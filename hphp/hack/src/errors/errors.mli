@@ -434,7 +434,7 @@ val expected_stringlike : typing_error_callback
 
 val type_constant_mismatch : typing_error_callback
 
-val type_constant_redeclaration : typing_error_callback
+val class_constant_type_mismatch : typing_error_callback
 
 val constant_does_not_match_enum_type : typing_error_callback
 

@@ -580,7 +580,7 @@ module Typing = struct
     | IndexTypeMismatch
     | ExpectedStringlike
     | TypeConstantMismatch
-    | TypeConstantRedeclaration
+    | TypeConstantRedeclarationDEPRECATED
     | ConstantDoesNotMatchEnumType
     | EnumConstraintMustBeArraykey
     | EnumSubtypeMustHaveCompatibleConstraint
@@ -601,6 +601,7 @@ module Typing = struct
     | EnumUnderlyingTypeMustBeArraykey
     | ClassGetReified
     | RequireGenericExplicit
+    | ClassConstantTypeMismatch
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@deriving enum, show { with_path = false }]
 

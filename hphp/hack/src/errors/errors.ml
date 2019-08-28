@@ -3288,8 +3288,8 @@ let expected_stringlike = maybe_unify_error Typing.ExpectedStringlike
 
 let type_constant_mismatch = maybe_unify_error Typing.TypeConstantMismatch
 
-let type_constant_redeclaration =
-  maybe_unify_error Typing.TypeConstantRedeclaration
+let class_constant_type_mismatch =
+  maybe_unify_error Typing.ClassConstantTypeMismatch
 
 let constant_does_not_match_enum_type =
   maybe_unify_error Typing.ConstantDoesNotMatchEnumType

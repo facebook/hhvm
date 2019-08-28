@@ -101,27 +101,6 @@ let check_members_implemented check_private parent_reason reason
       | _ -> ()
   end
 
-(* When constant is overridden we need to check if the type is
- * compatible with the previous type defined in the parent.
- *)
-let check_types_for_const env
-    parent_abstract parent_type class_abstract class_type =
-  match (parent_type, class_type) with
-    | fty_parent, fty_child when parent_abstract && class_abstract ->
-      (* redeclaration of an abstract constant *)
-      Phase.sub_type_decl env fty_child fty_parent Errors.type_constant_redeclaration
-    | fty_parent, _ when parent_abstract ->
-      (* const definition constrained by parent abstract const *)
-      Phase.sub_type_decl env class_type fty_parent Errors.type_constant_mismatch
-    | _, _ when class_abstract ->
-      (* Trying to override concrete type with an abstract one *)
-      let pos = Reason.to_pos (fst class_type) in
-      let parent_pos = Reason.to_pos (fst parent_type) in
-      Errors.abstract_concrete_override pos parent_pos `constant
-    | (_, _) ->
-      (* types should be the same *)
-      Phase.unify_decl env parent_type class_type Errors.type_constant_mismatch
-
 (* An abstract member can be declared in multiple ancestors. Sometimes these
  * declarations can be different, but yet compatible depending on which ancestor
  * we inherit the member from. For example:
@@ -298,7 +277,6 @@ let check_override env ~check_member_unique member_name mem_source ?(ignore_fun_
     (fun errorl ->
       Errors.bad_method_override pos member_name errorl)
 
-
 let check_const_override env
     const_name parent_class class_ parent_class_const class_const =
   let check_params = should_check_params parent_class class_ in
@@ -329,9 +307,12 @@ let check_const_override env
       class_const.cc_origin parent_class_const.cc_origin
       const_name (Cls.name class_)
     else
-      check_types_for_const env
-        parent_class_const.cc_abstract parent_class_const.cc_type
-        class_const.cc_abstract class_const.cc_type
+      if not parent_class_const.cc_abstract && class_const.cc_abstract then (
+        let pos = Reason.to_pos (fst class_const.cc_type) in
+        let parent_pos = Reason.to_pos (fst parent_class_const.cc_type) in
+        Errors.abstract_concrete_override pos parent_pos `constant);
+      Phase.sub_type_decl env class_const.cc_type parent_class_const.cc_type
+        Errors.class_constant_type_mismatch
 
 (* Privates are only visible in the parent, we don't need to check them *)
 let filter_privates members =

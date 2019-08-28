@@ -1,4 +1,4 @@
 File "test_consts13.php", line 4, characters 18-20:
-Expected int (Typing[4326])
+Expected int (Typing[4348])
 File "test_consts13.php", line 7, characters 9-14:
 But got string

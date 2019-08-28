@@ -568,7 +568,7 @@ TypeConstraintViolation = 4323
 IndexTypeMismatch = 4324
 ExpectedStringlike = 4325
 TypeConstantMismatch = 4326
-TypeConstantRedeclaration = 4327
+TypeConstantRedeclarationDEPRECATED = 4327
 ConstantDoesNotMatchEnumType = 4328
 EnumConstraintMustBeArraykey = 4329
 EnumSubtypeMustHaveCompatibleConstraint = 4330
@@ -589,4 +589,5 @@ TraitPropConstClass = 4344
 EnumUnderlyingTypeMustBeArraykey = 4345
 ClassGetReified = 4346
 RequireGenericExplicit = 4347
+ClassConstantTypeMismatch = 4348
   |}]

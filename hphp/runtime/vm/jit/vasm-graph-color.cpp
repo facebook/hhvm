@@ -142,9 +142,11 @@ struct RegInfo {
   Color color;
   // Index into the penalty vector table
   size_t penaltyIdx = 0;
-  // Can this Vreg be potentially rematerialized (instead of reloaded) by this
-  // instruction?
-  folly::Optional<Vinstr> remat;
+  // Can this Vreg be potentially rematerialized (instead of reloaded)
+  // by this instruction? This field is calculated lazily and then
+  // cached. Even if there's an instruction here, we may still need to
+  // do context sensitive checks to see if its usuable.
+  folly::Optional<Vinstr> cachedRemat;
 };
 
 using BlockVector = jit::vector<Vlabel>;
@@ -306,7 +308,7 @@ std::string show(const Vunit& unit, const RegInfo& info) {
     show(info.regClass),
     show(info.color),
     info.penaltyIdx,
-    info.remat ? show(unit, *info.remat) : "-"
+    info.cachedRemat ? show(unit, *info.cachedRemat) : "-"
   );
 }
 
@@ -2319,54 +2321,18 @@ void infer_register_classes(State& state) {
 /*
  * Materialization:
  *
- * When attempting to reload a spilled Vreg, we can instead rematerialize the
- * value in some cases. Right now we only attempt to materialize instructions
- * which have no source operands and are pure (this is basically the ldimm*
- * instructions). If we successfully rematerialize a Vreg, we should (hopefully)
- * have a spill with no associated reloads, which will be cleaned up by dead
- * code elimination.
- *
- * We'd like to expand this list, but we have to deal with issues about
- * detecting which sources are available at the point of the reload.
+ * When attempting to reload a spilled Vreg, we can instead
+ * rematerialize the value in some cases. We look backwards from the
+ * current Vreg use to its definition(s). We chain through copyish
+ * instructions (including phis, which is how we can have multiple
+ * definitions). If the definition is pure, and any sources in the
+ * definition are still available, we can re-emit the definition
+ * instead of a reload. If there are multiple definitions, they must
+ * be all equivalent (same op and sources). If we successfully
+ * rematerialize a Vreg, we should (hopefully) have a spill with no
+ * associated reloads, which will be cleaned up by dead code
+ * elimination.
  */
-
-// Check if the given instruction can possibly be rematerialized, returning the
-// Vreg the instruction defines if successful (invalid Vreg otherwise).
-Vreg is_materialization_candidate(const State& state, const Vinstr& inst) {
-  if (inst.op == Vinstr::copy ||
-      inst.op == Vinstr::copy2 ||
-      inst.op == Vinstr::copyargs ||
-      inst.op == Vinstr::phijmp ||
-      inst.op == Vinstr::phidef) return Vreg{};
-
-  // Not safe to rematerialize non-pure instructions
-  if (!isPure(inst)) return Vreg{};
-
-  // Can't rematerialize instructions which define more than one Vreg, or define
-  // flags or physical registers. We can't use cached operands here because we
-  // need to take into account ignored registers.
-  auto def = Vreg{};
-  auto defCount = 0;
-  visitDefs(
-    state.unit, inst,
-    [&] (Vreg r) {
-      if (!r.isPhys() && reg_class(state, r) != RegClass::SF) def = r;
-      ++defCount;
-    }
-  );
-  if (!def.isValid() || defCount != 1) return Vreg{};
-
-  // Right now we don't allow any source Vregs.
-  auto useCount = 0;
-  visitUses(
-    state.unit, inst,
-    [&] (Vreg r) { ++useCount; }
-  );
-  if (useCount > 0) return Vreg{};
-  // TODO (TT37650327): Handle instructions with sources
-
-  return def;
-}
 
 // Comparators for instruction source types
 namespace detail {
@@ -2424,120 +2390,328 @@ bool compare_insts_without_defs(const Vunit& unit,
   return true;
 }
 
-// Find all Vregs which can potentially be rematerialized rather than reloaded
-// if spilled.
-void find_materialization_candidates(State& state) {
+// Given a Vreg, search backwards in the unit to find its defining
+// instruction. The search is started at the specified block and
+// instruction index. Copyish instructions (including phis) are
+// "transparent" to this search. If the Vreg has multiple definitions,
+// and they are all equivalent, return an arbitrary one. If they are
+// not equivalent, or if the definition cannot be found, return a
+// nullptr, or a pointer to a static nop Vinstr (the difference is an
+// internal implementation detail). The visited set is used to prevent
+// unbounded recursion and should be initially empty.
+const Vinstr* find_defining_inst_for_remat(
+    State& state,
+    Vlabel b,
+    size_t instIdx,
+    Vreg r,
+    jit::vector<std::pair<Vlabel, Vreg>>& visited
+) {
   auto& unit = state.unit;
 
-  // First iterate over every instruction and record if its a candidate or not.
-  for (auto const b : state.rpo) {
-    auto& block = unit.blocks[b];
-    for (auto& inst : block.code) {
-      auto const r = is_materialization_candidate(state, inst);
-      if (r.isValid()) reg_info(state, r).remat = inst;
-    }
-  }
-
-  // Now use dataflow to propagate this candidate information across copy
-  // instructions. At a merge point we'll keep the information if the two
-  // instructions are the same (same sources and immediates), but drop it if
-  // they are not.
-
-  auto const compare = [&] (const folly::Optional<Vinstr>& remat1,
-                            const folly::Optional<Vinstr>& remat2) {
-    if (!remat1) return !remat2;
-    if (!remat2) return false;
-    return compare_insts_without_defs(unit, *remat1, *remat2);
+  auto const compatible = [&] (Vreg r1, Vreg r2) {
+    return compatible_reg_classes(
+      reg_info(state, r1).regClass,
+      reg_info(state, r2).regClass
+    );
   };
 
-  auto const updateDst = [&] (const folly::Optional<Vinstr>& remat, Vreg d) {
-    assertx(!d.isPhys());
-    auto& dInfo = reg_info(state, d);
-    if (!compare(remat, dInfo.remat)) {
-      assertx(!!remat != !!dInfo.remat);
-      dInfo.remat = remat;
-      return true;
-    } else {
-      return false;
-    }
-  };
+  // Record whether we passed through a copyish instruction where the
+  // source and dest were not compatible (different register
+  // classes). If so, we'll only report the defining instruction if
+  // its an immediate load. The copyish instruction may actually
+  // change the value if they're incompatible (it could truncate or
+  // zero-extend). The reason we still allow immediate loads is
+  // because we often materialize constants into a different register
+  // class than how its ultimately used.
+  auto incompatibility = false;
 
-  // Propagate information across the copy
-  auto const srcToDst = [&] (Vreg s, Vreg d) {
-    if (s.isPhys() || d.isPhys()) return false;
-    auto const& sInfo = reg_info(state, s);
-    return updateDst(sInfo.remat, d);
-  };
+  while (true) {
+    assertx(!r.isPhys());
 
-  boost::dynamic_bitset<> visited(unit.blocks.size());
+    // First find the correct block:
+    //
+    // From the current block, walk backwards through the predecessors
+    // until we encounter a block where the desired Vreg is *not*
+    // live-in. Since it's live-in for its successors, this means it
+    // must be defined in that block. This lets us skip over most
+    // blocks without examining their instructions.
+    while (state.liveIn[b][r]) {
+      auto const& preds = state.preds[b];
+      assertx(!preds.empty());
 
-  auto changed = true;
-  while (changed) {
-    changed = false;
-
-    for (auto const b : state.rpo) {
-      auto const& block = unit.blocks[b];
-      for (auto const& inst : block.code) {
-        switch (inst.op) {
-          case Vinstr::copy:
-            changed |= srcToDst(inst.copy_.s, inst.copy_.d);
-            break;
-          case Vinstr::copy2:
-            changed |= srcToDst(inst.copy2_.s0, inst.copy2_.d0);
-            changed |= srcToDst(inst.copy2_.s1, inst.copy2_.d1);
-            break;
-          case Vinstr::copyargs: {
-            auto const& s = unit.tuples[inst.copyargs_.s];
-            auto const& d = unit.tuples[inst.copyargs_.d];
-            assertx(s.size() == d.size());
-            for (size_t i = 0; i < s.size(); ++i) {
-              changed |= srcToDst(s[i], d[i]);
-            }
-            break;
-          }
-          case Vinstr::phidef: {
-            // Phi is like a copy, except we might have to merge together
-            // instructions.
-            auto const& defs = unit.tuples[inst.phidef_.defs];
-            for (size_t i = 0; i < defs.size(); ++i) {
-              folly::Optional<Vinstr> remat;
-              auto first = true;
-              for (auto const& pred : state.preds[b]) {
-                if (!visited[pred]) continue;
-
-                auto const& phijmp = unit.blocks[pred].code.back();
-                assertx(phijmp.op == Vinstr::phijmp);
-                auto const& uses = unit.tuples[phijmp.phijmp_.uses];
-                assertx(defs.size() == uses.size());
-
-                if (defs[i].isPhys() || uses[i].isPhys()) {
-                  remat.clear();
-                  break;
-                }
-
-                auto const& info = reg_info(state, uses[i]);
-                if (first) {
-                  remat = info.remat;
-                  first = false;
-                } else if (!compare(remat, info.remat)) {
-                  remat.clear();
-                  break;
-                }
-              }
-
-              if (!defs[i].isPhys()) changed |= updateDst(remat, defs[i]);
-            }
-
-            break;
-          }
-          default:
-            break;
+      // If a block has multiple predecessors, choose the one with the
+      // lowest RPO order. Not only does this prevent us from getting
+      // loops, but it helps us find the def faster.
+      auto bestOrder = state.rpoOrder[preds[0]];
+      auto bestPred = preds[0];
+      assertx(state.liveOut[preds[0]][r]);
+      for (size_t i = 1; i < preds.size(); ++i) {
+        auto const pred = preds[i];
+        assertx(state.liveOut[pred][r]);
+        if (state.rpoOrder[pred] < bestOrder) {
+          bestOrder = state.rpoOrder[pred];
+          bestPred = pred;
         }
       }
+      // Should always decrease
+      assertx(state.rpoOrder[bestPred] < state.rpoOrder[b]);
+      b = bestPred;
+      assertx(!unit.blocks[b].code.empty());
+      instIdx = unit.blocks[b].code.size();
+    }
 
-      visited[b] = true;
+    // Now that we have the correct block, find the correct
+    // instruction within it.
+    auto& block = unit.blocks[b];
+    while (true) {
+      always_assert(instIdx > 0);
+      --instIdx;
+      auto& inst = block.code[instIdx];
+
+      // Quick check if this instruction defs the Vreg
+      if (!defs_set_cached(state, inst)[r]) continue;
+
+      // Process each instruction. If it's copyish, change the tracked
+      // Vreg to be the source. We treat reload/spill/ssaalias as
+      // copyish here because they don't change the actual value in
+      // the Vreg.
+
+      switch (inst.op) {
+        case Vinstr::copy:
+          assertx(inst.copy_.d == r);
+          // We don't track physical registers (they're not
+          // necessarily in SSA), so we cannot proceed
+          // further. Otherwise start tracking the copy's source.
+          if (inst.copy_.s.isPhys()) return nullptr;
+          if (!compatible(inst.copy_.s, r)) incompatibility = true;
+          r = inst.copy_.s;
+          break;
+        case Vinstr::reload:
+          assertx(inst.reload_.d == r);
+          r = inst.reload_.s;
+          break;
+        case Vinstr::spill:
+          assertx(inst.spill_.d == r);
+          r = inst.spill_.s;
+          break;
+        case Vinstr::ssaalias:
+          assertx(inst.ssaalias_.d == r);
+          r = inst.ssaalias_.s;
+          break;
+        case Vinstr::copyargs: {
+          auto const& dsts = unit.tuples[inst.copyargs_.d];
+          auto const& srcs = unit.tuples[inst.copyargs_.s];
+          assertx(srcs.size() == dsts.size());
+          auto DEBUG_ONLY found = false;
+          for (size_t i = 0; i < dsts.size(); ++i) {
+            if (dsts[i] != r) continue;
+            if (srcs[i].isPhys()) return nullptr;
+            if (!compatible(srcs[i], r)) incompatibility = true;
+            r = srcs[i];
+            if (debug) found = true;
+            break;
+          }
+          // We should always find something because of the defs set
+          // check above.
+          assertx(found);
+          break;
+        }
+        case Vinstr::phidef: {
+          // A phidef is copyish, but we may have to examine more than
+          // one source, hence the need for recursion.
+
+          // We need a special return value to indicate that this
+          // source should be ignored (because it's recursively
+          // defined). Use a pointer to a static nop Vinstr to mean
+          // this (nop cannot legitimately be returned because it
+          // doesn't define anything).
+          auto const ignore = [] () -> const Vinstr* {
+            static const Vinstr nopInstr{nop{}};
+            return &nopInstr;
+          };
+
+          // Phidef can only appear at the beginning of the block.
+          assertx(instIdx == 0);
+
+          // Self-recursion check. If we encounter the same phidef
+          // with the same Vreg, we've looped and should ignore this
+          // one.
+          if (std::find(
+                visited.begin(), visited.end(), std::make_pair(b, r)
+              ) != visited.end()) {
+            return ignore();
+          }
+          // Otherwise remember this phidef and Vreg pair for later
+          // recursion checks.
+          visited.emplace_back(b, r);
+          SCOPE_EXIT { visited.pop_back(); };
+
+          auto const& dsts = unit.tuples[inst.phidef_.defs];
+          auto const& preds = state.preds[b];
+
+          for (size_t i = 0; i < dsts.size(); ++i) {
+            if (dsts[i] != r) continue;
+
+            // Found a def. Recursively find the defining instruction
+            // for each predecessor Vreg.
+            const Vinstr* common = nullptr;
+            for (auto const p : preds) {
+              auto const& pred = unit.blocks[p];
+              auto const& phijmp = pred.code.back();
+              assertx(phijmp.op == Vinstr::phijmp);
+              auto const s = unit.tuples[phijmp.phijmp_.uses][i];
+              // Can't track phi-ing with a physical register
+              if (s.isPhys()) return nullptr;
+              auto const defining = find_defining_inst_for_remat(
+                state,
+                p,
+                pred.code.size(),
+                s,
+                visited
+              );
+              if (!defining) return nullptr;
+              // Skip over recursive definitions
+              if (defining->op == ignore()->op) continue;
+              if (!compatible(s, r) &&
+                  defining->op != Vinstr::ldimmq &&
+                  defining->op != Vinstr::ldimml &&
+                  defining->op != Vinstr::ldimmb) {
+                return nullptr;
+              }
+              // All defining instructions should be compatible.
+              if (!common) {
+                common = defining;
+              } else if (
+                !compare_insts_without_defs(unit, *common, *defining)
+              ) {
+                return nullptr;
+              }
+            }
+            // This can only happen if all of the sources were
+            // recursively defined.
+            if (!common) return ignore();
+            return common;
+          }
+
+          // We should always find a matching def because of the defs
+          // set check above.
+          always_assert(false);
+        }
+        case Vinstr::ldimmq:
+        case Vinstr::ldimml:
+        case Vinstr::ldimmb:
+          // These can be used regardless of the incompatibility flag.
+          return &inst;
+        default:
+          // The rest can only be used if we didn't encounter any
+          // incompatible copies.
+          return !incompatibility ? &inst : nullptr;
+      }
+
+      // If we reach here, we encountered a copyish instruction which
+      // changed what Vreg we're looking for. We need to find the
+      // block which defines the new Vreg, so break out of the
+      // instruction loop and restart the block search above.
+      break;
     }
   }
+}
+
+// Return an instruction to reload a spilled Vreg src into Vreg dst,
+// possibly using rematerialization. If rematerialization is not
+// possible, then a normal reload instruction is returned. If
+// rematerialization is accomplished, set the rematerialized parameter
+// to true (this avoids an annoying cyclic dependency on
+// SpillerState). The search for the rematerialized instruction is
+// started at the specified block and instruction offset. The "inReg"
+// VregSet determines which Vregs are known to be in registers (and
+// thus available) at the current program point. An instruction can
+// only be rematerialized if all of its sources are available in
+// physical registers.
+Vinstr reload_with_remat(State& state,
+                         bool& rematerialized,
+                         Vlabel b,
+                         size_t instIdx,
+                         const VregSet& inReg,
+                         Vreg src,
+                         Vreg dst) {
+  assertx(!src.isPhys());
+
+  // We cache rematerialization resolutions to avoid redundant
+  // lookups. If there's no cached information for this Vreg,
+  // calculate it by searching for a defining instruction. If the
+  // instruction isn't found, or if its always unusable (if its not
+  // pure, for example), we'll just store a reload instead.
+  auto& info = reg_info(state, src);
+  if (!info.cachedRemat) {
+    info.cachedRemat = [&] () -> Vinstr {
+      jit::vector<std::pair<Vlabel, Vreg>> visited;
+      auto const inst =
+        find_defining_inst_for_remat(state, b, instIdx, src, visited);
+      // No single defining instruction found
+      if (!inst || inst->op == Vinstr::nop) return reload{src, dst};
+
+      // Not safe to rematerialize non-pure instructions
+      if (!isPure(*inst)) return reload{src, dst};
+
+      // Can't rematerialize instructions which define more than one Vreg,
+      // or define flags or physical registers. We can't use cached
+      // operands here because we need to take into account ignored
+      // registers.
+      size_t defCount = 0;
+      visitDefs(state.unit, *inst, [&] (Vreg r) { ++defCount; });
+      if (defCount != 1) return reload{src, dst};
+
+      return *inst;
+    }();
+  }
+  // At this point, we know cachedRemat is populated.
+
+  // If the cached rematerialization instruction is a reload, we'll
+  // just return it, so no further checks are needed. Otherwise we can
+  // cache an instruction which may be situationally usable, so we
+  // need to do these checks everytime (if the instruction is never
+  // useful, we should have a reload stored here).
+  if (info.cachedRemat->op != Vinstr::reload) {
+    // All sources need to be available. We don't support physical
+    // register sources right now because we don't know if they contain
+    // the same value at this point as they did originally. This needs
+    // to take into account ignored registers, so we can't use cached
+    // operands.
+    auto unavailableSrc = false;
+    auto physicalSrc = false;
+    visitUses(
+      state.unit, *info.cachedRemat,
+      [&] (Vreg r) {
+        if (r.isPhys()) physicalSrc = true;
+        if (!inReg[r]) unavailableSrc = true;
+      }
+    );
+    if (physicalSrc) {
+      // The instruction uses a physical register. This instruction
+      // will never be suitable, so turn it into a reload so we'll
+      // never check again.
+      info.cachedRemat = reload{src, dst};
+    } else if (unavailableSrc) {
+      // Otherwise one of the sources is unavailable. It could be
+      // available at a different program point, so keep the cached
+      // instruction, but return a reload.
+      return reload{src, dst};
+    }
+  }
+
+  // Copy the rematerialized instruction, rewrite the output Vreg and
+  // insert it.
+  auto copy = *info.cachedRemat;
+  visitRegsMutable(
+    state.unit,
+    copy,
+    [] (Vreg r) { return r; },
+    [&] (Vreg)  { return dst; }
+  );
+  invalidate_cached_operands(copy);
+  if (copy.op != Vinstr::reload) rematerialized = true;
+  return copy;
 }
 
 /*
@@ -3448,54 +3622,6 @@ size_t setup_initial_spiller_state(State& state,
   return !!defs;
 }
 
-// Emit instructions to reload Vreg src into Vreg dst, possibly using
-// rematerialization. If rematerialization is not possible, then a reload vasm
-// instruction is emitted. The number of instructions emitted is returned.
-size_t reload_with_remat(Vout& v,
-                         State& state,
-                         SpillerResults& results,
-                         const VregSet& gpInReg,
-                         const VregSet& simdInReg,
-                         Vreg src,
-                         Vreg dst) {
-  assertx(!src.isPhys());
-
-  auto const reload = [&] (Vout& v) { v << jit::reload{src, dst}; return 1; };
-
-  // No rematerialized instruction, just emit a reload instruction.
-  auto& sInfo = reg_info(state, src);
-  if (!sInfo.remat) return reload(v);
-
-  // Check if all of the rematerialized instructions are available. This check
-  // is actually pointless because we do not allow rematerialization candidates
-  // which take inputs right now. This is because the check isn't quite correct
-  // because we might spill one of the inputs after this check. TODO
-  // (TT37650327): Handle instructions with sources
-  auto srcsAvailable = true;
-  for (auto const r : uses_set_cached(state, *sInfo.remat)) {
-    assertx(!r.isPhys());
-    if (!gpInReg[r] && !simdInReg[r]) {
-      srcsAvailable = false;
-      break;
-    }
-  }
-  // If the inputs aren't available, just reload
-  if (!srcsAvailable) return reload(v);
-
-  // Copy the rematerialized instruction, rewrite the output Vreg and insert it.
-  auto inst = *sInfo.remat;
-  visitRegsMutable(
-    state.unit,
-    inst,
-    [] (Vreg r) { return r; },
-    [&] (Vreg)  { return dst; }
-  );
-  invalidate_cached_operands(inst);
-  v << inst;
-  results.rematerialized = true;
-  return 1;
-}
-
 // Run spiller logic for a phijmp instruction. Phis can handle spilled Vregs, so
 // we don't need to reload the phi's inputs.
 void process_phijmp_spills(State& state,
@@ -3869,19 +3995,24 @@ size_t process_inst_spills(State& state,
         state.spilled = true;
       }
 
-      // Now emit the reloads (which increases register pressure), possibly
-      // with rematerialization.
+      // Now emit the reloads (which increases register pressure),
+      // possibly with rematerialization. Keep track of the Vregs
+      // which are currently in registers so we know which ones are
+      // available as rematerialization sources.
+      auto inReg = (spiller.gp.inReg | spiller.simd.inReg) - reloads;
       for (auto const r : reloads) {
         assertx(!r.isPhys());
-        added += reload_with_remat(
-          v,
+        v << reload_with_remat(
           state,
-          results,
-          spiller.gp.inReg,
-          spiller.simd.inReg,
+          results.rematerialized,
+          b,
+          instIdx,
+          inReg,
           r,
           r
         );
+        ++added;
+        inReg.add(r);
       }
 
       return 0;
@@ -4297,6 +4428,7 @@ SpillMismatchState find_spill_mismatches(State& state,
 
   mismatch.spills |= newSpills;
   mismatch.reloads |= newReloads;
+  assertx((mismatch.spills & mismatch.reloads).none());
 
   return mismatch;
 }
@@ -4333,6 +4465,8 @@ void fixup_spill_mismatches(State& state, SpillerResults& results) {
       processMap(mismatch.reloadDests);
       processMap(mismatch.aliases);
 
+      size_t reloadCount = 0;
+
       // Materialize the actual instructions. The order of these is important.
       vmodify(
         unit, b, unit.blocks[b].code.size() - 1,
@@ -4358,21 +4492,54 @@ void fixup_spill_mismatches(State& state, SpillerResults& results) {
             auto const it = mismatch.reloadDests.find(r);
             auto const r2 =
               (it == mismatch.reloadDests.end()) ? r : it->second;
-            auto const& pred = results.perBlock[b].out;
-            reload_with_remat(
-              v,
-              state,
-              results,
-              pred->gp.inReg,
-              pred->simd.inReg,
-              r,
-              r2
-            );
+            // This may be replaced by rematerialized instruction below
+            v << reload{r, r2};
+            ++reloadCount;
           }
 
           return 0;
         }
       );
+
+      // We have to defer rematerialization until after we emitted all
+      // the reloads. Otherwise the rematerialization logic could
+      // become confused because it will try to walk backwards through
+      // a block which we're still emitting instructions into.
+      if (reloadCount > 0) {
+        auto const& pred = results.perBlock[b].out;
+        // We can only rematerialize instructions which have available
+        // sources. These are the Vregs which are currently in
+        // registers and haven't been reloaded (if they were reloaded
+        // they may not be in registers when we need them).
+        auto inReg = (pred->gp.inReg | pred->simd.inReg) - mismatch.reloads;
+
+        auto instIdx = unit.blocks[b].code.size() - reloadCount - 1;
+        for (auto const r : mismatch.reloads) {
+          assertx(instIdx < unit.blocks[b].code.size());
+          assertx(!r.isPhys());
+          auto const it = mismatch.reloadDests.find(r);
+          auto const r2 = (it == mismatch.reloadDests.end()) ? r : it->second;
+
+          // Try to replace the instruction with a rematerialized one.
+          auto& inst = unit.blocks[b].code[instIdx];
+          assertx(inst.op == Vinstr::reload &&
+                  inst.reload_.s == r &&
+                  inst.reload_.d == r2);
+          inst = reload_with_remat(
+            state,
+            results.rematerialized,
+            b,
+            instIdx,
+            inReg,
+            r,
+            r2
+          );
+          // The def of the instruction is now available for more
+          // rematerialized instructions.
+          inReg.add(r2);
+          ++instIdx;
+        }
+      }
     }
 
     if (debug) {
@@ -4712,7 +4879,6 @@ void insert_spills(State& state) {
 
   // Otherwise calculate metadata the spiller will need.
   calculate_loop_info(state);
-  find_materialization_candidates(state);
 
   // Generate spills and fixup mismatches between blocks.
   auto results = process_spills(state, needsSpilling);

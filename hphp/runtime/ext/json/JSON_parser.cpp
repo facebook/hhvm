@@ -34,6 +34,7 @@ SOFTWARE.
 
 #include <folly/FBVector.h>
 
+#include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/string-buffer.h"
@@ -361,6 +362,7 @@ struct SimpleParser {
     , is_tsimplejson(is_tsimplejson)
   {
     assertx(input[length] == 0);  // Parser relies on sentinel to avoid checks.
+    prov_tag = arrprov::tagFromProgramCounter();
   }
 
   /*
@@ -668,6 +670,10 @@ struct SimpleParser {
     auto const tv = top++;
     tv->m_type = data->toDataType();
     tv->m_data.parr = data;
+
+    if (RuntimeOption::EvalArrayProvenance && prov_tag) {
+      *tv = arrprov::tagTVKnown(*tv, *prov_tag);
+    }
   }
 
   const char* p;
@@ -675,6 +681,7 @@ struct SimpleParser {
   int array_depth;
   JSONContainerType container_type;
   bool is_tsimplejson;
+  folly::Optional<arrprov::Tag> prov_tag;
 };
 
 /*
@@ -742,6 +749,7 @@ struct json_parser {
   UncheckedBuffer sb_buf;
   UncheckedBuffer sb_key;
   int sb_cap{0};  // Capacity of each of sb_buf/key.
+  folly::Optional<arrprov::Tag> prov_tag;
 
   void initSb(int length) {
     if (UNLIKELY(length >= sb_cap)) {
@@ -1006,7 +1014,8 @@ void utf16_to_utf8(UncheckedBuffer &buf, unsigned short utf16) {
 
 StaticString s__empty_("_empty_");
 
-static void object_set(Variant &var,
+static void object_set(const json_parser* json,
+                       Variant &var,
                        const String& key,
                        const Variant& value,
                        int assoc,
@@ -1024,6 +1033,10 @@ static void object_set(Variant &var,
       collections::set(var.getObjectData(), &keyTV, value.toCell());
     } else if (container_type == JSONContainerType::HACK_ARRAYS) {
       forceToDict(var).set(key, value);
+      if (RuntimeOption::EvalArrayProvenance && json->prov_tag) {
+        auto const tv = var.asTypedValue();
+        *tv = arrprov::tagTVKnown(*tv, *json->prov_tag);
+      }
     } else if (container_type == JSONContainerType::DARRAYS ||
                container_type == JSONContainerType::DARRAYS_AND_VARRAYS) {
       int64_t i;
@@ -1062,7 +1075,7 @@ static void attach_zval(json_parser *json,
       root.toArrRef().append(child);
     }
   } else if (up_mode == Mode::OBJECT) {
-    object_set(root, key, child, assoc, container_type);
+    object_set(json, root, key, child, assoc, container_type);
   }
 }
 
@@ -1132,6 +1145,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
   // they exceed kMaxPersistentStringBufferCapacity at exit or if the thread
   // is explicitly flushed (e.g., due to being idle).
   json->initSb(length);
+  json->prov_tag = arrprov::tagFromProgramCounter();
   SCOPE_EXIT {
     constexpr int kMaxPersistentStringBufferCapacity = 256 * 1024;
     if (json->sb_cap > kMaxPersistentStringBufferCapacity) json->flushSb();
@@ -1327,7 +1341,8 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
           Variant mval;
           json_create_zval(mval, *buf, type, options);
           Variant &top = json->stack[json->top].val;
-          object_set(top, copy_and_clear(*key), mval, assoc, container_type);
+          object_set(json, top, copy_and_clear(*key),
+                     mval, assoc, container_type);
           buf->clear();
           reset_type();
         }
@@ -1448,6 +1463,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
               if (type != kInvalidDataType) {
                 Variant &top = json->stack[json->top].val;
                 object_set(
+                  json,
                   top,
                   copy_and_clear(*key),
                   mval,

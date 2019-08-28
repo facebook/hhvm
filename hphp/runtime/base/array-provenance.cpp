@@ -148,6 +148,11 @@ TypedValue tagTV(TypedValue tv) {
   return tv;
 }
 
+TypedValue tagTVKnown(TypedValue tv, Tag tag) {
+  tagTVImpl(tv, tag);
+  return tv;
+}
+
 const ArrayData* makeEmptyArray(const ArrayData* base, const Tag& tag) {
   assertx(base->empty());
   assertx(base->isStatic());

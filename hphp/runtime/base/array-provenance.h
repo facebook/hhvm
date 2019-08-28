@@ -147,6 +147,7 @@ void clearTag(const ArrayData* ad);
  * without touching the usual TV mutation machinery.
  */
 TypedValue tagTV(TypedValue tv);
+TypedValue tagTVKnown(TypedValue tv, Tag tag);
 
 /*
  * Produce a static empty array (with the same kind and contents as `base`)

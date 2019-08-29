@@ -1739,7 +1739,7 @@ To string conversions:
 
 | SpillFrame<offset,numArgs>,
 |   ND,
-|   S(StkPtr) S(Func,Nullptr) S(Ctx,Cls,Nullptr) S(Bool) S(Arr|Vec,Nullptr),
+|   S(StkPtr) S(Func) S(Ctx,Cls,Nullptr) S(Bool) S(Arr|Vec,Nullptr),
 |   NF
 
   Operands:

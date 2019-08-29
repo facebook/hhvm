@@ -109,7 +109,6 @@ folly::Optional<Vreg> getTSBits(
 void cgSpillFrame(IRLS& env, const IRInstruction* inst) {
   auto const sp = srcLoc(env, inst, 0).reg();
   auto const extra = inst->extra<SpillFrame>();
-  auto const funcTmp = inst->src(1);
   auto const ctxTmp = inst->src(2);
   auto const isDynamic = inst->src(3);
   auto const tsListTmp = inst->src(4);
@@ -165,28 +164,9 @@ void cgSpillFrame(IRLS& env, const IRInstruction* inst) {
   }
 
   // Set m_func.
-  if (funcTmp->isA(TNullptr)) {
-    if (RuntimeOption::EvalHHIRGenerateAsserts) {
-      emitImmStoreq(v, ActRec::kTrashedFuncSlot, ar + AROFF(m_func));
-    }
-  } else {
-    assertx(funcTmp->isA(TFunc | TNullptr));
-    auto const func = srcLoc(env, inst, 1).reg();
-    v << store{func, ar + AROFF(m_func)};
-    if (RuntimeOption::EvalHHIRGenerateAsserts &&
-        funcTmp->type().maybe(TNullptr)) {
-      auto const sf = v.makeReg();
-      v << testq{func, func, sf};
-      ifThen(
-        v,
-        CC_Z,
-        sf,
-        [&] (Vout& v) {
-          emitImmStoreq(v, ActRec::kTrashedFuncSlot, ar + AROFF(m_func));
-        }
-      );
-    }
-  }
+  assertx(inst->src(1)->isA(TFunc));
+  auto const func = srcLoc(env, inst, 1).reg();
+  v << store{func, ar + AROFF(m_func)};
 
   auto const createCompactReifiedPtr = [&] (Vout& v) {
     auto const tsListReg = srcLoc(env, inst, 4).reg();

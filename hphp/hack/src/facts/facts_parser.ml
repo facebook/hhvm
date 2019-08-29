@@ -488,14 +488,21 @@ let extract_as_json_string
     ~(text : string)
     ~(rust : bool) : string option =
   (* return empty string if file has syntax errors *)
+  let bool2int b =
+    if b then
+      1
+    else
+      0
+  in
   if rust then
     let unnormalized =
       Rust_facts_ffi.extract_as_json_ffi
-        php5_compat_mode
-        hhvm_compat_mode
-        allow_new_attribute_syntax
+        ( (bool2int php5_compat_mode lsl 0)
+        lor (bool2int hhvm_compat_mode lsl 1)
+        lor (bool2int allow_new_attribute_syntax lsl 2) )
         filename
         text
+        !mangle_xhp_mode
     in
     if unnormalized = "" then
       None
@@ -523,15 +530,31 @@ let from_text
     ~(allow_new_attribute_syntax : bool)
     ~(disable_legacy_attribute_syntax : bool)
     ~(filename : Relative_path.t)
-    ~(text : string) : facts option =
-  Option.bind
-    (extract_as_json
-       ~php5_compat_mode
-       ~hhvm_compat_mode
-       ~disable_nontoplevel_declarations
-       ~disable_legacy_soft_typehints
-       ~allow_new_attribute_syntax
-       ~disable_legacy_attribute_syntax
-       ~filename
-       ~text)
-    facts_from_json
+    ~(text : string)
+    ~(rust : bool) : facts option =
+  let json =
+    if rust then
+      Option.map
+        (extract_as_json_string
+           ~php5_compat_mode
+           ~hhvm_compat_mode
+           ~disable_nontoplevel_declarations
+           ~disable_legacy_soft_typehints
+           ~allow_new_attribute_syntax
+           ~disable_legacy_attribute_syntax
+           ~filename
+           ~text
+           ~rust:true)
+        Hh_json.json_of_string
+    else
+      extract_as_json
+        ~php5_compat_mode
+        ~hhvm_compat_mode
+        ~disable_nontoplevel_declarations
+        ~disable_legacy_soft_typehints
+        ~allow_new_attribute_syntax
+        ~disable_legacy_attribute_syntax
+        ~filename
+        ~text
+  in
+  Option.bind json facts_from_json

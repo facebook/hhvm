@@ -61,6 +61,7 @@ let parse_file (ctxt : index_builder_context) (filename : string) : si_capture
         ~disable_legacy_attribute_syntax:false
         ~filename:rp
         ~text
+        ~rust:true
     in
     (* Iterate through facts and print them out *)
     let result =

@@ -33,4 +33,5 @@ val from_text :
   disable_legacy_attribute_syntax:bool ->
   filename:Relative_path.t ->
   text:string ->
+  rust:bool ->
   Facts.facts option

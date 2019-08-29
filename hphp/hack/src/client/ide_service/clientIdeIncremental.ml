@@ -119,6 +119,7 @@ let compute_fileinfo_for_path (env : ServerEnv.env) (path : Relative_path.t) :
           ~disable_legacy_attribute_syntax:false
           ~filename:path
           ~text:contents
+          ~rust:ServerEnv.(ParserOptions.rust env.popt)
       in
       let (funs, classes, typedefs, consts) =
         match facts with

@@ -492,8 +492,11 @@ let set_env_pessimize env =
   let open Relative_path in
   let pessimize = match prefix path with
     | Root when pessimize_coefficient > 0.0 ->
-      let hash = Hashtbl.hash (suffix path) in
-      ((Float.of_int hash) /. (Float.of_int Int.max_value)) <= pessimize_coefficient
+      let range = 2000000 in
+      let filename = suffix path in
+      let hash = Hashtbl.hash filename in
+      let r = hash % range in
+      (Float.of_int r) /. (Float.of_int range) <= pessimize_coefficient
     | _ -> pessimize_coefficient = 1.0 (* hack for test cases *) in
   { env with pessimize }
 

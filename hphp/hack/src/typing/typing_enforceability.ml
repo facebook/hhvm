@@ -240,23 +240,31 @@ let is_enforced env ~is_xhp_attr ty =
     (=) Relative_path.Hhi in
   enforceable && not is_hhi && not is_xhp_attr
 
-let pessimize_type_simple env (ty: decl ty) =
-  if not env.pessimize then ty else
-  match ty with
-  | _, Tprim (Aast.Tvoid | Aast.Tnoreturn) -> ty
-  | _ -> wrap_like ty
+let pessimize_type_simple env et_enforced (ty: decl ty) =
+  let et_type =
+    if et_enforced || not env.pessimize then ty else
+    match ty with
+    | _, Tprim (Aast.Tvoid | Aast.Tnoreturn) -> ty
+    | _ -> wrap_like ty in
+  { et_type; et_enforced }
 
 let compute_enforced_and_pessimize_ty_simple env ?(is_xhp_attr = false) (ty: decl ty) =
   let et_enforced = is_enforced env ~is_xhp_attr ty in
-  let et_type =
-    if not et_enforced
-    then pessimize_type_simple env ty
-    else ty in
-  { et_type; et_enforced }
+  pessimize_type_simple env et_enforced ty
+
+let handle_awaitable_return env ft_fun_kind (ft_ret: decl possibly_enforced_ty) =
+  let { et_type = return_type; _ } = ft_ret in
+  match ft_fun_kind, return_type with
+  | Ast_defs.FAsync, (_, Tapply ((_, name), [inner_ty]))
+    when name = Naming_special_names.Classes.cAwaitable ->
+    let { et_enforced; _ } = compute_enforced_and_pessimize_ty_simple env inner_ty in
+    pessimize_type_simple env et_enforced return_type
+  | _ ->
+    compute_enforced_and_pessimize_ty_simple env return_type
 
 let compute_enforced_and_pessimize_fun_type_simple env (ft: decl fun_type) =
-  let { ft_params; ft_ret = { et_type; _ }; _ } = ft in
-  let ft_ret = compute_enforced_and_pessimize_ty_simple env et_type in
+  let { ft_params; ft_ret; ft_fun_kind; _ } = ft in
+  let ft_ret = handle_awaitable_return env ft_fun_kind ft_ret in
   let ft_params = List.map ~f:(fun fp ->
     let { fp_type = { et_type; _ }; _ } = fp in
     let fp_type = compute_enforced_and_pessimize_ty_simple env et_type in

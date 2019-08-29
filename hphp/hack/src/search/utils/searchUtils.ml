@@ -297,8 +297,7 @@ type si_env = {
   sie_fuzzy_search_mode: bool ref;
   sie_log_timings: bool;
   (* LocalSearchService *)
-  lss_fileinfos: FileInfo.t Relative_path.Map.t;
-  lss_filenames: FileInfo.names Relative_path.Map.t;
+  lss_fullitems: si_capture Relative_path.Map.t;
   lss_tombstones: Tombstone_set.t;
   (* SqliteSearchService *)
   sql_symbolindex_db: Sqlite3.db option ref;
@@ -320,8 +319,7 @@ let default_si_env =
     sie_fuzzy_search_mode = ref false;
     sie_log_timings = false;
     (* LocalSearchService *)
-    lss_fileinfos = Relative_path.Map.empty;
-    lss_filenames = Relative_path.Map.empty;
+    lss_fullitems = Relative_path.Map.empty;
     lss_tombstones = Tombstone_set.empty;
     (* SqliteSearchService *)
     sql_symbolindex_db = ref None;

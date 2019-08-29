@@ -204,7 +204,7 @@ let test_sqlite_plus_local (harness : Test_harness.t) : bool =
   assert_autocomplete ~query_text:"UsesA" ~kind:SI_Class ~expected:1 ~sienv;
   assert_autocomplete
     ~query_text:"NoBigTrait"
-    ~kind:SI_Class
+    ~kind:SI_Trait
     ~expected:1
     ~sienv;
   assert_autocomplete

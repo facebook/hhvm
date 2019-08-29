@@ -166,10 +166,11 @@ let find_matching_symbols
       | LocalIndex
       | SqliteIndex ->
         LocalSearchService.search_local_symbols
+          ~sienv
           ~query_text
           ~max_results
+          ~context
           ~kind_filter
-          ~sienv
     in
     (* Next search globals *)
     let global_results =

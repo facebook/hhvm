@@ -39,16 +39,13 @@ let get_details_from_info (info_opt : Facts.type_facts option) :
       (k, is_abstract, is_final))
 
 (* Parse one single file and capture information about it *)
-let parse_file (ctxt : index_builder_context) (filename : string) : si_capture
-    =
+let parse_one_file ~(path : Relative_path.t) : si_capture =
+  let filename = Relative_path.to_absolute path in
   if Sys.is_directory filename then
     []
   else
-    let path =
-      String.substr_replace_first filename ~pattern:ctxt.repo_folder ~with_:""
-    in
+    let relative_path_str = Relative_path.suffix path in
     let text = In_channel.read_all filename in
-    let rp = Relative_path.from_root filename in
     (* Just the facts ma'am *)
     Facts_parser.mangle_xhp_mode := false;
     let fact_opt =
@@ -59,7 +56,7 @@ let parse_file (ctxt : index_builder_context) (filename : string) : si_capture
         ~disable_legacy_soft_typehints:false
         ~allow_new_attribute_syntax:false
         ~disable_legacy_attribute_syntax:false
-        ~filename:rp
+        ~filename:path
         ~text
         ~rust:true
     in
@@ -78,7 +75,7 @@ let parse_file (ctxt : index_builder_context) (filename : string) : si_capture
               {
                 sif_name = key;
                 sif_kind = kind;
-                sif_filepath = path;
+                sif_filepath = relative_path_str;
                 sif_is_abstract = is_abstract;
                 sif_is_final = is_final;
               })
@@ -89,7 +86,7 @@ let parse_file (ctxt : index_builder_context) (filename : string) : si_capture
               {
                 sif_name = funcname;
                 sif_kind = SI_Function;
-                sif_filepath = path;
+                sif_filepath = relative_path_str;
                 sif_is_abstract = false;
                 sif_is_final = false;
               })
@@ -100,7 +97,7 @@ let parse_file (ctxt : index_builder_context) (filename : string) : si_capture
               {
                 sif_name = typename;
                 sif_kind = SI_Typedef;
-                sif_filepath = path;
+                sif_filepath = relative_path_str;
                 sif_is_abstract = false;
                 sif_is_final = false;
               })
@@ -111,7 +108,7 @@ let parse_file (ctxt : index_builder_context) (filename : string) : si_capture
               {
                 sif_name = constantname;
                 sif_kind = SI_GlobalConstant;
-                sif_filepath = path;
+                sif_filepath = relative_path_str;
                 sif_is_abstract = false;
                 sif_is_final = false;
               })
@@ -126,6 +123,17 @@ let parse_file (ctxt : index_builder_context) (filename : string) : si_capture
     files_scanned := !files_scanned + 1;
     result
 
+(* Parse the file using the existing context*)
+let parse_file (ctxt : index_builder_context) (filename : string) : si_capture
+    =
+  let _ = ctxt in
+  let stripped_path =
+    String.substr_replace_first filename ~pattern:ctxt.repo_folder ~with_:""
+  in
+  let path = Relative_path.from_root stripped_path in
+  parse_one_file ~path
+
+(* Parse a batch of files *)
 let parse_batch
     (ctxt : index_builder_context) (acc : si_capture) (files : string list) :
     si_capture =

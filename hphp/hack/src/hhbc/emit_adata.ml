@@ -17,6 +17,9 @@ open Hhbc_ast
 let hack_arr_dv_arrs () =
   Hhbc_options.hack_arr_dv_arrs !Hhbc_options.compiler_options
 
+let arrprov_enabled () =
+  Hhbc_options.array_provenance !Hhbc_options.compiler_options
+
 let adata_array_prefix = "a"
 
 let adata_varray_prefix = "y"
@@ -122,10 +125,7 @@ let array_identifier_map = ref TVMap.empty
 
 let get_array_identifier tv =
   (* If we're logging for array provenance, we musn't merge identical adatas *)
-  let arrprov_enabled =
-    Hhbc_options.log_array_provenance !Hhbc_options.compiler_options
-  in
-  if arrprov_enabled then
+  if arrprov_enabled () then
     next_adata_id tv
   else
     match TVMap.get tv !array_identifier_map with

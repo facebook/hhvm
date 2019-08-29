@@ -69,7 +69,7 @@ let is_in_active_class_scope context =
 
 (* TODO: put complicated reducers into separate files *)
 let reducer_await_toplevel = object(_)
-  inherit [_, _] Ast_visitor.reducer
+  inherit [_, _] Ast.reducer
     (fun () -> ESet.empty)
     ESet.union
 
@@ -81,7 +81,7 @@ let reducer_await_toplevel = object(_)
 end
 
 let reducer_this_usage = object(this)
-  inherit [_, _] Ast_visitor.reducer
+  inherit [_, _] Ast.reducer
     (fun () -> ESet.empty)
     ESet.union
 
@@ -109,7 +109,7 @@ end
 
 let check_program program =
   (* This is analogous to the iter_with but with reducers instead of handlers: *)
-  let reducers : (ESet.t, context) Ast_visitor.reducer_type list =
+  let reducers : (ESet.t, context) Ast.reducer_type list =
     [ reducer_await_toplevel
     ; reducer_this_usage
     ] in

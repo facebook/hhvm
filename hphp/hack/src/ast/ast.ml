@@ -543,3 +543,31 @@ let string_of_kind = function
   | Private -> "private"
   | Public -> "public"
   | Protected -> "protected"
+
+(** A {!reducer} is a AST visitor which is not in control of the iteration
+ * (and thus cannot change the order of the iteration or choose not to visit
+ * some subtrees).
+ *
+ * Intended to be used with {!Ast.reduce} to aggregate many checks into a
+ * single pass over a AST.  The type parameters are as follows:
+ * - 'a result being reduced (accumulated)
+ * - 'b context type, which is updated by a {!Ast.reduce} visitor
+ *)
+class type ['a, 'b] reducer_type =
+  object
+    method at_Call : 'b -> expr -> targ list -> expr list -> expr list -> 'a
+
+    method at_expr : 'b -> expr -> 'a
+
+    method at_Lvar : 'b -> id -> 'a
+  end
+
+class ['a, 'b] reducer (_zero : unit -> 'a) (_plus : 'a -> 'a -> 'a) :
+  ['a, 'b] reducer_type =
+  object
+    method at_Call _ctx _ _ _ _ = _zero ()
+
+    method at_expr _ctx _e = _zero ()
+
+    method at_Lvar _ctx _ = _zero ()
+  end

@@ -4,8 +4,7 @@
   (modules
     ast
     ast_defs
-    ast_defs_visitors_ancestors
-    ast_visitor)
+    ast_defs_visitors_ancestors)
   (libraries
     file_info
     namespace_env

@@ -2161,17 +2161,20 @@ and pStmt : stmt parser = fun node env ->
         , []
       )))
   | UnsetStatement { unset_keyword = kw; unset_variables  = exprs; _ } ->
-   let rec check_mutate_class_const e =
-      match snd e with
-      | Array_get (e, Some _) ->
-        check_mutate_class_const e
-      | Class_const _ ->
-        raise_parsing_error env (`Node node) SyntaxError.const_mutation;
-      | _ -> ()
-    in
-    if ParserOptions.disable_unset_class_const env.parser_options then
-      List.iter ~f:check_mutate_class_const @@ couldMap ~f:pExpr exprs env;
-    lift_awaits_in_statement env pos (fun () -> pos, Expr
+    lift_awaits_in_statement env pos @@ begin fun () ->
+      let exprl = couldMap ~f:pExpr exprs env in
+      if ParserOptions.disable_unset_class_const env.parser_options
+      then begin
+        let rec check_mutate_class_const = function
+          | _, Array_get (e, Some _) ->
+            check_mutate_class_const e
+          | _, Class_const _ ->
+            raise_parsing_error env (`Node node) SyntaxError.const_mutation;
+          | _ -> ()
+        in
+        List.iter ~f:check_mutate_class_const exprl
+      end;
+      pos, Expr
       ( pPos node env
       , Call
         ( (match syntax kw with
@@ -2182,9 +2185,10 @@ and pStmt : stmt parser = fun node env ->
           | _ -> missing_syntax "id" kw env
           )
         , []
-        , couldMap ~f:pExpr exprs env
+        , exprl
         , []
-      )))
+      ))
+    end
   | BreakStatement { break_level=level; _ } ->
     pos, Break (pBreak_or_continue_level env level)
   | ContinueStatement { continue_level=level; _ } ->

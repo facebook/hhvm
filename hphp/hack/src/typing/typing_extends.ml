@@ -225,16 +225,16 @@ let check_override env ~check_member_unique member_name mem_source ?(ignore_fun_
   let check_params = should_check_params parent_class class_ in
   check_class_elt_visibility parent_class_elt class_elt;
   let lazy fty_child = class_elt.ce_type in
+  let lazy fty_parent = parent_class_elt.ce_type in
   let pos = Reason.to_pos (fst fty_child) in
+  let parent_pos = Reason.to_pos (fst fty_parent) in
   if class_elt.ce_const <> parent_class_elt.ce_const then (
-    let lazy fty_parent = parent_class_elt.ce_type in
-    let parent_pos = Reason.to_pos (fst fty_parent) in
     Errors.overriding_prop_const_mismatch parent_pos parent_class_elt.ce_const
       pos class_elt.ce_const);
   if check_params then
     Errors.try_ (fun () ->
-    match parent_class_elt.ce_type, fty_child with
-    | lazy (r_parent, Tfun ft_parent), (r_child, Tfun ft_child) ->
+    match fty_parent, fty_child with
+    | (r_parent, Tfun ft_parent), (r_child, Tfun ft_child) ->
       let is_static = Cls.has_smethod parent_class member_name in
       (* Add deps here when we override *)
       let subtype_funs = SubType.subtype_method
@@ -252,8 +252,8 @@ let check_override env ~check_member_unique member_name mem_source ?(ignore_fun_
         | false, false ->
           (* Multiple concrete trait definitions, error *)
           Errors.multiple_concrete_defs
-            (Reason.to_pos r_child)
-            (Reason.to_pos r_parent)
+            pos
+            parent_pos
             (class_elt.ce_origin)
             (parent_class_elt.ce_origin)
             member_name
@@ -262,16 +262,15 @@ let check_override env ~check_member_unique member_name mem_source ?(ignore_fun_
         (* these unify errors are collected into errorl *)
         ignore(subtype_funs env r2 ft2 r1 ft1 Errors.unify_error) in
       check_ambiguous_inheritance check (r_parent, ft_parent) (r_child, ft_child)
-        (Reason.to_pos r_child) class_ class_elt.ce_origin
-    | lazy fty_parent, _ ->
-      begin match snd fty_parent, snd fty_child with
+        pos class_ class_elt.ce_origin
+    | fty_parent, _ ->
+      (match snd fty_parent, snd fty_child with
         | Tany _, Tany _ -> ()
         | Tany _, _ ->
-          Errors.decl_override_missing_hint @@ Reason.to_pos (fst fty_parent)
+          Errors.decl_override_missing_hint parent_pos
         | _, Tany _ ->
-          Errors.decl_override_missing_hint @@ Reason.to_pos (fst fty_child)
-        | _, _ -> ()
-      end;
+          Errors.decl_override_missing_hint pos
+        | _, _ -> ());
       Typing_ops.unify_decl pos Typing_reason.URnone env fty_parent fty_child
     )
     (fun errorl ->

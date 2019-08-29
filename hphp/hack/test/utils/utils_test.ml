@@ -42,7 +42,29 @@ let test_class_meth_splitter () =
   assert_cm_split "Justsomerandomtext" None;
   true
 
+let assert_expand_ns str map expected : unit =
+  let r = Utils.expand_namespace map str in
+  String_asserter.assert_equals
+    r
+    expected
+    "Expanded namespace does not match expected"
+
+let test_expand_namespace () =
+  let nsmap =
+    [ ("Dict", "HH\\Lib\\Dict");
+      ("Vec", "HH\\Lib\\Vec");
+      ("Keyset", "HH\\Lib\\Keyset");
+      ("C", "HH\\Lib\\C");
+      ("Str", "HH\\Lib\\Str") ]
+  in
+  assert_expand_ns "Str\\join" nsmap "\\HH\\Lib\\Str\\join";
+  assert_expand_ns "HH\\Lib\\Str\\join" nsmap "\\HH\\Lib\\Str\\join";
+  assert_expand_ns "\\HH\\Lib\\Str\\join" nsmap "\\HH\\Lib\\Str\\join";
+  assert_expand_ns "global_func" nsmap "\\global_func";
+  true
+
 let () =
   Unit_test.run_all
     [ ("test ability to split namespaces", test_namespace_splitter);
-      ("test ability to split class::meth", test_class_meth_splitter) ]
+      ("test ability to split class::meth", test_class_meth_splitter);
+      ("test ability to expand namespaces", test_expand_namespace) ]

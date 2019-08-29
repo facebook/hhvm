@@ -78,18 +78,6 @@ let get_positional_info (cst : Syntax.t) (file_offset : int) :
                else
                  None))
 
-let fixup_namespace (env : ServerEnv.env) (s : string) : string =
-  let ns_map = ParserOptions.auto_namespace_map env.ServerEnv.popt in
-  let (ns, name) = Utils.split_ns_from_name s in
-  let matching_alias =
-    List.find ns_map ~f:(fun (alias, _) ->
-        let fixup = Utils.add_ns alias ^ "\\" in
-        fixup = ns)
-  in
-  match matching_alias with
-  | None -> s
-  | Some (_, expanded) -> Utils.add_ns (expanded ^ "\\" ^ name)
-
 let get_occurrence_info
     (env : ServerEnv.env)
     (nast : Nast.program)
@@ -109,7 +97,9 @@ let get_occurrence_info
       in
       ft
     | _ ->
-      let fun_name = fixup_namespace env occurrence.SymbolOccurrence.name in
+      let fun_name =
+        ServerEnv.expand_namespace env occurrence.SymbolOccurrence.name
+      in
       let ft = Decl_provider.get_fun fun_name in
       ft
   in

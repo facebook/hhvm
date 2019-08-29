@@ -116,11 +116,11 @@ let experiment_enabled env experiment =
     (Env.get_tcopt env)
     experiment
 
-let make_idx_fake_super_shape shape_pos fun_name field_name field_ty =
-  Reason.Rshape (shape_pos, fun_name),
-  Tshape
-    (Open_shape,
-     Nast.ShapeMap.singleton field_name field_ty)
+let make_idx_fake_super_shape env shape_pos fun_name field_name field_ty =
+  let ty =
+    Reason.Rshape (shape_pos, fun_name),
+    Tshape (Open_shape, Nast.ShapeMap.singleton field_name field_ty) in
+  Typing_enforceability.make_locl_like_type env ty
 
 (* Is a given field required in a given shape?
  *
@@ -140,9 +140,10 @@ let is_shape_field_required env shape_pos fun_name field_name shape_ty =
     sft_optional = false;
     sft_ty = MakeType.mixed Reason.Rnone
   } in
+  let env, super_shape_ty = make_idx_fake_super_shape env shape_pos fun_name field_name field_ty in
   Typing_solver.is_sub_type env
     shape_ty
-    (make_idx_fake_super_shape shape_pos fun_name field_name field_ty)
+    super_shape_ty
 
 (* Typing rules for Shapes::idx
  *
@@ -163,11 +164,12 @@ let is_shape_field_required env shape_pos fun_name field_name shape_ty =
 let idx env ~expr_pos ~fun_pos ~shape_pos shape_ty field default =
   let env, shape_ty = Env.expand_type env shape_ty in
   let env, res = Env.fresh_type env expr_pos in
-  match TUtils.shape_field_name env field with
+  let env, res = match TUtils.shape_field_name env field with
   | None -> env, (Reason.Rwitness (fst field), TUtils.tany env)
   | Some field_name ->
-    let fake_super_shape_ty =
+    let env, fake_super_shape_ty =
       make_idx_fake_super_shape
+        env
         shape_pos
         "Shapes::idx"
         field_name
@@ -196,17 +198,19 @@ let idx env ~expr_pos ~fun_pos ~shape_pos shape_ty field default =
           default_ty
           res
           Errors.unify_error in
-      env, res
+      env, res in
+    Typing_enforceability.make_locl_like_type env res
 
 let at env ~expr_pos ~shape_pos shape_ty field =
   let env, shape_ty = Env.expand_type env shape_ty in
   let env, res = Env.fresh_type env expr_pos in
-  match TUtils.shape_field_name env field with
+  let env, res = match TUtils.shape_field_name env field with
    | None ->
      env, (Reason.Rwitness (fst field), TUtils.tany env)
    | Some field_name ->
-     let fake_super_shape_ty =
+     let env, fake_super_shape_ty =
        make_idx_fake_super_shape
+         env
          shape_pos
          "Shapes::at"
          field_name
@@ -216,7 +220,8 @@ let at env ~expr_pos ~shape_pos shape_ty field =
          shape_ty
          fake_super_shape_ty
          Errors.unify_error in
-     env, res
+     env, res in
+  Typing_enforceability.make_locl_like_type env res
 
 let remove_key p env shape_ty field  =
   match TUtils.shape_field_name env field with
@@ -253,7 +258,7 @@ let to_collection env shape_ty res return_type =
         let values = ShapeMap.values fdm in
         let values = List.map ~f:(fun { sft_ty; _ } -> sft_ty) values in
         let env, value = Typing_arrays.union_values env values in
-        env, return_type (fst res) key value
+        return_type env (fst res) key value
       | Open_shape ->
         env, res
 
@@ -268,12 +273,12 @@ let to_array env pos shape_ty res =
   let env, shape_ty =
     Typing_solver.expand_type_and_solve ~description_of_expected:"a shape" env
       pos shape_ty Errors.unify_error in
-  to_collection env shape_ty res (fun r key value ->
-    (r, Tarraykind (AKmap (key, value))))
+  to_collection env shape_ty res (fun env r key value ->
+    Typing_enforceability.make_locl_like_type env (r, Tarraykind (AKmap (key, value))))
 
 let to_dict env pos shape_ty res =
   let env, shape_ty =
     Typing_solver.expand_type_and_solve ~description_of_expected:"a shape" env
       pos shape_ty Errors.unify_error in
-  to_collection env shape_ty res (fun r key value ->
-    MakeType.dict r key value)
+  to_collection env shape_ty res (fun env r key value ->
+    Typing_enforceability.make_locl_like_type env (MakeType.dict r key value))

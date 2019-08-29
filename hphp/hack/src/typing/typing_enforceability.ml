@@ -230,6 +230,13 @@ let rec is_enforceable (env: env) (ty: decl ty) =
   (* TODO(T36532263) make sure that this is what we want *)
   | Tpu_access _ -> false
 
+let make_locl_like_type env ty =
+  if env.Typing_env_types.pessimize then
+    let dyn = MakeType.dynamic (Reason.Renforceable (Reason.to_pos (fst ty))) in
+    Typing_union.union env dyn ty
+  else
+    env, ty
+
 let is_enforced env ~is_xhp_attr ty =
   let enforceable = is_enforceable env ty in
   let is_hhi =

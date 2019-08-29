@@ -3033,6 +3033,213 @@ struct SpillerResults {
   }
 };
 
+// Recursive implementation for spill_weight_at (see below).
+SpillWeight spill_weight_at_impl(State& state,
+                                 const SpillerResults& spillerResults,
+                                 boost::dynamic_bitset<>& processed,
+                                 VregSet& regs,
+                                 Vlabel startBlock,
+                                 size_t startRpo,
+                                 Vlabel b,
+                                 size_t instIdx) {
+  // The total block weights of all the usages seen so far.
+  int64_t totalUsage = 0;
+  // The instruction count of the first usage.
+  int64_t firstDistance = -1;
+  // The number of instructions seen so far on this linear chain of
+  // blocks (not counting copyish instructions).
+  int64_t instructionCount = 0;
+
+  auto& unit = state.unit;
+
+  while (true) {
+    // We should never get here with a block that is before the
+    // start block (such blocks have already been processed by the
+    // spiller, thus they don't matter to future decisions).
+    assertx(state.rpoOrder[b] >= startRpo);
+
+    if (processed[b]) break;
+
+    // Remove any interesting Vregs which are no longer live. If
+    // there's none left, we're done and can report our
+    // results. Don't do this for the start block because the
+    // Vreg(s) may not be live in to that block (they may be defined
+    // in it).
+    if (b != startBlock) regs &= state.liveIn[b];
+    if (regs.none()) break;
+
+    processed[b] = true;
+
+    auto const recordUse = [&] (Vreg r) {
+      totalUsage += block_weight(state, b);
+      if (firstDistance < 0) firstDistance = instructionCount;
+      regs.remove(r);
+    };
+
+    // Examine each instruction in the current block, looking for
+    // uses. For copyish instructions, add the destination Vreg to
+    // the set of interesting Vregs. However, if the destination is
+    // a physical register, treat that as a use. Once used, remove
+    // it from the interesting set.
+    auto& block = unit.blocks[b];
+    for (size_t i = instIdx; i < block.code.size(); ++i) {
+      auto& inst = block.code[i];
+
+      if (inst.op == Vinstr::copy) {
+        if (!regs[inst.copy_.s]) continue;
+        if (inst.copy_.d.isPhys()) {
+          recordUse(inst.copy_.s);
+        } else {
+          regs.add(inst.copy_.d);
+        }
+      } else if (inst.op == Vinstr::copyargs) {
+        auto const& srcs = unit.tuples[inst.copyargs_.s];
+        auto const& dsts = unit.tuples[inst.copyargs_.d];
+        assertx(srcs.size() == dsts.size());
+        for (size_t j = 0; j < srcs.size(); ++j) {
+          if (!regs[srcs[j]]) continue;
+          if (dsts[j].isPhys()) {
+            recordUse(srcs[j]);
+          } else {
+            regs.add(dsts[j]);
+          }
+        }
+      } else if (inst.op == Vinstr::phijmp) {
+        auto const successors = succs(block);
+        assertx(successors.size() == 1);
+        auto const succ = successors[0];
+        auto const& phidef = unit.blocks[succ].code.front();
+        assertx(phidef.op == Vinstr::phidef);
+        auto const& srcs = unit.tuples[inst.phijmp_.uses];
+        auto const& dsts = unit.tuples[phidef.phidef_.defs];
+        assertx(srcs.size() == dsts.size());
+
+        if (state.rpoOrder[succ] < startRpo) {
+          // Special case: if this jump is a back edge to a block
+          // which the spiller has already processed. We don't want
+          // to examine this block like the others, but we can use
+          // the already calculated spiller state. If the spiller
+          // has determined that the phi def is non-spilled, we
+          // treat that as a use. If the Vreg is spilled, we'll have
+          // to insert a reload on the back edge.
+          auto const& spillerState = spillerResults.perBlock[succ].inPhi;
+          assertx(spillerState.hasValue());
+          assertx(spillerState->size() == srcs.size());
+
+          for (size_t j = 0; j < srcs.size(); ++j) {
+            if (!regs[srcs[j]]) continue;
+            if ((*spillerState)[j] || dsts[j].isPhys()) recordUse(srcs[j]);
+          }
+        } else {
+          // Otherwise treat it like a copyargs
+          for (size_t j = 0; j < srcs.size(); ++j) {
+            if (!regs[srcs[j]]) continue;
+            if (dsts[j].isPhys()) {
+              recordUse(srcs[j]);
+            } else {
+              regs.add(dsts[j]);
+            }
+          }
+        }
+      } else {
+        // A normal instruction. Shouldn't be a spill or reload
+        // because we should only examine blocks that the spiller
+        // hasn't visited yet.
+        assertx(inst.op != Vinstr::spill && inst.op != Vinstr::reload);
+        // Remove any Vregs which have been used.
+        auto const uses = uses_set_cached(state, inst) & regs;
+        if (uses.any()) {
+          totalUsage += block_weight(state, b) * uses.size();
+          if (firstDistance < 0) firstDistance = instructionCount;
+          regs -= uses;
+        }
+        ++instructionCount;
+      }
+    }
+
+    // We didn't find any actual uses in this block. We need to now
+    // process the successors.
+    auto const successors = succs(block);
+    if (successors.empty()) break;
+
+    // If there's more than one successor we can't do this
+    // iteratively. Instead recurse and combine the results among
+    // the successors.
+    if (successors.size() > 1) {
+      int64_t usage = 0;
+      int64_t distance = 0;
+
+      for (auto const succ : successors) {
+        // Since critical edges are split, we cannot have any
+        // back-edges here.
+        assertx(state.rpoOrder[succ] >= state.rpoOrder[b]);
+        auto const result = spill_weight_at_impl(
+          state,
+          spillerResults,
+          processed,
+          regs,
+          startBlock,
+          startRpo,
+          succ,
+          0
+        );
+        if (result.usage <= 0) continue;
+        if (usage <= 0) {
+          distance = result.distance;
+        } else {
+          distance = std::min(distance, result.distance);
+        }
+        usage += result.usage;
+      }
+      if (usage > 0) {
+        totalUsage += usage;
+        if (firstDistance < 0) firstDistance = distance + instructionCount;
+      }
+      break;
+    }
+
+    // Otherwise just advance to the next block (and start from the
+    // beginning of that block).
+
+    auto const succ = successors[0];
+    if (state.rpoOrder[succ] < startRpo) {
+      // Special case: if the successor is a jump backwards to a
+      // block which the spiller has already processed, we can
+      // examine the spiller state to see what it has already
+      // decided there. If it has decided the Vreg is not-spilled,
+      // that counts as a use (we'll have to reload it on the
+      // back-edge). This can only happen if there's a single
+      // successor because we've split critical edges.
+      auto const& spillerState = spillerResults.perBlock[succ].in;
+      assertx(spillerState.hasValue());
+
+      for (auto const r : regs) {
+        auto const s = spillerState->forReg(r);
+        assertx(s);
+        if (s->inReg[r]) {
+          totalUsage += block_weight(state, b);
+          if (firstDistance < 0) firstDistance = instructionCount;
+        }
+      }
+
+      // We don't actually examine the successor in this case so
+      // we're done.
+      break;
+    }
+
+    // Otherwise proceed normally
+    b = succ;
+    instIdx = 0;
+  }
+
+  if (firstDistance < 0) {
+    // No usages at all
+    assertx(totalUsage == 0);
+    return SpillWeight{0, 0};
+  }
+  return SpillWeight{totalUsage, firstDistance};
+}
+
 // Calculate the spill weight for the given Vreg at the given block
 // and index into that block.
 SpillWeight spill_weight_at(State& state,
@@ -3045,8 +3252,6 @@ SpillWeight spill_weight_at(State& state,
 
   assertx(!reg.isPhys());
   assertx(reg_info(state, reg).regClass != RegClass::SF);
-
-  auto& unit = state.unit;
 
   /*
    * From the specified starting block, we walk the CFG. We keep a set
@@ -3103,198 +3308,17 @@ SpillWeight spill_weight_at(State& state,
   VregSet regs{reg};
 
   // Avoid infinite loops
-  boost::dynamic_bitset<> processed(unit.blocks.size());
-
-  auto const scan =
-    [&] (Vlabel b, size_t instIdx, auto const& self) -> SpillWeight {
-    // The total block weights of all the usages seen so far.
-    int64_t totalUsage = 0;
-    // The instruction count of the first usage.
-    int64_t firstDistance = -1;
-    // The number of instructions seen so far on this linear chain of
-    // blocks (not counting copyish instructions).
-    int64_t instructionCount = 0;
-
-    while (true) {
-      // We should never get here with a block that is before the
-      // start block (such blocks have already been processed by the
-      // spiller, thus they don't matter to future decisions).
-      assertx(state.rpoOrder[b] >= startRpo);
-
-      if (processed[b]) break;
-
-      // Remove any interesting Vregs which are no longer live. If
-      // there's none left, we're done and can report our
-      // results. Don't do this for the start block because the
-      // Vreg(s) may not be live in to that block (they may be defined
-      // in it).
-      if (b != startBlock) regs &= state.liveIn[b];
-      if (regs.none()) break;
-
-      processed[b] = true;
-
-      auto const recordUse = [&] (Vreg r) {
-        totalUsage += block_weight(state, b);
-        if (firstDistance < 0) firstDistance = instructionCount;
-        regs.remove(r);
-      };
-
-      // Examine each instruction in the current block, looking for
-      // uses. For copyish instructions, add the destination Vreg to
-      // the set of interesting Vregs. However, if the destination is
-      // a physical register, treat that as a use. Once used, remove
-      // it from the interesting set.
-      auto& block = unit.blocks[b];
-      for (size_t i = instIdx; i < block.code.size(); ++i) {
-        auto& inst = block.code[i];
-
-        if (inst.op == Vinstr::copy) {
-          if (!regs[inst.copy_.s]) continue;
-          if (inst.copy_.d.isPhys()) {
-            recordUse(inst.copy_.s);
-          } else {
-            regs.add(inst.copy_.d);
-          }
-        } else if (inst.op == Vinstr::copyargs) {
-          auto const& srcs = unit.tuples[inst.copyargs_.s];
-          auto const& dsts = unit.tuples[inst.copyargs_.d];
-          assertx(srcs.size() == dsts.size());
-          for (size_t j = 0; j < srcs.size(); ++j) {
-            if (!regs[srcs[j]]) continue;
-            if (dsts[j].isPhys()) {
-              recordUse(srcs[j]);
-            } else {
-              regs.add(dsts[j]);
-            }
-          }
-        } else if (inst.op == Vinstr::phijmp) {
-          auto const successors = succs(block);
-          assertx(successors.size() == 1);
-          auto const succ = successors[0];
-          auto const& phidef = unit.blocks[succ].code.front();
-          assertx(phidef.op == Vinstr::phidef);
-          auto const& srcs = unit.tuples[inst.phijmp_.uses];
-          auto const& dsts = unit.tuples[phidef.phidef_.defs];
-          assertx(srcs.size() == dsts.size());
-
-          if (state.rpoOrder[succ] < startRpo) {
-            // Special case: if this jump is a back edge to a block
-            // which the spiller has already processed. We don't want
-            // to examine this block like the others, but we can use
-            // the already calculated spiller state. If the spiller
-            // has determined that the phi def is non-spilled, we
-            // treat that as a use. If the Vreg is spilled, we'll have
-            // to insert a reload on the back edge.
-            auto const& spillerState = spillerResults.perBlock[succ].inPhi;
-            assertx(spillerState.hasValue());
-            assertx(spillerState->size() == srcs.size());
-
-            for (size_t j = 0; j < srcs.size(); ++j) {
-              if (!regs[srcs[j]]) continue;
-              if ((*spillerState)[j] || dsts[j].isPhys()) recordUse(srcs[j]);
-            }
-          } else {
-            // Otherwise treat it like a copyargs
-            for (size_t j = 0; j < srcs.size(); ++j) {
-              if (!regs[srcs[j]]) continue;
-              if (dsts[j].isPhys()) {
-                recordUse(srcs[j]);
-              } else {
-                regs.add(dsts[j]);
-              }
-            }
-          }
-        } else {
-          // A normal instruction. Shouldn't be a spill or reload
-          // because we should only examine blocks that the spiller
-          // hasn't visited yet.
-          assertx(inst.op != Vinstr::spill && inst.op != Vinstr::reload);
-          // Remove any Vregs which have been used.
-          auto const uses = uses_set_cached(state, inst) & regs;
-          if (uses.any()) {
-            totalUsage += block_weight(state, b) * uses.size();
-            if (firstDistance < 0) firstDistance = instructionCount;
-            regs -= uses;
-          }
-          ++instructionCount;
-        }
-      }
-
-      // We didn't find any actual uses in this block. We need to now
-      // process the successors.
-      auto const successors = succs(block);
-      if (successors.empty()) break;
-
-      // If there's more than one successor we can't do this
-      // iteratively. Instead recurse and combine the results among
-      // the successors.
-      if (successors.size() > 1) {
-        int64_t usage = 0;
-        int64_t distance = 0;
-
-        for (auto const succ : successors) {
-          // Since critical edges are split, we cannot have any
-          // back-edges here.
-          assertx(state.rpoOrder[succ] >= state.rpoOrder[b]);
-          auto const result = self(succ, 0, self);
-          if (result.usage <= 0) continue;
-          if (usage <= 0) {
-            distance = result.distance;
-          } else {
-            distance = std::min(distance, result.distance);
-          }
-          usage += result.usage;
-        }
-        if (usage > 0) {
-          totalUsage += usage;
-          if (firstDistance < 0) firstDistance = distance + instructionCount;
-        }
-        break;
-      }
-
-      // Otherwise just advance to the next block (and start from the
-      // beginning of that block).
-
-      auto const succ = successors[0];
-      if (state.rpoOrder[succ] < startRpo) {
-        // Special case: if the successor is a jump backwards to a
-        // block which the spiller has already processed, we can
-        // examine the spiller state to see what it has already
-        // decided there. If it has decided the Vreg is not-spilled,
-        // that counts as a use (we'll have to reload it on the
-        // back-edge). This can only happen if there's a single
-        // successor because we've split critical edges.
-        auto const& spillerState = spillerResults.perBlock[succ].in;
-        assertx(spillerState.hasValue());
-
-        for (auto const r : regs) {
-          auto const s = spillerState->forReg(r);
-          assertx(s);
-          if (s->inReg[r]) {
-            totalUsage += block_weight(state, b);
-            if (firstDistance < 0) firstDistance = instructionCount;
-          }
-        }
-
-        // We don't actually examine the successor in this case so
-        // we're done.
-        break;
-      }
-
-      // Otherwise proceed normally
-      b = succ;
-      instIdx = 0;
-    }
-
-    if (firstDistance < 0) {
-      // No usages at all
-      assertx(totalUsage == 0);
-      return SpillWeight{0, 0};
-    }
-    return SpillWeight{totalUsage, firstDistance};
-  };
-
-  return scan(startBlock, startInstIdx, scan);
+  boost::dynamic_bitset<> processed(state.unit.blocks.size());
+  return spill_weight_at_impl(
+    state,
+    spillerResults,
+    processed,
+    regs,
+    startBlock,
+    startRpo,
+    startBlock,
+    startInstIdx
+  );
 }
 
 // Update the phi spiller state for block b to account for which Vregs have been

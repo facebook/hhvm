@@ -544,7 +544,9 @@ let get_desc_string_for env ty kind =
     result
   | _ -> kind_to_string kind
 
-let get_func_details_for env ty =
+(* Convert a `TFun` into a func details structure *)
+let tfun_to_func_details (env : Tast_env.t) (ft : 'a Typing_defs.fun_type) :
+    func_details_result option =
   let param_to_record ?(is_variadic = false) param =
     {
       param_name =
@@ -555,27 +557,28 @@ let get_func_details_for env ty =
       param_variadic = is_variadic;
     }
   in
-  let tfun_to_func_details ft =
-    Some
-      {
-        return_ty = Tast_env.print_ty env ft.ft_ret.et_type;
-        min_arity = arity_min ft.ft_arity;
-        params =
-          ( List.map ft.ft_params param_to_record
-          @
-          match ft.ft_arity with
-          | Fellipsis _ ->
-            let empty =
-              TUtils.default_fun_param (Reason.none, Typing_defs.make_tany ())
-            in
-            [param_to_record ~is_variadic:true empty]
-          | Fvariadic (_, p) -> [param_to_record ~is_variadic:true p]
-          | Fstandard _ -> [] );
-      }
-  in
+  Some
+    {
+      return_ty = Tast_env.print_ty env ft.ft_ret.et_type;
+      min_arity = arity_min ft.ft_arity;
+      params =
+        ( List.map ft.ft_params param_to_record
+        @
+        match ft.ft_arity with
+        | Fellipsis _ ->
+          let empty =
+            TUtils.default_fun_param (Reason.none, Tany TanySentinel.value)
+          in
+          [param_to_record ~is_variadic:true empty]
+        | Fvariadic (_, p) -> [param_to_record ~is_variadic:true p]
+        | Fstandard _ -> [] );
+    }
+
+(* Convert a `ty` into a func details structure *)
+let get_func_details_for env ty =
   match ty with
-  | DeclTy (_, Tfun ft) -> tfun_to_func_details ft
-  | LoclTy (_, Tfun ft) -> tfun_to_func_details ft
+  | DeclTy (_, Tfun ft) -> tfun_to_func_details env ft
+  | LoclTy (_, Tfun ft) -> tfun_to_func_details env ft
   | _ -> None
 
 (* Here we turn partial_autocomplete_results into complete_autocomplete_results *)
@@ -835,7 +838,8 @@ let find_global_results
     ~(content_funs : Reordered_argument_collections.SSet.t)
     ~(content_classes : Reordered_argument_collections.SSet.t)
     ~(autocomplete_context : AutocompleteTypes.legacy_autocomplete_context)
-    ~(sienv : SearchUtils.si_env) : unit =
+    ~(sienv : SearchUtils.si_env)
+    ~(tast_env : Tast_env.t) : unit =
   (* Select the provider to use for symbol autocomplete *)
   match sienv.sie_provider with
   (* Legacy provider should match previous behavior *)
@@ -844,7 +848,15 @@ let find_global_results
       ~tcopt
       ~autocomplete_context
       ~content_funs
-      ~content_classes
+      ~content_classes;
+
+    (* If only traits are valid, filter to that *)
+    if completion_type = Some Actrait_only then
+      autocomplete_results :=
+        List.filter !autocomplete_results ~f:(fun r ->
+            match r with
+            | Complete c -> c.res_kind = SI_Trait
+            | Partial p -> p.kind_ = SI_Trait)
   (* The new simpler providers *)
   | _ ->
     (kind_filter :=
@@ -854,7 +866,8 @@ let find_global_results
        | _ -> None);
     let query_text = strip_suffix !auto_complete_for_global in
     let replace_pos = get_replace_pos_exn () in
-    (* TODO: This needs to be replaced with REAL namespace processing *)
+    let (ns, _) = Utils.split_ns_from_name query_text in
+    (* This ensures that we do not have a leading backslash *)
     let query_text = Utils.strip_ns query_text in
     let absolute_none = Pos.none |> Pos.to_absolute in
     let results =
@@ -865,23 +878,41 @@ let find_global_results
         ~kind_filter:!kind_filter
         ~context:completion_type
     in
+    (* Looking up a function signature using Tast_env.get_fun consumes ~67KB
+     * and can cause complex typechecking which can take from 2-100 milliseconds
+     * per result.  When tested in summer 2019 it was possible to load 1.4GB of data
+     * if get_fun was called on every function in the WWW codebase.
+     *
+     * Therefore, this feature is only available via the option sie_resolve_signatures
+     * - and please be careful not to turn it on unless you really want to consume
+     * memory and performance.
+     *)
     List.iter results ~f:(fun r ->
-        SearchUtils.(
-          (* Figure out how to display them *)
-          let complete =
-            {
-              res_pos = absolute_none;
-              (* This is okay - resolve will fill it in *)
-              res_replace_pos = replace_pos;
-              res_base_class = None;
-              res_ty = kind_to_string r.si_kind;
-              res_name = r.si_name;
-              res_fullname = r.si_fullname;
-              res_kind = r.si_kind;
-              func_details = None;
-            }
-          in
-          add_res (Complete complete)));
+        (* Only load func details if the flag sie_resolve_signatures is true *)
+        let func_details =
+          if sienv.sie_resolve_signatures && r.si_kind = SI_Function then
+            let fixed_name = ns ^ r.si_name in
+            match Tast_env.get_fun tast_env fixed_name with
+            | None -> None
+            | Some ft -> tfun_to_func_details tast_env ft
+          else
+            None
+        in
+        (* Figure out how to display them *)
+        let complete =
+          {
+            res_pos = absolute_none;
+            (* This is okay - resolve will fill it in *)
+            res_replace_pos = replace_pos;
+            res_base_class = None;
+            res_ty = kind_to_string r.si_kind;
+            res_name = r.si_name;
+            res_fullname = r.si_fullname;
+            res_kind = r.si_kind;
+            func_details;
+          }
+        in
+        add_res (Complete complete));
     autocomplete_is_complete := List.length results < max_results
 
 (* Main entry point for autocomplete *)
@@ -898,6 +929,11 @@ let go
       let start_time = Unix.gettimeofday () in
       let max_results = 100 in
       let kind_filter = ref None in
+      let tast_env =
+        match !ac_env with
+        | Some e -> e
+        | None -> Tast_env.empty tcopt
+      in
       let completion_type = !argument_global_type in
       if
         completion_type = Some Acid
@@ -913,25 +949,10 @@ let go
           ~autocomplete_context
           ~content_funs
           ~content_classes
-          ~sienv;
+          ~sienv
+          ~tast_env;
 
       if completion_type = Some Acprop then compute_complete_local tast;
-      let tast_env =
-        match !ac_env with
-        | Some e -> e
-        | None -> Tast_env.empty tcopt
-      in
-      let filter_results (result : autocomplete_result) : bool =
-        let kind =
-          match result with
-          | Partial res -> res.kind_
-          | Complete res -> res.res_kind
-        in
-        match (completion_type, kind) with
-        | (Some Actrait_only, SearchUtils.SI_Trait) -> true
-        | (Some Actrait_only, _) -> false
-        | _ -> true
-      in
       let replace_pos =
         try get_replace_pos_exn ()
         with _ -> Pos.none |> Pos.to_absolute |> Ide_api_types.pos_to_range
@@ -946,10 +967,7 @@ let go
       let results =
         {
           With_complete_flag.is_complete = !autocomplete_is_complete;
-          value =
-            !autocomplete_results
-            |> List.filter ~f:filter_results
-            |> List.map ~f:resolve;
+          value = !autocomplete_results |> List.map ~f:resolve;
         }
       in
       SymbolIndex.log_symbol_index_search

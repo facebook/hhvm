@@ -296,6 +296,7 @@ type si_env = {
   sie_quiet_mode: bool;
   sie_fuzzy_search_mode: bool ref;
   sie_log_timings: bool;
+  sie_resolve_signatures: bool;
   (* LocalSearchService *)
   lss_fullitems: si_capture Relative_path.Map.t;
   lss_tombstones: Tombstone_set.t;
@@ -318,6 +319,7 @@ let default_si_env =
     sie_quiet_mode = false;
     sie_fuzzy_search_mode = ref false;
     sie_log_timings = false;
+    sie_resolve_signatures = false;
     (* LocalSearchService *)
     lss_fullitems = Relative_path.Map.empty;
     lss_tombstones = Tombstone_set.empty;

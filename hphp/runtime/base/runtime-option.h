@@ -89,12 +89,15 @@ struct RepoOptions {
   E(std::string,    HHJSAdditionalTransform,        "")               \
   E(bool,           HHJSNoBabel,                    false)            \
   E(bool,           HHJSUniqueFilenames,            true)             \
-  E(std::string,    HHJSBabelTransform,                               \
-                                         hhjsBabelTransformDefault()) \
   E(bool,           HHJSSetLocs,                    false)            \
   E(std::string,    HHJSNodeModules,                "")               \
   E(bool,           EmitFuncPointers,               true)             \
   E(bool,           EmitInstMethPointers,           EmitFuncPointers) \
+  /**/
+
+#define PARSERFLAGSNOCACHEKEY() \
+  E(std::string,    HHJSBabelTransform,                               \
+                                       hhjsBabelTransformDefault())   \
   /**/
 
 #define AUTOLOADFLAGS() \
@@ -128,6 +131,7 @@ private:
 #define H(t, n, ...) t n;
 #define E(t, n, ...) t n;
 PARSERFLAGS()
+PARSERFLAGSNOCACHEKEY()
 AUTOLOADFLAGS()
 #undef N
 #undef P

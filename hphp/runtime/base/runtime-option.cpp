@@ -390,6 +390,7 @@ folly::dynamic RepoOptions::toDynamic() const {
 #define H(_, n, ...) OUT("Hack.Lang." #n, n)
 #define E(_, n, ...) OUT("Eval." #n, n)
 PARSERFLAGS()
+PARSERFLAGSNOCACHEKEY()
 AUTOLOADFLAGS();
 #undef N
 #undef P
@@ -407,6 +408,7 @@ bool RepoOptions::operator==(const RepoOptions& o) const {
 #define H(_, n, ...) if (n != o.n) return false;
 #define E(_, n, ...) if (n != o.n) return false;
 PARSERFLAGS()
+PARSERFLAGSNOCACHEKEY()
 AUTOLOADFLAGS();
 #undef N
 #undef P
@@ -446,7 +448,8 @@ RepoOptions::RepoOptions(const char* file) : m_path(file) {
 #define P(_, n, ...) hdfExtract(parserConfig, "PHP7." #n, n, s_defaults.n);
 #define H(_, n, ...) hdfExtract(parserConfig, "Hack.Lang." #n, n, s_defaults.n);
 #define E(_, n, ...) hdfExtract(parserConfig, "Eval." #n, n, s_defaults.n);
-PARSERFLAGS();
+PARSERFLAGS()
+PARSERFLAGSNOCACHEKEY();
 #undef N
 #undef P
 #undef H
@@ -473,6 +476,7 @@ void RepoOptions::initDefaults(const Hdf& hdf, const IniSettingMap& ini) {
 #define H(_, n, dv) Config::Bind(n, ini, hdf, "Hack.Lang." #n, dv);
 #define E(_, n, dv) Config::Bind(n, ini, hdf, "Eval." #n, dv);
 PARSERFLAGS()
+PARSERFLAGSNOCACHEKEY()
 AUTOLOADFLAGS()
 #undef N
 #undef P

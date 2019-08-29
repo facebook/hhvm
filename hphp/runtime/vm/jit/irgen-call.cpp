@@ -193,11 +193,10 @@ IRSPRelOffset fsetActRec(
   gen(
     env,
     SpillFrame,
-    ActRecInfo { arOffset, numArgs },
+    ActRecInfo { arOffset, numArgs, dynamicCall },
     sp(env),
     func,
     objOrClass ? objOrClass : cns(env, TNullptr),
-    cns(env, dynamicCall),
     tsList ? tsList : cns(env, TNullptr)
   );
 

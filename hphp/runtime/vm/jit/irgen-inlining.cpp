@@ -235,9 +235,9 @@ void beginInlining(IRGS& env,
   assertx(!fca.hasUnpack());
   IRSPRelOffset calleeAROff = spOffBCFromIRSP(env) + fca.numArgs;
 
-  auto const arInfo = ActRecInfo { calleeAROff, fca.numArgs };
+  auto const arInfo = ActRecInfo { calleeAROff, fca.numArgs, dynamicCall };
   gen(env, SpillFrame, arInfo, sp(env), cns(env, target), ctx,
-      cns(env, dynamicCall), tsList ? tsList : cns(env, TNullptr));
+      tsList ? tsList : cns(env, TNullptr));
 
   ctx = [&] () -> SSATmp* {
     if (!target->implCls()) {

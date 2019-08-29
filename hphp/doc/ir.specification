@@ -1737,9 +1737,9 @@ To string conversions:
 
 9. Call & Return
 
-| SpillFrame<offset,numArgs>,
+| SpillFrame<offset,numArgs,dynamicCall>,
 |   ND,
-|   S(StkPtr) S(Func) S(Ctx,Cls,Nullptr) S(Bool) S(Arr|Vec,Nullptr),
+|   S(StkPtr) S(Func) S(Ctx,Cls,Nullptr) S(Arr|Vec,Nullptr),
 |   NF
 
   Operands:
@@ -1748,8 +1748,7 @@ To string conversions:
      S1 - callee Func or nullptr
      S2 - object (for FCallObjMethod*), class (for FCallClsMethod*), context
           (for FCallClsMethod*), or nullptr (for FCallFunc*).
-     S3 - whether this is a "dynamic" call
-     S4 - reified generics type structure list
+     S3 - reified generics type structure list
 
   Defines the fields for an activation record and writes them to the stack
   pointed to by S0, at `offset'.

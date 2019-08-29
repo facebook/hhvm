@@ -110,8 +110,7 @@ void cgSpillFrame(IRLS& env, const IRInstruction* inst) {
   auto const sp = srcLoc(env, inst, 0).reg();
   auto const extra = inst->extra<SpillFrame>();
   auto const ctxTmp = inst->src(2);
-  auto const isDynamic = inst->src(3);
-  auto const tsListTmp = inst->src(4);
+  auto const tsListTmp = inst->src(3);
   auto& v = vmain(env);
 
   auto const ar = sp[cellsToBytes(extra->spOffset.offset)];
@@ -168,8 +167,14 @@ void cgSpillFrame(IRLS& env, const IRInstruction* inst) {
   auto const func = srcLoc(env, inst, 1).reg();
   v << store{func, ar + AROFF(m_func)};
 
+  // Set flags
+  auto flags = ActRec::Flags::None;
+  if (extra->dynamicCall) {
+    flags = static_cast<ActRec::Flags>(flags | ActRec::Flags::DynamicCall);
+  }
+
   auto const createCompactReifiedPtr = [&] (Vout& v) {
-    auto const tsListReg = srcLoc(env, inst, 4).reg();
+    auto const tsListReg = srcLoc(env, inst, 3).reg();
     auto const bits = getTSBits(env, inst, tsListTmp, tsListReg);
     if (!bits) return tsListReg;
     auto const bits_shifted = v.makeReg();
@@ -184,17 +189,7 @@ void cgSpillFrame(IRLS& env, const IRInstruction* inst) {
     return result;
   };
 
-  // Set flags
-  auto flags = ActRec::Flags::None;
-
-  bool dynamicCheck = false;
   bool reifiedCheck = false;
-  if (!isDynamic->hasConstVal()) {
-    dynamicCheck = true;
-  } else if (isDynamic->hasConstVal(true)) {
-    flags = static_cast<ActRec::Flags>(flags | ActRec::Flags::DynamicCall);
-  }
-
   if (!tsListTmp->type().maybe(TNullptr)) {
     auto const tsList = createCompactReifiedPtr(v);
     v << store{tsList, ar + AROFF(m_reifiedGenerics)};
@@ -207,22 +202,6 @@ void cgSpillFrame(IRLS& env, const IRInstruction* inst) {
   auto naaf = v.cns(
     static_cast<int32_t>(ActRec::encodeNumArgsAndFlags(extra->numArgs, flags))
   );
-
-  if (dynamicCheck) {
-    auto const dynamicReg = srcLoc(env, inst, 3).reg();
-    auto const sf = v.makeReg();
-    auto const naaf2 = v.makeReg();
-    auto const dst = v.makeReg();
-    v << orli{
-      static_cast<int32_t>(ActRec::Flags::DynamicCall),
-      naaf,
-      dst,
-      v.makeReg()
-    };
-    v << testb{dynamicReg, dynamicReg, sf};
-    v << cmovl{CC_NZ, sf, naaf, dst, naaf2};
-    naaf = naaf2;
-  }
 
   if (reifiedCheck) {
     auto const tsList = createCompactReifiedPtr(v);

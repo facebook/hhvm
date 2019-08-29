@@ -3503,6 +3503,7 @@ let abstract_concrete_override pos parent_pos kind =
     | `method_ -> "method"
     | `typeconst -> "type constant"
     | `constant -> "constant"
+    | `property -> "property"
   in
   add_list
     (Typing.err_code Typing.AbstractConcreteOverride)

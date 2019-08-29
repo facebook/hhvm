@@ -1,0 +1,10 @@
+File "multiple_concrete_defs_from_traits.php", line 13, characters 17-19:
+Member $p has the wrong type (Typing[4341])
+File "multiple_concrete_defs_from_traits.php", line 13, characters 17-19:
+T3 and T1 both declare ambiguous implementations of $p.
+File "multiple_concrete_defs_from_traits.php", line 13, characters 17-19:
+T3's definition is here.
+File "multiple_concrete_defs_from_traits.php", line 5, characters 17-19:
+T1's definition is here.
+File "multiple_concrete_defs_from_traits.php", line 13, characters 17-19:
+Redeclare $p in C with a compatible signature.

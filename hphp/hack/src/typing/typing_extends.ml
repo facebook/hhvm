@@ -257,10 +257,10 @@ let check_override env ~check_member_unique member_name mem_source ?(ignore_fun_
             (class_elt.ce_origin)
             (parent_class_elt.ce_origin)
             member_name
-            ((Cls.name class_))
+            (Cls.name class_)
         | _ -> () end;
         (* these unify errors are collected into errorl *)
-        ignore(subtype_funs env r2 ft2 r1 ft1 Errors.unify_error) in
+        ignore (subtype_funs env r2 ft2 r1 ft1 Errors.unify_error) in
       check_ambiguous_inheritance check (r_parent, ft_parent) (r_child, ft_child)
         pos class_ class_elt.ce_origin
     | fty_parent, _ ->
@@ -271,7 +271,17 @@ let check_override env ~check_member_unique member_name mem_source ?(ignore_fun_
         | _, Tany _ ->
           Errors.decl_override_missing_hint pos
         | _, _ -> ());
-      Typing_ops.unify_decl pos Typing_reason.URnone env fty_parent fty_child
+        if not parent_class_elt.ce_abstract && class_elt.ce_abstract then
+          Errors.abstract_concrete_override pos parent_pos `property;
+        if check_member_unique && not class_elt.ce_abstract &&
+          not parent_class_elt.ce_abstract then
+            Errors.multiple_concrete_defs pos parent_pos
+            class_elt.ce_origin parent_class_elt.ce_origin
+            member_name (Cls.name class_);
+        if class_elt.ce_const then
+          Typing_ops.sub_type_decl pos Typing_reason.URnone env fty_child fty_parent
+        else
+          Typing_ops.unify_decl pos Typing_reason.URnone env fty_parent fty_child
     )
     (fun errorl ->
       Errors.bad_method_override pos member_name errorl)

@@ -45,6 +45,7 @@ let initialize
       CustomSearchService.initialize ~globalrev_opt;
       sienv
     | NoIndex
+    | LocalIndex
     | TrieIndex ->
       sienv
   in
@@ -54,6 +55,7 @@ let initialize
     | SqliteIndex -> SqliteSearchService.fetch_namespaces ~sienv
     | CustomIndex -> CustomSearchService.fetch_namespaces ()
     | NoIndex
+    | LocalIndex
     | TrieIndex ->
       []
   in
@@ -161,6 +163,7 @@ let find_matching_symbols
       | TrieIndex ->
         []
       | CustomIndex
+      | LocalIndex
       | SqliteIndex ->
         LocalSearchService.search_local_symbols
           ~query_text
@@ -180,7 +183,6 @@ let find_matching_symbols
             ~kind_filter
         in
         LocalSearchService.extract_dead_results ~sienv ~results:r
-      | NoIndex -> []
       | SqliteIndex ->
         let results =
           SqliteSearchService.sqlite_search
@@ -193,6 +195,9 @@ let find_matching_symbols
         LocalSearchService.extract_dead_results ~sienv ~results
       | TrieIndex ->
         HackSearchService.index_search query_text max_results kind_filter
+      | LocalIndex
+      | NoIndex ->
+        []
     in
     (* Merge and deduplicate results *)
     let all_results = List.append local_results global_results in
@@ -251,6 +256,7 @@ let update_files
   match !sienv.sie_provider with
   | CustomIndex
   | NoIndex
+  | LocalIndex
   | SqliteIndex ->
     List.iter paths ~f:(fun (path, info, detector) ->
         if detector = SearchUtils.TypeChecker then
@@ -266,6 +272,7 @@ let remove_files
   match !sienv.sie_provider with
   | CustomIndex
   | NoIndex
+  | LocalIndex
   | SqliteIndex ->
     Relative_path.Set.iter paths ~f:(fun path ->
         sienv := LocalSearchService.remove_file ~sienv:!sienv ~path)

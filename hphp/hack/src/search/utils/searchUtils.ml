@@ -14,6 +14,7 @@ type search_provider =
   | NoIndex
   | SqliteIndex
   | TrieIndex
+  | LocalIndex
 [@@deriving show]
 
 (* The context in which autocomplete is being performed *)
@@ -35,6 +36,7 @@ let provider_of_string (provider_str : string) : search_provider =
   | "NoIndex" -> NoIndex
   | "CustomIndex" -> CustomIndex
   | "TrieIndex" -> TrieIndex
+  | "LocalIndex" -> LocalIndex
   | _ -> TrieIndex
 
 (* Convert a string to a human readable description of the provider *)
@@ -44,6 +46,7 @@ let descriptive_name_of_provider (provider : search_provider) : string =
   | NoIndex -> "Symbol index disabled"
   | SqliteIndex -> "Sqlite"
   | TrieIndex -> "SharedMem/Trie"
+  | LocalIndex -> "Local file index only"
 
 (* Shared Search code between Fuzzy and Trie based searches *)
 module type Searchable = sig

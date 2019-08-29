@@ -136,16 +136,18 @@ function(embed_sections TARGET DEST)
     #        "${CMAKE_CURRENT_SOURCE_DIR}/generated-repo-schema-id.txt"
     #        "${CMAKE_CURRENT_SOURCE_DIR}/generated-build-id.txt"
     #        "${CMAKE_CURRENT_SOURCE_DIR}/generated-hhjs-babel-transform.txt"
-    COMMAND "${HPHP_HOME}/hphp/hhvm/generate-buildinfo.sh"
+    COMMAND
+      "INSTALL_DIR=${CMAKE_BINARY_DIR}/hphp/util"
+      "${HPHP_HOME}/hphp/hhvm/generate-buildinfo.sh"
     WORKING_DIRECTORY "${HPHP_HOME}/hphp/util"
     COMMENT "Generating Repo Schema ID and Compiler ID"
     VERBATIM)
 
   if (APPLE)
-    set(COMPILER_ID -Wl,-sectcreate,__text,"compiler_id","${HPHP_HOME}/hphp/util/generated-compiler-id.txt")
-    set(REPO_SCHEMA -Wl,-sectcreate,__text,"repo_schema_id","${HPHP_HOME}/hphp/util/generated-repo-schema-id.txt")
-    set(BUILD_ID -Wl,-sectcreate,__text,"build_id","${HPHP_HOME}/hphp/util/generated-build-id.txt")
-    set(HHJS_BABEL_TRANSFORM -Wl,-sectcreate,__text,"hhjs_babel_transform","${HPHP_HOME}/hphp/util/generated-hhjs-babel-transform.txt")
+    set(COMPILER_ID -Wl,-sectcreate,__text,"compiler_id","${CMAKE_BINARY_DIR}/hphp/util/generated-compiler-id.txt")
+    set(REPO_SCHEMA -Wl,-sectcreate,__text,"repo_schema_id","${CMAKE_BINARY_DIR}/hphp/util/generated-repo-schema-id.txt")
+    set(BUILD_ID -Wl,-sectcreate,__text,"build_id","${CMAKE_BINARY_DIR}/hphp/util/generated-build-id.txt")
+    set(HHJS_BABEL_TRANSFORM -Wl,-sectcreate,__text,"hhjs_babel_transform","${CMAKE_BINARY_DIR}/hphp/util/generated-hhjs-babel-transform.txt")
     target_link_libraries(${TARGET} ${${TARGET}_SLIBS} ${COMPILER_ID} ${REPO_SCHEMA} ${BUILD_ID} ${HHJS_BABEL_TRANSFORM})
   elseif(MSVC)
     set(RESOURCE_FILE "#pragma code_page(1252)\n")

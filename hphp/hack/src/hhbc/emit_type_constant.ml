@@ -15,6 +15,18 @@ module TV = Typed_value
 let hack_arr_dv_arrs () =
   Hhbc_options.hack_arr_dv_arrs !Hhbc_options.compiler_options
 
+let vec_or_varray l =
+  if hack_arr_dv_arrs () then
+    TV.Vec l
+  else
+    TV.VArray l
+
+let dict_or_darray kv =
+  if hack_arr_dv_arrs () then
+    TV.Dict kv
+  else
+    TV.DArray kv
+
 (* Taken from: hphp/runtime/base/type-structure.h *)
 let get_kind_num ~tparams p =
   let p =
@@ -128,12 +140,7 @@ let rec shape_field_to_pair ~tparams ~namespace ~targ_map sfi =
         hint_to_type_constant ~tparams ~namespace ~targ_map hint ) ]
   in
   let inner_value = class_const @ optional @ inner_value in
-  let value =
-    if hack_arr_dv_arrs () then
-      TV.Dict inner_value
-    else
-      TV.DArray inner_value
-  in
+  let value = dict_or_darray inner_value in
   (TV.String name, value)
 
 and shape_info_to_typed_value
@@ -143,10 +150,7 @@ and shape_info_to_typed_value
       ~f:(shape_field_to_pair ~tparams ~namespace ~targ_map)
       si.Aast.nsi_field_map
   in
-  if hack_arr_dv_arrs () then
-    TV.Dict info
-  else
-    TV.DArray info
+  dict_or_darray info
 
 and shape_allows_unknown_fields { Aast.nsi_allows_unknown_fields; _ } =
   if nsi_allows_unknown_fields then
@@ -156,10 +160,7 @@ and shape_allows_unknown_fields { Aast.nsi_allows_unknown_fields; _ } =
 
 and type_constant_access_list sl =
   let l = List.map ~f:(fun (_, s) -> TV.String s) sl in
-  if hack_arr_dv_arrs () then
-    TV.Vec l
-  else
-    TV.VArray l
+  vec_or_varray l
 
 and resolve_classname ~tparams ~namespace (p, s) =
   let is_tparam = s = "_" || List.mem ~equal:( = ) tparams s in
@@ -302,18 +303,10 @@ and hint_to_type_constant
     else
       tconsts
   in
-  if hack_arr_dv_arrs () then
-    TV.Dict tconsts
-  else
-    TV.DArray tconsts
+  dict_or_darray tconsts
 
 and hints_to_type_constant ~tparams ~namespace ~targ_map hl =
-  let tconsts =
-    List.map
-      ~f:(fun h -> hint_to_type_constant ~tparams ~namespace ~targ_map h)
-      hl
-  in
-  if hack_arr_dv_arrs () then
-    TV.Vec tconsts
-  else
-    TV.VArray tconsts
+  vec_or_varray
+  @@ List.map
+       ~f:(fun h -> hint_to_type_constant ~tparams ~namespace ~targ_map h)
+       hl

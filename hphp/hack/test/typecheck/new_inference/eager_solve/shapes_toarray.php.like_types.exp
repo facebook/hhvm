@@ -1,6 +1,6 @@
 File "shapes_toarray.php", line 28, characters 23-117:
 Invalid return type (Typing[4110])
 File "shapes_toarray.php", line 25, characters 18-36:
-Expected ~darray<~string, ~num> because it is an unenforceable type
+Expected darray<string, num>
 File "collections/Map.hhi", line 709, characters 31-44:
-But got darray<[unresolved], [unresolved]>
+But got dynamic because it is an unenforceable type

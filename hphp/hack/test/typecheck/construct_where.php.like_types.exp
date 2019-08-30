@@ -1,4 +1,0 @@
-File "construct_where.php", line 9, characters 53-54:
-You are trying to access the member T2 but this is not an object, it is a dynamic value (Typing[4062])
-File "construct_where.php", line 8, characters 24-24:
-Definition is here

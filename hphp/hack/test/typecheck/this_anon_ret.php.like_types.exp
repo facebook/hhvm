@@ -1,0 +1,6 @@
+File "this_anon_ret.php", line 14, characters 12-61:
+Invalid return type (Typing[4110])
+File "this_anon_ret.php", line 13, characters 31-51:
+Expected ~(function(int): this) because it is an unenforceable type
+File "this_anon_ret.php", line 14, characters 12-61:
+But got (function(int $x): ~this)

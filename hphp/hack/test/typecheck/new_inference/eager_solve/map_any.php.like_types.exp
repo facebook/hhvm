@@ -1,10 +1,4 @@
-File "map_any.php", line 14, characters 5-35:
-Invalid return type (Typing[4323])
-File "map_any.php", line 4, characters 21-22:
-Some type constraint(s) are violated here
-File "map_any.php", line 4, characters 21-22:
-T2 is a constrained type parameter
-File "map_any.php", line 14, characters 5-35:
-Expected void because this function implicitly returns void
-File "map_any.php", line 4, characters 21-22:
-But got dynamic
+File "map_any.php", line 15, characters 7-8:
+Was expecting an object but type is unknown (Typing[4297])
+File "map_any.php", line 14, characters 5-6:
+It is unknown because the type of the lambda parameter could not be determined. Please add a type hint to the parameter

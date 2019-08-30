@@ -1,6 +1,0 @@
-File "simplify_error.php", line 13, characters 31-33:
-Member foo has the wrong type (Typing[4341])
-File "simplify_error.php", line 4, characters 38-38:
-Expected ~this::T because it is an unenforceable type
-File "simplify_error.php", line 13, characters 38-38:
-But got T

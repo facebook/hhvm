@@ -1,8 +1,0 @@
-File "constraint_override_good.php", line 15, characters 19-21:
-Member foo has the wrong type (Typing[4341])
-File "constraint_override_good.php", line 15, characters 51-51:
-Expected A
-File "constraint_override_good.php", line 9, characters 15-16:
-But got Td
-File "constraint_override_good.php", line 15, characters 45-46:
-  via this generic Td

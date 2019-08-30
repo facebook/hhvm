@@ -1,6 +1,0 @@
-File "bad_inout_hint_typeconst4.php", line 4, characters 23-23:
-Unable to satisfy constraint on this type constant (Typing[4110])
-File "bad_inout_hint_typeconst4.php", line 4, characters 28-54:
-Expected ~(function(inout num): void) because it is an unenforceable type
-File "bad_inout_hint_typeconst4.php", line 8, characters 18-44:
-But got (function(inout int): void)

@@ -1,14 +1,9 @@
 File "asyncgen2.php", line 14, characters 5-15:
-  nothing
+  dynamic
 File "asyncgen2.php", line 15, characters 5-15:
-  nothing
+  dynamic
 File "asyncgen2.php", line 14, characters 5-15:[2]
-  nothing
+  dynamic
 File "asyncgen2.php", line 15, characters 5-15:[2]
-  nothing
-File "asyncgen2.php", line 9, characters 3-16:
-Invalid yield (Typing[4110])
-File "asyncgen2.php", line 9, characters 9-10:
-Expected int
-File "asyncgen2.php", line 7, characters 36-38:
-But got dynamic because it is an unenforceable type
+  dynamic
+No errors

@@ -1,6 +1,0 @@
-File "this.php", line 21, characters 30-41:
-Invalid argument (Typing[4110])
-File "this.php", line 20, characters 23-26:
-Expected Y<T>
-File "this.php", line 13, characters 26-29:
-But got dynamic because it is an unenforceable type

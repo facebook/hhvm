@@ -40,13 +40,13 @@ File "unpack_call11.php", line 20, characters 19-19:
 But got B
 File "unpack_call11.php", line 41, characters 36-37:
 Invalid argument (Typing[4110])
-File "unpack_call11.php", line 53, characters 39-40:
-Expected D (variadic argument)
-File "unpack_call11.php", line 39, characters 24-24:
+File "unpack_call11.php", line 41, characters 36-37:
+Expected Traversable<D> (it is unpacked with '...')
+File "unpack_call11.php", line 39, characters 12-25:
 But got dynamic because it is an unenforceable type
 File "unpack_call11.php", line 44, characters 26-27:
 Invalid argument (Typing[4110])
 File "unpack_call11.php", line 49, characters 32-33:
 Expected B (variadic argument)
 File "unpack_call11.php", line 39, characters 24-24:
-But got dynamic because it is an unenforceable type
+But got E

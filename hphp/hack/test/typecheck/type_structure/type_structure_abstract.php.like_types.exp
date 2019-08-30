@@ -1,12 +1,7 @@
 File "type_structure_abstract.php", line 10, characters 5-73:
-  ?nothing
+  ~?classname<this::T>
 File "type_structure_abstract.php", line 17, characters 5-60:
-  ~?classname<~this::T>
+  classname<this::T>
 File "type_structure_abstract.php", line 24, characters 5-60:
-  ~?classname<~IChild>
-File "type_structure_abstract.php", line 10, characters 25-58:
-Invalid argument (Typing[4110])
-File "type_structure_abstract.php", line 10, characters 25-58:
-Expected shape(?'classname' => [unresolved], ...) because Shapes::idx expects a shape
-File "typestructure.hhi", line 54, characters 29-747:
-But got dynamic because it is an unenforceable type
+  classname<IChild>
+No errors

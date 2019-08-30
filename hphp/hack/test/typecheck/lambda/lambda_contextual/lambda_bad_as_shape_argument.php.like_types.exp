@@ -1,12 +1,4 @@
-File "lambda_bad_as_shape_argument.php", line 27, characters 10-16:
-Invalid return type (Typing[4110])
-File "lambda_bad_as_shape_argument.php", line 26, characters 4-27:
-Expected MyClosureRunner<~MyClass>
-File "lambda_bad_as_shape_argument.php", line 23, characters 12-35:
-But got dynamic because it is an unenforceable type
-File "lambda_bad_as_shape_argument.php", line 31, characters 5-169:
-Invalid argument (Typing[4110])
-File "lambda_bad_as_shape_argument.php", line 22, characters 3-65:
-Expected ~shape('a' => ~MyClosureRunner<~MyClass>, 'b' => ~int) because it is an unenforceable type
-File "lambda_bad_as_shape_argument.php", line 31, characters 5-169:
-But got shape('a' => MyClosureRunner<dynamic>, 'b' => int)
+File "lambda_bad_as_shape_argument.php", line 34, characters 11-14:
+Was expecting an object but type is unknown (Typing[4297])
+File "lambda_bad_as_shape_argument.php", line 33, characters 18-21:
+It is unknown because the type of the lambda parameter could not be determined. Please add a type hint to the parameter

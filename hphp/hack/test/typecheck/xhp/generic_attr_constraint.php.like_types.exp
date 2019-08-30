@@ -1,10 +1,6 @@
 File "generic_attr_constraint.php", line 8, characters 15-17:
-Invalid xhp value for attribute :foo in :my-xhp (Typing[4323])
-File "generic_attr_constraint.php", line 3, characters 20-22:
-Some type constraint(s) are violated here
-File "generic_attr_constraint.php", line 3, characters 15-15:
-T is a constrained type parameter
-File "generic_attr_constraint.php", line 3, characters 20-22:
-Expected ~num
+Invalid xhp value for attribute :foo in :my-xhp (Typing[4343])
+File "generic_attr_constraint.php", line 4, characters 13-13:
+Expected ~[unresolved] because it is an unenforceable type
 File "generic_attr_constraint.php", line 8, characters 15-17:
 But got string

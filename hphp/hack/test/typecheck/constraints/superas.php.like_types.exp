@@ -1,4 +1,6 @@
-File "superas.php", line 23, characters 15-19:
-You are trying to access the member Equal but this is not an object, it is a dynamic value or an object of type IMem (Typing[4062])
-File "superas.php", line 9, characters 19-22:
-Definition is here
+File "superas.php", line 19, characters 22-30:
+Invalid argument (Typing[4110])
+File "superas.php", line 10, characters 39-47:
+Expected ~Vector<[unresolved]> because it is an unenforceable type
+File "superas.php", line 12, characters 17-25:
+But got Vector<[unresolved]>

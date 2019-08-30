@@ -1,6 +1,0 @@
-File "enum_6.php--use.php", line 5, characters 13-15:
-Wrong type hint (Typing[4338])
-File "enum_6.php--use.php", line 5, characters 9-11:
-Expected foo
-File "enum_6.php--def.php", line 8, characters 9-11:
-But got dynamic because it is an unenforceable type

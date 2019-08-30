@@ -1,6 +1,0 @@
-File "nullsafe-bug.php", line 9, characters 10-39:
-Invalid return type (Typing[4110])
-File "nullsafe-bug.php", line 8, characters 22-37:
-Expected Awaitable<~?IFoo>
-File "nullsafe-bug.php", line 9, characters 10-39:
-But got dynamic, the result of calling a dynamic type as a function

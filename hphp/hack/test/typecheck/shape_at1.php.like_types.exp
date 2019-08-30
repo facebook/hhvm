@@ -1,16 +1,11 @@
 File "shape_at1.php", line 13, characters 3-48:
-  nothing
+  ~int
 File "shape_at1.php", line 14, characters 3-48:
-  nothing
+  ~string
 File "shape_at1.php", line 15, characters 3-48:
-  nothing
+  ~?float
 File "shape_at1.php", line 16, characters 3-57:
-  nothing
+  ~?int
 File "shape_at1.php", line 17, characters 3-45:
-  nothing
-File "shape_at1.php", line 13, characters 22-34:
-Invalid argument (Typing[4110])
-File "shape_at1.php", line 13, characters 22-34:
-Expected shape(?'required' => [unresolved], ...) because Shapes::at expects a shape
-File "shape_at1.php", line 3, characters 20-129:
-But got dynamic because it is an unenforceable type
+  mixed
+No errors

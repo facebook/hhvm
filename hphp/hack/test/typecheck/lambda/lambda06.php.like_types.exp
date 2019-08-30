@@ -1,6 +1,0 @@
-File "lambda06.php", line 20, characters 12-15:
-Invalid argument (Typing[4110])
-File "lambda06.php", line 13, characters 18-23:
-Expected int because this is used in an arithmetic operation
-File "lambda06.php", line 12, characters 26-28:
-But got dynamic because it is an unenforceable type

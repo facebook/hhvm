@@ -1,6 +1,0 @@
-File "ternary6.php", line 6, characters 10-10:
-Invalid return type (Typing[4336])
-File "ternary6.php", line 6, characters 10-10:
-Expected void because this function implicitly returns void
-File "ternary6.php", line 6, characters 15-21:
-But got ?string

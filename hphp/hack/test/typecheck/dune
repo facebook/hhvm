@@ -94,11 +94,11 @@ let () =
     ; "--new-inference-lambda"
     ; "--like-types"
     ; "--coercion-from-dynamic"
-    ; "--pessimize-types"
+    ; "--simple-pessimize 1.0"
     ; "--error-format raw"
     ; "--out-extension .like_types.out" ] in
   let cmd = String.concat " " cmds in
-  let _typecheck_like_types =
+  let typecheck_like_types =
     Printf.sprintf "
 
 (alias
@@ -139,9 +139,10 @@ let () =
     (deps
       (alias typecheck)
       (alias decl_compare)
-      (alias typecheck_legacy_decl)))" in
+      (alias typecheck_legacy_decl)
+      (alias typecheck_like_types)))" in
 
   let dune_file = typecheck ^
-                  typecheck_legacy_decl ^ decl_compare ^
+                  typecheck_legacy_decl ^ typecheck_like_types ^ decl_compare ^
                   run_tests in
   Jbuild_plugin.V1.send dune_file

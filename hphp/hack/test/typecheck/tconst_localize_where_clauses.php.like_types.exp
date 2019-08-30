@@ -1,4 +1,0 @@
-File "tconst_localize_where_clauses.php", line 10, characters 22-28:
-You are trying to access the member TResult but this is not an object, it is a dynamic value (Typing[4062])
-File "tconst_localize_where_clauses.php", line 8, characters 32-34:
-Definition is here

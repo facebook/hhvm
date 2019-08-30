@@ -1,30 +1,12 @@
-File "lambda_as_awaitable_result.php", line 14, characters 10-44:
-Invalid return type (Typing[4336])
-File "lambda_as_awaitable_result.php", line 14, characters 10-44:
-Expected void because this async function implicitly returns Awaitable<void>
-File "lambda_as_awaitable_result.php", line 11, characters 36-39:
-But got dynamic because it is an unenforceable type
-File "lambda_as_awaitable_result.php", line 20, characters 10-44:
-Invalid return type (Typing[4336])
-File "lambda_as_awaitable_result.php", line 20, characters 10-44:
-Expected void because this async function implicitly returns Awaitable<void>
-File "lambda_as_awaitable_result.php", line 11, characters 36-39:
-But got dynamic because it is an unenforceable type
-File "lambda_as_awaitable_result.php", line 42, characters 37-48:
+File "lambda_as_awaitable_result.php", line 45, characters 5-17:
 Invalid argument (Typing[4110])
-File "lambda_as_awaitable_result.php", line 37, characters 28-35:
-Expected arraykey
-File "lambda_as_awaitable_result.php", line 39, characters 42-44:
+File "stdlib/builtins_array.hhi", line 115, characters 10-18:
+Expected Container<[unresolved]>
+File "lambda_as_awaitable_result.php", line 39, characters 35-45:
 But got dynamic because it is an unenforceable type
 File "lambda_as_awaitable_result.php", line 63, characters 10-45:
-Some elements in this Vector are incompatible (Typing[4110])
-File "lambda_as_awaitable_result.php", line 62, characters 40-47:
-Expected ~arraykey because it is an unenforceable type
-File "lambda_as_awaitable_result.php", line 65, characters 5-7:
-But got float
+Invalid return type (Typing[4110])
+File "lambda_as_awaitable_result.php", line 62, characters 36-48:
+Expected ~vec<arraykey> because it is an unenforceable type
 File "lambda_as_awaitable_result.php", line 63, characters 10-45:
-Some elements in this Vector are incompatible (Typing[4110])
-File "lambda_as_awaitable_result.php", line 62, characters 40-47:
-Expected ~arraykey because it is an unenforceable type
-File "lambda_as_awaitable_result.php", line 66, characters 5-8:
-But got bool
+But got vec<(bool | float | string)>

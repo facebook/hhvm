@@ -1,13 +1,13 @@
 File "hh_show_typevar.php", line 4, characters 3-13:
-  Ta
-  where Ta super dynamic, Ta super Tb
+  ~Ta
+  where Ta super Tb
 File "hh_show_typevar.php", line 5, characters 3-13:
-  Tb
-  where Tb super dynamic, Tb as Ta, Tb as ~\Foo
+  ~Tb
+  where Tb as Ta, Tb as \Foo
 File "hh_show_typevar.php", line 9, characters 3-13:
-  Ta
-  where Ta super dynamic, Ta as Tb
+  ~Ta
+  where Ta as Tb
 File "hh_show_typevar.php", line 10, characters 3-13:
-  Tb
+  ~Tb
   where Tb super Ta, Tb super \Foo
 No errors

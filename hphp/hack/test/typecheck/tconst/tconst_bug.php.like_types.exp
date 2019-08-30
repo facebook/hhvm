@@ -1,16 +1,18 @@
 File "tconst_bug.php", line 9, characters 5-49:
-  (function(vec<~StringType> $boxes): vec<~err>)
+  (function(~vec<StringType> $boxes): ~vec<string>)
 File "tconst_bug.php", line 10, characters 5-49:
-  (function(vec<~exact StringType> $boxes): vec<~string>)
+  (function(~vec<exact StringType> $boxes): ~vec<string>)
 File "tconst_bug.php", line 11, characters 5-44:
-  (function(vec<~StringType> $boxes): vec<~err>)
+  (function(~vec<StringType> $boxes): ~vec<string>)
 File "tconst_bug.php", line 12, characters 5-39:
-  (function(vec<~<expr#1> as StringType> $boxes): vec<~err>)
+  (function(~vec<<expr#1> as StringType> $boxes): ~vec<string>)
 File "tconst_bug.php", line 13, characters 5-44:
-  (function(vec<~exact StringType> $boxes): vec<~string>)
+  (function(~vec<exact StringType> $boxes): ~vec<string>)
 File "tconst_bug.php", line 14, characters 5-39:
-  (function(vec<~<expr#1> as StringType> $boxes): vec<~string>)
-File "tconst_bug.php", line 31, characters 23-31:
-You are trying to access the member TExposeAs but this is not an object, it is a dynamic value (Typing[4062])
-File "tconst_bug.php", line 27, characters 22-25:
-Definition is here
+  (function(~vec<<expr#1> as StringType> $boxes): ~vec<string>)
+File "tconst_bug.php", line 16, characters 37-38:
+Invalid argument (Typing[4110])
+File "tconst_bug.php", line 37, characters 5-13:
+Expected ~vec<StringType> because it is an unenforceable type
+File "tconst_bug.php", line 7, characters 26-40:
+But got vec<StringType>

@@ -1,2 +1,0 @@
-File "enum_5.php--def.php", line 8, characters 7-9:
-Enums must be int or string or arraykey, not ~int (Typing[4024])

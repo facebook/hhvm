@@ -1,64 +1,12 @@
-File "lambda_prop.php", line 25, characters 27-32:
+File "lambda_prop.php", line 19, characters 13-14:
 Invalid argument (Typing[4110])
-File "lambda_prop.php", line 25, characters 10-24:
-Expected ~Contra<~Derived> because it is an unenforceable type
-File "lambda_prop.php", line 8, characters 20-20:
-  via this generic T
-File "lambda_prop.php", line 18, characters 65-74:
-But got Contra<~Derived>
-File "lambda_prop.php", line 27, characters 24-29:
-Invalid argument (Typing[4110])
-File "lambda_prop.php", line 27, characters 10-21:
-Expected ~Contra<~Base> because it is an unenforceable type
-File "lambda_prop.php", line 8, characters 20-20:
-  via this generic T
-File "lambda_prop.php", line 18, characters 65-74:
-But got Contra<~Derived>
-File "lambda_prop.php", line 29, characters 27-32:
-Invalid argument (Typing[4110])
-File "lambda_prop.php", line 29, characters 10-24:
-Expected ~Contra<~Derived> because it is an unenforceable type
-File "lambda_prop.php", line 8, characters 20-20:
-  via this generic T
-File "lambda_prop.php", line 18, characters 65-74:
-But got Contra<~<expr#1>>
-File "lambda_prop.php", line 31, characters 24-29:
-Invalid argument (Typing[4110])
-File "lambda_prop.php", line 31, characters 10-21:
-Expected ~Contra<~Base> because it is an unenforceable type
-File "lambda_prop.php", line 8, characters 20-20:
-  via this generic T
-File "lambda_prop.php", line 18, characters 65-74:
-But got Contra<~<expr#1>>
-File "lambda_prop.php", line 37, characters 28-33:
-Invalid argument (Typing[4110])
-File "lambda_prop.php", line 37, characters 10-25:
-Expected ~Contra<~?Derived> because it is an unenforceable type
-File "lambda_prop.php", line 8, characters 20-20:
-  via this generic T
-File "lambda_prop.php", line 18, characters 65-74:
-But got Contra<~?Derived>
-File "lambda_prop.php", line 39, characters 25-30:
-Invalid argument (Typing[4110])
-File "lambda_prop.php", line 39, characters 10-22:
-Expected ~Contra<~?Base> because it is an unenforceable type
-File "lambda_prop.php", line 8, characters 20-20:
-  via this generic T
-File "lambda_prop.php", line 18, characters 65-74:
-But got Contra<~?Derived>
-File "lambda_prop.php", line 41, characters 28-33:
-Invalid argument (Typing[4110])
-File "lambda_prop.php", line 41, characters 10-25:
-Expected ~Contra<~?Derived> because it is an unenforceable type
-File "lambda_prop.php", line 8, characters 20-20:
-  via this generic T
-File "lambda_prop.php", line 18, characters 65-74:
-But got Contra<~?<expr#1>>
-File "lambda_prop.php", line 43, characters 25-30:
-Invalid argument (Typing[4110])
-File "lambda_prop.php", line 43, characters 10-22:
-Expected ~Contra<~?Base> because it is an unenforceable type
-File "lambda_prop.php", line 8, characters 20-20:
-  via this generic T
-File "lambda_prop.php", line 18, characters 65-74:
-But got Contra<~?<expr#1>>
+File "lambda_prop.php", line 18, characters 49-50:
+Expected T1
+File "lambda_prop.php", line 18, characters 32-33:
+But got dynamic because it is an unenforceable type
+File "lambda_prop.php", line 20, characters 10-33:
+Invalid return type (Typing[4110])
+File "lambda_prop.php", line 18, characters 61-75:
+Expected ~(T2, Contra<T1>) because it is an unenforceable type
+File "lambda_prop.php", line 20, characters 10-33:
+But got (~T2, Contra<mixed>)

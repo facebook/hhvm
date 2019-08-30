@@ -1,6 +1,0 @@
-File "apply_with_invoke_curried.php", line 18, characters 11-26:
-Invalid argument (Typing[4110])
-File "apply_with_invoke_curried.php", line 9, characters 37-55:
-Expected ~(function(~<expr#1>): void) because it is an unenforceable type
-File "apply_with_invoke_curried.php", line 18, characters 11-26:
-But got (function(~<expr#1> $d): ~void)

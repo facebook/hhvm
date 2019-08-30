@@ -1,36 +1,42 @@
+File "array_append_bad.php", line 5, characters 13-14:
+Typing error (Typing[4324])
+File "array_append_bad.php", line 4, characters 48-49:
+Expected Tk
+File "array_append_bad.php", line 4, characters 59-60:
+But got dynamic because it is an unenforceable type
 File "array_append_bad.php", line 32, characters 16-20:
 Invalid argument (Typing[4110])
 File "array_append_bad.php", line 11, characters 23-28:
 Expected string
 File "array_append_bad.php", line 22, characters 9-11:
-But got dynamic because it is an unenforceable type
+But got int
 File "array_append_bad.php", line 35, characters 16-20:
 Invalid argument (Typing[4110])
 File "array_append_bad.php", line 11, characters 23-28:
 Expected string
 File "array_append_bad.php", line 23, characters 7-9:
-But got dynamic because it is an unenforceable type
+But got int
 File "array_append_bad.php", line 37, characters 3-18:
 Invalid assignment (Typing[4110])
 File "array_append_bad.php", line 24, characters 10-12:
-Expected ~num because it is an unenforceable type
+Expected num
 File "array_append_bad.php", line 37, characters 15-18:
 But got bool
 File "array_append_bad.php", line 39, characters 3-15:
 Invalid assignment (Typing[4110])
 File "array_append_bad.php", line 26, characters 7-9:
-Expected ~int because it is an unenforceable type
+Expected int
 File "array_append_bad.php", line 39, characters 12-15:
 But got bool
 File "array_append_bad.php", line 41, characters 3-21:
 Invalid assignment (Typing[4110])
 File "array_append_bad.php", line 27, characters 11-13:
-Expected ~num because it is an unenforceable type
+Expected num
 File "array_append_bad.php", line 41, characters 18-20:
 But got string
 File "array_append_bad.php", line 42, characters 3-21:
 Invalid assignment (Typing[4110])
 File "array_append_bad.php", line 27, characters 7-9:
-Expected ~int because it is an unenforceable type
+Expected int
 File "array_append_bad.php", line 42, characters 15-17:
 But got string

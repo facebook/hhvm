@@ -1,6 +1,0 @@
-File "assign_vector_bad.php", line 5, characters 3-12:
-Invalid assignment (Typing[4110])
-File "assign_vector_bad.php", line 4, characters 22-27:
-Expected ~string because it is an unenforceable type
-File "assign_vector_bad.php", line 5, characters 11-12:
-But got int

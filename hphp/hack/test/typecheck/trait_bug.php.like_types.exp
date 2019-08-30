@@ -1,6 +1,0 @@
-File "trait_bug.php", line 22, characters 21-41:
-Invalid argument (Typing[4110])
-File "trait_bug.php", line 30, characters 13-23:
-Expected QIC<[unresolved]>
-File "trait_bug.php", line 16, characters 47-50:
-But got dynamic because it is an unenforceable type

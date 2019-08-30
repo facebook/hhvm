@@ -1,20 +1,12 @@
-File "ref_get_array_append.php", line 27, characters 19-29:
-Invalid argument (Typing[4323])
-File "ref_get_array_append.php", line 57, characters 19-19:
-Some type constraint(s) are violated here
-File "ref_get_array_append.php", line 57, characters 19-19:
-T is a constrained type parameter
-File "ref_get_array_append.php", line 9, characters 27-35:
-Expected Vector<[unresolved]>
-File "ref_get_array_append.php", line 57, characters 19-19:
-But got dynamic
-File "ref_get_array_append.php", line 52, characters 30-40:
-Invalid argument (Typing[4323])
-File "ref_get_array_append.php", line 57, characters 19-19:
-Some type constraint(s) are violated here
-File "ref_get_array_append.php", line 57, characters 19-19:
-T is a constrained type parameter
+File "ref_get_array_append.php", line 7, characters 10-11:
+Invalid return type (Typing[4110])
+File "ref_get_array_append.php", line 5, characters 42-47:
+Expected ~vec<T> because it is an unenforceable type
 File "ref_get_array_append.php", line 5, characters 24-29:
-Expected vec<[unresolved]>
-File "ref_get_array_append.php", line 57, characters 19-19:
-But got dynamic
+But got vec<~T>
+File "ref_get_array_append.php", line 10, characters 3-11:
+Invalid assignment (Typing[4110])
+File "ref_get_array_append.php", line 9, characters 34-34:
+Expected T
+File "ref_get_array_append.php", line 9, characters 41-41:
+But got dynamic because it is an unenforceable type

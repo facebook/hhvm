@@ -1,0 +1,6 @@
+File "functional_higher_order2.php", line 13, characters 19-19:
+Invalid argument (Typing[4110])
+File "functional_higher_order2.php", line 13, characters 19-19:
+Expected T
+File "functional_higher_order2.php", line 13, characters 19-19:
+But got dynamic because it is an unenforceable type

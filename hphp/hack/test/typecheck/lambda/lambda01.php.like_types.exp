@@ -1,6 +1,0 @@
-File "lambda01.php", line 26, characters 12-16:
-Invalid argument (Typing[4110])
-File "lambda01.php", line 14, characters 36-40:
-Expected ~(function([unresolved]): [unresolved])
-File "lambda01.php", line 22, characters 11-41:
-But got (function(int $y): int)

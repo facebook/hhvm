@@ -1,0 +1,6 @@
+File "tconst_unresolved_taccess.php", line 26, characters 12-19:
+Invalid return type (Typing[4110])
+File "tconst_unresolved_taccess.php", line 18, characters 60-78:
+Expected ~Vector<this::TData> because it is an unenforceable type
+File "tconst_unresolved_taccess.php", line 19, characters 16-24:
+But got Vector<[unresolved]>

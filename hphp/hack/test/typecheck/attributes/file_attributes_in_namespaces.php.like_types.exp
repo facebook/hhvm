@@ -1,6 +1,0 @@
-File "file_attributes_in_namespaces.php", line 10, characters 18-31:
-Invalid argument (Typing[4110])
-File "file_attributes_in_namespaces.php", line 5, characters 40-45:
-Expected string
-File "classname.hhi", line 15, characters 26-36:
-But got dynamic because it is an unenforceable type

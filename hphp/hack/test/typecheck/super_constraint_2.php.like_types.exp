@@ -1,10 +1,6 @@
 File "super_constraint_2.php", line 27, characters 12-26:
-Invalid return type (Typing[4323])
-File "super_constraint_2.php", line 10, characters 23-24:
-Some type constraint(s) are violated here
-File "super_constraint_2.php", line 10, characters 23-24:
-Tu is a constrained type parameter
+Invalid return type (Typing[4110])
 File "super_constraint_2.php", line 26, characters 6-18:
 Expected FooDerived123
-File "super_constraint_2.php", line 10, characters 23-24:
-But got dynamic
+File "super_constraint_2.php", line 10, characters 52-53:
+But got dynamic because it is an unenforceable type

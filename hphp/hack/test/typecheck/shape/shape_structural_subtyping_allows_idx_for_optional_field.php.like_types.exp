@@ -1,6 +1,0 @@
-File "shape_structural_subtyping_allows_idx_for_optional_field.php", line 6, characters 15-20:
-Invalid argument (Typing[4110])
-File "shape_structural_subtyping_allows_idx_for_optional_field.php", line 6, characters 15-20:
-Expected shape(?'a' => [unresolved], ...) because Shapes::idx expects a shape
-File "shape_structural_subtyping_allows_idx_for_optional_field.php", line 3, characters 31-48:
-But got dynamic because it is an unenforceable type

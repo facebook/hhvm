@@ -1,4 +1,0 @@
-File "ambiguous_member_good.php", line 16, characters 7-11:
-You are trying to access the member dupe1 but this is not an object, it is a value of generic type T (Typing[4062])
-File "ambiguous_member_good.php", line 15, characters 40-40:
-Definition is here

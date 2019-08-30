@@ -1,30 +1,6 @@
-File "inter_tconst.php", line 10, characters 51-52:
-You are trying to access the member Ta but this is not an object, it is a dynamic value (Typing[4062])
-File "inter_tconst.php", line 10, characters 20-20:
-Definition is here
-File "inter_tconst.php", line 11, characters 14-16:
-You are trying to access the member get but this is not an object, it is a dynamic value or an object of type A (Typing[4062])
-File "inter_tconst.php", line 10, characters 20-20:
-Definition is here
-File "inter_tconst.php", line 16, characters 5-8:
-Some type constraint(s) here are violated (Typing[4323])
-File "inter_tconst.php", line 10, characters 15-15:
-'T' is a constrained type parameter
-File "inter_tconst.php", line 10, characters 51-52:
-You are trying to access the member Ta but this is not an object, it is a dynamic value
-File "inter_tconst.php", line 10, characters 15-15:
-Definition is here
-File "inter_tconst.php", line 16, characters 5-8:
-Some type constraint(s) here are violated (Typing[4323])
-File "inter_tconst.php", line 10, characters 15-15:
-'T' is a constrained type parameter
-File "inter_tconst.php", line 10, characters 51-52:
-You are trying to access the member Ta but this is not an object, it is a dynamic value
-File "inter_tconst.php", line 10, characters 20-20:
-Definition is here
 File "inter_tconst.php", line 16, characters 10-11:
-Invalid argument (Typing[4090])
+Invalid argument (Typing[4110])
+File "inter_tconst.php", line 10, characters 27-27:
+Expected ~[unresolved] because it is an unenforceable type
 File "inter_tconst.php", line 15, characters 13-13:
-No type constant 'Ta' in B
-File "inter_tconst.php", line 8, characters 7-7:
-Declaration of B is here
+But got (<expr#1> & <expr#1>) from this is expression test

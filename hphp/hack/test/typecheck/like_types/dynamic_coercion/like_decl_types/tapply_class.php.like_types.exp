@@ -1,6 +1,1 @@
-File "tapply_class.php", line 13, characters 10-11:
-Invalid return type (Typing[4110])
-File "tapply_class.php", line 12, characters 30-35:
-Expected E<~int>
-File "tapply_class.php", line 12, characters 18-23:
-But got dynamic because it is an unenforceable type
+No errors

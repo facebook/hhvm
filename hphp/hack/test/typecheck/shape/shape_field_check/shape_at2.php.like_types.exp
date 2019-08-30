@@ -1,6 +1,1 @@
-File "shape_at2.php", line 8, characters 19-31:
-Invalid argument (Typing[4110])
-File "shape_at2.php", line 8, characters 19-31:
-Expected shape(?'missing' => [unresolved], ...) because Shapes::at expects a shape
-File "shape_at2.php", line 3, characters 20-48:
-But got dynamic because it is an unenforceable type
+No errors

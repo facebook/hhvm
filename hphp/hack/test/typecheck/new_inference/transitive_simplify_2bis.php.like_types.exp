@@ -1,24 +1,6 @@
-File "transitive_simplify_2bis.php", line 27, characters 11-12:
+File "transitive_simplify_2bis.php", line 43, characters 6-16:
 Invalid argument (Typing[4110])
-File "transitive_simplify_2bis.php", line 15, characters 15-19:
+File "transitive_simplify_2bis.php", line 11, characters 36-40:
 Expected Co<[unresolved]>
-File "transitive_simplify_2bis.php", line 11, characters 19-23:
-But got dynamic because it is an unenforceable type
-File "transitive_simplify_2bis.php", line 28, characters 11-12:
-Invalid argument (Typing[4110])
-File "transitive_simplify_2bis.php", line 15, characters 15-19:
-Expected Co<[unresolved]>
-File "transitive_simplify_2bis.php", line 11, characters 19-23:
-But got dynamic because it is an unenforceable type
-File "transitive_simplify_2bis.php", line 29, characters 10-12:
-Invalid argument (Typing[4110])
-File "transitive_simplify_2bis.php", line 19, characters 15-19:
-Expected Co<[unresolved]>
-File "transitive_simplify_2bis.php", line 15, characters 27-31:
-But got dynamic because it is an unenforceable type
-File "transitive_simplify_2bis.php", line 29, characters 15-17:
-Invalid argument (Typing[4110])
-File "transitive_simplify_2bis.php", line 19, characters 26-30:
-Expected Co<[unresolved]>
-File "transitive_simplify_2bis.php", line 15, characters 27-31:
+File "transitive_simplify_2bis.php", line 6, characters 28-32:
 But got dynamic because it is an unenforceable type

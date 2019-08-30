@@ -1,8 +1,0 @@
-File "nonnull_and_nullable.php", line 9, characters 9-11:
-You are trying to access the member bar but this is not an object, it is a value of generic type T (Typing[4062])
-File "nonnull_and_nullable.php", line 8, characters 23-23:
-Definition is here
-File "nonnull_and_nullable.php", line 14, characters 9-11:
-You are trying to access the member bar but this is not an object, it is a value of generic type T (Typing[4062])
-File "nonnull_and_nullable.php", line 13, characters 23-23:
-Definition is here

@@ -1,6 +1,0 @@
-File "typing_fail_extends.php", line 35, characters 12-24:
-Invalid return type (Typing[4110])
-File "typing_fail_extends.php", line 34, characters 26-34:
-Expected Option<T>
-File "typing_fail_extends.php", line 28, characters 22-30:
-But got dynamic because it is an unenforceable type

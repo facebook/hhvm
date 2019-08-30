@@ -1,6 +1,0 @@
-File "fake_nullable.php", line 28, characters 7-57:
-Invalid argument (Typing[4110])
-File "fake_nullable.php", line 10, characters 3-32:
-Expected ~(function([unresolved]): Awaitable<[unresolved]>) because it is an unenforceable type
-File "fake_nullable.php", line 28, characters 7-57:
-But got (function(int $id): Awaitable<?I>)

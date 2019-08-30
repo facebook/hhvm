@@ -1,6 +1,6 @@
 File "yield_from_bad1.php", line 7, characters 3-16:
 Invalid yield from (Typing[4110])
-File "yield_from_bad1.php", line 6, characters 25-27:
-Expected ~int because it is an unenforceable type
-File "yield_from_bad1.php", line 3, characters 25-30:
-But got string
+File "yield_from_bad1.php", line 7, characters 3-16:
+Expected KeyedTraversable<[unresolved], [unresolved]> (result of function with 'yield' in the body)
+File "yield_from_bad1.php", line 3, characters 15-42:
+But got dynamic because it is an unenforceable type

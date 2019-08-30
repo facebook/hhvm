@@ -1,6 +1,0 @@
-File "bad_inout_hint_parent4.php", line 8, characters 19-21:
-Member foo has the wrong type (Typing[4341])
-File "bad_inout_hint_parent4.php", line 8, characters 23-54:
-Expected ~(function(inout arraykey): void) because it is an unenforceable type
-File "bad_inout_hint_parent4.php", line 4, characters 23-52:
-But got (function(inout string): void)

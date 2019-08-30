@@ -1,5 +1,5 @@
-File "explicitly_typed_lambda.php", line 20, characters 28-34:
-Wrong type hint (Typing[4110])
+File "explicitly_typed_lambda.php", line 20, characters 8-34:
+Invalid argument (Typing[4110])
 File "explicitly_typed_lambda.php", line 20, characters 8-34:
 Expected this::TMyContainer::TMyElem
 File "explicitly_typed_lambda.php", line 20, characters 8-34:

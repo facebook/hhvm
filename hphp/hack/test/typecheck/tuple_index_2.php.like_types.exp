@@ -3,4 +3,4 @@ Invalid return type (Typing[4336])
 File "tuple_index_2.php", line 5, characters 10-16:
 Expected void because this function implicitly returns void
 File "tuple_index_2.php", line 8, characters 4-11:
-But got vec<Tv2>
+But got dynamic because it is an unenforceable type

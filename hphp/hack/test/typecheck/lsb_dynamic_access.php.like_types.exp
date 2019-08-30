@@ -1,8 +1,0 @@
-File "lsb_dynamic_access.php", line 14, characters 12-19:
-Invalid return type (Typing[4110])
-File "lsb_dynamic_access.php", line 13, characters 58-59:
-Expected ?T
-File "lsb_dynamic_access.php", line 13, characters 35-35:
-But got <expr#1>
-File "lsb_dynamic_access.php", line 14, characters 12-15:
-  where '<expr#1>' is a reference to this expression

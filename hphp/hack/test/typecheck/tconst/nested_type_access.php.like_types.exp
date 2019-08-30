@@ -1,4 +1,0 @@
-File "nested_type_access.php", line 22, characters 31-31:
-You are trying to access the member T but this is not an object, it is a dynamic value (Typing[4062])
-File "nested_type_access.php", line 9, characters 21-30:
-Definition is here

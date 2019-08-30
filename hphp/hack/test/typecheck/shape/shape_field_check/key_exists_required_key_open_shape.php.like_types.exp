@@ -1,6 +1,1 @@
-File "key_exists_required_key_open_shape.php", line 6, characters 28-29:
-Invalid argument (Typing[4110])
-File "key_exists_required_key_open_shape.php", line 6, characters 28-29:
-Expected shape(?'x' => [unresolved], ...) because Shapes::idx expects a shape
-File "key_exists_required_key_open_shape.php", line 3, characters 10-31:
-But got dynamic because it is an unenforceable type
+No errors

@@ -1,6 +1,1 @@
-File "shape_remove_key2.php", line 21, characters 15-17:
-Invalid argument (Typing[4110])
-File "shape_remove_key2.php", line 21, characters 15-17:
-Expected shape(?'x' => [unresolved], ...) because Shapes::idx expects a shape
-File "shape_remove_key2.php", line 5, characters 10-48:
-But got dynamic because it is an unenforceable type
+No errors

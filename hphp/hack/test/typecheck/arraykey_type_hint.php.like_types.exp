@@ -1,6 +1,0 @@
-File "arraykey_type_hint.php", line 41, characters 5-19:
-Invalid argument (Typing[4110])
-File "arraykey_type_hint.php", line 12, characters 12-19:
-Expected arraykey
-File "arraykey_type_hint.php", line 32, characters 27-38:
-But got dynamic because it is an unenforceable type

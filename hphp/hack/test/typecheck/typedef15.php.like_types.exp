@@ -1,6 +1,0 @@
-File "typedef15.php", line 11, characters 12-13:
-Invalid return type (Typing[4110])
-File "typedef15.php", line 9, characters 24-46:
-Expected Pair<~Map<~int, ~Map<~int, ~int>>, ~int>
-File "typedef15.php", line 7, characters 27-49:
-But got dynamic because it is an unenforceable type

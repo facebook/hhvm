@@ -1,0 +1,6 @@
+File "await_preserves_nullability.php", line 17, characters 17-18:
+Invalid argument (Typing[4110])
+File "await_preserves_nullability.php", line 20, characters 25-25:
+Expected ~T because it is an unenforceable type
+File "await_preserves_nullability.php", line 16, characters 10-20:
+But got ~?T

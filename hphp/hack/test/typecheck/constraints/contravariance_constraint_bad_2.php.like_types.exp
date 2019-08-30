@@ -1,18 +1,16 @@
-File "contravariance_constraint_bad_2.php", line 39, characters 7-55:
+File "contravariance_constraint_bad_2.php", line 20, characters 10-13:
 Invalid argument (Typing[4110])
-File "contravariance_constraint_bad_2.php", line 16, characters 39-57:
-Expected ~(function([unresolved]): void) because it is an unenforceable type
-File "contravariance_constraint_bad_2.php", line 39, characters 7-55:
-But got (function(NAC\AAA $arg): void)
-File "contravariance_constraint_bad_2.php", line 43, characters 12-13:
-Invalid return type (Typing[4323])
-File "contravariance_constraint_bad_2.php", line 14, characters 17-19:
-Some type constraint(s) are violated here
 File "contravariance_constraint_bad_2.php", line 14, characters 12-12:
-T is a constrained type parameter
-File "contravariance_constraint_bad_2.php", line 14, characters 17-19:
-Expected ~NAC\AAA
-File "contravariance_constraint_bad_2.php", line 37, characters 33-33:
-But got T
-File "contravariance_constraint_bad_2.php", line 37, characters 33-33:
-Considering that this type argument is contravariant with respect to NAC\CONTRA
+Expected T
+File "contravariance_constraint_bad_2.php", line 16, characters 49-49:
+  via this generic T
+File "contravariance_constraint_bad_2.php", line 18, characters 28-28:
+But got <expr#1> because it is an unenforceable type
+File "contravariance_constraint_bad_2.php", line 20, characters 10-13:
+  where '<expr#1>' is a reference to this expression
+File "contravariance_constraint_bad_2.php", line 43, characters 12-13:
+Invalid return type (Typing[4110])
+File "contravariance_constraint_bad_2.php", line 37, characters 26-34:
+Expected ~NAC\CONTRA<T> because it is an unenforceable type
+File "contravariance_constraint_bad_2.php", line 38, characters 14-16:
+But got NAC\CCC<NAC\AAA>

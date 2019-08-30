@@ -1,6 +1,0 @@
-File "asyncgen6.php", line 9, characters 3-16:
-Invalid yield (Typing[4110])
-File "asyncgen6.php", line 9, characters 9-10:
-Expected int
-File "asyncgen6.php", line 7, characters 36-38:
-But got dynamic because it is an unenforceable type

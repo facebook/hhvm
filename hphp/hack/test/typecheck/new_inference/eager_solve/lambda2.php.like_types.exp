@@ -1,10 +1,6 @@
-File "lambda2.php", line 33, characters 33-40:
-Invalid argument (Typing[4323])
-File "lambda2.php", line 8, characters 40-41:
-Some type constraint(s) are violated here
-File "lambda2.php", line 8, characters 40-41:
-Ta is a constrained type parameter
-File "lambda2.php", line 16, characters 5-19:
-Expected Traversable<[unresolved]>
-File "lambda2.php", line 8, characters 40-41:
-But got dynamic
+File "lambda2.php", line 23, characters 10-26:
+Invalid return type (Typing[4110])
+File "lambda2.php", line 22, characters 30-43:
+Expected ~Map<string, Tv> because it is an unenforceable type
+File "lambda2.php", line 23, characters 10-26:
+But got Map<[unresolved], [unresolved]>

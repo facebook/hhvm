@@ -1,5 +1,5 @@
 File "this_anon_bad.php", line 15, characters 21-24:
-Wrong type hint (Typing[4110])
+Invalid argument (Typing[4110])
 File "this_anon_bad.php", line 15, characters 21-24:
 Expected this
 File "this_anon_bad.php", line 15, characters 21-24:

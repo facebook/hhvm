@@ -1,0 +1,6 @@
+File "nullsafe_call_on_expr_dep.php--file2.php", line 7, characters 13-14:
+Invalid argument (Typing[4110])
+File "nullsafe_call_on_expr_dep.php--file2.php", line 5, characters 13-14:
+Expected Ta
+File "nullsafe_call_on_expr_dep.php--file2.php", line 4, characters 3-4:
+But got dynamic because it is an unenforceable type

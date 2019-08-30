@@ -1,14 +1,12 @@
 File "new_generic.php", line 13, characters 3-16:
-  <expr#1> as C<Targ>
+  <expr#1> as Tobj
 File "new_generic.php", line 18, characters 3-32:
-  ~C<~int>
+  ~C<int>
 File "new_generic.php", line 19, characters 3-38:
-  ~C<~int>
-File "new_generic.php", line 14, characters 10-14:
-Invalid return type (Typing[4110])
-File "new_generic.php", line 11, characters 4-7:
-Expected Tobj
-File "new_generic.php", line 12, characters 15-20:
-But got <expr#1>
-File "new_generic.php", line 12, characters 15-20:
-  where '<expr#1>' is a reference to this expression
+  ~C<int>
+File "new_generic.php", line 19, characters 29-36:
+Invalid argument (Typing[4110])
+File "new_generic.php", line 10, characters 3-6:
+Expected ~[unresolved] because it is an unenforceable type
+File "new_generic.php", line 19, characters 29-36:
+But got string

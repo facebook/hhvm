@@ -1,8 +1,0 @@
-File "namespaced_classname.php", line 11, characters 10-21:
-Invalid return type (Typing[4110])
-File "namespaced_classname.php", line 10, characters 47-47:
-Expected T
-File "namespaced_classname.php", line 11, characters 14-19:
-But got <expr#1>
-File "namespaced_classname.php", line 11, characters 14-19:
-  where '<expr#1>' is a reference to this expression

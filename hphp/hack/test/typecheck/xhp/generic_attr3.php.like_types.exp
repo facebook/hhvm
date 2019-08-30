@@ -1,0 +1,6 @@
+File "generic_attr3.php", line 8, characters 10-39:
+Invalid return type (Typing[4110])
+File "generic_attr3.php", line 7, characters 25-34:
+Expected ~:my-xhp<T> because it is an unenforceable type
+File "generic_attr3.php", line 8, characters 11-16:
+But got :my-xhp<[unresolved]>

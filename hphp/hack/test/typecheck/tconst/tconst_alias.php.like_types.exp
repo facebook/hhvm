@@ -1,7 +1,4 @@
 File "tconst_alias.php", line 18, characters 5-34:
   ~this::TBar::TData
   where this::TBar::TData as \Test::TBar::TData
-File "tconst_alias.php", line 12, characters 36-40:
-You are trying to access the member TData but this is not an object, it is a dynamic value (Typing[4062])
-File "tconst_alias.php", line 11, characters 23-32:
-Definition is here
+No errors

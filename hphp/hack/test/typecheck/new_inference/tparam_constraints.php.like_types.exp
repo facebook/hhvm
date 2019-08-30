@@ -1,16 +1,12 @@
-File "tparam_constraints.php", line 5, characters 10-36:
-Invalid return type (Typing[4323])
-File "tparam_constraints.php", line 8, characters 20-21:
-Some type constraint(s) are violated here
-File "tparam_constraints.php", line 8, characters 20-21:
-Tr is a constrained type parameter
-File "tparam_constraints.php", line 4, characters 56-58:
-Expected int
-File "tparam_constraints.php", line 8, characters 20-21:
-But got dynamic
-File "tparam_constraints.php", line 5, characters 10-36:
-Invalid return type (Typing[4110])
-File "tparam_constraints.php", line 4, characters 56-58:
-Expected int
+File "tparam_constraints.php", line 5, characters 24-25:
+Invalid argument (Typing[4110])
+File "idx.hhi", line 32, characters 4-25:
+Expected KeyedContainer<[unresolved], ?[unresolved]>
+File "tparam_constraints.php", line 4, characters 24-40:
+But got dynamic because it is an unenforceable type
+File "tparam_constraints.php", line 5, characters 34-35:
+Invalid argument (Typing[4110])
+File "tparam_constraints.php", line 8, characters 52-53:
+Expected ~[unresolved] because it is an unenforceable type
 File "tparam_constraints.php", line 4, characters 46-49:
-But got ~?int
+But got null

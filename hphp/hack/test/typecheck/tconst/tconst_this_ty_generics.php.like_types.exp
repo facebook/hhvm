@@ -1,6 +1,0 @@
-File "tconst_this_ty_generics.php", line 48, characters 26-31:
-Invalid argument (Typing[4110])
-File "tconst_this_ty_generics.php", line 35, characters 5-24:
-Expected TaoQuery<[unresolved], [unresolved]>
-File "tconst_this_ty_generics.php", line 44, characters 46-57:
-But got dynamic because it is an unenforceable type

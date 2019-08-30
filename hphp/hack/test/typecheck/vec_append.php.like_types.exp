@@ -1,0 +1,8 @@
+File "vec_append.php", line 18, characters 5-33:
+Invalid assignment (Typing[4110])
+File "vec_append.php", line 9, characters 38-38:
+Expected ~dict<Tk, Tv> because it is an unenforceable type
+File "vec_append.php", line 13, characters 8-19:
+But got dict<~Tk, ~Tv>
+File "vec_append.php", line 9, characters 38-38:
+  via this generic T

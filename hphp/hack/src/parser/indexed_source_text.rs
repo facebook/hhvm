@@ -10,7 +10,7 @@ use oxidized::pos::Pos;
 
 #[derive(Debug)]
 pub struct IndexedSourceText<'a> {
-    source_text: &'a SourceText<'a>,
+    pub source_text: &'a SourceText<'a>,
     offset_map: LineBreakMap,
 }
 

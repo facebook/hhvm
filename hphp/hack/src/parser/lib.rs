@@ -49,5 +49,5 @@ pub mod positioned_smart_constructors;
 pub use parser_core_types::{
     indexed_source_text, lexable_token, minimal_syntax, minimal_token, minimal_trivia,
     positioned_syntax, positioned_token, positioned_trivia, source_text, syntax, syntax_error,
-    syntax_kind, token_kind, trivia_kind,
+    syntax_kind, syntax_trait, token_kind, trivia_kind,
 };

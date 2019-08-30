@@ -43,6 +43,13 @@ impl Pos {
         })
     }
 
+    pub fn filename(&self) -> &RelativePath {
+        match &self.0 {
+            Small { file, .. } => &file,
+            Large { file, .. } => &file,
+        }
+    }
+
     pub fn from_lnum_bol_cnum(
         file: RelativePath,
         start: (usize, usize, usize),

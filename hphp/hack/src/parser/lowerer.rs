@@ -4,22 +4,22 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use parser_rust as parser;
+use oxidized::{
+    map::Map,
+    namespace_env::Env as NamespaceEnv,
+    pos::Pos,
+    prim_defs::Comment,
+    relative_path::RelativePath,
+    s_map::SMap,
+    s_set::SSet,
+    {aast, aast_defs, ast_defs, file_info},
+};
 
-use oxidized::map::Map;
-use oxidized::namespace_env::Env as NamespaceEnv;
-use oxidized::parser_options::ParserOptions;
-use oxidized::pos::Pos;
-use oxidized::prim_defs::Comment;
-use oxidized::relative_path::RelativePath;
-use oxidized::s_map::SMap;
-use oxidized::s_set::SSet;
-use oxidized::{aast, file_info};
-use parser::indexed_source_text::IndexedSourceText;
-use parser::lexable_token::LexablePositionedToken;
-use parser::positioned_syntax::PositionedSyntaxTrait;
-use parser::source_text::SourceText;
-use parser_core_types::syntax::*;
+use parser_rust::{
+    indexed_source_text::IndexedSourceText, lexable_token::LexablePositionedToken,
+    positioned_syntax::PositionedSyntaxTrait, source_text::SourceText, syntax::*, syntax_error,
+    syntax_trait::SyntaxTrait,
+};
 
 use ocamlvalue_macro::Ocamlvalue;
 
@@ -150,7 +150,11 @@ impl<'a> Env<'a> {
     }
 
     fn source_text(&self) -> &SourceText<'a> {
-        self.indexed_source_text.source_text()
+        self.indexed_source_text.source_text
+    }
+
+    fn lower_coroutines(&self) -> bool {
+        self.lower_coroutines
     }
 
     fn fail_open(&self) -> bool {
@@ -161,6 +165,7 @@ impl<'a> Env<'a> {
 pub enum Error<Node> {
     APIMissingSyntax(String, Node),
     LowererInvariantFailure(String, String),
+    Failwith(String),
 }
 
 #[derive(Ocamlvalue)]
@@ -175,6 +180,7 @@ pub trait Lowerer<'a, T, V>
 where
     T: LexablePositionedToken<'a>,
     Syntax<T, V>: PositionedSyntaxTrait,
+    V: SyntaxValueWithKind,
 {
     fn make_empty_ns_env(env: &Env) -> NamespaceEnv {
         NamespaceEnv::empty(Vec::from(env.auto_ns_map), env.codegen())
@@ -190,6 +196,27 @@ where
     fn p_pos(node: &Syntax<T, V>, env: &Env) -> Pos {
         node.position_exclusive(env.indexed_source_text)
             .unwrap_or(Pos::make_none())
+    }
+
+    fn raise_parsing_error(node: &Syntax<T, V>, env: &mut Env, msg: &str) {
+        not_impl!()
+    }
+
+    fn raise_parsing_error_pos(pos: Pos, env: &mut Env, msg: &str) {
+        // TODO: enable should_surface_errors
+        if env.codegen() && !env.lower_coroutines() {
+            env.lowpri_errors.push((pos, String::from(msg)))
+        }
+    }
+
+    #[inline]
+    fn failwith<N>(msg: &str) -> ret!(N) {
+        Err(Error::Failwith(String::from(msg)))
+    }
+
+    #[inline]
+    fn text(node: &Syntax<T, V>, env: &Env) -> String {
+        String::from(node.text(env.source_text()))
     }
 
     fn missing_syntax<N>(
@@ -217,8 +244,27 @@ where
         }
     }
 
-    fn pos_name(node: &Syntax<T, V>, env: &Env) -> aast!(Sid) {
+    fn pos_qualified_name(node: &Syntax<T, V>, env: &Env) -> ret_aast!(Sid) {
         not_impl!()
+    }
+
+    fn pos_name(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Sid) {
+        match &node.syntax {
+            QualifiedName(_) => Self::pos_qualified_name(node, env),
+            SimpleTypeSpecifier(child) => Self::pos_name(&child.simple_type_specifier, env),
+            _ => {
+                let name = node.text(env.indexed_source_text.source_text);
+                if name == "__COMPILER_HALT_OFFSET__" {
+                    env.saw_compiler_halt_offset = Some(0);
+                }
+                let p = if name == "__LINE__" {
+                    Pos::make_none()
+                } else {
+                    Self::p_pos(node, env)
+                };
+                Ok(ast_defs::Id(p, String::from(name)))
+            }
+        }
     }
 
     fn as_list(node: &Syntax<T, V>) -> Vec<&Syntax<T, V>> {
@@ -259,7 +305,50 @@ where
         not_impl!()
     }
 
-    fn p_def(node: &Syntax<T, V>, env: &Env) -> ret!(Vec<aast!(Def<,>)>) {
+    fn p_stmt(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Stmt<,>) {
+        // TODO: clear_statement_scope & extract_and_push_docblock
+        let pos = Self::p_pos(node, env);
+        match &node.syntax {
+            MarkupSection(_) => Self::p_markup(node, env),
+            _ => not_impl!(),
+        }
+    }
+
+    fn is_hashbang(text: &Syntax<T, V>) -> bool {
+        not_impl!()
+    }
+
+    fn p_markup(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Stmt<,>) {
+        match &node.syntax {
+            MarkupSection(child) => {
+                let markup_prefix = &child.markup_prefix;
+                let markup_text = &child.markup_text;
+                let markup_expression = &child.markup_expression;
+                let pos = Self::p_pos(node, env);
+                let has_dot_hack_extension = pos.filename().ends_with(".hack");
+                if has_dot_hack_extension {
+                    Self::raise_parsing_error(node, env, &syntax_error::error1060);
+                } else if markup_prefix.value.is_missing()
+                    && markup_text.width() > 0
+                    && !Self::is_hashbang(&markup_text)
+                {
+                    Self::raise_parsing_error(node, env, &syntax_error::error1001);
+                }
+                let expr = match &markup_expression.syntax {
+                    Missing => None,
+                    ExpressionStatement(e) => {
+                        Some(Self::p_expr(&e.expression_statement_expression, env)?)
+                    }
+                    _ => Self::failwith("expression expected")?,
+                };
+                let stmt_ = aast::Stmt_::Markup((pos.clone(), Self::text(&markup_text, env)), expr);
+                Ok(aast::Stmt(pos, Box::new(stmt_)))
+            }
+            _ => Self::failwith("invalid node"),
+        }
+    }
+
+    fn p_def(node: &Syntax<T, V>, env: &mut Env) -> ret!(Vec<aast!(Def<,>)>) {
         match &node.syntax {
             ConstDeclaration(child) => {
                 let ty = &child.const_type_specifier;
@@ -273,7 +362,7 @@ where
                             let gconst = aast::Gconst {
                                 annotation: (),
                                 mode: Self::mode_annotation(env.file_mode()),
-                                name: Self::pos_name(name, env),
+                                name: Self::pos_name(name, env)?,
                                 type_: Self::mp_optional(&Self::p_hint, ty, env)?,
                                 value: Self::p_simple_initializer(init, env)?,
                                 namespace: Self::make_empty_ns_env(env),
@@ -298,11 +387,11 @@ where
                     Box::new(aast::Stmt_::Expr(expr)),
                 ))])
             }
-            _ => not_impl!(),
+            _ => Ok(vec![aast::Def::Stmt(Self::p_stmt(node, env)?)]),
         }
     }
 
-    fn p_program(node: &Syntax<T, V>, mut env: &Env) -> ret_aast!(Program<,>) {
+    fn p_program(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Program<,>) {
         let nodes = Self::as_list(node);
         let mut acc = vec![];
         for i in 0..nodes.len() {
@@ -319,14 +408,14 @@ where
         Ok(acc)
     }
 
-    fn p_script(node: &Syntax<T, V>, mut env: &Env) -> ret_aast!(Program<,>) {
+    fn p_script(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Program<,>) {
         match &node.syntax {
             Script(children) => Self::p_program(&children.script_declarations, env),
             _ => Self::missing_syntax(None, "script", node, env),
         }
     }
 
-    fn lower(mut env: &Env<'a>, script: &Syntax<T, V>) -> ::std::result::Result<Result, String> {
+    fn lower(env: &mut Env<'a>, script: &Syntax<T, V>) -> ::std::result::Result<Result, String> {
         let comments = vec![];
         let ast_result = Self::p_script(script, env);
         // TODO: handle error

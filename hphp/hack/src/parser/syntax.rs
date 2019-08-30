@@ -99,6 +99,54 @@ where
         Self { syntax, value }
     }
 
+    pub fn is_public(&self) -> bool {
+        if let SyntaxVariant::Token(t) = &self.syntax {
+            t.kind() == TokenKind::Public
+        } else {
+            false
+        }
+    }
+
+    pub fn is_private(&self) -> bool {
+        if let SyntaxVariant::Token(t) = &self.syntax {
+            t.kind() == TokenKind::Private
+        } else {
+            false
+        }
+    }
+
+    pub fn is_protected(&self) -> bool {
+        if let SyntaxVariant::Token(t) = &self.syntax {
+            t.kind() == TokenKind::Protected
+        } else {
+            false
+        }
+    }
+
+    pub fn is_abstract(&self) -> bool {
+        if let SyntaxVariant::Token(t) = &self.syntax {
+            t.kind() == TokenKind::Abstract
+        } else {
+            false
+        }
+    }
+
+    pub fn is_static(&self) -> bool {
+        if let SyntaxVariant::Token(t) = &self.syntax {
+            t.kind() == TokenKind::Static
+        } else {
+            false
+        }
+    }
+
+    pub fn is_missing(&self) -> bool {
+        if let SyntaxVariant::Missing = &self.syntax {
+            true
+        } else {
+            false
+        }
+    }
+
     pub fn children<'a>(&'a self) -> Vec<&'a Self> {
         let f = |node: &'a Self, mut acc: Vec<&'a Self>| {
             acc.push(node);

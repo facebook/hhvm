@@ -6,14 +6,11 @@
 
 use std::rc::Rc;
 
-use crate::indexed_source_text::IndexedSourceText;
-use crate::lexable_token::LexableToken;
-use crate::positioned_token::PositionedToken;
-use crate::source_text::SourceText;
-use crate::syntax::*;
-use crate::syntax_kind::SyntaxKind;
-use crate::syntax_trait::SyntaxTrait;
-use crate::token_kind::TokenKind;
+use crate::{
+    indexed_source_text::IndexedSourceText, lexable_token::LexableToken,
+    positioned_token::PositionedToken, source_text::SourceText, syntax::*, syntax_kind::SyntaxKind,
+    syntax_trait::SyntaxTrait, token_kind::TokenKind,
+};
 
 use oxidized::pos::Pos;
 
@@ -247,10 +244,17 @@ impl SyntaxTrait for PositionedSyntax {
     fn leading_width(&self) -> usize {
         self.value.leading_width()
     }
+
+    fn leading_start_offset(&self) -> usize {
+        self.value.start_offset()
+    }
+
+    fn extract_text<'a>(&self, source_text: &'a SourceText) -> Option<&'a str> {
+        Some(self.text(source_text))
+    }
 }
 
 pub trait PositionedSyntaxTrait: SyntaxTrait {
-    fn leading_start_offset(&self) -> usize;
     fn start_offset(&self) -> usize;
     fn end_offset(&self) -> usize;
 
@@ -260,14 +264,10 @@ pub trait PositionedSyntaxTrait: SyntaxTrait {
      */
     fn trailing_width(&self) -> usize;
     fn position_exclusive(&self, source_text: &IndexedSourceText) -> Option<Pos>;
-    fn text<'a>(&'a self, source_text: &'a SourceText) -> &'a str;
+    fn text<'a>(&self, source_text: &'a SourceText) -> &'a str;
 }
 
 impl PositionedSyntaxTrait for PositionedSyntax {
-    fn leading_start_offset(&self) -> usize {
-        self.value.start_offset()
-    }
-
     fn trailing_width(&self) -> usize {
         self.value.trailing_width()
     }
@@ -288,7 +288,7 @@ impl PositionedSyntaxTrait for PositionedSyntax {
         Some(source_text.relative_pos(start_offset, end_offset))
     }
 
-    fn text<'a>(&'a self, source_text: &'a SourceText) -> &'a str {
+    fn text<'a>(&self, source_text: &'a SourceText) -> &'a str {
         source_text.sub_as_str(self.start_offset(), self.width())
     }
 }

@@ -1,9 +1,9 @@
-File "array_append_bad.php", line 5, characters 13-14:
-Typing error (Typing[4324])
+File "array_append_bad.php", line 5, characters 10-15:
+Invalid index type for this KeyedContainer (Typing[4324])
 File "array_append_bad.php", line 4, characters 48-49:
-Expected Tk
+This is a value of generic type Tk
 File "array_append_bad.php", line 4, characters 59-60:
-But got dynamic because it is an unenforceable type
+It is incompatible with a dynamic value or a value of generic type Tk because it is an unenforceable type
 File "array_append_bad.php", line 32, characters 16-20:
 Invalid argument (Typing[4110])
 File "array_append_bad.php", line 11, characters 23-28:

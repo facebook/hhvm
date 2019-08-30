@@ -27,14 +27,14 @@ let should_enforce env = TCO.disallow_invalid_arraykey (Env.get_tcopt env)
  *)
 let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
   let type_index env ty_have ty_expect reason =
-    match Env.can_coerce index_pos env ty_have (MakeType.unenforced ty_expect) Errors.index_type_mismatch with
+    let t_env = Env.tast_env_as_typing_env env in
+    match Typing_coercion.try_coerce index_pos Reason.URnone t_env ty_have (MakeType.unenforced ty_expect) with
     | Some _ -> ()
     | None ->
       if (Env.can_subtype env ty_have (fst ty_have, Tdynamic)
       (* Terrible heuristic to agree with legacy: if we inferred `nothing` for
        * the key type of the array, just let it pass *)
       || Env.can_subtype env ty_expect (fst ty_expect, Tunion []))
-      || Env.can_subtype env ty_have ty_expect
       (* If the key is not even an arraykey, we've already produced an error *)
       || not (Env.can_subtype env ty_have (Reason.Rnone, Tprim Tarraykey)) && should_enforce env
       then ()

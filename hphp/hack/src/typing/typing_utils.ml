@@ -109,12 +109,6 @@ type coerce_type =
 let (coerce_type_ref : coerce_type ref) = ref (not_implemented "coerce_type")
 let coerce_type x = !coerce_type_ref x
 
-type can_coerce = Pos.t -> env -> ?ur:Reason.ureason -> locl ty ->
-  locl possibly_enforced_ty ->
-  Errors.typing_error_callback -> env option
-let (can_coerce_ref : can_coerce ref) = ref (not_implemented "can_coerce")
-let can_coerce x = !can_coerce_ref x
-
 (* Convenience function for creating `this` types *)
 let this_of ty = Tabstract (AKdependent DTthis, Some ty)
 

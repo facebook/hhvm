@@ -15,66 +15,6 @@ module Env     = Typing_env
 module SubType = Typing_subtype
 module Cls = Decl_provider.Class
 
-let validator =
-  object(this) inherit type_validator
-
-    method! on_tthis acc r = this#invalid acc r "the this type"
-    method! on_tapply acc r (_, name) tyl =
-      (* TODO(T45690473): follow type aliases in the `type` case and allow enforceable targets *)
-      let not_class = Env.is_typedef name ||
-        Env.is_enum (Tast_env.tast_env_as_typing_env acc.env) name in
-      if not_class then this#invalid acc r "a typedef or enum" else
-
-      match Tast_env.get_class acc.env name with
-      | Some tc ->
-        let tparams = Cls.tparams tc in
-        begin match tyl with
-        | [] -> acc (* A class without type arguments is enforceable *)
-        | targs ->
-          let open List.Or_unequal_lengths in
-          begin match List.fold2 ~init:acc targs tparams ~f:(fun acc targ tparam ->
-            match targ with
-            | _, Tdynamic (* We accept the inner type being dynamic regardless of reification *)
-            | _, Tlike _ ->
-              acc
-            | _ ->
-              match tparam.tp_reified with
-              | Aast.Erased -> this#invalid acc r "a type with an erased generic type argument"
-              | Aast.SoftReified -> this#invalid acc r "a type with a soft reified type argument"
-              | Aast.Reified -> this#on_type acc targ
-          ) with
-          | Ok new_acc -> new_acc
-          | Unequal_lengths -> acc (* arity error elsewhere *)
-          end
-        end
-      | None -> acc
-    method! on_tgeneric acc r name =
-      Enforceable_hint_check.validator#check_generic acc r name
-    method! on_taccess acc r _ = this#invalid acc r "a type const"
-    method! on_tarray acc r ty1_opt ty2_opt =
-      match ty1_opt, ty2_opt with
-      | None, None -> acc
-      | _ -> this#invalid acc r "an array type"
-    (* Optimization, don't visit type in dynamic ~> ~T case, fall back to subtyping *)
-    method! on_tlike acc r _ = this#invalid acc r "a like type"
-    method! on_tprim acc r prim =
-      Enforceable_hint_check.validator#on_tprim acc r prim
-    method! on_tfun acc r _ = this#invalid acc r "a function type"
-    method! on_ttuple acc r _ = this#invalid acc r "a tuple type"
-    method! on_tshape acc r _ _ = this#invalid acc r "a shape type"
-
-  end
-
-let supports_coercion_from_dynamic env (ty_expect_decl: decl ty) =
-  let { validity; env; _ } = validator#on_type {
-    env = Tast_env.typing_env_as_tast_env env;
-    ety_env = Typing_phase.env_with_self env;
-    validity = Valid;
-  } ty_expect_decl in
-  match validity with
-  | Valid -> Some (Tast_env.tast_env_as_typing_env env)
-  | Invalid (_reason, _kind) -> None
-
 (* Typing_union.union normalizes a union out of two types, but it creates Toption for unions with
  * null. This function unwraps the null. TODO: remove in accordance with T45650596 *)
 let force_null_union env r t =
@@ -162,12 +102,12 @@ and coerce_type p ?sub_fn:(sub=Typing_ops.sub_type) ur env ty_have ty_expect on_
 
 (* does coercion if possible, returning Some env with resultant coercion constraints
  * otherwise suppresses errors from attempted coercion and returns None *)
-let try_coerce ?sub_fn:(sub=Typing_ops.sub_type) p ur env ty_have ty_expect =
+let try_coerce p ur env ty_have ty_expect =
   let f = !Errors.is_hh_fixme in
   Errors.is_hh_fixme := (fun _ _ -> false);
   let result =
     Errors.try_
-      (fun () -> Some (coerce_type ~sub_fn:sub p ur env ty_have ty_expect Errors.unify_error))
+      (fun () -> Some (coerce_type ~sub_fn:Typing_ops.sub_type p ur env ty_have ty_expect Errors.unify_error))
       (fun _ -> None) in
   Errors.is_hh_fixme := f;
   result
@@ -177,5 +117,4 @@ let coerce_type p ?sub_fn:(sub=Typing_ops.sub_type) ur env ty_have ty_expect on_
     (fun () -> coerce_type p ~sub_fn:sub ur env ty_have ty_expect on_error)
     (fun _ -> sub p ur env ty_have ty_expect.et_type on_error)
 
-let () = Typing_utils.can_coerce_ref := can_coerce
 let () = Typing_utils.coerce_type_ref := coerce_type

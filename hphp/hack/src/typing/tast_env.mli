@@ -244,12 +244,6 @@ val get_anonymous_lambda_types : env -> int -> Tast.ty list
 val typing_env_as_tast_env : Typing_env_types.env -> env
 val tast_env_as_typing_env : env -> Typing_env_types.env
 
-val can_coerce : Pos.t -> env -> Tast.ty ->
-  Tast.possibly_enforced_ty -> Errors.typing_error_callback -> env option
-(** Return None when coercion cannot occur from the second arg to the third,
-    otherwise return Some env where env is the first arg updated with coercion
-    constraints. *)
-
 val is_xhp_child : env -> Pos.t -> Tast.ty -> bool
 (** Verify that an XHP body expression is legal. *)
 

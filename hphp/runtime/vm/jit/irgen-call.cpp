@@ -278,7 +278,7 @@ void callKnown(IRGS& env, const Func* callee, const FCallArgs& fca) {
     return callWithAsyncEagerReturn(env, callee, fca, false /* unlikely */);
   }
 
-  return callRegular(env, callee, fca, false /* unlikely */);
+  callRegular(env, callee, fca, false /* unlikely */);
 }
 
 void callUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca,
@@ -286,32 +286,12 @@ void callUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca,
   assertx(!callee->hasConstVal() || env.formingRegion);
   if (fca.hasUnpack()) return callUnpack(env, nullptr, fca, unlikely);
 
-  if (fca.asyncEagerOffset == kInvalidOffset) {
-    return callRegular(env, nullptr, fca, unlikely);
-  }
-
-  if (fca.supportsAsyncEagerReturn()) {
+  if (fca.asyncEagerOffset != kInvalidOffset) {
+    // Okay to request async eager return even if it is not supported.
     return callWithAsyncEagerReturn(env, nullptr, fca, unlikely);
   }
 
-  ifThenElse(
-    env,
-    [&] (Block* taken) {
-      auto const supportsAER = gen(
-        env,
-        FuncHasAttr,
-        AttrData {static_cast<int32_t>(AttrSupportsAsyncEagerReturn)},
-        callee);
-      gen(env, JmpNZero, taken, supportsAER);
-    },
-    [&] {
-      hint(env, Block::Hint::Unlikely);
-      callRegular(env, nullptr, fca, unlikely);
-    },
-    [&] {
-      callWithAsyncEagerReturn(env, nullptr, fca, unlikely);
-    }
-  );
+  callRegular(env, nullptr, fca, unlikely);
 }
 
 //////////////////////////////////////////////////////////////////////

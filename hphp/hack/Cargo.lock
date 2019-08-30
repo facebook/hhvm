@@ -160,6 +160,7 @@ version = "3.49.0"
 dependencies = [
  "hack_oxidized 3.49.0",
  "hack_parser 3.49.0",
+ "hack_parser_core_types 3.49.0",
  "hack_parser_errors 3.49.0",
  "hack_parser_ffi 3.49.0",
  "hack_utils_ocamlpool 3.49.0",
@@ -172,6 +173,7 @@ version = "3.49.0"
 dependencies = [
  "hack_oxidized 3.49.0",
  "hack_parser 3.49.0",
+ "hack_parser_core_types 3.49.0",
  "hack_utils_ocamlpool 3.49.0",
  "libc 0.2.60 (registry+https://github.com/rust-lang/crates.io-index)",
  "ocaml 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",

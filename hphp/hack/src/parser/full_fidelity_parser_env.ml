@@ -19,6 +19,7 @@ type t = {
   disable_legacy_soft_typehints : bool;
   allow_new_attribute_syntax : bool;
   disable_legacy_attribute_syntax : bool;
+  leak_rust_tree : bool;
 } [@@deriving show]
 
 let default = {
@@ -33,6 +34,7 @@ let default = {
   disable_legacy_soft_typehints = false;
   allow_new_attribute_syntax = false;
   disable_legacy_attribute_syntax = false;
+  leak_rust_tree = false;
 }
 
 let make
@@ -47,6 +49,9 @@ let make
   ?(disable_legacy_soft_typehints = default.disable_legacy_soft_typehints)
   ?(allow_new_attribute_syntax = default.allow_new_attribute_syntax)
   ?(disable_legacy_attribute_syntax = default.disable_legacy_attribute_syntax)
+  (* DANGER: if you leak the root tree into OCaml, it's on you to ensure that
+  * it's eventually disposed to avoid memory leak. *)
+  ?(leak_rust_tree = default.leak_rust_tree)
   () = {
     hhvm_compat_mode;
     php5_compat_mode;
@@ -59,6 +64,7 @@ let make
     disable_legacy_soft_typehints;
     allow_new_attribute_syntax;
     disable_legacy_attribute_syntax;
+    leak_rust_tree;
   }
 
 let hhvm_compat_mode e = e.hhvm_compat_mode
@@ -74,3 +80,4 @@ let rust e = e.rust
 let disable_legacy_soft_typehints e = e.disable_legacy_soft_typehints
 let allow_new_attribute_syntax e = e.allow_new_attribute_syntax
 let disable_legacy_attribute_syntax e = e.disable_legacy_attribute_syntax
+let leak_rust_tree e = e.leak_rust_tree

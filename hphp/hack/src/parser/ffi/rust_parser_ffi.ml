@@ -19,14 +19,16 @@ type parser_opts = (
   bool * (* hhvm_compat_mode *)
   bool * (* php5_compat_mode *)
   bool * (* codegen *)
-  bool (* allow_new_attribute_syntax *)
+  bool * (* allow_new_attribute_syntax *)
+  bool   (* leak_rust_tree *)
 )
 let env_to_opts env = (
   (Env.is_experimental_mode env),
   (Env.hhvm_compat_mode env),
   (Env.php5_compat_mode env),
   (Env.codegen env),
-  (Env.allow_new_attribute_syntax env)
+  (Env.allow_new_attribute_syntax env),
+  (Env.leak_rust_tree env)
 )
 let set_global_lexer_env _ =
   (* Parsing of file sets up global variables in lexer module. Those variables
@@ -77,9 +79,17 @@ external parse_positioned_with_coroutine_sc:
    parser_opts ->
    (bool, PositionedSyntax.t) result = "parse_positioned_with_coroutine_sc"
 
+external parse_positioned_with_coroutine_sc_leak_tree:
+  SourceText.t ->
+  parser_opts ->
+  (bool, PositionedSyntax.t) result = "parse_positioned_with_coroutine_sc_leak_tree"
+
 let parse_positioned_with_coroutine_sc text env =
   set_global_lexer_env env;
-  parse_positioned_with_coroutine_sc text (env_to_opts env)
+  if Env.leak_rust_tree env then
+    parse_positioned_with_coroutine_sc_leak_tree text (env_to_opts env)
+  else
+    parse_positioned_with_coroutine_sc text (env_to_opts env)
 
 external parse_positioned_with_verify_sc:
   SourceText.t ->

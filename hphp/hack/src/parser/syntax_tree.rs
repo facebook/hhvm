@@ -114,6 +114,12 @@ where
         self.mode == Some(Mode::Mdecl)
     }
 
+    // "unsafe" because it can break the invariant that text is consistent with other syntax
+    // tree members
+    pub fn replace_text_unsafe(&mut self, text: &'a SourceText<'a>) {
+        self.text = text
+    }
+
     //TODO: errors and to_json require some unimplemented methods in syntax.rs, particularly
     // is_in_body and and Hh_json.to_json
 }

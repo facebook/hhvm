@@ -15,12 +15,14 @@ use parser_rust as parser;
 
 use parser::lexer::Lexer;
 use parser::minimal_parser::MinimalSyntaxParser;
+use parser::minimal_syntax::MinimalSyntax;
 use parser::minimal_token::MinimalToken;
 use parser::minimal_trivia::MinimalTrivia;
 use parser::mode_parser::parse_mode;
 use parser::parser_env::ParserEnv;
 use parser::source_text::SourceText;
 use parser::stack_limit::StackLimit;
+use parser_core_types::syntax_tree::SyntaxTree;
 
 use ocamlpool_rust::{caml_raise, ocamlvalue::Ocamlvalue, utils::*};
 use rust_to_ocaml::{to_list, SerializationContext, ToOcaml};
@@ -38,7 +40,7 @@ type PositionedSyntaxParser<'a> = Parser<'a, WithKind<PositionedSmartConstructor
 
 use crate::ocaml_coroutine_state::OcamlCoroutineState;
 use crate::ocaml_syntax::OcamlSyntax;
-use parser::coroutine_smart_constructors::CoroutineSmartConstructors;
+use parser::coroutine_smart_constructors::{CoroutineSmartConstructors, State as CoroutineState};
 
 type CoroutineParser<'a> = Parser<
     'a,
@@ -50,6 +52,14 @@ type CoroutineParser<'a> = Parser<
         >,
     >,
     OcamlCoroutineState<'a, OcamlSyntax<PositionedValue>>,
+>;
+
+type CoroutineParserLeakTree<'a> = Parser<
+    'a,
+    WithKind<
+        CoroutineSmartConstructors<'a, PositionedSyntax, CoroutineState<'a, PositionedSyntax>>,
+    >,
+    CoroutineState<'a, PositionedSyntax>,
 >;
 
 use parser::decl_mode_smart_constructors::DeclModeSmartConstructors;
@@ -72,7 +82,7 @@ extern "C" {
 }
 
 macro_rules! parse {
-    ($name:ident, $parser:ident) => {
+    ($name:ident, $parser:ident, $syntax:ty) => {
         caml_raise!($name, |ocaml_source_text, opts|, <l>, {
             let ocaml_source_text_value = ocaml_source_text.0;
 
@@ -81,6 +91,7 @@ macro_rules! parse {
             let php5_compat_mode = bool_field(&opts, 2);
             let codegen = bool_field(&opts, 3);
             let allow_new_attribute_syntax = bool_field(&opts, 4);
+            let leak_rust_tree = bool_field(&opts, 5);
             let env = ParserEnv {
                 is_experimental_mode,
                 hhvm_compat_mode,
@@ -146,7 +157,13 @@ macro_rules! parse {
                         let ocaml_root = root.to_ocaml(&context);
                         let ocaml_errors = errors.ocamlvalue();
                         let ocaml_state = state.to_ocaml(&context);
-                        let tree : Option<()> = None; // TODO
+                        let tree = if leak_rust_tree {
+                            let mode = parse_mode(&source_text);
+                            let tree = Box::new(SyntaxTree::build(&source_text, root, errors, mode, ()));
+                            Some(Box::leak(tree) as *const SyntaxTree<$syntax, ()> as usize)
+                        } else {
+                            None
+                        };
                         let ocaml_tree = tree.ocamlvalue();
                         let res = caml_tuple(&[
                             ocaml_state,
@@ -195,11 +212,28 @@ macro_rules! parse {
     };
 }
 
-parse!(parse_minimal, MinimalSyntaxParser);
-parse!(parse_positioned, PositionedSyntaxParser);
-parse!(parse_positioned_with_coroutine_sc, CoroutineParser);
-parse!(parse_positioned_with_decl_mode_sc, DeclModeParser);
-parse!(parse_positioned_with_verify_sc, VerifyParser);
+parse!(parse_minimal, MinimalSyntaxParser, MinimalSyntax);
+parse!(parse_positioned, PositionedSyntaxParser, PositionedSyntax);
+parse!(
+    parse_positioned_with_coroutine_sc,
+    CoroutineParser,
+    OcamlSyntax<PositionedValue>
+);
+parse!(
+    parse_positioned_with_coroutine_sc_leak_tree,
+    CoroutineParserLeakTree,
+    PositionedSyntax
+);
+parse!(
+    parse_positioned_with_decl_mode_sc,
+    DeclModeParser,
+    PositionedSyntax
+);
+parse!(
+    parse_positioned_with_verify_sc,
+    VerifyParser,
+    PositionedSyntax
+);
 
 caml_raise!(rust_parse_mode, |ocaml_source_text|, <l>, {
     let relative_path_raw = block_field(&ocaml_source_text, 0);

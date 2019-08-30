@@ -5,6 +5,7 @@ edition = "2018"
 
 [dependencies]
 rust_parser_errors = { path = "..", package = "hack_parser_errors" }
+parser_core_types = { path = "../../core_types", package = "hack_parser_core_types" }
 parser_ffi_rust = { path = "../../ffi", package = "hack_parser_ffi" }
 parser_rust = { path = "../..", package = "hack_parser" }
 ocaml = "^0.7"

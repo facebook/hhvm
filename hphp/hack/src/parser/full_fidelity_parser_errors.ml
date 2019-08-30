@@ -4318,6 +4318,12 @@ let find_syntax_errors env =
     } in
   acc.errors
 
+let find_syntax_errors env =
+  match SyntaxTree.rust_tree env.syntax_tree with
+  | Some rust_tree -> Syntax.rust_parser_errors
+      (SyntaxTree.text env.syntax_tree) rust_tree env.parser_options
+  | None -> find_syntax_errors env
+
 let parse_errors_impl env =
   (*
   Minimum: suppress cascading errors; no second-pass errors if there are

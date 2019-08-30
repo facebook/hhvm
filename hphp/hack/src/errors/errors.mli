@@ -703,7 +703,7 @@ val ambiguous_inheritance : Pos.t -> string -> string -> error -> unit
 val cyclic_typeconst : Pos.t -> string list -> unit
 
 val abstract_concrete_override :
-  Pos.t -> Pos.t -> [< `method_ | `typeconst | `constant | `property ] -> unit
+  Pos.t -> Pos.t -> [< `method_ | `typeconst | `constant ] -> unit
 
 val local_variable_modified_and_used : Pos.t -> Pos.t list -> unit
 

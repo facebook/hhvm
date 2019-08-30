@@ -1940,76 +1940,33 @@ void emitNativeImpl(IRGS& env) {
   }
 
   auto ctx = callee->isMethod() ? ldCtx(env) : nullptr;
-  auto const numParams = gen(env, LdARNumParams, fp(env));
+  if (ctx) {
+    if (!hasThis(env)) {
+      ctx = gen(env, LdClsCtx, ctx);
+    } else {
+      ctx = castCtxThis(env, ctx);
+    }
+  }
 
-  ifThenElse(
+  auto params = prepare_params(
     env,
-    [&] (Block* fallback) {
-      if (ctx) {
-        if (!hasThis(env)) {
-          ctx = gen(env, LdClsCtx, ctx);
-        } else {
-          ctx = castCtxThis(env, ctx);
-        }
-      }
-
-      auto maxArgs = callee->numParams();
-      auto minArgs = callee->numNonVariadicParams();
-      while (minArgs) {
-        auto const& pi = callee->params()[minArgs - 1];
-        if (pi.funcletOff == InvalidAbsoluteOffset) {
-          break;
-        }
-        --minArgs;
-      }
-      if (callee->hasVariadicCaptureParam()) {
-        if (minArgs) {
-          auto const check = gen(env, LtInt, numParams, cns(env, minArgs));
-          gen(env, JmpNZero, fallback, check);
-        }
-      } else {
-        if (minArgs == maxArgs) {
-          auto const check = gen(env, EqInt, numParams, cns(env, minArgs));
-          gen(env, JmpZero, fallback, check);
-        } else {
-          if (minArgs) {
-            auto const checkMin = gen(env, LtInt,
-                                      numParams, cns(env, minArgs));
-            gen(env, JmpNZero, fallback, checkMin);
-          }
-          auto const checkMax = gen(env, GtInt, numParams, cns(env, maxArgs));
-          gen(env, JmpNZero, fallback, checkMax);
-        }
-      }
-    },
-    [&] {
-      auto params = prepare_params(
-        env,
-        callee,
-        ctx,
-        callee->numParams(),
-        callee->numParams(),
-        true,
-        [&] (uint32_t i, const Type) {
-          return gen(env, LdLocAddr, LocalId(i), fp(env));
-        }
-      );
-      auto const catcher = CatchMaker {
-        env,
-        CatchMaker::Kind::NotInlining,
-        &params
-      };
-
-      auto const ret = builtinCall(env, callee, params,
-                                   callee->numParams(), catcher);
-      push(env, ret);
-      emitRetC(env);
-    },
-    [&] {
-      hint(env, Block::Hint::Unlikely);
-      genericNativeImpl();
+    callee,
+    ctx,
+    callee->numParams(),
+    callee->numParams(),
+    true,
+    [&] (uint32_t i, const Type) {
+      return gen(env, LdLocAddr, LocalId(i), fp(env));
     }
   );
+  auto const catcher = CatchMaker {
+    env,
+    CatchMaker::Kind::NotInlining,
+    &params
+  };
+
+  push(env, builtinCall(env, callee, params, callee->numParams(), catcher));
+  emitRetC(env);
 }
 
 //////////////////////////////////////////////////////////////////////

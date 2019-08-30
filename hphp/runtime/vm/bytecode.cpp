@@ -1540,13 +1540,10 @@ static void prepareFuncEntry(ActRec *ar, StackArgsState stk) {
     : func->getEntry();
   vmJitReturnAddr() = nullptr;
 
-  // cppext functions/methods have their own logic for raising
-  // warnings for missing arguments, so we only need to do this work
-  // for non-cppext functions/methods
-  if (raiseMissingArgumentWarnings && !func->isCPPBuiltin()) {
+  if (raiseMissingArgumentWarnings) {
     HPHP::jit::raiseMissingArgument(func, ar->numArgs());
   }
-  if (raiseTooManyArgumentsWarnings && !func->isCPPBuiltin()) {
+  if (raiseTooManyArgumentsWarnings) {
     // since shuffleExtraStackArgs changes ar->numArgs() we need to communicate
     // the value before it gets changed
     HPHP::jit::raiseTooManyArguments(func, *raiseTooManyArgumentsWarnings);

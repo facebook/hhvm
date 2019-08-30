@@ -1649,7 +1649,7 @@ X(LdFuncCached,                 FuncNameData);
 X(LookupFuncCached,             FuncNameData);
 X(LdObjMethodS,                 FuncNameData);
 X(RaiseMissingArg,              FuncArgData);
-X(RaiseTooManyArg,              FuncArgData);
+X(RaiseTooManyArg,              FuncData);
 X(ThrowParamRefMismatch,        ParamData);
 X(ThrowParamRefMismatchRange,   CheckRefsData);
 X(ThrowArrayIndexException,     ThrowArrayIndexExceptionData);

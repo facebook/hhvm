@@ -842,7 +842,10 @@ const Func* lookupClsMethodHelper(const Class* cls, const StringData* methName,
 //////////////////////////////////////////////////////////////////////
 
 void raiseArgumentImpl(const Func* func, int got, bool missing) {
-  if (!missing && !RuntimeOption::EvalWarnOnTooManyArguments) return;
+  if (!missing && !RuntimeOption::EvalWarnOnTooManyArguments &&
+      !func->isCPPBuiltin()) {
+    return;
+  }
   const auto total = func->numNonVariadicParams();
   const auto variadic = func->hasVariadicCaptureParam();
   const Func::ParamInfoVec& params = func->params();
@@ -866,13 +869,14 @@ void raiseArgumentImpl(const Func* func, int got, bool missing) {
 
   auto const value = atmost ? total : expected;
   auto const msg = folly::sformat("{}() expects {} {} parameter{}, {} given",
-                                  func->displayName()->data(),
+                                  func->fullDisplayName()->data(),
                                   amount,
                                   value,
                                   value == 1 ? "" : "s",
                                   got);
 
-  if (missing || RuntimeOption::EvalWarnOnTooManyArguments > 1) {
+  if (missing || RuntimeOption::EvalWarnOnTooManyArguments > 1 ||
+      func->isCPPBuiltin()) {
     SystemLib::throwRuntimeExceptionObject(Variant(msg));
   } else {
     raise_warning(msg);

@@ -421,42 +421,12 @@ const StringData* getInvokeName(ActRec* ar) {
   return ar->func()->fullDisplayName();
 }
 
-bool nativeWrapperCheckArgs(ActRec* ar) {
-  auto func = ar->m_func;
-  auto numArgs = func->numNonVariadicParams();
-  auto numNonDefault = ar->numArgs();
-
-  if (numNonDefault < numArgs) {
-    const Func::ParamInfoVec& paramInfo = func->params();
-    for (auto i = numNonDefault; i < numArgs; ++i) {
-      if (InvalidAbsoluteOffset == paramInfo[i].funcletOff) {
-        // There's at least one non-default param which wasn't passed, throw a
-        // RuntimeException
-        throw_wrong_arguments_nr(
-            getInvokeName(ar)->data(), numNonDefault, minNumArgs(ar),
-            func->hasVariadicCaptureParam() ? INT_MAX : numArgs);
-      }
-    }
-  } else if (numNonDefault > numArgs && !func->hasVariadicCaptureParam()) {
-    // Too many arguments passed, throw a RuntimeException
-    throw_wrong_arguments_nr(getInvokeName(ar)->data(),
-      numNonDefault, minNumArgs(ar), numArgs);
-  }
-
-  // Looks good
-  return true;
-}
-
 TypedValue* functionWrapper(ActRec* ar) {
   assertx(ar);
   auto func = ar->m_func;
   auto numArgs = func->numParams();
   auto numNonDefault = ar->numArgs();
   TypedValue* args = ((TypedValue*)ar) - 1;
-
-  if (numNonDefault != numArgs) {
-    nativeWrapperCheckArgs(ar);
-  }
 
   coerceFCallArgs(args, numArgs, numNonDefault, func);
 
@@ -477,10 +447,6 @@ TypedValue* methodWrapper(ActRec* ar) {
   auto numNonDefault = ar->numArgs();
   bool isStatic = func->isStatic();
   TypedValue* args = ((TypedValue*)ar) - 1;
-
-  if (numNonDefault != numArgs) {
-    nativeWrapperCheckArgs(ar);
-  }
 
   coerceFCallArgs(args, numArgs, numNonDefault, func);
 

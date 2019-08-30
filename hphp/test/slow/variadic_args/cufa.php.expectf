@@ -159,24 +159,24 @@ string(58) "variadic_hack_some() expects at least 1 parameter, 0 given"
 * C::st_variadic_only
 array(0) {
 }
-string(56) "st_variadic_some() expects at least 1 parameter, 0 given"
+string(59) "C::st_variadic_some() expects at least 1 parameter, 0 given"
 
 * C::st_variadic_hack_only
 array(0) {
 }
-string(61) "st_variadic_hack_some() expects at least 1 parameter, 0 given"
+string(64) "C::st_variadic_hack_some() expects at least 1 parameter, 0 given"
 
 ========= instance methods ==========
 
 * C::variadic_only
 array(0) {
 }
-string(53) "variadic_some() expects at least 1 parameter, 0 given"
+string(56) "C::variadic_some() expects at least 1 parameter, 0 given"
 
 * C::variadic_hack_only
 array(0) {
 }
-string(58) "variadic_hack_some() expects at least 1 parameter, 0 given"
+string(61) "C::variadic_hack_some() expects at least 1 parameter, 0 given"
 
 ********* test_cufa **********
 array(3) {
@@ -444,24 +444,24 @@ string(58) "variadic_hack_some() expects at least 1 parameter, 0 given"
 * C::st_variadic_only
 array(0) {
 }
-string(56) "st_variadic_some() expects at least 1 parameter, 0 given"
+string(59) "C::st_variadic_some() expects at least 1 parameter, 0 given"
 
 * C::st_variadic_hack_only
 array(0) {
 }
-string(61) "st_variadic_hack_some() expects at least 1 parameter, 0 given"
+string(64) "C::st_variadic_hack_some() expects at least 1 parameter, 0 given"
 
 ========= instance methods ==========
 
 * C::variadic_only
 array(0) {
 }
-string(53) "variadic_some() expects at least 1 parameter, 0 given"
+string(56) "C::variadic_some() expects at least 1 parameter, 0 given"
 
 * C::variadic_hack_only
 array(0) {
 }
-string(58) "variadic_hack_some() expects at least 1 parameter, 0 given"
+string(61) "C::variadic_hack_some() expects at least 1 parameter, 0 given"
 
 ********* test_stack_should_not_overflow **********
 bool(true)

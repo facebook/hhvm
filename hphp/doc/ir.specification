@@ -2246,9 +2246,9 @@ To string conversions:
   Raise a missing argument warning because only argc arguments were passed to
   function func.
 
-| RaiseTooManyArg<func,argc>, ND, NA, NF
+| RaiseTooManyArg<func>, ND, S(Int), NF
 
-  Raise a too many argument warning because argc arguments were passed to
+  Raise a too many argument warning because S0 arguments were passed to
   function func.
 
 | RaiseError, ND, S(Str), T

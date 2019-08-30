@@ -982,40 +982,14 @@ bool is_constructor_name(const char* fn) {
   return false;
 }
 
-void throw_wrong_argument_count_nr(const char *fn, int expected, int got,
-                                   const char *expectDesc) {
-  auto const msg = folly::sformat("{}() expects {} {} parameter{}, {} given",
-                                  fn,
-                                  expectDesc,
-                                  expected,
-                                  expected == 1 ? "" : "s",
-                                  got);
-
-  SystemLib::throwRuntimeExceptionObject(msg);
-}
-
 void throw_missing_arguments_nr(const char *fn, int expected, int got) {
-  throw_wrong_argument_count_nr(fn, expected, got, "exactly");
-}
-
-void throw_wrong_arguments_nr(const char *fn, int count, int cmin, int cmax) {
-  if (cmin >= 0 && count < cmin) {
-    if (cmin != cmax) {
-      throw_wrong_argument_count_nr(fn, cmin, count, "at least");
-    } else {
-      throw_wrong_argument_count_nr(fn, cmin, count, "exactly");
-    }
-    return;
-  }
-  if (cmax >= 0 && count > cmax) {
-    if (cmin != cmax) {
-      throw_wrong_argument_count_nr(fn, cmax, count, "at most");
-    } else {
-      throw_wrong_argument_count_nr(fn, cmax, count, "exactly");
-    }
-    return;
-  }
-  assertx(false);
+  SystemLib::throwRuntimeExceptionObject(folly::sformat(
+    "{}() expects exactly {} parameter{}, {} given",
+    fn,
+    expected,
+    expected == 1 ? "" : "s",
+    got
+  ));
 }
 
 void throw_bad_type_exception(const char *fmt, ...) {

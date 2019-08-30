@@ -329,23 +329,20 @@ void init_locals(IRGS& env, const Func* func) {
 /*
  * Emit raise-warnings for any missing or too many arguments.
  */
-void warn_argument_arity(IRGS& env, uint32_t argc) {
+void warn_argument_arity(IRGS& env, uint32_t argc, SSATmp* numTooManyArgs) {
   auto const func = curFunc(env);
   auto const nparams = func->numNonVariadicParams();
+  auto const& paramInfo = func->params();
 
-  if (!func->isCPPBuiltin()) {
-    auto const& paramInfo = func->params();
-
-    for (auto i = argc; i < nparams; ++i) {
-      if (paramInfo[i].funcletOff == InvalidAbsoluteOffset) {
-        env.irb->exceptionStackBoundary();
-        gen(env, RaiseMissingArg, FuncArgData { func, argc });
-        break;
-      }
+  for (auto i = argc; i < nparams; ++i) {
+    if (paramInfo[i].funcletOff == InvalidAbsoluteOffset) {
+      env.irb->exceptionStackBoundary();
+      gen(env, RaiseMissingArg, FuncArgData { func, argc });
+      break;
     }
   }
-  if (!func->hasVariadicCaptureParam() && argc > nparams) {
-    gen(env, RaiseTooManyArg, FuncArgData { func, argc });
+  if (numTooManyArgs) {
+    gen(env, RaiseTooManyArg, FuncData { func }, numTooManyArgs);
   }
 }
 
@@ -424,11 +421,19 @@ void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID) {
     profData()->setProfiling(func->getFuncId());
   }
 
+  // If too many arguments were passed, load the actual number of arguments
+  // from ActRec before m_numArgs gets overwritten by emitPrologueLocals().
+  // We can't use argc, as there is only one prologue for argc > nparams.
+  auto const numTooManyArgs =
+    !func->hasVariadicCaptureParam() && argc > func->numNonVariadicParams()
+      ? gen(env, LdARNumParams, fp(env))
+      : nullptr;
+
   // Initialize params, locals, and---if we have a closure---the closure's
   // bound class context and use vars.
   emitPrologueLocals(env, argc, func, nullptr);
 
-  warn_argument_arity(env, argc);
+  warn_argument_arity(env, argc, numTooManyArgs);
 
   // Check surprise flags in the same place as the interpreter: after setting
   // up the callee's frame but before executing any of its code.

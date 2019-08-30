@@ -294,19 +294,8 @@ void throw_object(const String& s, const Array& params, bool init = true) {
   throw_object(create_object(s, params, init));
 }
 
-/**
- * Argument count handling.
- *   - When level is 2, it's from constructors that turn these into fatals
- *   - When level is 1, it's from system funcs that turn both into warnings
- *   - When level is 0, it's from user funcs that turn missing arg in warnings
- */
-void throw_wrong_argument_count_nr(const char *fn, int expected, int got,
-                                   const char *expectDesc)
-  __attribute__((__cold__));
 void throw_missing_arguments_nr(const char *fn, int expected, int got)
 
-  __attribute__((__cold__));
-void throw_wrong_arguments_nr(const char *fn, int count, int cmin, int cmax)
   __attribute__((__cold__));
 
 /**

@@ -153,7 +153,7 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
       stack.ret();
       assertx(stack.topTV() == fp->retSlot());
       cellCopy(make_tv<KindOfObject>(waitHandle), *fp->retSlot());
-      fp->retSlot()->m_aux.u_asyncNonEagerReturnFlag = -1;
+      fp->retSlot()->m_aux.u_asyncEagerReturnFlag = 0;
     } else {
       // Free ActRec.
       stack.ndiscard(func->numSlotsInFrame());

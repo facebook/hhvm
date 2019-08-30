@@ -3154,7 +3154,7 @@ OPTBLD_INLINE TCA ret(PC& pc) {
     assertx(vmStack().topTV() == vmfp()->retSlot());
     // In case async eager return was requested by the caller, pretend that
     // we did not finish eagerly as we already boxed the value.
-    vmStack().topTV()->m_aux.u_asyncNonEagerReturnFlag = -1;
+    vmStack().topTV()->m_aux.u_asyncEagerReturnFlag = 0;
   } else if (vmfp()->func()->isAsyncFunction()) {
     // Mark the async function as succeeded and store the return value.
     assertx(!sfp);
@@ -3914,7 +3914,7 @@ OPTBLD_INLINE void iopMemoGetEager(PC& pc,
 
   if (auto const c = memoGetImpl(keys)) {
     cellDup(*c, *vmStack().allocC());
-    if (c->m_aux.u_asyncNonEagerReturnFlag) {
+    if (!c->m_aux.u_asyncEagerReturnFlag) {
       assertx(tvIsObject(c) && c->m_data.pobj->isWaitHandle());
       pc = suspended;
     }
@@ -4031,7 +4031,7 @@ OPTBLD_INLINE void iopMemoSet(LocalRange keys) {
   assertx(val.m_type != KindOfUninit);
   if (vmfp()->m_func->isAsyncFunction()) {
     assertx(tvIsObject(val) && val.m_data.pobj->isWaitHandle());
-    val.m_aux.u_asyncNonEagerReturnFlag = -1;
+    val.m_aux.u_asyncEagerReturnFlag = 0;
   }
   memoSetImpl(keys, val);
 }
@@ -4041,7 +4041,7 @@ OPTBLD_INLINE void iopMemoSetEager(LocalRange keys) {
   assertx(!vmfp()->resumed());
   auto val = *vmStack().topC();
   assertx(val.m_type != KindOfUninit);
-  val.m_aux.u_asyncNonEagerReturnFlag = 0;
+  val.m_aux.u_asyncEagerReturnFlag = static_cast<uint32_t>(-1);
   memoSetImpl(keys, val);
 }
 
@@ -6436,7 +6436,7 @@ OPTBLD_INLINE void asyncSuspendE(PC& pc) {
     vmStack().ndiscard(func->numSlotsInFrame());
     vmStack().ret();
     tvCopy(make_tv<KindOfObject>(waitHandle), *vmStack().topTV());
-    vmStack().topTV()->m_aux.u_asyncNonEagerReturnFlag = -1;
+    vmStack().topTV()->m_aux.u_asyncEagerReturnFlag = 0;
     assertx(vmStack().topTV() == fp->retSlot());
 
     // Return control to the caller.

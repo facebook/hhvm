@@ -839,7 +839,7 @@ struct CallData : IRExtraData {
 
 struct RetCtrlData : IRExtraData {
   explicit RetCtrlData(IRSPRelOffset offset, bool suspendingResumed,
-                       folly::Optional<AuxUnion> aux = folly::none)
+                       AuxUnion aux)
     : offset(offset)
     , suspendingResumed(suspendingResumed)
     , aux(aux)
@@ -860,8 +860,8 @@ struct RetCtrlData : IRExtraData {
   // decrefing locals.  Used by refcount optimizer.
   bool suspendingResumed;
 
-  // Optional TV aux value to attach to the function's return value.
-  folly::Optional<AuxUnion> aux;
+  // TV aux value to attach to the function's return value.
+  AuxUnion aux;
 };
 
 /*

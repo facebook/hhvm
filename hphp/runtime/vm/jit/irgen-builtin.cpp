@@ -1930,7 +1930,8 @@ void emitNativeImpl(IRGS& env) {
   auto genericNativeImpl = [&]() {
     gen(env, NativeImpl, fp(env), sp(env));
     auto const retVal = gen(env, LdRetVal, callReturnType(callee), fp(env));
-    auto const data = RetCtrlData { offsetToReturnSlot(env), false };
+    auto const spAdjust = offsetToReturnSlot(env);
+    auto const data = RetCtrlData { spAdjust, false, AuxUnion{0} };
     gen(env, RetCtrl, data, sp(env), fp(env), retVal);
   };
 
@@ -2649,7 +2650,7 @@ void memoGetImpl(IRGS& env,
     [&] (Block* taken) {
       auto const aux = gen(env, LdTVAux, LdTVAuxData {}, val);
       auto const tst = gen(env, AndInt, aux, cns(env, 1u << 31));
-      gen(env, JmpNZero, taken, tst);
+      gen(env, JmpZero, taken, tst);
     },
     [&] {
       pushIncRef(

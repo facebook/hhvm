@@ -246,7 +246,7 @@ void callWithAsyncEagerReturn(IRGS& env, const Func* callee,
     [&] (Block* taken) {
       auto const aux = gen(env, LdTVAux, LdTVAuxData {}, retVal);
       auto const tst = gen(env, AndInt, aux, cns(env, 1u << 31));
-      gen(env, JmpNZero, taken, tst);
+      gen(env, JmpZero, taken, tst);
     },
     [&] {
       auto const ty = callee ? awaitedCallReturnType(callee) : TInitCell;

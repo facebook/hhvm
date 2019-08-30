@@ -81,6 +81,7 @@
     partial_provider
     relative_path
 
+    rust_parser_errors_ffi
     rust_parser_ffi
     (select rust_lazy_trivia_ffi.ml from
       (-> ffi/rust_lazy_trivia_ffi.ml)

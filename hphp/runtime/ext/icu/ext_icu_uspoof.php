@@ -28,7 +28,9 @@ class SpoofChecker {
    *                spoofing issues, FALSE otherwise.
    */
   <<__Native>>
-  public function isSuspicious(string $text, mixed &$issuesFound = null): bool;
+  public function isSuspicious(string $text,
+                               <<__OutOnly("KindOfInt64")>>
+                               inout mixed $issuesFound): bool;
 
   /**
    * Check the whether two specified UTF-8 strings are visually confusable.
@@ -50,7 +52,8 @@ class SpoofChecker {
    */
   <<__Native>>
   public function areConfusable(string $s1, string $s2,
-                                mixed &$issuesFound = null): bool;
+                                <<__OutOnly("KindOfInt64")>>
+                                inout mixed $issuesFound): bool;
 
   /**
    * Limit characters that are acceptable in identifiers being checked to those

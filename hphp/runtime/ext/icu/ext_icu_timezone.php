@@ -82,7 +82,9 @@ class IntlTimeZone {
    */
   <<__Native>>
   public static
-  function getCanonicalID(string $zoneId, mixed &$isSystemID = null): mixed;
+  function getCanonicalID(string $zoneId,
+                          <<__OutOnly("KindOfBoolean")>>
+                          inout mixed $isSystemID): mixed;
 
 
   <<__Native>>
@@ -297,8 +299,8 @@ function intltz_from_date_time_zone(DateTimeZone $zoneId): IntlTimeZone {
  * @return string -
  */
 function intltz_get_canonical_id(string $zoneId,
-                                 mixed &$isSystemID = null): mixed {
-  return IntlTimeZone::getCanonicalID($zoneId, &$isSystemID);
+                                 inout mixed $isSystemID): mixed {
+  return IntlTimeZone::getCanonicalID($zoneId, inout $isSystemID);
 }
 
 function intltz_get_region(string $str): mixed {

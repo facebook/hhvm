@@ -138,25 +138,17 @@ function ut_nfmt_format( $fmt, $number, $type = 0 )
 {
     return $GLOBALS['oo-mode'] ? $fmt->format( $number, $type ) : numfmt_format( $fmt, $number, $type );
 }
-function ut_nfmt_parse( $fmt, $string, $type = NumberFormatter::TYPE_DOUBLE, &$position = null )
+function ut_nfmt_parse( $fmt, $string, $type, inout $position)
 {
-    if(is_null($position)) {
-    return $GLOBALS['oo-mode'] ? $fmt->parse( $string, $type ) : numfmt_parse( $fmt, $string, $type );
-    } else {
-    return $GLOBALS['oo-mode'] ? $fmt->parse( $string, $type, &$position ) : numfmt_parse( $fmt, $string, $type, &$position );
-    }
+    return $GLOBALS['oo-mode'] ? $fmt->parseWithPosition( $string, $type, inout $position ) : numfmt_parse( $fmt, $string, $type, inout $position );
 }
 function ut_nfmt_format_currency( $fmt, $number, $currency )
 {
     return $GLOBALS['oo-mode'] ? $fmt->formatCurrency( $number, $currency ) : numfmt_format_currency( $fmt, $number, $currency );
 }
-function ut_nfmt_parse_currency( $fmt, $string, &$currency, &$position = null )
+function ut_nfmt_parse_currency( $fmt, $string, inout $currency, inout $position)
 {
-    if(is_null($position)) {
-    return $GLOBALS['oo-mode'] ? $fmt->parseCurrency( $string, &$currency ) : numfmt_parse_currency( $fmt, $string, &$currency );
-    } else {
-    return $GLOBALS['oo-mode'] ? $fmt->parseCurrency( $string, &$currency, &$position ) : numfmt_parse_currency( $fmt, $string, &$currency, &$position );
-   }
+    return $GLOBALS['oo-mode'] ? $fmt->parseCurrency( $string, inout $currency, inout $position ) : numfmt_parse_currency( $fmt, $string, inout $currency, inout $position );
 }
 function ut_nfmt_set_attribute( $fmt, $attribute, $value )
 {
@@ -381,13 +373,13 @@ function ut_datefmt_format( $fmt , $value )
 {
     return $GLOBALS['oo-mode'] ? $fmt->format(  $value ) : datefmt_format( $fmt ,  $value);
 }
-function ut_datefmt_parse( $fmt , $value , &$parse_pos=0 )
+function ut_datefmt_parse( $fmt , $value , inout $parse_pos )
 {
-    return $GLOBALS['oo-mode'] ? $fmt->parse(  $value ,&$parse_pos ) : datefmt_parse( $fmt ,  $value,&$parse_pos);
+    return $GLOBALS['oo-mode'] ? $fmt->parseWithPosition(  $value ,inout $parse_pos ) : datefmt_parse( $fmt ,  $value,&$parse_pos);
 }
-function ut_datefmt_localtime( $fmt , $value , &$parse_pos=0 )
+function ut_datefmt_localtime( $fmt , $value , inout $parse_pos )
 {
-    return $GLOBALS['oo-mode'] ? $fmt->localtime(  $value , &$parse_pos ) : datefmt_localtime( $fmt ,  $value , &$parse_pos );
+    return $GLOBALS['oo-mode'] ? $fmt->localtime(  $value , inout $parse_pos ) : datefmt_localtime( $fmt ,  $value , inout $parse_pos );
 }
 
 function ut_resourcebundle_create( $locale, $bundle, $fallback=true )

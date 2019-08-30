@@ -229,11 +229,11 @@ function collator_sort_with_sort_keys($obj, &$arr);
 <<__PHPStdLib>>
 function collator_sort($obj, &$arr, int $sort_flag = Collator::SORT_REGULAR);
 <<__PHPStdLib>>
-function idn_to_ascii(string $domain, int $options = 0, int $variant = 0, &$idna_info = null);
+function idn_to_ascii(string $domain, int $options = 0, int $variant = 0);
 <<__PHPStdLib>>
-function idn_to_unicode(string $domain, int $options = 0, int $variant = 0, &$idna_info = null);
+function idn_to_unicode(string $domain, int $options = 0, int $variant = 0);
 <<__PHPStdLib>>
-function idn_to_utf8(string $domain, int $options = 0, int $variant = 0, &$idna_info = null);
+function idn_to_utf8(string $domain, int $options = 0, int $variant = 0);
 <<__PHPStdLib>>
 function datefmt_create($locale, $date_type, $time_type, $timezone_str = null, $calendar = null, $pattern = null);
 <<__PHPStdLib>>
@@ -263,9 +263,9 @@ function datefmt_get_timezone_id($mf);
 <<__PHPStdLib>>
 function datefmt_is_lenient($mf);
 <<__PHPStdLib>>
-function datefmt_localtime($formatter, $string, &$position = null);
+function datefmt_localtime($formatter, $string, inout $position);
 <<__PHPStdLib>>
-function datefmt_parse($formatter, $string, &$position = null);
+function datefmt_parse($formatter, $string, inout $position);
 <<__PHPStdLib>>
 function datefmt_set_calendar($mf, $calendar);
 <<__PHPStdLib>>
@@ -277,7 +277,8 @@ function datefmt_set_timezone($mf, $timezone);
 <<__PHPStdLib>>
 function datefmt_set_timezone_id($mf, $timezone);
 <<__PHPStdLib>>
-function grapheme_extract(string $haystack, int $size, int $extract_type = GRAPHEME_EXTR_COUNT, int $start = 0, &$next = null);
+function grapheme_extract(string $haystack, int $size, int $extract_type,
+                          int $start, inout ?int $next);
 <<__PHPStdLib>>
 function grapheme_stripos(string $haystack, string $needle, int $offset = 0);
 <<__PHPStdLib>>
@@ -405,7 +406,7 @@ function intltz_create_time_zone_id_enumeration(int $zoneType, string $region = 
 <<__PHPStdLib>>
 function intltz_from_date_time_zone(DateTimeZone $dateTimeZone);
 <<__PHPStdLib>>
-function intltz_get_canonical_id(string $zoneId, &$isSystemID = null);
+function intltz_get_canonical_id(string $zoneId, inout $isSystemID);
 <<__PHPStdLib>>
 function intltz_get_display_name(IntlTimeZone $timeZone, bool $isDaylight = false, int $style = IntlTimeZone::DISPLAY_LONG, string $locale = "");
 <<__PHPStdLib>>
@@ -517,9 +518,10 @@ function numfmt_get_symbol($nf, $attr);
 <<__PHPStdLib>>
 function numfmt_get_text_attribute($nf, $attr);
 <<__PHPStdLib>>
-function numfmt_parse($formatter, $string, $type = null, &$position = null);
+function numfmt_parse($formatter, $string, $type, inout $position);
 <<__PHPStdLib>>
-function numfmt_parse_currency($formatter, $string, &$currency, &$position = null);
+function numfmt_parse_currency($formatter, $string, inout $currency,
+                               inout $position);
 <<__PHPStdLib>>
 function numfmt_set_attribute($nf, $attr, $value);
 <<__PHPStdLib>>
@@ -668,8 +670,9 @@ class IntlDateFormatter {
   public function getTimeZone();
   public function getTimeZoneId();
   public function isLenient();
-  public function localtime(string $string, &$position = null);
+  public function localtime(string $string, inout $position);
   public function parse(string $string, &$position = null);
+  public function parseWithPosition(string $string, inout $position);
   public function setCalendar($which);
   public function setLenient(bool $lenient);
   public function setPattern(string $pattern);
@@ -707,7 +710,7 @@ class IntlTimeZone {
   public static function createTimeZone(string $zoneId);
   public static function createTimeZoneIDEnumeration(int $zoneType, string $region = "", $rawOffset = null);
   public static function fromDateTimeZone($zoneId);
-  public static function getCanonicalID(string $zoneId, &$isSystemID = null);
+  public static function getCanonicalID(string $zoneId, inout $isSystemID);
   public function getDSTSavings();
   public function getDisplayName(bool $isDaylight = false, int $style = IntlTimeZone::DISPLAY_LONG, string $locale = "");
   public static function getEquivalentID(string $zoneId, int $index);

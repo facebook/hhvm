@@ -29,9 +29,10 @@
 <<__Native>>
 function grapheme_extract(string $haystack,
                           int $size,
-                          int $extract_type = GRAPHEME_EXTR_COUNT,
-                          int $start = 0,
-                          ?int &$next = null): mixed;
+                          int $extract_type,
+                          int $start,
+                          <<__OutOnly("KindOfInt64")>>
+                          inout ?int $next): mixed;
 
 /**
  * Find position (in grapheme units) of first occurrence of a case-insensitive

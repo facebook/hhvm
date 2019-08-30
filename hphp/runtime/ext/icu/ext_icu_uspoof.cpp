@@ -14,7 +14,7 @@ const StaticString s_SpoofChecker("SpoofChecker");
   }
 
 static bool HHVM_METHOD(SpoofChecker, isSuspicious, const String& text,
-                                                    VRefParam issuesFound) {
+                                                    int64_t& issuesFound) {
   FETCH_SPOOF(data, this_);
   UErrorCode error = U_ZERO_ERROR;
   int32_t ret = uspoof_checkUTF8(data->checker(),
@@ -25,13 +25,13 @@ static bool HHVM_METHOD(SpoofChecker, isSuspicious, const String& text,
                          "error %d (%s)",
                          text.c_str(), error, u_errorName(error));
   }
-  issuesFound.assignIfRef(ret);
+  issuesFound = ret;
   return ret != 0;
 }
 
 static bool HHVM_METHOD(SpoofChecker, areConfusable, const String& s1,
                                                      const String& s2,
-                                                     VRefParam issuesFound) {
+                                                     int64_t& issuesFound) {
   FETCH_SPOOF(data, this_);
   UErrorCode error = U_ZERO_ERROR;
   int32_t ret = uspoof_areConfusableUTF8(data->checker(),
@@ -43,7 +43,7 @@ static bool HHVM_METHOD(SpoofChecker, areConfusable, const String& s1,
                          " error %d (%s)",
                          s1.c_str(), s2.c_str(), error, u_errorName(error));
   }
-  issuesFound.assignIfRef(ret);
+  issuesFound = ret;
   return ret != 0;
 }
 

@@ -7,12 +7,12 @@
 
 function ut_main()
 {
-	$timezone = 'GMT+05:00'; 
+	$timezone = 'GMT+05:00';
 
 	$locale_arr = array (
 		'en_US'
 	);
-	
+
 	$datetype_arr = array (
                 IntlDateFormatter::FULL,
                 IntlDateFormatter::LONG,
@@ -75,7 +75,8 @@ function ut_main()
 				$fmt = ut_datefmt_create( $locale_entry , $datetype_entry ,$datetype_entry,$timezone);
 				$formatted = ut_datefmt_format( $fmt , $timestamp_entry);
 				$res_str .= "\nFormatted timestamp is : $formatted";
-				$parsed = ut_datefmt_parse( $fmt , $formatted);
+				$pos = 0;
+				$parsed = ut_datefmt_parse( $fmt , $formatted, inout $pos);
 				if( intl_get_error_code() == U_ZERO_ERROR){
 					$res_str .= "\nParsed timestamp is : $parsed";
 				}else{
@@ -105,7 +106,8 @@ function ut_main()
 					$res_str .= "\nError while formatting as: '".intl_get_error_message()."'";
 				}
 				//Parsing
-				$parsed_arr = ut_datefmt_localtime( $fmt, $formatted1 );
+                $pos = 0;
+				$parsed_arr = ut_datefmt_localtime( $fmt, $formatted1, inout $pos );
 
 				if( $parsed_arr){
 				    $res_str .= "\nParsed array is: ";

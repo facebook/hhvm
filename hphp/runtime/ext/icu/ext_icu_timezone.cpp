@@ -150,7 +150,7 @@ static Object HHVM_STATIC_METHOD(IntlTimeZone, createTimeZone,
 
 static Variant HHVM_STATIC_METHOD(IntlTimeZone, getCanonicalID,
                                   const String& zoneId,
-                                  VRefParam isSystemID) {
+                                  bool& isSystemID) {
   UErrorCode error = U_ZERO_ERROR;
   icu::UnicodeString id;
   if (!ustring_from_char(id, zoneId, error)) {
@@ -169,7 +169,7 @@ static Variant HHVM_STATIC_METHOD(IntlTimeZone, getCanonicalID,
     return false;
   }
 
-  isSystemID.assignIfRef((bool)system);
+  isSystemID = (bool)system;
   error = U_ZERO_ERROR;
   String ret(u8(result, error));
   if (U_FAILURE(error)) {

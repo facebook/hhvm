@@ -1515,6 +1515,135 @@ compute_place_constants_block_info(State& state) {
   return {std::move(outInfo), std::move(trivialUses)};
 }
 
+// Find the last index in the block where it's not legal to insert the
+// ldimm. IE, avoid the special instructions which end blocks which we
+// cannot insert anything after.
+size_t find_first_invalid_block_index(const Vblock& block) {
+  auto const valid = [] (Vinstr::Opcode op) {
+    return op != Vinstr::unwind &&
+      op != Vinstr::syncpoint &&
+      op != Vinstr::nothrow &&
+      op != Vinstr::fallthru;
+  };
+  auto i = block.code.size();
+  while (i > 0 && !valid(block.code[i-1].op)) --i;
+  return i;
+};
+
+// Look for any blocks where all the successors of the block define
+// the same constant at the front. Hoist those definitions up into the
+// end of the block. Constant materialization can sometimes cause such
+// definitions, and its difficult to modify the dataflow to not do
+// so. Instead just fix it up after the fact.
+void hoist_constants(State& state) {
+  auto& unit = state.unit;
+
+  // NB: Be careful with references to things inside the unit here,
+  // since they can be invalidated whenever we call vmodify.
+  for (auto const b : state.rpo) {
+    auto successors = succs(unit.blocks[b]);
+    // Can only happen if we have more than one successor
+    if (successors.size() < 2) continue;
+
+    // Avoid self-loops
+    if (std::any_of(successors.begin(),
+                    successors.end(),
+                    [&] (Vlabel s) { return s == b; })) {
+      continue;
+    }
+
+    // Search a block for a constant defining the given Vreg. We stop
+    // looking if we encounter a non-constant materialization
+    // instruction.
+    auto const findVreg = [&] (Vreg r, Vlabel succ) -> folly::Optional<size_t> {
+      size_t idx = 0;
+      auto const& code = unit.blocks[succ].code;
+      auto const limit = code.size();
+      while (idx < limit) {
+        auto const& inst = code[idx];
+        switch (inst.op) {
+          case Vinstr::ldimmq:
+            if (inst.ldimmq_.d == r) return idx;
+            break;
+          case Vinstr::ldimml:
+            if (inst.ldimml_.d == r) return idx;
+            break;
+          case Vinstr::ldimmb:
+            if (inst.ldimmb_.d == r) return idx;
+            break;
+          default:
+            return folly::none;
+        }
+        ++idx;
+      }
+      return folly::none;
+    };
+
+    VregSet hoisted;
+
+    // Attempt to hoist a Vreg (defined by the given instruction from
+    // one of the successors) into the parent block.
+    auto const hoist = [&] (Vreg r, const Vinstr& inst) {
+      // Check all the other successors and make sure its also defined there.
+      for (size_t succIndex = 1; succIndex < successors.size(); ++succIndex) {
+        if (!findVreg(r, successors[succIndex])) return;
+      }
+
+      // It is, so copy the instruction into the end of the parent
+      // block.
+      vmodify(
+        unit, b, find_first_invalid_block_index(unit.blocks[b]) - 1,
+        [&] (Vout& v) { v << inst; return 0; }
+      );
+      // vmodify could have shift data, so re-calculate successors
+      // (which is a pointer).
+      successors = succs(unit.blocks[b]);
+      hoisted.add(r);
+    };
+
+    // For every constant defined in the first successor (an arbitrary
+    // choise), attempt to hoist into the parent. We only examine
+    // constants which are defined before any other instruction.
+    //
+    // hoist() can call vmodify, which can invalidate references in
+    // the unit, so use indices.
+    for (size_t idx = 0; idx < unit.blocks[successors[0]].code.size(); ++idx) {
+      auto const& inst = unit.blocks[successors[0]].code[idx];
+      switch (inst.op) {
+        case Vinstr::ldimmq:
+          hoist(inst.ldimmq_.d, inst);
+          continue;
+        case Vinstr::ldimml:
+          hoist(inst.ldimml_.d, inst);
+          continue;
+        case Vinstr::ldimmb:
+          hoist(inst.ldimmb_.d, inst);
+          continue;
+        default:
+          break;
+      }
+      break;
+    }
+
+    // Didn't hoist anything, so we're done
+    if (hoisted.none()) continue;
+
+    // Otherwise we need to remove the now unneeded definitions from
+    // the successors.
+    for (size_t idx = 0; idx < successors.size(); ++idx) {
+      auto const succ = successors[idx];
+      for (auto const r : hoisted) {
+        auto const constIdx = findVreg(r, succ);
+        assertx(constIdx); // Should be there
+        vmodify(unit, succ, *constIdx, [&] (Vout&) { return 1; });
+      }
+      // vmodify() might have invalidated successors (which is a
+      // pointer), so re-acquire it.
+      successors = succs(unit.blocks[b]);
+    }
+  }
+}
+
 // Materialize constants by placing instructions to create them at the
 // appropriate points. The set of constants placed multiple times
 // (thus needing SSA restoration) is returned.
@@ -1674,20 +1803,7 @@ VregSet place_constants(State& state) {
     auto block = &unit.blocks[b];
     assertx(!block->code.empty());
 
-    // Find the last index in the block where its not legal to insert the
-    // ldimm. IE, avoid the special block ending instructions which we cannot
-    // insert anything after.
-    auto stopIdx = [&]{
-      auto const valid = [] (Vinstr::Opcode op) {
-        return op != Vinstr::unwind &&
-               op != Vinstr::syncpoint &&
-               op != Vinstr::nothrow &&
-               op != Vinstr::fallthru;
-      };
-      auto i = block->code.size();
-      while (i > 0 && !valid(block->code[i-1].op)) --i;
-      return i;
-    }();
+    auto stopIdx = find_first_invalid_block_index(*block);
 
     // Walk through this block, inserting ldimms immediately before a constant's
     // use for the constants we decided to materialize here.
@@ -1743,6 +1859,9 @@ VregSet place_constants(State& state) {
   // Constant registers no longer exist!
   unit.regToConst.clear();
   unit.constToReg.clear();
+
+  // Attempt to hoist constants
+  hoist_constants(state);
 
   return multiplePlaced;
 }

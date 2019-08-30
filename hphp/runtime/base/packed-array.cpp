@@ -621,6 +621,9 @@ void PackedArray::Release(ArrayData* ad) {
   assertx(ad->isRefCounted());
   assertx(ad->hasExactlyOneRef());
 
+  if (RuntimeOption::EvalArrayProvenance) {
+    arrprov::clearTag(ad);
+  }
   for (uint32_t i = 0; i < ad->m_size; ++i) {
     tvDecRefGen(LvalUncheckedInt(ad, i));
   }

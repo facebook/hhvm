@@ -695,6 +695,10 @@ void MixedArray::Release(ArrayData* in) {
   in->fixCountForRelease();
   assertx(in->isRefCounted());
   assertx(in->hasExactlyOneRef());
+
+  if (RuntimeOption::EvalArrayProvenance) {
+    arrprov::clearTag(in);
+  }
   auto const ad = asMixed(in);
 
   if (!ad->isZombie()) {

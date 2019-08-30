@@ -2693,6 +2693,10 @@ void RuntimeOption::Load(
     RuntimeOption::EvalIsCompatibleClsMethType = false;
   }
 
+  if (RuntimeOption::EvalArrayProvenance) {
+    RuntimeOption::EvalJitForceVMRegSync = true;
+  }
+
   // Initialize defaults for repo-specific parser configuration options.
   RepoOptions::setDefaults(config, ini);
 }

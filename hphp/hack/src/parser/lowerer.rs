@@ -4,29 +4,39 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use oxidized as o;
-use oxidized::file_info;
+use oxidized::map::Map;
+use oxidized::namespace_env::Env as NamespaceEnv;
 use oxidized::parser_options::ParserOptions;
 use oxidized::pos::Pos;
 use oxidized::prim_defs::Comment;
 use oxidized::relative_path::RelativePath;
+use oxidized::s_map::SMap;
 use oxidized::s_set::SSet;
+use oxidized::{aast, file_info};
+use parser::indexed_source_text::IndexedSourceText;
 use parser::lexable_token::LexablePositionedToken;
 use parser::positioned_syntax::PositionedSyntaxTrait;
 use parser::source_text::SourceText;
-use parser_core_types::syntax::{Syntax, SyntaxVariant};
+use parser_core_types::syntax::*;
+
 use parser_rust as parser;
 
 use std::result::Result::{Err, Ok};
 
+macro_rules! not_impl {
+    () => {
+        panic!("NOT IMPLEMENTED")
+    };
+}
+
 macro_rules! aast {
-    ($ty:ident) =>  {o::aast::$ty};
+    ($ty:ident) =>  {oxidized::aast::$ty};
     // NOTE: In <,> pattern, comma prevents rustfmt eating <>
-    ($ty:ident<,>) =>  {o::aast::$ty<Pos, (), (), ()>}
+    ($ty:ident<,>) =>  {oxidized::aast::$ty<Pos, (), (), ()>}
 }
 
 macro_rules! ret {
-    ($ty:ident) => { std::result::Result<$ty, Error<Syntax<T, V>>> }
+    ($ty:ty) => { std::result::Result<$ty, Error<Syntax<T, V>>> }
 }
 
 macro_rules! ret_aast {
@@ -35,14 +45,14 @@ macro_rules! ret_aast {
 }
 
 #[derive(Debug, Clone)]
-enum LiftedAwaitKind {
+pub enum LiftedAwaitKind {
     LiftedFromStatement,
     LiftedFromConcurrent,
 }
 
 #[derive(Debug, Clone)]
 pub struct LiftedAwaits {
-    pub awaits: Vec<(Option<o::aast_defs::Id>, aast!(Expr<,>))>,
+    pub awaits: Vec<(Option<aast::Id>, aast!(Expr<,>))>,
     lift_kind: LiftedAwaitKind,
 }
 
@@ -98,7 +108,7 @@ pub struct Env<'a> {
      * which would be expensive). */
     pub lowpri_errors: Vec<(Pos, String)>,
 
-    pub source_text: &'a SourceText<'a>,
+    pub indexed_source_text: &'a IndexedSourceText<'a>,
 }
 
 impl<'a> Env<'a> {
@@ -107,7 +117,7 @@ impl<'a> Env<'a> {
     }
 
     fn fi_mode(&self) -> file_info::Mode {
-        self.fi_mode.clone()
+        self.fi_mode
     }
 
     fn should_surface_error(&self) -> bool {
@@ -115,7 +125,15 @@ impl<'a> Env<'a> {
     }
 
     fn is_typechecker(&self) -> bool {
+        !self.codegen
+    }
+
+    fn codegen(&self) -> bool {
         self.codegen
+    }
+
+    fn source_text(&self) -> &SourceText<'a> {
+        self.indexed_source_text.source_text()
     }
 }
 
@@ -133,17 +151,26 @@ pub struct Result<'a> {
     comments: Vec<(Pos, Comment)>,
 }
 
+use parser_core_types::syntax::SyntaxVariant::*;
+
 pub trait Ast<'a, T, V>
 where
     T: LexablePositionedToken<'a>,
     Syntax<T, V>: PositionedSyntaxTrait,
 {
+    fn mode_annotation(mode: file_info::Mode) -> file_info::Mode {
+        match mode {
+            file_info::Mode::Mphp => file_info::Mode::Mdecl,
+            m => m,
+        }
+    }
+
     fn p_pos(node: &Syntax<T, V>, env: &Env) -> Pos {
-        //TODO:
         if env.ignore_pos {
             Pos::make_none()
         } else {
-            Pos::make_none()
+            node.position_exclusive(env.indexed_source_text)
+                .unwrap_or(Pos::make_none())
         }
     }
 
@@ -161,19 +188,123 @@ where
         ))
     }
 
+    fn mp_optional<S>(
+        p: &Fn(&Syntax<T, V>, &Env) -> ret!(S),
+        node: &Syntax<T, V>,
+        env: &Env,
+    ) -> ret!(Option<S>) {
+        match &node.syntax {
+            Missing => Ok(None),
+            _ => p(node, env).map(Some),
+        }
+    }
+
+    fn pos_name(node: &Syntax<T, V>, env: &Env) -> aast!(Sid) {
+        not_impl!()
+    }
+
+    fn as_list(node: &Syntax<T, V>) -> Vec<&Syntax<T, V>> {
+        fn strip_list_item<T1, V1>(node: &Syntax<T1, V1>) -> &Syntax<T1, V1> {
+            match node {
+                Syntax {
+                    syntax: ListItem(i),
+                    ..
+                } => &i.list_item,
+                x => x,
+            }
+        }
+
+        match node {
+            Syntax {
+                syntax: SyntaxList(synl),
+                ..
+            } => synl.iter().map(strip_list_item).collect(),
+            Syntax {
+                syntax: Missing, ..
+            } => vec![],
+            syn => vec![syn],
+        }
+    }
+
+    fn p_hint(node: &Syntax<T, V>, env: &Env) -> ret_aast!(Hint) {
+        not_impl!()
+    }
+
+    fn p_simple_initializer(node: &Syntax<T, V>, env: &Env) -> ret_aast!(Expr<,>) {
+        match &node.syntax {
+            SimpleInitializer(child) => Self::p_expr(&child.simple_initializer_value, env),
+            _ => Self::missing_syntax(None, "simple initializer", node, env),
+        }
+    }
+
+    fn p_expr(node: &Syntax<T, V>, env: &Env) -> ret_aast!(Expr<,>) {
+        not_impl!()
+    }
+
+    fn p_def(node: &Syntax<T, V>, env: &Env) -> ret!(Vec<aast!(Def<,>)>) {
+        match &node.syntax {
+            ConstDeclaration(child) => {
+                let ty = &child.const_type_specifier;
+                let decls = Self::as_list(&child.const_declarators);
+                let mut defs = vec![];
+                for decl in decls.iter() {
+                    let def = match &decl.syntax {
+                        ConstantDeclarator(child) => {
+                            let name = &child.constant_declarator_name;
+                            let init = &child.constant_declarator_initializer;
+                            let gconst = aast::Gconst {
+                                annotation: (),
+                                mode: Self::mode_annotation(env.fi_mode()),
+                                name: Self::pos_name(name, env),
+                                type_: Self::mp_optional(&Self::p_hint, ty, env)?,
+                                value: Self::p_simple_initializer(init, env)?,
+                                namespace: namespace_env_empty(&env.parser_options),
+                                span: Self::p_pos(node, env),
+                            };
+                            aast::Def::Constant(gconst)
+                        }
+                        _ => Self::missing_syntax(None, "constant declaration", decl, env)?,
+                    };
+                    defs.push(def);
+                }
+                Ok(defs)
+            }
+            InclusionDirective(child)
+                if env.fi_mode() != file_info::Mode::Mdecl
+                    && env.fi_mode() != file_info::Mode::Mphp
+                    || env.codegen() =>
+            {
+                let expr = Self::p_expr(&child.inclusion_expression, env)?;
+                Ok(vec![aast::Def::Stmt(aast::Stmt(
+                    Self::p_pos(node, env),
+                    Box::new(aast::Stmt_::Expr(expr)),
+                ))])
+            }
+            _ => not_impl!(),
+        }
+    }
+
     fn p_program(node: &Syntax<T, V>, mut env: &Env) -> ret_aast!(Program<,>) {
-        //TODO:
-        Ok(vec![])
+        let nodes = Self::as_list(node);
+        let mut acc = vec![];
+        for i in 0..nodes.len() {
+            match nodes[i] {
+                // TODO: handle Halt
+                Syntax {
+                    syntax: EndOfFile(_),
+                    ..
+                } => break,
+                node => acc.append(&mut Self::p_def(node, env)?),
+            }
+        }
+        // TODO: post process
+        Ok(acc)
     }
 
     fn p_script(node: &Syntax<T, V>, mut env: &Env) -> ret_aast!(Program<,>) {
-        //TODO:
         match &node.syntax {
-            SyntaxVariant::Script(children) => Self::p_program(&children.script_declarations, env),
-            _ => Err(Error::LowererInvariantFailure(
-                String::from(""),
-                String::from(""),
-            )),
+            Script(children) => Self::p_program(&children.script_declarations, env),
+            _ => Self::missing_syntax(None, "script", node, env),
         }
     }
 
@@ -181,16 +312,34 @@ where
         mut env: &Env<'a>,
         script: &Syntax<T, V>,
         comments: Vec<(Pos, Comment)>,
-    ) -> Result<'a> {
-        //TODO:
-        let ast = vec![];
-        Result {
+    ) -> ::std::result::Result<Result<'a>, String> {
+        let ast_result = Self::p_script(script, env);
+        // TODO: handle error
+        let ast = match ast_result {
+            Ok(ast) => ast,
+            // TODO: add msg
+            Err(_) => return Err(String::from("ERROR")),
+        };
+        Ok(Result {
             fi_mode: env.fi_mode(),
             is_hh_file: env.is_hh_file(),
             ast,
-            content: env.source_text.text(),
+            content: env.source_text().text(),
             file: env.file.clone(),
             comments,
-        }
+        })
+    }
+}
+
+// Move to namespace_env.rs
+fn namespace_env_empty(parser_options: &ParserOptions) -> NamespaceEnv {
+    NamespaceEnv {
+        ns_uses: Map::empty(),
+        class_uses: Map::empty(),
+        fun_uses: Map::empty(),
+        const_uses: Map::empty(),
+        name: None,
+        // TODO: avoid clone
+        popt: parser_options.clone(),
     }
 }

@@ -8,6 +8,7 @@ use crate::source_text::SourceText;
 use line_break_map::LineBreakMap;
 use oxidized::pos::Pos;
 
+#[derive(Debug)]
 pub struct IndexedSourceText<'a> {
     source_text: &'a SourceText<'a>,
     offset_map: LineBreakMap,

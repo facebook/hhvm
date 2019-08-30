@@ -380,6 +380,8 @@ let load config_filename options =
       ?po_disable_unset_class_const:
         (bool_opt "disable_unset_class_const" config)
       ~po_parser_errors_only:(ServerArgs.ai_mode options <> None)
+      ?tco_check_attribute_locations:
+        (bool_opt "check_attribute_locations" config)
       ()
   in
   Errors.ignored_fixme_codes := GlobalOptions.ignored_fixme_codes global_opts;

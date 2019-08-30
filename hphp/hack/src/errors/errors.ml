@@ -4213,12 +4213,21 @@ let wrong_expression_kind_attribute
     Printf.sprintf
       "The attribute's class is defined here. To be available for use on %s, the %s class must implement %s."
       expr_kind
-      (String_utils.string_after attr_class_name 1)
-      (String_utils.string_after intf_name 1)
+      (Utils.strip_ns attr_class_name)
+      (Utils.strip_ns intf_name)
   in
   add_list
     (Typing.err_code Typing.WrongExpressionKindAttribute)
     [(pos, msg1); (attr_class_pos, msg2)]
+
+let wrong_expression_kind_builtin_attribute expr_kind pos attr =
+  let msg1 =
+    Printf.sprintf
+      "The %s attribute cannot be used on %s."
+      (Utils.strip_ns attr)
+      expr_kind
+  in
+  add_list (Typing.err_code Typing.WrongExpressionKindAttribute) [(pos, msg1)]
 
 let cannot_return_borrowed_value_as_immutable fun_pos value_pos =
   add_list

@@ -108,6 +108,7 @@ type t = {
   po_abstract_static_props: bool;
   po_disable_unset_class_const: bool;
   po_parser_errors_only: bool;
+  tco_check_attribute_locations: bool;
 }
 [@@deriving show]
 
@@ -259,6 +260,7 @@ let default =
     po_abstract_static_props = false;
     po_disable_unset_class_const = false;
     po_parser_errors_only = false;
+    tco_check_attribute_locations = false;
   }
 
 let make
@@ -344,6 +346,7 @@ let make
     ?(po_abstract_static_props = default.po_abstract_static_props)
     ?(po_disable_unset_class_const = default.po_disable_unset_class_const)
     ?(po_parser_errors_only = default.po_parser_errors_only)
+    ?(tco_check_attribute_locations = default.tco_check_attribute_locations)
     () =
   {
     tco_safe_array;
@@ -415,6 +418,7 @@ let make
     po_abstract_static_props;
     po_disable_unset_class_const;
     po_parser_errors_only;
+    tco_check_attribute_locations;
   }
 
 let tco_safe_array t = t.tco_safe_array
@@ -564,6 +568,8 @@ let po_disallow_silence t = t.po_disallow_silence
 let po_abstract_static_props t = t.po_abstract_static_props
 
 let po_disable_unset_class_const t = t.po_disable_unset_class_const
+
+let tco_check_attribute_locations t = t.tco_check_attribute_locations
 
 let setup_pocket_universes env enabled =
   let exp_features = env.tco_experimental_features in

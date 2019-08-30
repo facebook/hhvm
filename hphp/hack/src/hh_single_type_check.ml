@@ -534,6 +534,7 @@ let parse_options () =
       ~po_disallow_silence:!disallow_silence
       ~po_abstract_static_props:!abstract_static_props
       ~po_disable_unset_class_const:!disable_unset_class_const
+      ~tco_check_attribute_locations:true
       ()
   in
   let tcopt =

@@ -1,0 +1,2 @@
+File "entry_point_locations.php", line 4, characters 3-14:
+The __EntryPoint attribute cannot be used on a class. (Typing[4231])

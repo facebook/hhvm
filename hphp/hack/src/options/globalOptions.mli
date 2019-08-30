@@ -256,6 +256,7 @@ type t = {
   (* Ignore all errors except those that can influence the shape of syntax tree
    * (skipping post parse error checks) *)
   po_parser_errors_only: bool;
+  tco_check_attribute_locations: bool;
 }
 [@@deriving show]
 
@@ -328,6 +329,7 @@ val make :
   ?po_abstract_static_props:bool ->
   ?po_disable_unset_class_const:bool ->
   ?po_parser_errors_only:bool ->
+  ?tco_check_attribute_locations:bool ->
   unit ->
   t
 
@@ -500,3 +502,5 @@ val po_disable_unset_class_const : t -> bool
 val set_infer_missing : t -> InferMissing.t -> t
 
 val po_parser_errors_only : t -> bool
+
+val tco_check_attribute_locations : t -> bool

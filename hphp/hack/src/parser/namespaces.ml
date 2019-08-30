@@ -269,7 +269,7 @@ let elaborate_id_impl nsenv kind id =
   | None ->
     let fq_id =
       let unaliased_id = aliased_to_fully_qualified_id
-        (ParserOptions.auto_namespace_map nsenv.ns_popt) id in
+        nsenv.ns_auto_ns_map id in
       if unaliased_id <> id then
         "\\" ^ unaliased_id
       else
@@ -278,7 +278,7 @@ let elaborate_id_impl nsenv kind id =
           elaborate_into_current_ns nsenv id
         | Some (typechecker_ns, compiler_ns) ->
           let ns =
-            if ParserOptions.codegen nsenv.ns_popt
+            if nsenv.ns_is_codegen
             then compiler_ns
             else typechecker_ns
           in
@@ -429,7 +429,7 @@ module ElaborateDefs = struct
 end
 
 let elaborate_toplevel_defs popt ast  =
-  ElaborateDefs.program (Namespace_env.empty popt) ast
+  ElaborateDefs.program (Namespace_env.empty_from_popt popt) ast
 
 let elaborate_def nsenv def =
   ElaborateDefs.def nsenv def
@@ -553,4 +553,4 @@ module ElaborateDefsNast = struct
 end
 
 let elaborate_toplevel_defs_nast popt ast  =
-  ElaborateDefsNast.program (Namespace_env.empty popt) ast
+  ElaborateDefsNast.program (Namespace_env.empty_from_popt popt) ast

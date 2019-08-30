@@ -87,7 +87,7 @@ let empty =
   {
     env_pipe_var = None;
     env_scope = Ast_scope.Scope.toplevel;
-    env_namespace = Namespace_env.empty_with_default_popt;
+    env_namespace = Namespace_env.empty_with_default;
     env_needs_local_this = false;
     env_jump_targets = Jump_targets.empty;
     env_in_try = false;

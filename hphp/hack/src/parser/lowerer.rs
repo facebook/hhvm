@@ -109,6 +109,7 @@ pub struct Env<'a> {
     pub lowpri_errors: Vec<(Pos, String)>,
 
     pub indexed_source_text: &'a IndexedSourceText<'a>,
+    pub auto_ns_map: &'a [(String, String)],
 }
 
 impl<'a> Env<'a> {
@@ -158,6 +159,10 @@ where
     T: LexablePositionedToken<'a>,
     Syntax<T, V>: PositionedSyntaxTrait,
 {
+    fn make_empty_ns_env(env: &Env) -> NamespaceEnv {
+        NamespaceEnv::empty(Vec::from(env.auto_ns_map), env.codegen())
+    }
+
     fn mode_annotation(mode: file_info::Mode) -> file_info::Mode {
         match mode {
             file_info::Mode::Mphp => file_info::Mode::Mdecl,
@@ -258,7 +263,7 @@ where
                                 name: Self::pos_name(name, env),
                                 type_: Self::mp_optional(&Self::p_hint, ty, env)?,
                                 value: Self::p_simple_initializer(init, env)?,
-                                namespace: namespace_env_empty(&env.parser_options),
+                                namespace: Self::make_empty_ns_env(env),
                                 span: Self::p_pos(node, env),
                             };
                             aast::Def::Constant(gconst)
@@ -328,18 +333,5 @@ where
             file: env.file.clone(),
             comments,
         })
-    }
-}
-
-// Move to namespace_env.rs
-fn namespace_env_empty(parser_options: &ParserOptions) -> NamespaceEnv {
-    NamespaceEnv {
-        ns_uses: Map::empty(),
-        class_uses: Map::empty(),
-        fun_uses: Map::empty(),
-        const_uses: Map::empty(),
-        name: None,
-        // TODO: avoid clone
-        popt: parser_options.clone(),
     }
 }

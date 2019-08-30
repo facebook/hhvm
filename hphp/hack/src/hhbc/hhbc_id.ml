@@ -29,7 +29,9 @@ module Class = struct
   let elaborate_id ns ((_, n) as id) =
     let ns =
       if SU.Xhp.is_xhp n then
-        Namespace_env.empty ns.Namespace_env.ns_popt
+        Namespace_env.empty
+          ns.Namespace_env.ns_auto_ns_map
+          ns.Namespace_env.ns_is_codegen
       else
         ns
     in

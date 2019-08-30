@@ -309,7 +309,7 @@ end = struct
       class_consts = Caml.Hashtbl.create 0;
       class_props = Caml.Hashtbl.create 0;
       droot = Typing_deps.Dep.Fun "";
-      namespace = Namespace_env.empty_with_default_popt;
+      namespace = Namespace_env.empty_with_default;
     }
 
   let make_top_level_env () =
@@ -3162,7 +3162,7 @@ module Make (GetLocals : GetLocals) = struct
         cstrs
         nc.N.c_mode
         (nc.N.c_name, nc.N.c_kind)
-        Namespace_env.empty_with_default_popt
+        Namespace_env.empty_with_default
         (Attributes.mem
            SN.UserAttributes.uaProbabilisticModel
            nc.N.c_user_attributes)

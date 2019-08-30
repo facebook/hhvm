@@ -125,7 +125,6 @@ let type_declaration name td =
     let derive_attr =
       List.fold derives_filters ~init:(derived_traits @ init_derives) ~f:filter
       |> List.sort ~compare:(fun (_, t1) (_, t2) -> String.compare t1 t2)
-      |> List.sort ~compare:(fun (_, t1) (_, t2) -> String.compare t1 t2)
       |> List.map ~f:(fun (m, trait) ->
              Option.iter m ~f:(fun m -> add_extern_use (m ^ "::" ^ trait));
              trait)

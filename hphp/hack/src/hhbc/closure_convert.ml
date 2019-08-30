@@ -152,7 +152,7 @@ let initial_state popt =
     hoisted_functions = [];
     named_hoisted_functions = SMap.empty;
     inout_wrappers = [];
-    namespace = Namespace_env.empty popt;
+    namespace = Namespace_env.empty_from_popt popt;
     explicit_use_set = SSet.empty;
     closure_namespaces = SMap.empty;
     closure_enclosing_classes = SMap.empty;
@@ -608,7 +608,7 @@ let make_closure
       c_attributes = [];
       c_xhp_children = [];
       c_xhp_attrs = [];
-      c_namespace = Namespace_env.empty_with_default_popt;
+      c_namespace = Namespace_env.empty_with_default;
       c_enum = None;
       c_doc_comment = None;
       c_pu_enums = [];
@@ -814,7 +814,7 @@ let convert_meth_caller_to_func_ptr env st ann pc cls pf func =
         f_user_attributes = [{ ua_name = (p, "__MethCaller"); ua_params = [] }];
         f_file_attributes = [];
         f_external = false;
-        f_namespace = Namespace_env.empty_with_default_popt;
+        f_namespace = Namespace_env.empty_with_default;
         f_doc_comment = None;
         f_static = false;
       }

@@ -981,7 +981,7 @@ and string_of_hint ~ns h =
   let h =
     Emit_type_hint.fmt_hint
       ~tparams:[]
-      ~namespace:Namespace_env.empty_with_default_popt
+      ~namespace:Namespace_env.empty_with_default
       h
   in
   let h =

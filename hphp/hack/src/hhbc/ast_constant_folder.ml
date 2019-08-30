@@ -520,7 +520,7 @@ let folder_visitor =
 let fold_expr ns e = folder_visitor#on_expr ns e
 
 let fold_program p =
-  folder_visitor#on_program Namespace_env.empty_with_default_popt p
+  folder_visitor#on_program Namespace_env.empty_with_default p
 
 let literals_from_exprs_with_index ns exprs =
   try

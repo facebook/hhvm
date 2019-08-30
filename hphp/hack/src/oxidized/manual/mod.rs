@@ -11,6 +11,7 @@ pub mod i_set;
 pub mod infer_missing;
 pub mod local_id;
 pub mod map;
+pub mod namespace_env_impl;
 pub mod pos;
 pub mod relative_path;
 pub mod s_map;

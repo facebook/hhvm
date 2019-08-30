@@ -400,6 +400,8 @@ let runP : 'a parser -> node -> env -> 'a = fun pThing thing env ->
     in
     raise (Failure msg)
 
+let mk_empty_ns_env env = Namespace_env.empty_from_popt env.parser_options
+
 (* TODO: Cleanup this hopeless Noop mess *)
 let mk_noop pos : stmt list -> stmt list = function
   | [] -> [pos, Noop]
@@ -687,7 +689,7 @@ let fun_template yielding node suspension_kind env =
   ; f_user_attributes = []
   ; f_file_attributes = []
   ; f_fun_kind        = mk_fun_kind suspension_kind yielding
-  ; f_namespace       = Namespace_env.empty env.parser_options
+  ; f_namespace       = mk_empty_ns_env env
   ; f_span            = p
   ; f_doc_comment     = None
   ; f_static          = false
@@ -3053,7 +3055,7 @@ and pDef : def list parser = fun node env ->
         in
         List.concat @@ List.rev (aux [] (as_list elts))
       in
-      let c_namespace = Namespace_env.empty env.parser_options in
+      let c_namespace = mk_empty_ns_env env in
       let c_enum = None in
       let c_span = pPos node env in
       let c_kind =
@@ -3100,7 +3102,7 @@ and pDef : def list parser = fun node env ->
             ; cst_name      = pos_name name env
             ; cst_type      = mpOptional pHint ty env
             ; cst_value     = pSimpleInitializer init env
-            ; cst_namespace = Namespace_env.empty env.parser_options
+            ; cst_namespace = mk_empty_ns_env env
             ; cst_span      = pPos node env
             }
         | _ -> missing_syntax "constant declaration" decls env
@@ -3124,7 +3126,7 @@ and pDef : def list parser = fun node env ->
           mpOptional pTConstraint constr env
       ; t_user_attributes = List.concat @@
           List.map ~f:(fun x -> pUserAttribute x env) (as_list attr)
-      ; t_namespace       = Namespace_env.empty env.parser_options
+      ; t_namespace       = mk_empty_ns_env env
       ; t_mode            = mode_annotation env.fi_mode
       ; t_kind            =
         match token_kind kw with
@@ -3163,7 +3165,7 @@ and pDef : def list parser = fun node env ->
       ; c_implements      = []
       ; c_where_constraints   = []
       ; c_body            = couldMap enums env ~f:pEnumerator
-      ; c_namespace       = Namespace_env.empty env.parser_options
+      ; c_namespace       = mk_empty_ns_env env
       ; c_span            = pPos node env
       ; c_enum            = Some
         { e_base       = pHint base env
@@ -3210,7 +3212,7 @@ and pDef : def list parser = fun node env ->
       ; c_implements      = []
       ; c_where_constraints   = []
       ; c_body            = couldMap fields env ~f:pFields
-      ; c_namespace       = Namespace_env.empty env.parser_options
+      ; c_namespace       = mk_empty_ns_env env
       ; c_span            = pPos node env
       ; c_enum            = None
       ; c_doc_comment = doc_comment_opt
@@ -3250,7 +3252,7 @@ and pDef : def list parser = fun node env ->
   | FileAttributeSpecification _ ->
     [ FileAttributes
     { fa_user_attributes = pUserAttribute node env
-    ; fa_namespace = Namespace_env.empty env.parser_options
+    ; fa_namespace = mk_empty_ns_env env
     }]
   | _ when env.fi_mode = FileInfo.Mdecl || env.fi_mode = FileInfo.Mphp
         && not env.codegen -> []

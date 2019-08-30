@@ -15,7 +15,7 @@ let emit_main is_evaled debugger_modify_program popt (defs : Tast.program) =
   let (body, _is_generator, _is_pair_generator) =
     Emit_body.emit_body
       ~pos:Pos.none
-      ~namespace:(Namespace_env.empty popt)
+      ~namespace:(Namespace_env.empty_from_popt popt)
       ~is_closure_body:false
       ~is_memoize:false
       ~is_native:false

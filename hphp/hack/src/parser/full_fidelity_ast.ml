@@ -425,7 +425,7 @@ let mpYielding : ('a, ('a * bool)) metaparser = fun p node env ->
 let in_string l =
   l = InDoubleQuotedString || l = InBacktickedString
 
-  let pos_qualified_name node env =
+let pos_qualified_name node env =
   let aux p =
     match syntax p with
     | ListItem li -> (text li.list_item) ^ (text li.list_separator)

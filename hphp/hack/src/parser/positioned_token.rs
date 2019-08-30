@@ -7,7 +7,7 @@
 use std::hash::{Hash, Hasher};
 use std::rc::Rc;
 
-use crate::lexable_token::LexableToken;
+use crate::lexable_token::{LexablePositionedToken, LexableToken};
 use crate::positioned_trivia::PositionedTrivia;
 use crate::source_text::SourceText;
 use crate::token_kind::TokenKind;
@@ -165,3 +165,5 @@ impl PartialEq for PositionedToken {
     }
 }
 impl Eq for PositionedToken {}
+
+impl<'a> LexablePositionedToken<'a> for PositionedToken {}

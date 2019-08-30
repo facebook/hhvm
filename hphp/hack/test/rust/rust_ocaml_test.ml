@@ -35,6 +35,7 @@ type parser =
   | COROUTINE
   | DECL_MODE
   | PPL_REWRITER
+  | LOWERER
 
 type mode =
   | RUST
@@ -257,15 +258,6 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
             !crashed;
         if !failed && not args.keep_going then exit 1
 
-      let test_multi args ~ocaml_env ~rust_env path =
-        (* Some typechecked files embed multiple files; they're invalid without a split *)
-        Relative_path.(create Dummy path)
-        |> Multifile.file_to_files
-        |> Relative_path.Map.iter ~f:(test args ~ocaml_env ~rust_env)
-
-      let test_batch args ~ocaml_env ~rust_env paths =
-        List.iter paths ~f:(test_multi args ~ocaml_env ~rust_env)
-
       (* WithTreeBuilder *)
     end
 
@@ -282,6 +274,27 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
 end
 
 (* WithSyntax *)
+
+module type SingleRunner_S = sig
+  val test :
+    args ->
+    ocaml_env:Env.t ->
+    rust_env:Env.t ->
+    Relative_path.t ->
+    string ->
+    unit
+end
+
+module Runner (SingleRunner : SingleRunner_S) = struct
+  let test_multi args ~ocaml_env ~rust_env path =
+    (* Some typechecked files embed multiple files; they're invalid without a split *)
+    Relative_path.(create Dummy path)
+    |> Multifile.file_to_files
+    |> Relative_path.Map.iter ~f:(SingleRunner.test args ~ocaml_env ~rust_env)
+
+  let test_batch args ~ocaml_env ~rust_env paths =
+    List.iter paths ~f:(test_multi args ~ocaml_env ~rust_env)
+end
 
 let get_files_in_path ~args path =
   let files = Find.find [Path.make path] in
@@ -344,6 +357,7 @@ let parse_args () =
         "" );
       ("--ppl-rewriter", Arg.Unit (fun () -> parser := PPL_REWRITER), "");
       ("--experimental", Arg.Set is_experimental, "");
+      ("--lower", Arg.Unit (fun () -> parser := LOWERER), "");
       ("--codegen", Arg.Set codegen, "");
       ("--hhvm-compat-mode", Arg.Set hhvm_compat_mode, "");
       ("--php5-compat-mode", Arg.Set php5_compat_mode, "");
@@ -373,22 +387,24 @@ let parse_args () =
     dir = !dir;
   }
 
-module MinimalTest = WithSyntax (MinimalSyntax)
-module PositionedTest = WithSyntax (PositionedSyntax)
+module MinimalTest = Runner (WithSyntax (MinimalSyntax))
+module PositionedTest_ = WithSyntax (PositionedSyntax)
+module PositionedTest = Runner (PositionedTest_)
 module CoroutineTest_ = WithSyntax (PositionedSyntax)
 module CoroutineSC = Coroutine_smart_constructor.WithSyntax (PositionedSyntax)
-module CoroutineTest = CoroutineTest_.WithSmartConstructors (CoroutineSC)
+module CoroutineTest =
+  Runner (CoroutineTest_.WithSmartConstructors (CoroutineSC))
 module DeclModeTest_ = WithSyntax (PositionedSyntax)
 module DeclModeSC = DeclModeSmartConstructors.WithSyntax (PositionedSyntax)
-module DeclModeTest = DeclModeTest_.WithSmartConstructors (DeclModeSC)
+module DeclModeTest = Runner (DeclModeTest_.WithSmartConstructors (DeclModeSC))
 module EditablePositionedSyntaxSC =
   SyntaxSmartConstructors.WithSyntax (EditablePositionedSyntax)
-module PPLRewriterTest__ = WithSyntax (EditablePositionedSyntax)
-module PPLRewriterTest_ =
-  PPLRewriterTest__.WithSmartConstructors (EditablePositionedSyntaxSC)
+module PPLRewriterTest___ = WithSyntax (EditablePositionedSyntax)
+module PPLRewriterTest__ =
+  PPLRewriterTest___.WithSmartConstructors (EditablePositionedSyntaxSC)
 
-module PPLRewriterTest = PPLRewriterTest_.WithTreeBuilder (struct
-  module EditableSyntaxTree = PPLRewriterTest_.SyntaxTree
+module PPLRewriterTest_ = PPLRewriterTest__.WithTreeBuilder (struct
+  module EditableSyntaxTree = PPLRewriterTest__.SyntaxTree
 
   type t = EditableSyntaxTree.t
 
@@ -397,13 +413,58 @@ module PPLRewriterTest = PPLRewriterTest_.WithTreeBuilder (struct
       if Env.rust env then
         Ppl_class_rewriter_ffi.parse_and_rewrite_ppl_classes source_text
       else
-        PositionedTest.SyntaxTree.(make source_text |> root)
+        PositionedTest_.SyntaxTree.(make source_text |> root)
         |> EditablePositionedSyntax.from_positioned_syntax
         |> Ppl_class_rewriter.rewrite_ppl_classes
     in
     (* We don't care about errors / mode / state here *)
     EditableSyntaxTree.build source_text root [] None ()
 end)
+
+module PPLRewriterTest = Runner (PPLRewriterTest_)
+
+module LowererTest_ = struct
+  module OcamlLowerer = Full_fidelity_ast
+  module RustLowerer = Lowerer_ffi
+
+  type r =
+    | Tree of (Ast_defs.pos, unit, unit, unit) Aast.program
+    | Crash
+
+  let build_ocaml_tree _env file source_text =
+    let i x = x in
+    let env = OcamlLowerer.make_env file ~keep_errors:false in
+    try
+      let ast = OcamlLowerer.from_text env source_text in
+      let aast = Ast_to_aast.convert_program i () () () ast.OcamlLowerer.ast in
+      Tree aast
+    with _ -> Crash
+
+  let build_rust_tree _env file source_text =
+    let env = OcamlLowerer.make_env file in
+    try
+      let result = RustLowerer.from_text_rust env source_text in
+      match result with
+      | RustLowerer.Ok aast -> Tree aast.RustLowerer.ast
+      | RustLowerer.Err _ -> Crash
+    with _ -> Crash
+
+  let test _args ~ocaml_env ~rust_env file contents =
+    let source_text = SourceText.make file contents in
+    let path = Relative_path.to_absolute file in
+    let ocaml_tree = build_ocaml_tree ocaml_env file source_text in
+    let rust_tree = build_rust_tree rust_env file source_text in
+    (match (ocaml_tree, rust_tree) with
+    | (Tree ot, Tree rt) when ot = rt -> Printf.printf "EQUAL: "
+    | (Tree _, Tree _) -> Printf.printf "NOT_EQUAL: "
+    | (Tree _, Crash) -> Printf.printf "OCAML PASS: RUST_CRASH: "
+    | (Crash, Tree _) -> Printf.printf "OCAML_CRASH: RUST_PASS: "
+    | (Crash, Crash) -> Printf.printf "OCAML_CRASH: RUST_CRASH: ");
+    Printf.printf "%s\n" path;
+    flush stdout
+end
+
+module LowererTest = Runner (LowererTest_)
 
 (*
 Tool comparing outputs of Rust and OCaml parsers. Example usage:
@@ -439,6 +500,7 @@ let () =
     | COROUTINE -> CoroutineTest.test_batch args ~ocaml_env ~rust_env
     | DECL_MODE -> DeclModeTest.test_batch args ~ocaml_env ~rust_env
     | PPL_REWRITER -> PPLRewriterTest.test_batch args ~ocaml_env ~rust_env
+    | LOWERER -> LowererTest.test_batch args ~ocaml_env ~rust_env
   in
   let (user, runs, _mem) =
     Profile.profile_longer_than (fun () -> f files) ~retry:false 0.

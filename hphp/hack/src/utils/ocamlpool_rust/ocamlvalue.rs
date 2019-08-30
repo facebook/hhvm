@@ -12,6 +12,7 @@ use ocaml::core::mlvalues::{empty_list, Value, UNIT};
 use std::borrow::Cow;
 use std::path::PathBuf;
 use std::rc::Rc;
+use std::result::Result;
 
 const DOUBLE_TAG: u8 = 253;
 
@@ -143,5 +144,14 @@ impl<T: Ocamlvalue> Ocamlvalue for Rc<T> {
 impl Ocamlvalue for PathBuf {
     fn ocamlvalue(&self) -> Value {
         self.to_str().unwrap().ocamlvalue()
+    }
+}
+
+impl<T: Ocamlvalue, E: Ocamlvalue> Ocamlvalue for Result<T, E> {
+    fn ocamlvalue(&self) -> Value {
+        match self {
+            Result::Ok(t) => caml_block(0, &[t.ocamlvalue()]),
+            Result::Err(e) => caml_block(1, &[e.ocamlvalue()]),
+        }
     }
 }

@@ -4,6 +4,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use parser_rust as parser;
+
 use oxidized::map::Map;
 use oxidized::namespace_env::Env as NamespaceEnv;
 use oxidized::parser_options::ParserOptions;
@@ -19,8 +21,9 @@ use parser::positioned_syntax::PositionedSyntaxTrait;
 use parser::source_text::SourceText;
 use parser_core_types::syntax::*;
 
-use parser_rust as parser;
+use ocamlvalue_macro::Ocamlvalue;
 
+use std::collections::HashSet;
 use std::result::Result::{Err, Ok};
 
 macro_rules! not_impl {
@@ -64,9 +67,7 @@ impl LiftedAwaits {
 
 #[derive(Debug, Clone)]
 pub struct Env<'a> {
-    is_hh_file: bool,
     codegen: bool,
-    php5_compat_mode: bool,
     elaborate_namespaces: bool,
     include_line_comments: bool,
     keep_errors: bool,
@@ -77,15 +78,10 @@ pub struct Env<'a> {
     show_all_errors: bool,
     lower_coroutines: bool,
     fail_open: bool,
-    parser_options: &'a ParserOptions,
-    fi_mode: file_info::Mode,
-    file: RelativePath,
-    hacksperimental: bool,
+    file_mode: file_info::Mode,
     top_level_statements: bool, /* Whether we are (still) considering TLSs*/
-    /* Changing parts; should disappear in future. `mutable` saves allocations. */
-    pub ignore_pos: bool,
-    pub max_depth: isize, /* Filthy hack around OCaml bug */
-    pub saw_yield: bool,  /* Information flowing back up */
+
+    pub saw_yield: bool, /* Information flowing back up */
     pub lifted_awaits: Option<LiftedAwaits>,
     pub tmp_var_counter: isize,
     /* Whether we've seen COMPILER_HALT_OFFSET. The value of COMPILER_HALT_OFFSET
@@ -96,8 +92,7 @@ pub struct Env<'a> {
                 HALT_COMPILER is at x bytes offset in the file.
     */
     pub saw_compiler_halt_offset: Option<isize>,
-    pub recursion_depth: isize,
-    cls_reified_generics: SSet,
+    pub cls_reified_generics: HashSet<String>,
     pub in_static_method: bool,
     pub parent_maybe_reified: bool,
     /* This provides a generic mechanism to delay raising parsing errors;
@@ -113,12 +108,33 @@ pub struct Env<'a> {
 }
 
 impl<'a> Env<'a> {
-    fn is_hh_file(&self) -> bool {
-        self.is_hh_file
+    pub fn make(indexed_source_text: &'a IndexedSourceText<'a>) -> Self {
+        Env {
+            codegen: false,
+            elaborate_namespaces: true,
+            include_line_comments: false,
+            keep_errors: false,
+            quick_mode: false,
+            show_all_errors: false,
+            lower_coroutines: true,
+            fail_open: true,
+            file_mode: file_info::Mode::Mpartial,
+            top_level_statements: false,
+            saw_yield: false,
+            lifted_awaits: None,
+            tmp_var_counter: 0,
+            saw_compiler_halt_offset: None,
+            cls_reified_generics: HashSet::new(),
+            in_static_method: false,
+            parent_maybe_reified: false,
+            lowpri_errors: vec![],
+            indexed_source_text,
+            auto_ns_map: &[],
+        }
     }
 
-    fn fi_mode(&self) -> file_info::Mode {
-        self.fi_mode
+    fn file_mode(&self) -> file_info::Mode {
+        self.file_mode
     }
 
     fn should_surface_error(&self) -> bool {
@@ -136,6 +152,10 @@ impl<'a> Env<'a> {
     fn source_text(&self) -> &SourceText<'a> {
         self.indexed_source_text.source_text()
     }
+
+    fn fail_open(&self) -> bool {
+        self.fail_open
+    }
 }
 
 pub enum Error<Node> {
@@ -143,18 +163,15 @@ pub enum Error<Node> {
     LowererInvariantFailure(String, String),
 }
 
-pub struct Result<'a> {
-    fi_mode: file_info::Mode,
-    is_hh_file: bool,
+#[derive(Ocamlvalue)]
+pub struct Result {
     ast: aast!(Program<,>),
-    content: &'a [u8],
-    file: RelativePath,
     comments: Vec<(Pos, Comment)>,
 }
 
 use parser_core_types::syntax::SyntaxVariant::*;
 
-pub trait Ast<'a, T, V>
+pub trait Lowerer<'a, T, V>
 where
     T: LexablePositionedToken<'a>,
     Syntax<T, V>: PositionedSyntaxTrait,
@@ -171,12 +188,8 @@ where
     }
 
     fn p_pos(node: &Syntax<T, V>, env: &Env) -> Pos {
-        if env.ignore_pos {
-            Pos::make_none()
-        } else {
-            node.position_exclusive(env.indexed_source_text)
-                .unwrap_or(Pos::make_none())
-        }
+        node.position_exclusive(env.indexed_source_text)
+            .unwrap_or(Pos::make_none())
     }
 
     fn missing_syntax<N>(
@@ -259,7 +272,7 @@ where
                             let init = &child.constant_declarator_initializer;
                             let gconst = aast::Gconst {
                                 annotation: (),
-                                mode: Self::mode_annotation(env.fi_mode()),
+                                mode: Self::mode_annotation(env.file_mode()),
                                 name: Self::pos_name(name, env),
                                 type_: Self::mp_optional(&Self::p_hint, ty, env)?,
                                 value: Self::p_simple_initializer(init, env)?,
@@ -275,8 +288,8 @@ where
                 Ok(defs)
             }
             InclusionDirective(child)
-                if env.fi_mode() != file_info::Mode::Mdecl
-                    && env.fi_mode() != file_info::Mode::Mphp
+                if env.file_mode() != file_info::Mode::Mdecl
+                    && env.file_mode() != file_info::Mode::Mphp
                     || env.codegen() =>
             {
                 let expr = Self::p_expr(&child.inclusion_expression, env)?;
@@ -313,11 +326,8 @@ where
         }
     }
 
-    fn lower(
-        mut env: &Env<'a>,
-        script: &Syntax<T, V>,
-        comments: Vec<(Pos, Comment)>,
-    ) -> ::std::result::Result<Result<'a>, String> {
+    fn lower(mut env: &Env<'a>, script: &Syntax<T, V>) -> ::std::result::Result<Result, String> {
+        let comments = vec![];
         let ast_result = Self::p_script(script, env);
         // TODO: handle error
         let ast = match ast_result {
@@ -325,13 +335,6 @@ where
             // TODO: add msg
             Err(_) => return Err(String::from("ERROR")),
         };
-        Ok(Result {
-            fi_mode: env.fi_mode(),
-            is_hh_file: env.is_hh_file(),
-            ast,
-            content: env.source_text().text(),
-            file: env.file.clone(),
-            comments,
-        })
+        Ok(Result { ast, comments })
     }
 }

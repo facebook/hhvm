@@ -6,4 +6,7 @@
 #![allow(unused_variables)]
 #![allow(dead_code)]
 
-pub mod lowerer;
+mod lowerer;
+
+pub use lowerer::Env;
+pub use lowerer::Lowerer;

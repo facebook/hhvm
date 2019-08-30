@@ -1968,6 +1968,7 @@ function can_run_server_test($test) {
     !find_test_ext($test, 'opts') &&
     !is_file("$test.ini") &&
     !is_file("$test.onlyrepo") &&
+    !is_file("$test.onlyjumpstart") &&
     !is_file("$test.use.for.ini.migration.testing.only.hdf") &&
     strpos($test, 'quick/debugger') === false &&
     strpos($test, 'quick/xenon') === false &&
@@ -2357,6 +2358,10 @@ function run_test($options, $test) {
     if (preg_grep('/-m debug/', (array)$hhvm) || file_exists($test.'.norepo')) {
       return 'skip-norepo';
     }
+    if (file_exists($test.'.onlyjumpstart') &&
+       (!isset($options['jit-serialize']) || $options['jit-serialize'] < 1)) {
+      return 'skip-onlyjumpstart';
+    }
 
     $hphp_hhvm_repo = "$test.repo/hhvm.hhbc";
     $hhbbc_hhvm_repo = "$test.repo/hhvm.hhbbc";
@@ -2422,8 +2427,8 @@ function run_test($options, $test) {
     return run_one_config($options, $test, $hhvm, $hhvm_env);
   }
 
-  if (file_exists($test.'.onlyrepo')) {
-    return 'skip-onlyrepo';
+  if (file_exists($test.'.onlyrepo') || file_exists($test.'.onlyjumpstart')) {
+    return 'skip-onlyrepo or skip-onlyjumpstart';
   }
 
   if (isset($options['hhas-round-trip'])) {

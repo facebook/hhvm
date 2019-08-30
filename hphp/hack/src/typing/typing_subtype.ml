@@ -2209,6 +2209,8 @@ let subtype_method
     on_error
     env in
 
+  let env, res = prop_to_env env res on_error in
+  let env = Env.add_subtype_prop env res in
   process_simplify_subtype_result res;
 
   (* This is (3) above *)

@@ -260,7 +260,7 @@ let check_override env ~check_member_unique member_name mem_source ?(ignore_fun_
             ((Cls.name class_))
         | _ -> () end;
         (* these unify errors are collected into errorl *)
-        ignore(subtype_funs env r2 ft2 r1 ft1 Errors.unify_error) in
+        subtype_funs env r2 ft2 r1 ft1 Errors.unify_error in
       check_ambiguous_inheritance check (r_parent, ft_parent) (r_child, ft_child)
         pos class_ class_elt.ce_origin
     | fty_parent, _ ->
@@ -271,10 +271,11 @@ let check_override env ~check_member_unique member_name mem_source ?(ignore_fun_
         | _, Tany _ ->
           Errors.decl_override_missing_hint pos
         | _, _ -> ());
-      Typing_ops.unify_decl pos Typing_reason.URnone env fty_parent fty_child
+      Typing_ops.unify_decl pos Typing_reason.URnone env fty_parent fty_child; env
     )
     (fun errorl ->
-      Errors.bad_method_override pos member_name errorl)
+      Errors.bad_method_override pos member_name errorl; env)
+    else env
 
 let check_const_override env
     const_name parent_class class_ parent_class_const class_const =
@@ -346,28 +347,30 @@ let check_members check_private env removals (parent_class, psubst, parent_ty)
       (* defined from parent class, nothing to check *)
       && class_elt.ce_origin <> parent_class_elt.ce_origin
     | _ -> false in
-  Sequence.iter parent_members begin fun (member_name, parent_class_elt) ->
-    (* for this particular member, check to see if the parent considered
-    is a trait that was removed, otherwise subtype with the declaration in
-    that parent *)
-    let removed = match String.Map.find removals member_name with
-    | Some traits -> List.mem traits parent_class_elt.ce_origin ~equal:String.equal
-    | None -> false in
-    if not removed then
-    match get_member member_name with
-    | Some class_elt ->
-      let parent_class_elt = Inst.instantiate_ce psubst parent_class_elt in
-      let class_elt = Inst.instantiate_ce subst class_elt in
-      let check_member_unique = should_check_member_unique class_elt parent_class_elt in
-      if parent_class_elt.ce_origin <> class_elt.ce_origin then
-        Typing_deps.add_idep
-          (Dep.Class (Cls.name class_))
-          (dep parent_class_elt.ce_origin member_name);
-      check_override ~check_member_unique env member_name mem_source
-        (parent_class, parent_ty) (class_, class_ty)
-        parent_class_elt class_elt
-    | None -> ()
-  end
+  Sequence.fold ~init:env parent_members
+    ~f:(fun env (member_name, parent_class_elt) ->
+      (* for this particular member, check to see if the parent considered
+      is a trait that was removed, otherwise subtype with the declaration in
+      that parent *)
+      let removed = match String.Map.find removals member_name with
+      | Some traits -> List.mem traits parent_class_elt.ce_origin ~equal:String.equal
+      | None -> false in
+      if not removed then
+      match get_member member_name with
+      | Some class_elt ->
+        let parent_class_elt = Inst.instantiate_ce psubst parent_class_elt in
+        let class_elt = Inst.instantiate_ce subst class_elt in
+        let check_member_unique = should_check_member_unique class_elt parent_class_elt in
+        if parent_class_elt.ce_origin <> class_elt.ce_origin then
+          Typing_deps.add_idep
+            (Dep.Class (Cls.name class_))
+            (dep parent_class_elt.ce_origin member_name);
+        check_override ~check_member_unique env member_name mem_source
+          (parent_class, parent_ty) (class_, class_ty)
+          parent_class_elt class_elt
+      | None -> env
+      else env
+  )
 
 (*****************************************************************************)
 (* Before checking that a class implements an interface, we have to
@@ -435,12 +438,12 @@ let check_constructors env (parent_class, parent_ty) (class_, class_ty) psubst s
   if (Cls.kind parent_class) = Ast_defs.Cinterface || consistent
   then (
     match (fst (Cls.construct parent_class)), (fst (Cls.construct class_)) with
-      | Some parent_cstr, _  when parent_cstr.ce_synthesized -> ()
+      | Some parent_cstr, _  when parent_cstr.ce_synthesized -> env
       | Some parent_cstr, None ->
         let lazy (pos, _) = parent_cstr.ce_type in
-        Errors.missing_constructor (Reason.to_pos pos)
+        Errors.missing_constructor (Reason.to_pos pos); env
       | _, Some cstr when cstr.ce_override -> (* <<__UNSAFE_Construct>> *)
-        ()
+        env
       | Some parent_cstr, Some cstr ->
         let parent_cstr = Inst.instantiate_ce psubst parent_cstr in
         let cstr = Inst.instantiate_ce subst cstr in
@@ -461,14 +464,16 @@ let check_constructors env (parent_class, parent_ty) (class_, class_ty) psubst s
             (Dep.Cstr parent_cstr.ce_origin);
         check_override env ~check_member_unique:false "__construct" `FromMethod
           ~ignore_fun_return:true (parent_class, parent_ty) (class_, class_ty) parent_cstr cstr
-      | None, _ -> ()
+      | None, _ -> env
   ) else (
-    match fst (Cls.construct parent_class), fst (Cls.construct class_) with
+    begin match fst (Cls.construct parent_class), fst (Cls.construct class_) with
     | Some parent_cstr, _ when parent_cstr.ce_synthesized -> ()
     | Some parent_cstr, Some child_cstr ->
       check_final_method `FromMethod parent_cstr child_cstr;
       check_class_elt_visibility parent_cstr child_cstr
     | _, _ -> ()
+    end;
+    env
   )
 
 (* Checks if a child is compatible with the type constant of its parent.
@@ -597,15 +602,15 @@ let check_class_implements env removals (parent_class, parent_ty) (class_, class
   let subst = Inst.make_subst (Cls.tparams class_) tparaml in
   check_consts env parent_class class_ psubst subst;
   let memberl = make_all_members ~parent_class ~child_class:class_ in
-  check_constructors env (parent_class, parent_ty) (class_, class_ty) psubst subst;
+  let env = check_constructors env (parent_class, parent_ty) (class_, class_ty) psubst subst in
   let check_privates:bool = Cls.kind parent_class = Ast_defs.Ctrait in
   if not fully_known then () else
     List.iter memberl
       (check_members_implemented check_privates parent_pos pos);
-  List.iter memberl
-    (check_members check_privates env removals
-      (parent_class, psubst, parent_ty) (class_, subst, class_ty));
-  ()
+  List.fold ~init:env memberl
+    ~f:(fun env -> check_members check_privates env removals
+      (parent_class, psubst, parent_ty) (class_, subst, class_ty))
+
 
 (*****************************************************************************)
 (* The externally visible function *)
@@ -618,7 +623,7 @@ let check_implements env removals parent_type type_ =
   let parent_class = Env.get_class env (snd parent_name) in
   let class_ = Env.get_class env (snd name) in
   match parent_class, class_ with
-  | None, _ | _, None -> ()
+  | None, _ | _, None -> env
   | Some parent_class, Some class_ ->
       let parent_class =
         (Reason.to_pos parent_r), parent_class, parent_tparaml in
@@ -632,7 +637,7 @@ let check_implements env removals parent_type type_ =
               (fun () -> check_class_implements env removals (parent_class, parent_type) (class_, type_))
               (fun errorl ->
                 let name_pos, _ = name in
-                Errors.bad_enum_decl name_pos errorl)
+                Errors.bad_enum_decl name_pos errorl; env)
           else
             Errors.try_unless_error_in_different_file
               (Env.get_file env)

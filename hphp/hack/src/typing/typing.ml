@@ -6321,7 +6321,7 @@ and class_def_ env c tc =
     let _, trait, _ = Decl_utils.unwrap_class_hint m.mt_trait in
     name, trait) in
   let removals = String.Map.of_alist_fold alist ~init:[] ~f:(Fn.flip List.cons) in
-  List.iter impl (class_implements_type env c removals);
+  let env = List.fold ~init:env impl ~f:(fun env -> class_implements_type env c removals) in
   let env = List.fold c.c_method_redeclarations ~init:env ~f:(supertype_redeclared_method tc) in
   if (Cls.is_disposable tc)
     then List.iter (c.c_extends @ c.c_uses) (Typing_disposable.enforce_is_disposable env);
@@ -6524,8 +6524,7 @@ and class_implements_type env c1 removals ctype2 =
     end in
   let r = Reason.Rwitness (fst c1.c_name) in
   let ctype1 = r, Tapply (c1.c_name, params) in
-  Typing_extends.check_implements env removals ctype2 ctype1;
-  ()
+  Typing_extends.check_implements env removals ctype2 ctype1
 
 (* Type-check a property declaration, with optional initializer *)
 and class_var_def ~is_static env cv =
@@ -6602,12 +6601,12 @@ and supertype_redeclared_method tc env m =
   let trait_member_opt = Env.get_class env trait >>= (fun trait_tc ->
     get_method true env trait_tc trait_method) in
 
-  ignore (map2 trait_member_opt class_member_opt ~f:begin fun trait_member class_member ->
+ map2 trait_member_opt class_member_opt ~f:begin fun trait_member class_member ->
     match trait_member.ce_type, class_member.ce_type with
     | lazy (r_child, Tfun ft_child), lazy (r_parent, Tfun ft_parent) ->
       Errors.try_
       (fun () ->
-        ignore (Typing_subtype.(subtype_method
+        Typing_subtype.(subtype_method
           ~check_return:true
           ~extra_info:{ method_info = None; class_ty = None; parent_class_ty = None }
           env
@@ -6616,12 +6615,13 @@ and supertype_redeclared_method tc env m =
           r_parent
           ft_parent
           Errors.unify_error
-        ))
+        )
       ) (fun errorl ->
-          Errors.bad_method_override pos name errorl
+          Errors.bad_method_override pos name errorl; env
       )
-    | _ -> ()
-  end); env
+    | _ -> env
+  end
+  |> Option.value ~default:env
 
 and file_attributes env file_attrs =
   let uas = List.concat_map ~f:(fun fa -> fa.fa_user_attributes) file_attrs in

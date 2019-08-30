@@ -20,7 +20,7 @@ sig
   val errors : t -> Full_fidelity_syntax_error.t list
   val env : t -> Env.t
   val sc_state : t -> SCI.t
-  val parse_script : t -> t * SCI.r
+  val parse_script : t -> t * SCI.r * Rust_pointer.t option
   val parse_header_only : Env.t -> Full_fidelity_source_text.t -> SCI.r option
 end = struct
 module SCWithToken = SmartConstructorsWrappers.SyntaxKind(SCI)
@@ -118,10 +118,10 @@ let parse_header_only env text =
   | None -> None
 
 let rust_parse_script parser =
-  let sc_state, root, errors = SCI.rust_parse
+  let sc_state, root, errors, rust_tree = SCI.rust_parse
     (parser.lexer |> Lexer.source) parser.env
   in
-  { parser with errors; sc_state }, root
+  { parser with errors; sc_state }, root, rust_tree
 
 let parse_script parser =
   if Env.rust parser.env then rust_parse_script parser else
@@ -139,7 +139,7 @@ let parse_script parser =
   let context = DeclParser.context decl_parser in
   let env = DeclParser.env decl_parser in
   let sc_state = DeclParser.sc_state decl_parser in
-  { lexer; errors; context; env; sc_state }, SCWithToken.extract node
+  { lexer; errors; context; env; sc_state }, SCWithToken.extract node, None
 
 end (* WithSmartConstructors *)
 

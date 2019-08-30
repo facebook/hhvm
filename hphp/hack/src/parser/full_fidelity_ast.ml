@@ -3569,9 +3569,9 @@ let parse_text
     in
     if quick_mode then
       let parser = DeclModeParser.make env' source_text in
-      let (parser, root) = DeclModeParser.parse_script parser in
+      let (parser, root, rust_tree) = DeclModeParser.parse_script parser in
       let errors = DeclModeParser.errors parser in
-      PositionedSyntaxTree.create source_text root errors mode false
+      PositionedSyntaxTree.create source_text root rust_tree errors mode false
     else
       PositionedSyntaxTree.make ~env:env' source_text
   in

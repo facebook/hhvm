@@ -834,19 +834,24 @@ SYNTAX
   val rust_parse :
     Full_fidelity_source_text.t ->
     Full_fidelity_parser_env.t ->
-    unit * t * Full_fidelity_syntax_error.t list
+    unit * t * Full_fidelity_syntax_error.t list * Rust_pointer.t option
   val rust_parse_with_coroutine_sc :
     Full_fidelity_source_text.t ->
     Full_fidelity_parser_env.t ->
-    bool * t * Full_fidelity_syntax_error.t list
+    bool * t * Full_fidelity_syntax_error.t list * Rust_pointer.t option
   val rust_parse_with_decl_mode_sc :
     Full_fidelity_source_text.t ->
     Full_fidelity_parser_env.t ->
-    bool list * t * Full_fidelity_syntax_error.t list
+    bool list * t * Full_fidelity_syntax_error.t list * Rust_pointer.t option
   val rust_parse_with_verify_sc :
     Full_fidelity_source_text.t ->
     Full_fidelity_parser_env.t ->
-    t list * t * Full_fidelity_syntax_error.t list
+    t list * t * Full_fidelity_syntax_error.t list * Rust_pointer.t option
+  val rust_parser_errors :
+    Full_fidelity_source_text.t ->
+    Rust_pointer.t ->
+    ParserOptions.t ->
+    Full_fidelity_syntax_error.t list
   val has_leading_trivia : TriviaKind.t -> Token.t -> bool
   val to_json : ?with_value:bool -> t -> Hh_json.json
   val extract_text : t -> string option
@@ -949,7 +954,7 @@ module type SmartConstructors_S = sig
   val rust_parse :
     Full_fidelity_source_text.t ->
     ParserEnv.t ->
-    t * r * Full_fidelity_syntax_error.t list
+    t * r * Full_fidelity_syntax_error.t list * Rust_pointer.t option
 
   val initial_state : ParserEnv.t -> t
   val make_token : Token.t -> t -> t * r
@@ -1553,7 +1558,7 @@ module type RustParser_S = sig
   val rust_parse :
     Full_fidelity_source_text.t ->
     ParserEnv.t ->
-    t * r * Full_fidelity_syntax_error.t list
+    t * r * Full_fidelity_syntax_error.t list * Rust_pointer.t option
 end
 
 module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
@@ -2082,9 +2087,9 @@ module SyntaxKind(SC : SC_S)
     state, (kind, res)
 
   let rust_parse text env =
-    let state, res, errors = SC.rust_parse text env in
+    let state, res, errors, pointer = SC.rust_parse text env in
     let state, res = compose SK.Script (state, res) in
-    state, res, errors
+    state, res, errors, pointer
 
   let initial_state = SC.initial_state
 

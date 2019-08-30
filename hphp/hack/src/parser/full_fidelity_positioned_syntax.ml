@@ -319,7 +319,7 @@ let leading_trivia node =
   | Some t -> Token.leading t
 
 type 'a rust_parse_type = Full_fidelity_source_text.t -> Full_fidelity_parser_env.t
-  -> 'a * t * Full_fidelity_syntax_error.t list
+  -> 'a * t * Full_fidelity_syntax_error.t list * Rust_pointer.t option
 let rust_parse_ref : unit rust_parse_type ref =
   ref (fun _  _ -> failwith "This should be lazily set in Rust_parser_ffi")
 let rust_parse text env = !rust_parse_ref text env
@@ -335,3 +335,5 @@ let rust_parse_with_decl_mode_sc text env = !rust_parse_with_decl_mode_sc_ref te
 let rust_parse_with_verify_sc_ref : (t list) rust_parse_type ref =
   ref (fun _  _ -> failwith "This should be lazily set in Rust_parser_ffi")
 let rust_parse_with_verify_sc text env = !rust_parse_with_verify_sc_ref text env
+
+let rust_parser_errors _ _ _ = failwith "not implemented"

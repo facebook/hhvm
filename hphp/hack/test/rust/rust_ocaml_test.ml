@@ -418,7 +418,7 @@ module PPLRewriterTest_ = PPLRewriterTest__.WithTreeBuilder (struct
         |> Ppl_class_rewriter.rewrite_ppl_classes
     in
     (* We don't care about errors / mode / state here *)
-    EditableSyntaxTree.build source_text root [] None ()
+    EditableSyntaxTree.build source_text root None [] None ()
 end)
 
 module PPLRewriterTest = Runner (PPLRewriterTest_)

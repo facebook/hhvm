@@ -227,9 +227,9 @@ module SyntaxKind(SC : SC_S)
     state, (kind, res)
 
   let rust_parse text env =
-    let state, res, errors = SC.rust_parse text env in
+    let state, res, errors, pointer = SC.rust_parse text env in
     let state, res = compose SK.Script (state, res) in
-    state, res, errors
+    state, res, errors, pointer
 
   let initial_state = SC.initial_state
 

@@ -38,7 +38,7 @@ module type RustParser_S = sig
   val rust_parse :
     Full_fidelity_source_text.t ->
     ParserEnv.t ->
-    t * r * Full_fidelity_syntax_error.t list
+    t * r * Full_fidelity_syntax_error.t list * Rust_pointer.t option
 end
 
 module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct

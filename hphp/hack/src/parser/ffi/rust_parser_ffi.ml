@@ -43,10 +43,12 @@ exception RustException of string
 
 external parse_mode: SourceText.t -> FileInfo.mode option = "rust_parse_mode"
 
+type ('a, 'b) result = 'a * 'b * SyntaxError.t list * Rust_pointer.t option
+
 external parse_minimal:
   SourceText.t ->
   parser_opts ->
-  unit * MinimalSyntax.t * SyntaxError.t list = "parse_minimal"
+  (unit, MinimalSyntax.t) result = "parse_minimal"
 
 let parse_minimal text env =
   set_global_lexer_env env;
@@ -55,7 +57,7 @@ let parse_minimal text env =
 external parse_positioned:
   SourceText.t ->
   parser_opts ->
-  unit * PositionedSyntax.t * SyntaxError.t list = "parse_positioned"
+  (unit, PositionedSyntax.t) result = "parse_positioned"
 
 let parse_positioned text env =
   set_global_lexer_env env;
@@ -64,7 +66,7 @@ let parse_positioned text env =
 external parse_positioned_with_decl_mode_sc:
   SourceText.t ->
   parser_opts ->
-  bool list * PositionedSyntax.t * SyntaxError.t list = "parse_positioned_with_decl_mode_sc"
+  (bool list, PositionedSyntax.t) result = "parse_positioned_with_decl_mode_sc"
 
 let parse_positioned_with_decl_mode_sc text env =
   set_global_lexer_env env;
@@ -73,7 +75,7 @@ let parse_positioned_with_decl_mode_sc text env =
 external parse_positioned_with_coroutine_sc:
    SourceText.t ->
    parser_opts ->
-   bool * PositionedSyntax.t * SyntaxError.t list = "parse_positioned_with_coroutine_sc"
+   (bool, PositionedSyntax.t) result = "parse_positioned_with_coroutine_sc"
 
 let parse_positioned_with_coroutine_sc text env =
   set_global_lexer_env env;
@@ -82,7 +84,7 @@ let parse_positioned_with_coroutine_sc text env =
 external parse_positioned_with_verify_sc:
   SourceText.t ->
   parser_opts ->
-  PositionedSyntax.t list * PositionedSyntax.t * SyntaxError.t list = "parse_positioned_with_verify_sc"
+  (PositionedSyntax.t list, PositionedSyntax.t) result = "parse_positioned_with_verify_sc"
 
 let parse_positioned_with_verify_sc text env =
   set_global_lexer_env env;

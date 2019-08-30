@@ -18,7 +18,8 @@ let verify ?(env = Env.default) text =
   let parser = VerifyParser.make env text in
   try
     let mode = Full_fidelity_parser.parse_mode ~rust:(Env.rust env) text in
-    let (parser, root) = VerifyParser.parse_script parser in
+    let (parser, root, none_) = VerifyParser.parse_script parser in
+    assert (none_ = None);
     let sc_state = VerifyParser.sc_state parser in
     if List.length sc_state > 1 then
       raise (MoreThanOneElementInTheState sc_state);

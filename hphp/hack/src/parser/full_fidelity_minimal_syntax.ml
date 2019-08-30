@@ -111,11 +111,11 @@ let position _file _node = None
 let extract_text _node = None
 
 type rust_parse_type = Full_fidelity_source_text.t -> Full_fidelity_parser_env.t
-  -> unit * t * Full_fidelity_syntax_error.t list
+  -> unit * t * Full_fidelity_syntax_error.t list * Rust_pointer.t option
 let rust_parse_ref : rust_parse_type ref =
   ref (fun _  _ -> failwith "This should be lazily set in Rust_parser_ffi")
 let rust_parse text env = !rust_parse_ref text env
-
 let rust_parse_with_coroutine_sc _ _ = failwith "not implemented"
 let rust_parse_with_decl_mode_sc _ _ = failwith "not implemented"
 let rust_parse_with_verify_sc _ _ = failwith "not implemented"
+let rust_parser_errors _ _ _ = failwith "not implemented"

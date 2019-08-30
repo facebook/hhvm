@@ -146,10 +146,13 @@ macro_rules! parse {
                         let ocaml_root = root.to_ocaml(&context);
                         let ocaml_errors = errors.ocamlvalue();
                         let ocaml_state = state.to_ocaml(&context);
+                        let tree : Option<()> = None; // TODO
+                        let ocaml_tree = tree.ocamlvalue();
                         let res = caml_tuple(&[
                             ocaml_state,
                             ocaml_root,
-                            ocaml_errors
+                            ocaml_errors,
+                            ocaml_tree,
                         ]);
                         let l = ocaml::Value::new(res);
                         l

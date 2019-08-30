@@ -22,6 +22,7 @@ module WithSmartConstructors : functor (SmartConstructors : SmartConstructors.Sm
   val create :
     Full_fidelity_source_text.t ->
     Syntax.t ->
+    Rust_pointer.t option ->
     Full_fidelity_syntax_error.t list ->
     FileInfo.mode option ->
     SmartConstructors.t ->
@@ -30,12 +31,14 @@ module WithSmartConstructors : functor (SmartConstructors : SmartConstructors.Sm
   val build :
     Full_fidelity_source_text.t ->
     Syntax.t ->
+    Rust_pointer.t option ->
     Full_fidelity_syntax_error.t list ->
     FileInfo.mode option ->
     SmartConstructors.t ->
     t
 
   val root : t -> Syntax.t
+  val rust_tree : t -> Rust_pointer.t option
   val text : t -> Full_fidelity_source_text.t
   val sc_state : t -> SmartConstructors.t
   val all_errors : t -> Full_fidelity_syntax_error.t list

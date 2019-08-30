@@ -30,7 +30,7 @@ module type SmartConstructors_S = sig
   val rust_parse :
     Full_fidelity_source_text.t ->
     ParserEnv.t ->
-    t * r * Full_fidelity_syntax_error.t list
+    t * r * Full_fidelity_syntax_error.t list * Rust_pointer.t option
 
   val initial_state : ParserEnv.t -> t
   val make_token : Token.t -> t -> t * r

@@ -36,6 +36,7 @@ open Syntax
 type t = {
   text : SourceText.t;
   root : Syntax.t;
+  rust_tree : Rust_pointer.t option;
   errors : SyntaxError.t list;
   mode : FileInfo.mode option;
   state : SCI.t;
@@ -62,10 +63,11 @@ let remove_duplicates errors equals =
 let build
     (text: SourceText.t)
     (root: Syntax.t)
+    (rust_tree: Rust_pointer.t option)
     (errors: SyntaxError.t list)
     (mode: FileInfo.mode option)
     (state: SCI.t): t =
-  { text; root; errors; mode; state }
+  { text; root; rust_tree; errors; mode; state }
 
 let process_errors errors =
   (* We've got the lexical errors and the parser errors together, both
@@ -76,17 +78,17 @@ let process_errors errors =
   let errors = List.stable_sort SyntaxError.compare errors in
   remove_duplicates errors SyntaxError.exactly_equal
 
-let create text root errors mode state =
+let create text root rust_tree errors mode state =
   let errors = process_errors errors in
-  build text root errors mode state
+  build text root rust_tree errors mode state
 
 let make_impl ?(env = Env.default) text =
   let mode = Full_fidelity_parser.parse_mode ~rust:(Env.rust env) text in
   let parser = Parser.make env text in
-  let (parser, root) = Parser.parse_script parser in
+  let (parser, root, rust_tree) = Parser.parse_script parser in
   let errors = Parser.errors parser in
   let state = Parser.sc_state parser in
-  create text root errors mode state
+  create text root rust_tree errors mode state
 
 let make ?(env = Env.default) text =
   Stats_container.wrap_nullary_fn_timing
@@ -96,6 +98,9 @@ let make ?(env = Env.default) text =
 
 let root tree =
   tree.root
+
+let rust_tree tree =
+  tree.rust_tree
 
 let text tree =
   tree.text
@@ -156,9 +161,9 @@ end (* WithSmartConstructors *)
 include WithSmartConstructors(SyntaxSmartConstructors.WithSyntax(Syntax))
 
 let create text root errors mode =
-  create text root errors mode ()
+  create text root None errors mode ()
 
 let build text root errors mode =
-  build text root errors mode ()
+  build text root None errors mode ()
 
 end (* WithSyntax *)

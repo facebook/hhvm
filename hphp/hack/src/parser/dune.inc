@@ -59,6 +59,7 @@
    positioned_syntax_sig
    syntax_sig
    parserSig
+   rust_pointer
    rust_parser_ffi
    rust_lazy_trivia_ffi
    syntaxTransforms

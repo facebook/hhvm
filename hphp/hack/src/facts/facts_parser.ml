@@ -441,10 +441,11 @@ let from_text_
       ?mode
       ()
   in
-  let (parser, root) =
+  let (parser, root, none_) =
     let p = FactsParser.make env text in
     FactsParser.parse_script p
   in
+  assert (none_ = None);
   let has_script_content = FactsParser.sc_state parser in
   (* report errors only if result of parsing is non-empty *)
   if has_script_content && (not @@ List.is_empty (FactsParser.errors parser))

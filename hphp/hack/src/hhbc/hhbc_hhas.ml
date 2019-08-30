@@ -40,7 +40,7 @@ let string_of_class_num id = string_of_int id
 let string_of_typedef_num id = string_of_int id
 
 let string_of_pos pos =
-  let { line_begin; line_end; col_begin; col_end } = pos in
+  let { H.line_begin; line_end; col_begin; col_end } = pos in
   Printf.sprintf "%d:%d,%d:%d" line_begin col_begin line_end col_end
 
 let string_of_span (line_begin, line_end) =

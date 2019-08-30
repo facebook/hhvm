@@ -8,9 +8,7 @@
  *)
 
 open Core_kernel
-open Common
 open Hhbc_ast
-module A = Ast_defs
 
 (* The various from_X functions below take some kind of AST (expression,
  * statement, etc.) and produce what is logically a sequence of instructions.
@@ -494,11 +492,11 @@ let create_try_catch
       instr (ITry TryCatchEnd);
       instr_label done_label ]
 
-(* Functions on instr_seq that correspond to existing Hh_core.List functions *)
+(* Functions on instr_seq that correspond to existing List functions *)
 module InstrSeq = struct
   (* f takes an instruction and produces an instruction list to replace it. *)
   let rec flat_map instrseq ~f =
-    let flat_map_list items ~f = Hh_core.List.bind items f in
+    let flat_map_list items ~f = List.bind items f in
     match instrseq with
     | Instr_empty -> Instr_empty
     | Instr_one x ->

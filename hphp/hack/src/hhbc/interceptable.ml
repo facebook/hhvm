@@ -7,7 +7,6 @@
  *
  *)
 open Core_kernel
-module Ast = Aast
 
 let is_method_interceptable namespace ast_class original_id =
   Hhbc_options.(
@@ -16,7 +15,7 @@ let is_method_interceptable namespace ast_class original_id =
     || (not (SSet.is_empty difs))
        &&
        let class_id =
-         Hhbc_id.Class.elaborate_id namespace ast_class.Ast.c_name
+         Hhbc_id.Class.elaborate_id namespace ast_class.Aast.c_name
        in
        let class_name = Hhbc_id.Class.to_unmangled_string class_id in
        let method_name = Hhbc_id.Method.to_raw_string original_id in
@@ -31,7 +30,7 @@ let is_function_interceptable namespace ast_fun =
     || (not (SSet.is_empty difs))
        &&
        let fq_id =
-         Hhbc_id.Function.elaborate_id namespace ast_fun.Ast.f_name
+         Hhbc_id.Function.elaborate_id namespace ast_fun.Aast.f_name
        in
        let name = String.lowercase (Hhbc_id.Function.to_raw_string fq_id) in
        SSet.mem name difs)

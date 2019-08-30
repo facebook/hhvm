@@ -310,12 +310,12 @@ void cgNewLikeArray(IRLS& env, const IRInstruction* inst) {
 
 namespace {
 
-void newStructImpl(IRLS& env,
-                   const IRInstruction* inst,
-                   MixedArray* (*f)(uint32_t,
-                                    const StringData* const*,
-                                    const TypedValue*)
-                  ) {
+void newStructImpl(
+  IRLS& env,
+  const IRInstruction* inst,
+  MixedArray* (*f)(uint32_t, const StringData* const*, const TypedValue*),
+  SyncOptions sync = SyncOptions::None
+) {
   auto const sp = srcLoc(env, inst, 0).reg();
   auto const extra = inst->extra<NewStructData>();
   auto& v = vmain(env);
@@ -328,41 +328,23 @@ void newStructImpl(IRLS& env,
     .dataPtr(table)
     .addr(sp, cellsToBytes(extra->offset.offset));
 
-  cgCallHelper(v, env, CallSpec::direct(f), callDest(env, inst),
-               SyncOptions::None, args);
+  cgCallHelper(v, env, CallSpec::direct(f), callDest(env, inst), sync, args);
 }
 
 }
 
-namespace {
-template<typename Fn>
-void newRecordImpl(IRLS& env, const IRInstruction* inst, Fn creatorFn) {
-  auto const rec = srcLoc(env, inst, 0).reg();
-  auto const sp = srcLoc(env, inst, 1).reg();
-  auto const extra = inst->extra<NewStructData>();
-  auto& v = vmain(env);
+MixedArray* wrapMakeStructDict(uint32_t size,
+                               const StringData* const* keys,
+                               const TypedValue* values) {
+  using namespace arrprov;
+  assertx(RuntimeOption::EvalArrayProvenance);
 
-  auto table = v.allocData<const StringData*>(extra->numKeys);
-  memcpy(table, extra->keys, extra->numKeys * sizeof(*extra->keys));
+  auto const ad = MixedArray::MakeStructDict(size, keys, values);
 
-  auto const args = argGroup(env, inst)
-    .reg(rec)
-    .imm(extra->numKeys)
-    .dataPtr(table)
-    .addr(sp, cellsToBytes(extra->offset.offset));
-
-  cgCallHelper(v, env, CallSpec::direct(creatorFn),
-               callDest(env, inst),
-               SyncOptions::Sync, args);
-}
-}
-
-void cgNewRecord(IRLS& env, const IRInstruction* inst) {
-  newRecordImpl(env, inst, RecordData::newRecord);
-}
-
-void cgNewRecordArray(IRLS& env, const IRInstruction* inst) {
-  newRecordImpl(env, inst, RecordArray::newRecordArray);
+  if (auto const tag = tagFromProgramCounter()) {
+    setTag(ad, *tag);
+  }
+  return ad;
 }
 
 void cgNewStructArray(IRLS& env, const IRInstruction* inst) {
@@ -374,7 +356,11 @@ void cgNewStructDArray(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgNewStructDict(IRLS& env, const IRInstruction* inst) {
-  newStructImpl(env, inst, MixedArray::MakeStructDict);
+  if (RuntimeOption::EvalArrayProvenance) {
+    newStructImpl(env, inst, wrapMakeStructDict, SyncOptions::Sync);
+  } else {
+    newStructImpl(env, inst, MixedArray::MakeStructDict);
+  }
 }
 
 void cgNewKeysetArray(IRLS& env, const IRInstruction* inst) {
@@ -435,6 +421,39 @@ void cgInitPackedLayoutArrayLoop(IRLS& env, const IRInstruction* inst) {
     },
     count
   );
+}
+
+namespace {
+
+template<typename Fn>
+void newRecordImpl(IRLS& env, const IRInstruction* inst, Fn creatorFn) {
+  auto const rec = srcLoc(env, inst, 0).reg();
+  auto const sp = srcLoc(env, inst, 1).reg();
+  auto const extra = inst->extra<NewStructData>();
+  auto& v = vmain(env);
+
+  auto table = v.allocData<const StringData*>(extra->numKeys);
+  memcpy(table, extra->keys, extra->numKeys * sizeof(*extra->keys));
+
+  auto const args = argGroup(env, inst)
+    .reg(rec)
+    .imm(extra->numKeys)
+    .dataPtr(table)
+    .addr(sp, cellsToBytes(extra->offset.offset));
+
+  cgCallHelper(v, env, CallSpec::direct(creatorFn),
+               callDest(env, inst),
+               SyncOptions::Sync, args);
+}
+
+}
+
+void cgNewRecord(IRLS& env, const IRInstruction* inst) {
+  newRecordImpl(env, inst, RecordData::newRecord);
+}
+
+void cgNewRecordArray(IRLS& env, const IRInstruction* inst) {
+  newRecordImpl(env, inst, RecordArray::newRecordArray);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

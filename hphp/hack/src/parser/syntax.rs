@@ -107,6 +107,19 @@ where
         Self::fold_over_children(&f, vec![], &self.syntax)
     }
 
+    pub fn drain_children(&mut self) -> Vec<Self> {
+        let f = |node: Self, mut acc: Vec<Self>| {
+            acc.push(node);
+            acc
+        };
+        let syntax = std::mem::replace(&mut self.syntax, SyntaxVariant::Missing);
+        Self::fold_over_children_owned(&f, vec![], syntax)
+    }
+
+    pub fn replace_children(&mut self, kind: SyntaxKind, children: Vec<Self>) {
+        std::mem::replace(&mut self.syntax, Syntax::from_children(kind, children));
+    }
+
     fn get_token(&self) -> Option<&T> {
         match &self.syntax {
             SyntaxVariant::Token(t) => Some(&t),

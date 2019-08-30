@@ -3128,6 +3128,1390 @@ where
         }
     }
 
+    pub fn fold_over_children_owned<U>(
+        f: &dyn Fn(Self, U) -> U,
+        acc: U,
+        syntax: SyntaxVariant<T, V>,
+    ) -> U {
+        match syntax {
+            SyntaxVariant::Missing => acc,
+            SyntaxVariant::Token (_) => acc,
+            SyntaxVariant::SyntaxList(elems) => {
+                let mut acc = acc;
+                for item in elems {
+                    acc = f(item, acc);
+                }
+                acc
+            },
+            SyntaxVariant::EndOfFile(x) => {
+                let EndOfFileChildren { end_of_file_token } = *x;
+                let acc = f(end_of_file_token, acc);
+                acc
+            },
+            SyntaxVariant::Script(x) => {
+                let ScriptChildren { script_declarations } = *x;
+                let acc = f(script_declarations, acc);
+                acc
+            },
+            SyntaxVariant::QualifiedName(x) => {
+                let QualifiedNameChildren { qualified_name_parts } = *x;
+                let acc = f(qualified_name_parts, acc);
+                acc
+            },
+            SyntaxVariant::SimpleTypeSpecifier(x) => {
+                let SimpleTypeSpecifierChildren { simple_type_specifier } = *x;
+                let acc = f(simple_type_specifier, acc);
+                acc
+            },
+            SyntaxVariant::LiteralExpression(x) => {
+                let LiteralExpressionChildren { literal_expression } = *x;
+                let acc = f(literal_expression, acc);
+                acc
+            },
+            SyntaxVariant::PrefixedStringExpression(x) => {
+                let PrefixedStringExpressionChildren { prefixed_string_name, prefixed_string_str } = *x;
+                let acc = f(prefixed_string_name, acc);
+                let acc = f(prefixed_string_str, acc);
+                acc
+            },
+            SyntaxVariant::VariableExpression(x) => {
+                let VariableExpressionChildren { variable_expression } = *x;
+                let acc = f(variable_expression, acc);
+                acc
+            },
+            SyntaxVariant::PipeVariableExpression(x) => {
+                let PipeVariableExpressionChildren { pipe_variable_expression } = *x;
+                let acc = f(pipe_variable_expression, acc);
+                acc
+            },
+            SyntaxVariant::FileAttributeSpecification(x) => {
+                let FileAttributeSpecificationChildren { file_attribute_specification_left_double_angle, file_attribute_specification_keyword, file_attribute_specification_colon, file_attribute_specification_attributes, file_attribute_specification_right_double_angle } = *x;
+                let acc = f(file_attribute_specification_left_double_angle, acc);
+                let acc = f(file_attribute_specification_keyword, acc);
+                let acc = f(file_attribute_specification_colon, acc);
+                let acc = f(file_attribute_specification_attributes, acc);
+                let acc = f(file_attribute_specification_right_double_angle, acc);
+                acc
+            },
+            SyntaxVariant::EnumDeclaration(x) => {
+                let EnumDeclarationChildren { enum_attribute_spec, enum_keyword, enum_name, enum_colon, enum_base, enum_type, enum_left_brace, enum_enumerators, enum_right_brace } = *x;
+                let acc = f(enum_attribute_spec, acc);
+                let acc = f(enum_keyword, acc);
+                let acc = f(enum_name, acc);
+                let acc = f(enum_colon, acc);
+                let acc = f(enum_base, acc);
+                let acc = f(enum_type, acc);
+                let acc = f(enum_left_brace, acc);
+                let acc = f(enum_enumerators, acc);
+                let acc = f(enum_right_brace, acc);
+                acc
+            },
+            SyntaxVariant::Enumerator(x) => {
+                let EnumeratorChildren { enumerator_name, enumerator_equal, enumerator_value, enumerator_semicolon } = *x;
+                let acc = f(enumerator_name, acc);
+                let acc = f(enumerator_equal, acc);
+                let acc = f(enumerator_value, acc);
+                let acc = f(enumerator_semicolon, acc);
+                acc
+            },
+            SyntaxVariant::RecordDeclaration(x) => {
+                let RecordDeclarationChildren { record_attribute_spec, record_modifier, record_keyword, record_name, record_extends_keyword, record_extends_list, record_left_brace, record_fields, record_right_brace } = *x;
+                let acc = f(record_attribute_spec, acc);
+                let acc = f(record_modifier, acc);
+                let acc = f(record_keyword, acc);
+                let acc = f(record_name, acc);
+                let acc = f(record_extends_keyword, acc);
+                let acc = f(record_extends_list, acc);
+                let acc = f(record_left_brace, acc);
+                let acc = f(record_fields, acc);
+                let acc = f(record_right_brace, acc);
+                acc
+            },
+            SyntaxVariant::RecordField(x) => {
+                let RecordFieldChildren { record_field_name, record_field_colon, record_field_type, record_field_init, record_field_comma } = *x;
+                let acc = f(record_field_name, acc);
+                let acc = f(record_field_colon, acc);
+                let acc = f(record_field_type, acc);
+                let acc = f(record_field_init, acc);
+                let acc = f(record_field_comma, acc);
+                acc
+            },
+            SyntaxVariant::AliasDeclaration(x) => {
+                let AliasDeclarationChildren { alias_attribute_spec, alias_keyword, alias_name, alias_generic_parameter, alias_constraint, alias_equal, alias_type, alias_semicolon } = *x;
+                let acc = f(alias_attribute_spec, acc);
+                let acc = f(alias_keyword, acc);
+                let acc = f(alias_name, acc);
+                let acc = f(alias_generic_parameter, acc);
+                let acc = f(alias_constraint, acc);
+                let acc = f(alias_equal, acc);
+                let acc = f(alias_type, acc);
+                let acc = f(alias_semicolon, acc);
+                acc
+            },
+            SyntaxVariant::PropertyDeclaration(x) => {
+                let PropertyDeclarationChildren { property_attribute_spec, property_modifiers, property_type, property_declarators, property_semicolon } = *x;
+                let acc = f(property_attribute_spec, acc);
+                let acc = f(property_modifiers, acc);
+                let acc = f(property_type, acc);
+                let acc = f(property_declarators, acc);
+                let acc = f(property_semicolon, acc);
+                acc
+            },
+            SyntaxVariant::PropertyDeclarator(x) => {
+                let PropertyDeclaratorChildren { property_name, property_initializer } = *x;
+                let acc = f(property_name, acc);
+                let acc = f(property_initializer, acc);
+                acc
+            },
+            SyntaxVariant::NamespaceDeclaration(x) => {
+                let NamespaceDeclarationChildren { namespace_keyword, namespace_name, namespace_body } = *x;
+                let acc = f(namespace_keyword, acc);
+                let acc = f(namespace_name, acc);
+                let acc = f(namespace_body, acc);
+                acc
+            },
+            SyntaxVariant::NamespaceBody(x) => {
+                let NamespaceBodyChildren { namespace_left_brace, namespace_declarations, namespace_right_brace } = *x;
+                let acc = f(namespace_left_brace, acc);
+                let acc = f(namespace_declarations, acc);
+                let acc = f(namespace_right_brace, acc);
+                acc
+            },
+            SyntaxVariant::NamespaceEmptyBody(x) => {
+                let NamespaceEmptyBodyChildren { namespace_semicolon } = *x;
+                let acc = f(namespace_semicolon, acc);
+                acc
+            },
+            SyntaxVariant::NamespaceUseDeclaration(x) => {
+                let NamespaceUseDeclarationChildren { namespace_use_keyword, namespace_use_kind, namespace_use_clauses, namespace_use_semicolon } = *x;
+                let acc = f(namespace_use_keyword, acc);
+                let acc = f(namespace_use_kind, acc);
+                let acc = f(namespace_use_clauses, acc);
+                let acc = f(namespace_use_semicolon, acc);
+                acc
+            },
+            SyntaxVariant::NamespaceGroupUseDeclaration(x) => {
+                let NamespaceGroupUseDeclarationChildren { namespace_group_use_keyword, namespace_group_use_kind, namespace_group_use_prefix, namespace_group_use_left_brace, namespace_group_use_clauses, namespace_group_use_right_brace, namespace_group_use_semicolon } = *x;
+                let acc = f(namespace_group_use_keyword, acc);
+                let acc = f(namespace_group_use_kind, acc);
+                let acc = f(namespace_group_use_prefix, acc);
+                let acc = f(namespace_group_use_left_brace, acc);
+                let acc = f(namespace_group_use_clauses, acc);
+                let acc = f(namespace_group_use_right_brace, acc);
+                let acc = f(namespace_group_use_semicolon, acc);
+                acc
+            },
+            SyntaxVariant::NamespaceUseClause(x) => {
+                let NamespaceUseClauseChildren { namespace_use_clause_kind, namespace_use_name, namespace_use_as, namespace_use_alias } = *x;
+                let acc = f(namespace_use_clause_kind, acc);
+                let acc = f(namespace_use_name, acc);
+                let acc = f(namespace_use_as, acc);
+                let acc = f(namespace_use_alias, acc);
+                acc
+            },
+            SyntaxVariant::FunctionDeclaration(x) => {
+                let FunctionDeclarationChildren { function_attribute_spec, function_declaration_header, function_body } = *x;
+                let acc = f(function_attribute_spec, acc);
+                let acc = f(function_declaration_header, acc);
+                let acc = f(function_body, acc);
+                acc
+            },
+            SyntaxVariant::FunctionDeclarationHeader(x) => {
+                let FunctionDeclarationHeaderChildren { function_modifiers, function_keyword, function_name, function_type_parameter_list, function_left_paren, function_parameter_list, function_right_paren, function_colon, function_type, function_where_clause } = *x;
+                let acc = f(function_modifiers, acc);
+                let acc = f(function_keyword, acc);
+                let acc = f(function_name, acc);
+                let acc = f(function_type_parameter_list, acc);
+                let acc = f(function_left_paren, acc);
+                let acc = f(function_parameter_list, acc);
+                let acc = f(function_right_paren, acc);
+                let acc = f(function_colon, acc);
+                let acc = f(function_type, acc);
+                let acc = f(function_where_clause, acc);
+                acc
+            },
+            SyntaxVariant::WhereClause(x) => {
+                let WhereClauseChildren { where_clause_keyword, where_clause_constraints } = *x;
+                let acc = f(where_clause_keyword, acc);
+                let acc = f(where_clause_constraints, acc);
+                acc
+            },
+            SyntaxVariant::WhereConstraint(x) => {
+                let WhereConstraintChildren { where_constraint_left_type, where_constraint_operator, where_constraint_right_type } = *x;
+                let acc = f(where_constraint_left_type, acc);
+                let acc = f(where_constraint_operator, acc);
+                let acc = f(where_constraint_right_type, acc);
+                acc
+            },
+            SyntaxVariant::MethodishDeclaration(x) => {
+                let MethodishDeclarationChildren { methodish_attribute, methodish_function_decl_header, methodish_function_body, methodish_semicolon } = *x;
+                let acc = f(methodish_attribute, acc);
+                let acc = f(methodish_function_decl_header, acc);
+                let acc = f(methodish_function_body, acc);
+                let acc = f(methodish_semicolon, acc);
+                acc
+            },
+            SyntaxVariant::MethodishTraitResolution(x) => {
+                let MethodishTraitResolutionChildren { methodish_trait_attribute, methodish_trait_function_decl_header, methodish_trait_equal, methodish_trait_name, methodish_trait_semicolon } = *x;
+                let acc = f(methodish_trait_attribute, acc);
+                let acc = f(methodish_trait_function_decl_header, acc);
+                let acc = f(methodish_trait_equal, acc);
+                let acc = f(methodish_trait_name, acc);
+                let acc = f(methodish_trait_semicolon, acc);
+                acc
+            },
+            SyntaxVariant::ClassishDeclaration(x) => {
+                let ClassishDeclarationChildren { classish_attribute, classish_modifiers, classish_keyword, classish_name, classish_type_parameters, classish_extends_keyword, classish_extends_list, classish_implements_keyword, classish_implements_list, classish_where_clause, classish_body } = *x;
+                let acc = f(classish_attribute, acc);
+                let acc = f(classish_modifiers, acc);
+                let acc = f(classish_keyword, acc);
+                let acc = f(classish_name, acc);
+                let acc = f(classish_type_parameters, acc);
+                let acc = f(classish_extends_keyword, acc);
+                let acc = f(classish_extends_list, acc);
+                let acc = f(classish_implements_keyword, acc);
+                let acc = f(classish_implements_list, acc);
+                let acc = f(classish_where_clause, acc);
+                let acc = f(classish_body, acc);
+                acc
+            },
+            SyntaxVariant::ClassishBody(x) => {
+                let ClassishBodyChildren { classish_body_left_brace, classish_body_elements, classish_body_right_brace } = *x;
+                let acc = f(classish_body_left_brace, acc);
+                let acc = f(classish_body_elements, acc);
+                let acc = f(classish_body_right_brace, acc);
+                acc
+            },
+            SyntaxVariant::TraitUsePrecedenceItem(x) => {
+                let TraitUsePrecedenceItemChildren { trait_use_precedence_item_name, trait_use_precedence_item_keyword, trait_use_precedence_item_removed_names } = *x;
+                let acc = f(trait_use_precedence_item_name, acc);
+                let acc = f(trait_use_precedence_item_keyword, acc);
+                let acc = f(trait_use_precedence_item_removed_names, acc);
+                acc
+            },
+            SyntaxVariant::TraitUseAliasItem(x) => {
+                let TraitUseAliasItemChildren { trait_use_alias_item_aliasing_name, trait_use_alias_item_keyword, trait_use_alias_item_modifiers, trait_use_alias_item_aliased_name } = *x;
+                let acc = f(trait_use_alias_item_aliasing_name, acc);
+                let acc = f(trait_use_alias_item_keyword, acc);
+                let acc = f(trait_use_alias_item_modifiers, acc);
+                let acc = f(trait_use_alias_item_aliased_name, acc);
+                acc
+            },
+            SyntaxVariant::TraitUseConflictResolution(x) => {
+                let TraitUseConflictResolutionChildren { trait_use_conflict_resolution_keyword, trait_use_conflict_resolution_names, trait_use_conflict_resolution_left_brace, trait_use_conflict_resolution_clauses, trait_use_conflict_resolution_right_brace } = *x;
+                let acc = f(trait_use_conflict_resolution_keyword, acc);
+                let acc = f(trait_use_conflict_resolution_names, acc);
+                let acc = f(trait_use_conflict_resolution_left_brace, acc);
+                let acc = f(trait_use_conflict_resolution_clauses, acc);
+                let acc = f(trait_use_conflict_resolution_right_brace, acc);
+                acc
+            },
+            SyntaxVariant::TraitUse(x) => {
+                let TraitUseChildren { trait_use_keyword, trait_use_names, trait_use_semicolon } = *x;
+                let acc = f(trait_use_keyword, acc);
+                let acc = f(trait_use_names, acc);
+                let acc = f(trait_use_semicolon, acc);
+                acc
+            },
+            SyntaxVariant::RequireClause(x) => {
+                let RequireClauseChildren { require_keyword, require_kind, require_name, require_semicolon } = *x;
+                let acc = f(require_keyword, acc);
+                let acc = f(require_kind, acc);
+                let acc = f(require_name, acc);
+                let acc = f(require_semicolon, acc);
+                acc
+            },
+            SyntaxVariant::ConstDeclaration(x) => {
+                let ConstDeclarationChildren { const_modifiers, const_keyword, const_type_specifier, const_declarators, const_semicolon } = *x;
+                let acc = f(const_modifiers, acc);
+                let acc = f(const_keyword, acc);
+                let acc = f(const_type_specifier, acc);
+                let acc = f(const_declarators, acc);
+                let acc = f(const_semicolon, acc);
+                acc
+            },
+            SyntaxVariant::ConstantDeclarator(x) => {
+                let ConstantDeclaratorChildren { constant_declarator_name, constant_declarator_initializer } = *x;
+                let acc = f(constant_declarator_name, acc);
+                let acc = f(constant_declarator_initializer, acc);
+                acc
+            },
+            SyntaxVariant::TypeConstDeclaration(x) => {
+                let TypeConstDeclarationChildren { type_const_attribute_spec, type_const_modifiers, type_const_keyword, type_const_type_keyword, type_const_name, type_const_type_parameters, type_const_type_constraint, type_const_equal, type_const_type_specifier, type_const_semicolon } = *x;
+                let acc = f(type_const_attribute_spec, acc);
+                let acc = f(type_const_modifiers, acc);
+                let acc = f(type_const_keyword, acc);
+                let acc = f(type_const_type_keyword, acc);
+                let acc = f(type_const_name, acc);
+                let acc = f(type_const_type_parameters, acc);
+                let acc = f(type_const_type_constraint, acc);
+                let acc = f(type_const_equal, acc);
+                let acc = f(type_const_type_specifier, acc);
+                let acc = f(type_const_semicolon, acc);
+                acc
+            },
+            SyntaxVariant::DecoratedExpression(x) => {
+                let DecoratedExpressionChildren { decorated_expression_decorator, decorated_expression_expression } = *x;
+                let acc = f(decorated_expression_decorator, acc);
+                let acc = f(decorated_expression_expression, acc);
+                acc
+            },
+            SyntaxVariant::ParameterDeclaration(x) => {
+                let ParameterDeclarationChildren { parameter_attribute, parameter_visibility, parameter_call_convention, parameter_type, parameter_name, parameter_default_value } = *x;
+                let acc = f(parameter_attribute, acc);
+                let acc = f(parameter_visibility, acc);
+                let acc = f(parameter_call_convention, acc);
+                let acc = f(parameter_type, acc);
+                let acc = f(parameter_name, acc);
+                let acc = f(parameter_default_value, acc);
+                acc
+            },
+            SyntaxVariant::VariadicParameter(x) => {
+                let VariadicParameterChildren { variadic_parameter_call_convention, variadic_parameter_type, variadic_parameter_ellipsis } = *x;
+                let acc = f(variadic_parameter_call_convention, acc);
+                let acc = f(variadic_parameter_type, acc);
+                let acc = f(variadic_parameter_ellipsis, acc);
+                acc
+            },
+            SyntaxVariant::OldAttributeSpecification(x) => {
+                let OldAttributeSpecificationChildren { old_attribute_specification_left_double_angle, old_attribute_specification_attributes, old_attribute_specification_right_double_angle } = *x;
+                let acc = f(old_attribute_specification_left_double_angle, acc);
+                let acc = f(old_attribute_specification_attributes, acc);
+                let acc = f(old_attribute_specification_right_double_angle, acc);
+                acc
+            },
+            SyntaxVariant::AttributeSpecification(x) => {
+                let AttributeSpecificationChildren { attribute_specification_attributes } = *x;
+                let acc = f(attribute_specification_attributes, acc);
+                acc
+            },
+            SyntaxVariant::Attribute(x) => {
+                let AttributeChildren { attribute_at, attribute_attribute_name } = *x;
+                let acc = f(attribute_at, acc);
+                let acc = f(attribute_attribute_name, acc);
+                acc
+            },
+            SyntaxVariant::InclusionExpression(x) => {
+                let InclusionExpressionChildren { inclusion_require, inclusion_filename } = *x;
+                let acc = f(inclusion_require, acc);
+                let acc = f(inclusion_filename, acc);
+                acc
+            },
+            SyntaxVariant::InclusionDirective(x) => {
+                let InclusionDirectiveChildren { inclusion_expression, inclusion_semicolon } = *x;
+                let acc = f(inclusion_expression, acc);
+                let acc = f(inclusion_semicolon, acc);
+                acc
+            },
+            SyntaxVariant::CompoundStatement(x) => {
+                let CompoundStatementChildren { compound_left_brace, compound_statements, compound_right_brace } = *x;
+                let acc = f(compound_left_brace, acc);
+                let acc = f(compound_statements, acc);
+                let acc = f(compound_right_brace, acc);
+                acc
+            },
+            SyntaxVariant::ExpressionStatement(x) => {
+                let ExpressionStatementChildren { expression_statement_expression, expression_statement_semicolon } = *x;
+                let acc = f(expression_statement_expression, acc);
+                let acc = f(expression_statement_semicolon, acc);
+                acc
+            },
+            SyntaxVariant::MarkupSection(x) => {
+                let MarkupSectionChildren { markup_prefix, markup_text, markup_suffix, markup_expression } = *x;
+                let acc = f(markup_prefix, acc);
+                let acc = f(markup_text, acc);
+                let acc = f(markup_suffix, acc);
+                let acc = f(markup_expression, acc);
+                acc
+            },
+            SyntaxVariant::MarkupSuffix(x) => {
+                let MarkupSuffixChildren { markup_suffix_less_than_question, markup_suffix_name } = *x;
+                let acc = f(markup_suffix_less_than_question, acc);
+                let acc = f(markup_suffix_name, acc);
+                acc
+            },
+            SyntaxVariant::UnsetStatement(x) => {
+                let UnsetStatementChildren { unset_keyword, unset_left_paren, unset_variables, unset_right_paren, unset_semicolon } = *x;
+                let acc = f(unset_keyword, acc);
+                let acc = f(unset_left_paren, acc);
+                let acc = f(unset_variables, acc);
+                let acc = f(unset_right_paren, acc);
+                let acc = f(unset_semicolon, acc);
+                acc
+            },
+            SyntaxVariant::LetStatement(x) => {
+                let LetStatementChildren { let_statement_keyword, let_statement_name, let_statement_colon, let_statement_type, let_statement_initializer, let_statement_semicolon } = *x;
+                let acc = f(let_statement_keyword, acc);
+                let acc = f(let_statement_name, acc);
+                let acc = f(let_statement_colon, acc);
+                let acc = f(let_statement_type, acc);
+                let acc = f(let_statement_initializer, acc);
+                let acc = f(let_statement_semicolon, acc);
+                acc
+            },
+            SyntaxVariant::UsingStatementBlockScoped(x) => {
+                let UsingStatementBlockScopedChildren { using_block_await_keyword, using_block_using_keyword, using_block_left_paren, using_block_expressions, using_block_right_paren, using_block_body } = *x;
+                let acc = f(using_block_await_keyword, acc);
+                let acc = f(using_block_using_keyword, acc);
+                let acc = f(using_block_left_paren, acc);
+                let acc = f(using_block_expressions, acc);
+                let acc = f(using_block_right_paren, acc);
+                let acc = f(using_block_body, acc);
+                acc
+            },
+            SyntaxVariant::UsingStatementFunctionScoped(x) => {
+                let UsingStatementFunctionScopedChildren { using_function_await_keyword, using_function_using_keyword, using_function_expression, using_function_semicolon } = *x;
+                let acc = f(using_function_await_keyword, acc);
+                let acc = f(using_function_using_keyword, acc);
+                let acc = f(using_function_expression, acc);
+                let acc = f(using_function_semicolon, acc);
+                acc
+            },
+            SyntaxVariant::WhileStatement(x) => {
+                let WhileStatementChildren { while_keyword, while_left_paren, while_condition, while_right_paren, while_body } = *x;
+                let acc = f(while_keyword, acc);
+                let acc = f(while_left_paren, acc);
+                let acc = f(while_condition, acc);
+                let acc = f(while_right_paren, acc);
+                let acc = f(while_body, acc);
+                acc
+            },
+            SyntaxVariant::IfStatement(x) => {
+                let IfStatementChildren { if_keyword, if_left_paren, if_condition, if_right_paren, if_statement, if_elseif_clauses, if_else_clause } = *x;
+                let acc = f(if_keyword, acc);
+                let acc = f(if_left_paren, acc);
+                let acc = f(if_condition, acc);
+                let acc = f(if_right_paren, acc);
+                let acc = f(if_statement, acc);
+                let acc = f(if_elseif_clauses, acc);
+                let acc = f(if_else_clause, acc);
+                acc
+            },
+            SyntaxVariant::ElseifClause(x) => {
+                let ElseifClauseChildren { elseif_keyword, elseif_left_paren, elseif_condition, elseif_right_paren, elseif_statement } = *x;
+                let acc = f(elseif_keyword, acc);
+                let acc = f(elseif_left_paren, acc);
+                let acc = f(elseif_condition, acc);
+                let acc = f(elseif_right_paren, acc);
+                let acc = f(elseif_statement, acc);
+                acc
+            },
+            SyntaxVariant::ElseClause(x) => {
+                let ElseClauseChildren { else_keyword, else_statement } = *x;
+                let acc = f(else_keyword, acc);
+                let acc = f(else_statement, acc);
+                acc
+            },
+            SyntaxVariant::TryStatement(x) => {
+                let TryStatementChildren { try_keyword, try_compound_statement, try_catch_clauses, try_finally_clause } = *x;
+                let acc = f(try_keyword, acc);
+                let acc = f(try_compound_statement, acc);
+                let acc = f(try_catch_clauses, acc);
+                let acc = f(try_finally_clause, acc);
+                acc
+            },
+            SyntaxVariant::CatchClause(x) => {
+                let CatchClauseChildren { catch_keyword, catch_left_paren, catch_type, catch_variable, catch_right_paren, catch_body } = *x;
+                let acc = f(catch_keyword, acc);
+                let acc = f(catch_left_paren, acc);
+                let acc = f(catch_type, acc);
+                let acc = f(catch_variable, acc);
+                let acc = f(catch_right_paren, acc);
+                let acc = f(catch_body, acc);
+                acc
+            },
+            SyntaxVariant::FinallyClause(x) => {
+                let FinallyClauseChildren { finally_keyword, finally_body } = *x;
+                let acc = f(finally_keyword, acc);
+                let acc = f(finally_body, acc);
+                acc
+            },
+            SyntaxVariant::DoStatement(x) => {
+                let DoStatementChildren { do_keyword, do_body, do_while_keyword, do_left_paren, do_condition, do_right_paren, do_semicolon } = *x;
+                let acc = f(do_keyword, acc);
+                let acc = f(do_body, acc);
+                let acc = f(do_while_keyword, acc);
+                let acc = f(do_left_paren, acc);
+                let acc = f(do_condition, acc);
+                let acc = f(do_right_paren, acc);
+                let acc = f(do_semicolon, acc);
+                acc
+            },
+            SyntaxVariant::ForStatement(x) => {
+                let ForStatementChildren { for_keyword, for_left_paren, for_initializer, for_first_semicolon, for_control, for_second_semicolon, for_end_of_loop, for_right_paren, for_body } = *x;
+                let acc = f(for_keyword, acc);
+                let acc = f(for_left_paren, acc);
+                let acc = f(for_initializer, acc);
+                let acc = f(for_first_semicolon, acc);
+                let acc = f(for_control, acc);
+                let acc = f(for_second_semicolon, acc);
+                let acc = f(for_end_of_loop, acc);
+                let acc = f(for_right_paren, acc);
+                let acc = f(for_body, acc);
+                acc
+            },
+            SyntaxVariant::ForeachStatement(x) => {
+                let ForeachStatementChildren { foreach_keyword, foreach_left_paren, foreach_collection, foreach_await_keyword, foreach_as, foreach_key, foreach_arrow, foreach_value, foreach_right_paren, foreach_body } = *x;
+                let acc = f(foreach_keyword, acc);
+                let acc = f(foreach_left_paren, acc);
+                let acc = f(foreach_collection, acc);
+                let acc = f(foreach_await_keyword, acc);
+                let acc = f(foreach_as, acc);
+                let acc = f(foreach_key, acc);
+                let acc = f(foreach_arrow, acc);
+                let acc = f(foreach_value, acc);
+                let acc = f(foreach_right_paren, acc);
+                let acc = f(foreach_body, acc);
+                acc
+            },
+            SyntaxVariant::SwitchStatement(x) => {
+                let SwitchStatementChildren { switch_keyword, switch_left_paren, switch_expression, switch_right_paren, switch_left_brace, switch_sections, switch_right_brace } = *x;
+                let acc = f(switch_keyword, acc);
+                let acc = f(switch_left_paren, acc);
+                let acc = f(switch_expression, acc);
+                let acc = f(switch_right_paren, acc);
+                let acc = f(switch_left_brace, acc);
+                let acc = f(switch_sections, acc);
+                let acc = f(switch_right_brace, acc);
+                acc
+            },
+            SyntaxVariant::SwitchSection(x) => {
+                let SwitchSectionChildren { switch_section_labels, switch_section_statements, switch_section_fallthrough } = *x;
+                let acc = f(switch_section_labels, acc);
+                let acc = f(switch_section_statements, acc);
+                let acc = f(switch_section_fallthrough, acc);
+                acc
+            },
+            SyntaxVariant::SwitchFallthrough(x) => {
+                let SwitchFallthroughChildren { fallthrough_keyword, fallthrough_semicolon } = *x;
+                let acc = f(fallthrough_keyword, acc);
+                let acc = f(fallthrough_semicolon, acc);
+                acc
+            },
+            SyntaxVariant::CaseLabel(x) => {
+                let CaseLabelChildren { case_keyword, case_expression, case_colon } = *x;
+                let acc = f(case_keyword, acc);
+                let acc = f(case_expression, acc);
+                let acc = f(case_colon, acc);
+                acc
+            },
+            SyntaxVariant::DefaultLabel(x) => {
+                let DefaultLabelChildren { default_keyword, default_colon } = *x;
+                let acc = f(default_keyword, acc);
+                let acc = f(default_colon, acc);
+                acc
+            },
+            SyntaxVariant::ReturnStatement(x) => {
+                let ReturnStatementChildren { return_keyword, return_expression, return_semicolon } = *x;
+                let acc = f(return_keyword, acc);
+                let acc = f(return_expression, acc);
+                let acc = f(return_semicolon, acc);
+                acc
+            },
+            SyntaxVariant::GotoLabel(x) => {
+                let GotoLabelChildren { goto_label_name, goto_label_colon } = *x;
+                let acc = f(goto_label_name, acc);
+                let acc = f(goto_label_colon, acc);
+                acc
+            },
+            SyntaxVariant::GotoStatement(x) => {
+                let GotoStatementChildren { goto_statement_keyword, goto_statement_label_name, goto_statement_semicolon } = *x;
+                let acc = f(goto_statement_keyword, acc);
+                let acc = f(goto_statement_label_name, acc);
+                let acc = f(goto_statement_semicolon, acc);
+                acc
+            },
+            SyntaxVariant::ThrowStatement(x) => {
+                let ThrowStatementChildren { throw_keyword, throw_expression, throw_semicolon } = *x;
+                let acc = f(throw_keyword, acc);
+                let acc = f(throw_expression, acc);
+                let acc = f(throw_semicolon, acc);
+                acc
+            },
+            SyntaxVariant::BreakStatement(x) => {
+                let BreakStatementChildren { break_keyword, break_level, break_semicolon } = *x;
+                let acc = f(break_keyword, acc);
+                let acc = f(break_level, acc);
+                let acc = f(break_semicolon, acc);
+                acc
+            },
+            SyntaxVariant::ContinueStatement(x) => {
+                let ContinueStatementChildren { continue_keyword, continue_level, continue_semicolon } = *x;
+                let acc = f(continue_keyword, acc);
+                let acc = f(continue_level, acc);
+                let acc = f(continue_semicolon, acc);
+                acc
+            },
+            SyntaxVariant::EchoStatement(x) => {
+                let EchoStatementChildren { echo_keyword, echo_expressions, echo_semicolon } = *x;
+                let acc = f(echo_keyword, acc);
+                let acc = f(echo_expressions, acc);
+                let acc = f(echo_semicolon, acc);
+                acc
+            },
+            SyntaxVariant::ConcurrentStatement(x) => {
+                let ConcurrentStatementChildren { concurrent_keyword, concurrent_statement } = *x;
+                let acc = f(concurrent_keyword, acc);
+                let acc = f(concurrent_statement, acc);
+                acc
+            },
+            SyntaxVariant::SimpleInitializer(x) => {
+                let SimpleInitializerChildren { simple_initializer_equal, simple_initializer_value } = *x;
+                let acc = f(simple_initializer_equal, acc);
+                let acc = f(simple_initializer_value, acc);
+                acc
+            },
+            SyntaxVariant::AnonymousClass(x) => {
+                let AnonymousClassChildren { anonymous_class_class_keyword, anonymous_class_left_paren, anonymous_class_argument_list, anonymous_class_right_paren, anonymous_class_extends_keyword, anonymous_class_extends_list, anonymous_class_implements_keyword, anonymous_class_implements_list, anonymous_class_body } = *x;
+                let acc = f(anonymous_class_class_keyword, acc);
+                let acc = f(anonymous_class_left_paren, acc);
+                let acc = f(anonymous_class_argument_list, acc);
+                let acc = f(anonymous_class_right_paren, acc);
+                let acc = f(anonymous_class_extends_keyword, acc);
+                let acc = f(anonymous_class_extends_list, acc);
+                let acc = f(anonymous_class_implements_keyword, acc);
+                let acc = f(anonymous_class_implements_list, acc);
+                let acc = f(anonymous_class_body, acc);
+                acc
+            },
+            SyntaxVariant::AnonymousFunction(x) => {
+                let AnonymousFunctionChildren { anonymous_attribute_spec, anonymous_static_keyword, anonymous_async_keyword, anonymous_coroutine_keyword, anonymous_function_keyword, anonymous_left_paren, anonymous_parameters, anonymous_right_paren, anonymous_colon, anonymous_type, anonymous_use, anonymous_body } = *x;
+                let acc = f(anonymous_attribute_spec, acc);
+                let acc = f(anonymous_static_keyword, acc);
+                let acc = f(anonymous_async_keyword, acc);
+                let acc = f(anonymous_coroutine_keyword, acc);
+                let acc = f(anonymous_function_keyword, acc);
+                let acc = f(anonymous_left_paren, acc);
+                let acc = f(anonymous_parameters, acc);
+                let acc = f(anonymous_right_paren, acc);
+                let acc = f(anonymous_colon, acc);
+                let acc = f(anonymous_type, acc);
+                let acc = f(anonymous_use, acc);
+                let acc = f(anonymous_body, acc);
+                acc
+            },
+            SyntaxVariant::AnonymousFunctionUseClause(x) => {
+                let AnonymousFunctionUseClauseChildren { anonymous_use_keyword, anonymous_use_left_paren, anonymous_use_variables, anonymous_use_right_paren } = *x;
+                let acc = f(anonymous_use_keyword, acc);
+                let acc = f(anonymous_use_left_paren, acc);
+                let acc = f(anonymous_use_variables, acc);
+                let acc = f(anonymous_use_right_paren, acc);
+                acc
+            },
+            SyntaxVariant::LambdaExpression(x) => {
+                let LambdaExpressionChildren { lambda_attribute_spec, lambda_async, lambda_coroutine, lambda_signature, lambda_arrow, lambda_body } = *x;
+                let acc = f(lambda_attribute_spec, acc);
+                let acc = f(lambda_async, acc);
+                let acc = f(lambda_coroutine, acc);
+                let acc = f(lambda_signature, acc);
+                let acc = f(lambda_arrow, acc);
+                let acc = f(lambda_body, acc);
+                acc
+            },
+            SyntaxVariant::LambdaSignature(x) => {
+                let LambdaSignatureChildren { lambda_left_paren, lambda_parameters, lambda_right_paren, lambda_colon, lambda_type } = *x;
+                let acc = f(lambda_left_paren, acc);
+                let acc = f(lambda_parameters, acc);
+                let acc = f(lambda_right_paren, acc);
+                let acc = f(lambda_colon, acc);
+                let acc = f(lambda_type, acc);
+                acc
+            },
+            SyntaxVariant::CastExpression(x) => {
+                let CastExpressionChildren { cast_left_paren, cast_type, cast_right_paren, cast_operand } = *x;
+                let acc = f(cast_left_paren, acc);
+                let acc = f(cast_type, acc);
+                let acc = f(cast_right_paren, acc);
+                let acc = f(cast_operand, acc);
+                acc
+            },
+            SyntaxVariant::ScopeResolutionExpression(x) => {
+                let ScopeResolutionExpressionChildren { scope_resolution_qualifier, scope_resolution_operator, scope_resolution_name } = *x;
+                let acc = f(scope_resolution_qualifier, acc);
+                let acc = f(scope_resolution_operator, acc);
+                let acc = f(scope_resolution_name, acc);
+                acc
+            },
+            SyntaxVariant::MemberSelectionExpression(x) => {
+                let MemberSelectionExpressionChildren { member_object, member_operator, member_name } = *x;
+                let acc = f(member_object, acc);
+                let acc = f(member_operator, acc);
+                let acc = f(member_name, acc);
+                acc
+            },
+            SyntaxVariant::SafeMemberSelectionExpression(x) => {
+                let SafeMemberSelectionExpressionChildren { safe_member_object, safe_member_operator, safe_member_name } = *x;
+                let acc = f(safe_member_object, acc);
+                let acc = f(safe_member_operator, acc);
+                let acc = f(safe_member_name, acc);
+                acc
+            },
+            SyntaxVariant::EmbeddedMemberSelectionExpression(x) => {
+                let EmbeddedMemberSelectionExpressionChildren { embedded_member_object, embedded_member_operator, embedded_member_name } = *x;
+                let acc = f(embedded_member_object, acc);
+                let acc = f(embedded_member_operator, acc);
+                let acc = f(embedded_member_name, acc);
+                acc
+            },
+            SyntaxVariant::YieldExpression(x) => {
+                let YieldExpressionChildren { yield_keyword, yield_operand } = *x;
+                let acc = f(yield_keyword, acc);
+                let acc = f(yield_operand, acc);
+                acc
+            },
+            SyntaxVariant::YieldFromExpression(x) => {
+                let YieldFromExpressionChildren { yield_from_yield_keyword, yield_from_from_keyword, yield_from_operand } = *x;
+                let acc = f(yield_from_yield_keyword, acc);
+                let acc = f(yield_from_from_keyword, acc);
+                let acc = f(yield_from_operand, acc);
+                acc
+            },
+            SyntaxVariant::PrefixUnaryExpression(x) => {
+                let PrefixUnaryExpressionChildren { prefix_unary_operator, prefix_unary_operand } = *x;
+                let acc = f(prefix_unary_operator, acc);
+                let acc = f(prefix_unary_operand, acc);
+                acc
+            },
+            SyntaxVariant::PostfixUnaryExpression(x) => {
+                let PostfixUnaryExpressionChildren { postfix_unary_operand, postfix_unary_operator } = *x;
+                let acc = f(postfix_unary_operand, acc);
+                let acc = f(postfix_unary_operator, acc);
+                acc
+            },
+            SyntaxVariant::BinaryExpression(x) => {
+                let BinaryExpressionChildren { binary_left_operand, binary_operator, binary_right_operand } = *x;
+                let acc = f(binary_left_operand, acc);
+                let acc = f(binary_operator, acc);
+                let acc = f(binary_right_operand, acc);
+                acc
+            },
+            SyntaxVariant::IsExpression(x) => {
+                let IsExpressionChildren { is_left_operand, is_operator, is_right_operand } = *x;
+                let acc = f(is_left_operand, acc);
+                let acc = f(is_operator, acc);
+                let acc = f(is_right_operand, acc);
+                acc
+            },
+            SyntaxVariant::AsExpression(x) => {
+                let AsExpressionChildren { as_left_operand, as_operator, as_right_operand } = *x;
+                let acc = f(as_left_operand, acc);
+                let acc = f(as_operator, acc);
+                let acc = f(as_right_operand, acc);
+                acc
+            },
+            SyntaxVariant::NullableAsExpression(x) => {
+                let NullableAsExpressionChildren { nullable_as_left_operand, nullable_as_operator, nullable_as_right_operand } = *x;
+                let acc = f(nullable_as_left_operand, acc);
+                let acc = f(nullable_as_operator, acc);
+                let acc = f(nullable_as_right_operand, acc);
+                acc
+            },
+            SyntaxVariant::ConditionalExpression(x) => {
+                let ConditionalExpressionChildren { conditional_test, conditional_question, conditional_consequence, conditional_colon, conditional_alternative } = *x;
+                let acc = f(conditional_test, acc);
+                let acc = f(conditional_question, acc);
+                let acc = f(conditional_consequence, acc);
+                let acc = f(conditional_colon, acc);
+                let acc = f(conditional_alternative, acc);
+                acc
+            },
+            SyntaxVariant::EvalExpression(x) => {
+                let EvalExpressionChildren { eval_keyword, eval_left_paren, eval_argument, eval_right_paren } = *x;
+                let acc = f(eval_keyword, acc);
+                let acc = f(eval_left_paren, acc);
+                let acc = f(eval_argument, acc);
+                let acc = f(eval_right_paren, acc);
+                acc
+            },
+            SyntaxVariant::DefineExpression(x) => {
+                let DefineExpressionChildren { define_keyword, define_left_paren, define_argument_list, define_right_paren } = *x;
+                let acc = f(define_keyword, acc);
+                let acc = f(define_left_paren, acc);
+                let acc = f(define_argument_list, acc);
+                let acc = f(define_right_paren, acc);
+                acc
+            },
+            SyntaxVariant::HaltCompilerExpression(x) => {
+                let HaltCompilerExpressionChildren { halt_compiler_keyword, halt_compiler_left_paren, halt_compiler_argument_list, halt_compiler_right_paren } = *x;
+                let acc = f(halt_compiler_keyword, acc);
+                let acc = f(halt_compiler_left_paren, acc);
+                let acc = f(halt_compiler_argument_list, acc);
+                let acc = f(halt_compiler_right_paren, acc);
+                acc
+            },
+            SyntaxVariant::IssetExpression(x) => {
+                let IssetExpressionChildren { isset_keyword, isset_left_paren, isset_argument_list, isset_right_paren } = *x;
+                let acc = f(isset_keyword, acc);
+                let acc = f(isset_left_paren, acc);
+                let acc = f(isset_argument_list, acc);
+                let acc = f(isset_right_paren, acc);
+                acc
+            },
+            SyntaxVariant::FunctionCallExpression(x) => {
+                let FunctionCallExpressionChildren { function_call_receiver, function_call_type_args, function_call_left_paren, function_call_argument_list, function_call_right_paren } = *x;
+                let acc = f(function_call_receiver, acc);
+                let acc = f(function_call_type_args, acc);
+                let acc = f(function_call_left_paren, acc);
+                let acc = f(function_call_argument_list, acc);
+                let acc = f(function_call_right_paren, acc);
+                acc
+            },
+            SyntaxVariant::ParenthesizedExpression(x) => {
+                let ParenthesizedExpressionChildren { parenthesized_expression_left_paren, parenthesized_expression_expression, parenthesized_expression_right_paren } = *x;
+                let acc = f(parenthesized_expression_left_paren, acc);
+                let acc = f(parenthesized_expression_expression, acc);
+                let acc = f(parenthesized_expression_right_paren, acc);
+                acc
+            },
+            SyntaxVariant::BracedExpression(x) => {
+                let BracedExpressionChildren { braced_expression_left_brace, braced_expression_expression, braced_expression_right_brace } = *x;
+                let acc = f(braced_expression_left_brace, acc);
+                let acc = f(braced_expression_expression, acc);
+                let acc = f(braced_expression_right_brace, acc);
+                acc
+            },
+            SyntaxVariant::EmbeddedBracedExpression(x) => {
+                let EmbeddedBracedExpressionChildren { embedded_braced_expression_left_brace, embedded_braced_expression_expression, embedded_braced_expression_right_brace } = *x;
+                let acc = f(embedded_braced_expression_left_brace, acc);
+                let acc = f(embedded_braced_expression_expression, acc);
+                let acc = f(embedded_braced_expression_right_brace, acc);
+                acc
+            },
+            SyntaxVariant::ListExpression(x) => {
+                let ListExpressionChildren { list_keyword, list_left_paren, list_members, list_right_paren } = *x;
+                let acc = f(list_keyword, acc);
+                let acc = f(list_left_paren, acc);
+                let acc = f(list_members, acc);
+                let acc = f(list_right_paren, acc);
+                acc
+            },
+            SyntaxVariant::CollectionLiteralExpression(x) => {
+                let CollectionLiteralExpressionChildren { collection_literal_name, collection_literal_left_brace, collection_literal_initializers, collection_literal_right_brace } = *x;
+                let acc = f(collection_literal_name, acc);
+                let acc = f(collection_literal_left_brace, acc);
+                let acc = f(collection_literal_initializers, acc);
+                let acc = f(collection_literal_right_brace, acc);
+                acc
+            },
+            SyntaxVariant::ObjectCreationExpression(x) => {
+                let ObjectCreationExpressionChildren { object_creation_new_keyword, object_creation_object } = *x;
+                let acc = f(object_creation_new_keyword, acc);
+                let acc = f(object_creation_object, acc);
+                acc
+            },
+            SyntaxVariant::ConstructorCall(x) => {
+                let ConstructorCallChildren { constructor_call_type, constructor_call_left_paren, constructor_call_argument_list, constructor_call_right_paren } = *x;
+                let acc = f(constructor_call_type, acc);
+                let acc = f(constructor_call_left_paren, acc);
+                let acc = f(constructor_call_argument_list, acc);
+                let acc = f(constructor_call_right_paren, acc);
+                acc
+            },
+            SyntaxVariant::RecordCreationExpression(x) => {
+                let RecordCreationExpressionChildren { record_creation_type, record_creation_array_token, record_creation_left_bracket, record_creation_members, record_creation_right_bracket } = *x;
+                let acc = f(record_creation_type, acc);
+                let acc = f(record_creation_array_token, acc);
+                let acc = f(record_creation_left_bracket, acc);
+                let acc = f(record_creation_members, acc);
+                let acc = f(record_creation_right_bracket, acc);
+                acc
+            },
+            SyntaxVariant::ArrayCreationExpression(x) => {
+                let ArrayCreationExpressionChildren { array_creation_left_bracket, array_creation_members, array_creation_right_bracket } = *x;
+                let acc = f(array_creation_left_bracket, acc);
+                let acc = f(array_creation_members, acc);
+                let acc = f(array_creation_right_bracket, acc);
+                acc
+            },
+            SyntaxVariant::ArrayIntrinsicExpression(x) => {
+                let ArrayIntrinsicExpressionChildren { array_intrinsic_keyword, array_intrinsic_left_paren, array_intrinsic_members, array_intrinsic_right_paren } = *x;
+                let acc = f(array_intrinsic_keyword, acc);
+                let acc = f(array_intrinsic_left_paren, acc);
+                let acc = f(array_intrinsic_members, acc);
+                let acc = f(array_intrinsic_right_paren, acc);
+                acc
+            },
+            SyntaxVariant::DarrayIntrinsicExpression(x) => {
+                let DarrayIntrinsicExpressionChildren { darray_intrinsic_keyword, darray_intrinsic_explicit_type, darray_intrinsic_left_bracket, darray_intrinsic_members, darray_intrinsic_right_bracket } = *x;
+                let acc = f(darray_intrinsic_keyword, acc);
+                let acc = f(darray_intrinsic_explicit_type, acc);
+                let acc = f(darray_intrinsic_left_bracket, acc);
+                let acc = f(darray_intrinsic_members, acc);
+                let acc = f(darray_intrinsic_right_bracket, acc);
+                acc
+            },
+            SyntaxVariant::DictionaryIntrinsicExpression(x) => {
+                let DictionaryIntrinsicExpressionChildren { dictionary_intrinsic_keyword, dictionary_intrinsic_explicit_type, dictionary_intrinsic_left_bracket, dictionary_intrinsic_members, dictionary_intrinsic_right_bracket } = *x;
+                let acc = f(dictionary_intrinsic_keyword, acc);
+                let acc = f(dictionary_intrinsic_explicit_type, acc);
+                let acc = f(dictionary_intrinsic_left_bracket, acc);
+                let acc = f(dictionary_intrinsic_members, acc);
+                let acc = f(dictionary_intrinsic_right_bracket, acc);
+                acc
+            },
+            SyntaxVariant::KeysetIntrinsicExpression(x) => {
+                let KeysetIntrinsicExpressionChildren { keyset_intrinsic_keyword, keyset_intrinsic_explicit_type, keyset_intrinsic_left_bracket, keyset_intrinsic_members, keyset_intrinsic_right_bracket } = *x;
+                let acc = f(keyset_intrinsic_keyword, acc);
+                let acc = f(keyset_intrinsic_explicit_type, acc);
+                let acc = f(keyset_intrinsic_left_bracket, acc);
+                let acc = f(keyset_intrinsic_members, acc);
+                let acc = f(keyset_intrinsic_right_bracket, acc);
+                acc
+            },
+            SyntaxVariant::VarrayIntrinsicExpression(x) => {
+                let VarrayIntrinsicExpressionChildren { varray_intrinsic_keyword, varray_intrinsic_explicit_type, varray_intrinsic_left_bracket, varray_intrinsic_members, varray_intrinsic_right_bracket } = *x;
+                let acc = f(varray_intrinsic_keyword, acc);
+                let acc = f(varray_intrinsic_explicit_type, acc);
+                let acc = f(varray_intrinsic_left_bracket, acc);
+                let acc = f(varray_intrinsic_members, acc);
+                let acc = f(varray_intrinsic_right_bracket, acc);
+                acc
+            },
+            SyntaxVariant::VectorIntrinsicExpression(x) => {
+                let VectorIntrinsicExpressionChildren { vector_intrinsic_keyword, vector_intrinsic_explicit_type, vector_intrinsic_left_bracket, vector_intrinsic_members, vector_intrinsic_right_bracket } = *x;
+                let acc = f(vector_intrinsic_keyword, acc);
+                let acc = f(vector_intrinsic_explicit_type, acc);
+                let acc = f(vector_intrinsic_left_bracket, acc);
+                let acc = f(vector_intrinsic_members, acc);
+                let acc = f(vector_intrinsic_right_bracket, acc);
+                acc
+            },
+            SyntaxVariant::ElementInitializer(x) => {
+                let ElementInitializerChildren { element_key, element_arrow, element_value } = *x;
+                let acc = f(element_key, acc);
+                let acc = f(element_arrow, acc);
+                let acc = f(element_value, acc);
+                acc
+            },
+            SyntaxVariant::SubscriptExpression(x) => {
+                let SubscriptExpressionChildren { subscript_receiver, subscript_left_bracket, subscript_index, subscript_right_bracket } = *x;
+                let acc = f(subscript_receiver, acc);
+                let acc = f(subscript_left_bracket, acc);
+                let acc = f(subscript_index, acc);
+                let acc = f(subscript_right_bracket, acc);
+                acc
+            },
+            SyntaxVariant::EmbeddedSubscriptExpression(x) => {
+                let EmbeddedSubscriptExpressionChildren { embedded_subscript_receiver, embedded_subscript_left_bracket, embedded_subscript_index, embedded_subscript_right_bracket } = *x;
+                let acc = f(embedded_subscript_receiver, acc);
+                let acc = f(embedded_subscript_left_bracket, acc);
+                let acc = f(embedded_subscript_index, acc);
+                let acc = f(embedded_subscript_right_bracket, acc);
+                acc
+            },
+            SyntaxVariant::AwaitableCreationExpression(x) => {
+                let AwaitableCreationExpressionChildren { awaitable_attribute_spec, awaitable_async, awaitable_coroutine, awaitable_compound_statement } = *x;
+                let acc = f(awaitable_attribute_spec, acc);
+                let acc = f(awaitable_async, acc);
+                let acc = f(awaitable_coroutine, acc);
+                let acc = f(awaitable_compound_statement, acc);
+                acc
+            },
+            SyntaxVariant::XHPChildrenDeclaration(x) => {
+                let XHPChildrenDeclarationChildren { xhp_children_keyword, xhp_children_expression, xhp_children_semicolon } = *x;
+                let acc = f(xhp_children_keyword, acc);
+                let acc = f(xhp_children_expression, acc);
+                let acc = f(xhp_children_semicolon, acc);
+                acc
+            },
+            SyntaxVariant::XHPChildrenParenthesizedList(x) => {
+                let XHPChildrenParenthesizedListChildren { xhp_children_list_left_paren, xhp_children_list_xhp_children, xhp_children_list_right_paren } = *x;
+                let acc = f(xhp_children_list_left_paren, acc);
+                let acc = f(xhp_children_list_xhp_children, acc);
+                let acc = f(xhp_children_list_right_paren, acc);
+                acc
+            },
+            SyntaxVariant::XHPCategoryDeclaration(x) => {
+                let XHPCategoryDeclarationChildren { xhp_category_keyword, xhp_category_categories, xhp_category_semicolon } = *x;
+                let acc = f(xhp_category_keyword, acc);
+                let acc = f(xhp_category_categories, acc);
+                let acc = f(xhp_category_semicolon, acc);
+                acc
+            },
+            SyntaxVariant::XHPEnumType(x) => {
+                let XHPEnumTypeChildren { xhp_enum_optional, xhp_enum_keyword, xhp_enum_left_brace, xhp_enum_values, xhp_enum_right_brace } = *x;
+                let acc = f(xhp_enum_optional, acc);
+                let acc = f(xhp_enum_keyword, acc);
+                let acc = f(xhp_enum_left_brace, acc);
+                let acc = f(xhp_enum_values, acc);
+                let acc = f(xhp_enum_right_brace, acc);
+                acc
+            },
+            SyntaxVariant::XHPLateinit(x) => {
+                let XHPLateinitChildren { xhp_lateinit_at, xhp_lateinit_keyword } = *x;
+                let acc = f(xhp_lateinit_at, acc);
+                let acc = f(xhp_lateinit_keyword, acc);
+                acc
+            },
+            SyntaxVariant::XHPRequired(x) => {
+                let XHPRequiredChildren { xhp_required_at, xhp_required_keyword } = *x;
+                let acc = f(xhp_required_at, acc);
+                let acc = f(xhp_required_keyword, acc);
+                acc
+            },
+            SyntaxVariant::XHPClassAttributeDeclaration(x) => {
+                let XHPClassAttributeDeclarationChildren { xhp_attribute_keyword, xhp_attribute_attributes, xhp_attribute_semicolon } = *x;
+                let acc = f(xhp_attribute_keyword, acc);
+                let acc = f(xhp_attribute_attributes, acc);
+                let acc = f(xhp_attribute_semicolon, acc);
+                acc
+            },
+            SyntaxVariant::XHPClassAttribute(x) => {
+                let XHPClassAttributeChildren { xhp_attribute_decl_type, xhp_attribute_decl_name, xhp_attribute_decl_initializer, xhp_attribute_decl_required } = *x;
+                let acc = f(xhp_attribute_decl_type, acc);
+                let acc = f(xhp_attribute_decl_name, acc);
+                let acc = f(xhp_attribute_decl_initializer, acc);
+                let acc = f(xhp_attribute_decl_required, acc);
+                acc
+            },
+            SyntaxVariant::XHPSimpleClassAttribute(x) => {
+                let XHPSimpleClassAttributeChildren { xhp_simple_class_attribute_type } = *x;
+                let acc = f(xhp_simple_class_attribute_type, acc);
+                acc
+            },
+            SyntaxVariant::XHPSimpleAttribute(x) => {
+                let XHPSimpleAttributeChildren { xhp_simple_attribute_name, xhp_simple_attribute_equal, xhp_simple_attribute_expression } = *x;
+                let acc = f(xhp_simple_attribute_name, acc);
+                let acc = f(xhp_simple_attribute_equal, acc);
+                let acc = f(xhp_simple_attribute_expression, acc);
+                acc
+            },
+            SyntaxVariant::XHPSpreadAttribute(x) => {
+                let XHPSpreadAttributeChildren { xhp_spread_attribute_left_brace, xhp_spread_attribute_spread_operator, xhp_spread_attribute_expression, xhp_spread_attribute_right_brace } = *x;
+                let acc = f(xhp_spread_attribute_left_brace, acc);
+                let acc = f(xhp_spread_attribute_spread_operator, acc);
+                let acc = f(xhp_spread_attribute_expression, acc);
+                let acc = f(xhp_spread_attribute_right_brace, acc);
+                acc
+            },
+            SyntaxVariant::XHPOpen(x) => {
+                let XHPOpenChildren { xhp_open_left_angle, xhp_open_name, xhp_open_attributes, xhp_open_right_angle } = *x;
+                let acc = f(xhp_open_left_angle, acc);
+                let acc = f(xhp_open_name, acc);
+                let acc = f(xhp_open_attributes, acc);
+                let acc = f(xhp_open_right_angle, acc);
+                acc
+            },
+            SyntaxVariant::XHPExpression(x) => {
+                let XHPExpressionChildren { xhp_open, xhp_body, xhp_close } = *x;
+                let acc = f(xhp_open, acc);
+                let acc = f(xhp_body, acc);
+                let acc = f(xhp_close, acc);
+                acc
+            },
+            SyntaxVariant::XHPClose(x) => {
+                let XHPCloseChildren { xhp_close_left_angle, xhp_close_name, xhp_close_right_angle } = *x;
+                let acc = f(xhp_close_left_angle, acc);
+                let acc = f(xhp_close_name, acc);
+                let acc = f(xhp_close_right_angle, acc);
+                acc
+            },
+            SyntaxVariant::TypeConstant(x) => {
+                let TypeConstantChildren { type_constant_left_type, type_constant_separator, type_constant_right_type } = *x;
+                let acc = f(type_constant_left_type, acc);
+                let acc = f(type_constant_separator, acc);
+                let acc = f(type_constant_right_type, acc);
+                acc
+            },
+            SyntaxVariant::PUAccess(x) => {
+                let PUAccessChildren { pu_access_left_type, pu_access_separator, pu_access_right_type } = *x;
+                let acc = f(pu_access_left_type, acc);
+                let acc = f(pu_access_separator, acc);
+                let acc = f(pu_access_right_type, acc);
+                acc
+            },
+            SyntaxVariant::VectorTypeSpecifier(x) => {
+                let VectorTypeSpecifierChildren { vector_type_keyword, vector_type_left_angle, vector_type_type, vector_type_trailing_comma, vector_type_right_angle } = *x;
+                let acc = f(vector_type_keyword, acc);
+                let acc = f(vector_type_left_angle, acc);
+                let acc = f(vector_type_type, acc);
+                let acc = f(vector_type_trailing_comma, acc);
+                let acc = f(vector_type_right_angle, acc);
+                acc
+            },
+            SyntaxVariant::KeysetTypeSpecifier(x) => {
+                let KeysetTypeSpecifierChildren { keyset_type_keyword, keyset_type_left_angle, keyset_type_type, keyset_type_trailing_comma, keyset_type_right_angle } = *x;
+                let acc = f(keyset_type_keyword, acc);
+                let acc = f(keyset_type_left_angle, acc);
+                let acc = f(keyset_type_type, acc);
+                let acc = f(keyset_type_trailing_comma, acc);
+                let acc = f(keyset_type_right_angle, acc);
+                acc
+            },
+            SyntaxVariant::TupleTypeExplicitSpecifier(x) => {
+                let TupleTypeExplicitSpecifierChildren { tuple_type_keyword, tuple_type_left_angle, tuple_type_types, tuple_type_right_angle } = *x;
+                let acc = f(tuple_type_keyword, acc);
+                let acc = f(tuple_type_left_angle, acc);
+                let acc = f(tuple_type_types, acc);
+                let acc = f(tuple_type_right_angle, acc);
+                acc
+            },
+            SyntaxVariant::VarrayTypeSpecifier(x) => {
+                let VarrayTypeSpecifierChildren { varray_keyword, varray_left_angle, varray_type, varray_trailing_comma, varray_right_angle } = *x;
+                let acc = f(varray_keyword, acc);
+                let acc = f(varray_left_angle, acc);
+                let acc = f(varray_type, acc);
+                let acc = f(varray_trailing_comma, acc);
+                let acc = f(varray_right_angle, acc);
+                acc
+            },
+            SyntaxVariant::VectorArrayTypeSpecifier(x) => {
+                let VectorArrayTypeSpecifierChildren { vector_array_keyword, vector_array_left_angle, vector_array_type, vector_array_right_angle } = *x;
+                let acc = f(vector_array_keyword, acc);
+                let acc = f(vector_array_left_angle, acc);
+                let acc = f(vector_array_type, acc);
+                let acc = f(vector_array_right_angle, acc);
+                acc
+            },
+            SyntaxVariant::TypeParameter(x) => {
+                let TypeParameterChildren { type_attribute_spec, type_reified, type_variance, type_name, type_constraints } = *x;
+                let acc = f(type_attribute_spec, acc);
+                let acc = f(type_reified, acc);
+                let acc = f(type_variance, acc);
+                let acc = f(type_name, acc);
+                let acc = f(type_constraints, acc);
+                acc
+            },
+            SyntaxVariant::TypeConstraint(x) => {
+                let TypeConstraintChildren { constraint_keyword, constraint_type } = *x;
+                let acc = f(constraint_keyword, acc);
+                let acc = f(constraint_type, acc);
+                acc
+            },
+            SyntaxVariant::DarrayTypeSpecifier(x) => {
+                let DarrayTypeSpecifierChildren { darray_keyword, darray_left_angle, darray_key, darray_comma, darray_value, darray_trailing_comma, darray_right_angle } = *x;
+                let acc = f(darray_keyword, acc);
+                let acc = f(darray_left_angle, acc);
+                let acc = f(darray_key, acc);
+                let acc = f(darray_comma, acc);
+                let acc = f(darray_value, acc);
+                let acc = f(darray_trailing_comma, acc);
+                let acc = f(darray_right_angle, acc);
+                acc
+            },
+            SyntaxVariant::MapArrayTypeSpecifier(x) => {
+                let MapArrayTypeSpecifierChildren { map_array_keyword, map_array_left_angle, map_array_key, map_array_comma, map_array_value, map_array_right_angle } = *x;
+                let acc = f(map_array_keyword, acc);
+                let acc = f(map_array_left_angle, acc);
+                let acc = f(map_array_key, acc);
+                let acc = f(map_array_comma, acc);
+                let acc = f(map_array_value, acc);
+                let acc = f(map_array_right_angle, acc);
+                acc
+            },
+            SyntaxVariant::DictionaryTypeSpecifier(x) => {
+                let DictionaryTypeSpecifierChildren { dictionary_type_keyword, dictionary_type_left_angle, dictionary_type_members, dictionary_type_right_angle } = *x;
+                let acc = f(dictionary_type_keyword, acc);
+                let acc = f(dictionary_type_left_angle, acc);
+                let acc = f(dictionary_type_members, acc);
+                let acc = f(dictionary_type_right_angle, acc);
+                acc
+            },
+            SyntaxVariant::ClosureTypeSpecifier(x) => {
+                let ClosureTypeSpecifierChildren { closure_outer_left_paren, closure_coroutine, closure_function_keyword, closure_inner_left_paren, closure_parameter_list, closure_inner_right_paren, closure_colon, closure_return_type, closure_outer_right_paren } = *x;
+                let acc = f(closure_outer_left_paren, acc);
+                let acc = f(closure_coroutine, acc);
+                let acc = f(closure_function_keyword, acc);
+                let acc = f(closure_inner_left_paren, acc);
+                let acc = f(closure_parameter_list, acc);
+                let acc = f(closure_inner_right_paren, acc);
+                let acc = f(closure_colon, acc);
+                let acc = f(closure_return_type, acc);
+                let acc = f(closure_outer_right_paren, acc);
+                acc
+            },
+            SyntaxVariant::ClosureParameterTypeSpecifier(x) => {
+                let ClosureParameterTypeSpecifierChildren { closure_parameter_call_convention, closure_parameter_type } = *x;
+                let acc = f(closure_parameter_call_convention, acc);
+                let acc = f(closure_parameter_type, acc);
+                acc
+            },
+            SyntaxVariant::ClassnameTypeSpecifier(x) => {
+                let ClassnameTypeSpecifierChildren { classname_keyword, classname_left_angle, classname_type, classname_trailing_comma, classname_right_angle } = *x;
+                let acc = f(classname_keyword, acc);
+                let acc = f(classname_left_angle, acc);
+                let acc = f(classname_type, acc);
+                let acc = f(classname_trailing_comma, acc);
+                let acc = f(classname_right_angle, acc);
+                acc
+            },
+            SyntaxVariant::FieldSpecifier(x) => {
+                let FieldSpecifierChildren { field_question, field_name, field_arrow, field_type } = *x;
+                let acc = f(field_question, acc);
+                let acc = f(field_name, acc);
+                let acc = f(field_arrow, acc);
+                let acc = f(field_type, acc);
+                acc
+            },
+            SyntaxVariant::FieldInitializer(x) => {
+                let FieldInitializerChildren { field_initializer_name, field_initializer_arrow, field_initializer_value } = *x;
+                let acc = f(field_initializer_name, acc);
+                let acc = f(field_initializer_arrow, acc);
+                let acc = f(field_initializer_value, acc);
+                acc
+            },
+            SyntaxVariant::ShapeTypeSpecifier(x) => {
+                let ShapeTypeSpecifierChildren { shape_type_keyword, shape_type_left_paren, shape_type_fields, shape_type_ellipsis, shape_type_right_paren } = *x;
+                let acc = f(shape_type_keyword, acc);
+                let acc = f(shape_type_left_paren, acc);
+                let acc = f(shape_type_fields, acc);
+                let acc = f(shape_type_ellipsis, acc);
+                let acc = f(shape_type_right_paren, acc);
+                acc
+            },
+            SyntaxVariant::ShapeExpression(x) => {
+                let ShapeExpressionChildren { shape_expression_keyword, shape_expression_left_paren, shape_expression_fields, shape_expression_right_paren } = *x;
+                let acc = f(shape_expression_keyword, acc);
+                let acc = f(shape_expression_left_paren, acc);
+                let acc = f(shape_expression_fields, acc);
+                let acc = f(shape_expression_right_paren, acc);
+                acc
+            },
+            SyntaxVariant::TupleExpression(x) => {
+                let TupleExpressionChildren { tuple_expression_keyword, tuple_expression_left_paren, tuple_expression_items, tuple_expression_right_paren } = *x;
+                let acc = f(tuple_expression_keyword, acc);
+                let acc = f(tuple_expression_left_paren, acc);
+                let acc = f(tuple_expression_items, acc);
+                let acc = f(tuple_expression_right_paren, acc);
+                acc
+            },
+            SyntaxVariant::GenericTypeSpecifier(x) => {
+                let GenericTypeSpecifierChildren { generic_class_type, generic_argument_list } = *x;
+                let acc = f(generic_class_type, acc);
+                let acc = f(generic_argument_list, acc);
+                acc
+            },
+            SyntaxVariant::NullableTypeSpecifier(x) => {
+                let NullableTypeSpecifierChildren { nullable_question, nullable_type } = *x;
+                let acc = f(nullable_question, acc);
+                let acc = f(nullable_type, acc);
+                acc
+            },
+            SyntaxVariant::LikeTypeSpecifier(x) => {
+                let LikeTypeSpecifierChildren { like_tilde, like_type } = *x;
+                let acc = f(like_tilde, acc);
+                let acc = f(like_type, acc);
+                acc
+            },
+            SyntaxVariant::SoftTypeSpecifier(x) => {
+                let SoftTypeSpecifierChildren { soft_at, soft_type } = *x;
+                let acc = f(soft_at, acc);
+                let acc = f(soft_type, acc);
+                acc
+            },
+            SyntaxVariant::AttributizedSpecifier(x) => {
+                let AttributizedSpecifierChildren { attributized_specifier_attribute_spec, attributized_specifier_type } = *x;
+                let acc = f(attributized_specifier_attribute_spec, acc);
+                let acc = f(attributized_specifier_type, acc);
+                acc
+            },
+            SyntaxVariant::ReifiedTypeArgument(x) => {
+                let ReifiedTypeArgumentChildren { reified_type_argument_reified, reified_type_argument_type } = *x;
+                let acc = f(reified_type_argument_reified, acc);
+                let acc = f(reified_type_argument_type, acc);
+                acc
+            },
+            SyntaxVariant::TypeArguments(x) => {
+                let TypeArgumentsChildren { type_arguments_left_angle, type_arguments_types, type_arguments_right_angle } = *x;
+                let acc = f(type_arguments_left_angle, acc);
+                let acc = f(type_arguments_types, acc);
+                let acc = f(type_arguments_right_angle, acc);
+                acc
+            },
+            SyntaxVariant::TypeParameters(x) => {
+                let TypeParametersChildren { type_parameters_left_angle, type_parameters_parameters, type_parameters_right_angle } = *x;
+                let acc = f(type_parameters_left_angle, acc);
+                let acc = f(type_parameters_parameters, acc);
+                let acc = f(type_parameters_right_angle, acc);
+                acc
+            },
+            SyntaxVariant::TupleTypeSpecifier(x) => {
+                let TupleTypeSpecifierChildren { tuple_left_paren, tuple_types, tuple_right_paren } = *x;
+                let acc = f(tuple_left_paren, acc);
+                let acc = f(tuple_types, acc);
+                let acc = f(tuple_right_paren, acc);
+                acc
+            },
+            SyntaxVariant::ErrorSyntax(x) => {
+                let ErrorSyntaxChildren { error_error } = *x;
+                let acc = f(error_error, acc);
+                acc
+            },
+            SyntaxVariant::ListItem(x) => {
+                let ListItemChildren { list_item, list_separator } = *x;
+                let acc = f(list_item, acc);
+                let acc = f(list_separator, acc);
+                acc
+            },
+            SyntaxVariant::PocketAtomExpression(x) => {
+                let PocketAtomExpressionChildren { pocket_atom_glyph, pocket_atom_expression } = *x;
+                let acc = f(pocket_atom_glyph, acc);
+                let acc = f(pocket_atom_expression, acc);
+                acc
+            },
+            SyntaxVariant::PocketIdentifierExpression(x) => {
+                let PocketIdentifierExpressionChildren { pocket_identifier_qualifier, pocket_identifier_pu_operator, pocket_identifier_field, pocket_identifier_operator, pocket_identifier_name } = *x;
+                let acc = f(pocket_identifier_qualifier, acc);
+                let acc = f(pocket_identifier_pu_operator, acc);
+                let acc = f(pocket_identifier_field, acc);
+                let acc = f(pocket_identifier_operator, acc);
+                let acc = f(pocket_identifier_name, acc);
+                acc
+            },
+            SyntaxVariant::PocketAtomMappingDeclaration(x) => {
+                let PocketAtomMappingDeclarationChildren { pocket_atom_mapping_glyph, pocket_atom_mapping_name, pocket_atom_mapping_left_paren, pocket_atom_mapping_mappings, pocket_atom_mapping_right_paren, pocket_atom_mapping_semicolon } = *x;
+                let acc = f(pocket_atom_mapping_glyph, acc);
+                let acc = f(pocket_atom_mapping_name, acc);
+                let acc = f(pocket_atom_mapping_left_paren, acc);
+                let acc = f(pocket_atom_mapping_mappings, acc);
+                let acc = f(pocket_atom_mapping_right_paren, acc);
+                let acc = f(pocket_atom_mapping_semicolon, acc);
+                acc
+            },
+            SyntaxVariant::PocketEnumDeclaration(x) => {
+                let PocketEnumDeclarationChildren { pocket_enum_modifiers, pocket_enum_enum, pocket_enum_name, pocket_enum_left_brace, pocket_enum_fields, pocket_enum_right_brace } = *x;
+                let acc = f(pocket_enum_modifiers, acc);
+                let acc = f(pocket_enum_enum, acc);
+                let acc = f(pocket_enum_name, acc);
+                let acc = f(pocket_enum_left_brace, acc);
+                let acc = f(pocket_enum_fields, acc);
+                let acc = f(pocket_enum_right_brace, acc);
+                acc
+            },
+            SyntaxVariant::PocketFieldTypeExprDeclaration(x) => {
+                let PocketFieldTypeExprDeclarationChildren { pocket_field_type_expr_case, pocket_field_type_expr_type, pocket_field_type_expr_name, pocket_field_type_expr_semicolon } = *x;
+                let acc = f(pocket_field_type_expr_case, acc);
+                let acc = f(pocket_field_type_expr_type, acc);
+                let acc = f(pocket_field_type_expr_name, acc);
+                let acc = f(pocket_field_type_expr_semicolon, acc);
+                acc
+            },
+            SyntaxVariant::PocketFieldTypeDeclaration(x) => {
+                let PocketFieldTypeDeclarationChildren { pocket_field_type_case, pocket_field_type_type, pocket_field_type_name, pocket_field_type_semicolon } = *x;
+                let acc = f(pocket_field_type_case, acc);
+                let acc = f(pocket_field_type_type, acc);
+                let acc = f(pocket_field_type_name, acc);
+                let acc = f(pocket_field_type_semicolon, acc);
+                acc
+            },
+            SyntaxVariant::PocketMappingIdDeclaration(x) => {
+                let PocketMappingIdDeclarationChildren { pocket_mapping_id_name, pocket_mapping_id_initializer } = *x;
+                let acc = f(pocket_mapping_id_name, acc);
+                let acc = f(pocket_mapping_id_initializer, acc);
+                acc
+            },
+            SyntaxVariant::PocketMappingTypeDeclaration(x) => {
+                let PocketMappingTypeDeclarationChildren { pocket_mapping_type_keyword, pocket_mapping_type_name, pocket_mapping_type_equal, pocket_mapping_type_type } = *x;
+                let acc = f(pocket_mapping_type_keyword, acc);
+                let acc = f(pocket_mapping_type_name, acc);
+                let acc = f(pocket_mapping_type_equal, acc);
+                let acc = f(pocket_mapping_type_type, acc);
+                acc
+            },
+
+        }
+    }
+
     pub fn kind(&self) -> SyntaxKind {
         match &self.syntax {
             SyntaxVariant::Missing => SyntaxKind::Missing,

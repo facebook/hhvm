@@ -541,6 +541,31 @@ module GenerateFFRustSyntax = struct
       x.kind_name
       fields
 
+  let fold_over_owned x =
+    let fold_mapper prefix (f, _) =
+      sprintf "let acc = f(%s_%s, acc)" prefix f
+    in
+    let fold_fields =
+      map_and_concat_separated
+        ";\n                "
+        (fold_mapper x.prefix)
+        x.fields
+    in
+    let destructure_mapper prefix (f, _) = sprintf "%s_%s" prefix f in
+    let destructure_fields =
+      map_and_concat_separated ", " (destructure_mapper x.prefix) x.fields
+    in
+    sprintf
+      "            SyntaxVariant::%s(x) => {
+                let %sChildren { %s } = *x;
+                %s;
+                acc
+            },\n"
+      x.kind_name
+      x.kind_name
+      destructure_fields
+      fold_fields
+
   let to_syntax_variant x =
     sprintf "    %s(Box<%sChildren<T, V>>),\n" x.kind_name x.kind_name
 
@@ -627,6 +652,25 @@ FOLD_OVER_CHILDREN
         }
     }
 
+    pub fn fold_over_children_owned<U>(
+        f: &dyn Fn(Self, U) -> U,
+        acc: U,
+        syntax: SyntaxVariant<T, V>,
+    ) -> U {
+        match syntax {
+            SyntaxVariant::Missing => acc,
+            SyntaxVariant::Token (_) => acc,
+            SyntaxVariant::SyntaxList(elems) => {
+                let mut acc = acc;
+                for item in elems {
+                    acc = f(item, acc);
+                }
+                acc
+            },
+FOLD_OVER_CHILDREN_OWNED
+        }
+    }
+
     pub fn kind(&self) -> SyntaxKind {
         match &self.syntax {
             SyntaxVariant::Missing => SyntaxKind::Missing,
@@ -660,6 +704,7 @@ SYNTAX_VARIANT}
           { pattern = "SYNTAX_CHILDREN"; func = to_syntax_variant_children };
           { pattern = "SYNTAX_CONSTRUCTORS"; func = to_syntax_constructors };
           { pattern = "FOLD_OVER_CHILDREN"; func = fold_over };
+          { pattern = "FOLD_OVER_CHILDREN_OWNED"; func = fold_over_owned };
           { pattern = "TO_KIND"; func = to_kind };
           { pattern = "SYNTAX_FROM_CHILDREN"; func = to_syntax_from_children }
         ]

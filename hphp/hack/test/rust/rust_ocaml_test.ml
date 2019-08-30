@@ -431,9 +431,21 @@ module LowererTest_ = struct
     | Tree of (Ast_defs.pos, unit, unit, unit) Aast.program
     | Crash
 
+  let print_aast path aast =
+    let print_pos pos = Format.asprintf "(%a)" Pos.pp pos in
+    let pp_pos fmt pos = Format.pp_print_string fmt (print_pos pos) in
+    let pp_unit fmt _ = Format.pp_print_string fmt "" in
+    let oc = Pervasives.open_out path in
+    Printf.fprintf
+      oc
+      "%s\n"
+      (Aast.show_program pp_pos pp_unit pp_unit pp_unit aast)
+
   let build_ocaml_tree _env file source_text =
     let i x = x in
-    let env = OcamlLowerer.make_env file ~keep_errors:false in
+    let env =
+      OcamlLowerer.make_env file ~keep_errors:false ~elaborate_namespaces:false
+    in
     try
       let ast = OcamlLowerer.from_text env source_text in
       let aast = Ast_to_aast.convert_program i () () () ast.OcamlLowerer.ast in
@@ -449,19 +461,27 @@ module LowererTest_ = struct
       | RustLowerer.Err _ -> Crash
     with _ -> Crash
 
-  let test _args ~ocaml_env ~rust_env file contents =
+  let test args ~ocaml_env ~rust_env file contents =
     let source_text = SourceText.make file contents in
     let path = Relative_path.to_absolute file in
     let ocaml_tree = build_ocaml_tree ocaml_env file source_text in
     let rust_tree = build_rust_tree rust_env file source_text in
     (match (ocaml_tree, rust_tree) with
-    | (Tree ot, Tree rt) when ot = rt -> Printf.printf "EQUAL: "
-    | (Tree _, Tree _) -> Printf.printf "NOT_EQUAL: "
-    | (Tree _, Crash) -> Printf.printf "OCAML PASS: RUST_CRASH: "
-    | (Crash, Tree _) -> Printf.printf "OCAML_CRASH: RUST_PASS: "
-    | (Crash, Crash) -> Printf.printf "OCAML_CRASH: RUST_CRASH: ");
+    | (Tree ot, Tree rt) when ot = rt -> Printf.printf ":EQUAL: "
+    | (Tree _, Tree _) -> Printf.printf ":NOT_EQUAL: "
+    | (Tree _, Crash) -> Printf.printf ":OCAML_PASS: :RUST_CRASH: "
+    | (Crash, Tree _) -> Printf.printf ":OCAML_CRASH: :RUST_PASS: "
+    | (Crash, Crash) -> Printf.printf ":OCAML_CRASH: :RUST_CRASH: ");
     Printf.printf "%s\n" path;
-    flush stdout
+    flush stdout;
+    if args.check_printed_tree then (
+      (match ocaml_tree with
+      | Tree t -> print_aast "/tmp/ocaml.aast" t
+      | _ -> ());
+      match rust_tree with
+      | Tree t -> print_aast "/tmp/rust.aast" t
+      | _ -> ()
+    )
 end
 
 module LowererTest = Runner (LowererTest_)

@@ -141,7 +141,7 @@ bool php_mail(const String& to, const String& subject, const String& message,
 ///////////////////////////////////////////////////////////////////////////////
 
 const StaticString
-  s_zero("\0", 1),
+  s_zero("\0"),
   s_space(" ");
 
 bool HHVM_FUNCTION(mail,

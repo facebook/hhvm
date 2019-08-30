@@ -55,7 +55,7 @@ static Mutex s_mutex;
 
 const StaticString
   s_HPHP_TRIM_CHARLIST("HPHP_TRIM_CHARLIST"),
-  k_HPHP_TRIM_CHARLIST("\n\r\t\x0b\x00 ", 6);
+  k_HPHP_TRIM_CHARLIST("\n\r\t\x0b\x00 ");
 
 ///////////////////////////////////////////////////////////////////////////////
 

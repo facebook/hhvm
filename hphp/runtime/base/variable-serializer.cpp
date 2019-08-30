@@ -48,15 +48,13 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-extern const StaticString
-  s_serializedNativeDataKey(std::string("\0native", 7));
-
 const StaticString
+  s_serializedNativeDataKey("\0native"),
   s_JsonSerializable("JsonSerializable"),
   s_jsonSerialize("jsonSerialize"),
   s_serialize("serialize"),
-  s_zero("\0", 1),
-  s_protected_prefix("\0*\0", 3),
+  s_zero("\0"),
+  s_protected_prefix("\0*\0"),
   s_PHP_DebugDisplay("__PHP_DebugDisplay"),
   s_PHP_Incomplete_Class("__PHP_Incomplete_Class"),
   s_PHP_Incomplete_Class_Name("__PHP_Incomplete_Class_Name"),

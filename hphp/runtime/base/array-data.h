@@ -198,7 +198,7 @@ public:
    * DArrays are compatible when it is not set. Empty arrays are always
    * compatible. No other types are compatible.
    *
-   * This function will return staticEmptyShapeArray when this is empty and it
+   * This function will return ArrayData::CreateShape when this is empty and it
    * will return this otherwise.
    */
   ArrayData* toShapeInPlaceIfCompatible();

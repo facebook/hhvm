@@ -1110,9 +1110,11 @@ static void shuffleMagicArgs(ActRec* ar) {
       if (RuntimeOption::EvalHackArrDVArrs) {
         return nargs
           ? PackedArray::MakeVec(nargs, args)
-          : staticEmptyVecArray();
+          : ArrayData::CreateVec();
       }
-      return nargs ? PackedArray::MakeVArray(nargs, args) : staticEmptyVArray();
+      return nargs
+        ? PackedArray::MakeVArray(nargs, args)
+        : ArrayData::CreateVArray();
     }()
   );
 
@@ -1183,11 +1185,11 @@ static NEVER_INLINE void shuffleMagicArrayArgs(ActRec* ar, const Cell args,
         if (RuntimeOption::EvalHackArrDVArrs) {
           return nregular
             ? PackedArray::MakeVec(nregular, args)
-            : staticEmptyVecArray();
+            : ArrayData::CreateVec();
         }
         return nregular
           ? PackedArray::MakeVArray(nregular, args)
-          : staticEmptyVArray();
+          : ArrayData::CreateVArray();
       }()
     );
 
@@ -1493,9 +1495,9 @@ static void prepareFuncEntry(ActRec *ar, StackArgsState stk) {
       }
       if (UNLIKELY(func->hasVariadicCaptureParam())) {
         if (RuntimeOption::EvalHackArrDVArrs) {
-          stack.pushVecNoRc(staticEmptyVecArray());
+          stack.pushVecNoRc(ArrayData::CreateVec());
         } else {
-          stack.pushArrayNoRc(staticEmptyVArray());
+          stack.pushArrayNoRc(ArrayData::CreateVArray());
         }
       }
       if (func->attrs() & AttrMayUseVV) {
@@ -1979,7 +1981,7 @@ OPTBLD_INLINE void iopKeyset(const ArrayData* a) {
 
 OPTBLD_INLINE void iopNewArray(uint32_t capacity) {
   if (capacity == 0) {
-    vmStack().pushArrayNoRc(staticEmptyArray());
+    vmStack().pushArrayNoRc(ArrayData::Create());
   } else {
     vmStack().pushArrayNoRc(PackedArray::MakeReserve(capacity));
   }
@@ -1987,7 +1989,7 @@ OPTBLD_INLINE void iopNewArray(uint32_t capacity) {
 
 OPTBLD_INLINE void iopNewMixedArray(uint32_t capacity) {
   if (capacity == 0) {
-    vmStack().pushArrayNoRc(staticEmptyArray());
+    vmStack().pushArrayNoRc(ArrayData::Create());
   } else {
     vmStack().pushArrayNoRc(MixedArray::MakeReserveMixed(capacity));
   }
@@ -1995,7 +1997,7 @@ OPTBLD_INLINE void iopNewMixedArray(uint32_t capacity) {
 
 OPTBLD_INLINE void iopNewDictArray(uint32_t capacity) {
   auto const ad = capacity == 0
-    ? staticEmptyDictArray()
+    ? ArrayData::CreateDict()
     : MixedArray::MakeReserveDict(capacity);
   vmStack().pushDictNoRc(ad);
 }
@@ -2082,7 +2084,7 @@ OPTBLD_INLINE void iopNewVArray(uint32_t n) {
 OPTBLD_INLINE void iopNewDArray(uint32_t capacity) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
   if (capacity == 0) {
-    vmStack().pushArrayNoRc(staticEmptyDArray());
+    vmStack().pushArrayNoRc(ArrayData::CreateDArray());
   } else {
     vmStack().pushArrayNoRc(MixedArray::MakeReserveDArray(capacity));
   }
@@ -4579,7 +4581,7 @@ bool doFCall(ActRec* ar, uint32_t numArgs, bool unpack) {
         Cell tmp = *c1;
         // argument_unpacking RFC dictates "containers and Traversables"
         raise_warning_unsampled("Only containers may be unpacked");
-        *c1 = make_persistent_array_like_tv(staticEmptyVArray());
+        *c1 = make_persistent_array_like_tv(ArrayData::CreateVArray());
         tvDecRefGen(&tmp);
       }
 

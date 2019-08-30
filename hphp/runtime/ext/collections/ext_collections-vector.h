@@ -33,7 +33,7 @@ protected:
   explicit BaseVector(Class* cls, HeaderKind kind)
     : ObjectData(cls, NoInit{}, ObjectData::NoAttrs, kind)
     , m_unusedAndSize(0)
-    , m_arr(staticEmptyVecArray())
+    , m_arr(ArrayData::CreateVec())
   {}
   explicit BaseVector(Class* cls, HeaderKind kind, ArrayData* arr)
     : ObjectData(cls, NoInit{}, ObjectData::NoAttrs, kind)

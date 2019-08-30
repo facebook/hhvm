@@ -1896,7 +1896,7 @@ inline bool isa_non_null(const Variant& v) {
 // and type-array
 template <IntishCast IC>
 ALWAYS_INLINE Cell Array::convertKey(Cell k) const {
-  return cellToKey<IC>(k, m_arr ? m_arr.get() : staticEmptyArray());
+  return cellToKey<IC>(k, m_arr ? m_arr.get() : ArrayData::Create());
 }
 template <IntishCast IC>
 ALWAYS_INLINE Cell Array::convertKey(const Variant& k) const {

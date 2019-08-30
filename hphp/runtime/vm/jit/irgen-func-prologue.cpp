@@ -210,7 +210,7 @@ void init_params(IRGS& env, const Func* func, uint32_t argc) {
   if (argc <= nparams && func->hasVariadicCaptureParam()) {
     // Need to initialize `...$args'.
     gen(env, StLoc, LocalId{nparams}, fp(env),
-        cns(env, staticEmptyVArray()));
+        cns(env, ArrayData::CreateVArray()));
   }
 
   if (!isInlining(env)) {

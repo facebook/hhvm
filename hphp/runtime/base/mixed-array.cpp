@@ -465,7 +465,7 @@ MixedArray* MixedArray::SlowCopy(MixedArray* ad, const ArrayData& old,
         ad->m_size = i;
         ad->m_pos = 0;
         Release(ad);
-        throwRefInvalidArrayValueException(staticEmptyDictArray());
+        throwRefInvalidArrayValueException(ArrayData::CreateDict());
       }
     }
     // When we convert an element to a tombstone, we set its value type to
@@ -1731,7 +1731,7 @@ ArrayData* MixedArray::ToPHPArray(ArrayData* in, bool copy) {
   assertx(adIn->isPHPArray());
   if (adIn->isNotDVArray()) return adIn;
   assertx(adIn->isDArray());
-  if (adIn->getSize() == 0) return staticEmptyArray();
+  if (adIn->getSize() == 0) return ArrayData::Create();
   auto ad = copy ? adIn->copyMixed() : adIn;
   ad->setDVArray(ArrayData::kNotDVArray);
   assertx(ad->checkInvariants());
@@ -1790,7 +1790,7 @@ ArrayData* MixedArray::ToPHPArrayIntishCast(ArrayData* in, bool copy) {
   // clear DV array bits and cast any intish strings that may appear
   auto adIn = asMixed(in);
   assertx(adIn->isPHPArray());
-  if (adIn->size() == 0) return staticEmptyArray();
+  if (adIn->size() == 0) return ArrayData::Create();
 
   if (copy || adIn->hasIntishKeys()) {
     return copyWithIntishCast<IntishCast::Cast>(adIn);
@@ -1812,7 +1812,7 @@ ArrayData* MixedArray::FromDictImpl(ArrayData* adIn,
 
   auto const size = a->size();
 
-  if (!size) return toDArray ? staticEmptyDArray() : staticEmptyArray();
+  if (!size) return toDArray ? ArrayData::CreateDArray() : ArrayData::Create();
 
   // If we don't necessarily have to make a copy, first scan the dict looking
   // for any int-like string keys. If we don't find any, we can transform the
@@ -1862,7 +1862,7 @@ ArrayData* MixedArray::ToDArray(ArrayData* in, bool copy) {
   assertx(a->isMixed());
   if (RuntimeOption::EvalHackArrDVArrs) return ToDict(in, copy);
   if (a->isDArray()) return a;
-  if (a->getSize() == 0) return staticEmptyDArray();
+  if (a->getSize() == 0) return ArrayData::CreateDArray();
   auto out = copy ? a->copyMixed() : a;
   out->setDVArray(ArrayData::kDArray);
   out->setLegacyArray(false);
@@ -1907,7 +1907,7 @@ ArrayData* MixedArray::ToDict(ArrayData* ad, bool copy) {
   auto a = asMixed(ad);
   assertx(a->isMixedOrShape());
 
-  if (a->empty() && a->m_nextKI == 0) return staticEmptyDictArray();
+  if (a->empty() && a->m_nextKI == 0) return ArrayData::CreateDict();
 
   if (copy) {
     auto const out = CopyMixed(
@@ -1926,7 +1926,7 @@ ArrayData* MixedArray::ToDict(ArrayData* ad, bool copy) {
       );
       return tryTagArrProvDict(out);
     } else {
-      throwRefInvalidArrayValueException(staticEmptyDictArray());
+      throwRefInvalidArrayValueException(ArrayData::CreateDict());
     }
   }
 }
@@ -1939,7 +1939,7 @@ ArrayData* MixedArray::ToShape(ArrayData* ad, bool copy) {
     return a;
   }
   auto a = asMixed(ad);
-  if (a->getSize() == 0) return staticEmptyShapeArray();
+  if (a->getSize() == 0) return ArrayData::CreateShape();
   assertx(a->isDArray());
   auto out = copy ? a->copyMixed() : a;
   out->setDVArray(ArrayData::kDArray);

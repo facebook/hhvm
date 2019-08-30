@@ -59,7 +59,7 @@ ArrayData* ArrayCommon::Dequeue(ArrayData* a, Variant &value) {
 
 ArrayData* ArrayCommon::ToVec(ArrayData* a, bool) {
   auto const size = a->size();
-  if (!size) return staticEmptyVecArray();
+  if (!size) return ArrayData::CreateVec();
   VecArrayInit init{size};
   IterateVNoInc(
     a,
@@ -80,7 +80,7 @@ ArrayData* ArrayCommon::ToVec(ArrayData* a, bool) {
 
 ArrayData* ArrayCommon::ToDict(ArrayData* a, bool) {
   auto const size = a->size();
-  if (!size) return staticEmptyDictArray();
+  if (!size) return ArrayData::CreateDict();
   DictInit init{size};
   IterateKVNoInc(
     a,
@@ -101,7 +101,7 @@ ArrayData* ArrayCommon::ToDict(ArrayData* a, bool) {
 
 ArrayData* ArrayCommon::ToKeyset(ArrayData* a, bool) {
   auto const size = a->size();
-  if (!size) return staticEmptyKeysetArray();
+  if (!size) return ArrayData::CreateKeyset();
   KeysetInit init{size};
   IterateVNoInc(
     a,
@@ -129,7 +129,7 @@ ArrayData* ArrayCommon::ToKeyset(ArrayData* a, bool) {
 ArrayData* ArrayCommon::ToVArray(ArrayData* a, bool) {
   if (a->isVArray()) return a;
   auto const size = a->size();
-  if (!size) return staticEmptyVArray();
+  if (!size) return ArrayData::CreateVArray();
   VArrayInit init{size};
   IterateVNoInc(a, [&](TypedValue v) { init.appendWithRef(v); });
   return init.create();
@@ -138,7 +138,7 @@ ArrayData* ArrayCommon::ToVArray(ArrayData* a, bool) {
 ArrayData* ArrayCommon::ToDArray(ArrayData* a, bool) {
   if (a->isDArray()) return a;
   auto const size = a->size();
-  if (!size) return staticEmptyDArray();
+  if (!size) return ArrayData::CreateDArray();
   DArrayInit init{size};
   IterateKV(
     a,

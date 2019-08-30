@@ -84,7 +84,7 @@ ArrayData* EmptyArray::CopyStatic(const ArrayData* /*ad*/) {
 //////////////////////////////////////////////////////////////////////
 
 NEVER_INLINE
-ArrayData* EmptyArray::Copy(const ArrayData*) { return staticEmptyArray(); }
+ArrayData* EmptyArray::Copy(const ArrayData*) { return ArrayData::Create(); }
 
 //////////////////////////////////////////////////////////////////////
 
@@ -335,19 +335,19 @@ ArrayData* EmptyArray::Prepend(ArrayData*, Cell v) {
 }
 
 ArrayData* EmptyArray::ToDict(ArrayData*, bool) {
-  return staticEmptyDictArray();
+  return ArrayData::CreateDict();
 }
 
 ArrayData* EmptyArray::ToShape(ArrayData*, bool) {
-  return staticEmptyShapeArray();
+  return ArrayData::CreateShape();
 }
 
 ArrayData* EmptyArray::ToVec(ArrayData*, bool) {
-  return staticEmptyVecArray();
+  return ArrayData::CreateVec();
 }
 
 ArrayData* EmptyArray::ToKeyset(ArrayData*, bool) {
-  return staticEmptyKeysetArray();
+  return ArrayData::CreateKeyset();
 }
 
 //////////////////////////////////////////////////////////////////////

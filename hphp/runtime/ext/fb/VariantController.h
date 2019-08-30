@@ -172,15 +172,15 @@ struct VariantControllerImpl {
     ArrayData* empty;
     switch (HackArraysMode) {
       case VariantControllerHackArraysMode::ON:
-        empty = staticEmptyDictArray();
+        empty = ArrayData::CreateDict();
         break;
       case VariantControllerHackArraysMode::OFF:
-        empty = staticEmptyDArray();
+        empty = ArrayData::CreateDArray();
         break;
       case VariantControllerHackArraysMode::MIGRATORY:
         empty = RuntimeOption::EvalHackArrDVArrs
-          ? staticEmptyDictArray()
-          : staticEmptyDArray();
+          ? ArrayData::CreateDict()
+          : ArrayData::CreateDArray();
         break;
     }
     return MapType(empty);

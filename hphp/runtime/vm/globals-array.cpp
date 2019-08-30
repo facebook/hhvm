@@ -39,7 +39,7 @@ GlobalsArray::GlobalsArray(NameValueTable* tab)
   : ArrayData(kGlobalsKind)
   , m_tab(tab)
 {
-  Variant arr(staticEmptyDArray());
+  Variant arr(ArrayData::CreateDArray());
 #define X(s,v) tab->set(makeStaticString(#s), v.asTypedValue());
 
   X(argc,                 init_null_variant);

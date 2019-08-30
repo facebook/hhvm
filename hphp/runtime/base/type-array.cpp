@@ -676,7 +676,7 @@ decltype(auto) elem(const Array& arr, Fn fn, bool is_key,
                     const String& key, Args&&... args) {
   if (is_key) return fn(key, std::forward<Args>(args)...);
 
-  auto const ad = arr.get() ? arr.get() : staticEmptyArray();
+  auto const ad = arr.get() ? arr.get() : ArrayData::Create();
 
   // The logic here is a specialization of cellToKey().
   if (key.isNull()) {

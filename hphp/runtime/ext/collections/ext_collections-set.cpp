@@ -407,7 +407,8 @@ BaseSet::php_map(const Variant& callback) {
   auto set = req::make<TSet>();
   if (!m_size) return Object{std::move(set)};
   assertx(posLimit() != 0);
-  assertx(set->arrayData() == staticEmptyDictArrayAsMixed());
+  assertx(set->arrayData()->isStatic() &&
+          set->arrayData()->empty());
   auto oldCap = set->cap();
   set->reserve(posLimit()); // presume minimum collisions ...
   assertx(set->canMutateBuffer());
@@ -740,7 +741,7 @@ Object BaseSet::getIterator() {
 void c_Set::clear() {
   dropImmCopy();
   decRefArr(arrayData());
-  m_arr = staticEmptyDictArrayAsMixed();
+  m_arr = CreateDictAsMixed();
   m_size = 0;
 }
 

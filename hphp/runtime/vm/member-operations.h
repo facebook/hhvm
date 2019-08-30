@@ -1388,7 +1388,7 @@ inline void SetElemEmptyish(tv_lval base, key_type<keyType> key,
                             Cell* value, const MInstrPropState* pState) {
   detail::checkPromotion(base, pState);
   auto const& scratchKey = initScratchKey(key);
-  cellMove(make_tv<KindOfArray>(staticEmptyArray()), base);
+  cellMove(make_tv<KindOfArray>(ArrayData::Create()), base);
   asArrRef(base).set(tvAsCVarRef(&scratchKey), tvAsCVarRef(value));
 }
 
@@ -2052,7 +2052,7 @@ inline tv_lval SetOpElemEmptyish(SetOpOp op, tv_lval base,
 
   detail::checkPromotion(base, pState);
 
-  cellMove(make_tv<KindOfArray>(staticEmptyArray()), base);
+  cellMove(make_tv<KindOfArray>(ArrayData::Create()), base);
   auto const lval = asArrRef(base).lvalAt(tvAsCVarRef(&key));
   setopBody(lval, op, rhs);
   return lval;
@@ -2200,7 +2200,7 @@ inline tv_lval SetOpElem(TypedValue& tvRef,
 inline tv_lval SetOpNewElemEmptyish(SetOpOp op, tv_lval base, Cell* rhs,
                                     const MInstrPropState* pState) {
   detail::checkPromotion(base, pState);
-  cellMove(make_tv<KindOfArray>(staticEmptyArray()), base);
+  cellMove(make_tv<KindOfArray>(ArrayData::Create()), base);
   auto result = asArrRef(base).lvalAt();
   setopBody(tvToCell(result), op, rhs);
   return result;
@@ -2338,7 +2338,7 @@ inline Cell IncDecElemEmptyish(
 ) {
   detail::checkPromotion(base, pState);
 
-  cellMove(make_tv<KindOfArray>(staticEmptyArray()), base);
+  cellMove(make_tv<KindOfArray>(ArrayData::Create()), base);
   auto const lval = asArrRef(base).lvalAt(tvAsCVarRef(&key));
   assertx(type(lval) == KindOfNull);
   return IncDecBody(op, lval);
@@ -2477,7 +2477,7 @@ inline Cell IncDecNewElemEmptyish(
   const MInstrPropState* pState
 ) {
   detail::checkPromotion(base, pState);
-  cellMove(make_tv<KindOfArray>(staticEmptyArray()), base);
+  cellMove(make_tv<KindOfArray>(ArrayData::Create()), base);
   auto result = asArrRef(base).lvalAt();
   assertx(type(result) == KindOfNull);
   return IncDecBody(op, result);

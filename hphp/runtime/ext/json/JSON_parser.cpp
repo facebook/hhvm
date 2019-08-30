@@ -514,22 +514,22 @@ struct SimpleParser {
     auto arr = [&] {
       if (container_type == JSONContainerType::HACK_ARRAYS) {
         return top == fp
-          ? staticEmptyVecArray()
+          ? ArrayData::CreateVec()
           : PackedArray::MakeVecNatural(top - fp, fp);
       }
       if (container_type == JSONContainerType::DARRAYS_AND_VARRAYS) {
         return top == fp
-          ? staticEmptyVArray()
+          ? ArrayData::CreateVArray()
           : PackedArray::MakeVArrayNatural(top - fp, fp);
       }
       if (container_type == JSONContainerType::DARRAYS) {
         return top == fp
-          ? staticEmptyDArray()
+          ? ArrayData::CreateDArray()
           : MixedArray::MakeDArrayNatural(top - fp, fp);
       }
       assertx(container_type == JSONContainerType::PHP_ARRAYS);
       return top == fp
-        ? staticEmptyArray()
+        ? ArrayData::Create()
         : PackedArray::MakePackedNatural(top - fp, fp);
     }();
     top = fp;
@@ -569,18 +569,18 @@ struct SimpleParser {
     auto arr = [&] {
       if (container_type == JSONContainerType::HACK_ARRAYS) {
         return top == fp
-          ? staticEmptyDictArray()
+          ? ArrayData::CreateDict()
           : MixedArray::MakeDict((top - fp) >> 1, fp)->asArrayData();
       }
       if (container_type == JSONContainerType::DARRAYS ||
           container_type == JSONContainerType::DARRAYS_AND_VARRAYS) {
         return top == fp
-          ? staticEmptyDArray()
+          ? ArrayData::CreateDArray()
           : MixedArray::MakeDArray((top - fp) >> 1, fp)->asArrayData();
       }
       assertx(container_type == JSONContainerType::PHP_ARRAYS);
       return top == fp
-        ? staticEmptyArray()
+        ? ArrayData::Create()
         : MixedArray::MakeMixed((top - fp) >> 1, fp)->asArrayData();
     }();
     // MixedArray::MakeMixed can return nullptr if there are duplicate keys

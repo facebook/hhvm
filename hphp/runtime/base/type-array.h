@@ -632,19 +632,23 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 
 ALWAYS_INLINE Array empty_array() {
-  return Array::attach(staticEmptyArray());
+  return Array::attach(ArrayData::Create());
 }
 
 ALWAYS_INLINE Array empty_varray() {
-  return Array::attach(staticEmptyVArray());
+  return Array::attach(ArrayData::CreateVArray());
 }
 
 ALWAYS_INLINE Array empty_darray() {
-  return Array::attach(staticEmptyDArray());
+  return Array::attach(ArrayData::CreateDArray());
 }
 
 ALWAYS_INLINE Array empty_vec_array() {
-  return Array::attach(staticEmptyVecArray());
+  return Array::attach(ArrayData::CreateVec());
+}
+
+ALWAYS_INLINE Array empty_dict_array() {
+  return Array::attach(ArrayData::CreateDict());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

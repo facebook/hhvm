@@ -111,7 +111,7 @@ static Variant doIdnTranslateUTS46(const String& domain, int64_t options,
                                  &info, &error);
   }
   // retInfo will be empty array in case of error
-  retInfo.assignIfRef(Variant(staticEmptyArray()));
+  retInfo.assignIfRef(Variant(ArrayData::Create()));
   if (len > capacity) {
     s_intl_error->setError(U_IDNA_DOMAIN_NAME_TOO_LONG_ERROR);
     return false;

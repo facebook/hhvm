@@ -983,7 +983,7 @@ TypedValue HHVM_FUNCTION(array_slice,
   }
 
   if (len <= 0) {
-    return make_tv<KindOfPersistentArray>(staticEmptyArray());
+    return make_tv<KindOfPersistentArray>(ArrayData::Create());
   }
 
   bool input_is_packed = isClsMethType(cell_input.m_type) ||
@@ -1815,7 +1815,7 @@ TypedValue HHVM_FUNCTION(array_diff,
   }
   /* If container1 is empty, we can stop here and return the empty array */
   if (!getContainerSize(c1)) {
-    return make_tv<KindOfPersistentArray>(staticEmptyArray());
+    return make_tv<KindOfPersistentArray>(ArrayData::Create());
   }
   /* If all of the containers (except container1) are empty, we can just
      return container1 (converting it to an array if needed) */
@@ -2025,7 +2025,7 @@ TypedValue HHVM_FUNCTION(array_diff_key,
     return make_tv<KindOfNull>();
   }
   if (getContainerSize(c1) == 0) {
-    return make_tv<KindOfPersistentArray>(staticEmptyArray());
+    return make_tv<KindOfPersistentArray>(ArrayData::Create());
   }
   if (largestSize == 0) {
     if (isArrayLikeType(c1.m_type)) {
@@ -2424,7 +2424,7 @@ TypedValue HHVM_FUNCTION(array_intersect,
   /* If any of the containers were empty, we can stop here and return the
      empty array */
   if (!getContainerSize(c1) || !smallestSize) {
-    return make_tv<KindOfPersistentArray>(staticEmptyArray());
+    return make_tv<KindOfPersistentArray>(ArrayData::Create());
   }
 
   Array ret = Array::Create();
@@ -2479,7 +2479,7 @@ TypedValue HHVM_FUNCTION(array_intersect_key,
     return make_tv<KindOfNull>();
   }
   if ((getContainerSize(c1) == 0) || empty_arg) {
-    return make_tv<KindOfPersistentArray>(staticEmptyArray());
+    return make_tv<KindOfPersistentArray>(ArrayData::Create());
   }
 
   auto intersect_step = [](TypedValue left, TypedValue right) {

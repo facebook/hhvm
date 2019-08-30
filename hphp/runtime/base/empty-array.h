@@ -149,10 +149,10 @@ struct EmptyArray final : type_scan::MarkCollectable<EmptyArray> {
   }
   static constexpr auto ToPHPArrayIntishCast = &ToPHPArray;
   static ArrayData* ToVArray(ArrayData*, bool) {
-    return staticEmptyVArray();
+    return ArrayData::CreateVArray();
   }
   static ArrayData* ToDArray(ArrayData*, bool) {
-    return staticEmptyDArray();
+    return ArrayData::CreateDArray();
   }
   static ArrayData* ToDict(ArrayData*, bool);
   static ArrayData* ToShape(ArrayData*, bool);

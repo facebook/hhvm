@@ -49,7 +49,7 @@ TypedValue HHVM_FUNCTION(dummy_varr_or_darr_builtin, const Variant& var) {
     if (arr.isVecOrVArray() ||
         arr.isDictOrDArray()) return tvReturn(arr);
   }
-  return tvReturn(staticEmptyVArray());
+  return tvReturn(ArrayData::CreateVArray());
 }
 
 TypedValue HHVM_FUNCTION(dummy_arraylike_builtin, const Variant& var) {
@@ -57,7 +57,7 @@ TypedValue HHVM_FUNCTION(dummy_arraylike_builtin, const Variant& var) {
     auto const& arr = var.asCArrRef();
     return tvReturn(arr);
   }
-  return tvReturn(staticEmptyKeysetArray());
+  return tvReturn(ArrayData::CreateKeyset());
 }
 
 Array HHVM_FUNCTION(dummy_array_builtin, const Array& arr) {

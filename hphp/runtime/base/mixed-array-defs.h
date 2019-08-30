@@ -330,7 +330,7 @@ void ConvertTvToUncounted(
       auto& ad = data.parr;
       assertx(ad->isVecArray());
       if (handlePersistent(ad)) break;
-      if (ad->empty()) ad = staticEmptyVecArray();
+      if (ad->empty()) ad = ArrayData::CreateVec();
       else ad = PackedArray::MakeUncounted(ad, false, seen);
       break;
     }
@@ -342,7 +342,7 @@ void ConvertTvToUncounted(
       auto& ad = data.parr;
       assertx(ad->isDict());
       if (handlePersistent(ad)) break;
-      if (ad->empty()) ad = staticEmptyDictArray();
+      if (ad->empty()) ad = ArrayData::CreateDict();
       else ad = MixedArray::MakeUncounted(ad, false, seen);
       break;
     }
@@ -354,7 +354,7 @@ void ConvertTvToUncounted(
       auto& ad = data.parr;
       assertx(ad->isKeyset());
       if (handlePersistent(ad)) break;
-      if (ad->empty()) ad = staticEmptyKeysetArray();
+      if (ad->empty()) ad = ArrayData::CreateKeyset();
       else ad = SetArray::MakeUncounted(ad, false, seen);
       break;
     }
@@ -365,7 +365,7 @@ void ConvertTvToUncounted(
       assertx(ad->isShape());
       if (handlePersistent(ad)) break;
       if (ad->empty()) {
-        ad = staticEmptyShapeArray();
+        ad = ArrayData::CreateShape();
       } else {
         ad = MixedArray::MakeUncounted(ad, false, seen);
       }
@@ -381,9 +381,9 @@ void ConvertTvToUncounted(
       assertx(!RuntimeOption::EvalHackArrDVArrs || ad->isNotDVArray());
       if (handlePersistent(ad)) break;
       if (ad->empty()) {
-        if (ad->isVArray()) ad = staticEmptyVArray();
-        else if (ad->isDArray()) ad = staticEmptyDArray();
-        else ad = staticEmptyArray();
+        if (ad->isVArray()) ad = ArrayData::CreateVArray();
+        else if (ad->isDArray()) ad = ArrayData::CreateDArray();
+        else ad = ArrayData::Create();
       } else if (ad->hasPackedLayout()) {
         ad = PackedArray::MakeUncounted(ad, false, seen);
       } else {

@@ -365,7 +365,7 @@ void register_variable(Array& variables, char *name, const Variant& value,
         SuppressHACFalseyPromoteNotices shacn;
         auto lval = symtable->lvalAt();
         type(lval) = KindOfPersistentArray;
-        val(lval).parr = staticEmptyArray();
+        val(lval).parr = ArrayData::Create();
         gpc_elements.push_back(uninit_null());
         gpc_elements.back().assignRef(lval);
       } else {
@@ -374,7 +374,7 @@ void register_variable(Array& variables, char *name, const Variant& value,
           symtable->convertKey<IntishCast::Cast>(key_str.toCell());
         auto const v = symtable->rvalAt(key).unboxed();
         if (isNullType(v.type()) || !isArrayLikeType(v.type())) {
-          symtable->set(key, make_tv<KindOfPersistentArray>(staticEmptyArray()));
+          symtable->set(key, make_tv<KindOfPersistentArray>(ArrayData::Create()));
         }
         gpc_elements.push_back(uninit_null());
         gpc_elements.back().assignRef(symtable->lvalAt(key));

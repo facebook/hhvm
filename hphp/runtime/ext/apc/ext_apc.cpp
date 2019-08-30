@@ -310,7 +310,7 @@ Variant HHVM_FUNCTION(apc_store,
       apc_store().set(key.toString(), v, ttl);
     }
 
-    return Variant(staticEmptyArray());
+    return Variant(ArrayData::Create());
   }
 
   if (!key_or_array.isString()) {

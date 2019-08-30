@@ -547,7 +547,7 @@ Class* c_Vector::s_cls;
 void c_Vector::clear() {
   dropImmCopy();
   decRefArr(arrayData());
-  m_arr = staticEmptyVecArray();
+  m_arr = ArrayData::CreateVec();
   m_size = 0;
 }
 
@@ -587,7 +587,7 @@ void c_Vector::resize(uint32_t sz, const Cell* val) {
   if (sz == 0) {
     dropImmCopy();
     decRefArr(arrayData());
-    m_arr = staticEmptyVecArray();
+    m_arr = ArrayData::CreateVec();
     m_size = 0;
   } else if (m_size > sz) {
     // If there were any objects in the part that's being resized away, their

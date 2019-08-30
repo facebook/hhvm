@@ -602,17 +602,17 @@ static folly::Optional<TypedValue> builtinInValue(
   case KindOfInt64:   return make_tv<KindOfInt64>(0);
   case KindOfDouble:  return make_tv<KindOfDouble>(0.0);
   case KindOfPersistentString:
-  case KindOfString:  return make_tv<KindOfString>(empty_string().get());
+  case KindOfString:  return make_tv<KindOfString>(staticEmptyString());
   case KindOfPersistentVec:
-  case KindOfVec:     return make_tv<KindOfVec>(empty_vec_array().get());
+  case KindOfVec:     return make_tv<KindOfVec>(ArrayData::CreateVec());
   case KindOfPersistentDict:
-  case KindOfDict:    return make_tv<KindOfDict>(empty_dict_array().get());
+  case KindOfDict:    return make_tv<KindOfDict>(ArrayData::CreateDict());
   case KindOfPersistentKeyset:
   case KindOfKeyset:  return make_tv<KindOfNull>();
   case KindOfPersistentShape:
-  case KindOfShape:   return make_array_like_tv(empty_darray().get());
+  case KindOfShape:   return make_array_like_tv(ArrayData::CreateShape());
   case KindOfPersistentArray:
-  case KindOfArray:   return make_tv<KindOfArray>(empty_array().get());
+  case KindOfArray:   return make_tv<KindOfArray>(ArrayData::Create());
   case KindOfUninit:
   case KindOfObject:
   case KindOfResource:

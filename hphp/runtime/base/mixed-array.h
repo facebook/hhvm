@@ -885,10 +885,6 @@ private:
   int64_t  m_nextKI;        // Next integer key to use for append.
 };
 
-ALWAYS_INLINE Array empty_dict_array() {
-  return Array::attach(staticEmptyDictArray());
-}
-
 HASH_TABLE_CHECK_OFFSETS(MixedArray, MixedArrayElm)
 //////////////////////////////////////////////////////////////////////
 

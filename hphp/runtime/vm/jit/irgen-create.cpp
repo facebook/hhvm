@@ -389,7 +389,7 @@ void emitCreateCl(IRGS& env, uint32_t numParams, uint32_t clsIx) {
 
 void emitNewArray(IRGS& env, uint32_t capacity) {
   if (capacity == 0) {
-    push(env, cns(env, staticEmptyArray()));
+    push(env, cns(env, ArrayData::Create()));
   } else {
     push(env, gen(env, NewArray, cns(env, capacity)));
   }
@@ -397,7 +397,7 @@ void emitNewArray(IRGS& env, uint32_t capacity) {
 
 void emitNewMixedArray(IRGS& env, uint32_t capacity) {
   if (capacity == 0) {
-    push(env, cns(env, staticEmptyArray()));
+    push(env, cns(env, ArrayData::Create()));
   } else {
     push(env, gen(env, NewMixedArray, cns(env, capacity)));
   }
@@ -406,7 +406,7 @@ void emitNewMixedArray(IRGS& env, uint32_t capacity) {
 void emitNewDArray(IRGS& env, uint32_t capacity) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
   if (capacity == 0) {
-    push(env, cns(env, staticEmptyDArray()));
+    push(env, cns(env, ArrayData::CreateDArray()));
   } else {
     push(env, gen(env, NewDArray, cns(env, capacity)));
   }

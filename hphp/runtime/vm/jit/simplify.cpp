@@ -2149,7 +2149,7 @@ SSATmp* simplifyConvCellToArr(State& env, const IRInstruction* inst) {
   if (src->isA(TVec))    return gen(env, ConvVecToArr, src);
   if (src->isA(TDict))   return gen(env, ConvDictToArr, inst->taken(), src);
   if (src->isA(TKeyset)) return gen(env, ConvKeysetToArr, inst->taken(), src);
-  if (src->isA(TNull))   return cns(env, staticEmptyArray());
+  if (src->isA(TNull))   return cns(env, ArrayData::Create());
   if (src->isA(TBool))   return gen(env, ConvBoolToArr, src);
   if (src->isA(TDbl))    return gen(env, ConvDblToArr, src);
   if (src->isA(TInt))    return gen(env, ConvIntToArr, src);

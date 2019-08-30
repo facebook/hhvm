@@ -836,7 +836,7 @@ ArrayData* ArrayData::Create(TypedValue name, TypedValue value) {
 
 ArrayData* ArrayData::toShapeInPlaceIfCompatible() {
   if (size() == 0 && isStatic()) {
-    return staticEmptyShapeArray();
+    return ArrayData::CreateShape();
   }
   assertx((RuntimeOption::EvalHackArrDVArrs && isDict()) ||
           (!RuntimeOption::EvalHackArrDVArrs && isMixed() && isDArray()));

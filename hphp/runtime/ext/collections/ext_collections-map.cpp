@@ -741,7 +741,7 @@ BaseMap::FromArray(const Class*, const Variant& arr) {
 void c_Map::clear() {
   dropImmCopy();
   decRefArr(arrayData());
-  m_arr = staticEmptyDictArrayAsMixed();
+  m_arr = CreateDictAsMixed();
   m_size = 0;
 }
 

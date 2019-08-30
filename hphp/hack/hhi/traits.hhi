@@ -16,7 +16,7 @@
 
 trait StrictIterable<+Tv> implements Iterable<Tv> {
 
-  /* HH_IGNORE_ERROR[2082] T30260145 */
+  <<__PHPStdLib>>
   public function toArray(): array;
 
   public function toValuesArray(): varray<Tv>;
@@ -66,7 +66,7 @@ trait StrictIterable<+Tv> implements Iterable<Tv> {
 
 
 trait StrictKeyedIterable<Tk,+Tv> implements KeyedIterable<Tk,Tv> {
-  /* HH_IGNORE_ERROR[2082] T30260145 */
+  <<__PHPStdLib>>
   public function toArray(): array;
 
   public function toValuesArray(): varray<Tv>;
@@ -140,7 +140,7 @@ trait StrictKeyedIterable<Tk,+Tv> implements KeyedIterable<Tk,Tv> {
 
 
 trait LazyIterable<+Tv> implements Iterable<Tv> {
-  /* HH_IGNORE_ERROR[2082] T30260145 */
+  <<__PHPStdLib>>
   public function toArray(): array;
 
   public function toValuesArray(): varray<Tv>;
@@ -189,7 +189,7 @@ trait LazyIterable<+Tv> implements Iterable<Tv> {
 
 
 trait LazyKeyedIterable<Tk,+Tv> implements KeyedIterable<Tk,Tv> {
-  /* HH_IGNORE_ERROR[2082] T30260145 */
+  <<__PHPStdLib>>
   public function toArray(): array;
 
   public function toValuesArray(): varray<Tv>;

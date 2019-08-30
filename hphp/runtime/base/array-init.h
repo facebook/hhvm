@@ -103,7 +103,6 @@ struct ArrayInitBase {
   ArrayData* create() {
     assertx(m_arr->hasExactlyOneRef());
     assertx(m_arr->toDataType() == DT);
-    if (RuntimeOption::EvalArrayProvenance) trySetProvenance();
     auto const ptr = m_arr;
     m_arr = nullptr;
 #ifndef NDEBUG
@@ -134,15 +133,6 @@ protected:
     assertx(newp == m_arr);
     // You cannot add/set more times than you reserved with ArrayInit.
     assertx(++m_addCount <= m_expectedCount);
-  }
-
-  void trySetProvenance() {
-    if (DT != KindOfVec && DT != KindOfDict) return;
-    assertx(arrprov::arrayWantsTag(m_arr));
-
-    if (auto const tag = arrprov::tagFromProgramCounter()) {
-      arrprov::setTag(m_arr, *tag);
-    }
   }
 
 protected:

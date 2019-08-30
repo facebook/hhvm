@@ -877,21 +877,6 @@ enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
   assertx(cellIsPlausible(*tv));
 }
 
-namespace {
-
-void tagResultHackArr(const ArrayData* src, ArrayData* dst) {
-  if (!RuntimeOption::EvalArrayProvenance) return;
-  if (dst->hasProvenanceData()) return;
-  if (!dst->isRefCounted()) return;
-  if (src) {
-    arrprov::copyTag(src, dst);
-  } else {
-    arrprov::setTag(dst, *arrprov::tagFromProgramCounter());
-  }
-}
-
-}
-
 template<typename T>
 enable_if_lval_t<T, void> tvCastToVecInPlace(T tv) {
   assertx(tvIsPlausible(*tv));
@@ -937,7 +922,6 @@ enable_if_lval_t<T, void> tvCastToVecInPlace(T tv) {
         auto* adIn = val(tv).parr;
         assertx(adIn->isDict());
         a = MixedArray::ToVecDict(adIn, adIn->cowCheck());
-        tagResultHackArr(adIn, a);
         assertx(a != adIn);
         decRefArr(adIn);
         continue;
@@ -948,7 +932,6 @@ enable_if_lval_t<T, void> tvCastToVecInPlace(T tv) {
         auto* adIn = val(tv).parr;
         assertx(adIn->isKeyset());
         a = SetArray::ToVec(adIn, adIn->cowCheck());
-        tagResultHackArr(nullptr, a);
         assertx(a != adIn);
         decRefArr(adIn);
         continue;
@@ -959,7 +942,6 @@ enable_if_lval_t<T, void> tvCastToVecInPlace(T tv) {
         auto const adIn = val(tv).parr;
         assertx(adIn->isShape());
         a = MixedArray::ToVecShape(adIn, adIn->cowCheck());
-        tagResultHackArr(nullptr, a);
         assertx(a != adIn);
         decRefArr(adIn);
         continue;
@@ -970,7 +952,6 @@ enable_if_lval_t<T, void> tvCastToVecInPlace(T tv) {
         auto* adIn = val(tv).parr;
         assertx(adIn->isPHPArray());
         a = adIn->toVec(adIn->cowCheck());
-        tagResultHackArr(nullptr, a);
         if (a != adIn) decRefArr(adIn);
         continue;
       }
@@ -982,7 +963,6 @@ enable_if_lval_t<T, void> tvCastToVecInPlace(T tv) {
 
       case KindOfObject:
         a = castObjToVec(val(tv).pobj);
-        tagResultHackArr(nullptr, a);
         // We might have re-entered, so tv may not contain the object anymore.
         tvDecRefGen(tv);
         continue;
@@ -1001,7 +981,6 @@ enable_if_lval_t<T, void> tvCastToVecInPlace(T tv) {
         raiseClsMethToVecWarningHelper();
         a = make_vec_array(
           val(tv).pclsmeth->getCls(), val(tv).pclsmeth->getFunc()).detach();
-        tagResultHackArr(nullptr, a);
         tvDecRefClsMeth(tv);
         continue;
       }
@@ -1065,7 +1044,6 @@ enable_if_lval_t<T, void> tvCastToDictInPlace(T tv) {
         auto* adIn = val(tv).parr;
         assertx(adIn->isVecArray());
         a = PackedArray::ToDictVec(adIn, adIn->cowCheck());
-        tagResultHackArr(adIn, a);
         assertx(a != adIn);
         decRefArr(adIn);
         continue;
@@ -1076,7 +1054,6 @@ enable_if_lval_t<T, void> tvCastToDictInPlace(T tv) {
         auto* adIn = val(tv).parr;
         assertx(adIn->isKeyset());
         a = SetArray::ToDict(adIn, adIn->cowCheck());
-        tagResultHackArr(nullptr, a);
         if (a != adIn) decRefArr(adIn);
         continue;
       }
@@ -1086,7 +1063,6 @@ enable_if_lval_t<T, void> tvCastToDictInPlace(T tv) {
         auto const adIn = val(tv).parr;
         assertx(adIn->isShape());
         a = MixedArray::ToDictShape(adIn, adIn->cowCheck());
-        tagResultHackArr(nullptr, a);
         if (a != adIn) decRefArr(adIn);
         continue;
       }
@@ -1096,7 +1072,6 @@ enable_if_lval_t<T, void> tvCastToDictInPlace(T tv) {
         auto* adIn = val(tv).parr;
         assertx(adIn->isPHPArray());
         a = adIn->toDict(adIn->cowCheck());
-        tagResultHackArr(nullptr, a);
         if (a != adIn) decRefArr(adIn);
         continue;
       }
@@ -1108,7 +1083,6 @@ enable_if_lval_t<T, void> tvCastToDictInPlace(T tv) {
 
       case KindOfObject:
         a = castObjToDict(val(tv).pobj);
-        tagResultHackArr(nullptr, a);
         // We might have re-entered, so tv may not contain the object anymore.
         tvDecRefGen(tv);
         continue;
@@ -1128,7 +1102,6 @@ enable_if_lval_t<T, void> tvCastToDictInPlace(T tv) {
         a = make_dict_array(
           0, val(tv).pclsmeth->getCls(),
           1, val(tv).pclsmeth->getFunc()).detach();
-        tagResultHackArr(nullptr, a);
         tvDecRefClsMeth(tv);
         continue;
       }

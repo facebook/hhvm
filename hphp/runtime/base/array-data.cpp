@@ -1397,4 +1397,18 @@ StringData* getHackArrCompatNullHackArrayKeyMsg() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+ArrayData* tagArrProv(ArrayData* ad, const ArrayData* src) {
+  assertx(RuntimeOption::EvalArrayProvenance);
+  assertx(ad->hasExactlyOneRef());
+
+  if (src != nullptr) {
+    arrprov::copyTag(src, ad);
+  } else if (auto const tag = arrprov::tagFromProgramCounter()) {
+    arrprov::setTag(ad, *tag);
+  }
+  return ad;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 }

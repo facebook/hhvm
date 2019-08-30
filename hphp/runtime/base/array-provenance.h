@@ -29,6 +29,7 @@
 
 namespace HPHP {
 
+struct ArrayData;
 struct StringData;
 
 namespace arrprov {

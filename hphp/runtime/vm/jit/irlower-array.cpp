@@ -254,21 +254,6 @@ void implAllocArray(IRLS& env, const IRInstruction* inst, MakeArrayFn target,
 
 }
 
-template<MakeArrayFn make>
-ArrayData* with_prov(uint32_t size) {
-  using namespace arrprov;
-  assertx(RuntimeOption::EvalArrayProvenance);
-
-  auto ad = make(size);
-  assertx(ad->hasExactlyOneRef());
-  assertx(arrayWantsTag(ad));
-
-  if (auto const pctag = tagFromProgramCounter()) {
-    setTag(ad, *pctag);
-  }
-  return ad;
-}
-
 void cgNewArray(IRLS& env, const IRInstruction* inst) {
   implNewArray(env, inst, PackedArray::MakeReserve);
 }
@@ -276,12 +261,10 @@ void cgNewMixedArray(IRLS& env, const IRInstruction* inst) {
   implNewArray(env, inst, MixedArray::MakeReserveMixed);
 }
 void cgNewDictArray(IRLS& env, const IRInstruction* inst) {
-  if (RuntimeOption::EvalArrayProvenance) {
-    implNewArray(env, inst, with_prov<MixedArray::MakeReserveDict>,
-                 SyncOptions::Sync);
-  } else {
-    implNewArray(env, inst, MixedArray::MakeReserveDict);
-  }
+  implNewArray(
+    env, inst, MixedArray::MakeReserveDict,
+    RuntimeOption::EvalArrayProvenance ? SyncOptions::Sync : SyncOptions::None
+  );
 }
 void cgNewDArray(IRLS& env, const IRInstruction* inst) {
   implNewArray(env, inst, MixedArray::MakeReserveDArray);
@@ -291,12 +274,10 @@ void cgAllocPackedArray(IRLS& env, const IRInstruction* inst) {
   implAllocArray(env, inst, PackedArray::MakeUninitialized);
 }
 void cgAllocVecArray(IRLS& env, const IRInstruction* inst) {
-  if (RuntimeOption::EvalArrayProvenance) {
-    implAllocArray(env, inst, with_prov<PackedArray::MakeUninitializedVec>,
-                   SyncOptions::Sync);
-  } else {
-    implAllocArray(env, inst, PackedArray::MakeUninitializedVec);
-  }
+  implAllocArray(
+    env, inst, PackedArray::MakeUninitializedVec,
+    RuntimeOption::EvalArrayProvenance ? SyncOptions::Sync : SyncOptions::None
+  );
 }
 void cgAllocVArray(IRLS& env, const IRInstruction* inst) {
   implAllocArray(env, inst, PackedArray::MakeUninitializedVArray);
@@ -333,20 +314,6 @@ void newStructImpl(
 
 }
 
-MixedArray* wrapMakeStructDict(uint32_t size,
-                               const StringData* const* keys,
-                               const TypedValue* values) {
-  using namespace arrprov;
-  assertx(RuntimeOption::EvalArrayProvenance);
-
-  auto const ad = MixedArray::MakeStructDict(size, keys, values);
-
-  if (auto const tag = tagFromProgramCounter()) {
-    setTag(ad, *tag);
-  }
-  return ad;
-}
-
 void cgNewStructArray(IRLS& env, const IRInstruction* inst) {
   newStructImpl(env, inst, MixedArray::MakeStruct);
 }
@@ -356,11 +323,10 @@ void cgNewStructDArray(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgNewStructDict(IRLS& env, const IRInstruction* inst) {
-  if (RuntimeOption::EvalArrayProvenance) {
-    newStructImpl(env, inst, wrapMakeStructDict, SyncOptions::Sync);
-  } else {
-    newStructImpl(env, inst, MixedArray::MakeStructDict);
-  }
+  newStructImpl(
+    env, inst, MixedArray::MakeStructDict,
+    RuntimeOption::EvalArrayProvenance ? SyncOptions::Sync : SyncOptions::None
+  );
 }
 
 void cgNewKeysetArray(IRLS& env, const IRInstruction* inst) {

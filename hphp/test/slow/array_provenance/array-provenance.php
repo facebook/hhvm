@@ -101,4 +101,21 @@ function main() {
     dict[ConstBag::MY_TRASH_GARBAGE => $d]
   );
   var_dump(HH\get_provenance($e));
+
+  $f = __hhvm_intrinsics\launder_value(
+    Vector { rand(), rand() }
+  );
+  $f1 = vec($f);
+  $f2 = dict($f);
+  $f3 = $f->toMap();
+  $f4 = dict($f3);
+  var_dump(HH\get_provenance($f1));
+  var_dump(HH\get_provenance($f2));
+  var_dump(HH\get_provenance($f4));
+
+  $g = __hhvm_intrinsics\launder_value(
+    Map { 'foo'.rand() => rand() }
+  );
+  $g1 = dict($g);
+  var_dump(HH\get_provenance($g1));
 }

@@ -706,7 +706,6 @@ inline tv_lval ElemDVecPre(tv_lval base, int64_t key) {
 
   auto const lval = PackedArray::LvalIntVec(oldArr, key, oldArr->cowCheck());
   if (lval.arr != oldArr) {
-    if (copyProv) arrprov::copyTag(oldArr, lval.arr);
     base.type() = KindOfVec;
     base.val().parr = lval.arr;
     assertx(cellIsPlausible(base.tv()));
@@ -759,7 +758,6 @@ inline tv_lval ElemDDictPre(tv_lval base, int64_t key) {
   }
 
   if (lval.arr != oldArr) {
-    if (copyProv) arrprov::copyTag(oldArr, lval.arr);
     base.type() = KindOfDict;
     base.val().parr = lval.arr;
     assertx(cellIsPlausible(base.tv()));
@@ -782,7 +780,6 @@ inline tv_lval ElemDDictPre(tv_lval base, StringData* key) {
   }
 
   if (lval.arr != oldArr) {
-    if (copyProv) arrprov::copyTag(oldArr, lval.arr);
     base.type() = KindOfDict;
     base.val().parr = lval.arr;
     assertx(cellIsPlausible(base.tv()));
@@ -1713,9 +1710,6 @@ inline void SetElemVec(tv_lval base, key_type<keyType> key, Cell* value) {
   auto* newData = SetElemVecPre<setResult>(a, key, value);
   assertx(newData->isVecArray());
 
-  if (copyProv && a != newData) {
-    arrprov::copyTag(a, newData);
-  }
   arrayRefShuffle<true, KindOfVec>(a, newData, base);
 }
 
@@ -1760,9 +1754,6 @@ inline void SetElemDict(tv_lval base, key_type<keyType> key,
   auto newData = SetElemDictPre<setResult>(a, key, value);
   assertx(newData->isDict());
 
-  if (copyProv && a != newData) {
-    arrprov::copyTag(a, newData);
-  }
   arrayRefShuffle<true, KindOfDict>(a, newData, base);
 }
 
@@ -1943,7 +1934,6 @@ inline void SetNewElemVec(tv_lval base, Cell* value) {
   auto a = val(base).parr;
   auto a2 = PackedArray::AppendVec(a, *value);
   if (a2 != a) {
-    if (copyProv) arrprov::copyTag(a, a2);
     type(base) = KindOfVec;
     val(base).parr = a2;
     assertx(cellIsPlausible(*base));
@@ -1962,7 +1952,6 @@ inline void SetNewElemDict(tv_lval base, Cell* value) {
   auto a = val(base).parr;
   auto a2 = MixedArray::AppendDict(a, *value);
   if (a2 != a) {
-    if (copyProv) arrprov::copyTag(a, a2);
     type(base) = KindOfDict;
     val(base).parr = a2;
     assertx(cellIsPlausible(*base));

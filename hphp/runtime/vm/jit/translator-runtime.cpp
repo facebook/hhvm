@@ -237,21 +237,9 @@ ArrayData* convKeysetToArrHelper(ArrayData* adIn) {
   return a;
 }
 
-namespace {
-
-void tagResult(ArrayData* res, const ArrayData* adIn) {
-  if (!RuntimeOption::EvalArrayProvenance) return;
-  if (res->hasProvenanceData()) return;
-  if (!res->isRefCounted()) return;
-  arrprov::copyTag(adIn, res);
-}
-
-}
-
 ArrayData* convArrToVecHelper(ArrayData* adIn) {
   assertx(adIn->isPHPArray());
   auto a = adIn->toVec(adIn->cowCheck());
-  tagResult(a, adIn);
   if (a != adIn) decRefArr(adIn);
   return a;
 }
@@ -260,7 +248,6 @@ ArrayData* convDictToVecHelper(ArrayData* adIn) {
   assertx(adIn->isDict());
   auto a = MixedArray::ToVecDict(adIn, adIn->cowCheck());
   assertx(a != adIn);
-  tagResult(a, adIn);
   decRefArr(adIn);
   return a;
 }
@@ -269,7 +256,6 @@ ArrayData* convShapeToVecHelper(ArrayData* adIn) {
   assertx(adIn->isShape());
   auto a = MixedArray::ToVecShape(adIn, adIn->cowCheck());
   assertx(a != adIn);
-  tagResult(a, adIn);
   decRefArr(adIn);
   return a;
 }
@@ -278,7 +264,6 @@ ArrayData* convKeysetToVecHelper(ArrayData* adIn) {
   assertx(adIn->isKeyset());
   auto a = SetArray::ToVec(adIn, adIn->cowCheck());
   assertx(a != adIn);
-  tagResult(a, adIn);
   decRefArr(adIn);
   return a;
 }
@@ -286,11 +271,6 @@ ArrayData* convKeysetToVecHelper(ArrayData* adIn) {
 ArrayData* convObjToVecHelper(ObjectData* obj) {
   auto a = castObjToVec(obj);
   assertx(a->isVecArray());
-  if (RuntimeOption::EvalArrayProvenance &&
-      a->isRefCounted() &&
-      !a->hasProvenanceData()) {
-    arrprov::setTag(a, *arrprov::tagFromProgramCounter());
-  }
   decRefObj(obj);
   return a;
 }
@@ -298,7 +278,6 @@ ArrayData* convObjToVecHelper(ObjectData* obj) {
 ArrayData* convArrToDictHelper(ArrayData* adIn) {
   assertx(adIn->isPHPArray());
   auto a = adIn->toDict(adIn->cowCheck());
-  tagResult(a, adIn);
   if (a != adIn) decRefArr(adIn);
   return a;
 }
@@ -306,7 +285,6 @@ ArrayData* convArrToDictHelper(ArrayData* adIn) {
 ArrayData* convShapeToDictHelper(ArrayData* adIn) {
   assertx(adIn->isShape());
   auto a = MixedArray::ToDictShape(adIn, adIn->cowCheck());
-  tagResult(a, adIn);
   if (a != adIn) decRefArr(adIn);
   return a;
 }
@@ -315,7 +293,6 @@ ArrayData* convVecToDictHelper(ArrayData* adIn) {
   assertx(adIn->isVecArray());
   auto a = PackedArray::ToDictVec(adIn, adIn->cowCheck());
   assertx(a != adIn);
-  tagResult(a, adIn);
   decRefArr(adIn);
   return a;
 }
@@ -323,7 +300,6 @@ ArrayData* convVecToDictHelper(ArrayData* adIn) {
 ArrayData* convKeysetToDictHelper(ArrayData* adIn) {
   assertx(adIn->isKeyset());
   auto a = SetArray::ToDict(adIn, adIn->cowCheck());
-  tagResult(a, adIn);
   if (a != adIn) decRefArr(adIn);
   return a;
 }
@@ -331,11 +307,6 @@ ArrayData* convKeysetToDictHelper(ArrayData* adIn) {
 ArrayData* convObjToDictHelper(ObjectData* obj) {
   auto a = castObjToDict(obj);
   assertx(a->isDict());
-  if (RuntimeOption::EvalArrayProvenance &&
-      a->isRefCounted() &&
-      !a->hasProvenanceData()) {
-    arrprov::setTag(a, *arrprov::tagFromProgramCounter());
-  }
   decRefObj(obj);
   return a;
 }

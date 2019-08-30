@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/array-helpers.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/empty-array.h"
 #include "hphp/runtime/base/execution-context.h"
@@ -115,6 +116,19 @@ MixedArray::ShapeInitializer MixedArray::s_shape_initializer;
 
 //////////////////////////////////////////////////////////////////////
 
+namespace {
+
+template<bool check_kind = false>
+ArrayData* tryTagArrProvDict(ArrayData* ad,
+                             const ArrayData* src = nullptr) {
+  return RuntimeOption::EvalArrayProvenance &&
+         (!check_kind || ad->kind() == ArrayData::kDictKind)
+    ? tagArrProv(ad, src)
+    : ad;
+}
+
+}
+
 ALWAYS_INLINE
 ArrayData* MixedArray::MakeReserveImpl(uint32_t size,
                                        HeaderKind hk,
@@ -168,7 +182,7 @@ ArrayData* MixedArray::MakeReserveDArray(uint32_t size) {
 ArrayData* MixedArray::MakeReserveDict(uint32_t size) {
   auto ad = MakeReserveImpl(size, HeaderKind::Dict, ArrayData::kNotDVArray);
   assertx(ad->isDict());
-  return ad;
+  return tryTagArrProvDict(ad);
 }
 
 ArrayData* MixedArray::MakeReserveShape(uint32_t size) {
@@ -285,9 +299,10 @@ MixedArray* MixedArray::MakeStruct(uint32_t size,
 MixedArray* MixedArray::MakeStructDict(uint32_t size,
                                        const StringData* const* keys,
                                        const TypedValue* values) {
-  return MakeStructImpl(size, keys, values,
-                        HeaderKind::Dict,
-                        ArrayData::kNotDVArray);
+  auto const ad = MakeStructImpl(size, keys, values,
+                                 HeaderKind::Dict,
+                                 ArrayData::kNotDVArray);
+  return asMixed(tryTagArrProvDict(ad));
 }
 
 MixedArray* MixedArray::MakeStructDArray(uint32_t size,
@@ -382,7 +397,7 @@ MixedArray* MixedArray::MakeDict(uint32_t size, const TypedValue* kvs) {
   auto const ad =
     MakeMixedImpl<HeaderKind::Dict, ArrayData::kNotDVArray>(size, kvs);
   assertx(ad == nullptr || ad->kind() == kDictKind);
-  return ad;
+  return asMixed(tryTagArrProvDict(ad));
 }
 
 MixedArray* MixedArray::MakeDArrayNatural(uint32_t size,
@@ -545,7 +560,8 @@ NEVER_INLINE ArrayData* MixedArray::CopyStatic(const ArrayData* in) {
 
 NEVER_INLINE MixedArray* MixedArray::copyMixed() const {
   assertx(checkInvariants());
-  return CopyMixed(*this, AllocMode::Request, this->m_kind, this->dvArray());
+  auto const out = CopyMixed(*this, AllocMode::Request, m_kind, dvArray());
+  return asMixed(tryTagArrProvDict<true>(out, this));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1033,7 +1049,7 @@ MixedArray* MixedArray::Grow(MixedArray* old, uint32_t newScale, bool copy) {
     assertx(res->m_pos == old->m_pos);
     assertx(res->m_used == oldUsed);
     assertx(res->m_scale == newScale);
-    return res;
+    return asMixed(tryTagArrProvDict<true>(res, old));
   };
 
   if (copy) {
@@ -1894,16 +1910,21 @@ ArrayData* MixedArray::ToDict(ArrayData* ad, bool copy) {
   if (a->empty() && a->m_nextKI == 0) return staticEmptyDictArray();
 
   if (copy) {
-    return CopyMixed(*a, AllocMode::Request,
-                     HeaderKind::Dict, ArrayData::kNotDVArray);
+    auto const out = CopyMixed(
+      *a, AllocMode::Request,
+      HeaderKind::Dict, ArrayData::kNotDVArray
+    );
+    return tryTagArrProvDict(out);
   } else {
     auto const result = ArrayCommon::CheckForRefs(a);
     if (LIKELY(result == ArrayCommon::RefCheckResult::Pass)) {
-      return ToDictInPlace(a);
+      return tryTagArrProvDict(ToDictInPlace(a));
     } else if (result == ArrayCommon::RefCheckResult::Collapse) {
-      // Remove unreferenced refs
-      return CopyMixed(*a, AllocMode::Request,
-                       HeaderKind::Dict, ArrayData::kNotDVArray);
+      auto const out = CopyMixed(
+        *a, AllocMode::Request,
+        HeaderKind::Dict, ArrayData::kNotDVArray
+      );
+      return tryTagArrProvDict(out);
     } else {
       throwRefInvalidArrayValueException(staticEmptyDictArray());
     }

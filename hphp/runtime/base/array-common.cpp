@@ -72,7 +72,10 @@ ArrayData* ArrayCommon::ToVec(ArrayData* a, bool) {
       init.append(v);
     }
   );
-  return init.create();
+  auto const out = init.create();
+  return RuntimeOption::EvalArrayProvenance && out->isRefCounted()
+    ? tagArrProv(out, a)
+    : out;
 }
 
 ArrayData* ArrayCommon::ToDict(ArrayData* a, bool) {
@@ -90,7 +93,10 @@ ArrayData* ArrayCommon::ToDict(ArrayData* a, bool) {
       init.setValidKey(k, v);
     }
   );
-  return init.create();
+  auto const out = init.create();
+  return RuntimeOption::EvalArrayProvenance && out->isRefCounted()
+    ? tagArrProv(out, a)
+    : out;
 }
 
 ArrayData* ArrayCommon::ToKeyset(ArrayData* a, bool) {
@@ -200,7 +206,10 @@ ArrayData* castObjToHackArrImpl(ObjectData* obj,
 
   auto arr = empty();
   for (ArrayIter iter(iterObj); iter; ++iter) add(arr, iter);
-  return arr.detach();
+  auto const out = arr.detach();
+  return RuntimeOption::EvalArrayProvenance && out->isRefCounted()
+    ? tagArrProv(out)
+    : out;
 }
 
 }

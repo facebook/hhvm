@@ -1997,12 +1997,6 @@ OPTBLD_INLINE void iopNewDictArray(uint32_t capacity) {
   auto const ad = capacity == 0
     ? staticEmptyDictArray()
     : MixedArray::MakeReserveDict(capacity);
-
-  if (RuntimeOption::EvalArrayProvenance) {
-    if (auto const pctag = arrprov::tagFromProgramCounter()) {
-      arrprov::setTag(ad, *pctag);
-    }
-  }
   vmStack().pushDictNoRc(ad);
 }
 
@@ -2060,23 +2054,12 @@ OPTBLD_INLINE void iopNewStructDArray(imm_array<int32_t> ids) {
 
 OPTBLD_INLINE void iopNewStructDict(imm_array<int32_t> ids) {
   auto const a = newStructArrayImpl(ids, MixedArray::MakeStructDict);
-
-  if (RuntimeOption::EvalArrayProvenance) {
-    if (auto const tag = arrprov::tagFromProgramCounter()) {
-      arrprov::setTag(a, *tag);
-    }
-  }
   vmStack().pushDictNoRc(a);
 }
 
 OPTBLD_INLINE void iopNewVecArray(uint32_t n) {
   // This constructor moves values, no inc/decref is necessary.
   auto const a = PackedArray::MakeVec(n, vmStack().topC());
-  if (RuntimeOption::EvalArrayProvenance) {
-    if (auto const pctag = arrprov::tagFromProgramCounter()) {
-      arrprov::setTag(a, *pctag);
-    }
-  }
   vmStack().ndiscard(n);
   vmStack().pushVecNoRc(a);
 }

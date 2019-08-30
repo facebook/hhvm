@@ -36,6 +36,7 @@ type parser =
   | DECL_MODE
   | PPL_REWRITER
   | LOWERER
+  | COROUTINE_ERRORS
 
 type mode =
   | RUST
@@ -349,6 +350,9 @@ let parse_args () =
       ("--ocaml", Arg.Unit (fun () -> mode := OCAML), "");
       ("--positioned", Arg.Unit (fun () -> parser := POSITIONED), "");
       ("--coroutine", Arg.Unit (fun () -> parser := COROUTINE), "");
+      ( "--coroutine-errors",
+        Arg.Unit (fun () -> parser := COROUTINE_ERRORS),
+        "" );
       ( "--decl-mode",
         Arg.Unit
           (fun () ->
@@ -390,10 +394,41 @@ let parse_args () =
 module MinimalTest = Runner (WithSyntax (MinimalSyntax))
 module PositionedTest_ = WithSyntax (PositionedSyntax)
 module PositionedTest = Runner (PositionedTest_)
-module CoroutineTest_ = WithSyntax (PositionedSyntax)
+module CoroutineTest__ = WithSyntax (PositionedSyntax)
 module CoroutineSC = Coroutine_smart_constructor.WithSyntax (PositionedSyntax)
-module CoroutineTest =
-  Runner (CoroutineTest_.WithSmartConstructors (CoroutineSC))
+module CoroutineTest_ = CoroutineTest__.WithSmartConstructors (CoroutineSC)
+module CoroutineTest = Runner (CoroutineTest_)
+
+module CoroutineErrorsTest_ = CoroutineTest_.WithTreeBuilder (struct
+  module ParserErrors_ =
+    Full_fidelity_parser_errors.WithSyntax (PositionedSyntax)
+  module ParserErrors = ParserErrors_.WithSmartConstructors (CoroutineSC)
+
+  type t = CoroutineTest_.SyntaxTree.t
+
+  let make ~env source_text =
+    (* We only care about errors here *)
+    let fake_root = PositionedSyntax.make_missing source_text 0 in
+    (* TODO:
+      - make parser_options configurable and use them
+      - make the arguments to ParserErrors.make_env configurable and use them
+    *)
+    let parser_options = ParserOptions.default in
+    let tree = CoroutineTest_.SyntaxTree.make ~env source_text in
+    let errors =
+      ParserErrors.(
+        make_env ~parser_options ~codegen:false tree |> parse_errors)
+    in
+    CoroutineTest_.SyntaxTree.build
+      source_text
+      fake_root
+      None
+      errors
+      None
+      false
+end)
+
+module CoroutineErrorsTest = Runner (CoroutineErrorsTest_)
 module DeclModeTest_ = WithSyntax (PositionedSyntax)
 module DeclModeSC = DeclModeSmartConstructors.WithSyntax (PositionedSyntax)
 module DeclModeTest = Runner (DeclModeTest_.WithSmartConstructors (DeclModeSC))
@@ -509,6 +544,7 @@ let () =
       ~hhvm_compat_mode:args.hhvm_compat_mode
       ~php5_compat_mode:args.php5_compat_mode
       ~codegen:args.codegen
+      ~leak_rust_tree:(args.parser = COROUTINE_ERRORS)
       ?mode
   in
   let ocaml_env = make_env ~rust:false () in
@@ -518,6 +554,8 @@ let () =
     | MINIMAL -> MinimalTest.test_batch args ~ocaml_env ~rust_env
     | POSITIONED -> PositionedTest.test_batch args ~ocaml_env ~rust_env
     | COROUTINE -> CoroutineTest.test_batch args ~ocaml_env ~rust_env
+    | COROUTINE_ERRORS ->
+      CoroutineErrorsTest.test_batch args ~ocaml_env ~rust_env
     | DECL_MODE -> DeclModeTest.test_batch args ~ocaml_env ~rust_env
     | PPL_REWRITER -> PPLRewriterTest.test_batch args ~ocaml_env ~rust_env
     | LOWERER -> LowererTest.test_batch args ~ocaml_env ~rust_env

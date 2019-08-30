@@ -116,6 +116,8 @@ let rec localize ~ety_env env (dty: decl ty) =
       env, (r, TUtils.terr env)
   | r, Tany _ ->
       env, (r, TUtils.tany env)
+  | r, Tvar var ->
+    Env.set_tvenv_link_global_tyvar env var, (r, Tvar var)
   | _, (Tnonnull | Tprim _ | Tdynamic) as x ->
       env, x
   | r, Tmixed ->

@@ -46,7 +46,7 @@ end = struct
           | AKdarray (tk, tv)
           | AKmap (tk, tv) -> ty tk; ty tv
         end
-      | Tvar _ -> assert false (* Expansion got rid of Tvars ... *)
+      | Tvar _ -> ()
       | Toption x -> ty x
       | Tlike x -> ty x
       | Tfun fty ->

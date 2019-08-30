@@ -465,7 +465,7 @@ and generic_ env variance name =
 
 and type_ tcopt root variance env (reason, ty) =
   match ty with
-  | Tany _ | Tmixed | Tnonnull | Terr | Tdynamic | Tnothing -> ()
+  | Tany _ | Tmixed | Tnonnull | Terr | Tdynamic | Tnothing | Tvar _ -> ()
   | Tarray (ty1, ty2) ->
     type_option tcopt root variance env ty1;
     type_option tcopt root variance env ty2
@@ -630,7 +630,7 @@ and get_typarams root env (ty: decl ty) =
     if Option.is_some (SMap.get id env)
     then empty
     else single id (fst ty)
-  | Tnonnull | Tdynamic | Tprim _ | Tnothing | Tany _ | Terr | Tthis | Tmixed -> empty
+  | Tnonnull | Tdynamic | Tprim _ | Tnothing | Tany _ | Terr | Tthis | Tmixed | Tvar _ -> empty
   | Toption ty | Tlike ty | Taccess (ty, _) -> get_typarams root env ty
   | Ttuple tyl -> List.fold_left tyl ~init:empty ~f:get_typarams_union
   | Tshape (_, m) ->

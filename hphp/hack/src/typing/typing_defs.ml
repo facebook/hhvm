@@ -171,13 +171,13 @@ and _ ty_ =
     : shape_kind * ('phase shape_field_type Nast.ShapeMap.t)
       -> 'phase ty_
 
-  (*========== Below Are Types That Cannot Be Declared In User Code ==========*)
-
   (* A type variable (not to be confused with a type parameter).
    * It represents a type that is "unknown" and must be inferred by Hack's
    * constraint-based type inference engine.
    *)
-  | Tvar : Ident.t -> locl ty_
+  | Tvar : Ident.t -> 'phase ty_
+
+  (*========== Below Are Types That Cannot Be Declared In User Code ==========*)
 
   (* The type of an opaque type (e.g. a "newtype" outside of the file where it
    * was defined). They are "opaque", which means that they only unify with

@@ -28,6 +28,7 @@ let rec pessimize_type env ?(trust_awaitable=false) (ty: decl ty) =
   | _, Tprim _
   | _, Tdynamic
   | _, Tmixed
+  | _, Tvar _
   | _, Tnothing ->
     ty
   | _, Tthis ->
@@ -220,6 +221,7 @@ let rec is_enforceable (env: env) (ty: decl ty) =
   | Tshape _ -> false
   | Tmixed -> true
   | Tnothing -> true
+  | Tvar _ -> false
   | Tdarray _ -> false
   | Tvarray _ -> false
   (* With no parameters, we enforce varray_or_darray just like array *)

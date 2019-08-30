@@ -439,6 +439,7 @@ let unwrap_class_type = function
       | Taccess (_, _)
       | Tthis
       | Tpu_access _
+      | Tvar _
     ) ->
       raise @@ Invalid_argument "unwrap_class_type got non-class"
 

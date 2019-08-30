@@ -51,8 +51,8 @@ and instantiate_ subst x =
   | Tdarray (ty1, ty2) -> Tdarray (instantiate subst ty1, instantiate subst ty2)
   | Tvarray ty -> Tvarray (instantiate subst ty)
   | Tvarray_or_darray ty -> Tvarray_or_darray (instantiate subst ty)
-  | (Tthis | Tmixed | Tdynamic | Tnonnull | Tany _ | Terr | Tprim _ | Tnothing)
-    as x ->
+  | ( Tthis | Tvar _ | Tmixed | Tdynamic | Tnonnull | Tany _ | Terr | Tprim _
+    | Tnothing ) as x ->
     x
   | Ttuple tyl ->
     let tyl = List.map tyl (instantiate subst) in

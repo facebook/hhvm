@@ -234,7 +234,7 @@ module Full = struct
     | Tprim x -> text @@ prim x
     | Tvar n ->
       let _, n' = Env.get_var env n in
-      let _, ety = Env.expand_type env (Reason.Rnone, x) in
+      let _, ety = Env.expand_type env (Reason.Rnone, (Tvar n)) in
       begin match ety with
         (* For unsolved type variables, always show the type variable *)
       | (_, Tvar _) ->
@@ -825,8 +825,8 @@ let rec from_type: type a. env -> a ty -> json =
     | None -> []
     | Some ty -> ["as", from_type env ty] in
   match snd ty with
-  | Tvar _ ->
-    let _, ty = Typing_env.expand_type env ty in
+  | Tvar n ->
+    let _, ty = Typing_env.expand_type env (fst ty, Tvar n) in
     begin match snd ty with
     | Tvar _ -> obj @@ kind "var"
     | _ -> from_type env ty

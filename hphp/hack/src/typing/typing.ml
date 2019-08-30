@@ -3447,6 +3447,7 @@ and call_parent_construct pos env el uel =
     | _,
       (
           Tany _
+        | Tvar _
         | Tdynamic
         | Tmixed
         | Tnonnull

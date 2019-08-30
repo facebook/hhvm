@@ -128,7 +128,7 @@ class SplFileObject extends SplFileInfo
     bool $use_include_path = false,
     ?resource $context = null,
   );
-  /* returns string|array ... violates Iterator interface */
+  /** @return string|array violates Iterator interface */
   public function current();
   public function eof(): bool;
   public function fflush(): bool;

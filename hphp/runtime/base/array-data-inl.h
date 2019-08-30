@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/base/runtime-option.h"
 
 #include "hphp/util/portability.h"
@@ -88,7 +89,9 @@ ALWAYS_INLINE ArrayData* ArrayData::CreateVArray() {
 }
 
 ALWAYS_INLINE ArrayData* ArrayData::CreateVec() {
-  return staticEmptyVecArray();
+  return RuntimeOption::EvalArrayProvenanceEmpty
+    ? arrprov::makeEmptyVec()
+    : staticEmptyVecArray();
 }
 
 ALWAYS_INLINE ArrayData* ArrayData::CreateDArray() {
@@ -96,7 +99,9 @@ ALWAYS_INLINE ArrayData* ArrayData::CreateDArray() {
 }
 
 ALWAYS_INLINE ArrayData* ArrayData::CreateDict() {
-  return staticEmptyDictArray();
+  return RuntimeOption::EvalArrayProvenanceEmpty
+    ? arrprov::makeEmptyDict()
+    : staticEmptyDictArray();
 }
 
 ALWAYS_INLINE ArrayData* ArrayData::CreateShape() {

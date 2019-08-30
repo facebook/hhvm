@@ -1959,7 +1959,7 @@ const ArrayData* makeEmptyArray(const ArrayData* base) {
   assertx(base->empty());
   assertx(base->isStatic());
 
-  return arrprov::makeEmptyArray(base, *arrprov::tagFromProgramCounter());
+  return arrprov::makeEmptyArray(base);
 }
 
 }

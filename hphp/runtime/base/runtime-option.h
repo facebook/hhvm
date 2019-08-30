@@ -1050,6 +1050,8 @@ struct RuntimeOption {
    * RepoAuthoritativeMode wasn't built with this flag or if the        \
    * flag LogArrayProvenance is unset */                                \
   F(bool, ArrayProvenance, false)                                       \
+  /* Tag _all_ empty arrays we create at runtime. */                    \
+  F(bool, ArrayProvenanceEmpty, false)                                  \
   /* Enable experimental array provenance opportunistic creation of     \
    * tagged empty arrays */                                             \
   F(bool, ArrayProvenancePromoteEmptyArrays, false)                      \

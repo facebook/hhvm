@@ -19,10 +19,13 @@
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/init-fini-node.h"
+#include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/util/rds-local.h"
 #include "hphp/util/type-scan.h"
+#include "hphp/util/type-traits.h"
 
 #include <folly/AtomicHashMap.h>
 #include <folly/container/F14Map.h>
@@ -166,14 +169,49 @@ TypedValue tagTVKnown(TypedValue tv, Tag tag) {
   return tv;
 }
 
-const ArrayData* makeEmptyArray(const ArrayData* base, const Tag& tag) {
+namespace {
+
+template<typename AD, typename Copy>
+typename maybe_const<AD, ArrayData, AD*>::type
+makeEmptyImpl(AD* base, folly::Optional<Tag> tag, Copy&& copy) {
   assertx(base->empty());
   assertx(base->isStatic());
   assertx(arrayWantsTag(base));
-  auto ad = base->copy();
-  arrprov::setTag(ad, tag);
+
+  if (!tag) tag = tagFromProgramCounter();
+  if (!tag) return base;
+
+  auto ad = copy(base);
+  assertx(ad);
+  assertx(ad->hasExactlyOneRef());
+
+  arrprov::setTagReplace(ad, *tag);
   ArrayData::GetScalarArray(&ad);
+
   return ad;
+}
+
+}
+
+const ArrayData* makeEmptyArray(const ArrayData* base,
+                                folly::Optional<Tag> tag) {
+  return makeEmptyImpl(base, tag, [] (const ArrayData* ad) {
+    return ad->copy();
+  });
+}
+
+ArrayData* makeEmptyVec() {
+  return makeEmptyImpl(
+    staticEmptyVecArray(), folly::none,
+    [] (const ArrayData* ad) { return PackedArray::CopyVec(ad); }
+  );
+}
+
+ArrayData* makeEmptyDict() {
+  return makeEmptyImpl(
+    staticEmptyDictArray(), folly::none,
+    [] (const ArrayData* ad) { return MixedArray::CopyDict(ad); }
+  );
 }
 
 folly::Optional<Tag> tagFromProgramCounter() {

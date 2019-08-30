@@ -32,6 +32,7 @@
    | LocalTyvar of tyvar_info_
    | GlobalTyvar
  type tvenv = tyvar_info IMap.t
+ type global_tvenv = tyvar_info_ IMap.t
 
  type env = {
    (* position of the function/method being checked *)
@@ -52,6 +53,7 @@
    subtype_prop : Typing_logic.subtype_prop;
    log_levels : int SMap.t;
    tvenv : tvenv;
+   global_tvenv : global_tvenv;
    tyvars_stack : (Pos.t * Ident.t list) list;
    allow_wildcards : bool;
    big_envs : (Pos.t * env) list ref ;

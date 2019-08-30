@@ -338,6 +338,12 @@ let tvenv_as_value env tvenv =
     | GlobalTyvar ->
       SMap.add (Printf.sprintf "#%d" i) (global_tyvar_info_as_value) m
     ) tvenv SMap.empty)
+
+let global_tvenv_as_value env global_tvenv =
+  Map (IMap.fold (fun i x m ->
+      SMap.add (Printf.sprintf "#%d" i) (local_tyvar_info_as_value env x) m
+    ) global_tvenv SMap.empty)
+
 let tyvars_stack_as_value tyvars_stack =
   List (List.map tyvars_stack (fun (_, l) ->
   List (List.map l (fun i -> Atom (Printf.sprintf "#%d" i)))))
@@ -448,6 +454,7 @@ let env_as_value env =
     subtype_prop;
     log_levels = _;
     tvenv;
+    global_tvenv;
     tyvars_stack;
     allow_wildcards;
     big_envs = _;
@@ -456,6 +463,7 @@ let env_as_value env =
   make_map [
     "function_pos", pos_as_value function_pos;
     "tvenv", tvenv_as_value env tvenv;
+    "global_tvenv", global_tvenv_as_value env global_tvenv;
     "tenv", tenv_as_value env tenv;
     "subst", subst_as_value subst;
     "fresh_typarams", Set fresh_typarams;

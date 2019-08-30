@@ -77,11 +77,23 @@ type tyvar_info_ = {
     * locl_ty) SMap.t;
 }
 
+(* For global inference we are distinguishing global tyvars and local tyvars.
+Global tyvars are tyvars which have to remain unsolved until all of the files
+are done typechecking. Thus, global tyvars are going possess their own constraint
+graph which is global_tvenv. Local tyvars have the same behavior as a "normal"
+tyvar.
+
+Concerning the implementation, the tvenv can now hold either "LocalTyvar tyvar_info"
+if the tyvar is local or a "GlobalTyvar" atom if the tyvar is global and thus
+can be found in the globalenv.
+*)
 type tyvar_info =
   | LocalTyvar of tyvar_info_
   | GlobalTyvar
 
 type tvenv = tyvar_info IMap.t
+
+type global_tvenv = tyvar_info_ IMap.t
 
 type env = {
   (* position of the function/method being checked *)
@@ -104,6 +116,7 @@ type env = {
   subtype_prop : Typing_logic.subtype_prop;
   log_levels : int SMap.t ;
   tvenv : tvenv;
+  global_tvenv: global_tvenv;
   tyvars_stack : (Pos.t * Ident.t list) list;
   allow_wildcards : bool ;
   big_envs : (Pos.t * env) list ref ;

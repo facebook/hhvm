@@ -90,6 +90,9 @@ let empty_bounds = TySet.empty
 let env_with_tvenv env tvenv =
   { env with tvenv = tvenv }
 
+let env_with_global_tvenv env global_tvenv =
+  { env with global_tvenv = global_tvenv }
+
 let empty_tyvar_info =
   { tyvar_pos = Pos.none;
     eager_solve_fail = false;
@@ -156,7 +159,7 @@ let get_tyvar_info_opt env var =
   let tyvaropt = IMap.get var env.tvenv in
   match tyvaropt with
   | None -> None
-  | Some GlobalTyvar -> None
+  | Some GlobalTyvar -> IMap.get var env.global_tvenv
   | Some (LocalTyvar tyvar) -> Some tyvar
 
 let get_tyvar_info env var =
@@ -164,7 +167,8 @@ let get_tyvar_info env var =
 
 let update_tyvar_info env var tyvar_info =
   if IMap.get var env.tvenv = Some GlobalTyvar then
-    failwith "unimplemented"
+    let env = env_with_tvenv env (IMap.add var GlobalTyvar env.tvenv) in
+    env_with_global_tvenv env (IMap.add var tyvar_info env.global_tvenv)
   else
     env_with_tvenv env (IMap.add var (LocalTyvar tyvar_info) env.tvenv)
 
@@ -484,6 +488,7 @@ let empty ?(mode = FileInfo.Mstrict) tcopt file ~droot = {
   subtype_prop = TL.valid;
   log_levels = TypecheckerOptions.log_levels tcopt;
   tvenv = IMap.empty;
+  global_tvenv = IMap.empty;
   tyvars_stack = [];
   allow_wildcards = false;
   big_envs = ref [];

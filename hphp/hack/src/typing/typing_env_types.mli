@@ -19,7 +19,7 @@
    local_using_vars   : Local_id.Set.t;
  }
 
- type tyvar_info = {
+ type tyvar_info_ = {
    tyvar_pos: Pos.t;
    eager_solve_fail: bool;
    appears_covariantly: bool;
@@ -28,6 +28,9 @@
    upper_bounds : TySet.t;
    type_constants : (Aast.sid * locl ty) SMap.t;
  }
+ type tyvar_info =
+   | LocalTyvar of tyvar_info_
+   | GlobalTyvar
  type tvenv = tyvar_info IMap.t
 
  type env = {

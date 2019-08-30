@@ -50,7 +50,7 @@ let pp_tfun _ _ = Printf.printf "%s\n" "<tfun>"
 
 [@@@warning "+32"]
 
-type tyvar_info = {
+type tyvar_info_ = {
   (* Where was the type variable introduced? (e.g. generic method invocation,
    * new object construction)
    *)
@@ -76,6 +76,11 @@ type tyvar_info = {
     (Aast.sid (* id of the type constant "T", containing its position. *)
     * locl_ty) SMap.t;
 }
+
+type tyvar_info =
+  | LocalTyvar of tyvar_info_
+  | GlobalTyvar
+
 type tvenv = tyvar_info IMap.t
 
 type env = {

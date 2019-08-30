@@ -15,8 +15,13 @@ let ty_set_size env tyset =
 
 let tvenv_size env =
   IMap.fold
-    (fun _ { lower_bounds; upper_bounds; _ } size ->
-      size + ty_set_size env lower_bounds + ty_set_size env upper_bounds) env.tvenv 0
+    (fun _ tyvar_info size ->
+      match tyvar_info with
+      | LocalTyvar { lower_bounds; upper_bounds; _ } ->
+        size + ty_set_size env lower_bounds + ty_set_size env upper_bounds
+      | GlobalTyvar ->
+        0
+    ) env.tvenv 0
 
 let env_size env =
   local_env_size env +

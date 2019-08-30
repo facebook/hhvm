@@ -103,7 +103,7 @@ let empty_tyvar_info =
 let add_current_tyvar ?variance env p v =
   match env.tyvars_stack with
   | (expr_pos, tyvars) :: rest ->
-    let tyvar =
+    let tyvar_info =
       match variance with
       | Some Ast_defs.Invariant -> {empty_tyvar_info with appears_covariantly = true; appears_contravariantly = true}
       | Some Ast_defs.Covariant -> {empty_tyvar_info with appears_covariantly = true}
@@ -111,7 +111,7 @@ let add_current_tyvar ?variance env p v =
       | None -> empty_tyvar_info
     in
     let env = env_with_tvenv env
-      (IMap.add v { tyvar with tyvar_pos = p } env.tvenv) in
+      (IMap.add v (LocalTyvar { tyvar_info with tyvar_pos = p }) env.tvenv) in
     { env with tyvars_stack = (expr_pos, (v :: tyvars)) :: rest }
   | _ -> env
 
@@ -152,11 +152,21 @@ let get_type_unsafe env x =
       env, (Reason.none, Typing_defs.make_tany ())
   | Some ty -> env, ty
 
-let get_tyvar_info env var =
-  Option.value (IMap.get var env.tvenv) ~default:empty_tyvar_info
+let get_tyvar_info_opt env var =
+  let tyvaropt = IMap.get var env.tvenv in
+  match tyvaropt with
+  | None -> None
+  | Some GlobalTyvar -> None
+  | Some (LocalTyvar tyvar) -> Some tyvar
 
-let set_tyvar_info env var tyvar_info =
-  { env with tvenv = IMap.add var tyvar_info env.tvenv }
+let get_tyvar_info env var =
+  Option.value (get_tyvar_info_opt env var) ~default:empty_tyvar_info
+
+let update_tyvar_info env var tyvar_info =
+  if IMap.get var env.tvenv = Some GlobalTyvar then
+    failwith "unimplemented"
+  else
+    env_with_tvenv env (IMap.add var (LocalTyvar tyvar_info) env.tvenv)
 
 let get_tyvar_eager_solve_fail env var =
   let tvinfo = get_tyvar_info env var in
@@ -294,25 +304,25 @@ let get_tpenv_size env =
  *****************************************************************************)
 
 let get_tyvar_lower_bounds env var =
-  match IMap.get var env.tvenv with
+  match get_tyvar_info_opt env var with
   | None -> empty_bounds
-  | Some {lower_bounds; _} -> lower_bounds
+  | Some ({lower_bounds; _}) -> lower_bounds
 
 let get_tyvar_upper_bounds env var =
-  match IMap.get var env.tvenv with
+  match get_tyvar_info_opt env var with
   | None -> empty_bounds
-  | Some {upper_bounds; _} -> upper_bounds
+  | Some ({upper_bounds; _}) -> upper_bounds
 
 let set_tyvar_lower_bounds env var lower_bounds =
   let tyvar_info = get_tyvar_info env var in
   let tyvar_info = { tyvar_info with lower_bounds } in
-  let env = set_tyvar_info env var tyvar_info in
+  let env = update_tyvar_info env var tyvar_info in
   env
 
 let set_tyvar_upper_bounds env var upper_bounds =
   let tyvar_info = get_tyvar_info env var in
   let tyvar_info = { tyvar_info with upper_bounds } in
-  let env = set_tyvar_info env var tyvar_info in
+  let env = update_tyvar_info env var tyvar_info in
   env
 
 let rec is_tvar ~elide_nullable ty var =
@@ -321,20 +331,17 @@ let rec is_tvar ~elide_nullable ty var =
   | (_, Toption ty) when elide_nullable -> is_tvar ~elide_nullable ty var
   | _ -> false
 
-let set_tyvar_info env var tvinfo =
-  env_with_tvenv env (IMap.add var tvinfo env.tvenv)
-
 let remove_tyvar env var =
   (* Don't remove it entirely if we have marked it as eager_solve_fail *)
   log_env_change "remove_tyvar" env @@
   let tvinfo = get_tyvar_info env var in
   if tvinfo.eager_solve_fail
-  then set_tyvar_info env var { empty_tyvar_info with eager_solve_fail = true }
+  then update_tyvar_info env var { empty_tyvar_info with eager_solve_fail = true }
   else env_with_tvenv env (IMap.remove var env.tvenv)
 
 let set_tyvar_eager_solve_fail env var =
   let tvinfo = get_tyvar_info env var in
-  set_tyvar_info env var { tvinfo with eager_solve_fail = true }
+  update_tyvar_info env var { tvinfo with eager_solve_fail = true }
 
 let get_tyvar_appears_covariantly env var =
   let tvinfo = get_tyvar_info env var in
@@ -357,7 +364,7 @@ let get_tyvar_type_const env var (_, tyconstid) =
 let set_tyvar_type_const env var (_, tyconstid_ as tyconstid) ty =
   let tvinfo = get_tyvar_info env var in
   let type_constants = SMap.add tyconstid_ (tyconstid, ty) tvinfo.type_constants in
-  set_tyvar_info env var { tvinfo with type_constants }
+  update_tyvar_info env var { tvinfo with type_constants }
 
 (* Conjoin a subtype proposition onto the subtype_prop in the environment *)
 let add_subtype_prop env prop =
@@ -1168,7 +1175,7 @@ let rec set_tyvar_appears_covariantly env var =
   if tvinfo.appears_covariantly
   then env
   else
-    let env = env_with_tvenv env (IMap.add var { tvinfo with appears_covariantly = true } env.tvenv) in
+    let env = update_tyvar_info env var { tvinfo with appears_covariantly = true } in
     update_variance_of_tyvars_occurring_in_lower_bounds env tvinfo.lower_bounds
 
 and set_tyvar_appears_contravariantly env var =
@@ -1176,7 +1183,7 @@ and set_tyvar_appears_contravariantly env var =
   if tvinfo.appears_contravariantly
   then env
   else
-    let env = env_with_tvenv env (IMap.add var { tvinfo with appears_contravariantly = true } env.tvenv) in
+    let env = update_tyvar_info env var { tvinfo with appears_contravariantly = true } in
     update_variance_of_tyvars_occurring_in_upper_bounds env tvinfo.upper_bounds
 
 and update_variance_of_tyvars_occurring_in_lower_bounds env tys =
@@ -1287,8 +1294,7 @@ let fresh_invariant_type_var env p =
     | None -> ty ++ tvinfo.upper_bounds
     | Some intersect ->
       TySet.of_list (intersect ty (TySet.elements tvinfo.upper_bounds)) in
-   let env = env_with_tvenv env
-    (IMap.add var { tvinfo with upper_bounds } env.tvenv) in
+   let env = update_tyvar_info env var { tvinfo with upper_bounds } in
    if get_tyvar_appears_contravariantly env var
    then update_variance_of_tyvars_occurring_in_upper_bound env ty
    else env
@@ -1301,7 +1307,7 @@ let remove_tyvar_upper_bound env var upper_var =
   let upper_bounds = TySet.filter
     (fun ty -> match expand_type env ty with _, (_, Tvar v) -> v <> upper_var | _ -> true)
     tvinfo.upper_bounds in
-  env_with_tvenv env (IMap.add var { tvinfo with upper_bounds } env.tvenv)
+  update_tyvar_info env var { tvinfo with upper_bounds }
 
 
 (* Remove type variable `lower_var` from the lower bounds on `var`, if it exists
@@ -1312,7 +1318,7 @@ let remove_tyvar_lower_bound env var lower_var =
   let lower_bounds = TySet.filter
     (fun ty -> match expand_type env ty with _, (_, Tvar v) -> v <> lower_var | _ -> true)
     tvinfo.lower_bounds in
-  env_with_tvenv env (IMap.add var { tvinfo with lower_bounds } env.tvenv)
+  update_tyvar_info env var { tvinfo with lower_bounds }
 
 
 (* Add a single new upper bound [ty] to type variable [var] in [env.tvenv].
@@ -1332,8 +1338,7 @@ let add_tyvar_lower_bound ?union env var ty =
     | None -> ty ++ tvinfo.lower_bounds
     | Some union ->
       TySet.of_list (union ty (TySet.elements tvinfo.lower_bounds)) in
-  let env = env_with_tvenv env
-    (IMap.add var { tvinfo with lower_bounds } env.tvenv) in
+  let env = update_tyvar_info env var { tvinfo with lower_bounds } in
   if get_tyvar_appears_covariantly env var
   then update_variance_of_tyvars_occurring_in_lower_bound env ty
   else env

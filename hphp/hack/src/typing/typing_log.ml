@@ -309,7 +309,10 @@ let subst_as_value subst =
   Map (IMap.fold (fun i x m ->
     SMap.add (Printf.sprintf "#%d" i) (Atom (Printf.sprintf "#%d" x)) m) subst SMap.empty)
 
-let tyvar_info_as_value env tvinfo =
+let global_tyvar_info_as_value =
+  Atom "global"
+
+let local_tyvar_info_as_value env tvinfo =
   let {
     tyvar_pos;
     eager_solve_fail;
@@ -329,7 +332,12 @@ let tyvar_info_as_value env tvinfo =
   ]
 let tvenv_as_value env tvenv =
   Map (IMap.fold (fun i x m ->
-    SMap.add (Printf.sprintf "#%d" i) (tyvar_info_as_value env x) m) tvenv SMap.empty)
+    match x with
+    | LocalTyvar x ->
+      SMap.add (Printf.sprintf "#%d" i) (local_tyvar_info_as_value env x) m
+    | GlobalTyvar ->
+      SMap.add (Printf.sprintf "#%d" i) (global_tyvar_info_as_value) m
+    ) tvenv SMap.empty)
 let tyvars_stack_as_value tyvars_stack =
   List (List.map tyvars_stack (fun (_, l) ->
   List (List.map l (fun i -> Atom (Printf.sprintf "#%d" i)))))

@@ -163,7 +163,7 @@ val get_tyvar_appears_contravariantly :
 val get_tyvar_appears_invariantly :
   env -> Ident.t -> bool
 val get_tyvar_info :
-  env -> Ident.t -> tyvar_info
+  env -> Ident.t -> tyvar_info_
 val get_tyvar_eager_solve_fail :
   env -> Ident.t -> bool
 val get_tyvar_type_const :

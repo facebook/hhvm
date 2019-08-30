@@ -1958,27 +1958,32 @@ and env_to_prop env =
 
 and tvenv_to_prop tvenv =
   let props_per_tvar = IMap.mapi (
-    fun id { lower_bounds; upper_bounds; _ } ->
-      let tyvar = (Reason.Rnone, Tvar id) in
-      let lower_bounds = TySet.elements lower_bounds in
-      let upper_bounds = TySet.elements upper_bounds in
-      let lower_bounds_props = List.map ~f:(fun ty -> TL.IsSubtype (ty, tyvar))
-        lower_bounds in
-      (* If an upper bound of variable n1 is a `Tvar n2`,
-      then we have already added "Tvar n1 <: Tvar n2" when traversing
-      lower bounds of n2, so we can filter out upper bounds that are Tvars. *)
-      let can_be_removed = function
-        | _, Tvar n ->
-          begin match IMap.find_opt n tvenv with
-          | Some _ -> true
-          | None -> false
-          end
-        | _ -> false in
-      let upper_bounds = List.filter ~f:(fun ty -> not (can_be_removed ty))
-        upper_bounds in
-      let upper_bounds_props = List.map ~f:(fun ty -> TL.IsSubtype (tyvar, ty))
-        upper_bounds in
-      TL.conj_list (lower_bounds_props @ upper_bounds_props))
+    fun id tyvar_info ->
+      match tyvar_info with
+      | LocalTyvar { lower_bounds; upper_bounds; _ } ->
+        let tyvar = (Reason.Rnone, Tvar id) in
+        let lower_bounds = TySet.elements lower_bounds in
+        let upper_bounds = TySet.elements upper_bounds in
+        let lower_bounds_props = List.map ~f:(fun ty -> TL.IsSubtype (ty, tyvar))
+          lower_bounds in
+        (* If an upper bound of variable n1 is a `Tvar n2`,
+        then we have already added "Tvar n1 <: Tvar n2" when traversing
+        lower bounds of n2, so we can filter out upper bounds that are Tvars. *)
+        let can_be_removed = function
+          | _, Tvar n ->
+            begin match IMap.find_opt n tvenv with
+            | Some _ -> true
+            | None -> false
+            end
+          | _ -> false in
+        let upper_bounds = List.filter ~f:(fun ty -> not (can_be_removed ty))
+          upper_bounds in
+        let upper_bounds_props = List.map ~f:(fun ty -> TL.IsSubtype (tyvar, ty))
+          upper_bounds in
+        TL.conj_list (lower_bounds_props @ upper_bounds_props)
+      | GlobalTyvar ->
+        TL.conj_list []
+    )
     tvenv in
   let _ids, props = List.unzip (IMap.bindings props_per_tvar) in
   TL.conj_list props

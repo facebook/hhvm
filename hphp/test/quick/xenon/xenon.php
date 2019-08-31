@@ -48,7 +48,7 @@ main(42);
 // get the Xenon data then verify that there are no unknown functions
 // and that all of the functions in this file are in the stack
 $success = false;
-$request_num = apc_fetch('request_number', &$success);
+$request_num = apc_fetch('request_number', inout $success);
 if ($success) {
   $stacks = HH\xenon_get_and_clear_samples();
 } else {

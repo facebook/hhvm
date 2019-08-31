@@ -85,12 +85,12 @@ bool HHVM_FUNCTION(apc_clear_cache,
                    const String& cache_type = "");
 Variant HHVM_FUNCTION(apc_inc,
                       const String& key,
-                      int64_t step = 1,
-                      VRefParam success = uninit_null());
+                      int64_t step,
+                      bool& success);
 Variant HHVM_FUNCTION(apc_dec,
                       const String& key,
-                      int64_t step = 1,
-                      VRefParam success = uninit_null());
+                      int64_t step,
+                      bool& success);
 bool HHVM_FUNCTION(apc_cas,
                    const String& key,
                    int64_t old_cas,

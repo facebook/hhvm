@@ -49,14 +49,15 @@ $ret = apc_add("foo", false);
 if ($ret !== false) {
   echo "no7\n";
 }
-$ret = apc_fetch("foo", &$success);
+$success = null;
+$ret = apc_fetch("foo", inout $success);
 if ($ret !== false) {
   echo "no8\n";
 }
 if ($success !== true) {
   echo "no9\n";
 }
-$ret = apc_fetch("bar", &$success);
+$ret = apc_fetch("bar", inout $success);
 if ($ret !== false) {
   echo "no10\n";
 }

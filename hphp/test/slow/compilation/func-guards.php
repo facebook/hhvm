@@ -5,7 +5,8 @@ function test() {
 }
 
 function setup() {
-  $i = apc_inc('foo', 1);
+  $res = null;
+  $i = apc_inc('foo', 1, inout $res);
   var_dump($i);
 
   $text = "";

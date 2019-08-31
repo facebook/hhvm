@@ -568,7 +568,7 @@ function curl_multi_add_handle(resource $mh, resource $ch);
 <<__PHPStdLib>>
 function curl_multi_remove_handle(resource $mh, resource $ch);
 <<__PHPStdLib>>
-function curl_multi_exec(resource $mh, &$still_running);
+function curl_multi_exec(resource $mh, inout $still_running);
 <<__PHPStdLib>>
 function curl_multi_select(resource $mh, float $timeout = 1.0);
 <<__PHPStdLib>>
@@ -576,7 +576,7 @@ function curl_multi_await(resource $mh, float $timeout = 1.0): Awaitable<int>;
 <<__PHPStdLib>>
 function curl_multi_getcontent(resource $ch);
 <<__PHPStdLib>>
-function curl_multi_info_read(resource $mh, &$msgs_in_queue = null);
+function curl_multi_info_read(resource $mh, inout $msgs_in_queue);
 <<__PHPStdLib>>
 function curl_multi_close(resource $mh);
 <<__PHPStdLib>>

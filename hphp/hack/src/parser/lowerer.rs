@@ -234,7 +234,7 @@ where
     }
 
     fn mp_optional<S>(
-        p: &Fn(&Syntax<T, V>, &Env) -> ret!(S),
+        p: &dyn Fn(&Syntax<T, V>, &Env) -> ret!(S),
         node: &Syntax<T, V>,
         env: &Env,
     ) -> ret!(Option<S>) {

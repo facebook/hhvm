@@ -42,26 +42,10 @@ extern RawDestructor g_destructors[kDestrTableSize];
 
 /*
  * Return true iff decreffing `tv' will cause any helper function to be called.
- *
- * Note that there are cases (specifically, for RefData) where this function
- * returns true but tvDecRefWillRelease() will return false.
  */
 ALWAYS_INLINE bool tvDecRefWillCallHelper(const TypedValue tv) {
   if (noop_decref) return false;
   return isRefcountedType(tv.m_type) && tv.m_data.pcnt->decWillRelease();
-}
-
-/*
- * Return true iff decreffing `tv' will free heap-allocated data.
- *
- * Always returns false for non-refcounted types.
- */
-ALWAYS_INLINE bool tvDecRefWillRelease(TypedValue tv) {
-  if (noop_decref) return false;
-  if (!isRefcountedType(tv.m_type)) {
-    return false;
-  }
-  return tv.m_data.pcnt->decWillRelease();
 }
 
 /*

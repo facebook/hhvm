@@ -2155,6 +2155,7 @@ SSATmp* simplifyConvCellToArr(State& env, const IRInstruction* inst) {
   if (src->isA(TInt))    return gen(env, ConvIntToArr, src);
   if (src->isA(TStr))    return gen(env, ConvStrToArr, src);
   if (src->isA(TObj))    return gen(env, ConvObjToArr, inst->taken(), src);
+  // TODO: T53309695 Handle TFunc and TClsMeth as well
   return nullptr;
 }
 

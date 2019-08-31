@@ -1,0 +1,4 @@
+-vEval.EmitFuncPointers=1
+-vEval.EmitClsMethPointers=1
+-vEval.HackRecords=1
+--count=18

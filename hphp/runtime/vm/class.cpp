@@ -2690,7 +2690,7 @@ void Class::setProperties() {
       if ((prop.attrs & AttrPrivate) && !(prop.attrs & AttrLSB)) continue;
 
       auto it = curSPropMap.find(prop.name);
-      assertx(it != curPropMap.end());
+      assertx(it != curSPropMap.end());
 
       Slot slot = it->second;
       assertx(staticSerializationVisited.size() > slot);

@@ -29,14 +29,15 @@ RecordBase::RecordBase(const RecordDesc* record)
 }
 
 template
-RecordData* RecordBase::copyRecordImpl<RecordData>(const RecordData*);
+RecordData* RecordBase::copyRecordBase<RecordData>(const RecordData*);
+template
+RecordArray* RecordBase::copyRecordBase<RecordArray>(const RecordArray*);
 
 template<class RecordType>
-RecordType* RecordBase::copyRecordImpl(const RecordType* old) {
+RecordType* RecordBase::copyRecordBase(const RecordType* old) {
   auto const size = RecordType::sizeWithFields(old->record());
   auto const newRec = static_cast<RecordType*>(tl_heap->objMalloc(size));
   memcpy(newRec, old, size);
-  newRec->initHeader(old->kind(), OneReference);
   auto const fields = newRec->fieldVec();
   for (auto i = 0; i < old->record()->numFields(); ++i) {
     tvIncRefGen(fields[i]);
@@ -69,24 +70,28 @@ RecordType* RecordBase::newRecordImpl(const RecordDesc* rec,
   try {
     for (auto i = 0; i < initSize; ++i) {
       auto const name = keys[i];
-      const auto&  field = rec->field(name);
+      auto const idx = rec->lookupField(name);
+      if (idx == kInvalidSlot) {
+        raise_record_field_error(rec->name(), name);
+      }
+      const auto&  field = rec->field(idx);
       auto const& val = values[initSize - i -1];
       auto const& tc = field.typeConstraint();
       if (tc.isCheckable()) {
         tc.verifyRecField(&val, rec->name(), field.name());
       }
-      auto const& tv = recdata->fieldLval(name);
+      auto const& tv = recdata->lvalAt(idx);
       tvCopy(val, tv);
     }
-    for (auto const &field : rec->allFields()) {
-      auto const name = field.name();
-      auto const& tv = recdata->fieldLval(name);
+    for (auto i = 0; i < rec->numFields(); ++i) {
+      auto const field = rec->field(i);
+      auto const& tv = recdata->lvalAt(i);
       if (type(tv) != KindOfUninit) continue;
       auto const& val = field.val();
       if (val.m_type != KindOfUninit) {
         tvDup(val, tv);
       } else {
-        raise_record_init_error(rec->name(), name);
+        raise_record_init_error(rec->name(), field.name());
       }
     }
   } catch (...) {
@@ -96,13 +101,13 @@ RecordType* RecordBase::newRecordImpl(const RecordDesc* rec,
   return recdata;
 }
 
-tv_rval RecordBase::fieldRval(const StringData* fieldName) const {
-  auto const idx = m_record->lookupField(fieldName);
+tv_rval RecordBase::rvalAt(Slot idx) const {
+  assertx(idx != kInvalidSlot && idx < record()->numFields());
   return tv_rval(&fieldVec()[idx]);
 }
 
-tv_lval RecordBase::fieldLval(const StringData* fieldName) {
-  auto const idx = m_record->lookupField(fieldName);
+tv_lval RecordBase::lvalAt(Slot idx) {
+  assertx(idx != kInvalidSlot && idx < record()->numFields());
   return tv_lval(const_cast<TypedValue*>(&fieldVec()[idx]));
 }
 

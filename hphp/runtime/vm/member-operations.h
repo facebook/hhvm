@@ -520,8 +520,11 @@ inline tv_rval ElemObject(TypedValue& tvRef,
 template <KeyType keyType>
 inline tv_rval ElemRecord(RecordData* base, key_type<keyType> key) {
   auto const fieldName = tvCastToString(initScratchKey(key));
-  auto const ret = base->fieldRval(fieldName.get());
-  return ret;
+  auto const idx = base->record()->lookupField(fieldName.get());
+  if (idx == kInvalidSlot) {
+    raise_record_field_error(base->record()->name(), fieldName.get());
+  }
+  return base->rvalAt(idx);
 }
 
 /**
@@ -909,7 +912,12 @@ inline tv_lval ElemDRecord(tv_lval base, key_type<keyType> key) {
     decRefRec(oldRecData);
   }
   auto const fieldName = tvCastToString(initScratchKey(key));
-  return val(base).prec->fieldLval(fieldName.get());
+  auto const rec = val(base).prec->record();
+  auto const idx = rec->lookupField(fieldName.get());
+  if (idx == kInvalidSlot) {
+    raise_record_field_error(rec->name(), fieldName.get());
+  }
+  return val(base).prec->lvalAt(idx);
 }
 /**
  * ElemD when base is an Object
@@ -1540,7 +1548,11 @@ inline void SetElemRecord(tv_lval base, key_type<keyType> key,
   auto const fieldName = tvCastToString(initScratchKey(key));
   auto const oldRecData = val(base).prec;
   auto const rec = oldRecData->record();
-  auto const& field = rec->field(fieldName.get());
+  auto const idx = rec->lookupField(fieldName.get());
+  if (idx == kInvalidSlot) {
+    raise_record_field_error(rec->name(), fieldName.get());
+  }
+  auto const& field = rec->field(idx);
   auto const& tc = field.typeConstraint();
   if (tc.isCheckable()) {
     tc.verifyRecField(value, rec->name(), field.name());
@@ -1549,7 +1561,7 @@ inline void SetElemRecord(tv_lval base, key_type<keyType> key,
     val(base).prec = oldRecData->copyRecord();
     decRefRec(oldRecData);
   }
-  auto const& tv = val(base).prec->fieldLval(fieldName.get());
+  auto const& tv = val(base).prec->lvalAt(idx);
   tvSet(*value, tv);
 }
 

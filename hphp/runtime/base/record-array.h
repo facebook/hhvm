@@ -43,13 +43,14 @@ struct RecordArray : ArrayData,
                                      uint32_t initSize,
                                      const StringData* const* keys,
                                      const TypedValue* values);
+  RecordArray* copyRecordArray() const;
 
   // Array interface
   static void Release(ArrayData*);
   static tv_rval NvGetInt(const ArrayData*, int64_t key);
   static tv_rval NvTryGetInt(const ArrayData*, int64_t key);
   static tv_rval NvGetStr(const ArrayData*, const StringData*);
-  static tv_rval NvTryGetStr(const ArrayData*, const StringData*);
+  static constexpr auto NvTryGetStr = &NvGetStr;
   static ssize_t NvGetIntPos(const ArrayData*, int64_t k);
   static ssize_t NvGetStrPos(const ArrayData*, const StringData* k);
   static Cell NvGetKey(const ArrayData*, ssize_t pos);
@@ -109,12 +110,24 @@ struct RecordArray : ArrayData,
   static ArrayData* ToDArray(ArrayData*, bool);
 
   static RecordArray* asRecordArray(ArrayData*);
+  static const RecordArray* asRecordArray(const ArrayData*);
 
 private:
   using ExtraFieldMap = req::StringFastMap<TypedValue>;
   const ExtraFieldMap* extraFieldMap() const;
   bool checkInvariants() const;
-
+  /**
+   * Returns index of the field with name `key` if it exists and
+   * `val` passes the typehint for the field.
+   * Returns kInvalidSlot if the field does not exist.
+   * Raises a typehint error if the field exists but the type check fails.
+   */
+  Slot checkFieldForWrite(const StringData* key, Cell val) const;
+  /*
+   * Updates the field at idx if idx is valid. Otherwise inserts key, val pair
+   * in the extra field map.
+   */
+  void updateField(StringData* key, Cell val, Slot idx);
 };
 } // namespace HPHP
 #endif // incl_HPHP_RECORD_ARRAY_H_

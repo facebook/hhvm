@@ -34,12 +34,12 @@ struct RecordData : Countable,
   RecordData& operator=(const RecordData&) = delete;
   ~RecordData() = delete;
 
-  static size_t sizeWithFields(const RecordDesc* rec) {
-    return sizeof(RecordData) + fieldSize(rec);
-  }
   size_t heapSize() const;
   bool kindIsValid() const;
 
+  static size_t sizeWithFields(const RecordDesc* rec) {
+    return sizeof(RecordData) + fieldSize(rec);
+  }
   static constexpr ptrdiff_t getVMRecordOffset() {
     return offsetof(RecordData, m_record);
   }

@@ -78,6 +78,7 @@ enum class SimpleOp {
   Vector, // c_Vector* or c_ImmVector*
   Map,    // c_Map*
   Pair,   // c_Pair*
+  RecordArray,
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -274,6 +275,8 @@ folly::Optional<GuardConstraint> simpleOpConstraint(SimpleOp op) {
     case SimpleOp::Dict:
     case SimpleOp::Keyset:
     case SimpleOp::String:
+    // TODO: T47925625: DatatypeSpecialized GuardConstraint for RecordArray
+    case SimpleOp::RecordArray:
       return GuardConstraint(DataTypeSpecific);
 
     case SimpleOp::PackedArray:
@@ -1036,6 +1039,9 @@ SSATmp* emitCGetElem(IRGS& env, SSATmp* base, SSATmp* key,
     case SimpleOp::Map:
       assertx(mode != MOpMode::InOut);
       return gen(env, MapGet, base, key);
+    case SimpleOp::RecordArray:
+      assertx(mode != MOpMode::InOut);
+      return gen(env, ArrayGet, MOpModeData{mode}, base, key);
     case SimpleOp::None:
       return gen(env, CGetElem, MOpModeData{mode}, base, key);
   }
@@ -1064,6 +1070,7 @@ SSATmp* emitCGetElemQuiet(IRGS& env, SSATmp* base, SSATmp* key,
     case SimpleOp::Pair:
     case SimpleOp::Map:
       assertx(mode != MOpMode::InOut);
+    case SimpleOp::RecordArray:
     case SimpleOp::None:
       return gen(env, CGetElem, MOpModeData{mode}, ldMBase(env), key);
   }
@@ -1074,6 +1081,7 @@ SSATmp* emitIssetElem(IRGS& env, SSATmp* base, SSATmp* key, SimpleOp simpleOp) {
   switch (simpleOp) {
   case SimpleOp::Array:
   case SimpleOp::ProfiledPackedArray:
+  case SimpleOp::RecordArray:
     return gen(env, ArrayIsset, base, key);
   case SimpleOp::PackedArray:
     return emitPackedArrayIsset(env, base, key);
@@ -1114,6 +1122,7 @@ SSATmp* emitEmptyElem(IRGS& env, SSATmp* base,
     case SimpleOp::Vector:
     case SimpleOp::Pair:
     case SimpleOp::Map:
+    case SimpleOp::RecordArray:
     case SimpleOp::None:
       return gen(env, EmptyElem, ldMBase(env), key);
   }
@@ -1132,6 +1141,9 @@ SimpleOp simpleCollectionOp(Type baseType, Type keyType, bool readInst,
   if (baseType <= TArr) {
     auto isPacked = false;
     if (auto arrSpec = baseType.arrSpec()) {
+      if (arrSpec.kind() == ArrayData::kRecordKind) {
+        return SimpleOp::RecordArray;
+      }
       isPacked = arrSpec.kind() == ArrayData::kPackedKind;
     }
     if (keyType <= TInt || keyType <= TStr) {
@@ -1989,6 +2001,7 @@ SSATmp* setElemImpl(IRGS& env, uint32_t nDiscard, SSATmp* key) {
       // If we couldn't emit ArraySet, fall through to the generic path.
 
     case SimpleOp::Pair:
+    case SimpleOp::RecordArray:
     case SimpleOp::None:
       // We load the member base pointer before calling makeCatchSet() to avoid
       // mismatched in-states for any catch block edges we emit later on.

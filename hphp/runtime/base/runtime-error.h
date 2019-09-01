@@ -162,6 +162,12 @@ void raise_record_init_error(const StringData* recName,
                              const StringData* fieldName);
 
 /*
+ * Raise error if a record field is not declared.
+ */
+[[noreturn]] void raise_record_field_error(const StringData* recName,
+                                           const StringData* fieldName);
+
+/*
  * Raise the appropriate warning or error if we try to bind a property to a ref,
  * and that property has a type-hint which we're enforcing.
  */

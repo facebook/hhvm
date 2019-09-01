@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/record-array.h"
+#include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/base/tv-refcount.h"
 
 namespace HPHP {
@@ -25,6 +26,7 @@ RecordArray::RecordArray(const RecordDesc* record)
   new (const_cast<ExtraFieldMap*>(extraFieldMap())) ExtraFieldMap();
   auto const sizeIdx = MemoryManager::size2Index(sizeWithFields(record));
   m_aux16 = static_cast<uint16_t>(sizeIdx) << 8;
+  m_size = record->numFields();
   static_assert(sizeof(RecordArray) == sizeof(RecordBase) + sizeof(ArrayData),
                 "RecordArray must not have any fields of its own");
 }
@@ -64,6 +66,20 @@ RecordArray* RecordArray::asRecordArray(ArrayData* in) {
   return ad;
 }
 
+const RecordArray* RecordArray::asRecordArray(const ArrayData* in) {
+  return asRecordArray(const_cast<ArrayData*>(in));
+}
+
+RecordArray* RecordArray::copyRecordArray() const {
+  auto const ra = copyRecordBase(this);
+  auto const extra = new (const_cast<ExtraFieldMap*>(ra->extraFieldMap()))
+    ExtraFieldMap(*extraFieldMap());
+  for (auto& p : *extra) {
+    tvIncRefGen(p.second);
+  }
+  return ra;
+}
+
 void RecordArray::Release(ArrayData* in) {
   in->fixCountForRelease();
   assertx(in->isRefCounted());
@@ -84,20 +100,73 @@ void RecordArray::Release(ArrayData* in) {
   AARCH64_WALKABLE_FRAME();
 }
 
+Slot RecordArray::checkFieldForWrite(const StringData* key, Cell val) const {
+  auto const rec = record();
+  auto const idx = rec->lookupField(key);
+  if (idx != kInvalidSlot) {
+    auto const& field = rec->field(idx);
+    auto const& tc = field.typeConstraint();
+    if (tc.isCheckable()) {
+      tc.verifyRecField(&val, rec->name(), field.name());
+    }
+  }
+  return idx;
+}
+
+void RecordArray::updateField(StringData* key, Cell val, Slot idx) {
+  if (idx != kInvalidSlot) {
+    assertx(idx == record()->lookupField(key));
+    auto const& tv = lvalAt(idx);
+    tvSet(val, tv);
+  } else {
+    auto const extraMap = const_cast<ExtraFieldMap*>(extraFieldMap());
+    auto const keyStr = String::attach(key);
+    auto it = extraMap->find(keyStr);
+    if (it == extraMap->end()) {
+      ++m_size;
+      extraMap->emplace(keyStr, val);
+    } else {
+      tvSet(val, it->second);
+    }
+  }
+}
+
+tv_rval RecordArray::NvGetStr(const ArrayData* base, const StringData* key) {
+  auto const ra = asRecordArray(base);
+  auto const idx = ra->record()->lookupField(key);
+  if (idx != kInvalidSlot) return ra->rvalAt(idx);
+  auto const extraMap = ra->extraFieldMap();
+  auto it = extraMap->find(String::attach(const_cast<StringData*>(key)));
+  if (it != extraMap->end()) return tv_rval(&it->second);
+  return nullptr;
+}
+
+ArrayData* RecordArray::SetStrInPlace(ArrayData* base,
+                                      StringData* key, Cell val) {
+  assertx(base->notCyclic(val));
+  auto const ra = asRecordArray(base);
+  auto const idx = ra->checkFieldForWrite(key, val);
+  ra->updateField(key, val, idx);
+  return ra;
+}
+
+ArrayData* RecordArray::SetStr(ArrayData* base, StringData* key, Cell val) {
+  assertx(base->cowCheck() || base->notCyclic(val));
+  auto ra = asRecordArray(base);
+  auto const idx = ra->checkFieldForWrite(key, val);
+  if (ra->cowCheck()) ra = ra->copyRecordArray();
+  ra->updateField(key, val, idx);
+  return ra;
+}
+
+size_t RecordArray::Vsize(const ArrayData*) { always_assert(false); }
+
 // TODO: T47449944: methods below this are stubs
 tv_rval RecordArray::NvGetInt(const ArrayData*, int64_t) {
   throw_not_implemented("This method on RecordArray");
 }
 
 tv_rval RecordArray::NvTryGetInt(const ArrayData*, int64_t) {
-  throw_not_implemented("This method on RecordArray");
-}
-
-tv_rval RecordArray::NvGetStr(const ArrayData*, const StringData*) {
-  throw_not_implemented("This method on RecordArray");
-}
-
-tv_rval RecordArray::NvTryGetStr(const ArrayData*, const StringData*) {
   throw_not_implemented("This method on RecordArray");
 }
 
@@ -121,14 +190,6 @@ ArrayData* RecordArray::SetIntInPlace(ArrayData*, int64_t, Cell) {
   throw_not_implemented("This method on RecordArray");
 }
 
-ArrayData* RecordArray::SetStr(ArrayData*, StringData*, Cell) {
-  throw_not_implemented("This method on RecordArray");
-}
-
-ArrayData* RecordArray::SetStrInPlace(ArrayData*, StringData*, Cell) {
-  throw_not_implemented("This method on RecordArray");
-}
-
 ArrayData* RecordArray::SetWithRefInt(ArrayData*, int64_t, Cell) {
   throw_not_implemented("This method on RecordArray");
 }
@@ -142,10 +203,6 @@ ArrayData* RecordArray::SetWithRefStr(ArrayData*, StringData*, Cell) {
 }
 
 ArrayData* RecordArray::SetWithRefStrInPlace(ArrayData*, StringData*, Cell) {
-  throw_not_implemented("This method on RecordArray");
-}
-
-size_t RecordArray::Vsize(const ArrayData*) {
   throw_not_implemented("This method on RecordArray");
 }
 

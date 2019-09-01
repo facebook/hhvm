@@ -167,7 +167,7 @@ struct RecordDesc : AtomicCountable {
     return FieldRange(m_fields.accessList(), m_fields.size());
   }
   Slot lookupField(const StringData*) const;
-  const Field& field(const StringData*) const;
+  const Field& field(Slot) const;
 
   const PreRecordDesc* preRecordDesc() const { return m_preRec.get(); }
 

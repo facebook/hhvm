@@ -38,7 +38,9 @@ RecordData* RecordData::newRecord(const RecordDesc* rec,
 }
 
 RecordData* RecordData::copyRecord() const {
-  return copyRecordImpl(this);
+  auto const rd = copyRecordBase(this);
+  rd->initHeader(this->kind(), OneReference);
+  return rd;
 }
 
 NEVER_INLINE

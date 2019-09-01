@@ -25,8 +25,9 @@ struct StringData;
 struct RecordBase {
   const RecordDesc* record() const;
 
-  tv_rval fieldRval(const StringData*) const;
-  tv_lval fieldLval(const StringData*);
+  // Slot must be valid and less than number of fields
+  tv_rval rvalAt(Slot) const;
+  tv_lval lvalAt(Slot);
 
   static size_t fieldSize(const RecordDesc* rec) {
     return sizeof(TypedValue) * rec->numFields();
@@ -44,7 +45,7 @@ protected:
                                    const StringData* const* keys,
                                    const TypedValue* values);
   template<class RecordType>
-  static RecordType* copyRecordImpl(const RecordType*);
+  static RecordType* copyRecordBase(const RecordType*);
 };
 } // namespace HPHP
 #endif // incl_HPHP_RECORD_COMMON_H_

@@ -146,6 +146,12 @@ void raise_record_init_error(const StringData* recName,
   );
 }
 
+void raise_record_field_error(const StringData* recName,
+                              const StringData* fieldName) {
+  raise_error(folly::sformat("Field '{}' does not exist in record '{}'",
+                              fieldName, recName));
+}
+
 void raise_property_typehint_binding_error(const Class* declCls,
                                            const StringData* propName,
                                            bool isSoft) {

@@ -76,6 +76,8 @@ impl Default for GlobalOptions {
             po_disallow_silence: false,
             po_abstract_static_props: false,
             po_disable_unset_class_const: false,
+            po_parser_errors_only: false,
+            tco_check_attribute_locations: false,
         }
     }
 }

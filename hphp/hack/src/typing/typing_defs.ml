@@ -171,6 +171,13 @@ and _ ty_ =
     : shape_kind * ('phase shape_field_type Nast.ShapeMap.t)
       -> 'phase ty_
 
+  (* Access to a Pocket Universe Expression or Atom, denoted by
+   * Foo:@Bar or Foo:@Bar:@X.
+   * It might be unresolved at first (e.g. if Foo is a generic variable).
+   * Will be refined to Tpu once typechecking is successful
+   *)
+  | Tpu_access : 'phase ty * Nast.sid -> 'phase ty_
+
   (* A type variable (not to be confused with a type parameter).
    * It represents a type that is "unknown" and must be inferred by Hack's
    * constraint-based type inference engine.
@@ -254,13 +261,6 @@ and _ ty_ =
    *   all its atoms) or Pu_atom (a specific atom in the enumeration)
    *)
   | Tpu: locl ty * Nast.sid * pu_kind -> locl ty_
-
-  (* Access to a Pocket Universe Expression or Atom, denoted by
-   * Foo:@Bar or Foo:@Bar:@X.
-   * It might be unresolved at first (e.g. if Foo is a generic variable).
-   * Will be refined to Tpu once typechecking is successful
-   *)
-  | Tpu_access : 'a ty * Nast.sid -> 'a ty_
 
 and array_kind =
   (* Those three types directly correspond to their decl level counterparts:

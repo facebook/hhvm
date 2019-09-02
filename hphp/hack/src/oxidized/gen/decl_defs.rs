@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e09efc98d64f27eb0391819275f5eb5c>>
+// @generated SignedSource<<3ddcad0e41a18399c24cd88b9dd0d69f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -77,6 +77,7 @@ pub struct DeclClassType {
     pub substs: s_map::SMap<SubstContext>,
     pub consts: s_map::SMap<ClassConst>,
     pub typeconsts: s_map::SMap<TypeconstType>,
+    pub pu_enums: s_map::SMap<PuEnumType>,
     pub props: s_map::SMap<Element>,
     pub sprops: s_map::SMap<Element>,
     pub methods: s_map::SMap<Element>,

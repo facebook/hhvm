@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b1dadc778dc7707fa96bb2c99199327b>>
+// @generated SignedSource<<3172fe548582f84f22fa5ecdd9948037>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -39,6 +39,21 @@ pub struct ShallowTypeconst {
     pub enforceable: (pos::Pos, bool),
     pub visibility: aast::Visibility,
     pub reifiable: Option<pos::Pos>,
+}
+
+#[derive(Clone, Debug, IntoOcamlRep)]
+pub struct ShallowPuMember {
+    pub atom: aast::Sid,
+    pub types: Vec<(aast::Sid, Ty)>,
+}
+
+#[derive(Clone, Debug, IntoOcamlRep)]
+pub struct ShallowPuEnum {
+    pub name: aast::Sid,
+    pub is_final: bool,
+    pub case_types: Vec<aast::Sid>,
+    pub case_values: Vec<(aast::Sid, Ty)>,
+    pub members: Vec<ShallowPuMember>,
 }
 
 #[derive(Clone, Debug, IntoOcamlRep)]
@@ -99,6 +114,7 @@ pub struct ShallowClass {
     pub implements: Vec<Ty>,
     pub consts: Vec<ShallowClassConst>,
     pub typeconsts: Vec<ShallowTypeconst>,
+    pub pu_enums: Vec<ShallowPuEnum>,
     pub props: Vec<ShallowProp>,
     pub sprops: Vec<ShallowProp>,
     pub constructor: Option<ShallowMethod>,

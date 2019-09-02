@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<58b80c9b60dd1455e7700f90f9011b1f>>
+// @generated SignedSource<<c2ff68df8ee060d7dac93becb5a01b43>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -127,7 +127,7 @@ pub enum Hint_ {
     HpuAccess(Hint, Sid),
 }
 
-#[derive(Clone, Copy, Debug, Eq, IntoOcamlRep, Ocamlvalue, PartialEq)]
+#[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]
 pub enum Tprim {
     Tnull,
     Tvoid,
@@ -139,6 +139,7 @@ pub enum Tprim {
     Tnum,
     Tarraykey,
     Tnoreturn,
+    Tatom(String),
 }
 
 #[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]

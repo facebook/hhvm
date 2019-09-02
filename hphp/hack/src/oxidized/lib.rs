@@ -21,6 +21,7 @@ pub use manual::s_map;
 pub use manual::s_set;
 pub use manual::set;
 pub use manual::shape_map;
+pub use manual::tany_sentinel;
 
 mod stubs;
 

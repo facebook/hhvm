@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f31baa85a411d33ee7ac8d72f1cc03ca>>
+// @generated SignedSource<<c6977ed468e35f336b5901b8857cea3a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -19,6 +19,7 @@ use crate::nast;
 use crate::pos;
 use crate::s_map;
 use crate::s_set;
+use crate::tany_sentinel;
 
 pub use crate::typing_reason as reason;
 
@@ -33,6 +34,12 @@ pub enum Visibility {
 pub enum Exact {
     Exact,
     Nonexact,
+}
+
+#[derive(Clone, Debug, IntoOcamlRep)]
+pub enum PuKind {
+    PuPlain,
+    PuAtom(String),
 }
 
 #[derive(Clone, Debug, IntoOcamlRep)]
@@ -57,15 +64,17 @@ pub enum Ty_ {
     Tmixed,
     Tnothing,
     Tlike(Ty),
-    Tany,
+    Tany(tany_sentinel::TanySentinel),
+    Terr,
     Tnonnull,
     Tdynamic,
-    Terr,
     Toption(Ty),
     Tprim(aast::Tprim),
     Tfun(FunType),
     Ttuple(Vec<Ty>),
     Tshape(ShapeKind, nast::shape_map::ShapeMap<ShapeFieldType>),
+    TpuAccess(Ty, nast::Sid),
+    Tvar(ident::Ident),
 }
 
 #[derive(Clone, Debug, IntoOcamlRep)]
@@ -258,6 +267,7 @@ pub struct ClassType {
     pub where_constraints: Vec<WhereConstraint>,
     pub consts: s_map::SMap<ClassConst>,
     pub typeconsts: s_map::SMap<TypeconstType>,
+    pub pu_enums: s_map::SMap<PuEnumType>,
     pub props: s_map::SMap<ClassElt>,
     pub sprops: s_map::SMap<ClassElt>,
     pub methods: s_map::SMap<ClassElt>,
@@ -289,6 +299,21 @@ pub struct TypeconstType {
     pub origin: String,
     pub enforceable: (pos::Pos, bool),
     pub reifiable: Option<pos::Pos>,
+}
+
+#[derive(Clone, Debug, IntoOcamlRep)]
+pub struct PuEnumType {
+    pub name: nast::Sid,
+    pub is_final: bool,
+    pub case_types: s_map::SMap<nast::Sid>,
+    pub case_values: s_map::SMap<(nast::Sid, Ty)>,
+    pub members: s_map::SMap<PuMemberType>,
+}
+
+#[derive(Clone, Debug, IntoOcamlRep)]
+pub struct PuMemberType {
+    pub atom: nast::Sid,
+    pub types: s_map::SMap<(nast::Sid, Ty)>,
 }
 
 #[derive(Clone, Debug, IntoOcamlRep)]

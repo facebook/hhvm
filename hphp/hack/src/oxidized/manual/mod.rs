@@ -19,3 +19,4 @@ pub mod s_map;
 pub mod s_set;
 pub mod set;
 pub mod shape_map;
+pub mod tany_sentinel;

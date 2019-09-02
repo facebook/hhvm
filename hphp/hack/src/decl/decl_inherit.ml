@@ -96,10 +96,30 @@ let add_const name const acc =
   match SMap.get name acc with
   | None -> SMap.add name const acc
   | Some existing_const ->
-    (match (const.cc_abstract, existing_const.cc_abstract) with
-    | (true, true) -> SMap.add name const acc
-    | (true, _) -> acc
-    | (_, _) -> SMap.add name const acc)
+    (match
+       ( const.cc_synthesized,
+         existing_const.cc_synthesized,
+         const.cc_abstract,
+         existing_const.cc_abstract )
+     with
+    | (true, false, _, _) ->
+      (* Don't replace a constant with a synthesized constant. This
+         covers the following case:
+
+         class HasFoo { abstract const int FOO; }
+         trait T { require extends Foo; }
+         class Child extends HasFoo {
+            use T;
+         }
+
+         In this case, Child still doesn't have a value for the FOO
+         constant. *)
+      acc
+    | (_, _, true, false) ->
+      (* Don't replace a concrete constant with an abstract constant
+           found later in the MRO.*)
+      acc
+    | (_, _, _, _) -> SMap.add name const acc)
 
 let add_members members acc = SMap.fold SMap.add members acc
 

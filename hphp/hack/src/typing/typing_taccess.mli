@@ -12,8 +12,5 @@ open Typing_env_types
 
 (* Returns (class_name, tconst_name, tconst_reference_position) for each type
  * constant referenced in a type access. *)
-val referenced_typeconsts:
-  env ->
-  expand_env ->
-  taccess_type ->
-  (string * string * Pos.t) list
+val referenced_typeconsts :
+  env -> expand_env -> taccess_type -> (string * string * Pos.t) list

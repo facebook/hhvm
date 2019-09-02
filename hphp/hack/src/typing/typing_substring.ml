@@ -10,40 +10,39 @@
 open Core_kernel
 open Typing_defs
 open Typing_env_types
-
 module Reason = Typing_reason
 module Env = Typing_env
 module TUtils = Typing_utils
 module MakeType = Typing_make_type
 
-let is_object env ty =
-  Typing_solver.is_sub_type env ty (Reason.Rnone, Tobject)
+let is_object env ty = Typing_solver.is_sub_type env ty (Reason.Rnone, Tobject)
 
-let sub_string
-  (p : Pos.Map.key)
-  (env : env)
-  (ty : locl ty) : env =
+let sub_string (p : Pos.Map.key) (env : env) (ty : locl ty) : env =
   (* Under constraint-based inference, we implement sub_string as a subtype test.
    * All the cases in the legacy implementation just fall out from subtyping rules.
    * We test against ?(arraykey | bool | float | resource | object | dynamic |
    * FormatString<T> | HH\FormatString<T>).
    *)
   let r = Reason.Rwitness p in
-  let env, formatter_tyvar = Env.fresh_invariant_type_var env p in
-  let tyl = [
-    MakeType.arraykey r;
-    MakeType.bool r;
-    MakeType.float r;
-    MakeType.resource r;
-    MakeType.dynamic r;
-    MakeType.class_type r SN.Classes.cFormatString [formatter_tyvar];
-    MakeType.class_type r SN.Classes.cHHFormatString [formatter_tyvar];
-  ] in
+  let (env, formatter_tyvar) = Env.fresh_invariant_type_var env p in
+  let tyl =
+    [ MakeType.arraykey r;
+      MakeType.bool r;
+      MakeType.float r;
+      MakeType.resource r;
+      MakeType.dynamic r;
+      MakeType.class_type r SN.Classes.cFormatString [formatter_tyvar];
+      MakeType.class_type r SN.Classes.cHHFormatString [formatter_tyvar] ]
+  in
   let stringish =
-    (Reason.Rwitness p, Tclass((p, SN.Classes.cStringish), Nonexact, [])) in
-  let stringlike = (Reason.Rwitness p, Toption (Reason.Rwitness p, Tunion tyl)) in
+    (Reason.Rwitness p, Tclass ((p, SN.Classes.cStringish), Nonexact, []))
+  in
+  let stringlike =
+    (Reason.Rwitness p, Toption (Reason.Rwitness p, Tunion tyl))
+  in
   Errors.try_
-    (fun () -> Typing_subtype.sub_type env ty stringlike Errors.expected_stringlike)
+    (fun () ->
+      Typing_subtype.sub_type env ty stringlike Errors.expected_stringlike)
     (fun _ ->
       if Typing_solver.is_sub_type env ty stringish then
         Errors.object_string_deprecated p

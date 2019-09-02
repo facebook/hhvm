@@ -8,6 +8,7 @@
  *)
 
 open Core_kernel
+
 module Continuations = struct
   type t =
     | Next
@@ -17,18 +18,24 @@ module Continuations = struct
     | Do
     | Exit
     | Fallthrough
-    | Finally [@@deriving show, enum]
+    | Finally
+  [@@deriving show, enum]
 
   (* build the list of all continuations *)
   let all =
     let n_cont = max + 1 in
     let rec build_all i conts =
-      if (i < 0) then conts else
-      let cont = match (of_enum i) with
-        | Some cont -> [cont]
-        | None -> [] in
-      let conts = cont @ conts in
-      build_all (i - 1) conts in
+      if i < 0 then
+        conts
+      else
+        let cont =
+          match of_enum i with
+          | Some cont -> [cont]
+          | None -> []
+        in
+        let conts = cont @ conts in
+        build_all (i - 1) conts
+    in
     build_all (n_cont - 1) []
 
   let compare = Pervasives.compare
@@ -47,7 +54,9 @@ end
 include Continuations
 
 module Map = struct
-  let show _ = "<MyMap.Make(Continuations)>";;
-  let pp _ _ = Printf.printf "%s\n" "<MyMap.Make(Continuations)>";;
-  include MyMap.Make(Continuations)
+  let show _ = "<MyMap.Make(Continuations)>"
+
+  let pp _ _ = Printf.printf "%s\n" "<MyMap.Make(Continuations)>"
+
+  include MyMap.Make (Continuations)
 end

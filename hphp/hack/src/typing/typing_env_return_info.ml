@@ -15,16 +15,12 @@ type t = {
    * when checking the body of the lambda.
    *)
   return_type: Typing_defs.locl Typing_defs.possibly_enforced_ty;
-
   (* Does the function or function type have the <<__ReturnDisposable>> attribute? *)
-  return_disposable : bool;
-
+  return_disposable: bool;
   (* Does the function or function type have the <<__MutableReturn>> attribute? *)
   return_mutable: bool;
-
   (* Was there an explicit return type hint? *)
   return_explicit: bool;
-
   (* Is function return type in rx context treated as void? *)
   return_void_to_rx: bool;
 }

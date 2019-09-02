@@ -10,7 +10,6 @@
 open Core_kernel
 open Aast
 open Typing_defs
-
 module Cls = Decl_provider.Class
 module Env = Tast_env
 
@@ -28,34 +27,44 @@ let check_reifiable env tc attr_pos =
   | TCAbstract default_ty -> check_impl "type" default_ty
   | _ -> ()
 
-let handler = object
-  inherit Tast_visitor.handler_base
+let handler =
+  object
+    inherit Tast_visitor.handler_base
 
-  method! at_class_typeconst env { c_tconst_abstract; c_tconst_name = (p, name); _ } =
-    let open Option in
-    let cls_opt = Tast_env.get_self_id env >>=
-      Tast_env.get_class env in
-    match cls_opt with
-    | None -> ()
-    | Some cls ->
-      begin match Cls.kind cls, c_tconst_abstract with
-      | Ast_defs.Cnormal, TCAbstract _ ->
-        Errors.implement_abstract ~is_final:(Cls.final cls) (Cls.pos cls) p "type constant" name
-      | _ -> ()
-      end;
-      begin match Cls.get_typeconst cls name with
-      | None -> ()
-      | Some tc ->
-        begin match tc.ttc_abstract, tc.ttc_type with
-        | TCAbstract (Some ty), _
-        | (TCPartiallyAbstract | TCConcrete), Some ty ->
-          if snd tc.ttc_enforceable then begin
-            let pos = fst tc.ttc_enforceable in
-            Enforceable_hint_check.validator#validate_type env ty
-              (Errors.invalid_enforceable_type "constant" (pos, name))
+    method! at_class_typeconst
+        env { c_tconst_abstract; c_tconst_name = (p, name); _ } =
+      Option.(
+        let cls_opt = Tast_env.get_self_id env >>= Tast_env.get_class env in
+        match cls_opt with
+        | None -> ()
+        | Some cls ->
+          begin
+            match (Cls.kind cls, c_tconst_abstract) with
+            | (Ast_defs.Cnormal, TCAbstract _) ->
+              Errors.implement_abstract
+                ~is_final:(Cls.final cls)
+                (Cls.pos cls)
+                p
+                "type constant"
+                name
+            | _ -> ()
           end;
-        | _ -> ()
-        end;
-        Option.iter tc.ttc_reifiable (check_reifiable env tc);
-      end;
+          begin
+            match Cls.get_typeconst cls name with
+            | None -> ()
+            | Some tc ->
+              begin
+                match (tc.ttc_abstract, tc.ttc_type) with
+                | (TCAbstract (Some ty), _)
+                | ((TCPartiallyAbstract | TCConcrete), Some ty) ->
+                  if snd tc.ttc_enforceable then
+                    let pos = fst tc.ttc_enforceable in
+                    Enforceable_hint_check.validator#validate_type
+                      env
+                      ty
+                      (Errors.invalid_enforceable_type "constant" (pos, name))
+                | _ -> ()
+              end;
+              Option.iter tc.ttc_reifiable (check_reifiable env tc)
+          end)
   end

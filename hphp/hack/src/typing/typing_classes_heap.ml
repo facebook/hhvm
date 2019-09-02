@@ -11,7 +11,6 @@ open Core_kernel
 open Decl_inheritance
 open Shallow_decl_defs
 open Typing_defs
-
 module Attrs = Attributes
 module LSTable = Lazy_string_table
 module SN = Naming_special_names
@@ -31,13 +30,16 @@ type class_type_variant =
   | Eager of class_type
 
 let make_lazy_class_type class_name sc =
-  let Decl_ancestors.{
-    ancestors;
-    parents_and_traits;
-    members_fully_known;
-    req_ancestor_names;
-    all_requirements;
-  } = Decl_ancestors.make class_name in
+  let Decl_ancestors.
+        {
+          ancestors;
+          parents_and_traits;
+          members_fully_known;
+          req_ancestor_names;
+          all_requirements;
+        } =
+    Decl_ancestors.make class_name
+  in
   let get_ancestor = LSTable.get ancestors in
   let inherited_members = Decl_inheritance.make class_name get_ancestor in
   {
@@ -54,45 +56,56 @@ let shallow_decl_enabled () =
   TypecheckerOptions.shallow_class_decl (GlobalNamingOptions.get ())
 
 let defer_threshold () =
-  TypecheckerOptions.defer_class_declaration_threshold (GlobalNamingOptions.get ())
+  TypecheckerOptions.defer_class_declaration_threshold
+    (GlobalNamingOptions.get ())
 
 module Classes = struct
-  module Cache = SharedMem.LocalCache (StringKey) (struct
-    type t = class_type_variant
-    let prefix = Prefix.make()
-    let description = "ClassType"
-  end)
+  module Cache =
+    SharedMem.LocalCache
+      (StringKey)
+      (struct
+        type t = class_type_variant
+
+        let prefix = Prefix.make ()
+
+        let description = "ClassType"
+      end)
 
   type key = StringKey.t
+
   type t = class_type_variant
 
-  let compute_class_decl ~(use_cache: bool) (class_name: string): t option =
+  let compute_class_decl ~(use_cache : bool) (class_name : string) : t option =
     try
       let get_eager_class_type class_name =
-        Decl_class.to_class_type @@
+        Decl_class.to_class_type
+        @@
         let cached =
-          if use_cache
-          then Decl_heap.Classes.get class_name
-          else None
+          if use_cache then
+            Decl_heap.Classes.get class_name
+          else
+            None
         in
         match cached with
         | Some dc -> dc
         | None ->
-          match Naming_table.Types.get_pos class_name with
+          (match Naming_table.Types.get_pos class_name with
           | Some (_, Naming_table.TTypedef)
-          | None -> raise Exit
+          | None ->
+            raise Exit
           | Some (pos, Naming_table.TClass) ->
             let file = FileInfo.get_pos_filename pos in
-            Option.iter
-              (defer_threshold ())
-              ~f:(fun threshold -> Deferred_decl.should_defer ~d:file ~threshold);
-            let class_type = Errors.run_in_decl_mode file
-              (fun () -> Decl.declare_class_in_file file class_name) in
-            match class_type with
+            Option.iter (defer_threshold ()) ~f:(fun threshold ->
+                Deferred_decl.should_defer ~d:file ~threshold);
+            let class_type =
+              Errors.run_in_decl_mode file (fun () ->
+                  Decl.declare_class_in_file file class_name)
+            in
+            (match class_type with
             | Some class_type -> class_type
-            | None -> failwith (
-                "No class returned for get_eager_class_type on " ^ class_name
-              )
+            | None ->
+              failwith
+                ("No class returned for get_eager_class_type on " ^ class_name)))
       in
       (* We don't want to fetch the shallow_class if shallow_class_decl is not
          enabled--this would frequently involve a re-parse, which would result
@@ -102,21 +115,20 @@ module Classes = struct
          constructing [Eager] or [Lazy] classes, depending on whether
          shallow_class_decl is enabled. *)
       let class_type_variant =
-        if shallow_decl_enabled ()
-        then
+        if shallow_decl_enabled () then
           match Shallow_classes_heap.get class_name with
           | None -> raise Exit
-          | Some sc ->
-            Lazy (make_lazy_class_type class_name sc)
+          | Some sc -> Lazy (make_lazy_class_type class_name sc)
         else
           Eager (get_eager_class_type class_name)
       in
-      if use_cache
-      then Cache.add class_name class_type_variant;
+      if use_cache then Cache.add class_name class_type_variant;
       Some class_type_variant
-    (* If we raise Exit, then the class does not exist. *)
+      (* If we raise Exit, then the class does not exist. *)
     with
-    | Deferred_decl.Defer d -> Deferred_decl.add ~d; None
+    | Deferred_decl.Defer d ->
+      Deferred_decl.add ~d;
+      None
     | Exit -> None
 
   let get class_name =
@@ -146,12 +158,16 @@ module Api = struct
   let abstract t =
     match t with
     | Lazy lc ->
-      begin match lc.sc.sc_kind with
-      | Ast_defs.Cabstract | Ast_defs.Cinterface | Ast_defs.Ctrait | Ast_defs.Cenum -> true
-      | _ -> false
+      begin
+        match lc.sc.sc_kind with
+        | Ast_defs.Cabstract
+        | Ast_defs.Cinterface
+        | Ast_defs.Ctrait
+        | Ast_defs.Cenum ->
+          true
+        | _ -> false
       end
-    | Eager c ->
-      c.tc_abstract
+    | Eager c -> c.tc_abstract
 
   let final t =
     match t with
@@ -165,7 +181,8 @@ module Api = struct
 
   let ppl t =
     match t with
-    | Lazy lc -> Attrs.mem SN.UserAttributes.uaProbabilisticModel lc.sc.sc_user_attributes
+    | Lazy lc ->
+      Attrs.mem SN.UserAttributes.uaProbabilisticModel lc.sc.sc_user_attributes
     | Eager c -> c.tc_ppl
 
   let kind t =
@@ -209,18 +226,18 @@ module Api = struct
     | Eager c -> c.tc_enum_type
 
   let get_sealed_whitelist sc =
-    let open Aast in
-    match Attrs.find SN.UserAttributes.uaSealed sc.sc_user_attributes with
-    | None -> None
-    | Some { ua_params; _ } ->
-      let add_class_name names param =
-        match param with
-        | _, Class_const ((_, CI (_, cls)), (_, name))
-          when name = SN.Members.mClass ->
-          SSet.add cls names
-        | _ -> names
-      in
-      Some (List.fold_left ua_params ~f:add_class_name ~init:SSet.empty)
+    Aast.(
+      match Attrs.find SN.UserAttributes.uaSealed sc.sc_user_attributes with
+      | None -> None
+      | Some { ua_params; _ } ->
+        let add_class_name names param =
+          match param with
+          | (_, Class_const ((_, CI (_, cls)), (_, name)))
+            when name = SN.Members.mClass ->
+            SSet.add cls names
+          | _ -> names
+        in
+        Some (List.fold_left ua_params ~f:add_class_name ~init:SSet.empty))
 
   let sealed_whitelist t =
     match t with
@@ -251,12 +268,12 @@ module Api = struct
   let need_init t =
     match t with
     | Lazy _ ->
-      begin match fst (construct t) with
-      | None -> false
-      | Some ce -> not ce.ce_abstract
+      begin
+        match fst (construct t) with
+        | None -> false
+        | Some ce -> not ce.ce_abstract
       end
-    | Eager c ->
-      c.tc_need_init
+    | Eager c -> c.tc_need_init
 
   (* We cannot invoke [Typing_deferred_members.class_] here because it would be a
      dependency cycle. Instead, we raise an exception. We should remove this
@@ -303,29 +320,32 @@ module Api = struct
     | Eager c -> Sequence.of_list (SSet.elements c.tc_extends)
 
   let all_where_constraints_on_this t =
-    List.filter ~f:(fun c ->
-      match c with
-      | (_, Typing_defs.Tthis), _, _
-      | _, _, (_, Typing_defs.Tthis) -> true
-      | _ -> false) (where_constraints t)
+    List.filter
+      ~f:(fun c ->
+        match c with
+        | ((_, Typing_defs.Tthis), _, _)
+        | (_, _, (_, Typing_defs.Tthis)) ->
+          true
+        | _ -> false)
+      (where_constraints t)
 
   let upper_bounds_on_this_from_constraints t =
-    List.filter_map ~f:(fun c ->
-      match c with
-      | (_, Typing_defs.Tthis), Ast_defs.Constraint_as, ty
-      | (_, Typing_defs.Tthis), Ast_defs.Constraint_eq, ty
-      | ty, Ast_defs.Constraint_eq, (_, Typing_defs.Tthis)
-      | ty, Ast_defs.Constraint_super, (_, Typing_defs.Tthis) ->
-        Some ty
-      | _ -> None) (where_constraints t)
+    List.filter_map
+      ~f:(fun c ->
+        match c with
+        | ((_, Typing_defs.Tthis), Ast_defs.Constraint_as, ty)
+        | ((_, Typing_defs.Tthis), Ast_defs.Constraint_eq, ty)
+        | (ty, Ast_defs.Constraint_eq, (_, Typing_defs.Tthis))
+        | (ty, Ast_defs.Constraint_super, (_, Typing_defs.Tthis)) ->
+          Some ty
+        | _ -> None)
+      (where_constraints t)
     |> Sequence.of_list
 
   (* get upper bounds on `this` from the where constraints as well as
    * requirements *)
   let upper_bounds_on_this t =
-    Sequence.map ~f: ( fun req ->
-      snd req
-    ) (all_ancestor_reqs t)
+    Sequence.map ~f:(fun req -> snd req) (all_ancestor_reqs t)
     |> Sequence.append (upper_bounds_on_this_from_constraints t)
 
   let has_upper_bounds_on_this_from_constraints t =
@@ -333,14 +353,16 @@ module Api = struct
 
   (* get lower bounds on `this` from the where constraints *)
   let lower_bounds_on_this_from_constraints t =
-    List.filter_map ~f:(fun c ->
-      match c with
-      | (_, Typing_defs.Tthis), Ast_defs.Constraint_super, ty
-      | (_, Typing_defs.Tthis), Ast_defs.Constraint_eq, ty
-      | ty, Ast_defs.Constraint_eq, (_, Typing_defs.Tthis)
-      | ty, Ast_defs.Constraint_as, (_, Typing_defs.Tthis) ->
-        Some(ty)
-      | _ -> None) (where_constraints t)
+    List.filter_map
+      ~f:(fun c ->
+        match c with
+        | ((_, Typing_defs.Tthis), Ast_defs.Constraint_super, ty)
+        | ((_, Typing_defs.Tthis), Ast_defs.Constraint_eq, ty)
+        | (ty, Ast_defs.Constraint_eq, (_, Typing_defs.Tthis))
+        | (ty, Ast_defs.Constraint_as, (_, Typing_defs.Tthis)) ->
+          Some ty
+        | _ -> None)
+      (where_constraints t)
     |> Sequence.of_list
 
   let lower_bounds_on_this = lower_bounds_on_this_from_constraints
@@ -349,17 +371,16 @@ module Api = struct
     not (Sequence.is_empty (lower_bounds_on_this_from_constraints t))
 
   let is_disposable_class_name class_name =
-    class_name = SN.Classes.cIDisposable ||
-    class_name = SN.Classes.cIAsyncDisposable
+    class_name = SN.Classes.cIDisposable
+    || class_name = SN.Classes.cIAsyncDisposable
 
   let is_disposable t =
     match t with
     | Lazy _ ->
-      is_disposable_class_name (name t) ||
-      Sequence.exists (all_ancestor_names t) is_disposable_class_name ||
-      Sequence.exists (all_ancestor_req_names t) is_disposable_class_name
-    | Eager c ->
-      c.tc_is_disposable
+      is_disposable_class_name (name t)
+      || Sequence.exists (all_ancestor_names t) is_disposable_class_name
+      || Sequence.exists (all_ancestor_req_names t) is_disposable_class_name
+    | Eager c -> c.tc_is_disposable
 
   let get_const t id =
     match t with

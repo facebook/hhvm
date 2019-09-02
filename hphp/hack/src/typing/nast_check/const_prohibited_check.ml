@@ -10,26 +10,25 @@
 open Core_kernel
 open Aast
 open Nast_check_env
-
 module SN = Naming_special_names
 
-let has_const attrs =
-  Attributes.mem SN.UserAttributes.uaConst attrs
+let has_const attrs = Attributes.mem SN.UserAttributes.uaConst attrs
 
 let error_if_const pos attrs =
   if has_const attrs then
     Errors.experimental_feature pos "The __Const attribute is not supported."
 
-let handler = object
-  inherit Nast_visitor.handler_base
+let handler =
+  object
+    inherit Nast_visitor.handler_base
 
-  method! at_class_ env c =
-    (* Const handling:
-     * disallow __Const attribute unless typechecker option is enabled
-     *)
-    let pos = (fst c.c_name) in
-    if not (TypecheckerOptions.const_attribute env.tcopt) then begin
-      error_if_const pos c.c_user_attributes;
-      List.iter c.c_vars (fun cv -> error_if_const pos cv.cv_user_attributes)
-    end
-end
+    method! at_class_ env c =
+      (* Const handling:
+       * disallow __Const attribute unless typechecker option is enabled
+       *)
+      let pos = fst c.c_name in
+      if not (TypecheckerOptions.const_attribute env.tcopt) then (
+        error_if_const pos c.c_user_attributes;
+        List.iter c.c_vars (fun cv -> error_if_const pos cv.cv_user_attributes)
+      )
+  end

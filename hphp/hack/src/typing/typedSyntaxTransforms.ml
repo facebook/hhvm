@@ -9,22 +9,23 @@
 
 open Core_kernel
 module PS = Full_fidelity_positioned_syntax
-module PositionedTree = Full_fidelity_syntax_tree
-  .WithSyntax(PS)
-
+module PositionedTree = Full_fidelity_syntax_tree.WithSyntax (PS)
 module TS = Full_fidelity_typed_positioned_syntax
-module TypedTree = Full_fidelity_syntax_tree
-  .WithSyntax(TS)
+module TypedTree = Full_fidelity_syntax_tree.WithSyntax (TS)
 
 let typed_from_positioned
-    (file: Relative_path.t)
-    (map: Tast_type_collector.collected_type list Pos.AbsolutePosMap.t)
-    (tree: PositionedTree.t): TypedTree.t =
-  let rec aux (positioned_node: PS.t): TS.t =
+    (file : Relative_path.t)
+    (map : Tast_type_collector.collected_type list Pos.AbsolutePosMap.t)
+    (tree : PositionedTree.t) : TypedTree.t =
+  let rec aux (positioned_node : PS.t) : TS.t =
     let value = PS.value positioned_node in
-    let position = Pos.to_absolute (Option.value_exn (PS.position file positioned_node)) in
-    let types = Tast_type_collector.get_from_pos_map position map
-      |> Option.value ~default:[] in
+    let position =
+      Pos.to_absolute (Option.value_exn (PS.position file positioned_node))
+    in
+    let types =
+      Tast_type_collector.get_from_pos_map position map
+      |> Option.value ~default:[]
+    in
     match PS.syntax positioned_node with
     | PS.Token token ->
       let syntax = TS.Token token in

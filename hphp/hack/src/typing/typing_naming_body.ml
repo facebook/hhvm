@@ -8,4 +8,4 @@
  *)
 
 (* See the comment above Naming.Make for details *)
-include Naming.Make(Typing_get_locals)
+include Naming.Make (Typing_get_locals)

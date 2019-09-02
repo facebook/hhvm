@@ -7,7 +7,6 @@
  *
  *)
 
-
 (*****************************************************************************)
 (* Gets rid of all the type variables,
  * this is only useful when declaring class constants.
@@ -17,7 +16,7 @@
  *)
 (*****************************************************************************)
 
-val fully_expand:
+val fully_expand :
   Typing_env_types.env ->
   Typing_defs.locl Typing_defs.ty ->
   Typing_defs.locl Typing_defs.ty

@@ -8,34 +8,43 @@
  *)
 
 [@@@warning "-33"]
+
 open Core_kernel
+
 [@@@warning "+33"]
+
 open Typing_defs
 module TySet = Typing_set
 
 type tparam_bounds = TySet.t
 
 let empty_bounds = TySet.empty
+
 let singleton_bound ty = TySet.singleton ty
 
 type tparam_info = {
-  lower_bounds : tparam_bounds;
-  upper_bounds : tparam_bounds;
-  reified      : Aast.reify_kind;
-  enforceable  : bool;
-  newable      : bool;
+  lower_bounds: tparam_bounds;
+  upper_bounds: tparam_bounds;
+  reified: Aast.reify_kind;
+  enforceable: bool;
+  newable: bool;
 }
 
 let tparam_info_size tpinfo =
   TySet.cardinal tpinfo.lower_bounds + TySet.cardinal tpinfo.upper_bounds
 
 type tpenv = tparam_info SMap.t
+
 type t = tpenv
 
 let empty = SMap.empty
+
 let mem name tpenv = SMap.mem name tpenv
+
 let get name tpenv = SMap.get name tpenv
+
 let add name tpinfo tpenv = SMap.add name tpinfo tpenv
+
 let union tpenv1 tpenv2 = SMap.union tpenv1 tpenv2
 
 let size tpenv =
@@ -43,77 +52,81 @@ let size tpenv =
 
 let fold f tpenv accu = SMap.fold f tpenv accu
 
-let merge_env env tpenv1 tpenv2 ~combine = SMap.merge_env env tpenv1 tpenv2 ~combine
+let merge_env env tpenv1 tpenv2 ~combine =
+  SMap.merge_env env tpenv1 tpenv2 ~combine
 
 let get_lower_bounds tpenv name =
   match SMap.get name tpenv with
   | None -> empty_bounds
-  | Some {lower_bounds; _} -> lower_bounds
+  | Some { lower_bounds; _ } -> lower_bounds
 
 let get_upper_bounds tpenv name =
   match SMap.get name tpenv with
   | None -> empty_bounds
-  | Some {upper_bounds; _} -> upper_bounds
+  | Some { upper_bounds; _ } -> upper_bounds
 
 let get_reified tpenv name =
   match SMap.get name tpenv with
   | None -> Aast.Erased
-  | Some {reified; _} -> reified
+  | Some { reified; _ } -> reified
 
 let get_enforceable tpenv name =
   match SMap.get name tpenv with
   | None -> false
-  | Some {enforceable; _} -> enforceable
+  | Some { enforceable; _ } -> enforceable
 
 let get_newable tpenv name =
   match SMap.get name tpenv with
   | None -> false
-  | Some {newable; _} -> newable
+  | Some { newable; _ } -> newable
 
 let get_names = SMap.keys
 
 let rec is_generic_param ~elide_nullable ty name =
   match ty with
   | (_, Tabstract (AKgeneric name', None)) -> name = name'
-  | (_, Toption ty) when elide_nullable -> is_generic_param ~elide_nullable ty name
+  | (_, Toption ty) when elide_nullable ->
+    is_generic_param ~elide_nullable ty name
   | _ -> false
 
 (* Add a single new upper bound [ty] to generic parameter [name] in [tpenv] *)
 let add_upper_bound_ tpenv name ty =
   (* Don't add superfluous T <: T or T <: ?T to environment *)
-  if is_generic_param ~elide_nullable:true ty name
-  then tpenv
+  if is_generic_param ~elide_nullable:true ty name then
+    tpenv
   else
-    let tpinfo = match get name tpenv with
+    let tpinfo =
+      match get name tpenv with
       | None ->
         {
           lower_bounds = empty_bounds;
           upper_bounds = singleton_bound ty;
           reified = Aast.Erased;
           enforceable = false;
-          newable = false
+          newable = false;
         }
-      | Some tp ->
-        { tp with upper_bounds = TySet.add ty tp.upper_bounds; } in
+      | Some tp -> { tp with upper_bounds = TySet.add ty tp.upper_bounds }
+    in
     add name tpinfo tpenv
 
 (* Add a single new lower bound [ty] to generic parameter [name] in [tpenv] *)
 let add_lower_bound_ tpenv name ty =
   (* Don't add superfluous T <: T to environment *)
-  if is_generic_param ~elide_nullable:false ty name
-  then tpenv
+  if is_generic_param ~elide_nullable:false ty name then
+    tpenv
   else
-    let tpinfo = match get name tpenv with
+    let tpinfo =
+      match get name tpenv with
       | None ->
         {
           lower_bounds = singleton_bound ty;
           upper_bounds = empty_bounds;
           reified = Aast.Erased;
           enforceable = false;
-          newable = false
+          newable = false;
         }
-      | Some tp ->
-        { tp with lower_bounds = TySet.add ty tp.lower_bounds } in
+      | Some tp -> { tp with lower_bounds = TySet.add ty tp.lower_bounds }
+    in
     add name tpinfo tpenv
 
 (* Add a single new upper bound [ty] to generic parameter [name] in the local
@@ -125,27 +138,37 @@ let add_lower_bound_ tpenv name ty =
   * is equivalent to a single upper bound
   *   T <: (t1 & ... & tn)
   *)
- let add_upper_bound ?intersect env_tpenv name ty =
-   let tpenv =
-     begin match ty with
-     | (r, Tabstract (AKgeneric formal_super, _)) ->
-       add_lower_bound_ env_tpenv formal_super
-         (r, Tabstract (AKgeneric name, None))
-     | _ -> env_tpenv
-     end in
-   match intersect with
-   | None -> add_upper_bound_ env_tpenv name ty
-   | Some intersect ->
-     let tyl = intersect ty (TySet.elements (get_upper_bounds env_tpenv name)) in
-     let add_generic ty tys =
-       if is_generic_param ~elide_nullable:true ty name
-       then tys else TySet.add ty tys in
-     let upper_bounds = List.fold_right ~init:TySet.empty ~f:add_generic tyl in
-     let lower_bounds = get_lower_bounds env_tpenv name in
-     let reified = get_reified env_tpenv name in
-     let enforceable = get_enforceable env_tpenv name in
-     let newable = get_newable env_tpenv name in
-     add name {lower_bounds; upper_bounds; reified; enforceable; newable} tpenv
+let add_upper_bound ?intersect env_tpenv name ty =
+  let tpenv =
+    match ty with
+    | (r, Tabstract (AKgeneric formal_super, _)) ->
+      add_lower_bound_
+        env_tpenv
+        formal_super
+        (r, Tabstract (AKgeneric name, None))
+    | _ -> env_tpenv
+  in
+  match intersect with
+  | None -> add_upper_bound_ env_tpenv name ty
+  | Some intersect ->
+    let tyl =
+      intersect ty (TySet.elements (get_upper_bounds env_tpenv name))
+    in
+    let add_generic ty tys =
+      if is_generic_param ~elide_nullable:true ty name then
+        tys
+      else
+        TySet.add ty tys
+    in
+    let upper_bounds = List.fold_right ~init:TySet.empty ~f:add_generic tyl in
+    let lower_bounds = get_lower_bounds env_tpenv name in
+    let reified = get_reified env_tpenv name in
+    let enforceable = get_enforceable env_tpenv name in
+    let newable = get_newable env_tpenv name in
+    add
+      name
+      { lower_bounds; upper_bounds; reified; enforceable; newable }
+      tpenv
 
 (* Add a single new upper lower [ty] to generic parameter [name] in the
  * local type parameter environment [env].
@@ -158,12 +181,14 @@ let add_lower_bound_ tpenv name ty =
  *)
 let add_lower_bound ?union env_tpenv name ty =
   let tpenv =
-    begin match ty with
+    match ty with
     | (r, Tabstract (AKgeneric formal_sub, _)) ->
-      add_upper_bound_ env_tpenv formal_sub
+      add_upper_bound_
+        env_tpenv
+        formal_sub
         (r, Tabstract (AKgeneric name, None))
     | _ -> env_tpenv
-    end in
+  in
   match union with
   | None -> add_lower_bound_ env_tpenv name ty
   | Some union ->
@@ -173,7 +198,10 @@ let add_lower_bound ?union env_tpenv name ty =
     let reified = get_reified env_tpenv name in
     let enforceable = get_enforceable env_tpenv name in
     let newable = get_newable env_tpenv name in
-    add name {lower_bounds; upper_bounds; reified; enforceable; newable} tpenv
+    add
+      name
+      { lower_bounds; upper_bounds; reified; enforceable; newable }
+      tpenv
 
 let remove_upper_bound tpenv name bound =
   match get name tpenv with
@@ -198,34 +226,44 @@ let remove tpenv name =
   let lower_bounds = get_lower_bounds tpenv name in
   let remove_from_upper_bounds_of ty tpenv =
     match ty with
-    | _, Tabstract (AKgeneric name, _) ->
+    | (_, Tabstract (AKgeneric name, _)) ->
       remove_upper_bound tpenv name tparam
-    | _ -> tpenv in
+    | _ -> tpenv
+  in
   let tpenv = TySet.fold remove_from_upper_bounds_of lower_bounds tpenv in
   let upper_bounds = get_upper_bounds tpenv name in
   let remove_from_lower_bounds_of ty tpenv =
     match ty with
-    | _, Tabstract (AKgeneric name, _) ->
+    | (_, Tabstract (AKgeneric name, _)) ->
       remove_lower_bound tpenv name tparam
-    | _ -> tpenv in
+    | _ -> tpenv
+  in
   let tpenv = TySet.fold remove_from_lower_bounds_of upper_bounds tpenv in
   SMap.remove name tpenv
 
 (* Add type parameters to environment, initially with no bounds.
  * Existing type parameters with the same name will be overridden. *)
 let add_generic_parameters tpenv tparaml =
-  let add_empty_bounds tpenv { tp_name = (_, name); tp_reified = reified; tp_user_attributes; _ } =
-    let enforceable = Attributes.mem SN.UserAttributes.uaEnforceable tp_user_attributes in
-    let newable = Attributes.mem SN.UserAttributes.uaNewable tp_user_attributes in
+  let add_empty_bounds
+      tpenv
+      { tp_name = (_, name); tp_reified = reified; tp_user_attributes; _ } =
+    let enforceable =
+      Attributes.mem SN.UserAttributes.uaEnforceable tp_user_attributes
+    in
+    let newable =
+      Attributes.mem SN.UserAttributes.uaNewable tp_user_attributes
+    in
     let tpinfo =
       {
         lower_bounds = empty_bounds;
         upper_bounds = empty_bounds;
         reified;
         enforceable;
-        newable
-      } in
-    add name tpinfo tpenv in
+        newable;
+      }
+    in
+    add name tpinfo tpenv
+  in
   List.fold_left tparaml ~f:add_empty_bounds ~init:tpenv
 
 let pp_tparam_info fmt tpi =
@@ -257,7 +295,6 @@ let pp_tparam_info fmt tpi =
 
   Format.fprintf fmt " }@]"
 
-let pp_tpenv fmt tpenv =
-  SMap.pp pp_tparam_info fmt tpenv
+let pp_tpenv fmt tpenv = SMap.pp pp_tparam_info fmt tpenv
 
 let pp = pp_tpenv

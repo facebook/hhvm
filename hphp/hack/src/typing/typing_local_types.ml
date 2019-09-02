@@ -7,11 +7,12 @@
  *
  *)
 open Core_kernel
-
 open Typing_defs
 
 let show_locl_ty _ = "<locl_ty>"
+
 let pp_locl_ty _ _ = Printf.printf "%s\n" "<locl_ty>"
+
 type locl_ty = locl ty
 
 (* Along with a type, each local variable has a expression id associated with
@@ -21,10 +22,13 @@ type locl_ty = locl ty
 * 'this' types.
 *)
 type expression_id = Ident.t [@@deriving show]
+
 type local = locl_ty * expression_id [@@deriving show]
 
 let show_t _ = "<local_types.t>"
+
 let pp_t _ _ = Printf.printf "%s\n" "<local_types.t>"
+
 type t = local Local_id.Map.t
 
 let empty = Local_id.Map.empty

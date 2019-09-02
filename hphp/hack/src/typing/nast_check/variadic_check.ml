@@ -8,7 +8,6 @@
  *)
 
 open Aast
-
 module Partial = Partial_provider
 
 let check_variadic v =
@@ -17,10 +16,11 @@ let check_variadic v =
     Errors.variadic_byref_param vparam.param_pos
   | _ -> ()
 
-let handler = object
-  inherit Nast_visitor.handler_base
+let handler =
+  object
+    inherit Nast_visitor.handler_base
 
-  method! at_fun_ _ f = check_variadic f.f_variadic
+    method! at_fun_ _ f = check_variadic f.f_variadic
 
-  method! at_method_ _ m = check_variadic m.m_variadic
-end
+    method! at_method_ _ m = check_variadic m.m_variadic
+  end

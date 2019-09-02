@@ -7,4 +7,4 @@
  *
  *)
 
-val get_depth: Nast.stmt -> int
+val get_depth : Nast.stmt -> int

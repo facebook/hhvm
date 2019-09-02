@@ -7,10 +7,14 @@
  *
  *)
 
-let handler = object
-  inherit Tast_visitor.handler_base
+let handler =
+  object
+    inherit Tast_visitor.handler_base
 
-  method! at_expr env ((p, ty), _) =
-    if TypecheckerOptions.disallow_unresolved_type_variables (Tast_env.get_tcopt env) then
-      ignore (Tast_expand.expand_ty ~pos:p env ty)
-end
+    method! at_expr env ((p, ty), _) =
+      if
+        TypecheckerOptions.disallow_unresolved_type_variables
+          (Tast_env.get_tcopt env)
+      then
+        ignore (Tast_expand.expand_ty ~pos:p env ty)
+  end

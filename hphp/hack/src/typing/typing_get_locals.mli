@@ -7,7 +7,12 @@
  *
  *)
 
-val lvalue : Namespace_env.env * Pos.t SMap.t ->
-  Nast.expr -> Namespace_env.env * Pos.t SMap.t
-val stmt : Namespace_env.env * Pos.t SMap.t ->
-  Nast.stmt -> Namespace_env.env * Pos.t SMap.t
+val lvalue :
+  Namespace_env.env * Pos.t SMap.t ->
+  Nast.expr ->
+  Namespace_env.env * Pos.t SMap.t
+
+val stmt :
+  Namespace_env.env * Pos.t SMap.t ->
+  Nast.stmt ->
+  Namespace_env.env * Pos.t SMap.t

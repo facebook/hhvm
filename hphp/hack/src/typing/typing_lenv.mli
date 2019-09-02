@@ -12,66 +12,53 @@ open Typing_env_types
 (* Functions dealing with old style local environment *)
 (*****************************************************************************)
 
-val get_all_locals :
-  env -> Typing_per_cont_env.t
+val get_all_locals : env -> Typing_per_cont_env.t
+
 val get_cont_option :
-  env ->
-  Typing_continuations.t -> Typing_per_cont_env.per_cont_entry option
-val drop_cont :
-  env ->
-  Typing_continuations.t -> env
-val drop_conts :
-  env ->
-  Typing_continuations.t list -> env
+  env -> Typing_continuations.t -> Typing_per_cont_env.per_cont_entry option
+
+val drop_cont : env -> Typing_continuations.t -> env
+
+val drop_conts : env -> Typing_continuations.t list -> env
+
 val replace_cont :
   env ->
   Typing_continuations.t ->
-  Typing_per_cont_env.per_cont_entry option -> env
+  Typing_per_cont_env.per_cont_entry option ->
+  env
+
 val restore_conts_from :
-  env ->
-  Typing_per_cont_env.t ->
-  Typing_continuations.t list -> env
+  env -> Typing_per_cont_env.t -> Typing_continuations.t list -> env
+
 val restore_and_merge_conts_from :
-  env ->
-  Typing_per_cont_env.t ->
-  Typing_continuations.t list -> env
-val update_next_from_conts :
-  env ->
-  Typing_continuations.t list -> env
-val save_and_merge_next_in_cont :
-  env ->
-  Typing_continuations.t -> env
-val move_and_merge_next_in_cont :
-  env ->
-  Typing_continuations.t -> env
-val union:
+  env -> Typing_per_cont_env.t -> Typing_continuations.t list -> env
+
+val update_next_from_conts : env -> Typing_continuations.t list -> env
+
+val save_and_merge_next_in_cont : env -> Typing_continuations.t -> env
+
+val move_and_merge_next_in_cont : env -> Typing_continuations.t -> env
+
+val union :
   env ->
   Typing_local_types.local ->
   Typing_local_types.local ->
   env * Typing_local_types.local
-val union_by_cont :
-  env ->
-  local_env ->
-  local_env -> env
+
+val union_by_cont : env -> local_env -> local_env -> env
+
 val union_contextopts :
   env ->
   Typing_per_cont_env.per_cont_entry option ->
   Typing_per_cont_env.per_cont_entry option ->
   env * Typing_per_cont_env.per_cont_entry option
-val union_lenvs :
-  env ->
-  local_env ->
-  local_env ->
-  local_env -> env
-val union_lenv_list :
-  env ->
-  local_env ->
-  local_env list -> env
-val union_envs :
-  env ->
-  env ->
-  env ->
-  env
+
+val union_lenvs : env -> local_env -> local_env -> local_env -> env
+
+val union_lenv_list : env -> local_env -> local_env list -> env
+
+val union_envs : env -> env -> env -> env
+
 (* When entering control flow structures, some
  * preexisting continuations must be stashed away and then restored
  * on exiting those control flow structures.
@@ -80,11 +67,8 @@ val union_envs :
  * continuations from any enclosing loops must be stashed away so as not to
  * interfere with them. *)
 val stash_and_do :
-  env ->
-  Typing_continuations.t list ->
-  (env ->
-  env * 'a) -> env * 'a
-val env_with_empty_fakes :
-  env -> env
-val has_next :
-  env -> bool
+  env -> Typing_continuations.t list -> (env -> env * 'a) -> env * 'a
+
+val env_with_empty_fakes : env -> env
+
+val has_next : env -> bool

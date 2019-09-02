@@ -12,8 +12,8 @@ type t
 
 (* Validation blame: call or lambda *)
 type blame =
-| Blame_call of Pos.t
-| Blame_lambda of Pos.t
+  | Blame_call of Pos.t
+  | Blame_lambda of Pos.t
 
 (* Initial validation *)
 val empty : t
@@ -40,4 +40,5 @@ val as_log_value : t -> Typing_log_value.value
 
 (* Make identifiers *)
 val make_static_id : Nast.class_id_ -> string -> Local_id.t
+
 val make_id : Nast.expr -> string -> Local_id.t

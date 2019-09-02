@@ -11,7 +11,6 @@
 (* Functions dealing with continuation based flow typing of local variables *)
 (*****************************************************************************)
 open Typing_env_types
-
 module Env = Typing_env
 module C = Typing_continuations
 module LEnvC = Typing_per_cont_env
@@ -26,14 +25,13 @@ module LEnvC = Typing_per_cont_env
  * For example, on entering a loop, preexisting 'break' and 'continue'
  * continuations from any enclosing loops must be stashed away so as not to
  * interfere with them. *)
-val restore_conts_from :
-  LEnvC.t ->
-  from:LEnvC.t ->
-  C.t list ->
-  LEnvC.t
+val restore_conts_from : LEnvC.t -> from:LEnvC.t -> C.t list -> LEnvC.t
 
 type 'a locals_merge_fn =
-  'a -> Typing_local_types.local -> Typing_local_types.local -> 'a * Typing_local_types.local
+  'a ->
+  Typing_local_types.local ->
+  Typing_local_types.local ->
+  'a * Typing_local_types.local
 
 (* Same as restore_conts_from, except continuations from the 'from' locals
  * are unioned with the continuations from the current environment. This is
@@ -44,7 +42,8 @@ val restore_and_merge_conts_from :
   env locals_merge_fn ->
   LEnvC.t ->
   from:LEnvC.t ->
-  C.t list -> env * LEnvC.t
+  C.t list ->
+  env * LEnvC.t
 
 (* Merge all continuations in the provided list and update the next
  * continuation with the result.
@@ -54,10 +53,7 @@ val restore_and_merge_conts_from :
  * continuation, or at the beginning of a loop block, we merge the 'continue'
  * continuation into the 'next' continuation. *)
 val update_next_from_conts :
-  env ->
-  env locals_merge_fn ->
-  LEnvC.t ->
-  C.Map.key list -> env * LEnvC.t
+  env -> env locals_merge_fn -> LEnvC.t -> C.Map.key list -> env * LEnvC.t
 
 (* After this call, the provided continuation will be the union of
  * itself and the next continuation.
@@ -68,10 +64,7 @@ val update_next_from_conts :
  * continuation.
  *)
 val save_and_merge_next_in_cont :
-  env ->
-  env locals_merge_fn ->
-  LEnvC.t ->
-  C.Map.key -> env * LEnvC.t
+  env -> env locals_merge_fn -> LEnvC.t -> C.Map.key -> env * LEnvC.t
 
 (* union the provided continuation with the next continuation and store
  * the result in the provided continuation. Finally, remove the next
@@ -82,10 +75,7 @@ val save_and_merge_next_in_cont :
  * continuation by "merging" it into the 'continue' continuation.
  *)
 val move_and_merge_next_in_cont :
-  env ->
-  env locals_merge_fn ->
-  LEnvC.t ->
-  C.Map.key -> env * LEnvC.t
+  env -> env locals_merge_fn -> LEnvC.t -> C.Map.key -> env * LEnvC.t
 
 (* Unions two context options. We call "context" here a map from locals to
  * types.
@@ -107,7 +97,8 @@ val union_opts :
   env locals_merge_fn ->
   env ->
   LEnvC.per_cont_entry option ->
-  LEnvC.per_cont_entry option -> env * LEnvC.per_cont_entry option
+  LEnvC.per_cont_entry option ->
+  env * LEnvC.per_cont_entry option
 
 (* union all continuations pairwise from two continuation maps.
  * This is used at certain merge points in the control flow,
@@ -132,7 +123,4 @@ val union_opts :
  *   }
  *)
 val union_by_cont :
-  env ->
-  env locals_merge_fn ->
-  LEnvC.t ->
-  LEnvC.t -> env * LEnvC.t
+  env -> env locals_merge_fn -> LEnvC.t -> LEnvC.t -> env * LEnvC.t

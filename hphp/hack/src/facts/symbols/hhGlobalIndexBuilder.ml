@@ -7,25 +7,10 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  *)
-open IndexBuilder
 open IndexBuilderTypes
 
 (* Basic help text - too many options to list all *)
 let usage = Printf.sprintf "Usage: %s [opts] [repository]\n" Sys.argv.(0)
-
-(* Create one worker per cpu *)
-let init_workers () =
-  let nbr_procs = Sys_utils.nproc () in
-  let gc_control = GlobalConfig.gc_control in
-  let config = GlobalConfig.default_sharedmem_config in
-  let heap_handle = SharedMem.init config ~num_workers:nbr_procs in
-  MultiWorker.make
-    ?call_wrapper:None
-    ~saved_state:()
-    ~entry
-    ~nbr_procs
-    ~gc_control
-    ~heap_handle
 
 (* Parse command line options *)
 let parse_options () : index_builder_context option =
@@ -95,7 +80,9 @@ let parse_options () : index_builder_context option =
         custom_service = !custom_service;
         custom_repo_name = !custom_repo_name;
         include_builtins = !include_builtins;
+        set_paths_for_worker = true;
         silent = !silent;
+        hhi_root_folder = Some (Hhi.get_hhi_root ());
       }
 
 (* Run the application *)
@@ -107,7 +94,9 @@ let main () : unit =
   match ctxt_opt with
   | None -> ()
   | Some ctxt ->
-    let workers = Some (init_workers ()) in
+    let workers = Some (IndexBuilder.init_workers ()) in
+    let repo_path = Path.make ctxt.repo_folder in
+    Relative_path.set_path_prefix Relative_path.Root repo_path;
     IndexBuilder.go ctxt workers
 
 (* Main entry point *)

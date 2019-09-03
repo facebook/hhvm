@@ -124,39 +124,38 @@ let parse_one_file ~(path : Relative_path.t) : si_capture =
     result
 
 (* Parse the file using the existing context*)
-let parse_file (ctxt : index_builder_context) (filename : string) : si_capture
-    =
+let parse_file (ctxt : index_builder_context) (path : Relative_path.t) :
+    si_capture =
   let _ = ctxt in
-  let stripped_path =
-    String.substr_replace_first filename ~pattern:ctxt.repo_folder ~with_:""
-  in
-  let path = Relative_path.from_root stripped_path in
   parse_one_file ~path
 
 (* Parse a batch of files *)
 let parse_batch
-    (ctxt : index_builder_context) (acc : si_capture) (files : string list) :
-    si_capture =
+    (ctxt : index_builder_context)
+    (acc : si_capture)
+    (files : Relative_path.t list) : si_capture =
+  let repo_path = Path.make ctxt.repo_folder in
+  if ctxt.set_paths_for_worker then (
+    Relative_path.set_path_prefix Relative_path.Root repo_path;
+    Relative_path.set_path_prefix
+      Relative_path.Hhi
+      (Option.value_exn ctxt.hhi_root_folder)
+  );
   List.fold files ~init:acc ~f:(fun acc file ->
-      if Path.file_exists (Path.make file) then (
-        try
-          let res = (parse_file ctxt) file in
-          List.append res acc
-        with exn ->
-          error_count := !error_count + 1;
-          Hh_logger.log
-            "IndexBuilder exception: %s. Failed to parse [%s]"
-            (Caml.Printexc.to_string exn)
-            file;
-          acc
-      ) else (
-        Hh_logger.log "File [%s] does not exist." file;
-        acc
-      ))
+      try
+        let res = (parse_file ctxt) file in
+        List.append res acc
+      with exn ->
+        error_count := !error_count + 1;
+        Hh_logger.log
+          "IndexBuilder exception: %s. Failed to parse [%s]"
+          (Caml.Printexc.to_string exn)
+          (Relative_path.to_absolute file);
+        acc)
 
 let parallel_parse
     ~(workers : MultiWorker.worker list option)
-    (files : string list)
+    (files : Relative_path.t list)
     (ctxt : index_builder_context) : si_capture =
   MultiWorker.call
     workers
@@ -167,8 +166,22 @@ let parallel_parse
 
 let entry = WorkerController.register_entry_point ~restore:(fun () -> ())
 
+(* Create one worker per cpu *)
+let init_workers () =
+  let nbr_procs = Sys_utils.nproc () in
+  let gc_control = GlobalConfig.gc_control in
+  let config = GlobalConfig.default_sharedmem_config in
+  let heap_handle = SharedMem.init config ~num_workers:nbr_procs in
+  MultiWorker.make
+    ?call_wrapper:None
+    ~saved_state:()
+    ~entry
+    ~nbr_procs
+    ~gc_control
+    ~heap_handle
+
 (* Let's use the unix find command which seems to be really quick at this sort of thing *)
-let gather_file_list (path : string) : string list =
+let gather_file_list (path : string) : Relative_path.t list =
   let cmdline =
     Printf.sprintf
       "find %s \\( \\( -name \"*.php\" -o -name \"*.hhi\" \\) -and -not -path \"*/.hg/*\" \\)"
@@ -180,7 +193,8 @@ let gather_file_list (path : string) : string list =
      while true do
        let line_opt = In_channel.input_line channel in
        match line_opt with
-       | Some line -> result := line :: !result
+       | Some line ->
+         result := Relative_path.create_detect_prefix line :: !result
        | None -> raise End_of_file
      done
    with End_of_file -> ());
@@ -275,8 +289,9 @@ let go
     (* If desired, get the HHI root folder and add all HHI files from there *)
     let files =
       if ctxt.include_builtins then
-        let hhi_root_folder = Hhi.get_hhi_root () in
-        let hhi_root_folder_path = Path.to_string hhi_root_folder in
+        let hhi_root_folder_path =
+          Path.to_string (Option.value_exn ctxt.hhi_root_folder)
+        in
         let name =
           Printf.sprintf "Scanned HHI folder [%s] in " hhi_root_folder_path
         in

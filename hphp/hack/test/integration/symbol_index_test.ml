@@ -78,8 +78,10 @@ let assert_autocomplete
   )
 
 let run_index_builder (harness : Test_harness.t) : si_env =
+  let hhi_folder = Hhi.get_hhi_root () in
   Relative_path.set_path_prefix Relative_path.Root harness.repo_dir;
   Relative_path.set_path_prefix Relative_path.Tmp (Path.make "/tmp");
+  Relative_path.set_path_prefix Relative_path.Hhi hhi_folder;
   let repo_path = Path.to_string harness.repo_dir in
   (* Set up initial variables *)
   let fn = Filename.temp_file "autocomplete." ".db" in
@@ -95,6 +97,8 @@ let run_index_builder (harness : Test_harness.t) : si_env =
       custom_service = None;
       custom_repo_name = None;
       include_builtins = true;
+      set_paths_for_worker = false;
+      hhi_root_folder = Some hhi_folder;
       silent = true;
     }
   in

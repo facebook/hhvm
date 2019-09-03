@@ -13,10 +13,20 @@ open SearchUtils
 let count_local_fileinfos ~(sienv : si_env) : int =
   Relative_path.Map.cardinal sienv.lss_fullitems
 
+(* Relative paths sometimes produce doubled-up slashes, as in
+ * "/path/to/root//subpath/file".  When we extract the suffix
+ * from a relative_path.t, clear out any preceding slash. *)
+let strip_first_char char s =
+  if String.length s = 0 || s.[0] <> char then
+    s
+  else
+    String.sub s 1 (String.length s - 1)
+
 (* Determine a tombstone for a file path *)
 let get_tombstone (path : Relative_path.t) : int64 =
   let rel_path_str = Relative_path.suffix path in
-  let path_hash = SharedMem.get_hash rel_path_str in
+  let fixed_path_str = strip_first_char '/' rel_path_str in
+  let path_hash = SharedMem.get_hash fixed_path_str in
   path_hash
 
 (* Update files when they were discovered *)

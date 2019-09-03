@@ -97,6 +97,8 @@ let find_or_build_sqlite_file
           custom_service = None;
           custom_repo_name = None;
           include_builtins = true;
+          set_paths_for_worker = false;
+          hhi_root_folder = None;
           silent;
         }
       in

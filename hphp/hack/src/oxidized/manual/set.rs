@@ -8,6 +8,7 @@ use std::cmp::Ord;
 use ocamlrep_derive::IntoOcamlRep;
 use ocamlvalue_macro::Ocamlvalue;
 
+#[allow(dead_code)]
 #[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]
 enum SetImpl<T: Ord> {
     Empty,

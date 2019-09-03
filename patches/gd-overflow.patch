@@ -1,0 +1,23 @@
+diff --git a/hphp/runtime/ext/gd/ext_gd.cpp b/hphp/runtime/ext/gd/ext_gd.cpp
+--- a/hphp/runtime/ext/gd/ext_gd.cpp
++++ b/hphp/runtime/ext/gd/ext_gd.cpp
+@@ -6964,7 +6964,7 @@
+     exif_iif_add_tag(ImageInfo, SECTION_APP12, "Company",
+                      TAG_NONE, TAG_FMT_STRING, l1, buffer+2);
+     if (length > 2+l1+1) {
+-      l2 = php_strnlen(buffer+2+l1+1, length-2-l1+1);
++      l2 = php_strnlen(buffer+2+l1+1, length-2-l1-1);
+       exif_iif_add_tag(ImageInfo, SECTION_APP12, "Info",
+                        TAG_NONE, TAG_FMT_STRING, l2, buffer+2+l1+1);
+     }
+@@ -7117,6 +7117,10 @@
+       case M_SOF13:
+       case M_SOF14:
+       case M_SOF15:
++        if ((itemlen - 2) < 6) {
++          return 0;
++        }
++
+         exif_process_SOFn(Data, marker, &sof_info);
+         ImageInfo->Width  = sof_info.width;
+         ImageInfo->Height = sof_info.height;

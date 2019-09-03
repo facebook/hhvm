@@ -1037,9 +1037,17 @@ SSATmp* opt_shapes_idx(IRGS& env, const ParamPrep& params) {
       return gen(env, op, data, arr, key, def);
     }
   );
-  auto const cell = is_dict ? elm : unbox(env, elm, nullptr);
-  gen(env, IncRef, cell);
-  return cell;
+
+  auto const finish = [&](SSATmp* val){
+    auto const cell = is_dict ? val : unbox(env, val, nullptr);
+    gen(env, IncRef, cell);
+    return cell;
+  };
+  return finish(profiledType(env, elm, [&] {
+    auto const cell = finish(elm);
+    params.decRefParams(env);
+    push(env, cell);
+  }));
 }
 
 SSATmp* opt_is_meth_caller(IRGS& env, const ParamPrep& params) {

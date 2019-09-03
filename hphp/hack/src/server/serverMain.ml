@@ -79,6 +79,7 @@ module Program = struct
           {
             ServerCommandTypes.Recheck_stats.id = info.recheck_id;
             time = info.recheck_time;
+            count = info.stats.total_rechecked_count;
           }
     in
     ServerError.print_error_list
@@ -92,8 +93,7 @@ module Program = struct
 
     WorkerController.killall ();
 
-    (* as Warnings shouldn't break CI, don't change the exit status except
-      * for Errors *)
+    (* as Warnings shouldn't break CI, don't change the exit status except for Errors *)
     let has_errors =
       List.exists
         ~f:(fun e -> Errors.get_severity e = Errors.Error)

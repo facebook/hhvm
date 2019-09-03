@@ -14,6 +14,7 @@ module Recheck_stats = struct
   type t = {
     id: string;
     time: float;
+    count: int;
   }
 end
 

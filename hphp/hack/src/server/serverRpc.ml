@@ -42,7 +42,12 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       match last_recheck_info with
       | None -> None
       | Some info ->
-        Some { Recheck_stats.id = info.recheck_id; time = info.recheck_time }
+        Some
+          {
+            Recheck_stats.id = info.recheck_id;
+            time = info.recheck_time;
+            count = info.stats.total_rechecked_count;
+          }
     in
     ( env,
       {

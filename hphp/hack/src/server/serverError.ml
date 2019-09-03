@@ -58,7 +58,8 @@ let get_error_list_json
           ( "last_recheck",
             Hh_json.JSON_Object
               [ ("id", Hh_json.JSON_String stats.id);
-                ("time", Hh_json.JSON_Number (string_of_float stats.time)) ] )
+                ("time", Hh_json.JSON_Number (string_of_float stats.time));
+                ("count", Hh_json.JSON_Number (string_of_int stats.count)) ] )
         in
         last_recheck_result :: properties
     in

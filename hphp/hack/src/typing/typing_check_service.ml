@@ -458,6 +458,18 @@ module Mocking =
       else
         (module NoMocking : Mocking_sig) )
 
+let should_process_sequentially
+    (opts : TypecheckerOptions.t)
+    (fnl : (Relative_path.t * computation_kind) list) : bool =
+  (* If decls can be deferred, then we should process in parallel, since
+    we are likely to have more computations than there are files to type check. *)
+  let defer_threshold =
+    TypecheckerOptions.defer_class_declaration_threshold opts
+  in
+  match (defer_threshold, List.length fnl) with
+  | (None, file_count) when file_count < 10 -> true
+  | _ -> false
+
 let go_with_interrupt
     (workers : MultiWorker.worker list option)
     (opts : TypecheckerOptions.t)
@@ -470,7 +482,8 @@ let go_with_interrupt
   Mocking.with_test_mocking fnl
   @@ fun fnl ->
   let result =
-    if List.length fnl < 10 then
+    if should_process_sequentially opts fnl then (
+      Hh_logger.log "Type checking service will process files sequentially";
       let progress = { completed = []; remaining = fnl; deferred = [] } in
       let (errors, _) =
         process_files
@@ -482,7 +495,8 @@ let go_with_interrupt
           ~check_info
       in
       (errors, interrupt.MultiThreadedCall.env, [])
-    else
+    ) else (
+      Hh_logger.log "Type checking service will process files in parallel";
       process_in_parallel
         dynamic_view_files
         workers
@@ -491,6 +505,7 @@ let go_with_interrupt
         ~interrupt
         ~memory_cap
         ~check_info
+    )
   in
   if !Utils.profile then
     TypingLogger.ProfileTypeCheck.print_path ~init_id:check_info.init_id;

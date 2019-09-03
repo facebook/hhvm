@@ -21,10 +21,11 @@ type lowerer_result = {
 
 type r = (lowerer_result, string) result
 
-external parse_and_lower_from_text_ffi:
-  SourceText.t -> r = "parse_and_lower_from_text"
+external parse_and_lower_from_text_ffi : SourceText.t -> r
+  = "parse_and_lower_from_text"
 
 let parse_and_lower_from_text text = parse_and_lower_from_text_ffi text
 
-let from_text_rust (_env: Full_fidelity_ast.env) (source_text : SourceText.t) : r =
+let from_text_rust (_env : Full_fidelity_ast.env) (source_text : SourceText.t)
+    : r =
   parse_and_lower_from_text source_text

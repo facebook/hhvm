@@ -17,7 +17,7 @@
  *
  * This module contains smart constructors implementation that does nothing
  * and can be used as initial stubs.
-
+ 
  *)
 
 module type Op_S = sig
@@ -1518,5 +1518,3 @@ module WithOp (Op : Op_S) = struct
     else
       (state, Op.flatten [arg0; arg1; arg2; arg3])
 end
-
-(* WithSyntax *)

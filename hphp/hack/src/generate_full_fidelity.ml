@@ -294,7 +294,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       value, projection node
 AGGREGATE_VALIDATORS
 VALIDATE_FUNCTIONS
-end (* Make *)
+end
 "
 
   let full_fidelity_validated_syntax =
@@ -311,8 +311,6 @@ end (* Make *)
       ~template:full_fidelity_validated_syntax_template
       ()
 end
-
-(* ValidatedSyntax *)
 
 module GenerateFFSyntaxType = struct
   let to_parse_tree x =
@@ -454,7 +452,7 @@ PARSE_TREE   and syntax =
   | Missing
   | SyntaxList                        of t list
 SYNTAX
-end (* MakeSyntaxType *)
+end
 
 module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   type 'a value = SyntaxValue.t * 'a [@@deriving show]
@@ -468,7 +466,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | SingletonList of 'a value
 AGGREGATE_TYPESVALIDATED_SYNTAX
 [@@deriving show]
-end (* MakeValidated *)
+end
 "
 
   let full_fidelity_syntax_type =
@@ -486,8 +484,6 @@ end (* MakeValidated *)
       ~template:full_fidelity_syntax_template
       ()
 end
-
-(* GenerateFFSyntaxType *)
 
 module GenerateFFRustSyntax = struct
   let from_children x =
@@ -903,7 +899,7 @@ TYPE_TESTS
   val is_inout          : t -> bool
 
 
-end (* Syntax_S *)
+end
 "
 
   let full_fidelity_syntax_sig =
@@ -961,7 +957,7 @@ module type SmartConstructors_S = sig
   val make_missing : Full_fidelity_source_text.pos -> t -> t * r
   val make_list : Full_fidelity_source_text.pos -> r list -> t -> t * r
 CONSTRUCTOR_METHODS
-end (* SmartConstructors_S *)
+end
 
 module ParserWrapper (Parser : sig
   type parser_type
@@ -976,8 +972,8 @@ end) = struct
     let missing parser p = call parser (SCI.make_missing p)
     let list parser p items = call parser (SCI.make_list p items)
 MAKE_METHODS
-  end (* Make *)
-end (* ParserWrapper *)
+  end
+end
 "
 
   let full_fidelity_smart_constructors =
@@ -1401,10 +1397,10 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
         val missing : t -> Full_fidelity_source_text.pos -> t * SC.r
         val list : t -> Full_fidelity_source_text.pos -> SC.r list -> t * SC.r
 MAKE_METHODS
-      end (* Make *)
-    end (* Parser_S *)
-  end (* WithLexer *)
-end (* WithSyntax *)
+      end
+    end
+  end
+end
 "
 
   let full_fidelity_parser_sig =
@@ -1502,7 +1498,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
         lst :: t, lst
       else make_missing (s, o) stack
 CONSTRUCTOR_METHODS
-end (* WithSyntax *)
+end
 "
 
   let full_fidelity_verify_smart_constructors =
@@ -1581,8 +1577,8 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       then State.next state items, Syntax.make_list s o items
       else make_missing (s, o) state
 CONSTRUCTOR_METHODS
-  end (* WithRustParser *)
-  end (* WithState *)
+  end
+  end
 
   include WithState(
     struct
@@ -1601,7 +1597,7 @@ CONSTRUCTOR_METHODS
     end
   )
 
-end (* WithSyntax *)
+end
 "
 
   let full_fidelity_syntax_smart_constructors =
@@ -1873,7 +1869,7 @@ module WithOp(Op : Op_S) = struct
   let make_list _  _ state = state, Op.zero
 CONSTRUCTOR_METHODS
 
-end (* WithSyntax *)
+end
 "
 
   let flatten_smart_constructors =
@@ -2107,7 +2103,7 @@ CONSTRUCTOR_METHODS
   let is_list = has_kind SK.Missing
 TYPE_TESTS
 
-end (* SyntaxKind *)
+end
 "
 
   let full_fidelity_smart_constructors_wrappers =
@@ -2607,9 +2603,9 @@ FROM_METHODS
 
 GET_METHODS
 
-    end (* WithValueBuilder *)
-  end (* WithSyntaxValue *)
-end (* WithToken *)
+    end
+  end
+end
 "
 
   let full_fidelity_syntax =
@@ -2628,8 +2624,6 @@ end (* WithToken *)
       ~template:full_fidelity_syntax_template
       ()
 end
-
-(* GenerateFFSyntax *)
 
 module GenerateFFTriviaKind = struct
   let to_trivia { trivia_kind; trivia_text = _ } =

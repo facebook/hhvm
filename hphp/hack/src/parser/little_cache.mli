@@ -7,5 +7,7 @@
  *
  *)
 type ('k, 'v) t
-val memoize : ('k, 'v) t -> ('k -> 'v) -> ('k -> 'v)
+
+val memoize : ('k, 'v) t -> ('k -> 'v) -> 'k -> 'v
+
 val make : 'k -> 'v -> ('k, 'v) t

@@ -7,4 +7,4 @@
  *
  *)
 
-include Full_fidelity_parser.WithSyntax(Full_fidelity_minimal_syntax)
+include Full_fidelity_parser.WithSyntax (Full_fidelity_minimal_syntax)

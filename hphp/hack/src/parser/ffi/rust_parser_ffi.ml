@@ -14,22 +14,23 @@ module PositionedSyntax = Full_fidelity_positioned_syntax
 
 (* We could pass ParserEnv, but the less complicated structs we need to
  * synchronize on the boundary between Rust and OCaml, the better. *)
-type parser_opts = (
-  bool * (* is_experimental mode *)
-  bool * (* hhvm_compat_mode *)
-  bool * (* php5_compat_mode *)
-  bool * (* codegen *)
-  bool * (* allow_new_attribute_syntax *)
-  bool   (* leak_rust_tree *)
-)
-let env_to_opts env = (
-  (Env.is_experimental_mode env),
-  (Env.hhvm_compat_mode env),
-  (Env.php5_compat_mode env),
-  (Env.codegen env),
-  (Env.allow_new_attribute_syntax env),
-  (Env.leak_rust_tree env)
-)
+type parser_opts =
+  (* is_experimental mode *)
+  bool
+  * (* hhvm_compat_mode *) bool
+  * (* php5_compat_mode *) bool
+  * (* codegen *) bool
+  * (* allow_new_attribute_syntax *) bool
+  * (* leak_rust_tree *) bool
+
+let env_to_opts env =
+  ( Env.is_experimental_mode env,
+    Env.hhvm_compat_mode env,
+    Env.php5_compat_mode env,
+    Env.codegen env,
+    Env.allow_new_attribute_syntax env,
+    Env.leak_rust_tree env )
+
 let set_global_lexer_env _ =
   (* Parsing of file sets up global variables in lexer module. Those variables
    * are then accessed even after parsing, with the assumption that they have
@@ -38,51 +39,45 @@ let set_global_lexer_env _ =
    * Going through Rust parser would bypass setting those variables and produces
    * incorrect results. I'll just set them here directly to maintain the same
    * behavior. *)
-  Full_fidelity_lexer.Env.set
-    ~rust:true
+  Full_fidelity_lexer.Env.set ~rust:true
 
 exception RustException of string
 
-external parse_mode: SourceText.t -> FileInfo.mode option = "rust_parse_mode"
+external parse_mode : SourceText.t -> FileInfo.mode option = "rust_parse_mode"
 
 type ('a, 'b) result = 'a * 'b * SyntaxError.t list * Rust_pointer.t option
 
-external parse_minimal:
-  SourceText.t ->
-  parser_opts ->
-  (unit, MinimalSyntax.t) result = "parse_minimal"
+external parse_minimal :
+  SourceText.t -> parser_opts -> (unit, MinimalSyntax.t) result
+  = "parse_minimal"
 
 let parse_minimal text env =
   set_global_lexer_env env;
   parse_minimal text (env_to_opts env)
 
-external parse_positioned:
-  SourceText.t ->
-  parser_opts ->
-  (unit, PositionedSyntax.t) result = "parse_positioned"
+external parse_positioned :
+  SourceText.t -> parser_opts -> (unit, PositionedSyntax.t) result
+  = "parse_positioned"
 
 let parse_positioned text env =
   set_global_lexer_env env;
   parse_positioned text (env_to_opts env)
 
-external parse_positioned_with_decl_mode_sc:
-  SourceText.t ->
-  parser_opts ->
-  (bool list, PositionedSyntax.t) result = "parse_positioned_with_decl_mode_sc"
+external parse_positioned_with_decl_mode_sc :
+  SourceText.t -> parser_opts -> (bool list, PositionedSyntax.t) result
+  = "parse_positioned_with_decl_mode_sc"
 
 let parse_positioned_with_decl_mode_sc text env =
   set_global_lexer_env env;
   parse_positioned_with_decl_mode_sc text (env_to_opts env)
 
-external parse_positioned_with_coroutine_sc:
-   SourceText.t ->
-   parser_opts ->
-   (bool, PositionedSyntax.t) result = "parse_positioned_with_coroutine_sc"
+external parse_positioned_with_coroutine_sc :
+  SourceText.t -> parser_opts -> (bool, PositionedSyntax.t) result
+  = "parse_positioned_with_coroutine_sc"
 
-external parse_positioned_with_coroutine_sc_leak_tree:
-  SourceText.t ->
-  parser_opts ->
-  (bool, PositionedSyntax.t) result = "parse_positioned_with_coroutine_sc_leak_tree"
+external parse_positioned_with_coroutine_sc_leak_tree :
+  SourceText.t -> parser_opts -> (bool, PositionedSyntax.t) result
+  = "parse_positioned_with_coroutine_sc_leak_tree"
 
 let parse_positioned_with_coroutine_sc text env =
   set_global_lexer_env env;
@@ -91,15 +86,15 @@ let parse_positioned_with_coroutine_sc text env =
   else
     parse_positioned_with_coroutine_sc text (env_to_opts env)
 
-external parse_positioned_with_verify_sc:
+external parse_positioned_with_verify_sc :
   SourceText.t ->
   parser_opts ->
-  (PositionedSyntax.t list, PositionedSyntax.t) result = "parse_positioned_with_verify_sc"
+  (PositionedSyntax.t list, PositionedSyntax.t) result
+  = "parse_positioned_with_verify_sc"
 
 let parse_positioned_with_verify_sc text env =
   set_global_lexer_env env;
   parse_positioned_with_verify_sc text (env_to_opts env)
-
 
 let init () =
   Callback.register_exception "rust exception" (RustException "");

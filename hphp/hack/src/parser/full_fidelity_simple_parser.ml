@@ -7,100 +7,103 @@
  *
  *)
 
-module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
-module type Lexer_S = Full_fidelity_lexer_sig.WithToken(Syntax.Token).Lexer_S
-module Context = Full_fidelity_parser_context.WithToken(Syntax.Token)
-module type SCWithToken_S = SmartConstructorsWrappers.SyntaxKind_S
+module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
+  module type Lexer_S = Full_fidelity_lexer_sig.WithToken(Syntax.Token).Lexer_S
 
-module WithLexer(Lexer : Lexer_S) = struct
-  module Lexer = Lexer
+  module Context = Full_fidelity_parser_context.WithToken (Syntax.Token)
 
-  module WithSmartConstructors
-  (SC : SCWithToken_S with module Token = Syntax.Token) = struct
-    module SC = SC
+  module type SCWithToken_S = SmartConstructorsWrappers.SyntaxKind_S
 
-  type context_type = Context.t
-  let show_context_type _x = "<Full_fidelity_parser_context.WithToken(Syntax.Token).t>"
-  let pp_context_type _fmt _x = Printf.printf "%s\n" "<Full_fidelity_parser_context.WithToken(Syntax.Token).t>"
+  module WithLexer (Lexer : Lexer_S) = struct
+    module Lexer = Lexer
 
-  type t = {
-    lexer : Lexer.t;
-    errors : Full_fidelity_syntax_error.t list;
-    context : context_type;
-    env : Full_fidelity_parser_env.t;
-    sc_state : SC.t;
-  } [@@deriving show]
+    module WithSmartConstructors
+        (SC : SCWithToken_S with module Token = Syntax.Token) =
+    struct
+      module SC = SC
 
-  let pos parser = (Lexer.source parser.lexer, Lexer.end_offset parser.lexer)
+      type context_type = Context.t
 
-  let sc_call parser f =
-    let (sc_state, result) = f parser.sc_state in
-    {parser with sc_state}, result
+      let show_context_type _x =
+        "<Full_fidelity_parser_context.WithToken(Syntax.Token).t>"
 
-  let sc_state parser =
-    parser.sc_state
+      let pp_context_type _fmt _x =
+        Printf.printf
+          "%s\n"
+          "<Full_fidelity_parser_context.WithToken(Syntax.Token).t>"
 
-  let make env lexer errors context sc_state =
-    { lexer; errors; context; env; sc_state}
+      type t = {
+        lexer: Lexer.t;
+        errors: Full_fidelity_syntax_error.t list;
+        context: context_type;
+        env: Full_fidelity_parser_env.t;
+        sc_state: SC.t;
+      }
+      [@@deriving show]
 
-  let errors parser =
-    parser.errors @ (Lexer.errors parser.lexer)
+      let pos parser =
+        (Lexer.source parser.lexer, Lexer.end_offset parser.lexer)
 
-  let env parser =
-    parser.env
+      let sc_call parser f =
+        let (sc_state, result) = f parser.sc_state in
+        ({ parser with sc_state }, result)
 
-  let with_errors parser errors =
-    { parser with errors }
+      let sc_state parser = parser.sc_state
 
-  let lexer parser =
-    parser.lexer
+      let make env lexer errors context sc_state =
+        { lexer; errors; context; env; sc_state }
 
-  let with_lexer parser lexer =
-    { parser with lexer }
+      let errors parser = parser.errors @ Lexer.errors parser.lexer
 
-  let context parser =
-    parser.context
+      let env parser = parser.env
 
-  let with_context parser context =
-    { parser with context }
+      let with_errors parser errors = { parser with errors }
 
-  let skipped_tokens parser =
-    Context.skipped_tokens parser.context
+      let lexer parser = parser.lexer
 
-  let with_skipped_tokens parser skipped_tokens =
-    let new_context = Context.with_skipped_tokens
-      parser.context skipped_tokens in
-    with_context parser new_context
+      let with_lexer parser lexer = { parser with lexer }
 
-  let clear_skipped_tokens parser =
-    with_skipped_tokens parser []
+      let context parser = parser.context
 
-  (** Wrapper functions for interfacing with parser context **)
+      let with_context parser context = { parser with context }
 
-  let expect parser token_kind_list =
-    let new_context = Context.expect parser.context token_kind_list in
-    with_context parser new_context
+      let skipped_tokens parser = Context.skipped_tokens parser.context
 
-  let expect_in_new_scope parser token_kind_list =
-    let new_context = Context.expect_in_new_scope
-      parser.context token_kind_list in
-    with_context parser new_context
+      let with_skipped_tokens parser skipped_tokens =
+        let new_context =
+          Context.with_skipped_tokens parser.context skipped_tokens
+        in
+        with_context parser new_context
 
-  let expects parser token_kind =
-    Context.expects parser.context token_kind
+      let clear_skipped_tokens parser = with_skipped_tokens parser []
 
-  let pop_scope parser token_kind_list =
-    let new_context = Context.pop_scope parser.context token_kind_list in
-    with_context parser new_context
+      (** Wrapper functions for interfacing with parser context **)
 
-  let print_expected parser =
-    Context.print_expected parser.context
+      let expect parser token_kind_list =
+        let new_context = Context.expect parser.context token_kind_list in
+        with_context parser new_context
 
-  include SmartConstructors.ParserWrapper(struct
-    type parser_type = t
-    module SCI = SC
-    let call = sc_call
-  end)
-end (* WithSmartConstructors *)
-end (* WithLexer *)
-end (* WithSyntax *)
+      let expect_in_new_scope parser token_kind_list =
+        let new_context =
+          Context.expect_in_new_scope parser.context token_kind_list
+        in
+        with_context parser new_context
+
+      let expects parser token_kind = Context.expects parser.context token_kind
+
+      let pop_scope parser token_kind_list =
+        let new_context = Context.pop_scope parser.context token_kind_list in
+        with_context parser new_context
+
+      let print_expected parser = Context.print_expected parser.context
+
+      include SmartConstructors.ParserWrapper (struct
+        type parser_type = t
+
+        module SCI = SC
+
+        let call = sc_call
+      end)
+    end
+  end
+end

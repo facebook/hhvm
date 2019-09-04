@@ -72,11 +72,10 @@ The paper refers to this approach as "restarting", and further suggests that rec
 the chain of jobs could be used to minimize the number of restarts.
  *)
 
-type computation_kind =
-  | Check of FileInfo.names
-  | Declare
-
-type file_computation = Relative_path.t * computation_kind
+type file_computation =
+  | Check of Relative_path.t * FileInfo.names
+  | Declare of Relative_path.t
+  | Prefetch of Relative_path.t list
 
 type progress = {
   completed: file_computation list;
@@ -185,11 +184,11 @@ let process_file
           SSet.iter (ignore_check_typedef opts fn) n_types;
           SSet.iter (ignore_check_const opts fn) n_consts)
     in
-    let deferred_files = Deferred_decl.get ~f:(fun d -> (d, Declare)) in
+    let deferred_files = Deferred_decl.get ~f:(fun d -> Declare d) in
     let result =
       match deferred_files with
       | [] -> (Errors.merge errors' errors, [])
-      | _ -> (errors, List.concat [deferred_files; [(fn, Check file_infos)]])
+      | _ -> (errors, List.concat [deferred_files; [Check (fn, file_infos)]])
     in
     result
   with e ->
@@ -256,10 +255,13 @@ let process_files
     | fn :: fns ->
       let (errors, deferred) =
         match fn with
-        | (path, Check info) -> process_file_wrapper errors (path, info)
-        | (path, Declare) ->
+        | Check (path, info) -> process_file_wrapper errors (path, info)
+        | Declare path ->
           let errors = Decl_service.decl_file errors path in
           (errors, [])
+        | Prefetch paths ->
+          Vfs.prefetch paths;
+          (Errors.empty, [])
       in
       let progress =
         {
@@ -310,13 +312,25 @@ let merge
   (* Let's also prepend the deferred files! *)
   files_to_process := results.deferred @ !files_to_process;
 
+  (* Prefetch the deferred files, if necessary *)
+  files_to_process :=
+    if Vfs.is_vfs () && List.length results.deferred > 10 then
+      let files_to_prefetch =
+        List.fold results.deferred ~init:[] ~f:(fun acc computation ->
+            match computation with
+            | Declare path -> path :: acc
+            | _ -> acc)
+      in
+      Prefetch files_to_prefetch :: !files_to_process
+    else
+      !files_to_process;
   List.iter ~f:(Hash_set.Poly.remove files_in_progress) results.completed;
 
   (* Let's re-add the deferred files here! *)
   List.iter ~f:(Hash_set.Poly.add files_in_progress) results.deferred;
   let is_check file =
     match file with
-    | (_, Check _) -> true
+    | Check _ -> true
     | _ -> false
   in
   let deferred_check_count = List.count ~f:is_check results.deferred in
@@ -383,7 +397,7 @@ let process_in_parallel
     (fnl : file_computation list)
     ~(interrupt : 'a MultiWorker.interrupt_config)
     ~(memory_cap : int option)
-    ~(check_info : check_info) : Errors.t * 'a * file_computation list =
+    ~(check_info : check_info) : Errors.t * 'a * Relative_path.t list =
   TypeCheckStore.store opts;
   let files_to_process = ref fnl in
   let files_in_progress = Hash_set.Poly.create () in
@@ -413,22 +427,26 @@ let process_in_parallel
   TypeCheckStore.clear ();
   ( errors,
     env,
-    List.concat (cancelled |> List.map ~f:(fun progress -> progress.remaining))
-  )
+    List.concat
+      ( cancelled
+      |> List.map ~f:(fun progress ->
+             progress.remaining
+             |> List.fold ~init:[] ~f:(fun acc computation ->
+                    match computation with
+                    | Check (path, _) -> path :: acc
+                    | _ -> acc)) ) )
 
-type 'a job = Relative_path.t * 'a
-
-type ('a, 'b, 'c) job_result = 'b * 'c * 'a job list
+type ('b, 'c) job_result = 'b * 'c * Relative_path.t list
 
 module type Mocking_sig = sig
   val with_test_mocking :
     (* real job payload, that we can modify... *)
-    'a job list ->
+    file_computation list ->
     ((* ... before passing it to the real job executor... *)
-     'a job list ->
-    ('a, 'b, 'c) job_result) ->
+     file_computation list ->
+    ('b, 'c) job_result) ->
     (* ... which output we can also modify. *)
-    ('a, 'b, 'c) job_result
+    ('b, 'c) job_result
 end
 
 module NoMocking = struct
@@ -444,7 +462,14 @@ module TestMocking = struct
 
   let with_test_mocking fnl f =
     let (mock_cancelled, fnl) =
-      List.partition_tf fnl ~f:(fun (path, _) -> is_cancelled path)
+      List.partition_map fnl ~f:(fun computation ->
+          match computation with
+          | Check (path, _) ->
+            if is_cancelled path then
+              `Fst path
+            else
+              `Snd computation
+          | _ -> `Snd computation)
     in
     (* Only cancel once to avoid infinite loops *)
     cancelled := Relative_path.Set.empty;
@@ -459,8 +484,7 @@ module Mocking =
         (module NoMocking : Mocking_sig) )
 
 let should_process_sequentially
-    (opts : TypecheckerOptions.t)
-    (fnl : (Relative_path.t * computation_kind) list) : bool =
+    (opts : TypecheckerOptions.t) (fnl : file_computation list) : bool =
   (* If decls can be deferred, then we should process in parallel, since
     we are likely to have more computations than there are files to type check. *)
   let defer_threshold =
@@ -477,8 +501,8 @@ let go_with_interrupt
     (fnl : (Relative_path.t * FileInfo.names) list)
     ~(interrupt : 'a MultiWorker.interrupt_config)
     ~(memory_cap : int option)
-    ~(check_info : check_info) : (computation_kind, Errors.t, 'a) job_result =
-  let fnl = List.map fnl ~f:(fun (path, names) -> (path, Check names)) in
+    ~(check_info : check_info) : (Errors.t, 'a) job_result =
+  let fnl = List.map fnl ~f:(fun (path, names) -> Check (path, names)) in
   Mocking.with_test_mocking fnl
   @@ fun fnl ->
   let result =

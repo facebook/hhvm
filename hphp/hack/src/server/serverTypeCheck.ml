@@ -910,7 +910,7 @@ functor
         List.fold
           cancelled
           ~init:(fast, needs_recheck)
-          ~f:(fun (fast, needs_recheck) (path, _) ->
+          ~f:(fun (fast, needs_recheck) path ->
             ( Relative_path.Map.remove fast path,
               Relative_path.Set.add needs_recheck path ))
       in

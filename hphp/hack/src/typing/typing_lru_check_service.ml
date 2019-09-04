@@ -26,10 +26,13 @@ let process_file_computation
     ~(errors : Errors.t) : Errors.t * file_computation list =
   let process_file_wrapper = process_file dynamic_view_files opts in
   match fc with
-  | (path, Check info) -> process_file_wrapper errors (path, info)
-  | (path, Declare) ->
+  | Check (path, info) -> process_file_wrapper errors (path, info)
+  | Declare path ->
     let errors = Decl_service.decl_file errors path in
     (errors, [])
+  | Prefetch paths ->
+    Vfs.prefetch paths;
+    (Errors.empty, [])
 
 let process_in_parallel
     (dynamic_view_files : Relative_path.Set.t)
@@ -37,7 +40,7 @@ let process_in_parallel
     (opts : TypecheckerOptions.t)
     (fnl : file_computation list)
     ~(interrupt : 'a MultiWorker.interrupt_config) :
-    Errors.t * 'a * file_computation list =
+    Errors.t * 'a * Relative_path.t list =
   TypeCheckStore.store opts;
   let files_initial_count = List.length fnl in
   ServerProgress.send_percentage_progress_to_monitor
@@ -149,10 +152,10 @@ let go_with_interrupt
     (opts : TypecheckerOptions.t)
     (dynamic_view_files : Relative_path.Set.t)
     (fnl : (Relative_path.t * FileInfo.names) list)
-    ~(interrupt : 'a MultiWorker.interrupt_config) :
-    (computation_kind, Errors.t, 'a) job_result =
+    ~(interrupt : 'a MultiWorker.interrupt_config) : (Errors.t, 'a) job_result
+    =
   Hh_logger.log "Using shared_lru workers to typecheck!";
-  let fnl = List.map fnl ~f:(fun (path, names) -> (path, Check names)) in
+  let fnl = List.map fnl ~f:(fun (path, names) -> Check (path, names)) in
   process_in_parallel dynamic_view_files lru_host_env opts fnl ~interrupt
 
 let go

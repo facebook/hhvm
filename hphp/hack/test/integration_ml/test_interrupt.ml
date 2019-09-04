@@ -70,6 +70,6 @@ let test () =
 
   (* ...while bar1 is among cancelled jobs*)
   (match cancelled with
-  | [(x, _)] when x = bar1_path -> ()
+  | [x] when x = bar1_path -> ()
   | _ -> assert false);
   ()

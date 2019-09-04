@@ -222,7 +222,8 @@
     server_monitor
     shared_lru_stubs
     typing
-    typing_defs)
+    typing_defs
+    vfs_stubs)
   (preprocess (pps ppx_deriving.std))) ; See T41851208
 
 (library

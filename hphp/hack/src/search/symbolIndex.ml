@@ -255,8 +255,8 @@ let update_files
     ~(workers : MultiWorker.worker list option)
     ~(paths : (Relative_path.t * info * file_source) list) : unit =
   match !sienv.sie_provider with
+  | NoIndex -> ()
   | CustomIndex
-  | NoIndex
   | LocalIndex
   | SqliteIndex ->
     List.iter paths ~f:(fun (path, info, detector) ->
@@ -271,8 +271,8 @@ let update_files
 let remove_files
     ~(sienv : SearchUtils.si_env ref) ~(paths : Relative_path.Set.t) : unit =
   match !sienv.sie_provider with
+  | NoIndex -> ()
   | CustomIndex
-  | NoIndex
   | LocalIndex
   | SqliteIndex ->
     Relative_path.Set.iter paths ~f:(fun path ->

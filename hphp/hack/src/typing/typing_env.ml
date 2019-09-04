@@ -554,20 +554,10 @@ let set_env_pessimize env =
   let pessimize_coefficient =
     TypecheckerOptions.simple_pessimize (get_tcopt env)
   in
-  let path = Pos.filename env.function_pos in
-  Relative_path.(
-    let pessimize =
-      match prefix path with
-      | Root when pessimize_coefficient > 0.0 ->
-        let range = 2000000 in
-        let filename = suffix path in
-        let hash = Hashtbl.hash filename in
-        let r = hash % range in
-        Float.of_int r /. Float.of_int range <= pessimize_coefficient
-      | _ -> pessimize_coefficient = 1.0
-      (* hack for test cases *)
-    in
-    { env with pessimize })
+  let pessimize =
+    Pos.pessimize_enabled env.function_pos pessimize_coefficient
+  in
+  { env with pessimize }
 
 let set_env_function_pos env function_pos = { env with function_pos }
 

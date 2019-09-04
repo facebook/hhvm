@@ -2875,39 +2875,7 @@ if there already is one, since that one will likely be better than this one. *)
           modifiers.has_coroutine
       in
       let fh_name = pos_name function_name env in
-      let fh_constrs =
-        match syntax function_where_clause with
-        | Missing -> []
-        | WhereClause { where_clause_constraints; _ } ->
-          let rec f node =
-            match syntax node with
-            | ListItem { list_item; _ } -> f list_item
-            | WhereConstraint
-                {
-                  where_constraint_left_type;
-                  where_constraint_operator;
-                  where_constraint_right_type;
-                } ->
-              let l = pHint where_constraint_left_type env in
-              let o =
-                match syntax where_constraint_operator with
-                | Token token when Token.kind token = TK.Equal -> Constraint_eq
-                | Token token when Token.kind token = TK.As -> Constraint_as
-                | Token token when Token.kind token = TK.Super ->
-                  Constraint_super
-                | _ ->
-                  missing_syntax
-                    "constraint operator"
-                    where_constraint_operator
-                    env
-              in
-              let r = pHint where_constraint_right_type env in
-              (l, o, r)
-            | _ -> missing_syntax "where constraint" node env
-          in
-          List.map ~f (syntax_node_to_list where_clause_constraints)
-        | _ -> missing_syntax "function header constraints" node env
-      in
+      let fh_constrs = pWhereConstraint ~is_class:false node function_where_clause env in
       let fh_type_parameters = pTParaml function_type_parameter_list env in
       let fh_param_modifiers =
         List.filter ~f:(fun p -> Option.is_some p.param_modifier) fh_parameters
@@ -3569,6 +3537,53 @@ if there already is one, since that one will likely be better than this one. *)
         alias )
     | _ -> missing_syntax "namespace use clause" node env
 
+  and pWhereConstraint ~is_class parent :
+      (hint * constraint_kind * hint) list parser =
+   fun node env ->
+    match syntax node with
+    | Missing -> []
+    | WhereClause { where_clause_constraints; _ } ->
+      if
+        is_class
+        && not
+             (ParserOptions.enable_class_level_where_clauses env.parser_options)
+      then
+        raise_parsing_error
+          env
+          (`Node parent)
+          "Class-level where clauses are disabled";
+      let rec f node =
+        match syntax node with
+        | ListItem { list_item; _ } -> f list_item
+        | WhereConstraint
+            {
+              where_constraint_left_type;
+              where_constraint_operator;
+              where_constraint_right_type;
+            } ->
+          let l = pHint where_constraint_left_type env in
+          let o =
+            match syntax where_constraint_operator with
+            | Token token when Token.kind token = TK.Equal -> Constraint_eq
+            | Token token when Token.kind token = TK.As -> Constraint_as
+            | Token token when Token.kind token = TK.Super -> Constraint_super
+            | _ ->
+              missing_syntax
+                "constraint operator"
+                where_constraint_operator
+                env
+          in
+          let r = pHint where_constraint_right_type env in
+          (l, o, r)
+        | _ -> missing_syntax "where constraint" node env
+      in
+      List.map ~f (syntax_node_to_list where_clause_constraints)
+    | _ ->
+      if is_class then
+        missing_syntax "classish declaration constraints" parent env
+      else
+        missing_syntax "function header constraints" parent env
+
   and pDef : def list parser =
    fun node env ->
     let doc_comment_opt = extract_docblock node in
@@ -3639,50 +3654,7 @@ if there already is one, since that one will likely be better than this one. *)
          | (_, Happly (_, hl)) :: _ -> not @@ List.is_empty hl
          | _ -> false);
       let c_implements = couldMap ~f:pHint impls env in
-      (* This is copied from pFunHdr. TODO: Make it a
-       * helper function *)
-      let c_where_constraints =
-        match syntax where_clause with
-        | Missing -> []
-        | WhereClause { where_clause_constraints; _ } ->
-          if
-            not
-              (ParserOptions.enable_class_level_where_clauses
-                 env.parser_options)
-          then
-            raise_parsing_error
-              env
-              (`Node node)
-              "Class-level where clauses are disabled";
-          let rec f node =
-            match syntax node with
-            | ListItem { list_item; _ } -> f list_item
-            | WhereConstraint
-                {
-                  where_constraint_left_type;
-                  where_constraint_operator;
-                  where_constraint_right_type;
-                } ->
-              let l = pHint where_constraint_left_type env in
-              let o =
-                match syntax where_constraint_operator with
-                | Token token when Token.kind token = TK.Equal -> Constraint_eq
-                | Token token when Token.kind token = TK.As -> Constraint_as
-                | Token token when Token.kind token = TK.Super ->
-                  Constraint_super
-                | _ ->
-                  missing_syntax
-                    "constraint operator"
-                    where_constraint_operator
-                    env
-              in
-              let r = pHint where_constraint_right_type env in
-              (l, o, r)
-            | _ -> missing_syntax "where constraint" node env
-          in
-          List.map ~f (syntax_node_to_list where_clause_constraints)
-        | _ -> missing_syntax "classish declaration constraints" node env
-      in
+      let c_where_constraints = pWhereConstraint ~is_class:true node where_clause env in
       let c_body =
         let rec aux acc ns =
           match ns with

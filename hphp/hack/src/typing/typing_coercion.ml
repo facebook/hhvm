@@ -31,13 +31,11 @@ let force_null_union env r t =
 *
 * 1. |- t ~> dynamic
 *    (you can coerce t to dynamic)
-* 2. t1 ~> t2 |- t1 ~> ?t2
-*    (you can coerce t1 to optional type if the inner type is a valid coercion target)
-* 3. t is enforceable |- dynamic ~> t
+* 2. t is enforceable |- dynamic ~> t
 *    (coercion from dynamic to enforceable types is permitted)
-* 4. T1 ~> T and T2 ~> T |- T1|T2 ~> T
+* 3. T1 ~> T and T2 ~> T |- T1|T2 ~> T
 *    (coercion from a union is valid if coercion from each element is valid)
-* 5. t1 <: t2 |- t1 ~> t2
+* 4. t1 <: t2 |- t1 ~> t2
 *    (you can coerce t1 to any of its supertypes)
 *
 * This boils down to running the normal sub_type procedure whenever possible,
@@ -86,14 +84,6 @@ let rec can_coerce p env ?(ur = Reason.URnone) ty_have ty_expect on_error =
     when TypecheckerOptions.coercion_from_dynamic (Env.get_tcopt env) ->
     let union : locl ty = force_null_union env r t in
     can_coerce p env ~ur union ty_expect on_error
-  (* TODO: remove in accordance with T45650596 *)
-  | (_, (_, Toption ty)) ->
-    can_coerce
-      p
-      env
-      ty_have
-      { et_type = ty; et_enforced = ty_expect.et_enforced }
-      on_error
   | _ -> None
 
 (* does coercion, including subtyping *)

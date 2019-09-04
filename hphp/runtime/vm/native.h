@@ -218,10 +218,6 @@ inline int maxFCallBuiltinArgs() {
   return kMaxBuiltinArgs;
 }
 
-inline bool allowFCallBuiltinDoubles() {
-  return true;
-}
-
 enum Attr {
   AttrNone         = 0,
 

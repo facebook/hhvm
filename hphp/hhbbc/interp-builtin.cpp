@@ -551,19 +551,10 @@ bool can_emit_builtin(const php::Func* func,
     return false;
   }
 
-  auto const allowDoubleArgs = Native::allowFCallBuiltinDoubles();
-
-  if (!allowDoubleArgs && func->nativeInfo->returnType == KindOfDouble) {
-    return false;
-  }
-
   auto const concrete_params = func->params.size() - (variadic ? 1 : 0);
 
   for (int i = 0; i < concrete_params; i++) {
     auto const& pi = func->params[i];
-    if (!allowDoubleArgs && pi.builtinType == KindOfDouble) {
-      return false;
-    }
     if (i >= numArgs) {
       if (pi.isVariadic) continue;
       if (pi.defaultValue.m_type == KindOfUninit) {

@@ -50,6 +50,10 @@
 
 #include <atomic>
 
+extern "C" _Unwind_Reason_Code
+__gxx_personality_v0(int, _Unwind_Action, uint64_t, _Unwind_Exception*,
+                     _Unwind_Context*);
+
 TRACE_SET_MOD(mcg);
 
 namespace HPHP { namespace jit { namespace tc {
@@ -305,7 +309,13 @@ void processInit() {
   g_ustubs.emitAll(*g_code, *Debug::DebugInfo::Get());
 
   // Write an .eh_frame section that covers the whole TC.
-  initUnwinder(g_code->base(), g_code->codeSize());
+  initUnwinder(g_code->base(), g_code->tcSize(),
+               tc_unwind_personality);
+
+  // write an .eh_frame for cti code using default personality
+  initUnwinder(g_code->bytecode().base(), g_code->bytecode().capacity(),
+               __gxx_personality_v0);
+
   Disasm::ExcludedAddressRange(g_code->base(), g_code->codeSize());
 
   recycleInit();

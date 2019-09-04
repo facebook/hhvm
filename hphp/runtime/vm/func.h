@@ -153,7 +153,8 @@ struct Func final {
     LowStringPtr phpCode{nullptr};
     // User-annotated type.
     LowStringPtr userType{nullptr};
-
+    // offset of dvi funclet from cti section base.
+    Offset ctiFunclet{InvalidAbsoluteOffset};
     TypeConstraint typeConstraint;
     UserAttributeMap userAttributes;
   };
@@ -440,6 +441,11 @@ struct Func final {
    * next parameter that has a DV funclet.
    */
   Offset getEntryForNumArgs(int numArgsPassed) const;
+
+  // CTI entry points
+  Offset ctiEntry() const;
+  void setCtiFunclet(int i, Offset);
+  void setCtiEntry(Offset entry, uint32_t size);
 
   /////////////////////////////////////////////////////////////////////////////
   // Return type.                                                       [const]
@@ -1202,6 +1208,8 @@ private:
     uint16_t m_line2Delta;
     uint16_t m_pastDelta;
 
+    std::atomic<Offset> m_cti_base; // relative to CodeCache cti section
+    uint32_t m_cti_size; // size of cti code
     // 32 bits free here.
   };
 

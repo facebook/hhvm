@@ -96,6 +96,7 @@
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
+#include "hphp/runtime/vm/cti.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/event-hook.h"
@@ -129,6 +130,7 @@
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/unwind-itanium.h"
+#include "hphp/util/stacktrace-profiler.h"
 
 
 namespace HPHP {
@@ -6960,12 +6962,42 @@ OPCODES
 #undef O
 };
 
+// fast path to look up native pc; try entry point first.
+PcPair lookup_cti(const Func* func, PC pc) {
+  auto unitpc = func->unit()->entry();
+  auto cti_entry = func->ctiEntry();
+  if (!cti_entry) {
+    cti_entry = compile_cti(const_cast<Func*>(func), unitpc);
+  }
+  if (pc == unitpc + func->base()) {
+    return {cti_code().base() + cti_entry, pc};
+  }
+  return {lookup_cti(func, cti_entry, unitpc, pc), pc};
+}
+
+template <bool breakOnCtlFlow>
+TCA dispatchThreaded(bool coverage) {
+  auto modes = breakOnCtlFlow ? ExecMode::BB : ExecMode::Normal;
+  if (coverage) {
+    modes = modes | ExecMode::Coverage;
+  }
+  DEBUGGER_ATTACHED_ONLY(modes = modes | ExecMode::Debugger);
+  auto target = lookup_cti(vmfp()->func(), vmpc());
+  CALLEE_SAVED_BARRIER();
+  auto retAddr = g_enterCti(modes, target, rds::header());
+  CALLEE_SAVED_BARRIER();
+  return retAddr;
+}
+
 template <bool breakOnCtlFlow>
 TCA dispatchImpl() {
+  bool collectCoverage = RID().getCoverage();
+  if (cti_enabled()) {
+    return dispatchThreaded<breakOnCtlFlow>(collectCoverage);
+  }
+
   // Unfortunately, MSVC doesn't support computed
   // gotos, so use a switch instead.
-  bool collectCoverage = RID().getCoverage();
-
 #ifndef _MSC_VER
   static const void* const optabDirect[] = {
 #define O(name, imm, push, pop, flags) \
@@ -7143,5 +7175,173 @@ TCA dispatchBB() {
   auto retAddr = dispatchImpl<true>();
   return switchModeForDebugger(retAddr);
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// Call-threaded entry points
+
+namespace {
+
+constexpr auto do_prof = false;
+
+static BoolProfiler PredictProf("predict"), LookupProf("lookup");
+
+constexpr unsigned NumPredictors = 16; // real cpus have 8-24
+static __thread unsigned s_predict{0};
+static __thread PcPair s_predictors[NumPredictors];
+static void pushPrediction(PcPair p) {
+  s_predictors[s_predict++ % NumPredictors] = p;
+}
+static PcPair popPrediction() {
+  return s_predictors[--s_predict % NumPredictors];
+}
+
+// callsites quick reference:
+//
+// simple opcodes, including throw
+//       call  #addr
+// conditional branch
+//       lea   [pc + instrLen(pc)], nextpc_saved
+//       call  #addr
+//       cmp   rdx, nextpc_saved
+//       jne   native-target
+// unconditional branch
+//       call  #addr
+//       jmp   native-target
+// indirect branch
+//       call  #addr
+//       jmp   rax
+// calls w/ return prediction
+//       lea   [pc + instrLen(pc)], nextpc_arg
+//       call  #addr
+//       jmp   rax
+
+NEVER_INLINE void execModeHelper(PC pc, ExecMode modes) {
+  if (modes & ExecMode::Debugger) phpDebuggerOpcodeHook(pc);
+  if (modes & ExecMode::Coverage) recordCodeCoverage(pc);
+  if (modes & ExecMode::BB) {
+    //Stats::inc(Stats::Instr_InterpBB##name);
+  }
+}
+
+template<Op opcode, bool repo_auth, class Iop>
+PcPair run(TCA* returnaddr, ExecMode modes, rds::Header* tl, PC nextpc, PC pc,
+           Iop iop) {
+  assert(vmpc() == pc);
+  assert(peek_op(pc) == opcode);
+  FTRACE(1, "dispatch: {}: {}\n", pcOff(),
+         instrToString(pc, vmfp()->m_func->unit()));
+  if (!repo_auth) {
+    if (UNLIKELY(modes != ExecMode::Normal)) {
+      execModeHelper(pc, modes);
+    }
+  }
+  DEBUG_ONLY auto origPc = pc;
+  pc += encoded_op_size(opcode); // skip the opcode
+  auto retAddr = iop(pc);
+  vmpc() = pc;
+  assert(!isThrow(opcode));
+  if (isSimple(opcode)) {
+    // caller ignores rax return value, invokes next bytecode
+    return {nullptr, pc};
+  }
+  if (isBranch(opcode) || isGoto(opcode)) {
+    // callsites have no ability to indirect-jump out of bytecode.
+    // so smash the return address to &g_exitCti
+    // if we need to exit because of dispatchBB() mode.
+    // TODO: t6019406 use surprise checks to eliminate BB mode
+    if (modes & ExecMode::BB) {
+      *returnaddr = g_exitCti;
+      return {nullptr, (PC)retAddr};  // exit stub will return retAddr
+    }
+    return {nullptr, pc};
+  }
+  // call & indirect branch: caller will jump to address returned in rax
+  if (instrCanHalt(opcode) && !pc) {
+    vmfp() = nullptr;
+    // We returned from the top VM frame in this nesting level. This means
+    // m_savedRip in our ActRec must have been callToExit, which should've
+    // been returned by jitReturnPost(), whether or not we were called from
+    // the TC. We only actually return callToExit to our caller if that
+    // caller is dispatchBB().
+    assert(retAddr == jit::tc::ustubs().callToExit);
+    if (!(modes & ExecMode::BB)) retAddr = nullptr;
+    return {g_exitCti, (PC)retAddr};
+  }
+  if (instrIsControlFlow(opcode) && (modes & ExecMode::BB)) {
+    return {g_exitCti, (PC)retAddr};
+  }
+  if (isReturnish(opcode)) {
+    auto target = popPrediction();
+    if (do_prof) PredictProf(pc == target.pc);
+    if (pc == target.pc) return target;
+  }
+  if (isFCall(opcode)) {
+    // call-like opcodes predict return to next bytecode
+    assert(nextpc == origPc + instrLen(origPc));
+    pushPrediction({*returnaddr + kCtiIndirectJmpSize, nextpc});
+  }
+  if (do_prof) LookupProf(pc == vmfp()->m_func->getEntry());
+  // return ip to jump to, caller will do jmp(rax)
+  return lookup_cti(vmfp()->m_func, pc);
+}
+}
+
+// register assignments inbetween calls to cti opcodes
+// rax = target of indirect branch instr (call, switch, etc)
+// rdx = pc (passed as 3rd arg register, 2nd return register)
+// rbx = next-pc after branch instruction, only if isBranch(op)
+// r12 = rds::Header* (vmtl)
+// r13 = modes
+// r14 = location of return address to cti caller on native stack
+
+#ifdef __clang__
+#define DECLARE_FIXED(TL,MODES,RA)\
+  rds::Header* TL; asm volatile("mov %%r12, %0" : "=r"(TL) ::);\
+  ExecMode MODES;  asm volatile("mov %%r13d, %0" : "=r"(MODES) ::);\
+  TCA* RA;         asm volatile("mov %%r14, %0" : "=r"(RA) ::);
+#else
+#define DECLARE_FIXED(TL,MODES,RA)\
+  register rds::Header* TL asm("r12");\
+  register ExecMode MODES  asm("r13");\
+  register TCA* RA         asm("r14");
+#endif
+
+namespace cti {
+// generate cti::op call-threaded function for each opcode
+#define O(opcode, imm, push, pop, flags)\
+PcPair opcode(PC nextpc, TCA*, PC pc) {\
+  DECLARE_FIXED(tl, modes, returnaddr);\
+  return run<Op::opcode,true>(returnaddr, modes, tl, nextpc, pc,\
+      [](PC& pc) {\
+    return iopWrap##opcode(pc);\
+  });\
+}
+OPCODES
+#undef O
+
+// generate debug/coverage-capable opcode bodies (for non-repo-auth)
+#define O(opcode, imm, push, pop, flags)\
+PcPair d##opcode(PC nextpc, TCA*, PC pc) {\
+  DECLARE_FIXED(tl, modes, returnaddr);\
+  return run<Op::opcode,false>(returnaddr, modes, tl, nextpc, pc,\
+      [](PC& pc) {\
+    return iopWrap##opcode(pc);\
+  });\
+}
+OPCODES
+#undef O
+}
+
+// generate table of opcode handler addresses, used by call-threaded emitter
+const CodeAddress cti_ops[] = {
+  #define O(opcode, imm, push, pop, flags) (CodeAddress)&cti::opcode,
+  OPCODES
+  #undef O
+};
+const CodeAddress ctid_ops[] = {
+  #define O(opcode, imm, push, pop, flags) (CodeAddress)&cti::d##opcode,
+  OPCODES
+  #undef O
+};
 
 }

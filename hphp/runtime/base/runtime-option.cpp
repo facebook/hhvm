@@ -1892,6 +1892,8 @@ void RuntimeOption::Load(
                  24 << 20);
     Config::Bind(CodeCache::AFrozenSize, ini, config, "Eval.JitAFrozenSize",
                  40 << 20);
+    Config::Bind(CodeCache::ABytecodeSize, ini, config,
+                 "Eval.JitABytecodeSize", 0);
     Config::Bind(CodeCache::GlobalDataSize, ini, config,
                  "Eval.JitGlobalDataSize", CodeCache::ASize >> 2);
 

@@ -28,6 +28,7 @@
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/vm/as-shared.h"
 #include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/cti.h"
 #include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-global-data.h"
@@ -691,6 +692,7 @@ Func::SharedData::SharedData(PreClass* preClass, Offset base, Offset past,
   , m_hasReifiedGenerics(false)
   , m_isRxDisabled(false)
   , m_originalFilename(nullptr)
+  , m_cti_base(0)
 {
   m_pastDelta = std::min<uint32_t>(past - base, kSmallDeltaLimit);
   m_line2Delta = std::min<uint32_t>(line2 - line1, kSmallDeltaLimit);
@@ -698,6 +700,7 @@ Func::SharedData::SharedData(PreClass* preClass, Offset base, Offset past,
 
 Func::SharedData::~SharedData() {
   free(m_refBitPtr);
+  if (m_cti_base) free_cti(m_cti_base, m_cti_size);
 }
 
 void Func::SharedData::atomicRelease() {

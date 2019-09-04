@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-variant.h"
+#include "hphp/runtime/vm/cti.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/event-hook.h"
@@ -1151,6 +1152,7 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
   emitInterpOneCFHelpers(cold, data, *this, view, rh, code, dbg);
 
   emitAllResumable(code, dbg);
+  if (cti_enabled()) compile_cti_stubs();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

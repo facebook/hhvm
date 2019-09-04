@@ -113,8 +113,10 @@ inline void inc(StatCounter stat, int n = 1) {
   }
 }
 
-inline StatCounter opToTranslStat(Op opc) {
-  return StatCounter(STATS_PER_OPCODE * size_t(opc));
+// see stats-opcodeDef.h
+// which_ctr: 0 = Instr_InterpOne, 1 = InterpBB, 2 = Transl
+inline StatCounter opToTranslStat(Op opc, size_t which_ctr = 0) {
+  return StatCounter(which_ctr + STATS_PER_OPCODE * size_t(opc));
 }
 
 extern void init();

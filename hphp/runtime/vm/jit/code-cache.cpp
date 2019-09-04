@@ -46,6 +46,7 @@ uint32_t CodeCache::ASize = 0;
 uint32_t CodeCache::AProfSize = 0;
 uint32_t CodeCache::AColdSize = 0;
 uint32_t CodeCache::AFrozenSize = 0;
+uint32_t CodeCache::ABytecodeSize = 0;
 uint32_t CodeCache::GlobalDataSize = 0;
 uint32_t CodeCache::AMaxUsage = 0;
 uint32_t CodeCache::AProfMaxUsage = 0;
@@ -81,10 +82,12 @@ CodeCache::CodeCache()
   auto const kAProfSize   = ru(CodeCache::AProfSize);
   auto const kAColdSize   = ru(CodeCache::AColdSize);
   auto const kAFrozenSize = ru(CodeCache::AFrozenSize);
+  auto const kABytecodeSize = ru(CodeCache::ABytecodeSize);
 
   auto kGDataSize = ru(CodeCache::GlobalDataSize);
   m_totalSize = ru(kAHotSize + kASize + kAColdSize + kAProfSize +
-                   kAFrozenSize + kGDataSize + thread_local_size);
+               kAFrozenSize + kABytecodeSize + kGDataSize + thread_local_size);
+  m_tcSize = m_totalSize - kABytecodeSize - kGDataSize;
   m_codeSize = m_totalSize - kGDataSize;
 
   if ((kASize < (10 << 20)) ||
@@ -129,9 +132,10 @@ CodeCache::CodeCache()
 
   auto const currBase = ru(reinterpret_cast<uintptr_t>(sbrk(0)));
   if (m_totalSize > (2ul << 30)) {
-    fprintf(stderr, "Combined size of ASize, AColdSize, AFrozenSize and "
-                    "GlobalDataSize must be < 2GiB to support 32-bit relative "
-                    "addresses.\n  The sizes will be automatically reduced.\n");
+    fprintf(stderr, "Combined size of ASize, AColdSize, AFrozenSize, "
+                    "ABytecodeSize, and GlobalDataSize must be < 2GiB "
+                    "to support 32-bit relative addresses.\n"
+                    "The sizes will be automatically reduced.\n");
     cutTCSizeTo((2ul << 30) - kRoundUp - currBase - thread_local_size);
     new (this) CodeCache;
     return;
@@ -253,6 +257,10 @@ CodeCache::CodeCache()
   TRACE(1, "init afrozen @%p\n", base);
   m_frozen.init(base, kAFrozenSize, "afrozen");
   base += kAFrozenSize;
+
+  TRACE(1, "init abytecode @%p\n", base);
+  m_bytecode.init(base, kABytecodeSize, "abytecode");
+  base += kABytecodeSize;
 
   TRACE(1, "init gdata @%p\n", base);
   m_data.init(base, kGDataSize, "gdata");

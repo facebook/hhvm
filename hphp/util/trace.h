@@ -98,6 +98,7 @@ namespace Trace {
       TM(bcinterp)      \
       TM(bisector)      \
       TM(class_load)    \
+      TM(cti)           \
       TM(datablock)     \
       TM(debugger)      \
       TM(debuggerflow)  \

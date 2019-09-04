@@ -7117,6 +7117,10 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo) {
       case M_SOF13:
       case M_SOF14:
       case M_SOF15:
+        if ((itemlen - 2) < 6) {
+          return 0;
+        }
+
         exif_process_SOFn(Data, marker, &sof_info);
         ImageInfo->Width  = sof_info.width;
         ImageInfo->Height = sof_info.height;

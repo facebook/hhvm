@@ -6,6 +6,7 @@
  *
  *)
 
+open Core_kernel
 open ServerEnv
 open ServerLocalConfig
 
@@ -29,7 +30,7 @@ let extend_fast_sequential fast naming_table additional_files =
            let info = Naming_table.get_file_info_unsafe naming_table x in
            let info_names = FileInfo.simplify info in
            Relative_path.Map.add acc ~key:x ~data:info_names
-         with Not_found -> acc)
+         with Not_found_s _ -> acc)
       | Some _ -> acc)
 
 let extend_fast_batch genv fast naming_table additional_files bucket_size =
@@ -40,7 +41,7 @@ let extend_fast_batch genv fast naming_table additional_files bucket_size =
       let info = Naming_table.get_file_info_unsafe naming_table x in
       let info_names = FileInfo.simplify info in
       Relative_path.Map.add acc ~key:x ~data:info_names
-    with Not_found -> acc
+    with Not_found_s _ -> acc
   in
   let job (acc : FileInfo.names Relative_path.Map.t) additional_files =
     Core_kernel.(

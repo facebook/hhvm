@@ -13,9 +13,11 @@ let get_naming_table_fallback_path genv (naming_table_fn : string option) :
     string option =
   Hh_logger.log "Figuring out naming table SQLite path...";
   match genv.local_config.naming_sqlite_path with
-  | Some path -> Some path
+  | Some path ->
+    Hh_logger.log "Naming table path from config: %s" path;
+    Some path
   | None ->
-    Hh_logger.log "No path, using loaded naming table";
+    Hh_logger.log "No path set in config, using the loaded naming table";
     naming_table_fn
 
 let extend_fast_sequential fast naming_table additional_files =

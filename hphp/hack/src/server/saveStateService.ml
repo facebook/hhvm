@@ -67,6 +67,15 @@ let load_saved_state
   let old_naming_table =
     match naming_table_fallback_path with
     | Some nt_path ->
+      let naming_table_exists = Sys.file_exists nt_path in
+      Hh_logger.log
+        "Checked if the old naming table file exists (%b)"
+        naming_table_exists;
+      if not naming_table_exists then
+        failwith
+          (Printf.sprintf
+             "Naming table file does not exist on disk: '%s'"
+             nt_path);
       Naming_table.load_from_sqlite ~update_reverse_entries:true nt_path
     | None ->
       let chan = In_channel.create ~binary:true saved_state_filename in

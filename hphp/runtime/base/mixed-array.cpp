@@ -397,7 +397,9 @@ MixedArray* MixedArray::MakeDict(uint32_t size, const TypedValue* kvs) {
   auto const ad =
     MakeMixedImpl<HeaderKind::Dict, ArrayData::kNotDVArray>(size, kvs);
   assertx(ad == nullptr || ad->kind() == kDictKind);
-  return asMixed(tryTagArrProvDict(ad));
+  return ad ?
+    asMixed(tryTagArrProvDict(ad)) :
+    nullptr;
 }
 
 MixedArray* MixedArray::MakeDArrayNatural(uint32_t size,

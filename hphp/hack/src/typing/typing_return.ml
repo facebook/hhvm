@@ -172,7 +172,7 @@ let implicit_return env pos ~expected ~actual =
       actual
       Errors.missing_return
   in
-  Typing_ops.coerce_type
+  Typing_coercion.coerce_type
     pos
     Reason.URreturn
     env

@@ -1025,7 +1025,7 @@ and stmt_ env pos st =
     (* This is a unify_error rather than a return_type_mismatch because the return
      * statement is the problem, not the return type itself. *)
     let env =
-      Type.coerce_type
+      Typing_coercion.coerce_type
         expr_pos
         Reason.URreturn
         env
@@ -2867,7 +2867,7 @@ and expr_
       Env.get_return env
     in
     let env =
-      Type.coerce_type
+      Typing_coercion.coerce_type
         p
         Reason.URyield
         env
@@ -2901,7 +2901,7 @@ and expr_
         env
       (* all set if dynamic, otherwise need to check against KeyedTraversable *)
       else
-        Type.coerce_type
+        Typing_coercion.coerce_type
           p
           Reason.URyield_from
           env
@@ -2934,7 +2934,7 @@ and expr_
       Env.get_return env
     in
     let env =
-      Type.coerce_type
+      Typing_coercion.coerce_type
         p
         Reason.URyield_from
         env
@@ -3423,7 +3423,7 @@ and expr_
                   (fun x -> x)
               in
               let ureason = Reason.URxhp (Cls.name class_info, snd namepstr) in
-              Type.coerce_type
+              Typing_coercion.coerce_type
                 valp
                 ureason
                 env
@@ -3512,7 +3512,13 @@ and anon_sub_type pos ur env ty_sub ty_super on_error =
     (fun () -> env)
 
 and anon_coerce_type pos ur env ty_have ty_expect =
-  Typing_ops.coerce_type ~sub_fn:anon_sub_type pos ur env ty_have ty_expect
+  Typing_coercion.coerce_type
+    ~sub_fn:anon_sub_type
+    pos
+    ur
+    env
+    ty_have
+    ty_expect
   (*****************************************************************************)
   (* XHP attribute/body helpers. *)
   (*****************************************************************************)
@@ -3668,7 +3674,7 @@ and anon_check_param env param =
     in
     let hint_pos = Reason.to_pos (fst hty) in
     let env =
-      Type.coerce_type
+      Typing_coercion.coerce_type
         hint_pos
         Reason.URhint
         env
@@ -3977,7 +3983,7 @@ and check_expected_ty message env inferred_ty (expected : ExpectedTy.t option)
                     ty.et_enforced,
                   [ Log_type ("inferred_ty", inferred_ty);
                     Log_type ("expected_ty", ty.et_type) ] ) ]));
-    Type.coerce_type p ur env inferred_ty ty Errors.unify_error
+    Typing_coercion.coerce_type p ur env inferred_ty ty Errors.unify_error
 
 and new_object
     ~(expected : ExpectedTy.t option)
@@ -4350,7 +4356,7 @@ and assign_ p ur env e1 ty2 =
     let (env, exp_real_type) = Env.expand_type env real_type in
     let env = { env with lenv } in
     let env =
-      Type.coerce_type
+      Typing_coercion.coerce_type
         p
         ur
         env
@@ -4437,7 +4443,7 @@ and assign_ p ur env e1 ty2 =
 and assign_simple pos ur env e1 ty2 =
   let (env, te1, ty1) = lvalue env e1 in
   let env =
-    Type.coerce_type
+    Typing_coercion.coerce_type
       pos
       ur
       env
@@ -5800,7 +5806,7 @@ and class_get_
             match coerce_from_ty with
             | None -> env
             | Some (p, ur, ty) ->
-              Type.coerce_type
+              Typing_coercion.coerce_type
                 p
                 ur
                 env
@@ -6181,7 +6187,7 @@ and obj_get_concrete_ty
               match coerce_from_ty with
               | None -> env
               | Some (p, ur, ty) ->
-                Type.coerce_type
+                Typing_coercion.coerce_type
                   p
                   ur
                   env
@@ -6910,7 +6916,7 @@ and call ~(expected : ExpectedTy.t option) ?method_call_info pos env fty el uel
                   if IM.is_on @@ TCO.infer_missing (Env.get_tcopt env) then
                     match efty with
                     | (_, (Terr | Tany _ | Tdynamic)) ->
-                      Typing_ops.coerce_type
+                      Typing_coercion.coerce_type
                         pos
                         Reason.URparam
                         env
@@ -7279,7 +7285,7 @@ and call_param env param (((pos, _) as e), arg_ty) ~is_variadic =
     | Lvar _ -> ExprDepTy.make env (CIexpr e) arg_ty
     | _ -> (env, arg_ty)
   in
-  Type.coerce_type
+  Typing_coercion.coerce_type
     pos
     Reason.URparam
     env
@@ -7302,7 +7308,7 @@ and call_untyped_unpack env uel =
       let (env, ty) = Env.fresh_type env pos in
       let unpack_r = Reason.Runpack_param pos in
       let unpack_ty = MakeType.traversable unpack_r ty in
-      Type.coerce_type
+      Typing_coercion.coerce_type
         pos
         Reason.URparam
         env
@@ -8694,7 +8700,7 @@ and class_const_def env cc =
     | Some e ->
       let (env, te, ty') = expr ?expected:opt_expected env e in
       let env =
-        Type.coerce_type
+        Typing_coercion.coerce_type
           (fst id)
           Reason.URhint
           env
@@ -8754,7 +8760,7 @@ and class_var_def ~is_static env cv =
         match expected with
         | None -> env
         | Some ExpectedTy.{ pos = p; reason = ur; ty = cty } ->
-          Type.coerce_type
+          Typing_coercion.coerce_type
             p
             ur
             env

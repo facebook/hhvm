@@ -149,27 +149,6 @@ let (localize_with_self_ref : localize_with_self ref) =
 
 let localize_with_self x = !localize_with_self_ref x
 
-type coerce_type =
-  Pos.t ->
-  ?sub_fn:
-    (Pos.t ->
-    Reason.ureason ->
-    env ->
-    locl ty ->
-    locl ty ->
-    Errors.typing_error_callback ->
-    env) ->
-  Reason.ureason ->
-  env ->
-  locl ty ->
-  locl possibly_enforced_ty ->
-  Errors.typing_error_callback ->
-  env
-
-let (coerce_type_ref : coerce_type ref) = ref (not_implemented "coerce_type")
-
-let coerce_type x = !coerce_type_ref x
-
 (* Convenience function for creating `this` types *)
 let this_of ty = Tabstract (AKdependent DTthis, Some ty)
 

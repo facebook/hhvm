@@ -516,9 +516,10 @@ void in(ISS& env, const bc::FCallBuiltin& op) {
 
 }
 
-bool can_emit_builtin(const php::Func* func,
-                      int numArgs, bool hasUnpack) {
-  if (func->attrs & (AttrInterceptable | AttrNoFCallBuiltin) ||
+bool can_emit_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
+  if (!will_reduce(env) ||
+      any(env.collect.opts & CollectionOpts::Speculating) ||
+      func->attrs & (AttrInterceptable | AttrNoFCallBuiltin) ||
       (func->cls && !(func->attrs & AttrStatic))  ||
       !func->nativeInfo ||
       func->params.size() >= Native::maxFCallBuiltinArgs() ||
@@ -533,52 +534,45 @@ bool can_emit_builtin(const php::Func* func,
     return false;
   }
 
-  auto variadic = func->params.size() && func->params.back().isVariadic;
+  auto const variadic = func->params.size() && func->params.back().isVariadic;
+  auto const concrete_params = func->params.size() - (variadic ? 1 : 0);
 
   // Only allowed to overrun the signature if we have somewhere to put it
-  if (numArgs > func->params.size() && !variadic) return false;
+  if (!variadic && (fca.hasUnpack() || fca.numArgs > concrete_params)) {
+    return false;
+  }
 
   // Don't convert an FCall* with unpack unless we're calling a variadic
   // function with the unpack in the right place to pass it directly.
-  if (hasUnpack &&
-      (!variadic || numArgs != func->params.size())) {
+  if (variadic && fca.hasUnpack() && fca.numArgs != concrete_params) {
     return false;
   }
 
   // Don't convert to FCallBuiltin if there are too many variadic args.
-  if (variadic && !hasUnpack &&
-      numArgs - func->params.size() + 1 > ArrayData::MaxElemsOnStack) {
+  if (variadic && !fca.hasUnpack() &&
+      fca.numArgs - concrete_params > ArrayData::MaxElemsOnStack) {
     return false;
   }
 
-  auto const concrete_params = func->params.size() - (variadic ? 1 : 0);
-
-  for (int i = 0; i < concrete_params; i++) {
+  // Check for missing non-optional arguments.
+  for (int i = fca.numArgs; i < concrete_params; i++) {
     auto const& pi = func->params[i];
-    if (i >= numArgs) {
-      if (pi.isVariadic) continue;
-      if (pi.defaultValue.m_type == KindOfUninit) {
-        return false;
-      }
+    if (pi.defaultValue.m_type == KindOfUninit) {
+      return false;
     }
   }
 
   return true;
 }
 
-void finish_builtin(ISS& env,
-                    const php::Func* func,
-                    uint32_t numArgs,
-                    uint32_t numOut,
-                    bool unpack) {
+void finish_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
   BytecodeVec repl;
-  assert(!unpack ||
-         (numArgs + 1 == func->params.size() &&
+  assert(!fca.hasUnpack() ||
+         (fca.numArgs + 1 == func->params.size() &&
           func->params.back().isVariadic));
 
-  if (unpack) {
-    ++numArgs;
-  } else {
+  auto numArgs = fca.numArgsInclUnpack();
+  if (!fca.hasUnpack()) {
     for (auto i = numArgs; i < func->params.size(); i++) {
       auto const& pi = func->params[i];
       if (pi.isVariadic) {
@@ -613,16 +607,16 @@ void finish_builtin(ISS& env,
   auto const numParams = static_cast<uint32_t>(func->params.size());
   if (func->cls == nullptr) {
     repl.emplace_back(
-      bc::FCallBuiltin { numParams, numArgs, numOut, func->name });
+      bc::FCallBuiltin { numParams, numArgs, fca.numRets - 1, func->name });
   } else {
     assertx(func->attrs & AttrStatic);
     auto const fullname =
       makeStaticString(folly::sformat("{}::{}", func->cls->name, func->name));
     repl.emplace_back(
-      bc::FCallBuiltin { numParams, numArgs, numOut, fullname });
+      bc::FCallBuiltin { numParams, numArgs, fca.numRets - 1, fullname });
   }
-  if (numOut) {
-    repl.emplace_back(bc::PopFrame {numOut + 1});
+  if (fca.numRets != 1) {
+    repl.emplace_back(bc::PopFrame { fca.numRets });
   } else {
     repl.emplace_back(bc::PopU2 {});
     repl.emplace_back(bc::PopU2 {});

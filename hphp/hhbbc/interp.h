@@ -206,14 +206,9 @@ void default_dispatch(ISS&, const Bytecode&);
 /*
  * Can this call be converted to an FCallBuiltin
  */
-bool can_emit_builtin(const php::Func* func,
-                      int numParams, bool hasUnpack);
+bool can_emit_builtin(ISS& env, const php::Func* func, const FCallArgs& fca);
 
-void finish_builtin(ISS& env,
-                    const php::Func* func,
-                    uint32_t numParams,
-                    uint32_t numOut,
-                    bool unpack);
+void finish_builtin(ISS& env, const php::Func* func, const FCallArgs& fca);
 
 bool handle_function_exists(ISS& env, const Type& name);
 

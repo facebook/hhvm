@@ -4014,11 +4014,8 @@ void in(ISS& env, const bc::FCallFuncD& op) {
   }
 
   if (auto const func = rfunc.exactFunc()) {
-    if (will_reduce(env) &&
-        !any(env.collect.opts & CollectionOpts::Speculating) &&
-        can_emit_builtin(func, op.fca.numArgsInclUnpack(), op.fca.hasUnpack())) {
-      return finish_builtin(
-        env, func, op.fca.numArgs, op.fca.numRets - 1, op.fca.hasUnpack());
+    if (can_emit_builtin(env, func, op.fca)) {
+      return finish_builtin(env, func, op.fca);
     }
   }
 
@@ -4316,17 +4313,13 @@ void in(ISS& env, const bc::FCallClsMethodD& op) {
   auto const rfunc = env.index.resolve_method(env.ctx, clsTy, op.str4);
   if (auto const func = rfunc.exactFunc()) {
     assertx(func->cls != nullptr);
-    if (will_reduce(env) &&
-        !any(env.collect.opts & CollectionOpts::Speculating) &&
-        func->cls->name->same(op.str3) &&
-        can_emit_builtin(func, op.fca.numArgsInclUnpack(), op.fca.hasUnpack())) {
+    if (func->cls->name->same(op.str3) && can_emit_builtin(env, func, op.fca)) {
       // When we use FCallBuiltin to call a static method, the litstr method
       // name will be a fully qualified cls::fn (e.g. "HH\Map::fromItems").
       //
       // As a result, we can only do this optimization if the name of the
       // builtin function's class matches this op's class name immediate.
-      return finish_builtin(
-        env, func, op.fca.numArgs, op.fca.numRets - 1, op.fca.hasUnpack());
+      return finish_builtin(env, func, op.fca);
     }
   }
 

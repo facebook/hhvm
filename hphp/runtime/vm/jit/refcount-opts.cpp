@@ -2547,19 +2547,6 @@ bool can_sink_inc_through(const IRInstruction& inst) {
   }
 }
 
-bool can_sink(Env& env, const IRInstruction* inst, const Block* block) {
-  assertx(inst->is(IncRef));
-  if (!block->taken() || !block->next()) return false;
-  if (inst->src(0)->inst()->is(DefConst)) return true;
-  // We've split critical edges, so `next' and 'taken' blocks can't
-  // have other predecessors.
-  assertx(block->taken()->numPreds() == 1);
-  assertx(block->next()->numPreds() == 1);
-  auto const defBlock = findDefiningBlock(inst->src(0), env.idoms);
-  return dominates(defBlock, block->taken(), env.idoms) &&
-         dominates(defBlock, block->next(), env.idoms);
-}
-
 void sink_incs(Env& env) {
   FTRACE(2, "sink_incs ---------------------------------\n");
   jit::vector<IRInstruction*> incs;
@@ -2593,9 +2580,11 @@ void sink_incs(Env& env) {
     auto const& succ = *iter;
     if (succ.is(CheckType, CheckLoc, CheckStk,
                 CheckMBase, CheckVArray, CheckDArray)) {
-      // try to sink past Check* instructions
-      if (!can_sink(env, inc, block)) continue;
-
+      // We've split critical edges, so `next' and 'taken' blocks can't have
+      // other predecessors.  Therefore, `block' dominates both the 'next' and
+      // the 'taken' block, and so does the block defining `tmp'.
+      assertx(block->taken()->numPreds() == 1);
+      assertx(block->next()->numPreds() == 1);
       auto const new_taken = env.unit.gen(IncRef, bcctx, tmp);
       auto const new_next  = env.unit.gen(IncRef, bcctx, tmp);
       block->taken()->prepend(new_taken);

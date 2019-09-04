@@ -1549,6 +1549,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvBoolToArr:
   case ConvDblToStr:
   case ConvDblToArr:
+  case ConvFuncToArr:
   case ConvIntToArr:
   case ConvIntToStr:
   case Box:  // conditional allocation

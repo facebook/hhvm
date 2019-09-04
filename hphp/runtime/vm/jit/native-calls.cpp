@@ -146,6 +146,8 @@ static CallMap s_callMap {
                            {{TV, 0}}},
     {ConvStrToArr,       convCellToArrHelper, DSSA, SNone,
                            {{TV, 0}}},
+    {ConvFuncToArr,      convCellToArrHelper, DSSA, SNone,
+                           {{TV, 0}}},
     {ConvVecToArr,       convVecToArrHelper, DSSA, SNone,
                            {{SSA, 0}}},
     // These two need to sync because of Hack array compat notices

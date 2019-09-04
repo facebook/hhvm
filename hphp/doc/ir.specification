@@ -412,6 +412,8 @@ To array conversions:
 
 | ConvKeysetToArr,              D(Arr), S(Keyset),                PRc|CRc
 
+| ConvFuncToArr,                D(Arr), S(Func),                  PRc
+
 | ConvCellToArr,                D(Arr), S(Cell),                  PRc|CRc
 
 

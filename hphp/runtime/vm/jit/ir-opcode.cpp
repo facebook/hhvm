@@ -644,6 +644,7 @@ bool opcodeMayRaise(Opcode opc) {
   case ConvDblToStr:
   case ConvDictToVArr:
   case ConvDictToVec:
+  case ConvFuncToArr:
   case ConvShapeToVArr:
   case ConvShapeToVec:
   case ConvIntToArr:

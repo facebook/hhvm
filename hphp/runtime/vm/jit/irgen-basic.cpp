@@ -384,7 +384,6 @@ void emitCastVArray(IRGS& env) {
       if (src->isA(TShape))  return gen(env, ConvShapeToVArr, src);
       if (src->isA(TKeyset)) return gen(env, ConvKeysetToVArr, src);
       if (src->isA(TObj))    return gen(env, ConvObjToVArr, src);
-      if (src->isA(TFunc))   PUNT(CastVArrayFunc); // TODO: T53309695
       if (src->isA(TClsMeth)) PUNT(CastVArrayClsMeth); // TODO: T53309695
       if (src->isA(TRecord)) PUNT(CastVArrayRecord); // TODO: T53309767
       if (src->isA(TNull))   return raise("Null");
@@ -392,6 +391,7 @@ void emitCastVArray(IRGS& env) {
       if (src->isA(TInt))    return raise("Int");
       if (src->isA(TDbl))    return raise("Double");
       if (src->isA(TStr))    return raise("String");
+      if (src->isA(TFunc))   return raise("Func");
       if (src->isA(TRes))    return raise("Resource");
       PUNT(CastVArrayUnknown);
     }()
@@ -431,7 +431,6 @@ void emitCastDArray(IRGS& env) {
       if (src->isA(TShape))  return gen(env, ConvShapeToDArr, src);
       if (src->isA(TKeyset)) return gen(env, ConvKeysetToDArr, src);
       if (src->isA(TObj))    return gen(env, ConvObjToDArr, src);
-      if (src->isA(TFunc))   PUNT(CastDArrayFunc); // TODO: T53309695
       if (src->isA(TClsMeth)) PUNT(CastDArrayClsMeth); // TODO: T53309695
       if (src->isA(TRecord)) PUNT(CastDArrayRecord); // TODO: T53309767
       if (src->isA(TNull))   return raise("Null");
@@ -439,6 +438,7 @@ void emitCastDArray(IRGS& env) {
       if (src->isA(TInt))    return raise("Int");
       if (src->isA(TDbl))    return raise("Double");
       if (src->isA(TStr))    return raise("String");
+      if (src->isA(TFunc))   return raise("Func");
       if (src->isA(TRes))    return raise("Resource");
       PUNT(CastDArrayUnknown);
     }()
@@ -469,7 +469,6 @@ void emitCastVec(IRGS& env) {
       if (src->isA(TShape))  return gen(env, ConvShapeToVec, src);
       if (src->isA(TKeyset)) return gen(env, ConvKeysetToVec, src);
       if (src->isA(TObj))    return gen(env, ConvObjToVec, src);
-      if (src->isA(TFunc))   PUNT(CastVecFunc); // TODO: T53309695
       if (src->isA(TClsMeth)) PUNT(CastVecClsMeth); // TODO: T53309695
       if (src->isA(TRecord)) PUNT(CastVecRecord); // TODO: T53309767
       if (src->isA(TNull))   return raise("Null");
@@ -477,6 +476,7 @@ void emitCastVec(IRGS& env) {
       if (src->isA(TInt))    return raise("Int");
       if (src->isA(TDbl))    return raise("Double");
       if (src->isA(TStr))    return raise("String");
+      if (src->isA(TFunc))   return raise("Func");
       if (src->isA(TRes))    return raise("Resource");
       PUNT(CastVecUnknown);
     }()
@@ -507,7 +507,6 @@ void emitCastDict(IRGS& env) {
       if (src->isA(TVec))     return gen(env, ConvVecToDict, src);
       if (src->isA(TKeyset))  return gen(env, ConvKeysetToDict, src);
       if (src->isA(TObj))     return gen(env, ConvObjToDict, src);
-      if (src->isA(TFunc))    PUNT(CastDictFunc); // TODO: T53309695
       if (src->isA(TClsMeth)) PUNT(CastDictClsMeth); // TODO: T53309695
       if (src->isA(TRecord))  PUNT(CastDictRecord); // TODO: T53309767
       if (src->isA(TNull))    return raise("Null");
@@ -515,6 +514,7 @@ void emitCastDict(IRGS& env) {
       if (src->isA(TInt))     return raise("Int");
       if (src->isA(TDbl))     return raise("Double");
       if (src->isA(TStr))     return raise("String");
+      if (src->isA(TFunc))    return raise("Func");
       if (src->isA(TRes))     return raise("Resource");
       PUNT(CastDictUnknown);
     }()
@@ -545,7 +545,6 @@ void emitCastKeyset(IRGS& env) {
       if (src->isA(TDict))    return gen(env, ConvDictToKeyset, src);
       if (src->isA(TShape))   return gen(env, ConvShapeToKeyset, src);
       if (src->isA(TObj))     return gen(env, ConvObjToKeyset, src);
-      if (src->isA(TFunc))    PUNT(CastKeysetFunc); // TODO: T53309695
       if (src->isA(TClsMeth)) PUNT(CastKeysetClsMeth); // TODO: T53309695
       if (src->isA(TRecord))  PUNT(CastKeysetRecord); // TODO: T53309767
       if (src->isA(TNull))    return raise("Null");
@@ -553,6 +552,7 @@ void emitCastKeyset(IRGS& env) {
       if (src->isA(TInt))     return raise("Int");
       if (src->isA(TDbl))     return raise("Double");
       if (src->isA(TStr))     return raise("String");
+      if (src->isA(TFunc))    return raise("Func");
       if (src->isA(TRes))     return raise("Resource");
       PUNT(CastKeysetUnknown);
     }()

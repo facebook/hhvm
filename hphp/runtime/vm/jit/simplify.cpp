@@ -2155,7 +2155,7 @@ SSATmp* simplifyConvCellToArr(State& env, const IRInstruction* inst) {
   if (src->isA(TInt))    return gen(env, ConvIntToArr, src);
   if (src->isA(TStr))    return gen(env, ConvStrToArr, src);
   if (src->isA(TObj))    return gen(env, ConvObjToArr, inst->taken(), src);
-  // TODO: T53309695 Handle TFunc and TClsMeth as well
+  if (src->isA(TFunc))   return gen(env, ConvFuncToArr, src);
   return nullptr;
 }
 
@@ -2172,6 +2172,10 @@ SSATmp* simplifyConvDblToArr(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* simplifyConvStrToArr(State& env, const IRInstruction* inst) {
+  return convNonArrToArrImpl(env, inst);
+}
+
+SSATmp* simplifyConvFuncToArr(State& env, const IRInstruction* inst) {
   return convNonArrToArrImpl(env, inst);
 }
 
@@ -3765,6 +3769,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(ConvIntToStr)
   X(ConvObjToBool)
   X(ConvStrToArr)
+  X(ConvFuncToArr)
   X(ConvVecToArr)
   X(ConvDictToArr)
   X(ConvKeysetToArr)

@@ -383,8 +383,8 @@ void emitCastVArray(IRGS& env) {
       if (src->isA(TDict))   return gen(env, ConvDictToVArr, src);
       if (src->isA(TShape))  return gen(env, ConvShapeToVArr, src);
       if (src->isA(TKeyset)) return gen(env, ConvKeysetToVArr, src);
+      if (src->isA(TClsMeth)) return gen(env, ConvClsMethToVArr, src);
       if (src->isA(TObj))    return gen(env, ConvObjToVArr, src);
-      if (src->isA(TClsMeth)) PUNT(CastVArrayClsMeth); // TODO: T53309695
       if (src->isA(TRecord)) PUNT(CastVArrayRecord); // TODO: T53309767
       if (src->isA(TNull))   return raise("Null");
       if (src->isA(TBool))   return raise("Bool");
@@ -430,8 +430,8 @@ void emitCastDArray(IRGS& env) {
       if (src->isA(TDict))   return gen(env, ConvDictToDArr, src);
       if (src->isA(TShape))  return gen(env, ConvShapeToDArr, src);
       if (src->isA(TKeyset)) return gen(env, ConvKeysetToDArr, src);
+      if (src->isA(TClsMeth)) return gen(env, ConvClsMethToDArr, src);
       if (src->isA(TObj))    return gen(env, ConvObjToDArr, src);
-      if (src->isA(TClsMeth)) PUNT(CastDArrayClsMeth); // TODO: T53309695
       if (src->isA(TRecord)) PUNT(CastDArrayRecord); // TODO: T53309767
       if (src->isA(TNull))   return raise("Null");
       if (src->isA(TBool))   return raise("Bool");
@@ -468,8 +468,8 @@ void emitCastVec(IRGS& env) {
       if (src->isA(TDict))   return gen(env, ConvDictToVec, src);
       if (src->isA(TShape))  return gen(env, ConvShapeToVec, src);
       if (src->isA(TKeyset)) return gen(env, ConvKeysetToVec, src);
+      if (src->isA(TClsMeth)) return gen(env, ConvClsMethToVec, src);
       if (src->isA(TObj))    return gen(env, ConvObjToVec, src);
-      if (src->isA(TClsMeth)) PUNT(CastVecClsMeth); // TODO: T53309695
       if (src->isA(TRecord)) PUNT(CastVecRecord); // TODO: T53309767
       if (src->isA(TNull))   return raise("Null");
       if (src->isA(TBool))   return raise("Bool");
@@ -506,8 +506,8 @@ void emitCastDict(IRGS& env) {
       if (src->isA(TArr))     return gen(env, ConvArrToDict, src);
       if (src->isA(TVec))     return gen(env, ConvVecToDict, src);
       if (src->isA(TKeyset))  return gen(env, ConvKeysetToDict, src);
+      if (src->isA(TClsMeth)) return gen(env, ConvClsMethToDict, src);
       if (src->isA(TObj))     return gen(env, ConvObjToDict, src);
-      if (src->isA(TClsMeth)) PUNT(CastDictClsMeth); // TODO: T53309695
       if (src->isA(TRecord))  PUNT(CastDictRecord); // TODO: T53309767
       if (src->isA(TNull))    return raise("Null");
       if (src->isA(TBool))    return raise("Bool");
@@ -544,8 +544,8 @@ void emitCastKeyset(IRGS& env) {
       if (src->isA(TVec))     return gen(env, ConvVecToKeyset, src);
       if (src->isA(TDict))    return gen(env, ConvDictToKeyset, src);
       if (src->isA(TShape))   return gen(env, ConvShapeToKeyset, src);
+      if (src->isA(TClsMeth)) return gen(env, ConvClsMethToKeyset, src);
       if (src->isA(TObj))     return gen(env, ConvObjToKeyset, src);
-      if (src->isA(TClsMeth)) PUNT(CastKeysetClsMeth); // TODO: T53309695
       if (src->isA(TRecord))  PUNT(CastKeysetRecord); // TODO: T53309767
       if (src->isA(TNull))    return raise("Null");
       if (src->isA(TBool))    return raise("Bool");

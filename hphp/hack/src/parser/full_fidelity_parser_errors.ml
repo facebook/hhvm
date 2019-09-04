@@ -199,13 +199,6 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
       | NoCase m' -> LSMap.get k m'
       | YesCase m' -> SMap.get k m'
 
-    let strmap_find_first_opt :
-        (string -> bool) -> 'a strmap -> (string * 'a) option =
-     fun k m ->
-      match m with
-      | NoCase m' -> LSMap.find_first_opt k m'
-      | YesCase m' -> SMap.find_first_opt k m'
-
     let strmap_filter : (string -> 'a -> bool) -> 'a strmap -> 'a strmap =
      fun f m ->
       match m with
@@ -4298,24 +4291,15 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
           get_short_name_from_qualified_name name_text (text alias)
         in
         let do_check
-            ?(case_sensitive = false)
             ~error_on_global_redefinition
             names
             errors
             get_map
             update_map
             report_error =
-          (* We store the original names in the SMap of names for error messaging purposes
-        but we check for case sensitivity specifically. *)
-          let find_name name =
-            if case_sensitive then
-              short_name = name
-            else
-              String.lowercase short_name = String.lowercase name
-          in
           let map = get_map names in
-          match strmap_find_first_opt find_name map with
-          | Some (_, { f_location = location; f_kind; f_global; _ }) ->
+          match strmap_get short_name map with
+          | Some { f_location = location; f_kind; f_global; _ } ->
             if
               f_kind <> Name_def
               || error_on_global_redefinition
@@ -4373,7 +4357,6 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
                   SyntaxError.function_name_is_already_in_use
               | Const ->
                 do_check
-                  ~case_sensitive:true
                   ~error_on_global_redefinition:true
                   names
                   errors

@@ -2134,6 +2134,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvDictToArr:
   case ConvShapeToArr:
   case ConvKeysetToArr:
+  case ConvClsMethToArr:
+  case ConvClsMethToDArr:
+  case ConvClsMethToDict:
+  case ConvClsMethToKeyset:
+  case ConvClsMethToVArr:
+  case ConvClsMethToVec:
     return may_load_store(AElemAny, AEmpty);
 
   case ConvVecToArr:

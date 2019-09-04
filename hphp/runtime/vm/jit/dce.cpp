@@ -19,6 +19,7 @@
 #include <array>
 #include <folly/MapUtil.h>
 
+#include "hphp/util/low-ptr.h"
 #include "hphp/util/match.h"
 #include "hphp/util/trace.h"
 
@@ -363,6 +364,17 @@ bool canDCE(IRInstruction* inst) {
   case LdOutAddr:
     return !opcodeMayRaise(inst->op()) &&
       (!inst->consumesReferences() || inst->producesReference());
+
+  case ConvClsMethToArr:
+  case ConvClsMethToDArr:
+  case ConvClsMethToDict:
+  case ConvClsMethToKeyset:
+  case ConvClsMethToVArr:
+  case ConvClsMethToVec: {
+    bool consumeRef = use_lowptr ? false : inst->consumesReferences();
+    return !opcodeMayRaise(inst->op()) &&
+      (!consumeRef || inst->producesReference());
+  }
 
   case DbgTraceCall:
   case AKExistsObj:

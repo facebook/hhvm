@@ -31,6 +31,7 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 struct Func;
+struct ClsMethDataRef;
 struct Iter;
 struct MInstrState;
 struct TypeConstraint;
@@ -82,6 +83,12 @@ ArrayData* convDictToKeysetHelper(ArrayData* a);
 ArrayData* convShapeToKeysetHelper(ArrayData* a);
 ArrayData* convObjToKeysetHelper(ObjectData* o);
 ArrayData* convCellToKeysetHelper(TypedValue tv);
+ArrayData* convClsMethToArrHealper(ClsMethDataRef clsmeth);
+ArrayData* convClsMethToVArrHealper(ClsMethDataRef clsmeth);
+ArrayData* convClsMethToVecHealper(ClsMethDataRef clsmeth);
+ArrayData* convClsMethToDArrHealper(ClsMethDataRef clsmeth);
+ArrayData* convClsMethToDictHealper(ClsMethDataRef clsmeth);
+ArrayData* convClsMethToKeysetHealper(ClsMethDataRef clsmeth);
 double convObjToDblHelper(const ObjectData* o);
 double convArrToDblHelper(ArrayData* a);
 double convStrToDblHelper(const StringData* s);

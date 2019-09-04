@@ -2156,6 +2156,7 @@ SSATmp* simplifyConvCellToArr(State& env, const IRInstruction* inst) {
   if (src->isA(TStr))    return gen(env, ConvStrToArr, src);
   if (src->isA(TObj))    return gen(env, ConvObjToArr, inst->taken(), src);
   if (src->isA(TFunc))   return gen(env, ConvFuncToArr, src);
+  if (src->isA(TClsMeth)) return gen(env, ConvClsMethToArr, inst->taken(), src);
   return nullptr;
 }
 
@@ -2177,6 +2178,69 @@ SSATmp* simplifyConvStrToArr(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyConvFuncToArr(State& env, const IRInstruction* inst) {
   return convNonArrToArrImpl(env, inst);
+}
+
+SSATmp* simplifyConvClsMethToArr(State& env, const IRInstruction* inst) {
+  auto const src = inst->src(0);
+  if (src->hasConstVal()) {
+    auto const clsmeth = src->clsmethVal();
+    auto arr = make_packed_array(clsmeth->getCls(), clsmeth->getFunc());
+    return cns(env, ArrayData::GetScalarArray(std::move(arr)));
+  }
+  return nullptr;
+}
+
+SSATmp* simplifyConvClsMethToVArr(State& env, const IRInstruction* inst) {
+  auto const src = inst->src(0);
+  if (src->hasConstVal()) {
+    auto const clsmeth = src->clsmethVal();
+    auto arr = make_varray(clsmeth->getCls(), clsmeth->getFunc());
+    return cns(env, ArrayData::GetScalarArray(std::move(arr)));
+  }
+  return nullptr;
+}
+
+SSATmp* simplifyConvClsMethToVec(State& env, const IRInstruction* inst) {
+  auto const src = inst->src(0);
+  if (src->hasConstVal()) {
+    auto const clsmeth = src->clsmethVal();
+    auto arr = make_vec_array(clsmeth->getCls(), clsmeth->getFunc());
+    return cns(env, ArrayData::GetScalarArray(std::move(arr)));
+  }
+  return nullptr;
+}
+
+SSATmp* simplifyConvClsMethToDArr(State& env, const IRInstruction* inst) {
+  auto const src = inst->src(0);
+  if (src->hasConstVal()) {
+    auto const clsmeth = src->clsmethVal();
+    auto arr = make_darray(0, clsmeth->getCls(), 1, clsmeth->getFunc());
+    return cns(env, ArrayData::GetScalarArray(std::move(arr)));
+  }
+  return nullptr;
+}
+
+SSATmp* simplifyConvClsMethToDict(State& env, const IRInstruction* inst) {
+  auto const src = inst->src(0);
+  if (src->hasConstVal()) {
+    auto const clsmeth = src->clsmethVal();
+    auto arr = make_dict_array(
+      0, clsmeth->getCls(), 1, clsmeth->getFunc());
+    return cns(env, ArrayData::GetScalarArray(std::move(arr)));
+  }
+  return nullptr;
+}
+
+SSATmp* simplifyConvClsMethToKeyset(State& env, const IRInstruction* inst) {
+  auto const src = inst->src(0);
+  if (src->hasConstVal()) {
+    auto const clsmeth = src->clsmethVal();
+    auto arr = make_keyset_array(
+      const_cast<StringData*>(clsmeth->getCls()->name()),
+      const_cast<StringData*>(clsmeth->getFunc()->name()));
+    return cns(env, ArrayData::GetScalarArray(std::move(arr)));
+  }
+  return nullptr;
 }
 
 SSATmp* simplifyConvArrToBool(State& env, const IRInstruction* inst) {
@@ -3773,6 +3837,12 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(ConvVecToArr)
   X(ConvDictToArr)
   X(ConvKeysetToArr)
+  X(ConvClsMethToArr)
+  X(ConvClsMethToVArr)
+  X(ConvClsMethToDArr)
+  X(ConvClsMethToVec)
+  X(ConvClsMethToDict)
+  X(ConvClsMethToKeyset)
   X(ConvStrToBool)
   X(ConvStrToDbl)
   X(ConvStrToInt)

@@ -46,6 +46,7 @@
 
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/method-lookup.h"
@@ -344,6 +345,51 @@ ArrayData* convObjToKeysetHelper(ObjectData* obj) {
   auto a = castObjToKeyset(obj);
   assertx(a->isKeyset());
   decRefObj(obj);
+  return a;
+}
+
+ArrayData* convClsMethToArrHealper(ClsMethDataRef clsmeth) {
+  raiseClsMethConvertWarningHelper("array");
+  auto a = make_varray(clsmeth->getCls(), clsmeth->getFunc()).detach();
+  decRefClsMeth(clsmeth);
+  return a;
+}
+
+ArrayData* convClsMethToVArrHealper(ClsMethDataRef clsmeth) {
+  raiseClsMethConvertWarningHelper("varray");
+  auto a = make_varray(clsmeth->getCls(), clsmeth->getFunc()).detach();
+  decRefClsMeth(clsmeth);
+  return a;
+}
+
+ArrayData* convClsMethToVecHealper(ClsMethDataRef clsmeth) {
+  raiseClsMethConvertWarningHelper("vec");
+  auto a = make_vec_array(clsmeth->getCls(), clsmeth->getFunc()).detach();
+  decRefClsMeth(clsmeth);
+  return a;
+}
+
+ArrayData* convClsMethToDArrHealper(ClsMethDataRef clsmeth) {
+  raiseClsMethConvertWarningHelper("darray");
+  auto a = make_darray(0, clsmeth->getCls(), 1, clsmeth->getFunc()).detach();
+  decRefClsMeth(clsmeth);
+  return a;
+}
+
+ArrayData* convClsMethToDictHealper(ClsMethDataRef clsmeth) {
+  raiseClsMethConvertWarningHelper("dict");
+  auto a = make_dict_array(
+    0, clsmeth->getCls(), 1, clsmeth->getFunc()).detach();
+  decRefClsMeth(clsmeth);
+  return a;
+}
+
+ArrayData* convClsMethToKeysetHealper(ClsMethDataRef clsmeth) {
+  raiseClsMethConvertWarningHelper("keyset");
+  auto a = make_keyset_array(
+    const_cast<StringData*>(classToStringHelper(clsmeth->getCls())),
+    const_cast<StringData*>(funcToStringHelper(clsmeth->getFunc()))).detach();
+  decRefClsMeth(clsmeth);
   return a;
 }
 

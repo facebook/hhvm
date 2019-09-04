@@ -45,7 +45,7 @@ int(1)
 Notice: Implicit clsmeth to vec conversion in %s/container_builtins_convert_and_warn.php on line 28
 class(A)
 
-Notice: Implicit clsmeth to vec conversion in %s/container_builtins_convert_and_warn.php on line 30
+Notice: Implicit clsmeth to array conversion in %s/container_builtins_convert_and_warn.php on line 30
 array(2) {
   [0]=>
   class(A)
@@ -83,7 +83,7 @@ array(2) {
   }
 }
 
-Notice: Implicit clsmeth to vec conversion in %s/container_builtins_convert_and_warn.php on line 39
+Notice: Implicit clsmeth to array conversion in %s/container_builtins_convert_and_warn.php on line 39
 array(0) {
 }
 
@@ -116,7 +116,7 @@ array(2) {
   int(1)
 }
 
-Notice: Implicit clsmeth to vec conversion in %s/container_builtins_convert_and_warn.php on line 45
+Notice: Implicit clsmeth to array conversion in %s/container_builtins_convert_and_warn.php on line 45
 array(2) {
   [0]=>
   function(A::func1)
@@ -124,7 +124,7 @@ array(2) {
   class(A)
 }
 
-Notice: Implicit clsmeth to vec conversion in %s/container_builtins_convert_and_warn.php on line 48
+Notice: Implicit clsmeth to array conversion in %s/container_builtins_convert_and_warn.php on line 48
 array(4) {
   [0]=>
   class(A)

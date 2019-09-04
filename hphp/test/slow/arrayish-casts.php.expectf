@@ -35,7 +35,10 @@ vec(2) {
   class(A)
   function(A::meth)
 }
-Exception: clsmeth to keyset conversion
+keyset(2) {
+  string(1) "A"
+  string(4) "meth"
+}
 
 Fatal error: Cannot convert record to array in %s/arrayish-casts.php on line 15
 

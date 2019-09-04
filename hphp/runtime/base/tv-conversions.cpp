@@ -121,7 +121,6 @@ enable_if_lval_t<T, void> tvCastToBooleanInPlace(T tv) {
         continue;
 
       case KindOfClsMeth:
-        raiseClsMethConvertWarningHelper("bool");
         b = true;
         tvDecRefClsMeth(tv);
         continue;
@@ -853,7 +852,7 @@ enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
         continue;
 
       case KindOfClsMeth: {
-        raiseClsMethToVecWarningHelper();
+        raiseClsMethConvertWarningHelper("array");
         a = make_packed_array(
           val(tv).pclsmeth->getCls(), val(tv).pclsmeth->getFunc()).detach();
         tvDecRefClsMeth(tv);
@@ -978,7 +977,7 @@ enable_if_lval_t<T, void> tvCastToVecInPlace(T tv) {
         );
 
       case KindOfClsMeth: {
-        raiseClsMethToVecWarningHelper();
+        raiseClsMethConvertWarningHelper("vec");
         a = make_vec_array(
           val(tv).pclsmeth->getCls(), val(tv).pclsmeth->getFunc()).detach();
         tvDecRefClsMeth(tv);
@@ -1098,7 +1097,7 @@ enable_if_lval_t<T, void> tvCastToDictInPlace(T tv) {
         );
 
       case KindOfClsMeth: {
-        raiseClsMethToVecWarningHelper();
+        raiseClsMethConvertWarningHelper("dict");
         a = make_dict_array(
           0, val(tv).pclsmeth->getCls(),
           1, val(tv).pclsmeth->getFunc()).detach();
@@ -1218,10 +1217,16 @@ enable_if_lval_t<T, void> tvCastToKeysetInPlace(T tv) {
           "Class to keyset conversion"
         );
 
-      case KindOfClsMeth:
-        SystemLib::throwInvalidOperationExceptionObject(
-          "clsmeth to keyset conversion"
-        );
+      case KindOfClsMeth: {
+        raiseClsMethConvertWarningHelper("keyset");
+        a = make_keyset_array(
+          const_cast<StringData*>(
+            classToStringHelper(val(tv).pclsmeth->getCls())),
+          const_cast<StringData*>(
+            funcToStringHelper(val(tv).pclsmeth->getFunc()))).detach();
+        tvDecRefClsMeth(tv);
+        continue;
+      }
 
       case KindOfRecord:
         raise_convert_record_to_type("keyset");
@@ -1480,7 +1485,7 @@ enable_if_lval_t<T, void> tvCastToDArrayInPlace(T tv) {
         );
 
       case KindOfClsMeth: {
-        raiseClsMethToVecWarningHelper();
+        raiseClsMethConvertWarningHelper("darray");
         a = make_darray(
           0, val(tv).pclsmeth->getCls(),
           1, val(tv).pclsmeth->getFunc()).detach();
@@ -1550,7 +1555,7 @@ ObjectData* tvCastToObjectData(TypedValue tv) {
       return tv.m_data.pobj;
 
     case KindOfClsMeth: {
-      raiseClsMethToVecWarningHelper();
+      raiseClsMethConvertWarningHelper("array");
       auto arr = make_packed_array(
         val(tv).pclsmeth->getCls(), val(tv).pclsmeth->getFunc());
       return ObjectData::FromArray(arr.get()).detach();

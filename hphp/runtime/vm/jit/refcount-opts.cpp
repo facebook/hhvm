@@ -2595,6 +2595,17 @@ void sink_incs(Env& env) {
              *inc, *new_taken, *new_next);
       remove_helper(env.unit, inc);
 
+    } else if (succ.is(Jmp)) {
+      // try to sink through trivial jumps (to blocks with one predecessor)
+      assertx(block->taken() != nullptr);
+      if (block->taken()->numPreds() > 1) continue;
+
+      auto const new_taken = env.unit.gen(IncRef, bcctx, tmp);
+      block->taken()->prepend(new_taken);
+      incs.push_back(new_taken);
+      FTRACE(2, "    ** sink_incs: {} -> {}\n", *inc, *new_taken);
+      remove_helper(env.unit, inc);
+
     } else if (iter != iterOrigSucc) {
       // insert the inc right before succ if we advanced any instruction
       auto const new_inc = env.unit.gen(IncRef, bcctx, tmp);

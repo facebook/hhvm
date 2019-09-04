@@ -1,5 +1,4 @@
 
-Notice: Observing vec in json_encode from %s/ap-logging.php:6 in %s/ap-logging.php on line 7
 string(9) "["hello"]"
 
 Notice: Observing vec in serialize from %s/ap-logging.php:6 in %s/ap-logging.php on line 8

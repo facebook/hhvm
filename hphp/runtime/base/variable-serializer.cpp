@@ -1727,7 +1727,8 @@ void VariableSerializer::serializeArray(const ArrayData* arr,
                (arr->isDict() || arr->isVecArray()))) {
     auto const source = [&]() -> const char* {
       switch (getType()) {
-      case VariableSerializer::Type::JSON:      return "json_encode";
+      case VariableSerializer::Type::JSON:
+        return arr->isVecArray() ? nullptr : "json_encode";
       case VariableSerializer::Type::Serialize: return "serialize";
       case VariableSerializer::Type::VarExport: return "var_export";
       case VariableSerializer::Type::PrintR:    return "print_r";

@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/array-provenance.h"
 
+#include "hphp/hhbbc/bc.h"
 #include "hphp/hhbbc/class-util.h"
 #include "hphp/hhbbc/context.h"
 #include "hphp/hhbbc/func-util.h"
@@ -421,9 +422,11 @@ folly::Optional<Type> parentClsExact(ISS& env) {
 //////////////////////////////////////////////////////////////////////
 // folding
 
-bool canFold(ISS& env, const php::Func* func, int32_t nArgs,
+bool canFold(ISS& env, const php::Func* func, const FCallArgs& fca,
              Type context, bool maybeDynamic) {
   if (!func ||
+      fca.hasUnpack() ||
+      fca.numRets != 1 ||
       !options.ConstantFoldBuiltins ||
       !will_reduce(env) ||
       any(env.collect.opts & CollectionOpts::Speculating) ||
@@ -469,7 +472,7 @@ bool canFold(ISS& env, const php::Func* func, int32_t nArgs,
 
   if (func->params.size()) {
     // Not worth trying if we're going to warn due to missing args
-    return check_nargs_in_range(func, nArgs);
+    return check_nargs_in_range(func, fca.numArgs);
   }
 
   // The function has no args. Check if it's effect free and returns

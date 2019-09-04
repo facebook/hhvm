@@ -3818,55 +3818,54 @@ bool fcallTryFold(
 ) {
   auto const foldableFunc = func.exactFunc();
   if (!foldableFunc) return false;
-  if (!canFold(env, foldableFunc, fca.numArgs, context, maybeDynamic)) {
+  if (!canFold(env, foldableFunc, fca, context, maybeDynamic)) {
     return false;
   }
 
+  assertx(!fca.hasUnpack() && fca.numRets == 1);
+  assertx(options.ConstantFoldBuiltins);
+
   auto tried_lookup = false;
-  if (options.ConstantFoldBuiltins &&
-      !fca.hasUnpack() &&
-      fca.numRets == 1) {
-    auto ty = [&] () {
-      if (foldableFunc->attrs & AttrBuiltin &&
-          foldableFunc->attrs & AttrIsFoldable) {
-        auto ret = const_fold(env, fca.numArgs, numExtraInputs, *foldableFunc,
-                              false);
-        return ret ? *ret : TBottom;
-      }
-      CompactVector<Type> args(fca.numArgs);
-      auto const firstArgPos = numExtraInputs + fca.numArgsInclUnpack() - 1;
-      for (auto i = uint32_t{0}; i < fca.numArgs; ++i) {
-        auto const& arg = topT(env, firstArgPos - i);
-        auto const isScalar = is_scalar(arg);
-        if (!isScalar &&
-            (env.index.func_depends_on_arg(foldableFunc, i) ||
-             !arg.subtypeOf(BInitCell))) {
-          return TBottom;
-        }
-        args[i] = isScalar ? scalarize(arg) : arg;
-      }
-
-      tried_lookup = true;
-      return env.index.lookup_foldable_return_type(
-        env.ctx, foldableFunc, context, std::move(args));
-    }();
-
-    if (auto v = tv(ty)) {
-      BytecodeVec repl;
-      for (uint32_t i = 0; i < numExtraInputs; ++i) repl.push_back(bc::PopC {});
-      for (uint32_t i = 0; i < fca.numArgs; ++i) repl.push_back(bc::PopC {});
-      repl.push_back(bc::PopU {});
-      repl.push_back(bc::PopU {});
-      if (topT(env, fca.numArgs + 2 + numExtraInputs).subtypeOf(TInitCell)) {
-        repl.push_back(bc::PopC {});
-      } else {
-        assertx(topT(env, fca.numArgs + 2 + numExtraInputs).subtypeOf(TUninit));
-        repl.push_back(bc::PopU {});
-      }
-      repl.push_back(gen_constant(*v));
-      reduce(env, std::move(repl));
-      return true;
+  auto ty = [&] () {
+    if (foldableFunc->attrs & AttrBuiltin &&
+        foldableFunc->attrs & AttrIsFoldable) {
+      auto ret = const_fold(env, fca.numArgs, numExtraInputs, *foldableFunc,
+                            false);
+      return ret ? *ret : TBottom;
     }
+    CompactVector<Type> args(fca.numArgs);
+    auto const firstArgPos = numExtraInputs + fca.numArgsInclUnpack() - 1;
+    for (auto i = uint32_t{0}; i < fca.numArgs; ++i) {
+      auto const& arg = topT(env, firstArgPos - i);
+      auto const isScalar = is_scalar(arg);
+      if (!isScalar &&
+          (env.index.func_depends_on_arg(foldableFunc, i) ||
+           !arg.subtypeOf(BInitCell))) {
+        return TBottom;
+      }
+      args[i] = isScalar ? scalarize(arg) : arg;
+    }
+
+    tried_lookup = true;
+    return env.index.lookup_foldable_return_type(
+      env.ctx, foldableFunc, context, std::move(args));
+  }();
+
+  if (auto v = tv(ty)) {
+    BytecodeVec repl;
+    for (uint32_t i = 0; i < numExtraInputs; ++i) repl.push_back(bc::PopC {});
+    for (uint32_t i = 0; i < fca.numArgs; ++i) repl.push_back(bc::PopC {});
+    repl.push_back(bc::PopU {});
+    repl.push_back(bc::PopU {});
+    if (topT(env, fca.numArgs + 2 + numExtraInputs).subtypeOf(TInitCell)) {
+      repl.push_back(bc::PopC {});
+    } else {
+      assertx(topT(env, fca.numArgs + 2 + numExtraInputs).subtypeOf(TUninit));
+      repl.push_back(bc::PopU {});
+    }
+    repl.push_back(gen_constant(*v));
+    reduce(env, std::move(repl));
+    return true;
   }
 
   if (tried_lookup) {

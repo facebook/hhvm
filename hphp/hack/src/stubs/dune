@@ -60,6 +60,14 @@
     clientMessages))
 
 (library
+  (name vfs_stubs)
+  (wrapped false)
+  (modules
+    vfs)
+  (libraries
+    relative_path))
+
+(library
   (name remote_scheduler_stubs)
   (wrapped false)
   (modules

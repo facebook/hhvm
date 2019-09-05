@@ -608,8 +608,6 @@ static CallMap s_callMap {
     {GetTimeNs, folly::chrono::clock_gettime_ns, DSSA, SNone, {{SSA, 0}}},
 
     /* reified generics operations */
-    {IsReifiedName, isReifiedName, DSSA, SNone, {{SSA, 0}}},
-    {LdReifiedGeneric, getReifiedGenerics, DSSA, SSync, {{SSA, 0}}},
     {CheckClsReifiedGenericMismatch, checkClassReifiedGenericMismatch,
                                      DNone, SSync,
                                      {{extra(&ClassData::cls)}, {SSA, 0}}},

@@ -744,8 +744,6 @@ bool canDCE(IRInstruction* inst) {
   case ConjureUse:
   case LdClsMethodFCacheFunc:
   case LdClsMethodCacheFunc:
-  case LdReifiedGeneric:
-  case IsReifiedName:
   case ProfileInstanceCheck:
   case MemoGetStaticValue:
   case MemoGetStaticCache:

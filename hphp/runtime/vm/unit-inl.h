@@ -362,22 +362,8 @@ inline Class* Unit::loadClass(const StringData* name) {
   // Normalize the namespace
   if (normStr) name = normStr.get();
 
-  // Autoload the class if not reified
-  if (LIKELY(!isReifiedName(name))) return loadClass(ne, name);
-
-  // We are loading a reified class for the first time
-  name = stripTypeFromReifiedName(name);
-  auto generic_ne = NamedEntity::get(name, true, &normStr);
-  if (normStr) {
-    name = normStr.get();
-  }
-  class_ = loadClass(generic_ne, name);
-  // If the class still does not exists, return null
-  if (!class_) return nullptr;
-  ne->m_cachedClass.bind(
-    classHasPersistentRDS(class_) ? rds::Mode::Persistent : rds::Mode::Normal);
-  ne->setCachedClass(class_);
-  return class_;
+  // Autoload the class
+  return loadClass(ne, name);
 }
 
 inline Class* Unit::getClass(const StringData* name, bool tryAutoload) {

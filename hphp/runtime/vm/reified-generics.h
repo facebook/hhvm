@@ -37,7 +37,6 @@ struct StringData;
 // Returns either newly created or already cached static array
 ArrayData* addToReifiedGenericsTable(const StringData* mangledName,
                                      ArrayData* tsList);
-ArrayData* getReifiedTypeList(const StringData* name);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -66,23 +65,6 @@ void checkClassReifiedGenericMismatch(
 );
 
 ///////////////////////////////////////////////////////////////////////////////
-
-// Pulls the reified generics associated with the name named 'name'
-// Throws if no such reified generics exist
-inline ArrayData* getReifiedGenerics(StringData* name) {
-  assertx(isReifiedName(name));
-  auto const tstr = stripClsOrFnNameFromReifiedName(name);
-  return getReifiedTypeList(tstr);
-}
-
-// Does the same operation as getReifiedGenerics but returns nullptr
-// if no such generics exist
-inline ArrayData* getReifiedGenericsOpt(Cell cell) {
-  if (!isStringType(cell.m_type) || !isReifiedName(cell.m_data.pstr)) {
-    return nullptr;
-  }
-  return getReifiedGenerics(cell.m_data.pstr);
-}
 
 }
 

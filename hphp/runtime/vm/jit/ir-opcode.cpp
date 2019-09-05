@@ -442,7 +442,6 @@ bool opcodeMayRaise(Opcode opc) {
   case LdClsCtor:
   case LdClsPropAddrOrNull:
   case LdClsPropAddrOrRaise:
-  case LdReifiedGeneric:
   case LdClsTypeCns:
   case LdClsTypeCnsClsName:
   case LdFunc:
@@ -789,7 +788,6 @@ bool opcodeMayRaise(Opcode opc) {
   case IsDVArray:
   case IsFunReifiedGenericsMatched:
   case IsClsDynConstructible:
-  case IsReifiedName:
   case IsNType:
   case IsNTypeMem:
   case IsType:

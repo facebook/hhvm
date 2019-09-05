@@ -930,36 +930,6 @@ void fcallObjMethodObj(IRGS& env, const FCallArgs& fca, SSATmp* obj,
                              emitFCall);
 }
 
-SSATmp* getReifiedGenerics(IRGS& env, SSATmp* funcName) {
-  if (funcName->hasConstVal(TStr)) {
-    auto const name = funcName->strVal();
-    if (!isReifiedName(name)) return nullptr;
-    return cns(env, getReifiedTypeList(stripClsOrFnNameFromReifiedName(name)));
-  }
-  return cond(
-    env,
-    [&] (Block* not_reified_block) {
-      // Lets do a quick check before calling IsReifiedName since that's an
-      // expensive native call
-      // Reified names always start with a $
-      // It is also safe to read the 0th char without checking the length since
-      // if it is an empty string, then we'll be reading the null terminator
-      auto const first_char = gen(env, OrdStrIdx, funcName, cns(env, 0));
-      auto const issame = gen(env, EqInt, cns(env, (uint64_t)'$'), first_char);
-      gen(env, JmpZero, not_reified_block, issame);
-      auto const isreified = gen(env, IsReifiedName, funcName);
-      gen(env, JmpZero, not_reified_block, isreified);
-    },
-    [&] {
-      hint(env, Block::Hint::Unlikely);
-      return gen(env, LdReifiedGeneric, funcName);
-    },
-    [&] {
-      return cns(env, TNullptr);
-    }
-  );
-}
-
 void fcallFuncObj(IRGS& env, const FCallArgs& fca) {
   auto const obj = topC(env);
   assertx(obj->isA(TObj));
@@ -1007,12 +977,11 @@ void fcallFuncStr(IRGS& env, const FCallArgs& fca) {
   // TODO: improve this if str->hasConstVal()
   auto const funcN = gen(env, LdFunc, str);
   auto const func = gen(env, CheckNonNull, makeExitSlow(env), funcN);
-  auto const tsList = getReifiedGenerics(env, str);
   popDecRef(env);
   auto const mightCareAboutDynCall =
     RuntimeOption::EvalForbidDynamicCallsToFunc > 0;
   prepareAndCallProfiled(env, func, fca, nullptr, true, mightCareAboutDynCall,
-                         tsList);
+                         nullptr);
 }
 
 void fcallFuncArr(IRGS& env, const FCallArgs& fca) {

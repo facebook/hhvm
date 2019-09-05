@@ -338,14 +338,6 @@ SSATmp* simplifyLdFuncRxLevel(State& env, const IRInstruction* inst) {
     : nullptr;
 }
 
-SSATmp* simplifyIsReifiedName(State& env, const IRInstruction* inst) {
-  // Names coming from LdClsName can never be reified
-  auto const src = inst->src(0);
-  if (src->inst()->is(LdClsName)) return cns(env, false);
-  if (src->hasConstVal(TStr)) return cns(env, isReifiedName(src->strVal()));
-  return nullptr;
-}
-
 SSATmp* simplifyLdCls(State& env, const IRInstruction* inst) {
   if (inst->src(0)->inst()->is(LdClsName)) return inst->src(0)->inst()->src(0);
   return nullptr;
@@ -3893,7 +3885,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(IsWaitHandle)
   X(IsCol)
   X(IsDVArray)
-  X(IsReifiedName)
   X(HasToString)
   X(LdCls)
   X(LdClsCtx)

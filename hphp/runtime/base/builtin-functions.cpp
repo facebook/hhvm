@@ -586,24 +586,11 @@ vm_decode_function(const_variant_ref function,
         return nullptr;
       }
       assertx(f && f->preClass() == nullptr);
-      if (f->hasReifiedGenerics()) {
-        auto const reifiedName = isReifiedName(name.get());
-        if (reifiedName) {
-          if (genericsAlreadyGiven) {
-            throw_invalid_argument("You may not add more generics to the "
-                                   "function '%s' that already has reified "
-                                   "arguments",
-                                   f->fullName()->data());
-            return nullptr;
-          }
-          reifiedGenerics =
-            getReifiedTypeList(stripClsOrFnNameFromReifiedName(name.get()));
-        } else if (!genericsAlreadyGiven) {
-          throw_invalid_argument("You may not call the reified function '%s' "
-                                 "without reified arguments",
-                                 f->fullName()->data());
-          return nullptr;
-        }
+      if (f->hasReifiedGenerics() && !genericsAlreadyGiven) {
+        throw_invalid_argument("You may not call the reified function '%s' "
+                               "without reified arguments",
+                               f->fullName()->data());
+        return nullptr;
       }
       return f;
     }

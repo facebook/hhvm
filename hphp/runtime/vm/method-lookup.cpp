@@ -92,9 +92,6 @@ const Func* lookupMethodCtx(const Class* cls,
   } else {
     assertx(callType == CallType::ObjMethod || callType == CallType::ClsMethod);
     assertx(methodName != nullptr);
-    if (isReifiedName(methodName)) {
-      methodName = stripTypeFromReifiedName(methodName);
-    }
     method = cls->lookupMethod(methodName);
     if (!method) {
       // We didn't find any methods with the specified name in cls's method

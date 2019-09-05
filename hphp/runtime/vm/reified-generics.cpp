@@ -49,18 +49,6 @@ ArrayData* addToReifiedGenericsTable(
   return generics;
 }
 
-ArrayData* getReifiedTypeList(const StringData* name) {
-  auto const bail = [&] {
-    raise_error("%s does not exist on the reified generics table",
-                name->data());
-  };
-  auto const ne = NamedEntity::get(name, false);
-  if (!ne) bail();
-  auto const generics = ne->getCachedReifiedGenerics();
-  if (!generics) bail();
-  return generics;
-}
-
 ArrayData* getClsReifiedGenericsProp(Class* cls, ObjectData* obj) {
   if (!cls->hasReifiedGenerics()) {
     raise_error("Cannot get reified generics property of a non reified class");

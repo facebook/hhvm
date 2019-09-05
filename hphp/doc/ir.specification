@@ -1544,16 +1544,6 @@ To string conversions:
 
   Returns the value of func->rxLevel().
 
-| IsReifiedName, D(Bool), S(Str), NF
-
-  Tests whether the name in S0 is name of a reified class or function.
-
-| LdReifiedGeneric, DVArr, S(Str), NF
-
-  Loads the reified generics associated with the name at S0. This name can be a
-  class name or a function name. Raises an error if this name does not have
-  any associated reified generics.
-
 | LdClsFromClsMeth, D(Cls), S(ClsMeth), NF
 
   Load the Class* of the ClsMethDataRef in S0.

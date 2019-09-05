@@ -120,15 +120,6 @@ inline String mangleInOutFuncName(const StringData* name,
 
 std::string mangleReifiedGenericsName(const ArrayData* tsList);
 
-inline bool isReifiedName(const StringData* name) {
-  // Length larger than $$name$$<type>
-  return name->size() > 7 &&
-         name->data()[0] == '$' &&
-         name->data()[1] == '$' &&
-         folly::qfind(name->slice(), folly::StringPiece("$$<"))
-          != std::string::npos;
-}
-
 inline bool isMangledReifiedGenericInClosure(const StringData* name) {
   // mangled name is of the form
   // __captured$reifiedgeneric$class$ or __captured$reifiedgeneric$function$
@@ -137,31 +128,6 @@ inline bool isMangledReifiedGenericInClosure(const StringData* name) {
          folly::qfind(name->slice(),
                       folly::StringPiece("__captured$reifiedgeneric$"))
           != std::string::npos;
-}
-
-inline folly::StringPiece stripClsOrFnNameFromReifiedName(
-  const folly::StringPiece name
-) {
-  auto i = name.find("$$<");
-  if (i == std::string::npos) raise_error("Not a reified name");
-  return name.subpiece(i + 2, name.size() - i - 2);
-}
-
-inline StringData* stripClsOrFnNameFromReifiedName(const StringData* name) {
-  return makeStaticString(stripClsOrFnNameFromReifiedName(name->slice()));
-}
-
-inline folly::StringPiece stripTypeFromReifiedName(
-  const folly::StringPiece name
-) {
-  auto i = name.find("$$<");
-  if (i == std::string::npos || i < 2) raise_error("Not a reified name");
-  // Remove the initial $$
-  return name.subpiece(2, i - 2);
-}
-
-inline StringData* stripTypeFromReifiedName(const StringData* name) {
-  return makeStaticString(stripTypeFromReifiedName(name->slice()));
 }
 
 //////////////////////////////////////////////////////////////////////

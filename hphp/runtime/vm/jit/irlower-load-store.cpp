@@ -189,9 +189,6 @@ const Func* funcFromFp(const SSATmp* fp) {
 
 }
 
-IMPL_OPCODE_CALL(IsReifiedName)
-IMPL_OPCODE_CALL(LdReifiedGeneric)
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void cgLdMem(IRLS& env, const IRInstruction* inst) {

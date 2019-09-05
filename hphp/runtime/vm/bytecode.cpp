@@ -4608,16 +4608,12 @@ namespace {
 
 // FIXME: unify FCallFuncRD with other FCall*RD opcodes
 template<bool errOnFail>
-ArrayData* getReifiedGenerics(const Func* func, const StringData* funcName,
-                              Array&& tsList) {
+ArrayData* getReifiedGenerics(const Func* func, Array&& tsList) {
   if (!func->hasReifiedGenerics()) return nullptr;
   if (tsList.get()) {
     // As long as a tsList is passed, we'll use that over reading it from the
     // method name. The array-data passed on the stack may not be static.
     return ArrayData::GetScalarArray(std::move(tsList));
-  }
-  if (funcName != nullptr && isReifiedName(funcName)) {
-    return getReifiedTypeList(stripClsOrFnNameFromReifiedName(funcName));
   }
   if (!errOnFail) return nullptr;
   throw_call_reified_func_without_generics(func);
@@ -4885,7 +4881,7 @@ void fcallFuncDImpl(PC origpc, PC& pc, const FCallArgs& fca, Id id,
   }
 
   auto const reifiedGenerics = getReifiedGenerics<false>(
-    func, nullptr, std::move(tsList));
+    func, std::move(tsList));
 
   fcallImpl<false>(origpc, pc, fca, func, reifiedGenerics, [&] (ActRec* ar) {
     ar->trashThis();
@@ -4947,7 +4943,7 @@ void fcallObjMethodImpl(PC origpc, PC& pc, const FCallArgs& fca,
           res == LookupResult::MagicCallFound);
 
   auto const reifiedGenerics = getReifiedGenerics<true>(
-    func, methName, std::move(tsList));
+    func, std::move(tsList));
 
   fcallImpl<dynamic>(origpc, pc, fca, func, reifiedGenerics, [&] (ActRec* ar) {
     /* Transfer ownership of obj to the ActRec*/
@@ -5174,7 +5170,7 @@ void fcallClsMethodImpl(PC origpc, PC& pc, const FCallArgs& fca, Class* cls,
   }
 
   auto const reifiedGenerics = getReifiedGenerics<true>(
-    func, methName, std::move(tsList));
+    func, std::move(tsList));
 
   fcallImpl<dynamic>(origpc, pc, fca, func, reifiedGenerics, [&] (ActRec* ar) {
     if (obj) {

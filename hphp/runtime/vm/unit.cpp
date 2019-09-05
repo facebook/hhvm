@@ -722,26 +722,10 @@ Func* Unit::loadFunc(const StringData* name) {
     name = normStr.get();
   }
 
-  // Autoload the function if not reified
-  if (LIKELY(!isReifiedName(name))) {
-    return AutoloadHandler::s_instance->autoloadFunc(
-        const_cast<StringData*>(name))
-      ? ne->getCachedFunc() : nullptr;
-  }
-
-  // We are loading a reified function for the first time
-  name = stripTypeFromReifiedName(name);
-  auto generic_ne = NamedEntity::get(name, true, &normStr);
-  if (normStr) {
-    name = normStr.get();
-  }
-  func_ = loadFunc(generic_ne, name);
-  // If the function still does not exist, return null
-  if (!func_) return nullptr;
-  ne->m_cachedFunc.bind(
-    func_->isPersistent() ? rds::Mode::Persistent : rds::Mode::Normal);
-  ne->setCachedFunc(func_);
-  return func_;
+  // Autoload the function
+  return AutoloadHandler::s_instance->autoloadFunc(
+    const_cast<StringData*>(name)
+  ) ? ne->getCachedFunc() : nullptr;
 }
 
 void Unit::bindFunc(Func *func) {

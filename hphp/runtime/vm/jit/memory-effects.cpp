@@ -1743,7 +1743,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdFuncRxLevel:
   case LdSmashable:
   case LdSmashableFunc:
-  case IsReifiedName:
   case LdARNumParams:
   case LdRDSAddr:
   case ExitPlaceholder:
@@ -2118,7 +2117,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case AddNewElemVec:
   case IsTypeStruct:
-  case LdReifiedGeneric:
   case RecordReifiedGenericsAndGetTSList:
     return may_load_store(AElemAny, AEmpty);
 

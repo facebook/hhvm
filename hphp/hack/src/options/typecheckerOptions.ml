@@ -116,6 +116,8 @@ let simple_pessimize = GlobalOptions.tco_simple_pessimize
 
 let coercion_from_dynamic = GlobalOptions.tco_coercion_from_dynamic
 
+let complex_coercion = GlobalOptions.tco_complex_coercion
+
 let disable_partially_abstract_typeconsts =
   GlobalOptions.tco_disable_partially_abstract_typeconsts
 

@@ -200,6 +200,7 @@ let parse_options () =
   let pessimize_types = ref false in
   let simple_pessimize = ref 0.0 in
   let coercion_from_dynamic = ref false in
+  let complex_coercion = ref false in
   let disable_partially_abstract_typeconsts = ref false in
   let search_provider = ref "TrieIndex" in
   let rust = ref true in
@@ -420,8 +421,11 @@ let parse_options () =
       );
       ( "--coercion-from-dynamic",
         Arg.Set coercion_from_dynamic,
-        "Allows coercion from dynamic and like types to enforceable types at positions that HHVM enforces"
+        "Allows coercion from dynamic to enforceable types at positions that HHVM enforces"
       );
+      ( "--complex-coercion",
+        Arg.Set complex_coercion,
+        "Allows complex coercions that involve like types" );
       ( "--disable-partially-abstract-typeconsts",
         Arg.Set disable_partially_abstract_typeconsts,
         "Treat partially abstract type constants as concrete type constants" );
@@ -515,6 +519,7 @@ let parse_options () =
       ~tco_pessimize_types:!pessimize_types
       ~tco_simple_pessimize:!simple_pessimize
       ~tco_coercion_from_dynamic:!coercion_from_dynamic
+      ~tco_complex_coercion:!complex_coercion
       ~tco_disable_partially_abstract_typeconsts:
         !disable_partially_abstract_typeconsts
       ~log_levels:!log_levels

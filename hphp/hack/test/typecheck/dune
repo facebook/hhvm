@@ -94,6 +94,7 @@ let () =
     ; "--new-inference-lambda"
     ; "--like-types"
     ; "--coercion-from-dynamic"
+    ; "--complex-coercion"
     ; "--simple-pessimize 1.0"
     ; "--error-format raw"
     ; "--out-extension .like_types.out" ] in

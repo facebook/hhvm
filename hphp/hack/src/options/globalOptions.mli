@@ -208,9 +208,11 @@ type t = {
   (* A simpler form of pessimization, only wraps the outermost type in like
    * if the type is not enforceable *)
   tco_simple_pessimize: float;
-  (* Enables coercion from dynamic and like types to enforceable types
-     i.e. dynamic ~> int, ~string ~> string *)
+  (* Enables coercion from dynamic to enforceable types
+     i.e. dynamic ~> int *)
   tco_coercion_from_dynamic: bool;
+  (* Enables complex coercion interactions that involve like types *)
+  tco_complex_coercion: bool;
   (* Treat partially abstract typeconsts like concrete typeconsts, disable overriding type *)
   tco_disable_partially_abstract_typeconsts: bool;
   (* Set of codes to be treated as if they were in strict mode files *)
@@ -309,6 +311,7 @@ val make :
   ?tco_pessimize_types:bool ->
   ?tco_simple_pessimize:float ->
   ?tco_coercion_from_dynamic:bool ->
+  ?tco_complex_coercion:bool ->
   ?tco_disable_partially_abstract_typeconsts:bool ->
   ?error_codes_treated_strictly:ISet.t ->
   ?tco_check_xhp_attribute:bool ->
@@ -460,6 +463,8 @@ val tco_pessimize_types : t -> bool
 val tco_simple_pessimize : t -> float
 
 val tco_coercion_from_dynamic : t -> bool
+
+val tco_complex_coercion : t -> bool
 
 val tco_disable_partially_abstract_typeconsts : t -> bool
 

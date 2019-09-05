@@ -43,6 +43,9 @@ function execution_context(): string;
 <<__Native>>
 function enable_legacy_behavior(vec_or_dict $v): vec_or_dict;
 
+<<__Native>>
+function is_legacy_behavior_enabled(vec_or_dict $v): bool;
+
 /**
  * This function is a kludge that returns the last argument it receives
  */

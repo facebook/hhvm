@@ -47,6 +47,8 @@ let go
   let t = Unix.gettimeofday () in
   let num_remote_workers = TypecheckerOptions.num_remote_workers opts in
   let version_specifier = TypecheckerOptions.remote_version_specifier opts in
+  let eden_threshold = Some eden_threshold in
+  let files = Some fnl in
   RemoteScheduler.(
     let default_env =
       default_env
@@ -58,7 +60,7 @@ let go
         {
           default_env with
           eden_threshold;
-          files = Some fnl;
+          files;
           naming_sqlite_path;
           naming_table;
           num_remote_workers;

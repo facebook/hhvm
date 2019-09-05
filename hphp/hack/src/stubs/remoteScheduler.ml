@@ -8,7 +8,7 @@
 
 type schedule_env = {
   bin_root: Path.t;
-  eden_threshold: int;
+  eden_threshold: int option;
   files: (Relative_path.t * FileInfo.names) list option;
   naming_sqlite_path: string option;
   naming_table: Naming_table.t option;

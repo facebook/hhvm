@@ -3298,9 +3298,6 @@ and emit_call_lhs_and_fcall
   let does_not_have_non_tparam_generics =
     not (has_non_tparam_generics env targs)
   in
-  let reified_call_body name =
-    gather [emit_reified_targs env pos targs; instr_reified_name name]
-  in
   match expr_ with
   | A.Obj_get (obj, (_, A.String id), null_flavor)
   | A.Obj_get (obj, (_, A.Id (_, id)), null_flavor) ->
@@ -3388,12 +3385,9 @@ and emit_call_lhs_and_fcall
               instr_classgetc;
               instr_fcallclsmethod fcall_args [] ]
         in
-        if does_not_have_non_tparam_generics then
-          ( gather [instr_nulluninit; instr_nulluninit; instr_nulluninit],
-            emit_fcall (instr_string method_id_string) )
-        else
-          ( gather [instr_nulluninit; instr_nulluninit; instr_nulluninit],
-            emit_fcall (reified_call_body method_id_string) )
+        (* TODO(T31677864): Implement reification here *)
+        ( gather [instr_nulluninit; instr_nulluninit; instr_nulluninit],
+          emit_fcall (instr_string method_id_string) )
       | Class_reified instrs ->
         (* TODO(T31677864): Implement reification here *)
         let tmp = Local.get_unnamed_local () in

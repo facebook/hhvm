@@ -97,6 +97,7 @@ let main () : unit =
     let workers = Some (IndexBuilder.init_workers ()) in
     let repo_path = Path.make ctxt.repo_folder in
     Relative_path.set_path_prefix Relative_path.Root repo_path;
+    Relative_path.set_path_prefix Relative_path.Tmp (Path.make "/tmp");
     IndexBuilder.go ctxt workers
 
 (* Main entry point *)

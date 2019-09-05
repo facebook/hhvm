@@ -1091,7 +1091,7 @@ void TypeConstraint::verifyOutParamFail(const Func* func,
     return;
   }
 
-  if (!isSoft() && (isFuncType(c->m_type) || isClassType(c->m_type))) {
+  if (isFuncType(c->m_type) || isClassType(c->m_type)) {
     if (isString() || (isObject() && interface_supports_string(m_typeName))) {
       if (RuntimeOption::EvalStringHintNotices) {
         if (isFuncType(c->m_type)) {
@@ -1264,7 +1264,7 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
     }
   }
 
-  if (!isSoft() && (isFuncType(c->m_type) || isClassType(c->m_type))) {
+  if (isFuncType(c->m_type) || isClassType(c->m_type)) {
     if (isString() || (isObject() && interface_supports_string(m_typeName))) {
       if (RuntimeOption::EvalStringHintNotices) {
         if (isFuncType(c->m_type)) {

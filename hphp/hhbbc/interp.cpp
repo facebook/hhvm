@@ -5270,28 +5270,26 @@ void verifyRetImpl(ISS& env, const TypeConstraint& constraint,
   // In some circumstances, verifyRetType can modify the type. If it
   // does that we can't reduce even when we know it succeeds.
   auto dont_reduce = false;
-  if (!constraint.isSoft()) {
-    // VerifyRetType will convert a TFunc to a TStr implicitly
-    // (and possibly warn)
-    if (tcT.subtypeOf(TStr) && stackT.couldBe(BFunc | BCls)) {
-      stackT |= TStr;
+  // VerifyRetType will convert a TFunc to a TStr implicitly
+  // (and possibly warn)
+  if (tcT.couldBe(BStr) && stackT.couldBe(BFunc | BCls)) {
+    stackT |= TStr;
+    dont_reduce = true;
+  }
+
+  // VerifyRetType will convert TClsMeth to TVec/TVArr/TArr implicitly
+  if (stackT.couldBe(BClsMeth)) {
+    if (tcT.couldBe(BVec)) {
+      stackT |= TVec;
       dont_reduce = true;
     }
-
-    // VerifyRetType will convert TClsMeth to TVec/TVArr/TArr implicitly
-    if (stackT.couldBe(BClsMeth)) {
-      if (tcT.couldBe(BVec)) {
-        stackT |= TVec;
-        dont_reduce = true;
-      }
-      if (tcT.couldBe(BVArr)) {
-        stackT |= TVArr;
-        dont_reduce = true;
-      }
-      if (tcT.couldBe(TArr)) {
-        stackT |= TArr;
-        dont_reduce = true;
-      }
+    if (tcT.couldBe(BVArr)) {
+      stackT |= TVArr;
+      dont_reduce = true;
+    }
+    if (tcT.couldBe(TArr)) {
+      stackT |= TArr;
+      dont_reduce = true;
     }
   }
 

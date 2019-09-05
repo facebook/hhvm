@@ -105,6 +105,15 @@ bool mayHaveData(trep bits) {
   case BOptDArrN: case BOptSDArrN: case BOptCDArrN:
     return true;
 
+    /* Under some circumstances, we store an array in
+     * B[Opt][S]{Vec,Dict}E to effectively track their
+     * provenance tag */
+  case BCVecE:     case BSVecE:     case BVecE:
+  case BOptCVecE:  case BOptSVecE:  case BOptVecE:
+  case BCDictE:    case BSDictE:    case BDictE:
+  case BOptCDictE: case BOptSDictE: case BOptDictE:
+    return true;
+
   case BBottom:
   case BUninit:
   case BInitNull:
@@ -113,10 +122,6 @@ bool mayHaveData(trep bits) {
   case BCStr:
   case BSArrE:
   case BCArrE:
-  case BSVecE:
-  case BCVecE:
-  case BSDictE:
-  case BCDictE:
   case BSKeysetE:
   case BCKeysetE:
   case BSPArrE:
@@ -133,8 +138,6 @@ bool mayHaveData(trep bits) {
   case BNum:
   case BBool:
   case BArrE:
-  case BVecE:
-  case BDictE:
   case BKeysetE:
   case BInitPrim:
   case BPrim:
@@ -152,12 +155,6 @@ bool mayHaveData(trep bits) {
   case BOptSArrE:
   case BOptCArrE:
   case BOptArrE:
-  case BOptSVecE:
-  case BOptCVecE:
-  case BOptVecE:
-  case BOptSDictE:
-  case BOptCDictE:
-  case BOptDictE:
   case BOptSKeysetE:
   case BOptCKeysetE:
   case BOptKeysetE:
@@ -644,7 +641,6 @@ folly::Optional<DArrLikePackedN> toDArrLikePackedN(SArray ar) {
 
 folly::Optional<DArrLikeMap> toDArrLikeMap(SArray ar) {
   assert(!ar->empty());
-
   auto map = MapElems{};
   auto idx = int64_t{0};
   auto packed = true;
@@ -1185,6 +1181,27 @@ struct DualDispatchUnionImpl {
 
   Type operator()(SArray a, SArray b) const {
     assert(a != b); // Should've been handled earlier in union_of.
+    if (a->empty() && b->empty()) {
+      auto const aTag = arrprov::getTag(a);
+      auto const bTag = arrprov::getTag(b);
+      assert(aTag != bTag ||
+             a->kind() != b->kind());
+      if (a->kind() != b->kind() ||
+          a->dvArray() != b->dvArray()) return Type { bits };
+      if (!a->isVecArray() && !a->isDict()) return Type { bits };
+
+      auto ad = a->copy();
+      if (auto const tag = unionProvTag(aTag, bTag)) {
+        arrprov::setTag(ad, *tag);
+      }
+      ArrayData::GetScalarArray(&ad);
+
+      auto r = a->isVecArray()
+        ? vec_empty()
+        : dict_empty();
+      set_trep(r, bits);
+      return r;
+    }
 
     auto const p1 = toDArrLikePacked(a);
     auto const p2 = toDArrLikePacked(b);
@@ -1210,24 +1227,28 @@ struct DualDispatchUnionImpl {
   }
 
   Type operator()(const DArrLikePacked& a, SArray b) const {
+    assert(!b->empty());
     auto const p = toDArrLikePacked(b);
     if (p) return (*this)(a, *p);
     return (*this)(a, *toDArrLikeMap(b));
   }
 
   Type operator()(const DArrLikePackedN& a, SArray b) const {
+    assert(!b->empty());
     auto const p = toDArrLikePackedN(b);
     if (p) return (*this)(a, *p);
     return (*this)(a, *toDArrLikeMap(b));
   }
 
   Type operator()(const DArrLikeMap& a, SArray b) const {
+    assert(!b->empty());
     auto const m = toDArrLikeMap(b);
     if (m) return (*this)(a, *m);
     return (*this)(*toDArrLikePacked(b), a);
   }
 
   Type operator()(const DArrLikeMapN& a, SArray b) const {
+    assert(!b->empty());
     auto const m1 = toDArrLikeMapN(b);
     if (m1) return (*this)(a, *m1);
     auto const m2 = toDArrLikeMap(b);
@@ -1348,7 +1369,7 @@ struct DualDispatchSubtype {
   }
 
   bool operator()(SArray a, const DArrLikeMapN& b) const {
-    assert(!a->empty());
+    assert(!a->empty()); // if a is empty, we should have projected b to top
     bool bad = false;
     IterateKV(
       a,
@@ -1368,6 +1389,7 @@ struct DualDispatchSubtype {
   }
 
   bool operator()(SArray a, const DArrLikePackedN& b) const {
+    assert(!a->empty()); // if a is empty, we should have projected b to top
     auto p = toDArrLikePackedN(a);
     return p && p->type.subtypeOfImpl<contextSensitive>(b.type);
   }
@@ -2053,6 +2075,47 @@ size_t Type::hash() const {
   return folly::hash::hash_combine(rawBits, rawTag, data);
 }
 
+Type project_data(Type t, trep bits) {
+  auto const restrict_to = [&](trep allowed) {
+    assert(t.m_bits & allowed);
+    return bits & allowed ? t : loosen_values(t);
+  };
+
+  switch (t.m_dataTag) {
+  case DataTag::None:
+    return t;
+  case DataTag::Int:         return restrict_to(BInt);
+  case DataTag::Dbl:         return restrict_to(BDbl);
+  case DataTag::Obj:         return restrict_to(BObj);
+  case DataTag::Cls:         return restrict_to(BCls);
+  case DataTag::Str:         return restrict_to(BStr);
+  case DataTag::RefInner:    return restrict_to(BRef);
+  case DataTag::ArrLikePacked:
+    return restrict_to(BVecN | BDictN | BKeysetN | BArrN);
+  case DataTag::ArrLikeMap:
+    return restrict_to(BDictN | BKeysetN | BArrN);
+  case DataTag::ArrLikeVal: {
+    auto const ad = t.m_data.aval;
+    if (ad->empty()) {
+      if (bits & (BArrN | BVecN | BDictN | BKeysetN)) {
+        return loosen_values(t);
+      }
+      return restrict_to(BArrE | BDictE | BVecE | BKeysetE);
+    } else{
+      return restrict_to(BArrN | BDictN | BVecN | BKeysetN);
+    }
+    not_reached();
+  }
+  case DataTag::ArrLikePackedN:
+    return restrict_to(BVecN | BDictN | BKeysetN | BArrN);
+  case DataTag::ArrLikeMapN:
+    return restrict_to(BDictN | BKeysetN | BArrN);
+  default:
+    not_reached();
+  }
+}
+
+
 template<bool contextSensitive>
 bool Type::subtypeOfImpl(const Type& o) const {
   // NB: We don't assert checkInvariants() here because this can be called from
@@ -2062,11 +2125,13 @@ bool Type::subtypeOfImpl(const Type& o) const {
   if (isect != m_bits) return false;
 
   // No data is always more general.
-  if (!o.hasData()) return true;
-  if (!hasData()) return !mayHaveData(m_bits);
+  auto const this_projected = project_data(*this, isect);
+  auto const o_projected = project_data(o, isect);
+  if (!o_projected.hasData())      return true;
+  if (!this_projected.hasData()) return !mayHaveData(m_bits);
 
   // Both have data, so it depends on what the data says.
-  return subtypeData<contextSensitive>(o);
+  return this_projected.subtypeData<contextSensitive>(o_projected);
 }
 
 bool Type::moreRefined(const Type& o) const {
@@ -2096,9 +2161,12 @@ bool Type::couldBe(const Type& o) const {
   if (isect == 0) return false;
   // just an optimization; if the intersection contains one of these,
   // we're done because they don't support data.
-  if (isect & (BNull | BBool | BArrLikeE)) return true;
+  if (isect & (BNull | BBool)) return true;
+
+  auto const this_projected = project_data(*this, isect);
+  auto const o_projected = project_data(o, isect);
   // hasData is actually cheaper than mayHaveData, so do those checks first
-  if (!hasData() || !o.hasData()) return true;
+  if (!this_projected.hasData() || !o_projected.hasData()) return true;
   // This looks like it could be problematic - eg BCell does not
   // support data, but lots of its subtypes do. It seems like what we
   // need here is !subtypeMayHaveData(isect) (a function we don't
@@ -2107,7 +2175,7 @@ bool Type::couldBe(const Type& o) const {
   // subtype of A that does not (eg TOptArr and TOptArrE), then no
   // subtype of B can support data.
   if (!mayHaveData(isect)) return true;
-  return couldBeData(o);
+  return this_projected.couldBeData(o_projected);
 }
 
 bool Type::checkInvariants() const {
@@ -2168,7 +2236,12 @@ bool Type::checkInvariants() const {
   case DataTag::Obj:    break;
   case DataTag::ArrLikeVal:
     assert(m_data.aval->isStatic());
-    assert(!m_data.aval->empty());
+    assert(!m_data.aval->empty() || isVector || isDict);
+    assert(m_bits & (BArr | BVec | BDict | BKeyset));
+    if (m_data.aval->empty()) {
+      assert(!couldBe(BVecN));
+      assert(!couldBe(BDictN));
+    }
     // If we have a static array, we'd better be sure of the type.
     assert(!isPHPArray || isVArray || isDArray || isNotDVArray);
     assert(!isPHPArray || m_data.aval->isPHPArray());
@@ -2191,6 +2264,7 @@ bool Type::checkInvariants() const {
     assertx(!m_data.packed->provenance || couldBe(BVec) || couldBe(BDict));
     assertx(!m_data.packed->provenance ||
             m_data.packed->provenance->filename());
+    assert(m_bits & (BVecN | BDictN | BKeysetN | BArrN));
     DEBUG_ONLY auto idx = size_t{0};
     for (DEBUG_ONLY auto const& v : m_data.packed->elems) {
       assert(v.subtypeOf(valBits) && v != TBottom);
@@ -2201,6 +2275,7 @@ bool Type::checkInvariants() const {
   case DataTag::ArrLikeMap: {
     assert(!isVector);
     assert(!isVArray);
+    assert(m_bits & (BDictN | BKeysetN | BArrN));
     assert(!m_data.map->map.empty());
     assertx(!m_data.map->provenance || RuntimeOption::EvalArrayProvenance);
     assertx(!m_data.map->provenance || couldBe(BDict));
@@ -2228,11 +2303,13 @@ bool Type::checkInvariants() const {
   case DataTag::ArrLikePackedN:
     assert(m_data.packedn->type.subtypeOf(valBits));
     assert(m_data.packedn->type != TBottom);
+    assert(m_bits & (BVecN | BDictN | BKeysetN | BArrN));
     assert(!isKeyset || m_data.packedn->type == TInt);
     break;
   case DataTag::ArrLikeMapN:
     assert(!isVector);
     assert(!isVArray);
+    assert(m_bits & (BDictN | BKeysetN | BArrN));
     assert(m_data.mapn->key.subtypeOf(keyBits));
     // MapN shouldn't have a specialized key. If it does, then that implies it
     // only contains arrays of size 1, which means it should be Map instead.
@@ -2334,15 +2411,26 @@ Type some_aempty_darray() {
 Type vec_val(SArray val) {
   assert(val->isStatic());
   assert(val->isVecArray());
-  if (val->empty()) return vec_empty();
-  auto r        = Type { BSVecN };
+  auto const bits = val->empty() ? BSVecE : BSVecN;
+  auto r = Type { bits };
   r.m_data.aval = val;
   r.m_dataTag   = DataTag::ArrLikeVal;
   return r;
 }
 
-Type vec_empty()         { return Type { BSVecE }; }
-Type some_vec_empty()    { return Type { BVecE }; }
+Type vec_empty() {
+  auto r = Type { BSVecE };
+  r.m_data.aval = staticEmptyVecArray();
+  r.m_dataTag   = DataTag::ArrLikeVal;
+  return r;
+}
+
+Type some_vec_empty() {
+  auto r = Type { BVecE };
+  r.m_data.aval = staticEmptyVecArray();
+  r.m_dataTag   = DataTag::ArrLikeVal;
+  return r;
+}
 
 Type packedn_impl(trep bits, Type t) {
   auto r = Type { bits };
@@ -2379,15 +2467,26 @@ Type svec(std::vector<Type> elems, ProvTag tag) {
 Type dict_val(SArray val) {
   assert(val->isStatic());
   assert(val->isDict());
-  if (val->empty()) return dict_empty();
-  auto r        = Type { BSDictN };
+  auto const bits = val->empty() ? BSDictE : BSDictN;
+  auto r = Type { bits };
   r.m_data.aval = val;
   r.m_dataTag   = DataTag::ArrLikeVal;
   return r;
 }
 
-Type dict_empty()         { return Type { BSDictE }; }
-Type some_dict_empty()    { return Type { BDictE }; }
+Type dict_empty() {
+  auto r = Type { BSDictE };
+  r.m_data.aval = staticEmptyDictArray();
+  r.m_dataTag   = DataTag::ArrLikeVal;
+  return r;
+}
+
+Type some_dict_empty() {
+  auto r = Type { BDictE };
+  r.m_data.aval = staticEmptyDictArray();
+  r.m_dataTag   = DataTag::ArrLikeVal;
+  return r;
+}
 
 Type dict_map(MapElems m, ProvTag tag) {
   return map_impl(BDictN, std::move(m), tag);
@@ -2957,9 +3056,15 @@ R tvImpl(const Type& t) {
     return H::template make<KindOfPersistentArray>(staticEmptyDArray());
   case BVecE:
   case BSVecE:
+    if (t.m_dataTag == DataTag::ArrLikeVal) {
+      return H::template make<KindOfPersistentVec>(t.m_data.aval);
+    }
     return H::template make<KindOfPersistentVec>(staticEmptyVecArray());
   case BDictE:
   case BSDictE:
+    if (t.m_dataTag == DataTag::ArrLikeVal) {
+      return H::template make<KindOfPersistentDict>(t.m_data.aval);
+    }
     return H::template make<KindOfPersistentDict>(staticEmptyDictArray());
   case BKeysetE:
   case BSKeysetE:
@@ -3100,7 +3205,8 @@ Type scalarize(Type t) {
     case DataTag::Dbl:
       return t;
     case DataTag::ArrLikeVal:
-      t.m_bits &= BSArrN | BSVecN | BSDictN | BSKeysetN;
+      t.m_bits &= BSArrN | BSVecN | BSDictN | BSKeysetN |
+                  BSVecE | BSDictE;
       return t;
     case DataTag::Str:
       t.m_bits &= BSStr;
@@ -3510,10 +3616,18 @@ Type intersection_of(Type a, Type b) {
     return std::move(t);
   };
 
-  if (!b.hasData())           return fix(a);
-  if (!a.hasData())           return fix(b);
-  if (a.subtypeData<true>(b)) return fix(a);
-  if (b.subtypeData<true>(a)) return fix(b);
+  auto aProjected = project_data(a, isect);
+  auto bProjected = project_data(b, isect);
+
+  if (!bProjected.hasData()) return fix(aProjected);
+  if (!aProjected.hasData()) return fix(bProjected);
+  if (aProjected.subtypeData<true>(bProjected)) return fix(aProjected);
+  if (bProjected.subtypeData<true>(aProjected)) return fix(bProjected);
+
+  /* from this point on, the projection doesn't matter since neither a or b
+   * isn't supported by a type bit in the intersection */
+  assert(aProjected.hasData() && aProjected == a);
+  assert(bProjected.hasData() && bProjected == b);
 
   auto t = [&] {
     if (a.m_dataTag == b.m_dataTag) {
@@ -3606,6 +3720,20 @@ Type intersection_of(Type a, Type b) {
 
 Type Type::unionArrLike(Type a, Type b) {
   auto const newBits = combine_arr_like_bits(a.m_bits, b.m_bits);
+  /* the call to project_data here is because adding bits to the trep
+   * can cause us to lose data also, e.g. if a ArrN bit is added to
+   * what was previously known to be an empty array */
+  auto a_projected = project_data(a, newBits);
+  auto b_projected = project_data(b, newBits);
+  if (!b_projected.hasData()) {
+    return set_trep(a_projected, newBits);
+  }
+  if (!a_projected.hasData()) {
+    return set_trep(b_projected, newBits);
+  }
+  /* at this point we know the projection removed nothing */
+  assert(a.hasData() && a_projected.hasData());
+  assert(b.hasData() && b_projected.hasData());
   if (a.subtypeData<true>(b)) {
     return set_trep(b, newBits);
   }
@@ -4172,7 +4300,7 @@ Type loosen_emptiness(Type t) {
   check(BCDict,   BDict);
   check(BSKeyset, BSKeyset);
   check(BCKeyset, BKeyset);
-  return t;
+  return project_data(t, t.m_bits);
 }
 
 Type loosen_all(Type t) {
@@ -4201,7 +4329,7 @@ Type add_nonemptiness(Type t) {
   check(BCDictE,   BDictN);
   check(BSKeysetE, BSKeysetN);
   check(BCKeysetE, BKeysetN);
-  return t;
+  return project_data(t, t.m_bits);
 }
 
 Type remove_uninit(Type t) {
@@ -4237,6 +4365,7 @@ Type assert_emptiness(Type t) {
       if (t.hasData() && !mayHaveData(bits)) {
         t = Type { bits };
       } else {
+        t = project_data(t, bits);
         t.m_bits = bits;
       }
       return true;

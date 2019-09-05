@@ -680,6 +680,7 @@ private:
   friend Type unnullish(Type);
   friend bool is_opt(const Type&);
   friend bool is_nullish(const Type&);
+  friend Type project_data(Type t, trep bits);
   template<typename R, bool>
   friend R tvImpl(const Type&);
   friend Type scalarize(Type t);
@@ -1208,6 +1209,14 @@ Type setctx(Type t, bool to = true);
  * types.
  */
 Type unctx(Type t);
+
+/*
+ * Discards any data associated with `t` that isn't valid for the given trep
+ *
+ * At the moment this will do nothing beyond removing empty ArrLikeDatas from
+ * types that used to only have ArrE bits set but now have a ArrN bit set
+ */
+Type project_data(Type t, trep bits);
 
 /*
  * Refinedness equivalence checks.

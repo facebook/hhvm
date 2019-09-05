@@ -1762,7 +1762,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case Select:
   case LookupSPropSlot:
   case ConvPtrToLval:
-  case MangleReifiedName:
   case ProfileProp:
     return IrrelevantEffects {};
 
@@ -2120,7 +2119,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case AddNewElemVec:
   case IsTypeStruct:
   case LdReifiedGeneric:
-  case RecordReifiedGenericsAndGetName:
   case RecordReifiedGenericsAndGetTSList:
     return may_load_store(AElemAny, AEmpty);
 

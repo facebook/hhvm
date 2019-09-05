@@ -1517,7 +1517,6 @@ void dce(Env& env, const bc::Neq&)              { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::Not&)              { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::NSame&)            { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::Pow&)              { pushRemovableIfNoThrow(env); }
-void dce(Env& env, const bc::ReifiedName&)      { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::Same&)             { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::Shl&)              { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::Shr&)              { pushRemovableIfNoThrow(env); }

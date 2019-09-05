@@ -162,8 +162,6 @@ let instr_throwastypestructexception = instr (IOp ThrowAsTypeStructException)
 let instr_combine_and_resolve_type_struct i =
   instr (IOp (CombineAndResolveTypeStruct i))
 
-let instr_reified_name name = instr (IMisc (ReifiedName name))
-
 let instr_record_reified_generic = instr (IMisc RecordReifiedGeneric)
 
 let instr_check_reified_generic_mismatch =

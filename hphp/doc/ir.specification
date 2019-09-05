@@ -1996,20 +1996,11 @@ To string conversions:
   For debugging purposes.  Store kTVTrashJITHeap to a heap slot pointed to by
   S0.
 
-| RecordReifiedGenericsAndGetName, D(StaticStr), SVArr, CRc
-
-  Takes a varray of reified generics from the stack, adds them to the reified
-  generics table and returns mangled name used as the key
-
 | RecordReifiedGenericsAndGetTSList, DVArr, SVArr, CRc
 
   Takes a varray of reified generics from the stack and adds them to the reified
   generics table and returns the input varray of reified generics, possibly
   static
-
-| MangleReifiedName, D(StaticStr), S(StaticStr) S(StaticStr), NF
-
-  Mangles the name from S0 with the mangled type structure string from S1
 
 
 11. Trace exits

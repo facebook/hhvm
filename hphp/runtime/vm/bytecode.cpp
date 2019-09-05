@@ -2646,19 +2646,6 @@ OPTBLD_INLINE void iopRecordReifiedGeneric() {
   }
 }
 
-OPTBLD_INLINE void iopReifiedName(const StringData* name) {
-  auto const tsList = vmStack().topC();
-  if (RuntimeOption::EvalHackArrDVArrs ?
-      !tvIsVec(tsList) : !tvIsArray(tsList)) {
-    raise_error("Invalid type-structure list in ReifiedName");
-  }
-  // recordReifiedGenericsAndGetName decrefs the tsList
-  auto const result = jit::recordReifiedGenericsAndGetName(tsList->m_data.parr);
-  auto const mangledName = mangleReifiedName(name, result);
-  vmStack().discard();
-  vmStack().pushStaticString(mangledName);
-}
-
 OPTBLD_INLINE void iopCheckReifiedGenericMismatch() {
   Class* cls = arGetContextClass(vmfp());
   if (!cls) raise_error("No class scope is active");

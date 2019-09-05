@@ -3474,15 +3474,6 @@ void in(ISS& env, const bc::RecordReifiedGeneric& op) {
   push(env, RuntimeOption::EvalHackArrDVArrs ? TSVec : TSVArr);
 }
 
-void in(ISS& env, const bc::ReifiedName& op) {
-  // TODO(T31677864): implement real optimizations
-  auto const t = popC(env);
-  auto const required = RuntimeOption::EvalHackArrDVArrs ? BVec : BVArr;
-  if (!t.couldBe(required)) return unreachable(env);
-  if (t.subtypeOf(required)) nothrow(env);
-  return push(env, TSStr);
-}
-
 void in(ISS& env, const bc::CheckReifiedGenericMismatch& op) {
   // TODO(T31677864): implement real optimizations
   popC(env);

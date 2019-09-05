@@ -1351,17 +1351,6 @@ void emitRecordReifiedGeneric(IRGS& env) {
   push(env, result);
 }
 
-void emitReifiedName(IRGS& env, const StringData* name) {
-  auto const ts = popC(env);
-  if (!ts->isA(RuntimeOption::EvalHackArrDVArrs ? TVec : TArr)) {
-    PUNT(ReifiedName-InvalidTS);
-  }
-  // RecordReifiedGenericsAndGetName decrefs the ts
-  auto const result = gen(env, RecordReifiedGenericsAndGetName, ts);
-  auto const mangledName = gen(env, MangleReifiedName, cns(env, name), result);
-  push(env, mangledName);
-}
-
 void emitCombineAndResolveTypeStruct(IRGS& env, uint32_t n) {
   push(env, resolveTypeStructImpl(env, true, false, n, false));
 }

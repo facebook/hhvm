@@ -507,7 +507,6 @@ type instruct_misc =
   | Parent
   | LateBoundCls
   | ClassName
-  | ReifiedName of string
   | RecordReifiedGeneric
   | CheckReifiedGenericMismatch
   | NativeImpl

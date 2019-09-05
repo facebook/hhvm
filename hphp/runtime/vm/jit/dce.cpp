@@ -290,7 +290,6 @@ bool canDCE(IRInstruction* inst) {
   case StrictlyIntegerConv:
   case GetMemoKeyScalar:
   case LookupSPropSlot:
-  case MangleReifiedName:
   case ConstructClosure:
   case Box:
   case AllocPackedArray:
@@ -762,7 +761,6 @@ bool canDCE(IRInstruction* inst) {
   case MemoSetInstanceCache:
   case BoxPtr:
   case ThrowAsTypeStructException:
-  case RecordReifiedGenericsAndGetName:
   case RecordReifiedGenericsAndGetTSList:
   case ResolveTypeStruct:
   case CheckRDSInitialized:

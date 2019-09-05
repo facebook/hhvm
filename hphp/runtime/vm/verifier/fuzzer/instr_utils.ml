@@ -161,7 +161,6 @@ let stk_data : instruct -> stack_sig = function
   | IGenerator _
   | IAsync _
   | IMisc RecordReifiedGeneric
-  | IMisc ReifiedName _
   | ILitConst ColFromArray _               -> ["C"], ["C"]
   | IOp CombineAndResolveTypeStruct n      -> produce "C" n, ["C"]
   | ILitConst NewPair

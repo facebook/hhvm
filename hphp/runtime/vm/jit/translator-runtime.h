@@ -204,7 +204,6 @@ ArrayData* errorOnIsAsExpressionInvalidTypesHelper(ArrayData*);
 /* Reified generics helpers
  * Both functions decref the input array by turning it into a static array
  */
-StringData* recordReifiedGenericsAndGetName(ArrayData*);
 ArrayData* recordReifiedGenericsAndGetTSList(ArrayData*);
 /*
  * Throw a VMSwitchMode exception.

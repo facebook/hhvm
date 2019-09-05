@@ -1506,7 +1506,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::ThrowAsTypeStructException:
     case Op::CombineAndResolveTypeStruct:
     case Op::RecordReifiedGeneric:
-    case Op::ReifiedName:
     case Op::CheckReifiedGenericMismatch:
     case Op::VerifyOutType:
     case Op::VerifyParamType:

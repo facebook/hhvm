@@ -501,7 +501,6 @@ bool opcodeMayRaise(Opcode opc) {
   case RaiseUndefProp:
   case RaiseUninitLoc:
   case RaiseWarning:
-  case RecordReifiedGenericsAndGetName:
   case RecordReifiedGenericsAndGetTSList:
   case ResolveTypeStruct:
   case ReturnHook:
@@ -911,7 +910,6 @@ bool opcodeMayRaise(Opcode opc) {
   case LtRes:
   case LtStr:
   case LtStrInt:
-  case MangleReifiedName:
   case MapIsset:
   case MarkRDSInitialized:
   case MemoGetInstanceCache:

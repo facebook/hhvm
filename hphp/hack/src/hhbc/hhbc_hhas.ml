@@ -577,7 +577,6 @@ let string_of_misc instruction =
   | Parent -> "Parent"
   | LateBoundCls -> "LateBoundCls"
   | ClassName -> "ClassName"
-  | ReifiedName name -> sep ["ReifiedName"; SU.quote_string name]
   | RecordReifiedGeneric -> "RecordReifiedGeneric"
   | CheckReifiedGenericMismatch -> "CheckReifiedGenericMismatch"
   | VerifyParamType id -> sep ["VerifyParamType"; string_of_param_id id]

@@ -3362,14 +3362,6 @@ RecordReifiedGeneric [C:VArr] -> [C:VArr]
   representation of these type structures to the global reified generics table.
   Pushes the resulting static list of type structures.
 
-ReifiedName <name> [C:VArr] -> [C:Str]
-
-  Takes a varray or vec based on runtime flag of type structures from $1
-  and mangles the type structures into the name given by %1. Pushes the mangled
-  name. This instruction also performs RecordReifiedGeneric instruction's
-  recording duty but it can be implemented more efficiently subsumed in this
-  instruction.
-
 CheckReifiedGenericMismatch [C:VArr] -> []
 
   Throws a fatal error unless whether each generic in $1 is reified or erased

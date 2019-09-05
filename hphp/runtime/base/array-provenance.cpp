@@ -203,8 +203,11 @@ folly::Optional<Tag> tagFromProgramCounter() {
 
   auto const tag = fromLeaf(
     [&] (const ActRec* fp, Offset offset) -> folly::Optional<Tag> {
+      auto const func = fp->func();
       auto const unit = fp->unit();
-      auto const filename = unit->filepath();
+      // grab the filename off the Func* since it might be different
+      // from the unit's for flattened trait methods
+      auto const filename = func->filename();
       auto const line = unit->getLineNumber(offset);
       return Tag { filename, line };
     },

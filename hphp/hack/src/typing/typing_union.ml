@@ -55,13 +55,13 @@ let ty_equiv env ty1 ty2 ~are_ty_param =
   in
   (env, ty)
 
-let make_union r tyl reason_nullable_opt ~discard_singletons =
-  match (discard_singletons, reason_nullable_opt, tyl) with
-  | (_, Some null_r, []) -> (null_r, Tprim Nast.Tnull)
-  | (true, None, [ty]) -> ty
-  | (_, None, tyl) -> (r, Tunion tyl)
-  | (true, Some null_r, [ty]) -> (null_r, Toption ty)
-  | (_, Some null_r, tyl) -> (null_r, Toption (r, Tunion tyl))
+let make_union r tyl reason_nullable_opt =
+  match (reason_nullable_opt, tyl) with
+  | (Some null_r, []) -> (null_r, Tprim Nast.Tnull)
+  | (None, [ty]) -> ty
+  | (None, tyl) -> (r, Tunion tyl)
+  | (Some null_r, [ty]) -> (null_r, Toption ty)
+  | (Some null_r, tyl) -> (null_r, Toption (r, Tunion tyl))
 
 let rec union env ((r1, _) as ty1) ((r2, _) as ty2) =
   let (env, result) =
@@ -249,7 +249,7 @@ and union_lists env tyl1 tyl2 r =
       end
   in
   let (env, tyl, res_is_opt) = normalize_union env tyl1 tyl2 None in
-  (env, make_union r tyl res_is_opt ~discard_singletons:true)
+  (env, make_union r tyl res_is_opt)
 
 and union_arraykind env ak1 ak2 =
   match (ak1, ak2) with
@@ -478,7 +478,7 @@ let union_list_2_by_2 env tyl =
 let union_list env r tyl =
   let (env, r_null, _r_union, tys) = normalize_union env tyl in
   let (env, tyl) = union_list_2_by_2 env (TySet.elements tys) in
-  (env, make_union r tyl r_null ~discard_singletons:true)
+  (env, make_union r tyl r_null)
 
 let fold_union env r tyl =
   List.fold_left_env env tyl ~init:(MakeType.nothing r) ~f:union
@@ -487,7 +487,7 @@ let simplify_unions env ?on_tyvar ((r, _) as ty) =
   let (env, r_null, r_union, tys) = normalize_union env [ty] ?on_tyvar in
   let (env, tyl) = union_list_2_by_2 env (TySet.elements tys) in
   let r = Option.value r_union ~default:r in
-  (env, make_union r tyl r_null ~discard_singletons:true)
+  (env, make_union r tyl r_null)
 
 (* Only ever called with ty2 a type variable and ty1 a normalized union, so
 unless those conditions are met, this is an overapproximation. *)

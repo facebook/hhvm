@@ -1134,6 +1134,8 @@ struct RuntimeOption {
    */                                                                   \
   F(bool, ForbidDynamicCallsWithAttr, false)                            \
   F(bool, WarnOnNonLiteralClsMeth, false)                               \
+  /* Toggles logging for expressions of type $var::name() */            \
+  F(bool, LogKnownMethodsAsDynamicCalls, true)                          \
   /*                                                                    \
    * Control handling of out-of-range integer values in the compact     \
    * Thrift serializer.                                                 \

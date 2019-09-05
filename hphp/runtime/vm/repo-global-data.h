@@ -143,6 +143,13 @@ struct Repo::GlobalData {
   */
   bool WarnOnNonLiteralClsMeth = false;
   /*
+  * If set to true calls to class methods of form $cls::meth() will not be
+  * logged as dynamic calls, which means behavior for such calls would be
+  * as if ForbidDynamicCallsToClsMeth was set to 0.
+  */
+  bool LogKnownMethodsAsDynamicCalls = true;
+
+  /*
    * Should the runtime emit notices whenever a builtin is called dynamically?
    */
   bool NoticeOnBuiltinDynamicCalls = false;
@@ -219,6 +226,7 @@ struct Repo::GlobalData {
       (ForbidDynamicConstructs)
       (ForbidDynamicCallsWithAttr)
       (WarnOnNonLiteralClsMeth)
+      (LogKnownMethodsAsDynamicCalls)
       (NoticeOnBuiltinDynamicCalls)
       (Signature)
       (AbortBuildOnVerifyError)

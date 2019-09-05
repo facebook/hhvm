@@ -140,6 +140,10 @@ let string_of_cls_meth_resolve_op = function
   | Warn -> "Warn"
   | NoWarn -> "NoWarn"
 
+let string_of_is_log_as_dynamic_call_op = function
+  | LogAsDynamicCall -> "LogAsDynamicCall"
+  | DontLogAsDynamicCall -> "DontLogAsDynamicCall"
+
 let string_of_operator instruction =
   match instruction with
   | Concat -> "Concat"
@@ -483,12 +487,13 @@ let string_of_call instruction =
         string_of_int n2;
         string_of_int n3;
         SU.quote_string id ]
-  | FCallClsMethod (fcall_args, pl) ->
+  | FCallClsMethod (fcall_args, pl, is_log_as_dynamic_call) ->
     sep
       [ "FCallClsMethod";
         string_of_fcall_args fcall_args;
         "\"\"";
-        string_of_param_locations pl ]
+        string_of_param_locations pl;
+        string_of_is_log_as_dynamic_call_op is_log_as_dynamic_call ]
   | FCallClsMethodD (fcall_args, cid, mid) ->
     sep
       [ "FCallClsMethodD";

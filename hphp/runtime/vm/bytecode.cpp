@@ -196,6 +196,9 @@ inline const char* prettytype(ContCheckOp) { return "ContCheckOp"; }
 inline const char* prettytype(SpecialClsRef) { return "SpecialClsRef"; }
 inline const char* prettytype(CollectionType) { return "CollectionType"; }
 inline const char* prettytype(ClsMethResolveOp) { return "ClsMethResolveOp"; }
+inline const char* prettytype(IsLogAsDynamicCallOp) {
+  return "IsLogAsDynamicCallOp";
+}
 
 // load a T value from *pc without incrementing
 template<class T> T peek(PC pc) {
@@ -4621,9 +4624,10 @@ ArrayData* getReifiedGenerics(const Func* func, Array&& tsList) {
 
 template<bool dynamic, class InitActRec>
 void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
-               ArrayData* reifiedGenerics, InitActRec initActRec) {
+               ArrayData* reifiedGenerics, InitActRec initActRec,
+               bool logAsDynamicCall = true) {
   if (fca.enforceReffiness()) callerReffinessChecks(func, fca);
-  if (dynamic) callerDynamicCallChecks(func);
+  if (dynamic && logAsDynamicCall) callerDynamicCallChecks(func);
   callerRxChecks(vmfp(), func);
   checkStack(vmStack(), func, 0);
 
@@ -5151,7 +5155,8 @@ namespace {
 
 template<bool dynamic>
 void fcallClsMethodImpl(PC origpc, PC& pc, const FCallArgs& fca, Class* cls,
-                        StringData* methName, bool forwarding, Array&& tsList) {
+                        StringData* methName, bool forwarding,
+                        Array&& tsList, bool logAsDynamicCall = true) {
   auto const ctx = liveClass();
   auto obj = ctx && vmfp()->hasThis() ? vmfp()->getThis() : nullptr;
   const Func* func;
@@ -5195,7 +5200,8 @@ void fcallClsMethodImpl(PC origpc, PC& pc, const FCallArgs& fca, Class* cls,
     } else {
       decRefStr(const_cast<StringData*>(methName));
     }
-  });
+  },
+  logAsDynamicCall);
 }
 
 Class* specialClsRefToCls(SpecialClsRef ref) {
@@ -5220,7 +5226,7 @@ Class* specialClsRefToCls(SpecialClsRef ref) {
 
 OPTBLD_INLINE void
 iopFCallClsMethod(PC origpc, PC& pc, FCallArgs fca, const StringData*,
-                  imm_array<uint32_t> args) {
+                  imm_array<uint32_t> args, IsLogAsDynamicCallOp op) {
   auto const c1 = vmStack().topC();
   if (!isClassType(c1->m_type)) {
     raise_error("Attempting to use non-class in FCallClsMethod");
@@ -5241,7 +5247,10 @@ iopFCallClsMethod(PC origpc, PC& pc, FCallArgs fca, const StringData*,
   // fcallClsMethodImpl will take care of decReffing method name
   vmStack().ndiscard(2);
   assertx(cls && methName);
-  fcallClsMethodImpl<true>(origpc, pc, fca, cls, methName, false, Array());
+  auto const logAsDynamicCall = op == IsLogAsDynamicCallOp::LogAsDynamicCall ||
+    RuntimeOption::EvalLogKnownMethodsAsDynamicCalls;
+  fcallClsMethodImpl<true>(origpc, pc, fca, cls, methName, false,
+                           Array(), logAsDynamicCall);
 }
 
 

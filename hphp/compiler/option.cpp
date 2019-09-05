@@ -270,6 +270,9 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   Config::Bind(RuntimeOption::EvalWarnOnNonLiteralClsMeth,
                ini, config, "WarnOnNonLiteralClsMeth",
                RuntimeOption::EvalWarnOnNonLiteralClsMeth);
+  Config::Bind(RuntimeOption::EvalLogKnownMethodsAsDynamicCalls,
+               ini, config, "LogKnownMethodsAsDynamicCalls",
+               RuntimeOption::EvalLogKnownMethodsAsDynamicCalls);
   Config::Bind(RuntimeOption::EvalNoticeOnBuiltinDynamicCalls,
                ini, config, "NoticeOnBuiltinDynamicCalls",
                RuntimeOption::EvalNoticeOnBuiltinDynamicCalls);

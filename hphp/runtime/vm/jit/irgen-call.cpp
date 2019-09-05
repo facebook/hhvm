@@ -1518,6 +1518,7 @@ void fcallClsMethodCommon(IRGS& env,
                           SSATmp* methVal,
                           bool forward,
                           bool dynamic,
+                          bool allowLogAsDynCall,
                           uint32_t numExtraInputs,
                           SSATmp* tsList) {
   assertx(clsVal->isA(TCls));
@@ -1537,7 +1538,7 @@ void fcallClsMethodCommon(IRGS& env,
     }
 
     auto const ctx = forward ? gen(env, FwdCtxStaticCall, ldCtx(env)) : clsVal;
-    auto const mightCareAboutDynCall =
+    auto const mightCareAboutDynCall = allowLogAsDynCall &&
       RuntimeOption::EvalForbidDynamicCallsToClsMeth > 0;
     decRef(env, methVal);
     discard(env, numExtraInputs);
@@ -1598,15 +1599,18 @@ void fcallClsMethodCommon(IRGS& env,
 }
 
 void emitFCallClsMethod(IRGS& env, FCallArgs fca, const StringData* clsHint,
-                        const ImmVector& v) {
+                        const ImmVector& v, IsLogAsDynamicCallOp op) {
   auto const cls = topC(env);
   auto const methName = topC(env, BCSPRelOffset { 1 });
   if (v.size() != 0 || !cls->isA(TCls) || !methName->isA(TStr)) {
     return interpOne(env);
   }
 
-  fcallClsMethodCommon(env, fca, clsHint, cls, methName, false, true, 2,
-                       nullptr);
+  auto const allowLogAsDynamicCall =
+    op == IsLogAsDynamicCallOp::LogAsDynamicCall ||
+    RuntimeOption::EvalLogKnownMethodsAsDynamicCalls;
+  fcallClsMethodCommon(env, fca, clsHint, cls, methName, false, true,
+                       allowLogAsDynamicCall, 2, nullptr);
 }
 
 void emitFCallClsMethodS(IRGS& env, FCallArgs fca, const StringData* clsHint,
@@ -1616,7 +1620,8 @@ void emitFCallClsMethodS(IRGS& env, FCallArgs fca, const StringData* clsHint,
   if (v.size() != 0 || !cls || !methName->isA(TStr)) return interpOne(env);
 
   auto const fwd = ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent;
-  fcallClsMethodCommon(env, fca, clsHint, cls, methName, fwd, true, 1, nullptr);
+  fcallClsMethodCommon(env, fca, clsHint, cls, methName, fwd, true, true, 1,
+                       nullptr);
 }
 
 void emitFCallClsMethodSD(IRGS& env, FCallArgs fca, const StringData* clsHint,
@@ -1626,7 +1631,7 @@ void emitFCallClsMethodSD(IRGS& env, FCallArgs fca, const StringData* clsHint,
 
   auto const fwd = ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent;
   fcallClsMethodCommon(env, fca, clsHint, cls, cns(env, methName), fwd, false,
-                       0, nullptr);
+                       false, 0, nullptr);
 }
 
 void emitFCallClsMethodSRD(IRGS& env, FCallArgs fca, const StringData* clsHint,
@@ -1637,7 +1642,7 @@ void emitFCallClsMethodSRD(IRGS& env, FCallArgs fca, const StringData* clsHint,
 
   auto const fwd = ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent;
   fcallClsMethodCommon(env, fca, clsHint, cls, cns(env, methName), fwd, false,
-                       1, tsList);
+                       false, 1, tsList);
 }
 
 //////////////////////////////////////////////////////////////////////

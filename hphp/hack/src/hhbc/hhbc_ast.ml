@@ -189,6 +189,10 @@ type has_generics_op =
   | MaybeGenerics
   | HasGenerics
 
+type is_log_as_dynamic_call_op =
+  | LogAsDynamicCall
+  | DontLogAsDynamicCall
+
 type instruct_lit_const =
   | Null
   | True
@@ -414,7 +418,7 @@ type instruct_call =
   | NewObjS of SpecialClsRef.t
   | FCall of fcall_args
   | FCallBuiltin of num_params * num_params * num_params * string
-  | FCallClsMethod of fcall_args * param_locations
+  | FCallClsMethod of fcall_args * param_locations * is_log_as_dynamic_call_op
   | FCallClsMethodD of fcall_args * class_id * method_id
   | FCallClsMethodRD of fcall_args * class_id * method_id
   | FCallClsMethodS of fcall_args * SpecialClsRef.t

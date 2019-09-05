@@ -1906,7 +1906,7 @@ FCallObjMethodRD <fca> <class hint> <nullsafe> <litstr id>
 
   FCallObjMethodRD's $1 contains a list of reified generics.
 
-FCallClsMethod <fca> <class hint>
+FCallClsMethod <fca> <class hint> <op>
   [U U U C|V..C|V C C:Class]  ->  [C..C]
 FCallClsMethodD <fca> <class hint> <litstr id> <litstr id>
   [U U U C|V..C|V]    ->  [C..C]
@@ -1958,6 +1958,9 @@ FCallClsMethodSRD <fca> <class hint> <mode> <litstr id>
 
   FCallClsMethodRD and FCallClsMethodSRD's $1 contains a list of reified
   generics.
+
+  If op is DontLogAsDynamicCall all logging set up for dynamic calls will be
+  skipped.
 
 FCallCtor <fca> <class hint>  [C:Obj U U C|V..C|V]  ->  [C]
 

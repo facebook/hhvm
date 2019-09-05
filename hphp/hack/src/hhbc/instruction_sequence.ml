@@ -319,8 +319,9 @@ let instr_dim_warn_pt key = instr_dim MemberOpMode.Warn (MemberKey.PT key)
 
 let instr_dim_define_pt key = instr_dim MemberOpMode.Define (MemberKey.PT key)
 
-let instr_fcallclsmethod fcall_args pl =
-  instr (ICall (FCallClsMethod (fcall_args, pl)))
+let instr_fcallclsmethod
+    ?(is_log_as_dynamic_call = LogAsDynamicCall) fcall_args pl =
+  instr (ICall (FCallClsMethod (fcall_args, pl, is_log_as_dynamic_call)))
 
 let instr_fcallclsmethodd fcall_args method_name class_name =
   instr (ICall (FCallClsMethodD (fcall_args, class_name, method_name)))

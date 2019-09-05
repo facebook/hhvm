@@ -4353,8 +4353,11 @@ void in(ISS& env, const bc::FCallClsMethod& op) {
 
   auto const clsTy = topC(env);
   auto const rfunc = env.index.resolve_method(env.ctx, clsTy, methName);
+  auto const skipLogAsDynamicCall =
+    !RuntimeOption::EvalLogKnownMethodsAsDynamicCalls &&
+      op.subop4 == IsLogAsDynamicCallOp::DontLogAsDynamicCall;
   if (is_specialized_cls(clsTy) && dcls_of(clsTy).type == DCls::Exact &&
-      !rfunc.mightCareAboutDynCalls()) {
+      (!rfunc.mightCareAboutDynCalls() || skipLogAsDynamicCall)) {
     auto const clsName = dcls_of(clsTy).cls.name();
     return reduce(
       env,
@@ -4366,7 +4369,7 @@ void in(ISS& env, const bc::FCallClsMethod& op) {
 
   auto const updateBC = [&] (FCallArgs fca, SString clsHint = nullptr) {
     if (!clsHint) clsHint = op.str2;
-    return bc::FCallClsMethod { std::move(fca), clsHint, op.argv };
+    return bc::FCallClsMethod { std::move(fca), clsHint, op.argv, op.subop4 };
   };
   fcallClsMethodImpl(env, op, clsTy, methName, true, 2, true, updateBC);
 }

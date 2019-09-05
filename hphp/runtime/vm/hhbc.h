@@ -456,13 +456,23 @@ enum class SpecialClsRef : uint8_t {
 };
 
 #define CLS_METH_RESOLVE_OPS \
-  OP(NoWarn)               \
+  OP(NoWarn)                 \
   OP(Warn)
 
 enum class ClsMethResolveOp : uint8_t {
 #define OP(name) name,
   CLS_METH_RESOLVE_OPS
 #undef OP
+};
+
+#define IS_LOG_AS_DYNAMIC_CALL_OPS                  \
+  IS_LOG_AS_DYNAMIC_CALL_OP(LogAsDynamicCall)       \
+  IS_LOG_AS_DYNAMIC_CALL_OP(DontLogAsDynamicCall)
+
+enum class IsLogAsDynamicCallOp : uint8_t {
+#define IS_LOG_AS_DYNAMIC_CALL_OP(name) name,
+  IS_LOG_AS_DYNAMIC_CALL_OPS
+#undef IS_LOG_AS_DYNAMIC_CALL_OP
 };
 
 constexpr uint32_t kMaxConcatN = 4;
@@ -634,7 +644,7 @@ constexpr uint32_t kMaxConcatN = 4;
   O(NewObjS,         ONE(OA(SpecialClsRef)),                            \
                                        NOV,             ONE(CV),    NF) \
   O(LockObj,         NA,               ONE(CV),         ONE(CV),    NF) \
-  O(FCallClsMethod,  THREE(FCA,SA,I32LA),                               \
+  O(FCallClsMethod,  FOUR(FCA,SA,I32LA,OA(IsLogAsDynamicCallOp)),       \
                                        FCALL(2, 0),     FCALL,      CF) \
   O(FCallClsMethodD, FOUR(FCA,SA,SA,SA),                                \
                                        FCALL(0, 0),     FCALL,      CF) \
@@ -923,6 +933,7 @@ const char* subopToName(ContCheckOp);
 const char* subopToName(CudOp);
 const char* subopToName(SpecialClsRef);
 const char* subopToName(ClsMethResolveOp);
+const char* subopToName(IsLogAsDynamicCallOp);
 
 /*
  * Returns true iff the given SubOp is in the valid range for its type.

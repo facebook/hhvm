@@ -183,7 +183,7 @@
   String "print_it"
   String "Base"
   ClassGetC
-  FCallClsMethod <> 1 1 "" - ""
+  FCallClsMethod <> 1 1 "" - "" LogAsDynamicCall
   PopC
 
   NewObjD "Derived"

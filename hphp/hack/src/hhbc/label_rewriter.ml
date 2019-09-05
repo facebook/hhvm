@@ -37,7 +37,7 @@ let get_regular_labels instr =
   | IIterator (LIterNextK (_, _, l, _, _))
   | IIterator (IterBreak (l, _))
   | ICall (FCall (_, _, _, _, Some l))
-  | ICall (FCallClsMethod ((_, _, _, _, Some l), _))
+  | ICall (FCallClsMethod ((_, _, _, _, Some l), _, _))
   | ICall (FCallClsMethodD ((_, _, _, _, Some l), _, _))
   | ICall (FCallClsMethodRD ((_, _, _, _, Some l), _, _))
   | ICall (FCallClsMethodS ((_, _, _, _, Some l), _))
@@ -109,8 +109,11 @@ let relabel_instr instr relabel =
     IGenDelegation (YieldFromDelegate (i, relabel l))
   | ICall (FCall (fl, na, nr, br, Some l)) ->
     ICall (FCall (fl, na, nr, br, Some (relabel l)))
-  | ICall (FCallClsMethod ((fl, na, nr, br, Some l), p)) ->
-    ICall (FCallClsMethod ((fl, na, nr, br, Some (relabel l)), p))
+  | ICall
+      (FCallClsMethod ((fl, na, nr, br, Some l), p, is_log_as_dynamic_call)) ->
+    ICall
+      (FCallClsMethod
+         ((fl, na, nr, br, Some (relabel l)), p, is_log_as_dynamic_call))
   | ICall (FCallClsMethodD ((fl, na, nr, br, Some l), c, m)) ->
     ICall (FCallClsMethodD ((fl, na, nr, br, Some (relabel l)), c, m))
   | ICall (FCallClsMethodRD ((fl, na, nr, br, Some l), c, m)) ->

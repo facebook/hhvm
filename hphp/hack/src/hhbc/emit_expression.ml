@@ -3406,7 +3406,10 @@ and emit_call_lhs_and_fcall
             [ instr_meth;
               emit_expr env expr;
               instr_classgetc;
-              instr_fcallclsmethod fcall_args [] ]
+              instr_fcallclsmethod
+                ~is_log_as_dynamic_call:DontLogAsDynamicCall
+                fcall_args
+                [] ]
         in
         (* TODO(T31677864): Implement reification here *)
         ( gather [instr_nulluninit; instr_nulluninit; instr_nulluninit],

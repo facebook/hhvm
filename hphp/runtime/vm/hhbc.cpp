@@ -988,6 +988,12 @@ static const char* CudOp_names[] = {
 #undef CUD_OP
 };
 
+static const char* IsLogAsDynamicCallOp_names[] = {
+#define IS_LOG_AS_DYNAMIC_CALL_OP(x) #x,
+  IS_LOG_AS_DYNAMIC_CALL_OPS
+#undef IS_LOG_AS_DYNAMIC_CALL_OP
+};
+
 static const char* SpecialClsRef_names[] = {
 #define REF(x) #x,
   SPECIAL_CLS_REFS
@@ -1073,6 +1079,8 @@ X(CudOp,          static_cast<int>(CudOp::IgnoreIter))
 X(SpecialClsRef,  static_cast<int>(SpecialClsRef::Self))
 X(ClsMethResolveOp,
                   static_cast<int>(ClsMethResolveOp::NoWarn))
+X(IsLogAsDynamicCallOp,
+                  static_cast<int>(IsLogAsDynamicCallOp::LogAsDynamicCall))
 #undef X
 
 //////////////////////////////////////////////////////////////////////

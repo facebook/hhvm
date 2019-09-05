@@ -642,6 +642,8 @@ val concurrent_is_disabled : string
 
 val static_closures_are_disabled : string
 
+val halt_compiler_is_disabled : string
+
 val invalid_await_position : string
 
 val invalid_await_position_dependent : string

@@ -586,6 +586,9 @@ struct RuntimeOption {
   // Disables static closures
   // true => error, false => default behaviour
   static bool DisableStaticClosures;
+  // Disables __halt_compiler()
+  // true => error, false => default behaviour
+  static bool DisableHaltCompiler;
   // Enables the class-level where constraints
   // true => allow the feature, false => disable the feature
   static bool EnableClassLevelWhereClauses;

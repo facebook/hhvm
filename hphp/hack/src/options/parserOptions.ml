@@ -91,6 +91,11 @@ let disable_unset_class_const = GlobalOptions.po_disable_unset_class_const
 
 let parser_errors_only = GlobalOptions.po_parser_errors_only
 
+let disable_halt_compiler = GlobalOptions.po_disable_halt_compiler
+
+let with_disable_halt_compiler po b =
+  { po with GlobalOptions.po_disable_halt_compiler = b }
+
 let make
     ~auto_namespace_map
     ~codegen
@@ -108,7 +113,8 @@ let make
     ~disallow_silence
     ~const_static_props
     ~abstract_static_props
-    ~disable_unset_class_const =
+    ~disable_unset_class_const
+    ~disable_halt_compiler =
   GlobalOptions.
     {
       default with
@@ -130,4 +136,5 @@ let make
       tco_const_static_props = const_static_props;
       po_abstract_static_props = abstract_static_props;
       po_disable_unset_class_const = disable_unset_class_const;
+      po_disable_halt_compiler = disable_halt_compiler;
     }

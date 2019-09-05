@@ -46,6 +46,7 @@ type t = {
   option_phpism_disallow_execution_operator: bool;
   option_phpism_disable_nontoplevel_declarations: bool;
   option_phpism_disable_static_closures: bool;
+  option_phpism_disable_halt_compiler: bool;
   option_emit_func_pointers: bool;
   option_emit_cls_meth_pointers: bool;
   option_emit_inst_meth_pointers: bool;
@@ -106,6 +107,7 @@ let default =
     option_phpism_disallow_execution_operator = false;
     option_phpism_disable_nontoplevel_declarations = false;
     option_phpism_disable_static_closures = false;
+    option_phpism_disable_halt_compiler = false;
     option_emit_func_pointers = true;
     option_emit_cls_meth_pointers = true;
     option_emit_inst_meth_pointers = true;
@@ -198,6 +200,8 @@ let phpism_disable_nontoplevel_declarations o =
 
 let phpism_disable_static_closures o = o.option_phpism_disable_static_closures
 
+let phpism_disable_halt_compiler o = o.option_phpism_disable_halt_compiler
+
 let emit_func_pointers o = o.option_emit_func_pointers
 
 let emit_cls_meth_pointers o = o.option_emit_cls_meth_pointers
@@ -287,6 +291,8 @@ let to_string o =
       @@ phpism_disable_nontoplevel_declarations o;
       Printf.sprintf "phpism_disable_static_closures %B"
       @@ phpism_disable_static_closures o;
+      Printf.sprintf "phpism_disable_halt_compiler: %B"
+      @@ phpism_disable_halt_compiler o;
       Printf.sprintf "emit_func_pointers: %B" @@ emit_func_pointers o;
       Printf.sprintf "emit_cls_meth_pointers: %B" @@ emit_cls_meth_pointers o;
       Printf.sprintf "emit_inst_meth_pointers: %B" @@ emit_inst_meth_pointers o;
@@ -408,6 +414,8 @@ let set_option options name value =
     }
   | "hack.lang.phpism.disablestaticclosures" ->
     { options with option_phpism_disable_static_closures = as_bool value }
+  | "hhvm.lang.phpism.disablehaltcompiler" ->
+    { options with option_phpism_disable_halt_compiler = as_bool value }
   | "hhvm.emit_func_pointers" ->
     { options with option_emit_func_pointers = int_of_string value > 0 }
   | "hhvm.emit_cls_meth_pointers" ->
@@ -618,6 +626,11 @@ let value_setters =
         get_value_from_config_int
     @@ fun opts v ->
     { opts with option_phpism_disable_static_closures = v = 1 } );
+    ( set_value
+        "hhvm.hack.lang.phpism.disable_halt_compiler"
+        get_value_from_config_int
+    @@ (fun opts v -> { opts with option_phpism_disable_halt_compiler = v = 1 })
+    );
     ( set_value "hhvm.emit_func_pointers" get_value_from_config_int
     @@ (fun opts v -> { opts with option_emit_func_pointers = v > 0 }) );
     ( set_value "hhvm.emit_cls_meth_pointers" get_value_from_config_int

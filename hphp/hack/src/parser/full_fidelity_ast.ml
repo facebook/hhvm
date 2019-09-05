@@ -1961,7 +1961,7 @@ if there already is one, since that one will likely be better than this one. *)
             | (_, Some TK.HexadecimalLiteral)
             (* We allow underscores while lexing the integer literals. This gets rid of them before
              * the literal is created. *)
-            
+
             | (_, Some TK.BinaryLiteral) ->
               Int (Str.global_replace underscore "" s)
             | (_, Some TK.FloatingLiteral) -> Float s
@@ -3950,10 +3950,10 @@ if there already is one, since that one will likely be better than this one. *)
     let rec aux env acc = function
       | []
       (* EOF happens only as the last token in the list. *)
-      
+
       | [{ syntax = EndOfFile _; _ }] ->
         List.concat (List.rev acc)
-      (* HaltCompiler stops processing the list *)
+      (* HaltCompiler stops processing the list in PHP but can be disabled in Hack *)
       | ( {
             syntax =
               ExpressionStatement
@@ -3965,8 +3965,13 @@ if there already is one, since that one will likely be better than this one. *)
             _;
           } as cur_node )
         :: nodel ->
+        ( if ParserOptions.disable_halt_compiler env.parser_options then
+          raise_parsing_error
+            env
+            (`Node cur_node)
+            SyntaxError.halt_compiler_is_disabled
         (* If we saw COMPILER_HALT_OFFSET, calculate the position of HALT_COMPILER *)
-        ( if !(env.saw_compiler_halt_offset) <> None then
+        else if !(env.saw_compiler_halt_offset) <> None then
           let local_ignore_pos = env.ignore_pos in
           let () = env.ignore_pos <- false in
           let pos = pPos cur_node env in

@@ -508,6 +508,7 @@ let make_popt () =
       ~disable_nontoplevel_declarations:
         (phpism_disable_nontoplevel_declarations co)
       ~disable_static_closures:(phpism_disable_static_closures co)
+      ~disable_halt_compiler:(phpism_disable_halt_compiler co)
       ~disable_lval_as_an_expression:(disable_lval_as_an_expression co)
       ~enable_constant_visibility_modifiers:
         (enable_constant_visibility_modifiers co)

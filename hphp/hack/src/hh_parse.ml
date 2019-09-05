@@ -72,6 +72,7 @@ module FullFidelityParseArgs = struct
     const_default_func_args: bool;
     const_static_props: bool;
     abstract_static_props: bool;
+    disable_halt_compiler: bool;
   }
 
   let make
@@ -108,7 +109,8 @@ module FullFidelityParseArgs = struct
       disable_legacy_attribute_syntax
       const_default_func_args
       const_static_props
-      abstract_static_props =
+      abstract_static_props
+      disable_halt_compiler =
     {
       full_fidelity_json;
       full_fidelity_dot;
@@ -144,6 +146,7 @@ module FullFidelityParseArgs = struct
       const_default_func_args;
       const_static_props;
       abstract_static_props;
+      disable_halt_compiler;
     }
 
   let parse_args () =
@@ -196,6 +199,7 @@ module FullFidelityParseArgs = struct
     let const_default_func_args = ref false in
     let const_static_props = ref false in
     let abstract_static_props = ref false in
+    let disable_halt_compiler = ref false in
     let options =
       [ (* modes *)
         ( "--full-fidelity-json",
@@ -331,7 +335,10 @@ No errors are filtered out."
           "Enable static properties to be const" );
         ( "--abstract-static-props",
           Arg.Set abstract_static_props,
-          "Enable abstract static properties" ) ]
+          "Enable abstract static properties" );
+        ( "--disable-halt-compiler",
+          Arg.Set disable_halt_compiler,
+          "Disable using PHP __halt_compiler()" ) ]
     in
     Arg.parse options push_file usage;
     let modes =
@@ -384,6 +391,7 @@ No errors are filtered out."
       !const_default_func_args
       !const_static_props
       !abstract_static_props
+      !disable_halt_compiler
 end
 
 open FullFidelityParseArgs
@@ -444,6 +452,9 @@ let handle_existing_file args filename =
   in
   let popt =
     ParserOptions.with_abstract_static_props popt args.abstract_static_props
+  in
+  let popt =
+    ParserOptions.with_disable_halt_compiler popt args.disable_halt_compiler
   in
   (* Parse with the full fidelity parser *)
   let file = Relative_path.create Relative_path.Dummy filename in

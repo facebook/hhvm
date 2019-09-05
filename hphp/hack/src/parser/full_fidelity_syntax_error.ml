@@ -949,6 +949,8 @@ let concurrent_is_disabled = "Concurrent is disabled"
 
 let static_closures_are_disabled = "Static closures are not supported in Hack"
 
+let halt_compiler_is_disabled = "__halt_compiler() is not supported in Hack"
+
 let invalid_await_position =
   "Await cannot be used as an expression in this "
   ^ "location because it's conditionally executed."

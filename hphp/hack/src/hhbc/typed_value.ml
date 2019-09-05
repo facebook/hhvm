@@ -32,9 +32,11 @@ type t =
   | VArray of t list
   | DArray of (t * t) list
   (* Hack arrays: vectors, keysets, and dictionaries *)
-  | Vec of t list
+  | Vec of t list * prov_tag
   | Keyset of t list
-  | Dict of (t * t) list
+  | Dict of (t * t) list * prov_tag
+
+and prov_tag = Pos.t option
 
 module TVMap : MyMap.S with type key = t = MyMap.Make (struct
   type key = t
@@ -92,21 +94,21 @@ let to_bool v =
   | Int i -> i <> Int64.zero
   | Float f -> f <> 0.0
   (* Empty collections cast to false *)
-  | Dict []
+  | Dict ([], _)
   | Array []
   | VArray []
   | DArray []
   | Keyset []
-  | Vec [] ->
+  | Vec ([], _) ->
     false
   (* Non-empty collections cast to true *)
   | HhasAdata _
-  | Dict _
+  | Dict (_, _)
   | Array _
   | VArray _
   | DArray _
   | Keyset _
-  | Vec _ ->
+  | Vec (_, _) ->
     true
 
 (* try to convert numeric

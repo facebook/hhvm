@@ -32,9 +32,25 @@ let adata_darray_prefix = "Y"
 
 let adata_keyset_prefix = "k"
 
-let adata_mapped_argument_to_buffer b col_type pairs f =
+let pos_to_prov_tag loc =
+  if arrprov_enabled () then
+    match loc with
+    | Some loc' ->
+      let (line, _, _) = Pos.info_pos loc' in
+      let filename = Relative_path.to_absolute @@ Pos.filename loc' in
+      Printf.sprintf
+        "p:i:%d;s:%d:%s;"
+        line
+        (String.length filename)
+        (SU.quote_string_with_escape filename)
+    | None -> ""
+  else
+    ""
+
+let adata_mapped_argument_to_buffer b col_type loc pairs f =
   let num = List.length pairs in
-  Printf.sprintf "%s:%d:{" col_type num |> Acc.add b;
+  let prov_str = pos_to_prov_tag loc in
+  Printf.sprintf "%s:%d:{%s" col_type num prov_str |> Acc.add b;
   List.iter pairs ~f:(f b);
   Acc.add b "}"
 
@@ -52,25 +68,25 @@ let rec adata_to_buffer b argument =
   | TV.Int i -> Acc.add b @@ "i:" ^ Int64.to_string i ^ ";"
   | TV.HhasAdata data -> Acc.add b (String.escaped data)
   | TV.Array pairs ->
-    adata_dict_collection_argument_to_buffer b adata_array_prefix pairs
+    adata_dict_collection_argument_to_buffer b adata_array_prefix None pairs
   | TV.VArray values ->
-    adata_collection_argument_to_buffer b adata_varray_prefix values
-  | TV.Vec values ->
-    adata_collection_argument_to_buffer b adata_vec_prefix values
-  | TV.Dict pairs ->
-    adata_dict_collection_argument_to_buffer b adata_dict_prefix pairs
+    adata_collection_argument_to_buffer b adata_varray_prefix None values
+  | TV.Vec (values, loc) ->
+    adata_collection_argument_to_buffer b adata_vec_prefix loc values
+  | TV.Dict (pairs, loc) ->
+    adata_dict_collection_argument_to_buffer b adata_dict_prefix loc pairs
   | TV.DArray pairs ->
-    adata_dict_collection_argument_to_buffer b adata_darray_prefix pairs
+    adata_dict_collection_argument_to_buffer b adata_darray_prefix None pairs
   | TV.Keyset values ->
-    adata_collection_argument_to_buffer b adata_keyset_prefix values
+    adata_collection_argument_to_buffer b adata_keyset_prefix None values
 
-and adata_dict_collection_argument_to_buffer b col_type pairs =
-  adata_mapped_argument_to_buffer b col_type pairs (fun b (v1, v2) ->
+and adata_dict_collection_argument_to_buffer b col_type loc pairs =
+  adata_mapped_argument_to_buffer b col_type loc pairs (fun b (v1, v2) ->
       adata_to_buffer b v1;
       adata_to_buffer b v2)
 
-and adata_collection_argument_to_buffer b col_type fields =
-  adata_mapped_argument_to_buffer b col_type fields adata_to_buffer
+and adata_collection_argument_to_buffer b col_type loc fields =
+  adata_mapped_argument_to_buffer b col_type loc fields adata_to_buffer
 
 let attribute_to_string a =
   let name = Hhas_attribute.name a in

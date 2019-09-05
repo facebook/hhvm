@@ -241,7 +241,7 @@ let emit_reified_extends_params env class_ =
   if List.is_empty type_params then
     let tv =
       if hack_arr_dv_arrs () then
-        TV.Vec []
+        TV.Vec ([], None)
       else
         TV.VArray []
     in

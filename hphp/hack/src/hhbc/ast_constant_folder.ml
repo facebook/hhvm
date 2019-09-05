@@ -124,7 +124,8 @@ let try_type_intlike (s : string) : TV.t option =
 (* Literal expressions can be converted into values *)
 (* Restrict_keys flag forces keys to be only ints or strings *)
 let rec expr_to_typed_value
-    ?(allow_maps = false) ?(restrict_keys = false) ns (_, expr_) =
+    ?(allow_maps = false) ?(restrict_keys = false) ns ((_, expr_) as expr) =
+  let pos = Tast_annotate.get_pos expr in
   match expr_ with
   | A.Int s ->
     begin
@@ -145,11 +146,11 @@ let rec expr_to_typed_value
   | A.Varray (_, fields) -> varray_to_typed_value ns fields
   | A.Darray (_, fields) -> darray_to_typed_value ns fields
   | A.Collection ((_, "vec"), _, fields) ->
-    TV.Vec (List.map fields (value_afield_to_typed_value ns))
+    TV.Vec (List.map fields (value_afield_to_typed_value ns), Some pos)
   | A.ValCollection (A.Vec, _, el)
   | A.ValCollection (A.Vector, _, el) ->
     let fields = List.map el ~f:(fun e -> Aast.AFvalue e) in
-    TV.Vec (List.map fields (value_afield_to_typed_value ns))
+    TV.Vec (List.map fields (value_afield_to_typed_value ns), Some pos)
   | A.Collection ((_, "keyset"), _, fields) ->
     let l =
       List.fold_left
@@ -177,7 +178,7 @@ let rec expr_to_typed_value
       List.map fields ~f:(afield_to_typed_value_pair ~restrict_keys ns)
     in
     let d = update_duplicates_in_map values in
-    TV.Dict d
+    TV.Dict (d, Some pos)
   | A.KeyValCollection (A.Dict, _, fields)
   | A.KeyValCollection (A.Map, _, fields)
   | A.KeyValCollection (A.ImmMap, _, fields) ->
@@ -186,20 +187,20 @@ let rec expr_to_typed_value
       List.map fields ~f:(afield_to_typed_value_pair ~restrict_keys ns)
     in
     let d = update_duplicates_in_map values in
-    TV.Dict d
+    TV.Dict (d, Some pos)
   | A.Collection ((_, kind), _, fields)
     when allow_maps
          && ( SU.cmp ~case_sensitive:false ~ignore_ns:true kind "Set"
             || SU.cmp ~case_sensitive:false ~ignore_ns:true kind "ImmSet" ) ->
     let values = List.map fields ~f:(set_afield_to_typed_value_pair ns) in
     let d = update_duplicates_in_map values in
-    TV.Dict d
+    TV.Dict (d, Some pos)
   | A.ValCollection (A.Set, _, el)
   | A.ValCollection (A.ImmSet, _, el) ->
     let fields = List.map el ~f:(fun e -> Aast.AFvalue e) in
     let values = List.map fields ~f:(set_afield_to_typed_value_pair ns) in
     let d = update_duplicates_in_map values in
-    TV.Dict d
+    TV.Dict (d, Some pos)
   | A.Shape fields -> shape_to_typed_value ns fields
   | A.Class_const (cid, id) -> class_const_to_typed_value ns cid id
   | A.BracedExpr e -> expr_to_typed_value ~allow_maps ~restrict_keys ns e

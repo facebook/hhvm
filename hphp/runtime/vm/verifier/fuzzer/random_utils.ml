@@ -83,9 +83,9 @@ let rec random_typed_value () : Typed_value.t =
    (fun () -> Typed_value.String "");
    (fun () -> Typed_value.Null);
    (fun () -> Typed_value.Array [random_typed_value (), random_typed_value ()]);
-   (fun () -> Typed_value.Vec [random_typed_value ()]);
+   (fun () -> Typed_value.Vec ([random_typed_value ()], None));
    (fun () -> Typed_value.Keyset [random_typed_value ()]);
-   (fun () -> Typed_value.Dict [random_typed_value (), random_typed_value ()])]
+   (fun () -> Typed_value.Dict ([random_typed_value (), random_typed_value ()], None))]
    |> rand_elt) ()
 
 let random_key () : MemberKey.t =

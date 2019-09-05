@@ -17,13 +17,13 @@ let hack_arr_dv_arrs () =
 
 let vec_or_varray l =
   if hack_arr_dv_arrs () then
-    TV.Vec l
+    TV.Vec (l, None)
   else
     TV.VArray l
 
 let dict_or_darray kv =
   if hack_arr_dv_arrs () then
-    TV.Dict kv
+    TV.Dict (kv, None)
   else
     TV.DArray kv
 

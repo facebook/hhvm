@@ -219,8 +219,7 @@ function test_multiple_type(C1 $c1, C2 $c2, bool $cond): arraykey {
 
 let multiple_type_cases =
   [ (("multiple_type.php", 6, 10), "(C1 | C2)");
-    (("multiple_type.php", 6, 14), "((function(): int) | (function(): string))")
-  ]
+    (("multiple_type.php", 6, 14), "(function(): (int | string))") ]
 
 let lambda_param =
   "<?hh // strict

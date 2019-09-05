@@ -1,6 +1,0 @@
-File "cond_typeconstant1.php", line 18, characters 5-24:
-Cannot invoke conditionally reactive function in reactive context, because at least one reactivity condition is not met. (Typing[4237])
-File "cond_typeconstant1.php", line 21, characters 49-70:
-Receiver type must be a subtype of \IRxSomeBaseClass, now ~this::TTest#\IRxTest::TTest.
-File "cond_typeconstant1.php", line 6, characters 26-37:
-This is the function declaration

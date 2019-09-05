@@ -1,0 +1,6 @@
+File "union_polyvariant.php", line 17, characters 27-41:
+This expression is always false (Typing[4118])
+File "union_polyvariant.php", line 8, characters 25-30:
+This is a string
+File "union_polyvariant.php", line 17, characters 41-41:
+This is an int

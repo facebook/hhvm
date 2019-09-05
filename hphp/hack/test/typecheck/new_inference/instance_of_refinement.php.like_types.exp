@@ -16,24 +16,20 @@ File "instance_of_refinement.php", line 8, characters 23-23:
 Expected ~T#1 because it is an unenforceable type
 File "instance_of_refinement.php", line 41, characters 13-14:
 But got string
-File "instance_of_refinement.php", line 41, characters 9-11:
-No method 'set' in B (Typing[4053])
-File "instance_of_refinement.php", line 39, characters 12-12:
-This is why I think it is an object of type B
-File "instance_of_refinement.php", line 12, characters 7-7:
-Declaration of B is here
 File "instance_of_refinement.php", line 42, characters 16-24:
 Invalid argument (Typing[4110])
 File "instance_of_refinement.php", line 15, characters 21-23:
 Expected int
 File "instance_of_refinement.php", line 5, characters 26-26:
 But got dynamic because it is an unenforceable type
-File "instance_of_refinement.php", line 42, characters 20-22:
-No method 'get' in B (Typing[4053])
-File "instance_of_refinement.php", line 39, characters 12-12:
-This is why I think it is an object of type B
-File "instance_of_refinement.php", line 12, characters 7-7:
-Declaration of B is here
+File "instance_of_refinement.php", line 42, characters 16-24:
+Invalid argument (Typing[4110])
+File "instance_of_refinement.php", line 15, characters 21-23:
+Expected int
+File "instance_of_refinement.php", line 40, characters 13-16:
+But got T#1 from this is expression test
+File "instance_of_refinement.php", line 5, characters 26-26:
+  via this generic T
 File "instance_of_refinement.php", line 50, characters 16-24:
 Invalid argument (Typing[4110])
 File "instance_of_refinement.php", line 15, characters 21-23:

@@ -2251,7 +2251,6 @@ and expr_
         (CIexpr instance)
         meth
         (fun x -> x)
-        (fun x -> x)
     in
     let (env, result) =
       Env.FakeMembers.check_instance_invalid env instance (snd meth) result
@@ -2297,7 +2296,6 @@ and expr_
           local_obj_ty
           (CI (pos, class_name))
           meth_name
-          (fun x -> x)
       in
       (match fty with
       | (reason, Tfun fty) ->
@@ -2764,7 +2762,6 @@ and expr_
         cty
         mid
         cid
-        (fun x -> x)
     in
     let (env, ty) =
       Env.FakeMembers.check_static_invalid env cid (snd mid) ty
@@ -2802,7 +2799,6 @@ and expr_
         ty1
         (CIexpr e1)
         m
-        (fun x -> x)
     in
     let (env, result) =
       Env.FakeMembers.check_instance_invalid env e1 (snd m) result
@@ -3420,7 +3416,6 @@ and expr_
                   obj
                   cid
                   namepstr
-                  (fun x -> x)
               in
               let ureason = Reason.URxhp (Cls.name class_info, snd namepstr) in
               Typing_coercion.coerce_type
@@ -3500,7 +3495,6 @@ and class_const ?(incl_tc = false) env p ((cpos, cid), mid) =
       cty
       mid
       cid
-      (fun x -> x)
   in
   make_result env p (T.Class_const (ce, mid)) const_ty
 
@@ -4328,7 +4322,6 @@ and assign_ p ur env e1 ty2 =
         obj_ty
         (CIexpr e1)
         m
-        (fun x -> x)
     in
     let te1 =
       Tast.make_typed_expr
@@ -4387,7 +4380,6 @@ and assign_ p ur env e1 ty2 =
         cty
         (pos_member, y)
         x
-        (fun x -> x)
     in
     let (env, local) = Env.FakeMembers.make_static env x y in
     let env = set_valid_rvalue p env local ty2 in
@@ -4676,23 +4668,6 @@ and dispatch_call
   in
   let check_class_function_in_suspend class_name function_name =
     check_function_in_suspend (class_name ^ "::" ^ function_name)
-  in
-  let method_get_helper env getter call_continuation =
-    let tel = ref [] and tuel = ref [] and tftyl = ref [] in
-    let k (env, fty) =
-      let (env, (tel_, tuel_, method_)) = call_continuation env fty in
-      tel := tel_;
-      tuel := tuel_;
-      tftyl := fty :: !tftyl;
-      (env, method_)
-    in
-    let (env, ty) = getter env k in
-    let tfty =
-      match !tftyl with
-      | [fty] -> fty
-      | tftyl -> (Reason.none, Tunion tftyl)
-    in
-    (env, ty, tfty, !tel, !tuel)
   in
   match fun_expr with
   (* Special function `echo` *)
@@ -5263,48 +5238,44 @@ and dispatch_call
     let is_static =
       e1 <> CIparent || Env.is_static env || class_contains_smethod env ty1 m
     in
-    let getter =
+    let (env, fty) =
       if is_static then
-        fun env k ->
-      class_get
-        ~coerce_from_ty:None
-        ~is_method:true
-        ~is_const:false
-        ~explicit_tparams:tal
-        env
-        ty1
-        m
-        e1
-        k
+        class_get
+          ~coerce_from_ty:None
+          ~is_method:true
+          ~is_const:false
+          ~explicit_tparams:tal
+          env
+          ty1
+          m
+          e1
       else
         (* parent::nonStaticFunc() is really weird. It's calling a method
          * defined on the parent class, but $this is still the child class.
          * We can deal with this by hijacking the continuation that
          * calculates the SN.Typehints.this type *)
         let k_lhs _ = this_ty in
-        fun env k ->
-          obj_get_
-            ~inst_meth:false
-            ~is_method:true
-            ~nullsafe:None
-            ~obj_pos:pos
-            ~coerce_from_ty:None
-            ~pos_params:(Some el)
-            env
-            ty1
-            e1
-            m
-            k
-            k_lhs
-    in
-    let call_continuation env fty =
-      let env = check_coroutine_call env fty in
-      let ty =
-        if e1 = CIparent then
-          this_ty
-        else
+        obj_get_
+          ~inst_meth:false
+          ~is_method:true
+          ~nullsafe:None
+          ~obj_pos:pos
+          ~coerce_from_ty:None
+          ~pos_params:(Some el)
+          env
           ty1
-      in
+          e1
+          m
+          k_lhs
+    in
+    let env = check_coroutine_call env fty in
+    let ty =
+      if e1 = CIparent then
+        this_ty
+      else
+        ty1
+    in
+    let (env, (tel, tuel, ty)) =
       call
         ~expected
         ~method_call_info:
@@ -5319,16 +5290,13 @@ and dispatch_call
         el
         uel
     in
-    let (env, method_, fty, tel, tuel) =
-      method_get_helper env getter call_continuation
-    in
     make_call
       env
       (Tast.make_typed_expr fpos fty (T.Class_const (tcid, m)))
       tal
       tel
       tuel
-      method_
+      ty
   (* <<__PPL>>: sample, factor, observe, condition *)
   | Id (pos, id) when env.inside_ppl_class && SN.PPLFunctions.is_reserved id ->
     let m = (pos, String_utils.lstrip id "\\") in
@@ -5338,22 +5306,7 @@ and dispatch_call
       static_class_id ~check_constraints:true p env [] infer_e
     in
     let nullsafe = None in
-    let call_continuation env fty =
-      call
-        ~expected
-        ~method_call_info:
-          (TR.make_call_info
-             ~receiver_is_self:false
-             ~is_static:false
-             ty1
-             (snd m))
-        p
-        env
-        fty
-        el
-        uel
-    in
-    let getter env k =
+    let (env, tfty) =
       obj_get
         ~obj_pos:p
         ~is_method:true
@@ -5365,10 +5318,21 @@ and dispatch_call
         ty1
         infer_e
         m
-        k
     in
-    let (env, ty, tfty, tel, tuel) =
-      method_get_helper env getter call_continuation
+    let (env, (tel, tuel, ty)) =
+      call
+        ~expected
+        ~method_call_info:
+          (TR.make_call_info
+             ~receiver_is_self:false
+             ~is_static:false
+             ty1
+             (snd m))
+        p
+        env
+        tfty
+        el
+        uel
     in
     make_call env (Tast.make_typed_expr fpos tfty (T.Fun_id m)) tal tel tuel ty
   (* Call instance method *)
@@ -5380,23 +5344,7 @@ and dispatch_call
       | OG_nullthrows -> None
       | OG_nullsafe -> Some p
     in
-    let call_continuation env fty =
-      let env = check_coroutine_call env fty in
-      call
-        ~expected
-        ~method_call_info:
-          (TR.make_call_info
-             ~receiver_is_self:false
-             ~is_static:false
-             ty1
-             (snd m))
-        p
-        env
-        fty
-        el
-        uel
-    in
-    let getter env k =
+    let (env, tfty) =
       obj_get
         ~obj_pos:(fst e1)
         ~is_method
@@ -5408,10 +5356,23 @@ and dispatch_call
         ty1
         (CIexpr e1)
         m
-        k
     in
-    let (env, ty, tfty, tel, tuel) =
-      method_get_helper env getter call_continuation
+    let env = check_coroutine_call env tfty in
+    let (env, (tel, tuel, ty)) =
+      call
+        ~nullsafe
+        ~expected
+        ~method_call_info:
+          (TR.make_call_info
+             ~receiver_is_self:false
+             ~is_static:false
+             ty1
+             (snd m))
+        p
+        env
+        tfty
+        el
+        uel
     in
     make_call
       env
@@ -5528,8 +5489,7 @@ and class_get
     env
     cty
     (p, mid)
-    cid
-    k =
+    cid =
   let (env, this_ty) =
     if is_method then
       this_for_method env cid cty
@@ -5547,7 +5507,6 @@ and class_get
     cid
     cty
     (p, mid)
-    k
 
 and class_get_
     ~is_method
@@ -5559,13 +5518,12 @@ and class_get_
     env
     cid
     cty
-    (p, mid)
-    k =
+    (p, mid) =
   let (env, cty) = Env.expand_type env cty in
   match cty with
-  | (r, Tany _) -> k (env, (r, Typing_utils.tany env))
-  | (r, Terr) -> k (env, err_witness env (Reason.to_pos r))
-  | (_, Tdynamic) -> k (env, cty)
+  | (r, Tany _) -> (env, (r, Typing_utils.tany env))
+  | (r, Terr) -> (env, err_witness env (Reason.to_pos r))
+  | (_, Tdynamic) -> (env, cty)
   | (_, Tunion tyl) ->
     let (env, tyl) =
       List.map_env env tyl (fun env ty ->
@@ -5578,8 +5536,7 @@ and class_get_
             env
             ty
             (p, mid)
-            cid
-            k)
+            cid)
     in
     Union.union_list env (fst cty) tyl
   | (_, Tintersection tyl) ->
@@ -5594,8 +5551,7 @@ and class_get_
             env
             ty
             (p, mid)
-            cid
-            k)
+            cid)
     in
     Inter.intersect_list env (fst cty) tyl
   | (_, Tabstract (_, Some ty)) ->
@@ -5610,7 +5566,6 @@ and class_get_
       cid
       ty
       (p, mid)
-      k
   | (_, Tabstract (_, None)) ->
     let resl =
       TUtils.try_over_concrete_supertypes env cty (fun env ty ->
@@ -5624,8 +5579,7 @@ and class_get_
             env
             cid
             ty
-            (p, mid)
-            k)
+            (p, mid))
     in
     begin
       match resl with
@@ -5635,7 +5589,7 @@ and class_get_
           p
           (Typing_print.error env cty)
           (Reason.to_pos (fst cty));
-        k (env, err_witness env p)
+        (env, err_witness env p)
       | ((_, ty) as res) :: rest ->
         if List.exists rest (fun (_, ty') -> not @@ ty_equal ty' ty) then (
           Errors.ambiguous_member
@@ -5643,14 +5597,14 @@ and class_get_
             p
             (Typing_print.error env cty)
             (Reason.to_pos (fst cty));
-          k (env, err_witness env p)
+          (env, err_witness env p)
         ) else
           res
     end
   | (_, Tclass ((_, c), _, paraml)) ->
     let class_ = Env.get_class env c in
     (match class_ with
-    | None -> k (env, (Reason.Rwitness p, Typing_utils.tany env))
+    | None -> (env, (Reason.Rwitness p, Typing_utils.tany env))
     | Some class_ ->
       (* We need to instantiate generic parameters in the method signature *)
       let ety_env =
@@ -5662,7 +5616,7 @@ and class_get_
           validate_dty = None;
         }
       in
-      let get_smember_from_constraints env class_info k =
+      let get_smember_from_constraints env class_info =
         let upper_bounds =
           Sequence.to_list
             (Cls.upper_bounds_on_this_from_constraints class_info)
@@ -5685,16 +5639,13 @@ and class_get_
           cid
           inter_ty
           (p, mid)
-          k
       in
-      let try_get_smember_from_constraints env class_info k =
-        k
-          (Errors.try_with_result
-             (fun () ->
-               get_smember_from_constraints env class_info (fun x -> x))
-             (fun _ _ ->
-               smember_not_found p ~is_const ~is_method class_info mid;
-               (env, (Reason.Rnone, Typing_utils.terr env))))
+      let try_get_smember_from_constraints env class_info =
+        Errors.try_with_result
+          (fun () -> get_smember_from_constraints env class_info)
+          (fun _ _ ->
+            smember_not_found p ~is_const ~is_method class_info mid;
+            (env, (Reason.Rnone, Typing_utils.terr env)))
       in
       if is_const then (
         let const =
@@ -5709,10 +5660,10 @@ and class_get_
         in
         match const with
         | None when Cls.has_upper_bounds_on_this_from_constraints class_ ->
-          try_get_smember_from_constraints env class_ k
+          try_get_smember_from_constraints env class_
         | None ->
           smember_not_found p ~is_const ~is_method class_ mid;
-          k (env, (Reason.Rnone, Typing_utils.terr env))
+          (env, (Reason.Rnone, Typing_utils.terr env))
         | Some { cc_type; cc_abstract; cc_pos; cc_visibility; _ } ->
           let p_vis = Reason.to_pos (fst cc_type) in
           TVis.check_class_access
@@ -5730,17 +5681,17 @@ and class_get_
             | _ ->
               let cc_name = Cls.name class_ ^ "::" ^ mid in
               Errors.abstract_const_usage p cc_pos cc_name );
-          k (env, cc_locl_type)
+          (env, cc_locl_type)
       ) else
         let static_member_opt =
           Env.get_static_member is_method env class_ mid
         in
         (match static_member_opt with
         | None when Cls.has_upper_bounds_on_this_from_constraints class_ ->
-          try_get_smember_from_constraints env class_ k
+          try_get_smember_from_constraints env class_
         | None ->
           smember_not_found p ~is_const ~is_method class_ mid;
-          k (env, (Reason.Rnone, Typing_utils.terr env))
+          (env, (Reason.Rnone, Typing_utils.terr env))
         | Some
             {
               ce_visibility = vis;
@@ -5789,8 +5740,7 @@ and class_get_
             if Cls.has_upper_bounds_on_this_from_constraints class_ then
               let ((env, member_ty'), succeed) =
                 Errors.try_with_result
-                  (fun () ->
-                    (get_smember_from_constraints env class_ (fun x -> x), true))
+                  (fun () -> (get_smember_from_constraints env class_, true))
                   (fun _ _ ->
                     (* No eligible functions found in constraints *)
                     ((env, MakeType.mixed Reason.Rnone), false))
@@ -5814,14 +5764,14 @@ and class_get_
                 { et_type = member_ty; et_enforced }
                 Errors.unify_error
           in
-          k (env, member_ty)))
+          (env, member_ty)))
   | ( _,
       ( Tvar _ | Tnonnull | Tarraykind _ | Toption _ | Tprim _ | Tfun _
       | Ttuple _
       | Tanon (_, _)
       | Tobject | Tshape _ | Tdestructure _ | Tpu _ | Tpu_access _ ) ) ->
     (* should never happen; static_class_id takes care of these *)
-    k (env, (Reason.Rnone, Typing_utils.tany env))
+    (env, (Reason.Rnone, Typing_utils.tany env))
 
 and smember_not_found pos ~is_const ~is_method class_ member_name =
   let kind =
@@ -5920,8 +5870,7 @@ and obj_get
     env
     ty1
     cid
-    id
-    k =
+    id =
   obj_get_
     ~inst_meth:false
     ~is_method
@@ -5934,7 +5883,6 @@ and obj_get
     ty1
     cid
     id
-    k
     (fun x -> x)
 
 (* We know that the receiver is a concrete class: not a generic with
@@ -5986,7 +5934,6 @@ and obj_get_concrete_ty
         inter_ty
         class_id
         (id_pos, id_str)
-        (fun x -> x)
         k_lhs
     in
     begin
@@ -6257,6 +6204,49 @@ and widen_class_for_obj_get ~is_method ~nullsafe member_name env ty =
     end
   | _ -> (env, None)
 
+(* `ty` is expected to be the type for a property or method that has been
+ * accessed using the nullsafe operatore e.g. $x?->prop or $x?->foo(...).
+ *
+ * For properties, just make the type nullable.
+ * For methods, we expect a function type, and make the return type nullable.
+ * But in the case that we have type dynamic, or err, or any, or nothing, we
+ * just use the type `null`. The `call` helper will deal appropriately
+ * with it.
+ *)
+and make_nullable_member_type env ~is_method id_pos pos ty =
+  if is_method then
+    match ty with
+    | (r, Tfun tf) ->
+      let (env, ty) =
+        make_nullable_member_type
+          ~is_method:false
+          env
+          id_pos
+          pos
+          tf.ft_ret.et_type
+      in
+      (env, (r, Tfun { tf with ft_ret = { tf.ft_ret with et_type = ty } }))
+    | (r, Tunion (_ :: _ as tyl)) ->
+      let (env, tyl) =
+        List.map_env env tyl (fun env ty ->
+            make_nullable_member_type ~is_method env id_pos pos ty)
+      in
+      Union.union_list env r tyl
+    | (r, Tintersection tyl) ->
+      let (env, tyl) =
+        List.map_env env tyl (fun env ty ->
+            make_nullable_member_type ~is_method env id_pos pos ty)
+      in
+      Inter.intersect_list env r tyl
+    | (_, (Terr | Tdynamic | Tany _)) -> (env, ty)
+    | (_, Tunion []) -> (env, MakeType.null (Reason.Rnullsafe_op pos))
+    | _ ->
+      (* Shouldn't happen *)
+      make_nullable_member_type ~is_method:false env id_pos pos ty
+  else
+    let (env, ty) = Typing_solver.non_null env id_pos ty in
+    (env, MakeType.nullable (Reason.Rnullsafe_op pos) ty)
+
 (* k_lhs takes the type of the object receiver *)
 and obj_get_
     ~inst_meth
@@ -6270,7 +6260,6 @@ and obj_get_
     ty1
     cid
     ((id_pos, id_str) as id)
-    k
     k_lhs =
   let (env, ety1) =
     if is_method then
@@ -6305,11 +6294,9 @@ and obj_get_
           ty
           cid
           id
-          k
           k_lhs
       in
-      let (env, method_) = Typing_solver.non_null env id_pos method_ in
-      (env, MakeType.nullable (Reason.Rnullsafe_op p1) method_)
+      make_nullable_member_type ~is_method env id_pos p1 method_
     | None ->
       Errors.null_member
         id_str
@@ -6317,7 +6304,7 @@ and obj_get_
         (Reason.to_string
            "This is what makes me believe it can be null"
            (fst ety1));
-      k (env, (fst ety1, Typing_utils.terr env))
+      (env, (fst ety1, Typing_utils.terr env))
   in
   match ety1 with
   | (_, Tunion tyl) ->
@@ -6335,7 +6322,6 @@ and obj_get_
             ty
             cid
             id
-            k
             k_lhs)
     in
     Union.union_list env (fst ety1) tyl
@@ -6354,7 +6340,6 @@ and obj_get_
             ty
             cid
             id
-            k
             k_lhs)
     in
     Inter.intersect_list env (fst ety1) tyl
@@ -6376,7 +6361,6 @@ and obj_get_
       ty
       cid
       id
-      k
       k_lhs'
   | (p', Tabstract (ak, _)) ->
     let resl =
@@ -6408,7 +6392,7 @@ and obj_get_
           id_pos
           (Typing_print.error env ety1)
           (Reason.to_pos (fst ety1));
-        k (env, err_witness env id_pos)
+        (env, err_witness env id_pos)
       | ((_env, ty) as res) :: rest ->
         if List.exists rest (fun (_, ty') -> not @@ ty_equal ty' ty) then (
           Errors.ambiguous_member
@@ -6416,9 +6400,9 @@ and obj_get_
             id_pos
             (Typing_print.error env ety1)
             (Reason.to_pos (fst ety1));
-          k (env, err_witness env id_pos)
+          (env, err_witness env id_pos)
         ) else
-          k res
+          res
     end
   | (_, Toption ty) -> nullable_obj_get ty
   | (r, Tprim Tnull) ->
@@ -6430,19 +6414,18 @@ and obj_get_
       id_str
       id_pos
       (Reason.to_string "It is unknown" r);
-    k (env, (r, Typing_utils.terr env))
+    (env, (r, Typing_utils.terr env))
   | (_, _) ->
-    k
-      (obj_get_concrete_ty
-         ~inst_meth
-         ~is_method
-         ~explicit_tparams
-         ~coerce_from_ty
-         env
-         ety1
-         cid
-         id
-         k_lhs)
+    obj_get_concrete_ty
+      ~inst_meth
+      ~is_method
+      ~explicit_tparams
+      ~coerce_from_ty
+      env
+      ety1
+      cid
+      id
+      k_lhs
 
 and class_id_for_new ~exact p env cid tal =
   let (env, te, cid_ty) =
@@ -6881,397 +6864,453 @@ and inout_write_back env { fp_type; _ } (_, e) =
     env
   | _ -> env
 
+and is_empty_type ty =
+  match ty with
+  | (_, Tunion []) -> true
+  | _ -> false
+
 (** Typechecks a call.
 Returns in this order the typed expressions for the arguments, for the variadic arguments, and the return type. *)
-and call ~(expected : ExpectedTy.t option) ?method_call_info pos env fty el uel
-    =
-  let make_unpacked_traversable_ty pos ty =
-    MakeType.traversable (Reason.Runpack_param pos) ty
-  in
-  let resl =
-    TUtils.try_over_concrete_supertypes env fty (fun env fty ->
-        let (env, efty) =
-          Typing_solver.expand_type_and_solve
-            ~description_of_expected:"a function value"
-            env
-            pos
-            fty
-            Errors.unify_error
-        in
-        match efty with
-        | (_, (Terr | Tany _ | Tunion [] | Tdynamic)) ->
-          let el = el @ uel in
-          let (env, tel) =
-            List.map_env env el (fun env elt ->
-                let (env, te, ty) =
+and call
+    ~(expected : ExpectedTy.t option)
+    ?method_call_info
+    ?nullsafe
+    pos
+    env
+    fty
+    el
+    uel =
+  (* Special case needed for invoking a method on the empty type *)
+  if is_empty_type fty then
+    (env, ([], [], fty))
+  else
+    let make_unpacked_traversable_ty pos ty =
+      MakeType.traversable (Reason.Runpack_param pos) ty
+    in
+    let resl =
+      TUtils.try_over_concrete_supertypes env fty (fun env fty ->
+          let (env, efty) =
+            Typing_solver.expand_type_and_solve
+              ~description_of_expected:"a function value"
+              env
+              pos
+              fty
+              Errors.unify_error
+          in
+          match efty with
+          (* We allow nullsafe calls on a "null" function type, in order to type check nullsafe
+           * method invocation *)
+          | (_, Tprim Tnull) when Option.is_some nullsafe ->
+            let el = el @ uel in
+            let (env, tel) =
+              List.map_env env el (fun env elt ->
                   let expected =
                     ExpectedTy.make
                       pos
                       Reason.URparam
                       (Reason.Rnone, Typing_utils.tany env)
                   in
-                  expr ~expected ~is_func_arg:true env elt
-                in
-                let env =
-                  if IM.is_on @@ TCO.infer_missing (Env.get_tcopt env) then
-                    match efty with
-                    | (_, (Terr | Tany _ | Tdynamic)) ->
-                      Typing_coercion.coerce_type
+                  let (env, te, _) =
+                    expr ~expected ~is_func_arg:true env elt
+                  in
+                  (env, te))
+            in
+            let env = call_untyped_unpack env uel in
+            (env, (tel, [], efty))
+          | (_, (Terr | Tany _ | Tunion [] | Tdynamic)) ->
+            let el = el @ uel in
+            let (env, tel) =
+              List.map_env env el (fun env elt ->
+                  let (env, te, ty) =
+                    let expected =
+                      ExpectedTy.make
                         pos
                         Reason.URparam
-                        env
-                        ty
-                        (MakeType.unenforced efty)
-                        Errors.unify_error
+                        (Reason.Rnone, Typing_utils.tany env)
+                    in
+                    expr ~expected ~is_func_arg:true env elt
+                  in
+                  let env =
+                    if IM.is_on @@ TCO.infer_missing (Env.get_tcopt env) then
+                      match efty with
+                      | (_, (Terr | Tany _ | Tdynamic)) ->
+                        Typing_coercion.coerce_type
+                          pos
+                          Reason.URparam
+                          env
+                          ty
+                          (MakeType.unenforced efty)
+                          Errors.unify_error
+                      | _ -> env
+                    else
+                      env
+                  in
+                  let env =
+                    match elt with
+                    | (_, Callconv (Ast_defs.Pinout, e1)) ->
+                      let (env, _te, _ty) =
+                        assign_ (fst e1) Reason.URparam_inout env e1 efty
+                      in
+                      env
+                    | (_, Unop (Ast_defs.Uref, e1)) ->
+                      let (env, _te, _ty) =
+                        assign_ (fst e1) Reason.URparam env e1 efty
+                      in
+                      env
                     | _ -> env
-                  else
+                  in
+                  (env, te))
+            in
+            let env = call_untyped_unpack env uel in
+            let ty =
+              if snd efty = Tdynamic then
+                MakeType.dynamic (Reason.Rdynamic_call pos)
+              else
+                (Reason.Rnone, Typing_utils.tany env)
+            in
+            (env, (tel, [], ty))
+          | (_, Tunion [ty]) -> call ~expected ?nullsafe pos env ty el uel
+          | (r, Tunion tyl) ->
+            let (env, resl) =
+              List.map_env env tyl (fun env ty ->
+                  call ~expected ?nullsafe pos env ty el uel)
+            in
+            let retl = List.map resl ~f:(fun (_, _, x) -> x) in
+            let (env, ty) = Union.union_list env r retl in
+            (* We shouldn't be picking arbitrarily for the TAST here, as TAST checks
+             * depend on the types inferred. Here's we're preserving legacy behaviour
+             * by picking the last one.
+             * TODO: don't do this, instead use subtyping to push unions
+             * through function types
+             *)
+            let (tel, tuel, _) = List.hd_exn (List.rev resl) in
+            (env, (tel, tuel, ty))
+          | (r, Tintersection tyl) ->
+            let (env, resl) =
+              TUtils.run_on_intersection env tyl ~f:(fun env ty ->
+                  call ~expected ?nullsafe pos env ty el uel)
+            in
+            let retl = List.map resl ~f:(fun (_, _, x) -> x) in
+            let (env, ty) = Inter.intersect_list env r retl in
+            (* We shouldn't be picking arbitrarily for the TAST here, as TAST checks
+             * depend on the types inferred. Here we're preserving legacy behaviour
+             * by picking the last one.
+             * TODO: don't do this, instead use subtyping to push intersections
+             * through function types
+             *)
+            let (tel, tuel, _) = List.hd_exn (List.rev resl) in
+            (env, (tel, tuel, ty))
+          | (r2, Tfun ft) ->
+            (* Typing of format string functions. It is dependent on the arguments (el)
+             * so it cannot be done earlier.
+             *)
+            let pos_def = Reason.to_pos r2 in
+            let (env, ft) = Typing_exts.retype_magic_func env ft el in
+            check_deprecated pos ft;
+            let (env, var_param) = variadic_param env ft in
+            (* Force subtype with expected result *)
+            let env =
+              check_expected_ty "Call result" env ft.ft_ret.et_type expected
+            in
+            let env = Env.set_tyvar_variance env ft.ft_ret.et_type in
+            let is_lambda e =
+              match snd e with
+              | Efun _
+              | Lfun _ ->
+                true
+              | _ -> false
+            in
+            let get_next_param_info paraml =
+              match paraml with
+              | param :: paraml -> (false, Some param, paraml)
+              | [] -> (true, var_param, paraml)
+            in
+            let check_arg env ((pos, _) as e) opt_param ~is_variadic =
+              match opt_param with
+              | Some param ->
+                let (env, te, ty) =
+                  let expected =
+                    ExpectedTy.make_and_allow_coercion
+                      pos
+                      Reason.URparam
+                      param.fp_type
+                  in
+                  expr
+                    ~is_func_arg:true
+                    ~accept_using_var:param.fp_accept_disposable
+                    ~expected
                     env
+                    e
                 in
-                let env =
-                  match elt with
-                  | (_, Callconv (Ast_defs.Pinout, e1)) ->
-                    let (env, _te, _ty) =
-                      assign_ (fst e1) Reason.URparam_inout env e1 efty
-                    in
-                    env
-                  | (_, Unop (Ast_defs.Uref, e1)) ->
-                    let (env, _te, _ty) =
-                      assign_ (fst e1) Reason.URparam env e1 efty
-                    in
-                    env
-                  | _ -> env
-                in
-                (env, te))
-          in
-          let env = call_untyped_unpack env uel in
-          let ty =
-            if snd efty = Tdynamic then
-              MakeType.dynamic (Reason.Rdynamic_call pos)
-            else
-              (Reason.Rnone, Typing_utils.tany env)
-          in
-          (env, (tel, [], ty))
-        | (_, Tunion [ty]) -> call ~expected pos env ty el uel
-        | (r, Tunion tyl) ->
-          let (env, retl) =
-            List.map_env env tyl (fun env ty ->
-                let (env, (_, _, ty)) = call ~expected pos env ty el uel in
-                (env, ty))
-          in
-          let ty = (r, Tunion retl) in
-          (env, ([], [], ty))
-        | (r, Tintersection tyl) ->
-          let (env, resl) =
-            TUtils.run_on_intersection env tyl ~f:(fun env ty ->
-                call ~expected pos env ty el uel)
-          in
-          let retl = List.map resl ~f:(fun (_, _, x) -> x) in
-          let (env, ty) = Inter.intersect_list env r retl in
-          (env, ([], [], ty))
-        | (r2, Tfun ft) ->
-          (* Typing of format string functions. It is dependent on the arguments (el)
-           * so it cannot be done earlier.
-           *)
-          let pos_def = Reason.to_pos r2 in
-          let (env, ft) = Typing_exts.retype_magic_func env ft el in
-          check_deprecated pos ft;
-          let (env, var_param) = variadic_param env ft in
-          (* Force subtype with expected result *)
-          let env =
-            check_expected_ty "Call result" env ft.ft_ret.et_type expected
-          in
-          let env = Env.set_tyvar_variance env ft.ft_ret.et_type in
-          let is_lambda e =
-            match snd e with
-            | Efun _
-            | Lfun _ ->
-              true
-            | _ -> false
-          in
-          let get_next_param_info paraml =
-            match paraml with
-            | param :: paraml -> (false, Some param, paraml)
-            | [] -> (true, var_param, paraml)
-          in
-          let check_arg env ((pos, _) as e) opt_param ~is_variadic =
-            match opt_param with
-            | Some param ->
-              let (env, te, ty) =
+                let env = call_param env param (e, ty) ~is_variadic in
+                (env, Some (te, ty))
+              | None ->
                 let expected =
-                  ExpectedTy.make_and_allow_coercion
+                  ExpectedTy.make
                     pos
                     Reason.URparam
-                    param.fp_type
+                    (Reason.Rnone, Typing_utils.tany env)
                 in
-                expr
-                  ~is_func_arg:true
-                  ~accept_using_var:param.fp_accept_disposable
-                  ~expected
-                  env
-                  e
-              in
-              let env = call_param env param (e, ty) ~is_variadic in
-              (env, Some (te, ty))
-            | None ->
-              let expected =
-                ExpectedTy.make
-                  pos
-                  Reason.URparam
-                  (Reason.Rnone, Typing_utils.tany env)
-              in
-              let (env, te, ty) = expr ~expected ~is_func_arg:true env e in
-              (env, Some (te, ty))
-          in
-          let set_tyvar_variance_from_lambda_param env opt_param =
-            match opt_param with
-            | Some param ->
-              let rec set_params_variance env ty =
-                let (env, ty) = Env.expand_type env ty in
-                match ty with
-                | (_, Tunion [ty]) -> set_params_variance env ty
-                | (_, Toption ty) -> set_params_variance env ty
-                | (_, Tfun { ft_params; ft_ret; _ }) ->
-                  let env =
-                    List.fold
-                      ~init:env
-                      ~f:(fun env param ->
-                        Env.set_tyvar_variance env param.fp_type.et_type)
-                      ft_params
-                  in
-                  Env.set_tyvar_variance env ft_ret.et_type ~flip:true
-                | _ -> env
-              in
-              set_params_variance env param.fp_type.et_type
-            | None -> env
-          in
-          (* Given an expected function type ft, check types for the non-unpacked
-           * arguments. Don't check lambda expressions if check_lambdas=false *)
-          let rec check_args check_lambdas env el paraml =
-            match el with
-            (* We've got an argument *)
-            | (e, opt_result) :: el ->
-              (* Pick up next parameter type info *)
-              let (is_variadic, opt_param, paraml) =
-                get_next_param_info paraml
-              in
-              let (env, one_result) =
-                match (check_lambdas, is_lambda e) with
-                | (false, false)
-                | (true, true) ->
-                  check_arg env e opt_param ~is_variadic
-                | (false, true) ->
-                  let env =
-                    set_tyvar_variance_from_lambda_param env opt_param
-                  in
-                  (env, opt_result)
-                | (true, false) -> (env, opt_result)
-              in
-              let (env, rl, paraml) = check_args check_lambdas env el paraml in
-              (env, (e, one_result) :: rl, paraml)
-            | [] -> (env, [], paraml)
-          in
-          (* First check the non-lambda arguments. For generic functions, this
-           * is likely to resolve type variables to concrete types *)
-          let rl = List.map el (fun e -> (e, None)) in
-          let (env, rl, _) = check_args false env rl ft.ft_params in
-          (* Now check the lambda arguments, hopefully with type variables resolved *)
-          let (env, rl, paraml) = check_args true env rl ft.ft_params in
-          (* We expect to see results for all arguments after this second pass *)
-          let get_param opt =
-            match opt with
-            | Some x -> x
-            | None -> failwith "missing parameter in check_args"
-          in
-          let (tel, tys) =
-            let l = List.map rl (fun (_, opt) -> get_param opt) in
-            List.unzip l
-          in
-          TR.check_call env method_call_info pos r2 ft tys;
-          let (env, tuel, arity, did_unpack) =
-            match uel with
-            | [] -> (env, [], List.length el, false)
-            | e :: _ ->
-              (* Enforces that e is unpackable. If e is a tuple, check types against
-               * parameter types *)
-              let (env, te, ty) = expr env e in
-              let (env, ety) =
-                Typing_solver.expand_type_and_solve
-                  ~description_of_expected:"an unpackable value"
-                  env
-                  (fst e)
-                  ty
-                  Errors.unify_error
-              in
-              (match ety with
-              | (_, Ttuple tyl) ->
-                let rec check_elements env tyl paraml =
-                  match tyl with
-                  | [] -> env
-                  | ty :: tyl ->
-                    let (is_variadic, opt_param, paraml) =
-                      get_next_param_info paraml
+                let (env, te, ty) = expr ~expected ~is_func_arg:true env e in
+                (env, Some (te, ty))
+            in
+            let set_tyvar_variance_from_lambda_param env opt_param =
+              match opt_param with
+              | Some param ->
+                let rec set_params_variance env ty =
+                  let (env, ty) = Env.expand_type env ty in
+                  match ty with
+                  | (_, Tunion [ty]) -> set_params_variance env ty
+                  | (_, Toption ty) -> set_params_variance env ty
+                  | (_, Tfun { ft_params; ft_ret; _ }) ->
+                    let env =
+                      List.fold
+                        ~init:env
+                        ~f:(fun env param ->
+                          Env.set_tyvar_variance env param.fp_type.et_type)
+                        ft_params
                     in
-                    (match opt_param with
-                    | None -> env
-                    | Some param ->
-                      let env = call_param env param (e, ty) ~is_variadic in
-                      check_elements env tyl paraml)
+                    Env.set_tyvar_variance env ft_ret.et_type ~flip:true
+                  | _ -> env
                 in
-                let env = check_elements env tyl paraml in
-                (env, [te], List.length el + List.length tyl, false)
-              | _ ->
-                let param_tyl = List.map paraml (fun param -> param.fp_type) in
-                let add_variadic_param_ty param_tyl =
-                  match var_param with
-                  | Some param -> param.fp_type :: param_tyl
-                  | None -> param_tyl
+                set_params_variance env param.fp_type.et_type
+              | None -> env
+            in
+            (* Given an expected function type ft, check types for the non-unpacked
+             * arguments. Don't check lambda expressions if check_lambdas=false *)
+            let rec check_args check_lambdas env el paraml =
+              match el with
+              (* We've got an argument *)
+              | (e, opt_result) :: el ->
+                (* Pick up next parameter type info *)
+                let (is_variadic, opt_param, paraml) =
+                  get_next_param_info paraml
                 in
-                let param_tyl = add_variadic_param_ty param_tyl in
-                let pos = fst e in
-                let env =
-                  List.fold_right param_tyl ~init:env ~f:(fun param_ty env ->
-                      let traversable_ty =
-                        make_unpacked_traversable_ty pos param_ty.et_type
+                let (env, one_result) =
+                  match (check_lambdas, is_lambda e) with
+                  | (false, false)
+                  | (true, true) ->
+                    check_arg env e opt_param ~is_variadic
+                  | (false, true) ->
+                    let env =
+                      set_tyvar_variance_from_lambda_param env opt_param
+                    in
+                    (env, opt_result)
+                  | (true, false) -> (env, opt_result)
+                in
+                let (env, rl, paraml) =
+                  check_args check_lambdas env el paraml
+                in
+                (env, (e, one_result) :: rl, paraml)
+              | [] -> (env, [], paraml)
+            in
+            (* First check the non-lambda arguments. For generic functions, this
+             * is likely to resolve type variables to concrete types *)
+            let rl = List.map el (fun e -> (e, None)) in
+            let (env, rl, _) = check_args false env rl ft.ft_params in
+            (* Now check the lambda arguments, hopefully with type variables resolved *)
+            let (env, rl, paraml) = check_args true env rl ft.ft_params in
+            (* We expect to see results for all arguments after this second pass *)
+            let get_param opt =
+              match opt with
+              | Some x -> x
+              | None -> failwith "missing parameter in check_args"
+            in
+            let (tel, tys) =
+              let l = List.map rl (fun (_, opt) -> get_param opt) in
+              List.unzip l
+            in
+            TR.check_call env method_call_info pos r2 ft tys;
+            let (env, tuel, arity, did_unpack) =
+              match uel with
+              | [] -> (env, [], List.length el, false)
+              | e :: _ ->
+                (* Enforces that e is unpackable. If e is a tuple, check types against
+                 * parameter types *)
+                let (env, te, ty) = expr env e in
+                let (env, ety) =
+                  Typing_solver.expand_type_and_solve
+                    ~description_of_expected:"an unpackable value"
+                    env
+                    (fst e)
+                    ty
+                    Errors.unify_error
+                in
+                (match ety with
+                | (_, Ttuple tyl) ->
+                  let rec check_elements env tyl paraml =
+                    match tyl with
+                    | [] -> env
+                    | ty :: tyl ->
+                      let (is_variadic, opt_param, paraml) =
+                        get_next_param_info paraml
                       in
-                      Type.sub_type
-                        pos
-                        Reason.URparam
-                        env
-                        ety
-                        traversable_ty
-                        Errors.unify_error)
+                      (match opt_param with
+                      | None -> env
+                      | Some param ->
+                        let env = call_param env param (e, ty) ~is_variadic in
+                        check_elements env tyl paraml)
+                  in
+                  let env = check_elements env tyl paraml in
+                  (env, [te], List.length el + List.length tyl, false)
+                | _ ->
+                  let param_tyl =
+                    List.map paraml (fun param -> param.fp_type)
+                  in
+                  let add_variadic_param_ty param_tyl =
+                    match var_param with
+                    | Some param -> param.fp_type :: param_tyl
+                    | None -> param_tyl
+                  in
+                  let param_tyl = add_variadic_param_ty param_tyl in
+                  let pos = fst e in
+                  let env =
+                    List.fold_right param_tyl ~init:env ~f:(fun param_ty env ->
+                        let traversable_ty =
+                          make_unpacked_traversable_ty pos param_ty.et_type
+                        in
+                        Type.sub_type
+                          pos
+                          Reason.URparam
+                          env
+                          ety
+                          traversable_ty
+                          Errors.unify_error)
+                  in
+                  (env, [te], List.length el, true))
+            in
+            (* If we unpacked an array, we don't check arity exactly. Since each
+             * unpacked array consumes 1 or many parameters, it is nonsensical to say
+             * that not enough args were passed in (so we don't do the min check).
+             *)
+            let () = check_arity ~did_unpack pos pos_def arity ft.ft_arity in
+            (* Variadic params cannot be inout so we can stop early *)
+            let env = wfold_left2 inout_write_back env ft.ft_params el in
+            let (env, ret_ty) =
+              TR.get_adjusted_return_type
+                env
+                method_call_info
+                ft.ft_ret.et_type
+            in
+            (env, (tel, tuel, ret_ty))
+          | (r2, Tanon (arity, id)) ->
+            let (env, tel, tyl) = exprs ~is_func_arg:true env el in
+            let expr_for_unpacked_expr_list env = function
+              | [] -> (env, [], None, Pos.none)
+              | ((pos, _) as e) :: _ ->
+                let (env, te, ety) = expr env e in
+                (env, [te], Some ety, pos)
+            in
+            let append_tuple_types tyl = function
+              | Some (_, Ttuple tuple_tyl) -> tyl @ tuple_tyl
+              | _ -> tyl
+            in
+            let determine_arity env min_arity pos = function
+              | None
+              | Some (_, Ttuple _) ->
+                (env, Fstandard (min_arity, min_arity))
+              | Some ety ->
+                (* We need to figure out the underlying type of the unpacked expr type.
+                 *
+                 * For example, assume the call is:
+                 *    $lambda(...$y);
+                 * where $y is a variadic or collection of strings.
+                 *
+                 * $y may have the type Tarraykind or Traversable, however we need to
+                 * pass Fvariadic a param of type string.
+                 *
+                 * Assuming $y has type Tarraykind, in order to get the underlying type
+                 * we create a fresh_type(), wrap it in a Traversable and make that
+                 * Traversable a super type of the expr type (Tarraykind). This way
+                 * we can infer the underlying type and create the correct param for
+                 * Fvariadic.
+                 *)
+                let (env, ty) = Env.fresh_type env pos in
+                let traversable_ty = make_unpacked_traversable_ty pos ty in
+                let env =
+                  Type.sub_type
+                    pos
+                    Reason.URparam
+                    env
+                    ety
+                    traversable_ty
+                    Errors.unify_error
                 in
-                (env, [te], List.length el, true))
-          in
-          (* If we unpacked an array, we don't check arity exactly. Since each
-           * unpacked array consumes 1 or many parameters, it is nonsensical to say
-           * that not enough args were passed in (so we don't do the min check).
-           *)
-          let () = check_arity ~did_unpack pos pos_def arity ft.ft_arity in
-          (* Variadic params cannot be inout so we can stop early *)
-          let env = wfold_left2 inout_write_back env ft.ft_params el in
-          let (env, ret_ty) =
-            TR.get_adjusted_return_type env method_call_info ft.ft_ret.et_type
-          in
-          (env, (tel, tuel, ret_ty))
-        | (r2, Tanon (arity, id)) ->
-          let (env, tel, tyl) = exprs ~is_func_arg:true env el in
-          let expr_for_unpacked_expr_list env = function
-            | [] -> (env, [], None, Pos.none)
-            | ((pos, _) as e) :: _ ->
-              let (env, te, ety) = expr env e in
-              (env, [te], Some ety, pos)
-          in
-          let append_tuple_types tyl = function
-            | Some (_, Ttuple tuple_tyl) -> tyl @ tuple_tyl
-            | _ -> tyl
-          in
-          let determine_arity env min_arity pos = function
-            | None
-            | Some (_, Ttuple _) ->
-              (env, Fstandard (min_arity, min_arity))
-            | Some ety ->
-              (* We need to figure out the underlying type of the unpacked expr type.
-               *
-               * For example, assume the call is:
-               *    $lambda(...$y);
-               * where $y is a variadic or collection of strings.
-               *
-               * $y may have the type Tarraykind or Traversable, however we need to
-               * pass Fvariadic a param of type string.
-               *
-               * Assuming $y has type Tarraykind, in order to get the underlying type
-               * we create a fresh_type(), wrap it in a Traversable and make that
-               * Traversable a super type of the expr type (Tarraykind). This way
-               * we can infer the underlying type and create the correct param for
-               * Fvariadic.
-               *)
-              let (env, ty) = Env.fresh_type env pos in
-              let traversable_ty = make_unpacked_traversable_ty pos ty in
-              let env =
-                Type.sub_type
-                  pos
-                  Reason.URparam
-                  env
-                  ety
-                  traversable_ty
-                  Errors.unify_error
-              in
-              let param =
-                {
-                  fp_pos = pos;
-                  fp_name = None;
-                  fp_type = MakeType.unenforced ty;
-                  fp_kind = FPnormal;
-                  fp_accept_disposable = false;
-                  fp_mutability = None;
-                  fp_rx_annotation = None;
-                }
-              in
-              (env, Fvariadic (min_arity, param))
-          in
-          let (env, tuel, uety_opt, uepos) =
-            expr_for_unpacked_expr_list env uel
-          in
-          let tyl = append_tuple_types tyl uety_opt in
-          let (env, call_arity) =
-            determine_arity env (List.length tyl) uepos uety_opt
-          in
-          let anon = Env.get_anonymous env id in
-          let fpos = Reason.to_pos r2 in
-          (match anon with
-          | None ->
-            Errors.anonymous_recursive_call pos;
-            (env, (tel, tuel, err_witness env pos))
-          | Some
-              {
-                rx = reactivity;
-                is_coroutine;
-                counter = ftys;
-                typecheck = anon;
-                _;
-              } ->
-            let () =
-              check_arity pos fpos (Typing_defs.arity_min call_arity) arity
-            in
-            let tyl = List.map tyl TUtils.default_fun_param in
-            let (env, _, ty) = anon ~el env tyl call_arity in
-            let fty =
-              ( Reason.Rlambda_use pos,
-                Tfun
+                let param =
                   {
-                    ft_pos = fpos;
-                    ft_deprecated = None;
-                    ft_abstract = false;
-                    ft_is_coroutine = is_coroutine;
-                    ft_arity = arity;
-                    ft_tparams = ([], FTKtparams);
-                    ft_where_constraints = [];
-                    ft_params = tyl;
-                    ft_ret = MakeType.unenforced ty;
-                    ft_reactive = reactivity;
-                    (* TODO: record proper async lambda information *)
-                    ft_fun_kind = Ast_defs.FSync;
-                    ft_return_disposable = false;
-                    ft_mutability = None;
-                    ft_returns_mutable = false;
-                    ft_decl_errors = None;
-                    ft_returns_void_to_rx = false;
-                  } )
+                    fp_pos = pos;
+                    fp_name = None;
+                    fp_type = MakeType.unenforced ty;
+                    fp_kind = FPnormal;
+                    fp_accept_disposable = false;
+                    fp_mutability = None;
+                    fp_rx_annotation = None;
+                  }
+                in
+                (env, Fvariadic (min_arity, param))
             in
-            ftys := TUtils.add_function_type env fty !ftys;
-            (env, (tel, tuel, ty)))
-        | ty ->
-          bad_call env pos ty;
-          let env = call_untyped_unpack env uel in
-          (env, ([], [], err_witness env pos)))
-  in
-  match resl with
-  | [res] -> res
-  | _ ->
-    bad_call env pos fty;
-    let env = call_untyped_unpack env uel in
-    (env, ([], [], err_witness env pos))
+            let (env, tuel, uety_opt, uepos) =
+              expr_for_unpacked_expr_list env uel
+            in
+            let tyl = append_tuple_types tyl uety_opt in
+            let (env, call_arity) =
+              determine_arity env (List.length tyl) uepos uety_opt
+            in
+            let anon = Env.get_anonymous env id in
+            let fpos = Reason.to_pos r2 in
+            (match anon with
+            | None ->
+              Errors.anonymous_recursive_call pos;
+              (env, (tel, tuel, err_witness env pos))
+            | Some
+                {
+                  rx = reactivity;
+                  is_coroutine;
+                  counter = ftys;
+                  typecheck = anon;
+                  _;
+                } ->
+              let () =
+                check_arity pos fpos (Typing_defs.arity_min call_arity) arity
+              in
+              let tyl = List.map tyl TUtils.default_fun_param in
+              let (env, _, ty) = anon ~el env tyl call_arity in
+              let fty =
+                ( Reason.Rlambda_use pos,
+                  Tfun
+                    {
+                      ft_pos = fpos;
+                      ft_deprecated = None;
+                      ft_abstract = false;
+                      ft_is_coroutine = is_coroutine;
+                      ft_arity = arity;
+                      ft_tparams = ([], FTKtparams);
+                      ft_where_constraints = [];
+                      ft_params = tyl;
+                      ft_ret = MakeType.unenforced ty;
+                      ft_reactive = reactivity;
+                      (* TODO: record proper async lambda information *)
+                      ft_fun_kind = Ast_defs.FSync;
+                      ft_return_disposable = false;
+                      ft_mutability = None;
+                      ft_returns_mutable = false;
+                      ft_decl_errors = None;
+                      ft_returns_void_to_rx = false;
+                    } )
+              in
+              ftys := TUtils.add_function_type env fty !ftys;
+              (env, (tel, tuel, ty)))
+          | ty ->
+            bad_call env pos ty;
+            let env = call_untyped_unpack env uel in
+            (env, ([], [], err_witness env pos)))
+    in
+    match resl with
+    | [res] -> res
+    | _ ->
+      bad_call env pos fty;
+      let env = call_untyped_unpack env uel in
+      (env, ([], [], err_witness env pos))
 
 and call_param env param (((pos, _) as e), arg_ty) ~is_variadic =
   param_modes ~is_variadic param e;
@@ -9221,7 +9260,6 @@ and overload_function
       ty
       method_id
       class_id
-      (fun x -> x)
   in
   (* call the function as declared to validate arity and input types,
      but ignore the result and overwrite with custom one *)

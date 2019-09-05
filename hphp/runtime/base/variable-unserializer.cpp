@@ -1349,7 +1349,7 @@ Array VariableUnserializer::unserializeDict() {
 
   if (size == 0) {
     expectChar('}');
-    return Array::CreateDict();
+    return Array::attach(arrprov::makeEmptyDict(provTag));
   }
   if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
     throwArraySizeOutOfBounds();
@@ -1414,7 +1414,7 @@ Array VariableUnserializer::unserializeVec() {
 
   if (size == 0) {
     expectChar('}');
-    return Array::CreateVec();
+    return Array::attach(arrprov::makeEmptyVec(provTag));
   }
   if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
     throwArraySizeOutOfBounds();

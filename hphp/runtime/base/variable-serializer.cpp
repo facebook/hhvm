@@ -1738,12 +1738,13 @@ void VariableSerializer::serializeArray(const ArrayData* arr,
     if (source) raise_array_serialization_notice(source, arr);
   }
 
-  if (arr->size() == 0) {
+  if (arr->size() == 0 && LIKELY(!RuntimeOption::EvalArrayProvenance)) {
     auto const kind = getKind(arr);
     writeArrayHeader(0, arr->isVectorData(), kind);
     writeArrayFooter(kind);
     return;
   }
+
   if (!skipNestCheck) {
     TypedValue tv = make_array_like_tv(const_cast<ArrayData*>(arr));
     if (incNestedLevel(&tv)) {

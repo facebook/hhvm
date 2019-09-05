@@ -1,26 +1,25 @@
-
 string(9) "["hello"]"
 
-Notice: Observing vec in serialize from %s/ap-logging.php:6 in %s/ap-logging.php on line 8
+Notice: Observing vec in serialize from %s/ap-logging.php:5 in %s/ap-logging.php on line 8
 string(18) "v:1:{s:5:"hello";}"
 
-Notice: Observing vec in print_r from %s/ap-logging.php:6 in %s/ap-logging.php on line 9
+Notice: Observing vec in print_r from %s/ap-logging.php:5 in %s/ap-logging.php on line 9
 string(25) "Vec
 (
     [0] => hello
 )
 "
 
-Notice: Observing vec in var_export from %s/ap-logging.php:6 in %s/ap-logging.php on line 10
+Notice: Observing vec in var_export from %s/ap-logging.php:5 in %s/ap-logging.php on line 10
 string(18) "vec [
   'hello',
 ]"
 
-Notice: Observing vec in fb_serialize from %s/ap-logging.php:6 in %s/ap-logging.php on line 11
+Notice: Observing vec in fb_serialize from %s/ap-logging.php:5 in %s/ap-logging.php on line 11
 string(11) "hello"
 
-Notice: Observing vec in gettype from %s/ap-logging.php:6 in %s/ap-logging.php on line 12
+Notice: Observing vec in gettype from %s/ap-logging.php:5 in %s/ap-logging.php on line 12
 string(3) "vec"
 
-Notice: Observing vec in is_array from %s/ap-logging.php:6 in %s/ap-logging.php on line 13
+Notice: Observing vec in is_array from %s/ap-logging.php:5 in %s/ap-logging.php on line 13
 bool(false)

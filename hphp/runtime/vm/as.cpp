@@ -952,14 +952,7 @@ std::pair<ArrayData*, std::string> read_litarray(AsmState& as) {
         as.error(".adata only supports serialized arrays");
       }
 
-      auto const line = as.srcLoc.line0;
-      auto const filename = as.ue->m_filepath;
       auto data = var.detach().m_data.parr;
-      if (RuntimeOption::EvalArrayProvenance &&
-          !data->empty() &&
-          !(as.fe->attrs & AttrProvenanceSkipFrame)) {
-        arrprov::setTagRecursive(data, {filename, line});
-      }
       ArrayData::GetScalarArray(&data);
       as.adataMap[name] = std::make_pair(data, std::move(overrides));
       as.adataDecls.erase(decl);

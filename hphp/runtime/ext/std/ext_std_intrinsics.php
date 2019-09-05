@@ -48,6 +48,14 @@ function apc_fetch_no_check(mixed $key) {
   return \apc_fetch($key, inout $ignored);
 }
 
+<<__Native, __IsFoldable>>
+function builtin_io_foldable(
+  int $a,
+  inout int $b,
+  inout int $c,
+  inout int $d,
+): int;
+
 <<__Native>>
 function builtin_io(
   string $s,

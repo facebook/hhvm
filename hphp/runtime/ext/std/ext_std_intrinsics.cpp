@@ -224,6 +224,23 @@ Array HHVM_FUNCTION(
   return orig;
 }
 
+int64_t HHVM_FUNCTION(
+  builtin_io_foldable,
+  int64_t a,
+  int64_t& b,
+  int64_t& c,
+  int64_t& d
+) {
+  auto const t1 = b * c * d;
+  auto const t2 = a * c * d;
+  auto const t3 = a * b * d;
+  auto const t4 = a * b * c;
+  b = t2;
+  c = t3;
+  d = t4;
+  return t1;
+}
+
 }
 
 void StandardExtension::initIntrinsics() {
@@ -231,6 +248,7 @@ void StandardExtension::initIntrinsics() {
 
   HHVM_FALIAS(__hhvm_intrinsics\\builtin_io, builtin_io);
   HHVM_FALIAS(__hhvm_intrinsics\\builtin_io_no_fca, builtin_io);
+  HHVM_FALIAS(__hhvm_intrinsics\\builtin_io_foldable, builtin_io_foldable);
 
   HHVM_FALIAS(__hhvm_intrinsics\\trigger_oom, trigger_oom);
   HHVM_FALIAS(__hhvm_intrinsics\\launder_value, launder_value);

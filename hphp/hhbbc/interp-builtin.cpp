@@ -461,8 +461,43 @@ void in(ISS& env, const bc::FCallBuiltin& op) {
     assertx(func.exactFunc());
     if (auto val = const_fold(env, op.arg1, 0, *func.exactFunc(), true)) {
       constprop(env);
-      discard(env, op.arg1);
-      return push(env, std::move(*val));
+
+      // If there's no in-out parameters, we're done and can just push
+      // the result.
+      if (!op.arg3) {
+        discard(env, op.arg1);
+        return push(env, std::move(*val));
+      }
+
+      // Otherwise what we got from evaluating the function is
+      // actually a tuple of all the results. We need to extract the
+      // values out of the tuple and push them onto the stack in their
+      // proper order.
+      auto const v = tv(*val);
+      assertx(v);
+
+      assertx(tvIsVecOrVArray(*v));
+      auto const ad = v->m_data.parr;
+      assertx(ad->isStatic());
+      assertx(ad->size() == op.arg3 + 1);
+
+      BytecodeVec repl;
+      // Pop the arguments
+      for (uint32_t i = 0; i < op.arg1; ++i) {
+        repl.push_back(bc::PopC {});
+      }
+      // Pop the placeholder uninit values
+      for (uint32_t i = 0; i < op.arg3; ++i) {
+        repl.push_back(bc::PopU {});
+      }
+      // Push the in-out returns
+      for (uint32_t i = 0; i < op.arg3; ++i) {
+        repl.push_back(gen_constant(ad->atPos(op.arg3 - i)));
+      }
+      // And push the actual function return
+      repl.push_back(gen_constant(ad->atPos(0)));
+
+      return reduce(env, std::move(repl));
     }
   }
 

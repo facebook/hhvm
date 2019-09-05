@@ -1089,7 +1089,43 @@ SSATmp* optimizedFCallBuiltin(IRGS& env,
     auto const fname = func->fullName();
 
     if (auto const retVal = opt_foldable(env, func, params, numNonDefault)) {
-      return retVal;
+      // Check if any of the parameters are in-out. If not, we don't
+      // need any special handling.
+      auto const numInOut = std::count_if(
+        params.info.begin(), params.info.end(),
+        [] (const ParamPrep::Info& i) { return i.isInOut; }
+      );
+      if (!numInOut) return retVal;
+
+      // Otherwise, the return value is actually a tuple containing
+      // all of the results. We need to unpack the tuple and write the
+      // contents to their proper place on the stack.
+      auto const ad = [&] {
+        if (retVal->hasConstVal(TArr)) return retVal->arrVal();
+        if (retVal->hasConstVal(TVec)) return retVal->vecVal();
+        always_assert(false);
+      }();
+      assertx(ad->isStatic());
+      assertx(ad->size() == numInOut + 1);
+
+      size_t inOutIndex = 0;
+      for (auto const& param : params.info) {
+        if (!param.isInOut) continue;
+        // NB: The parameters to the builtin have already been popped
+        // at this point, so we don't need to account for them when
+        // calculating the stack offset.
+        auto const val = cns(env, ad->atPos(inOutIndex + 1));
+        auto const offset = offsetFromIRSP(
+          env,
+          BCSPRelOffset{safe_cast<int32_t>(inOutIndex)}
+        );
+        gen(env, StStk, IRSPRelOffsetData{offset}, sp(env), val);
+        ++inOutIndex;
+      }
+
+      // The first element of the tuple is always the actual function
+      // return.
+      return cns(env, ad->atPos(0));
     }
 #define X(x) \
     if (fname->isame(s_##x.get())) return opt_##x(env, params);

@@ -200,16 +200,16 @@ const ArrayData* makeEmptyArray(const ArrayData* base,
   });
 }
 
-ArrayData* makeEmptyVec() {
+ArrayData* makeEmptyVec(folly::Optional<Tag> tag /* = folly::none */) {
   return makeEmptyImpl(
-    staticEmptyVecArray(), folly::none,
+    staticEmptyVecArray(), tag,
     [] (const ArrayData* ad) { return PackedArray::CopyVec(ad); }
   );
 }
 
-ArrayData* makeEmptyDict() {
+ArrayData* makeEmptyDict(folly::Optional<Tag> tag /* = folly::none */) {
   return makeEmptyImpl(
-    staticEmptyDictArray(), folly::none,
+    staticEmptyDictArray(), tag,
     [] (const ArrayData* ad) { return MixedArray::CopyDict(ad); }
   );
 }

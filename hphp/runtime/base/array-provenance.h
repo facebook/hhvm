@@ -165,8 +165,8 @@ TypedValue tagTVKnown(TypedValue tv, Tag tag);
  */
 const ArrayData* makeEmptyArray(const ArrayData* base,
                           folly::Optional<Tag> tag = folly::none);
-ArrayData* makeEmptyVec();
-ArrayData* makeEmptyDict();
+ArrayData* makeEmptyVec(folly::Optional<Tag> tag = folly::none);
+ArrayData* makeEmptyDict(folly::Optional<Tag> tag = folly::none);
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -13,8 +13,6 @@ open Full_fidelity_schema
 
 let full_fidelity_path_prefix = "hphp/hack/src/parser/"
 
-let facts_path_prefix = "hphp/hack/src/facts/"
-
 type comment_style =
   | CStyle
   | MLStyle
@@ -1829,59 +1827,6 @@ CONSTRUCTOR_METHODS}
 end
 
 (* GenerateFFRustDeclModeSmartConstructors *)
-
-module GenerateFlattenSmartConstructors = struct
-  let to_constructor_methods x =
-    let fields = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d" i) in
-    let stack = String.concat ~sep:" " fields in
-    let arr = String.concat ~sep:"; " fields in
-    let is_zero =
-      List.map fields (sprintf "Op.is_zero %s") |> String.concat ~sep:" && "
-    in
-    sprintf
-      "  let make_%s %s state =\n    if %s then state, Op.zero\n    else state, Op.flatten [%s]\n"
-      x.type_name
-      stack
-      is_zero
-      arr
-
-  let flatten_smart_constructors_template : string =
-    make_header
-      MLStyle
-      "
- * This module contains smart constructors implementation that does nothing
- * and can be used as initial stubs.
- "
-    ^ "
-
-module type Op_S = sig
-  type r [@@deriving show]
-  val is_zero: r -> bool
-  val flatten: r list -> r
-  val zero: r
-end
-
-module WithOp(Op : Op_S) = struct
-  type r = Op.r [@@deriving show]
-
-  let make_token _token state = state, Op.zero
-  let make_missing _ state = state, Op.zero
-  let make_list _  _ state = state, Op.zero
-CONSTRUCTOR_METHODS
-
-end
-"
-
-  let flatten_smart_constructors =
-    Full_fidelity_schema.make_template_file
-      ~transformations:
-        [{ pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods }]
-      ~filename:(facts_path_prefix ^ "flatten_smart_constructors.ml")
-      ~template:flatten_smart_constructors_template
-      ()
-end
-
-(* GenerateFlattenSmartConstructors *)
 
 module GenerateRustFlattenSmartConstructors = struct
   let to_constructor_methods x =
@@ -3942,7 +3887,6 @@ let () =
     GenerateFFRustCoroutineSmartConstructors.coroutine_smart_constructors;
   generate_file
     GenerateFFRustDeclModeSmartConstructors.decl_mode_smart_constructors;
-  generate_file GenerateFlattenSmartConstructors.flatten_smart_constructors;
   generate_file GenerateRustFlattenSmartConstructors.flatten_smart_constructors;
   generate_file GenerateRustFactsSmartConstructors.facts_smart_constructors;
   generate_file GenerateFFParserSig.full_fidelity_parser_sig;

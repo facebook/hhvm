@@ -4,8 +4,6 @@
   (modules
     facts
     facts_parser
-    facts_smart_constructors
-    flatten_smart_constructors
     rust_facts_ffi)
   (libraries
     core_kernel

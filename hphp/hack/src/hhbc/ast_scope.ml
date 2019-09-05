@@ -131,4 +131,23 @@ module Scope = struct
     | ScopeItem.Method { T.m_user_attributes = attrs; _ } :: _
     | ScopeItem.Function { T.f_user_attributes = attrs; _ } :: _ ->
       Rx.rx_level_from_ast attrs |> Option.value ~default:Rx.NonRx
+
+  let rec find_enclosing_function scope =
+    match scope with
+    | [] -> None
+    | (ScopeItem.Function _ as f) :: _ -> Some f
+    | (ScopeItem.Method _ as m) :: _ -> Some m
+    | _ :: more -> find_enclosing_function more
+
+  let find_function_attribute scope attr_name =
+    let find_attribute ua_list =
+      List.find ua_list (fun attr -> snd attr.T.ua_name = attr_name)
+    in
+    match find_enclosing_function scope with
+    | Some (ScopeItem.Function f) -> find_attribute f.T.f_user_attributes
+    | Some (ScopeItem.Method m) -> find_attribute m.T.m_user_attributes
+    | _ -> None
+
+  let has_function_attribute scope attr_name =
+    Option.is_some @@ find_function_attribute scope attr_name
 end

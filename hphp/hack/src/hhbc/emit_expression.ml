@@ -1650,13 +1650,36 @@ and emit_expr (env : Emit_env.t) (expr : Tast.expr) =
   | A.Special_func _ -> failwith "TODO Unimplemented expression Special"
   | A.Assert _ -> failwith "TODO Unimplemented expression Assert"
 
-and emit_static_collection ~transform_to_collection pos tv =
+and emit_static_collection env ~transform_to_collection pos tv =
+  let arrprov_enabled =
+    Hhbc_options.array_provenance !Hhbc_options.compiler_options
+  in
   let transform_instr =
     match transform_to_collection with
     | Some collection_type -> instr_colfromarray collection_type
     | _ -> empty
   in
-  gather [emit_pos pos; instr (ILitConst (TypedValue tv)); transform_instr]
+  let col =
+    gather [emit_pos pos; instr (ILitConst (TypedValue tv)); transform_instr]
+  in
+  (* This is a nasty hack to make sure that static arrays in a PSF function are tagged
+   * using dynamic provenance information *)
+  if
+    arrprov_enabled
+    && Ast_scope.Scope.has_function_attribute
+         (Emit_env.get_scope env)
+         "__ProvenanceSkipFrame"
+  then
+    gather
+      [ instr_nulluninit;
+        instr_nulluninit;
+        instr_nulluninit;
+        col;
+        instr_fcallfuncd
+          (make_fcall_args 1)
+          (Hhbc_id.Function.from_raw_string "HH\\tag_provenance_here") ]
+  else
+    col
 
 and emit_value_only_collection env pos es constructor =
   let limit = max_array_elem_on_stack () in
@@ -1953,7 +1976,7 @@ and emit_collection ?transform_to_collection env (expr : Tast.expr) es =
       (Emit_env.get_namespace env)
       expr
   with
-  | Some tv -> emit_static_collection ~transform_to_collection pos tv
+  | Some tv -> emit_static_collection env ~transform_to_collection pos tv
   | None -> emit_dynamic_collection env expr es
 
 and emit_pipe env (e1 : Tast.expr) (e2 : Tast.expr) =

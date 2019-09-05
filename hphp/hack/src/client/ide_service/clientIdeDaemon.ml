@@ -383,6 +383,35 @@ let handle_message :
           in
           () );
         Lwt.return (state, Handle_message_result.Response result))
+    (* Autocomplete docblock resolve *)
+    | (Initialized { server_env; _ }, Completion_resolve_location param) ->
+      ClientIdeMessage.Completion_resolve_location.(
+        let start_time = Unix.gettimeofday () in
+        let contents =
+          Option.value_exn param.document_location.file_contents
+        in
+        let result =
+          ServerDocblockAt.go_docblock_at_contents
+            ~filename:(Path.to_string param.document_location.file_path)
+            ~contents
+            ~line:param.document_location.line
+            ~column:param.document_location.column
+            ~kind:param.kind
+        in
+        let sienv = !(server_env.ServerEnv.local_symbol_table) in
+        ( if sienv.SearchUtils.sie_log_timings then
+          let pathstr = Path.to_string param.document_location.file_path in
+          let msg =
+            Printf.sprintf
+              "[docblock] Search for [%s] line [%d] column [%d] kind [%s]"
+              pathstr
+              param.document_location.line
+              param.document_location.column
+              (SearchUtils.show_si_kind param.kind)
+          in
+          let _t : float = Hh_logger.log_duration msg start_time in
+          () );
+        Lwt.return (state, Handle_message_result.Response result))
     (* Document highlighting *)
     | (Initialized { server_env; _ }, Document_highlight document_location) ->
       let (ctx, entry) =

@@ -379,7 +379,6 @@ let test_docblock_finder (harness : Test_harness.t) : bool =
   let root_prefix = Path.to_string harness.repo_dir in
   let docblock =
     ServerDocblockAt.go_docblock_at
-      ~env
       ~filename:(root_prefix ^ "/bar_1.php")
       ~line:6
       ~column:7

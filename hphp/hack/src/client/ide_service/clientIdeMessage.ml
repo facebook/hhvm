@@ -60,11 +60,21 @@ module Completion = struct
   type result = AutocompleteTypes.ide_result
 end
 
-(* Handles "completionItem/resolve" LSP messages *)
+(* "completionItem/resolve" LSP messages - if we have symbol name *)
 module Completion_resolve = struct
   type request = {
     symbol: string;
     kind: SearchUtils.si_kind;
+  }
+
+  type result = DocblockService.result
+end
+
+(* "completionItem/resolve" LSP messages - if we have file/line/column *)
+module Completion_resolve_location = struct
+  type request = {
+    kind: SearchUtils.si_kind;
+    document_location: document_location;
   }
 
   type result = DocblockService.result
@@ -97,6 +107,9 @@ type _ t =
   | Completion_resolve :
       Completion_resolve.request
       -> Completion_resolve.result t
+  | Completion_resolve_location :
+      Completion_resolve_location.request
+      -> Completion_resolve_location.result t
   | Document_highlight :
       Document_highlight.request
       -> Document_highlight.result t

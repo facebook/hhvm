@@ -875,21 +875,28 @@ let hack_errors_to_lsp_diagnostic
 (************************************************************************)
 (* Protocol                                                             *)
 (************************************************************************)
+let get_document_contents
+    (editor_open_files : Lsp.TextDocumentItem.t SMap.t) (uri : string) :
+    string option =
+  match SMap.get uri editor_open_files with
+  | Some document -> Some document.TextDocumentItem.text
+  | None ->
+    let rawpath = String_utils.lstrip uri "file://" in
+    (try
+       let contents = Disk.cat rawpath in
+       Some contents
+     with _ -> None)
 
 let get_document_location
     (editor_open_files : Lsp.TextDocumentItem.t SMap.t)
     (params : Lsp.TextDocumentPositionParams.t) :
     ClientIdeMessage.document_location =
   let (file_path, line, column) = lsp_file_position_to_hack params in
-  let file_path = Path.make file_path in
-  let file_contents =
-    let uri =
-      params.TextDocumentPositionParams.textDocument.TextDocumentIdentifier.uri
-    in
-    match SMap.get uri editor_open_files with
-    | Some document -> Some document.TextDocumentItem.text
-    | None -> None
+  let uri =
+    params.TextDocumentPositionParams.textDocument.TextDocumentIdentifier.uri
   in
+  let file_path = Path.make file_path in
+  let file_contents = get_document_contents editor_open_files uri in
   { ClientIdeMessage.file_path; file_contents; line; column }
 
 let do_shutdown
@@ -1599,22 +1606,61 @@ let do_completionItemResolve
  * hh_server.
  *)
 let do_resolve_local
-    (ide_service : ClientIdeService.t) (params : CompletionItemResolve.params)
-    : CompletionItemResolve.result Lwt.t =
-  let symbolname = params.Completion.label in
+    (ide_service : ClientIdeService.t)
+    (editor_open_files : Lsp.TextDocumentItem.t SMap.t)
+    (params : CompletionItemResolve.params) :
+    CompletionItemResolve.result Lwt.t =
   let raw_kind = params.Completion.kind in
   let kind = completion_kind_to_si_kind raw_kind in
-  let request =
-    ClientIdeMessage.Completion_resolve
-      { ClientIdeMessage.Completion_resolve.symbol = symbolname; kind }
+  (* Some docblocks are for class methods.  Class methods need to know
+  * file/line/column/base_class to find the docblock. *)
+  let%lwt result =
+    try
+      match params.Completion.data with
+      | None -> raise NoLocationFound
+      | Some _ as data ->
+        let filename = Jget.string_exn data "filename" in
+        let uri = "file://" ^ filename in
+        let file_path = Path.make filename in
+        let line = Jget.int_exn data "line" in
+        let column = Jget.int_exn data "char" in
+        let file_contents = get_document_contents editor_open_files uri in
+        let request =
+          ClientIdeMessage.Completion_resolve_location
+            {
+              ClientIdeMessage.Completion_resolve_location.document_location =
+                {
+                  ClientIdeMessage.file_path;
+                  ClientIdeMessage.file_contents;
+                  ClientIdeMessage.line;
+                  ClientIdeMessage.column;
+                };
+              kind;
+            }
+        in
+        let%lwt location_result = ClientIdeService.rpc ide_service request in
+        (match location_result with
+        | Ok raw_docblock ->
+          let documentation = docblock_to_markdown raw_docblock in
+          Lwt.return { params with Completion.documentation }
+        | Error error_message ->
+          failwith (Printf.sprintf "Local resolve failed: %s" error_message))
+      (* If that fails, next try using symbol *)
+    with _ ->
+      let symbolname = params.Completion.label in
+      let request =
+        ClientIdeMessage.Completion_resolve
+          { ClientIdeMessage.Completion_resolve.symbol = symbolname; kind }
+      in
+      let%lwt resolve_result = ClientIdeService.rpc ide_service request in
+      (match resolve_result with
+      | Ok raw_docblock ->
+        let documentation = docblock_to_markdown raw_docblock in
+        Lwt.return { params with Completion.documentation }
+      | Error error_message ->
+        failwith (Printf.sprintf "Local resolve failed: %s" error_message))
   in
-  let%lwt result = ClientIdeService.rpc ide_service request in
-  match result with
-  | Ok raw_docblock ->
-    let documentation = docblock_to_markdown raw_docblock in
-    Lwt.return { params with Completion.documentation }
-  | Error error_message ->
-    failwith (Printf.sprintf "Local resolve failed: %s" error_message)
+  Lwt.return result
 
 let do_workspaceSymbol
     (conn : server_conn)
@@ -2966,12 +3012,15 @@ let handle_event
           |> respond_jsonrpc ~powered_by:Serverless_ide c;
           Lwt.return_unit
         (* Resolve documentation for a symbol: "Autocomplete Docblock!" *)
-        | ((In_init _ | Lost_server _), Client_message c)
+        | ( ( In_init { In_init_env.editor_open_files; _ }
+            | Lost_server { Lost_env.editor_open_files; _ } ),
+            Client_message c )
           when env.use_serverless_ide && c.method_ = "completionItem/resolve"
           ->
           let%lwt () = cancel_if_stale client c short_timeout in
           let%lwt result =
-            parse_completionItem c.params |> do_resolve_local ide_service
+            parse_completionItem c.params
+            |> do_resolve_local ide_service editor_open_files
           in
           result
           |> print_completionItem

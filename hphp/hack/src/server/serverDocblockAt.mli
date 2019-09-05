@@ -15,13 +15,21 @@ val go_comments_for_symbol :
 (** Returns the documentation comments for the given symbol or expression. *)
 
 val go_docblock_at :
-  env:ServerEnv.env ->
   filename:string ->
   line:int ->
   column:int ->
   kind:SearchUtils.si_kind ->
   DocblockService.result
 (** Returns the docblock most appropriate to this position *)
+
+val go_docblock_at_contents :
+  filename:string ->
+  contents:string ->
+  line:int ->
+  column:int ->
+  kind:SearchUtils.si_kind ->
+  DocblockService.result
+(** Returns the docblock from these file contents *)
 
 val go_locate_symbol :
   env:ServerEnv.env ->

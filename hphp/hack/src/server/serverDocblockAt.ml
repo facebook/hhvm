@@ -211,34 +211,42 @@ let symboldefinition_kind_from_si_kind (kind : SearchUtils.si_kind) :
   | SearchUtils.SI_Keyword -> failwith "Cannot look up a keyword"
   | SearchUtils.SI_Namespace -> failwith "Cannot look up a namespace"
 
-(* Given a location, find best doc block *)
+(* Given a location and file contents, find best doc block *)
+let go_docblock_at_contents
+    ~(filename : string)
+    ~(contents : string)
+    ~(line : int)
+    ~(column : int)
+    ~(kind : SearchUtils.si_kind) : DocblockService.result =
+  let def_kind = symboldefinition_kind_from_si_kind kind in
+  let path = Relative_path.create_detect_prefix filename in
+  match
+    go_comments_for_position
+      ~line
+      ~column
+      ~path
+      ~filename
+      ~contents
+      ~kind:def_kind
+  with
+  | None -> []
+  | Some "" -> []
+  | Some comments -> [DocblockService.Markdown comments]
+
+(* Given a location and filename, find best doc block *)
 let go_docblock_at
-    ~(env : ServerEnv.env)
     ~(filename : string)
     ~(line : int)
     ~(column : int)
     ~(kind : SearchUtils.si_kind) : DocblockService.result =
-  let _ = env in
   (* Convert relative path and kind *)
   let path = Relative_path.create_detect_prefix filename in
-  let def_kind = symboldefinition_kind_from_si_kind kind in
   (* Okay, now that we know its position, let's gather a docblock *)
   let contents_opt = File_provider.get_contents path in
   match contents_opt with
   | None -> []
   | Some contents ->
-    (match
-       go_comments_for_position
-         ~line
-         ~column
-         ~path
-         ~filename
-         ~contents
-         ~kind:def_kind
-     with
-    | None -> []
-    | Some "" -> []
-    | Some comments -> [DocblockService.Markdown comments])
+    go_docblock_at_contents ~filename ~contents ~line ~column ~kind
 
 (* Locate a symbol and return its docblock, no extra steps *)
 let go_docblock_for_symbol
@@ -264,7 +272,6 @@ let go_docblock_for_symbol
     | Some location ->
       DocblockService.(
         go_docblock_at
-          ~env
           ~filename:location.dbs_filename
           ~line:location.dbs_line
           ~column:location.dbs_column

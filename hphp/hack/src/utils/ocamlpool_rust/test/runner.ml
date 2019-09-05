@@ -22,6 +22,8 @@ and foo3 = {
 
 and foo4 = bool * string
 
+module StringMap = Map.Make (String)
+
 external getString : unit -> string list = "getString"
 
 external getIsize : unit -> int list = "getIsize"
@@ -48,12 +50,38 @@ external getRc : unit -> foo2 list = "getRc"
 
 external getPathBuf : unit -> string list = "getPathBuf"
 
+external getEmptyStringMap : unit -> string StringMap.t list
+  = "getEmptyStringMap"
+
+external getSingletonStringMap : unit -> string StringMap.t list
+  = "getSingletonStringMap"
+
+external getStringMap : unit -> string StringMap.t list = "getStringMap"
+
+let format stringMap =
+  let pairs = StringMap.bindings stringMap in
+  List.map (fun (k, v) -> "(" ^ k ^ ", " ^ v ^ ")") pairs |> String.concat " "
+
+let formatlist stringMapList =
+  String.concat " " (List.map (fun value -> format value) stringMapList)
+
 let run f expected () =
   let rust_values = f () in
   if List.length expected <> List.length rust_values then
     Some "Length not equal"
   else if expected <> rust_values then
-    Some "not equal"
+    Some " not equal"
+  else
+    None
+
+let runNonTrivialMap f expected () =
+  let rust_values = f () in
+  if List.length expected <> List.length rust_values then
+    Some "Length not equal"
+  else if
+    not (List.for_all2 (StringMap.equal String.equal) expected rust_values)
+  then
+    Some (" not equal" ^ formatlist expected ^ " " ^ formatlist rust_values)
   else
     None
 
@@ -70,7 +98,19 @@ let tests =
     ("getFoo4", run getFoo4 [(true, "C")]);
     ("getStrRef", run getStrRef [""; "TEST"]);
     ("getRc", run getRc [true]);
-    ("getPathBuf", run getPathBuf ["foo.txt"; ""]) ]
+    ("getPathBuf", run getPathBuf ["foo.txt"; ""]);
+    ("getEmptyStringMap", run getEmptyStringMap [StringMap.empty]);
+    ( "getSingletonStringMap",
+      run getSingletonStringMap [StringMap.(add "1" "one" StringMap.empty)] );
+    ( "getStringMap",
+      runNonTrivialMap
+        getStringMap
+        [ StringMap.(
+            add
+              "3"
+              "c"
+              StringMap.(add "2" "b" StringMap.(add "1" "a" StringMap.empty)))
+        ] ) ]
 
 let () =
   let results =

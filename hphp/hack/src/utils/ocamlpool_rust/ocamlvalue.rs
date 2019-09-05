@@ -155,3 +155,43 @@ impl<T: Ocamlvalue, E: Ocamlvalue> Ocamlvalue for Result<T, E> {
         }
     }
 }
+
+impl<T1: Ocamlvalue, T2: Ocamlvalue> Ocamlvalue for std::collections::BTreeMap<T1, T2> {
+    fn ocamlvalue(&self) -> Value {
+        match self.is_empty() {
+            true => usize_to_ocaml(0),
+            false => {
+                let mut iterator: std::collections::btree_map::Iter<T1, T2> = self.iter();
+                let (res, _) = ocamlvalue_from_iterator(&mut iterator, self.len());
+                res
+            }
+        }
+    }
+}
+
+fn ocamlvalue_from_iterator<T1: Ocamlvalue, T2: Ocamlvalue>(
+    iterator: &mut std::collections::btree_map::Iter<T1, T2>,
+    size: usize,
+) -> (Value, usize) {
+    if size == 0 {
+        (usize_to_ocaml(0), 0)
+    } else {
+        let (left, left_height) = ocamlvalue_from_iterator(iterator, size / 2);
+        let (key, val) = iterator.next().unwrap();
+        let (right, right_height) = ocamlvalue_from_iterator(iterator, size - 1 - size / 2);
+        let height = std::cmp::max(left_height, right_height) + 1;
+        (
+            caml_block(
+                0,
+                &[
+                    left,
+                    key.ocamlvalue(),
+                    val.ocamlvalue(),
+                    right,
+                    usize_to_ocaml(height),
+                ],
+            ),
+            height,
+        )
+    }
+}

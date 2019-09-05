@@ -110,3 +110,25 @@ test_case!(
     { std::path::Path::new("foo.txt").to_path_buf() }
     { std::path::Path::new("").to_path_buf() }
 );
+
+test_case!(getEmptyStringMap, {
+    std::collections::BTreeMap::<String, String>::new()
+});
+
+test_case!(getSingletonStringMap, {
+    {
+        let mut res = std::collections::BTreeMap::<String, String>::new();
+        res.insert("1".to_string(), "one".to_string());
+        res
+    }
+});
+
+test_case!(getStringMap, {
+    {
+        let mut map = std::collections::BTreeMap::<String, String>::new();
+        map.insert("1".to_string(), "a".to_string());
+        map.insert("2".to_string(), "b".to_string());
+        map.insert("3".to_string(), "c".to_string());
+        map
+    }
+});

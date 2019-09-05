@@ -3270,7 +3270,6 @@ OPTBLD_INLINE void iopClassGetTS() {
   assertx(isStringType(classname_field.type()));
   auto const name = classname_field.val().pstr;
   auto const generics_field = ts->rval(s_generic_types.get());
-  auto mangledName = name;
   ArrayData* reified_types = nullptr;
   if (generics_field.is_set()) {
     reified_types = generics_field.val().parr;
@@ -3278,10 +3277,11 @@ OPTBLD_INLINE void iopClassGetTS() {
       makeStaticString(mangleReifiedGenericsName(reified_types));
     reified_types->incRefCount();
     reified_types = addToReifiedGenericsTable(mangledTypeName, reified_types);
-    mangledName = mangleReifiedName(name, mangledTypeName);
   }
-  auto tv = make_tv<KindOfString>(mangledName);
-  auto const cls = lookupClsRef(&tv);
+  auto const cls = Unit::loadClass(name);
+  if (cls == nullptr) {
+    raise_error(Strings::UNKNOWN_CLASS, name->data());
+  }
 
   vmStack().popC();
   vmStack().pushClass(cls);

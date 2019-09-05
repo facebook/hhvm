@@ -120,13 +120,6 @@ inline String mangleInOutFuncName(const StringData* name,
 
 std::string mangleReifiedGenericsName(const ArrayData* tsList);
 
-inline StringData* mangleReifiedName(
-  const StringData* name,
-  const StringData* tsName
-) {
-  return makeStaticString(folly::sformat("$${}$${}", name, tsName));
-}
-
 inline bool isReifiedName(const StringData* name) {
   // Length larger than $$name$$<type>
   return name->size() > 7 &&

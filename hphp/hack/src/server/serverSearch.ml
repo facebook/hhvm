@@ -73,7 +73,10 @@ let go workers query type_ (sienv : SearchUtils.si_env) : SearchUtils.result =
       in
       begin
         match class_ with
-        | Some name -> ClassMethodSearch.query_class_methods name method_query
+        | Some name ->
+          ClassMethodSearch.query_class_methods
+            (Utils.add_ns name)
+            method_query
         | None ->
           (* When we can't find a class with a name similar to the given one,
            just return no search results. *)

@@ -18,14 +18,16 @@
 #include <folly/Bits.h>
 
 #include "hphp/runtime/base/apc-handle.h"
-#include "hphp/runtime/base/data-walker.h"
 #include "hphp/runtime/base/apc-handle-defs.h"
-#include "hphp/runtime/base/apc-typed-value.h"
+#include "hphp/runtime/base/apc-local-array-defs.h"
+#include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/base/apc-string.h"
-#include "hphp/runtime/base/apc-local-array.h"
-#include "hphp/runtime/base/apc-local-array-defs.h"
+#include "hphp/runtime/base/apc-typed-value.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/array-provenance.h"
+#include "hphp/runtime/base/data-walker.h"
+
 #include "hphp/runtime/ext/apc/ext_apc.h"
 
 namespace HPHP {
@@ -120,7 +122,15 @@ APCArray::MakeSharedVec(ArrayData* vec, APCHandleLevel level,
   return MakeSharedImpl(
     vec,
     level,
-    [&]() { return MakePacked(vec, APCKind::SharedVec, unserializeObj); },
+    [&] {
+      auto const pair = MakePacked(vec, APCKind::SharedVec, unserializeObj);
+      if (RuntimeOption::EvalArrayProvenance) {
+        if (auto const tag = arrprov::getTag(vec)) {
+          arrprov::setTag(APCArray::fromHandle(pair.handle), *tag);
+        }
+      }
+      return pair;
+    },
     [&](DataWalker::PointerMap* m) { return MakeUncountedVec(vec, m); },
     [&](StringData* s) { return APCString::MakeSerializedVec(s); }
   );
@@ -137,7 +147,15 @@ APCArray::MakeSharedDict(ArrayData* dict, APCHandleLevel level,
   return MakeSharedImpl(
     dict,
     level,
-    [&]() { return MakeHash(dict, APCKind::SharedDict, unserializeObj); },
+    [&] {
+      auto const pair = MakeHash(dict, APCKind::SharedDict, unserializeObj);
+      if (RuntimeOption::EvalArrayProvenance) {
+        if (auto const tag = arrprov::getTag(dict)) {
+          arrprov::setTag(APCArray::fromHandle(pair.handle), *tag);
+        }
+      }
+      return pair;
+    },
     [&](DataWalker::PointerMap* m) { return MakeUncountedDict(dict, m); },
     [&](StringData* s) { return APCString::MakeSerializedDict(s); }
   );
@@ -317,6 +335,9 @@ APCHandle::Pair APCArray::MakePacked(ArrayData* arr, APCKind kind,
 void APCArray::Delete(APCHandle* handle) {
   auto const arr = APCArray::fromHandle(handle);
   arr->~APCArray();
+  if (RuntimeOption::EvalArrayProvenance) {
+    arrprov::clearTag(arr);
+  }
   apc_free(arr);
 }
 

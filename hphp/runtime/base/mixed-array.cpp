@@ -651,7 +651,7 @@ ArrayData* MixedArray::MakeUncounted(ArrayData* array,
   if (updateSeen) (*seen)[array] = ad;
   assertx(ad->keyTypes() == a->keyTypes());
   assertx(ad->checkInvariants());
-  return ad;
+  return tryTagArrProvDict<true>(ad, array);
 }
 
 ArrayData* MixedArray::MakeDictFromAPC(const APCArray* apc) {
@@ -661,7 +661,8 @@ ArrayData* MixedArray::MakeDictFromAPC(const APCArray* apc) {
   for (uint32_t i = 0; i < apcSize; ++i) {
     init.setValidKey(apc->getKey(i), apc->getValue(i)->toLocal());
   }
-  return init.create();
+  auto const ad = init.create();
+  return tryTagArrProvDict(ad, apc);
 }
 
 ArrayData* MixedArray::MakeDArrayFromAPC(const APCArray* apc) {
@@ -740,6 +741,9 @@ void MixedArray::ReleaseUncounted(ArrayData* in) {
   auto const ad = asMixed(in);
   if (!ad->uncountedDecRef()) return;
 
+  if (RuntimeOption::EvalArrayProvenance) {
+    arrprov::clearTag(in);
+  }
   if (!ad->isZombie()) {
     auto const data = ad->data();
     auto const stop = data + ad->m_used;

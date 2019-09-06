@@ -97,9 +97,12 @@ folly::Optional<Tag> getTagImpl(const A* a) {
     decltype(rl_array_provenance->tags)
   >::value, "Static and request-local provenance tables must share a type.");
 
-  auto const get = [] (const A* a, const ProvenanceTable& tbl) {
+  auto const get = [] (
+    const A* a,
+    const ProvenanceTable& tbl
+  ) -> folly::Optional<Tag> {
     auto const it = tbl.find(a);
-    assertx(it != tbl.cend());
+    if (it == tbl.cend()) return folly::none;
     assertx(it->second.filename() != nullptr);
     return it->second;
   };
@@ -142,7 +145,9 @@ void clearTagImpl(const A* a) {
 
 folly::Optional<Tag> getTag(const ArrayData* ad) {
   if (!ad->hasProvenanceData()) return folly::none;
-  return getTagImpl(ad);
+  auto const tag = getTagImpl(ad);
+  assertx(tag);
+  return tag;
 }
 folly::Optional<Tag> getTag(const APCArray* a) {
   return getTagImpl(a);

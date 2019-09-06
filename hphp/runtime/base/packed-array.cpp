@@ -618,7 +618,8 @@ ArrayData* PackedArray::MakeVecFromAPC(const APCArray* apc) {
   for (uint32_t i = 0; i < apcSize; ++i) {
     init.append(apc->getValue(i)->toLocal());
   }
-  return init.create();
+  auto const ad = init.create();
+  return tryTagArrProvVec(ad, apc);
 }
 
 ArrayData* PackedArray::MakeVArrayFromAPC(const APCArray* apc) {
@@ -653,6 +654,9 @@ void PackedArray::ReleaseUncounted(ArrayData* ad) {
   assertx(checkInvariants(ad));
   if (!ad->uncountedDecRef()) return;
 
+  if (RuntimeOption::EvalArrayProvenance) {
+    arrprov::clearTag(ad);
+  }
   for (uint32_t i = 0; i < ad->m_size; ++i) {
     ReleaseUncountedTv(LvalUncheckedInt(ad, i));
   }
@@ -1474,7 +1478,7 @@ ArrayData* PackedArray::MakeUncounted(ArrayData* array,
   assertx(ad->isUncounted());
   assertx(checkInvariants(ad));
   if (updateSeen) (*seen)[array] = ad;
-  return ad;
+  return tryTagArrProvVec<true>(ad, array);
 }
 
 ALWAYS_INLINE

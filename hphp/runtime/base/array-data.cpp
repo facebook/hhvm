@@ -1402,16 +1402,16 @@ namespace {
 template<typename SrcArr>
 ArrayData* tagArrProvImpl(ArrayData* ad, const SrcArr* src) {
   assertx(RuntimeOption::EvalArrayProvenance);
-  assertx(ad->hasExactlyOneRef());
+  assertx(ad->hasExactlyOneRef() || ad->isUncounted());
 
   if (src != nullptr) {
     if (auto const tag = arrprov::getTag(src)) {
-      arrprov::setTag(ad, *tag);
+      arrprov::setTag<arrprov::Mode::Emplace>(ad, *tag);
       return ad;
     }
   }
   if (auto const tag = arrprov::tagFromPC()) {
-    arrprov::setTag(ad, *tag);
+    arrprov::setTag<arrprov::Mode::Emplace>(ad, *tag);
   }
   return ad;
 }

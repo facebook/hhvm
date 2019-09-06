@@ -721,9 +721,7 @@ let visitor =
 
        In order to handle this, we strip off the leading `:` if one exists and
        use that as the search term. *)
-      let trimmed_sid =
-        snd sid |> Utils.strip_ns |> (fun s -> (fst sid, lstrip s ":"))
-      in
+      let trimmed_sid = (fst sid, snd sid |> Utils.strip_both_ns) in
       autocomplete_id trimmed_sid env;
       let cid = Nast.CI sid in
       Decl_provider.get_class (snd sid)

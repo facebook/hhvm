@@ -270,9 +270,10 @@ let test_builder_names (harness : Test_harness.t) : bool =
     ~expected:1
     ~sienv;
 
-  (* XHP is considered a class at the moment - this may change *)
+  (* XHP is considered a class at the moment - this may change.
+   * Note that XHP classes are saved WITHOUT a leading colon. *)
   assert_autocomplete
-    ~query_text:":xhp:helloworld"
+    ~query_text:"xhp:helloworld"
     ~kind:SI_Class
     ~expected:1
     ~sienv;

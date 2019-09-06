@@ -63,8 +63,40 @@ let test_expand_namespace () =
   assert_expand_ns "global_func" nsmap "\\global_func";
   true
 
+let test_strip_namespace () =
+  String_asserter.assert_equals
+    (Utils.strip_both_ns "\\MyClass")
+    "MyClass"
+    "Strip both should remove Hack namespaces";
+  String_asserter.assert_equals
+    (Utils.strip_both_ns ":xhp:foo")
+    "xhp:foo"
+    "Strip both should remove XHP namespaces";
+  String_asserter.assert_equals
+    (Utils.strip_both_ns "MyClass")
+    "MyClass"
+    "Strip both should leave unchanged normal strings";
+  String_asserter.assert_equals
+    (Utils.strip_both_ns "\\:MyClass")
+    "MyClass"
+    "Strip both should remove both \\ and :";
+  String_asserter.assert_equals
+    (Utils.strip_xhp_ns "\\MyClass")
+    "\\MyClass"
+    "Strip xhp should leave unchanged Hack namespaces";
+  String_asserter.assert_equals
+    (Utils.strip_xhp_ns ":xhp:foo")
+    "xhp:foo"
+    "Strip xhp should remove XHP namespaces";
+  String_asserter.assert_equals
+    (Utils.strip_xhp_ns "MyClass")
+    "MyClass"
+    "Strip xhp should leave unchanged normal strings";
+  true
+
 let () =
   Unit_test.run_all
     [ ("test ability to split namespaces", test_namespace_splitter);
       ("test ability to split class::meth", test_class_meth_splitter);
-      ("test ability to expand namespaces", test_expand_namespace) ]
+      ("test ability to expand namespaces", test_expand_namespace);
+      ("test strip namespace functions", test_strip_namespace) ]

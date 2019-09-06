@@ -73,7 +73,10 @@ let parse_one_file ~(path : Relative_path.t) : si_capture =
                 get_details_from_info info_opt
               in
               {
-                sif_name = key;
+                (* We store all classes without the preceding
+                 * namespace indicator, because that is closest
+                 * to how they are returned by autocomplete. *)
+                sif_name = Utils.strip_both_ns key;
                 sif_kind = kind;
                 sif_filepath = relative_path_str;
                 sif_is_abstract = is_abstract;

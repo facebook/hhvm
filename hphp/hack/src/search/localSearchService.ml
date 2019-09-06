@@ -64,7 +64,7 @@ let convert_fileinfo_to_contents
     in
     let item =
       {
-        sif_name = Utils.strip_ns name;
+        sif_name = Utils.strip_both_ns name;
         sif_kind = fixed_kind;
         sif_filepath = filepath;
         sif_is_abstract = is_abstract;
@@ -180,7 +180,7 @@ let search_local_symbols
            symbol.sif_name
            0
     then
-      let fullname = Utils.strip_ns symbol.sif_name in
+      let fullname = Utils.strip_both_ns symbol.sif_name in
       let acc_new =
         {
           si_name = fullname;

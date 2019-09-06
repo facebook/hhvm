@@ -364,10 +364,7 @@ struct ExternCompiler {
     bool wantsSymbolRefs,
     const RepoOptions& options
   ) {
-    if (!isRunning()) {
-      start();
-    }
-
+    auto isHookInstalled = nullptr != g_hhas_handler;
     std::string prog;
     std::unique_ptr<Unit> u;
     try {
@@ -382,6 +379,9 @@ struct ExternCompiler {
       };
 
       auto compile = [&]() {
+        if (!isRunning()) {
+          start();
+        }
         writeProgram(filename, sha1, code, forDebuggerEval, options);
         statefulLogTime("send_source");
         auto hhas = readResult(&log);
@@ -389,7 +389,7 @@ struct ExternCompiler {
         return hhas;
       };
 
-      if (nullptr != g_hhas_handler) {
+      if (isHookInstalled) {
         prog = g_hhas_handler(
           filename,
           sha1,

@@ -487,7 +487,9 @@ void cellCastToStringInPlace(tv_lval tv) {
     }
 
     case KindOfClsMeth:
-      raiseClsMethConvertWarningHelper("string");
+      if (RuntimeOption::EvalRaiseClsMethConversionWarning) {
+        raise_notice("ClsMeth to string conversion");
+      }
       tvDecRefClsMeth(tv);
       if (RuntimeOption::EvalHackArrDVArrs) {
         return persistentString(vec_string.get());
@@ -583,7 +585,9 @@ StringData* cellCastToStringData(Cell tv) {
     }
 
     case KindOfClsMeth:
-      raiseClsMethConvertWarningHelper("string");
+      if (RuntimeOption::EvalRaiseClsMethConversionWarning) {
+        raise_notice("ClsMeth to string conversion");
+      }
       if (RuntimeOption::EvalHackArrDVArrs) {
         return vec_string.get();
       } else {
@@ -1352,7 +1356,7 @@ enable_if_lval_t<T, void> tvCastToVArrayInPlace(T tv) {
         );
 
       case KindOfClsMeth: {
-        raiseClsMethToVecWarningHelper();
+        raiseClsMethConvertWarningHelper("varray");
         a = make_varray(
           val(tv).pclsmeth->getCls(), val(tv).pclsmeth->getFunc()).detach();
         tvDecRefClsMeth(tv);

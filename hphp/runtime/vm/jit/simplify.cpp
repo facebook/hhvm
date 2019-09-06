@@ -2385,14 +2385,21 @@ SSATmp* simplifyConvCellToBool(State& env, const IRInstruction* inst) {
     return gen(env, ConvObjToBool, inst->taken(), src);
   }
   if (srcType <= TRes)  return cns(env, true);
+  if (srcType <= TClsMeth) return cns(env, true);
 
   return nullptr;
 }
 
-const StaticString s_msgArrToStr("Array to string conversion");
-const StaticString s_msgVecToStr("Vec to string conversion");
-const StaticString s_msgDictToStr("Dict to string conversion");
-const StaticString s_msgKeysetToStr("Keyset to string conversion");
+namespace {
+const StaticString
+    s_msgArrToStr("Array to string conversion"),
+    s_msgVecToStr("Vec to string conversion"),
+    s_msgDictToStr("Dict to string conversion"),
+    s_msgKeysetToStr("Keyset to string conversion"),
+    s_msgClsMethToStr("ClsMeth to string conversion"),
+    s_msgClsMethToInt("Implicit clsmeth to int conversion"),
+    s_msgClsMethToDbl("Implicit clsmeth to double conversion");
+}
 
 SSATmp* simplifyConvCellToStr(State& env, const IRInstruction* inst) {
   auto const src        = inst->src(0);
@@ -2435,6 +2442,16 @@ SSATmp* simplifyConvCellToStr(State& env, const IRInstruction* inst) {
   }
   if (srcType <= TObj)    return gen(env, ConvObjToStr, catchTrace, src);
   if (srcType <= TRes)    return gen(env, ConvResToStr, catchTrace, src);
+  if (srcType <= TClsMeth) {
+    if (RuntimeOption::EvalRaiseClsMethConversionWarning) {
+      gen(env, RaiseNotice, catchTrace, cns(env, s_msgClsMethToStr.get()));
+    }
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      return cns(env, s_Vec.get());
+    } else {
+      return cns(env, s_Array.get());
+    }
+  }
 
   return nullptr;
 }
@@ -2470,7 +2487,12 @@ SSATmp* simplifyConvCellToInt(State& env, const IRInstruction* inst) {
   if (srcType <= TStr)  return gen(env, ConvStrToInt, src);
   if (srcType <= TObj)  return gen(env, ConvObjToInt, inst->taken(), src);
   if (srcType <= TRes)  return gen(env, ConvResToInt, src);
-
+  if (srcType <= TClsMeth)  {
+    if (RuntimeOption::EvalRaiseClsMethConversionWarning) {
+      gen(env, RaiseNotice, inst->taken(), cns(env, s_msgClsMethToInt.get()));
+    }
+    return cns(env, 1);
+  }
   return nullptr;
 }
 
@@ -2502,6 +2524,12 @@ SSATmp* simplifyConvCellToDbl(State& env, const IRInstruction* inst) {
   if (srcType <= TStr)  return gen(env, ConvStrToDbl, src);
   if (srcType <= TObj)  return gen(env, ConvObjToDbl, inst->taken(), src);
   if (srcType <= TRes)  return gen(env, ConvResToDbl, src);
+  if (srcType <= TClsMeth)  {
+    if (RuntimeOption::EvalRaiseClsMethConversionWarning) {
+      gen(env, RaiseNotice, inst->taken(), cns(env, s_msgClsMethToDbl.get()));
+    }
+    return cns(env, 1.0);
+  }
 
   return nullptr;
 }

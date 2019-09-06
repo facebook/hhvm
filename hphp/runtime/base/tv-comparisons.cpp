@@ -639,8 +639,12 @@ typename Op::RetType cellRelOpVec(Op op, Cell cell, const ArrayData* a) {
   assertx(a->isVecArray());
 
   if (isClsMethType(cell.m_type)) {
-    raiseClsMethToVecWarningHelper();
-    return op.vec(clsMethToVecHelper(cell.m_data.pclsmeth).get(), a);
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      raiseClsMethToVecWarningHelper();
+      return op.vec(clsMethToVecHelper(cell.m_data.pclsmeth).get(), a);
+    } else {
+      return op.vecVsNonVec();
+    }
   }
 
   if (UNLIKELY(!isVecType(cell.m_type))) {

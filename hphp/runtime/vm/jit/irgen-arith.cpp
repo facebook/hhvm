@@ -620,6 +620,12 @@ void implIntCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
         }
       )
     );
+  } else if (rightTy <= TClsMeth) {
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      push(env, emitMixedVecCmp(env, op));
+    } else {
+      push(env, emitConstCmp(env, op, false, true));
+    }
   } else {
     // For everything else, convert to an int. The conversion may be a no-op if
     // the right operand is already an int.
@@ -672,6 +678,12 @@ void implDblCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
         }
       )
     );
+  } else if (rightTy <= TClsMeth) {
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      push(env, emitMixedVecCmp(env, op));
+    } else {
+      push(env, emitConstCmp(env, op, false, true));
+    }
   } else {
     // For everything else, convert to a double. The conversion may be a no-op
     // if the right operand is already a double.

@@ -12,7 +12,6 @@
    full_fidelity_editable_syntax
    full_fidelity_editable_token
    full_fidelity_editable_trivia
-   full_fidelity_lexer
    full_fidelity_minimal_syntax
    full_fidelity_minimal_token
    full_fidelity_minimal_trivia

@@ -1961,7 +1961,7 @@ if there already is one, since that one will likely be better than this one. *)
             | (_, Some TK.HexadecimalLiteral)
             (* We allow underscores while lexing the integer literals. This gets rid of them before
              * the literal is created. *)
-
+            
             | (_, Some TK.BinaryLiteral) ->
               Int (Str.global_replace underscore "" s)
             | (_, Some TK.FloatingLiteral) -> Float s
@@ -2875,7 +2875,9 @@ if there already is one, since that one will likely be better than this one. *)
           modifiers.has_coroutine
       in
       let fh_name = pos_name function_name env in
-      let fh_constrs = pWhereConstraint ~is_class:false node function_where_clause env in
+      let fh_constrs =
+        pWhereConstraint ~is_class:false node function_where_clause env
+      in
       let fh_type_parameters = pTParaml function_type_parameter_list env in
       let fh_param_modifiers =
         List.filter ~f:(fun p -> Option.is_some p.param_modifier) fh_parameters
@@ -3654,7 +3656,9 @@ if there already is one, since that one will likely be better than this one. *)
          | (_, Happly (_, hl)) :: _ -> not @@ List.is_empty hl
          | _ -> false);
       let c_implements = couldMap ~f:pHint impls env in
-      let c_where_constraints = pWhereConstraint ~is_class:true node where_clause env in
+      let c_where_constraints =
+        pWhereConstraint ~is_class:true node where_clause env
+      in
       let c_body =
         let rec aux acc ns =
           match ns with
@@ -3950,7 +3954,7 @@ if there already is one, since that one will likely be better than this one. *)
     let rec aux env acc = function
       | []
       (* EOF happens only as the last token in the list. *)
-
+      
       | [{ syntax = EndOfFile _; _ }] ->
         List.concat (List.rev acc)
       (* HaltCompiler stops processing the list in PHP but can be disabled in Hack *)
@@ -4234,11 +4238,7 @@ let pos_of_error path source_text error =
 
 let parse_text (env : env) (source_text : SourceText.t) :
     FileInfo.mode option * PositionedSyntaxTree.t =
-  let mode =
-    Full_fidelity_parser.parse_mode
-      ~rust:(ParserOptions.rust env.parser_options)
-      source_text
-  in
+  let mode = Full_fidelity_parser.parse_mode source_text in
   let quick_mode =
     (not env.codegen)
     &&
@@ -4270,7 +4270,6 @@ let parse_text (env : env) (source_text : SourceText.t) :
         ~php5_compat_mode:env.php5_compat_mode
         ~disable_nontoplevel_declarations:
           (GlobalOptions.po_disable_nontoplevel_declarations env.parser_options)
-        ~rust:(GlobalOptions.po_rust env.parser_options)
         ~disable_legacy_soft_typehints:
           (GlobalOptions.po_disable_legacy_soft_typehints env.parser_options)
         ~allow_new_attribute_syntax:
@@ -4488,9 +4487,7 @@ let defensive_program
     let mode =
       try
         let source = Full_fidelity_source_text.make fn content in
-        Full_fidelity_parser.parse_mode
-          ~rust:(ParserOptions.rust parser_options)
-          source
+        Full_fidelity_parser.parse_mode source
       with _ -> None
     in
     let err = Exn.to_string e in

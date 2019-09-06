@@ -24,8 +24,7 @@ let extract_as_json_string
     ~(allow_new_attribute_syntax : bool)
     ~(disable_legacy_attribute_syntax : bool)
     ~(filename : Relative_path.t)
-    ~(text : string)
-    ~(rust : bool) : string option =
+    ~(text : string) =
   (* return empty string if file has syntax errors *)
   let bool2int b =
     if b then
@@ -36,7 +35,6 @@ let extract_as_json_string
   ignore @@ disable_nontoplevel_declarations;
   ignore @@ disable_legacy_soft_typehints;
   ignore @@ disable_legacy_attribute_syntax;
-  ignore @@ rust;
   let unnormalized =
     Rust_facts_ffi.extract_as_json_ffi
       ( (bool2int php5_compat_mode lsl 0)
@@ -61,8 +59,7 @@ let from_text
     ~(allow_new_attribute_syntax : bool)
     ~(disable_legacy_attribute_syntax : bool)
     ~(filename : Relative_path.t)
-    ~(text : string)
-    ~(rust : bool) : facts option =
+    ~(text : string) =
   Option.bind
     ( extract_as_json_string
         ~php5_compat_mode
@@ -73,6 +70,5 @@ let from_text
         ~disable_legacy_attribute_syntax
         ~filename
         ~text
-        ~rust
     |> Option.map ~f:Hh_json.json_of_string )
     facts_from_json

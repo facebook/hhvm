@@ -1,7 +1,0 @@
-(executable
-  (name facts_parse)
-  (modules
-    facts_parse)
-  (libraries
-    default_injector_config
-    facts))

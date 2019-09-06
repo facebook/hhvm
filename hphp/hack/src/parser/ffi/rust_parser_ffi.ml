@@ -31,16 +31,6 @@ let env_to_opts env =
     Env.allow_new_attribute_syntax env,
     Env.leak_rust_tree env )
 
-let set_global_lexer_env _ =
-  (* Parsing of file sets up global variables in lexer module. Those variables
-   * are then accessed even after parsing, with the assumption that they have
-   * not changed since the tree was created (which must accidentally be true,
-   * lucky us).
-   * Going through Rust parser would bypass setting those variables and produces
-   * incorrect results. I'll just set them here directly to maintain the same
-   * behavior. *)
-  Full_fidelity_lexer.Env.set ~rust:true
-
 exception RustException of string
 
 external parse_mode : SourceText.t -> FileInfo.mode option = "rust_parse_mode"
@@ -51,24 +41,19 @@ external parse_minimal :
   SourceText.t -> parser_opts -> (unit, MinimalSyntax.t) result
   = "parse_minimal"
 
-let parse_minimal text env =
-  set_global_lexer_env env;
-  parse_minimal text (env_to_opts env)
+let parse_minimal text env = parse_minimal text (env_to_opts env)
 
 external parse_positioned :
   SourceText.t -> parser_opts -> (unit, PositionedSyntax.t) result
   = "parse_positioned"
 
-let parse_positioned text env =
-  set_global_lexer_env env;
-  parse_positioned text (env_to_opts env)
+let parse_positioned text env = parse_positioned text (env_to_opts env)
 
 external parse_positioned_with_decl_mode_sc :
   SourceText.t -> parser_opts -> (bool list, PositionedSyntax.t) result
   = "parse_positioned_with_decl_mode_sc"
 
 let parse_positioned_with_decl_mode_sc text env =
-  set_global_lexer_env env;
   parse_positioned_with_decl_mode_sc text (env_to_opts env)
 
 external parse_positioned_with_coroutine_sc :
@@ -80,7 +65,6 @@ external parse_positioned_with_coroutine_sc_leak_tree :
   = "parse_positioned_with_coroutine_sc_leak_tree"
 
 let parse_positioned_with_coroutine_sc text env =
-  set_global_lexer_env env;
   if Env.leak_rust_tree env then
     parse_positioned_with_coroutine_sc_leak_tree text (env_to_opts env)
   else
@@ -93,7 +77,6 @@ external parse_positioned_with_verify_sc :
   = "parse_positioned_with_verify_sc"
 
 let parse_positioned_with_verify_sc text env =
-  set_global_lexer_env env;
   parse_positioned_with_verify_sc text (env_to_opts env)
 
 let init () =

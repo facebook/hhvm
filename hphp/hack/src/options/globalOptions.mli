@@ -198,8 +198,6 @@ type t = {
   (* Look up class members lazily from shallow declarations instead of eagerly
      computing folded declarations representing the entire class type. *)
   tco_shallow_class_decl: bool;
-  (* Use Rust parser *)
-  po_rust: bool;
   (* The threshold (in seconds) that determines whether a file's type checking time
       should be logged. It's only in effect if we're profiling type checking to begin
       with. To profile, pass --profile-log to hh_server. *)
@@ -311,7 +309,6 @@ val make :
   ?tco_typecheck_xhp_cvars:bool ->
   ?tco_ignore_collection_expr_type_arguments:bool ->
   ?tco_shallow_class_decl:bool ->
-  ?po_rust:bool ->
   ?profile_type_check_duration_threshold:float ->
   ?tco_like_types:bool ->
   ?tco_pessimize_types:bool ->
@@ -461,8 +458,6 @@ val tco_typecheck_xhp_cvars : t -> bool
 val tco_ignore_collection_expr_type_arguments : t -> bool
 
 val tco_shallow_class_decl : t -> bool
-
-val po_rust : t -> bool
 
 val profile_type_check_duration_threshold : t -> float
 

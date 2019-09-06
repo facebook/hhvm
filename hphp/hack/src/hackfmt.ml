@@ -382,7 +382,7 @@ let parse ~parser_env text_source =
     {
       parser_env with
       Full_fidelity_parser_env.mode =
-        Full_fidelity_parser.parse_mode ~rust:false source_text;
+        Full_fidelity_parser.parse_mode source_text;
     }
   in
   let tree = SyntaxTree.make ~env:parser_env source_text in

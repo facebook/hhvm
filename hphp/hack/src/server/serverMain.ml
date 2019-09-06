@@ -1123,7 +1123,6 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
     interrupt_on_client;
     predeclare_ide;
     max_typechecker_worker_memory_mb;
-    rust;
     _;
   } =
     local_config
@@ -1180,8 +1179,7 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
   );
 
   ( if
-    rust
-    && ServerConfig.warn_on_non_opt_build config
+    ServerConfig.warn_on_non_opt_build config
     && not Build_id.is_build_optimized
   then
     let msg =

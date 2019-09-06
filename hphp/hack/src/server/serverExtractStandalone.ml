@@ -276,7 +276,7 @@ let print_error source_text error =
 
 let tree_from_string s =
   let source_text = SourceText.make Relative_path.default s in
-  let mode = Full_fidelity_parser.parse_mode ~rust:false source_text in
+  let mode = Full_fidelity_parser.parse_mode source_text in
   let env = Full_fidelity_parser_env.make ?mode () in
   let tree = SyntaxTree.make ~env source_text in
   if List.is_empty (SyntaxTree.all_errors tree) then

@@ -119,7 +119,6 @@ let compute_fileinfo_for_path (env : ServerEnv.env) (path : Relative_path.t) :
           ~disable_legacy_attribute_syntax:false
           ~filename:path
           ~text:contents
-          ~rust:ServerEnv.(ParserOptions.rust env.popt)
       in
       let (funs, classes, typedefs, consts) =
         match facts with
@@ -175,7 +174,6 @@ let compute_fileinfo_for_path (env : ServerEnv.env) (path : Relative_path.t) :
       in
       let fi_mode =
         Full_fidelity_parser.parse_mode
-          ~rust:(ParserOptions.rust env.ServerEnv.popt)
           (Full_fidelity_source_text.make path contents)
         |> Option.value (* TODO: is this a reasonable default? *)
              ~default:FileInfo.Mstrict

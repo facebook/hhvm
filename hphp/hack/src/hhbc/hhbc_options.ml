@@ -56,7 +56,6 @@ type t = {
   option_enable_pocket_universes: bool;
   option_notice_on_byref_argument_typehint_violation: bool;
   option_array_provenance: bool;
-  option_use_rust_parser: bool;
   option_enable_constant_visibility_modifiers: bool;
   option_enable_class_level_where_clauses: bool;
   option_disable_legacy_soft_typehints: bool;
@@ -117,7 +116,6 @@ let default =
     option_enable_pocket_universes = false;
     option_notice_on_byref_argument_typehint_violation = false;
     option_array_provenance = false;
-    option_use_rust_parser = false;
     option_enable_constant_visibility_modifiers = false;
     option_enable_class_level_where_clauses = false;
     option_disable_legacy_soft_typehints = false;
@@ -221,8 +219,6 @@ let notice_on_byref_argument_typehint_violation o =
 
 let array_provenance o = o.option_array_provenance
 
-let use_rust_parser o = o.option_use_rust_parser
-
 let enable_constant_visibility_modifiers o =
   o.option_enable_constant_visibility_modifiers
 
@@ -303,7 +299,6 @@ let to_string o =
       Printf.sprintf "notice_on_byref_argument_typehint_violation: %B"
       @@ notice_on_byref_argument_typehint_violation o;
       Printf.sprintf "array_provenance: %B" @@ array_provenance o;
-      Printf.sprintf "use_rust_parser: %B" @@ use_rust_parser o;
       Printf.sprintf "enable_constant_visibility_modifiers: %B"
       @@ enable_constant_visibility_modifiers o;
       Printf.sprintf "enable_class_level_where_clauses: %B"
@@ -644,10 +639,6 @@ let value_setters =
     @@ (fun opts v -> { opts with option_rx_is_enabled = v > 0 }) );
     ( set_value "hhvm.array_provenance" get_value_from_config_int
     @@ (fun opts v -> { opts with option_array_provenance = v > 0 }) );
-    ( set_value
-        "hhvm.hack.lang.hack_compiler_use_rust_parser"
-        get_value_from_config_int
-    @@ (fun opts v -> { opts with option_use_rust_parser = v > 0 }) );
     ( set_value
         "hhvm.hack.lang.enable_constant_visibility_modifiers"
         get_value_from_config_int

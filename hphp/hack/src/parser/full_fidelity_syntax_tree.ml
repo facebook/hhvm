@@ -83,7 +83,7 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
       build text root rust_tree errors mode state
 
     let make_impl ?(env = Env.default) text =
-      let mode = Full_fidelity_parser.parse_mode ~rust:(Env.rust env) text in
+      let mode = Full_fidelity_parser.parse_mode text in
       let parser = Parser.make env text in
       let (parser, root, rust_tree) = Parser.parse_script parser in
       let errors = Parser.errors parser in

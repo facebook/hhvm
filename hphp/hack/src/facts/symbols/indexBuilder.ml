@@ -58,7 +58,6 @@ let parse_one_file ~(path : Relative_path.t) : si_capture =
         ~disable_legacy_attribute_syntax:false
         ~filename:path
         ~text
-        ~rust:true
     in
     (* Iterate through facts and print them out *)
     let result =

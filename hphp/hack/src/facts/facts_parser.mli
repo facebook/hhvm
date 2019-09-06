@@ -21,7 +21,6 @@ val extract_as_json_string :
   disable_legacy_attribute_syntax:bool ->
   filename:Relative_path.t ->
   text:string ->
-  rust:bool ->
   string option
 
 val from_text :
@@ -33,5 +32,4 @@ val from_text :
   disable_legacy_attribute_syntax:bool ->
   filename:Relative_path.t ->
   text:string ->
-  rust:bool ->
   Facts.facts option

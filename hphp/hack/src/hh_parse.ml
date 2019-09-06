@@ -63,7 +63,6 @@ module FullFidelityParseArgs = struct
     dump_nast: bool;
     disable_lval_as_an_expression: bool;
     pocket_universes: bool;
-    rust: bool;
     enable_constant_visibility_modifiers: bool;
     enable_class_level_where_clauses: bool;
     disable_legacy_soft_typehints: bool;
@@ -101,7 +100,6 @@ module FullFidelityParseArgs = struct
       dump_nast
       disable_lval_as_an_expression
       pocket_universes
-      rust
       enable_constant_visibility_modifiers
       enable_class_level_where_clauses
       disable_legacy_soft_typehints
@@ -137,7 +135,6 @@ module FullFidelityParseArgs = struct
       dump_nast;
       disable_lval_as_an_expression;
       pocket_universes;
-      rust;
       enable_constant_visibility_modifiers;
       enable_class_level_where_clauses;
       disable_legacy_soft_typehints;
@@ -190,7 +187,6 @@ module FullFidelityParseArgs = struct
     let pocket_universes = ref false in
     let files = ref [] in
     let push_file file = files := file :: !files in
-    let rust = ref true in
     let enable_constant_visibility_modifiers = ref false in
     let enable_class_level_where_clauses = ref false in
     let disable_legacy_soft_typehints = ref false in
@@ -306,9 +302,6 @@ No errors are filtered out."
         ( "--pocket-universes",
           Arg.Set pocket_universes,
           "Enables support for Pocket Universes" );
-        ( "--rust",
-          Arg.Bool (fun x -> rust := x),
-          "Use the parser written in Rust instead of OCaml one" );
         ( "--enable-constant-visibility-modifiers",
           Arg.Set enable_constant_visibility_modifiers,
           "Require constants to have visibility modifiers" );
@@ -382,7 +375,6 @@ No errors are filtered out."
       !dump_nast
       !disable_lval_as_an_expression
       !pocket_universes
-      !rust
       !enable_constant_visibility_modifiers
       !enable_class_level_where_clauses
       !disable_legacy_soft_typehints
@@ -414,7 +406,6 @@ let handle_existing_file args filename =
       args.disable_lval_as_an_expression
   in
   let popt = ParserOptions.setup_pocket_universes popt args.pocket_universes in
-  let popt = ParserOptions.with_rust popt args.rust in
   let popt =
     ParserOptions.with_enable_constant_visibility_modifiers
       popt
@@ -459,11 +450,10 @@ let handle_existing_file args filename =
   (* Parse with the full fidelity parser *)
   let file = Relative_path.create Relative_path.Dummy filename in
   let source_text = SourceText.from_file file in
-  let mode = Full_fidelity_parser.parse_mode ~rust:args.rust source_text in
+  let mode = Full_fidelity_parser.parse_mode source_text in
   let env =
     Full_fidelity_parser_env.make
       ~disable_lval_as_an_expression:args.disable_lval_as_an_expression
-      ~rust:args.rust
       ~disable_legacy_soft_typehints:args.disable_legacy_soft_typehints
       ~allow_new_attribute_syntax:args.allow_new_attribute_syntax
       ~disable_legacy_attribute_syntax:args.disable_legacy_attribute_syntax

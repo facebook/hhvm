@@ -88,11 +88,7 @@ let get_from_local_cache ~full file_name =
       | Some ast -> ast.Parser_return.ast
       | None ->
         let source = Full_fidelity_source_text.make file_name contents in
-        (match
-           Full_fidelity_parser.parse_mode
-             ~rust:(ParserOptions.rust popt)
-             source
-         with
+        (match Full_fidelity_parser.parse_mode source with
         | None
         | Some FileInfo.Mphp ->
           []

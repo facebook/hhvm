@@ -14,7 +14,6 @@ module SyntaxError = Full_fidelity_syntax_error
 module SourceText = Full_fidelity_source_text
 module SyntaxTree =
   Full_fidelity_syntax_tree.WithSyntax (Full_fidelity_positioned_syntax)
-module Lex = Full_fidelity_lexer
 module Logger = HackcEventLogger
 
 (*****************************************************************************)
@@ -451,14 +450,13 @@ let do_compile filename compiler_options popt fail_or_ast debug_time =
     log_success compiler_options filename debug_time;
   hhas
 
-let extract_facts ~rust ~filename ~source_root text =
+let extract_facts ~filename ~source_root text =
   [ Hhbc_options.(
       let co = !compiler_options in
       match Hackc_parse_delegator.extract_facts filename source_root with
       | Some result -> Hh_json.json_to_multiline ~sort_keys:true result
       | None ->
         Facts_parser.extract_as_json_string
-          ~rust
           ~php5_compat_mode:true
           ~hhvm_compat_mode:true
           ~disable_nontoplevel_declarations:
@@ -473,10 +471,9 @@ let extract_facts ~rust ~filename ~source_root text =
 let parse_hh_file filename body =
   Hhbc_options.(
     let co = !compiler_options in
-    let rust = use_rust_parser co in
     let file = Relative_path.create Relative_path.Dummy filename in
     let source_text = SourceText.make file body in
-    let mode = Full_fidelity_parser.parse_mode ~rust source_text in
+    let mode = Full_fidelity_parser.parse_mode source_text in
     let env =
       Full_fidelity_parser_env.make
         ~codegen:true
@@ -513,7 +510,6 @@ let make_popt () =
       ~enable_constant_visibility_modifiers:
         (enable_constant_visibility_modifiers co)
       ~enable_class_level_where_clauses:(enable_class_level_where_clauses co)
-      ~rust:(use_rust_parser co)
       ~disable_legacy_soft_typehints:(disable_legacy_soft_typehints co)
       ~allow_new_attribute_syntax:(allow_new_attribute_syntax co)
       ~disable_legacy_attribute_syntax:(disable_legacy_attribute_syntax co)
@@ -536,11 +532,7 @@ let process_single_source_unit
     let t = Unix.gettimeofday () in
     let output =
       if compiler_options.extract_facts then
-        extract_facts
-          ~rust:(ParserOptions.rust popt)
-          ~filename
-          ~source_root
-          source_text
+        extract_facts ~filename ~source_root source_text
       else
         let fail_or_ast =
           match
@@ -718,9 +710,6 @@ let decl_and_run_mode compiler_options =
                  let path =
                    Relative_path.create Relative_path.Dummy filename
                  in
-                 let rust =
-                   Hhbc_options.use_rust_parser !Hhbc_options.compiler_options
-                 in
                  let old_config = !Hhbc_options.compiler_options in
                  let config_overrides =
                    get_field
@@ -732,7 +721,7 @@ let decl_and_run_mode compiler_options =
                  let result =
                    handle_output
                      path
-                     (extract_facts ~rust ~filename:path ~source_root body)
+                     (extract_facts ~filename:path ~source_root body)
                  in
                  Hhbc_options.set_compiler_options old_config;
                  result)

@@ -117,8 +117,6 @@ type t = {
   tico_invalidate_files: bool;
   (* Use finer grain hh_server dependencies *)
   tico_invalidate_smart: bool;
-  (* Use rust parser *)
-  rust: bool;
   profile_type_check_duration_threshold: float;
   (* Use shared_lru workers *)
   use_lru_workers: bool;
@@ -190,7 +188,6 @@ let default =
     symbolindex_file = None;
     tico_invalidate_files = false;
     tico_invalidate_smart = false;
-    rust = true;
     profile_type_check_duration_threshold = 0.05;
     (* seconds *)
     use_lru_workers = false;
@@ -531,7 +528,6 @@ let load_ fn ~silent ~current_version overrides =
       ~default:default.tico_invalidate_smart
       config
   in
-  let rust = bool_if_version "rust" ~default:default.rust config in
   let profile_type_check_duration_threshold =
     float_
       "profile_type_check_duration_threshold"
@@ -605,7 +601,6 @@ let load_ fn ~silent ~current_version overrides =
     symbolindex_file;
     tico_invalidate_files;
     tico_invalidate_smart;
-    rust;
     profile_type_check_duration_threshold;
     use_lru_workers;
   }

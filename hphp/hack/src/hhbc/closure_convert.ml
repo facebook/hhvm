@@ -1527,9 +1527,9 @@ and convert_catch env st (ty, (p, catch_var), b) =
 
 and convert_case env st case =
   match case with
-  | Default b ->
+  | Default (p, b) ->
     let (st, b) = convert_block env st b in
-    (st, Default b)
+    (st, Default (p, b))
   | Case (e, b) ->
     let (st, e) = convert_expr env st e in
     let (st, b) = convert_block env st b in

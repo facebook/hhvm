@@ -67,7 +67,7 @@ and collect_valid_target_labels_for_block_aux acc block =
 and collect_valid_target_labels_for_switch_cases_aux acc cl =
   List.fold_left cl ~init:acc ~f:(fun acc s ->
       match s with
-      | T.Default block
+      | T.Default (_, block)
       | T.Case (_, block) ->
         collect_valid_target_labels_for_block_aux acc block)
 

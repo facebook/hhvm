@@ -234,7 +234,7 @@ and ('ex, 'fb, 'en, 'hi) class_get_expr =
 and ('ex, 'fb, 'en, 'hi) assert_expr = AE_assert of ('ex, 'fb, 'en, 'hi) expr
 
 and ('ex, 'fb, 'en, 'hi) case =
-  | Default of ('ex, 'fb, 'en, 'hi) block
+  | Default of pos * ('ex, 'fb, 'en, 'hi) block
   | Case of ('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) block
 
 and ('ex, 'fb, 'en, 'hi) catch = sid * lid * ('ex, 'fb, 'en, 'hi) block

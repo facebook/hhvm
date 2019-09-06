@@ -516,7 +516,7 @@ and afield =
   | AFkvalue of expr * expr
 
 and case =
-  | Default of block
+  | Default of pos * block
   | Case of expr * block
 
 and catch = id * id * block

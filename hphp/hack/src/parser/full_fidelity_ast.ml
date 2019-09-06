@@ -2313,7 +2313,7 @@ if there already is one, since that one will likely be better than this one. *)
                   match syntax node with
                   | CaseLabel { case_expression; _ } ->
                     Case (pExpr case_expression env, cont)
-                  | DefaultLabel _ -> Default cont
+                  | DefaultLabel _ -> Default (pPos node env, cont)
                   | _ -> missing_syntax "switch label" node env
                 in
                 let pSwitchSection : case list parser =

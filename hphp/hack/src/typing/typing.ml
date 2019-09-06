@@ -1364,7 +1364,7 @@ and case_list parent_locals ty env switch_pos cl =
     if not @@ List.is_empty block then
       match rest_of_list with
       | []
-      | [Default []] ->
+      | [Default (_, [])] ->
         ()
       | _ ->
         begin
@@ -1412,16 +1412,16 @@ and case_list parent_locals ty env switch_pos cl =
     if has_default || is_enum then
       (env, cl, false)
     else
-      (env, cl @ [Default []], true)
+      (env, cl @ [Default (Pos.none, [])], true)
   in
   let rec case_list env = function
     | [] -> (env, [])
-    | Default b :: rl ->
+    | Default (pos, b) :: rl ->
       let env = initialize_next_cont env in
       let (env, tb) = block env b in
-      check_fallthrough env switch_pos Pos.none b rl ~is_default:true;
+      check_fallthrough env switch_pos pos b rl ~is_default:true;
       let (env, tcl) = case_list env rl in
-      (env, T.Default tb :: tcl)
+      (env, T.Default (pos, tb) :: tcl)
     | Case (((pos, _) as e), b) :: rl ->
       let env = initialize_next_cont env in
       let (env, te, _) = expr env e in

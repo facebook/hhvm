@@ -255,7 +255,7 @@ let sequence_visitor ~require_used used_vars =
     (* Handle case to disallow assigning to vars inside case labels. *)
     method! on_case acc =
       function
-      | Default b ->
+      | Default (_, b) ->
         let acc = this#on_block acc b in
         acc
       | Case (e, b) ->

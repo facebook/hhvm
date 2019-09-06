@@ -355,7 +355,7 @@ let converter
     | RequireOnce -> Aast.RequireOnce
   and on_case c =
     match c with
-    | Default b -> Aast.Default (on_block b)
+    | Default (p, b) -> Aast.Default (p, on_block b)
     | Case (e, b) -> Aast.Case (on_expr e, on_block b)
   and on_catch (id1, id2, b) =
     let lid = Local_id.make_unscoped (snd id2) in

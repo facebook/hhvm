@@ -185,7 +185,7 @@ class gatherer env =
     method! on_case () c =
       let b =
         match c with
-        | Default b -> b
+        | Default (_, b) -> b
         | Case (((pos, _) as e), b) -> (pos, Expr e) :: b
       in
       self#on_branch b

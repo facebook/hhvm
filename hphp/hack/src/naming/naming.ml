@@ -2927,9 +2927,9 @@ module Make (GetLocals : GetLocals) = struct
 
   and case env c =
     match c with
-    | Aast.Default b ->
+    | Aast.Default (p, b) ->
       let b = branch env b in
-      N.Default b
+      N.Default (p, b)
     | Aast.Case (e, b) ->
       let e = expr env e in
       let b = branch env b in

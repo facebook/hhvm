@@ -86,7 +86,7 @@ and terminal_ nsenv ~in_try st =
     List.iter catch_l (terminal_catch nsenv ~in_try)
   | Aast.Break
   (* TODO this is terminal sometimes too, except switch, see above. *)
-  
+
   | Aast.TempBreak _
   | Aast.Expr _
   | Aast.Markup _
@@ -115,7 +115,7 @@ and terminal_cl nsenv ~in_try = function
        else
          raise Exit
      with Exit -> terminal_cl nsenv ~in_try rl)
-  | Aast.Default b :: rl ->
+  | Aast.Default (_, b) :: rl ->
     begin
       try terminal nsenv ~in_try b with Exit -> terminal_cl nsenv ~in_try rl
     end
@@ -335,7 +335,7 @@ let rec stmt (acc : Namespace_env.env * Pos.t SMap.t) st =
     let cl =
       List.filter cl ~f:(function
           | Aast.Case (_, b)
-          | Aast.Default b
+          | Aast.Default (_, b)
           -> not (is_terminal nsenv b))
     in
     let cl = casel nsenv cl in
@@ -354,7 +354,7 @@ and casel nsenv cl =
   match cl with
   | [] -> []
   | Aast.Case (_, []) :: rl -> casel nsenv rl
-  | Aast.Default b :: rl
+  | Aast.Default (_, b) :: rl
   | Aast.Case (_, b) :: rl ->
     let (_, b) = block (nsenv, SMap.empty) b in
     b :: casel nsenv rl

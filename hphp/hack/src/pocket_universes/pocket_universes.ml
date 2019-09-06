@@ -97,16 +97,18 @@ let gen_pu_accessor
       let call =
         Call (Aast.Cnormal, (annotation pos, parent_call), [], [var_atom], [])
       in
-      Default [(pos, Return (Some (annotation pos, call)))]
+      Default (pos, [(pos, Return (Some (annotation pos, call)))])
     else
       let msg = Binop (Dot, str pos error, var_atom) in
       let class_id = (annotation pos, CIexpr (id pos "\\Exception")) in
       Default
-        [ ( pos,
-            Throw
-              ( annotation pos,
-                New (class_id, [], [(annotation pos, msg)], [], annotation pos)
-              ) ) ]
+        ( pos,
+          [ ( pos,
+              Throw
+                ( annotation pos,
+                  New
+                    (class_id, [], [(annotation pos, msg)], [], annotation pos)
+                ) ) ] )
   in
   let cases = cases @ [default] in
   let body =

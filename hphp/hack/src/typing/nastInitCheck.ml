@@ -294,13 +294,13 @@ and stmt env acc st =
   | GotoLabel _
   | Goto _
   (* Naming will catch errors with TempBreak *)
-  
+
   | TempBreak _
   | Break ->
     acc
   | Continue
   (* Naming will catch errors with TempContinue *)
-  
+
   | TempContinue _ ->
     acc
   | Throw _ -> S.Top
@@ -532,7 +532,7 @@ and expr_ env acc p e =
   | PU_identifier _ -> acc
 
 and case env acc = function
-  | Default b
+  | Default (_, b)
   | Case (_, b) ->
     block env acc b
 

@@ -714,7 +714,7 @@ module Visitor_DEPRECATED = struct
 
       method on_case acc =
         function
-        | Default b ->
+        | Default (_, b) ->
           let acc = this#on_block acc b in
           acc
         | Case (e, b) ->

@@ -1148,7 +1148,7 @@ and emit_case (env : Emit_env.t) c =
   let l = Label.next_regular () in
   let (b, e) =
     match c with
-    | A.Default b -> (b, None)
+    | A.Default (_, b) -> (b, None)
     | A.Case (e, b) -> (b, Some e)
   in
   let b = emit_stmt env (Pos.none, A.Block b) in

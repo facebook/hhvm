@@ -871,6 +871,7 @@ module Make (GetLocals : GetLocals) = struct
       | N.Hprim _
       | N.Hmixed
       | N.Hnonnull
+      | N.Hdynamic
       | N.Hnothing ->
         if hl <> [] then Errors.unexpected_type_arguments p
       | _ -> ());

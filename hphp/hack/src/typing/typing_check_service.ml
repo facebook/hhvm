@@ -301,6 +301,7 @@ let load_and_process_files
     (gasp) mutation to track that, so combine the errors but always return an
     empty list for the list of unchecked files. *)
 let merge
+    ~(should_prefetch_deferred_files : bool)
     (files_to_process : file_computation list ref)
     (files_initial_count : int)
     (files_in_progress : file_computation Hash_set.t)
@@ -314,7 +315,7 @@ let merge
 
   (* Prefetch the deferred files, if necessary *)
   files_to_process :=
-    if Vfs.is_vfs () && List.length results.deferred > 10 then
+    if should_prefetch_deferred_files && List.length results.deferred > 10 then
       let files_to_prefetch =
         List.fold results.deferred ~init:[] ~f:(fun acc computation ->
             match computation with
@@ -409,6 +410,9 @@ let process_in_parallel
     files_initial_count
     "files";
   let next = next workers files_to_process files_in_progress in
+  let should_prefetch_deferred_files =
+    Vfs.is_vfs () && TypecheckerOptions.prefetch_deferred_files opts
+  in
   let (errors, env, cancelled) =
     MultiWorker.call_with_interrupt
       workers
@@ -416,6 +420,7 @@ let process_in_parallel
       ~neutral
       ~merge:
         (merge
+           ~should_prefetch_deferred_files
            files_to_process
            files_initial_count
            files_in_progress

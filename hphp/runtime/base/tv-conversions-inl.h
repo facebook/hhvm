@@ -64,7 +64,10 @@ inline bool cellToBool(Cell cell) {
     case KindOfRecord:        raise_convert_record_to_type("bool");
     case KindOfRef:           break;
     case KindOfFunc:
-      return funcToStringHelper(cell.m_data.pfunc)->toBoolean();
+      if (RuntimeOption::EvalRaiseFuncConversionWarning) {
+        raise_warning("Func to bool conversion");
+      }
+      return true;
     case KindOfClass:
       return classToStringHelper(cell.m_data.pclass)->toBoolean();
     case KindOfClsMeth:       return true;
@@ -98,7 +101,10 @@ inline int64_t cellToInt(Cell cell) {
     case KindOfRecord:        raise_convert_record_to_type("int");
     case KindOfRef:           break;
     case KindOfFunc:
-      return funcToStringHelper(cell.m_data.pfunc)->toInt64(10);
+      if (RuntimeOption::EvalRaiseFuncConversionWarning) {
+        raise_warning("Func to int conversion");
+      }
+      return 0;
     case KindOfClass:
       return classToStringHelper(cell.m_data.pclass)->toInt64(10);
     case KindOfClsMeth:

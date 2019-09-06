@@ -371,7 +371,10 @@ double tvCastToDouble(TypedValue tv) {
       return tv.m_data.pres->data()->o_toDouble();
 
     case KindOfFunc:
-      return funcToStringHelper(tv.m_data.pfunc)->toDouble();
+      if (RuntimeOption::EvalRaiseFuncConversionWarning) {
+        raise_warning("Func to double conversion");
+      }
+      return 0.0;
 
     case KindOfClass:
       return classToStringHelper(tv.m_data.pclass)->toDouble();

@@ -2346,6 +2346,21 @@ SSATmp* simplifyConvIntToStr(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+namespace {
+const StaticString
+    s_msgArrToStr("Array to string conversion"),
+    s_msgVecToStr("Vec to string conversion"),
+    s_msgDictToStr("Dict to string conversion"),
+    s_msgKeysetToStr("Keyset to string conversion"),
+    s_msgFuncToStr("Func to string conversion"),
+    s_msgFuncToBool("Func to bool conversion"),
+    s_msgFuncToInt("Func to int conversion"),
+    s_msgFuncToDbl("Func to double conversion"),
+    s_msgClsMethToStr("ClsMeth to string conversion"),
+    s_msgClsMethToInt("Implicit clsmeth to int conversion"),
+    s_msgClsMethToDbl("Implicit clsmeth to double conversion");
+}
+
 SSATmp* simplifyConvCellToBool(State& env, const IRInstruction* inst) {
   auto const src     = inst->src(0);
   auto const srcType = src->type();
@@ -2385,20 +2400,15 @@ SSATmp* simplifyConvCellToBool(State& env, const IRInstruction* inst) {
     return gen(env, ConvObjToBool, inst->taken(), src);
   }
   if (srcType <= TRes)  return cns(env, true);
+  if (srcType <= TFunc) {
+    if (RuntimeOption::EvalRaiseFuncConversionWarning) {
+      gen(env, RaiseWarning, inst->taken(), cns(env, s_msgFuncToBool.get()));
+    }
+    return cns(env, true);
+  }
   if (srcType <= TClsMeth) return cns(env, true);
 
   return nullptr;
-}
-
-namespace {
-const StaticString
-    s_msgArrToStr("Array to string conversion"),
-    s_msgVecToStr("Vec to string conversion"),
-    s_msgDictToStr("Dict to string conversion"),
-    s_msgKeysetToStr("Keyset to string conversion"),
-    s_msgClsMethToStr("ClsMeth to string conversion"),
-    s_msgClsMethToInt("Implicit clsmeth to int conversion"),
-    s_msgClsMethToDbl("Implicit clsmeth to double conversion");
 }
 
 SSATmp* simplifyConvCellToStr(State& env, const IRInstruction* inst) {
@@ -2442,6 +2452,12 @@ SSATmp* simplifyConvCellToStr(State& env, const IRInstruction* inst) {
   }
   if (srcType <= TObj)    return gen(env, ConvObjToStr, catchTrace, src);
   if (srcType <= TRes)    return gen(env, ConvResToStr, catchTrace, src);
+  if (srcType <= TFunc) {
+    if (RuntimeOption::EvalRaiseFuncConversionWarning) {
+      gen(env, RaiseWarning, catchTrace, cns(env, s_msgFuncToStr.get()));
+    }
+    return gen(env, LdFuncName, src);
+  }
   if (srcType <= TClsMeth) {
     if (RuntimeOption::EvalRaiseClsMethConversionWarning) {
       gen(env, RaiseNotice, catchTrace, cns(env, s_msgClsMethToStr.get()));
@@ -2459,6 +2475,7 @@ SSATmp* simplifyConvCellToStr(State& env, const IRInstruction* inst) {
 SSATmp* simplifyConvCellToInt(State& env, const IRInstruction* inst) {
   auto const src      = inst->src(0);
   auto const srcType  = src->type();
+  auto const catchTrace = inst->taken();
 
   if (srcType <= TInt)  return src;
   if (srcType <= TNull) return cns(env, 0);
@@ -2487,9 +2504,15 @@ SSATmp* simplifyConvCellToInt(State& env, const IRInstruction* inst) {
   if (srcType <= TStr)  return gen(env, ConvStrToInt, src);
   if (srcType <= TObj)  return gen(env, ConvObjToInt, inst->taken(), src);
   if (srcType <= TRes)  return gen(env, ConvResToInt, src);
+  if (srcType <= TFunc) {
+    if (RuntimeOption::EvalRaiseFuncConversionWarning) {
+      gen(env, RaiseWarning, catchTrace, cns(env, s_msgFuncToInt.get()));
+    }
+    return cns(env, 0);
+  }
   if (srcType <= TClsMeth)  {
     if (RuntimeOption::EvalRaiseClsMethConversionWarning) {
-      gen(env, RaiseNotice, inst->taken(), cns(env, s_msgClsMethToInt.get()));
+      gen(env, RaiseNotice, catchTrace, cns(env, s_msgClsMethToInt.get()));
     }
     return cns(env, 1);
   }
@@ -2499,6 +2522,7 @@ SSATmp* simplifyConvCellToInt(State& env, const IRInstruction* inst) {
 SSATmp* simplifyConvCellToDbl(State& env, const IRInstruction* inst) {
   auto const src      = inst->src(0);
   auto const srcType  = src->type();
+  auto const catchTrace = inst->taken();
 
   if (srcType <= TDbl)  return src;
   if (srcType <= TNull) return cns(env, 0.0);
@@ -2524,9 +2548,15 @@ SSATmp* simplifyConvCellToDbl(State& env, const IRInstruction* inst) {
   if (srcType <= TStr)  return gen(env, ConvStrToDbl, src);
   if (srcType <= TObj)  return gen(env, ConvObjToDbl, inst->taken(), src);
   if (srcType <= TRes)  return gen(env, ConvResToDbl, src);
+  if (srcType <= TFunc) {
+    if (RuntimeOption::EvalRaiseFuncConversionWarning) {
+      gen(env, RaiseWarning, catchTrace, cns(env, s_msgFuncToDbl.get()));
+    }
+    return cns(env, 0.0);
+  }
   if (srcType <= TClsMeth)  {
     if (RuntimeOption::EvalRaiseClsMethConversionWarning) {
-      gen(env, RaiseNotice, inst->taken(), cns(env, s_msgClsMethToDbl.get()));
+      gen(env, RaiseNotice, catchTrace, cns(env, s_msgClsMethToDbl.get()));
     }
     return cns(env, 1.0);
   }

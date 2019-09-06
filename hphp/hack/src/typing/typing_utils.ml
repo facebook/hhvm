@@ -115,12 +115,6 @@ let (simplify_unions_ref : simplify_unions ref) =
 
 let simplify_unions x = !simplify_unions_ref x
 
-type diff = locl ty -> locl ty -> locl ty
-
-let (diff_ref : diff ref) = ref (not_implemented "diff")
-
-let diff x = !diff_ref x
-
 type approx =
   | ApproxUp
   | ApproxDown

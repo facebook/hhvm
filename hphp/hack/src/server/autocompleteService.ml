@@ -546,7 +546,7 @@ let get_desc_string_for env ty kind =
 
 (* Convert a `TFun` into a func details structure *)
 let tfun_to_func_details (env : Tast_env.t) (ft : 'a Typing_defs.fun_type) :
-    func_details_result option =
+    func_details_result =
   let param_to_record ?(is_variadic = false) param =
     {
       param_name =
@@ -557,28 +557,27 @@ let tfun_to_func_details (env : Tast_env.t) (ft : 'a Typing_defs.fun_type) :
       param_variadic = is_variadic;
     }
   in
-  Some
-    {
-      return_ty = Tast_env.print_ty env ft.ft_ret.et_type;
-      min_arity = arity_min ft.ft_arity;
-      params =
-        ( List.map ft.ft_params param_to_record
-        @
-        match ft.ft_arity with
-        | Fellipsis _ ->
-          let empty =
-            TUtils.default_fun_param (Reason.none, Tany TanySentinel.value)
-          in
-          [param_to_record ~is_variadic:true empty]
-        | Fvariadic (_, p) -> [param_to_record ~is_variadic:true p]
-        | Fstandard _ -> [] );
-    }
+  {
+    return_ty = Tast_env.print_ty env ft.ft_ret.et_type;
+    min_arity = arity_min ft.ft_arity;
+    params =
+      ( List.map ft.ft_params param_to_record
+      @
+      match ft.ft_arity with
+      | Fellipsis _ ->
+        let empty =
+          TUtils.default_fun_param (Reason.none, Tany TanySentinel.value)
+        in
+        [param_to_record ~is_variadic:true empty]
+      | Fvariadic (_, p) -> [param_to_record ~is_variadic:true p]
+      | Fstandard _ -> [] );
+  }
 
 (* Convert a `ty` into a func details structure *)
 let get_func_details_for env ty =
   match ty with
-  | DeclTy (_, Tfun ft) -> tfun_to_func_details env ft
-  | LoclTy (_, Tfun ft) -> tfun_to_func_details env ft
+  | DeclTy (_, Tfun ft) -> Some (tfun_to_func_details env ft)
+  | LoclTy (_, Tfun ft) -> Some (tfun_to_func_details env ft)
   | _ -> None
 
 (* Here we turn partial_autocomplete_results into complete_autocomplete_results *)
@@ -889,14 +888,18 @@ let find_global_results
      *)
     List.iter results ~f:(fun r ->
         (* Only load func details if the flag sie_resolve_signatures is true *)
-        let func_details =
+        let (func_details, res_ty) =
           if sienv.sie_resolve_signatures && r.si_kind = SI_Function then
             let fixed_name = ns ^ r.si_name in
             match Tast_env.get_fun tast_env fixed_name with
-            | None -> None
-            | Some ft -> tfun_to_func_details tast_env ft
+            | None -> (None, kind_to_string r.si_kind)
+            | Some ft ->
+              let details = tfun_to_func_details tast_env ft in
+              let ty = (Typing_reason.Rnone, Tfun ft) in
+              let res_ty = Tast_env.print_ty tast_env ty in
+              (Some details, res_ty)
           else
-            None
+            (None, kind_to_string r.si_kind)
         in
         (* Figure out how to display them *)
         let complete =
@@ -905,7 +908,7 @@ let find_global_results
             (* This is okay - resolve will fill it in *)
             res_replace_pos = replace_pos;
             res_base_class = None;
-            res_ty = kind_to_string r.si_kind;
+            res_ty;
             res_name = r.si_name;
             res_fullname = r.si_fullname;
             res_kind = r.si_kind;

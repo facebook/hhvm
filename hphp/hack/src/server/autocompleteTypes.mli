@@ -13,12 +13,14 @@ type func_param_result = {
   param_ty: string;
   param_variadic: bool;
 }
+[@@deriving show]
 
 type func_details_result = {
   params: func_param_result list;
   return_ty: string;
   min_arity: int;
 }
+[@@deriving show]
 
 (* Results ready to be displayed to the user *)
 type complete_autocomplete_result = {

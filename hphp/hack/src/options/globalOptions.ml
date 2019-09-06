@@ -45,6 +45,7 @@ type t = {
   tco_migration_flags: SSet.t;
   tco_dynamic_view: bool;
   tco_defer_class_declaration_threshold: int option;
+  tco_prefetch_deferred_files: bool;
   tco_remote_type_check_threshold: int option;
   tco_remote_type_check: bool;
   tco_remote_worker_key: string option;
@@ -199,6 +200,7 @@ let default =
     tco_migration_flags = SSet.empty;
     tco_dynamic_view = false;
     tco_defer_class_declaration_threshold = None;
+    tco_prefetch_deferred_files = false;
     tco_remote_type_check_threshold = None;
     tco_remote_type_check = true;
     tco_remote_worker_key = None;
@@ -283,6 +285,7 @@ let make
     ?(tco_migration_flags = default.tco_migration_flags)
     ?(tco_dynamic_view = default.tco_dynamic_view)
     ?tco_defer_class_declaration_threshold
+    ?(tco_prefetch_deferred_files = default.tco_prefetch_deferred_files)
     ?tco_remote_type_check_threshold
     ?(tco_remote_type_check = default.tco_remote_type_check)
     ?tco_remote_worker_key
@@ -361,6 +364,7 @@ let make
     tco_migration_flags;
     tco_dynamic_view;
     tco_defer_class_declaration_threshold;
+    tco_prefetch_deferred_files;
     tco_remote_type_check_threshold;
     tco_remote_type_check;
     tco_remote_worker_key;
@@ -442,6 +446,8 @@ let tco_dynamic_view t = t.tco_dynamic_view
 
 let tco_defer_class_declaration_threshold t =
   t.tco_defer_class_declaration_threshold
+
+let tco_prefetch_deferred_files t = t.tco_prefetch_deferred_files
 
 let tco_remote_type_check_threshold t = t.tco_remote_type_check_threshold
 

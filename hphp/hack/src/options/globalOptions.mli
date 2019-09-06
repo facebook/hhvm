@@ -80,6 +80,8 @@ type t = {
   (* If set, defers class declarations after N lazy declarations; if not set,
     always lazily declares classes not already in cache. *)
   tco_defer_class_declaration_threshold: int option;
+  (* Whether the Eden prefetch hook should be invoked *)
+  tco_prefetch_deferred_files: bool;
   (* If set, distributes type checking to remote workers if the number of files to
    type check exceeds the threshold. If not set, then always checks everything locally. *)
   tco_remote_type_check_threshold: int option;
@@ -279,6 +281,7 @@ val make :
   ?tco_migration_flags:SSet.t ->
   ?tco_dynamic_view:bool ->
   ?tco_defer_class_declaration_threshold:int ->
+  ?tco_prefetch_deferred_files:bool ->
   ?tco_remote_type_check_threshold:int ->
   ?tco_remote_type_check:bool ->
   ?tco_remote_worker_key:string ->
@@ -350,6 +353,8 @@ val tco_migration_flag_enabled : t -> SSet.elt -> bool
 val tco_dynamic_view : t -> bool
 
 val tco_defer_class_declaration_threshold : t -> int option
+
+val tco_prefetch_deferred_files : t -> bool
 
 val tco_remote_type_check_threshold : t -> int option
 

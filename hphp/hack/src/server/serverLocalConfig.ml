@@ -89,6 +89,8 @@ type t = {
   (* If set, defers class declarations after N lazy declarations; if not set,
     always lazily declares classes not already in cache. *)
   defer_class_declaration_threshold: int option;
+  (* The whether to use the hook that prefetches files on an Eden checkout *)
+  prefetch_deferred_files: bool;
   (* If set, distributes type checking to remote workers if the number of files to
     type check exceeds the threshold. If not set, then always checks everything locally. *)
   remote_type_check_threshold: int option;
@@ -173,6 +175,7 @@ let default =
     idle_gc_slice = 0;
     shallow_class_decl = false;
     defer_class_declaration_threshold = None;
+    prefetch_deferred_files = false;
     remote_type_check_threshold = None;
     remote_type_check = true;
     remote_worker_key = None;
@@ -462,6 +465,13 @@ let load_ fn ~silent ~current_version overrides =
   let defer_class_declaration_threshold =
     int_opt "defer_class_declaration_threshold" config
   in
+  let prefetch_deferred_files =
+    bool_if_min_version
+      "prefetch_deferred_files"
+      ~default:false
+      ~current_version
+      config
+  in
   let remote_type_check_threshold =
     int_opt "remote_type_check_threshold" config
   in
@@ -580,6 +590,7 @@ let load_ fn ~silent ~current_version overrides =
     idle_gc_slice;
     shallow_class_decl;
     defer_class_declaration_threshold;
+    prefetch_deferred_files;
     remote_worker_eden_checkout_threshold;
     remote_type_check_threshold;
     remote_type_check;

@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/base/array-provenance.h"
 
+#include "hphp/runtime/base/apc-array.h"
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/init-fini-node.h"
@@ -31,6 +32,8 @@
 #include <folly/container/F14Map.h>
 #include <folly/Format.h>
 
+#include <type_traits>
+
 namespace HPHP { namespace arrprov {
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -45,7 +48,7 @@ std::string Tag::toString() const {
 namespace {
 
 RDS_LOCAL(ArrayProvenanceTable, rl_array_provenance);
-folly::F14FastMap<const ArrayData*, Tag> s_static_array_provenance;
+folly::F14FastMap<const void*, Tag> s_static_array_provenance;
 std::mutex s_static_provenance_lock;
 
 /*
@@ -53,13 +56,25 @@ std::mutex s_static_provenance_lock;
  * valid anymore
  */
 InitFiniNode flushTable([]{
-    if (!RuntimeOption::EvalArrayProvenance) return;
-    rl_array_provenance->tags.clear();
-  }, InitFiniNode::When::RequestFini);
+  if (!RuntimeOption::EvalArrayProvenance) return;
+  rl_array_provenance->tags.clear();
+}, InitFiniNode::When::RequestFini);
 
 } // anonymous namespace
 
 ///////////////////////////////////////////////////////////////////////////////
+
+namespace {
+
+/*
+ * Whether provenance for a given array should be request-local.
+ *
+ * True for refcounted request arrays, else false.
+ */
+bool wants_local_prov(const ArrayData* ad) { return ad->isRefCounted(); }
+constexpr bool wants_local_prov(const APCArray* a) { return false; }
+
+}
 
 bool arrayWantsTag(const ArrayData* ad) {
   auto const kind = ad->kind();
@@ -67,50 +82,92 @@ bool arrayWantsTag(const ArrayData* ad) {
          kind == ArrayData::ArrayKind::kDictKind;
 }
 
+bool arrayWantsTag(const APCArray* a) {
+  return a->isVec() || a->isDict();
+}
+
 namespace {
 
-template <bool allow_overwrite>
-void setTagImpl(ArrayData* ad, const Tag& tag) {
-  if (!arrayWantsTag(ad)) return;
-  assertx(allow_overwrite || !getTag(ad));
-  ad->markHasProvenanceData();
-  if (ad->isRefCounted()) {
-    rl_array_provenance->tags[ad] = tag;
+template<typename A>
+folly::Optional<Tag> getTagImpl(const A* a) {
+  using ProvenanceTable = decltype(s_static_array_provenance);
+
+  static_assert(std::is_same<
+    ProvenanceTable,
+    decltype(rl_array_provenance->tags)
+  >::value, "Static and request-local provenance tables must share a type.");
+
+  auto const get = [] (const A* a, const ProvenanceTable& tbl) {
+    auto const it = tbl.find(a);
+    assertx(it != tbl.cend());
+    assertx(it->second.filename() != nullptr);
+    return it->second;
+  };
+
+  if (wants_local_prov(a)) {
+    return get(a, rl_array_provenance->tags);
   } else {
     std::lock_guard<std::mutex> g{s_static_provenance_lock};
-    s_static_array_provenance[ad] = tag;
+    return get(a, s_static_array_provenance);
   }
 }
+
+template<Mode mode, typename A>
+void setTagImpl(A* a, Tag tag) {
+  if (!arrayWantsTag(a)) return;
+  assertx(mode == Mode::Emplace || !getTag(a));
+
+  if (wants_local_prov(a)) {
+    rl_array_provenance->tags[a] = tag;
+  } else {
+    std::lock_guard<std::mutex> g{s_static_provenance_lock};
+    s_static_array_provenance[a] = tag;
+  }
+}
+
+template<typename A>
+void clearTagImpl(const A* a) {
+  if (!arrayWantsTag(a)) return;
+
+  if (wants_local_prov(a)) {
+    rl_array_provenance->tags.erase(a);
+  } else {
+    std::lock_guard<std::mutex> g{s_static_provenance_lock};
+    s_static_array_provenance.erase(a);
+  }
+}
+
 
 } // namespace
 
-void setTag(ArrayData* ad, const Tag& tag) {
-  setTagImpl<false>(ad, tag);
-}
-
-void setTagReplace(ArrayData* ad, const Tag& tag) {
-  setTagImpl<true>(ad, tag);
-}
-
 folly::Optional<Tag> getTag(const ArrayData* ad) {
-  if (!ad->hasProvenanceData()) return {};
-  if (ad->isRefCounted()) {
-    auto const iter = rl_array_provenance->tags.find(ad);
-    assertx(iter != rl_array_provenance->tags.cend());
-    assertx(iter->second.filename());
-    return iter->second;
-  } else {
-    std::lock_guard<std::mutex> g{s_static_provenance_lock};
-    auto const ret = s_static_array_provenance.find(ad)->second;
-    assertx(ret.filename());
-    return ret;
-  }
+  if (!ad->hasProvenanceData()) return folly::none;
+  return getTagImpl(ad);
 }
+folly::Optional<Tag> getTag(const APCArray* a) {
+  return getTagImpl(a);
+}
+
+template<Mode mode>
+void setTag(ArrayData* ad, Tag tag) {
+  setTagImpl<mode>(ad, tag);
+  ad->markHasProvenanceData();
+}
+template<Mode mode>
+void setTag(const APCArray* a, Tag tag) {
+  setTagImpl<mode>(a, tag);
+}
+
+template void setTag<Mode::Insert>(ArrayData*, Tag);
+template void setTag<Mode::Emplace>(ArrayData*, Tag);
+template void setTag<Mode::Insert>(const APCArray*, Tag);
+template void setTag<Mode::Emplace>(const APCArray*, Tag);
 
 void clearTag(const ArrayData* ad) {
-  assertx(ad->isRefCounted());
-  if (!arrayWantsTag(ad)) return;
-  rl_array_provenance->tags.erase(ad);
+  clearTagImpl(ad);
+}
+void clearTag(const APCArray* a) {
+  clearTagImpl(a);
 }
 
 namespace {
@@ -123,7 +180,7 @@ void tagTVImpl(TypedValue& tv, folly::Optional<Tag> tag) {
   auto ad = val(tv).parr;
   if (ad->hasProvenanceData()) return;
 
-  if (!tag) tag = tagFromProgramCounter();
+  if (!tag) tag = tagFromPC();
   if (!tag) return;
 
   if (!ad->hasExactlyOneRef()) {
@@ -159,14 +216,14 @@ makeEmptyImpl(AD* base, folly::Optional<Tag> tag, Copy&& copy) {
   assertx(base->isStatic());
   assertx(arrayWantsTag(base));
 
-  if (!tag) tag = tagFromProgramCounter();
+  if (!tag) tag = tagFromPC();
   if (!tag) return base;
 
   auto ad = copy(base);
   assertx(ad);
   assertx(ad->hasExactlyOneRef());
 
-  arrprov::setTagReplace(ad, *tag);
+  arrprov::setTag<Mode::Emplace>(ad, *tag);
   ArrayData::GetScalarArray(&ad);
 
   return ad;
@@ -195,7 +252,7 @@ ArrayData* makeEmptyDict(folly::Optional<Tag> tag /* = folly::none */) {
   );
 }
 
-folly::Optional<Tag> tagFromProgramCounter() {
+folly::Optional<Tag> tagFromPC() {
   VMRegAnchor _(VMRegAnchor::Soft);
   if (tl_regState != VMRegState::CLEAN || vmfp() == nullptr) {
     return folly::none;

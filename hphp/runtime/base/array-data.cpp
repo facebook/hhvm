@@ -1397,16 +1397,32 @@ StringData* getHackArrCompatNullHackArrayKeyMsg() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ArrayData* tagArrProv(ArrayData* ad, const ArrayData* src) {
+namespace {
+
+template<typename SrcArr>
+ArrayData* tagArrProvImpl(ArrayData* ad, const SrcArr* src) {
   assertx(RuntimeOption::EvalArrayProvenance);
   assertx(ad->hasExactlyOneRef());
 
   if (src != nullptr) {
-    arrprov::copyTag(src, ad);
-  } else if (auto const tag = arrprov::tagFromProgramCounter()) {
+    if (auto const tag = arrprov::getTag(src)) {
+      arrprov::setTag(ad, *tag);
+      return ad;
+    }
+  }
+  if (auto const tag = arrprov::tagFromPC()) {
     arrprov::setTag(ad, *tag);
   }
   return ad;
+}
+
+}
+
+ArrayData* tagArrProv(ArrayData* ad, const ArrayData* src) {
+  return tagArrProvImpl(ad, src);
+}
+ArrayData* tagArrProv(ArrayData* ad, const APCArray* src) {
+  return tagArrProvImpl(ad, src);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

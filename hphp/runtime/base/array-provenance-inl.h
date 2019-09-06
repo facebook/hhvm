@@ -26,19 +26,6 @@ inline bool tvWantsTag(TypedValue tv) {
   return isVecType(type(tv)) || isDictType(type(tv));
 }
 
-inline void copyTag(const ArrayData* src, ArrayData* dest) {
-  if (auto const tag = getTag(src)) {
-    setTag(dest, *tag);
-  } else if (auto const pctag = tagFromProgramCounter()) {
-    setTag(dest, *pctag);
-  }
-}
-
-inline void copyTagStatic(const ArrayData* src, ArrayData* dest) {
-  if (!RuntimeOption::EvalArrayProvenance) return;
-  if (auto const tag = getTag(src)) setTag(dest, *tag);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 }}

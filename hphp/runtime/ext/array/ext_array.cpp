@@ -3484,8 +3484,8 @@ TypedValue HHVM_FUNCTION(HH_tag_provenance_here, TypedValue in) {
   if (!RuntimeOption::EvalArrayProvenance) return in;
 
   auto const ad = in.m_data.parr;
-  if (auto const tag = arrprov::tagFromProgramCounter()) {
-    arrprov::setTagReplace(ad, *tag);
+  if (auto const tag = arrprov::tagFromPC()) {
+    arrprov::setTag<arrprov::Mode::Emplace>(ad, *tag);
   }
 
   return in;

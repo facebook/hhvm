@@ -38,6 +38,7 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+struct APCArray;
 struct Array;
 struct String;
 struct StringData;
@@ -1036,6 +1037,7 @@ folly::Optional<int64_t> tryIntishCast(const StringData* key);
  * assert that `ad` does not have an existing tag, and instead overrides it.
  */
 ArrayData* tagArrProv(ArrayData* ad, const ArrayData* src = nullptr);
+ArrayData* tagArrProv(ArrayData* ad, const APCArray* src);
 
 ///////////////////////////////////////////////////////////////////////////////
 

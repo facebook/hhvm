@@ -117,13 +117,22 @@ bool PackedArray::checkInvariants(const ArrayData* arr) {
 
 namespace {
 
-template<bool check_kind = false>
-ArrayData* tryTagArrProvVec(ArrayData* ad,
-                            const ArrayData* src = nullptr) {
+template<bool check_kind, typename SrcArr>
+ArrayData* implTagArrProvVec(ArrayData* ad, const SrcArr* src) {
   return RuntimeOption::EvalArrayProvenance &&
          (!check_kind || ad->kind() == ArrayData::kVecKind)
     ? tagArrProv(ad, src)
     : ad;
+}
+
+template<bool check_kind = false>
+ArrayData* tryTagArrProvVec(ArrayData* ad, const ArrayData* src = nullptr) {
+  return implTagArrProvVec<check_kind>(ad, src);
+}
+
+template<bool check_kind = false>
+ArrayData* tryTagArrProvVec(ArrayData* ad, const APCArray* src) {
+  return implTagArrProvVec<check_kind>(ad, src);
 }
 
 }
@@ -371,7 +380,11 @@ ArrayData* PackedArray::CopyStatic(const ArrayData* adIn) {
     packSizeIndexAndAuxBits(sizeIndex, adIn->auxBits())
   );
 
-  arrprov::copyTagStatic(adIn, ad);
+  if (RuntimeOption::EvalArrayProvenance) {
+    if (auto const tag = arrprov::getTag(adIn)) {
+      arrprov::setTag(ad, *tag);
+    }
+  }
 
   assertx(ad->kind() == adIn->kind());
   assertx(ad->dvArray() == adIn->dvArray());
@@ -404,7 +417,11 @@ ArrayData* PackedArray::ConvertStatic(const ArrayData* arr) {
     tvDupWithRef(arr->atPos(pos), LvalUncheckedInt(ad, i), arr);
   }
 
-  arrprov::copyTagStatic(arr, ad);
+  if (RuntimeOption::EvalArrayProvenance) {
+    if (auto const tag = arrprov::getTag(arr)) {
+      arrprov::setTag(ad, *tag);
+    }
+  }
 
   assertx(ad->isPacked());
   assertx(capacity(ad) >= arr->m_size);

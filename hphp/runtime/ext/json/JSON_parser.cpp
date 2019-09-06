@@ -362,7 +362,7 @@ struct SimpleParser {
     , is_tsimplejson(is_tsimplejson)
   {
     assertx(input[length] == 0);  // Parser relies on sentinel to avoid checks.
-    prov_tag = arrprov::tagFromProgramCounter();
+    prov_tag = arrprov::tagFromPC();
   }
 
   /*
@@ -1145,7 +1145,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
   // they exceed kMaxPersistentStringBufferCapacity at exit or if the thread
   // is explicitly flushed (e.g., due to being idle).
   json->initSb(length);
-  json->prov_tag = arrprov::tagFromProgramCounter();
+  json->prov_tag = arrprov::tagFromPC();
   SCOPE_EXIT {
     constexpr int kMaxPersistentStringBufferCapacity = 256 * 1024;
     if (json->sb_cap > kMaxPersistentStringBufferCapacity) json->flushSb();

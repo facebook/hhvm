@@ -118,13 +118,22 @@ MixedArray::ShapeInitializer MixedArray::s_shape_initializer;
 
 namespace {
 
-template<bool check_kind = false>
-ArrayData* tryTagArrProvDict(ArrayData* ad,
-                             const ArrayData* src = nullptr) {
+template<bool check_kind, typename SrcArr>
+ArrayData* implTagArrProvDict(ArrayData* ad, const SrcArr* src) {
   return RuntimeOption::EvalArrayProvenance &&
          (!check_kind || ad->kind() == ArrayData::kDictKind)
     ? tagArrProv(ad, src)
     : ad;
+}
+
+template<bool check_kind = false>
+ArrayData* tryTagArrProvDict(ArrayData* ad, const ArrayData* src = nullptr) {
+  return implTagArrProvDict<check_kind>(ad, src);
+}
+
+template<bool check_kind = false>
+ArrayData* tryTagArrProvDict(ArrayData* ad, const APCArray* src) {
+  return implTagArrProvDict<check_kind>(ad, src);
 }
 
 }
@@ -556,7 +565,12 @@ NEVER_INLINE ArrayData* MixedArray::CopyStatic(const ArrayData* in) {
   auto a = asMixed(in);
   assertx(a->checkInvariants());
   auto ret = CopyMixed(*a, AllocMode::Static, in->m_kind, in->dvArray());
-  arrprov::copyTagStatic(in, ret);
+
+  if (RuntimeOption::EvalArrayProvenance) {
+    if (auto const tag = arrprov::getTag(in)) {
+      arrprov::setTag(ret, *tag);
+    }
+  }
   return ret;
 }
 

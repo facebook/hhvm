@@ -147,14 +147,6 @@ where
         }
     }
 
-    pub fn children<'a>(&'a self) -> Vec<&'a Self> {
-        let f = |node: &'a Self, mut acc: Vec<&'a Self>| {
-            acc.push(node);
-            acc
-        };
-        Self::fold_over_children(&f, vec![], &self.syntax)
-    }
-
     pub fn drain_children(&mut self) -> Vec<Self> {
         let f = |node: Self, mut acc: Vec<Self>| {
             acc.push(node);
@@ -179,7 +171,7 @@ where
         match self.get_token() {
             Some(token) => Some(token),
             None => {
-                for node in self.children() {
+                for node in self.iter_children() {
                     if let Some(token) = node.leading_token() {
                         return Some(token);
                     }
@@ -193,7 +185,7 @@ where
         match self.get_token() {
             Some(token) => Some(token),
             None => {
-                for node in self.children().iter().rev() {
+                for node in self.iter_children().rev() {
                     if let Some(token) = node.trailing_token() {
                         return Some(token);
                     }
@@ -201,5 +193,38 @@ where
                 None
             }
         }
+    }
+
+    pub fn iter_children<'a>(&'a self) -> SyntaxChildrenIterator<'a, T, V> {
+        self.syntax.iter_children()
+    }
+}
+
+pub struct SyntaxChildrenIterator<'a, T, V> {
+    pub syntax: &'a SyntaxVariant<T, V>,
+    pub index: usize,
+    pub index_back: usize,
+}
+
+impl<'src, T, V> SyntaxVariant<T, V> {
+    pub fn iter_children<'a>(&'a self) -> SyntaxChildrenIterator<'a, T, V> {
+        SyntaxChildrenIterator {
+            syntax: &self,
+            index: 0,
+            index_back: 0,
+        }
+    }
+}
+
+impl<'a, T, V> Iterator for SyntaxChildrenIterator<'a, T, V> {
+    type Item = &'a Syntax<T, V>;
+    fn next(&mut self) -> Option<Self::Item> {
+        self.next_impl(true)
+    }
+}
+
+impl<'a, T, V> DoubleEndedIterator for SyntaxChildrenIterator<'a, T, V> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        self.next_impl(false)
     }
 }

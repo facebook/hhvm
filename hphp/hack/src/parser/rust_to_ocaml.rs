@@ -159,18 +159,14 @@ where
                 // This could be much more readable by constructing a vector of children and
                 // passing it to caml_block, but the cost of this intermediate vector allocation is
                 // too big
-                let n = Self::fold_over_children(&|_, n| n + 1, 0, &self.syntax);
+                let n = self.iter_children().count();
                 let result = reserve_block(tag, n);
-                // Similarly, fold_over_children() avoids intermediate allocation done by children()
-                Self::fold_over_children(
-                    &|field, i| {
-                        let field = field.to_ocaml(context);
-                        caml_set_field(result, i, field);
-                        i + 1
-                    },
-                    0,
-                    &self.syntax,
-                );
+                // Similarly, fold() avoids intermediate allocation done by children()
+                self.iter_children().fold(0, |i, field| {
+                    let field = field.to_ocaml(context);
+                    caml_set_field(result, i, field);
+                    i + 1
+                });
                 result
             }
         };

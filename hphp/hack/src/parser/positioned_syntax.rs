@@ -156,8 +156,8 @@ impl PositionedValue {
         syntax_variant: &'a SyntaxVariant<PositionedToken, Self>,
         f: &'b dyn Fn(&'a Self, Acc<'a>) -> Acc<'a>,
     ) -> Acc<'a> {
-        let f_ = |n: &'a Syntax<PositionedToken, Self>, acc: Acc<'a>| f(&n.value, acc);
-        Syntax::fold_over_children(&f_, acc, syntax_variant)
+        let f_ = |acc: Acc<'a>, n: &'a Syntax<PositionedToken, Self>| f(&n.value, acc);
+        syntax_variant.iter_children().fold(acc, f_)
     }
 
     // This function should be a closure in the caller,

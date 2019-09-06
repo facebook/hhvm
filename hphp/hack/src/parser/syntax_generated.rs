@@ -1918,1216 +1918,6 @@ impl<'src, T, V> Syntax<T, V>
 where
     T: LexableToken<'src>,
 {
-    pub fn fold_over_children<'a, U>(
-        f: &dyn Fn(&'a Self, U) -> U,
-        acc: U,
-        syntax: &'a SyntaxVariant<T, V>,
-    ) -> U {
-        match syntax {
-            SyntaxVariant::Missing => acc,
-            SyntaxVariant::Token (_) => acc,
-            SyntaxVariant::SyntaxList(elems) => {
-                let mut acc = acc;
-                for item in elems.iter() {
-                    acc = f(item, acc)
-                }
-                acc
-            },
-            SyntaxVariant::EndOfFile(x) => {
-                let acc = f(&x.end_of_file_token, acc);
-                acc
-            },
-            SyntaxVariant::Script(x) => {
-                let acc = f(&x.script_declarations, acc);
-                acc
-            },
-            SyntaxVariant::QualifiedName(x) => {
-                let acc = f(&x.qualified_name_parts, acc);
-                acc
-            },
-            SyntaxVariant::SimpleTypeSpecifier(x) => {
-                let acc = f(&x.simple_type_specifier, acc);
-                acc
-            },
-            SyntaxVariant::LiteralExpression(x) => {
-                let acc = f(&x.literal_expression, acc);
-                acc
-            },
-            SyntaxVariant::PrefixedStringExpression(x) => {
-                let acc = f(&x.prefixed_string_name, acc);
-                let acc = f(&x.prefixed_string_str, acc);
-                acc
-            },
-            SyntaxVariant::VariableExpression(x) => {
-                let acc = f(&x.variable_expression, acc);
-                acc
-            },
-            SyntaxVariant::PipeVariableExpression(x) => {
-                let acc = f(&x.pipe_variable_expression, acc);
-                acc
-            },
-            SyntaxVariant::FileAttributeSpecification(x) => {
-                let acc = f(&x.file_attribute_specification_left_double_angle, acc);
-                let acc = f(&x.file_attribute_specification_keyword, acc);
-                let acc = f(&x.file_attribute_specification_colon, acc);
-                let acc = f(&x.file_attribute_specification_attributes, acc);
-                let acc = f(&x.file_attribute_specification_right_double_angle, acc);
-                acc
-            },
-            SyntaxVariant::EnumDeclaration(x) => {
-                let acc = f(&x.enum_attribute_spec, acc);
-                let acc = f(&x.enum_keyword, acc);
-                let acc = f(&x.enum_name, acc);
-                let acc = f(&x.enum_colon, acc);
-                let acc = f(&x.enum_base, acc);
-                let acc = f(&x.enum_type, acc);
-                let acc = f(&x.enum_left_brace, acc);
-                let acc = f(&x.enum_enumerators, acc);
-                let acc = f(&x.enum_right_brace, acc);
-                acc
-            },
-            SyntaxVariant::Enumerator(x) => {
-                let acc = f(&x.enumerator_name, acc);
-                let acc = f(&x.enumerator_equal, acc);
-                let acc = f(&x.enumerator_value, acc);
-                let acc = f(&x.enumerator_semicolon, acc);
-                acc
-            },
-            SyntaxVariant::RecordDeclaration(x) => {
-                let acc = f(&x.record_attribute_spec, acc);
-                let acc = f(&x.record_modifier, acc);
-                let acc = f(&x.record_keyword, acc);
-                let acc = f(&x.record_name, acc);
-                let acc = f(&x.record_extends_keyword, acc);
-                let acc = f(&x.record_extends_list, acc);
-                let acc = f(&x.record_left_brace, acc);
-                let acc = f(&x.record_fields, acc);
-                let acc = f(&x.record_right_brace, acc);
-                acc
-            },
-            SyntaxVariant::RecordField(x) => {
-                let acc = f(&x.record_field_name, acc);
-                let acc = f(&x.record_field_colon, acc);
-                let acc = f(&x.record_field_type, acc);
-                let acc = f(&x.record_field_init, acc);
-                let acc = f(&x.record_field_comma, acc);
-                acc
-            },
-            SyntaxVariant::AliasDeclaration(x) => {
-                let acc = f(&x.alias_attribute_spec, acc);
-                let acc = f(&x.alias_keyword, acc);
-                let acc = f(&x.alias_name, acc);
-                let acc = f(&x.alias_generic_parameter, acc);
-                let acc = f(&x.alias_constraint, acc);
-                let acc = f(&x.alias_equal, acc);
-                let acc = f(&x.alias_type, acc);
-                let acc = f(&x.alias_semicolon, acc);
-                acc
-            },
-            SyntaxVariant::PropertyDeclaration(x) => {
-                let acc = f(&x.property_attribute_spec, acc);
-                let acc = f(&x.property_modifiers, acc);
-                let acc = f(&x.property_type, acc);
-                let acc = f(&x.property_declarators, acc);
-                let acc = f(&x.property_semicolon, acc);
-                acc
-            },
-            SyntaxVariant::PropertyDeclarator(x) => {
-                let acc = f(&x.property_name, acc);
-                let acc = f(&x.property_initializer, acc);
-                acc
-            },
-            SyntaxVariant::NamespaceDeclaration(x) => {
-                let acc = f(&x.namespace_keyword, acc);
-                let acc = f(&x.namespace_name, acc);
-                let acc = f(&x.namespace_body, acc);
-                acc
-            },
-            SyntaxVariant::NamespaceBody(x) => {
-                let acc = f(&x.namespace_left_brace, acc);
-                let acc = f(&x.namespace_declarations, acc);
-                let acc = f(&x.namespace_right_brace, acc);
-                acc
-            },
-            SyntaxVariant::NamespaceEmptyBody(x) => {
-                let acc = f(&x.namespace_semicolon, acc);
-                acc
-            },
-            SyntaxVariant::NamespaceUseDeclaration(x) => {
-                let acc = f(&x.namespace_use_keyword, acc);
-                let acc = f(&x.namespace_use_kind, acc);
-                let acc = f(&x.namespace_use_clauses, acc);
-                let acc = f(&x.namespace_use_semicolon, acc);
-                acc
-            },
-            SyntaxVariant::NamespaceGroupUseDeclaration(x) => {
-                let acc = f(&x.namespace_group_use_keyword, acc);
-                let acc = f(&x.namespace_group_use_kind, acc);
-                let acc = f(&x.namespace_group_use_prefix, acc);
-                let acc = f(&x.namespace_group_use_left_brace, acc);
-                let acc = f(&x.namespace_group_use_clauses, acc);
-                let acc = f(&x.namespace_group_use_right_brace, acc);
-                let acc = f(&x.namespace_group_use_semicolon, acc);
-                acc
-            },
-            SyntaxVariant::NamespaceUseClause(x) => {
-                let acc = f(&x.namespace_use_clause_kind, acc);
-                let acc = f(&x.namespace_use_name, acc);
-                let acc = f(&x.namespace_use_as, acc);
-                let acc = f(&x.namespace_use_alias, acc);
-                acc
-            },
-            SyntaxVariant::FunctionDeclaration(x) => {
-                let acc = f(&x.function_attribute_spec, acc);
-                let acc = f(&x.function_declaration_header, acc);
-                let acc = f(&x.function_body, acc);
-                acc
-            },
-            SyntaxVariant::FunctionDeclarationHeader(x) => {
-                let acc = f(&x.function_modifiers, acc);
-                let acc = f(&x.function_keyword, acc);
-                let acc = f(&x.function_name, acc);
-                let acc = f(&x.function_type_parameter_list, acc);
-                let acc = f(&x.function_left_paren, acc);
-                let acc = f(&x.function_parameter_list, acc);
-                let acc = f(&x.function_right_paren, acc);
-                let acc = f(&x.function_colon, acc);
-                let acc = f(&x.function_type, acc);
-                let acc = f(&x.function_where_clause, acc);
-                acc
-            },
-            SyntaxVariant::WhereClause(x) => {
-                let acc = f(&x.where_clause_keyword, acc);
-                let acc = f(&x.where_clause_constraints, acc);
-                acc
-            },
-            SyntaxVariant::WhereConstraint(x) => {
-                let acc = f(&x.where_constraint_left_type, acc);
-                let acc = f(&x.where_constraint_operator, acc);
-                let acc = f(&x.where_constraint_right_type, acc);
-                acc
-            },
-            SyntaxVariant::MethodishDeclaration(x) => {
-                let acc = f(&x.methodish_attribute, acc);
-                let acc = f(&x.methodish_function_decl_header, acc);
-                let acc = f(&x.methodish_function_body, acc);
-                let acc = f(&x.methodish_semicolon, acc);
-                acc
-            },
-            SyntaxVariant::MethodishTraitResolution(x) => {
-                let acc = f(&x.methodish_trait_attribute, acc);
-                let acc = f(&x.methodish_trait_function_decl_header, acc);
-                let acc = f(&x.methodish_trait_equal, acc);
-                let acc = f(&x.methodish_trait_name, acc);
-                let acc = f(&x.methodish_trait_semicolon, acc);
-                acc
-            },
-            SyntaxVariant::ClassishDeclaration(x) => {
-                let acc = f(&x.classish_attribute, acc);
-                let acc = f(&x.classish_modifiers, acc);
-                let acc = f(&x.classish_keyword, acc);
-                let acc = f(&x.classish_name, acc);
-                let acc = f(&x.classish_type_parameters, acc);
-                let acc = f(&x.classish_extends_keyword, acc);
-                let acc = f(&x.classish_extends_list, acc);
-                let acc = f(&x.classish_implements_keyword, acc);
-                let acc = f(&x.classish_implements_list, acc);
-                let acc = f(&x.classish_where_clause, acc);
-                let acc = f(&x.classish_body, acc);
-                acc
-            },
-            SyntaxVariant::ClassishBody(x) => {
-                let acc = f(&x.classish_body_left_brace, acc);
-                let acc = f(&x.classish_body_elements, acc);
-                let acc = f(&x.classish_body_right_brace, acc);
-                acc
-            },
-            SyntaxVariant::TraitUsePrecedenceItem(x) => {
-                let acc = f(&x.trait_use_precedence_item_name, acc);
-                let acc = f(&x.trait_use_precedence_item_keyword, acc);
-                let acc = f(&x.trait_use_precedence_item_removed_names, acc);
-                acc
-            },
-            SyntaxVariant::TraitUseAliasItem(x) => {
-                let acc = f(&x.trait_use_alias_item_aliasing_name, acc);
-                let acc = f(&x.trait_use_alias_item_keyword, acc);
-                let acc = f(&x.trait_use_alias_item_modifiers, acc);
-                let acc = f(&x.trait_use_alias_item_aliased_name, acc);
-                acc
-            },
-            SyntaxVariant::TraitUseConflictResolution(x) => {
-                let acc = f(&x.trait_use_conflict_resolution_keyword, acc);
-                let acc = f(&x.trait_use_conflict_resolution_names, acc);
-                let acc = f(&x.trait_use_conflict_resolution_left_brace, acc);
-                let acc = f(&x.trait_use_conflict_resolution_clauses, acc);
-                let acc = f(&x.trait_use_conflict_resolution_right_brace, acc);
-                acc
-            },
-            SyntaxVariant::TraitUse(x) => {
-                let acc = f(&x.trait_use_keyword, acc);
-                let acc = f(&x.trait_use_names, acc);
-                let acc = f(&x.trait_use_semicolon, acc);
-                acc
-            },
-            SyntaxVariant::RequireClause(x) => {
-                let acc = f(&x.require_keyword, acc);
-                let acc = f(&x.require_kind, acc);
-                let acc = f(&x.require_name, acc);
-                let acc = f(&x.require_semicolon, acc);
-                acc
-            },
-            SyntaxVariant::ConstDeclaration(x) => {
-                let acc = f(&x.const_modifiers, acc);
-                let acc = f(&x.const_keyword, acc);
-                let acc = f(&x.const_type_specifier, acc);
-                let acc = f(&x.const_declarators, acc);
-                let acc = f(&x.const_semicolon, acc);
-                acc
-            },
-            SyntaxVariant::ConstantDeclarator(x) => {
-                let acc = f(&x.constant_declarator_name, acc);
-                let acc = f(&x.constant_declarator_initializer, acc);
-                acc
-            },
-            SyntaxVariant::TypeConstDeclaration(x) => {
-                let acc = f(&x.type_const_attribute_spec, acc);
-                let acc = f(&x.type_const_modifiers, acc);
-                let acc = f(&x.type_const_keyword, acc);
-                let acc = f(&x.type_const_type_keyword, acc);
-                let acc = f(&x.type_const_name, acc);
-                let acc = f(&x.type_const_type_parameters, acc);
-                let acc = f(&x.type_const_type_constraint, acc);
-                let acc = f(&x.type_const_equal, acc);
-                let acc = f(&x.type_const_type_specifier, acc);
-                let acc = f(&x.type_const_semicolon, acc);
-                acc
-            },
-            SyntaxVariant::DecoratedExpression(x) => {
-                let acc = f(&x.decorated_expression_decorator, acc);
-                let acc = f(&x.decorated_expression_expression, acc);
-                acc
-            },
-            SyntaxVariant::ParameterDeclaration(x) => {
-                let acc = f(&x.parameter_attribute, acc);
-                let acc = f(&x.parameter_visibility, acc);
-                let acc = f(&x.parameter_call_convention, acc);
-                let acc = f(&x.parameter_type, acc);
-                let acc = f(&x.parameter_name, acc);
-                let acc = f(&x.parameter_default_value, acc);
-                acc
-            },
-            SyntaxVariant::VariadicParameter(x) => {
-                let acc = f(&x.variadic_parameter_call_convention, acc);
-                let acc = f(&x.variadic_parameter_type, acc);
-                let acc = f(&x.variadic_parameter_ellipsis, acc);
-                acc
-            },
-            SyntaxVariant::OldAttributeSpecification(x) => {
-                let acc = f(&x.old_attribute_specification_left_double_angle, acc);
-                let acc = f(&x.old_attribute_specification_attributes, acc);
-                let acc = f(&x.old_attribute_specification_right_double_angle, acc);
-                acc
-            },
-            SyntaxVariant::AttributeSpecification(x) => {
-                let acc = f(&x.attribute_specification_attributes, acc);
-                acc
-            },
-            SyntaxVariant::Attribute(x) => {
-                let acc = f(&x.attribute_at, acc);
-                let acc = f(&x.attribute_attribute_name, acc);
-                acc
-            },
-            SyntaxVariant::InclusionExpression(x) => {
-                let acc = f(&x.inclusion_require, acc);
-                let acc = f(&x.inclusion_filename, acc);
-                acc
-            },
-            SyntaxVariant::InclusionDirective(x) => {
-                let acc = f(&x.inclusion_expression, acc);
-                let acc = f(&x.inclusion_semicolon, acc);
-                acc
-            },
-            SyntaxVariant::CompoundStatement(x) => {
-                let acc = f(&x.compound_left_brace, acc);
-                let acc = f(&x.compound_statements, acc);
-                let acc = f(&x.compound_right_brace, acc);
-                acc
-            },
-            SyntaxVariant::ExpressionStatement(x) => {
-                let acc = f(&x.expression_statement_expression, acc);
-                let acc = f(&x.expression_statement_semicolon, acc);
-                acc
-            },
-            SyntaxVariant::MarkupSection(x) => {
-                let acc = f(&x.markup_prefix, acc);
-                let acc = f(&x.markup_text, acc);
-                let acc = f(&x.markup_suffix, acc);
-                let acc = f(&x.markup_expression, acc);
-                acc
-            },
-            SyntaxVariant::MarkupSuffix(x) => {
-                let acc = f(&x.markup_suffix_less_than_question, acc);
-                let acc = f(&x.markup_suffix_name, acc);
-                acc
-            },
-            SyntaxVariant::UnsetStatement(x) => {
-                let acc = f(&x.unset_keyword, acc);
-                let acc = f(&x.unset_left_paren, acc);
-                let acc = f(&x.unset_variables, acc);
-                let acc = f(&x.unset_right_paren, acc);
-                let acc = f(&x.unset_semicolon, acc);
-                acc
-            },
-            SyntaxVariant::LetStatement(x) => {
-                let acc = f(&x.let_statement_keyword, acc);
-                let acc = f(&x.let_statement_name, acc);
-                let acc = f(&x.let_statement_colon, acc);
-                let acc = f(&x.let_statement_type, acc);
-                let acc = f(&x.let_statement_initializer, acc);
-                let acc = f(&x.let_statement_semicolon, acc);
-                acc
-            },
-            SyntaxVariant::UsingStatementBlockScoped(x) => {
-                let acc = f(&x.using_block_await_keyword, acc);
-                let acc = f(&x.using_block_using_keyword, acc);
-                let acc = f(&x.using_block_left_paren, acc);
-                let acc = f(&x.using_block_expressions, acc);
-                let acc = f(&x.using_block_right_paren, acc);
-                let acc = f(&x.using_block_body, acc);
-                acc
-            },
-            SyntaxVariant::UsingStatementFunctionScoped(x) => {
-                let acc = f(&x.using_function_await_keyword, acc);
-                let acc = f(&x.using_function_using_keyword, acc);
-                let acc = f(&x.using_function_expression, acc);
-                let acc = f(&x.using_function_semicolon, acc);
-                acc
-            },
-            SyntaxVariant::WhileStatement(x) => {
-                let acc = f(&x.while_keyword, acc);
-                let acc = f(&x.while_left_paren, acc);
-                let acc = f(&x.while_condition, acc);
-                let acc = f(&x.while_right_paren, acc);
-                let acc = f(&x.while_body, acc);
-                acc
-            },
-            SyntaxVariant::IfStatement(x) => {
-                let acc = f(&x.if_keyword, acc);
-                let acc = f(&x.if_left_paren, acc);
-                let acc = f(&x.if_condition, acc);
-                let acc = f(&x.if_right_paren, acc);
-                let acc = f(&x.if_statement, acc);
-                let acc = f(&x.if_elseif_clauses, acc);
-                let acc = f(&x.if_else_clause, acc);
-                acc
-            },
-            SyntaxVariant::ElseifClause(x) => {
-                let acc = f(&x.elseif_keyword, acc);
-                let acc = f(&x.elseif_left_paren, acc);
-                let acc = f(&x.elseif_condition, acc);
-                let acc = f(&x.elseif_right_paren, acc);
-                let acc = f(&x.elseif_statement, acc);
-                acc
-            },
-            SyntaxVariant::ElseClause(x) => {
-                let acc = f(&x.else_keyword, acc);
-                let acc = f(&x.else_statement, acc);
-                acc
-            },
-            SyntaxVariant::TryStatement(x) => {
-                let acc = f(&x.try_keyword, acc);
-                let acc = f(&x.try_compound_statement, acc);
-                let acc = f(&x.try_catch_clauses, acc);
-                let acc = f(&x.try_finally_clause, acc);
-                acc
-            },
-            SyntaxVariant::CatchClause(x) => {
-                let acc = f(&x.catch_keyword, acc);
-                let acc = f(&x.catch_left_paren, acc);
-                let acc = f(&x.catch_type, acc);
-                let acc = f(&x.catch_variable, acc);
-                let acc = f(&x.catch_right_paren, acc);
-                let acc = f(&x.catch_body, acc);
-                acc
-            },
-            SyntaxVariant::FinallyClause(x) => {
-                let acc = f(&x.finally_keyword, acc);
-                let acc = f(&x.finally_body, acc);
-                acc
-            },
-            SyntaxVariant::DoStatement(x) => {
-                let acc = f(&x.do_keyword, acc);
-                let acc = f(&x.do_body, acc);
-                let acc = f(&x.do_while_keyword, acc);
-                let acc = f(&x.do_left_paren, acc);
-                let acc = f(&x.do_condition, acc);
-                let acc = f(&x.do_right_paren, acc);
-                let acc = f(&x.do_semicolon, acc);
-                acc
-            },
-            SyntaxVariant::ForStatement(x) => {
-                let acc = f(&x.for_keyword, acc);
-                let acc = f(&x.for_left_paren, acc);
-                let acc = f(&x.for_initializer, acc);
-                let acc = f(&x.for_first_semicolon, acc);
-                let acc = f(&x.for_control, acc);
-                let acc = f(&x.for_second_semicolon, acc);
-                let acc = f(&x.for_end_of_loop, acc);
-                let acc = f(&x.for_right_paren, acc);
-                let acc = f(&x.for_body, acc);
-                acc
-            },
-            SyntaxVariant::ForeachStatement(x) => {
-                let acc = f(&x.foreach_keyword, acc);
-                let acc = f(&x.foreach_left_paren, acc);
-                let acc = f(&x.foreach_collection, acc);
-                let acc = f(&x.foreach_await_keyword, acc);
-                let acc = f(&x.foreach_as, acc);
-                let acc = f(&x.foreach_key, acc);
-                let acc = f(&x.foreach_arrow, acc);
-                let acc = f(&x.foreach_value, acc);
-                let acc = f(&x.foreach_right_paren, acc);
-                let acc = f(&x.foreach_body, acc);
-                acc
-            },
-            SyntaxVariant::SwitchStatement(x) => {
-                let acc = f(&x.switch_keyword, acc);
-                let acc = f(&x.switch_left_paren, acc);
-                let acc = f(&x.switch_expression, acc);
-                let acc = f(&x.switch_right_paren, acc);
-                let acc = f(&x.switch_left_brace, acc);
-                let acc = f(&x.switch_sections, acc);
-                let acc = f(&x.switch_right_brace, acc);
-                acc
-            },
-            SyntaxVariant::SwitchSection(x) => {
-                let acc = f(&x.switch_section_labels, acc);
-                let acc = f(&x.switch_section_statements, acc);
-                let acc = f(&x.switch_section_fallthrough, acc);
-                acc
-            },
-            SyntaxVariant::SwitchFallthrough(x) => {
-                let acc = f(&x.fallthrough_keyword, acc);
-                let acc = f(&x.fallthrough_semicolon, acc);
-                acc
-            },
-            SyntaxVariant::CaseLabel(x) => {
-                let acc = f(&x.case_keyword, acc);
-                let acc = f(&x.case_expression, acc);
-                let acc = f(&x.case_colon, acc);
-                acc
-            },
-            SyntaxVariant::DefaultLabel(x) => {
-                let acc = f(&x.default_keyword, acc);
-                let acc = f(&x.default_colon, acc);
-                acc
-            },
-            SyntaxVariant::ReturnStatement(x) => {
-                let acc = f(&x.return_keyword, acc);
-                let acc = f(&x.return_expression, acc);
-                let acc = f(&x.return_semicolon, acc);
-                acc
-            },
-            SyntaxVariant::GotoLabel(x) => {
-                let acc = f(&x.goto_label_name, acc);
-                let acc = f(&x.goto_label_colon, acc);
-                acc
-            },
-            SyntaxVariant::GotoStatement(x) => {
-                let acc = f(&x.goto_statement_keyword, acc);
-                let acc = f(&x.goto_statement_label_name, acc);
-                let acc = f(&x.goto_statement_semicolon, acc);
-                acc
-            },
-            SyntaxVariant::ThrowStatement(x) => {
-                let acc = f(&x.throw_keyword, acc);
-                let acc = f(&x.throw_expression, acc);
-                let acc = f(&x.throw_semicolon, acc);
-                acc
-            },
-            SyntaxVariant::BreakStatement(x) => {
-                let acc = f(&x.break_keyword, acc);
-                let acc = f(&x.break_level, acc);
-                let acc = f(&x.break_semicolon, acc);
-                acc
-            },
-            SyntaxVariant::ContinueStatement(x) => {
-                let acc = f(&x.continue_keyword, acc);
-                let acc = f(&x.continue_level, acc);
-                let acc = f(&x.continue_semicolon, acc);
-                acc
-            },
-            SyntaxVariant::EchoStatement(x) => {
-                let acc = f(&x.echo_keyword, acc);
-                let acc = f(&x.echo_expressions, acc);
-                let acc = f(&x.echo_semicolon, acc);
-                acc
-            },
-            SyntaxVariant::ConcurrentStatement(x) => {
-                let acc = f(&x.concurrent_keyword, acc);
-                let acc = f(&x.concurrent_statement, acc);
-                acc
-            },
-            SyntaxVariant::SimpleInitializer(x) => {
-                let acc = f(&x.simple_initializer_equal, acc);
-                let acc = f(&x.simple_initializer_value, acc);
-                acc
-            },
-            SyntaxVariant::AnonymousClass(x) => {
-                let acc = f(&x.anonymous_class_class_keyword, acc);
-                let acc = f(&x.anonymous_class_left_paren, acc);
-                let acc = f(&x.anonymous_class_argument_list, acc);
-                let acc = f(&x.anonymous_class_right_paren, acc);
-                let acc = f(&x.anonymous_class_extends_keyword, acc);
-                let acc = f(&x.anonymous_class_extends_list, acc);
-                let acc = f(&x.anonymous_class_implements_keyword, acc);
-                let acc = f(&x.anonymous_class_implements_list, acc);
-                let acc = f(&x.anonymous_class_body, acc);
-                acc
-            },
-            SyntaxVariant::AnonymousFunction(x) => {
-                let acc = f(&x.anonymous_attribute_spec, acc);
-                let acc = f(&x.anonymous_static_keyword, acc);
-                let acc = f(&x.anonymous_async_keyword, acc);
-                let acc = f(&x.anonymous_coroutine_keyword, acc);
-                let acc = f(&x.anonymous_function_keyword, acc);
-                let acc = f(&x.anonymous_left_paren, acc);
-                let acc = f(&x.anonymous_parameters, acc);
-                let acc = f(&x.anonymous_right_paren, acc);
-                let acc = f(&x.anonymous_colon, acc);
-                let acc = f(&x.anonymous_type, acc);
-                let acc = f(&x.anonymous_use, acc);
-                let acc = f(&x.anonymous_body, acc);
-                acc
-            },
-            SyntaxVariant::AnonymousFunctionUseClause(x) => {
-                let acc = f(&x.anonymous_use_keyword, acc);
-                let acc = f(&x.anonymous_use_left_paren, acc);
-                let acc = f(&x.anonymous_use_variables, acc);
-                let acc = f(&x.anonymous_use_right_paren, acc);
-                acc
-            },
-            SyntaxVariant::LambdaExpression(x) => {
-                let acc = f(&x.lambda_attribute_spec, acc);
-                let acc = f(&x.lambda_async, acc);
-                let acc = f(&x.lambda_coroutine, acc);
-                let acc = f(&x.lambda_signature, acc);
-                let acc = f(&x.lambda_arrow, acc);
-                let acc = f(&x.lambda_body, acc);
-                acc
-            },
-            SyntaxVariant::LambdaSignature(x) => {
-                let acc = f(&x.lambda_left_paren, acc);
-                let acc = f(&x.lambda_parameters, acc);
-                let acc = f(&x.lambda_right_paren, acc);
-                let acc = f(&x.lambda_colon, acc);
-                let acc = f(&x.lambda_type, acc);
-                acc
-            },
-            SyntaxVariant::CastExpression(x) => {
-                let acc = f(&x.cast_left_paren, acc);
-                let acc = f(&x.cast_type, acc);
-                let acc = f(&x.cast_right_paren, acc);
-                let acc = f(&x.cast_operand, acc);
-                acc
-            },
-            SyntaxVariant::ScopeResolutionExpression(x) => {
-                let acc = f(&x.scope_resolution_qualifier, acc);
-                let acc = f(&x.scope_resolution_operator, acc);
-                let acc = f(&x.scope_resolution_name, acc);
-                acc
-            },
-            SyntaxVariant::MemberSelectionExpression(x) => {
-                let acc = f(&x.member_object, acc);
-                let acc = f(&x.member_operator, acc);
-                let acc = f(&x.member_name, acc);
-                acc
-            },
-            SyntaxVariant::SafeMemberSelectionExpression(x) => {
-                let acc = f(&x.safe_member_object, acc);
-                let acc = f(&x.safe_member_operator, acc);
-                let acc = f(&x.safe_member_name, acc);
-                acc
-            },
-            SyntaxVariant::EmbeddedMemberSelectionExpression(x) => {
-                let acc = f(&x.embedded_member_object, acc);
-                let acc = f(&x.embedded_member_operator, acc);
-                let acc = f(&x.embedded_member_name, acc);
-                acc
-            },
-            SyntaxVariant::YieldExpression(x) => {
-                let acc = f(&x.yield_keyword, acc);
-                let acc = f(&x.yield_operand, acc);
-                acc
-            },
-            SyntaxVariant::YieldFromExpression(x) => {
-                let acc = f(&x.yield_from_yield_keyword, acc);
-                let acc = f(&x.yield_from_from_keyword, acc);
-                let acc = f(&x.yield_from_operand, acc);
-                acc
-            },
-            SyntaxVariant::PrefixUnaryExpression(x) => {
-                let acc = f(&x.prefix_unary_operator, acc);
-                let acc = f(&x.prefix_unary_operand, acc);
-                acc
-            },
-            SyntaxVariant::PostfixUnaryExpression(x) => {
-                let acc = f(&x.postfix_unary_operand, acc);
-                let acc = f(&x.postfix_unary_operator, acc);
-                acc
-            },
-            SyntaxVariant::BinaryExpression(x) => {
-                let acc = f(&x.binary_left_operand, acc);
-                let acc = f(&x.binary_operator, acc);
-                let acc = f(&x.binary_right_operand, acc);
-                acc
-            },
-            SyntaxVariant::IsExpression(x) => {
-                let acc = f(&x.is_left_operand, acc);
-                let acc = f(&x.is_operator, acc);
-                let acc = f(&x.is_right_operand, acc);
-                acc
-            },
-            SyntaxVariant::AsExpression(x) => {
-                let acc = f(&x.as_left_operand, acc);
-                let acc = f(&x.as_operator, acc);
-                let acc = f(&x.as_right_operand, acc);
-                acc
-            },
-            SyntaxVariant::NullableAsExpression(x) => {
-                let acc = f(&x.nullable_as_left_operand, acc);
-                let acc = f(&x.nullable_as_operator, acc);
-                let acc = f(&x.nullable_as_right_operand, acc);
-                acc
-            },
-            SyntaxVariant::ConditionalExpression(x) => {
-                let acc = f(&x.conditional_test, acc);
-                let acc = f(&x.conditional_question, acc);
-                let acc = f(&x.conditional_consequence, acc);
-                let acc = f(&x.conditional_colon, acc);
-                let acc = f(&x.conditional_alternative, acc);
-                acc
-            },
-            SyntaxVariant::EvalExpression(x) => {
-                let acc = f(&x.eval_keyword, acc);
-                let acc = f(&x.eval_left_paren, acc);
-                let acc = f(&x.eval_argument, acc);
-                let acc = f(&x.eval_right_paren, acc);
-                acc
-            },
-            SyntaxVariant::DefineExpression(x) => {
-                let acc = f(&x.define_keyword, acc);
-                let acc = f(&x.define_left_paren, acc);
-                let acc = f(&x.define_argument_list, acc);
-                let acc = f(&x.define_right_paren, acc);
-                acc
-            },
-            SyntaxVariant::HaltCompilerExpression(x) => {
-                let acc = f(&x.halt_compiler_keyword, acc);
-                let acc = f(&x.halt_compiler_left_paren, acc);
-                let acc = f(&x.halt_compiler_argument_list, acc);
-                let acc = f(&x.halt_compiler_right_paren, acc);
-                acc
-            },
-            SyntaxVariant::IssetExpression(x) => {
-                let acc = f(&x.isset_keyword, acc);
-                let acc = f(&x.isset_left_paren, acc);
-                let acc = f(&x.isset_argument_list, acc);
-                let acc = f(&x.isset_right_paren, acc);
-                acc
-            },
-            SyntaxVariant::FunctionCallExpression(x) => {
-                let acc = f(&x.function_call_receiver, acc);
-                let acc = f(&x.function_call_type_args, acc);
-                let acc = f(&x.function_call_left_paren, acc);
-                let acc = f(&x.function_call_argument_list, acc);
-                let acc = f(&x.function_call_right_paren, acc);
-                acc
-            },
-            SyntaxVariant::ParenthesizedExpression(x) => {
-                let acc = f(&x.parenthesized_expression_left_paren, acc);
-                let acc = f(&x.parenthesized_expression_expression, acc);
-                let acc = f(&x.parenthesized_expression_right_paren, acc);
-                acc
-            },
-            SyntaxVariant::BracedExpression(x) => {
-                let acc = f(&x.braced_expression_left_brace, acc);
-                let acc = f(&x.braced_expression_expression, acc);
-                let acc = f(&x.braced_expression_right_brace, acc);
-                acc
-            },
-            SyntaxVariant::EmbeddedBracedExpression(x) => {
-                let acc = f(&x.embedded_braced_expression_left_brace, acc);
-                let acc = f(&x.embedded_braced_expression_expression, acc);
-                let acc = f(&x.embedded_braced_expression_right_brace, acc);
-                acc
-            },
-            SyntaxVariant::ListExpression(x) => {
-                let acc = f(&x.list_keyword, acc);
-                let acc = f(&x.list_left_paren, acc);
-                let acc = f(&x.list_members, acc);
-                let acc = f(&x.list_right_paren, acc);
-                acc
-            },
-            SyntaxVariant::CollectionLiteralExpression(x) => {
-                let acc = f(&x.collection_literal_name, acc);
-                let acc = f(&x.collection_literal_left_brace, acc);
-                let acc = f(&x.collection_literal_initializers, acc);
-                let acc = f(&x.collection_literal_right_brace, acc);
-                acc
-            },
-            SyntaxVariant::ObjectCreationExpression(x) => {
-                let acc = f(&x.object_creation_new_keyword, acc);
-                let acc = f(&x.object_creation_object, acc);
-                acc
-            },
-            SyntaxVariant::ConstructorCall(x) => {
-                let acc = f(&x.constructor_call_type, acc);
-                let acc = f(&x.constructor_call_left_paren, acc);
-                let acc = f(&x.constructor_call_argument_list, acc);
-                let acc = f(&x.constructor_call_right_paren, acc);
-                acc
-            },
-            SyntaxVariant::RecordCreationExpression(x) => {
-                let acc = f(&x.record_creation_type, acc);
-                let acc = f(&x.record_creation_array_token, acc);
-                let acc = f(&x.record_creation_left_bracket, acc);
-                let acc = f(&x.record_creation_members, acc);
-                let acc = f(&x.record_creation_right_bracket, acc);
-                acc
-            },
-            SyntaxVariant::ArrayCreationExpression(x) => {
-                let acc = f(&x.array_creation_left_bracket, acc);
-                let acc = f(&x.array_creation_members, acc);
-                let acc = f(&x.array_creation_right_bracket, acc);
-                acc
-            },
-            SyntaxVariant::ArrayIntrinsicExpression(x) => {
-                let acc = f(&x.array_intrinsic_keyword, acc);
-                let acc = f(&x.array_intrinsic_left_paren, acc);
-                let acc = f(&x.array_intrinsic_members, acc);
-                let acc = f(&x.array_intrinsic_right_paren, acc);
-                acc
-            },
-            SyntaxVariant::DarrayIntrinsicExpression(x) => {
-                let acc = f(&x.darray_intrinsic_keyword, acc);
-                let acc = f(&x.darray_intrinsic_explicit_type, acc);
-                let acc = f(&x.darray_intrinsic_left_bracket, acc);
-                let acc = f(&x.darray_intrinsic_members, acc);
-                let acc = f(&x.darray_intrinsic_right_bracket, acc);
-                acc
-            },
-            SyntaxVariant::DictionaryIntrinsicExpression(x) => {
-                let acc = f(&x.dictionary_intrinsic_keyword, acc);
-                let acc = f(&x.dictionary_intrinsic_explicit_type, acc);
-                let acc = f(&x.dictionary_intrinsic_left_bracket, acc);
-                let acc = f(&x.dictionary_intrinsic_members, acc);
-                let acc = f(&x.dictionary_intrinsic_right_bracket, acc);
-                acc
-            },
-            SyntaxVariant::KeysetIntrinsicExpression(x) => {
-                let acc = f(&x.keyset_intrinsic_keyword, acc);
-                let acc = f(&x.keyset_intrinsic_explicit_type, acc);
-                let acc = f(&x.keyset_intrinsic_left_bracket, acc);
-                let acc = f(&x.keyset_intrinsic_members, acc);
-                let acc = f(&x.keyset_intrinsic_right_bracket, acc);
-                acc
-            },
-            SyntaxVariant::VarrayIntrinsicExpression(x) => {
-                let acc = f(&x.varray_intrinsic_keyword, acc);
-                let acc = f(&x.varray_intrinsic_explicit_type, acc);
-                let acc = f(&x.varray_intrinsic_left_bracket, acc);
-                let acc = f(&x.varray_intrinsic_members, acc);
-                let acc = f(&x.varray_intrinsic_right_bracket, acc);
-                acc
-            },
-            SyntaxVariant::VectorIntrinsicExpression(x) => {
-                let acc = f(&x.vector_intrinsic_keyword, acc);
-                let acc = f(&x.vector_intrinsic_explicit_type, acc);
-                let acc = f(&x.vector_intrinsic_left_bracket, acc);
-                let acc = f(&x.vector_intrinsic_members, acc);
-                let acc = f(&x.vector_intrinsic_right_bracket, acc);
-                acc
-            },
-            SyntaxVariant::ElementInitializer(x) => {
-                let acc = f(&x.element_key, acc);
-                let acc = f(&x.element_arrow, acc);
-                let acc = f(&x.element_value, acc);
-                acc
-            },
-            SyntaxVariant::SubscriptExpression(x) => {
-                let acc = f(&x.subscript_receiver, acc);
-                let acc = f(&x.subscript_left_bracket, acc);
-                let acc = f(&x.subscript_index, acc);
-                let acc = f(&x.subscript_right_bracket, acc);
-                acc
-            },
-            SyntaxVariant::EmbeddedSubscriptExpression(x) => {
-                let acc = f(&x.embedded_subscript_receiver, acc);
-                let acc = f(&x.embedded_subscript_left_bracket, acc);
-                let acc = f(&x.embedded_subscript_index, acc);
-                let acc = f(&x.embedded_subscript_right_bracket, acc);
-                acc
-            },
-            SyntaxVariant::AwaitableCreationExpression(x) => {
-                let acc = f(&x.awaitable_attribute_spec, acc);
-                let acc = f(&x.awaitable_async, acc);
-                let acc = f(&x.awaitable_coroutine, acc);
-                let acc = f(&x.awaitable_compound_statement, acc);
-                acc
-            },
-            SyntaxVariant::XHPChildrenDeclaration(x) => {
-                let acc = f(&x.xhp_children_keyword, acc);
-                let acc = f(&x.xhp_children_expression, acc);
-                let acc = f(&x.xhp_children_semicolon, acc);
-                acc
-            },
-            SyntaxVariant::XHPChildrenParenthesizedList(x) => {
-                let acc = f(&x.xhp_children_list_left_paren, acc);
-                let acc = f(&x.xhp_children_list_xhp_children, acc);
-                let acc = f(&x.xhp_children_list_right_paren, acc);
-                acc
-            },
-            SyntaxVariant::XHPCategoryDeclaration(x) => {
-                let acc = f(&x.xhp_category_keyword, acc);
-                let acc = f(&x.xhp_category_categories, acc);
-                let acc = f(&x.xhp_category_semicolon, acc);
-                acc
-            },
-            SyntaxVariant::XHPEnumType(x) => {
-                let acc = f(&x.xhp_enum_optional, acc);
-                let acc = f(&x.xhp_enum_keyword, acc);
-                let acc = f(&x.xhp_enum_left_brace, acc);
-                let acc = f(&x.xhp_enum_values, acc);
-                let acc = f(&x.xhp_enum_right_brace, acc);
-                acc
-            },
-            SyntaxVariant::XHPLateinit(x) => {
-                let acc = f(&x.xhp_lateinit_at, acc);
-                let acc = f(&x.xhp_lateinit_keyword, acc);
-                acc
-            },
-            SyntaxVariant::XHPRequired(x) => {
-                let acc = f(&x.xhp_required_at, acc);
-                let acc = f(&x.xhp_required_keyword, acc);
-                acc
-            },
-            SyntaxVariant::XHPClassAttributeDeclaration(x) => {
-                let acc = f(&x.xhp_attribute_keyword, acc);
-                let acc = f(&x.xhp_attribute_attributes, acc);
-                let acc = f(&x.xhp_attribute_semicolon, acc);
-                acc
-            },
-            SyntaxVariant::XHPClassAttribute(x) => {
-                let acc = f(&x.xhp_attribute_decl_type, acc);
-                let acc = f(&x.xhp_attribute_decl_name, acc);
-                let acc = f(&x.xhp_attribute_decl_initializer, acc);
-                let acc = f(&x.xhp_attribute_decl_required, acc);
-                acc
-            },
-            SyntaxVariant::XHPSimpleClassAttribute(x) => {
-                let acc = f(&x.xhp_simple_class_attribute_type, acc);
-                acc
-            },
-            SyntaxVariant::XHPSimpleAttribute(x) => {
-                let acc = f(&x.xhp_simple_attribute_name, acc);
-                let acc = f(&x.xhp_simple_attribute_equal, acc);
-                let acc = f(&x.xhp_simple_attribute_expression, acc);
-                acc
-            },
-            SyntaxVariant::XHPSpreadAttribute(x) => {
-                let acc = f(&x.xhp_spread_attribute_left_brace, acc);
-                let acc = f(&x.xhp_spread_attribute_spread_operator, acc);
-                let acc = f(&x.xhp_spread_attribute_expression, acc);
-                let acc = f(&x.xhp_spread_attribute_right_brace, acc);
-                acc
-            },
-            SyntaxVariant::XHPOpen(x) => {
-                let acc = f(&x.xhp_open_left_angle, acc);
-                let acc = f(&x.xhp_open_name, acc);
-                let acc = f(&x.xhp_open_attributes, acc);
-                let acc = f(&x.xhp_open_right_angle, acc);
-                acc
-            },
-            SyntaxVariant::XHPExpression(x) => {
-                let acc = f(&x.xhp_open, acc);
-                let acc = f(&x.xhp_body, acc);
-                let acc = f(&x.xhp_close, acc);
-                acc
-            },
-            SyntaxVariant::XHPClose(x) => {
-                let acc = f(&x.xhp_close_left_angle, acc);
-                let acc = f(&x.xhp_close_name, acc);
-                let acc = f(&x.xhp_close_right_angle, acc);
-                acc
-            },
-            SyntaxVariant::TypeConstant(x) => {
-                let acc = f(&x.type_constant_left_type, acc);
-                let acc = f(&x.type_constant_separator, acc);
-                let acc = f(&x.type_constant_right_type, acc);
-                acc
-            },
-            SyntaxVariant::PUAccess(x) => {
-                let acc = f(&x.pu_access_left_type, acc);
-                let acc = f(&x.pu_access_separator, acc);
-                let acc = f(&x.pu_access_right_type, acc);
-                acc
-            },
-            SyntaxVariant::VectorTypeSpecifier(x) => {
-                let acc = f(&x.vector_type_keyword, acc);
-                let acc = f(&x.vector_type_left_angle, acc);
-                let acc = f(&x.vector_type_type, acc);
-                let acc = f(&x.vector_type_trailing_comma, acc);
-                let acc = f(&x.vector_type_right_angle, acc);
-                acc
-            },
-            SyntaxVariant::KeysetTypeSpecifier(x) => {
-                let acc = f(&x.keyset_type_keyword, acc);
-                let acc = f(&x.keyset_type_left_angle, acc);
-                let acc = f(&x.keyset_type_type, acc);
-                let acc = f(&x.keyset_type_trailing_comma, acc);
-                let acc = f(&x.keyset_type_right_angle, acc);
-                acc
-            },
-            SyntaxVariant::TupleTypeExplicitSpecifier(x) => {
-                let acc = f(&x.tuple_type_keyword, acc);
-                let acc = f(&x.tuple_type_left_angle, acc);
-                let acc = f(&x.tuple_type_types, acc);
-                let acc = f(&x.tuple_type_right_angle, acc);
-                acc
-            },
-            SyntaxVariant::VarrayTypeSpecifier(x) => {
-                let acc = f(&x.varray_keyword, acc);
-                let acc = f(&x.varray_left_angle, acc);
-                let acc = f(&x.varray_type, acc);
-                let acc = f(&x.varray_trailing_comma, acc);
-                let acc = f(&x.varray_right_angle, acc);
-                acc
-            },
-            SyntaxVariant::VectorArrayTypeSpecifier(x) => {
-                let acc = f(&x.vector_array_keyword, acc);
-                let acc = f(&x.vector_array_left_angle, acc);
-                let acc = f(&x.vector_array_type, acc);
-                let acc = f(&x.vector_array_right_angle, acc);
-                acc
-            },
-            SyntaxVariant::TypeParameter(x) => {
-                let acc = f(&x.type_attribute_spec, acc);
-                let acc = f(&x.type_reified, acc);
-                let acc = f(&x.type_variance, acc);
-                let acc = f(&x.type_name, acc);
-                let acc = f(&x.type_constraints, acc);
-                acc
-            },
-            SyntaxVariant::TypeConstraint(x) => {
-                let acc = f(&x.constraint_keyword, acc);
-                let acc = f(&x.constraint_type, acc);
-                acc
-            },
-            SyntaxVariant::DarrayTypeSpecifier(x) => {
-                let acc = f(&x.darray_keyword, acc);
-                let acc = f(&x.darray_left_angle, acc);
-                let acc = f(&x.darray_key, acc);
-                let acc = f(&x.darray_comma, acc);
-                let acc = f(&x.darray_value, acc);
-                let acc = f(&x.darray_trailing_comma, acc);
-                let acc = f(&x.darray_right_angle, acc);
-                acc
-            },
-            SyntaxVariant::MapArrayTypeSpecifier(x) => {
-                let acc = f(&x.map_array_keyword, acc);
-                let acc = f(&x.map_array_left_angle, acc);
-                let acc = f(&x.map_array_key, acc);
-                let acc = f(&x.map_array_comma, acc);
-                let acc = f(&x.map_array_value, acc);
-                let acc = f(&x.map_array_right_angle, acc);
-                acc
-            },
-            SyntaxVariant::DictionaryTypeSpecifier(x) => {
-                let acc = f(&x.dictionary_type_keyword, acc);
-                let acc = f(&x.dictionary_type_left_angle, acc);
-                let acc = f(&x.dictionary_type_members, acc);
-                let acc = f(&x.dictionary_type_right_angle, acc);
-                acc
-            },
-            SyntaxVariant::ClosureTypeSpecifier(x) => {
-                let acc = f(&x.closure_outer_left_paren, acc);
-                let acc = f(&x.closure_coroutine, acc);
-                let acc = f(&x.closure_function_keyword, acc);
-                let acc = f(&x.closure_inner_left_paren, acc);
-                let acc = f(&x.closure_parameter_list, acc);
-                let acc = f(&x.closure_inner_right_paren, acc);
-                let acc = f(&x.closure_colon, acc);
-                let acc = f(&x.closure_return_type, acc);
-                let acc = f(&x.closure_outer_right_paren, acc);
-                acc
-            },
-            SyntaxVariant::ClosureParameterTypeSpecifier(x) => {
-                let acc = f(&x.closure_parameter_call_convention, acc);
-                let acc = f(&x.closure_parameter_type, acc);
-                acc
-            },
-            SyntaxVariant::ClassnameTypeSpecifier(x) => {
-                let acc = f(&x.classname_keyword, acc);
-                let acc = f(&x.classname_left_angle, acc);
-                let acc = f(&x.classname_type, acc);
-                let acc = f(&x.classname_trailing_comma, acc);
-                let acc = f(&x.classname_right_angle, acc);
-                acc
-            },
-            SyntaxVariant::FieldSpecifier(x) => {
-                let acc = f(&x.field_question, acc);
-                let acc = f(&x.field_name, acc);
-                let acc = f(&x.field_arrow, acc);
-                let acc = f(&x.field_type, acc);
-                acc
-            },
-            SyntaxVariant::FieldInitializer(x) => {
-                let acc = f(&x.field_initializer_name, acc);
-                let acc = f(&x.field_initializer_arrow, acc);
-                let acc = f(&x.field_initializer_value, acc);
-                acc
-            },
-            SyntaxVariant::ShapeTypeSpecifier(x) => {
-                let acc = f(&x.shape_type_keyword, acc);
-                let acc = f(&x.shape_type_left_paren, acc);
-                let acc = f(&x.shape_type_fields, acc);
-                let acc = f(&x.shape_type_ellipsis, acc);
-                let acc = f(&x.shape_type_right_paren, acc);
-                acc
-            },
-            SyntaxVariant::ShapeExpression(x) => {
-                let acc = f(&x.shape_expression_keyword, acc);
-                let acc = f(&x.shape_expression_left_paren, acc);
-                let acc = f(&x.shape_expression_fields, acc);
-                let acc = f(&x.shape_expression_right_paren, acc);
-                acc
-            },
-            SyntaxVariant::TupleExpression(x) => {
-                let acc = f(&x.tuple_expression_keyword, acc);
-                let acc = f(&x.tuple_expression_left_paren, acc);
-                let acc = f(&x.tuple_expression_items, acc);
-                let acc = f(&x.tuple_expression_right_paren, acc);
-                acc
-            },
-            SyntaxVariant::GenericTypeSpecifier(x) => {
-                let acc = f(&x.generic_class_type, acc);
-                let acc = f(&x.generic_argument_list, acc);
-                acc
-            },
-            SyntaxVariant::NullableTypeSpecifier(x) => {
-                let acc = f(&x.nullable_question, acc);
-                let acc = f(&x.nullable_type, acc);
-                acc
-            },
-            SyntaxVariant::LikeTypeSpecifier(x) => {
-                let acc = f(&x.like_tilde, acc);
-                let acc = f(&x.like_type, acc);
-                acc
-            },
-            SyntaxVariant::SoftTypeSpecifier(x) => {
-                let acc = f(&x.soft_at, acc);
-                let acc = f(&x.soft_type, acc);
-                acc
-            },
-            SyntaxVariant::AttributizedSpecifier(x) => {
-                let acc = f(&x.attributized_specifier_attribute_spec, acc);
-                let acc = f(&x.attributized_specifier_type, acc);
-                acc
-            },
-            SyntaxVariant::ReifiedTypeArgument(x) => {
-                let acc = f(&x.reified_type_argument_reified, acc);
-                let acc = f(&x.reified_type_argument_type, acc);
-                acc
-            },
-            SyntaxVariant::TypeArguments(x) => {
-                let acc = f(&x.type_arguments_left_angle, acc);
-                let acc = f(&x.type_arguments_types, acc);
-                let acc = f(&x.type_arguments_right_angle, acc);
-                acc
-            },
-            SyntaxVariant::TypeParameters(x) => {
-                let acc = f(&x.type_parameters_left_angle, acc);
-                let acc = f(&x.type_parameters_parameters, acc);
-                let acc = f(&x.type_parameters_right_angle, acc);
-                acc
-            },
-            SyntaxVariant::TupleTypeSpecifier(x) => {
-                let acc = f(&x.tuple_left_paren, acc);
-                let acc = f(&x.tuple_types, acc);
-                let acc = f(&x.tuple_right_paren, acc);
-                acc
-            },
-            SyntaxVariant::ErrorSyntax(x) => {
-                let acc = f(&x.error_error, acc);
-                acc
-            },
-            SyntaxVariant::ListItem(x) => {
-                let acc = f(&x.list_item, acc);
-                let acc = f(&x.list_separator, acc);
-                acc
-            },
-            SyntaxVariant::PocketAtomExpression(x) => {
-                let acc = f(&x.pocket_atom_glyph, acc);
-                let acc = f(&x.pocket_atom_expression, acc);
-                acc
-            },
-            SyntaxVariant::PocketIdentifierExpression(x) => {
-                let acc = f(&x.pocket_identifier_qualifier, acc);
-                let acc = f(&x.pocket_identifier_pu_operator, acc);
-                let acc = f(&x.pocket_identifier_field, acc);
-                let acc = f(&x.pocket_identifier_operator, acc);
-                let acc = f(&x.pocket_identifier_name, acc);
-                acc
-            },
-            SyntaxVariant::PocketAtomMappingDeclaration(x) => {
-                let acc = f(&x.pocket_atom_mapping_glyph, acc);
-                let acc = f(&x.pocket_atom_mapping_name, acc);
-                let acc = f(&x.pocket_atom_mapping_left_paren, acc);
-                let acc = f(&x.pocket_atom_mapping_mappings, acc);
-                let acc = f(&x.pocket_atom_mapping_right_paren, acc);
-                let acc = f(&x.pocket_atom_mapping_semicolon, acc);
-                acc
-            },
-            SyntaxVariant::PocketEnumDeclaration(x) => {
-                let acc = f(&x.pocket_enum_modifiers, acc);
-                let acc = f(&x.pocket_enum_enum, acc);
-                let acc = f(&x.pocket_enum_name, acc);
-                let acc = f(&x.pocket_enum_left_brace, acc);
-                let acc = f(&x.pocket_enum_fields, acc);
-                let acc = f(&x.pocket_enum_right_brace, acc);
-                acc
-            },
-            SyntaxVariant::PocketFieldTypeExprDeclaration(x) => {
-                let acc = f(&x.pocket_field_type_expr_case, acc);
-                let acc = f(&x.pocket_field_type_expr_type, acc);
-                let acc = f(&x.pocket_field_type_expr_name, acc);
-                let acc = f(&x.pocket_field_type_expr_semicolon, acc);
-                acc
-            },
-            SyntaxVariant::PocketFieldTypeDeclaration(x) => {
-                let acc = f(&x.pocket_field_type_case, acc);
-                let acc = f(&x.pocket_field_type_type, acc);
-                let acc = f(&x.pocket_field_type_name, acc);
-                let acc = f(&x.pocket_field_type_semicolon, acc);
-                acc
-            },
-            SyntaxVariant::PocketMappingIdDeclaration(x) => {
-                let acc = f(&x.pocket_mapping_id_name, acc);
-                let acc = f(&x.pocket_mapping_id_initializer, acc);
-                acc
-            },
-            SyntaxVariant::PocketMappingTypeDeclaration(x) => {
-                let acc = f(&x.pocket_mapping_type_keyword, acc);
-                let acc = f(&x.pocket_mapping_type_name, acc);
-                let acc = f(&x.pocket_mapping_type_equal, acc);
-                let acc = f(&x.pocket_mapping_type_type, acc);
-                acc
-            },
-
-        }
-    }
-
     pub fn fold_over_children_owned<U>(
         f: &dyn Fn(Self, U) -> U,
         acc: U,
@@ -7439,4 +6229,1750 @@ pub enum SyntaxVariant<T, V> {
     PocketFieldTypeDeclaration(Box<PocketFieldTypeDeclarationChildren<T, V>>),
     PocketMappingIdDeclaration(Box<PocketMappingIdDeclarationChildren<T, V>>),
     PocketMappingTypeDeclaration(Box<PocketMappingTypeDeclarationChildren<T, V>>),
+}
+
+impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
+    pub fn next_impl(&mut self, direction : bool) -> Option<&'a Syntax<T, V>> {
+        use SyntaxVariant::*;
+        let get_index = |len| {
+            let back_index = len - self.index_back - 1;
+            if back_index < self.index {
+                return None
+            }
+            if direction {
+                Some (self.index)
+            } else {
+                Some (back_index)
+            }
+        };
+        let res = match &self.syntax {
+            Missing => None,
+            Token (_) => None,
+            SyntaxList(elems) => {
+                get_index(elems.len()).and_then(|x| elems.get(x))
+            },
+            EndOfFile(x) => {
+                get_index(1).and_then(|index| { match index {
+                        0 => Some(&x.end_of_file_token),
+                        _ => None,
+                    }
+                })
+            },
+            Script(x) => {
+                get_index(1).and_then(|index| { match index {
+                        0 => Some(&x.script_declarations),
+                        _ => None,
+                    }
+                })
+            },
+            QualifiedName(x) => {
+                get_index(1).and_then(|index| { match index {
+                        0 => Some(&x.qualified_name_parts),
+                        _ => None,
+                    }
+                })
+            },
+            SimpleTypeSpecifier(x) => {
+                get_index(1).and_then(|index| { match index {
+                        0 => Some(&x.simple_type_specifier),
+                        _ => None,
+                    }
+                })
+            },
+            LiteralExpression(x) => {
+                get_index(1).and_then(|index| { match index {
+                        0 => Some(&x.literal_expression),
+                        _ => None,
+                    }
+                })
+            },
+            PrefixedStringExpression(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.prefixed_string_name),
+                    1 => Some(&x.prefixed_string_str),
+                        _ => None,
+                    }
+                })
+            },
+            VariableExpression(x) => {
+                get_index(1).and_then(|index| { match index {
+                        0 => Some(&x.variable_expression),
+                        _ => None,
+                    }
+                })
+            },
+            PipeVariableExpression(x) => {
+                get_index(1).and_then(|index| { match index {
+                        0 => Some(&x.pipe_variable_expression),
+                        _ => None,
+                    }
+                })
+            },
+            FileAttributeSpecification(x) => {
+                get_index(5).and_then(|index| { match index {
+                        0 => Some(&x.file_attribute_specification_left_double_angle),
+                    1 => Some(&x.file_attribute_specification_keyword),
+                    2 => Some(&x.file_attribute_specification_colon),
+                    3 => Some(&x.file_attribute_specification_attributes),
+                    4 => Some(&x.file_attribute_specification_right_double_angle),
+                        _ => None,
+                    }
+                })
+            },
+            EnumDeclaration(x) => {
+                get_index(9).and_then(|index| { match index {
+                        0 => Some(&x.enum_attribute_spec),
+                    1 => Some(&x.enum_keyword),
+                    2 => Some(&x.enum_name),
+                    3 => Some(&x.enum_colon),
+                    4 => Some(&x.enum_base),
+                    5 => Some(&x.enum_type),
+                    6 => Some(&x.enum_left_brace),
+                    7 => Some(&x.enum_enumerators),
+                    8 => Some(&x.enum_right_brace),
+                        _ => None,
+                    }
+                })
+            },
+            Enumerator(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.enumerator_name),
+                    1 => Some(&x.enumerator_equal),
+                    2 => Some(&x.enumerator_value),
+                    3 => Some(&x.enumerator_semicolon),
+                        _ => None,
+                    }
+                })
+            },
+            RecordDeclaration(x) => {
+                get_index(9).and_then(|index| { match index {
+                        0 => Some(&x.record_attribute_spec),
+                    1 => Some(&x.record_modifier),
+                    2 => Some(&x.record_keyword),
+                    3 => Some(&x.record_name),
+                    4 => Some(&x.record_extends_keyword),
+                    5 => Some(&x.record_extends_list),
+                    6 => Some(&x.record_left_brace),
+                    7 => Some(&x.record_fields),
+                    8 => Some(&x.record_right_brace),
+                        _ => None,
+                    }
+                })
+            },
+            RecordField(x) => {
+                get_index(5).and_then(|index| { match index {
+                        0 => Some(&x.record_field_name),
+                    1 => Some(&x.record_field_colon),
+                    2 => Some(&x.record_field_type),
+                    3 => Some(&x.record_field_init),
+                    4 => Some(&x.record_field_comma),
+                        _ => None,
+                    }
+                })
+            },
+            AliasDeclaration(x) => {
+                get_index(8).and_then(|index| { match index {
+                        0 => Some(&x.alias_attribute_spec),
+                    1 => Some(&x.alias_keyword),
+                    2 => Some(&x.alias_name),
+                    3 => Some(&x.alias_generic_parameter),
+                    4 => Some(&x.alias_constraint),
+                    5 => Some(&x.alias_equal),
+                    6 => Some(&x.alias_type),
+                    7 => Some(&x.alias_semicolon),
+                        _ => None,
+                    }
+                })
+            },
+            PropertyDeclaration(x) => {
+                get_index(5).and_then(|index| { match index {
+                        0 => Some(&x.property_attribute_spec),
+                    1 => Some(&x.property_modifiers),
+                    2 => Some(&x.property_type),
+                    3 => Some(&x.property_declarators),
+                    4 => Some(&x.property_semicolon),
+                        _ => None,
+                    }
+                })
+            },
+            PropertyDeclarator(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.property_name),
+                    1 => Some(&x.property_initializer),
+                        _ => None,
+                    }
+                })
+            },
+            NamespaceDeclaration(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.namespace_keyword),
+                    1 => Some(&x.namespace_name),
+                    2 => Some(&x.namespace_body),
+                        _ => None,
+                    }
+                })
+            },
+            NamespaceBody(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.namespace_left_brace),
+                    1 => Some(&x.namespace_declarations),
+                    2 => Some(&x.namespace_right_brace),
+                        _ => None,
+                    }
+                })
+            },
+            NamespaceEmptyBody(x) => {
+                get_index(1).and_then(|index| { match index {
+                        0 => Some(&x.namespace_semicolon),
+                        _ => None,
+                    }
+                })
+            },
+            NamespaceUseDeclaration(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.namespace_use_keyword),
+                    1 => Some(&x.namespace_use_kind),
+                    2 => Some(&x.namespace_use_clauses),
+                    3 => Some(&x.namespace_use_semicolon),
+                        _ => None,
+                    }
+                })
+            },
+            NamespaceGroupUseDeclaration(x) => {
+                get_index(7).and_then(|index| { match index {
+                        0 => Some(&x.namespace_group_use_keyword),
+                    1 => Some(&x.namespace_group_use_kind),
+                    2 => Some(&x.namespace_group_use_prefix),
+                    3 => Some(&x.namespace_group_use_left_brace),
+                    4 => Some(&x.namespace_group_use_clauses),
+                    5 => Some(&x.namespace_group_use_right_brace),
+                    6 => Some(&x.namespace_group_use_semicolon),
+                        _ => None,
+                    }
+                })
+            },
+            NamespaceUseClause(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.namespace_use_clause_kind),
+                    1 => Some(&x.namespace_use_name),
+                    2 => Some(&x.namespace_use_as),
+                    3 => Some(&x.namespace_use_alias),
+                        _ => None,
+                    }
+                })
+            },
+            FunctionDeclaration(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.function_attribute_spec),
+                    1 => Some(&x.function_declaration_header),
+                    2 => Some(&x.function_body),
+                        _ => None,
+                    }
+                })
+            },
+            FunctionDeclarationHeader(x) => {
+                get_index(10).and_then(|index| { match index {
+                        0 => Some(&x.function_modifiers),
+                    1 => Some(&x.function_keyword),
+                    2 => Some(&x.function_name),
+                    3 => Some(&x.function_type_parameter_list),
+                    4 => Some(&x.function_left_paren),
+                    5 => Some(&x.function_parameter_list),
+                    6 => Some(&x.function_right_paren),
+                    7 => Some(&x.function_colon),
+                    8 => Some(&x.function_type),
+                    9 => Some(&x.function_where_clause),
+                        _ => None,
+                    }
+                })
+            },
+            WhereClause(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.where_clause_keyword),
+                    1 => Some(&x.where_clause_constraints),
+                        _ => None,
+                    }
+                })
+            },
+            WhereConstraint(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.where_constraint_left_type),
+                    1 => Some(&x.where_constraint_operator),
+                    2 => Some(&x.where_constraint_right_type),
+                        _ => None,
+                    }
+                })
+            },
+            MethodishDeclaration(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.methodish_attribute),
+                    1 => Some(&x.methodish_function_decl_header),
+                    2 => Some(&x.methodish_function_body),
+                    3 => Some(&x.methodish_semicolon),
+                        _ => None,
+                    }
+                })
+            },
+            MethodishTraitResolution(x) => {
+                get_index(5).and_then(|index| { match index {
+                        0 => Some(&x.methodish_trait_attribute),
+                    1 => Some(&x.methodish_trait_function_decl_header),
+                    2 => Some(&x.methodish_trait_equal),
+                    3 => Some(&x.methodish_trait_name),
+                    4 => Some(&x.methodish_trait_semicolon),
+                        _ => None,
+                    }
+                })
+            },
+            ClassishDeclaration(x) => {
+                get_index(11).and_then(|index| { match index {
+                        0 => Some(&x.classish_attribute),
+                    1 => Some(&x.classish_modifiers),
+                    2 => Some(&x.classish_keyword),
+                    3 => Some(&x.classish_name),
+                    4 => Some(&x.classish_type_parameters),
+                    5 => Some(&x.classish_extends_keyword),
+                    6 => Some(&x.classish_extends_list),
+                    7 => Some(&x.classish_implements_keyword),
+                    8 => Some(&x.classish_implements_list),
+                    9 => Some(&x.classish_where_clause),
+                    10 => Some(&x.classish_body),
+                        _ => None,
+                    }
+                })
+            },
+            ClassishBody(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.classish_body_left_brace),
+                    1 => Some(&x.classish_body_elements),
+                    2 => Some(&x.classish_body_right_brace),
+                        _ => None,
+                    }
+                })
+            },
+            TraitUsePrecedenceItem(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.trait_use_precedence_item_name),
+                    1 => Some(&x.trait_use_precedence_item_keyword),
+                    2 => Some(&x.trait_use_precedence_item_removed_names),
+                        _ => None,
+                    }
+                })
+            },
+            TraitUseAliasItem(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.trait_use_alias_item_aliasing_name),
+                    1 => Some(&x.trait_use_alias_item_keyword),
+                    2 => Some(&x.trait_use_alias_item_modifiers),
+                    3 => Some(&x.trait_use_alias_item_aliased_name),
+                        _ => None,
+                    }
+                })
+            },
+            TraitUseConflictResolution(x) => {
+                get_index(5).and_then(|index| { match index {
+                        0 => Some(&x.trait_use_conflict_resolution_keyword),
+                    1 => Some(&x.trait_use_conflict_resolution_names),
+                    2 => Some(&x.trait_use_conflict_resolution_left_brace),
+                    3 => Some(&x.trait_use_conflict_resolution_clauses),
+                    4 => Some(&x.trait_use_conflict_resolution_right_brace),
+                        _ => None,
+                    }
+                })
+            },
+            TraitUse(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.trait_use_keyword),
+                    1 => Some(&x.trait_use_names),
+                    2 => Some(&x.trait_use_semicolon),
+                        _ => None,
+                    }
+                })
+            },
+            RequireClause(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.require_keyword),
+                    1 => Some(&x.require_kind),
+                    2 => Some(&x.require_name),
+                    3 => Some(&x.require_semicolon),
+                        _ => None,
+                    }
+                })
+            },
+            ConstDeclaration(x) => {
+                get_index(5).and_then(|index| { match index {
+                        0 => Some(&x.const_modifiers),
+                    1 => Some(&x.const_keyword),
+                    2 => Some(&x.const_type_specifier),
+                    3 => Some(&x.const_declarators),
+                    4 => Some(&x.const_semicolon),
+                        _ => None,
+                    }
+                })
+            },
+            ConstantDeclarator(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.constant_declarator_name),
+                    1 => Some(&x.constant_declarator_initializer),
+                        _ => None,
+                    }
+                })
+            },
+            TypeConstDeclaration(x) => {
+                get_index(10).and_then(|index| { match index {
+                        0 => Some(&x.type_const_attribute_spec),
+                    1 => Some(&x.type_const_modifiers),
+                    2 => Some(&x.type_const_keyword),
+                    3 => Some(&x.type_const_type_keyword),
+                    4 => Some(&x.type_const_name),
+                    5 => Some(&x.type_const_type_parameters),
+                    6 => Some(&x.type_const_type_constraint),
+                    7 => Some(&x.type_const_equal),
+                    8 => Some(&x.type_const_type_specifier),
+                    9 => Some(&x.type_const_semicolon),
+                        _ => None,
+                    }
+                })
+            },
+            DecoratedExpression(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.decorated_expression_decorator),
+                    1 => Some(&x.decorated_expression_expression),
+                        _ => None,
+                    }
+                })
+            },
+            ParameterDeclaration(x) => {
+                get_index(6).and_then(|index| { match index {
+                        0 => Some(&x.parameter_attribute),
+                    1 => Some(&x.parameter_visibility),
+                    2 => Some(&x.parameter_call_convention),
+                    3 => Some(&x.parameter_type),
+                    4 => Some(&x.parameter_name),
+                    5 => Some(&x.parameter_default_value),
+                        _ => None,
+                    }
+                })
+            },
+            VariadicParameter(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.variadic_parameter_call_convention),
+                    1 => Some(&x.variadic_parameter_type),
+                    2 => Some(&x.variadic_parameter_ellipsis),
+                        _ => None,
+                    }
+                })
+            },
+            OldAttributeSpecification(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.old_attribute_specification_left_double_angle),
+                    1 => Some(&x.old_attribute_specification_attributes),
+                    2 => Some(&x.old_attribute_specification_right_double_angle),
+                        _ => None,
+                    }
+                })
+            },
+            AttributeSpecification(x) => {
+                get_index(1).and_then(|index| { match index {
+                        0 => Some(&x.attribute_specification_attributes),
+                        _ => None,
+                    }
+                })
+            },
+            Attribute(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.attribute_at),
+                    1 => Some(&x.attribute_attribute_name),
+                        _ => None,
+                    }
+                })
+            },
+            InclusionExpression(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.inclusion_require),
+                    1 => Some(&x.inclusion_filename),
+                        _ => None,
+                    }
+                })
+            },
+            InclusionDirective(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.inclusion_expression),
+                    1 => Some(&x.inclusion_semicolon),
+                        _ => None,
+                    }
+                })
+            },
+            CompoundStatement(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.compound_left_brace),
+                    1 => Some(&x.compound_statements),
+                    2 => Some(&x.compound_right_brace),
+                        _ => None,
+                    }
+                })
+            },
+            ExpressionStatement(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.expression_statement_expression),
+                    1 => Some(&x.expression_statement_semicolon),
+                        _ => None,
+                    }
+                })
+            },
+            MarkupSection(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.markup_prefix),
+                    1 => Some(&x.markup_text),
+                    2 => Some(&x.markup_suffix),
+                    3 => Some(&x.markup_expression),
+                        _ => None,
+                    }
+                })
+            },
+            MarkupSuffix(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.markup_suffix_less_than_question),
+                    1 => Some(&x.markup_suffix_name),
+                        _ => None,
+                    }
+                })
+            },
+            UnsetStatement(x) => {
+                get_index(5).and_then(|index| { match index {
+                        0 => Some(&x.unset_keyword),
+                    1 => Some(&x.unset_left_paren),
+                    2 => Some(&x.unset_variables),
+                    3 => Some(&x.unset_right_paren),
+                    4 => Some(&x.unset_semicolon),
+                        _ => None,
+                    }
+                })
+            },
+            LetStatement(x) => {
+                get_index(6).and_then(|index| { match index {
+                        0 => Some(&x.let_statement_keyword),
+                    1 => Some(&x.let_statement_name),
+                    2 => Some(&x.let_statement_colon),
+                    3 => Some(&x.let_statement_type),
+                    4 => Some(&x.let_statement_initializer),
+                    5 => Some(&x.let_statement_semicolon),
+                        _ => None,
+                    }
+                })
+            },
+            UsingStatementBlockScoped(x) => {
+                get_index(6).and_then(|index| { match index {
+                        0 => Some(&x.using_block_await_keyword),
+                    1 => Some(&x.using_block_using_keyword),
+                    2 => Some(&x.using_block_left_paren),
+                    3 => Some(&x.using_block_expressions),
+                    4 => Some(&x.using_block_right_paren),
+                    5 => Some(&x.using_block_body),
+                        _ => None,
+                    }
+                })
+            },
+            UsingStatementFunctionScoped(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.using_function_await_keyword),
+                    1 => Some(&x.using_function_using_keyword),
+                    2 => Some(&x.using_function_expression),
+                    3 => Some(&x.using_function_semicolon),
+                        _ => None,
+                    }
+                })
+            },
+            WhileStatement(x) => {
+                get_index(5).and_then(|index| { match index {
+                        0 => Some(&x.while_keyword),
+                    1 => Some(&x.while_left_paren),
+                    2 => Some(&x.while_condition),
+                    3 => Some(&x.while_right_paren),
+                    4 => Some(&x.while_body),
+                        _ => None,
+                    }
+                })
+            },
+            IfStatement(x) => {
+                get_index(7).and_then(|index| { match index {
+                        0 => Some(&x.if_keyword),
+                    1 => Some(&x.if_left_paren),
+                    2 => Some(&x.if_condition),
+                    3 => Some(&x.if_right_paren),
+                    4 => Some(&x.if_statement),
+                    5 => Some(&x.if_elseif_clauses),
+                    6 => Some(&x.if_else_clause),
+                        _ => None,
+                    }
+                })
+            },
+            ElseifClause(x) => {
+                get_index(5).and_then(|index| { match index {
+                        0 => Some(&x.elseif_keyword),
+                    1 => Some(&x.elseif_left_paren),
+                    2 => Some(&x.elseif_condition),
+                    3 => Some(&x.elseif_right_paren),
+                    4 => Some(&x.elseif_statement),
+                        _ => None,
+                    }
+                })
+            },
+            ElseClause(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.else_keyword),
+                    1 => Some(&x.else_statement),
+                        _ => None,
+                    }
+                })
+            },
+            TryStatement(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.try_keyword),
+                    1 => Some(&x.try_compound_statement),
+                    2 => Some(&x.try_catch_clauses),
+                    3 => Some(&x.try_finally_clause),
+                        _ => None,
+                    }
+                })
+            },
+            CatchClause(x) => {
+                get_index(6).and_then(|index| { match index {
+                        0 => Some(&x.catch_keyword),
+                    1 => Some(&x.catch_left_paren),
+                    2 => Some(&x.catch_type),
+                    3 => Some(&x.catch_variable),
+                    4 => Some(&x.catch_right_paren),
+                    5 => Some(&x.catch_body),
+                        _ => None,
+                    }
+                })
+            },
+            FinallyClause(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.finally_keyword),
+                    1 => Some(&x.finally_body),
+                        _ => None,
+                    }
+                })
+            },
+            DoStatement(x) => {
+                get_index(7).and_then(|index| { match index {
+                        0 => Some(&x.do_keyword),
+                    1 => Some(&x.do_body),
+                    2 => Some(&x.do_while_keyword),
+                    3 => Some(&x.do_left_paren),
+                    4 => Some(&x.do_condition),
+                    5 => Some(&x.do_right_paren),
+                    6 => Some(&x.do_semicolon),
+                        _ => None,
+                    }
+                })
+            },
+            ForStatement(x) => {
+                get_index(9).and_then(|index| { match index {
+                        0 => Some(&x.for_keyword),
+                    1 => Some(&x.for_left_paren),
+                    2 => Some(&x.for_initializer),
+                    3 => Some(&x.for_first_semicolon),
+                    4 => Some(&x.for_control),
+                    5 => Some(&x.for_second_semicolon),
+                    6 => Some(&x.for_end_of_loop),
+                    7 => Some(&x.for_right_paren),
+                    8 => Some(&x.for_body),
+                        _ => None,
+                    }
+                })
+            },
+            ForeachStatement(x) => {
+                get_index(10).and_then(|index| { match index {
+                        0 => Some(&x.foreach_keyword),
+                    1 => Some(&x.foreach_left_paren),
+                    2 => Some(&x.foreach_collection),
+                    3 => Some(&x.foreach_await_keyword),
+                    4 => Some(&x.foreach_as),
+                    5 => Some(&x.foreach_key),
+                    6 => Some(&x.foreach_arrow),
+                    7 => Some(&x.foreach_value),
+                    8 => Some(&x.foreach_right_paren),
+                    9 => Some(&x.foreach_body),
+                        _ => None,
+                    }
+                })
+            },
+            SwitchStatement(x) => {
+                get_index(7).and_then(|index| { match index {
+                        0 => Some(&x.switch_keyword),
+                    1 => Some(&x.switch_left_paren),
+                    2 => Some(&x.switch_expression),
+                    3 => Some(&x.switch_right_paren),
+                    4 => Some(&x.switch_left_brace),
+                    5 => Some(&x.switch_sections),
+                    6 => Some(&x.switch_right_brace),
+                        _ => None,
+                    }
+                })
+            },
+            SwitchSection(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.switch_section_labels),
+                    1 => Some(&x.switch_section_statements),
+                    2 => Some(&x.switch_section_fallthrough),
+                        _ => None,
+                    }
+                })
+            },
+            SwitchFallthrough(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.fallthrough_keyword),
+                    1 => Some(&x.fallthrough_semicolon),
+                        _ => None,
+                    }
+                })
+            },
+            CaseLabel(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.case_keyword),
+                    1 => Some(&x.case_expression),
+                    2 => Some(&x.case_colon),
+                        _ => None,
+                    }
+                })
+            },
+            DefaultLabel(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.default_keyword),
+                    1 => Some(&x.default_colon),
+                        _ => None,
+                    }
+                })
+            },
+            ReturnStatement(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.return_keyword),
+                    1 => Some(&x.return_expression),
+                    2 => Some(&x.return_semicolon),
+                        _ => None,
+                    }
+                })
+            },
+            GotoLabel(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.goto_label_name),
+                    1 => Some(&x.goto_label_colon),
+                        _ => None,
+                    }
+                })
+            },
+            GotoStatement(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.goto_statement_keyword),
+                    1 => Some(&x.goto_statement_label_name),
+                    2 => Some(&x.goto_statement_semicolon),
+                        _ => None,
+                    }
+                })
+            },
+            ThrowStatement(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.throw_keyword),
+                    1 => Some(&x.throw_expression),
+                    2 => Some(&x.throw_semicolon),
+                        _ => None,
+                    }
+                })
+            },
+            BreakStatement(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.break_keyword),
+                    1 => Some(&x.break_level),
+                    2 => Some(&x.break_semicolon),
+                        _ => None,
+                    }
+                })
+            },
+            ContinueStatement(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.continue_keyword),
+                    1 => Some(&x.continue_level),
+                    2 => Some(&x.continue_semicolon),
+                        _ => None,
+                    }
+                })
+            },
+            EchoStatement(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.echo_keyword),
+                    1 => Some(&x.echo_expressions),
+                    2 => Some(&x.echo_semicolon),
+                        _ => None,
+                    }
+                })
+            },
+            ConcurrentStatement(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.concurrent_keyword),
+                    1 => Some(&x.concurrent_statement),
+                        _ => None,
+                    }
+                })
+            },
+            SimpleInitializer(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.simple_initializer_equal),
+                    1 => Some(&x.simple_initializer_value),
+                        _ => None,
+                    }
+                })
+            },
+            AnonymousClass(x) => {
+                get_index(9).and_then(|index| { match index {
+                        0 => Some(&x.anonymous_class_class_keyword),
+                    1 => Some(&x.anonymous_class_left_paren),
+                    2 => Some(&x.anonymous_class_argument_list),
+                    3 => Some(&x.anonymous_class_right_paren),
+                    4 => Some(&x.anonymous_class_extends_keyword),
+                    5 => Some(&x.anonymous_class_extends_list),
+                    6 => Some(&x.anonymous_class_implements_keyword),
+                    7 => Some(&x.anonymous_class_implements_list),
+                    8 => Some(&x.anonymous_class_body),
+                        _ => None,
+                    }
+                })
+            },
+            AnonymousFunction(x) => {
+                get_index(12).and_then(|index| { match index {
+                        0 => Some(&x.anonymous_attribute_spec),
+                    1 => Some(&x.anonymous_static_keyword),
+                    2 => Some(&x.anonymous_async_keyword),
+                    3 => Some(&x.anonymous_coroutine_keyword),
+                    4 => Some(&x.anonymous_function_keyword),
+                    5 => Some(&x.anonymous_left_paren),
+                    6 => Some(&x.anonymous_parameters),
+                    7 => Some(&x.anonymous_right_paren),
+                    8 => Some(&x.anonymous_colon),
+                    9 => Some(&x.anonymous_type),
+                    10 => Some(&x.anonymous_use),
+                    11 => Some(&x.anonymous_body),
+                        _ => None,
+                    }
+                })
+            },
+            AnonymousFunctionUseClause(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.anonymous_use_keyword),
+                    1 => Some(&x.anonymous_use_left_paren),
+                    2 => Some(&x.anonymous_use_variables),
+                    3 => Some(&x.anonymous_use_right_paren),
+                        _ => None,
+                    }
+                })
+            },
+            LambdaExpression(x) => {
+                get_index(6).and_then(|index| { match index {
+                        0 => Some(&x.lambda_attribute_spec),
+                    1 => Some(&x.lambda_async),
+                    2 => Some(&x.lambda_coroutine),
+                    3 => Some(&x.lambda_signature),
+                    4 => Some(&x.lambda_arrow),
+                    5 => Some(&x.lambda_body),
+                        _ => None,
+                    }
+                })
+            },
+            LambdaSignature(x) => {
+                get_index(5).and_then(|index| { match index {
+                        0 => Some(&x.lambda_left_paren),
+                    1 => Some(&x.lambda_parameters),
+                    2 => Some(&x.lambda_right_paren),
+                    3 => Some(&x.lambda_colon),
+                    4 => Some(&x.lambda_type),
+                        _ => None,
+                    }
+                })
+            },
+            CastExpression(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.cast_left_paren),
+                    1 => Some(&x.cast_type),
+                    2 => Some(&x.cast_right_paren),
+                    3 => Some(&x.cast_operand),
+                        _ => None,
+                    }
+                })
+            },
+            ScopeResolutionExpression(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.scope_resolution_qualifier),
+                    1 => Some(&x.scope_resolution_operator),
+                    2 => Some(&x.scope_resolution_name),
+                        _ => None,
+                    }
+                })
+            },
+            MemberSelectionExpression(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.member_object),
+                    1 => Some(&x.member_operator),
+                    2 => Some(&x.member_name),
+                        _ => None,
+                    }
+                })
+            },
+            SafeMemberSelectionExpression(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.safe_member_object),
+                    1 => Some(&x.safe_member_operator),
+                    2 => Some(&x.safe_member_name),
+                        _ => None,
+                    }
+                })
+            },
+            EmbeddedMemberSelectionExpression(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.embedded_member_object),
+                    1 => Some(&x.embedded_member_operator),
+                    2 => Some(&x.embedded_member_name),
+                        _ => None,
+                    }
+                })
+            },
+            YieldExpression(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.yield_keyword),
+                    1 => Some(&x.yield_operand),
+                        _ => None,
+                    }
+                })
+            },
+            YieldFromExpression(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.yield_from_yield_keyword),
+                    1 => Some(&x.yield_from_from_keyword),
+                    2 => Some(&x.yield_from_operand),
+                        _ => None,
+                    }
+                })
+            },
+            PrefixUnaryExpression(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.prefix_unary_operator),
+                    1 => Some(&x.prefix_unary_operand),
+                        _ => None,
+                    }
+                })
+            },
+            PostfixUnaryExpression(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.postfix_unary_operand),
+                    1 => Some(&x.postfix_unary_operator),
+                        _ => None,
+                    }
+                })
+            },
+            BinaryExpression(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.binary_left_operand),
+                    1 => Some(&x.binary_operator),
+                    2 => Some(&x.binary_right_operand),
+                        _ => None,
+                    }
+                })
+            },
+            IsExpression(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.is_left_operand),
+                    1 => Some(&x.is_operator),
+                    2 => Some(&x.is_right_operand),
+                        _ => None,
+                    }
+                })
+            },
+            AsExpression(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.as_left_operand),
+                    1 => Some(&x.as_operator),
+                    2 => Some(&x.as_right_operand),
+                        _ => None,
+                    }
+                })
+            },
+            NullableAsExpression(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.nullable_as_left_operand),
+                    1 => Some(&x.nullable_as_operator),
+                    2 => Some(&x.nullable_as_right_operand),
+                        _ => None,
+                    }
+                })
+            },
+            ConditionalExpression(x) => {
+                get_index(5).and_then(|index| { match index {
+                        0 => Some(&x.conditional_test),
+                    1 => Some(&x.conditional_question),
+                    2 => Some(&x.conditional_consequence),
+                    3 => Some(&x.conditional_colon),
+                    4 => Some(&x.conditional_alternative),
+                        _ => None,
+                    }
+                })
+            },
+            EvalExpression(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.eval_keyword),
+                    1 => Some(&x.eval_left_paren),
+                    2 => Some(&x.eval_argument),
+                    3 => Some(&x.eval_right_paren),
+                        _ => None,
+                    }
+                })
+            },
+            DefineExpression(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.define_keyword),
+                    1 => Some(&x.define_left_paren),
+                    2 => Some(&x.define_argument_list),
+                    3 => Some(&x.define_right_paren),
+                        _ => None,
+                    }
+                })
+            },
+            HaltCompilerExpression(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.halt_compiler_keyword),
+                    1 => Some(&x.halt_compiler_left_paren),
+                    2 => Some(&x.halt_compiler_argument_list),
+                    3 => Some(&x.halt_compiler_right_paren),
+                        _ => None,
+                    }
+                })
+            },
+            IssetExpression(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.isset_keyword),
+                    1 => Some(&x.isset_left_paren),
+                    2 => Some(&x.isset_argument_list),
+                    3 => Some(&x.isset_right_paren),
+                        _ => None,
+                    }
+                })
+            },
+            FunctionCallExpression(x) => {
+                get_index(5).and_then(|index| { match index {
+                        0 => Some(&x.function_call_receiver),
+                    1 => Some(&x.function_call_type_args),
+                    2 => Some(&x.function_call_left_paren),
+                    3 => Some(&x.function_call_argument_list),
+                    4 => Some(&x.function_call_right_paren),
+                        _ => None,
+                    }
+                })
+            },
+            ParenthesizedExpression(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.parenthesized_expression_left_paren),
+                    1 => Some(&x.parenthesized_expression_expression),
+                    2 => Some(&x.parenthesized_expression_right_paren),
+                        _ => None,
+                    }
+                })
+            },
+            BracedExpression(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.braced_expression_left_brace),
+                    1 => Some(&x.braced_expression_expression),
+                    2 => Some(&x.braced_expression_right_brace),
+                        _ => None,
+                    }
+                })
+            },
+            EmbeddedBracedExpression(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.embedded_braced_expression_left_brace),
+                    1 => Some(&x.embedded_braced_expression_expression),
+                    2 => Some(&x.embedded_braced_expression_right_brace),
+                        _ => None,
+                    }
+                })
+            },
+            ListExpression(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.list_keyword),
+                    1 => Some(&x.list_left_paren),
+                    2 => Some(&x.list_members),
+                    3 => Some(&x.list_right_paren),
+                        _ => None,
+                    }
+                })
+            },
+            CollectionLiteralExpression(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.collection_literal_name),
+                    1 => Some(&x.collection_literal_left_brace),
+                    2 => Some(&x.collection_literal_initializers),
+                    3 => Some(&x.collection_literal_right_brace),
+                        _ => None,
+                    }
+                })
+            },
+            ObjectCreationExpression(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.object_creation_new_keyword),
+                    1 => Some(&x.object_creation_object),
+                        _ => None,
+                    }
+                })
+            },
+            ConstructorCall(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.constructor_call_type),
+                    1 => Some(&x.constructor_call_left_paren),
+                    2 => Some(&x.constructor_call_argument_list),
+                    3 => Some(&x.constructor_call_right_paren),
+                        _ => None,
+                    }
+                })
+            },
+            RecordCreationExpression(x) => {
+                get_index(5).and_then(|index| { match index {
+                        0 => Some(&x.record_creation_type),
+                    1 => Some(&x.record_creation_array_token),
+                    2 => Some(&x.record_creation_left_bracket),
+                    3 => Some(&x.record_creation_members),
+                    4 => Some(&x.record_creation_right_bracket),
+                        _ => None,
+                    }
+                })
+            },
+            ArrayCreationExpression(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.array_creation_left_bracket),
+                    1 => Some(&x.array_creation_members),
+                    2 => Some(&x.array_creation_right_bracket),
+                        _ => None,
+                    }
+                })
+            },
+            ArrayIntrinsicExpression(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.array_intrinsic_keyword),
+                    1 => Some(&x.array_intrinsic_left_paren),
+                    2 => Some(&x.array_intrinsic_members),
+                    3 => Some(&x.array_intrinsic_right_paren),
+                        _ => None,
+                    }
+                })
+            },
+            DarrayIntrinsicExpression(x) => {
+                get_index(5).and_then(|index| { match index {
+                        0 => Some(&x.darray_intrinsic_keyword),
+                    1 => Some(&x.darray_intrinsic_explicit_type),
+                    2 => Some(&x.darray_intrinsic_left_bracket),
+                    3 => Some(&x.darray_intrinsic_members),
+                    4 => Some(&x.darray_intrinsic_right_bracket),
+                        _ => None,
+                    }
+                })
+            },
+            DictionaryIntrinsicExpression(x) => {
+                get_index(5).and_then(|index| { match index {
+                        0 => Some(&x.dictionary_intrinsic_keyword),
+                    1 => Some(&x.dictionary_intrinsic_explicit_type),
+                    2 => Some(&x.dictionary_intrinsic_left_bracket),
+                    3 => Some(&x.dictionary_intrinsic_members),
+                    4 => Some(&x.dictionary_intrinsic_right_bracket),
+                        _ => None,
+                    }
+                })
+            },
+            KeysetIntrinsicExpression(x) => {
+                get_index(5).and_then(|index| { match index {
+                        0 => Some(&x.keyset_intrinsic_keyword),
+                    1 => Some(&x.keyset_intrinsic_explicit_type),
+                    2 => Some(&x.keyset_intrinsic_left_bracket),
+                    3 => Some(&x.keyset_intrinsic_members),
+                    4 => Some(&x.keyset_intrinsic_right_bracket),
+                        _ => None,
+                    }
+                })
+            },
+            VarrayIntrinsicExpression(x) => {
+                get_index(5).and_then(|index| { match index {
+                        0 => Some(&x.varray_intrinsic_keyword),
+                    1 => Some(&x.varray_intrinsic_explicit_type),
+                    2 => Some(&x.varray_intrinsic_left_bracket),
+                    3 => Some(&x.varray_intrinsic_members),
+                    4 => Some(&x.varray_intrinsic_right_bracket),
+                        _ => None,
+                    }
+                })
+            },
+            VectorIntrinsicExpression(x) => {
+                get_index(5).and_then(|index| { match index {
+                        0 => Some(&x.vector_intrinsic_keyword),
+                    1 => Some(&x.vector_intrinsic_explicit_type),
+                    2 => Some(&x.vector_intrinsic_left_bracket),
+                    3 => Some(&x.vector_intrinsic_members),
+                    4 => Some(&x.vector_intrinsic_right_bracket),
+                        _ => None,
+                    }
+                })
+            },
+            ElementInitializer(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.element_key),
+                    1 => Some(&x.element_arrow),
+                    2 => Some(&x.element_value),
+                        _ => None,
+                    }
+                })
+            },
+            SubscriptExpression(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.subscript_receiver),
+                    1 => Some(&x.subscript_left_bracket),
+                    2 => Some(&x.subscript_index),
+                    3 => Some(&x.subscript_right_bracket),
+                        _ => None,
+                    }
+                })
+            },
+            EmbeddedSubscriptExpression(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.embedded_subscript_receiver),
+                    1 => Some(&x.embedded_subscript_left_bracket),
+                    2 => Some(&x.embedded_subscript_index),
+                    3 => Some(&x.embedded_subscript_right_bracket),
+                        _ => None,
+                    }
+                })
+            },
+            AwaitableCreationExpression(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.awaitable_attribute_spec),
+                    1 => Some(&x.awaitable_async),
+                    2 => Some(&x.awaitable_coroutine),
+                    3 => Some(&x.awaitable_compound_statement),
+                        _ => None,
+                    }
+                })
+            },
+            XHPChildrenDeclaration(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.xhp_children_keyword),
+                    1 => Some(&x.xhp_children_expression),
+                    2 => Some(&x.xhp_children_semicolon),
+                        _ => None,
+                    }
+                })
+            },
+            XHPChildrenParenthesizedList(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.xhp_children_list_left_paren),
+                    1 => Some(&x.xhp_children_list_xhp_children),
+                    2 => Some(&x.xhp_children_list_right_paren),
+                        _ => None,
+                    }
+                })
+            },
+            XHPCategoryDeclaration(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.xhp_category_keyword),
+                    1 => Some(&x.xhp_category_categories),
+                    2 => Some(&x.xhp_category_semicolon),
+                        _ => None,
+                    }
+                })
+            },
+            XHPEnumType(x) => {
+                get_index(5).and_then(|index| { match index {
+                        0 => Some(&x.xhp_enum_optional),
+                    1 => Some(&x.xhp_enum_keyword),
+                    2 => Some(&x.xhp_enum_left_brace),
+                    3 => Some(&x.xhp_enum_values),
+                    4 => Some(&x.xhp_enum_right_brace),
+                        _ => None,
+                    }
+                })
+            },
+            XHPLateinit(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.xhp_lateinit_at),
+                    1 => Some(&x.xhp_lateinit_keyword),
+                        _ => None,
+                    }
+                })
+            },
+            XHPRequired(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.xhp_required_at),
+                    1 => Some(&x.xhp_required_keyword),
+                        _ => None,
+                    }
+                })
+            },
+            XHPClassAttributeDeclaration(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.xhp_attribute_keyword),
+                    1 => Some(&x.xhp_attribute_attributes),
+                    2 => Some(&x.xhp_attribute_semicolon),
+                        _ => None,
+                    }
+                })
+            },
+            XHPClassAttribute(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.xhp_attribute_decl_type),
+                    1 => Some(&x.xhp_attribute_decl_name),
+                    2 => Some(&x.xhp_attribute_decl_initializer),
+                    3 => Some(&x.xhp_attribute_decl_required),
+                        _ => None,
+                    }
+                })
+            },
+            XHPSimpleClassAttribute(x) => {
+                get_index(1).and_then(|index| { match index {
+                        0 => Some(&x.xhp_simple_class_attribute_type),
+                        _ => None,
+                    }
+                })
+            },
+            XHPSimpleAttribute(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.xhp_simple_attribute_name),
+                    1 => Some(&x.xhp_simple_attribute_equal),
+                    2 => Some(&x.xhp_simple_attribute_expression),
+                        _ => None,
+                    }
+                })
+            },
+            XHPSpreadAttribute(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.xhp_spread_attribute_left_brace),
+                    1 => Some(&x.xhp_spread_attribute_spread_operator),
+                    2 => Some(&x.xhp_spread_attribute_expression),
+                    3 => Some(&x.xhp_spread_attribute_right_brace),
+                        _ => None,
+                    }
+                })
+            },
+            XHPOpen(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.xhp_open_left_angle),
+                    1 => Some(&x.xhp_open_name),
+                    2 => Some(&x.xhp_open_attributes),
+                    3 => Some(&x.xhp_open_right_angle),
+                        _ => None,
+                    }
+                })
+            },
+            XHPExpression(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.xhp_open),
+                    1 => Some(&x.xhp_body),
+                    2 => Some(&x.xhp_close),
+                        _ => None,
+                    }
+                })
+            },
+            XHPClose(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.xhp_close_left_angle),
+                    1 => Some(&x.xhp_close_name),
+                    2 => Some(&x.xhp_close_right_angle),
+                        _ => None,
+                    }
+                })
+            },
+            TypeConstant(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.type_constant_left_type),
+                    1 => Some(&x.type_constant_separator),
+                    2 => Some(&x.type_constant_right_type),
+                        _ => None,
+                    }
+                })
+            },
+            PUAccess(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.pu_access_left_type),
+                    1 => Some(&x.pu_access_separator),
+                    2 => Some(&x.pu_access_right_type),
+                        _ => None,
+                    }
+                })
+            },
+            VectorTypeSpecifier(x) => {
+                get_index(5).and_then(|index| { match index {
+                        0 => Some(&x.vector_type_keyword),
+                    1 => Some(&x.vector_type_left_angle),
+                    2 => Some(&x.vector_type_type),
+                    3 => Some(&x.vector_type_trailing_comma),
+                    4 => Some(&x.vector_type_right_angle),
+                        _ => None,
+                    }
+                })
+            },
+            KeysetTypeSpecifier(x) => {
+                get_index(5).and_then(|index| { match index {
+                        0 => Some(&x.keyset_type_keyword),
+                    1 => Some(&x.keyset_type_left_angle),
+                    2 => Some(&x.keyset_type_type),
+                    3 => Some(&x.keyset_type_trailing_comma),
+                    4 => Some(&x.keyset_type_right_angle),
+                        _ => None,
+                    }
+                })
+            },
+            TupleTypeExplicitSpecifier(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.tuple_type_keyword),
+                    1 => Some(&x.tuple_type_left_angle),
+                    2 => Some(&x.tuple_type_types),
+                    3 => Some(&x.tuple_type_right_angle),
+                        _ => None,
+                    }
+                })
+            },
+            VarrayTypeSpecifier(x) => {
+                get_index(5).and_then(|index| { match index {
+                        0 => Some(&x.varray_keyword),
+                    1 => Some(&x.varray_left_angle),
+                    2 => Some(&x.varray_type),
+                    3 => Some(&x.varray_trailing_comma),
+                    4 => Some(&x.varray_right_angle),
+                        _ => None,
+                    }
+                })
+            },
+            VectorArrayTypeSpecifier(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.vector_array_keyword),
+                    1 => Some(&x.vector_array_left_angle),
+                    2 => Some(&x.vector_array_type),
+                    3 => Some(&x.vector_array_right_angle),
+                        _ => None,
+                    }
+                })
+            },
+            TypeParameter(x) => {
+                get_index(5).and_then(|index| { match index {
+                        0 => Some(&x.type_attribute_spec),
+                    1 => Some(&x.type_reified),
+                    2 => Some(&x.type_variance),
+                    3 => Some(&x.type_name),
+                    4 => Some(&x.type_constraints),
+                        _ => None,
+                    }
+                })
+            },
+            TypeConstraint(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.constraint_keyword),
+                    1 => Some(&x.constraint_type),
+                        _ => None,
+                    }
+                })
+            },
+            DarrayTypeSpecifier(x) => {
+                get_index(7).and_then(|index| { match index {
+                        0 => Some(&x.darray_keyword),
+                    1 => Some(&x.darray_left_angle),
+                    2 => Some(&x.darray_key),
+                    3 => Some(&x.darray_comma),
+                    4 => Some(&x.darray_value),
+                    5 => Some(&x.darray_trailing_comma),
+                    6 => Some(&x.darray_right_angle),
+                        _ => None,
+                    }
+                })
+            },
+            MapArrayTypeSpecifier(x) => {
+                get_index(6).and_then(|index| { match index {
+                        0 => Some(&x.map_array_keyword),
+                    1 => Some(&x.map_array_left_angle),
+                    2 => Some(&x.map_array_key),
+                    3 => Some(&x.map_array_comma),
+                    4 => Some(&x.map_array_value),
+                    5 => Some(&x.map_array_right_angle),
+                        _ => None,
+                    }
+                })
+            },
+            DictionaryTypeSpecifier(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.dictionary_type_keyword),
+                    1 => Some(&x.dictionary_type_left_angle),
+                    2 => Some(&x.dictionary_type_members),
+                    3 => Some(&x.dictionary_type_right_angle),
+                        _ => None,
+                    }
+                })
+            },
+            ClosureTypeSpecifier(x) => {
+                get_index(9).and_then(|index| { match index {
+                        0 => Some(&x.closure_outer_left_paren),
+                    1 => Some(&x.closure_coroutine),
+                    2 => Some(&x.closure_function_keyword),
+                    3 => Some(&x.closure_inner_left_paren),
+                    4 => Some(&x.closure_parameter_list),
+                    5 => Some(&x.closure_inner_right_paren),
+                    6 => Some(&x.closure_colon),
+                    7 => Some(&x.closure_return_type),
+                    8 => Some(&x.closure_outer_right_paren),
+                        _ => None,
+                    }
+                })
+            },
+            ClosureParameterTypeSpecifier(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.closure_parameter_call_convention),
+                    1 => Some(&x.closure_parameter_type),
+                        _ => None,
+                    }
+                })
+            },
+            ClassnameTypeSpecifier(x) => {
+                get_index(5).and_then(|index| { match index {
+                        0 => Some(&x.classname_keyword),
+                    1 => Some(&x.classname_left_angle),
+                    2 => Some(&x.classname_type),
+                    3 => Some(&x.classname_trailing_comma),
+                    4 => Some(&x.classname_right_angle),
+                        _ => None,
+                    }
+                })
+            },
+            FieldSpecifier(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.field_question),
+                    1 => Some(&x.field_name),
+                    2 => Some(&x.field_arrow),
+                    3 => Some(&x.field_type),
+                        _ => None,
+                    }
+                })
+            },
+            FieldInitializer(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.field_initializer_name),
+                    1 => Some(&x.field_initializer_arrow),
+                    2 => Some(&x.field_initializer_value),
+                        _ => None,
+                    }
+                })
+            },
+            ShapeTypeSpecifier(x) => {
+                get_index(5).and_then(|index| { match index {
+                        0 => Some(&x.shape_type_keyword),
+                    1 => Some(&x.shape_type_left_paren),
+                    2 => Some(&x.shape_type_fields),
+                    3 => Some(&x.shape_type_ellipsis),
+                    4 => Some(&x.shape_type_right_paren),
+                        _ => None,
+                    }
+                })
+            },
+            ShapeExpression(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.shape_expression_keyword),
+                    1 => Some(&x.shape_expression_left_paren),
+                    2 => Some(&x.shape_expression_fields),
+                    3 => Some(&x.shape_expression_right_paren),
+                        _ => None,
+                    }
+                })
+            },
+            TupleExpression(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.tuple_expression_keyword),
+                    1 => Some(&x.tuple_expression_left_paren),
+                    2 => Some(&x.tuple_expression_items),
+                    3 => Some(&x.tuple_expression_right_paren),
+                        _ => None,
+                    }
+                })
+            },
+            GenericTypeSpecifier(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.generic_class_type),
+                    1 => Some(&x.generic_argument_list),
+                        _ => None,
+                    }
+                })
+            },
+            NullableTypeSpecifier(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.nullable_question),
+                    1 => Some(&x.nullable_type),
+                        _ => None,
+                    }
+                })
+            },
+            LikeTypeSpecifier(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.like_tilde),
+                    1 => Some(&x.like_type),
+                        _ => None,
+                    }
+                })
+            },
+            SoftTypeSpecifier(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.soft_at),
+                    1 => Some(&x.soft_type),
+                        _ => None,
+                    }
+                })
+            },
+            AttributizedSpecifier(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.attributized_specifier_attribute_spec),
+                    1 => Some(&x.attributized_specifier_type),
+                        _ => None,
+                    }
+                })
+            },
+            ReifiedTypeArgument(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.reified_type_argument_reified),
+                    1 => Some(&x.reified_type_argument_type),
+                        _ => None,
+                    }
+                })
+            },
+            TypeArguments(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.type_arguments_left_angle),
+                    1 => Some(&x.type_arguments_types),
+                    2 => Some(&x.type_arguments_right_angle),
+                        _ => None,
+                    }
+                })
+            },
+            TypeParameters(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.type_parameters_left_angle),
+                    1 => Some(&x.type_parameters_parameters),
+                    2 => Some(&x.type_parameters_right_angle),
+                        _ => None,
+                    }
+                })
+            },
+            TupleTypeSpecifier(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.tuple_left_paren),
+                    1 => Some(&x.tuple_types),
+                    2 => Some(&x.tuple_right_paren),
+                        _ => None,
+                    }
+                })
+            },
+            ErrorSyntax(x) => {
+                get_index(1).and_then(|index| { match index {
+                        0 => Some(&x.error_error),
+                        _ => None,
+                    }
+                })
+            },
+            ListItem(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.list_item),
+                    1 => Some(&x.list_separator),
+                        _ => None,
+                    }
+                })
+            },
+            PocketAtomExpression(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.pocket_atom_glyph),
+                    1 => Some(&x.pocket_atom_expression),
+                        _ => None,
+                    }
+                })
+            },
+            PocketIdentifierExpression(x) => {
+                get_index(5).and_then(|index| { match index {
+                        0 => Some(&x.pocket_identifier_qualifier),
+                    1 => Some(&x.pocket_identifier_pu_operator),
+                    2 => Some(&x.pocket_identifier_field),
+                    3 => Some(&x.pocket_identifier_operator),
+                    4 => Some(&x.pocket_identifier_name),
+                        _ => None,
+                    }
+                })
+            },
+            PocketAtomMappingDeclaration(x) => {
+                get_index(6).and_then(|index| { match index {
+                        0 => Some(&x.pocket_atom_mapping_glyph),
+                    1 => Some(&x.pocket_atom_mapping_name),
+                    2 => Some(&x.pocket_atom_mapping_left_paren),
+                    3 => Some(&x.pocket_atom_mapping_mappings),
+                    4 => Some(&x.pocket_atom_mapping_right_paren),
+                    5 => Some(&x.pocket_atom_mapping_semicolon),
+                        _ => None,
+                    }
+                })
+            },
+            PocketEnumDeclaration(x) => {
+                get_index(6).and_then(|index| { match index {
+                        0 => Some(&x.pocket_enum_modifiers),
+                    1 => Some(&x.pocket_enum_enum),
+                    2 => Some(&x.pocket_enum_name),
+                    3 => Some(&x.pocket_enum_left_brace),
+                    4 => Some(&x.pocket_enum_fields),
+                    5 => Some(&x.pocket_enum_right_brace),
+                        _ => None,
+                    }
+                })
+            },
+            PocketFieldTypeExprDeclaration(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.pocket_field_type_expr_case),
+                    1 => Some(&x.pocket_field_type_expr_type),
+                    2 => Some(&x.pocket_field_type_expr_name),
+                    3 => Some(&x.pocket_field_type_expr_semicolon),
+                        _ => None,
+                    }
+                })
+            },
+            PocketFieldTypeDeclaration(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.pocket_field_type_case),
+                    1 => Some(&x.pocket_field_type_type),
+                    2 => Some(&x.pocket_field_type_name),
+                    3 => Some(&x.pocket_field_type_semicolon),
+                        _ => None,
+                    }
+                })
+            },
+            PocketMappingIdDeclaration(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.pocket_mapping_id_name),
+                    1 => Some(&x.pocket_mapping_id_initializer),
+                        _ => None,
+                    }
+                })
+            },
+            PocketMappingTypeDeclaration(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.pocket_mapping_type_keyword),
+                    1 => Some(&x.pocket_mapping_type_name),
+                    2 => Some(&x.pocket_mapping_type_equal),
+                    3 => Some(&x.pocket_mapping_type_type),
+                        _ => None,
+                    }
+                })
+            },
+
+        };
+        if res.is_some() {
+            if direction {
+                self.index = self.index + 1
+            } else {
+                self.index_back = self.index_back + 1
+            }
+        }
+        res
+    }
 }

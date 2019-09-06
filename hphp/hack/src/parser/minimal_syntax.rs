@@ -25,12 +25,12 @@ impl SyntaxValueType<MinimalToken> for MinimalValue {
     }
 
     fn from_syntax(variant: &SyntaxVariant<MinimalToken, Self>) -> Self {
-        let f = |node: &Syntax<MinimalToken, Self>, acc| {
+        let f = |acc, node: &Syntax<MinimalToken, Self>| {
             let w = node.value.full_width;
             acc + w
         };
 
-        let full_width = Syntax::fold_over_children(&f, 0, variant);
+        let full_width = variant.iter_children().fold(0, f);
         Self { full_width }
     }
 

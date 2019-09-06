@@ -522,17 +522,29 @@ module GenerateFFRustSyntax = struct
       fields
       fields2
 
-  let fold_over x =
-    let mapper prefix (f, _) = sprintf "let acc = f(&x.%s_%s, acc)" prefix f in
+  let to_iter_children x =
+    let index = ref 0 in
+    let mapper prefix (f, _) =
+      let res = sprintf "%d => Some(&x.%s_%s)," !index prefix f in
+      let () = incr index in
+      res
+    in
     let fields =
-      map_and_concat_separated ";\n                " (mapper x.prefix) x.fields
+      map_and_concat_separated
+        "\n                    "
+        (mapper x.prefix)
+        x.fields
     in
     sprintf
-      "            SyntaxVariant::%s(x) => {
-                %s;
-                acc
+      "            %s(x) => {
+                get_index(%d).and_then(|index| { match index {
+                        %s
+                        _ => None,
+                    }
+                })
             },\n"
       x.kind_name
+      (List.length x.fields)
       fields
 
   let fold_over_owned x =
@@ -627,25 +639,6 @@ impl<'src, T, V> Syntax<T, V>
 where
     T: LexableToken<'src>,
 {
-    pub fn fold_over_children<'a, U>(
-        f: &dyn Fn(&'a Self, U) -> U,
-        acc: U,
-        syntax: &'a SyntaxVariant<T, V>,
-    ) -> U {
-        match syntax {
-            SyntaxVariant::Missing => acc,
-            SyntaxVariant::Token (_) => acc,
-            SyntaxVariant::SyntaxList(elems) => {
-                let mut acc = acc;
-                for item in elems.iter() {
-                    acc = f(item, acc)
-                }
-                acc
-            },
-FOLD_OVER_CHILDREN
-        }
-    }
-
     pub fn fold_over_children_owned<U>(
         f: &dyn Fn(Self, U) -> U,
         acc: U,
@@ -689,6 +682,39 @@ pub enum SyntaxVariant<T, V> {
     Missing,
     SyntaxList(Vec<Syntax<T, V>>),
 SYNTAX_VARIANT}
+
+impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
+    pub fn next_impl(&mut self, direction : bool) -> Option<&'a Syntax<T, V>> {
+        use SyntaxVariant::*;
+        let get_index = |len| {
+            let back_index = len - self.index_back - 1;
+            if back_index < self.index {
+                return None
+            }
+            if direction {
+                Some (self.index)
+            } else {
+                Some (back_index)
+            }
+        };
+        let res = match &self.syntax {
+            Missing => None,
+            Token (_) => None,
+            SyntaxList(elems) => {
+                get_index(elems.len()).and_then(|x| elems.get(x))
+            },
+ITER_CHILDREN
+        };
+        if res.is_some() {
+            if direction {
+                self.index = self.index + 1
+            } else {
+                self.index_back = self.index_back + 1
+            }
+        }
+        res
+    }
+}
 "
 
   let full_fidelity_syntax =
@@ -697,7 +723,7 @@ SYNTAX_VARIANT}
         [ { pattern = "SYNTAX_VARIANT"; func = to_syntax_variant };
           { pattern = "SYNTAX_CHILDREN"; func = to_syntax_variant_children };
           { pattern = "SYNTAX_CONSTRUCTORS"; func = to_syntax_constructors };
-          { pattern = "FOLD_OVER_CHILDREN"; func = fold_over };
+          { pattern = "ITER_CHILDREN"; func = to_iter_children };
           { pattern = "FOLD_OVER_CHILDREN_OWNED"; func = fold_over_owned };
           { pattern = "TO_KIND"; func = to_kind };
           { pattern = "SYNTAX_FROM_CHILDREN"; func = to_syntax_from_children }

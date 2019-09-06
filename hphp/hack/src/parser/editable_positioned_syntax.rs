@@ -69,8 +69,7 @@ impl<'a> EditablePositionedSyntaxTrait<'a> for EditablePositionedSyntax<'a> {
             )),
             _ => {
                 let children = node
-                    .children()
-                    .iter()
+                    .iter_children()
                     .map(|x| Self::from_positioned_syntax(x, source_text))
                     .collect();
                 Self::from_children(node.kind(), children)

@@ -84,6 +84,7 @@ type t = {
   tco_typecheck_xhp_cvars: bool;
   tco_ignore_collection_expr_type_arguments: bool;
   tco_shallow_class_decl: bool;
+  po_rust_parser_errors: bool;
   profile_type_check_duration_threshold: float;
   tco_like_types: bool;
   tco_pessimize_types: bool;
@@ -238,6 +239,7 @@ let default =
     tco_typecheck_xhp_cvars = false;
     tco_ignore_collection_expr_type_arguments = false;
     tco_shallow_class_decl = false;
+    po_rust_parser_errors = false;
     profile_type_check_duration_threshold = 0.05;
     tco_like_types = false;
     tco_pessimize_types = false;
@@ -318,6 +320,7 @@ let make
     ?(tco_ignore_collection_expr_type_arguments =
       default.tco_ignore_collection_expr_type_arguments)
     ?(tco_shallow_class_decl = default.tco_shallow_class_decl)
+    ?(po_rust_parser_errors = default.po_rust_parser_errors)
     ?(profile_type_check_duration_threshold =
       default.profile_type_check_duration_threshold)
     ?(tco_like_types = default.tco_like_types)
@@ -400,6 +403,7 @@ let make
     tco_typecheck_xhp_cvars;
     tco_ignore_collection_expr_type_arguments;
     tco_shallow_class_decl;
+    po_rust_parser_errors;
     profile_type_check_duration_threshold;
     tco_like_types;
     tco_pessimize_types;
@@ -524,6 +528,8 @@ let po_disable_lval_as_an_expression t = t.po_disable_lval_as_an_expression
 let tco_typecheck_xhp_cvars t = t.tco_typecheck_xhp_cvars
 
 let tco_shallow_class_decl t = t.tco_shallow_class_decl
+
+let po_rust_parser_errors t = t.po_rust_parser_errors
 
 let profile_type_check_duration_threshold t =
   t.profile_type_check_duration_threshold

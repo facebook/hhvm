@@ -202,6 +202,7 @@ let parse_options () =
   let coercion_from_dynamic = ref false in
   let complex_coercion = ref false in
   let disable_partially_abstract_typeconsts = ref false in
+  let rust_parser_errors = ref false in
   let symbolindex_file = ref None in
   let check_xhp_attribute = ref false in
   let disallow_invalid_arraykey_constraint = ref None in
@@ -428,6 +429,9 @@ let parse_options () =
       ( "--disable-partially-abstract-typeconsts",
         Arg.Set disable_partially_abstract_typeconsts,
         "Treat partially abstract type constants as concrete type constants" );
+      ( "--rust-parser-errors",
+        Arg.Bool (fun x -> rust_parser_errors := x),
+        "Use rust parser error checker" );
       ( "--symbolindex-file",
         Arg.String (fun str -> symbolindex_file := Some str),
         "Load the symbol index from this file" );
@@ -521,6 +525,7 @@ let parse_options () =
       ~tco_disable_partially_abstract_typeconsts:
         !disable_partially_abstract_typeconsts
       ~log_levels:!log_levels
+      ~po_rust_parser_errors:!rust_parser_errors
       ~po_enable_class_level_where_clauses:!enable_class_level_where_clauses
       ~po_enable_constant_visibility_modifiers:
         !enable_constant_visibility_modifiers

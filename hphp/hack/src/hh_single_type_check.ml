@@ -202,7 +202,6 @@ let parse_options () =
   let coercion_from_dynamic = ref false in
   let complex_coercion = ref false in
   let disable_partially_abstract_typeconsts = ref false in
-  let search_provider = ref "TrieIndex" in
   let rust = ref true in
   let symbolindex_file = ref None in
   let check_xhp_attribute = ref false in
@@ -430,9 +429,6 @@ let parse_options () =
       ( "--disable-partially-abstract-typeconsts",
         Arg.Set disable_partially_abstract_typeconsts,
         "Treat partially abstract type constants as concrete type constants" );
-      ( "--search-provider",
-        Arg.String (fun str -> search_provider := str),
-        "Configure the symbol index search provider" );
       ("--rust", Arg.Bool (fun x -> rust := x), "Use rust parser");
       ( "--symbolindex-file",
         Arg.String (fun str -> symbolindex_file := Some str),
@@ -569,11 +565,12 @@ let parse_options () =
     SymbolIndex.initialize
       ~globalrev_opt:None
       ~namespace_map
-      ~provider_name:!search_provider
+      ~provider_name:"LocalIndex"
       ~quiet:true
       ~savedstate_file_opt:!symbolindex_file
       ~workers:None
   in
+  let sienv = { sienv with SearchUtils.sie_resolve_signatures = true } in
   ( {
       files = fns;
       mode = !mode;
@@ -902,6 +899,24 @@ let sort_debug_deps deps =
 let dump_debug_deps dbg_deps =
   dbg_deps |> sort_debug_deps |> show_debug_deps |> Printf.printf "%s\n"
 
+let scan_files_for_symbol_index
+    (filename : Relative_path.t)
+    (popt : ParserOptions.t)
+    (sienv : SearchUtils.si_env) : SearchUtils.si_env =
+  let files_contents = Multifile.file_to_files filename in
+  let (_, individual_file_info) = parse_name_and_decl popt files_contents in
+  let fileinfo_list = Relative_path.Map.values individual_file_info in
+  let transformed_list =
+    List.map fileinfo_list ~f:(fun fileinfo ->
+        (filename, SearchUtils.Full fileinfo, SearchUtils.TypeChecker))
+  in
+  let sienv_ref = ref sienv in
+  SymbolIndex.update_files
+    ~sienv:sienv_ref
+    ~workers:None
+    ~paths:transformed_list;
+  !sienv_ref
+
 let handle_mode
     mode
     filenames
@@ -928,6 +943,7 @@ let handle_mode
   | Autocomplete
   | Autocomplete_manually_invoked ->
     let filename = expect_single_file () in
+    let sienv = scan_files_for_symbol_index filename popt sienv in
     let token = "AUTO332" in
     let token_len = String.length token in
     let file = cat (Relative_path.to_absolute filename) in
@@ -959,6 +975,7 @@ let handle_mode
   | Ffp_autocomplete ->
     iter_over_files (fun filename ->
         try
+          let sienv = scan_files_for_symbol_index filename popt sienv in
           let file_text = cat (Relative_path.to_absolute filename) in
           (* TODO: Use a magic word/symbol to identify autocomplete location instead *)
           let args_regex = Str.regexp "AUTOCOMPLETE [1-9][0-9]* [1-9][0-9]*" in

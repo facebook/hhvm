@@ -665,8 +665,7 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
 }
 
 bool irGenTryInlineFCall(irgen::IRGS& irgs, const Func* callee,
-                         const FCallArgs& fca, SSATmp* ctx, bool dynamicCall,
-                         SSATmp* tsList) {
+                         const FCallArgs& fca, SSATmp* ctx, bool dynamicCall) {
   auto const psk = ProfSrcKey { irgs.profTransID, curSrcKey(irgs) };
   int calleeCost{0};
 
@@ -697,7 +696,7 @@ bool irGenTryInlineFCall(irgen::IRGS& irgs, const Func* callee,
   };
   auto callFuncOff = bcOff(irgs) - curFunc(irgs)->base();
 
-  irgen::beginInlining(irgs, callee, fca, ctx, ctx->type(), dynamicCall, tsList,
+  irgen::beginInlining(irgs, callee, fca, ctx, ctx->type(), dynamicCall,
                        psk.srcKey.op(),
                        calleeRegion->start(),
                        callFuncOff,

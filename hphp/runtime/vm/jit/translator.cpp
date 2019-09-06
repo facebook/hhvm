@@ -287,24 +287,17 @@ static const struct {
                    {StackTop2,        StackN,       OutUnknown      }},
   { OpFCallClsMethodD,
                    {None,             StackN,       OutUnknown      }},
-  { OpFCallClsMethodRD,
-                   {Stack1,           StackN,       OutUnknown      }},
   { OpFCallClsMethodS,
                    {Stack1,           StackN,       OutUnknown      }},
   { OpFCallClsMethodSD,
                    {None,             StackN,       OutUnknown      }},
-  { OpFCallClsMethodSRD,
-                   {Stack1,           StackN,       OutUnknown      }},
   { OpFCallCtor,   {None,             StackN,       OutUnknown      }},
   { OpFCallFunc,   {Stack1,           StackN,       OutUnknown      }},
   { OpFCallFuncD,  {None,             StackN,       OutUnknown      }},
-  { OpFCallFuncRD, {Stack1,           StackN,       OutUnknown      }},
   { OpFCallObjMethod,
                    {Stack1,           StackN,       OutUnknown      }},
   { OpFCallObjMethodD,
                    {None,             StackN,       OutUnknown      }},
-  { OpFCallObjMethodRD,
-                   {Stack1,           StackN,       OutUnknown      }},
   { OpFCallBuiltin,{BStackN|DontGuardAny,
                                       StackN,       OutUnknown      }},
 
@@ -499,20 +492,16 @@ int64_t getStackPopped(PC pc) {
   switch (op) {
     case Op::FCallClsMethod:
     case Op::FCallClsMethodD:
-    case Op::FCallClsMethodRD:
     case Op::FCallClsMethodS:
     case Op::FCallClsMethodSD:
-    case Op::FCallClsMethodSRD:
     case Op::FCallCtor:
     case Op::FCallFunc:
     case Op::FCallFuncD:
-    case Op::FCallFuncRD:
     case Op::FCallObjMethod:
-    case Op::FCallObjMethodD:
-    case Op::FCallObjMethodRD: {
+    case Op::FCallObjMethodD: {
       auto const fca = getImm(pc, 0).u_FCA;
       auto const nin = countOperands(getInstrInfo(op).in);
-      return nin + fca.numArgsInclUnpack() + kNumActRecCells - 1 + fca.numRets;
+      return nin + fca.numInputs() + kNumActRecCells - 1 + fca.numRets;
     }
 
     case Op::QueryM:
@@ -561,17 +550,13 @@ int64_t getStackPushed(PC pc) {
   switch (op) {
     case Op::FCallClsMethod:
     case Op::FCallClsMethodD:
-    case Op::FCallClsMethodRD:
     case Op::FCallClsMethodS:
     case Op::FCallClsMethodSD:
-    case Op::FCallClsMethodSRD:
     case Op::FCallCtor:
     case Op::FCallFunc:
     case Op::FCallFuncD:
-    case Op::FCallFuncRD:
     case Op::FCallObjMethod:
     case Op::FCallObjMethodD:
-    case Op::FCallObjMethodRD:
       return getImm(pc, 0).u_FCA.numRets;
     case Op::FCallBuiltin:
       return getImm(pc, 2).u_IVA + 1;
@@ -772,16 +757,17 @@ InputInfoVec getInputs(const NormalizedInstruction& ni, FPInvOffset bcSPOff) {
     }
   }
   if (isFCall(ni.op())) {
-    auto const numArgs = ni.imm[0].u_FCA.numArgsInclUnpack();
-
+    auto const& fca = ni.imm[0].u_FCA;
     SKTRACE(1, sk, "getInputs: %s %d %d\n",
-            opcodeToName(ni.op()), stackOff.offset, numArgs);
-    stackOff -= numArgs + 2;
+            opcodeToName(ni.op()), stackOff.offset, fca.numInputs());
+
+    if (fca.hasGenerics()) inputs.emplace_back(Location::Stack { stackOff });
+    stackOff -= fca.numInputs() + 2;
+
     switch (ni.op()) {
       case Op::FCallCtor:
       case Op::FCallObjMethod:
       case Op::FCallObjMethodD:
-      case Op::FCallObjMethodRD:
         inputs.emplace_back(Location::Stack { stackOff-- });
         break;
       default:
@@ -970,16 +956,12 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::EmptyS:
   case Op::FCallClsMethod:
   case Op::FCallClsMethodD:
-  case Op::FCallClsMethodRD:
   case Op::FCallClsMethodS:
   case Op::FCallClsMethodSD:
-  case Op::FCallClsMethodSRD:
   case Op::FCallCtor:
   case Op::FCallFunc:
   case Op::FCallFuncD:
-  case Op::FCallFuncRD:
   case Op::FCallObjMethodD:
-  case Op::FCallObjMethodRD:
   case Op::ResolveFunc:
   case Op::ResolveClsMethod:
   case Op::ResolveObjMethod:

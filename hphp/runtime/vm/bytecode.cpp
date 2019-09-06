@@ -4609,19 +4609,6 @@ bool doFCall(ActRec* ar, uint32_t numArgs, bool unpack) {
 
 namespace {
 
-// FIXME: unify FCallFuncRD with other FCall*RD opcodes
-template<bool errOnFail>
-ArrayData* getReifiedGenerics(const Func* func, Array&& tsList) {
-  if (!func->hasReifiedGenerics()) return nullptr;
-  if (tsList.get()) {
-    // As long as a tsList is passed, we'll use that over reading it from the
-    // method name. The array-data passed on the stack may not be static.
-    return ArrayData::GetScalarArray(std::move(tsList));
-  }
-  if (!errOnFail) return nullptr;
-  throw_call_reified_func_without_generics(func);
-}
-
 template<bool dynamic, class InitActRec>
 void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
                ArrayData* reifiedGenerics, InitActRec initActRec,
@@ -4632,9 +4619,9 @@ void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
   checkStack(vmStack(), func, 0);
 
   assertx(kNumActRecCells == 3);
-  ActRec* ar = vmStack().indA(fca.numArgsInclUnpack());
+  ActRec* ar = vmStack().indA(fca.numInputs());
   ar->m_func = func;
-  ar->initNumArgs(fca.numArgsInclUnpack());
+  ar->initNumArgs(fca.numArgs + (fca.hasUnpack() ? 1 : 0));
   if (dynamic) ar->setDynamicCall();
   if (fca.numRets != 1) ar->setFCallM();
   auto const asyncEagerReturn =
@@ -4642,6 +4629,16 @@ void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
   if (asyncEagerReturn) ar->setAsyncEagerReturn();
   ar->setReturn(vmfp(), origpc, jit::tc::ustubs().retHelper);
   ar->trashVarEnv();
+  if (fca.hasGenerics()) {
+    assertx(!reifiedGenerics);
+    assertx(tvIsVecOrVArray(vmStack().topC()));
+    if (func->hasReifiedGenerics()) {
+      ar->setReifiedGenerics(vmStack().topC()->m_data.parr);
+      vmStack().discard();
+    } else {
+      vmStack().popC();
+    }
+  }
   if (reifiedGenerics != nullptr) ar->setReifiedGenerics(reifiedGenerics);
 
   initActRec(ar);
@@ -4876,22 +4873,6 @@ OPTBLD_INLINE void fcallFuncClsMeth(PC origpc, PC& pc, const FCallArgs& fca,
   });
 }
 
-void fcallFuncDImpl(PC origpc, PC& pc, const FCallArgs& fca, Id id,
-                    Array&& tsList) {
-  auto const nep = vmfp()->unit()->lookupNamedEntityPairId(id);
-  auto const func = Unit::loadFunc(nep.second, nep.first);
-  if (UNLIKELY(func == nullptr)) {
-    raise_call_to_undefined(vmfp()->unit()->lookupLitstrId(id));
-  }
-
-  auto const reifiedGenerics = getReifiedGenerics<false>(
-    func, std::move(tsList));
-
-  fcallImpl<false>(origpc, pc, fca, func, reifiedGenerics, [&] (ActRec* ar) {
-    ar->trashThis();
-  });
-}
-
 } // namespace
 
 OPTBLD_INLINE void iopResolveFunc(Id id) {
@@ -4915,26 +4896,26 @@ OPTBLD_INLINE void iopFCallFunc(PC origpc, PC& pc, FCallArgs fca,
 }
 
 OPTBLD_INLINE void iopFCallFuncD(PC origpc, PC& pc, FCallArgs fca, Id id) {
-  fcallFuncDImpl(origpc, pc, fca, id, Array());
-}
+  auto const nep = vmfp()->unit()->lookupNamedEntityPairId(id);
+  auto const func = Unit::loadFunc(nep.second, nep.first);
+  if (UNLIKELY(func == nullptr)) {
+    raise_call_to_undefined(vmfp()->unit()->lookupLitstrId(id));
+  }
 
-OPTBLD_INLINE void iopFCallFuncRD(PC origpc, PC& pc, FCallArgs fca, Id id) {
-  assertx(tvIsVecOrVArray(vmStack().topC()));
-  auto tsList = Array::attach(vmStack().topC()->m_data.parr);
-  vmStack().discard();
-  fcallFuncDImpl(origpc, pc, fca, id, std::move(tsList));
+  fcallImpl<false>(origpc, pc, fca, func, nullptr, [&] (ActRec* ar) {
+    ar->trashThis();
+  });
 }
 
 namespace {
 
 template<bool dynamic>
 void fcallObjMethodImpl(PC origpc, PC& pc, const FCallArgs& fca,
-                        StringData* methName, Array&& tsList) {
-  auto const numArgs = fca.numArgsInclUnpack();
+                        StringData* methName) {
   const Func* func;
   LookupResult res;
-  assertx(tvIsObject(vmStack().indC(numArgs + 2)));
-  auto const obj = vmStack().indC(numArgs + 2)->m_data.pobj;
+  assertx(tvIsObject(vmStack().indC(fca.numInputs() + 2)));
+  auto const obj = vmStack().indC(fca.numInputs() + 2)->m_data.pobj;
   auto cls = obj->getVMClass();
   // if lookup throws, obj will be decref'd via stack
   res = lookupObjMethod(
@@ -4946,10 +4927,11 @@ void fcallObjMethodImpl(PC origpc, PC& pc, const FCallArgs& fca,
   assertx(res == LookupResult::MethodFoundWithThis ||
           res == LookupResult::MagicCallFound);
 
-  auto const reifiedGenerics = getReifiedGenerics<true>(
-    func, std::move(tsList));
+  if (func->hasReifiedGenerics() && !fca.hasGenerics()) {
+    throw_call_reified_func_without_generics(func);
+  }
 
-  fcallImpl<dynamic>(origpc, pc, fca, func, reifiedGenerics, [&] (ActRec* ar) {
+  fcallImpl<dynamic>(origpc, pc, fca, func, nullptr, [&] (ActRec* ar) {
     /* Transfer ownership of obj to the ActRec*/
     ar->setThis(obj);
 
@@ -4987,7 +4969,7 @@ static void throw_call_non_object(const char* methodName,
 ALWAYS_INLINE bool
 fcallObjMethodHandleInput(const FCallArgs& fca, ObjMethodOp op,
                           const StringData* methName, bool extraStk) {
-  Cell* obj = vmStack().indC(fca.numArgsInclUnpack() + 2 + (extraStk ? 1 : 0));
+  Cell* obj = vmStack().indC(fca.numInputs() + 2 + (extraStk ? 1 : 0));
   if (LIKELY(isObjectType(obj->m_type))) return false;
 
   if (UNLIKELY(op == ObjMethodOp::NullThrows || !isNullType(obj->m_type))) {
@@ -4999,6 +4981,7 @@ fcallObjMethodHandleInput(const FCallArgs& fca, ObjMethodOp op,
   // the null "object" and all uninits for inout returns, then push null.
   auto& stack = vmStack();
   if (extraStk) stack.popC();
+  if (fca.hasGenerics()) stack.popC();
   if (fca.hasUnpack()) stack.popC();
   for (uint32_t i = 0; i < fca.numArgs; ++i) stack.popTV();
   stack.popU();
@@ -5031,7 +5014,7 @@ iopFCallObjMethod(PC origpc, PC& pc, FCallArgs fca, const StringData*,
 
   // We handle decReffing method name in fcallObjMethodImpl
   vmStack().discard();
-  fcallObjMethodImpl<true>(origpc, pc, fca, methName, Array());
+  fcallObjMethodImpl<true>(origpc, pc, fca, methName);
 }
 
 OPTBLD_INLINE void
@@ -5039,18 +5022,7 @@ iopFCallObjMethodD(PC origpc, PC& pc, FCallArgs fca, const StringData*,
                    ObjMethodOp op, const StringData* methName) {
   if (fcallObjMethodHandleInput(fca, op, methName, false)) return;
   auto const methNameC = const_cast<StringData*>(methName);
-  fcallObjMethodImpl<false>(origpc, pc, fca, methNameC, Array());
-}
-
-OPTBLD_INLINE void
-iopFCallObjMethodRD(PC origpc, PC& pc, FCallArgs fca, const StringData*,
-                    ObjMethodOp op, const StringData* methName) {
-  if (fcallObjMethodHandleInput(fca, op, methName, true)) return;
-  assertx(tvIsVecOrVArray(vmStack().topC()));
-  auto const methNameC = const_cast<StringData*>(methName);
-  auto tsList = Array::attach(vmStack().topC()->m_data.parr);
-  vmStack().discard();
-  fcallObjMethodImpl<false>(origpc, pc, fca, methNameC, std::move(tsList));
+  fcallObjMethodImpl<false>(origpc, pc, fca, methNameC);
 }
 
 namespace {
@@ -5156,7 +5128,7 @@ namespace {
 template<bool dynamic>
 void fcallClsMethodImpl(PC origpc, PC& pc, const FCallArgs& fca, Class* cls,
                         StringData* methName, bool forwarding,
-                        Array&& tsList, bool logAsDynamicCall = true) {
+                        bool logAsDynamicCall = true) {
   auto const ctx = liveClass();
   auto obj = ctx && vmfp()->hasThis() ? vmfp()->getThis() : nullptr;
   const Func* func;
@@ -5174,10 +5146,11 @@ void fcallClsMethodImpl(PC origpc, PC& pc, const FCallArgs& fca, Class* cls,
             res == LookupResult::MagicCallFound);
   }
 
-  auto const reifiedGenerics = getReifiedGenerics<true>(
-    func, std::move(tsList));
+  if (func->hasReifiedGenerics() && !fca.hasGenerics()) {
+    throw_call_reified_func_without_generics(func);
+  }
 
-  fcallImpl<dynamic>(origpc, pc, fca, func, reifiedGenerics, [&] (ActRec* ar) {
+  fcallImpl<dynamic>(origpc, pc, fca, func, nullptr, [&] (ActRec* ar) {
     if (obj) {
       obj->incRefCount();
       ar->setThis(obj);
@@ -5250,15 +5223,13 @@ iopFCallClsMethod(PC origpc, PC& pc, FCallArgs fca, const StringData*,
   auto const logAsDynamicCall = op == IsLogAsDynamicCallOp::LogAsDynamicCall ||
     RuntimeOption::EvalLogKnownMethodsAsDynamicCalls;
   fcallClsMethodImpl<true>(origpc, pc, fca, cls, methName, false,
-                           Array(), logAsDynamicCall);
+                           logAsDynamicCall);
 }
 
 
-namespace {
-
-ALWAYS_INLINE void
-fcallClsMethodDImpl(PC origpc, PC& pc, const FCallArgs& fca,
-                    Id classId, const StringData* methName, Array&& tsList) {
+OPTBLD_INLINE void
+iopFCallClsMethodD(PC origpc, PC& pc, FCallArgs fca, const StringData*,
+                   Id classId, const StringData* methName) {
   const NamedEntityPair &nep =
     vmfp()->m_func->unit()->lookupNamedEntityPairId(classId);
   Class* cls = Unit::loadClass(nep.second, nep.first);
@@ -5266,25 +5237,7 @@ fcallClsMethodDImpl(PC origpc, PC& pc, const FCallArgs& fca,
     raise_error(Strings::UNKNOWN_CLASS, nep.first->data());
   }
   auto const methNameC = const_cast<StringData*>(methName);
-  fcallClsMethodImpl<false>(origpc, pc, fca, cls, methNameC, false,
-                            std::move(tsList));
-}
-
-} // namespace
-
-OPTBLD_INLINE void
-iopFCallClsMethodD(PC origpc, PC& pc, FCallArgs fca, const StringData*,
-                   Id classId, const StringData* methName) {
-  fcallClsMethodDImpl(origpc, pc, fca, classId, methName, Array());
-}
-
-OPTBLD_INLINE void
-iopFCallClsMethodRD(PC origpc, PC& pc, FCallArgs fca, const StringData*,
-                    Id classId, const StringData* methName) {
-  assertx(tvIsVecOrVArray(vmStack().topC()));
-  auto tsList = Array::attach(vmStack().topC()->m_data.parr);
-  vmStack().discard();
-  fcallClsMethodDImpl(origpc, pc, fca, classId, methName, std::move(tsList));
+  fcallClsMethodImpl<false>(origpc, pc, fca, cls, methNameC, false);
 }
 
 OPTBLD_INLINE void
@@ -5305,7 +5258,7 @@ iopFCallClsMethodS(PC origpc, PC& pc, FCallArgs fca, const StringData*,
   // fcallClsMethodImpl will take care of decReffing name
   vmStack().ndiscard(1);
   auto const fwd = ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent;
-  fcallClsMethodImpl<true>(origpc, pc, fca, cls, methName, fwd, Array());
+  fcallClsMethodImpl<true>(origpc, pc, fca, cls, methName, fwd);
 }
 
 OPTBLD_INLINE void
@@ -5314,20 +5267,7 @@ iopFCallClsMethodSD(PC origpc, PC& pc, FCallArgs fca, const StringData*,
   auto const cls = specialClsRefToCls(ref);
   auto const methNameC = const_cast<StringData*>(methName);
   auto const fwd = ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent;
-  fcallClsMethodImpl<false>(origpc, pc, fca, cls, methNameC, fwd, Array());
-}
-
-OPTBLD_INLINE void
-iopFCallClsMethodSRD(PC origpc, PC& pc, FCallArgs fca, const StringData*,
-                     SpecialClsRef ref, const StringData* methName) {
-  assertx(tvIsVecOrVArray(vmStack().topC()));
-  auto const cls = specialClsRefToCls(ref);
-  auto const methNameC = const_cast<StringData*>(methName);
-  auto const fwd = ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent;
-  auto tsList = Array::attach(vmStack().topC()->m_data.parr);
-  vmStack().discard();
-  fcallClsMethodImpl<false>(origpc, pc, fca, cls, methNameC, fwd,
-                            std::move(tsList));
+  fcallClsMethodImpl<false>(origpc, pc, fca, cls, methNameC, fwd);
 }
 
 namespace {
@@ -5426,9 +5366,8 @@ OPTBLD_INLINE void iopFCallCtor(PC origpc, PC& pc, FCallArgs fca,
                                 const StringData*) {
   assertx(fca.numRets == 1);
   assertx(fca.asyncEagerOffset == kInvalidOffset);
-  auto const numArgs = fca.numArgsInclUnpack();
-  assertx(tvIsObject(vmStack().indC(numArgs + 2)));
-  auto const obj = vmStack().indC(numArgs + 2)->m_data.pobj;
+  assertx(tvIsObject(vmStack().indC(fca.numInputs() + 2)));
+  auto const obj = vmStack().indC(fca.numInputs() + 2)->m_data.pobj;
 
   const Func* func;
   auto const ctx = arGetContextClass(vmfp());

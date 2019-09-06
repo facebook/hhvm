@@ -443,7 +443,7 @@ int instrNumPops(PC pc) {
   if (n <= -20) {
     auto const fca = getImm(pc, 0).u_FCA;
     auto const nin = -n - 20;
-    return nin + fca.numArgsInclUnpack() + 2 + fca.numRets;
+    return nin + fca.numInputs() + 2 + fca.numRets;
   }
   // Other final member operations pop their first immediate + n
   if (n <= -10) return getImm(pc, 0).u_IVA - n - 10;
@@ -518,9 +518,12 @@ FlavorDesc fcallFlavor(PC op, uint32_t i) {
   auto const fca = getImm(op, 0).u_FCA;
   if (i < nin) return CV;
   i -= nin;
+  if (i == 0 && fca.hasGenerics()) return CV;
+  i -= fca.hasGenerics() ? 1 : 0;
   if (i == 0 && fca.hasUnpack()) return CV;
-  if (i < fca.numArgsInclUnpack()) return CVV;
-  i -= fca.numArgsInclUnpack();
+  i -= fca.hasUnpack() ? 1 : 0;
+  if (i < fca.numArgs) return CVV;
+  i -= fca.numArgs;
   if (i == 2 && nobj) return CV;
   return UV;
 }
@@ -1203,6 +1206,7 @@ std::string show(const FCallArgsBase& fca, const uint8_t* byRefsRaw,
 
   std::vector<std::string> flags;
   if (fca.hasUnpack()) flags.push_back("Unpack");
+  if (fca.hasGenerics()) flags.push_back("Generics");
   if (fca.supportsAsyncEagerReturn()) flags.push_back("SupportsAER");
   if (fca.lockWhileUnwinding) flags.push_back("LockWhileUnwinding");
   return folly::sformat(

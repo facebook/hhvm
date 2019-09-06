@@ -65,24 +65,26 @@ struct FCallArgsBase {
     None                     = 0,
     // Unpack remaining arguments from a varray passed by ...$args.
     HasUnpack                = (1 << 0),
+    // Pass generics to the callee.
+    HasGenerics              = (1 << 1),
     // Op is not FCallCtor and callee is known to support async eager return.
     // In the encoded form, this bit is re-used to encode lockWhileUnwinding
-    SupportsAsyncEagerReturn = (1 << 1),
+    SupportsAsyncEagerReturn = (1 << 2),
     // HHBC-only: is the number of returns provided? false => 1
-    HasInOut                 = (1 << 2),
+    HasInOut                 = (1 << 3),
     // HHBC-only: should this FCall enforce argument reffiness?
-    EnforceReffiness         = (1 << 3),
+    EnforceReffiness         = (1 << 4),
     // HHBC-only: is the async eager offset provided? false => kInvalidOffset
-    HasAsyncEagerOffset      = (1 << 4),
+    HasAsyncEagerOffset      = (1 << 5),
     // HHBC-only: the remaining space is used for number of arguments
-    NumArgsStart             = (1 << 5),
+    NumArgsStart             = (1 << 6),
   };
 
   // Flags that are valid on FCallArgsBase::flags struct (i.e. non-HHBC-only).
   static constexpr uint8_t kInternalFlags =
-    HasUnpack | SupportsAsyncEagerReturn;
+    HasUnpack | HasGenerics | SupportsAsyncEagerReturn;
   // The first (lowest) bit of numArgs.
-  static constexpr uint8_t kFirstNumArgsBit = 5;
+  static constexpr uint8_t kFirstNumArgsBit = 6;
 
   explicit FCallArgsBase(Flags flags, uint32_t numArgs, uint32_t numRets,
                          bool lockWhileUnwinding)
@@ -92,7 +94,10 @@ struct FCallArgsBase {
     assertx(!(supportsAsyncEagerReturn() && lockWhileUnwinding));
   }
   bool hasUnpack() const { return flags & Flags::HasUnpack; }
-  uint32_t numArgsInclUnpack() const { return numArgs + (hasUnpack() ? 1 : 0); }
+  bool hasGenerics() const { return flags & Flags::HasGenerics; }
+  uint32_t numInputs() const {
+    return numArgs + (hasUnpack() ? 1 : 0) + (hasGenerics() ? 1 : 0);
+  }
   bool supportsAsyncEagerReturn() const {
     return flags & Flags::SupportsAsyncEagerReturn;
   }
@@ -648,24 +653,17 @@ constexpr uint32_t kMaxConcatN = 4;
                                        FCALL(2, 0),     FCALL,      CF) \
   O(FCallClsMethodD, FOUR(FCA,SA,SA,SA),                                \
                                        FCALL(0, 0),     FCALL,      CF) \
-  O(FCallClsMethodRD,FOUR(FCA,SA,SA,SA),                                \
-                                       FCALL(1, 0),     FCALL,      CF) \
   O(FCallClsMethodS, FOUR(FCA,SA,OA(SpecialClsRef),I32LA),              \
                                        FCALL(1, 0),     FCALL,      CF) \
   O(FCallClsMethodSD,FOUR(FCA,SA,OA(SpecialClsRef),SA),                 \
                                        FCALL(0, 0),     FCALL,      CF) \
-  O(FCallClsMethodSRD,FOUR(FCA,SA,OA(SpecialClsRef),SA),                \
-                                       FCALL(1, 0),     FCALL,      CF) \
   O(FCallCtor,       TWO(FCA,SA),      FCALL(0, 1),     FCALL,      CF) \
   O(FCallFunc,       TWO(FCA,I32LA),   FCALL(1, 0),     FCALL,      CF) \
   O(FCallFuncD,      TWO(FCA,SA),      FCALL(0, 0),     FCALL,      CF) \
-  O(FCallFuncRD,     TWO(FCA,SA),      FCALL(1, 0),     FCALL,      CF) \
   O(FCallObjMethod,  FOUR(FCA,SA,OA(ObjMethodOp),I32LA),                \
                                        FCALL(1, 1),     FCALL,      CF) \
   O(FCallObjMethodD, FOUR(FCA,SA,OA(ObjMethodOp),SA),                   \
                                        FCALL(0, 1),     FCALL,      CF) \
-  O(FCallObjMethodRD,FOUR(FCA,SA,OA(ObjMethodOp),SA),                   \
-                                       FCALL(1, 1),     FCALL,      CF) \
   O(FCallBuiltin,    FOUR(IVA,IVA,IVA,SA),CALLNATIVE,   CALLNATIVE, NF) \
   O(IterInit,        THREE(IA,BA,LA),  ONE(CV),         NOV,        CF) \
   O(LIterInit,       FOUR(IA,LA,BA,LA),NOV,             NOV,        CF) \
@@ -1019,24 +1017,20 @@ constexpr bool isFCallClsMethod(Op opcode) {
   return
     opcode == OpFCallClsMethod ||
     opcode == OpFCallClsMethodD ||
-    opcode == OpFCallClsMethodRD ||
     opcode == OpFCallClsMethodS ||
-    opcode == OpFCallClsMethodSD ||
-    opcode == OpFCallClsMethodSRD;
+    opcode == OpFCallClsMethodSD;
 }
 
 constexpr bool isFCallFunc(Op opcode) {
   return
     opcode == OpFCallFunc ||
-    opcode == OpFCallFuncD ||
-    opcode == OpFCallFuncRD;
+    opcode == OpFCallFuncD;
 }
 
 constexpr bool isFCallObjMethod(Op opcode) {
   return
     opcode == OpFCallObjMethod ||
-    opcode == OpFCallObjMethodD ||
-    opcode == OpFCallObjMethodRD;
+    opcode == OpFCallObjMethodD;
 }
 
 constexpr bool isFCall(Op opcode) {

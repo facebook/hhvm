@@ -138,6 +138,13 @@ struct FCallArgs : FCallArgsBase {
     assertx(enforceReffiness());
     return byRefs[i / 8] & (1 << (i % 8));
   }
+
+  FCallArgs withoutGenerics() const {
+    auto fca = *this;
+    fca.flags = static_cast<Flags>(fca.flags & ~Flags::HasGenerics);
+    return fca;
+  }
+
   BlockId asyncEagerTarget;
   std::unique_ptr<uint8_t[]> byRefs;
 };
@@ -607,15 +614,18 @@ namespace imm {
 
 #define POP_FCALL(nin, nobj)                                                   \
                     uint32_t numPop() const {                                  \
-                      return nin + fca.numArgsInclUnpack() + 2 + fca.numRets;  \
+                      return nin + fca.numInputs() + 2 + fca.numRets;          \
                     }                                                          \
                     Flavor popFlavor(uint32_t i) const {                       \
                       assert(i < numPop());                                    \
                       if (i < nin) return Flavor::C;                           \
                       i -= nin;                                                \
+                      if (i == 0 && fca.hasGenerics()) return Flavor::C;       \
+                      i -= fca.hasGenerics() ? 1 : 0;                          \
                       if (i == 0 && fca.hasUnpack()) return Flavor::C;         \
-                      if (i < fca.numArgsInclUnpack()) return Flavor::CV;      \
-                      i -= fca.numArgsInclUnpack();                            \
+                      i -= fca.hasUnpack() ? 1 : 0;                            \
+                      if (i < fca.numArgs) return Flavor::CV;                  \
+                      i -= fca.numArgs;                                        \
                       if (i == 2 && nobj) return Flavor::C;                    \
                       return Flavor::U;                                        \
                     }

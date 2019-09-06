@@ -850,22 +850,23 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
   }
 
   FTRACE(2, "selectCalleeRegion: callee = {}\n", callee->fullName()->data());
+  auto const firstArgPos = static_cast<int32_t>(fca.numInputs()) - 1;
   std::vector<Type> argTypes;
-  for (int i = fca.numArgs - 1; i >= 0; --i) {
+  for (int32_t i = 0; i < fca.numArgs; ++i) {
     // DataTypeGeneric is used because we're just passing the locals into the
     // callee.  It's up to the callee to constrain further if needed.
-    auto type = irgen::publicTopType(irgs, BCSPRelOffset{i});
+    auto type = irgen::publicTopType(irgs, BCSPRelOffset{firstArgPos - i});
     assertx(type <= TGen);
 
     // If we don't have sufficient type information to inline the region return
     // early
     if (type == TBottom) return nullptr;
     if (!(type <= TCell) && !(type <= TBoxedCell)) {
-      traceRefusal(sk, callee, folly::sformat("maybe boxed arg num: {}", i),
+      traceRefusal(sk, callee, folly::sformat("maybe boxed arg num: {}", i + 1),
                    annotationsPtr);
       return nullptr;
     }
-    FTRACE(2, "arg {}: {}\n", i, type);
+    FTRACE(2, "arg {}: {}\n", i + 1, type);
     argTypes.push_back(type);
   }
 

@@ -75,17 +75,13 @@ inline ControlFlowInfo opcodeControlFlowInfo(const Op op, bool inlining) {
       return inlining ? ControlFlowInfo::ChangesPC : ControlFlowInfo::BreaksBB;
     case Op::FCallClsMethod:
     case Op::FCallClsMethodD:
-    case Op::FCallClsMethodRD:
     case Op::FCallClsMethodS:
     case Op::FCallClsMethodSD:
-    case Op::FCallClsMethodSRD:
     case Op::FCallCtor:
     case Op::FCallFunc:
     case Op::FCallFuncD:
-    case Op::FCallFuncRD:
     case Op::FCallObjMethod:
     case Op::FCallObjMethodD:
-    case Op::FCallObjMethodRD:
     case Op::ContEnter:
     case Op::ContRaise:
     case Op::ContEnterDelegate:

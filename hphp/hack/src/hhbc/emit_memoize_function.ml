@@ -10,6 +10,7 @@
 open Core_kernel
 open Instruction_sequence
 open Emit_memoize_helpers
+open Hhbc_ast
 module R = Hhbc_string_utils.Reified
 module T = Aast
 
@@ -85,28 +86,22 @@ let make_memoize_function_with_params_code
     Emit_body.emit_deprecation_warning scope deprecation_info
   in
   let fcall_args =
+    let flags = { default_fcall_flags with has_generics = is_reified } in
     if is_async then
-      make_fcall_args ~async_eager_label:eager_set param_count
+      make_fcall_args ~flags ~async_eager_label:eager_set param_count
     else
-      make_fcall_args param_count
+      make_fcall_args ~flags param_count
   in
-  let fcall_instrs =
+  let (reified_get, reified_memokeym) =
     if not is_reified then
-      instr_fcallfuncd fcall_args renamed_method_id
+      (empty, empty)
     else
-      gather
-        [ instr_cgetl (Local.Named R.reified_generics_local_name);
-          instr_fcallfuncrd fcall_args renamed_method_id ]
-  in
-  let reified_memokeym =
-    if not is_reified then
-      empty
-    else
-      gather
-      @@ getmemokeyl
-           param_count
-           (param_count + add_reified)
-           R.reified_generics_local_name
+      ( instr_cgetl (Local.Named R.reified_generics_local_name),
+        gather
+        @@ getmemokeyl
+             param_count
+             (param_count + add_reified)
+             R.reified_generics_local_name )
   in
   let param_count = param_count + add_reified in
   gather
@@ -138,7 +133,8 @@ let make_memoize_function_with_params_code
       instr_nulluninit;
       instr_nulluninit;
       param_code_gets params;
-      fcall_instrs;
+      reified_get;
+      instr_fcallfuncd fcall_args renamed_method_id;
       instr_memoset (Some (first_local, param_count));
       ( if is_async then
         gather

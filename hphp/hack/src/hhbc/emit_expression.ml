@@ -3321,6 +3321,13 @@ and emit_call_lhs_and_fcall
   let does_not_have_non_tparam_generics =
     not (has_non_tparam_generics env targs)
   in
+  let emit_generics (flags, a, b, c, d) =
+    if does_not_have_non_tparam_generics then
+      (empty, fcall_args)
+    else
+      ( emit_reified_targs env pos targs,
+        ({ flags with has_generics = true }, a, b, c, d) )
+  in
   match expr_ with
   | A.Obj_get (obj, (_, A.String id), null_flavor)
   | A.Obj_get (obj, (_, A.Id (_, id)), null_flavor) ->
@@ -3334,14 +3341,9 @@ and emit_call_lhs_and_fcall
         name
     in
     let obj = emit_object_expr env obj in
-    if does_not_have_non_tparam_generics then
-      ( gather [obj; instr_nulluninit; instr_nulluninit],
-        instr_fcallobjmethodd fcall_args name null_flavor )
-    else
-      ( gather [obj; instr_nulluninit; instr_nulluninit],
-        gather
-          [ emit_reified_targs env pos targs;
-            instr_fcallobjmethodrd fcall_args name null_flavor ] )
+    let (generics, fcall_args) = emit_generics fcall_args in
+    ( gather [obj; instr_nulluninit; instr_nulluninit],
+      gather [generics; instr_fcallobjmethodd fcall_args name null_flavor] )
   | A.Obj_get (obj, method_expr, null_flavor) ->
     let obj = emit_object_expr env obj in
     let tmp = Local.get_unnamed_local () in
@@ -3383,23 +3385,15 @@ and emit_call_lhs_and_fcall
         in
         let fq_cid_string = Hhbc_id.Class.to_raw_string fq_cid in
         Emit_symbol_refs.add_class fq_cid_string;
-        if does_not_have_non_tparam_generics then
-          ( gather [instr_nulluninit; instr_nulluninit; instr_nulluninit],
-            instr_fcallclsmethodd fcall_args method_id fq_cid )
-        else
-          ( gather [instr_nulluninit; instr_nulluninit; instr_nulluninit],
-            gather
-              [ emit_reified_targs env pos targs;
-                instr_fcallclsmethodrd fcall_args method_id fq_cid ] )
+        let (generics, fcall_args) = emit_generics fcall_args in
+        ( gather [instr_nulluninit; instr_nulluninit; instr_nulluninit],
+          gather [generics; instr_fcallclsmethodd fcall_args method_id fq_cid]
+        )
       | Class_special clsref ->
-        if does_not_have_non_tparam_generics then
-          ( gather [instr_nulluninit; instr_nulluninit; instr_nulluninit],
-            instr_fcallclsmethodsd fcall_args clsref method_id )
-        else
-          ( gather [instr_nulluninit; instr_nulluninit; instr_nulluninit],
-            gather
-              [ emit_reified_targs env pos targs;
-                instr_fcallclsmethodsrd fcall_args clsref method_id ] )
+        let (generics, fcall_args) = emit_generics fcall_args in
+        ( gather [instr_nulluninit; instr_nulluninit; instr_nulluninit],
+          gather [generics; instr_fcallclsmethodsd fcall_args clsref method_id]
+        )
       | Class_expr expr ->
         let emit_fcall instr_meth =
           gather
@@ -3522,24 +3516,14 @@ and emit_call_lhs_and_fcall
       else
         fq_id
     in
-    if does_not_have_non_tparam_generics then
-      ( gather [instr_nulluninit; instr_nulluninit; instr_nulluninit],
-        instr_fcallfuncd fcall_args fq_id )
-    else
-      ( gather [instr_nulluninit; instr_nulluninit; instr_nulluninit],
-        gather
-          [emit_reified_targs env pos targs; instr_fcallfuncrd fcall_args fq_id]
-      )
+    let (generics, fcall_args) = emit_generics fcall_args in
+    ( gather [instr_nulluninit; instr_nulluninit; instr_nulluninit],
+      gather [generics; instr_fcallfuncd fcall_args fq_id] )
   | A.String s ->
-    if does_not_have_non_tparam_generics then
-      ( gather [instr_nulluninit; instr_nulluninit; instr_nulluninit],
-        instr_fcallfuncd fcall_args (Hhbc_id.Function.from_raw_string s) )
-    else
-      ( gather [instr_nulluninit; instr_nulluninit; instr_nulluninit],
-        gather
-          [ emit_reified_targs env pos targs;
-            instr_fcallfuncrd fcall_args (Hhbc_id.Function.from_raw_string s)
-          ] )
+    let fq_id = Hhbc_id.Function.from_raw_string s in
+    let (generics, fcall_args) = emit_generics fcall_args in
+    ( gather [instr_nulluninit; instr_nulluninit; instr_nulluninit],
+      gather [generics; instr_fcallfuncd fcall_args fq_id] )
   | _ ->
     let tmp = Local.get_unnamed_local () in
     ( gather

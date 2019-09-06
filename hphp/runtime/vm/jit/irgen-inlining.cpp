@@ -216,7 +216,6 @@ void beginInlining(IRGS& env,
                    SSATmp* ctx,
                    Type ctxType,
                    bool dynamicCall,
-                   SSATmp* tsList,
                    Op writeArOpc,
                    SrcKey startSk,
                    Offset callBcOffset,
@@ -230,14 +229,15 @@ void beginInlining(IRGS& env,
 
   FTRACE(1, "[[[ begin inlining: {}\n", target->fullName()->data());
 
+  auto const generics = fca.hasGenerics() ? popC(env) : cns(env, TNullptr);
+
   // The VM stack-pointer is conceptually pointing to the last
   // parameter, so we need to add numArgs to get to the ActRec
   assertx(!fca.hasUnpack());
   IRSPRelOffset calleeAROff = spOffBCFromIRSP(env) + fca.numArgs;
 
   auto const arInfo = ActRecInfo { calleeAROff, fca.numArgs, dynamicCall };
-  gen(env, SpillFrame, arInfo, sp(env), cns(env, target), ctx,
-      tsList ? tsList : cns(env, TNullptr));
+  gen(env, SpillFrame, arInfo, sp(env), cns(env, target), ctx, generics);
 
   ctx = [&] () -> SSATmp* {
     if (!target->implCls()) {
@@ -420,6 +420,9 @@ void conjureBeginInlining(IRGS& env,
   }
   auto const ctx = conjure(thisType);
 
+  // FIXME: conjure generics; otherwise this translation will have tiny cost
+  // as it will fail early due to generics mismatch, causing us to inline
+  // huge functions if they have reified generics
   beginInlining(
     env,
     func,
@@ -428,7 +431,6 @@ void conjureBeginInlining(IRGS& env,
     ctx,
     ctx->type(),
     false,
-    cns(env, TNullptr),
     env.context.initSrcKey.op(),
     startSk,
     0 /* callBcOffset */,

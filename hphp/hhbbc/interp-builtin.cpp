@@ -558,6 +558,7 @@ bool can_emit_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
       (func->cls && !(func->attrs & AttrStatic))  ||
       !func->nativeInfo ||
       func->params.size() >= Native::maxFCallBuiltinArgs() ||
+      fca.hasGenerics() ||
       !RuntimeOption::EvalEnableCallBuiltin) {
     return false;
   }
@@ -602,11 +603,12 @@ bool can_emit_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
 
 void finish_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
   BytecodeVec repl;
-  assert(!fca.hasUnpack() ||
-         (fca.numArgs + 1 == func->params.size() &&
-          func->params.back().isVariadic));
+  assertx(!fca.hasGenerics());
+  assertx(!fca.hasUnpack() ||
+          (fca.numArgs + 1 == func->params.size() &&
+           func->params.back().isVariadic));
 
-  auto numArgs = fca.numArgsInclUnpack();
+  auto numArgs = fca.numInputs();
   if (!fca.hasUnpack()) {
     for (auto i = numArgs; i < func->params.size(); i++) {
       auto const& pi = func->params[i];

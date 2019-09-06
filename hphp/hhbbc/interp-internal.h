@@ -426,6 +426,7 @@ bool canFold(ISS& env, const php::Func* func, const FCallArgs& fca,
              Type context, bool maybeDynamic) {
   if (!func ||
       fca.hasUnpack() ||
+      fca.hasGenerics() ||
       fca.numRets != 1 ||
       !options.ConstantFoldBuiltins ||
       !will_reduce(env) ||

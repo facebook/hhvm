@@ -70,21 +70,12 @@ let make_info ast_class class_id ast_methods =
     memoize_class_id = class_id;
   }
 
-let call_cls_method info fcall_args method_id with_lsb is_reified =
+let call_cls_method info fcall_args method_id with_lsb =
   let method_id = Hhbc_id.Method.add_suffix method_id memoize_suffix in
-  match (info.memoize_is_trait || with_lsb, is_reified) with
-  | (true, false) ->
+  if info.memoize_is_trait || with_lsb then
     instr_fcallclsmethodsd fcall_args SpecialClsRef.Self method_id
-  | (true, true) ->
-    gather
-      [ instr_cgetl (Local.Named R.reified_generics_local_name);
-        instr_fcallclsmethodsrd fcall_args SpecialClsRef.Self method_id ]
-  | (false, false) ->
+  else
     instr_fcallclsmethodd fcall_args method_id info.memoize_class_id
-  | (false, true) ->
-    gather
-      [ instr_cgetl (Local.Named R.reified_generics_local_name);
-        instr_fcallclsmethodrd fcall_args method_id info.memoize_class_id ]
 
 let make_memoize_instance_method_no_params_code
     scope deprecation_info method_id is_async =
@@ -162,29 +153,22 @@ let make_memoize_instance_method_with_params_code
     Emit_body.emit_deprecation_warning scope deprecation_info
   in
   let fcall_args =
+    let flags = { default_fcall_flags with has_generics = is_reified } in
     if is_async then
-      make_fcall_args ~async_eager_label:eager_set param_count
+      make_fcall_args ~flags ~async_eager_label:eager_set param_count
     else
-      make_fcall_args param_count
+      make_fcall_args ~flags param_count
   in
-  let fcall_instrs =
+  let (reified_get, reified_memokeym) =
     if not is_reified then
-      instr_fcallobjmethodd_nullthrows fcall_args renamed_name
+      (empty, empty)
     else
-      gather
-        [ instr_cgetl (Local.Named R.reified_generics_local_name);
-          instr_fcallobjmethodrd fcall_args renamed_name Ast_defs.OG_nullthrows
-        ]
-  in
-  let reified_memokeym =
-    if not is_reified then
-      empty
-    else
-      gather
-      @@ getmemokeyl
-           param_count
-           (param_count + add_reified)
-           R.reified_generics_local_name
+      ( instr_cgetl (Local.Named R.reified_generics_local_name),
+        gather
+        @@ getmemokeyl
+             param_count
+             (param_count + add_reified)
+             R.reified_generics_local_name )
   in
   let param_count = param_count + add_reified in
   gather
@@ -217,7 +201,8 @@ let make_memoize_instance_method_with_params_code
       instr_nulluninit;
       instr_nulluninit;
       param_code_gets params;
-      fcall_instrs;
+      reified_get;
+      instr_fcallobjmethodd_nullthrows fcall_args renamed_name;
       instr_memoset (Some (first_local, param_count));
       ( if is_async then
         gather
@@ -257,7 +242,7 @@ let make_memoize_static_method_no_params_code
       instr_nulluninit;
       instr_nulluninit;
       instr_nulluninit;
-      call_cls_method info fcall_args method_id with_lsb false;
+      call_cls_method info fcall_args method_id with_lsb;
       instr_memoset None;
       ( if is_async then
         gather
@@ -303,20 +288,22 @@ let make_memoize_static_method_with_params_code
     Emit_param.emit_param_default_value_setter env pos params
   in
   let fcall_args =
+    let flags = { default_fcall_flags with has_generics = is_reified } in
     if is_async then
-      make_fcall_args ~async_eager_label:eager_set param_count
+      make_fcall_args ~flags ~async_eager_label:eager_set param_count
     else
-      make_fcall_args param_count
+      make_fcall_args ~flags param_count
   in
-  let reified_memokeym =
+  let (reified_get, reified_memokeym) =
     if not is_reified then
-      empty
+      (empty, empty)
     else
-      gather
-      @@ getmemokeyl
-           param_count
-           (param_count + add_reified)
-           R.reified_generics_local_name
+      ( instr_cgetl (Local.Named R.reified_generics_local_name),
+        gather
+        @@ getmemokeyl
+             param_count
+             (param_count + add_reified)
+             R.reified_generics_local_name )
   in
   let param_count = param_count + add_reified in
   gather
@@ -348,7 +335,8 @@ let make_memoize_static_method_with_params_code
       instr_nulluninit;
       instr_nulluninit;
       param_code_gets params;
-      call_cls_method info fcall_args method_id with_lsb is_reified;
+      reified_get;
+      call_cls_method info fcall_args method_id with_lsb;
       instr_memoset (Some (first_local, param_count));
       ( if is_async then
         gather

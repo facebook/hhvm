@@ -735,17 +735,13 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
     return m_tmp_sig;
   case Op::FCallClsMethod:
   case Op::FCallClsMethodD:
-  case Op::FCallClsMethodRD:
   case Op::FCallClsMethodS:
   case Op::FCallClsMethodSD:
-  case Op::FCallClsMethodSRD:
   case Op::FCallCtor:
   case Op::FCallFunc:
   case Op::FCallFuncD:
-  case Op::FCallFuncRD:
   case Op::FCallObjMethod:
-  case Op::FCallObjMethodD:
-  case Op::FCallObjMethodRD: {  // FCA..., FCALL, FCALL
+  case Op::FCallObjMethodD: {  // FCA..., FCALL, FCALL
     auto const fca = getImm(pc, 0).u_FCA;
     auto const numPops = instrNumPops(pc);
     assertx(fca.numRets != 0);
@@ -756,6 +752,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
     m_tmp_sig[idx++] = UV;
     for (int i = 0; i < fca.numArgs; ++i) m_tmp_sig[idx++] = CVV;
     if (fca.hasUnpack()) m_tmp_sig[idx++] = CV;
+    if (fca.hasGenerics()) m_tmp_sig[idx++] = CV;
     assertx(idx == numPops || idx + 1 == numPops || idx + 2 == numPops);
     while (idx < numPops) m_tmp_sig[idx++] = CV;
     return m_tmp_sig;
@@ -1591,17 +1588,13 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::FCallBuiltin:
     case Op::FCallClsMethod:
     case Op::FCallClsMethodD:
-    case Op::FCallClsMethodRD:
     case Op::FCallClsMethodS:
     case Op::FCallClsMethodSD:
-    case Op::FCallClsMethodSRD:
     case Op::FCallCtor:
     case Op::FCallFunc:
     case Op::FCallFuncD:
-    case Op::FCallFuncRD:
     case Op::FCallObjMethod:
     case Op::FCallObjMethodD:
-    case Op::FCallObjMethodRD:
     case Op::NativeImpl:
     case Op::NewObj:
     case Op::NewObjR:

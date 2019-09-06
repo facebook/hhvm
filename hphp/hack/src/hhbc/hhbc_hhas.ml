@@ -321,20 +321,12 @@ let string_of_optional_label opt_label =
 
 let string_of_fcall_flags fl =
   let fl =
-    [ ( if fl.has_unpack then
-        "Unpack"
-      else
-        "" );
-      ( if fl.supports_async_eager_return then
-        "SupportsAER"
-      else
-        "" );
-      ( if fl.lock_while_unwinding then
-        "LockWhileUnwinding"
-      else
-        "" ) ]
+    [ Option.some_if fl.has_unpack "Unpack";
+      Option.some_if fl.has_generics "Generics";
+      Option.some_if fl.supports_async_eager_return "SupportsAER";
+      Option.some_if fl.lock_while_unwinding "LockWhileUnwinding" ]
   in
-  "<" ^ (String.concat ~sep:" " @@ List.filter ~f:(fun f -> f <> "") fl) ^ ">"
+  "<" ^ (String.concat ~sep:" " @@ List.filter_opt fl) ^ ">"
 
 let string_of_list_of_bools l =
   let bool_to_str b =
@@ -501,13 +493,6 @@ let string_of_call instruction =
         "\"\"";
         string_of_class_id cid;
         string_of_method_id mid ]
-  | FCallClsMethodRD (fcall_args, cid, mid) ->
-    sep
-      [ "FCallClsMethodRD";
-        string_of_fcall_args fcall_args;
-        "\"\"";
-        string_of_class_id cid;
-        string_of_method_id mid ]
   | FCallClsMethodS (fcall_args, r) ->
     sep
       [ "FCallClsMethodS";
@@ -517,13 +502,6 @@ let string_of_call instruction =
   | FCallClsMethodSD (fcall_args, r, mid) ->
     sep
       [ "FCallClsMethodSD";
-        string_of_fcall_args fcall_args;
-        "\"\"";
-        SpecialClsRef.to_string r;
-        string_of_method_id mid ]
-  | FCallClsMethodSRD (fcall_args, r, mid) ->
-    sep
-      [ "FCallClsMethodSRD";
         string_of_fcall_args fcall_args;
         "\"\"";
         SpecialClsRef.to_string r;
@@ -538,9 +516,6 @@ let string_of_call instruction =
   | FCallFuncD (fcall_args, id) ->
     sep
       ["FCallFuncD"; string_of_fcall_args fcall_args; string_of_function_id id]
-  | FCallFuncRD (fcall_args, id) ->
-    sep
-      ["FCallFuncRD"; string_of_fcall_args fcall_args; string_of_function_id id]
   | FCallObjMethod (fcall_args, nf, pl) ->
     sep
       [ "FCallObjMethod";
@@ -551,13 +526,6 @@ let string_of_call instruction =
   | FCallObjMethodD (fcall_args, nf, id) ->
     sep
       [ "FCallObjMethodD";
-        string_of_fcall_args fcall_args;
-        "\"\"";
-        string_of_null_flavor nf;
-        string_of_method_id id ]
-  | FCallObjMethodRD (fcall_args, nf, id) ->
-    sep
-      [ "FCallObjMethodRD";
         string_of_fcall_args fcall_args;
         "\"\"";
         string_of_null_flavor nf;

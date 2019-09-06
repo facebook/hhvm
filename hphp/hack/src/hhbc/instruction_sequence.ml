@@ -56,6 +56,7 @@ let of_pair (i1, i2) = gather [i1; i2]
 let default_fcall_flags =
   {
     has_unpack = false;
+    has_generics = false;
     supports_async_eager_return = false;
     lock_while_unwinding = false;
   }
@@ -69,12 +70,6 @@ let make_fcall_args
   if by_refs <> [] && List.length by_refs <> num_args then
     failwith "length of by_refs must be either zero or num_args";
   (flags, num_args, num_rets, by_refs, async_eager_label)
-
-let num_args_of (flags, num_args, _, _, _) =
-  if flags.has_unpack then
-    num_args + 1
-  else
-    num_args
 
 let instr_lit_const l = instr (ILitConst l)
 
@@ -326,17 +321,11 @@ let instr_fcallclsmethod
 let instr_fcallclsmethodd fcall_args method_name class_name =
   instr (ICall (FCallClsMethodD (fcall_args, class_name, method_name)))
 
-let instr_fcallclsmethodrd fcall_args method_name class_name =
-  instr (ICall (FCallClsMethodRD (fcall_args, class_name, method_name)))
-
 let instr_fcallclsmethods fcall_args scref =
   instr (ICall (FCallClsMethodS (fcall_args, scref)))
 
 let instr_fcallclsmethodsd fcall_args scref method_name =
   instr (ICall (FCallClsMethodSD (fcall_args, scref, method_name)))
-
-let instr_fcallclsmethodsrd fcall_args scref method_name =
-  instr (ICall (FCallClsMethodSRD (fcall_args, scref, method_name)))
 
 let instr_fcallctor fcall_args = instr (ICall (FCallCtor fcall_args))
 
@@ -346,17 +335,11 @@ let instr_fcallfunc fcall_args param_locs =
 let instr_fcallfuncd fcall_args id =
   instr (ICall (FCallFuncD (fcall_args, id)))
 
-let instr_fcallfuncrd fcall_args id =
-  instr (ICall (FCallFuncRD (fcall_args, id)))
-
 let instr_fcallobjmethod fcall_args flavor pl =
   instr (ICall (FCallObjMethod (fcall_args, flavor, pl)))
 
 let instr_fcallobjmethodd fcall_args method_ flavor =
   instr (ICall (FCallObjMethodD (fcall_args, flavor, method_)))
-
-let instr_fcallobjmethodrd fcall_args method_ flavor =
-  instr (ICall (FCallObjMethodRD (fcall_args, flavor, method_)))
 
 let instr_fcallobjmethodd_nullthrows fcall_args method_ =
   instr_fcallobjmethodd fcall_args method_ Ast_defs.OG_nullthrows

@@ -1830,16 +1830,19 @@ FCall* opcodes
 
   The %1 contains a list of boolean flags:
 
-  Unpack: if enabled, the elements of the last value on the stack, which must be
-  an array, are transferred to the callee as parameters, following the regular
-  %2 parameters.
+  Unpack: if enabled, %2 arguments on the stack are followed by an additional
+  value, which must be an array. Its elements are transferred to the callee as
+  parameters, following the regular %2 parameters.
+
+  Generics: if enabled, %2 arguments and an optional unpack array on the stack
+  are followed by an additional value containing the list of reified generics.
+  Only FCall*D opcodes are allowed to pass generics.
 
   SupportsAER: hint from static analysis indicating whether the callee is known
   to support async eager return. Requires specified async eager offset in %5.
 
 FCallFunc <fca>                 [U U U C|V..C|V C]  ->  [C..C]
 FCallFuncD <fca> <litstr id>    [U U U C|V..C|V]  ->  [C..C]
-FCallFuncRD <fca> <litstr id>   [U U U C|V..C|V C]  ->  [C..C]
 
   Call a callable. First, these instructions load a value into x as given by
   the following table:
@@ -1848,7 +1851,6 @@ FCallFuncRD <fca> <litstr id>   [U U U C|V..C|V C]  ->  [C..C]
     --------------+----
       FCallFunc   | $1
       FCallFuncD  | %2
-      FCallFuncRD | %2
 
   If x is a string, this instruction attempts to lookup a function named x. If
   a function named x is defined, this instruction calls it. Otherwise it throws
@@ -1870,23 +1872,18 @@ FCallFuncRD <fca> <litstr id>   [U U U C|V..C|V C]  ->  [C..C]
   If x is not a string, object, array, func, or clsmeth, this instruction
   throws a fatal error.
 
-  FCallFuncRD's $1 contains a list of reified generics.
-
 FCallObjMethod <fca> <class hint> <nullsafe>
   [C U U C|V..C|V C]  ->  [C..C]
 FCallObjMethodD <fca> <class hint> <nullsafe> <litstr id>
   [C U U C|V..C|V]  ->  [C..C]
-FCallObjMethodRD <fca> <class hint> <nullsafe> <litstr id>
-  [C U U C|V..C|V C]  ->  [C..C]
 
   Call an instance method. First, these instructions load values into x
   and y as given by the following table:
 
-    instruction        x                              y
-    -----------------+------------------------------+-----
-    FCallObjMethod   | $(num args + has unpack + 4) | $1
-    FCallObjMethodD  | $(num args + has unpack + 3) | %3
-    FCallObjMethodRD | $(num args + has unpack + 4) | %3
+    instruction        x                                             y
+    -----------------+---------------------------------------------+-----
+    FCallObjMethod   | $(num args + has unpack + 4)                | $1
+    FCallObjMethodD  | $(num args + has unpack + has generics + 3) | %3
 
   If x is not an object and nullsafe != ObjMethodOp::NullThrows, or if y is not
   a string, this instruction throws a fatal error. Next, this instruction checks
@@ -1904,20 +1901,14 @@ FCallObjMethodRD <fca> <class hint> <nullsafe> <litstr id>
   The string in %2 provides a static analysis hint. If it is non-empty, it is
   the class name with the implementation of method y that will be called.
 
-  FCallObjMethodRD's $1 contains a list of reified generics.
-
 FCallClsMethod <fca> <class hint> <op>
   [U U U C|V..C|V C C:Class]  ->  [C..C]
 FCallClsMethodD <fca> <class hint> <litstr id> <litstr id>
   [U U U C|V..C|V]    ->  [C..C]
-FCallClsMethodRD <fca> <class hint> <litstr id> <litstr id>
-  [U U U C|V..C|V C]  ->  [C..C]
 FCallClsMethodS <fca> <class hint> <mode>
   [U U U C|V..C|V C]  ->  [C..C]
 FCallClsMethodSD <fca> <class hint> <mode> <litstr id>
   [U U U C|V..C|V]    ->  [C..C]
-FCallClsMethodSRD <fca> <class hint> <mode> <litstr id>
-  [U U U C|V..C|V C]  ->  [C..C]
 
   Call a static method. First, these instructions load values into x and
   y as given by the following table:
@@ -1926,18 +1917,16 @@ FCallClsMethodSRD <fca> <class hint> <mode> <litstr id>
     --------------------+----+-----
       FCallClsMethod    | $1 | $2
       FCallClsMethodD   | %3 | %4
-      FCallClsMethodRD  | %3 | %4
       FCallClsMethodS   | %3 | $1
       FCallClsMethodSD  | %3 | %4
-      FCallClsMethodSRD | %3 | %4
 
-  When loading litstr id %3 into x, FCallClsMethodD and FCallClsMethodRD will
-  perform the work performed by the ClassGetC instruction to convert the name
-  given by %3 into a class.
+  When loading litstr id %3 into x, FCallClsMethodD will perform the work
+  performed by the ClassGetC instruction to convert the name given by %3 into
+  a class.
 
-  When loading mode %3 into x, FCallClsMethodS, FCallClsMethodSD and
-  FCallClsMethodSRD will perform the work performed by LateBoundCls/Self/Parent
-  depending on the specified mode.
+  When loading mode %3 into x, FCallClsMethodS and FCallClsMethodSD will
+  perform the work performed by LateBoundCls/Self/Parent depending on the
+  specified mode.
 
   If y is not a string, this instruction throws a fatal error. Next, this
   instruction checks if class x has an accessible method named y. If it does,
@@ -1955,9 +1944,6 @@ FCallClsMethodSRD <fca> <class hint> <mode> <litstr id>
 
   The string in %2 provides a static analysis hint. If it is non-empty, it is
   the class name with the implementation of method y that will be called.
-
-  FCallClsMethodRD and FCallClsMethodSRD's $1 contains a list of reified
-  generics.
 
   If op is DontLogAsDynamicCall all logging set up for dynamic calls will be
   skipped.

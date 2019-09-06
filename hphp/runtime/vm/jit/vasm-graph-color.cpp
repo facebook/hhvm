@@ -4665,6 +4665,7 @@ void fixup_spill_mismatches(State& state, SpillerResults& results) {
 
           // Try to replace the instruction with a rematerialized one.
           auto& inst = unit.blocks[b].code[instIdx];
+          auto const irctx = inst.irctx();
           assertx(inst.op == Vinstr::reload &&
                   inst.reload_.s == r &&
                   inst.reload_.d == r2);
@@ -4677,6 +4678,7 @@ void fixup_spill_mismatches(State& state, SpillerResults& results) {
             r,
             r2
           );
+          inst.set_irctx(irctx);
           // The def of the instruction is now available for more
           // rematerialized instructions.
           inReg.add(r2);

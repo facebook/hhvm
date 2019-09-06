@@ -6,18 +6,13 @@
   (modules
    full_fidelity_ast_types
    full_fidelity_parser_env
-   full_fidelity_declaration_parser
-   full_fidelity_declaration_parser_type
    full_fidelity_editable_positioned_original_source_data
    full_fidelity_editable_positioned_syntax
    full_fidelity_editable_positioned_token
    full_fidelity_editable_syntax
    full_fidelity_editable_token
    full_fidelity_editable_trivia
-   full_fidelity_expression_parser
-   full_fidelity_expression_parser_type
    full_fidelity_lexer
-   full_fidelity_lexer_sig
    full_fidelity_minimal_syntax
    full_fidelity_minimal_token
    full_fidelity_minimal_trivia
@@ -25,17 +20,12 @@
    full_fidelity_operator
    full_fidelity_parser
    full_fidelity_parser_errors
-   full_fidelity_parser_helpers
    full_fidelity_parser_profiling
    full_fidelity_positioned_syntax
    full_fidelity_positioned_token
    full_fidelity_positioned_trivia
-   full_fidelity_precedence_parser
    full_fidelity_rewriter
-   full_fidelity_simple_parser
    full_fidelity_source_text
-   full_fidelity_statement_parser
-   full_fidelity_statement_parser_type
    stats_container
    full_fidelity_token_kind
    full_fidelity_syntax
@@ -44,13 +34,8 @@
    full_fidelity_syntax_tree
    full_fidelity_syntax_type
    full_fidelity_trivia_kind
-   full_fidelity_type_lexer
-   full_fidelity_type_parser
-   full_fidelity_type_parser_type
    full_fidelity_validated_syntax
    lambda_analyzer
-   full_fidelity_parser_context
-   little_cache
    lexable_trivia_sig
    lexable_token_sig
    lexable_positioned_token_sig
@@ -58,7 +43,6 @@
    positioned_parser
    positioned_syntax_sig
    syntax_sig
-   parserSig
    rust_pointer
    rust_parser_ffi
    rust_lazy_trivia_ffi

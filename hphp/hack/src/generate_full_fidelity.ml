@@ -914,21 +914,6 @@ end
 (* GenerateFFSyntaxSig *)
 
 module GenerateFFSmartConstructors = struct
-  let to_constructor_methods x =
-    let args = map_and_concat_separated " -> " (fun _ -> "r") x.fields in
-    (* We put state as the last argument to use currying *)
-    sprintf "  val make_%s : %s -> t -> t * r\n" x.type_name args
-
-  let to_make_methods x =
-    let fields = List.mapi x.fields ~f:(fun i _ -> "arg" ^ string_of_int i) in
-    let stack = String.concat ~sep:" " fields in
-    sprintf
-      "    let %s parser %s = call parser (SCI.make_%s %s)\n"
-      x.type_name
-      stack
-      x.type_name
-      stack
-
   let full_fidelity_smart_constructors_template : string =
     make_header
       MLStyle
@@ -942,7 +927,9 @@ module ParserEnv = Full_fidelity_parser_env
 
 module type SmartConstructors_S = sig
   module Token : Lexable_token_sig.LexableToken_S
+
   type t (* state *) [@@deriving show]
+
   type r (* smart constructor return type *) [@@deriving show]
 
   val rust_parse :
@@ -951,34 +938,12 @@ module type SmartConstructors_S = sig
     t * r * Full_fidelity_syntax_error.t list * Rust_pointer.t option
 
   val initial_state : ParserEnv.t -> t
-  val make_token : Token.t -> t -> t * r
-  val make_missing : Full_fidelity_source_text.pos -> t -> t * r
-  val make_list : Full_fidelity_source_text.pos -> r list -> t -> t * r
-CONSTRUCTOR_METHODS
-end
-
-module ParserWrapper (Parser : sig
-  type parser_type
-  module SCI : SmartConstructors_S
-  val call : parser_type -> (SCI.t -> SCI.t * SCI.r) -> parser_type * SCI.r
-end) = struct
-
-  module Make = struct
-    open Parser
-
-    let token parser token = call parser (SCI.make_token token)
-    let missing parser p = call parser (SCI.make_missing p)
-    let list parser p items = call parser (SCI.make_list p items)
-MAKE_METHODS
-  end
 end
 "
 
   let full_fidelity_smart_constructors =
     Full_fidelity_schema.make_template_file
-      ~transformations:
-        [ { pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods };
-          { pattern = "MAKE_METHODS"; func = to_make_methods } ]
+      ~transformations:[]
       ~filename:
         (full_fidelity_path_prefix ^ "smart_constructors/smartConstructors.ml")
       ~template:full_fidelity_smart_constructors_template
@@ -1350,90 +1315,7 @@ end
 
 (* GenerateFFRustCoroutineSmartConstructors *)
 
-module GenerateFFParserSig = struct
-  let to_make_methods x =
-    let args = map_and_concat_separated " -> " (fun _ -> "SC.r") x.fields in
-    (* We put state as the last argument to use currying *)
-    sprintf "        val %s : t -> %s -> t * SC.r\n" x.type_name args
-
-  let full_fidelity_parser_sig_template : string =
-    make_header
-      MLStyle
-      "
- * This module contains a signature which can be used to describe smart
- * constructors.
-  "
-    ^ "
-
-module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
-  module Token = Syntax.Token
-  module TokenKind = Full_fidelity_token_kind
-  module SyntaxError = Full_fidelity_syntax_error
-  module Env = Full_fidelity_parser_env
-  module type SCWithKind_S = SmartConstructorsWrappers.SyntaxKind_S
-  module type Lexer_S = Full_fidelity_lexer_sig.WithToken(Token).Lexer_S
-
-  module WithLexer(Lexer : Lexer_S) = struct
-    module type Parser_S = sig
-      module SC : SCWithKind_S with module Token = Token
-      type t [@@deriving show]
-      val pos : t -> Full_fidelity_source_text.pos
-      val sc_call : t -> (SC.t -> SC.t * SC.r) -> t * SC.r
-      val lexer : t -> Lexer.t
-      val errors : t -> Full_fidelity_syntax_error.t list
-      val env : t -> Full_fidelity_parser_env.t
-      val sc_state : t -> SC.t
-      val with_errors : t -> SyntaxError.t list -> t
-      val with_lexer : t -> Lexer.t -> t
-      val expect : t -> TokenKind.t list -> t
-      val skipped_tokens : t -> Token.t list
-      val with_skipped_tokens : t -> Token.t list -> t
-      val clear_skipped_tokens : t -> t
-
-      module Make : sig
-        val token : t -> Token.t -> t * SC.r
-        val missing : t -> Full_fidelity_source_text.pos -> t * SC.r
-        val list : t -> Full_fidelity_source_text.pos -> SC.r list -> t * SC.r
-MAKE_METHODS
-      end
-    end
-  end
-end
-"
-
-  let full_fidelity_parser_sig =
-    Full_fidelity_schema.make_template_file
-      ~transformations:[{ pattern = "MAKE_METHODS"; func = to_make_methods }]
-      ~filename:(full_fidelity_path_prefix ^ "parserSig.ml")
-      ~template:full_fidelity_parser_sig_template
-      ()
-end
-
-(* GenerateFFParserSig *)
-
 module GenerateFFVerifySmartConstructors = struct
-  let to_constructor_methods x =
-    let params = List.mapi x.fields ~f:(fun i _ -> sprintf "p%d" i) in
-    let args = List.mapi x.fields ~f:(fun i _ -> sprintf "a%d" i) in
-    sprintf
-      "
-  let make_%s %s stack =
-    match stack with
-    | %s :: rem ->
-      let () = verify ~stack [%s] [%s] \"%s\" in
-      let node = Syntax.make_%s %s in
-      node :: rem, node
-    | _ -> failwith \"Unexpected stack state\"
-"
-      x.type_name
-      (String.concat ~sep:" " params)
-      (String.concat ~sep:" :: " (List.rev args))
-      (String.concat ~sep:"; " params)
-      (String.concat ~sep:"; " args)
-      x.type_name
-      x.type_name
-      (String.concat ~sep:" " params)
-
   let full_fidelity_verify_smart_constructors_template : string =
     make_header
       MLStyle
@@ -1445,64 +1327,38 @@ module GenerateFFVerifySmartConstructors = struct
 
 open Core_kernel
 
-module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
-    module Token = Syntax.Token
-    type t = Syntax.t list [@@deriving show]
-    type r = Syntax.t [@@deriving show]
+module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
+  module Token = Syntax.Token
 
-    exception NotEquals of
+  type t = Syntax.t list [@@deriving show]
+
+  type r = Syntax.t [@@deriving show]
+
+  exception NotEquals of string * Syntax.t list * Syntax.t list * Syntax.t list
+
+  exception
+    NotPhysicallyEquals of
       string * Syntax.t list * Syntax.t list * Syntax.t list
-    exception NotPhysicallyEquals of
-      string * Syntax.t list * Syntax.t list * Syntax.t list
 
-    let verify ~stack params args cons_name =
-      let equals e1 e2 =
-        if not (phys_equal e1 e2) then
-          if e1 = e2
-          then
-            raise @@ NotPhysicallyEquals
-              (cons_name
-              , List.rev stack
-              , params
-              , args
-              )
-          else
-            raise @@ NotEquals
-              (cons_name
-              , List.rev stack
-              , params
-              , args
-              )
-      in
-      List.iter2_exn ~f:equals params args
+  let verify ~stack params args cons_name =
+    let equals e1 e2 =
+      if not (phys_equal e1 e2) then
+        if e1 = e2 then
+          raise @@ NotPhysicallyEquals (cons_name, List.rev stack, params, args)
+        else
+          raise @@ NotEquals (cons_name, List.rev stack, params, args)
+    in
+    List.iter2_exn ~f:equals params args
 
-    let rust_parse = Syntax.rust_parse_with_verify_sc
+  let rust_parse = Syntax.rust_parse_with_verify_sc
 
-    let initial_state _ = []
-
-    let make_token token stack =
-      let token = Syntax.make_token token in
-      token :: stack, token
-
-    let make_missing (s, o) stack =
-      let missing = Syntax.make_missing s o in
-      missing :: stack, missing
-
-    let make_list (s, o) items stack =
-      if items <> [] then
-        let (h, t) = List.split_n stack (List.length items) in
-        let () = verify ~stack items (List.rev h) \"list\" in
-        let lst = Syntax.make_list s o items in
-        lst :: t, lst
-      else make_missing (s, o) stack
-CONSTRUCTOR_METHODS
+  let initial_state _ = []
 end
 "
 
   let full_fidelity_verify_smart_constructors =
     Full_fidelity_schema.make_template_file
-      ~transformations:
-        [{ pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods }]
+      ~transformations:[]
       ~filename:
         ( full_fidelity_path_prefix
         ^ "smart_constructors/verifySmartConstructors.ml" )
@@ -1513,18 +1369,6 @@ end
 (* GenerateFFVerifySmartConstructors *)
 
 module GenerateFFSyntaxSmartConstructors = struct
-  let to_constructor_methods x =
-    let fields = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d" i) in
-    let stack = String.concat ~sep:" " fields in
-    let arr = String.concat ~sep:"; " fields in
-    sprintf
-      "    let make_%s %s state = State.next state [%s], Syntax.make_%s %s\n"
-      x.type_name
-      stack
-      arr
-      x.type_name
-      stack
-
   let full_fidelity_syntax_smart_constructors_template : string =
     make_header
       MLStyle
@@ -1534,74 +1378,71 @@ module GenerateFFSyntaxSmartConstructors = struct
  "
     ^ "
 
-open Core_kernel
-
 module type SC_S = SmartConstructors.SmartConstructors_S
+
 module ParserEnv = Full_fidelity_parser_env
 
 module type State_S = sig
   type r [@@deriving show]
+
   type t [@@deriving show]
+
   val initial : ParserEnv.t -> t
+
   val next : t -> r list -> t
 end
 
 module type RustParser_S = sig
   type t
+
   type r
+
   val rust_parse :
     Full_fidelity_source_text.t ->
     ParserEnv.t ->
     t * r * Full_fidelity_syntax_error.t list * Rust_pointer.t option
 end
 
-module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
-  module WithState(State : State_S with type r = Syntax.t) = struct
-  module WithRustParser(RustParser : RustParser_S
-   with type t = State.t
-   with type r = Syntax.t
-  ) = struct
-    module Token = Syntax.Token
-    type t = State.t [@@deriving show]
+module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
+  module WithState (State : State_S with type r = Syntax.t) = struct
+    module WithRustParser
+        (RustParser : RustParser_S with type t = State.t with type r = Syntax.t) =
+    struct
+      module Token = Syntax.Token
+
+      type t = State.t [@@deriving show]
+
+      type r = Syntax.t [@@deriving show]
+
+      let rust_parse = RustParser.rust_parse
+
+      let initial_state = State.initial
+    end
+  end
+
+  include WithState (struct
     type r = Syntax.t [@@deriving show]
 
-    let rust_parse = RustParser.rust_parse
+    type t = unit [@@deriving show]
 
-    let initial_state = State.initial
-    let make_token token state = State.next state [], Syntax.make_token token
-    let make_missing (s, o) state = State.next state [], Syntax.make_missing s o
-    let make_list (s, o) items state =
-      if items <> []
-      then State.next state items, Syntax.make_list s o items
-      else make_missing (s, o) state
-CONSTRUCTOR_METHODS
-  end
-  end
+    let initial _ = ()
 
-  include WithState(
-    struct
-      type r = Syntax.t [@@deriving show]
-      type t = unit [@@deriving show]
-      let initial _ = ()
-      let next () _ = ()
-    end
-  )
+    let next () _ = ()
+  end)
 
-  include WithRustParser(
-    struct
-      type r = Syntax.t
-      type t = unit
-      let rust_parse = Syntax.rust_parse
-    end
-  )
+  include WithRustParser (struct
+    type r = Syntax.t
 
+    type t = unit
+
+    let rust_parse = Syntax.rust_parse
+  end)
 end
 "
 
   let full_fidelity_syntax_smart_constructors =
     Full_fidelity_schema.make_template_file
-      ~transformations:
-        [{ pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods }]
+      ~transformations:[]
       ~filename:
         ( full_fidelity_path_prefix
         ^ "smart_constructors/syntaxSmartConstructors.ml" )
@@ -1964,28 +1805,6 @@ end
 (* GenerateRustFactsSmartConstructors *)
 
 module GenerateFFSmartConstructorsWrappers = struct
-  let to_constructor_methods x =
-    let fields = List.mapi x.fields ~f:(fun i _ -> "arg" ^ string_of_int i) in
-    let stack = String.concat ~sep:" " fields in
-    let raw_stack =
-      map_and_concat_separated " " (fun x -> "(snd " ^ x ^ ")") fields
-    in
-    sprintf
-      "  let make_%s %s state = compose SK.%s (SC.make_%s %s state)\n"
-      x.type_name
-      stack
-      x.kind_name
-      x.type_name
-      raw_stack
-
-  let to_type_tests_sig x = sprintf "  val is_%s : r -> bool\n" x.type_name
-
-  let to_type_tests x =
-    sprintf
-      ("  let is_" ^^ type_name_fmt ^^ " = has_kind SK.%s\n")
-      x.type_name
-      x.kind_name
-
   let full_fidelity_smart_constructors_wrappers_template : string =
     make_header
       MLStyle
@@ -1995,68 +1814,44 @@ module GenerateFFSmartConstructorsWrappers = struct
  "
     ^ "
 
-open Core_kernel
-
 module type SC_S = SmartConstructors.SmartConstructors_S
+
 module SK = Full_fidelity_syntax_kind
 
 module type SyntaxKind_S = sig
   include SC_S
+
   type original_sc_r [@@deriving show]
-  val extract : r -> original_sc_r
-  val is_name : r -> bool
-  val is_abstract : r -> bool
-  val is_missing : r -> bool
-  val is_list : r -> bool
-TYPE_TESTS_SIG
 end
 
-module SyntaxKind(SC : SC_S)
-  : (SyntaxKind_S
+module SyntaxKind (SC : SC_S) :
+  SyntaxKind_S
     with module Token = SC.Token
-    and type original_sc_r = SC.r
-    and type t = SC.t
-  ) = struct
+     and type original_sc_r = SC.r
+     and type t = SC.t = struct
   module Token = SC.Token
+
   type original_sc_r = SC.r [@@deriving show]
+
   type t = SC.t [@@deriving show]
+
   type r = SK.t * SC.r [@@deriving show]
 
-  let extract (_, r) = r
-  let kind_of (kind, _) = kind
-  let compose : SK.t -> t * SC.r -> t * r = fun kind (state, res) ->
-    state, (kind, res)
+  let compose : SK.t -> t * SC.r -> t * r =
+   (fun kind (state, res) -> (state, (kind, res)))
 
   let rust_parse text env =
-    let state, res, errors, pointer = SC.rust_parse text env in
-    let state, res = compose SK.Script (state, res) in
-    state, res, errors, pointer
+    let (state, res, errors, pointer) = SC.rust_parse text env in
+    let (state, res) = compose SK.Script (state, res) in
+    (state, res, errors, pointer)
 
   let initial_state = SC.initial_state
-
-  let make_token token state = compose (SK.Token (SC.Token.kind token)) (SC.make_token token state)
-  let make_missing p state = compose SK.Missing (SC.make_missing p state)
-  let make_list p items state =
-    let kind = if items <> [] then SK.SyntaxList else SK.Missing in
-    compose kind (SC.make_list p (List.map ~f:snd items) state)
-CONSTRUCTOR_METHODS
-
-  let has_kind kind node = kind_of node = kind
-  let is_name = has_kind (SK.Token Full_fidelity_token_kind.Name)
-  let is_abstract = has_kind (SK.Token Full_fidelity_token_kind.Abstract)
-  let is_missing = has_kind SK.Missing
-  let is_list = has_kind SK.Missing
-TYPE_TESTS
-
 end
 "
 
   let full_fidelity_smart_constructors_wrappers =
     Full_fidelity_schema.make_template_file
-      ~transformations:
-        [ { pattern = "TYPE_TESTS_SIG"; func = to_type_tests_sig };
-          { pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods };
-          { pattern = "TYPE_TESTS"; func = to_type_tests } ]
+      ~transformations:[]
       ~filename:
         ( full_fidelity_path_prefix
         ^ "smart_constructors/smartConstructorsWrappers.ml" )
@@ -3889,7 +3684,6 @@ let () =
     GenerateFFRustDeclModeSmartConstructors.decl_mode_smart_constructors;
   generate_file GenerateRustFlattenSmartConstructors.flatten_smart_constructors;
   generate_file GenerateRustFactsSmartConstructors.facts_smart_constructors;
-  generate_file GenerateFFParserSig.full_fidelity_parser_sig;
   generate_file
     GenerateFFSmartConstructorsWrappers
     .full_fidelity_smart_constructors_wrappers;

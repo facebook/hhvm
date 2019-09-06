@@ -24,7 +24,6 @@ module Trivia = Full_fidelity_positioned_trivia
 module SourceText = Full_fidelity_source_text
 module TokenKind = Full_fidelity_token_kind
 module TriviaKind = Full_fidelity_trivia_kind
-module MinimalLexer = Full_fidelity_lexer.WithToken (MinimalToken)
 
 module LazyTrivia : sig
   type t [@@deriving show]
@@ -238,23 +237,14 @@ let is_in_xhp token =
   | TokenKind.XHPBody -> true
   | _ -> false
 
-let make_ocaml_scanner token fn offset =
-  let lexer = MinimalLexer.make_at token.source_text offset in
-  let (_, trivia) = fn lexer in
-  trivia
-
 let make_rust_scanner token fn (offset : int) = fn token.source_text offset
 
 let leading token =
   let scanner =
-    match (is_in_xhp token, Full_fidelity_lexer.Env.is_rust ()) with
-    | (true, false) ->
-      make_ocaml_scanner token MinimalLexer.scan_leading_xhp_trivia
-    | (false, false) ->
-      make_ocaml_scanner token MinimalLexer.scan_leading_php_trivia
-    | (true, true) ->
+    match is_in_xhp token with
+    | true ->
       make_rust_scanner token Rust_lazy_trivia_ffi.scan_leading_xhp_trivia
-    | (false, true) ->
+    | false ->
       make_rust_scanner token Rust_lazy_trivia_ffi.scan_leading_php_trivia
   in
   LazyTrivia.leading
@@ -266,14 +256,10 @@ let leading token =
 
 let trailing token =
   let scanner =
-    match (is_in_xhp token, Full_fidelity_lexer.Env.is_rust ()) with
-    | (true, false) ->
-      make_ocaml_scanner token MinimalLexer.scan_trailing_xhp_trivia
-    | (false, false) ->
-      make_ocaml_scanner token MinimalLexer.scan_trailing_php_trivia
-    | (true, true) ->
+    match is_in_xhp token with
+    | true ->
       make_rust_scanner token Rust_lazy_trivia_ffi.scan_trailing_xhp_trivia
-    | (false, true) ->
+    | false ->
       make_rust_scanner token Rust_lazy_trivia_ffi.scan_trailing_php_trivia
   in
   let offset = token.offset + token.leading_width + token.width in

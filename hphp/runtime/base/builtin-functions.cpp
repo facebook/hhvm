@@ -418,7 +418,6 @@ vm_decode_function(const_variant_ref function,
                    HPHP::Class*& cls,
                    StringData*& invName,
                    bool& dynamic,
-                   ArrayData*& reifiedGenerics,
                    DecodeFlags flags /* = DecodeFlags::Warn */,
                    bool genericsAlreadyGiven /* = false */) {
   bool forwarding = false;

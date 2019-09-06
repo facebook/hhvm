@@ -370,7 +370,6 @@ static Variant call_intercept_handler_callback(
     assertx(tvIsVecOrVArray(tv));
     return tv->m_data.parr;
   }();
-  callCtx.reifiedGenerics = reifiedGenerics;
   vm_decode_function(function, callCtx, DecodeFlags::Warn, true);
   auto f = callCtx.func;
   if (!f) return uninit_null();

@@ -4611,8 +4611,7 @@ namespace {
 
 template<bool dynamic, class InitActRec>
 void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
-               ArrayData* reifiedGenerics, InitActRec initActRec,
-               bool logAsDynamicCall = true) {
+               InitActRec initActRec, bool logAsDynamicCall = true) {
   if (fca.enforceReffiness()) callerReffinessChecks(func, fca);
   if (dynamic && logAsDynamicCall) callerDynamicCallChecks(func);
   callerRxChecks(vmfp(), func);
@@ -4630,7 +4629,6 @@ void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
   ar->setReturn(vmfp(), origpc, jit::tc::ustubs().retHelper);
   ar->trashVarEnv();
   if (fca.hasGenerics()) {
-    assertx(!reifiedGenerics);
     assertx(tvIsVecOrVArray(vmStack().topC()));
     if (func->hasReifiedGenerics()) {
       ar->setReifiedGenerics(vmStack().topC()->m_data.parr);
@@ -4639,7 +4637,6 @@ void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
       vmStack().popC();
     }
   }
-  if (reifiedGenerics != nullptr) ar->setReifiedGenerics(reifiedGenerics);
 
   initActRec(ar);
 
@@ -4682,7 +4679,7 @@ OPTBLD_INLINE void fcallFuncObj(PC origpc, PC& pc, const FCallArgs& fca,
     raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
   }
 
-  fcallImpl<false>(origpc, pc, fca, func, nullptr, [&] (ActRec* ar) {
+  fcallImpl<false>(origpc, pc, fca, func, [&] (ActRec* ar) {
     if (func->isStaticInPrologue()) {
       ar->setClass(cls);
     } else {
@@ -4730,17 +4727,16 @@ OPTBLD_INLINE void fcallFuncArr(PC origpc, PC& pc, const FCallArgs& fca,
   HPHP::Class* cls = nullptr;
   StringData* invName = nullptr;
   bool dynamic = false;
-  ArrayData* reifiedGenerics = nullptr;
 
   auto const func = vm_decode_function(const_variant_ref{arr}, vmfp(), thiz,
-                                       cls, invName, dynamic, reifiedGenerics,
+                                       cls, invName, dynamic,
                                        DecodeFlags::NoWarn);
   assertx(dynamic);
   if (UNLIKELY(func == nullptr)) {
     raise_error("Invalid callable (array)");
   }
 
-  fcallImpl<true>(origpc, pc, fca, func, reifiedGenerics, [&] (ActRec* ar) {
+  fcallImpl<true>(origpc, pc, fca, func, [&] (ActRec* ar) {
     if (thiz) {
       thiz->incRefCount();
       ar->setThis(thiz);
@@ -4779,10 +4775,9 @@ OPTBLD_INLINE void fcallFuncStr(PC origpc, PC& pc, const FCallArgs& fca,
   HPHP::Class* cls = nullptr;
   StringData* invName = nullptr;
   bool dynamic = false;
-  ArrayData* reifiedGenerics = nullptr;
 
   auto const func = vm_decode_function(const_variant_ref{str}, vmfp(), thiz,
-                                       cls, invName, dynamic, reifiedGenerics,
+                                       cls, invName, dynamic,
                                        DecodeFlags::NoWarn);
   assertx(dynamic);
   if (UNLIKELY(func == nullptr)) {
@@ -4790,7 +4785,7 @@ OPTBLD_INLINE void fcallFuncStr(PC origpc, PC& pc, const FCallArgs& fca,
       args.size ? stripInOutSuffix(str.get()) : str.get());
   }
 
-  fcallImpl<true>(origpc, pc, fca, func, reifiedGenerics, [&] (ActRec* ar) {
+  fcallImpl<true>(origpc, pc, fca, func, [&] (ActRec* ar) {
     if (thiz) {
       thiz->incRefCount();
       ar->setThis(thiz);
@@ -4819,9 +4814,6 @@ OPTBLD_INLINE void fcallFuncFunc(PC origpc, PC& pc, const FCallArgs& fca,
     raise_error(Strings::CALL_ILLFORMED_FUNC);
   }
 
-  // FIXME: can this ever be non-null?
-  ArrayData* reifiedGenerics = nullptr;
-
   // Handle inout name mangling
   if (UNLIKELY(args.size)) {
     auto const funcName = func->fullDisplayName();
@@ -4831,12 +4823,12 @@ OPTBLD_INLINE void fcallFuncFunc(PC origpc, PC& pc, const FCallArgs& fca,
     StringData* invName = nullptr;
     bool dynamic = false;
     func = vm_decode_function(v, vmfp(), thiz, cls, invName, dynamic,
-                              reifiedGenerics, DecodeFlags::NoWarn);
+                              DecodeFlags::NoWarn);
     if (func == nullptr) raise_call_to_undefined(funcName);
     assertx(!thiz && !cls && !invName);
   }
 
-  fcallImpl<false>(origpc, pc, fca, func, reifiedGenerics, [&] (ActRec* ar) {
+  fcallImpl<false>(origpc, pc, fca, func, [&] (ActRec* ar) {
     ar->trashThis();
   });
 }
@@ -4851,9 +4843,6 @@ OPTBLD_INLINE void fcallFuncClsMeth(PC origpc, PC& pc, const FCallArgs& fca,
   auto const cls = clsMeth->getCls();
   assertx(func && cls);
 
-  // FIXME: can this ever be non-null?
-  ArrayData* reifiedGenerics = nullptr;
-
   // Handle inout name mangling
   if (UNLIKELY(args.size)) {
     auto const funcName = func->fullDisplayName();
@@ -4863,12 +4852,12 @@ OPTBLD_INLINE void fcallFuncClsMeth(PC origpc, PC& pc, const FCallArgs& fca,
     StringData* invName = nullptr;
     bool dynamic = false;
     func = vm_decode_function(v, vmfp(), thiz, cls2, invName, dynamic,
-                              reifiedGenerics, DecodeFlags::NoWarn);
+                              DecodeFlags::NoWarn);
     if (func == nullptr) raise_call_to_undefined(funcName);
     assertx(!thiz && cls == cls2 && !invName);
   }
 
-  fcallImpl<false>(origpc, pc, fca, func, reifiedGenerics, [&] (ActRec* ar) {
+  fcallImpl<false>(origpc, pc, fca, func, [&] (ActRec* ar) {
     ar->setClass(cls);
   });
 }
@@ -4902,7 +4891,7 @@ OPTBLD_INLINE void iopFCallFuncD(PC origpc, PC& pc, FCallArgs fca, Id id) {
     raise_call_to_undefined(vmfp()->unit()->lookupLitstrId(id));
   }
 
-  fcallImpl<false>(origpc, pc, fca, func, nullptr, [&] (ActRec* ar) {
+  fcallImpl<false>(origpc, pc, fca, func, [&] (ActRec* ar) {
     ar->trashThis();
   });
 }
@@ -4931,7 +4920,7 @@ void fcallObjMethodImpl(PC origpc, PC& pc, const FCallArgs& fca,
     throw_call_reified_func_without_generics(func);
   }
 
-  fcallImpl<dynamic>(origpc, pc, fca, func, nullptr, [&] (ActRec* ar) {
+  fcallImpl<dynamic>(origpc, pc, fca, func, [&] (ActRec* ar) {
     /* Transfer ownership of obj to the ActRec*/
     ar->setThis(obj);
 
@@ -5032,7 +5021,6 @@ void resolveMethodImpl(Cell* c1, Cell* c2) {
   HPHP::Class* cls = nullptr;
   StringData* invName = nullptr;
   bool dynamic = false;
-  ArrayData* reifiedGenerics = nullptr;
   auto arr = make_varray(cellAsVariant(*c2), cellAsVariant(*c1));
   auto const func = vm_decode_function(
     Variant{arr},
@@ -5041,7 +5029,6 @@ void resolveMethodImpl(Cell* c1, Cell* c2) {
     cls,
     invName,
     dynamic,
-    reifiedGenerics,
     DecodeFlags::NoWarn
   );
   assertx(dynamic);
@@ -5150,7 +5137,7 @@ void fcallClsMethodImpl(PC origpc, PC& pc, const FCallArgs& fca, Class* cls,
     throw_call_reified_func_without_generics(func);
   }
 
-  fcallImpl<dynamic>(origpc, pc, fca, func, nullptr, [&] (ActRec* ar) {
+  fcallImpl<dynamic>(origpc, pc, fca, func, [&] (ActRec* ar) {
     if (obj) {
       obj->incRefCount();
       ar->setThis(obj);
@@ -5374,7 +5361,7 @@ OPTBLD_INLINE void iopFCallCtor(PC origpc, PC& pc, FCallArgs fca,
   auto const res UNUSED = lookupCtorMethod(func, obj->getVMClass(), ctx, true);
   assertx(res == LookupResult::MethodFoundWithThis);
 
-  fcallImpl<false>(origpc, pc, fca, func, nullptr, [&] (ActRec* ar) {
+  fcallImpl<false>(origpc, pc, fca, func, [&] (ActRec* ar) {
     /* Transfer ownership of obj to the ActRec*/
     ar->setThis(obj);
   });

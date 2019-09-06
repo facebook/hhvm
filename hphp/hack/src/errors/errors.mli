@@ -236,7 +236,9 @@ val uninstantiable_class :
 
 val abstract_const_usage : Pos.t -> Pos.t -> string -> unit
 
-val add_a_typehint : Pos.t -> unit
+val const_without_typehint : Pos.t * string -> unit
+
+val prop_without_typehint : string -> Pos.t * string -> unit
 
 val illegal_constant : Pos.t -> unit
 

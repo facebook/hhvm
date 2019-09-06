@@ -1359,8 +1359,21 @@ let abstract_const_usage usage_pos decl_pos name =
     [ (usage_pos, "Cannot reference abstract constant " ^ name ^ " directly");
       (decl_pos, "Declaration is here") ]
 
-let add_a_typehint pos =
-  add (Naming.err_code Naming.AddATypehint) pos "Please add a type hint"
+let const_without_typehint sid =
+  let (pos, name) = sid in
+  let msg =
+    Printf.sprintf
+      "Please add a type hint 'const SomeType %s'"
+      (Utils.strip_all_ns name)
+  in
+  add (Naming.err_code Naming.AddATypehint) pos msg
+
+let prop_without_typehint visibility sid =
+  let (pos, name) = sid in
+  let msg =
+    Printf.sprintf "Please add a type hint '%s SomeType %s'" visibility name
+  in
+  add (Naming.err_code Naming.AddATypehint) pos msg
 
 let illegal_constant pos =
   add (Naming.err_code Naming.IllegalConstant) pos "Illegal constant value"

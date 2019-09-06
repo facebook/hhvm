@@ -8830,7 +8830,9 @@ and class_var_def ~is_static env cv =
     Option.is_none cv.cv_type
     && Partial.should_check_error (Env.get_mode env) 2001
   then
-    Errors.add_a_typehint (fst cv.cv_id);
+    Errors.prop_without_typehint
+      (string_of_visibility cv.cv_visibility)
+      cv.cv_id;
   ( env,
     {
       T.cv_final = cv.cv_final;

@@ -3206,7 +3206,7 @@ module Make (GetLocals : GetLocals) = struct
   let check_constant_hint cst =
     match cst.Aast.cst_type with
     | None when Partial.should_check_error cst.Aast.cst_mode 2001 ->
-      Errors.add_a_typehint (fst cst.Aast.cst_name)
+      Errors.const_without_typehint cst.Aast.cst_name
     | None
     | Some _ ->
       ()

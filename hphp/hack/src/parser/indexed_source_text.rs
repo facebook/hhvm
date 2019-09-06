@@ -26,6 +26,10 @@ impl<'a> IndexedSourceText<'a> {
         self.source_text
     }
 
+    pub fn offset_to_position(&self, offset: isize) -> (isize, isize) {
+        self.offset_map.offset_to_position(offset)
+    }
+
     pub fn relative_pos(&self, start_offset: usize, end_offset: usize) -> Pos {
         let pos_start = self.offset_map.offset_to_file_pos_triple(start_offset);
         let pos_end = self.offset_map.offset_to_file_pos_triple(end_offset);

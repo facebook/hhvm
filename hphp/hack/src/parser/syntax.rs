@@ -99,49 +99,87 @@ where
         Self { syntax, value }
     }
 
-    pub fn is_public(&self) -> bool {
-        if let SyntaxVariant::Token(t) = &self.syntax {
-            t.kind() == TokenKind::Public
-        } else {
-            false
+    fn is_specific_token(&self, kind: TokenKind) -> bool {
+        match &self.syntax {
+            SyntaxVariant::Token(t) => t.kind() == kind,
+            _ => false,
         }
+    }
+
+    pub fn is_public(&self) -> bool {
+        self.is_specific_token(TokenKind::Public)
     }
 
     pub fn is_private(&self) -> bool {
-        if let SyntaxVariant::Token(t) = &self.syntax {
-            t.kind() == TokenKind::Private
-        } else {
-            false
-        }
+        self.is_specific_token(TokenKind::Private)
     }
 
     pub fn is_protected(&self) -> bool {
-        if let SyntaxVariant::Token(t) = &self.syntax {
-            t.kind() == TokenKind::Protected
-        } else {
-            false
-        }
+        self.is_specific_token(TokenKind::Protected)
     }
 
     pub fn is_abstract(&self) -> bool {
-        if let SyntaxVariant::Token(t) = &self.syntax {
-            t.kind() == TokenKind::Abstract
-        } else {
-            false
-        }
+        self.is_specific_token(TokenKind::Abstract)
     }
 
     pub fn is_static(&self) -> bool {
-        if let SyntaxVariant::Token(t) = &self.syntax {
-            t.kind() == TokenKind::Static
-        } else {
-            false
-        }
+        self.is_specific_token(TokenKind::Static)
+    }
+
+    pub fn is_ampersand(&self) -> bool {
+        self.is_specific_token(TokenKind::Ampersand)
+    }
+
+    pub fn is_ellipsis(&self) -> bool {
+        self.is_specific_token(TokenKind::DotDotDot)
+    }
+
+    pub fn is_final(&self) -> bool {
+        self.is_specific_token(TokenKind::Final)
+    }
+
+    pub fn is_async(&self) -> bool {
+        self.is_specific_token(TokenKind::Async)
+    }
+
+    pub fn is_construct(&self) -> bool {
+        self.is_specific_token(TokenKind::Construct)
+    }
+
+    pub fn is_void(&self) -> bool {
+        self.is_specific_token(TokenKind::Void)
+    }
+
+    pub fn is_as_expression(&self) -> bool {
+        self.kind() == SyntaxKind::AsExpression
     }
 
     pub fn is_missing(&self) -> bool {
-        if let SyntaxVariant::Missing = &self.syntax {
-            true
+        self.kind() == SyntaxKind::Missing
+    }
+
+    pub fn is_namespace_empty_body(&self) -> bool {
+        self.kind() == SyntaxKind::NamespaceEmptyBody
+    }
+
+    pub fn syntax_node_to_list<'a>(&'a self) -> Box<dyn DoubleEndedIterator<Item = &'a Self> + 'a> {
+        use std::iter::{empty, once};
+        match &self.syntax {
+            SyntaxVariant::SyntaxList(x) => Box::new(x.iter()),
+            SyntaxVariant::Missing => Box::new(empty()),
+            _ => Box::new(once(self)),
+        }
+    }
+
+    pub fn is_namespace_prefix(&self) -> bool {
+        if let SyntaxVariant::QualifiedName(x) = &self.syntax {
+            x.qualified_name_parts
+                .syntax_node_to_list()
+                .last()
+                .map_or(false, |p| match &p.syntax {
+                    SyntaxVariant::ListItem(x) => !&x.list_separator.is_missing(),
+                    _ => false,
+                })
         } else {
             false
         }

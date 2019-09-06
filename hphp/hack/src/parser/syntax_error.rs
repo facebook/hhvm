@@ -18,18 +18,29 @@ pub type Error = Cow<'static, str>;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SyntaxError {
+    pub child: Option<Box<SyntaxError>>,
     pub start_offset: usize,
     pub end_offset: usize,
     pub message: Error,
 }
 
 impl SyntaxError {
-    pub fn make(start_offset: usize, end_offset: usize, message: Error) -> Self {
+    pub fn make_with_child(
+        child: Option<SyntaxError>,
+        start_offset: usize,
+        end_offset: usize,
+        message: Error,
+    ) -> Self {
         Self {
+            child: child.map(|x| Box::new(x)),
             start_offset,
             end_offset,
             message,
         }
+    }
+
+    pub fn make(start_offset: usize, end_offset: usize, message: Error) -> Self {
+        Self::make_with_child(None, start_offset, end_offset, message)
     }
 }
 
@@ -44,7 +55,7 @@ impl Ocamlvalue for SyntaxError {
         //   error_type   : error_type;
         //   message      : string;
         // }
-        let child = usize_to_ocaml(0); // None
+        let child = self.child.ocamlvalue();
         let start_offset = usize_to_ocaml(self.start_offset);
         let end_offset = usize_to_ocaml(self.end_offset);
         let error_type = usize_to_ocaml(0); // ParseError

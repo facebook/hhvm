@@ -912,23 +912,6 @@ if there already is one, since that one will likely be better than this one. *)
       (cp_hint, cp_kind)
     | _ -> missing_syntax "closure parameter" node env
 
-  (* In some cases, we need to unwrap an extra layer of Block due to lowering
-   * from CompoundStatement. This applies to `if`, `while` and other control flow
-   * statements which allow optional curly braces.
-   *
-   * In other words, we want these to be lowered into the same Ast
-   * `if ($b) { func(); }` and `if ($b) func();`
-   * rather than the left hand side one having an extra `Block` in the Ast
-   *)
-  let unwrap_extra_block (stmt : block) : block =
-    let de_noop = function
-      | [(_, Noop)] -> []
-      | stmts -> stmts
-    in
-    match stmt with
-    | [(_, Block b)] -> de_noop b
-    | blk -> blk
-
   let fail_if_invalid_class_creation env node (_, id) =
     if not !(env.in_static_method) then
       ()
@@ -2250,15 +2233,20 @@ if there already is one, since that one will likely be better than this one. *)
     in
     result
 
-  and pBlock : block parser =
+  (* In some cases, we need to unwrap an extra layer of Block due to lowering
+   * from CompoundStatement. This applies to `if`, `while` and other control flow
+   * statements which allow optional curly braces.
+   *
+   * In other words, we want these to be lowered into the same Ast
+   * `if ($b) { func(); }` and `if ($b) func();`
+   * rather than the left hand side one having an extra `Block` in the Ast
+   *)
+  and pBlock ?(remove_noop = false) : block parser =
    fun node env ->
-    let rec fix_last acc = function
-      | x :: (_ :: _ as xs) -> fix_last (x :: acc) xs
-      | [(_, Block block)] -> List.rev acc @ block
-      | stmt -> List.rev acc @ stmt
-    in
-    let stmt = pStmtUnsafe node env in
-    fix_last [] stmt
+    match pStmt node env with
+    | (_, Block [(_, Noop)]) when remove_noop -> []
+    | (_, Block block) -> block
+    | blk -> [blk]
 
   and pFunctionBody : block parser =
    fun node env ->
@@ -2292,11 +2280,6 @@ if there already is one, since that one will likely be better than this one. *)
           [ lift_awaits_in_statement env pos (fun () ->
                 let (p, r) = pExpr node env in
                 (p, Return (Some (p, r)))) ])
-
-  and pStmtUnsafe : stmt list parser =
-   fun node env ->
-    let stmt = pStmt node env in
-    [stmt]
 
   and pStmt : stmt parser =
    fun node env ->
@@ -2336,8 +2319,7 @@ if there already is one, since that one will likely be better than this one. *)
                         []
                     in
                     let blk =
-                      List.concat
-                      @@ couldMap ~f:pStmtUnsafe switch_section_statements env
+                      couldMap ~f:pStmt switch_section_statements env
                     in
                     let blk =
                       if is_missing switch_section_fallthrough then
@@ -2368,9 +2350,7 @@ if there already is one, since that one will likely be better than this one. *)
                  * produce `Noop`s for compound statements **in if statements**
                  *)
                 let if_condition = pExpr cond env in
-                let if_statement =
-                  unwrap_extra_block @@ pStmtUnsafe stmt env
-                in
+                let if_statement = pBlock ~remove_noop:true stmt env in
                 let if_elseif_statement =
                   let pElseIf : (block -> block) parser =
                    fun node env ->
@@ -2384,7 +2364,7 @@ if there already is one, since that one will likely be better than this one. *)
                       fun next_clause ->
                         let elseif_condition = pExpr ei_cond env in
                         let elseif_statement =
-                          unwrap_extra_block @@ pStmtUnsafe ei_stmt env
+                          pBlock ~remove_noop:true ei_stmt env
                         in
                         [ ( pos,
                             If (elseif_condition, elseif_statement, next_clause)
@@ -2397,7 +2377,7 @@ if there already is one, since that one will likely be better than this one. *)
                     ~init:
                       (match syntax else_clause with
                       | ElseClause { else_statement = e_stmt; _ } ->
-                        unwrap_extra_block @@ pStmtUnsafe e_stmt env
+                        pBlock ~remove_noop:true e_stmt env
                       | Missing -> [(Pos.none, Noop)]
                       | _ -> missing_syntax "else clause" else_clause env)
                 in
@@ -2433,7 +2413,7 @@ if there already is one, since that one will likely be better than this one. *)
             ( pos,
               While
                 ( pExpr while_condition env,
-                  unwrap_extra_block @@ pStmtUnsafe while_body env ) )
+                  pBlock ~remove_noop:true while_body env ) )
           | UsingStatementBlockScoped
               {
                 using_block_await_keyword;
@@ -2492,7 +2472,7 @@ if there already is one, since that one will likely be better than this one. *)
                 let ini = pExprL for_initializer env in
                 let ctr = pExprL for_control env in
                 let eol = pExprL for_end_of_loop env in
-                let blk = unwrap_extra_block @@ pStmtUnsafe for_body env in
+                let blk = pBlock ~remove_noop:true for_body env in
                 (pos, For (ini, ctr, eol, blk)))
           | ForeachStatement
               {
@@ -2519,7 +2499,7 @@ if there already is one, since that one will likely be better than this one. *)
                     let key = pExpr foreach_key env in
                     As_kv (key, value)
                 in
-                let blk = unwrap_extra_block @@ pStmtUnsafe foreach_body env in
+                let blk = pBlock ~remove_noop:true foreach_body env in
                 (pos, Foreach (col, akw, akv, blk)))
           | TryStatement
               {
@@ -2964,7 +2944,7 @@ if there already is one, since that one will likely be better than this one. *)
   and handle_loop_body pos stmts tail env =
     let rec conv acc stmts =
       match stmts with
-      | [] -> List.concat @@ List.rev acc
+      | [] -> List.rev acc
       | {
           syntax =
             UsingStatementFunctionScoped
@@ -2988,9 +2968,9 @@ if there already is one, since that one will likely be better than this one. *)
                     us_block = body;
                   } ))
         in
-        List.concat @@ List.rev ([using] :: acc)
+        List.rev (using :: acc)
       | h :: rest ->
-        let h = pStmtUnsafe h env in
+        let h = pStmt h env in
         conv (h :: acc) rest
     in
     let blk = conv [] (as_list stmts) in

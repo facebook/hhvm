@@ -1,4 +1,5 @@
 <?hh
+<<__DynamicallyConstructible>>
 class Test {
     function say_hello() {
         echo "Hello world";

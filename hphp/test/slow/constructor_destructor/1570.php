@@ -1,20 +1,28 @@
 <?hh
+<<__DynamicallyConstructible>>
 class B1 {
 }
+<<__DynamicallyConstructible>>
 class C1 {
  function __construct() {
 }
  }
+<<__DynamicallyConstructible>>
 class D1 {
  }
+<<__DynamicallyConstructible>>
 class D2 extends C1 {
  }
+<<__DynamicallyConstructible>>
 class D3 extends D2 {
 }
+<<__DynamicallyConstructible>>
 class D4 extends B1 {
  }
+<<__DynamicallyConstructible>>
 class D5 extends D4 {
 }
+<<__DynamicallyConstructible>>
 class D6 extends D1 {
  function __construct($a) {
  if ($a) f();

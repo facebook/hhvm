@@ -1,5 +1,5 @@
 <?hh
-class A {
+<<__DynamicallyConstructible>> class A {
     const B = 'foo';
 }
 <<__EntryPoint>> function main(): void {

@@ -6,6 +6,7 @@ trait TestTrait {
     }
 }
 
+<<__DynamicallyConstructible>>
 class A {
     use TestTrait;
 }

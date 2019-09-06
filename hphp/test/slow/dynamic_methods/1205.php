@@ -1,5 +1,6 @@
 <?hh
 
+<<__DynamicallyConstructible>>
 class dyn_A{
 }
  class B{

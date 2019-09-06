@@ -1,5 +1,6 @@
 <?hh
 
+<<__DynamicallyConstructible>>
 class AB {
   static function foo() {
     var_dump('foo');

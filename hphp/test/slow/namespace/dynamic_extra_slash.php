@@ -1,7 +1,7 @@
 <?hh
 
 namespace A {
-  class B {}
+  <<__DynamicallyConstructible>> class B {}
 }
 
 namespace C {

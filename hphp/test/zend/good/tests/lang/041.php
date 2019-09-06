@@ -1,5 +1,5 @@
 <?hh
-class A {
+<<__DynamicallyConstructible>> class A {
     public    static $b = 'foo';
 }
 <<__EntryPoint>> function main(): void {

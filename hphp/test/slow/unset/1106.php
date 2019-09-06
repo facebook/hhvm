@@ -1,5 +1,6 @@
 <?hh
 
+<<__DynamicallyConstructible>>
 class A {
  static $foo = array(123);
 }

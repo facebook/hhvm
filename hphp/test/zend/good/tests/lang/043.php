@@ -1,5 +1,5 @@
 <?hh
-class A {
+<<__DynamicallyConstructible>> class A {
     static function foo() { return 'foo'; }
 }
 <<__EntryPoint>> function main(): void {

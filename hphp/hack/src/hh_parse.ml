@@ -63,6 +63,7 @@ module FullFidelityParseArgs = struct
     dump_nast: bool;
     disable_lval_as_an_expression: bool;
     pocket_universes: bool;
+    rust_parser_errors: bool;
     enable_constant_visibility_modifiers: bool;
     enable_class_level_where_clauses: bool;
     disable_legacy_soft_typehints: bool;
@@ -100,6 +101,7 @@ module FullFidelityParseArgs = struct
       dump_nast
       disable_lval_as_an_expression
       pocket_universes
+      rust_parser_errors
       enable_constant_visibility_modifiers
       enable_class_level_where_clauses
       disable_legacy_soft_typehints
@@ -135,6 +137,7 @@ module FullFidelityParseArgs = struct
       dump_nast;
       disable_lval_as_an_expression;
       pocket_universes;
+      rust_parser_errors;
       enable_constant_visibility_modifiers;
       enable_class_level_where_clauses;
       disable_legacy_soft_typehints;
@@ -187,6 +190,7 @@ module FullFidelityParseArgs = struct
     let pocket_universes = ref false in
     let files = ref [] in
     let push_file file = files := file :: !files in
+    let rust_parser_errors = ref false in
     let enable_constant_visibility_modifiers = ref false in
     let enable_class_level_where_clauses = ref false in
     let disable_legacy_soft_typehints = ref false in
@@ -302,6 +306,9 @@ No errors are filtered out."
         ( "--pocket-universes",
           Arg.Set pocket_universes,
           "Enables support for Pocket Universes" );
+        ( "--rust-parser-errors",
+          Arg.Bool (fun x -> rust_parser_errors := x),
+          "Use the parser errors written in Rust instead of OCaml one" );
         ( "--enable-constant-visibility-modifiers",
           Arg.Set enable_constant_visibility_modifiers,
           "Require constants to have visibility modifiers" );
@@ -375,6 +382,7 @@ No errors are filtered out."
       !dump_nast
       !disable_lval_as_an_expression
       !pocket_universes
+      !rust_parser_errors
       !enable_constant_visibility_modifiers
       !enable_class_level_where_clauses
       !disable_legacy_soft_typehints
@@ -451,12 +459,19 @@ let handle_existing_file args filename =
   let file = Relative_path.create Relative_path.Dummy filename in
   let source_text = SourceText.from_file file in
   let mode = Full_fidelity_parser.parse_mode source_text in
+  let print_errors =
+    args.codegen || args.full_fidelity_errors || args.full_fidelity_errors_all
+  in
   let env =
     Full_fidelity_parser_env.make
       ~disable_lval_as_an_expression:args.disable_lval_as_an_expression
       ~disable_legacy_soft_typehints:args.disable_legacy_soft_typehints
       ~allow_new_attribute_syntax:args.allow_new_attribute_syntax
-      ~disable_legacy_attribute_syntax:args.disable_legacy_attribute_syntax
+      ~disable_legacy_attribute_syntax:
+        args.disable_legacy_attribute_syntax
+        (* When print_errors is true, the leaked tree will be passed to ParserErrors,
+         * which will consume it. *)
+      ~leak_rust_tree:(args.rust_parser_errors && print_errors)
       ?mode
       ()
   in
@@ -474,9 +489,6 @@ let handle_existing_file args filename =
     let str = DebugPos.dump_syntax root in
     Printf.printf "%s\n" str );
 
-  let print_errors =
-    args.codegen || args.full_fidelity_errors || args.full_fidelity_errors_all
-  in
   let dump_needed = args.full_fidelity_ast_s_expr || args.dump_nast in
   let lowered =
     if dump_needed || print_errors then

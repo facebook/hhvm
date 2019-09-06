@@ -116,8 +116,8 @@ folly::Optional<Tag> getTagImpl(const A* a) {
 }
 
 template<Mode mode, typename A>
-void setTagImpl(A* a, Tag tag) {
-  if (!arrayWantsTag(a)) return;
+bool setTagImpl(A* a, Tag tag) {
+  if (!arrayWantsTag(a)) return false;
   assertx(mode == Mode::Emplace || !getTag(a));
 
   if (wants_local_prov(a)) {
@@ -126,6 +126,7 @@ void setTagImpl(A* a, Tag tag) {
     std::lock_guard<std::mutex> g{s_static_provenance_lock};
     s_static_array_provenance[a] = tag;
   }
+  return true;
 }
 
 template<typename A>
@@ -155,8 +156,9 @@ folly::Optional<Tag> getTag(const APCArray* a) {
 
 template<Mode mode>
 void setTag(ArrayData* ad, Tag tag) {
-  setTagImpl<mode>(ad, tag);
-  ad->markHasProvenanceData();
+  if (setTagImpl<mode>(ad, tag)) {
+    ad->markHasProvenanceData();
+  }
 }
 template<Mode mode>
 void setTag(const APCArray* a, Tag tag) {

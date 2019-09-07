@@ -75,6 +75,7 @@ the chain of jobs could be used to minimize the number of restarts.
 type check_file_computation = {
   path: Relative_path.t;
   names: FileInfo.names;
+  deferred_count: int;
 }
 
 type file_computation =
@@ -194,7 +195,12 @@ let process_file
     let result =
       match deferred_files with
       | [] -> (Errors.merge errors' errors, [])
-      | _ -> (errors, List.concat [deferred_files; [Check file]])
+      | _ ->
+        ( errors,
+          List.concat
+            [ deferred_files;
+              [Check { file with deferred_count = file.deferred_count + 1 }] ]
+        )
     in
     result
   with e ->
@@ -513,7 +519,10 @@ let go_with_interrupt
     ~(interrupt : 'a MultiWorker.interrupt_config)
     ~(memory_cap : int option)
     ~(check_info : check_info) : (Errors.t, 'a) job_result =
-  let fnl = List.map fnl ~f:(fun (path, names) -> Check { path; names }) in
+  let fnl =
+    List.map fnl ~f:(fun (path, names) ->
+        Check { path; names; deferred_count = 0 })
+  in
   Mocking.with_test_mocking fnl
   @@ fun fnl ->
   let result =

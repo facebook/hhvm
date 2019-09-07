@@ -8,6 +8,8 @@
  *
  *)
 
+open Core_kernel
+
 let test_process_data =
   ServerProcess.
     {
@@ -96,9 +98,158 @@ let test_deferred_decl_should_defer () =
 
   true
 
+let foo_contents =
+  {|<?hh //strict
+  class Foo {
+    public function foo (Bar $b): int {
+      return $b->toString();
+    }
+  }
+|}
+
+let bar_contents =
+  {|<?hh //strict
+  class Bar {
+    public function toString() : string {
+      return "bar";
+    }
+  }
+|}
+
+(* In this test, we wish to establish that we enable deferring type checking
+  for files that have undeclared dependencies, UNLESS we've already deferred
+  those files a certain number of times. *)
+let test_process_file_deferring () =
+  Deferred_decl.reset ();
+
+  (* Set up a simple fake repo *)
+  Disk.mkdir_p "/fake/root/";
+  Relative_path.set_path_prefix Relative_path.Root (Path.make "/fake/root/");
+
+  (* We'll need to parse these files in order to create a naming table, which
+    will be used for look up of symbols in type checking. *)
+  Disk.write_file ~file:"/fake/root/Foo.php" ~contents:foo_contents;
+  Disk.write_file ~file:"/fake/root/Bar.php" ~contents:bar_contents;
+  let foo_path =
+    Relative_path.create Relative_path.Root "/fake/root/Foo.php"
+  in
+  let bar_path =
+    Relative_path.create Relative_path.Root "/fake/root/Bar.php"
+  in
+  (* The parsing service needs shared memory to be set up *)
+  let config =
+    SharedMem.
+      {
+        global_size = 1024;
+        heap_size = 1024 * 4;
+        dep_table_pow = 16;
+        hash_table_pow = 10;
+        shm_dirs = [];
+        shm_min_avail = 0;
+        log_level = 0;
+        sample_rate = 0.0;
+      }
+  in
+  let (_ : SharedMem.handle) = SharedMem.init config ~num_workers:0 in
+  (* Parsing produces the file infos that the naming table module can use
+    to construct the forward naming table (files-to-symbols) *)
+  let (file_infos, _errors, _failed_parsing) =
+    Parsing_service.go
+      None
+      Relative_path.Set.empty
+      ~get_next:(MultiWorker.next None [foo_path; bar_path])
+      ParserOptions.default
+      ~trace:true
+  in
+  let naming_table = Naming_table.create file_infos in
+  (* Construct the reverse naming table (symbols-to-files) *)
+  let fast = Naming_table.to_fast naming_table in
+  Relative_path.Map.iter fast ~f:(fun name info ->
+      let {
+        FileInfo.n_classes = classes;
+        n_types = typedefs;
+        n_funs = funs;
+        n_consts = consts;
+      } =
+        info
+      in
+      NamingGlobal.ndecl_file_fast name ~funs ~classes ~typedefs ~consts);
+
+  (* Construct one instance of file type check computation. Class \Foo depends
+    on class \Bar being declared, so processing \Foo once should result in
+    two computations:
+      - a declaration of \Bar
+      - a (deferred) type check of \Foo *)
+  let dynamic_view_files = Relative_path.Set.empty in
+  let opts =
+    GlobalNamingOptions.set
+      GlobalOptions.
+        { default with tco_defer_class_declaration_threshold = Some 1 };
+    GlobalNamingOptions.get ()
+  in
+  let errors = Errors.empty in
+  let file =
+    Typing_check_service.
+      {
+        path = foo_path;
+        names = Relative_path.Map.find foo_path fast;
+        deferred_count = 0;
+      }
+  in
+  (* Finally, this is what all the setup was for: process this file *)
+  let (_errors, file_computations) =
+    Typing_check_service.process_file dynamic_view_files opts errors file
+  in
+  Asserter.Int_asserter.assert_equals
+    2
+    (List.length file_computations)
+    "Should be two file computations";
+
+  (* Validate the deferred type check computation *)
+  let found_check =
+    List.exists file_computations ~f:(fun file_computation ->
+        match file_computation with
+        | Typing_check_service.(Check { path; names = _names; deferred_count })
+          ->
+          Asserter.String_asserter.assert_equals
+            "Foo.php"
+            (Relative_path.suffix path)
+            "Check path must match the expected";
+          Asserter.Int_asserter.assert_equals
+            1
+            deferred_count
+            "Check deferred count must match the expected";
+          true
+        | _ -> false)
+  in
+  Asserter.Bool_asserter.assert_equals
+    true
+    found_check
+    "Should have found the check file computation";
+
+  (* Validate the declare file computation *)
+  let found_declare =
+    List.exists file_computations ~f:(fun file_computation ->
+        match file_computation with
+        | Typing_check_service.Declare path ->
+          Asserter.String_asserter.assert_equals
+            "Bar.php"
+            (Relative_path.suffix path)
+            "Declare path must match the expected";
+          true
+        | _ -> false)
+  in
+  Asserter.Bool_asserter.assert_equals
+    true
+    found_declare
+    "Should have found the declare file computation";
+
+  true
+
 let tests =
   [ ("test_deferred_decl_add", test_deferred_decl_add);
     ("test_deferred_decl_should_defer", test_deferred_decl_should_defer);
+    ("test_process_file_deferring", test_process_file_deferring);
     ("test_dmesg_parser", test_dmesg_parser) ]
 
 let () = Unit_test.run_all tests

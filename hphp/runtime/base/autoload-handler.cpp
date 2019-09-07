@@ -79,7 +79,7 @@ Variant vm_call_decoded_handler(const AutoloadHandler::DecodedHandler& handler,
     invName->incRefCount();
   }
   return Variant::attach(
-    g_context->invokeFunc(f, params, obj, cls, nullptr, invName, false,
+    g_context->invokeFunc(f, params, obj, cls, invName, false,
                           handler.m_dynamic)
   );
 }

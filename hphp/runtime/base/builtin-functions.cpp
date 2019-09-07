@@ -629,7 +629,7 @@ Variant vm_call_user_func(const_variant_ref function, const Variant& params,
   }
   auto ret = Variant::attach(
     g_context->invokeFunc(ctx.func, params, ctx.this_, ctx.cls,
-                          nullptr, ctx.invName, ctx.dynamic, checkRef)
+                          ctx.invName, ctx.dynamic, checkRef)
   );
   if (UNLIKELY(isRefType(ret.getRawType()))) {
     tvUnbox(*ret.asTypedValue());

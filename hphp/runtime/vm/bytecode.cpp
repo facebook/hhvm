@@ -1605,7 +1605,7 @@ void enterVMAtPseudoMain(ActRec* enterFnAr, VarEnv* varEnv) {
   }
 }
 
-void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk, VarEnv* varEnv) {
+void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk) {
   assertx(enterFnAr);
   assertx(!enterFnAr->resumed());
   Stats::inc(Stats::VMEnter);
@@ -1613,12 +1613,11 @@ void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk, VarEnv* varEnv) {
   const bool useJit = RID().getJit() && !RID().getJitFolding();
   const bool useJitPrologue = useJit && vmfp()
     && !enterFnAr->magicDispatch()
-    && !varEnv
     && (stk != StackArgsState::Trimmed);
   // The jit prologues only know how to do limited amounts of work; cannot
-  // be used for magic call/pseudo-main/extra-args already determined or
-  // ... or if the stack args have been explicitly been prepared (e.g. via
-  // entry as part of invoke func).
+  // be used for magic call/extra-args already determined or ... or if the
+  // stack args have been explicitly been prepared (e.g. via entry as part
+  // of invoke func).
 
   if (LIKELY(useJitPrologue)) {
     const int np = enterFnAr->m_func->numNonVariadicParams();
@@ -1629,20 +1628,7 @@ void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk, VarEnv* varEnv) {
     return;
   }
 
-  if (UNLIKELY(varEnv != nullptr)) {
-    enterFnAr->setVarEnv(varEnv);
-    assertx(enterFnAr->func()->isPseudoMain());
-    pushFrameSlots(enterFnAr->func());
-    auto oldFp = vmfp();
-    if (UNLIKELY(oldFp && oldFp->skipFrame())) {
-      oldFp = g_context->getPrevVMStateSkipFrame(oldFp);
-    }
-    varEnv->enterFP(oldFp, enterFnAr);
-    vmfp() = enterFnAr;
-    vmpc() = enterFnAr->func()->getEntry();
-  } else {
-    prepareFuncEntry(enterFnAr, stk);
-  }
+  prepareFuncEntry(enterFnAr, stk);
 
   checkForReifiedGenericsErrors(enterFnAr);
   if (!EventHook::FunctionCall(enterFnAr, EventHook::NormalFunc)) return;

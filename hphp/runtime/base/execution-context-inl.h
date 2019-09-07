@@ -219,8 +219,8 @@ inline TypedValue ExecutionContext::invokeFunc(
   const CallCtx& ctx,
   const Variant& args_
 ) {
-  return invokeFunc(ctx.func, args_, ctx.this_, ctx.cls, nullptr,
-                    ctx.invName, ctx.dynamic);
+  return invokeFunc(ctx.func, args_, ctx.this_, ctx.cls, ctx.invName,
+                    ctx.dynamic);
 }
 
 inline TypedValue ExecutionContext::invokeFuncFew(

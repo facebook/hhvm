@@ -1376,11 +1376,11 @@ TypedValue ExecutionContext::invokeUnit(const Unit* unit,
       invokeFunc(
         Unit::lookupFunc(s_enter_async_entry_point.get()),
         make_vec_array(Variant{it}),
-        nullptr, nullptr, nullptr, nullptr, false
+        nullptr, nullptr, nullptr, false
       );
     } else {
       invokeFunc(it, init_null_variant, nullptr, nullptr,
-                 nullptr, nullptr, false);
+                 nullptr, false);
     }
   }
   return ret;
@@ -1765,7 +1765,6 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
                                         const Variant& args_,
                                         ObjectData* thiz /* = NULL */,
                                         Class* cls /* = NULL */,
-                                        VarEnv* varEnv /* = NULL */,
                                         StringData* invName /* = NULL */,
                                         bool dynamic /* = true */,
                                         bool checkRefAnnot /* = false */,
@@ -1775,8 +1774,6 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
   assertx(isContainerOrNull(args));
 
   auto const argc = cellIsNull(&args) ? 0 : getContainerSize(args);
-  // If we are inheriting a variable environment, then `args' must be empty.
-  assertx(IMPLIES(varEnv, argc == 0));
 
   auto const doCheckStack = [&]() {
     // We must do a stack overflow check for leaf functions on re-entry,
@@ -1796,21 +1793,15 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
   };
 
   auto const doInitArgs = [&] (ActRec* ar) {
-    if (!varEnv) {
-      auto const& prepArgs = cellIsNull(&args)
-        ? make_array_like_tv(ArrayData::CreateVArray())
-        : args;
-      prepareArrayArgs(ar, prepArgs, vmStack(), 0, checkRefAnnot);
-    }
+    auto const& prepArgs = cellIsNull(&args)
+      ? make_array_like_tv(ArrayData::CreateVArray())
+      : args;
+    prepareArrayArgs(ar, prepArgs, vmStack(), 0, checkRefAnnot);
   };
 
   auto const doEnterVM = [&] (ActRec* ar) {
     enterVM(ar, [&] {
-      enterVMAtFunc(
-        ar,
-        varEnv ? StackArgsState::Untrimmed : StackArgsState::Trimmed,
-        varEnv
-      );
+      enterVMAtFunc(ar, StackArgsState::Trimmed);
     });
   };
 
@@ -1848,7 +1839,7 @@ TypedValue ExecutionContext::invokeFuncFew(const Func* f,
   };
 
   auto const doEnterVM = [&] (ActRec* ar) {
-    enterVM(ar, [&] { enterVMAtFunc(ar, StackArgsState::Untrimmed, nullptr); });
+    enterVM(ar, [&] { enterVMAtFunc(ar, StackArgsState::Untrimmed); });
   };
 
   return invokeFuncImpl(f,

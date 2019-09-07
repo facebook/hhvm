@@ -471,7 +471,6 @@ public:
                         const Variant& args_ = init_null_variant,
                         ObjectData* this_ = nullptr,
                         Class* class_ = nullptr,
-                        VarEnv* varEnv = nullptr,
                         StringData* invName = nullptr,
                         bool dynamic = true,
                         bool checkRefAnnot = false,

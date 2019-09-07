@@ -72,8 +72,13 @@ The paper refers to this approach as "restarting", and further suggests that rec
 the chain of jobs could be used to minimize the number of restarts.
  *)
 
+type check_file_computation = {
+  path: Relative_path.t;
+  names: FileInfo.names;
+}
+
 type file_computation =
-  | Check of Relative_path.t * FileInfo.names
+  | Check of check_file_computation
   | Declare of Relative_path.t
   | Prefetch of Relative_path.t list
 
@@ -159,9 +164,10 @@ let process_file
     (dynamic_view_files : Relative_path.Set.t)
     (opts : GlobalOptions.t)
     (errors : Errors.t)
-    ((fn : Relative_path.Set.elt), (file_infos : FileInfo.names)) :
-    Errors.t * file_computation list =
+    (file : check_file_computation) : Errors.t * file_computation list =
   Deferred_decl.reset ();
+  let fn = file.path in
+  let file_infos = file.names in
   let opts =
     {
       opts with
@@ -188,7 +194,7 @@ let process_file
     let result =
       match deferred_files with
       | [] -> (Errors.merge errors' errors, [])
-      | _ -> (errors, List.concat [deferred_files; [Check (fn, file_infos)]])
+      | _ -> (errors, List.concat [deferred_files; [Check file]])
     in
     result
   with e ->
@@ -231,15 +237,15 @@ let process_files
   Ast_provider.local_changes_push_stack ();
   let process_file_wrapper =
     if !Utils.profile then (
-      fun acc fn ->
+      fun acc file ->
     let start_time = Unix.gettimeofday () in
-    let result = process_file dynamic_view_files opts acc fn in
-    let filepath = Relative_path.suffix (fst fn) in
+    let result = process_file dynamic_view_files opts acc file in
+    let filepath = Relative_path.suffix file.path in
     TypingLogger.ProfileTypeCheck.log
       ~init_id:check_info.init_id
       ~recheck_id:check_info.recheck_id
       ~start_time
-      ~absolute:(Relative_path.to_absolute (fst fn))
+      ~absolute:(Relative_path.to_absolute file.path)
       ~relative:filepath;
     let _t =
       Hh_logger.log_duration
@@ -255,7 +261,7 @@ let process_files
     | fn :: fns ->
       let (errors, deferred) =
         match fn with
-        | Check (path, info) -> process_file_wrapper errors (path, info)
+        | Check file -> process_file_wrapper errors file
         | Declare path ->
           let errors = Decl_service.decl_file errors path in
           (errors, [])
@@ -438,7 +444,7 @@ let process_in_parallel
              progress.remaining
              |> List.fold ~init:[] ~f:(fun acc computation ->
                     match computation with
-                    | Check (path, _) -> path :: acc
+                    | Check { path; _ } -> path :: acc
                     | _ -> acc)) ) )
 
 type ('b, 'c) job_result = 'b * 'c * Relative_path.t list
@@ -469,7 +475,7 @@ module TestMocking = struct
     let (mock_cancelled, fnl) =
       List.partition_map fnl ~f:(fun computation ->
           match computation with
-          | Check (path, _) ->
+          | Check { path; _ } ->
             if is_cancelled path then
               `Fst path
             else
@@ -507,7 +513,7 @@ let go_with_interrupt
     ~(interrupt : 'a MultiWorker.interrupt_config)
     ~(memory_cap : int option)
     ~(check_info : check_info) : (Errors.t, 'a) job_result =
-  let fnl = List.map fnl ~f:(fun (path, names) -> Check (path, names)) in
+  let fnl = List.map fnl ~f:(fun (path, names) -> Check { path; names }) in
   Mocking.with_test_mocking fnl
   @@ fun fnl ->
   let result =

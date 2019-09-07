@@ -26,7 +26,7 @@ let process_file_computation
     ~(errors : Errors.t) : Errors.t * file_computation list =
   let process_file_wrapper = process_file dynamic_view_files opts in
   match fc with
-  | Check (path, info) -> process_file_wrapper errors (path, info)
+  | Check file -> process_file_wrapper errors file
   | Declare path ->
     let errors = Decl_service.decl_file errors path in
     (errors, [])
@@ -155,7 +155,7 @@ let go_with_interrupt
     ~(interrupt : 'a MultiWorker.interrupt_config) : (Errors.t, 'a) job_result
     =
   Hh_logger.log "Using shared_lru workers to typecheck!";
-  let fnl = List.map fnl ~f:(fun (path, names) -> Check (path, names)) in
+  let fnl = List.map fnl ~f:(fun (path, names) -> Check { path; names }) in
   process_in_parallel dynamic_view_files lru_host_env opts fnl ~interrupt
 
 let go

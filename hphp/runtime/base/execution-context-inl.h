@@ -220,7 +220,7 @@ inline TypedValue ExecutionContext::invokeFunc(
   const Variant& args_
 ) {
   return invokeFunc(ctx.func, args_, ctx.this_, ctx.cls, nullptr,
-                    ctx.invName, InvokeNormal, ctx.dynamic);
+                    ctx.invName, ctx.dynamic);
 }
 
 inline TypedValue ExecutionContext::invokeFuncFew(

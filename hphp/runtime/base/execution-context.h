@@ -462,10 +462,10 @@ private:
 public:
   void syncGdbState();
 
-  enum InvokeFlags {
-    InvokeNormal,
-    InvokePseudoMain
-  };
+  TypedValue invokePseudoMain(const Func* f,
+                              VarEnv* varEnv = nullptr,
+                              ObjectData* this_ = nullptr,
+                              Class* class_ = nullptr);
 
   TypedValue invokeFunc(const Func* f,
                         const Variant& args_ = init_null_variant,
@@ -473,7 +473,6 @@ public:
                         Class* class_ = nullptr,
                         VarEnv* varEnv = nullptr,
                         StringData* invName = nullptr,
-                        InvokeFlags flags = InvokeNormal,
                         bool dynamic = true,
                         bool checkRefAnnot = false,
                         Array&& reifiedGenerics = Array());

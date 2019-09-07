@@ -1572,6 +1572,39 @@ void checkForReifiedGenericsErrors(const ActRec* ar) {
 
 static void dispatch();
 
+void enterVMAtPseudoMain(ActRec* enterFnAr, VarEnv* varEnv) {
+  assertx(enterFnAr);
+  assertx(enterFnAr->func()->isPseudoMain());
+  assertx(!enterFnAr->resumed());
+  Stats::inc(Stats::VMEnter);
+
+  enterFnAr->setVarEnv(varEnv);
+  pushFrameSlots(enterFnAr->func());
+  if (varEnv != nullptr) {
+    auto oldFp = vmfp();
+    if (UNLIKELY(oldFp && oldFp->skipFrame())) {
+      oldFp = g_context->getPrevVMStateSkipFrame(oldFp);
+    }
+    varEnv->enterFP(oldFp, enterFnAr);
+  }
+  vmfp() = enterFnAr;
+  vmpc() = enterFnAr->func()->getEntry();
+
+  if (!EventHook::FunctionCall(enterFnAr, EventHook::NormalFunc)) return;
+  checkStack(vmStack(), enterFnAr->m_func, 0);
+  assertx(vmfp()->func()->contains(vmpc()));
+
+  if (RID().getJit() && !RID().getJitFolding()) {
+    jit::TCA start = enterFnAr->m_func->getFuncBody();
+    assert_flog(jit::tc::isValidCodeAddress(start),
+                "start = {} ; func = {} ({})\n",
+                start, enterFnAr->m_func, enterFnAr->m_func->fullName());
+    jit::enterTCAfterPrologue(start);
+  } else {
+    dispatch();
+  }
+}
+
 void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk, VarEnv* varEnv) {
   assertx(enterFnAr);
   assertx(!enterFnAr->resumed());

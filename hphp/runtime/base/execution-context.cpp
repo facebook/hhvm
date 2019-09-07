@@ -1366,9 +1366,7 @@ TypedValue ExecutionContext::invokeUnit(const Unit* unit,
     throw PhpNotSupportedException(unit->filepath()->data());
   }
 
-  auto const func = unit->getMain(nullptr);
-  auto ret = invokeFunc(func, init_null_variant, nullptr, nullptr,
-                    m_globalVarEnv, nullptr, InvokePseudoMain);
+  auto ret = invokePseudoMain(unit->getMain(nullptr), m_globalVarEnv);
 
   pseudomainHelper(unit, callByHPHPInvoke);
 
@@ -1378,11 +1376,11 @@ TypedValue ExecutionContext::invokeUnit(const Unit* unit,
       invokeFunc(
         Unit::lookupFunc(s_enter_async_entry_point.get()),
         make_vec_array(Variant{it}),
-        nullptr, nullptr, nullptr, nullptr, InvokeNormal, false
+        nullptr, nullptr, nullptr, nullptr, false
       );
     } else {
       invokeFunc(it, init_null_variant, nullptr, nullptr,
-                    nullptr, nullptr, InvokeNormal, false);
+                 nullptr, nullptr, false);
     }
   }
   return ret;
@@ -1602,8 +1600,7 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
 
   if (thiz != nullptr) thiz->incRefCount();
 
-  TypedValue retval;
-  if (doStackCheck(retval)) return retval;
+  doStackCheck();
 
   if (UNLIKELY(f->takesInOutParams())) {
     for (auto i = f->numInOutParams(); i > 0; --i) vmStack().pushNull();
@@ -1690,7 +1687,7 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
       auto arr = varr.toArray();
       return make_array_like_tv(arr.detach());
     } else {
-      tvCopy(*vmStack().topTV(), retval);
+      auto const retval = *vmStack().topTV();
       vmStack().discard();
       return retval;
     }
@@ -1725,13 +1722,51 @@ static inline void enterVM(ActRec* ar, Action action) {
   enterVMCustomHandler(ar, [&] { exception_handler(action); });
 }
 
+TypedValue ExecutionContext::invokePseudoMain(const Func* f,
+                                              VarEnv* varEnv /* = NULL */,
+                                              ObjectData* thiz /* = NULL */,
+                                              Class* cls /* = NULL */) {
+  assertx(f->isPseudoMain());
+  auto toMerge = f->unit();
+  toMerge->merge();
+  if (toMerge->isMergeOnly()) {
+    Stats::inc(Stats::PseudoMain_Skipped);
+    return *toMerge->getMainReturn();
+  }
+
+  Stats::inc(Stats::PseudoMain_Executed);
+
+  auto const doCheckStack = [&]() {
+    // We must do a stack overflow check for leaf functions on re-entry,
+    // because we won't have checked that the stack is deep enough for a
+    // leaf function /after/ re-entry, and the prologue for the leaf
+    // function will not make a check.
+    if (f->isPhpLeafFn()) {
+      // Check both the native stack and VM stack for overflow.
+      checkStack(vmStack(), f, kNumActRecCells);
+    } else {
+      // invokePseudoMain() must always check the native stack for overflow no
+      // matter what.
+      checkNativeStack();
+    }
+  };
+
+  auto const doInitArgs = [&] (ActRec* ar) {};
+
+  auto const doEnterVM = [&] (ActRec* ar) {
+    enterVM(ar, [&] { enterVMAtPseudoMain(ar, varEnv); });
+  };
+
+  return invokeFuncImpl(f, thiz, cls, 0, nullptr, false,
+                        doCheckStack, doInitArgs, doEnterVM, Array());
+}
+
 TypedValue ExecutionContext::invokeFunc(const Func* f,
                                         const Variant& args_,
                                         ObjectData* thiz /* = NULL */,
                                         Class* cls /* = NULL */,
                                         VarEnv* varEnv /* = NULL */,
                                         StringData* invName /* = NULL */,
-                                        InvokeFlags flags /* = InvokeNormal */,
                                         bool dynamic /* = true */,
                                         bool checkRefAnnot /* = false */,
                                         Array&& reifiedGenerics
@@ -1743,7 +1778,7 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
   // If we are inheriting a variable environment, then `args' must be empty.
   assertx(IMPLIES(varEnv, argc == 0));
 
-  auto const doCheckStack = [&](TypedValue& retval) {
+  auto const doCheckStack = [&]() {
     // We must do a stack overflow check for leaf functions on re-entry,
     // because we won't have checked that the stack is deep enough for a
     // leaf function /after/ re-entry, and the prologue for the leaf
@@ -1758,22 +1793,6 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
       // matter what.
       checkNativeStack();
     }
-
-    // Handle includes of pseudomains.
-    if (flags & InvokePseudoMain) {
-      assertx(f->isPseudoMain());
-      assertx(cellIsNull(&args) || !getContainerSize(args));
-
-      auto toMerge = f->unit();
-      toMerge->merge();
-      if (toMerge->isMergeOnly()) {
-        Stats::inc(Stats::PseudoMain_Skipped);
-        retval = *toMerge->getMainReturn();
-        return true;
-      }
-      Stats::inc(Stats::PseudoMain_Executed);
-    }
-    return false;
   };
 
   auto const doInitArgs = [&] (ActRec* ar) {
@@ -1795,8 +1814,7 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
     });
   };
 
-  return invokeFuncImpl(f, thiz, cls, argc, invName,
-                        dynamic && !(flags & InvokePseudoMain),
+  return invokeFuncImpl(f, thiz, cls, argc, invName, dynamic,
                         doCheckStack, doInitArgs, doEnterVM,
                         std::move(reifiedGenerics));
 }
@@ -1807,7 +1825,7 @@ TypedValue ExecutionContext::invokeFuncFew(const Func* f,
                                            int argc,
                                            const TypedValue* argv,
                                            bool dynamic /* = true */) {
-  auto const doCheckStack = [&](TypedValue&) {
+  auto const doCheckStack = [&]() {
     // See comments in invokeFunc().
     if (f->isPhpLeafFn() ||
         !(argc <= kStackCheckReenterPadding - kNumActRecCells)) {
@@ -1815,7 +1833,6 @@ TypedValue ExecutionContext::invokeFuncFew(const Func* f,
     } else {
       checkNativeStack();
     }
-    return false;
   };
 
   auto const doInitArgs = [&](ActRec* /*ar*/) {
@@ -2033,9 +2050,7 @@ Variant ExecutionContext::getEvaledArg(const StringData* val,
   assertx(unit != nullptr);
   // Default arg values are not currently allowed to depend on class context.
   auto v = Variant::attach(
-    g_context->invokeFunc(unit->getMain(nullptr),
-                          init_null_variant, nullptr, nullptr, nullptr, nullptr,
-                          InvokePseudoMain)
+    g_context->invokePseudoMain(unit->getMain(nullptr))
   );
   SuppressHACFalseyPromoteNotices shacn;
   auto const lv = m_evaledArgs.lvalAt(key, AccessFlags::Key);
@@ -2236,9 +2251,8 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
     // current function on the stack, optionally passing a this pointer or
     // class used to execute the current function.
     return {false, Variant::attach(
-        invokeFunc(unit->getMain(functionClass), init_null_variant,
-                   this_, frameClass, fp ? fp->m_varEnv : nullptr, nullptr,
-                   InvokePseudoMain)
+      invokePseudoMain(unit->getMain(functionClass),
+                       fp ? fp->m_varEnv : nullptr, this_, frameClass)
     ), ""};
   } catch (FatalErrorException& e) {
     errorString << s_fatal.data();

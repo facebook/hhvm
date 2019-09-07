@@ -2094,7 +2094,6 @@ void Unit::mergeImpl(MergeInfo* mi) {
 
           unit->mergeImpl<debugger>(unit->mergeInfo());
           if (UNLIKELY(!unit->isMergeOnly())) {
-            Stats::inc(Stats::PseudoMain_Reentered);
             VarEnv* ve = nullptr;
             ActRec* fp = vmfp();
             if (!fp) {
@@ -2108,10 +2107,13 @@ void Unit::mergeImpl(MergeInfo* mi) {
                 // local scope.
               }
             }
+
+            // Move the count from executed to reentered.
+            Stats::inc(Stats::PseudoMain_Reentered);
+            Stats::inc(Stats::PseudoMain_Executed, -1);
+
             tvDecRefGen(
-              g_context->invokeFunc(unit->getMain(nullptr),
-                                    init_null_variant,
-                                    nullptr, nullptr, ve)
+              g_context->invokePseudoMain(unit->getMain(nullptr), ve)
             );
           } else {
             Stats::inc(Stats::PseudoMain_SkipDeep);

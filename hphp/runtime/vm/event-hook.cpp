@@ -334,9 +334,7 @@ static Variant call_intercept_handler(
 
   auto ret = Variant::attach(
     g_context->invokeFunc(f, intArgs, callCtx.this_, callCtx.cls,
-                          nullptr, callCtx.invName,
-                          ExecutionContext::InvokeNormal,
-                          callCtx.dynamic, false)
+                          nullptr, callCtx.invName, callCtx.dynamic)
   );
 
   if (inout) {
@@ -395,9 +393,7 @@ static Variant call_intercept_handler_callback(
   IterateV(curArgs.get(), [&](TypedValue v) { args.append(v); });
   auto ret = Variant::attach(
     g_context->invokeFunc(f, args.toArray(), callCtx.this_, callCtx.cls,
-                          nullptr, callCtx.invName,
-                          ExecutionContext::InvokeNormal,
-                          callCtx.dynamic, false,
+                          nullptr, callCtx.invName, callCtx.dynamic, false,
                           Array::attach(reifiedGenerics))
   );
   return ret;

@@ -629,8 +629,7 @@ Variant vm_call_user_func(const_variant_ref function, const Variant& params,
   }
   auto ret = Variant::attach(
     g_context->invokeFunc(ctx.func, params, ctx.this_, ctx.cls,
-                          nullptr, ctx.invName, ExecutionContext::InvokeNormal,
-                          ctx.dynamic, checkRef)
+                          nullptr, ctx.invName, ctx.dynamic, checkRef)
   );
   if (UNLIKELY(isRefType(ret.getRawType()))) {
     tvUnbox(*ret.asTypedValue());
@@ -657,8 +656,7 @@ invoke(const String& function, const Variant& params, strhash_t /*hash*/,
   Func* func = Unit::loadFunc(function.get());
   if (func && (isContainer(params) || params.isNull())) {
     auto ret = Variant::attach(
-      g_context->invokeFunc(func, params, nullptr, nullptr,
-                            nullptr, nullptr, ExecutionContext::InvokeNormal)
+      g_context->invokeFunc(func, params)
     );
     if (UNLIKELY(isRefType(ret.getRawType()))) {
       tvUnbox(*ret.asTypedValue());

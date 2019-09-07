@@ -79,8 +79,7 @@ Variant vm_call_decoded_handler(const AutoloadHandler::DecodedHandler& handler,
     invName->incRefCount();
   }
   return Variant::attach(
-    g_context->invokeFunc(f, params, obj, cls, nullptr, invName,
-                          ExecutionContext::InvokeNormal, false,
+    g_context->invokeFunc(f, params, obj, cls, nullptr, invName, false,
                           handler.m_dynamic)
   );
 }
@@ -276,11 +275,7 @@ AutoloadHandler::loadFromMapImpl(const String& clsName,
                                  RuntimeOption::TrustAutoloaderPath);
     if (unit) {
       if (initial) {
-        tvDecRefGen(
-            ec->invokeFunc(unit->getMain(nullptr), init_null_variant,
-                           nullptr, nullptr, nullptr, nullptr,
-                           ExecutionContext::InvokePseudoMain)
-        );
+        tvDecRefGen(ec->invokePseudoMain(unit->getMain(nullptr)));
       }
       ok = true;
     }

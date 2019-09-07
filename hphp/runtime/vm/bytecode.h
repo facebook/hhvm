@@ -842,6 +842,7 @@ enum class StackArgsState { // tells prepareFuncEntry how much work to do
   // have been teleported away into ExtraArgs and/or a variadic param
   Trimmed
 };
+void enterVMAtPseudoMain(ActRec* enterFnAr, VarEnv* varEnv);
 void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk, VarEnv* varEnv);
 void enterVMAtCurPC();
 void prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,

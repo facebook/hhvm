@@ -2731,8 +2731,10 @@ let track_ide_service_open_files
       Lwt.return_unit)
 
 let log_response_if_necessary
-    (event : event) (response : Hh_json.json option) (unblocked_time : float) :
-    unit =
+    (event : event)
+    (response : Hh_json.json option)
+    (unblocked_time : float)
+    (env : env) : unit =
   Jsonrpc.(
     match event with
     | Client_message c ->
@@ -2754,6 +2756,7 @@ let log_response_if_necessary
         ~start_hh_server_state:
           (get_older_hh_server_state c.timestamp |> hh_server_state_to_string)
         ~start_handle_time:unblocked_time
+        ~serverless_ide_flag:env.use_serverless_ide
         ~json
         ~json_response
     | _ -> ())
@@ -2763,7 +2766,8 @@ let hack_log_error
     (message : string)
     (stack : string)
     (source : string)
-    (unblocked_time : float) : unit =
+    (unblocked_time : float)
+    (env : env) : unit =
   let root = get_root_opt () in
   log "Exception: message: %s, stack trace: %s" message stack;
   match event with
@@ -2778,6 +2782,7 @@ let hack_log_error
         ~start_hh_server_state:
           (get_older_hh_server_state c.timestamp |> hh_server_state_to_string)
         ~start_handle_time:unblocked_time
+        ~serverless_ide_flag:env.use_serverless_ide
         ~json
         ~message
         ~stack
@@ -3559,7 +3564,7 @@ let main (env : env) : Exit_status.t Lwt.t =
       in
       let response = Jsonrpc.last_sent () in
       (* for LSP requests and notifications, we keep a log of what+when we responded *)
-      log_response_if_necessary event response !ref_unblocked_time;
+      log_response_if_necessary event response !ref_unblocked_time env;
       Lwt.return_unit
     with
     | Server_fatal_connection_exception { Marshal_tools.stack; message } ->
@@ -3593,7 +3598,8 @@ let main (env : env) : Exit_status.t Lwt.t =
           message
           stack
           "from_server"
-          !ref_unblocked_time;
+          !ref_unblocked_time
+          env;
         Lsp_helpers.telemetry_error
           to_stdout
           (message ^ ", from_server\n" ^ stack);
@@ -3653,7 +3659,13 @@ let main (env : env) : Exit_status.t Lwt.t =
       Lwt.return_unit
     | Client_fatal_connection_exception { Marshal_tools.stack; message } ->
       let stack = stack ^ "---\n" ^ Printexc.get_backtrace () in
-      hack_log_error !ref_event message stack "from_client" !ref_unblocked_time;
+      hack_log_error
+        !ref_event
+        message
+        stack
+        "from_client"
+        !ref_unblocked_time
+        env;
       Lsp_helpers.telemetry_error
         to_stdout
         (message ^ ", from_client\n" ^ stack);
@@ -3662,14 +3674,26 @@ let main (env : env) : Exit_status.t Lwt.t =
     | Client_recoverable_connection_exception { Marshal_tools.stack; message }
       ->
       let stack = stack ^ "---\n" ^ Printexc.get_backtrace () in
-      hack_log_error !ref_event message stack "from_client" !ref_unblocked_time;
+      hack_log_error
+        !ref_event
+        message
+        stack
+        "from_client"
+        !ref_unblocked_time
+        env;
       Lsp_helpers.telemetry_error
         to_stdout
         (message ^ ", from_client\n" ^ stack);
       Lwt.return_unit
     | Server_nonfatal_exception { Marshal_tools.stack; message } ->
       let stack = stack ^ "---\n" ^ Printexc.get_backtrace () in
-      hack_log_error !ref_event message stack "from_server" !ref_unblocked_time;
+      hack_log_error
+        !ref_event
+        message
+        stack
+        "from_server"
+        !ref_unblocked_time
+        env;
       respond_to_error !ref_event (Error.Unknown message) stack;
       Lwt.return_unit
     | Error.RequestCancelled _ as e ->
@@ -3684,7 +3708,13 @@ let main (env : env) : Exit_status.t Lwt.t =
       let stack = Printexc.get_backtrace () in
       let message = Exn.to_string e in
       respond_to_error !ref_event e stack;
-      hack_log_error !ref_event message stack "from_lsp" !ref_unblocked_time;
+      hack_log_error
+        !ref_event
+        message
+        stack
+        "from_lsp"
+        !ref_unblocked_time
+        env;
       Lwt.return_unit
   in
   let rec main_loop () : unit Lwt.t =

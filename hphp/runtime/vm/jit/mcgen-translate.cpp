@@ -385,6 +385,7 @@ TCA retranslate(TransArgs args, const RegionContext& ctx) {
 
   auto sr = tc::findSrcRec(args.sk);
   auto const initialNumTrans = sr->numTrans();
+  auto const funcId = args.sk.funcID();
 
   if (isDebuggerAttachedProcess() && isSrcKeyInDbgBL(args.sk)) {
     // We are about to translate something known to be blacklisted by
@@ -407,7 +408,7 @@ TCA retranslate(TransArgs args, const RegionContext& ctx) {
   // trigger retranslation) and helps remove bias towards larger functions that
   // can cause variations in the size of code.prof.
   if (args.kind == TransKind::Profile &&
-      !profData()->profiling(args.sk.funcID()) &&
+      !profData()->profiling(funcId) &&
       !args.sk.func()->isEntry(args.sk.offset())) {
     return nullptr;
   }
@@ -420,13 +421,24 @@ TCA retranslate(TransArgs args, const RegionContext& ctx) {
   // chain ahead of the optimized translations.
   if (retranslateAllPending() && args.kind != TransKind::Profile &&
       profData() &&
-      (profData()->profiling(args.sk.funcID()) ||
-       profData()->optimized(args.sk.funcID()))) {
+      (profData()->profiling(funcId) ||
+       profData()->optimized(funcId))) {
     return nullptr;
   }
 
   LeaseHolder writer(args.sk.func(), args.kind);
-  if (!writer || !tc::shouldTranslate(args.sk, kind())) {
+  if (!writer) return nullptr;
+
+  // Update kind now that we have the write lease.
+  args.kind = kind();
+
+  if (!tc::shouldTranslate(args.sk, args.kind)) return nullptr;
+
+  // If the function is being profiled and hasn't been optimized yet, we don't
+  // want to emit Live translations for it, as these would be made unreachable
+  // once we clear the SrcRec to publish the optimized code.
+  if (args.kind != TransKind::Profile && profData() &&
+      profData()->profiling(funcId) && !profData()->optimized(funcId)) {
     return nullptr;
   }
 

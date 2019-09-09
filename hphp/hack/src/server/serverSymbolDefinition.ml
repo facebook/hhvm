@@ -174,32 +174,34 @@ let go ast result =
     end
 
 let get_definition_cst_node_from_pos kind source_text pos =
-  let tree =
-    if Ide_parser_cache.is_enabled () then
-      Ide_parser_cache.(with_ide_cache @@ (fun () -> get_cst source_text))
-    else
-      let env = Full_fidelity_parser_env.default in
-      SyntaxTree.make ~env source_text
-  in
-  let (line, start, _) = Pos.info_pos pos in
-  let offset = SourceText.position_to_offset source_text (line, start) in
-  let parents = Syntax.parentage (SyntaxTree.root tree) offset in
-  List.find parents ~f:(fun syntax ->
-      match (kind, Syntax.kind syntax) with
-      | (SymbolDefinition.Function, SyntaxKind.FunctionDeclaration)
-      | (SymbolDefinition.Class, SyntaxKind.ClassishDeclaration)
-      | (SymbolDefinition.Method, SyntaxKind.MethodishDeclaration)
-      | (SymbolDefinition.Property, SyntaxKind.PropertyDeclaration)
-      | (SymbolDefinition.Const, SyntaxKind.ConstDeclaration)
-      | (SymbolDefinition.Enum, SyntaxKind.EnumDeclaration)
-      | (SymbolDefinition.Interface, SyntaxKind.ClassishDeclaration)
-      | (SymbolDefinition.Trait, SyntaxKind.ClassishDeclaration)
-      | (SymbolDefinition.LocalVar, SyntaxKind.VariableExpression)
-      | (SymbolDefinition.Typeconst, SyntaxKind.TypeConstDeclaration)
-      | (SymbolDefinition.Param, SyntaxKind.ParameterDeclaration)
-      | (SymbolDefinition.Typedef, SyntaxKind.SimpleTypeSpecifier) ->
-        true
-      | _ -> false)
+  try
+    let tree =
+      if Ide_parser_cache.is_enabled () then
+        Ide_parser_cache.(with_ide_cache @@ (fun () -> get_cst source_text))
+      else
+        let env = Full_fidelity_parser_env.default in
+        SyntaxTree.make ~env source_text
+    in
+    let (line, start, _) = Pos.info_pos pos in
+    let offset = SourceText.position_to_offset source_text (line, start) in
+    let parents = Syntax.parentage (SyntaxTree.root tree) offset in
+    List.find parents ~f:(fun syntax ->
+        match (kind, Syntax.kind syntax) with
+        | (SymbolDefinition.Function, SyntaxKind.FunctionDeclaration)
+        | (SymbolDefinition.Class, SyntaxKind.ClassishDeclaration)
+        | (SymbolDefinition.Method, SyntaxKind.MethodishDeclaration)
+        | (SymbolDefinition.Property, SyntaxKind.PropertyDeclaration)
+        | (SymbolDefinition.Const, SyntaxKind.ConstDeclaration)
+        | (SymbolDefinition.Enum, SyntaxKind.EnumDeclaration)
+        | (SymbolDefinition.Interface, SyntaxKind.ClassishDeclaration)
+        | (SymbolDefinition.Trait, SyntaxKind.ClassishDeclaration)
+        | (SymbolDefinition.LocalVar, SyntaxKind.VariableExpression)
+        | (SymbolDefinition.Typeconst, SyntaxKind.TypeConstDeclaration)
+        | (SymbolDefinition.Param, SyntaxKind.ParameterDeclaration)
+        | (SymbolDefinition.Typedef, SyntaxKind.SimpleTypeSpecifier) ->
+          true
+        | _ -> false)
+  with _ -> None
 
 let get_definition_cst_node_from_file_input
     (file_input : ServerCommandTypes.file_input)

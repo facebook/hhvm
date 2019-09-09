@@ -67,13 +67,13 @@ module SearchServiceRunner = struct
    * false if we should run small chunks every few seconds *)
   let should_run_completely
       (genv : ServerEnv.genv) (provider : SearchUtils.search_provider) : bool =
-    (* If we are using a non-trie provider, no need to use chunks *)
-    if provider <> SearchUtils.TrieIndex then
-      true
-    else if chunk_size genv = 0 && ServerArgs.ai_mode genv.options = None then
-      true
-    else
-      false
+    match provider with
+    (* Use this logic to determine if we should run in one go *)
+    | SearchUtils.TrieIndex
+    | SearchUtils.LocalIndex ->
+      chunk_size genv = 0 && ServerArgs.ai_mode genv.options = None
+    (* All other providers should run in one go *)
+    | _ -> true
 
   let update_fileinfo_map
       (fast : Naming_table.t) ~(source : SearchUtils.file_source) : unit =

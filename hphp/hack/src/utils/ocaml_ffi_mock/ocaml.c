@@ -44,3 +44,4 @@ void caml_raise_sys_error(void) {}
 void caml_raise_with_arg(void) {}
 void caml_raise_zero_divide(void) {}
 
+int ocamlpool_generation = 0;

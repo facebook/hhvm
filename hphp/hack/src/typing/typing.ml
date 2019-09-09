@@ -3478,9 +3478,14 @@ and expr_
       p
       (T.Shape (List.map ~f:(fun (k, (te, _)) -> (k, te)) tfdm))
       (Reason.Rwitness p, Tshape (Closed_shape, fdm))
-  | PU_atom _ -> failwith "TODO(T36532263): Pocket Universes"
-  | PU_identifier _ -> failwith "TODO(T36532263): Pocket Universes"
+  | PU_atom _
+  (* TODO(T36532263): Pocket Universes *)
+  
+  | PU_identifier _ ->
+    Errors.pu_typing p;
+    expr_error env (Reason.Rwitness p) outer
 
+(* let ty = (Reason.Rwitness cst_pos, Typing_utils.terr env) in *)
 and class_const ?(incl_tc = false) env p ((cpos, cid), mid) =
   let (env, ce, cty) =
     static_class_id ~check_constraints:true cpos env [] cid

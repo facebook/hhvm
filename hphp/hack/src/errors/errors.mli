@@ -910,6 +910,10 @@ val mutable_methods_must_be_reactive : Pos.t -> string -> unit
 val mutable_return_annotated_decls_must_be_reactive :
   string -> Pos.t -> string -> unit
 
+val pu_expansion : Pos.t -> unit
+
+val pu_typing : Pos.t -> unit
+
 val lvar_in_obj_get : Pos.t -> unit
 
 val invalid_freeze_target : Pos.t -> Pos.t -> string -> unit

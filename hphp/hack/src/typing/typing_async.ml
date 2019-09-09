@@ -63,13 +63,11 @@ let overload_extract_from_awaitable env ~p opt_ty_maybe =
     | (_, Tdynamic) ->
       (* Awaiting a dynamic results in a new dynamic *)
       (env, (r, Tdynamic))
-    | (_, Tpu _) -> failwith "T36532263: typing_async Tpu"
-    | (_, Tpu_access _) -> failwith "T36532263: typing_async Tpu_access"
     | ( _,
         ( Terr | Tany _ | Tarraykind _ | Tnonnull | Tprim _ | Tvar _ | Tfun _
         | Tabstract _ | Tclass _ | Ttuple _
         | Tanon (_, _)
-        | Tobject | Tshape _ | Tdestructure _ ) ) ->
+        | Tobject | Tshape _ | Tdestructure _ | Tpu _ | Tpu_access _ ) ) ->
       let (env, type_var) = Env.fresh_type env p in
       let expected_type = MakeType.awaitable r type_var in
       let return_type =
@@ -77,12 +75,11 @@ let overload_extract_from_awaitable env ~p opt_ty_maybe =
         | (_, Tany _) -> (r, Typing_defs.make_tany ())
         | (_, Terr) -> (r, Terr)
         | (_, Tdynamic) -> (r, Tdynamic)
-        | (_, Tpu_access _) -> assert false
-        | (_, Tpu _) -> assert false
         | ( _,
             ( Tnonnull | Tarraykind _ | Tprim _ | Tvar _ | Tfun _ | Tabstract _
             | Tclass _ | Ttuple _ | Tanon _ | Tintersection _ | Toption _
-            | Tunion _ | Tobject | Tshape _ | Tdestructure _ ) ) ->
+            | Tunion _ | Tobject | Tshape _ | Tdestructure _ | Tpu _
+            | Tpu_access _ ) ) ->
           type_var
       in
       let env =

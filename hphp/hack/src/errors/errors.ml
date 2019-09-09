@@ -1506,7 +1506,7 @@ let pu_duplication pos name kind =
   add
     (Naming.err_code Naming.PocketUniversesDuplication)
     pos
-    (sprintf "[PocketUniverses] %s (%s) is declared multiple times" name kind)
+    (sprintf "[PocketUniverses] %s (%s) is declared multiple times." name kind)
 
 let illegal_use_of_dynamically_callable attr_pos meth_pos visibility =
   add_list
@@ -3695,6 +3695,18 @@ let mutable_return_result_mismatch pos1_has_mutable_return pos1 pos2 =
           m2
         else
           m1 ) ]
+
+let pu_expansion pos =
+  add
+    (Typing.err_code Typing.PocketUniversesExpansion)
+    pos
+    "[PocketUniverses] Type expansion is not supported."
+
+let pu_typing pos =
+  add
+    (Typing.err_code Typing.PocketUniversesTyping)
+    pos
+    "[PocketUniverses] Typing is not supported."
 
 (*****************************************************************************)
 (* Typing decl errors *)

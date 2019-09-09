@@ -3323,7 +3323,7 @@ and emit_call_lhs_and_fcall
   in
   let emit_generics (flags, a, b, c, d) =
     if does_not_have_non_tparam_generics then
-      (empty, fcall_args)
+      (empty, (flags, a, b, c, d))
     else
       ( emit_reified_targs env pos targs,
         ({ flags with has_generics = true }, a, b, c, d) )

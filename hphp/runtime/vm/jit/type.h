@@ -758,6 +758,7 @@ public:
   const ArrayData* dictVal() const;
   const ArrayData* shapeVal() const;
   const ArrayData* keysetVal() const;
+  const ArrayData* arrLikeVal() const;
   const HPHP::Func* funcVal() const;
   const Class* clsVal() const;
   ClsMethDataRef clsmethVal() const;

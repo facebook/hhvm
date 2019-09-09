@@ -67,27 +67,43 @@ void implIterNextJmp(IRGS& env, Offset relOffset, SSATmp* result) {
   }
 }
 
+// If the iterator base is an empty array-like, this method will generate
+// trivial IR for the loop (just jump directly to done) and return true.
+bool iterInitEmptyBase(IRGS& env, Offset relOffset, SSATmp* base) {
+  auto const empty = base->hasConstVal(TArrLike) && base->arrLikeVal()->empty();
+  if (!empty) return false;
+
+  // NOTE: `base` is static, so we can skip the dec-ref for non-local iters.
+  auto const targetOffset = bcOff(env) + relOffset;
+  auto const target = getBlock(env, targetOffset);
+  assertx(target != nullptr);
+  gen(env, Jmp, target);
+  return true;
+}
+
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
 
 void emitIterInit(IRGS& env, int32_t iterId, Offset relOffset,
                   int32_t valLocalId) {
-  auto const src = popC(env);
-  if (!src->type().subtypeOfAny(TArrLike, TObj)) PUNT(IterInit);
+  auto const base = popC(env);
+  if (!base->type().subtypeOfAny(TArrLike, TObj)) PUNT(IterInit);
+  if (iterInitEmptyBase(env, relOffset, base)) return;
 
   auto const data = IterInitData(iterId, uint32_t(-1), valLocalId, true);
-  auto const result = gen(env, IterInit, data, src, fp(env));
+  auto const result = gen(env, IterInit, data, base, fp(env));
   implIterInitJmp(env, relOffset, result);
 }
 
 void emitIterInitK(IRGS& env, int32_t iterId, Offset relOffset,
                    int32_t valLocalId, int32_t keyLocalId) {
-  auto const src = popC(env);
-  if (!src->type().subtypeOfAny(TArrLike, TObj)) PUNT(IterInitK);
+  auto const base = popC(env);
+  if (!base->type().subtypeOfAny(TArrLike, TObj)) PUNT(IterInitK);
+  if (iterInitEmptyBase(env, relOffset, base)) return;
 
   auto const data = IterInitData(iterId, keyLocalId, valLocalId, true);
-  auto const result = gen(env, IterInitK, data, src, fp(env));
+  auto const result = gen(env, IterInitK, data, base, fp(env));
   implIterInitJmp(env, relOffset, result);
 }
 
@@ -122,6 +138,7 @@ void emitLIterInit(IRGS& env,
   if (curFunc(env)->isPseudoMain()) PUNT(LIterInit-pseudomain);
   auto const base = ldLoc(env, baseLocalId, nullptr, DataTypeSpecific);
   if (!base->type().subtypeOfAny(TArrLike, TObj)) PUNT(LIterInit);
+  if (iterInitEmptyBase(env, relOffset, base)) return;
 
   if (base->isA(TObj)) gen(env, IncRef, base);
   auto const data = IterInitData(iterId, uint32_t(-1), valLocalId, false);
@@ -139,6 +156,7 @@ void emitLIterInitK(IRGS& env,
   if (curFunc(env)->isPseudoMain()) PUNT(LIterInitK-pseudomain);
   auto const base = ldLoc(env, baseLocalId, nullptr, DataTypeSpecific);
   if (!base->type().subtypeOfAny(TArrLike, TObj)) PUNT(LIterInitK);
+  if (iterInitEmptyBase(env, relOffset, base)) return;
 
   if (base->isA(TObj)) gen(env, IncRef, base);
   auto const data = IterInitData(iterId, keyLocalId, valLocalId, false);

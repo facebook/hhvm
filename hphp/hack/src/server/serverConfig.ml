@@ -299,6 +299,8 @@ let load config_filename options =
       ?tco_disallow_array_literal:(bool_opt "disallow_array_literal" config)
       ?tco_defer_class_declaration_threshold:
         local_config.ServerLocalConfig.defer_class_declaration_threshold
+      ?tco_max_times_to_defer_type_checking:
+        local_config.ServerLocalConfig.max_times_to_defer_type_checking
       ?tco_prefetch_deferred_files:
         (Some local_config.ServerLocalConfig.prefetch_deferred_files)
       ?tco_remote_type_check_threshold:

@@ -207,6 +207,8 @@ let rec expr_to_typed_value
   | A.Id _
   | A.Class_get _ ->
     raise UserDefinedConstant
+  | A.As (e, (_, A.Hlike _), _nullable) ->
+    expr_to_typed_value ~allow_maps ~restrict_keys ns e
   | _ -> raise NotLiteral
 
 and update_duplicates_in_map kvs =

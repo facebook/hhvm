@@ -4682,6 +4682,13 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
         when is_good_scope_resolution_qualifier scope_resolution_qualifier
              && is_good_scope_resolution_name scope_resolution_name ->
         errors
+      | AsExpression
+          {
+            as_left_operand = e;
+            as_right_operand = { syntax = LikeTypeSpecifier _; _ };
+            _;
+          } ->
+        check_constant_expression errors e
       | _ ->
         make_error_from_node node SyntaxError.invalid_constant_initializer
         :: errors

@@ -1037,6 +1037,9 @@ let rec convert_expr env st ((p, expr_) as expr) =
       let (st, e) = convert_expr env st e in
       let (st, h) = convert_hint env st h in
       (st, (p, Is (e, h)))
+    | As (e, (_, Hlike _), _) ->
+      let (st, e) = convert_expr env st e in
+      (st, e)
     | As (e, h, b) ->
       let (st, e) = convert_expr env st e in
       let (st, h) = convert_hint env st h in

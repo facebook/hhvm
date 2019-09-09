@@ -1,11 +1,10 @@
-((script 58
-  ((list 58
+((script 52
+  ((list 52
     ((markup_section 4
       ((missing 0 ()) (() markup 0 ())
        (markup_suffix 4
         ((() <? 2 ())
-         (() name 2
-          ((whitespace 1) (single_line_comment 15) (end_of_line 1)))))
+         (() name 2 ((whitespace 1) (single_line_comment 9) (end_of_line 1)))))
        (missing 0 ())))
      (classish_declaration 36
       ((missing 0 ()) (missing 0 ())

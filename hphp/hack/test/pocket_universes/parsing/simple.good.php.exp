@@ -1,11 +1,10 @@
-((script 690
-  ((list 690
+((script 684
+  ((list 684
     ((markup_section 4
       ((missing 0 ()) (() markup 0 ())
        (markup_suffix 4
         ((() <? 2 ())
-         (() name 2
-          ((whitespace 1) (single_line_comment 15) (end_of_line 1)))))
+         (() name 2 ((whitespace 1) (single_line_comment 9) (end_of_line 1)))))
        (missing 0 ())))
      (classish_declaration 466
       ((missing 0 ())

@@ -1,4 +1,4 @@
-<?hh // experimental
+<?hh // strict
 
 class X {}
 class Y {}

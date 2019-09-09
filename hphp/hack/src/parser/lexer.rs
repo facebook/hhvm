@@ -1597,14 +1597,12 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
                 }
             },
             ':' => {
-                // In experimental mode only: try to scan for a pocket universes atom
-                // of the form `:@`
                 let ch1 = self.peek_char(1);
 
                 if ch1 == ':' {
                     self.advance(2);
                     TokenKind::ColonColon
-                } else if self.is_experimental_mode && ch1 == '@' {
+                } else if ch1 == '@' {
                     self.advance(2);
                     TokenKind::ColonAt
                 } else {

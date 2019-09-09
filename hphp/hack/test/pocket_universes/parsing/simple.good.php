@@ -1,4 +1,4 @@
-<?hh // experimental
+<?hh // strict
 
 abstract class Foo
 {

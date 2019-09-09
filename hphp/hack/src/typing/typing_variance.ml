@@ -562,8 +562,7 @@ and type_ tcopt root variance env (reason, ty) =
       variancel
       tyl
   | Ttuple tyl -> type_list tcopt root variance env tyl
-  (* when we add type params to type consts might need to change *)
-  | Taccess _ -> ()
+  | Taccess (ty, _) -> type_ tcopt root variance env ty
   | Tshape (_, ty_map) ->
     Nast.ShapeMap.iter
       begin

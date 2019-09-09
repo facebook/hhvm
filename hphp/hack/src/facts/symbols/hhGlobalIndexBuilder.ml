@@ -58,7 +58,7 @@ let parse_options () : index_builder_context option =
   in
   Arg.parse_dynamic
     options
-    (fun anonymous_arg -> repository := Some anonymous_arg)
+    (fun anonymous_arg -> repository := Sys_utils.realpath anonymous_arg)
     usage;
 
   (* Parameters for this execution *)

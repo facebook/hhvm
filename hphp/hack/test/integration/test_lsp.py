@@ -582,6 +582,207 @@ class TestLsp(TestCase[LspTestDriver]):
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
+    def test_serverless_ide_document_symbol(self) -> None:
+        variables = dict(self.prepare_serverless_ide_environment())
+        variables.update(self.setup_php_file("definition.php"))
+        self.test_driver.stop_hh_server()
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("serverless_ide_document_symbol"), use_serverless_ide=True
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .request(
+                comment="documentSymbol call",
+                method="textDocument/documentSymbol",
+                params={"textDocument": {"uri": "${php_file_uri}"}},
+                result=[
+                    {
+                        "name": "testClassMemberInsideConstructorInvocation",
+                        "kind": 12,
+                        "location": {
+                            "uri": "file://${root_path}/definition.php",
+                            "range": {
+                                "start": {"line": 44, "character": 0},
+                                "end": {"line": 46, "character": 1},
+                            },
+                        },
+                    },
+                    {
+                        "name": "MyString",
+                        "kind": 14,
+                        "location": {
+                            "uri": "file://${root_path}/definition.php",
+                            "range": {
+                                "start": {"line": 41, "character": 8},
+                                "end": {"line": 41, "character": 29},
+                            },
+                        },
+                        "containerName": "HasString",
+                    },
+                    {
+                        "name": "HasString",
+                        "kind": 5,
+                        "location": {
+                            "uri": "file://${root_path}/definition.php",
+                            "range": {
+                                "start": {"line": 40, "character": 0},
+                                "end": {"line": 42, "character": 1},
+                            },
+                        },
+                    },
+                    {
+                        "name": "__construct",
+                        "kind": 6,
+                        "location": {
+                            "uri": "file://${root_path}/definition.php",
+                            "range": {
+                                "start": {"line": 37, "character": 2},
+                                "end": {"line": 37, "character": 43},
+                            },
+                        },
+                        "containerName": "TakesString",
+                    },
+                    {
+                        "name": "TakesString",
+                        "kind": 5,
+                        "location": {
+                            "uri": "file://${root_path}/definition.php",
+                            "range": {
+                                "start": {"line": 36, "character": 0},
+                                "end": {"line": 38, "character": 1},
+                            },
+                        },
+                    },
+                    {
+                        "name": "FF",
+                        "kind": 5,
+                        "location": {
+                            "uri": "file://${root_path}/definition.php",
+                            "range": {
+                                "start": {"line": 26, "character": 0},
+                                "end": {"line": 26, "character": 11},
+                            },
+                        },
+                    },
+                    {
+                        "name": "__construct",
+                        "kind": 6,
+                        "location": {
+                            "uri": "file://${root_path}/definition.php",
+                            "range": {
+                                "start": {"line": 21, "character": 2},
+                                "end": {"line": 23, "character": 3},
+                            },
+                        },
+                        "containerName": "EE",
+                    },
+                    {
+                        "name": "EE",
+                        "kind": 5,
+                        "location": {
+                            "uri": "file://${root_path}/definition.php",
+                            "range": {
+                                "start": {"line": 20, "character": 0},
+                                "end": {"line": 24, "character": 1},
+                            },
+                        },
+                    },
+                    {
+                        "name": "CC",
+                        "kind": 5,
+                        "location": {
+                            "uri": "file://${root_path}/definition.php",
+                            "range": {
+                                "start": {"line": 14, "character": 0},
+                                "end": {"line": 15, "character": 1},
+                            },
+                        },
+                    },
+                    {
+                        "name": "__construct",
+                        "kind": 6,
+                        "location": {
+                            "uri": "file://${root_path}/definition.php",
+                            "range": {
+                                "start": {"line": 11, "character": 2},
+                                "end": {"line": 11, "character": 40},
+                            },
+                        },
+                        "containerName": "BB",
+                    },
+                    {
+                        "name": "BB",
+                        "kind": 5,
+                        "location": {
+                            "uri": "file://${root_path}/definition.php",
+                            "range": {
+                                "start": {"line": 10, "character": 0},
+                                "end": {"line": 12, "character": 1},
+                            },
+                        },
+                    },
+                    {
+                        "name": "a_definition",
+                        "kind": 12,
+                        "location": {
+                            "uri": "file://${root_path}/definition.php",
+                            "range": {
+                                "start": {"line": 2, "character": 0},
+                                "end": {"line": 4, "character": 1},
+                            },
+                        },
+                    },
+                    {
+                        "name": "b_definition",
+                        "kind": 12,
+                        "location": {
+                            "uri": "file://${root_path}/definition.php",
+                            "range": {
+                                "start": {"line": 6, "character": 0},
+                                "end": {"line": 8, "character": 1},
+                            },
+                        },
+                    },
+                    {
+                        "name": "DD",
+                        "kind": 5,
+                        "location": {
+                            "uri": "file://${root_path}/definition.php",
+                            "range": {
+                                "start": {"line": 17, "character": 0},
+                                "end": {"line": 18, "character": 1},
+                            },
+                        },
+                    },
+                    {
+                        "name": "test",
+                        "kind": 12,
+                        "location": {
+                            "uri": "file://${root_path}/definition.php",
+                            "range": {
+                                "start": {"line": 28, "character": 0},
+                                "end": {"line": 34, "character": 1},
+                            },
+                        },
+                    },
+                ],
+                powered_by="serverless_ide",
+            )
+            .request(method="shutdown", params={}, result=None)
+        )
+        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+
     def test_type_definition(self) -> None:
         self.prepare_server_environment()
         variables = self.setup_php_file("type_definition.php")

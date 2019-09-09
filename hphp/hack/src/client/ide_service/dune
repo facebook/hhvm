@@ -23,6 +23,7 @@
     facts
     lwt_utils
     server_command_types
+    server_services
     sys_utils)
   (preprocess
     (pps lwt_ppx)))

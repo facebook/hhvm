@@ -1711,56 +1711,103 @@ let do_workspaceSymbol
       in
       Lwt.return (List.map results ~f:hack_symbol_to_lsp)))
 
+let rec hack_symbol_tree_to_lsp
+    ~(filename : string)
+    ~(accu : Lsp.SymbolInformation.t list)
+    ~(container_name : string option)
+    (defs : FileOutline.outline) : Lsp.SymbolInformation.t list =
+  SymbolDefinition.(
+    let hack_to_lsp_kind = function
+      | SymbolDefinition.Function -> SymbolInformation.Function
+      | SymbolDefinition.Class -> SymbolInformation.Class
+      | SymbolDefinition.Method -> SymbolInformation.Method
+      | SymbolDefinition.Property -> SymbolInformation.Property
+      | SymbolDefinition.Const -> SymbolInformation.Constant
+      | SymbolDefinition.Enum -> SymbolInformation.Enum
+      | SymbolDefinition.Interface -> SymbolInformation.Interface
+      | SymbolDefinition.Trait -> SymbolInformation.Interface
+      (* LSP doesn't have traits, so we approximate with interface *)
+      | SymbolDefinition.LocalVar -> SymbolInformation.Variable
+      | SymbolDefinition.Typeconst -> SymbolInformation.Class
+      (* e.g. "const type Ta = string;" -- absent from LSP *)
+      | SymbolDefinition.Typedef -> SymbolInformation.Class
+      (* e.g. top level type alias -- absent from LSP *)
+      | SymbolDefinition.Param -> SymbolInformation.Variable
+      (* We never return a param from a document-symbol-search *)
+    in
+    let hack_symbol_to_lsp definition containerName =
+      {
+        SymbolInformation.name = definition.name;
+        kind = hack_to_lsp_kind definition.kind;
+        location =
+          hack_symbol_definition_to_lsp_construct_location
+            definition
+            ~default_path:filename;
+        containerName;
+      }
+    in
+    match defs with
+    (* Flattens the recursive list of symbols *)
+    | [] -> List.rev accu
+    | def :: defs ->
+      let children = Option.value def.children ~default:[] in
+      let accu = hack_symbol_to_lsp def container_name :: accu in
+      let accu =
+        hack_symbol_tree_to_lsp
+          ~filename
+          ~accu
+          ~container_name:(Some def.name)
+          children
+      in
+      hack_symbol_tree_to_lsp ~filename ~accu ~container_name defs)
+
 let do_documentSymbol
     (conn : server_conn)
     (ref_unblocked_time : float ref)
     (params : DocumentSymbol.params) : DocumentSymbol.result Lwt.t =
   DocumentSymbol.(
     TextDocumentIdentifier.(
-      SymbolDefinition.(
-        let filename = lsp_uri_to_path params.textDocument.uri in
-        let command = ServerCommandTypes.OUTLINE filename in
-        let%lwt results = rpc conn ref_unblocked_time command in
-        let hack_to_lsp_kind = function
-          | SymbolDefinition.Function -> SymbolInformation.Function
-          | SymbolDefinition.Class -> SymbolInformation.Class
-          | SymbolDefinition.Method -> SymbolInformation.Method
-          | SymbolDefinition.Property -> SymbolInformation.Property
-          | SymbolDefinition.Const -> SymbolInformation.Constant
-          | SymbolDefinition.Enum -> SymbolInformation.Enum
-          | SymbolDefinition.Interface -> SymbolInformation.Interface
-          | SymbolDefinition.Trait -> SymbolInformation.Interface
-          (* LSP doesn't have traits, so we approximate with interface *)
-          | SymbolDefinition.LocalVar -> SymbolInformation.Variable
-          | SymbolDefinition.Typeconst -> SymbolInformation.Class
-          (* e.g. "const type Ta = string;" -- absent from LSP *)
-          | SymbolDefinition.Typedef -> SymbolInformation.Class
-          (* e.g. top level type alias -- absent from LSP *)
-          | SymbolDefinition.Param -> SymbolInformation.Variable
-          (* We never return a param from a document-symbol-search *)
+      let filename = lsp_uri_to_path params.textDocument.uri in
+      let command = ServerCommandTypes.OUTLINE filename in
+      let%lwt outline = rpc conn ref_unblocked_time command in
+      let converted =
+        hack_symbol_tree_to_lsp ~filename ~accu:[] ~container_name:None outline
+      in
+      Lwt.return converted))
+
+(* for serverless ide *)
+let do_documentSymbol_local
+    (ide_service : ClientIdeService.t)
+    (editor_open_files : Lsp.TextDocumentItem.t SMap.t)
+    (params : DocumentSymbol.params) : DocumentSymbol.result Lwt.t =
+  DocumentSymbol.(
+    TextDocumentIdentifier.(
+      Hh_logger.log "DOCUMENTSYMBOL_LOCAL: start";
+      let filename = lsp_uri_to_path params.textDocument.uri in
+      let file_contents =
+        get_document_contents editor_open_files params.textDocument.uri
+      in
+      let request =
+        ClientIdeMessage.Document_symbol
+          { ClientIdeMessage.Document_symbol.file_contents }
+      in
+      Hh_logger.log "DOCUMENTSYMBOL_LOCAL: IDE request";
+      let%lwt results = ClientIdeService.rpc ide_service request in
+      match results with
+      | Ok outline ->
+        Hh_logger.log "DOCUMENTSYMBOL_LOCAL: convert results";
+        let converted =
+          hack_symbol_tree_to_lsp
+            ~filename
+            ~accu:[]
+            ~container_name:None
+            outline
         in
-        let hack_symbol_to_lsp definition containerName =
-          {
-            SymbolInformation.name = definition.name;
-            kind = hack_to_lsp_kind definition.kind;
-            location =
-              hack_symbol_definition_to_lsp_construct_location
-                definition
-                ~default_path:filename;
-            containerName;
-          }
-        in
-        let rec hack_symbol_tree_to_lsp ~accu ~container_name = function
-          (* Flattens the recursive list of symbols *)
-          | [] -> List.rev accu
-          | def :: defs ->
-            let children = Option.value def.children ~default:[] in
-            let accu = hack_symbol_to_lsp def container_name :: accu in
-            let accu = hack_symbol_tree_to_lsp accu (Some def.name) children in
-            hack_symbol_tree_to_lsp accu container_name defs
-        in
-        Lwt.return
-          (hack_symbol_tree_to_lsp ~accu:[] ~container_name:None results))))
+        Lwt.return converted
+      | Error error_message ->
+        Hh_logger.log "DOCUMENTSYMBOL_LOCAL: failed";
+        failwith
+          (Printf.sprintf "Local document-symbol failed: %s" error_message)))
 
 let do_findReferences
     (conn : server_conn)
@@ -3054,6 +3101,20 @@ let handle_event
             |> do_hover_local ide_service editor_open_files
           in
           result |> print_hover |> respond_jsonrpc ~powered_by:Serverless_ide c;
+          Lwt.return_unit
+        | ( ( In_init { In_init_env.editor_open_files; _ }
+            | Lost_server { Lost_env.editor_open_files; _ } ),
+            Client_message c )
+          when env.use_serverless_ide
+               && c.method_ = "textDocument/documentSymbol" ->
+          let%lwt () = cancel_if_stale client c short_timeout in
+          let%lwt result =
+            parse_documentSymbol c.params
+            |> do_documentSymbol_local ide_service editor_open_files
+          in
+          result
+          |> print_documentSymbol
+          |> respond_jsonrpc ~powered_by:Serverless_ide c;
           Lwt.return_unit
         | ( ( In_init { In_init_env.editor_open_files; _ }
             | Lost_server { Lost_env.editor_open_files; _ } ),

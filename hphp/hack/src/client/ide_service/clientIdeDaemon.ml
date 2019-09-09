@@ -468,6 +468,15 @@ let handle_message :
               ~line:document_location.ClientIdeMessage.line
               ~column:document_location.ClientIdeMessage.column)
       in
+      Lwt.return (state, Handle_message_result.Response result)
+    (* Document Symbol *)
+    | (Initialized { server_env; _ }, Document_symbol document_identifier) ->
+      let result =
+        match document_identifier.Document_symbol.file_contents with
+        | None -> []
+        | Some file_contents ->
+          FileOutline.outline server_env.ServerEnv.popt file_contents
+      in
       Lwt.return (state, Handle_message_result.Response result))
 
 let write_message

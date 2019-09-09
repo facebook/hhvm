@@ -13,6 +13,8 @@ open SymbolDefinition
 open Aast
 module Parser = Full_fidelity_ast
 
+type outline = string SymbolDefinition.t list
+
 let modifiers_to_list ~is_final ~visibility ~is_abstract ~is_static =
   let modifiers =
     match visibility with

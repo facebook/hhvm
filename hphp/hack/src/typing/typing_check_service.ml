@@ -161,12 +161,18 @@ let check_const
     Tast_check.def opts def;
     Some def
 
+let should_enable_deferring
+    (opts : GlobalOptions.t) (file : check_file_computation) =
+  match GlobalOptions.tco_max_times_to_defer_type_checking opts with
+  | Some max_times when file.deferred_count >= max_times -> false
+  | _ -> true
+
 let process_file
     (dynamic_view_files : Relative_path.Set.t)
     (opts : GlobalOptions.t)
     (errors : Errors.t)
     (file : check_file_computation) : Errors.t * file_computation list =
-  Deferred_decl.reset ();
+  Deferred_decl.reset ~enable:(should_enable_deferring opts file);
   let fn = file.path in
   let file_infos = file.names in
   let opts =

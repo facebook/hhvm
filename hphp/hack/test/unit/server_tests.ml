@@ -39,7 +39,7 @@ let ensure_count (count : int) : unit =
     "The number of deferred items should match the expected value"
 
 let test_deferred_decl_add () =
-  Deferred_decl.reset ();
+  Deferred_decl.reset ~enable:true;
   ensure_count 0;
 
   Deferred_decl.add (Relative_path.create Relative_path.Dummy "foo");
@@ -51,14 +51,14 @@ let test_deferred_decl_add () =
   Deferred_decl.add (Relative_path.create Relative_path.Dummy "bar");
   ensure_count 2;
 
-  Deferred_decl.reset ();
+  Deferred_decl.reset ~enable:true;
   ensure_count 0;
 
   true
 
 let ensure_threshold ~(threshold : int) ~(limit : int) ~(expected : int) : unit
     =
-  Deferred_decl.reset ();
+  Deferred_decl.reset ~enable:true;
   ensure_count 0;
 
   let deferred_count = ref 0 in
@@ -120,7 +120,7 @@ let bar_contents =
   for files that have undeclared dependencies, UNLESS we've already deferred
   those files a certain number of times. *)
 let test_process_file_deferring () =
-  Deferred_decl.reset ();
+  Deferred_decl.reset ~enable:true;
 
   (* Set up a simple fake repo *)
   Disk.mkdir_p "/fake/root/";
@@ -246,10 +246,53 @@ let test_process_file_deferring () =
 
   true
 
+let test_should_enable_deferring () =
+  Relative_path.set_path_prefix Relative_path.Root (Path.make "/fake/www");
+
+  let opts =
+    GlobalOptions.
+      { default with tco_max_times_to_defer_type_checking = Some 2 }
+  in
+  let file =
+    Typing_check_service.
+      {
+        path = Relative_path.create Relative_path.Root "/fake/www/Foo.php";
+        names = FileInfo.empty_names;
+        deferred_count = 1;
+      }
+  in
+  Asserter.Bool_asserter.assert_equals
+    true
+    (Typing_check_service.should_enable_deferring opts file)
+    "File should be deferred twice - below max";
+
+  let file = Typing_check_service.{ file with deferred_count = 2 } in
+  Asserter.Bool_asserter.assert_equals
+    false
+    (Typing_check_service.should_enable_deferring opts file)
+    "File should not be deferred - at max";
+
+  let file = Typing_check_service.{ file with deferred_count = 3 } in
+  Asserter.Bool_asserter.assert_equals
+    false
+    (Typing_check_service.should_enable_deferring opts file)
+    "File should not be deferred - above max";
+
+  let opts =
+    GlobalOptions.{ default with tco_max_times_to_defer_type_checking = None }
+  in
+  Asserter.Bool_asserter.assert_equals
+    true
+    (Typing_check_service.should_enable_deferring opts file)
+    "File should be deferred - max is not set";
+
+  true
+
 let tests =
   [ ("test_deferred_decl_add", test_deferred_decl_add);
     ("test_deferred_decl_should_defer", test_deferred_decl_should_defer);
     ("test_process_file_deferring", test_process_file_deferring);
-    ("test_dmesg_parser", test_dmesg_parser) ]
+    ("test_dmesg_parser", test_dmesg_parser);
+    ("test_should_enable_deferring", test_should_enable_deferring) ]
 
 let () = Unit_test.run_all tests

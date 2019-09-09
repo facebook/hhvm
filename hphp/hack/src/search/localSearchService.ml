@@ -109,28 +109,24 @@ let update_file
     si_env =
   let _ = info in
   let tombstone = get_tombstone path in
-  let full_filename = Relative_path.to_absolute path in
   let filepath = Relative_path.suffix path in
-  if Sys.file_exists full_filename then
-    let contents = IndexBuilder.parse_one_file ~path in
-    let contents =
+  let contents =
+    let full_filename = Relative_path.to_absolute path in
+    if Sys.file_exists full_filename then
+      let contents = IndexBuilder.parse_one_file ~path in
       if List.length contents = 0 then
         convert_fileinfo_to_contents ~info ~filepath
       else
         contents
-    in
-    {
-      sienv with
-      lss_fullitems =
-        Relative_path.Map.add sienv.lss_fullitems ~key:path ~data:contents;
-      lss_tombstones = Tombstone_set.add sienv.lss_tombstones tombstone;
-    }
-  else (
-    Hh_logger.log
-      "Symbol Index: Attempt to update a file that does not exist [%s]"
-      full_filename;
-    sienv
-  )
+    else
+      convert_fileinfo_to_contents ~info ~filepath
+  in
+  {
+    sienv with
+    lss_fullitems =
+      Relative_path.Map.add sienv.lss_fullitems ~key:path ~data:contents;
+    lss_tombstones = Tombstone_set.add sienv.lss_tombstones tombstone;
+  }
 
 (* Remove files from local when they are deleted *)
 let remove_file ~(sienv : si_env) ~(path : Relative_path.t) : si_env =

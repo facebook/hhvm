@@ -1,6 +1,0 @@
-File "4323-bad_type_constraint.php", line 7, characters 16-19:
-Invalid argument (Typing[4110])
-File "4323-bad_type_constraint.php", line 5, characters 38-38:
-Expected ~[unresolved] because it is an unenforceable type
-File "4323-bad_type_constraint.php", line 7, characters 16-19:
-But got bool

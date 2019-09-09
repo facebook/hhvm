@@ -1140,8 +1140,12 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
     let profile_threshold =
       local_config.ServerLocalConfig.profile_type_check_duration_threshold
     in
+    let max_times_to_defer =
+      local_config.ServerLocalConfig.max_times_to_defer_type_checking
+    in
     TypingLogger.ProfileTypeCheck.init
       ~threshold:profile_threshold
+      ~max_times_to_defer
       ~root:(Path.to_string root);
     if Sys_utils.is_test_mode () then
       EventLogger.init ~exit_on_parent_exit EventLogger.Event_logger_fake 0.0

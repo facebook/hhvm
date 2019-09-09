@@ -8,7 +8,7 @@
           (glob_files %{project_root}/test/pocket_universes/parsing/*.good.php.exp))
     (action (run %{project_root}/test/verify.py %{project_root}/test/pocket_universes/parsing
     --program %{exe:../../../src/hh_parse.exe}
-    --in-extension .good.php --flags --pocket-universes
+    --in-extension .good.php --flags
     --full-fidelity-errors --full-fidelity-errors-all
     --full-fidelity-s-expression)))
 
@@ -22,7 +22,7 @@
           (glob_files %{project_root}/test/pocket_universes/parsing/*.bad.php.exp))
     (action (run %{project_root}/test/verify.py %{project_root}/test/pocket_universes/parsing
     --program %{exe:../../../src/hh_parse.exe}
-    --in-extension .bad.php --flags --pocket-universes
+    --in-extension .bad.php --flags
     --full-fidelity-errors --full-fidelity-errors-all
     )))
 

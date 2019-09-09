@@ -810,11 +810,6 @@ module Make (GetLocals : GetLocals) = struct
       env
       (p, x) =
     let tcopt = (fst env).tcopt in
-    let pu_enabled =
-      TypecheckerOptions.experimental_feature_enabled
-        tcopt
-        GlobalOptions.tco_experimental_pocket_universes
-    in
     let like_types_enabled = TypecheckerOptions.like_types tcopt in
     let hint = hint ~forbid_this ~allow_typedef ~allow_wildcard in
     match x with
@@ -908,14 +903,7 @@ module Make (GetLocals : GetLocals) = struct
             | N.Hthis
             | N.Happly _ ->
               h
-            (* Pocket Universes: we want to be able to write `FieldName::Type`
-               in various locations (class, pu enum definitions, function
-               signatures), not just in `where` clauses.
-               This syntax is not (yet) allowed in Hack so
-               I guard its handling behind the experimental PU flag.
-            *)
-            | N.Habstr _ when in_where_clause && not pu_enabled -> h
-            | N.Habstr _ when pu_enabled -> h
+            | N.Habstr _ when in_where_clause -> h
             | _ ->
               Errors.invalid_type_access_root root;
               N.Herr

@@ -193,7 +193,6 @@ let parse_options () =
   let disallow_byref_dynamic_calls = ref (Some false) in
   let disallow_byref_calls = ref (Some false) in
   let set_bool x () = x := Some true in
-  let pocket_universes = ref false in
   let shallow_class_decl = ref false in
   let out_extension = ref ".out" in
   let like_types = ref false in
@@ -402,9 +401,6 @@ let parse_options () =
         Arg.Unit (set_bool disallow_byref_calls),
         "Disallow passing arguments by reference in any form [e.g. foo(&$bar)]"
       );
-      ( "--pocket-universes",
-        Arg.Set pocket_universes,
-        "Enables support for Pocket Universes" );
       ( "--shallow-class-decl",
         Arg.Set shallow_class_decl,
         "Look up class members lazily from shallow declarations" );
@@ -560,7 +556,6 @@ let parse_options () =
           tcopt.GlobalOptions.tco_experimental_features;
     }
   in
-  let tcopt = GlobalOptions.setup_pocket_universes tcopt !pocket_universes in
   (* Configure symbol index settings *)
   let namespace_map = GlobalOptions.po_auto_namespace_map tcopt in
   let sienv =

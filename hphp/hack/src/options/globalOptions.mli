@@ -438,8 +438,6 @@ val tco_experimental_type_param_shadowing : string
 
 val tco_experimental_trait_method_redeclarations : string
 
-val tco_experimental_pocket_universes : string
-
 val tco_experimental_abstract_type_const_with_default : string
 
 val tco_experimental_all : SSet.t
@@ -453,8 +451,6 @@ val ignored_fixme_regex : t -> string option
 val log_levels : t -> int SMap.t
 
 val po_disable_lval_as_an_expression : t -> bool
-
-val setup_pocket_universes : t -> bool -> t
 
 val tco_typecheck_xhp_cvars : t -> bool
 

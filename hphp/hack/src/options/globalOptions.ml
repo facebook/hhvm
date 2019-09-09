@@ -162,11 +162,6 @@ let tco_experimental_trait_method_redeclarations =
   "trait_method_redeclarations"
 
 (**
- * Enable support for the Pocket Universes
- *)
-let tco_experimental_pocket_universes = "pocket_universes"
-
-(**
  * Enable abstract const type with default syntax, i.e.
  * abstract const type T as num = int;
  *)
@@ -588,16 +583,6 @@ let po_abstract_static_props t = t.po_abstract_static_props
 let po_disable_unset_class_const t = t.po_disable_unset_class_const
 
 let tco_check_attribute_locations t = t.tco_check_attribute_locations
-
-let setup_pocket_universes env enabled =
-  let exp_features = env.tco_experimental_features in
-  let exp_features =
-    if enabled then
-      SSet.add tco_experimental_pocket_universes exp_features
-    else
-      SSet.remove tco_experimental_pocket_universes exp_features
-  in
-  { env with tco_experimental_features = exp_features }
 
 let set_infer_missing t w = { t with tco_infer_missing = w }
 

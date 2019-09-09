@@ -41,8 +41,6 @@ let with_disable_lval_as_an_expression po b =
 let disable_lval_as_an_expression =
   GlobalOptions.po_disable_lval_as_an_expression
 
-let setup_pocket_universes = GlobalOptions.setup_pocket_universes
-
 let rust_parser_errors = GlobalOptions.po_rust_parser_errors
 
 let enable_constant_visibility_modifiers =

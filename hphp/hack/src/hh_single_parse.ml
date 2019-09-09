@@ -58,18 +58,10 @@ let handle_errors : Errors.t -> unit =
       exit_with ParseError
     ))
 
-let run_ffp
-    ?(iters = 0)
-    ~codegen
-    ~allow_malformed
-    ~pocket_universes
-    (file : Relative_path.t) : Lowerer.result =
+let run_ffp ?(iters = 0) ~codegen ~allow_malformed (file : Relative_path.t) :
+    Lowerer.result =
   let env =
-    let popt =
-      ParserOptions.setup_pocket_universes
-        ParserOptions.default
-        pocket_universes
-    in
+    let popt = ParserOptions.default in
     Lowerer.make_env
       ~codegen
       ~include_line_comments:true
@@ -86,8 +78,8 @@ let run_ffp
     done;
   Lowerer.from_file env
 
-let run_validated_ffp : bool -> Relative_path.t -> Lowerer.result =
- fun pocket_universes file ->
+let run_validated_ffp : Relative_path.t -> Lowerer.result =
+ fun file ->
   SyntaxTree.(
     let source_text = SourceText.from_file file in
     let tree = make source_text in
@@ -114,11 +106,7 @@ let run_validated_ffp : bool -> Relative_path.t -> Lowerer.result =
         invalidated
     in
     let is_hh_file = is_hack tree in
-    let popt =
-      ParserOptions.setup_pocket_universes
-        ParserOptions.default
-        pocket_universes
-    in
+    let popt = ParserOptions.default in
     let env = Lowerer.make_env ~is_hh_file ~parser_options:popt file in
     let comments =
       Lowerer.scour_comments_and_add_fixmes env source_text script
@@ -141,11 +129,10 @@ let run_parsers
     ~hash
     ~codegen
     ~allow_malformed
-    ~dump_nast
-    ~pocket_universes =
+    ~dump_nast =
   match conf with
   | FFP ->
-    let res = run_ffp ~codegen ~allow_malformed ~pocket_universes file in
+    let res = run_ffp ~codegen ~allow_malformed file in
     let ast = res.Lowerer.ast in
     let output =
       if dump_nast then
@@ -161,19 +148,13 @@ let run_parsers
     in
     Printf.printf "%s" output
   | ValidatedFFP ->
-    let res = run_validated_ffp pocket_universes file in
+    let res = run_validated_ffp file in
     Printf.printf "%s" (dumper res.Lowerer.ast)
   | Benchmark_batch iters ->
     let filename = Relative_path.S.to_string file in
     let (_, duration) =
       try
-        measure (fun () ->
-            run_ffp
-              ~codegen
-              ~iters
-              ~allow_malformed:false
-              ~pocket_universes
-              file)
+        measure (fun () -> run_ffp ~codegen ~iters ~allow_malformed:false file)
       with _ ->
         Printf.printf "FAIL, %s\n" filename;
         exit_with ParseError
@@ -192,7 +173,6 @@ let () =
   let no_codegen = ref false in
   let allow_malformed = ref false in
   let dump_nast = ref false in
-  let pocket_universes = ref false in
   Arg.(
     parse
       [ ("--hash", Set hash, "Get the decl level parsing hash of a given file ");
@@ -216,10 +196,7 @@ let () =
         ( "--allow-malformed",
           Set allow_malformed,
           "Allow malformed files (such as for testing IDE services) [default: false]"
-        );
-        ( "--pocket-universes",
-          Set pocket_universes,
-          "Enables support for Pocket Universes [default: false]" ) ])
+        ) ])
     (fun fn -> filename := fn)
     usage;
   let parse_function =
@@ -247,7 +224,6 @@ let () =
       ~codegen:(not !no_codegen)
       ~allow_malformed:!allow_malformed
       ~dump_nast:!dump_nast
-      ~pocket_universes:!pocket_universes
   in
   if !benchmark_files <> [] then
     List.iter ~f:parse_file !benchmark_files

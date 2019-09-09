@@ -1782,7 +1782,6 @@ let do_documentSymbol_local
     (params : DocumentSymbol.params) : DocumentSymbol.result Lwt.t =
   DocumentSymbol.(
     TextDocumentIdentifier.(
-      Hh_logger.log "DOCUMENTSYMBOL_LOCAL: start";
       let filename = lsp_uri_to_path params.textDocument.uri in
       let file_contents =
         get_document_contents editor_open_files params.textDocument.uri
@@ -1791,11 +1790,9 @@ let do_documentSymbol_local
         ClientIdeMessage.Document_symbol
           { ClientIdeMessage.Document_symbol.file_contents }
       in
-      Hh_logger.log "DOCUMENTSYMBOL_LOCAL: IDE request";
       let%lwt results = ClientIdeService.rpc ide_service request in
       match results with
       | Ok outline ->
-        Hh_logger.log "DOCUMENTSYMBOL_LOCAL: convert results";
         let converted =
           hack_symbol_tree_to_lsp
             ~filename
@@ -1805,7 +1802,6 @@ let do_documentSymbol_local
         in
         Lwt.return converted
       | Error error_message ->
-        Hh_logger.log "DOCUMENTSYMBOL_LOCAL: failed";
         failwith
           (Printf.sprintf "Local document-symbol failed: %s" error_message)))
 

@@ -3395,9 +3395,11 @@ and emit_call_lhs_and_fcall
           gather [generics; instr_fcallclsmethodsd fcall_args clsref method_id]
         )
       | Class_expr expr ->
+        let (generics, fcall_args) = emit_generics fcall_args in
         let emit_fcall instr_meth =
           gather
-            [ instr_meth;
+            [ generics;
+              instr_meth;
               emit_expr env expr;
               instr_classgetc;
               instr_fcallclsmethod
@@ -3405,7 +3407,6 @@ and emit_call_lhs_and_fcall
                 fcall_args
                 [] ]
         in
-        (* TODO(T31677864): Implement reification here *)
         ( gather [instr_nulluninit; instr_nulluninit; instr_nulluninit],
           emit_fcall (instr_string method_id_string) )
       | Class_reified instrs ->

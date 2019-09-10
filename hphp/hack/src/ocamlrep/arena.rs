@@ -83,6 +83,31 @@ impl<'a> Arena<'a> {
     pub fn add<T: IntoOcamlRep>(&self, value: T) -> Value<'a> {
         value.into_ocamlrep(self)
     }
+
+    pub unsafe fn add_from_ocaml(&self, value: usize) -> Value<'a> {
+        use crate::block::{DOUBLE_TAG, STRING_TAG};
+        if value & 1 == 1 {
+            return Value::bits(value);
+        }
+        let ptr = value as *const Value<'a>;
+        let ptr = ptr.offset(-1);
+        let header = *ptr;
+        let size = header.0 >> 10;
+        let tag = header.0 as u8;
+        let block = self.alloc(size + 1).as_mut_ptr();
+        // Copy header
+        *block = *ptr;
+        if tag == STRING_TAG || tag == DOUBLE_TAG {
+            // Copy binary data
+            std::ptr::copy_nonoverlapping(ptr, block, size + 1);
+        } else {
+            // Copy fields
+            for i in 1..=(size as isize) {
+                *block.offset(i) = self.add_from_ocaml((*ptr.offset(i)).0);
+            }
+        }
+        Value::bits(std::mem::transmute(block.offset(1)))
+    }
 }
 
 #[cfg(test)]

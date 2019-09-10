@@ -16,6 +16,13 @@ fn val<T: IntoOcamlRep>(value: T) -> ocaml::Value {
     ocaml::Value::new(unsafe { value.as_usize() })
 }
 
+caml!(convert_to_ocamlrep, |value|, <result>, {
+    let mut arena = ocamlrep::Arena::new_with_size(8);
+    let value = arena.add_from_ocaml(value.0);
+    mem::forget(arena);
+    result = ocaml::Value::new(value.as_usize());
+} -> result);
+
 // Primitive Tests
 
 caml!(get_a, |_unit|, <result>, {

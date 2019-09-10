@@ -8,9 +8,9 @@ Last value of ArrayObject is: 3
 next/reset etc have no impact on using arrayObject as iterator, proof: 1
 current value after setting STD_PROP_LIST: false
 each with STD_PROP_LIST enabled: false
-current with STD_PROP_LIST enabled: false
-key with STD_PROP_LIST enabled: NULL
 prev with STD_PROP_LIST enabled: false
 next with STD_PROP_LIST enabled: false
 reset with STD_PROP_LIST enabled: false
+current with STD_PROP_LIST enabled: false
+key with STD_PROP_LIST enabled: NULL
 Disabling STD_PROP_LIST and checking current value: 2

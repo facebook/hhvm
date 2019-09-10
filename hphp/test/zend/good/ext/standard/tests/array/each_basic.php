@@ -16,14 +16,14 @@ echo "\n-- Passed array: --\n";
 var_dump($arr);
 
 echo "\n-- Initial position: --\n";
-var_dump(each(&$arr));
+var_dump(each(inout $arr));
 
 echo "\n-- End position: --\n";
-end(&$arr);
-var_dump(each(&$arr));
+end(inout $arr);
+var_dump(each(inout $arr));
 
 echo "\n-- Passed the end of array: --\n";
-var_dump(each(&$arr));
+var_dump(each(inout $arr));
 
 echo "Done";
 }

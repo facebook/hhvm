@@ -11,14 +11,13 @@ class A {
  */
 function test_warning($c, $f, $cmp) {
   $x = HH\class_meth($c, $f); var_dump(shuffle(&$x));
-  $x = HH\class_meth($c, $f); var_dump(key(&$x));
-  $x = HH\class_meth($c, $f); var_dump(reset(&$x));
-  $x = HH\class_meth($c, $f); var_dump(each(&$x));
-  $x = HH\class_meth($c, $f); var_dump(current(&$x));
-  $x = HH\class_meth($c, $f); var_dump(next(&$x));
-  $x = HH\class_meth($c, $f); var_dump(pos(&$x));
-  $x = HH\class_meth($c, $f); var_dump(prev(&$x));
-  $x = HH\class_meth($c, $f); var_dump(end(&$x));
+  $x = HH\class_meth($c, $f); var_dump(key($x));
+  $x = HH\class_meth($c, $f); var_dump(reset(inout $x));
+  $x = HH\class_meth($c, $f); var_dump(each(inout $x));
+  $x = HH\class_meth($c, $f); var_dump(current($x));
+  $x = HH\class_meth($c, $f); var_dump(next(inout $x));
+  $x = HH\class_meth($c, $f); var_dump(prev(inout $x));
+  $x = HH\class_meth($c, $f); var_dump(end(inout $x));
 
   var_dump(array_diff(HH\class_meth($c, $f), [$f]));
   var_dump(array_udiff(HH\class_meth($c, $f), [$f], $cmp));

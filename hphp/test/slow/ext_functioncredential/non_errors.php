@@ -7,7 +7,7 @@ function print_cred_info($cred) {
   $file_name = idx($info, 'file_name');
   echo "class=".$class_name.PHP_EOL;
   echo "function=".$function_name.PHP_EOL;
-  $e = explode('/', $file_name); echo "file=".end(&$e).PHP_EOL;
+  $e = explode('/', $file_name); echo "file=".end(inout $e).PHP_EOL;
 }
 
 function test_function() {

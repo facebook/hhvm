@@ -1,4 +1,5 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-each(&$foo);
+  $foo = null;
+  each(inout $foo);
 }

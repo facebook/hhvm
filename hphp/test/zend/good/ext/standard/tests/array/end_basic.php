@@ -13,16 +13,16 @@ echo "*** Testing end() : basic functionality ***\n";
 $array = array('zero', 'one', 200 => 'two');
 
 echo "\n-- Initial Position: --\n";
-echo key(&$array) . " => " . current(&$array) . "\n";
+echo key($array) . " => " . current($array) . "\n";
 
 echo "\n-- Call to end() --\n";
-var_dump(end(&$array));
+var_dump(end(inout $array));
 
 echo "\n-- Current Position: --\n";
-echo key(&$array) . " => " . current(&$array) . "\n";
+echo key($array) . " => " . current($array) . "\n";
 
 echo "\n-- Add a new element to array --\n";
 $array[2] = 'foo';
-var_dump(end(&$array));
+var_dump(end(inout $array));
 echo "===DONE===\n";
 }

@@ -13,10 +13,10 @@ echo "*** Testing reset() : usage variations ***\n";
 $array = array('a', 'b', 'c');
 
 echo "\n-- Initial Position: --\n";
-echo current(&$array) . " => " . key(&$array) . "\n";
+echo current($array) . " => " . key($array) . "\n";
 
 echo "\n-- Unset First element in array and check reset() --\n";
 unset($array[0]);
-var_dump(reset(&$array));
+var_dump(reset(inout $array));
 echo "===DONE===\n";
 }

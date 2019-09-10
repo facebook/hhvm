@@ -1,13 +1,13 @@
 <?hh // strict
 
 function run($input) {
-  var_dump(each(&$input));
-  var_dump(current(&$input));
-  var_dump(key(&$input));
-  var_dump(next(&$input));
-  var_dump(prev(&$input));
-  var_dump(reset(&$input));
-  var_dump(end(&$input));
+  var_dump(each(inout $input));
+  var_dump(current($input));
+  var_dump(key($input));
+  var_dump(next(inout $input));
+  var_dump(prev(inout $input));
+  var_dump(reset(inout $input));
+  var_dump(end(inout $input));
 }
 
 <<__EntryPoint>>

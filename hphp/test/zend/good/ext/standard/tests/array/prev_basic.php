@@ -11,22 +11,22 @@
 echo "*** Testing prev() : basic functionality ***\n";
 
 $array = array('zero', 'one', 'two');
-end(&$array);
-echo key(&$array) . " => " . current(&$array) . "\n";
-var_dump(prev(&$array));
+end(inout $array);
+echo key($array) . " => " . current($array) . "\n";
+var_dump(prev(inout $array));
 
-echo key(&$array) . " => " . current(&$array) . "\n";
-var_dump(prev(&$array));
+echo key($array) . " => " . current($array) . "\n";
+var_dump(prev(inout $array));
 
-echo key(&$array) . " => " . current(&$array) . "\n";
-var_dump(prev(&$array));
+echo key($array) . " => " . current($array) . "\n";
+var_dump(prev(inout $array));
 
 echo "\n*** Testing an array with differing values/keys ***\n";
 $array2 = array('one', 2 => "help", 3, false, 'stringkey2' => 'val2', 'stringkey1' => 'val1');
-end(&$array2);
+end(inout $array2);
 $length = count($array2);
 for ($i = $length; $i > 0; $i--) {
-    var_dump(prev(&$array2));
+    var_dump(prev(inout $array2));
 }
 
 echo "===DONE===\n";

@@ -1,6 +1,6 @@
 <?hh
 $pwd = getcwd();
-$included_files = get_included_files(); $f = basename(current(&$included_files), ".php");
+$included_files = get_included_files(); $f = basename(current($included_files), ".php");
 ZendGoodExtStandardTestsFileFopenIncludePathInc::$dir1 = $pwd."/".$f.".dir1";
 ZendGoodExtStandardTestsFileFopenIncludePathInc::$dir2 = $pwd."/".$f.".dir2";
 ZendGoodExtStandardTestsFileFopenIncludePathInc::$dir3 = $pwd."/".$f.".dir3";

@@ -19,6 +19,6 @@ try { var_dump( current() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->
 echo "\n-- Testing current() function with more than expected no. of arguments --\n";
 $array_arg = array(1, 2);
 $extra_arg = 10;
-try { var_dump( current(&$array_arg, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( current($array_arg, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 echo "===DONE===\n";
 }

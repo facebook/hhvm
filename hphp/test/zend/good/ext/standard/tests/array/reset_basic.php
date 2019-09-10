@@ -13,15 +13,15 @@ echo "*** Testing reset() : basic functionality ***\n";
 $array = array('zero', 'one', 200 => 'two');
 
 echo "\n-- Initial Position: --\n";
-echo key(&$array) . " => " . current(&$array) . "\n";
+echo key($array) . " => " . current($array) . "\n";
 
 echo "\n-- Call to next() --\n";
-var_dump(next(&$array));
+var_dump(next(inout $array));
 
 echo "\n-- Current Position: --\n";
-echo key(&$array) . " => " . current(&$array) . "\n";
+echo key($array) . " => " . current($array) . "\n";
 
 echo "\n-- Call to reset() --\n";
-var_dump(reset(&$array));
+var_dump(reset(inout $array));
 echo "===DONE===\n";
 }

@@ -1,6 +1,6 @@
 <?hh <<__EntryPoint>> function main(): void {
 $arr = array (b"foo\0bar" => b"foo\0bar");
-$key = key(&$arr);
+$key = key($arr);
 echo strlen($key), ': ';
 echo urlencode($key), "\n";
 }

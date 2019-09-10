@@ -61,19 +61,19 @@ foreach( $mixed_array as $sub_array ) {
 echo"\n*** Checking for internal array pointer being reset when shift is called ***\n";
 
 echo "\nCurrent Element is : ";
-var_dump( current(&$mixed_array1) );
+var_dump( current($mixed_array1) );
 
 echo "\nNext Element is : ";
-var_dump( next(&$mixed_array1) );
+var_dump( next(inout $mixed_array1) );
 
 echo "\nNext Element is : ";
-var_dump( next(&$mixed_array1) );
+var_dump( next(inout $mixed_array1) );
 
 echo "\nshifted Element is : ";
 var_dump( array_shift(&$mixed_array1) );
 
 echo "\nCurrent Element after shift operation is: ";
-var_dump( current(&$mixed_array1) );
+var_dump( current($mixed_array1) );
 
 echo"Done";
 }

@@ -8,7 +8,7 @@ class mycollection implements Iterator {
 
   public function rewind() {
     $__elements = $this->_elements;
-    reset(&$__elements);
+    reset(inout $__elements);
     $this->_elements = $__elements;
   }
 
@@ -18,14 +18,14 @@ class mycollection implements Iterator {
 
   public function current() {
     $__elements = $this->_elements;
-    $element = current(&$__elements);
+    $element = current($__elements);
     $this->_elements = $__elements;
     return $element;
   }
 
   public function next() {
     $__elements = $this->_elements;
-    $element = next(&$__elements);
+    $element = next(inout $__elements);
     $this->_elements = $__elements;
     return $element;
   }
@@ -33,7 +33,7 @@ class mycollection implements Iterator {
   public function key() {
     $this->_fillCollection();
     $__elements = $this->_elements;
-    $element = key(&$__elements);
+    $element = key($__elements);
     $this->_elements = $__elements;
     return $element;
   }

@@ -16,9 +16,9 @@ echo "\n-- Call array_change_key_case() --\n";
 var_dump($result = array_change_key_case($input, CASE_UPPER));
 
 echo "-- Position of Internal Pointer in Result: --\n";
-echo key(&$result) . " => " . current(&$result) . "\n";
+echo key($result) . " => " . current($result) . "\n";
 echo "\n-- Position of Internal Pointer in Original Array: --\n";
-echo key(&$input) . " => " . current (&$input) . "\n";
+echo key($input) . " => " . current($input) . "\n";
 
 echo "Done";
 }

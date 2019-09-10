@@ -6,34 +6,34 @@ final class Test implements Iterator {
   public function rewind() {
     if ($this->x == 0) throw new Exception(__METHOD__);
     $arr = $this->arr;
-    reset(&$arr);
+    reset(inout $arr);
     $this->arr = $arr;
   }
   public function current() {
     if ($this->x == 1) throw new Exception(__METHOD__);
     $arr = $this->arr;
-    $x = current(&$arr);
+    $x = current($arr);
     $this->arr = $arr;
     return $x;
   }
   public function key() {
     if ($this->x == 2) throw new Exception(__METHOD__);
     $arr = $this->arr;
-    $key = key(&$arr);
+    $key = key($arr);
     $this->arr = $arr;
     return $key;
   }
   public function next() {
     if ($this->x == 3) throw new Exception(__METHOD__);
     $arr = $this->arr;
-    $n = next(&$arr);
+    $n = next(inout $arr);
     $this->arr = $arr;
     return $n;
   }
   public function valid() {
     if ($this->x == 4) throw new Exception(__METHOD__);
     $arr = $this->arr;
-    $key = key(&$arr);
+    $key = key($arr);
     $this->arr = $arr;
     return $key !== null;
   }

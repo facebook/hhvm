@@ -659,7 +659,7 @@ function sizeof(
  *
  */
 <<__Native>>
-function each(mixed &$array): mixed;
+function each(inout mixed $array): mixed;
 
 /**
  * Every array has an internal pointer to its "current" element, which is
@@ -678,10 +678,10 @@ function each(mixed &$array): mixed;
  *
  */
 <<__Native>>
-function current(mixed &$array): mixed;
+function current(mixed $array): mixed;
 
-function current_ref(mixed &$array): mixed {
-  return current(&$array);
+function current_ref(inout mixed $array): mixed {
+  return current($array);
 }
 
 /**
@@ -701,16 +701,7 @@ function current_ref(mixed &$array): mixed {
  *
  */
 <<__Native>>
-function next(mixed &$array): mixed;
-
-/**
- * @param mixed $array
- *
- * @return mixed
- *
- */
-<<__Native>>
-function pos(mixed &$array): mixed;
+function next(inout mixed $array): mixed;
 
 /**
  * Rewind the internal array pointer. prev() behaves just like next(), except
@@ -724,7 +715,7 @@ function pos(mixed &$array): mixed;
  *
  */
 <<__Native>>
-function prev(mixed &$array): mixed;
+function prev(inout mixed $array): mixed;
 
 /**
  * reset() rewinds array's internal pointer to the first element and returns
@@ -737,7 +728,7 @@ function prev(mixed &$array): mixed;
  *
  */
 <<__Native>>
-function reset(mixed &$array): mixed;
+function reset(inout mixed $array): mixed;
 
 /**
  * end() advances array's internal pointer to the last element, and returns
@@ -753,7 +744,7 @@ function reset(mixed &$array): mixed;
  *
  */
 <<__Native>>
-function end(mixed &$array): mixed;
+function end(inout mixed $array): mixed;
 
 /**
  * key() returns the index element of the current array position.
@@ -767,10 +758,10 @@ function end(mixed &$array): mixed;
  *
  */
 <<__Native>>
-function key(mixed &$array): mixed;
+function key(mixed $array): mixed;
 
-function key_ref(mixed &$array): mixed {
-  return key(&$array);
+function key_ref(inout mixed $array): mixed {
+  return key($array);
 }
 
 /**

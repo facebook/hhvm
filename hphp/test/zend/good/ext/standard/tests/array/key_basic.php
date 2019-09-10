@@ -12,18 +12,18 @@ echo "*** Testing key() : basic functionality ***\n";
 
 $array = array ('zero', 99 => 'one', 'two', 'three' => 3);
 echo "\n-- Initial Position: --\n";
-var_dump(key(&$array));
+var_dump(key($array));
 
 echo "\n-- Next Position: --\n";
-next(&$array);
-var_dump(key(&$array));
+next(inout $array);
+var_dump(key($array));
 
 echo "\n-- End Position: --\n";
-end(&$array);
-var_dump(key(&$array));
+end(inout $array);
+var_dump(key($array));
 
 echo "\n-- Past end of the array --\n";
-next(&$array);
-var_dump(key(&$array));
+next(inout $array);
+var_dump(key($array));
 echo "===DONE===\n";
 }

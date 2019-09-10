@@ -9,11 +9,11 @@
   var_dump($x);
   unset($a, $x);
   $a = array();
-  $x = next(&$a);
+  $x = next(inout $a);
   var_dump($x);
   unset($a, $x);
   $a = array();
-  $x = prev(&$a);
+  $x = prev(inout $a);
   var_dump($x);
   unset($a, $x);
 }

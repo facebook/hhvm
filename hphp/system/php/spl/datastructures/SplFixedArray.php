@@ -39,9 +39,7 @@ class SplFixedArray implements \HH\Iterator, ArrayAccess, Countable {
    * @return     mixed   The current element value.
    */
   public function current() {
-    $data = $this->data;
-    $ret = current(&$data);
-    $this->data = $data;
+    $ret = current($this->data);
     return $ret;
   }
 
@@ -54,9 +52,7 @@ class SplFixedArray implements \HH\Iterator, ArrayAccess, Countable {
    * @return     mixed   The current array index.
    */
   public function key() {
-    $data = $this->data;
-    $ret = key(&$data);
-    $this->data = $data;
+    $ret = key($this->data);
     return $ret;
   }
 
@@ -70,7 +66,7 @@ class SplFixedArray implements \HH\Iterator, ArrayAccess, Countable {
    */
   public function next() {
     $data = $this->data;
-    $ret = next(&$data);
+    $ret = next(inout $data);
     $this->data = $data;
   }
 
@@ -84,7 +80,7 @@ class SplFixedArray implements \HH\Iterator, ArrayAccess, Countable {
    */
   public function rewind() {
     $data = $this->data;
-    $ret = reset(&$data);
+    $ret = reset(inout $data);
     $this->data = $data;
   }
 
@@ -98,9 +94,7 @@ class SplFixedArray implements \HH\Iterator, ArrayAccess, Countable {
    *                     elements, FALSE otherwise.
    */
   public function valid() {
-    $data = $this->data;
-    $ret = key(&$data);
-    $this->data = $data;
+    $ret = key($this->data);
     return $ret !== NULL;
   }
 

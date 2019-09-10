@@ -243,25 +243,23 @@ function shuffle(&$array);
   'doesn\'t suggest that it\'s counting bytes.'), __PHPStdLib, __Rx>>
 function sizeof($var);
 <<__PHPStdLib>>
-function each(&$array);
+function each(inout $array);
 <<__PHPStdLib>>
-function current(&$array);
+function current($array);
 <<__PHPStdLib>>
 function current_ref(&$array);
 <<__PHPStdLib>>
 function hphp_current_ref(&$array);
 <<__PHPStdLib>>
-function next(&$array);
+function next(inout $array);
 <<__PHPStdLib>>
-function pos(&$array);
+function prev(inout $array);
 <<__PHPStdLib>>
-function prev(&$array);
+function reset(inout $array);
 <<__PHPStdLib>>
-function reset(&$array);
+function end(inout $array);
 <<__PHPStdLib>>
-function end(&$array);
-<<__PHPStdLib>>
-function key(&$array);
+function key($array);
 <<__PHPStdLib>>
 function key_ref(&$array);
 <<__PHPStdLib>>

@@ -2,22 +2,22 @@
 
 function a() {
   $foo = array("bob", "fred", "jussi", "jouni", "egon", "marliese");
-  $bar = each(&$foo);
+  $bar = each(inout $foo);
   var_dump($bar);
 }
 
 function b() {
   $foo = array("Robert" => "Bob", "Seppo" => "Sepi");
-  $bar = each(&$foo);
+  $bar = each(inout $foo);
   var_dump($bar);
 }
 
 function c() {
   $fruit = array("a" => "apple", "b" => "banana", "c" => "cranberry");
-  reset(&$fruit);
+  reset(inout $fruit);
   $output = '';
   while (true) {
-    $item = each(&$fruit);
+    $item = each(inout $fruit);
     if ($item === false) break;
     $output .= $item[0];
     $output .= ": ";

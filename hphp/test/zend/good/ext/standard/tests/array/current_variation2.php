@@ -106,7 +106,7 @@ $inputs = array(
 $iterator = 1;
 foreach($inputs as $key => $input) {
   echo "\n-- Iteration $iterator : $key data --\n";
-  var_dump( current(&$input) );
+  var_dump( current($input) );
   $iterator++;
 };
 

@@ -534,7 +534,7 @@ class ArrayObject implements IteratorAggregate, ArrayAccess,
       return false;
     }
     $__storage = $this->storage;
-    reset(&$__storage);
+    reset(inout $__storage);
     $this->storage = $__storage;
   }
 
@@ -545,9 +545,7 @@ class ArrayObject implements IteratorAggregate, ArrayAccess,
     if($this->flags & self::STD_PROP_LIST) {
       return false;
     }
-    $__storage = $this->storage;
-    $ret = current(&$__storage);
-    $this->storage = $__storage;
+    $ret = current($this->storage);
     return $ret;
   }
 
@@ -558,9 +556,7 @@ class ArrayObject implements IteratorAggregate, ArrayAccess,
     if($this->flags & self::STD_PROP_LIST) {
       return null;
     }
-    $__storage = $this->storage;
-    $key = key(&$__storage);
-    $this->storage = $__storage;
+    $key = key($this->storage);
     return $key;
   }
 
@@ -572,7 +568,7 @@ class ArrayObject implements IteratorAggregate, ArrayAccess,
       return false;
     }
     $__storage = $this->storage;
-    $ret = next(&$__storage);
+    $ret = next(inout $__storage);
     $this->storage = $__storage;
     return $ret;
   }
@@ -585,7 +581,7 @@ class ArrayObject implements IteratorAggregate, ArrayAccess,
       return false;
     }
     $__storage = $this->storage;
-    $ret = prev(&$__storage);
+    $ret = prev(inout $__storage);
     $this->storage = $__storage;
     return $ret;
   }
@@ -598,7 +594,7 @@ class ArrayObject implements IteratorAggregate, ArrayAccess,
       return false;
     }
     $__storage = $this->storage;
-    $ret = each(&$__storage);
+    $ret = each(inout $__storage);
     $this->storage = $__storage;
     return $ret;
   }
@@ -611,7 +607,7 @@ class ArrayObject implements IteratorAggregate, ArrayAccess,
       return false;
     }
     $__storage = $this->storage;
-    $ret = end(&$__storage);
+    $ret = end(inout $__storage);
     $this->storage = $__storage;
     return $ret;
   }

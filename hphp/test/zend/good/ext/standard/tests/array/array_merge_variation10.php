@@ -19,15 +19,15 @@ echo "\n-- Call array_merge() --\n";
 var_dump($result = array_merge($arr1, $arr2, $arr3));
 
 echo "\n-- Position of Internal Pointer in Result: --\n";
-echo key(&$result) . " => " . current(&$result) . "\n";
+echo key($result) . " => " . current($result) . "\n";
 
 echo "\n-- Position of Internal Pointer in Original Array: --\n";
 echo "\$arr1: ";
-echo key(&$arr1) . " => " . current (&$arr1) . "\n";
+echo key($arr1) . " => " . current($arr1) . "\n";
 echo "\$arr2: ";
-echo key(&$arr2) . " => " . current (&$arr2) . "\n";
+echo key($arr2) . " => " . current($arr2) . "\n";
 echo "\$arr3: ";
-echo key(&$arr3) . " => " . current (&$arr3) . "\n";
+echo key($arr3) . " => " . current($arr3) . "\n";
 
 echo "Done";
 }

@@ -47,7 +47,7 @@ class ArrayIterator implements ArrayAccess, SeekableIterator, Countable {
     }
     $this->flags = ($flags === null) ? 0 : $flags;
     $__storage = $this->storage;
-    reset(&$__storage);
+    reset(inout $__storage);
     $this->storage = $__storage;
   }
 
@@ -106,9 +106,7 @@ class ArrayIterator implements ArrayAccess, SeekableIterator, Countable {
    * @return     mixed   The current array entry.
    */
   public function current() {
-    $__storage = $this->storage;
-    $ret = (key(&$__storage) === null) ? null : current(&$__storage);
-    $this->storage = $__storage;
+    $ret = (key($this->storage) === null) ? null : current($this->storage);
     return $ret;
   }
 
@@ -148,9 +146,7 @@ class ArrayIterator implements ArrayAccess, SeekableIterator, Countable {
    * @return     mixed   The current array key.
    */
   public function key() {
-    $__storage = $this->storage;
-    $ret = key(&$__storage);
-    $this->storage = $__storage;
+    $ret = key($this->storage);
     return $ret;
   }
 
@@ -214,7 +210,7 @@ class ArrayIterator implements ArrayAccess, SeekableIterator, Countable {
    */
   public function next() {
     $__storage = $this->storage;
-    next(&$__storage);
+    next(inout $__storage);
     $this->storage = $__storage;
   }
 
@@ -293,7 +289,7 @@ class ArrayIterator implements ArrayAccess, SeekableIterator, Countable {
    */
   public function rewind() {
     $__storage = $this->storage;
-    reset(&$__storage);
+    reset(inout $__storage);
     $this->storage = $__storage;
   }
 
@@ -313,9 +309,9 @@ class ArrayIterator implements ArrayAccess, SeekableIterator, Countable {
       );
     }
     $__storage = $this->storage;
-    reset(&$__storage);
+    reset(inout $__storage);
     for ($i = 0; $i < $position; $i++) {
-      if (!next(&$__storage)) {
+      if (!next(inout $__storage)) {
         break;
       }
     }
@@ -389,9 +385,7 @@ class ArrayIterator implements ArrayAccess, SeekableIterator, Countable {
    * @return     mixed   No value is returned.
    */
   public function valid() {
-    $__storage = $this->storage;
-    $key = key(&$__storage);
-    $this->storage = $__storage;
+    $key = key($this->storage);
     return $key !== null;
   }
 }

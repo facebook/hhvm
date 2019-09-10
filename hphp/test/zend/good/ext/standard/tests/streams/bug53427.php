@@ -1,7 +1,7 @@
 <?hh <<__EntryPoint>> function main(): void {
 $read = array();
 $read[1] = fopen(__FILE__, "r");
-$read["myindex"] = reset(&$read);
+$read["myindex"] = reset(inout $read);
 $write = NULL;
 $except = NULL;
 

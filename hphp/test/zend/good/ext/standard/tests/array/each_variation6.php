@@ -14,13 +14,13 @@ echo "*** Testing each() : usage variations ***\n";
 $arr = array('zero', 'one', 'two', 'abc', 'xyz');
 
 echo "\n-- Current position: --\n";
-echo key(&$arr) . " => " . current(&$arr) . "\n";
+echo key($arr) . " => " . current($arr) . "\n";
 
 echo "\n-- Call to each(): --\n";
-var_dump( each(&$arr) );
+var_dump( each(inout $arr) );
 
 echo "\n-- New position: --\n";
-echo key(&$arr) . " => " . current(&$arr) . "\n";
+echo key($arr) . " => " . current($arr) . "\n";
 
 echo "Done";
 }

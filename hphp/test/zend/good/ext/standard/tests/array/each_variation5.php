@@ -20,7 +20,7 @@ $arr = array ('zero',
 
 echo "\n-- Pass each() a two-dimensional array --\n";
 for ($i = 1; $i < count($arr); $i++) {
-    var_dump( each(&$arr) );
+    var_dump( each(inout $arr) );
 }
 
 echo "Done";

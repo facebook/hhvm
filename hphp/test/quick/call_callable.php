@@ -30,7 +30,7 @@ class C extends Base {
 class CMagic {
   public function __call($name, $args) {
     echo $name, ' called on instance', "\n";
-    return intval(reset(&$args));
+    return intval(reset(inout $args));
   }
 }
 

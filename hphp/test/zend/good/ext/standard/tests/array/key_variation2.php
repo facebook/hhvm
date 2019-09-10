@@ -93,9 +93,9 @@ $inputs = array(
 $iterator = 1;
 foreach($inputs as $key => $input) {
   echo "\n-- Iteration $iterator : $key data --\n";
-  while (key(&$input) !== NULL) {
-      var_dump(key(&$input));
-      next(&$input);
+  while (key($input) !== NULL) {
+      var_dump(key($input));
+      next(inout $input);
   }
   $iterator++;
 };

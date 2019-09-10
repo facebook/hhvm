@@ -6,5 +6,5 @@ function test() {
 
  <<__EntryPoint>>
 function main_1263() {
-reset(&test());
+reset(inout test());
 }

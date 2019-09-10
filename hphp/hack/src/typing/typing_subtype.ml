@@ -298,13 +298,29 @@ and simplify_subtype
   let (env, ety_super) = Env.expand_type env ty_super in
   let (env, ety_sub) = Env.expand_type env ty_sub in
   let fail () =
-    TUtils.uerror
-      env
-      (fst ety_super)
-      (snd ety_super)
-      (fst ety_sub)
-      (snd ety_sub)
-      on_error
+    let (r1, ty1) = ety_super in
+    let (r2, ty2) = ety_sub in
+    let ty1 =
+      Typing_print.with_blank_tyvars (fun () ->
+          Typing_print.full_strip_ns env (r1, ty1))
+    in
+    let ty2 =
+      Typing_print.with_blank_tyvars (fun () ->
+          Typing_print.full_strip_ns env (r2, ty2))
+    in
+    let (ty1, ty2) =
+      if String.equal ty1 ty2 then
+        ("exactly the type " ^ ty1, "the nonexact type " ^ ty2)
+      else
+        (ty1, ty2)
+    in
+    let left = Reason.to_string ("Expected " ^ ty1) r1 in
+    let right = Reason.to_string ("But got " ^ ty2) r2 in
+    match (r1, r2) with
+    | (Reason.Rcstr_on_generics (p, tparam), _)
+    | (_, Reason.Rcstr_on_generics (p, tparam)) ->
+      Errors.violated_constraint p tparam left right
+    | _ -> on_error left right
   in
   let ( ||| ) (env, p1) (f : env -> env * TL.subtype_prop) =
     if TL.is_valid p1 then

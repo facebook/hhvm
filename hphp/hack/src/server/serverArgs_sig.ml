@@ -64,6 +64,8 @@ module type S = sig
 
   val profile_log : options -> bool
 
+  val remote : options -> bool
+
   val replace_state_after_saving : options -> bool
 
   val root : options -> Path.t

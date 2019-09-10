@@ -105,6 +105,7 @@ let parse_check_args cmd =
   let profile_log = ref false in
   let refactor_before = ref "" in
   let refactor_mode = ref "" in
+  let remote = ref false in
   let replace_state_after_saving = ref false in
   let sort_results = ref false in
   let timeout = ref None in
@@ -458,6 +459,7 @@ let parse_check_args cmd =
                   ()) ],
         " (mode) rename a symbol, Usage: --refactor "
         ^ "[\"Class\", \"Function\", \"Method\"] <Current Name> <New Name>" );
+      ("--remote", Arg.Set remote, " force remote type checking");
       ( "--remove-dead-fixme",
         Arg.Int
           begin
@@ -674,6 +676,7 @@ let parse_check_args cmd =
       output_json = !output_json;
       prechecked = !prechecked;
       profile_log = !profile_log;
+      remote = !remote;
       replace_state_after_saving = !replace_state_after_saving;
       root;
       sort_results = !sort_results;

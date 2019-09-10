@@ -2309,6 +2309,8 @@ let rec connect_client (root : Path.t) ~(autostart : bool) : server_conn Lwt.t
         (* irrelevant *)
         profile_log = false;
         (* irrelevant *)
+        remote = false;
+        (* irrelevant *)
         ai_mode = None;
         (* only relevant when autostart=true *)
         progress_callback = ClientConnect.null_progress_reporter;

@@ -22,6 +22,7 @@ type env = {
   watchman_debug_logging: bool;
   log_inference_constraints: bool;
   profile_log: bool;
+  remote: bool;
   ai_mode: string option;
   progress_callback: string option -> unit;
   do_post_handoff_handshake: bool;

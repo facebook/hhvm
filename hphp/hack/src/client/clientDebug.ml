@@ -26,6 +26,7 @@ let main (env : env) : Exit_status.t Lwt.t =
         watchman_debug_logging = false;
         log_inference_constraints = false;
         profile_log = false;
+        remote = false;
         progress_callback = ClientConnect.tty_progress_reporter ();
         do_post_handoff_handshake = true;
         ignore_hh_version = false;

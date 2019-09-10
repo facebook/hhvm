@@ -102,6 +102,7 @@ let connect ?(use_priority_pipe = false) args =
       watchman_debug_logging = args.watchman_debug_logging;
       log_inference_constraints = args.log_inference_constraints;
       profile_log = args.profile_log;
+      remote = args.remote;
       ai_mode = args.ai_mode;
       progress_callback = ClientConnect.tty_progress_reporter ();
       do_post_handoff_handshake = true;

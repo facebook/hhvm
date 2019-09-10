@@ -75,6 +75,20 @@ external get_pear : unit -> fruit = "get_pear"
 
 external get_kiwi : unit -> fruit = "get_kiwi"
 
+(* map tests *)
+
+module SMap = Caml.Map.Make (struct
+  type t = string
+
+  let compare = String.compare
+end)
+
+external get_empty_smap : unit -> 'a SMap.t = "get_empty_smap"
+
+external get_int_smap_singleton : unit -> int SMap.t = "get_int_smap_singleton"
+
+external get_int_smap : unit -> int SMap.t = "get_int_smap"
+
 external convert_to_ocamlrep : 'a -> 'a = "convert_to_ocamlrep"
 
 let test_char () =
@@ -206,6 +220,21 @@ let test_orange () =
 let test_pear () =
   match get_pear () with
   | Pear { num = 76 } -> ()
+  | _ -> assert false
+
+let test_empty_smap () =
+  match SMap.bindings (get_empty_smap ()) with
+  | [] -> ()
+  | _ -> assert false
+
+let test_int_smap_singleton () =
+  match SMap.bindings (get_int_smap_singleton ()) with
+  | [("a", 1)] -> ()
+  | _ -> assert false
+
+let test_int_smap () =
+  match SMap.bindings (get_int_smap ()) with
+  | [("a", 1); ("b", 2); ("c", 3)] -> ()
   | _ -> assert false
 
 (* Conversion tests *)
@@ -344,6 +373,25 @@ let test_convert_pear () =
   | Pear { num = 76 } -> ()
   | _ -> assert false
 
+let test_convert_empty_smap () =
+  match SMap.bindings (convert_to_ocamlrep SMap.empty) with
+  | [] -> ()
+  | _ -> assert false
+
+let test_convert_int_smap_singleton () =
+  match SMap.bindings (convert_to_ocamlrep (SMap.singleton "a" 1)) with
+  | [("a", 1)] -> ()
+  | _ -> assert false
+
+let test_convert_int_smap () =
+  let map = SMap.empty in
+  let map = SMap.add "a" 1 map in
+  let map = SMap.add "b" 2 map in
+  let map = SMap.add "c" 3 map in
+  match SMap.bindings (convert_to_ocamlrep map) with
+  | [("a", 1); ("b", 2); ("c", 3)] -> ()
+  | _ -> assert false
+
 let test_cases =
   [ test_char;
     test_int;
@@ -371,6 +419,9 @@ let test_cases =
     test_kiwi;
     test_orange;
     test_pear;
+    test_empty_smap;
+    test_int_smap_singleton;
+    test_int_smap;
     test_convert_char;
     test_convert_int;
     test_convert_true;
@@ -396,7 +447,10 @@ let test_cases =
     test_convert_apple;
     test_convert_kiwi;
     test_convert_orange;
-    test_convert_pear ]
+    test_convert_pear;
+    test_convert_empty_smap;
+    test_convert_int_smap_singleton;
+    test_convert_int_smap ]
 
 let main () = List.iter test_cases (fun test -> test ())
 

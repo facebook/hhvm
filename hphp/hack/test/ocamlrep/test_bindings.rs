@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::collections::BTreeMap;
 use std::mem;
 
 use ocaml::caml;
@@ -160,4 +161,25 @@ caml!(get_pear, |_unit|, <result>, {
 
 caml!(get_kiwi, |_unit|, <result>, {
     result = val(Fruit::Kiwi);
+} -> result);
+
+// Map tests
+
+caml!(get_empty_smap, |_unit|, <result>, {
+    let map: BTreeMap<String, isize> = BTreeMap::new();
+    result = val(map);
+} -> result);
+
+caml!(get_int_smap_singleton, |_unit|, <result>, {
+    let mut map = BTreeMap::new();
+    map.insert("a", 1);
+    result = val(map);
+} -> result);
+
+caml!(get_int_smap, |_unit|, <result>, {
+    let mut map = BTreeMap::new();
+    map.insert("a", 1);
+    map.insert("b", 2);
+    map.insert("c", 3);
+    result = val(map);
 } -> result);

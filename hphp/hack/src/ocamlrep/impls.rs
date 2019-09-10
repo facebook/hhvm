@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::collections::{btree_map, BTreeMap};
 use std::convert::TryInto;
 use std::mem;
 use std::path::PathBuf;
@@ -114,6 +115,39 @@ impl<T: OcamlRep> OcamlRep for Vec<T> {
         }
         hd
     }
+}
+
+impl<K: OcamlRep, V: OcamlRep> OcamlRep for BTreeMap<K, V> {
+    fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
+        if self.is_empty() {
+            return Value::int(0);
+        }
+        let len = self.len();
+        let mut iter = self.into_iter();
+        let (res, _) = btree_map_helper(&mut iter, arena, len);
+        res
+    }
+}
+
+fn btree_map_helper<'a, K: OcamlRep, V: OcamlRep>(
+    iter: &mut btree_map::IntoIter<K, V>,
+    arena: &Arena<'a>,
+    size: usize,
+) -> (Value<'a>, usize) {
+    if size == 0 {
+        return (Value::int(0), 0);
+    }
+    let (left, left_height) = btree_map_helper(iter, arena, size / 2);
+    let (key, val) = iter.next().unwrap();
+    let (right, right_height) = btree_map_helper(iter, arena, size - 1 - size / 2);
+    let height = std::cmp::max(left_height, right_height) + 1;
+    let mut block = arena.block_with_size(5);
+    block[0] = left;
+    block[1] = arena.add(key);
+    block[2] = arena.add(val);
+    block[3] = right;
+    block[4] = arena.add(height);
+    (block.build(), height)
 }
 
 impl OcamlRep for PathBuf {

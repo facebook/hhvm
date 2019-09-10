@@ -203,9 +203,10 @@ struct State {
   std::unordered_multimap<Vlabel, Vlabel> loopMembership;
 
   // Cached operands. The "id" field in a Vinstr is an index into this
-  // table. Since 0 means no cached information, the first entry in
-  // this vector is never used.
-  jit::vector<CachedOperands> cachedOperands;
+  // table. Since 0 means no cached information, the first entry is
+  // never used. We use a deque to guarantee that references will
+  // never be invalidated.
+  jit::deque<CachedOperands> cachedOperands;
 
   // Calculate penalty vectors. Different Vregs may share the same
   // penalty vector.

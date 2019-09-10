@@ -320,7 +320,7 @@ bool typeStructureIsType(
           // This is safe since we already checked this above
           auto cleanedInput = inputField->remove(s_optional_shape_field.get());
           auto cleanedType = typeField->remove(s_optional_shape_field.get());
-          if (!typeStructureIsType(cleanedInput, cleanedType, strict, warn)) {
+          if (!typeStructureIsType(cleanedInput, cleanedType, warn, strict)) {
             if (warn || is_ts_soft(typeField)) {
               willWarn = true;
               warn = false;
@@ -742,6 +742,10 @@ bool checkTypeStructureMatchesCellImpl(
           break;
         }
       }
+      if (!isOrAsOp) {
+        result = true;
+        break;
+      }
       assertx(ts.exists(s_elem_types));
       auto const tsElems = ts[s_elem_types].getArrayData();
       if (elems->size() != tsElems->size()) {
@@ -811,6 +815,10 @@ bool checkTypeStructureMatchesCellImpl(
           result = false;
           break;
         }
+      }
+      if (!isOrAsOp) {
+        result = true;
+        break;
       }
       assertx(ts.exists(s_fields));
       auto const tsFields = ts[s_fields].getArrayData();

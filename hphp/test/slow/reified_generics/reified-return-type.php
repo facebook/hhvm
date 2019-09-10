@@ -12,6 +12,8 @@ set_error_handler(
   }
 );
 
+class C<reify T> {}
+
 function f<reify T>($x): @T { return $x; }
 
 f<int>(1);
@@ -23,8 +25,8 @@ f<int>(true);
 f<bool>(true);
 f<bool>(1);
 
-f<shape('x' => int, 'y' => string)>(shape('x' => 1, 'y' => "hi"));
-f<shape('x' => int, 'y' => string)>(shape('x' => 1, 'y' => 2));
+f<C<shape('x' => int, 'y' => string)>>(new C<shape('x' => int, 'y' => string)>());
+f<C<shape('x' => int, 'y' => string)>>(new C<shape('x' => int, 'y' => int)>());
 
-f<(int, string)>(tuple(1, "hi"));
-f<(int, string)>(tuple(1, 2));
+f<C<(int, string)>>(new C<(int, string)>());
+f<C<(int, string)>>(new C<(int, int)>());

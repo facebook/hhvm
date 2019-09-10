@@ -44,10 +44,10 @@ let process_in_parallel
   TypeCheckStore.store opts;
   let files_initial_count = List.length fnl in
   ServerProgress.send_percentage_progress_to_monitor
-    "typechecking"
-    0
-    files_initial_count
-    "files";
+    ~operation:"typechecking"
+    ~done_count:0
+    ~total_count:files_initial_count
+    ~unit:"files";
 
   let next job_state =
     let (files_to_process, next_input, pending_jobs) =
@@ -109,10 +109,10 @@ let process_in_parallel
     let { errors_acc; num_files_checked; pending_jobs; _ } = job_state in
     let total_files_checked = num_files_checked + num_files in
     ServerProgress.send_percentage_progress_to_monitor
-      "typechecking"
-      total_files_checked
-      files_initial_count
-      "files";
+      ~operation:"typechecking"
+      ~done_count:total_files_checked
+      ~total_count:files_initial_count
+      ~unit:"files";
 
     (* Errors.merge is a List.rev_append, so put the [acc] second *)
     let errors_acc = Errors.merge errors errors_acc in

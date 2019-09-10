@@ -54,19 +54,32 @@ let send_progress_to_monitor ?(include_in_logs = true) fmt =
   in
   Printf.ksprintf f fmt
 
-let send_percentage_progress_to_monitor s1 x y s2 =
-  let s2 =
-    if s2 = "" then
-      s2
+let make_percentage_progress_message
+    ~(operation : string)
+    ~(done_count : int)
+    ~(total_count : int)
+    ~(unit : string) : string =
+  let unit =
+    if unit = "" then
+      unit
     else
-      s2 ^ " "
+      unit ^ " "
   in
-  let percent = 100.0 *. float_of_int x /. float_of_int y in
+  let percent = 100.0 *. float_of_int done_count /. float_of_int total_count in
+  Printf.sprintf
+    "%s %d/%d %s(%.1f%%)"
+    operation
+    done_count
+    total_count
+    unit
+    percent
+
+let send_percentage_progress_to_monitor
+    ~(operation : string)
+    ~(done_count : int)
+    ~(total_count : int)
+    ~(unit : string) : unit =
   send_progress_to_monitor
     ~include_in_logs:false
-    "%s %d/%d %s(%.1f%%)"
-    s1
-    x
-    y
-    s2
-    percent
+    "%s"
+    (make_percentage_progress_message ~operation ~done_count ~total_count ~unit)

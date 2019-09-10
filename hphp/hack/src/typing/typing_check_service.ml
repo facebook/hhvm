@@ -369,10 +369,10 @@ let merge
   files_checked_count :=
     !files_checked_count + completed_check_count - deferred_check_count;
   ServerProgress.send_percentage_progress_to_monitor
-    "typechecking"
-    !files_checked_count
-    files_initial_count
-    "files";
+    ~operation:"typechecking"
+    ~done_count:!files_checked_count
+    ~total_count:files_initial_count
+    ~unit:"files";
   Errors.merge errors acc
 
 let next
@@ -435,10 +435,10 @@ let process_in_parallel
   let files_processed_count = ref 0 in
   let files_initial_count = List.length fnl in
   ServerProgress.send_percentage_progress_to_monitor
-    "typechecking"
-    0
-    files_initial_count
-    "files";
+    ~operation:"typechecking"
+    ~done_count:0
+    ~total_count:files_initial_count
+    ~unit:"files";
   let next = next workers files_to_process files_in_progress in
   let should_prefetch_deferred_files =
     Vfs.is_vfs () && TypecheckerOptions.prefetch_deferred_files opts

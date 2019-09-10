@@ -29,5 +29,14 @@ val send_to_monitor : MonitorRpc.server_to_monitor_message -> unit
 val send_progress_to_monitor :
   ?include_in_logs:bool -> ('a, unit, string, unit) format4 -> 'a
 
+(* The message will look roughly like this:
+  <operation> <done_count>/<total_count> <unit> <percent done>*)
+val make_percentage_progress_message :
+  operation:string ->
+  done_count:int ->
+  total_count:int ->
+  unit:string ->
+  string
+
 val send_percentage_progress_to_monitor :
-  string -> int -> int -> string -> unit
+  operation:string -> done_count:int -> total_count:int -> unit:string -> unit

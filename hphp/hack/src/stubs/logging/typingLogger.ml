@@ -20,7 +20,7 @@ module ProfileTypeCheck = struct
       ~relative:_ =
     ()
 
-  let print_path ~init_id:_ = ()
+  let print_path ~init_id:_ ~recheck_id:_ = ()
 end
 
 let log_lambda_counts _ = ()

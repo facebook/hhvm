@@ -570,7 +570,9 @@ let go_with_interrupt
     )
   in
   if !Utils.profile then
-    TypingLogger.ProfileTypeCheck.print_path ~init_id:check_info.init_id;
+    TypingLogger.ProfileTypeCheck.print_path
+      ~init_id:check_info.init_id
+      ~recheck_id:check_info.recheck_id;
   result
 
 let go

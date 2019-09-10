@@ -1188,6 +1188,10 @@ val typechecker_timeout : Pos.t * string -> int -> unit
 
 val byref_on_property : Pos.t -> unit
 
+val switch_multiple_default : Pos.t -> unit
+
+val switch_non_terminal_default : Pos.t -> unit
+
 val unsupported_trait_use_as : Pos.t -> unit
 
 val unsupported_instead_of : Pos.t -> unit

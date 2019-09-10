@@ -1977,6 +1977,18 @@ let byref_on_property pos =
     pos
     "Properties cannot be passed by reference"
 
+let switch_non_terminal_default pos =
+  add
+    (NastCheck.err_code NastCheck.SwitchNonTerminalDefault)
+    pos
+    "Default case in switch must be terminal"
+
+let switch_multiple_default pos =
+  add
+    (NastCheck.err_code NastCheck.SwitchMultipleDefault)
+    pos
+    "There can be only one default case in switch"
+
 (*****************************************************************************)
 (* Nast terminality *)
 (*****************************************************************************)

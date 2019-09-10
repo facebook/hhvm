@@ -246,6 +246,8 @@ module NastCheck = struct
     | ByRefDynamicCall
     | ByRefProperty
     | ByRefCall
+    | SwitchNonTerminalDefault
+    | SwitchMultipleDefault
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@deriving enum, show { with_path = false }]
 

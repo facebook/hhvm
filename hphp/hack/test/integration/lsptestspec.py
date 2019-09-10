@@ -460,7 +460,6 @@ This was the associated request:
     def _find_line_range_for_function_call(
         self, file_contents: str, line_num_1idx: int
     ) -> Tuple[int, int]:
-        # pyre-fixme[18]: Global name `driver` is undefined.
         driver = lib2to3.pgen2.driver.Driver(
             grammar=lib2to3.pygram.python_grammar, convert=pytree.convert
         )

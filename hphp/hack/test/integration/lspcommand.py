@@ -248,7 +248,6 @@ Transcript of all the messages we saw:
 
     def _write_to_disk(self, command: Json) -> None:
         params = command["params"]
-        # pyre-fixme[18]: Global name `parse` is undefined.
         path = urllib.parse.urlparse(params["uri"]).path
         contents = params["contents"]
         with open(path, "w") as f:
@@ -295,7 +294,6 @@ Transcript of all the messages we saw:
         def make_id(
             json: Json, is_client_request: bool, idgen: Callable[[], str]
         ) -> str:
-            # pyre-fixme[18]: Global name `lspcommand` is undefined.
             if LspCommandProcessor._has_id(json):
                 if is_client_request:
                     return LspCommandProcessor._client_request_id(json["id"])

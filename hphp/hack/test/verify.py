@@ -585,7 +585,6 @@ def get_flags_cache(args_flags: List[str]) -> Callable[[str], List[str]]:
 
     def get_flags(test_dir: str) -> List[str]:
         if test_dir not in flags_cache:
-            # pyre-fixme[18]: Global name `verify` is undefined.
             flags_cache[test_dir] = get_hh_flags(test_dir)
         flags = flags_cache[test_dir]
         if args_flags is not None:

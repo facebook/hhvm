@@ -1,4 +1,5 @@
 --coercion-from-dynamic
+--coercion-from-union
 --complex-coercion
 --like-types
 --pessimize-types

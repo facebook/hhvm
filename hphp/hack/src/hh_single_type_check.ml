@@ -199,6 +199,7 @@ let parse_options () =
   let pessimize_types = ref false in
   let simple_pessimize = ref 0.0 in
   let coercion_from_dynamic = ref false in
+  let coercion_from_union = ref false in
   let complex_coercion = ref false in
   let disable_partially_abstract_typeconsts = ref false in
   let rust_parser_errors = ref false in
@@ -419,6 +420,9 @@ let parse_options () =
         Arg.Set coercion_from_dynamic,
         "Allows coercion from dynamic to enforceable types at positions that HHVM enforces"
       );
+      ( "--coercion-from-union",
+        Arg.Set coercion_from_union,
+        "Allows coercion from union types" );
       ( "--complex-coercion",
         Arg.Set complex_coercion,
         "Allows complex coercions that involve like types" );
@@ -517,6 +521,7 @@ let parse_options () =
       ~tco_pessimize_types:!pessimize_types
       ~tco_simple_pessimize:!simple_pessimize
       ~tco_coercion_from_dynamic:!coercion_from_dynamic
+      ~tco_coercion_from_union:!coercion_from_union
       ~tco_complex_coercion:!complex_coercion
       ~tco_disable_partially_abstract_typeconsts:
         !disable_partially_abstract_typeconsts

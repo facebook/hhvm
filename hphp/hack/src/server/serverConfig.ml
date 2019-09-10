@@ -350,6 +350,7 @@ let load config_filename options =
       ?tco_simple_pessimize:(float_opt "simple_pessimize" config)
       ?tco_coercion_from_dynamic:(bool_opt "coercion_from_dynamic" config)
       ?tco_complex_coercion:(bool_opt "complex_coercion" config)
+      ?tco_coercion_from_union:(bool_opt "coercion_from_union" config)
       ?tco_disable_partially_abstract_typeconsts:
         (bool_opt "disable_partially_abstract_typeconsts" config)
       ~error_codes_treated_strictly:

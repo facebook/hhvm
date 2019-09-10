@@ -58,24 +58,22 @@ let rec coerce_type_impl ~sub_type p ur env ty_have ty_expect on_error =
   let coercion_from_dynamic =
     TypecheckerOptions.coercion_from_dynamic (Typing_env.get_tcopt env)
   in
-  let complex_coercion =
-    TypecheckerOptions.complex_coercion (Typing_env.get_tcopt env)
+  let coercion_from_union =
+    TypecheckerOptions.coercion_from_union (Typing_env.get_tcopt env)
   in
   let coerce_type_impl = coerce_type_impl ~sub_type p ur in
   let (env, ety_expect) = Typing_env.expand_type env ty_expect.et_type in
   let (env, ety_have) = Typing_env.expand_type env ty_have in
   match (ety_have, ety_expect) with
   | (_, (_, Tdynamic)) -> env
-  (* From dynamic *)
   | ((_, Tdynamic), _) when ty_expect.et_enforced && coercion_from_dynamic ->
     env
-  (* Complex coercion rules *)
-  | ((_, Tunion tyl), _) when complex_coercion ->
+  | ((_, Tunion tyl), _) when coercion_from_union ->
     (* If coercion and subtyping fail for any of the elements of the union,
      * errors will be emitted *)
     List.fold tyl ~init:env ~f:(fun env ty ->
         coerce_type_impl env ty ty_expect on_error)
-  | ((r, Toption t), _) when complex_coercion ->
+  | ((r, Toption t), _) when coercion_from_union ->
     let union : locl ty = force_null_union env r t in
     coerce_type_impl env union ty_expect on_error
   | _ -> sub_type p ur env ty_have ty_expect.et_type on_error

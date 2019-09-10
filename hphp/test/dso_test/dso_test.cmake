@@ -6,9 +6,27 @@
 # See http://www.cmake.org/cmake/help/v3.0/command/add_custom_target.html
 #
 if (LINUX)
-  set(HPHPIZE_EXE "../../tools/hphpize/hphpize")
-  set(HPHPIZE_CMAKE "../../tools/hphpize/hphpize.cmake")
-  set(HPHPIZE_MODULE_PATH "../../../CMake")
+  if (NOT "${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
+    # As we're generating cmake files (when calling hphpize), we can't do a
+    # standard out-of-source build.
+    #
+    # Also, as this is included from the root cmake, rather than added with
+    # add_directory(), the '_CURRENT' vars are set to the root dir, so not
+    # useful
+    set(SOURCE_DIR "${CMAKE_SOURCE_DIR}/hphp/test/dso_test")
+    FILE(
+      GLOB FILE_LIST
+0
+      "${SOURCE_DIR}/*.cpp"
+      "${SOURCE_DIR}/config.cmake"
+      "${SOURCE_DIR}/*.php"
+    )
+    FILE(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/hphp/test/dso_test")
+    FILE(COPY ${FILE_LIST} DESTINATION "${CMAKE_BINARY_DIR}/hphp/test/dso_test")
+  endif()
+  set(HPHPIZE_EXE "${CMAKE_BINARY_DIR}/hphp/tools/hphpize/hphpize")
+  set(HPHPIZE_CMAKE "${CMAKE_BINARY_DIR}/hphp/tools/hphpize/hphpize.cmake")
+  set(HPHPIZE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake")
   add_custom_target(
     dso_test
     DEPENDS dso_test.so hhvm
@@ -28,9 +46,10 @@ if (LINUX)
 
     COMMAND make
 
-    WORKING_DIRECTORY test/dso_test
+    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/hphp/test/dso_test"
 
     COMMENT "Making dso_test.so"
+    DEPENDS ${HPHPIZE_CMAKE} ${HPHPIZE_EXE}
   )
 
 endif()

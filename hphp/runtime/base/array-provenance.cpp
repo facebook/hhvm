@@ -200,7 +200,10 @@ void tagTVImpl(TypedValue& tv, folly::Optional<Tag> tag) {
 
     tvMove(tmp, tv);
   }
-  setTag(ad, *tag);
+  // the copy() above may have tagged this array with the PC data
+  // so we can't assert that it's not there--this is safe since
+  // we bail out above if the input array was already tagged
+  setTag<Mode::Emplace>(ad, *tag);
 }
 
 }

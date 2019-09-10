@@ -86,7 +86,10 @@ let extend_fast
 let maybe_remote_type_check genv env fnl =
   let t = Unix.gettimeofday () in
   let (do_remote, _t) =
-    Typing_remote_check_service.should_do_remote env.tcopt fnl t
+    if genv.ServerEnv.options |> ServerArgs.remote then
+      (true, t)
+    else
+      Typing_remote_check_service.should_do_remote env.tcopt fnl t
   in
   if do_remote then
     let eden_threshold =

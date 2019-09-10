@@ -11,16 +11,6 @@
 namespace HH\ReifiedGenerics;
 
 /**
- * DO NOT USE; use `get_type_structure()` instead.
- */
-function getTypeStructure<reify T>(): TypeStructure<T>;
-
-/**
- * DO NOT USE; use `get_classname()` instead.
- */
-function getClassname<reify T>(): classname<T>;
-
-/**
  * Returns the type structure representation of the reified type
  */
 function get_type_structure<reify T>(): TypeStructure<T>;

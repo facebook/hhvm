@@ -231,12 +231,6 @@ namespace HH\ReifiedGenerics {
     return ${'0ReifiedGenerics'}[0];
   }
 
-  // Old API for get_type_structure()
-  // TODO(T46695073): Kill after next HHVM release
-  function getTypeStructure<reify T>(): mixed {
-    return namespace\get_type_structure<T>();
-  }
-
   /**
    * Returns the name of the class represented by this reified type.
    * If this type does not represent a class, throws an exception
@@ -250,9 +244,4 @@ namespace HH\ReifiedGenerics {
     return $clsname;
   }
 
-  // Old API for get_classname
-  // TODO(T46695073): Kill after next HHVM release
-  function getClassname<reify T>(): classname<T> {
-    return namespace\get_classname<T>();
-  }
 }

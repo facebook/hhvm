@@ -219,6 +219,7 @@ namespace {
 template<typename AD, typename Copy>
 typename maybe_const<AD, ArrayData, AD*>::type
 makeEmptyImpl(AD* base, folly::Optional<Tag> tag, Copy&& copy) {
+  assertx(RuntimeOption::EvalArrayProvenance);
   assertx(base->empty());
   assertx(base->isStatic());
   assertx(arrayWantsTag(base));

@@ -12,18 +12,19 @@ open Aast
 open Typing_defs
 module Env = Tast_env
 module MakeType = Typing_make_type
+module SN = Naming_special_names
 
 let rxTraversableType =
   MakeType.class_type
     Reason.none
-    Naming_special_names.Rx.cTraversable
-    [(Reason.Rnone, Typing_defs.make_tany ())]
+    SN.Rx.cTraversable
+    [MakeType.mixed Reason.Rnone]
 
 let rxAsyncIteratorType =
   MakeType.class_type
     Reason.none
-    Naming_special_names.Rx.cAsyncIterator
-    [(Reason.Rnone, Typing_defs.make_tany ())]
+    SN.Rx.cAsyncIterator
+    [MakeType.mixed Reason.Rnone]
 
 let check_foreach_collection env p ty =
   (* do nothing if unsafe_rx is set *)

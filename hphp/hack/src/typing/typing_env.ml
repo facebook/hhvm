@@ -156,12 +156,6 @@ let get_type env x_reason x =
   | None -> (env, (x_reason, Tvar x))
   | Some ty -> (env, ty)
 
-let get_type_unsafe env x =
-  let ty = IMap.get x env.tenv in
-  match ty with
-  | None -> (env, (Reason.none, Typing_defs.make_tany ()))
-  | Some ty -> (env, ty)
-
 let get_tyvar_info_opt env var =
   let tyvaropt = IMap.get var env.tvenv in
   match tyvaropt with

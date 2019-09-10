@@ -41,8 +41,6 @@ val add : env -> int -> locl ty -> env
 
 val get_type : env -> Reason.t -> int -> env * locl ty
 
-val get_type_unsafe : env -> int -> env * locl ty
-
 val expand_var : env -> Reason.t -> Ident.t -> env * locl ty
 
 val expand_type : env -> locl ty -> env * locl ty

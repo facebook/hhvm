@@ -72,16 +72,16 @@ let intersect_truthiness tr1 tr2 =
 
 let (tclass_is_falsy_when_empty, is_traversable) =
   let r = Typing_reason.Rnone in
-  let tany r = (r, Typing_defs.make_tany ()) in
+  let mixed = MakeType.mixed r in
   let simple_xml_el = MakeType.class_type r "\\SimpleXMLElement" [] in
-  let container_type = MakeType.container r (tany r) in
-  let pair_type = MakeType.pair r (tany r) (tany r) in
+  let container_type = MakeType.container r mixed in
+  let pair_type = MakeType.pair r mixed mixed in
   let tclass_is_falsy_when_empty env ty =
     Env.can_subtype env ty simple_xml_el
     || Env.can_subtype env ty container_type
        && not (Env.can_subtype env ty pair_type)
   in
-  let trv = MakeType.traversable r (tany r) in
+  let trv = MakeType.traversable r mixed in
   let is_traversable env ty = Env.can_subtype env ty trv in
   (tclass_is_falsy_when_empty, is_traversable)
 

@@ -13,6 +13,7 @@ open Common
 open Aast
 open Typing_defs
 module Env = Typing_env
+module MakeType = Typing_make_type
 module Phase = Typing_phase
 module Reason = Typing_reason
 module SN = Naming_special_names
@@ -38,7 +39,7 @@ let make_ts env ty =
     Phase.localize ~ety_env env ts
   | _ ->
     (* Should not hit this because TypeStructure should always be defined *)
-    (env, (fst ty, Typing_defs.make_tany ()))
+    (env, MakeType.dynamic (fst ty))
 
 let rec transform_shapemap ?(nullable = false) env pos ty shape =
   let (env, ty) =

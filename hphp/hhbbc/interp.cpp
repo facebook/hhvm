@@ -2055,6 +2055,8 @@ bool instanceOfJmpImpl(ISS& env,
   auto const instTy = subObj(*rcls);
   assertx(!val.subtypeOf(instTy) && val.couldBe(instTy));
 
+  if (rcls->couldBeInterface()) return false;
+
   // If we have an optional type, whose unopt is guaranteed to pass
   // the instanceof check, then failing to pass implies it was null.
   auto const fail_implies_null = is_opt(val) && unopt(val).subtypeOf(instTy);

@@ -67,8 +67,10 @@ function xml_parse(resource $parser, string $data, bool $is_final = true): int;
 <<__Native>>
 function xml_parse_into_struct(resource $parser,
                                string $data,
-                               mixed &$values,
-                               mixed &$index = null): int;
+                               <<__OutOnly("KindOfArray")>>
+                               inout mixed $values,
+                               <<__OutOnly("KindOfArray")>>
+                               inout mixed $index): int;
 
 /**
  * xml_parser_create_ns() creates a new XML parser with XML namespace support
@@ -323,10 +325,10 @@ function xml_set_notation_decl_handler(resource $parser, mixed $handler): bool;
  *
  */
 <<__Native>>
-function xml_set_object(resource $parser, mixed &$object): bool;
+function xml_set_object(resource $parser, mixed $object): bool;
 
-function xml_set_object_ref(resource $parser, mixed &$object): bool {
-  return xml_set_object($parser, &$object);
+function xml_set_object_ref(resource $parser, inout mixed $object): bool {
+  return xml_set_object($parser, $object);
 }
 
 /**

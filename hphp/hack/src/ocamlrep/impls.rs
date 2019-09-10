@@ -11,57 +11,57 @@ use std::rc::Rc;
 use crate::arena::Arena;
 use crate::block;
 use crate::value::Value;
-use crate::IntoOcamlRep;
+use crate::OcamlRep;
 
-impl IntoOcamlRep for () {
+impl OcamlRep for () {
     fn into_ocamlrep<'a>(self, _arena: &Arena<'a>) -> Value<'a> {
         Value::int(0)
     }
 }
 
-impl IntoOcamlRep for isize {
+impl OcamlRep for isize {
     fn into_ocamlrep<'a>(self, _arena: &Arena<'a>) -> Value<'a> {
         Value::int(self)
     }
 }
 
-impl IntoOcamlRep for usize {
+impl OcamlRep for usize {
     fn into_ocamlrep<'a>(self, _arena: &Arena<'a>) -> Value<'a> {
         Value::int(self.try_into().unwrap())
     }
 }
 
-impl IntoOcamlRep for i64 {
+impl OcamlRep for i64 {
     fn into_ocamlrep<'a>(self, _arena: &Arena<'a>) -> Value<'a> {
         Value::int(self.try_into().unwrap())
     }
 }
 
-impl IntoOcamlRep for u64 {
+impl OcamlRep for u64 {
     fn into_ocamlrep<'a>(self, _arena: &Arena<'a>) -> Value<'a> {
         Value::int(self.try_into().unwrap())
     }
 }
 
-impl IntoOcamlRep for i32 {
+impl OcamlRep for i32 {
     fn into_ocamlrep<'a>(self, _arena: &Arena<'a>) -> Value<'a> {
         Value::int(self.try_into().unwrap())
     }
 }
 
-impl IntoOcamlRep for u32 {
+impl OcamlRep for u32 {
     fn into_ocamlrep<'a>(self, _arena: &Arena<'a>) -> Value<'a> {
         Value::int(self.try_into().unwrap())
     }
 }
 
-impl IntoOcamlRep for bool {
+impl OcamlRep for bool {
     fn into_ocamlrep<'a>(self, _arena: &Arena<'a>) -> Value<'a> {
         Value::int(self.into())
     }
 }
 
-impl IntoOcamlRep for char {
+impl OcamlRep for char {
     fn into_ocamlrep<'a>(self, _arena: &Arena<'a>) -> Value<'a> {
         if self as u32 > 255 {
             panic!("char out of range: {}", self.to_string())
@@ -70,7 +70,7 @@ impl IntoOcamlRep for char {
     }
 }
 
-impl IntoOcamlRep for f64 {
+impl OcamlRep for f64 {
     fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
         let mut block = arena.block_with_size_and_tag(1, block::DOUBLE_TAG);
         block[0] = Value::bits(self.to_bits() as usize);
@@ -78,19 +78,19 @@ impl IntoOcamlRep for f64 {
     }
 }
 
-impl<T: IntoOcamlRep> IntoOcamlRep for Box<T> {
+impl<T: OcamlRep> OcamlRep for Box<T> {
     fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
         arena.add(*self)
     }
 }
 
-impl<T: IntoOcamlRep + Clone> IntoOcamlRep for Rc<T> {
+impl<T: OcamlRep + Clone> OcamlRep for Rc<T> {
     fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
         arena.add(self.as_ref().clone())
     }
 }
 
-impl<T: IntoOcamlRep> IntoOcamlRep for Option<T> {
+impl<T: OcamlRep> OcamlRep for Option<T> {
     fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
         match self {
             None => Value::int(0),
@@ -103,7 +103,7 @@ impl<T: IntoOcamlRep> IntoOcamlRep for Option<T> {
     }
 }
 
-impl<T: IntoOcamlRep> IntoOcamlRep for Vec<T> {
+impl<T: OcamlRep> OcamlRep for Vec<T> {
     fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
         let mut hd = arena.add(());
         for val in self.into_iter().rev() {
@@ -116,19 +116,19 @@ impl<T: IntoOcamlRep> IntoOcamlRep for Vec<T> {
     }
 }
 
-impl IntoOcamlRep for PathBuf {
+impl OcamlRep for PathBuf {
     fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
         arena.add(self.to_str().unwrap())
     }
 }
 
-impl IntoOcamlRep for String {
+impl OcamlRep for String {
     fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
         arena.add(self.as_str())
     }
 }
 
-impl IntoOcamlRep for &str {
+impl OcamlRep for &str {
     fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
         let bytes_in_word = mem::size_of::<usize>();
         let blocks_length = 1 + (self.len() / bytes_in_word);
@@ -147,10 +147,10 @@ impl IntoOcamlRep for &str {
     }
 }
 
-impl<T0, T1> IntoOcamlRep for (T0, T1)
+impl<T0, T1> OcamlRep for (T0, T1)
 where
-    T0: IntoOcamlRep,
-    T1: IntoOcamlRep,
+    T0: OcamlRep,
+    T1: OcamlRep,
 {
     fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
         let mut block = arena.block_with_size(2);
@@ -160,11 +160,11 @@ where
     }
 }
 
-impl<T0, T1, T2> IntoOcamlRep for (T0, T1, T2)
+impl<T0, T1, T2> OcamlRep for (T0, T1, T2)
 where
-    T0: IntoOcamlRep,
-    T1: IntoOcamlRep,
-    T2: IntoOcamlRep,
+    T0: OcamlRep,
+    T1: OcamlRep,
+    T2: OcamlRep,
 {
     fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
         let mut block = arena.block_with_size(3);
@@ -175,12 +175,12 @@ where
     }
 }
 
-impl<T0, T1, T2, T3> IntoOcamlRep for (T0, T1, T2, T3)
+impl<T0, T1, T2, T3> OcamlRep for (T0, T1, T2, T3)
 where
-    T0: IntoOcamlRep,
-    T1: IntoOcamlRep,
-    T2: IntoOcamlRep,
-    T3: IntoOcamlRep,
+    T0: OcamlRep,
+    T1: OcamlRep,
+    T2: OcamlRep,
+    T3: OcamlRep,
 {
     fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
         let mut block = arena.block_with_size(4);
@@ -192,13 +192,13 @@ where
     }
 }
 
-impl<T0, T1, T2, T3, T4> IntoOcamlRep for (T0, T1, T2, T3, T4)
+impl<T0, T1, T2, T3, T4> OcamlRep for (T0, T1, T2, T3, T4)
 where
-    T0: IntoOcamlRep,
-    T1: IntoOcamlRep,
-    T2: IntoOcamlRep,
-    T3: IntoOcamlRep,
-    T4: IntoOcamlRep,
+    T0: OcamlRep,
+    T1: OcamlRep,
+    T2: OcamlRep,
+    T3: OcamlRep,
+    T4: OcamlRep,
 {
     fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
         let mut block = arena.block_with_size(5);
@@ -211,14 +211,14 @@ where
     }
 }
 
-impl<T0, T1, T2, T3, T4, T5> IntoOcamlRep for (T0, T1, T2, T3, T4, T5)
+impl<T0, T1, T2, T3, T4, T5> OcamlRep for (T0, T1, T2, T3, T4, T5)
 where
-    T0: IntoOcamlRep,
-    T1: IntoOcamlRep,
-    T2: IntoOcamlRep,
-    T3: IntoOcamlRep,
-    T4: IntoOcamlRep,
-    T5: IntoOcamlRep,
+    T0: OcamlRep,
+    T1: OcamlRep,
+    T2: OcamlRep,
+    T3: OcamlRep,
+    T4: OcamlRep,
+    T5: OcamlRep,
 {
     fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
         let mut block = arena.block_with_size(6);
@@ -232,15 +232,15 @@ where
     }
 }
 
-impl<T0, T1, T2, T3, T4, T5, T6> IntoOcamlRep for (T0, T1, T2, T3, T4, T5, T6)
+impl<T0, T1, T2, T3, T4, T5, T6> OcamlRep for (T0, T1, T2, T3, T4, T5, T6)
 where
-    T0: IntoOcamlRep,
-    T1: IntoOcamlRep,
-    T2: IntoOcamlRep,
-    T3: IntoOcamlRep,
-    T4: IntoOcamlRep,
-    T5: IntoOcamlRep,
-    T6: IntoOcamlRep,
+    T0: OcamlRep,
+    T1: OcamlRep,
+    T2: OcamlRep,
+    T3: OcamlRep,
+    T4: OcamlRep,
+    T5: OcamlRep,
+    T6: OcamlRep,
 {
     fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
         let mut block = arena.block_with_size(7);
@@ -255,16 +255,16 @@ where
     }
 }
 
-impl<T0, T1, T2, T3, T4, T5, T6, T7> IntoOcamlRep for (T0, T1, T2, T3, T4, T5, T6, T7)
+impl<T0, T1, T2, T3, T4, T5, T6, T7> OcamlRep for (T0, T1, T2, T3, T4, T5, T6, T7)
 where
-    T0: IntoOcamlRep,
-    T1: IntoOcamlRep,
-    T2: IntoOcamlRep,
-    T3: IntoOcamlRep,
-    T4: IntoOcamlRep,
-    T5: IntoOcamlRep,
-    T6: IntoOcamlRep,
-    T7: IntoOcamlRep,
+    T0: OcamlRep,
+    T1: OcamlRep,
+    T2: OcamlRep,
+    T3: OcamlRep,
+    T4: OcamlRep,
+    T5: OcamlRep,
+    T6: OcamlRep,
+    T7: OcamlRep,
 {
     fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
         let mut block = arena.block_with_size(8);

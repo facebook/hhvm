@@ -3,12 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f29ea026b4db32341092c7292e173894>>
+// @generated SignedSource<<473b941949a5c02b7af84a5acdb28f69>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
 
-use ocamlrep_derive::IntoOcamlRep;
+use ocamlrep_derive::OcamlRep;
 use ocamlvalue_macro::Ocamlvalue;
 
 use crate::pos;
@@ -17,26 +17,26 @@ pub use crate::shape_map;
 
 pub use pos::Pos;
 
-#[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 pub struct Id(pub Pos, pub String);
 
 pub type Pstring = (Pos, String);
 
-#[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 pub enum ShapeFieldName {
     SFlitInt(Pstring),
     SFlitStr(Pstring),
     SFclassConst(Id, Pstring),
 }
 
-#[derive(Clone, Copy, Debug, Eq, IntoOcamlRep, Ocamlvalue, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
 pub enum Variance {
     Covariant,
     Contravariant,
     Invariant,
 }
 
-#[derive(Clone, Copy, Debug, Eq, IntoOcamlRep, Ocamlvalue, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
 pub enum ConstraintKind {
     ConstraintAs,
     ConstraintEq,
@@ -45,7 +45,7 @@ pub enum ConstraintKind {
 
 pub type Reified = bool;
 
-#[derive(Clone, Copy, Debug, Eq, IntoOcamlRep, Ocamlvalue, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
 pub enum ClassKind {
     Cabstract,
     Cnormal,
@@ -55,18 +55,18 @@ pub enum ClassKind {
     Crecord,
 }
 
-#[derive(Clone, Copy, Debug, Eq, IntoOcamlRep, Ocamlvalue, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
 pub enum ParamKind {
     Pinout,
 }
 
-#[derive(Clone, Copy, Debug, Eq, IntoOcamlRep, Ocamlvalue, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
 pub enum OgNullFlavor {
     OGNullthrows,
     OGNullsafe,
 }
 
-#[derive(Clone, Copy, Debug, Eq, IntoOcamlRep, Ocamlvalue, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
 pub enum FunKind {
     FSync,
     FAsync,
@@ -75,7 +75,7 @@ pub enum FunKind {
     FCoroutine,
 }
 
-#[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 pub enum Bop {
     Plus,
     Minus,
@@ -105,7 +105,7 @@ pub enum Bop {
     Eq(Option<Box<Bop>>),
 }
 
-#[derive(Clone, Copy, Debug, Eq, IntoOcamlRep, Ocamlvalue, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
 pub enum Uop {
     Utild,
     Unot,
@@ -119,7 +119,7 @@ pub enum Uop {
     Usilence,
 }
 
-#[derive(Clone, Copy, Debug, Eq, IntoOcamlRep, Ocamlvalue, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
 pub enum FunDeclKind {
     FDeclAsync,
     FDeclSync,

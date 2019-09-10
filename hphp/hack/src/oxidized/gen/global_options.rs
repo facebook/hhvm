@@ -3,12 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1458e02cdfb7e0e90bafedd577edddc6>>
+// @generated SignedSource<<b3af90802c55a4368b56917799b5bf9d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
 
-use ocamlrep_derive::IntoOcamlRep;
+use ocamlrep_derive::OcamlRep;
 use ocamlvalue_macro::Ocamlvalue;
 
 use crate::i_set;
@@ -17,7 +17,7 @@ use crate::s_set;
 
 pub use crate::infer_missing;
 
-#[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 pub struct GlobalOptions {
     pub tco_safe_array: bool,
     pub tco_safe_vector_array: bool,
@@ -25,6 +25,7 @@ pub struct GlobalOptions {
     pub tco_migration_flags: s_set::SSet,
     pub tco_dynamic_view: bool,
     pub tco_defer_class_declaration_threshold: Option<isize>,
+    pub tco_prefetch_deferred_files: bool,
     pub tco_remote_type_check_threshold: Option<isize>,
     pub tco_remote_type_check: bool,
     pub tco_remote_worker_key: Option<String>,
@@ -41,6 +42,7 @@ pub struct GlobalOptions {
     pub po_disallow_toplevel_requires: bool,
     pub po_disable_nontoplevel_declarations: bool,
     pub po_disable_static_closures: bool,
+    pub po_disable_halt_compiler: bool,
     pub po_allow_goto: bool,
     pub tco_log_inference_constraints: bool,
     pub tco_disallow_ambiguous_lambda: bool,
@@ -62,7 +64,7 @@ pub struct GlobalOptions {
     pub tco_typecheck_xhp_cvars: bool,
     pub tco_ignore_collection_expr_type_arguments: bool,
     pub tco_shallow_class_decl: bool,
-    pub po_rust: bool,
+    pub po_rust_parser_errors: bool,
     pub profile_type_check_duration_threshold: f64,
     pub tco_like_types: bool,
     pub tco_pessimize_types: bool,

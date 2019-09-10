@@ -6,10 +6,10 @@
 use std::mem;
 
 use ocaml::caml;
-use ocamlrep::IntoOcamlRep;
-use ocamlrep_derive::IntoOcamlRep;
+use ocamlrep::OcamlRep;
+use ocamlrep_derive::OcamlRep;
 
-fn val<T: IntoOcamlRep>(value: T) -> ocaml::Value {
+fn val<T: OcamlRep>(value: T) -> ocaml::Value {
     let arena = ocamlrep::Arena::new_with_size(8);
     let value = value.into_ocamlrep(&arena);
     mem::forget(arena);
@@ -79,13 +79,13 @@ caml!(get_float_list, |_unit|, <result>, {
 
 // Struct tests
 
-#[derive(IntoOcamlRep)]
+#[derive(OcamlRep)]
 struct Foo {
     a: isize,
     b: bool,
 }
 
-#[derive(IntoOcamlRep)]
+#[derive(OcamlRep)]
 struct Bar {
     c: Foo,
     d: Option<Vec<Option<isize>>>,
@@ -138,7 +138,7 @@ caml!(get_one_two_float, |_unit|, <result>, {
 
 // Variant tests
 
-#[derive(IntoOcamlRep)]
+#[derive(OcamlRep)]
 enum Fruit {
     Apple,
     Orange(isize),

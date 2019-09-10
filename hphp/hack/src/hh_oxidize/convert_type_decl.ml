@@ -20,7 +20,7 @@ open Convert_type
 let derived_traits =
   [ (None, "Clone");
     (None, "Debug");
-    (Some "ocamlrep_derive", "IntoOcamlRep");
+    (Some "ocamlrep_derive", "OcamlRep");
     (Some "ocamlvalue_macro", "Ocamlvalue") ]
 
 (* HACK: ignore phases since we are only considering decl tys *)

@@ -3,18 +3,18 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1fe1b84d1d2549dc4fc874f645485785>>
+// @generated SignedSource<<364f81509fc3a6a48ec0eed52d2f5be7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
 
-use ocamlrep_derive::IntoOcamlRep;
+use ocamlrep_derive::OcamlRep;
 
 use crate::aast;
 use crate::ast_defs;
 use crate::pos;
 
-#[derive(Clone, Debug, IntoOcamlRep)]
+#[derive(Clone, Debug, OcamlRep)]
 pub enum Reason {
     Rnone,
     Rwitness(pos::Pos),
@@ -104,14 +104,14 @@ pub enum Reason {
     Rdestructure(pos::Pos, isize),
 }
 
-#[derive(Clone, Copy, Debug, Eq, IntoOcamlRep, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, OcamlRep, PartialEq)]
 pub enum ArgPosition {
     Aonly,
     Afirst,
     Asecond,
 }
 
-#[derive(Clone, Debug, IntoOcamlRep)]
+#[derive(Clone, Debug, OcamlRep)]
 pub enum ExprDepTypeReason {
     ERexpr(isize),
     ERstatic,
@@ -120,7 +120,7 @@ pub enum ExprDepTypeReason {
     ERself(String),
 }
 
-#[derive(Clone, Debug, IntoOcamlRep)]
+#[derive(Clone, Debug, OcamlRep)]
 pub enum Ureason {
     URnone,
     URassign,

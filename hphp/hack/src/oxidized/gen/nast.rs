@@ -3,12 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ff5ead383222f1a2ee71ace0a25e81cd>>
+// @generated SignedSource<<6ff4ed270e1d784f1aff81d9bf73c515>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
 
-use ocamlrep_derive::IntoOcamlRep;
+use ocamlrep_derive::OcamlRep;
 
 use crate::aast;
 use crate::namespace_env;
@@ -18,7 +18,7 @@ pub use crate::ast_defs::shape_map;
 
 pub use aast::Sid;
 
-#[derive(Clone, Debug, IntoOcamlRep)]
+#[derive(Clone, Debug, OcamlRep)]
 pub enum FuncBodyAnn {
     Named,
     NamedWithUnsafeBlocks,
@@ -71,7 +71,7 @@ pub type Field = aast::Field<pos::Pos, FuncBodyAnn, (), ()>;
 
 pub type Afield = aast::Afield<pos::Pos, FuncBodyAnn, (), ()>;
 
-#[derive(Clone, Debug, IntoOcamlRep)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct IgnoreAttributeEnv {
     pub ignored_attributes: Vec<String>,
 }

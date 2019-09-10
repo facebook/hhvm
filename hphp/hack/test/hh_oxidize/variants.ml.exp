@@ -1,6 +1,6 @@
-use ocamlrep_derive::IntoOcamlRep;
+use ocamlrep_derive::OcamlRep;
 
-#[derive(Clone, Debug, IntoOcamlRep)]
+#[derive(Clone, Debug, OcamlRep)]
 pub enum A {
     I,
     J(isize),

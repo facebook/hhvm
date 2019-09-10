@@ -4,12 +4,12 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ocamlpool_rust::utils::*;
-use ocamlrep_derive::IntoOcamlRep;
+use ocamlrep_derive::OcamlRep;
 use ocamlvalue_macro::Ocamlvalue;
 use std::path::PathBuf;
 use std::rc::Rc;
 
-#[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 pub enum Prefix {
     Root,
     Hhi,
@@ -17,7 +17,7 @@ pub enum Prefix {
     Tmp,
 }
 
-#[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 pub struct RelativePath(Rc<(Prefix, PathBuf)>);
 
 impl RelativePath {

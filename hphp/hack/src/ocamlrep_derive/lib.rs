@@ -9,7 +9,7 @@ use proc_macro2::TokenStream;
 use quote::quote;
 use synstructure::decl_derive;
 
-decl_derive!([IntoOcamlRep] => derive_ocamlrep);
+decl_derive!([OcamlRep] => derive_ocamlrep);
 
 fn derive_ocamlrep(mut s: synstructure::Structure) -> TokenStream {
     // By default, if you are deriving an impl of trait Foo for generic type
@@ -32,7 +32,7 @@ fn derive_ocamlrep(mut s: synstructure::Structure) -> TokenStream {
     };
 
     s.gen_impl(quote! {
-        gen impl ::ocamlrep::IntoOcamlRep for @Self {
+        gen impl ::ocamlrep::OcamlRep for @Self {
             fn into_ocamlrep<'a>(self, arena: &::ocamlrep::Arena<'a>) -> ::ocamlrep::Value<'a> {
                 match self { #body }
             }

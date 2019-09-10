@@ -5,7 +5,7 @@
 
 use std::cell::RefCell;
 
-use crate::{BlockBuilder, IntoOcamlRep, Value};
+use crate::{BlockBuilder, OcamlRep, Value};
 
 struct Chunk<'a> {
     data: Box<[Value<'a>]>,
@@ -80,7 +80,7 @@ impl<'a> Arena<'a> {
     }
 
     #[inline]
-    pub fn add<T: IntoOcamlRep>(&self, value: T) -> Value<'a> {
+    pub fn add<T: OcamlRep>(&self, value: T) -> Value<'a> {
         value.into_ocamlrep(self)
     }
 

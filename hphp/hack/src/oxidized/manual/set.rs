@@ -5,11 +5,11 @@
 
 use std::cmp::Ord;
 
-use ocamlrep_derive::IntoOcamlRep;
+use ocamlrep_derive::OcamlRep;
 use ocamlvalue_macro::Ocamlvalue;
 
 #[allow(dead_code)]
-#[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 enum SetImpl<T: Ord> {
     Empty,
     Node {
@@ -22,7 +22,7 @@ enum SetImpl<T: Ord> {
 
 use SetImpl::*;
 
-#[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 pub struct Set<T: Ord>(SetImpl<T>);
 
 impl<T: Ord> Set<T> {

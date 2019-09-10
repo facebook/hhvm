@@ -13,13 +13,11 @@ pub use manual::i_map;
 pub use manual::i_set;
 pub use manual::infer_missing;
 pub use manual::local_id;
-pub use manual::map;
 pub use manual::namespace_env_impl;
 pub use manual::pos;
 pub use manual::relative_path;
 pub use manual::s_map;
 pub use manual::s_set;
-pub use manual::set;
 pub use manual::shape_map;
 pub use manual::tany_sentinel;
 

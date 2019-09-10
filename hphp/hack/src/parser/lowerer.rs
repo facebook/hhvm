@@ -5,7 +5,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use oxidized::{
-    map::Map,
     namespace_env::Env as NamespaceEnv,
     pos::Pos,
     prim_defs::Comment,

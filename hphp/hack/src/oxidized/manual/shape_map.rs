@@ -43,4 +43,4 @@ impl PartialEq for ShapeField {
 
 impl Eq for ShapeField {}
 
-pub type ShapeMap<T> = crate::map::Map<ShapeField, T>;
+pub type ShapeMap<T> = std::collections::BTreeMap<ShapeField, T>;

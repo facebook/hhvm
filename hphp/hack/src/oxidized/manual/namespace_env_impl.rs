@@ -4,15 +4,15 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::gen::namespace_env::Env;
-use crate::map::Map;
+use crate::s_map::SMap;
 
 impl Env {
     pub fn empty(auto_ns_map: Vec<(String, String)>, is_codegen: bool) -> Self {
         Env {
-            ns_uses: Map::empty(),
-            class_uses: Map::empty(),
-            fun_uses: Map::empty(),
-            const_uses: Map::empty(),
+            ns_uses: SMap::new(),
+            class_uses: SMap::new(),
+            fun_uses: SMap::new(),
+            const_uses: SMap::new(),
             name: None,
             auto_ns_map,
             is_codegen,

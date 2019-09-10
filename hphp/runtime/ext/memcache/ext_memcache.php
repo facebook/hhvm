@@ -125,17 +125,11 @@ class Memcache {
    * Memcache::get() to get array of values. The result array will contain only
    * found key-value pairs.
    * @param mixed $key - The key or array of keys to fetch.
-   * @param mixed $flags - If present, flags fetched along with the values will
-   * be written to this parameter. These flags are the same as the ones given to
-   * for example Memcache::set(). The lowest byte of the int is reserved for
-   * pecl/memcache internal usage (e.g. to indicate compression and
-   * serialization status).
    * @return mixed - Returns the string associated with the key or FALSE on
    * failure or if such key was not found.
    */
   <<__Native>>
-  public function get(mixed $key,
-               mixed &$flags = null): mixed;
+  public function get(mixed $key): mixed;
 
   /* Memcache::delete() deletes item with the key. If parameter timeout is
    * specified, the item will expire after timeout seconds. Also you can use
@@ -527,14 +521,11 @@ function memcache_replace(Memcache $memcache,
  * for example Memcache::set(). The lowest byte of the int is reserved for
  * pecl/memcache internal usage (e.g. to indicate compression and
  * serialization status).
- * @param mixed $flags
  * @return mixed - Returns the string associated with the key or FALSE on
  * failure or if such key was not found.
  */
-function memcache_get(Memcache $memcache,
-                      mixed $key,
-                      mixed &$flags = null): mixed {
-  return $memcache->get($key, &$flags);
+function memcache_get(Memcache $memcache, mixed $key): mixed {
+  return $memcache->get($key);
 }
 
 /* Memcache::delete() deletes item with the key. If parameter timeout is
@@ -722,4 +713,3 @@ function memcache_add_server(Memcache $memcache,
                               $retry_interval, $status, $failure_callback,
                               $timeoutms);
 }
-

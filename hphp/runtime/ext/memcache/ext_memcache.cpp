@@ -384,7 +384,7 @@ static bool HHVM_METHOD(Memcache, replace, const String& key,
 }
 
 static Variant
-HHVM_METHOD(Memcache, get, const Variant& key, VRefParam /*flags*/ /*= null*/) {
+HHVM_METHOD(Memcache, get, const Variant& key) {
   auto data = Native::data<MemcacheData>(this_);
 
   if (!hasAvailableServers(data)) {

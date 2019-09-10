@@ -19,7 +19,7 @@ function memcache_set($memcache, $key, $var, $flag = 0, $expire = 0) { }
 <<__PHPStdLib>>
 function memcache_replace($memcache, $key, $var, $flag = 0, $expire = 0) { }
 <<__PHPStdLib>>
-function memcache_get($memcache, $key, &$flags = null) { }
+function memcache_get($memcache, $key) { }
 <<__PHPStdLib>>
 function memcache_delete($memcache, $key, $expire = 0) { }
 <<__PHPStdLib>>
@@ -55,7 +55,7 @@ class Memcache {
   public function add(string $key, $var, int $flag = 0, int $expire = 0);
   public function set(string $key, $var, int $flag = 0, int $expire = 0);
   public function replace(string $key, $var, int $flag = 0, int $expire = 0);
-  public function get($key, &$flags = null);
+  public function get($key);
   public function delete(string $key, int $expire = 0);
   public function increment(string $key, int $offset = 1);
   public function decrement(string $key, int $offset = 1);

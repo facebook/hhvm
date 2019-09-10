@@ -5,7 +5,7 @@ object(Memcached) (0) {
 Warning: Attempted to serialize unserializable builtin class Memcached in %s/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-array(50) {
+array(54) {
   [0]=>
   string(11) "__construct"
   [1]=>
@@ -45,66 +45,74 @@ array(50) {
   [18]=>
   string(3) "get"
   [19]=>
-  string(10) "getAllKeys"
+  string(15) "getWithCasToken"
   [20]=>
-  string(8) "getByKey"
+  string(10) "getAllKeys"
   [21]=>
-  string(10) "getDelayed"
+  string(8) "getByKey"
   [22]=>
-  string(15) "getDelayedByKey"
+  string(20) "getByKeyWithCasToken"
   [23]=>
-  string(8) "getMulti"
+  string(10) "getDelayed"
   [24]=>
-  string(13) "getMultiByKey"
+  string(15) "getDelayedByKey"
   [25]=>
-  string(9) "getOption"
+  string(8) "getMulti"
   [26]=>
-  string(13) "getResultCode"
+  string(21) "getMultiWithCasTokens"
   [27]=>
-  string(16) "getResultMessage"
+  string(13) "getMultiByKey"
   [28]=>
-  string(14) "getServerByKey"
+  string(26) "getMultiByKeyWithCasTokens"
   [29]=>
-  string(13) "getServerList"
+  string(9) "getOption"
   [30]=>
-  string(15) "resetServerList"
+  string(13) "getResultCode"
   [31]=>
-  string(8) "getStats"
+  string(16) "getResultMessage"
   [32]=>
-  string(10) "getVersion"
+  string(14) "getServerByKey"
   [33]=>
-  string(9) "increment"
+  string(13) "getServerList"
   [34]=>
-  string(14) "incrementByKey"
+  string(15) "resetServerList"
   [35]=>
-  string(12) "isPersistent"
+  string(8) "getStats"
   [36]=>
-  string(10) "isPristine"
+  string(10) "getVersion"
   [37]=>
-  string(7) "prepend"
+  string(9) "increment"
   [38]=>
-  string(12) "prependByKey"
+  string(14) "incrementByKey"
   [39]=>
-  string(4) "quit"
+  string(12) "isPersistent"
   [40]=>
-  string(7) "replace"
+  string(10) "isPristine"
   [41]=>
-  string(12) "replaceByKey"
+  string(7) "prepend"
   [42]=>
-  string(3) "set"
+  string(12) "prependByKey"
   [43]=>
-  string(8) "setByKey"
+  string(4) "quit"
   [44]=>
-  string(8) "setMulti"
+  string(7) "replace"
   [45]=>
-  string(13) "setMultiByKey"
+  string(12) "replaceByKey"
   [46]=>
-  string(9) "setOption"
+  string(3) "set"
   [47]=>
-  string(10) "setOptions"
+  string(8) "setByKey"
   [48]=>
-  string(5) "touch"
+  string(8) "setMulti"
   [49]=>
+  string(13) "setMultiByKey"
+  [50]=>
+  string(9) "setOption"
+  [51]=>
+  string(10) "setOptions"
+  [52]=>
+  string(5) "touch"
+  [53]=>
   string(10) "touchByKey"
 }
 ================
@@ -117,7 +125,7 @@ object(A_Memcached) (1) {
 Warning: Attempted to serialize unserializable builtin class A_Memcached in %s/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-array(50) {
+array(54) {
   [0]=>
   string(11) "__construct"
   [1]=>
@@ -157,65 +165,73 @@ array(50) {
   [18]=>
   string(3) "get"
   [19]=>
-  string(10) "getAllKeys"
+  string(15) "getWithCasToken"
   [20]=>
-  string(8) "getByKey"
+  string(10) "getAllKeys"
   [21]=>
-  string(10) "getDelayed"
+  string(8) "getByKey"
   [22]=>
-  string(15) "getDelayedByKey"
+  string(20) "getByKeyWithCasToken"
   [23]=>
-  string(8) "getMulti"
+  string(10) "getDelayed"
   [24]=>
-  string(13) "getMultiByKey"
+  string(15) "getDelayedByKey"
   [25]=>
-  string(9) "getOption"
+  string(8) "getMulti"
   [26]=>
-  string(13) "getResultCode"
+  string(21) "getMultiWithCasTokens"
   [27]=>
-  string(16) "getResultMessage"
+  string(13) "getMultiByKey"
   [28]=>
-  string(14) "getServerByKey"
+  string(26) "getMultiByKeyWithCasTokens"
   [29]=>
-  string(13) "getServerList"
+  string(9) "getOption"
   [30]=>
-  string(15) "resetServerList"
+  string(13) "getResultCode"
   [31]=>
-  string(8) "getStats"
+  string(16) "getResultMessage"
   [32]=>
-  string(10) "getVersion"
+  string(14) "getServerByKey"
   [33]=>
-  string(9) "increment"
+  string(13) "getServerList"
   [34]=>
-  string(14) "incrementByKey"
+  string(15) "resetServerList"
   [35]=>
-  string(12) "isPersistent"
+  string(8) "getStats"
   [36]=>
-  string(10) "isPristine"
+  string(10) "getVersion"
   [37]=>
-  string(7) "prepend"
+  string(9) "increment"
   [38]=>
-  string(12) "prependByKey"
+  string(14) "incrementByKey"
   [39]=>
-  string(4) "quit"
+  string(12) "isPersistent"
   [40]=>
-  string(7) "replace"
+  string(10) "isPristine"
   [41]=>
-  string(12) "replaceByKey"
+  string(7) "prepend"
   [42]=>
-  string(3) "set"
+  string(12) "prependByKey"
   [43]=>
-  string(8) "setByKey"
+  string(4) "quit"
   [44]=>
-  string(8) "setMulti"
+  string(7) "replace"
   [45]=>
-  string(13) "setMultiByKey"
+  string(12) "replaceByKey"
   [46]=>
-  string(9) "setOption"
+  string(3) "set"
   [47]=>
-  string(10) "setOptions"
+  string(8) "setByKey"
   [48]=>
-  string(5) "touch"
+  string(8) "setMulti"
   [49]=>
+  string(13) "setMultiByKey"
+  [50]=>
+  string(9) "setOption"
+  [51]=>
+  string(10) "setOptions"
+  [52]=>
+  string(5) "touch"
+  [53]=>
   string(10) "touchByKey"
 }

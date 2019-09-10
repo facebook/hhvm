@@ -494,10 +494,10 @@ Variant HHVM_METHOD(Memcached, getallkeys) {
   return allKeys;
 }
 
-Variant HHVM_METHOD(Memcached, getbykey, const String& server_key,
-                                         const String& key,
-                                         const Variant& cache_cb /*= null*/,
-                                         VRefParam cas_token /*= null*/) {
+namespace {
+Variant getByKeyImpl(ObjectData* const this_, const String& server_key,
+                     const String& key, const Variant& cache_cb,
+                     Variant* cas_token) {
   auto data = Native::data<MemcachedData>(this_);
   data->m_impl->rescode = MEMCACHED_SUCCESS;
   if (key.empty()) {
@@ -507,7 +507,7 @@ Variant HHVM_METHOD(Memcached, getbykey, const String& server_key,
 
   memcached_behavior_set(&data->m_impl->memcached,
                          MEMCACHED_BEHAVIOR_SUPPORT_CAS,
-                         cas_token.isReferenced() ? 1 : 0);
+                         cas_token ? 1 : 0);
   const char *myServerKey = server_key.empty() ? nullptr : server_key.c_str();
   size_t myServerKeyLen = server_key.length();
   const char *myKey = key.c_str();
@@ -532,26 +532,30 @@ Variant HHVM_METHOD(Memcached, getbykey, const String& server_key,
     data->m_impl->rescode = q_Memcached$$RES_PAYLOAD_FAILURE;
     return false;
   }
-  cas_token.assignIfRef((double) memcached_result_cas(&result.value));
+  if (cas_token) {
+    *cas_token = (double) memcached_result_cas(&result.value);
+  }
   return returnValue;
 }
 
-Variant HHVM_METHOD(Memcached, getmultibykey, const String& server_key,
-                               const Array& keys,
-                               VRefParam cas_tokens /*= uninit_variant*/,
-                               int flags /*= 0*/) {
+Variant getMultiByKeyImpl(ObjectData* const this_, const String& server_key,
+                          const Array& keys, Variant* cas_tokens, int flags) {
   auto data = Native::data<MemcachedData>(this_);
   data->m_impl->rescode = MEMCACHED_SUCCESS;
 
   bool preserveOrder = flags & q_Memcached$$GET_PRESERVE_ORDER;
   Array returnValue = Array::Create();
-  if (!data->getMultiImpl(server_key, keys, cas_tokens.isReferenced(),
+  if (!data->getMultiImpl(server_key, keys, cas_tokens,
                           preserveOrder ? &returnValue : nullptr)) {
     return false;
   }
 
   Array cas_tokens_arr;
-  SCOPE_EXIT { cas_tokens.assignIfRef(cas_tokens_arr); };
+  SCOPE_EXIT {
+    if (cas_tokens) {
+      *cas_tokens = cas_tokens_arr;
+    }
+  };
 
   MemcachedResultWrapper result(&data->m_impl->memcached);
   memcached_return status;
@@ -571,12 +575,46 @@ Variant HHVM_METHOD(Memcached, getmultibykey, const String& server_key,
     size_t keyLength = memcached_result_key_length(&result.value);
     String sKey(key, keyLength, CopyString);
     returnValue.set(sKey, value, true);
-    if (cas_tokens.isReferenced()) {
+    if (cas_tokens) {
       double cas = (double) memcached_result_cas(&result.value);
       cas_tokens_arr.set(sKey, cas, true);
     }
   }
   return returnValue;
+}
+} // anonymous namespace
+
+Variant HHVM_METHOD(Memcached, getbykey, const String& server_key,
+                                         const String& key,
+                                         const Variant& cache_cb /*= null*/,
+                                         VRefParam cas_token /*= null*/) {
+  return getByKeyImpl(this_, server_key, key, cache_cb,
+                      cas_token.getVariantOrNull());
+}
+
+Variant HHVM_METHOD(Memcached, getbykeywithcastoken,
+                    const String& server_key,
+                    const String& key,
+                    const Variant& cache_cb,
+                    Variant& cas_token) {
+  return getByKeyImpl(this_, server_key, key, cache_cb, &cas_token);
+}
+
+Variant HHVM_METHOD(Memcached, getmultibykey, const String& server_key,
+                               const Array& keys,
+                               VRefParam cas_tokens /*= uninit_variant*/,
+                               int flags /*= 0*/) {
+  return getMultiByKeyImpl(this_, server_key, keys,
+                           cas_tokens.getVariantOrNull(),
+                           flags);
+}
+
+Variant HHVM_METHOD(Memcached, getmultibykeywithcastokens,
+                    const String& server_key,
+                    const Array& keys,
+                    Variant& cas_tokens,
+                    int flags /*= 0*/) {
+  return getMultiByKeyImpl(this_, server_key, keys, &cas_tokens, flags);
 }
 
 bool HHVM_METHOD(Memcached, getdelayedbykey, const String& server_key,
@@ -1200,7 +1238,9 @@ struct MemcachedExtension final : Extension {
     HHVM_ME(Memcached, quit);
     HHVM_ME(Memcached, getallkeys);
     HHVM_ME(Memcached, getbykey);
+    HHVM_ME(Memcached, getbykeywithcastoken);
     HHVM_ME(Memcached, getmultibykey);
+    HHVM_ME(Memcached, getmultibykeywithcastokens);
     HHVM_ME(Memcached, getdelayedbykey);
     HHVM_ME(Memcached, fetch);
     HHVM_ME(Memcached, fetchall);

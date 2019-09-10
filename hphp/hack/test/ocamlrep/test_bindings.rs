@@ -10,8 +10,8 @@ use ocamlrep::IntoOcamlRep;
 use ocamlrep_derive::IntoOcamlRep;
 
 fn val<T: IntoOcamlRep>(value: T) -> ocaml::Value {
-    let mut arena = ocamlrep::Arena::new_with_size(8);
-    let value = arena.add(value);
+    let arena = ocamlrep::Arena::new_with_size(8);
+    let value = value.into_ocamlrep(&arena);
     mem::forget(arena);
     ocaml::Value::new(unsafe { value.as_usize() })
 }

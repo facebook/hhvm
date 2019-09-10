@@ -5,9 +5,8 @@
 
 #![recursion_limit = "128"]
 
-use proc_macro2::{Span, TokenStream};
+use proc_macro2::TokenStream;
 use quote::quote;
-use syn::Ident;
 use synstructure::decl_derive;
 
 decl_derive!([IntoOcamlRep] => derive_ocamlrep);
@@ -34,7 +33,7 @@ fn derive_ocamlrep(mut s: synstructure::Structure) -> TokenStream {
 
     s.gen_impl(quote! {
         gen impl ::ocamlrep::IntoOcamlRep for @Self {
-            fn into_ocamlrep<'a>(self, arena: &mut ::ocamlrep::Arena<'a>) -> ::ocamlrep::Value<'a> {
+            fn into_ocamlrep<'a>(self, arena: &::ocamlrep::Arena<'a>) -> ::ocamlrep::Value<'a> {
                 match self { #body }
             }
         }
@@ -97,15 +96,11 @@ fn enum_impl(s: &synstructure::Structure) -> TokenStream {
 
 fn allocate_block(variant: &synstructure::VariantInfo, tag: u8) -> TokenStream {
     let size = variant.bindings().len();
-    let mut locals = TokenStream::new();
     let mut fields = TokenStream::new();
     for (i, bi) in variant.bindings().iter().enumerate() {
-        let ident = Ident::new(&format!("__field_{}", i), Span::call_site());
-        locals.extend(quote! { let #ident = arena.add(#bi); });
-        fields.extend(quote! { block[#i] = #ident; });
+        fields.extend(quote! { block[#i] = arena.add(#bi); });
     }
     quote! {
-        #locals
         let mut block = arena.block_with_size_and_tag(#size, #tag);
         #fields
         block.build()

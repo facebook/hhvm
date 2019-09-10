@@ -13,5 +13,5 @@ pub use block::{Block, BlockBuilder};
 pub use value::Value;
 
 pub trait IntoOcamlRep {
-    fn into_ocamlrep<'a>(self, arena: &mut Arena<'a>) -> Value<'a>;
+    fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a>;
 }

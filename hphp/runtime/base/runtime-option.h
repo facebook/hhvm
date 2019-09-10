@@ -18,6 +18,7 @@
 #define incl_HPHP_RUNTIME_OPTION_H_
 
 #include <folly/dynamic.h>
+#include <folly/experimental/io/FsUtil.h>
 
 #include <unordered_map>
 #include <algorithm>
@@ -175,6 +176,18 @@ struct RuntimeOption {
     std::string& xboxPassword,
     std::set<std::string>& xboxPasswords
   );
+
+  static folly::Optional<folly::fs::path> GetHomePath(
+    const folly::StringPiece user);
+
+  /**
+   * Find a config file corresponding to the given user and parse its
+   * settings into the given ini and hdf objects.
+   *
+   * Return true on success and false on failure.
+   */
+  static bool ReadPerUserSettings(const folly::fs::path& confFileName,
+                                  IniSettingMap& ini, Hdf& config);
 
   static std::string getTraceOutputFile();
 

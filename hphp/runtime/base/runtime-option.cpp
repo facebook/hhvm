@@ -1026,6 +1026,38 @@ uint64_t ahotDefault() {
   return RuntimeOption::RepoAuthoritative ? 4 << 20 : 0;
 }
 
+folly::Optional<folly::fs::path> RuntimeOption::GetHomePath(
+  const folly::StringPiece user) {
+
+  auto homePath = folly::fs::path{RuntimeOption::SandboxHome}
+    / folly::fs::path{user};
+  if (folly::fs::is_directory(homePath)) {
+    return {std::move(homePath)};
+  }
+
+  if (!RuntimeOption::SandboxFallback.empty()) {
+    homePath = folly::fs::path{RuntimeOption::SandboxFallback}
+      / folly::fs::path{user};
+    if (folly::fs::is_directory(homePath)) {
+      return {std::move(homePath)};
+    }
+  }
+
+  return {};
+}
+
+bool RuntimeOption::ReadPerUserSettings(const folly::fs::path& confFileName,
+                                        IniSettingMap& ini, Hdf& config) {
+  try {
+    Config::ParseConfigFile(confFileName.native(), ini, config, false);
+    return true;
+  } catch (HdfException& e) {
+    Logger::Error("%s ignored: %s", confFileName.native().c_str(),
+                  e.getMessage().c_str());
+    return false;
+  }
+}
+
 std::string RuntimeOption::getTraceOutputFile() {
   return folly::sformat("{}/hphp.{}.log",
                         RuntimeOption::RemoteTraceOutputDir, (int64_t)getpid());
@@ -1364,6 +1396,7 @@ void RuntimeOption::Load(
         [&] (const String& f) {
           if (access(f.data(), R_OK) == 0) {
             fullpath = f.toCppString();
+            FTRACE_MOD(Trace::watchman_autoload, 3, "Parsing {}\n", fullpath);
             Config::ParseConfigFile(fullpath, ini, config);
             return true;
           }

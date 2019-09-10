@@ -52,6 +52,7 @@ type hh_server_state =
   | Hh_server_typechecking_local
   | Hh_server_typechecking_global_blocking
   | Hh_server_typechecking_global_interruptible
+  | Hh_server_typechecking_global_remote_blocking
   | Hh_server_stolen
   | Hh_server_forgot
 
@@ -245,6 +246,8 @@ let hh_server_state_to_string (hh_server_state : hh_server_state) : string =
     "hh_server typechecking (global, blocking)"
   | Hh_server_typechecking_global_interruptible ->
     "hh_server typechecking (global, interruptible)"
+  | Hh_server_typechecking_global_remote_blocking ->
+    "hh_server typechecking (global remote, blocking)"
   | Hh_server_handling_or_ready -> "hh_server ready"
   | Hh_server_unknown -> "hh_server unknown state"
   | Hh_server_forgot -> "hh_server forgotten state"
@@ -384,12 +387,12 @@ let update_hh_server_state_if_necessary (event : event) : unit =
         set_hh_server_state Hh_server_handling_or_ready
       | BUSY_STATUS Doing_local_typecheck ->
         set_hh_server_state Hh_server_typechecking_local
-      | BUSY_STATUS (Doing_global_typecheck can_interrupt) ->
+      | BUSY_STATUS (Doing_global_typecheck global_typecheck_kind) ->
         set_hh_server_state
-          ( if can_interrupt then
-            Hh_server_typechecking_global_interruptible
-          else
-            Hh_server_typechecking_global_blocking )
+          (match global_typecheck_kind with
+          | Blocking -> Hh_server_typechecking_global_blocking
+          | Interruptible -> Hh_server_typechecking_global_interruptible
+          | Remote_blocking _ -> Hh_server_typechecking_global_remote_blocking)
       | NEW_CLIENT_CONNECTED -> set_hh_server_state Hh_server_stolen
       | DIAGNOSTIC _
       | FATAL_EXCEPTION _
@@ -2082,14 +2085,20 @@ let do_server_busy (state : state) (status : ServerCommandTypes.busy_status) :
           ( MessageType.InfoMessage,
             None,
             "hh_server is initialized and running correctly." )
-        | Doing_global_typecheck false ->
+        | Doing_global_typecheck Blocking ->
           ( MessageType.WarningMessage,
             Some "checking project",
             "Hack: checking entire project (blocking)" )
-        | Doing_global_typecheck true ->
+        | Doing_global_typecheck Interruptible ->
           ( MessageType.InfoMessage,
             None,
             "Hack: checking entire project (interruptible)" )
+        | Doing_global_typecheck (Remote_blocking message) ->
+          ( MessageType.WarningMessage,
+            Some (Printf.sprintf "checking project: %s" message),
+            Printf.sprintf
+              "Hack: checking entire project (remote, blocking) - %s"
+              message )
         | Done_global_typecheck _ ->
           ( MessageType.InfoMessage,
             None,

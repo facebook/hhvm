@@ -83,6 +83,14 @@ let extend_fast
     extended_fast
   )
 
+let global_typecheck_kind genv env =
+  if genv.ServerEnv.options |> ServerArgs.remote then
+    ServerCommandTypes.Remote_blocking "Forced remote type check"
+  else if env.can_interrupt then
+    ServerCommandTypes.Interruptible
+  else
+    ServerCommandTypes.Blocking
+
 let maybe_remote_type_check genv env fnl =
   let t = Unix.gettimeofday () in
   let (do_remote, _t) =

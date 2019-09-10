@@ -244,7 +244,8 @@ let handle_connection_ genv env client =
         if env.full_check = Full_check_started then
           ServerBusyStatus.send
             env
-            (ServerCommandTypes.Doing_global_typecheck env.can_interrupt);
+            (ServerCommandTypes.Doing_global_typecheck
+               (ServerCheckUtils.global_typecheck_kind genv env));
         env
       in
       if

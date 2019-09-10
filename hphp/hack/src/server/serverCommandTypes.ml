@@ -358,12 +358,17 @@ and busy_status =
   | Needs_local_typecheck
   | Doing_local_typecheck
   | Done_local_typecheck
-  | Doing_global_typecheck of bool (* interruptible? *)
+  | Doing_global_typecheck of global_typecheck_kind
   | Done_global_typecheck of {
       is_truncated: bool;
       shown: int;
       total: int;
     }
+
+and global_typecheck_kind =
+  | Blocking
+  | Interruptible
+  | Remote_blocking of string
 
 type 'a message_type =
   (* Only sent to persistent connections. *)

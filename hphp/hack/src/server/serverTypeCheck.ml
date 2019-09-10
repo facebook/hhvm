@@ -1335,7 +1335,8 @@ let type_check_unsafe genv env kind =
   | Full_check ->
     ServerBusyStatus.send
       env
-      (ServerCommandTypes.Doing_global_typecheck env.can_interrupt);
+      (ServerCommandTypes.Doing_global_typecheck
+         (global_typecheck_kind genv env));
     let ((env, _) as res) = FC.type_check_core genv env in
     ( if env.full_check = Full_check_done then
       let total = Errors.count env.ServerEnv.errorl in

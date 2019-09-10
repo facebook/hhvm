@@ -322,8 +322,9 @@ bool ArrayData::hasProvenanceData() const {
 }
 
 ALWAYS_INLINE
-void ArrayData::markHasProvenanceData() {
-  m_aux16 |= kHasProvenanceData;
+void ArrayData::setHasProvenanceData(bool value) {
+  m_aux16 = (m_aux16 & ~kHasProvenanceData) |
+    (value ? kHasProvenanceData : 0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

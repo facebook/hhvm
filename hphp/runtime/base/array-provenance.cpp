@@ -157,7 +157,7 @@ folly::Optional<Tag> getTag(const APCArray* a) {
 template<Mode mode>
 void setTag(ArrayData* ad, Tag tag) {
   if (setTagImpl<mode>(ad, tag)) {
-    ad->markHasProvenanceData();
+    ad->setHasProvenanceData(true);
   }
 }
 template<Mode mode>
@@ -170,7 +170,8 @@ template void setTag<Mode::Emplace>(ArrayData*, Tag);
 template void setTag<Mode::Insert>(const APCArray*, Tag);
 template void setTag<Mode::Emplace>(const APCArray*, Tag);
 
-void clearTag(const ArrayData* ad) {
+void clearTag(ArrayData* ad) {
+  ad->setHasProvenanceData(false);
   clearTagImpl(ad);
 }
 void clearTag(const APCArray* a) {

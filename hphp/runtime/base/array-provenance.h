@@ -122,9 +122,9 @@ template<Mode mode = Mode::Insert> void setTag(const APCArray* a, Tag tag);
 
 /*
  * Clear a tag for a released array---only call this if the array is henceforth
- * unreachable.
+ * unreachable or no longer of a kind that accepts provenance tags
  */
-void clearTag(const ArrayData* ad);
+void clearTag(ArrayData* ad);
 void clearTag(const APCArray* a);
 
 /*

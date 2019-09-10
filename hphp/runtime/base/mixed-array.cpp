@@ -567,10 +567,13 @@ NEVER_INLINE ArrayData* MixedArray::CopyStatic(const ArrayData* in) {
   auto ret = CopyMixed(*a, AllocMode::Static, in->m_kind, in->dvArray());
 
   if (RuntimeOption::EvalArrayProvenance) {
+    assertx(!ret->hasProvenanceData());
     if (auto const tag = arrprov::getTag(in)) {
       arrprov::setTag(ret, *tag);
     }
   }
+  assertx(!arrprov::arrayWantsTag(ret) ||
+          ret->hasProvenanceData() == in->hasProvenanceData());
   return ret;
 }
 
@@ -817,6 +820,7 @@ bool MixedArray::checkInvariants() const {
   assertx(m_scale >= 1 && (m_scale & (m_scale - 1)) == 0);
   assertx(MixedArray::HashSize(m_scale) ==
          folly::nextPowTwo<uint64_t>(capacity()));
+  assertx(arrprov::arrayWantsTag(this) || !hasProvenanceData());
 
   if (isZombie()) return true;
 
@@ -1845,6 +1849,7 @@ ArrayData* MixedArray::FromDictImpl(ArrayData* adIn,
     // No int-like string keys, so transform in place.
     a->m_kind = HeaderKind::Mixed;
     if (toDArray) a->setDVArray(ArrayData::kDArray);
+    arrprov::clearTag(a);
     a->setLegacyArray(false);
     assertx(a->checkInvariants());
     return a;

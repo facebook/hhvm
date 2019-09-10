@@ -96,6 +96,7 @@ bool PackedArray::checkInvariants(const ArrayData* arr) {
   assertx(!arr->isPacked() || !arr->isDArray());
   assertx(!arr->isVecArray() || arr->isNotDVArray());
   assertx(!RuntimeOption::EvalHackArrDVArrs || arr->isNotDVArray());
+  assertx(arrprov::arrayWantsTag(arr) || !arr->hasProvenanceData());
   static_assert(ArrayData::kPackedKind == 0, "");
   // Note that m_pos < m_size is not an invariant, because an array
   // that grows will only adjust m_size to zero on the old array.
@@ -381,6 +382,7 @@ ArrayData* PackedArray::CopyStatic(const ArrayData* adIn) {
   );
 
   if (RuntimeOption::EvalArrayProvenance) {
+    assertx(!ad->hasProvenanceData());
     if (auto const tag = arrprov::getTag(adIn)) {
       arrprov::setTag(ad, *tag);
     }
@@ -388,6 +390,8 @@ ArrayData* PackedArray::CopyStatic(const ArrayData* adIn) {
 
   assertx(ad->kind() == adIn->kind());
   assertx(ad->dvArray() == adIn->dvArray());
+  assertx(!arrprov::arrayWantsTag(ad) ||
+          ad->hasProvenanceData() == adIn->hasProvenanceData());
   assertx(capacity(ad) >= adIn->m_size);
   assertx(ad->m_size == adIn->m_size);
   assertx(ad->m_pos == adIn->m_pos);
@@ -418,6 +422,7 @@ ArrayData* PackedArray::ConvertStatic(const ArrayData* arr) {
   }
 
   if (RuntimeOption::EvalArrayProvenance) {
+    assertx(!ad->hasProvenanceData());
     if (auto const tag = arrprov::getTag(arr)) {
       arrprov::setTag(ad, *tag);
     }
@@ -426,6 +431,8 @@ ArrayData* PackedArray::ConvertStatic(const ArrayData* arr) {
   assertx(ad->isPacked());
   assertx(capacity(ad) >= arr->m_size);
   assertx(ad->dvArray() == arr->dvArray());
+  assertx(!arrprov::arrayWantsTag(ad) ||
+          ad->hasProvenanceData() == arr->hasProvenanceData());
   assertx(ad->m_size == arr->m_size);
   assertx(ad->m_pos == arr->m_pos);
   assertx(ad->isStatic());
@@ -1277,6 +1284,7 @@ ArrayData* PackedArray::ToPHPArrayVec(ArrayData* adIn, bool copy) {
   ArrayData* ad = copy ? Copy(adIn) : adIn;
   ad->m_kind = HeaderKind::Packed;
   assertx(ad->isNotDVArray());
+  arrprov::clearTag(ad);
   ad->setLegacyArray(false);
   assertx(checkInvariants(ad));
   return ad;
@@ -1289,6 +1297,7 @@ ArrayData* PackedArray::ToVArrayVec(ArrayData* adIn, bool copy) {
   if (adIn->getSize() == 0) return ArrayData::CreateVArray();
   ArrayData* ad = copy ? Copy(adIn) : adIn;
   ad->m_kind = HeaderKind::Packed;
+  arrprov::clearTag(ad);
   ad->setDVArray(ArrayData::kVArray);
   ad->setLegacyArray(false);
   assertx(checkInvariants(ad));

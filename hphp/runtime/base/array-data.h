@@ -311,10 +311,11 @@ public:
    * side table--see array-provenance.h
    */
   bool hasProvenanceData() const;
+
   /*
-   * Latches the provenance data bit to true
+   * Sets the provenance data bit
    */
-  void markHasProvenanceData();
+  void setHasProvenanceData(bool value);
 
   /*
    * Whether the array has legacy behaviors enabled (this bit can only be set

@@ -89,6 +89,20 @@ external get_int_smap_singleton : unit -> int SMap.t = "get_int_smap_singleton"
 
 external get_int_smap : unit -> int SMap.t = "get_int_smap"
 
+(* set tests *)
+
+module SSet = Caml.Set.Make (struct
+  type t = string
+
+  let compare = String.compare
+end)
+
+external get_empty_sset : unit -> SSet.t = "get_empty_sset"
+
+external get_sset_singleton : unit -> SSet.t = "get_sset_singleton"
+
+external get_sset : unit -> SSet.t = "get_sset"
+
 external convert_to_ocamlrep : 'a -> 'a = "convert_to_ocamlrep"
 
 let test_char () =
@@ -235,6 +249,21 @@ let test_int_smap_singleton () =
 let test_int_smap () =
   match SMap.bindings (get_int_smap ()) with
   | [("a", 1); ("b", 2); ("c", 3)] -> ()
+  | _ -> assert false
+
+let test_empty_sset () =
+  match SSet.elements (get_empty_sset ()) with
+  | [] -> ()
+  | _ -> assert false
+
+let test_sset_singleton () =
+  match SSet.elements (get_sset_singleton ()) with
+  | ["a"] -> ()
+  | _ -> assert false
+
+let test_sset () =
+  match SSet.elements (get_sset ()) with
+  | ["a"; "b"; "c"] -> ()
   | _ -> assert false
 
 (* Conversion tests *)
@@ -392,6 +421,25 @@ let test_convert_int_smap () =
   | [("a", 1); ("b", 2); ("c", 3)] -> ()
   | _ -> assert false
 
+let test_convert_empty_sset () =
+  match SSet.elements (convert_to_ocamlrep SSet.empty) with
+  | [] -> ()
+  | _ -> assert false
+
+let test_convert_sset_singleton () =
+  match SSet.elements (convert_to_ocamlrep (SSet.singleton "a")) with
+  | ["a"] -> ()
+  | _ -> assert false
+
+let test_convert_sset () =
+  let set = SSet.empty in
+  let set = SSet.add "a" set in
+  let set = SSet.add "b" set in
+  let set = SSet.add "c" set in
+  match SSet.elements (convert_to_ocamlrep set) with
+  | ["a"; "b"; "c"] -> ()
+  | _ -> assert false
+
 let test_cases =
   [ test_char;
     test_int;
@@ -422,6 +470,9 @@ let test_cases =
     test_empty_smap;
     test_int_smap_singleton;
     test_int_smap;
+    test_empty_sset;
+    test_sset_singleton;
+    test_sset;
     test_convert_char;
     test_convert_int;
     test_convert_true;
@@ -450,7 +501,10 @@ let test_cases =
     test_convert_pear;
     test_convert_empty_smap;
     test_convert_int_smap_singleton;
-    test_convert_int_smap ]
+    test_convert_int_smap;
+    test_convert_empty_sset;
+    test_convert_sset_singleton;
+    test_convert_sset ]
 
 let main () = List.iter test_cases (fun test -> test ())
 

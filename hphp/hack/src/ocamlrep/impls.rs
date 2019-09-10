@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::collections::{btree_map, BTreeMap};
+use std::collections::{btree_map, btree_set, BTreeMap, BTreeSet};
 use std::convert::TryInto;
 use std::mem;
 use std::path::PathBuf;
@@ -147,6 +147,38 @@ fn btree_map_helper<'a, K: OcamlRep, V: OcamlRep>(
     block[2] = arena.add(val);
     block[3] = right;
     block[4] = arena.add(height);
+    (block.build(), height)
+}
+
+impl<T: OcamlRep> OcamlRep for BTreeSet<T> {
+    fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
+        if self.is_empty() {
+            return Value::int(0);
+        }
+        let len = self.len();
+        let mut iter = self.into_iter();
+        let (res, _) = btree_set_helper(&mut iter, arena, len);
+        res
+    }
+}
+
+fn btree_set_helper<'a, T: OcamlRep>(
+    iter: &mut btree_set::IntoIter<T>,
+    arena: &Arena<'a>,
+    size: usize,
+) -> (Value<'a>, usize) {
+    if size == 0 {
+        return (Value::int(0), 0);
+    }
+    let (left, left_height) = btree_set_helper(iter, arena, size / 2);
+    let val = iter.next().unwrap();
+    let (right, right_height) = btree_set_helper(iter, arena, size - 1 - size / 2);
+    let height = std::cmp::max(left_height, right_height) + 1;
+    let mut block = arena.block_with_size(4);
+    block[0] = left;
+    block[1] = arena.add(val);
+    block[2] = right;
+    block[3] = arena.add(height);
     (block.build(), height)
 }
 

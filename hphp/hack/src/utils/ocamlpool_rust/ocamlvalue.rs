@@ -10,6 +10,7 @@ use crate::utils::*;
 
 use ocaml::core::mlvalues::{empty_list, Value, UNIT};
 use std::borrow::Cow;
+use std::collections::{btree_set, BTreeSet};
 use std::path::PathBuf;
 use std::rc::Rc;
 use std::result::Result;
@@ -194,4 +195,31 @@ fn ocamlvalue_from_iterator<T1: Ocamlvalue, T2: Ocamlvalue>(
             height,
         )
     }
+}
+
+impl<T: Ocamlvalue> Ocamlvalue for BTreeSet<T> {
+    fn ocamlvalue(&self) -> Value {
+        if self.is_empty() {
+            return usize_to_ocaml(0);
+        }
+        let len = self.len();
+        let mut iter = self.iter();
+        let (res, _) = btree_set_helper(&mut iter, len);
+        res
+    }
+}
+
+fn btree_set_helper<'a, T: Ocamlvalue>(
+    iter: &mut btree_set::Iter<T>,
+    size: usize,
+) -> (Value, usize) {
+    if size == 0 {
+        return (usize_to_ocaml(0), 0);
+    }
+    let (left, left_height) = btree_set_helper(iter, size / 2);
+    let val = iter.next().unwrap();
+    let (right, right_height) = btree_set_helper(iter, size - 1 - size / 2);
+    let height = std::cmp::max(left_height, right_height) + 1;
+    let block = caml_block(0, &[left, val.ocamlvalue(), right, usize_to_ocaml(height)]);
+    (block, height)
 }

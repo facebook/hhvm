@@ -1701,6 +1701,7 @@ module Make (GetLocals : GetLocals) = struct
         List.iter l ~f:(check_afield_constant_expr env)
       else
         Errors.illegal_constant p
+    | Aast.As (e, (_, Aast.Hlike _), _) -> check_constant_expr env e
     | _ -> Errors.illegal_constant pos
 
   and check_afield_constant_expr env afield =

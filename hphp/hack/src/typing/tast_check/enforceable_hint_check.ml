@@ -19,7 +19,7 @@ module Nast = Aast
 
 let validator =
   object (this)
-    inherit type_validator
+    inherit type_validator as super
 
     (* Only comes about because naming has reported an error and left Hany *)
     method! on_tany acc _ = acc
@@ -98,7 +98,16 @@ let validator =
 
     method! on_tanon acc r _arity _id = this#invalid acc r "a function type"
 
-    method! on_tunion acc r _tyl = this#invalid acc r "a union"
+    method! on_tunion acc r tyl =
+      if
+        TypecheckerOptions.like_types (Tast_env.get_tcopt acc.env)
+        && Typing_utils.is_dynamic
+             (Env.tast_env_as_typing_env acc.env)
+             (r, Tunion tyl)
+      then
+        super#on_tunion { acc with like_context = true } r tyl
+      else
+        this#invalid acc r "a union"
 
     method! on_tobject acc r = this#invalid acc r "the object type"
 
@@ -116,21 +125,32 @@ let validator =
               begin
                 match
                   List.fold2 ~init:acc targs tparams ~f:(fun acc targ tparam ->
+                      let covariant =
+                        tparam.tp_variance = Ast_defs.Covariant
+                      in
+                      let like_types_enabled =
+                        TypecheckerOptions.like_types
+                          (Tast_env.get_tcopt acc.env)
+                      in
                       if this#is_wildcard targ then
                         acc
+                      else if
+                        tparam.tp_reified = Nast.Reified
+                        || (acc.like_context && covariant && like_types_enabled)
+                      then
+                        this#on_type acc targ
                       else
-                        match tparam.tp_reified with
-                        | Nast.Erased ->
-                          this#invalid
-                            acc
-                            r
-                            "a type with an erased generic type argument"
-                        | Nast.SoftReified ->
-                          this#invalid
-                            acc
-                            r
-                            "a type with a soft reified type argument"
-                        | Nast.Reified -> this#on_type acc targ)
+                        let error_message =
+                          "a type with an erased generic type argument"
+                        in
+                        let error_message =
+                          if like_types_enabled then
+                            error_message
+                            ^ ", except in a like cast when the corresponding type parameter is covariant"
+                          else
+                            error_message
+                        in
+                        this#invalid acc r error_message)
                 with
                 | Ok new_acc -> new_acc
                 | Unequal_lengths -> acc (* arity error elsewhere *)
@@ -170,47 +190,6 @@ let validator =
           r
           "a reified type parameter that is not marked <<__Enforceable>>"
       | (Nast.Reified, true) -> acc
-
-    method check_class_targs : type a. _ -> _ -> _ -> a ty list -> _ =
-      fun acc r c_name targs ->
-        match Env.get_class acc.env c_name with
-        | Some tc ->
-          let tparams = Cls.tparams tc in
-          begin
-            match targs with
-            | [] -> acc
-            (* this case should really be handled by the fold2,
-        but we still allow class hints without args in certain places *)
-            | targs ->
-              List.Or_unequal_lengths.(
-                begin
-                  match
-                    List.fold2
-                      ~init:acc
-                      targs
-                      tparams
-                      ~f:(fun acc targ tparam ->
-                        if this#is_wildcard targ then
-                          acc
-                        else
-                          match tparam.tp_reified with
-                          | Nast.Erased ->
-                            this#invalid
-                              acc
-                              r
-                              "a type with an erased generic type argument"
-                          | Nast.SoftReified ->
-                            this#invalid
-                              acc
-                              r
-                              "a type with a soft reified type argument"
-                          | Nast.Reified -> this#on_type acc targ)
-                  with
-                  | Ok new_acc -> new_acc
-                  | Unequal_lengths -> acc (* arity error elsewhere *)
-                end)
-          end
-        | None -> acc
   end
 
 let handler =

@@ -20,6 +20,7 @@ type validation_state = {
   env: Env.env;
   ety_env: expand_env;
   validity: validity;
+  like_context: bool;
 }
 
 class virtual type_validator =
@@ -29,7 +30,11 @@ class virtual type_validator =
     method validate_type env root_ty emit_error =
       let should_suppress = ref false in
       let validate env ety_env ty =
-        let state = this#on_type { env; ety_env; validity = Valid } ty in
+        let state =
+          this#on_type
+            { env; ety_env; validity = Valid; like_context = false }
+            ty
+        in
         match state.validity with
         | Invalid (r, msg) ->
           if not !should_suppress then

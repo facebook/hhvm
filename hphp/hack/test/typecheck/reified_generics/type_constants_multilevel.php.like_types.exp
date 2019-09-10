@@ -1,0 +1,24 @@
+File "type_constants_multilevel.php", line 9, characters 10-21:
+Invalid "as" expression hint (Typing[4195])
+File "type_constants_multilevel.php", line 26, characters 23-24:
+The "as" operator cannot be used with the abstract type constant Tx because it is not marked <<__Enforceable>>
+File "type_constants_multilevel.php", line 11, characters 10-21:
+Invalid "as" expression hint (Typing[4195])
+File "type_constants_multilevel.php", line 28, characters 19-24:
+The "as" operator cannot be used with a type with an erased generic type argument, except in a like cast when the corresponding type parameter is covariant
+File "type_constants_multilevel.php", line 12, characters 10-21:
+Invalid "as" expression hint (Typing[4195])
+File "type_constants_multilevel.php", line 29, characters 14-15:
+The "as" operator cannot be used with the abstract type constant Tw because it is not marked <<__Enforceable>>
+File "type_constants_multilevel.php", line 18, characters 10-21:
+Invalid "as" expression hint (Typing[4195])
+File "type_constants_multilevel.php", line 34, characters 19-24:
+The "as" operator cannot be used with a type with an erased generic type argument, except in a like cast when the corresponding type parameter is covariant
+File "type_constants_multilevel.php", line 20, characters 10-21:
+Invalid "as" expression hint (Typing[4195])
+File "type_constants_multilevel.php", line 28, characters 19-24:
+The "as" operator cannot be used with a type with an erased generic type argument, except in a like cast when the corresponding type parameter is covariant
+File "type_constants_multilevel.php", line 21, characters 10-21:
+Invalid "as" expression hint (Typing[4195])
+File "type_constants_multilevel.php", line 35, characters 19-25:
+The "as" operator cannot be used with a type with an erased generic type argument, except in a like cast when the corresponding type parameter is covariant

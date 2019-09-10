@@ -1,0 +1,6 @@
+File "wildcard_invalid2.php", line 10, characters 16-27:
+Invalid "is" expression hint (Typing[4195])
+File "wildcard_invalid2.php", line 10, characters 16-27:
+The "is" operator cannot be used with a type with an erased generic type argument, except in a like cast when the corresponding type parameter is covariant
+File "wildcard_invalid2.php", line 14, characters 16-16:
+Wildcard typehints are not allowed in this position (Naming[2084])

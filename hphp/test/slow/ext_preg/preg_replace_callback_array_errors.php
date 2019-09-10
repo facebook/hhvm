@@ -12,35 +12,38 @@ function f() {
 
 <<__EntryPoint>>
 function main_preg_replace_callback_array_errors() {
+$count = -1;
 try { var_dump(preg_replace_callback_array()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump(preg_replace_callback_array(1)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-var_dump(preg_replace_callback_array(1,2));
-var_dump(preg_replace_callback_array(1,2,3));
+var_dump(preg_replace_callback_array(1, 2, -1, inout $count));
+var_dump(preg_replace_callback_array(1,2,3, inout $count));
 // Provide an integer subject; no warning, just null
-var_dump(preg_replace_callback_array(array(), 3));
+var_dump(preg_replace_callback_array(array(), 3, -1, inout $count));
 $a = 5;
-var_dump(preg_replace_callback_array(1,2,3,&$a));
+var_dump(preg_replace_callback_array(1, 2, 3, inout $a));
 $a = "";
-try { var_dump(preg_replace_callback_array(array("" => ""),"","",&$a)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(preg_replace_callback_array(array("" => ""), "", "", inout $a)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 $a = array();
 $b = "";
 try { var_dump(preg_replace_callback_array($a, $a, $a, &$a, $b)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump($b);
-$b = "";
+$b = -1;
 // PHP 7 used preg_replace_callback here, but we are testing
 // preg_replace_callback_array.
 // Testing multiple invalid. We only catch the first invalid one
 // even if there are more - that matches PHP 7
 var_dump(preg_replace_callback_array(
-  array("xx" => "notValid1", "yy" => "notValid2"), $a, -1, &$b)
+  array("xx" => "notValid1", "yy" => "notValid2"), $a, -1, inout $b)
 );
 var_dump($b);
-var_dump(preg_replace_callback_array(array('/\w' => 'f'), 'z'));
+var_dump(preg_replace_callback_array(array('/\w' => 'f'), 'z', -1, inout $count));
 try {
   var_dump(
     preg_replace_callback_array(
       array('/\w/' => 'f', '/.*/' => 'f'),
-      'z'
+      'z',
+      -1,
+      inout $count
     )
   );
 } catch (Exception $e) {

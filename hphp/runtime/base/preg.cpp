@@ -1724,7 +1724,7 @@ static Variant php_replace_in_subject(const Variant& regex, const Variant& repla
 }
 
 Variant preg_replace_impl(const Variant& pattern, const Variant& replacement,
-                          const Variant& subject, int limit, Variant* count,
+                          const Variant& subject, int limit, int64_t* count,
                           bool is_callable, bool is_filter) {
   assertx(!(is_callable && is_filter));
   if (!is_callable &&
@@ -1774,10 +1774,10 @@ int preg_replace(Variant& result,
                  const Variant& replacement,
                  const Variant& subject,
                  int limit /* = -1 */) {
-  Variant count;
+  int64_t count;
   result = preg_replace_impl(pattern, replacement, subject,
                              limit, &count, false, false);
-  return count.toInt32();
+  return count;
 }
 
 int preg_replace_callback(Variant& result,
@@ -1785,10 +1785,10 @@ int preg_replace_callback(Variant& result,
                           const Variant& callback,
                           const Variant& subject,
                           int limit /* = -1 */) {
-  Variant count;
+  int64_t count;
   result = preg_replace_impl(pattern, callback, subject,
                              limit, &count, true, false);
-  return count.toInt32();
+  return count;
 }
 
 int preg_filter(Variant& result,
@@ -1796,10 +1796,10 @@ int preg_filter(Variant& result,
                 const Variant& replacement,
                 const Variant& subject,
                 int limit /* = -1 */) {
-  Variant count;
+  int64_t count;
   result = preg_replace_impl(pattern, replacement, subject,
                              limit, &count, false, true);
-  return count.toInt32();
+  return count;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

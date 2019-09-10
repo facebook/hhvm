@@ -141,8 +141,13 @@ class RegexIterator extends FilterIterator
         break;
       case self::REPLACE:
         $replace_count = 0;
-        $result = preg_replace($this->regex, $this->replacement,
-                               $subject, -1, &$replace_count);
+        $result = preg_replace_with_count(
+          $this->regex,
+          $this->replacement,
+          $subject,
+          -1,
+          inout $replace_count,
+        );
 
         if ($result === null || $replace_count == 0) {
           $ret = false;

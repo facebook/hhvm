@@ -11,9 +11,10 @@ var_dump($string);
 var_dump(preg_replace('<- This is a string$>',
                       'This shouldn\'t work', $string));                //tries to find '- This is a string' at the end of a string but can't so replaces nothing and prints the unchanged $string.
 
+$count = -1;
 var_dump(preg_replace_with_count('<[0-35-9]>',
                                  '4', $string,                                   //finds any number that's not 4 and replaces it with a 4
-                                 5, &$count));                            //limits to 5 replacements returns 444444789
+                                 5, inout $count));                            //limits to 5 replacements returns 444444789
 var_dump($count);                                            //counts the number of replacements made (5)
 
 

@@ -6,6 +6,7 @@ class foo {
     }
 }
 <<__EntryPoint>> function main(): void {
+$count = -1;
 var_dump(preg_replace('', array(), ''));
-var_dump(preg_replace_callback("/(ab)(cd)(e)/", array(new foo(), "cb"), 'abcde'));
+var_dump(preg_replace_callback("/(ab)(cd)(e)/", array(new foo(), "cb"), 'abcde', -1, inout $count));
 }

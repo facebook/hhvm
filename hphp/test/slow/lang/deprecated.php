@@ -62,12 +62,6 @@ function memoized() {
   echo "\n";
 }
 
-function builtin() {
-  echo '= ', __FUNCTION__, " =", "\n";
-  ereg('foobar', 'foo');
-  echo "\n";
-}
-
 function via_trait() {
   echo '= ', __FUNCTION__, " =", "\n";
   // f();
@@ -82,7 +76,6 @@ function main() {
   basic();
   via_trait();
   memoized();
-  builtin();
   echo 'Done', "\n";
 }
 

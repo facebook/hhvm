@@ -18,7 +18,8 @@ $regex = '/\d/';
 $subject = 'there are 7 words in this sentence.';
 $limit = 10;
 $extra_arg = 10;
-try { var_dump(preg_replace_callback($regex, 'integer_word', $subject, $limit, &$count, $extra_arg)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+$count = -1;
+try { var_dump(preg_replace_callback($regex, 'integer_word', $subject, $limit, inout $count, $extra_arg)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 //Testing preg_replace_callback() with one less than the expected number of arguments
 echo "\n-- Testing preg_replace_callback() function with less than expected no. of arguments --\n";
 $regex = '/\d/';

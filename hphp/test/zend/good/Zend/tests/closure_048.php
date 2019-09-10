@@ -5,6 +5,7 @@ class Ref { public function __construct(public $val) {} }
 function replace_variables($text, $params) {
   $text = new Ref($text);
   $params = new Ref($params);
+  $count = -1;
 
   $c = function($matches) use ($params, $text) {
     $__val = $params->val;
@@ -12,7 +13,7 @@ function replace_variables($text, $params) {
     $params->val = $__val;
   };
 
-  preg_replace_callback( '/(\?)/', $c, $text->val );
+  preg_replace_callback( '/(\?)/', $c, $text->val , -1, inout $count);
 
   return $text->val;
 }

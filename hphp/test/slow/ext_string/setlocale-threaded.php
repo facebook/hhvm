@@ -21,9 +21,10 @@ function send_to_pagelet($relative_file_path, $locale) {
 }
 
 function escape_non_ascii($str) {
+  $count = -1;
   return preg_replace_callback('/([\x00-\x1F\x7F-\xFF]+)/',
     function ($match) { return urlencode($match[1]); },
-    $str);
+    $str, -1, inout $count);
 }
 
 

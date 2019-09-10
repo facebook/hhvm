@@ -83,10 +83,9 @@ TypedValue HHVM_FUNCTION(preg_match_all_with_matches,
 
 
 Variant HHVM_FUNCTION(preg_replace, const Variant& pattern, const Variant& replacement,
-                                    const Variant& subject, int limit /* = -1 */,
-                                    VRefParam count /* = null */) {
+                                    const Variant& subject, int limit /* = -1 */) {
   return preg_replace_impl(pattern, replacement, subject,
-                           limit, count.getVariantOrNull(), false, false);
+                           limit, nullptr, false, false);
 }
 
 Variant HHVM_FUNCTION(preg_replace_with_count,
@@ -94,35 +93,35 @@ Variant HHVM_FUNCTION(preg_replace_with_count,
                       const Variant& replacement,
                       const Variant& subject,
                       int limit,
-                      VRefParam count) {
+                      int64_t& count) {
   return preg_replace_impl(pattern, replacement, subject,
-                           limit, count.getVariantOrNull(), false, false);
+                           limit, &count, false, false);
 }
 
 Variant HHVM_FUNCTION(preg_replace_callback,
                       const Variant& pattern,
                       const Variant& callback,
                       const Variant& subject,
-                      int limit /* = -1 */,
-                      VRefParam count /* = null */) {
+                      int limit,
+                      int64_t& count) {
   if (!is_callable(callback)) {
     raise_warning("Not a valid callback function %s",
                   callback.toString().data());
     return empty_string_variant();
   }
   return preg_replace_impl(pattern, callback, subject,
-                           limit, count.getVariantOrNull(), true, false);
+                           limit, &count, true, false);
 }
 
 static Variant preg_replace_callback_array_impl(
   const Variant& patterns_and_callbacks,
   const Array& subjects,
   int limit,
-  VRefParam count) {
+  int64_t& total_count) {
 
   Array ret = Array::Create();
   auto key = 0;
-  auto total_replacement_count = 0;
+  total_count = 0;
   for (ArrayIter s_iter(subjects); s_iter; ++s_iter) {
     assertx(s_iter.second().isString());
     auto subj = s_iter.second();
@@ -131,6 +130,7 @@ static Variant preg_replace_callback_array_impl(
       Variant pattern(pc_iter.first());
       assertx(pattern.isString());
       Variant callback(pc_iter.second());
+      int64_t count;
       subj = HHVM_FN(preg_replace_callback)(pattern, callback, subj, limit,
                                             count);
       // If we got an error on the replacement, the subject will be null,
@@ -139,16 +139,10 @@ static Variant preg_replace_callback_array_impl(
         return init_null();
       }
 
-      if (count.isReferenced()) {
-        total_replacement_count += count.toInt64();
-      }
+      total_count += count;
     }
     ret.set(key++, subj);
   }
-
-  // If count was passed in as an explicit reference, we will assign it to our
-  // total replacement count; otherwise, count will just remained unassigned
-  count.assignIfRef(total_replacement_count);
 
   // If there were no replacements (i.e., matches) return original subject(s)
   if (ret.empty()) {
@@ -160,8 +154,8 @@ static Variant preg_replace_callback_array_impl(
 Variant HHVM_FUNCTION(preg_replace_callback_array,
                       const Variant& patterns_and_callbacks,
                       const Variant& subject,
-                      int limit /* = -1 */,
-                      VRefParam count /* = uninit_null() */) {
+                      int limit,
+                      int64_t& count) {
   if (!patterns_and_callbacks.isArray()) {
     raise_warning(
       "%s() expects parameter 1 to be an array, %s given",
@@ -201,10 +195,10 @@ Variant HHVM_FUNCTION(preg_replace_callback_array,
 }
 
 Variant HHVM_FUNCTION(preg_filter, const Variant& pattern, const Variant& callback,
-                                   const Variant& subject, int limit /* = -1 */,
-                                   VRefParam count /* = null */) {
+                                   const Variant& subject, int limit,
+                                   int64_t& count) {
   return preg_replace_impl(pattern, callback, subject,
-                           limit, count.getVariantOrNull(), false, true);
+                           limit, &count, false, true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -243,16 +237,6 @@ String HHVM_FUNCTION(eregi_replace, const String& pattern,
                                     const String& replacement,
                                     const String& str) {
   return HHVM_FN(mb_eregi_replace)(pattern, replacement, str).toString();
-}
-
-Variant HHVM_FUNCTION(ereg, const String& pattern, const String& str,
-                            VRefParam regs /* = null */) {
-  return HHVM_FN(mb_ereg)(pattern, str, ref(regs));
-}
-
-Variant HHVM_FUNCTION(eregi, const String& pattern, const String& str,
-                             VRefParam regs /* = null */) {
-  return HHVM_FN(mb_eregi)(pattern, str, ref(regs));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -348,8 +332,6 @@ struct PcreExtension final : Extension {
     HHVM_FE(preg_last_error);
     HHVM_FE(ereg_replace);
     HHVM_FE(eregi_replace);
-    HHVM_FE(ereg);
-    HHVM_FE(eregi);
     HHVM_FE(split);
     HHVM_FE(spliti);
     HHVM_FE(sql_regcase);

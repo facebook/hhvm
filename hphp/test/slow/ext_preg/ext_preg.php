@@ -207,7 +207,7 @@ function test_preg_replace() {
   VS($str, "foo o");
 
   $count = 0;
-  preg_replace_with_count(array("/\\d/", "/\\s/"), "*", "xp 4 to", -1, &$count);
+  preg_replace_with_count(array("/\\d/", "/\\s/"), "*", "xp 4 to", -1, inout $count);
   VS($count, 3);
 
   VS(preg_replace("/xxx", "w", "xxxx"), NULL);
@@ -232,8 +232,9 @@ function next_year($m) {
 function test_preg_replace_callback() {
   $text = "April fools day is 04/01/2002\n".
     "Last christmas was 12/24/2001\n";
+  $count = -1;
   $text = preg_replace_callback("|(\\d{2}/\\d{2}/)(\\d{4})|", "next_year",
-                                $text);
+                                $text, -1, inout $count);
   VS($text, "April fools day is 04/01/2003\nLast christmas was 12/24/2002\n");
 }
 
@@ -338,20 +339,6 @@ function test_eregi_replace() {
   VS($body, ">whatever<span class=\"search\">suffix</span>");
 }
 
-function test_ereg() {
-  $date = "1973-04-30";
-  VERIFY(ereg("([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})", $date, &$regs) !== false);
-  VS($regs[3], "30");
-  VS($regs[2], "04");
-  VS($regs[1], "1973");
-  VS($regs[0], "1973-04-30");
-}
-
-function test_eregi() {
-  $str = "XYZ";
-  VERIFY(eregi("z", $str) !== false);
-}
-
 function test_split() {
   $mb = "\xe4\xbf\xa1\xe6\x81\xaf\x01  2366797";
   $ret = split("\x01", $mb);
@@ -391,8 +378,6 @@ test_preg_split();
 test_preg_quote();
 test_ereg_replace();
 test_eregi_replace();
-test_ereg();
-test_eregi();
 test_split();
 test_spliti();
 test_sql_regcase();

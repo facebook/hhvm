@@ -33,17 +33,16 @@ function preg_match_all_with_matches(string $pattern, string $subject, inout $ma
                                      int $flags = 0, int $offset = 0);
 
 <<__PHPStdLib>>
-function preg_replace($pattern, $replacement, $subject, int $limit = -1,
-                      &$count = null);
+function preg_replace($pattern, $replacement, $subject, int $limit = -1);
 <<__PHPStdLib>>
 function preg_replace_with_count($pattern, $replacement, $subject, int $limit,
-                                 &$count);
+                                 inout ?int $count);
 <<__PHPStdLib>>
-function preg_replace_callback($pattern, $callback, $subject, int $limit = -1,
-                               &$count = null);
+function preg_replace_callback($pattern, $callback, $subject, int $limit,
+                               inout ?int $count);
 <<__PHPStdLib>>
 function preg_replace_callback_array($patterns_and_callbacks, $subject,
-                                     int $limit = -1, &$count = null);
+                                     int $limit, inout ?int $count);
 <<__PHPStdLib, __Rx>>
 function preg_split(string $pattern, string $subject, $limit = -1, int $flags = 0);
 <<__PHPStdLib, __Rx>>
@@ -54,10 +53,6 @@ function preg_last_error();
 function ereg_replace(string $pattern, string $replacement, string $str);
 <<__PHPStdLib>>
 function eregi_replace(string $pattern, string $replacement, string $str);
-<<__PHPStdLib>>
-function ereg(string $pattern, string $str, &$regs = null);
-<<__PHPStdLib>>
-function eregi(string $pattern, string $str, &$regs = null);
 <<__Deprecated('Use explode() or preg_split().'), __PHPStdLib>>
 function split(string $pattern, string $str, int $limit = -1);
 <<__PHPStdLib>>

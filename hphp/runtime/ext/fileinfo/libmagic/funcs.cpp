@@ -443,7 +443,7 @@ file_replace(struct magic_set *ms, const char *pat, const char *rep)
   HPHP::String patt(pat);
   int opts = 0;
   int res_len;
-  HPHP::Variant rep_cnt;
+  int64_t rep_cnt;
 
   opts |= PCRE_MULTILINE;
   convert_libmagic_pattern(patt, opts);
@@ -459,5 +459,5 @@ file_replace(struct magic_set *ms, const char *pat, const char *rep)
   strncpy(ms->o.buf, res.data(), res_len);
   ms->o.buf[res_len] = '\0';
 
-  return rep_cnt.toInt64Val();
+  return rep_cnt;
 }

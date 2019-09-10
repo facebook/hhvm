@@ -138,7 +138,7 @@ Variant preg_match_all(const StringData* pattern, const StringData* subject,
                        int flags = 0, int offset = 0);
 
 Variant preg_replace_impl(const Variant& pattern, const Variant& replacement,
-                          const Variant& subject, int limit, Variant* count,
+                          const Variant& subject, int limit, int64_t* count,
                           bool is_callable, bool is_filter);
 int preg_replace(Variant& result,
                  const Variant& pattern,

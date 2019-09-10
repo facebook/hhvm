@@ -13,7 +13,7 @@ $ret = preg_replace_callback_array(
         '~[a]+~i' => function ($match) {},
         '~[b]+~i' => function ($match) {}
     ],
-    $subject, -1, &$count
+    $subject, -1, inout $count
 );
 
 var_dump($subject);
@@ -29,7 +29,7 @@ $ret = preg_replace_callback_array(
         '~[a]+~i' => function ($match) {},
         '~[b]+~i' => function ($match) {}
     ],
-    $subject, -1, &$count
+    $subject, -1, inout $count
 );
 
 var_dump($subject);

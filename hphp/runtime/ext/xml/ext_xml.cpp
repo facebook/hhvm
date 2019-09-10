@@ -449,7 +449,7 @@ void _xml_endElementHandler(void *userData, const XML_Char *name) {
       if (parser->lastwasopen) {
         parser->ctag.toArrRef().set(s_type, s_complete);
       } else {
-        ArrayInit tag(3, ArrayInit::Map{});
+        DArrayInit tag(3);
         _xml_add_to_info(parser, tag_name.substr(parser->toffset));
         tag.set(s_tag, tag_name.substr(parser->toffset));
         tag.set(s_type, s_close);
@@ -584,7 +584,7 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
     if (parser->startElementHandler.toBoolean()) {
       args.append(Variant(parser));
       args.append(tag_name);
-      args.append(Array::Create());
+      args.append(Array::CreateDArray());
 
       while (attributes && *attributes) {
         String att = _xml_decode_tag(parser, (const char*)attributes[0]);
@@ -603,8 +603,8 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
       if (parser->level <= XML_MAXLEVEL) {
         Array tag, atr;
         int atcnt = 0;
-        tag = Array::Create();
-        atr = Array::Create();
+        tag = Array::CreateDArray();
+        atr = Array::CreateDArray();
 
         _xml_add_to_info(parser, tag_name.substr(parser->toffset));
 

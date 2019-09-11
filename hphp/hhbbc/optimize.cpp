@@ -375,6 +375,7 @@ bool persistence_check(const php::Func* const func) {
         case Op::DefClsNop:
         case Op::DefCns:
         case Op::DefTypeAlias:
+        case Op::DefRecord:
         case Op::Null:
         case Op::True:
         case Op::False:

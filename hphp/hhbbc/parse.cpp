@@ -897,7 +897,7 @@ std::unique_ptr<php::Record> parse_record(php::Unit* unit,
   ret->srcInfo            = php::SrcInfo {re.getLocation(), re.docComment()};
   ret->name               = re.name();
   ret->attrs              = static_cast<Attr>(re.attrs() & ~AttrNoOverride);
-  ret->parentName         = re.parentName();
+  ret->parentName         = re.parentName()->empty()? nullptr: re.parentName();
   ret->id                 = re.id();
   ret->userAttributes     = re.userAttributes();
 

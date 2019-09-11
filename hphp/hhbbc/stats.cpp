@@ -129,10 +129,13 @@ struct Stats {
   std::atomic<uint64_t> ratL_specialized_array;
   std::atomic<uint64_t> ratStk_specialized_array;
   std::atomic<uint64_t> persistentClasses;
+  std::atomic<uint64_t> persistentRecords;
   std::atomic<uint64_t> persistentFunctions;
   std::atomic<uint64_t> uniqueClasses;
+  std::atomic<uint64_t> uniqueRecords;
   std::atomic<uint64_t> uniqueFunctions;
   std::atomic<uint64_t> totalClasses;
+  std::atomic<uint64_t> totalRecords;
   std::atomic<uint64_t> totalFunctions;
   std::atomic<uint64_t> totalPseudoMains;
   std::atomic<uint64_t> totalMethods;
@@ -220,6 +223,9 @@ std::string show(const Stats& stats) {
     "       total_classes:  {: >8}\n"
     "      unique_classes:  {: >8}\n"
     "  persistent_classes:  {: >8}\n"
+    "       total_records:  {: >8}\n"
+    "      unique_records:  {: >8}\n"
+    "  persistent_records:  {: >8}\n"
     "\n"
     "        total_sprops:      {: >8}\n"
     "   persistent_sprops_pub:  {: >8}\n"
@@ -233,6 +239,9 @@ std::string show(const Stats& stats) {
     stats.totalClasses.load(),
     stats.uniqueClasses.load(),
     stats.persistentClasses.load(),
+    stats.totalRecords.load(),
+    stats.uniqueRecords.load(),
+    stats.persistentRecords.load(),
     stats.totalSProps.load(),
     stats.persistentSPropsPub.load(),
     stats.persistentSPropsProt.load(),
@@ -453,6 +462,23 @@ void collect_func(Stats& stats, const Index& index, php::Func& func) {
   }
 }
 
+void collect_record(Stats& stats, const php::Record& rec) {
+  ++stats.totalRecords;
+  if (rec.attrs & AttrPersistent) {
+    ++stats.persistentRecords;
+  }
+  if (rec.attrs & AttrUnique) {
+    if (!(rec.attrs & AttrPersistent)) {
+      FTRACE(1, "Record unique but not persistent: {} : {}\n",
+             rec.name, rec.unit->filename);
+    }
+    ++stats.uniqueRecords;
+  } else {
+    FTRACE(1, "Record not unique: {} : {}\n",
+           rec.name, rec.unit->filename);
+  }
+}
+
 void collect_class(Stats& stats, const Index& index, const php::Class& cls) {
   ++stats.totalClasses;
   if (cls.attrs & AttrPersistent) {
@@ -501,6 +527,9 @@ void collect_stats(Stats& stats,
           collect_func(stats, index, *m);
         }
       }
+      for (auto& r : unit->records) {
+        collect_record(stats, *r);
+      }
       for (auto& x : unit->funcs) {
         collect_func(stats, index, *x);
       }
@@ -537,6 +566,9 @@ void collect_stats(const StatsHolder& stats,
     for (auto& m : c->methods) {
       collect_func(*stats.stats, index, *m);
     }
+  }
+  for (auto& r : unit->records) {
+    collect_record(*stats.stats, *r);
   }
   for (auto& x : unit->funcs) {
     collect_func(*stats.stats, index, *x);

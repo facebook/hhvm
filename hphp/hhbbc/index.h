@@ -967,9 +967,9 @@ struct Index {
                                       DependencyContextSet& deps);
 
   /*
-   * Identify the persistent classes, functions and typeAliases.
+   * Identify the persistent classes, records, functions and typeAliases.
    */
-  void mark_persistent_classes_and_functions(php::Program& program);
+  void mark_persistent_types_and_functions(php::Program& program);
 
   /*
    * Mark any properties in cls that definitely do not redeclare a property in

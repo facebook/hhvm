@@ -239,6 +239,7 @@ and expand env ~as_tyvar_with_cnstr root id =
               let ty = Typing_print.error env.tenv root in
               fun () ->
                 Errors.non_object_member
+                  ~is_method:false
                   tconst
                   (Reason.to_pos root_reason)
                   ty
@@ -290,7 +291,12 @@ and expand env ~as_tyvar_with_cnstr root id =
     let (pos, tconst) = id in
     let ty = Typing_print.error env.tenv root in
     raise_error (fun () ->
-        Errors.non_object_member tconst pos ty (Reason.to_pos root_reason))
+        Errors.non_object_member
+          ~is_method:false
+          tconst
+          pos
+          ty
+          (Reason.to_pos root_reason))
 
 (* The function takes a "step" forward in the expansion. We look up the type
  * constant associated with the given class_name and create a new root type.

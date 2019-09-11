@@ -472,15 +472,20 @@ val static_redeclared_as_dynamic :
 val dynamic_redeclared_as_static :
   Pos.t -> Pos.t -> string -> elt_type:[ `Method | `Property ] -> unit
 
-val null_member : string -> Pos.t -> (Pos.t * string) list -> unit
+val null_member :
+  is_method:bool -> string -> Pos.t -> (Pos.t * string) list -> unit
 
-val non_object_member : string -> Pos.t -> string -> Pos.t -> unit
+val non_object_member :
+  is_method:bool -> string -> Pos.t -> string -> Pos.t -> unit
 
-val unknown_object_member : string -> Pos.t -> (Pos.t * string) list -> unit
+val unknown_object_member :
+  is_method:bool -> string -> Pos.t -> (Pos.t * string) list -> unit
 
-val non_class_member : string -> Pos.t -> string -> Pos.t -> unit
+val non_class_member :
+  is_method:bool -> string -> Pos.t -> string -> Pos.t -> unit
 
-val ambiguous_member : string -> Pos.t -> string -> Pos.t -> unit
+val ambiguous_member :
+  is_method:bool -> string -> Pos.t -> string -> Pos.t -> unit
 
 val null_container : Pos.t -> (Pos.t * string) list -> unit
 

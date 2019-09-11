@@ -1,4 +1,4 @@
 File "instantiate_from_unresolved_class_id_type.php", line 5, characters 45-45:
-You are trying to access the member T but this is not an object, it is a dynamic value (Typing[4062])
+You are trying to access the property 'T' but this is a dynamic value (Typing[4062])
 File "instantiate_from_unresolved_class_id_type.php", line 21, characters 54-65:
 Definition is here

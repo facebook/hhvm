@@ -1,4 +1,4 @@
 File "disallow_access_on_nullable.php", line 6, characters 24-24:
-You are trying to access the member B but this is not an object, it is a nullable type (Typing[4062])
+You are trying to access the property 'B' but this is a nullable type (Typing[4062])
 File "disallow_access_on_nullable.php", line 4, characters 18-19:
 Definition is here

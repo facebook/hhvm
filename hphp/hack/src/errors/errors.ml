@@ -3404,21 +3404,28 @@ let dynamic_redeclared_as_static
     (Typing.err_code Typing.StaticDynamic)
     [(static_position, msg_static); (dyn_position, msg_dynamic)]
 
-let null_member s pos r =
-  add_list
-    (Typing.err_code Typing.NullMember)
-    ( [ ( pos,
-          "You are trying to access the member "
-          ^ s
-          ^ " but this object can be null. " ) ]
-    @ r )
+let null_member ~is_method s pos r =
+  let msg =
+    Printf.sprintf
+      "You are trying to access the %s '%s' but this object can be null."
+      ( if is_method then
+        "method"
+      else
+        "property" )
+      s
+  in
+  add_list (Typing.err_code Typing.NullMember) ([(pos, msg)] @ r)
 
-let non_object_member s pos1 ty pos2 =
+let non_object_member ~is_method s pos1 ty pos2 =
   let msg_start =
-    "You are trying to access the member "
-    ^ s
-    ^ " but this is not an object, it is "
-    ^ ty
+    Printf.sprintf
+      "You are trying to access the %s '%s' but this is %s"
+      ( if is_method then
+        "method"
+      else
+        "property" )
+      s
+      ty
   in
   let msg =
     if ty = "a shape" then
@@ -3430,33 +3437,47 @@ let non_object_member s pos1 ty pos2 =
     (Typing.err_code Typing.NonObjectMember)
     [(pos1, msg); (pos2, "Definition is here")]
 
-let unknown_object_member s pos r =
+let unknown_object_member ~is_method s pos r =
   let msg =
-    "You are trying to access the member "
-    ^ s
-    ^ " on a value whose class is unknown"
+    Printf.sprintf
+      "You are trying to access the %s '%s' on a value whose class is unknown."
+      ( if is_method then
+        "method"
+      else
+        "property" )
+      s
   in
   add_list (Typing.err_code Typing.UnknownObjectMember) ([(pos, msg)] @ r)
 
-let non_class_member s pos1 ty pos2 =
+let non_class_member ~is_method s pos1 ty pos2 =
+  let msg =
+    Printf.sprintf
+      "You are trying to access the static %s '%s' but this is %s"
+      ( if is_method then
+        "method"
+      else
+        "property" )
+      s
+      ty
+  in
   add_list
     (Typing.err_code Typing.NonClassMember)
-    [ ( pos1,
-        "You are trying to access the member "
-        ^ s
-        ^ " but this is not a class, it is "
-        ^ ty );
-      (pos2, "Definition is here") ]
+    [(pos1, msg); (pos2, "Definition is here")]
 
-let ambiguous_member s pos1 ty pos2 =
+let ambiguous_member ~is_method s pos1 ty pos2 =
+  let msg =
+    Printf.sprintf
+      "You are trying to access the %s '%s' but there is more than one implementation on %s"
+      ( if is_method then
+        "method"
+      else
+        "property" )
+      s
+      ty
+  in
   add_list
     (Typing.err_code Typing.AmbiguousMember)
-    [ ( pos1,
-        "You are trying to access the member "
-        ^ s
-        ^ " but there is more than one implementation on "
-        ^ ty );
-      (pos2, "Definition is here") ]
+    [(pos1, msg); (pos2, "Definition is here")]
 
 let null_container p null_witness =
   add_list

@@ -1,4 +1,4 @@
 File "rx_conditional2.php", line 20, characters 14-16:
-You are trying to access the member get but this is not an object, it is a dynamic value or an object of type A<T> (Typing[4062])
+You are trying to access the method 'get' but this is a dynamic value or an object of type A<T> (Typing[4062])
 File "rx_conditional2.php", line 18, characters 54-57:
 Definition is here

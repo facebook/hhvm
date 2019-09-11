@@ -5590,6 +5590,7 @@ and class_get_
       match resl with
       | [] ->
         Errors.non_class_member
+          ~is_method
           mid
           p
           (Typing_print.error env cty)
@@ -5598,6 +5599,7 @@ and class_get_
       | ((_, ty) as res) :: rest ->
         if List.exists rest (fun (_, ty') -> not @@ ty_equal ty' ty) then (
           Errors.ambiguous_member
+            ~is_method
             mid
             p
             (Typing_print.error env cty)
@@ -6161,6 +6163,7 @@ and obj_get_concrete_ty
     default ()
   | _ ->
     Errors.non_object_member
+      ~is_method
       id_str
       id_pos
       (Typing_print.error env concrete_ty)
@@ -6304,11 +6307,10 @@ and obj_get_
       make_nullable_member_type ~is_method env id_pos p1 method_
     | None ->
       Errors.null_member
+        ~is_method
         id_str
         id_pos
-        (Reason.to_string
-           "This is what makes me believe it can be null"
-           (fst ety1));
+        (Reason.to_string "This can be null" (fst ety1));
       (env, (fst ety1, Typing_utils.terr env))
   in
   match ety1 with
@@ -6393,6 +6395,7 @@ and obj_get_
       match resl with
       | [] ->
         Errors.non_object_member
+          ~is_method
           id_str
           id_pos
           (Typing_print.error env ety1)
@@ -6401,6 +6404,7 @@ and obj_get_
       | ((_env, ty) as res) :: rest ->
         if List.exists rest (fun (_, ty') -> not @@ ty_equal ty' ty) then (
           Errors.ambiguous_member
+            ~is_method
             id_str
             id_pos
             (Typing_print.error env ety1)
@@ -6416,6 +6420,7 @@ and obj_get_
   (* We are trying to access a member through a value of unknown type *)
   | (r, Tvar _) ->
     Errors.unknown_object_member
+      ~is_method
       id_str
       id_pos
       (Reason.to_string "It is unknown" r);

@@ -299,7 +299,14 @@ val get_tyvar_appears_invariantly : env -> Ident.t -> bool
 
 val get_tyvar_info : env -> Ident.t -> tyvar_info_
 
+val create_global_tyvar :
+  ?variance:Ast_defs.variance -> env -> Ident.t -> Pos.t -> env
+
 val get_tyvar_eager_solve_fail : env -> Ident.t -> bool
+
+val create_tyvar_info : ?variance:Ast_defs.variance -> Pos.t -> tyvar_info_
+
+val empty_tyvar_info : tyvar_info_
 
 val get_tyvar_type_const :
   env -> int -> Aast.sid -> (Aast.sid * locl ty) option
@@ -376,5 +383,3 @@ val set_tyvar_variance :
 
 val update_variance_after_bind :
   env -> int -> Typing_defs.locl Typing_defs.ty -> env
-
-val set_tvenv_link_global_tyvar : env -> int -> env

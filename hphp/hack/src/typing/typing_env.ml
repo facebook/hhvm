@@ -102,23 +102,27 @@ let empty_tyvar_info =
     type_constants = SMap.empty;
   }
 
+let create_tyvar_info ?variance pos =
+  let tyvar_info =
+    match variance with
+    | Some Ast_defs.Invariant ->
+      {
+        empty_tyvar_info with
+        appears_covariantly = true;
+        appears_contravariantly = true;
+      }
+    | Some Ast_defs.Covariant ->
+      { empty_tyvar_info with appears_covariantly = true }
+    | Some Ast_defs.Contravariant ->
+      { empty_tyvar_info with appears_contravariantly = true }
+    | None -> empty_tyvar_info
+  in
+  { tyvar_info with tyvar_pos = pos }
+
 let add_current_tyvar ?variance env p v =
   match env.tyvars_stack with
   | (expr_pos, tyvars) :: rest ->
-    let tyvar_info =
-      match variance with
-      | Some Ast_defs.Invariant ->
-        {
-          empty_tyvar_info with
-          appears_covariantly = true;
-          appears_contravariantly = true;
-        }
-      | Some Ast_defs.Covariant ->
-        { empty_tyvar_info with appears_covariantly = true }
-      | Some Ast_defs.Contravariant ->
-        { empty_tyvar_info with appears_contravariantly = true }
-      | None -> empty_tyvar_info
-    in
+    let tyvar_info = create_tyvar_info ?variance p in
     let env =
       env_with_tvenv
         env
@@ -166,15 +170,20 @@ let get_tyvar_info_opt env var =
 let get_tyvar_info env var =
   Option.value (get_tyvar_info_opt env var) ~default:empty_tyvar_info
 
-let set_tvenv_link_global_tyvar env var =
-  env_with_tvenv env (IMap.add var GlobalTyvar env.tvenv)
-
 let update_tyvar_info env var tyvar_info =
   if IMap.get var env.tvenv = Some GlobalTyvar then
     let env = env_with_tvenv env (IMap.add var GlobalTyvar env.tvenv) in
     env_with_global_tvenv env (IMap.add var tyvar_info env.global_tvenv)
   else
     env_with_tvenv env (IMap.add var (LocalTyvar tyvar_info) env.tvenv)
+
+let create_global_tyvar ?variance env var pos =
+  let tyvar_info = create_tyvar_info ?variance pos in
+  let env = env_with_tvenv env (IMap.add var GlobalTyvar env.tvenv) in
+  if not @@ IMap.mem var env.global_tvenv then
+    update_tyvar_info env var tyvar_info
+  else
+    env
 
 let get_tyvar_eager_solve_fail env var =
   let tvinfo = get_tyvar_info env var in

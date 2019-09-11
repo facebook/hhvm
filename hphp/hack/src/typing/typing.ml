@@ -344,6 +344,12 @@ type array_ctx =
   | ElementAssignment
   | ElementAccess
 
+let merge_hint_with_decl_hint env type_hint decl_hint =
+  match (type_hint, decl_hint) with
+  | (None, Some hint) -> Some hint
+  | (Some hint, _) -> Some (Decl_hint.hint env.decl_env hint)
+  | (None, None) -> None
+
 (* This function is used to determine the type of an argument.
  * When we want to type-check the body of a function, we need to
  * introduce the type of the arguments of the function in the environment
@@ -384,20 +390,19 @@ type array_ctx =
  *
  * A similar line of reasoning is applied for the static method create.
  *)
-let make_param_local_ty env param =
+let make_param_local_ty env decl_hint param =
   let ety_env =
     { (Phase.env_with_self env) with from_class = Some CIstatic }
   in
+  let r = Reason.Rwitness param.param_pos in
   let (env, ty) =
-    match hint_of_type_hint param.param_type_hint with
+    match decl_hint with
     | None ->
-      let r = Reason.Rwitness param.param_pos in
       if IM.can_infer_params @@ TCO.infer_missing (Env.get_tcopt env) then
         Env.fresh_type_reason ~variance:Ast_defs.Contravariant env r
       else
         (env, (r, TUtils.tany env))
-    | Some x ->
-      let ty = Decl_hint.hint env.decl_env x in
+    | Some ty ->
       let { et_type = ty; _ } =
         Typing_enforceability.compute_enforced_and_pessimize_ty_simple env ty
       in
@@ -599,6 +604,20 @@ and add_decl_errors = function
   | None -> ()
   | Some errors -> Errors.merge_into_current errors
 
+and get_callable_variadicity
+    ?(is_function = false) ~partial_callback ~pos env variadicity_decl_ty =
+  function
+  | FVvariadicArg vparam ->
+    let (env, ty) = make_param_local_ty env variadicity_decl_ty vparam in
+    check_param env vparam ty partial_callback;
+    let (env, t_variadic) = bind_param env (ty, vparam) in
+    (env, T.FVvariadicArg t_variadic)
+  | FVellipsis p ->
+    if is_function && Partial.should_check_error (Env.get_mode env) 4223 then
+      Errors.ellipsis_strict_mode ~require:`Type_and_param_name pos;
+    (env, T.FVellipsis p)
+  | FVnonVariadic -> (env, T.FVnonVariadic)
+
 (*****************************************************************************)
 (* Now we are actually checking stuff! *)
 (*****************************************************************************)
@@ -608,6 +627,9 @@ and fun_def tcopt f : Tast.fun_def option =
       (* reset the expression dependent display ids for each function body *)
       Reason.expr_display_id_map := IMap.empty;
       let pos = fst f.f_name in
+      let decl_header =
+        get_decl_function_header (Env.get_tcopt env) (snd f.f_name)
+      in
       let nb = TNBody.func_body f in
       add_decl_errors
         (Option.map
@@ -643,10 +665,15 @@ and fun_def tcopt f : Tast.fun_def option =
       let env =
         Phase.localize_where_constraints ~ety_env env f.f_where_constraints
       in
-      let decl_ty =
-        Option.map ~f:(Decl_hint.hint env.decl_env) (hint_of_type_hint f.f_ret)
-      in
       let env = Env.set_fn_kind env f.f_fun_kind in
+      let (decl_ty, params_decl_ty, variadicity_decl_ty) =
+        merge_decl_header_with_hints
+          ~params:f.f_params
+          ~ret:f.f_ret
+          ~variadic:f.f_variadic
+          decl_header
+          env
+      in
       let (env, locl_ty) =
         match decl_ty with
         | None ->
@@ -676,7 +703,11 @@ and fun_def tcopt f : Tast.fun_def option =
           locl_ty
           decl_ty
       in
-      let (env, param_tys) = List.map_env env f.f_params make_param_local_ty in
+      let (env, param_tys) =
+        List.zip_exn f.f_params params_decl_ty
+        |> List.map_env env ~f:(fun env (param, hint) ->
+               make_param_local_ty env hint param)
+      in
       let partial_callback = Partial.should_check_error (Env.get_mode env) in
       let param_fn p t = check_param env p t partial_callback in
       List.iter2_exn ~f:param_fn f.f_params param_tys;
@@ -685,18 +716,15 @@ and fun_def tcopt f : Tast.fun_def option =
         List.map_env env (List.zip_exn param_tys f.f_params) bind_param
       in
       let (env, t_variadic) =
-        match f.f_variadic with
-        | FVvariadicArg vparam ->
-          let (env, ty) = make_param_local_ty env vparam in
-          check_param env vparam ty partial_callback;
-          let (env, t_vparam) = bind_param env (ty, vparam) in
-          (env, T.FVvariadicArg t_vparam)
-        | FVellipsis p ->
-          if Partial.should_check_error (Env.get_mode env) 4223 then
-            Errors.ellipsis_strict_mode ~require:`Type_and_param_name pos;
-          (env, T.FVellipsis p)
-        | FVnonVariadic -> (env, T.FVnonVariadic)
+        get_callable_variadicity
+          ~is_function:true
+          ~pos
+          ~partial_callback
+          env
+          variadicity_decl_ty
+          f.f_variadic
       in
+      let env = set_tyvars_variance_in_callable env locl_ty param_tys in
       let local_tpenv = Env.get_tpenv env in
       let (env, tb) = fun_ env return pos nb f.f_fun_kind in
       (* restore original reactivity *)
@@ -8392,6 +8420,29 @@ and class_def tcopt c =
     if shallow_decl_enabled () then Typing_inheritance.check_class env tc;
     Some (class_def_ env c tc)
 
+(* The two following functions enable us to retrieve the function (or class)
+  header from the shared mem. Note that they only return a non None value if
+  global inference is on *)
+and get_decl_method_header tcopt cls method_id =
+  let is_global_inference_on =
+    IM.global_inference @@ TCO.infer_missing tcopt
+  in
+  if is_global_inference_on then
+    match Cls.get_method cls method_id with
+    | Some { ce_type = (lazy (_, Tfun fun_type)); _ } -> Some fun_type
+    | _ -> None
+  else
+    None
+
+and get_decl_function_header tcopt function_id =
+  let is_global_inference_on =
+    IM.global_inference @@ TCO.infer_missing tcopt
+  in
+  if is_global_inference_on then
+    Decl_provider.get_fun function_id
+  else
+    None
+
 and class_def_ env c tc =
   let env =
     let kind =
@@ -8557,19 +8608,21 @@ and class_def_ env c tc =
     List.map_env env vars (class_var_def ~is_static:false)
   in
   let typed_method_redeclarations = [] in
-  let typed_methods = List.filter_map methods (method_def env) in
+  let typed_methods = List.filter_map methods (method_def env tc) in
   let (env, typed_typeconsts) =
     List.map_env env c.c_typeconsts typeconst_def
   in
   let (env, consts) = List.map_env env c.c_consts class_const_def in
   let (typed_consts, const_types) = List.unzip consts in
   let env = Typing_enum.enum_class_check env tc c.c_consts const_types in
-  let typed_constructor = class_constr_def env constructor in
+  let typed_constructor = class_constr_def env tc constructor in
   let env = Env.set_static env in
   let (env, typed_static_vars) =
     List.map_env env static_vars (class_var_def ~is_static:true)
   in
-  let typed_static_methods = List.filter_map static_methods (method_def env) in
+  let typed_static_methods =
+    List.filter_map static_methods (method_def env tc)
+  in
   let (env, file_attrs) = file_attributes env c.c_file_attributes in
   let methods =
     match typed_constructor with
@@ -8770,9 +8823,9 @@ and class_const_def env cc =
       },
       ty ) )
 
-and class_constr_def env constructor =
+and class_constr_def env cls constructor =
   let env = { env with inside_constructor = true } in
-  Option.bind constructor (method_def env)
+  Option.bind constructor (method_def env cls)
 
 and class_implements_type env c1 removals ctype2 =
   let params =
@@ -8966,10 +9019,76 @@ and class_type_param env ct =
         SMap.map (Tuple.T2.map_fst ~f:reify_kind) ct.c_tparam_constraints;
     } )
 
-and method_def env m =
+(* If the localized types of the return type is a tyvar we force it to be covariant.
+  The same goes for parameter types, but this time we force them to be contravariant
+*)
+and set_tyvars_variance_in_callable env return_ty param_tys =
+  let env =
+    match return_ty with
+    | (_, Tvar v) -> Env.set_tyvar_appears_covariantly env v
+    | _ -> env
+  in
+  List.fold
+    ~init:env
+    ~f:(fun env -> function
+      | (_, Tvar v) -> Env.set_tyvar_appears_contravariantly env v
+      | _ -> env)
+    param_tys
+
+(* During the decl phase we can, for global inference, add "improved type hints".
+   That is we can say that some missing type hints are in fact global tyvars.
+   In that case to get the real type hint we must merge the type hint present
+   in the ast with the one we created during the decl phase. This function does
+   exactly this for the return type, the parameters and the variadic parameters.
+   *)
+and merge_decl_header_with_hints ~params ~ret ~variadic decl_header env =
+  let ret_decl_ty =
+    merge_hint_with_decl_hint
+      env
+      (hint_of_type_hint ret)
+      (Option.map
+         ~f:(fun { ft_ret = { et_type; _ }; _ } -> et_type)
+         decl_header)
+  in
+  let params_decl_ty =
+    match decl_header with
+    | None ->
+      List.map
+        ~f:(fun h ->
+          merge_hint_with_decl_hint
+            env
+            (hint_of_type_hint h.param_type_hint)
+            None)
+        params
+    | Some { ft_params; _ } ->
+      List.zip_exn params ft_params
+      |> List.map ~f:(fun (h, { fp_type = { et_type; _ }; _ }) ->
+             merge_hint_with_decl_hint
+               env
+               (hint_of_type_hint h.param_type_hint)
+               (Some et_type))
+  in
+  let variadicity_decl_ty =
+    match (decl_header, variadic) with
+    | ( Some { ft_arity = Fvariadic (_, { fp_type = { et_type; _ }; _ }); _ },
+        FVvariadicArg fp ) ->
+      merge_hint_with_decl_hint
+        env
+        (hint_of_type_hint fp.param_type_hint)
+        (Some et_type)
+    | (_, FVvariadicArg fp) ->
+      merge_hint_with_decl_hint env (hint_of_type_hint fp.param_type_hint) None
+    | _ -> None
+  in
+  (ret_decl_ty, params_decl_ty, variadicity_decl_ty)
+
+and method_def env cls m =
   with_timeout env m.m_name ~do_:(fun env ->
       (* reset the expression dependent display ids for each method body *)
       Reason.expr_display_id_map := IMap.empty;
+      let decl_header =
+        get_decl_method_header (Env.get_tcopt env) cls (snd m.m_name)
+      in
       let pos = fst m.m_name in
       let env = Env.open_tyvars env (fst m.m_name) in
       let env = Env.reinitialize_locals env in
@@ -9029,8 +9148,13 @@ and method_def env m =
             env
       in
       let env = Env.clear_params env in
-      let decl_ty =
-        Option.map ~f:(Decl_hint.hint env.decl_env) (hint_of_type_hint m.m_ret)
+      let (decl_ty, params_decl_ty, variadicity_decl_ty) =
+        merge_decl_header_with_hints
+          ~params:m.m_params
+          ~ret:m.m_ret
+          ~variadic:m.m_variadic
+          decl_header
+          env
       in
       let env = Env.set_fn_kind env m.m_fun_kind in
       let (env, locl_ty) =
@@ -9068,7 +9192,11 @@ and method_def env m =
           locl_ty
           decl_ty
       in
-      let (env, param_tys) = List.map_env env m.m_params make_param_local_ty in
+      let (env, param_tys) =
+        List.zip_exn m.m_params params_decl_ty
+        |> List.map_env env ~f:(fun env (param, hint) ->
+               make_param_local_ty env hint param)
+      in
       let partial_callback = Partial.should_check_error (Env.get_mode env) in
       let param_fn p t = check_param env p t partial_callback in
       List.iter2_exn ~f:param_fn m.m_params param_tys;
@@ -9077,15 +9205,14 @@ and method_def env m =
         List.map_env env (List.zip_exn param_tys m.m_params) bind_param
       in
       let (env, t_variadic) =
-        match m.m_variadic with
-        | FVvariadicArg vparam ->
-          let (env, ty) = make_param_local_ty env vparam in
-          check_param env vparam ty partial_callback;
-          let (env, t_variadic) = bind_param env (ty, vparam) in
-          (env, T.FVvariadicArg t_variadic)
-        | FVellipsis p -> (env, T.FVellipsis p)
-        | FVnonVariadic -> (env, T.FVnonVariadic)
+        get_callable_variadicity
+          ~partial_callback
+          ~pos
+          env
+          variadicity_decl_ty
+          m.m_variadic
       in
+      let env = set_tyvars_variance_in_callable env locl_ty param_tys in
       let nb = Nast.assert_named_body m.m_body in
       let local_tpenv = Env.get_tpenv env in
       let (env, tb) =

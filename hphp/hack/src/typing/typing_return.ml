@@ -129,6 +129,8 @@ let force_awaitable env p ty =
 
 let make_default_return ~is_method ~is_infer_missing_on env name =
   let pos = fst name in
+  let reason = Reason.Rwitness pos in
+  let default = (reason, Typing_utils.tany env) in
   if is_method && snd name = SN.Members.__construct then
     (env, MakeType.void (Reason.Rwitness pos))
   else if is_infer_missing_on then
@@ -136,14 +138,11 @@ let make_default_return ~is_method ~is_infer_missing_on env name =
         returned type. Later on it will be reused to get back the inferred type
         of the function. *)
     let (env, ty) =
-      Env.fresh_type_reason
-        ~variance:Ast_defs.Covariant
-        env
-        (Reason.Rwitness pos)
+      Env.fresh_type_reason ~variance:Ast_defs.Covariant env reason
     in
     (env, wrap_awaitable env pos ty)
   else
-    (env, (Reason.Rwitness pos, Typing_utils.tany env))
+    (env, default)
 
 let suggest_return env p ty is_code_error =
   let ty = Typing_expand.fully_expand env ty in

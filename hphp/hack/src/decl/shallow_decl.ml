@@ -223,7 +223,11 @@ let method_type env m =
   let params = make_params env m.m_params in
   let ret =
     match hint_of_type_hint m.m_ret with
-    | None -> ret_from_fun_kind (fst m.m_name) m.m_fun_kind
+    | None ->
+      ret_from_fun_kind
+        ~is_constructor:(snd m.m_name = SN.Members.__construct)
+        (fst m.m_name)
+        m.m_fun_kind
     | Some ret -> Decl_hint.hint env ret
   in
   let arity =
@@ -265,7 +269,11 @@ let method_redeclaration_type env m =
   let params = make_params env m.mt_params in
   let ret =
     match hint_of_type_hint m.mt_ret with
-    | None -> ret_from_fun_kind (fst m.mt_name) m.mt_fun_kind
+    | None ->
+      ret_from_fun_kind
+        ~is_constructor:(snd m.mt_name = SN.Members.__construct)
+        (fst m.mt_name)
+        m.mt_fun_kind
     | Some ret -> Decl_hint.hint env ret
   in
   let arity =

@@ -69,12 +69,24 @@ let get_param_mutability user_attributes =
   else
     None
 
+(* If global inference is on this will create a new type variable and store it in
+  the global tvenv. Otherwise we return the default type given as parameter *)
+let global_inference_create_tyvar (reason, default_ty_) =
+  let tco = GlobalNamingOptions.get () in
+  if
+    GlobalOptions.InferMissing.global_inference
+    @@ GlobalOptions.tco_infer_missing tco
+  then
+    (reason, Tvar (Ident.tmp ()))
+  else
+    (reason, default_ty_)
+
 let make_param_ty env param =
   let ty =
     match hint_of_type_hint param.param_type_hint with
     | None ->
       let r = Reason.Rwitness param.param_pos in
-      (r, Typing_defs.make_tany ())
+      global_inference_create_tyvar (r, Typing_defs.make_tany ())
     (* if the code is strict, use the type-hint *)
     | Some x -> Decl_hint.hint env x
   in
@@ -116,21 +128,32 @@ let make_param_ty env param =
     fp_rx_annotation = rx_annotation;
   }
 
-let ret_from_fun_kind pos kind =
-  let ty_any = (Reason.Rwitness pos, Typing_defs.make_tany ()) in
+let ret_from_fun_kind ?(is_constructor = false) pos kind =
+  let default = (Reason.Rwitness pos, Typing_defs.make_tany ()) in
+  let ret_ty () =
+    if is_constructor then
+      default
+    else
+      global_inference_create_tyvar default
+  in
   match kind with
   | Ast_defs.FGenerator ->
     let r = Reason.Rret_fun_kind (pos, kind) in
-    (r, Tapply ((pos, SN.Classes.cGenerator), [ty_any; ty_any; ty_any]))
+    ( r,
+      Tapply ((pos, SN.Classes.cGenerator), [ret_ty (); ret_ty (); ret_ty ()])
+    )
   | Ast_defs.FAsyncGenerator ->
     let r = Reason.Rret_fun_kind (pos, kind) in
-    (r, Tapply ((pos, SN.Classes.cAsyncGenerator), [ty_any; ty_any; ty_any]))
+    ( r,
+      Tapply
+        ((pos, SN.Classes.cAsyncGenerator), [ret_ty (); ret_ty (); ret_ty ()])
+    )
   | Ast_defs.FAsync ->
     let r = Reason.Rret_fun_kind (pos, kind) in
-    (r, Tapply ((pos, SN.Classes.cAwaitable), [ty_any]))
+    (r, Tapply ((pos, SN.Classes.cAwaitable), [ret_ty ()]))
   | Ast_defs.FSync
   | Ast_defs.FCoroutine ->
-    ty_any
+    ret_ty ()
 
 let type_param env (t : Nast.tparam) =
   {

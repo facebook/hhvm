@@ -157,6 +157,9 @@ std::string Type::constValString() const {
       m_clsmethVal->getFunc()->fullName()->data() : "nullptr"
     ).str();
   }
+  if (*this <= TRecDesc) {
+    return "Record()";
+  }
   if (*this <= TCctx) {
     if (!m_intVal) {
       return "Cctx(Cls(nullptr))";

@@ -122,6 +122,9 @@ public:
   }
   void checkFieldDefaultValues() const;
 
+  bool isUnique() const { return m_attrs & AttrUnique; }
+  bool isPersistent() const { return m_attrs & AttrPersistent; }
+
 private:
   Unit* m_unit;
   LowPtr<NamedEntity> m_namedEntity;
@@ -158,6 +161,30 @@ struct RecordDesc : AtomicCountable {
   Attr attrs()                   const { return m_preRec->attrs(); }
   const StringData* parentName() const { return m_preRec->parentName();  }
 
+  /*
+   * Whether this record is uniquely named across the codebase.
+   *
+   * It's legal to define multiple records in different pseudomains
+   * with the same name, so long as both are not required in the same request.
+   */
+  bool isUnique() const { return attrs() & AttrUnique; }
+
+  /*
+   * Whether we can load this record once and persist it across requests.
+   *
+   * Persistence is possible when a RecordDesc is uniquely named and
+   * is defined in a pseudomain that has no side-effects
+   * (except other persistent definitions).
+   *
+   * A record which satisfies isPersistent() may not actually /be/ persistent,
+   * if we had to allocate its RDS handle before we loaded the record.
+   *
+   * @see: recordHasPersistentRDS()
+   * @implies: isUnique()
+   */
+  bool isPersistent() const { return attrs() & AttrPersistent; }
+  bool verifyPersistent() const;
+
   const RecordDesc* parent() const { return m_parent.get(); }
   bool recordDescOf(const RecordDesc* rec) const;
 
@@ -191,6 +218,7 @@ struct RecordDesc : AtomicCountable {
   void setCached();
   void setRecordDescHandle(rds::Link<LowPtr<RecordDesc>,
                                      rds::Mode::NonLocal> link) const;
+  rds::Handle recordHandle() const { return m_cachedRecordDesc.handle(); }
 
   /*
    * Check whether a RecordDesc from a previous request is available
@@ -222,6 +250,10 @@ private:
 
   mutable rds::Link<LowPtr<RecordDesc>, rds::Mode::NonLocal> m_cachedRecordDesc;
 };
+
+inline bool recordHasPersistentRDS(const RecordDesc* rec) {
+  return rec && rds::isPersistentHandle(rec->recordHandle());
+}
 
 extern Mutex g_recordsMutex;
 

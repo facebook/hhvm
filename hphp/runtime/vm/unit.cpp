@@ -843,6 +843,17 @@ const char* checkSameName(NamedEntity* nameList) {
   return nullptr;
 }
 
+void setupRecord(RecordDesc* newRecord, NamedEntity* nameList) {
+  bool const isPersistent =
+    (!SystemLib::s_inited || RuntimeOption::RepoAuthoritative) &&
+    newRecord->verifyPersistent();
+  nameList->m_cachedRecordDesc.bind(
+      isPersistent? rds::Mode::Persistent : rds::Mode::Normal);
+  newRecord->setRecordDescHandle(nameList->m_cachedRecordDesc);
+  newRecord->incAtomicCount();
+  nameList->pushRecordDesc(newRecord);
+}
+
 void setupClass(Class* newClass, NamedEntity* nameList) {
   bool const isPersistent =
     (!SystemLib::s_inited || RuntimeOption::RepoAuthoritative) &&
@@ -1141,10 +1152,9 @@ RecordDesc* Unit::defRecordDesc(PreRecordDesc* preRecord,
       top = nameList->recordList();
       continue;
     }
-    nameList->m_cachedRecordDesc.bind(rds::Mode::Normal);
-    newRecord->setRecordDescHandle(nameList->m_cachedRecordDesc);
-    newRecord->incAtomicCount();
-    nameList->pushRecordDesc(newRecord.get());
+
+    setupRecord(newRecord.get(), nameList);
+
     newRecord->setCached();
     return newRecord.get();
   }
@@ -1483,7 +1493,8 @@ bool Unit::defTypeAlias(Id id) {
   nameList->m_cachedTypeAlias.bind(
     [thisType, &resolved] {
       auto const persistent = (thisType->attrs & AttrPersistent) &&
-        (!resolved.klass || classHasPersistentRDS(resolved.klass));
+        (!resolved.klass || classHasPersistentRDS(resolved.klass)) &&
+        (!resolved.rec || recordHasPersistentRDS(resolved.rec));
 
       auto const handle = persistent ?
         rds::alloc<TypeAliasReq, rds::Mode::Persistent>().handle() :

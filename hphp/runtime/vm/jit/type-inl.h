@@ -134,6 +134,7 @@ inline Type for_const(const ArrayData* ad) {
 inline Type for_const(double)        { return TDbl; }
 inline Type for_const(const Func*)   { return TFunc; }
 inline Type for_const(const Class*)  { return TCls; }
+inline Type for_const(const RecordDesc*)  { return TRecDesc; }
 inline Type for_const(ClsMethDataRef) { return TClsMeth; }
 inline Type for_const(ConstCctx)     { return TCctx; }
 inline Type for_const(TCA)           { return TTCA; }

@@ -96,6 +96,12 @@ void RecordDesc::setRecordDescHandle(
   m_cachedRecordDesc = link;
 }
 
+bool RecordDesc::verifyPersistent() const {
+  if (!isPersistent()) return false;
+  if (m_parent && !recordHasPersistentRDS(m_parent.get())) return false;
+  return true;
+}
+
 void RecordDesc::destroy() {
   if (!m_cachedRecordDesc.bound()) return;
 

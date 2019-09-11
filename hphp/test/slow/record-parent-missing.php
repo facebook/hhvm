@@ -7,6 +7,9 @@ function foo() {
 
   if ($count == 0) {
     require 'record-parent-1.inc';
+  } else if ($count == 2) {
+    // This never gets executed, included to make record I non-persistent
+    require 'record-parent-2.inc';
   }
 
   require 'record-child.inc';

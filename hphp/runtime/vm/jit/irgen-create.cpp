@@ -610,7 +610,10 @@ void emitNewPair(IRGS& env) {
 void emitNewRecordImpl(IRGS& env, const StringData* name,
                        const ImmVector& immVec,
                        Opcode newRecordOp) {
-  auto const cachedRec = gen(env, LdRecDescCached, RecNameData{name});
+  auto const recDesc = Unit::lookupUniqueRecDesc(name);
+  auto const isPersistent = recordHasPersistentRDS(recDesc);
+  auto const cachedRec = isPersistent ?
+    cns(env, recDesc) : gen(env, LdRecDescCached, RecNameData{name});
   auto const numArgs = immVec.size();
   auto const ids = immVec.vec32();
   NewStructData extra;

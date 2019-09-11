@@ -337,6 +337,13 @@ inline Class* Unit::lookupClass(const StringData* name) {
   return lookupClass(NamedEntity::get(name));
 }
 
+inline const RecordDesc* Unit::lookupUniqueRecDesc(const StringData* name) {
+  auto ne = NamedEntity::get(name);
+  auto rec = ne->recordList();
+  if (LIKELY(rec && (rec->attrs() & AttrUnique))) return rec;
+  return nullptr;
+}
+
 inline const Class* Unit::lookupUniqueClassInContext(const NamedEntity* ne,
                                                      const Class* ctx) {
   Class* cls = ne->clsList();

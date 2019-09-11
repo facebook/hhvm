@@ -647,34 +647,14 @@ void emitArray(IRGS& env, const ArrayData* x) {
   push(env, cns(env, x));
 }
 
-namespace {
-
-const ArrayData* makeEmptyArray(IRGS& env, const ArrayData* base) {
-  if (!RuntimeOption::EvalArrayProvenancePromoteEmptyArrays ||
-      !base->empty() ||
-      curFunc(env)->isProvenanceSkipFrame()) {
-    return base;
-  }
-  assertx(base->empty());
-  assertx(base->isStatic());
-
-  auto const unit = curUnit(env);
-  auto const filename = unit->filepath();
-  auto const line = unit->getLineNumber(bcOff(env));
-
-  return arrprov::makeEmptyArray(base, arrprov::Tag{filename, line});
-}
-
-}
-
 void emitVec(IRGS& env, const ArrayData* x) {
   assertx(x->isVecArray());
-  push(env, cns(env, makeEmptyArray(env, x)));
+  push(env, cns(env, x));
 }
 
 void emitDict(IRGS& env, const ArrayData* x) {
   assertx(x->isDict());
-  push(env, cns(env, makeEmptyArray(env, x)));
+  push(env, cns(env, x));
 }
 
 void emitKeyset(IRGS& env, const ArrayData* x) {

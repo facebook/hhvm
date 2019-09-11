@@ -1067,9 +1067,6 @@ struct RuntimeOption {
   F(bool, ArrayProvenance, false)                                       \
   /* Tag _all_ empty arrays we create at runtime. */                    \
   F(bool, ArrayProvenanceEmpty, false)                                  \
-  /* Enable experimental array provenance opportunistic creation of     \
-   * tagged empty arrays */                                             \
-  F(bool, ArrayProvenancePromoteEmptyArrays, false)                      \
   /* Enable logging the source of vecs/dicts whose vec/dict-ness is     \
    * observed, e.g. through serialization */                            \
   F(bool, LogArrayProvenance, false)                                    \

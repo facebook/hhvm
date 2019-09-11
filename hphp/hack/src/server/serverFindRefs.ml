@@ -20,11 +20,13 @@ let to_json input =
         let filename = Pos.filename pos in
         let (line, start, end_) = Pos.info_pos pos in
         Hh_json.JSON_Object
-          [ ("name", Hh_json.JSON_String name);
+          [
+            ("name", Hh_json.JSON_String name);
             ("filename", Hh_json.JSON_String filename);
             ("line", Hh_json.int_ line);
             ("char_start", Hh_json.int_ start);
-            ("char_end", Hh_json.int_ end_) ])
+            ("char_end", Hh_json.int_ end_);
+          ])
   in
   Hh_json.JSON_Array entries
 

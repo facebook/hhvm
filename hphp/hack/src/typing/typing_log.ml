@@ -290,11 +290,13 @@ let return_info_as_value env return_info =
     return_info
   in
   make_map
-    [ ("return_type", possibly_enforced_type_as_value env return_type);
+    [
+      ("return_type", possibly_enforced_type_as_value env return_type);
       ("return_disposable", Bool return_disposable);
       ("return_mutable", Bool return_mutable);
       ("return_explicit", Bool return_explicit);
-      ("return_void_to_rx", Bool return_void_to_rx) ]
+      ("return_void_to_rx", Bool return_void_to_rx);
+    ]
 
 let local_id_map_as_value f m =
   Map
@@ -323,11 +325,13 @@ let tparam_info_as_value env tpinfo =
     tpinfo
   in
   make_map
-    [ ("lower_bounds", tyset_as_value env lower_bounds);
+    [
+      ("lower_bounds", tyset_as_value env lower_bounds);
       ("upper_bounds", tyset_as_value env upper_bounds);
       ("reified", reify_kind_as_value reified);
       ("enforceable", bool_as_value enforceable);
-      ("newable", bool_as_value newable) ]
+      ("newable", bool_as_value newable);
+    ]
 
 let tpenv_as_value env tpenv =
   Map
@@ -338,12 +342,14 @@ let tpenv_as_value env tpenv =
 
 let per_cont_entry_as_value env f entry =
   make_map
-    [ ( "local_types",
+    [
+      ( "local_types",
         local_id_map_as_value f entry.Typing_per_cont_env.local_types );
       ( "fake_members",
         Typing_fake_members.as_log_value entry.Typing_per_cont_env.fake_members
       );
-      ("tpenv", tpenv_as_value env entry.Typing_per_cont_env.tpenv) ]
+      ("tpenv", tpenv_as_value env entry.Typing_per_cont_env.tpenv);
+    ]
 
 let continuations_map_as_value f m =
   Map
@@ -423,14 +429,16 @@ let local_tyvar_info_as_value env tvinfo =
     tvinfo
   in
   make_map
-    [ ("tyvar_pos", pos_as_value tyvar_pos);
+    [
+      ("tyvar_pos", pos_as_value tyvar_pos);
       ("eager_solve_fail", bool_as_value eager_solve_fail);
       ("appears_covariantly", bool_as_value appears_covariantly);
       ("appears_contravariantly", bool_as_value appears_contravariantly);
       ("lower_bounds", tyset_as_value env lower_bounds);
       ("upper_bounds", tyset_as_value env upper_bounds);
       ( "type_constants",
-        smap_as_value (fun (_, ty) -> type_as_value env ty) type_constants ) ]
+        smap_as_value (fun (_, ty) -> type_as_value env ty) type_constants );
+    ]
 
 let tvenv_as_value env tvenv =
   Map
@@ -513,11 +521,13 @@ let lenv_as_value env lenv =
     lenv
   in
   make_map
-    [ ("per_cont_env", per_cont_env_as_value env per_cont_env);
+    [
+      ("per_cont_env", per_cont_env_as_value env per_cont_env);
       ("local_mutability", local_mutability_as_value local_mutability);
       ("local_using_vars", local_id_set_as_value local_using_vars);
       ( "local_reactive",
-        string_as_value (reactivity_to_string env local_reactive) ) ]
+        string_as_value (reactivity_to_string env local_reactive) );
+    ]
 
 let subtype_prop_as_value env prop = Atom (Typing_print.subtype_prop env prop)
 
@@ -548,7 +558,8 @@ let genv_as_value env genv =
     genv
   in
   make_map
-    ( [ ("return", return_info_as_value env return);
+    ( [
+        ("return", return_info_as_value env return);
         ("params", local_id_map_as_value (param_as_value env) params);
         ("condition_types", smap_as_value (type_as_value env) condition_types);
         ("parent_id", string_as_value parent_id);
@@ -557,7 +568,8 @@ let genv_as_value env genv =
         ("self", type_as_value env self);
         ("static", bool_as_value static);
         ("val_kind", string_as_value (val_kind_to_string val_kind));
-        ("fun_kind", string_as_value (fun_kind_to_string fun_kind)) ]
+        ("fun_kind", string_as_value (fun_kind_to_string fun_kind));
+      ]
     @
     match fun_mutable with
     | None -> []
@@ -591,7 +603,8 @@ let env_as_value env =
     env
   in
   make_map
-    [ ("function_pos", pos_as_value function_pos);
+    [
+      ("function_pos", pos_as_value function_pos);
       ("tvenv", tvenv_as_value env tvenv);
       ("global_tvenv", global_tvenv_as_value env global_tvenv);
       ("tenv", tenv_as_value env tenv);
@@ -607,7 +620,8 @@ let env_as_value env =
       ("inside_ppl_class", bool_as_value inside_ppl_class);
       ("global_tpenv", tpenv_as_value env global_tpenv);
       ("subtype_prop", subtype_prop_as_value env subtype_prop);
-      ("allow_wildcards", bool_as_value allow_wildcards) ]
+      ("allow_wildcards", bool_as_value allow_wildcards);
+    ]
 
 let log_env_diff p ?function_name old_env new_env =
   let value = env_as_value new_env in
@@ -709,11 +723,15 @@ let log_intersection ~level env r ty1 ty2 ~inter_ty =
       log_types
         (Reason.to_pos r)
         env
-        [ Log_head
+        [
+          Log_head
             ( "Intersecting",
-              [ Log_type ("ty1", ty1);
+              [
+                Log_type ("ty1", ty1);
                 Log_type ("ty2", ty2);
-                Log_type ("intersection", inter_ty) ] ) ])
+                Log_type ("intersection", inter_ty);
+              ] );
+        ])
 
 let increment_feature_count env s =
   if GlobalOptions.tco_language_feature_logging (Env.get_tcopt env) then

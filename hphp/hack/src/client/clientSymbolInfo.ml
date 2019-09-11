@@ -20,26 +20,32 @@ let fun_call_to_json fun_call_results =
           | Constructor -> "Constructor"
         in
         JSON_Object
-          [ ("name", JSON_String item.name);
+          [
+            ("name", JSON_String item.name);
             ("type", JSON_String item_type);
             ("pos", Pos.json item.pos);
-            ("caller", JSON_String item.caller) ]))
+            ("caller", JSON_String item.caller);
+          ]))
 
 let symbol_type_to_json symbol_type_results =
   ServerCommandTypes.Symbol_type.(
     List.rev_map symbol_type_results (fun item ->
         JSON_Object
-          [ ("pos", Pos.json item.pos);
+          [
+            ("pos", Pos.json item.pos);
             ("type", JSON_String item.type_);
-            ("ident", int_ item.ident_) ]))
+            ("ident", int_ item.ident_);
+          ]))
 
 let to_json result =
   ServerCommandTypes.Symbol_info_service.(
     let fun_call_json = fun_call_to_json result.fun_calls in
     let symbol_type_json = symbol_type_to_json result.symbol_types in
     JSON_Object
-      [ ("function_calls", JSON_Array fun_call_json);
-        ("symbol_types", JSON_Array symbol_type_json) ])
+      [
+        ("function_calls", JSON_Array fun_call_json);
+        ("symbol_types", JSON_Array symbol_type_json);
+      ])
 
 let go
     (conn : ClientConnect.conn)

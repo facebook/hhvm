@@ -63,11 +63,13 @@ let go_hackfmt ?filename ~content args =
   let paths =
     List.map
       ~f:(fun x -> Path.make x |> Path.to_string)
-      [ (* if running from build tree *)
-        dirname ^ "/hackfmt";
+      [
+        (* if running from build tree *)
+          dirname ^ "/hackfmt";
         dirname ^ "/../hackfmt/hackfmt";
         (* look for system installation *)
-        BuildOptions.default_hackfmt_path ]
+          BuildOptions.default_hackfmt_path;
+      ]
   in
   let path = List.find ~f:Sys.file_exists paths in
   match path with

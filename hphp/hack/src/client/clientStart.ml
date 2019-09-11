@@ -63,7 +63,8 @@ let start_server env =
   let hh_server = get_hhserver () in
   let hh_server_args =
     Array.concat
-      [ [|hh_server; "-d"; Path.to_string env.root|];
+      [
+        [|hh_server; "-d"; Path.to_string env.root|];
         ( if env.from = "" then
           [||]
         else
@@ -91,7 +92,7 @@ let start_server env =
          *
          * Note: Yes, the FD is available in the monitor process as well, but
          * it doesn't, and shouldn't, use it. *)
-        [|"--waiting-client"; string_of_int (Handle.get_handle out_fd)|];
+          [|"--waiting-client"; string_of_int (Handle.get_handle out_fd)|];
         ( if env.ignore_hh_version then
           [|"--ignore-hh-version"|]
         else
@@ -122,7 +123,8 @@ let start_server env =
           [||] );
         (match env.debug_port with
         | None -> [||]
-        | Some fd -> [|"--debug-client"; string_of_int @@ Handle.get_handle fd|])
+        | Some fd ->
+          [|"--debug-client"; string_of_int @@ Handle.get_handle fd|]);
       ]
   in
   if not env.silent then

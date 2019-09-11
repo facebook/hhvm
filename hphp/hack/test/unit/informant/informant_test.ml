@@ -526,9 +526,10 @@ let run_test test =
   Tempfile.with_tempdir test
 
 let tests =
-  [ ( "test_informant_restarts_significant_move",
-      (fun () -> run_test test_informant_restarts_significant_move) )
-    (*"test_informant_restarts_significant_move_with_local_changes", (fun () ->
+  [
+    ( "test_informant_restarts_significant_move",
+      (fun () -> run_test test_informant_restarts_significant_move) );
+      (*"test_informant_restarts_significant_move_with_local_changes", (fun () ->
       run_test test_informant_restarts_significant_move_with_local_changes);
     "test_informant_restarts_significant_move_delayed", (fun () ->
       run_test test_informant_restarts_significant_move_delayed);
@@ -540,4 +541,5 @@ let tests =
       run_test test_repo_starts_midupdate);
     "test_watcher_in_unknown_state", (fun () ->
       run_test test_watcher_in_unknown_state); *)
-   ]
+    
+  ]

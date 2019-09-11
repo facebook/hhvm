@@ -17,8 +17,10 @@ let get_save_state_result_props_json
     (save_state_result : SaveStateServiceTypes.save_state_result) :
     (string * Hh_json.json) list =
   SaveStateServiceTypes.
-    [ ( "dep_table_edges_added",
-        Hh_json.int_ save_state_result.dep_table_edges_added ) ]
+    [
+      ( "dep_table_edges_added",
+        Hh_json.int_ save_state_result.dep_table_edges_added );
+    ]
 
 let get_save_state_result_json
     (save_state_result : SaveStateServiceTypes.save_state_result) :
@@ -36,9 +38,11 @@ let get_error_list_json
     | error_list -> (List.map ~f:Errors.to_json error_list, false)
   in
   let (properties : (string * Hh_json.json) list) =
-    [ ("passed", Hh_json.JSON_Bool did_pass);
+    [
+      ("passed", Hh_json.JSON_Bool did_pass);
       ("errors", Hh_json.JSON_Array error_list);
-      ("version", Hh_version.version_json) ]
+      ("version", Hh_version.version_json);
+    ]
   in
   let properties =
     match save_state_result with
@@ -57,9 +61,11 @@ let get_error_list_json
         let last_recheck_result =
           ( "last_recheck",
             Hh_json.JSON_Object
-              [ ("id", Hh_json.JSON_String stats.id);
+              [
+                ("id", Hh_json.JSON_String stats.id);
                 ("time", Hh_json.JSON_Number (string_of_float stats.time));
-                ("count", Hh_json.JSON_Number (string_of_int stats.count)) ] )
+                ("count", Hh_json.JSON_Number (string_of_int stats.count));
+              ] )
         in
         last_recheck_result :: properties
     in

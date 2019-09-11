@@ -54,9 +54,11 @@ let go
       let classes = List.map classes_to_save string_ in
       json_to_string ~pretty:true
       @@ JSON_Object
-           [ ("comment", JSON_Array comment);
+           [
+             ("comment", JSON_Array comment);
              ("threshold", int_ threshold);
-             ("classes", JSON_Array classes) ])
+             ("classes", JSON_Array classes);
+           ])
   in
   let result = ServerHotClassesDescription.postprocess (result ^ "\n") in
   let (_ : float) =

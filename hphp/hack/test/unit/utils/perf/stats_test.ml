@@ -35,5 +35,7 @@ let test_quantiles_equal_step4 () =
 
 let () =
   Unit_test.run_all
-    [ ("test_quantiles_equal_step2", test_quantiles_equal_step2);
-      ("test_quantiles_equal_step4", test_quantiles_equal_step4) ]
+    [
+      ("test_quantiles_equal_step2", test_quantiles_equal_step2);
+      ("test_quantiles_equal_step4", test_quantiles_equal_step4);
+    ]

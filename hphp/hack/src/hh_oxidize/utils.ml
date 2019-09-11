@@ -43,7 +43,8 @@ let with_tempfile f =
 
 let rust_keywords =
   SSet.of_list
-    [ "as";
+    [
+      "as";
       "break";
       "const";
       "continue";
@@ -94,7 +95,8 @@ let rust_keywords =
       "async";
       "await";
       "try";
-      "union" ]
+      "union";
+    ]
 
 let map_and_concat ?sep l ~f = List.map l ~f |> String.concat ?sep
 

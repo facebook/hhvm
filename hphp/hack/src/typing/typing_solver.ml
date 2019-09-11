@@ -555,9 +555,11 @@ let solve_tyvar_wrt_variance env r var on_error =
         log_types
           (Reason.to_pos r)
           env
-          [ Log_head
+          [
+            Log_head
               ( Printf.sprintf "Typing_subtype.solve_tyvar_wrt_variance #%d" var,
-                [] ) ]));
+                [] );
+          ]));
 
   (* If there is a type that is both a lower and upper bound, force to that type *)
   let env = try_bind_to_equal_bound ~freshen:false env r var on_error in

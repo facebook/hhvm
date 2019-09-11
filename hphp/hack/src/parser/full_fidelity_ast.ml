@@ -1558,7 +1558,8 @@ if there already is one, since that one will likely be better than this one. *)
                 {
                   syntax =
                     SyntaxList
-                      [ {
+                      [
+                        {
                           syntax =
                             ListItem
                               {
@@ -1572,7 +1573,8 @@ if there already is one, since that one will likely be better than this one. *)
                                 _;
                               };
                           _;
-                        } ];
+                        };
+                      ];
                   _;
                 };
               _;
@@ -2277,9 +2279,11 @@ if there already is one, since that one will likely be better than this one. *)
             block
         | _ ->
           let pos = pPos node env in
-          [ lift_awaits_in_statement env pos (fun () ->
+          [
+            lift_awaits_in_statement env pos (fun () ->
                 let (p, r) = pExpr node env in
-                (p, Return (Some (p, r)))) ])
+                (p, Return (Some (p, r))));
+          ])
 
   and pStmt : stmt parser =
    fun node env ->
@@ -2366,9 +2370,11 @@ if there already is one, since that one will likely be better than this one. *)
                         let elseif_statement =
                           pBlock ~remove_noop:true ei_stmt env
                         in
-                        [ ( pos,
+                        [
+                          ( pos,
                             If (elseif_condition, elseif_statement, next_clause)
-                          ) ]
+                          );
+                        ]
                     | _ -> missing_syntax "elseif clause" node env
                   in
                   List.fold_right
@@ -3008,7 +3014,8 @@ if there already is one, since that one will likely be better than this one. *)
           in
           find_vis_from_kind_list modifiers
         in
-        [ Const
+        [
+          Const
             {
               cc_visibility = vis;
               cc_hint = mpOptional pHint const_type_specifier env;
@@ -3035,7 +3042,8 @@ if there already is one, since that one will likely be better than this one. *)
                           else
                             None )
                     | node -> missing_syntax "constant declarator" node env);
-            } ]
+            };
+        ]
       | TypeConstDeclaration
           {
             type_const_attribute_spec;
@@ -3056,7 +3064,8 @@ if there already is one, since that one will likely be better than this one. *)
           |> Option.map ~f:(soften_hint tconst_user_attributes)
         in
         let tconst_kinds = pKinds (fun _ -> ()) type_const_modifiers env in
-        [ TypeConst
+        [
+          TypeConst
             {
               tconst_user_attributes;
               tconst_kinds;
@@ -3066,7 +3075,8 @@ if there already is one, since that one will likely be better than this one. *)
                 mpOptional pTConstraintTy type_const_type_constraint env;
               tconst_span = pPos node env;
               tconst_doc_comment = doc_comment_opt;
-            } ]
+            };
+        ]
       | PropertyDeclaration
           {
             property_attribute_spec;
@@ -3087,7 +3097,8 @@ if there already is one, since that one will likely be better than this one. *)
           mpOptional pHint property_type env
           |> Option.map ~f:(soften_hint cv_user_attributes)
         in
-        [ ClassVars
+        [
+          ClassVars
             {
               cv_user_attributes;
               cv_hint;
@@ -3112,7 +3123,8 @@ if there already is one, since that one will likely be better than this one. *)
                   None
                 else
                   doc_comment_opt );
-            } ]
+            };
+        ]
       | MethodishDeclaration
           {
             methodish_attribute;
@@ -3194,7 +3206,8 @@ if there already is one, since that one will likely be better than this one. *)
         in
         let user_attributes = pUserAttributes env methodish_attribute in
         member_def
-        @ [ Method
+        @ [
+            Method
               {
                 m_kind = kind;
                 m_tparams = hdr.fh_type_parameters;
@@ -3208,7 +3221,8 @@ if there already is one, since that one will likely be better than this one. *)
                 m_fun_kind = mk_fun_kind hdr.fh_suspension_kind body_has_yield;
                 m_doc_comment = doc_comment_opt;
                 m_external = is_external (* see f_external above for context *);
-              } ]
+              };
+          ]
       | MethodishTraitResolution
           {
             methodish_trait_attribute;
@@ -3227,7 +3241,8 @@ if there already is one, since that one will likely be better than this one. *)
               pos_name scope_resolution_name env )
           | _ -> missing_syntax "trait method redeclaration item" node env
         in
-        [ MethodTraitResolution
+        [
+          MethodTraitResolution
             {
               mt_kind = kind;
               mt_tparams = hdr.fh_type_parameters;
@@ -3240,7 +3255,8 @@ if there already is one, since that one will likely be better than this one. *)
               mt_fun_kind = mk_fun_kind hdr.fh_suspension_kind false;
               mt_trait = qualifier;
               mt_method = name;
-            } ]
+            };
+        ]
       | TraitUseConflictResolution
           {
             trait_use_conflict_resolution_names;
@@ -3331,12 +3347,14 @@ if there already is one, since that one will likely be better than this one. *)
       | TraitUse { trait_use_names; _ } ->
         couldMap ~f:(fun n e -> ClassUse (pHint n e)) trait_use_names env
       | RequireClause { require_kind; require_name; _ } ->
-        [ ClassTraitRequire
+        [
+          ClassTraitRequire
             ( (match token_kind require_kind with
               | Some TK.Implements -> MustImplement
               | Some TK.Extends -> MustExtend
               | _ -> missing_syntax "trait require kind" require_kind env),
-              pHint require_name env ) ]
+              pHint require_name env );
+        ]
       | XHPClassAttributeDeclaration { xhp_attribute_attributes; _ } ->
         let pXHPAttr node env =
           match syntax node with
@@ -3589,7 +3607,8 @@ if there already is one, since that one will likely be better than this one. *)
           mpYielding pFunctionBody function_body env
       in
       let user_attributes = pUserAttributes env function_attribute_spec in
-      [ Fun
+      [
+        Fun
           {
             (fun_template yield node hdr.fh_suspension_kind env) with
             f_tparams = hdr.fh_type_parameters;
@@ -3601,7 +3620,8 @@ if there already is one, since that one will likely be better than this one. *)
             f_user_attributes = user_attributes;
             f_doc_comment = doc_comment_opt;
             f_external = is_external;
-          } ]
+          };
+      ]
     | ClassishDeclaration
         {
           classish_attribute = attr;
@@ -3663,7 +3683,8 @@ if there already is one, since that one will likely be better than this one. *)
         | _ -> missing_syntax "class kind" kw env
       in
       let c_doc_comment = doc_comment_opt in
-      [ Class
+      [
+        Class
           {
             c_mode;
             c_user_attributes;
@@ -3681,7 +3702,8 @@ if there already is one, since that one will likely be better than this one. *)
             c_span;
             c_kind;
             c_doc_comment;
-          } ]
+          };
+      ]
     | ConstDeclaration
         { const_type_specifier = ty; const_declarators = decls; _ } ->
       let declarations = List.map ~f:syntax (as_list decls) in
@@ -3717,7 +3739,8 @@ if there already is one, since that one will likely be better than this one. *)
       List.iter ast_tparams ~f:(function { tp_reified; _ } ->
           if tp_reified then
             raise_parsing_error env (`Node node) SyntaxError.invalid_reified);
-      [ Typedef
+      [
+        Typedef
           {
             t_id = pos_name name env;
             t_tparams = ast_tparams;
@@ -3733,7 +3756,8 @@ if there already is one, since that one will likely be better than this one. *)
               | Some TK.Newtype -> NewType (pHint hint env)
               | Some TK.Type -> Alias (pHint hint env)
               | _ -> missing_syntax "kind" kw env);
-          } ]
+          };
+      ]
     | EnumDeclaration
         {
           enum_attribute_spec = attrs;
@@ -3756,7 +3780,8 @@ if there already is one, since that one will likely be better than this one. *)
               }
         | _ -> missing_syntax "enumerator" node
       in
-      [ Class
+      [
+        Class
           {
             c_mode = mode_annotation env.fi_mode;
             c_user_attributes = pUserAttributes env attrs;
@@ -3779,7 +3804,8 @@ if there already is one, since that one will likely be better than this one. *)
                   e_constraint = mpOptional pTConstraintTy constr env;
                 };
             c_doc_comment = doc_comment_opt;
-          } ]
+          };
+      ]
     | RecordDeclaration
         {
           record_attribute_spec = attrs;
@@ -3805,15 +3831,18 @@ if there already is one, since that one will likely be better than this one. *)
                 cv_hint = Some (pHint ftype env);
                 cv_is_promoted_variadic = false;
                 cv_names =
-                  [ ( pPos node env,
+                  [
+                    ( pPos node env,
                       pos_name name env,
-                      mpOptional pSimpleInitializer init env ) ];
+                      mpOptional pSimpleInitializer init env );
+                  ];
                 cv_doc_comment = None;
                 cv_user_attributes = [];
               }
         | _ -> missing_syntax "record_field" node env
       in
-      [ Class
+      [
+        Class
           {
             c_mode = mode_annotation env.fi_mode;
             c_user_attributes = pUserAttributes env attrs;
@@ -3831,7 +3860,8 @@ if there already is one, since that one will likely be better than this one. *)
             c_span = pPos node env;
             c_enum = None;
             c_doc_comment = doc_comment_opt;
-          } ]
+          };
+      ]
     | InclusionDirective { inclusion_expression; inclusion_semicolon = _ }
       when (env.fi_mode <> FileInfo.Mdecl && env.fi_mode <> FileInfo.Mphp)
            || env.codegen ->
@@ -3845,9 +3875,11 @@ if there already is one, since that one will likely be better than this one. *)
           _;
         } ->
       let env = non_tls env in
-      [ Namespace
+      [
+        Namespace
           ( pos_name name env,
-            List.concat_map ~f:(fun x -> pDef x env) (as_list decls) ) ]
+            List.concat_map ~f:(fun x -> pDef x env) (as_list decls) );
+      ]
     | NamespaceDeclaration { namespace_name = name; _ } ->
       [Namespace (pos_name name env, [])]
     | NamespaceGroupUseDeclaration
@@ -3864,11 +3896,13 @@ if there already is one, since that one will likely be better than this one. *)
       let f = pNamespaceUseClause env kind ~prefix:None in
       [NamespaceUse (List.map ~f (as_list clauses))]
     | FileAttributeSpecification _ ->
-      [ FileAttributes
+      [
+        FileAttributes
           {
             fa_user_attributes = pUserAttribute node env;
             fa_namespace = mk_empty_ns_env env;
-          } ]
+          };
+      ]
     | _
       when env.fi_mode = FileInfo.Mdecl
            || (env.fi_mode = FileInfo.Mphp && not env.codegen) ->

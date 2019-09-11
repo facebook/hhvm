@@ -346,7 +346,8 @@ let parse_args () =
   let filter = ref "" in
   let dir = ref None in
   let options =
-    [ ("--rust", Arg.Unit (fun () -> mode := RUST), "");
+    [
+      ("--rust", Arg.Unit (fun () -> mode := RUST), "");
       ("--ocaml", Arg.Unit (fun () -> mode := OCAML), "");
       ("--positioned", Arg.Unit (fun () -> parser := POSITIONED), "");
       ("--coroutine", Arg.Unit (fun () -> parser := COROUTINE), "");
@@ -373,7 +374,8 @@ let parse_args () =
       ("--dir", Arg.String (fun s -> dir := Some s), "");
       ( "--hhvm-tests",
         Arg.Unit (fun () -> dir := Some (fbcode ^ "hphp/test/")),
-        "" ) ]
+        "" );
+    ]
   in
   Arg.parse options (fun _ -> ()) "";
   {

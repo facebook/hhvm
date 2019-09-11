@@ -146,7 +146,8 @@ module Members = struct
     List.fold_right
       ~f:SSet.add
       ~init:SSet.empty
-      [ __construct;
+      [
+        __construct;
         __destruct;
         __call;
         __callStatic;
@@ -162,7 +163,8 @@ module Members = struct
         __sleep;
         __toString;
         __unset;
-        __wakeup ]
+        __wakeup;
+      ]
 
   let as_lowercase_set = SSet.map String.lowercase as_set
 
@@ -200,7 +202,8 @@ module AttributeKinds = struct
     List.fold_left
       ~init:SMap.empty
       ~f:(fun acc (k, v) -> SMap.add k v acc)
-      [ (cls, "a class");
+      [
+        (cls, "a class");
         (enum, "an enum");
         (typealias, "a typealias");
         (fn, "a function");
@@ -210,7 +213,8 @@ module AttributeKinds = struct
         (parameter, "a parameter");
         (typeparam, "a type parameter");
         (file, "a file");
-        (typeconst, "a type constant") ]
+        (typeconst, "a type constant");
+      ]
 end
 
 module UserAttributes = struct
@@ -293,7 +297,8 @@ module UserAttributes = struct
   let as_map =
     AttributeKinds.(
       SMap.of_list
-        [ (uaOverride, [mthd]);
+        [
+          (uaOverride, [mthd]);
           (uaConsistentConstruct, [cls]);
           (uaConst, [cls; instProperty; parameter; staticProperty]);
           (uaDeprecated, [cls; enum; typealias; fn; mthd]);
@@ -330,7 +335,8 @@ module UserAttributes = struct
           (uaDynamicallyCallable, [fn; mthd]);
           (uaDynamicallyConstructible, [cls]);
           (uaReifiable, [typeconst]);
-          (uaNeverInline, [fn; mthd]) ])
+          (uaNeverInline, [fn; mthd]);
+        ])
 end
 
 (* Tested before \\-prepending name-canonicalization *)
@@ -392,13 +398,15 @@ module PseudoFunctions = struct
   let hh_loop_forever = "\\hh_loop_forever"
 
   let all_pseudo_functions =
-    [ isset;
+    [
+      isset;
       unset;
       hh_show;
       hh_show_env;
       hh_log_level;
       hh_force_solve;
-      hh_loop_forever ]
+      hh_loop_forever;
+    ]
 end
 
 module StdlibFunctions = struct
@@ -534,7 +542,8 @@ module PseudoConsts = struct
   let g__FUNCTION_CREDENTIAL__ = "\\__FUNCTION_CREDENTIAL__"
 
   let all_pseudo_consts =
-    [ g__LINE__;
+    [
+      g__LINE__;
       g__CLASS__;
       g__TRAIT__;
       g__FILE__;
@@ -543,7 +552,8 @@ module PseudoConsts = struct
       g__METHOD__;
       g__NAMESPACE__;
       g__COMPILER_FRONTEND__;
-      g__FUNCTION_CREDENTIAL__ ]
+      g__FUNCTION_CREDENTIAL__;
+    ]
 
   let is_pseudo_const =
     let h = HashSet.create 23 in
@@ -610,13 +620,15 @@ module Superglobals = struct
 
   let is_superglobal =
     let superglobals =
-      [ "$_SERVER";
+      [
+        "$_SERVER";
         "$_GET";
         "$_POST";
         "$_FILES";
         "$_COOKIE";
         "$_REQUEST";
-        "$_ENV" ]
+        "$_ENV";
+      ]
     in
     let h = HashSet.create (List.length superglobals) in
     List.iter superglobals (HashSet.add h);
@@ -625,7 +637,8 @@ end
 
 module PPLFunctions = struct
   let all_reserved =
-    [ "sample";
+    [
+      "sample";
       "\\sample";
       "factor";
       "\\factor";
@@ -634,7 +647,8 @@ module PPLFunctions = struct
       "condition";
       "\\condition";
       "sample_model";
-      "\\sample_model" ]
+      "\\sample_model";
+    ]
 
   let is_reserved =
     let h = HashSet.create 23 in

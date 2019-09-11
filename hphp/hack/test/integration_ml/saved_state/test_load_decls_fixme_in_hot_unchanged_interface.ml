@@ -24,9 +24,11 @@ let init_disk_state =
      cold dependency of MyFoo in the same file as IFoo will cause the issue to
      disappear, since we will need to re-parse the file in order to declare the
      cold dependency. *)
-  [ ("hack/hh_hot_classes.json", {|{"classes":["\\IFoo", "\\Thing"]}|});
+  [
+    ("hack/hh_hot_classes.json", {|{"classes":["\\IFoo", "\\Thing"]}|});
     ("ifoo.php", ifoo_contents);
-    ("my_foo.php", my_foo_contents "") ]
+    ("my_foo.php", my_foo_contents "");
+  ]
 
 (* When we recheck MyFoo, no declaration will have been loaded from the saved
    state, so we will redeclare it. The error 4101 suppression comment in the hot

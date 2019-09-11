@@ -94,11 +94,13 @@ let test_fun_and_channel env =
 
 let tests =
   List.map
-    [ ("test_fun_wait", test_fun_wait);
+    [
+      ("test_fun_wait", test_fun_wait);
       ("test_fun_wait_once", test_fun_wait_once);
       ("test_channel_wait", test_channel_wait);
       ("test_priorities", test_priorities);
-      ("test_fun_and_channel", test_fun_and_channel) ]
+      ("test_fun_and_channel", test_fun_and_channel);
+    ]
     (fun (name, f) ->
       let f' () =
         TestScheduler.reset ();

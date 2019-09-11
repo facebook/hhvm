@@ -122,13 +122,15 @@ let patch_to_json res =
   let (char_start, char_end) = Pos.info_raw pos in
   let (line, start, end_) = Pos.info_pos pos in
   Hh_json.JSON_Object
-    [ ("char_start", Hh_json.int_ char_start);
+    [
+      ("char_start", Hh_json.int_ char_start);
       ("char_end", Hh_json.int_ char_end);
       ("line", Hh_json.int_ line);
       ("col_start", Hh_json.int_ start);
       ("col_end", Hh_json.int_ end_);
       ("patch_type", Hh_json.JSON_String type_);
-      ("replacement", Hh_json.JSON_String replacement) ]
+      ("replacement", Hh_json.JSON_String replacement);
+    ]
 
 let patches_to_json_string patches =
   let file_map = list_to_file_map patches in
@@ -137,8 +139,9 @@ let patches_to_json_string patches =
       begin
         fun fn patch_list acc ->
         Hh_json.JSON_Object
-          [ ("filename", Hh_json.JSON_String fn);
-            ("patches", Hh_json.JSON_Array (List.map patch_list patch_to_json))
+          [
+            ("filename", Hh_json.JSON_String fn);
+            ("patches", Hh_json.JSON_Array (List.map patch_list patch_to_json));
           ]
         :: acc
       end

@@ -55,6 +55,8 @@ let test () =
   let (_, loop_output) = Test.coverage_counts env "/foo.php" in
   Test.assert_coverage_counts
     loop_output
-    [ "/foo.php( array_get< checked=1 partial=0 unchecked=0 >"
+    [
+      "/foo.php( array_get< checked=1 partial=0 unchecked=0 >"
       ^ " call< checked=1 partial=0 unchecked=0 >"
-      ^ " lvar< checked=4 partial=0 unchecked=1 > )" ]
+      ^ " lvar< checked=4 partial=0 unchecked=1 > )";
+    ]

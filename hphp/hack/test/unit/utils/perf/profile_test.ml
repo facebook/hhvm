@@ -57,9 +57,11 @@ let test_profile_longer_than_min_runs_gt1 () =
 
 let () =
   Unit_test.run_all
-    [ ("test_with_gc_alloc", test_with_gc_alloc);
+    [
+      ("test_with_gc_alloc", test_with_gc_alloc);
       ("test_merge_alloc", test_merge_alloc);
       ("test_avg_mem", test_avg_mem);
       ("test_profile_longer_than", test_profile_longer_than);
       ( "test_profile_longer_than_min_runs_gt1",
-        test_profile_longer_than_min_runs_gt1 ) ]
+        test_profile_longer_than_min_runs_gt1 );
+    ]

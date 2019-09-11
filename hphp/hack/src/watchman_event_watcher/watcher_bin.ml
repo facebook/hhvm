@@ -18,8 +18,10 @@ module Args = struct
     let daemonize = ref false in
     let get_sockname = ref false in
     let options =
-      [ ("--daemonize", Arg.Set daemonize, "spawn watcher daemon");
-        ("--get-sockname", Arg.Set get_sockname, "print socket and exit") ]
+      [
+        ("--daemonize", Arg.Set daemonize, "spawn watcher daemon");
+        ("--get-sockname", Arg.Set get_sockname, "print socket and exit");
+      ]
     in
     let () = Arg.parse options (fun s -> root := Some s) usage in
     match !root with

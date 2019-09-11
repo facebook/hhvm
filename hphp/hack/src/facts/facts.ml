@@ -159,13 +159,15 @@ let facts_to_json ~md5 ~sha1 facts =
     ("typeAliases", list_to_json_array facts.type_aliases)
   in
   J.JSON_Object
-    [ md5sum0;
+    [
+      md5sum0;
       md5sum1;
       sha1sum;
       type_facts_json;
       functions_json;
       constants_json;
-      type_aliases_json ]
+      type_aliases_json;
+    ]
 
 (* Facts from JSON *)
 

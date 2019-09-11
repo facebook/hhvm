@@ -57,10 +57,12 @@ let test_basic_nested_outer_timeout () =
           false))
 
 let tests =
-  [ ("test_basic_no_timeout", test_basic_no_timeout);
+  [
+    ("test_basic_no_timeout", test_basic_no_timeout);
     ("test_basic_with_timeout", test_basic_with_timeout);
     ("test_basic_nested_no_timeout", test_basic_nested_no_timeout);
     ("test_basic_nested_inner_timeout", test_basic_nested_inner_timeout);
-    ("test_basic_nested_outer_timeout", test_basic_nested_outer_timeout) ]
+    ("test_basic_nested_outer_timeout", test_basic_nested_outer_timeout);
+  ]
 
 let () = Unit_test.run_all tests

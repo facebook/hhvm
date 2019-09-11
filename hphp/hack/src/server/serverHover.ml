@@ -39,9 +39,11 @@ let make_hover_return_type env_and_ty occurrence =
     Typing_defs.(
       match (occurrence, env_and_ty) with
       | ({ type_ = Function | Method _; _ }, Some (env, (_, Tfun ft))) ->
-        [ Printf.sprintf
+        [
+          Printf.sprintf
             "Return type: `%s`"
-            (Tast_env.print_ty env ft.ft_ret.et_type) ]
+            (Tast_env.print_ty env ft.ft_ret.et_type);
+        ]
       | _ -> []))
 
 let make_hover_full_name env_and_ty occurrence def_opt =
@@ -85,9 +87,11 @@ let make_hover_info env_and_ty file (occurrence, def_opt) =
       in
       let addendum =
         List.concat
-          [ make_hover_doc_block file occurrence def_opt;
+          [
+            make_hover_doc_block file occurrence def_opt;
             make_hover_return_type env_and_ty occurrence;
-            make_hover_full_name env_and_ty occurrence def_opt ]
+            make_hover_full_name env_and_ty occurrence def_opt;
+          ]
       in
       HoverService.
         { snippet; addendum; pos = Some occurrence.SymbolOccurrence.pos }))

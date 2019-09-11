@@ -172,29 +172,36 @@ let retype_magic_func (env : env) (ft : locl fun_type) (el : Nast.expr list) :
     env * locl fun_type =
   let rec f env param_types args : env * locl fun_params option =
     match (param_types, args) with
-    | ( [ {
+    | ( [
+          {
             fp_type =
               { et_type = (_, Toption (_, Tclass ((_, fs), _, [_]))); _ };
             _;
-          } ],
+          };
+        ],
         [(_, Null)] )
       when SN.Classes.is_format_string fs ->
       (env, None)
-    | ( [ ( {
+    | ( [
+          ( {
               fp_type =
                 {
                   et_type = (why, Toption (_, Tclass ((_, fs), _, [type_arg])));
                   _;
                 };
               _;
-            } as fp ) ],
+            } as fp );
+        ],
         arg :: _ )
-    | ( [ ( {
+    | ( [
+          ( {
               fp_type = { et_type = (why, Tclass ((_, fs), _, [type_arg])); _ };
               _;
-            } as fp ) ],
+            } as fp );
+        ],
         arg :: _ )
-    | ( [ ( {
+    | ( [
+          ( {
               fp_type =
                 {
                   et_type =
@@ -205,7 +212,8 @@ let retype_magic_func (env : env) (ft : locl fun_type) (el : Nast.expr list) :
                   _;
                 };
               _;
-            } as fp ) ],
+            } as fp );
+        ],
         arg :: _ )
       when SN.Classes.is_format_string fs ->
       (match const_string_of env arg with

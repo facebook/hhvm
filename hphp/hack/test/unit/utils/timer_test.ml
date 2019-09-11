@@ -156,7 +156,8 @@ let test_cancelling_finished_timer () =
   true
 
 let tests =
-  [ ("test_adding_in_order", test_adding_in_order);
+  [
+    ("test_adding_in_order", test_adding_in_order);
     ("test_adding_in_reverse_order", test_adding_in_reverse_order);
     ("test_negative_interval", test_negative_interval);
     ( "test_single_exception_in_sync_callback",
@@ -167,6 +168,7 @@ let tests =
       test_mult_exception_in_async_callback );
     ("test_cancelling_current_timer", test_cancelling_current_timer);
     ("test_cancelling_next_timer", test_cancelling_next_timer);
-    ("test_cancelling_finished_timer", test_cancelling_finished_timer) ]
+    ("test_cancelling_finished_timer", test_cancelling_finished_timer);
+  ]
 
 let () = Unit_test.run_all tests

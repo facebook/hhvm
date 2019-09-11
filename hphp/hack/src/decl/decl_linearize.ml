@@ -318,12 +318,14 @@ and linearize (env : env) (c : shallow_class) : linearization =
     match env.linearization_kind with
     | Member_resolution ->
       List.concat
-        [ List.rev (interfaces c);
+        [
+          List.rev (interfaces c);
           List.rev (req_implements c);
           List.rev (xhp_attr_uses c);
           List.rev (traits c);
           List.rev (req_extends c);
-          parents c ]
+          parents c;
+        ]
     | Ancestor_types ->
       (* In order to match the historical handling of ancestor types (that is,
          the collection of "canonical" type parameterizations of each ancestor
@@ -333,12 +335,14 @@ and linearize (env : env) (c : shallow_class) : linearization =
          support Stringish (and can be removed here if we remove support for the
          magic Stringish type, or require it to be explicitly implemented). *)
       List.concat
-        [ extends c;
+        [
+          extends c;
           req_extends c;
           req_implements c;
           stringish_interface c;
           interfaces c;
-          traits c ]
+          traits c;
+        ]
   in
   Sequence.unfold_step
     ~init:(Child child, ancestors, [], [])

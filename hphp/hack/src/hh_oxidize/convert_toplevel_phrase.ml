@@ -17,8 +17,9 @@ open Convert_longident
    will result in an "unused import" warning or an "unresolved import" error in
    Rust. *)
 let module_blacklist =
-  [ (* nast.ml opens Aast, but doesn't use it in type declarations. *)
-    "aast";
+  [
+    (* nast.ml opens Aast, but doesn't use it in type declarations. *)
+      "aast";
     "aast_defs_visitors_ancestors";
     "ast_defs_visitors_ancestors";
     "hh_core";
@@ -27,7 +28,8 @@ let module_blacklist =
     "reordered_argument_collections";
     "string_utils";
     "utils";
-    "core_kernel" ]
+    "core_kernel";
+  ]
 
 (* HACK: These submodules are defined inline in another module. We don't convert
    nested modules (I think it would be a bit of work to handle imports

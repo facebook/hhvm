@@ -67,8 +67,10 @@ let parse_work_args () : command =
   let key = ref "" in
   let timeout = ref 9999 in
   let options =
-    [ ("--key", Arg.String (fun x -> key := x), " The worker's key");
-      ("--timeout", Arg.Int (fun x -> timeout := x), " The timeout") ]
+    [
+      ("--key", Arg.String (fun x -> key := x), " The worker's key");
+      ("--timeout", Arg.Int (fun x -> timeout := x), " The timeout");
+    ]
   in
   let usage = "Usage: " ^ Sys.executable_name ^ " work <key>" in
   let args = parse_without_command options usage ~keyword:CKWork in

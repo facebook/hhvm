@@ -441,7 +441,8 @@ let test_convert_sset () =
   | _ -> assert false
 
 let test_cases =
-  [ test_char;
+  [
+    test_char;
     test_int;
     test_true;
     test_false;
@@ -504,7 +505,8 @@ let test_cases =
     test_convert_int_smap;
     test_convert_empty_sset;
     test_convert_sset_singleton;
-    test_convert_sset ]
+    test_convert_sset;
+  ]
 
 let main () = List.iter test_cases (fun test -> test ())
 

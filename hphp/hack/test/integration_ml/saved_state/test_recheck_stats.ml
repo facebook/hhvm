@@ -41,8 +41,10 @@ let enum_switches =
   List.init 20 ~f:(fun n -> (enum_switch_name n, enum_switch_contents n))
 
 let init_disk_state =
-  [ ("hack/hh_hot_classes.json", {|{"classes":[ "\\MyEnum" ]}|});
-    ("my_enum.php", enum_contents) ]
+  [
+    ("hack/hh_hot_classes.json", {|{"classes":[ "\\MyEnum" ]}|});
+    ("my_enum.php", enum_contents);
+  ]
   @ enum_users
   @ enum_switches
 

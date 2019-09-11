@@ -88,20 +88,24 @@ let test () =
   @@ fun temp_dir ->
   let saved_state_dir = Path.to_string temp_dir in
   Test.save_state
-    [ (foo_name, foo_contents);
+    [
+      (foo_name, foo_contents);
       (test_name, test_contests);
       (x_name, x_contents "int");
-      (y_name, y_contents) ]
+      (y_name, y_contents);
+    ]
     saved_state_dir;
 
   let env =
     Test.load_state
       saved_state_dir
       ~disk_state:
-        [ (foo_name, foo_similar_contents);
+        [
+          (foo_name, foo_similar_contents);
           (test_name, test_contests);
           (x_name, x_contents "string");
-          (y_name, y_contents) ]
+          (y_name, y_contents);
+        ]
       ~master_changes:[]
       ~local_changes:[foo_name; x_name]
       ~use_precheked_files:false

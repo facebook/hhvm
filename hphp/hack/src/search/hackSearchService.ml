@@ -18,13 +18,15 @@ module SS = SearchService.Make (struct
   type t = si_kind
 
   let fuzzy_types =
-    [ SI_Class;
+    [
+      SI_Class;
       SI_Interface;
       SI_Trait;
       SI_Enum;
       SI_Function;
       SI_GlobalConstant;
-      SI_Typedef ]
+      SI_Typedef;
+    ]
 
   let compare_result_type a b = kind_to_int a - kind_to_int b
 end)

@@ -136,8 +136,10 @@ let rec shape_field_to_pair ~tparams ~namespace ~targ_map sfi =
       []
   in
   let inner_value =
-    [ ( TV.String "value",
-        hint_to_type_constant ~tparams ~namespace ~targ_map hint ) ]
+    [
+      ( TV.String "value",
+        hint_to_type_constant ~tparams ~namespace ~targ_map hint );
+    ]
   in
   let inner_value = class_const @ optional @ inner_value in
   let value = dict_or_darray inner_value in
@@ -185,10 +187,13 @@ and get_generic_types ~tparams ~namespace ~targ_map hl =
   match hl with
   | [] -> []
   | _ ->
-    [ ( TV.String "generic_types",
-        hints_to_type_constant ~tparams ~namespace ~targ_map hl ) ]
+    [
+      ( TV.String "generic_types",
+        hints_to_type_constant ~tparams ~namespace ~targ_map hl );
+    ]
 
-and get_kind ~tparams s = [(TV.String "kind", TV.Int (get_kind_num ~tparams s))]
+and get_kind ~tparams s =
+  [(TV.String "kind", TV.Int (get_kind_num ~tparams s))]
 
 and root_to_string ~namespace s =
   if s = "this" then
@@ -224,13 +229,17 @@ and hint_to_type_constant_list ~tparams ~namespace ~targ_map (h : Aast.hint) =
   | Aast.Hshape si ->
     shape_allows_unknown_fields si
     @ get_kind ~tparams "shape"
-    @ [ ( TV.String "fields",
-          shape_info_to_typed_value ~tparams ~namespace ~targ_map si ) ]
+    @ [
+        ( TV.String "fields",
+          shape_info_to_typed_value ~tparams ~namespace ~targ_map si );
+      ]
   (* Matches the structure in ast_to_nast.ml on_hint for Haccess *)
   | Aast.Haccess ((_, Aast.Happly ((_, root_id), [])), ids) ->
     get_kind ~tparams "typeaccess"
-    @ [ (TV.String "root_name", TV.String (root_to_string ~namespace root_id));
-        (TV.String "access_list", type_constant_access_list ids) ]
+    @ [
+        (TV.String "root_name", TV.String (root_to_string ~namespace root_id));
+        (TV.String "access_list", type_constant_access_list ids);
+      ]
   | Aast.Haccess _ ->
     failwith "Structure not translated according to ast_to_nast"
   | Aast.Hfun (_, true (* is_coroutine *), _, _, _, _, _, _) ->
@@ -246,8 +255,10 @@ and hint_to_type_constant_list ~tparams ~namespace ~targ_map (h : Aast.hint) =
       Option.value_map vh ~f:(single_hint "variadic_type") ~default:[]
     in
     let param_types =
-      [ ( TV.String "param_types",
-          hints_to_type_constant ~tparams ~namespace ~targ_map hl ) ]
+      [
+        ( TV.String "param_types",
+          hints_to_type_constant ~tparams ~namespace ~targ_map hl );
+      ]
     in
     kind @ return_type @ param_types @ variadic_type
   | Aast.Hoption h ->
@@ -256,8 +267,10 @@ and hint_to_type_constant_list ~tparams ~namespace ~targ_map (h : Aast.hint) =
   | Aast.Htuple hl ->
     let kind = get_kind ~tparams "tuple" in
     let elem_types =
-      [ ( TV.String "elem_types",
-          hints_to_type_constant ~tparams ~namespace ~targ_map hl ) ]
+      [
+        ( TV.String "elem_types",
+          hints_to_type_constant ~tparams ~namespace ~targ_map hl );
+      ]
     in
     kind @ elem_types
   | Aast.Hsoft h ->

@@ -16,9 +16,11 @@ let to_json result =
     | Error s -> (s, "", true)
   in
   JSON_Object
-    [ ("error_message", JSON_String error);
+    [
+      ("error_message", JSON_String error);
       ("result", JSON_String result);
-      ("internal_error", JSON_Bool internal_error) ]
+      ("internal_error", JSON_Bool internal_error);
+    ]
 
 let print_json res = print_endline (Hh_json.json_to_string (to_json res))
 

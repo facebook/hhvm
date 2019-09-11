@@ -201,11 +201,13 @@ let rec serve (t : t) : unit Lwt.t =
       (* We mutate the queues in `t`, which is why we don't return a new `t` here. *)
       let%lwt should_continue =
         Lwt.pick
-          [ send_queued_up_messages ~out_fd:t.out_fd t.messages_to_send;
+          [
+            send_queued_up_messages ~out_fd:t.out_fd t.messages_to_send;
             emit_messages_from_daemon
               ~in_fd:t.in_fd
               t.response_emitter
-              t.notification_emitter ]
+              t.notification_emitter;
+          ]
       in
       Lwt.return should_continue
     with e ->
@@ -240,7 +242,8 @@ let destroy (t : t) : unit Lwt.t =
     | Initialized ->
       let%lwt () =
         Lwt.pick
-          [ (let%lwt (_result : (unit, string) result) =
+          [
+            (let%lwt (_result : (unit, string) result) =
                do_rpc
                  ~message:(ClientIdeMessage.Shutdown ())
                  ~messages_to_send
@@ -250,7 +253,8 @@ let destroy (t : t) : unit Lwt.t =
              Lwt.return_unit);
             (let%lwt () = Lwt_unix.sleep 5.0 in
              Daemon.kill daemon_handle;
-             Lwt.return_unit) ]
+             Lwt.return_unit);
+          ]
       in
       Lwt.return_unit
   in

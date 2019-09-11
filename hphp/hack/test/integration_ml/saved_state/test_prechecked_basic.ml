@@ -50,10 +50,12 @@ let test () =
    * - "d" depends on "c"
    *   - both pairs are independent from each other *)
   Test.save_state
-    [ ("a.php", x_contents "a" "int");
+    [
+      ("a.php", x_contents "a" "int");
       ("b.php", y_contents "b" "a");
       ("c.php", x_contents "c" "int");
-      ("d.php", y_contents "d" "c") ]
+      ("d.php", y_contents "d" "c");
+    ]
     temp_dir;
 
   (* "a" and "c" change in a way that generates errors in "b" and "d". But since
@@ -63,10 +65,12 @@ let test () =
     Test.load_state
       temp_dir
       ~disk_state:
-        [ ("a.php", x_contents "a" "string");
+        [
+          ("a.php", x_contents "a" "string");
           ("b.php", y_contents "b" "a");
           ("c.php", x_contents "c" "string");
-          ("d.php", y_contents "d" "c") ]
+          ("d.php", y_contents "d" "c");
+        ]
       ~master_changes:["a.php"]
       ~local_changes:["c.php"]
       ~use_precheked_files:true

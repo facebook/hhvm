@@ -197,8 +197,10 @@ let test_sqlite_plus_local (harness : Test_harness.t) : bool =
     }
   in
   let changelist =
-    [ (bar1path, Full bar1fileinfo, TypeChecker);
-      (foo3path, Full foo3fileinfo, TypeChecker) ]
+    [
+      (bar1path, Full bar1fileinfo, TypeChecker);
+      (foo3path, Full foo3fileinfo, TypeChecker);
+    ]
   in
   SymbolIndex.update_files ~sienv ~workers:None ~paths:changelist;
   let n = LocalSearchService.count_local_fileinfos !sienv in
@@ -399,7 +401,8 @@ let tests args =
       template_repo = args.Args.template_repo;
     }
   in
-  [ ( "test_sqlite_plus_local",
+  [
+    ( "test_sqlite_plus_local",
       fun () ->
         Test_harness.run_test
           ~stop_server_in_teardown:false
@@ -422,7 +425,8 @@ let tests args =
         Test_harness.run_test
           ~stop_server_in_teardown:false
           harness_config
-          test_docblock_finder ) ]
+          test_docblock_finder );
+  ]
 
 let () =
   Daemon.check_entry_point ();

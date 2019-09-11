@@ -31,7 +31,8 @@ let alias_map =
   List.fold_left
     ~f:add_alias
     ~init:SMap.empty
-    [ HH_ONLY_TYPE "AsyncIterator";
+    [
+      HH_ONLY_TYPE "AsyncIterator";
       HH_ONLY_TYPE "AsyncKeyedIterator";
       HH_ONLY_TYPE "Traversable";
       HH_ONLY_TYPE "Container";
@@ -94,8 +95,8 @@ let alias_map =
       HH_ALIAS ("boolean", "bool");
       HH_ALIAS ("integer", "int");
       HH_ALIAS ("double", "float");
-      HH_ALIAS ("real", "float")
-      (*
+      HH_ALIAS ("real", "float");
+        (*
   PHP7_TYPE("Throwable"; PHP7_EngineExceptions);
   PHP7_TYPE("Error"; PHP7_EngineExceptions);
   PHP7_TYPE("ArithmeticError"; PHP7_EngineExceptions);
@@ -104,7 +105,8 @@ let alias_map =
   PHP7_TYPE("ParseError"; PHP7_EngineExceptions);
   PHP7_TYPE("TypeError"; PHP7_EngineExceptions);
   *)
-     ]
+      
+    ]
 
 let rec normalize s =
   match SMap.get (String.lowercase s) alias_map with

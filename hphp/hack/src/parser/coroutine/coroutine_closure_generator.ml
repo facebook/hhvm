@@ -53,8 +53,10 @@ let do_resume_body =
       state_machine_variable_name_syntax
       [this_syntax; coroutine_data_variable_syntax; exception_variable_syntax]
   in
-  [ assign_state_machine_syntax;
-    make_return_statement_syntax call_state_machine_syntax ]
+  [
+    assign_state_machine_syntax;
+    make_return_statement_syntax call_state_machine_syntax;
+  ]
 
 let generate_do_resume_method function_type =
   make_methodish_declaration_syntax
@@ -148,9 +150,11 @@ let generate_clone_method state_machine_data =
 
 let generate_closure_body context function_type state_machine_data =
   generate_closure_properties state_machine_data
-  @ [ generate_constructor_method context function_type state_machine_data;
+  @ [
+      generate_constructor_method context function_type state_machine_data;
       generate_do_resume_method function_type;
-      generate_clone_method state_machine_data ]
+      generate_clone_method state_machine_data;
+    ]
 
 (**
  * If the provided methodish declaration is for a coroutine, rewrites the

@@ -89,7 +89,8 @@ let utf32_to_utf8 k = Bytes.to_string (utf32_to_utf8 k)
 
 let decode_table =
   let ent_iso_8859_1 =
-    [ "nbsp";
+    [
+      "nbsp";
       "iexcl";
       "cent";
       "pound";
@@ -184,11 +185,13 @@ let decode_table =
       "uuml";
       "yacute";
       "thorn";
-      "yuml" ]
+      "yuml";
+    ]
   in
   let ent_uni_338_402 =
-    [ (* 338 (0x0152) *)
-      "OElig";
+    [
+      (* 338 (0x0152) *)
+        "OElig";
       "oelig";
       "";
       "";
@@ -203,7 +206,7 @@ let decode_table =
       "";
       "";
       (* 352 (0x0160) *)
-      "Scaron";
+        "Scaron";
       "scaron";
       "";
       "";
@@ -228,7 +231,7 @@ let decode_table =
       "";
       "";
       (* 376 (0x0178) *)
-      "Yuml";
+        "Yuml";
       "";
       "";
       "";
@@ -253,15 +256,17 @@ let decode_table =
       "";
       "";
       (* 400 (0x0190) *)
+        "";
       "";
-      "";
-      "fnof" ]
+      "fnof";
+    ]
   in
   let ent_uni_spacing =
-    [ (* 710 *)
-      "circ";
+    [
+      (* 710 *)
+        "circ";
       (* 711 - 730 *)
-      "";
+        "";
       "";
       "";
       "";
@@ -282,12 +287,14 @@ let decode_table =
       "";
       "";
       (* 731 - 732 *)
-      "";
-      "tilde" ]
+        "";
+      "tilde";
+    ]
   in
   let ent_uni_greek =
-    [ (* 913 *)
-      "Alpha";
+    [
+      (* 913 *)
+        "Alpha";
       "Beta";
       "Gamma";
       "Delta";
@@ -313,7 +320,7 @@ let decode_table =
       "Psi";
       "Omega";
       (* 938 - 944 are not mapped *)
-      "";
+        "";
       "";
       "";
       "";
@@ -346,7 +353,7 @@ let decode_table =
       "psi";
       "omega";
       (* 970 - 976 are not mapped *)
-      "";
+        "";
       "";
       "";
       "";
@@ -358,11 +365,13 @@ let decode_table =
       "";
       "";
       "";
-      "piv" ]
+      "piv";
+    ]
   in
   let ent_uni_punct =
-    [ (* 8194 *)
-      "ensp";
+    [
+      (* 8194 *)
+        "ensp";
       "emsp";
       "";
       "";
@@ -385,7 +394,7 @@ let decode_table =
       "";
       "";
       (* 8216 *)
-      "lsquo";
+        "lsquo";
       "rsquo";
       "sbquo";
       "";
@@ -412,7 +421,7 @@ let decode_table =
       "permil";
       "";
       (* 8242 *)
-      "prime";
+        "prime";
       "Prime";
       "";
       "";
@@ -430,12 +439,14 @@ let decode_table =
       "";
       "";
       "";
-      "frasl" ]
+      "frasl";
+    ]
   in
   let ent_uni_euro = ["euro"] in
   let ent_uni_8465_8501 =
-    [ (* 8465 *)
-      "image";
+    [
+      (* 8465 *)
+        "image";
       "";
       "";
       "";
@@ -443,19 +454,19 @@ let decode_table =
       "";
       "";
       (* 8472 *)
-      "weierp";
+        "weierp";
       "";
       "";
       "";
       (* 8476 *)
-      "real";
+        "real";
       "";
       "";
       "";
       "";
       "";
       (* 8482 *)
-      "trade";
+        "trade";
       "";
       "";
       "";
@@ -475,11 +486,13 @@ let decode_table =
       "";
       "";
       (* 8501 *)
-      "alefsym" ]
+        "alefsym";
+    ]
   in
   let ent_uni_8592_9002 =
-    [ (* 8592 (0x2190) *)
-      "larr";
+    [
+      (* 8592 (0x2190) *)
+        "larr";
       "uarr";
       "rarr";
       "darr";
@@ -496,7 +509,7 @@ let decode_table =
       "";
       "";
       (* 8608 (0x21a0) *)
-      "";
+        "";
       "";
       "";
       "";
@@ -513,7 +526,7 @@ let decode_table =
       "";
       "";
       (* 8624 (0x21b0) *)
-      "";
+        "";
       "";
       "";
       "";
@@ -530,7 +543,7 @@ let decode_table =
       "";
       "";
       (* 8640 (0x21c0) *)
-      "";
+        "";
       "";
       "";
       "";
@@ -547,7 +560,7 @@ let decode_table =
       "";
       "";
       (* 8656 (0x21d0) *)
-      "lArr";
+        "lArr";
       "uArr";
       "rArr";
       "dArr";
@@ -564,7 +577,7 @@ let decode_table =
       "";
       "";
       (* 8672 (0x21e0) *)
-      "";
+        "";
       "";
       "";
       "";
@@ -597,7 +610,7 @@ let decode_table =
       "";
       "";
       (* 8704 (0x2200) *)
-      "forall";
+        "forall";
       "comp";
       "part";
       "exist";
@@ -614,7 +627,7 @@ let decode_table =
       "";
       "prod";
       (* 8720 (0x2210) *)
-      "coprod";
+        "coprod";
       "sum";
       "minus";
       "mnplus";
@@ -631,7 +644,7 @@ let decode_table =
       "infin";
       "ang90";
       (* 8736 (0x2220) *)
-      "ang";
+        "ang";
       "angmsd";
       "angsph";
       "mid";
@@ -648,7 +661,7 @@ let decode_table =
       "conint";
       "";
       (* 8752 (0x2230) *)
-      "";
+        "";
       "";
       "";
       "";
@@ -665,7 +678,7 @@ let decode_table =
       "";
       "";
       (* 8768 (0x2240) *)
-      "wreath";
+        "wreath";
       "nsim";
       "";
       "sime";
@@ -682,7 +695,7 @@ let decode_table =
       "bump";
       "bumpe";
       (* 8784 (0x2250) *)
-      "";
+        "";
       "";
       "";
       "";
@@ -699,7 +712,7 @@ let decode_table =
       "";
       "";
       (* 8800 (0x2260) *)
-      "ne";
+        "ne";
       "equiv";
       "";
       "";
@@ -716,7 +729,7 @@ let decode_table =
       "nlt";
       "ngt";
       (* 8816 (0x2270) *)
-      "nles";
+        "nles";
       "nges";
       "lsim";
       "gsim";
@@ -733,7 +746,7 @@ let decode_table =
       "prsim";
       "scsim";
       (* 8832 (0x2280) *)
-      "npr";
+        "npr";
       "nsc";
       "sub";
       "sup";
@@ -750,7 +763,7 @@ let decode_table =
       "";
       "";
       (* 8848 (0x2290) *)
-      "";
+        "";
       "";
       "";
       "";
@@ -767,7 +780,7 @@ let decode_table =
       "";
       "";
       (* 8864 (0x22a0) *)
-      "";
+        "";
       "";
       "";
       "";
@@ -784,7 +797,7 @@ let decode_table =
       "";
       "";
       (* 8880 (0x22b0) *)
-      "";
+        "";
       "";
       "";
       "";
@@ -801,7 +814,7 @@ let decode_table =
       "";
       "";
       (* 8896 (0x22c0) *)
-      "";
+        "";
       "";
       "";
       "";
@@ -818,7 +831,7 @@ let decode_table =
       "";
       "";
       (* 8912 (0x22d0) *)
-      "";
+        "";
       "";
       "";
       "";
@@ -835,7 +848,7 @@ let decode_table =
       "";
       "";
       (* 8928 (0x22e0) *)
-      "";
+        "";
       "";
       "";
       "";
@@ -852,7 +865,7 @@ let decode_table =
       "";
       "";
       (* 8944 (0x22f0) *)
-      "";
+        "";
       "";
       "";
       "";
@@ -869,7 +882,7 @@ let decode_table =
       "";
       "";
       (* 8960 (0x2300) *)
-      "";
+        "";
       "";
       "";
       "";
@@ -886,7 +899,7 @@ let decode_table =
       "";
       "";
       (* 8976 (0x2310) *)
-      "";
+        "";
       "";
       "";
       "";
@@ -903,7 +916,7 @@ let decode_table =
       "";
       "";
       (* 8992 (0x2320) *)
-      "";
+        "";
       "";
       "";
       "";
@@ -913,14 +926,16 @@ let decode_table =
       "";
       "";
       "lang";
-      "rang" ]
+      "rang";
+    ]
   in
   let ent_uni_9674 = [(* 9674 *) "loz"] in
   let ent_uni_9824_9830 =
     [(* 9824 *) "spades"; ""; ""; "clubs"; ""; "hearts"; "diams"]
   in
   let utf_entity_maps =
-    [ { start_char = 0xa0; table = ent_iso_8859_1 };
+    [
+      { start_char = 0xa0; table = ent_iso_8859_1 };
       { start_char = 338; table = ent_uni_338_402 };
       { start_char = 710; table = ent_uni_spacing };
       { start_char = 913; table = ent_uni_greek };
@@ -929,7 +944,8 @@ let decode_table =
       { start_char = 8465; table = ent_uni_8465_8501 };
       { start_char = 8592; table = ent_uni_8592_9002 };
       { start_char = 9674; table = ent_uni_9674 };
-      { start_char = 9824; table = ent_uni_9824_9830 } ]
+      { start_char = 9824; table = ent_uni_9824_9830 };
+    ]
   in
   let decode_table = Caml.Hashtbl.create 0 in
   List.iter utf_entity_maps ~f:(fun { start_char; table } ->
@@ -940,7 +956,8 @@ let decode_table =
               entity
               (utf32_to_utf8 (start_char + i))));
   let predefined =
-    [ ("quot", "\"");
+    [
+      ("quot", "\"");
       ("lt", "<");
       ("gt", ">");
       ("amp", "&");
@@ -950,7 +967,8 @@ let decode_table =
       ("snowman", utf32_to_utf8 0x2603);
       ("snowflake", utf32_to_utf8 0x2745);
       ("comet", utf32_to_utf8 0x2604);
-      ("thunderstorm", utf32_to_utf8 0x2608) ]
+      ("thunderstorm", utf32_to_utf8 0x2608);
+    ]
   in
   List.iter predefined ~f:(fun (k, v) -> Caml.Hashtbl.add decode_table k v);
   decode_table

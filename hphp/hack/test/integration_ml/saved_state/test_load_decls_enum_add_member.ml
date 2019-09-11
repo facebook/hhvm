@@ -41,8 +41,10 @@ let enum_switches =
   List.init 20 ~f:(fun n -> (enum_switch_name n, enum_switch_contents n))
 
 let init_disk_state =
-  [ ("hack/hh_hot_classes.json", {|{"classes":[ "\\MyEnum" ]}|});
-    ("my_enum.php", enum_contents) ]
+  [
+    ("hack/hh_hot_classes.json", {|{"classes":[ "\\MyEnum" ]}|});
+    ("my_enum.php", enum_contents);
+  ]
   @ enum_users
   @ enum_switches
 
@@ -139,10 +141,12 @@ let test_master_change_with_locally_changed_dependent saved_state_dir () =
       saved_state_dir
       ~master_changes:added_member
       ~local_changes:
-        [ ( enum_switch_name 2,
+        [
+          ( enum_switch_name 2,
             "<?hh // strict
       function enum_switch_2(MyEnum $x) : void { switch($x) {} }"
-          ) ]
+          );
+        ]
   in
   (* Files that changed *)
   Test.assert_needs_recheck env "my_enum.php";

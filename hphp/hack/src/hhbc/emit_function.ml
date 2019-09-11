@@ -120,13 +120,15 @@ let emit_function (ast_fun, hoisted) : Hhas_function.t list =
   in
   let decl_vars = Hhas_body.decl_vars @@ Hhas_function.body normal_function in
   if is_memoize then
-    [ normal_function;
+    [
+      normal_function;
       Emit_memoize_function.emit_wrapper_function
         ~original_id
         ~renamed_id
         ~is_method:false
         ~deprecation_info
-        ast_fun ]
+        ast_fun;
+    ]
   else
     match wrapper_type_opt with
     | Some wrapper_type ->

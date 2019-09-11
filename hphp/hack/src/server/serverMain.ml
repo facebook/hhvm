@@ -900,8 +900,10 @@ let setup_interrupts env client_provider =
         let handlers =
           match genv.notifier_async_reader () with
           | Some reader when interrupt_on_watchman ->
-            [ ( Buffered_line_reader.get_fd reader,
-                watchman_interrupt_handler genv ) ]
+            [
+              ( Buffered_line_reader.get_fd reader,
+                watchman_interrupt_handler genv );
+            ]
           | _ -> []
         in
         let handlers =

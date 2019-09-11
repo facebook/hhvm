@@ -314,7 +314,8 @@ let test_performance () =
   List.length (Errors.get_error_list errors) == n
 
 let tests =
-  [ ("test", test_do);
+  [
+    ("test", test_do);
     ("test_get_sorted_error_list", test_get_sorted_error_list);
     ("test_try", test_try);
     ("test_merge", test_merge);
@@ -322,8 +323,9 @@ let tests =
     ("test_phases", test_phases);
     (* TODO T44055462 please amend test to maintain new invariants of error API
   "test_incremental_update", test_incremental_update; *)
-    ("test_merge_into_current", test_merge_into_current);
-    ("test_performance", test_performance) ]
+      ("test_merge_into_current", test_merge_into_current);
+    ("test_performance", test_performance);
+  ]
 
 let () =
   Relative_path.(set_path_prefix Root (Path.make "/"));

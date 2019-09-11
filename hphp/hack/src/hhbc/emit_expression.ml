@@ -553,9 +553,11 @@ and emit_local ~notice ~need_ref env (lid : Aast.lid) =
         "Superglobals may not be taken by reference."
     else
       gather
-        [ instr_string (SU.Locals.strip_dollar str);
+        [
+          instr_string (SU.Locals.strip_dollar str);
           emit_pos pos;
-          instr (IGet CGetG) ]
+          instr (IGet CGetG);
+        ]
   else
     let local = get_local env (pos, str) in
     if is_local_this env id && not (Emit_env.get_needs_local_this env) then
@@ -626,14 +628,16 @@ and emit_binop env annot op (e1 : Tast.expr) (e2 : Tast.expr) =
   | Ast_defs.QuestionQuestion ->
     let end_label = Label.next_regular () in
     gather
-      [ fst (emit_quiet_expr env pos e1);
+      [
+        fst (emit_quiet_expr env pos e1);
         instr_dup;
         instr_istypec OpNull;
         instr_not;
         instr_jmpnz end_label;
         instr_popc;
         emit_expr env e2;
-        instr_label end_label ]
+        instr_label end_label;
+      ]
   | _ ->
     if not (optimize_null_check ()) then
       default ()
@@ -670,7 +674,8 @@ and emit_as env pos e h is_nullable =
   let done_label = Label.next_regular () in
   let main_block ts_instrs resolve =
     gather
-      [ ts_instrs;
+      [
+        ts_instrs;
         instr_setl type_struct_local;
         instr_istypestructc resolve;
         instr_jmpnz then_label;
@@ -678,25 +683,30 @@ and emit_as env pos e h is_nullable =
           gather [instr_null; instr_jmp done_label]
         else
           gather
-            [ instr_pushl arg_local;
+            [
+              instr_pushl arg_local;
               instr_pushl type_struct_local;
-              instr_throwastypestructexception ] ) ]
+              instr_throwastypestructexception;
+            ] );
+      ]
   in
   (* Set aside the argument value. *)
   gather
-    [ emit_expr env e;
+    [
+      emit_expr env e;
       instr_setl arg_local;
       (* Store type struct in a variable and reuse it. *)
-      ( if is_static then
-        main_block
-          (get_type_structure_for_hint env ~targ_map:SMap.empty h)
-          Resolve
-      else
-        main_block ts_instrs DontResolve );
+        ( if is_static then
+          main_block
+            (get_type_structure_for_hint env ~targ_map:SMap.empty h)
+            Resolve
+        else
+          main_block ts_instrs DontResolve );
       instr_label then_label;
       instr_pushl arg_local;
       instr_unsetl type_struct_local;
-      instr_label done_label ]
+      instr_label done_label;
+    ]
 
 and emit_is env pos (h : Aast.hint) =
   let (ts_instrs, is_static) = emit_reified_arg env ~isas:true pos h in
@@ -706,8 +716,10 @@ and emit_is env pos (h : Aast.hint) =
       instr_islateboundcls
     | _ ->
       gather
-        [ get_type_structure_for_hint env ~targ_map:SMap.empty h;
-          instr_istypestructc Resolve ]
+        [
+          get_type_structure_for_hint env ~targ_map:SMap.empty h;
+          instr_istypestructc Resolve;
+        ]
   else
     gather [ts_instrs; instr_istypestructc DontResolve]
 
@@ -744,35 +756,39 @@ and emit_conditional_expression
     let end_label = Label.next_regular () in
     let r = emit_jmpz env etest false_label in
     gather
-      [ r.instrs;
+      [
+        r.instrs;
         (* only emit true branch if there is fallthrough from condition *)
-        begin
-          if r.is_fallthrough then
-            gather [emit_expr env etrue; emit_pos pos; instr_jmp end_label]
-          else empty
-        end;
+          begin
+            if r.is_fallthrough then
+              gather [emit_expr env etrue; emit_pos pos; instr_jmp end_label]
+            else empty
+          end;
         (* only emit false branch if false_label is used *)
-        begin
-          if r.is_label_used then
-            gather [instr_label false_label; emit_expr env efalse]
-          else empty
-        end;
+          begin
+            if r.is_label_used then
+              gather [instr_label false_label; emit_expr env efalse]
+            else empty
+          end;
         (* end_label is used to jump out of true branch so they should be emitted
          together *)
-        begin
-          if r.is_fallthrough then
-            instr_label end_label
-          else empty
-        end ]
+          begin
+            if r.is_fallthrough then
+              instr_label end_label
+            else empty
+          end;
+      ]
   | None ->
     let end_label = Label.next_regular () in
     gather
-      [ emit_expr env etest;
+      [
+        emit_expr env etest;
         instr_dup;
         instr_jmpnz end_label;
         instr_popc;
         emit_expr env efalse;
-        instr_label end_label ]
+        instr_label end_label;
+      ]
 
 and get_erased_tparams env =
   Ast_scope.Scope.get_tparams (Emit_env.get_scope env)
@@ -810,25 +826,29 @@ and emit_reified_targs env pos targs =
     instr_cgetl (Local.Named SU.Reified.reified_generics_local_name)
   else if (not is_in_lambda) && is_same current_cls_tparam.A.c_tparam_list then
     gather
-      [ instr_checkthis;
+      [
+        instr_checkthis;
         instr_baseh;
         instr_querym
           0
           QueryOp.CGet
           (MemberKey.PT
-             (Hhbc_id.Prop.from_raw_string SU.Reified.reified_prop_name)) ]
+             (Hhbc_id.Prop.from_raw_string SU.Reified.reified_prop_name));
+      ]
   (* TODO(T31677864): If the full generic array is static and does not require
    * resolution, emit it as static array *)
   else
     gather
-      [ gather
+      [
+        gather
         @@ List.map targs ~f:(fun h ->
                fst @@ emit_reified_arg env ~isas:false pos h);
         instr_lit_const
           ( if hack_arr_dv_arrs () then
             NewVecArray len
           else
-            NewVArray len ) ]
+            NewVArray len );
+      ]
 
 and emit_new
     env
@@ -885,9 +905,11 @@ and emit_new
         | H.NoGenerics -> gather [emit_pos pos; instr_newobjd fq_id]
         | H.HasGenerics ->
           gather
-            [ emit_pos pos;
+            [
+              emit_pos pos;
               emit_reified_targs env pos targs;
-              instr_newobjrd fq_id ]
+              instr_newobjrd fq_id;
+            ]
         | H.MaybeGenerics ->
           failwith "Internal error: This case should have been transformed"
       end
@@ -906,7 +928,8 @@ and emit_new
   in
   ( empty,
     gather
-      [ newobj_instrs;
+      [
+        newobj_instrs;
         instr_dup;
         instr_nulluninit;
         instr_nulluninit;
@@ -916,7 +939,8 @@ and emit_new
         instr_fcallctor
           (get_fcall_args ~lock_while_unwinding:true args uargs None);
         instr_popc;
-        instr_lockobj ],
+        instr_lockobj;
+      ],
     empty )
 
 (* TODO(T36697624) more efficient bytecode for static records *)
@@ -973,10 +997,12 @@ and emit_call_expr env pos e targs args uargs async_eager_label =
     when String.lowercase id = "hh\\set_frame_metadata"
          || String.lowercase id = "\\hh\\set_frame_metadata" ->
     gather
-      [ emit_expr env arg1;
+      [
+        emit_expr env arg1;
         emit_pos pos;
         instr_popl (Local.Named "$86metadata");
-        instr_null ]
+        instr_null;
+      ]
   | (A.Id (_, s), _, [], [])
     when String.lowercase s = "exit" || String.lowercase s = "die" ->
     emit_pos_then pos @@ emit_exit env None
@@ -1025,9 +1051,11 @@ and emit_class_expr
     let cexpr_local = emit_expr env e in
     ( empty,
       gather
-        [ cexpr_local;
+        [
+          cexpr_local;
           Scope.stash_top_in_unnamed_local load_prop;
-          instr_classgetc ] )
+          instr_classgetc;
+        ] )
   in
   match cexpr with
   | Class_expr
@@ -1049,13 +1077,15 @@ and emit_class_get env qop (cid : Tast.class_id) (prop : Tast.class_get_expr) =
     class_id_to_class_expr ~resolve_self:false (Emit_env.get_scope env) cid
   in
   gather
-    [ of_pair @@ emit_class_expr env cexpr prop;
+    [
+      of_pair @@ emit_class_expr env cexpr prop;
       (match qop with
       | QueryOp.CGet -> instr_cgets
       | QueryOp.CGetQuiet -> failwith "emit_class_get: CGetQuiet"
       | QueryOp.Isset -> instr_issets
       | QueryOp.Empty -> instr_emptys
-      | QueryOp.InOut -> failwith "emit_class_get: InOut") ]
+      | QueryOp.InOut -> failwith "emit_class_get: InOut");
+    ]
 
 (* Class constant <cid>::<id>.
  * We follow the logic for the Construct::KindOfClassConstantExpression
@@ -1098,12 +1128,14 @@ and emit_string2 env pos (exprs : Tast.expr list) =
   | [e] -> gather [emit_expr env e; emit_pos pos; instr (IOp CastString)]
   | e1 :: e2 :: es ->
     gather
-    @@ [ emit_two_exprs env (fst (fst e1)) e1 e2;
+    @@ [
+         emit_two_exprs env (fst (fst e1)) e1 e2;
          emit_pos pos;
          instr (IOp Concat);
          gather
            (List.map es (fun e ->
-                gather [emit_expr env e; emit_pos pos; instr (IOp Concat)])) ]
+                gather [emit_expr env e; emit_pos pos; instr (IOp Concat)]));
+       ]
   | [] -> failwith "String2 with zero arguments is impossible"
 
 and emit_lambda (env : Emit_env.t) (fundef : Tast.fun_) (ids : Aast.lid list) =
@@ -1114,7 +1146,8 @@ and emit_lambda (env : Emit_env.t) (fundef : Tast.fun_) (ids : Aast.lid list) =
   let explicit_use = SSet.mem fundef_name (Emit_env.get_explicit_use_set ()) in
   let is_in_lambda = Ast_scope.Scope.is_in_lambda (Emit_env.get_scope env) in
   gather
-    [ gather
+    [
+      gather
       @@ List.map ids (fun (pos, id) ->
              match SU.Reified.is_captured_generic @@ Local_id.get_name id with
              | Some (is_fun, i) ->
@@ -1130,7 +1163,8 @@ and emit_lambda (env : Emit_env.t) (fundef : Tast.fun_) (ids : Aast.lid list) =
                  instr_cgetl lid
                else
                  instr_cugetl lid);
-      instr (IMisc (CreateCl (List.length ids, class_num))) ]
+      instr (IMisc (CreateCl (List.length ids, class_num)));
+    ]
 
 and emit_id (env : Emit_env.t) (id : Aast.sid) =
   let (p, s) = id in
@@ -1237,18 +1271,22 @@ and emit_call_isset_expr env outer_pos (expr : Tast.expr) =
     when SN.Superglobals.is_superglobal (Local_id.get_name n)
          || Local_id.get_name n = SN.Superglobals.globals ->
     gather
-      [ emit_pos outer_pos;
+      [
+        emit_pos outer_pos;
         instr_string @@ SU.Locals.strip_dollar (Local_id.get_name n);
         emit_pos outer_pos;
-        instr_issetg ]
+        instr_issetg;
+      ]
   | A.Lvar ((_, name) as id)
     when is_local_this env name && not (Emit_env.get_needs_local_this env) ->
     gather
-      [ emit_pos outer_pos;
+      [
+        emit_pos outer_pos;
         emit_local ~notice:NoNotice ~need_ref:false env id;
         emit_pos outer_pos;
         instr_istypec OpNull;
-        instr_not ]
+        instr_not;
+      ]
   | A.Lvar (pos, id) ->
     emit_pos_then outer_pos
     @@ instr (IIsset (IssetL (get_local env (pos, Local_id.get_name id))))
@@ -1269,19 +1307,23 @@ and emit_call_empty_expr env outer_pos ((annot, expr_) as expr) =
     when SN.Superglobals.is_superglobal (Local_id.get_name id)
          || Local_id.get_name id = SN.Superglobals.globals ->
     gather
-      [ instr_string @@ SU.Locals.strip_dollar (Local_id.get_name id);
+      [
+        instr_string @@ SU.Locals.strip_dollar (Local_id.get_name id);
         emit_pos outer_pos;
-        instr_emptyg ]
+        instr_emptyg;
+      ]
   | A.Lvar (pos, id) ->
     if (not (is_local_this env id)) || Emit_env.get_needs_local_this env then
       emit_pos_then outer_pos
       @@ instr_emptyl (get_local env (pos, Local_id.get_name id))
     else
       gather
-        [ emit_pos pos;
+        [
+          emit_pos pos;
           instr (IMisc (BareThis NoNotice));
           emit_pos outer_pos;
-          instr_not ]
+          instr_not;
+        ]
   | _ -> gather [emit_expr env expr; instr_not]
 
 and emit_unset_expr env expr =
@@ -1308,13 +1350,15 @@ and emit_set_range_expr env pos name kind args =
     emit_base ~notice:Notice ~is_object:false env MemberOpMode.Define 3 3 base
   in
   gather
-    [ base_expr;
+    [
+      base_expr;
       cls_expr;
       emit_expr env offset;
       emit_expr env src;
       count_instrs;
       base_setup;
-      instr (IFinal (SetRangeM (base_stack + cls_stack, range_op, size))) ]
+      instr (IFinal (SetRangeM (base_stack + cls_stack, range_op, size)));
+    ]
 
 and emit_call_isset_exprs env pos (exprs : Tast.expr list) =
   match exprs with
@@ -1325,22 +1369,28 @@ and emit_call_isset_exprs env pos (exprs : Tast.expr list) =
     let n = List.length exprs in
     let its_done = Label.next_regular () in
     gather
-      [ gather
+      [
+        gather
         @@ List.mapi exprs (fun i expr ->
                gather
-                 [ emit_call_isset_expr env pos expr;
+                 [
+                   emit_call_isset_expr env pos expr;
                    ( if i < n - 1 then
                      gather [instr_dup; instr_jmpz its_done; instr_popc]
                    else
-                     empty ) ]);
-        instr_label its_done ]
+                     empty );
+                 ]);
+        instr_label its_done;
+      ]
 
 and emit_exit env (expr_opt : Tast.expr option) =
   gather
-    [ (match expr_opt with
+    [
+      (match expr_opt with
       | None -> instr_int 0
       | Some e -> emit_expr env e);
-      instr_exit ]
+      instr_exit;
+    ]
 
 and emit_idx env pos (es : Tast.expr list) =
   let default =
@@ -1386,9 +1436,11 @@ and emit_iter ~collection f =
   in
   let iterate =
     gather
-      [ instr_label loop_next;
+      [
+        instr_label loop_next;
         f value_local key_local;
-        instr_iternextk iter loop_next value_local key_local ]
+        instr_iternextk iter loop_next value_local key_local;
+      ]
   in
   let iter_done =
     gather
@@ -1406,15 +1458,18 @@ and inline_gena_call env (arg : Tast.expr) =
   let async_eager_label = Label.next_regular () in
   (* before *)
   ( gather
-      [ load_array;
+      [
+        load_array;
         ( if hack_arr_dv_arrs () then
           instr_cast_dict
         else
           instr_cast_darray );
-        instr_popl arr_local ],
+        instr_popl arr_local;
+      ],
     (* inner *)
     gather
-      [ instr_nulluninit;
+      [
+        instr_nulluninit;
         instr_nulluninit;
         instr_nulluninit;
         instr_cgetl arr_local;
@@ -1432,13 +1487,16 @@ and inline_gena_call env (arg : Tast.expr) =
         ( emit_iter ~collection:(instr_cgetl arr_local)
         @@ fun value_local key_local ->
         gather
-          [ (* generate code for
+          [
+            (* generate code for
            arr_local[key_local] = WHResult (value_local) *)
-            instr_cgetl value_local;
+              instr_cgetl value_local;
             instr_whresult;
             instr_basel arr_local MemberOpMode.Define;
             instr_setm 0 (MemberKey.EL key_local);
-            instr_popc ] ) ],
+            instr_popc;
+          ] );
+      ],
     (* after *)
     instr_pushl arr_local )
 
@@ -1454,13 +1512,15 @@ and emit_await env pos (expr : Tast.expr) =
       | _ -> emit_expr env expr
     in
     gather
-      [ instrs;
+      [
+        instrs;
         emit_pos pos;
         instr_dup;
         instr_istypec OpNull;
         instr_jmpnz after_await;
         instr_await;
-        instr_label after_await ]
+        instr_label after_await;
+      ]
 
 and emit_callconv _env kind _e =
   match kind with
@@ -1474,9 +1534,11 @@ and get_reified_var_cexpr env pos name : Ast_class_expr.class_expr option =
     Some
       (Class_reified
          (gather
-            [ instrs;
+            [
+              instrs;
               instr_basec 0 MemberOpMode.Warn;
-              instr_querym 1 QueryOp.CGet (MemberKey.ET "classname") ]))
+              instr_querym 1 QueryOp.CGet (MemberKey.ET "classname");
+            ]))
 
 and emit_reified_generic_instrs pos ~is_fun index =
   let base =
@@ -1486,10 +1548,12 @@ and emit_reified_generic_instrs pos ~is_fun index =
         MemberOpMode.Warn
     else
       gather
-        [ instr_checkthis;
+        [
+          instr_checkthis;
           instr_baseh;
           instr_dim_warn_pt
-          @@ Hhbc_id.Prop.from_raw_string SU.Reified.reified_prop_name ]
+          @@ Hhbc_id.Prop.from_raw_string SU.Reified.reified_prop_name;
+        ]
   in
   emit_pos_then pos
   @@ gather
@@ -1671,13 +1735,15 @@ and emit_static_collection env ~transform_to_collection pos tv =
          "__ProvenanceSkipFrame"
   then
     gather
-      [ instr_nulluninit;
+      [
+        instr_nulluninit;
         instr_nulluninit;
         instr_nulluninit;
         col;
         instr_fcallfuncd
           (make_fcall_args 1)
-          (Hhbc_id.Function.from_raw_string "HH\\tag_provenance_here") ]
+          (Hhbc_id.Function.from_raw_string "HH\\tag_provenance_here");
+      ]
   else
     col
 
@@ -1685,14 +1751,16 @@ and emit_value_only_collection env pos es constructor =
   let limit = max_array_elem_on_stack () in
   let inline exprs =
     gather
-      [ gather
+      [
+        gather
         @@ List.map exprs ~f:(function
                (* Drop the keys *)
                | A.AFkvalue (_, e)
                | A.AFvalue e
                -> emit_expr env e);
         emit_pos pos;
-        instr @@ ILitConst (constructor @@ List.length exprs) ]
+        instr @@ ILitConst (constructor @@ List.length exprs);
+      ]
   in
   let outofline exprs =
     gather
@@ -1723,12 +1791,14 @@ and emit_keyvalue_collection name env pos es constructor =
       gather [instr_dup; instr_add_elemc]
   in
   gather
-    [ emit_pos pos;
+    [
+      emit_pos pos;
       instr (ILitConst constructor);
       gather
         (List.map es ~f:(expr_and_new env pos add_elem_instr instr_add_elemc));
       emit_pos pos;
-      transform_instr ]
+      transform_instr;
+    ]
 
 and emit_struct_array env pos es ctor =
   let es =
@@ -1845,33 +1915,41 @@ and emit_dynamic_collection env (expr : Tast.expr) es =
   | A.ValCollection (A.Set, _, _) ->
     if is_struct_init env es true then
       gather
-        [ emit_struct_array env pos es instr_newstructdict;
+        [
+          emit_struct_array env pos es instr_newstructdict;
           emit_pos pos;
-          instr_colfromarray (collection_type "Set") ]
+          instr_colfromarray (collection_type "Set");
+        ]
     else
       emit_keyvalue_collection "Set" env pos es (NewDictArray count)
   | A.ValCollection (A.ImmSet, _, _) ->
     if is_struct_init env es true then
       gather
-        [ emit_struct_array env pos es instr_newstructdict;
+        [
+          emit_struct_array env pos es instr_newstructdict;
           emit_pos pos;
-          instr_colfromarray (collection_type "ImmSet") ]
+          instr_colfromarray (collection_type "ImmSet");
+        ]
     else
       emit_keyvalue_collection "ImmSet" env pos es (NewDictArray count)
   | A.KeyValCollection (A.Map, _, _) ->
     if is_struct_init env es true then
       gather
-        [ emit_struct_array env pos es instr_newstructdict;
+        [
+          emit_struct_array env pos es instr_newstructdict;
           emit_pos pos;
-          instr_colfromarray (collection_type "Map") ]
+          instr_colfromarray (collection_type "Map");
+        ]
     else
       emit_keyvalue_collection "Map" env pos es (NewDictArray count)
   | A.KeyValCollection (A.ImmMap, _, _) ->
     if is_struct_init env es true then
       gather
-        [ emit_struct_array env pos es instr_newstructdict;
+        [
+          emit_struct_array env pos es instr_newstructdict;
           emit_pos pos;
-          instr_colfromarray (collection_type "ImmMap") ]
+          instr_colfromarray (collection_type "ImmMap");
+        ]
     else
       emit_keyvalue_collection "ImmMap" env pos es (NewDictArray count)
   | A.Collection ((_, name), _, _)
@@ -1881,9 +1959,11 @@ and emit_dynamic_collection env (expr : Tast.expr) es =
          || SU.strip_ns name = "ImmMap" ->
     if is_struct_init env es true then
       gather
-        [ emit_struct_array env pos es instr_newstructdict;
+        [
+          emit_struct_array env pos es instr_newstructdict;
           emit_pos pos;
-          instr_colfromarray (collection_type (SU.strip_ns name)) ]
+          instr_colfromarray (collection_type (SU.strip_ns name));
+        ]
     else
       emit_keyvalue_collection name env pos es (NewDictArray count)
   | A.Varray _ ->
@@ -1938,11 +2018,13 @@ and emit_named_collection env (expr : Tast.expr) pos name fields =
       let ((_, ty), _) = expr in
       let annot = (pos, ty) in
       gather
-        [ emit_collection
+        [
+          emit_collection
             env
             (annot, A.Collection ((pos, "vec"), None, fields))
             fields;
-          instr_colfromarray collection_type ]
+          instr_colfromarray collection_type;
+        ]
   | "Map"
   | "ImmMap"
   | "Set"
@@ -1954,11 +2036,13 @@ and emit_named_collection env (expr : Tast.expr) pos name fields =
       emit_collection ~transform_to_collection:collection_type env expr fields
   | "Pair" ->
     gather
-      [ gather
+      [
+        gather
           (List.map fields (function
               | A.AFvalue e -> emit_expr env e
               | _ -> failwith "impossible Pair argument"));
-        instr (ILitConst NewPair) ]
+        instr (ILitConst NewPair);
+      ]
   | _ -> failwith @@ "collection: " ^ name ^ " does not exist"
 
 and is_php_array = function
@@ -2035,9 +2119,11 @@ and emit_jmpz env (expr : Tast.expr) label : emit_jmp_result =
           let r2 = emit_jmpz env e2 label in
           let instrs =
             gather
-              [ r1.instrs;
+              [
+                r1.instrs;
                 r2.instrs;
-                optional r1.is_label_used [instr_label skip_label] ]
+                optional r1.is_label_used [instr_label skip_label];
+              ]
           in
           {
             instrs = with_pos instrs;
@@ -2130,8 +2216,10 @@ and emit_jmpnz env annot (expr_ : Tast.expr_) label : emit_jmp_result =
             instrs =
               with_pos
               @@ gather
-                   [ r1.instrs;
-                     optional r1.is_label_used [instr_label skip_label] ];
+                   [
+                     r1.instrs;
+                     optional r1.is_label_used [instr_label skip_label];
+                   ];
             is_fallthrough = r1.is_label_used;
             is_label_used = false;
           }
@@ -2141,9 +2229,11 @@ and emit_jmpnz env annot (expr_ : Tast.expr_) label : emit_jmp_result =
             instrs =
               with_pos
               @@ gather
-                   [ r1.instrs;
+                   [
+                     r1.instrs;
                      r2.instrs;
-                     optional r1.is_label_used [instr_label skip_label] ];
+                     optional r1.is_label_used [instr_label skip_label];
+                   ];
             is_fallthrough = r2.is_fallthrough || r1.is_label_used;
             is_label_used = r2.is_label_used;
           }
@@ -2166,7 +2256,8 @@ and emit_jmpnz env annot (expr_ : Tast.expr_) label : emit_jmp_result =
       | _ ->
         {
           instrs =
-            with_pos @@ gather [emit_expr env (annot, expr_); instr_jmpnz label];
+            with_pos
+            @@ gather [emit_expr env (annot, expr_); instr_jmpnz label];
           is_fallthrough = true;
           is_label_used = true;
         }
@@ -2185,12 +2276,14 @@ and emit_short_circuit_op env annot (expr : Tast.expr_) =
   in
   if r1.is_fallthrough then
     gather
-      [ r1.instrs;
+      [
+        r1.instrs;
         emit_pos pos;
         instr_false;
         instr_jmp its_done;
         if_true;
-        instr_label its_done ]
+        instr_label its_done;
+      ]
   else
     gather [r1.instrs; if_true]
 
@@ -2207,7 +2300,8 @@ and emit_null_coalesce_assignment env pos (e1 : Tast.expr) (e2 : Tast.expr) =
     | None -> empty
   in
   gather
-    [ quiet_instr;
+    [
+      quiet_instr;
       instr_dup;
       instr_istypec OpNull;
       instr_jmpnz do_set_label;
@@ -2224,7 +2318,8 @@ and emit_null_coalesce_assignment env pos (e1 : Tast.expr) (e2 : Tast.expr) =
         LValOp.Set
         e1
         (Some e2);
-      instr_label end_label ]
+      instr_label end_label;
+    ]
 
 and emit_quiet_expr
     ?(null_coalesce_assignment = false)
@@ -2236,10 +2331,12 @@ and emit_quiet_expr
   | A.Lvar (name_pos, name)
     when Local_id.get_name name = SN.Superglobals.globals ->
     ( gather
-        [ emit_pos name_pos;
+        [
+          emit_pos name_pos;
           instr_string (SU.Locals.strip_dollar (Local_id.get_name name));
           emit_pos pos;
-          instr (IGet CGetG) ],
+          instr (IGet CGetG);
+        ],
       None )
   | A.Lvar (_, name) when not (is_local_this env name) ->
     (instr_cgetquietl (get_local env (pos, Local_id.get_name name)), None)
@@ -2288,11 +2385,13 @@ and emit_store_for_simple_base
       instr_setm 0 mk
   in
   gather
-    [ base_expr_instrs_begin;
+    [
+      base_expr_instrs_begin;
       base_expr_instrs_end;
       emit_pos pos;
       base_setup_instrs;
-      expr ]
+      expr;
+    ]
 
 (* get LocalTempKind option for a given expression
    - None - expression can be emitted as is
@@ -2439,42 +2538,49 @@ and emit_array_get_worker
         (* both base and expression don't need to store anything *)
         Array_get_regular
           (gather
-             [ base.base_instrs;
+             [
+               base.base_instrs;
                elem_expr_instrs;
                base.cls_instrs;
                emit_pos outer_pos;
                base.setup_instrs;
                make_final
-                 (base.base_stack_size + base.cls_stack_size + elem_stack_size)
+                 (base.base_stack_size + base.cls_stack_size + elem_stack_size);
              ])
       | (Array_get_base_regular base, Some local_kind) ->
         (* base does not need temp locals but index expression does *)
         let local = Local.get_unnamed_local () in
         let load =
-          [ (* load base and indexer, value of indexer will be saved in local *)
-            ( gather [base.base_instrs; elem_expr_instrs],
-              Some (local, local_kind) );
+          [
+            (* load base and indexer, value of indexer will be saved in local *)
+              ( gather [base.base_instrs; elem_expr_instrs],
+                Some (local, local_kind) );
             (* finish loading the value *)
-            ( gather
-                [ base.base_instrs;
-                  emit_pos outer_pos;
-                  base.setup_instrs;
-                  make_final
-                    ( base.base_stack_size
-                    + base.cls_stack_size
-                    + elem_stack_size ) ],
-              None ) ]
+              ( gather
+                  [
+                    base.base_instrs;
+                    emit_pos outer_pos;
+                    base.setup_instrs;
+                    make_final
+                      ( base.base_stack_size
+                      + base.cls_stack_size
+                      + elem_stack_size );
+                  ],
+                None );
+          ]
         in
         let store =
           gather
-            [ emit_store_for_simple_base
+            [
+              emit_store_for_simple_base
                 ~is_base:false
                 env
                 outer_pos
                 elem_stack_size
                 base_expr
                 local;
-              instr_popc ]
+              instr_popc;
+            ]
         in
         Array_get_inout { load; store }
       | (Array_get_base_inout base, None) ->
@@ -2482,16 +2588,20 @@ and emit_array_get_worker
        simply concat two instruction sequences *)
         let load =
           base.load.base_instrs
-          @ [ ( gather
-                  [ elem_expr_instrs;
+          @ [
+              ( gather
+                  [
+                    elem_expr_instrs;
                     base.load.cls_instrs;
                     emit_pos outer_pos;
                     base.load.setup_instrs;
                     make_final
                       ( base.load.base_stack_size
                       + base.load.cls_stack_size
-                      + elem_stack_size ) ],
-                None ) ]
+                      + elem_stack_size );
+                  ],
+                None );
+            ]
         in
         let store = gather [base.store; instr_setm 0 mk; instr_popc] in
         Array_get_inout { load; store }
@@ -2502,17 +2612,21 @@ and emit_array_get_worker
         let load =
           (* load base *)
           base.load.base_instrs
-          @ [ (* load index, value will be saved in local *)
-              (elem_expr_instrs, Some (local, local_kind));
+          @ [
+              (* load index, value will be saved in local *)
+                (elem_expr_instrs, Some (local, local_kind));
               ( gather
-                  [ base.load.cls_instrs;
+                  [
+                    base.load.cls_instrs;
                     emit_pos outer_pos;
                     base.load.setup_instrs;
                     make_final
                       ( base.load.base_stack_size
                       + base.load.cls_stack_size
-                      + elem_stack_size ) ],
-                None ) ]
+                      + elem_stack_size );
+                  ],
+                None );
+            ]
         in
         let store =
           gather [base.store; instr_setm 0 (MemberKey.EL local); instr_popc]
@@ -2593,12 +2707,14 @@ and emit_obj_get
         in
         let instr =
           gather
-            [ base_expr_instrs_begin;
+            [
+              base_expr_instrs_begin;
               prop_expr_instrs;
               base_expr_instrs_end;
               emit_pos pos;
               base_setup_instrs;
-              final_instr ]
+              final_instr;
+            ]
         in
         (instr, querym_n_unpopped)
     end
@@ -2971,7 +3087,8 @@ and emit_base_worker
             load =
               {
                 (* concat index evaluation to base *)
-                base_instrs = base.load.base_instrs @ [(elem_expr_instrs, None)];
+                base_instrs =
+                  base.load.base_instrs @ [(elem_expr_instrs, None)];
                 cls_instrs = base.load.cls_instrs;
                 setup_instrs = make_setup_instrs base.load.setup_instrs;
                 base_stack_size = base.load.base_stack_size + elem_stack_size;
@@ -2988,8 +3105,10 @@ and emit_base_worker
               {
                 base_instrs =
                   base.load.base_instrs
-                  @ [ (* evaluate index, result will be stored in local *)
-                      (elem_expr_instrs, Some (local, local_kind)) ];
+                  @ [
+                      (* evaluate index, result will be stored in local *)
+                        (elem_expr_instrs, Some (local, local_kind));
+                    ];
                 cls_instrs = base.load.cls_instrs;
                 setup_instrs = make_setup_instrs base.load.setup_instrs;
                 base_stack_size = base.load.base_stack_size + elem_stack_size;
@@ -2997,7 +3116,10 @@ and emit_base_worker
               };
             store =
               gather
-                [base.store; instr_dim MemberOpMode.Define (MemberKey.EL local)];
+                [
+                  base.store;
+                  instr_dim MemberOpMode.Define (MemberKey.EL local);
+                ];
           }
     end
   | A.Obj_get (base_expr, prop_expr, null_flavor) ->
@@ -3227,9 +3349,11 @@ and emit_args_and_inout_setters env (args : Tast.expr list) =
           in
           let setter =
             gather
-              [ setter_base;
+              [
+                setter_base;
                 instr_setm 0 (get_elem_member_key env 0 opt_elem_expr);
-                instr_popc ]
+                instr_popc;
+              ]
           in
           (instrs, setter)
         | Array_get_inout { load; store } -> rebuild_load_store load store
@@ -3348,14 +3472,18 @@ and emit_call_lhs_and_fcall
     let obj = emit_object_expr env obj in
     let tmp = Local.get_unnamed_local () in
     ( gather
-        [ obj;
+        [
+          obj;
           instr_nulluninit;
           instr_nulluninit;
           emit_expr env method_expr;
-          instr_popl tmp ],
+          instr_popl tmp;
+        ],
       gather
-        [ instr_pushl tmp;
-          instr_fcallobjmethod fcall_args null_flavor inout_arg_positions ] )
+        [
+          instr_pushl tmp;
+          instr_fcallobjmethod fcall_args null_flavor inout_arg_positions;
+        ] )
   | A.Class_const (cid, (_, id)) ->
     let cexpr =
       class_id_to_class_expr ~resolve_self:false (Emit_env.get_scope env) cid
@@ -3398,14 +3526,16 @@ and emit_call_lhs_and_fcall
         let (generics, fcall_args) = emit_generics fcall_args in
         let emit_fcall instr_meth =
           gather
-            [ generics;
+            [
+              generics;
               instr_meth;
               emit_expr env expr;
               instr_classgetc;
               instr_fcallclsmethod
                 ~is_log_as_dynamic_call:DontLogAsDynamicCall
                 fcall_args
-                [] ]
+                [];
+            ]
         in
         ( gather [instr_nulluninit; instr_nulluninit; instr_nulluninit],
           emit_fcall (instr_string method_id_string) )
@@ -3413,16 +3543,20 @@ and emit_call_lhs_and_fcall
         (* TODO(T31677864): Implement reification here *)
         let tmp = Local.get_unnamed_local () in
         ( gather
-            [ instr_nulluninit;
+            [
+              instr_nulluninit;
               instr_nulluninit;
               instr_nulluninit;
               instrs;
-              instr_popl tmp ],
+              instr_popl tmp;
+            ],
           gather
-            [ instr_string method_id_string;
+            [
+              instr_string method_id_string;
               instr_pushl tmp;
               instr_classgetc;
-              instr_fcallclsmethod fcall_args [] ] )
+              instr_fcallclsmethod fcall_args [];
+            ] )
     end
   | A.Class_get (cid, e) ->
     let cexpr =
@@ -3445,56 +3579,70 @@ and emit_call_lhs_and_fcall
       | Class_id cid ->
         let tmp = Local.get_unnamed_local () in
         ( gather
-            [ instr_nulluninit;
+            [
+              instr_nulluninit;
               instr_nulluninit;
               instr_nulluninit;
               emit_meth_name ();
-              instr_popl tmp ],
+              instr_popl tmp;
+            ],
           gather
-            [ instr_pushl tmp;
+            [
+              instr_pushl tmp;
               emit_known_class_id env cid;
-              instr_fcallclsmethod fcall_args inout_arg_positions ] )
+              instr_fcallclsmethod fcall_args inout_arg_positions;
+            ] )
       | Class_special clsref ->
         let tmp = Local.get_unnamed_local () in
         ( gather
-            [ instr_nulluninit;
+            [
+              instr_nulluninit;
               instr_nulluninit;
               instr_nulluninit;
               emit_meth_name ();
-              instr_popl tmp ],
+              instr_popl tmp;
+            ],
           gather [instr_pushl tmp; instr_fcallclsmethods fcall_args clsref] )
       | Class_expr expr ->
         let cls = Local.get_unnamed_local () in
         let meth = Local.get_unnamed_local () in
         ( gather
-            [ instr_nulluninit;
+            [
+              instr_nulluninit;
               instr_nulluninit;
               instr_nulluninit;
               emit_expr env expr;
               instr_popl cls;
               emit_meth_name ();
-              instr_popl meth ],
+              instr_popl meth;
+            ],
           gather
-            [ instr_pushl meth;
+            [
+              instr_pushl meth;
               instr_pushl cls;
               instr_classgetc;
-              instr_fcallclsmethod fcall_args inout_arg_positions ] )
+              instr_fcallclsmethod fcall_args inout_arg_positions;
+            ] )
       | Class_reified instrs ->
         let cls = Local.get_unnamed_local () in
         let meth = Local.get_unnamed_local () in
         ( gather
-            [ instr_nulluninit;
+            [
+              instr_nulluninit;
               instr_nulluninit;
               instr_nulluninit;
               instrs;
               instr_popl cls;
               emit_meth_name ();
-              instr_popl meth ],
+              instr_popl meth;
+            ],
           gather
-            [ instr_pushl meth;
+            [
+              instr_pushl meth;
               instr_pushl cls;
               instr_classgetc;
-              instr_fcallclsmethod fcall_args inout_arg_positions ] )
+              instr_fcallclsmethod fcall_args inout_arg_positions;
+            ] )
     end
   | A.Id ((_, s) as id) ->
     let fq_id =
@@ -3528,11 +3676,13 @@ and emit_call_lhs_and_fcall
   | _ ->
     let tmp = Local.get_unnamed_local () in
     ( gather
-        [ instr_nulluninit;
+        [
+          instr_nulluninit;
           instr_nulluninit;
           instr_nulluninit;
           emit_expr env expr;
-          instr_popl tmp ],
+          instr_popl tmp;
+        ],
       gather [instr_pushl tmp; instr_fcallfunc fcall_args inout_arg_positions]
     )
 
@@ -3589,13 +3739,15 @@ and emit_special_function
       gather
       @@ List.mapi args (fun i arg ->
              gather
-               [ emit_expr env arg;
+               [
+                 emit_expr env arg;
                  emit_pos pos;
                  instr (IOp Print);
                  ( if i = nargs - 1 then
                    empty
                  else
-                   instr_popc ) ])
+                   instr_popc );
+               ])
     in
     Some instrs
   | ("hh\\invariant", e :: rest) ->
@@ -3604,21 +3756,24 @@ and emit_special_function
     let expr_id = (annot, A.Id (pos, "\\hh\\invariant_violation")) in
     Some
       (gather
-         [ (* Could use emit_jmpnz for better code *)
-           emit_expr env e;
+         [
+           (* Could use emit_jmpnz for better code *)
+             emit_expr env e;
            instr_jmpnz l;
            emit_ignored_expr
              env
              (annot, A.Call (Aast.Cnormal, expr_id, [], rest, uargs));
            Emit_fatal.emit_fatal_runtime pos "invariant_violation";
            instr_label l;
-           instr_null ])
+           instr_null;
+         ])
   | ("assert", _) ->
     let l0 = Label.next_regular () in
     let l1 = Label.next_regular () in
     Some
       (gather
-         [ instr_string "zend.assertions";
+         [
+           instr_string "zend.assertions";
            instr_fcallbuiltin 1 1 0 "ini_get";
            instr_int 0;
            instr_gt;
@@ -3627,7 +3782,8 @@ and emit_special_function
            instr_jmp l1;
            instr_label l0;
            instr_true;
-           instr_label l1 ])
+           instr_label l1;
+         ])
   | ("hh\\sequence", []) -> Some instr_null
   | ("hh\\sequence", args) ->
     Some
@@ -3643,14 +3799,16 @@ and emit_special_function
     in
     Some
       (gather
-         [ emit_name_string env arg1;
+         [
+           emit_name_string env arg1;
            instr (IOp CastString);
            ( if nargs = 1 then
              instr_true
            else
              gather [emit_expr env (List.nth_exn args 1); instr (IOp CastBool)]
            );
-           instr (IMisc (OODeclExists class_kind)) ])
+           instr (IMisc (OODeclExists class_kind));
+         ])
   | (("exit" | "die"), _) when nargs = 0 || nargs = 1 ->
     Some (emit_exit env (List.hd args))
   | ("hh\\fun", _) ->
@@ -3690,7 +3848,8 @@ and emit_special_function
       | [obj_expr; method_name] ->
         Some
           (gather
-             [ emit_expr env obj_expr;
+             [
+               emit_expr env obj_expr;
                emit_expr env method_name;
                ( if
                  Hhbc_options.emit_inst_meth_pointers
@@ -3698,7 +3857,8 @@ and emit_special_function
                then
                  instr_resolve_obj_method
                else
-                 instr (ILitConst (NewVArray 2)) ) ])
+                 instr (ILitConst (NewVArray 2)) );
+             ])
       | _ ->
         Emit_fatal.raise_fatal_runtime
           pos
@@ -3709,11 +3869,15 @@ and emit_special_function
   | ("hh\\class_meth", _) ->
     begin
       match args with
-      | [((_, A.Class_const _) as class_name); ((_, A.String _) as method_name)]
+      | [
+          ((_, A.Class_const _) as class_name);
+          ((_, A.String _) as method_name);
+        ]
       | [((_, A.String _) as class_name); ((_, A.String _) as method_name)] ->
         Some
           (gather
-             [ emit_expr env class_name;
+             [
+               emit_expr env class_name;
                emit_expr env method_name;
                ( if
                  Hhbc_options.emit_cls_meth_pointers
@@ -3721,11 +3885,13 @@ and emit_special_function
                then
                  instr_resolve_cls_method NoWarn
                else
-                 instr (ILitConst (NewVArray 2)) ) ])
+                 instr (ILitConst (NewVArray 2)) );
+             ])
       | [class_name; method_name] ->
         Some
           (gather
-             [ emit_expr env class_name;
+             [
+               emit_expr env class_name;
                emit_expr env method_name;
                ( if
                  Hhbc_options.emit_cls_meth_pointers
@@ -3733,7 +3899,8 @@ and emit_special_function
                then
                  instr_resolve_cls_method Warn
                else
-                 instr (ILitConst (NewVArray 2)) ) ])
+                 instr (ILitConst (NewVArray 2)) );
+             ])
       | _ ->
         Emit_fatal.raise_fatal_runtime
           pos
@@ -3747,12 +3914,14 @@ and emit_special_function
       | [gkey; gvalue] ->
         Some
           (gather
-             [ emit_expr env gkey;
+             [
+               emit_expr env gkey;
                emit_expr env gvalue;
                emit_pos pos;
                instr (IMutator SetG);
                instr_popc;
-               instr_null ])
+               instr_null;
+             ])
       | _ ->
         Emit_fatal.raise_fatal_runtime
           pos
@@ -3766,10 +3935,12 @@ and emit_special_function
       | [gkey] ->
         Some
           (gather
-             [ emit_expr env gkey;
+             [
+               emit_expr env gkey;
                emit_pos pos;
                instr (IMutator UnsetG);
-               instr_null ])
+               instr_null;
+             ])
       | _ ->
         Emit_fatal.raise_fatal_runtime
           pos
@@ -3799,9 +3970,11 @@ and emit_special_function
              || Local_id.get_name arg_str = SN.Superglobals.globals ->
         Some
           (gather
-             [ emit_local ~notice:NoNotice ~need_ref:false env arg_id;
+             [
+               emit_local ~notice:NoNotice ~need_ref:false env arg_id;
                emit_pos pos;
-               instr (IIsset (IsTypeC i)) ])
+               instr (IIsset (IsTypeC i));
+             ])
       | ([(_, A.Lvar (arg_pos, arg_str))], Some i, _)
         when not (is_local_this env arg_str) ->
         Some
@@ -3858,13 +4031,15 @@ and emit_call
     in
     ( empty,
       gather
-        [ gather @@ List.init num_uninit ~f:(fun _ -> instr_nulluninit);
+        [
+          gather @@ List.init num_uninit ~f:(fun _ -> instr_nulluninit);
           instr_lhs;
           instr_args;
           instr_uargs;
           emit_pos pos;
           instr_fcall;
-          instr_inout_setters ],
+          instr_inout_setters;
+        ],
       empty )
   in
   match (expr_, args) with
@@ -4107,13 +4282,15 @@ and emit_lval_op_list
     in
     let rest =
       gather
-        [ ( if is_ltr then
+        [
+          ( if is_ltr then
             lhs_instrs
           else
             empty );
           rhs_instrs;
           set_op;
-          instr_popc ]
+          instr_popc;
+        ]
     in
     (lhs, rest)
 
@@ -4167,10 +4344,12 @@ and emit_lval_op
       | Some (_, A.Yield af) ->
         let temp = Local.get_unnamed_local () in
         ( gather
-            [ emit_yield env pos af;
+            [
+              emit_yield env pos af;
               instr_setl temp;
               instr_popc;
-              instr_pushl temp ],
+              instr_pushl temp;
+            ],
           1 )
       | Some
           ( (pos, _),
@@ -4309,7 +4488,8 @@ and emit_lval_op_nonlist_steps
       emit_pos_then pos @@ emit_final_member_op total_stack_size op mk
     in
     ( gather
-        [ ( if null_coalesce_assignment then
+        [
+          ( if null_coalesce_assignment then
             empty
           else
             base_expr_instrs_begin );
@@ -4317,7 +4497,8 @@ and emit_lval_op_nonlist_steps
           ( if null_coalesce_assignment then
             empty
           else
-            base_expr_instrs_end ) ],
+            base_expr_instrs_end );
+        ],
       rhs_instrs,
       gather [emit_pos pos; base_setup_instrs; final_instr] )
   | A.Obj_get (e1, e2, null_flavor) ->
@@ -4368,7 +4549,8 @@ and emit_lval_op_nonlist_steps
       emit_pos_then pos @@ emit_final_member_op total_stack_size op mk
     in
     ( gather
-        [ ( if null_coalesce_assignment then
+        [
+          ( if null_coalesce_assignment then
             empty
           else
             base_expr_instrs_begin );
@@ -4376,7 +4558,8 @@ and emit_lval_op_nonlist_steps
           ( if null_coalesce_assignment then
             empty
           else
-            base_expr_instrs_end ) ],
+            base_expr_instrs_end );
+        ],
       rhs_instrs,
       gather [base_setup_instrs; final_instr] )
   | A.Class_get (cid, prop) ->
@@ -4412,19 +4595,24 @@ and emit_unop env pos op e =
   match op with
   | Ast_defs.Utild ->
     gather [emit_expr env e; emit_pos_then pos @@ from_unop op]
-  | Ast_defs.Unot -> gather [emit_expr env e; emit_pos_then pos @@ from_unop op]
+  | Ast_defs.Unot ->
+    gather [emit_expr env e; emit_pos_then pos @@ from_unop op]
   | Ast_defs.Uplus ->
     gather
-      [ emit_pos pos;
+      [
+        emit_pos pos;
         instr (ILitConst (Int Int64.zero));
         emit_expr env e;
-        emit_pos_then pos @@ from_unop op ]
+        emit_pos_then pos @@ from_unop op;
+      ]
   | Ast_defs.Uminus ->
     gather
-      [ emit_pos pos;
+      [
+        emit_pos pos;
         instr (ILitConst (Int Int64.zero));
         emit_expr env e;
-        emit_pos_then pos @@ from_unop op ]
+        emit_pos_then pos @@ from_unop op;
+      ]
   | Ast_defs.Uincr
   | Ast_defs.Udecr
   | Ast_defs.Upincr
@@ -4436,13 +4624,15 @@ and emit_unop env pos op e =
     @@ fun () ->
     let temp_local = Local.get_unnamed_local () in
     gather
-      [ emit_pos pos;
+      [
+        emit_pos pos;
         instr_silence_start temp_local;
         create_try_catch
           (emit_expr env e)
           (gather [emit_pos pos; instr_silence_end temp_local]);
         emit_pos pos;
-        instr_silence_end temp_local ]
+        instr_silence_end temp_local;
+      ]
 
 and emit_exprs env (exprs : Tast.expr list) =
   match exprs with

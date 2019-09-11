@@ -222,15 +222,19 @@ let emit_param_default_value_setter ?(is_native = false) env pos params =
     let dvo = Hhas_param.default_value param in
     Option.map dvo ~f:(fun (l, e) ->
         gather
-          [ instr_label l;
+          [
+            instr_label l;
             ( if nop_requirements e then
               instr_nop
             else
               gather
-                [ Emit_expression.emit_expr env e;
+                [
+                  Emit_expression.emit_expr env e;
                   Emit_pos.emit_pos pos;
                   instr_setl (Local.Named param_name);
-                  instr_popc ] ) ])
+                  instr_popc;
+                ] );
+          ])
   in
   let setters = List.filter_map params ~f:param_to_setter in
   if List.is_empty setters then

@@ -917,14 +917,20 @@ type t =
 
 let watchman_expression_terms =
   let module J = Hh_json_helpers.AdhocJsonHelpers in
-  [ J.pred "not"
-    @@ [ J.pred "anyof"
-         @@ [ J.strlist ["name"; ".hg"];
+  [
+    J.pred "not"
+    @@ [
+         J.pred "anyof"
+         @@ [
+              J.strlist ["name"; ".hg"];
               J.strlist ["dirname"; ".hg"];
               J.strlist ["name"; ".git"];
               J.strlist ["dirname"; ".git"];
               J.strlist ["name"; ".svn"];
-              J.strlist ["dirname"; ".svn"] ] ] ]
+              J.strlist ["dirname"; ".svn"];
+            ];
+       ];
+  ]
 
 let init
     {

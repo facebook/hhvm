@@ -519,9 +519,11 @@ and check_tparams_constraints ~use_pos ~ety_env env tparams =
                 log_types
                   use_pos
                   env
-                  [ Log_head
+                  [
+                    Log_head
                       ( "check_tparams_constraints: add_check_constraint_todo",
-                        [Log_type ("ty", ty); Log_type ("x_ty", x_ty)] ) ]));
+                        [Log_type ("ty", ty); Log_type ("x_ty", x_ty)] );
+                  ]));
           TGenConstraint.add_check_constraint_todo
             env
             ~use_pos

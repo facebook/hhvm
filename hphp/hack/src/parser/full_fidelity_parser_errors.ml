@@ -1401,12 +1401,14 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
           (* __NonRx attribute is found with single string argument.
       This is ok for declarations for not allowed for lambdas *)
           | Some
-              [ {
+              [
+                {
                   syntax =
                     LiteralExpression
                       { literal_expression = { syntax = Token token; _ }; _ };
                   _;
-                } ]
+                };
+              ]
             when Token.kind token = TokenKind.DoubleQuotedStringLiteral
                  || Token.kind token = TokenKind.SingleQuotedStringLiteral ->
             if is_decl then
@@ -2700,16 +2702,19 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
         | PipeVariableExpression _ -> []
         | SubscriptExpression { subscript_index = { syntax = Missing; _ }; _ }
           ->
-          [ make_error_from_node
+          [
+            make_error_from_node
               node
-              SyntaxError.instanceof_missing_subscript_index ]
+              SyntaxError.instanceof_missing_subscript_index;
+          ]
         | SubscriptExpression { subscript_receiver; _ } ->
           helper subscript_receiver ~inside_scope_resolution
         | MemberSelectionExpression { member_object; _ } ->
           if inside_scope_resolution then
-            [ make_error_from_node
+            [
+              make_error_from_node
                 node
-                SyntaxError.instanceof_memberselection_inside_scoperesolution
+                SyntaxError.instanceof_memberselection_inside_scoperesolution;
             ]
           else
             helper member_object ~inside_scope_resolution
@@ -2731,9 +2736,11 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
           when Token.kind name = TokenKind.Variable ->
           helper scope_resolution_qualifier ~inside_scope_resolution:true
         | ScopeResolutionExpression _ ->
-          [ make_error_from_node
+          [
+            make_error_from_node
               node
-              SyntaxError.instanceof_invalid_scope_resolution ]
+              SyntaxError.instanceof_invalid_scope_resolution;
+          ]
         | _ ->
           let error_msg =
             SyntaxError.instanceof_new_unknown_node
@@ -2967,9 +2974,11 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
         (* Dependent awaits are not allowed currently *)
         | PrefixUnaryExpression { prefix_unary_operator = op; _ }
           when token_kind op = Some TokenKind.Await ->
-          [ make_error_from_node
+          [
+            make_error_from_node
               await_node
-              SyntaxError.invalid_await_position_dependent ]
+              SyntaxError.invalid_await_position_dependent;
+          ]
         (* Unary based expressions have their own custom fanout *)
         | PrefixUnaryExpression { prefix_unary_operator = operator; _ }
         | PostfixUnaryExpression { postfix_unary_operator = operator; _ }
@@ -3143,9 +3152,11 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
               then
                 let node = ctr_call.constructor_call_type in
                 let constructor_name = text ctr_call.constructor_call_type in
-                [ make_error_from_node
+                [
+                  make_error_from_node
                     node
-                    (SyntaxError.error2038 constructor_name) ]
+                    (SyntaxError.error2038 constructor_name);
+                ]
               else
                 []
           else

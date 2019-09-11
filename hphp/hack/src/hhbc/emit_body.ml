@@ -44,11 +44,13 @@ let emit_method_prolog ~env ~pos ~params ~ast_params ~should_emit_init_this =
       | (RGH.MaybeReified, Some h) ->
         Some
           (gather
-             [ Emit_expression.get_type_structure_for_hint
+             [
+               Emit_expression.get_type_structure_for_hint
                  env
                  ~targ_map:SMap.empty
                  h;
-               instr (IMisc (VerifyParamTypeTS param_name)) ])
+               instr (IMisc (VerifyParamTypeTS param_name));
+             ])
       | (RGH.DefinitelyReified, Some h) ->
         let check =
           instr_istypel (Local.Named (Hhas_param.name param)) OpNull
@@ -75,10 +77,12 @@ let rec emit_def env def =
     let cns_name = snd c.A.cst_name in
     let cns_id = Hhbc_id.Const.from_ast_name cns_name in
     gather
-      [ Emit_expression.emit_expr env c.A.cst_value;
+      [
+        Emit_expression.emit_expr env c.A.cst_value;
         Emit_pos.emit_pos_then c.A.cst_span
         @@ instr (IIncludeEvalDefine (DefCns cns_id));
-        instr_popc ]
+        instr_popc;
+      ]
   (* We assume that SetNamespaceEnv does namespace setting *)
   | A.Namespace (_, defs) -> emit_defs env defs
   | _ -> empty
@@ -124,7 +128,8 @@ and emit_defs env defs =
     
     | [A.Stmt s; A.Stmt (_, A.Markup ((_, ""), None))] ->
       Emit_statement.emit_final_statement env s
-    | [d] -> gather [emit_def env d; Emit_statement.emit_dropthrough_return env]
+    | [d] ->
+      gather [emit_def env d; Emit_statement.emit_dropthrough_return env]
     | d :: defs ->
       let i1 = emit_def env d in
       let i2 = aux env defs in
@@ -248,13 +253,15 @@ let emit_deprecation_warning scope deprecation_info =
       empty
     else
       gather
-        [ trait_instrs;
+        [
+          trait_instrs;
           instr_string deprecation_string;
           concat_instruction;
           instr_int64 sampling_rate;
           instr_int error_code;
           instr_trigger_sampled_error;
-          instr_popc ]
+          instr_popc;
+        ]
 
 let rec is_awaitable h =
   match snd h with
@@ -286,11 +293,13 @@ let emit_verify_out params =
         if Hhas_param.is_inout p then
           Some
             (gather
-               [ instr_cgetl (Local.Named (Hhas_param.name p));
+               [
+                 instr_cgetl (Local.Named (Hhas_param.name p));
                  ( if is_verifiable p then
                    instr_verifyOutType (Param_unnamed i)
                  else
-                   empty ) ])
+                   empty );
+               ])
         else if
           Hhas_param.is_reference p
           && is_verifiable p
@@ -298,9 +307,11 @@ let emit_verify_out params =
         then
           Some
             (gather
-               [ instr_cgetl (Local.Named (Hhas_param.name p));
+               [
+                 instr_cgetl (Local.Named (Hhas_param.name p));
                  instr_verifyOutType (Param_unnamed i);
-                 instr_popc ])
+                 instr_popc;
+               ])
         else
           None)
   in
@@ -316,9 +327,11 @@ let modify_prog_for_debugger_eval instr_seq =
   else
     let (h, t) = List.split_n instr_list (instr_length - 3) in
     match t with
-    | [ Hhbc_ast.IBasic Hhbc_ast.PopC;
-        Hhbc_ast.ILitConst (Hhbc_ast.Int 1L);
-        Hhbc_ast.IContFlow Hhbc_ast.RetC ] ->
+    | [
+     Hhbc_ast.IBasic Hhbc_ast.PopC;
+     Hhbc_ast.ILitConst (Hhbc_ast.Int 1L);
+     Hhbc_ast.IContFlow Hhbc_ast.RetC;
+    ] ->
       gather [instrs h; instr_retc]
     | _ -> instr_seq
 
@@ -567,7 +580,8 @@ let emit_body
      * and header content is empty *)
     let header_content =
       gather
-        [ ( if is_native then
+        [
+          ( if is_native then
             empty
           else
             emit_method_prolog
@@ -577,7 +591,8 @@ let emit_body
               ~ast_params
               ~should_emit_init_this );
           emit_deprecation_warning scope deprecation_info;
-          generator_instr ]
+          generator_instr;
+        ]
     in
     if
       first_instruction_is_label

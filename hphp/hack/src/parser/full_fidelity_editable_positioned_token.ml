@@ -205,8 +205,10 @@ let to_json token =
   let original_source_data = original_source_data_or_default token in
   Hh_json.(
     JSON_Object
-      [ ("kind", JSON_String (TokenKind.to_string token.kind));
+      [
+        ("kind", JSON_String (TokenKind.to_string token.kind));
         ("leading_text", JSON_String token.leading_text);
         ("trailing_text", JSON_String token.trailing_text);
         ("original_source_data", SourceData.to_json original_source_data);
-        ("text", JSON_String (text token)) ])
+        ("text", JSON_String (text token));
+      ])

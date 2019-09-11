@@ -129,8 +129,10 @@ let json_of_gconst tcopt gc_id gc json_data_progress =
   in
   let json =
     JSON_Object
-      [ ("name", JSON_Object [("key", JSON_String gc_id)]);
-        ("type", JSON_Object [("key", JSON_String (type_ ty))]) ]
+      [
+        ("name", JSON_Object [("key", JSON_String gc_id)]);
+        ("type", JSON_Object [("key", JSON_String (type_ ty))]);
+      ]
   in
   glean_json GconstDeclaration json json_data_progress
 
@@ -142,8 +144,10 @@ let json_of_typedef _ td_id td json_data_progress =
   in
   let json =
     JSON_Object
-      [ ("name", JSON_Object [("key", JSON_String td_id)]);
-        ("is_visible", JSON_Bool visibility) ]
+      [
+        ("name", JSON_Object [("key", JSON_String td_id)]);
+        ("is_visible", JSON_Bool visibility);
+      ]
   in
   glean_json TypedefDeclaration json json_data_progress
 
@@ -166,17 +170,21 @@ let json_of_fun tcopt fn_id fn json_data_progress =
         in
         let json =
           JSON_Object
-            [ ("name", JSON_Object [("key", JSON_String f_param.param_name)]);
-              ("type", JSON_Object [("key", JSON_String (type_ ty))]) ]
+            [
+              ("name", JSON_Object [("key", JSON_String f_param.param_name)]);
+              ("type", JSON_Object [("key", JSON_String (type_ ty))]);
+            ]
         in
         let (json_facts, progress) = glean_json Parameter json progress_acc in
         (json_facts :: param_acc, progress))
   in
   let json_facts =
     JSON_Object
-      [ ("name", JSON_Object [("key", JSON_String fn_id)]);
+      [
+        ("name", JSON_Object [("key", JSON_String fn_id)]);
         ("params", JSON_Array params);
-        ("return_type", JSON_Object [("key", JSON_String (type_ ret_type))]) ]
+        ("return_type", JSON_Object [("key", JSON_String (type_ ret_type))]);
+      ]
   in
   glean_json FunctionDeclaration json_facts progress
 
@@ -188,9 +196,11 @@ let json_of_class _ class_name clss json_data_progress =
   in
   let json_facts =
     JSON_Object
-      [ ("name", JSON_Object [("key", JSON_String class_name)]);
+      [
+        ("name", JSON_Object [("key", JSON_String class_name)]);
         ("is_abstract", JSON_Bool is_abstract);
-        ("is_final", JSON_Bool clss.c_final) ]
+        ("is_final", JSON_Bool clss.c_final);
+      ]
   in
   glean_json ClassDeclaration json_facts json_data_progress
 
@@ -200,19 +210,23 @@ let json_of_pos pos json_data_progress =
   let file_hash = SharedMem.get_hash fn in
   let file_json =
     JSON_Object
-      [ ("filename", JSON_String fn);
-        ("filehash_id", JSON_String (Int64.to_string file_hash)) ]
+      [
+        ("filename", JSON_String fn);
+        ("filehash_id", JSON_String (Int64.to_string file_hash));
+      ]
   in
   let (json_facts, progress) =
     glean_json Filename file_json json_data_progress
   in
   let json =
     Hh_json.JSON_Object
-      [ ("filename", json_facts);
+      [
+        ("filename", json_facts);
         ("line_start", int_ line_start);
         ("char_start", int_ char_start);
         ("line_end", int_ line_end);
-        ("char_end", int_ (char_end - 1)) ]
+        ("char_end", int_ (char_end - 1));
+      ]
   in
   (json, progress)
 
@@ -222,9 +236,11 @@ let json_of_symbol tcopt decl_type json_fun pos id elem json_data_progress =
   let name_lowercase = String.lowercase id in
   let json_facts =
     JSON_Object
-      [ ("name_lowercase", JSON_String name_lowercase);
+      [
+        ("name_lowercase", JSON_String name_lowercase);
         ("position", pos_json);
-        ("declaration", JSON_Object [(decl_type, json_facts)]) ]
+        ("declaration", JSON_Object [(decl_type, json_facts)]);
+      ]
   in
   glean_json Symbol json_facts progress
 
@@ -238,24 +254,32 @@ let json_of_symbol_occurrence_shared symbol_occurrence progress symbol_def =
     | Method (s1, s2) ->
       ( 2,
         JSON_Object
-          [ ("class_name", key_ (JSON_String s1));
-            ("property_name", key_ (JSON_String s2)) ] )
+          [
+            ("class_name", key_ (JSON_String s1));
+            ("property_name", key_ (JSON_String s2));
+          ] )
     | LocalVar -> (3, JSON_Null)
     | Property (s1, s2) ->
       ( 4,
         JSON_Object
-          [ ("class_name", key_ (JSON_String s1));
-            ("property_name", key_ (JSON_String s2)) ] )
+          [
+            ("class_name", key_ (JSON_String s1));
+            ("property_name", key_ (JSON_String s2));
+          ] )
     | ClassConst (s1, s2) ->
       ( 5,
         JSON_Object
-          [ ("class_name", key_ (JSON_String s1));
-            ("property_name", key_ (JSON_String s2)) ] )
+          [
+            ("class_name", key_ (JSON_String s1));
+            ("property_name", key_ (JSON_String s2));
+          ] )
     | Typeconst (s1, s2) ->
       ( 6,
         JSON_Object
-          [ ("class_name", key_ (JSON_String s1));
-            ("property_name", key_ (JSON_String s2)) ] )
+          [
+            ("class_name", key_ (JSON_String s1));
+            ("property_name", key_ (JSON_String s2));
+          ] )
     | GConst -> (7, JSON_Null)
   in
   let type_object =
@@ -263,8 +287,10 @@ let json_of_symbol_occurrence_shared symbol_occurrence progress symbol_def =
     | JSON_Null -> JSON_Object [("symbol_kind", int_ symbol_kind)]
     | _ ->
       JSON_Object
-        [ ("symbol_kind", int_ symbol_kind);
-          ("class_attribute", class_attribute) ]
+        [
+          ("symbol_kind", int_ symbol_kind);
+          ("class_attribute", class_attribute);
+        ]
   in
   let (pos_json, progress) = json_of_pos symbol_occurrence.pos progress in
   let (def_pos_json, progress) =
@@ -278,15 +304,19 @@ let json_of_symbol_occurrence_shared symbol_occurrence progress symbol_def =
     match def_pos_json with
     | None ->
       JSON_Object
-        [ ("name_lowercase", JSON_String name_lowercase);
-          ("type", type_object);
-          ("position", pos_json) ]
-    | Some def_pos_json ->
-      JSON_Object
-        [ ("name_lowercase", JSON_String name_lowercase);
+        [
+          ("name_lowercase", JSON_String name_lowercase);
           ("type", type_object);
           ("position", pos_json);
-          ("definition_pos", def_pos_json) ]
+        ]
+    | Some def_pos_json ->
+      JSON_Object
+        [
+          ("name_lowercase", JSON_String name_lowercase);
+          ("type", type_object);
+          ("position", pos_json);
+          ("definition_pos", def_pos_json);
+        ]
   in
   glean_json SymbolOccurrence json_facts progress
 
@@ -333,14 +363,16 @@ let build_json tcopt symbols =
     List.fold symbols.localvars ~init:json_data_progress ~f:json_of_localvars
   in
   let preds_and_records =
-    [ ("hackfull.symbol.1", json_data_progress.symbol);
+    [
+      ("hackfull.symbol.1", json_data_progress.symbol);
       ("hackfull.functionParameter.1", json_data_progress.parameter);
       ("hackfull.filename.1", json_data_progress.filename);
       ("hackfull.functionDeclaration.1", json_data_progress.functionDeclaration);
       ("hackfull.classDeclaration.1", json_data_progress.classDeclaration);
       ("hackfull.typedefDeclaration.1", json_data_progress.typedefDeclaration);
       ("hackfull.gconstDeclaration.1", json_data_progress.gconstDeclaration);
-      ("hackfull.symbolOccurrence.1", json_data_progress.symbolOccurrence) ]
+      ("hackfull.symbolOccurrence.1", json_data_progress.symbolOccurrence);
+    ]
   in
   let json_array =
     List.fold preds_and_records ~init:[] ~f:(fun acc (pred, json_lst) ->

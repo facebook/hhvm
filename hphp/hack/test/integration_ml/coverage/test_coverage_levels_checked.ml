@@ -37,7 +37,9 @@ let test () =
   in
   Test.assert_coverage_levels
     loop_output
-    [ "checked: 1";
+    [
+      "checked: 1";
       "partial: 0";
       "unchecked: 0";
-      "File \"/foo.php\", line 3, characters 10-11: checked" ]
+      "File \"/foo.php\", line 3, characters 10-11: checked";
+    ]

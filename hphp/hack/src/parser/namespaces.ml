@@ -44,7 +44,8 @@ let autoimport_map_of_list ids =
  *)
 let autoimport_types =
   SMap.of_list
-    [ ("AsyncFunctionWaitHandle", Global);
+    [
+      ("AsyncFunctionWaitHandle", Global);
       ("AsyncGenerator", Global);
       ("AsyncGeneratorWaitHandle", Global);
       ("AsyncIterator", Global);
@@ -88,11 +89,13 @@ let autoimport_types =
       ("vec", Global);
       ("Vector", Global);
       ("WaitableWaitHandle", Global);
-      ("XenonSample", HH) ]
+      ("XenonSample", HH);
+    ]
 
 let autoimport_funcs =
   autoimport_map_of_list
-    [ "asio_get_current_context_idx";
+    [
+      "asio_get_current_context_idx";
       "asio_get_running_in_context";
       "asio_get_running";
       "class_meth";
@@ -131,7 +134,8 @@ let autoimport_funcs =
       "type_structure";
       "varray";
       "vec";
-      "xenon_get_data" ]
+      "xenon_get_data";
+    ]
 
 let autoimport_consts = autoimport_map_of_list ["Rx\\IS_ENABLED"]
 
@@ -404,7 +408,8 @@ module ElaborateDefs = struct
         (Typedef { t with t_id = name; t_namespace = nsenv })
     | Constant cst ->
       ( nsenv,
-        [ Constant
+        [
+          Constant
             {
               cst with
               cst_name =
@@ -413,7 +418,8 @@ module ElaborateDefs = struct
                  in
                  name);
               cst_namespace = nsenv;
-            } ] )
+            };
+        ] )
     | FileAttributes fa ->
       finish nsenv false (FileAttributes { fa with fa_namespace = nsenv })
     | other -> (nsenv, [other])
@@ -533,7 +539,8 @@ module ElaborateDefsNast = struct
         (Nast.Typedef Nast.{ t with t_name = name; t_namespace = nsenv })
     | Nast.Constant cst ->
       ( nsenv,
-        [ Nast.Constant
+        [
+          Nast.Constant
             Nast.
               {
                 cst with
@@ -546,7 +553,8 @@ module ElaborateDefsNast = struct
                    in
                    name);
                 cst_namespace = nsenv;
-              } ] )
+              };
+        ] )
     | Nast.FileAttributes fa ->
       finish
         nsenv

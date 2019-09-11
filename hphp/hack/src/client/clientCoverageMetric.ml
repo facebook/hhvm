@@ -28,9 +28,10 @@ let rec entry_to_json = function
     JSON_Object [("type", JSON_String "file"); ("result", result_to_json r)]
   | Node (r, el) ->
     JSON_Object
-      [ ("type", JSON_String "directory");
+      [
+        ("type", JSON_String "directory");
         ("result", result_to_json r);
-        ("children", JSON_Object (SMap.elements (SMap.map entry_to_json el)))
+        ("children", JSON_Object (SMap.elements (SMap.map entry_to_json el)));
       ]
 
 let print_json r_opt =

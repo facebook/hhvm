@@ -86,7 +86,7 @@ and terminal_ nsenv ~in_try st =
     List.iter catch_l (terminal_catch nsenv ~in_try)
   | Aast.Break
   (* TODO this is terminal sometimes too, except switch, see above. *)
-
+  
   | Aast.TempBreak _
   | Aast.Expr _
   | Aast.Markup _

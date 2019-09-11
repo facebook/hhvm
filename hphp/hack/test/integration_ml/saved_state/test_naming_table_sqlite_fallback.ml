@@ -173,7 +173,9 @@ let test () =
              empty with
              hash = SMap.get "baz.php" hashes;
              consts =
-               [(File (Const, Relative_path.from_root "baz.php"), "\\BAZCONST")];
+               [
+                 (File (Const, Relative_path.from_root "baz.php"), "\\BAZCONST");
+               ];
            })
         (Naming_table.get_file_info
            naming_table

@@ -135,10 +135,12 @@ let test_bool_if_min_version () =
   true
 
 let tests =
-  [ ("test_parse_version_none", test_parse_version_none);
+  [
+    ("test_parse_version_none", test_parse_version_none);
     ("test_parse_version_some_string", test_parse_version_some_string);
     ("test_parse_version_valid_components", test_parse_version_valid_components);
     ("test_compare_versions", test_compare_versions);
-    ("test_bool_if_min_version", test_bool_if_min_version) ]
+    ("test_bool_if_min_version", test_bool_if_min_version);
+  ]
 
 let () = Unit_test.run_all tests

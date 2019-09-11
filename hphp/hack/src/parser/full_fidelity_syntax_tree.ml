@@ -146,9 +146,11 @@ all errors that happen in a body. *)
       let root = Syntax.to_json ?with_value tree.root in
       let text = Hh_json.JSON_String (SourceText.text tree.text) in
       Hh_json.JSON_Object
-        [ ("parse_tree", root);
+        [
+          ("parse_tree", root);
           ("program_text", text);
-          ("version", Hh_json.JSON_String version) ]
+          ("version", Hh_json.JSON_String version);
+        ]
   end
 
   include WithSmartConstructors (SyntaxSmartConstructors.WithSyntax (Syntax))

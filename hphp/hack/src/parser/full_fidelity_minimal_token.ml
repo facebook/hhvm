@@ -68,7 +68,9 @@ let source_text _ = (* Not available *) Full_fidelity_source_text.empty
 let to_json token =
   Hh_json.(
     JSON_Object
-      [ ("kind", JSON_String (TokenKind.to_string token.kind));
+      [
+        ("kind", JSON_String (TokenKind.to_string token.kind));
         ("width", int_ token.width);
         ("leading", JSON_Array (List.map Trivia.to_json token.leading));
-        ("trailing", JSON_Array (List.map Trivia.to_json token.trailing)) ])
+        ("trailing", JSON_Array (List.map Trivia.to_json token.trailing));
+      ])

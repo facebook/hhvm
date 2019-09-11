@@ -125,7 +125,8 @@ let parse_args () =
   let rustfmt_path = ref None in
   let files = ref [] in
   let options =
-    [ ( "--out-dir",
+    [
+      ( "--out-dir",
         Arg.String (fun s -> out_dir := Some s),
         " Output directory for conversion of multiple files" );
       ( "--regen-command",
@@ -133,7 +134,8 @@ let parse_args () =
         " Include this command in file headers" );
       ( "--rustfmt-path",
         Arg.String (fun s -> rustfmt_path := Some s),
-        " Path to rustfmt binary used to format output" ) ]
+        " Path to rustfmt binary used to format output" );
+    ]
   in
   Arg.parse options (fun file -> files := file :: !files) usage;
   let rustfmt_path = Option.value !rustfmt_path ~default:"rustfmt" in

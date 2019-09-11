@@ -103,12 +103,14 @@ let gen_pu_accessor
       let class_id = (annotation pos, CIexpr (id pos "\\Exception")) in
       Default
         ( pos,
-          [ ( pos,
+          [
+            ( pos,
               Throw
                 ( annotation pos,
                   New
                     (class_id, [], [(annotation pos, msg)], [], annotation pos)
-                ) ) ] )
+                ) );
+          ] )
   in
   let cases = cases @ [default] in
   let body =
@@ -121,7 +123,8 @@ let gen_pu_accessor
     m_tparams = [];
     m_name = (pos, fun_name);
     m_params =
-      [ {
+      [
+        {
           param_annotation = annotation pos;
           param_type_hint =
             (snd (annotation pos), Some (simple_typ pos "string"));
@@ -133,7 +136,8 @@ let gen_pu_accessor
           param_callconv = None;
           param_user_attributes = [];
           param_visibility = None;
-        } ];
+        };
+      ];
     m_body = body;
     m_user_attributes = [];
     (* TODO: Memoize ? *)
@@ -164,7 +168,8 @@ let gen_Members field pos (fields : pu_enum) =
   let body =
     {
       fb_ast =
-        [ ( pos,
+        [
+          ( pos,
             Expr
               ( annot,
                 Binop
@@ -173,7 +178,8 @@ let gen_Members field pos (fields : pu_enum) =
                     (annot, Collection ((pos, "ImmVector"), None, mems)) ) ) );
           ( pos,
             Return (Some (annot, Lvar (pos, Local_id.make_unscoped "$mems")))
-          ) ];
+          );
+        ];
       fb_annotation = NoUnsafeBlocks;
     }
   in

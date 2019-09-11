@@ -43,7 +43,9 @@ let parse_state_leave_response () =
   | _ -> false
 
 let tests =
-  [ ("parse_state_enter_response", parse_state_enter_response);
-    ("parse_state_leave_response", parse_state_leave_response) ]
+  [
+    ("parse_state_enter_response", parse_state_enter_response);
+    ("parse_state_leave_response", parse_state_leave_response);
+  ]
 
 let () = Unit_test.run_all tests

@@ -20,9 +20,11 @@ let check_constraint env ck ty ~cstr_ty =
         log_types
           (Reason.to_pos (fst ty))
           env
-          [ Log_head
+          [
+            Log_head
               ( "Typing_generic_constraint.check_constraint",
-                [Log_type ("ty", ty); Log_type ("cstr_ty", cstr_ty)] ) ]));
+                [Log_type ("ty", ty); Log_type ("cstr_ty", cstr_ty)] );
+          ]));
   let (env, ety) = Env.expand_type env ty in
   let (env, ecstr_ty) = Env.expand_type env cstr_ty in
   (* using unify error here since the error itself is (almost) always superseded

@@ -83,9 +83,11 @@ let add_reified_attribute attrs (params : Tast.tparam list) =
     in
     let data =
       List.concat_map reified_data ~f:(fun (i, is_soft, is_warn) ->
-          [ TV.Int (Int64.of_int i);
+          [
+            TV.Int (Int64.of_int i);
             TV.Int (Int64.of_int @@ int_of_bool is_soft);
-            TV.Int (Int64.of_int @@ int_of_bool is_warn) ])
+            TV.Int (Int64.of_int @@ int_of_bool is_warn);
+          ])
     in
     let data = TV.Int (Int64.of_int (List.length params)) :: data in
     Hhas_attribute.make "__Reified" data :: attrs

@@ -76,10 +76,12 @@ module PositionedSyntaxValue = struct
   let to_json value =
     Hh_json.(
       JSON_Object
-        [ ("offset", int_ (start_offset value));
+        [
+          ("offset", int_ (start_offset value));
           ("leading_width", int_ (leading_width value));
           ("width", int_ (width value));
-          ("trailing_width", int_ (trailing_width value)) ])
+          ("trailing_width", int_ (trailing_width value));
+        ])
 end
 
 module PositionedWithValue =

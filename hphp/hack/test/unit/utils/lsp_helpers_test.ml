@@ -545,10 +545,12 @@ let test_update_range_due_to_replace () =
   true
 
 let tests =
-  [ ("test_pos_compare", test_pos_compare);
+  [
+    ("test_pos_compare", test_pos_compare);
     ("test_range_overlap", test_range_overlap);
     ( "test_update_pos_due_to_prior_replace",
       test_update_pos_due_to_prior_replace );
-    ("test_update_range_due_to_replace", test_update_range_due_to_replace) ]
+    ("test_update_range_due_to_replace", test_update_range_due_to_replace);
+  ]
 
 let () = Unit_test.run_all tests

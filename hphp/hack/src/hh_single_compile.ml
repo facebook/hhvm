@@ -81,8 +81,10 @@ let print_compiler_version () =
     let compiler_version_msg =
       json_to_string
       @@ JSON_Object
-           [ ("type", JSON_String "compiler_version");
-             ("version", JSON_String (Compiler_id.get_compiler_id ())) ]
+           [
+             ("type", JSON_String "compiler_version");
+             ("version", JSON_String (Compiler_id.get_compiler_id ()));
+           ]
     in
     P.printf "%s\n%!" compiler_version_msg)
 
@@ -114,7 +116,8 @@ let parse_options () =
     P.sprintf "Usage: hh_single_compile (%s) filename\n" Sys.argv.(0)
   in
   let options =
-    [ ("--version", Arg.Set want_version, " print the version and do nothing");
+    [
+      ("--version", Arg.Set want_version, " print the version and do nothing");
       ("--fallback", Arg.Set fallback, " Enables fallback compilation");
       ( "--debug-time",
         Arg.Set debug_time,
@@ -158,7 +161,8 @@ let parse_options () =
         " Stop logging stats" );
       ( "--for-debugger-eval",
         Arg.Unit (fun () -> for_debugger_eval := true),
-        " Mutate the program as if we're in the debugger repl" ) ]
+        " Mutate the program as if we're in the debugger repl" );
+    ]
   in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := Some fn) usage;
@@ -208,9 +212,11 @@ let fail_daemon file error =
     let msg =
       json_to_string
       @@ JSON_Object
-           [ ("type", JSON_String "error");
+           [
+             ("type", JSON_String "error");
              ("file", JSON_String file);
-             ("error", JSON_String error) ]
+             ("error", JSON_String error);
+           ]
     in
     P.printf "%s\n%!" msg;
     die error)
@@ -447,7 +453,8 @@ let do_compile filename compiler_options popt fail_or_ast debug_time =
   hhas
 
 let extract_facts ~filename ~source_root text =
-  [ Hhbc_options.(
+  [
+    Hhbc_options.(
       let co = !compiler_options in
       match Hackc_parse_delegator.extract_facts filename source_root with
       | Some result -> Hh_json.json_to_multiline ~sort_keys:true result
@@ -462,7 +469,8 @@ let extract_facts ~filename ~source_root text =
           ~disable_legacy_attribute_syntax:(disable_legacy_attribute_syntax co)
           ~filename
           ~text
-        |> Option.value ~default:"") ]
+        |> Option.value ~default:"");
+  ]
 
 let parse_hh_file filename body =
   Hhbc_options.(
@@ -580,9 +588,11 @@ let decl_and_run_mode compiler_options =
             List.fold ~f:(fun len s -> len + String.length s) ~init:0 output
           in
           let msg =
-            [ ("type", JSON_String "success");
+            [
+              ("type", JSON_String "success");
               ("file", JSON_String abs_path);
-              ("bytes", int_ bytes) ]
+              ("bytes", int_ bytes);
+            ]
           in
           let msg =
             if Hhbc_options.enable_perf_logging !Hhbc_options.compiler_options
@@ -603,9 +613,11 @@ let decl_and_run_mode compiler_options =
           let msg =
             json_to_string
             @@ JSON_Object
-                 [ ("type", JSON_String "error");
+                 [
+                   ("type", JSON_String "error");
                    ("file", JSON_String abs_path);
-                   ("error", JSON_String (Caml.Printexc.to_string exc)) ]
+                   ("error", JSON_String (Caml.Printexc.to_string exc));
+                 ]
           in
           P.printf "%s\n%!" msg
         in

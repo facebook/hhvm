@@ -374,13 +374,15 @@ let rewrite_suspend
         [make_throw_statement_syntax exception_variable_syntax]
     in
     let statements =
-      [ update_next_label_syntax;
+      [
+        update_next_label_syntax;
         assign_coroutine_result_syntax;
         return_if_suspended_syntax;
         assign_coroutine_data_syntax;
         declare_next_label_syntax;
         assign_coroutine_result_data_syntax;
-        throw_if_exception_not_null_syntax ]
+        throw_if_exception_not_null_syntax;
+      ]
     in
     {
       next_label = next_label + 1;
@@ -819,11 +821,13 @@ let rewrite_suspends_in_statement node context next_label ~is_argument_to_unset
             in
             let not_missing syntax = not @@ is_missing syntax in
             let then_block =
-              consequence_extra_info.prefix @ [consequence_assignment_or_return]
+              consequence_extra_info.prefix
+              @ [consequence_assignment_or_return]
               |> List.filter ~f:not_missing
             in
             let else_block =
-              alternative_extra_info.prefix @ [alternative_assignment_or_return]
+              alternative_extra_info.prefix
+              @ [alternative_assignment_or_return]
               |> List.filter ~f:not_missing
             in
             let if_statement =

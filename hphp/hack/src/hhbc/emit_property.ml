@@ -219,13 +219,17 @@ let from_ast
               @@ instr (IMutator (InitProp (pid, NonStatic))) )
           else
             ( gather
-                [ Emit_pos.emit_pos class_.T.c_span;
+                [
+                  Emit_pos.emit_pos class_.T.c_span;
                   instr (IMutator (CheckProp pid));
-                  instr_jmpnz label ],
+                  instr_jmpnz label;
+                ],
               gather
-                [ Emit_pos.emit_pos class_.T.c_span;
+                [
+                  Emit_pos.emit_pos class_.T.c_span;
                   instr (IMutator (InitProp (pid, NonStatic)));
-                  instr_label label ] )
+                  instr_label label;
+                ] )
         in
         ( Some Typed_value.Uninit,
           deep_init,

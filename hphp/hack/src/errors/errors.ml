@@ -649,7 +649,8 @@ let is_strict_code code = ISet.mem code !error_codes_treated_strictly
 (* The 'phps FixmeAllHackErrors' tool must be kept in sync with this list *)
 let default_ignored_fixme_codes =
   ISet.of_list
-    [ Typing.err_code Typing.InvalidIsAsExpressionHint;
+    [
+      Typing.err_code Typing.InvalidIsAsExpressionHint;
       Typing.err_code Typing.InvalidEnforceableTypeArgument;
       Typing.err_code Typing.RequireArgsReify;
       Typing.err_code Typing.InvalidReifiedArgument;
@@ -659,7 +660,8 @@ let default_ignored_fixme_codes =
       Typing.err_code Typing.NewWithoutNewable;
       Typing.err_code Typing.NewStaticClassReified;
       Typing.err_code Typing.MemoizeReified;
-      Typing.err_code Typing.ClassGetReified ]
+      Typing.err_code Typing.ClassGetReified;
+    ]
 
 let ignored_fixme_codes = ref default_ignored_fixme_codes
 
@@ -683,28 +685,34 @@ let add_ignored_fixme_code_error pos code =
     add_error
       (make_error
          code
-         [ ( pos,
+         [
+           ( pos,
              Printf.sprintf
                "You cannot use HH_FIXME or HH_IGNORE_ERROR comments to suppress error %d in declarations"
-               code ) ])
+               code );
+         ])
   else if !is_hh_fixme pos code && is_ignored_code code then
     let pos = Option.value (!get_hh_fixme_pos pos code) ~default:pos in
     if code / 1000 = 5 then
       add_error
         (make_error
            code
-           [ ( pos,
+           [
+             ( pos,
                Printf.sprintf
                  "You cannot use HH_FIXME or HH_IGNORE_ERROR comments to suppress error %d.Please use @lint-ignore."
-                 code ) ])
+                 code );
+           ])
     else
       add_error
         (make_error
            code
-           [ ( pos,
+           [
+             ( pos,
                Printf.sprintf
                  "You cannot use HH_FIXME or HH_IGNORE_ERROR comments to suppress error %d"
-                 code ) ])
+                 code );
+           ])
 
 (*****************************************************************************)
 (* Errors accumulator. *)
@@ -994,14 +1002,16 @@ let error_name_already_bound name name_prev p p_prev =
   let name = Utils.strip_ns name in
   let name_prev = Utils.strip_ns name_prev in
   let errs =
-    [ (p, "Name already bound: " ^ name);
+    [
+      (p, "Name already bound: " ^ name);
       ( p_prev,
         if String.compare name name_prev = 0 then
           "Previous definition is here"
         else
           "Previous definition "
           ^ name_prev
-          ^ " differs only in capitalization " ) ]
+          ^ " differs only in capitalization " );
+    ]
   in
   let hhi_msg =
     "This appears to be defined in an hhi file included in your project "
@@ -1024,10 +1034,12 @@ let error_class_attribute_already_bound name name_prev p p_prev =
   let name = Utils.strip_ns name in
   let name_prev = Utils.strip_ns name_prev in
   let errs =
-    [ ( p,
+    [
+      ( p,
         "A class and an attribute class cannot share the same name. Conflicting class: "
         ^ name );
-      (p_prev, "Previous definition: " ^ name_prev) ]
+      (p_prev, "Previous definition: " ^ name_prev);
+    ]
   in
   add_list (Naming.err_code Naming.AttributeClassNameConflict) errs
 
@@ -1133,8 +1145,10 @@ let invalid_type_access_root (pos, id) =
 let duplicate_user_attribute (pos, name) existing_attr_pos =
   add_list
     (Naming.err_code Naming.DuplicateUserAttribute)
-    [ (pos, "You cannot reuse the attribute " ^ name);
-      (existing_attr_pos, name ^ " was already used here") ]
+    [
+      (pos, "You cannot reuse the attribute " ^ name);
+      (existing_attr_pos, name ^ " was already used here");
+    ]
 
 let unbound_attribute_name pos name =
   let reason =
@@ -1220,8 +1234,10 @@ let tparam_with_tparam pos x =
 let shadowed_type_param p pos name =
   add_list
     (Naming.err_code Naming.ShadowedTypeParam)
-    [ (p, Printf.sprintf "You cannot re-bind the type parameter %s" name);
-      (pos, Printf.sprintf "%s is already bound here" name) ]
+    [
+      (p, Printf.sprintf "You cannot re-bind the type parameter %s" name);
+      (pos, Printf.sprintf "%s is already bound here" name);
+    ]
 
 let missing_typehint pos =
   add (Naming.err_code Naming.MissingTypehint) pos "Please add a type hint"
@@ -1341,8 +1357,10 @@ let unexpected_ty_in_tast pos ~actual_ty ~expected_ty =
 let uninstantiable_class usage_pos decl_pos name reason_msgl =
   let name = strip_ns name in
   let msgl =
-    [ (usage_pos, name ^ " is uninstantiable");
-      (decl_pos, "Declaration is here") ]
+    [
+      (usage_pos, name ^ " is uninstantiable");
+      (decl_pos, "Declaration is here");
+    ]
   in
   let msgl =
     match reason_msgl with
@@ -1356,8 +1374,10 @@ let abstract_const_usage usage_pos decl_pos name =
   let name = strip_ns name in
   add_list
     (Typing.err_code Typing.AbstractConstUsage)
-    [ (usage_pos, "Cannot reference abstract constant " ^ name ^ " directly");
-      (decl_pos, "Declaration is here") ]
+    [
+      (usage_pos, "Cannot reference abstract constant " ^ name ^ " directly");
+      (decl_pos, "Declaration is here");
+    ]
 
 let const_without_typehint sid =
   let (pos, name) = sid in
@@ -1393,8 +1413,10 @@ let invalid_req_extends pos =
 let did_you_mean_naming pos name suggest_pos suggest_name =
   add_list
     (Naming.err_code Naming.DidYouMeanNaming)
-    [ (pos, "Could not find " ^ strip_ns name);
-      (suggest_pos, "Did you mean " ^ strip_ns suggest_name ^ "?") ]
+    [
+      (pos, "Could not find " ^ strip_ns name);
+      (suggest_pos, "Did you mean " ^ strip_ns suggest_name ^ "?");
+    ]
 
 let using_internal_class pos name =
   add
@@ -1412,9 +1434,11 @@ let goto_label_already_defined
     label_name redeclaration_pos original_delcaration_pos =
   add_list
     (Naming.err_code Naming.GotoLabelAlreadyDefined)
-    [ ( redeclaration_pos,
+    [
+      ( redeclaration_pos,
         "Cannot redeclare the goto label '" ^ label_name ^ "'" );
-      (original_delcaration_pos, "Declaration is here") ]
+      (original_delcaration_pos, "Declaration is here");
+    ]
 
 let goto_label_undefined pos label_name =
   add
@@ -1511,8 +1535,10 @@ let pu_duplication pos name kind =
 let illegal_use_of_dynamically_callable attr_pos meth_pos visibility =
   add_list
     (Naming.err_code Naming.IllegalUseOfDynamicallyCallable)
-    [ (attr_pos, "__DynamicallyCallable can only be used on public methods");
-      (meth_pos, sprintf "But this method is %s" visibility) ]
+    [
+      (attr_pos, "__DynamicallyCallable can only be used on public methods");
+      (meth_pos, sprintf "But this method is %s" visibility);
+    ]
 
 (*****************************************************************************)
 (* Init check errors *)
@@ -1523,8 +1549,10 @@ let no_construct_parent pos =
     (NastCheck.err_code NastCheck.NoConstructParent)
     pos
     (sl
-       [ "You are extending a class that needs to be initialized\n";
-         "Make sure you call parent::__construct.\n" ])
+       [
+         "You are extending a class that needs to be initialized\n";
+         "Make sure you call parent::__construct.\n";
+       ])
 
 let nonstatic_method_in_abstract_final_class pos =
   add
@@ -1566,7 +1594,8 @@ let not_initialized (pos, cname) prop_names =
     (NastCheck.err_code NastCheck.NotInitialized)
     pos
     (sl
-       [ "Class ";
+       [
+         "Class ";
          cname;
          " does not initialize all of its members; ";
          props_str;
@@ -1577,16 +1606,19 @@ let not_initialized (pos, cname) prop_names =
          "when the method __construct is called.";
          "\nAlternatively, you can define the ";
          members;
-         " as optional (?...)\n" ])
+         " as optional (?...)\n";
+       ])
 
 let call_before_init pos cv =
   add
     (NastCheck.err_code NastCheck.CallBeforeInit)
     pos
     (sl
-       ( [ "Until the initialization of $this is over,";
+       ( [
+           "Until the initialization of $this is over,";
            " you can only call private methods\n";
-           "The initialization is not over because " ]
+           "The initialization is not over because ";
+         ]
        @
        if cv = "parent::__construct" then
          ["you forgot to call parent::__construct"]
@@ -1600,13 +1632,15 @@ let call_before_init pos cv =
 let type_arity pos name nargs c_pos =
   add_list
     (Typing.err_code Typing.TypeArityMismatch)
-    [ ( pos,
+    [
+      ( pos,
         "The type "
         ^ Utils.strip_ns name
         ^ " expects "
         ^ nargs
         ^ " type parameter(s)" );
-      (c_pos, "Definition is here") ]
+      (c_pos, "Definition is here");
+    ]
 
 let abstract_with_body (p, _) =
   add
@@ -1630,10 +1664,12 @@ let not_abstract_without_typeconst (p, _) =
 let typeconst_depends_on_external_tparam pos ext_pos ext_name =
   add_list
     (NastCheck.err_code NastCheck.TypeconstDependsOnExternalTparam)
-    [ ( pos,
+    [
+      ( pos,
         "A type constant can only use type parameters declared in its own"
         ^ " type parameter list" );
-      (ext_pos, ext_name ^ " was declared as a type parameter here") ]
+      (ext_pos, ext_name ^ " was declared as a type parameter here");
+    ]
 
 let interface_with_partial_typeconst tconst_pos =
   add
@@ -1996,10 +2032,12 @@ let switch_multiple_default pos =
 let case_fallthrough pos1 pos2 =
   add_list
     (NastCheck.err_code NastCheck.CaseFallthrough)
-    [ ( pos1,
+    [
+      ( pos1,
         "This switch has a case that implicitly falls through and is "
         ^ "not annotated with // FALLTHROUGH" );
-      (pos2, "This case implicitly falls through") ]
+      (pos2, "This case implicitly falls through");
+    ]
 
 let default_fallthrough pos =
   add
@@ -2086,24 +2124,30 @@ let enum_type_typedef_nonnull pos =
 let enum_switch_redundant const first_pos second_pos =
   add_list
     (Typing.err_code Typing.EnumSwitchRedundant)
-    [ (second_pos, "Redundant case statement");
-      (first_pos, const ^ " already handled here") ]
+    [
+      (second_pos, "Redundant case statement");
+      (first_pos, const ^ " already handled here");
+    ]
 
 let enum_switch_nonexhaustive pos missing enum_pos =
   add_list
     (Typing.err_code Typing.EnumSwitchNonexhaustive)
-    [ ( pos,
+    [
+      ( pos,
         "Switch statement nonexhaustive; the following cases are missing: "
         ^ String.concat ~sep:", " missing );
-      (enum_pos, "Enum declared here") ]
+      (enum_pos, "Enum declared here");
+    ]
 
 let enum_switch_redundant_default pos enum_pos =
   add_list
     (Typing.err_code Typing.EnumSwitchRedundantDefault)
-    [ ( pos,
+    [
+      ( pos,
         "All cases already covered; a redundant default case prevents "
         ^ "detecting future errors" );
-      (enum_pos, "Enum declared here") ]
+      (enum_pos, "Enum declared here");
+    ]
 
 let enum_switch_not_const pos =
   add
@@ -2132,49 +2176,63 @@ let invalid_shape_field_name_empty p =
 let invalid_shape_field_type pos ty_pos ty trail =
   add_with_trail
     (Typing.err_code Typing.InvalidShapeFieldType)
-    [ (pos, "A shape field name must be an int or string");
-      (ty_pos, "Not " ^ ty) ]
+    [
+      (pos, "A shape field name must be an int or string");
+      (ty_pos, "Not " ^ ty);
+    ]
     trail
 
 let invalid_shape_field_literal key_pos witness_pos =
   add_list
     (Typing.err_code Typing.InvalidShapeFieldLiteral)
-    [ (key_pos, "Shape uses literal string as field name");
-      (witness_pos, "But expected a class constant") ]
+    [
+      (key_pos, "Shape uses literal string as field name");
+      (witness_pos, "But expected a class constant");
+    ]
 
 let invalid_shape_field_const key_pos witness_pos =
   add_list
     (Typing.err_code Typing.InvalidShapeFieldConst)
-    [ (key_pos, "Shape uses class constant as field name");
-      (witness_pos, "But expected a literal string") ]
+    [
+      (key_pos, "Shape uses class constant as field name");
+      (witness_pos, "But expected a literal string");
+    ]
 
 let shape_field_class_mismatch key_pos witness_pos key_class witness_class =
   add_list
     (Typing.err_code Typing.ShapeFieldClassMismatch)
-    [ (key_pos, "Shape field name is class constant from " ^ key_class);
-      (witness_pos, "But expected constant from " ^ witness_class) ]
+    [
+      (key_pos, "Shape field name is class constant from " ^ key_class);
+      (witness_pos, "But expected constant from " ^ witness_class);
+    ]
 
 let shape_field_type_mismatch key_pos witness_pos key_ty witness_ty =
   add_list
     (Typing.err_code Typing.ShapeFieldTypeMismatch)
-    [ (key_pos, "Shape field name is " ^ key_ty ^ " class constant");
-      (witness_pos, "But expected " ^ witness_ty) ]
+    [
+      (key_pos, "Shape field name is " ^ key_ty ^ " class constant");
+      (witness_pos, "But expected " ^ witness_ty);
+    ]
 
 let missing_field pos1 pos2 name =
   add_list
     (Typing.err_code Typing.MissingField)
-    [ (pos1, "The field '" ^ name ^ "' is missing");
-      (pos2, "The field '" ^ name ^ "' is defined") ]
+    [
+      (pos1, "The field '" ^ name ^ "' is missing");
+      (pos2, "The field '" ^ name ^ "' is defined");
+    ]
 
 let shape_fields_unknown pos1 pos2 =
   add_list
     (Typing.err_code Typing.ShapeFieldsUnknown)
-    [ ( pos1,
+    [
+      ( pos1,
         "This shape type allows unknown fields, and so it may contain fields other than those explicitly declared in its declaration."
       );
       ( pos2,
         "It is incompatible with a shape that does not allow unknown fields."
-      ) ]
+      );
+    ]
 
 let invalid_shape_remove_key p =
   add
@@ -2185,16 +2243,19 @@ let invalid_shape_remove_key p =
 let unification_cycle pos ty =
   add_list
     (Typing.err_code Typing.UnificationCycle)
-    [ ( pos,
+    [
+      ( pos,
         "Type circularity: in order to type-check this expression it "
         ^ "is necessary for a type [rec] to be equal to type "
-        ^ ty ) ]
+        ^ ty );
+    ]
 
 let violated_constraint p_cstr (p_tparam, tparam) left right =
   add_list
     (Typing.err_code Typing.TypeConstraintViolation)
-    ( [ (p_cstr, "Some type constraint(s) are violated here");
-        (p_tparam, Printf.sprintf "%s is a constrained type parameter" tparam)
+    ( [
+        (p_cstr, "Some type constraint(s) are violated here");
+        (p_tparam, Printf.sprintf "%s is a constrained type parameter" tparam);
       ]
     @ left
     @ right )
@@ -2218,8 +2279,10 @@ let explain_constraint ~use_pos ~definition_pos ~param_name (error : error) =
   let name = Utils.strip_ns param_name in
   add_list
     (Typing.err_code Typing.TypeConstraintViolation)
-    ( [ (use_pos, inst_msg);
-        (definition_pos, "'" ^ name ^ "' is a constrained type parameter") ]
+    ( [
+        (use_pos, inst_msg);
+        (definition_pos, "'" ^ name ^ "' is a constrained type parameter");
+      ]
     @ msgl )
 
 let explain_where_constraint ~in_class ~use_pos ~definition_pos (error : error)
@@ -2244,20 +2307,24 @@ let explain_tconst_where_constraint ~use_pos ~definition_pos (error : error) =
   let msgl = to_list error in
   add_list
     (Typing.err_code Typing.TypeConstraintViolation)
-    ( [ (use_pos, inst_msg);
+    ( [
+        (use_pos, inst_msg);
         ( definition_pos,
-          "This method's where constraints contain a generic type access" ) ]
+          "This method's where constraints contain a generic type access" );
+      ]
     @ msgl )
 
 let format_string pos snippet s class_pos fname class_suggest =
   add_list
     (Typing.err_code Typing.FormatString)
-    [ (pos, "I don't understand the format string " ^ snippet ^ " in " ^ s);
+    [
+      (pos, "I don't understand the format string " ^ snippet ^ " in " ^ s);
       ( class_pos,
         "You can add a new format specifier by adding "
         ^ fname
         ^ "() to "
-        ^ class_suggest ) ]
+        ^ class_suggest );
+    ]
 
 let expected_literal_format_string pos =
   add
@@ -2399,8 +2466,10 @@ let accept_disposable_invariant pos1 pos2 =
 let field_kinds pos1 pos2 =
   add_list
     (Typing.err_code Typing.FieldKinds)
-    [ (pos1, "You cannot use this kind of field (value)");
-      (pos2, "Mixed with this kind of field (key => value)") ]
+    [
+      (pos1, "You cannot use this kind of field (value)");
+      (pos2, "Mixed with this kind of field (key => value)");
+    ]
 
 let unbound_name_typing pos name =
   add
@@ -2461,34 +2530,42 @@ let unbound_global cst_pos =
 let private_inst_meth ~def_pos ~use_pos =
   add_list
     (Typing.err_code Typing.PrivateInstMeth)
-    [ ( use_pos,
+    [
+      ( use_pos,
         "You cannot use this method with inst_meth (whether you are in the same class or not)."
       );
-      (def_pos, "It is declared as private here") ]
+      (def_pos, "It is declared as private here");
+    ]
 
 let protected_inst_meth ~def_pos ~use_pos =
   add_list
     (Typing.err_code Typing.ProtectedInstMeth)
-    [ ( use_pos,
+    [
+      ( use_pos,
         "You cannot use this method with inst_meth (whether you are in the same class hierarchy or not)."
       );
-      (def_pos, "It is declared as protected here") ]
+      (def_pos, "It is declared as protected here");
+    ]
 
 let private_class_meth ~def_pos ~use_pos =
   add_list
     (Typing.err_code Typing.PrivateClassMeth)
-    [ ( use_pos,
+    [
+      ( use_pos,
         "You cannot use this method with class_meth (whether you are in the same class or not)."
       );
-      (def_pos, "It is declared as private here") ]
+      (def_pos, "It is declared as private here");
+    ]
 
 let protected_class_meth ~def_pos ~use_pos =
   add_list
     (Typing.err_code Typing.ProtectedClassMeth)
-    [ ( use_pos,
+    [
+      ( use_pos,
         "You cannot use this method with class_meth (whether you are in the same class hierarchy or not)."
       );
-      (def_pos, "It is declared as protected here") ]
+      (def_pos, "It is declared as protected here");
+    ]
 
 let array_cast pos =
   add
@@ -2505,8 +2582,10 @@ let string_cast pos ty =
 let nullable_cast pos ty ty_pos =
   add_list
     (Typing.err_code Typing.NullableCast)
-    [ (pos, "Casting from a nullable type is forbidden");
-      (ty_pos, "This is " ^ ty) ]
+    [
+      (pos, "Casting from a nullable type is forbidden");
+      (ty_pos, "This is " ^ ty);
+    ]
 
 let anonymous_recursive pos =
   add
@@ -2535,13 +2614,15 @@ let new_inconsistent_construct new_pos (cpos, cname) kind =
   in
   add_list
     (Typing.err_code Typing.NewStaticInconsistent)
-    [ ( new_pos,
+    [
+      ( new_pos,
         preamble
         ^ "; __construct arguments are not guaranteed to be consistent in child classes"
       );
       ( cpos,
         "This declaration is neither final nor uses the <<__ConsistentConstruct>> attribute"
-      ) ]
+      );
+    ]
 
 let undefined_parent pos =
   add
@@ -2558,33 +2639,40 @@ let parent_outside_class pos =
 let parent_abstract_call meth_name call_pos decl_pos =
   add_list
     (Typing.err_code Typing.AbstractCall)
-    [ (call_pos, "Cannot call parent::" ^ meth_name ^ "(); it is abstract");
-      (decl_pos, "Declaration is here") ]
+    [
+      (call_pos, "Cannot call parent::" ^ meth_name ^ "(); it is abstract");
+      (decl_pos, "Declaration is here");
+    ]
 
 let self_abstract_call meth_name call_pos decl_pos =
   add_list
     (Typing.err_code Typing.AbstractCall)
-    [ ( call_pos,
+    [
+      ( call_pos,
         "Cannot call self::"
         ^ meth_name
         ^ "(); it is abstract. Did you mean static::"
         ^ meth_name
         ^ "()?" );
-      (decl_pos, "Declaration is here") ]
+      (decl_pos, "Declaration is here");
+    ]
 
 let classname_abstract_call cname meth_name call_pos decl_pos =
   let cname = Utils.strip_ns cname in
   add_list
     (Typing.err_code Typing.AbstractCall)
-    [ ( call_pos,
+    [
+      ( call_pos,
         "Cannot call " ^ cname ^ "::" ^ meth_name ^ "(); it is abstract" );
-      (decl_pos, "Declaration is here") ]
+      (decl_pos, "Declaration is here");
+    ]
 
 let static_synthetic_method cname meth_name call_pos decl_pos =
   let cname = Utils.strip_ns cname in
   add_list
     (Typing.err_code Typing.StaticSyntheticMethod)
-    [ ( call_pos,
+    [
+      ( call_pos,
         "Cannot call "
         ^ cname
         ^ "::"
@@ -2593,7 +2681,8 @@ let static_synthetic_method cname meth_name call_pos decl_pos =
         ^ meth_name
         ^ " is not defined in "
         ^ cname );
-      (decl_pos, "Declaration is here") ]
+      (decl_pos, "Declaration is here");
+    ]
 
 let isset_in_strict pos =
   add
@@ -2605,17 +2694,21 @@ let isset_in_strict pos =
 let unset_nonidx_in_strict pos msgs =
   add_list
     (Typing.err_code Typing.UnsetNonidxInStrict)
-    ( [ ( pos,
+    ( [
+        ( pos,
           "In strict mode, unset is banned except on array, keyset, "
-          ^ "or dict indexing" ) ]
+          ^ "or dict indexing" );
+      ]
     @ msgs )
 
 let unset_nonidx_in_strict_no_varray pos msgs =
   add_list
     (Typing.err_code Typing.UnsetNonidxInStrict)
-    ( [ ( pos,
+    ( [
+        ( pos,
           "In strict mode, unset is banned except on dict-like array, "
-          ^ "darray, keyset, or dict indexing" ) ]
+          ^ "darray, keyset, or dict indexing" );
+      ]
     @ msgs )
 
 let unpacking_disallowed_builtin_function pos name =
@@ -2628,16 +2721,20 @@ let unpacking_disallowed_builtin_function pos name =
 let array_get_arity pos1 name pos2 =
   add_list
     (Typing.err_code Typing.ArrayGetArity)
-    [ (pos1, "You cannot use this " ^ Utils.strip_ns name);
-      (pos2, "It is missing its type parameters") ]
+    [
+      (pos1, "You cannot use this " ^ Utils.strip_ns name);
+      (pos2, "It is missing its type parameters");
+    ]
 
 let typing_error pos msg = add (Typing.err_code Typing.GenericUnify) pos msg
 
 let undefined_field ~use_pos ~name ~shape_type_pos =
   add_list
     (Typing.err_code Typing.UndefinedField)
-    [ (use_pos, "The field " ^ name ^ " is undefined");
-      (shape_type_pos, "Definition is here") ]
+    [
+      (use_pos, "The field " ^ name ^ " is undefined");
+      (shape_type_pos, "Definition is here");
+    ]
 
 let array_access pos1 pos2 ty =
   add_list
@@ -2713,8 +2810,10 @@ let smember_not_found kind pos (cpos, class_name) member_name hint =
   let msg = Printf.sprintf "No %s '%s' in %s" kind member_name class_name in
   add_list
     (Typing.err_code Typing.SmemberNotFound)
-    [ (pos, msg ^ snot_found_hint hint);
-      (cpos, "Declaration of " ^ class_name ^ " is here") ]
+    [
+      (pos, msg ^ snot_found_hint hint);
+      (cpos, "Declaration of " ^ class_name ^ " is here");
+    ]
 
 let member_not_found kind pos (cpos, type_name) member_name hint reason =
   let type_name = strip_ns type_name in
@@ -2751,22 +2850,26 @@ let visibility p msg1 p_vis msg2 =
 let typing_too_many_args expected actual pos pos_def =
   add_list
     (Typing.err_code Typing.TypingTooManyArgs)
-    [ ( pos,
+    [
+      ( pos,
         Printf.sprintf
           "Too many arguments (expected %d but got %d)"
           expected
           actual );
-      (pos_def, "Definition is here") ]
+      (pos_def, "Definition is here");
+    ]
 
 let typing_too_few_args required actual pos pos_def =
   add_list
     (Typing.err_code Typing.TypingTooFewArgs)
-    [ ( pos,
+    [
+      ( pos,
         Printf.sprintf
           "Too few arguments (required %d but got %d)"
           required
           actual );
-      (pos_def, "Definition is here") ]
+      (pos_def, "Definition is here");
+    ]
 
 let anonymous_recursive_call pos =
   add
@@ -2784,15 +2887,19 @@ let extend_final extend_pos decl_pos name =
   let name = strip_ns name in
   add_list
     (Typing.err_code Typing.ExtendFinal)
-    [ (extend_pos, "You cannot extend final class " ^ name);
-      (decl_pos, "Declaration is here") ]
+    [
+      (extend_pos, "You cannot extend final class " ^ name);
+      (decl_pos, "Declaration is here");
+    ]
 
 let extend_sealed child_pos parent_pos parent_name parent_kind verb =
   let name = strip_ns parent_name in
   add_list
     (Typing.err_code Typing.ExtendSealed)
-    [ (child_pos, "You cannot " ^ verb ^ " sealed " ^ parent_kind ^ " " ^ name);
-      (parent_pos, "Declaration is here") ]
+    [
+      (child_pos, "You cannot " ^ verb ^ " sealed " ^ parent_kind ^ " " ^ name);
+      (parent_pos, "Declaration is here");
+    ]
 
 let trait_prop_const_class pos x =
   add
@@ -2868,8 +2975,10 @@ let generic_static pos x =
 let fun_too_many_args pos1 pos2 =
   add_list
     (Typing.err_code Typing.FunTooManyArgs)
-    [ (pos1, "Too many mandatory arguments");
-      (pos2, "Because of this definition") ]
+    [
+      (pos1, "Too many mandatory arguments");
+      (pos2, "Because of this definition");
+    ]
 
 let fun_too_few_args pos1 pos2 =
   add_list
@@ -2879,14 +2988,18 @@ let fun_too_few_args pos1 pos2 =
 let fun_unexpected_nonvariadic pos1 pos2 =
   add_list
     (Typing.err_code Typing.FunUnexpectedNonvariadic)
-    [ (pos1, "Should have a variadic argument");
-      (pos2, "Because of this definition") ]
+    [
+      (pos1, "Should have a variadic argument");
+      (pos2, "Because of this definition");
+    ]
 
 let fun_variadicity_hh_vs_php56 pos1 pos2 =
   add_list
     (Typing.err_code Typing.FunVariadicityHhVsPhp56)
-    [ (pos1, "Variadic arguments: ...-style is not a subtype of ...$args");
-      (pos2, "Because of this definition") ]
+    [
+      (pos1, "Variadic arguments: ...-style is not a subtype of ...$args");
+      (pos2, "Because of this definition");
+    ]
 
 let ellipsis_strict_mode ~require pos =
   let msg =
@@ -2915,20 +3028,24 @@ let echo_in_reactive_context pos =
 let expected_tparam ~use_pos ~definition_pos n =
   add_list
     (Typing.err_code Typing.ExpectedTparam)
-    [ ( use_pos,
+    [
+      ( use_pos,
         "Expected "
         ^
         match n with
         | 0 -> "no type parameter"
         | 1 -> "a type parameter"
         | n -> string_of_int n ^ " type parameters" );
-      (definition_pos, "Definition is here") ]
+      (definition_pos, "Definition is here");
+    ]
 
 let object_string pos1 pos2 =
   add_list
     (Typing.err_code Typing.ObjectString)
-    [ (pos1, "You cannot use this object as a string");
-      (pos2, "This object doesn't implement __toString") ]
+    [
+      (pos1, "You cannot use this object as a string");
+      (pos2, "This object doesn't implement __toString");
+    ]
 
 let object_string_deprecated pos =
   add
@@ -2942,7 +3059,10 @@ let cyclic_typedef p =
 let type_arity_mismatch pos1 n1 pos2 n2 =
   add_list
     (Typing.err_code Typing.TypeArityMismatch)
-    [(pos1, "This type has " ^ n1 ^ " arguments"); (pos2, "This one has " ^ n2)]
+    [
+      (pos1, "This type has " ^ n1 ^ " arguments");
+      (pos2, "This one has " ^ n2);
+    ]
 
 let this_final id pos2 (error : error) =
   let n = Utils.strip_ns (snd id) in
@@ -2963,8 +3083,10 @@ let exact_class_final id pos2 (error : error) =
 let fun_arity_mismatch pos1 pos2 =
   add_list
     (Typing.err_code Typing.FunArityMismatch)
-    [ (pos1, "Number of arguments doesn't match");
-      (pos2, "Because of this definition") ]
+    [
+      (pos1, "Number of arguments doesn't match");
+      (pos2, "Because of this definition");
+    ]
 
 let fun_reactivity_mismatch pos1 kind1 pos2 kind2 =
   let f k = "This function is " ^ k ^ "." in
@@ -2977,9 +3099,11 @@ let inconsistent_mutability pos1 mut1 p2_opt =
   | Some (pos2, mut2) ->
     add_list
       (Typing.err_code Typing.InconsistentMutability)
-      [ ( pos1,
+      [
+        ( pos1,
           "Inconsistent mutability of local variable, here local is " ^ mut1 );
-        (pos2, "But here it is " ^ mut2) ]
+        (pos2, "But here it is " ^ mut2);
+      ]
   | None ->
     add
       (Typing.err_code Typing.InconsistentMutability)
@@ -2989,10 +3113,12 @@ let inconsistent_mutability pos1 mut1 p2_opt =
 let inconsistent_mutability_for_conditional p_mut p_other =
   add_list
     (Typing.err_code Typing.InconsistentMutability)
-    [ ( p_mut,
+    [
+      ( p_mut,
         "Inconsistent mutability of conditional expression, this branch returns owned mutable value"
       );
-      (p_other, "But this one does not.") ]
+      (p_other, "But this one does not.");
+    ]
 
 let invalid_mutability_flavor pos mut1 mut2 =
   add
@@ -3035,12 +3161,14 @@ let mutable_expression_as_multiple_mutable_arguments
     pos param_kind prev_pos prev_param_kind =
   add_list
     (Typing.err_code Typing.MutableExpressionAsMultipleMutableArguments)
-    [ ( pos,
+    [
+      ( pos,
         "A mutable expression may not be passed as multiple arguments where at least one matching parameter is mutable. Matching parameter here is "
         ^ param_kind );
       ( prev_pos,
         "This is where it was used before, being passed as " ^ prev_param_kind
-      ) ]
+      );
+    ]
 
 let reassign_maybe_mutable_var ~in_collection pos1 =
   let msg =
@@ -3055,9 +3183,11 @@ let mutable_call_on_immutable fpos pos1 rx_mutable_hint_pos =
   let l =
     match rx_mutable_hint_pos with
     | Some p ->
-      [ ( p,
+      [
+        ( p,
           "Consider wrapping this expression with Rx\\mutable to forward mutability."
-        ) ]
+        );
+      ]
     | None -> []
   in
   let l =
@@ -3071,8 +3201,10 @@ let mutable_call_on_immutable fpos pos1 rx_mutable_hint_pos =
 let immutable_call_on_mutable fpos pos1 =
   add_list
     (Typing.err_code Typing.ImmutableCallOnMutable)
-    [ (pos1, "Cannot call non-mutable function on mutable expression");
-      (fpos, "This function is not marked as <<__Mutable>>.") ]
+    [
+      (pos1, "Cannot call non-mutable function on mutable expression");
+      (fpos, "This function is not marked as <<__Mutable>>.");
+    ]
 
 let mutability_mismatch ~is_receiver pos1 mut1 pos2 mut2 =
   let msg mut =
@@ -3104,16 +3236,20 @@ let invalid_call_on_maybe_mutable ~fun_is_mutable pos fpos =
 let mutable_argument_mismatch param_pos arg_pos =
   add_list
     (Typing.err_code Typing.MutableArgumentMismatch)
-    [ (arg_pos, "Invalid argument");
+    [
+      (arg_pos, "Invalid argument");
       (param_pos, "This parameter is marked mutable");
-      (arg_pos, "But this expression is not") ]
+      (arg_pos, "But this expression is not");
+    ]
 
 let immutable_argument_mismatch param_pos arg_pos =
   add_list
     (Typing.err_code Typing.ImmutableArgumentMismatch)
-    [ (arg_pos, "Invalid argument");
+    [
+      (arg_pos, "Invalid argument");
       (param_pos, "This parameter is not marked as mutable");
-      (arg_pos, "But this expression is mutable") ]
+      (arg_pos, "But this expression is mutable");
+    ]
 
 let mutably_owned_argument_mismatch ~arg_is_owned_local param_pos arg_pos =
   let arg_msg =
@@ -3124,25 +3260,31 @@ let mutably_owned_argument_mismatch ~arg_is_owned_local param_pos arg_pos =
   in
   add_list
     (Typing.err_code Typing.ImmutableArgumentMismatch)
-    [ (arg_pos, "Invalid argument");
+    [
+      (arg_pos, "Invalid argument");
       (param_pos, "This parameter is marked with <<__OwnedMutable>>");
-      (arg_pos, arg_msg) ]
+      (arg_pos, arg_msg);
+    ]
 
 let maybe_mutable_argument_mismatch param_pos arg_pos =
   add_list
     (Typing.err_code Typing.MaybeMutableArgumentMismatch)
-    [ (arg_pos, "Invalid argument");
+    [
+      (arg_pos, "Invalid argument");
       (param_pos, "This parameter is not marked <<__MaybeMutable>>");
-      (arg_pos, "But this expression is maybe mutable") ]
+      (arg_pos, "But this expression is maybe mutable");
+    ]
 
 let invalid_mutable_return_result error_pos function_pos value_kind =
   add_list
     (Typing.err_code Typing.InvalidMutableReturnResult)
-    [ ( error_pos,
+    [
+      ( error_pos,
         "Functions marked <<__MutableReturn>> must return mutably owned values: mutably owned local variables and results of calling Rx\\mutable."
       );
       (function_pos, "This function is marked <<__MutableReturn>>");
-      (error_pos, "This expression is " ^ value_kind) ]
+      (error_pos, "This expression is " ^ value_kind);
+    ]
 
 let freeze_in_nonreactive_context pos1 =
   add
@@ -3180,27 +3322,33 @@ let invalid_argument_type_for_condition_in_rx
   in
   add_list
     (Typing.err_code Typing.InvalidConditionallyReactiveCall)
-    [ ( f_pos,
+    [
+      ( f_pos,
         "Cannot invoke conditionally reactive function in reactive context, because at least one reactivity condition is not met."
       );
       (arg_pos, arg_msg);
-      (def_pos, "This is the function declaration") ]
+      (def_pos, "This is the function declaration");
+    ]
 
 let callsite_reactivity_mismatch
     f_pos def_pos callee_reactivity cause_pos_opt caller_reactivity =
   add_list
     (Typing.err_code Typing.CallSiteReactivityMismatch)
-    ( [ ( f_pos,
+    ( [
+        ( f_pos,
           "Reactivity mismatch: "
           ^ caller_reactivity
           ^ " function cannot call "
           ^ callee_reactivity
           ^ " function." );
-        (def_pos, "This is declaration of the function being called.") ]
+        (def_pos, "This is declaration of the function being called.");
+      ]
     @ Option.value_map cause_pos_opt ~default:[] ~f:(fun cause_pos ->
-          [ ( cause_pos,
+          [
+            ( cause_pos,
               "Reactivity of this argument was used as reactivity of the callee."
-            ) ]) )
+            );
+          ]) )
 
 let invalid_argument_of_rx_mutable_function pos =
   add
@@ -3223,36 +3371,44 @@ let invalid_move_use pos1 =
 let require_args_reify def_pos arg_pos =
   add_list
     (Typing.err_code Typing.RequireArgsReify)
-    [ ( arg_pos,
+    [
+      ( arg_pos,
         "All type arguments must be specified because a type parameter is reified"
       );
-      (def_pos, "Definition is here") ]
+      (def_pos, "Definition is here");
+    ]
 
 let require_generic_explicit (def_pos, def_name) arg_pos =
   add_list
     (Typing.err_code Typing.RequireGenericExplicit)
-    [ ( arg_pos,
+    [
+      ( arg_pos,
         "Generic type parameter " ^ def_name ^ " must be specified explicitly"
       );
-      (def_pos, "Definition is here") ]
+      (def_pos, "Definition is here");
+    ]
 
 let invalid_reified_argument (def_pos, def_name) hint_pos arg_pos arg_kind =
   add_list
     (Typing.err_code Typing.InvalidReifiedArgument)
-    [ (hint_pos, "Invalid reified hint");
+    [
+      (hint_pos, "Invalid reified hint");
       ( arg_pos,
         "This is "
         ^ arg_kind
         ^ ", it cannot be used as a reified type argument" );
-      (def_pos, def_name ^ " is reified") ]
+      (def_pos, def_name ^ " is reified");
+    ]
 
 let invalid_reified_argument_reifiable
     (def_pos, def_name) arg_pos ty_pos ty_msg =
   add_list
     (Typing.err_code Typing.InvalidReifiedArgument)
-    [ (arg_pos, "PHP arrays cannot be used as a reified type argument");
+    [
+      (arg_pos, "PHP arrays cannot be used as a reified type argument");
       (ty_pos, String.capitalize ty_msg);
-      (def_pos, def_name ^ " is reified") ]
+      (def_pos, def_name ^ " is reified");
+    ]
 
 let new_static_class_reified pos =
   add
@@ -3283,23 +3439,29 @@ let new_without_newable pos name =
 let invalid_freeze_target pos1 var_pos var_mutability_str =
   add_list
     (Typing.err_code Typing.InvalidFreezeTarget)
-    [ (pos1, "Invalid argument - freeze() takes a single mutable variable");
-      (var_pos, "This variable is " ^ var_mutability_str) ]
+    [
+      (pos1, "Invalid argument - freeze() takes a single mutable variable");
+      (var_pos, "This variable is " ^ var_mutability_str);
+    ]
 
 let invalid_move_target pos1 var_pos var_mutability_str =
   add_list
     (Typing.err_code Typing.InvalidMoveTarget)
-    [ (pos1, "Invalid argument - move() takes a single mutably-owned variable");
-      (var_pos, "This variable is " ^ var_mutability_str) ]
+    [
+      (pos1, "Invalid argument - move() takes a single mutably-owned variable");
+      (var_pos, "This variable is " ^ var_mutability_str);
+    ]
 
 let discarded_awaitable pos1 pos2 =
   add_list
     (Typing.err_code Typing.DiscardedAwaitable)
-    [ ( pos1,
+    [
+      ( pos1,
         "This expression is of type Awaitable, but it's "
         ^ "either being discarded or used in a dangerous way before "
         ^ "being awaited" );
-      (pos2, "This is why I think it is Awaitable") ]
+      (pos2, "This is why I think it is Awaitable");
+    ]
 
 let unify_error left right =
   add_list (Typing.err_code Typing.UnifyError) (left @ right)
@@ -3502,9 +3664,11 @@ let ambiguous_member ~is_method s pos1 ty pos2 =
 let null_container p null_witness =
   add_list
     (Typing.err_code Typing.NullContainer)
-    ( [ ( p,
+    ( [
+        ( p,
           "You are trying to access an element of this container"
-          ^ " but the container could be null. " ) ]
+          ^ " but the container could be null. " );
+      ]
     @ null_witness )
 
 let option_mixed pos =
@@ -3522,27 +3686,32 @@ let option_null pos =
 let declared_covariant pos1 pos2 emsg =
   add_list
     (Typing.err_code Typing.DeclaredCovariant)
-    ( [ (pos2, "Illegal usage of a covariant type parameter");
-        (pos1, "This is where the parameter was declared as covariant (+)") ]
+    ( [
+        (pos2, "Illegal usage of a covariant type parameter");
+        (pos1, "This is where the parameter was declared as covariant (+)");
+      ]
     @ emsg )
 
 let declared_contravariant pos1 pos2 emsg =
   add_list
     (Typing.err_code Typing.DeclaredContravariant)
-    ( [ (pos2, "Illegal usage of a contravariant type parameter");
-        (pos1, "This is where the parameter was declared as contravariant (-)")
+    ( [
+        (pos2, "Illegal usage of a contravariant type parameter");
+        (pos1, "This is where the parameter was declared as contravariant (-)");
       ]
     @ emsg )
 
 let static_property_type_generic_param ~class_pos ~var_type_pos ~generic_pos =
   add_list
     (Typing.err_code Typing.ClassVarTypeGenericParam)
-    [ ( generic_pos,
+    [
+      ( generic_pos,
         "A generic parameter cannot be used in the type of a static property"
       );
       ( var_type_pos,
         "This is where the type of the static property was declared" );
-      (class_pos, "This is the class containing the static property") ]
+      (class_pos, "This is the class containing the static property");
+    ]
 
 let contravariant_this pos class_name tp =
   add
@@ -3573,24 +3742,30 @@ let abstract_concrete_override pos parent_pos kind =
   in
   add_list
     (Typing.err_code Typing.AbstractConcreteOverride)
-    [ (pos, "Cannot re-declare this " ^ kind_str ^ " as abstract");
-      (parent_pos, "Previously defined here") ]
+    [
+      (pos, "Cannot re-declare this " ^ kind_str ^ " as abstract");
+      (parent_pos, "Previously defined here");
+    ]
 
 let required_field_is_optional pos1 pos2 name =
   add_list
     (Typing.err_code Typing.RequiredFieldIsOptional)
-    [ (pos1, "The field '" ^ name ^ "' is optional");
-      (pos2, "The field '" ^ name ^ "' is defined as required") ]
+    [
+      (pos1, "The field '" ^ name ^ "' is optional");
+      (pos2, "The field '" ^ name ^ "' is defined as required");
+    ]
 
 let array_get_with_optional_field pos1 pos2 name =
   add_list
     (Typing.err_code Typing.ArrayGetWithOptionalField)
-    [ ( pos1,
+    [
+      ( pos1,
         "Invalid index operation: '"
         ^ name
         ^ "' is marked as an optional shape field. It may not be present in the shape. Use the `??` operator instead."
       );
-      (pos2, "This is where the field was declared as optional.") ]
+      (pos2, "This is where the field was declared as optional.");
+    ]
 
 let non_call_argument_in_suspend pos msgs =
   add_list
@@ -3601,33 +3776,40 @@ let non_call_argument_in_suspend pos msgs =
 let non_coroutine_call_in_suspend pos msgs =
   add_list
     (Typing.err_code Typing.NonCoroutineCallInSuspend)
-    ( [ ( pos,
+    ( [
+        ( pos,
           "Only coroutine functions are allowed to be called in 'suspend' operator."
-        ) ]
+        );
+      ]
     @ msgs )
 
 let coroutine_call_outside_of_suspend pos =
   add_list
     (Typing.err_code Typing.CoroutineCallOutsideOfSuspend)
-    [ ( pos,
+    [
+      ( pos,
         "Coroutine calls are only allowed when they are arguments to 'suspend' operator"
-      ) ]
+      );
+    ]
 
 let function_is_not_coroutine pos name =
   add_list
     (Typing.err_code Typing.FunctionIsNotCoroutine)
-    [ ( pos,
+    [
+      ( pos,
         "Function '"
         ^ name
         ^ "' is not a coroutine and cannot be used in as an argument of 'suspend' operator."
-      ) ]
+      );
+    ]
 
 let coroutinness_mismatch pos1_is_coroutine pos1 pos2 =
   let m1 = "This is a coroutine." in
   let m2 = "This is not a coroutine." in
   add_list
     (Typing.err_code Typing.CoroutinnessMismatch)
-    [ ( pos1,
+    [
+      ( pos1,
         if pos1_is_coroutine then
           m1
         else
@@ -3636,7 +3818,8 @@ let coroutinness_mismatch pos1_is_coroutine pos1 pos2 =
         if pos1_is_coroutine then
           m2
         else
-          m1 ) ]
+          m1 );
+    ]
 
 let invalid_ppl_call pos context =
   let error_msg =
@@ -3665,7 +3848,8 @@ let return_disposable_mismatch pos1_return_disposable pos1 pos2 =
   let m2 = "This is not marked <<__ReturnDisposable>>." in
   add_list
     (Typing.err_code Typing.ReturnDisposableMismatch)
-    [ ( pos1,
+    [
+      ( pos1,
         if pos1_return_disposable then
           m1
         else
@@ -3674,14 +3858,16 @@ let return_disposable_mismatch pos1_return_disposable pos1 pos2 =
         if pos1_return_disposable then
           m2
         else
-          m1 ) ]
+          m1 );
+    ]
 
 let return_void_to_rx_mismatch ~pos1_has_attribute pos1 pos2 =
   let m1 = "This is marked <<__ReturnsVoidToRx>>." in
   let m2 = "This is not marked <<__ReturnsVoidToRx>>." in
   add_list
     (Typing.err_code Typing.ReturnVoidToRxMismatch)
-    [ ( pos1,
+    [
+      ( pos1,
         if pos1_has_attribute then
           m1
         else
@@ -3690,7 +3876,8 @@ let return_void_to_rx_mismatch ~pos1_has_attribute pos1 pos2 =
         if pos1_has_attribute then
           m2
         else
-          m1 ) ]
+          m1 );
+    ]
 
 let this_as_lexical_variable pos =
   add
@@ -3722,7 +3909,8 @@ let overriding_prop_const_mismatch
   let m2 = "This property is not __Const" in
   add_list
     (Typing.err_code Typing.OverridingPropConstMismatch)
-    [ ( parent_pos,
+    [
+      ( parent_pos,
         if parent_const then
           m1
         else
@@ -3731,14 +3919,16 @@ let overriding_prop_const_mismatch
         if child_const then
           m1
         else
-          m2 ) ]
+          m2 );
+    ]
 
 let mutable_return_result_mismatch pos1_has_mutable_return pos1 pos2 =
   let m1 = "This is marked <<__MutableReturn>>." in
   let m2 = "This is not marked <<__MutableReturn>>." in
   add_list
     (Typing.err_code Typing.MutableReturnResultMismatch)
-    [ ( pos1,
+    [
+      ( pos1,
         if pos1_has_mutable_return then
           m1
         else
@@ -3747,7 +3937,8 @@ let mutable_return_result_mismatch pos1_has_mutable_return pos1 pos2 =
         if pos1_has_mutable_return then
           m2
         else
-          m1 ) ]
+          m1 );
+    ]
 
 let pu_expansion pos =
   add
@@ -3802,33 +3993,41 @@ let trait_reuse p_pos p_name class_name trait =
 let invalid_is_as_expression_hint op hint_pos ty_pos ty_str =
   add_list
     (Typing.err_code Typing.InvalidIsAsExpressionHint)
-    [ (hint_pos, "Invalid \"" ^ op ^ "\" expression hint");
-      (ty_pos, "The \"" ^ op ^ "\" operator cannot be used with " ^ ty_str) ]
+    [
+      (hint_pos, "Invalid \"" ^ op ^ "\" expression hint");
+      (ty_pos, "The \"" ^ op ^ "\" operator cannot be used with " ^ ty_str);
+    ]
 
 let invalid_enforceable_type kind_str (tp_pos, tp_name) targ_pos ty_pos ty_str
     =
   add_list
     (Typing.err_code Typing.InvalidEnforceableTypeArgument)
-    [ (targ_pos, "Invalid type");
+    [
+      (targ_pos, "Invalid type");
       ( tp_pos,
         "Type " ^ kind_str ^ " " ^ tp_name ^ " was declared __Enforceable here"
       );
-      (ty_pos, "This type is not enforceable because it has " ^ ty_str) ]
+      (ty_pos, "This type is not enforceable because it has " ^ ty_str);
+    ]
 
 let reifiable_attr attr_pos decl_kind decl_pos ty_pos ty_msg =
   add_list
     (Typing.err_code Typing.DisallowPHPArraysAttr)
-    [ (decl_pos, "Invalid " ^ decl_kind);
+    [
+      (decl_pos, "Invalid " ^ decl_kind);
       (attr_pos, "This type constant has the __Reifiable attribute");
-      (ty_pos, "It cannot contain " ^ ty_msg) ]
+      (ty_pos, "It cannot contain " ^ ty_msg);
+    ]
 
 let invalid_newable_type_argument (tp_pos, tp_name) ta_pos =
   add_list
     (Typing.err_code Typing.InvalidNewableTypeArgument)
-    [ ( ta_pos,
+    [
+      ( ta_pos,
         "A newable type argument must be a concrete class or a newable type parameter."
       );
-      (tp_pos, "Type parameter " ^ tp_name ^ " was declared __Newable here") ]
+      (tp_pos, "Type parameter " ^ tp_name ^ " was declared __Newable here");
+    ]
 
 let invalid_newable_type_param_constraints
     (tparam_pos, tparam_name) constraint_list =
@@ -3854,23 +4053,29 @@ let invalid_newable_type_param_constraints
 let override_final ~parent ~child =
   add_list
     (Typing.err_code Typing.OverrideFinal)
-    [ (child, "You cannot override this method");
-      (parent, "It was declared as final") ]
+    [
+      (child, "You cannot override this method");
+      (parent, "It was declared as final");
+    ]
 
 let override_memoizelsb ~parent ~child =
   add_list
     (Typing.err_code Typing.OverrideMemoizeLSB)
-    [ ( child,
+    [
+      ( child,
         "__MemoizeLSB method may not be an override (temporary due to HHVM bug)"
       );
-      (parent, "This method is being overridden") ]
+      (parent, "This method is being overridden");
+    ]
 
 let override_lsb ~member_name ~parent ~child =
   add_list
     (Typing.err_code Typing.OverrideLSB)
-    [ ( child,
+    [
+      ( child,
         "Member " ^ member_name ^ " may not override __LSB member of parent" );
-      (parent, "This is being overridden") ]
+      (parent, "This is being overridden");
+    ]
 
 let should_be_override pos class_id id =
   add
@@ -4041,8 +4246,9 @@ let cannot_declare_constant kind pos (class_pos, class_name) =
   in
   add_list
     (Typing.err_code Typing.CannotDeclareConstant)
-    [ (pos, "Cannot declare a constant in " ^ kind_str);
-      (class_pos, strip_ns class_name ^ " was defined as " ^ kind_str ^ " here")
+    [
+      (pos, "Cannot declare a constant in " ^ kind_str);
+      (class_pos, strip_ns class_name ^ " was defined as " ^ kind_str ^ " here");
     ]
 
 let ambiguous_inheritance pos class_ origin (error : error) =
@@ -4065,7 +4271,8 @@ let multiple_concrete_defs
   let class_ = strip_ns class_ in
   add_list
     (Typing.err_code Typing.MultipleConcreteDefs)
-    [ ( child_pos,
+    [
+      ( child_pos,
         child_origin
         ^ " and "
         ^ parent_origin
@@ -4076,7 +4283,8 @@ let multiple_concrete_defs
       (parent_pos, parent_origin ^ "'s definition is here.");
       ( child_pos,
         "Redeclare " ^ name ^ " in " ^ class_ ^ " with a compatible signature."
-      ) ]
+      );
+    ]
 
 let local_variable_modified_and_used pos_modified pos_used_l =
   let used_msg p = (p, "And accessed here") in
@@ -4131,10 +4339,12 @@ let illegal_typeconst_direct_access pos =
 let override_no_default_typeconst pos_child pos_parent =
   add_list
     (Typing.err_code Typing.OverrideNoDefaultTypeconst)
-    [ (pos_child, "This abstract type constant does not have a default type");
+    [
+      (pos_child, "This abstract type constant does not have a default type");
       ( pos_parent,
         "It cannot override an abstract type constant that has a default type"
-      ) ]
+      );
+    ]
 
 let reference_expr pos =
   let msg = "References are only allowed as function call arguments" in
@@ -4202,23 +4412,31 @@ let invalid_return_disposable pos =
 let nonreactive_function_call pos decl_pos callee_reactivity cause_pos_opt =
   add_list
     (Typing.err_code Typing.NonreactiveFunctionCall)
-    ( [ (pos, "Reactive functions can only call other reactive functions.");
-        (decl_pos, "This function is " ^ callee_reactivity ^ ".") ]
+    ( [
+        (pos, "Reactive functions can only call other reactive functions.");
+        (decl_pos, "This function is " ^ callee_reactivity ^ ".");
+      ]
     @ Option.value_map cause_pos_opt ~default:[] ~f:(fun cause_pos ->
-          [ ( cause_pos,
+          [
+            ( cause_pos,
               "This argument caused function to be " ^ callee_reactivity ^ "."
-            ) ]) )
+            );
+          ]) )
 
 let nonreactive_call_from_shallow pos decl_pos callee_reactivity cause_pos_opt
     =
   add_list
     (Typing.err_code Typing.NonreactiveCallFromShallow)
-    ( [ (pos, "Shallow reactive functions cannot call non-reactive functions.");
-        (decl_pos, "This function is " ^ callee_reactivity ^ ".") ]
+    ( [
+        (pos, "Shallow reactive functions cannot call non-reactive functions.");
+        (decl_pos, "This function is " ^ callee_reactivity ^ ".");
+      ]
     @ Option.value_map cause_pos_opt ~default:[] ~f:(fun cause_pos ->
-          [ ( cause_pos,
+          [
+            ( cause_pos,
               "This argument caused function to be " ^ callee_reactivity ^ "."
-            ) ]) )
+            );
+          ]) )
 
 let rx_enabled_in_non_rx_context pos =
   add
@@ -4229,11 +4447,12 @@ let rx_enabled_in_non_rx_context pos =
 let rx_parameter_condition_mismatch cond pos def_pos =
   add_list
     (Typing.err_code Typing.RxParameterConditionMismatch)
-    [ ( pos,
+    [
+      ( pos,
         "This parameter does not satisfy "
         ^ cond
         ^ " condition defined on matching parameter in function super type." );
-      (def_pos, "This is parameter declaration from the function super type.")
+      (def_pos, "This is parameter declaration from the function super type.");
     ]
 
 let nonreactive_indexing is_append pos =
@@ -4311,11 +4530,12 @@ let wrong_expression_kind_builtin_attribute expr_kind pos attr =
 let cannot_return_borrowed_value_as_immutable fun_pos value_pos =
   add_list
     (Typing.err_code Typing.CannotReturnBorrowedValueAsImmutable)
-    [ ( fun_pos,
+    [
+      ( fun_pos,
         "Values returned from reactive function by default are treated as immutable."
       );
       ( value_pos,
-        "This value is mutably borrowed and cannot be returned as immutable" )
+        "This value is mutably borrowed and cannot be returned as immutable" );
     ]
 
 let decl_override_missing_hint pos =
@@ -4376,10 +4596,12 @@ let static_property_in_reactive_context pos =
 let returns_void_to_rx_function_as_non_expression_statement pos fpos =
   add_list
     (Typing.err_code Typing.ReturnsVoidToRxAsNonExpressionStatement)
-    [ ( pos,
+    [
+      ( pos,
         "Cannot use result of function annotated with <<__ReturnsVoidToRx>> in reactive context"
       );
-      (fpos, "This is function declaration.") ]
+      (fpos, "This is function declaration.");
+    ]
 
 let non_awaited_awaitable_in_rx pos =
   add
@@ -4390,8 +4612,10 @@ let non_awaited_awaitable_in_rx pos =
 let shapes_key_exists_always_true pos1 name pos2 =
   add_list
     (Typing.err_code Typing.ShapesKeyExistsAlwaysTrue)
-    [ (pos1, "This Shapes::keyExists() check is always true");
-      (pos2, "The field '" ^ name ^ "' exists because of this definition") ]
+    [
+      (pos1, "This Shapes::keyExists() check is always true");
+      (pos2, "The field '" ^ name ^ "' exists because of this definition");
+    ]
 
 let shape_field_non_existence_reason pos name = function
   | `Undefined ->
@@ -4428,11 +4652,12 @@ let ambiguous_object_access
   let class_subclass = Utils.strip_ns class_subclass in
   add_list
     (Typing.err_code Typing.AmbiguousObjectAccess)
-    [ (pos, "This object access to " ^ name ^ " is ambiguous");
+    [
+      (pos, "This object access to " ^ name ^ " is ambiguous");
       ( self_pos,
         "You will access the private instance declared in " ^ class_self );
       ( subclass_pos,
-        "Instead of the " ^ vis ^ " instance declared in " ^ class_subclass )
+        "Instead of the " ^ vis ^ " instance declared in " ^ class_subclass );
     ]
 
 let invalid_traversable_in_rx pos =
@@ -4456,19 +4681,23 @@ let bad_lateinit_override parent_is_lateinit parent_pos child_pos =
   in
   add_list
     (Typing.err_code Typing.BadLateInitOverride)
-    [ ( child_pos,
+    [
+      ( child_pos,
         "Redeclared properties must be consistently declared __LateInit" );
-      (parent_pos, "The property " ^ verb ^ " declared __LateInit here") ]
+      (parent_pos, "The property " ^ verb ^ " declared __LateInit here");
+    ]
 
 let bad_xhp_attr_required_override parent_tag child_tag parent_pos child_pos =
   add_list
     (Typing.err_code Typing.BadXhpAttrRequiredOverride)
-    [ (child_pos, "Redeclared attribute must not be less strict");
+    [
+      (child_pos, "Redeclared attribute must not be less strict");
       ( parent_pos,
         "The attribute is "
         ^ parent_tag
         ^ ", which is stricter than "
-        ^ child_tag ) ]
+        ^ child_tag );
+    ]
 
 let invalid_switch_case_value_type case_value_p case_value_ty scrutinee_ty =
   add (Typing.err_code Typing.InvalidSwitchCaseValueType) case_value_p
@@ -4493,9 +4722,10 @@ let redundant_rx_condition pos =
 let invalid_arraykey pos (cpos, ctype) (kpos, ktype) =
   add_list
     (Typing.err_code Typing.InvalidArrayKey)
-    [ (pos, "This value is not a valid key type for this container");
+    [
+      (pos, "This value is not a valid key type for this container");
       (cpos, "This container is " ^ ctype);
-      (kpos, String.capitalize ktype ^ " cannot be used as a key for " ^ ctype)
+      (kpos, String.capitalize ktype ^ " cannot be used as a key for " ^ ctype);
     ]
 
 let invalid_sub_string pos ty =
@@ -4536,12 +4766,14 @@ let to_json (error : Pos.absolute error_) =
     List.map msgl (fun (p, w) ->
         let (line, scol, ecol) = Pos.info_pos p in
         Hh_json.JSON_Object
-          [ ("descr", Hh_json.JSON_String w);
+          [
+            ("descr", Hh_json.JSON_String w);
             ("path", Hh_json.JSON_String (Pos.filename p));
             ("line", Hh_json.int_ line);
             ("start", Hh_json.int_ scol);
             ("end", Hh_json.int_ ecol);
-            ("code", Hh_json.int_ error_code) ])
+            ("code", Hh_json.int_ error_code);
+          ])
   in
   Hh_json.JSON_Object [("message", Hh_json.JSON_Array elts)]
 

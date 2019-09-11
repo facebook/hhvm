@@ -186,9 +186,11 @@ and emit_stmt env (pos, stmt) =
     gather [emit_await env inner_pos e; Emit_pos.emit_pos pos; emit_return env]
   | A.Return (Some (_, A.Yield_from e)) ->
     gather
-      [ emit_yield_from_delegates env pos e;
+      [
+        emit_yield_from_delegates env pos e;
         Emit_pos.emit_pos pos;
-        emit_return env ]
+        emit_return env;
+      ]
   | A.Expr (ann, A.Await e) -> gather [emit_await env (fst ann) e; instr_popc]
   | A.Expr
       ( _,
@@ -226,13 +228,16 @@ and emit_stmt env (pos, stmt) =
     let temp = Local.get_unnamed_local () in
     let rhs_instrs = instr_pushl temp in
     gather
-      [ emit_yield_from_delegates env pos e;
+      [
+        emit_yield_from_delegates env pos e;
         instr_setl temp;
         instr_popc;
         emit_lval_op_nonlist env pos LValOp.Set e_lhs rhs_instrs 1;
-        instr_popc ]
+        instr_popc;
+      ]
   | A.Expr expr -> emit_ignored_expr ~pop_pos:pos env expr
-  | A.Return None -> gather [instr_null; Emit_pos.emit_pos pos; emit_return env]
+  | A.Return None ->
+    gather [instr_null; Emit_pos.emit_pos pos; emit_return env]
   | A.Return (Some expr) ->
     gather [emit_expr env expr; Emit_pos.emit_pos pos; emit_return env]
   | A.GotoLabel (_, label) -> instr_label (Label.named label)
@@ -330,30 +335,36 @@ and emit_if env pos condition consequence alternative =
   | [(_, A.Noop)] ->
     let done_label = Label.next_regular () in
     gather
-      [ get_instrs @@ emit_jmpz env condition done_label;
+      [
+        get_instrs @@ emit_jmpz env condition done_label;
         emit_stmts env consequence;
-        instr_label done_label ]
+        instr_label done_label;
+      ]
   | _ ->
     let alternative_label = Label.next_regular () in
     let done_label = Label.next_regular () in
     let consequence_instr = emit_stmts env consequence in
     let alternative_instr = emit_stmts env alternative in
     gather
-      [ get_instrs @@ emit_jmpz env condition alternative_label;
+      [
+        get_instrs @@ emit_jmpz env condition alternative_label;
         consequence_instr;
         emit_pos pos;
         instr_jmp done_label;
         instr_label alternative_label;
         alternative_instr;
-        instr_label done_label ]
+        instr_label done_label;
+      ]
 
 and emit_await_assignment env pos lval e =
   match snd lval with
   | A.Lvar id when not (is_local_this env (snd id)) ->
     gather
-      [ emit_await env pos e;
+      [
+        emit_await env pos e;
         emit_pos pos;
-        instr_popl (get_local env (pos, Local_id.get_name (snd id))) ]
+        instr_popl (get_local env (pos, Local_id.get_name (snd id)));
+      ]
   | _ ->
     let awaited_instrs = emit_await env pos e in
     Scope.with_unnamed_local
@@ -411,13 +422,15 @@ and emit_awaitall_multi env el b =
     @@ List.map locals ~f:(fun l ->
            let label_done = Label.next_regular () in
            gather
-             [ instr_pushl l;
+             [
+               instr_pushl l;
                instr_dup;
                instr_istypec OpNull;
                instr_jmpnz label_done;
                instr_whresult;
                instr_label label_done;
-               instr_popl l ])
+               instr_popl l;
+             ])
   in
   let block = emit_stmts env b in
   let unset_locals = gather @@ List.map locals ~f:instr_unsetl in
@@ -442,12 +455,14 @@ and emit_while env e b =
   instr_label break_label;
   *)
   gather
-    [ get_instrs @@ emit_jmpz env e break_label;
+    [
+      get_instrs @@ emit_jmpz env e break_label;
       instr_label start_label;
       Emit_env.do_in_loop_body break_label cont_label env b emit_stmt;
       instr_label cont_label;
       get_instrs @@ emit_jmpnz env (fst e) (snd e) start_label;
-      instr_label break_label ]
+      instr_label break_label;
+    ]
 
 and emit_using
     (env : Emit_env.t) pos is_block_scoped has_await (e : Tast.expr) b =
@@ -508,7 +523,8 @@ and emit_using
           (instr_popc, None)
       in
       gather
-        [ instr_cgetl local;
+        [
+          instr_cgetl local;
           instr_nulluninit;
           instr_nulluninit;
           instr_fcallobjmethodd
@@ -519,7 +535,8 @@ and emit_using
           ( if is_block_scoped then
             instr_unsetl local
           else
-            empty ) ]
+            empty );
+        ]
     in
     let finally_epilogue =
       TFR.emit_finally_epilogue
@@ -540,28 +557,34 @@ and emit_using
           ~skip_throw:true
           body
           (gather
-             [ emit_pos (fst b);
+             [
+               emit_pos (fst b);
                make_finally_catch exn_local (emit_finally ());
-               emit_pos pos ])
+               emit_pos pos;
+             ])
     in
     gather
-      [ preamble;
+      [
+        preamble;
         middle;
         instr_label finally_start;
         emit_finally ();
         finally_epilogue;
-        instr_label finally_end ]
+        instr_label finally_end;
+      ]
 
 and emit_do env b e =
   let cont_label = Label.next_regular () in
   let break_label = Label.next_regular () in
   let start_label = Label.next_regular () in
   gather
-    [ instr_label start_label;
+    [
+      instr_label start_label;
       Emit_env.do_in_loop_body break_label cont_label env b emit_stmt;
       instr_label cont_label;
       get_instrs @@ emit_jmpnz env (fst e) (snd e) start_label;
-      instr_label break_label ]
+      instr_label break_label;
+    ]
 
 and emit_for (env : Emit_env.t) p (e1 : Tast.expr) e2 e3 b =
   let break_label = Label.next_regular () in
@@ -590,9 +613,11 @@ and emit_for (env : Emit_env.t) p (e1 : Tast.expr) e2 e3 b =
     let rec expr_list h tl =
       match tl with
       | [] ->
-        [ final
+        [
+          final
           @@ ( (Pos.none, (Typing_reason.none, Typing_defs.make_tany ())),
-               A.Expr_list [h] ) ]
+               A.Expr_list [h] );
+        ]
       | h1 :: t1 -> emit_ignored_expr env ~pop_pos:p h :: expr_list h1 t1
     in
     match e2 with
@@ -605,14 +630,16 @@ and emit_for (env : Emit_env.t) p (e1 : Tast.expr) e2 e3 b =
     | cond -> final cond
   in
   gather
-    [ emit_ignored_expr env e1;
+    [
+      emit_ignored_expr env e1;
       emit_cond ~jmpz:true break_label;
       instr_label start_label;
       Emit_env.do_in_loop_body break_label cont_label env b emit_stmt;
       instr_label cont_label;
       emit_ignored_expr env e3;
       emit_cond ~jmpz:false start_label;
-      instr_label break_label ]
+      instr_label break_label;
+    ]
 
 and emit_switch (env : Emit_env.t) pos scrutinee_expr cl =
   if List.is_empty cl then
@@ -627,9 +654,11 @@ and emit_switch (env : Emit_env.t) pos scrutinee_expr cl =
           fun case_expr case_handler_label ->
             let ((pos, _), _) = case_expr in
             gather
-              [ emit_two_exprs env pos scrutinee_expr case_expr;
+              [
+                emit_two_exprs env pos scrutinee_expr case_expr;
                 instr_eq;
-                instr_jmpnz case_handler_label ] )
+                instr_jmpnz case_handler_label;
+              ] )
       | _ ->
         ( emit_expr env scrutinee_expr,
           instr_popc,
@@ -637,14 +666,16 @@ and emit_switch (env : Emit_env.t) pos scrutinee_expr cl =
             let next_case_label = Label.next_regular () in
             let ((pos, _), _) = case_expr in
             gather
-              [ instr_dup;
+              [
+                instr_dup;
                 emit_expr env case_expr;
                 emit_pos pos;
                 instr_eq;
                 instr_jmpz next_case_label;
                 instr_popc;
                 instr_jmp case_handler_label;
-                instr_label next_case_label ] )
+                instr_label next_case_label;
+              ] )
     in
     (* "continue" in a switch in PHP has the same semantics as break! *)
     let break_label = Label.next_regular () in
@@ -677,12 +708,14 @@ and emit_switch (env : Emit_env.t) pos scrutinee_expr cl =
              | ((Some e, l), _) -> emit_check_case e l)
     in
     gather
-      [ instr_init;
+      [
+        instr_init;
         instr_check_cases;
         instr_free;
         instr_jmp default_label;
         instr_bodies;
-        instr_label break_label ]
+        instr_label break_label;
+      ]
 
 and block_pos b =
   let bpos = List.map b fst in
@@ -701,7 +734,8 @@ and emit_catch
     Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) catch_type
   in
   gather
-    [ instr_dup;
+    [
+      instr_dup;
       instr_instanceofd id;
       instr_jmpz next_catch;
       instr_setl (Local.Named (Local_id.get_name catch_local));
@@ -709,7 +743,8 @@ and emit_catch
       emit_stmt env (Pos.none, A.Block b);
       Emit_pos.emit_pos pos;
       instr_jmp end_label;
-      instr_label next_catch ]
+      instr_label next_catch;
+    ]
 
 and emit_catches (env : Emit_env.t) pos catch_list end_label =
   gather (List.map catch_list ~f:(emit_catch env pos end_label))
@@ -831,28 +866,34 @@ and emit_try_finally_ env pos try_block finally_block =
         ~skip_throw:true
         try_body
         (gather
-           [ emit_pos enclosing_span;
-             make_finally_catch exn_local finally_body_for_catch ])
+           [
+             emit_pos enclosing_span;
+             make_finally_catch exn_local finally_body_for_catch;
+           ])
     in
     (* Put it all together. *)
     gather
-      [ middle;
+      [
+        middle;
         instr_label finally_start;
         Emit_pos.emit_pos (fst finally_block);
         finally_body;
         finally_epilogue;
-        instr_label finally_end ]
+        instr_label finally_end;
+      ]
 
 and make_finally_catch exn_local finally_body =
   gather
-    [ instr_popl exn_local;
+    [
+      instr_popl exn_local;
       instr_unsetl (Local.get_label_id_local ());
       instr_unsetl (Local.get_retval_local ());
       create_try_catch
         finally_body
         (gather [instr_pushl exn_local; instr_chain_faults]);
       instr_pushl exn_local;
-      instr_throw ]
+      instr_throw;
+    ]
 
 and get_id_of_simple_lvar_opt v =
   match v with
@@ -875,16 +916,20 @@ and emit_load_list_elements env path vs =
 and emit_load_list_element env path i v =
   let query_value =
     gather
-      [ gather @@ List.rev path;
-        instr_querym 0 QueryOp.CGet (MemberKey.EI (Int64.of_int i)) ]
+      [
+        gather @@ List.rev path;
+        instr_querym 0 QueryOp.CGet (MemberKey.EI (Int64.of_int i));
+      ]
   in
   match v with
   | (_, A.Lvar (_, id)) ->
     let load_value =
       gather
-        [ query_value;
+        [
+          query_value;
           instr_setl (Local.Named (Local_id.get_name id));
-          instr_popc ]
+          instr_popc;
+        ]
     in
     ([], [load_value])
   | (_, A.List exprs) ->
@@ -937,10 +982,12 @@ and emit_iterator_key_value_storage env iterator :
         ( Some key_local,
           value_local,
           gather
-            [ gather value_preamble;
+            [
+              gather value_preamble;
               gather value_load;
               gather key_preamble;
-              gather key_load ] )
+              gather key_load;
+            ] )
     end
   | A.As_v ((_, v) as expr_v) ->
     begin
@@ -1050,7 +1097,8 @@ and emit_foreach_await env pos collection iterator block =
   let next_meth = Hhbc_id.Method.from_raw_string "next" in
   (* before *)
   ( gather
-      [ instr_collection;
+      [
+        instr_collection;
         instr_dup;
         instr_instanceofd (Hhbc_id.Class.from_raw_string "HH\\AsyncIterator");
         instr_jmpnz input_is_async_iterator_label;
@@ -1058,10 +1106,12 @@ and emit_foreach_await env pos collection iterator block =
           pos
           "Unable to iterate non-AsyncIterator asynchronously";
         instr_label input_is_async_iterator_label;
-        instr_popl iter_temp_local ],
+        instr_popl iter_temp_local;
+      ],
     (* inner *)
     gather
-      [ instr_label next_label;
+      [
+        instr_label next_label;
         instr_cgetl iter_temp_local;
         instr_nulluninit;
         instr_nulluninit;
@@ -1080,7 +1130,8 @@ and emit_foreach_await env pos collection iterator block =
         instr_jmp next_label;
         instr_label pop_and_exit_label;
         instr_popc;
-        instr_label exit_label ],
+        instr_label exit_label;
+      ],
     (* after *)
     instr_unsetl iter_temp_local )
 
@@ -1116,29 +1167,35 @@ and emit_foreach_ env pos collection iterator block =
   in
   ( gather [instr_collection; emit_pos (Tast_annotate.get_pos collection); init],
     gather
-      [ instr_label loop_head_label;
+      [
+        instr_label loop_head_label;
         preamble;
         body;
         instr_label loop_continue_label;
         emit_pos pos;
-        next ],
+        next;
+      ],
     gather [instr_label loop_break_label] )
 
 and emit_yield_from_delegates env pos e =
   let iterator_number = Iterator.get_iterator () in
   let loop_label = Label.next_regular () in
   gather
-    [ emit_expr env e;
+    [
+      emit_expr env e;
       emit_pos pos;
       instr_contAssignDelegate iterator_number;
       create_try_catch
         (gather
-           [ instr_null;
+           [
+             instr_null;
              instr_label loop_label;
              instr_contEnterDelegate;
-             instr_yieldFromDelegate iterator_number loop_label ])
+             instr_yieldFromDelegate iterator_number loop_label;
+           ])
         (instr_contUnsetDelegate_free iterator_number);
-      instr_contUnsetDelegate_ignore iterator_number ]
+      instr_contUnsetDelegate_ignore iterator_number;
+    ]
 
 and emit_stmts env stl =
   let results = List.map stl (emit_stmt env) in

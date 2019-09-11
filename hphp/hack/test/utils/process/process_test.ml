@@ -336,7 +336,8 @@ let assert_no_fd_leaked test () =
   result
 
 let tests =
-  [ ("test_echo", assert_no_fd_leaked test_echo);
+  [
+    ("test_echo", assert_no_fd_leaked test_echo);
     ("test_echo_in_a_loop", assert_no_fd_leaked test_echo_in_a_loop);
     ( "test_process_read_idempotent",
       assert_no_fd_leaked test_process_read_idempotent );
@@ -359,7 +360,8 @@ let tests =
       assert_no_fd_leaked test_future_long_continuation_chain_error );
     ("test_stdin_input", assert_no_fd_leaked test_stdin_input);
     ("test_entry_point", assert_no_fd_leaked test_entry_point);
-    ("test_chdir", assert_no_fd_leaked test_chdir) ]
+    ("test_chdir", assert_no_fd_leaked test_chdir);
+  ]
 
 let () =
   Daemon.check_entry_point ();

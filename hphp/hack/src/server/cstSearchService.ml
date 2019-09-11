@@ -212,12 +212,14 @@ let rec search_node ~(env : env) ~(pattern : pattern) ~(node : Syntax.t) :
     let result =
       {
         matched_nodes =
-          [ {
+          [
+            {
               match_name;
               kind = NodeKind (SyntaxKind.to_string (Syntax.kind node));
               start_offset = Syntax.start_offset node;
               end_offset = Syntax.end_offset node;
-            } ];
+            };
+          ];
       }
     in
     (env, Some result)
@@ -548,10 +550,12 @@ let result_to_json ~(sort_results : bool) (result : result option) :
               | NodeKind kind -> kind
             in
             JSON_Object
-              [ ("match_name", JSON_String match_name);
+              [
+                ("match_name", JSON_String match_name);
                 ("kind", JSON_String kind);
                 ("start_offset", Hh_json.int_ matched_node.start_offset);
-                ("end_offset", Hh_json.int_ matched_node.end_offset) ])
+                ("end_offset", Hh_json.int_ matched_node.end_offset);
+              ])
       in
       JSON_Object [("matched_nodes", JSON_Array matched_nodes)])
 

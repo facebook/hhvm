@@ -74,14 +74,16 @@ let expect_equals_list key values expected_values =
 let max_int_31bits = 2147483647 (* 0x7FFFFFFF *)
 
 let data =
-  [ (0, [10; 11]);
+  [
+    (0, [10; 11]);
     (1, [10]);
     (2, [20; 21; 22]);
     (3, [30; 31]);
     (4, [40]);
     (5, List.range 100 10000);
     (max_int_31bits - 1, List.range 1000000 1001000);
-    (max_int_31bits, [max_int_31bits; max_int_31bits - 1]) ]
+    (max_int_31bits, [max_int_31bits; max_int_31bits - 1]);
+  ]
 
 let data_empty = [(10, []); (11, []); (12, [])]
 
@@ -157,9 +159,11 @@ let test_ignore_hh_version () =
 
 let tests () =
   let test_list =
-    [ ("test_in_memory", test_deps_in_memory);
+    [
+      ("test_in_memory", test_deps_in_memory);
       ("test_sql", test_deptable_sql);
-      ("test_ignore_hh_version", test_ignore_hh_version) ]
+      ("test_ignore_hh_version", test_ignore_hh_version);
+    ]
   in
   let setup_test (name, test) =
     ( name,

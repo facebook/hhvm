@@ -18,23 +18,31 @@ open Convert_longident
 open Convert_type
 
 let derived_traits =
-  [ (None, "Clone");
+  [
+    (None, "Clone");
     (None, "Debug");
     (Some "ocamlrep_derive", "OcamlRep");
-    (Some "ocamlvalue_macro", "Ocamlvalue") ]
+    (Some "ocamlvalue_macro", "Ocamlvalue");
+  ]
 
 (* HACK: ignore phases since we are only considering decl tys *)
 let blacklisted_types =
-  [("typing_defs", "Decl"); ("typing_defs", "Locl"); ("typing_defs", "PhaseTy")]
+  [
+    ("typing_defs", "Decl");
+    ("typing_defs", "Locl");
+    ("typing_defs", "PhaseTy");
+  ]
 
 let ocamlvalue_derive_whitelist =
-  [ "aast_defs";
+  [
+    "aast_defs";
     "aast";
     "ast_defs";
     "namespace_env";
     "file_info";
     "global_options";
-    "prim_defs" ]
+    "prim_defs";
+  ]
 
 let ocamlvalue_derive_filter (derive : string option * string) : bool =
   snd derive <> "Ocamlvalue"
@@ -208,11 +216,13 @@ let type_declaration name td =
                   ptyp_desc =
                     Ptyp_constr
                       ( { txt = Lident "ty_"; _ },
-                        [ {
+                        [
+                          {
                             ptyp_desc =
                               Ptyp_constr ({ txt = Lident "locl"; _ }, _);
                             _;
-                          } ] );
+                          };
+                        ] );
                   _;
                 } ->
               log

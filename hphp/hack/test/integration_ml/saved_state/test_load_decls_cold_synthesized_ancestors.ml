@@ -32,11 +32,13 @@ trait Cold {
 }"
 
 let init_disk_state =
-  [ ("hack/hh_hot_classes.json", {|{"classes":["\\Hot"]}|});
+  [
+    ("hack/hh_hot_classes.json", {|{"classes":["\\Hot"]}|});
     ("cfoo.php", cfoo_contents);
     ("ibar.php", ibar_contents);
     ("hot.php", hot_contents);
-    ("cold.php", cold_contents "int") ]
+    ("cold.php", cold_contents "int");
+  ]
 
 let test () =
   Tempfile.with_real_tempdir

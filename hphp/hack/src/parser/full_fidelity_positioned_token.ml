@@ -419,7 +419,8 @@ let to_json token =
   Hh_json.(
     let (line_number, _) = start_position token in
     JSON_Object
-      [ ("kind", JSON_String (TokenKind.to_string token.kind));
+      [
+        ("kind", JSON_String (TokenKind.to_string token.kind));
         ("text", JSON_String (text token));
         ("offset", int_ token.offset);
         ("leading_width", int_ token.leading_width);
@@ -427,4 +428,5 @@ let to_json token =
         ("trailing_width", int_ token.trailing_width);
         ("leading", JSON_Array (List.map Trivia.to_json (leading token)));
         ("trailing", JSON_Array (List.map Trivia.to_json (trailing token)));
-        ("line_number", int_ line_number) ])
+        ("line_number", int_ line_number);
+      ])

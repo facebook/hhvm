@@ -154,7 +154,8 @@ let trivia_node_from_list l =
 let trivia_kinds =
   List.map
     trivia_node_from_list
-    [ ["WhiteSpace"; "whitespace"];
+    [
+      ["WhiteSpace"; "whitespace"];
       ["EndOfLine"; "end_of_line"];
       ["DelimitedComment"; "delimited_comment"];
       ["SingleLineComment"; "single_line_comment"];
@@ -162,7 +163,8 @@ let trivia_kinds =
       ["IgnoreError"; "ignore_error"];
       ["FallThrough"; "fall_through"];
       ["ExtraTokenError"; "extra_token_error"];
-      ["AfterHaltCompiler"; "after_halt_compiler"] ]
+      ["AfterHaltCompiler"; "after_halt_compiler"];
+    ]
 
 let escape_token_text t =
   (* add one extra backslash because
@@ -326,20 +328,26 @@ AST_NODES
     make_template_file
       ~transformations:[{ pattern = "AST_NODES"; func = to_json_ast_nodes }]
       ~token_given_text_transformations:
-        [ {
+        [
+          {
             token_pattern = "GIVEN_TEXT_TOKENS";
             token_func = map_and_concat to_json_given_text;
-          } ]
+          };
+        ]
       ~token_variable_text_transformations:
-        [ {
+        [
+          {
             token_pattern = "VARIABLE_TEXT_TOKENS";
             token_func = map_and_concat to_json_variable_text;
-          } ]
+          };
+        ]
       ~trivia_transformations:
-        [ {
+        [
+          {
             trivia_pattern = "TRIVIA_KINDS";
             trivia_func = map_and_concat_separated ",\n" to_json_trivia;
-          } ]
+          };
+        ]
       ~template:full_fidelity_json_schema_template
       ~filename:"hphp/hack/src/parser/js/full_fidelity_schema.json"
       ()

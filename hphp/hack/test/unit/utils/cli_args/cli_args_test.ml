@@ -114,13 +114,15 @@ let verify_parsed_spec parsed_spec =
     }
   in
   let expected =
-    [ Prefix (Relative_path.from_root "/some/path/prefix1");
+    [
+      Prefix (Relative_path.from_root "/some/path/prefix1");
       Range range1;
       Range range2;
       Prefix (Relative_path.from_root "/some/path/prefix2");
       Range range3;
       Range range4;
-      Range range5 ]
+      Range range5;
+    ]
   in
   List.iter2 compare_files_to_check_spec expected parsed_spec.files_to_check
 
@@ -140,7 +142,8 @@ let test_save_state_spec_json () : bool =
     get_save_state_spec_json
       {
         files_to_check =
-          [ Prefix (Relative_path.from_root "/some/path/prefix1");
+          [
+            Prefix (Relative_path.from_root "/some/path/prefix1");
             Range
               {
                 from_prefix_incl =
@@ -165,7 +168,8 @@ let test_save_state_spec_json () : bool =
               {
                 from_prefix_incl = None;
                 to_prefix_excl = Some (Relative_path.from_root "/to/path/only");
-              } ];
+              };
+          ];
         filename = "/some/dir/some_filename";
         gen_with_errors = true;
       }
@@ -177,7 +181,9 @@ let test_save_state_spec_json () : bool =
   true
 
 let tests =
-  [ ("Test save state spec", test_save_state_spec);
-    ("Test save state spec JSON", test_save_state_spec_json) ]
+  [
+    ("Test save state spec", test_save_state_spec);
+    ("Test save state spec JSON", test_save_state_spec_json);
+  ]
 
 let () = Unit_test.run_all tests

@@ -474,16 +474,18 @@ let get_message_source (server : server_conn) (client : Jsonrpc.queue) :
     in
     let%lwt message_source =
       Lwt.pick
-        [ (let%lwt () = Lwt_unix.sleep 1.0 in
+        [
+          (let%lwt () = Lwt_unix.sleep 1.0 in
            Lwt.return `No_source);
           (* Note that `wait_read` waits for the file descriptor to be readable, but
     does not actually read anything from it (so we won't end up with a race
     condition where we've read data from both file descriptors but only process
     the data from either the client or the server). *)
-          (let%lwt () = Lwt_unix.wait_read server_read_fd in
-           Lwt.return `From_server);
+            (let%lwt () = Lwt_unix.wait_read server_read_fd in
+             Lwt.return `From_server);
           (let%lwt () = Lwt_unix.wait_read client_read_fd in
-           Lwt.return `From_client) ]
+           Lwt.return `From_client);
+        ]
     in
     Lwt.return message_source
 
@@ -499,7 +501,8 @@ let get_client_message_source
     in
     let%lwt message_source =
       Lwt.pick
-        [ (let%lwt () = Lwt_unix.sleep 1.0 in
+        [
+          (let%lwt () = Lwt_unix.sleep 1.0 in
            Lwt.return `No_source);
           (let%lwt () = Lwt_unix.wait_read client_read_fd in
            Lwt.return `From_client);
@@ -513,7 +516,7 @@ let get_client_message_source
              failwith
                "this `sleep` should have deferred to the `No_source case above"
            | Some message ->
-             Lwt.return (`From_ide_service (Client_ide_notification message)))
+             Lwt.return (`From_ide_service (Client_ide_notification message)));
         ]
     in
     Lwt.return message_source
@@ -942,7 +945,8 @@ let state_to_rage (state : state) : string =
     | Post_shutdown -> []
     | Main_loop menv ->
       Main_env.
-        [ "needs_idle";
+        [
+          "needs_idle";
           menv.needs_idle |> string_of_bool;
           "editor_open_files";
           menv.editor_open_files |> SMap.keys |> List.length |> string_of_int;
@@ -953,10 +957,12 @@ let state_to_rage (state : state) : string =
           "status.message";
           menv.status.message;
           "status.shortMessage";
-          Option.value menv.status.shortMessage ~default:"" ]
+          Option.value menv.status.shortMessage ~default:"";
+        ]
     | In_init ienv ->
       In_init_env.
-        [ "first_start_time";
+        [
+          "first_start_time";
           ienv.first_start_time |> string_of_float;
           "most_recent_start_time";
           ienv.most_recent_start_time |> string_of_float;
@@ -965,10 +971,12 @@ let state_to_rage (state : state) : string =
           "file_edits";
           ienv.file_edits |> ImmQueue.length |> string_of_int;
           "uris_with_unsaved_changes";
-          ienv.uris_with_unsaved_changes |> SSet.cardinal |> string_of_int ]
+          ienv.uris_with_unsaved_changes |> SSet.cardinal |> string_of_int;
+        ]
     | Lost_server lenv ->
       Lost_env.
-        [ "editor_open_files";
+        [
+          "editor_open_files";
           lenv.editor_open_files |> SMap.keys |> List.length |> string_of_int;
           "uris_with_unsaved_changes";
           lenv.uris_with_unsaved_changes |> SSet.cardinal |> string_of_int;
@@ -983,7 +991,8 @@ let state_to_rage (state : state) : string =
           "trigger_on_lsp";
           lenv.p.trigger_on_lsp |> string_of_bool;
           "trigger_on_lock_file";
-          lenv.p.trigger_on_lock_file |> string_of_bool ]
+          lenv.p.trigger_on_lock_file |> string_of_bool;
+        ]
   in
   state_to_string state ^ "\n" ^ String.concat ~sep:"\n" details ^ "\n"
 
@@ -1042,11 +1051,13 @@ let do_rage (state : state) (ref_unblocked_time : float ref) :
            in
            let%lwt stacks =
              Lwt.pick
-               [ (let%lwt () = Lwt_unix.sleep 4.50 in
+               [
+                 (let%lwt () = Lwt_unix.sleep 4.50 in
                   Lwt.return ["Timed out while getting pstacks"]);
                  pids
                  |> List.filter ~f:is_interesting
-                 |> Lwt_list.map_p get_stack ]
+                 |> Lwt_list.map_p get_stack;
+               ]
            in
            List.iter stacks ~f:add_data;
            Lwt.return_unit
@@ -1388,11 +1399,13 @@ let make_ide_completion_response
         | (_, false) -> (`InsertText completion.res_name, PlainText)
         | (_, true) ->
           ( `TextEdit
-              [ TextEdit.
+              [
+                TextEdit.
                   {
                     range = ide_range_to_lsp completion.res_replace_pos;
                     newText = completion.res_name;
-                  } ],
+                  };
+              ],
             PlainText )
       in
       let hack_completion_to_lsp (completion : complete_autocomplete_result) :
@@ -1418,18 +1431,20 @@ let make_ide_completion_response
           in
           Some
             (Hh_json.JSON_Object
-               [ (* Fullname is needed for namespaces.  We often trim namespaces to make
+               [
+                 (* Fullname is needed for namespaces.  We often trim namespaces to make
                   * the results more readable, such as showing "ad__breaks" instead of
                   * "Thrift\Packages\cf\ad__breaks".
                   *)
-                 ("fullname", Hh_json.JSON_String completion.res_fullname);
+                   ("fullname", Hh_json.JSON_String completion.res_fullname);
                  (* Filename/line/char/base_class are used to handle class methods.
                   * We could unify this with fullname in the future.
                   *)
-                 ("filename", Hh_json.JSON_String filename);
+                   ("filename", Hh_json.JSON_String filename);
                  ("line", Hh_json.int_ line);
                  ("char", Hh_json.int_ start);
-                 ("base_class", base_class) ])
+                 ("base_class", base_class);
+               ])
         in
         {
           label =
@@ -2429,13 +2444,15 @@ let do_didChangeWatchedFiles_registerCapability () : Lsp.lsp_request =
     DidChangeWatchedFilesRegistrationOptions
       {
         DidChangeWatchedFiles.watchers =
-          [ {
+          [
+            {
               DidChangeWatchedFiles.globPattern
               (* We could be more precise here, but some language clients (such as
           LanguageClient-neovim) don't currently support rich glob patterns.
           We'll do further filtering at a later stage. *) =
                 "**";
-            } ];
+            };
+          ];
       }
   in
   let registration =

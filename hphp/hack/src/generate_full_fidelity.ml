@@ -73,13 +73,15 @@ let token_kind_fmt = align_fmt (fun x -> x.token_kind) all_tokens
 let omit_syntax_record =
   let names =
     SSet.of_list
-      [ "anonymous_function";
+      [
+        "anonymous_function";
         "closure_type_specifier";
         "function_declaration";
         "function_declaration_header";
         "lambda_expression";
         "lambda_signature";
-        "methodish_declaration" ]
+        "methodish_declaration";
+      ]
   in
   (fun x -> not (SSet.mem x.type_name names))
 
@@ -300,10 +302,12 @@ end
       ~transformations:
         [{ pattern = "VALIDATE_FUNCTIONS"; func = to_validate_functions }]
       ~aggregate_transformations:
-        [ {
+        [
+          {
             aggregate_pattern = "AGGREGATE_VALIDATORS";
             aggregate_func = to_aggregate_validation;
-          } ]
+          };
+        ]
       ~filename:
         (full_fidelity_path_prefix ^ "full_fidelity_validated_syntax.ml")
       ~template:full_fidelity_validated_syntax_template
@@ -470,14 +474,18 @@ end
   let full_fidelity_syntax_type =
     Full_fidelity_schema.make_template_file
       ~transformations:
-        [ { pattern = "PARSE_TREE"; func = to_parse_tree };
+        [
+          { pattern = "PARSE_TREE"; func = to_parse_tree };
           { pattern = "SYNTAX"; func = to_syntax };
-          { pattern = "VALIDATED_SYNTAX"; func = to_validated_syntax } ]
+          { pattern = "VALIDATED_SYNTAX"; func = to_validated_syntax };
+        ]
       ~aggregate_transformations:
-        [ {
+        [
+          {
             aggregate_pattern = "AGGREGATE_TYPES";
             aggregate_func = to_aggregate_type;
-          } ]
+          };
+        ]
       ~filename:(full_fidelity_path_prefix ^ "full_fidelity_syntax_type.ml")
       ~template:full_fidelity_syntax_template
       ()
@@ -720,13 +728,14 @@ ITER_CHILDREN
   let full_fidelity_syntax =
     Full_fidelity_schema.make_template_file
       ~transformations:
-        [ { pattern = "SYNTAX_VARIANT"; func = to_syntax_variant };
+        [
+          { pattern = "SYNTAX_VARIANT"; func = to_syntax_variant };
           { pattern = "SYNTAX_CHILDREN"; func = to_syntax_variant_children };
           { pattern = "SYNTAX_CONSTRUCTORS"; func = to_syntax_constructors };
           { pattern = "ITER_CHILDREN"; func = to_iter_children };
           { pattern = "FOLD_OVER_CHILDREN_OWNED"; func = fold_over_owned };
           { pattern = "TO_KIND"; func = to_kind };
-          { pattern = "SYNTAX_FROM_CHILDREN"; func = to_syntax_from_children }
+          { pattern = "SYNTAX_FROM_CHILDREN"; func = to_syntax_from_children };
         ]
       ~filename:(full_fidelity_path_prefix ^ "syntax_generated.rs")
       ~template:full_fidelity_syntax_template
@@ -929,9 +938,11 @@ end
   let full_fidelity_syntax_sig =
     Full_fidelity_schema.make_template_file
       ~transformations:
-        [ { pattern = "SYNTAX"; func = to_syntax };
+        [
+          { pattern = "SYNTAX"; func = to_syntax };
           { pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods };
-          { pattern = "TYPE_TESTS"; func = to_type_tests } ]
+          { pattern = "TYPE_TESTS"; func = to_type_tests };
+        ]
       ~filename:(full_fidelity_path_prefix ^ "syntax_sig.ml")
       ~template:full_fidelity_syntax_template
       ()
@@ -2377,7 +2388,8 @@ end
   let full_fidelity_syntax =
     Full_fidelity_schema.make_template_file
       ~transformations:
-        [ { pattern = "TO_KIND"; func = to_to_kind };
+        [
+          { pattern = "TO_KIND"; func = to_to_kind };
           { pattern = "TYPE_TESTS"; func = to_type_tests };
           { pattern = "CHILDREN"; func = to_children };
           { pattern = "FOLD_FROM_SYNTAX"; func = to_fold_from_syntax };
@@ -2385,7 +2397,8 @@ end
           { pattern = "SYNTAX_FROM_CHILDREN"; func = to_syntax_from_children };
           { pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods };
           { pattern = "FROM_METHODS"; func = to_from_methods };
-          { pattern = "GET_METHODS"; func = to_get_methods } ]
+          { pattern = "GET_METHODS"; func = to_get_methods };
+        ]
       ~filename:(full_fidelity_path_prefix ^ "full_fidelity_syntax.ml")
       ~template:full_fidelity_syntax_template
       ()
@@ -2416,11 +2429,13 @@ TO_STRING"
   let full_fidelity_trivia_kind =
     Full_fidelity_schema.make_template_file
       ~trivia_transformations:
-        [ { trivia_pattern = "TRIVIA"; trivia_func = map_and_concat to_trivia };
+        [
+          { trivia_pattern = "TRIVIA"; trivia_func = map_and_concat to_trivia };
           {
             trivia_pattern = "TO_STRING";
             trivia_func = map_and_concat to_to_string;
-          } ]
+          };
+        ]
       ~filename:(full_fidelity_path_prefix ^ "/full_fidelity_trivia_kind.ml")
       ~template:full_fidelity_trivia_kind_template
       ()
@@ -2465,7 +2480,8 @@ OCAML_TAG        }
   let full_fidelity_trivia_kind =
     Full_fidelity_schema.make_template_file
       ~trivia_transformations:
-        [ { trivia_pattern = "TRIVIA"; trivia_func = map_and_concat to_trivia };
+        [
+          { trivia_pattern = "TRIVIA"; trivia_func = map_and_concat to_trivia };
           {
             trivia_pattern = "TO_STRING";
             trivia_func = map_and_concat to_to_string;
@@ -2473,7 +2489,8 @@ OCAML_TAG        }
           {
             trivia_pattern = "OCAML_TAG";
             trivia_func = map_and_concat to_ocaml_tag;
-          } ]
+          };
+        ]
       ~filename:(full_fidelity_path_prefix ^ "trivia_kind.rs")
       ~template:full_fidelity_trivia_kind_template
       ()
@@ -2511,8 +2528,10 @@ TO_STRING"
   let full_fidelity_syntax_kind =
     Full_fidelity_schema.make_template_file
       ~transformations:
-        [ { pattern = "TOKENS"; func = to_tokens };
-          { pattern = "TO_STRING"; func = to_to_string } ]
+        [
+          { pattern = "TOKENS"; func = to_tokens };
+          { pattern = "TO_STRING"; func = to_to_string };
+        ]
       ~filename:(full_fidelity_path_prefix ^ "full_fidelity_syntax_kind.ml")
       ~template:full_fidelity_syntax_kind_template
       ()
@@ -2570,9 +2589,11 @@ OCAML_TAG        }
   let full_fidelity_syntax_kind =
     Full_fidelity_schema.make_template_file
       ~transformations:
-        [ { pattern = "TOKENS"; func = to_tokens };
+        [
+          { pattern = "TOKENS"; func = to_tokens };
           { pattern = "TO_STRING"; func = to_to_string };
-          { pattern = "OCAML_TAG"; func = to_ocaml_tag } ]
+          { pattern = "OCAML_TAG"; func = to_ocaml_tag };
+        ]
       ~filename:(full_fidelity_path_prefix ^ "syntax_kind.rs")
       ~template:full_fidelity_syntax_kind_template
       ()
@@ -3285,11 +3306,14 @@ EXPORTS_SYNTAX"
   let full_fidelity_javascript =
     Full_fidelity_schema.make_template_file
       ~transformations:
-        [ { pattern = "FROM_JSON_SYNTAX"; func = to_from_json };
+        [
+          { pattern = "FROM_JSON_SYNTAX"; func = to_from_json };
           { pattern = "EDITABLE_SYNTAX"; func = to_editable_syntax };
-          { pattern = "EXPORTS_SYNTAX"; func = to_exports_syntax } ]
+          { pattern = "EXPORTS_SYNTAX"; func = to_exports_syntax };
+        ]
       ~token_no_text_transformations:
-        [ {
+        [
+          {
             token_pattern = "EDITABLE_NO_TEXT_TOKENS";
             token_func = map_and_concat to_editable_no_text;
           };
@@ -3300,9 +3324,11 @@ EXPORTS_SYNTAX"
           {
             token_pattern = "EXPORTS_NO_TEXT_TOKENS";
             token_func = map_and_concat to_export_token;
-          } ]
+          };
+        ]
       ~token_given_text_transformations:
-        [ {
+        [
+          {
             token_pattern = "EDITABLE_GIVEN_TEXT_TOKENS";
             token_func = map_and_concat to_editable_given_text;
           };
@@ -3313,9 +3339,11 @@ EXPORTS_SYNTAX"
           {
             token_pattern = "EXPORTS_GIVEN_TEXT_TOKENS";
             token_func = map_and_concat to_export_token;
-          } ]
+          };
+        ]
       ~token_variable_text_transformations:
-        [ {
+        [
+          {
             token_pattern = "EDITABLE_VARIABLE_TEXT_TOKENS";
             token_func = map_and_concat to_editable_variable_text;
           };
@@ -3326,9 +3354,11 @@ EXPORTS_SYNTAX"
           {
             token_pattern = "EXPORTS_VARIABLE_TEXT_TOKENS";
             token_func = map_and_concat to_export_token;
-          } ]
+          };
+        ]
       ~trivia_transformations:
-        [ {
+        [
+          {
             trivia_pattern = "FROM_JSON_TRIVIA";
             trivia_func = map_and_concat trivia_from_json;
           };
@@ -3343,7 +3373,8 @@ EXPORTS_SYNTAX"
           {
             trivia_pattern = "EXPORTS_TRIVIA";
             trivia_func = map_and_concat to_export_trivia;
-          } ]
+          };
+        ]
       ~filename:(full_fidelity_path_prefix ^ "js/full_fidelity_editable.js")
       ~template:full_fidelity_javascript_template
       ()
@@ -3445,16 +3476,19 @@ IS_VARIABLE_TEXT_VARIABLE_TEXT  | _ -> false
   let full_fidelity_token_kind =
     Full_fidelity_schema.make_template_file
       ~token_no_text_transformations:
-        [ {
+        [
+          {
             token_pattern = "KIND_DECLARATIONS_NO_TEXT";
             token_func = map_and_concat to_kind_declaration;
           };
           {
             token_pattern = "TO_STRING_NO_TEXT";
             token_func = map_and_concat to_to_string;
-          } ]
+          };
+        ]
       ~token_given_text_transformations:
-        [ {
+        [
+          {
             token_pattern = "KIND_DECLARATIONS_GIVEN_TEXT";
             token_func = map_and_concat to_kind_declaration;
           };
@@ -3465,9 +3499,11 @@ IS_VARIABLE_TEXT_VARIABLE_TEXT  | _ -> false
           {
             token_pattern = "TO_STRING_GIVEN_TEXT";
             token_func = map_and_concat to_to_string;
-          } ]
+          };
+        ]
       ~token_variable_text_transformations:
-        [ {
+        [
+          {
             token_pattern = "KIND_DECLARATIONS_VARIABLE_TEXT";
             token_func = map_and_concat to_kind_declaration;
           };
@@ -3478,7 +3514,8 @@ IS_VARIABLE_TEXT_VARIABLE_TEXT  | _ -> false
           {
             token_pattern = "IS_VARIABLE_TEXT_VARIABLE_TEXT";
             token_func = map_and_concat to_is_variable_text;
-          } ]
+          };
+        ]
       ~filename:(full_fidelity_path_prefix ^ "full_fidelity_token_kind.ml")
       ~template:full_fidelity_token_kind_template
       ()
@@ -3571,7 +3608,8 @@ OCAML_TAG_NO_TEXTOCAML_TAG_GIVEN_TEXTOCAML_TAG_VARIABLE_TEXT        }
   let full_fidelity_token_kind =
     Full_fidelity_schema.make_template_file
       ~token_no_text_transformations:
-        [ {
+        [
+          {
             token_pattern = "KIND_DECLARATIONS_NO_TEXT";
             token_func = map_and_concat to_kind_declaration;
           };
@@ -3582,9 +3620,11 @@ OCAML_TAG_NO_TEXTOCAML_TAG_GIVEN_TEXTOCAML_TAG_VARIABLE_TEXT        }
           {
             token_pattern = "OCAML_TAG_NO_TEXT";
             token_func = map_and_concat to_ocaml_tag;
-          } ]
+          };
+        ]
       ~token_given_text_transformations:
-        [ {
+        [
+          {
             token_pattern = "KIND_DECLARATIONS_GIVEN_TEXT";
             token_func = map_and_concat to_kind_declaration;
           };
@@ -3599,9 +3639,11 @@ OCAML_TAG_NO_TEXTOCAML_TAG_GIVEN_TEXTOCAML_TAG_VARIABLE_TEXT        }
           {
             token_pattern = "OCAML_TAG_GIVEN_TEXT";
             token_func = map_and_concat to_ocaml_tag;
-          } ]
+          };
+        ]
       ~token_variable_text_transformations:
-        [ {
+        [
+          {
             token_pattern = "KIND_DECLARATIONS_VARIABLE_TEXT";
             token_func = map_and_concat to_kind_declaration;
           };
@@ -3612,7 +3654,8 @@ OCAML_TAG_NO_TEXTOCAML_TAG_GIVEN_TEXTOCAML_TAG_VARIABLE_TEXT        }
           {
             token_pattern = "OCAML_TAG_VARIABLE_TEXT";
             token_func = map_and_concat to_ocaml_tag;
-          } ]
+          };
+        ]
       ~filename:(full_fidelity_path_prefix ^ "token_kind.rs")
       ~template:full_fidelity_rust_token_kind_template
       ()
@@ -3629,11 +3672,13 @@ OPERATORS}
   let full_fidelity_operators =
     Full_fidelity_schema.make_template_file
       ~operator_transformations:
-        [ {
+        [
+          {
             operator_pattern = "OPERATORS";
             operator_func =
               map_and_concat (fun op -> sprintf "    %sOperator,\n" op.name);
-          } ]
+          };
+        ]
       ~filename:(full_fidelity_path_prefix ^ "operator_generated.rs")
       ~template
       ()

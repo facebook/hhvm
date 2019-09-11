@@ -248,14 +248,18 @@ let emit_reified_extends_params env class_ =
     instr (H.ILitConst (H.TypedValue tv))
   else
     gather
-      [ Emit_expression.emit_reified_targs env class_.A.c_span type_params;
-        instr_record_reified_generic ]
+      [
+        Emit_expression.emit_reified_targs env class_.A.c_span type_params;
+        instr_record_reified_generic;
+      ]
 
 let emit_reified_init_body env num_reified class_ =
   let check_length =
     gather
-      [ instr_cgetl (Local.Named SU.Reified.reified_init_method_param_name);
-        instr_check_reified_generic_mismatch ]
+      [
+        instr_cgetl (Local.Named SU.Reified.reified_init_method_param_name);
+        instr_check_reified_generic_mismatch;
+      ]
   in
   let set_prop =
     if num_reified = 0 then
@@ -263,14 +267,16 @@ let emit_reified_init_body env num_reified class_ =
     else
       (* $this->86reified_prop = $__typestructures *)
       gather
-        [ check_length;
+        [
+          check_length;
           instr_checkthis;
           instr_cgetl (Local.Named SU.Reified.reified_init_method_param_name);
           instr_baseh;
           instr_setm_pt
             0
             (Hhbc_id.Prop.from_raw_string SU.Reified.reified_prop_name);
-          instr_popc ]
+          instr_popc;
+        ]
   in
   let return = gather [instr_null; instr_retc] in
   if class_.A.c_extends = [] then
@@ -280,7 +286,8 @@ let emit_reified_init_body env num_reified class_ =
     (* parent::86reifiedinit($generic_arr) *)
     let call_parent =
       gather
-        [ instr_nulluninit;
+        [
+          instr_nulluninit;
           instr_nulluninit;
           instr_nulluninit;
           generic_arr;
@@ -288,7 +295,8 @@ let emit_reified_init_body env num_reified class_ =
             (make_fcall_args 1)
             Hhbc_ast.SpecialClsRef.Parent
             (Hhbc_id.Method.from_raw_string SU.Reified.reified_init_method_name);
-          instr_popc ]
+          instr_popc;
+        ]
     in
     gather [set_prop; call_parent; return]
 
@@ -307,25 +315,30 @@ let emit_reified_init_method env ast_class =
   else
     let tc = Hhas_type_constraint.make (Some "HH\\varray") [] in
     let params =
-      [ Hhas_param.make
+      [
+        Hhas_param.make
           SU.Reified.reified_init_method_param_name
           false (* reference *)
           false (* variadic *)
           false (* inout *)
           [] (* uattrs *)
           (Some (Hhas_type_info.make (Some "HH\\varray") tc))
-          None
-        (* default value *) ]
+          None;
+          (* default value *)
+        
+      ]
     in
     let instrs = emit_reified_init_body env num_reified ast_class in
-    [ make_86method
+    [
+      make_86method
         ~name:SU.Reified.reified_init_method_name
         ~params
         ~is_static:false
         ~visibility:Aast.Protected
         ~is_abstract:false
         ~span:(Hhas_pos.pos_to_span ast_class.A.c_span)
-        instrs ]
+        instrs;
+    ]
 
 let emit_class (ast_class, hoisted) =
   let namespace = ast_class.A.c_namespace in
@@ -526,14 +539,16 @@ let emit_class (ast_class, hoisted) =
                  None)
       in
       let instrs = gather [instrs; instr_null; instr_retc] in
-      [ make_86method
+      [
+        make_86method
           ~name
           ~params:[]
           ~is_static:true
           ~visibility:Aast.Private
           ~is_abstract:false
           ~span:class_span
-          instrs ]
+          instrs;
+      ]
     else
       []
   in
@@ -566,7 +581,8 @@ let emit_class (ast_class, hoisted) =
           else
             let label = Label.next_regular () in
             gather
-              [ instr_cgetl (Local.Named "$constName");
+              [
+                instr_cgetl (Local.Named "$constName");
                 instr_string name;
                 instr_eq;
                 instr_jmpz label;
@@ -574,7 +590,8 @@ let emit_class (ast_class, hoisted) =
                 Emit_pos.emit_pos ast_class.A.c_span;
                 instr_jmp return_label;
                 instr_label label;
-                make_cinit_instrs cs ]
+                make_cinit_instrs cs;
+              ]
       in
       let instrs =
         Emit_pos.emit_pos_then ast_class.A.c_span
@@ -583,14 +600,16 @@ let emit_class (ast_class, hoisted) =
       let params =
         [Hhas_param.make "$constName" false false false [] None None]
       in
-      [ make_86method
+      [
+        make_86method
           ~name:"86cinit"
           ~params
           ~is_static:true
           ~visibility:Aast.Private
           ~is_abstract:class_is_interface
           ~span:class_span
-          instrs ]
+          instrs;
+      ]
   in
   let should_emit_reified_init =
     not

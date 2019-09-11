@@ -17,8 +17,10 @@ let output_json oc el =
   let errors_json = List.map el Lint.to_json in
   let res =
     Hh_json.JSON_Object
-      [ ("errors", Hh_json.JSON_Array errors_json);
-        ("version", Hh_json.JSON_String Hh_version.version) ]
+      [
+        ("errors", Hh_json.JSON_Array errors_json);
+        ("version", Hh_json.JSON_String Hh_version.version);
+      ]
   in
   Out_channel.output_string oc (Hh_json.json_to_string res);
   Out_channel.flush stderr

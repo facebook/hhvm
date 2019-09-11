@@ -59,9 +59,11 @@ let with_unnamed_locals_and_iterators emit =
     temp_local_map := current_temp_local_map;
     next_iterator := current_next_iterator;
     gather
-      [ before;
+      [
+        before;
         create_try_catch inner (gather [local_unsets; iter_frees]);
-        after ]
+        after;
+      ]
 
 (* An equivalent of with_unnamed_locals () that allocates a single local and
  * passes it to emit (). *)

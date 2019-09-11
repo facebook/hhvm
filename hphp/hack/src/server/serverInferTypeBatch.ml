@@ -33,7 +33,8 @@ let result_to_string result (fn, line, char, range_end) =
   Hh_json.(
     let obj =
       JSON_Object
-        [ ( "position",
+        [
+          ( "position",
             JSON_Object
               ( [("file", JSON_String (Relative_path.to_absolute fn))]
               @
@@ -46,7 +47,8 @@ let result_to_string result (fn, line, char, range_end) =
                 [("start", pos line char); ("end", pos end_line end_char)] ) );
           (match result with
           | Ok ty -> ("type", Option.value ty ~default:JSON_Null)
-          | Error e -> ("error", JSON_String e)) ]
+          | Error e -> ("error", JSON_String e));
+        ]
     in
     json_to_string obj)
 

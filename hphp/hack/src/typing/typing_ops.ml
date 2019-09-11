@@ -23,10 +23,12 @@ let sub_type p ur env ty_sub ty_super on_error =
         log_types
           p
           env
-          [ Log_head
+          [
+            Log_head
               ( "Typing_ops.sub_type",
                 [Log_type ("ty_sub", ty_sub); Log_type ("ty_super", ty_super)]
-              ) ]));
+              );
+          ]));
   Errors.try_add_err
     p
     (Reason.string_of_ureason ur)

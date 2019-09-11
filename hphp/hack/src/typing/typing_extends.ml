@@ -488,7 +488,8 @@ let instantiate_consts subst consts =
   Sequence.map consts (fun (id, cc) -> (id, Inst.instantiate_cc subst cc))
 
 let make_all_members ~child_class ~parent_class =
-  [ ( `FromProp,
+  [
+    ( `FromProp,
       Cls.props parent_class,
       Cls.get_prop child_class,
       (fun x y -> Dep.Prop (x, y)) );
@@ -503,7 +504,8 @@ let make_all_members ~child_class ~parent_class =
     ( `FromSMethod,
       Cls.smethods parent_class,
       Cls.get_smethod child_class,
-      (fun x y -> Dep.SMethod (x, y)) ) ]
+      (fun x y -> Dep.SMethod (x, y)) );
+  ]
 
 (* The phantom class element that represents the default constructor:
  * public function __construct() {}

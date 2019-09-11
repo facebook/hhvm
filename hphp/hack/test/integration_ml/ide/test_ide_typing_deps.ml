@@ -81,11 +81,13 @@ let test () =
   let env =
     Test.setup_disk
       env
-      [ (take_int_name, take_int_contents);
+      [
+        (take_int_name, take_int_contents);
         (foo_name, foo_contents "int");
         (foo_child_name, foo_child_contents);
         (bar_name, bar_contents);
-        (baz_name, baz_contents) ]
+        (baz_name, baz_contents);
+      ]
   in
   let env = Test.connect_persistent_client env in
   let env = Test.subscribe_diagnostic env in

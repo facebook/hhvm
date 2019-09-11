@@ -60,12 +60,14 @@ let identify_symbol_response_to_json results =
     in
     SymbolOccurrence.(
       JSON_Object
-        [ ("name", JSON_String occurrence.name);
+        [
+          ("name", JSON_String occurrence.name);
           ("result_type", JSON_String (result_type occurrence));
           ("pos", Pos.json occurrence.pos);
           ("definition_pos", definition_pos);
           ("definition_span", definition_span);
-          ("definition_id", definition_id) ])
+          ("definition_id", definition_id);
+        ])
   in
   JSON_Array (List.map results ~f:symbol_to_json)
 
@@ -84,12 +86,14 @@ let rec definition_to_json def =
       opt_field def.docblock "docblock" (fun x -> JSON_String x)
     in
     JSON_Object
-      ( [ ("kind", JSON_String (string_of_kind def.kind));
+      ( [
+          ("kind", JSON_String (string_of_kind def.kind));
           ("name", JSON_String def.name);
           ("id", opt_string_to_json def.id);
           ("position", Pos.json def.pos);
           ("span", Pos.multiline_json def.span);
-          ("modifiers", modifiers) ]
+          ("modifiers", modifiers);
+        ]
       @ children
       @ params
       @ docblock ))
@@ -103,8 +107,10 @@ let coverage_levels_response_to_json spans =
   in
   let span_to_json (color, text) =
     JSON_Object
-      [ ("color", JSON_String (opt_coverage_level_to_string color));
-        ("text", JSON_String text) ]
+      [
+        ("color", JSON_String (opt_coverage_level_to_string color));
+        ("text", JSON_String text);
+      ]
   in
   JSON_Array (List.map spans ~f:span_to_json)
 
@@ -119,11 +125,13 @@ let find_references_response_to_json = function
       List.map references (fun x ->
           Ide_api_types.(
             Hh_json.JSON_Object
-              [ ("name", Hh_json.JSON_String symbol_name);
+              [
+                ("name", Hh_json.JSON_String symbol_name);
                 ("filename", Hh_json.JSON_String x.range_filename);
                 ("line", Hh_json.int_ x.file_range.st.line);
                 ("char_start", Hh_json.int_ x.file_range.st.column);
-                ("char_end", Hh_json.int_ (x.file_range.ed.column - 1)) ]))
+                ("char_end", Hh_json.int_ (x.file_range.ed.column - 1));
+              ]))
     in
     Hh_json.JSON_Array entries
 
@@ -132,8 +140,10 @@ let highlight_references_response_to_json l =
     (List.map l ~f:(fun x ->
          Ide_api_types.(
            Hh_json.JSON_Object
-             [ ("line", Hh_json.int_ x.st.line);
+             [
+               ("line", Hh_json.int_ x.st.line);
                ("char_start", Hh_json.int_ x.st.column);
-               ("char_end", Hh_json.int_ (x.ed.column - 1)) ])))
+               ("char_end", Hh_json.int_ (x.ed.column - 1));
+             ])))
 
 let print_json json = Hh_json.json_to_string json |> print_endline

@@ -462,7 +462,8 @@ let create_try_catch
     | Some l -> l
   in
   gather
-    [ instr (ITry TryCatchBegin);
+    [
+      instr (ITry TryCatchBegin);
       try_instrs;
       instr_jmp done_label;
       instr (ITry TryCatchMiddle);
@@ -472,7 +473,8 @@ let create_try_catch
       else
         instr_throw );
       instr (ITry TryCatchEnd);
-      instr_label done_label ]
+      instr_label done_label;
+    ]
 
 (* Functions on instr_seq that correspond to existing List functions *)
 module InstrSeq = struct

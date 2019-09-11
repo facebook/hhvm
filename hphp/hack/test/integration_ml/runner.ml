@@ -12,7 +12,8 @@ let run (f : unit -> unit) : unit -> bool =
   true
 
 let tests =
-  [ ("ide/added_parent", run Test_added_parent.test);
+  [
+    ("ide/added_parent", run Test_added_parent.test);
     ("ide/auto_ns_aliasing", run Test_auto_ns_aliasing.test);
     ("ide/diagnostics_in_closed_file", run Test_diagnostics_in_closed_file.test);
     ("ide/error_pos", run Test_error_pos.test);
@@ -116,7 +117,8 @@ let tests =
     ("rx_if_implements", run Test_rx_if_implements.test);
     ("server_config_overrides", run Test_serverConfig_overrides.test);
     ("server_hover", run Test_server_hover.test);
-    ("unbound_name", run Test_unbound_name.test) ]
+    ("unbound_name", run Test_unbound_name.test);
+  ]
 
 let () =
   if Array.length Sys.argv != 2 then

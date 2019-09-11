@@ -17,9 +17,11 @@ class Hot implements IFoo {%s
 }"
 
 let init_disk_state =
-  [ ("hack/hh_hot_classes.json", {|{"classes":["\\Hot"]}|});
+  [
+    ("hack/hh_hot_classes.json", {|{"classes":["\\Hot"]}|});
     ("ifoo.php", ifoo_contents);
-    ("hot.php", hot_contents "") ]
+    ("hot.php", hot_contents "");
+  ]
 
 (* If we fail to oldify declarations in similar files, the position of foo in
    the loaded declaration for Hot will have a different line number than the

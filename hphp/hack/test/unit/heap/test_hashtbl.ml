@@ -338,14 +338,16 @@ let test_heapsize_decrease () =
 
 let tests () =
   let list =
-    [ ("test_ops", test_ops);
+    [
+      ("test_ops", test_ops);
       ("test_hashtbl_full_hh_add", test_hashtbl_full_hh_add);
       ("test_hashtbl_full_hh_move", test_hashtbl_full_hh_move);
       ("test_no_overwrite", test_no_overwrite);
       ("test_reuse_slots", test_reuse_slots);
       ("test_gc_collect", test_gc_collect);
       ("test_gc_aggressive", test_gc_aggressive);
-      ("test_heapsize_decrease", test_heapsize_decrease) ]
+      ("test_heapsize_decrease", test_heapsize_decrease);
+    ]
   in
   let setup_test (name, test) =
     ( name,

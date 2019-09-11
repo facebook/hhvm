@@ -93,14 +93,17 @@ let make_memoize_instance_method_no_params_code
       make_fcall_args 0
   in
   gather
-    [ deprecation_body;
+    [
+      deprecation_body;
       instr_checkthis;
       ( if is_async then
         gather
-          [ instr_memoget_eager notfound suspended_get None;
+          [
+            instr_memoget_eager notfound suspended_get None;
             instr_retc;
             instr_label suspended_get;
-            instr_retc_suspended ]
+            instr_retc_suspended;
+          ]
       else
         gather [instr_memoget notfound None; instr_retc] );
       instr_label notfound;
@@ -111,12 +114,15 @@ let make_memoize_instance_method_no_params_code
       instr_memoset None;
       ( if is_async then
         gather
-          [ instr_retc_suspended;
+          [
+            instr_retc_suspended;
             instr_label eager_set;
             instr_memoset_eager None;
-            instr_retc ]
+            instr_retc;
+          ]
       else
-        gather [instr_retc] ) ]
+        gather [instr_retc] );
+    ]
 
 (* md is the already-renamed memoize method that must be wrapped *)
 let make_memoize_instance_method_with_params_code
@@ -172,7 +178,8 @@ let make_memoize_instance_method_with_params_code
   in
   let param_count = param_count + add_reified in
   gather
-    [ begin_label;
+    [
+      begin_label;
       Emit_body.emit_method_prolog
         ~env
         ~pos
@@ -185,17 +192,21 @@ let make_memoize_instance_method_with_params_code
       reified_memokeym;
       ( if is_async then
         gather
-          [ instr_memoget_eager
+          [
+            instr_memoget_eager
               notfound
               suspended_get
               (Some (first_local, param_count));
             instr_retc;
             instr_label suspended_get;
-            instr_retc_suspended ]
+            instr_retc_suspended;
+          ]
       else
         gather
-          [instr_memoget notfound (Some (first_local, param_count)); instr_retc]
-      );
+          [
+            instr_memoget notfound (Some (first_local, param_count));
+            instr_retc;
+          ] );
       instr_label notfound;
       instr_this;
       instr_nulluninit;
@@ -206,13 +217,16 @@ let make_memoize_instance_method_with_params_code
       instr_memoset (Some (first_local, param_count));
       ( if is_async then
         gather
-          [ instr_retc_suspended;
+          [
+            instr_retc_suspended;
             instr_label eager_set;
             instr_memoset_eager (Some (first_local, param_count));
-            instr_retc ]
+            instr_retc;
+          ]
       else
         gather [instr_retc] );
-      default_value_setters ]
+      default_value_setters;
+    ]
 
 let make_memoize_static_method_no_params_code
     info scope deprecation_info method_id with_lsb is_async =
@@ -229,13 +243,16 @@ let make_memoize_static_method_no_params_code
       make_fcall_args 0
   in
   gather
-    [ deprecation_body;
+    [
+      deprecation_body;
       ( if is_async then
         gather
-          [ instr_memoget_eager notfound suspended_get None;
+          [
+            instr_memoget_eager notfound suspended_get None;
             instr_retc;
             instr_label suspended_get;
-            instr_retc_suspended ]
+            instr_retc_suspended;
+          ]
       else
         gather [instr_memoget notfound None; instr_retc] );
       instr_label notfound;
@@ -246,12 +263,15 @@ let make_memoize_static_method_no_params_code
       instr_memoset None;
       ( if is_async then
         gather
-          [ instr_retc_suspended;
+          [
+            instr_retc_suspended;
             instr_label eager_set;
             instr_memoset_eager None;
-            instr_retc ]
+            instr_retc;
+          ]
       else
-        gather [instr_retc] ) ]
+        gather [instr_retc] );
+    ]
 
 let make_memoize_static_method_with_params_code
     ~pos
@@ -307,7 +327,8 @@ let make_memoize_static_method_with_params_code
   in
   let param_count = param_count + add_reified in
   gather
-    [ begin_label;
+    [
+      begin_label;
       Emit_body.emit_method_prolog
         ~env
         ~pos
@@ -319,17 +340,21 @@ let make_memoize_static_method_with_params_code
       reified_memokeym;
       ( if is_async then
         gather
-          [ instr_memoget_eager
+          [
+            instr_memoget_eager
               notfound
               suspended_get
               (Some (first_local, param_count));
             instr_retc;
             instr_label suspended_get;
-            instr_retc_suspended ]
+            instr_retc_suspended;
+          ]
       else
         gather
-          [instr_memoget notfound (Some (first_local, param_count)); instr_retc]
-      );
+          [
+            instr_memoget notfound (Some (first_local, param_count));
+            instr_retc;
+          ] );
       instr_label notfound;
       instr_nulluninit;
       instr_nulluninit;
@@ -340,13 +365,16 @@ let make_memoize_static_method_with_params_code
       instr_memoset (Some (first_local, param_count));
       ( if is_async then
         gather
-          [ instr_retc_suspended;
+          [
+            instr_retc_suspended;
             instr_label eager_set;
             instr_memoset_eager (Some (first_local, param_count));
-            instr_retc ]
+            instr_retc;
+          ]
       else
         gather [instr_retc] );
-      default_value_setters ]
+      default_value_setters;
+    ]
 
 let make_memoize_static_method_code
     ~pos
@@ -534,7 +562,10 @@ let make_memoize_wrapper_method env info ast_class ast_method =
   in
   let method_id = Hhbc_id.Method.from_ast_name original_name in
   let scope =
-    [Ast_scope.ScopeItem.Method ast_method; Ast_scope.ScopeItem.Class ast_class]
+    [
+      Ast_scope.ScopeItem.Method ast_method;
+      Ast_scope.ScopeItem.Class ast_class;
+    ]
   in
   let namespace = ast_class.T.c_namespace in
   let method_is_interceptable =

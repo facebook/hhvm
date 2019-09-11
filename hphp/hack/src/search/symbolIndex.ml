@@ -142,12 +142,14 @@ let find_matching_symbols
    * Let's capture it and avoid doing unnecessary work.
    *)
   if query_text = "this_is_just_to_check_liveness_of_hh_server" then
-    [ {
+    [
+      {
         si_name = "Yes_hh_server_is_alive";
         si_kind = SI_Unknown;
         si_filehash = 0L;
         si_fullname = "";
-      } ]
+      };
+    ]
   else
     (* Potential namespace matches always show up first *)
     let namespace_results =

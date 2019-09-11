@@ -30,10 +30,12 @@ let save_state temp_dir =
   (* A and B are identical classes with a function bar(). foo() returns A,
    * and test contains an invocation to A::bar ()) *)
   Test.save_state
-    [ ("A.php", bar_contents "A");
+    [
+      ("A.php", bar_contents "A");
       ("B.php", bar_contents "B");
       ("foo.php", foo_contents "A");
-      ("test.php", test_contents) ]
+      ("test.php", test_contents);
+    ]
     temp_dir
 
 let test saved_state_dir test_request assert_response () =
@@ -42,10 +44,12 @@ let test saved_state_dir test_request assert_response () =
     Test.load_state
       saved_state_dir
       ~disk_state:
-        [ ("A.php", bar_contents "A");
+        [
+          ("A.php", bar_contents "A");
           ("B.php", bar_contents "B");
           ("foo.php", foo_contents "B");
-          ("test.php", test_contents) ]
+          ("test.php", test_contents);
+        ]
       ~master_changes:["foo.php"]
       ~local_changes:[]
       ~use_precheked_files:true
@@ -110,8 +114,10 @@ let test () =
          Test.assert_ide_find_refs
            x
            "B::bar"
-           [ {|File "/B.php", line 4, characters 19-21:|};
-             {|File "/test.php", line 3, characters 17-19:|} ]);
+           [
+             {|File "/B.php", line 4, characters 19-21:|};
+             {|File "/test.php", line 3, characters 17-19:|};
+           ]);
 
   Test.in_daemon
   @@ test

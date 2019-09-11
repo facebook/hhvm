@@ -71,21 +71,23 @@ let hhi_builtins = Hhi.get_raw_hhi_contents ()
 (* All of the stuff that hh_single_type_check relies on is sadly not contained
  * in the hhi library, so we include a very small number of magic builtins *)
 let magic_builtins =
-  [| ( "hh_single_type_check_magic.hhi",
-       "<?hh\n"
-       ^ "namespace {\n"
-       ^ "async function gena<Tk as arraykey, Tv>(
+  [|
+    ( "hh_single_type_check_magic.hhi",
+      "<?hh\n"
+      ^ "namespace {\n"
+      ^ "async function gena<Tk as arraykey, Tv>(
   KeyedTraversable<Tk, Awaitable<Tv>> $awaitables,
 ): Awaitable<darray<Tk, Tv>>;\n"
-       ^ "function hh_show(<<__AcceptDisposable>> $val) {}\n"
-       ^ "function hh_show_env() {}\n"
-       ^ "function hh_log_level($key, $level) {}\n"
-       ^ "function hh_force_solve () {}"
-       ^ "}\n"
-       ^ "namespace HH\\Lib\\Tuple{\n"
-       ^ "function gen();\n"
-       ^ "function from_async();\n"
-       ^ "}\n" ) |]
+      ^ "function hh_show(<<__AcceptDisposable>> $val) {}\n"
+      ^ "function hh_show_env() {}\n"
+      ^ "function hh_log_level($key, $level) {}\n"
+      ^ "function hh_force_solve () {}"
+      ^ "}\n"
+      ^ "namespace HH\\Lib\\Tuple{\n"
+      ^ "function gen();\n"
+      ^ "function from_async();\n"
+      ^ "}\n" );
+  |]
 
 (*****************************************************************************)
 (* Helpers *)
@@ -222,7 +224,8 @@ let parse_options () =
   let disable_halt_compiler = ref false in
   let disable_unset_class_const = ref false in
   let options =
-    [ ("--ai", Arg.String set_ai, " Run the abstract interpreter (Zoncolan)");
+    [
+      ("--ai", Arg.String set_ai, " Run the abstract interpreter (Zoncolan)");
       ( "--allow-user-attributes",
         Arg.Unit (set_bool allow_user_attributes),
         " Allow all user attributes" );
@@ -278,14 +281,18 @@ let parse_options () =
         " Print inheritance" );
       ( "--identify-symbol",
         Arg.Tuple
-          [ Arg.Int (fun x -> line := x);
+          [
+            Arg.Int (fun x -> line := x);
             Arg.Int
-              (fun column -> set_mode (Identify_symbol (!line, column)) ()) ],
+              (fun column -> set_mode (Identify_symbol (!line, column)) ());
+          ],
         "<pos> Show info about symbol at given line and column" );
       ( "--find-local",
         Arg.Tuple
-          [ Arg.Int (fun x -> line := x);
-            Arg.Int (fun column -> set_mode (Find_local (!line, column)) ()) ],
+          [
+            Arg.Int (fun x -> line := x);
+            Arg.Int (fun column -> set_mode (Find_local (!line, column)) ());
+          ],
         "<pos> Find all usages of local at given line and column" );
       ( "--max-errors",
         Arg.Int (fun num_errors -> max_errors := Some num_errors),
@@ -303,14 +310,18 @@ let parse_options () =
         " (mode) show full fidelity parse tree with types in json format." );
       ( "--find-refs",
         Arg.Tuple
-          [ Arg.Int (fun x -> line := x);
-            Arg.Int (fun column -> set_mode (Find_refs (!line, column)) ()) ],
+          [
+            Arg.Int (fun x -> line := x);
+            Arg.Int (fun column -> set_mode (Find_refs (!line, column)) ());
+          ],
         "<pos> Find all usages of a symbol at given line and column" );
       ( "--highlight-refs",
         Arg.Tuple
-          [ Arg.Int (fun x -> line := x);
+          [
+            Arg.Int (fun x -> line := x);
             Arg.Int
-              (fun column -> set_mode (Highlight_refs (!line, column)) ()) ],
+              (fun column -> set_mode (Highlight_refs (!line, column)) ());
+          ],
         "<pos> Highlight all usages of a symbol at given line and column" );
       ( "--decl-compare",
         Arg.Unit (set_mode Decl_compare),
@@ -366,9 +377,10 @@ let parse_options () =
         " Timeout in seconds for checking a function or a class." );
       ( "--hh-log-level",
         Arg.Tuple
-          [ Arg.String (fun x -> log_key := x);
+          [
+            Arg.String (fun x -> log_key := x);
             Arg.Int
-              (fun level -> log_levels := SMap.add !log_key level !log_levels)
+              (fun level -> log_levels := SMap.add !log_key level !log_levels);
           ],
         " Set the log level for a key" );
       ( "--batch-files",
@@ -481,7 +493,8 @@ let parse_options () =
         "Make unsetting a class const a parse error" );
       ( "--disable-halt-compiler",
         Arg.Set disable_halt_compiler,
-        "Disable using PHP __halt_compiler()" ) ]
+        "Disable using PHP __halt_compiler()" );
+    ]
   in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := fn :: !fn_ref) usage;
@@ -1375,7 +1388,8 @@ let handle_mode
                   in
                   Decl_defs.(
                     let modifiers =
-                      [ ( if Option.is_some mro.mro_required_at then
+                      [
+                        ( if Option.is_some mro.mro_required_at then
                           Some "requirement"
                         else if mro.mro_via_req_extends || mro.mro_via_req_impl
                       then
@@ -1399,7 +1413,8 @@ let handle_mode
                         else
                           None );
                         Option.map mro.mro_trait_reuse ~f:(fun c ->
-                            "trait reuse via " ^ c) ]
+                            "trait reuse via " ^ c);
+                      ]
                       |> List.filter_map ~f:(fun x -> x)
                       |> String.concat ~sep:", "
                     in

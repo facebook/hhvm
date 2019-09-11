@@ -246,7 +246,8 @@ let require_constraint_keyword =
 let declaration_keywords =
   {
     keywords =
-      [ "enum";
+      [
+        "enum";
         "require";
         "include";
         "require_once";
@@ -254,7 +255,8 @@ let declaration_keywords =
         "namespace";
         "newtype";
         "trait";
-        "type" ];
+        "type";
+      ];
     is_valid_in_context =
       begin
         fun context -> is_top_level_statement_valid context
@@ -288,7 +290,8 @@ let noreturn_keyword =
 let primitive_types =
   {
     keywords =
-      [ "array";
+      [
+        "array";
         "arraykey";
         "bool";
         "classname";
@@ -300,7 +303,8 @@ let primitive_types =
         "string";
         "resource";
         "varray";
-        "nothing" ];
+        "nothing";
+      ];
     is_valid_in_context = is_type_valid;
   }
 
@@ -363,7 +367,8 @@ let postfix_expressions =
 let general_statements =
   {
     keywords =
-      [ "if";
+      [
+        "if";
         "do";
         "while";
         "for";
@@ -373,7 +378,8 @@ let general_statements =
         "throw";
         "switch";
         "yield";
-        "echo" ];
+        "echo";
+      ];
     is_valid_in_context =
       begin
         fun context -> is_at_beginning_of_new_statement context
@@ -431,7 +437,8 @@ let scope_resolution_qualifiers =
   }
 
 let keyword_matches : keyword_completion list =
-  [ abstract_keyword;
+  [
+    abstract_keyword;
     async_keyword;
     async_func_body_keywords;
     class_keyword;
@@ -459,7 +466,8 @@ let keyword_matches : keyword_completion list =
     try_trailing_keywords;
     use_keyword;
     visibility_modifiers;
-    void_keyword ]
+    void_keyword;
+  ]
 
 let autocomplete_keyword (context : context) : string list =
   let check_keyword_match { keywords; is_valid_in_context } =

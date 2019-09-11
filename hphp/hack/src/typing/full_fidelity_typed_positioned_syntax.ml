@@ -55,15 +55,21 @@ let pos_to_zero_indexed_json t =
   let (line_start, char_start, line_end, char_end) = Pos.destruct_range t in
   let fn = Pos.filename t in
   Hh_json.JSON_Object
-    [ ("filename", Hh_json.JSON_String fn);
+    [
+      ("filename", Hh_json.JSON_String fn);
       ( "start",
         Hh_json.JSON_Object
-          [ ("line", Hh_json.int_ (line_start - 1));
-            ("column", Hh_json.int_ (char_start - 1)) ] );
+          [
+            ("line", Hh_json.int_ (line_start - 1));
+            ("column", Hh_json.int_ (char_start - 1));
+          ] );
       ( "end",
         Hh_json.JSON_Object
-          [ ("line", Hh_json.int_ (line_end - 1));
-            ("column", Hh_json.int_ char_end) ] ) ]
+          [
+            ("line", Hh_json.int_ (line_end - 1));
+            ("column", Hh_json.int_ char_end);
+          ] );
+    ]
 
 module Value = struct
   (* placeholder definitions *)

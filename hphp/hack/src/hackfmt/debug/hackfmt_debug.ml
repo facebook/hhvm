@@ -32,7 +32,8 @@ let debug_config =
     }
 
 let init_with_options () =
-  [ ( "--ast",
+  [
+    ( "--ast",
       Arg.Unit
         (fun () -> debug_config := { !debug_config with print_ast = true }),
       " Print out an ast dump before the formatted result " );
@@ -64,7 +65,8 @@ let init_with_options () =
         (fun () ->
           debug_config := { !debug_config with print_rule_dependencies = true }),
       " Print out a representation of the rule dependenies below each chunk group"
-    ) ]
+    );
+  ]
 
 let debug_nesting chunk_group =
   List.iteri chunk_group.Chunk_group.chunks ~f:(fun i c ->

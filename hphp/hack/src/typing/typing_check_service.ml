@@ -204,9 +204,10 @@ let process_file
       | _ ->
         ( errors,
           List.concat
-            [ deferred_files;
-              [Check { file with deferred_count = file.deferred_count + 1 }] ]
-        )
+            [
+              deferred_files;
+              [Check { file with deferred_count = file.deferred_count + 1 }];
+            ] )
     in
     result
   with e ->

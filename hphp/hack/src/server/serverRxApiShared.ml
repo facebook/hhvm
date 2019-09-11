@@ -26,9 +26,11 @@ module SN = Naming_special_names
 let pos_to_json fn line char =
   Hh_json.(
     JSON_Object
-      [ ("file", JSON_String (Relative_path.to_absolute fn));
+      [
+        ("file", JSON_String (Relative_path.to_absolute fn));
         ("line", int_ line);
-        ("character", int_ char) ])
+        ("character", int_ char);
+      ])
 
 let recheck_typing tcopt (pos_infos : pos_info list) =
   let files_to_check =

@@ -1574,9 +1574,11 @@ and expr
               log_types
                 p
                 env
-                [ Log_head
+                [
+                  Log_head
                     ( "Typing.expr " ^ Typing_reason.string_of_ureason r,
-                      [Log_type ("expected_ty", ty)] ) ]))
+                      [Log_type ("expected_ty", ty)] );
+                ]))
     end;
     raw_expr
       ~accept_using_var
@@ -4003,13 +4005,17 @@ and check_expected_ty message env inferred_ty (expected : ExpectedTy.t option)
           log_types
             p
             env
-            [ Log_head
+            [
+              Log_head
                 ( Printf.sprintf
                     "Typing.check_expected_ty %s enforced=%b"
                     message
                     ty.et_enforced,
-                  [ Log_type ("inferred_ty", inferred_ty);
-                    Log_type ("expected_ty", ty.et_type) ] ) ]));
+                  [
+                    Log_type ("inferred_ty", inferred_ty);
+                    Log_type ("expected_ty", ty.et_type);
+                  ] );
+            ]));
     Typing_coercion.coerce_type p ur env inferred_ty ty Errors.unify_error
 
 and new_object
@@ -4752,12 +4758,14 @@ and dispatch_call
         let super =
           ( Reason.Rnone,
             Tunion
-              [ MakeType.dict r tmixed tmixed;
+              [
+                MakeType.dict r tmixed tmixed;
                 MakeType.keyset r tmixed;
                 ( if disallow_varray then
                   (r, Tarraykind (AKmap (tmixed, tmixed)))
                 else
-                  (r, Tarraykind AKany) ) ] )
+                  (r, Tarraykind AKany) );
+              ] )
         in
         Errors.try_
           (fun () -> SubType.sub_type env ty super Errors.unify_error)

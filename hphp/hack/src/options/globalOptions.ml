@@ -174,7 +174,8 @@ let tco_experimental_all =
   SSet.empty
   |> List.fold_right
        SSet.add
-       [ tco_experimental_isarray;
+       [
+         tco_experimental_isarray;
          tco_experimental_stronger_shape_idx_ret;
          tco_experimental_generics_arity;
          tco_experimental_forbid_nullable_cast;
@@ -182,7 +183,8 @@ let tco_experimental_all =
          tco_experimental_disallow_static_memoized;
          tco_experimental_no_trait_reuse;
          tco_experimental_trait_method_redeclarations;
-         tco_experimental_abstract_type_const_with_default ]
+         tco_experimental_abstract_type_const_with_default;
+       ]
 
 let tco_migration_flags_all =
   SSet.empty |> List.fold_right SSet.add ["array_cast"]

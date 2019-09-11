@@ -9,7 +9,8 @@ let errors_to_string errors =
   @@ errors
 
 let init_disk_changes =
-  [ ( "base.php",
+  [
+    ( "base.php",
       "<?hh // strict
 abstract class Base {
   public function meth(): void {}
@@ -21,7 +22,8 @@ abstract class Base {
     ("child.php", "<?hh // strict
 
 class Child extends Base {}
-") ]
+");
+  ]
 
 let content =
   "<?hh // strict
@@ -34,7 +36,8 @@ abstract class Base {
 "
 
 let next_disk_changes =
-  [ ( "base.php",
+  [
+    ( "base.php",
       "<?hh // strict
 abstract class Base {
   public function methFoo(): void {}
@@ -42,7 +45,8 @@ abstract class Base {
     $c->methFoo();
   }
 }"
-    ) ]
+    );
+  ]
 
 (* We revive removed class elements early because they may be referenced by
  * subclasses

@@ -26,7 +26,8 @@ let parse_options () : index_builder_context option =
   let silent = ref false in
   let options =
     ref
-      [ ( "--sqlite",
+      [
+        ( "--sqlite",
           Arg.String (fun x -> sqlite_filename := Some x),
           "[filename]  Save the global index in a Sqlite database" );
         ( "--text",
@@ -54,7 +55,8 @@ let parse_options () : index_builder_context option =
           "Disable processing of built-in HHI files" );
         ( "--silent",
           Arg.Unit (fun () -> silent := true),
-          "Build without logging timing data" ) ]
+          "Build without logging timing data" );
+      ]
   in
   Arg.parse_dynamic
     options

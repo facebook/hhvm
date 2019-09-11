@@ -24,9 +24,11 @@ let emit_body_instrs_inout params call_instrs =
     @@ List.map params ~f:(fun p ->
            if Hhas_param.is_inout p then
              gather
-               [ instr_cgetquietl (Local.Named (Hhas_param.name p));
+               [
+                 instr_cgetquietl (Local.Named (Hhas_param.name p));
                  instr_null;
-                 instr_popl (Local.Named (Hhas_param.name p)) ]
+                 instr_popl (Local.Named (Hhas_param.name p));
+               ]
            else
              instr_pushl (Local.Named (Hhas_param.name p)))
   in
@@ -51,7 +53,8 @@ let emit_body_instrs_inout params call_instrs =
     make_fcall_args ~flags ~num_rets:(num_inout + 1) param_count
   in
   gather
-    [ gather @@ List.init num_inout ~f:(fun _ -> instr_nulluninit);
+    [
+      gather @@ List.init num_inout ~f:(fun _ -> instr_nulluninit);
       instr_nulluninit;
       instr_nulluninit;
       instr_nulluninit;
@@ -60,7 +63,8 @@ let emit_body_instrs_inout params call_instrs =
       instr_popl local;
       gather @@ inout_setters;
       instr_pushl local;
-      instr_retc ]
+      instr_retc;
+    ]
 
 let emit_body_instrs_ref params call_instrs =
   let param_count = List.length params in
@@ -91,13 +95,15 @@ let emit_body_instrs_ref params call_instrs =
   let flags = { default_fcall_flags with has_unpack = has_variadic } in
   let fcall_args = make_fcall_args ~flags param_count in
   gather
-    [ instr_nulluninit;
+    [
+      instr_nulluninit;
       instr_nulluninit;
       instr_nulluninit;
       param_instrs;
       call_instrs fcall_args;
       gather param_get_instrs;
-      instr_retm (List.length param_get_instrs + 1) ]
+      instr_retm (List.length param_get_instrs + 1);
+    ]
 
 let emit_body_instrs ~wrapper_type env pos params call_instrs =
   let body =
@@ -211,7 +217,10 @@ let emit_wrapper_method
       decl_vars
   in
   let scope =
-    [Ast_scope.ScopeItem.Method ast_method; Ast_scope.ScopeItem.Class ast_class]
+    [
+      Ast_scope.ScopeItem.Method ast_method;
+      Ast_scope.ScopeItem.Class ast_class;
+    ]
   in
   let namespace = ast_class.T.c_namespace in
   let env = Emit_env.(empty |> with_namespace namespace |> with_scope scope) in

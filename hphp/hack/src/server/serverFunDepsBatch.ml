@@ -101,7 +101,8 @@ let result_to_string result (fn, line, char) =
   Hh_json.(
     let obj =
       JSON_Object
-        [ ("position", S.pos_to_json fn line char);
+        [
+          ("position", S.pos_to_json fn line char);
           (match result with
           | Ok (Some refs) ->
             ( "deps",
@@ -112,9 +113,10 @@ let result_to_string result (fn, line, char) =
                     | Some def ->
                       let module SD = SymbolDefinition in
                       let props =
-                        [ ("name", JSON_String def.SD.full_name);
+                        [
+                          ("name", JSON_String def.SD.full_name);
                           ("kind", JSON_String (SD.string_of_kind def.SD.kind));
-                          ("position", Pos.json (Pos.to_absolute def.SD.pos))
+                          ("position", Pos.json (Pos.to_absolute def.SD.pos));
                         ]
                       in
                       let props =
@@ -132,7 +134,8 @@ let result_to_string result (fn, line, char) =
               in
               JSON_Array l )
           | Ok None -> ("error", JSON_String "Function/method not found")
-          | Error e -> ("error", JSON_String e)) ]
+          | Error e -> ("error", JSON_String e));
+        ]
     in
     json_to_string obj)
 

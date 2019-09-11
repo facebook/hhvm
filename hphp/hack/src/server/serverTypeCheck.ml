@@ -102,9 +102,11 @@ let debug_print_path_set genv name set =
               JSON_String (Relative_path.suffix k) :: acc)
         in
         JSON_Object
-          [ ("type", JSON_String "incremental_files");
+          [
+            ("type", JSON_String "incremental_files");
             ("name", JSON_String name);
-            ("files", JSON_Array files) ]))
+            ("files", JSON_Array files);
+          ]))
 
 let debug_print_fast_keys genv name fast =
   ServerDebug.log genv (fun () ->
@@ -127,10 +129,12 @@ let debug_print_fast_keys genv name fast =
               acc)
         in
         JSON_Object
-          [ ("type", JSON_String "incremental_files");
+          [
+            ("type", JSON_String "incremental_files");
             ("name", JSON_String name);
             ("files", JSON_Array files);
-            ("decls", JSON_Array decls) ]))
+            ("decls", JSON_Array decls);
+          ]))
 
 (*****************************************************************************)
 (* Given a set of Ast.id list produce a SSet.t (got rid of the positions)    *)

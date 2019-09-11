@@ -30,7 +30,8 @@ let make_operator
   { name; associativity; precedence; is_assignment; is_comparison }
 
 let operators =
-  [ make_operator "Dollar" Right 32 ();
+  [
+    make_operator "Dollar" Right 32 ();
     make_operator "ScopeResolution" Left 31 ();
     make_operator "Indexing" Left 30 ();
     make_operator "NullSafeMemberSelection" Left 29 ();
@@ -102,4 +103,5 @@ let operators =
     make_operator "RequireOnce" Left 1 ();
     make_operator "Include" Left 1 ();
     make_operator "IncludeOnce" Left 1 ();
-    make_operator "Await" None 1 () ]
+    make_operator "Await" None 1 ();
+  ]

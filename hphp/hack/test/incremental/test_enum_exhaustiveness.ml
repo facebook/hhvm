@@ -19,7 +19,8 @@ enum DynamicTemplateField : string {
 }"
 
 let make_disk_changes base_content =
-  [ ("base.php", base_content);
+  [
+    ("base.php", base_content);
     ( "test.php",
       "<?hh // strict
 
@@ -34,7 +35,8 @@ function test(
       return 'Description';
   }
 }"
-    ) ]
+    );
+  ]
 
 let errors_to_string errors =
   List.fold_left

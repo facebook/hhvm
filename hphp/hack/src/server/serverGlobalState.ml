@@ -76,7 +76,8 @@ let to_string state =
   let strict_codes = ISet.to_string state.strict_codes in
   (* OCaml regexps cannot be re-serialized to strings *)
   let paths_to_ignore = "(...)" in
-  [ ("saved_root", saved_root);
+  [
+    ("saved_root", saved_root);
     ("saved_hhi", saved_hhi);
     ("saved_tmp", saved_tmp);
     ("trace", trace);
@@ -84,7 +85,8 @@ let to_string state =
     ("profile_log", profile_log);
     ("fixme_codes", fixme_codes);
     ("strict_codes", strict_codes);
-    ("paths_to_ignore", paths_to_ignore) ]
+    ("paths_to_ignore", paths_to_ignore);
+  ]
   |> List.map (fun (x, y) -> Printf.sprintf "%s : %s" x y)
   |> String.concat ", "
   |> Printf.sprintf "{%s}"

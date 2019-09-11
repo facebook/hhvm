@@ -35,18 +35,22 @@ let print_reason_color
     if not first then
       []
     else
-      [ (C.Normal C.Default, " (");
+      [
+        (C.Normal C.Default, " (");
         (code_clr, Errors.error_code_to_string code);
-        (C.Normal C.Default, ")") ]
+        (C.Normal C.Default, ")");
+      ]
   in
   let to_print =
-    [ (line_clr, string_of_int line);
+    [
+      (line_clr, string_of_int line);
       (C.Normal C.Default, ":");
       (col_clr, string_of_int start);
       (C.Normal C.Default, ",");
       (col_clr, string_of_int end_);
       (C.Normal C.Default, ": ");
-      (err_clr, s) ]
+      (err_clr, s);
+    ]
     @ to_print_code
     @ [(C.Normal C.Default, "\n")]
   in

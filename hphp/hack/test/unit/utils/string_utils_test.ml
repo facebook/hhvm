@@ -26,7 +26,9 @@ let test_truncate_long () =
   true
 
 let tests =
-  [ ("test_truncate_short", test_truncate_short);
-    ("test_truncate_long", test_truncate_long) ]
+  [
+    ("test_truncate_short", test_truncate_short);
+    ("test_truncate_long", test_truncate_long);
+  ]
 
 let () = Unit_test.run_all tests

@@ -147,7 +147,8 @@ let tests args =
       template_repo = args.Args.template_repo;
     }
   in
-  [ ( "test_no_socket_file",
+  [
+    ( "test_no_socket_file",
       fun () ->
         Test_harness.run_test
           ~stop_server_in_teardown:false
@@ -164,7 +165,8 @@ let tests args =
         Test_harness.run_test
           ~stop_server_in_teardown:false
           harness_config
-          test_watcher_unknown_then_settled ) ]
+          test_watcher_unknown_then_settled );
+  ]
 
 let () =
   Daemon.check_entry_point ();

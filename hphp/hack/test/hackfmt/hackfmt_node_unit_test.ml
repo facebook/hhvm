@@ -41,7 +41,8 @@ let assert_formatting
 
 let range_test_suite =
   "hackfmt_node"
-  >::: [ "simple"
+  >::: [
+         "simple"
          >:: assert_formatting ~src:"$x = f($a,$b);" ~exp:"$x = f($a, $b);\n";
          "indented"
          >:: assert_formatting
@@ -72,6 +73,7 @@ let range_test_suite =
          >:: assert_formatting
                ~src:"$x = f($a,'foo\nbar');"
                ~indent:1
-               ~exp:"  $x = f($a, 'foo\nbar');\n" ]
+               ~exp:"  $x = f($a, 'foo\nbar');\n";
+       ]
 
 let _ = run_test_tt_main range_test_suite

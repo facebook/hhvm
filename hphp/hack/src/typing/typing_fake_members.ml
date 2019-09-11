@@ -107,11 +107,15 @@ let as_log_value fake =
   | Valid valid -> make_map [("Valid", local_id_set_as_value valid)]
   | Invalidated { valid; invalid; blame } ->
     make_map
-      [ ( "Invalidated",
+      [
+        ( "Invalidated",
           make_map
-            [ ("valid", local_id_set_as_value valid);
+            [
+              ("valid", local_id_set_as_value valid);
               ("invalid", local_id_set_as_value invalid);
-              ("blame", blame_as_log_value blame) ] ) ]
+              ("blame", blame_as_log_value blame);
+            ] );
+      ]
 
 let make_id obj_name member_name =
   let obj_name =

@@ -59,9 +59,11 @@ let test () =
   let env =
     Test.setup_disk
       env
-      [ (foo_name, "");
+      [
+        (foo_name, "");
         (foo_child_name, foo_child_contents);
-        (bar_name, bar_contents) ]
+        (bar_name, bar_contents);
+      ]
   in
   (* We need to suppress all the errors (see HH_FIXMEs above), otherwise the
    * logic that always rechecks the files with errors kicks in and does the

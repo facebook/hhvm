@@ -172,44 +172,46 @@ function f7f((function(): void) $a): void {
 let files = [f1; f2; f3; f4; f5; f6; f7]
 
 let tests =
-  [ ( (fst f1, 2, 11),
+  [
+    ( (fst f1, 2, 11),
       "{\"position\":{\"file\":\"/f1.php\",\"line\":2,\"character\":11},\"deps\":[null,null,{\"name\":\"F2A::f\",\"kind\":\"method\",\"position\":{\"filename\":\"/f2.php\",\"line\":7,\"char_start\":19,\"char_end\":19}},{\"name\":\"F3B::f\",\"kind\":\"method\",\"position\":{\"filename\":\"/f3.php\",\"line\":3,\"char_start\":19,\"char_end\":19}}]}"
     );
     ( (fst f2, 7, 19),
       "{\"position\":{\"file\":\"/f2.php\",\"line\":7,\"character\":19},\"deps\":[null,{\"name\":\"getf3b\",\"kind\":\"function\",\"position\":{\"filename\":\"/f1.php\",\"line\":10,\"char_start\":10,\"char_end\":15}}]}"
     );
     (* should find class (since constructor is not defined) and method call *)
-    ( (fst f3, 8, 16),
-      "{\"position\":{\"file\":\"/f3.php\",\"line\":8,\"character\":16},\"deps\":[{\"name\":\"F3B\",\"kind\":\"class\",\"position\":{\"filename\":\"/f3.php\",\"line\":2,\"char_start\":7,\"char_end\":9}},{\"name\":\"F3B::f\",\"kind\":\"method\",\"position\":{\"filename\":\"/f3.php\",\"line\":3,\"char_start\":19,\"char_end\":19}}]}"
-    );
+      ( (fst f3, 8, 16),
+        "{\"position\":{\"file\":\"/f3.php\",\"line\":8,\"character\":16},\"deps\":[{\"name\":\"F3B\",\"kind\":\"class\",\"position\":{\"filename\":\"/f3.php\",\"line\":2,\"char_start\":7,\"char_end\":9}},{\"name\":\"F3B::f\",\"kind\":\"method\",\"position\":{\"filename\":\"/f3.php\",\"line\":3,\"char_start\":19,\"char_end\":19}}]}"
+      );
     (* should find constructor and method *)
-    ( (fst f3, 14, 10),
-      "{\"position\":{\"file\":\"/f3.php\",\"line\":14,\"character\":10},\"deps\":[{\"name\":\"F2A::__construct\",\"kind\":\"method\",\"position\":{\"filename\":\"/f2.php\",\"line\":4,\"char_start\":19,\"char_end\":29}},{\"name\":\"F2A::f\",\"kind\":\"method\",\"position\":{\"filename\":\"/f2.php\",\"line\":7,\"char_start\":19,\"char_end\":19}}]}"
-    );
+      ( (fst f3, 14, 10),
+        "{\"position\":{\"file\":\"/f3.php\",\"line\":14,\"character\":10},\"deps\":[{\"name\":\"F2A::__construct\",\"kind\":\"method\",\"position\":{\"filename\":\"/f2.php\",\"line\":4,\"char_start\":19,\"char_end\":29}},{\"name\":\"F2A::f\",\"kind\":\"method\",\"position\":{\"filename\":\"/f2.php\",\"line\":7,\"char_start\":19,\"char_end\":19}}]}"
+      );
     (* should find reactive function *)
-    ( (fst f3, 41, 10),
-      "{\"position\":{\"file\":\"/f3.php\",\"line\":41,\"character\":10},\"deps\":[{\"name\":\"rx1\",\"kind\":\"function\",\"position\":{\"filename\":\"/f3.php\",\"line\":37,\"char_start\":10,\"char_end\":12},\"reactivity\":[\"reactive\"]},{\"name\":\"rxshallow1\",\"kind\":\"function\",\"position\":{\"filename\":\"/f3.php\",\"line\":32,\"char_start\":10,\"char_end\":19},\"reactivity\":[\"shallow\"]},{\"name\":\"A::g\",\"kind\":\"method\",\"position\":{\"filename\":\"/f3.php\",\"line\":23,\"char_start\":19,\"char_end\":19},\"reactivity\":[\"only_rx_if_impl\",\"reactive\"]}]}"
-    );
+      ( (fst f3, 41, 10),
+        "{\"position\":{\"file\":\"/f3.php\",\"line\":41,\"character\":10},\"deps\":[{\"name\":\"rx1\",\"kind\":\"function\",\"position\":{\"filename\":\"/f3.php\",\"line\":37,\"char_start\":10,\"char_end\":12},\"reactivity\":[\"reactive\"]},{\"name\":\"rxshallow1\",\"kind\":\"function\",\"position\":{\"filename\":\"/f3.php\",\"line\":32,\"char_start\":10,\"char_end\":19},\"reactivity\":[\"shallow\"]},{\"name\":\"A::g\",\"kind\":\"method\",\"position\":{\"filename\":\"/f3.php\",\"line\":23,\"char_start\":19,\"char_end\":19},\"reactivity\":[\"only_rx_if_impl\",\"reactive\"]}]}"
+      );
     (* should find static method*)
-    ( (fst f4, 8, 21),
-      "{\"position\":{\"file\":\"/f4.php\",\"line\":8,\"character\":21},\"deps\":[{\"name\":\"A1::sm\",\"kind\":\"method\",\"position\":{\"filename\":\"/f4.php\",\"line\":3,\"char_start\":28,\"char_end\":29}}]}"
-    );
+      ( (fst f4, 8, 21),
+        "{\"position\":{\"file\":\"/f4.php\",\"line\":8,\"character\":21},\"deps\":[{\"name\":\"A1::sm\",\"kind\":\"method\",\"position\":{\"filename\":\"/f4.php\",\"line\":3,\"char_start\":28,\"char_end\":29}}]}"
+      );
     (* should find inst_meth, fun_, class_meth, class, methods and function  *)
-    ( (fst f5, 3, 10),
-      "{\"position\":{\"file\":\"/f5.php\",\"line\":3,\"character\":10},\"deps\":[{\"name\":\"HH\\\\class_meth\",\"kind\":\"function\",\"position\":{\"filename\":\"/hhi/func_pointers.hhi\",\"line\":131,\"char_start\":10,\"char_end\":19}},{\"name\":\"HH\\\\fun\",\"kind\":\"function\",\"position\":{\"filename\":\"/hhi/func_pointers.hhi\",\"line\":50,\"char_start\":10,\"char_end\":12}},{\"name\":\"HH\\\\inst_meth\",\"kind\":\"function\",\"position\":{\"filename\":\"/hhi/func_pointers.hhi\",\"line\":173,\"char_start\":10,\"char_end\":18}},{\"name\":\"f5f\",\"kind\":\"function\",\"position\":{\"filename\":\"/f5.php\",\"line\":9,\"char_start\":10,\"char_end\":12}},{\"name\":\"C\",\"kind\":\"class\",\"position\":{\"filename\":\"/f5.php\",\"line\":12,\"char_start\":7,\"char_end\":7}},{\"name\":\"C::m\",\"kind\":\"method\",\"position\":{\"filename\":\"/f5.php\",\"line\":16,\"char_start\":19,\"char_end\":19}},{\"name\":\"C::sm\",\"kind\":\"method\",\"position\":{\"filename\":\"/f5.php\",\"line\":13,\"char_start\":26,\"char_end\":27}}]}"
-    );
+      ( (fst f5, 3, 10),
+        "{\"position\":{\"file\":\"/f5.php\",\"line\":3,\"character\":10},\"deps\":[{\"name\":\"HH\\\\class_meth\",\"kind\":\"function\",\"position\":{\"filename\":\"/hhi/func_pointers.hhi\",\"line\":131,\"char_start\":10,\"char_end\":19}},{\"name\":\"HH\\\\fun\",\"kind\":\"function\",\"position\":{\"filename\":\"/hhi/func_pointers.hhi\",\"line\":50,\"char_start\":10,\"char_end\":12}},{\"name\":\"HH\\\\inst_meth\",\"kind\":\"function\",\"position\":{\"filename\":\"/hhi/func_pointers.hhi\",\"line\":173,\"char_start\":10,\"char_end\":18}},{\"name\":\"f5f\",\"kind\":\"function\",\"position\":{\"filename\":\"/f5.php\",\"line\":9,\"char_start\":10,\"char_end\":12}},{\"name\":\"C\",\"kind\":\"class\",\"position\":{\"filename\":\"/f5.php\",\"line\":12,\"char_start\":7,\"char_end\":7}},{\"name\":\"C::m\",\"kind\":\"method\",\"position\":{\"filename\":\"/f5.php\",\"line\":16,\"char_start\":19,\"char_end\":19}},{\"name\":\"C::sm\",\"kind\":\"method\",\"position\":{\"filename\":\"/f5.php\",\"line\":13,\"char_start\":26,\"char_end\":27}}]}"
+      );
     (* handle chained calls *)
-    ( (fst f5, 21, 10),
-      "{\"position\":{\"file\":\"/f5.php\",\"line\":21,\"character\":10},\"deps\":[{\"name\":\"D::getc\",\"kind\":\"method\",\"position\":{\"filename\":\"/f5.php\",\"line\":26,\"char_start\":26,\"char_end\":29}},{\"name\":\"C::m\",\"kind\":\"method\",\"position\":{\"filename\":\"/f5.php\",\"line\":16,\"char_start\":19,\"char_end\":19}}]}"
-    );
+      ( (fst f5, 21, 10),
+        "{\"position\":{\"file\":\"/f5.php\",\"line\":21,\"character\":10},\"deps\":[{\"name\":\"D::getc\",\"kind\":\"method\",\"position\":{\"filename\":\"/f5.php\",\"line\":26,\"char_start\":26,\"char_end\":29}},{\"name\":\"C::m\",\"kind\":\"method\",\"position\":{\"filename\":\"/f5.php\",\"line\":16,\"char_start\":19,\"char_end\":19}}]}"
+      );
     (* should look into lambdas *)
-    ( (fst f6, 2, 10),
-      "{\"position\":{\"file\":\"/f6.php\",\"line\":2,\"character\":10},\"deps\":[{\"name\":\"f6g\",\"kind\":\"function\",\"position\":{\"filename\":\"/f6.php\",\"line\":7,\"char_start\":10,\"char_end\":12}}]}"
-    );
+      ( (fst f6, 2, 10),
+        "{\"position\":{\"file\":\"/f6.php\",\"line\":2,\"character\":10},\"deps\":[{\"name\":\"f6g\",\"kind\":\"function\",\"position\":{\"filename\":\"/f6.php\",\"line\":7,\"char_start\":10,\"char_end\":12}}]}"
+      );
     (* locals as call targets *)
-    ( (fst f7, 2, 10),
-      "{\"position\":{\"file\":\"/f7.php\",\"line\":2,\"character\":10},\"deps\":[{\"name\":\"$a\",\"kind\":\"local\",\"position\":{\"filename\":\"/f7.php\",\"line\":2,\"char_start\":33,\"char_end\":34}},{\"name\":\"$b\",\"kind\":\"local\",\"position\":{\"filename\":\"/f7.php\",\"line\":4,\"char_start\":3,\"char_end\":4}}]}"
-    ) ]
+      ( (fst f7, 2, 10),
+        "{\"position\":{\"file\":\"/f7.php\",\"line\":2,\"character\":10},\"deps\":[{\"name\":\"$a\",\"kind\":\"local\",\"position\":{\"filename\":\"/f7.php\",\"line\":2,\"char_start\":33,\"char_end\":34}},{\"name\":\"$b\",\"kind\":\"local\",\"position\":{\"filename\":\"/f7.php\",\"line\":4,\"char_start\":3,\"char_end\":4}}]}"
+      );
+  ]
 
 let test () =
   let env =

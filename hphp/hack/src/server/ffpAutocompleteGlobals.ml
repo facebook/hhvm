@@ -153,7 +153,8 @@ let get_globals
       in
       let completions =
         List.concat_no_order
-          [ List.filter_map
+          [
+            List.filter_map
               ~f:(make_class_completion context replace_pos)
               classes;
             List.filter_map
@@ -161,7 +162,8 @@ let get_globals
               traits;
             List.filter_map
               ~f:(make_interface_completion context replace_pos)
-              interfaces ]
+              interfaces;
+          ]
       in
       let { value; _ } =
         SymbolIndex.query_for_autocomplete

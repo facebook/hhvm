@@ -111,11 +111,13 @@ let test_write_after_read () =
     true)
 
 let tests =
-  [ ("test_mixed_read", test_mixed_read);
+  [
+    ("test_mixed_read", test_mixed_read);
     ("test_one_byte_at_a_time", test_few_bytes_at_a_time 1);
     ("test_two_bytes_at_a_time", test_few_bytes_at_a_time 2);
     ("test_three_bytes_at_a_time", test_few_bytes_at_a_time 3);
     ("test_four_bytes_at_a_time", test_few_bytes_at_a_time 4);
-    ("test_write_after_read", test_write_after_read) ]
+    ("test_write_after_read", test_write_after_read);
+  ]
 
 let () = Unit_test.run_all tests

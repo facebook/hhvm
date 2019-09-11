@@ -197,10 +197,11 @@ module FullFidelityParseArgs = struct
     let abstract_static_props = ref false in
     let disable_halt_compiler = ref false in
     let options =
-      [ (* modes *)
-        ( "--full-fidelity-json",
-          Arg.Unit set_full_fidelity_json,
-          "Displays the full-fidelity parse tree in JSON format." );
+      [
+        (* modes *)
+          ( "--full-fidelity-json",
+            Arg.Unit set_full_fidelity_json,
+            "Displays the full-fidelity parse tree in JSON format." );
         ( "--full-fidelity-text-json",
           Arg.Unit set_full_fidelity_text_json,
           "Displays the full-fidelity parse tree in JSON format with token text."
@@ -331,11 +332,13 @@ No errors are filtered out."
           "Enable abstract static properties" );
         ( "--disable-halt-compiler",
           Arg.Set disable_halt_compiler,
-          "Disable using PHP __halt_compiler()" ) ]
+          "Disable using PHP __halt_compiler()" );
+      ]
     in
     Arg.parse options push_file usage;
     let modes =
-      [ !full_fidelity_json;
+      [
+        !full_fidelity_json;
         !full_fidelity_text_json;
         !full_fidelity_dot;
         !full_fidelity_dot_edges;
@@ -345,7 +348,8 @@ No errors are filtered out."
         !full_fidelity_ast_s_expr;
         !program_text;
         !pretty_print;
-        !schema ]
+        !schema;
+      ]
     in
     if not (List.exists (fun x -> x) modes) then
       full_fidelity_errors_all := true;

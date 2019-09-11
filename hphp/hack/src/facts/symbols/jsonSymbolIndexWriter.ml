@@ -26,8 +26,9 @@ let record_one_jsonfile
   (* Write all results in json format *)
   let json_export =
     JSON_Array
-      [ JSON_Object
-          [("predicate", JSON_String predicate); ("facts", JSON_Array elems)]
+      [
+        JSON_Object
+          [("predicate", JSON_String predicate); ("facts", JSON_Array elems)];
       ]
   in
   (* Close the json file *)
@@ -55,15 +56,19 @@ let record_in_jsonfiles
           Caml.Hashtbl.find symbols.sisr_filepaths symbol.sif_filepath
         in
         JSON_Object
-          [ ( "key",
+          [
+            ( "key",
               JSON_Object
-                [ ( "name_lowercase",
+                [
+                  ( "name_lowercase",
                     JSON_String (String.lowercase symbol.sif_name) );
                   ( "valid",
                     JSON_Object
-                      [ ("acid", JSON_Bool (valid_for_acid symbol));
+                      [
+                        ("acid", JSON_Bool (valid_for_acid symbol));
                         ("acnew", JSON_Bool (valid_for_acnew symbol));
-                        ("actype", JSON_Bool (valid_for_actype symbol)) ] );
+                        ("actype", JSON_Bool (valid_for_actype symbol));
+                      ] );
                   ( "kind_id",
                     JSON_Number (string_of_int (kind_to_int symbol.sif_kind))
                   );
@@ -71,8 +76,10 @@ let record_in_jsonfiles
                   ("filehash_id", JSON_String (Int64.to_string hash));
                   ("is_abstract", JSON_Bool (valid_for_actype symbol));
                   ("is_final", JSON_Bool (valid_for_actype symbol));
-                  ("canonical_name", JSON_String symbol.sif_name) ] );
-            ("id", JSON_Number (string_of_int !json_element_id)) ])
+                  ("canonical_name", JSON_String symbol.sif_name);
+                ] );
+            ("id", JSON_Number (string_of_int !json_element_id));
+          ])
   in
   (* Save schema 1 files by chunk size *)
   let array_chunk_list = List.chunks_of hackSymbols chunk_size in
@@ -86,11 +93,15 @@ let record_in_jsonfiles
       (fun ns id acc ->
         incr json_element_id;
         JSON_Object
-          [ ( "key",
+          [
+            ( "key",
               JSON_Object
-                [ ("namespace_id", JSON_Number (string_of_int id));
-                  ("namespace_name", JSON_String ns) ] );
-            ("id", JSON_Number (string_of_int !json_element_id)) ]
+                [
+                  ("namespace_id", JSON_Number (string_of_int id));
+                  ("namespace_name", JSON_String ns);
+                ] );
+            ("id", JSON_Number (string_of_int !json_element_id));
+          ]
         :: acc)
       symbols.sisr_namespaces
       []
@@ -107,11 +118,15 @@ let record_in_jsonfiles
       (fun path hash acc ->
         incr json_element_id;
         JSON_Object
-          [ ( "key",
+          [
+            ( "key",
               JSON_Object
-                [ ("filename", JSON_String path);
-                  ("filehash_id", JSON_String (Int64.to_string hash)) ] );
-            ("id", JSON_Number (string_of_int !json_element_id)) ]
+                [
+                  ("filename", JSON_String path);
+                  ("filehash_id", JSON_String (Int64.to_string hash));
+                ] );
+            ("id", JSON_Number (string_of_int !json_element_id));
+          ]
         :: acc)
       symbols.sisr_filepaths
       []

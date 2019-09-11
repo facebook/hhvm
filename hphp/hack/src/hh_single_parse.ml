@@ -175,7 +175,8 @@ let () =
   let dump_nast = ref false in
   Arg.(
     parse
-      [ ("--hash", Set hash, "Get the decl level parsing hash of a given file ");
+      [
+        ("--hash", Set hash, "Get the decl level parsing hash of a given file ");
         ( "--sorted",
           Unit (fun () -> dumper := Hh_debug.dump_sorted_ast),
           "When using the `compare` parser, the (lexicographically) sort the "
@@ -196,7 +197,8 @@ let () =
         ( "--allow-malformed",
           Set allow_malformed,
           "Allow malformed files (such as for testing IDE services) [default: false]"
-        ) ])
+        );
+      ])
     (fun fn -> filename := fn)
     usage;
   let parse_function =

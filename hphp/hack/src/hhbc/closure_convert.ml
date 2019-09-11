@@ -764,7 +764,8 @@ let convert_meth_caller_to_func_ptr env st ann pc cls pf func =
            ( Aast.Cnormal,
              Tast_annotate.with_pos p (Id (p, "invariant")),
              [],
-             [ Tast_annotate.with_pos p
+             [
+               Tast_annotate.with_pos p
                @@ Call
                     ( Aast.Cnormal,
                       Tast_annotate.with_pos p (Id (p, "is_a")),
@@ -773,7 +774,8 @@ let convert_meth_caller_to_func_ptr env st ann pc cls pf func =
                       [] );
                Tast_annotate.with_pos
                  p
-                 (String ("object must be an instance of (" ^ cls ^ ")")) ],
+                 (String ("object must be an instance of (" ^ cls ^ ")"));
+             ],
              [] )
     in
     (* return $o-><func>(...$args); *)
@@ -806,8 +808,10 @@ let convert_meth_caller_to_func_ptr env st ann pc cls pf func =
         f_body =
           {
             fb_ast =
-              [ (p, Expr assert_invariant);
-                (p, Return (Some meth_caller_handle)) ];
+              [
+                (p, Expr assert_invariant);
+                (p, Return (Some meth_caller_handle));
+              ];
             fb_annotation = Tast.NoUnsafeBlocks;
           };
         f_fun_kind = Ast_defs.FSync;

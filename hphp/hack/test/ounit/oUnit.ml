@@ -455,10 +455,12 @@ let run_test_tt_main suite =
   let only_test = ref [] in
   Arg.parse
     (Arg.align
-       [ ("-verbose", Arg.Set verbose, " Run the test in verbose mode.");
+       [
+         ("-verbose", Arg.Set verbose, " Run the test in verbose mode.");
          ( "-only-test",
            Arg.String (fun str -> only_test := str :: !only_test),
-           "path Run only the selected test" ) ])
+           "path Run only the selected test" );
+       ])
     (fun x -> raise (Arg.Bad ("Bad argument : " ^ x)))
     ("usage: " ^ Sys.argv.(0) ^ " [-verbose] [-only-test path]*");
 

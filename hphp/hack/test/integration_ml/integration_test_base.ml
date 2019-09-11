@@ -708,9 +708,11 @@ let assert_coverage_levels loop_output expected =
     | _ -> fail "Expected coverage levels response"
   in
   let strings_of_stats =
-    [ "checked: " ^ string_of_int counts.checked;
+    [
+      "checked: " ^ string_of_int counts.checked;
       "partial: " ^ string_of_int counts.partial;
-      "unchecked: " ^ string_of_int counts.unchecked ]
+      "unchecked: " ^ string_of_int counts.unchecked;
+    ]
   in
   let results_as_string =
     List.map results ~f:coverage_levels_to_str_helper

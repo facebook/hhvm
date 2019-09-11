@@ -51,9 +51,11 @@ let test () =
   let env =
     Test.setup_disk
       env
-      [ (foo1_name, foo_contents);
+      [
+        (foo1_name, foo_contents);
         (foo2_name, foo_contents);
-        ("bar.php", bar_contents) ]
+        ("bar.php", bar_contents);
+      ]
   in
   Test.assert_env_errors env init_errors;
 

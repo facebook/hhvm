@@ -36,7 +36,8 @@ module Pos_asserter = Asserter.Make_asserter (struct
 end)
 
 let files =
-  [ ("foo.php", {|<?hh
+  [
+    ("foo.php", {|<?hh
     class Foo {}
   |});
     ("bar.php", {|<?hh
@@ -47,7 +48,8 @@ let files =
   |});
     ("qux.php", {|<?hh
     const int Qux = 5;
-  |}) ]
+  |});
+  ]
 
 let write_and_parse_test_files () =
   let files =
@@ -194,7 +196,9 @@ let test_get_sqlite_paths () =
 
 let () =
   Unit_test.run_all
-    [ ("test_get_pos", test_get_pos);
+    [
+      ("test_get_pos", test_get_pos);
       ("test_get_canon_name", test_get_canon_name);
       ("test_remove", test_remove);
-      ("test_get_sqlite_paths", test_get_sqlite_paths) ]
+      ("test_get_sqlite_paths", test_get_sqlite_paths);
+    ]

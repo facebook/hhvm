@@ -42,22 +42,26 @@ let test () =
   let temp_dir = Path.to_string temp_dir in
   (* A and B are identical classes with a function named "bar" returning int *)
   Test.save_state
-    [ ("A.php", x_contents "A" "int");
+    [
+      ("A.php", x_contents "A" "int");
       ("B.php", x_contents "B" "int");
       ("foo.php", foo_contents "A");
-      ("test.php", test_contents) ]
+      ("test.php", test_contents);
+    ]
     temp_dir;
 
   let env =
     Test.load_state
       temp_dir
       ~disk_state:
-        [ ("A.php", x_contents "A" "int");
+        [
+          ("A.php", x_contents "A" "int");
           (* No change to B yet! *)
-          ("B.php", x_contents "B" "int");
+            ("B.php", x_contents "B" "int");
           (* changes foo() return type to B *)
-          ("foo.php", foo_contents "B");
-          ("test.php", test_contents) ]
+            ("foo.php", foo_contents "B");
+          ("test.php", test_contents);
+        ]
       ~master_changes:["foo.php"]
       ~local_changes:[]
       ~use_precheked_files:true

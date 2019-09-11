@@ -84,17 +84,20 @@ let get_replace_pos_exn () =
 let autocomplete_result_to_json res =
   let func_param_to_json param =
     Hh_json.JSON_Object
-      [ ("name", Hh_json.JSON_String param.param_name);
+      [
+        ("name", Hh_json.JSON_String param.param_name);
         ("type", Hh_json.JSON_String param.param_ty);
-        ("variadic", Hh_json.JSON_Bool param.param_variadic) ]
+        ("variadic", Hh_json.JSON_Bool param.param_variadic);
+      ]
   in
   let func_details_to_json details =
     match details with
     | Some fd ->
       Hh_json.JSON_Object
-        [ ("min_arity", Hh_json.int_ fd.min_arity);
+        [
+          ("min_arity", Hh_json.int_ fd.min_arity);
           ("return_type", Hh_json.JSON_String fd.return_ty);
-          ("params", Hh_json.JSON_Array (List.map fd.params func_param_to_json))
+          ("params", Hh_json.JSON_Array (List.map fd.params func_param_to_json));
         ]
     | None -> Hh_json.JSON_Null
   in
@@ -102,13 +105,15 @@ let autocomplete_result_to_json res =
   let pos = res.res_pos in
   let ty = res.res_ty in
   Hh_json.JSON_Object
-    [ ("name", Hh_json.JSON_String name);
+    [
+      ("name", Hh_json.JSON_String name);
       ("type", Hh_json.JSON_String ty);
       ("pos", Pos.json pos);
       ("func_details", func_details_to_json res.func_details);
-      ("expected_ty", Hh_json.JSON_Bool false)
-      (* legacy field, left here in case clients need it *)
-     ]
+      ("expected_ty", Hh_json.JSON_Bool false);
+        (* legacy field, left here in case clients need it *)
+      
+    ]
 
 let get_partial_result name ty kind class_opt =
   let base_class = Option.map ~f:(fun class_ -> Cls.name class_) class_opt in
@@ -477,7 +482,8 @@ let compute_complete_global
     (* This will give a good experience only for codebases where users rarely   *)
     (* define their own namespaces...                                           *)
     let standard_namespaces =
-      [ "C";
+      [
+        "C";
         "Vec";
         "Dict";
         "Str";
@@ -486,15 +492,18 @@ let compute_complete_global
         "PseudoRandom";
         "SecureRandom";
         "PHP";
-        "JS" ]
+        "JS";
+      ]
     in
     let auto_namespace_map = GlobalOptions.po_auto_namespace_map tcopt in
     let all_standard_namespaces =
       List.concat_map standard_namespaces ~f:(fun ns ->
-          [ Printf.sprintf "%s" ns;
+          [
+            Printf.sprintf "%s" ns;
             Printf.sprintf "%s\\fb" ns;
             Printf.sprintf "HH\\Lib\\%s" ns;
-            Printf.sprintf "HH\\Lib\\%s\\fb" ns ])
+            Printf.sprintf "HH\\Lib\\%s\\fb" ns;
+          ])
     in
     let all_aliased_namespaces =
       List.concat_map auto_namespace_map ~f:(fun (alias, fully_qualified) ->

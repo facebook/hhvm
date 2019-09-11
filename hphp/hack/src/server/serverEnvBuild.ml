@@ -23,18 +23,23 @@ let git_dirname = J.strlist ["dirname"; ".git"]
 let svn_dirname = J.strlist ["dirname"; ".svn"]
 
 let watchman_expression_terms =
-  [ J.strlist ["type"; "f"];
+  [
+    J.strlist ["type"; "f"];
     J.pred "anyof"
-    @@ [ J.strlist ["name"; ".hhconfig"];
+    @@ [
+         J.strlist ["name"; ".hhconfig"];
          J.pred "anyof"
-         @@ [ J.strlist ["suffix"; "php"];
+         @@ [
+              J.strlist ["suffix"; "php"];
               J.strlist ["suffix"; "phpt"];
               J.strlist ["suffix"; "hack"];
               J.strlist ["suffix"; "hck"];
               J.strlist ["suffix"; "hh"];
               J.strlist ["suffix"; "hhi"];
-              J.strlist ["suffix"; "xhp"] ] ];
-    J.pred "not" @@ [J.pred "anyof" @@ [hg_dirname; git_dirname; svn_dirname]]
+              J.strlist ["suffix"; "xhp"];
+            ];
+       ];
+    J.pred "not" @@ [J.pred "anyof" @@ [hg_dirname; git_dirname; svn_dirname]];
   ]
 
 type changes_mode =

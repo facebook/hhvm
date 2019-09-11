@@ -94,7 +94,8 @@ let to_json
     } =
   let (line, scol, ecol) = Pos.info_pos pos in
   Hh_json.JSON_Object
-    [ ("descr", Hh_json.JSON_String message);
+    [
+      ("descr", Hh_json.JSON_String message);
       ("severity", Hh_json.JSON_String (string_of_severity severity));
       ("path", Hh_json.JSON_String (Pos.filename pos));
       ("line", Hh_json.int_ line);
@@ -103,7 +104,8 @@ let to_json
       ("code", Hh_json.int_ code);
       ("bypass_changed_lines", Hh_json.JSON_Bool bypass_changed_lines);
       ("original", Hh_json.JSON_String original);
-      ("replacement", Hh_json.JSON_String replacement) ]
+      ("replacement", Hh_json.JSON_String replacement);
+    ]
 
 let do_ f =
   let list_copy = !lint_list in

@@ -46,10 +46,12 @@ let emit_fatal_program ~ignore_message op pos message =
   let body =
     Emit_body.make_body
       (gather
-         [ optional
+         [
+           optional
              ignore_message
              [instr (IComment "Ignore Fatal Parse message")];
-           Emit_fatal.emit_fatal op pos message ])
+           Emit_fatal.emit_fatal op pos message;
+         ])
       [] (* decl_vars *)
       false (*is_memoize_wrapper*)
       false (*is_memoize_wrapper_lsb*)

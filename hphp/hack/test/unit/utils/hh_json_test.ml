@@ -17,13 +17,15 @@ let throws f =
   with _ -> true
 
 let test_escape_unescape_data =
-  [ "newline\n";
+  [
+    "newline\n";
     "\"quoted string\"";
     "tab\t";
     "carriage return\r";
     "backslash\\";
     "magic char" ^ String.make 1 (Char.of_int_exn 8);
-    "magic_char_with_hexadecimal_digit" ^ String.make 1 (Char.of_int_exn 26) ]
+    "magic_char_with_hexadecimal_digit" ^ String.make 1 (Char.of_int_exn 26);
+  ]
 
 let test_escape_unescape () =
   List.for_all test_escape_unescape_data (fun s ->
@@ -376,7 +378,8 @@ let test_hex_escape () =
   true
 
 let tests =
-  [ ("test_escape_unescape", test_escape_unescape);
+  [
+    ("test_escape_unescape", test_escape_unescape);
     ("test_empty_string", test_empty_string);
     ("test_whitespace_string", test_whitespace_string);
     ("test_access_string", test_access_string);
@@ -393,6 +396,7 @@ let tests =
     ( "test_access_3_keys_one_object_wrong_type_middle",
       test_access_3_keys_one_object_wrong_type_middle );
     ("test_truncate", test_truncate);
-    ("test_hex_escape", test_hex_escape) ]
+    ("test_hex_escape", test_hex_escape);
+  ]
 
 let () = Unit_test.run_all tests

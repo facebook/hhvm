@@ -51,5 +51,7 @@ let kind trivia = trivia.kind
 let to_json trivia =
   Hh_json.(
     JSON_Object
-      [ ("kind", JSON_String (to_string trivia.kind));
-        ("width", int_ trivia.width) ])
+      [
+        ("kind", JSON_String (to_string trivia.kind));
+        ("width", int_ trivia.width);
+      ])

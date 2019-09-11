@@ -170,10 +170,12 @@ let process_untrusted_mode config =
   | Some s ->
     if bool_of_string s then
       let blacklist =
-        [ (* out of tree file access*)
-          "extra_paths";
+        [
+          (* out of tree file access*)
+            "extra_paths";
           (* potential resource abuse *)
-          "language_feature_logging" ]
+            "language_feature_logging";
+        ]
       in
       let prefix_blacklist =
         [(* potential resource abuse *) "gc_"; "sharedmem_"]

@@ -212,10 +212,14 @@ let rec array_get
               log_types
                 p
                 env
-                [ Log_head
+                [
+                  Log_head
                     ( "array_get/type_index",
-                      [ Log_type ("ty_have", ty_have);
-                        Log_type ("ty_expect", ty_expect) ] ) ]));
+                      [
+                        Log_type ("ty_have", ty_have);
+                        Log_type ("ty_expect", ty_expect);
+                      ] );
+                ]));
 
         (* coerce if possible *)
         match

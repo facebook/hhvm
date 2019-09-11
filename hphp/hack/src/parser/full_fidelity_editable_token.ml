@@ -76,10 +76,12 @@ let full_text token = leading_text token ^ text token ^ trailing_text token
 let to_json token =
   Hh_json.(
     JSON_Object
-      [ ("kind", JSON_String (TokenKind.to_string token.kind));
+      [
+        ("kind", JSON_String (TokenKind.to_string token.kind));
         ("text", JSON_String token.text);
         ("leading", JSON_Array (List.map Trivia.to_json token.leading));
-        ("trailing", JSON_Array (List.map Trivia.to_json token.trailing)) ])
+        ("trailing", JSON_Array (List.map Trivia.to_json token.trailing));
+      ])
 
 let source_text _ =
   raise (Invalid_argument "Editable token doesn't support source_text")

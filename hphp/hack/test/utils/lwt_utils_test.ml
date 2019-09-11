@@ -142,11 +142,12 @@ let wrap_lwt_test (test : string * (unit -> bool Lwt.t)) :
   let wrapped_test () : bool Lwt.t =
     let%lwt result =
       Lwt.pick
-        [ f ();
+        [
+          f ();
           (let timeout = 5.0 in
            let%lwt () = Lwt_unix.sleep timeout in
            failwith
-             (Printf.sprintf "Test %s timed out after %f seconds" name timeout))
+             (Printf.sprintf "Test %s timed out after %f seconds" name timeout));
         ]
     in
     Lwt.return result
@@ -157,10 +158,12 @@ let () =
   Unit_test.run_all
   @@ List.map
        wrap_lwt_test
-       [ ("test Lwt_utils.exec_checked basic", test_exec_checked_basic);
+       [
+         ("test Lwt_utils.exec_checked basic", test_exec_checked_basic);
          ("test Lwt_utils.exec_checked failing", test_exec_checked_failing);
          ( "test Lwt_utils.exec_checked big payload",
            test_exec_checked_big_payload );
          ("test Lwt_message_queue.t basic", test_lwt_message_queue_basic);
          ("test Lwt_message_queue.t close", test_lwt_message_queue_close);
-         ("test Lwt_message_queue.t length", test_lwt_message_queue_length) ]
+         ("test Lwt_message_queue.t length", test_lwt_message_queue_length);
+       ]

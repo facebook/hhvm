@@ -47,9 +47,11 @@ let test () =
         {
           default_loop_input with
           disk_changes =
-            [ ("foo.php", foo_contents);
+            [
+              ("foo.php", foo_contents);
               ("qux.php", qux_contents);
-              ("bar.php", bar_contents) ];
+              ("bar.php", bar_contents);
+            ];
         })
   in
   if not loop_output.did_read_disk_changes then

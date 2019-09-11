@@ -12,7 +12,8 @@ open Hh_core
 module Test = Integration_test_base
 
 let files =
-  [ ("C", "class C {}");
+  [
+    ("C", "class C {}");
     ("D", "class D extends C {}");
     ("E", "class E extends D {}");
     ("F", "trait F { require extends E; }");
@@ -24,7 +25,8 @@ let files =
     ("L", "trait L { require implements K; }");
     ("M", "class :M {}");
     ("N", "class :N { attribute :M; }");
-    ("Unrelated", "class Unrelated {}") ]
+    ("Unrelated", "class Unrelated {}");
+  ]
   |> List.map ~f:(fun (name, contents) -> (name ^ ".php", "<?hh\n" ^ contents))
 
 let test () =
@@ -47,7 +49,8 @@ let test () =
   let expected_dependent_classes =
     List.sort
       ~cmp:String.compare
-      [ "\\C";
+      [
+        "\\C";
         "\\D";
         "\\E";
         "\\F";
@@ -58,7 +61,8 @@ let test () =
         "\\K";
         "\\L";
         "\\:M";
-        "\\:N" ]
+        "\\:N";
+      ]
   in
   List.iter (SSet.elements dependent_classes) ~f:print_endline;
 

@@ -13,9 +13,11 @@ open Instruction_sequence
 let memoize_suffix = "$memoize_impl"
 
 let getmemokeyl local index name =
-  [ instr_getmemokeyl (Local.Named name);
+  [
+    instr_getmemokeyl (Local.Named name);
     instr_setl (Local.Unnamed (local + index));
-    instr_popc ]
+    instr_popc;
+  ]
 
 let param_code_sets params local =
   gather

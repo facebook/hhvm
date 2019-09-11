@@ -375,9 +375,11 @@ let rewrite_foreach node =
       (* Putting it all together *)
       let foreach_replacement_syntax =
         make_compound_statement_syntax
-          [ iterator_assignment_syntax;
+          [
+            iterator_assignment_syntax;
             zero_index_assignment_syntax;
-            while_syntax ]
+            while_syntax;
+          ]
       in
       let new_iterator_variables =
         iterator_variable_string :: iterator_index_string :: iterator_variables
@@ -583,11 +585,13 @@ let make_coroutine_switch label_count =
 
 let add_switch (next_label, body) =
   make_compound_statement_syntax
-    [ make_coroutine_switch (next_label - 1);
+    [
+      make_coroutine_switch (next_label - 1);
       make_label_declaration_syntax (StateLabel 0);
       body;
       make_label_declaration_syntax ErrorStateLabel;
-      throw_unimplemented_syntax "A completed coroutine was resumed." ]
+      throw_unimplemented_syntax "A completed coroutine was resumed.";
+    ]
 
 (**
  * Recurively unnests compound_statements that are *direct* children of another
@@ -668,9 +672,11 @@ let make_closure_lambda_signature_from_method method_node context function_type
   *)
   make_lambda_signature_from_method_syntax
     method_node
-    [ make_closure_parameter_syntax context;
+    [
+      make_closure_parameter_syntax context;
       coroutine_data_parameter_syntax;
-      nullable_exception_parameter_syntax ]
+      nullable_exception_parameter_syntax;
+    ]
     (make_coroutine_result_type_syntax function_type)
 
 let make_outer_param outer_variable =

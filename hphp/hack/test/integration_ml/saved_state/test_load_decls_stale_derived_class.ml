@@ -52,12 +52,14 @@ function child_bar_user(Child $c): int {
 }"
 
 let init_disk_state =
-  [ ("base.php", base_contents "public");
+  [
+    ("base.php", base_contents "public");
     ("base_foo_user.php", base_foo_user_contents);
     ("base_bar_user.php", base_bar_user_contents);
     ("child.php", child_contents);
     ("child_foo_user.php", child_foo_user_contents "");
-    ("child_bar_user.php", child_bar_user_contents) ]
+    ("child_bar_user.php", child_bar_user_contents);
+  ]
 
 let hot_classes_file hot_classes =
   ( "hack/hh_hot_classes.json",

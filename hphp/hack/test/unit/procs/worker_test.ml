@@ -88,11 +88,13 @@ let test_simple_worker_spawn heap_handle () =
   | worker :: _ -> call_and_verify_result worker (fun () -> "hello") () "hello"
 
 let make_tests handle =
-  [ ("simple_worker_spawn_test", test_simple_worker_spawn handle);
+  [
+    ("simple_worker_spawn_test", test_simple_worker_spawn handle);
     ( "worker_uncaught_exception_exits_with_2",
       test_worker_uncaught_exception_exits_with_2 handle );
     ( "wrapped_worker_with_custom_exit",
-      test_wrapped_worker_with_custom_exit handle ) ]
+      test_wrapped_worker_with_custom_exit handle );
+  ]
 
 let () =
   Daemon.check_entry_point ();

@@ -35,9 +35,11 @@ let test () =
   let env =
     Test.setup_disk
       env
-      [ (foo_name, foo_contents);
+      [
+        (foo_name, foo_contents);
         (bar_name 1, bar_contents 1);
-        (bar_name 2, bar_contents 2) ]
+        (bar_name 2, bar_contents 2);
+      ]
   in
   (* Prepare rechecking of all files *)
   let workers = None in

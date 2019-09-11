@@ -131,15 +131,17 @@ let run_test ?(stop_server_in_teardown = true) config test_case =
     let bin_dir = Tempfile.mkdtemp () in
     let hh_server_dir = Path.parent config.hh_server in
     let test_env =
-      [ ("HH_TEST_MODE", "1");
+      [
+        ("HH_TEST_MODE", "1");
         (* ("HH_TMPDIR", (Path.to_string hh_tmpdir)); *)
-        ( "PATH",
-          Printf.sprintf
-            "'%s:%s:/bin:/usr/bin:/usr/local/bin"
-            (Path.to_string hh_server_dir)
-            (Path.to_string bin_dir) );
+          ( "PATH",
+            Printf.sprintf
+              "'%s:%s:/bin:/usr/bin:/usr/local/bin"
+              (Path.to_string hh_server_dir)
+              (Path.to_string bin_dir) );
         ("OCAMLRUNPARAM", "b");
-        ("HH_LOCALCONF_PATH", Path.to_string repo_dir) ]
+        ("HH_LOCALCONF_PATH", Path.to_string repo_dir);
+      ]
     in
     let test_env =
       List.map test_env ~f:(fun (k, v) -> Printf.sprintf "%s=%s" k v)

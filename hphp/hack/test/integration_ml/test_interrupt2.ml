@@ -45,9 +45,11 @@ let test () =
   let env =
     Test.setup_disk
       env
-      [ (foo_name, foo_contents "int");
+      [
+        (foo_name, foo_contents "int");
         (bar_name 1, bar_contents 1);
-        (bar_name 2, bar_contents 2) ]
+        (bar_name 2, bar_contents 2);
+      ]
   in
   Test.assert_no_errors env;
 

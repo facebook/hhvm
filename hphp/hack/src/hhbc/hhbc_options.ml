@@ -252,7 +252,8 @@ let to_string o =
   in
   String.concat
     ~sep:"\n"
-    [ Printf.sprintf "constant_folding: %B" @@ constant_folding o;
+    [
+      Printf.sprintf "constant_folding: %B" @@ constant_folding o;
       Printf.sprintf "optimize_null_check: %B" @@ optimize_null_check o;
       Printf.sprintf "max_array_elem_size_on_the_stack: %d"
       @@ max_array_elem_size_on_the_stack o;
@@ -313,7 +314,8 @@ let to_string o =
       Printf.sprintf "const_static_props: %B" @@ const_static_props o;
       Printf.sprintf "abstract_static_props: %B" @@ abstract_static_props o;
       Printf.sprintf "disable_unset_class_const: %B"
-      @@ disable_unset_class_const o ]
+      @@ disable_unset_class_const o;
+    ]
 
 let as_bool s =
   match String.lowercase s with
@@ -520,7 +522,8 @@ let set_value name get set config opts =
     raise (Arg.Bad ("Option " ^ name ^ ": error parsing JSON"))
 
 let value_setters =
-  [ ( set_value "hhvm.aliased_namespaces" get_value_from_config_kv_list
+  [
+    ( set_value "hhvm.aliased_namespaces" get_value_from_config_kv_list
     @@ (fun opts v -> { opts with option_aliased_namespaces = Some v }) );
     ( set_value "hack.compiler.constant_folding" get_value_from_config_int
     @@ (fun opts v -> { opts with option_constant_folding = v = 1 }) );
@@ -676,7 +679,8 @@ let value_setters =
         "hhvm.hack.lang.disable_unset_class_const"
         get_value_from_config_int
     @@ (fun opts v -> { opts with option_disable_unset_class_const = v = 1 })
-    ) ]
+    );
+  ]
 
 let extract_config_options_from_json ~init config_json =
   match config_json with

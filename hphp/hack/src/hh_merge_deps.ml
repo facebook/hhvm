@@ -55,13 +55,15 @@ let () =
   let (db_name : string ref) = ref "" in
   let options =
     Arg.align
-      [ ( "--ignore-hh-version",
+      [
+        ( "--ignore-hh-version",
           Arg.Bool (fun b -> ignore_hh_version := b),
           " Indicates whether to ignore the Hack server version" );
         ( "--output-filename",
           Arg.String (fun s -> db_name := s),
           " The name of the SQLite file to save the merged dependency table into"
-        ) ]
+        );
+      ]
   in
   let usage =
     "Usage: "

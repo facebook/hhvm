@@ -26,13 +26,15 @@ let sub_string (p : Pos.Map.key) (env : env) (ty : locl ty) : env =
   let r = Reason.Rwitness p in
   let (env, formatter_tyvar) = Env.fresh_invariant_type_var env p in
   let tyl =
-    [ MakeType.arraykey r;
+    [
+      MakeType.arraykey r;
       MakeType.bool r;
       MakeType.float r;
       MakeType.resource r;
       MakeType.dynamic r;
       MakeType.class_type r SN.Classes.cFormatString [formatter_tyvar];
-      MakeType.class_type r SN.Classes.cHHFormatString [formatter_tyvar] ]
+      MakeType.class_type r SN.Classes.cHHFormatString [formatter_tyvar];
+    ]
   in
   let stringish =
     (Reason.Rwitness p, Tclass ((p, SN.Classes.cStringish), Nonexact, []))

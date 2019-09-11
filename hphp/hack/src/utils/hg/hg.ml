@@ -166,14 +166,16 @@ module Hg_actual = struct
     else
       let process =
         exec_hg
-          [ "status";
+          [
+            "status";
             "-n";
             "--rev";
             rev_string start;
             "--rev";
             rev_string finish;
             "--cwd";
-            repo ]
+            repo;
+          ]
       in
       Future.make process Sys_utils.split_lines
 

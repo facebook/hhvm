@@ -13,23 +13,28 @@ module MethodJumps = ServerCommandTypes.Method_jumps
 let pos_to_json pos =
   let (line, start, end_) = Pos.info_pos pos in
   Hh_json.JSON_Object
-    [ ("file", Hh_json.JSON_String (Pos.filename pos));
+    [
+      ("file", Hh_json.JSON_String (Pos.filename pos));
       (* we can't use Pos.json *)
-      ("line", Hh_json.int_ line);
+        ("line", Hh_json.int_ line);
       ("char_start", Hh_json.int_ start);
-      ("char_end", Hh_json.int_ end_) ]
+      ("char_end", Hh_json.int_ end_);
+    ]
 
 let cls_or_mthd_to_json name pos p_name =
   Hh_json.JSON_Object
-    [ ("name", Hh_json.JSON_String (Utils.strip_ns name));
+    [
+      ("name", Hh_json.JSON_String (Utils.strip_ns name));
       ("pos", pos_to_json pos);
-      ("parent_name", Hh_json.JSON_String (Utils.strip_ns p_name)) ]
+      ("parent_name", Hh_json.JSON_String (Utils.strip_ns p_name));
+    ]
 
 let to_json input =
   let entries =
     List.map input (fun res ->
         Hh_json.JSON_Object
-          [ ( "origin",
+          [
+            ( "origin",
               cls_or_mthd_to_json
                 res.MethodJumps.orig_name
                 res.MethodJumps.orig_pos
@@ -38,7 +43,8 @@ let to_json input =
               cls_or_mthd_to_json
                 res.MethodJumps.dest_name
                 res.MethodJumps.dest_pos
-                res.MethodJumps.dest_p_name ) ])
+                res.MethodJumps.dest_p_name );
+          ])
   in
   Hh_json.JSON_Array entries
 

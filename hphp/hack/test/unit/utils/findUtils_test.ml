@@ -22,10 +22,12 @@ let test_no_match () =
   not (FindUtils.has_ancestor "abc/def/g/hhi/foo.php" "experimental")
 
 let tests =
-  [ ("empty_path", test_empty_path);
+  [
+    ("empty_path", test_empty_path);
     ("no_parent", test_no_parent);
     ("parent_matches", test_parent_matches);
     ("grandparent_matches", test_grandparent_matches);
-    ("no_match", test_no_match) ]
+    ("no_match", test_no_match);
+  ]
 
 let () = Unit_test.run_all tests

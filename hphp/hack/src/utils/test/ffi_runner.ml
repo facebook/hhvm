@@ -156,7 +156,8 @@ let run_5 data =
   List.map cmp inputs |> all
 
 let data_ =
-  [ "";
+  [
+    "";
     "\n";
     "\n\n";
     "12345";
@@ -172,7 +173,8 @@ let data_ =
     "\r\n123\r\n123\r\n";
     "\r\r\n";
     "\r\n\r\n";
-    "\n\r\n\r\n" ]
+    "\n\r\n\r\n";
+  ]
 
 let data = String.concat "" data_ :: data_
 

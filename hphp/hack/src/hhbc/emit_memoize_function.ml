@@ -30,13 +30,16 @@ let make_memoize_function_no_params_code
       make_fcall_args 0
   in
   gather
-    [ deprecation_body;
+    [
+      deprecation_body;
       ( if is_async then
         gather
-          [ instr_memoget_eager notfound suspended_get None;
+          [
+            instr_memoget_eager notfound suspended_get None;
             instr_retc;
             instr_label suspended_get;
-            instr_retc_suspended ]
+            instr_retc_suspended;
+          ]
       else
         gather [instr_memoget notfound None; instr_retc] );
       instr_label notfound;
@@ -47,12 +50,15 @@ let make_memoize_function_no_params_code
       instr_memoset None;
       ( if is_async then
         gather
-          [ instr_retc_suspended;
+          [
+            instr_retc_suspended;
             instr_label eager_set;
             instr_memoset_eager None;
-            instr_retc ]
+            instr_retc;
+          ]
       else
-        gather [instr_retc] ) ]
+        gather [instr_retc] );
+    ]
 
 let make_memoize_function_with_params_code
     ~pos
@@ -105,7 +111,8 @@ let make_memoize_function_with_params_code
   in
   let param_count = param_count + add_reified in
   gather
-    [ begin_label;
+    [
+      begin_label;
       Emit_body.emit_method_prolog
         ~env
         ~pos
@@ -117,17 +124,21 @@ let make_memoize_function_with_params_code
       reified_memokeym;
       ( if is_async then
         gather
-          [ instr_memoget_eager
+          [
+            instr_memoget_eager
               notfound
               suspended_get
               (Some (first_local, param_count));
             instr_retc;
             instr_label suspended_get;
-            instr_retc_suspended ]
+            instr_retc_suspended;
+          ]
       else
         gather
-          [instr_memoget notfound (Some (first_local, param_count)); instr_retc]
-      );
+          [
+            instr_memoget notfound (Some (first_local, param_count));
+            instr_retc;
+          ] );
       instr_label notfound;
       instr_nulluninit;
       instr_nulluninit;
@@ -138,13 +149,16 @@ let make_memoize_function_with_params_code
       instr_memoset (Some (first_local, param_count));
       ( if is_async then
         gather
-          [ instr_retc_suspended;
+          [
+            instr_retc_suspended;
             instr_label eager_set;
             instr_memoset_eager (Some (first_local, param_count));
-            instr_retc ]
+            instr_retc;
+          ]
       else
         gather [instr_retc] );
-      default_value_setters ]
+      default_value_setters;
+    ]
 
 let make_memoize_function_code
     ~pos

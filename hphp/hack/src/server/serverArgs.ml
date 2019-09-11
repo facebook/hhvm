@@ -187,7 +187,8 @@ let parse_options () =
   let set_from s = from := s in
   let set_lru_cache_directory s = lru_cache_directory := Some s in
   let options =
-    [ ("--ai", Arg.String set_ai, Messages.ai);
+    [
+      ("--ai", Arg.String set_ai, Messages.ai);
       ("--allow-non-opt-build", Arg.Set allow_non_opt_build, "");
       ("--check", Arg.Set check_mode, Messages.check);
       ( "--config",
@@ -248,7 +249,8 @@ let parse_options () =
         Arg.String set_write_symbol_info,
         Messages.write_symbol_info );
       ("-d", Arg.Set should_detach, Messages.daemon);
-      ("-s", Arg.String set_save_state, Messages.save_state) ]
+      ("-s", Arg.String set_save_state, Messages.save_state);
+    ]
   in
   let options = Arg.align options in
   Arg.parse options (fun s -> root := s) usage;
@@ -542,7 +544,8 @@ let to_string
            ~f:(fun (key, value) -> Printf.sprintf "%s=%s" key value)
            config )
   in
-  [ "ServerArgs.options({";
+  [
+    "ServerArgs.options({";
     "ai_mode: ";
     ai_mode_str;
     ", ";
@@ -625,5 +628,6 @@ let to_string
     "write_symbol_info: ";
     write_symbol_info_str;
     ", ";
-    "})" ]
+    "})";
+  ]
   |> String.concat ~sep:""

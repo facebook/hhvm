@@ -3,7 +3,8 @@ open ServerEnv
 module Test = Integration_test_base
 
 let init_disk_changes =
-  [ ( "base.php",
+  [
+    ( "base.php",
       "<?hh // strict
 abstract class Base {
   public static function meth(): void {}
@@ -24,10 +25,12 @@ class AChild extends ParentClass {
   private function __meth(): void {}
 }
 "
-    ) ]
+    );
+  ]
 
 let next_disk_changes =
-  [ ("base.php", "<?hh // strict
+  [
+    ("base.php", "<?hh // strict
 abstract class Base {
 }
 ");
@@ -43,7 +46,8 @@ class AChild extends ParentClass {
   private function meth(): void {}
 }
 "
-    ) ]
+    );
+  ]
 
 let errors_to_string errors =
   List.fold_left

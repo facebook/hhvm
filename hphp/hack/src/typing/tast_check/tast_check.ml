@@ -18,7 +18,8 @@ let visitor opts =
   let handlers = List.map makers (( |> ) opts) |> List.filter_opt in
   Tast_visitor.iter_with
     ( handlers
-    @ [ Shape_field_check.handler;
+    @ [
+        Shape_field_check.handler;
         String_cast_check.handler;
         Tautology_check.handler;
         Enforceable_hint_check.handler;
@@ -54,7 +55,8 @@ let visitor opts =
         Static_method_call_check.handler;
         Unresolved_type_variable_check.handler;
         Invalid_arraykey_constraint_check.handler;
-        Type_const_check.handler ] )
+        Type_const_check.handler;
+      ] )
 
 let program opts = (visitor opts)#go
 

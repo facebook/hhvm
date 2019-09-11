@@ -82,7 +82,8 @@ function test_mypair(MyPair<A> $v): MyPair<A> {
 "
 
 let test_mypair_cases =
-  [ (("test_mypair.php", 6, 8), "MyPair<A>");
+  [
+    (("test_mypair.php", 6, 8), "MyPair<A>");
     (("test_mypair.php", 6, 15), "(function(): A)");
     (("test_mypair.php", 6, 19), "A");
     (("test_mypair.php", 8, 4), "MyPair<A>");
@@ -90,7 +91,8 @@ let test_mypair_cases =
     (("test_mypair.php", 10, 14), "A");
     (("test_mypair.php", 12, 10), "(function(MyPair<A> $v): MyPair<A>)");
     (("test_mypair.php", 12, 21), "MyPair<A>");
-    (("test_mypair.php", 12, 22), "MyPair<A>") ]
+    (("test_mypair.php", 12, 22), "MyPair<A>");
+  ]
 
 let loop_assignment =
   "<?hh // strict
@@ -112,10 +114,12 @@ function loop_assignment(): void {
 "
 
 let loop_assignment_cases =
-  [ (("loop_assignment.php", 5, 4), "int");
+  [
+    (("loop_assignment.php", 5, 4), "int");
     (("loop_assignment.php", 8, 11), "(int | string)");
     (("loop_assignment.php", 11, 7), "string");
-    (("loop_assignment.php", 14, 9), "(int | string)") ]
+    (("loop_assignment.php", 14, 9), "(int | string)");
+  ]
 
 let lambda1 =
   "<?hh // strict
@@ -131,14 +135,16 @@ function test_lambda1(): void {
 "
 
 let lambda_cases =
-  [ (("lambda1.php", 4, 3), "[fun]");
+  [
+    (("lambda1.php", 4, 3), "[fun]");
     (("lambda1.php", 4, 29), "string");
     (("lambda1.php", 6, 3), "string");
     (("lambda1.php", 6, 8), "[fun]");
     (("lambda1.php", 6, 11), "int");
     (("lambda1.php", 8, 3), "string");
     (("lambda1.php", 8, 8), "[fun]");
-    (("lambda1.php", 8, 11), "string") ]
+    (("lambda1.php", 8, 11), "string");
+  ]
 
 let callback =
   "<?hh // strict
@@ -151,9 +157,11 @@ function test_callback((function(int): string) $cb): void {
 "
 
 let callback_cases =
-  [ (("callback.php", 3, 3), "(function(int): string)");
+  [
+    (("callback.php", 3, 3), "(function(int): string)");
     (("callback.php", 5, 3), "(function(int): string)");
-    (("callback.php", 5, 8), "string") ]
+    (("callback.php", 5, 8), "string");
+  ]
 
 let nullthrows =
   "<?hh // strict
@@ -184,9 +192,11 @@ function foo() : vec<?int> {
 "
 
 let nullvec_cases =
-  [ (("nullvec.php", 4, 3), "vec<?int>");
+  [
+    (("nullvec.php", 4, 3), "vec<?int>");
     (("nullvec.php", 7, 3), "vec<?(int | string)>");
-    (("nullvec.php", 10, 3), "vec<null>") ]
+    (("nullvec.php", 10, 3), "vec<null>");
+  ]
 
 let curried =
   "<?hh // strict
@@ -201,10 +211,12 @@ function test_curried(bool $cond): void {
 "
 
 let curried_cases =
-  [ ( ("curried.php", 6, 3),
+  [
+    ( ("curried.php", 6, 3),
       "(function(): (function(int): (function(bool): string)))" );
     ( ("curried.php", 7, 3),
-      "(function(): (function(int): (function(bool): string)))" ) ]
+      "(function(): (function(int): (function(bool): string)))" );
+  ]
 
 let multiple_type =
   "<?hh // strict
@@ -218,8 +230,10 @@ function test_multiple_type(C1 $c1, C2 $c2, bool $cond): arraykey {
 "
 
 let multiple_type_cases =
-  [ (("multiple_type.php", 6, 10), "(C1 | C2)");
-    (("multiple_type.php", 6, 14), "(function(): (int | string))") ]
+  [
+    (("multiple_type.php", 6, 10), "(C1 | C2)");
+    (("multiple_type.php", 6, 14), "(function(): (int | string))");
+  ]
 
 let lambda_param =
   "<?hh // strict
@@ -233,10 +247,12 @@ function lambda_param(): void {
 "
 
 let lambda_param_cases =
-  [ (("lambda_param.php", 4, 9), "_");
+  [
+    (("lambda_param.php", 4, 9), "_");
     (("lambda_param.php", 6, 14), "int");
     (("lambda_param.php", 4, 12), "[fun]");
-    (("lambda_param.php", 6, 17), "(function(int $x): num)") ]
+    (("lambda_param.php", 6, 17), "(function(int $x): num)");
+  ]
 
 let class_id =
   "<?hh // strict
@@ -256,11 +272,13 @@ function class_id(): void {
 "
 
 let class_id_cases =
-  [ (("class_id.php", 3, 12), "A");
+  [
+    (("class_id.php", 3, 12), "A");
     (("class_id.php", 5, 3), "A");
     (("class_id.php", 7, 3), "A");
     (("class_id.php", 9, 3), "A");
-    (("class_id.php", 12, 4), "classname<A>") ]
+    (("class_id.php", 12, 4), "classname<A>");
+  ]
 
 let dynamic_view =
   "<?hh
@@ -286,16 +304,19 @@ function foo($x) : void {
 "
 
 let dynamic_view_cases =
-  [ (("dynamic_view.php", 5, 14), "dynamic");
+  [
+    (("dynamic_view.php", 5, 14), "dynamic");
     (("dynamic_view.php", 7, 3), "num");
     (("dynamic_view.php", 9, 3), "dynamic");
     (("dynamic_view.php", 11, 3), "dynamic");
     (("dynamic_view.php", 13, 3), "dynamic");
     (("dynamic_view.php", 15, 3), "string");
-    (("dynamic_view.php", 17, 3), "int") ]
+    (("dynamic_view.php", 17, 3), "int");
+  ]
 
 let files =
-  [ ("id.php", id);
+  [
+    ("id.php", id);
     ("A.php", class_A);
     ("MyPair.php", mypair);
     ("test_mypair.php", test_mypair);
@@ -308,7 +329,8 @@ let files =
     ("multiple_type.php", multiple_type);
     ("lambda_param.php", lambda_param);
     ("class_id.php", class_id);
-    ("dynamic_view.php", dynamic_view) ]
+    ("dynamic_view.php", dynamic_view);
+  ]
 
 let cases =
   id_cases

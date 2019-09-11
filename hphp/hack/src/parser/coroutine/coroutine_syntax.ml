@@ -884,9 +884,11 @@ let state_machine_variable_name_syntax =
 let make_state_machine_parameter_syntax context function_type =
   let state_machine_type_syntax =
     make_functional_type_syntax
-      [ make_closure_type_syntax context;
+      [
+        make_closure_type_syntax context;
         mixed_syntax;
-        nullable_exception_type_syntax ]
+        nullable_exception_type_syntax;
+      ]
       (make_coroutine_result_type_syntax function_type)
   in
   make_parameter_declaration_syntax
@@ -949,7 +951,9 @@ let current_name_syntax = make_name_syntax "current"
 let next_name_syntax = make_name_syntax "next"
 
 let make_new_coroutine_foreach_helper_object collection =
-  make_object_creation_expression_syntax "\\CoroutineForeachHelper" [collection]
+  make_object_creation_expression_syntax
+    "\\CoroutineForeachHelper"
+    [collection]
 
 (**
  * $saved_...

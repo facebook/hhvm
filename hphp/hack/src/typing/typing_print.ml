@@ -171,9 +171,11 @@ module Full = struct
 
   let delimited_list sep left_delimiter f l right_delimiter =
     Span
-      [ text left_delimiter;
+      [
+        text left_delimiter;
         WithRule
-          (Rule.Parental, Concat [list_sep sep f l; text right_delimiter]) ]
+          (Rule.Parental, Concat [list_sep sep f l; text right_delimiter]);
+      ]
 
   let list : type c. _ -> (c -> Doc.t) -> c list -> _ -> _ =
    (fun ld x y rd -> delimited_list comma_sep ld x y rd)
@@ -229,12 +231,14 @@ module Full = struct
     | Tgeneric s -> to_doc s
     | Taccess (root_ty, ids) ->
       Concat
-        [ k root_ty;
+        [
+          k root_ty;
           to_doc
             (List.fold_left
                ids
                ~f:(fun acc (_, sid) -> acc ^ "::" ^ sid)
-               ~init:"") ]
+               ~init:"");
+        ]
     | Toption (_, Tnonnull) -> text "mixed"
     | Toption (r, Tunion tyl)
       when TypecheckerOptions.like_types (Env.get_tcopt env)
@@ -275,7 +279,8 @@ module Full = struct
       end
     | Tfun ft ->
       Concat
-        [ ( if ft.ft_abstract then
+        [
+          ( if ft.ft_abstract then
             text "abs" ^^ Space
           else
             Nothing );
@@ -289,7 +294,8 @@ module Full = struct
           text ")";
           (match ft.ft_ret.et_type with
           | (Reason.Rdynamic_yield _, _) -> Space ^^ text "[DynamicYield]"
-          | _ -> Nothing) ]
+          | _ -> Nothing);
+        ]
     | Tclass ((_, s), exact, tyl) ->
       let d = to_doc s ^^ list "<" k tyl ">" in
       begin
@@ -379,9 +385,11 @@ module Full = struct
             Concat [text "~?"; k ty]
         | (_, _, _) ->
           Concat
-            [ text "~";
+            [
+              text "~";
               text "?";
-              delimited_list (Space ^^ text "|" ^^ Space) "(" k nonnull ")" ]
+              delimited_list (Space ^^ text "|" ^^ Space) "(" k nonnull ")";
+            ]
       end
     | Tunion tyl ->
       let tyl =
@@ -416,8 +424,10 @@ module Full = struct
         (* Type is nullable union type *)
         | (_, _) ->
           Concat
-            [ text "?";
-              delimited_list (Space ^^ text "|" ^^ Space) "(" k nonnull ")" ]
+            [
+              text "?";
+              delimited_list (Space ^^ text "|" ^^ Space) "(" k nonnull ")";
+            ]
       end
     | Tintersection [] -> text "mixed"
     | Tintersection tyl ->
@@ -432,7 +442,8 @@ module Full = struct
             | _ -> Nothing
           in
           Concat
-            [ ( if sft_optional then
+            [
+              ( if sft_optional then
                 text "?"
               else
                 Nothing );
@@ -442,7 +453,8 @@ module Full = struct
               Space;
               text "=>";
               Space;
-              k sft_ty ]
+              k sft_ty;
+            ]
         in
         shape_map fdm f_field
       in
@@ -485,10 +497,12 @@ module Full = struct
       | Fvariadic (_, p) ->
         Some
           (Concat
-             [ (match p.fp_type.et_type with
+             [
+               (match p.fp_type.et_type with
                | (_, Tany _) -> Nothing
                | _ -> fun_param to_doc st env p);
-               text "..." ])
+               text "...";
+             ])
     in
     let params =
       match variadic_param with
@@ -496,31 +510,36 @@ module Full = struct
       | Some variadic_param -> params @ [variadic_param]
     in
     Span
-      [ (* only print tparams when they have been instantiated with targs
+      [
+        (* only print tparams when they have been instantiated with targs
          * so that they correctly express reified parameterization *)
-        (match ft.ft_tparams with
-        | ([], _)
-        | (_, FTKtparams) ->
-          Nothing
-        | (l, FTKinstantiated_targs) -> list "<" (tparam to_doc st env) l ">");
+          (match ft.ft_tparams with
+          | ([], _)
+          | (_, FTKtparams) ->
+            Nothing
+          | (l, FTKinstantiated_targs) -> list "<" (tparam to_doc st env) l ">");
         list "(" id params "):";
         Space;
-        possibly_enforced_ty to_doc st env ft.ft_ret ]
+        possibly_enforced_ty to_doc st env ft.ft_ret;
+      ]
 
   and possibly_enforced_ty : type a. _ -> _ -> _ -> a possibly_enforced_ty -> _
       =
    fun to_doc st env { et_enforced; et_type } ->
     Concat
-      [ ( if show_verbose env && et_enforced then
+      [
+        ( if show_verbose env && et_enforced then
           text "enforced" ^^ Space
         else
           Nothing );
-        ty to_doc st env et_type ]
+        ty to_doc st env et_type;
+      ]
 
   and fun_param : type a. _ -> _ -> _ -> a fun_param -> _ =
    fun to_doc st env { fp_name; fp_type; fp_kind; _ } ->
     Concat
-      [ (match fp_kind with
+      [
+        (match fp_kind with
         | FPinout -> text "inout" ^^ Space
         | _ -> Nothing);
         (match (fp_name, fp_type) with
@@ -528,7 +547,11 @@ module Full = struct
         | (Some param_name, { et_type = (_, Tany _); _ }) -> text param_name
         | (Some param_name, _) ->
           Concat
-            [possibly_enforced_ty to_doc st env fp_type; Space; text param_name])
+            [
+              possibly_enforced_ty to_doc st env fp_type;
+              Space;
+              text param_name;
+            ]);
       ]
 
   and tparam : type a. _ -> _ -> _ -> a Typing_defs.tparam -> _ =
@@ -537,27 +560,31 @@ module Full = struct
        env
        { tp_name = (_, x); tp_constraints = cstrl; tp_reified = r; _ } ->
     Concat
-      [ begin
+      [
+        begin
           match r with
           | Nast.Erased -> Nothing
           | Nast.SoftReified -> text "<<__Soft>> reify" ^^ Space
           | Nast.Reified -> text "reify" ^^ Space
         end;
         text x;
-        list_sep ~split:false Space (tparam_constraint to_doc st env) cstrl ]
+        list_sep ~split:false Space (tparam_constraint to_doc st env) cstrl;
+      ]
 
   and tparam_constraint :
       type a. _ -> _ -> _ -> Ast_defs.constraint_kind * a ty -> _ =
    fun to_doc st env (ck, cty) ->
     Concat
-      [ Space;
+      [
+        Space;
         text
           (match ck with
           | Ast_defs.Constraint_as -> "as"
           | Ast_defs.Constraint_super -> "super"
           | Ast_defs.Constraint_eq -> "=");
         Space;
-        ty to_doc st env cty ]
+        ty to_doc st env cty;
+      ]
 
   (* For a given type parameter, construct a list of its constraints *)
   let get_constraints_on_tparam env tparam =
@@ -589,7 +616,8 @@ module Full = struct
     else
       Some
         (Concat
-           [ text "where";
+           [
+             text "where";
              Space;
              WithRule
                ( Rule.Parental,
@@ -598,10 +626,13 @@ module Full = struct
                    begin
                      fun (tparam, ck, ty) ->
                      Concat
-                       [ text tparam;
-                         tparam_constraint to_doc ISet.empty env (ck, ty) ]
+                       [
+                         text tparam;
+                         tparam_constraint to_doc ISet.empty env (ck, ty);
+                       ]
                    end
-                   constraints ) ])
+                   constraints );
+           ])
 
   let to_string_rec env n x =
     ty Doc.text (ISet.add n ISet.empty) env x
@@ -645,10 +676,12 @@ module Full = struct
           (* Use short names for function types since they display a lot more
            information to the user. *)
           Concat
-            [ text "function";
+            [
+              text "function";
               Space;
               text_strip_ns name;
-              fun_type text_strip_ns ISet.empty env ft ]
+              fun_type text_strip_ns ISet.empty env ft;
+            ]
         | ({ type_ = Property _; name; _ }, _)
         | ({ type_ = ClassConst _; name; _ }, _)
         | ({ type_ = GConst; name; _ }, _) ->
@@ -998,7 +1031,8 @@ module Json = struct
         | Tarraykind (AKdarray (ty1, ty2)) ->
           obj @@ kind "darray" @ args [ty1; ty2]
         | Tarraykind (AKvarray ty) -> obj @@ kind "varray" @ args [ty]
-        | Tarraykind (AKvec ty) -> obj @@ kind "array" @ empty false @ args [ty]
+        | Tarraykind (AKvec ty) ->
+          obj @@ kind "array" @ empty false @ args [ty]
         | Tarraykind (AKmap (ty1, ty2)) ->
           obj @@ kind "array" @ empty false @ args [ty1; ty2]
         | Tarraykind AKempty -> obj @@ kind "array" @ empty true @ args []

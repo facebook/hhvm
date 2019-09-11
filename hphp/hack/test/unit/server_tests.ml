@@ -23,7 +23,8 @@ let test_process_data =
 
 let test_dmesg_parser () =
   let input =
-    [ "[3034339.262439] Out of memory: Kill process 2758734 (hh_server) score 253 or sacrifice child"
+    [
+      "[3034339.262439] Out of memory: Kill process 2758734 (hh_server) score 253 or sacrifice child";
     ]
   in
   Sys_utils.find_oom_in_dmesg_output
@@ -289,10 +290,12 @@ let test_should_enable_deferring () =
   true
 
 let tests =
-  [ ("test_deferred_decl_add", test_deferred_decl_add);
+  [
+    ("test_deferred_decl_add", test_deferred_decl_add);
     ("test_deferred_decl_should_defer", test_deferred_decl_should_defer);
     ("test_process_file_deferring", test_process_file_deferring);
     ("test_dmesg_parser", test_dmesg_parser);
-    ("test_should_enable_deferring", test_should_enable_deferring) ]
+    ("test_should_enable_deferring", test_should_enable_deferring);
+  ]
 
 let () = Unit_test.run_all tests

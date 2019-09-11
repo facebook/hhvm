@@ -145,16 +145,21 @@ let parse_options () =
   let cli_root = ref None in
   let rec options =
     ref
-      [ ( "--range",
+      [
+        ( "--range",
           Arg.Tuple
-            [ Arg.Int (fun x -> start_char := Some x);
-              Arg.Int (fun x -> end_char := Some x) ],
+            [
+              Arg.Int (fun x -> start_char := Some x);
+              Arg.Int (fun x -> end_char := Some x);
+            ],
           "[start end]  Range of character positions to be formatted (1 indexed)"
         );
         ( "--line-range",
           Arg.Tuple
-            [ Arg.Int (fun x -> start_line := Some x);
-              Arg.Int (fun x -> end_line := Some x) ],
+            [
+              Arg.Int (fun x -> start_line := Some x);
+              Arg.Int (fun x -> end_line := Some x);
+            ],
           "[start end]  Range of lines to be formatted (1 indexed, inclusive)"
         );
         ( "--at-char",
@@ -197,7 +202,8 @@ let parse_options () =
           Arg.String (fun x -> filename_for_logging := Some x),
           " The filename for logging purposes, when providing file contents "
           ^ "through stdin." );
-        ("--test", Arg.Set test, " Disable logging") ]
+        ("--test", Arg.Set test, " Disable logging");
+      ]
   in
   Arg.parse_dynamic options (fun file -> files := file :: !files) usage;
   let range =

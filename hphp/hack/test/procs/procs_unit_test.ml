@@ -148,11 +148,13 @@ let multi_worker_with_failure_handler _workers () =
         sum = 15))
 
 let tests =
-  [ ("multi_worker_list", multi_worker_list);
+  [
+    ("multi_worker_list", multi_worker_list);
     ("multi_worker_bucket", multi_worker_bucket);
     ("multi_worker_of_n_buckets", multi_worker_of_n_buckets);
     ("multi_worker_one_worker_throws", multi_worker_one_worker_throws);
-    ("multi_worker_with_failure_handler", multi_worker_with_failure_handler) ]
+    ("multi_worker_with_failure_handler", multi_worker_with_failure_handler);
+  ]
 
 let () =
   Daemon.check_entry_point ();

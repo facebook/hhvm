@@ -129,8 +129,10 @@ let test_get_proc_stack_self_max_depth () =
     ok_or_assert (Proc.get_proc_stack ~max_depth:2 proc_test_pid.contents)
   in
   String_asserter.assert_list_equals
-    [ "[xarexec] /usr/local/bin/threshold-monitor -tt /mnt/xarfuse/uid-0/456/__run_xar_main__.py";
-      "/data/users/unixname/proc_test/proc_test.opt" ]
+    [
+      "[xarexec] /usr/local/bin/threshold-monitor -tt /mnt/xarfuse/uid-0/456/__run_xar_main__.py";
+      "/data/users/unixname/proc_test/proc_test.opt";
+    ]
     proc_stack
     "The process name should be correct!";
   true
@@ -140,11 +142,13 @@ let test_get_proc_stack_self_max_length () =
     ok_or_assert (Proc.get_proc_stack ~max_length:50 proc_test_pid.contents)
   in
   String_asserter.assert_list_equals
-    [ "/usr/lib/systemd/systemd --switched-root --system...";
+    [
+      "/usr/lib/systemd/systemd --switched-root --system...";
       "toold -Xmx1000m -Djava.awt.headless=true -Djna.nos...";
       "[xarexec] /usr/local/bin/threshold-monitor -tt /mn...";
       "[xarexec] /usr/local/bin/threshold-monitor -tt /mn...";
-      "/data/users/unixname/proc_test/proc_test.opt" ]
+      "/data/users/unixname/proc_test/proc_test.opt";
+    ]
     proc_stack
     "The process name should be correct!";
   true
@@ -152,12 +156,14 @@ let test_get_proc_stack_self_max_length () =
 let test_get_proc_stack_self () =
   let proc_stack = ok_or_assert (Proc.get_proc_stack proc_test_pid.contents) in
   String_asserter.assert_list_equals
-    [ "/usr/lib/systemd/systemd --switched-root --system --deserialize 30";
+    [
+      "/usr/lib/systemd/systemd --switched-root --system --deserialize 30";
       "toold -Xmx1000m -Djava.awt.headless=true -Djna.nosys=true -Djava.util.logging.config"
       ^ ".class=com.company.tool.abc.bootstrapper.SomeConfig -Dtool.test_util_no_tests_dir=true";
       "[xarexec] /usr/local/bin/threshold-monitor -tt /mnt/xarfuse/uid-0/123/__run_xar_main__.py";
       "[xarexec] /usr/local/bin/threshold-monitor -tt /mnt/xarfuse/uid-0/456/__run_xar_main__.py";
-      "/data/users/unixname/proc_test/proc_test.opt" ]
+      "/data/users/unixname/proc_test/proc_test.opt";
+    ]
     proc_stack
     "The process name should be correct!";
   true
@@ -168,7 +174,8 @@ let test_get_proc_stack_non_existent_PID () : bool =
   | Error _ -> true
 
 let tests =
-  [ ("Test get_cmdline on self", test_get_cmdline_self);
+  [
+    ("Test get_cmdline on self", test_get_cmdline_self);
     ("Test get_proc_stat on systemd", test_get_proc_stat_systemd);
     ("Test get_proc_stat on self", test_get_proc_stat_self);
     ("Test get_proc_stack on self", test_get_proc_stack_self);
@@ -178,7 +185,8 @@ let tests =
     ( "Test get_proc_stack on self with max length",
       test_get_proc_stack_self_max_length );
     ( "Test get_proc_stack for a non-existent PID",
-      test_get_proc_stack_non_existent_PID ) ]
+      test_get_proc_stack_non_existent_PID );
+  ]
 
 let () =
   (* Note: if you're running the tests with the default dependency injector,

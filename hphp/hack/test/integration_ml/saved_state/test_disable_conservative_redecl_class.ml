@@ -54,16 +54,20 @@ class Qux {
 "
 
 let init_disk_state =
-  [ (foo_name, foo_contents "num");
+  [
+    (foo_name, foo_contents "num");
     (bar_name, bar_contents);
-    (qux_name, qux_contents) ]
+    (qux_name, qux_contents);
+  ]
 
 let test_cases =
-  [ (false, 3);
+  [
+    (false, 3);
     (* Without disable flag, recheck Foo, Bar, Qux *)
-    (true, 2)
-    (* With conservative redecl disabled, recheck only Foo and Bar *)
-   ]
+      (true, 2);
+      (* With conservative redecl disabled, recheck only Foo and Bar *)
+    
+  ]
 
 let run_test saved_state_dir test_case () =
   let (disable_conservative_redecl, expected_rechecked) = test_case in

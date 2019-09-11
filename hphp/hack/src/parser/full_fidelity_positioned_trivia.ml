@@ -86,7 +86,9 @@ let from_minimal_list source_text ts offset =
 let to_json trivia =
   Hh_json.(
     JSON_Object
-      [ ("kind", JSON_String (TriviaKind.to_string trivia.kind));
+      [
+        ("kind", JSON_String (TriviaKind.to_string trivia.kind));
         ("text", JSON_String (text trivia));
         ("offset", int_ trivia.offset);
-        ("width", int_ trivia.width) ])
+        ("width", int_ trivia.width);
+      ])

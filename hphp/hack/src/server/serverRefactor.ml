@@ -241,7 +241,8 @@ let get_call_signature_for_wrap (func_decl : Full_fidelity_positioned_syntax.t)
                           {
                             syntax =
                               SyntaxList
-                                [ {
+                                [
+                                  {
                                     syntax =
                                       ListItem
                                         {
@@ -258,7 +259,8 @@ let get_call_signature_for_wrap (func_decl : Full_fidelity_positioned_syntax.t)
                                           _;
                                         };
                                     _;
-                                  } ];
+                                  };
+                                ];
                             _;
                           };
                         _;

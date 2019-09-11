@@ -80,11 +80,15 @@ let rec union env ((r1, _) as ty1) ((r2, _) as ty2) =
         log_types
           (Reason.to_pos r2)
           env
-          [ Log_head
+          [
+            Log_head
               ( "Typing_union.union",
-                [ Log_type ("ty1", ty1);
+                [
+                  Log_type ("ty1", ty1);
                   Log_type ("ty2", ty2);
-                  Log_type ("result", result) ] ) ]));
+                  Log_type ("result", result);
+                ] );
+          ]));
   (env, result)
 
 and union_ env ty1 ty2 r =

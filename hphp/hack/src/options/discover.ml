@@ -6,5 +6,7 @@ let () =
       and bindir = Sys.getenv "CMAKE_INSTALL_FULL_BINDIR" in
       C.Flags.write_lines
         "generated_buildOptions.ml"
-        [ "let system_config_path = \"" ^ sysconfdir ^ "\"";
-          "let default_hackfmt_path = \"" ^ bindir ^ "/hackfmt\"" ])
+        [
+          "let system_config_path = \"" ^ sysconfdir ^ "\"";
+          "let default_hackfmt_path = \"" ^ bindir ^ "/hackfmt\"";
+        ])

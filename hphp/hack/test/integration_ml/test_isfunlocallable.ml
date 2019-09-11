@@ -174,7 +174,8 @@ let normalize s =
   String.split_on_char '\n' s |> List.map ~f:String.trim |> String.concat ""
 
 let tests : ((string * int * int) * string) list =
-  [ ( (fst f1, 2, 1),
+  [
+    ( (fst f1, 2, 1),
       {|
     {"position":{"file":"/f1.php","line":2,"character":1},
      "error":"Function/method not found"}
@@ -267,7 +268,8 @@ let tests : ((string * int * int) * string) list =
     "result":false,"errors":[{"message":[{
       "descr":"Neither a Mutable nor MaybeMutable object may be captured by an anonymous function.",
       "path":"/f11.php","line":4,"start":23,"end":27,"code":4283}]}]}  |}
-    ) ]
+    );
+  ]
   |> List.map ~f:(fun (p, s) -> (p, normalize s))
 
 let test () =

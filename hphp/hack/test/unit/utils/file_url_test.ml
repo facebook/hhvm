@@ -12,7 +12,8 @@ open Hh_core
 
 let test_valid () =
   let examples =
-    [ ("file://localhost/etc/fstab", "/etc/fstab");
+    [
+      ("file://localhost/etc/fstab", "/etc/fstab");
       ("file:///etc/fstab", "/etc/fstab");
       ("file://localhost/c:/WINDOWS/clock.avi", "c:/WINDOWS/clock.avi");
       ("file:///c:/WINDOWS/clock.avi", "c:/WINDOWS/clock.avi");
@@ -62,7 +63,8 @@ let test_valid () =
       ("file:///fileURLs/mozilla-banner", "/fileURLs/mozilla-banner");
       ("file:///wh/at!/ev%20/er", "/wh/at!/ev /er");
       ("file:///fi%6Ce", "/file");
-      ("file:///fi%6ce", "/file") ]
+      ("file:///fi%6ce", "/file");
+    ]
   in
   let do_example (uri, expected) =
     let actual = File_url.parse uri in
@@ -75,7 +77,8 @@ let test_valid () =
 
 let test_invalid_parse () =
   let examples =
-    [ "file";
+    [
+      "file";
       "file:";
       "file:/";
       "file://";
@@ -122,7 +125,8 @@ let test_invalid_parse () =
       "file:///fi%6";
       "file:///fi%ge";
       "file:///fi%/stuff";
-      "file:///fi%" ]
+      "file:///fi%";
+    ]
   in
   let do_example uri =
     let did_raise =
@@ -139,7 +143,8 @@ let test_invalid_parse () =
 
 let test_create () =
   let examples =
-    [ ("c:\\autoexec.bat", "file:///c:/autoexec.bat");
+    [
+      ("c:\\autoexec.bat", "file:///c:/autoexec.bat");
       ("c:/autoexec.bat", "file:///c:/autoexec.bat");
       ("c:\\\\autoexec.bat", "file:///c://autoexec.bat");
       ("c://autoexec.bat", "file:///c://autoexec.bat");
@@ -147,7 +152,8 @@ let test_create () =
       ("/etc/hash#hash", "file:///etc/hash%23hash");
       ("/etc/question?question", "file:///etc/question%3fquestion");
       ( "/etc/braces{}/backtick`/caret^/space /file",
-        "file:///etc/braces%7b%7d/backtick%60/caret%5e/space%20/file" ) ]
+        "file:///etc/braces%7b%7d/backtick%60/caret%5e/space%20/file" );
+    ]
   in
   let do_example (file, expected) =
     let actual = File_url.create file in
@@ -159,8 +165,10 @@ let test_create () =
   true
 
 let tests =
-  [ ("test_valid_parse", test_valid);
+  [
+    ("test_valid_parse", test_valid);
     ("test_invalid_parse", test_invalid_parse);
-    ("test_create", test_create) ]
+    ("test_create", test_create);
+  ]
 
 let () = Unit_test.run_all tests

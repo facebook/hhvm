@@ -48,10 +48,12 @@ let test () =
   let env =
     Test.setup_disk
       env
-      [ (foo_name, foo_takes_int_contents);
-        (bar_name, bar_contents)
-        (* no errors *)
-       ]
+      [
+        (foo_name, foo_takes_int_contents);
+        (bar_name, bar_contents);
+          (* no errors *)
+        
+      ]
   in
   let env = Test.connect_persistent_client env in
   let env = Test.subscribe_diagnostic env in

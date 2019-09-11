@@ -28,9 +28,11 @@ let parameter_type_collector =
     method! on_fun_param env fun_param =
       Pos.AbsolutePosMap.singleton
         (Pos.to_absolute fun_param.Aast.param_pos)
-        [ ( env,
+        [
+          ( env,
             Typing_defs.LoclTy
-              (type_of_type_hint env fun_param.Aast.param_type_hint) ) ]
+              (type_of_type_hint env fun_param.Aast.param_type_hint) );
+        ]
 
     (* Deactivate the codemod for methods *)
     method! on_method_ _ _ = Pos.AbsolutePosMap.empty

@@ -38,7 +38,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
     | Syntax.Token x ->
       let token_kind = Token.kind x in
       Concat
-        [ begin
+        [
+          begin
             match token_kind with
             | TokenKind.EndOfFile ->
               let leading_trivia = Token.leading x in
@@ -64,7 +65,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
               make_string (Token.text x) (Token.width x)
             | _ -> Text (Token.text x, Token.width x)
           end;
-          transform_trailing_trivia (Token.trailing x) ]
+          transform_trailing_trivia (Token.trailing x);
+        ]
     | Syntax.SyntaxList _ ->
       failwith
         (Printf.sprintf
@@ -187,9 +189,11 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
     | Syntax.ReifiedTypeArgument
         { reified_type_argument_reified; reified_type_argument_type } ->
       Concat
-        [ t env reified_type_argument_reified;
+        [
+          t env reified_type_argument_reified;
           Space;
-          t env reified_type_argument_type ]
+          t env reified_type_argument_type;
+        ]
     | Syntax.QualifiedName { qualified_name_parts } ->
       handle_possible_list env qualified_name_parts
     | Syntax.ExpressionStatement _ -> transform_simple_statement env node
@@ -206,7 +210,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           enum_right_brace = right_b;
         } ->
       Concat
-        [ t env attr;
+        [
+          t env attr;
           when_present attr newline;
           t env kw;
           Space;
@@ -220,7 +225,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
             left_b
             right_b
             [handle_possible_list env enumerators];
-          Newline ]
+          Newline;
+        ]
     | Syntax.Enumerator
         {
           enumerator_name = name;
@@ -230,7 +236,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         } ->
       let value = t env value in
       Concat
-        [ t env name;
+        [
+          t env name;
           Space;
           t env eq_kw;
           Space;
@@ -240,7 +247,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
             Nothing );
           Nest [value];
           t env semi;
-          Newline ]
+          Newline;
+        ]
     | Syntax.RecordDeclaration
         {
           record_attribute_spec = attr;
@@ -260,7 +268,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           space_split ()
       in
       Concat
-        [ t env attr;
+        [
+          t env attr;
           when_present attr newline;
           t env modifier;
           Space;
@@ -270,24 +279,37 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           Space;
           when_present extends_kw (fun () ->
               Concat
-                [ Space;
+                [
+                  Space;
                   Split;
                   WithRule
                     ( Rule.Parental,
                       Nest
-                        [ Span
-                            [ t env extends_kw;
+                        [
+                          Span
+                            [
+                              t env extends_kw;
                               Space;
                               Split;
                               WithRule
                                 ( Rule.Parental,
                                   Nest
-                                    [ handle_possible_list
+                                    [
+                                      handle_possible_list
                                         env
                                         ~after_each:after_each_ancestor
-                                        extends ] ) ] ] ) ]);
-          braced_block_nest env left_b right_b [handle_possible_list env fields];
-          Newline ]
+                                        extends;
+                                    ] );
+                            ];
+                        ] );
+                ]);
+          braced_block_nest
+            env
+            left_b
+            right_b
+            [handle_possible_list env fields];
+          Newline;
+        ]
     | Syntax.RecordField
         {
           record_field_name = name;
@@ -297,13 +319,15 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           record_field_comma = comma_kw;
         } ->
       Concat
-        [ t env name;
+        [
+          t env name;
           t env colon_kw;
           Space;
           t env record_field_type;
           t env record_field_init;
           t env comma_kw;
-          Newline ]
+          Newline;
+        ]
     | Syntax.AliasDeclaration
         {
           alias_attribute_spec = attr;
@@ -317,7 +341,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         } ->
       (* TODO: revisit this for long names *)
       Concat
-        [ t env attr;
+        [
+          t env attr;
           when_present attr newline;
           t env kw;
           Space;
@@ -331,7 +356,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           SplitWith Cost.Base;
           Nest [t env alias_type];
           t env semi;
-          Newline ]
+          Newline;
+        ]
     | Syntax.PropertyDeclaration
         {
           property_attribute_spec = attr;
@@ -342,11 +368,13 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         } ->
       let declaration =
         Concat
-          [ handle_possible_list env ~after_each:(fun _ -> Space) modifiers;
+          [
+            handle_possible_list env ~after_each:(fun _ -> Space) modifiers;
             t env prop_type;
             handle_declarator_list env declarators;
             t env semi;
-            Newline ]
+            Newline;
+          ]
       in
       if Syntax.is_missing attr then
         declaration
@@ -369,8 +397,9 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           namespace_right_brace = right_b;
         } ->
       Concat
-        [ Space;
-          braced_block_nest env left_b right_b [handle_possible_list env decls]
+        [
+          Space;
+          braced_block_nest env left_b right_b [handle_possible_list env decls];
         ]
     | Syntax.NamespaceEmptyBody { namespace_semicolon = semi } ->
       Concat [t env semi]
@@ -382,19 +411,23 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           namespace_use_semicolon = semi;
         } ->
       Concat
-        [ t env kw;
+        [
+          t env kw;
           Space;
           t env use_kind;
           when_present use_kind space;
           WithRule
             ( Rule.Parental,
               Nest
-                [ handle_possible_list
+                [
+                  handle_possible_list
                     env
                     clauses
-                    ~after_each:after_each_argument ] );
+                    ~after_each:after_each_argument;
+                ] );
           t env semi;
-          Newline ]
+          Newline;
+        ]
     | Syntax.NamespaceGroupUseDeclaration
         {
           namespace_group_use_keyword = kw;
@@ -406,14 +439,16 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           namespace_group_use_semicolon = semi;
         } ->
       Concat
-        [ t env kw;
+        [
+          t env kw;
           Space;
           t env use_kind;
           when_present use_kind space;
           t env prefix;
           transform_argish env left_b clauses right_b;
           t env semi;
-          Newline ]
+          Newline;
+        ]
     | Syntax.NamespaceUseClause
         {
           namespace_use_clause_kind = use_kind;
@@ -422,13 +457,15 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           namespace_use_alias = alias;
         } ->
       Concat
-        [ t env use_kind;
+        [
+          t env use_kind;
           when_present use_kind space;
           t env name;
           when_present as_kw space;
           t env as_kw;
           when_present alias space;
-          t env alias ]
+          t env alias;
+        ]
     | Syntax.FunctionDeclaration
         {
           function_attribute_spec = attr;
@@ -436,11 +473,13 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           function_body = body;
         } ->
       Concat
-        [ t env attr;
+        [
+          t env attr;
           when_present attr newline;
           t env header;
           handle_possible_compound_statement env ~allow_collapse:true body;
-          Newline ]
+          Newline;
+        ]
     | Syntax.FunctionDeclarationHeader
         {
           function_modifiers = modifiers;
@@ -455,17 +494,21 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           function_where_clause = where;
         } ->
       Concat
-        [ Span (transform_fn_decl_name env modifiers kw name type_params leftp);
-          transform_fn_decl_args env params rightp colon ret_type where ]
+        [
+          Span (transform_fn_decl_name env modifiers kw name type_params leftp);
+          transform_fn_decl_args env params rightp colon ret_type where;
+        ]
     | Syntax.WhereClause
         {
           where_clause_keyword = where;
           where_clause_constraints = constraints;
         } ->
       Concat
-        [ t env where;
+        [
+          t env where;
           Space;
-          handle_possible_list env constraints ~after_each:(fun _ -> Space) ]
+          handle_possible_list env constraints ~after_each:(fun _ -> Space);
+        ]
     | Syntax.WhereConstraint
         {
           where_constraint_left_type = left;
@@ -481,7 +524,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           methodish_semicolon = semi;
         } ->
       Concat
-        [ t env attr;
+        [
+          t env attr;
           when_present attr newline;
           (let (fn_name, args_and_where) =
              match Syntax.syntax func_decl with
@@ -514,7 +558,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           when_present body (fun () ->
               handle_possible_compound_statement env ~allow_collapse:true body);
           t env semi;
-          Newline ]
+          Newline;
+        ]
     | Syntax.MethodishTraitResolution
         {
           methodish_trait_attribute = attr;
@@ -524,7 +569,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           methodish_trait_semicolon = semi;
         } ->
       Concat
-        [ t env attr;
+        [
+          t env attr;
           when_present attr newline;
           (let (fn_name, args_and_where) =
              match Syntax.syntax func_decl with
@@ -557,7 +603,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           t env equal;
           t env name;
           t env semi;
-          Newline ]
+          Newline;
+        ]
     | Syntax.ClassishDeclaration
         {
           classish_attribute = attr;
@@ -579,58 +626,80 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           space_split ()
       in
       Concat
-        [ t env attr;
+        [
+          t env attr;
           when_present attr newline;
           Span
-            [ handle_possible_list env ~after_each:(fun _ -> Space) modifiers;
+            [
+              handle_possible_list env ~after_each:(fun _ -> Space) modifiers;
               t env kw;
               Space;
               SplitWith Cost.Base;
-              Nest [t env name; t env type_params] ];
+              Nest [t env name; t env type_params];
+            ];
           WithRule
             ( Rule.Parental,
               Concat
-                [ when_present extends_kw (fun () ->
+                [
+                  when_present extends_kw (fun () ->
                       Nest
-                        [ Space;
+                        [
+                          Space;
                           Split;
                           t env extends_kw;
                           WithRule
                             ( Rule.Parental,
                               Nest
-                                [ Span
-                                    [ Space;
+                                [
+                                  Span
+                                    [
+                                      Space;
                                       ( if list_length extends = 1 then
                                         SplitWith Cost.Base
                                       else
                                         Split );
                                       Nest
-                                        [ handle_possible_list
+                                        [
+                                          handle_possible_list
                                             env
                                             ~after_each:after_each_ancestor
-                                            extends ] ] ] ) ]);
+                                            extends;
+                                        ];
+                                    ];
+                                ] );
+                        ]);
                   when_present impl_kw (fun () ->
                       Nest
-                        [ Space;
+                        [
+                          Space;
                           Split;
                           t env impl_kw;
                           WithRule
                             ( Rule.Parental,
                               Nest
-                                [ Span
-                                    [ Space;
+                                [
+                                  Span
+                                    [
+                                      Space;
                                       ( if list_length impls = 1 then
                                         SplitWith Cost.Base
                                       else
                                         Split );
                                       Nest
-                                        [ handle_possible_list
+                                        [
+                                          handle_possible_list
                                             env
                                             ~after_each:after_each_ancestor
-                                            impls ] ] ] ) ]);
+                                            impls;
+                                        ];
+                                    ];
+                                ] );
+                        ]);
                   when_present where space;
-                  t env where ] );
-          t env body ]
+                  t env where;
+                ] );
+          t env body;
+        ]
     | Syntax.ClassishBody
         {
           classish_body_left_brace = left_b;
@@ -638,9 +707,11 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           classish_body_right_brace = right_b;
         } ->
       Concat
-        [ Space;
+        [
+          Space;
           braced_block_nest env left_b right_b [handle_possible_list env body];
-          Newline ]
+          Newline;
+        ]
     | Syntax.TraitUsePrecedenceItem
         {
           trait_use_precedence_item_name = name;
@@ -648,17 +719,21 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           trait_use_precedence_item_removed_names = removed_names;
         } ->
       Concat
-        [ t env name;
+        [
+          t env name;
           Space;
           t env kw;
           Space;
           WithRule
             ( Rule.Parental,
               Nest
-                [ handle_possible_list
+                [
+                  handle_possible_list
                     env
                     ~before_each:space_split
-                    removed_names ] ) ]
+                    removed_names;
+                ] );
+        ]
     | Syntax.TraitUseAliasItem
         {
           trait_use_alias_item_aliasing_name = aliasing_name;
@@ -667,13 +742,15 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           trait_use_alias_item_aliased_name = aliased_name;
         } ->
       Concat
-        [ t env aliasing_name;
+        [
+          t env aliasing_name;
           Space;
           t env kw;
           Space;
           t env visibility;
           Space;
-          t env aliased_name ]
+          t env aliased_name;
+        ]
     | Syntax.TraitUseConflictResolution
         {
           trait_use_conflict_resolution_keyword = kw;
@@ -683,7 +760,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           trait_use_conflict_resolution_right_brace = rb;
         } ->
       Concat
-        [ t env kw;
+        [
+          t env kw;
           WithRule
             ( Rule.Parental,
               Nest [handle_possible_list env ~before_each:space_split elements]
@@ -693,7 +771,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           Newline;
           Nest [handle_possible_list env ~before_each:newline clauses];
           Newline;
-          t env rb ]
+          t env rb;
+        ]
     | Syntax.TraitUse
         {
           trait_use_keyword = kw;
@@ -701,7 +780,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           trait_use_semicolon = semi;
         } ->
       Concat
-        [ t env kw;
+        [
+          t env kw;
           (match Syntax.syntax elements with
           | Syntax.SyntaxList [x] -> Concat [Space; t env x]
           | Syntax.SyntaxList _ ->
@@ -712,7 +792,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
               )
           | _ -> Concat [Space; t env elements]);
           t env semi;
-          Newline ]
+          Newline;
+        ]
     | Syntax.RequireClause
         {
           require_keyword = kw;
@@ -722,7 +803,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         } ->
       let name = t env name in
       Concat
-        [ t env kw;
+        [
+          t env kw;
           Space;
           t env kind;
           Space;
@@ -731,7 +813,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           else
             Nothing );
           Nest [name; t env semi];
-          Newline ]
+          Newline;
+        ]
     | Syntax.ConstDeclaration
         {
           const_modifiers = modifiers;
@@ -741,13 +824,15 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           const_semicolon = semi;
         } ->
       Concat
-        [ handle_possible_list env ~after_each:(fun _ -> Space) modifiers;
+        [
+          handle_possible_list env ~after_each:(fun _ -> Space) modifiers;
           t env kw;
           when_present const_type space;
           t env const_type;
           handle_declarator_list env declarators;
           t env semi;
-          Newline ]
+          Newline;
+        ]
     | Syntax.TypeConstDeclaration
         {
           type_const_attribute_spec = attr;
@@ -762,7 +847,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           type_const_semicolon = semi;
         } ->
       Concat
-        [ t env attr;
+        [
+          t env attr;
           when_present attr newline;
           handle_possible_list env ~after_each:(fun _ -> Space) modifiers;
           Space;
@@ -779,7 +865,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           when_present type_spec (fun _ ->
               Concat [Space; SplitWith Cost.Base; Nest [t env type_spec]]);
           t env semi;
-          Newline ]
+          Newline;
+        ]
     | Syntax.ParameterDeclaration
         {
           parameter_attribute = attr;
@@ -790,7 +877,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           parameter_default_value = default;
         } ->
       Concat
-        [ handle_attribute_spec env attr ~always_split:false;
+        [
+          handle_attribute_spec env attr ~always_split:false;
           when_present attr (fun _ -> Concat [Space; SplitWith Cost.Base]);
           t env visibility;
           when_present visibility space;
@@ -805,7 +893,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
             t env name
           else
             Concat [Space; SplitWith Cost.Moderate; Nest [t env name]] );
-          t env default ]
+          t env default;
+        ]
     | Syntax.VariadicParameter
         {
           variadic_parameter_call_convention = callconv;
@@ -813,10 +902,12 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           variadic_parameter_ellipsis = ellipsis;
         } ->
       Concat
-        [ t env callconv;
+        [
+          t env callconv;
           when_present callconv space;
           t env type_var;
-          t env ellipsis ]
+          t env ellipsis;
+        ]
     | Syntax.FileAttributeSpecification
         {
           file_attribute_specification_left_double_angle = left_da;
@@ -826,7 +917,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           file_attribute_specification_right_double_angle = right_da;
         } ->
       Concat
-        [ t env left_da;
+        [
+          t env left_da;
           t env keyword;
           t env colon;
           when_present colon space;
@@ -835,7 +927,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
             ~allow_trailing:false
             attrs
             right_da;
-          Newline ]
+          Newline;
+        ]
     | Syntax.OldAttributeSpecification _
     | Syntax.AttributeSpecification _ ->
       handle_attribute_spec env node ~always_split:true
@@ -848,30 +941,36 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           attributized_specifier_type = attr_type;
         } ->
       Concat
-        [ handle_attribute_spec env attr_spec ~always_split:false;
+        [
+          handle_attribute_spec env attr_spec ~always_split:false;
           Space;
-          t env attr_type ]
+          t env attr_type;
+        ]
     | Syntax.InclusionExpression
         { inclusion_require = kw; inclusion_filename = expr } ->
       Concat
-        [ t env kw;
+        [
+          t env kw;
           (match Syntax.syntax expr with
           | Syntax.ParenthesizedExpression _ -> Nothing
           | _ -> Space);
           SplitWith Cost.Base;
-          t env expr ]
+          t env expr;
+        ]
     | Syntax.InclusionDirective
         { inclusion_expression = expr; inclusion_semicolon = semi } ->
       Concat [t env expr; t env semi; Newline]
     | Syntax.CompoundStatement
         { compound_left_brace; compound_statements; compound_right_brace } ->
       Concat
-        [ handle_compound_statement
+        [
+          handle_compound_statement
             env
             compound_left_brace
             compound_statements
             compound_right_brace;
-          Newline ]
+          Newline;
+        ]
     | Syntax.UnsetStatement
         {
           unset_keyword = kw;
@@ -881,27 +980,34 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           unset_semicolon = semi;
         } ->
       Concat
-        [ t env kw;
+        [
+          t env kw;
           transform_argish env ~allow_trailing:false left_p args right_p;
           t env semi;
-          Newline ]
+          Newline;
+        ]
     | Syntax.WhileStatement x ->
       Concat
-        [ t env x.while_keyword;
+        [
+          t env x.while_keyword;
           Space;
           t env x.while_left_paren;
           Split;
           WithRule
             ( Rule.Parental,
               Concat
-                [ Nest [t env x.while_condition];
+                [
+                  Nest [t env x.while_condition];
                   Split;
-                  t env x.while_right_paren ] );
+                  t env x.while_right_paren;
+                ] );
           handle_possible_compound_statement env x.while_body;
-          Newline ]
+          Newline;
+        ]
     | Syntax.UsingStatementBlockScoped x ->
       Concat
-        [ t env x.using_block_await_keyword;
+        [
+          t env x.using_block_await_keyword;
           when_present x.using_block_await_keyword space;
           t env x.using_block_using_keyword;
           Space;
@@ -910,24 +1016,31 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           WithRule
             ( Rule.Parental,
               Concat
-                [ Nest
-                    [ handle_possible_list
+                [
+                  Nest
+                    [
+                      handle_possible_list
                         env
                         ~after_each:separate_with_space_split
-                        x.using_block_expressions ];
+                        x.using_block_expressions;
+                    ];
                   Split;
-                  t env x.using_block_right_paren ] );
+                  t env x.using_block_right_paren;
+                ] );
           handle_possible_compound_statement env x.using_block_body;
-          Newline ]
+          Newline;
+        ]
     | Syntax.UsingStatementFunctionScoped x ->
       Concat
-        [ t env x.using_function_await_keyword;
+        [
+          t env x.using_function_await_keyword;
           when_present x.using_function_await_keyword space;
           t env x.using_function_using_keyword;
           Space;
           t env x.using_function_expression;
           t env x.using_function_semicolon;
-          Newline ]
+          Newline;
+        ]
     | Syntax.IfStatement
         {
           if_keyword = kw;
@@ -939,13 +1052,15 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           if_else_clause = else_clause;
         } ->
       Concat
-        [ t env kw;
+        [
+          t env kw;
           Space;
           transform_condition env left_p condition right_p;
           transform_consequence t env if_body right_p;
           handle_possible_list env elseif_clauses;
           t env else_clause;
-          Newline ]
+          Newline;
+        ]
     | Syntax.ElseifClause
         {
           elseif_keyword = kw;
@@ -955,17 +1070,20 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           elseif_statement = body;
         } ->
       Concat
-        [ t env kw;
+        [
+          t env kw;
           Space;
           transform_condition env left_p condition right_p;
-          transform_consequence t env body right_p ]
+          transform_consequence t env body right_p;
+        ]
     | Syntax.ElseClause x ->
       Concat
-        [ t env x.else_keyword;
+        [
+          t env x.else_keyword;
           (match Syntax.syntax x.else_statement with
           | Syntax.IfStatement _ ->
             Concat [Space; t env x.else_statement; Space]
-          | _ -> transform_consequence t env x.else_statement x.else_keyword)
+          | _ -> transform_consequence t env x.else_statement x.else_keyword);
         ]
     | Syntax.TryStatement
         {
@@ -976,11 +1094,13 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         } ->
       (* TODO: revisit *)
       Concat
-        [ t env kw;
+        [
+          t env kw;
           handle_possible_compound_statement env body;
           handle_possible_list env catch_clauses;
           t env finally_clause;
-          Newline ]
+          Newline;
+        ]
     | Syntax.CatchClause
         {
           catch_keyword = kw;
@@ -991,14 +1111,16 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           catch_body = body;
         } ->
       Concat
-        [ t env kw;
+        [
+          t env kw;
           Space;
           delimited_nest
             env
             left_p
             right_p
             [t env ex_type; Space; SplitWith Cost.Base; Nest [t env var]];
-          handle_possible_compound_statement env body ]
+          handle_possible_compound_statement env body;
+        ]
     | Syntax.FinallyClause { finally_keyword = kw; finally_body = body } ->
       Concat [t env kw; Space; handle_possible_compound_statement env body]
     | Syntax.DoStatement
@@ -1012,14 +1134,16 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           do_semicolon = semi;
         } ->
       Concat
-        [ t env do_kw;
+        [
+          t env do_kw;
           Space;
           handle_possible_compound_statement env body;
           t env while_kw;
           Space;
           transform_condition env left_p cond right_p;
           t env semi;
-          Newline ]
+          Newline;
+        ]
     | Syntax.ForStatement
         {
           for_keyword = kw;
@@ -1033,15 +1157,18 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           for_body = body;
         } ->
       Concat
-        [ t env kw;
+        [
+          t env kw;
           Space;
           t env left_p;
           WithRule
             ( Rule.Parental,
               Concat
-                [ Split;
+                [
+                  Split;
                   Nest
-                    [ handle_possible_list
+                    [
+                      handle_possible_list
                         env
                         ~after_each:separate_with_space_split
                         init;
@@ -1058,11 +1185,14 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
                       handle_possible_list
                         env
                         ~after_each:separate_with_space_split
-                        after_iter ];
+                        after_iter;
+                    ];
                   Split;
-                  t env right_p ] );
+                  t env right_p;
+                ] );
           handle_possible_compound_statement env body;
-          Newline ]
+          Newline;
+        ]
     | Syntax.ForeachStatement
         {
           foreach_keyword = kw;
@@ -1077,13 +1207,15 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           foreach_body = body;
         } ->
       Concat
-        [ t env kw;
+        [
+          t env kw;
           Space;
           delimited_nest
             env
             left_p
             right_p
-            [ t env collection;
+            [
+              t env collection;
               Space;
               t env await_kw;
               Space;
@@ -1091,15 +1223,21 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
               Space;
               SplitWith Cost.Base;
               Nest
-                [ Span
-                    [ t env key;
+                [
+                  Span
+                    [
+                      t env key;
                       Space;
                       t env arrow;
                       Space;
                       SplitWith Cost.Base;
-                      Nest [t env value] ] ] ];
+                      Nest [t env value];
+                    ];
+                ];
+            ];
           handle_possible_compound_statement env body;
-          Newline ]
+          Newline;
+        ]
     | Syntax.SwitchStatement
         {
           switch_keyword = kw;
@@ -1112,12 +1250,14 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         } ->
       let sections = Syntax.syntax_node_to_list sections in
       Concat
-        [ t env kw;
+        [
+          t env kw;
           Space;
           delimited_nest env left_p right_p [t env expr];
           Space;
           braced_block_nest env left_b right_b (List.map sections (t env));
-          Newline ]
+          Newline;
+        ]
     | Syntax.SwitchSection
         {
           switch_section_labels = labels;
@@ -1145,12 +1285,15 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         | _ -> false
       in
       Concat
-        [ ( if List.is_empty upto_fallthrough then
+        [
+          ( if List.is_empty upto_fallthrough then
             transform_leading_trivia after_fallthrough
           else
             Concat
-              [ BlockNest [transform_leading_trivia upto_fallthrough; Newline];
-                transform_trailing_trivia after_fallthrough ] );
+              [
+                BlockNest [transform_leading_trivia upto_fallthrough; Newline];
+                transform_trailing_trivia after_fallthrough;
+              ] );
           handle_list env labels ~after_each:(fun is_last_label ->
               if is_last_label && is_scoped_section then
                 Nothing
@@ -1160,7 +1303,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
             handle_list env statements
           else
             BlockNest [handle_list env statements] );
-          t env fallthrough ]
+          t env fallthrough;
+        ]
     | Syntax.CaseLabel
         { case_keyword = kw; case_expression = expr; case_colon = colon } ->
       Concat [t env kw; Space; t env expr; t env colon]
@@ -1185,11 +1329,13 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           goto_statement_semicolon;
         } ->
       Concat
-        [ t env goto_statement_keyword;
+        [
+          t env goto_statement_keyword;
           Space;
           t env goto_statement_label_name;
           t env goto_statement_semicolon;
-          Newline ]
+          Newline;
+        ]
     | Syntax.ThrowStatement
         { throw_keyword = kw; throw_expression = expr; throw_semicolon = semi }
       ->
@@ -1219,10 +1365,12 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
     | Syntax.ConcurrentStatement
         { concurrent_keyword = kw; concurrent_statement = statement } ->
       Concat
-        [ t env kw;
+        [
+          t env kw;
           Space;
           handle_possible_compound_statement env statement;
-          Newline ]
+          Newline;
+        ]
     | Syntax.SimpleInitializer
         { simple_initializer_equal = eq_kw; simple_initializer_value = value }
       ->
@@ -1244,7 +1392,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           anonymous_body = body;
         } ->
       Concat
-        [ handle_attribute_spec env attr ~always_split:false;
+        [
+          handle_attribute_spec env attr ~always_split:false;
           when_present attr space;
           t env static_kw;
           when_present static_kw space;
@@ -1259,7 +1408,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
             env
             ~space:false
             ~allow_collapse:true
-            body ]
+            body;
+        ]
     | Syntax.AnonymousFunctionUseClause
         {
           anonymous_use_keyword = kw;
@@ -1279,7 +1429,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           lambda_body = body;
         } ->
       Concat
-        [ handle_attribute_spec env attr ~always_split:false;
+        [
+          handle_attribute_spec env attr ~always_split:false;
           when_present attr space;
           t env async;
           when_present async space;
@@ -1288,7 +1439,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           t env signature;
           Space;
           t env arrow;
-          handle_lambda_body env body ]
+          handle_lambda_body env body;
+        ]
     | Syntax.LambdaSignature
         {
           lambda_left_paren = lp;
@@ -1311,16 +1463,19 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           yield_from_operand = operand;
         } ->
       Concat
-        [ t env yield_kw;
+        [
+          t env yield_kw;
           Space;
           t env from_kw;
           Space;
           SplitWith Cost.Base;
-          Nest [t env operand] ]
+          Nest [t env operand];
+        ]
     | Syntax.PrefixUnaryExpression
         { prefix_unary_operator = operator; prefix_unary_operand = operand } ->
       Concat
-        [ t env operator;
+        [
+          t env operator;
           (match Syntax.syntax operator with
           | Syntax.Token x ->
             let is_parenthesized =
@@ -1341,7 +1496,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
                   Space
               | _ -> Nothing))
           | _ -> Nothing);
-          t env operand ]
+          t env operand;
+        ]
     | Syntax.BinaryExpression
         { binary_left_operand; binary_operator; binary_right_operand } ->
       Syntax.(
@@ -1384,11 +1540,13 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
                     };
                 } ) ->
             Concat
-              [ t env list_keyword;
+              [
+                t env list_keyword;
                 WithRule
                   ( Rule.Parental,
                     Concat
-                      [ t env list_left_paren;
+                      [
+                        t env list_left_paren;
                         nest
                           env
                           list_right_paren
@@ -1404,8 +1562,9 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
                         nest
                           env
                           function_call_right_paren
-                          [transform_arg_list env function_call_argument_list]
-                      ] ) ]
+                          [transform_arg_list env function_call_argument_list];
+                      ] );
+              ]
           | _ ->
             transform_binary_expression
               env
@@ -1423,10 +1582,12 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           nullable_as_right_operand = right;
         } ->
       Concat
-        [ t env left;
+        [
+          t env left;
           Space;
           SplitWith Cost.Base;
-          Nest [t env kw; Space; t env right] ]
+          Nest [t env kw; Space; t env right];
+        ]
     | Syntax.ConditionalExpression
         {
           conditional_test = test_expr;
@@ -1439,18 +1600,21 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         ( Rule.Parental,
           t env test_expr,
           Nest
-            [ Space;
+            [
+              Space;
               Split;
               t env q_kw;
               when_present true_expr (fun () ->
                   Concat
-                    [ Space;
+                    [
+                      Space;
                       ( if env.Env.indent_width = 2 then
                         Nest [t env true_expr]
                       else
                         t env true_expr );
                       Space;
-                      Split ]);
+                      Split;
+                    ]);
               t env c_kw;
               Space;
               ( if
@@ -1458,7 +1622,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
               then
                 Nest [t env false_expr]
               else
-                t env false_expr ) ] )
+                t env false_expr );
+            ] )
     | Syntax.FunctionCallExpression _ -> handle_possible_chaining env node
     | Syntax.EvalExpression
         {
@@ -1476,8 +1641,10 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           isset_right_paren = right_p;
         } ->
       Concat
-        [ t env kw;
-          transform_argish env ~allow_trailing:false left_p args right_p ]
+        [
+          t env kw;
+          transform_argish env ~allow_trailing:false left_p args right_p;
+        ]
     | Syntax.DefineExpression
         {
           define_keyword = kw;
@@ -1501,10 +1668,11 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           parenthesized_expression_right_paren = right_p;
         } ->
       Concat
-        [ t env left_p;
+        [
+          t env left_p;
           Split;
           WithRule
-            (Rule.Parental, Concat [Nest [t env expr]; Split; t env right_p])
+            (Rule.Parental, Concat [Nest [t env expr]; Split; t env right_p]);
         ]
     | Syntax.BracedExpression
         {
@@ -1514,7 +1682,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         } ->
       (* TODO: revisit this *)
       Concat
-        [ t env left_b;
+        [
+          t env left_b;
           Split;
           (let rule =
              if
@@ -1525,7 +1694,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
              else
                Rule.Parental
            in
-           WithRule (rule, Concat [Nest [t env expr]; Split; t env right_b]))
+           WithRule (rule, Concat [Nest [t env expr]; Split; t env right_b]));
         ]
     | Syntax.EmbeddedBracedExpression
         {
@@ -1608,45 +1777,63 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           space_split ()
       in
       Concat
-        [ t env classkw;
+        [
+          t env classkw;
           transform_argish env left_p arg_list right_p;
           when_present extends_kw (fun () ->
               Concat
-                [ Space;
+                [
+                  Space;
                   Split;
                   WithRule
                     ( Rule.Parental,
                       Nest
-                        [ Span
-                            [ t env extends_kw;
+                        [
+                          Span
+                            [
+                              t env extends_kw;
                               Space;
                               Split;
                               WithRule
                                 ( Rule.Parental,
                                   Nest
-                                    [ handle_possible_list
+                                    [
+                                      handle_possible_list
                                         env
                                         ~after_each:after_each_ancestor
-                                        extends ] ) ] ] ) ]);
+                                        extends;
+                                    ] );
+                            ];
+                        ] );
+                ]);
           when_present impl_kw (fun () ->
               Concat
-                [ Space;
+                [
+                  Space;
                   Split;
                   WithRule
                     ( Rule.Parental,
                       Nest
-                        [ Span
-                            [ t env impl_kw;
+                        [
+                          Span
+                            [
+                              t env impl_kw;
                               Space;
                               Split;
                               WithRule
                                 ( Rule.Parental,
                                   Nest
-                                    [ handle_possible_list
+                                    [
+                                      handle_possible_list
                                         env
                                         ~after_each:after_each_ancestor
-                                        impls ] ) ] ] ) ]);
-          t env body ]
+                                        impls;
+                                    ] );
+                            ];
+                        ] );
+                ]);
+          t env body;
+        ]
     | Syntax.ArrayCreationExpression
         {
           array_creation_left_bracket = left_b;
@@ -1722,7 +1909,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           awaitable_compound_statement = body;
         } ->
       Concat
-        [ handle_attribute_spec env attr ~always_split:false;
+        [
+          handle_attribute_spec env attr ~always_split:false;
           when_present attr space;
           t env async_kw;
           when_present async_kw space;
@@ -1730,7 +1918,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           when_present coroutine_kw space;
           (* TODO: rethink possible one line bodies *)
           (* TODO: correctly handle spacing after the closing brace *)
-          handle_possible_compound_statement env ~space:false body ]
+            handle_possible_compound_statement env ~space:false body;
+        ]
     | Syntax.XHPChildrenDeclaration
         {
           xhp_children_keyword = kw;
@@ -1753,15 +1942,18 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           xhp_category_semicolon = semi;
         } ->
       Concat
-        [ t env kw;
+        [
+          t env kw;
           (* TODO: Eliminate code duplication *)
-          WithRule
-            ( Rule.Parental,
-              Nest
-                [handle_possible_list env ~before_each:space_split categories]
-            );
+            WithRule
+              ( Rule.Parental,
+                Nest
+                  [
+                    handle_possible_list env ~before_each:space_split categories;
+                  ] );
           t env semi;
-          Newline ]
+          Newline;
+        ]
     | Syntax.XHPEnumType
         {
           xhp_enum_optional = opt;
@@ -1771,7 +1963,12 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           xhp_enum_right_brace = right_b;
         } ->
       Concat
-        [t env opt; t env kw; Space; transform_argish env left_b values right_b]
+        [
+          t env opt;
+          t env kw;
+          Space;
+          transform_argish env left_b values right_b;
+        ]
     | Syntax.XHPClassAttributeDeclaration
         {
           xhp_attribute_keyword = kw;
@@ -1779,7 +1976,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           xhp_attribute_semicolon = semi;
         } ->
       Concat
-        [ t env kw;
+        [
+          t env kw;
           (match Syntax.syntax xhp_attributes with
           | Syntax.Missing -> Nothing
           | Syntax.SyntaxList [attr] ->
@@ -1788,7 +1986,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
             Nest [handle_list env ~before_each:newline attrs]
           | _ -> failwith "Expected SyntaxList");
           t env semi;
-          Newline ]
+          Newline;
+        ]
     | Syntax.XHPClassAttribute
         {
           xhp_attribute_decl_type = attr_type;
@@ -1798,13 +1997,15 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         } ->
       (* TODO: figure out nesting here *)
       Concat
-        [ t env attr_type;
+        [
+          t env attr_type;
           Space;
           t env name;
           when_present init space;
           t env init;
           when_present req space;
-          t env req ]
+          t env req;
+        ]
     | Syntax.XHPSimpleAttribute
         {
           xhp_simple_attribute_name = name;
@@ -1820,11 +2021,13 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           xhp_spread_attribute_right_brace = r_brace;
         } ->
       Span
-        [ t env l_brace;
+        [
+          t env l_brace;
           t env spread;
           SplitWith Cost.Base;
           Nest [t env expr];
-          t env r_brace ]
+          t env r_brace;
+        ]
     | Syntax.XHPOpen
         {
           xhp_open_left_angle = left_a;
@@ -1833,29 +2036,36 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           xhp_open_right_angle = right_a;
         } ->
       Concat
-        [ t env left_a;
+        [
+          t env left_a;
           t env name;
           (match Syntax.syntax attrs with
           | Syntax.Missing ->
             handle_xhp_open_right_angle_token env attrs right_a
           | _ ->
             Concat
-              [ Space;
+              [
+                Space;
                 Split;
                 WithRule
                   ( Rule.Parental,
                     Concat
-                      [ Nest
-                          [ handle_possible_list
+                      [
+                        Nest
+                          [
+                            handle_possible_list
                               env
                               ~after_each:(fun is_last ->
                                 if not is_last then
                                   space_split ()
                                 else
                                   Nothing)
-                              attrs ];
-                        handle_xhp_open_right_angle_token env attrs right_a ]
-                  ) ]) ]
+                              attrs;
+                          ];
+                        handle_xhp_open_right_angle_token env attrs right_a;
+                      ] );
+              ]);
+        ]
     | Syntax.XHPExpression { xhp_open; xhp_body = body; xhp_close = close } ->
       let handle_xhp_body body =
         match Syntax.syntax body with
@@ -1912,33 +2122,39 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
                    let trailing = Syntax.trailing_trivia node in
                    let leading_whitespace =
                      Concat
-                       [ (* Whitespace in an XHP body is *only* significant when adjacent to
+                       [
+                         (* Whitespace in an XHP body is *only* significant when adjacent to
                an XHPBody token, so we are free to add splits between other
                nodes (like XHPExpressions and BracedExpressions). *)
-                         ( if
-                           (not !prev_token_was_xhpbody) && not node_is_xhpbody
-                         then
-                           Split
-                         else
-                           Nothing );
+                           ( if
+                             (not !prev_token_was_xhpbody)
+                             && not node_is_xhpbody
+                           then
+                             Split
+                           else
+                             Nothing );
                          (* If the previous token was an XHPBody token, the lexer will have
                scanned trailing trivia for it, so we can handle the leading
                trivia for this node normally. Otherwise, handle the trivia up to
                the first newline as trailing trivia. *)
-                         ( if !prev_token_was_xhpbody then
-                           transform_leading_trivia leading
-                         else
-                           transform_xhp_leading_trivia leading ) ]
+                           ( if !prev_token_was_xhpbody then
+                             transform_leading_trivia leading
+                           else
+                             transform_xhp_leading_trivia leading );
+                       ]
                    in
                    prev_token_was_xhpbody := node_is_xhpbody;
                    Concat
-                     [ leading_whitespace;
+                     [
+                       leading_whitespace;
                        preserve_xhpbody_whitespace leading;
                        t env node;
-                       preserve_xhpbody_whitespace trailing ]))
+                       preserve_xhpbody_whitespace trailing;
+                     ]))
           in
           Concat
-            [ transformed_body;
+            [
+              transformed_body;
               ( if !prev_token_was_xhpbody then
                 Nothing
               else if
@@ -1951,19 +2167,24 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
             then
                 Newline
               else
-                Split ) ]
+                Split );
+            ]
         | _ -> failwith "Expected SyntaxList"
       in
       WithOverridingParentalRule
         (Concat
-           [ t env xhp_open;
+           [
+             t env xhp_open;
              Nest [handle_xhp_body body];
              when_present close (fun () ->
                  let (leading, close) = remove_leading_trivia close in
                  Concat
-                   [ (* Ignore extra newlines by treating this as trailing trivia *)
-                     ignore_trailing_invisibles leading;
-                     t env close ]) ])
+                   [
+                     (* Ignore extra newlines by treating this as trailing trivia *)
+                       ignore_trailing_invisibles leading;
+                     t env close;
+                   ]);
+           ])
     | Syntax.VarrayTypeSpecifier
         {
           varray_keyword = kw;
@@ -1973,13 +2194,15 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           varray_right_angle = right_a;
         } ->
       Concat
-        [ t env kw;
+        [
+          t env kw;
           transform_braced_item_with_trailer
             env
             left_a
             varray_type
             trailing_comma
-            right_a ]
+            right_a;
+        ]
     | Syntax.VectorArrayTypeSpecifier
         {
           vector_array_keyword = kw;
@@ -1997,13 +2220,15 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           vector_type_right_angle = right_a;
         } ->
       Concat
-        [ t env kw;
+        [
+          t env kw;
           transform_braced_item_with_trailer
             env
             left_a
             vec_type
             trailing_comma
-            right_a ]
+            right_a;
+        ]
     | Syntax.KeysetTypeSpecifier
         {
           keyset_type_keyword = kw;
@@ -2013,13 +2238,15 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           keyset_type_right_angle = right_a;
         } ->
       Concat
-        [ t env kw;
+        [
+          t env kw;
           transform_braced_item_with_trailer
             env
             left_a
             ks_type
             trailing_comma
-            right_a ]
+            right_a;
+        ]
     | Syntax.TypeParameter
         {
           type_attribute_spec = attr;
@@ -2029,7 +2256,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           type_constraints = constraints;
         } ->
       Concat
-        [ handle_attribute_spec env attr ~always_split:false;
+        [
+          handle_attribute_spec env attr ~always_split:false;
           when_present attr space;
           t env reified;
           when_present reified space;
@@ -2040,7 +2268,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
               if is_last then
                 Nothing
               else
-                Space) ]
+                Space);
+        ]
     | Syntax.TypeConstraint { constraint_keyword = kw; constraint_type } ->
       Concat [t env kw; Space; t env constraint_type]
     | Syntax.DarrayTypeSpecifier
@@ -2057,8 +2286,10 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
       let val_list_item = Syntax.make_list_item value trailing_comma in
       let args = make_list [key_list_item; val_list_item] in
       Concat
-        [ t env kw;
-          transform_argish env ~allow_trailing:true left_a args right_a ]
+        [
+          t env kw;
+          transform_argish env ~allow_trailing:true left_a args right_a;
+        ]
     | Syntax.MapArrayTypeSpecifier
         {
           map_array_keyword = kw;
@@ -2069,11 +2300,13 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           map_array_right_angle = right_a;
         } ->
       Concat
-        [ t env kw;
+        [
+          t env kw;
           (let key_list_item = Syntax.make_list_item key comma_kw in
            let val_list_item = Syntax.make_list_item value (make_missing ()) in
            let args = make_list [key_list_item; val_list_item] in
-           transform_argish env ~allow_trailing:false left_a args right_a) ]
+           transform_argish env ~allow_trailing:false left_a args right_a);
+        ]
     | Syntax.DictionaryTypeSpecifier
         {
           dictionary_type_keyword = kw;
@@ -2095,7 +2328,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           closure_outer_right_paren = outer_right_p;
         } ->
       Concat
-        [ t env outer_left_p;
+        [
+          t env outer_left_p;
           t env coroutine;
           when_present coroutine space;
           t env kw;
@@ -2106,7 +2340,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
             inner_right_p
             colon
             ret_type;
-          t env outer_right_p ]
+          t env outer_right_p;
+        ]
     | Syntax.ClosureParameterTypeSpecifier
         {
           closure_parameter_call_convention = callconv;
@@ -2122,13 +2357,15 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           classname_right_angle = right_a;
         } ->
       Concat
-        [ t env kw;
+        [
+          t env kw;
           transform_braced_item_with_trailer
             env
             left_a
             class_type
             trailing_comma
-            right_a ]
+            right_a;
+        ]
     | Syntax.FieldSpecifier
         {
           field_question = question;
@@ -2221,13 +2458,15 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           decorated_expression_expression = expr;
         } ->
       Concat
-        [ t env op;
+        [
+          t env op;
           begin
             match Syntax.syntax op with
             | Syntax.Token t when Token.kind t = TokenKind.Inout -> Space
             | _ -> Nothing
           end;
-          t env expr ]
+          t env expr;
+        ]
     | Syntax.LetStatement
         {
           let_statement_keyword = kw;
@@ -2238,7 +2477,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           let_statement_semicolon = semi;
         } ->
       Concat
-        [ t env kw;
+        [
+          t env kw;
           Space;
           t env name;
           when_present colon space;
@@ -2248,7 +2488,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           Space;
           t env init;
           t env semi;
-          Newline ]
+          Newline;
+        ]
     | Syntax.ErrorSyntax _ -> raise Hackfmt_error.InvalidSyntax)
 
 and when_present node f =
@@ -2276,10 +2517,12 @@ and braced_block_nest env ?(allow_collapse = true) open_b close_b nodes =
      * BlockNest, so that comments will be indented correctly. *)
     let (leading, close_b) = remove_leading_trivia close_b in
     Concat
-      [ t env open_b;
+      [
+        t env open_b;
         Newline;
         BlockNest [nodes; transform_leading_trivia leading; Newline];
-        t env close_b ]
+        t env close_b;
+      ]
 
 and delimited_nest
     env
@@ -2366,7 +2609,8 @@ and handle_possible_compound_statement
   | Syntax.CompoundStatement
       { compound_left_brace; compound_statements; compound_right_brace } ->
     Concat
-      [ handle_compound_statement
+      [
+        handle_compound_statement
           env
           ~allow_collapse
           compound_left_brace
@@ -2375,20 +2619,23 @@ and handle_possible_compound_statement
         ( if space then
           Space
         else
-          Nothing ) ]
+          Nothing );
+      ]
   | Syntax.Token _ -> t env node
   | _ -> Concat [Newline; BlockNest [t env node]]
 
 and handle_compound_statement
     env ?(allow_collapse = false) left_b statements right_b =
   Concat
-    [ Space;
+    [
+      Space;
       braced_block_nest
         env
         ~allow_collapse
         left_b
         right_b
-        [handle_possible_list env statements] ]
+        [handle_possible_list env statements];
+    ]
 
 (**
  * Special-case handling for lists of declarators, where we want the splits
@@ -2401,11 +2648,13 @@ and handle_declarator_list env declarators =
   | Syntax.Missing -> Nothing
   | Syntax.SyntaxList [declarator] ->
     Nest
-      [ Space;
+      [
+        Space;
         (* Use an independent split, so we don't break just because a line break
          * occurs in the declarator. *)
-        SplitWith Cost.Base;
-        t env declarator ]
+          SplitWith Cost.Base;
+        t env declarator;
+      ]
   | Syntax.SyntaxList xs ->
     (* Use Rule.Parental to break each declarator onto its own line if any
      * line break occurs in a declarator, or if they can't all fit onto one
@@ -2458,11 +2707,13 @@ and handle_xhp_open_right_angle_token env attrs node =
   match Syntax.syntax node with
   | Syntax.Token token ->
     Concat
-      [ ( if Token.text token = "/>" then
+      [
+        ( if Token.text token = "/>" then
           Concat [Space; when_present attrs split]
         else
           Nothing );
-        t env node ]
+        t env node;
+      ]
   | _ -> failwith "expected xhp_open right_angle token"
 
 and handle_possible_chaining env node =
@@ -2519,11 +2770,13 @@ and handle_possible_chaining env node =
   let chain_list = List.rev chain_list in
   let transform_chain (arrow, member, targs, argish) =
     Concat
-      [ t env arrow;
+      [
+        t env arrow;
         t env member;
         Option.value_map targs ~default:Nothing ~f:(t env);
         Option.value_map argish ~default:Nothing ~f:(fun (lp, args, rp) ->
-            transform_argish env lp args rp) ]
+            transform_argish env lp args rp);
+      ]
   in
   (* The actual transform for function call expressions (the default transform
      just calls into [handle_possible_chaining]). *)
@@ -2551,12 +2804,14 @@ and handle_possible_chaining env node =
   | [] -> transform_first_receiver first_receiver
   | [hd] ->
     Concat
-      [ Span [transform_first_receiver first_receiver];
+      [
+        Span [transform_first_receiver first_receiver];
         ( if first_receiver_has_trailing_newline then
           Newline
         else
           SplitWith Cost.High );
-        Nest [transform_chain hd] ]
+        Nest [transform_chain hd];
+      ]
   | hd :: tl ->
     let transformed_hd = transform_chain hd in
     let tl = List.map tl transform_chain in
@@ -2588,18 +2843,24 @@ and handle_possible_chaining env node =
             Rule.Simple Cost.NoCost
     in
     Span
-      [ WithLazyRule
+      [
+        WithLazyRule
           ( rule_type,
             Concat
-              [ transform_first_receiver first_receiver;
+              [
+                transform_first_receiver first_receiver;
                 ( if first_receiver_has_trailing_newline then
                   Newline
                 else
-                  SplitWith Cost.Base ) ],
+                  SplitWith Cost.Base );
+              ],
             Concat
-              [ (* This needs to be nested separately due to the above SplitWith *)
-                Nest [transformed_hd];
-                Nest (List.map tl ~f:(fun x -> Concat [Split; x])) ] ) ]
+              [
+                (* This needs to be nested separately due to the above SplitWith *)
+                  Nest [transformed_hd];
+                Nest (List.map tl ~f:(fun x -> Concat [Split; x]));
+              ] );
+      ]
 
 and transform_fn_decl_name env modifiers kw name type_params leftp =
   let mods = handle_possible_list env ~after_each:(fun _ -> Space) modifiers in
@@ -2647,17 +2908,20 @@ and transform_fn_decl_args env params rightp colon ret_type where =
   WithRule
     ( Rule.Parental,
       Concat
-        [ transform_possible_comma_list env ~allow_trailing params rightp;
+        [
+          transform_possible_comma_list env ~allow_trailing params rightp;
           t env colon;
           when_present colon space;
           t env ret_type;
           when_present where space;
-          t env where ] )
+          t env where;
+        ] )
 
 and transform_argish_with_return_type env left_p params right_p colon ret_type
     =
   Concat
-    [ t env left_p;
+    [
+      t env left_p;
       when_present params split;
       transform_fn_decl_args
         env
@@ -2665,7 +2929,8 @@ and transform_argish_with_return_type env left_p params right_p colon ret_type
         right_p
         colon
         ret_type
-        (Syntax.make_missing SourceText.empty 0) ]
+        (Syntax.make_missing SourceText.empty 0);
+    ]
 
 and transform_argish
     env
@@ -2842,23 +3107,27 @@ and transform_trailing_comma env ~allow_trailing item comma =
   match Syntax.syntax comma with
   | Syntax.Token tok ->
     Concat
-      [ transform_argish_item env item;
+      [
+        transform_argish_item env item;
         transform_leading_trivia (Token.leading tok);
         ( if allow_trailing then
           TrailingComma true
         else
           Nothing );
         Ignore (Token.text tok, Token.width tok);
-        transform_trailing_trivia (Token.trailing tok) ]
+        transform_trailing_trivia (Token.trailing tok);
+      ]
   | Syntax.Missing ->
     let (item, item_trailing) = remove_trailing_trivia item in
     Concat
-      [ transform_argish_item env item;
+      [
+        transform_argish_item env item;
         ( if allow_trailing then
           TrailingComma false
         else
           Nothing );
-        transform_trailing_trivia item_trailing ]
+        transform_trailing_trivia item_trailing;
+      ]
   | _ -> failwith "Expected Token"
 
 and transform_braced_item_with_trailer env left_p item comma right_p =
@@ -2908,7 +3177,8 @@ and transform_container_literal
     | None -> Nothing
   in
   Concat
-    [ t env kw;
+    [
+      t env kw;
       ty;
       ( if space then
         Space
@@ -2920,7 +3190,8 @@ and transform_container_literal
         ?allow_trailing
         left_p
         members
-        right_p ]
+        right_p;
+    ]
 
 and replace_leading_trivia node new_leading_trivia =
   match Syntax.leading_token node with
@@ -2976,30 +3247,35 @@ and transform_last_arg env ~allow_trailing node =
 
 and transform_mapish_entry env key arrow value =
   Concat
-    [ t env key;
+    [
+      t env key;
       Space;
       t env arrow;
       Space;
       SplitWith Cost.Base;
-      Nest [t env value] ]
+      Nest [t env value];
+    ]
 
 and transform_keyword_expression_statement env kw expr semi =
   Concat
-    [ t env kw;
+    [
+      t env kw;
       when_present expr (fun () ->
           Concat [Space; SplitWith Cost.Moderate; Nest [t env expr]]);
       t env semi;
-      Newline ]
+      Newline;
+    ]
 
 and transform_keyword_expr_list_statement env kw expr_list semi =
   Concat [t env kw; handle_declarator_list env expr_list; t env semi; Newline]
 
 and transform_condition env left_p condition right_p =
   Concat
-    [ t env left_p;
+    [
+      t env left_p;
       Split;
       WithRule
-        (Rule.Parental, Concat [Nest [t env condition]; Split; t env right_p])
+        (Rule.Parental, Concat [Nest [t env condition]; Split; t env right_p]);
     ]
 
 and get_operator_type op =
@@ -3026,15 +3302,18 @@ and transform_binary_expression env ~is_nested (left, operator, right) =
         Concat [Space; Split; Nest [t env right]] )
   else if Full_fidelity_operator.is_assignment operator_t then
     Concat
-      [ t env left;
+      [
+        t env left;
         Space;
         t env operator;
         Space;
         SplitWith Cost.Moderate;
-        Nest [t env right] ]
+        Nest [t env right];
+      ]
   else
     Concat
-      [ (let penv = Full_fidelity_parser_env.default in
+      [
+        (let penv = Full_fidelity_parser_env.default in
          let precedence = Full_fidelity_operator.precedence penv operator_t in
          let rec flatten_expression expr =
            match Syntax.syntax expr with
@@ -3090,7 +3369,8 @@ and transform_binary_expression env ~is_nested (left, operator, right) =
                          && node_has_trailing_newline !last_operand
                        in
                        Concat
-                         [ ( if newline_before_op then
+                         [
+                           ( if newline_before_op then
                              Newline
                            else if op_is_leading then
                              if op_has_spaces then
@@ -3104,7 +3384,8 @@ and transform_binary_expression env ~is_nested (left, operator, right) =
                            ( if is_concat op then
                              ConcatOperator (t env op)
                            else
-                             t env op ) ]
+                             t env op );
+                         ]
                      ) else
                        let operand = x in
                        last_operand := x;
@@ -3113,7 +3394,8 @@ and transform_binary_expression env ~is_nested (left, operator, right) =
                        in
                        let op_is_leading = operator_is_leading !last_op in
                        Concat
-                         [ ( if op_is_leading then
+                         [
+                           ( if op_is_leading then
                              if op_has_spaces then
                                Space
                              else
@@ -3122,13 +3404,14 @@ and transform_binary_expression env ~is_nested (left, operator, right) =
                              space_split ()
                            else
                              Split );
-                           transform_operand operand ])
+                           transform_operand operand;
+                         ])
                in
                if is_nested then
                  Nest expression
                else
                  ConditionalNest expression )
-         | _ -> failwith "Expected non empty list of binary expression pieces")
+         | _ -> failwith "Expected non empty list of binary expression pieces");
       ]
 
 and make_string text width =
@@ -3188,7 +3471,8 @@ and transform_node_if_ignored node =
     else
       Some
         (Concat
-           [ transform_leading_trivia leading_before;
+           [
+             transform_leading_trivia leading_before;
              (* If we have a non-error-suppression comment here, then we want to ensure
        that we don't join it up onto the preceding line. Since we only scan
        leading trivia for hackfmt-ignore comments, and joining the comment
@@ -3199,16 +3483,17 @@ and transform_node_if_ignored node =
 
        Error-suppression comments are different--they are specially handled by
        the lexer to ensure that they always appear in leading trivia. *)
-             ( if is_fixme then
-               Nothing
-             else
-               Newline );
+               ( if is_fixme then
+                 Nothing
+               else
+                 Newline );
              make_string (Syntax.text node) (Syntax.width node);
              transform_trailing_trivia trailing_trivia;
              ( if has_newline trailing_trivia then
                Newline
              else
-               Nothing ) ])
+               Nothing );
+           ])
 
 and ignore_re = Str.regexp_string "hackfmt-ignore"
 
@@ -3271,7 +3556,8 @@ and transform_trivia ~is_leading trivia =
     );
     comments :=
       Concat
-        [ transform_leading_invisibles (List.rev !leading_invisibles);
+        [
+          transform_leading_invisibles (List.rev !leading_invisibles);
           Option.value !last_comment ~default:Nothing;
           ignore_trailing_invisibles (List.rev !trailing_invisibles);
           ( if !last_comment_was_delimited && !whitespace_followed_last_comment
@@ -3280,7 +3566,8 @@ and transform_trivia ~is_leading trivia =
           else if !newline_followed_last_comment then
             Newline
           else
-            Nothing ) ]
+            Nothing );
+        ]
       :: !comments;
     last_comment := None;
     leading_invisibles := [];
@@ -3329,10 +3616,12 @@ and transform_trivia ~is_leading trivia =
             Trivia.create_delimited_comment @@ String.sub str start_index len
           in
           Concat
-            [ Ignore ("\n", 1);
+            [
+              Ignore ("\n", 1);
               Newline;
               Ignore (String.make start_index ' ', start_index);
-              Comment (Trivia.text dc, Trivia.width dc) ]
+              Comment (Trivia.text dc, Trivia.width dc);
+            ]
         in
         let hd = List.hd_exn delimited_lines in
         let tl = List.tl_exn delimited_lines in
@@ -3347,13 +3636,15 @@ and transform_trivia ~is_leading trivia =
         last_comment :=
           Some
             (Concat
-               [ ( if should_break then
+               [
+                 ( if should_break then
                    Newline
                  else if preceded_by_whitespace then
                    Space
                  else
                    Nothing );
-                 Concat (hd :: List.map tl ~f:map_tail) ]);
+                 Concat (hd :: List.map tl ~f:map_tail);
+               ]);
         last_comment_was_delimited := true;
         currently_leading := false
       | TriviaKind.FallThrough
@@ -3362,11 +3653,13 @@ and transform_trivia ~is_leading trivia =
         last_comment :=
           Some
             (Concat
-               [ ( if !currently_leading then
+               [
+                 ( if !currently_leading then
                    Newline
                  else
                    Space );
-                 SingleLineComment (Trivia.text triv, Trivia.width triv) ]);
+                 SingleLineComment (Trivia.text triv, Trivia.width triv);
+               ]);
         last_comment_was_delimited := false;
         currently_leading := false
       | TriviaKind.EndOfLine ->
@@ -3405,11 +3698,13 @@ and transform_leading_invisibles triv =
          | TriviaKind.EndOfLine ->
            newlines := !newlines + 1;
            Concat
-             [ ignored;
+             [
+               ignored;
                ( if !newlines <= _MAX_CONSECUTIVE_BLANK_LINES then
                  BlankLine
                else
-                 Nothing ) ]
+                 Nothing );
+             ]
          | _ -> ignored))
 
 and ignore_trailing_invisibles triv =
@@ -3424,8 +3719,10 @@ and transform_xhp_leading_trivia triv =
           (t :: upto, after, Trivia.kind t = TriviaKind.EndOfLine))
   in
   Concat
-    [ ignore_trailing_invisibles up_to_first_newline;
-      transform_leading_invisibles after_newline ]
+    [
+      ignore_trailing_invisibles up_to_first_newline;
+      transform_leading_invisibles after_newline;
+    ]
 
 and node_has_trailing_newline node =
   let trivia = Syntax.trailing_trivia node in
@@ -3438,11 +3735,13 @@ and transform_consequence
     handle_possible_compound_statement env node_body
   | _ ->
     Concat
-      [ Space;
+      [
+        Space;
         ( if has_newline (Syntax.trailing_trivia node_newline) then
           Concat [Newline; Nest [t env node_body]]
         else
           WithRule (Rule.Parental, Nest [Span [Space; Split; t env node_body]])
-        ) ]
+        );
+      ]
 
 let transform (env : Env.t) (node : Syntax.t) : Doc.t = t env node

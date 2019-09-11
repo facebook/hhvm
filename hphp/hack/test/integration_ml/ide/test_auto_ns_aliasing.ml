@@ -111,14 +111,16 @@ let test () =
     Test.setup_disk env
     @@ List.mapi
          (fun i contents -> (get_name i, contents))
-         [ autocomplete_contents0;
+         [
+           autocomplete_contents0;
            autocomplete_contents1;
            autocomplete_contents2;
            autocomplete_contents3;
            autocomplete_contents4;
            autocomplete_contents5;
            autocomplete_contents6;
-           autocomplete_contents7 ]
+           autocomplete_contents7;
+         ]
   in
   let env = Test.connect_persistent_client env in
   let test_legacy env contents expected =

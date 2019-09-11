@@ -18,13 +18,16 @@ let test_json_deser_ser_idempotent () =
   let md5 = "C0DEC0DEC0DEC0DEDEADBEEFDEADBEEF" in
   let json0 =
     JSON_Object
-      [ ("md5sum0", JSON_Number "-4548986510646525730");
+      [
+        ("md5sum0", JSON_Number "-4548986510646525730");
         ("md5sum1", JSON_Number "-2401053088876216593");
         ("sha1sum", JSON_String sha1);
         ( "types",
           JSON_Array
-            [ JSON_Object
-                [ ("name", JSON_String "Type1");
+            [
+              JSON_Object
+                [
+                  ("name", JSON_String "Type1");
                   ("kindOf", JSON_String "trait");
                   ("flags", JSON_Number "6");
                   ( "baseTypes",
@@ -33,10 +36,13 @@ let test_json_deser_ser_idempotent () =
                     JSON_Object
                       [("A", JSON_Array [JSON_String "B"; JSON_String "C"])] );
                   ("requireImplements", JSON_Array []);
-                  ("requireExtends", JSON_Array []) ] ] );
+                  ("requireExtends", JSON_Array []);
+                ];
+            ] );
         ("functions", JSON_Array [JSON_String "foo"; JSON_String "bar"]);
         ("constants", JSON_Array [JSON_String "c1"; JSON_String "c2"]);
-        ("typeAliases", JSON_Array []) ]
+        ("typeAliases", JSON_Array []);
+      ]
   in
   validate_json_deser_ser json0 md5 sha1
 
@@ -45,24 +51,32 @@ let test_json_deser_ser_type_alias () =
   let md5 = "C0DEC0DEC0DEC0DEDEADBEEFDEADBEEF" in
   let json0 =
     JSON_Object
-      [ ("md5sum0", JSON_Number "-4548986510646525730");
+      [
+        ("md5sum0", JSON_Number "-4548986510646525730");
         ("md5sum1", JSON_Number "-2401053088876216593");
         ("sha1sum", JSON_String sha1);
         ( "types",
           JSON_Array
-            [ JSON_Object
-                [ ("name", JSON_String "T0");
+            [
+              JSON_Object
+                [
+                  ("name", JSON_String "T0");
                   ("kindOf", JSON_String "typeAlias");
                   ("flags", JSON_Number "0");
                   ("baseTypes", JSON_Array []);
-                  ("attributes", JSON_Object [("A", JSON_Array [])]) ] ] );
+                  ("attributes", JSON_Object [("A", JSON_Array [])]);
+                ];
+            ] );
         ("functions", JSON_Array []);
         ("constants", JSON_Array []);
-        ("typeAliases", JSON_Array [JSON_String "T0"]) ]
+        ("typeAliases", JSON_Array [JSON_String "T0"]);
+      ]
   in
   validate_json_deser_ser json0 md5 sha1
 
 let () =
   Unit_test.run_all
-    [ ("test_json_deser_ser_idempotent", test_json_deser_ser_idempotent);
-      ("test_json_deser_ser_type_alias", test_json_deser_ser_type_alias) ]
+    [
+      ("test_json_deser_ser_idempotent", test_json_deser_ser_idempotent);
+      ("test_json_deser_ser_type_alias", test_json_deser_ser_type_alias);
+    ]

@@ -101,8 +101,10 @@ let contents hhi_dir =
   get_hhis hhi_dir
   |> List.map (fun (name, contents) ->
          Exp.tuple
-           [ Exp.constant (Const.string name);
-             Exp.constant (Const.string contents) ])
+           [
+             Exp.constant (Const.string name);
+             Exp.constant (Const.string contents);
+           ])
   |> Exp.array
 
 (* Whenever we see [%hhi_contents], replace it with all of the hhis *)

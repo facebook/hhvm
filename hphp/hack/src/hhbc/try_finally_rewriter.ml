@@ -148,11 +148,13 @@ let emit_goto ~in_finally_epilogue env label =
             emit_save_label_id label_id
         in
         gather
-          [ preamble;
+          [
+            preamble;
             emit_jump_to_label rgf_finally_start_label rgf_iterators_to_release;
             (* emit goto as an indicator for try/finally rewriter to generate
             finally epilogue, try/finally rewriter will remove it. *)
-            instr_goto label ]
+              instr_goto label;
+          ]
       | JT.ResolvedGoto_goto_from_finally ->
         Emit_fatal.raise_fatal_runtime
           err_pos
@@ -186,11 +188,13 @@ let emit_return ~verify_return ~verify_out ~num_out ~in_finally_epilogue env =
         | RGH.NotReified -> instr_verifyRetTypeC
         | RGH.MaybeReified ->
           gather
-            [ Emit_expression.get_type_structure_for_hint
+            [
+              Emit_expression.get_type_structure_for_hint
                 env
                 ~targ_map:SMap.empty
                 h;
-              instr_verifyRetTypeTS ]
+              instr_verifyRetTypeTS;
+            ]
         | RGH.DefinitelyReified ->
           let check = gather [instr_dup; instr_istypec OpNull] in
           RGH.simplify_verify_type env Pos.none check h instr_verifyRetTypeTS)
@@ -202,23 +206,27 @@ let emit_return ~verify_return ~verify_out ~num_out ~in_finally_epilogue env =
     if in_finally_epilogue then
       let load_retval_instr = instr_cgetl (Local.get_retval_local ()) in
       gather
-        [ load_retval_instr;
+        [
+          load_retval_instr;
           verify_return_instr ();
           verify_out;
           release_iterators_instr;
           ( if num_out <> 0 then
             instr_retm (num_out + 1)
           else
-            instr_retc ) ]
+            instr_retc );
+        ]
     else
       gather
-        [ verify_return_instr ();
+        [
+          verify_return_instr ();
           verify_out;
           release_iterators_instr;
           ( if num_out <> 0 then
             instr_retm (num_out + 1)
           else
-            instr_retc ) ]
+            instr_retc );
+        ]
   (* ret is in finally block and there might be iterators to release -
     jump to finally block via Jmp/IterBreak *)
   | Some (target_label, iterators_to_release) ->
@@ -233,11 +241,13 @@ let emit_return ~verify_return ~verify_out ~num_out ~in_finally_epilogue env =
         gather [save_state; save_retval]
     in
     gather
-      [ preamble;
+      [
+        preamble;
         emit_jump_to_label target_label iterators_to_release;
         (* emit ret instr as an indicator for try/finally rewriter to generate
         finally epilogue, try/finally rewriter will remove it. *)
-        instr_retc ]
+          instr_retc;
+      ]
 
 and emit_break_or_continue ~is_break ~in_finally_epilogue env pos level =
   let jump_targets = Emit_env.get_jump_targets env in
@@ -251,9 +261,11 @@ and emit_break_or_continue ~is_break ~in_finally_epilogue env pos level =
         empty
     in
     gather
-      [ preamble;
+      [
+        preamble;
         Emit_pos.emit_pos pos;
-        emit_jump_to_label target_label iterators_to_release ]
+        emit_jump_to_label target_label iterators_to_release;
+      ]
   | JT.ResolvedTryFinally
       {
         JT.target_label;
@@ -268,15 +280,17 @@ and emit_break_or_continue ~is_break ~in_finally_epilogue env pos level =
         empty
     in
     gather
-      [ preamble;
+      [
+        preamble;
         emit_jump_to_label finally_label iterators_to_release;
         Emit_pos.emit_pos pos;
         (* emit break/continue instr as an indicator for try/finally rewriter
          to generate finally epilogue - try/finally rewriter will remove it. *)
-        ( if is_break then
-          instr_break adjusted_level
-        else
-          instr_continue adjusted_level ) ]
+          ( if is_break then
+            instr_break adjusted_level
+          else
+            instr_continue adjusted_level );
+      ]
 
 let emit_finally_epilogue
     ~verify_return
@@ -316,10 +330,12 @@ let emit_finally_epilogue
   | [] -> empty
   | [(_, h)] ->
     gather
-      [ Emit_pos.emit_pos pos;
+      [
+        Emit_pos.emit_pos pos;
         instr_issetl (Local.get_label_id_local ());
         instr_jmpz finally_end;
-        emit_instr h ]
+        emit_instr h;
+      ]
   | (max_id, _) :: _ as lst ->
     (* mimic HHVM behavior:
       in some cases ids can be non-consequtive - this might happen i.e. return statement
@@ -357,12 +373,14 @@ let emit_finally_epilogue
     let (labels, bodies) = aux max_id lst [] [] in
     let labels = labels in
     gather
-      [ Emit_pos.emit_pos pos;
+      [
+        Emit_pos.emit_pos pos;
         instr_issetl (Local.get_label_id_local ());
         instr_jmpz finally_end;
         instr_cgetl (Local.get_label_id_local ());
         instr_switch labels;
-        gather bodies ]
+        gather bodies;
+      ]
 
 (*
 TODO: This codegen is unnecessarily complex.  Basically we are generating

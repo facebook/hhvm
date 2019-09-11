@@ -94,8 +94,10 @@ let multi_worker_nested_exn workers () =
 let multi_worker_nested = multi_worker_nested ~fail_inner:false
 
 let tests =
-  [ ("multi_worker_nested", multi_worker_nested);
-    ("multi_worker_nested_exn", multi_worker_nested_exn) ]
+  [
+    ("multi_worker_nested", multi_worker_nested);
+    ("multi_worker_nested_exn", multi_worker_nested_exn);
+  ]
 
 let () =
   Daemon.check_entry_point ();

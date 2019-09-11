@@ -194,7 +194,8 @@ let test_rm_dir dir =
   true
 
 let tests =
-  [ ("test_write_and_read", with_temp_dir test_write_and_read);
+  [
+    ("test_write_and_read", with_temp_dir test_write_and_read);
     ("test_is_directory_with_dot", with_temp_dir test_is_directory_with_dot);
     ("test_mkdir_p", with_temp_dir test_mkdir_p);
     ( "test_write_needs_directory_tree",
@@ -226,6 +227,7 @@ let tests =
     ( "test_rename_src_ends_with_slash_target_is_dir",
       with_temp_dir test_rename_src_ends_with_slash_target_is_dir );
     ("test_readdir", with_temp_dir test_readdir);
-    ("test_rm_dir", with_temp_dir test_rm_dir) ]
+    ("test_rm_dir", with_temp_dir test_rm_dir);
+  ]
 
 let () = Unit_test.run_all tests

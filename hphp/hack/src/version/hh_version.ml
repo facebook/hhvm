@@ -23,6 +23,8 @@ let version : string =
 let version_json =
   Hh_json.(
     JSON_Object
-      [ ("commit", JSON_String Build_id.build_revision);
+      [
+        ("commit", JSON_String Build_id.build_revision);
         ("commit_time", int_ Build_id.build_commit_time);
-        ("api_version", int_ api_version) ])
+        ("api_version", int_ api_version);
+      ])

@@ -282,7 +282,8 @@ let test_line_text () =
   true
 
 let tests =
-  [ ("test_basic_edit", test_basic_edit);
+  [
+    ("test_basic_edit", test_basic_edit);
     ("test_basic_edit2", test_basic_edit2);
     ("test_multi_line_edit", test_multi_line_edit);
     ("test_multi_line_edit2", test_multi_line_edit2);
@@ -294,6 +295,7 @@ let tests =
     ("test-utf8", test_utf8);
     ("test-offsets", test_offsets);
     ("test_large", test_large);
-    ("test_line_text", test_line_text) ]
+    ("test_line_text", test_line_text);
+  ]
 
 let () = Unit_test.run_all tests

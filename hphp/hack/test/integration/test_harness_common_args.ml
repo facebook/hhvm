@@ -34,8 +34,10 @@ let parse () =
   let hh_server = ref None in
   let hh_client = ref None in
   let options =
-    [ ("--hh-server", string_spec hh_server, "Path to hh_server");
-      ("--hh-client", string_spec hh_client, "Path to hh_client") ]
+    [
+      ("--hh-server", string_spec hh_server, "Path to hh_server");
+      ("--hh-client", string_spec hh_client, "Path to hh_client");
+    ]
   in
   let () = Arg.parse options (fun s -> template_repo := Some s) usage in
   let template_repo = requires "template repo" template_repo in

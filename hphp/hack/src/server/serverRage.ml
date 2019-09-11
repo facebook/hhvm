@@ -60,7 +60,8 @@ let go (_genv : ServerEnv.genv) (env : ServerEnv.env) : ServerRageTypes.result
             Diagnostic_subscription.pop_errors sub env.errorl
           in
           let messages =
-            [ "hh_server view of diagnostics on client:";
+            [
+              "hh_server view of diagnostics on client:";
               "client_has_message";
               ClientProvider.client_has_message client |> string_of_bool;
               "ide_needs_parsing";
@@ -73,7 +74,8 @@ let go (_genv : ServerEnv.genv) (env : ServerEnv.env) : ServerRageTypes.result
               is_truncated |> string_of_bool;
               "error_files_to_push";
               errors |> SMap.keys |> List.length |> string_of_int;
-              "" ]
+              "";
+            ]
           in
           String.concat "\n" messages
       in

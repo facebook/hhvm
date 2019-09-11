@@ -15,7 +15,8 @@ abstract class Base {
 }"
 
 let make_disk_changes base_content =
-  [ ("base.php", base_content);
+  [
+    ("base.php", base_content);
     ( "parent.php",
       "<?hh // strict
 
@@ -38,7 +39,8 @@ class Child1 extends ParentClass {
 class Child2 extends ParentClass {
   public static function meth(int $x): void {}
 }"
-    ) ]
+    );
+  ]
 
 let errors_to_string errors =
   List.fold_left

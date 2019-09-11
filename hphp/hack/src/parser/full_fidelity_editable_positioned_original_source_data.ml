@@ -134,7 +134,9 @@ let spanning_between b e =
 let to_json data =
   Hh_json.(
     JSON_Object
-      [ ("offset", int_ data.offset);
+      [
+        ("offset", int_ data.offset);
         ("leading_width", int_ data.leading_width);
         ("width", int_ data.width);
-        ("trailing_width", int_ data.trailing_width) ])
+        ("trailing_width", int_ data.trailing_width);
+      ])

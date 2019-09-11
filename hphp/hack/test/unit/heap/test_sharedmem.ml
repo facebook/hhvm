@@ -211,10 +211,12 @@ module TestWithCache =
 
 let tests () =
   let list =
-    [ ("test_local_changes_no_cache", test_local_changes (module TestNoCache));
+    [
+      ("test_local_changes_no_cache", test_local_changes (module TestNoCache));
       ( "test_local_changes_with_cache",
         test_local_changes (module TestWithCache) );
-      ("test_cache_behavior", test_cache_behavior (module TestWithCache)) ]
+      ("test_cache_behavior", test_cache_behavior (module TestWithCache));
+    ]
   in
   let setup_test (name, test) =
     ( name,

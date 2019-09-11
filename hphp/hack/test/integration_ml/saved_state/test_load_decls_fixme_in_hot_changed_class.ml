@@ -41,12 +41,14 @@ trait TBothTraits {
 }"
 
 let init_disk_state =
-  [ ("hack/hh_hot_classes.json", {|{"classes":["\\Foo"]}|});
+  [
+    ("hack/hh_hot_classes.json", {|{"classes":["\\Foo"]}|});
     ("foo.php", foo "\n  public function x(): void {}\n");
     ("treq_ext_foo.php", treq_ext_foo);
     ("child.php", child);
     ("treq_ext_child.php", treq_ext_child);
-    ("tboth_traits.php", tboth_traits) ]
+    ("tboth_traits.php", tboth_traits);
+  ]
 
 (* This test ensures that we remove any HH_FIXMEs we loaded from the saved state
    from shared memory before re-parsing any changed files. If we fail to do so,

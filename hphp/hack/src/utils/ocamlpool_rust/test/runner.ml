@@ -86,7 +86,8 @@ let runNonTrivialMap f expected () =
     None
 
 let tests =
-  [ ("getString", run getString [""; "TEST"]);
+  [
+    ("getString", run getString [""; "TEST"]);
     ("getIsize", run getIsize [-1; 0; 1; max_int]);
     ("getOption", run getOption [None; Some 1]);
     ("getVec", run getVec [[]; [0]]);
@@ -105,12 +106,14 @@ let tests =
     ( "getStringMap",
       runNonTrivialMap
         getStringMap
-        [ StringMap.(
+        [
+          StringMap.(
             add
               "3"
               "c"
-              StringMap.(add "2" "b" StringMap.(add "1" "a" StringMap.empty)))
-        ] ) ]
+              StringMap.(add "2" "b" StringMap.(add "1" "a" StringMap.empty)));
+        ] );
+  ]
 
 let () =
   let results =

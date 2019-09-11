@@ -17,7 +17,8 @@ let get_first_param_name params =
 
 let emit_generator_method name params =
   gather
-    [ begin
+    [
+      begin
         match name with
         | "send" ->
           let local = Local.Named (get_first_param_name params) in
@@ -35,18 +36,23 @@ let emit_generator_method name params =
         | "getReturn" -> instr_contgetreturn
         | _ -> failwith "incorrect native generator function"
       end;
-      instr_retc ]
+      instr_retc;
+    ]
 
 let emit_native_opcode_impl name params ua =
   match ua with
-  | [ {
+  | [
+      {
         T.ua_name = (_, "__NativeData");
         T.ua_params = [(_, T.String "HH\\AsyncGenerator")];
-      } ]
-  | [ {
+      };
+    ]
+  | [
+      {
         T.ua_name = (_, "__NativeData");
         T.ua_params = [(_, T.String "Generator")];
-      } ] ->
+      };
+    ] ->
     emit_generator_method name params
   | _ ->
     Emit_fatal.raise_fatal_runtime

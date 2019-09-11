@@ -45,10 +45,12 @@ let handle_empty_autocomplete (pos : File_content.position) file_content =
     in
     if is_whitespace prev_char && is_whitespace next_char then
       let edits =
-        [ {
+        [
+          {
             range = Some { st = pos; ed = pos };
             text = empty_autocomplete_token;
-          } ]
+          };
+        ]
       in
       File_content.edit_file_unsafe file_content edits
     else

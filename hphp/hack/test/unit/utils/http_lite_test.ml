@@ -126,9 +126,11 @@ let test_read_request () =
   true
 
 let tests =
-  [ ("test_read_headers", test_read_headers);
+  [
+    ("test_read_headers", test_read_headers);
     ("test_parse_headers", test_parse_headers);
     ("test_parse_charset", test_parse_charset);
-    ("test_read_request", test_read_request) ]
+    ("test_read_request", test_read_request);
+  ]
 
 let () = Unit_test.run_all tests

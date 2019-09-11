@@ -51,10 +51,14 @@ let rec coerce_type_impl ~sub_type p ur env ty_have ty_expect on_error =
         log_types
           p
           env
-          [ Log_head
+          [
+            Log_head
               ( "can_coerce",
-                [ Log_type ("ty_have", ty_have);
-                  Log_type ("ty_expect", ty_expect.et_type) ] ) ]));
+                [
+                  Log_type ("ty_have", ty_have);
+                  Log_type ("ty_expect", ty_expect.et_type);
+                ] );
+          ]));
   let coercion_from_dynamic =
     TypecheckerOptions.coercion_from_dynamic (Typing_env.get_tcopt env)
   in

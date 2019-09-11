@@ -111,14 +111,18 @@ let string_of_lit_const instruction =
   | NewPair -> "NewPair"
   | NewRecord (cid, l) ->
     sep
-      [ "NewRecord";
+      [
+        "NewRecord";
         string_of_class_id cid;
-        "<" ^ string_of_list_of_shape_fields l ^ ">" ]
+        "<" ^ string_of_list_of_shape_fields l ^ ">";
+      ]
   | NewRecordArray (cid, l) ->
     sep
-      [ "NewRecordArray";
+      [
+        "NewRecordArray";
         string_of_class_id cid;
-        "<" ^ string_of_list_of_shape_fields l ^ ">" ]
+        "<" ^ string_of_list_of_shape_fields l ^ ">";
+      ]
   | ClsCns cnsid -> sep ["ClsCns"; string_of_const_id cnsid]
   | ClsCnsD (cnsid, cid) ->
     sep ["ClsCnsD"; string_of_const_id cnsid; string_of_class_id cid]
@@ -296,7 +300,8 @@ let string_of_mutator x =
   | PopL id -> sep ["PopL"; string_of_local_id id]
   | SetG -> "SetG"
   | SetS -> "SetS"
-  | SetOpL (id, op) -> sep ["SetOpL"; string_of_local_id id; string_of_eq_op op]
+  | SetOpL (id, op) ->
+    sep ["SetOpL"; string_of_local_id id; string_of_eq_op op]
   | SetOpG op -> sep ["SetOpG"; string_of_eq_op op]
   | SetOpS op -> sep ["SetOpS"; string_of_eq_op op]
   | IncDecL (id, op) ->
@@ -321,10 +326,12 @@ let string_of_optional_label opt_label =
 
 let string_of_fcall_flags fl =
   let fl =
-    [ Option.some_if fl.has_unpack "Unpack";
+    [
+      Option.some_if fl.has_unpack "Unpack";
       Option.some_if fl.has_generics "Generics";
       Option.some_if fl.supports_async_eager_return "SupportsAER";
-      Option.some_if fl.lock_while_unwinding "LockWhileUnwinding" ]
+      Option.some_if fl.lock_while_unwinding "LockWhileUnwinding";
+    ]
   in
   "<" ^ (String.concat ~sep:" " @@ List.filter_opt fl) ^ ">"
 
@@ -340,11 +347,13 @@ let string_of_list_of_bools l =
 let string_of_fcall_args fcall_args =
   let (flags, num_args, num_rets, by_refs, async_eager_label) = fcall_args in
   sep
-    [ string_of_fcall_flags flags;
+    [
+      string_of_fcall_flags flags;
       string_of_int num_args;
       string_of_int num_rets;
       string_of_list_of_bools by_refs;
-      string_of_optional_label async_eager_label ]
+      string_of_optional_label async_eager_label;
+    ]
 
 let string_of_switch_kind = function
   | H.Unbounded -> "Unbounded"
@@ -417,10 +426,12 @@ let string_of_base x =
     sep ["BaseGL"; string_of_local_id id; MemberOpMode.to_string m]
   | BaseSC (si, si2, m) ->
     sep
-      [ "BaseSC";
+      [
+        "BaseSC";
         string_of_stack_index si;
         string_of_stack_index si2;
-        MemberOpMode.to_string m ]
+        MemberOpMode.to_string m;
+      ]
   | BaseL (lid, m) ->
     sep ["BaseL"; string_of_local_id lid; MemberOpMode.to_string m]
   | BaseC (si, m) ->
@@ -433,21 +444,31 @@ let string_of_final instruction =
   match instruction with
   | QueryM (n, op, mk) ->
     sep
-      ["QueryM"; string_of_int n; QueryOp.to_string op; string_of_member_key mk]
+      [
+        "QueryM";
+        string_of_int n;
+        QueryOp.to_string op;
+        string_of_member_key mk;
+      ]
   | UnsetM (n, mk) -> sep ["UnsetM"; string_of_int n; string_of_member_key mk]
-  | SetM (i, mk) -> sep ["SetM"; string_of_param_num i; string_of_member_key mk]
+  | SetM (i, mk) ->
+    sep ["SetM"; string_of_param_num i; string_of_member_key mk]
   | SetOpM (i, op, mk) ->
     sep
-      [ "SetOpM";
+      [
+        "SetOpM";
         string_of_param_num i;
         string_of_eq_op op;
-        string_of_member_key mk ]
+        string_of_member_key mk;
+      ]
   | IncDecM (i, op, mk) ->
     sep
-      [ "IncDecM";
+      [
+        "IncDecM";
         string_of_param_num i;
         string_of_incdec_op op;
-        string_of_member_key mk ]
+        string_of_member_key mk;
+      ]
   | SetRangeM (i, op, s) ->
     sep
       ["SetRangeM"; string_of_int i; string_of_setrange_op op; string_of_int s]
@@ -474,62 +495,78 @@ let string_of_call instruction =
     sep ["FCall"; string_of_fcall_args fcall_args; "\"\""; "\"\""]
   | FCallBuiltin (n1, n2, n3, id) ->
     sep
-      [ "FCallBuiltin";
+      [
+        "FCallBuiltin";
         string_of_int n1;
         string_of_int n2;
         string_of_int n3;
-        SU.quote_string id ]
+        SU.quote_string id;
+      ]
   | FCallClsMethod (fcall_args, pl, is_log_as_dynamic_call) ->
     sep
-      [ "FCallClsMethod";
+      [
+        "FCallClsMethod";
         string_of_fcall_args fcall_args;
         "\"\"";
         string_of_param_locations pl;
-        string_of_is_log_as_dynamic_call_op is_log_as_dynamic_call ]
+        string_of_is_log_as_dynamic_call_op is_log_as_dynamic_call;
+      ]
   | FCallClsMethodD (fcall_args, cid, mid) ->
     sep
-      [ "FCallClsMethodD";
+      [
+        "FCallClsMethodD";
         string_of_fcall_args fcall_args;
         "\"\"";
         string_of_class_id cid;
-        string_of_method_id mid ]
+        string_of_method_id mid;
+      ]
   | FCallClsMethodS (fcall_args, r) ->
     sep
-      [ "FCallClsMethodS";
-        string_of_fcall_args fcall_args;
-        "\"\"";
-        SpecialClsRef.to_string r ]
-  | FCallClsMethodSD (fcall_args, r, mid) ->
-    sep
-      [ "FCallClsMethodSD";
+      [
+        "FCallClsMethodS";
         string_of_fcall_args fcall_args;
         "\"\"";
         SpecialClsRef.to_string r;
-        string_of_method_id mid ]
+      ]
+  | FCallClsMethodSD (fcall_args, r, mid) ->
+    sep
+      [
+        "FCallClsMethodSD";
+        string_of_fcall_args fcall_args;
+        "\"\"";
+        SpecialClsRef.to_string r;
+        string_of_method_id mid;
+      ]
   | FCallCtor fcall_args ->
     sep ["FCallCtor"; string_of_fcall_args fcall_args; "\"\""]
   | FCallFunc (fcall_args, pl) ->
     sep
-      [ "FCallFunc";
+      [
+        "FCallFunc";
         string_of_fcall_args fcall_args;
-        string_of_param_locations pl ]
+        string_of_param_locations pl;
+      ]
   | FCallFuncD (fcall_args, id) ->
     sep
       ["FCallFuncD"; string_of_fcall_args fcall_args; string_of_function_id id]
   | FCallObjMethod (fcall_args, nf, pl) ->
     sep
-      [ "FCallObjMethod";
+      [
+        "FCallObjMethod";
         string_of_fcall_args fcall_args;
         "\"\"";
         string_of_null_flavor nf;
-        string_of_param_locations pl ]
+        string_of_param_locations pl;
+      ]
   | FCallObjMethodD (fcall_args, nf, id) ->
     sep
-      [ "FCallObjMethodD";
+      [
+        "FCallObjMethodD";
         string_of_fcall_args fcall_args;
         "\"\"";
         string_of_null_flavor nf;
-        string_of_method_id id ]
+        string_of_method_id id;
+      ]
 
 let string_of_barethis_op i =
   match i with
@@ -768,9 +805,11 @@ let string_of_gen_delegation = function
     sep ["YieldFromDelegate"; string_of_iterator_id i; string_of_label l]
   | ContUnsetDelegate (free, i) ->
     sep
-      [ "ContUnsetDelegate";
+      [
+        "ContUnsetDelegate";
         string_of_free_iterator free;
-        string_of_iterator_id i ]
+        string_of_iterator_id i;
+      ]
 
 let string_of_instruction instruction =
   let s =

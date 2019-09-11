@@ -40,12 +40,14 @@ module SaveNamingResultPrinter = ClientResultPrinter.Make (struct
 
   let to_json t =
     Hh_json.JSON_Object
-      [ ( "files_added",
+      [
+        ( "files_added",
           Hh_json.JSON_Number
             (string_of_int t.SaveStateServiceTypes.nt_files_added) );
         ( "symbols_added",
           Hh_json.JSON_Number
-            (string_of_int t.SaveStateServiceTypes.nt_symbols_added) ) ]
+            (string_of_int t.SaveStateServiceTypes.nt_symbols_added) );
+      ]
 end)
 
 let parse_function_or_method_id ~func_action ~meth_action name =

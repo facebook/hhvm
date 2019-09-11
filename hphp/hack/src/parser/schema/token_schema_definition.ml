@@ -32,7 +32,8 @@ let make_token_node token_kind token_text ?(allowed_as_identifier = false) () =
   { token_kind; token_text; allowed_as_identifier }
 
 let variable_text_tokens =
-  [ make_token_node "ErrorToken" "error_token" ();
+  [
+    make_token_node "ErrorToken" "error_token" ();
     make_token_node "Name" "name" ();
     make_token_node "Variable" "variable" ();
     make_token_node "DecimalLiteral" "decimal_literal" ();
@@ -68,12 +69,14 @@ let variable_text_tokens =
     make_token_node "XHPStringLiteral" "XHP_string_literal" ();
     make_token_node "XHPBody" "XHP_body" ();
     make_token_node "XHPComment" "XHP_comment" ();
-    make_token_node "Markup" "markup" () ]
+    make_token_node "Markup" "markup" ();
+  ]
 
 let no_text_tokens = [make_token_node "EndOfFile" "end_of_file" ()]
 
 let given_text_tokens =
-  [ make_token_node "Abstract" "abstract" ();
+  [
+    make_token_node "Abstract" "abstract" ();
     make_token_node "Array" "array" ();
     make_token_node "Arraykey" "arraykey" ~allowed_as_identifier:true ();
     make_token_node "As" "as" ();
@@ -256,6 +259,7 @@ let given_text_tokens =
     make_token_node "LessThanSlash" "</" ();
     make_token_node "LessThanQuestion" "<?" ();
     make_token_node "QuestionGreaterThan" "?>" ();
-    make_token_node "ColonAt" ":@" () ]
+    make_token_node "ColonAt" ":@" ();
+  ]
 
 let tokens = variable_text_tokens @ no_text_tokens @ given_text_tokens

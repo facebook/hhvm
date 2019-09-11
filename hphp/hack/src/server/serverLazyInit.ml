@@ -749,10 +749,12 @@ let post_saved_state_initialization
     List.fold
       ~init:Relative_path.Set.empty
       ~f:Relative_path.Set.union
-      [ naming_and_parsing_error_files;
+      [
+        naming_and_parsing_error_files;
         dirty_naming_files;
         dirty_master_files;
-        dirty_local_files ]
+        dirty_local_files;
+      ]
   in
   let t = Unix.gettimeofday () in
   let dirty_files =

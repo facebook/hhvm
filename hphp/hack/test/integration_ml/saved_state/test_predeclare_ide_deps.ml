@@ -27,10 +27,12 @@ function test(Baz $x): void {
 |}
 
 let disk_state =
-  [ ("foo.php", foo_fun);
+  [
+    ("foo.php", foo_fun);
     ("bar.php", bar_class);
     ("baz.php", baz_typedef);
-    ("qux.php", qux_const) ]
+    ("qux.php", qux_const);
+  ]
 
 let test () =
   Tempfile.with_real_tempdir

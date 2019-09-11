@@ -331,11 +331,13 @@ let setup_global_test_state () =
     "assume_php = false"
 
 let tests =
-  [ ("test_no_event", make_test test_no_event);
+  [
+    ("test_no_event", make_test test_no_event);
     ( "test_restart_server_with_target_saved_state",
       make_test test_restart_server_with_target_saved_state );
     ( "test_server_restart_suppressed_on_hhconfig_version_change",
-      make_test test_server_restart_suppressed_on_hhconfig_version_change ) ]
+      make_test test_server_restart_suppressed_on_hhconfig_version_change );
+  ]
 
 let () =
   setup_global_test_state ();

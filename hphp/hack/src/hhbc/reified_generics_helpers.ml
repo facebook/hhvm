@@ -128,11 +128,13 @@ let simplify_verify_type env pos check hint verify_instr =
   | (_, Aast.Hoption hint) ->
     let done_label = Label.next_regular () in
     gather
-      [ check;
+      [
+        check;
         instr_jmpnz done_label;
         get_ts hint;
         verify_instr;
-        instr_label done_label ]
+        instr_label done_label;
+      ]
   | _ -> gather [get_ts hint; verify_instr]
 
 let remove_erased_generics env h =

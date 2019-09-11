@@ -24,8 +24,10 @@ let get name config = List.assoc name config
 let default = []
 
 let long_assignment_config =
-  [ ("SimpleAssignmentExpression", [0.6; 0.2; 0.2]);
-    ("CompoundAssignmentExpression", [0.6; 0.2; 0.2]) ]
+  [
+    ("SimpleAssignmentExpression", [0.6; 0.2; 0.2]);
+    ("CompoundAssignmentExpression", [0.6; 0.2; 0.2]);
+  ]
 
 let mapping =
   [("Default", default); ("LongAssignmentConfig", long_assignment_config)]

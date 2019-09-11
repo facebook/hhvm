@@ -132,7 +132,7 @@ function test_openssl_pkcs7_sign() {
   VS(file_get_contents($tmp), false);
   VERIFY(openssl_x509_export_to_file($scert, $tmp));
 
-  VS(openssl_pkcs7_verify($outfile, 0, $infile, (array)$tmp), true);
+  VS(openssl_pkcs7_verify($outfile, 0, $infile, varray[$tmp]), true);
   unlink($infile);
   unlink($outfile);
   unlink($tmp);

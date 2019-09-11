@@ -286,7 +286,7 @@ function openssl_pkcs7_sign(string $infilename,
 function openssl_pkcs7_verify(string $filename,
                               int $flags,
                               ?string $outfilename = null,
-                              ?array $cainfo = null,
+                              ?varray<string> $cainfo = null,
                               ?string $extracerts = null,
                               ?string $content = null): mixed;
 

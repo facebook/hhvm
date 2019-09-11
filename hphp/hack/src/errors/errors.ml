@@ -3416,6 +3416,26 @@ let null_member ~is_method s pos r =
   in
   add_list (Typing.err_code Typing.NullMember) ([(pos, msg)] @ r)
 
+(* Trying to access a member on a mixed or nonnull value. *)
+let top_member ~is_method ~is_nullable s pos1 ty pos2 =
+  let msg =
+    Printf.sprintf
+      "You are trying to access the %s '%s' but this is %s. Use a specific class or interface name."
+      ( if is_method then
+        "method"
+      else
+        "property" )
+      s
+      ty
+  in
+  add_list
+    (Typing.err_code
+       ( if is_nullable then
+         Typing.NullMember
+       else
+         Typing.NonObjectMember ))
+    [(pos1, msg); (pos2, "Definition is here")]
+
 let non_object_member ~is_method s pos1 ty pos2 =
   let msg_start =
     Printf.sprintf

@@ -475,6 +475,15 @@ val dynamic_redeclared_as_static :
 val null_member :
   is_method:bool -> string -> Pos.t -> (Pos.t * string) list -> unit
 
+val top_member :
+  is_method:bool ->
+  is_nullable:bool ->
+  string ->
+  Pos.t ->
+  string ->
+  Pos.t ->
+  unit
+
 val non_object_member :
   is_method:bool -> string -> Pos.t -> string -> Pos.t -> unit
 

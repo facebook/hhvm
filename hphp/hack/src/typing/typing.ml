@@ -6189,6 +6189,15 @@ and obj_get_concrete_ty
   | (_, Tany _)
   | (_, Terr) ->
     default ()
+  | (_, Tnonnull) ->
+    Errors.top_member
+      ~is_method
+      ~is_nullable:false
+      id_str
+      id_pos
+      (Typing_print.error env concrete_ty)
+      (Reason.to_pos (fst concrete_ty));
+    default ()
   | _ ->
     Errors.non_object_member
       ~is_method
@@ -6334,11 +6343,21 @@ and obj_get_
       in
       make_nullable_member_type ~is_method env id_pos p1 method_
     | None ->
-      Errors.null_member
-        ~is_method
-        id_str
-        id_pos
-        (Reason.to_string "This can be null" (fst ety1));
+      (match ety1 with
+      | (_, Toption (_, Tnonnull)) as ty ->
+        Errors.top_member
+          ~is_method
+          ~is_nullable:true
+          id_str
+          id_pos
+          (Typing_print.error env ty)
+          (Reason.to_pos (fst ety1))
+      | _ ->
+        Errors.null_member
+          ~is_method
+          id_str
+          id_pos
+          (Reason.to_string "This can be null" (fst ety1)));
       (env, (fst ety1, Typing_utils.terr env))
   in
   match ety1 with

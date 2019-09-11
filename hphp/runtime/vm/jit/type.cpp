@@ -158,7 +158,8 @@ std::string Type::constValString() const {
     ).str();
   }
   if (*this <= TRecDesc) {
-    return "Record()";
+    return folly::format("RecDesc({})", m_recVal ? m_recVal->name()->data()
+                                                 : "nullptr").str();
   }
   if (*this <= TCctx) {
     if (!m_intVal) {
@@ -259,6 +260,9 @@ std::string Type::toString() const {
   if (m_hasConstVal) {
     if (*this <= TCls) {
       return folly::sformat("Cls={}", m_clsVal->name()->data());
+    }
+    if (*this <= TRecDesc) {
+      return folly::sformat("RecDesc={}", m_recVal->name()->data());
     }
     return folly::sformat("{}<{}>",
                           dropConstVal().toString(), constValString());

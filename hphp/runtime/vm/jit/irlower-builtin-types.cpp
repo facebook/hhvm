@@ -53,12 +53,8 @@ template<typename T>
 const T* constVal(SSATmp*);
 template<>
 const Class* constVal<Class>(SSATmp* cls) { return cls->clsVal(); }
-// Records do not have constant value yet. This will never be called.
 template<>
-const RecordDesc* constVal<RecordDesc>(SSATmp*) {
-  always_assert(false);
-  return nullptr;
-}
+const RecordDesc* constVal<RecordDesc>(SSATmp* rec) { return rec->recVal(); }
 
 template<typename T>
 void implVerifyType(IRLS& env, const IRInstruction* inst) {

@@ -162,7 +162,10 @@ where
         self.allow_as_expressions
     }
 
-    pub fn with_as_expressions<U>(&mut self, enabled: bool, f: &dyn Fn(&mut Self) -> U) -> U {
+    pub fn with_as_expressions<F, U>(&mut self, enabled: bool, f: F) -> U
+    where
+        F: Fn(&mut Self) -> U,
+    {
         let old_enabled = self.allow_as_expressions();
         self.allow_as_expressions = enabled;
         let r = f(self);
@@ -170,9 +173,10 @@ where
         r
     }
 
-    fn with_type_parser<U>(&mut self, f: &dyn Fn(&mut TypeParser<'a, S, T>) -> U) -> U
+    fn with_type_parser<F, U>(&mut self, f: F) -> U
     where
         T: Clone,
+        F: Fn(&mut TypeParser<'a, S, T>) -> U,
     {
         let mut type_parser: TypeParser<S, T> = TypeParser::make(
             self.lexer.clone(),
@@ -200,12 +204,13 @@ where
     }
 
     fn parse_generic_type_arguments(&mut self) -> (S::R, bool) {
-        self.with_type_parser(&|x| x.parse_generic_type_argument_list())
+        self.with_type_parser(|x| x.parse_generic_type_argument_list())
     }
 
-    fn with_decl_parser<U>(&mut self, f: &dyn Fn(&mut DeclarationParser<'a, S, T>) -> U) -> U
+    fn with_decl_parser<F, U>(&mut self, f: F) -> U
     where
         T: Clone,
+        F: Fn(&mut DeclarationParser<'a, S, T>) -> U,
     {
         let mut decl_parser: DeclarationParser<S, T> = DeclarationParser::make(
             self.lexer.clone(),
@@ -219,9 +224,10 @@ where
         res
     }
 
-    fn with_statement_parser<U>(&mut self, f: &dyn Fn(&mut StatementParser<'a, S, T>) -> U) -> U
+    fn with_statement_parser<F, U>(&mut self, f: F) -> U
     where
         T: Clone,
+        F: Fn(&mut StatementParser<'a, S, T>) -> U,
     {
         let mut statement_parser: StatementParser<S, T> = StatementParser::make(
             self.lexer.clone(),
@@ -236,11 +242,11 @@ where
     }
 
     fn parse_compound_statement(&mut self) -> S::R {
-        self.with_statement_parser(&|x| x.parse_compound_statement())
+        self.with_statement_parser(|x| x.parse_compound_statement())
     }
 
     fn parse_parameter_list_opt(&mut self) -> (S::R, S::R, S::R) {
-        self.with_decl_parser(&|x| x.parse_parameter_list_opt())
+        self.with_decl_parser(|x| x.parse_parameter_list_opt())
     }
 
     pub fn parse_expression(&mut self) -> S::R {
@@ -1457,7 +1463,7 @@ where
             }
             (left_kind, _) => {
                 let left_token = S!(make_token, self, left);
-                let index = self.with_as_expressions(/* enabled :*/ true, &|x| {
+                let index = self.with_as_expressions(/* enabled :*/ true, |x| {
                     x.with_reset_precedence(|x| x.parse_expression())
                 });
                 let right = match left_kind {
@@ -1506,7 +1512,7 @@ where
         //   argument-expressions  ,  expression
         //
         // This function parses the parens as well.
-        self.parse_parenthesized_comma_list_opt_allow_trailing(&|x| {
+        self.parse_parenthesized_comma_list_opt_allow_trailing(|x| {
             x.with_reset_precedence(|x| x.parse_decorated_expression_opt())
         })
     }
@@ -1911,7 +1917,7 @@ where
         let expression =
             self.with_as_expressions(
                 /* enabled:*/ true,
-                &|p| p.with_reset_precedence(|p| p.parse_expression()),
+                |p| p.with_reset_precedence(|p| p.parse_expression()),
             );
         let right_paren = self.require_right_paren();
         S!(
@@ -1964,15 +1970,13 @@ where
         S!(make_prefix_unary_expression, self, dollar, operand)
     }
 
-    fn parse_is_as_helper(
-        &mut self,
-        f: &dyn Fn(&mut Self, S::R, S::R, S::R) -> S::R,
-        left: S::R,
-        kw: TokenKind,
-    ) -> S::R {
+    fn parse_is_as_helper<F>(&mut self, f: F, left: S::R, kw: TokenKind) -> S::R
+    where
+        F: Fn(&mut Self, S::R, S::R, S::R) -> S::R,
+    {
         let op = self.assert_token(kw);
         let right = self
-            .with_type_parser(&|p: &mut TypeParser<'a, S, T>| p.parse_type_specifier(false, true));
+            .with_type_parser(|p: &mut TypeParser<'a, S, T>| p.parse_type_specifier(false, true));
         let result = f(self, left, op, right);
         self.parse_remaining_expression(result)
     }
@@ -1985,7 +1989,7 @@ where
         // is-subject:
         //   expression
         self.parse_is_as_helper(
-            &|p, x, y, z| S!(make_is_expression, p, x, y, z),
+            |p, x, y, z| S!(make_is_expression, p, x, y, z),
             left,
             TokenKind::Is,
         )
@@ -1999,7 +2003,7 @@ where
         // as-subject:
         //   expression
         self.parse_is_as_helper(
-            &|p, x, y, z| S!(make_as_expression, p, x, y, z),
+            |p, x, y, z| S!(make_as_expression, p, x, y, z),
             left,
             TokenKind::As,
         )
@@ -2010,7 +2014,7 @@ where
         // nullable-as-expression:
         //   as-subject  ?as  type-specifier
         self.parse_is_as_helper(
-            &|p, x, y, z| S!(make_nullable_as_expression, p, x, y, z),
+            |p, x, y, z| S!(make_nullable_as_expression, p, x, y, z),
             left,
             TokenKind::QuestionAs,
         )
@@ -2239,7 +2243,7 @@ where
         let members = self.parse_comma_list_opt_allow_trailing(
             TokenKind::RightBracket,
             Errors::error1015,
-            &|x| x.parse_keyed_element_initializer(),
+            |x| x.parse_keyed_element_initializer(),
         );
         let right_bracket = self.require_right_bracket();
         S!(
@@ -2281,7 +2285,7 @@ where
         // This work item is tracked by spec issue #109.
 
         let (left_brace, initialization_list, right_brace) =
-            self.parse_braced_comma_list_opt_allow_trailing(&|p| p.parse_init_expression());
+            self.parse_braced_comma_list_opt_allow_trailing(|p| p.parse_init_expression());
         // Validating the name is a collection type happens in a later phase
         S!(
             make_collection_literal_expression,
@@ -2336,7 +2340,7 @@ where
         // TODO: Produce an error later if the expressions in the list destructuring
         // are not lvalues.
         let keyword = self.assert_token(TokenKind::List);
-        let (left, items, right) = self.parse_parenthesized_comma_list_opt_items_opt(&|p| {
+        let (left, items, right) = self.parse_parenthesized_comma_list_opt_items_opt(|p| {
             p.parse_expression_with_reset_precedence()
         });
         S!(make_list_expression, self, keyword, left, items, right)
@@ -2347,7 +2351,7 @@ where
     fn parse_array_intrinsic_expression(&mut self) -> S::R {
         let array_keyword = self.assert_token(TokenKind::Array);
         let (left_paren, members, right_paren) = self
-            .parse_parenthesized_comma_list_opt_allow_trailing(&|p| p.parse_array_element_init());
+            .parse_parenthesized_comma_list_opt_allow_trailing(|p| p.parse_array_element_init());
         S!(
             make_array_intrinsic_expression,
             self,
@@ -2358,12 +2362,16 @@ where
         )
     }
 
-    fn parse_bracketed_collection_intrinsic_expression(
+    fn parse_bracketed_collection_intrinsic_expression<F, G>(
         &mut self,
         keyword_token: TokenKind,
-        parse_element_function: &dyn Fn(&mut Self) -> S::R,
-        make_intrinsic_function: &dyn Fn(&mut Self, S::R, S::R, S::R, S::R, S::R) -> S::R,
-    ) -> S::R {
+        parse_element_function: F,
+        make_intrinsic_function: G,
+    ) -> S::R
+    where
+        F: Fn(&mut Self) -> S::R,
+        G: Fn(&mut Self, S::R, S::R, S::R, S::R, S::R) -> S::R,
+    {
         let mut parser1 = self.clone();
         let keyword = parser1.assert_token(keyword_token);
         let explicit_type = match parser1.peek_token_kind_with_possible_attributized_type_list() {
@@ -2402,8 +2410,8 @@ where
         // TODO: Create the grammar and add it to the spec.
         self.parse_bracketed_collection_intrinsic_expression(
             TokenKind::Darray,
-            &|p| p.parse_keyed_element_initializer(),
-            &|p, a, b, c, d, e| S!(make_darray_intrinsic_expression, p, a, b, c, d, e),
+            |p| p.parse_keyed_element_initializer(),
+            |p, a, b, c, d, e| S!(make_darray_intrinsic_expression, p, a, b, c, d, e),
         )
     }
 
@@ -2412,16 +2420,16 @@ where
         // TODO: Can the list have a trailing comma?
         self.parse_bracketed_collection_intrinsic_expression(
             TokenKind::Dict,
-            &|p| p.parse_keyed_element_initializer(),
-            &|p, a, b, c, d, e| S!(make_dictionary_intrinsic_expression, p, a, b, c, d, e),
+            |p| p.parse_keyed_element_initializer(),
+            |p, a, b, c, d, e| S!(make_dictionary_intrinsic_expression, p, a, b, c, d, e),
         )
     }
 
     fn parse_keyset_intrinsic_expression(&mut self) -> S::R {
         self.parse_bracketed_collection_intrinsic_expression(
             TokenKind::Keyset,
-            &|p| p.parse_expression_with_reset_precedence(),
-            &|p, a, b, c, d, e| S!(make_keyset_intrinsic_expression, p, a, b, c, d, e),
+            |p| p.parse_expression_with_reset_precedence(),
+            |p, a, b, c, d, e| S!(make_keyset_intrinsic_expression, p, a, b, c, d, e),
         )
     }
 
@@ -2429,8 +2437,8 @@ where
         // TODO: Create the grammar and add it to the spec.
         self.parse_bracketed_collection_intrinsic_expression(
             TokenKind::Varray,
-            &|p| p.parse_expression_with_reset_precedence(),
-            &|p, a, b, c, d, e| S!(make_varray_intrinsic_expression, p, a, b, c, d, e),
+            |p| p.parse_expression_with_reset_precedence(),
+            |p, a, b, c, d, e| S!(make_varray_intrinsic_expression, p, a, b, c, d, e),
         )
     }
 
@@ -2439,8 +2447,8 @@ where
         // TODO: Can the list have a trailing comma?
         self.parse_bracketed_collection_intrinsic_expression(
             TokenKind::Vec,
-            &|p| p.parse_expression_with_reset_precedence(),
-            &|p, a, b, c, d, e| S!(make_vector_intrinsic_expression, p, a, b, c, d, e),
+            |p| p.parse_expression_with_reset_precedence(),
+            |p, a, b, c, d, e| S!(make_vector_intrinsic_expression, p, a, b, c, d, e),
         )
     }
 
@@ -2453,7 +2461,7 @@ where
     //   array-element-initializer , array-initializer-list
     fn parse_array_creation_expression(&mut self) -> S::R {
         let (left_bracket, members, right_bracket) =
-            self.parse_bracketted_comma_list_opt_allow_trailing(&|p| p.parse_array_element_init());
+            self.parse_bracketted_comma_list_opt_allow_trailing(|p| p.parse_array_element_init());
         S!(
             make_array_creation_expression,
             self,
@@ -2513,8 +2521,8 @@ where
         //   field-initializer
         //   field-initializers  ,  field-initializer
         let shape = self.assert_token(TokenKind::Shape);
-        let (left_paren, fields, right_paren) = self
-            .parse_parenthesized_comma_list_opt_allow_trailing(&|p| p.parse_field_initializer());
+        let (left_paren, fields, right_paren) =
+            self.parse_parenthesized_comma_list_opt_allow_trailing(|p| p.parse_field_initializer());
         S!(
             make_shape_expression,
             self,
@@ -2538,7 +2546,7 @@ where
         // TODO: We need to produce an error in a later pass if the list is empty.
         let keyword = self.assert_token(TokenKind::Tuple);
         let (left_paren, items, right_paren) = self
-            .parse_parenthesized_comma_list_opt_allow_trailing(&|p| {
+            .parse_parenthesized_comma_list_opt_allow_trailing(|p| {
                 p.parse_expression_with_reset_precedence()
             });
         S!(
@@ -2567,7 +2575,7 @@ where
         // feed the original parser into the syntax parsers. they will take care of
         // them as appropriate.
         let parser1 = self.clone();
-        let attribute_spec = self.with_decl_parser(&|p| p.parse_attribute_specification_opt());
+        let attribute_spec = self.with_decl_parser(|p| p.parse_attribute_specification_opt());
         let mut parser2 = self.clone();
         let _ = parser2.optional_token(TokenKind::Static);
         let _ = parser2.optional_token(TokenKind::Async);
@@ -2618,7 +2626,7 @@ where
             use_token
         } else {
             let (left, vars, right) =
-                self.parse_parenthesized_comma_list_opt_allow_trailing(&|p| p.parse_use_variable());
+                self.parse_parenthesized_comma_list_opt_allow_trailing(|p| p.parse_use_variable());
             S!(
                 make_anonymous_function_use_clause,
                 self,
@@ -2636,7 +2644,7 @@ where
         let return_type = if colon.is_missing() {
             S!(make_missing, self, self.pos())
         } else {
-            self.with_type_parser(&|p| p.parse_return_type())
+            self.with_type_parser(|p| p.parse_return_type())
         };
         (colon, return_type)
     }
@@ -2924,7 +2932,7 @@ where
         left_angle: S::R,
         name: S::R,
     ) -> S::R {
-        let attrs = self.parse_list_until_none(&|p| p.parse_xhp_attribute());
+        let attrs = self.parse_list_until_none(|p| p.parse_xhp_attribute());
         let mut parser1 = self.clone();
         let (token, _) = parser1.next_xhp_element_token(/*no_trailing:*/ true);
         match token.kind() {
@@ -2948,7 +2956,7 @@ where
                 self.continue_from(parser1);
                 let token = S!(make_token, self, token);
                 let xhp_open = S!(make_xhp_open, self, left_angle, name, attrs, token);
-                let xhp_body = self.parse_list_until_none(&|p| p.parse_xhp_body_element());
+                let xhp_body = self.parse_list_until_none(|p| p.parse_xhp_body_element());
                 let xhp_close = self.parse_xhp_close(consume_trailing_trivia);
                 S!(make_xhp_expression, self, xhp_open, xhp_body, xhp_close)
             }

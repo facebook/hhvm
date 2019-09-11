@@ -130,7 +130,10 @@ where
     S: SmartConstructors<'a, T>,
     S::R: NodeType,
 {
-    fn with_type_parser<U>(&mut self, f: &dyn Fn(&mut TypeParser<'a, S, T>) -> U) -> U {
+    fn with_type_parser<F, U>(&mut self, f: F) -> U
+    where
+        F: Fn(&mut TypeParser<'a, S, T>) -> U,
+    {
         let mut type_parser: TypeParser<S, T> = TypeParser::make(
             self.lexer.clone(),
             self.env.clone(),
@@ -144,10 +147,13 @@ where
     }
 
     fn parse_type_specifier(&mut self) -> S::R {
-        self.with_type_parser(&|x: &mut TypeParser<'a, S, T>| x.parse_type_specifier(false, true))
+        self.with_type_parser(|x: &mut TypeParser<'a, S, T>| x.parse_type_specifier(false, true))
     }
 
-    fn with_expression_parser<U>(&mut self, f: &dyn Fn(&mut ExpressionParser<'a, S, T>) -> U) -> U {
+    fn with_expression_parser<F, U>(&mut self, f: F) -> U
+    where
+        F: Fn(&mut ExpressionParser<'a, S, T>) -> U,
+    {
         let mut expression_parser: ExpressionParser<S, T> = ExpressionParser::make(
             self.lexer.clone(),
             self.env.clone(),
@@ -160,7 +166,10 @@ where
         res
     }
 
-    fn with_decl_parser<U>(&mut self, f: &dyn Fn(&mut DeclarationParser<'a, S, T>) -> U) -> U {
+    fn with_decl_parser<F, U>(&mut self, f: F) -> U
+    where
+        F: Fn(&mut DeclarationParser<'a, S, T>) -> U,
+    {
         let mut decl_parser: DeclarationParser<S, T> = DeclarationParser::make(
             self.lexer.clone(),
             self.env.clone(),
@@ -184,7 +193,7 @@ where
             | TokenKind::Trait
             | TokenKind::Class => {
                 self.with_error(Errors::decl_outside_global_scope);
-                self.with_decl_parser(&|x| {
+                self.with_decl_parser(|x| {
                     let missing = S!(make_missing, x, x.pos());
                     x.parse_classish_declaration(missing)
                 })
@@ -322,7 +331,7 @@ where
             | (TokenKind::Async, TokenKind::LeftBrace) // Async block
                 => self.parse_expression_statement(),
             | _ => {
-                let missing = self.with_decl_parser(&|x: &mut DeclarationParser<'a, S, T>| {
+                let missing = self.with_decl_parser(|x: &mut DeclarationParser<'a, S, T>| {
                     let missing = S!(make_missing, x, x.pos());
                     x.parse_function_declaration(missing)
                 });
@@ -358,17 +367,17 @@ where
         let for_keyword_token = self.assert_token(TokenKind::For);
         let for_left_paren = self.require_left_paren();
         let for_initializer_expr =
-            self.parse_comma_list_opt(TokenKind::Semicolon, Errors::error1015, &|x| {
+            self.parse_comma_list_opt(TokenKind::Semicolon, Errors::error1015, |x| {
                 x.parse_expression()
             });
         let for_first_semicolon = self.require_semicolon();
         let for_control_expr =
-            self.parse_comma_list_opt(TokenKind::Semicolon, Errors::error1015, &|x| {
+            self.parse_comma_list_opt(TokenKind::Semicolon, Errors::error1015, |x| {
                 x.parse_expression()
             });
         let for_second_semicolon = self.require_semicolon();
         let for_end_of_loop_expr =
-            self.parse_comma_list_opt(TokenKind::RightParen, Errors::error1015, &|x| {
+            self.parse_comma_list_opt(TokenKind::RightParen, Errors::error1015, |x| {
                 x.parse_expression()
             });
         let for_right_paren = self.require_right_paren();
@@ -393,8 +402,8 @@ where
         let foreach_left_paren = self.require_left_paren();
         self.expect_in_new_scope(ExpectedTokens::RightParen);
         let foreach_collection_name =
-            self.with_expression_parser(&|x: &mut ExpressionParser<'a, S, T>| {
-                x.with_as_expressions(false, &|x| x.parse_expression())
+            self.with_expression_parser(|x: &mut ExpressionParser<'a, S, T>| {
+                x.with_as_expressions(false, |x| x.parse_expression())
             });
         let await_token = self.optional_token(TokenKind::Await);
         let as_token = self.require_as();
@@ -531,7 +540,7 @@ where
         //
         let mut parser1 = self.clone();
         let expr = if token_kind == TokenKind::LeftParen {
-            parser1.with_expression_parser(&|p: &mut ExpressionParser<'a, S, T>| {
+            parser1.with_expression_parser(|p: &mut ExpressionParser<'a, S, T>| {
                 p.parse_cast_or_parenthesized_or_lambda_expression()
             })
         } else {
@@ -554,7 +563,7 @@ where
             _ => {
                 let left_paren = self.require_left_paren();
                 let expressions =
-                    self.parse_comma_list(TokenKind::RightParen, Errors::error1015, &|x| {
+                    self.parse_comma_list(TokenKind::RightParen, Errors::error1015, |x| {
                         x.parse_expression()
                     });
                 let right_paren = self.require_right_paren();
@@ -584,7 +593,7 @@ where
         // TODO: TokenKind::Unset is case-insentive. Should non-lowercase be an error?
         let keyword = self.assert_token(TokenKind::Unset);
         let (left_paren, variables, right_paren) =
-            self.parse_parenthesized_comma_list_opt_allow_trailing(&|x| x.parse_expression());
+            self.parse_parenthesized_comma_list_opt_allow_trailing(|x| x.parse_expression());
         let semi = self.require_semicolon();
         S!(
             make_unset_statement,
@@ -656,7 +665,7 @@ where
         //   else   statement
         let if_keyword_token = self.assert_token(TokenKind::If);
         let (if_left_paren, if_expr, if_right_paren, if_consequence) = self.parse_if_body_helper();
-        let elseif_syntax = self.parse_list_until_none(&|x| x.parse_elseif_opt());
+        let elseif_syntax = self.parse_list_until_none(|x| x.parse_elseif_opt());
         let else_syntax = self.parse_else_opt();
         S!(
             make_if_statement,
@@ -756,7 +765,7 @@ where
                     S!(make_list, self, vec![], self.pos())
                 }
                 _ => {
-                    self.parse_terminated_list(&|x| x.parse_switch_section(), TokenKind::RightBrace)
+                    self.parse_terminated_list(|x| x.parse_switch_section(), TokenKind::RightBrace)
                 }
             }
         };
@@ -839,11 +848,11 @@ where
 
     fn parse_switch_section(&mut self) -> S::R {
         // See parse_switch_statement for grammar
-        let labels = self.parse_list_until_none(&|x| x.parse_switch_section_label());
+        let labels = self.parse_list_until_none(|x| x.parse_switch_section_label());
         if labels.is_missing() {
             self.with_error(Errors::error2008);
         };
-        let statements = self.parse_list_until_none(&|x| x.parse_switch_section_statement());
+        let statements = self.parse_list_until_none(|x| x.parse_switch_section_statement());
         let fallthrough = self.parse_switch_fallthrough_opt();
         S!(make_switch_section, self, labels, statements, fallthrough)
     }
@@ -940,7 +949,7 @@ where
         //   try  compound-statement   catch-clauses   finally-clause
         let try_keyword_token = self.assert_token(TokenKind::Try);
         let try_compound_stmt = self.parse_compound_statement();
-        let catch_clauses = self.parse_list_until_none(&|x| x.parse_catch_clause_opt());
+        let catch_clauses = self.parse_list_until_none(|x| x.parse_catch_clause_opt());
         let finally_clause = self.parse_finally_clause_opt();
         // If the catch and finally are both missing then we give an error in
         // a later pass.
@@ -1104,10 +1113,9 @@ where
 
     fn parse_echo_statement(&mut self) -> S::R {
         let token = self.assert_token(TokenKind::Echo);
-        let expression_list =
-            self.parse_comma_list(TokenKind::Semicolon, Errors::error1015, &|x| {
-                x.parse_expression()
-            });
+        let expression_list = self.parse_comma_list(TokenKind::Semicolon, Errors::error1015, |x| {
+            x.parse_expression()
+        });
         let semicolon = self.require_semicolon();
         S!(make_echo_statement, self, token, expression_list, semicolon)
     }
@@ -1151,7 +1159,7 @@ where
             _ => {
                 let left_brace_token = self.require_left_brace();
                 let statement_list =
-                    self.parse_terminated_list(&|x| x.parse_statement(), TokenKind::RightBrace);
+                    self.parse_terminated_list(|x| x.parse_statement(), TokenKind::RightBrace);
                 let right_brace_token = self.require_right_brace();
                 S!(
                     make_compound_statement,
@@ -1165,6 +1173,6 @@ where
     }
 
     fn parse_expression(&mut self) -> S::R {
-        self.with_expression_parser(&|p: &mut ExpressionParser<'a, S, T>| p.parse_expression())
+        self.with_expression_parser(|p: &mut ExpressionParser<'a, S, T>| p.parse_expression())
     }
 }

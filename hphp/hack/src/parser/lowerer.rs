@@ -17,8 +17,10 @@ use oxidized::{
 use parser_rust::{
     indexed_source_text::IndexedSourceText, lexable_token::LexablePositionedToken,
     positioned_syntax::PositionedSyntaxTrait, source_text::SourceText, syntax::*, syntax_error,
-    syntax_trait::SyntaxTrait,
+    syntax_trait::SyntaxTrait, token_kind::TokenKind as TK,
 };
+
+use utils_rust::*;
 
 use ocamlvalue_macro::Ocamlvalue;
 
@@ -46,7 +48,7 @@ macro_rules! ret_aast {
     ($ty:ident<,>) => { std::result::Result<aast!($ty<,>), Error<Syntax<T, V>>> }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum LiftedAwaitKind {
     LiftedFromStatement,
     LiftedFromConcurrent,
@@ -62,6 +64,19 @@ impl LiftedAwaits {
     fn lift_kind(&self) -> LiftedAwaitKind {
         self.lift_kind.clone()
     }
+}
+
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+enum ExprLocation {
+    TopLevel,
+    MemberSelect,
+    InDoubleQuotedString,
+    InBacktickedString,
+    AsStatement,
+    RightOfAssignment,
+    RightOfAssignmentInUsingStatement,
+    RightOfReturn,
+    UsingStatement,
 }
 
 #[derive(Debug, Clone)]
@@ -107,7 +122,7 @@ pub struct Env<'a> {
 }
 
 impl<'a> Env<'a> {
-    pub fn make(indexed_source_text: &'a IndexedSourceText<'a>) -> Self {
+    pub fn make(mode: file_info::Mode, indexed_source_text: &'a IndexedSourceText<'a>) -> Self {
         Env {
             codegen: false,
             elaborate_namespaces: true,
@@ -117,7 +132,7 @@ impl<'a> Env<'a> {
             show_all_errors: false,
             lower_coroutines: true,
             fail_open: true,
-            file_mode: file_info::Mode::Mpartial,
+            file_mode: mode,
             top_level_statements: false,
             saw_yield: false,
             lifted_awaits: None,
@@ -220,7 +235,7 @@ where
 
     fn missing_syntax<N>(
         fallback: Option<N>,
-        expecting: &'static str,
+        expecting: &str,
         node: &Syntax<T, V>,
         env: &Env,
     ) -> ret!(N) {
@@ -232,10 +247,14 @@ where
         ))
     }
 
+    fn is_num_octal_lit(s: &str) -> bool {
+        !s.chars().any(|c| c == '8' || c == '9')
+    }
+
     fn mp_optional<S>(
-        p: &dyn Fn(&Syntax<T, V>, &Env) -> ret!(S),
+        p: &dyn Fn(&Syntax<T, V>, &mut Env) -> ret!(S),
         node: &Syntax<T, V>,
-        env: &Env,
+        env: &mut Env,
     ) -> ret!(Option<S>) {
         match &node.syntax {
             Missing => Ok(None),
@@ -266,6 +285,52 @@ where
         }
     }
 
+    fn mk_str(
+        node: &Syntax<T, V>,
+        env: &mut Env,
+        unescaper: &Fn(&str) -> std::result::Result<String, InvalidString>,
+        mut content: &str,
+    ) -> String {
+        if let Some('b') = content.chars().nth(0) {
+            content = content.get(1..).unwrap();
+        }
+
+        let len = content.len();
+        let no_quotes_result = extract_unquoted_string(content, 0, len);
+        match no_quotes_result {
+            Ok(no_quotes) => {
+                let result = unescaper(&no_quotes);
+                match result {
+                    Ok(s) => s,
+                    Err(_) => {
+                        Self::raise_parsing_error(
+                            node,
+                            env,
+                            &format!("Malformed string literal <<{}>>", &no_quotes),
+                        );
+                        String::from("")
+                    }
+                }
+            }
+            Err(_) => {
+                Self::raise_parsing_error(
+                    node,
+                    env,
+                    &format!("Malformed string literal <<{}>>", &content),
+                );
+                String::from("")
+            }
+        }
+    }
+
+    fn unesc_dbl(s: &str) -> std::result::Result<String, InvalidString> {
+        let unesc_s = unescape_double(s)?;
+        match unesc_s.as_str() {
+            "''" | "\"\"" => Ok(String::from("")),
+            _ => Ok(unesc_s),
+        }
+    }
+
     fn as_list(node: &Syntax<T, V>) -> Vec<&Syntax<T, V>> {
         fn strip_list_item<T1, V1>(node: &Syntax<T1, V1>) -> &Syntax<T1, V1> {
             match node {
@@ -289,19 +354,161 @@ where
         }
     }
 
-    fn p_hint(node: &Syntax<T, V>, env: &Env) -> ret_aast!(Hint) {
-        not_impl!()
+    fn token_kind(node: &Syntax<T, V>) -> Option<TK> {
+        match &node.syntax {
+            Token(t) => Some(t.kind()),
+            _ => None,
+        }
     }
 
-    fn p_simple_initializer(node: &Syntax<T, V>, env: &Env) -> ret_aast!(Expr<,>) {
+    fn check_valid_reified_hint(env: &Env, node: &Syntax<T, V>, hint: &aast_defs::Hint) {
+        // TODO:
+    }
+
+    fn p_hint_(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Hint_) {
+        match &node.syntax {
+            /* Dirty hack; CastExpression can have type represented by token */
+            Token(_) | SimpleTypeSpecifier(_) | QualifiedName(_) => {
+                Ok(aast_defs::Hint_::Happly(Self::pos_name(node, env)?, vec![]))
+            }
+            _ => not_impl!(),
+        }
+    }
+
+    fn p_hint(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Hint) {
+        let hint_ = Self::p_hint_(node, env)?;
+        let pos = Self::p_pos(node, env);
+        let hint = aast_defs::Hint(pos, Box::new(hint_));
+        Self::check_valid_reified_hint(env, node, &hint);
+        Ok(hint)
+    }
+
+    fn p_simple_initializer(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Expr<,>) {
         match &node.syntax {
             SimpleInitializer(child) => Self::p_expr(&child.simple_initializer_value, env),
             _ => Self::missing_syntax(None, "simple initializer", node, env),
         }
     }
 
-    fn p_expr(node: &Syntax<T, V>, env: &Env) -> ret_aast!(Expr<,>) {
-        not_impl!()
+    #[inline]
+    fn p_expr(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Expr<,>) {
+        Self::p_expr_with_loc(ExprLocation::TopLevel, node, env)
+    }
+
+    fn p_expr_with_loc(
+        location: ExprLocation,
+        node: &Syntax<T, V>,
+        env: &mut Env,
+    ) -> ret_aast!(Expr<,>) {
+        match &node.syntax {
+            BracedExpression(child) => {
+                let expr = &child.braced_expression_expression;
+                let inner = Self::p_expr_with_loc(location, expr, env)?;
+                let inner_pos = &inner.0;
+                let inner_expr_ = inner.1.as_ref();
+                use aast::Expr_::*;
+                match inner_expr_ {
+                    Lvar(_) | String(_) | Int(_) | Float(_) => Ok(inner),
+                    _ => Ok(aast::Expr(
+                        inner_pos.clone(),
+                        Box::new(aast::Expr_::BracedExpr(inner)),
+                    )),
+                }
+            }
+            ParenthesizedExpression(child) => {
+                Self::p_expr_with_loc(location, &child.parenthesized_expression_expression, env)
+            }
+            _ => {
+                let expr_ = Self::p_expr_with_loc_(location, node, env)?;
+                let p = Self::p_pos(node, env);
+                Ok(aast::Expr(p, Box::new(expr_)))
+            }
+        }
+    }
+
+    fn p_expr_lit(
+        location: ExprLocation,
+        parent: &Syntax<T, V>,
+        expr: &Syntax<T, V>,
+        env: &mut Env,
+    ) -> ret_aast!(Expr_<,>) {
+        match &expr.syntax {
+            Token(_) => {
+                let s = expr.text(env.indexed_source_text.source_text);
+                match (location, Self::token_kind(expr)) {
+                    (ExprLocation::InDoubleQuotedString, _) if env.codegen() => Ok(
+                        aast::Expr_::String(Self::mk_str(expr, env, &Self::unesc_dbl, s)),
+                    ),
+                    (ExprLocation::InBacktickedString, _) if env.codegen() => Ok(
+                        aast::Expr_::String(Self::mk_str(expr, env, &unescape_backtick, s)),
+                    ),
+                    (_, Some(TK::OctalLiteral))
+                        if env.is_typechecker() && !Self::is_num_octal_lit(s) =>
+                    {
+                        Self::raise_parsing_error(
+                            parent,
+                            env,
+                            &syntax_error::invalid_octal_integer,
+                        );
+                        Self::missing_syntax(None, "octal", expr, env)
+                    }
+                    (_, Some(TK::DecimalLiteral))
+                    | (_, Some(TK::OctalLiteral))
+                    | (_, Some(TK::HexadecimalLiteral))
+                    | (_, Some(TK::BinaryLiteral)) => Ok(aast::Expr_::Int(s.replace("_", ""))),
+                    (_, Some(TK::FloatingLiteral)) => Ok(aast::Expr_::Float(String::from(s))),
+                    (_, Some(TK::SingleQuotedStringLiteral)) => Ok(aast::Expr_::String(
+                        Self::mk_str(expr, env, &unescape_single, s),
+                    )),
+                    (_, Some(TK::DoubleQuotedStringLiteral)) => Ok(aast::Expr_::String(
+                        Self::mk_str(expr, env, &unescape_double, s),
+                    )),
+                    (_, Some(TK::HeredocStringLiteral)) => Ok(aast::Expr_::String(Self::mk_str(
+                        expr,
+                        env,
+                        &unescape_heredoc,
+                        s,
+                    ))),
+                    (_, Some(TK::NowdocStringLiteral)) => Ok(aast::Expr_::String(Self::mk_str(
+                        expr,
+                        env,
+                        &unescape_nowdoc,
+                        s,
+                    ))),
+                    (_, Some(TK::NullLiteral)) => {
+                        // TODO: Handle Lint
+                        Ok(aast::Expr_::Null)
+                    }
+                    (_, Some(TK::BooleanLiteral)) => {
+                        // TODO: Handle Lint
+                        if s.eq_ignore_ascii_case("false") {
+                            Ok(aast::Expr_::False)
+                        } else if s.eq_ignore_ascii_case("true") {
+                            Ok(aast::Expr_::True)
+                        } else {
+                            Self::missing_syntax(None, &format!("boolean (not: {})", s), expr, env)
+                        }
+                    }
+                    _ => Self::missing_syntax(None, "literal", expr, env),
+                }
+            }
+            SyntaxList(ts) => not_impl!(),
+            _ => Self::missing_syntax(None, "literal expressoin", expr, env),
+        }
+    }
+
+    fn p_expr_with_loc_(
+        location: ExprLocation,
+        node: &Syntax<T, V>,
+        env: &mut Env,
+    ) -> ret_aast!(Expr_<,>) {
+        let pos = Self::p_pos(node, env);
+        match &node.syntax {
+            LiteralExpression(child) => {
+                Self::p_expr_lit(location, node, &child.literal_expression, env)
+            }
+            _ => not_impl!(),
+        }
     }
 
     fn p_stmt(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Stmt<,>) {
@@ -414,7 +621,7 @@ where
         }
     }
 
-    fn lower(env: &mut Env<'a>, script: &Syntax<T, V>) -> ::std::result::Result<Result, String> {
+    fn lower(env: &mut Env<'a>, script: &Syntax<T, V>) -> std::result::Result<Result, String> {
         let comments = vec![];
         let ast_result = Self::p_script(script, env);
         // TODO: handle error

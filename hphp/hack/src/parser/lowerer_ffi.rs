@@ -11,9 +11,10 @@ use ocamlpool_rust::{
     ocamlvalue::*,
     utils::{block_field, str_field},
 };
-use oxidized::relative_path::RelativePath;
+use oxidized::{file_info, relative_path::RelativePath};
 use parser::{
     indexed_source_text::IndexedSourceText,
+    mode_parser::parse_mode,
     parser::Parser,
     parser_env::ParserEnv,
     positioned_smart_constructors::PositionedSmartConstructors,
@@ -42,6 +43,7 @@ caml_raise!(parse_and_lower_from_text, |ocaml_source_text|, <res>, {
     let content = str_field(&ocaml_source_text, 2);
     let source_text = SourceText::make_with_raw(&relative_path, &content.data(), ocaml_source_text_value);
     let indexed_source_text = IndexedSourceText::new(&source_text);
+    let mode = parse_mode(&source_text).unwrap_or(file_info::Mode::Mpartial);
 
     let env = ParserEnv {
         is_experimental_mode : false,
@@ -53,7 +55,7 @@ caml_raise!(parse_and_lower_from_text, |ocaml_source_text|, <res>, {
 
     let mut parser = PositionedSyntaxParser::make(&source_text, env);
     let script = parser.parse_script(None);
-    let mut env = LowererEnv::make(&indexed_source_text);
+    let mut env = LowererEnv::make(mode, &indexed_source_text);
 
     ocamlpool_enter();
     let r = PositionedSyntaxLowerer::lower(&mut env, &script).ocamlvalue();

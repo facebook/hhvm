@@ -133,6 +133,22 @@ function dynamic_fun(string $name): mixed;
 <<__Native>>
 function dynamic_class_meth(string $cls, string $meth): mixed;
 
+/**
+ * Same as dynamic_fun but can't be used in RepoAuthoritative mode and
+ * doesn't raise warnings or errors
+ * on functions not marked __DynamicallyCallable.
+ */
+<<__Native>>
+function dynamic_fun_force(string $name): mixed;
+
+/**
+ * Same as dynamic_class_meth but can't be used in RepoAuthoritative mode
+ * and doesn't raise warnings or errors
+ * on methods not marked __DynamicallyCallable.
+ */
+<<__Native>>
+function dynamic_class_meth_force(string $cls, string $meth): mixed;
+
 // class-like
 interface ClassLikeAttribute {}
 interface ClassAttribute extends ClassLikeAttribute {}

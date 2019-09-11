@@ -237,6 +237,12 @@ class ['self] erase_body_visitor =
     method! on_PU_identifier _ _ qual (pos, field) (_, name) =
       let fun_name = (pos, gen_fun_name field name) in
       Class_const (qual, fun_name)
+
+    method! on_hint_ _ h =
+      match h with
+      | Hpu_access _ -> Hmixed
+      | Hprim (Tatom _) -> Hprim Tstring
+      | _ -> h
   end
 
 (* Wrapper around the AST visitor *)

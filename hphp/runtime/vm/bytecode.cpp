@@ -4294,25 +4294,17 @@ OPTBLD_INLINE void iopGetMemoKeyL(local_var loc) {
   cellCopy(key, *vmStack().allocC());
 }
 
-namespace {
-const StaticString s_idx("hh\\idx");
-
-TypedValue genericIdx(TypedValue obj, TypedValue key, TypedValue def) {
-  static auto func = Unit::loadFunc(s_idx.get());
-  assertx(func != nullptr);
-  TypedValue args[] = {
-    obj,
-    key,
-    def
-  };
-  return g_context->invokeFuncFew(func, nullptr, nullptr, 3, &args[0]);
-}
-}
-
 OPTBLD_INLINE void iopIdx() {
   TypedValue* def = vmStack().topTV();
   TypedValue* key = vmStack().indTV(1);
   TypedValue* arr = vmStack().indTV(2);
+
+  if (isNullType(key->m_type)) {
+    tvDecRefGen(arr);
+    *arr = *def;
+    vmStack().ndiscard(2);
+    return;
+  }
 
   TypedValue result;
   if (isArrayLikeType(arr->m_type)) {
@@ -4320,18 +4312,32 @@ OPTBLD_INLINE void iopIdx() {
                                      tvAsCVarRef(key),
                                      tvAsCVarRef(def));
     vmStack().popTV();
-  } else if (isNullType(key->m_type)) {
-    tvDecRefGen(arr);
-    *arr = *def;
-    vmStack().ndiscard(2);
-    return;
-  } else if (!isStringType(arr->m_type) &&
-             arr->m_type != KindOfObject) {
+  } else if (arr->m_type == KindOfObject) {
+    auto obj = arr->m_data.pobj;
+    if (obj->isCollection() && collections::contains(obj, tvAsCVarRef(key))) {
+      result = collections::at(obj, key).tv();
+      tvIncRefGen(result);
+      vmStack().popTV();
+    } else {
+      result = *def;
+      vmStack().discard();
+    }
+  } else if (isStringType(arr->m_type)) {
+    // This replicates the behavior of the hack implementation of idx, which
+    // first checks isset($arr[$idx]), then returns $arr[(int)$idx]
+    auto str = arr->m_data.pstr;
+    if (IssetEmptyElemString<false, KeyType::Any>(str, *key)) {
+      auto idx = tvCastToInt64(*key);
+      assertx(idx >= 0 && idx < str->size());
+      result = make_tv<KindOfPersistentString>(str->getChar(idx));
+      vmStack().popTV();
+    } else {
+      result = *def;
+      vmStack().discard();
+    }
+  } else {
     result = *def;
     vmStack().discard();
-  } else {
-    result = genericIdx(*arr, *key, *def);
-    vmStack().popTV();
   }
   vmStack().popTV();
   tvDecRefGen(arr);

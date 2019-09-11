@@ -2297,21 +2297,6 @@ void implDictKeysetIdx(IRGS& env,
   finish(pelem);
 }
 
-const StaticString s_idx("hh\\idx");
-
-void implGenericIdx(IRGS& env) {
-  auto const def = popC(env, DataTypeSpecific);
-  auto const key = popC(env, DataTypeSpecific);
-  auto const base = popC(env, DataTypeSpecific);
-
-  SSATmp* const args[] = { base, key, def };
-
-  static auto func = Unit::lookupBuiltin(s_idx.get());
-  assertx(func && func->numParams() == 3);
-
-  emitDirectCall(env, func, 3, args);
-}
-
 /*
  * Return the GuardConstraint that should be used to constrain baseType for an
  * Idx bytecode.
@@ -2379,11 +2364,8 @@ void emitIdx(IRGS& env) {
     return;
   }
 
-  auto const simple_key =
-    keyType <= TInt || keyType <= TStr;
-
-  if (!simple_key) {
-    implGenericIdx(env);
+  if (!(keyType <= TInt || keyType <= TStr)) {
+    interpOne(env, TCell, 3);
     return;
   }
 
@@ -2408,7 +2390,7 @@ void emitIdx(IRGS& env) {
     return;
   }
 
-  implGenericIdx(env);
+  interpOne(env, TCell, 3);
 }
 
 void emitAKExists(IRGS& env) {

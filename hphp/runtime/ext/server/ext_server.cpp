@@ -219,7 +219,7 @@ Variant HHVM_FUNCTION(xbox_process_call_message,
   if (!args.isArray()) {
     raise_error("Error decoding xbox call message");
   }
-  return vm_call_user_func(fn, args.toArray());
+  return vm_call_user_func(fn, args.toArray(), false, true);
 }
 
 int64_t HHVM_FUNCTION(xbox_get_thread_timeout) {

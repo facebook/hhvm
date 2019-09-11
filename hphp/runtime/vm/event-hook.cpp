@@ -393,7 +393,7 @@ static Variant call_intercept_handler_callback(
   IterateV(curArgs.get(), [&](TypedValue v) { args.append(v); });
   auto ret = Variant::attach(
     g_context->invokeFunc(f, args.toArray(), callCtx.this_, callCtx.cls,
-                          callCtx.invName, callCtx.dynamic, false,
+                          callCtx.invName, callCtx.dynamic, false, false,
                           Array::attach(reifiedGenerics))
   );
   return ret;

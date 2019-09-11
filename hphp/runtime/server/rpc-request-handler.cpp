@@ -355,7 +355,8 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
                           reqInitFunc, reqInitDoc, error, errorMsg, runOnce,
                           false /* warmupOnly */,
                           false /* richErrorMessage */,
-                          RuntimeOption::EvalPreludePath);
+                          RuntimeOption::EvalPreludePath,
+                          true /* allowDynCallNoPointer */);
       }
       // no need to do the initialization for a second time
       reqInitFunc.clear();
@@ -367,7 +368,8 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
                         true /* once */,
                         false /* warmupOnly */,
                         false /* richErrorMessage */,
-                        RuntimeOption::EvalPreludePath);
+                        RuntimeOption::EvalPreludePath,
+                        true /* allowDynCallNoPointer */);
     }
     if (ret) {
       bool serializeFailed = false;

@@ -843,7 +843,8 @@ enum class StackArgsState { // tells prepareFuncEntry how much work to do
   Trimmed
 };
 void enterVMAtPseudoMain(ActRec* enterFnAr, VarEnv* varEnv);
-void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk);
+void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk,
+                   bool allowDynCallNoPointer = false);
 void enterVMAtCurPC();
 void prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
                       int nregular, bool checkRefAnnot);

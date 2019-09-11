@@ -2667,7 +2667,8 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
                  const std::string &reqInitFunc, const std::string &reqInitDoc,
                  bool &error, std::string &errorMsg,
                  bool once, bool warmupOnly,
-                 bool richErrorMsg, const std::string& prelude) {
+                 bool richErrorMsg, const std::string& prelude,
+                 bool allowDynCallNoPointer /* = false */) {
   bool isServer =
     RuntimeOption::ServerExecutionMode() && !is_cli_mode();
   error = false;
@@ -2702,7 +2703,8 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
                 context->getCwd().data(), true);
       }
       if (func) {
-        funcRet.assignIfRef(invoke(cmd.c_str(), funcParams));
+        funcRet.assignIfRef(invoke(cmd.c_str(), funcParams, -1,
+                                   true, true, allowDynCallNoPointer));
       } else {
         if (isServer) hphp_chdir_file(cmd);
         include_impl_invoke(cmd.c_str(), once, "", true);

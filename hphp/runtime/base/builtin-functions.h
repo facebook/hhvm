@@ -222,13 +222,14 @@ std::pair<Class*, Func*> decode_for_clsmeth(
   DecodeFlags flags = DecodeFlags::Warn);
 
 Variant vm_call_user_func(const_variant_ref function, const Variant& params,
-                          bool checkRef = false);
+                          bool checkRef = false,
+                          bool allowDynCallNoPointer = false);
 template<typename T>
-Variant vm_call_user_func(T&& t, const Variant& params,
-                          bool checkRef = false) {
+Variant vm_call_user_func(T&& t, const Variant& params, bool checkRef = false,
+                          bool allowDynCallNoPointer = false) {
   const Variant function{std::forward<T>(t)};
   return vm_call_user_func(
-    const_variant_ref{function}, params, checkRef
+    const_variant_ref{function}, params, checkRef, allowDynCallNoPointer
   );
 }
 

@@ -1605,7 +1605,8 @@ void enterVMAtPseudoMain(ActRec* enterFnAr, VarEnv* varEnv) {
   }
 }
 
-void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk) {
+void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk,
+                   bool allowDynCallNoPointer /* = false */) {
   assertx(enterFnAr);
   assertx(!enterFnAr->resumed());
   Stats::inc(Stats::VMEnter);
@@ -1633,7 +1634,7 @@ void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk) {
   checkForReifiedGenericsErrors(enterFnAr);
   if (!EventHook::FunctionCall(enterFnAr, EventHook::NormalFunc)) return;
   checkStack(vmStack(), enterFnAr->m_func, 0);
-  calleeDynamicCallChecks(enterFnAr);
+  calleeDynamicCallChecks(enterFnAr, allowDynCallNoPointer);
   checkForRequiredCallM(enterFnAr);
   assertx(vmfp()->func()->contains(vmpc()));
 

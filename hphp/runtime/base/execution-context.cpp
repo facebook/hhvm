@@ -1579,6 +1579,7 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
                                             ObjectData* thiz, Class* cls,
                                             uint32_t argc, StringData* invName,
                                             bool dynamic,
+                                            bool allowDynCallNoPointer,
                                             FStackCheck doStackCheck,
                                             FInitArgs doInitArgs,
                                             FEnterVM doEnterVM,
@@ -1596,7 +1597,7 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
   VMRegAnchor _;
   auto const reentrySP = vmStack().top();
 
-  if (dynamic) callerDynamicCallChecks(f);
+  if (dynamic) callerDynamicCallChecks(f, allowDynCallNoPointer);
 
   if (thiz != nullptr) thiz->incRefCount();
 
@@ -1757,7 +1758,7 @@ TypedValue ExecutionContext::invokePseudoMain(const Func* f,
     enterVM(ar, [&] { enterVMAtPseudoMain(ar, varEnv); });
   };
 
-  return invokeFuncImpl(f, thiz, cls, 0, nullptr, false,
+  return invokeFuncImpl(f, thiz, cls, 0, nullptr, false, false,
                         doCheckStack, doInitArgs, doEnterVM, Array());
 }
 
@@ -1768,6 +1769,8 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
                                         StringData* invName /* = NULL */,
                                         bool dynamic /* = true */,
                                         bool checkRefAnnot /* = false */,
+                                        bool allowDynCallNoPointer
+                                                              /* = false */,
                                         Array&& reifiedGenerics
                                                               /* = Array() */) {
   const auto& args = *args_.toCell();
@@ -1801,13 +1804,13 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
 
   auto const doEnterVM = [&] (ActRec* ar) {
     enterVM(ar, [&] {
-      enterVMAtFunc(ar, StackArgsState::Trimmed);
+      enterVMAtFunc(ar, StackArgsState::Trimmed, allowDynCallNoPointer);
     });
   };
 
   return invokeFuncImpl(f, thiz, cls, argc, invName, dynamic,
-                        doCheckStack, doInitArgs, doEnterVM,
-                        std::move(reifiedGenerics));
+                        allowDynCallNoPointer, doCheckStack, doInitArgs,
+                        doEnterVM, std::move(reifiedGenerics));
 }
 
 TypedValue ExecutionContext::invokeFuncFew(const Func* f,
@@ -1845,7 +1848,7 @@ TypedValue ExecutionContext::invokeFuncFew(const Func* f,
   return invokeFuncImpl(f,
                         ActRec::decodeThis(thisOrCls),
                         ActRec::decodeClass(thisOrCls),
-                        argc, invName, dynamic,
+                        argc, invName, dynamic, false,
                         doCheckStack, doInitArgs, doEnterVM, Array());
 }
 

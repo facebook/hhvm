@@ -46,7 +46,11 @@ inline void callerReffinessChecks(const Func* func, const FCallArgs& fca) {
  * Check if a dynamic call to `func` is allowed. Return true if it is, otherwise
  * raise a notice and return false or raise an exception.
  */
-inline bool callerDynamicCallChecks(const Func* func) {
+inline bool callerDynamicCallChecks(const Func* func,
+                                    bool allowDynCallNoPointer = false) {
+  if (allowDynCallNoPointer && func->isDynamicallyCallable()) {
+    return false;
+  }
   int dynCallErrorLevel = func->isMethod() ?
     (
       func->isStatic() ?
@@ -100,9 +104,13 @@ inline void callerDynamicConstructChecks(const Class* cls) {
   }
 }
 
-inline void calleeDynamicCallChecks(const ActRec* ar) {
+inline void calleeDynamicCallChecks(const ActRec* ar,
+                                    bool allowDynCallNoPointer = false) {
   if (!ar->isDynamicCall()) return;
   auto const func = ar->func();
+
+  if (func->isDynamicallyCallable() && allowDynCallNoPointer) return;
+
   auto error_msg = func->isDynamicallyCallable() ?
     Strings::FUNCTION_CALLED_DYNAMICALLY_WITH_ATTRIBUTE :
     Strings::FUNCTION_CALLED_DYNAMICALLY_WITHOUT_ATTRIBUTE;

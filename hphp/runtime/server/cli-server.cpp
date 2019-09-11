@@ -1136,7 +1136,8 @@ void CLIWorker::doJob(int client) {
         true /* once */,
         false /* warmup only */,
         false /* richErrorMsg */,
-        prelude
+        prelude,
+        true /* allowDynCallNoPointer */
       );
       if (invoke_result) {
         ret = *rl_exit_code;

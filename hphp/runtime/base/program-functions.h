@@ -121,7 +121,8 @@ bool hphp_invoke(ExecutionContext *context,
                  bool once,
                  bool warmupOnly,
                  bool richErrorMsg,
-                 const std::string& prelude);
+                 const std::string& prelude,
+                 bool allowDynCallNoPointer = false);
 void hphp_context_exit();
 
 void hphp_thread_init();

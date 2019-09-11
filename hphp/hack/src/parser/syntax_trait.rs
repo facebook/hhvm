@@ -16,6 +16,8 @@ pub trait SyntaxTrait {
     fn offset(&self) -> Option<usize>;
     fn width(&self) -> usize;
     fn leading_width(&self) -> usize;
+    fn trailing_width(&self) -> usize;
+    fn full_width(&self) -> usize;
     fn leading_start_offset(&self) -> usize;
     fn extract_text<'a>(&self, source_text: &'a SourceText) -> Option<&'a str>;
 }

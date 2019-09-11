@@ -150,6 +150,22 @@ where
         self.is_specific_token(TokenKind::Void)
     }
 
+    pub fn is_left_brace(&self) -> bool {
+        self.is_specific_token(TokenKind::LeftBrace)
+    }
+
+    pub fn is_comma(&self) -> bool {
+        self.is_specific_token(TokenKind::Comma)
+    }
+
+    pub fn is_inout(&self) -> bool {
+        self.is_specific_token(TokenKind::Inout)
+    }
+
+    pub fn is_name(&self) -> bool {
+        self.is_specific_token(TokenKind::Name)
+    }
+
     pub fn is_as_expression(&self) -> bool {
         self.kind() == SyntaxKind::AsExpression
     }
@@ -160,6 +176,30 @@ where
 
     pub fn is_namespace_empty_body(&self) -> bool {
         self.kind() == SyntaxKind::NamespaceEmptyBody
+    }
+
+    pub fn is_attribute_specification(&self) -> bool {
+        self.kind() == SyntaxKind::AttributeSpecification
+    }
+
+    pub fn is_old_attribute_specification(&self) -> bool {
+        self.kind() == SyntaxKind::OldAttributeSpecification
+    }
+
+    pub fn is_file_attribute_specification(&self) -> bool {
+        self.kind() == SyntaxKind::FileAttributeSpecification
+    }
+
+    pub fn is_return_statement(&self) -> bool {
+        self.kind() == SyntaxKind::ReturnStatement
+    }
+
+    pub fn is_conditional_expression(&self) -> bool {
+        self.kind() == SyntaxKind::ConditionalExpression
+    }
+
+    pub fn is_safe_member_selection_expression(&self) -> bool {
+        self.kind() == SyntaxKind::SafeMemberSelectionExpression
     }
 
     pub fn syntax_node_to_list<'a>(&'a self) -> Box<dyn DoubleEndedIterator<Item = &'a Self> + 'a> {

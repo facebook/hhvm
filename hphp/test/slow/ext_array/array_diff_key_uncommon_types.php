@@ -17,13 +17,13 @@ function test_apc_local(): void {
 function test_globals(): void {
   echo "== GLOBALS array ==\n";
 
-  $c = count($GLOBALS);
+  $c = count($GLOBALS['GLOBALS']);
   $key = basename(__FILE__);
   $GLOBALS[$key] = 'lol';
-  $c2 = count(array_diff_key($GLOBALS, dict[$key => true]));
+  $c2 = count(array_diff_key($GLOBALS['GLOBALS'], dict[$key => true]));
   var_dump($c == $c2);
 
-  var_dump(array_diff_key(dict[$key => true], $GLOBALS));
+  var_dump(array_diff_key(dict[$key => true], $GLOBALS['GLOBALS']));
 }
 
 <<__EntryPoint>>

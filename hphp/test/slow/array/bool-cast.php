@@ -8,7 +8,7 @@ function f($a) {
 
 <<__EntryPoint>>
 function main_bool_cast() {
-f($GLOBALS);
+f($GLOBALS['GLOBALS']);
 f(array('a' => 'b'));
 f(array('a'));
 f(array());

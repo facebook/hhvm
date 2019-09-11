@@ -17,13 +17,13 @@ class ary implements ArrayAccess {
   }
 }
 
-function init() {
+<<__EntryPoint>>
+function cgetm_ge() {
   $GLOBALS['gArray'] = array(1, 2, 'bob', 'cat');
   $GLOBALS['gObj'] = new ary(4);
   $GLOBALS['gStr'] = '01234567890';
-}
 
-function main() {
+
   var_dump($GLOBALS['gArray'][2]);
   var_dump($GLOBALS['gObj'][6]);
   var_dump($GLOBALS['gStr'][3]);
@@ -32,21 +32,15 @@ function main() {
   foreach (array('gArray', 'gObj', 'gStr') as $dyn) {
     var_dump($GLOBALS[$dyn][array_shift(&$idx)]);
   }
-}
-init();
-main();
 
-function non_exist() {
   try {
     $a = $GLOBALS['doesnt_exist'][12];
     var_dump($a);
   } catch (Exception $e) { echo $e->getMessage()."\n"; }
 
-  foreach ($GLOBALS as $k => $v) {
+  foreach (HH\global_keys() as $k) {
     if ($k == 'doesnt_exist') {
       echo "has key $k\n";
     }
   }
 }
-
-non_exist();

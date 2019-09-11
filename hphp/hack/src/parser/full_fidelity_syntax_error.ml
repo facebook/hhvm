@@ -450,6 +450,8 @@ let error2078 = "Superglobals may not be taken by reference."
 let list_must_be_lvar =
   "list() can only be used as an lvar. Did you mean to use tuple()?"
 
+let globals_without_subscript = "$GLOBALS access requires a subscript."
+
 (* Start giving names rather than numbers *)
 let async_not_last =
   "The 'async' modifier must be directly before the 'function' keyword."

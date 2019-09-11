@@ -717,3 +717,5 @@ val abstract_instance_property : string
 val const_mutation : string
 
 val no_attributes_on_variadic_parameter : string
+
+val globals_without_subscript : string

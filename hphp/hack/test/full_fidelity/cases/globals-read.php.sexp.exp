@@ -1,0 +1,38 @@
+((script 91
+  ((list 91
+    ((markup_section 4
+      ((missing 0 ()) (() markup 0 ())
+       (markup_suffix 4
+        ((() <? 2 ())
+         (() name 2
+          ((whitespace 1) (single_line_comment 10) (end_of_line 1)))))
+       (missing 0 ())))
+     (function_declaration 73
+      ((missing 0 ())
+       (function_declaration_header 12
+        ((missing 0 ())
+         (((end_of_line 1) (end_of_line 1)) function 8 ((whitespace 1)))
+         (() name 1 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+         (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
+         (missing 0 ())))
+       (compound_statement 60
+        ((() { 1 ((end_of_line 1)))
+         (list 44
+          ((expression_statement 21
+            ((binary_expression 20
+              ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
+               (() = 1 ((whitespace 1)))
+               (subscript_expression 15
+                ((variable 8 ((() variable 8 ()))) (() [ 1 ())
+                 (literal 5 ((() single_quoted_string_literal 5 ())))
+                 (() ] 1 ())))))
+             (() ";" 1
+              ((whitespace 1) (single_line_comment 5) (end_of_line 1)))))
+           (expression_statement 14
+            ((binary_expression 13
+              ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
+               (() = 1 ((whitespace 1))) (variable 8 ((() variable 8 ())))))
+             (() ";" 1
+              ((whitespace 1) (single_line_comment 9) (end_of_line 1)))))))
+         (() } 1 ((end_of_line 1)))))))
+     (end_of_file 0 ((() end_of_file 0 ()))))))))

@@ -1,23 +1,18 @@
 <?hh
 
 function test($g) {
-  $GLOBALS['g'] = $GLOBALS;
+  $GLOBALS['g'] = $GLOBALS['GLOBALS'];
 
-  array_replace_recursive($GLOBALS, $g);
+  array_replace_recursive($GLOBALS['GLOBALS'], $g);
 
-  $GLOBALS['g'] = $GLOBALS;
-  array_merge_recursive($GLOBALS, $g);
+  $GLOBALS['g'] = $GLOBALS['GLOBALS'];
+  array_merge_recursive($GLOBALS['GLOBALS'], $g);
 }
-
-function main() {
-  $a = array('g' => $GLOBALS);
-
-  test($a);
-  test($GLOBALS);
-}
-
 
 <<__EntryPoint>>
 function main_self_recursive() {
-main();
+  $a = array('g' => $GLOBALS['GLOBALS']);
+
+  test($a);
+  test($GLOBALS['GLOBALS']);
 }

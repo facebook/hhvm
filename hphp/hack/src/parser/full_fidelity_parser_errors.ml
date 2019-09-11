@@ -2565,6 +2565,9 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
     let function_call_argument_errors ~in_constructor_call node errors =
       let result =
         match syntax node with
+        | VariableExpression { variable_expression }
+          when text variable_expression = SN.Superglobals.globals ->
+          Some SyntaxError.globals_without_subscript
         | PrefixUnaryExpression
             {
               prefix_unary_operator = { syntax = Token token; _ };
@@ -5140,6 +5143,9 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
       in
       let check_rvalue roperand errors : SyntaxError.t list =
         match syntax roperand with
+        | VariableExpression { variable_expression }
+          when text variable_expression = SN.Superglobals.globals ->
+          append_errors roperand errors SyntaxError.globals_without_subscript
         | PrefixUnaryExpression { prefix_unary_operator = op; _ }
           when token_kind op = Some TokenKind.Ampersand ->
           append_errors roperand errors SyntaxError.references_not_allowed
@@ -5168,8 +5174,9 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
         when does_binop_create_write_on_left (token_kind op) ->
         let errors = check_lvalue loperand errors in
         check_rvalue roperand errors
-      | ForeachStatement { foreach_key = k; foreach_value = v; _ } ->
-        check_lvalue k @@ check_lvalue v errors
+      | ForeachStatement
+          { foreach_key = k; foreach_value = v; foreach_collection = fc; _ } ->
+        check_rvalue fc @@ check_lvalue k @@ check_lvalue v errors
       | _ -> errors
 
     let dynamic_method_call_errors node errors =

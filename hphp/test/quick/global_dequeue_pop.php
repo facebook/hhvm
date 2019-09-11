@@ -1,7 +1,7 @@
 <?hh
 
 function foo() {
-  $a = $GLOBALS;
+  $a = $GLOBALS['GLOBALS'];
   $x = count($a);
   array_pop(&$a);
   $y = count($a);
@@ -9,7 +9,7 @@ function foo() {
 }
 
 function bar() {
-  $b = $GLOBALS;
+  $b = $GLOBALS['GLOBALS'];
   $x = count($b);
   array_shift(&$b);
   $y = count($b);

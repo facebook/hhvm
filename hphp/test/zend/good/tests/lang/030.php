@@ -1,14 +1,14 @@
 <?hh
 class foo {
 	function __construct($name) {
-     	$GLOBALS['List']= $this;
-     	$this->Name = $name;
+    $GLOBALS['List']= $this;
+    $this->Name = $name;
 		$GLOBALS['List']->echoName();
 	}
 
 	function echoName() {
-		if (!array_key_exists('names', $GLOBALS)) $GLOBALS['names'] = array();
-     	$GLOBALS['names'][]=$this->Name;
+    $GLOBALS['names'] ??= [];
+    $GLOBALS['names'][] = $this->Name;
 	}
 }
 

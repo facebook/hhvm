@@ -18,8 +18,8 @@ function test_globals(): void {
   echo "== GLOBALS array ==\n";
   $key = basename(__FILE__);
   $GLOBALS[$key] = 'lol';
-  var_dump(array_intersect_key($GLOBALS, dict[$key => true]));
-  var_dump(array_intersect_key(dict[$key => true], $GLOBALS));
+  var_dump(array_intersect_key($GLOBALS['GLOBALS'], dict[$key => true]));
+  var_dump(array_intersect_key(dict[$key => true], $GLOBALS['GLOBALS']));
 }
 
 <<__EntryPoint>>

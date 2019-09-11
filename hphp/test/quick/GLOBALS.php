@@ -8,7 +8,7 @@ while (isset($GLOBALS[$k])) {
   $k .= 'k';
 }
 
-$a = $GLOBALS;
+$a = $GLOBALS['GLOBALS'];
 $GLOBALS[$k] = 42;
 if (isset($GLOBALS[$k])) {
   print "Key is set in \$GLOBALS\n";

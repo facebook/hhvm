@@ -1868,6 +1868,25 @@ let do_highlight_local
   | Error error_message ->
     failwith (Printf.sprintf "Local highlight failed: %s" error_message)
 
+let format_typeCoverage_result results counts =
+  TypeCoverage.(
+    let coveredPercent = Coverage_level.get_percent counts in
+    let hack_coverage_to_lsp (pos, level) =
+      let range = hack_pos_to_lsp_range pos in
+      match level with
+      (* We only show diagnostics for completely untypechecked code. *)
+      | Ide_api_types.Checked
+      | Ide_api_types.Partial ->
+        None
+      | Ide_api_types.Unchecked -> Some { range; message = None }
+    in
+    {
+      coveredPercent;
+      uncoveredRanges = List.filter_map results ~f:hack_coverage_to_lsp;
+      defaultMessage =
+        "Un-type checked code. Consider adding type annotations.";
+    })
+
 let do_typeCoverage
     (conn : server_conn)
     (ref_unblocked_time : float ref)
@@ -1882,23 +1901,39 @@ let do_typeCoverage
     let%lwt (results, counts) : Coverage_level_defs.result =
       rpc conn ref_unblocked_time command
     in
-    let coveredPercent = Coverage_level.get_percent counts in
-    let hack_coverage_to_lsp (pos, level) =
-      let range = hack_pos_to_lsp_range pos in
-      match level with
-      (* We only show diagnostics for completely untypechecked code. *)
-      | Ide_api_types.Checked
-      | Ide_api_types.Partial ->
-        None
-      | Ide_api_types.Unchecked -> Some { range; message = None }
+    let formatted = format_typeCoverage_result results counts in
+    Lwt.return formatted)
+
+let do_typeCoverage_local
+    (ide_service : ClientIdeService.t)
+    (editor_open_files : Lsp.TextDocumentItem.t SMap.t)
+    (params : TypeCoverage.params) : TypeCoverage.result Lwt.t =
+  TypeCoverage.(
+    let document_contents =
+      get_document_contents
+        editor_open_files
+        params.textDocument.TextDocumentIdentifier.uri
     in
-    Lwt.return
-      {
-        coveredPercent;
-        uncoveredRanges = List.filter_map results ~f:hack_coverage_to_lsp;
-        defaultMessage =
-          "Un-type checked code. Consider adding type annotations.";
-      })
+    match document_contents with
+    | None -> failwith "Local type coverage failed, file could not be found."
+    | Some file_contents ->
+      let file_path =
+        params.textDocument.TextDocumentIdentifier.uri
+        |> lsp_uri_to_path
+        |> Path.make
+      in
+      let request =
+        ClientIdeMessage.Type_coverage
+          { ClientIdeMessage.file_path; ClientIdeMessage.file_contents }
+      in
+      let%lwt result = ClientIdeService.rpc ide_service request in
+      (match result with
+      | Ok (results, counts) ->
+        let formatted = format_typeCoverage_result results counts in
+        Lwt.return formatted
+      | Error error_message ->
+        failwith
+          (Printf.sprintf "Local type coverage failed: %s" error_message)))
 
 let do_formatting_common
     (editor_open_files : Lsp.TextDocumentItem.t SMap.t)
@@ -2776,7 +2811,7 @@ let track_ide_service_open_files
         ClientIdeService.rpc
           ide_service
           (ClientIdeMessage.File_opened
-             { ClientIdeMessage.File_opened.file_path; file_contents })
+             { ClientIdeMessage.file_path; file_contents })
       in
       Lwt.return_unit
     | _ ->
@@ -3098,6 +3133,20 @@ let handle_event
           in
           result |> print_documentHighlight |> Jsonrpc.respond to_stdout c;
           Lwt.return_unit
+        (* Type coverage in serverless IDE *)
+        | ( ( In_init { In_init_env.editor_open_files; _ }
+            | Lost_server { Lost_env.editor_open_files; _ } ),
+            Client_message c )
+          when env.use_serverless_ide
+               && c.method_ = "textDocument/typeCoverage" ->
+          let%lwt () = cancel_if_stale client c short_timeout in
+          let%lwt result =
+            parse_typeCoverage c.params
+            |> do_typeCoverage_local ide_service editor_open_files
+          in
+          result |> print_typeCoverage |> Jsonrpc.respond to_stdout c;
+          Lwt.return_unit
+        (* Hover docblocks in serverless IDE *)
         | ( ( In_init { In_init_env.editor_open_files; _ }
             | Lost_server { Lost_env.editor_open_files; _ } ),
             Client_message c )

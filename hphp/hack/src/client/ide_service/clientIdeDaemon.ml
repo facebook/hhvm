@@ -297,8 +297,8 @@ let handle_message :
             (Printf.sprintf
                "IDE services failed to initialize: %s"
                error_message) )
-    | ( Initialized { server_env; _ },
-        File_opened { File_opened.file_path; file_contents } ) ->
+    | (Initialized { server_env; _ }, File_opened { file_path; file_contents })
+      ->
       let path =
         file_path |> Path.to_string |> Relative_path.create_detect_prefix
       in
@@ -476,6 +476,24 @@ let handle_message :
         | None -> []
         | Some file_contents ->
           FileOutline.outline server_env.ServerEnv.popt file_contents
+      in
+      Lwt.return (state, Handle_message_result.Response result)
+    (* Type Coverage *)
+    | (Initialized { server_env; _ }, Type_coverage document_identifier) ->
+      let document_location =
+        {
+          file_path = document_identifier.file_path;
+          file_contents = Some document_identifier.file_contents;
+          line = 0;
+          column = 0;
+        }
+      in
+      let (ctx, entry) =
+        make_context_from_document_location server_env document_location
+      in
+      let result =
+        Provider_utils.with_context ~ctx ~f:(fun () ->
+            ServerColorFile.go_ctx ~ctx ~entry)
       in
       Lwt.return (state, Handle_message_result.Response result))
 

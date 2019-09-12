@@ -74,6 +74,7 @@
   (libraries
     lwt_utils
     sys_utils))
+; end of splitted utils:utils
 
 (library
   (name mutable_accumulator)
@@ -81,7 +82,6 @@
   (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum)) ; See T41851208
   (modules
     mutable_accumulator))
-; end of splitted utils:utils
 
 (library
   (name relative_path)

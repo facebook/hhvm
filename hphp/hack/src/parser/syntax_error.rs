@@ -512,8 +512,6 @@ pub const type_alias_to_type_constant: Error =
     Cow::Borrowed("Type aliases to type constants are not supported");
 pub const interface_with_memoize: Error =
     Cow::Borrowed("Memoize is not allowed on interface methods");
-pub const xhp_class_attribute_type_constant: Error =
-    Cow::Borrowed("Type constants are not allowed on xhp class attributes");
 pub const multiple_reactivity_annotations: Error = Cow::Borrowed(
     "Only one of following annotations is allowed: __Rx, __RxShallow, __RxLocal, __NonRx.",
 );
@@ -969,3 +967,5 @@ pub fn lowering_parsing_error(text: &str, syntax: &str) -> Error {
         syntax.to_string(),
     ))
 }
+pub const xhp_class_attribute_type_constant: Error =
+    Cow::Borrowed("Type constants are not allowed on xhp class attributes");

@@ -130,17 +130,17 @@ impl Pos {
 
     pub fn btw(x1: &Self, x2: &Self) -> Result<Self, String> {
         if x1.filename() != x2.filename() {
-            Err(format!(
-                "Position in separate files {} and {}",
-                x1.filename(),
-                x2.filename()
-            ))
+            // using string concatenation instead of format!,
+            // it is not stable see T52404885
+            Err(String::from("Position in separate files ")
+                + &x1.filename().to_string()
+                + " and "
+                + &x2.filename().to_string())
         } else if x1.end_cnum() > x2.end_cnum() {
-            Err(format!(
-                "btw: invalid positions {} and {}",
-                x1.end_cnum(),
-                x2.end_cnum()
-            ))
+            Err(String::from("btw: invalid positions")
+                + &x1.end_cnum().to_string()
+                + "and"
+                + &x2.end_cnum().to_string())
         } else {
             Ok(Self::btw_nocheck(x1.clone(), x2.clone()))
         }

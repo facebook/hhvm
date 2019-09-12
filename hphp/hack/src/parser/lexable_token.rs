@@ -7,6 +7,7 @@
 use crate::lexable_trivia::LexableTrivia;
 use crate::source_text::SourceText;
 use crate::token_kind::TokenKind;
+use std::fmt::Debug;
 
 pub trait LexableToken<'a>: Clone {
     type Trivia: LexableTrivia;
@@ -37,4 +38,8 @@ pub trait LexableToken<'a>: Clone {
     fn with_kind(self, kind: TokenKind) -> Self;
 }
 
-pub trait LexablePositionedToken<'a>: LexableToken<'a> {}
+pub trait LexablePositionedToken<'a>: LexableToken<'a>
+where
+    Self: Debug,
+{
+}

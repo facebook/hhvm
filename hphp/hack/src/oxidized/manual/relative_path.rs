@@ -25,7 +25,7 @@ impl Display for Prefix {
             Root => write!(f, "root"),
             Hhi => write!(f, "hhi"),
             Tmp => write!(f, "tmp"),
-            Dummy => write!(f, ""),
+            Dummy => write!(f, "dummy"),
         }
     }
 }

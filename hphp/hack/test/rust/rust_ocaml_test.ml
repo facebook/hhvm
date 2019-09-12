@@ -323,7 +323,20 @@ let get_files_in_path ~args path =
            @@ String_utils.string_ends_with f "test_variadic_type_hint.php"
         && not
            @@ String_utils.string_ends_with f "namespace_group_use_decl.php"
+        && (not @@ String_utils.string_ends_with f "parser_massive_add_exp.php")
+        && not
+           @@ String_utils.string_ends_with f "parser_massive_concat_exp.php"
         && true
+      | LOWERER ->
+        (not @@ String_utils.string_ends_with f "parser_massive_add_exp.php")
+        && not
+           @@ String_utils.string_ends_with f "parser_massive_concat_exp.php"
+        && not
+           @@ String_utils.string_ends_with
+                f
+                "parser_reasonable_nested_array.php"
+        && (not @@ String_utils.string_ends_with f "bug64555.php")
+        && (not @@ String_utils.string_ends_with f "bug64660.php")
       | _ -> true)
     files
 

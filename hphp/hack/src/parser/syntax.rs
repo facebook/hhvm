@@ -8,6 +8,7 @@ use crate::lexable_token::LexableToken;
 use crate::syntax_kind::SyntaxKind;
 use crate::token_kind::TokenKind;
 
+use std::fmt::Debug;
 use std::marker::Sized;
 
 pub use crate::syntax_generated::*;
@@ -27,7 +28,10 @@ where
     fn text_range(&self) -> Option<(usize, usize)>; // corresponds to extract_text in OCaml impl.
 }
 
-pub trait SyntaxValueWithKind {
+pub trait SyntaxValueWithKind
+where
+    Self: Debug,
+{
     fn is_missing(&self) -> bool;
     fn token_kind(&self) -> Option<TokenKind>;
 }

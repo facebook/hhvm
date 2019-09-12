@@ -233,7 +233,7 @@ use parser_core_types::syntax::SyntaxVariant::*;
 
 pub trait Lowerer<'a, T, V>
 where
-    T: LexablePositionedToken<'a> + std::fmt::Debug,
+    T: LexablePositionedToken<'a>,
     Syntax<T, V>: PositionedSyntaxTrait,
     V: SyntaxValueWithKind + SyntaxValueType<T> + std::fmt::Debug,
 {
@@ -355,37 +355,49 @@ where
         not_impl!()
     }
 
+    #[inline]
     fn pos_name(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Sid) {
-        Self::pos_name_(node, env, false)
+        Self::pos_name_(node, env, None)
     }
 
     // TODO: after porting unify Sid and Pstring
+    #[inline]
     fn p_pstring(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Pstring) {
-        let ast_defs::Id(p, id) = Self::pos_name_(node, env, false)?;
+        Self::p_pstring_(node, env, None)
+    }
+
+    #[inline]
+    fn p_pstring_(
+        node: &Syntax<T, V>,
+        env: &mut Env,
+        drop_prefix: Option<char>,
+    ) -> ret_aast!(Pstring) {
+        let ast_defs::Id(p, id) = Self::pos_name_(node, env, drop_prefix)?;
         Ok((p, id))
     }
 
-    fn drop_dollar(s: &str) -> &str {
-        if s.len() > 0 && s.chars().nth(0) == Some('$') {
+    #[inline]
+    fn drop_prefix(s: &str, prefix: char) -> &str {
+        if s.len() > 0 && s.chars().nth(0) == Some(prefix) {
             &s[1..]
         } else {
             s
         }
     }
 
-    fn pos_name_(node: &Syntax<T, V>, env: &mut Env, drop_dollar: bool) -> ret_aast!(Sid) {
+    fn pos_name_(node: &Syntax<T, V>, env: &mut Env, drop_prefix: Option<char>) -> ret_aast!(Sid) {
         match &node.syntax {
             QualifiedName(_) => Self::pos_qualified_name(node, env),
             SimpleTypeSpecifier(child) => {
-                Self::pos_name_(&child.simple_type_specifier, env, drop_dollar)
+                Self::pos_name_(&child.simple_type_specifier, env, drop_prefix)
             }
             _ => {
                 let mut name = node.text(env.indexed_source_text.source_text);
                 if name == "__COMPILER_HALT_OFFSET__" {
                     env.saw_compiler_halt_offset = Some(0);
                 }
-                if drop_dollar && name.len() > 0 && name.chars().nth(0) == Some('$') {
-                    name = &name[1..];
+                if let Some(prefix) = drop_prefix {
+                    name = Self::drop_prefix(name, prefix);
                 }
                 let p = Self::p_pos(node, env);
                 Ok(ast_defs::Id(p, String::from(name)))
@@ -1393,6 +1405,36 @@ where
         parse(str, 0, Free, 0)
     }
 
+    fn p_xhp_child(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(XhpChild) {
+        use aast::XhpChild::*;
+        use aast::XhpChildOp::*;
+        match &node.syntax {
+            Token(_) => Self::pos_name(node, env).map(ChildName),
+            PostfixUnaryExpression(c) => {
+                let operand = Self::p_xhp_child(&c.postfix_unary_operand, env)?;
+                let operator = match Self::token_kind(&c.postfix_unary_operator) {
+                    Some(TK::Question) => ChildQuestion,
+                    Some(TK::Plus) => ChildPlus,
+                    Some(TK::Star) => ChildStar,
+                    _ => Self::missing_syntax(None, "xhp children operator", node, env)?,
+                };
+                Ok(ChildUnary(Box::new(operand), operator))
+            }
+            BinaryExpression(c) => {
+                let left = Self::p_xhp_child(&c.binary_left_operand, env)?;
+                let right = Self::p_xhp_child(&c.binary_right_operand, env)?;
+                Ok(ChildBinary(Box::new(left), Box::new(right)))
+            }
+            XHPChildrenParenthesizedList(c) => {
+                let children = Self::as_list(&c.xhp_children_list_xhp_children);
+                let children: std::result::Result<Vec<_>, _> =
+                    children.iter().map(|c| Self::p_xhp_child(c, env)).collect();
+                Ok(ChildList(children?))
+            }
+            _ => Self::missing_syntax(None, "xhp children", node, env),
+        }
+    }
+
     fn p_class_elt_(class: &mut aast!(Class_<,>), node: &Syntax<T, V>, env: &mut Env) -> ret!(()) {
         let doc_comment_opt = Self::extract_docblock(node, env);
         let has_fun_header = |m: &MethodishDeclarationChildren<T, V>| {
@@ -1452,8 +1494,7 @@ where
                     &c.const_declarators,
                     env,
                 )?;
-                class.consts.append(&mut class_consts);
-                Ok(())
+                Ok(class.consts.append(&mut class_consts))
             }
             TypeConstDeclaration(c) => {
                 if !c.type_const_type_parameters.is_missing() {
@@ -1485,7 +1526,7 @@ where
                     ),
                     (true, _, Some(_)) => (None, aast::TypeconstAbstractKind::TCAbstract(type__)),
                 };
-                class.typeconsts.push(aast::ClassTypeconst {
+                Ok(class.typeconsts.push(aast::ClassTypeconst {
                     abstract_: abstract_kind,
                     visibility,
                     name,
@@ -1494,8 +1535,7 @@ where
                     user_attributes,
                     span,
                     doc_comment: doc_comment_opt,
-                });
-                Ok(())
+                }))
             }
             PropertyDeclaration(c) => {
                 let user_attributes = Self::p_user_attributes(&c.property_attribute_spec, env)?;
@@ -1521,7 +1561,7 @@ where
                     &|n, e| -> ret!((Pos, aast!(Sid), Option<aast!(Expr<,>)>)) {
                         match &n.syntax {
                             PropertyDeclarator(c) => {
-                                let name = Self::pos_name_(&c.property_name, e, true)?;
+                                let name = Self::pos_name_(&c.property_name, e, Some('$'))?;
                                 let pos = Self::p_pos(n, e);
                                 let expr = Self::mp_optional(
                                     &Self::p_simple_initializer,
@@ -1555,13 +1595,12 @@ where
                     });
                     i += 1;
                 }
-
                 Ok(())
             }
             MethodishDeclaration(c) if has_fun_header(c) => {
                 let classvar_init =
                     |param: &aast!(FunParam<,>)| -> (aast!(Stmt<,>), aast!(ClassVar<,>)) {
-                        let cvname = Self::drop_dollar(&param.name);
+                        let cvname = Self::drop_prefix(&param.name, '$');
                         let p = &param.pos;
                         let span = match &param.expr {
                             Some(aast::Expr(pos_end, _)) => {
@@ -1664,8 +1703,7 @@ where
                     doc_comment: doc_comment_opt,
                 };
                 class.vars.append(&mut member_def);
-                class.methods.push(method);
-                Ok(())
+                Ok(class.methods.push(method))
             }
             MethodishTraitResolution(c) if has_fun_header_mtr(c) => {
                 let header = &c.methodish_trait_function_decl_header;
@@ -1786,8 +1824,7 @@ where
             }
             TraitUse(c) => {
                 let mut uses = Self::could_map(&Self::p_hint, &c.trait_use_names, env)?;
-                class.uses.append(&mut uses);
-                Ok(())
+                Ok(class.uses.append(&mut uses))
             }
             RequireClause(c) => {
                 let is_extends = match Self::token_kind(&c.require_kind) {
@@ -1796,13 +1833,174 @@ where
                     _ => Self::missing_syntax(None, "trait require kind", &c.require_kind, env)?,
                 };
                 let hint = Self::p_hint(&c.require_name, env)?;
-                class.reqs.push((hint, is_extends));
+                Ok(class.reqs.push((hint, is_extends)))
+            }
+            XHPClassAttributeDeclaration(c) => {
+                type Ret = ret!(Either<aast!(XhpAttr<,>), aast!(Hint)>);
+                let mut p_attr = |node: &Syntax<T, V>, env: &mut Env| -> Ret {
+                    let mut mk_attr_use = |n: &Syntax<T, V>| {
+                        Ok(Either::Right(aast::Hint(
+                            Self::p_pos(n, env),
+                            Box::new(aast::Hint_::Happly(Self::pos_name(n, env)?, vec![])),
+                        )))
+                    };
+                    match &node.syntax {
+                        XHPClassAttribute(c) => {
+                            let ty = &c.xhp_attribute_decl_type;
+                            let init = &c.xhp_attribute_decl_initializer;
+                            let ast_defs::Id(p, name) =
+                                Self::pos_name(&c.xhp_attribute_decl_name, env)?;
+                            match &ty.syntax {
+                                TypeConstant(_) if env.is_typechecker() => {
+                                    Self::raise_parsing_error(
+                                        ty,
+                                        env,
+                                        &syntax_error::xhp_class_attribute_type_constant,
+                                    )
+                                }
+                                _ => {}
+                            }
+                            let req = match &c.xhp_attribute_decl_required.syntax {
+                                XHPRequired(_) => Some(aast::XhpAttrTag::Required),
+                                XHPLateinit(_) => Some(aast::XhpAttrTag::LateInit),
+                                _ => None,
+                            };
+                            let pos = if init.is_missing() {
+                                p.clone()
+                            } else {
+                                Pos::btw(&p, &Self::p_pos(init, env)).map_err(Error::Failwith)?
+                            };
+                            let (hint, enum_) = match &ty.syntax {
+                                XHPEnumType(c) => {
+                                    let p = Self::p_pos(ty, env);
+                                    let opt = !(&c.xhp_enum_optional.is_missing());
+                                    let vals =
+                                        Self::could_map(&Self::p_expr, &c.xhp_enum_values, env)?;
+                                    (None, Some((p, opt, vals)))
+                                }
+                                _ => (Some(Self::p_hint(ty, env)?), None),
+                            };
+                            let init_expr =
+                                Self::mp_optional(&Self::p_simple_initializer, init, env)?;
+                            let xhp_attr = aast::XhpAttr(
+                                hint.clone(),
+                                aast::ClassVar {
+                                    final_: false,
+                                    xhp_attr: Some(aast::XhpAttrInfo { xai_tag: req }),
+                                    abstract_: false,
+                                    visibility: aast::Visibility::Public,
+                                    type_: hint,
+                                    id: ast_defs::Id(p, String::from(":") + &name),
+                                    expr: init_expr,
+                                    user_attributes: vec![],
+                                    doc_comment: None,
+                                    is_promoted_variadic: false,
+                                    is_static: false,
+                                    span: pos,
+                                },
+                                req,
+                                enum_,
+                            );
+                            Ok(Either::Left(xhp_attr))
+                        }
+                        XHPSimpleClassAttribute(c) => {
+                            mk_attr_use(&c.xhp_simple_class_attribute_type)
+                        }
+                        Token(_) => mk_attr_use(node),
+                        _ => Self::missing_syntax(None, "XHP attribute", node, env),
+                    }
+                };
+                let attrs = Self::could_map(&mut p_attr, &c.xhp_attribute_attributes, env)?;
+                for attr in attrs.into_iter() {
+                    match attr {
+                        Either::Left(attr) => class.xhp_attrs.push(attr),
+                        Either::Right(xhp_attr_use) => class.xhp_attr_uses.push(xhp_attr_use),
+                    }
+                }
                 Ok(())
             }
-            XHPClassAttributeDeclaration(_) => not_impl!(),
-            XHPChildrenDeclaration(_) => not_impl!(),
-            XHPCategoryDeclaration(_) => not_impl!(),
-            PocketEnumDeclaration(_) => not_impl!(),
+            XHPChildrenDeclaration(c) => {
+                let p = Self::p_pos(node, env);
+                Ok(class
+                    .xhp_children
+                    .push((p, Self::p_xhp_child(&c.xhp_children_expression, env)?)))
+            }
+            XHPCategoryDeclaration(c) => {
+                let p = Self::p_pos(node, env);
+                let categories = Self::could_map(
+                    &|n, e| Self::p_pstring_(n, e, Some('%')),
+                    &c.xhp_category_categories,
+                    env,
+                )?;
+                if let Some((_, cs)) = &class.xhp_category {
+                    if cs.len() > 0 {
+                        Self::raise_nast_error("multiple_xhp_category")
+                    }
+                }
+                Ok(class.xhp_category = Some((p, categories)))
+            }
+            PocketEnumDeclaration(c) => {
+                let is_final = Self::p_kinds(&c.pocket_enum_modifiers, env)?.has(modifier::FINAL);
+                let id = Self::pos_name(&c.pocket_enum_name, env)?;
+                let flds = Self::as_list(&c.pocket_enum_fields);
+                let mut case_types = vec![];
+                let mut case_values = vec![];
+                let mut members = vec![];
+                for fld in flds.iter() {
+                    match &fld.syntax {
+                        PocketAtomMappingDeclaration(c) => {
+                            let id = Self::pos_name(&c.pocket_atom_mapping_name, env)?;
+                            let maps = Self::as_list(&c.pocket_atom_mapping_mappings);
+                            let mut types = vec![];
+                            let mut exprs = vec![];
+                            for map in maps.iter() {
+                                match &map.syntax {
+                                    PocketMappingIdDeclaration(c) => {
+                                        let id = Self::pos_name(&c.pocket_mapping_id_name, env)?;
+                                        let expr = Self::p_simple_initializer(
+                                            &c.pocket_mapping_id_initializer,
+                                            env,
+                                        )?;
+                                        exprs.push((id, expr));
+                                    }
+                                    PocketMappingTypeDeclaration(c) => {
+                                        let id = Self::pos_name(&c.pocket_mapping_type_name, env)?;
+                                        let hint = Self::p_hint(&c.pocket_mapping_type_type, env)?;
+                                        types.push((id, hint));
+                                    }
+                                    _ => {
+                                        Self::missing_syntax(None, "pumapping", map, env)?;
+                                    }
+                                }
+                            }
+                            members.push(aast::PuMember {
+                                atom: id,
+                                types,
+                                exprs,
+                            })
+                        }
+                        PocketFieldTypeExprDeclaration(c) => {
+                            let typ = Self::p_hint(&c.pocket_field_type_expr_type, env)?;
+                            let id = Self::pos_name(&c.pocket_field_type_expr_name, env)?;
+                            case_values.push((id, typ));
+                        }
+                        PocketFieldTypeDeclaration(c) => {
+                            let id = Self::pos_name(&c.pocket_field_type_name, env)?;
+                            case_types.push(id);
+                        }
+                        _ => {
+                            Self::missing_syntax(None, "pufield", fld, env)?;
+                        }
+                    }
+                }
+                Ok(class.pu_enums.push(aast::PuEnum {
+                    name: id,
+                    is_final,
+                    case_types,
+                    case_values,
+                    members,
+                }))
+            }
             _ => Self::missing_syntax(None, "class element", node, env),
         }
     }

@@ -1,0 +1,5 @@
+Fatal error: Uncaught exception 'OutOfBoundsException' with message 'Out of bounds dict access: invalid index "C"' in %s/hphp/test/quick/constrain-builtin.php:6
+Stack trace:
+#0 %s/hphp/test/quick/constrain-builtin.php(12): lookup_value()
+#1 (): main()
+#2 {main}

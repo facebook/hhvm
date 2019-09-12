@@ -520,8 +520,6 @@ SSATmp* opt_array_key_cast(IRGS& env, const ParamPrep& params) {
   if (params.size() != 1) return nullptr;
   auto const value = params[0].value;
 
-  env.irb->constrainValue(value, DataTypeSpecific);
-
   if (value->isA(TInt))  return value;
   if (value->isA(TNull)) return cns(env, staticEmptyString());
   if (value->isA(TBool)) return gen(env, ConvBoolToInt, value);
@@ -1168,6 +1166,26 @@ SSATmp* optimizedFCallBuiltin(IRGS& env,
   }();
 
   if (result == nullptr) return nullptr;
+
+  // We don't constrain types when loading parameters whose typehints don't
+  // imply any checks. However, optimized codegen for a builtin generally
+  // requires specific input types (and uses them to produce specific outputs).
+  //
+  // As a result, if we're returning optimized builtin codegen, we also need
+  // to constrain our input parameters as well.
+  //
+  // To play well with assumptions in tracelet region selection, our optimized
+  // codegen must obey the following restriction:
+  //   - IF we relax the inputs for an optimized builtin to DataTypeSpecific
+  //   - THEN the output must have its current type relaxed to DataTypeSpecific
+  //
+  // Here's a breaking example: a builtin that returns an int for one string
+  // input and null for a different string input. If any builtin behaves like
+  // this, it should place additional constraints on its inputs. (No current
+  // builtins need to do so - DataTypeSpecific is a good default.)
+  for (auto const& param : params.info) {
+    env.irb->constrainValue(param.value, DataTypeSpecific);
+  }
   params.decRefParams(env);
   return result;
 }

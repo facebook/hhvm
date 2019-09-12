@@ -5056,7 +5056,7 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
       let append_errors node errors error =
         make_error_from_node node error :: errors
       in
-      let rec check_lvalue ?(allow_reassign_this = false) loperand errors :
+      let rec check_lvalue ?(allow_reassign = false) loperand errors :
           SyntaxError.t list =
         let err = append_errors loperand errors in
         match syntax loperand with
@@ -5068,11 +5068,14 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
         | MemberSelectionExpression { member_name; _ }
           when token_kind member_name = Some TokenKind.XHPClassName ->
           err (SyntaxError.not_allowed_in_write "->: operator")
+        | VariableExpression _ when allow_reassign -> errors
         | VariableExpression { variable_expression }
-          when (not allow_reassign_this)
-               && String.lowercase (text variable_expression)
-                  = SN.SpecialIdents.this ->
+          when String.lowercase (text variable_expression)
+               = SN.SpecialIdents.this ->
           err SyntaxError.reassign_this
+        | VariableExpression { variable_expression }
+          when text variable_expression = SN.Superglobals.globals ->
+          err (SyntaxError.not_allowed_in_write "$GLOBALS")
         | DecoratedExpression { decorated_expression_decorator = op; _ }
           when token_kind op = Some TokenKind.Clone ->
           err (SyntaxError.not_allowed_in_write "Clone")
@@ -5093,9 +5096,9 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
           err (SyntaxError.not_allowed_in_write "Inout")
         | ParenthesizedExpression
             { parenthesized_expression_expression = e; _ } ->
-          check_lvalue ~allow_reassign_this e errors
+          check_lvalue ~allow_reassign e errors
         | SubscriptExpression { subscript_receiver = e; _ } ->
-          check_lvalue ~allow_reassign_this:true e errors
+          check_lvalue ~allow_reassign:true e errors
         | LambdaExpression _
         | AnonymousFunction _
         | AwaitableCreationExpression _
@@ -5157,14 +5160,14 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
       | PostfixUnaryExpression
           { postfix_unary_operator = op; postfix_unary_operand = loperand }
         when does_unop_create_write (token_kind op) ->
-        check_lvalue ~allow_reassign_this:true loperand errors
+        check_lvalue ~allow_reassign:true loperand errors
       | DecoratedExpression
           {
             decorated_expression_decorator = op;
             decorated_expression_expression = loperand;
           }
         when does_decorator_create_write (token_kind op) ->
-        check_lvalue ~allow_reassign_this:true loperand errors
+        check_lvalue ~allow_reassign:true loperand errors
       | BinaryExpression
           {
             binary_left_operand = loperand;

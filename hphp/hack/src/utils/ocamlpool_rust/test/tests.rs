@@ -3,16 +3,13 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-#[macro_use]
-extern crate ocaml;
-
-extern crate libc;
 
 extern "C" {
     fn ocamlpool_enter();
     fn ocamlpool_leave();
 }
 
+use ocaml::caml;
 use ocaml_ffi_test_utils::test_case;
 use ocamlpool_rust::ocamlvalue::*;
 use ocamlvalue_macro::Ocamlvalue;

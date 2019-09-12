@@ -3,9 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-#[macro_use]
-extern crate ocaml;
-
 use std::rc::Rc;
 
 use parser::parser::Parser;
@@ -18,6 +15,7 @@ use parser_rust as parser;
 
 use rust_editable_positioned_syntax::{EditablePositionedSyntax, EditablePositionedSyntaxTrait};
 
+use ocaml::caml;
 use ocamlpool_rust::utils::{block_field, str_field};
 use oxidized::relative_path::RelativePath;
 use rust_to_ocaml::rust_to_ocaml::{SerializationContext, ToOcaml};

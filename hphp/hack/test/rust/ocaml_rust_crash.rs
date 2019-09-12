@@ -1,5 +1,4 @@
-#[macro_use]
-extern crate ocaml;
+use ocaml::caml;
 
 caml!(rust_crash() {
     let _four = format!("{}", 4);

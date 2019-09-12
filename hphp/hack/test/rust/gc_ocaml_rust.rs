@@ -1,6 +1,4 @@
-#[macro_use]
-extern crate ocaml;
-
+use ocaml::caml;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 trait OCamlTransferableStruct {}

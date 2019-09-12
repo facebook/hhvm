@@ -4,8 +4,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-extern crate libc;
-
 mod ocaml_coroutine_state;
 mod ocaml_syntax;
 mod ocaml_syntax_generated;

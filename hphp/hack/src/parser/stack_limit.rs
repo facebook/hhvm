@@ -18,7 +18,6 @@ pub struct StackLimit {
 ///
 /// # Usage:
 /// ```
-/// extern crate parser_rust;
 /// use parser_rust::stack_limit::StackLimit;
 /// let limit = std::sync::Arc::new(StackLimit::relative(3_000_000));
 /// limit.reset(); // set the baseline (when the stack is low)

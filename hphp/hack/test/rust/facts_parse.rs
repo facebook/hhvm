@@ -7,13 +7,8 @@
 use std::fs;
 use std::path::PathBuf;
 
-extern crate clap;
 use clap::{App, Arg};
-
-extern crate facts_rust;
 use facts_rust::facts_parser::*;
-
-extern crate oxidized;
 use oxidized::relative_path::*;
 
 fn main() {

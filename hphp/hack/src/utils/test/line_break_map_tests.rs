@@ -3,10 +3,6 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-#[macro_use]
-extern crate ocaml;
-
-extern crate libc;
 
 extern "C" {
     fn ocamlpool_enter();
@@ -14,6 +10,7 @@ extern "C" {
 }
 
 use line_break_map::LineBreakMap;
+use ocaml::caml;
 use ocamlpool_rust::ocamlvalue::*;
 use ocamlpool_rust::utils::*;
 

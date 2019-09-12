@@ -4,8 +4,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-extern crate ocaml;
-
 use crate::rust_to_ocaml::*;
 use ocaml::core::mlvalues::Value as OcamlValue;
 use parser::lexable_token::LexableToken;

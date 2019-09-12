@@ -420,12 +420,79 @@ where
     }
 
     fn p_hint_(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Hint_) {
+        use aast_defs::Hint_::*;
+        let unary = |kw, ty, env: &mut Env| {
+            Ok(Happly(
+                Self::pos_name(kw, env)?,
+                Self::could_map(&Self::p_hint, ty, env)?,
+            ))
+        };
+        let binary = |kw, key, ty, env: &mut Env| {
+            let kw = Self::pos_name(kw, env)?;
+            let key = Self::p_hint(key, env)?;
+            Ok(Happly(
+                kw,
+                Self::map_flatten_(&Self::p_hint, ty, env, vec![key])?,
+            ))
+        };
         match &node.syntax {
             /* Dirty hack; CastExpression can have type represented by token */
             Token(_) | SimpleTypeSpecifier(_) | QualifiedName(_) => {
-                Ok(aast_defs::Hint_::Happly(Self::pos_name(node, env)?, vec![]))
+                Ok(Happly(Self::pos_name(node, env)?, vec![]))
             }
-            _ => not_impl!(),
+            TupleTypeSpecifier(c) => {
+                Ok(Htuple(Self::could_map(&Self::p_hint, &c.tuple_types, env)?))
+            }
+            KeysetTypeSpecifier(c) => Ok(Happly(
+                Self::pos_name(&c.keyset_type_keyword, env)?,
+                Self::could_map(&Self::p_hint, &c.keyset_type_type, env)?,
+            )),
+            VectorTypeSpecifier(c) => unary(&c.vector_type_keyword, &c.vector_type_type, env),
+            ClassnameTypeSpecifier(c) => unary(&c.classname_keyword, &c.classname_type, env),
+            TupleTypeExplicitSpecifier(c) => unary(&c.tuple_type_keyword, &c.tuple_type_types, env),
+            VarrayTypeSpecifier(c) => unary(&c.varray_keyword, &c.varray_type, env),
+            VectorArrayTypeSpecifier(c) => {
+                unary(&c.vector_array_keyword, &c.vector_array_type, env)
+            }
+            DarrayTypeSpecifier(c) => {
+                binary(&c.darray_keyword, &c.darray_key, &c.darray_value, env)
+            }
+            MapArrayTypeSpecifier(c) => binary(
+                &c.map_array_keyword,
+                &c.map_array_key,
+                &c.map_array_value,
+                env,
+            ),
+            DictionaryTypeSpecifier(c) => {
+                unary(&c.dictionary_type_keyword, &c.dictionary_type_members, env)
+            }
+            GenericTypeSpecifier(c) => {
+                let name = Self::pos_name(&c.generic_class_type, env)?;
+                let type_args = match &c.generic_argument_list.syntax {
+                    TypeArguments(c) => {
+                        Self::could_map(&Self::p_hint, &c.type_arguments_types, env)?
+                    }
+                    _ => Self::missing_syntax(
+                        None,
+                        "generic type arguments",
+                        &c.generic_argument_list,
+                        env,
+                    )?,
+                };
+                if env.codegen() {
+                    not_impl!()
+                } else {
+                    Ok(Happly(name, type_args))
+                }
+            }
+            NullableTypeSpecifier(c) => Ok(Hoption(Self::p_hint(&c.nullable_type, env)?)),
+            LikeTypeSpecifier(c) => Ok(Hlike(Self::p_hint(&c.like_type, env)?)),
+            SoftTypeSpecifier(c) => Ok(Hsoft(Self::p_hint(&c.soft_type, env)?)),
+            ClosureTypeSpecifier(_) => not_impl!(),
+            AttributizedSpecifier(_) => not_impl!(),
+            TypeConstant(_) => not_impl!(),
+            ReifiedTypeArgument(_) => not_impl!(),
+            _ => Self::missing_syntax(None, "type hint", node, env),
         }
     }
 
@@ -565,7 +632,7 @@ where
         env: &mut Env,
     ) -> ret_aast!(Expr_<,>) {
         let mk_lvar = |name, env| {
-            let name = Self::pos_name(node, env)?;
+            let name = Self::pos_name(name, env)?;
             let lid = aast::Lid(name.0, (0, name.1));
             Ok(aast::Expr_::Lvar(lid))
         };

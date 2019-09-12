@@ -5,6 +5,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use oxidized::aast::Visibility;
+use oxidized::aast_defs::UseAsVisibility;
 use parser_rust::token_kind::TokenKind as TK;
 
 #[derive(Copy, Clone, Eq, PartialEq)]
@@ -43,10 +44,23 @@ pub fn to_visibility(kind: Kind) -> Option<Visibility> {
     }
 }
 
+pub fn to_use_as_visibility(kind: Kind) -> Option<UseAsVisibility> {
+    use UseAsVisibility::*;
+    match kind {
+        PUBLIC => Some(UseAsPublic),
+        PRIVATE => Some(UseAsPrivate),
+        PROTECTED => Some(UseAsProtected),
+        FINAL => Some(UseAsFinal),
+        _ => None,
+    }
+}
+
 #[derive(Copy, Clone)]
 pub struct KindSet(u32);
 
-pub const VISIBILLITIES: KindSet = KindSet(PRIVATE.0 | PUBLIC.0 | PROTECTED.0);
+pub const VISIBILITIES: KindSet = KindSet(PRIVATE.0 | PUBLIC.0 | PROTECTED.0);
+
+pub const USE_AS_VISIBILITY: KindSet = KindSet(PRIVATE.0 | PUBLIC.0 | PROTECTED.0 | FINAL.0);
 
 impl KindSet {
     pub fn new() -> Self {
@@ -66,5 +80,9 @@ impl KindSet {
 
     pub fn has(&self, kind: Kind) -> bool {
         self.0 & kind.0 > 0
+    }
+
+    pub fn has_any(&self, set: KindSet) -> bool {
+        self.0 & set.0 > 0
     }
 }

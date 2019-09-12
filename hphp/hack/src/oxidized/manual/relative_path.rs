@@ -6,10 +6,11 @@
 use ocamlpool_rust::utils::*;
 use ocamlrep_derive::OcamlRep;
 use ocamlvalue_macro::Ocamlvalue;
+use std::fmt::{Display, Formatter, Result};
 use std::path::PathBuf;
 use std::rc::Rc;
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
 pub enum Prefix {
     Root,
     Hhi,
@@ -17,7 +18,19 @@ pub enum Prefix {
     Tmp,
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+impl Display for Prefix {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        use Prefix::*;
+        match self {
+            Root => write!(f, "root"),
+            Hhi => write!(f, "hhi"),
+            Tmp => write!(f, "tmp"),
+            Dummy => write!(f, ""),
+        }
+    }
+}
+
+#[derive(Clone, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
 pub struct RelativePath(Rc<(Prefix, PathBuf)>);
 
 impl RelativePath {
@@ -45,5 +58,11 @@ impl RelativePath {
 
     pub fn path_str(&self) -> &str {
         (self.0).1.to_str().unwrap()
+    }
+}
+
+impl Display for RelativePath {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        write!(f, "{} {}", (self.0).0, (self.0).1.display())
     }
 }

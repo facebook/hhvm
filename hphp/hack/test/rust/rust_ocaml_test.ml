@@ -488,6 +488,9 @@ module LowererTest_ = struct
       OcamlLowerer.make_env file ~keep_errors:false ~elaborate_namespaces:false
     in
     try
+      (Errors.is_hh_fixme := (fun _ _ -> false));
+      (Errors.get_hh_fixme_pos := (fun _ _ -> None));
+      (Errors.is_hh_fixme_disallowed := (fun _ _ -> false));
       let ast = OcamlLowerer.from_text env source_text in
       let aast = Ast_to_aast.convert_program i () () () ast.OcamlLowerer.ast in
       Tree aast

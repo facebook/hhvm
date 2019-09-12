@@ -13,6 +13,7 @@ use crate::file_pos_small::FilePosSmall;
 use crate::relative_path::{Prefix, RelativePath};
 
 use std::path::PathBuf;
+use std::result::Result::*;
 
 #[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 enum PosImpl {
@@ -125,6 +126,24 @@ impl Pos {
             },
         };
         Pos(inner)
+    }
+
+    pub fn btw(x1: &Self, x2: &Self) -> Result<Self, String> {
+        if x1.filename() != x2.filename() {
+            Err(format!(
+                "Position in separate files {} and {}",
+                x1.filename(),
+                x2.filename()
+            ))
+        } else if x1.end_cnum() > x2.end_cnum() {
+            Err(format!(
+                "btw: invalid positions {} and {}",
+                x1.end_cnum(),
+                x2.end_cnum()
+            ))
+        } else {
+            Ok(Self::btw_nocheck(x1.clone(), x2.clone()))
+        }
     }
 
     pub fn end_cnum(&self) -> usize {

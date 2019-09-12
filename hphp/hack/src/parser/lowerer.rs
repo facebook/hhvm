@@ -8,7 +8,7 @@ use oxidized::{
     namespace_env::Env as NamespaceEnv,
     pos::Pos,
     prim_defs::Comment,
-    {aast, aast_defs, ast_defs, file_info},
+    s_map, {aast, aast_defs, ast_defs, file_info},
 };
 
 use parser_rust::{
@@ -25,6 +25,8 @@ use std::collections::HashSet;
 use std::result::Result::{Err, Ok};
 
 use crate::lowerer_modifier as modifier;
+
+use itertools::Either;
 
 macro_rules! not_impl {
     () => {
@@ -231,9 +233,9 @@ use parser_core_types::syntax::SyntaxVariant::*;
 
 pub trait Lowerer<'a, T, V>
 where
-    T: LexablePositionedToken<'a>,
+    T: LexablePositionedToken<'a> + std::fmt::Debug,
     Syntax<T, V>: PositionedSyntaxTrait,
-    V: SyntaxValueWithKind + SyntaxValueType<T>,
+    V: SyntaxValueWithKind + SyntaxValueType<T> + std::fmt::Debug,
 {
     fn make_empty_ns_env(env: &Env) -> NamespaceEnv {
         NamespaceEnv::empty(Vec::from(env.auto_ns_map), env.codegen())
@@ -285,6 +287,10 @@ where
         if env.codegen() && !env.lower_coroutines() {
             env.lowpri_errors.push((pos, String::from(msg)))
         }
+    }
+
+    fn raise_nast_error(msg: &str) {
+        // A placehold for error raised in ast_to_aast.ml
     }
 
     #[inline]
@@ -350,13 +356,36 @@ where
     }
 
     fn pos_name(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Sid) {
+        Self::pos_name_(node, env, false)
+    }
+
+    // TODO: after porting unify Sid and Pstring
+    fn p_pstring(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Pstring) {
+        let ast_defs::Id(p, id) = Self::pos_name_(node, env, false)?;
+        Ok((p, id))
+    }
+
+    fn drop_dollar(s: &str) -> &str {
+        if s.len() > 0 && s.chars().nth(0) == Some('$') {
+            &s[1..]
+        } else {
+            s
+        }
+    }
+
+    fn pos_name_(node: &Syntax<T, V>, env: &mut Env, drop_dollar: bool) -> ret_aast!(Sid) {
         match &node.syntax {
             QualifiedName(_) => Self::pos_qualified_name(node, env),
-            SimpleTypeSpecifier(child) => Self::pos_name(&child.simple_type_specifier, env),
+            SimpleTypeSpecifier(child) => {
+                Self::pos_name_(&child.simple_type_specifier, env, drop_dollar)
+            }
             _ => {
-                let name = node.text(env.indexed_source_text.source_text);
+                let mut name = node.text(env.indexed_source_text.source_text);
                 if name == "__COMPILER_HALT_OFFSET__" {
                     env.saw_compiler_halt_offset = Some(0);
+                }
+                if drop_dollar && name.len() > 0 && name.chars().nth(0) == Some('$') {
+                    name = &name[1..];
                 }
                 let p = Self::p_pos(node, env);
                 Ok(ast_defs::Id(p, String::from(name)))
@@ -804,23 +833,24 @@ where
         Ok((kind_set, init))
     }
 
+    fn p_kinds(node: &Syntax<T, V>, env: &mut Env) -> ret!(modifier::KindSet) {
+        Self::p_modifiers(&|_, _, _, _| {}, (), node, env).map(|r| r.0)
+    }
+
     // TODO: change name to map_flatten after porting
     #[inline]
-    fn could_map<R>(
-        f: &dyn Fn(&Syntax<T, V>, &mut Env) -> ret!(R),
-        node: &Syntax<T, V>,
-        env: &mut Env,
-    ) -> ret!(Vec<R>) {
+    fn could_map<R, F>(f: &F, node: &Syntax<T, V>, env: &mut Env) -> ret!(Vec<R>)
+    where
+        F: Fn(&Syntax<T, V>, &mut Env) -> ret!(R),
+    {
         Self::map_flatten_(f, node, env, vec![])
     }
 
     #[inline]
-    fn map_flatten_<R>(
-        f: &dyn Fn(&Syntax<T, V>, &mut Env) -> ret!(R),
-        node: &Syntax<T, V>,
-        env: &mut Env,
-        acc: Vec<R>,
-    ) -> ret!(Vec<R>) {
+    fn map_flatten_<R, F>(f: &F, node: &Syntax<T, V>, env: &mut Env, acc: Vec<R>) -> ret!(Vec<R>)
+    where
+        F: Fn(&Syntax<T, V>, &mut Env) -> ret!(R),
+    {
         Self::map_fold(
             f,
             &|mut v: Vec<R>, a| {
@@ -833,13 +863,11 @@ where
         )
     }
 
-    fn map_fold<A, R>(
-        f: &dyn Fn(&Syntax<T, V>, &mut Env) -> ret!(R),
-        op: &dyn Fn(A, R) -> A,
-        node: &Syntax<T, V>,
-        env: &mut Env,
-        acc: A,
-    ) -> ret!(A) {
+    fn map_fold<A, R, F, O>(f: &F, op: &O, node: &Syntax<T, V>, env: &mut Env, acc: A) -> ret!(A)
+    where
+        F: Fn(&Syntax<T, V>, &mut Env) -> ret!(R),
+        O: Fn(A, R) -> A,
+    {
         match &node.syntax {
             Missing => Ok(acc),
             SyntaxList(xs) => {
@@ -849,21 +877,40 @@ where
                 }
                 Ok(a)
             }
-            ListItem(x) => Self::map_fold(f, op, &x.list_item, env, acc),
+            ListItem(x) => Ok(op(acc, f(&x.list_item, env)?)),
             _ => Ok(op(acc, f(node, env)?)),
         }
     }
 
     fn p_visibility(node: &Syntax<T, V>, env: &mut Env) -> ret!(Option<aast!(Visibility)>) {
-        let first_vis =
-            |r: Option<aast!(Visibility)>, kind: modifier::Kind, _: &Syntax<T, V>, _: &mut Env| {
-                if let None = r {
-                    modifier::to_visibility(kind)
-                } else {
-                    r
-                }
-            };
+        let first_vis = |r: Option<aast!(Visibility)>, kind, _: &Syntax<T, V>, _: &mut Env| {
+            r.or_else(|| modifier::to_visibility(kind))
+        };
         Self::p_modifiers(&first_vis, None, node, env).map(|r| r.1)
+    }
+
+    fn p_visibility_or(
+        node: &Syntax<T, V>,
+        env: &mut Env,
+        default: aast!(Visibility),
+    ) -> ret!(aast!(Visibility)) {
+        Self::p_visibility(node, env).map(|v| v.unwrap_or(default))
+    }
+
+    fn p_visibility_last_win(
+        node: &Syntax<T, V>,
+        env: &mut Env,
+    ) -> ret!(Option<aast!(Visibility)>) {
+        let last_vis = |r, kind, _: &Syntax<T, V>, _: &mut Env| modifier::to_visibility(kind).or(r);
+        Self::p_modifiers(&last_vis, None, node, env).map(|r| r.1)
+    }
+
+    fn p_visibility_last_win_or(
+        node: &Syntax<T, V>,
+        env: &mut Env,
+        default: aast!(Visibility),
+    ) -> ret!(aast!(Visibility)) {
+        Self::p_visibility_last_win(node, env).map(|v| v.unwrap_or(default))
     }
 
     fn has_soft(attrs: &[aast!(UserAttribute<,>)]) -> bool {
@@ -984,6 +1031,13 @@ where
                 Ok(param)
             }
             _ => Self::missing_syntax(None, "function parameter", node, env),
+        }
+    }
+
+    fn p_tconstraint_ty(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Hint) {
+        match &node.syntax {
+            TypeConstraint(c) => Self::p_hint(&c.constraint_type, env),
+            _ => Self::missing_syntax(None, "type constraint", node, env),
         }
     }
 
@@ -1339,6 +1393,436 @@ where
         parse(str, 0, Free, 0)
     }
 
+    fn p_class_elt_(class: &mut aast!(Class_<,>), node: &Syntax<T, V>, env: &mut Env) -> ret!(()) {
+        let doc_comment_opt = Self::extract_docblock(node, env);
+        let has_fun_header = |m: &MethodishDeclarationChildren<T, V>| {
+            if let FunctionDeclarationHeader(_) = m.methodish_function_decl_header.syntax {
+                return true;
+            }
+            false
+        };
+        let has_fun_header_mtr = |m: &MethodishTraitResolutionChildren<T, V>| {
+            if let FunctionDeclarationHeader(_) = m.methodish_trait_function_decl_header.syntax {
+                return true;
+            }
+            false
+        };
+        let p_method_vis = |node: &Syntax<T, V>, env: &mut Env| -> ret_aast!(Visibility) {
+            match Self::p_visibility_last_win(node, env)? {
+                None => {
+                    Self::raise_nast_error("method_needs_visiblity");
+                    Ok(aast::Visibility::Public)
+                }
+                Some(v) => Ok(v),
+            }
+        };
+        match &node.syntax {
+            ConstDeclaration(c) => {
+                // TODO: make wrap `type_` `doc_comment` by `Rc` in ClassConst to avoid clone
+                let vis = Self::p_visibility_or(&c.const_modifiers, env, aast::Visibility::Public)?;
+                let type_ = Self::mp_optional(&Self::p_hint, &c.const_type_specifier, env)?;
+                // using map_fold can save one Vec allocation, but ocaml's behavior is that
+                // if anything throw, it will discard all lowered elements. So adding to class
+                // must be at the last.
+                let mut class_consts = Self::could_map(
+                    &|n: &Syntax<T, V>, e: &mut Env| -> ret_aast!(ClassConst<,>) {
+                        match &n.syntax {
+                            ConstantDeclarator(c) => {
+                                let id = Self::pos_name(&c.constant_declarator_name, e)?;
+                                let expr = if n.is_abstract() {
+                                    None
+                                } else {
+                                    Self::mp_optional(
+                                        &Self::p_simple_initializer,
+                                        &c.constant_declarator_initializer,
+                                        e,
+                                    )?
+                                };
+                                Ok(aast::ClassConst {
+                                    visibility: vis,
+                                    type_: type_.clone(),
+                                    id,
+                                    expr,
+                                    doc_comment: doc_comment_opt.clone(),
+                                })
+                            }
+                            _ => Self::missing_syntax(None, "constant declarator", n, e),
+                        }
+                    },
+                    &c.const_declarators,
+                    env,
+                )?;
+                class.consts.append(&mut class_consts);
+                Ok(())
+            }
+            TypeConstDeclaration(c) => {
+                if !c.type_const_type_parameters.is_missing() {
+                    Self::raise_parsing_error(node, env, &syntax_error::tparams_in_tconst);
+                }
+                let user_attributes = Self::p_user_attributes(&c.type_const_attribute_spec, env)?;
+                let type__ = Self::mp_optional(&Self::p_hint, &c.type_const_type_specifier, env)?
+                    .map(|hint| Self::soften_hint(&user_attributes, hint));
+                let kinds = Self::p_kinds(&c.type_const_modifiers, env)?;
+                let name = Self::pos_name(&c.type_const_name, env)?;
+                let constraint =
+                    Self::mp_optional(&Self::p_tconstraint_ty, &c.type_const_type_constraint, env)?;
+                let span = Self::p_pos(node, env);
+                let visibility = Self::p_visibility(&c.type_const_modifiers, env)?
+                    .unwrap_or(aast::Visibility::Public);
+                let has_abstract = kinds.has(modifier::ABSTRACT);
+                let (type_, abstract_kind) = match (has_abstract, &constraint, &type__) {
+                    (false, _, None) => {
+                        Self::raise_nast_error("not_abstract_without_typeconst");
+                        (constraint.clone(), aast::TypeconstAbstractKind::TCConcrete)
+                    }
+                    (false, None, Some(_)) => (type__, aast::TypeconstAbstractKind::TCConcrete),
+                    (false, Some(_), Some(_)) => {
+                        (type__, aast::TypeconstAbstractKind::TCPartiallyAbstract)
+                    }
+                    (true, _, None) => (
+                        type__.clone(),
+                        aast::TypeconstAbstractKind::TCAbstract(type__),
+                    ),
+                    (true, _, Some(_)) => (None, aast::TypeconstAbstractKind::TCAbstract(type__)),
+                };
+                class.typeconsts.push(aast::ClassTypeconst {
+                    abstract_: abstract_kind,
+                    visibility,
+                    name,
+                    constraint,
+                    type_,
+                    user_attributes,
+                    span,
+                    doc_comment: doc_comment_opt,
+                });
+                Ok(())
+            }
+            PropertyDeclaration(c) => {
+                let user_attributes = Self::p_user_attributes(&c.property_attribute_spec, env)?;
+                let type_ = Self::mp_optional(&Self::p_hint, &c.property_type, env)?
+                    .map(|t| Self::soften_hint(&user_attributes, t));
+                let modifier_checker = |_, _, n: &Syntax<T, V>, e: &mut Env| -> () {
+                    if n.is_final() {
+                        Self::raise_parsing_error(n, e, &syntax_error::declared_final("Properties"))
+                    }
+                };
+                let kinds = Self::p_modifiers(&modifier_checker, (), &c.property_modifiers, env)?.0;
+                let vis = Self::p_visibility_last_win_or(
+                    &c.property_modifiers,
+                    env,
+                    aast::Visibility::Public,
+                )?;
+                let doc_comment = if env.quick_mode {
+                    None
+                } else {
+                    doc_comment_opt
+                };
+                let name_exprs = Self::could_map(
+                    &|n, e| -> ret!((Pos, aast!(Sid), Option<aast!(Expr<,>)>)) {
+                        match &n.syntax {
+                            PropertyDeclarator(c) => {
+                                let name = Self::pos_name_(&c.property_name, e, true)?;
+                                let pos = Self::p_pos(n, e);
+                                let expr = Self::mp_optional(
+                                    &Self::p_simple_initializer,
+                                    &c.property_initializer,
+                                    e,
+                                )?;
+                                Ok((pos, name, expr))
+                            }
+                            _ => Self::missing_syntax(None, "property declarator", n, e),
+                        }
+                    },
+                    &c.property_declarators,
+                    env,
+                )?;
+
+                let mut i = 0;
+                for name_expr in name_exprs.into_iter() {
+                    class.vars.push(aast::ClassVar {
+                        final_: kinds.has(modifier::FINAL),
+                        xhp_attr: None,
+                        abstract_: kinds.has(modifier::ABSTRACT),
+                        visibility: vis,
+                        type_: type_.clone(),
+                        id: name_expr.1,
+                        expr: name_expr.2,
+                        user_attributes: user_attributes.clone(),
+                        doc_comment: if i == 0 { doc_comment.clone() } else { None },
+                        is_promoted_variadic: false,
+                        is_static: kinds.has(modifier::STATIC),
+                        span: name_expr.0,
+                    });
+                    i += 1;
+                }
+
+                Ok(())
+            }
+            MethodishDeclaration(c) if has_fun_header(c) => {
+                let classvar_init =
+                    |param: &aast!(FunParam<,>)| -> (aast!(Stmt<,>), aast!(ClassVar<,>)) {
+                        let cvname = Self::drop_dollar(&param.name);
+                        let p = &param.pos;
+                        let span = match &param.expr {
+                            Some(aast::Expr(pos_end, _)) => {
+                                Pos::btw(p, pos_end).unwrap_or_else(|_| p.clone())
+                            }
+                            _ => p.clone(),
+                        };
+                        let e = |expr_: aast!(Expr_<,>)| -> aast!(Expr<,>) {
+                            aast::Expr(p.clone(), Box::new(expr_))
+                        };
+                        let lid =
+                            |s: &str| -> aast!(Lid) { aast::Lid(p.clone(), (0, s.to_string())) };
+                        use aast::Expr_::*;
+                        (
+                            aast::Stmt(
+                                p.clone(),
+                                Box::new(aast::Stmt_::Expr(e(Binop(
+                                    ast_defs::Bop::Eq(None),
+                                    e(ObjGet(
+                                        e(Lvar(lid("$this"))),
+                                        e(Id(ast_defs::Id(p.clone(), cvname.to_string()))),
+                                        aast::OgNullFlavor::OGNullthrows,
+                                    )),
+                                    e(Lvar(lid(&param.name))),
+                                )))),
+                            ),
+                            aast::ClassVar {
+                                final_: false,
+                                xhp_attr: None,
+                                abstract_: false,
+                                visibility: param.visibility.unwrap(),
+                                type_: param.type_hint.1.clone(),
+                                id: ast_defs::Id(p.clone(), cvname.to_string()),
+                                expr: None,
+                                user_attributes: param.user_attributes.clone(),
+                                doc_comment: None,
+                                is_promoted_variadic: param.is_variadic,
+                                is_static: false,
+                                span,
+                            },
+                        )
+                    };
+                let header = &c.methodish_function_decl_header;
+                let h = match &header.syntax {
+                    FunctionDeclarationHeader(h) => h,
+                    _ => panic!(),
+                };
+                let hdr = Self::p_fun_hdr(&|_, _, _, _| {}, header, env)?;
+                if hdr.fh_name.1 == "__construct" && !hdr.fh_type_parameters.is_empty() {
+                    Self::raise_parsing_error(
+                        header,
+                        env,
+                        &syntax_error::no_generics_on_constructors,
+                    );
+                }
+                let (mut member_init, mut member_def): (
+                    Vec<aast!(Stmt<,>)>,
+                    Vec<aast!(ClassVar<,>)>,
+                ) = hdr
+                    .fh_parameters
+                    .iter()
+                    .filter_map(|p| p.visibility.map(|_| classvar_init(p)))
+                    .unzip();
+
+                let kinds = Self::p_kinds(&h.function_modifiers, env)?;
+                let visibility = p_method_vis(&h.function_modifiers, env)?;
+                let is_static = kinds.has(modifier::STATIC);
+                env.in_static_method = is_static;
+                let (mut body, body_has_yield) =
+                    Self::mp_yielding(&Self::p_function_body, &c.methodish_function_body, env)?;
+                if env.codegen() {
+                    member_init.reverse();
+                }
+                member_init.append(&mut body);
+                let body = member_init;
+                env.in_static_method = false;
+                let is_abstract = kinds.has(modifier::ABSTRACT);
+                let is_external = !is_abstract && c.methodish_function_body.is_external();
+                let user_attributes = Self::p_user_attributes(&c.methodish_attribute, env)?;
+                let method = aast::Method_ {
+                    span: Self::p_function(node, env),
+                    annotation: (),
+                    final_: kinds.has(modifier::FINAL),
+                    abstract_: is_abstract,
+                    static_: is_static,
+                    name: hdr.fh_name,
+                    visibility,
+                    tparams: hdr.fh_type_parameters,
+                    where_constraints: hdr.fh_constrs,
+                    variadic: Self::determine_variadicity(&hdr.fh_parameters),
+                    params: hdr.fh_parameters,
+                    body: aast::FuncBody {
+                        annotation: (),
+                        ast: body,
+                    },
+                    fun_kind: Self::mk_fun_kind(hdr.fh_suspension_kind, body_has_yield),
+                    user_attributes,
+                    ret: aast::TypeHint((), hdr.fh_return_type),
+                    external: is_external,
+                    doc_comment: doc_comment_opt,
+                };
+                class.vars.append(&mut member_def);
+                class.methods.push(method);
+                Ok(())
+            }
+            MethodishTraitResolution(c) if has_fun_header_mtr(c) => {
+                let header = &c.methodish_trait_function_decl_header;
+                let h = match &header.syntax {
+                    FunctionDeclarationHeader(h) => h,
+                    _ => panic!(),
+                };
+                let hdr = Self::p_fun_hdr(&|_, _, _, _| {}, header, env)?;
+                let kind = Self::p_kinds(&h.function_modifiers, env)?;
+                let (qualifier, name) = match &c.methodish_trait_name.syntax {
+                    ScopeResolutionExpression(c) => (
+                        Self::p_hint(&c.scope_resolution_qualifier, env)?,
+                        Self::p_pstring(&c.scope_resolution_name, env)?,
+                    ),
+                    _ => Self::missing_syntax(None, "trait method redeclaration", node, env)?,
+                };
+                let user_attributes = Self::p_user_attributes(&c.methodish_trait_attribute, env)?;
+                let visibility = p_method_vis(&h.function_modifiers, env)?;
+                let mtr = aast::MethodRedeclaration {
+                    final_: kind.has(modifier::FINAL),
+                    abstract_: kind.has(modifier::ABSTRACT),
+                    static_: kind.has(modifier::STATIC),
+                    visibility,
+                    name: hdr.fh_name,
+                    tparams: hdr.fh_type_parameters,
+                    where_constraints: hdr.fh_constrs,
+                    variadic: Self::determine_variadicity(&hdr.fh_parameters),
+                    params: hdr.fh_parameters,
+                    fun_kind: Self::mk_fun_kind(hdr.fh_suspension_kind, false),
+                    ret: aast::TypeHint((), hdr.fh_return_type),
+                    trait_: qualifier,
+                    method: name,
+                    user_attributes,
+                };
+                class.method_redeclarations.push(mtr);
+                Ok(())
+            }
+            TraitUseConflictResolution(c) => {
+                type Ret = ret!(Either<aast!(InsteadofAlias), aast!(UseAsAlias)>);
+                let p_item = |n: &Syntax<T, V>, e: &mut Env| -> Ret {
+                    match &n.syntax {
+                        TraitUsePrecedenceItem(c) => {
+                            let removed_names = &c.trait_use_precedence_item_removed_names;
+                            let (qualifier, name) = match &c.trait_use_precedence_item_name.syntax {
+                                ScopeResolutionExpression(c) => (
+                                    Self::pos_name(&c.scope_resolution_qualifier, e)?,
+                                    Self::p_pstring(&c.scope_resolution_name, e)?,
+                                ),
+                                _ => Self::missing_syntax(None, "trait use precedence item", n, e)?,
+                            };
+                            let removed_names = Self::could_map(&Self::pos_name, removed_names, e)?;
+                            Self::raise_nast_error("unsupported_instead_of");
+                            Ok(Either::Left(aast::InsteadofAlias(
+                                qualifier,
+                                name,
+                                removed_names,
+                            )))
+                        }
+                        TraitUseAliasItem(c) => {
+                            let aliasing_name = &c.trait_use_alias_item_aliasing_name;
+                            let modifiers = &c.trait_use_alias_item_modifiers;
+                            let aliased_name = &c.trait_use_alias_item_aliased_name;
+                            let (qualifier, name) = match &aliasing_name.syntax {
+                                ScopeResolutionExpression(c) => (
+                                    Some(Self::pos_name(&c.scope_resolution_qualifier, e)?),
+                                    Self::p_pstring(&c.scope_resolution_name, e)?,
+                                ),
+                                _ => (None, Self::p_pstring(aliasing_name, e)?),
+                            };
+                            let (kinds, mut vis_raw) = Self::p_modifiers(
+                                &|mut acc, kind, n, e| -> Vec<aast_defs::UseAsVisibility> {
+                                    if let Some(v) = modifier::to_use_as_visibility(kind) {
+                                        acc.push(v);
+                                    }
+                                    acc
+                                },
+                                vec![],
+                                modifiers,
+                                e,
+                            )?;
+                            if !kinds.has_any(modifier::USE_AS_VISIBILITY) {
+                                Self::raise_parsing_error(n, e, &syntax_error::trait_alias_rule_allows_only_final_and_visibility_modifiers);
+                            }
+                            let vis = if !kinds.has_any(modifier::VISIBILITIES) {
+                                let mut v = vec![aast::UseAsVisibility::UseAsPublic];
+                                v.append(&mut vis_raw);
+                                v
+                            } else {
+                                vis_raw
+                            };
+                            let aliased_name = if !aliased_name.is_missing() {
+                                Some(Self::pos_name(aliased_name, e)?)
+                            } else {
+                                None
+                            };
+                            Self::raise_nast_error("unsupported_trait_use_as");
+                            Ok(Either::Right(aast::UseAsAlias(
+                                qualifier,
+                                name,
+                                aliased_name,
+                                vis,
+                            )))
+                        }
+                        _ => Self::missing_syntax(None, "trait use conflict resolution item", n, e),
+                    }
+                };
+                let mut uses =
+                    Self::could_map(&Self::p_hint, &c.trait_use_conflict_resolution_names, env)?;
+                let elts = Self::could_map(&p_item, &c.trait_use_conflict_resolution_clauses, env)?;
+                class.uses.append(&mut uses);
+                for elt in elts.into_iter() {
+                    match elt {
+                        Either::Left(l) => class.insteadof_alias.push(l),
+                        Either::Right(r) => class.use_as_alias.push(r),
+                    }
+                }
+                Ok(())
+            }
+            TraitUse(c) => {
+                let mut uses = Self::could_map(&Self::p_hint, &c.trait_use_names, env)?;
+                class.uses.append(&mut uses);
+                Ok(())
+            }
+            RequireClause(c) => {
+                let is_extends = match Self::token_kind(&c.require_kind) {
+                    Some(TK::Implements) => false,
+                    Some(TK::Extends) => true,
+                    _ => Self::missing_syntax(None, "trait require kind", &c.require_kind, env)?,
+                };
+                let hint = Self::p_hint(&c.require_name, env)?;
+                class.reqs.push((hint, is_extends));
+                Ok(())
+            }
+            XHPClassAttributeDeclaration(_) => not_impl!(),
+            XHPChildrenDeclaration(_) => not_impl!(),
+            XHPCategoryDeclaration(_) => not_impl!(),
+            PocketEnumDeclaration(_) => not_impl!(),
+            _ => Self::missing_syntax(None, "class element", node, env),
+        }
+    }
+
+    fn p_class_elt(class: &mut aast!(Class_<,>), node: &Syntax<T, V>, env: &mut Env) -> ret!(()) {
+        let r = Self::p_class_elt_(class, node, env);
+        match r {
+            // match ocaml behavior, don't throw if missing syntax when fail_open is true
+            Err(Error::APIMissingSyntax { .. }) if env.fail_open => Ok(()),
+            _ => r,
+        }
+    }
+
+    fn contains_class_body(c: &ClassishDeclarationChildren<T, V>) -> bool {
+        match &c.classish_body.syntax {
+            ClassishBody(_) => true,
+            _ => false,
+        }
+    }
+
     fn p_def(node: &Syntax<T, V>, env: &mut Env) -> ret!(Vec<aast!(Def<,>)>) {
         let doc_comment_opt = Self::extract_docblock(node, env);
         match &node.syntax {
@@ -1392,6 +1876,87 @@ where
                     static_: false,
                 })])
             }
+            ClassishDeclaration(c) if Self::contains_class_body(c) => {
+                // TOOD: env = non_tls env
+                let mode = Self::mode_annotation(env.file_mode());
+                let user_attributes = Self::p_user_attributes(&c.classish_attribute, env)?;
+                let kinds = Self::p_kinds(&c.classish_modifiers, env)?;
+                let final_ = kinds.has(modifier::FINAL);
+                let is_xhp = match Self::token_kind(&c.classish_name) {
+                    Some(TK::XHPElementName) => true,
+                    Some(TK::XHPClassName) => true,
+                    _ => false,
+                };
+                let name = Self::pos_name(&c.classish_name, env)?;
+                env.cls_reified_generics = HashSet::new();
+                let tparams = aast::ClassTparams {
+                    list: Self::p_tparam_l(true, &c.classish_type_parameters, env)?,
+                    constraints: s_map::SMap::new(),
+                };
+                let extends = Self::could_map(&Self::p_hint, &c.classish_extends_list, env)?;
+                // TODO: env.parent_may_reified =
+                let implements = Self::could_map(&Self::p_hint, &c.classish_implements_list, env)?;
+                let where_constraints = match &c.classish_where_clause.syntax {
+                    Missing => vec![],
+                    WhereClause(_) => not_impl!(),
+                    _ => Self::missing_syntax(None, "class constraints", node, env)?,
+                };
+                let namespace = Self::mk_empty_ns_env(env);
+                let span = Self::p_pos(node, env);
+                let class_kind = match Self::token_kind(&c.classish_keyword) {
+                    Some(TK::Class) if kinds.has(modifier::ABSTRACT) => {
+                        ast_defs::ClassKind::Cabstract
+                    }
+                    Some(TK::Class) => ast_defs::ClassKind::Cnormal,
+                    Some(TK::Interface) => ast_defs::ClassKind::Cinterface,
+                    Some(TK::Trait) => ast_defs::ClassKind::Ctrait,
+                    Some(TK::Enum) => ast_defs::ClassKind::Cenum,
+                    _ => Self::missing_syntax(None, "class kind", &c.classish_keyword, env)?,
+                };
+                let mut class_ = aast::Class_ {
+                    span,
+                    annotation: (),
+                    mode,
+                    final_,
+                    is_xhp,
+                    kind: class_kind,
+                    name,
+                    tparams,
+                    extends,
+                    uses: vec![],
+                    use_as_alias: vec![],
+                    insteadof_alias: vec![],
+                    method_redeclarations: vec![],
+                    xhp_attr_uses: vec![],
+                    xhp_category: None,
+                    reqs: vec![],
+                    implements,
+                    where_constraints,
+                    consts: vec![],
+                    typeconsts: vec![],
+                    vars: vec![],
+                    methods: vec![],
+                    // TODO: what is this attbiute? check ast_to_aast
+                    attributes: vec![],
+                    xhp_children: vec![],
+                    xhp_attrs: vec![],
+                    namespace,
+                    user_attributes,
+                    file_attributes: vec![],
+                    enum_: None,
+                    pu_enums: vec![],
+                    doc_comment: doc_comment_opt,
+                };
+                match &c.classish_body.syntax {
+                    ClassishBody(c1) => {
+                        for elt in Self::as_list(&c1.classish_body_elements).iter() {
+                            Self::p_class_elt(&mut class_, elt, env)?;
+                        }
+                    }
+                    _ => Self::missing_syntax(None, "classish body", &c.classish_body, env)?,
+                }
+                Ok(vec![aast::Def::Class(class_)])
+            }
             ConstDeclaration(child) => {
                 let ty = &child.const_type_specifier;
                 let decls = Self::as_list(&child.const_declarators);
@@ -1418,6 +1983,9 @@ where
                 }
                 Ok(defs)
             }
+            AliasDeclaration(_) => not_impl!(),
+            EnumDeclaration(_) => not_impl!(),
+            RecordDeclaration(_) => not_impl!(),
             InclusionDirective(child)
                 if env.file_mode() != file_info::Mode::Mdecl
                     && env.file_mode() != file_info::Mode::Mphp
@@ -1428,6 +1996,15 @@ where
                     Self::p_pos(node, env),
                     Box::new(aast::Stmt_::Expr(expr)),
                 ))])
+            }
+            NamespaceDeclaration(_) => not_impl!(),
+            NamespaceGroupUseDeclaration(_) => not_impl!(),
+            NamespaceUseDeclaration(_) => not_impl!(),
+            FileAttributeSpecification(_) => not_impl!(),
+            _ if env.file_mode() == file_info::Mode::Mdecl
+                || env.file_mode() == file_info::Mode::Mphp && !env.codegen =>
+            {
+                Ok(vec![])
             }
             _ => Ok(vec![aast::Def::Stmt(Self::p_stmt(node, env)?)]),
         }

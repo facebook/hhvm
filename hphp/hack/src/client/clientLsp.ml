@@ -1390,7 +1390,8 @@ let make_ide_completion_response
         match (completion.func_details, use_textedits) with
         | (Some details, _)
           when Lsp_helpers.supports_snippets p
-               && not is_caret_followed_by_lparen ->
+               && (not is_caret_followed_by_lparen)
+               && completion.res_kind <> SearchUtils.SI_LocalVariable ->
           (* "method(${1:arg1}, ...)" but for args we just use param names. *)
           let f i param = Printf.sprintf "${%i:%s}" (i + 1) param.param_name in
           let params = String.concat ~sep:", " (List.mapi details.params ~f) in

@@ -7,6 +7,7 @@
 #![allow(dead_code)]
 
 mod lowerer;
+mod lowerer_modifier;
 
 pub use lowerer::Env;
 pub use lowerer::Lowerer;

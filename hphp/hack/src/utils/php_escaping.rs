@@ -13,7 +13,7 @@ use std::fmt;
 
 #[derive(Debug)]
 pub struct InvalidString {
-    msg: String,
+    pub msg: String,
 }
 
 impl fmt::Display for InvalidString {

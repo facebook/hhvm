@@ -8,9 +8,6 @@ use oxidized::{
     namespace_env::Env as NamespaceEnv,
     pos::Pos,
     prim_defs::Comment,
-    relative_path::RelativePath,
-    s_map::SMap,
-    s_set::SSet,
     {aast, aast_defs, ast_defs, file_info},
 };
 
@@ -27,6 +24,8 @@ use ocamlvalue_macro::Ocamlvalue;
 use std::collections::HashSet;
 use std::result::Result::{Err, Ok};
 
+use crate::lowerer_modifier as modifier;
+
 macro_rules! not_impl {
     () => {
         panic!("NOT IMPLEMENTED")
@@ -39,8 +38,7 @@ macro_rules! aast {
     ($ty:ident<,>) =>  {oxidized::aast::$ty<Pos, (), (), ()>}
 }
 
-macro_rules! ret {
-    ($ty:ty) => { std::result::Result<$ty, Error<Syntax<T, V>>> }
+macro_rules! ret {    ($ty:ty) => { std::result::Result<$ty, Error<Syntax<T, V>>> }
 }
 
 macro_rules! ret_aast {
@@ -67,7 +65,7 @@ impl LiftedAwaits {
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
-enum ExprLocation {
+pub enum ExprLocation {
     TopLevel,
     MemberSelect,
     InDoubleQuotedString,
@@ -77,6 +75,36 @@ enum ExprLocation {
     RightOfAssignmentInUsingStatement,
     RightOfReturn,
     UsingStatement,
+}
+
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+pub enum SuspensionKind {
+    SKSync,
+    SKAsync,
+    SKCoroutine,
+}
+
+#[derive(Debug)]
+pub struct FunHdr {
+    fh_suspension_kind: SuspensionKind,
+    fh_name: aast!(Sid),
+    fh_constrs: Vec<aast_defs::WhereConstraint>,
+    fh_type_parameters: Vec<aast!(Tparam<,>)>,
+    fh_parameters: Vec<aast!(FunParam<,>)>,
+    fh_return_type: Option<aast!(Hint)>,
+}
+
+impl FunHdr {
+    fn make_empty() -> Self {
+        Self {
+            fh_suspension_kind: SuspensionKind::SKSync,
+            fh_name: ast_defs::Id(Pos::make_none(), String::from("<ANONYMOUS>")),
+            fh_constrs: vec![],
+            fh_type_parameters: vec![],
+            fh_parameters: vec![],
+            fh_return_type: None,
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -194,7 +222,7 @@ pub trait Lowerer<'a, T, V>
 where
     T: LexablePositionedToken<'a>,
     Syntax<T, V>: PositionedSyntaxTrait,
-    V: SyntaxValueWithKind,
+    V: SyntaxValueWithKind + SyntaxValueType<T>,
 {
     fn make_empty_ns_env(env: &Env) -> NamespaceEnv {
         NamespaceEnv::empty(Vec::from(env.auto_ns_map), env.codegen())
@@ -204,6 +232,31 @@ where
         match mode {
             file_info::Mode::Mphp => file_info::Mode::Mdecl,
             m => m,
+        }
+    }
+
+    // Turns a syntax node into a list of nodes; if it is a separated syntax
+    // list then the separators are filtered from the resulting list.
+    fn syntax_to_list(include_separators: bool, node: &Syntax<T, V>) -> Vec<&Syntax<T, V>> {
+        fn on_list_item<T1, V1>(sep: bool, x: &ListItemChildren<T1, V1>) -> Vec<&Syntax<T1, V1>> {
+            if sep {
+                vec![&x.list_item, &x.list_separator]
+            } else {
+                vec![&x.list_item]
+            }
+        }
+        match &node.syntax {
+            Missing => vec![],
+            SyntaxList(s) => s
+                .iter()
+                .map(|x| match &x.syntax {
+                    ListItem(x) => on_list_item(include_separators, x),
+                    _ => vec![node],
+                })
+                .flatten()
+                .collect(),
+            ListItem(x) => on_list_item(include_separators, x),
+            _ => vec![node],
         }
     }
 
@@ -231,6 +284,11 @@ where
     #[inline]
     fn text(node: &Syntax<T, V>, env: &Env) -> String {
         String::from(node.text(env.source_text()))
+    }
+
+    #[inline]
+    fn text_str<'b>(node: &'b Syntax<T, V>, env: &'b Env) -> &'b str {
+        node.text(env.source_text())
     }
 
     fn missing_syntax<N>(
@@ -275,11 +333,7 @@ where
                 if name == "__COMPILER_HALT_OFFSET__" {
                     env.saw_compiler_halt_offset = Some(0);
                 }
-                let p = if name == "__LINE__" {
-                    Pos::make_none()
-                } else {
-                    Self::p_pos(node, env)
-                };
+                let p = Self::p_pos(node, env);
                 Ok(ast_defs::Id(p, String::from(name)))
             }
         }
@@ -288,7 +342,7 @@ where
     fn mk_str(
         node: &Syntax<T, V>,
         env: &mut Env,
-        unescaper: &Fn(&str) -> std::result::Result<String, InvalidString>,
+        unescaper: &dyn Fn(&str) -> std::result::Result<String, InvalidString>,
         mut content: &str,
     ) -> String {
         if let Some('b') = content.chars().nth(0) {
@@ -497,13 +551,48 @@ where
         }
     }
 
+    #[inline]
+    fn wrap_unescaper(
+        unescaper: &dyn Fn(&str) -> std::result::Result<String, InvalidString>,
+        s: &str,
+    ) -> ret!(String) {
+        unescaper(s).map_err(|e| Error::Failwith(e.msg))
+    }
+
     fn p_expr_with_loc_(
         location: ExprLocation,
         node: &Syntax<T, V>,
         env: &mut Env,
     ) -> ret_aast!(Expr_<,>) {
+        let mk_lvar = |name, env| {
+            let name = Self::pos_name(node, env)?;
+            let lid = aast::Lid(name.0, (0, name.1));
+            Ok(aast::Expr_::Lvar(lid))
+        };
         let pos = Self::p_pos(node, env);
         match &node.syntax {
+            VariableExpression(c) => mk_lvar(&c.variable_expression, env),
+            Token(t) => {
+                use ExprLocation::*;
+                match (location, t.kind()) {
+                    (MemberSelect, TK::Variable) => mk_lvar(node, env),
+                    (InDoubleQuotedString, _) => Ok(aast::Expr_::String(Self::wrap_unescaper(
+                        &Self::unesc_dbl,
+                        Self::text_str(node, env),
+                    )?)),
+                    (InBacktickedString, _) => Ok(aast::Expr_::String(Self::wrap_unescaper(
+                        &unescape_backtick,
+                        Self::text_str(node, env),
+                    )?)),
+                    (MemberSelect, _)
+                    | (TopLevel, _)
+                    | (AsStatement, _)
+                    | (UsingStatement, _)
+                    | (RightOfAssignment, _)
+                    | (RightOfAssignmentInUsingStatement, _)
+                    | (RightOfReturn, _) => Ok(aast::Expr_::Id(Self::pos_name(node, env)?)),
+                }
+            }
             LiteralExpression(child) => {
                 Self::p_expr_lit(location, node, &child.literal_expression, env)
             }
@@ -511,10 +600,57 @@ where
         }
     }
 
+    fn is_noop(stmt: &aast!(Stmt<,>)) -> bool {
+        if let aast::Stmt_::Noop = *stmt.1 {
+            true
+        } else {
+            false
+        }
+    }
+
+    // TODO: rename to p_stmt_list
+    fn handle_loop_body(pos: Pos, node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Stmt<,>) {
+        let list = Self::as_list(node);
+        let mut result = vec![];
+        for n in list.iter() {
+            match &n.syntax {
+                UsingStatementFunctionScoped(_) => not_impl!(),
+                _ => {
+                    let mut h = Self::p_stmt_unsafe(n, env)?;
+                    result.append(&mut h);
+                }
+            }
+        }
+        let blk: Vec<_> = result
+            .into_iter()
+            .filter(|stmt| !Self::is_noop(stmt))
+            .collect();
+        let body = if blk.len() == 0 {
+            vec![Self::mk_noop()]
+        } else {
+            blk
+        };
+        Ok(aast::Stmt(pos, Box::new(aast::Stmt_::Block(body))))
+    }
+
     fn p_stmt(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Stmt<,>) {
         // TODO: clear_statement_scope & extract_and_push_docblock
+        // TODO: add lift_awaits_in_statement
         let pos = Self::p_pos(node, env);
         match &node.syntax {
+            CompoundStatement(c) => Self::handle_loop_body(pos, &c.compound_statements, env),
+            ReturnStatement(c) => {
+                let expr = match &c.return_expression.syntax {
+                    Missing => None,
+                    _ => Some(Self::p_expr_with_loc(
+                        ExprLocation::RightOfReturn,
+                        &c.return_expression,
+                        env,
+                    )?),
+                };
+
+                Ok(aast::Stmt(pos, Box::new(aast::Stmt_::Return(expr))))
+            }
             MarkupSection(_) => Self::p_markup(node, env),
             _ => not_impl!(),
         }
@@ -554,8 +690,615 @@ where
         }
     }
 
-    fn p_def(node: &Syntax<T, V>, env: &mut Env) -> ret!(Vec<aast!(Def<,>)>) {
+    fn p_modifiers<R>(
+        on_kind: &dyn Fn(R, modifier::Kind, &Syntax<T, V>, &mut Env) -> R,
+        mut init: R,
+        node: &Syntax<T, V>,
+        env: &mut Env,
+    ) -> ret!((modifier::KindSet, R)) {
+        let nodes = Self::as_list(node);
+        let mut kind_set = modifier::KindSet::new();
+        for n in nodes.iter() {
+            let token_kind = Self::token_kind(n).map_or(None, modifier::from_token_kind);
+            match token_kind {
+                Some(kind) => {
+                    kind_set.add(kind);
+                    init = on_kind(init, kind, n, env);
+                }
+                _ => Self::missing_syntax(None, "kind", n, env)?,
+            }
+        }
+        Ok((kind_set, init))
+    }
+
+    // TODO: change name to map_flatten after porting
+    #[inline]
+    fn could_map<R>(
+        f: &dyn Fn(&Syntax<T, V>, &mut Env) -> ret!(R),
+        node: &Syntax<T, V>,
+        env: &mut Env,
+    ) -> ret!(Vec<R>) {
+        Self::map_flatten_(f, node, env, vec![])
+    }
+
+    #[inline]
+    fn map_flatten_<R>(
+        f: &dyn Fn(&Syntax<T, V>, &mut Env) -> ret!(R),
+        node: &Syntax<T, V>,
+        env: &mut Env,
+        acc: Vec<R>,
+    ) -> ret!(Vec<R>) {
+        Self::map_fold(
+            f,
+            &|mut v: Vec<R>, a| {
+                v.push(a);
+                v
+            },
+            node,
+            env,
+            acc,
+        )
+    }
+
+    fn map_fold<A, R>(
+        f: &dyn Fn(&Syntax<T, V>, &mut Env) -> ret!(R),
+        op: &dyn Fn(A, R) -> A,
+        node: &Syntax<T, V>,
+        env: &mut Env,
+        acc: A,
+    ) -> ret!(A) {
         match &node.syntax {
+            Missing => Ok(acc),
+            SyntaxList(xs) => {
+                let mut a = acc;
+                for x in xs.iter() {
+                    a = Self::map_fold(f, op, &x, env, a)?;
+                }
+                Ok(a)
+            }
+            ListItem(x) => Self::map_fold(f, op, &x.list_item, env, acc),
+            _ => Ok(op(acc, f(node, env)?)),
+        }
+    }
+
+    fn p_visibility(node: &Syntax<T, V>, env: &mut Env) -> ret!(Option<aast!(Visibility)>) {
+        let first_vis =
+            |r: Option<aast!(Visibility)>, kind: modifier::Kind, _: &Syntax<T, V>, _: &mut Env| {
+                if let None = r {
+                    modifier::to_visibility(kind)
+                } else {
+                    r
+                }
+            };
+        Self::p_modifiers(&first_vis, None, node, env).map(|r| r.1)
+    }
+
+    fn has_soft(attrs: &[aast!(UserAttribute<,>)]) -> bool {
+        attrs.iter().any(|attr| attr.name.1 == "__Soft")
+    }
+
+    fn soften_hint(attrs: &[aast!(UserAttribute<,>)], hint: aast!(Hint)) -> aast!(Hint) {
+        if Self::has_soft(attrs) {
+            aast::Hint(hint.0.clone(), Box::new(aast::Hint_::Hsoft(hint)))
+        } else {
+            hint
+        }
+    }
+
+    fn p_fun_param_default_value(
+        node: &Syntax<T, V>,
+        env: &mut Env,
+    ) -> ret!(Option<aast!(Expr<,>)>) {
+        match &node.syntax {
+            SimpleInitializer(c) => {
+                Self::mp_optional(&Self::p_expr, &c.simple_initializer_value, env)
+            }
+            _ => Ok(None),
+        }
+    }
+
+    fn p_param_kind(node: &Syntax<T, V>, env: &mut Env) -> ret!(ast_defs::ParamKind) {
+        match Self::token_kind(node) {
+            Some(TK::Inout) => Ok(ast_defs::ParamKind::Pinout),
+            _ => Self::missing_syntax(None, "param kind", node, env),
+        }
+    }
+
+    fn param_template(node: &Syntax<T, V>, env: &Env) -> aast!(FunParam<,>) {
+        let pos = Self::p_pos(node, env);
+        aast::FunParam {
+            annotation: pos.clone(),
+            type_hint: aast::TypeHint((), None),
+            is_reference: false,
+            is_variadic: false,
+            pos,
+            name: Self::text(node, env),
+            expr: None,
+            callconv: None,
+            user_attributes: vec![],
+            visibility: None,
+        }
+    }
+
+    fn p_fun_param(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(FunParam<,>) {
+        match &node.syntax {
+            ParameterDeclaration(child) => {
+                let parameter_attribute = &child.parameter_attribute;
+                let parameter_visibility = &child.parameter_visibility;
+                let parameter_call_convention = &child.parameter_call_convention;
+                let parameter_type = &child.parameter_type;
+                let parameter_name = &child.parameter_name;
+                let parameter_default_value = &child.parameter_default_value;
+                let (is_reference, is_variadic, name) = match &parameter_name.syntax {
+                    DecoratedExpression(child) => {
+                        let decorated_expression_decorator = &child.decorated_expression_decorator;
+                        let decorated_expression_expression =
+                            &child.decorated_expression_expression;
+                        let decorator = Self::text_str(decorated_expression_decorator, env);
+                        match &decorated_expression_expression.syntax {
+                            DecoratedExpression(child) => {
+                                let nested_expression = &child.decorated_expression_expression;
+                                let nested_decorator =
+                                    Self::text_str(&child.decorated_expression_decorator, env);
+                                (
+                                    decorator == "&" || nested_decorator == "&",
+                                    decorator == "..." || nested_decorator == "...",
+                                    nested_expression,
+                                )
+                            }
+                            _ => (
+                                decorator == "&",
+                                decorator == "...",
+                                decorated_expression_expression,
+                            ),
+                        }
+                    }
+                    _ => (false, false, parameter_name),
+                };
+                let user_attributes = Self::p_user_attributes(&parameter_attribute, env)?;
+                let hint = Self::mp_optional(&Self::p_hint, parameter_type, env)?
+                    .map(|h| Self::soften_hint(&user_attributes, h));
+                let pos = Self::p_pos(name, env);
+                Ok(aast::FunParam {
+                    annotation: pos.clone(),
+                    type_hint: aast::TypeHint((), hint),
+                    user_attributes,
+                    is_reference,
+                    is_variadic,
+                    pos,
+                    name: Self::text(name, env),
+                    expr: Self::p_fun_param_default_value(parameter_default_value, env)?,
+                    callconv: Self::mp_optional(
+                        &Self::p_param_kind,
+                        parameter_call_convention,
+                        env,
+                    )?,
+                    /* implicit field via constructor parameter.
+                     * This is always None except for constructors and the modifier
+                     * can be only Public or Protected or Private.
+                     */
+                    visibility: Self::p_visibility(parameter_visibility, env)?,
+                })
+            }
+            VariadicParameter(_) => {
+                let mut param = Self::param_template(node, env);
+                param.is_variadic = true;
+                Ok(param)
+            }
+            Token(_) if Self::text_str(node, env) == "..." => {
+                let mut param = Self::param_template(node, env);
+                param.is_variadic = true;
+                Ok(param)
+            }
+            _ => Self::missing_syntax(None, "function parameter", node, env),
+        }
+    }
+
+    fn p_tconstraint(
+        node: &Syntax<T, V>,
+        env: &mut Env,
+    ) -> ret!((ast_defs::ConstraintKind, aast!(Hint))) {
+        match &node.syntax {
+            TypeConstraint(c) => Ok((
+                match Self::token_kind(&c.constraint_keyword) {
+                    Some(TK::As) => ast_defs::ConstraintKind::ConstraintAs,
+                    Some(TK::Super) => ast_defs::ConstraintKind::ConstraintSuper,
+                    Some(TK::Equal) => ast_defs::ConstraintKind::ConstraintEq,
+                    _ => Self::missing_syntax(
+                        None,
+                        "constriant operator",
+                        &c.constraint_keyword,
+                        env,
+                    )?,
+                },
+                Self::p_hint(&c.constraint_type, env)?,
+            )),
+            _ => Self::missing_syntax(None, "type constriant", node, env),
+        }
+    }
+
+    fn p_tparam(is_class: bool, node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Tparam<,>) {
+        match &node.syntax {
+            TypeParameter(c) => {
+                let user_attributes = Self::p_user_attributes(&c.type_attribute_spec, env)?;
+                let is_reified = !&c.type_reified.is_missing();
+                if is_class && is_reified {
+                    env.cls_reified_generics
+                        .insert(Self::text(&c.type_name, env));
+                }
+                let variance = match Self::token_kind(&c.type_variance) {
+                    Some(TK::Plus) => ast_defs::Variance::Covariant,
+                    Some(TK::Minus) => ast_defs::Variance::Contravariant,
+                    _ => ast_defs::Variance::Invariant,
+                };
+                if is_reified && variance != ast_defs::Variance::Invariant {
+                    Self::raise_parsing_error(
+                        node,
+                        env,
+                        &syntax_error::non_invariant_reified_generic,
+                    );
+                }
+                let reified = match (is_reified, Self::has_soft(&user_attributes)) {
+                    (true, true) => aast::ReifyKind::SoftReified,
+                    (true, false) => aast::ReifyKind::Reified,
+                    _ => aast::ReifyKind::Erased,
+                };
+                Ok(aast::Tparam {
+                    variance,
+                    name: Self::pos_name(&c.type_name, env)?,
+                    constraints: Self::could_map(&Self::p_tconstraint, &c.type_constraints, env)?,
+                    reified,
+                    user_attributes,
+                })
+            }
+            _ => Self::missing_syntax(None, "type parameter", node, env),
+        }
+    }
+
+    fn p_tparam_l(
+        is_class: bool,
+        node: &Syntax<T, V>,
+        env: &mut Env,
+    ) -> ret!(Vec<aast!(Tparam<,>)>) {
+        match &node.syntax {
+            Missing => Ok(vec![]),
+            TypeParameters(c) => Self::could_map(
+                &|n, e| Self::p_tparam(is_class, n, e),
+                &c.type_parameters_parameters,
+                env,
+            ),
+            _ => Self::missing_syntax(None, "type parameter", node, env),
+        }
+    }
+
+    fn p_fun_hdr(
+        modifier_checker: &dyn Fn((), modifier::Kind, &Syntax<T, V>, &mut Env),
+        node: &Syntax<T, V>,
+        env: &mut Env,
+    ) -> ret!(FunHdr) {
+        match &node.syntax {
+            FunctionDeclarationHeader(child) => {
+                let function_modifiers = &child.function_modifiers;
+                let function_name = &child.function_name;
+                let function_where_clause = &child.function_where_clause;
+                let function_type_parameter_list = &child.function_type_parameter_list;
+                let function_parameter_list = &child.function_parameter_list;
+                let function_type = &child.function_type;
+                // TODO: use Naming_special_names
+                let is_autoload =
+                    Self::text_str(function_name, env).eq_ignore_ascii_case("__autoload");
+                if function_name.value.is_missing() {
+                    Self::raise_parsing_error(node, env, &syntax_error::empty_method_name);
+                }
+                let num_params = Self::syntax_to_list(false, function_parameter_list).len();
+                if is_autoload && num_params > 1 {
+                    Self::raise_parsing_error(
+                        node,
+                        env,
+                        &syntax_error::autoload_takes_one_argument,
+                    );
+                }
+                let (kinds, _) = Self::p_modifiers(modifier_checker, (), function_modifiers, env)?;
+                let has_async = kinds.has(modifier::ASYNC);
+                let has_coroutine = kinds.has(modifier::COROUTINE);
+                let fh_parameters =
+                    Self::could_map(&Self::p_fun_param, function_parameter_list, env)?;
+                let fh_return_type = Self::mp_optional(&Self::p_hint, function_type, env)?;
+                let fh_suspension_kind =
+                    Self::mk_suspension_kind_(node, env, has_async, has_coroutine);
+                let fh_name = Self::pos_name(function_name, env)?;
+                let fh_constrs = match &function_where_clause.syntax {
+                    Missing => vec![],
+                    WhereClause(_) => not_impl!(),
+                    _ => Self::missing_syntax(None, "function header constraints", node, env)?,
+                };
+
+                let fh_type_parameters =
+                    Self::p_tparam_l(false, function_type_parameter_list, env)?;
+                Ok(FunHdr {
+                    fh_suspension_kind,
+                    fh_name,
+                    fh_constrs,
+                    fh_type_parameters,
+                    fh_parameters,
+                    fh_return_type,
+                })
+            }
+            LambdaSignature(_) => not_impl!(),
+            Token(_) => Ok(FunHdr::make_empty()),
+            _ => Self::missing_syntax(None, "function header", node, env),
+        }
+    }
+
+    fn determine_variadicity(params: &[aast!(FunParam<,>)]) -> aast!(FunVariadicity<,>) {
+        use aast::FunVariadicity::*;
+        if let Some(x) = params.last() {
+            match (x.is_variadic, &x.name) {
+                (false, _) => FVnonVariadic,
+                (true, name) if name == "..." => FVellipsis(x.pos.clone()),
+                (true, _) => FVvariadicArg(x.clone()),
+            }
+        } else {
+            FVnonVariadic
+        }
+    }
+
+    // TODO: change name to p_fun_pos after porting.
+    fn p_function(node: &Syntax<T, V>, env: &Env) -> Pos {
+        let get_pos = |n: &Syntax<T, V>, p: Pos| -> Pos {
+            if let FunctionDeclarationHeader(c1) = &n.syntax {
+                if !c1.function_keyword.value.is_missing() {
+                    return Pos::btw_nocheck(Self::p_pos(n, env), p);
+                }
+            }
+            p
+        };
+        let p = Self::p_pos(node, env);
+        match &node.syntax {
+            FunctionDeclaration(c) if env.codegen() => get_pos(&c.function_declaration_header, p),
+            MethodishDeclaration(c) if env.codegen() => {
+                get_pos(&c.methodish_function_decl_header, p)
+            }
+            _ => p,
+        }
+    }
+
+    fn p_stmt_unsafe(node: &Syntax<T, V>, env: &mut Env) -> ret!(Vec<aast!(Stmt<,>)>) {
+        Ok(vec![Self::p_stmt(node, env)?])
+    }
+
+    fn p_block(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Block<,>) {
+        let mut stmts = Self::p_stmt_unsafe(node, env)?;
+        let last = stmts.pop();
+        if let Some(stmt) = last {
+            if let aast::Stmt_::Block(mut b) = *stmt.1 {
+                stmts.append(&mut b)
+            }
+        }
+        Ok(stmts)
+    }
+
+    fn mk_noop() -> aast!(Stmt<,>) {
+        aast::Stmt(Pos::make_none(), Box::new(aast::Stmt_::Noop))
+    }
+
+    fn p_function_body(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Block<,>) {
+        let mk_noop_result = || Ok(vec![Self::mk_noop()]);
+        // TODO: with_new_nonconcurrent_scrope
+        match &node.syntax {
+            Missing => Ok(vec![]),
+            CompoundStatement(c) => {
+                let compound_statements = &c.compound_statements.syntax;
+                let compound_right_brace = &c.compound_right_brace.syntax;
+                match (compound_statements, compound_right_brace) {
+                    (Missing, Token(_)) => mk_noop_result(),
+                    (SyntaxList(t), _) if t.len() == 1 && t[0].is_yield() => {
+                        env.saw_yield = true;
+                        mk_noop_result()
+                    }
+                    _ => {
+                        if !env.top_level_statements
+                            && (env.file_mode() == file_info::Mode::Mdecl && env.codegen()
+                                || env.quick_mode)
+                        {
+                            mk_noop_result()
+                        } else {
+                            Self::p_block(node, env)
+                        }
+                    }
+                }
+            }
+            _ => not_impl!(),
+        }
+    }
+
+    fn mk_suspension_kind_(
+        node: &Syntax<T, V>,
+        env: &mut Env,
+        has_async: bool,
+        has_coroutine: bool,
+    ) -> SuspensionKind {
+        use SuspensionKind::*;
+        match (has_async, has_coroutine) {
+            (false, false) => SKSync,
+            (true, false) => SKAsync,
+            (false, true) => SKCoroutine,
+            (true, true) => {
+                Self::raise_parsing_error(node, env, "Coroutine functions may not be async");
+                SKCoroutine
+            }
+        }
+    }
+
+    fn mk_fun_kind(suspension_kind: SuspensionKind, yield_: bool) -> ast_defs::FunKind {
+        use ast_defs::FunKind::*;
+        use SuspensionKind::*;
+        match (suspension_kind, yield_) {
+            (SKSync, true) => FGenerator,
+            (SKAsync, true) => FAsyncGenerator,
+            (SKSync, false) => FSync,
+            (SKAsync, false) => FAsync,
+            (SKCoroutine, _) => FCoroutine,
+        }
+    }
+
+    fn p_user_attribute(
+        _node: &Syntax<T, V>,
+        _env: &mut Env,
+    ) -> ret!(Vec<aast!(UserAttribute<,>)>) {
+        not_impl!()
+    }
+
+    fn p_user_attributes(node: &Syntax<T, V>, env: &mut Env) -> ret!(Vec<aast!(UserAttribute<,>)>) {
+        Self::map_fold(
+            &Self::p_user_attribute,
+            &|mut acc: Vec<aast!(UserAttribute<,>)>, mut x: Vec<aast!(UserAttribute<,>)>| {
+                acc.append(&mut x);
+                acc
+            },
+            node,
+            env,
+            vec![],
+        )
+    }
+
+    fn mp_yielding<R>(
+        p: &dyn Fn(&Syntax<T, V>, &mut Env) -> ret!(R),
+        node: &Syntax<T, V>,
+        env: &mut Env,
+    ) -> ret!((R, bool)) {
+        let outer_saw_yield = env.saw_yield;
+        env.saw_yield = false;
+        let r = p(node, env);
+        env.saw_yield = outer_saw_yield;
+        let result = (r?, env.saw_yield);
+        Ok(result)
+    }
+
+    fn mk_empty_ns_env(env: &Env) -> NamespaceEnv {
+        NamespaceEnv::empty(env.auto_ns_map.to_vec(), env.codegen())
+    }
+
+    fn extract_docblock(node: &Syntax<T, V>, env: &Env) -> Option<String> {
+        #[derive(Copy, Clone, Eq, PartialEq)]
+        enum State {
+            DocComment,
+            EmbeddedCmt,
+            EndDoc,
+            EndEmbedded,
+            Free,
+            LineCmt,
+            MaybeDoc,
+            MaybeDoc2,
+            SawSlash,
+        }
+        use State::*;
+        // `parse` mixes loop and recursion to use less stack space.
+        fn parse(str: &str, start: usize, state: State, idx: usize) -> Option<String> {
+            let is_whitespace = |c| c == ' ' || c == '\t' || c == '\n' || c == '\r';
+            let mut s = (start, state, idx); // (start, state, index)
+            loop {
+                if s.2 == str.len() {
+                    break None;
+                }
+
+                let next = s.2 + 1;
+                match (s.1, str.chars().nth(s.2).unwrap()) {
+                    (LineCmt, '\n') => s = (next, Free, next),
+                    (EndEmbedded, '/') => s = (next, Free, next),
+                    (EndDoc, '/') => {
+                        let r = parse(str, next, Free, next);
+                        match r {
+                            d @ Some(_) => break d,
+                            None => break Some(String::from(&str[s.0..s.2 + 1])),
+                        }
+                    }
+                    /* PHP has line comments delimited by a # */
+                    (Free, '#') => s = (next, LineCmt, next),
+                    /* All other comment delimiters start with a / */
+                    (Free, '/') => s = (s.2, SawSlash, next),
+                    /* After a / in trivia, we must see either another / or a * */
+                    (SawSlash, '/') => s = (next, LineCmt, next),
+                    (SawSlash, '*') => s = (s.0, MaybeDoc, next),
+                    (MaybeDoc, '*') => s = (s.0, MaybeDoc2, next),
+                    (MaybeDoc, _) => s = (s.0, EmbeddedCmt, next),
+                    (MaybeDoc2, '/') => s = (next, Free, next),
+                    /* Doc comments have a space after the second star */
+                    (MaybeDoc2, c) if is_whitespace(c) => s = (s.0, DocComment, s.2),
+                    (MaybeDoc2, _) => s = (s.0, EmbeddedCmt, next),
+                    (DocComment, '*') => s = (s.0, EndDoc, next),
+                    (DocComment, _) => s = (s.0, DocComment, next),
+                    (EndDoc, _) => s = (s.0, DocComment, next),
+                    /* A * without a / does not end an embedded comment */
+                    (EmbeddedCmt, '*') => s = (s.0, EndEmbedded, next),
+                    (EndEmbedded, '*') => s = (s.0, EndEmbedded, next),
+                    (EndEmbedded, _) => s = (s.0, EmbeddedCmt, next),
+                    /* Whitespace skips everywhere else */
+                    (_, c) if is_whitespace(c) => s = (s.0, s.1, next),
+                    /* When scanning comments, anything else is accepted */
+                    (LineCmt, _) => s = (s.0, s.1, next),
+                    (EmbeddedCmt, _) => s = (s.0, s.1, next),
+                    _ => break None,
+                }
+            }
+        }
+        let str = node.leading_text(env.indexed_source_text.source_text);
+        parse(str, 0, Free, 0)
+    }
+
+    fn p_def(node: &Syntax<T, V>, env: &mut Env) -> ret!(Vec<aast!(Def<,>)>) {
+        let doc_comment_opt = Self::extract_docblock(node, env);
+        match &node.syntax {
+            FunctionDeclaration(child) => {
+                let function_attribute_spec = &child.function_attribute_spec;
+                let function_declaration_header = &child.function_declaration_header;
+                let function_body = &child.function_body;
+                // TOOD: env = non_tls env;
+                let allowed_kinds =
+                    modifier::KindSet::from_kinds(&[modifier::ASYNC, modifier::COROUTINE]);
+                let modifier_checker =
+                    |_: (), kind: modifier::Kind, node: &Syntax<T, V>, env: &mut Env| {
+                        if !allowed_kinds.has(kind) {
+                            Self::raise_parsing_error(
+                                node,
+                                env,
+                                &syntax_error::function_modifier(Self::text_str(node, env)),
+                            );
+                        }
+                    };
+                let hdr = Self::p_fun_hdr(&modifier_checker, function_declaration_header, env)?;
+                let is_external = function_body.is_external();
+                let (block, yield_) = if is_external {
+                    (vec![], false)
+                } else {
+                    Self::mp_yielding(&Self::p_function_body, function_body, env)?
+                };
+                let user_attributes = Self::p_user_attributes(function_attribute_spec, env)?;
+                let variadic = Self::determine_variadicity(&hdr.fh_parameters);
+                let ret = aast::TypeHint((), hdr.fh_return_type);
+                Ok(vec![aast::Def::Fun(aast::Fun_ {
+                    span: Self::p_function(node, env),
+                    annotation: (),
+                    mode: Self::mode_annotation(env.file_mode()),
+                    ret,
+                    name: hdr.fh_name,
+                    tparams: hdr.fh_type_parameters,
+                    where_constraints: hdr.fh_constrs,
+                    params: hdr.fh_parameters,
+                    body: aast::FuncBody {
+                        ast: block,
+                        annotation: (),
+                    },
+                    fun_kind: Self::mk_fun_kind(hdr.fh_suspension_kind, yield_),
+                    variadic,
+                    user_attributes,
+                    file_attributes: vec![],
+                    external: is_external,
+                    namespace: Self::mk_empty_ns_env(env),
+                    doc_comment: doc_comment_opt,
+                    static_: false,
+                })])
+            }
             ConstDeclaration(child) => {
                 let ty = &child.const_type_specifier;
                 let decls = Self::as_list(&child.const_declarators);

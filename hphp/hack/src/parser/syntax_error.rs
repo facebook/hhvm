@@ -961,3 +961,4 @@ pub const memoize_on_lambda: Error =
 pub fn declared_final(elt: &str) -> Error {
     Cow::Owned(format!("{} cannot be declared final.", elt.to_string(),))
 }
+pub const empty_method_name: Error = Cow::Borrowed("Expected a method name");

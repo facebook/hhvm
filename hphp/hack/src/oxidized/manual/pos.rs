@@ -103,4 +103,27 @@ impl Pos {
             }
         }
     }
+
+    fn small_to_large_file_pos(p: &FilePosSmall) -> FilePosLarge {
+        let (lnum, col, bol) = p.line_column_beg();
+        FilePosLarge::from_lnum_bol_cnum(lnum, bol, bol + col)
+    }
+
+    pub fn btw_nocheck(x1: Self, x2: Self) -> Self {
+        let inner = match (x1.0, x2.0) {
+            (Small { file, start, .. }, Small { end, .. }) => Small { file, start, end },
+            (Large { file, start, .. }, Large { end, .. }) => Large { file, start, end },
+            (Small { file, start, .. }, Large { end, .. }) => Large {
+                file,
+                start: Box::new(Self::small_to_large_file_pos(&start)),
+                end,
+            },
+            (Large { file, start, .. }, Small { end, .. }) => Large {
+                file,
+                start,
+                end: Box::new(Self::small_to_large_file_pos(&end)),
+            },
+        };
+        Pos(inner)
+    }
 }

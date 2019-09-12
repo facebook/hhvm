@@ -142,6 +142,10 @@ where
         self.is_specific_token(TokenKind::Async)
     }
 
+    pub fn is_yield(&self) -> bool {
+        self.is_specific_token(TokenKind::Yield)
+    }
+
     pub fn is_construct(&self) -> bool {
         self.is_specific_token(TokenKind::Construct)
     }
@@ -172,6 +176,10 @@ where
 
     pub fn is_missing(&self) -> bool {
         self.kind() == SyntaxKind::Missing
+    }
+
+    pub fn is_external(&self) -> bool {
+        self.is_specific_token(TokenKind::Semicolon) || self.is_missing()
     }
 
     pub fn is_namespace_empty_body(&self) -> bool {

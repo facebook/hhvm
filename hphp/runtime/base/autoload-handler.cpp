@@ -132,7 +132,12 @@ void AutoloadHandler::requestInit() {
   auto* factory = AutoloadMapFactory::getInstance();
   if (factory) {
     auto* map = getAutoloadMapFromFactory(*factory);
-    if (map && map->ensureUpdated()) {
+    if (map) {
+      if (!map->ensureUpdated()) {
+        Logger::Warning(
+            "Failed to update native autoloader, proceeding with stale data.\n"
+        );
+      }
       m_map = map;
     }
   }

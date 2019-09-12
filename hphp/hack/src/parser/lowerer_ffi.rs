@@ -55,7 +55,11 @@ caml_raise!(parse_and_lower_from_text, |ocaml_source_text|, <res>, {
 
     let mut parser = PositionedSyntaxParser::make(&source_text, env);
     let script = parser.parse_script(None);
-    let mut env = LowererEnv::make(mode, &indexed_source_text);
+    let mut env = LowererEnv::make(
+        false, /*elaborate namespace*/
+        mode,
+        &indexed_source_text,
+    );
 
     ocamlpool_enter();
     let r = PositionedSyntaxLowerer::lower(&mut env, &script).ocamlvalue();

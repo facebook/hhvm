@@ -14,7 +14,7 @@ use oxidized::{
 use parser_rust::{
     indexed_source_text::IndexedSourceText, lexable_token::LexablePositionedToken,
     positioned_syntax::PositionedSyntaxTrait, source_text::SourceText, syntax::*, syntax_error,
-    syntax_trait::SyntaxTrait, token_kind::TokenKind as TK,
+    syntax_kind, syntax_trait::SyntaxTrait, token_kind::TokenKind as TK,
 };
 
 use utils_rust::*;
@@ -38,12 +38,13 @@ macro_rules! aast {
     ($ty:ident<,>) =>  {oxidized::aast::$ty<Pos, (), (), ()>}
 }
 
-macro_rules! ret {    ($ty:ty) => { std::result::Result<$ty, Error<Syntax<T, V>>> }
+macro_rules! ret {
+    ($ty:ty) => { std::result::Result<$ty, Error> }
 }
 
 macro_rules! ret_aast {
-    ($ty:ident) => { std::result::Result<aast!($ty), Error<Syntax<T, V>>> };
-    ($ty:ident<,>) => { std::result::Result<aast!($ty<,>), Error<Syntax<T, V>>> }
+    ($ty:ident) => { std::result::Result<aast!($ty), Error> };
+    ($ty:ident<,>) => { std::result::Result<aast!($ty<,>), Error> }
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
@@ -133,7 +134,7 @@ pub struct Env<'a> {
       Some x -> COMPILER_HALT_OFFSET is in the source file,
                 HALT_COMPILER is at x bytes offset in the file.
     */
-    pub saw_compiler_halt_offset: Option<isize>,
+    pub saw_compiler_halt_offset: Option<usize>,
     pub cls_reified_generics: HashSet<String>,
     pub in_static_method: bool,
     pub parent_maybe_reified: bool,
@@ -150,10 +151,14 @@ pub struct Env<'a> {
 }
 
 impl<'a> Env<'a> {
-    pub fn make(mode: file_info::Mode, indexed_source_text: &'a IndexedSourceText<'a>) -> Self {
+    pub fn make(
+        elaborate_namespaces: bool,
+        mode: file_info::Mode,
+        indexed_source_text: &'a IndexedSourceText<'a>,
+    ) -> Self {
         Env {
             codegen: false,
-            elaborate_namespaces: true,
+            elaborate_namespaces,
             include_line_comments: false,
             keep_errors: false,
             quick_mode: false,
@@ -204,8 +209,14 @@ impl<'a> Env<'a> {
     }
 }
 
-pub enum Error<Node> {
-    APIMissingSyntax(String, Node),
+#[derive(Debug)]
+pub enum Error {
+    APIMissingSyntax {
+        expecting: String,
+        pos: Pos,
+        node_name: String,
+        kind: syntax_kind::SyntaxKind,
+    },
     LowererInvariantFailure(String, String),
     Failwith(String),
 }
@@ -291,18 +302,32 @@ where
         node.text(env.source_text())
     }
 
+    fn lowering_error(env: &mut Env, pos: Pos, text: &str, syntax_kind: &str) {
+        if env.is_typechecker() && env.lowpri_errors.is_empty() {
+            // TODO: Ocaml also checks Errors.currently_has_errors
+            Self::raise_parsing_error_pos(
+                pos,
+                env,
+                &syntax_error::lowering_parsing_error(text, syntax_kind),
+            )
+        }
+    }
+
     fn missing_syntax<N>(
         fallback: Option<N>,
         expecting: &str,
         node: &Syntax<T, V>,
-        env: &Env,
+        env: &mut Env,
     ) -> ret!(N) {
-        //TODO:
         let pos = Self::p_pos(node, env);
-        Err(Error::LowererInvariantFailure(
-            String::from(""),
-            String::from(""),
-        ))
+        let text = Self::text(node, env);
+        Self::lowering_error(env, pos, &text, expecting);
+        Err(Error::APIMissingSyntax {
+            expecting: String::from(expecting),
+            pos: Self::p_pos(node, env),
+            node_name: text,
+            kind: node.kind(),
+        })
     }
 
     fn is_num_octal_lit(s: &str) -> bool {
@@ -440,6 +465,7 @@ where
             Token(_) | SimpleTypeSpecifier(_) | QualifiedName(_) => {
                 Ok(Happly(Self::pos_name(node, env)?, vec![]))
             }
+            ShapeTypeSpecifier(_) => not_impl!(),
             TupleTypeSpecifier(c) => {
                 Ok(Htuple(Self::could_map(&Self::p_hint, &c.tuple_types, env)?))
             }
@@ -1408,16 +1434,29 @@ where
     }
 
     fn p_program(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Program<,>) {
+        let is_halt = |syntax: &SyntaxVariant<T, V>| -> bool {
+            match syntax {
+                ExpressionStatement(c) => match &c.expression_statement_expression.syntax {
+                    HaltCompilerExpression(_) => true,
+                    _ => false,
+                },
+                _ => false,
+            }
+        };
         let nodes = Self::as_list(node);
         let mut acc = vec![];
         for i in 0..nodes.len() {
-            match nodes[i] {
-                // TODO: handle Halt
-                Syntax {
-                    syntax: EndOfFile(_),
-                    ..
-                } => break,
-                node => acc.append(&mut Self::p_def(node, env)?),
+            match &nodes[i].syntax {
+                EndOfFile(_) => break,
+                n if is_halt(n) => {
+                    let pos = Self::p_pos(nodes[i], env);
+                    env.saw_compiler_halt_offset = Some(pos.end_cnum());
+                }
+                _ => match Self::p_def(nodes[i], env) {
+                    Err(Error::APIMissingSyntax { .. }) if env.fail_open => {}
+                    e @ Err(_) => return e,
+                    Ok(mut def) => acc.append(&mut def),
+                },
             }
         }
         // TODO: post process
@@ -1431,15 +1470,39 @@ where
         }
     }
 
+    fn elabarate_halt_compiler(ast: aast!(Program<,>), env: &Env) -> aast!(Program<,>) {
+        match env.saw_compiler_halt_offset {
+            Some(_) => not_impl!(),
+            _ => ast,
+        }
+    }
+
     fn lower(env: &mut Env<'a>, script: &Syntax<T, V>) -> std::result::Result<Result, String> {
         let comments = vec![];
         let ast_result = Self::p_script(script, env);
-        // TODO: handle error
         let ast = match ast_result {
             Ok(ast) => ast,
-            // TODO: add msg
-            Err(_) => return Err(String::from("ERROR")),
+            Err(err) => match err {
+                Error::APIMissingSyntax {
+                    expecting,
+                    pos,
+                    node_name,
+                    kind,
+                } => Err(format!(
+                    "missing case in {:?}.\n - pos: {:?}\n - unexpected: '{:?}'\n - kind: {:?}\n",
+                    expecting.to_string(),
+                    pos,
+                    node_name.to_string(),
+                    kind,
+                ))?,
+                _ => Err(format!("Lowerer Error: {:?}", err))?,
+            },
         };
+
+        if env.elaborate_namespaces {
+            not_impl!()
+        }
+        let ast = Self::elabarate_halt_compiler(ast, env);
         Ok(Result { ast, comments })
     }
 }

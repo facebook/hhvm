@@ -962,3 +962,10 @@ pub fn declared_final(elt: &str) -> Error {
     Cow::Owned(format!("{} cannot be declared final.", elt.to_string(),))
 }
 pub const empty_method_name: Error = Cow::Borrowed("Expected a method name");
+pub fn lowering_parsing_error(text: &str, syntax: &str) -> Error {
+    Cow::Owned(format!(
+        "Encountered unexpected text '{}', was expecting a {}.",
+        text.to_string(),
+        syntax.to_string(),
+    ))
+}

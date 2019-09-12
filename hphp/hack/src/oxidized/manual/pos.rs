@@ -126,4 +126,11 @@ impl Pos {
         };
         Pos(inner)
     }
+
+    pub fn end_cnum(&self) -> usize {
+        match &self.0 {
+            Small { end, .. } => end.offset(),
+            Large { end, .. } => end.offset(),
+        }
+    }
 }

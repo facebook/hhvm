@@ -466,7 +466,11 @@ module LowererTest_ = struct
 
   type r =
     | Tree of (Ast_defs.pos, unit, unit, unit) Aast.program
-    | Crash
+    | Crash of string
+
+  let print_err path s =
+    let oc = Pervasives.open_out path in
+    Printf.fprintf oc "%s\n" s
 
   let print_aast path aast =
     let print_pos pos = Format.asprintf "(%a)" Pos.pp pos in
@@ -487,7 +491,7 @@ module LowererTest_ = struct
       let ast = OcamlLowerer.from_text env source_text in
       let aast = Ast_to_aast.convert_program i () () () ast.OcamlLowerer.ast in
       Tree aast
-    with _ -> Crash
+    with e -> Crash (Caml.Printexc.to_string e)
 
   let build_rust_tree _env file source_text =
     let env = OcamlLowerer.make_env file in
@@ -495,8 +499,8 @@ module LowererTest_ = struct
       let result = RustLowerer.from_text_rust env source_text in
       match result with
       | RustLowerer.Ok aast -> Tree aast.RustLowerer.ast
-      | RustLowerer.Err _ -> Crash
-    with _ -> Crash
+      | RustLowerer.Err s -> Crash s
+    with e -> Crash (Caml.Printexc.to_string e)
 
   let test args ~ocaml_env ~rust_env file contents =
     let source_text = SourceText.make file contents in
@@ -506,18 +510,18 @@ module LowererTest_ = struct
     (match (ocaml_tree, rust_tree) with
     | (Tree ot, Tree rt) when ot = rt -> Printf.printf ":EQUAL: "
     | (Tree _, Tree _) -> Printf.printf ":NOT_EQUAL: "
-    | (Tree _, Crash) -> Printf.printf ":OCAML_PASS: :RUST_CRASH: "
-    | (Crash, Tree _) -> Printf.printf ":OCAML_CRASH: :RUST_PASS: "
-    | (Crash, Crash) -> Printf.printf ":OCAML_CRASH: :RUST_CRASH: ");
+    | (Tree _, Crash _) -> Printf.printf ":OCAML_PASS: :RUST_CRASH: "
+    | (Crash _, Tree _) -> Printf.printf ":OCAML_CRASH: :RUST_PASS: "
+    | (Crash _, Crash _) -> Printf.printf ":OCAML_CRASH: :RUST_CRASH: ");
     Printf.printf "%s\n" path;
     flush stdout;
     if args.check_printed_tree then (
       (match ocaml_tree with
       | Tree t -> print_aast "/tmp/ocaml.aast" t
-      | _ -> ());
+      | Crash e -> print_err "/tmp/ocaml.aast" e);
       match rust_tree with
       | Tree t -> print_aast "/tmp/rust.aast" t
-      | _ -> ()
+      | Crash e -> print_err "/tmp/rust.aast" e
     )
 end
 

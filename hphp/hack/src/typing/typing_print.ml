@@ -241,7 +241,7 @@ module Full = struct
         ]
     | Toption (_, Tnonnull) -> text "mixed"
     | Toption (r, Tunion tyl)
-      when TypecheckerOptions.like_types (Env.get_tcopt env)
+      when TypecheckerOptions.like_type_hints (Env.get_tcopt env)
            && List.exists ~f:(fun (_, ty) -> ty = Tdynamic) tyl ->
       (* Unions with null become Toption, which leads to the awkward ?~...
        * The Tunion case can better handle this *)
@@ -331,7 +331,7 @@ module Full = struct
         | _ -> text "[fun]"
       end
     | Tunion [] -> text "nothing"
-    | Tunion tyl when TypecheckerOptions.like_types (Env.get_tcopt env) ->
+    | Tunion tyl when TypecheckerOptions.like_type_hints (Env.get_tcopt env) ->
       let tyl =
         List.fold_right tyl ~init:Typing_set.empty ~f:Typing_set.add
         |> Typing_set.elements

@@ -197,7 +197,8 @@ let parse_options () =
   let set_bool x () = x := Some true in
   let shallow_class_decl = ref false in
   let out_extension = ref ".out" in
-  let like_types = ref false in
+  let like_type_hints = ref false in
+  let like_casts = ref false in
   let pessimize_types = ref false in
   let simple_pessimize = ref 0.0 in
   let coercion_from_dynamic = ref false in
@@ -417,9 +418,12 @@ let parse_options () =
       ( "--shallow-class-decl",
         Arg.Set shallow_class_decl,
         "Look up class members lazily from shallow declarations" );
-      ( "--like-types",
-        Arg.Set like_types,
-        "Allows deeper like types features like inferring trust" );
+      ( "--like-type-hints",
+        Arg.Set like_type_hints,
+        "Allows like types to be written in type hint positions" );
+      ( "--like-casts",
+        Arg.Set like_casts,
+        "Allows like types to be written in as expressions" );
       ( "--pessimize-types",
         Arg.Set pessimize_types,
         "When unenforceable types are encountered, convert them to like types"
@@ -530,7 +534,8 @@ let parse_options () =
         !disallow_invalid_arraykey_constraint
       ~tco_check_xhp_attribute:!check_xhp_attribute
       ~tco_shallow_class_decl:!shallow_class_decl
-      ~tco_like_types:!like_types
+      ~tco_like_type_hints:!like_type_hints
+      ~tco_like_casts:!like_casts
       ~tco_pessimize_types:!pessimize_types
       ~tco_simple_pessimize:!simple_pessimize
       ~tco_coercion_from_dynamic:!coercion_from_dynamic

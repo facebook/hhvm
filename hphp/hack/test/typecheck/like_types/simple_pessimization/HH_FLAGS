@@ -1,5 +1,5 @@
 --coercion-from-dynamic
 --coercion-from-union
 --complex-coercion
---like-types
+--like-type-hints
 --simple-pessimize 1.0

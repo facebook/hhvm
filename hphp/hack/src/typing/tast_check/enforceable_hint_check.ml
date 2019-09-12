@@ -100,7 +100,7 @@ let validator =
 
     method! on_tunion acc r tyl =
       if
-        TypecheckerOptions.like_types (Tast_env.get_tcopt acc.env)
+        TypecheckerOptions.like_casts (Tast_env.get_tcopt acc.env)
         && Typing_utils.is_dynamic
              (Env.tast_env_as_typing_env acc.env)
              (r, Tunion tyl)
@@ -128,15 +128,15 @@ let validator =
                       let covariant =
                         tparam.tp_variance = Ast_defs.Covariant
                       in
-                      let like_types_enabled =
-                        TypecheckerOptions.like_types
+                      let like_casts_enabled =
+                        TypecheckerOptions.like_casts
                           (Tast_env.get_tcopt acc.env)
                       in
                       if this#is_wildcard targ then
                         acc
                       else if
                         tparam.tp_reified = Nast.Reified
-                        || (acc.like_context && covariant && like_types_enabled)
+                        || (acc.like_context && covariant && like_casts_enabled)
                       then
                         this#on_type acc targ
                       else
@@ -144,7 +144,7 @@ let validator =
                           "a type with an erased generic type argument"
                         in
                         let error_message =
-                          if like_types_enabled then
+                          if like_casts_enabled then
                             error_message
                             ^ ", except in a like cast when the corresponding type parameter is covariant"
                           else

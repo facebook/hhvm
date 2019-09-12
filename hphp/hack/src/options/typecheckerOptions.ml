@@ -113,7 +113,9 @@ let ignore_collection_expr_type_arguments =
 
 let shallow_class_decl = GlobalOptions.tco_shallow_class_decl
 
-let like_types = GlobalOptions.tco_like_types
+let like_type_hints = GlobalOptions.tco_like_type_hints
+
+let like_casts = GlobalOptions.tco_like_casts
 
 let pessimize_types = GlobalOptions.tco_pessimize_types
 

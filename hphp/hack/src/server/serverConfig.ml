@@ -347,7 +347,8 @@ let load config_filename options =
       ~tco_shallow_class_decl:local_config.ServerLocalConfig.shallow_class_decl
       ~profile_type_check_duration_threshold:
         local_config.ServerLocalConfig.profile_type_check_duration_threshold
-      ?tco_like_types:(bool_opt "like_types" config)
+      ?tco_like_type_hints:(bool_opt "like_type_hints" config)
+      ?tco_like_casts:(bool_opt "like_casts" config)
       ?tco_pessimize_types:(bool_opt "pessimize_types" config)
       ?tco_simple_pessimize:(float_opt "simple_pessimize" config)
       ?tco_coercion_from_dynamic:(bool_opt "coercion_from_dynamic" config)

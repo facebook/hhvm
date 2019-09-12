@@ -208,8 +208,10 @@ type t = {
       should be logged. It's only in effect if we're profiling type checking to begin
       with. To profile, pass --profile-log to hh_server. *)
   profile_type_check_duration_threshold: float;
-  (* Enables deeper like types features *)
-  tco_like_types: bool;
+  (* Enables like type hints *)
+  tco_like_type_hints: bool;
+  (* Enables like casts *)
+  tco_like_casts: bool;
   (* This tells the type checker to rewrite unenforceable as like types
      i.e. vec<string> => vec<~string> *)
   tco_pessimize_types: bool;
@@ -320,7 +322,8 @@ val make :
   ?tco_shallow_class_decl:bool ->
   ?po_rust_parser_errors:bool ->
   ?profile_type_check_duration_threshold:float ->
-  ?tco_like_types:bool ->
+  ?tco_like_type_hints:bool ->
+  ?tco_like_casts:bool ->
   ?tco_pessimize_types:bool ->
   ?tco_simple_pessimize:float ->
   ?tco_coercion_from_dynamic:bool ->
@@ -472,7 +475,9 @@ val po_rust_parser_errors : t -> bool
 
 val profile_type_check_duration_threshold : t -> float
 
-val tco_like_types : t -> bool
+val tco_like_type_hints : t -> bool
+
+val tco_like_casts : t -> bool
 
 val tco_pessimize_types : t -> bool
 

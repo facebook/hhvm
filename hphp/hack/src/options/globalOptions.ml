@@ -87,7 +87,8 @@ type t = {
   tco_shallow_class_decl: bool;
   po_rust_parser_errors: bool;
   profile_type_check_duration_threshold: float;
-  tco_like_types: bool;
+  tco_like_type_hints: bool;
+  tco_like_casts: bool;
   tco_pessimize_types: bool;
   tco_simple_pessimize: float;
   tco_coercion_from_dynamic: bool;
@@ -241,7 +242,8 @@ let default =
     tco_shallow_class_decl = false;
     po_rust_parser_errors = false;
     profile_type_check_duration_threshold = 0.05;
-    tco_like_types = false;
+    tco_like_type_hints = false;
+    tco_like_casts = false;
     tco_pessimize_types = false;
     tco_simple_pessimize = 0.0;
     tco_coercion_from_dynamic = false;
@@ -325,7 +327,8 @@ let make
     ?(po_rust_parser_errors = default.po_rust_parser_errors)
     ?(profile_type_check_duration_threshold =
       default.profile_type_check_duration_threshold)
-    ?(tco_like_types = default.tco_like_types)
+    ?(tco_like_type_hints = default.tco_like_type_hints)
+    ?(tco_like_casts = default.tco_like_casts)
     ?(tco_pessimize_types = default.tco_pessimize_types)
     ?(tco_simple_pessimize = default.tco_simple_pessimize)
     ?(tco_coercion_from_dynamic = default.tco_coercion_from_dynamic)
@@ -409,7 +412,8 @@ let make
     tco_shallow_class_decl;
     po_rust_parser_errors;
     profile_type_check_duration_threshold;
-    tco_like_types;
+    tco_like_type_hints;
+    tco_like_casts;
     tco_pessimize_types;
     tco_simple_pessimize;
     tco_coercion_from_dynamic;
@@ -542,7 +546,9 @@ let po_rust_parser_errors t = t.po_rust_parser_errors
 let profile_type_check_duration_threshold t =
   t.profile_type_check_duration_threshold
 
-let tco_like_types t = t.tco_like_types
+let tco_like_type_hints t = t.tco_like_type_hints
+
+let tco_like_casts t = t.tco_like_casts
 
 let tco_pessimize_types t = t.tco_pessimize_types
 

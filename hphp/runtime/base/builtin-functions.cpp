@@ -432,7 +432,7 @@ vm_decode_function(const_variant_ref function,
   }
 
   if (function.isClsMeth()) {
-    dynamic = true;
+    dynamic = false;
     this_ = nullptr;
     auto const clsmeth = function.toClsMethVal();
     cls = clsmeth->getCls();

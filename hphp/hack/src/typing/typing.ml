@@ -2602,7 +2602,7 @@ and expr_
       SubType.sub_type
         env
         ty1
-        (MakeType.nullable Reason.Rnone ty1')
+        (MakeType.nullable_locl Reason.Rnone ty1')
         Errors.unify_error
     in
     (* Essentially mimic a call to
@@ -2862,7 +2862,7 @@ and expr_
           | Ast_defs.FGenerator -> (env, MakeType.int (Reason.Rwitness p))
           | Ast_defs.FAsyncGenerator ->
             let (env, ty) = Env.fresh_type env p in
-            (env, MakeType.nullable (Reason.Ryield_asyncnull p) ty)
+            (env, MakeType.nullable_locl (Reason.Ryield_asyncnull p) ty)
         end
       | (_, Some x) -> (env, x)
       | (_, _) -> assert false
@@ -2899,7 +2899,7 @@ and expr_
       env
       p
       (T.Yield taf)
-      (MakeType.nullable (Reason.Ryield_send p) send)
+      (MakeType.nullable_locl (Reason.Ryield_send p) send)
   | Yield_from e ->
     let (env, key) = Env.fresh_type env p in
     let (env, value) = Env.fresh_type env p in
@@ -3075,7 +3075,7 @@ and expr_
         (env, hint_ty)
       else if is_nullable then
         let (env, hint_ty) = refine_type env (fst e) expr_ty hint_ty in
-        (env, MakeType.nullable (Reason.Rwitness p) hint_ty)
+        (env, MakeType.nullable_locl (Reason.Rwitness p) hint_ty)
       else if is_instance_var e then
         let (env, _, ivar_ty) = raw_expr env e in
         let (env, ((ivar_pos, _) as ivar)) = get_instance_var env e in
@@ -5094,19 +5094,20 @@ and dispatch_call
           let param1 =
             { param1 with fp_type = { param1.fp_type with et_type = ty1 } }
           in
-          let ty2 = MakeType.nullable r2 (r2, Tgeneric "Tk") in
+          let ty2 = MakeType.nullable_decl r2 (r2, Tgeneric "Tk") in
           let param2 =
             { param2 with fp_type = { param2.fp_type with et_type = ty2 } }
           in
           let rret = fst fty.ft_ret.et_type in
-          let ret = MakeType.nullable rret (rret, Tgeneric "Tv") in
+          let ret = MakeType.nullable_decl rret (rret, Tgeneric "Tv") in
           ([param1; param2], ret)
         | 3 ->
           let param2 =
             {
               param2 with
               fp_type =
-                MakeType.unenforced (MakeType.nullable r2 (r2, Tgeneric "Tk"));
+                MakeType.unenforced
+                  (MakeType.nullable_decl r2 (r2, Tgeneric "Tk"));
             }
           in
           let param3 =
@@ -6299,7 +6300,7 @@ and make_nullable_member_type env ~is_method id_pos pos ty =
       make_nullable_member_type ~is_method:false env id_pos pos ty
   else
     let (env, ty) = Typing_solver.non_null env id_pos ty in
-    (env, MakeType.nullable (Reason.Rnullsafe_op pos) ty)
+    (env, MakeType.nullable_locl (Reason.Rnullsafe_op pos) ty)
 
 (* k_lhs takes the type of the object receiver *)
 and obj_get_

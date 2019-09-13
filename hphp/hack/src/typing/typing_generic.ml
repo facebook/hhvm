@@ -17,21 +17,14 @@ module Env = Typing_env
  *)
 module IsGeneric : sig
   (* Give back the position and name of a generic type parameter if found *)
-  val ty : 'phase ty -> (Pos.t * string) option
+  val ty : decl_ty -> (Pos.t * string) option
 end = struct
   exception Found of Reason.t * string
 
-  let ty : type a. a ty -> _ =
-   fun x ->
-    let rec ty : type a. a ty -> _ =
-     fun (r, t) ->
+  let ty x =
+    let rec ty (r, t) =
       match t with
-      | Tabstract (AKdependent _, cstr) -> ty_opt cstr
-      | Tabstract (AKgeneric x, cstr) when AbstractKind.is_generic_dep_ty x ->
-        ty_opt cstr
-      | Tabstract (AKgeneric x, _) -> raise (Found (r, x))
       | Tgeneric x -> raise (Found (r, x))
-      | Tanon _ -> ()
       | Tthis -> ()
       | Tmixed -> ()
       | Tnothing -> ()
@@ -41,20 +34,6 @@ end = struct
       | Tnonnull
       | Tprim _ ->
         ()
-      | Tarraykind akind ->
-        begin
-          match akind with
-          | AKany -> ()
-          | AKempty -> ()
-          | AKvarray_or_darray tv
-          | AKvarray tv
-          | AKvec tv ->
-            ty tv
-          | AKdarray (tk, tv)
-          | AKmap (tk, tv) ->
-            ty tk;
-            ty tv
-        end
       | Tvar _ -> ()
       | Toption x -> ty x
       | Tlike x -> ty x
@@ -64,46 +43,22 @@ end = struct
         (match fty.ft_arity with
         | Fvariadic (_min, { fp_type = var_ty; _ }) -> ty var_ty.et_type
         | _ -> ())
-      | Tabstract (AKnewtype (_, tyl), x) ->
-        List.iter tyl ty;
-        ty_opt x
       | Ttuple tyl -> List.iter tyl ty
-      | Tclass (_, _, tyl) -> List.iter tyl ty
-      | Tunion tyl -> List.iter tyl ty
-      | Tintersection tyl -> List.iter tyl ty
-      | Tobject -> ()
       | Tapply (_, tyl) -> List.iter tyl ty
       | Taccess (t, _) -> ty t
       | Tarray (t1, t2) ->
-        ty_opt t1;
-        ty_opt t2
+        Option.iter ~f:ty t1;
+        Option.iter ~f:ty t2
       | Tdarray (t1, t2) ->
         ty t1;
         ty t2
       | Tvarray t -> ty t
       | Tvarray_or_darray t -> ty t
       | Tshape (_, fdm) -> ShapeFieldMap.iter (fun _ v -> ty v) fdm
-      | Tdestructure _ -> () (* Only apperas in assignment lhs position *)
-      | Tpu (base, _, _) -> ty base
       | Tpu_access (base, _) -> ty base
-    and ty_opt : type a. a ty option -> _ = function
-      | None -> ()
-      | Some x -> ty x
     in
     try
       ty x;
       None
     with Found (r, x) -> Some (Reason.to_pos r, x)
 end
-
-(* Function making sure that a type can be generalized, in our case it just
- * means the type should be monomorphic
- *)
-let no_generic p local_var_id env =
-  let ty = Env.get_local env local_var_id in
-  let ty = Typing_expand.fully_expand env ty in
-  match IsGeneric.ty ty with
-  | None -> (env, false)
-  | Some (_, x) ->
-    Errors.generic_static p x;
-    (env, true)

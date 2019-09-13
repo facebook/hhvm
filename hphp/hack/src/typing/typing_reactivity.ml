@@ -280,7 +280,7 @@ let check_call env method_info pos reason ft arg_types =
                 arg_ty :: arg_tl ) ->
               let ty =
                 if Typing_utils.is_option env fp_type.et_type then
-                  MakeType.nullable (fst ty) ty
+                  MakeType.nullable_decl (fst ty) ty
                 else
                   ty
               in
@@ -301,7 +301,7 @@ let check_call env method_info pos reason ft arg_types =
               when Typing_utils.is_option env fp_type.et_type ->
               (* if there are more parameters than actual arguments - assume that remaining parameters
             have default values (actual arity check is performed elsewhere).  *)
-              let ty = MakeType.nullable (fst ty) ty in
+              let ty = MakeType.nullable_decl (fst ty) ty in
               (* Treat missing arguments as if null was provided explicitly *)
               let arg_ty = MakeType.null Reason.none in
               check_only_rx_if_impl

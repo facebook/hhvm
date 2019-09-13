@@ -13,8 +13,7 @@ open Typing_defs
 
 For example, we don't currently serialize the arity of function types, so update
 the input type to set it to a default arity value. *)
-let rec strip_ty : type a. a ty -> a ty =
- fun ty ->
+let rec strip_ty ty =
   let (reason, ty) = ty in
   let strip_tyl tyl = List.map tyl ~f:strip_ty in
   let strip_opt ty_opt = Option.map ty_opt ~f:strip_ty in
@@ -23,38 +22,27 @@ let rec strip_ty : type a. a ty -> a ty =
   in
   let ty =
     match ty with
-    | Tmixed -> ty
-    | Tnothing -> ty
     | Tany _
     | Tnonnull
     | Tdynamic
     | Terr ->
       ty
     | Tobject -> ty
-    | Tthis -> ty
-    | Tgeneric _ -> ty
     | Tprim _ -> ty
     | Tvar _ -> ty
     | Tanon _ -> ty
-    | Tapply (s, tyl) -> Tapply (s, strip_tyl tyl)
-    | Taccess (ty, sids) -> Taccess (strip_ty ty, sids)
-    | Tarray (ty1_opt, ty2_opt) -> Tarray (strip_opt ty1_opt, strip_opt ty2_opt)
     | Tarraykind (AKany | AKempty) -> ty
     | Tarraykind (AKdarray (ty1, ty2)) ->
       Tarraykind (AKdarray (strip_ty ty1, strip_ty ty2))
     | Tarraykind (AKmap (ty1, ty2)) ->
       Tarraykind (AKmap (strip_ty ty1, strip_ty ty2))
-    | Tdarray (ty1, ty2) -> Tdarray (strip_ty ty1, strip_ty ty2)
     | Tarraykind (AKvarray ty) -> Tarraykind (AKvarray (strip_ty ty))
     | Tarraykind (AKvec ty) -> Tarraykind (AKvec (strip_ty ty))
-    | Tvarray ty -> Tvarray (strip_ty ty)
-    | Tvarray_or_darray ty -> Tvarray_or_darray (strip_ty ty)
     | Tarraykind (AKvarray_or_darray ty) ->
       Tarraykind (AKvarray_or_darray (strip_ty ty))
     | Ttuple tyl -> Ttuple (strip_tyl tyl)
     | Tdestructure tyl -> Tdestructure (strip_tyl tyl)
     | Toption ty -> Toption (strip_ty ty)
-    | Tlike ty -> Tlike (strip_ty ty)
     | Tabstract (abstract_kind, ty_opt) ->
       let abstract_kind =
         match abstract_kind with

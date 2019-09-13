@@ -57,6 +57,10 @@ val get_newable : t -> string -> bool
 
 val get_names : t -> string list
 
+val is_consistent : t -> bool
+
+val mark_inconsistent : t -> t
+
 val add_upper_bound :
   ?intersect:
     (Typing_defs.locl_ty ->

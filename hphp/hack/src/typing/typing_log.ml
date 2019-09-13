@@ -334,11 +334,17 @@ let tparam_info_as_value env tpinfo =
     ]
 
 let tpenv_as_value env tpenv =
-  Map
-    (TPEnv.fold
-       (fun name tpinfo m -> SMap.add name (tparam_info_as_value env tpinfo) m)
-       tpenv
-       SMap.empty)
+  make_map
+    [
+      ( "tparams",
+        Map
+          (TPEnv.fold
+             (fun name tpinfo m ->
+               SMap.add name (tparam_info_as_value env tpinfo) m)
+             tpenv
+             SMap.empty) );
+      ("consistent", bool_as_value (TPEnv.is_consistent tpenv));
+    ]
 
 let per_cont_entry_as_value env f entry =
   make_map

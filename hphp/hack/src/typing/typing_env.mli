@@ -381,3 +381,7 @@ val add_subtype_prop : env -> Typing_logic.subtype_prop -> env
 val set_tyvar_variance : env -> ?flip:bool -> Typing_defs.locl_ty -> env
 
 val update_variance_after_bind : env -> int -> Typing_defs.locl_ty -> env
+
+val is_consistent : env -> bool
+
+val mark_inconsistent : env -> env

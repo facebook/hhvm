@@ -330,6 +330,11 @@ let get_generic_parameters env =
 let get_tpenv_size env =
   TPEnv.size (get_tpenv env) + TPEnv.size env.global_tpenv
 
+let is_consistent env = TPEnv.is_consistent (get_tpenv env)
+
+let mark_inconsistent env =
+  env_with_tpenv env (TPEnv.mark_inconsistent (get_tpenv env))
+
 (*****************************************************************************
  * Operations to get or add bounds to type variables.
  * There is a lot of code duplication from the tpenv code here, which we

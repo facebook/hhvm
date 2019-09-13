@@ -2714,6 +2714,7 @@ and decompose_subtype_add_prop p env prop =
   match prop with
   | TL.Conj props ->
     List.fold_left ~f:(decompose_subtype_add_prop p) ~init:env props
+  | TL.Disj (_, []) -> Env.mark_inconsistent env
   | TL.Disj (_, [prop']) -> decompose_subtype_add_prop p env prop'
   | TL.Disj _ ->
     Typing_log.log_prop

@@ -1,9 +1,2 @@
 File "fc_enum_non_arraykey_constraint.php", line 4, characters 6-9:
-This enum declaration is invalid.
-Read the following to see why: (Typing[4342])
-File "BuiltinEnum.hhi", line 43, characters 32-39:
-Member getNames has the wrong type
-File "BuiltinEnum.hhi", line 43, characters 73-80:
-Expected arraykey
-File "fc_enum_non_arraykey_constraint.php", line 4, characters 22-28:
-But got ?string
+Enums must be int or string or arraykey, not ?string (Typing[4024])

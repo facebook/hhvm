@@ -33,54 +33,70 @@ type tparam_info = {
 let tparam_info_size tpinfo =
   TySet.cardinal tpinfo.lower_bounds + TySet.cardinal tpinfo.upper_bounds
 
-type tpenv = tparam_info SMap.t
+type t = {
+  tparams: tparam_info SMap.t;
+  consistent: bool;
+}
 
-type t = tpenv
+let empty = { tparams = SMap.empty; consistent = true }
 
-let empty = SMap.empty
+let mem name tpenv = SMap.mem name tpenv.tparams
 
-let mem name tpenv = SMap.mem name tpenv
+let get name tpenv = SMap.get name tpenv.tparams
 
-let get name tpenv = SMap.get name tpenv
+let add name tpinfo tpenv =
+  { tpenv with tparams = SMap.add name tpinfo tpenv.tparams }
 
-let add name tpinfo tpenv = SMap.add name tpinfo tpenv
-
-let union tpenv1 tpenv2 = SMap.union tpenv1 tpenv2
+let union tpenv1 tpenv2 =
+  {
+    tparams = SMap.union tpenv1.tparams tpenv2.tparams;
+    consistent = tpenv1.consistent && tpenv2.consistent;
+  }
 
 let size tpenv =
-  SMap.fold (fun _ tpinfo count -> tparam_info_size tpinfo + count) tpenv 0
+  SMap.fold
+    (fun _ tpinfo count -> tparam_info_size tpinfo + count)
+    tpenv.tparams
+    0
 
-let fold f tpenv accu = SMap.fold f tpenv accu
+let fold f tpenv accu = SMap.fold f tpenv.tparams accu
 
 let merge_env env tpenv1 tpenv2 ~combine =
-  SMap.merge_env env tpenv1 tpenv2 ~combine
+  let (env, tparams) =
+    SMap.merge_env env tpenv1.tparams tpenv2.tparams ~combine
+  in
+  (env, { tparams; consistent = tpenv1.consistent && tpenv2.consistent })
 
 let get_lower_bounds tpenv name =
-  match SMap.get name tpenv with
+  match get name tpenv with
   | None -> empty_bounds
   | Some { lower_bounds; _ } -> lower_bounds
 
 let get_upper_bounds tpenv name =
-  match SMap.get name tpenv with
+  match get name tpenv with
   | None -> empty_bounds
   | Some { upper_bounds; _ } -> upper_bounds
 
 let get_reified tpenv name =
-  match SMap.get name tpenv with
+  match get name tpenv with
   | None -> Aast.Erased
   | Some { reified; _ } -> reified
 
 let get_enforceable tpenv name =
-  match SMap.get name tpenv with
+  match get name tpenv with
   | None -> false
   | Some { enforceable; _ } -> enforceable
 
 let get_newable tpenv name =
-  match SMap.get name tpenv with
+  match get name tpenv with
   | None -> false
   | Some { newable; _ } -> newable
 
-let get_names = SMap.keys
+let get_names tpenv = SMap.keys tpenv.tparams
+
+let is_consistent tpenv = tpenv.consistent
+
+let mark_inconsistent tpenv = { tpenv with consistent = false }
 
 let rec is_generic_param ~elide_nullable ty name =
   match ty with
@@ -239,7 +255,7 @@ let remove tpenv name =
     | _ -> tpenv
   in
   let tpenv = TySet.fold remove_from_lower_bounds_of upper_bounds tpenv in
-  SMap.remove name tpenv
+  { tpenv with tparams = SMap.remove name tpenv.tparams }
 
 (* Add type parameters to environment, initially with no bounds.
  * Existing type parameters with the same name will be overridden. *)
@@ -295,6 +311,15 @@ let pp_tparam_info fmt tpi =
 
   Format.fprintf fmt " }@]"
 
-let pp_tpenv fmt tpenv = SMap.pp pp_tparam_info fmt tpenv
+let pp_tpenv fmt tpenv =
+  Format.fprintf fmt "@[<hv 2>{ ";
+
+  Format.fprintf fmt "@[%s =@ " "tparams";
+  SMap.pp pp_tparam_info fmt tpenv.tparams;
+
+  Format.fprintf fmt "@[%s =@ " "consistent";
+  Format.pp_print_bool fmt tpenv.consistent;
+
+  Format.fprintf fmt " }@]"
 
 let pp = pp_tpenv

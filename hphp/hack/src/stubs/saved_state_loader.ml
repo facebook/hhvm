@@ -51,4 +51,5 @@ as necessary. *)
 
 type load_error
 
-let load_error_to_string _ = failwith "Not implemented"
+(* Please do not throw an exception here; it breaks hack for open source users *)
+let load_error_to_string _ = "Saved states are not supported in this build."

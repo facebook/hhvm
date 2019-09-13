@@ -145,23 +145,17 @@ class LspCommandProcessor:
                 return message in entry.received["error"]["message"]
 
         while True:
+            transcript = dict(transcript)
+            if id in transcript:
+                del transcript[id]
             transcript = self._send_commands(transcript, [dummy_command])
-            transcript = self._read_request_responses(
-                transcript, [dummy_command], timeout_seconds=5
+            transcript = self._wait_for_response(
+                transcript, request_id=dummy_command["id"]
             )
 
-            if (
-                not any(
-                    has_error_message(entry, "Server busy")
-                    for entry in transcript.values()
-                )
-                and not any(
-                    has_error_message(entry, "hh_server initializing")
-                    for entry in transcript.values()
-                )
-                and id in transcript
-                and transcript[id].received is not None
-            ):
+            if not has_error_message(
+                transcript[id], "Server busy"
+            ) and not has_error_message(transcript[id], "hh_server initializing"):
                 return transcript
 
     def _wait_for_shutdown(self, transcript: Transcript) -> Transcript:
@@ -189,18 +183,28 @@ class LspCommandProcessor:
     ) -> Transcript:
         transcript_id = self._client_request_id(request_id)
         request = transcript[transcript_id].sent
-        requests = [request]
 
         while transcript[transcript_id].received is None:
-            transcript = self._read_request_responses(
-                transcript, commands=requests, timeout_seconds=5
+            message = self._try_read_logged(timeout_seconds=5.0)
+            assert message is not None, (
+                f"Timed out while waiting for the response to request {transcript_id}. "
+                + f"Here is the request: {request}. "
+                + f"Here is the transcript so far: {transcript}"
             )
+            transcript = self._scribe(transcript, sent=None, received=message)
         return transcript
 
     def _wait_for_message_from_server(
         self, transcript: Transcript, method: str, params: Json
     ) -> Tuple[Transcript, Json]:
-        while True:
+        def is_target_message(entry: TranscriptEntry) -> bool:
+            return (
+                entry.received is not None
+                and entry.received.get("method") == method
+                and entry.received.get("params") == params
+            )
+
+        while not any(is_target_message(entry) for entry in transcript.values()):
             message = self._try_read_logged(timeout_seconds=5)
             params_pretty = pprint.pformat(params)
             assert (
@@ -216,12 +220,10 @@ Transcript of all the messages we saw:
 {transcript}"""
             transcript = self._scribe(transcript, sent=None, received=message)
 
-            if message.get("id") == -1:
-                # Dummy method from `_wait_for_initialize`, ignore.
-                continue
-
-            if message.get("method") == method and message["params"] == params:
-                return (transcript, message)
+        [message] = [
+            entry.received for entry in transcript.values() if is_target_message(entry)
+        ]
+        return (transcript, message)
 
     def _wait_for_request(self, transcript: Transcript, command: Json) -> Transcript:
         method = command["params"]["method"]

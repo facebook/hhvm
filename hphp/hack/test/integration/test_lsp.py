@@ -1189,7 +1189,266 @@ class TestLsp(TestCase[LspTestDriver]):
     def test_signature_help(self) -> None:
         self.prepare_server_environment()
         variables = self.setup_php_file("signaturehelp.php")
-        self.load_and_run("signaturehelp", variables)
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("test_signature_help"), use_serverless_ide=False
+            )
+            .wait_for_hh_server_ready()
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .request(
+                comment="signature help for 0-argument constructor (left of opening paren)",
+                method="textDocument/signatureHelp",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 16, "character": 18},
+                },
+                result=None,
+            )
+            .request(
+                comment="signature help for 0-argument constructor",
+                method="textDocument/signatureHelp",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 16, "character": 19},
+                },
+                result={
+                    "signatures": [
+                        {
+                            "label": "public function __construct(): _",
+                            "documentation": "Constructor with doc block",
+                            "parameters": [],
+                        }
+                    ],
+                    "activeSignature": 0,
+                    "activeParameter": 0,
+                },
+            )
+            .request(
+                comment="signature help for 0-argument constructor (right of closing paren)",
+                method="textDocument/signatureHelp",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 16, "character": 20},
+                },
+                result=None,
+            )
+            .request(
+                comment="signature help for 2-argument instance method (left of opening paren)",
+                method="textDocument/signatureHelp",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 17, "character": 20},
+                },
+                result=None,
+            )
+            .request(
+                comment="signature help for 2-argument instance method (right of opening paren)",
+                method="textDocument/signatureHelp",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 17, "character": 21},
+                },
+                result={
+                    "signatures": [
+                        {
+                            "label": "public function instanceMethod(int $x1, int $x2): void",
+                            "documentation": "Instance method with doc block",
+                            "parameters": [{"label": "$x1"}, {"label": "$x2"}],
+                        }
+                    ],
+                    "activeSignature": 0,
+                    "activeParameter": 0,
+                },
+            )
+            .request(
+                comment="signature help for 2-argument instance method (left of first comma)",
+                method="textDocument/signatureHelp",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 17, "character": 22},
+                },
+                result={
+                    "signatures": [
+                        {
+                            "label": "public function instanceMethod(int $x1, int $x2): void",
+                            "documentation": "Instance method with doc block",
+                            "parameters": [{"label": "$x1"}, {"label": "$x2"}],
+                        }
+                    ],
+                    "activeSignature": 0,
+                    "activeParameter": 1,
+                },
+            )
+            .request(
+                comment="signature help for 2-argument instance method (right of first comma)",
+                method="textDocument/signatureHelp",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 17, "character": 23},
+                },
+                result={
+                    "signatures": [
+                        {
+                            "label": "public function instanceMethod(int $x1, int $x2): void",
+                            "documentation": "Instance method with doc block",
+                            "parameters": [{"label": "$x1"}, {"label": "$x2"}],
+                        }
+                    ],
+                    "activeSignature": 0,
+                    "activeParameter": 1,
+                },
+            )
+            .request(
+                comment="signature help for 2-argument instance method (left of closing paren)",
+                method="textDocument/signatureHelp",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 17, "character": 24},
+                },
+                result={
+                    "signatures": [
+                        {
+                            "label": "public function instanceMethod(int $x1, int $x2): void",
+                            "documentation": "Instance method with doc block",
+                            "parameters": [{"label": "$x1"}, {"label": "$x2"}],
+                        }
+                    ],
+                    "activeSignature": 0,
+                    "activeParameter": 1,
+                },
+            )
+            .request(
+                comment="signature help for 2-argument instance method (right of closing paren)",
+                method="textDocument/signatureHelp",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 17, "character": 25},
+                },
+                result=None,
+            )
+            .request(
+                comment="signature help for 1-argument static method (left of open paren)",
+                method="textDocument/signatureHelp",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 18, "character": 23},
+                },
+                result=None,
+            )
+            .request(
+                comment="signature help for 1-argument static method (right of open paren)",
+                method="textDocument/signatureHelp",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 18, "character": 24},
+                },
+                result={
+                    "signatures": [
+                        {
+                            "label": "public static function staticMethod(string $z): void",
+                            "documentation": "Static method with doc block",
+                            "parameters": [{"label": "$z"}],
+                        }
+                    ],
+                    "activeSignature": 0,
+                    "activeParameter": 0,
+                },
+            )
+            .request(
+                comment="signature help for 2-argument global function (left of open paren)",
+                method="textDocument/signatureHelp",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 19, "character": 17},
+                },
+                result=None,
+            )
+            .request(
+                comment="signature help for 2-argument global function (right of open paren)",
+                method="textDocument/signatureHelp",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 19, "character": 18},
+                },
+                result={
+                    "signatures": [
+                        {
+                            "label": "function global_function(string $s, int $x): void",
+                            "documentation": "Global function with doc block",
+                            "parameters": [{"label": "$s"}, {"label": "$x"}],
+                        }
+                    ],
+                    "activeSignature": 0,
+                    "activeParameter": 0,
+                },
+            )
+            .request(
+                comment="signature help for 1-argument namespace-aliased global function (left of open paren)",
+                method="textDocument/signatureHelp",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 20, "character": 26},
+                },
+                result=None,
+            )
+            .request(
+                comment="signature help for 1-argument namespace-aliased global function (right of open paren)",
+                method="textDocument/signatureHelp",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 20, "character": 26},
+                },
+                result=None,
+            )
+            .request(
+                comment="signature help for 1-argument namespace-aliased global function (right of open paren)",
+                method="textDocument/signatureHelp",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 20, "character": 27},
+                },
+                result={
+                    "signatures": [
+                        {
+                            "label": "function Herp\\aliased_global_func(string $s): void",
+                            "parameters": [{"label": "$s"}],
+                        }
+                    ],
+                    "activeSignature": 0,
+                    "activeParameter": 0,
+                },
+            )
+            .request(
+                comment="signature help for 1-argument namespace-aliased global function (right of open paren)",
+                method="textDocument/signatureHelp",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 20, "character": 28},
+                },
+                result={
+                    "signatures": [
+                        {
+                            "label": "function Herp\\aliased_global_func(string $s): void",
+                            "parameters": [{"label": "$s"}],
+                        }
+                    ],
+                    "activeSignature": 0,
+                    "activeParameter": 0,
+                },
+            )
+            .request(method="shutdown", params={}, result=None)
+        )
+        self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)
 
     def test_rename(self) -> None:
         self.prepare_server_environment()

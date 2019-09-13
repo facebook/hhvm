@@ -76,12 +76,10 @@ fi
 COMPILER_FILE="${INSTALL_DIR}/generated-compiler-id.txt"
 REPO_SCHEMA_FILE="${INSTALL_DIR}/generated-repo-schema-id.txt"
 BUILD_ID_FILE="${INSTALL_DIR}/generated-build-id.txt"
-HHJS_BABEL_TRANSFORM_PATH_FILE="${INSTALL_DIR}/generated-hhjs-babel-transform.txt"
 
 echo -n "${COMPILER_ID}" > "${COMPILER_FILE}"
 echo -n "${HHVM_REPO_SCHEMA}" > "${REPO_SCHEMA_FILE}"
 echo -n "${BUILD_ID}" > "${BUILD_ID_FILE}"
-echo -n "${HHJS_BABEL_TRANSFORM}" > "${HHJS_BABEL_TRANSFORM_PATH_FILE}"
 
 if [ -z "${COMPILER_ID}" ]; then
   exit 1

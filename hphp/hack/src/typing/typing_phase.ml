@@ -17,6 +17,7 @@ module TUtils = Typing_utils
 module TGenConstraint = Typing_generic_constraint
 module Subst = Decl_subst
 module MakeType = Typing_make_type
+module Cls = Decl_provider.Class
 
 (* Here is the general problem the delayed application of the phase solves.
  * Let's say you have a function that you want to operate generically across
@@ -203,15 +204,23 @@ let rec localize ~ety_env env (dty : decl_ty) =
       in
       (env, (r, Tabstract (AKnewtype (x, []), Some cstr)))
   | (r, Tapply (((_, cid) as cls), tyl)) ->
+    let can_infer_tparams =
+      GlobalOptions.InferMissing.can_infer_params
+      @@ TypecheckerOptions.infer_missing (Env.get_tcopt env)
+    in
     let (env, tyl) =
-      if not (tyl_contains_wildcard tyl) then
+      if (not (tyl_contains_wildcard tyl)) && List.length tyl <> 0 then
         List.map_env env tyl (localize ~ety_env)
       else
         match Env.get_class env cid with
         | None -> List.map_env env tyl (localize ~ety_env)
         | Some class_info ->
-          let tparams = Decl_provider.Class.tparams class_info in
-          localize_tparams ~ety_env env (Reason.to_pos r) tyl tparams
+          let tparams = Cls.tparams class_info in
+          if List.length tparams <> List.length tyl && can_infer_tparams then
+            (* In this case we will infer the missing type parameters *)
+            localize_missing_tparams_class env r cls class_info tyl
+          else
+            localize_tparams ~ety_env env (Reason.to_pos r) tyl tparams
     in
     (env, (r, Tclass (cls, Nonexact, tyl)))
   | (r, Ttuple tyl) ->
@@ -585,6 +594,98 @@ and localize_hint_with_self env h =
 and localize_hint ~ety_env env hint =
   let hint_ty = Decl_hint.hint env.decl_env hint in
   localize ~ety_env env hint_ty
+
+and localize_missing_tparams_class env r sid class_ tyl =
+  let p = Reason.to_pos r in
+  let (env, _, tyl) =
+    resolve_type_arguments_and_check_constraints
+      ~exact:Nonexact
+      ~check_constraints:false
+      env
+      p
+      sid
+      (Aast.CI sid)
+      (Cls.tparams class_)
+      tyl
+  in
+  let c_ty = (r, Tclass (sid, Nonexact, tyl)) in
+  let env = Env.set_tyvar_variance env c_ty in
+  let ety_env =
+    {
+      type_expansions = [];
+      this_ty = c_ty;
+      substs = Subst.make (Cls.tparams class_) tyl;
+      from_class = Some (Aast.CI sid);
+      validate_dty = None;
+    }
+  in
+  let env =
+    check_tparams_constraints ~use_pos:p ~ety_env env (Cls.tparams class_)
+  in
+  let env =
+    check_where_constraints
+      ~in_class:true
+      ~use_pos:p
+      ~definition_pos:(Cls.pos class_)
+      ~ety_env
+      env
+      (Cls.where_constraints class_)
+  in
+  (env, tyl)
+
+(* If there are no explicit type arguments then generate fresh type variables
+* for all of them. Otherwise, check the arity, and use the explicit types. *)
+and resolve_type_argument env hint =
+  (* For explicit type arguments we support a wildcard syntax `_` for which
+   * Hack will generate a fresh type variable *)
+  match hint with
+  | (r, Tapply ((_, id), [])) when id = SN.Typehints.wildcard ->
+    Env.fresh_type env (Reason.to_pos r)
+  | _ -> localize_with_self env hint
+
+and resolve_type_argument_hint env hint =
+  Decl_hint.hint env.decl_env hint |> resolve_type_argument env
+
+and resolve_type_arguments env p class_id tparaml hintl =
+  let length_hintl = List.length hintl in
+  let length_tparaml = List.length tparaml in
+  if length_hintl <> length_tparaml then
+    List.map_env env tparaml (fun env tparam ->
+        let (env, tvar) =
+          Env.fresh_type_reason
+            env
+            (Reason.Rtype_variable_generics
+               (p, snd tparam.tp_name, Utils.strip_ns (snd class_id)))
+        in
+        Typing_log.log_tparam_instantiation env p tparam tvar;
+        (env, tvar))
+  else
+    List.map_env env hintl resolve_type_argument
+
+(* Do all of the above, and also check any constraints associated with the type parameters.
+ *)
+and resolve_type_arguments_and_check_constraints
+    ~exact ~check_constraints env p class_id from_class tparaml hintl =
+  let (env, type_argl) = resolve_type_arguments env p class_id tparaml hintl in
+  let this_ty =
+    (Reason.Rwitness (fst class_id), Tclass (class_id, exact, type_argl))
+  in
+  let env =
+    if check_constraints then
+      let ety_env =
+        {
+          type_expansions = [];
+          this_ty;
+          substs = Subst.make tparaml type_argl;
+          from_class = Some from_class;
+          validate_dty = None;
+        }
+      in
+      check_tparams_constraints ~use_pos:p ~ety_env env tparaml
+    else
+      env
+  in
+  (env, this_ty, type_argl)
 
 (* Add generic parameters to the environment, localize their bounds, and
  * transform these into a flat list of constraints of the form (ty1,ck,ty2)

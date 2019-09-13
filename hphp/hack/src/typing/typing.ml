@@ -1972,8 +1972,8 @@ and expr_
         when not
                (TCO.ignore_collection_expr_type_arguments (Env.get_tcopt env))
         ->
-        let (env, localtk) = resolve_type_argument env tk in
-        let (env, localtv) = resolve_type_argument env tv in
+        let (env, localtk) = Phase.resolve_type_argument_hint env tk in
+        let (env, localtv) = Phase.resolve_type_argument_hint env tv in
         let localtk_expected = ExpectedTy.make pk Reason.URhint localtk in
         let localtv_expected = ExpectedTy.make pv Reason.URhint localtv in
         (env, Some localtk_expected, Some localtv_expected)
@@ -2024,7 +2024,7 @@ and expr_
         when not
                (TCO.ignore_collection_expr_type_arguments (Env.get_tcopt env))
         ->
-        let (env, localtv) = resolve_type_argument env tv in
+        let (env, localtv) = Phase.resolve_type_argument_hint env tv in
         (env, Some (ExpectedTy.make pv Reason.URhint localtv))
       | _ ->
         (* no explicit typehint, fallback to supplied expect *)
@@ -2060,7 +2060,7 @@ and expr_
         when not
                (TCO.ignore_collection_expr_type_arguments (Env.get_tcopt env))
         ->
-        let (env, localtv) = resolve_type_argument env tv in
+        let (env, localtv) = Phase.resolve_type_argument_hint env tv in
         (env, Some (ExpectedTy.make pv Reason.URhint localtv))
       | _ ->
         begin
@@ -2106,8 +2106,8 @@ and expr_
         when not
                (TCO.ignore_collection_expr_type_arguments (Env.get_tcopt env))
         ->
-        let (env, localtk) = resolve_type_argument env tk in
-        let (env, localtv) = resolve_type_argument env tv in
+        let (env, localtk) = Phase.resolve_type_argument_hint env tk in
+        let (env, localtv) = Phase.resolve_type_argument_hint env tv in
         let localtk_expected = ExpectedTy.make pk Reason.URhint localtk in
         let localtv_expected = ExpectedTy.make pv Reason.URhint localtv in
         (env, Some localtk_expected, Some localtv_expected)
@@ -6574,57 +6574,6 @@ and trait_most_concrete_req_class trait env =
       end
     ~init:None
 
-(* If there are no explicit type arguments then generate fresh type variables
- * for all of them. Otherwise, check the arity, and use the explicit types. *)
-and resolve_type_argument env hint =
-  (* For explicit type arguments we support a wildcard syntax `_` for which
-  * Hack will generate a fresh type variable *)
-  match hint with
-  | (p, Happly ((_, id), [])) when id = SN.Typehints.wildcard ->
-    Env.fresh_type env p
-  | _ -> Phase.localize_hint_with_self env hint
-
-and resolve_type_arguments env p class_id tparaml hintl =
-  let length_hintl = List.length hintl in
-  let length_tparaml = List.length tparaml in
-  if length_hintl <> length_tparaml then
-    List.map_env env tparaml (fun env tparam ->
-        let (env, tvar) =
-          Env.fresh_type_reason
-            env
-            (Reason.Rtype_variable_generics
-               (p, snd tparam.tp_name, strip_ns (snd class_id)))
-        in
-        Typing_log.log_tparam_instantiation env p tparam tvar;
-        (env, tvar))
-  else
-    List.map_env env hintl resolve_type_argument
-
-(* Do all of the above, and also check any constraints associated with the type parameters.
- *)
-and resolve_type_arguments_and_check_constraints
-    ~exact ~check_constraints env p class_id from_class tparaml hintl =
-  let (env, type_argl) = resolve_type_arguments env p class_id tparaml hintl in
-  let this_ty =
-    (Reason.Rwitness (fst class_id), Tclass (class_id, exact, type_argl))
-  in
-  let env =
-    if check_constraints then
-      let ety_env =
-        {
-          type_expansions = [];
-          this_ty;
-          substs = Subst.make tparaml type_argl;
-          from_class = Some from_class;
-          validate_dty = None;
-        }
-      in
-      Phase.check_tparams_constraints ~use_pos:p ~ety_env env tparaml
-    else
-      env
-  in
-  (env, this_ty)
-
 (* When invoking a method the class_id is used to determine what class we
  * lookup the method in, but the type of 'this' will be the late bound type.
  * For example:
@@ -6722,16 +6671,16 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
       | None ->
         make_result env (T.CI c) (Reason.Rwitness p, Typing_utils.tany env)
       | Some class_ ->
-        let (env, ty) =
-          resolve_type_arguments_and_check_constraints
-            ~exact
-            ~check_constraints
-            env
-            p
-            c
-            e1
-            (Cls.tparams class_)
-            tal
+        let (env, ty, _) =
+          List.map ~f:(Decl_hint.hint env.decl_env) tal
+          |> Phase.resolve_type_arguments_and_check_constraints
+               ~exact
+               ~check_constraints
+               env
+               p
+               c
+               e1
+               (Cls.tparams class_)
         in
         make_result env (T.CI c) ty)
   | CIexpr ((p, _) as e) ->

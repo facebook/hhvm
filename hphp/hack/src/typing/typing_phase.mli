@@ -67,3 +67,16 @@ val check_where_constraints :
 val decl : decl_ty -> phase_ty
 
 val locl : locl_ty -> phase_ty
+
+val resolve_type_argument_hint : env -> Aast.hint -> env * locl_ty
+
+val resolve_type_arguments_and_check_constraints :
+  exact:exact ->
+  check_constraints:bool ->
+  env ->
+  Pos.t ->
+  Ast_defs.id ->
+  Nast.class_id_ ->
+  decl_tparam sexp_list ->
+  decl_ty sexp_list ->
+  env * (Reason.t * locl_phase ty_) * locl_ty sexp_list

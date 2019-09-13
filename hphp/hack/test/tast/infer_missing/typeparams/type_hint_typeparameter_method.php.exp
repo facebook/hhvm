@@ -1,0 +1,45 @@
+Errors:
+  [3:14-17] The type Map expects 2 type parameter(s)
+  [57:13-16] Definition is here
+[(Fun
+    { f_span = [3:1-6:2]; f_annotation = (); f_mode = <opaque>;
+      f_ret = ((_), None); f_name = ([3:10-13], "\\foo"); f_tparams = [];
+      f_where_constraints = []; f_variadic = FVnonVariadic;
+      f_params =
+      [{ param_annotation = ([3:18-20], Map<string, (int | string)>);
+         param_type_hint =
+         ((Map<string, (int | string)>),
+          (Some ([3:14-17], (Happly (([3:14-17], "\\Map"), [])))));
+         param_is_reference = false; param_is_variadic = false;
+         param_pos = [3:18-20]; param_name = "$x"; param_expr = None;
+         param_callconv = None; param_user_attributes = [];
+         param_visibility = None }
+        ];
+      f_body =
+      { fb_ast =
+        [([4:3-18],
+          (Expr
+             (([4:3-17], int),
+              (Binop ((Eq None),
+                 (([4:3-12], int),
+                  (Array_get (
+                     (([4:3-5], Map<string, (int | string)>),
+                      (Lvar ([4:3-5], $x))),
+                     (Some (([4:6-11], string), (String "int")))))),
+                 (([4:15-17], int), (Int "42")))))));
+          ([5:3-20],
+           (Expr
+              (([5:3-19], string),
+               (Binop ((Eq None),
+                  (([5:3-12], string),
+                   (Array_get (
+                      (([5:3-5], Map<string, (int | string)>),
+                       (Lvar ([5:3-5], $x))),
+                      (Some (([5:6-11], string), (String "foo")))))),
+                  (([5:15-19], string), (String "23")))))))
+          ];
+        fb_annotation = No unsafe blocks };
+      f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+      f_external = false; f_namespace = <opaque>; f_doc_comment = None;
+      f_static = false })
+  ]

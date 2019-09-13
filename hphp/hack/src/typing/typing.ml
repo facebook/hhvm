@@ -472,11 +472,12 @@ let rec bind_param env (ty1, param) =
         | None -> false
         | Some ty -> Typing_enforceability.is_enforceable env ty
       in
+      let ty1_enforced = { et_type = ty1; et_enforced = enforced } in
       let expected =
         ExpectedTy.make_and_allow_coercion
           param.param_pos
           Reason.URparam
-          { et_type = ty1; et_enforced = enforced }
+          ty1_enforced
       in
       let (env, te, ty2) = expr ~expected env e in
       Typing_sequencing.sequence_check_expr e;
@@ -495,12 +496,12 @@ let rec bind_param env (ty1, param) =
          * must be a subtype *)
         else
           let env =
-            Type.sub_type
+            Typing_coercion.coerce_type
               param.param_pos
               Reason.URhint
               env
               ty2
-              ty1
+              ty1_enforced
               Errors.parameter_default_value_wrong_type
           in
           (env, ty1)

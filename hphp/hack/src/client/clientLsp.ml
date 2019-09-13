@@ -3110,6 +3110,7 @@ let handle_event
           raise (Error.ServerNotInitialized "Server not yet initialized")
         (* Text document completion: "AutoComplete!" *)
         | ( ( In_init { In_init_env.editor_open_files; _ }
+            | Main_loop { Main_env.editor_open_files; _ }
             | Lost_server { Lost_env.editor_open_files; _ } ),
             Client_message c )
           when env.use_serverless_ide && c.method_ = "textDocument/completion"
@@ -3125,6 +3126,7 @@ let handle_event
           Lwt.return_unit
         (* Resolve documentation for a symbol: "Autocomplete Docblock!" *)
         | ( ( In_init { In_init_env.editor_open_files; _ }
+            | Main_loop { Main_env.editor_open_files; _ }
             | Lost_server { Lost_env.editor_open_files; _ } ),
             Client_message c )
           when env.use_serverless_ide && c.method_ = "completionItem/resolve"
@@ -3140,6 +3142,7 @@ let handle_event
           Lwt.return_unit
         (* Document highlighting in serverless IDE *)
         | ( ( In_init { In_init_env.editor_open_files; _ }
+            | Main_loop { Main_env.editor_open_files; _ }
             | Lost_server { Lost_env.editor_open_files; _ } ),
             Client_message c )
           when env.use_serverless_ide
@@ -3153,6 +3156,7 @@ let handle_event
           Lwt.return_unit
         (* Type coverage in serverless IDE *)
         | ( ( In_init { In_init_env.editor_open_files; _ }
+            | Main_loop { Main_env.editor_open_files; _ }
             | Lost_server { Lost_env.editor_open_files; _ } ),
             Client_message c )
           when env.use_serverless_ide
@@ -3166,6 +3170,7 @@ let handle_event
           Lwt.return_unit
         (* Hover docblocks in serverless IDE *)
         | ( ( In_init { In_init_env.editor_open_files; _ }
+            | Main_loop { Main_env.editor_open_files; _ }
             | Lost_server { Lost_env.editor_open_files; _ } ),
             Client_message c )
           when env.use_serverless_ide && c.method_ = "textDocument/hover" ->
@@ -3177,6 +3182,7 @@ let handle_event
           result |> print_hover |> respond_jsonrpc ~powered_by:Serverless_ide c;
           Lwt.return_unit
         | ( ( In_init { In_init_env.editor_open_files; _ }
+            | Main_loop { Main_env.editor_open_files; _ }
             | Lost_server { Lost_env.editor_open_files; _ } ),
             Client_message c )
           when env.use_serverless_ide
@@ -3191,6 +3197,7 @@ let handle_event
           |> respond_jsonrpc ~powered_by:Serverless_ide c;
           Lwt.return_unit
         | ( ( In_init { In_init_env.editor_open_files; _ }
+            | Main_loop { Main_env.editor_open_files; _ }
             | Lost_server { Lost_env.editor_open_files; _ } ),
             Client_message c )
           when env.use_serverless_ide && c.method_ = "textDocument/definition"
@@ -3205,6 +3212,7 @@ let handle_event
           |> respond_jsonrpc ~powered_by:Serverless_ide c;
           Lwt.return_unit
         | ( ( In_init { In_init_env.editor_open_files; _ }
+            | Main_loop { Main_env.editor_open_files; _ }
             | Lost_server { Lost_env.editor_open_files; _ } ),
             Client_message c )
           when env.use_serverless_ide
@@ -3220,6 +3228,7 @@ let handle_event
           Lwt.return_unit
         (* Resolve documentation for a symbol: "Autocomplete Docblock!" *)
         | ( ( In_init { In_init_env.editor_open_files; _ }
+            | Main_loop { Main_env.editor_open_files; _ }
             | Lost_server { Lost_env.editor_open_files; _ } ),
             Client_message c )
           when env.use_serverless_ide

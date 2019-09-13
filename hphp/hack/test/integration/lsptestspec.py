@@ -5,16 +5,23 @@ import copy
 import difflib
 import inspect
 import itertools
-import lib2to3.patcomp  # pyre-ignore: Pyre can't find this
-import lib2to3.pgen2
-import lib2to3.pygram
-import lib2to3.pytree as pytree
-import operator
 import os.path
 import pprint
 import textwrap
-from typing import AbstractSet, Iterable, Mapping, Optional, Sequence, Tuple, Union
+from typing import (
+    AbstractSet,
+    Iterable,
+    List,
+    Mapping,
+    Optional,
+    Sequence,
+    Tuple,
+    Union,
+)
 
+import libcst
+from libcst.metadata.position_provider import SyntacticPositionProvider
+from libcst.metadata.wrapper import MetadataWrapper
 from lspcommand import LspCommandProcessor, Transcript, TranscriptEntry
 from utils import Json, VariableMap, interpolate_variables, uninterpolate_variables
 
@@ -460,58 +467,22 @@ This was the associated request:
     def _find_line_range_for_function_call(
         self, file_contents: str, line_num_1idx: int
     ) -> Tuple[int, int]:
-        driver = lib2to3.pgen2.driver.Driver(
-            grammar=lib2to3.pygram.python_grammar, convert=pytree.convert
-        )
-        tree = driver.parse_string(file_contents)
-
-        function_call_pattern = lib2to3.patcomp.compile_pattern(  # pyre-ignore
-            # For arithmetic precedence reasons, any regular, non-arithmetic
-            # expression node is a 'power' node, since that has the most extreme
-            # precedence in some respect. The 'trailer' denotes that it's
-            # followed by an argument list.
-            "power< any* trailer< '(' [any] ')' > >"
-        )
-        all_function_call_chains = [
-            # For similar arithmetic precedence reasons, consecutive function
-            # call and member access expressions appear to form one big n-ary
-            # node, instead of a sequence of nested binary nodes.
-            node
-            for node in tree.pre_order()
-            if function_call_pattern.match(node)
-        ]
-        all_function_calls = [
-            # Flatten all elements of all chains into one list.
-            child
-            for chain in all_function_call_chains
-            for child in chain.children
-        ]
-        function_calls_with_line_ranges = [
-            (node, self._line_range_of_node(node)) for node in all_function_calls
-        ]
+        tree = libcst.parse_module(file_contents)
+        function_call_finder = _FunctionCallFinder()
+        MetadataWrapper(tree).visit(function_call_finder)
         function_calls_containing_line = [
-            (node, (max_line_num_1idx_incl - min_line_num_1idx_incl))
-            for (
-                node,
-                (min_line_num_1idx_incl, max_line_num_1idx_incl),
-            ) in function_calls_with_line_ranges
-            if min_line_num_1idx_incl <= line_num_1idx <= max_line_num_1idx_incl
+            (node, node_range)
+            for node, node_range in function_call_finder.function_calls
+            if node_range.start.line <= line_num_1idx <= node_range.end.line
         ]
-        innermost_function_call = min(
-            function_calls_containing_line, key=operator.itemgetter(1)
-        )[0]
-        (start_line_num_1idx_incl, end_line_num_1idx_incl) = self._line_range_of_node(
-            innermost_function_call
-        )
-        start_line_num_0idx_incl = start_line_num_1idx_incl - 1
-        end_line_num_0idx_incl = end_line_num_1idx_incl - 1
+        node_range = min(
+            function_calls_containing_line,
+            key=lambda node_with_range: node_with_range[1].end.line
+            - node_with_range[1].start.line,
+        )[1]
+        start_line_num_0idx_incl = node_range.start.line - 1
+        end_line_num_0idx_incl = node_range.end.line - 1
         return (start_line_num_0idx_incl, end_line_num_0idx_incl)
-
-    def _line_range_of_node(self, node: pytree.Base) -> Tuple[int, int]:
-        min_line_num_1idx_incl = node.get_lineno()
-        num_lines_in_node = str(node).strip().count("\n")
-        max_line_num_1idx_incl = node.get_lineno() + num_lines_in_node
-        return (min_line_num_1idx_incl, max_line_num_1idx_incl)
 
     def _pretty_print_file_context(
         self,
@@ -524,10 +495,9 @@ This was the associated request:
         context_lines = source_lines[
             start_line_num_0idx_incl : end_line_num_0idx_incl + 1
         ]
-        vertical_bar = "\N{BOX DRAWINGS LIGHT VERTICAL}"
         context_lines = [
             # Include the line number in a gutter for display.
-            f"{line_num:>5} {vertical_bar} {line_contents}"
+            f"{line_num:>5} | {line_contents}"
             for line_num, line_contents in enumerate(
                 context_lines, start=start_line_num_0idx_incl + 1
             )
@@ -751,6 +721,38 @@ Remove this `debug` request once you're done debugging.
 
 
 ### Internal. ###
+
+
+class _FunctionCallFinder(libcst.CSTVisitor):
+    """Find function calls and their locations in the given syntax tree.
+
+    Chained function calls include the entire chain as the callee. For example,
+    the chain `x().y().z()` might include `x().y().z` as the callee and `()` as
+    the function call itself. But in the case of function call chains, we really
+    want just the range covered by the parentheses.
+
+    However, that's not directly available in `libcst`, so we approximate this
+    by finding the location of `z` and assume that's where the function call
+    starts.
+    """
+
+    METADATA_DEPENDENCIES = (SyntacticPositionProvider,)
+
+    def __init__(self) -> None:
+        self.function_calls: List[Tuple[libcst.Call, libcst.CodeRange]] = []
+
+    def visit_Call(self, node: libcst.Call) -> None:
+        node_range = self.get_metadata(SyntacticPositionProvider, node)
+
+        start_node = node.func
+        while isinstance(start_node, libcst.Attribute):
+            start_node = start_node.attr
+        start_node_range = self.get_metadata(SyntacticPositionProvider, start_node)
+        start_position = start_node_range.start
+        end_position = node_range.end
+        node_range = libcst.CodeRange(start=start_position, end=end_position)
+
+        self.function_calls.append((node, node_range))
 
 
 class _RequestSpec:

@@ -1689,3 +1689,121 @@ function b_hover(): string {
         )
 
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+
+    def _sanitize_gutter_line_numbers(self, s: str) -> str:
+        gutter_line_number_re = re.compile(r"^[ ]*[0-9]+ \|", re.MULTILINE)
+        return re.sub(gutter_line_number_re, " XXXX |", s)
+
+    def test_lsptestspec_incorrect_request_result(self) -> None:
+        variables = dict(self.prepare_serverless_ide_environment())
+        variables.update(self.setup_php_file("hover.php"))
+        self.test_driver.stop_hh_server()
+
+        spec = (
+            self.initialize_spec(LspTestSpec("bad_hover"), use_serverless_ide=True)
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .request(
+                comment="hover over function invocation",
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 3, "character": 16},
+                },
+                result={
+                    "contents": [
+                        {"language": "hack", "value": "int"},
+                        "INCORRECT COMMENT HERE",
+                    ],
+                    "range": {
+                        "start": {"line": 3, "character": 9},
+                        "end": {"line": 3, "character": 16},
+                    },
+                },
+                powered_by="serverless_ide",
+            )
+            .request(method="shutdown", params={}, result=None)
+        )
+        try:
+            self.run_spec(
+                spec,
+                variables=variables,
+                wait_for_server=False,
+                use_serverless_ide=True,
+            )
+            assert False, "No assertion failure raised"
+        except AssertionError as e:
+            self.assertEqual(
+                self._sanitize_gutter_line_numbers(str(e)),
+                """\
+Test case bad_hover failed with 1 errors:
+
+Error 1/1:
+Description: Request with ID 4 (comment: 'hover over function invocation') \
+got an incorrect result:
+
+(+ is expected lines, - is actual lines)
+- {'contents': [{'language': 'hack', 'value': 'int'},
++ {'contents': [{'language': 'hack', 'value': 'int'}, 'INCORRECT COMMENT HERE'],
+?                                                    +++++++++++++++++++++++++++
+
+-               'A comment describing b_hover.'],
+   'range': {'end': {'character': 16, 'line': 3},
+             'start': {'character': 9, 'line': 3}}}
+
+Context:
+This was the associated request:
+
+hphp/hack/test/integration/test_lsp.py
+ XXXX |             .request(
+ XXXX |                 comment="hover over function invocation",
+ XXXX |                 method="textDocument/hover",
+ XXXX |                 params={
+ XXXX |                     "textDocument": {"uri": "${php_file_uri}"},
+ XXXX |                     "position": {"line": 3, "character": 16},
+ XXXX |                 },
+ XXXX |                 result={
+ XXXX |                     "contents": [
+ XXXX |                         {"language": "hack", "value": "int"},
+ XXXX |                         "INCORRECT COMMENT HERE",
+ XXXX |                     ],
+ XXXX |                     "range": {
+ XXXX |                         "start": {"line": 3, "character": 9},
+ XXXX |                         "end": {"line": 3, "character": 16},
+ XXXX |                     },
+ XXXX |                 },
+ XXXX |                 powered_by="serverless_ide",
+ XXXX |             )
+
+Remediation:
+1) If this was unexpected, then the language server is buggy and should be
+fixed.
+
+2) If this was expected, you can update your request with the following code to
+make it match:
+
+    .request(
+        comment='hover over function invocation',
+        method='textDocument/hover',
+        params={'textDocument': {'uri': '${php_file_uri}'}, \
+'position': {'line': 3, 'character': 16}},
+        result={'contents': [{'language': 'hack', 'value': 'int'}, \
+'A comment describing b_hover.'], \
+'range': {'start': {'line': 3, 'character': 9}, \
+'end': {'line': 3, 'character': 16}}},
+        powered_by='serverless_ide',
+    )
+
+If you want to examine the raw LSP logs, you can check the `.sent.log` and
+`.received.log` files that were generated in the template repo for this test.\
+""",
+            )

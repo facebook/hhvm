@@ -7,7 +7,7 @@ members = [
     "src/parser/errors",
     "src/parser/errors/ffi",
     "src/parser/ffi",
-    "src/utils",
+    "src/utils/escaper",
     "src/utils/ocamlpool_rust",
     "test",
 ]

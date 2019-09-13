@@ -17,7 +17,7 @@ use parser_rust::{
     syntax_kind, syntax_trait::SyntaxTrait, token_kind::TokenKind as TK,
 };
 
-use utils_rust::*;
+use escaper::*;
 
 use ocamlvalue_macro::Ocamlvalue;
 

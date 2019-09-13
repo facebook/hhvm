@@ -61,12 +61,19 @@ version = "0.3.55"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
+name = "hack_escaper"
+version = "3.49.0"
+dependencies = [
+ "pretty_assertions 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "hack_facts"
 version = "3.49.0"
 dependencies = [
+ "hack_escaper 3.49.0",
  "hack_oxidized 3.49.0",
  "hack_parser 3.49.0",
- "hack_utils 3.49.0",
  "pretty_assertions 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "rust-crypto 0.2.36 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.98 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -177,13 +184,6 @@ dependencies = [
  "hack_utils_ocamlpool 3.49.0",
  "libc 0.2.60 (registry+https://github.com/rust-lang/crates.io-index)",
  "ocaml 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
-name = "hack_utils"
-version = "3.49.0"
-dependencies = [
- "pretty_assertions 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

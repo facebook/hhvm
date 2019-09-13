@@ -8,13 +8,11 @@
 */
 use parser_rust as parser;
 
+use escaper::{extract_unquoted_string, unescape_double, unescape_single};
 use parser::flatten_smart_constructors::{FlattenOp, FlattenSmartConstructors};
 use parser::lexable_token::LexableToken;
 use parser::source_text::SourceText;
 use parser::token_kind::TokenKind;
-use utils_rust::extract_unquoted_string;
-use utils_rust::unescape_double;
-use utils_rust::unescape_single;
 
 pub use crate::facts_smart_constructors_generated::*;
 

@@ -1214,21 +1214,23 @@ void implCmp(IRGS& env, Op op) {
     PUNT(cmpUnknownDataType);
   }
 
-  if (checkHACCompare()) {
+  if (checkHACCompare() || checkHACCompareNonAnyArray()) {
     // With EvalHackArrCompatNotices enabled, we'll raise a notice on ===, !==,
     // ==, or != between a PHP array and a Hack array. On relational compares,
     // we'll raise a notice between a PHP array and any other type.
+    bool const is_php_arr_hack_arr_cmp =
+      (leftTy <= TArr && rightTy <= (TVec|TDict|TKeyset)) ||
+      (leftTy <= (TVec|TDict|TKeyset) && rightTy <= TArr);
     switch (op) {
       case Op::Same:
       case Op::NSame:
       case Op::Eq:
       case Op::Neq:
-        if ((leftTy <= TArr && rightTy <= (TVec|TDict|TKeyset)) ||
-            (leftTy <= (TVec|TDict|TKeyset) && rightTy <= TArr)) {
+        if (checkHACCompare() && is_php_arr_hack_arr_cmp) {
           gen(
             env,
             RaiseHackArrCompatNotice,
-            cns(env, makeStaticString(Strings::HACKARR_COMPAT_ARR_MIXEDCMP))
+            cns(env, makeStaticString(Strings::HACKARR_COMPAT_ARR_HACK_ARR_CMP))
           );
         }
         break;
@@ -1238,11 +1240,26 @@ void implCmp(IRGS& env, Op op) {
       case Op::Gte:
       case Op::Cmp:
         if ((leftTy <= TArr) != (rightTy <= TArr)) {
-          gen(
-            env,
-            RaiseHackArrCompatNotice,
-            cns(env, makeStaticString(Strings::HACKARR_COMPAT_ARR_MIXEDCMP))
-          );
+          if (checkHACCompare() && is_php_arr_hack_arr_cmp) {
+            gen(
+              env,
+              RaiseHackArrCompatNotice,
+              cns(
+                env,
+                makeStaticString(Strings::HACKARR_COMPAT_ARR_HACK_ARR_CMP)
+              )
+            );
+          }
+          if (checkHACCompareNonAnyArray() && !is_php_arr_hack_arr_cmp) {
+            gen(
+              env,
+              RaiseHackArrCompatNotice,
+              cns(
+                env,
+                makeStaticString(Strings::HACKARR_COMPAT_ARR_NON_ARR_CMP)
+              )
+            );
+          }
         }
         break;
       default:

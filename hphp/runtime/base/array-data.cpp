@@ -982,7 +982,7 @@ int ArrayData::compare(const ArrayData* v2) const {
   if (isPHPArray()) {
     if (UNLIKELY(!v2->isPHPArray())) {
       if (UNLIKELY(checkHACCompare())) {
-        raiseHackArrCompatArrMixedCmp();
+        raiseHackArrCompatArrHackArrCmp();
       }
       if (v2->isVecArray()) throw_vec_compare_exception();
       if (v2->isDictOrShape()) throw_dict_compare_exception();
@@ -995,7 +995,7 @@ int ArrayData::compare(const ArrayData* v2) const {
   if (isVecArray()) {
     if (UNLIKELY(!v2->isVecArray())) {
       if (UNLIKELY(checkHACCompare() && v2->isPHPArray())) {
-        raiseHackArrCompatArrMixedCmp();
+        raiseHackArrCompatArrHackArrCmp();
       }
       throw_vec_compare_exception();
     }
@@ -1003,7 +1003,7 @@ int ArrayData::compare(const ArrayData* v2) const {
   }
 
   if (UNLIKELY(checkHACCompare() && v2->isPHPArray())) {
-    raiseHackArrCompatArrMixedCmp();
+    raiseHackArrCompatArrHackArrCmp();
   }
 
   if (isDict()) throw_dict_compare_exception();
@@ -1017,7 +1017,7 @@ bool ArrayData::equal(const ArrayData* v2, bool strict) const {
 
   auto const mixed = [&]{
     if (UNLIKELY(checkHACCompare() && v2->isHackArray())) {
-      raiseHackArrCompatArrMixedCmp();
+      raiseHackArrCompatArrHackArrCmp();
     }
     return false;
   };
@@ -1360,8 +1360,12 @@ void raiseHackArrCompatAdd() {
   raise_hac_array_plus_notice("Using + operator on arrays");
 }
 
-void raiseHackArrCompatArrMixedCmp() {
-  raise_hac_compare_notice(Strings::HACKARR_COMPAT_ARR_MIXEDCMP);
+void raiseHackArrCompatArrHackArrCmp() {
+  raise_hac_compare_notice(Strings::HACKARR_COMPAT_ARR_HACK_ARR_CMP);
+}
+
+void raiseHackArrCompatArrNonArrCmp() {
+  raise_hac_compare_notice(Strings::HACKARR_COMPAT_ARR_NON_ARR_CMP);
 }
 
 void raiseHackArrCompatDVArrCmp(const ArrayData* ad1, const ArrayData* ad2) {

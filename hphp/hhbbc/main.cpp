@@ -282,6 +282,7 @@ std::pair<std::vector<std::unique_ptr<UnitEmitter>>,
     RuntimeOption::EvalHackArrCompatCheckRefBind =
     RuntimeOption::EvalHackArrCompatCheckFalseyPromote =
     RuntimeOption::EvalHackArrCompatCheckCompare =
+    RuntimeOption::EvalHackArrCompatCheckCompareNonAnyArray =
     RuntimeOption::EvalHackArrCompatCheckArrayPlus =
     RuntimeOption::EvalHackArrCompatCheckArrayKeyCast =
     RuntimeOption::EvalHackArrCompatCheckNullHackArrayKey =

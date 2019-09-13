@@ -1005,7 +1005,8 @@ void raiseHackArrCompatRefIter();
 
 void raiseHackArrCompatAdd();
 
-void raiseHackArrCompatArrMixedCmp();
+void raiseHackArrCompatArrHackArrCmp();
+void raiseHackArrCompatArrNonArrCmp();
 void raiseHackArrCompatDVArrCmp(const ArrayData*, const ArrayData*);
 
 void raiseHackArrCompatMissingIncDec();
@@ -1020,6 +1021,7 @@ bool checkHACRefBind();
 bool checkHACFalseyPromote();
 bool checkHACEmptyStringPromote();
 bool checkHACCompare();
+bool checkHACCompareNonAnyArray();
 bool checkHACArrayPlus();
 bool checkHACArrayKeyCast();
 bool checkHACNullHackArrayKey();

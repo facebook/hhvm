@@ -106,8 +106,10 @@ constexpr char MULTIPLY_EXCLUDED[] =
   "to be excluded multiple times";
 constexpr char REDECLARE_BUILTIN[] = "Cannot redeclare %s()";
 constexpr char DISALLOWED_DYNCALL[] = "%s should not be called dynamically";
-constexpr char HACKARR_COMPAT_ARR_MIXEDCMP[] =
-  "Comparing array with non-array";
+constexpr char HACKARR_COMPAT_ARR_HACK_ARR_CMP[] =
+  "Comparing PHP array with Hack array";
+constexpr char HACKARR_COMPAT_ARR_NON_ARR_CMP[] =
+  "Comparing PHP array with non any-array";
 constexpr char HACKARR_COMPAT_VARR_IS_ARR[] = "is_array() called on varray";
 constexpr char HACKARR_COMPAT_DARR_IS_ARR[] = "is_array() called on darray";
 constexpr char HACKARR_COMPAT_VEC_IS_ARR[] = "is_array() called on vec";

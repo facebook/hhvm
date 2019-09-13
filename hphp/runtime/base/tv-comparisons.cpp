@@ -63,13 +63,13 @@ typename Op::RetType cellRelOp(Op op, Cell cell, bool val) {
       return op.vecVsNonVec();
     } else {
       if (UNLIKELY(op.noticeOnArrNonArr())) {
-        raiseHackArrCompatArrMixedCmp();
+        raiseHackArrCompatArrNonArrCmp();
       }
       return op(cellToBool(cell), val);
     }
   } else {
     if (UNLIKELY(op.noticeOnArrNonArr() && isArrayType(cell.m_type))) {
-      raiseHackArrCompatArrMixedCmp();
+      raiseHackArrCompatArrNonArrCmp();
     }
     return op(cellToBool(cell), val);
   }
@@ -127,7 +127,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, int64_t val) {
     case KindOfPersistentArray:
     case KindOfArray:
       if (UNLIKELY(op.noticeOnArrNonArr())) {
-        raiseHackArrCompatArrMixedCmp();
+        raiseHackArrCompatArrNonArrCmp();
       }
       return op(true, false);
 
@@ -151,7 +151,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, int64_t val) {
         return op.vecVsNonVec();
       } else {
         if (UNLIKELY(op.noticeOnArrNonArr())) {
-          raiseHackArrCompatArrMixedCmp();
+          raiseHackArrCompatArrNonArrCmp();
         }
         return op(true, false);
       }
@@ -209,7 +209,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, double val) {
     case KindOfPersistentArray:
     case KindOfArray:
       if (UNLIKELY(op.noticeOnArrNonArr())) {
-        raiseHackArrCompatArrMixedCmp();
+        raiseHackArrCompatArrNonArrCmp();
       }
       return op(true, false);
 
@@ -233,7 +233,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, double val) {
         return op.vecVsNonVec();
       } else {
         if (UNLIKELY(op.noticeOnArrNonArr())) {
-          raiseHackArrCompatArrMixedCmp();
+          raiseHackArrCompatArrNonArrCmp();
         }
         return op(true, false);
       }
@@ -299,7 +299,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const StringData* val) {
     case KindOfPersistentArray:
     case KindOfArray:
       if (UNLIKELY(op.noticeOnArrNonArr())) {
-        raiseHackArrCompatArrMixedCmp();
+        raiseHackArrCompatArrNonArrCmp();
       }
       return op(true, false);
 
@@ -330,7 +330,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const StringData* val) {
         return op.vecVsNonVec();
       } else {
         if (UNLIKELY(op.noticeOnArrNonArr())) {
-          raiseHackArrCompatArrMixedCmp();
+          raiseHackArrCompatArrNonArrCmp();
         }
         return op(true, false);
       }
@@ -352,12 +352,12 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ArrayData* ad) {
 
   auto const nonArr = [&]{
     if (UNLIKELY(op.noticeOnArrNonArr())) {
-      raiseHackArrCompatArrMixedCmp();
+      raiseHackArrCompatArrNonArrCmp();
     }
   };
   auto const hackArr = [&]{
     if (UNLIKELY(op.noticeOnArrHackArr())) {
-      raiseHackArrCompatArrMixedCmp();
+      raiseHackArrCompatArrHackArrCmp();
     }
   };
 
@@ -499,7 +499,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ObjectData* od) {
     case KindOfPersistentArray:
     case KindOfArray:
       if (UNLIKELY(op.noticeOnArrNonArr())) {
-        raiseHackArrCompatArrMixedCmp();
+        raiseHackArrCompatArrNonArrCmp();
       }
       return od->isCollection() ? op.collectionVsNonObj() : op(false, true);
 
@@ -521,7 +521,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ObjectData* od) {
         return op.vecVsNonVec();
       } else {
         if (UNLIKELY(op.noticeOnArrNonArr())) {
-          raiseHackArrCompatArrMixedCmp();
+          raiseHackArrCompatArrNonArrCmp();
         }
         return od->isCollection() ? op.collectionVsNonObj() : op(false, true);
       }
@@ -589,7 +589,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ResourceData* rd) {
     case KindOfPersistentArray:
     case KindOfArray:
       if (UNLIKELY(op.noticeOnArrNonArr())) {
-        raiseHackArrCompatArrMixedCmp();
+        raiseHackArrCompatArrNonArrCmp();
       }
       return op(true, false);
 
@@ -615,7 +615,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ResourceData* rd) {
         return op.vecVsNonVec();
       } else {
         if (UNLIKELY(op.noticeOnArrNonArr())) {
-          raiseHackArrCompatArrMixedCmp();
+          raiseHackArrCompatArrNonArrCmp();
         }
         return op(true, false);
       }
@@ -651,7 +651,7 @@ typename Op::RetType cellRelOpVec(Op op, Cell cell, const ArrayData* a) {
     if (isDictType(cell.m_type)) return op.dictVsNonDict();
     if (isKeysetType(cell.m_type)) return op.keysetVsNonKeyset();
     if (UNLIKELY(op.noticeOnArrHackArr() && isArrayType(cell.m_type))) {
-      raiseHackArrCompatArrMixedCmp();
+      raiseHackArrCompatArrHackArrCmp();
     }
     return op.vecVsNonVec();
   }
@@ -673,7 +673,7 @@ typename Op::RetType cellRelOpDict(Op op, Cell cell, const ArrayData* a) {
     if (isVecType(cell.m_type)) return op.vecVsNonVec();
     if (isKeysetType(cell.m_type)) return op.keysetVsNonKeyset();
     if (UNLIKELY(op.noticeOnArrHackArr() && isArrayType(cell.m_type))) {
-      raiseHackArrCompatArrMixedCmp();
+      raiseHackArrCompatArrHackArrCmp();
     }
     return op.dictVsNonDict();
   }
@@ -690,7 +690,7 @@ typename Op::RetType cellRelOpKeyset(Op op, Cell cell, const ArrayData* a) {
     if (isVecType(cell.m_type)) return op.vecVsNonVec();
     if (isDictType(cell.m_type)) return op.dictVsNonDict();
     if (UNLIKELY(op.noticeOnArrHackArr() && isArrayType(cell.m_type))) {
-      raiseHackArrCompatArrMixedCmp();
+      raiseHackArrCompatArrHackArrCmp();
     }
     return op.keysetVsNonKeyset();
   }
@@ -809,7 +809,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const Func* val) {
     case KindOfPersistentArray:
     case KindOfArray:
       if (UNLIKELY(op.noticeOnArrNonArr())) {
-        raiseHackArrCompatArrMixedCmp();
+        raiseHackArrCompatArrNonArrCmp();
       }
       funcToStringHelper(val); // warn
       return op(true, false);
@@ -842,7 +842,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const Func* val) {
         return op.vecVsNonVec();
       } else {
         if (UNLIKELY(op.noticeOnArrNonArr())) {
-          raiseHackArrCompatArrMixedCmp();
+          raiseHackArrCompatArrNonArrCmp();
         }
         funcToStringHelper(val); // warn
         return op(true, false);
@@ -909,7 +909,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const Class* val) {
     case KindOfPersistentArray:
     case KindOfArray:
       if (UNLIKELY(op.noticeOnArrNonArr())) {
-        raiseHackArrCompatArrMixedCmp();
+        raiseHackArrCompatArrNonArrCmp();
       }
       classToStringHelper(val); // warn
       return op(true, false);
@@ -942,7 +942,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const Class* val) {
         return op.vecVsNonVec();
       } else {
         if (UNLIKELY(op.noticeOnArrNonArr())) {
-          raiseHackArrCompatArrMixedCmp();
+          raiseHackArrCompatArrNonArrCmp();
         }
         classToStringHelper(val); // warn
         return op(true, false);
@@ -1141,7 +1141,7 @@ struct CompareBase {
   }
 
   bool noticeOnArrNonArr() const {
-    return checkHACCompare();
+    return checkHACCompareNonAnyArray();
   }
   bool noticeOnArrHackArr() const {
     return checkHACCompare();
@@ -1314,7 +1314,7 @@ bool cellSame(Cell c1, Cell c2) {
 
   auto const phpArrayCheck = [&]{
     if (UNLIKELY(checkHACCompare() && isArrayType(c2.m_type))) {
-      raiseHackArrCompatArrMixedCmp();
+      raiseHackArrCompatArrHackArrCmp();
     }
   };
 
@@ -1393,7 +1393,7 @@ bool cellSame(Cell c1, Cell c2) {
       } else {
         if (!isArrayOrShapeType(c2.m_type)) {
           if (UNLIKELY(checkHACCompare() && isHackArrayType(c2.m_type))) {
-            raiseHackArrCompatArrMixedCmp();
+            raiseHackArrCompatArrHackArrCmp();
           }
           return false;
         }
@@ -1410,7 +1410,7 @@ bool cellSame(Cell c1, Cell c2) {
       }
       if (!isArrayOrShapeType(c2.m_type)) {
         if (UNLIKELY(checkHACCompare() && isHackArrayType(c2.m_type))) {
-          raiseHackArrCompatArrMixedCmp();
+          raiseHackArrCompatArrHackArrCmp();
         }
         return false;
       }

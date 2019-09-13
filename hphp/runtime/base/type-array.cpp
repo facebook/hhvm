@@ -374,7 +374,7 @@ bool Array::same(const Array& v2) const {
   if (m_arr->isPHPArray()) {
     if (UNLIKELY(!v2.isPHPArray())) {
       if (UNLIKELY(checkHACCompare() && v2.isHackArray())) {
-        raiseHackArrCompatArrMixedCmp();
+        raiseHackArrCompatArrHackArrCmp();
       }
       return false;
     }
@@ -383,7 +383,7 @@ bool Array::same(const Array& v2) const {
 
   auto const nonHackArr = [&]{
     if (UNLIKELY(checkHACCompare() && v2.isPHPArray() && !v2.isNull())) {
-      raiseHackArrCompatArrMixedCmp();
+      raiseHackArrCompatArrHackArrCmp();
     }
   };
 
@@ -415,7 +415,7 @@ bool Array::equal(const Array& v2) const {
   if (isPHPArray()) {
     if (UNLIKELY(!v2.isPHPArray())) {
       if (UNLIKELY(checkHACCompare() && m_arr)) {
-        raiseHackArrCompatArrMixedCmp();
+        raiseHackArrCompatArrHackArrCmp();
       }
       return false;
     }
@@ -427,7 +427,7 @@ bool Array::equal(const Array& v2) const {
 
   auto const nonHackArr = [&]{
     if (UNLIKELY(checkHACCompare() && v2.isPHPArray() && !v2.isNull())) {
-      raiseHackArrCompatArrMixedCmp();
+      raiseHackArrCompatArrHackArrCmp();
     }
   };
 
@@ -459,7 +459,7 @@ bool Array::less(const Array& v2, bool flip /* = false */) const {
   if (isPHPArray()) {
     if (UNLIKELY(!v2.isPHPArray())) {
       if (UNLIKELY(checkHACCompare() && m_arr)) {
-        raiseHackArrCompatArrMixedCmp();
+        raiseHackArrCompatArrHackArrCmp();
       }
       if (v2.isVecArray()) throw_vec_compare_exception();
       if (v2.isDict()) throw_dict_compare_exception();
@@ -476,7 +476,7 @@ bool Array::less(const Array& v2, bool flip /* = false */) const {
   if (m_arr->isVecArray()) {
     if (UNLIKELY(!v2.isVecArray())) {
       if (UNLIKELY(checkHACCompare() && v2.isPHPArray() && !v2.isNull())) {
-        raiseHackArrCompatArrMixedCmp();
+        raiseHackArrCompatArrHackArrCmp();
       }
       throw_vec_compare_exception();
     }
@@ -485,7 +485,7 @@ bool Array::less(const Array& v2, bool flip /* = false */) const {
       : PackedArray::VecLt(m_arr.get(), v2.get());
   }
   if (UNLIKELY(checkHACCompare() && v2.isPHPArray() && !v2.isNull())) {
-    raiseHackArrCompatArrMixedCmp();
+    raiseHackArrCompatArrHackArrCmp();
   }
   if (m_arr->isDict()) throw_dict_compare_exception();
   if (m_arr->isKeyset()) throw_keyset_compare_exception();
@@ -495,8 +495,11 @@ bool Array::less(const Array& v2, bool flip /* = false */) const {
 bool Array::less(const Variant& v2) const {
   if (isPHPArray()) {
     if (m_arr == nullptr || v2.isNull()) {
-      if (UNLIKELY(checkHACCompare() && ((bool)m_arr == !v2.isPHPArray()))) {
-        raiseHackArrCompatArrMixedCmp();
+      if (
+        UNLIKELY(checkHACCompareNonAnyArray() &&
+        ((bool)m_arr == !v2.isPHPArray()))
+      ) {
+        raiseHackArrCompatArrNonArrCmp();
       }
       return HPHP::less(toBoolean(), v2.toBoolean());
     }
@@ -508,7 +511,7 @@ bool Array::more(const Array& v2, bool flip /* = true */) const {
   if (isPHPArray()) {
     if (UNLIKELY(!v2.isPHPArray())) {
       if (UNLIKELY(checkHACCompare() && m_arr)) {
-        raiseHackArrCompatArrMixedCmp();
+        raiseHackArrCompatArrHackArrCmp();
       }
       if (v2.isVecArray()) throw_vec_compare_exception();
       if (v2.isDict()) throw_dict_compare_exception();
@@ -525,7 +528,7 @@ bool Array::more(const Array& v2, bool flip /* = true */) const {
   if (m_arr->isVecArray()) {
     if (UNLIKELY(!v2.isVecArray())) {
       if (UNLIKELY(checkHACCompare() && v2.isPHPArray() && !v2.isNull())) {
-        raiseHackArrCompatArrMixedCmp();
+        raiseHackArrCompatArrHackArrCmp();
       }
       throw_vec_compare_exception();
     }
@@ -534,7 +537,7 @@ bool Array::more(const Array& v2, bool flip /* = true */) const {
       : PackedArray::VecLt(m_arr.get(), v2.get());
   }
   if (UNLIKELY(checkHACCompare() && v2.isPHPArray() && !v2.isNull())) {
-    raiseHackArrCompatArrMixedCmp();
+    raiseHackArrCompatArrHackArrCmp();
   }
   if (m_arr->isDict()) throw_dict_compare_exception();
   if (m_arr->isKeyset()) throw_keyset_compare_exception();
@@ -544,8 +547,11 @@ bool Array::more(const Array& v2, bool flip /* = true */) const {
 bool Array::more(const Variant& v2) const {
   if (isPHPArray()) {
     if (m_arr == nullptr || v2.isNull()) {
-      if (UNLIKELY(checkHACCompare() && ((bool)m_arr == !v2.isPHPArray()))) {
-        raiseHackArrCompatArrMixedCmp();
+      if (
+        UNLIKELY(checkHACCompareNonAnyArray() &&
+        ((bool)m_arr == !v2.isPHPArray()))
+      ) {
+        raiseHackArrCompatArrNonArrCmp();
       }
       return HPHP::more(toBoolean(), v2.toBoolean());
     }
@@ -557,7 +563,7 @@ int Array::compare(const Array& v2, bool flip /* = false */) const {
   if (isPHPArray()) {
     if (UNLIKELY(!v2.isPHPArray())) {
       if (UNLIKELY(checkHACCompare() && m_arr)) {
-        raiseHackArrCompatArrMixedCmp();
+        raiseHackArrCompatArrHackArrCmp();
       }
       if (v2.isVecArray()) throw_vec_compare_exception();
       if (v2.isDict()) throw_dict_compare_exception();
@@ -574,7 +580,7 @@ int Array::compare(const Array& v2, bool flip /* = false */) const {
   if (m_arr->isVecArray()) {
     if (UNLIKELY(!v2.isVecArray())) {
       if (UNLIKELY(checkHACCompare() && v2.isPHPArray() && !v2.isNull())) {
-        raiseHackArrCompatArrMixedCmp();
+        raiseHackArrCompatArrHackArrCmp();
       }
       throw_vec_compare_exception();
     }
@@ -583,7 +589,7 @@ int Array::compare(const Array& v2, bool flip /* = false */) const {
       : PackedArray::VecCmp(m_arr.get(), v2.get());
   }
   if (UNLIKELY(checkHACCompare() && v2.isPHPArray() && !v2.isNull())) {
-    raiseHackArrCompatArrMixedCmp();
+    raiseHackArrCompatArrHackArrCmp();
   }
   if (m_arr->isDict()) throw_dict_compare_exception();
   if (m_arr->isKeyset()) throw_keyset_compare_exception();

@@ -136,21 +136,24 @@ let test () =
     let (_, loop_output) = Test.ide_autocomplete env (path, line, column) in
     Test.assert_ide_autocomplete loop_output expected
   in
-  test_legacy env autocomplete_contents0 ["HH\\LongName\\ShortName\\foo"];
+  (* Note that autocomplete now hides namespaces when you've already typed them!
+   * This means that all tests will simply return "foo" as long as you're in
+   * the correct namespace when autocomplete is triggered. *)
+  test_legacy env autocomplete_contents0 ["foo"];
   test_legacy env autocomplete_contents1 [""];
-  test_legacy env autocomplete_contents2 ["HH\\LongName\\ShortName\\foo"];
-  test_legacy env autocomplete_contents3 ["HH\\LongName\\ShortName\\foo"];
+  test_legacy env autocomplete_contents2 ["foo"];
+  test_legacy env autocomplete_contents3 ["foo"];
   test_legacy env autocomplete_contents4 [""];
-  test_legacy env autocomplete_contents5 ["HH\\LongName\\ShortName\\foo"];
-  test_legacy env autocomplete_contents6 ["HH\\LongName\\ShortName\\foo"];
+  test_legacy env autocomplete_contents5 ["foo"];
+  test_legacy env autocomplete_contents6 ["foo"];
   test_legacy env autocomplete_contents7 [""];
 
-  test_ide env autocomplete_contents0 0 ["HH\\LongName\\ShortName\\foo"];
+  test_ide env autocomplete_contents0 0 ["foo"];
   test_ide env autocomplete_contents1 1 [];
-  test_ide env autocomplete_contents2 2 ["HH\\LongName\\ShortName\\foo"];
-  test_ide env autocomplete_contents3 3 ["HH\\LongName\\ShortName\\foo"];
+  test_ide env autocomplete_contents2 2 ["foo"];
+  test_ide env autocomplete_contents3 3 ["foo"];
   test_ide env autocomplete_contents4 4 [];
-  test_ide env autocomplete_contents5 5 ["HH\\LongName\\ShortName\\foo"];
-  test_ide env autocomplete_contents6 6 ["HH\\LongName\\ShortName\\foo"];
+  test_ide env autocomplete_contents5 5 ["foo"];
+  test_ide env autocomplete_contents6 6 ["foo"];
   test_ide env autocomplete_contents7 7 [];
   ()

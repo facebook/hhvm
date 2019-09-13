@@ -208,7 +208,7 @@ let find_matching_symbols
     let all_results = List.append local_results global_results in
     let dedup_results =
       List.dedup_and_sort
-        ~compare:(fun a b -> String.compare a.si_name b.si_name)
+        ~compare:(fun a b -> String.compare b.si_name a.si_name)
         all_results
     in
     (* Strip namespace already typed from the results *)

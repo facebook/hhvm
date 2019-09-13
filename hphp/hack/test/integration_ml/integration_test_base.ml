@@ -99,7 +99,7 @@ let setup_server ?custom_config ?(hhi_files = []) () =
     SymbolIndex.initialize
       ~globalrev_opt:None
       ~namespace_map:[]
-      ~provider_name:"TrieIndex"
+      ~provider_name:"LocalIndex"
       ~quiet:true
       ~savedstate_file_opt:None
       ~workers:None

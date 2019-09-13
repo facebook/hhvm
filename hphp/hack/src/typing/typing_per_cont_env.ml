@@ -56,6 +56,8 @@ let initial_locals entry = CMap.add C.Next entry CMap.empty
 
 let get_cont_option = CMap.get
 
+let all_continuations = Typing_continuations.Map.keys
+
 (* Update an entry if it exists *)
 let update_cont_entry name m f =
   match CMap.get name m with

@@ -215,6 +215,8 @@ let get_shape_field_name_pos = function
 
 let next_cont_opt env = LEnvC.get_cont_option C.Next env.lenv.per_cont_env
 
+let all_continuations env = LEnvC.all_continuations env.lenv.per_cont_env
+
 let get_tpenv env =
   match next_cont_opt env with
   | None -> TPEnv.empty

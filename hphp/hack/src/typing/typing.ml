@@ -941,9 +941,11 @@ and stmt_ env pos st =
         env
     in
     (env, T.Fallthrough)
-  | GotoLabel _
-  | Goto _ ->
-    let env = move_and_merge_next_in_catch env in
+  | Goto (_, label) ->
+    let env = LEnv.move_and_merge_next_in_cont env (C.Goto label) in
+    (env, T.Noop)
+  | GotoLabel (_, label) ->
+    let env = LEnv.update_next_from_conts env [C.Next; C.Goto label] in
     (env, T.Noop)
   | Noop -> (env, T.Noop)
   | Expr e ->
@@ -1329,9 +1331,10 @@ and finally env fb =
     * together.
     * During this phase, record errors found in the finally block, but discard
     * the resulting environment. *)
-    let env = LEnv.update_next_from_conts env C.all in
+    let all_conts = Env.all_continuations env in
+    let env = LEnv.update_next_from_conts env all_conts in
     let (env, tfb) = block env fb in
-    let env = LEnv.restore_conts_from env parent_locals C.all in
+    let env = LEnv.restore_conts_from env parent_locals all_conts in
     (* Second, typecheck the finally block once against each continuation. This
     * helps be more clever about what each continuation will be after the
     * finally block.
@@ -3736,7 +3739,7 @@ and stash_conts_for_anon env p is_anon captured f =
         (initial_locals, initial_fakes, tpenv))
   in
   let (env, (tfun, result)) =
-    Typing_lenv.stash_and_do env C.all (fun env ->
+    Typing_lenv.stash_and_do env (Env.all_continuations env) (fun env ->
         let env =
           match init with
           | None -> env

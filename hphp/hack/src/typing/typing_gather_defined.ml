@@ -217,7 +217,8 @@ class gatherer env =
 
     method! on_Try () b _cl fb =
       let delta = self#on_block () b in
-      let delta = L.set C.Next (self#union_cont_list C.all delta) delta in
+      let all_conts = Typing_env.all_continuations env in
+      let delta = L.set C.Next (self#union_cont_list all_conts delta) delta in
       let delta = L.drop C.Catch delta in
       (* The catch list might never be executed, so we ignore it *)
       self#plus delta (self#on_block () fb)

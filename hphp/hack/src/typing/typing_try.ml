@@ -16,6 +16,7 @@ open Common
 
 module C = Typing_continuations
 module CMap = C.Map
+module Env = Typing_env
 module LEnv = Typing_lenv
 module LEnvC = Typing_per_cont_env
 
@@ -40,4 +41,5 @@ let finally_merge env locals_map =
     let (env, ctxopt) = make_new_cont locals_map env cont in
     (env, LEnvC.replace_cont cont ctxopt locals)
   in
-  List.fold_left_env env ~f:make_and_add_new_cont C.all ~init:CMap.empty
+  Env.all_continuations env
+  |> List.fold_left_env env ~f:make_and_add_new_cont ~init:CMap.empty

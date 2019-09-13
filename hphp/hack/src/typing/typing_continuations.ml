@@ -19,24 +19,8 @@ module Continuations = struct
     | Exit
     | Fallthrough
     | Finally
-  [@@deriving show, enum]
-
-  (* build the list of all continuations *)
-  let all =
-    let n_cont = max + 1 in
-    let rec build_all i conts =
-      if i < 0 then
-        conts
-      else
-        let cont =
-          match of_enum i with
-          | Some cont -> [cont]
-          | None -> []
-        in
-        let conts = cont @ conts in
-        build_all (i - 1) conts
-    in
-    build_all (n_cont - 1) []
+    | Goto of string
+  [@@deriving show]
 
   let compare = Pervasives.compare
 
@@ -49,6 +33,7 @@ module Continuations = struct
     | Exit -> "Exit"
     | Fallthrough -> "Fallthrough"
     | Finally -> "Finally"
+    | Goto l -> "Goto " ^ l
 end
 
 include Continuations

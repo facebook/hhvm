@@ -448,7 +448,7 @@ let is_fresh_generic_parameter name =
 
 let tparams_visitor env =
   object (this)
-    inherit [SSet.t] Type_visitor.type_visitor
+    inherit [SSet.t] Type_visitor.locl_type_visitor
 
     method! on_tabstract acc _ ak _ty_opt =
       match ak with

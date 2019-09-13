@@ -35,7 +35,13 @@ let print_ty = Typing_print.full_strip_ns
 
 let print_error_ty = Typing_print.error
 
-let print_ty_with_identity = Typing_print.full_with_identity
+let print_ty_with_identity env phase_ty sym_occurrence sym_definition =
+  match phase_ty with
+  | Typing_defs.DeclTy ty ->
+    let (env, ty) = Typing_phase.localize_with_self env ty in
+    Typing_print.full_with_identity env ty sym_occurrence sym_definition
+  | Typing_defs.LoclTy ty ->
+    Typing_print.full_with_identity env ty sym_occurrence sym_definition
 
 let ty_to_json = Typing_print.to_json
 

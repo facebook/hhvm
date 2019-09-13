@@ -20,7 +20,7 @@ val print_error_ty : env -> Typing_defs.locl_ty -> string
 
 val print_ty_with_identity :
   env ->
-  'a Typing_defs.ty ->
+  Typing_defs.phase_ty ->
   'b SymbolOccurrence.t ->
   'b SymbolDefinition.t option ->
   string

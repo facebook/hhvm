@@ -27,7 +27,7 @@ val fun_type : TypecheckerOptions.t -> Typing_defs.decl_fun_type -> string
 
 val full_with_identity :
   env ->
-  'a Typing_defs.ty ->
+  Typing_defs.locl_ty ->
   'b SymbolOccurrence.t ->
   'b SymbolDefinition.t option ->
   string
@@ -45,7 +45,7 @@ val fun_ : TypecheckerOptions.t -> Decl_provider.fun_decl -> string
 
 val typedef : TypecheckerOptions.t -> Decl_provider.typedef_decl -> string
 
-val constraints_for_type : env -> 'a Typing_defs.ty -> string option
+val constraints_for_type : env -> Typing_defs.locl_ty -> string option
 
 val class_kind : Ast_defs.class_kind -> bool -> string
 

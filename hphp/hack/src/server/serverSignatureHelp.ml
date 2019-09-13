@@ -159,7 +159,7 @@ let go
             let siginfo_label =
               Tast_env.print_ty_with_identity
                 tast_env
-                (Reason.Rnone, Tfun ft)
+                (DeclTy (Reason.Rnone, Tfun ft))
                 occurrence
                 def_opt
             in

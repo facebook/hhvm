@@ -75,15 +75,24 @@ let make_hover_info env_and_ty file (occurrence, def_opt) =
               fst (Decl_provider.Class.construct c)
               >>| fun elt ->
               let ty = Lazy.force_val elt.ce_type in
-              Tast_env.print_ty_with_identity env ty occurrence def_opt)
+              Tast_env.print_ty_with_identity
+                env
+                (DeclTy ty)
+                occurrence
+                def_opt)
           in
           begin
             match snippet_opt with
             | Some s -> s
-            | None -> Tast_env.print_ty_with_identity env ty occurrence def_opt
+            | None ->
+              Tast_env.print_ty_with_identity
+                env
+                (LoclTy ty)
+                occurrence
+                def_opt
           end
         | (occurrence, Some (env, ty)) ->
-          Tast_env.print_ty_with_identity env ty occurrence def_opt
+          Tast_env.print_ty_with_identity env (LoclTy ty) occurrence def_opt
       in
       let addendum =
         List.concat

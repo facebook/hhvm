@@ -1,0 +1,6 @@
+File "test_array4.php", line 13, characters 10-17:
+Invalid return type (Typing[4110])
+File "test_array4.php", line 12, characters 37-40:
+Expected bool
+File "test_array4.php", line 12, characters 15-30:
+But got dynamic because it is an unenforceable type

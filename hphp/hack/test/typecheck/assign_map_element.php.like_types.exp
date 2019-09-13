@@ -1,0 +1,6 @@
+File "assign_map_element.php", line 5, characters 3-22:
+Invalid assignment (Typing[4110])
+File "assign_map_element.php", line 4, characters 27-34:
+Expected vec<int>
+File "assign_map_element.php", line 4, characters 15-35:
+But got dynamic because it is an unenforceable type

@@ -1,0 +1,6 @@
+File "inout_hint1.php", line 12, characters 20-27:
+Invalid argument (Typing[4110])
+File "inout_hint1.php", line 11, characters 36-38:
+Expected int
+File "inout_hint1.php", line 11, characters 12-46:
+But got dynamic because it is an unenforceable type

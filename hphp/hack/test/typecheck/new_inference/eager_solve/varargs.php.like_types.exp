@@ -2,8 +2,8 @@ File "varargs.php", line 13, characters 20-22:
 Invalid argument (Typing[4110])
 File "varargs.php", line 13, characters 20-22:
 Expected Traversable<string> (it is unpacked with '...')
-File "varargs.php", line 12, characters 18-36:
-But got ([unresolved], [unresolved])
+File "varargs.php", line 8, characters 38-38:
+But got dynamic because it is an unenforceable type
 File "varargs.php", line 13, characters 10-23:
 Too few arguments (required 1 but got 0) (Typing[4104])
 File "varargs.php", line 3, characters 10-15:

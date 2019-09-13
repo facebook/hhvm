@@ -4,3 +4,9 @@ File "transitive_simplify_2bis.php", line 11, characters 36-40:
 Expected Co<[unresolved]>
 File "transitive_simplify_2bis.php", line 6, characters 28-32:
 But got dynamic because it is an unenforceable type
+File "transitive_simplify_2bis.php", line 43, characters 6-16:
+Invalid argument (Typing[4110])
+File "transitive_simplify_2bis.php", line 11, characters 36-40:
+Expected Co<[unresolved]>
+File "transitive_simplify_2bis.php", line 43, characters 6-16:
+But got dynamic, the result of calling a dynamic type as a function

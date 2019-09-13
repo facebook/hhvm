@@ -1,2 +1,1 @@
-File "nullable_predicate_lambda.php", line 29, characters 9-174:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+No errors

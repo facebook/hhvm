@@ -4,5 +4,3 @@ File "shape_unification_disallows_providing_optional_field_where_required_field_
 Expected ~MyWrapper<shape('x' => int)> because it is an unenforceable type
 File "shape_unification_disallows_providing_optional_field_where_required_field_is_consumed.php", line 7, characters 15-43:
 But got <expr#1> because it is an unenforceable type
-File "shape_unification_disallows_providing_optional_field_where_required_field_is_consumed.php", line 8, characters 14-15:
-  where '<expr#1>' is a reference to this expression

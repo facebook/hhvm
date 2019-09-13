@@ -1,0 +1,6 @@
+File "erling_loop5.php", line 35, characters 10-11:
+Invalid return type (Typing[4110])
+File "erling_loop5.php", line 22, characters 18-20:
+Expected int
+File "erling_loop5.php", line 17, characters 26-26:
+But got dynamic because it is an unenforceable type

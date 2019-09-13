@@ -23,12 +23,11 @@ File "arithmetic_any.php--file2.php", line 58, characters 3-13:
 File "arithmetic_any.php--file2.php", line 63, characters 3-13:
   _
 File "arithmetic_any.php--file2.php", line 75, characters 35-45:
-  _
+  [unresolved]
 File "arithmetic_any.php--file2.php", line 75, characters 48-58:
-  _
+  [unresolved]
 File "arithmetic_any.php--file2.php", line 84, characters 3-13:
   _
 File "arithmetic_any.php--file2.php", line 89, characters 3-13:
   float
-File "arithmetic_any.php--file2.php", line 75, characters 15-77:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+No errors

@@ -16,3 +16,9 @@ File "inout_invariant.php", line 8, characters 24-50:
 Expected ~(function(inout T, T): void) because it is an unenforceable type
 File "inout_invariant.php", line 9, characters 10-44:
 But got (function(inout ~T $x, ~T $y): void)
+File "inout_invariant.php", line 20, characters 18-19:
+Invalid argument (Typing[4110])
+File "inout_invariant.php", line 12, characters 25-32:
+Expected arraykey
+File "inout_invariant.php", line 8, characters 24-50:
+But got dynamic because it is an unenforceable type

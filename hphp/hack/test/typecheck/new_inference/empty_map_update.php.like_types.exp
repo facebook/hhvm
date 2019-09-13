@@ -5,4 +5,4 @@ Expected nothing because type parameter Tv of idx could not be determined. Pleas
 File "idx.hhi", line 31, characters 10-12:
   via this generic Tv
 File "empty_map_update.php", line 4, characters 32-46:
-But got Map<string, int>
+But got dynamic because it is an unenforceable type

@@ -37,13 +37,13 @@ Invalid argument (Typing[4110])
 File "lambda_unpacked_parameters.php", line 49, characters 14-17:
 Expected Traversable<{suggest:mixed}> (it is unpacked with '...')
 File "lambda_unpacked_parameters.php", line 3, characters 15-27:
-But got (string, int)
+But got dynamic because it is an unenforceable type
 File "lambda_unpacked_parameters.php", line 49, characters 14-17:
 Invalid argument (Typing[4110])
 File "lambda_unpacked_parameters.php", line 49, characters 14-17:
 Expected Traversable<mixed> (it is unpacked with '...')
 File "lambda_unpacked_parameters.php", line 3, characters 15-27:
-But got (string, int)
+But got dynamic because it is an unenforceable type
 File "lambda_unpacked_parameters.php", line 49, characters 3-18:
 Too few arguments (required 2 but got 0) (Typing[4104])
 File "lambda_unpacked_parameters.php", line 46, characters 13-52:
@@ -53,13 +53,13 @@ Invalid argument (Typing[4110])
 File "lambda_unpacked_parameters.php", line 55, characters 14-17:
 Expected Traversable<int> (it is unpacked with '...')
 File "lambda_unpacked_parameters.php", line 3, characters 15-27:
-But got (string, int)
+But got dynamic because it is an unenforceable type
 File "lambda_unpacked_parameters.php", line 55, characters 14-17:
 Invalid argument (Typing[4110])
 File "lambda_unpacked_parameters.php", line 55, characters 14-17:
 Expected Traversable<mixed> (it is unpacked with '...')
 File "lambda_unpacked_parameters.php", line 3, characters 15-27:
-But got (string, int)
+But got dynamic because it is an unenforceable type
 File "lambda_unpacked_parameters.php", line 55, characters 3-18:
 Too few arguments (required 2 but got 0) (Typing[4104])
 File "lambda_unpacked_parameters.php", line 52, characters 13-49:

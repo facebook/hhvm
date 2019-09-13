@@ -4,6 +4,12 @@ File "lambda15.php", line 26, characters 18-22:
 Expected float
 File "lambda15.php", line 29, characters 16-16:
 But got int
+File "lambda15.php", line 33, characters 11-14:
+Invalid argument (Typing[4110])
+File "lambda15.php", line 26, characters 18-22:
+Expected float
+File "lambda15.php", line 33, characters 11-14:
+But got dynamic, the result of calling a dynamic type as a function
 File "lambda15.php", line 19, characters 19-30:
 Invalid return type (Typing[4110])
 File "lambda15.php", line 18, characters 31-31:

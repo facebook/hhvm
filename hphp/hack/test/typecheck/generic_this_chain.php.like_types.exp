@@ -2,5 +2,5 @@ File "generic_this_chain.php", line 74, characters 10-21:
 Invalid argument (Typing[4110])
 File "generic_this_chain.php", line 53, characters 17-17:
 Expected X
-File "generic_this_chain.php", line 19, characters 26-26:
-But got dynamic because it is an unenforceable type
+File "generic_this_chain.php", line 72, characters 18-30:
+But got dynamic, the result of calling a dynamic type as a function

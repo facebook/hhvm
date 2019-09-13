@@ -16,9 +16,3 @@ File "new_map_lambda.php", line 12, characters 5-26:
 Expected ~(function(string, string): [unresolved]) because it is an unenforceable type
 File "new_map_lambda.php", line 25, characters 25-73:
 But got (function(~MyEnum $value, string $name): [unresolved])
-File "new_map_lambda.php", line 25, characters 26-31:
-Invalid argument (Typing[4110])
-File "new_map_lambda.php", line 25, characters 26-31:
-Expected MyEnum
-File "new_map_lambda.php", line 25, characters 26-31:
-But got dynamic because it is an unenforceable type

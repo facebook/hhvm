@@ -4,5 +4,3 @@ File "subtype_bug_4.php", line 5, characters 14-31:
 Expected ~ConstVector<mixed> because it is an unenforceable type
 File "subtype_bug_4.php", line 6, characters 15-30:
 But got <expr#1> because it is an unenforceable type
-File "subtype_bug_4.php", line 6, characters 42-43:
-  where '<expr#1>' is a reference to this expression

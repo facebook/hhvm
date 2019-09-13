@@ -4,5 +4,3 @@ File "stdlib/builtins_array.hhi", line 82, characters 27-39:
 Expected ~Container<string> because it is an unenforceable type
 File "array_filter_explicitly_typed.php", line 8, characters 21-34:
 But got <expr#1> because it is an unenforceable type
-File "array_filter_explicitly_typed.php", line 9, characters 31-40:
-  where '<expr#1>' is a reference to this expression

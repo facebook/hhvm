@@ -4,5 +4,5 @@ File "variance_transfer.php", line 9, characters 10-11:
 Expected T1
 File "variance_transfer.php", line 10, characters 19-20:
   via this generic T1
-File "variance_transfer.php", line 4, characters 26-27:
-But got dynamic because it is an unenforceable type
+File "variance_transfer.php", line 15, characters 18-26:
+But got dynamic, the result of calling a dynamic type as a function

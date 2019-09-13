@@ -1,4 +1,4 @@
 File "typing_good_xhp.php", line 19, characters 29-30:
 XHP children must be compatible with XHPChild (Typing[4193])
-File "typing_good_xhp.php", line 16, characters 35-53:
-This is a dynamic value or a string or an object of type ConstVector<string> because it is an unenforceable type
+File "typing_good_xhp.php", line 16, characters 24-29:
+This is a dynamic value or a string or an object of type ConstVector<string>

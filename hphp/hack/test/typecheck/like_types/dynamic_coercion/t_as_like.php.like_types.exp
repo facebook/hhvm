@@ -1,0 +1,12 @@
+File "t_as_like.php", line 7, characters 14-15:
+Invalid argument (Typing[4110])
+File "t_as_like.php", line 4, characters 21-23:
+Expected int
+File "t_as_like.php", line 6, characters 23-23:
+But got dynamic because it is an unenforceable type
+File "t_as_like.php", line 14, characters 16-17:
+Invalid argument (Typing[4110])
+File "t_as_like.php", line 4, characters 21-23:
+Expected int
+File "t_as_like.php", line 13, characters 21-27:
+But got dynamic because it is an unenforceable type

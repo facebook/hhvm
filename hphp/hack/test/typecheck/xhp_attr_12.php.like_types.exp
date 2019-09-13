@@ -1,0 +1,6 @@
+File "xhp_attr_12.php", line 9, characters 10-20:
+Invalid return type (Typing[4110])
+File "xhp_attr_12.php", line 8, characters 27-29:
+Expected int
+File "xhp_attr_12.php", line 6, characters 13-17:
+But got dynamic because it is an unenforceable type

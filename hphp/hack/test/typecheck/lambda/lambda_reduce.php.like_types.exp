@@ -1,2 +1,1 @@
-File "lambda_reduce.php", line 28, characters 22-53:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+No errors

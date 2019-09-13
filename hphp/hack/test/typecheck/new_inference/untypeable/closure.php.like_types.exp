@@ -4,9 +4,15 @@ File "closure.php", line 14, characters 46-46:
 Expected T
 File "closure.php", line 6, characters 36-36:
 But got dynamic because it is an unenforceable type
+File "closure.php", line 15, characters 17-27:
+Invalid return type (Typing[4110])
+File "closure.php", line 14, characters 46-46:
+Expected T
+File "closure.php", line 15, characters 17-27:
+But got dynamic, the result of calling a dynamic type as a function
 File "closure.php", line 25, characters 17-18:
 Invalid argument (Typing[4110])
 File "closure.php", line 18, characters 24-29:
 Expected string
-File "closure.php", line 20, characters 15-17:
-But got int
+File "closure.php", line 23, characters 8-13:
+But got dynamic, the result of calling a dynamic type as a function

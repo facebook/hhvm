@@ -2,13 +2,11 @@ File "t_as_like.php", line 13, characters 3-13:
   ~Contain<Tx>
   where Tx super dynamic, Tx as ~arraykey
 File "t_as_like.php", line 15, characters 3-13:
-  Tx
+  ~Tx
   where Tx super dynamic, Tx as ~arraykey
 File "t_as_like.php", line 16, characters 19-20:
 Invalid argument (Typing[4110])
 File "t_as_like.php", line 3, characters 26-33:
 Expected arraykey
-File "t_as_like.php", line 12, characters 36-37:
-But got Tx
-File "t_as_like.php", line 7, characters 26-26:
-  via this generic T
+File "t_as_like.php", line 14, characters 8-16:
+But got dynamic, the result of calling a dynamic type as a function

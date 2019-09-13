@@ -18,5 +18,5 @@ File "tparam_constraints2.php", line 3, characters 29-30:
 Tk is a constrained type parameter
 File "tparam_constraints2.php", line 3, characters 35-42:
 Expected arraykey
-File "tparam_constraints2.php", line 10, characters 37-40:
-But got void
+File "tparam_constraints2.php", line 15, characters 30-34:
+But got dynamic

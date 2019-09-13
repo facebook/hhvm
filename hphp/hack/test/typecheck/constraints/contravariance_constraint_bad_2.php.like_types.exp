@@ -6,8 +6,6 @@ File "contravariance_constraint_bad_2.php", line 16, characters 49-49:
   via this generic T
 File "contravariance_constraint_bad_2.php", line 18, characters 28-28:
 But got <expr#1> because it is an unenforceable type
-File "contravariance_constraint_bad_2.php", line 20, characters 10-13:
-  where '<expr#1>' is a reference to this expression
 File "contravariance_constraint_bad_2.php", line 43, characters 12-13:
 Invalid return type (Typing[4110])
 File "contravariance_constraint_bad_2.php", line 37, characters 26-34:

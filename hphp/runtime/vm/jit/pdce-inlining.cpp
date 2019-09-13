@@ -170,6 +170,7 @@ ensure that the callee frame is visited by the unwinder.
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/mutation.h"
+#include "hphp/runtime/vm/jit/pass-tracer.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/util/trace.h"
@@ -614,13 +615,7 @@ bool canConvertToStack(IRInstruction& inst) {
  * catch blocks to ensure that the callee is visited by the unwinder).
  */
 bool canAdjustFrame(IRInstruction& inst) {
-  switch (inst.op()) {
-  case Call:
-  case CallBuiltin:
-  case EagerSyncVMRegs: return true;
-  default: break;
-  }
-  return false;
+  return inst.is(Call, CallBuiltin, EagerSyncVMRegs);
 }
 
 /*
@@ -940,7 +935,7 @@ void transformUses(InlineAnalysis& ia,
       // It's okay to have these in side exits
       always_assert(ctx.mainBlocks.count(block) == 0);
     } else if (inst->is(InitCtx)) {
-      always_assert(inst->src(1)->type().hasConstVal());
+      always_assert(inst->src(1)->type().admitsSingleVal());
       always_assert(ctx.initCtx == inst);
       inst->convertToNop();
     } else {
@@ -1118,8 +1113,8 @@ bool optimize(InlineAnalysis& env, IRInstruction* inlineReturn, bool& reflow) {
   ctx.mainBlocks = findMainBlocks(def->block(), inlineReturn->block());
 
   auto canMoveInitCtx = [&] (const IRInstruction& inst) {
-    if (ctx.initCtx) return false;
-    if (inst.is(InitCtx) && inst.src(1)->type().hasConstVal()) {
+    if (ctx.initCtx && ctx.initCtx != &inst) return false;
+    if (inst.is(InitCtx) && inst.src(1)->type().admitsSingleVal()) {
       ctx.initCtx = &inst;
       return true;
     }
@@ -1128,19 +1123,20 @@ bool optimize(InlineAnalysis& env, IRInstruction* inlineReturn, bool& reflow) {
 
   // Check if this callee is a candidate for DefInlineFP sinking
   auto& uses = env.fpUses[fp];
-  auto hasMainUse = std::any_of(
-    uses.begin(),
-    uses.end(),
-    [&] (IRInstruction* inst) {
-      return
-        ctx.mainBlocks.count(inst->block()) &&
-        !canConvertToStack(*inst) &&
-        !canAdjustFrame(*inst) &&
-        !canMoveInitCtx(*inst);
+  auto const hasMainUse = [&](IRInstruction* inst) {
+    return ctx.mainBlocks.count(inst->block()) &&
+           !canConvertToStack(*inst) &&
+           !canAdjustFrame(*inst) &&
+           !canMoveInitCtx(*inst);
+  };
+  auto numMainUses = std::count_if(uses.begin(), uses.end(), hasMainUse);
+  if (numMainUses > 0) {
+    ITRACE(2, "skipping unsuitable InlineReturn (uses = {})\n", numMainUses);
+    if (Trace::moduleEnabled(Trace::pdce_inline, 3)) {
+      for (auto const inst : uses) {
+        if (hasMainUse(inst)) ITRACE(3, "  use: {}\n", inst->toString());
       }
-  );
-  if (hasMainUse) {
-    ITRACE(2, "skipping unsuitable InlineReturn (uses = {})\n", uses.size());
+    }
     return false;
   }
 
@@ -1202,6 +1198,7 @@ bool optimize(InlineAnalysis& env, IRInstruction* inlineReturn, bool& reflow) {
 ////////////////////////////////////////////////////////////////////////////////
 
 void optimizeInlineReturns(IRUnit& unit) {
+  PassTracer tracer{&unit, Trace::pdce_inline, "optimizeInlineReturns"};
   Timer timer(Timer::partial_dce_DefInlineFP, unit.logEntry().get_pointer());
 
   ITRACE(1, "optimize_inline_returns()\n");

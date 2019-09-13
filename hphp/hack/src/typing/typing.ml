@@ -3072,7 +3072,16 @@ and expr_
     in
     let (env, hint_ty) = Phase.localize_hint ~ety_env env hint in
     let (env, hint_ty) =
-      if is_nullable then
+      if Typing_utils.is_dynamic env hint_ty then
+        let env =
+          if is_instance_var e then
+            let (env, ivar) = get_instance_var env e in
+            set_local env ivar hint_ty
+          else
+            env
+        in
+        (env, hint_ty)
+      else if is_nullable then
         let (env, hint_ty) = refine_type env (fst e) expr_ty hint_ty in
         (env, MakeType.nullable (Reason.Rwitness p) hint_ty)
       else if is_instance_var e then

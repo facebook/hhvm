@@ -1,1 +1,22 @@
-No errors
+File "like_casts.php", line 13, characters 16-17:
+Wrong type hint (Typing[4331])
+File "like_casts.php", line 13, characters 12-14:
+Expected int
+File "like_casts.php", line 13, characters 28-31:
+But got dynamic
+File "like_casts.php", line 8, characters 25-26:
+Wrong type hint (Typing[4331])
+File "like_casts.php", line 8, characters 21-23:
+Expected int
+File "like_casts.php", line 8, characters 37-40:
+But got dynamic
+File "like_casts.php", line 4, characters 13-13:
+Wrong type hint (Typing[4338])
+File "like_casts.php", line 4, characters 9-11:
+Expected int
+File "like_casts.php", line 4, characters 24-27:
+But got dynamic
+File "like_casts.php", line 11, characters 7-9:
+Expected int (Typing[4110])
+File "like_casts.php", line 11, characters 22-25:
+But got dynamic

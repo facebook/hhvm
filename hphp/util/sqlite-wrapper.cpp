@@ -423,6 +423,16 @@ const folly::StringPiece SQLiteQuery::getString(int iCol) {
   return {text, static_cast<size_t>(size)};
 }
 
+folly::Optional<const folly::StringPiece> SQLiteQuery::getNullableString(
+    int iCol) {
+  assertx(m_stmt != nullptr);
+  sqlite3_stmt* stmt = m_stmt->m_stmt;
+  if (sqlite3_column_type(stmt, iCol) == SQLITE_NULL) {
+    return {};
+  }
+  return {getString(iCol)};
+}
+
 SQLiteQuery::SQLiteQuery(SQLiteStmt& stmt) : m_stmt{&stmt} {}
 
 //==============================================================================

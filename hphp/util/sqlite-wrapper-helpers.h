@@ -19,6 +19,7 @@
 #include <stdexcept>
 #include <string>
 
+#include <folly/Optional.h>
 #include <folly/Range.h>
 
 struct sqlite3_stmt;
@@ -160,6 +161,8 @@ struct SQLiteQuery {
   double getDouble(int iCol);                               // throws(SQLiteExc)
   void getBlob(int iCol, const void*& blob, size_t& size);  // throws(SQLiteExc)
   const folly::StringPiece getString(int iCol);             // throws(SQLiteExc)
+  folly::Optional<const folly::StringPiece> getNullableString(
+      int iCol);                                            // throws(SQLiteExc)
 
  private:
   friend struct SQLite;

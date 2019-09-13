@@ -417,7 +417,7 @@ void trimExtraArgs(ActRec* ar) {
   assertx(f->numParams() == (numArgs - numExtra));
   assertx(f->numParams() == numParams);
   ar->setNumArgs(numParams);
-  if (tsList) tvSet(make_array_like_tv(tsList), *reifiedLocal);
+  if (tsList) *reifiedLocal = make_array_like_tv(tsList);
 }
 
 void shuffleExtraArgsMayUseVV(ActRec* ar) {
@@ -426,7 +426,7 @@ void shuffleExtraArgsMayUseVV(ActRec* ar) {
   assertx(f->attrs() & AttrMayUseVV);
 
   ar->setExtraArgs(ExtraArgs::allocateCopy(tvArgs, numExtra));
-  if (tsList) tvSet(make_array_like_tv(tsList), *reifiedLocal);
+  if (tsList) *reifiedLocal = make_array_like_tv(tsList);
 }
 
 void shuffleExtraArgsVariadic(ActRec* ar) {
@@ -464,7 +464,7 @@ void shuffleExtraArgsVariadic(ActRec* ar) {
   assertx(f->numParams() == (numArgs - numExtra + 1));
   assertx(f->numParams() == (numParams + 1));
   ar->setNumArgs(numParams + 1);
-  if (tsList) tvSet(make_array_like_tv(tsList), *reifiedLocal);
+  if (tsList) *reifiedLocal = make_array_like_tv(tsList);
 }
 
 void shuffleExtraArgsVariadicAndVV(ActRec* ar) {
@@ -494,7 +494,7 @@ void shuffleExtraArgsVariadicAndVV(ActRec* ar) {
     ar->resetExtraArgs();
     throw;
   }
-  if (tsList) tvSet(make_array_like_tv(tsList), *reifiedLocal);
+  if (tsList) *reifiedLocal = make_array_like_tv(tsList);
 }
 
 #undef SHUFFLE_EXTRA_ARGS_PRELUDE

@@ -401,6 +401,11 @@ constexpr char kTVTrashJITRetVal = 0x7f; // used by the JIT for ActRec::m_r
 constexpr uintptr_t kSmallFreeWord = 0x6a6a6a6a6a6a6a6aLL;
 constexpr uintptr_t kMallocFreeWord = 0x5a5a5a5a5a5a5a5aLL;
 
+// In debug builds, we check if refcounts are higher than RefCountMaxRealistic.
+// This check is only useful if a trashed refcount is above the bound. We check
+// kMallocFreeWord here because it's the smallest of the trash fill bytes.
+static_assert(RefCountMaxRealistic < (kMallocFreeWord >> 4), "");
+
 //////////////////////////////////////////////////////////////////////
 
 // Header MemoryManager uses for StringDatas that wrap APCHandle

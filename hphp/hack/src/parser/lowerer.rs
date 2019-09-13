@@ -1301,11 +1301,78 @@ where
         }
     }
 
-    fn p_user_attribute(
-        _node: &Syntax<T, V>,
-        _env: &mut Env,
-    ) -> ret!(Vec<aast!(UserAttribute<,>)>) {
-        not_impl!()
+    fn process_attribute_constructor_call(
+        node: &Syntax<T, V>,
+        constructor_call_argument_list: &Syntax<T, V>,
+        constructor_call_type: &Syntax<T, V>,
+        env: &mut Env,
+    ) -> ret_aast!(UserAttribute<,>) {
+        let name = Self::pos_name(constructor_call_type, env)?;
+        if name.1.eq_ignore_ascii_case("__reified")
+            || name.1.eq_ignore_ascii_case("__hasreifiedparent")
+        {
+            Self::raise_parsing_error(node, env, &syntax_error::reified_attribute);
+        } else if name.1.eq_ignore_ascii_case("__soft")
+            && Self::as_list(constructor_call_argument_list).len() > 0
+        {
+            Self::raise_parsing_error(node, env, &syntax_error::soft_no_arguments);
+        }
+        let params = Self::could_map(
+            &|n: &Syntax<T, V>, e: &mut Env| -> ret_aast!(Expr<,>) {
+                if let ScopeResolutionExpression(c) = &n.syntax {
+                    if let Some(TK::Name) = Self::token_kind(&c.scope_resolution_name) {
+                        Self::raise_parsing_error(
+                            n,
+                            e,
+                            &syntax_error::constants_as_attribute_arguments,
+                        );
+                    }
+                } else if let Some(TK::Name) = Self::token_kind(n) {
+                    Self::raise_parsing_error(
+                        n,
+                        e,
+                        &syntax_error::constants_as_attribute_arguments,
+                    );
+                }
+                Self::p_expr(n, e)
+            },
+            constructor_call_argument_list,
+            env,
+        )?;
+        Ok(aast::UserAttribute { name, params })
+    }
+
+    fn p_user_attribute(node: &Syntax<T, V>, env: &mut Env) -> ret!(Vec<aast!(UserAttribute<,>)>) {
+        let p_attr = |n: &Syntax<T, V>, e: &mut Env| -> ret_aast!(UserAttribute<,>) {
+            match &n.syntax {
+                ConstructorCall(c) => Self::process_attribute_constructor_call(
+                    node,
+                    &c.constructor_call_argument_list,
+                    &c.constructor_call_type,
+                    e,
+                ),
+                _ => Self::missing_syntax(None, "attribute", node, e),
+            }
+        };
+        match &node.syntax {
+            FileAttributeSpecification(c) => {
+                Self::could_map(&p_attr, &c.file_attribute_specification_attributes, env)
+            }
+            OldAttributeSpecification(c) => {
+                Self::could_map(&p_attr, &c.old_attribute_specification_attributes, env)
+            }
+            AttributeSpecification(c) => Self::could_map(
+                &|n: &Syntax<T, V>, e: &mut Env| -> ret_aast!(UserAttribute<,>) {
+                    match &n.syntax {
+                        Attribute(c) => p_attr(&c.attribute_attribute_name, e),
+                        _ => Self::missing_syntax(None, "attribute", node, e),
+                    }
+                },
+                &c.attribute_specification_attributes,
+                env,
+            ),
+            _ => Self::missing_syntax(None, "attribute specification", node, env),
+        }
     }
 
     fn p_user_attributes(node: &Syntax<T, V>, env: &mut Env) -> ret!(Vec<aast!(UserAttribute<,>)>) {

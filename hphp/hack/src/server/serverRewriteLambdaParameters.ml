@@ -17,7 +17,7 @@ open Syntax
 let is_not_acceptable ty =
   let finder =
     object
-      inherit [_] Type_visitor.type_visitor
+      inherit [_] Type_visitor.locl_type_visitor
 
       method! on_tprim acc _ =
         function

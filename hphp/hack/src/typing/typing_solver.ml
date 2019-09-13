@@ -157,7 +157,7 @@ and freshen_tparams env variancel tyl =
 let var_occurs_in_ty env var ty =
   let finder =
     object
-      inherit [env * bool] Type_visitor.type_visitor
+      inherit [env * bool] Type_visitor.locl_type_visitor
 
       method! on_tvar (env, occurs) _r v =
         if occurs then

@@ -23,7 +23,7 @@ module MakeType = Typing_make_type
 let ty_size env ty =
   let ty_size_visitor =
     object
-      inherit [int] Type_visitor.type_visitor as super
+      inherit [int] Type_visitor.locl_type_visitor as super
 
       method! on_type acc ty = 1 + super#on_type acc ty
 
@@ -485,18 +485,9 @@ end = struct
 
   let visitor =
     object (this)
-      inherit [Reason.t option] Type_visitor.type_visitor
+      inherit [Reason.t option] Type_visitor.locl_type_visitor
 
       method! on_tany _ r = Some r
-
-      method! on_tarray acc r ty1_opt ty2_opt =
-        (* Check for array without its type parameters specified *)
-        match (ty1_opt, ty2_opt) with
-        | (None, None) -> Some r
-        | _ ->
-          merge
-            (Option.fold ~f:this#on_type ~init:acc ty1_opt)
-            (Option.fold ~f:this#on_type ~init:acc ty2_opt)
 
       method! on_tarraykind acc r akind =
         match akind with

@@ -17,7 +17,7 @@ module Cls = Decl_provider.Class
 
 let is_disposable_visitor env =
   object (this)
-    inherit [string option] Type_visitor.type_visitor
+    inherit [string option] Type_visitor.locl_type_visitor
 
     (* Only bother looking at classish types. Other types can spuriously
      * claim to implement these interfaces. Ideally we should check

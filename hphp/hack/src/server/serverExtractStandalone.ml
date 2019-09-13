@@ -833,7 +833,7 @@ let rec add_dep deps ?cls:(this_cls = None) ty : unit =
   let add_ dep = if not (is_builtin_dep dep) then HashSet.add deps dep in
   let visitor =
     object (this)
-      inherit [unit] Type_visitor.type_visitor
+      inherit [unit] Type_visitor.decl_type_visitor
 
       method! on_tapply _ _ (_, name) tyl =
         add_ (Typing_deps.Dep.Class name);

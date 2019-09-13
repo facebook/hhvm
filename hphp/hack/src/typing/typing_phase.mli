@@ -18,8 +18,8 @@ val env_with_self : env -> expand_env
 
 val localize_with_self : env -> decl_ty -> env * locl_ty
 
-val localize_with_self_possibly_enforceable :
-  env -> decl_ty -> env * locl_possibly_enforced_ty
+val localize_possibly_enforced_with_self :
+  env -> decl_possibly_enforced_ty -> env * locl_possibly_enforced_ty
 
 val localize : ety_env:expand_env -> env -> decl_ty -> env * locl_ty
 

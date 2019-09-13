@@ -8825,8 +8825,13 @@ and class_var_def ~is_static env cv =
     | None -> (env, None)
     | Some ((p, _) as cty) ->
       let decl_cty = Decl_hint.hint env.decl_env cty in
+      let decl_cty =
+        Typing_enforceability.compute_enforced_and_pessimize_ty_simple
+          env
+          decl_cty
+      in
       let (env, cty) =
-        Phase.localize_with_self_possibly_enforceable env decl_cty
+        Phase.localize_possibly_enforced_with_self env decl_cty
       in
       (env, Some (ExpectedTy.make_and_allow_coercion p Reason.URhint cty))
   in

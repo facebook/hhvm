@@ -581,6 +581,10 @@ and check_where_constraints
  *)
 and localize_with_self env ty = localize env ty ~ety_env:(env_with_self env)
 
+and localize_possibly_enforced_with_self env ety =
+  let (env, et_type) = localize_with_self env ety.et_type in
+  (env, { ety with et_type })
+
 and localize_with_dty_validator env ty validate_dty =
   let ety_env =
     { (env_with_self env) with validate_dty = Some validate_dty }
@@ -738,11 +742,6 @@ let localize_with_self env ty =
 let localize ~ety_env env ty =
   let ty = Typing_enforceability.pessimize_type env ty in
   localize ~ety_env env ty
-
-let localize_with_self_possibly_enforceable env ty =
-  let et_enforced = Typing_enforceability.is_enforceable env ty in
-  let (env, et_type) = localize_with_self env ty in
-  (env, { et_type; et_enforced })
 
 let localize_ft ?instantiation ~ety_env env ft =
   let ft = Typing_enforceability.pessimize_fun_type env ft in

@@ -1644,6 +1644,7 @@ let do_resolve_local
         let line = Jget.int_exn data "line" in
         let column = Jget.int_exn data "char" in
         let file_contents = get_document_contents editor_open_files uri in
+        if line = 0 && column = 0 then failwith "NoFileLineColumnData";
         let request =
           ClientIdeMessage.Completion_resolve_location
             {

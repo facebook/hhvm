@@ -1179,12 +1179,65 @@ class TestLsp(TestCase[LspTestDriver]):
         self.load_and_run("ontypeformatting", variables)
 
     def test_did_change(self) -> None:
-        # Disabling this test because it has a race condition:
-        # see T27194253 for transcript
-        # self.prepare_server_environment()
-        # variables = self.setup_php_file('didchange.php')
-        # self.load_and_run('didchange', variables)
-        return
+        self.prepare_server_environment()
+        variables = self.setup_php_file("didchange.php")
+        spec = (
+            self.initialize_spec(LspTestSpec("did_change"), use_serverless_ide=False)
+            .wait_for_hh_server_ready()
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .notification(
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 7, "character": 11},
+                                "end": {"line": 7, "character": 12},
+                            },
+                            "text": "a",
+                        }
+                    ],
+                },
+            )
+            .wait_for_notification(
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${php_file_uri}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 7, "character": 11},
+                                "end": {"line": 7, "character": 11},
+                            },
+                            "severity": 1,
+                            "code": 1002,
+                            "source": "Hack",
+                            "message": "A semicolon (';') is expected here.",
+                            "relatedLocations": [],
+                            "relatedInformation": [],
+                        }
+                    ],
+                },
+            )
+            .request(method="shutdown", params={}, result=None)
+            .wait_for_notification(
+                comment="Hack appears to clear out diagnostics before shutting down",
+                method="textDocument/publishDiagnostics",
+                params={"uri": "${php_file_uri}", "diagnostics": []},
+            )
+        )
+        self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)
 
     def test_signature_help(self) -> None:
         self.prepare_server_environment()

@@ -85,7 +85,12 @@ def interpolate_variables(payload: Json, variables: VariableMap) -> Json:
 
 
 def uninterpolate_variables(payload: Json, variables: VariableMap) -> Json:
-    for variable, value in variables.items():
+    # Sort so that we process the variable with the longest-length bindings first.
+    variable_bindings = sorted(
+        variables.items(), key=lambda kv: len(kv[1]), reverse=True
+    )
+
+    for variable, value in variable_bindings:
 
         def uninterpolate(json: JsonScalar) -> JsonScalar:
             if isinstance(json, str):

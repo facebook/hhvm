@@ -285,7 +285,9 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                         "method": "$test/waitForRequest",
                         "params": {
                             "method": message.method,
-                            "params": message.params,
+                            "params": interpolate_variables(
+                                message.params, variables=variables
+                            ),
                             "result": message.result,
                         },
                     }
@@ -296,7 +298,12 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                         "jsonrpc": "2.0",
                         "comment": message.comment,
                         "method": "$test/waitForNotification",
-                        "params": {"method": message.method, "params": message.params},
+                        "params": {
+                            "method": message.method,
+                            "params": interpolate_variables(
+                                message.params, variables=variables
+                            ),
+                        },
                     }
                 )
             elif isinstance(message, _WaitForResponseSpec):
@@ -383,7 +390,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
 
         handled_entries |= set(self._find_ignored_transcript_ids(transcript))
         yield from self._flag_unhandled_notifications(
-            handled_entries, transcript, lsp_id_map
+            handled_entries, variables, transcript, lsp_id_map
         )
 
     def _verify_request(
@@ -560,6 +567,7 @@ make it match:
     def _flag_unhandled_notifications(
         self,
         handled_entries: AbstractSet[str],
+        variables: VariableMap,
         transcript: Transcript,
         lsp_id_map: _LspIdMap,
     ) -> Iterable["_ErrorDescription"]:
@@ -572,7 +580,7 @@ make it match:
                 continue
 
             if entry.sent is not None:
-                # We received a request and responded it it.
+                # We received a request and responded to it.
                 continue
 
             method = received["method"]
@@ -602,6 +610,22 @@ respond to it before proceeding:
     )
 """
             else:
+                if any(
+                    isinstance(message, _WaitForNotificationSpec)
+                    and message.method == method
+                    and interpolate_variables(
+                        payload=message.params, variables=variables
+                    )
+                    == params
+                    for message in self._messages
+                ):
+                    # This was a notification we we explicitly waiting for, so skip
+                    # it.
+                    continue
+
+                uninterpolated_params = uninterpolate_variables(
+                    payload=params, variables=variables
+                )
                 description = f"""\
 An unexpected notification of type {method!r} was sent by the language server.
 Here is the notification payload:
@@ -622,7 +646,7 @@ to your test to wait for it before proceeding:
 
     .{self.wait_for_notification.__name__}(
         method={method!r},
-        params={params!r},
+        params={uninterpolated_params!r},
     )
 """
 

@@ -265,11 +265,9 @@ val redeclaring_missing_method : Pos.t -> string -> unit
 
 val expecting_type_hint : Pos.t -> unit
 
-val expecting_type_hint_suggest : Pos.t -> string -> unit
+val expecting_type_hint_variadic : Pos.t -> unit
 
 val expecting_return_type_hint : Pos.t -> unit
-
-val expecting_return_type_hint_suggest : Pos.t -> string -> unit
 
 val expecting_awaitable_return_type_hint : Pos.t -> unit
 

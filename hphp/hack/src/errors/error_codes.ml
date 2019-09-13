@@ -286,9 +286,9 @@ module Typing = struct
     | ExpectedStaticIntDEPRECATED
     | ExpectedTparam
     | ExpectingReturnTypeHint
-    | ExpectingReturnTypeHintSuggest
+    | ExpectingReturnTypeHintSuggestDEPRECATED
     | ExpectingTypeHint
-    | ExpectingTypeHintSuggest
+    | ExpectingTypeHintVariadic
     | RetiredError4034DEPRECATED
     | ExtendFinal
     | FieldKinds

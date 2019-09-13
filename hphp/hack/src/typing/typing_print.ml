@@ -26,104 +26,6 @@ let shallow_decl_enabled () =
   TypecheckerOptions.shallow_class_decl (GlobalNamingOptions.get ())
 
 (*****************************************************************************)
-(* Module used to "suggest" types.
- * When a type is missing, it is nice to suggest a type to the user.
- * However, there are some cases where parts of the type is still unresolved.
- * When that is the case, we print '...' and let the user replace the missing
- * parts with a real type. So if we inferred that something was a Vector,
- * but we didn't manage to infer the type of the elements, the output becomes:
- * Vector<...>.
- *)
-(*****************************************************************************)
-
-module Suggest = struct
-  let rec type_ : type a. a ty -> string =
-   fun (_, ty) ->
-    match ty with
-    | Tarray _ -> "array"
-    | Tdarray _ -> "darray"
-    | Tvarray _ -> "varray"
-    | Tvarray_or_darray _ -> "varray_or_darray"
-    | Tarraykind (AKdarray (_, _)) -> "darray"
-    | Tarraykind (AKvarray _) -> "varray"
-    | Tarraykind _ -> "array"
-    | Tdynamic -> "dynamic"
-    | Tthis -> SN.Typehints.this
-    | Tunion _ -> "..."
-    | Tintersection _ -> "..."
-    | Ttuple l -> "(" ^ list l ^ ")"
-    | Tany _ -> "..."
-    | Terr -> "..."
-    | Tmixed -> "mixed"
-    | Tnonnull -> "nonnull"
-    | Tnothing -> "nothing"
-    | Tgeneric s -> s
-    | Tabstract (AKgeneric s, _) -> s
-    | Toption (_, Tnonnull) -> "mixed"
-    | Toption ty -> "?" ^ type_ ty
-    | Tlike ty -> "~" ^ type_ ty
-    | Tprim tp -> prim tp
-    | Tvar _ -> "..."
-    | Tanon _ -> "..."
-    | Tfun _ -> "..."
-    | Tapply ((_, cid), []) -> Utils.strip_ns cid
-    | Tapply ((_, cid), [x]) -> Utils.strip_ns cid ^ "<" ^ type_ x ^ ">"
-    | Tapply ((_, cid), l) -> Utils.strip_ns cid ^ "<" ^ list l ^ ">"
-    | Tclass ((_, cid), _, []) -> Utils.strip_ns cid
-    | Tabstract (AKnewtype (cid, []), _) -> Utils.strip_ns cid
-    | Tclass ((_, cid), _, [x]) -> Utils.strip_ns cid ^ "<" ^ type_ x ^ ">"
-    | Tabstract (AKnewtype (cid, [x]), _) ->
-      Utils.strip_ns cid ^ "<" ^ type_ x ^ ">"
-    | Tclass ((_, cid), _, l) -> Utils.strip_ns cid ^ "<" ^ list l ^ ">"
-    | Tabstract (AKnewtype (cid, l), _) ->
-      Utils.strip_ns cid ^ "<" ^ list l ^ ">"
-    | Tabstract (AKdependent _, _) -> "..."
-    | Tobject -> "..."
-    | Tshape _ -> "..."
-    | Tdestructure _ -> "..."
-    | Taccess (root_ty, ids) ->
-      let x =
-        match snd root_ty with
-        | Tapply ((_, x), _) -> Some x
-        | Tthis -> Some SN.Typehints.this
-        | _ -> None
-      in
-      (match x with
-      | None -> "..."
-      | Some x ->
-        List.fold_left
-          ids
-          ~f:(fun acc (_, sid) -> acc ^ "::" ^ sid)
-          ~init:(strip_ns x))
-    | Tpu (ty, (_, enum), kind) ->
-      let suffix =
-        match kind with
-        | Pu_plain -> ""
-        | Pu_atom atom -> atom
-      in
-      type_ ty ^ ":@" ^ enum ^ suffix
-    | Tpu_access (ty, (_, access)) -> type_ ty ^ ":@" ^ access
-
-  and list : type a. a ty list -> string = function
-    | [] -> ""
-    | [x] -> type_ x
-    | x :: rl -> type_ x ^ ", " ^ list rl
-
-  and prim = function
-    | Nast.Tnull -> "null"
-    | Nast.Tvoid -> "void"
-    | Nast.Tint -> "int"
-    | Nast.Tbool -> "bool"
-    | Nast.Tfloat -> "float"
-    | Nast.Tstring -> "string"
-    | Nast.Tnum -> "num (int/float)"
-    | Nast.Tresource -> "resource"
-    | Nast.Tarraykey -> "arraykey (int/string)"
-    | Nast.Tnoreturn -> "noreturn"
-    | Nast.Tatom s -> ":@ " ^ s
-end
-
-(*****************************************************************************)
 (* Pretty-printer of the "full" type.                                        *)
 (* This is used in server/symbolTypeService and elsewhere                    *)
 (* With debug_mode set it is used for hh_show_env                            *)
@@ -1885,8 +1787,6 @@ end
 (*****************************************************************************)
 
 let error env ty = ErrorString.to_string env ty
-
-let suggest : type a. a ty -> _ = (fun ty -> Suggest.type_ ty)
 
 let full env ty = Full.to_string Doc.text env ty
 

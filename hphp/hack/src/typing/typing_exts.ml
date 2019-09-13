@@ -123,7 +123,7 @@ let parse_printf_string env s pos (class_ : locl ty) : env * locl fun_params =
         s
         (Reason.to_pos (fst class_))
         fname
-        (Print.suggest class_);
+        (Print.full_strip_ns env class_);
       let (env, xs) = read_text env (i + 1) in
       (env, add_reason xs)
   in

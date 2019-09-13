@@ -144,14 +144,6 @@ let make_default_return ~is_method ~is_infer_missing_on env name =
   else
     (env, default)
 
-let suggest_return env p ty is_code_error =
-  let ty = Typing_expand.fully_expand env ty in
-  match Typing_print.suggest ty with
-  | "..." when is_code_error 4030 -> Errors.expecting_return_type_hint p
-  | ty when is_code_error 4031 ->
-    Errors.expecting_return_type_hint_suggest p ty
-  | _ -> ()
-
 let async_suggest_return fkind hint pos =
   let is_async = Ast_defs.FAsync = fkind in
   if is_async then

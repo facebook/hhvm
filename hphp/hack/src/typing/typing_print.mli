@@ -15,8 +15,6 @@ open Typing_env_types
 
 val error : env -> Typing_defs.locl Typing_defs.ty -> string
 
-val suggest : 'a Typing_defs.ty -> string
-
 val full : env -> 'a Typing_defs.ty -> string
 
 val full_rec : env -> int -> 'a Typing_defs.ty -> string

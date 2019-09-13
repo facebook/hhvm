@@ -2392,23 +2392,17 @@ let redeclaring_missing_method p trait_method =
 let expecting_type_hint p =
   add (Typing.err_code Typing.ExpectingTypeHint) p "Was expecting a type hint"
 
-let expecting_type_hint_suggest p ty =
+let expecting_type_hint_variadic p =
   add
-    (Typing.err_code Typing.ExpectingTypeHintSuggest)
+    (Typing.err_code Typing.ExpectingTypeHintVariadic)
     p
-    ("Was expecting a type hint (what about: " ^ ty ^ ")")
+    "Was expecting a type hint on this variadic parameter"
 
 let expecting_return_type_hint p =
   add
     (Typing.err_code Typing.ExpectingReturnTypeHint)
     p
     "Was expecting a return type hint"
-
-let expecting_return_type_hint_suggest p ty =
-  add
-    (Typing.err_code Typing.ExpectingReturnTypeHintSuggest)
-    p
-    ("Was expecting a return type hint (what about: ': " ^ ty ^ "')")
 
 let expecting_awaitable_return_type_hint p =
   add

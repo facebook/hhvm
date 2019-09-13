@@ -78,7 +78,11 @@ let test () =
    * declaration of foo and stored it in shared memory. *)
   (match Decl_heap.Funs.get "\\foo" with
   | Some f ->
-    let f_ret = Typing_print.suggest Typing_defs.(f.ft_ret.et_type) in
+    let f_ret =
+      Typing_print.full_decl
+        TypecheckerOptions.default
+        Typing_defs.(f.ft_ret.et_type)
+    in
     (* Notice that this declaration is "wrong" - it's based on file contents
      * that we didn't put through the right channels that would track if and how
      * things changed in that file.

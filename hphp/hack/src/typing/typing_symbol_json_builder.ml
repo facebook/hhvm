@@ -74,7 +74,7 @@ let get_next_elem_id () =
 
 let json_element_id = get_next_elem_id ()
 
-let type_ = Typing_print.suggest
+let type_ = Typing_print.full_decl
 
 let update_json_data predicate json json_data_progress =
   match predicate with
@@ -131,7 +131,7 @@ let json_of_gconst tcopt gc_id gc json_data_progress =
     JSON_Object
       [
         ("name", JSON_Object [("key", JSON_String gc_id)]);
-        ("type", JSON_Object [("key", JSON_String (type_ ty))]);
+        ("type", JSON_Object [("key", JSON_String (type_ tcopt ty))]);
       ]
   in
   glean_json GconstDeclaration json json_data_progress
@@ -172,7 +172,7 @@ let json_of_fun tcopt fn_id fn json_data_progress =
           JSON_Object
             [
               ("name", JSON_Object [("key", JSON_String f_param.param_name)]);
-              ("type", JSON_Object [("key", JSON_String (type_ ty))]);
+              ("type", JSON_Object [("key", JSON_String (type_ tcopt ty))]);
             ]
         in
         let (json_facts, progress) = glean_json Parameter json progress_acc in
@@ -183,7 +183,8 @@ let json_of_fun tcopt fn_id fn json_data_progress =
       [
         ("name", JSON_Object [("key", JSON_String fn_id)]);
         ("params", JSON_Array params);
-        ("return_type", JSON_Object [("key", JSON_String (type_ ret_type))]);
+        ( "return_type",
+          JSON_Object [("key", JSON_String (type_ tcopt ret_type))] );
       ]
   in
   glean_json FunctionDeclaration json_facts progress

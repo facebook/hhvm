@@ -121,13 +121,6 @@ let with_expr_hook hook f =
 (* Helpers *)
 (*****************************************************************************)
 
-let suggest env p ty is_code_error =
-  let ty = Typing_expand.fully_expand env ty in
-  match Typing_print.suggest ty with
-  | "..." when is_code_error 4032 -> Errors.expecting_type_hint p
-  | ty when is_code_error 4033 -> Errors.expecting_type_hint_suggest p ty
-  | _ -> ()
-
 let err_witness env p = (Reason.Rwitness p, Typing_utils.terr env)
 
 (* Set all the types in an expression to the given type. *)
@@ -574,7 +567,9 @@ and check_param env param ty is_code_error =
       env
   in
   match hint_of_type_hint param.param_type_hint with
-  | None -> suggest env param.param_pos ty is_code_error
+  | None when param.param_is_variadic && is_code_error 4033 ->
+    Errors.expecting_type_hint_variadic param.param_pos
+  | None when is_code_error 4032 -> Errors.expecting_type_hint param.param_pos
   | Some _ when is_code_error 4010 ->
     (* We do not permit hints to implement IDisposable or IAsyncDisposable *)
     enforce_param_not_disposable env param ty
@@ -733,11 +728,7 @@ and fun_def tcopt f : Tast.fun_def option =
       begin
         match hint_of_type_hint f.f_ret with
         | None ->
-          Typing_return.suggest_return
-            env
-            pos
-            return.Typing_env_return_info.return_type.et_type
-            partial_callback
+          if partial_callback 4030 then Errors.expecting_return_type_hint pos
         | Some hint -> Typing_return.async_suggest_return f.f_fun_kind hint pos
       end;
       let (env, file_attrs) = file_attributes env f.f_file_attributes in
@@ -9262,11 +9253,7 @@ and method_def env cls m =
         | None when snd m.m_name = SN.Members.__construct ->
           Some (pos, Hprim Tvoid)
         | None ->
-          Typing_return.suggest_return
-            env
-            pos
-            return.Typing_env_return_info.return_type.et_type
-            partial_callback;
+          if partial_callback 4030 then Errors.expecting_return_type_hint pos;
           None
         | Some hint ->
           Typing_return.async_suggest_return m.m_fun_kind hint (fst m.m_name);

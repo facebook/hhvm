@@ -1,5 +1,5 @@
 Errors:
-  [3:16-31] Was expecting a return type hint (what about: ': Awaitable<...>')
+  [3:16-31] Was expecting a return type hint
 [(Fun
     { f_span = [3:1-5:2]; f_annotation = (); f_mode = <opaque>;
       f_ret = ((Awaitable<int>), None);

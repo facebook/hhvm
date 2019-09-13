@@ -6147,4 +6147,3 @@
 .text.openssl_lock_function*
 .text._ZN4HPHP13interpOneExitEPNS_6ActRecEPNS_10TypedValueEi*
 .text._ZN4HPHP17ExtendedException16computeBacktraceEb*
-.text._ZN5folly18BucketedTimeSeriesIlNS_16LegacyStatsClockINSt6chrono8durationIlSt5ratioILl1ELl1EEEEEEE13updateBucketsENS2_10time_pointIS7_S6_EE*

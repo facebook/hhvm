@@ -1860,3 +1860,112 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
 `.received.log` files that were generated in the template repo for this test.\
 """,
             )
+
+    def test_lsptestspec_unexpected_notification(self) -> None:
+        self.prepare_server_environment()
+        variables = self.setup_php_file("didchange.php")
+        spec = (
+            self.initialize_spec(LspTestSpec("did_change"), use_serverless_ide=False)
+            .wait_for_hh_server_ready()
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .notification(
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 7, "character": 11},
+                                "end": {"line": 7, "character": 12},
+                            },
+                            "text": "a",
+                        }
+                    ],
+                },
+            )
+            .wait_for_notification(
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${php_file_uri}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 7, "character": 11},
+                                "end": {"line": 7, "character": 11},
+                            },
+                            "severity": 1,
+                            "code": 1002,
+                            "source": "Hack",
+                            "message": "A semicolon (';') is expected here.",
+                            "relatedLocations": [],
+                            "relatedInformation": [],
+                        }
+                    ],
+                },
+            )
+            .request(method="shutdown", params={}, result=None)
+        )
+        try:
+            self.run_spec(
+                spec, variables, wait_for_server=True, use_serverless_ide=False
+            )
+            assert False, "No assertion failure raised"
+        except AssertionError as e:
+            self.assertEqual(
+                self._sanitize_gutter_line_numbers(str(e)),
+                """\
+Test case did_change failed with 1 errors:
+
+Error 1/1:
+Description: An unexpected notification of type \
+'textDocument/publishDiagnostics' was sent by the language server.
+Here is the notification payload:
+
+  {'jsonrpc': '2.0',
+   'method': 'textDocument/publishDiagnostics',
+   'params': {'diagnostics': [],
+              'uri': '__PHP_FILE_URI__'}}
+
+Context:
+This was the most recent request issued from the language client before it
+received the notification:
+
+hphp/hack/test/integration/test_lsp.py
+ XXXX |             .request(method="shutdown", params={}, result=None)
+
+Remediation:
+1) If this was unexpected, then the language server is buggy and should be
+fixed.
+
+2) If all notifications of type 'textDocument/publishDiagnostics' should be \
+ignored, add this directive
+anywhere in your test:
+
+    .ignore_notifications(method='textDocument/publishDiagnostics')
+
+3) If this single instance of the notification was expected, add this directive
+to your test to wait for it before proceeding:
+
+    .wait_for_notification(
+        method='textDocument/publishDiagnostics',
+        params={'uri': '${php_file_uri}', 'diagnostics': []},
+    )
+
+If you want to examine the raw LSP logs, you can check the `.sent.log` and
+`.received.log` files that were generated in the template repo for this test.\
+"""
+                # There's an instance of a literal `${php_file_uri}` in there
+                # which we don't want to change, so use a different name than
+                # that one.
+                .replace("__PHP_FILE_URI__", variables["php_file_uri"]),
+            )

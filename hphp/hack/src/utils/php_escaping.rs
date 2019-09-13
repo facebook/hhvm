@@ -50,37 +50,39 @@ fn is_oct(c: char) -> bool {
 // It will escape $ in octal so that it can also be used as a PHP double
 // string.
 
-pub fn escape_char(c: char) -> String {
+pub fn escape_char<'a>(c: char, output: &mut Vec<u8>) {
     match c {
-        '\n' => "\\n".to_string(),
-        '\r' => "\\r".to_string(),
-        '\t' => "\\t".to_string(),
-        '\\' => "\\\\".to_string(),
-        '"' => "\\\"".to_string(),
-        '$' => "$".to_string(),
-        '?' => "\\?".to_string(),
-        c if is_lit_printable(c) => c.to_string(),
-        c => format!("\\{:o}", c as u8),
+        '\n' => output.extend_from_slice("\\n".as_bytes()),
+        '\r' => output.extend_from_slice("\\r".as_bytes()),
+        '\t' => output.extend_from_slice("\\t".as_bytes()),
+        '\\' => output.extend_from_slice("\\\\".as_bytes()),
+        '"' => output.extend_from_slice("\\\"".as_bytes()),
+        '$' => output.extend_from_slice("$".as_bytes()),
+        '?' => output.extend_from_slice("\\?".as_bytes()),
+        c if is_lit_printable(c) => output.push(c as u8),
+        c => output.extend_from_slice(format!("\\{:o}", c as u8).as_bytes()),
     }
 }
 
 pub fn escape(s: &str) -> String {
-    let mut output = String::with_capacity(s.len());
+    let mut output: Vec<u8> = Vec::with_capacity(s.len());
     for c in s.chars() {
-        output.push_str(&escape_char(c));
+        escape_char(c, &mut output);
     }
-    output
+    unsafe { String::from_utf8_unchecked(output) }
 }
 
-fn codepoint_to_utf8(n: u32, output: &str) -> Result<String, InvalidString> {
+fn codepoint_to_utf8(n: u32, output: &mut Vec<u8>) -> Result<(), InvalidString> {
     match std::char::from_u32(n) {
         None => Err(InvalidString {
             msg: String::from("UTF-8 codepoint too large"),
         }),
         Some(v) => {
-            let mut s = output.to_string();
-            s.push(v);
-            Ok(s)
+            match v.len_utf8() {
+                1 => output.push(v as u8),
+                _ => output.extend_from_slice(v.encode_utf8(&mut [0; 4]).as_bytes()),
+            }
+            Ok(())
         }
     }
 }
@@ -130,7 +132,7 @@ pub enum LiteralKind {
 
 fn unescape_literal(literal_kind: LiteralKind, s: &str) -> Result<String, InvalidString> {
     let len = s.len();
-    let mut output = String::with_capacity(len);
+    let mut output: Vec<u8> = Vec::with_capacity(len);
     let mut idx = 0;
     let next = |idx: usize| -> Result<(char, usize), InvalidString> {
         if idx >= len {
@@ -150,7 +152,7 @@ fn unescape_literal(literal_kind: LiteralKind, s: &str) -> Result<String, Invali
         mut i: usize,
         idx: usize,
         len: usize,
-        s: String,
+        s: &str,
     ) -> usize {
         let max = match max {
             None => len,
@@ -161,49 +163,51 @@ fn unescape_literal(literal_kind: LiteralKind, s: &str) -> Result<String, Invali
         }
         i
     };
+    let push = |s: &mut Vec<u8>, c: char| s.push(c as u8);
+    let push_str = |s: &mut Vec<u8>, st: &str| s.extend_from_slice(st.as_bytes());
     while {
         let (c, new_idx) = next(idx)?;
         idx = new_idx;
         if c != '\\' || idx == len {
-            output.push(c)
+            push(&mut output, c)
         } else {
             let (c, new_idx) = next(idx)?;
             idx = new_idx;
             match c {
-                'a' if literal_kind == LiteralKind::LiteralLongString => output.push('\x07'),
-                'b' if literal_kind == LiteralKind::LiteralLongString => output.push('\x08'),
-                '\'' => output.push_str("\\\'"),
+                'a' if literal_kind == LiteralKind::LiteralLongString => push(&mut output, '\x07'),
+                'b' if literal_kind == LiteralKind::LiteralLongString => push(&mut output, '\x08'),
+                '\'' => push_str(&mut output, "\\\'"),
                 'n' => {
                     if literal_kind != LiteralKind::LiteralLongString {
-                        output.push('\n')
+                        push(&mut output, '\n')
                     }
                 }
                 'r' => {
-                    if literal_kind == LiteralKind::LiteralLongString {
-                        output.push('\r')
+                    if literal_kind != LiteralKind::LiteralLongString {
+                        push(&mut output, '\r')
                     }
                 }
-                't' => output.push('\t'),
-                'v' => output.push('\x0b'),
-                'e' => output.push('\x1b'),
-                'f' => output.push('\x0c'),
-                '\\' => output.push('\\'),
-                '?' if literal_kind == LiteralKind::LiteralLongString => output.push('\x3f'),
-                '$' if literal_kind != LiteralKind::LiteralLongString => output.push('$'),
+                't' => push(&mut output, '\t'),
+                'v' => push(&mut output, '\x0b'),
+                'e' => push(&mut output, '\x1b'),
+                'f' => push(&mut output, '\x0c'),
+                '\\' => push(&mut output, '\\'),
+                '?' if literal_kind == LiteralKind::LiteralLongString => push(&mut output, '\x3f'),
+                '$' if literal_kind != LiteralKind::LiteralLongString => push(&mut output, '$'),
                 '`' if literal_kind != LiteralKind::LiteralLongString => {
                     if literal_kind == LiteralKind::LiteralBacktick {
-                        output.push('`')
+                        push(&mut output, '`')
                     } else {
-                        output.push_str("\\'")
+                        push_str(&mut output, "\\'")
                     }
                 }
                 '\"' => {
                     if literal_kind == LiteralKind::LiteralDoubleQuote
                         || literal_kind == LiteralKind::LiteralLongString
                     {
-                        output.push('\"')
+                        push(&mut output, '\"')
                     } else {
-                        output.push_str("\\\"")
+                        push_str(&mut output, "\\\"")
                     }
                 }
                 'u' if literal_kind != LiteralKind::LiteralLongString
@@ -212,11 +216,9 @@ fn unescape_literal(literal_kind: LiteralKind, s: &str) -> Result<String, Invali
                 {
                     let (_, new_idx) = next(idx)?;
                     idx = new_idx;
-                    let unicode_count =
-                        count_f(&|c: char| c != '}', Some(6), 0, idx, len, s.to_string());
+                    let unicode_count = count_f(&|c: char| c != '}', Some(6), 0, idx, len, s);
                     let n = parse_int(&s[idx..(unicode_count + idx)], 16)?;
-                    let new_output = codepoint_to_utf8(n, &output)?;
-                    output = new_output;
+                    codepoint_to_utf8(n, &mut output)?;
                     idx += unicode_count;
                     let (n, new_idx) = next(idx)?;
                     idx = new_idx;
@@ -227,32 +229,32 @@ fn unescape_literal(literal_kind: LiteralKind, s: &str) -> Result<String, Invali
                     }
                 }
                 'x' | 'X' => {
-                    let hex_count = count_f(&is_hex, Some(2), 0, idx, len, s.to_string());
+                    let hex_count = count_f(&is_hex, Some(2), 0, idx, len, s);
                     if hex_count == 0 {
-                        output.push('\\');
-                        output.push(c)
+                        push(&mut output, '\\');
+                        push(&mut output, c)
                     } else {
                         let c = parse_numeric_escape(false, &s[idx..(hex_count + idx)], 16)?;
-                        output.push(c);
+                        push(&mut output, c);
                         idx += hex_count
                     }
                 }
                 c if is_oct(c) => {
                     idx -= 1;
-                    let oct_count = count_f(&is_oct, Some(3), 0, idx, len, s.to_string());
+                    let oct_count = count_f(&is_oct, Some(3), 0, idx, len, s);
                     let c = parse_numeric_escape(true, &s[idx..(oct_count + idx)], 8)?;
-                    output.push(c);
+                    push(&mut output, c);
                     idx += oct_count
                 }
                 c => {
-                    output.push('\\');
-                    output.push(c)
+                    push(&mut output, '\\');
+                    push(&mut output, c)
                 }
             }
         }
         idx < len
     } {}
-    Ok(output)
+    unsafe { Ok(String::from_utf8_unchecked(output)) }
 }
 
 pub fn unescape_double(s: &str) -> Result<String, InvalidString> {
@@ -269,7 +271,7 @@ pub fn unescape_heredoc(s: &str) -> Result<String, InvalidString> {
 
 fn unescape_single_or_nowdoc(is_nowdoc: bool, s: &str) -> Result<String, InvalidString> {
     let len = s.len();
-    let mut output = String::with_capacity(len);
+    let mut output: Vec<u8> = Vec::with_capacity(len);
     let mut idx = 0;
     let next = |idx: usize| -> Result<(char, usize), InvalidString> {
         if idx >= len {
@@ -285,23 +287,23 @@ fn unescape_single_or_nowdoc(is_nowdoc: bool, s: &str) -> Result<String, Invalid
         let (c, new_idx) = next(idx)?;
         idx = new_idx;
         if is_nowdoc || c != '\\' {
-            output.push(c)
+            output.push(c as u8)
         } else {
             let (c, new_idx) = next(idx)?;
             idx = new_idx;
             match c {
-                '\'' => output.push('\''),
-                '\\' => output.push('\\'),
+                '\'' => output.push('\'' as u8),
+                '\\' => output.push('\\' as u8),
                 // unrecognized escapes are just copied over
                 _ => {
-                    output.push('\\');
-                    output.push(c)
+                    output.push('\\' as u8);
+                    output.push(c as u8)
                 }
             }
         }
         idx < len
     } {}
-    Ok(output)
+    unsafe { Ok(String::from_utf8_unchecked(output)) }
 }
 
 pub fn unescape_single(s: &str) -> Result<String, InvalidString> {
@@ -394,14 +396,16 @@ mod tests {
         assert_eq!(unescape_long_string("\\\\").unwrap(), "\\");
         assert_eq!(unescape_long_string("?").unwrap(), "\x3f");
         assert_eq!(unescape_long_string("$").unwrap(), "$");
+
         assert_eq!(unescape_long_string("\\b").unwrap(), "\x08");
         assert_eq!(unescape_long_string("\\e").unwrap(), "\x1b");
         assert_eq!(unescape_long_string("\\f").unwrap(), "\x0c");
         assert_eq!(unescape_long_string("\\\"").unwrap(), "\"");
         assert_eq!(unescape_heredoc("\\\"").unwrap(), "\\\"");
         assert_eq!(unescape_heredoc("\\p").unwrap(), "\\p");
-        assert_eq!(unescape_long_string("\\r").unwrap(), "\r");
+        assert_eq!(unescape_long_string("\\r").unwrap(), "");
         assert_eq!(unescape_double("\\u{b1}").unwrap(), "±");
+
         assert_eq!(unescape_double("\\x27\\x22").unwrap(), "\'\"");
         assert_eq!(unescape_double("\\X27\\X22").unwrap(), "\'\"");
         assert_eq!(
@@ -410,9 +414,15 @@ mod tests {
         );
         assert_eq!(
             unescape_backtick("\\a\\b\\n\\r\\t").unwrap(),
-            "\\a\\b\n\t".to_string()
+            "\\a\\b\n\r\t".to_string()
         );
-        assert_eq!(unescape_long_string("\\xb1").unwrap(), "±");
+        assert_eq!(unescape_long_string("\\xb1").unwrap().as_bytes(), &[177u8]);
+
+        let euro = "\u{20AC}"; // as bytes [226, 130, 172]
+        assert_eq!(
+            unescape_long_string(euro).unwrap().as_bytes(),
+            &[226u8, 130u8, 172u8]
+        );
     }
 
     #[test]
@@ -425,9 +435,15 @@ mod tests {
 
     #[test]
     fn escape_char_test() {
-        assert_eq!(escape_char('a'), "a");
-        assert_eq!(escape_char('$'), "$");
-        assert_eq!(escape_char('\"'), "\\\"");
+        let escape_char_ = |c: char| -> String {
+            let mut s = vec![];
+            escape_char(c, &mut s);
+            unsafe { String::from_utf8_unchecked(s) }
+        };
+
+        assert_eq!(escape_char_('a'), "a");
+        assert_eq!(escape_char_('$'), "$");
+        assert_eq!(escape_char_('\"'), "\\\"");
         assert_eq!(escape("house"), "house");
         assert_eq!(escape("red\n\t\r$?"), "red\\n\\t\\r$\\?");
         assert_eq!(is_oct('5'), true);

@@ -85,7 +85,6 @@
     facts
     global_config
     global_options
-    hackc_parse_delegator
     hhbc
     hhi
     heap_ident

@@ -28,12 +28,6 @@
   (modules ))
 
 (library
-  (name hackc_parse_delegator_stubs)
-  (wrapped false)
-  (modules
-    hackc_parse_delegator))
-
-(library
   (name linting_stubs)
   (wrapped false)
   (modules

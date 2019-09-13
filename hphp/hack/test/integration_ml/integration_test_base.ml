@@ -334,6 +334,16 @@ let edit_file env name contents =
   assert_responded "Expected EDIT_FILE to be processed" loop_output;
   (env, loop_output)
 
+let save_file env name contents =
+  let (env, loop_output) =
+    run_loop_once
+      env
+      { default_loop_input with disk_changes = [(name, contents)] }
+  in
+  if not loop_output.did_read_disk_changes then
+    fail "Expected the server to process disk updates";
+  (env, loop_output)
+
 let close_file ?(ignore_response = false) env name =
   let (env, loop_output) =
     run_loop_once

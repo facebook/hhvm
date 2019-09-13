@@ -70,6 +70,9 @@ val open_file : ServerEnv.env -> ?contents:string -> string -> ServerEnv.env
 val edit_file :
   ServerEnv.env -> string -> string -> ServerEnv.env * ('a, unit) loop_outputs
 
+val save_file :
+  ServerEnv.env -> string -> string -> ServerEnv.env * ('a, unit) loop_outputs
+
 val close_file :
   ?ignore_response:bool ->
   ServerEnv.env ->

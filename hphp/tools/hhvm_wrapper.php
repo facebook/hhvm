@@ -41,7 +41,6 @@ function my_option_map(): OptionInfoMap {
 'build-root:'     => Pair { '',
                             'Override the default directory for hhvm and hphp'},
 'perf:'           => Pair { '', 'Run perf record'},
-'hhjs'            => Pair { '', 'Enable HHJS' },
   };
 }
 
@@ -169,7 +168,6 @@ function determine_flags(OptionMap $opts): string {
     'no-pgo'          => '-v Eval.JitPGO=false ',
     'hphpd'           => '-m debug ',
     'server'          => '-m server ',
-    'hhjs'            => '-v Eval.EnableHHJS=1 ',
   };
 
   if ($opts->containsKey('pgo-threshold')) {

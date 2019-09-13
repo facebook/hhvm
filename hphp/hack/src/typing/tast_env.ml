@@ -100,7 +100,7 @@ let fold_unresolved = Typing_utils.fold_unresolved
 
 let flatten_unresolved = Typing_utils.flatten_unresolved
 
-let push_option_out = Typing_solver.push_option_out Pos.none
+let non_null = Typing_solver.non_null
 
 let get_concrete_supertypes = Typing_utils.get_concrete_supertypes
 

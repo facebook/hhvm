@@ -100,7 +100,7 @@ val fold_unresolved : env -> Tast.ty -> env * Tast.ty
 val flatten_unresolved : env -> Tast.ty -> Tast.ty list -> env * Tast.ty list
 (** Flatten nested unresolved unions, turning ((A | B) | C) to (A | B | C). *)
 
-val push_option_out : env -> Tast.ty -> env * Tast.ty
+val non_null : env -> Pos.t -> Tast.ty -> env * Tast.ty
 (** Strip away all Toptions that we possibly can in a type, expanding type
     variables along the way, turning ?T -> T. *)
 

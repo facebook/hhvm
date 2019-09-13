@@ -8,8 +8,6 @@ val is_sub_type : env -> locl_ty -> locl_ty -> bool
     result = false implies NOT ty1 <: ty2 OR we don't know
 *)
 
-val push_option_out : Pos.t -> env -> locl_ty -> env * locl_ty
-
 val non_null : env -> Pos.t -> locl_ty -> env * locl_ty
 
 (* Force solve all remaining unsolved type variables *)

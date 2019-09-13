@@ -98,7 +98,7 @@ type pattern =
    * TODO: decide what we want to name the pattern for decl types, if we create
    * one.
    *)
-  | TypePattern of { subtype_of: Typing_defs.locl Typing_defs.ty }
+  | TypePattern of { subtype_of: Typing_defs.locl_ty }
   (*
    * Matches if all of the children patterns match.
    *)

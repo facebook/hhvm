@@ -1087,7 +1087,7 @@ let rec name_and_declare_types_program prog =
       | SetNamespaceEnv _ -> ()
       | FileAttributes _ -> ()
       | Fun f ->
-        let (_ : decl fun_type) = ifun_decl f in
+        let (_ : decl_fun_type) = ifun_decl f in
         ()
       | Class c ->
         let class_env = { stack = SSet.empty } in
@@ -1096,7 +1096,7 @@ let rec name_and_declare_types_program prog =
       | Typedef typedef -> type_typedef_decl_if_missing typedef
       | Stmt _ -> ()
       | Constant cst ->
-        let (_ : decl ty * Errors.t) = iconst_decl cst in
+        let (_ : decl_ty * Errors.t) = iconst_decl cst in
         ())
 
 let make_env fn =

@@ -34,7 +34,7 @@ type inherited_members = {
     shallow class (this should only happen in partial-mode files when the
     assume_php setting is enabled). *)
 let get_shallow_classes_and_substs (lin : linearization) :
-    (mro_element * shallow_class * decl subst) Sequence.t =
+    (mro_element * shallow_class * decl_subst) Sequence.t =
   Sequence.filter_map lin (fun mro ->
       match Shallow_classes_heap.get mro.mro_name with
       | None -> None

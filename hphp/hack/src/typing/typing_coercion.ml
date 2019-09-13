@@ -78,7 +78,7 @@ let rec coerce_type_impl ~sub_type p ur env ty_have ty_expect on_error =
     List.fold tyl ~init:env ~f:(fun env ty ->
         coerce_type_impl env ty ty_expect on_error)
   | ((r, Toption t), _) when coercion_from_union ->
-    let union : locl ty = force_null_union env r t in
+    let union : locl_ty = force_null_union env r t in
     coerce_type_impl env union ty_expect on_error
   | _ -> sub_type p ur env ty_have ty_expect.et_type on_error
 

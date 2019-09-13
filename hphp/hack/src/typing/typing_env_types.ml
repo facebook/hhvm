@@ -13,7 +13,7 @@ open Typing_defs
 module TPEnv = Type_parameter_env
 module TySet = Typing_set
 
-type locl_ty = locl ty
+type locl_ty = Typing_defs.locl_ty
 
 [@@@warning "-32"]
 
@@ -138,9 +138,9 @@ and genv = {
      For every mayberx parameter that has condition type we create
      fresh type parameter (see: make_local_param_ty) and store mapping
      fresh type name -> condition type in env so it can be retrieved later *)
-  condition_types: decl ty SMap.t;
+  condition_types: decl_ty SMap.t;
   parent_id: string;
-  parent: decl ty;
+  parent: decl_ty;
   (* Identifier of the enclosing class *)
   self_id: string;
   (* Type of the enclosing class, instantiated at its generic parameters *)
@@ -160,7 +160,7 @@ and genv = {
  * - the arity of the function
  * - the expected return type of the body (optional)
  *)
-and anon_log = locl_ty list * locl ty list
+and anon_log = locl_ty list * locl_ty list
 
 and anon = {
   rx: reactivity;
@@ -171,8 +171,8 @@ and anon = {
     ?el:Nast.expr list ->
     ?ret_ty:locl_ty ->
     env ->
-    locl fun_params ->
-    locl fun_arity ->
+    locl_fun_params ->
+    locl_fun_arity ->
     env * Tast.expr * locl_ty;
 }
 

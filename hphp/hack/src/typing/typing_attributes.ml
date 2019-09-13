@@ -54,13 +54,13 @@ let check_implements
       let attr_cid = (Cls.pos attr_class, Cls.name attr_class) in
       (* successful exit condition: attribute class is subtype of correct interface
        * and its args satisfy the attribute class constructor *)
-      let attr_locl_ty : Typing_defs.locl Typing_defs.ty =
+      let attr_locl_ty : Typing_defs.locl_ty =
         MakeType.class_type
           (Rwitness (Cls.pos attr_class))
           (Cls.name attr_class)
           []
       in
-      let interface_locl_ty : Typing_defs.locl Typing_defs.ty =
+      let interface_locl_ty : Typing_defs.locl_ty =
         MakeType.class_type
           (Rwitness (Cls.pos intf_class))
           (Cls.name intf_class)

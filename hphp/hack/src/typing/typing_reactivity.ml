@@ -18,7 +18,7 @@ module CT = SubType.ConditionTypes
 module MakeType = Typing_make_type
 
 type method_call_info = {
-  receiver_type: locl ty;
+  receiver_type: locl_ty;
   receiver_is_self: bool;
   is_static: bool;
   method_name: string;

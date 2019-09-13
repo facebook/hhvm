@@ -29,7 +29,7 @@ end
 
 (* a function type *)
 module Fun = struct
-  type t = decl Typing_defs.fun_type
+  type t = decl_fun_type
 
   let prefix = Prefix.make ()
 
@@ -45,7 +45,7 @@ module Typedef = struct
 end
 
 module GConst = struct
-  type t = decl ty * Errors.t
+  type t = decl_ty * Errors.t
 
   let prefix = Prefix.make ()
 
@@ -62,7 +62,7 @@ module GConsts =
   SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (GConst)
 
 module Property = struct
-  type t = decl ty
+  type t = decl_ty
 
   let prefix = Prefix.make ()
 
@@ -70,7 +70,7 @@ module Property = struct
 end
 
 module StaticProperty = struct
-  type t = decl ty
+  type t = decl_ty
 
   let prefix = Prefix.make ()
 
@@ -78,7 +78,7 @@ module StaticProperty = struct
 end
 
 module Method = struct
-  type t = decl fun_type
+  type t = decl_fun_type
 
   let prefix = Prefix.make ()
 
@@ -86,7 +86,7 @@ module Method = struct
 end
 
 module StaticMethod = struct
-  type t = decl fun_type
+  type t = decl_fun_type
 
   let prefix = Prefix.make ()
 
@@ -94,7 +94,7 @@ module StaticMethod = struct
 end
 
 module Constructor = struct
-  type t = decl fun_type
+  type t = decl_fun_type
 
   let prefix = Prefix.make ()
 

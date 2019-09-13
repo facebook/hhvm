@@ -18,7 +18,7 @@ let wrap_like ty =
   let r = Typing_reason.Renforceable (Typing_reason.to_pos (fst ty)) in
   MakeType.like r ty
 
-let rec pessimize_type env ?(trust_awaitable = false) (ty : decl ty) =
+let rec pessimize_type env ?(trust_awaitable = false) (ty : decl_ty) =
   if not (TypecheckerOptions.pessimize_types (Env.get_tcopt env)) then
     ty
   else
@@ -120,7 +120,7 @@ and pessimize_wrap env ty =
   | _ -> wrap_like ty
 
 (* For erased generics with constraints, add super dynamic and make the as constraints like types *)
-and pessimize_tparam_constraints env (t : decl tparam) =
+and pessimize_tparam_constraints env (t : decl_tparam) =
   if not (TypecheckerOptions.pessimize_types (Env.get_tcopt env)) then
     t
   else
@@ -141,7 +141,7 @@ and pessimize_tparam_constraints env (t : decl tparam) =
       in
       { t with tp_constraints }
 
-and pessimize_fun_type env (ft : decl fun_type) =
+and pessimize_fun_type env (ft : decl_fun_type) =
   (* TODO: It may be necessary to pessimize ft_arity and ft_where_constraints *)
   let { ft_params; ft_ret; ft_fun_kind; ft_tparams; _ } = ft in
   (* The runtime will enforce the inner type of an Awaitable in the return of an
@@ -171,7 +171,7 @@ and pessimize_fun_type env (ft : decl fun_type) =
     ft_tparams;
   }
 
-let rec is_enforceable (env : env) (ty : decl ty) =
+let rec is_enforceable (env : env) (ty : decl_ty) =
   match snd ty with
   | Tthis -> false
   | Tapply ((_, name), _) when Env.is_enum env name -> false
@@ -278,7 +278,7 @@ let is_enforced env ~is_xhp_attr ty =
   in
   enforceable && (not is_hhi) && not is_xhp_attr
 
-let pessimize_type_simple env et_enforced (ty : decl ty) =
+let pessimize_type_simple env et_enforced (ty : decl_ty) =
   let et_type =
     if et_enforced || not env.pessimize then
       ty
@@ -290,12 +290,12 @@ let pessimize_type_simple env et_enforced (ty : decl ty) =
   { et_type; et_enforced }
 
 let compute_enforced_and_pessimize_ty_simple
-    env ?(is_xhp_attr = false) (ty : decl ty) =
+    env ?(is_xhp_attr = false) (ty : decl_ty) =
   let et_enforced = is_enforced env ~is_xhp_attr ty in
   pessimize_type_simple env et_enforced ty
 
 let handle_awaitable_return
-    env ft_fun_kind (ft_ret : decl possibly_enforced_ty) =
+    env ft_fun_kind (ft_ret : decl_possibly_enforced_ty) =
   let { et_type = return_type; _ } = ft_ret in
   match (ft_fun_kind, return_type) with
   | (Ast_defs.FAsync, (_, Tapply ((_, name), [inner_ty])))
@@ -306,7 +306,7 @@ let handle_awaitable_return
     pessimize_type_simple env et_enforced return_type
   | _ -> compute_enforced_and_pessimize_ty_simple env return_type
 
-let compute_enforced_and_pessimize_fun_type_simple env (ft : decl fun_type) =
+let compute_enforced_and_pessimize_fun_type_simple env (ft : decl_fun_type) =
   let { ft_params; ft_ret; ft_fun_kind; _ } = ft in
   let ft_ret = handle_awaitable_return env ft_fun_kind ft_ret in
   let ft_params =

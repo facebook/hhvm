@@ -389,7 +389,7 @@ module Full = struct
     | Nast.Tnoreturn -> "noreturn"
     | Nast.Tatom s -> ":@" ^ s
 
-  and fun_type : type a. _ -> _ -> _ -> a fun_type -> _ =
+  and fun_type : type a. _ -> _ -> _ -> a ty fun_type -> _ =
    fun to_doc st env ft ->
     let params = List.map ft.ft_params (fun_param to_doc st env) in
     let variadic_param =
@@ -425,8 +425,8 @@ module Full = struct
         possibly_enforced_ty to_doc st env ft.ft_ret;
       ]
 
-  and possibly_enforced_ty : type a. _ -> _ -> _ -> a possibly_enforced_ty -> _
-      =
+  and possibly_enforced_ty :
+      type a. _ -> _ -> _ -> a ty possibly_enforced_ty -> _ =
    fun to_doc st env { et_enforced; et_type } ->
     Concat
       [
@@ -437,7 +437,7 @@ module Full = struct
         ty to_doc st env et_type;
       ]
 
-  and fun_param : type a. _ -> _ -> _ -> a fun_param -> _ =
+  and fun_param : type a. _ -> _ -> _ -> a ty fun_param -> _ =
    fun to_doc st env { fp_name; fp_type; fp_kind; _ } ->
     Concat
       [
@@ -456,7 +456,7 @@ module Full = struct
             ]);
       ]
 
-  and tparam : type a. _ -> _ -> _ -> a Typing_defs.tparam -> _ =
+  and tparam : type a. _ -> _ -> _ -> a ty tparam -> _ =
    fun to_doc
        st
        env
@@ -543,11 +543,11 @@ module Full = struct
 
   let to_string_strip_ns env x = to_string text_strip_ns env x
 
-  let to_string_decl tcopt (x : decl ty) =
+  let to_string_decl tcopt (x : decl_ty) =
     let env = Typing_env.empty tcopt Relative_path.default ~droot:None in
     to_string Doc.text env x
 
-  let fun_to_string tcopt (x : decl fun_type) =
+  let fun_to_string tcopt (x : decl_fun_type) =
     let env = Typing_env.empty tcopt Relative_path.default ~droot:None in
     fun_type Doc.text ISet.empty env x
     |> Libhackfmt.format_doc_unbroken format_env
@@ -632,7 +632,7 @@ module ErrorString = struct
 
   let varray_or_darray = "a varray_or_darray"
 
-  let rec type_ : _ -> locl ty_ -> _ = function
+  let rec type_ : _ -> locl_phase ty_ -> _ = function
     | env ->
       (function
       | Tany _ -> "an untyped value"
@@ -775,7 +775,7 @@ module ErrorString = struct
     | Ast_defs.Cenum -> "an enum"
     | Ast_defs.Crecord -> "a record"
 
-  and to_string : _ -> locl ty -> _ =
+  and to_string : _ -> locl_ty -> _ =
    fun env ty ->
     let (_, ety) = Env.expand_type env ty in
     type_ env (snd ety)
@@ -989,11 +989,13 @@ module Json = struct
     Error (Wrong_phase (message ^ Hh_json.Access.keytrace_to_string keytrace))
 
   let to_locl_ty ?(keytrace = []) (json : Hh_json.json) :
-      locl deserialized_result =
+      locl_phase deserialized_result =
     let reason = Reason.none in
-    let ty (ty : locl ty_) : locl deserialized_result = Ok (reason, ty) in
+    let ty (ty : locl_phase ty_) : locl_phase deserialized_result =
+      Ok (reason, ty)
+    in
     let rec aux (json : Hh_json.json) ~(keytrace : Hh_json.Access.keytrace) :
-        locl deserialized_result =
+        locl_phase deserialized_result =
       Result.Monad_infix.(
         get_string "kind" (json, keytrace)
         >>= fun (kind, kind_keytrace) ->
@@ -1228,7 +1230,8 @@ module Json = struct
           get_bool "is_array" (json, keytrace)
           >>= fun (is_array, _is_array_keytrace) ->
           let unserialize_field field_json ~keytrace :
-              ( Ast_defs.shape_field_name * locl Typing_defs.shape_field_type,
+              ( Ast_defs.shape_field_name
+                * locl_phase Typing_defs.shape_field_type,
                 deserialization_error )
               result =
             get_val "name" (field_json, keytrace)
@@ -1394,10 +1397,10 @@ module Json = struct
       Result.all array
     and aux_args
         (args : Hh_json.json list) ~(keytrace : Hh_json.Access.keytrace) :
-        (locl ty list, deserialization_error) result =
+        (locl_ty list, deserialization_error) result =
       map_array args ~keytrace ~f:aux
     and aux_as (json : Hh_json.json) ~(keytrace : Hh_json.Access.keytrace) :
-        (locl ty option, deserialization_error) result =
+        (locl_ty option, deserialization_error) result =
       Result.Monad_infix.(
         (* as-constraint is optional, check to see if it exists. *)
         match Hh_json.Access.get_obj "as" (json, keytrace) with

@@ -26,7 +26,7 @@ type tyvar_info_ = {
   appears_contravariantly: bool;
   lower_bounds: TySet.t;
   upper_bounds: TySet.t;
-  type_constants: (Aast.sid * locl ty) SMap.t;
+  type_constants: (Aast.sid * locl_ty) SMap.t;
 }
 
 type tyvar_info =
@@ -40,7 +40,7 @@ type global_tvenv = tyvar_info_ IMap.t
 type env = {
   (* position of the function/method being checked *)
   function_pos: Pos.t;
-  tenv: locl ty IMap.t;
+  tenv: locl_ty IMap.t;
   subst: int IMap.t;
   fresh_typarams: SSet.t;
   lenv: local_env;
@@ -67,18 +67,18 @@ and genv = {
   tcopt: TypecheckerOptions.t;
   return: Typing_env_return_info.t;
   (* For each function parameter, its type and calling convention. *)
-  params: (locl ty * param_mode) Local_id.Map.t;
+  params: (locl_ty * param_mode) Local_id.Map.t;
   (* condition types associated with parameters.
      For every mayberx parameter that has condition type we create
      fresh type parameter (see: make_local_param_ty) and store mapping
      fresh type name -> condition type in env so it can be retrieved later *)
-  condition_types: decl ty SMap.t;
+  condition_types: decl_ty SMap.t;
   parent_id: string;
-  parent: decl ty;
+  parent: decl_ty;
   (* Identifier of the enclosing class *)
   self_id: string;
   (* Type of the enclosing class, instantiated at its generic parameters *)
-  self: locl ty;
+  self: locl_ty;
   static: bool;
   fun_kind: Ast_defs.fun_kind;
   val_kind: Typing_defs.val_kind;
@@ -94,7 +94,7 @@ and genv = {
  * - the arity of the function
  * - the expected return type of the body (optional)
  *)
-and anon_log = locl ty list * locl ty list
+and anon_log = locl_ty list * locl_ty list
 
 and anon = {
   rx: reactivity;
@@ -103,11 +103,11 @@ and anon = {
   pos: Pos.t;
   typecheck:
     ?el:Nast.expr list ->
-    ?ret_ty:locl ty ->
+    ?ret_ty:locl_ty ->
     env ->
-    locl fun_params ->
-    locl fun_arity ->
-    env * Tast.expr * locl ty;
+    locl_fun_params ->
+    locl_fun_arity ->
+    env * Tast.expr * locl_ty;
 }
 
 val get_fun : env -> Decl_provider.fun_key -> Decl_provider.fun_decl option

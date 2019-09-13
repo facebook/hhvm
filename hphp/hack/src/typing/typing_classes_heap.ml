@@ -18,11 +18,11 @@ module SN = Naming_special_names
 type lazy_class_type = {
   sc: shallow_class;
   ih: inherited_members;
-  ancestors: decl ty LSTable.t;
+  ancestors: decl_ty LSTable.t;
   parents_and_traits: unit LSTable.t;
   members_fully_known: bool Lazy.t;
   req_ancestor_names: unit LSTable.t;
-  all_requirements: (Pos.t * decl ty) list Lazy.t;
+  all_requirements: (Pos.t * decl_ty) list Lazy.t;
 }
 
 type class_type_variant =

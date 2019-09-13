@@ -85,7 +85,7 @@ type parameters by looking for a type to which they are equal in the tpenv.
 If such a type exists, remove the type parameter from the tpenv.
 Returns a set of substitutions mapping each type parameter name to the type
 to which it is equal if found, otherwise to itself. *)
-let simplify_tpenv env (tparams : ((_ * string) option * locl ty) list) r =
+let simplify_tpenv env (tparams : ((_ * string) option * locl_ty) list) r =
   let old_env = env in
   let tpenv = Env.get_tpenv env in
   (* For each tparam, "solve" it if it falls in any of those categories:

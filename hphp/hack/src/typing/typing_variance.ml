@@ -653,7 +653,7 @@ and constraint_ tcopt root env (ck, ((r, _) as ty)) =
   in
   type_ tcopt root var env ty
 
-and get_typarams root env (ty : decl ty) =
+and get_typarams root env (ty : decl_ty) =
   let empty = (SMap.empty, SMap.empty) in
   let union (pos1, neg1) (pos2, neg2) =
     ( SMap.union ~combine:(fun _ x y -> Some (x @ y)) pos1 pos2,

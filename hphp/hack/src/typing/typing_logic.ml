@@ -13,7 +13,7 @@ open Typing_defs
 (* Logical proposition about types *)
 type subtype_prop =
   (* IsSubtype(ty1,ty2) if ty1 is a subtype of ty2, written ty1 <: ty2 *)
-  | IsSubtype of locl ty * locl ty
+  | IsSubtype of locl_ty * locl_ty
   (* Conjunction. Conj [] means "true" *)
   | Conj of subtype_prop list
   (* Disjunction. Disj f [] means "false".  The error message function f

@@ -79,7 +79,7 @@ let locl ty = LoclTy ty
 type method_instantiation = {
   use_pos: Pos.t;
   use_name: string;
-  explicit_targs: decl ty list;
+  explicit_targs: decl_ty list;
 }
 
 let env_with_self env =
@@ -105,7 +105,7 @@ let env_with_self env =
  *)
 (*****************************************************************************)
 
-let rec localize ~ety_env env (dty : decl ty) =
+let rec localize ~ety_env env (dty : decl_ty) =
   Option.iter ety_env.validate_dty (fun validate_dty ->
       (* Make sure we don't double validate *)
       validate_dty { ety_env with validate_dty = None } dty);
@@ -591,10 +591,10 @@ and localize_hint ~ety_env env hint =
  * where ck is as, super or =
  *)
 let localize_generic_parameters_with_bounds
-    ~ety_env (env : env) (tparams : decl tparam list) =
+    ~ety_env (env : env) (tparams : decl_tparam list) =
   let env = Env.add_generic_parameters env tparams in
   let localize_bound
-      env ({ tp_name = (pos, name); tp_constraints = cstrl; _ } : decl tparam)
+      env ({ tp_name = (pos, name); tp_constraints = cstrl; _ } : decl_tparam)
       =
     let tparam_ty = (Reason.Rwitness pos, Tabstract (AKgeneric name, None)) in
     List.map_env env cstrl (fun env (ck, cstr) ->
@@ -658,7 +658,7 @@ let localize_ft ?instantiation ~ety_env env ft =
   localize_ft ?instantiation ~ety_env env ft
 
 let localize_generic_parameters_with_bounds ~ety_env env tparams =
-  let tparams : decl tparam list =
+  let tparams : decl_tparam list =
     List.map
       tparams
       ~f:(Typing_enforceability.pessimize_tparam_constraints env)

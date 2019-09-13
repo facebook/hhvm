@@ -18,7 +18,7 @@ let make_subst tparams tyl = Subst.make tparams tyl
 (* Code dealing with instantiation. *)
 (*****************************************************************************)
 
-let rec instantiate subst ((r, ty) : decl ty) =
+let rec instantiate subst ((r, ty) : decl_ty) =
   (* PERF: If subst is empty then instantiation is a no-op. We can save a
    * significant amount of CPU by avoiding recursively deconstructing the ty
    * data type.

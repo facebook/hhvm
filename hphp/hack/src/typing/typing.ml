@@ -57,17 +57,17 @@ module ExpectedTy : sig
   type t = private {
     pos: Pos.t;
     reason: Typing_reason.ureason;
-    ty: locl possibly_enforced_ty;
+    ty: locl_possibly_enforced_ty;
   }
   [@@deriving show]
 
   [@@@warning "+32"]
 
-  val make : Pos.t -> Typing_reason.ureason -> locl ty -> t
+  val make : Pos.t -> Typing_reason.ureason -> locl_ty -> t
 
   (* We will allow coercion to this expected type, if et_enforced=true *)
   val make_and_allow_coercion :
-    Pos.t -> Typing_reason.ureason -> locl possibly_enforced_ty -> t
+    Pos.t -> Typing_reason.ureason -> locl_possibly_enforced_ty -> t
 end = struct
   (* Some mutually recursive inference functions in typing.ml pass around an ~expected argument that
    * enables bidirectional type checking. This module abstracts away that type so that it can be
@@ -75,7 +75,7 @@ end = struct
   type t = {
     pos: Pos.t;
     reason: Typing_reason.ureason;
-    ty: locl possibly_enforced_ty;
+    ty: locl_possibly_enforced_ty;
         [@printer Pp_type.pp_possibly_enforced_ty Pp_type.pp_locl]
   }
   [@@deriving show]
@@ -649,7 +649,7 @@ and fun_def tcopt f : Tast.fun_def option =
       let env = Env.set_fun_mutable env mut in
       NastCheck.fun_ env f;
       let ety_env = Phase.env_with_self env in
-      let f_tparams : decl tparam list =
+      let f_tparams : decl_tparam list =
         List.map
           f.f_tparams
           ~f:(Decl_hint.aast_tparam_to_decl_tparam env.decl_env)
@@ -4988,8 +4988,8 @@ and dispatch_call
             Container<X>          -> f, where f R = array<arraykey, R>
             X                     -> f, where f R = Y
           *)
-        let rec build_output_container env (x : locl ty) :
-            env * (locl ty -> locl ty) =
+        let rec build_output_container env (x : locl_ty) :
+            env * (locl_ty -> locl_ty) =
           let (env, x) = Env.expand_type env x in
           match x with
           | (_, Tarraykind (AKany | AKempty)) as array_type ->
@@ -8135,7 +8135,7 @@ and safely_refine_class_type
     ivar_ty
     obj_ty
     reason
-    (tparams_with_new_names : (decl tparam * string) option list)
+    (tparams_with_new_names : (decl_tparam * string) option list)
     tyl_fresh =
   (* Type of variable in block will be class name
    * with fresh type parameters *)
@@ -8521,7 +8521,7 @@ and class_def_ env c tc =
       (c.c_extends @ c.c_implements @ c.c_uses)
       (Decl_hint.hint env.decl_env)
   in
-  let c_tparam_list : decl tparam list =
+  let c_tparam_list : decl_tparam list =
     List.map
       c.c_tparams.c_tparam_list
       ~f:(Decl_hint.aast_tparam_to_decl_tparam env.decl_env)
@@ -9147,7 +9147,7 @@ and method_def env cls m =
       let ety_env =
         { (Phase.env_with_self env) with from_class = Some CIstatic }
       in
-      let m_tparams : decl tparam list =
+      let m_tparams : decl_tparam list =
         List.map
           m.m_tparams
           ~f:(Decl_hint.aast_tparam_to_decl_tparam env.decl_env)
@@ -9304,7 +9304,7 @@ and typedef_def tcopt typedef =
   let tdecl = Env.get_typedef env (snd typedef.t_name) in
   add_decl_errors
     Option.(map tdecl (fun tdecl -> value_exn tdecl.td_decl_errors));
-  let t_tparams : decl tparam list =
+  let t_tparams : decl_tparam list =
     List.map
       typedef.t_tparams
       ~f:(Decl_hint.aast_tparam_to_decl_tparam env.decl_env)

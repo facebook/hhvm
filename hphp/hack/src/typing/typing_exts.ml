@@ -49,8 +49,8 @@ let magic_method_name input =
     else
       "format_" ^ String.make 1 lc
 
-let lookup_magic_type (env : env) (class_ : locl ty) (fname : string) :
-    env * (locl fun_params * locl ty option) option =
+let lookup_magic_type (env : env) (class_ : locl_ty) (fname : string) :
+    env * (locl_fun_params * locl_ty option) option =
   match class_ with
   | (_, Tunion [(_, Tdynamic); (_, Tclass ((_, className), _, []))])
   | (_, Tclass ((_, className), _, [])) ->
@@ -88,13 +88,13 @@ let get_char s i =
   else
     Some s.[i]
 
-let parse_printf_string env s pos (class_ : locl ty) : env * locl fun_params =
-  let rec read_text env i : env * locl fun_params =
+let parse_printf_string env s pos (class_ : locl_ty) : env * locl_fun_params =
+  let rec read_text env i : env * locl_fun_params =
     match get_char s i with
     | Some '%' -> read_modifier env (i + 1) class_ i
     | Some _ -> read_text env (i + 1)
     | None -> (env, [])
-  and read_modifier env i class_ i0 : env * locl fun_params =
+  and read_modifier env i class_ i0 : env * locl_fun_params =
     let fname = magic_method_name (get_char s i) in
     let snippet = String.sub s i0 (min (i + 1) (String.length s) - i0) in
     let add_reason =
@@ -168,9 +168,9 @@ let rec const_string_of (env : env) (e : Nast.expr) :
   | (p, _) -> (env, Left p)
 
 (* Specialize a function type using whatever we can tell about the args *)
-let retype_magic_func (env : env) (ft : locl fun_type) (el : Nast.expr list) :
-    env * locl fun_type =
-  let rec f env param_types args : env * locl fun_params option =
+let retype_magic_func (env : env) (ft : locl_fun_type) (el : Nast.expr list) :
+    env * locl_fun_type =
+  let rec f env param_types args : env * locl_fun_params option =
     match (param_types, args) with
     | ( [
           {

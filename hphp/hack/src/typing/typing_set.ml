@@ -15,7 +15,7 @@ open Core_kernel
 open Typing_defs
 
 module Ty_ = struct
-  type t = locl ty
+  type t = locl_ty
 
   let compare r1 r2 = ty_compare r1 r2
 end

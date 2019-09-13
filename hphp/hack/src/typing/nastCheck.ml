@@ -44,7 +44,7 @@ let rec fun_ tenv f =
   (* Add type parameters to typing environment and localize the bounds
      and where constraints *)
   let ety_env = Phase.env_with_self env.tenv in
-  let f_tparams : decl tparam list =
+  let f_tparams : decl_tparam list =
     List.map
       f.f_tparams
       ~f:(Decl_hint.aast_tparam_to_decl_tparam env.tenv.decl_env)
@@ -195,7 +195,7 @@ and check_happly unchecked_tparams env h =
 and class_ tenv c =
   let env = { typedef_tparams = []; tenv } in
   (* Add type parameters to typing environment and localize the bounds *)
-  let c_tparam_list : decl tparam list =
+  let c_tparam_list : decl_tparam list =
     List.map
       c.c_tparams.c_tparam_list
       ~f:(Decl_hint.aast_tparam_to_decl_tparam env.tenv.decl_env)
@@ -238,14 +238,14 @@ and class_var env cv = maybe hint env cv.cv_type
 and add_constraint pos tenv (ty1, ck, ty2) =
   Typing_subtype.add_constraint pos tenv ck ty1 ty2
 
-and add_constraints pos tenv (cstrs : locl where_constraint list) =
+and add_constraints pos tenv (cstrs : locl_where_constraint list) =
   List.fold_left cstrs ~init:tenv ~f:(add_constraint pos)
 
 and method_ env m =
   (* Add method type parameters to environment and localize the bounds
      and where constraints *)
   let ety_env = Phase.env_with_self env.tenv in
-  let m_tparams : decl tparam list =
+  let m_tparams : decl_tparam list =
     List.map
       m.m_tparams
       ~f:(Decl_hint.aast_tparam_to_decl_tparam env.tenv.decl_env)

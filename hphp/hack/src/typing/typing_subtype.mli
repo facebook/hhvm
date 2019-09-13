@@ -11,30 +11,30 @@ type reactivity_extra_info = {
 module ConditionTypes : sig
   val try_get_class_for_condition_type :
     env ->
-    decl ty ->
+    decl_ty ->
     ((Ast_defs.pos * string) * Decl_provider.class_decl) option
 
   val try_get_method_from_condition_type :
-    env -> decl ty -> bool -> string -> class_elt option
+    env -> decl_ty -> bool -> string -> class_elt option
 
-  val localize_condition_type : env -> decl ty -> locl ty
+  val localize_condition_type : env -> decl_ty -> locl_ty
 end
 
-val is_sub_type_LEGACY_DEPRECATED : env -> locl ty -> locl ty -> bool
+val is_sub_type_LEGACY_DEPRECATED : env -> locl_ty -> locl_ty -> bool
 
-val is_sub_type : env -> locl ty -> locl ty -> bool
+val is_sub_type : env -> locl_ty -> locl_ty -> bool
 (** Non-side-effecting test for subtypes.
     result = true implies ty1 <: ty2
     result = false implies NOT ty1 <: ty2 OR we don't know
 *)
 
-val is_sub_type_ignore_generic_params : env -> locl ty -> locl ty -> bool
+val is_sub_type_ignore_generic_params : env -> locl_ty -> locl_ty -> bool
 
-val is_sub_type_for_union : env -> locl ty -> locl ty -> bool
+val is_sub_type_for_union : env -> locl_ty -> locl_ty -> bool
 
-val can_sub_type : env -> locl ty -> locl ty -> bool
+val can_sub_type : env -> locl_ty -> locl_ty -> bool
 
-val sub_type : env -> locl ty -> locl ty -> Errors.typing_error_callback -> env
+val sub_type : env -> locl_ty -> locl_ty -> Errors.typing_error_callback -> env
 (**
   Checks that ty_sub is a subtype of ty_super, and returns an env.
 
@@ -50,9 +50,9 @@ val subtype_method :
   extra_info:reactivity_extra_info ->
   env ->
   Reason.t ->
-  decl fun_type ->
+  decl_fun_type ->
   Reason.t ->
-  decl fun_type ->
+  decl_fun_type ->
   Errors.typing_error_callback ->
   env
 (** Check that the method with signature ft_sub can be used to override
@@ -67,6 +67,6 @@ val subtype_reactivity :
   bool
 
 val add_constraint :
-  Pos.t -> env -> Ast_defs.constraint_kind -> locl ty -> locl ty -> env
+  Pos.t -> env -> Ast_defs.constraint_kind -> locl_ty -> locl_ty -> env
 
 val log_prop : env -> unit

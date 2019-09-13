@@ -15,12 +15,12 @@ module Reason = Typing_reason
 module SN = Naming_special_names
 
 type ancestor_caches = {
-  ancestors: decl ty LSTable.t;
+  ancestors: decl_ty LSTable.t;
       (** Types of parents, interfaces, and traits *)
   parents_and_traits: unit LSTable.t;  (** Names of parents and traits only *)
   members_fully_known: bool Lazy.t;
   req_ancestor_names: unit LSTable.t;
-  all_requirements: (Pos.t * decl ty) list Lazy.t;
+  all_requirements: (Pos.t * decl_ty) list Lazy.t;
 }
 
 let type_of_mro_element mro =

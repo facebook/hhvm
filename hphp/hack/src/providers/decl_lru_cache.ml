@@ -12,11 +12,11 @@ type typedef_key = string
 
 type gconst_key = string
 
-type fun_decl = Typing_defs.decl Typing_defs.fun_type
+type fun_decl = Typing_defs.decl_fun_type
 
 type typedef_decl = Typing_defs.typedef_type
 
-type gconst_decl = Typing_defs.decl Typing_defs.ty * Errors.t
+type gconst_decl = Typing_defs.decl_ty * Errors.t
 
 module Funs = SharedMem.LocalCache (StringKey) (Decl_heap.Fun)
 module GConsts = SharedMem.LocalCache (StringKey) (Decl_heap.GConst)

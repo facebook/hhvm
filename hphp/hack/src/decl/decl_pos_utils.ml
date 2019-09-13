@@ -137,7 +137,7 @@ struct
 
   let rec ty (p, x) = (reason p, ty_ x)
 
-  and ty_ : decl ty_ -> decl ty_ = function
+  and ty_ : decl_phase ty_ -> decl_phase ty_ = function
     | (Tany _ | Tthis | Terr | Tmixed | Tnonnull | Tdynamic | Tnothing | Tvar _)
       as x ->
       x

@@ -11,7 +11,7 @@ open Typing_defs
 open Typing_env_types
 module Env = Typing_env
 
-val union : env -> locl ty -> locl ty -> env * locl ty
+val union : env -> locl_ty -> locl_ty -> env * locl_ty
 (** Performs the union of two types.
 The union is the least upper bound of the subtyping relation.
 
@@ -23,7 +23,7 @@ This approximation is necessary to avoid type growing exponentially in size.
 We have seen cases where it would otherwise generate unions involving all
 the subsets of a set of types. *)
 
-val union_list : env -> Reason.t -> locl ty list -> env * locl ty
+val union_list : env -> Reason.t -> locl_ty list -> env * locl_ty
 (** Computes the union of a list of types by union types two by two.
 This is quadratic, so if this requires more than 20 two by two unions,
 fall back to simply flatten the unions, bubble up the option and remove
@@ -31,6 +31,6 @@ duplicates. *)
 
 val simplify_unions :
   env ->
-  ?on_tyvar:(env -> Reason.t -> Ident.t -> env * locl ty) ->
-  locl ty ->
-  env * locl ty
+  ?on_tyvar:(env -> Reason.t -> Ident.t -> env * locl_ty) ->
+  locl_ty ->
+  env * locl_ty

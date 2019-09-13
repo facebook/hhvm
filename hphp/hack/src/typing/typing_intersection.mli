@@ -12,14 +12,14 @@ open Typing_env_types
 module Reason = Typing_reason
 module Utils = Typing_utils
 
-val non : env -> Reason.t -> locl ty -> approx:Utils.approx -> env * locl ty
+val non : env -> Reason.t -> locl_ty -> approx:Utils.approx -> env * locl_ty
 
-val intersect : env -> r:Reason.t -> locl ty -> locl ty -> env * locl ty
+val intersect : env -> r:Reason.t -> locl_ty -> locl_ty -> env * locl_ty
 
-val intersect_list : env -> Reason.t -> locl ty list -> env * locl ty
+val intersect_list : env -> Reason.t -> locl_ty list -> env * locl_ty
 
 val simplify_intersections :
   env ->
-  ?on_tyvar:(env -> Reason.t -> int -> env * locl ty) ->
-  locl ty ->
-  env * locl ty
+  ?on_tyvar:(env -> Reason.t -> int -> env * locl_ty) ->
+  locl_ty ->
+  env * locl_ty

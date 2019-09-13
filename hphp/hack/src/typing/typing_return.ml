@@ -15,7 +15,7 @@ module TUtils = Typing_utils
 module MakeType = Typing_make_type
 
 (* The regular strip_awaitable function depends on expand_type and only works on locl types *)
-let strip_awaitable_decl fun_kind env (ty : decl ty) =
+let strip_awaitable_decl fun_kind env (ty : decl_ty) =
   if fun_kind <> Ast_defs.FAsync then
     ty
   else
@@ -96,7 +96,7 @@ let wrap_awaitable env p rty =
   | Ast_defs.FAsync ->
     MakeType.awaitable (Reason.Rret_fun_kind (p, Ast_defs.FAsync)) rty
 
-let make_return_type localize env (ty : decl ty) =
+let make_return_type localize env (ty : decl_ty) =
   match (Env.get_fn_kind env, ty) with
   | (Ast_defs.FAsync, (r, Tapply ((_, class_name), [inner_ty])))
     when class_name = Naming_special_names.Classes.cAwaitable ->

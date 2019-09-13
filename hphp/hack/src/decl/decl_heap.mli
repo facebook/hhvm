@@ -19,7 +19,7 @@ module Class : sig
 end
 
 module Fun : sig
-  type t = decl fun_type
+  type t = decl_fun_type
 
   val prefix : Prefix.t
 
@@ -35,7 +35,7 @@ module Typedef : sig
 end
 
 module GConst : sig
-  type t = decl ty * Errors.t
+  type t = decl_ty * Errors.t
 
   val prefix : Prefix.t
 
@@ -43,7 +43,7 @@ module GConst : sig
 end
 
 module Property : sig
-  type t = decl ty
+  type t = decl_ty
 
   val prefix : Prefix.t
 
@@ -51,7 +51,7 @@ module Property : sig
 end
 
 module StaticProperty : sig
-  type t = decl ty
+  type t = decl_ty
 
   val prefix : Prefix.t
 
@@ -59,7 +59,7 @@ module StaticProperty : sig
 end
 
 module Method : sig
-  type t = decl fun_type
+  type t = decl_fun_type
 
   val prefix : Prefix.t
 
@@ -67,7 +67,7 @@ module Method : sig
 end
 
 module StaticMethod : sig
-  type t = decl fun_type
+  type t = decl_fun_type
 
   val prefix : Prefix.t
 
@@ -75,7 +75,7 @@ module StaticMethod : sig
 end
 
 module Constructor : sig
-  type t = decl fun_type
+  type t = decl_fun_type
 
   val prefix : Prefix.t
 

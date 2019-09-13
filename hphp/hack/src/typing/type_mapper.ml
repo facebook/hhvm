@@ -20,7 +20,7 @@ module Env = Typing_env
 module Reason = Typing_reason
 
 (* Mapping result - updated environment, mapped type *)
-type result = env * locl ty
+type result = env * locl_ty
 
 let fresh_env env = env
 
@@ -38,7 +38,7 @@ class type type_mapper_type =
 
     method on_terr : env -> Reason.t -> result
 
-    method on_tanon : env -> Reason.t -> locl fun_arity -> Ident.t -> result
+    method on_tanon : env -> Reason.t -> locl_fun_arity -> Ident.t -> result
 
     method on_tprim : env -> Reason.t -> Aast.tprim -> result
 
@@ -46,33 +46,33 @@ class type type_mapper_type =
 
     method on_tarraykind_akempty : env -> Reason.t -> result
 
-    method on_tarraykind_akvec : env -> Reason.t -> locl ty -> result
+    method on_tarraykind_akvec : env -> Reason.t -> locl_ty -> result
 
-    method on_tarraykind_akvarray : env -> Reason.t -> locl ty -> result
+    method on_tarraykind_akvarray : env -> Reason.t -> locl_ty -> result
 
     method on_tarraykind_akmap :
-      env -> Reason.t -> locl ty -> locl ty -> result
+      env -> Reason.t -> locl_ty -> locl_ty -> result
 
     method on_tarraykind_akdarray :
-      env -> Reason.t -> locl ty -> locl ty -> result
+      env -> Reason.t -> locl_ty -> locl_ty -> result
 
-    method on_tvarray_or_darray : env -> Reason.t -> locl ty -> result
+    method on_tvarray_or_darray : env -> Reason.t -> locl_ty -> result
 
-    method on_ttuple : env -> Reason.t -> locl ty list -> result
+    method on_ttuple : env -> Reason.t -> locl_ty list -> result
 
-    method on_tunion : env -> Reason.t -> locl ty list -> result
+    method on_tunion : env -> Reason.t -> locl_ty list -> result
 
-    method on_tintersection : env -> Reason.t -> locl ty list -> result
+    method on_tintersection : env -> Reason.t -> locl_ty list -> result
 
-    method on_toption : env -> Reason.t -> locl ty -> result
+    method on_toption : env -> Reason.t -> locl_ty -> result
 
-    method on_tfun : env -> Reason.t -> locl fun_type -> result
+    method on_tfun : env -> Reason.t -> locl_fun_type -> result
 
     method on_tabstract :
-      env -> Reason.t -> abstract_kind -> locl ty option -> result
+      env -> Reason.t -> abstract_kind -> locl_ty option -> result
 
     method on_tclass :
-      env -> Reason.t -> Aast.sid -> exact -> locl ty list -> result
+      env -> Reason.t -> Aast.sid -> exact -> locl_ty list -> result
 
     method on_tobject : env -> Reason.t -> result
 
@@ -80,12 +80,12 @@ class type type_mapper_type =
       env ->
       Reason.t ->
       shape_kind ->
-      locl shape_field_type Nast.ShapeMap.t ->
+      locl_phase shape_field_type Nast.ShapeMap.t ->
       result
 
-    method on_tdestructure : env -> Reason.t -> locl ty list -> result
+    method on_tdestructure : env -> Reason.t -> locl_ty list -> result
 
-    method on_type : env -> locl ty -> result
+    method on_type : env -> locl_ty -> result
   end
 
 (* Base type mapper implementation that doesn't recursively go into the
@@ -190,7 +190,7 @@ class virtual tunion_type_mapper =
       let (env, tyl) = List.map_env env tyl this#on_type in
       (env, (r, Tunion tyl))
 
-    method virtual on_type : env -> locl ty -> result
+    method virtual on_type : env -> locl_ty -> result
   end
 
 class virtual tinter_type_mapper =
@@ -199,7 +199,7 @@ class virtual tinter_type_mapper =
       let (env, tyl) = List.map_env env tyl this#on_type in
       (env, (r, Tintersection tyl))
 
-    method virtual on_type : env -> locl ty -> result
+    method virtual on_type : env -> locl_ty -> result
   end
 
 (* Implementation of type_mapper that recursively visits everything in the
@@ -307,7 +307,7 @@ class virtual tvar_expanding_type_mapper =
       | (_, Tvar _) -> (env, ty)
       | _ -> this#on_type env ty
 
-    method virtual on_type : env -> locl ty -> result
+    method virtual on_type : env -> locl_ty -> result
   end
 
 (* Mixin that maps across the type inside the typevar, and then changes
@@ -323,5 +323,5 @@ class virtual tvar_substituting_type_mapper =
         let env = Env.add env n ty in
         (env, ty)
 
-    method virtual on_type : env -> locl ty -> result
+    method virtual on_type : env -> locl_ty -> result
   end

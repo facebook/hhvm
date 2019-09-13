@@ -51,7 +51,7 @@ class virtual downcast_tabstract_to_array_type_mapper =
         *)
           this#on_type env x)
 
-    method virtual on_type : env -> locl ty -> result
+    method virtual on_type : env -> locl_ty -> result
   end
 
 let union env tyl =

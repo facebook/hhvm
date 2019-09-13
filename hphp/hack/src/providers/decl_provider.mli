@@ -18,13 +18,13 @@ module Class : sig
   include module type of Typing_classes_heap.Api
 end
 
-type fun_decl = Typing_defs.decl Typing_defs.fun_type
+type fun_decl = Typing_defs.decl_fun_type
 
 type class_decl = Class.t
 
 type typedef_decl = Typing_defs.typedef_type
 
-type gconst_decl = Typing_defs.decl Typing_defs.ty * Errors.t
+type gconst_decl = Typing_defs.decl_ty * Errors.t
 
 val get_fun : fun_key -> fun_decl option
 

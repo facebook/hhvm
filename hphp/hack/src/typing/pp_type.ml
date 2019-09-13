@@ -377,7 +377,7 @@ and show_reactivity : reactivity -> string =
  (fun x -> Format.asprintf "%a" pp_reactivity x)
 
 and pp_possibly_enforced_ty :
-    type a. Format.formatter -> a possibly_enforced_ty -> unit =
+    type a. Format.formatter -> a ty possibly_enforced_ty -> unit =
  fun fmt x ->
   Format.fprintf fmt "@[<2>{ ";
 
@@ -390,7 +390,7 @@ and pp_possibly_enforced_ty :
   Format.fprintf fmt "@]";
   Format.fprintf fmt "@ }@]"
 
-and pp_fun_type : type a. Format.formatter -> a fun_type -> unit =
+and pp_fun_type : type a. Format.formatter -> a ty fun_type -> unit =
  fun fmt x ->
   Format.fprintf fmt "@[<2>{ ";
 
@@ -495,10 +495,10 @@ and show_param_mutability : param_mutability -> string =
   | Param_borrowed_mutable -> "mutable"
   | Param_maybe_mutable -> "maybe-mutable"
 
-and show_fun_type : type a. a fun_type -> string =
+and show_fun_type : type a. a ty fun_type -> string =
  (fun x -> Format.asprintf "%a" pp_fun_type x)
 
-and pp_fun_arity : type a. Format.formatter -> a fun_arity -> unit =
+and pp_fun_arity : type a. Format.formatter -> a ty fun_arity -> unit =
  fun fmt fa ->
   match fa with
   | Fstandard (a0, a1) ->
@@ -520,7 +520,7 @@ and pp_fun_arity : type a. Format.formatter -> a fun_arity -> unit =
     Pos.pp fmt a1;
     Format.fprintf fmt "@,))@]"
 
-and show_fun_arity : type a. a fun_arity -> string =
+and show_fun_arity : type a. a ty fun_arity -> string =
  (fun x -> Format.asprintf "%a" pp_fun_arity x)
 
 and pp_param_mode : Format.formatter -> param_mode -> unit =
@@ -533,7 +533,7 @@ and pp_param_mode : Format.formatter -> param_mode -> unit =
 and show_param_mode : param_mode -> string =
  (fun x -> Format.asprintf "%a" pp_param_mode x)
 
-and pp_fun_param : type a. Format.formatter -> a fun_param -> unit =
+and pp_fun_param : type a. Format.formatter -> a ty fun_param -> unit =
  fun fmt x ->
   Format.fprintf fmt "@[<2>{ ";
 
@@ -573,10 +573,10 @@ and pp_fun_param : type a. Format.formatter -> a fun_param -> unit =
 
   Format.fprintf fmt "@ }@]"
 
-and show_fun_param : type a. a fun_param -> string =
+and show_fun_param : type a. a ty fun_param -> string =
  (fun x -> Format.asprintf "%a" pp_fun_param x)
 
-and pp_fun_params : type a. Format.formatter -> a fun_params -> unit =
+and pp_fun_params : type a. Format.formatter -> a ty fun_params -> unit =
  fun fmt x ->
   Format.fprintf fmt "@[<2>[";
   ignore
@@ -589,7 +589,7 @@ and pp_fun_params : type a. Format.formatter -> a fun_params -> unit =
        x);
   Format.fprintf fmt "@,]@]"
 
-and show_fun_params : type a. a fun_params -> string =
+and show_fun_params : type a. a ty fun_params -> string =
  (fun x -> Format.asprintf "%a" pp_fun_params x)
 
 and pp_xhp_attr : Format.formatter -> xhp_attr -> unit =
@@ -1053,7 +1053,7 @@ and pp_typedef_type : Format.formatter -> typedef_type -> unit =
 and show_typedef_type : typedef_type -> string =
  (fun x -> Format.asprintf "%a" pp_typedef_type x)
 
-and pp_tparam : type a. Format.formatter -> a tparam -> unit =
+and pp_tparam : type a. Format.formatter -> a ty tparam -> unit =
  fun fmt
      {
        tp_variance;
@@ -1084,11 +1084,11 @@ and pp_tparam : type a. Format.formatter -> a tparam -> unit =
   Format.fprintf fmt "@,]@]";
   Format.fprintf fmt "@])"
 
-and show_tparam : type a. a tparam -> string =
+and show_tparam : type a. a ty tparam -> string =
  (fun x -> Format.asprintf "%a" pp_tparam x)
 
 and pp_where_constraint :
-    type a. Format.formatter -> a where_constraint -> unit =
+    type a. Format.formatter -> a ty where_constraint -> unit =
  fun fmt (a0, a1, a2) ->
   Format.fprintf fmt "(@[";
   pp_ty fmt a0;
@@ -1098,12 +1098,24 @@ and pp_where_constraint :
   pp_ty fmt a2;
   Format.fprintf fmt "@])"
 
-and show_where_constraint : type a. a where_constraint -> string =
+and show_where_constraint : type a. a ty where_constraint -> string =
  (fun x -> Format.asprintf "%a" pp_where_constraint x)
 
 let pp_decl _ _ = ()
 
 let pp_locl _ _ = ()
+
+let pp_decl_phase _ _ = ()
+
+let pp_locl_phase _ _ = ()
+
+let pp_decl_ty fmt ty = pp_ty fmt ty
+
+let show_decl_ty _ x = show_ty x
+
+let pp_locl_ty fmt ty = pp_ty fmt ty
+
+let show_locl_ty _ x = show_ty x
 
 let pp_ty _ fmt ty = pp_ty fmt ty
 
@@ -1116,6 +1128,10 @@ let show_shape_field_type _ x = show_shape_field_type x
 let pp_ty_ _ fmt x = pp_ty_ fmt x
 
 let show_ty_ _ x = show_ty_ x
+
+let pp_decl_fun_type fmt x = pp_fun_type fmt x
+
+let pp_locl_fun_type fmt x = pp_fun_type fmt x
 
 let pp_fun_type _ fmt x = pp_fun_type fmt x
 
@@ -1135,9 +1151,13 @@ let pp_fun_params _ fmt x = pp_fun_params fmt x
 
 let show_fun_params _ x = show_fun_params x
 
+let pp_decl_tparam fmt x = pp_tparam fmt x
+
 let pp_tparam _ fmt x = pp_tparam fmt x
 
 let show_tparam _ x = show_tparam x
+
+let pp_decl_where_constraint fmt x = pp_where_constraint fmt x
 
 let pp_where_constraint _ fmt x = pp_where_constraint fmt x
 

@@ -657,7 +657,7 @@ let hh_show p env ty =
 (* Simple type of possible log data *)
 type log_structure =
   | Log_head of string * log_structure list
-  | Log_type of string * Typing_defs.locl Typing_defs.ty
+  | Log_type of string * Typing_defs.locl_ty
 
 let log_with_level env key level log_f =
   if Env.get_log_level env key >= level then

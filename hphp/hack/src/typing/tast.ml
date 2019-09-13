@@ -20,11 +20,11 @@ open Core_kernel
  * that omits type inference artefacts such as type variables and lambda
  * identifiers.
  *)
-type ty = Typing_defs.locl Typing_defs.ty
+type ty = Typing_defs.locl_ty
 
-type possibly_enforced_ty = Typing_defs.locl Typing_defs.possibly_enforced_ty
+type possibly_enforced_ty = Typing_defs.locl_possibly_enforced_ty
 
-type decl_ty = Typing_defs.decl Typing_defs.ty
+type decl_ty = Typing_defs.decl_ty
 
 type reactivity = Typing_defs.reactivity
 

@@ -29,9 +29,9 @@ type exact =
    inferred via local inference.
 *)
 (* create private types to represent the different type phases *)
-type decl = private DeclPhase
+type decl_phase = private DeclPhase
 
-type locl = private LoclPhase
+type locl_phase = private LoclPhase
 
 (* This abstract type allows us to guard the construction of Tany to the
  * make_tany function in this module. *)
@@ -57,6 +57,10 @@ type pu_kind =
 
 type 'phase ty = Reason.t * 'phase ty_
 
+and decl_ty = decl_phase ty
+
+and locl_ty = locl_phase ty
+
 (* A shape may specify whether or not fields are required. For example, consider
    this typedef:
 
@@ -73,30 +77,30 @@ and 'phase shape_field_type = {
 and _ ty_ =
   (*========== Following Types Exist Only in the Declared Phase ==========*)
   (* The late static bound type of a class *)
-  | Tthis : decl ty_
+  | Tthis : decl_phase ty_
   (* Either an object type or a type alias, ty list are the arguments *)
-  | Tapply : Nast.sid * decl ty list -> decl ty_
+  | Tapply : Nast.sid * decl_ty list -> decl_phase ty_
   (* The type of a generic parameter. The constraints on a generic parameter
    * are accessed through the lenv.tpenv component of the environment, which
    * is set up when checking the body of a function or method. See uses of
    * Typing_phase.localize_generic_parameters_with_bounds.
    *)
-  | Tgeneric : string -> decl ty_
+  | Tgeneric : string -> decl_phase ty_
   (* Name of class, name of type const, remaining names of type consts *)
-  | Taccess : taccess_type -> decl ty_
+  | Taccess : taccess_type -> decl_phase ty_
   (* The type of the various forms of "array":
    * Tarray (None, None)         => "array"
    * Tarray (Some ty, None)      => "array<ty>"
    * Tarray (Some ty1, Some ty2) => "array<ty1, ty2>"
    * Tarray (None, Some ty)      => [invalid]
    *)
-  | Tarray : decl ty option * decl ty option -> decl ty_
+  | Tarray : decl_ty option * decl_ty option -> decl_phase ty_
   (* Tdarray (ty1, ty2) => "darray<ty1, ty2>" *)
-  | Tdarray : decl ty * decl ty -> decl ty_
+  | Tdarray : decl_ty * decl_ty -> decl_phase ty_
   (* Tvarray (ty) => "varray<ty>" *)
-  | Tvarray : decl ty -> decl ty_
+  | Tvarray : decl_ty -> decl_phase ty_
   (* Tvarray_or_darray (ty) => "varray_or_darray<ty>" *)
-  | Tvarray_or_darray : decl ty -> decl ty_
+  | Tvarray_or_darray : decl_ty -> decl_phase ty_
   (* "Any" is the type of a variable with a missing annotation, and "mixed" is
    * the type of a variable annotated as "mixed". THESE TWO ARE VERY DIFFERENT!
    * Any unifies with anything, i.e., it is both a supertype and subtype of any
@@ -119,12 +123,12 @@ and _ ty_ =
    * subtype of mixed.) A case analysis would need to be done on $x, via
    * is_int or similar.
    *
-   * mixed exists only in the decl phase because it is desugared into ?nonnull
+   * mixed exists only in the decl_phase phase because it is desugared into ?nonnull
    * during the localization phase.
    *)
-  | Tmixed : decl ty_
-  | Tnothing : decl ty_
-  | Tlike : decl ty -> decl ty_
+  | Tmixed : decl_phase ty_
+  | Tnothing : decl_phase ty_
+  | Tlike : decl_ty -> decl_phase ty_
   (*========== Following Types Exist in Both Phases ==========*)
   | Tany : TanySentinel.t -> 'phase ty_
   | Terr
@@ -147,7 +151,7 @@ and _ ty_ =
   (* A wrapper around fun_type, which contains the full type information for a
    * function, method, lambda, etc. Note that lambdas have an additional layer
    * of indirection before you get to Tfun -- see Tanon below. *)
-  | Tfun : 'phase fun_type -> 'phase ty_
+  | Tfun : 'phase ty fun_type -> 'phase ty_
   (* Tuple, with ordered list of the types of the elements of the tuple. *)
   | Ttuple : 'phase ty list -> 'phase ty_
   (* Whether all fields of this shape are known, types of each of the
@@ -192,11 +196,11 @@ and _ ty_ =
    * Finally abstract types are also derived from the 'this' type and
    * accessing type constants on it, resulting in a dependent type.
    *)
-  | Tabstract : abstract_kind * locl ty option -> locl ty_
+  | Tabstract : abstract_kind * locl_ty option -> locl_phase ty_
   (* An anonymous function, including the fun arity, and the identifier to
    * type the body of the function. (The actual closure is stored in
    * Typing_env.env.genv.anons) *)
-  | Tanon : locl fun_arity * Ident.t -> locl ty_
+  | Tanon : locl_fun_arity * Ident.t -> locl_phase ty_
   (* Union type.
    * The values that are members of this type are the union of the values
    * that are members of the components of the union.
@@ -205,8 +209,8 @@ and _ ty_ =
    *   Tunion [int;float] is the same as num
    *   Tunion [null;t] is the same as Toption t
    *)
-  | Tunion : locl ty list -> locl ty_
-  | Tintersection : locl ty list -> locl ty_
+  | Tunion : locl_ty list -> locl_phase ty_
+  | Tintersection : locl_ty list -> locl_phase ty_
   (* Tobject is an object type compatible with all objects. This type is also
    * compatible with some string operations (since a class might implement
    * __toString), but not with string type hints. In a similar way, Tobject
@@ -216,43 +220,43 @@ and _ ty_ =
    * Tobject is currently used to type code like:
    *   ../test/typecheck/return_unknown_class.php
    *)
-  | Tobject : locl ty_
+  | Tobject : locl_phase ty_
   (* An instance of a class or interface, ty list are the arguments
    * If exact=Exact, then this represents instances of *exactly* this class
    * If exact=Nonexact, this also includes subclasses
    *)
-  | Tclass : Nast.sid * exact * locl ty list -> locl ty_
+  | Tclass : Nast.sid * exact * locl_ty list -> locl_phase ty_
   (* Localized version of Tarray *)
-  | Tarraykind : array_kind -> locl ty_
+  | Tarraykind : array_kind -> locl_phase ty_
   (* The type of a list destructructuring assignment.
    * Implements valid destructuring operations via subtyping *)
-  | Tdestructure : locl ty list -> locl ty_
+  | Tdestructure : locl_ty list -> locl_phase ty_
   (* Typing of Pocket Universe Expressions
    * - first parameter is the enclosing class
    * - second parameter is the name of the Pocket Universe Enumeration
    * - third parameter is  either Pu_plain (the enumeration as the set of
    *   all its atoms) or Pu_atom (a specific atom in the enumeration)
    *)
-  | Tpu : locl ty * Nast.sid * pu_kind -> locl ty_
+  | Tpu : locl_ty * Nast.sid * pu_kind -> locl_phase ty_
 
 and array_kind =
-  (* Those three types directly correspond to their decl level counterparts:
+  (* Those three types directly correspond to their decl_phase level counterparts:
    * array, array<_> and array<_, _> *)
   | AKany
   (* An array declared as a varray. *)
-  | AKvarray of locl ty
+  | AKvarray of locl_ty
   (* An array declared as a darray. *)
-  | AKdarray of locl ty * locl ty
+  | AKdarray of locl_ty * locl_ty
   (* An array annotated as a varray_or_darray. *)
-  | AKvarray_or_darray of locl ty
+  | AKvarray_or_darray of locl_ty
   (* An array "used like a vec".
    * /!\ An actual `vec` is represented as a `Tclass ("\\vec", [...])`
    *)
-  | AKvec of locl ty
+  | AKvec of locl_ty
   (* An array "used like a map or dict".
    * /!\ An actual `dict` is represented as a `Tclass ("\\dict", [...])`
    *)
-  | AKmap of locl ty * locl ty
+  | AKmap of locl_ty * locl_ty
   (* This is a type created when we see array() literal *)
   | AKempty
 
@@ -263,7 +267,7 @@ and abstract_kind =
   (* newtype foo<T1, T2> ...
    * or
    * enum foo ... *)
-  | AKnewtype of string * locl ty list
+  | AKnewtype of string * locl_ty list
   (* <T super C> ; None if 'as' constrained *)
   | AKgeneric of string
   (* see dependent_type *)
@@ -299,7 +303,7 @@ and dependent_type =
    *)
   | DTexpr of Ident.t
 
-and taccess_type = decl ty * Nast.sid list
+and taccess_type = decl_ty * Nast.sid list
 
 and shape_kind =
   | Closed_shape
@@ -319,9 +323,9 @@ and shape_kind =
   *)
 and reactivity =
   | Nonreactive
-  | Local of decl ty option
-  | Shallow of decl ty option
-  | Reactive of decl ty option
+  | Local of decl_ty option
+  | Shallow of decl_ty option
+  | Reactive of decl_ty option
   | MaybeReactive of reactivity
   | RxVar of reactivity option
 
@@ -349,16 +353,16 @@ and fun_tparams_kind =
 
 (* The type of a function AND a method.
  * A function has a min and max arity because of optional arguments *)
-and 'phase fun_type = {
+and 'ty fun_type = {
   ft_pos: Pos.t;
   ft_deprecated: string option;
   ft_abstract: bool;
   ft_is_coroutine: bool;
-  ft_arity: 'phase fun_arity;
-  ft_tparams: 'phase tparam list * fun_tparams_kind;
-  ft_where_constraints: 'phase where_constraint list;
-  ft_params: 'phase fun_params;
-  ft_ret: 'phase possibly_enforced_ty;
+  ft_arity: 'ty fun_arity;
+  ft_tparams: 'ty tparam list * fun_tparams_kind;
+  ft_where_constraints: 'ty where_constraint list;
+  ft_params: 'ty fun_params;
+  ft_ret: 'ty possibly_enforced_ty;
   (* Carries through the sync/async information from the aast *)
   ft_fun_kind: Ast_defs.fun_kind;
   ft_reactive: reactivity;
@@ -370,18 +374,26 @@ and 'phase fun_type = {
   ft_returns_void_to_rx: bool;
 }
 
+and decl_fun_type = decl_ty fun_type
+
+and locl_fun_type = locl_ty fun_type
+
 (* Arity information for a fun_type; indicating the minimum number of
  * args expected by the function and the maximum number of args for
  * standard, non-variadic functions or the type of variadic argument taken *)
-and 'phase fun_arity =
+and 'ty fun_arity =
   (* min ; max *)
   | Fstandard of int * int
   (* PHP5.6-style ...$args finishes the func declaration.
      min ; variadic param type *)
-  | Fvariadic of int * 'phase fun_param
+  | Fvariadic of int * 'ty fun_param
   (* HH-style ... anonymous variadic arg; body presumably uses func_get_args.
      min ; position of ... *)
   | Fellipsis of int * Pos.t
+
+and decl_fun_arity = decl_ty fun_arity
+
+and locl_fun_arity = locl_ty fun_arity
 
 and param_mode =
   | FPnormal
@@ -390,25 +402,37 @@ and param_mode =
 
 and param_rx_annotation =
   | Param_rx_var
-  | Param_rx_if_impl of decl ty
+  | Param_rx_if_impl of decl_ty
 
-and 'phase possibly_enforced_ty = {
+and 'ty possibly_enforced_ty = {
   (* True if consumer of this type enforces it at runtime *)
   et_enforced: bool;
-  et_type: 'phase ty;
+  et_type: 'ty;
 }
 
-and 'phase fun_param = {
+and decl_possibly_enforced_ty = decl_ty possibly_enforced_ty
+
+and locl_possibly_enforced_ty = locl_ty possibly_enforced_ty
+
+and 'ty fun_param = {
   fp_pos: Pos.t;
   fp_name: string option;
-  fp_type: 'phase possibly_enforced_ty;
+  fp_type: 'ty possibly_enforced_ty;
   fp_kind: param_mode;
   fp_accept_disposable: bool;
   fp_mutability: param_mutability option;
   fp_rx_annotation: param_rx_annotation option;
 }
 
-and 'phase fun_params = 'phase fun_param list
+and decl_fun_param = decl_ty fun_param
+
+and locl_fun_param = locl_ty fun_param
+
+and 'ty fun_params = 'ty fun_param list
+
+and decl_fun_params = decl_ty fun_params
+
+and locl_fun_params = locl_ty fun_params
 
 and xhp_attr_tag =
   | Required
@@ -442,7 +466,7 @@ and class_elt = {
   ce_visibility: visibility;
   ce_const: bool;
   ce_lateinit: bool;
-  ce_type: decl ty Lazy.t;
+  ce_type: decl_ty Lazy.t;
   (* identifies the class from which this elt originates *)
   ce_origin: string;
 }
@@ -451,7 +475,7 @@ and class_const = {
   cc_synthesized: bool;
   cc_abstract: bool;
   cc_pos: Pos.t;
-  cc_type: decl ty;
+  cc_type: decl_ty;
   cc_visibility: visibility;
   cc_expr: Nast.expr option;
   (* identifies the class from which this const originates *)
@@ -464,13 +488,13 @@ and class_const = {
  * class Foo {}
  *
  * interface Bar {
- *   require extends Foo; <- position of the decl ty
+ *   require extends Foo; <- position of the decl_phase ty
  * }
  *
  * class Baz extends Foo implements Bar { <- position of the `implements`
  * }
  *)
-and requirement = Pos.t * decl ty
+and requirement = Pos.t * decl_ty
 
 (* In the default case, we use Inconsistent. If a class has <<__ConsistentConstruct>>,
  * or if it inherits a class that has <<__ConsistentConstruct>>, we use inherited.
@@ -500,8 +524,8 @@ and class_type = {
   tc_is_disposable: bool;
   tc_name: string;
   tc_pos: Pos.t;
-  tc_tparams: decl tparam list;
-  tc_where_constraints: decl where_constraint list;
+  tc_tparams: decl_tparam list;
+  tc_where_constraints: decl_where_constraint list;
   tc_consts: class_const SMap.t;
   tc_typeconsts: typeconst_type SMap.t;
   tc_pu_enums: pu_enum_type SMap.t;
@@ -513,7 +537,7 @@ and class_type = {
   tc_construct: class_elt option * consistent_kind;
   (* This includes all the classes, interfaces and traits this class is
    * using. *)
-  tc_ancestors: decl ty SMap.t;
+  tc_ancestors: decl_ty SMap.t;
   tc_req_ancestors: requirement list;
   tc_req_ancestors_extends: SSet.t;
   (* the extends of req_ancestors *)
@@ -524,7 +548,7 @@ and class_type = {
 }
 
 and typeconst_abstract_kind =
-  | TCAbstract of decl ty option
+  | TCAbstract of decl_ty option
   | TCPartiallyAbstract
   | TCConcrete
 
@@ -532,8 +556,8 @@ and typeconst_type = {
   ttc_abstract: typeconst_abstract_kind;
   ttc_visibility: visibility;
   ttc_name: Nast.sid;
-  ttc_constraint: decl ty option;
-  ttc_type: decl ty option;
+  ttc_constraint: decl_ty option;
+  ttc_type: decl_ty option;
   ttc_origin: string;
   ttc_enforceable: Pos.t * bool;
   ttc_reifiable: Pos.t option;
@@ -543,46 +567,54 @@ and pu_enum_type = {
   tpu_name: Nast.sid;
   tpu_is_final: bool;
   tpu_case_types: Nast.sid SMap.t;
-  tpu_case_values: (Nast.sid * decl ty) SMap.t;
+  tpu_case_values: (Nast.sid * decl_ty) SMap.t;
   tpu_members: pu_member_type SMap.t;
 }
 
 and pu_member_type = {
   tpum_atom: Nast.sid;
-  tpum_types: (Nast.sid * decl ty) SMap.t;
+  tpum_types: (Nast.sid * decl_ty) SMap.t;
 }
 
 and enum_type = {
-  te_base: decl ty;
-  te_constraint: decl ty option;
+  te_base: decl_ty;
+  te_constraint: decl_ty option;
 }
 
 and typedef_type = {
   td_pos: Pos.t;
   td_vis: Aast.typedef_visibility;
-  td_tparams: decl tparam list;
-  td_constraint: decl ty option;
-  td_type: decl ty;
+  td_tparams: decl_tparam list;
+  td_constraint: decl_ty option;
+  td_type: decl_ty;
   td_decl_errors: Errors.t option;
 }
 
-and 'phase tparam = {
+and 'ty tparam = {
   tp_variance: Ast_defs.variance;
   tp_name: Ast_defs.id;
-  tp_constraints: (Ast_defs.constraint_kind * 'phase ty) list;
+  tp_constraints: (Ast_defs.constraint_kind * 'ty) list;
   tp_reified: Aast.reify_kind;
   tp_user_attributes: Nast.user_attribute list;
 }
 
-and 'phase where_constraint = 'phase ty * Ast_defs.constraint_kind * 'phase ty
+and decl_tparam = decl_ty tparam
+
+and locl_tparam = locl_ty tparam
+
+and 'ty where_constraint = 'ty * Ast_defs.constraint_kind * 'ty
+
+and decl_where_constraint = decl_ty where_constraint
+
+and locl_where_constraint = locl_ty where_constraint
 
 type phase_ty =
-  | DeclTy of decl ty
-  | LoclTy of locl ty
+  | DeclTy of decl_ty
+  | LoclTy of locl_ty
 
 type deserialization_error =
-  (* The type was valid, but some component thereof was a decl ty when we
-  expected a locl ty, or vice versa. *)
+  (* The type was valid, but some component thereof was a decl_ty when we
+  expected a locl_phase ty, or vice versa. *)
   | Wrong_phase of string
   (* The specific type or some component thereof is not one that we support
   deserializing, usually because not enough information was serialized to be
@@ -598,13 +630,13 @@ type expand_env = {
    * to prevent entering into a cycle when expanding these types
    *)
   type_expansions: (Pos.t * string) list;
-  substs: locl ty SMap.t;
-  this_ty: locl ty;
+  substs: locl_ty SMap.t;
+  this_ty: locl_ty;
   (* The class that the type is extracted from. Used for creating expression
    * dependent types for type constants.
    *)
   from_class: Nast.class_id_ option;
-  validate_dty: (expand_env -> decl ty -> unit) option;
+  validate_dty: (expand_env -> decl_ty -> unit) option;
 }
 
 let is_type_no_return ty = ty = Tprim Aast.Tnoreturn

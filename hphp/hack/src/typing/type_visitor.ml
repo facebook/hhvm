@@ -29,7 +29,7 @@ class type ['a] type_visitor_type =
 
     method on_tarray : 'a -> Reason.t -> 'b ty option -> 'b ty option -> 'a
 
-    method on_tvarray_or_darray : 'a -> Reason.t -> decl ty -> 'a
+    method on_tvarray_or_darray : 'a -> Reason.t -> decl_ty -> 'a
 
     method on_tgeneric : 'a -> Reason.t -> string -> 'a
 
@@ -43,20 +43,20 @@ class type ['a] type_visitor_type =
 
     method on_type : 'a -> 'b ty -> 'a
 
-    method on_tfun : 'a -> Reason.t -> 'b fun_type -> 'a
+    method on_tfun : 'a -> Reason.t -> 'b ty fun_type -> 'a
 
     method on_tabstract :
-      'a -> Reason.t -> abstract_kind -> locl ty option -> 'a
+      'a -> Reason.t -> abstract_kind -> locl_ty option -> 'a
 
-    method on_tapply : 'a -> Reason.t -> Aast.sid -> decl ty list -> 'a
+    method on_tapply : 'a -> Reason.t -> Aast.sid -> decl_ty list -> 'a
 
     method on_ttuple : 'a -> Reason.t -> 'b ty list -> 'a
 
-    method on_tanon : 'a -> Reason.t -> locl fun_arity -> Ident.t -> 'a
+    method on_tanon : 'a -> Reason.t -> locl_fun_arity -> Ident.t -> 'a
 
-    method on_tunion : 'a -> Reason.t -> locl ty list -> 'a
+    method on_tunion : 'a -> Reason.t -> locl_ty list -> 'a
 
-    method on_tintersection : 'a -> Reason.t -> locl ty list -> 'a
+    method on_tintersection : 'a -> Reason.t -> locl_ty list -> 'a
 
     method on_tobject : 'a -> Reason.t -> 'a
 
@@ -66,11 +66,11 @@ class type ['a] type_visitor_type =
     method on_taccess : 'a -> Reason.t -> taccess_type -> 'a
 
     method on_tclass :
-      'a -> Reason.t -> Aast.sid -> exact -> locl ty list -> 'a
+      'a -> Reason.t -> Aast.sid -> exact -> locl_ty list -> 'a
 
     method on_tarraykind : 'a -> Reason.t -> array_kind -> 'a
 
-    method on_tlist : 'a -> Reason.t -> locl ty list -> 'a
+    method on_tlist : 'a -> Reason.t -> locl_ty list -> 'a
   end
 
 class virtual ['a] type_visitor : ['a] type_visitor_type =
@@ -110,7 +110,7 @@ class virtual ['a] type_visitor : ['a] type_visitor_type =
 
     method on_tvar acc _ _ = acc
 
-    method on_tfun : type a. _ -> Reason.t -> a fun_type -> _ =
+    method on_tfun : type a. _ -> Reason.t -> a ty fun_type -> _ =
       fun acc _ { ft_params; ft_tparams; ft_ret; _ } ->
         let acc =
           List.fold_left

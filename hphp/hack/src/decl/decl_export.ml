@@ -23,11 +23,11 @@ end
 
 type saved_decls = {
   classes: decl_class_type SMap.t;
-  props: decl ty CEKMap.t;
-  sprops: decl ty CEKMap.t;
-  meths: decl fun_type CEKMap.t;
-  smeths: decl fun_type CEKMap.t;
-  cstrs: decl fun_type SMap.t;
+  props: decl_ty CEKMap.t;
+  sprops: decl_ty CEKMap.t;
+  meths: decl_fun_type CEKMap.t;
+  smeths: decl_fun_type CEKMap.t;
+  cstrs: decl_fun_type SMap.t;
   fixmes: Pos.t IMap.t IMap.t Relative_path.Map.t;
   decl_fixmes: Pos.t IMap.t IMap.t Relative_path.Map.t;
 }

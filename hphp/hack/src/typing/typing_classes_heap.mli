@@ -51,21 +51,21 @@ module Api : sig
 
   val pos : t -> Pos.t
 
-  val tparams : t -> decl tparam list
+  val tparams : t -> decl_tparam list
 
-  val where_constraints : t -> decl where_constraint list
+  val where_constraints : t -> decl_where_constraint list
 
-  val all_where_constraints_on_this : t -> decl where_constraint list
+  val all_where_constraints_on_this : t -> decl_where_constraint list
 
-  val upper_bounds_on_this : t -> decl ty Sequence.t
+  val upper_bounds_on_this : t -> decl_ty Sequence.t
 
-  val upper_bounds_on_this_from_constraints : t -> decl ty Sequence.t
+  val upper_bounds_on_this_from_constraints : t -> decl_ty Sequence.t
 
   val has_upper_bounds_on_this_from_constraints : t -> bool
 
-  val lower_bounds_on_this : t -> decl ty Sequence.t
+  val lower_bounds_on_this : t -> decl_ty Sequence.t
 
-  val lower_bounds_on_this_from_constraints : t -> decl ty Sequence.t
+  val lower_bounds_on_this_from_constraints : t -> decl_ty Sequence.t
 
   val has_lower_bounds_on_this_from_constraints : t -> bool
 
@@ -77,7 +77,7 @@ module Api : sig
 
   val decl_errors : t -> Errors.t option
 
-  val get_ancestor : t -> string -> decl ty option
+  val get_ancestor : t -> string -> decl_ty option
 
   val has_ancestor : t -> string -> bool
 
@@ -85,7 +85,7 @@ module Api : sig
 
   val extends : t -> string -> bool
 
-  val all_ancestors : t -> (string * decl ty) Sequence.t
+  val all_ancestors : t -> (string * decl_ty) Sequence.t
 
   val all_ancestor_names : t -> string Sequence.t
 

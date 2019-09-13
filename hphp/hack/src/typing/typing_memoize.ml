@@ -22,7 +22,7 @@ let check_param : env -> Nast.fun_param -> unit =
     let msgl = Reason.to_string ("This is " ^ ty_str) (fst ty) in
     Errors.invalid_memoized_param param_pos msgl
   in
-  let rec check_memoizable : env -> locl ty -> unit =
+  let rec check_memoizable : env -> locl_ty -> unit =
    fun env ty ->
     let (env, ty) = Env.expand_type env ty in
     let ety_env = Typing_phase.env_with_self env in

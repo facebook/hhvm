@@ -100,13 +100,13 @@ module LocalCache =
       let description = "LazyLinearization"
     end)
 
-let ancestor_from_ty (source : source_type) (ty : decl ty) :
-    Pos.t * (Pos.t * string) * decl ty list * source_type =
+let ancestor_from_ty (source : source_type) (ty : decl_ty) :
+    Pos.t * (Pos.t * string) * decl_ty list * source_type =
   let (r, class_name, type_args) = Decl_utils.unwrap_class_type ty in
   let ty_pos = Typing_reason.to_pos r in
   (ty_pos, class_name, type_args, source)
 
-let from_parent (c : shallow_class) : decl ty list =
+let from_parent (c : shallow_class) : decl_ty list =
   (* In an abstract class or a trait, we assume the interfaces
    * will be implemented in the future, so we take them as
    * part of the class (as requested by dependency injection implementers)
@@ -187,7 +187,7 @@ let is_interface (source : source_type) =
 let rec ancestor_linearization
     (env : env)
     (child_class_concrete : bool)
-    (ancestor : Pos.t * (Pos.t * string) * decl ty list * source_type) :
+    (ancestor : Pos.t * (Pos.t * string) * decl_ty list * source_type) :
     string * linearization =
   let (ty_pos, (use_pos, class_name), type_args, source) = ancestor in
   Decl_env.add_extends_dependency env.decl_env class_name;

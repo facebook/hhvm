@@ -141,7 +141,7 @@ let strip_ns_prefix reference name =
 
 let list_items items = String.concat items ~sep:", "
 
-let tparam_name (tp : Typing_defs.decl Typing_defs.tparam) = snd tp.tp_name
+let tparam_name (tp : Typing_defs.decl_tparam) = snd tp.tp_name
 
 let function_make_default = "extract_standalone_make_default"
 

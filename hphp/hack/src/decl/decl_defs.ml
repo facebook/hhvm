@@ -42,7 +42,7 @@ exception Decl_not_found of string
  * `dc_substs` during inheritance. See Decl_inherit module.
  *)
 type subst_context = {
-  sc_subst: decl ty SMap.t;
+  sc_subst: decl_ty SMap.t;
   sc_class_context: string;
   sc_from_req_extends: bool;
 }
@@ -70,7 +70,7 @@ type mro_element = {
   (* The type arguments with which this ancestor class was instantiated. The
      first class in the linearization (the one which was linearized) will have
      an empty list here, even when it takes type parameters. *)
-  mro_type_args: decl ty list;
+  mro_type_args: decl_ty list;
   (* True if this element referred to a class whose definition could not be
      found. This is always indicative of an "Unbound name" error (emitted by
      Naming), so one could imagine omitting elements with this flag set from the
@@ -142,8 +142,8 @@ type decl_class_type = {
   dc_is_xhp: bool;
   dc_name: string;
   dc_pos: Pos.t;
-  dc_tparams: decl tparam list;
-  dc_where_constraints: decl where_constraint list;
+  dc_tparams: decl_tparam list;
+  dc_where_constraints: decl_where_constraint list;
   (* class name to the subst_context that must be applied to that class *)
   dc_substs: subst_context SMap.t;
   dc_consts: class_const SMap.t;
@@ -154,7 +154,7 @@ type decl_class_type = {
   dc_methods: element SMap.t;
   dc_smethods: element SMap.t;
   dc_construct: element option * consistent_kind;
-  dc_ancestors: decl ty SMap.t;
+  dc_ancestors: decl_ty SMap.t;
   dc_req_ancestors: requirement list;
   dc_req_ancestors_extends: SSet.t;
   dc_extends: SSet.t;

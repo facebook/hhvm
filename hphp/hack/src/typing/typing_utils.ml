@@ -43,7 +43,7 @@ let not_implemented s _ =
   failwith (Printf.sprintf "Function %s not implemented" s)
 
 type expand_typedef =
-  expand_env -> env -> Reason.t -> string -> locl ty list -> env * locl ty
+  expand_env -> env -> Reason.t -> string -> locl_ty list -> env * locl_ty
 
 let (expand_typedef_ref : expand_typedef ref) =
   ref (not_implemented "expand_typedef")
@@ -51,13 +51,13 @@ let (expand_typedef_ref : expand_typedef ref) =
 let expand_typedef x = !expand_typedef_ref x
 
 type sub_type =
-  env -> locl ty -> locl ty -> Errors.typing_error_callback -> env
+  env -> locl_ty -> locl_ty -> Errors.typing_error_callback -> env
 
 let (sub_type_ref : sub_type ref) = ref (not_implemented "sub_type")
 
 let sub_type x = !sub_type_ref x
 
-type is_sub_type_type = env -> locl ty -> locl ty -> bool
+type is_sub_type_type = env -> locl_ty -> locl_ty -> bool
 
 (*let (is_sub_type_ref: is_sub_type_type ref) = ref not_implemented*)
 let (is_sub_type_for_union_ref : is_sub_type_type ref) =
@@ -66,7 +66,7 @@ let (is_sub_type_for_union_ref : is_sub_type_type ref) =
 let is_sub_type_for_union x = !is_sub_type_for_union_ref x
 
 type add_constraint =
-  Pos.Map.key -> env -> Ast_defs.constraint_kind -> locl ty -> locl ty -> env
+  Pos.Map.key -> env -> Ast_defs.constraint_kind -> locl_ty -> locl_ty -> env
 
 let (add_constraint_ref : add_constraint ref) =
   ref (not_implemented "add_constraint")
@@ -77,28 +77,28 @@ type expand_typeconst =
   expand_env ->
   env ->
   ?as_tyvar_with_cnstr:bool ->
-  locl ty ->
+  locl_ty ->
   Aast.sid ->
-  env * locl ty
+  env * locl_ty
 
 let (expand_typeconst_ref : expand_typeconst ref) =
   ref (not_implemented "expand_typeconst")
 
 let expand_typeconst x = !expand_typeconst_ref x
 
-type union = env -> locl ty -> locl ty -> env * locl ty
+type union = env -> locl_ty -> locl_ty -> env * locl_ty
 
 let (union_ref : union ref) = ref (not_implemented "union")
 
 let union x = !union_ref x
 
-type union_list = env -> Reason.t -> locl ty list -> env * locl ty
+type union_list = env -> Reason.t -> locl_ty list -> env * locl_ty
 
 let (union_list_ref : union_list ref) = ref (not_implemented "union_list")
 
 let union_list x = !union_list_ref x
 
-type fold_union = env -> Reason.t -> locl ty list -> env * locl ty
+type fold_union = env -> Reason.t -> locl_ty list -> env * locl_ty
 
 let (fold_union_ref : fold_union ref) = ref (not_implemented "fold_union")
 
@@ -106,9 +106,9 @@ let fold_union x = !fold_union_ref x
 
 type simplify_unions =
   env ->
-  ?on_tyvar:(env -> Reason.t -> Ident.t -> env * locl ty) ->
-  locl ty ->
-  env * locl ty
+  ?on_tyvar:(env -> Reason.t -> Ident.t -> env * locl_ty) ->
+  locl_ty ->
+  env * locl_ty
 
 let (simplify_unions_ref : simplify_unions ref) =
   ref (not_implemented "simplify_unions")
@@ -119,7 +119,7 @@ type approx =
   | ApproxUp
   | ApproxDown
 
-type non = env -> Reason.t -> locl ty -> approx:approx -> env * locl ty
+type non = env -> Reason.t -> locl_ty -> approx:approx -> env * locl_ty
 
 let (non_ref : non ref) = ref (not_implemented "non")
 
@@ -127,16 +127,16 @@ let non x = !non_ref x
 
 type simplify_intersections =
   env ->
-  ?on_tyvar:(env -> Reason.t -> int -> env * locl ty) ->
-  locl ty ->
-  env * locl ty
+  ?on_tyvar:(env -> Reason.t -> int -> env * locl_ty) ->
+  locl_ty ->
+  env * locl_ty
 
 let (simplify_intersections_ref : simplify_intersections ref) =
   ref (not_implemented "simplify_intersections")
 
 let simplify_intersections x = !simplify_intersections_ref x
 
-type localize_with_self = env -> decl ty -> env * locl ty
+type localize_with_self = env -> decl_ty -> env * locl_ty
 
 let (localize_with_self_ref : localize_with_self ref) =
   ref (not_implemented "localize_with_self")
@@ -260,7 +260,7 @@ Similarly to try_over_concrete_supertypes, we stay liberal with errors:
 discard the result of any run which has produced an error.
 If all runs have produced an error, gather all errors and results and add errors. *)
 let run_on_intersection :
-    'env -> f:('env -> locl ty -> 'env * 'a) -> locl ty list -> 'env * 'a list
+    'env -> f:('env -> locl_ty -> 'env * 'a) -> locl_ty list -> 'env * 'a list
     =
  fun env ~f tyl ->
   let (env, resl_errors) =
@@ -477,9 +477,9 @@ let class_is_final_and_not_contravariant class_ty =
 (*****************************************************************************)
 
 module HasTany : sig
-  val check : locl ty -> bool
+  val check : locl_ty -> bool
 
-  val check_why : locl ty -> Reason.t option
+  val check_why : locl_ty -> Reason.t option
 end = struct
   let merge x y = Option.merge x y (fun x _ -> x)
 
@@ -576,7 +576,7 @@ let add_function_type env fty logged =
 type class_get_pu =
   ?from_class:Nast.class_id_ ->
   env ->
-  locl ty ->
+  locl_ty ->
   string ->
   env * (expand_env * pu_enum_type) option
 

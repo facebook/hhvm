@@ -16,7 +16,7 @@ exception Not_in_class
 val print_ty : env -> 'a Typing_defs.ty -> string
 (** Return a string representation of the given type using Hack-like syntax. *)
 
-val print_error_ty : env -> Typing_defs.locl Typing_defs.ty -> string
+val print_error_ty : env -> Typing_defs.locl_ty -> string
 
 val print_ty_with_identity :
   env ->
@@ -35,7 +35,7 @@ val ty_to_json : env -> 'a Typing_defs.ty -> Hh_json.json
 val json_to_locl_ty :
   ?keytrace:Hh_json.Access.keytrace ->
   Hh_json.json ->
-  (Typing_defs.locl Typing_defs.ty, Typing_defs.deserialization_error) result
+  (Typing_defs.locl_ty, Typing_defs.deserialization_error) result
 (** Convert a JSON representation of a type back into a locl-phase type. *)
 
 val get_self_id_exn : env -> string
@@ -133,31 +133,27 @@ val assert_nullable : Pos.t -> Ast_defs.bop -> env -> Tast.ty -> unit
     comparsion to null is nullable (otherwise it is known to always
     return true or false). *)
 
-val hint_to_ty : env -> Aast.hint -> Typing_defs.decl Typing_defs.ty
+val hint_to_ty : env -> Aast.hint -> Typing_defs.decl_ty
 (** Return the declaration-phase type the given hint represents. *)
 
 val localize :
-  env ->
-  Typing_defs.expand_env ->
-  Typing_defs.decl Typing_defs.ty ->
-  env * Tast.ty
+  env -> Typing_defs.expand_env -> Typing_defs.decl_ty -> env * Tast.ty
 
-val localize_with_self :
-  env -> Typing_defs.decl Typing_defs.ty -> env * Tast.ty
-(** Transforms a declaration phase type ({!Typing_defs.decl Typing_defs.ty})
-    into a localized type ({!Typing_defs.locl Typing_defs.ty} = {!Tast.ty}).
+val localize_with_self : env -> Typing_defs.decl_ty -> env * Tast.ty
+(** Transforms a declaration phase type ({!Typing_defs.decl_ty})
+    into a localized type ({!Typing_defs.locl_ty} = {!Tast.ty}).
     Performs no substitutions of generics and initializes the late static bound
     type ({!Typing_defs.Tthis}) to the current class type (the type returned by
     {!get_self}).
 
     This is mostly provided as legacy support for {!AutocompleteService}, and
-    should not be considered a general mechanism for transforming a {decl ty} to
+    should not be considered a general mechanism for transforming a {decl_ty} to
     a {!Tast.ty}. *)
 
 val localize_with_dty_validator :
   env ->
-  Typing_defs.decl Typing_defs.ty ->
-  (Typing_defs.expand_env -> Typing_defs.decl Typing_defs.ty -> unit) ->
+  Typing_defs.decl_ty ->
+  (Typing_defs.expand_env -> Typing_defs.decl_ty -> unit) ->
   env * Tast.ty
 (** Identical to localize_with_self, but also takes a validator that is applied
     to every expanded decl type on the way to becoming a locl type. *)

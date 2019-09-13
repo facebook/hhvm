@@ -39,7 +39,7 @@ let empty_extra_info =
   { method_info = None; class_ty = None; parent_class_ty = None }
 
 module ConditionTypes = struct
-  let try_get_class_for_condition_type (env : env) (ty : decl ty) =
+  let try_get_class_for_condition_type (env : env) (ty : decl_ty) =
     match TUtils.try_unwrap_class_type ty with
     | None -> None
     | Some (_, ((_, x) as sid), _) ->
@@ -50,7 +50,7 @@ module ConditionTypes = struct
       end
 
   let try_get_method_from_condition_type
-      (env : env) (ty : decl ty) (is_static : bool) (method_name : string) =
+      (env : env) (ty : decl_ty) (is_static : bool) (method_name : string) =
     match try_get_class_for_condition_type env ty with
     | Some (_, cls) ->
       let get =
@@ -62,7 +62,7 @@ module ConditionTypes = struct
       get cls method_name
     | None -> None
 
-  let localize_condition_type (env : env) (ty : decl ty) : locl ty =
+  let localize_condition_type (env : env) (ty : decl_ty) : locl_ty =
     (* if condition type is generic - we cannot specify type argument in attribute.
        For cases when we check if containing type is a subtype of condition type
        if condition type is generic instantiate it with TAny's *)
@@ -283,9 +283,9 @@ let rec process_simplify_subtype_result prop =
 and simplify_subtype
     ~(seen_generic_params : SSet.t option)
     ~(no_top_bottom : bool)
-    ?(this_ty : locl ty option = None)
-    (ty_sub : locl ty)
-    (ty_super : locl ty)
+    ?(this_ty : locl_ty option = None)
+    (ty_sub : locl_ty)
+    (ty_super : locl_ty)
     ~(on_error : Errors.typing_error_callback)
     env : env * TL.subtype_prop =
   log_subtype
@@ -1464,8 +1464,8 @@ and simplify_subtype_variance
     ~(no_top_bottom : bool)
     (cid : string)
     (variancel : Ast_defs.variance list)
-    (children_tyl : locl ty list)
-    (super_tyl : locl ty list)
+    (children_tyl : locl_ty list)
+    (super_tyl : locl_ty list)
     ~(on_error : Errors.typing_error_callback) : env -> env * TL.subtype_prop =
  fun env ->
   let simplify_subtype =
@@ -1507,10 +1507,10 @@ and simplify_subtype_params
     ?(is_method : bool = false)
     ?(check_params_reactivity = false)
     ?(check_params_mutability = false)
-    (subl : locl fun_param list)
-    (superl : locl fun_param list)
-    (variadic_sub_ty : locl possibly_enforced_ty option)
-    (variadic_super_ty : locl possibly_enforced_ty option)
+    (subl : locl_fun_param list)
+    (superl : locl_fun_param list)
+    (variadic_sub_ty : locl_possibly_enforced_ty option)
+    (variadic_super_ty : locl_possibly_enforced_ty option)
     ~(on_error : Errors.typing_error_callback)
     env =
   let simplify_subtype_possibly_enforced =
@@ -1606,8 +1606,8 @@ and simplify_subtype_params
 and simplify_subtype_params_with_variadic
     ~(seen_generic_params : SSet.t option)
     ~(no_top_bottom : bool)
-    (subl : locl fun_param list)
-    (variadic_ty : locl possibly_enforced_ty)
+    (subl : locl_fun_param list)
+    (variadic_ty : locl_possibly_enforced_ty)
     (on_error : Errors.typing_error_callback)
     env =
   let simplify_subtype_possibly_enforced =
@@ -1629,8 +1629,8 @@ and simplify_subtype_params_with_variadic
 and simplify_supertype_params_with_variadic
     ~(seen_generic_params : SSet.t option)
     ~(no_top_bottom : bool)
-    (superl : locl fun_param list)
-    (variadic_ty : locl possibly_enforced_ty)
+    (superl : locl_fun_param list)
+    (variadic_ty : locl_possibly_enforced_ty)
     (on_error : Errors.typing_error_callback)
     env =
   let simplify_subtype_possibly_enforced =
@@ -1793,16 +1793,16 @@ and subtype_reactivity
   | (Nonreactive, Local _, _) when is_call_site -> true
   | _ -> false
 
-and should_check_fun_params_reactivity (ft_super : locl fun_type) =
+and should_check_fun_params_reactivity (ft_super : locl_fun_type) =
   ft_super.ft_reactive <> Nonreactive
 
 (* checks condition described by OnlyRxIfImpl condition on parameter is met  *)
 and subtype_param_rx_if_impl
     ~is_param
     (env : env)
-    (cond_type_sub : decl ty option)
-    (declared_type_sub : locl ty option)
-    (cond_type_super : decl ty option) =
+    (cond_type_sub : decl_ty option)
+    (declared_type_sub : locl_ty option)
+    (cond_type_super : decl_ty option) =
   let cond_type_sub =
     Option.map cond_type_sub ~f:(ConditionTypes.localize_condition_type env)
   in
@@ -1906,7 +1906,7 @@ and subtype_param_rx_if_impl
 
 (* checks reactivity conditions for function parameters *)
 and subtype_fun_params_reactivity
-    (p_sub : locl fun_param) (p_super : locl fun_param) env =
+    (p_sub : locl_fun_param) (p_super : locl_fun_param) env =
   match (p_sub.fp_rx_annotation, p_super.fp_rx_annotation) with
   (* no conditions on parameters - do nothing *)
   | (None, None) -> valid env
@@ -1991,9 +1991,9 @@ and subtype_fun_params_reactivity
 and check_subtype_funs_attributes
     ?(extra_info : reactivity_extra_info option)
     (r_sub : Reason.t)
-    (ft_sub : locl fun_type)
+    (ft_sub : locl_fun_type)
     (r_super : Reason.t)
-    (ft_super : locl fun_type)
+    (ft_super : locl_fun_type)
     env =
   let p_sub = Reason.to_pos r_sub in
   let p_super = Reason.to_pos r_super in
@@ -2124,9 +2124,9 @@ and simplify_subtype_funs
     ~(check_return : bool)
     ?(extra_info : reactivity_extra_info option)
     (r_sub : Reason.t)
-    (ft_sub : locl fun_type)
+    (ft_sub : locl_fun_type)
     (r_super : Reason.t)
-    (ft_super : locl fun_type)
+    (ft_super : locl_fun_type)
     (on_error : Errors.typing_error_callback)
     env : env * TL.subtype_prop =
   let variadic_subtype =
@@ -2187,8 +2187,8 @@ and simplify_subtype_funs
 (* One of the main entry points to this module *)
 and sub_type
     (env : env)
-    (ty_sub : locl ty)
-    (ty_super : locl ty)
+    (ty_sub : locl_ty)
+    (ty_super : locl_ty)
     (on_error : Errors.typing_error_callback) : env =
   Env.log_env_change "sub_type" env
   @@ sub_type_inner env ~this_ty:None ty_sub ty_super on_error
@@ -2347,9 +2347,9 @@ and tvenv_to_prop tvenv =
 
 and sub_type_inner
     (env : env)
-    ~(this_ty : locl ty option)
-    (ty_sub : locl ty)
-    (ty_super : locl ty)
+    ~(this_ty : locl_ty option)
+    (ty_sub : locl_ty)
+    (ty_super : locl_ty)
     (on_error : Errors.typing_error_callback) : env =
   log_subtype
     ~level:1
@@ -2381,7 +2381,7 @@ and sub_type_inner
  * before calling sub_type and then re-enable it afterwards.
  *)
 and is_sub_type_LEGACY_DEPRECATED
-    (env : env) (ty_sub : locl ty) (ty_super : locl ty) : bool =
+    (env : env) (ty_sub : locl_ty) (ty_super : locl_ty) : bool =
   (* quick short circuit to help perf *)
   ty_equal ty_sub ty_super
   || Errors.try_
@@ -2545,9 +2545,9 @@ let subtype_method
     ~(extra_info : reactivity_extra_info)
     (env : env)
     (r_sub : Reason.t)
-    (ft_sub : decl fun_type)
+    (ft_sub : decl_fun_type)
     (r_super : Reason.t)
-    (ft_super : decl fun_type)
+    (ft_super : decl_fun_type)
     (on_error : Errors.typing_error_callback) : env =
   if (not ft_super.ft_abstract) && ft_sub.ft_abstract then
     (* It is valid for abstract class to extend a concrete class, but it cannot
@@ -2561,7 +2561,7 @@ let subtype_method
   (* We check constraint entailment and contravariant parameter/covariant result
    * subtyping in the context of the ft_super constraints. But we'd better
    * restore tpenv afterwards *)
-  let add_tparams_constraints env (tparams : locl tparam list) =
+  let add_tparams_constraints env (tparams : locl_tparam list) =
     let add_bound env { tp_name = (pos, name); tp_constraints = cstrl; _ } =
       List.fold_left cstrl ~init:env ~f:(fun env (ck, ty) ->
           let tparam_ty =
@@ -2572,7 +2572,7 @@ let subtype_method
     List.fold_left tparams ~f:add_bound ~init:env
   in
   let p_sub = Reason.to_pos r_sub in
-  let add_where_constraints env (cstrl : locl where_constraint list) =
+  let add_where_constraints env (cstrl : locl_where_constraint list) =
     List.fold_left cstrl ~init:env ~f:(fun env (ty1, ck, ty2) ->
         Typing_utils.add_constraint p_sub env ck ty1 ty2)
   in
@@ -2628,7 +2628,7 @@ let subtype_method
   Env.env_with_tpenv env old_tpenv
 
 let decompose_subtype_add_bound
-    (env : env) (ty_sub : locl ty) (ty_super : locl ty) : env =
+    (env : env) (ty_sub : locl_ty) (ty_super : locl_ty) : env =
   let (env, ty_super) = Env.expand_type env ty_super in
   let (env, ty_sub) = Env.expand_type env ty_sub in
   match (ty_sub, ty_super) with
@@ -2688,8 +2688,8 @@ let decompose_subtype_add_bound
 let rec decompose_subtype
     p
     (env : env)
-    (ty_sub : locl ty)
-    (ty_super : locl ty)
+    (ty_sub : locl_ty)
+    (ty_super : locl_ty)
     (on_error : Errors.typing_error_callback) : env =
   log_subtype
     ~level:2
@@ -2730,8 +2730,8 @@ and decompose_constraint
     p
     (env : env)
     (ck : Ast_defs.constraint_kind)
-    (ty_sub : locl ty)
-    (ty_super : locl ty) : env =
+    (ty_sub : locl_ty)
+    (ty_super : locl_ty) : env =
   (* constraints are caught based on reason, not error callback. Using unify_error *)
   match ck with
   | Ast_defs.Constraint_as ->
@@ -2768,8 +2768,8 @@ let add_constraint
     p
     (env : env)
     (ck : Ast_defs.constraint_kind)
-    (ty_sub : locl ty)
-    (ty_super : locl ty) : env =
+    (ty_sub : locl_ty)
+    (ty_super : locl_ty) : env =
   log_subtype
     ~level:1
     ~this_ty:None

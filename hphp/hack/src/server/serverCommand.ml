@@ -25,6 +25,7 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | REWRITE_LAMBDA_PARAMETERS _ -> true
   | REWRITE_RETURN_TYPE _ -> true
   | REWRITE_PARAMETER_TYPES _ -> true
+  | REWRITE_TYPE_PARAMS_TYPE _ -> true
   (* some Ai stuff - calls to those will likely never be interleaved with IDE
    * file sync commands (and resulting small checks), but putting it here just
    * to be safe *)
@@ -112,6 +113,7 @@ let get_description : type a. a command -> string = function
   | Rpc (REWRITE_LAMBDA_PARAMETERS _) -> "REWRITE_LAMBDA_PARAMETERS"
   | Rpc (REWRITE_RETURN_TYPE _) -> "REWRITE_RETURN_TYPE"
   | Rpc (REWRITE_PARAMETER_TYPES _) -> "REWRITE_PARAMETER_TYPES"
+  | Rpc (REWRITE_TYPE_PARAMS_TYPE _) -> "REWRITE_TYPE_PARAMS_TYPE"
   | Rpc (AI_QUERY _) -> "AI_QUERY"
   | Rpc (FIND_REFS _) -> "FIND_REFS"
   | Rpc (IDE_FIND_REFS _) -> "IDE_FIND_REFS"

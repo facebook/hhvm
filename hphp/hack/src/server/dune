@@ -225,6 +225,7 @@
     codemodTypePrinter
     serverRewriteReturnType
     serverRewriteParameterTypes
+    serverRewriteTypeParamsType
     serverSearch
     serverSignatureHelp
     serverStamp

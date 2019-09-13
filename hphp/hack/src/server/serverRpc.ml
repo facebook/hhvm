@@ -175,6 +175,8 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     (env, ServerRefactor.get_return_type_rewrite_patches env files)
   | REWRITE_PARAMETER_TYPES files ->
     (env, ServerRefactor.get_parameter_types_rewrite_patches env files)
+  | REWRITE_TYPE_PARAMS_TYPE files ->
+    (env, ServerRefactor.get_type_params_type_rewrite_patches env files)
   | DUMP_SYMBOL_INFO file_list ->
     (env, SymbolInfoService.go genv.workers file_list env)
   | IN_MEMORY_DEP_TABLE_SIZE ->

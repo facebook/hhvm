@@ -275,6 +275,7 @@ type _ t =
   | REWRITE_LAMBDA_PARAMETERS : string list -> ServerRefactorTypes.patch list t
   | REWRITE_RETURN_TYPE : string list -> ServerRefactorTypes.patch list t
   | REWRITE_PARAMETER_TYPES : string list -> ServerRefactorTypes.patch list t
+  | REWRITE_TYPE_PARAMS_TYPE : string list -> ServerRefactorTypes.patch list t
   | IN_MEMORY_DEP_TABLE_SIZE : (int, string) Pervasives.result t
   | SAVE_NAMING :
       string

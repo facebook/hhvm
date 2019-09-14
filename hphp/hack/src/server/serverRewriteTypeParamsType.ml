@@ -64,7 +64,7 @@ let collect_types tast =
 let is_not_acceptable ty =
   let finder =
     object
-      inherit [_] Type_visitor.type_visitor
+      inherit [_] Type_visitor.locl_type_visitor
 
       method! on_tprim acc _ =
         function
@@ -77,8 +77,6 @@ let is_not_acceptable ty =
       (* We consider both dynamic and nothing to be non acceptable as
       they are "too narrow" and imprecise *)
       method! on_tdynamic _ _ = true
-
-      method! on_tnothing _ _ = true
     end
   in
   finder#on_type false ty

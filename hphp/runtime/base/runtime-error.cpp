@@ -349,7 +349,7 @@ void raise_func_undefined(const char* prefix, const StringData* name,
         raise_error("%s method %s::%s() with incorrectly annotated inout "
                     "parameter", prefix, cls->name()->data(), stripped->data());
       }
-      raise_error("%s undefined method %s::%s()", cls->name()->data(), prefix,
+      raise_error("%s undefined method %s::%s()", prefix, cls->name()->data(),
                   stripped->data());
     } else if (Unit::lookupFunc(stripped)) {
       raise_error("%s function %s() with incorrectly annotated inout "

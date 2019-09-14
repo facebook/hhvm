@@ -669,12 +669,11 @@ struct RuntimeOption {
   F(bool, FatalOnParserOptionMismatch, true)                            \
   F(bool, WarnOnSkipFrameLookup,       true)                            \
   /*                                                                    \
-   * -1 - No checks on code coverage                                    \
    *  0 - Code coverage cannot be enabled through request param         \
    *  1 - Code coverage can be enabled through request param            \
    *  2 - Code coverage enabled                                         \
    */                                                                   \
-  F(int32_t, EnableCodeCoverage,       -1)                              \
+  F(uint32_t, EnableCodeCoverage,      0)                               \
   /* Whether to use the embedded hackc binary */                        \
   F(bool, HackCompilerUseEmbedded,     facebook)                        \
   /* Whether to trust existing versions of the extracted compiler */    \

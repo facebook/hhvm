@@ -458,8 +458,7 @@ void unwindBuiltinFrame() {
   auto& stack = vmStack();
   auto& fp = vmfp();
 
-  assertx(fp->m_func->name()->isame(s_hphpd_break.get()) ||
-          fp->m_func->name()->isame(s_fb_enable_code_coverage.get()));
+  assertx(fp->m_func->name()->isame(s_hphpd_break.get()));
 
   // Free any values that may be on the eval stack. We know it can't be
   // a resumable body because it's a builtin frame.

@@ -458,6 +458,18 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
                               && (cmd != "pprof/symbol")))
 #endif
                           ;
+    // When configured, we allow read-only stats to be read without a password.
+    if (needs_password && !RuntimeOption::AdminServerStatsNeedPassword) {
+      if ((strncmp(cmd.c_str(), "memory.", 7) == 0) ||
+          (strncmp(cmd.c_str(), "stats.", 6) == 0) ||
+          (strncmp(cmd.c_str(), "check-", 6) == 0) ||
+          (strncmp(cmd.c_str(), "static-strings", 14) == 0) ||
+          cmd == "hugepage" || cmd == "pcre-cache-size" ||
+          cmd == "vm-tcspace" || cmd == "vm-tcaddr" ||
+          cmd == "vm-namedentities" || cmd == "jemalloc-stats") {
+        needs_password = false;
+      }
+    }
 
     if (needs_password && !RuntimeOption::HashedAdminPasswords.empty()) {
       bool matched = false;

@@ -460,6 +460,7 @@ struct RuntimeOption {
   static std::string AdminServerIP;
   static int AdminServerPort;
   static int AdminThreadCount;
+  static bool AdminServerStatsNeedPassword;
   static std::string AdminPassword;
   static std::set<std::string> AdminPasswords;
   static std::set<std::string> HashedAdminPasswords;

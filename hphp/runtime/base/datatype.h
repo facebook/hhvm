@@ -139,6 +139,15 @@ constexpr DataType dt_with_persistence(DataType dt) {
   return static_cast<DataType>(dt_t(dt) & ~kRefCountedBit);
 }
 
+/*
+ * Return the ref-counted flavor of `dt` if it has both a KindOf$x and a
+ * KindOfPersistent$x flavor
+ */
+constexpr DataType dt_modulo_persistence(DataType dt) {
+  auto const rep = dt_t(dt);
+  return static_cast<DataType>(rep < 0 ? rep | kRefCountedBit : rep);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 /*
  * Optional DataType.

@@ -107,19 +107,20 @@ let convert_fileinfo_to_contents
 let update_file
     ~(sienv : si_env) ~(path : Relative_path.t) ~(info : SearchUtils.info) :
     si_env =
-  let _ = info in
   let tombstone = get_tombstone path in
   let filepath = Relative_path.suffix path in
   let contents =
-    let full_filename = Relative_path.to_absolute path in
-    if Sys.file_exists full_filename then
-      let contents = IndexBuilder.parse_one_file ~path in
-      if List.length contents = 0 then
-        convert_fileinfo_to_contents ~info ~filepath
+    try
+      let full_filename = Relative_path.to_absolute path in
+      if Sys.file_exists full_filename then
+        let contents = IndexBuilder.parse_one_file ~path in
+        if List.length contents = 0 then
+          convert_fileinfo_to_contents ~info ~filepath
+        else
+          contents
       else
-        contents
-    else
-      convert_fileinfo_to_contents ~info ~filepath
+        convert_fileinfo_to_contents ~info ~filepath
+    with _ -> convert_fileinfo_to_contents ~info ~filepath
   in
   {
     sienv with

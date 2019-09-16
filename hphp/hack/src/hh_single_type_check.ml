@@ -1372,7 +1372,7 @@ let handle_mode
            end
         ~init:files_info
     in
-    Relative_path.Map.iter files_info ~f:(fun file info ->
+    Relative_path.Map.iter files_info ~f:(fun _file info ->
         let { FileInfo.classes; _ } = info in
         List.iter classes ~f:(fun (_, classname) ->
             Printf.printf "Linearization for class %s:\n" classname;
@@ -1381,9 +1381,9 @@ let handle_mode
               Sequence.map linearization (fun mro ->
                   let name = mro.Decl_defs.mro_name in
                   let targs =
-                    List.map mro.Decl_defs.mro_type_args (fun ty ->
-                        let tenv = Typing_env.empty tcopt ~droot:None file in
-                        Typing_print.full tenv ty)
+                    List.map
+                      mro.Decl_defs.mro_type_args
+                      (Typing_print.full_decl tcopt)
                   in
                   let targs =
                     if targs = [] then

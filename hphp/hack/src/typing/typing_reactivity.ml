@@ -27,10 +27,9 @@ type method_call_info = {
 let make_call_info ~receiver_is_self ~is_static receiver_type method_name =
   { receiver_type; receiver_is_self; is_static; method_name }
 
-let type_to_str : type a. env -> a ty -> string =
- fun env ty ->
+let type_to_str env ty =
   (* strip expression dependent types to make error message clearer *)
-  let rec unwrap : type a. a ty -> a ty = function
+  let rec unwrap = function
     | (_, Tabstract (AKdependent DTthis, Some ty)) -> unwrap ty
     | ty -> ty
   in
@@ -383,7 +382,7 @@ let generate_fresh_name_for_target_of_condition_type
     Some
       ( Typing_print.full env target_type
       ^ "#"
-      ^ Typing_print.full env condition_type )
+      ^ Typing_print.full_decl (Env.get_tcopt env) condition_type )
   | _ -> None
 
 let try_substitute_type_with_condition env cond_ty ty =

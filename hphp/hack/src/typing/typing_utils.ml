@@ -371,7 +371,7 @@ let get_class_ids env ty =
 
 let reactivity_to_string env r =
   let cond_reactive prefix t =
-    let str = Typing_print.full env t in
+    let str = Typing_print.full_decl (Env.get_tcopt env) t in
     prefix ^ " (condition type: " ^ str ^ ")"
   in
   let rec aux r =

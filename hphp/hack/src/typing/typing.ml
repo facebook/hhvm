@@ -6633,7 +6633,7 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
           make_result env T.CIparent (r, TUtils.this_of parent_ty))
       | _ ->
         let parent = Env.get_parent env in
-        let parent_defined = snd parent <> Typing_utils.tany env in
+        let parent_defined = snd parent <> Typing_utils.decl_tany env in
         if not parent_defined then Errors.parent_undefined p;
         let r = Reason.Rwitness p in
         let (env, parent) = Phase.localize_with_self env parent in
@@ -6647,7 +6647,7 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
         | Tabstract (_, _)
         | Tobject | Tpu _ | Tpu_access _ ) ) ->
       let parent = Env.get_parent env in
-      let parent_defined = snd parent <> Typing_utils.tany env in
+      let parent_defined = snd parent <> Typing_utils.decl_tany env in
       if not parent_defined then Errors.parent_undefined p;
       let r = Reason.Rwitness p in
       let (env, parent) = Phase.localize_with_self env parent in
@@ -8324,7 +8324,7 @@ and class_def_parent env class_def class_type =
    *)
   | _ :: _
   | _ ->
-    (env, None, (Reason.Rnone, Typing_utils.tany env))
+    (env, None, (Reason.Rnone, Typing_utils.decl_tany env))
 
 and check_parent class_def class_type parent_type =
   let position = fst class_def.c_name in

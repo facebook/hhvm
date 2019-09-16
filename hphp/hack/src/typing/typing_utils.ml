@@ -536,6 +536,8 @@ let fun_mutable user_attributes =
 
 let tany = Env.tany
 
+let decl_tany = Env.decl_tany
+
 let terr env =
   let dynamic_view_enabled =
     TypecheckerOptions.dynamic_view (Typing_env.get_tcopt env)

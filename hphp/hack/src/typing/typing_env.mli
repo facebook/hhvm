@@ -181,7 +181,9 @@ module FakeMembers : sig
   val make_static : env -> Nast.class_id_ -> string -> env * Local_id.t
 end
 
-val tany : env -> 'a ty_
+val tany : env -> locl_phase ty_
+
+val decl_tany : env -> decl_phase ty_
 
 val next_cont_opt : env -> Typing_per_cont_env.per_cont_entry option
 

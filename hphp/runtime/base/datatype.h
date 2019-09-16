@@ -363,21 +363,11 @@ constexpr int kHasPersistentMask = -128;
  * strings, arrays, and Hack arrays). Note that KindOfUninit and KindOfNull are
  * not considered equivalent.
  */
-constexpr bool sameDataTypes(DataType t1, DataType t2) {
+constexpr bool equivDataTypes(DataType t1, DataType t2) {
   return t1 == t2 ||
     ((dt_t(t1) & dt_t(t2) & kHasPersistentMask) &&
      (dt_t(t1) & ~kRefCountedBit) == (dt_t(t2) & ~kRefCountedBit));
 }
-
-/*
- * Return whether two DataTypes for primitive types are "equivalent" as far as
- * user-visible PHP types are concerned (i.e. ignoring different types of
- * strings, arrays, and Hack arrays). Note that KindOfUninit and KindOfNull are
- * not considered equivalent. A good rule of thumb: equivDataTypes
- * should be preferred at runtime and sameDataTypes should be preferred at
- * compile time.
- */
-bool equivDataTypes(DataType t1, DataType t2);
 
 /*
  * If you think you need to do any of these operations, you should instead add

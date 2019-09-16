@@ -247,7 +247,6 @@ DEBUG_ONLY bool throwable_has_expected_props() {
 }
 
 const StaticString s_hphpd_break("hphpd_break");
-const StaticString s_fb_enable_code_coverage("fb_enable_code_coverage");
 
 //////////////////////////////////////////////////////////////////////
 

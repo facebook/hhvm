@@ -98,7 +98,7 @@ let find_or_build_sqlite_file
           custom_repo_name = None;
           include_builtins = true;
           set_paths_for_worker = false;
-          hhi_root_folder = None;
+          hhi_root_folder = Some (Hhi.get_hhi_root ());
           silent;
         }
       in

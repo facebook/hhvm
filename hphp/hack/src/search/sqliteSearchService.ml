@@ -96,7 +96,6 @@ let find_or_build_sqlite_file
           json_chunk_size = 0;
           custom_service = None;
           custom_repo_name = None;
-          include_builtins = true;
           set_paths_for_worker = false;
           hhi_root_folder = Some (Hhi.get_hhi_root ());
           silent;

@@ -96,7 +96,6 @@ let run_index_builder (harness : Test_harness.t) : si_env =
       json_chunk_size = 0;
       custom_service = None;
       custom_repo_name = None;
-      include_builtins = true;
       set_paths_for_worker = false;
       hhi_root_folder = Some hhi_folder;
       silent = true;

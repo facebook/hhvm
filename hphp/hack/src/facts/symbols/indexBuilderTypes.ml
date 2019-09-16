@@ -17,7 +17,6 @@ type index_builder_context = {
   json_repo_name: string option;
   custom_service: string option;
   custom_repo_name: string option;
-  include_builtins: bool;
   hhi_root_folder: Path.t option;
   set_paths_for_worker: bool;
   silent: bool;

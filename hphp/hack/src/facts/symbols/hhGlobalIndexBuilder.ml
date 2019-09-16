@@ -63,6 +63,11 @@ let parse_options () : index_builder_context option =
     (fun anonymous_arg -> repository := Sys_utils.realpath anonymous_arg)
     usage;
 
+  let hhi_root_folder =
+    match !include_builtins with
+    | true -> Some (Hhi.get_hhi_root ())
+    | false -> None
+  in
   (* Parameters for this execution *)
   match !repository with
   | None ->
@@ -81,10 +86,9 @@ let parse_options () : index_builder_context option =
         json_repo_name = !json_repo_name;
         custom_service = !custom_service;
         custom_repo_name = !custom_repo_name;
-        include_builtins = !include_builtins;
         set_paths_for_worker = true;
         silent = !silent;
-        hhi_root_folder = Some (Hhi.get_hhi_root ());
+        hhi_root_folder;
       }
 
 (* Run the application *)

@@ -290,7 +290,7 @@ let go
     in
     (* If desired, get the HHI root folder and add all HHI files from there *)
     let files =
-      if ctxt.include_builtins then
+      if Option.is_some ctxt.hhi_root_folder then
         let hhi_root_folder_path =
           Path.to_string (Option.value_exn ctxt.hhi_root_folder)
         in

@@ -97,7 +97,6 @@ struct CompilerOptions {
   std::vector<std::string> ffiles;
   std::vector<std::string> cfiles;
   std::vector<std::string> cmodules;
-  std::vector<std::string> hhjsDirs;
   bool parseOnDemand;
   std::string program;
   std::string programArgs;
@@ -262,8 +261,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
      "extra static files forced to include without exclusion checking")
     ("cmodule", value<std::vector<std::string>>(&po.cmodules)->composing(),
      "extra directories for static files without exclusion checking")
-    ("hhjs-dir", value<std::vector<std::string>>(&po.hhjsDirs)->composing(),
-     "directory containing JS to compile using HHJS")
     ("parse-on-demand", value<bool>(&po.parseOnDemand)->default_value(true),
      "whether to parse files that are not specified from command line")
     ("branch", value<std::string>(&po.branch), "SVN branch")
@@ -559,7 +556,7 @@ int process(const CompilerOptions &po) {
     if (!po.parseOnDemand) {
       ar->setParseOnDemandDirs(Option::ParseOnDemandDirs);
     }
-    if (po.modules.empty() && po.fmodules.empty() && po.hhjsDirs.empty() &&
+    if (po.modules.empty() && po.fmodules.empty() &&
         po.ffiles.empty() && po.inputs.empty() && po.inputList.empty()) {
       package.addAllFiles(false);
     } else {
@@ -568,9 +565,6 @@ int process(const CompilerOptions &po) {
       }
       for (auto const& fmodule : po.fmodules) {
         package.addDirectory(fmodule, true /*force*/);
-      }
-      for (auto const& hhjsDir : po.hhjsDirs) {
-        package.addHHJSDirectory(hhjsDir, false);
       }
       for (auto const& ffile : po.ffiles) {
         package.addSourceFile(ffile);

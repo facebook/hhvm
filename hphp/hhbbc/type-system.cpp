@@ -3505,8 +3505,6 @@ Type from_cell(Cell cell) {
     always_assert(cell.m_data.parr->isKeyset());
     return keyset_val(cell.m_data.parr);
 
-  case KindOfPersistentShape:
-  case KindOfShape:
   case KindOfRecord: // TODO(arnabde)
     not_implemented();
 
@@ -3543,8 +3541,6 @@ Type from_DataType(DataType dt) {
   case KindOfPersistentKeyset:
   case KindOfKeyset:   return TKeyset;
   case KindOfRecord:   return TRecord;
-  case KindOfPersistentShape:
-  case KindOfShape:    not_implemented();
   case KindOfPersistentArray:
   case KindOfArray:    return TArr;
   case KindOfRef:      return TRef;

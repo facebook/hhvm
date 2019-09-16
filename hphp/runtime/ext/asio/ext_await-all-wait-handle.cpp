@@ -186,12 +186,6 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromArray,
         PackedArray::IterateV(ad, fn);
       });
 
-    case ArrayData::kShapeKind:
-      if (RuntimeOption::EvalHackArrDVArrs) {
-        not_reached();
-      }
-      // Fallthrough
-
     case ArrayData::kMixedKind:
       return c_AwaitAllWaitHandle::Create<true>([=](auto fn) {
         MixedArray::IterateV(MixedArray::asMixed(ad), fn);
@@ -286,8 +280,6 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromContainer,
     case KindOfPersistentDict:
     case KindOfDict:
       return c_AwaitAllWaitHandle_ns_fromDict(self_, dependencies.asCArrRef());
-    case KindOfPersistentShape:
-    case KindOfShape:
     case KindOfPersistentArray:
     case KindOfArray:
       return c_AwaitAllWaitHandle_ns_fromArray(self_, dependencies.asCArrRef());

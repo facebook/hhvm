@@ -263,11 +263,6 @@ folly::Optional<Opcode> negateCmpOp(Opcode opc) {
     case SameArr:             return NSameArr;
     case NSameArr:            return SameArr;
 
-    case EqShape:             return NeqShape;
-    case NeqShape:            return EqShape;
-    case SameShape:           return NSameShape;
-    case NSameShape:          return SameShape;
-
     case EqVec:               return NeqVec;
     case NeqVec:              return EqVec;
     case SameVec:             return NSameVec;
@@ -296,8 +291,6 @@ folly::Optional<Opcode> negateCmpOp(Opcode opc) {
 
 bool opcodeMayRaise(Opcode opc) {
   switch (opc) {
-  case NSameShape:
-  case SameShape:
   case NSameArr:
   case SameArr:
   case NSameDict:
@@ -340,7 +333,6 @@ bool opcodeMayRaise(Opcode opc) {
   case CheckSurpriseFlagsEnter:
   case Clone:
   case CmpArr:
-  case CmpShape:
   case CmpObj:
   case CmpVec:
   case ConcatIntStr:
@@ -353,7 +345,6 @@ bool opcodeMayRaise(Opcode opc) {
   case ConvArrToDict:
   case ConvArrToKeyset:
   case ConvArrToVec:
-  case ConvShapeToDict:
   case ConvCellToArr:
   case ConvCellToBool:
   case ConvCellToDbl:
@@ -369,9 +360,6 @@ bool opcodeMayRaise(Opcode opc) {
   case ConvDictToArr:
   case ConvDictToDArr:
   case ConvDictToKeyset:
-  case ConvShapeToArr:
-  case ConvShapeToDArr:
-  case ConvShapeToKeyset:
   case ConvKeysetToArr:
   case ConvKeysetToDArr:
   case ConvObjToArr:
@@ -410,15 +398,12 @@ bool opcodeMayRaise(Opcode opc) {
   case EmptyElem:
   case EmptyProp:
   case EqArr:
-  case EqShape:
   case EqDict:
   case EqObj:
   case EqVec:
   case GetMemoKey:
   case GtArr:
   case GteArr:
-  case GtShape:
-  case GteShape:
   case GteObj:
   case GteVec:
   case GtObj:
@@ -459,8 +444,6 @@ bool opcodeMayRaise(Opcode opc) {
   case LookupFuncCached:
   case LtArr:
   case LteArr:
-  case LtShape:
-  case LteShape:
   case LteObj:
   case LteVec:
   case LtObj:
@@ -469,7 +452,6 @@ bool opcodeMayRaise(Opcode opc) {
   case MapSet:
   case NativeImpl:
   case NeqArr:
-  case NeqShape:
   case NeqDict:
   case NeqObj:
   case NeqVec:
@@ -650,8 +632,6 @@ bool opcodeMayRaise(Opcode opc) {
   case ConvDictToVArr:
   case ConvDictToVec:
   case ConvFuncToArr:
-  case ConvShapeToVArr:
-  case ConvShapeToVec:
   case ConvIntToArr:
   case ConvIntToBool:
   case ConvIntToDbl:
@@ -674,7 +654,6 @@ bool opcodeMayRaise(Opcode opc) {
   case CountArrayFast:
   case CountCollection:
   case CountDict:
-  case CountShape:
   case CountKeyset:
   case CountVec:
   case CountWHNotDone:

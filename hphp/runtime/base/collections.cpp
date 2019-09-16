@@ -178,7 +178,7 @@ ArrayData* deepCopyVecArray(ArrayData* arr) {
 }
 
 ArrayData* deepCopyDict(ArrayData* arr) {
-  assertx(arr->isDictOrShape());
+  assertx(arr->isDict());
   Array ar(arr);
   MixedArray::IterateKV(
     MixedArray::asMixed(arr),
@@ -218,15 +218,6 @@ void deepCopy(tv_lval lval) {
     case KindOfVec: {
       auto& original = val(lval).parr;
       auto arr = deepCopyVecArray(original);
-      decRefArr(original);
-      original = arr;
-      return;
-    }
-
-    case KindOfShape: {
-      auto& original = val(lval).parr;
-      auto arr = RuntimeOption::EvalHackArrDVArrs ?
-        deepCopyDict(original) : deepCopyArray(original);
       decRefArr(original);
       original = arr;
       return;

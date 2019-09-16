@@ -712,8 +712,6 @@ SSATmp* isDictImpl(IRGS& env, SSATmp* src) {
 
   static auto const tycheck = InstrumentedTypecheck<IsDictLogging>{
     {TDict,  true, mask & ProvLogging},
-    {RO::EvalHackArrDVArrs,
-     TShape, true, mask & ProvLogging},
     {TArr,   false, mask & DVArrayLogging},
   };
 
@@ -765,8 +763,6 @@ SSATmp* isArrayImpl(IRGS& env, SSATmp* src) {
     /* cases for shapes and clsmeth */
     {!RO::EvalHackArrDVArrs && RO::EvalIsCompatibleClsMethType,
      TClsMeth, true,  mask & ClsMethNotice},
-    {!RO::EvalHackArrDVArrs,
-     TShape,   true,  None},
     /* HAC logging */
     {TVec,     false, mask & (ProvLogging | VecLogging)},
     {TDict,    false, mask & (ProvLogging | DictLogging)},
@@ -778,8 +774,6 @@ SSATmp* isArrayImpl(IRGS& env, SSATmp* src) {
     {TArr,     true,  None},
     {!RO::EvalHackArrDVArrs && RO::EvalIsCompatibleClsMethType,
      TClsMeth, true,  mask & ClsMethNotice},
-    {!RO::EvalHackArrDVArrs,
-     TShape,   true,  None},
   };
 
   auto const instrumentation = [&](IsArrayLogging type, SSATmp* src) {

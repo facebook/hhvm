@@ -1031,9 +1031,6 @@ Bytecode gen_constant(const Cell& cell) {
     case KindOfPersistentKeyset:
       assert(cell.m_data.parr->isKeyset());
       return bc::Keyset { cell.m_data.parr };
-    case KindOfShape:
-    case KindOfPersistentShape:
-      not_implemented();
     case KindOfArray:
       assert(cell.m_data.parr->isStatic());
     case KindOfPersistentArray:

@@ -162,23 +162,6 @@ APCArray::MakeSharedDict(ArrayData* dict, APCHandleLevel level,
 }
 
 APCHandle::Pair
-APCArray::MakeSharedShape(ArrayData* shape, APCHandleLevel level,
-                          bool unserializeObj) {
-  assertx(shape->isShape());
-  if (auto const value = APCTypedValue::HandlePersistent(
-        APCTypedValue::StaticShape{}, APCTypedValue::UncountedShape{}, shape)) {
-    return value;
-  }
-  return MakeSharedImpl(
-    shape,
-    level,
-    [&]() { return MakeHash(shape, APCKind::SharedShape, unserializeObj); },
-    [&](DataWalker::PointerMap* m) { return MakeUncountedShape(shape, m); },
-    [&](StringData* s) { return APCString::MakeSerializedShape(s); }
-  );
-}
-
-APCHandle::Pair
 APCArray::MakeSharedKeyset(ArrayData* keyset, APCHandleLevel level,
                            bool unserializeObj) {
   assertx(keyset->isKeyset());
@@ -278,17 +261,6 @@ APCHandle* APCArray::MakeUncountedDict(
   auto data = MixedArray::MakeUncounted(dict, true, m);
   auto mem = reinterpret_cast<APCTypedValue*>(data) - 1;
   auto value = new(mem) APCTypedValue(APCTypedValue::UncountedDict{}, data);
-  return value->getHandle();
-}
-
-APCHandle* APCArray::MakeUncountedShape(
-    ArrayData* shape,
-    DataWalker::PointerMap* m) {
-  assertx(apcExtension::UseUncounted);
-  assertx(shape->isShape());
-  auto data = MixedArray::MakeUncounted(shape, true, m);
-  auto mem = reinterpret_cast<APCTypedValue*>(data) - 1;
-  auto value = new(mem) APCTypedValue(APCTypedValue::UncountedShape{}, data);
   return value->getHandle();
 }
 

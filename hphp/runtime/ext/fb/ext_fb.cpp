@@ -517,14 +517,6 @@ static int fb_compact_serialize_variant(
       return 0;
     }
 
-    case KindOfPersistentShape:
-    case KindOfShape: { // TODO(T31134050)
-      Array arr = var.toArray();
-      assertx(arr->isDictOrDArray());
-      fb_compact_serialize_array_as_map(sb, std::move(arr), depth);
-      return 0;
-    }
-
     case KindOfPersistentArray:
     case KindOfArray: {
       Array arr = var.toArray();

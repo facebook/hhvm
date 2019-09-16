@@ -71,7 +71,6 @@ size_t getMemSize(const APCHandle* handle) {
     case APCKind::StaticArray:
     case APCKind::StaticVec:
     case APCKind::StaticDict:
-    case APCKind::StaticShape:
     case APCKind::StaticKeyset:
       return sizeof(APCHandle);
 
@@ -84,7 +83,6 @@ size_t getMemSize(const APCHandle* handle) {
     case APCKind::SerializedArray:
     case APCKind::SerializedVec:
     case APCKind::SerializedDict:
-    case APCKind::SerializedShape:
     case APCKind::SerializedKeyset:
       return getMemSize(APCString::fromHandle(handle));
 
@@ -97,9 +95,6 @@ size_t getMemSize(const APCHandle* handle) {
     case APCKind::UncountedDict:
       return sizeof(APCTypedValue) +
              getMemSize(APCTypedValue::fromHandle(handle)->getDictData());
-    case APCKind::UncountedShape:
-      return sizeof(APCTypedValue) +
-             getMemSize(APCTypedValue::fromHandle(handle)->getShapeData());
     case APCKind::UncountedKeyset:
       return sizeof(APCTypedValue) +
              getMemSize(APCTypedValue::fromHandle(handle)->getKeysetData());
@@ -108,7 +103,6 @@ size_t getMemSize(const APCHandle* handle) {
     case APCKind::SharedPackedArray:
     case APCKind::SharedVec:
     case APCKind::SharedDict:
-    case APCKind::SharedShape:
     case APCKind::SharedKeyset:
     case APCKind::SharedVArray:
     case APCKind::SharedDArray:
@@ -182,7 +176,6 @@ size_t getMemSize(const ArrayData* arr, bool recurse) {
     }
     return size;
   }
-  case ArrayData::ArrayKind::kShapeKind:
   case ArrayData::ArrayKind::kDictKind:
   case ArrayData::ArrayKind::kMixedKind: {
     auto const mixed = MixedArray::asMixed(arr);
@@ -349,7 +342,6 @@ APCDetailedStats::APCDetailedStats() : m_uncounted(nullptr)
                                      , m_serArray(nullptr)
                                      , m_serVec(nullptr)
                                      , m_serDict(nullptr)
-                                     , m_serShape(nullptr)
                                      , m_serKeyset(nullptr)
                                      , m_apcArray(nullptr)
                                      , m_apcVec(nullptr)
@@ -371,17 +363,14 @@ APCDetailedStats::APCDetailedStats() : m_uncounted(nullptr)
   m_serArray = ServiceData::createCounter("apc.type_ser_array");
   m_serVec = ServiceData::createCounter("apc.type_ser_vec");
   m_serDict = ServiceData::createCounter("apc.type_ser_dict");
-  m_serShape = ServiceData::createCounter("apc.type_ser_shape");
   m_serKeyset = ServiceData::createCounter("apc.type_ser_keyset");
   m_apcArray = ServiceData::createCounter("apc.type_apc_array");
   m_apcVec = ServiceData::createCounter("apc.type_apc_vec");
   m_apcDict = ServiceData::createCounter("apc.type_apc_dict");
-  m_apcShape = ServiceData::createCounter("apc.type_apc_shape");
   m_apcKeyset = ServiceData::createCounter("apc.type_apc_keyset");
   m_uncArray = ServiceData::createCounter("apc.type_unc_array");
   m_uncVec = ServiceData::createCounter("apc.type_unc_vec");
   m_uncDict = ServiceData::createCounter("apc.type_unc_dict");
-  m_uncShape = ServiceData::createCounter("apc.type_unc_shape");
   m_uncKeyset = ServiceData::createCounter("apc.type_unc_keyset");
   m_serObject = ServiceData::createCounter("apc.type_ser_object");
   m_apcObject = ServiceData::createCounter("apc.type_apc_object");
@@ -398,17 +387,14 @@ const StaticString s_typeUncountedString("type_unc_string");
 const StaticString s_typeSerArray("type_ser_array");
 const StaticString s_typeSerVec("type_ser_vec");
 const StaticString s_typeSerDict("type_ser_dict");
-const StaticString s_typeSerShape("type_ser_shape");
 const StaticString s_typeSerKeyset("type_ser_keyset");
 const StaticString s_typeAPCArray("type_apc_array");
 const StaticString s_typeAPCVec("type_apc_vec");
 const StaticString s_typeAPCDict("type_apc_dict");
-const StaticString s_typeAPCShape("type_apc_shape");
 const StaticString s_typeAPCKeyset("type_apc_keyset");
 const StaticString s_typUncountedArray("type_unc_array");
 const StaticString s_typUncountedVec("type_unc_vec");
 const StaticString s_typUncountedDict("type_unc_dict");
-const StaticString s_typUncountedShape("type_unc_shape");
 const StaticString s_typUncountedKeyset("type_unc_keyset");
 const StaticString s_typeSerObject("type_ser_object");
 const StaticString s_typeAPCObject("type_apc_object");
@@ -430,8 +416,6 @@ std::string APCDetailedStats::getStatsInfo() const {
          std::to_string(m_serVec->getValue()) +
          "\nSerialized dict count: " +
          std::to_string(m_serDict->getValue()) +
-         "\nSerialized shape count: " +
-         std::to_string(m_serShape->getValue()) +
          "\nSerialized keyset count: " +
          std::to_string(m_serKeyset->getValue()) +
          "\nAPC array count: " +
@@ -440,8 +424,6 @@ std::string APCDetailedStats::getStatsInfo() const {
          std::to_string(m_apcVec->getValue()) +
          "\nAPC dict count: " +
          std::to_string(m_apcDict->getValue()) +
-         "\nAPC shape count: " +
-         std::to_string(m_apcShape->getValue()) +
          "\nAPC keyset count: " +
          std::to_string(m_apcKeyset->getValue()) +
          "\nUncounted array count: " +
@@ -450,8 +432,6 @@ std::string APCDetailedStats::getStatsInfo() const {
          std::to_string(m_uncVec->getValue()) +
          "\nUncounted dict count: " +
          std::to_string(m_uncDict->getValue()) +
-         "\nUncounted shape count: " +
-         std::to_string(m_uncShape->getValue()) +
          "\nUncounted keyset count: " +
          std::to_string(m_uncKeyset->getValue()) +
          "\nSerialized object count: " +
@@ -490,9 +470,6 @@ void APCDetailedStats::collectStats(
         std::pair<const StringData*, int64_t>(s_typeSerDict.get(),
                                               m_serDict->getValue()));
   stats.insert(
-        std::pair<const StringData*, int64_t>(s_typeSerShape.get(),
-                                              m_serShape->getValue()));
-  stats.insert(
         std::pair<const StringData*, int64_t>(s_typeSerKeyset.get(),
                                               m_serKeyset->getValue()));
   stats.insert(
@@ -505,9 +482,6 @@ void APCDetailedStats::collectStats(
         std::pair<const StringData*, int64_t>(s_typeAPCDict.get(),
                                               m_apcDict->getValue()));
   stats.insert(
-        std::pair<const StringData*, int64_t>(s_typeAPCShape.get(),
-                                              m_apcShape->getValue()));
-  stats.insert(
         std::pair<const StringData*, int64_t>(s_typeAPCKeyset.get(),
                                               m_apcKeyset->getValue()));
   stats.insert(
@@ -519,9 +493,6 @@ void APCDetailedStats::collectStats(
   stats.insert(
         std::pair<const StringData*, int64_t>(s_typUncountedDict.get(),
                                               m_uncDict->getValue()));
-  stats.insert(
-        std::pair<const StringData*, int64_t>(s_typUncountedShape.get(),
-                                              m_uncShape->getValue()));
   stats.insert(
         std::pair<const StringData*, int64_t>(s_typUncountedKeyset.get(),
                                               m_uncKeyset->getValue()));
@@ -585,7 +556,6 @@ APCDetailedStats::counterFor(const APCHandle* handle) {
     case APCKind::StaticArray:
     case APCKind::StaticVec:
     case APCKind::StaticDict:
-    case APCKind::StaticShape:
     case APCKind::StaticKeyset:
       return m_uncounted;
 
@@ -604,9 +574,6 @@ APCDetailedStats::counterFor(const APCHandle* handle) {
     case APCKind::UncountedDict:
       return m_uncDict;
 
-    case APCKind::UncountedShape:
-      return m_uncShape;
-
     case APCKind::UncountedKeyset:
       return m_uncKeyset;
 
@@ -618,9 +585,6 @@ APCDetailedStats::counterFor(const APCHandle* handle) {
 
     case APCKind::SerializedDict:
       return m_serDict;
-
-    case APCKind::SerializedShape:
-      return m_serShape;
 
     case APCKind::SerializedKeyset:
       return m_serKeyset;
@@ -636,9 +600,6 @@ APCDetailedStats::counterFor(const APCHandle* handle) {
 
     case APCKind::SharedDict:
       return m_apcDict;
-
-    case APCKind::SharedShape:
-      return m_apcShape;
 
     case APCKind::SharedKeyset:
       return m_apcKeyset;

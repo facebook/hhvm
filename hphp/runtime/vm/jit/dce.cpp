@@ -222,7 +222,6 @@ bool canDCE(IRInstruction* inst) {
   case CountArrayFast:
   case CountVec:
   case CountDict:
-  case CountShape:
   case CountKeyset:
   case CountCollection:
   case Nop:
@@ -320,7 +319,6 @@ bool canDCE(IRInstruction* inst) {
   case ConvStrToArr:
   case ConvVecToArr:
   case ConvDictToArr:
-  case ConvShapeToArr:
   case ConvKeysetToArr:
   case ConvArrToNonDVArr:
   case ConvObjToDbl:
@@ -335,29 +333,24 @@ bool canDCE(IRInstruction* inst) {
   case ConvCellToStr:
   case ConvArrToVec:
   case ConvDictToVec:
-  case ConvShapeToVec:
   case ConvKeysetToVec:
   case ConvObjToVec:
   case ConvArrToDict:
-  case ConvShapeToDict:
   case ConvVecToDict:
   case ConvKeysetToDict:
   case ConvObjToDict:
   case ConvArrToKeyset:
   case ConvVecToKeyset:
   case ConvDictToKeyset:
-  case ConvShapeToKeyset:
   case ConvObjToKeyset:
   case ConvArrToVArr:
   case ConvVecToVArr:
   case ConvDictToVArr:
-  case ConvShapeToVArr:
   case ConvKeysetToVArr:
   case ConvObjToVArr:
   case ConvArrToDArr:
   case ConvVecToDArr:
   case ConvDictToDArr:
-  case ConvShapeToDArr:
   case ConvKeysetToDArr:
   case ConvObjToDArr:
   case LdOutAddr:
@@ -421,13 +414,6 @@ bool canDCE(IRInstruction* inst) {
   case EqArr:
   case NeqArr:
   case CmpArr:
-  case GtShape:
-  case GteShape:
-  case LtShape:
-  case LteShape:
-  case EqShape:
-  case NeqShape:
-  case CmpShape:
   case GtVec:
   case GteVec:
   case LtVec:
@@ -766,8 +752,6 @@ bool canDCE(IRInstruction* inst) {
   case ProfileProp:
     return false;
 
-  case SameShape:
-  case NSameShape:
   case SameArr:
   case NSameArr:
   case SameVec:

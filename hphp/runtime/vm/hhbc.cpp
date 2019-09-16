@@ -580,7 +580,6 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 void staticArrayStreamer(const ArrayData* ad, std::string& out) {
   if (ad->isVecArray()) out += "vec(";
   else if (ad->isDict()) out += "dict(";
-  else if (ad->isShape()) out += "shape(";
   else if (ad->isKeyset()) out += "keyset(";
   else {
     assertx(ad->isPHPArray());
@@ -647,8 +646,6 @@ void staticStreamer(const TypedValue* tv, std::string& out) {
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
-    case KindOfPersistentShape:
-    case KindOfShape:
     case KindOfPersistentArray:
     case KindOfArray:
       staticArrayStreamer(tv->m_data.parr, out);

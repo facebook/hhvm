@@ -103,9 +103,6 @@ Variant SSATmp::variantVal() const {
     case KindOfPersistentKeyset:
       return Variant{keysetVal(), KindOfPersistentKeyset,
                      Variant::PersistentArrInit{}};
-    case KindOfPersistentShape:
-      return Variant{shapeVal(), KindOfPersistentShape,
-                     Variant::PersistentArrInit{}};
     case KindOfPersistentArray:
       return Variant{arrVal(), KindOfPersistentArray,
                      Variant::PersistentArrInit{}};
@@ -120,7 +117,6 @@ Variant SSATmp::variantVal() const {
     case KindOfVec:
     case KindOfDict:
     case KindOfKeyset:
-    case KindOfShape:
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:

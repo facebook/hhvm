@@ -266,21 +266,6 @@ Opcode toArrCmpOpcode(Op op) {
   }
 }
 
-Opcode toShapeCmpOpcode(Op op) {
-  switch (op) {
-    case Op::Gt:    return GtShape;
-    case Op::Gte:   return GteShape;
-    case Op::Lt:    return LtShape;
-    case Op::Lte:   return LteShape;
-    case Op::Eq:    return EqShape;
-    case Op::Same:  return SameShape;
-    case Op::Neq:   return NeqShape;
-    case Op::NSame: return NSameShape;
-    case Op::Cmp:   return CmpShape;
-    default: always_assert(false);
-  }
-}
-
 Opcode toVecCmpOpcode(Op op) {
   switch (op) {
     case Op::Gt:    return GtVec;
@@ -695,18 +680,6 @@ void implDblCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   }
 }
 
-void implShapeCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
-  if (!RuntimeOption::EvalHackArrDVArrs) {
-    assertx(left->type() <= TArr || left->type() <= TShape);
-    assertx(right->type() <= TArr || right->type() <= TShape);
-  } else {
-    assertx(left->type() <= TDict || left->type() <= TShape);
-    assertx(right->type() <= TDict || right->type() <= TShape);
-  }
-
-  push(env, gen(env, toShapeCmpOpcode(op), left, right));
-}
-
 const StaticString
   s_funcToStringWarning(Strings::FUNC_TO_STRING),
   s_clsToStringWarning(Strings::CLASS_TO_STRING);
@@ -781,12 +754,6 @@ void implArrCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     push(env, emitMixedDictCmp(env, op));
   } else if (rightTy <= TKeyset) {
     push(env, emitMixedKeysetCmp(env, op));
-  } else if (rightTy <= TShape) {
-    if (RuntimeOption::EvalHackArrDVArrs) {
-      push(env, emitMixedDictCmp(env, op));
-    } else {
-      implShapeCmp(env, op, left, right);
-    }
   } else if (rightTy <= TClsMeth) {
     raiseClsMethToVecWarningHelper(env);
     if (RuntimeOption::EvalHackArrDVArrs) {
@@ -841,8 +808,6 @@ void implDictCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
       );
       push(env, cns(env, false));
     }
-  } else if (rightTy <= TShape) {
-    implShapeCmp(env, op, left, right);
   } else {
     push(env, emitMixedDictCmp(env, op));
   }
@@ -1292,7 +1257,6 @@ void implCmp(IRGS& env, Op op) {
   else if (leftTy <= TInt) implIntCmp(env, op, left, right);
   else if (leftTy <= TDbl) implDblCmp(env, op, left, right);
   else if (leftTy <= TArr) implArrCmp(env, op, left, right);
-  else if (leftTy <= TShape) implShapeCmp(env, op, left, right);
   else if (leftTy <= TVec) implVecCmp(env, op, left, right);
   else if (leftTy <= TDict) implDictCmp(env, op, left, right);
   else if (leftTy <= TKeyset) implKeysetCmp(env, op, left, right);

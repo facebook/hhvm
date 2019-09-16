@@ -359,19 +359,6 @@ void ConvertTvToUncounted(
       break;
     }
 
-    case KindOfShape:
-    case KindOfPersistentShape: {
-      auto& ad = data.parr;
-      assertx(ad->isShape());
-      if (handlePersistent(ad)) break;
-      if (ad->empty()) {
-        ad = ArrayData::CreateShape();
-      } else {
-        ad = MixedArray::MakeUncounted(ad, false, seen);
-      }
-      break;
-    }
-
     case KindOfArray:
       type = KindOfPersistentArray;
       // Fall-through.

@@ -149,14 +149,6 @@ ArrayData* ArrayCommon::ToDArray(ArrayData* a, bool) {
   return init.create();
 }
 
-ArrayData* ArrayCommon::ToShape(ArrayData* a, bool copy) {
-  auto arr = RuntimeOption::EvalHackArrDVArrs
-    ? ArrayCommon::ToDict(a, copy)
-    : ArrayCommon::ToDArray(a, copy);
-  arr = arr->toShapeInPlaceIfCompatible();
-  return arr;
-}
-
 ArrayCommon::RefCheckResult
 ArrayCommon::CheckForRefs(const ArrayData* ad) {
   auto result = RefCheckResult::Pass;

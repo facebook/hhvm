@@ -207,7 +207,6 @@ void emitTypeTest(Vout& v, IRLS& env, Type type,
     if (type <= TPersistentStr) return cmp(KindOfPersistentString, CC_E);
     if (type <= TStr)           return cmp(KindOfPersistentString, CC_AE);
     if (type <= TArr)           return cmp(KindOfArray, CC_LE);
-    if (type <= TShape)         return persistent_type(KindOfPersistentShape);
     if (type <= TVec)           return persistent_type(KindOfPersistentVec);
     if (type <= TDict)          return persistent_type(KindOfPersistentDict);
     if (type <= TKeyset)        return persistent_type(KindOfPersistentKeyset);

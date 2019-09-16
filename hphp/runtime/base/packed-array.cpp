@@ -1269,14 +1269,6 @@ ArrayData* PackedArray::ToDArray(ArrayData* adIn, bool /*copy*/) {
   return init.create();
 }
 
-ArrayData* PackedArray::ToShape(ArrayData* ad, bool copy) {
-  auto arr = RuntimeOption::EvalHackArrDVArrs
-    ? PackedArray::ToDict(ad, copy)
-    : PackedArray::ToDArray(ad, copy);
-  arr = arr->toShapeInPlaceIfCompatible();
-  return arr;
-}
-
 ArrayData* PackedArray::ToPHPArrayVec(ArrayData* adIn, bool copy) {
   assertx(checkInvariants(adIn));
   assertx(adIn->isVecArray());
@@ -1338,14 +1330,6 @@ ArrayData* PackedArray::ToDictVec(ArrayData* ad, bool copy) {
   return RuntimeOption::EvalArrayProvenance
     ? tagArrProv(out, ad)
     : out;
-}
-
-ArrayData* PackedArray::ToShapeVec(ArrayData* ad, bool copy) {
-  auto arr = RuntimeOption::EvalHackArrDVArrs
-    ? PackedArray::ToDictVec(ad, copy)
-    : PackedArray::ToDArrayVec(ad, copy);
-  arr = arr->toShapeInPlaceIfCompatible();
-  return arr;
 }
 
 ArrayData* PackedArray::ToVec(ArrayData* adIn, bool copy) {

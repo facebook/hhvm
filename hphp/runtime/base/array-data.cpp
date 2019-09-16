@@ -102,7 +102,6 @@ struct ScalarHash {
           case KindOfInt64:
           case KindOfDouble:
           case KindOfPersistentString:
-          case KindOfPersistentShape:
           case KindOfPersistentArray:
           case KindOfPersistentVec:
           case KindOfPersistentDict:
@@ -110,7 +109,6 @@ struct ScalarHash {
             ret = folly::hash::hash_combine(ret, v.m_data.num);
             break;
           case KindOfString:
-          case KindOfShape:
           case KindOfArray:
           case KindOfVec:
           case KindOfDict:
@@ -132,10 +130,10 @@ struct ScalarHash {
     if (ad1 == ad2) return true;
     if (ad1->size() != ad2->size()) return false;
     if (!ArrayData::dvArrayEqual(ad1, ad2)) return false;
-    if (ad1->isHackArray() || ad1->isShape()) {
-      if (!ad2->isHackArray() && !ad2->isShape()) return false;
+    if (ad1->isHackArray()) {
+      if (!ad2->isHackArray()) return false;
       if (ad1->kind() != ad2->kind()) return false;
-    } else if (ad2->isHackArray() || ad2->isShape()) {
+    } else if (ad2->isHackArray()) {
       return false;
     }
 
@@ -195,7 +193,6 @@ void ArrayData::GetScalarArray(ArrayData** parr) {
     arr->hasProvenanceData();
 
   if (arr->empty() && LIKELY(!provenanceEnabled)) {
-    if (arr->isShape())    return replace(staticEmptyShapeArray());
     if (arr->isKeyset())   return replace(staticEmptyKeysetArray());
     if (arr->isVArray())   return replace(staticEmptyVArray());
     if (arr->isDArray())   return replace(staticEmptyDArray());
@@ -263,7 +260,6 @@ static_assert(ArrayFunctions::NK == ArrayData::ArrayKind::kNumKinds,
     APCLocalArray::entry,                       \
     GlobalsArray::entry,                        \
     RecordArray::entry,                         \
-    MixedArray::entry##Shape,  /* Shape */      \
     MixedArray::entry##Dict,   /* Dict */       \
     PackedArray::entry##Vec,   /* Vec */        \
     SetArray::entry,           /* Keyset */     \
@@ -730,15 +726,6 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(ToPHPArrayIntishCast)
 
    /*
-   * ArrayData* ToShape(ArrayData*, bool)
-   *
-   *   Convert to a shape. If already a shape, it will be returned unchange
-   *   (without copying). If copy is false, it may be converted in place. If the
-   *   input array contains references, an exception will be thrown.
-   */
-  DISPATCH(ToShape)
-
-   /*
    * ArrayData* ToDict(ArrayData*, bool)
    *
    *   Convert to a dict. If already a dict, it will be returned unchange
@@ -833,24 +820,6 @@ ArrayData* ArrayData::Create(TypedValue name, TypedValue value) {
   ArrayInit init(1, ArrayInit::Map{});
   init.setValidKey(name, value);
   return init.create();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-ArrayData* ArrayData::toShapeInPlaceIfCompatible() {
-  if (size() == 0 && isStatic()) {
-    return ArrayData::CreateShape();
-  }
-  assertx((RuntimeOption::EvalHackArrDVArrs && isDict()) ||
-          (!RuntimeOption::EvalHackArrDVArrs && isMixed() && isDArray()));
-  if (!isRefCounted()) {
-    auto ad = MixedArray::Copy(this);
-    ad->m_kind = HeaderKind::Shape;
-    return ad;
-  }
-  assertx(!cowCheck());
-  m_kind = HeaderKind::Shape;
-  return this;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -985,7 +954,7 @@ int ArrayData::compare(const ArrayData* v2) const {
         raiseHackArrCompatArrHackArrCmp();
       }
       if (v2->isVecArray()) throw_vec_compare_exception();
-      if (v2->isDictOrShape()) throw_dict_compare_exception();
+      if (v2->isDict()) throw_dict_compare_exception();
       if (v2->isKeyset()) throw_keyset_compare_exception();
       not_reached();
     }
@@ -1021,18 +990,6 @@ bool ArrayData::equal(const ArrayData* v2, bool strict) const {
     }
     return false;
   };
-
-  if (isShape()) {
-    if (UNLIKELY(!v2->isDictOrDArrayOrShape())) return mixed();
-    return strict
-      ? MixedArray::ShapeSame(this, v2) : MixedArray::ShapeEqual(this, v2);
-  }
-
-  if (v2->isShape()) {
-    if (UNLIKELY(!isDictOrDArrayOrShape())) return mixed();
-    return strict
-      ? MixedArray::ShapeSame(this, v2) : MixedArray::ShapeEqual(this, v2);
-  }
 
   if (isPHPArray()) {
     if (UNLIKELY(!v2->isPHPArray())) return mixed();
@@ -1143,14 +1100,13 @@ tv_rval ArrayData::getNotFound(const StringData* k, bool error) const {
 }
 
 const char* ArrayData::kindToString(ArrayKind kind) {
-  std::array<const char*,10> names = {{
+  std::array<const char*,9> names = {{
     "PackedKind",
     "MixedKind",
     "EmptyKind",
     "ApcKind",
     "GlobalsKind",
     "RecordKind",
-    "ShapeKind",
     "DictKind",
     "VecKind",
     "KeysetKind"
@@ -1178,9 +1134,6 @@ std::string describeKeyType(const TypedValue* tv) {
   case KindOfDict:             return "dict";
   case KindOfPersistentKeyset:
   case KindOfKeyset:           return "keyset";
-  case KindOfPersistentShape:
-  case KindOfShape:
-    return RuntimeOption::EvalHackArrDVArrs ? "dict" : "array";
   case KindOfPersistentArray:
   case KindOfArray:            return "array";
   case KindOfResource:
@@ -1220,8 +1173,6 @@ std::string describeKeyValue(TypedValue tv) {
   case KindOfDict:
   case KindOfPersistentKeyset:
   case KindOfKeyset:
-  case KindOfPersistentShape:
-  case KindOfShape:
   case KindOfPersistentArray:
   case KindOfArray:
   case KindOfResource:

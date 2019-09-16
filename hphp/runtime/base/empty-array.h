@@ -155,7 +155,6 @@ struct EmptyArray final : type_scan::MarkCollectable<EmptyArray> {
     return ArrayData::CreateDArray();
   }
   static ArrayData* ToDict(ArrayData*, bool);
-  static ArrayData* ToShape(ArrayData*, bool);
   static ArrayData* ToVec(ArrayData*, bool);
   static ArrayData* ToKeyset(ArrayData*, bool);
   static void Renumber(ArrayData*) {}

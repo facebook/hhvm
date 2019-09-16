@@ -92,7 +92,6 @@ EntryInfo::Type EntryInfo::getAPCType(const APCHandle* handle) {
     case APCKind::StaticArray:
     case APCKind::StaticVec:
     case APCKind::StaticDict:
-    case APCKind::StaticShape:
     case APCKind::StaticKeyset:
       return EntryInfo::Type::Uncounted;
     case APCKind::UncountedString:
@@ -105,8 +104,6 @@ EntryInfo::Type EntryInfo::getAPCType(const APCHandle* handle) {
       return EntryInfo::Type::UncountedVec;
     case APCKind::UncountedDict:
       return EntryInfo::Type::UncountedDict;
-    case APCKind::UncountedShape:
-      return EntryInfo::Type::UncountedShape;
     case APCKind::UncountedKeyset:
       return EntryInfo::Type::UncountedKeyset;
     case APCKind::SerializedArray:
@@ -115,16 +112,12 @@ EntryInfo::Type EntryInfo::getAPCType(const APCHandle* handle) {
       return EntryInfo::Type::SerializedVec;
     case APCKind::SerializedDict:
       return EntryInfo::Type::SerializedDict;
-    case APCKind::SerializedShape:
-      return EntryInfo::Type::SerializedShape;
     case APCKind::SerializedKeyset:
       return EntryInfo::Type::SerializedKeyset;
     case APCKind::SharedVec:
       return EntryInfo::Type::APCVec;
     case APCKind::SharedDict:
       return EntryInfo::Type::APCDict;
-    case APCKind::SharedShape:
-      return EntryInfo::Type::APCShape;
     case APCKind::SharedKeyset:
       return EntryInfo::Type::APCKeyset;
     case APCKind::SharedArray:
@@ -248,8 +241,6 @@ struct HotCache {
           return HotValue{APCTypedValue::fromHandle(h)->getVecData()};
         case APCKind::UncountedDict:
           return HotValue{APCTypedValue::fromHandle(h)->getDictData()};
-        case APCKind::UncountedShape:
-          return HotValue{APCTypedValue::fromHandle(h)->getShapeData()};
         case APCKind::UncountedKeyset:
           return HotValue{APCTypedValue::fromHandle(h)->getKeysetData()};
         default:

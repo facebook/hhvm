@@ -100,15 +100,6 @@ bool cellInstanceOfImpl(const Cell* tv, F lookupClass) {
       return cls && interface_supports_keyset(cls->name());
     }
 
-    case KindOfPersistentShape:
-    case KindOfShape: {
-      auto const cls = lookupClass();
-      if (RuntimeOption::EvalHackArrDVArrs) {
-        return cls && interface_supports_dict(cls->name());
-      }
-      return cls && interface_supports_array(cls->name());
-    }
-
     case KindOfPersistentArray:
     case KindOfArray: {
       auto const cls = lookupClass();
@@ -633,7 +624,7 @@ bool checkTypeStructureMatchesCellImpl(
           raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_DARR_IS_DICT);
         }
       }
-      result = isDictOrShapeType(type);
+      result = isDictType(type);
       if (result && UNLIKELY(RuntimeOption::EvalLogArrayProvenance)) {
         raise_array_serialization_notice("is_dict", data.parr);
       }
@@ -675,7 +666,7 @@ bool checkTypeStructureMatchesCellImpl(
         }
         break;
       }
-      result = isVecType(type) || isDictOrShapeType(type);
+      result = isVecType(type) || isDictType(type);
       if (result && UNLIKELY(RuntimeOption::EvalLogArrayProvenance)) {
         raise_array_serialization_notice(isVecType(type) ? "is_vec" : "is_dict",
                                          data.parr);
@@ -690,7 +681,7 @@ bool checkTypeStructureMatchesCellImpl(
         break;
       }
       result = isArrayType(type) || isVecType(type) ||
-               isDictType(type) || isShapeType(type) || isKeysetType(type);
+               isDictType(type) || isKeysetType(type);
       break;
     case TypeStructure::Kind::T_enum: {
       assertx(ts.exists(s_classname));

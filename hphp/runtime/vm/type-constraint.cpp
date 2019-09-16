@@ -506,19 +506,19 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
         c = td->klass;
         break;
       case AnnotAction::VArrayCheck:
-        assertx(tvIsArrayOrShape(val));
+        assertx(tvIsArray(val));
         return Assert || val.val().parr->isVArray();
       case AnnotAction::DArrayCheck:
-        assertx(tvIsArrayOrShape(val));
+        assertx(tvIsArray(val));
         return Assert || val.val().parr->isDArray();
       case AnnotAction::VArrayOrDArrayCheck:
-        assertx(tvIsArrayOrShape(val));
+        assertx(tvIsArray(val));
         return (Assert || (
           !RuntimeOption::EvalHackArrCompatTypeHintPolymorphism &&
           !val.val().parr->isNotDVArray()
         ));
       case AnnotAction::NonVArrayOrDArrayCheck:
-        assertx(tvIsArrayOrShape(val));
+        assertx(tvIsArray(val));
         return Assert || val.val().parr->isNotDVArray();
       case AnnotAction::WarnFunc:
       case AnnotAction::WarnClass:
@@ -762,19 +762,19 @@ bool TypeConstraint::checkImpl(tv_rval val,
     case AnnotAction::VArrayCheck:
       // Since d/varray type-hints are always soft, we can never assert on their
       // correctness.
-      assertx(tvIsArrayOrShape(val));
+      assertx(tvIsArray(val));
       return isAssert || val.val().parr->isVArray();
     case AnnotAction::DArrayCheck:
-      assertx(tvIsArrayOrShape(val));
+      assertx(tvIsArray(val));
       return isAssert || val.val().parr->isDArray();
     case AnnotAction::VArrayOrDArrayCheck:
-      assertx(tvIsArrayOrShape(val));
+      assertx(tvIsArray(val));
       return (isAssert || (
         !RuntimeOption::EvalHackArrCompatTypeHintPolymorphism &&
         !val.val().parr->isNotDVArray()
       ));
     case AnnotAction::NonVArrayOrDArrayCheck:
-      assertx(tvIsArrayOrShape(val));
+      assertx(tvIsArray(val));
       return isAssert || val.val().parr->isNotDVArray();
     case AnnotAction::WarnFunc:
     case AnnotAction::WarnClass:
@@ -989,9 +989,6 @@ std::string describe_actual_type(tv_rval val, bool isHHType) {
     case KindOfDict:          return "HH\\dict";
     case KindOfPersistentKeyset:
     case KindOfKeyset:        return "HH\\keyset";
-    case KindOfPersistentShape:
-    case KindOfShape:
-      return RuntimeOption::EvalHackArrDVArrs ? "HH\\dict" : "array";
     case KindOfPersistentArray:
     case KindOfArray:         return "array";
     case KindOfResource:
@@ -1409,8 +1406,6 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
         case KindOfDict:
         case KindOfPersistentKeyset:
         case KindOfKeyset:
-        case KindOfPersistentShape:
-        case KindOfShape:
         case KindOfPersistentArray:
         case KindOfArray:
         case KindOfClsMeth:

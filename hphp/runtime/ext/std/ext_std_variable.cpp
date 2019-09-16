@@ -117,11 +117,11 @@ bool HHVM_FUNCTION(is_scalar, const Variant& v) {
 
 bool HHVM_FUNCTION(is_array, const Variant& v) {
   if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsArrayNotices)) {
-    if (v.isPHPArrayOrShape()) {
+    if (v.isPHPArray()) {
       return true;
     } else if (v.isVecArray()) {
       raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_VEC_IS_ARR);
-    } else if (v.isDictOrShape()) {
+    } else if (v.isDict()) {
       raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_DICT_IS_ARR);
     } else if (v.isKeyset()) {
       raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_KEYSET_IS_ARR);
@@ -150,7 +150,7 @@ bool HHVM_FUNCTION(HH_is_vec, const Variant& v) {
 
 bool HHVM_FUNCTION(HH_is_dict, const Variant& v) {
   if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsVecDictNotices)) {
-    if (v.isPHPArrayOrShape()) {
+    if (v.isPHPArray()) {
       auto const& arr = v.toCArrRef();
       if (arr.isDArray()) {
         raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_DARR_IS_DICT);
@@ -188,12 +188,12 @@ bool HHVM_FUNCTION(HH_is_darray, const Variant& val) {
   auto const cell = val.asTypedValue();
   if (RuntimeOption::EvalHackArrDVArrs) return is_dict(cell);
   if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsVecDictNotices)) {
-    if (val.isDictOrShape()) {
+    if (val.isDict()) {
       raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_DICT_IS_DARR);
       return false;
     }
   }
-  return tvIsArrayOrShape(cell) && cell->m_data.parr->isDArray();
+  return tvIsArray(cell) && cell->m_data.parr->isDArray();
 }
 
 bool HHVM_FUNCTION(HH_is_any_array, const Variant& val) {
@@ -527,21 +527,6 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
       assertx(arr->isKeyset());
       if (arr->empty()) return empty_hack(arr, s_EmptyKeysetArray);
       break;
-    }
-
-    case KindOfPersistentShape:
-    case KindOfShape: { // TODO(T31134050)
-      if (RuntimeOption::EvalHackArrDVArrs) {
-        ArrayData* arr = value.getArrayData();
-        assertx(arr->isShape());
-        if (arr->empty()) {
-          return UNLIKELY(arr->isLegacyArray())
-            ? s_EmptyArray
-            : empty_hack(arr, s_EmptyDictArray);
-        }
-        break;
-      }
-      // Fallthrough
     }
 
     case KindOfPersistentArray:

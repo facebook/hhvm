@@ -102,7 +102,6 @@ struct RecordArray : ArrayData,
   static ArrayData* Escalate(const ArrayData*);
   static ArrayData* ToPHPArray(ArrayData*, bool);
   static ArrayData* ToPHPArrayIntishCast(ArrayData*, bool);
-  static ArrayData* ToShape(ArrayData*, bool);
   static ArrayData* ToDict(ArrayData*, bool);
   static ArrayData* ToVec(ArrayData*, bool);
   static ArrayData* ToKeyset(ArrayData*, bool);

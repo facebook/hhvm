@@ -362,10 +362,6 @@ ArrayData* RecordArray::ToPHPArrayIntishCast(ArrayData*, bool) {
   throw_not_implemented("This method on RecordArray");
 }
 
-ArrayData* RecordArray::ToShape(ArrayData*, bool) {
-  throw_not_implemented("This method on RecordArray");
-}
-
 ArrayData* RecordArray::ToDict(ArrayData*, bool) {
   throw_not_implemented("This method on RecordArray");
 }

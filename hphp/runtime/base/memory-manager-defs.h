@@ -259,7 +259,6 @@ inline size_t allocSize(const HeapObject* h) {
     0, /* APCLocalArray */
     sizeClass<GlobalsArray>(),
     0, /* RecordArray */
-    0, /* Shape */
     0, /* Dict */
     0, /* VecArray */
     0, /* KeySet */
@@ -355,7 +354,6 @@ inline size_t allocSize(const HeapObject* h) {
       assertx(size == MemoryManager::sizeClass(size));
       return size;
     case HeaderKind::Mixed:
-    case HeaderKind::Shape:
     case HeaderKind::Dict:
       // size = fn of h->m_scale
       size = static_cast<const MixedArray*>(h)->heapSize();

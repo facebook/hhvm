@@ -48,7 +48,6 @@ DEBUG_ONLY std::string describe(const HeapGraph& g, int n) {
     case HeaderKind::Packed:
     case HeaderKind::Mixed:
     case HeaderKind::Dict:
-    case HeaderKind::Shape:
     case HeaderKind::Empty:
     case HeaderKind::VecArray:
     case HeaderKind::Keyset:

@@ -920,14 +920,6 @@ ArrayData* SetArray::ToDArray(ArrayData* ad, bool copy) {
   return out;
 }
 
-ArrayData* SetArray::ToShape(ArrayData* ad, bool copy) {
-  auto arr = RuntimeOption::EvalHackArrDVArrs
-    ? SetArray::ToDict(ad, copy)
-    : SetArray::ToDArray(ad, copy);
-  arr = arr->toShapeInPlaceIfCompatible();
-  return arr;
-}
-
 ArrayData* SetArray::ToKeyset(ArrayData* ad, bool /*copy*/) {
   assertx(asSet(ad)->checkInvariants());
   return ad;

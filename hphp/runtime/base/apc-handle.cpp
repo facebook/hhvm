@@ -128,13 +128,6 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
       return APCArray::MakeSharedKeyset(ad, level, unserializeObj);
     }
 
-    case KindOfPersistentShape:
-    case KindOfShape: {
-      auto ad = source.getArrayData();
-      assertx(ad->isShape());
-      return APCArray::MakeSharedShape(ad, level, unserializeObj);
-    }
-
     case KindOfPersistentArray:
     case KindOfArray: {
       auto const ad = val(cell).parr;
@@ -194,8 +187,6 @@ Variant APCHandle::toLocalHelper() const {
     case APCKind::UncountedVec:
     case APCKind::StaticDict:
     case APCKind::UncountedDict:
-    case APCKind::StaticShape:
-    case APCKind::UncountedShape:
     case APCKind::StaticKeyset:
     case APCKind::UncountedKeyset:
       not_reached();
@@ -223,12 +214,6 @@ Variant APCHandle::toLocalHelper() const {
       auto const serDict = APCString::fromHandle(this)->getStringData();
       auto const v = apc_unserialize(serDict->data(), serDict->size());
       assertx(v.isDict());
-      return v;
-    }
-    case APCKind::SerializedShape: {
-      auto const serShape = APCString::fromHandle(this)->getStringData();
-      auto const v = apc_unserialize(serShape->data(), serShape->size());
-      assertx(v.isShape());
       return v;
     }
     case APCKind::SerializedKeyset: {
@@ -260,10 +245,6 @@ Variant APCHandle::toLocalHelper() const {
       return Variant::attach(
         APCArray::fromHandle(this)->toLocalDict()
       );
-    case APCKind::SharedShape:
-      return Variant::attach(
-        APCArray::fromHandle(this)->toLocalShape()
-      );
     case APCKind::SharedKeyset:
       return Variant::attach(
         APCArray::fromHandle(this)->toLocalKeyset()
@@ -293,7 +274,6 @@ void APCHandle::deleteShared() {
     case APCKind::StaticArray:
     case APCKind::StaticVec:
     case APCKind::StaticDict:
-    case APCKind::StaticShape:
     case APCKind::StaticKeyset:
     case APCKind::PersistentFunc:
       delete APCTypedValue::fromHandle(this);
@@ -307,7 +287,6 @@ void APCHandle::deleteShared() {
     case APCKind::SerializedArray:
     case APCKind::SerializedVec:
     case APCKind::SerializedDict:
-    case APCKind::SerializedShape:
     case APCKind::SerializedKeyset:
     case APCKind::SerializedObject:
       APCString::Delete(APCString::fromHandle(this));
@@ -320,7 +299,6 @@ void APCHandle::deleteShared() {
     case APCKind::SharedArray:
     case APCKind::SharedVec:
     case APCKind::SharedDict:
-    case APCKind::SharedShape:
     case APCKind::SharedKeyset:
       APCArray::Delete(this);
       return;
@@ -336,7 +314,6 @@ void APCHandle::deleteShared() {
     case APCKind::UncountedArray:
     case APCKind::UncountedVec:
     case APCKind::UncountedDict:
-    case APCKind::UncountedShape:
     case APCKind::UncountedKeyset:
     case APCKind::UncountedString:
       assertx(false);
@@ -381,10 +358,6 @@ bool APCHandle::checkInvariants() const {
     case APCKind::UncountedDict:
       assertx(m_type == KindOfPersistentDict);
       return true;
-    case APCKind::StaticShape:
-    case APCKind::UncountedShape:
-      assertx(m_type == KindOfPersistentShape);
-      return true;
     case APCKind::StaticKeyset:
     case APCKind::UncountedKeyset:
       assertx(m_type == KindOfPersistentKeyset);
@@ -398,14 +371,12 @@ bool APCHandle::checkInvariants() const {
     case APCKind::SharedPackedArray:
     case APCKind::SharedVec:
     case APCKind::SharedDict:
-    case APCKind::SharedShape:
     case APCKind::SharedKeyset:
     case APCKind::SharedObject:
     case APCKind::SharedCollection:
     case APCKind::SerializedArray:
     case APCKind::SerializedVec:
     case APCKind::SerializedDict:
-    case APCKind::SerializedShape:
     case APCKind::SerializedKeyset:
     case APCKind::SerializedObject:
       assertx(m_type == kInvalidDataType);

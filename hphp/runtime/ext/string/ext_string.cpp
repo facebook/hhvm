@@ -994,12 +994,10 @@ String HHVM_FUNCTION(chr, const Variant& ascii) {
     case KindOfPersistentVec:
     case KindOfPersistentDict:
     case KindOfPersistentKeyset:
-    case KindOfPersistentShape:
     case KindOfPersistentArray:
     case KindOfVec:
     case KindOfDict:
     case KindOfKeyset:
-    case KindOfShape:
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:

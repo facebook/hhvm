@@ -43,9 +43,6 @@ struct APCArray {
   static APCHandle::Pair MakeSharedDict(ArrayData* data,
                                         APCHandleLevel level,
                                         bool unserializeObj);
-  static APCHandle::Pair MakeSharedShape(ArrayData* data,
-                                         APCHandleLevel level,
-                                         bool unserializeObj);
   static APCHandle::Pair MakeSharedKeyset(ArrayData* data,
                                           APCHandleLevel level,
                                           bool unserializeObj);
@@ -56,8 +53,6 @@ struct APCArray {
                                      DataWalker::PointerMap* m = nullptr);
   static APCHandle* MakeUncountedDict(ArrayData* dict,
                                       DataWalker::PointerMap* m = nullptr);
-  static APCHandle* MakeUncountedShape(ArrayData* shape,
-                                       DataWalker::PointerMap* m = nullptr);
   static APCHandle* MakeUncountedKeyset(ArrayData* dict);
 
   static APCHandle::Pair MakeSharedEmptyArray();
@@ -103,7 +98,6 @@ struct APCArray {
   }
   ArrayData* toLocalVec() const { return PackedArray::MakeVecFromAPC(this); }
   ArrayData* toLocalDict() const { return MixedArray::MakeDictFromAPC(this); }
-  ArrayData* toLocalShape() const { return MixedArray::MakeShapeFromAPC(this); }
   ArrayData* toLocalKeyset() const { return SetArray::MakeSetFromAPC(this); }
 
   //
@@ -183,10 +177,6 @@ struct APCArray {
 
   bool isDict() const {
     return m_handle.kind() == APCKind::SharedDict;
-  }
-
-  bool isShape() const {
-    return m_handle.kind() == APCKind::SharedShape;
   }
 
   bool isKeyset() const {

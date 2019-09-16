@@ -408,8 +408,6 @@ To array conversions:
 
 | ConvDictToArr,                D(Arr), S(Dict),                  PRc|CRc
 
-| ConvShapeToArr,               D(Arr), S(Shape),                 PRc|CRc
-
 | ConvKeysetToArr,              D(Arr), S(Keyset),                PRc|CRc
 
 | ConvFuncToArr,                D(Arr), S(Func),                  PRc
@@ -428,8 +426,6 @@ To vec conversions:
 
 | ConvDictToVec,                D(Vec), S(Dict),                     PRc|CRc
 
-| ConvShapeToVec,               D(Vec), S(Shape),                    PRc|CRc
-
 | ConvKeysetToVec,              D(Vec), S(Keyset),                   PRc|CRc
 
 | ConvClsMethToVec,             D(Vec), S(ClsMeth),               PRc|CRc
@@ -440,8 +436,6 @@ To vec conversions:
 To dict conversions:
 
 | ConvArrToDict,                D(Dict), S(Arr),                  PRc|CRc
-
-| ConvShapeToDict,              D(Dict), S(Shape),                PRc|CRc
 
 | ConvVecToDict,                D(Dict), S(Vec),                     PRc|CRc
 
@@ -460,8 +454,6 @@ To keyset conversions:
 
 | ConvDictToKeyset,             D(Keyset), S(Dict),               PRc|CRc
 
-| ConvShapeToKeyset,            D(Keyset), S(Shape),              PRc|CRc
-
 | ConvClsMethToKeyset,          D(Keyset), S(ClsMeth),            PRc|CRc
 
 | ConvObjToKeyset,              D(Keyset), S(Obj),                PRc|CRc
@@ -474,8 +466,6 @@ To varray conversions:
 | ConvVecToVArr,                DArrPacked, S(Vec),                  PRc|CRc
 
 | ConvDictToVArr,               DArrPacked, S(Dict),                 PRc|CRc
-
-| ConvShapeToVArr,              DArrPacked, S(Shape),                PRc|CRc
 
 | ConvKeysetToVArr,             DArrPacked, S(Keyset),               PRc|CRc
 
@@ -491,8 +481,6 @@ To darray conversion:
 | ConvVecToDArr,                DArrMixed, S(Vec),                   PRc|CRc
 
 | ConvDictToDArr,               DArrMixed, S(Dict),               PRc|CRc
-
-| ConvShapeToDArr,              DArrMixed, S(Shape),              PRc|CRc
 
 | ConvKeysetToDArr,             DArrMixed, S(Keyset),             PRc|CRc
 
@@ -734,28 +722,6 @@ To string conversions:
   Perform comparison of arrays using PHP semantics. All versions except for
   SameArr and NSameArr may re-enter the VM and therefore may throw
   exceptions. SameArr and NSameArr never re-enter or throw.
-
-| GtShape,                     D(Bool), S(Shape,Arr,Dict) S(Shape,Arr,Dict), NF
-
-| GteShape,                    D(Bool), S(Shape,Arr,Dict) S(Shape,Arr,Dict), NF
-
-| LtShape,                     D(Bool), S(Shape,Arr,Dict) S(Shape,Arr,Dict), NF
-
-| LteShape,                    D(Bool), S(Shape,Arr,Dict) S(Shape,Arr,Dict), NF
-
-| EqShape,                     D(Bool), S(Shape,Arr,Dict) S(Shape,Arr,Dict), NF
-
-| NeqShape,                    D(Bool), S(Shape,Arr,Dict) S(Shape,Arr,Dict), NF
-
-| SameShape,                   D(Bool), S(Shape,Arr,Dict) S(Shape,Arr,Dict), NF
-
-| NSameShape,                  D(Bool), S(Shape,Arr,Dict) S(Shape,Arr,Dict), NF
-
-| CmpShape,                    D(Int),  S(Shape,Arr,Dict) S(Shape,Arr,Dict), NF
-
-  Perform comparison of Shapes using PHP semantics. All versions except for
-  SameShape and NSameShape may re-enter the VM and therefore may throw
-  exceptions. SameShape and NSameShape never re-enter or throw.
 
 | GtVec,                       D(Bool), S(Vec) S(Vec),                    NF
 
@@ -2082,8 +2048,6 @@ To string conversions:
 | CountVec,        D(Int), S(Vec),    NF
 
 | CountDict,       D(Int), S(Dict),   NF
-
-| CountShape,      D(Int), S(Shape),  NF
 
 | CountKeyset,     D(Int), S(Keyset), NF
 

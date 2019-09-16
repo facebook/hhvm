@@ -712,8 +712,6 @@ static std::string toStringElm(const TypedValue* tv) {
   case KindOfDict:
   case KindOfPersistentKeyset:
   case KindOfKeyset:
-  case KindOfPersistentShape:
-  case KindOfShape:
   case KindOfPersistentArray:
   case KindOfArray:
   case KindOfObject:
@@ -782,14 +780,6 @@ static std::string toStringElm(const TypedValue* tv) {
       os << tv->m_data.parr;
       print_count();
       os << ":Keyset";
-      continue;
-    case KindOfPersistentShape:
-    case KindOfShape:
-      assertx(tv->m_data.parr->isShape());
-      assertx(tv->m_data.parr->checkCount());
-      os << tv->m_data.parr;
-      print_count();
-      os << ":Shape";
       continue;
     case KindOfPersistentArray:
     case KindOfArray:
@@ -2883,8 +2873,6 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
             case KindOfDict:
             case KindOfPersistentKeyset:
             case KindOfKeyset:
-            case KindOfPersistentShape:
-            case KindOfShape:
             case KindOfPersistentArray:
             case KindOfArray:
             case KindOfObject:
@@ -2915,12 +2903,6 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
         case KindOfKeyset:
           tvDecRefArr(val);
         case KindOfPersistentKeyset:
-          match = SwitchMatch::DEFAULT;
-          return;
-
-        case KindOfShape:
-          tvDecRefArr(val);
-        case KindOfPersistentShape:
           match = SwitchMatch::DEFAULT;
           return;
 
@@ -4097,7 +4079,7 @@ OPTBLD_INLINE static bool isTypeHelper(Cell* val, IsTypeOp op) {
                !RuntimeOption::EvalLogArrayProvenance) ||
         vmfp()->m_func->isBuiltin()) {
       return is_array(val);
-    } else if (isArrayOrShapeType(val->m_type)) {
+    } else if (isArrayType(val->m_type)) {
       return true;
     } else if (isVecType(val->m_type)) {
       if (RuntimeOption::EvalHackArrCompatIsArrayNotices) {
@@ -4106,7 +4088,7 @@ OPTBLD_INLINE static bool isTypeHelper(Cell* val, IsTypeOp op) {
       if (RuntimeOption::EvalLogArrayProvenance) {
         raise_array_serialization_notice("is_array", val->m_data.parr);
       }
-    } else if (isDictOrShapeType(val->m_type)) {
+    } else if (isDictType(val->m_type)) {
       if (RuntimeOption::EvalHackArrCompatIsArrayNotices) {
         raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_DICT_IS_ARR);
       }
@@ -4136,7 +4118,7 @@ OPTBLD_INLINE static bool isTypeHelper(Cell* val, IsTypeOp op) {
   }
   case IsTypeOp::Dict: {
     if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsVecDictNotices)) {
-      if (isArrayOrShapeType(val->m_type)) {
+      if (isArrayType(val->m_type)) {
         if (val->m_data.parr->isDArray()) {
           raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_DARR_IS_DICT);
         }

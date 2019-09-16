@@ -338,10 +338,6 @@ ArrayData* EmptyArray::ToDict(ArrayData*, bool) {
   return ArrayData::CreateDict();
 }
 
-ArrayData* EmptyArray::ToShape(ArrayData*, bool) {
-  return ArrayData::CreateShape();
-}
-
 ArrayData* EmptyArray::ToVec(ArrayData*, bool) {
   return ArrayData::CreateVec();
 }

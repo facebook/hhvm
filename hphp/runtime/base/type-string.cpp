@@ -404,9 +404,6 @@ StaticString getDataTypeString(DataType t) {
     case KindOfDict:       return s_dict;
     case KindOfPersistentKeyset:
     case KindOfKeyset:     return s_keyset;
-    case KindOfPersistentShape:
-    case KindOfShape:
-      return RuntimeOption::EvalHackArrDVArrs ? s_dict : s_array;
     case KindOfPersistentArray:
     case KindOfArray:      return s_array;
     case KindOfObject:     return s_object;

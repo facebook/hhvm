@@ -277,14 +277,6 @@ MaybeDataType get_datatype(
   return KindOfObject;
 }
 
-bool isArrayOrShapeType(DataType t) {
-  return isArrayType(t) ||
-    (!RuntimeOption::EvalHackArrDVArrs && isShapeType(t));
-}
-bool isArrayOrShapeType(MaybeDataType t) {
-  return t && isArrayOrShapeType(*t);
-}
-
 bool isVecOrArrayType(DataType t) {
   return RuntimeOption::EvalHackArrDVArrs ? isVecType(t) : isArrayType(t);
 }
@@ -293,21 +285,8 @@ bool isDictOrArrayType(DataType t) {
   return RuntimeOption::EvalHackArrDVArrs ? isDictType(t) : isArrayType(t);
 }
 
-bool isDictOrShapeType(DataType t) {
-  return isDictType(t) ||
-    (RuntimeOption::EvalHackArrDVArrs && isShapeType(t));
-}
-bool isDictOrShapeType(MaybeDataType t) {
-  return t && isDictOrShapeType(*t);
-}
-
 bool equivDataTypes(DataType t1, DataType t2) {
-  return sameDataTypes(t1, t2) ||
-    (RuntimeOption::EvalHackArrDVArrs ?
-      ((isShapeType(t1) && isDictType(t2)) ||
-      (isDictType(t1) && isShapeType(t2))) :
-      ((isShapeType(t1) && isArrayType(t2)) ||
-      (isArrayType(t1) && isShapeType(t2))));
+  return sameDataTypes(t1, t2);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

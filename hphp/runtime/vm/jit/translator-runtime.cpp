@@ -220,15 +220,6 @@ ArrayData* convDictToArrHelper(ArrayData* adIn) {
   return a;
 }
 
-ArrayData* convShapeToArrHelper(ArrayData* adIn) {
-  assertx(adIn->isShape());
-  auto a = MixedArray::ToPHPArrayShape(adIn, adIn->cowCheck());
-  if (a != adIn) decRefArr(adIn);
-  assertx(a->isPHPArray());
-  assertx(a->isNotDVArray());
-  return a;
-}
-
 ArrayData* convKeysetToArrHelper(ArrayData* adIn) {
   assertx(adIn->isKeyset());
   auto a = SetArray::ToPHPArray(adIn, adIn->cowCheck());
@@ -253,14 +244,6 @@ ArrayData* convDictToVecHelper(ArrayData* adIn) {
   return a;
 }
 
-ArrayData* convShapeToVecHelper(ArrayData* adIn) {
-  assertx(adIn->isShape());
-  auto a = MixedArray::ToVecShape(adIn, adIn->cowCheck());
-  assertx(a != adIn);
-  decRefArr(adIn);
-  return a;
-}
-
 ArrayData* convKeysetToVecHelper(ArrayData* adIn) {
   assertx(adIn->isKeyset());
   auto a = SetArray::ToVec(adIn, adIn->cowCheck());
@@ -279,13 +262,6 @@ ArrayData* convObjToVecHelper(ObjectData* obj) {
 ArrayData* convArrToDictHelper(ArrayData* adIn) {
   assertx(adIn->isPHPArray());
   auto a = adIn->toDict(adIn->cowCheck());
-  if (a != adIn) decRefArr(adIn);
-  return a;
-}
-
-ArrayData* convShapeToDictHelper(ArrayData* adIn) {
-  assertx(adIn->isShape());
-  auto a = MixedArray::ToDictShape(adIn, adIn->cowCheck());
   if (a != adIn) decRefArr(adIn);
   return a;
 }
@@ -330,13 +306,6 @@ ArrayData* convVecToKeysetHelper(ArrayData* adIn) {
 ArrayData* convDictToKeysetHelper(ArrayData* adIn) {
   assertx(adIn->isDict());
   auto a = MixedArray::ToKeysetDict(adIn, adIn->cowCheck());
-  if (a != adIn) decRefArr(adIn);
-  return a;
-}
-
-ArrayData* convShapeToKeysetHelper(ArrayData* adIn) {
-  assertx(adIn->isShape());
-  auto a = MixedArray::ToKeysetShape(adIn, adIn->cowCheck());
   if (a != adIn) decRefArr(adIn);
   return a;
 }
@@ -797,8 +766,6 @@ int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets) {
       case KindOfDict:
       case KindOfPersistentKeyset:
       case KindOfKeyset:
-      case KindOfPersistentShape:
-      case KindOfShape:
       case KindOfPersistentArray:
       case KindOfArray:
       case KindOfObject:

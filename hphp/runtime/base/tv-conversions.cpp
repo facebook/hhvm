@@ -88,7 +88,6 @@ enable_if_lval_t<T, void> tvCastToBooleanInPlace(T tv) {
       case KindOfPersistentVec:
       case KindOfPersistentDict:
       case KindOfPersistentKeyset:
-      case KindOfPersistentShape:
       case KindOfPersistentArray:
         b = !val(tv).parr->empty();
         continue;
@@ -96,7 +95,6 @@ enable_if_lval_t<T, void> tvCastToBooleanInPlace(T tv) {
       case KindOfVec:
       case KindOfDict:
       case KindOfKeyset:
-      case KindOfShape:
       case KindOfArray:
         b = !val(tv).parr->empty();
         tvDecRefArr(tv);
@@ -181,7 +179,6 @@ enable_if_lval_t<T, void> tvCastToDoubleInPlace(T tv) {
       case KindOfPersistentVec:
       case KindOfPersistentDict:
       case KindOfPersistentKeyset:
-      case KindOfPersistentShape:
       case KindOfPersistentArray:
         d = val(tv).parr->empty() ? 0 : 1;
         continue;
@@ -189,7 +186,6 @@ enable_if_lval_t<T, void> tvCastToDoubleInPlace(T tv) {
       case KindOfVec:
       case KindOfDict:
       case KindOfKeyset:
-      case KindOfShape:
       case KindOfArray:
         d = val(tv).parr->empty() ? 0 : 1;
         tvDecRefArr(tv);
@@ -269,7 +265,6 @@ enable_if_lval_t<T, void> tvCastToInt64InPlace(T tv) {
       case KindOfPersistentVec:
       case KindOfPersistentDict:
       case KindOfPersistentKeyset:
-      case KindOfPersistentShape:
       case KindOfPersistentArray:
         i = val(tv).parr->empty() ? 0 : 1;
         continue;
@@ -277,7 +272,6 @@ enable_if_lval_t<T, void> tvCastToInt64InPlace(T tv) {
       case KindOfVec:
       case KindOfDict:
       case KindOfKeyset:
-      case KindOfShape:
       case KindOfArray:
         i = val(tv).parr->empty() ? 0 : 1;
         tvDecRefArr(tv);
@@ -358,8 +352,6 @@ double tvCastToDouble(TypedValue tv) {
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
-    case KindOfPersistentShape:
-    case KindOfShape:
     case KindOfPersistentArray:
     case KindOfArray:
       return tv.m_data.parr->empty() ? 0.0 : 1.0;
@@ -449,15 +441,6 @@ void cellCastToStringInPlace(tv_lval tv) {
       raise_notice("Keyset to string conversion");
       if (type(tv) == KindOfKeyset) tvDecRefArr(*tv);
       return persistentString(keyset_string.get());
-
-    case KindOfPersistentShape:
-    case KindOfShape:
-      if (RuntimeOption::EvalHackArrDVArrs) {
-        raise_notice("Dict to string conversion");
-        if (type(tv) == KindOfShape) tvDecRefArr(*tv);
-        return persistentString(dict_string.get());
-      }
-      // Fallthrough
 
     case KindOfArray:
     case KindOfPersistentArray:
@@ -558,14 +541,6 @@ StringData* cellCastToStringData(Cell tv) {
       raise_notice("Keyset to string conversion");
       return keyset_string.get();
 
-    case KindOfPersistentShape:
-    case KindOfShape:
-      if (RuntimeOption::EvalHackArrDVArrs) {
-        raise_notice("Dict to string conversion");
-        return dict_string.get();
-      }
-      // Fallthrough
-
     case KindOfPersistentArray:
     case KindOfArray:
       raise_notice("Array to string conversion");
@@ -638,8 +613,6 @@ ArrayData* tvCastToArrayLikeData(TypedValue tv) {
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
-    case KindOfPersistentShape:
-    case KindOfShape:
     case KindOfPersistentArray:
     case KindOfArray: {
       auto const ad = tv.m_data.parr;
@@ -685,20 +658,6 @@ static enable_if_lval_t<
   typename std::enable_if<std::is_rvalue_reference<T&&>::value, void>::type>
 assign(LHS lhs, T&& rhs) {
   variant_ref{lhs} = std::forward<T>(rhs);
-}
-
-template<typename T>
-enable_if_lval_t<T, void> tvCastToShapeInPlace(T tv) {
-  if (isShapeType(type(tv))) {
-    return;
-}
-  if (RuntimeOption::EvalHackArrDVArrs) {
-    tvCastToDictInPlace(tv);
-  } else {
-    tvCastToDArrayInPlace(tv);
-  }
-  auto const ad = val(tv).parr;
-  assign(tv, ad->toShape(ad->cowCheck()));
 }
 
 template<typename T, IntishCast IC /* = IntishCast::None */>
@@ -798,22 +757,6 @@ enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
           a = SetArray::ToPHPArray(adIn, adIn->cowCheck());
         }
 
-        if (a != adIn) tvDecRefArr(tv);
-        continue;
-      }
-
-      case KindOfPersistentShape: {
-        auto const adIn = val(tv).parr;
-        assertx(adIn->isShape());
-        a = MixedArray::ToPHPArrayShape(adIn, true);
-        assertx(a != adIn);
-        continue;
-      }
-
-      case KindOfShape: {
-        auto const adIn = val(tv).parr;
-        assertx(adIn->isShape());
-        a = MixedArray::ToPHPArrayShape(adIn, adIn->cowCheck());
         if (a != adIn) tvDecRefArr(tv);
         continue;
       }
@@ -943,16 +886,6 @@ enable_if_lval_t<T, void> tvCastToVecInPlace(T tv) {
         continue;
       }
 
-      case KindOfPersistentShape:
-      case KindOfShape: {
-        auto const adIn = val(tv).parr;
-        assertx(adIn->isShape());
-        a = MixedArray::ToVecShape(adIn, adIn->cowCheck());
-        assertx(a != adIn);
-        decRefArr(adIn);
-        continue;
-      }
-
       case KindOfPersistentArray:
       case KindOfArray: {
         auto* adIn = val(tv).parr;
@@ -1060,15 +993,6 @@ enable_if_lval_t<T, void> tvCastToDictInPlace(T tv) {
         auto* adIn = val(tv).parr;
         assertx(adIn->isKeyset());
         a = SetArray::ToDict(adIn, adIn->cowCheck());
-        if (a != adIn) decRefArr(adIn);
-        continue;
-      }
-
-      case KindOfPersistentShape:
-      case KindOfShape: {
-        auto const adIn = val(tv).parr;
-        assertx(adIn->isShape());
-        a = MixedArray::ToDictShape(adIn, adIn->cowCheck());
         if (a != adIn) decRefArr(adIn);
         continue;
       }
@@ -1181,15 +1105,6 @@ enable_if_lval_t<T, void> tvCastToKeysetInPlace(T tv) {
         auto* adIn = val(tv).parr;
         assertx(adIn->isDict());
         a = MixedArray::ToKeysetDict(adIn, adIn->cowCheck());
-        if (a != adIn) decRefArr(adIn);
-        continue;
-      }
-
-      case KindOfPersistentShape:
-      case KindOfShape: {
-        auto const adIn = val(tv).parr;
-        assertx(adIn->isShape());
-        a = MixedArray::ToKeysetShape(adIn, adIn->cowCheck());
         if (a != adIn) decRefArr(adIn);
         continue;
       }
@@ -1319,16 +1234,6 @@ enable_if_lval_t<T, void> tvCastToVArrayInPlace(T tv) {
         continue;
       }
 
-      case KindOfPersistentShape:
-      case KindOfShape: {
-        auto const adIn = val(tv).parr;
-        assertx(adIn->isShape());
-        a = MixedArray::ToVArrayShape(adIn, adIn->cowCheck());
-        assertx(a != adIn);
-        decRefArr(adIn);
-        continue;
-      }
-
       case KindOfPersistentArray:
       case KindOfArray: {
         auto* adIn = val(tv).parr;
@@ -1453,15 +1358,6 @@ enable_if_lval_t<T, void> tvCastToDArrayInPlace(T tv) {
         continue;
       }
 
-      case KindOfPersistentShape:
-      case KindOfShape: {
-        auto const adIn = val(tv).parr;
-        assertx(adIn->isShape());
-        a = MixedArray::ToDArrayShape(adIn, adIn->cowCheck());
-        if (a != adIn) decRefArr(adIn);
-        continue;
-      }
-
       case KindOfPersistentArray:
       case KindOfArray: {
         auto* adIn = val(tv).parr;
@@ -1545,8 +1441,6 @@ ObjectData* tvCastToObjectData(TypedValue tv) {
     case KindOfVec:
     case KindOfPersistentDict:
     case KindOfDict:
-    case KindOfPersistentShape:
-    case KindOfShape:
     case KindOfPersistentKeyset:
     case KindOfKeyset: {
       auto const arr = Array::attach(tv.m_data.parr->toPHPArray(true));
@@ -1615,14 +1509,6 @@ enable_if_lval_t<T, void> tvCastToObjectInPlace(T tv) {
         continue;
       }
 
-      case KindOfPersistentShape:
-      case KindOfShape:
-        if (RuntimeOption::EvalHackArrDVArrs) {
-          tvCastToArrayInPlace(tv);
-        }
-        assign(tv, ObjectData::FromArray(val(tv).parr));
-        return;
-
       case KindOfPersistentVec:
       case KindOfVec:
       case KindOfPersistentDict:
@@ -1686,7 +1572,6 @@ enable_if_lval_t<T, void> tvCastToResourceInPlace(T tv) {
       case KindOfVec:
       case KindOfDict:
       case KindOfKeyset:
-      case KindOfShape:
       case KindOfArray:
       case KindOfObject:
       case KindOfRecord:
@@ -1721,7 +1606,6 @@ X(String)
 X(Vec)
 X(Dict)
 X(Keyset)
-X(Shape)
 X(Object)
 X(NullableObject)
 X(Resource)

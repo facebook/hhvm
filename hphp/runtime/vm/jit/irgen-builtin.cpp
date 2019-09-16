@@ -716,12 +716,6 @@ SSATmp* opt_foldable(IRGS& env,
           env,
           make_tv<KindOfPersistentKeyset>(scalar_array())
         );
-      case KindOfPersistentShape:
-      case KindOfShape:
-        return cns(
-          env,
-          make_tv<KindOfPersistentShape>(scalar_array())
-        );
       case KindOfPersistentArray:
       case KindOfArray:
         return cns(
@@ -1808,7 +1802,6 @@ SSATmp* builtinCall(IRGS& env,
         if (ty->maybe(TPersistentVec)) *ty |= TVec;
         if (ty->maybe(TPersistentDict)) *ty |= TDict;
         if (ty->maybe(TPersistentKeyset)) *ty |= TKeyset;
-        if (ty->maybe(TPersistentShape)) *ty |= TShape;
         if (ty->maybe(TPersistentStr)) *ty |= TStr;
       }
       if (params.forNativeImpl) {

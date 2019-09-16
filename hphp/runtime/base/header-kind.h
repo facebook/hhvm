@@ -47,8 +47,6 @@ enum class HeaderKind : uint8_t {
   Packed, Mixed, Empty, Apc, Globals,
   // Record array
   RecordArray,
-  // Shape
-  Shape,
   // Hack arrays
   Dict, VecArray, Keyset,
   // Other ordinary refcounted heap objects

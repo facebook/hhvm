@@ -206,7 +206,6 @@ struct MixedArray final : ArrayData,
   static ArrayData* MakeReserveMixed(uint32_t size);
   static ArrayData* MakeReserveDArray(uint32_t size);
   static ArrayData* MakeReserveDict(uint32_t size);
-  static ArrayData* MakeReserveShape(uint32_t size);
   static constexpr auto MakeReserve = &MakeReserveMixed;
 
   /*
@@ -327,22 +326,11 @@ public:
 
   static ArrayData* MakeDictFromAPC(const APCArray* apc);
   static ArrayData* MakeDArrayFromAPC(const APCArray* apc);
-  static ArrayData* MakeShapeFromAPC(const APCArray* apc);
 
   static bool DictEqual(const ArrayData*, const ArrayData*);
   static bool DictNotEqual(const ArrayData*, const ArrayData*);
   static bool DictSame(const ArrayData*, const ArrayData*);
   static bool DictNotSame(const ArrayData*, const ArrayData*);
-
-  static bool ShapeEqual(const ArrayData*, const ArrayData*);
-  static bool ShapeNotEqual(const ArrayData*, const ArrayData*);
-  static bool ShapeSame(const ArrayData*, const ArrayData*);
-  static bool ShapeNotSame(const ArrayData*, const ArrayData*);
-  static bool ShapeGt(const ArrayData*, const ArrayData*);
-  static bool ShapeGte(const ArrayData*, const ArrayData*);
-  static bool ShapeLt(const ArrayData*, const ArrayData*);
-  static bool ShapeLte(const ArrayData*, const ArrayData*);
-  static bool ShapeCompare(const ArrayData*, const ArrayData*);
 
   using ArrayData::decRefCount;
   using ArrayData::hasMultipleRefs;
@@ -429,7 +417,6 @@ public:
   static ArrayData* ToPHPArray(ArrayData*, bool);
   static ArrayData* ToPHPArrayIntishCast(ArrayData*, bool);
   static ArrayData* ToDict(ArrayData*, bool);
-  static ArrayData* ToShape(ArrayData*, bool);
   static constexpr auto ToVec = &ArrayCommon::ToVec;
   static constexpr auto ToKeyset = &ArrayCommon::ToKeyset;
   static constexpr auto ToVArray = &ArrayCommon::ToVArray;
@@ -462,20 +449,20 @@ public:
   static constexpr auto NvGetIntPosDict = &NvGetIntPos;
   static constexpr auto NvGetStrPosDict = &NvGetStrPos;
   static tv_rval RvalIntDict(const ArrayData* ad, int64_t k) {
-    assertx(ad->isDictOrShape());
+    assertx(ad->isDict());
     return NvGetIntDict(ad, k);
   }
   static tv_rval RvalIntStrictDict(const ArrayData* ad, int64_t k) {
-    assertx(ad->isDictOrShape());
+    assertx(ad->isDict());
     return NvTryGetIntDict(ad, k);
   }
   static tv_rval RvalStrDict(const ArrayData* ad, const StringData* k) {
-    assertx(ad->isDictOrShape());
+    assertx(ad->isDict());
     return NvGetStrDict(ad, k);
   }
   static tv_rval RvalStrStrictDict(const ArrayData* ad,
                                        const StringData* k) {
-    assertx(ad->isDictOrShape());
+    assertx(ad->isDict());
     return NvTryGetStrDict(ad, k);
   }
   static constexpr auto ReleaseDict = &Release;
@@ -535,7 +522,6 @@ public:
   static constexpr auto ToVecDict = &ArrayCommon::ToVec;
   static constexpr auto ToKeysetDict = &ArrayCommon::ToKeyset;
   static constexpr auto ToVArrayDict = &ArrayCommon::ToVArray;
-  static constexpr auto ToShapeDict = &ArrayCommon::ToShape;
   static ArrayData* ToDArrayDict(ArrayData*, bool);
 
   //////////////////////////////////////////////////////////////////////
@@ -547,96 +533,6 @@ public:
 
   static constexpr auto LvalSilentIntDict = &LvalSilentInt;
   static constexpr auto LvalSilentStrDict = &LvalSilentStr;
-
-  //////////////////////////////////////////////////////////////////////
-
-  static tv_rval NvTryGetIntShape(const ArrayData*, int64_t);
-  static constexpr auto NvGetIntShape = &NvGetInt;
-  static tv_rval NvTryGetStrShape(const ArrayData*,
-                                  const StringData*);
-  static constexpr auto NvGetStrShape = &NvGetStr;
-  static constexpr auto NvGetIntPosShape = &NvGetIntPos;
-  static constexpr auto NvGetStrPosShape = &NvGetStrPos;
-  static tv_rval RvalIntShape(const ArrayData* ad, int64_t k) {
-    assertx(ad->isShape());
-    return NvGetIntShape(ad, k);
-  }
-  static tv_rval RvalIntStrictShape(const ArrayData* ad, int64_t k) {
-    assertx(ad->isShape());
-    return NvTryGetIntShape(ad, k);
-  }
-  static tv_rval RvalStrShape(const ArrayData* ad, const StringData* k) {
-    assertx(ad->isShape());
-    return NvGetStrShape(ad, k);
-  }
-  static tv_rval RvalStrStrictShape(const ArrayData* ad,
-                                       const StringData* k) {
-    assertx(ad->isShape());
-    return NvTryGetStrShape(ad, k);
-  }
-  static constexpr auto ReleaseShape = &Release;
-  static constexpr auto NvGetKeyShape = &NvGetKey;
-  static constexpr auto SetIntShape = &SetInt;
-  static constexpr auto SetIntInPlaceShape = &SetIntInPlace;
-  static constexpr auto SetStrShape = &SetStr;
-  static constexpr auto SetStrInPlaceShape = &SetStrInPlace;
-  static constexpr auto AddIntShape = &AddInt;
-  static constexpr auto AddStrShape = &AddStr;
-  static constexpr auto VsizeShape = &Vsize;
-  static constexpr auto GetValueRefShape = &GetValueRef;
-  static constexpr auto IsVectorDataShape = &IsVectorData;
-  static constexpr auto ExistsIntShape = &ExistsInt;
-  static constexpr auto ExistsStrShape = &ExistsStr;
-  static constexpr auto LvalIntShape = &LvalInt;
-  static constexpr auto LvalStrShape = &LvalStr;
-  static constexpr auto LvalNewShape = &LvalNew;
-  static constexpr auto RemoveIntShape = &RemoveInt;
-  static constexpr auto RemoveIntInPlaceShape = &RemoveIntInPlace;
-  static constexpr auto RemoveStrShape = &RemoveStr;
-  static constexpr auto RemoveStrInPlaceShape = &RemoveStrInPlace;
-  static constexpr auto IterBeginShape = &IterBegin;
-  static constexpr auto IterLastShape = &IterLast;
-  static constexpr auto IterEndShape = &IterEnd;
-  static constexpr auto IterAdvanceShape = &IterAdvance;
-  static constexpr auto IterRewindShape = &IterRewind;
-  static constexpr auto EscalateForSortShape = &EscalateForSort;
-  static constexpr auto KsortShape = &Ksort;
-  static constexpr auto SortShape = &Sort;
-  static constexpr auto AsortShape = &Asort;
-  static constexpr auto UksortShape = &Uksort;
-  static constexpr auto UsortShape = &Usort;
-  static constexpr auto UasortShape = &Uasort;
-  static constexpr auto CopyShape = &Copy;
-  static constexpr auto CopyStaticShape = &CopyStatic;
-  static constexpr auto AppendShape = &Append;
-  static constexpr auto AppendInPlaceShape = &AppendInPlace;
-  static ArrayData* SetWithRefIntShape(ArrayData*, int64_t k, TypedValue v);
-  static ArrayData* SetWithRefIntInPlaceShape(ArrayData*, int64_t k,
-                                              TypedValue v);
-  static ArrayData* SetWithRefStrShape(ArrayData*, StringData* k, TypedValue);
-  static ArrayData* SetWithRefStrInPlaceShape(ArrayData*, StringData* k,
-                                              TypedValue);
-  static ArrayData* AppendWithRefShape(ArrayData*, TypedValue);
-  static ArrayData* AppendWithRefInPlaceShape(ArrayData*, TypedValue);
-  static constexpr auto PlusEqShape = &PlusEq;
-  static constexpr auto MergeShape = &Merge;
-  static constexpr auto PopShape = &Pop;
-  static constexpr auto DequeueShape = &Dequeue;
-  static constexpr auto PrependShape = &Prepend;
-  static constexpr auto RenumberShape = &Renumber;
-  static constexpr auto OnSetEvalScalarShape = &OnSetEvalScalar;
-  static constexpr auto EscalateShape = &Escalate;
-  static ArrayData* ToPHPArrayShape(ArrayData*, bool);
-  static constexpr auto ToPHPArrayIntishCastShape = &ToPHPArrayShape;
-  static ArrayData* ToShapeShape(ArrayData*, bool);
-  static constexpr auto ToVecShape = &ArrayCommon::ToVec;
-  static constexpr auto ToKeysetShape = &ArrayCommon::ToKeyset;
-  static constexpr auto ToVArrayShape = &ArrayCommon::ToVArray;
-  static constexpr auto ToDictShape = &ArrayCommon::ToDict;
-  static ArrayData* ToDArrayShape(ArrayData*, bool);
-
-  static constexpr auto LvalSilentIntShape = &LvalSilentInt;
-  static constexpr auto LvalSilentStrShape = &LvalSilentStr;
 
   //////////////////////////////////////////////////////////////////////
 
@@ -878,9 +774,6 @@ private:
 
   struct DArrayInitializer;
   static DArrayInitializer s_darr_initializer;
-
-  struct ShapeInitializer;
-  static ShapeInitializer s_shape_initializer;
 
   int64_t  m_nextKI;        // Next integer key to use for append.
 };

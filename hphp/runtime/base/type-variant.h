@@ -73,10 +73,8 @@ public:
   bool isString()    const { return isStringType(getType()); }
   bool isArray()     const { return isArrayLikeType(getType()); }
   bool isPHPArray()  const { return isArrayType(getType()); }
-  bool isPHPArrayOrShape() const { return isArrayOrShapeType(getType()); }
   bool isVecArray()  const { return isVecType(getType()); }
   bool isDict()      const { return isDictType(getType()); }
-  bool isDictOrShape() const { return isDictOrShapeType(getType()); }
   bool isKeyset()    const { return isKeysetType(getType()); }
   bool isHackArray() const { return isHackArrayType(getType()); }
   bool isObject()    const { return isObjectType(getType()); }
@@ -864,20 +862,11 @@ struct Variant : private TypedValue {
   bool isPHPArray() const {
     return isArrayType(getType());
   }
-  bool isPHPArrayOrShape() const {
-    return isArrayOrShapeType(getType());
-  }
   bool isVecArray() const {
     return isVecType(getType());
   }
   bool isDict() const {
     return isDictType(getType());
-  }
-  bool isDictOrShape() const {
-    return isDictOrShapeType(getType());
-  }
-  bool isShape() const {
-    return isShapeType(getType());
   }
   bool isKeyset() const {
     return isKeysetType(getType());
@@ -923,8 +912,6 @@ struct Variant : private TypedValue {
       case KindOfDict:
       case KindOfPersistentKeyset:
       case KindOfKeyset:
-      case KindOfPersistentShape:
-      case KindOfShape:
       case KindOfPersistentArray:
       case KindOfArray:
       case KindOfFunc:
@@ -1729,7 +1716,6 @@ private:
       case KindOfVec:
       case KindOfDict:
       case KindOfKeyset:
-      case KindOfShape:
       case KindOfArray:
         assertx(m_data.parr->checkCount());
         return;

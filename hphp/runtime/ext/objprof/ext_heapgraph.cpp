@@ -212,7 +212,6 @@ CapturedPtr getEdgeInfo(const HeapGraph& g, int ptr) {
       // Known generalized cases that don't really need pointer kind
       case HeaderKind::Mixed:
       case HeaderKind::Dict:
-      case HeaderKind::Shape:
       case HeaderKind::Keyset: {
         if (edge.offset >= sizeof(MixedArray)) {
           using Elm = MixedArray::Elm;

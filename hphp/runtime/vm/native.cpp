@@ -254,8 +254,6 @@ void callFunc(const Func* const func, const void* const ctx,
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
-    case KindOfPersistentShape:
-    case KindOfShape:
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfClsMeth:
@@ -318,7 +316,7 @@ void coerceFCallArgs(TypedValue* args,
 
       if (LIKELY(!RuntimeOption::EvalHackArrCompatTypeHintNotices) ||
           !tc.isArray() ||
-          !isArrayOrShapeType(c->m_type)) continue;
+          !isArrayType(c->m_type)) continue;
 
       auto const raise = [&] {
         if (tc.isVArray()) {
@@ -575,8 +573,6 @@ static folly::Optional<TypedValue> builtinInValue(
   case KindOfDict:    return make_tv<KindOfDict>(ArrayData::CreateDict());
   case KindOfPersistentKeyset:
   case KindOfKeyset:  return make_tv<KindOfNull>();
-  case KindOfPersistentShape:
-  case KindOfShape:   return make_array_like_tv(ArrayData::CreateShape());
   case KindOfPersistentArray:
   case KindOfArray:   return make_tv<KindOfArray>(ArrayData::Create());
   case KindOfUninit:
@@ -628,8 +624,6 @@ static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
     case KindOfDict:         return ty == T::Array    || ty == T::ArrayArg;
     case KindOfPersistentKeyset:
     case KindOfKeyset:       return ty == T::Array    || ty == T::ArrayArg;
-    case KindOfPersistentShape:
-    case KindOfShape:        return ty == T::Array    || ty == T::ArrayArg;
     case KindOfPersistentArray:
     case KindOfArray:        return ty == T::Array    || ty == T::ArrayArg;
     case KindOfResource:     return ty == T::Resource || ty == T::ResourceArg;
@@ -663,8 +657,6 @@ static bool tcCheckNativeIO(
       case KindOfDict:         return ty == T::ArrayIO;
       case KindOfPersistentKeyset:
       case KindOfKeyset:       return ty == T::ArrayIO;
-      case KindOfPersistentShape:
-      case KindOfShape:        return ty == T::ArrayIO;
       case KindOfPersistentArray:
       case KindOfArray:        return ty == T::ArrayIO;
       case KindOfResource:     return ty == T::ResourceIO;

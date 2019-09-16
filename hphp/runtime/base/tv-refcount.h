@@ -161,7 +161,6 @@ enable_if_lval_t<T, void> tvDecRefArr(T tv) {
   assertx(type(tv) == KindOfArray ||
          type(tv) == KindOfVec ||
          type(tv) == KindOfDict ||
-         type(tv) == KindOfShape ||
          type(tv) == KindOfKeyset);
   decRefArr(val(tv).parr);
 }

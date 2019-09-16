@@ -1410,12 +1410,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case NSameKeyset:
     return may_load_store(AElemAny, AEmpty);
 
-  case SameShape:
-  case NSameShape:
-    return may_load_store(
-        RuntimeOption::EvalHackArrDVArrs ? AElemAny : AEmpty,
-        AEmpty);
-
   case AKExistsObj:
     return may_load_store(AHeapAny, AHeapAny);
 
@@ -1822,7 +1816,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CountArrayFast:
   case CountVec:
   case CountDict:
-  case CountShape:
   case CountKeyset:
   case InstanceOf:
   case InstanceOfBitmask:
@@ -2019,13 +2012,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case EqArr:
   case NeqArr:
   case CmpArr:
-  case GtShape:
-  case GteShape:
-  case LtShape:
-  case LteShape:
-  case EqShape:
-  case NeqShape:
-  case CmpShape:
   case GtVec:
   case GteVec:
   case LtVec:
@@ -2091,7 +2077,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvCellToDbl:
   case ConvArrToVec:
   case ConvArrToDict:
-  case ConvShapeToDict:
   case ConvObjToVec:
   case ConvObjToDict:
   case ConvObjToKeyset:
@@ -2123,12 +2108,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvArrToKeyset: // Decrefs input values
   case ConvVecToKeyset:
   case ConvDictToKeyset:
-  case ConvShapeToKeyset:
   case ConvDictToDArr: // These 4 may raise Hack array compat notices
-  case ConvShapeToDArr:
   case ConvKeysetToDArr:
   case ConvDictToArr:
-  case ConvShapeToArr:
   case ConvKeysetToArr:
   case ConvClsMethToArr:
   case ConvClsMethToDArr:
@@ -2141,14 +2123,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvVecToArr:
   case ConvArrToNonDVArr:
   case ConvDictToVec:
-  case ConvShapeToVec:
   case ConvKeysetToVec:
   case ConvVecToDict:
   case ConvKeysetToDict:
   case ConvArrToVArr:
   case ConvVecToVArr:
   case ConvDictToVArr:
-  case ConvShapeToVArr:
   case ConvKeysetToVArr:
   case ConvArrToDArr:
   case ConvVecToDArr:

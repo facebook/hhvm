@@ -306,7 +306,6 @@ bool record_request_heap_mem_event(const void* addr,
 
     case HeaderKind::Mixed:
     case HeaderKind::Dict:
-    case HeaderKind::Shape:
       fill_record(static_cast<const MixedArray*>(hdr), addr, record);
       break;
 

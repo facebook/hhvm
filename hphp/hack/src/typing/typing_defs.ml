@@ -636,7 +636,6 @@ type expand_env = {
    * dependent types for type constants.
    *)
   from_class: Nast.class_id_ option;
-  validate_dty: (expand_env -> decl_ty -> unit) option;
 }
 
 let is_type_no_return ty = ty = Tprim Aast.Tnoreturn

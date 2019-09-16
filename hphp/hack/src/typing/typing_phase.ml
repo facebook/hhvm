@@ -85,13 +85,7 @@ type method_instantiation = {
 
 let env_with_self env =
   let this_ty = (Reason.none, TUtils.this_of (Env.get_self env)) in
-  {
-    type_expansions = [];
-    substs = SMap.empty;
-    this_ty;
-    from_class = None;
-    validate_dty = None;
-  }
+  { type_expansions = []; substs = SMap.empty; this_ty; from_class = None }
 
 (*****************************************************************************)
 (* Transforms a declaration phase type into a localized type. This performs
@@ -107,9 +101,6 @@ let env_with_self env =
 (*****************************************************************************)
 
 let rec localize ~ety_env env (dty : decl_ty) =
-  Option.iter ety_env.validate_dty (fun validate_dty ->
-      (* Make sure we don't double validate *)
-      validate_dty { ety_env with validate_dty = None } dty);
   match dty with
   | (r, Terr) -> (env, (r, TUtils.terr env))
   | (r, Tany _) -> (env, (r, TUtils.tany env))
@@ -264,7 +255,6 @@ let rec localize ~ety_env env (dty : decl_ty) =
 and localize_tparams ~ety_env env pos tyl tparams =
   let length = min (List.length tyl) (List.length tparams) in
   let (tyl, tparams) = (List.take tyl length, List.take tparams length) in
-  let ety_env = { ety_env with validate_dty = None } in
   let ((env, _), tyl) =
     List.map2_env (env, ety_env) tyl tparams (localize_tparam pos)
   in
@@ -585,12 +575,6 @@ and localize_possibly_enforced_with_self env ety =
   let (env, et_type) = localize_with_self env ety.et_type in
   (env, { ety with et_type })
 
-and localize_with_dty_validator env ty validate_dty =
-  let ety_env =
-    { (env_with_self env) with validate_dty = Some validate_dty }
-  in
-  localize ~ety_env env ty
-
 and localize_hint_with_self env h =
   let h = Decl_hint.hint env.decl_env h in
   localize_with_self env h
@@ -620,7 +604,6 @@ and localize_missing_tparams_class env r sid class_ tyl =
       this_ty = c_ty;
       substs = Subst.make (Cls.tparams class_) tyl;
       from_class = Some (Aast.CI sid);
-      validate_dty = None;
     }
   in
   let env =
@@ -682,7 +665,6 @@ and resolve_type_arguments_and_check_constraints
           this_ty;
           substs = Subst.make tparaml type_argl;
           from_class = Some from_class;
-          validate_dty = None;
         }
       in
       check_tparams_constraints ~use_pos:p ~ety_env env tparaml

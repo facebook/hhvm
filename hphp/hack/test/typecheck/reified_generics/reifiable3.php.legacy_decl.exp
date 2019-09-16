@@ -3,7 +3,7 @@ Invalid type (Typing[4322])
 File "reifiable3.php", line 9, characters 5-15:
 This type constant has the __Reifiable attribute
 File "reifiable3.php", line 10, characters 32-42:
-It cannot contain an array
+It cannot contain an array type
 File "reifiable3.php", line 17, characters 19-26:
 Invalid type (Typing[4322])
 File "reifiable3.php", line 16, characters 5-15:
@@ -15,10 +15,10 @@ Invalid type (Typing[4322])
 File "reifiable3.php", line 6, characters 5-15:
 This type constant has the __Reifiable attribute
 File "reifiable3.php", line 21, characters 25-35:
-It cannot contain an array
+It cannot contain an array type
 File "reifiable3.php", line 27, characters 29-31:
 Invalid constraint (Typing[4322])
 File "reifiable3.php", line 26, characters 5-15:
 This type constant has the __Reifiable attribute
-File "reifiable3.php", line 27, characters 29-31:
-It cannot contain an array
+File "reifiable3.php", line 3, characters 12-32:
+It cannot contain an array type

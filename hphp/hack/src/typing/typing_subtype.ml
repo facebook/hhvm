@@ -784,7 +784,6 @@ and simplify_subtype
               substs = Subst.make (Cls.tparams class_ty) tyl_super;
               this_ty = Option.value this_ty ~default:ty_super;
               from_class = None;
-              validate_dty = None;
             }
           in
           let lower_bounds_super = Cls.lower_bounds_on_this class_ty in
@@ -988,7 +987,6 @@ and simplify_subtype
               (* TODO: do we need this? *)
               this_ty = Option.value this_ty ~default:ty_sub;
               from_class = None;
-              validate_dty = None;
             }
           in
           let up_obj = Cls.get_ancestor class_sub cid_super in

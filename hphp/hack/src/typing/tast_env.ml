@@ -122,8 +122,6 @@ let localize env ety_env = Typing_phase.localize ~ety_env env
 
 let localize_with_self = Typing_phase.localize_with_self
 
-let localize_with_dty_validator = Typing_phase.localize_with_dty_validator
-
 let get_upper_bounds = Typing_env.get_upper_bounds
 
 let is_fresh_generic_parameter = Typing_env.is_fresh_generic_parameter
@@ -238,6 +236,8 @@ let tast_env_as_typing_env env = env
 let is_xhp_child = Typing_xhp.is_xhp_child
 
 let get_enum = Typing_env.get_enum
+
+let get_typedef = Typing_env.get_typedef
 
 let is_enum = Typing_env.is_enum
 

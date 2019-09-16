@@ -43,9 +43,6 @@ val localize_generic_parameters_with_bounds :
 val localize_where_constraints :
   ety_env:expand_env -> env -> Aast.where_constraint list -> env
 
-val localize_with_dty_validator :
-  env -> decl_ty -> (expand_env -> decl_ty -> unit) -> env * locl_ty
-
 val sub_type_decl :
   env -> decl_ty -> decl_ty -> Errors.typing_error_callback -> unit
 

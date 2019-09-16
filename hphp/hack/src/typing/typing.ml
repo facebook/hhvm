@@ -2417,7 +2417,6 @@ and expr_
             substs = Subst.make (Cls.tparams class_) tyargs;
             this_ty = cid_ty;
             from_class = Some cid;
-            validate_dty = None;
           }
         in
         (match ty with
@@ -4156,7 +4155,6 @@ and new_object
                 substs = Subst.make (Cls.tparams class_info) params;
                 this_ty = obj_ty;
                 from_class = None;
-                validate_dty = None;
               }
             in
             let (env, ctor_fty) = Phase.localize ~ety_env env ty in
@@ -5661,7 +5659,6 @@ and class_get_
           this_ty;
           substs = Subst.make (Cls.tparams class_) paraml;
           from_class = Some cid;
-          validate_dty = None;
         }
       in
       let get_smember_from_constraints env class_info =
@@ -5953,7 +5950,6 @@ and obj_get_concrete_ty
       this_ty;
       substs = Subst.make (Cls.tparams class_info) paraml;
       from_class = Some class_id;
-      validate_dty = None;
     }
   in
   match concrete_ty with
@@ -6252,7 +6248,6 @@ and widen_class_for_obj_get ~is_method ~nullsafe member_name env ty =
                   substs = Subst.make (Cls.tparams class_info) tyl;
                   this_ty = ty;
                   from_class = None;
-                  validate_dty = None;
                 }
               in
               let (env, basety) = Phase.localize ~ety_env env basety in
@@ -6749,7 +6744,6 @@ and call_construct p env class_ params el uel cid =
       this_ty = cid_ty;
       substs = Subst.make (Cls.tparams class_) params;
       from_class = Some cid;
-      validate_dty = None;
     }
   in
   let env =
@@ -8106,7 +8100,6 @@ and safely_refine_class_type
       this_ty = obj_ty;
       (* In case `this` appears in constraints *)
       from_class = None;
-      validate_dty = None;
     }
   in
   let add_bounds env (t, ty_fresh) =
@@ -9431,15 +9424,7 @@ and class_get_pu ?from_class env ty name =
   match class_get_pu_ env ty name with
   | (env, None) -> (env, None)
   | (env, Some (this_ty, substs, et)) ->
-    let ety_env =
-      {
-        type_expansions = [];
-        this_ty;
-        substs;
-        from_class;
-        validate_dty = None;
-      }
-    in
+    let ety_env = { type_expansions = []; this_ty; substs; from_class } in
     (env, Some (ety_env, et))
 
 and class_get_pu_ env cty name =

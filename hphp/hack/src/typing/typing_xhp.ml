@@ -121,7 +121,6 @@ and get_spread_attributes env pos onto_xhp cty =
         this_ty = xhp_ty;
         substs = Subst.make (Cls.tparams xhp_info) tparams;
         from_class = None;
-        validate_dty = None;
       }
     in
     List.map_env

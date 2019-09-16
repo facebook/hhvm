@@ -150,14 +150,6 @@ val localize_with_self : env -> Typing_defs.decl_ty -> env * Tast.ty
     should not be considered a general mechanism for transforming a {decl_ty} to
     a {!Tast.ty}. *)
 
-val localize_with_dty_validator :
-  env ->
-  Typing_defs.decl_ty ->
-  (Typing_defs.expand_env -> Typing_defs.decl_ty -> unit) ->
-  env * Tast.ty
-(** Identical to localize_with_self, but also takes a validator that is applied
-    to every expanded decl type on the way to becoming a locl type. *)
-
 val get_upper_bounds : env -> string -> Type_parameter_env.tparam_bounds
 (** Get the upper bounds of the type parameter with the given name. *)
 
@@ -263,6 +255,8 @@ val is_xhp_child : env -> Pos.t -> Tast.ty -> bool
 (** Verify that an XHP body expression is legal. *)
 
 val get_enum : env -> string -> Decl_provider.class_decl option
+
+val get_typedef : env -> string -> Decl_provider.typedef_decl option
 
 val is_enum : env -> string -> bool
 

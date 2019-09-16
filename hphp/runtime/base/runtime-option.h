@@ -86,18 +86,10 @@ struct RepoOptions {
   H(bool,           AbstractStaticProps,            false)            \
   H(bool,           DisableUnsetClassConst,         false)            \
   E(bool,           CreateInOutWrapperFunctions,    true)             \
-  E(std::string,    HHJSAdditionalTransform,        "")               \
-  E(bool,           HHJSNoBabel,                    false)            \
-  E(bool,           HHJSUniqueFilenames,            true)             \
-  E(bool,           HHJSSetLocs,                    false)            \
-  E(std::string,    HHJSNodeModules,                "")               \
   E(bool,           EmitFuncPointers,               true)             \
   E(bool,           EmitInstMethPointers,           EmitFuncPointers) \
   /**/
 
-#define PARSERFLAGSNOCACHEKEY() \
-  E(std::string,    HHJSBabelTransform,                               \
-                                       hhjsBabelTransformDefault())   \
   /**/
 
 #define AUTOLOADFLAGS() \
@@ -131,7 +123,6 @@ private:
 #define H(t, n, ...) t n;
 #define E(t, n, ...) t n;
 PARSERFLAGS()
-PARSERFLAGSNOCACHEKEY()
 AUTOLOADFLAGS()
 #undef N
 #undef P
@@ -710,8 +701,6 @@ struct RuntimeOption {
   F(bool, EmitSwitch,                  true)                            \
   F(bool, LogThreadCreateBacktraces,   false)                           \
   F(bool, FailJitPrologs,              false)                           \
-  F(bool, EnableHHJS,                  false)                           \
-  F(bool, DumpHHJS,                    false)                           \
   F(bool, UseHHBBC,                    !getenv("HHVM_DISABLE_HHBBC"))   \
   F(bool, EnablePerRepoOptions,        true)                            \
   F(bool, CachePerRepoOptionsPath,     true)                            \

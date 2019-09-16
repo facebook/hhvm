@@ -35,14 +35,6 @@ type t = {
   option_include_roots: string SMap.t;
   option_enable_perf_logging: bool;
   option_enable_intrinsics_extension: bool;
-  option_enable_hhjs: bool;
-  option_dump_hhjs: bool;
-  option_hhjs_additional_transform: string;
-  option_hhjs_no_babel: bool;
-  option_hhjs_unique_filenames: bool;
-  option_hhjs_babel_transform: string;
-  option_hhjs_node_modules: SSet.t;
-  option_hhjs_setlocs: bool;
   option_phpism_disallow_execution_operator: bool;
   option_phpism_disable_nontoplevel_declarations: bool;
   option_phpism_disable_static_closures: bool;
@@ -95,14 +87,6 @@ let default =
     option_include_roots = SMap.empty;
     option_enable_perf_logging = false;
     option_enable_intrinsics_extension = false;
-    option_enable_hhjs = false;
-    option_dump_hhjs = false;
-    option_hhjs_additional_transform = "";
-    option_hhjs_no_babel = false;
-    option_hhjs_unique_filenames = true;
-    option_hhjs_babel_transform = "";
-    option_hhjs_node_modules = SSet.empty;
-    option_hhjs_setlocs = false;
     option_phpism_disallow_execution_operator = false;
     option_phpism_disable_nontoplevel_declarations = false;
     option_phpism_disable_static_closures = false;
@@ -173,22 +157,6 @@ let include_roots o = o.option_include_roots
 let enable_perf_logging o = o.option_enable_perf_logging
 
 let enable_intrinsics_extension o = o.option_enable_intrinsics_extension
-
-let enable_hhjs o = o.option_enable_hhjs
-
-let dump_hhjs o = o.option_dump_hhjs
-
-let hhjs_additional_transform o = o.option_hhjs_additional_transform
-
-let hhjs_no_babel o = o.option_hhjs_no_babel
-
-let hhjs_unique_filenames o = o.option_hhjs_unique_filenames
-
-let hhjs_babel_transform o = o.option_hhjs_babel_transform
-
-let hhjs_node_modules o = o.option_hhjs_node_modules
-
-let hhjs_setlocs o = o.option_hhjs_setlocs
 
 let phpism_disallow_execution_operator o =
   o.option_phpism_disallow_execution_operator
@@ -280,8 +248,6 @@ let to_string o =
       Printf.sprintf "enable_perf_logging: %B" @@ enable_perf_logging o;
       Printf.sprintf "enable_intrinsics_extension: %B"
       @@ enable_intrinsics_extension o;
-      Printf.sprintf "enable_hhjs: %B" @@ enable_hhjs o;
-      Printf.sprintf "hhjs_setlocs: %B" @@ hhjs_setlocs o;
       Printf.sprintf "phpism_disallow_execution_operator %B"
       @@ phpism_disallow_execution_operator o;
       Printf.sprintf "phpism_disable_nontoplevel_declarations %B"
@@ -330,25 +296,6 @@ let as_bool s =
 let set_of_csv_string s =
   SSet.of_list @@ String.split ~on:(Char.of_string ",") s
 
-let get_hhjs_node_modules_from_string = function
-  | Some "" -> Some SSet.empty
-  | Some v ->
-    let v_set = set_of_csv_string v in
-    let all_have_trailing_slash =
-      SSet.for_all
-        (fun s -> String_utils.string_ends_with s Filename.dir_sep)
-        v_set
-    in
-    if not all_have_trailing_slash then
-      raise
-        (Arg.Bad
-           ( "Expected all paths of HHJSNodeModules to end in "
-           ^ Filename.dir_sep
-           ^ ", however, at least one path did not." ))
-    else
-      Some v_set
-  | None -> None
-
 let set_option options name value =
   match String.lowercase name with
   | "hack.compiler.constantfolding" ->
@@ -385,23 +332,6 @@ let set_option options name value =
     { options with option_enable_perf_logging = as_bool value }
   | "eval.enableintrinsicsextension" ->
     { options with option_enable_intrinsics_extension = as_bool value }
-  | "eval.enablehhjs" -> { options with option_enable_hhjs = as_bool value }
-  | "eval.dumphhjs" -> { options with option_dump_hhjs = as_bool value }
-  | "eval.hhjsnobabel" -> { options with option_hhjs_no_babel = as_bool value }
-  | "eval.hhjsuniquefilenames" ->
-    { options with option_hhjs_unique_filenames = as_bool value }
-  | "eval.hhjsadditionaltransform" ->
-    { options with option_hhjs_additional_transform = value }
-  | "eval.hhjsbabeltransform" ->
-    { options with option_hhjs_babel_transform = value }
-  | "eval.hhjsnodemodules" ->
-    let hhjs_node_modules =
-      match get_hhjs_node_modules_from_string @@ Some value with
-      | Some s -> s
-      | None -> SSet.empty
-    in
-    { options with option_hhjs_node_modules = hhjs_node_modules }
-  | "eval.hhjssetlocs" -> { options with option_hhjs_setlocs = as_bool value }
   | "hack.lang.phpism.disallowexecutionoperator" ->
     { options with option_phpism_disallow_execution_operator = as_bool value }
   | "hack.lang.phpism.disablenontopleveldeclarations" ->
@@ -509,9 +439,6 @@ let get_value_from_config_string_to_string_map config key =
            | _ -> raise (Arg.Bad "Expected {root:path} pair")))
   | _ -> raise (Arg.Bad ("Expected string-to-string map strings at " ^ key))
 
-let get_hhjs_node_modules_from_config_string config key =
-  get_hhjs_node_modules_from_string @@ get_value_from_config_string config key
-
 let set_value name get set config opts =
   try
     let value = get config name in
@@ -591,24 +518,6 @@ let value_setters =
     ( set_value "hhvm.enable_intrinsics_extension" get_value_from_config_int
     @@ (fun opts v -> { opts with option_enable_intrinsics_extension = v = 1 })
     );
-    ( set_value "hhvm.enable_hhjs" get_value_from_config_int
-    @@ (fun opts v -> { opts with option_enable_hhjs = v = 1 }) );
-    ( set_value "hhvm.dump_hhjs" get_value_from_config_int
-    @@ (fun opts v -> { opts with option_dump_hhjs = v = 1 }) );
-    ( set_value "hhvm.hhjs_additional_transform" get_value_from_config_string
-    @@ (fun opts v -> { opts with option_hhjs_additional_transform = v }) );
-    ( set_value "hhvm.hhjs_no_babel" get_value_from_config_int
-    @@ (fun opts v -> { opts with option_hhjs_no_babel = v = 1 }) );
-    ( set_value "hhvm.hhjs_unique_filenames" get_value_from_config_int
-    @@ (fun opts v -> { opts with option_hhjs_unique_filenames = v = 1 }) );
-    ( set_value "hhvm.hhjs_babel_transform" get_value_from_config_string
-    @@ (fun opts v -> { opts with option_hhjs_babel_transform = v }) );
-    ( set_value
-        "hhvm.hhjs_node_modules"
-        get_hhjs_node_modules_from_config_string
-    @@ (fun opts v -> { opts with option_hhjs_node_modules = v }) );
-    ( set_value "hhvm.hhjs_set_locs" get_value_from_config_int
-    @@ (fun opts v -> { opts with option_hhjs_setlocs = v = 1 }) );
     ( set_value
         "hhvm.hack.lang.phpism.disallow_execution_operator"
         get_value_from_config_int

@@ -490,6 +490,23 @@ SSATmp* emitMixedKeysetCmp(IRGS& env, Op op) {
   }
 }
 
+SSATmp* emitMixedClsMethCmp(IRGS& env, Op op) {
+  switch (op) {
+    case Op::Gt:
+    case Op::Gte:
+    case Op::Lt:
+    case Op::Lte:
+    case Op::Cmp:
+      gen(env, ThrowInvalidOperation, cns(env, s_cmpWithClsMeth.get()));
+      return cns(env, false);
+    case Op::Same:
+    case Op::Eq:  return cns(env, false);
+    case Op::NSame:
+    case Op::Neq: return cns(env, true);
+    default: always_assert(false);
+  }
+}
+
 void implNullCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   assertx(left->type() <= TNull);
   auto const rightTy = right->type();
@@ -515,6 +532,12 @@ void implNullCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     push(env, emitMixedDictCmp(env, op));
   } else if (rightTy <= TKeyset) {
     push(env, emitMixedKeysetCmp(env, op));
+  } else if (rightTy <= TClsMeth) {
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      push(env, emitMixedClsMethCmp(env, op));
+    } else {
+      push(env, emitConstCmp(env, op, false, true));
+    }
   } else {
     // Otherwise, convert both sides to booleans (with null becoming false).
     push(env,
@@ -535,6 +558,12 @@ void implBoolCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     push(env, emitMixedDictCmp(env, op));
   } else if (rightTy <= TKeyset) {
     push(env, emitMixedKeysetCmp(env, op));
+  } else if (rightTy <= TClsMeth) {
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      push(env, emitMixedClsMethCmp(env, op));
+    } else {
+      push(env, gen(env, toBoolCmpOpcode(op), left, cns(env, true)));
+    }
   } else {
     // Convert whatever is on the right to a boolean and compare. The conversion
     // may be a no-op if the right operand is already a bool.
@@ -607,7 +636,7 @@ void implIntCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     );
   } else if (rightTy <= TClsMeth) {
     if (RuntimeOption::EvalHackArrDVArrs) {
-      push(env, emitMixedVecCmp(env, op));
+      push(env, emitMixedClsMethCmp(env, op));
     } else {
       push(env, emitConstCmp(env, op, false, true));
     }
@@ -665,7 +694,7 @@ void implDblCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     );
   } else if (rightTy <= TClsMeth) {
     if (RuntimeOption::EvalHackArrDVArrs) {
-      push(env, emitMixedVecCmp(env, op));
+      push(env, emitMixedClsMethCmp(env, op));
     } else {
       push(env, emitConstCmp(env, op, false, true));
     }
@@ -755,10 +784,10 @@ void implArrCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   } else if (rightTy <= TKeyset) {
     push(env, emitMixedKeysetCmp(env, op));
   } else if (rightTy <= TClsMeth) {
-    raiseClsMethToVecWarningHelper(env);
     if (RuntimeOption::EvalHackArrDVArrs) {
-      push(env, emitMixedVecCmp(env, op));
+      push(env, emitMixedClsMethCmp(env, op));
     } else {
+      raiseClsMethToVecWarningHelper(env);
       auto const arr = convertClsMethToVec(env, right);
       push(env, gen(env, toArrCmpOpcode(op), left, arr));
       decRef(env, arr);
@@ -776,9 +805,9 @@ void implVecCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   // Left operand is a vec.
   if (rightTy <= TVec) {
     push(env, gen(env, toVecCmpOpcode(op), left, right));
-  } else if (rightTy <= TClsMeth ) {
-    raiseClsMethToVecWarningHelper(env);
+  } else if (rightTy <= TClsMeth) {
     if (RuntimeOption::EvalHackArrDVArrs) {
+      raiseClsMethToVecWarningHelper(env);
       auto const arr = convertClsMethToVec(env, right);
       push(env, gen(env, toVecCmpOpcode(op), left, arr));
       decRef(env, arr);
@@ -921,6 +950,12 @@ void implStrCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     push(env, emitMixedDictCmp(env, op));
   } else if (rightTy <= TKeyset) {
     push(env, emitMixedKeysetCmp(env, op));
+  } else if (rightTy <= TClsMeth) {
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      push(env, emitMixedClsMethCmp(env, op));
+    } else {
+      push(env, emitConstCmp(env, op, false, true));
+    }
   } else {
     // Strings are less than anything else (usually arrays).
     push(env, emitConstCmp(env, op, false, true));
@@ -1011,6 +1046,20 @@ void implObjCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     push(env, emitMixedDictCmp(env, op));
   } else if (rightTy <= TKeyset) {
     push(env, emitMixedKeysetCmp(env, op));
+  } else if (rightTy <= TClsMeth) {
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      push(env, emitMixedClsMethCmp(env, op));
+    } else {
+      push(
+        env,
+        emitCollectionCheck(
+          env,
+          op,
+          left,
+          [&]{ return emitConstCmp(env, op, true, false); }
+        )
+      );
+    }
   } else {
     // For anything else, the object is always greater.
     push(env, emitConstCmp(env, op, true, false));
@@ -1064,6 +1113,12 @@ void implResCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     push(env, emitMixedDictCmp(env, op));
   } else if (rightTy <= TKeyset) {
     push(env, emitMixedKeysetCmp(env, op));
+  } else if (rightTy <= TClsMeth) {
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      push(env, emitMixedVecCmp(env, op));
+    } else {
+      push(env, emitConstCmp(env, op, true, false));
+    }
   } else {
     // Resources are always less than anything else.
     push(env, emitConstCmp(env, op, false, true));
@@ -1136,25 +1191,59 @@ void implClsMethCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
         env, gen(env, XorBool, equalClsMeth(env, left, right), cns(env, true)));
       return;
     }
+    PUNT(ClsMeth-ClsMeth-cmp);
+  } else if (rightTy <= TDict) {
+    push(env, emitMixedDictCmp(env, op));
+    return;
+  } else if (rightTy <= TKeyset) {
+    push(env, emitMixedKeysetCmp(env, op));
+    return;
   }
+
   if (RuntimeOption::EvalHackArrDVArrs) {
+    // Left (TClsMeth) is compatible with vec
     if (rightTy <= TVec) {
       raiseClsMethToVecWarningHelper(env);
       auto const arr = convertClsMethToVec(env, left);
       implVecCmp(env, op, arr, right);
       decRef(env, arr);
-      return;
+    } else {
+      push(env, emitMixedClsMethCmp(env, op));
     }
   } else {
-    if (rightTy <= TArr) {
+    // Left (TClsMeth) is compatible with varray
+    if (rightTy.subtypeOfAny(TNull, TInt, TDbl, TStr)) {
+      // Null is always less than TClsMeth
+      // ints,dbls,strs are implicitly less than TClsMeth
+      push(env, emitConstCmp(env, op, true, false));
+    } else if (rightTy <= TBool) {
+      push(env, gen(env, toBoolCmpOpcode(op), cns(env, true), right));
+    } else if (rightTy <= TObj) {
+      // collections are greater than TClsMeth
+      push(
+        env,
+        emitCollectionCheck(
+          env,
+          op,
+          right,
+          [&]{ return emitConstCmp(env, op, false, true); }
+        )
+      );
+    } else if (rightTy <= TArr) {
       raiseClsMethToVecWarningHelper(env);
       auto const arr = convertClsMethToVec(env, left);
       implArrCmp(env, op, arr, right);
       decRef(env, arr);
-      return;
+    } else if (rightTy <= TVec) {
+      push(env, emitMixedVecCmp(env, op));
+    } else if (rightTy <= TDict) {
+      push(env, emitMixedDictCmp(env, op));
+    } else if (rightTy <= TKeyset) {
+      push(env, emitMixedKeysetCmp(env, op));
+    } else {
+      PUNT(ClsMeth-cmp);
     }
   }
-  PUNT(ClsMeth-cmp);
 }
 
 void implRecordCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {

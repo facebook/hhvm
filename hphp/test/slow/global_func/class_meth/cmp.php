@@ -29,8 +29,14 @@ function comp($x, $y) {
 
 function getTestcase(int $num) {
   $test_cases = [
-    true, false, 0, 1, 0.0, 1.0, "Array",
+    null,
+    false, true,
+    0, 1,
+    0.0, 1.0,
+    "Array",
+    HH\fun("wrap"),
     array('A', 'func1'),
+    HH\Vector{'A', 'foo'},
     varray['A', 'func1'],
     vec['A', 'func1'],
     darray[0 => 'A', 1 => 'func1'],
@@ -41,7 +47,7 @@ function getTestcase(int $num) {
 }
 
 function comp_test($x) {
-  for ($i = 0; $i < 13; $i++) {
+  for ($i = 0; $i < 16; $i++) {
     print("Test ".$i."\n");
     comp($x, getTestcase($i));
     comp(getTestcase($i), $x);
@@ -51,6 +57,6 @@ function comp_test($x) {
 <<__EntryPoint>>
 function main(): void {
   comp_test(getVArr());
-  print("--- test class_meth --- \n");
+  print("--- test class_meth ---\n");
   comp_test(getClsMeth());
 }

@@ -34,6 +34,7 @@ extern const StaticString s_cmpWithCollection;
 extern const StaticString s_cmpWithVec;
 extern const StaticString s_cmpWithDict;
 extern const StaticString s_cmpWithKeyset;
+extern const StaticString s_cmpWithClsMeth;
 extern const StaticString s_cmpWithRecord;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -253,6 +254,7 @@ bool is_constructor_name(const char* func);
 [[noreturn]] void throw_vec_compare_exception();
 [[noreturn]] void throw_dict_compare_exception();
 [[noreturn]] void throw_keyset_compare_exception();
+[[noreturn]] void throw_clsmeth_compare_exception();
 [[noreturn]] void throw_record_compare_exception();
 [[noreturn]] void throw_rec_non_rec_compare_exception();
 [[noreturn]] void throw_param_is_not_container();

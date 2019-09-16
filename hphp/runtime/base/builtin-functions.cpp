@@ -91,7 +91,10 @@ const StaticString s_cmpWithRecord(
   "Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare "
   "records"
 );
-
+const StaticString s_cmpWithClsMeth(
+  "Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare "
+  "a clsmeth with a non-clsmeth"
+);
 const StaticString s_cmpWithNonRecord(
   "Cannot compare records with non-records"
 );
@@ -818,6 +821,10 @@ void throw_rec_non_rec_compare_exception() {
 
 void throw_keyset_compare_exception() {
   SystemLib::throwInvalidOperationExceptionObject(s_cmpWithKeyset);
+}
+
+void throw_clsmeth_compare_exception() {
+  SystemLib::throwInvalidOperationExceptionObject(s_cmpWithClsMeth);
 }
 
 void throw_param_is_not_container() {

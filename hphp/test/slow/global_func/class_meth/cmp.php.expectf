@@ -1,17 +1,17 @@
 Test 0
 bool(false)
-bool(true)
+bool(false)
+bool(false)
 bool(false)
 bool(true)
-bool(false)
 bool(true)
 
 bool(false)
-bool(true)
 bool(false)
 bool(true)
-bool(false)
 bool(true)
+bool(false)
+bool(false)
 
 Test 1
 bool(false)
@@ -30,18 +30,18 @@ bool(false)
 
 Test 2
 bool(false)
-bool(false)
-bool(false)
+bool(true)
 bool(false)
 bool(true)
+bool(false)
 bool(true)
 
 bool(false)
-bool(false)
-bool(true)
 bool(true)
 bool(false)
+bool(true)
 bool(false)
+bool(true)
 
 Test 3
 bool(false)
@@ -104,83 +104,128 @@ bool(false)
 bool(false)
 
 Test 7
-bool(true)
-bool(true)
+bool(false)
+bool(false)
+bool(false)
 bool(false)
 bool(true)
-bool(false)
 bool(true)
 
+bool(false)
+bool(false)
 bool(true)
 bool(true)
 bool(false)
-bool(true)
 bool(false)
-bool(true)
 
 Test 8
-bool(true)
-bool(true)
+bool(false)
+bool(false)
+bool(false)
 bool(false)
 bool(true)
-bool(false)
 bool(true)
 
+bool(false)
+bool(false)
 bool(true)
 bool(true)
 bool(false)
-bool(true)
 bool(false)
-bool(true)
 
 Test 9
+bool(true)
+bool(true)
 bool(false)
+bool(true)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+bool(true)
 
+bool(true)
+bool(true)
 bool(false)
+bool(true)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+bool(true)
 
 Test 10
-bool(true)
-bool(true)
 bool(false)
-bool(true)
 bool(false)
-bool(true)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
 
-bool(true)
-bool(true)
 bool(false)
-bool(true)
 bool(false)
-bool(true)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
 
 Test 11
+bool(true)
+bool(true)
 bool(false)
+bool(true)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+bool(true)
 
+bool(true)
+bool(true)
 bool(false)
+bool(true)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+bool(true)
 
 Test 12
 bool(false)
 bool(false)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+
+bool(false)
+bool(false)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+
+Test 13
+bool(true)
+bool(true)
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+
+bool(true)
+bool(true)
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+
+Test 14
+bool(false)
+bool(false)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+
+bool(false)
+bool(false)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+
+Test 15
+bool(false)
+bool(false)
 Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
 Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
 Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
@@ -193,21 +238,21 @@ Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keyset
 Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
 Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
 
---- test class_meth --- 
+--- test class_meth ---
 Test 0
 bool(false)
-bool(true)
+bool(false)
+bool(false)
 bool(false)
 bool(true)
-bool(false)
 bool(true)
 
 bool(false)
-bool(true)
 bool(false)
 bool(true)
-bool(false)
 bool(true)
+bool(false)
+bool(false)
 
 Test 1
 bool(false)
@@ -226,18 +271,18 @@ bool(false)
 
 Test 2
 bool(false)
-bool(false)
-bool(false)
+bool(true)
 bool(false)
 bool(true)
+bool(false)
 bool(true)
 
 bool(false)
-bool(false)
-bool(true)
 bool(true)
 bool(false)
+bool(true)
 bool(false)
+bool(true)
 
 Test 3
 bool(false)
@@ -300,81 +345,126 @@ bool(false)
 bool(false)
 
 Test 7
-bool(true)
-bool(true)
+bool(false)
+bool(false)
+bool(false)
 bool(false)
 bool(true)
-bool(false)
 bool(true)
 
+bool(false)
+bool(false)
 bool(true)
 bool(true)
 bool(false)
-bool(true)
 bool(false)
-bool(true)
 
 Test 8
-bool(true)
-bool(true)
+bool(false)
+bool(false)
+bool(false)
 bool(false)
 bool(true)
-bool(false)
 bool(true)
 
+bool(false)
+bool(false)
 bool(true)
 bool(true)
 bool(false)
-bool(true)
 bool(false)
-bool(true)
 
 Test 9
+bool(true)
+bool(true)
 bool(false)
+bool(true)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+bool(true)
 
+bool(true)
+bool(true)
 bool(false)
+bool(true)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+bool(true)
 
 Test 10
-bool(true)
-bool(true)
 bool(false)
-bool(true)
 bool(false)
-bool(true)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
 
-bool(true)
-bool(true)
 bool(false)
-bool(true)
 bool(false)
-bool(true)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
 
 Test 11
+bool(true)
+bool(true)
 bool(false)
+bool(true)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+bool(true)
 
+bool(true)
+bool(true)
 bool(false)
+bool(true)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+bool(true)
 
 Test 12
+bool(false)
+bool(false)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+
+bool(false)
+bool(false)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+
+Test 13
+bool(true)
+bool(true)
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+
+bool(true)
+bool(true)
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+
+Test 14
+bool(false)
+bool(false)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+
+bool(false)
+bool(false)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+
+Test 15
 bool(false)
 bool(false)
 Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets

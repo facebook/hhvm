@@ -30,7 +30,6 @@
 #include <folly/FileUtil.h>
 
 #include "hphp/runtime/base/ini-setting.h"
-#include "hphp/runtime/server/source-root-info.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/unit-emitter.h"
@@ -902,8 +901,7 @@ void ExternCompiler::writeProgram(
     ("file", filename)
     ("is_systemlib", !SystemLib::s_inited)
     ("for_debugger_eval", forDebuggerEval)
-    ("config_overrides", options.toDynamic())
-    ("root", SourceRootInfo::GetCurrentSourceRoot());
+    ("config_overrides", options.toDynamic());
   writeMessage(header, code);
 }
 
@@ -915,7 +913,6 @@ void ExternCompiler::writeExtractFacts(
   folly::dynamic header = folly::dynamic::object
     ("type", "facts")
     ("file", filename)
-    ("root", SourceRootInfo::GetCurrentSourceRoot())
     ("config_overrides", options.toDynamic());
   writeMessage(header, code);
 }

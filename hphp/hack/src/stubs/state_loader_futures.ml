@@ -6,6 +6,7 @@
  *
  *)
 
-let load ~repo:_ ~saved_state_type:_ = failwith "Not implemented"
+let load ~repo:_ ~saved_state_type:_ =
+  Future.of_value (Error "Not implemented")
 
 let wait_for_finish _ = failwith "Not implemented"

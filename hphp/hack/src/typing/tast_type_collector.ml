@@ -46,7 +46,7 @@ let collected_types_to_json (collected_types : collected_type list) :
     Hh_json.json list =
   List.map collected_types ~f:(fun (env, ty) ->
       match ty with
-      | Typing_defs.DeclTy ty -> Tast_env.ty_to_json env ty
+      | Typing_defs.DeclTy ty -> Tast_env.decl_ty_to_json env ty
       | Typing_defs.LoclTy ty -> Tast_env.ty_to_json env ty)
 
 (*

@@ -168,7 +168,7 @@ let go
                   let parinfo_label =
                     match param.fp_name with
                     | Some s -> s
-                    | None -> Tast_env.print_ty tast_env ft.ft_ret.et_type
+                    | None -> Tast_env.print_decl_ty tast_env ft.ft_ret.et_type
                   in
                   { parinfo_label; parinfo_documentation = None })
             in

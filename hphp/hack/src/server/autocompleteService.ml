@@ -547,14 +547,14 @@ let get_desc_string_for env ty kind =
   | SearchUtils.SI_Constructor ->
     let result =
       match ty with
-      | DeclTy declt -> Tast_env.print_ty env declt
+      | DeclTy declt -> Tast_env.print_decl_ty env declt
       | LoclTy loclt -> Tast_env.print_ty env loclt
     in
     result
   | _ -> kind_to_string kind
 
 (* Convert a `TFun` into a func details structure *)
-let tfun_to_func_details (env : Tast_env.t) (ft : 'a Typing_defs.fun_type) :
+let tfun_to_func_details (env : Tast_env.t) (ft : Typing_defs.locl_fun_type) :
     func_details_result =
   let param_to_record ?(is_variadic = false) param =
     {
@@ -584,9 +584,13 @@ let tfun_to_func_details (env : Tast_env.t) (ft : 'a Typing_defs.fun_type) :
 
 (* Convert a `ty` into a func details structure *)
 let get_func_details_for env ty =
+  let (env, ty) =
+    match ty with
+    | DeclTy ty -> Tast_env.localize_with_self env ty
+    | LoclTy ty -> (env, ty)
+  in
   match ty with
-  | DeclTy (_, Tfun ft) -> Some (tfun_to_func_details env ft)
-  | LoclTy (_, Tfun ft) -> Some (tfun_to_func_details env ft)
+  | (_, Tfun ft) -> Some (tfun_to_func_details env ft)
   | _ -> None
 
 (* Here we turn partial_autocomplete_results into complete_autocomplete_results *)
@@ -901,10 +905,10 @@ let find_global_results
             match Tast_env.get_fun tast_env fixed_name with
             | None -> (None, kind_to_string r.si_kind)
             | Some ft ->
-              let details = tfun_to_func_details tast_env ft in
               let ty = (Typing_reason.Rnone, Tfun ft) in
-              let res_ty = Tast_env.print_ty tast_env ty in
-              (Some details, res_ty)
+              let details = get_func_details_for tast_env (DeclTy ty) in
+              let res_ty = Tast_env.print_decl_ty tast_env ty in
+              (details, res_ty)
           else
             (None, kind_to_string r.si_kind)
         in

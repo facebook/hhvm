@@ -13,8 +13,10 @@ type t = env [@@deriving show]
 
 exception Not_in_class
 
-val print_ty : env -> 'a Typing_defs.ty -> string
+val print_ty : env -> Typing_defs.locl_ty -> string
 (** Return a string representation of the given type using Hack-like syntax. *)
+
+val print_decl_ty : env -> Typing_defs.decl_ty -> string
 
 val print_error_ty : env -> Typing_defs.locl_ty -> string
 
@@ -29,8 +31,10 @@ val print_ty_with_identity :
     information from the {!SymbolOccurrence.t} and (if provided)
     {!SymbolDefinition.t}. *)
 
-val ty_to_json : env -> 'a Typing_defs.ty -> Hh_json.json
+val ty_to_json : env -> Typing_defs.locl_ty -> Hh_json.json
 (** Return a JSON representation of the given type. *)
+
+val decl_ty_to_json : env -> Typing_defs.decl_ty -> Hh_json.json
 
 val json_to_locl_ty :
   ?keytrace:Hh_json.Access.keytrace ->

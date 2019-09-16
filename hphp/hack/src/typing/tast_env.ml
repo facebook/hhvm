@@ -33,6 +33,8 @@ exception Not_in_class
 
 let print_ty = Typing_print.full_strip_ns
 
+let print_decl_ty = Typing_print.full_strip_ns
+
 let print_error_ty = Typing_print.error
 
 let print_ty_with_identity env phase_ty sym_occurrence sym_definition =
@@ -44,6 +46,8 @@ let print_ty_with_identity env phase_ty sym_occurrence sym_definition =
     Typing_print.full_with_identity env ty sym_occurrence sym_definition
 
 let ty_to_json = Typing_print.to_json
+
+let decl_ty_to_json = Typing_print.to_json
 
 let json_to_locl_ty = Typing_print.json_to_locl_ty
 

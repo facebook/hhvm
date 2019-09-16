@@ -788,11 +788,6 @@ class TestLsp(TestCase[LspTestDriver]):
         variables = self.setup_php_file("type_definition.php")
         self.load_and_run("type_definition", variables)
 
-    def test_hover(self) -> None:
-        self.prepare_server_environment()
-        variables = self.setup_php_file("hover.php")
-        self.load_and_run("hover", variables)
-
     def initialize_spec(
         self, spec: LspTestSpec, use_serverless_ide: bool
     ) -> LspTestSpec:

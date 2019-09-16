@@ -1698,6 +1698,7 @@ void VariableSerializer::serializeArray(const ArrayData* arr,
   }
 
   if (UNLIKELY(RuntimeOption::EvalLogArrayProvenance &&
+               !m_forcePHPArrays &&
                (arr->isDict() || arr->isVecArray()))) {
     auto const source = [&]() -> const char* {
       switch (getType()) {

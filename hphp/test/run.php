@@ -666,6 +666,22 @@ function serial_only_tests($tests) {
   return $serial_tests;
 }
 
+// NOTE: If "files" is very long, then the shell may reject the desired
+// "find" command (especially because "escapeshellarg()" adds two single
+// quote characters to each file), so we split "files" into chunks below.
+function exec_find(mixed $files, string $extra): mixed {
+  $results = array();
+  foreach (array_chunk($files, 500) as $chunk) {
+    $efa = implode(' ', array_map(fun('escapeshellarg'), $chunk));
+    $output = shell_exec("find $efa $extra");
+    foreach (explode("\n", $output) as $result) {
+      // Collect the (non-empty) results, which should all be file paths.
+      if ($result !== "") $results[] = $result;
+    }
+  }
+  return $results;
+}
+
 function find_tests($files, array $options = null) {
   if (!$files) {
     $files = array('quick');
@@ -689,16 +705,14 @@ function find_tests($files, array $options = null) {
     $file = preg_replace(',^'.getcwd().'/,', '', $file);
     $files[$idx] = $file;
   }
-  $files = array_map('escapeshellarg', $files);
-  $files = implode(' ', $files);
   if (isset($options['typechecker'])) {
-    $tests = explode("\n", shell_exec(
-      "find $files ".
+    $tests = exec_find(
+      $files,
       "-name '*.php' ".
       "-o -name '*.php.type-errors' ".
       "-o -name '*.hack' ".
       "-o -name '*.hack.type-errors'"
-    ));
+    );
     // The above will get all the php files. Now filter out only the ones
     // that have a .hhconfig associated with it.
     $tests = array_filter(
@@ -710,17 +724,18 @@ function find_tests($files, array $options = null) {
       }
     );
   } else {
-    $tests = explode("\n", shell_exec(
-      "find $files '(' " .
-          "-name '*.php' " .
-          "-o -name '*.hack' " .
-          "-o -name '*.js' " .
-          "-o -name '*.php.type-errors' " .
-          "-o -name '*.hack.type-errors' " .
-          "-o -name '*.hhas' " .
-        "')' " .
-        "-not -regex '.*round_trip[.]hhas'"
-    ));
+    $tests = exec_find(
+      $files,
+      "'(' " .
+      "-name '*.php' " .
+      "-o -name '*.hack' " .
+      "-o -name '*.js' " .
+      "-o -name '*.php.type-errors' " .
+      "-o -name '*.hack.type-errors' " .
+      "-o -name '*.hhas' " .
+      "')' " .
+      "-not -regex '.*round_trip[.]hhas'"
+    );
   }
   if (!$tests) {
     error("Could not find any tests associated with your options.\n" .
@@ -2722,16 +2737,13 @@ function msg_loop($num_tests, $queue) {
 
   if ($do_progress) {
     $stty = strtolower(Status::getSTTY());
-    $output = null;
-    preg_match_all_with_matches("/columns ([0-9]+);/", $stty, inout $output);
-    if (!isset($output[1][0])) {
-      // because BSD has to be different
-      preg_match_all_with_matches("/([0-9]+) columns;/", $stty, inout $output);
-    }
-    if (!isset($output[1][0])) {
-      $do_progress = false;
+    $matches = null;
+    if (preg_match_with_matches("/columns ([0-9]+);/", $stty, inout $matches) ||
+        // because BSD has to be different
+        preg_match_with_matches("/([0-9]+) columns;/", $stty, inout $matches)) {
+      $cols = $matches[1];
     } else {
-      $cols = $output[1][0];
+      $do_progress = false;
     }
   }
 
@@ -3402,7 +3414,16 @@ function main($argv) {
 
   Status::finished();
 
-  // Kill the server.
+  // Wait for the printer child to die, if needed.
+  if (!Status::$nofork && $printer_pid != 0) {
+    $status = 0;
+    $pid = pcntl_waitpid($printer_pid, inout $status);
+    if (!pcntl_wifexited($status) && !pcntl_wifsignaled($status)) {
+      error("Unexpected exit status from child");
+    }
+  }
+
+  // Kill the servers.
   if ($servers) {
     foreach ($servers['pids'] as $ref) {
       proc_terminate($ref->server['proc']);

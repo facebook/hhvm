@@ -23,4 +23,8 @@ let default_env ~bin_root ~root =
   ignore (bin_root, root);
   failwith "not implemented"
 
+let set_send_progress _ : unit = failwith "not implemented"
+
+let set_send_percentage_progress _ : unit = failwith "not implemented"
+
 let go _ = failwith "not implemented"

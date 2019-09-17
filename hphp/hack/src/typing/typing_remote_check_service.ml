@@ -37,6 +37,10 @@ let should_do_remote
          do_remote)
       t )
 
+let set_up_logging ~send_progress ~send_percentage_progress : unit =
+  RemoteScheduler.set_send_progress send_progress;
+  RemoteScheduler.set_send_percentage_progress send_percentage_progress
+
 let go
     (workers : MultiWorker.worker list option)
     (opts : TypecheckerOptions.t)

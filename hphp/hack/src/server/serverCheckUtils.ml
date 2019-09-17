@@ -91,6 +91,34 @@ let global_typecheck_kind genv env =
   else
     ServerCommandTypes.Blocking
 
+let set_up_remote_logging (env : ServerEnv.env) : unit =
+  let send_progress (message : string) : unit =
+    ServerBusyStatus.send
+      env
+      ServerCommandTypes.(Doing_global_typecheck (Remote_blocking message));
+    ServerProgress.send_progress_to_monitor "%s" message
+  in
+  let send_percentage_progress
+      ~(operation : string)
+      ~(done_count : int)
+      ~(total_count : int)
+      ~(unit : string) : unit =
+    let message =
+      ServerProgress.make_percentage_progress_message
+        ~operation
+        ~done_count
+        ~total_count
+        ~unit
+    in
+    ServerBusyStatus.send
+      env
+      ServerCommandTypes.(Doing_global_typecheck (Remote_blocking message));
+    ServerProgress.send_progress_to_monitor ~include_in_logs:false "%s" message
+  in
+  Typing_remote_check_service.set_up_logging
+    ~send_progress
+    ~send_percentage_progress
+
 let maybe_remote_type_check genv env fnl =
   let t = Unix.gettimeofday () in
   let (do_remote, _t) =
@@ -99,7 +127,8 @@ let maybe_remote_type_check genv env fnl =
     else
       Typing_remote_check_service.should_do_remote env.tcopt fnl t
   in
-  if do_remote then
+  if do_remote then (
+    set_up_remote_logging env;
     let eden_threshold =
       genv.local_config.remote_worker_eden_checkout_threshold
     in
@@ -113,7 +142,7 @@ let maybe_remote_type_check genv env fnl =
         fnl
     in
     Some remote_errors
-  else
+  ) else
     None
 
 let maybe_remote_type_check_without_interrupt genv env fnl ~local =

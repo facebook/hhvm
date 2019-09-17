@@ -345,7 +345,7 @@ struct
         | `Node node -> pPos node env
       in
       env.lowpri_errors := (p, msg) :: !(env.lowpri_errors)
-    else if env.codegen && not env.lower_coroutines then
+    else if env.codegen then
       let p =
         match node_or_pos with
         | `Pos pos -> pos
@@ -1946,7 +1946,7 @@ if there already is one, since that one will likely be better than this one. *)
             | (_, Some TK.HexadecimalLiteral)
             (* We allow underscores while lexing the integer literals. This gets rid of them before
              * the literal is created. *)
-            
+
             | (_, Some TK.BinaryLiteral) ->
               Int (Str.global_replace underscore "" s)
             | (_, Some TK.FloatingLiteral) -> Float s
@@ -3968,7 +3968,7 @@ if there already is one, since that one will likely be better than this one. *)
     let rec aux env acc = function
       | []
       (* EOF happens only as the last token in the list. *)
-      
+
       | [{ syntax = EndOfFile _; _ }] ->
         List.concat (List.rev acc)
       (* HaltCompiler stops processing the list in PHP but can be disabled in Hack *)
@@ -4342,7 +4342,7 @@ let flush_parsing_errors env =
   env.lowpri_errors := [];
   if should_surface_errors env then
     List.iter ~f:Errors.parsing_error lowpri_errors
-  else if env.codegen && not env.lower_coroutines then
+  else if env.codegen then
     match lowpri_errors with
     | (p, msg) :: _ ->
       let (s, e) = Pos.info_raw p in
@@ -4375,7 +4375,7 @@ let lower_tree
       | Some ast -> Ast_check.check_program ast
       | _ -> []
     in
-    if env.codegen && not env.lower_coroutines then
+    if env.codegen then
       let error_env =
         ParserErrors.make_env
           tree

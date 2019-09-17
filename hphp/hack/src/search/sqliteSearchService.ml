@@ -58,21 +58,24 @@ let get_filename_for_symbol_index (extension : string) : string =
 
 (* Attempt to fetch this file *)
 let find_saved_symbolindex () : (string, string) Core_kernel.result =
-  let repo = Path.make (Relative_path.path_of_prefix Relative_path.Root) in
-  let res =
-    Future.get_exn
-      (State_loader_futures.load
-         ~repo
-         ~saved_state_type:Saved_state_loader.Symbol_index)
-  in
-  match res with
-  | Ok (info, _) ->
-    Ok
-      (Path.to_string
-         info
-           .Saved_state_loader.Symbol_index_saved_state_info.symbol_index_path)
-  | Error load_error ->
-    Error (Saved_state_loader.load_error_to_string load_error)
+  try
+    let repo = Path.make (Relative_path.path_of_prefix Relative_path.Root) in
+    let res =
+      Future.get_exn
+        (State_loader_futures.load
+           ~repo
+           ~saved_state_type:Saved_state_loader.Symbol_index)
+    in
+    match res with
+    | Ok (info, _) ->
+      Ok
+        (Path.to_string
+           info
+             .Saved_state_loader.Symbol_index_saved_state_info
+              .symbol_index_path)
+    | Error load_error ->
+      Error (Saved_state_loader.load_error_to_string load_error)
+  with _ -> Error "Exception searching for saved state"
 
 (* Determine the correct filename to use for the db_path or build it *)
 let find_or_build_sqlite_file

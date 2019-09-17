@@ -21,7 +21,10 @@ let test () =
         {
           default_loop_input with
           persistent_client_request =
-            Some (UncleanDisconect (ServerCommandTypes.STATUS (false, None)));
+            Some
+              (UncleanDisconect
+                 (ServerCommandTypes.STATUS
+                    { ignore_ide = false; remote = false; max_errors = None }));
         })
   in
   match env.ServerEnv.persistent_client with

@@ -230,7 +230,12 @@ type cst_search_input = {
 (* The following datatypes can be interpreted as follows:
  * MESSAGE_TAG : Argument type (sent from client to server) -> return type t *)
 type _ t =
-  | STATUS : bool * int option -> Server_status.t t
+  | STATUS : {
+      ignore_ide: bool;
+      remote: bool;
+      max_errors: int option;
+    }
+      -> Server_status.t t
   | STATUS_SINGLE :
       file_input * int option
       -> (Pos.absolute Errors.error_ list * int) t

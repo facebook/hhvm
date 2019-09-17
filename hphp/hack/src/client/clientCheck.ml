@@ -466,7 +466,12 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
         else
           Lwt.return_unit
       in
-      let%lwt status = rpc args (Rpc.STATUS (ignore_ide, args.max_errors)) in
+      let%lwt status =
+        rpc
+          args
+          (Rpc.STATUS
+             { ignore_ide; max_errors = args.max_errors; remote = args.remote })
+      in
       let exit_status =
         ClientCheckStatus.go
           status

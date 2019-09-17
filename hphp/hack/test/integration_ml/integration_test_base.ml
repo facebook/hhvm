@@ -402,14 +402,15 @@ let ide_autocomplete env (path, line, column) =
                   is_manually_invoked )));
     }
 
-let status ?(ignore_ide = false) ?(max_errors = None) env =
+let status ?(ignore_ide = false) ?(max_errors = None) ?(remote = false) env =
   run_loop_once
     env
     {
       default_loop_input with
       new_client =
         Some
-          (RequestResponse (ServerCommandTypes.STATUS (ignore_ide, max_errors)));
+          (RequestResponse
+             (ServerCommandTypes.STATUS { ignore_ide; max_errors; remote }));
     }
 
 let full_check env =

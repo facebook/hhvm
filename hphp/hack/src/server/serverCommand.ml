@@ -201,7 +201,7 @@ let full_recheck_if_needed' genv env reason =
     env
 
 let ignore_ide = function
-  | Rpc (STATUS (true, _)) -> true
+  | Rpc (STATUS status) -> status.ignore_ide
   | _ -> false
 
 let apply_changes env changes =

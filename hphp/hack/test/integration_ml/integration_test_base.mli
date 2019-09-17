@@ -104,6 +104,7 @@ val ide_autocomplete :
 val status :
   ?ignore_ide:bool ->
   ?max_errors:int option ->
+  ?remote:bool ->
   ServerEnv.env ->
   ServerEnv.env * (ServerCommandTypes.Server_status.t, 'a) loop_outputs
 

@@ -8409,6 +8409,7 @@ and shallow_decl_enabled () =
 and class_def tcopt c =
   let env = EnvFromDef.class_env tcopt c in
   let tc = Env.get_class env (snd c.c_name) in
+  let env = Env.set_env_pessimize env in
   add_decl_errors Option.(map tc (fun tc -> value_exn (Cls.decl_errors tc)));
   let c = TNBody.class_meth_bodies c in
   NastCheck.class_ env c;
@@ -8802,10 +8803,16 @@ and class_const_def env cc =
     match h with
     | None ->
       let (env, ty) = Env.fresh_type env (fst id) in
-      (env, ty, None)
+      (env, MakeType.unenforced ty, None)
     | Some h ->
-      let (env, ty) = Phase.localize_hint_with_self env h in
-      (env, ty, Some (ExpectedTy.make (fst id) Reason.URhint ty))
+      let ty = Decl_hint.hint env.decl_env h in
+      let ty =
+        Typing_enforceability.compute_enforced_and_pessimize_ty_simple env ty
+      in
+      let (env, ty) = Phase.localize_possibly_enforced_with_self env ty in
+      ( env,
+        ty,
+        Some (ExpectedTy.make_and_allow_coercion (fst id) Reason.URhint ty) )
   in
   let (env, eopt, ty) =
     match e with
@@ -8817,11 +8824,11 @@ and class_const_def env cc =
           Reason.URhint
           env
           ty'
-          (MakeType.unenforced ty)
+          ty
           Errors.class_constant_value_does_not_match_hint
       in
       (env, Some te, ty')
-    | None -> (env, None, ty)
+    | None -> (env, None, ty.et_type)
   in
   ( env,
     ( {
@@ -9108,7 +9115,6 @@ and method_def env cls m =
       let env = Env.open_tyvars env (fst m.m_name) in
       let env = Env.reinitialize_locals env in
       let env = Env.set_env_function_pos env pos in
-      let env = Env.set_env_pessimize env in
       let env =
         Typing_attributes.check_def
           env
@@ -9367,6 +9373,7 @@ and typedef_def tcopt typedef =
 
 and gconst_def tcopt cst =
   let env = EnvFromDef.gconst_env tcopt cst in
+  let env = Env.set_env_pessimize env in
   add_decl_errors (Option.map (Env.get_gconst env (snd cst.cst_name)) ~f:snd);
 
   let (typed_cst_value, env) =
@@ -9374,12 +9381,25 @@ and gconst_def tcopt cst =
     match cst.cst_type with
     | Some hint ->
       let ty = Decl_hint.hint env.decl_env hint in
-      let (env, dty) = Phase.localize_with_self env ty in
+      let ty =
+        Typing_enforceability.compute_enforced_and_pessimize_ty_simple env ty
+      in
+      let (env, dty) = Phase.localize_possibly_enforced_with_self env ty in
       let (env, te, value_type) =
-        let expected = ExpectedTy.make (fst hint) Reason.URhint dty in
+        let expected =
+          ExpectedTy.make_and_allow_coercion (fst hint) Reason.URhint dty
+        in
         expr ~expected env value
       in
-      let env = SubType.sub_type env value_type dty Errors.unify_error in
+      let env =
+        Typing_coercion.coerce_type
+          (fst hint)
+          Reason.URhint
+          env
+          value_type
+          dty
+          Errors.unify_error
+      in
       (te, env)
     | None ->
       let (env, te, _value_type) = expr env value in

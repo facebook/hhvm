@@ -6,6 +6,7 @@
 use std::cell::RefCell;
 use std::cmp::max;
 
+use crate::block::NO_SCAN_TAG;
 use crate::{BlockBuilder, OcamlRep, Value};
 
 struct Chunk<'a> {
@@ -90,7 +91,6 @@ impl<'a> Arena<'a> {
     }
 
     pub unsafe fn add_from_ocaml(&self, value: usize) -> Value<'a> {
-        use crate::block::{DOUBLE_TAG, STRING_TAG};
         if value & 1 == 1 {
             return Value::bits(value);
         }
@@ -100,12 +100,14 @@ impl<'a> Arena<'a> {
         let size = header.0 >> 10;
         let tag = header.0 as u8;
         let block = self.alloc(size + 1).as_mut_ptr();
-        // Copy header
-        *block = *ptr;
-        if tag == STRING_TAG || tag == DOUBLE_TAG {
-            // Copy binary data
+        // A tag >= NO_SCAN_TAG indicates that the block contains binary data
+        // rather than pointers or immediate integers.
+        if tag >= NO_SCAN_TAG {
+            // Copy header and binary data
             std::ptr::copy_nonoverlapping(ptr, block, size + 1);
         } else {
+            // Copy header
+            *block = *ptr;
             // Copy fields
             for i in 1..=(size as isize) {
                 *block.offset(i) = self.add_from_ocaml((*ptr.offset(i)).0);

@@ -10,6 +10,7 @@ use std::ops::{Index, IndexMut};
 
 use crate::value::Value;
 
+pub const NO_SCAN_TAG: u8 = 251;
 pub const STRING_TAG: u8 = 252;
 pub const DOUBLE_TAG: u8 = 253;
 

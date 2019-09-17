@@ -14,6 +14,7 @@ pub struct SyntaxTree<'a, Syntax, State> {
     errors: Vec<SyntaxError>,
     mode: Option<Mode>,
     state: State,
+    required_stack_size: Option<usize>,
 }
 
 fn dedup_errors(errors: Vec<SyntaxError>) -> Vec<SyntaxError> {
@@ -57,6 +58,7 @@ where
         errors: Vec<SyntaxError>,
         mode: Option<Mode>,
         state: State,
+        required_stack_size: Option<usize>,
     ) -> Self {
         Self {
             text,
@@ -64,6 +66,7 @@ where
             errors,
             mode,
             state,
+            required_stack_size,
         }
     }
 
@@ -73,9 +76,10 @@ where
         errors: Vec<SyntaxError>,
         mode: Option<Mode>,
         state: State,
+        required_stack_size: Option<usize>,
     ) -> Self {
         let errors = process_errors(errors);
-        Self::build(text, root, errors, mode, state)
+        Self::build(text, root, errors, mode, state, required_stack_size)
     }
 
     pub fn root(&self) -> &Syntax {
@@ -112,6 +116,10 @@ where
 
     pub fn is_decl(&self) -> bool {
         self.mode == Some(Mode::Mdecl)
+    }
+
+    pub fn required_stack_size(&self) -> Option<usize> {
+        self.required_stack_size
     }
 
     // "unsafe" because it can break the invariant that text is consistent with other syntax

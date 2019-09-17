@@ -49,7 +49,7 @@ where
         let mut parser = Parser::make(&source, env);
         let root = parser.parse_script(None);
         let (_, errors, _, state) = parser.into_parts();
-        SyntaxTree::create(source, root, errors, mode, state)
+        SyntaxTree::create(source, root, errors, mode, state, None)
     }
 
     fn into_parts(self) -> (Lexer<'a, S::Token>, Vec<SyntaxError>, ParserEnv, S) {

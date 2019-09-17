@@ -127,7 +127,6 @@ macro_rules! parse {
                 // TODO: rewrite to_ocaml iteratively & reduce it to "stack_size - MB" as in HHVM
                 // (https://github.com/facebook/hhvm/blob/master/hphp/runtime/base/request-info.h)
                 let relative_stack_size = stack_size - stack_size*6/10;
-                stack_size = next_stack_size;
                 let content = str_field(&ocaml_source_text, 2);
                 let relative_path_raw = block_field(&ocaml_source_text, 0);
 
@@ -156,13 +155,19 @@ macro_rules! parse {
                         let ocaml_errors = errors.ocamlvalue();
                         let ocaml_state = state.to_ocaml(&context);
                         let tree = if leak_rust_tree {
+                            let required_stack_size = if default_stack_size_sufficient {
+                                None
+                            } else {
+                                Some(stack_size)
+                            };
                             let mode = parse_mode(&source_text);
-                            let tree = Box::new(SyntaxTree::build(&source_text, root, errors, mode, ()));
+                            let tree = Box::new(SyntaxTree::build(&source_text, root, errors, mode, (), required_stack_size));
                             Some(Box::leak(tree) as *const SyntaxTree<$syntax, ()> as usize)
                         } else {
                             None
                         };
                         let ocaml_tree = tree.ocamlvalue();
+
                         let res = caml_tuple(&[
                             ocaml_state,
                             ocaml_root,
@@ -189,6 +194,7 @@ macro_rules! parse {
                         Err(msg) => panic!(msg),
                     }
                 };
+                stack_size = next_stack_size;
 
                 let l_opt = if default_stack_size_sufficient {
                     try_parse()

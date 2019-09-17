@@ -308,13 +308,14 @@ void processInit() {
   g_code = new(low_malloc(sizeof(CodeCache))) CodeCache();
   g_ustubs.emitAll(*g_code, *Debug::DebugInfo::Get());
 
-  // Write an .eh_frame section that covers the whole TC.
+  // Write an .eh_frame section that covers the JIT portion of the TC.
   initUnwinder(g_code->base(), g_code->tcSize(),
                tc_unwind_personality);
 
-  // write an .eh_frame for cti code using default personality
-  initUnwinder(g_code->bytecode().base(), g_code->bytecode().capacity(),
-               __gxx_personality_v0);
+  if (auto cti_cap = g_code->bytecode().capacity()) {
+    // write an .eh_frame for cti code using default personality
+    initUnwinder(g_code->bytecode().base(), cti_cap, __gxx_personality_v0);
+  }
 
   Disasm::ExcludedAddressRange(g_code->base(), g_code->codeSize());
 

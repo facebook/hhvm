@@ -379,10 +379,10 @@ let convert_to_tast ast =
     (* Ignore these errors to match legacy AST behavior *)
     | 2086
     (* Naming.MethodNeedsVisibility *)
-    
+
     | 2102
     (* Naming.UnsupportedTraitUseAs *)
-    
+
     | 2103 (* Naming.UnsupportedInsteadOf *) ->
       acc
     | _ (* Emit fatal parse otherwise *) ->
@@ -755,11 +755,14 @@ let decl_and_run_mode compiler_options =
         dispatch_loop handlers
       | CLI ->
         let handle_exception filename exc =
-          if not compiler_options.quiet_mode then
+          if not compiler_options.quiet_mode then (
+            let stack = Caml.Printexc.get_backtrace () in
+            prerr_endline stack;
             P.eprintf
               "Error in file %s: %s\n"
               (Relative_path.to_absolute filename)
               (Caml.Printexc.to_string exc)
+          )
         in
         let process_single_file handle_output filename =
           let filename = Relative_path.create Relative_path.Dummy filename in

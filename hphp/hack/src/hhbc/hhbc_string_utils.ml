@@ -22,7 +22,7 @@ let triple_quote_string s = "\"\"\"" ^ Php_escaping.escape s ^ "\"\"\""
 let prefix_namespace n s = n ^ "\\" ^ s
 
 let strip_global_ns s =
-  if String.length s > 0 || s.[0] = '\\' then
+  if String.length s > 0 && s.[0] = '\\' then
     String_utils.lstrip s "\\"
   else
     s
@@ -92,7 +92,7 @@ module Integer = struct
       | 'b'
       | 'B'
       (* Hex *)
-      
+
       | 'x'
       | 'X' ->
         s

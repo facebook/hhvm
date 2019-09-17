@@ -3,12 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b39ff872c50f55b5ff5bb2f15a331a20>>
+// @generated SignedSource<<29d18f13e6449238e7e9f739c1afccc9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
 
 use ocamlrep_derive::OcamlRep;
+use ocamlvalue_macro::Ocamlvalue;
 
 use crate::aast;
 use crate::ast_defs;
@@ -21,7 +22,7 @@ use crate::pos;
 
 use crate::typing_defs::*;
 
-#[derive(Clone, Debug, OcamlRep)]
+#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 pub struct ShallowClassConst {
     pub abstract_: bool,
     pub expr: Option<nast::Expr>,
@@ -30,7 +31,7 @@ pub struct ShallowClassConst {
     pub visibility: aast::Visibility,
 }
 
-#[derive(Clone, Debug, OcamlRep)]
+#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 pub struct ShallowTypeconst {
     pub abstract_: TypeconstAbstractKind,
     pub constraint: Option<DeclTy>,
@@ -41,13 +42,13 @@ pub struct ShallowTypeconst {
     pub reifiable: Option<pos::Pos>,
 }
 
-#[derive(Clone, Debug, OcamlRep)]
+#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 pub struct ShallowPuMember {
     pub atom: aast::Sid,
     pub types: Vec<(aast::Sid, DeclTy)>,
 }
 
-#[derive(Clone, Debug, OcamlRep)]
+#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 pub struct ShallowPuEnum {
     pub name: aast::Sid,
     pub is_final: bool,
@@ -56,7 +57,7 @@ pub struct ShallowPuEnum {
     pub members: Vec<ShallowPuMember>,
 }
 
-#[derive(Clone, Debug, OcamlRep)]
+#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 pub struct ShallowProp {
     pub const_: bool,
     pub xhp_attr: Option<XhpAttr>,
@@ -70,7 +71,7 @@ pub struct ShallowProp {
     pub fixme_codes: i_set::ISet,
 }
 
-#[derive(Clone, Debug, OcamlRep)]
+#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 pub struct ShallowMethod {
     pub abstract_: bool,
     pub final_: bool,
@@ -83,7 +84,7 @@ pub struct ShallowMethod {
     pub fixme_codes: i_set::ISet,
 }
 
-#[derive(Clone, Debug, OcamlRep)]
+#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 pub struct ShallowMethodRedeclaration {
     pub abstract_: bool,
     pub final_: bool,
@@ -96,7 +97,7 @@ pub struct ShallowMethodRedeclaration {
     pub fixme_codes: i_set::ISet,
 }
 
-#[derive(Clone, Debug, OcamlRep)]
+#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 pub struct ShallowClass {
     pub mode: file_info::Mode,
     pub final_: bool,

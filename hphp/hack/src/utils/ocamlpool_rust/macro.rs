@@ -17,6 +17,13 @@ fn derive_ocamlvalue(mut s: synstructure::Structure) -> proc_macro2::TokenStream
             let variant = &s.variants()[0];
             let size = variant.bindings().len();
             match st.fields {
+                syn::Fields::Unit => s.gen_impl(quote! {
+                    gen impl ocamlpool_rust::ocamlvalue::Ocamlvalue for @Self{
+                        fn ocamlvalue(&self) -> ocaml::core::mlvalues::Value {
+                            ().ocamlvalue()
+                        }
+                    }
+                }),
                 syn::Fields::Unnamed(_) if size == 1 => {
                     s.bind_with(|_| synstructure::BindStyle::Move);
                     s.gen_impl(quote! {
@@ -47,7 +54,6 @@ fn derive_ocamlvalue(mut s: synstructure::Structure) -> proc_macro2::TokenStream
                         }
                     })
                 }
-                _ => panic!(),
             }
         }
         syn::Data::Enum(_) => {

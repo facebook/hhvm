@@ -1,6 +1,7 @@
 use ocamlrep_derive::OcamlRep;
+use ocamlvalue_macro::Ocamlvalue;
 
-#[derive(Clone, Debug, OcamlRep)]
+#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 pub enum TypeTRecursion {
     Nil,
     Cons(isize, Box<TypeTRecursion>),

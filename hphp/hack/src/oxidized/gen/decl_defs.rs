@@ -3,12 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0deaf23581da4171f5d63f0a8760f26b>>
+// @generated SignedSource<<b4f887430087b83a0772248520cc5d2d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
 
 use ocamlrep_derive::OcamlRep;
+use ocamlvalue_macro::Ocamlvalue;
 
 use crate::ast_defs;
 use crate::errors;
@@ -20,14 +21,14 @@ use crate::sequence;
 
 use crate::typing_defs::*;
 
-#[derive(Clone, Debug, OcamlRep)]
+#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 pub struct SubstContext {
     pub subst: s_map::SMap<DeclTy>,
     pub class_context: String,
     pub from_req_extends: bool,
 }
 
-#[derive(Clone, Copy, Debug, Eq, OcamlRep, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
 pub enum SourceType {
     Child,
     Parent,
@@ -38,7 +39,7 @@ pub enum SourceType {
     ReqExtends,
 }
 
-#[derive(Clone, Debug, OcamlRep)]
+#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 pub struct MroElement {
     pub name: String,
     pub use_pos: pos::Pos,
@@ -58,7 +59,7 @@ pub struct MroElement {
 
 pub type Linearization = sequence::Sequence<MroElement>;
 
-#[derive(Clone, Debug, OcamlRep)]
+#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 pub struct DeclClassType {
     pub need_init: bool,
     pub members_fully_known: bool,
@@ -96,14 +97,14 @@ pub struct DeclClassType {
 
 pub type ConditionTypeName = Option<String>;
 
-#[derive(Clone, Debug, OcamlRep)]
+#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 pub enum MethodReactivity {
     MethodReactive(ConditionTypeName),
     MethodShallow(ConditionTypeName),
     MethodLocal(ConditionTypeName),
 }
 
-#[derive(Clone, Debug, OcamlRep)]
+#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 pub struct Element {
     pub final_: bool,
     pub synthesized: bool,

@@ -40,26 +40,6 @@ let blacklisted_types =
    considering decl tys *)
 let blacklisted_type_prefixes = [("typing_defs", "Locl")]
 
-let ocamlvalue_derive_whitelist =
-  [
-    "aast_defs";
-    "aast";
-    "ast_defs";
-    "namespace_env";
-    "file_info";
-    "global_options";
-    "prim_defs";
-  ]
-
-let ocamlvalue_derive_filter (derive : string option * string) : bool =
-  snd derive <> "Ocamlvalue"
-  || List.mem
-       ocamlvalue_derive_whitelist
-       ~equal:( = )
-       (State.curr_module_name ())
-
-let derives_filters = [ocamlvalue_derive_filter]
-
 (* HACK: Typing_reason is usually aliased to Reason, so we have lots of
    instances of Reason.t. Since we usually convert an identifier like Reason.t
    to reason::Reason, the actual type needs to be renamed to the common alias.
@@ -139,9 +119,8 @@ let ctor_arg_len (ctor_args : constructor_arguments) : int =
 
 let type_declaration name td =
   let attrs_and_vis init_derives =
-    let filter a f = List.filter a ~f in
     let derive_attr =
-      List.fold derives_filters ~init:(derived_traits @ init_derives) ~f:filter
+      derived_traits @ init_derives
       |> List.sort ~compare:(fun (_, t1) (_, t2) -> String.compare t1 t2)
       |> List.map ~f:(fun (m, trait) ->
              Option.iter m ~f:(fun m -> add_extern_use (m ^ "::" ^ trait));

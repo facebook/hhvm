@@ -72,7 +72,7 @@ let handle_value_in_return
       fun_pos
       (Tast.get_position e)
   in
-  let rec aux e =
+  let rec aux env e =
     match snd e with
     (* ignore nulls - it is ok to return then from functions
        that return nullable types and for non-nullable return types it will
@@ -88,7 +88,10 @@ let handle_value_in_return
       env
     | T.Pipe (_, _, r) ->
       (* ok for pipe if rhs returns mutable *)
-      aux r
+      aux env r
+    | T.Binop (Ast_defs.QuestionQuestion, l, r) ->
+      let env = aux env l in
+      aux env r
     | T.Lvar (_, id) ->
       let mut_env = Env.get_env_mutability env in
       begin
@@ -127,7 +130,7 @@ let handle_value_in_return
       );
       env
   in
-  aux e
+  aux env e
 
 let freeze_or_move_local
     (p : Pos.t)

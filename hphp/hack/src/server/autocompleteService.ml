@@ -911,11 +911,20 @@ let find_global_results
           else
             (None, kind_to_string r.si_kind)
         in
+        (* Only load exact positions if specially requested *)
+        let res_pos =
+          if sienv.sie_resolve_positions then
+            let fixed_name = ns ^ r.si_name in
+            match Tast_env.get_fun tast_env fixed_name with
+            | None -> absolute_none
+            | Some ft -> ft.ft_pos |> Pos.to_absolute
+          else
+            absolute_none
+        in
         (* Figure out how to display them *)
         let complete =
           {
-            res_pos = absolute_none;
-            (* This is okay - resolve will fill it in *)
+            res_pos;
             res_replace_pos = replace_pos;
             res_base_class = None;
             res_ty;

@@ -62,7 +62,7 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | DOCBLOCK_FOR_SYMBOL _ -> false
   | IDE_SIGNATURE_HELP _ -> false
   | COVERAGE_LEVELS _ -> false
-  | AUTOCOMPLETE _ -> false
+  | COMMANDLINE_AUTOCOMPLETE _ -> false
   | IDENTIFY_FUNCTION _ -> false
   | METHOD_JUMP_BATCH _ -> false
   | IDE_HIGHLIGHT_REFS _ -> false
@@ -141,7 +141,7 @@ let get_description : type a. a command -> string = function
   | Rpc (DOCBLOCK_FOR_SYMBOL _) -> "DOCBLOCK_FOR_SYMBOL"
   | Rpc (IDE_SIGNATURE_HELP _) -> "IDE_SIGNATURE_HELP"
   | Rpc (COVERAGE_LEVELS _) -> "COVERAGE_LEVELS"
-  | Rpc (AUTOCOMPLETE _) -> "AUTOCOMPLETE"
+  | Rpc (COMMANDLINE_AUTOCOMPLETE _) -> "COMMANDLINE_AUTOCOMPLETE"
   | Rpc (IDENTIFY_FUNCTION _) -> "IDENTIFY_FUNCTION"
   | Rpc (METHOD_JUMP_BATCH _) -> "METHOD_JUMP_BATCH"
   | Rpc (IDE_HIGHLIGHT_REFS _) -> "IDE_HIGHLIGHT_REFS"

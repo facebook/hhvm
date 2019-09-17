@@ -296,7 +296,9 @@ type si_env = {
   sie_quiet_mode: bool;
   sie_fuzzy_search_mode: bool ref;
   sie_log_timings: bool;
+  (* Setting the "resolve" parameters to true slows down autocomplete a lot *)
   sie_resolve_signatures: bool;
+  sie_resolve_positions: bool;
   (* LocalSearchService *)
   lss_fullitems: si_capture Relative_path.Map.t;
   lss_tombstones: Tombstone_set.t;
@@ -319,7 +321,9 @@ let default_si_env =
     sie_quiet_mode = false;
     sie_fuzzy_search_mode = ref false;
     sie_log_timings = false;
+    (* Setting the "resolve" parameters to true slows down autocomplete a lot *)
     sie_resolve_signatures = false;
+    sie_resolve_positions = false;
     (* LocalSearchService *)
     lss_fullitems = Relative_path.Map.empty;
     lss_tombstones = Tombstone_set.empty;

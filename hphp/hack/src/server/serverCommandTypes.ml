@@ -256,7 +256,7 @@ type _ t =
       -> DocblockService.result t
   | IDE_SIGNATURE_HELP : (file_input * int * int) -> Lsp.SignatureHelp.result t
   | COVERAGE_LEVELS : file_input -> Coverage_level_defs.result t
-  | AUTOCOMPLETE : string -> AutocompleteTypes.result t
+  | COMMANDLINE_AUTOCOMPLETE : string -> AutocompleteTypes.result t
   | IDENTIFY_FUNCTION : file_input * int * int -> Identify_symbol.result t
   | METHOD_JUMP :
       (string * Method_jumps.filter * bool)

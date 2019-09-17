@@ -384,7 +384,8 @@ let autocomplete env contents =
     env
     {
       default_loop_input with
-      persistent_client_request = Some (Request (AUTOCOMPLETE contents));
+      persistent_client_request =
+        Some (Request (COMMANDLINE_AUTOCOMPLETE contents));
     }
 
 let ide_autocomplete env (path, line, column) =

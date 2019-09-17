@@ -102,7 +102,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     r
   | IDE_SIGNATURE_HELP (file, line, column) ->
     (env, ServerSignatureHelp.go ~env ~file ~line ~column)
-  | AUTOCOMPLETE content ->
+  | COMMANDLINE_AUTOCOMPLETE content ->
     let autocomplete_context =
       {
         AutocompleteTypes.is_manually_invoked = false;
@@ -114,12 +114,22 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         is_after_quote = false;
       }
     in
+    (* Since this is being executed from the command line,
+     * let's turn on the flags that increase accuracy but slow it down *)
+    let old_sienv = env.ServerEnv.local_symbol_table in
+    let sienv =
+      {
+        !old_sienv with
+        SearchUtils.sie_resolve_signatures = true;
+        SearchUtils.sie_resolve_positions = true;
+      }
+    in
     (* feature not implemented here; it only works for LSP *)
     let result =
       ServerAutoComplete.auto_complete
         ~tcopt:env.tcopt
         ~autocomplete_context
-        ~sienv:!(env.ServerEnv.local_symbol_table)
+        ~sienv
         content
     in
     (env, result.With_complete_flag.value)

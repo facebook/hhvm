@@ -380,7 +380,7 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
       Lwt.return Exit_status.No_error
     | MODE_AUTO_COMPLETE ->
       let content = Sys_utils.read_stdin_to_string () in
-      let%lwt results = rpc args @@ Rpc.AUTOCOMPLETE content in
+      let%lwt results = rpc args @@ Rpc.COMMANDLINE_AUTOCOMPLETE content in
       ClientAutocomplete.go results args.output_json;
       Lwt.return Exit_status.No_error
     | MODE_OUTLINE

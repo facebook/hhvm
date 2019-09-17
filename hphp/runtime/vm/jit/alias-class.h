@@ -52,11 +52,11 @@ struct SSATmp;
  *                         Unknown
  *                            |
  *                            |
- *                    +-------+-------+----------+
- *                    |               |          |
- *                 UnknownTV      IterPosAny  IterBaseAny
- *                    |               |          |
- *                    |              ...        ...
+ *                    +-------+-------+
+ *                    |               |
+ *                 UnknownTV       UIterAll
+ *                    |               |
+ *                    |             Iter*
  *                    |
  *      +---------+---+---------------+-------------------------+----+
  *      |         |                   |                         |    |
@@ -113,28 +113,16 @@ FPRelOffset frame_base_offset(SSATmp* fp);
 FRAME_RELATIVE(AFrame, AliasIdSet, ids);
 
 /*
- * Iterator state. Note that iterator slots can contain different kinds of data
- * (normal iterators, mutable iterators, or cuf "iterators"). However, in a well
- * formed program, each iterator slot will always contain a known type at any
- * given point without the possibility of aliasing. Therefore its safe to
- * consider the different types as totally distinct alias classes.
- */
-
-/*
- * A specific php iterator's position value (m_pos).
- */
-FRAME_RELATIVE(AIterPos, uint32_t, id);
-
-/*
- * A specific php iterator's base and initialization state, for non-mutable
- * iterators.
- *
- * Instances of this AliasClass cover both the memory storing the pointer to
- * the object being iterated, and the initialization flags (itype and next
- * helper)---the reason for this is that nothing may load/store the
- * initialization state if it isn't also going to load/store the base pointer.
+ * Iterator state. We track changes to each field of the iterator separately.
+ * Doing so isn't particularly useful right now, because IterInit / IterNext
+ * are monolithic ops that touch all iter fields, but it would be useful if
+ * specialize iterators based on base type. (Specialized code would write to
+ * each field directly, and load- and store- elim could kick in.)
  */
 FRAME_RELATIVE(AIterBase, uint32_t, id);
+FRAME_RELATIVE(AIterType, uint32_t, id);
+FRAME_RELATIVE(AIterPos, uint32_t, id);
+FRAME_RELATIVE(AIterEnd, uint32_t, id);
 
 /*
  * A location inside of an object property, with base `obj' and byte offset
@@ -227,13 +215,15 @@ struct AliasClass {
     // The relative order of the values are used in operator| to decide
     // which specialization is more useful.
     BFrame          = 1U << 0,
-    BIterPos        = 1U << 1,
-    BIterBase       = 1U << 2,
-    BProp           = 1U << 3,
-    BElemI          = 1U << 4,
-    BElemS          = 1U << 5,
-    BStack          = 1U << 6,
-    BRef            = 1U << 7,
+    BIterBase       = 1U << 1,
+    BIterType       = 1U << 2,
+    BIterPos        = 1U << 3,
+    BIterEnd        = 1U << 4,
+    BProp           = 1U << 5,
+    BElemI          = 1U << 6,
+    BElemS          = 1U << 7,
+    BStack          = 1U << 8,
+    BRef            = 1U << 9,
     BRds            = 1U << 10,
 
     // Have no specialization, put them last.
@@ -248,7 +238,7 @@ struct AliasClass {
     BMIStateTV = BMITempBase | BMITvRef | BMITvRef2,
     BMIState   = BMIStateTV | BMIBase | BMIPropS,
 
-    BIter      = BIterPos | BIterBase,
+    BIter      = BIterBase | BIterType | BIterPos | BIterEnd,
 
     BUnknownTV = ~(BIter | BMIBase | BMIPropS),
 
@@ -271,8 +261,10 @@ struct AliasClass {
    * where it is.
    */
   /* implicit */ AliasClass(AFrame);
-  /* implicit */ AliasClass(AIterPos);
   /* implicit */ AliasClass(AIterBase);
+  /* implicit */ AliasClass(AIterType);
+  /* implicit */ AliasClass(AIterPos);
+  /* implicit */ AliasClass(AIterEnd);
   /* implicit */ AliasClass(AProp);
   /* implicit */ AliasClass(AElemI);
   /* implicit */ AliasClass(AElemS);
@@ -331,8 +323,10 @@ struct AliasClass {
    * Returns folly::none if this alias class has no specialization in that way.
    */
   folly::Optional<AFrame>          frame() const;
-  folly::Optional<AIterPos>        iterPos() const;
   folly::Optional<AIterBase>       iterBase() const;
+  folly::Optional<AIterType>       iterType() const;
+  folly::Optional<AIterPos>        iterPos() const;
+  folly::Optional<AIterEnd>        iterEnd() const;
   folly::Optional<AProp>           prop() const;
   folly::Optional<AElemI>          elemI() const;
   folly::Optional<AElemS>          elemS() const;
@@ -349,8 +343,10 @@ struct AliasClass {
    *   cls <= AFooAny ? cls.foo() : folly::none
    */
   folly::Optional<AFrame>          is_frame() const;
-  folly::Optional<AIterPos>        is_iterPos() const;
   folly::Optional<AIterBase>       is_iterBase() const;
+  folly::Optional<AIterType>       is_iterType() const;
+  folly::Optional<AIterPos>        is_iterPos() const;
+  folly::Optional<AIterEnd>        is_iterEnd() const;
   folly::Optional<AProp>           is_prop() const;
   folly::Optional<AElemI>          is_elemI() const;
   folly::Optional<AElemS>          is_elemS() const;
@@ -369,8 +365,10 @@ private:
   enum class STag {
     None,
     Frame,
-    IterPos,
     IterBase,
+    IterType,
+    IterPos,
+    IterEnd,
     Prop,
     ElemI,
     ElemS,
@@ -378,9 +376,9 @@ private:
     Ref,
     Rds,
 
-    IterBoth,  // A union of base and pos for the same iter.
+    IterAll,  // The union of all fields for a given iterator.
   };
-  struct UIterBoth   { FPRelOffset base; uint32_t id; };
+  struct UIterAll { FPRelOffset base; uint32_t id; };
 private:
   friend std::string show(AliasClass);
   friend AliasClass canonicalize(AliasClass);
@@ -391,10 +389,8 @@ private:
   bool diffSTagSubclassData(rep relevant_bits, AliasClass) const;
   bool maybeData(AliasClass) const;
   bool diffSTagMaybeData(rep relevant_bits, AliasClass) const;
-  folly::Optional<UIterBoth> asUIter() const;
+  folly::Optional<UIterAll> asUIter() const;
   bool refersToSameIterHelper(AliasClass) const;
-  static folly::Optional<AliasClass>
-    precise_diffSTag_unionData(rep newBits, AliasClass, AliasClass);
   static AliasClass unionData(rep newBits, AliasClass, AliasClass);
   static rep stagBits(STag tag);
 
@@ -403,8 +399,10 @@ private:
   STag m_stag{STag::None};
   union {
     AFrame          m_frame;
-    AIterPos        m_iterPos;
     AIterBase       m_iterBase;
+    AIterType       m_iterType;
+    AIterPos        m_iterPos;
+    AIterEnd        m_iterEnd;
     AProp           m_prop;
     AElemI          m_elemI;
     AElemS          m_elemS;
@@ -412,7 +410,7 @@ private:
     ARef            m_ref;
     ARds            m_rds;
 
-    UIterBoth       m_iterBoth;
+    UIterAll        m_iterAll;
   };
 };
 
@@ -421,8 +419,11 @@ private:
 /* General alias classes. */
 auto const AEmpty             = AliasClass{AliasClass::BEmpty};
 auto const AFrameAny          = AliasClass{AliasClass::BFrame};
-auto const AIterPosAny        = AliasClass{AliasClass::BIterPos};
 auto const AIterBaseAny       = AliasClass{AliasClass::BIterBase};
+auto const AIterTypeAny       = AliasClass{AliasClass::BIterType};
+auto const AIterPosAny        = AliasClass{AliasClass::BIterPos};
+auto const AIterEndAny        = AliasClass{AliasClass::BIterEnd};
+auto const AIterAny           = AliasClass{AliasClass::BIter};
 auto const APropAny           = AliasClass{AliasClass::BProp};
 auto const AHeapAny           = AliasClass{AliasClass::BHeap};
 auto const ARefAny            = AliasClass{AliasClass::BRef};

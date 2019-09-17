@@ -108,8 +108,10 @@ struct AliasAnalysis {
   ALocBits all_stack;
   ALocBits all_rds;
   ALocBits all_ref;
-  ALocBits all_iterPos;
   ALocBits all_iterBase;
+  ALocBits all_iterType;
+  ALocBits all_iterPos;
+  ALocBits all_iterEnd;
 
   /*
    * Return the number of distinct locations we're tracking by id

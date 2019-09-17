@@ -266,9 +266,12 @@ ALocBits AliasAnalysis::may_alias(AliasClass acls) const {
   ret |= may_alias_part(*this, acls, acls.elemI(), AElemIAny, all_elemIs);
   ret |= may_alias_part(*this, acls, acls.elemS(), AElemSAny, all_elemSs);
   ret |= may_alias_part(*this, acls, acls.ref(), ARefAny, all_ref);
+  ret |= may_alias_part(*this, acls, acls.iterBase(),
+                        AIterBaseAny, all_iterBase);
+  ret |= may_alias_part(*this, acls, acls.iterType(),
+                        AIterTypeAny, all_iterType);
   ret |= may_alias_part(*this, acls, acls.iterPos(), AIterPosAny, all_iterPos);
-  ret |= may_alias_part(*this, acls, acls.iterBase(), AIterBaseAny,
-                        all_iterBase);
+  ret |= may_alias_part(*this, acls, acls.iterEnd(), AIterEndAny, all_iterEnd);
 
   return ret;
 }
@@ -318,8 +321,10 @@ ALocBits AliasAnalysis::expand(AliasClass acls) const {
   ret |= expand_part(*this, acls, acls.elemI(), AElemIAny, all_elemIs);
   ret |= expand_part(*this, acls, acls.elemS(), AElemSAny, all_elemSs);
   ret |= expand_part(*this, acls, acls.ref(), ARefAny, all_ref);
-  ret |= expand_part(*this, acls, acls.iterPos(), AIterPosAny, all_iterPos);
   ret |= expand_part(*this, acls, acls.iterBase(), AIterBaseAny, all_iterBase);
+  ret |= expand_part(*this, acls, acls.iterType(), AIterTypeAny, all_iterType);
+  ret |= expand_part(*this, acls, acls.iterPos(), AIterPosAny, all_iterPos);
+  ret |= expand_part(*this, acls, acls.iterEnd(), AIterEndAny, all_iterEnd);
 
   return ret;
 }
@@ -382,7 +387,8 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
       return;
     }
 
-    if (acls.is_iterPos() || acls.is_iterBase()) {
+    if (acls.is_iterBase() || acls.is_iterType() ||
+        acls.is_iterPos() || acls.is_iterEnd()) {
       add_class(ret, acls);
       return;
     }
@@ -488,13 +494,23 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
       return;
     }
 
+    if (acls.is_iterBase()) {
+      ret.all_iterBase.set(meta.index);
+      return;
+    }
+
+    if (acls.is_iterType()) {
+      ret.all_iterType.set(meta.index);
+      return;
+    }
+
     if (acls.is_iterPos()) {
       ret.all_iterPos.set(meta.index);
       return;
     }
 
-    if (acls.is_iterBase()) {
-      ret.all_iterBase.set(meta.index);
+    if (acls.is_iterEnd()) {
+      ret.all_iterEnd.set(meta.index);
       return;
     }
 
@@ -601,14 +617,18 @@ std::string show(const AliasAnalysis& ainfo) {
       " {: <20}       : {}\n"
       " {: <20}       : {}\n"
       " {: <20}       : {}\n"
+      " {: <20}       : {}\n"
+      " {: <20}       : {}\n"
       " {: <20}       : {}\n",
 
       "all props",          show(ainfo.all_props),
       "all elemIs",         show(ainfo.all_elemIs),
       "all elemSs",         show(ainfo.all_elemSs),
       "all refs",           show(ainfo.all_ref),
-      "all iterPos",        show(ainfo.all_iterPos),
       "all iterBase",       show(ainfo.all_iterBase),
+      "all iterType",       show(ainfo.all_iterType),
+      "all iterPos",        show(ainfo.all_iterPos),
+      "all iterEnd",        show(ainfo.all_iterEnd),
       "all frame",          show(ainfo.all_frame),
       "all rds",            show(ainfo.all_rds)
   );

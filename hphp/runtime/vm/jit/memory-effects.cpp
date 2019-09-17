@@ -454,19 +454,17 @@ GeneralEffects may_load_store_move(AliasClass loads,
 
 /*
  * Helper for iterator instructions.  They all affect some locals, but are
- * otherwise the same.
- *
- * N.B. Currently the memory for frame iterator slots is not part of the
- * AliasClass lattice, since we never really manipulate them from the TC yet,
- * so we don't report the effect these instructions have on it.
+ * otherwise the same. Value iters touch one local; key-value iters touch two.
  */
 GeneralEffects iter_effects(const IRInstruction& inst,
                             SSATmp* fp,
                             AliasClass locals) {
   auto const iterID = inst.extra<IterData>()->iterId;
-  AliasClass const iterPos = AIterPos { fp, iterID };
   AliasClass const iterBase = AIterBase { fp, iterID };
-  auto const iterMem = iterPos | iterBase;
+  AliasClass const iterType = AIterType { fp, iterID };
+  AliasClass const iterPos  = AIterPos  { fp, iterID };
+  AliasClass const iterEnd  = AIterEnd  { fp, iterID };
+  auto const iterMem = iterBase | iterType | iterPos | iterEnd;
   return may_reenter(
     inst,
     may_load_store_kill(

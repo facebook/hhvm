@@ -615,11 +615,11 @@ void visit(Local& env, IRInstruction& inst) {
       load(env, l.inlStack);
       load(env, l.actrec);
 
-      // This is a lie, but we can't push StLoc instructions from the parent
-      // frame into the callee as the frame pointer has been updated. Ideally
-      // this wouldn't be an issue but the TFramePtr is still stored in a
-      // reserved register.
-      mayStore(env, AFrameAny);
+      // This effect is a lie, but we can't push any stores that use a caller
+      // frame pointer into the callee, as the frame pointer will be updated.
+      // Ideally, this wouldn't be an issue, but the TFramePtr is still stored
+      // as a reserved register. Both locals and iterators are on the frame.
+      mayStore(env, AFrameAny | AIterAny);
     },
 
     [&] (InlineExitEffects l) {

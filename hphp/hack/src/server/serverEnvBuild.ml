@@ -307,6 +307,7 @@ let make_env ?init_id config =
     needs_phase2_redecl = Relative_path.Set.empty;
     needs_recheck = Relative_path.Set.empty;
     paused = false;
+    remote = false;
     full_check = Full_check_done;
     prechecked_files = Prechecked_files_disabled;
     can_interrupt = true;

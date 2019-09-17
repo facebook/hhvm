@@ -160,6 +160,8 @@ type env = {
     (Unix.file_descr * env MultiThreadedCall.interrupt_handler) list;
   (* Upon `hh --pause` we no longer trigger a full check upon file changes *)
   paused: bool;
+  (* Whether we should force remote type checking or not *)
+  remote: bool;
   (* When persistent client sends a command that cannot be handled (due to
    * thread safety) we put the continuation that finishes handling it here. *)
   pending_command_needs_writes: (env -> env) option;

@@ -516,11 +516,11 @@ module FullCheckKind : CheckKindType = struct
 
   let get_env_after_typing
       ~old_env ~errorl ~needs_phase2_redecl:_ ~needs_recheck ~diag_subscribe =
-    let full_check =
+    let (full_check, remote) =
       if Relative_path.Set.is_empty needs_recheck then
-        Full_check_done
+        (Full_check_done, false)
       else
-        old_env.full_check
+        (old_env.full_check, old_env.remote)
     in
     let needs_full_init =
       old_env.init_env.needs_full_init && full_check <> Full_check_done
@@ -537,6 +537,7 @@ module FullCheckKind : CheckKindType = struct
       needs_phase2_redecl = Relative_path.Set.empty;
       needs_recheck;
       full_check;
+      remote;
       init_env = { old_env.init_env with needs_full_init };
       diag_subscribe;
     }

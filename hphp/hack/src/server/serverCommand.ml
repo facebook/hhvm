@@ -200,6 +200,10 @@ let full_recheck_if_needed' genv env reason =
     assert (ServerEnv.(env.full_check = Full_check_done));
     env
 
+let force_remote = function
+  | Rpc (STATUS status) -> status.remote
+  | _ -> false
+
 let ignore_ide = function
   | Rpc (STATUS status) -> status.ignore_ide
   | _ -> false
@@ -222,7 +226,12 @@ let full_recheck_if_needed genv env msg =
   if ignore_ide msg then
     let (ide, disk) = get_unsaved_changes env in
     let env = apply_changes env disk in
-    let env = full_recheck_if_needed' genv env (reason msg) in
+    let env =
+      full_recheck_if_needed'
+        genv
+        { env with ServerEnv.remote = force_remote msg }
+        (reason msg)
+    in
     apply_changes env ide
   else
     env
@@ -369,6 +378,7 @@ let handle
     (client : ClientProvider.client) :
     ServerEnv.env ServerUtils.handle_command_result =
   let msg = ClientProvider.read_client_msg client in
+  let env = { env with ServerEnv.remote = force_remote msg } in
   let full_recheck_needed = command_needs_full_check msg in
   let is_stale = ServerEnv.(env.recent_recheck_loop_stats.updates_stale) in
   let continuation =

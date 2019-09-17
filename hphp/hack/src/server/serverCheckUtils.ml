@@ -122,7 +122,7 @@ let set_up_remote_logging (env : ServerEnv.env) : unit =
 let maybe_remote_type_check genv env fnl =
   let t = Unix.gettimeofday () in
   let (do_remote, _t) =
-    if genv.ServerEnv.options |> ServerArgs.remote then
+    if ServerArgs.remote genv.ServerEnv.options || env.remote then
       (true, t)
     else
       Typing_remote_check_service.should_do_remote env.tcopt fnl t

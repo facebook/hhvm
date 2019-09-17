@@ -119,6 +119,7 @@ struct
     | Rshape (p, fun_name) -> Rshape (pos p, fun_name)
     | Renforceable p -> Renforceable (pos p)
     | Rdestructure (p, l) -> Rdestructure (pos p, l)
+    | Rkey_value_collection_key p -> Rkey_value_collection_key (pos p)
 
   let pos_mapper =
     object

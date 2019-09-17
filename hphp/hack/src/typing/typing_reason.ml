@@ -100,6 +100,7 @@ type t =
   | Rshape of Pos.t * string
   | Renforceable of Pos.t
   | Rdestructure of Pos.t * int
+  | Rkey_value_collection_key of Pos.t
 
 and arg_position =
   | Aonly
@@ -487,6 +488,8 @@ let rec to_string prefix r =
         ^ " resulting from a list destructuring assignment of length "
         ^ string_of_int n );
     ]
+  | Rkey_value_collection_key _ ->
+    [(p, "This is a key-value collection, which requires arraykey-typed keys")]
 
 and to_pos = function
   | Rnone -> Pos.none
@@ -579,6 +582,7 @@ and to_pos = function
   | Rshape (p, _) -> p
   | Renforceable p -> p
   | Rdestructure (p, _) -> p
+  | Rkey_value_collection_key p -> p
 
 (* This is a mapping from internal expression ids to a standardized int.
  * Used for outputting cleaner error messages to users
@@ -700,6 +704,7 @@ let to_constructor_string r =
   | Rshape _ -> "Rshape"
   | Renforceable _ -> "Renforceable"
   | Rdestructure _ -> "Rdestructure"
+  | Rkey_value_collection_key _ -> "Rkey_value_collection_key"
 
 let pp fmt r = Format.pp_print_string fmt @@ to_constructor_string r
 

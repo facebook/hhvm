@@ -189,17 +189,18 @@ let get_value_collection_inst ty =
  *           or KeyedContainer<kty,vty>
  * for some kty, vty?
  *)
-let get_key_value_collection_inst ty =
+let get_key_value_collection_inst p ty =
   match ty with
   | (_, Tclass ((_, c), _, [kty; vty]))
     when c = SN.Collections.cKeyedTraversable
          || c = SN.Collections.cKeyedContainer ->
     Some (kty, vty)
   (* If we're expecting a mixed or a nonnull then we can just assume
-   * that the value and key types are mixed *)
+   * that the key type is arraykey and the value type is mixed *)
   | (_, Tnonnull) ->
+    let arraykey = MakeType.arraykey (Reason.Rkey_value_collection_key p) in
     let mixed = MakeType.mixed Reason.Rnone in
-    Some (mixed, mixed)
+    Some (arraykey, mixed)
   | (_, Tany _) -> Some (ty, ty)
   | _ -> None
 
@@ -224,26 +225,26 @@ let get_akvec_inst ty =
   | _ -> get_value_collection_inst ty
 
 (* Is this type array<kty,vty> or a supertype for some kty and vty? *)
-let get_akmap_inst ty =
+let get_akmap_inst p ty =
   match ty with
   | (_, Tarraykind (AKmap (kty, vty))) -> Some (kty, vty)
-  | _ -> get_key_value_collection_inst ty
+  | _ -> get_key_value_collection_inst p ty
 
 (* Is this type one of the three key-value collection types
  * e.g. dict<kty,vty> or a supertype for some kty and vty? *)
-let get_kvc_inst kvc_kind ty =
+let get_kvc_inst p kvc_kind ty =
   match ty with
   | (_, Tclass ((_, c), _, [kty; vty])) when c = Nast.kvc_kind_to_name kvc_kind
     ->
     Some (kty, vty)
-  | _ -> get_key_value_collection_inst ty
+  | _ -> get_key_value_collection_inst p ty
 
 (* Is this type darray<kty, vty> or a supertype for some kty and vty? *)
-let get_darray_inst ty =
+let get_darray_inst p ty =
   match ty with
   (* It's darray<kty, vty> *)
   | (_, Tarraykind (AKdarray (kty, vty))) -> Some (kty, vty)
-  | _ -> get_key_value_collection_inst ty
+  | _ -> get_key_value_collection_inst p ty
 
 let with_timeout env fun_name ~(do_ : env -> 'b) : 'b option =
   let timeout = (Env.get_tcopt env).GlobalOptions.tco_timeout in
@@ -1936,7 +1937,7 @@ and expr_
         match expand_expected env expected with
         | (env, Some (pos, reason, ety)) ->
           begin
-            match get_akmap_inst ety with
+            match get_akmap_inst p ety with
             | Some (kty, vty) ->
               let k_expected = ExpectedTy.make pos reason kty in
               let v_expected = ExpectedTy.make pos reason vty in
@@ -1987,7 +1988,7 @@ and expr_
           match expand_expected env expected with
           | (env, Some (pos, reason, ety)) ->
             begin
-              match get_darray_inst ety with
+              match get_darray_inst p ety with
               | Some (kty, vty) ->
                 let k_expected = ExpectedTy.make pos reason kty in
                 let v_expected = ExpectedTy.make pos reason vty in
@@ -2121,7 +2122,7 @@ and expr_
           match expand_expected env expected with
           | (env, Some (pos, reason, ety)) ->
             begin
-              match get_kvc_inst kind ety with
+              match get_kvc_inst p kind ety with
               | Some (kty, vty) ->
                 let k_expected = ExpectedTy.make pos reason kty in
                 let v_expected = ExpectedTy.make pos reason vty in

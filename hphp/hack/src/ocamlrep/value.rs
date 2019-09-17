@@ -14,7 +14,7 @@ use crate::block::Block;
 pub struct Value<'arena>(pub(crate) usize, PhantomData<&'arena ()>);
 
 impl<'a> Value<'a> {
-    fn is_immediate(&self) -> bool {
+    pub fn is_immediate(&self) -> bool {
         self.0 & 1 == 1
     }
 
@@ -26,11 +26,12 @@ impl<'a> Value<'a> {
         Value(value, PhantomData)
     }
 
-    pub fn as_int(&self) -> isize {
-        if !self.is_immediate() {
-            panic!()
+    pub fn as_int(&self) -> Option<isize> {
+        if self.is_immediate() {
+            Some((self.0 as isize) >> 1)
+        } else {
+            None
         }
-        (self.0 as isize) >> 1
     }
 
     pub fn as_block(&self) -> Option<Block<'a>> {
@@ -57,7 +58,7 @@ impl<'a> Value<'a> {
 impl Debug for Value<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self.as_block() {
-            None => write!(f, "{}", self.as_int()),
+            None => write!(f, "{}", self.as_int().unwrap()),
             Some(block) => write!(f, "{:?}", block),
         }
     }

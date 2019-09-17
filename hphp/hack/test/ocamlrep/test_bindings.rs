@@ -11,14 +11,17 @@ use ocamlrep::OcamlRep;
 use ocamlrep_derive::OcamlRep;
 
 fn val<T: OcamlRep>(value: T) -> ocaml::Value {
-    let arena = ocamlrep::Arena::new_with_size(8);
+    let arena = ocamlrep::Arena::new();
+    let value = value.into_ocamlrep(&arena);
+    // Round-trip back to T to exercise from_ocamlrep.
+    let value = T::from_ocamlrep(value).unwrap();
     let value = value.into_ocamlrep(&arena);
     mem::forget(arena);
     ocaml::Value::new(unsafe { value.as_usize() })
 }
 
 caml!(convert_to_ocamlrep, |value|, <result>, {
-    let mut arena = ocamlrep::Arena::new_with_size(8);
+    let mut arena = ocamlrep::Arena::new();
     let value = arena.add_from_ocaml(value.0);
     mem::forget(arena);
     result = ocaml::Value::new(value.as_usize());
@@ -106,15 +109,15 @@ caml!(get_bar, |_unit|, <result>, {
 // String Tests
 
 caml!(get_empty_string, |_unit|, <result>, {
-    result = val("");
+    result = val(String::from(""));
 } -> result);
 
 caml!(get_a_string, |_unit|, <result>, {
-    result = val("a");
+    result = val(String::from("a"));
 } -> result);
 
 caml!(get_ab_string, |_unit|, <result>, {
-    result = val("ab");
+    result = val(String::from("ab"));
 } -> result);
 
 caml!(get_abcde_string, |_unit|, <result>, {
@@ -122,7 +125,7 @@ caml!(get_abcde_string, |_unit|, <result>, {
 } -> result);
 
 caml!(get_abcdefg_string, |_unit|, <result>, {
-    result = val("abcdefg");
+    result = val(String::from("abcdefg"));
 } -> result);
 
 caml!(get_abcdefgh_string, |_unit|, <result>, {
@@ -172,15 +175,15 @@ caml!(get_empty_smap, |_unit|, <result>, {
 
 caml!(get_int_smap_singleton, |_unit|, <result>, {
     let mut map = BTreeMap::new();
-    map.insert("a", 1);
+    map.insert(String::from("a"), 1);
     result = val(map);
 } -> result);
 
 caml!(get_int_smap, |_unit|, <result>, {
     let mut map = BTreeMap::new();
-    map.insert("a", 1);
-    map.insert("b", 2);
-    map.insert("c", 3);
+    map.insert(String::from("a"), 1);
+    map.insert(String::from("b"), 2);
+    map.insert(String::from("c"), 3);
     result = val(map);
 } -> result);
 
@@ -193,14 +196,14 @@ caml!(get_empty_sset, |_unit|, <result>, {
 
 caml!(get_sset_singleton, |_unit|, <result>, {
     let mut set = BTreeSet::new();
-    set.insert("a");
+    set.insert(String::from("a"));
     result = val(set);
 } -> result);
 
 caml!(get_sset, |_unit|, <result>, {
     let mut set = BTreeSet::new();
-    set.insert("a");
-    set.insert("b");
-    set.insert("c");
+    set.insert(String::from("a"));
+    set.insert(String::from("b"));
+    set.insert(String::from("c"));
     result = val(set);
 } -> result);

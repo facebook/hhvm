@@ -47,6 +47,7 @@ impl IndexMut<usize> for BlockBuilder<'_, '_> {
 }
 
 #[repr(transparent)]
+#[derive(Clone, Copy)]
 pub struct Block<'arena>(pub(crate) &'arena [Value<'arena>]);
 
 impl<'a> Block<'a> {

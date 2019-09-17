@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::cell::RefCell;
+use std::cmp::max;
 
 use crate::{BlockBuilder, OcamlRep, Value};
 
@@ -16,10 +17,10 @@ struct Chunk<'a> {
 }
 
 impl<'a> Chunk<'a> {
-    fn new_with_size(size: usize) -> Self {
+    fn with_capacity(capacity: usize) -> Self {
         Self {
             index: 0,
-            data: vec![Value::int(0); size].into_boxed_slice(),
+            data: vec![Value::int(0); capacity].into_boxed_slice(),
             prev: None,
         }
     }
@@ -45,10 +46,16 @@ pub struct Arena<'a> {
 }
 
 impl<'a> Arena<'a> {
-    /// Allocates a new Arena with `initial_size` bytes preallocated.
-    pub fn new_with_size(initial_size: usize) -> Self {
+    /// Create a new Arena with 4KB of capacity preallocated.
+    pub fn new() -> Self {
+        Self::with_capacity(1024 * 4)
+    }
+
+    /// Create a new Arena with `capacity_in_bytes` preallocated.
+    pub fn with_capacity(capacity_in_bytes: usize) -> Self {
+        let capacity_in_words = max(2, capacity_in_bytes / std::mem::size_of::<Value<'_>>());
         Self {
-            current_chunk: RefCell::new(Chunk::new_with_size(initial_size)),
+            current_chunk: RefCell::new(Chunk::with_capacity(capacity_in_words)),
         }
     }
 
@@ -56,12 +63,10 @@ impl<'a> Arena<'a> {
     fn alloc(&self, requested_size: usize) -> &mut [Value<'a>] {
         if !self.current_chunk.borrow().can_fit(requested_size) {
             let prev_chunk_capacity = self.current_chunk.borrow().capacity();
-            let prev_chunk = self
-                .current_chunk
-                .replace(Chunk::new_with_size(std::cmp::max(
-                    requested_size * 2,
-                    prev_chunk_capacity,
-                )));
+            let prev_chunk = self.current_chunk.replace(Chunk::with_capacity(max(
+                requested_size * 2,
+                prev_chunk_capacity,
+            )));
             self.current_chunk.borrow_mut().prev = Some(Box::new(prev_chunk));
         }
         let ptr = self.current_chunk.borrow_mut().alloc(requested_size);
@@ -118,7 +123,7 @@ mod tests {
 
     #[test]
     fn test_alloc_block_of_three_fields() {
-        let arena = Arena::new_with_size(1000);
+        let arena = Arena::with_capacity(1000);
         let mut block = arena.block_with_size(3);
         block[0] = Value::int(1);
         block[1] = Value::int(2);
@@ -126,14 +131,14 @@ mod tests {
         let block = block.build().as_block().unwrap();
 
         assert_eq!(block.size(), 3);
-        assert_eq!(block[0].as_int(), 1);
-        assert_eq!(block[1].as_int(), 2);
-        assert_eq!(block[2].as_int(), 3);
+        assert_eq!(block[0].as_int().unwrap(), 1);
+        assert_eq!(block[1].as_int().unwrap(), 2);
+        assert_eq!(block[2].as_int().unwrap(), 3);
     }
 
     #[test]
     fn test_large_allocs() {
-        let arena = Arena::new_with_size(1000);
+        let arena = Arena::with_capacity(1000);
         let max = arena.block_with_size(1000).build().as_block().unwrap();
         assert_eq!(max.size(), 1000);
 
@@ -146,7 +151,7 @@ mod tests {
 
     #[test]
     fn perf_test() {
-        let arena = Arena::new_with_size(10_000);
+        let arena = Arena::with_capacity(10_000);
 
         println!("Benchmarks for allocating [1] 200,000 times");
         let now = Instant::now();

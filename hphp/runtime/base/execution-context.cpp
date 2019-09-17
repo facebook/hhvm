@@ -1134,7 +1134,7 @@ ObjectData* ExecutionContext::initObject(const Class* class_,
   if (!isContainerOrNull(params)) {
     throw_param_is_not_container();
   }
-  tvDecRefGen(invokeFunc(ctor, params, o));
+  tvDecRefGen(invokeFunc(ctor, params, o, nullptr, nullptr, true, false, true));
   return o;
 }
 

@@ -875,6 +875,19 @@ size_t numLoadedUnits() {
   return s_nonRepoUnitCache.size();
 }
 
+Unit* getLoadedUnit(StringData* path) {
+  if (!RuntimeOption::RepoAuthoritative) {
+    NonRepoUnitCache::const_accessor accessor;
+    if (s_nonRepoUnitCache.find(accessor, path) ) {
+      auto cachedUnit = accessor->second.cachedUnit.copy();
+      return cachedUnit ? cachedUnit->cu.unit : nullptr;
+    }
+  }
+
+  return nullptr;
+}
+
+
 std::vector<Unit*> loadedUnitsRepoAuth() {
   always_assert(RuntimeOption::RepoAuthoritative);
   std::vector<Unit*> units;

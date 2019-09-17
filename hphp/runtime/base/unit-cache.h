@@ -122,6 +122,12 @@ void invalidateUnit(StringData* path);
  */
 void clearUnitCacheForExit();
 
+/*
+ * Returns a unit if it's already loaded. If not then this returns nullptr.
+ * Currently only works in !RepoAuthoritative mode.
+ */
+Unit* getLoadedUnit(StringData* path);
+
 //////////////////////////////////////////////////////////////////////
 
 }

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6552513a8cacdabe7bc246bbbfb26b40>>
+// @generated SignedSource<<0deaf23581da4171f5d63f0a8760f26b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -22,7 +22,7 @@ use crate::typing_defs::*;
 
 #[derive(Clone, Debug, OcamlRep)]
 pub struct SubstContext {
-    pub subst: s_map::SMap<Ty>,
+    pub subst: s_map::SMap<DeclTy>,
     pub class_context: String,
     pub from_req_extends: bool,
 }
@@ -43,7 +43,7 @@ pub struct MroElement {
     pub name: String,
     pub use_pos: pos::Pos,
     pub ty_pos: pos::Pos,
-    pub type_args: Vec<Ty>,
+    pub type_args: Vec<DeclTy>,
     pub class_not_found: bool,
     pub cyclic: Option<s_set::SSet>,
     pub trait_reuse: Option<String>,
@@ -72,8 +72,8 @@ pub struct DeclClassType {
     pub is_xhp: bool,
     pub name: String,
     pub pos: pos::Pos,
-    pub tparams: Vec<Tparam>,
-    pub where_constraints: Vec<WhereConstraint>,
+    pub tparams: Vec<DeclTparam>,
+    pub where_constraints: Vec<DeclWhereConstraint>,
     pub substs: s_map::SMap<SubstContext>,
     pub consts: s_map::SMap<ClassConst>,
     pub typeconsts: s_map::SMap<TypeconstType>,
@@ -83,7 +83,7 @@ pub struct DeclClassType {
     pub methods: s_map::SMap<Element>,
     pub smethods: s_map::SMap<Element>,
     pub construct: (Option<Element>, ConsistentKind),
-    pub ancestors: s_map::SMap<Ty>,
+    pub ancestors: s_map::SMap<DeclTy>,
     pub req_ancestors: Vec<Requirement>,
     pub req_ancestors_extends: s_set::SSet,
     pub extends: s_set::SSet,

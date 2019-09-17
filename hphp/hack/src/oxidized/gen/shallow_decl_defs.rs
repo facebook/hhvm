@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c05285ae47a26ae9a5907a55e102030a>>
+// @generated SignedSource<<b39ff872c50f55b5ff5bb2f15a331a20>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -26,16 +26,16 @@ pub struct ShallowClassConst {
     pub abstract_: bool,
     pub expr: Option<nast::Expr>,
     pub name: aast::Sid,
-    pub type_: Ty,
+    pub type_: DeclTy,
     pub visibility: aast::Visibility,
 }
 
 #[derive(Clone, Debug, OcamlRep)]
 pub struct ShallowTypeconst {
     pub abstract_: TypeconstAbstractKind,
-    pub constraint: Option<Ty>,
+    pub constraint: Option<DeclTy>,
     pub name: aast::Sid,
-    pub type_: Option<Ty>,
+    pub type_: Option<DeclTy>,
     pub enforceable: (pos::Pos, bool),
     pub visibility: aast::Visibility,
     pub reifiable: Option<pos::Pos>,
@@ -44,7 +44,7 @@ pub struct ShallowTypeconst {
 #[derive(Clone, Debug, OcamlRep)]
 pub struct ShallowPuMember {
     pub atom: aast::Sid,
-    pub types: Vec<(aast::Sid, Ty)>,
+    pub types: Vec<(aast::Sid, DeclTy)>,
 }
 
 #[derive(Clone, Debug, OcamlRep)]
@@ -52,7 +52,7 @@ pub struct ShallowPuEnum {
     pub name: aast::Sid,
     pub is_final: bool,
     pub case_types: Vec<aast::Sid>,
-    pub case_values: Vec<(aast::Sid, Ty)>,
+    pub case_values: Vec<(aast::Sid, DeclTy)>,
     pub members: Vec<ShallowPuMember>,
 }
 
@@ -64,7 +64,7 @@ pub struct ShallowProp {
     pub lsb: bool,
     pub name: aast::Sid,
     pub needs_init: bool,
-    pub type_: Option<Ty>,
+    pub type_: Option<DeclTy>,
     pub abstract_: bool,
     pub visibility: aast::Visibility,
     pub fixme_codes: i_set::ISet,
@@ -78,7 +78,7 @@ pub struct ShallowMethod {
     pub name: aast::Sid,
     pub override_: bool,
     pub reactivity: Option<decl_defs::MethodReactivity>,
-    pub type_: FunType,
+    pub type_: DeclFunType,
     pub visibility: aast::Visibility,
     pub fixme_codes: i_set::ISet,
 }
@@ -89,7 +89,7 @@ pub struct ShallowMethodRedeclaration {
     pub final_: bool,
     pub static_: bool,
     pub name: aast::Sid,
-    pub type_: FunType,
+    pub type_: DeclFunType,
     pub visibility: aast::Visibility,
     pub trait_: aast::Hint,
     pub method: aast::Pstring,
@@ -103,15 +103,15 @@ pub struct ShallowClass {
     pub is_xhp: bool,
     pub kind: ast_defs::ClassKind,
     pub name: aast::Sid,
-    pub tparams: Vec<Tparam>,
-    pub where_constraints: Vec<WhereConstraint>,
-    pub extends: Vec<Ty>,
-    pub uses: Vec<Ty>,
+    pub tparams: Vec<DeclTparam>,
+    pub where_constraints: Vec<DeclWhereConstraint>,
+    pub extends: Vec<DeclTy>,
+    pub uses: Vec<DeclTy>,
     pub method_redeclarations: Vec<ShallowMethodRedeclaration>,
-    pub xhp_attr_uses: Vec<Ty>,
-    pub req_extends: Vec<Ty>,
-    pub req_implements: Vec<Ty>,
-    pub implements: Vec<Ty>,
+    pub xhp_attr_uses: Vec<DeclTy>,
+    pub req_extends: Vec<DeclTy>,
+    pub req_implements: Vec<DeclTy>,
+    pub implements: Vec<DeclTy>,
     pub consts: Vec<ShallowClassConst>,
     pub typeconsts: Vec<ShallowTypeconst>,
     pub pu_enums: Vec<ShallowPuEnum>,

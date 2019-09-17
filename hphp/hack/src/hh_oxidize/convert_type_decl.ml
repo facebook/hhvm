@@ -28,10 +28,17 @@ let derived_traits =
 (* HACK: ignore phases since we are only considering decl tys *)
 let blacklisted_types =
   [
-    ("typing_defs", "Decl");
-    ("typing_defs", "Locl");
+    ("typing_defs", "AbstractKind");
+    ("typing_defs", "ArrayKind");
+    ("typing_defs", "DeclPhase");
+    ("typing_defs", "ExpandEnv");
+    ("typing_defs", "LoclPhase");
     ("typing_defs", "PhaseTy");
   ]
+
+(* HACK: ignore anything beginning with the "locl" prefix, since we are only
+   considering decl tys *)
+let blacklisted_type_prefixes = [("typing_defs", "Locl")]
 
 let ocamlvalue_derive_whitelist =
   [
@@ -66,7 +73,10 @@ let renamed_types = [(("typing_reason", "TypingReason"), "Reason")]
 let tuple_aliases = [("ast_defs", "Pstring")]
 
 let blacklisted ty_name =
-  List.mem blacklisted_types (curr_module_name (), ty_name) ~equal:( = )
+  let ty = (curr_module_name (), ty_name) in
+  List.mem blacklisted_types ty ~equal:( = )
+  || List.exists blacklisted_type_prefixes ~f:(fun (mod_name, prefix) ->
+         mod_name = curr_module_name () && String.is_prefix ty_name ~prefix)
 
 let rename ty_name =
   List.find renamed_types ~f:(fun (x, _) -> x = (curr_module_name (), ty_name))
@@ -219,14 +229,14 @@ let type_declaration name td =
                         [
                           {
                             ptyp_desc =
-                              Ptyp_constr ({ txt = Lident "locl"; _ }, _);
+                              Ptyp_constr ({ txt = Lident "locl_phase"; _ }, _);
                             _;
                           };
                         ] );
                   _;
                 } ->
               log
-                "Not generating an equivalent to the locl ty_ constructor %s"
+                "Not generating an equivalent to the locl_phase ty_ constructor %s"
                 cd.pcd_name.txt;
               false
             | _ -> true)

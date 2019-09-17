@@ -61,8 +61,12 @@ let rec core_type ?(seen_indirection = false) ct =
       (* HACK: consider only decl tys for now by eliminating the phase tparam *)
       match args with
       | [{ ptyp_desc = Ptyp_var "phase"; _ }] -> []
-      | [{ ptyp_desc = Ptyp_constr ({ txt = Lident "decl"; _ }, _); _ }] -> []
-      | [{ ptyp_desc = Ptyp_constr ({ txt = Lident "locl"; _ }, _); _ }] -> []
+      | [{ ptyp_desc = Ptyp_constr ({ txt = Lident "decl_phase"; _ }, _); _ }]
+        ->
+        []
+      | [{ ptyp_desc = Ptyp_constr ({ txt = Lident "locl_phase"; _ }, _); _ }]
+        ->
+        []
       | _ -> args
     in
     let args = type_args ~seen_indirection args in

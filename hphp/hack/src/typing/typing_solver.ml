@@ -349,7 +349,8 @@ let bind_to_lower_bound ~freshen env r var lower_bounds on_error =
     TySet.fold
       (fun ty env ->
         match Env.expand_type env ty with
-        | (env, (_, Tvar v)) -> Env.remove_tyvar_upper_bound env v var
+        | (env, (_, Tvar v)) when not (Env.is_global_tyvar env v) ->
+          Env.remove_tyvar_upper_bound env v var
         | (env, _) -> env)
       lower_bounds
       env
@@ -371,12 +372,15 @@ let bind_to_upper_bound env r var upper_bounds =
     *)
   let env =
     match Env.expand_type env ty with
-    | (env, (_, Tvar v)) -> Env.remove_tyvar_lower_bound env v var
+    | (env, (_, Tvar v)) when not (Env.is_global_tyvar env v) ->
+      Env.remove_tyvar_lower_bound env v var
     | (env, _) -> env
   in
   bind env var ty
 
 let tyvar_is_solved env var =
+  Env.is_global_tyvar env var
+  ||
   match snd @@ snd @@ Env.expand_type env (var_as_ty var) with
   | Tvar var' when var' = var -> false
   | _ -> true

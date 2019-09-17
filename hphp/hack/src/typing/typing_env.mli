@@ -303,6 +303,8 @@ val get_tyvar_appears_invariantly : env -> Ident.t -> bool
 
 val get_tyvar_info : env -> Ident.t -> tyvar_info_
 
+val is_global_tyvar : env -> Ident.t -> bool
+
 val create_global_tyvar :
   ?variance:Ast_defs.variance -> env -> Ident.t -> Pos.t -> env
 

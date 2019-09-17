@@ -170,6 +170,8 @@ let get_tyvar_info_opt env var =
 let get_tyvar_info env var =
   Option.value (get_tyvar_info_opt env var) ~default:empty_tyvar_info
 
+let is_global_tyvar env var = IMap.get var env.tvenv = Some GlobalTyvar
+
 let update_tyvar_info env var tyvar_info =
   if IMap.get var env.tvenv = Some GlobalTyvar then
     let env = env_with_tvenv env (IMap.add var GlobalTyvar env.tvenv) in

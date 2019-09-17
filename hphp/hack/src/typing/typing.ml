@@ -617,7 +617,7 @@ and get_callable_variadicity
 (*****************************************************************************)
 (* Now we are actually checking stuff! *)
 (*****************************************************************************)
-and fun_def tcopt f : Tast.fun_def option =
+and fun_def tcopt f : (Tast.fun_def * Typing_env_types.global_tvenv) option =
   let env = EnvFromDef.fun_env tcopt f in
   with_timeout env f.f_name ~do_:(fun env ->
       (* reset the expression dependent display ids for each function body *)
@@ -768,7 +768,7 @@ and fun_def tcopt f : Tast.fun_def option =
           T.f_static = f.f_static;
         }
       in
-      Typing_lambda_ambiguous.suggest_fun_def env fundef)
+      (Typing_lambda_ambiguous.suggest_fun_def env fundef, env.global_tvenv))
 
 (*****************************************************************************)
 (* function used to type closures, functions and methods *)
@@ -8610,7 +8610,9 @@ and class_def_ env c tc =
     List.map_env env vars (class_var_def ~is_static:false)
   in
   let typed_method_redeclarations = [] in
-  let typed_methods = List.filter_map methods (method_def env tc) in
+  let (typed_methods, typed_methods_global_tvenv) =
+    List.filter_map methods (method_def env tc) |> List.unzip
+  in
   let (env, typed_typeconsts) =
     List.map_env env c.c_typeconsts typeconst_def
   in
@@ -8622,14 +8624,15 @@ and class_def_ env c tc =
   let (env, typed_static_vars) =
     List.map_env env static_vars (class_var_def ~is_static:true)
   in
-  let typed_static_methods =
-    List.filter_map static_methods (method_def env tc)
+  let (typed_static_methods, typed_static_methods_global_tvenv) =
+    List.filter_map static_methods (method_def env tc) |> List.unzip
   in
   let (env, file_attrs) = file_attributes env c.c_file_attributes in
-  let methods =
+  let (methods, constr_global_tvenv) =
     match typed_constructor with
-    | None -> typed_static_methods @ typed_methods
-    | Some m -> (m :: typed_static_methods) @ typed_methods
+    | None -> (typed_static_methods @ typed_methods, [])
+    | Some (m, global_tvenv) ->
+      ((m :: typed_static_methods) @ typed_methods, [global_tvenv])
   in
   let (env, tparams) = class_type_param env c.c_tparams in
   let (env, user_attributes) =
@@ -8639,42 +8642,45 @@ and class_def_ env c tc =
     Typing_solver.solve_all_unsolved_tyvars env Errors.bad_class_typevar
   in
   let env = Typing_solver.expand_bounds_of_global_tyvars env in
-  {
-    T.c_span = c.c_span;
-    T.c_annotation = Env.save (Env.get_tpenv env) env;
-    T.c_mode = c.c_mode;
-    T.c_final = c.c_final;
-    T.c_is_xhp = c.c_is_xhp;
-    T.c_kind = c.c_kind;
-    T.c_name = c.c_name;
-    T.c_tparams = tparams;
-    T.c_extends = c.c_extends;
-    T.c_uses = c.c_uses;
-    (* c_use_as_alias and c_insteadof_alias are PHP features not supported
-     * in Hack but are required since we have runtime support for it
-     *)
-    T.c_use_as_alias = [];
-    T.c_insteadof_alias = [];
-    T.c_method_redeclarations = typed_method_redeclarations;
-    T.c_xhp_attr_uses = c.c_xhp_attr_uses;
-    T.c_xhp_category = c.c_xhp_category;
-    T.c_reqs = c.c_reqs;
-    T.c_implements = c.c_implements;
-    T.c_where_constraints = c.c_where_constraints;
-    T.c_consts = typed_consts;
-    T.c_typeconsts = typed_typeconsts;
-    T.c_vars = typed_static_vars @ typed_vars;
-    T.c_methods = methods;
-    T.c_file_attributes = file_attrs;
-    T.c_user_attributes = user_attributes;
-    T.c_namespace = c.c_namespace;
-    T.c_enum = c.c_enum;
-    T.c_doc_comment = c.c_doc_comment;
-    T.c_attributes = [];
-    T.c_xhp_children = c.c_xhp_children;
-    T.c_xhp_attrs = [];
-    T.c_pu_enums = [] (* TODO PU (typing) *);
-  }
+  ( {
+      T.c_span = c.c_span;
+      T.c_annotation = Env.save (Env.get_tpenv env) env;
+      T.c_mode = c.c_mode;
+      T.c_final = c.c_final;
+      T.c_is_xhp = c.c_is_xhp;
+      T.c_kind = c.c_kind;
+      T.c_name = c.c_name;
+      T.c_tparams = tparams;
+      T.c_extends = c.c_extends;
+      T.c_uses = c.c_uses;
+      (* c_use_as_alias and c_insteadof_alias are PHP features not supported
+       * in Hack but are required since we have runtime support for it
+       *)
+      T.c_use_as_alias = [];
+      T.c_insteadof_alias = [];
+      T.c_method_redeclarations = typed_method_redeclarations;
+      T.c_xhp_attr_uses = c.c_xhp_attr_uses;
+      T.c_xhp_category = c.c_xhp_category;
+      T.c_reqs = c.c_reqs;
+      T.c_implements = c.c_implements;
+      T.c_where_constraints = c.c_where_constraints;
+      T.c_consts = typed_consts;
+      T.c_typeconsts = typed_typeconsts;
+      T.c_vars = typed_static_vars @ typed_vars;
+      T.c_methods = methods;
+      T.c_file_attributes = file_attrs;
+      T.c_user_attributes = user_attributes;
+      T.c_namespace = c.c_namespace;
+      T.c_enum = c.c_enum;
+      T.c_doc_comment = c.c_doc_comment;
+      T.c_attributes = [];
+      T.c_xhp_children = c.c_xhp_children;
+      T.c_xhp_attrs = [];
+      T.c_pu_enums = [] (* TODO PU (typing) *);
+    },
+    typed_methods_global_tvenv
+    @ typed_static_methods_global_tvenv
+    @ constr_global_tvenv )
 
 and check_dynamic_class_element get_static_elt element_name dyn_pos ~elt_type =
   (* The non-static properties that we get passed do not start with '$', but the
@@ -9278,7 +9284,8 @@ and method_def env cls m =
           T.m_doc_comment = m.m_doc_comment;
         }
       in
-      Typing_lambda_ambiguous.suggest_method_def env method_def)
+      ( Typing_lambda_ambiguous.suggest_method_def env method_def,
+        env.global_tvenv ))
 
 and typedef_def tcopt typedef =
   let env = EnvFromDef.typedef_env tcopt typedef in
@@ -9501,7 +9508,7 @@ let nast_to_tast opts nast =
     | Fun f ->
       begin
         match fun_def opts f with
-        | Some f -> T.Fun f
+        | Some (f, _) -> T.Fun f
         | None ->
           failwith
           @@ Printf.sprintf
@@ -9513,7 +9520,7 @@ let nast_to_tast opts nast =
     | Class c ->
       begin
         match class_def opts c with
-        | Some c -> T.Class c
+        | Some (c, _) -> T.Class c
         | None ->
           failwith
           @@ Printf.sprintf "Error in declaration of class: %s" (snd c.c_name)

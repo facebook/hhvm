@@ -998,9 +998,10 @@ let collect_dependencies tcopt to_extract =
     let filename = get_filename to_extract in
     let (_ : Tast.def option) =
       match to_extract with
-      | Function func -> Typing_check_service.type_fun tcopt filename func
+      | Function func ->
+        Typing_check_service.type_fun tcopt filename func |> Option.map ~f:fst
       | Member (cls, Method _) ->
-        Typing_check_service.type_class tcopt filename cls
+        Typing_check_service.type_class tcopt filename cls |> Option.map ~f:fst
       | _ -> raise Unsupported
     in
     let types = Caml.Hashtbl.create 0 in

@@ -109,29 +109,32 @@ let neutral = Errors.empty
 (*****************************************************************************)
 
 let type_fun (opts : TypecheckerOptions.t) (fn : Relative_path.t) (x : string)
-    : Tast.def option =
+    : (Tast.def * Typing_env_types.global_tvenv) option =
   match Ast_provider.find_fun_in_file ~full:true fn x with
   | Some f ->
     let fun_ = Naming.fun_ f in
     Nast_check.def (Aast.Fun fun_);
     let def_opt =
-      Typing.fun_def opts fun_ |> Option.map ~f:(fun f -> Aast.Fun f)
+      Typing.fun_def opts fun_
+      |> Option.map ~f:(fun (f, global_tvenv) -> (Aast.Fun f, global_tvenv))
     in
-    Option.iter def_opt (Tast_check.def opts);
+    Option.iter def_opt (fun (f, _) -> Tast_check.def opts f);
+
     def_opt
   | None -> None
 
 let type_class
     (opts : TypecheckerOptions.t) (fn : Relative_path.t) (x : string) :
-    Tast.def option =
+    (Tast.def * Typing_env_types.global_tvenv list) option =
   match Ast_provider.find_class_in_file ~full:true fn x with
   | Some cls ->
     let class_ = Naming.class_ cls in
     Nast_check.def (Aast.Class class_);
     let def_opt =
-      Typing.class_def opts class_ |> Option.map ~f:(fun c -> Aast.Class c)
+      Typing.class_def opts class_
+      |> Option.map ~f:(fun (c, global_tvenv) -> (Aast.Class c, global_tvenv))
     in
-    Option.iter def_opt (Tast_check.def opts);
+    Option.iter def_opt (fun (f, _) -> Tast_check.def opts f);
     def_opt
   | None -> None
 
@@ -183,20 +186,33 @@ let process_file
     }
   in
   let { FileInfo.n_funs; n_classes; n_types; n_consts } = file_infos in
-  let ignore_type_fun opts fn name = ignore (type_fun opts fn name) in
-  let ignore_type_class opts fn name = ignore (type_class opts fn name) in
   let ignore_check_typedef opts fn name =
     ignore (check_typedef opts fn name)
   in
   let ignore_check_const opts fn name = ignore (check_const opts fn name) in
   try
-    let (errors', ()) =
+    let (errors', global_tvenvs) =
       Errors.do_with_context fn Errors.Typing (fun () ->
-          SSet.iter (ignore_type_fun opts fn) n_funs;
-          SSet.iter (ignore_type_class opts fn) n_classes;
+          let fun_global_tvenvs =
+            SSet.elements n_funs
+            |> List.filter_map ~f:(type_fun opts fn)
+            |> List.map ~f:snd
+          in
+          let class_global_tvenvs =
+            SSet.elements n_classes
+            |> List.filter_map ~f:(type_class opts fn)
+            |> List.map ~f:snd
+            |> List.concat
+          in
           SSet.iter (ignore_check_typedef opts fn) n_types;
-          SSet.iter (ignore_check_const opts fn) n_consts)
+          SSet.iter (ignore_check_const opts fn) n_consts;
+          fun_global_tvenvs @ class_global_tvenvs)
     in
+    if
+      GlobalOptions.InferMissing.global_inference
+      @@ GlobalOptions.tco_infer_missing opts
+    then
+      Typing_global_inference.save_subgraphs global_tvenvs;
     let deferred_files = Deferred_decl.get ~f:(fun d -> Declare d) in
     let result =
       match deferred_files with

@@ -12,13 +12,15 @@ open Core_kernel
 let type_file tcopt fn { FileInfo.funs; classes; typedefs; consts; _ } =
   let (errors, tast) =
     Errors.do_with_context fn Errors.Typing (fun () ->
-        let fs =
+        let (fs, _) =
           List.filter_map funs (fun (_, x) ->
               Typing_check_service.type_fun tcopt fn x)
+          |> List.unzip
         in
-        let cs =
+        let (cs, _) =
           List.filter_map classes (fun (_, x) ->
               Typing_check_service.type_class tcopt fn x)
+          |> List.unzip
         in
         let ts =
           List.filter_map typedefs (fun (_, x) ->

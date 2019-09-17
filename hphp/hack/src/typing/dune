@@ -87,6 +87,7 @@
     typing_utils
     typing_variance
     typing_visibility
+    typing_global_inference
     typing_xhp)
   (libraries
     common

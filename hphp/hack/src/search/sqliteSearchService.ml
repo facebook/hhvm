@@ -13,23 +13,32 @@ open Sqlite_utils
 
 (* SQL statements used by the autocomplete system *)
 let sql_select_symbols_by_kind =
-  "SELECT name, kind, filename_hash FROM symbols WHERE name LIKE ? AND kind = ? LIMIT ?"
+  "SELECT name, kind, filename_hash FROM symbols WHERE name LIKE ? ESCAPE '\\' AND kind = ? LIMIT ?"
 
 let sql_select_acid =
-  "SELECT name, kind, filename_hash FROM symbols WHERE name LIKE ? AND valid_for_acid = 1 LIMIT ?"
+  "SELECT name, kind, filename_hash FROM symbols WHERE name LIKE ? ESCAPE '\\' AND valid_for_acid = 1 LIMIT ?"
 
 let sql_select_acnew =
-  "SELECT name, kind, filename_hash FROM symbols WHERE name LIKE ? AND valid_for_acnew = 1 LIMIT ?"
+  "SELECT name, kind, filename_hash FROM symbols WHERE name LIKE ? ESCAPE '\\' AND valid_for_acnew = 1 LIMIT ?"
 
 let sql_select_actype =
-  "SELECT name, kind, filename_hash FROM symbols WHERE name LIKE ? AND valid_for_actype = 1 LIMIT ?"
+  "SELECT name, kind, filename_hash FROM symbols WHERE name LIKE ? ESCAPE '\\' AND valid_for_actype = 1 LIMIT ?"
 
 let sql_select_all_symbols =
-  "SELECT name, kind, filename_hash FROM symbols WHERE name LIKE ? LIMIT ?"
+  "SELECT name, kind, filename_hash FROM symbols WHERE name LIKE ? ESCAPE '\\' LIMIT ?"
 
 let sql_check_alive = "SELECT name FROM symbols LIMIT 1"
 
 let sql_select_namespaces = "SELECT namespace FROM namespaces"
+
+(* Add escape characters when necessary *)
+let sqlite_escape_str (str : string) : string =
+  String.fold str ~init:"" ~f:(fun acc char ->
+      match char with
+      | '%' -> acc ^ "\\%"
+      | '_' -> acc ^ "\\_"
+      | '\\' -> acc ^ "\\"
+      | _ -> acc ^ String.make 1 char)
 
 (* Select a filename for a temporary symbol index *)
 let get_filename_for_symbol_index (extension : string) : string =
@@ -234,6 +243,7 @@ let sqlite_search
     ~(max_results : int)
     ~(context : autocomplete_type option)
     ~(kind_filter : SearchUtils.si_kind option) : si_results =
+  let query_text = sqlite_escape_str query_text in
   match (context, kind_filter) with
   | (Some Acid, _) -> search_acid ~sienv ~query_text ~max_results
   | (Some Acnew, _) -> search_acnew ~sienv ~query_text ~max_results

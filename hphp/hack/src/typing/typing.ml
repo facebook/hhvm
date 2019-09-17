@@ -742,6 +742,7 @@ and fun_def tcopt f : Tast.fun_def option =
       let env =
         Typing_solver.solve_all_unsolved_tyvars env Errors.bad_function_typevar
       in
+      let env = Typing_solver.expand_bounds_of_global_tyvars env in
       let fundef =
         {
           T.f_annotation = Env.save local_tpenv env;
@@ -8637,6 +8638,7 @@ and class_def_ env c tc =
   let env =
     Typing_solver.solve_all_unsolved_tyvars env Errors.bad_class_typevar
   in
+  let env = Typing_solver.expand_bounds_of_global_tyvars env in
   {
     T.c_span = c.c_span;
     T.c_annotation = Env.save (Env.get_tpenv env) env;
@@ -9254,6 +9256,7 @@ and method_def env cls m =
       let env =
         Typing_solver.solve_all_unsolved_tyvars env Errors.bad_method_typevar
       in
+      let env = Typing_solver.expand_bounds_of_global_tyvars env in
       let method_def =
         {
           T.m_annotation = Env.save local_tpenv env;

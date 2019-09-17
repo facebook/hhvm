@@ -32,3 +32,5 @@ val expand_type_and_narrow :
   env * locl_ty
 
 val close_tyvars_and_solve : env -> Errors.typing_error_callback -> env
+
+val expand_bounds_of_global_tyvars : env -> env

@@ -885,3 +885,30 @@ let non_null env pos ty =
   match ty with
   | (_, Toption ty') -> (env, ty')
   | _ -> (env, ty)
+
+(**
+ * During global inference we want to remove any reference to local tyvars in
+ * the global tyvars.
+ * This function will expand all lower bounds and upper bounds of the global
+ * tvenv, which will have as effect to remove local tyvars
+ *)
+let expand_bounds_of_global_tyvars env =
+  Env.log_env_change "expand_bounds_of_global_tyvars" env
+  @@ {
+       env with
+       global_tvenv =
+         IMap.map
+           (fun tyvar_info ->
+             let upper_bounds =
+               TySet.map
+                 (Typing_expand.fully_expand env)
+                 tyvar_info.upper_bounds
+             in
+             let lower_bounds =
+               TySet.map
+                 (Typing_expand.fully_expand env)
+                 tyvar_info.lower_bounds
+             in
+             { tyvar_info with upper_bounds; lower_bounds })
+           env.global_tvenv;
+     }

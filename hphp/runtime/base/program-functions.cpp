@@ -835,8 +835,30 @@ hugifyText(char* from, char* to) {
     // zero size or negative sizes.
     return;
   }
-
   size_t sz = to - from;
+
+  if (RuntimeOption::EvalNewTHPHotText) {
+    auto const hasKernelSupport = [] () -> bool {
+      KernelVersion version;
+      if (version.m_major < 5) return false;
+      if (version.m_major > 5) return true;
+      if (version.m_minor > 2) return true;
+#ifdef FACEBOOK
+      if ((version.m_minor == 2) && (version.m_minor >= 9)) return true;
+#endif
+      return false;
+    };
+    if (hasKernelSupport()) {
+      // The new way doesn't work if the region is locked. Note that this means
+      // Server.LockCodeMemory won't be applied to the region--there is no
+      // guarantee that the region would stay in memory, especially if the
+      // kernel fails to find huge pages for us.
+      munlock(from, sz);
+      madvise(from, sz, MADV_HUGEPAGE);
+      return;
+    }
+  }
+
   void* mem = malloc(sz);
   memcpy(mem, from, sz);
 

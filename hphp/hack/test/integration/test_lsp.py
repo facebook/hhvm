@@ -783,11 +783,6 @@ class TestLsp(TestCase[LspTestDriver]):
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
-    def test_type_definition(self) -> None:
-        self.prepare_server_environment()
-        variables = self.setup_php_file("type_definition.php")
-        self.load_and_run("type_definition", variables)
-
     def initialize_spec(
         self, spec: LspTestSpec, use_serverless_ide: bool
     ) -> LspTestSpec:

@@ -1143,11 +1143,6 @@ class TestLsp(TestCase[LspTestDriver]):
         variables = self.setup_php_file("coverage.php")
         self.load_and_run("coverage", variables)
 
-    def test_highlight(self) -> None:
-        self.prepare_server_environment()
-        variables = self.setup_php_file("highlight.php")
-        self.load_and_run("highlight", variables)
-
     def test_formatting(self) -> None:
 
         # This test will fail if hackfmt can't be found
@@ -1959,3 +1954,45 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 # that one.
                 .replace("__PHP_FILE_URI__", variables["php_file_uri"]),
             )
+
+    def test_serverless_ide_highlight(self) -> None:
+        variables = dict(self.prepare_serverless_ide_environment())
+        variables.update(self.setup_php_file("highlight.php"))
+        self.test_driver.stop_hh_server()
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("serverless_ide_highlight"), use_serverless_ide=True
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .request(
+                comment="document highlight, id 2",
+                method="textDocument/documentHighlight",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 3, "character": 10},
+                },
+                result=[
+                    {
+                        "range": {
+                            "start": {"line": 3, "character": 9},
+                            "end": {"line": 3, "character": 20},
+                        }
+                    }
+                ],
+            )
+            .request(
+                comment="shutdown, id 3", method="shutdown", params={}, result=None
+            )
+        )
+        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)

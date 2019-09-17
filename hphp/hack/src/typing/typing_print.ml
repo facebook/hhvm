@@ -182,10 +182,6 @@ module Full = struct
     | Tfun ft ->
       Concat
         [
-          ( if ft.ft_abstract then
-            text "abs" ^^ Space
-          else
-            Nothing );
           text "(";
           ( if ft.ft_is_coroutine then
             text "coroutine" ^^ Space
@@ -1357,7 +1353,6 @@ module Json = struct
                  (* Dummy values: these aren't currently serialized. *)
                  ft_pos = Pos.none;
                  ft_deprecated = None;
-                 ft_abstract = false;
                  ft_arity = Fstandard (0, 0);
                  ft_tparams = ([], FTKtparams);
                  ft_where_constraints = [];
@@ -1719,7 +1714,6 @@ module PrintFun = struct
 
   let fun_type tcopt f =
     let ft_pos = PrintClass.pos f.ft_pos in
-    let ft_abstract = string_of_bool f.ft_abstract in
     let ft_arity = farity f.ft_arity in
     let tparams = PrintClass.tparam_list tcopt (fst f.ft_tparams) in
     let instantiate_tparams =
@@ -1731,9 +1725,6 @@ module PrintFun = struct
     let ft_ret = Full.to_string_decl tcopt f.ft_ret.et_type in
     "ft_pos: "
     ^ ft_pos
-    ^ "\n"
-    ^ "ft_abstract: "
-    ^ ft_abstract
     ^ "\n"
     ^ "ft_arity: "
     ^ ft_arity

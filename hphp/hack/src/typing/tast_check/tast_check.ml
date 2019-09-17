@@ -52,7 +52,6 @@ let visitor opts =
         Foreach_collection_reactivity_check.handler;
         Obj_get_check.handler;
         This_hint_check.handler;
-        Static_method_call_check.handler;
         Unresolved_type_variable_check.handler;
         Invalid_arraykey_constraint_check.handler;
         Type_const_check.handler;

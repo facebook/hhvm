@@ -79,7 +79,6 @@ let rec strip_ty ty =
           (* Dummy values: these aren't currently serialized. *)
           ft_pos = Pos.none;
           ft_deprecated = None;
-          ft_abstract = false;
           ft_arity = Fstandard (0, 0);
           ft_tparams = ([], FTKtparams);
           ft_where_constraints = [];

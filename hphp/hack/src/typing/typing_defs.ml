@@ -356,7 +356,6 @@ and fun_tparams_kind =
 and 'ty fun_type = {
   ft_pos: Pos.t;
   ft_deprecated: string option;
-  ft_abstract: bool;
   ft_is_coroutine: bool;
   ft_arity: 'ty fun_arity;
   ft_tparams: 'ty tparam list * fun_tparams_kind;

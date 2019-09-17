@@ -247,7 +247,6 @@ let method_type env m =
     ft_pos = fst m.m_name;
     ft_deprecated =
       Attrs.deprecated ~kind:"method" m.m_name m.m_user_attributes;
-    ft_abstract = m.m_abstract;
     ft_is_coroutine = m.m_fun_kind = Ast_defs.FCoroutine;
     ft_arity = arity;
     ft_tparams = (tparams, FTKtparams);
@@ -292,7 +291,6 @@ let method_redeclaration_type env m =
   {
     ft_pos = fst m.mt_name;
     ft_deprecated = None;
-    ft_abstract = m.mt_abstract;
     ft_is_coroutine = m.mt_fun_kind = Ast_defs.FCoroutine;
     ft_arity = arity;
     ft_tparams = (tparams, FTKtparams);
@@ -330,7 +328,7 @@ let method_ env c m =
     | _ -> None
   in
   {
-    sm_abstract = ft.ft_abstract;
+    sm_abstract = m.m_abstract;
     sm_final = m.m_final;
     sm_memoizelsb = has_memoizelsb;
     sm_name = m.m_name;
@@ -344,7 +342,7 @@ let method_ env c m =
 let method_redeclaration env m =
   let ft = method_redeclaration_type env m in
   {
-    smr_abstract = ft.ft_abstract;
+    smr_abstract = m.mt_abstract;
     smr_final = m.mt_final;
     smr_static = m.mt_static;
     smr_name = m.mt_name;

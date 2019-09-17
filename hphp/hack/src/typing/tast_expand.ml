@@ -62,7 +62,6 @@ let expand_ty ?pos env ty =
         ft_pos;
         ft_deprecated;
         ft_arity;
-        ft_abstract;
         ft_tparams;
         ft_where_constraints;
         ft_ret;
@@ -80,7 +79,6 @@ let expand_ty ?pos env ty =
       ft_pos;
       ft_deprecated;
       ft_arity;
-      ft_abstract;
       ft_fun_kind;
       ft_reactive;
       ft_is_coroutine;

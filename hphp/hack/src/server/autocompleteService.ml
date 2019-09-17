@@ -274,7 +274,6 @@ let get_constructor_ty c =
         {
           ft_pos = pos;
           ft_deprecated = None;
-          ft_abstract = false;
           ft_is_coroutine = false;
           ft_arity = Fstandard (0, 0);
           ft_tparams = ([], FTKtparams);

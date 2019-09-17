@@ -2353,7 +2353,6 @@ and expr_
           {
             ft_pos = pos;
             ft_deprecated = None;
-            ft_abstract = false;
             (* propagate 'is_coroutine' from the method being called*)
             ft_is_coroutine = fty.ft_is_coroutine;
             ft_arity = fun_arity;
@@ -2442,18 +2441,16 @@ and expr_
                 ft)
           in
           let ty = (r, Tfun ft) in
+          let def_pos = Reason.to_pos r in
+          let use_pos = fst meth in
           check_deprecated p ft;
           (match ce_visibility with
           | Vpublic -> make_result env p (T.Smethod_id (c, meth)) ty
           | Vprivate _ ->
-            Errors.private_class_meth
-              ~def_pos:(Reason.to_pos r)
-              ~use_pos:(fst meth);
+            Errors.private_class_meth ~def_pos ~use_pos;
             expr_error env r outer
           | Vprotected _ ->
-            Errors.protected_class_meth
-              ~def_pos:(Reason.to_pos r)
-              ~use_pos:(fst meth);
+            Errors.protected_class_meth ~def_pos ~use_pos;
             expr_error env r outer)
         | (r, _) ->
           Errors.internal_error p "We have a method which isn't callable";
@@ -4148,7 +4145,7 @@ and new_object
       | CIparent ->
         let (env, ctor_fty) =
           match fst (Cls.construct class_info) with
-          | Some { ce_type = (lazy ty); _ } ->
+          | Some { ce_type = (lazy ty); ce_abstract; _ } ->
             let ety_env =
               {
                 type_expansions = [];
@@ -4157,6 +4154,11 @@ and new_object
                 from_class = None;
               }
             in
+            if ce_abstract then
+              Errors.parent_abstract_call
+                SN.Members.__construct
+                p
+                (Reason.to_pos (fst ctor_fty));
             let (env, ctor_fty) = Phase.localize ~ety_env env ty in
             (env, ctor_fty)
           | None -> (env, ctor_fty)
@@ -4551,6 +4553,29 @@ and check_parent_construct pos env el uel env_parent =
   in
   (env, tel, tuel, MakeType.void (Reason.Rwitness pos), parent, fty)
 
+and check_class_get env p def_pos cid mid ce e =
+  match e with
+  | CIself when ce.ce_abstract ->
+    begin
+      match Env.get_self env with
+      | (_, Tclass ((_, self), _, _)) ->
+        (* at runtime, self:: in a trait is a call to whatever
+         * self:: is in the context of the non-trait "use"-ing
+         * the trait's code *)
+        begin
+          match Env.get_class env self with
+          | Some cls when Cls.kind cls = Ast_defs.Ctrait -> ()
+          | _ -> Errors.self_abstract_call mid p def_pos
+        end
+      | _ -> ()
+    end
+  | CIparent when ce.ce_abstract -> Errors.parent_abstract_call mid p def_pos
+  | CI _ when ce.ce_abstract ->
+    Errors.classname_abstract_call cid mid p def_pos
+  | CI (_, classname) when ce.ce_synthesized ->
+    Errors.static_synthetic_method classname mid p def_pos
+  | _ -> ()
+
 and call_parent_construct pos env el uel =
   let parent = Env.get_parent env in
   match parent with
@@ -4944,7 +4969,6 @@ and dispatch_call
                   {
                     ft_pos = fty.ft_pos;
                     ft_deprecated = None;
-                    ft_abstract = false;
                     ft_is_coroutine = false;
                     ft_arity = Fstandard (arity, arity);
                     ft_tparams = ([], FTKtparams);
@@ -5738,14 +5762,15 @@ and class_get_
           smember_not_found p ~is_const ~is_method class_ mid;
           (env, (Reason.Rnone, Typing_utils.terr env))
         | Some
-            {
-              ce_visibility = vis;
-              ce_lsb = lsb;
-              ce_type = (lazy member_decl_ty);
-              _;
-            } ->
+            ( {
+                ce_visibility = vis;
+                ce_lsb = lsb;
+                ce_type = (lazy member_decl_ty);
+                _;
+              } as ce ) ->
           let p_vis = Reason.to_pos (fst member_decl_ty) in
           TVis.check_class_access p env (p_vis, vis, lsb) cid class_;
+          check_class_get env p p_vis c mid ce cid;
           let (env, member_ty, et_enforced) =
             match member_decl_ty with
             (* We special case Tfun here to allow passing in explicit tparams to localize_ft. *)
@@ -6085,6 +6110,7 @@ and obj_get_concrete_ty
               ( {
                   ce_visibility = vis;
                   ce_type = (lazy member_);
+                  ce_abstract;
                   ce_xhp_attr;
                   _;
                 } as member_ce ) ->
@@ -6110,6 +6136,8 @@ and obj_get_concrete_ty
                 end
               | _ -> () );
             TVis.check_obj_access id_pos env (mem_pos, vis);
+            if class_id = CIparent && ce_abstract then
+              Errors.parent_abstract_call id_str id_pos mem_pos;
             let member_decl_ty = Typing_enum.member_type env member_ce in
             let ety_env = mk_ety_env r class_info x exact paraml in
             let (env, member_ty, et_enforced) =
@@ -7294,7 +7322,6 @@ and call
                     {
                       ft_pos = fpos;
                       ft_deprecated = None;
-                      ft_abstract = false;
                       ft_is_coroutine = is_coroutine;
                       ft_arity = arity;
                       ft_tparams = ([], FTKtparams);
@@ -8683,7 +8710,7 @@ and check_static_class_element get_dyn_elt element_name static_pos ~elt_type =
 and check_extend_abstract_meth ~is_final p seq =
   Sequence.iter seq (fun (x, ce) ->
       match ce.ce_type with
-      | (lazy (r, Tfun { ft_abstract = true; _ })) ->
+      | (lazy (r, Tfun _)) when ce.ce_abstract ->
         Errors.implement_abstract ~is_final p (Reason.to_pos r) "method" x
       | _ -> ())
 

@@ -409,11 +409,6 @@ and pp_fun_type : type a. Format.formatter -> a ty fun_type -> unit =
   Format.fprintf fmt "@]";
   Format.fprintf fmt ";@ ";
 
-  Format.fprintf fmt "@[%s =@ " "ft_abstract";
-  Format.fprintf fmt "%B" x.ft_abstract;
-  Format.fprintf fmt "@]";
-  Format.fprintf fmt ";@ ";
-
   Format.fprintf fmt "@[%s =@ " "ft_is_coroutine";
   Format.fprintf fmt "%B" x.ft_is_coroutine;
   Format.fprintf fmt "@]";

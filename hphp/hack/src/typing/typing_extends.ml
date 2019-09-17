@@ -269,6 +269,17 @@ let check_override
       parent_class_elt.ce_const
       pos
       class_elt.ce_const;
+  if (not parent_class_elt.ce_abstract) && class_elt.ce_abstract then
+    (* It is valid for abstract class to extend a concrete class, but it cannot
+     * redefine already concrete members as abstract.
+     * See override_abstract_concrete.php test case for example. *)
+    Errors.abstract_concrete_override
+      pos
+      parent_pos
+      ( if mem_source = `FromMethod || mem_source = `FromSMethod then
+        `method_
+      else
+        `property );
   if check_params then
     Errors.try_
       (fun () ->
@@ -289,7 +300,7 @@ let check_override
           in
           let check (r1, ft1) (r2, ft2) () =
             ( if check_member_unique then
-              match (ft1.ft_abstract, ft2.ft_abstract) with
+              match (parent_class_elt.ce_abstract, class_elt.ce_abstract) with
               | (false, false) ->
                 (* Multiple concrete trait definitions, error *)
                 Errors.multiple_concrete_defs
@@ -520,7 +531,6 @@ let default_constructor_ce class_ =
     {
       ft_pos = pos;
       ft_deprecated = None;
-      ft_abstract = false;
       ft_is_coroutine = false;
       ft_arity = Fstandard (0, 0);
       ft_tparams = ([], FTKtparams);

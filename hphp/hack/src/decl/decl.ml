@@ -282,7 +282,6 @@ and fun_decl_in_env env f =
       ft_deprecated =
         Attributes.deprecated ~kind:"function" f.f_name f.f_user_attributes;
       ft_is_coroutine = f.f_fun_kind = Ast_defs.FCoroutine;
-      ft_abstract = false;
       ft_arity = arity;
       ft_tparams = (tparams, FTKtparams);
       ft_where_constraints = where_constraints;
@@ -721,7 +720,7 @@ and build_constructor class_ method_ =
   let cstr =
     {
       elt_final = method_.sm_final;
-      elt_abstract = ft.ft_abstract;
+      elt_abstract = method_.sm_abstract;
       elt_xhp_attr = None;
       elt_const = false;
       elt_lateinit = false;
@@ -933,7 +932,7 @@ and method_redecl_acc c acc m =
       elt_const = false;
       elt_lateinit = false;
       elt_lsb = false;
-      elt_abstract = ft.ft_abstract;
+      elt_abstract = m.smr_abstract;
       elt_override = false;
       elt_memoizelsb = false;
       elt_synthesized = false;
@@ -981,7 +980,7 @@ and method_decl_acc ~is_static c (acc, condition_types) m =
       elt_const = false;
       elt_lateinit = false;
       elt_lsb = false;
-      elt_abstract = ft.ft_abstract;
+      elt_abstract = m.sm_abstract;
       elt_override = check_override;
       elt_memoizelsb = has_memoizelsb;
       elt_synthesized = false;

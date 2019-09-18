@@ -39,7 +39,7 @@ let get_shallow_classes_and_substs (lin : linearization) :
       match Shallow_classes_heap.get mro.mro_name with
       | None -> None
       | Some cls ->
-        let subst = Decl_subst.make cls.sc_tparams mro.mro_type_args in
+        let subst = Decl_subst.make_decl cls.sc_tparams mro.mro_type_args in
         Some (mro, cls, subst))
 
 (** Return a linearization suitable for method lookup, where ancestors are

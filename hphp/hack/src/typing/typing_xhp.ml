@@ -119,7 +119,7 @@ and get_spread_attributes env pos onto_xhp cty =
       {
         type_expansions = [];
         this_ty = xhp_ty;
-        substs = Subst.make (Cls.tparams xhp_info) tparams;
+        substs = Subst.make_locl (Cls.tparams xhp_info) tparams;
         from_class = None;
       }
     in

@@ -168,7 +168,7 @@ and check_happly unchecked_tparams env h =
           let ety_env =
             {
               (Phase.env_with_self env) with
-              substs = Subst.make tc_tparams tyl;
+              substs = Subst.make_locl tc_tparams tyl;
             }
           in
           iter2_shortest

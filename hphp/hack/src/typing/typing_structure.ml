@@ -34,7 +34,10 @@ let make_ts env ty =
     in
     let ts = (fst ty, Tapply ((Pos.none, SN.FB.cTypeStructure), params)) in
     let ety_env =
-      { (Phase.env_with_self env) with substs = Subst.make td_tparams [ty] }
+      {
+        (Phase.env_with_self env) with
+        substs = Subst.make_locl td_tparams [ty];
+      }
     in
     Phase.localize ~ety_env env ts
   | _ ->

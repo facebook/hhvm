@@ -781,7 +781,7 @@ and simplify_subtype
           let ety_env =
             {
               type_expansions = [];
-              substs = Subst.make (Cls.tparams class_ty) tyl_super;
+              substs = Subst.make_locl (Cls.tparams class_ty) tyl_super;
               this_ty = Option.value this_ty ~default:ty_super;
               from_class = None;
             }
@@ -983,7 +983,7 @@ and simplify_subtype
           let ety_env =
             {
               type_expansions = [];
-              substs = Subst.make (Cls.tparams class_sub) tyl_sub;
+              substs = Subst.make_locl (Cls.tparams class_sub) tyl_sub;
               (* TODO: do we need this? *)
               this_ty = Option.value this_ty ~default:ty_sub;
               from_class = None;

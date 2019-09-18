@@ -12,7 +12,7 @@ open Typing_defs
 module SN = Naming_special_names
 module Subst = Decl_subst
 
-let make_subst tparams tyl = Subst.make tparams tyl
+let make_subst tparams tyl = Subst.make_decl tparams tyl
 
 (*****************************************************************************)
 (* Code dealing with instantiation. *)

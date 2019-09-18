@@ -242,7 +242,7 @@ let rec ancestor_linearization
       Shallow_classes_heap.get class_name
       |> Option.value_map ~default:[] ~f:(fun c -> c.sc_tparams)
     in
-    let subst = Decl_subst.make tparams type_args in
+    let subst = Decl_subst.make_decl tparams type_args in
     let rest =
       Sequence.map rest ~f:(fun c ->
           {

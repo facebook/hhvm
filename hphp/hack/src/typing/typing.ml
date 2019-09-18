@@ -2309,7 +2309,7 @@ and expr_
       let ety_env =
         {
           (Phase.env_with_self env) with
-          substs = Subst.make (Cls.tparams class_) tvarl;
+          substs = Subst.make_locl (Cls.tparams class_) tvarl;
         }
       in
       let (env, local_obj_ty) = Phase.localize ~ety_env env obj_type in
@@ -2333,7 +2333,7 @@ and expr_
                  : return_type_of(Class::meth_name)
          *)
         let ety_env =
-          { ety_env with substs = Subst.make (Cls.tparams class_) tvarl }
+          { ety_env with substs = Subst.make_locl (Cls.tparams class_) tvarl }
         in
         let env =
           Phase.check_tparams_constraints
@@ -2415,7 +2415,7 @@ and expr_
         let ety_env =
           {
             type_expansions = [];
-            substs = Subst.make (Cls.tparams class_) tyargs;
+            substs = Subst.make_locl (Cls.tparams class_) tyargs;
             this_ty = cid_ty;
             from_class = Some cid;
           }
@@ -2747,7 +2747,7 @@ and expr_
         let ety_env =
           {
             (Phase.env_with_self env) with
-            substs = Subst.make tparaml tparams;
+            substs = Subst.make_locl tparaml tparams;
           }
         in
         let env =
@@ -4151,7 +4151,7 @@ and new_object
             let ety_env =
               {
                 type_expansions = [];
-                substs = Subst.make (Cls.tparams class_info) params;
+                substs = Subst.make_locl (Cls.tparams class_info) params;
                 this_ty = obj_ty;
                 from_class = None;
               }
@@ -5683,7 +5683,7 @@ and class_get_
         {
           type_expansions = [];
           this_ty;
-          substs = Subst.make (Cls.tparams class_) paraml;
+          substs = Subst.make_locl (Cls.tparams class_) paraml;
           from_class = Some cid;
         }
       in
@@ -5975,7 +5975,7 @@ and obj_get_concrete_ty
     {
       type_expansions = [];
       this_ty;
-      substs = Subst.make (Cls.tparams class_info) paraml;
+      substs = Subst.make_locl (Cls.tparams class_info) paraml;
       from_class = Some class_id;
     }
   in
@@ -6275,7 +6275,7 @@ and widen_class_for_obj_get ~is_method ~nullsafe member_name env ty =
               let ety_env =
                 {
                   type_expansions = [];
-                  substs = Subst.make (Cls.tparams class_info) tyl;
+                  substs = Subst.make_locl (Cls.tparams class_info) tyl;
                   this_ty = ty;
                   from_class = None;
                 }
@@ -6772,7 +6772,7 @@ and call_construct p env class_ params el uel cid =
     {
       type_expansions = [];
       this_ty = cid_ty;
-      substs = Subst.make (Cls.tparams class_) params;
+      substs = Subst.make_locl (Cls.tparams class_) params;
       from_class = Some cid;
     }
   in
@@ -8125,7 +8125,7 @@ and safely_refine_class_type
   let ety_env =
     {
       type_expansions = [];
-      substs = Subst.make tparams tyl_fresh;
+      substs = Subst.make_locl tparams tyl_fresh;
       this_ty = obj_ty;
       (* In case `this` appears in constraints *)
       from_class = None;
@@ -8540,7 +8540,10 @@ and class_def_ env c tc =
             ~f:(Typing_enforceability.pessimize_tparam_constraints env)
         in
         let ety_env =
-          { (Phase.env_with_self env) with substs = Subst.make tc_tparams tyl }
+          {
+            (Phase.env_with_self env) with
+            substs = Subst.make_locl tc_tparams tyl;
+          }
         in
         ignore
           (Phase.check_where_constraints
@@ -9520,7 +9523,7 @@ and class_get_pu_ env cty name =
       | Some class_ ->
         (match Env.get_pu_enum env class_ name with
         | Some et ->
-          (env, Some (cty, Subst.make (Cls.tparams class_) paraml, et))
+          (env, Some (cty, Subst.make_locl (Cls.tparams class_) paraml, et))
         | None -> (env, None))
     end
 

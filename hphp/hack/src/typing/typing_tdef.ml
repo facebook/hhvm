@@ -48,7 +48,7 @@ let expand_typedef_ ?(force_expand = false) ety_env env r x argl =
       {
         ety_env with
         type_expansions = (td_pos, x) :: ety_env.type_expansions;
-        substs = Subst.make td_tparams argl;
+        substs = Subst.make_locl td_tparams argl;
       }
     in
     let (env, expanded_ty) =

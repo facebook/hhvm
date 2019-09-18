@@ -367,7 +367,7 @@ and localize_ft ?instantiation ~ety_env env ft =
           in
           List.map_env env explicit_targs type_argument
       in
-      let ft_subst = Subst.make tparams tvarl in
+      let ft_subst = Subst.make_locl tparams tvarl in
       (env, SMap.union ft_subst ety_env.substs)
     | None ->
       ( env,
@@ -605,7 +605,7 @@ and localize_missing_tparams_class env r sid class_ tyl =
     {
       type_expansions = [];
       this_ty = c_ty;
-      substs = Subst.make (Cls.tparams class_) tyl;
+      substs = Subst.make_locl (Cls.tparams class_) tyl;
       from_class = Some (Aast.CI sid);
     }
   in
@@ -666,7 +666,7 @@ and resolve_type_arguments_and_check_constraints
         {
           type_expansions = [];
           this_ty;
-          substs = Subst.make tparaml type_argl;
+          substs = Subst.make_locl tparaml type_argl;
           from_class = Some from_class;
         }
       in

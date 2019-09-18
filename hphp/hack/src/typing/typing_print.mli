@@ -96,7 +96,7 @@ val subtype_prop : env -> Typing_logic.subtype_prop -> string
  *       Expression-dependent type
  *         { "kind":"expr" }
  *)
-val to_json : env -> 'a Typing_defs.ty -> Hh_json.json
+val to_json : env -> Typing_defs.locl_ty -> Hh_json.json
 
 (* Attempt to deserialize a previously-serialized type back into a type we can
 manipulate. Note that this function accesses the global state in

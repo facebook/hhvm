@@ -368,16 +368,6 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
       let%lwt responses = rpc args @@ Rpc.FUN_IS_LOCALLABLE_BATCH positions in
       List.iter responses print_endline;
       Lwt.return Exit_status.No_error
-    | MODE_TYPED_FULL_FIDELITY_PARSE filename ->
-      let fn =
-        try expand_path filename
-        with _ ->
-          Printf.eprintf "Invalid filename: %s\n" filename;
-          raise Exit_status.(Exit_with Input_error)
-      in
-      let%lwt result = rpc args @@ Rpc.TYPED_AST fn in
-      print_endline result;
-      Lwt.return Exit_status.No_error
     | MODE_AUTO_COMPLETE ->
       let content = Sys_utils.read_stdin_to_string () in
       let%lwt results = rpc args @@ Rpc.COMMANDLINE_AUTOCOMPLETE content in

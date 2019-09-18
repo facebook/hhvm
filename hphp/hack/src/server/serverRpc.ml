@@ -68,7 +68,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     let tcopt = { tcopt with GlobalOptions.tco_dynamic_view = dynamic_view } in
     let env = { env with tcopt } in
     (env, ServerInferTypeBatch.go genv.workers positions env)
-  | TYPED_AST filename -> (env, ServerTypedAst.go env filename)
   | IDE_HOVER (path, line, column) ->
     let relative_path = Relative_path.create_detect_prefix path in
     let (ctx, entry) =

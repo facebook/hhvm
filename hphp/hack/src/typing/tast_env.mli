@@ -34,8 +34,6 @@ val print_ty_with_identity :
 val ty_to_json : env -> Typing_defs.locl_ty -> Hh_json.json
 (** Return a JSON representation of the given type. *)
 
-val decl_ty_to_json : env -> Typing_defs.decl_ty -> Hh_json.json
-
 val json_to_locl_ty :
   ?keytrace:Hh_json.Access.keytrace ->
   Hh_json.json ->

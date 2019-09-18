@@ -106,10 +106,9 @@
   (preprocess (pps ppx_deriving.std)))
 
 (library
-  (name typed_positioned_syntax)
+  (name tast_type_collector)
   (wrapped false)
   (modules
-    full_fidelity_typed_positioned_syntax
     tast_type_collector)
   (libraries
     core_kernel
@@ -225,17 +224,6 @@
     typing
     typing_defs
     vfs_stubs)
-  (preprocess (pps ppx_deriving.std))) ; See T41851208
-
-(library
-  (name typed_syntax_transforms)
-  (wrapped false)
-  (modules
-    typedSyntaxTransforms)
-  (libraries
-    core_kernel
-    full_fidelity
-    typed_positioned_syntax)
   (preprocess (pps ppx_deriving.std))) ; See T41851208
 
 (library

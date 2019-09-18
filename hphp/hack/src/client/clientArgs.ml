@@ -609,11 +609,6 @@ let parse_check_args cmd =
           end,
         " (mode) show types at multiple positions [file:line:character list]"
       );
-      ( "--typed-full-fidelity-json",
-        Arg.String
-          (fun filename ->
-            set_mode (MODE_TYPED_FULL_FIDELITY_PARSE filename) ()),
-        " (mode) show full fidelity parse tree with types. Implies --json." );
       ("--version", Arg.Set version, " (mode) show version and exit");
       Common_argspecs.watchman_debug_logging watchman_debug_logging;
         (* Please keep these sorted in the alphabetical order *)

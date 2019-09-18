@@ -55,7 +55,6 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | STATUS_SINGLE _ -> false
   | INFER_TYPE _ -> false
   | INFER_TYPE_BATCH _ -> false
-  | TYPED_AST _ -> false
   | IDE_HOVER _ -> false
   | DOCBLOCK_AT _ -> false
   | LOCATE_SYMBOL _ -> false
@@ -134,7 +133,6 @@ let get_description : type a. a command -> string = function
   | Rpc (STATUS_SINGLE _) -> "STATUS_SINGLE"
   | Rpc (INFER_TYPE _) -> "INFER_TYPE"
   | Rpc (INFER_TYPE_BATCH _) -> "INFER_TYPE_BATCH"
-  | Rpc (TYPED_AST _) -> "TYPED_AST"
   | Rpc (IDE_HOVER _) -> "IDE_HOVER"
   | Rpc (DOCBLOCK_AT _) -> "DOCBLOCK_AT"
   | Rpc (LOCATE_SYMBOL _) -> "LOCATE_SYMBOL"

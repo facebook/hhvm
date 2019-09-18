@@ -243,7 +243,6 @@ type _ t =
   | INFER_TYPE_BATCH :
       (string * int * int * (int * int) option) list * bool
       -> string list t
-  | TYPED_AST : string -> string t
   | IDE_HOVER : string * int * int -> HoverService.result t
   | LOCATE_SYMBOL :
       (string * SearchUtils.si_kind)

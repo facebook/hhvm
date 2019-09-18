@@ -21,8 +21,6 @@ end
 
 module PS = Full_fidelity_positioned_syntax
 module PositionedTree = Full_fidelity_syntax_tree.WithSyntax (PS)
-module TS = Full_fidelity_typed_positioned_syntax
-module TypedTree = Full_fidelity_syntax_tree.WithSyntax (TS)
 
 (*****************************************************************************)
 (* Types, constants *)
@@ -48,7 +46,6 @@ type mode =
   | Dump_stripped_tast
   | Dump_tast
   | Check_tast
-  | Dump_typed_full_fidelity_json
   | Find_refs of int * int
   | Highlight_refs of int * int
   | Decl_compare
@@ -310,9 +307,6 @@ let parse_options () =
         Arg.Unit (set_mode Dump_stripped_tast),
         " Print out the typed AST, stripped of type information."
         ^ " This can be compared against the named AST to look for holes." );
-      ( "--typed-full-fidelity-json",
-        Arg.Unit (set_mode Dump_typed_full_fidelity_json),
-        " (mode) show full fidelity parse tree with types in json format." );
       ( "--find-refs",
         Arg.Tuple
           [
@@ -1242,30 +1236,6 @@ let handle_mode
           let tast_check_errors = typecheck_tasts tasts tcopt filename in
           print_error_list error_format tast_check_errors max_errors;
           if tast_check_errors <> [] then exit 2)
-  | Dump_typed_full_fidelity_json ->
-    iter_over_files (fun filename ->
-        (*
-      Ideally we'd reuse ServerTypedAst.go here. Unfortunately relative file
-      paths are not compatible between hh_single_type_check and server modules.
-      So we copy here instead.
-    *)
-        (* get the typed ast *)
-        let files_contents =
-          Relative_path.Map.filter files_contents ~f:(fun k _v -> k = filename)
-        in
-        let (_, tasts) = compute_tasts tcopt files_info files_contents in
-        (* get the parse tree *)
-        let source_text = Full_fidelity_source_text.from_file filename in
-        let positioned_tree = PositionedTree.make source_text in
-        Relative_path.Map.iter tasts ~f:(fun _k tast ->
-            let typed_tree =
-              ServerTypedAst.create_typed_parse_tree
-                ~filename
-                ~positioned_tree
-                ~tast
-            in
-            let result = ServerTypedAst.typed_parse_tree_to_json typed_tree in
-            Printf.printf "%s\n" (Hh_json.json_to_string result)))
   | Dump_stripped_tast ->
     iter_over_files (fun filename ->
         let files_contents =

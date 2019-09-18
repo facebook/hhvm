@@ -804,7 +804,7 @@ module Json = struct
     | "inout" -> Some FPinout
     | _ -> None
 
-  let rec from_type : type a. env -> a ty -> json = function
+  let rec from_type : env -> locl_ty -> json = function
     | env ->
       (function
       | ty ->
@@ -834,9 +834,6 @@ module Json = struct
           @ typ v.sft_ty
         in
         let fields fl = [("fields", JSON_Array (List.map fl make_field))] in
-        let path ids =
-          [("path", JSON_Array (List.map ids (fun id -> JSON_String id)))]
-        in
         let as_type opt_ty =
           match opt_ty with
           | None -> []
@@ -850,20 +847,12 @@ module Json = struct
             | Tvar _ -> obj @@ kind "var"
             | _ -> from_type env ty
           end
-        | Tarray (opt_ty1, opt_ty2) ->
-          obj
-          @@ kind "array"
-          @ args (Option.to_list opt_ty1 @ Option.to_list opt_ty2)
-        | Tthis -> obj @@ kind "this"
         | Ttuple tys -> obj @@ kind "tuple" @ is_array false @ args tys
         | Tany _
         | Terr ->
           obj @@ kind "any"
-        | Tmixed -> obj @@ kind "mixed"
         | Tnonnull -> obj @@ kind "nonnull"
         | Tdynamic -> obj @@ kind "dynamic"
-        | Tnothing -> obj @@ kind "nothing"
-        | Tgeneric s -> obj @@ kind "generic" @ is_array false @ name s
         | Tabstract (AKgeneric s, opt_ty) ->
           obj @@ kind "generic" @ is_array true @ name s @ as_type opt_ty
         | Tabstract (AKnewtype (s, _), opt_ty) when Typing_env.is_enum env s ->
@@ -881,9 +870,7 @@ module Json = struct
           obj @@ kind "path" @ [("type", obj @@ kind "this")] @ as_type opt_ty
         | Toption (_, Tnonnull) -> obj @@ kind "mixed"
         | Toption ty -> obj @@ kind "nullable" @ args [ty]
-        | Tlike ty -> obj @@ kind "like" @ args [ty]
         | Tprim tp -> obj @@ kind "primitive" @ name (prim tp)
-        | Tapply ((_, cid), tys) -> obj @@ kind "class" @ name cid @ args tys
         | Tclass ((_, cid), _, tys) ->
           obj @@ kind "class" @ name cid @ args tys
         | Tobject -> obj @@ kind "object"
@@ -904,8 +891,6 @@ module Json = struct
         | Tintersection [] -> obj @@ kind "mixed"
         | Tintersection [ty] -> from_type env ty
         | Tintersection tyl -> obj @@ kind "intersection" @ args tyl
-        | Taccess (ty, ids) ->
-          obj @@ kind "path" @ typ ty @ path (List.map ids snd)
         | Tfun ft ->
           let fun_kind =
             if ft.ft_is_coroutine then
@@ -920,9 +905,6 @@ module Json = struct
           let params fps = [("params", JSON_Array (List.map fps param))] in
           obj @@ fun_kind @ params ft.ft_params @ result ft.ft_ret.et_type
         | Tanon _ -> obj @@ kind "anon"
-        | Tdarray (ty1, ty2) -> obj @@ kind "darray" @ args [ty1; ty2]
-        | Tvarray ty -> obj @@ kind "varray" @ args [ty]
-        | Tvarray_or_darray ty -> obj @@ kind "varray_or_darray" @ args [ty]
         | Tarraykind (AKvarray_or_darray ty) ->
           obj @@ kind "varray_or_darray" @ args [ty]
         | Tarraykind AKany -> obj @@ kind "array" @ empty false @ args []

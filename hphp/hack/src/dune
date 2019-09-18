@@ -22,7 +22,6 @@
     tast
     tast_typecheck
     temp_file
-    typed_positioned_syntax
     typing
     utils_core
     utils_multifile))
@@ -47,7 +46,6 @@
     server_env
     sys_utils
     tast
-    typed_positioned_syntax
     typing
     utils_core))
 
@@ -71,7 +69,6 @@
     server_env
     sys_utils
     tast
-    typed_positioned_syntax
     typing
     utils_core))
 

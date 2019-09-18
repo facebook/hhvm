@@ -175,8 +175,8 @@
     server_env
     sys_utils
     tast_check
+    tast_type_collector
     typechecker_options
-    typed_positioned_syntax
     typing
     typing_check
     typing_deps
@@ -233,7 +233,6 @@
     serverStatusSingle
     serverTypeCheck
     serverTypeDefinition
-    serverTypedAst
     serverWorker
     symbolInfoService)
   (libraries
@@ -251,8 +250,6 @@
     server_services
     shared_lru_stubs
     sys_utils
-    typed_positioned_syntax
-    typed_syntax_transforms
     typing
     utils_core
     version

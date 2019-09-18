@@ -47,8 +47,6 @@ let print_ty_with_identity env phase_ty sym_occurrence sym_definition =
 
 let ty_to_json = Typing_print.to_json
 
-let decl_ty_to_json = Typing_print.to_json
-
 let json_to_locl_ty = Typing_print.json_to_locl_ty
 
 let get_self_id_exn env =

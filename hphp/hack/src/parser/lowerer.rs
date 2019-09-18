@@ -1166,12 +1166,7 @@ where
                 let fh_suspension_kind =
                     Self::mk_suspension_kind_(node, env, has_async, has_coroutine);
                 let fh_name = Self::pos_name(function_name, env)?;
-                let fh_constrs = match &function_where_clause.syntax {
-                    Missing => vec![],
-                    WhereClause(_) => not_impl!(),
-                    _ => Self::missing_syntax(None, "function header constraints", node, env)?,
-                };
-
+                let fh_constrs = Self::p_where_constraint(false, node, function_where_clause, env)?;
                 let fh_type_parameters =
                     Self::p_tparam_l(false, function_type_parameter_list, env)?;
                 Ok(FunHdr {
@@ -2088,6 +2083,53 @@ where
         }
     }
 
+    fn p_where_constraint(
+        is_class: bool,
+        parent: &Syntax<T, V>,
+        node: &Syntax<T, V>,
+        env: &mut Env,
+    ) -> ret!(Vec<aast!(WhereConstraint)>) {
+        match &node.syntax {
+            Missing => Ok(vec![]),
+            WhereClause(c) => {
+                if is_class {
+                    // TODO: check parser option
+                    // if not (ParserOptions.enable_class_level_where_clauses env.parser_options)
+                    // Self::raise_parsing_error(parent, "Class-level where clauses are disabled");
+                }
+                let f = |n: &Syntax<T, V>, e: &mut Env| -> ret_aast!(WhereConstraint) {
+                    match &n.syntax {
+                        WhereConstraint(c) => {
+                            use ast_defs::ConstraintKind::*;
+                            let l = Self::p_hint(&c.where_constraint_left_type, e)?;
+                            let o = &c.where_constraint_operator;
+                            let o = match Self::token_kind(o) {
+                                Some(TK::Equal) => ConstraintEq,
+                                Some(TK::As) => ConstraintAs,
+                                Some(TK::Super) => ConstraintSuper,
+                                _ => Self::missing_syntax(None, "constriant operator", o, e)?,
+                            };
+                            let r = Self::p_hint(&c.where_constraint_right_type, e)?;
+                            Ok(aast::WhereConstraint(l, o, r))
+                        }
+                        _ => Self::missing_syntax(None, "where constraint", n, e),
+                    }
+                };
+                Self::as_list(&c.where_clause_constraints)
+                    .iter()
+                    .map(|n| f(n, env))
+                    .collect()
+            }
+            _ => {
+                if is_class {
+                    Self::missing_syntax(None, "classish declaration constraints", parent, env)
+                } else {
+                    Self::missing_syntax(None, "function header constraints", parent, env)
+                }
+            }
+        }
+    }
+
     fn p_def(node: &Syntax<T, V>, env: &mut Env) -> ret!(Vec<aast!(Def<,>)>) {
         let doc_comment_opt = Self::extract_docblock(node, env);
         match &node.syntax {
@@ -2161,11 +2203,8 @@ where
                 let extends = Self::could_map(&Self::p_hint, &c.classish_extends_list, env)?;
                 // TODO: env.parent_may_reified =
                 let implements = Self::could_map(&Self::p_hint, &c.classish_implements_list, env)?;
-                let where_constraints = match &c.classish_where_clause.syntax {
-                    Missing => vec![],
-                    WhereClause(_) => not_impl!(),
-                    _ => Self::missing_syntax(None, "class constraints", node, env)?,
-                };
+                let where_constraints =
+                    Self::p_where_constraint(true, node, &c.classish_where_clause, env)?;
                 let namespace = Self::mk_empty_ns_env(env);
                 let span = Self::p_pos(node, env);
                 let class_kind = match Self::token_kind(&c.classish_keyword) {

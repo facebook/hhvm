@@ -1421,6 +1421,7 @@ Cell Class::clsCnsGet(const StringData* clsCnsName, ClsCnsLookup what) const {
     nullptr,
     1,
     args,
+    false,
     false
   );
 

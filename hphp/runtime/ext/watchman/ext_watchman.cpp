@@ -354,11 +354,15 @@ struct ActiveSubscription {
         str_socket_path.toCell(),
       };
       tvDecRefGen(
-          context->invokeFuncFew(func,
-                                 nullptr, // thisOrCls
-                                 nullptr, // invName
-                                 5, // argc
-                                 args)
+        context->invokeFuncFew(
+          func,
+          nullptr, // thisOrCls
+          nullptr, // invName
+          5, // argc
+          args,
+          true, // dynamic
+          true  // allowDynCallNoPointer
+        )
       );
     } catch(Exception& e) {
       if (m_error.empty()) {

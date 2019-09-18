@@ -485,7 +485,8 @@ public:
                            StringData* invName,
                            int argc,
                            const TypedValue* argv,
-                           bool dynamic = true);
+                           bool dynamic = true,
+                           bool allowDynCallNoPointer = false);
 
   TypedValue invokeFuncFew(const Func* f,
                            void* thisOrCls,

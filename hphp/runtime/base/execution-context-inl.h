@@ -264,7 +264,8 @@ inline TypedValue ExecutionContext::invokeMethod(
     nullptr /* invName */,
     args.size(),
     args.start(),
-    dynamic
+    dynamic,
+    false
   );
 }
 

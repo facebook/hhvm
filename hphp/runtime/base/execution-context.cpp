@@ -1818,7 +1818,9 @@ TypedValue ExecutionContext::invokeFuncFew(const Func* f,
                                            StringData* invName,
                                            int argc,
                                            const TypedValue* argv,
-                                           bool dynamic /* = true */) {
+                                           bool dynamic /* = true */,
+                                           bool allowDynCallNoPointer
+                                                                /* = false */) {
   auto const doCheckStack = [&]() {
     // See comments in invokeFunc().
     if (f->isPhpLeafFn() ||
@@ -1848,7 +1850,7 @@ TypedValue ExecutionContext::invokeFuncFew(const Func* f,
   return invokeFuncImpl(f,
                         ActRec::decodeThis(thisOrCls),
                         ActRec::decodeClass(thisOrCls),
-                        argc, invName, dynamic, false,
+                        argc, invName, dynamic, allowDynCallNoPointer,
                         doCheckStack, doInitArgs, doEnterVM, Array());
 }
 

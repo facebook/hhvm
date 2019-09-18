@@ -6,119 +6,12 @@
 
 require_once 'constants.inc';
 require_once 'callback.inc';
-
-// Borrowed and stripped down from Watchman project test infrastructure.
-class WatchmanInstance {
-  private $proc;
-  private $logfile;
-  private $sockname;
-  private $config_file;
-  private $repo_root;
-  private $run_details = '';
-  const TIMEOUT = 20;
-  private function tempfile() {
-    $temp = tempnam(sys_get_temp_dir(), 'wat');
-    return $temp;
-  }
-  function __construct($tmpdir) {
-    // Not atomic but PHP doesn't support this. Should be fine.
-    $this->repo_root = $tmpdir;
-    $this->logfile = $this->tempfile();
-    $this->sockname = $this->tempfile();
-    $this->config_file = $this->tempfile();
-    $config_json = '{}';
-    file_put_contents($this->config_file, $config_json);
-    $this->start();
-  }
-  function getFullSockName() {
-    return $this->sockname . '.sock';
-  }
-  function getRepoRoot() {
-    return $this->repo_root;
-  }
-  private function start() {
-    $cmd = "watchman --foreground --sockname=%s --logfile=%s " .
-            "--statefile=%s.state --log-level=2 --pidfile=%s";
-    putenv("WATCHMAN_CONFIG_FILE=".$this->config_file);
-    $cmd = sprintf(
-      $cmd,
-      $this->getFullSockName(),
-      $this->logfile,
-      $this->logfile,
-      $this->tempfile(),
-    );
-    $pipes = array();
-    $this->run_details = "Ran command: $cmd, in ".$this->repo_root;
-    $this->proc = proc_open($cmd, array(
-      0 => array('file', '/dev/null', 'r'),
-      1 => array('file', $this->logfile, 'a'),
-      2 => array('file', $this->logfile, 'a'),
-    ), &$pipes, $this->repo_root);
-    if (!$this->proc) {
-      throw new Exception("Failed to spawn $cmd");
-    }
-    try {
-      $this->openSock();
-    } catch(Exception $e) {
-      $this->dumpLog();
-      throw $e;
-    }
-  }
-  public function dumpLog() {
-    print("Dumping log:\n");
-    system("cat $this->logfile");
-    print($this->run_details."\n");
-  }
-  private function openSock() {
-    $sockname = $this->getFullSockName();
-    $deadline = time() + 60;
-    do {
-      if (!file_exists($sockname)) {
-        usleep(30000);
-      }
-      $this->sock = @fsockopen('unix://' . $sockname);
-      if ($this->sock) {
-        break;
-      }
-    } while (time() <= $deadline);
-    if (!$this->sock) {
-      throw new Exception("Failed to talk to watchman on $sockname");
-    }
-    stream_set_timeout($this->sock, self::TIMEOUT);
-  }
-  private function waitForTerminate($timeout) {
-    if (!$this->proc) {
-      return false;
-    }
-    $deadline = time() + $timeout;
-    do {
-      $st = proc_get_status($this->proc);
-      if (!$st['running']) {
-        return $st;
-      }
-      usleep(30000);
-    } while (time() <= $deadline);
-    return $st;
-  }
-  function terminateProcess() {
-    if (!$this->proc) {
-      return;
-    }
-    proc_terminate($this->proc);
-    $st = $this->waitForTerminate(self::TIMEOUT);
-    if ($st['running']) {
-      echo "Didn't stop, sending bigger signal\n";
-      proc_terminate($this->proc, 9);
-      $st = $this->waitForTerminate(5);
-      $this->proc = null;
-    }
-  }
-}
+require_once 'wminst.inc';
 
 function waitFor(string $filename, WatchmanInstance $wminst): void {
   print("Waiting for $filename\n");
   $timeout = 5;
-  while($timeout && !file_exists(TEST_FILE_GOT_FRESH)) {
+  while($timeout && !file_exists($filename)) {
     sleep(1);
     $timeout--;
   }

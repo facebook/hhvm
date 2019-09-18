@@ -453,24 +453,15 @@ where
 
     fn as_list(node: &Syntax<T, V>) -> Vec<&Syntax<T, V>> {
         fn strip_list_item<T1, V1>(node: &Syntax<T1, V1>) -> &Syntax<T1, V1> {
-            match node {
-                Syntax {
-                    syntax: ListItem(i),
-                    ..
-                } => &i.list_item,
-                x => x,
+            match &node.syntax {
+                ListItem(i) => &i.list_item,
+                _ => node,
             }
         }
-
-        match node {
-            Syntax {
-                syntax: SyntaxList(synl),
-                ..
-            } => synl.iter().map(strip_list_item).collect(),
-            Syntax {
-                syntax: Missing, ..
-            } => vec![],
-            syn => vec![syn],
+        match &node.syntax {
+            SyntaxList(l) => l.iter().map(strip_list_item).collect(),
+            Missing => vec![],
+            _ => vec![node],
         }
     }
 
@@ -2287,9 +2278,150 @@ where
                 }
                 Ok(defs)
             }
-            AliasDeclaration(_) => not_impl!(),
-            EnumDeclaration(_) => not_impl!(),
-            RecordDeclaration(_) => not_impl!(),
+            AliasDeclaration(c) => {
+                let tparams = Self::p_tparam_l(false, &c.alias_generic_parameter, env)?;
+                for tparam in tparams.iter() {
+                    if tparam.reified != aast::ReifyKind::Erased {
+                        Self::raise_parsing_error(node, env, &syntax_error::invalid_reified)
+                    }
+                }
+                Ok(vec![aast::Def::Typedef(aast::Typedef {
+                    annotation: (),
+                    name: Self::pos_name(&c.alias_name, env)?,
+                    tparams,
+                    constraint: Self::mp_optional(&Self::p_tconstraint, &c.alias_constraint, env)?
+                        .map(|x| x.1),
+                    user_attributes: itertools::concat(
+                        Self::as_list(&c.alias_attribute_spec)
+                            .iter()
+                            .map(|attr| Self::p_user_attribute(attr, env))
+                            .collect::<std::result::Result<Vec<Vec<_>>, _>>()?,
+                    ),
+                    namespace: Self::mk_empty_ns_env(env),
+                    mode: Self::mode_annotation(env.file_mode()),
+                    vis: match Self::token_kind(&c.alias_keyword) {
+                        Some(TK::Type) => aast::TypedefVisibility::Transparent,
+                        Some(TK::Newtype) => aast::TypedefVisibility::Opaque,
+                        _ => Self::missing_syntax(None, "kind", &c.alias_keyword, env)?,
+                    },
+                    kind: Self::p_hint(&c.alias_type, env)?,
+                })])
+            }
+            EnumDeclaration(c) => {
+                let p_enumerator = |n: &Syntax<T, V>, e: &mut Env| -> ret_aast!(ClassConst<,>) {
+                    match &n.syntax {
+                        Enumerator(c) => Ok(aast::ClassConst {
+                            type_: None,
+                            visibility: aast::Visibility::Public,
+                            id: Self::pos_name(&c.enumerator_name, e)?,
+                            expr: Some(Self::p_expr(&c.enumerator_value, e)?),
+                            doc_comment: None,
+                        }),
+                        _ => Self::missing_syntax(None, "enumerator", n, e),
+                    }
+                };
+                Ok(vec![aast::Def::Class(aast::Class_ {
+                    annotation: (),
+                    mode: Self::mode_annotation(env.file_mode()),
+                    user_attributes: Self::p_user_attributes(&c.enum_attribute_spec, env)?,
+                    file_attributes: vec![],
+                    final_: false,
+                    kind: ast_defs::ClassKind::Cenum,
+                    is_xhp: false,
+                    name: Self::pos_name(&c.enum_name, env)?,
+                    tparams: aast::ClassTparams {
+                        list: vec![],
+                        constraints: s_map::SMap::new(),
+                    },
+                    extends: vec![],
+                    implements: vec![],
+                    where_constraints: vec![],
+                    consts: Self::could_map(&p_enumerator, &c.enum_enumerators, env)?,
+                    namespace: Self::mk_empty_ns_env(env),
+                    span: Self::p_pos(node, env),
+                    enum_: Some(aast::Enum_ {
+                        base: Self::p_hint(&c.enum_base, env)?,
+                        constraint: Self::mp_optional(&Self::p_tconstraint_ty, &c.enum_type, env)?,
+                    }),
+
+                    doc_comment: doc_comment_opt,
+                    uses: vec![],
+                    use_as_alias: vec![],
+                    insteadof_alias: vec![],
+                    method_redeclarations: vec![],
+                    xhp_attr_uses: vec![],
+                    xhp_category: None,
+                    reqs: vec![],
+                    vars: vec![],
+                    typeconsts: vec![],
+                    methods: vec![],
+                    attributes: vec![],
+                    xhp_children: vec![],
+                    xhp_attrs: vec![],
+                    pu_enums: vec![],
+                })])
+            }
+            RecordDeclaration(c) => {
+                let p_field = |n: &Syntax<T, V>, e: &mut Env| -> ret_aast!(ClassVar<,>) {
+                    match &n.syntax {
+                        RecordField(c) => Ok(aast::ClassVar {
+                            final_: false,
+                            type_: Some(Self::p_hint(&c.record_field_type, e)?),
+                            is_promoted_variadic: false,
+                            span: Self::p_pos(n, e),
+                            id: Self::pos_name(&c.record_field_name, e)?,
+                            expr: Self::mp_optional(
+                                &Self::p_simple_initializer,
+                                &c.record_field_init,
+                                e,
+                            )?,
+                            doc_comment: None,
+                            user_attributes: vec![],
+                            is_static: false,
+                            abstract_: false,
+                            visibility: aast::Visibility::Public,
+                            xhp_attr: None,
+                        }),
+                        _ => Self::missing_syntax(None, "record_field", n, e),
+                    }
+                };
+                Ok(vec![aast::Def::Class(aast::Class_ {
+                    annotation: (),
+                    mode: Self::mode_annotation(env.file_mode()),
+                    user_attributes: Self::p_user_attributes(&c.record_attribute_spec, env)?,
+                    file_attributes: vec![],
+                    final_: Self::token_kind(&c.record_modifier) == Some(TK::Final),
+                    kind: ast_defs::ClassKind::Crecord,
+                    is_xhp: false,
+                    name: Self::pos_name(&c.record_name, env)?,
+                    tparams: aast::ClassTparams {
+                        list: vec![],
+                        constraints: s_map::SMap::new(),
+                    },
+                    extends: Self::could_map(&Self::p_hint, &c.record_extends_list, env)?,
+                    implements: vec![],
+                    where_constraints: vec![],
+                    vars: Self::could_map(&p_field, &c.record_fields, env)?,
+                    namespace: Self::mk_empty_ns_env(env),
+                    span: Self::p_pos(node, env),
+                    enum_: None,
+                    doc_comment: doc_comment_opt,
+                    uses: vec![],
+                    use_as_alias: vec![],
+                    insteadof_alias: vec![],
+                    method_redeclarations: vec![],
+                    xhp_attr_uses: vec![],
+                    xhp_category: None,
+                    reqs: vec![],
+                    consts: vec![],
+                    typeconsts: vec![],
+                    methods: vec![],
+                    attributes: vec![],
+                    xhp_children: vec![],
+                    xhp_attrs: vec![],
+                    pu_enums: vec![],
+                })])
+            }
             InclusionDirective(child)
                 if env.file_mode() != file_info::Mode::Mdecl
                     && env.file_mode() != file_info::Mode::Mphp
@@ -2304,7 +2436,12 @@ where
             NamespaceDeclaration(_) => not_impl!(),
             NamespaceGroupUseDeclaration(_) => not_impl!(),
             NamespaceUseDeclaration(_) => not_impl!(),
-            FileAttributeSpecification(_) => not_impl!(),
+            FileAttributeSpecification(_) => {
+                Ok(vec![aast::Def::FileAttributes(aast::FileAttribute {
+                    user_attributes: Self::p_user_attribute(node, env)?,
+                    namespace: Self::mk_empty_ns_env(env),
+                })])
+            }
             _ if env.file_mode() == file_info::Mode::Mdecl
                 || env.file_mode() == file_info::Mode::Mphp && !env.codegen =>
             {

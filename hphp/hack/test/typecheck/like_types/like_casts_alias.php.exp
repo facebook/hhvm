@@ -1,10 +1,1 @@
-File "like_casts_alias.php", line 4, characters 13-13:
-Wrong type hint (Typing[4338])
-File "like_casts_alias.php", line 4, characters 9-11:
-Expected int
-File "like_casts_alias.php", line 4, characters 24-45:
-But got dynamic
-File "like_casts_alias.php", line 11, characters 7-9:
-Expected int (Typing[4110])
-File "like_casts_alias.php", line 11, characters 22-43:
-But got dynamic
+No errors

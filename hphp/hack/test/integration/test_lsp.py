@@ -1138,11 +1138,6 @@ class TestLsp(TestCase[LspTestDriver]):
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
-    def test_coverage(self) -> None:
-        self.prepare_server_environment()
-        variables = self.setup_php_file("coverage.php")
-        self.load_and_run("coverage", variables)
-
     def test_formatting(self) -> None:
 
         # This test will fail if hackfmt can't be found
@@ -1994,5 +1989,40 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
             .request(
                 comment="shutdown, id 3", method="shutdown", params={}, result=None
             )
+        )
+        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+
+    def test_serverless_ide_coverage(self) -> None:
+        variables = dict(self.prepare_serverless_ide_environment())
+        variables.update(self.setup_php_file("coverage.php"))
+        self.test_driver.stop_hh_server()
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("serverless_ide_coverage"), use_serverless_ide=True
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .request(
+                comment="Check type coverage",
+                method="textDocument/typeCoverage",
+                params={"textDocument": {"uri": "${php_file_uri}"}},
+                result={
+                    "coveredPercent": 100,
+                    "uncoveredRanges": [],
+                    "defaultMessage": "Un-type checked code. Consider adding "
+                    "type annotations.",
+                },
+            )
+            .request(comment="Shutdown", method="shutdown", params={}, result=None)
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)

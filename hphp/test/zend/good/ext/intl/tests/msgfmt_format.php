@@ -4,22 +4,23 @@
  * Format a number using misc locales/patterns.
  */
 
+include_once( 'ut_common.inc' );
 
 function ut_main()
 {
     $locales = array(
         'en_US' => "{0,number,integer} monkeys on {1,number,integer} trees make {2,number} monkeys per tree",
         'ru_UA' => "{0,number,integer} мавп на {1,number,integer} деревах це {2,number} мавпи на кожному деревi",
-        'de' => "{0,number,integer} Affen über {1,number,integer} Bäume um {2,number} Affen pro Baum", 
-        'en_UK' => "{0,number,integer} monkeys on {1,number,integer} trees make {2,number} monkeys per tree", 
+        'de' => "{0,number,integer} Affen über {1,number,integer} Bäume um {2,number} Affen pro Baum",
+        'en_UK' => "{0,number,integer} monkeys on {1,number,integer} trees make {2,number} monkeys per tree",
 	'root' => '{0,whatever} would not work!',
 	'fr' => "C'est la vie!",
-    );  
+    );
 
     $str_res = '';
 	$m = 4560;
 	$t = 123;
-	
+
     foreach( $locales as $locale => $pattern )
     {
         $str_res .= "\nLocale is: $locale\n";
@@ -34,8 +35,9 @@ function ut_main()
     return $str_res;
 }
 
-include_once( 'ut_common.inc' );
+<<__EntryPoint>>
+function main_entry(): void {
 
-// Run the test
-ut_run();
-
+  // Run the test
+  ut_run();
+}

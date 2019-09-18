@@ -4,6 +4,7 @@
  * Compare various string pairs using various locales.
  */
 
+include_once( 'ut_common.inc' );
 
 /*
  * Converts comparison result to a character.
@@ -100,6 +101,7 @@ function ut_main()
 
     return $res_str;
 }
-
-include_once( 'ut_common.inc' );
-ut_run();
+<<__EntryPoint>>
+function main_entry(): void {
+  ut_run();
+}

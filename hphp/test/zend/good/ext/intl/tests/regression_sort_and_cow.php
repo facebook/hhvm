@@ -43,6 +43,9 @@ function ut_main()
 
     return $res_str;
 }
+<<__EntryPoint>>
+function main_entry(): void {
 
-require_once( 'ut_common.inc' );
-ut_run();
+  require_once( 'ut_common.inc' );
+  ut_run();
+}

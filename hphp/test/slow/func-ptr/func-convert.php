@@ -1,7 +1,5 @@
 <?hh
 
-set_error_handler(($_n, $str) ==> { throw new Exception($str); });
-
 class Props {
   public string $a;
   public static string $b;
@@ -58,5 +56,10 @@ function main() {
   $x = hh\fun('foo'); $y = 'foo'; var_dump(io(inout $y, inout $x));
   var_dump($x, $y);
 }
+<<__EntryPoint>>
+function main_entry(): void {
 
-for ($i = 0; $i < 10; $i++) main();
+  set_error_handler(($_n, $str) ==> { throw new Exception($str); });
+
+  for ($i = 0; $i < 10; $i++) main();
+}

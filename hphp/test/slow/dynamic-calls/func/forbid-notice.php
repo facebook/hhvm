@@ -432,15 +432,18 @@ async function negative_tests() {
   $x = [new A, 'static_cmp2']; $y = [2, 1]; usort(&$y, $x);
   $x = [new CCmp2, 'foobar']; $y = [2, 1]; usort(&$y, $x);
 }
+<<__EntryPoint>>
+function main_entry(): void {
 
-echo "=============== positive tests =====================\n";
-HH\Asio\join(positive_tests());
+  echo "=============== positive tests =====================\n";
+  HH\Asio\join(positive_tests());
 
-echo "=============== negative tests =====================\n";
-HH\Asio\join(negative_tests());
+  echo "=============== negative tests =====================\n";
+  HH\Asio\join(negative_tests());
 
-set_error_handler(
-  function ($type, $msg, $file) { throw new Exception($msg); }
-);
-echo "=============== positive tests (exceptions) ========\n";
-HH\Asio\join(positive_tests());
+  set_error_handler(
+    function ($type, $msg, $file) { throw new Exception($msg); }
+  );
+  echo "=============== positive tests (exceptions) ========\n";
+  HH\Asio\join(positive_tests());
+}

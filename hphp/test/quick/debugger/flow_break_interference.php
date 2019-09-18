@@ -28,6 +28,9 @@ function main() {
   var_dump($z);
 }
 
-main();
 
+<<__EntryPoint>>
+function main_entry(): void {
 
+  main();
+}

@@ -9,13 +9,6 @@ class ArrayIteratorEx extends ArrayIterator
 	}
 }
 
-$it = new ArrayIteratorEx(range(0,3));
-
-foreach(new IteratorIterator($it) as $v)
-{
-	var_dump($v);
-}
-
 class ArrayObjectEx extends ArrayObject
 {
 	function getIterator()
@@ -24,12 +17,22 @@ class ArrayObjectEx extends ArrayObject
 		return parent::getIterator();
 	}
 }
+<<__EntryPoint>>
+function main_entry(): void {
 
-$it = new ArrayObjectEx(range(0,3));
+  $it = new ArrayIteratorEx(range(0,3));
 
-foreach(new IteratorIterator($it) as $v)
-{
-	var_dump($v);
+  foreach(new IteratorIterator($it) as $v)
+  {
+  	var_dump($v);
+  }
+
+  $it = new ArrayObjectEx(range(0,3));
+
+  foreach(new IteratorIterator($it) as $v)
+  {
+  	var_dump($v);
+  }
+
+  echo "===DONE===\n";
 }
-
-echo "===DONE===\n";

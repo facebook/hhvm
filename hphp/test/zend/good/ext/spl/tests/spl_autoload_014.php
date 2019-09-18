@@ -1,7 +1,4 @@
 <?hh
-$closure = function($class) {
-  echo "closure called with class $class\n";
-};
 
 class Autoloader {
   private $dir;
@@ -19,19 +16,25 @@ class WorkingAutoloader {
     eval("class $class { }");
   }
 }
+<<__EntryPoint>>
+function main_entry(): void {
+  $closure = function($class) {
+    echo "closure called with class $class\n";
+  };
 
-$al1 = new Autoloader('d1');
-$al2 = new WorkingAutoloader('d2');
+  $al1 = new Autoloader('d1');
+  $al2 = new WorkingAutoloader('d2');
 
-spl_autoload_register($closure);
-spl_autoload_register($al1);
-spl_autoload_register($al2);
+  spl_autoload_register($closure);
+  spl_autoload_register($al1);
+  spl_autoload_register($al2);
 
-$x = new TestX;
+  $x = new TestX;
 
-spl_autoload_unregister($closure);
-spl_autoload_unregister($al1);
+  spl_autoload_unregister($closure);
+  spl_autoload_unregister($al1);
 
-$y = new TestY;
+  $y = new TestY;
 
-echo "===DONE===\n";
+  echo "===DONE===\n";
+}

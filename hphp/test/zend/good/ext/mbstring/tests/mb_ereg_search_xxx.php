@@ -1,7 +1,4 @@
 <?hh
-	mb_regex_set_options( '' );
-
-	$encs = array( 'EUC-JP', 'Shift_JIS', 'SJIS', 'UTF-8' );
 
 	function test_search( $test_enc, $str, $look_for, $opt, $in_enc = 'EUC-JP' ) {
 		mb_regex_encoding( $test_enc );
@@ -18,8 +15,14 @@
 		test_search( $enc, "¢Ï¡¦ ¡¦¢Ï\n", ' (¡¦?¢Ï¡¦?)[[:space:]]', $opt );
 		test_search( $enc, 'abcde abdeabcf anvfabc odu abcd ', '(ab[a-z]+)', $opt );
 	}
+<<__EntryPoint>>
+function main_entry(): void {
+  	mb_regex_set_options( '' );
 
-	foreach( $encs as $enc ) {
-		do_tests( $enc, '' );
-		do_tests( $enc, 'x' );
-	}
+  	$encs = array( 'EUC-JP', 'Shift_JIS', 'SJIS', 'UTF-8' );
+
+  	foreach( $encs as $enc ) {
+  		do_tests( $enc, '' );
+  		do_tests( $enc, 'x' );
+  	}
+}

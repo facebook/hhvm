@@ -1,28 +1,4 @@
 <?hh
-/* Prototype  : resource gzopen(string filename, string mode [, int use_include_path])
- * Description: Open a .gz-file and return a .gz-file pointer
- * Source code: ext/zlib/zlib.c
- * Alias to functions:
- */
-
-require_once('gzopen_include_path.inc');
-
-echo "*** Testing gzopen() : variation ***\n";
-$thisTestDir = "gzopenVariation5.dir";
-mkdir($thisTestDir);
-chdir($thisTestDir);
-
-$newpath = relative_include_path();
-set_include_path($newpath);
-runtest();
-$newpath = generate_next_rel_path();
-set_include_path($newpath);
-runtest();
-
-teardown_relative_path();
-restore_include_path();
-chdir("..");
-rmdir($thisTestDir);
 
 function runtest() {
 	$tmpfile = 'gzopen_variation5.tmp';
@@ -51,4 +27,31 @@ function runtest() {
 	   unlink('dir1/'.$tmpfile);
 	}
 }
-echo "===DONE===\n";
+<<__EntryPoint>>
+function main_entry(): void {
+  /* Prototype  : resource gzopen(string filename, string mode [, int use_include_path])
+   * Description: Open a .gz-file and return a .gz-file pointer
+   * Source code: ext/zlib/zlib.c
+   * Alias to functions:
+   */
+
+  require_once('gzopen_include_path.inc');
+
+  echo "*** Testing gzopen() : variation ***\n";
+  $thisTestDir = "gzopenVariation5.dir";
+  mkdir($thisTestDir);
+  chdir($thisTestDir);
+
+  $newpath = relative_include_path();
+  set_include_path($newpath);
+  runtest();
+  $newpath = generate_next_rel_path();
+  set_include_path($newpath);
+  runtest();
+
+  teardown_relative_path();
+  restore_include_path();
+  chdir("..");
+  rmdir($thisTestDir);
+  echo "===DONE===\n";
+}

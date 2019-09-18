@@ -1,22 +1,26 @@
 <?hh
-	include "resourcebundle.inc";
 
-	// fall back
-	$r = new ResourceBundle( 'en_US', $bundle );
+<<__EntryPoint>>
+function main_entry(): void {
+    include "resourcebundle.inc";
 
-	printf( "length: %d\n", count($r) );
-	printf( "teststring: %s\n", $r['teststring'] );
-	printf( "testint: %d\n", $r['testint'] );
+  	// fall back
+  	$r = new ResourceBundle( 'en_US', $bundle );
 
-	print_r( $r['testvector'] );
+  	printf( "length: %d\n", count($r) );
+  	printf( "teststring: %s\n", $r['teststring'] );
+  	printf( "testint: %d\n", $r['testint'] );
 
-	printf( "testbin: %s\n", bin2hex($r['testbin']) );
+  	print_r( $r['testvector'] );
 
-	$r2 = $r['testtable'];
-	printf( "testtable: %d\n", $r2['major'] );
+  	printf( "testbin: %s\n", bin2hex($r['testbin']) );
 
-	$r2 = $r['testarray'];
-	printf( "testarray: %s\n", $r2[2] );
+  	$r2 = $r['testtable'];
+  	printf( "testtable: %d\n", $r2['major'] );
 
-	$t = $r['nonexisting'];
-	echo debug( $t );
+  	$r2 = $r['testarray'];
+  	printf( "testarray: %s\n", $r2[2] );
+
+  	$t = $r['nonexisting'];
+  	echo debug( $t );
+}

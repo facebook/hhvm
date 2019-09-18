@@ -753,8 +753,6 @@ function ut_main()
 	return $res_str;
 }
 
-echo ut_main();
-
 function check_result($result, $expected) {
 
 	if ( $result === false ) {
@@ -766,4 +764,9 @@ function check_result($result, $expected) {
 	}
 
 	return "";
+}
+<<__EntryPoint>>
+function main_entry(): void {
+
+  echo ut_main();
 }

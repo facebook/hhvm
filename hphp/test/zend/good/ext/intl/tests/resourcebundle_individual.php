@@ -1,5 +1,4 @@
 <?hh
-	include "resourcebundle.inc";
 
 function ut_main($bundle) {
 	$str_res = '';
@@ -25,7 +24,6 @@ function ut_main($bundle) {
 
 	return $str_res;
 }
-	include_once( 'ut_common.inc' );
 function ut_run2($bundle) {
 			// Run unit test in OO mode.
 			$GLOBALS['oo-mode'] = true;
@@ -53,4 +51,10 @@ function ut_run2($bundle) {
 			// Else, if the results are equal, show one of them.
 			echo $proc_result;
 }
-ut_run2($bundle);
+<<__EntryPoint>>
+function main_entry(): void {
+  include "resourcebundle.inc";
+  include_once( 'ut_common.inc' );
+
+  ut_run2($bundle);
+}

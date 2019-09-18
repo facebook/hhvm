@@ -26,17 +26,20 @@ function book_from_xml($xml) {
 	$obj->b = (string)$sxe->b;
 	return $obj;
 }
+<<__EntryPoint>>
+function main_entry(): void {
 
-$options=array(
-        'uri'      => 'http://schemas.nothing.com',
-        'location' => 'test://',
-		'actor'    => 'http://schemas.nothing.com',
-		'typemap'  => array(array("type_ns"   => "http://schemas.nothing.com",
-		                          "type_name" => "book",
-		                          "from_xml"  => "book_from_xml"))
-		);
+  $options=array(
+          'uri'      => 'http://schemas.nothing.com',
+          'location' => 'test://',
+  		'actor'    => 'http://schemas.nothing.com',
+  		'typemap'  => array(array("type_ns"   => "http://schemas.nothing.com",
+  		                          "type_name" => "book",
+  		                          "from_xml"  => "book_from_xml"))
+  		);
 
-$client = new TestSoapClient(NULL, $options);
-$ret = $client->dotest2("???");
-var_dump($ret);
-echo "ok\n";
+  $client = new TestSoapClient(NULL, $options);
+  $ret = $client->dotest2("???");
+  var_dump($ret);
+  echo "ok\n";
+}

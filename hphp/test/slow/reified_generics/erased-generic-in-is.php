@@ -7,8 +7,6 @@ function f<T>($x) {
   return $x is A<B<T>>;
 }
 
-var_dump(f<int>(1));
-
 
 /*
 function f<reify Ta, reify Tb>(Ta $x): Tb {
@@ -19,3 +17,8 @@ function f<reify Ta, reify Tb>(Ta $x): Tb {
 f<string, int>("hi"); // pass
 f<int, int>("hi"); // param fail
  */
+<<__EntryPoint>>
+function main_entry(): void {
+
+  var_dump(f<int>(1));
+}

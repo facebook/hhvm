@@ -1,4 +1,6 @@
-<?hh <<__EntryPoint>> function main(): void {
+<?hh
+
+<<__EntryPoint>> function main(): void {
 ini_set("intl.error_level", E_WARNING);
 
 $r = new ResourceBundle('en_US', NULL);

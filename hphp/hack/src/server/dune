@@ -15,6 +15,7 @@
     diagnostic_subscription
     errors
     file_info
+    glean_options
     parser_options
     procs_bucket
     pos

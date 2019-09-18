@@ -4,8 +4,9 @@
  *)
 
 (* Put any initialization code necessary here *)
-let initialize ~(globalrev_opt : int option) : unit =
-  let _ = globalrev_opt in
+let initialize ~(globalrev : int option) ~(gleanopt : GleanOptions.t) : unit =
+  let _ = globalrev in
+  let _ = gleanopt in
   ()
 
 (* If you have a way of listing namespaces, put it here *)

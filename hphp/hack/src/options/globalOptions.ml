@@ -115,6 +115,10 @@ type t = {
   po_disable_unset_class_const: bool;
   po_parser_errors_only: bool;
   tco_check_attribute_locations: bool;
+  glean_service: string;
+  glean_hostname: string;
+  glean_port: int;
+  glean_reponame: string;
 }
 [@@deriving show]
 
@@ -270,6 +274,10 @@ let default =
     po_disable_unset_class_const = false;
     po_parser_errors_only = false;
     tco_check_attribute_locations = false;
+    glean_service = "";
+    glean_hostname = "";
+    glean_port = 0;
+    glean_reponame = "www.autocomplete";
   }
 
 let make
@@ -362,6 +370,10 @@ let make
     ?(po_disable_unset_class_const = default.po_disable_unset_class_const)
     ?(po_parser_errors_only = default.po_parser_errors_only)
     ?(tco_check_attribute_locations = default.tco_check_attribute_locations)
+    ?(glean_service = default.glean_service)
+    ?(glean_hostname = default.glean_hostname)
+    ?(glean_port = default.glean_port)
+    ?(glean_reponame = default.glean_reponame)
     () =
   {
     tco_safe_array;
@@ -440,6 +452,10 @@ let make
     po_disable_unset_class_const;
     po_parser_errors_only;
     tco_check_attribute_locations;
+    glean_service;
+    glean_hostname;
+    glean_port;
+    glean_reponame;
   }
 
 let tco_safe_array t = t.tco_safe_array
@@ -604,6 +620,14 @@ let po_abstract_static_props t = t.po_abstract_static_props
 let po_disable_unset_class_const t = t.po_disable_unset_class_const
 
 let tco_check_attribute_locations t = t.tco_check_attribute_locations
+
+let glean_service t = t.glean_service
+
+let glean_hostname t = t.glean_hostname
+
+let glean_port t = t.glean_port
+
+let glean_reponame t = t.glean_reponame
 
 let set_infer_missing t w = { t with tco_infer_missing = w }
 

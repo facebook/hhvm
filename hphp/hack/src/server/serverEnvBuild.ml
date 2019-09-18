@@ -293,6 +293,7 @@ let make_env ?init_id config =
   {
     tcopt = ServerConfig.typechecker_options config;
     popt = ServerConfig.parser_options config;
+    gleanopt = ServerConfig.glean_options config;
     naming_table = Naming_table.empty;
     errorl = Errors.empty;
     failed_naming = Relative_path.Set.empty;

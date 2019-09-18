@@ -97,7 +97,8 @@ let setup_server ?custom_config ?(hhi_files = []) () =
   (* Initialize symbol index *)
   let sienv =
     SymbolIndex.initialize
-      ~globalrev_opt:None
+      ~globalrev:None
+      ~gleanopt:result.ServerEnv.gleanopt
       ~namespace_map:[]
       ~provider_name:"LocalIndex"
       ~quiet:true

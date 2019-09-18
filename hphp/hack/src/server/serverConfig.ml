@@ -26,6 +26,7 @@ type t = {
   sharedmem_config: SharedMem.config;
   tc_options: TypecheckerOptions.t;
   parser_options: ParserOptions.t;
+  glean_options: GleanOptions.t;
   formatter_override: Path.t option;
   config_hash: string option;
   (* A list of regexps for paths to ignore *)
@@ -391,6 +392,10 @@ let load config_filename options =
       ~po_parser_errors_only:(ServerArgs.ai_mode options <> None)
       ?tco_check_attribute_locations:
         (bool_opt "check_attribute_locations" config)
+      ?glean_service:(string_opt "glean_service" config)
+      ?glean_hostname:(string_opt "glean_hostname" config)
+      ?glean_port:(int_opt "glean_port" config)
+      ?glean_reponame:(string_opt "glean_reponame" config)
       ()
   in
   Errors.ignored_fixme_codes := GlobalOptions.ignored_fixme_codes global_opts;
@@ -403,6 +408,7 @@ let load config_filename options =
       sharedmem_config = make_sharedmem_config config options local_config;
       tc_options = global_opts;
       parser_options = global_opts;
+      glean_options = global_opts;
       formatter_override;
       config_hash = Some config_hash;
       ignored_paths;
@@ -420,6 +426,7 @@ let default_config =
     gc_control = GlobalConfig.gc_control;
     sharedmem_config = GlobalConfig.default_sharedmem_config;
     tc_options = TypecheckerOptions.default;
+    glean_options = GleanOptions.default;
     parser_options = ParserOptions.default;
     formatter_override = None;
     config_hash = None;
@@ -433,6 +440,9 @@ let set_parser_options config popt = { config with parser_options = popt }
 
 let set_tc_options config tcopt = { config with tc_options = tcopt }
 
+let set_glean_options config gleanopt =
+  { config with glean_options = gleanopt }
+
 let gc_control config = config.gc_control
 
 let sharedmem_config config = config.sharedmem_config
@@ -440,6 +450,8 @@ let sharedmem_config config = config.sharedmem_config
 let typechecker_options config = config.tc_options
 
 let parser_options config = config.parser_options
+
+let glean_options config = config.glean_options
 
 let formatter_override config = config.formatter_override
 

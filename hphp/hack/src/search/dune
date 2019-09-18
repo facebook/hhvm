@@ -8,6 +8,7 @@
     file_info
     full_fidelity
     future
+    glean_options
     heap_shared_mem
     index_builder
     logging

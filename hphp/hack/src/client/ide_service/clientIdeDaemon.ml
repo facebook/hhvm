@@ -190,7 +190,8 @@ let initialize
   in
   let sienv =
     SymbolIndex.initialize
-      ~globalrev_opt:None
+      ~globalrev:None
+      ~gleanopt:server_env.ServerEnv.gleanopt
       ~namespace_map
       ~provider_name:
         server_local_config.ServerLocalConfig.symbolindex_search_provider

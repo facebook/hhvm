@@ -24,7 +24,8 @@ let init_needs_search_updates ~(provider_name : string) : bool =
 
 (* Set the currently selected search provider *)
 let initialize
-    ~(globalrev_opt : int option)
+    ~(globalrev : int option)
+    ~(gleanopt : GleanOptions.t)
     ~(namespace_map : (string * string) list)
     ~(provider_name : string)
     ~(quiet : bool)
@@ -44,7 +45,7 @@ let initialize
     | SqliteIndex ->
       SqliteSearchService.initialize ~sienv ~workers ~savedstate_file_opt
     | CustomIndex ->
-      CustomSearchService.initialize ~globalrev_opt;
+      CustomSearchService.initialize ~globalrev ~gleanopt;
       sienv
     | NoIndex
     | LocalIndex

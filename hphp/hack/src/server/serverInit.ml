@@ -210,7 +210,8 @@ let init
     let namespace_map = GlobalOptions.po_auto_namespace_map env.tcopt in
     env.local_symbol_table :=
       SymbolIndex.initialize
-        ~globalrev_opt:None
+        ~globalrev:None
+        ~gleanopt:env.gleanopt
         ~namespace_map
         ~provider_name:
           genv.local_config.ServerLocalConfig.symbolindex_search_provider

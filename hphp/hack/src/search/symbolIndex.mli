@@ -16,7 +16,8 @@ val init_needs_search_updates : provider_name:string -> bool
 
 (* Get or set the currently selected search provider *)
 val initialize :
-  globalrev_opt:int option ->
+  globalrev:int option ->
+  gleanopt:GleanOptions.t ->
   namespace_map:(string * string) list ->
   provider_name:string ->
   quiet:bool ->

@@ -271,6 +271,14 @@ type t = {
    * (skipping post parse error checks) *)
   po_parser_errors_only: bool;
   tco_check_attribute_locations: bool;
+  (* Service name for glean connection; default "" to autoselect server *)
+  glean_service: string;
+  (* Hostname for glean connection; default "" to autoselect server *)
+  glean_hostname: string;
+  (* Port number for glean connection; default 0 to autoselect server *)
+  glean_port: int;
+  (* Reponame used for glean connection, default to "www.autocomplete" *)
+  glean_reponame: string;
 }
 [@@deriving show]
 
@@ -350,6 +358,10 @@ val make :
   ?po_disable_unset_class_const:bool ->
   ?po_parser_errors_only:bool ->
   ?tco_check_attribute_locations:bool ->
+  ?glean_service:string ->
+  ?glean_hostname:string ->
+  ?glean_port:int ->
+  ?glean_reponame:string ->
   unit ->
   t
 
@@ -532,3 +544,11 @@ val set_infer_missing : t -> InferMissing.t -> t
 val po_parser_errors_only : t -> bool
 
 val tco_check_attribute_locations : t -> bool
+
+val glean_service : t -> string
+
+val glean_hostname : t -> string
+
+val glean_port : t -> int
+
+val glean_reponame : t -> string

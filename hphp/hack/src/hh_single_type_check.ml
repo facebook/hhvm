@@ -224,6 +224,10 @@ let parse_options () =
   let abstract_static_props = ref false in
   let disable_halt_compiler = ref false in
   let disable_unset_class_const = ref false in
+  let glean_service = ref (GleanOptions.service GlobalOptions.default) in
+  let glean_hostname = ref (GleanOptions.hostname GlobalOptions.default) in
+  let glean_port = ref (GleanOptions.port GlobalOptions.default) in
+  let glean_reponame = ref (GleanOptions.reponame GlobalOptions.default) in
   let options =
     [
       ("--ai", Arg.String set_ai, " Run the abstract interpreter (Zoncolan)");
@@ -498,6 +502,16 @@ let parse_options () =
       ( "--disable-halt-compiler",
         Arg.Set disable_halt_compiler,
         "Disable using PHP __halt_compiler()" );
+      ( "--glean-service",
+        Arg.String (fun str -> glean_service := str),
+        "glean service name" );
+      ( "--glean-hostname",
+        Arg.String (fun str -> glean_hostname := str),
+        "glean hostname" );
+      ("--glean-port", Arg.Int (fun x -> glean_port := x), "glean port number");
+      ( "--glean-reponame",
+        Arg.String (fun str -> glean_reponame := str),
+        "glean repo name" );
     ]
   in
   let options = Arg.align ~limit:25 options in
@@ -562,6 +576,10 @@ let parse_options () =
       ~po_disable_unset_class_const:!disable_unset_class_const
       ~po_disable_halt_compiler:!disable_halt_compiler
       ~tco_check_attribute_locations:true
+      ~glean_service:!glean_service
+      ~glean_hostname:!glean_hostname
+      ~glean_port:!glean_port
+      ~glean_reponame:!glean_reponame
       ()
   in
   let tcopt =
@@ -583,7 +601,8 @@ let parse_options () =
   let namespace_map = GlobalOptions.po_auto_namespace_map tcopt in
   let sienv =
     SymbolIndex.initialize
-      ~globalrev_opt:None
+      ~globalrev:None
+      ~gleanopt:tcopt
       ~namespace_map
       ~provider_name:"LocalIndex"
       ~quiet:true

@@ -98,6 +98,7 @@ type env = {
   naming_table: Naming_table.t;
   tcopt: TypecheckerOptions.t;
   popt: ParserOptions.t;
+  gleanopt: GleanOptions.t;
   (* Errors are indexed by files that were known to GENERATE errors in
    * corresponding phases. Note that this is different from HAVING errors -
    * it's possible for checking of A to generate error in B - in this case

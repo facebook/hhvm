@@ -1485,7 +1485,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::CastDouble:
     case Op::CastString:
     case Op::CastArray:
-    case Op::CastObject:
     case Op::CastDict:
     case Op::CastKeyset:
     case Op::CastVec:

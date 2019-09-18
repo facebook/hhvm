@@ -936,7 +936,7 @@ NewRecord <record-name><litstr id vector>    [C..C]  ->  [C:Rec]
 
 NewRecordArray <record-name><litstr id vector>    [C..C]  ->  [C:Arr]
 
-  New record-array. Same as NewRecord, except it creates a record-array 
+  New record-array. Same as NewRecord, except it creates a record-array
   instead of a record.
 
 AddElemC    [C C C]  ->  [C:Arr|Dict]
@@ -1218,10 +1218,6 @@ CastString    [C]  ->  [C:Str]
 CastArray    [C]  ->  [C:Arr]
 
   Cast to array ((array)). Pushes (array)$1 onto the stack.
-
-CastObject    [C]  ->  [C:Obj]
-
-  Cast to object ((object)). Pushes (object)$1 onto the stack.
 
 CastVec       [C]  ->  [C:Vec]
 

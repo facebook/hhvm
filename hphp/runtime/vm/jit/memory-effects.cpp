@@ -2020,7 +2020,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case EqDict:
   case NeqDict:
   case ConvCellToArr:  // decrefs src, may read obj props
-  case ConvCellToObj:  // decrefs src
   case ConvObjToArr:   // decrefs src
   case ConvObjToVArr:  // can invoke PHP
   case ConvObjToDArr:  // can invoke PHP

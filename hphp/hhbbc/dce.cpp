@@ -1490,7 +1490,6 @@ void dce(Env& env, const bc::CastDict&)         { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::CastDouble&)       { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::CastInt&)          { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::CastKeyset&)       { pushRemovableIfNoThrow(env); }
-void dce(Env& env, const bc::CastObject&)       { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::CastString&)       { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::CastVArray&)       { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::CastVec&)          { pushRemovableIfNoThrow(env); }

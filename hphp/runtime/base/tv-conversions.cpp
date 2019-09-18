@@ -1476,90 +1476,6 @@ Object tvCastToObject(TypedValue tv) {
 }
 
 template<typename T>
-enable_if_lval_t<T, void> tvCastToObjectInPlace(T tv) {
-  assertx(tvIsPlausible(*tv));
-  tvUnboxIfNeeded(tv);
-  ObjectData* o;
-
-  do {
-    switch (type(tv)) {
-      case KindOfUninit:
-      case KindOfNull:
-        o = SystemLib::AllocStdClassObject().detach();
-        continue;
-
-      case KindOfBoolean:
-      case KindOfInt64:
-      case KindOfDouble:
-      case KindOfPersistentString:
-      case KindOfFunc:
-      case KindOfClass:
-      case KindOfResource: {
-        ArrayInit props(1, ArrayInit::Map{});
-        props.set(s_scalar, *tv);
-        o = ObjectData::FromArray(props.create()).detach();
-        continue;
-      }
-
-      case KindOfString: {
-        ArrayInit props(1, ArrayInit::Map{});
-        props.set(s_scalar, *tv);
-        o = ObjectData::FromArray(props.create()).detach();
-        tvDecRefStr(tv);
-        continue;
-      }
-
-      case KindOfPersistentVec:
-      case KindOfVec:
-      case KindOfPersistentDict:
-      case KindOfDict:
-      case KindOfPersistentKeyset:
-      case KindOfKeyset:
-        tvCastToArrayInPlace(tv);
-        // Fall-through to array case
-      case KindOfPersistentArray:
-      case KindOfArray:
-        // For arrays, we fall back on the Variant machinery
-        assign(tv, ObjectData::FromArray(val(tv).parr));
-        return;
-      case KindOfClsMeth:
-        raiseClsMethToVecWarningHelper();
-        tvCastToArrayInPlace(tv);
-        assign(tv, ObjectData::FromArray(val(tv).parr));
-        return;
-      case KindOfObject:
-        return;
-
-      case KindOfRecord:
-        raise_convert_record_to_type("object");
-
-      case KindOfRef:
-        break;
-    }
-    not_reached();
-  } while (0);
-
-  val(tv).pobj = o;
-  type(tv) = KindOfObject;
-  assertx(cellIsPlausible(*tv));
-}
-
-template<typename T>
-enable_if_lval_t<T, void> tvCastToNullableObjectInPlace(T tv) {
-  if (isNullType(type(tv))) {
-    // XXX(t3879280) This happens immediately before calling an extension
-    // function that takes an optional Object argument. We want to end up
-    // passing const Object& holding nullptr, so by clearing out m_data.pobj we
-    // can unconditionally treat &val(tv).pobj as a const Object& in the
-    // function being called. This violates the invariant that the value of
-    // m_data doesn't matter in a KindOfNull TypedValue.
-    val(tv).pobj = nullptr;
-  } else {
-    tvCastToObjectInPlace(tv);
-  }
-}
-
-template<typename T>
 enable_if_lval_t<T, void> tvCastToResourceInPlace(T tv) {
   assertx(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);
@@ -1606,8 +1522,6 @@ X(String)
 X(Vec)
 X(Dict)
 X(Keyset)
-X(Object)
-X(NullableObject)
 X(Resource)
 X(VArray)
 X(DArray)

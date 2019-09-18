@@ -1805,8 +1805,6 @@ void in(ISS& env, const bc::CastArray&)  {
   castImpl(env, TPArr, tvCastToArrayInPlace);
 }
 
-void in(ISS& env, const bc::CastObject&) { castImpl(env, TObj, nullptr); }
-
 void in(ISS& env, const bc::CastDict&)   {
   castImpl(env, TDict, tvCastToDictInPlace);
 }

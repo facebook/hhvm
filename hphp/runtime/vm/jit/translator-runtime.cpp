@@ -382,19 +382,6 @@ double convCellToDblHelper(TypedValue tv) {
   return tvCastToDouble(tv);
 }
 
-ObjectData* convCellToObjHelper(TypedValue tv) {
-  // Note: the call sites of this function all assume that
-  // no user code will run and no recoverable exceptions will
-  // occur while running this code. This seems trivially true
-  // in all cases but converting arrays to objects. It also
-  // seems true for that case as well, since the source array
-  // is essentially metadata for the object. If that is not true,
-  // you might end up looking at this code in a debugger and now
-  // you know why.
-  tvCastToObjectInPlace(&tv); // consumes a ref on counted values
-  return tv.m_data.pobj;
-}
-
 StringData* convDblToStrHelper(double d) {
   return buildStringData(d);
 }

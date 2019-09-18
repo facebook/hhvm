@@ -572,11 +572,6 @@ void emitCastInt(IRGS& env) {
   decRef(env, src);
 }
 
-void emitCastObject(IRGS& env) {
-  auto const src = popC(env);
-  push(env, gen(env, ConvCellToObj, src));
-}
-
 void emitCastString(IRGS& env) {
   auto const src = popC(env);
   push(env, gen(env, ConvCellToStr, src));

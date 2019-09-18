@@ -2458,11 +2458,6 @@ OPTBLD_INLINE void iopCastArray() {
   tvCastToArrayInPlace(c1);
 }
 
-OPTBLD_INLINE void iopCastObject() {
-  Cell* c1 = vmStack().topC();
-  tvCastToObjectInPlace(c1);
-}
-
 OPTBLD_INLINE void iopCastDict() {
   Cell* c1 = vmStack().topC();
   tvCastToDictInPlace(c1);

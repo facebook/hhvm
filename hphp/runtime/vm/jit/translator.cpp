@@ -183,7 +183,6 @@ static const struct {
   { OpCastDouble,  {Stack1,           Stack1,       OutDouble       }},
   { OpCastString,  {Stack1,           Stack1,       OutString       }},
   { OpCastArray,   {Stack1,           Stack1,       OutArray        }},
-  { OpCastObject,  {Stack1,           Stack1,       OutObject       }},
   { OpCastDict,    {Stack1,           Stack1,       OutDict         }},
   { OpCastKeyset,  {Stack1,           Stack1,       OutKeyset       }},
   { OpCastVec,     {Stack1,           Stack1,       OutVec          }},
@@ -923,7 +922,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::CastArray:
   case Op::CastDouble:
   case Op::CastInt:
-  case Op::CastObject:
   case Op::CastString:
   case Op::CastDict:
   case Op::CastKeyset:

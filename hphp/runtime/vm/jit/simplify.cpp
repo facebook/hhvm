@@ -2569,10 +2569,6 @@ SSATmp* simplifyConvObjToBool(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* simplifyConvCellToObj(State& /*env*/, const IRInstruction* inst) {
-  if (inst->src(0)->isA(TObj)) return inst->src(0);
-  return nullptr;
-}
 
 SSATmp* simplifyDblAsBits(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
@@ -3857,7 +3853,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(ConvCellToBool)
   X(ConvCellToDbl)
   X(ConvCellToInt)
-  X(ConvCellToObj)
   X(ConvCellToStr)
   X(ConvCellToArr)
   X(ConvClsToCctx)

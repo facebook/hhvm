@@ -530,8 +530,6 @@ IMPL_OPCODE_CALL(ConvDictToKeyset);
 IMPL_OPCODE_CALL(ConvClsMethToKeyset);
 IMPL_OPCODE_CALL(ConvObjToKeyset);
 
-IMPL_OPCODE_CALL(ConvCellToObj);
-
 ///////////////////////////////////////////////////////////////////////////////
 
 static TypedValue strictlyIntegerConvImpl(StringData* str) {

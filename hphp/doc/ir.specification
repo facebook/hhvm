@@ -536,11 +536,6 @@ To int conversions:
 | ConvCellToInt,                D(Int), S(Cell),                          NF
 
 
-To object conversions:
-
-| ConvCellToObj, D(Obj), S(Cell), CRc|PRc
-
-
 To string conversions:
 
 | ConvDblToStr,                 D(Str), S(Dbl),                          PRc

@@ -223,9 +223,6 @@ static CallMap s_callMap {
     {ConvCellToInt,      cellToInt, DSSA, SSync,
                            {{TV, 0}}},
 
-    {ConvCellToObj,      convCellToObjHelper, DSSA, SSync,
-                           {{TV, 0}}},
-
     {ConvDblToStr,       convDblToStrHelper, DSSA, SNone,
                            {{SSA, 0}}},
     {ConvIntToStr,       convIntToStrHelper, DSSA, SNone,

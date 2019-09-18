@@ -349,7 +349,6 @@ bool opcodeMayRaise(Opcode opc) {
   case ConvCellToBool:
   case ConvCellToDbl:
   case ConvCellToInt:
-  case ConvCellToObj:
   case ConvCellToStr:
   case ConvClsMethToArr:
   case ConvClsMethToDArr:

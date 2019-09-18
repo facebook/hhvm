@@ -90,7 +90,6 @@ double convArrToDblHelper(ArrayData* a);
 double convStrToDblHelper(const StringData* s);
 double convResToDblHelper(const ResourceHdr* r);
 double convCellToDblHelper(TypedValue tv);
-ObjectData* convCellToObjHelper(TypedValue tv);
 StringData* convDblToStrHelper(double i);
 StringData* convIntToStrHelper(int64_t i);
 StringData* convObjToStrHelper(ObjectData* o);

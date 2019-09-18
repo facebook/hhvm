@@ -87,7 +87,7 @@ let utf32_to_utf8 k =
 
 let utf32_to_utf8 k = Bytes.to_string (utf32_to_utf8 k)
 
-let decode_table =
+let utf_entity_maps =
   let ent_iso_8859_1 =
     [
       "nbsp";
@@ -691,7 +691,7 @@ let decode_table =
       "ape";
       "";
       "bcong";
-      "asymp";
+      "asympeq";
       "bump";
       "bumpe";
       (* 8784 (0x2250) *)
@@ -933,20 +933,20 @@ let decode_table =
   let ent_uni_9824_9830 =
     [(* 9824 *) "spades"; ""; ""; "clubs"; ""; "hearts"; "diams"]
   in
-  let utf_entity_maps =
-    [
-      { start_char = 0xa0; table = ent_iso_8859_1 };
-      { start_char = 338; table = ent_uni_338_402 };
-      { start_char = 710; table = ent_uni_spacing };
-      { start_char = 913; table = ent_uni_greek };
-      { start_char = 8194; table = ent_uni_punct };
-      { start_char = 8364; table = ent_uni_euro };
-      { start_char = 8465; table = ent_uni_8465_8501 };
-      { start_char = 8592; table = ent_uni_8592_9002 };
-      { start_char = 9674; table = ent_uni_9674 };
-      { start_char = 9824; table = ent_uni_9824_9830 };
-    ]
-  in
+  [
+    { start_char = 0xa0; table = ent_iso_8859_1 };
+    { start_char = 338; table = ent_uni_338_402 };
+    { start_char = 710; table = ent_uni_spacing };
+    { start_char = 913; table = ent_uni_greek };
+    { start_char = 8194; table = ent_uni_punct };
+    { start_char = 8364; table = ent_uni_euro };
+    { start_char = 8465; table = ent_uni_8465_8501 };
+    { start_char = 8592; table = ent_uni_8592_9002 };
+    { start_char = 9674; table = ent_uni_9674 };
+    { start_char = 9824; table = ent_uni_9824_9830 };
+  ]
+
+let decode_table =
   let decode_table = Caml.Hashtbl.create 0 in
   List.iter utf_entity_maps ~f:(fun { start_char; table } ->
       List.iteri table ~f:(fun i entity ->

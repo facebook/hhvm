@@ -7,6 +7,8 @@
  *
  *)
 
+module OcamlPervasives = Pervasives
+module OcamlPrintf = Printf
 open Core_kernel
 open Printf
 open Full_fidelity_schema
@@ -3717,6 +3719,136 @@ OPERATOR_DECL_IMPLend
       ()
 end
 
+type gen_data = {
+  path: string;
+  content: string;
+}
+
+let gen_file data =
+  let file = OcamlPervasives.open_out data.path in
+  OcamlPrintf.fprintf file "%s" data.content
+
+let escape = Str.replace_first (Str.regexp "\"") "\\\""
+
+module GenerateHtmlEntityDecodTable = struct
+  open Html_entities
+
+  let template =
+    make_header CStyle ""
+    ^ "
+
+/**
+ * HTML5 special entity decoding
+ *
+ * HHVM decodes certain HTML entities present in input strings before
+ * generating bytecode. In order to generate bytecode identical to HHVM's,
+ * this module performs the same HTML entity decoding as HHVM.
+ * Mimics: zend-html.cpp
+ * The list of entities tested was taken from
+ * https://dev.w3.org/html5/html-author/charref on 09/27/2017.
+ */
+pub fn decode(s: &[u8]) -> Option<&'static [u8]> {
+    match s {
+TABLE
+        _ => None,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use pretty_assertions::assert_eq;
+
+    #[test]
+    fn test() {
+TEST_CASES
+    }
+}
+"
+
+  let to_hex_array s =
+    let rec to_array i =
+      match i with
+      | _ when i = String.length s -> ""
+      | _ -> Printf.sprintf "0x%x, " (Caml.Char.code s.[i]) ^ to_array (i + 1)
+    in
+    "&[" ^ to_array 0 ^ "]"
+
+  let table =
+    Caml.Hashtbl.fold
+      (fun key value acc ->
+        acc
+        ^ Printf.sprintf
+            "        //\"%s\" => \"%s\"\n        %s => Some(%s),\n"
+            key
+            value
+            (to_hex_array key)
+            (to_hex_array value))
+      decode_table
+      ""
+
+  let test_cases =
+    Caml.Hashtbl.fold
+      (fun key value acc ->
+        acc
+        ^ Printf.sprintf
+            "        assert_eq!(decode(\"%s\".as_bytes()).unwrap(), \"%s\".as_bytes());\n"
+            key
+            (escape value))
+      decode_table
+      ""
+
+  let data =
+    {
+      path = "hphp/hack/src/utils/html_entities/decoder.rs";
+      content =
+        template
+        |> Str.replace_first (Str.regexp "TABLE") table
+        |> Str.replace_first (Str.regexp "TEST_CASES") test_cases;
+    }
+end
+
+module GenerateHtmlEntityUtf32Tests = struct
+  open Html_entities
+
+  let template =
+    make_header CStyle ""
+    ^ "
+#[cfg(test)]
+mod tests {
+    use html_entities::decoder::*;
+    use pretty_assertions::assert_eq;
+
+    fn helper(x: u32) -> Vec<u8> {
+        html_entities::utf32_to_utf8_alloc(x)
+    }
+
+    #[test]
+    fn test() {
+TEST_CASES
+    }
+}"
+
+  let test_cases =
+    List.fold utf_entity_maps ~init:"" ~f:(fun acc { start_char; table } ->
+        List.foldi table ~init:acc ~f:(fun i a e ->
+            match String.length e with
+            | 0 -> a
+            | _ ->
+              a
+              ^ Printf.sprintf
+                  "        assert_eq!(&helper(%d)[..], decode(b\"%s\").unwrap());\n"
+                  (start_char + i)
+                  (escape e)))
+
+  let data =
+    {
+      path = "hphp/hack/src/utils/html_entities/test/utf32_to_utf8.rs";
+      content =
+        template |> Str.replace_first (Str.regexp "TEST_CASES") test_cases;
+    }
+end
+
 let () =
   generate_file GenerateFFOperatorRust.full_fidelity_operators;
   generate_file GenerateFFOperator.full_fidelity_operator;
@@ -3761,4 +3893,6 @@ let () =
   generate_file
     GenerateFFRustSmartConstructorsWrappers
     .full_fidelity_smart_constructors_wrappers;
-  generate_file GenerateOcamlSyntax.ocaml_syntax
+  generate_file GenerateOcamlSyntax.ocaml_syntax;
+  gen_file GenerateHtmlEntityDecodTable.data;
+  gen_file GenerateHtmlEntityUtf32Tests.data

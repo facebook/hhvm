@@ -282,11 +282,22 @@ let go
     let name =
       Printf.sprintf "Scanned repository folder [%s] in " ctxt.repo_folder
     in
+    let hhconfig_path = Path.concat (Path.make ctxt.repo_folder) ".hhconfig" in
     let files =
-      measure_time
-        ~silent:ctxt.silent
-        ~f:(fun () -> gather_file_list ctxt.repo_folder)
-        ~name
+      (* Sanity test.  If the folder does not have an .hhconfig file, this is probably
+        * an integration test that's using a fake repository.  Don't do anything! *)
+      if Disk.file_exists (Path.to_string hhconfig_path) then
+        measure_time
+          ~silent:ctxt.silent
+          ~f:(fun () -> gather_file_list ctxt.repo_folder)
+          ~name
+      else (
+        if not ctxt.silent then
+          Hh_logger.log
+            "The repository [%s] lacks an .hhconfig file.  Skipping index of repository."
+            ctxt.repo_folder;
+        []
+      )
     in
     (* If desired, get the HHI root folder and add all HHI files from there *)
     let files =

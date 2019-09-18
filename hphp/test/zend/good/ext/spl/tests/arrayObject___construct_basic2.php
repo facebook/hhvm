@@ -7,16 +7,6 @@ class MyArrayObject extends ArrayObject {
 	public $prop = 'MyArrayObject::prop.orig';
 }	
 
-echo "--> Access prop on instance of ArrayObject:\n";
-$c = new C;
-$ao = new ArrayObject($c);
-testAccess($c, $ao);
-
-echo "\n--> Access prop on instance of MyArrayObject:\n";
-$c = new C;
-$ao = new MyArrayObject($c);
-testAccess($c, $ao);
-
 function testAccess($c, $ao) {
 	echo "  - Iteration:\n";
 	foreach ($ao as $key=>$value) {
@@ -41,4 +31,17 @@ function testAccess($c, $ao) {
 	
 	echo "  - After:\n";
 	var_dump($ao, $c);
+}
+<<__EntryPoint>>
+function main_entry(): void {
+
+  echo "--> Access prop on instance of ArrayObject:\n";
+  $c = new C;
+  $ao = new ArrayObject($c);
+  testAccess($c, $ao);
+
+  echo "\n--> Access prop on instance of MyArrayObject:\n";
+  $c = new C;
+  $ao = new MyArrayObject($c);
+  testAccess($c, $ao);
 }

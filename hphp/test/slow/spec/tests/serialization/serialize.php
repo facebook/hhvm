@@ -1,11 +1,7 @@
 <?hh
+<<__EntryPoint>>
+function main_entry(): void {
+  error_reporting(-1);
 
-/*
-   +-------------------------------------------------------------+
-   | Copyright (c) 2015 Facebook, Inc. (http://www.facebook.com) |
-   +-------------------------------------------------------------+
-*/
-
-error_reporting(-1);
-
-include_once 'Point.inc';
+  include_once 'Point.inc';
+}

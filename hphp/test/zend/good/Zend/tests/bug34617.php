@@ -8,4 +8,7 @@ function boom()
     die("ok\n");
     xml_parser_free($reader);
 }
-boom();
+<<__EntryPoint>>
+function main_entry(): void {
+  boom();
+}

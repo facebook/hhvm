@@ -1,21 +1,5 @@
 <?hh
 
-/*
-   +-------------------------------------------------------------+
-   | Copyright (c) 2015 Facebook, Inc. (http://www.facebook.com) |
-   +-------------------------------------------------------------+
-*/
-
-error_reporting(-1);
-
-$table = array();
-$table[0] = [34];
-$table[0][1] = -3;
-$table[0][2] = 345;
-$table[1] = [123];
-$table[1][1] = 9854;
-$table[1][2] = -765;
-
 function findValue($table, $v)  // where $table is 2x3 array
 {
         for ($row = 0; $row <= 1; ++$row)
@@ -35,9 +19,6 @@ done:
         ;       // note that a label must always precede a statement
 }
 
-findValue($table, 123);
-findValue($table, -23);
-
 /*
 // Try to jump into a while loop (which is inside a for loop); disallowed
 
@@ -51,3 +32,18 @@ label1:
         }
 }
 */
+<<__EntryPoint>>
+function main_entry(): void {
+  error_reporting(-1);
+
+  $table = array();
+  $table[0] = [34];
+  $table[0][1] = -3;
+  $table[0][2] = 345;
+  $table[1] = [123];
+  $table[1][1] = 9854;
+  $table[1][2] = -765;
+
+  findValue($table, 123);
+  findValue($table, -23);
+}

@@ -1,7 +1,5 @@
 <?hh
 
-error_reporting(E_ALL);
-
 trait Hello {
    public function saySomething() {
      echo 'Hello';
@@ -20,7 +18,12 @@ class MyHelloWorld {
 	 World::saySomething as sayWorld;
    }
 }
- 
-$o = new MyHelloWorld();
-$o->saySomething();
-$o->sayWorld();
+<<__EntryPoint>>
+function main_entry(): void {
+
+  error_reporting(E_ALL);
+
+  $o = new MyHelloWorld();
+  $o->saySomething();
+  $o->sayWorld();
+}

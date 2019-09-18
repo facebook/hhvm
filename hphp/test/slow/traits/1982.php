@@ -1,6 +1,4 @@
 <?hh
-
-error_reporting(E_ALL);
 trait THello1 {
   public $hello = "Hello";
 }
@@ -14,7 +12,12 @@ class TraitsTest {
     echo $this->hello . ' ' . $this->world;
   }
 }
-var_dump(property_exists('TraitsTest', 'hello'));
-var_dump(property_exists('TraitsTest', 'world'));
-$t = new TraitsTest;
-$t->test();
+<<__EntryPoint>>
+function main_entry(): void {
+
+  error_reporting(E_ALL);
+  var_dump(property_exists('TraitsTest', 'hello'));
+  var_dump(property_exists('TraitsTest', 'world'));
+  $t = new TraitsTest;
+  $t->test();
+}

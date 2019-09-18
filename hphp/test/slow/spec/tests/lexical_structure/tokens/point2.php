@@ -1,13 +1,5 @@
 <?hh
 
-/*
-   +-------------------------------------------------------------+
-   | Copyright (c) 2015 Facebook, Inc. (http://www.facebook.com) |
-   +-------------------------------------------------------------+
-*/
-
-error_reporting(-1);
-
 class Point2
 {
     public $x;
@@ -25,4 +17,8 @@ class Point2
     {
         return '(' . $this->x . ',' . $this->y . ')';
     }
+}
+<<__EntryPoint>>
+function main_entry(): void {
+  error_reporting(-1);
 }

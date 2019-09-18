@@ -16,7 +16,10 @@
     return $this->values[$name];
   }
 }
+<<__EntryPoint>>
+function main_entry(): void {
 
-$test = new overloaded();
-$test->a++;     // __get(), then __set()
-++$test->a;
+  $test = new overloaded();
+  $test->a++;     // __get(), then __set()
+  ++$test->a;
+}

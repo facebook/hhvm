@@ -1,5 +1,4 @@
 <?hh
-new Attachment("");
 
 function __autoload($class) {
     switch ($class) {
@@ -34,4 +33,8 @@ PHP
     }
     return TRUE;
 }
-echo "okey";
+<<__EntryPoint>>
+function main_entry(): void {
+  new Attachment("");
+  echo "okey";
+}

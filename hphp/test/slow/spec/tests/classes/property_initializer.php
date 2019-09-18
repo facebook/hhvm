@@ -1,13 +1,5 @@
 <?hh
 
-/*
-   +-------------------------------------------------------------+
-   | Copyright (c) 2015 Facebook, Inc. (http://www.facebook.com) |
-   +-------------------------------------------------------------+
-*/
-
-error_reporting(-1);
-
 ///*
 class Point
 {
@@ -23,23 +15,8 @@ class Point
     public function __toString()
     {
         return '(' . $this->x . ',' . $this->y . ')';
-    }   
+    }
 }
-
-$p = new Point;
-echo $p . "\n";
-
-$p = new Point();
-echo $p . "\n";
-
-$p = new Point(100);
-echo $p . "\n";
-
-$p = new Point(1000, 2000);
-echo $p . "\n";
-//*/
-
-echo "--------------------\n";
 
 function f() { return 10; }
 
@@ -63,7 +40,26 @@ class X
     public $q1;         // take on NULL by default
     public static $q2;  // take on NULL by default
 }
+<<__EntryPoint>>
+function main_entry(): void {
+  error_reporting(-1);
 
-$x = new X;
-var_dump($x->q1);
-var_dump(X::$q2);
+  $p = new Point;
+  echo $p . "\n";
+
+  $p = new Point();
+  echo $p . "\n";
+
+  $p = new Point(100);
+  echo $p . "\n";
+
+  $p = new Point(1000, 2000);
+  echo $p . "\n";
+  //*/
+
+  echo "--------------------\n";
+
+  $x = new X;
+  var_dump($x->q1);
+  var_dump(X::$q2);
+}

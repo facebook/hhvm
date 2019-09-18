@@ -4,13 +4,6 @@ function foo($v) {
   return (bool)$v;
 }
 
-var_dump(foo(null));
-var_dump(foo(true));
-var_dump(foo(1));
-var_dump(foo(1.1));
-var_dump(foo("true"));
-var_dump(foo(array(123)));
-
 class C{}
 
 function bar($i) {
@@ -82,5 +75,15 @@ function bar($i) {
   var_dump((bool) $filled_col_5);
   var_dump((bool) $filled_col_6);
 }
+<<__EntryPoint>>
+function main_entry(): void {
 
-bar(1);
+  var_dump(foo(null));
+  var_dump(foo(true));
+  var_dump(foo(1));
+  var_dump(foo(1.1));
+  var_dump(foo("true"));
+  var_dump(foo(array(123)));
+
+  bar(1);
+}

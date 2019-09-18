@@ -1,13 +1,5 @@
 <?hh
 
-/*
-   +-------------------------------------------------------------+
-   | Copyright (c) 2015 Facebook, Inc. (http://www.facebook.com) |
-   +-------------------------------------------------------------+
-*/
-
-error_reporting(-1);
-
 class M
 {
 // The following members are overridden in class P
@@ -116,52 +108,6 @@ class P extends N
     const MYPI = 3.14159;
 }
 
-var_dump(M::psf());     // okay to access static method via class
-$memName = 'psf';
-var_dump(M::$memName());// string form allowed
-//var_dump(M::'psf'()); // but not string literal
-
-var_dump(M::$psProp);   // okay to access static property via class, but leading $ needed!!
-$memName = '$psProp';
-//var_dump(M::$memName);// Access to undeclared static property: M::$memName
-//var_dump(M::memName);// Undefined class constant 'memName'
-
-var_dump(M::MYPI);      // okay to access const via class
-$memName = 'MYPI';
-//var_dump(M::$memName);    // Access to undeclared static property: M::$memName
-
-$clName = "M";
-var_dump($clName::MYPI);    // okay to use a string containing class name
-//var_dump("M"::MYPI);      // but not the literal form
-
-echo "-----------------------------\n";
-
-var_dump(P::psf());     // okay to access static method via class
-var_dump(P::$psProp);   // okay to access static property via class, but leading $ needed!!
-var_dump(P::MYPI);      // okay to access const via class
-
-$clName = "P";
-var_dump($clName::MYPI);    // okay to use a string containing class name
-
-echo "-----------------------------\n";
-
-P::f1();
-
-echo "-----------------------------\n";
-
-$m = new M;
-$n = new N;
-$p = new P(1000);
-
-echo "-----------------------------\n";
-$m->b1();
-echo "-----------------------------\n";
-$n->b1();
-echo "-----------------------------\n";
-$p->b1();
-
-echo "-----------------------------\n";
-
 // simplified version of static
 
 class Base
@@ -187,13 +133,6 @@ class Derived extends Base
     }
 }
 
-$b1 = new Base;
-$b1->b();
-$d1 = new Derived;
-$d1->b();
-
-echo "-----------------------------\n";
-
 // see about :: in interfaces
 
 interface I1
@@ -204,12 +143,6 @@ interface I1
     function f();
 }
 
-var_dump(I1::CON1);
-$intName = 'I1';
-var_dump($intName::CON1);
-var_dump(I1::CON2);
-var_dump(I1::CON3);
-
 interface I2 extends I1
 {
     const CON4 = parent::CON1;  // Cannot access parent:: when current class scope has no parent
@@ -218,9 +151,6 @@ interface I2 extends I1
 //var_dump(I2::CON4);
 
 class X implements I2 { function f() {} }
-//$x = new X;
-
-echo "-----------------------------\n";
 
 // see about ...::class
 
@@ -240,10 +170,76 @@ class W2 extends W1
         var_dump(static::class);
     }
 }
+<<__EntryPoint>>
+function main_entry(): void {
+  error_reporting(-1);
 
-$w2 = new W2;
-var_dump($w2);
+  var_dump(M::psf());     // okay to access static method via class
+  $memName = 'psf';
+  var_dump(M::$memName());// string form allowed
+  //var_dump(M::'psf'()); // but not string literal
 
-$w2->M();
+  var_dump(M::$psProp);   // okay to access static property via class, but leading $ needed!!
+  $memName = '$psProp';
+  //var_dump(M::$memName);// Access to undeclared static property: M::$memName
+  //var_dump(M::memName);// Undefined class constant 'memName'
 
-var_dump(W2::class);
+  var_dump(M::MYPI);      // okay to access const via class
+  $memName = 'MYPI';
+  //var_dump(M::$memName);    // Access to undeclared static property: M::$memName
+
+  $clName = "M";
+  var_dump($clName::MYPI);    // okay to use a string containing class name
+  //var_dump("M"::MYPI);      // but not the literal form
+
+  echo "-----------------------------\n";
+
+  var_dump(P::psf());     // okay to access static method via class
+  var_dump(P::$psProp);   // okay to access static property via class, but leading $ needed!!
+  var_dump(P::MYPI);      // okay to access const via class
+
+  $clName = "P";
+  var_dump($clName::MYPI);    // okay to use a string containing class name
+
+  echo "-----------------------------\n";
+
+  P::f1();
+
+  echo "-----------------------------\n";
+
+  $m = new M;
+  $n = new N;
+  $p = new P(1000);
+
+  echo "-----------------------------\n";
+  $m->b1();
+  echo "-----------------------------\n";
+  $n->b1();
+  echo "-----------------------------\n";
+  $p->b1();
+
+  echo "-----------------------------\n";
+
+  $b1 = new Base;
+  $b1->b();
+  $d1 = new Derived;
+  $d1->b();
+
+  echo "-----------------------------\n";
+
+  var_dump(I1::CON1);
+  $intName = 'I1';
+  var_dump($intName::CON1);
+  var_dump(I1::CON2);
+  var_dump(I1::CON3);
+  //$x = new X;
+
+  echo "-----------------------------\n";
+
+  $w2 = new W2;
+  var_dump($w2);
+
+  $w2->M();
+
+  var_dump(W2::class);
+}

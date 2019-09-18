@@ -1,5 +1,4 @@
 <?hh
-// Copyright 2004-present Facebook. All Rights Reserved.
 
 type Foo = KeyedContainer<string, mixed>;
 
@@ -9,4 +8,7 @@ function get(): Foo {
 function test() {
   var_dump(get());
 }
-test();
+<<__EntryPoint>>
+function main_entry(): void {
+  test();
+}

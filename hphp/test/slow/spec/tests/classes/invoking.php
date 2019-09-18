@@ -1,7 +1,5 @@
 <?hh
 
-error_reporting(-1);
-
 class C
 {
 ///*
@@ -14,10 +12,15 @@ class C
 //*/
 }
 
-$c = new C;
-var_dump(is_callable($c)); // returns TRUE is __invoke exists; otherwise, FALSE
-$r = $c(123);
-var_dump($r);
-$r = $c("Hello");
-var_dump($r);
+<<__EntryPoint>>
+function main_entry(): void {
 
+  error_reporting(-1);
+
+  $c = new C;
+  var_dump(is_callable($c)); // returns TRUE is __invoke exists; otherwise, FALSE
+  $r = $c(123);
+  var_dump($r);
+  $r = $c("Hello");
+  var_dump($r);
+}

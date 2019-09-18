@@ -10,7 +10,10 @@ function foo(array<int> $arr): void {
   echo "sum is ";
   var_dump($sum);
 }
+<<__EntryPoint>>
+function main_entry(): void {
 
-foo(array());
-foo(array(1));
-foo(array(1, 2, 3, 4, 5));
+  foo(array());
+  foo(array(1));
+  foo(array(1, 2, 3, 4, 5));
+}

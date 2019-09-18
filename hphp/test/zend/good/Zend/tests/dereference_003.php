@@ -1,7 +1,5 @@
 <?hh
 
-error_reporting(E_ALL);
-
 class  foo {
 	public $x = 2;
 	public function a() {
@@ -22,11 +20,16 @@ class  foo {
 	}
 }
 
-$foo = new foo;
+<<__EntryPoint>>
+function main_entry(): void {
 
-var_dump($foo->a()[0]->x);
-var_dump($foo->a()[0]);
-var_dump($foo->b()[1][0]->a()[0]->x);
-var_dump($foo->c(&$a, &$a)[0]);
-var_dump($foo->d()[0]);
+  error_reporting(E_ALL);
 
+  $foo = new foo;
+
+  var_dump($foo->a()[0]->x);
+  var_dump($foo->a()[0]);
+  var_dump($foo->b()[1][0]->a()[0]->x);
+  var_dump($foo->c(&$a, &$a)[0]);
+  var_dump($foo->d()[0]);
+}

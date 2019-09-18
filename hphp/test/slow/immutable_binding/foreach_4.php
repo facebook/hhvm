@@ -10,7 +10,10 @@ function foo(Map<int, int> $arr): void {
   echo "sum is ";
   var_dump($sum);
 }
+<<__EntryPoint>>
+function main_entry(): void {
 
-foo(Map {});
-foo(Map {1 => 1});
-foo(Map {1 => 1, 2 => 2, 3 => 3, 4 => 4, 5 => 5});
+  foo(Map {});
+  foo(Map {1 => 1});
+  foo(Map {1 => 1, 2 => 2, 3 => 3, 4 => 4, 5 => 5});
+}

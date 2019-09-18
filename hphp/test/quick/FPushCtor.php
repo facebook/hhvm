@@ -1,7 +1,5 @@
 <?hh
 
-print "Test begin\n";
-
 class C {}
 class D {
   function __construct() {
@@ -29,23 +27,28 @@ class M extends J {
     print "In M::__construct()\n";
   }
 }
+<<__EntryPoint>>
+function main_entry(): void {
 
-$c = new C;
-$c = new D;
-$c = new F;
-$c = new G;
-$c = new H;
-$c = new J;
-$c = new K;
-$c = new M;
+  print "Test begin\n";
 
-$X = "C"; $c = new $X;
-$X = "D"; $c = new $X;
-$X = "F"; $c = new $X;
-$X = "G"; $c = new $X;
-$X = "H"; $c = new $X;
-$X = "J"; $c = new $X;
-$X = "K"; $c = new $X;
-$X = "M"; $c = new $X;
+  $c = new C;
+  $c = new D;
+  $c = new F;
+  $c = new G;
+  $c = new H;
+  $c = new J;
+  $c = new K;
+  $c = new M;
 
-print "Test end\n";
+  $X = "C"; $c = new $X;
+  $X = "D"; $c = new $X;
+  $X = "F"; $c = new $X;
+  $X = "G"; $c = new $X;
+  $X = "H"; $c = new $X;
+  $X = "J"; $c = new $X;
+  $X = "K"; $c = new $X;
+  $X = "M"; $c = new $X;
+
+  print "Test end\n";
+}

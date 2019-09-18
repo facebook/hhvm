@@ -1,58 +1,54 @@
 <?hh
+<<__EntryPoint>>
+function main_entry(): void {
+  error_reporting(-1);
 
-/*
-   +-------------------------------------------------------------+
-   | Copyright (c) 2015 Facebook, Inc. (http://www.facebook.com) |
-   +-------------------------------------------------------------+
-*/
+  // Try to require a non-existant file
 
-error_reporting(-1);
+  //$inc = require_once('XXPositions.inc');
+  //var_dump($inc);
 
-// Try to require a non-existant file
+  echo "----------------------------------\n";
 
-//$inc = require_once('XXPositions.inc');
-//var_dump($inc);
+  // require an existing file
 
-echo "----------------------------------\n";
+  $inc = require('Positions.inc');
+  //$inc = require_once('Positions.inc');
+  var_dump($inc);
 
-// require an existing file
+  // require an existing file. It doesn't matter if the first require was with/without
+  // _once; subsequent use of require_once returns true
 
-$inc = require('Positions.inc');
-//$inc = require_once('Positions.inc');
-var_dump($inc);
+  $inc = require_once('Positions.inc');
+  var_dump($inc);
 
-// require an existing file. It doesn't matter if the first require was with/without
-// _once; subsequent use of require_once returns true
+  var_dump(Positions\LEFT);
+  var_dump(Positions\TOP);
 
-$inc = require_once('Positions.inc');
-var_dump($inc);
+  echo "----------------------------------\n";
 
-var_dump(Positions\LEFT);
-var_dump(Positions\TOP);
+  ///*
+  // require Point.inc to get at the Point class type
 
-echo "----------------------------------\n";
+  $inc = require('Point.inc');
+  var_dump($inc);
 
-///*
-// require Point.inc to get at the Point class type
+  $p1 = new Point(10,20);
+  //*/
 
-$inc = require('Point.inc');
-var_dump($inc);
+  echo "----------------------------------\n";
 
-$p1 = new Point(10,20);
-//*/
+  // require Circle.inc to get at the Circle class type, which in turn uses the Point type
 
-echo "----------------------------------\n";
+  $inc = require('Circle.inc');
+  var_dump($inc);
 
-// require Circle.inc to get at the Circle class type, which in turn uses the Point type
+  $p2 = new Point(5, 6);
+  $c1 = new Circle(9, 7, 2.4);
 
-$inc = require('Circle.inc');
-var_dump($inc);
+  echo "----------------------------------\n";
 
-$p2 = new Point(5, 6);
-$c1 = new Circle(9, 7, 2.4);
+  // get the set of required files
 
-echo "----------------------------------\n";
-
-// get the set of required files
-
-print_r(get_required_files());
+  print_r(get_required_files());
+}

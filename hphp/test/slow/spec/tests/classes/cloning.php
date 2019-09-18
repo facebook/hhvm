@@ -1,15 +1,5 @@
 <?hh
 
-/*
-   +-------------------------------------------------------------+
-   | Copyright (c) 2015 Facebook, Inc. (http://www.facebook.com) |
-   +-------------------------------------------------------------+
-*/
-
-error_reporting(-1);
-
-echo "================= play around a bit =================\n";
-
 class C
 {
     private $m;
@@ -27,30 +17,6 @@ class C
     }
 //*/
 }
-
-$obj1 = new C(10);
-var_dump($obj1);
-
-$obj2 = clone $obj1;    // default action is to make a shallow copy
-var_dump($obj2);
-
-//$obj3 = $obj1->__clone(); // can't call directly!! Why is that?
-//var_dump($obj3);
-
-echo "================= Use cloning in Point class =================\n";
-
-include_once 'Point2.inc';
-
-$p1 = new Point2;
-var_dump($p1);
-$p2 = clone $p1;
-var_dump($p2);
-
-var_dump($p3 = clone $p1);
-
-var_dump($p4 = clone $p1);
-
-echo "================= use chained cloning in a class heirarchy =================\n";
 
 class Employee
 {
@@ -96,9 +62,39 @@ class Manager extends Employee
 
     }
 }
+<<__EntryPoint>>
+function main_entry(): void {
+  error_reporting(-1);
 
-$obj3 = new Manager("Smith", 23);
-var_dump($obj3);
+  echo "================= play around a bit =================\n";
 
-$obj4 = clone $obj3;
-var_dump($obj4);
+  $obj1 = new C(10);
+  var_dump($obj1);
+
+  $obj2 = clone $obj1;    // default action is to make a shallow copy
+  var_dump($obj2);
+
+  //$obj3 = $obj1->__clone(); // can't call directly!! Why is that?
+  //var_dump($obj3);
+
+  echo "================= Use cloning in Point class =================\n";
+
+  include_once 'Point2.inc';
+
+  $p1 = new Point2;
+  var_dump($p1);
+  $p2 = clone $p1;
+  var_dump($p2);
+
+  var_dump($p3 = clone $p1);
+
+  var_dump($p4 = clone $p1);
+
+  echo "================= use chained cloning in a class hierarchy =================\n";
+
+  $obj3 = new Manager("Smith", 23);
+  var_dump($obj3);
+
+  $obj4 = clone $obj3;
+  var_dump($obj4);
+}

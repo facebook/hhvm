@@ -1,27 +1,5 @@
 <?hh
 
-/*
-   +-------------------------------------------------------------+
-   | Copyright (c) 2015 Facebook, Inc. (http://www.facebook.com) |
-   +-------------------------------------------------------------+
-*/
-
-error_reporting(-1);
-
-echo "------------------- labels & goto ---------------------\n";
-
-$v = TRUE;
-
-if ($v)
-{
-    echo "Skipping echo\n";
-    goto label1;
-}
-
-echo "Might skip over this\n";
-
-label1:
-
 //goto label2;  // can't jump into a function
 
 function f1($p)
@@ -48,43 +26,61 @@ label2:
     label1:;    // OK; defined in outer scope
     }
 }
+<<__EntryPoint>>
+function main_entry(): void {
+  error_reporting(-1);
 
-f1(TRUE);
+  echo "------------------- labels & goto ---------------------\n";
 
-labelA:
-echo "At labelA\n";
-$v = !$v;
-if ($v) goto labelA;
+  $v = TRUE;
 
-echo "------------------- switch/case labels ---------------------\n";
+  if ($v)
+  {
+      echo "Skipping echo\n";
+      goto label1;
+  }
 
-$a = 10;
-$b = 20;
+  echo "Might skip over this\n";
 
-switch ($a)
-{
-    case 0:
-        echo "Case 0 outer\n";
-        break;
-    case 10:
-        echo "Case 10 outer\n";
+  label1:
 
-        switch ($b)
-        {
-        case 0:
-            echo "Case 0 inner\n";
-            break;
-        case 10:
-            echo "Case 10 inner\n";
-            break;
-        default:
-            echo "Default inner\n";
-            break;
-        }
-        break;
-    default:
-        echo "Default outer\n";
-        break;
+  f1(TRUE);
+
+  labelA:
+  echo "At labelA\n";
+  $v = !$v;
+  if ($v) goto labelA;
+
+  echo "------------------- switch/case labels ---------------------\n";
+
+  $a = 10;
+  $b = 20;
+
+  switch ($a)
+  {
+      case 0:
+          echo "Case 0 outer\n";
+          break;
+      case 10:
+          echo "Case 10 outer\n";
+
+          switch ($b)
+          {
+          case 0:
+              echo "Case 0 inner\n";
+              break;
+          case 10:
+              echo "Case 10 inner\n";
+              break;
+          default:
+              echo "Default inner\n";
+              break;
+          }
+          break;
+      default:
+          echo "Default outer\n";
+          break;
+  }
+
+  echo "------------------- xxx ---------------------\n";
 }
-
-echo "------------------- xxx ---------------------\n";

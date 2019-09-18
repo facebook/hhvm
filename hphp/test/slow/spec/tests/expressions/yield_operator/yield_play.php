@@ -1,13 +1,5 @@
 <?hh
 
-/*
-   +-------------------------------------------------------------+
-   | Copyright (c) 2015 Facebook, Inc. (http://www.facebook.com) |
-   +-------------------------------------------------------------+
-*/
-
-error_reporting(-1);
-
 class XGenerator implements Iterator
 {
     public function current() {}
@@ -18,4 +10,8 @@ class XGenerator implements Iterator
 //  public function throw(Exception $exception) {}
     public function valid() {}
     public function __wakeup() {}
+}
+<<__EntryPoint>>
+function main_entry(): void {
+  error_reporting(-1);
 }

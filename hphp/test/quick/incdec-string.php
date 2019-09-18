@@ -1,7 +1,6 @@
 <?hh
 
 function handler() {}
-set_error_handler(fun('handler'));
 
 function foo() {
   $go = function($start) {
@@ -16,10 +15,14 @@ function foo() {
   $go('A1');
   $go('a1');
 }
-foo();
 
 function bar() {
   $x = '1';
   var_dump(is_int(++$x));
 }
-bar();
+<<__EntryPoint>>
+function main_entry(): void {
+  set_error_handler(fun('handler'));
+  foo();
+  bar();
+}

@@ -1,5 +1,4 @@
 <?hh
-$input = "plain [indent] deep [indent] [abcd]deeper[/abcd] [/indent] deep [/indent] plain";
 
 function parseTagsRecursive($input)
 {
@@ -13,7 +12,11 @@ function parseTagsRecursive($input)
     $count = -1;
     return preg_replace_callback($regex, 'parseTagsRecursive', $input, -1, inout $count);
 }
+<<__EntryPoint>>
+function main_entry(): void {
+  $input = "plain [indent] deep [indent] [abcd]deeper[/abcd] [/indent] deep [/indent] plain";
 
-$output = parseTagsRecursive($input);
+  $output = parseTagsRecursive($input);
 
-echo $output, "\n";
+  echo $output, "\n";
+}

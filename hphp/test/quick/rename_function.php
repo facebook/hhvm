@@ -8,12 +8,6 @@ function three() {
   echo "three\n";
 }
 
-one();
-var_dump(fb_rename_function("one", "two"));
-two();
-var_dump(fb_rename_function("three", "one"));
-one();
-
 abstract final class MyMicrotimeStatics {
   public static $x = 0.0;
 }
@@ -29,10 +23,6 @@ function my_microtime(bool $foob = false) {
   return (string)MyMicrotimeStatics::$x;
 }
 
-var_dump(fb_rename_function('microtime', '__dont_call_microtime'));
-var_dump(fb_rename_function('my_microtime', 'microtime'));
-echo microtime(true) . "\n";
-
 function my_foo() {}
 
 function bar() {
@@ -40,5 +30,18 @@ function bar() {
   $new = "my_$orig";
   var_dump(fb_rename_function($new, "foo"));
 }
+<<__EntryPoint>>
+function main_entry(): void {
 
-bar();
+  one();
+  var_dump(fb_rename_function("one", "two"));
+  two();
+  var_dump(fb_rename_function("three", "one"));
+  one();
+
+  var_dump(fb_rename_function('microtime', '__dont_call_microtime'));
+  var_dump(fb_rename_function('my_microtime', 'microtime'));
+  echo microtime(true) . "\n";
+
+  bar();
+}

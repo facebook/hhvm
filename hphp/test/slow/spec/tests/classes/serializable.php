@@ -1,13 +1,5 @@
 <?hh
 
-/*
-   +-------------------------------------------------------------+
-   | Copyright (c) 2015 Facebook, Inc. (http://www.facebook.com) |
-   +-------------------------------------------------------------+
-*/
-
-error_reporting(-1);
-
 class Point implements Serializable
 {
     private static $nextId = 1;
@@ -28,12 +20,12 @@ class Point implements Serializable
     public function __toString()
     {
         return 'ID:' . $this->id . '(' . $this->x . ',' . $this->y . ')';
-    }   
+    }
 
     public function serialize()
     {
         echo "\nInside " . __METHOD__ . ", $this\n\n";
-        
+
         return serialize(array('y' => $this->y, 'x' => $this->x));
     }
 
@@ -47,21 +39,6 @@ class Point implements Serializable
         echo "\nInside " . __METHOD__ . ", $this\n\n";
     }
 }
-
-echo "---------------- create, serialize, and unserialize a Point -------------------\n";
-
-$p = new Point(2, 5);
-echo "Point \$p = $p\n";
-
-$s = serialize($p);
-var_dump($s);
-
-echo "------\n";
-
-$v = unserialize($s);
-var_dump($v);
-
-echo "------\n";
 
 class ColoredPoint extends Point implements Serializable
 {
@@ -81,12 +58,12 @@ class ColoredPoint extends Point implements Serializable
     public function __toString()
     {
         return parent::__toString() . $this->color;
-    }   
+    }
 
     public function serialize()
     {
         echo "\nInside " . __METHOD__ . ", $this\n\n";
-        
+
         return serialize(array(
             'color' => $this->color,
             'baseData' => parent::serialize()
@@ -102,16 +79,35 @@ class ColoredPoint extends Point implements Serializable
         echo "\nInside " . __METHOD__ . ", $this\n\n";
     }
 }
+<<__EntryPoint>>
+function main_entry(): void {
+  error_reporting(-1);
 
-echo "---------------- Serialize ColoredPoint -------------------\n";
+  echo "---------------- create, serialize, and unserialize a Point -------------------\n";
 
-$cp = new ColoredPoint(9, 8, ColoredPoint::BLUE);
-echo "ColoredPoint \$cp = $cp\n";
+  $p = new Point(2, 5);
+  echo "Point \$p = $p\n";
 
-$s = serialize($cp);
-var_dump($s);
+  $s = serialize($p);
+  var_dump($s);
 
-$v = unserialize($s);
-var_dump($v);
+  echo "------\n";
 
-echo "---------------- end -------------------\n";
+  $v = unserialize($s);
+  var_dump($v);
+
+  echo "------\n";
+
+  echo "---------------- Serialize ColoredPoint -------------------\n";
+
+  $cp = new ColoredPoint(9, 8, ColoredPoint::BLUE);
+  echo "ColoredPoint \$cp = $cp\n";
+
+  $s = serialize($cp);
+  var_dump($s);
+
+  $v = unserialize($s);
+  var_dump($v);
+
+  echo "---------------- end -------------------\n";
+}

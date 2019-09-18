@@ -1,36 +1,32 @@
 <?hh
+<<__EntryPoint>>
+function main_entry(): void {
+  error_reporting(-1);
 
-/*
-   +-------------------------------------------------------------+
-   | Copyright (c) 2015 Facebook, Inc. (http://www.facebook.com) |
-   +-------------------------------------------------------------+
-*/
+  include_once 'Point.inc';
 
-error_reporting(-1);
+  $v1 = TRUE;
+  $v2 = 123;
+  $v3 = 20.3E2;
+  $v4 = NULL;
+  $v5 = "Hello";
+  $v6 = new Point(3, 5);
 
-include_once 'Point.inc';
+  print '>>' . $v1 . '|' . $v2 . "<<\n";
+  print ('>>' . $v1 . '|' . $v2 . "<<\n");
+  print (('>>') . ($v1) . ('|') . ($v2) . ("<<\n"));// outer parens are part of optional syntax
+                                                   // inner ones are redundant grouping parens
+  print '>>' . $v3 . '|' . $v4 . '|' . $v5 . '|' . $v6 . "<<\n";
 
-$v1 = TRUE;
-$v2 = 123;
-$v3 = 20.3E2;
-$v4 = NULL;
-$v5 = "Hello";
-$v6 = new Point(3, 5);
+  $v3 = "qqq{$v2}zzz";
+  var_dump($v3);
+  print "$v3\n";
 
-print '>>' . $v1 . '|' . $v2 . "<<\n";
-print ('>>' . $v1 . '|' . $v2 . "<<\n");
-print (('>>') . ($v1) . ('|') . ($v2) . ("<<\n"));// outer parens are part of optional syntax
-                                                 // inner ones are redundant grouping parens
-print '>>' . $v3 . '|' . $v4 . '|' . $v5 . '|' . $v6 . "<<\n";
+  //print array(10, 20);  // Array to string conversion
 
-$v3 = "qqq{$v2}zzz";
-var_dump($v3);
-print "$v3\n";
+  //class C {}
+  //print new C;  //Object of class C could not be converted to string
 
-//print array(10, 20);  // Array to string conversion
-
-//class C {}
-//print new C;  //Object of class C could not be converted to string
-
-if (print "xx\n") ;
-10 > 5 ? print "AA\n" : print "ZZ\n";
+  if (print "xx\n") ;
+  10 > 5 ? print "AA\n" : print "ZZ\n";
+}

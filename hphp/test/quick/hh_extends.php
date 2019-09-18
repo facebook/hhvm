@@ -1,5 +1,4 @@
 <?hh
-echo "1..2\n";
 
 interface Bonk<T> {
 }
@@ -16,6 +15,10 @@ attribute
 function nest(Foo<B<C<D<E<F<G<H<I<J<B>,C>>,D>>>,E>>>> $bonk) {
   echo "ok 2\n";
 }
+<<__EntryPoint>>
+function main_entry(): void {
+  echo "1..2\n";
 
-Bar::beep();
-nest(new Foo());
+  Bar::beep();
+  nest(new Foo());
+}

@@ -5,14 +5,17 @@ function case1() {
   var_dump($x[]++);
   var_dump($x);
 }
-case1();
 
 function case3($x) {
   $x[]++;
   var_dump($x);
 }
-try {
-  case3("asdasd"); // fatal
-} catch(Exception $e) {
-  print "\nFatal error: " . $e->getMessage();
+<<__EntryPoint>>
+function main_entry(): void {
+  case1();
+  try {
+    case3("asdasd"); // fatal
+  } catch(Exception $e) {
+    print "\nFatal error: " . $e->getMessage();
+  }
 }

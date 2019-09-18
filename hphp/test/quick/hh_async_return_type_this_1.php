@@ -1,7 +1,4 @@
 <?hh
-
-
-error_reporting(-1);
 function handler($errno, $errmsg) {
   $pos = strpos($errmsg, ", Closure");
   if ($pos !== false) {
@@ -17,7 +14,6 @@ function handler($errno, $errmsg) {
     return false;
   }
 }
-set_error_handler(fun('handler'));
 
 type my_t = int;
 
@@ -157,4 +153,11 @@ function main() {
   }
   echo "Done\n";
 }
-main();
+<<__EntryPoint>>
+function main_entry(): void {
+
+
+  error_reporting(-1);
+  set_error_handler(fun('handler'));
+  main();
+}

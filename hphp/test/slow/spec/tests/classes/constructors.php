@@ -1,13 +1,5 @@
 <?hh
 
-/*
-   +-------------------------------------------------------------+
-   | Copyright (c) 2015 Facebook, Inc. (http://www.facebook.com) |
-   +-------------------------------------------------------------+
-*/
-
-error_reporting(-1);
-
 class D1
 {
 //  private function __construct($p1)
@@ -60,8 +52,12 @@ class D4 extends D3
     }
 //*/
 }
+<<__EntryPoint>>
+function main_entry(): void {
+  error_reporting(-1);
 
-//$d1 = new D1(10);
-//$d2 = new D2(10, 20);
-//$d3 = new D3(10, 20, 30);
-$d4 = new D4;
+  //$d1 = new D1(10);
+  //$d2 = new D2(10, 20);
+  //$d3 = new D3(10, 20, 30);
+  $d4 = new D4;
+}

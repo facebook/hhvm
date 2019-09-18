@@ -1,13 +1,5 @@
 <?hh
 
-/*
-   +-------------------------------------------------------------+
-   | Copyright (c) 2015 Facebook, Inc. (http://www.facebook.com) |
-   +-------------------------------------------------------------+
-*/
-
-error_reporting(-1);
-
 class C
 {
 // constants
@@ -55,11 +47,6 @@ class C
 //  private static function __construct() {}
 }
 
-echo "CON1: " . C::CON1 . "\n"; // use :: notation, as a const is implicitly static
-
-$c = new C;     // calls public constructor
-$c->prop2;      // accesses public instance prop
-
 abstract class D1
 {
     public abstract function paf1($p1);
@@ -90,4 +77,13 @@ class D2 extends D1
     static protected function pasf2($q1) {} // OK; has same visibility as abstract decl, and same signature
 //  static protected function pasf2($q1, $q2) {}    // Declaration of D2::pasf2() must be compatible with D1::pasf2($p1)
 //  static private function pasf2() {$q1}   // Access level to D2::pasf2() must be protected
+}
+<<__EntryPoint>>
+function main_entry(): void {
+  error_reporting(-1);
+
+  echo "CON1: " . C::CON1 . "\n"; // use :: notation, as a const is implicitly static
+
+  $c = new C;     // calls public constructor
+  $c->prop2;      // accesses public instance prop
 }

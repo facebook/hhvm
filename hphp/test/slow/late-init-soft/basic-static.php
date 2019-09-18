@@ -1,5 +1,4 @@
 <?hh
-// Copyright 2004-present Facebook. All Rights Reserved.
 
 function error_handler($errno, $errstr) {
   echo $errstr . "\n";
@@ -71,5 +70,8 @@ function main() {
   $count++;
   apc_store('test-count', $count);
 }
+<<__EntryPoint>>
+function main_entry(): void {
 
-main();
+  main();
+}

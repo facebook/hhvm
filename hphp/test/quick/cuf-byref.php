@@ -1,5 +1,4 @@
 <?hh
-error_reporting(-1);
 function foo(&$a) { var_dump($a++); }
 function test($cuf, $f) {
   $a = array(1);
@@ -28,4 +27,8 @@ function test($cuf, $f) {
   }
   var_dump($a, array(1));
 }
-test('call_user_func_array', 'foo');
+<<__EntryPoint>>
+function main_entry(): void {
+  error_reporting(-1);
+  test('call_user_func_array', 'foo');
+}

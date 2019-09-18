@@ -25,7 +25,7 @@ $subject = 'number 1.';
 foreach($regex_array as $regex_value) {
     print "\nArg value is $regex_value\n";
     $count = -1;
-    var_dump(preg_replace_callback($regex_value, 'integer_word', $subject, -1, inout $count));
+    var_dump(preg_replace_callback($regex_value, fun('integer_word'), $subject, -1, inout $count));
 }
 
 abstract final class ZendGoodExtPcreTestsPregReplaceCallbackError1 {

@@ -1,6 +1,6 @@
 <?hh
 
-function cmp ($a, $b) {
+function cmp($a, $b) {
     is_array ($a)
         && ($a = array_sum ($a));
     is_array ($b)
@@ -12,15 +12,14 @@ function cmp ($a, $b) {
 require(dirname(__FILE__) . '/data.inc');
 
 echo " -- Testing uasort() -- \n";
-uasort (&$data, 'cmp');
-var_dump ($data);
-
+uasort(&$data, fun('cmp'));
+var_dump($data);
 
 echo "\n -- Testing uksort() -- \n";
-uksort (&$data, 'cmp');
-var_dump ($data);
+uksort(&$data, fun('cmp'));
+var_dump($data);
 
 echo "\n -- Testing usort() -- \n";
-usort (&$data, 'cmp');
-var_dump ($data);
+usort(&$data, fun('cmp'));
+var_dump($data);
 }

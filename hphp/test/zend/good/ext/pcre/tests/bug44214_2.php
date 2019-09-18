@@ -10,7 +10,7 @@ function myCallBack( $match ) {
 }
 
 $count = -1;
-var_dump(preg_replace_callback('`a+`', 'myCallBack', $string, -1, inout $count));
+var_dump(preg_replace_callback('`a+`', fun('myCallBack'), $string, -1, inout $count));
 var_dump(ZendGoodExtPcreTestsBug442142::$array);
 
 abstract final class ZendGoodExtPcreTestsBug442142 {

@@ -3,7 +3,7 @@ function my_error_handler($errno, $errmsg, $filename, $linenum, $vars)
 {
 	echo "$errno: $errmsg\n";
 }
-set_error_handler('my_error_handler');
+set_error_handler(fun('my_error_handler'));
 
 function do_single_test($header)
 {

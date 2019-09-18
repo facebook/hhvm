@@ -13,7 +13,7 @@ $fruits = array(
   "b" => "banana",
   "c" => "apple"
 );
-uasort(&$fruits, 'reverse_strcasecmp');
+uasort(&$fruits, fun('reverse_strcasecmp'));
 var_dump($fruits);
 
 $fruits = array(
@@ -22,7 +22,7 @@ $fruits = array(
   "b" => "banana",
   "c" => "apple"
 );
-uksort(&$fruits, 'reverse_strcasecmp');
+uksort(&$fruits, fun('reverse_strcasecmp'));
 var_dump($fruits);
 
 uasort(&$fruits, "undefined_function_");

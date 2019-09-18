@@ -8,15 +8,9 @@ NULL ** string(1) "4" => int(0)
 NULL ** array(0) { } => int(1)
 NULL ** array(1) { [0]=> int(5) } => int(1)
 NULL ** resource(4) of type (stream) => int(0)
-NULL ** resource(5) of type (%s) => int(0)
-NULL ** object(stdClass) (0) { } => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-int(0)
-NULL ** object(stdClass) (1) { ["a"]=> int(1) } => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-int(0)
+NULL ** resource(5) of type (Unknown) => int(0)
 NULL ** object(ArrayObject) (1) { ["storage":"ArrayObject":private]=> array(1) { [0]=> int(11) } } => 
-Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 37
+Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 35
 int(0)
 bool(true) ** NULL => int(1)
 bool(true) ** bool(true) => int(1)
@@ -28,15 +22,9 @@ bool(true) ** string(1) "4" => int(1)
 bool(true) ** array(0) { } => int(1)
 bool(true) ** array(1) { [0]=> int(5) } => int(1)
 bool(true) ** resource(4) of type (stream) => int(1)
-bool(true) ** resource(5) of type (%s) => int(1)
-bool(true) ** object(stdClass) (0) { } => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-int(1)
-bool(true) ** object(stdClass) (1) { ["a"]=> int(1) } => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-int(1)
+bool(true) ** resource(5) of type (Unknown) => int(1)
 bool(true) ** object(ArrayObject) (1) { ["storage":"ArrayObject":private]=> array(1) { [0]=> int(11) } } => 
-Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 37
+Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 35
 int(1)
 bool(false) ** NULL => int(1)
 bool(false) ** bool(true) => int(0)
@@ -48,15 +36,9 @@ bool(false) ** string(1) "4" => int(0)
 bool(false) ** array(0) { } => int(1)
 bool(false) ** array(1) { [0]=> int(5) } => int(1)
 bool(false) ** resource(4) of type (stream) => int(0)
-bool(false) ** resource(5) of type (%s) => int(0)
-bool(false) ** object(stdClass) (0) { } => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-int(0)
-bool(false) ** object(stdClass) (1) { ["a"]=> int(1) } => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-int(0)
+bool(false) ** resource(5) of type (Unknown) => int(0)
 bool(false) ** object(ArrayObject) (1) { ["storage":"ArrayObject":private]=> array(1) { [0]=> int(11) } } => 
-Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 37
+Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 35
 int(0)
 int(2) ** NULL => int(1)
 int(2) ** bool(true) => int(2)
@@ -68,15 +50,9 @@ int(2) ** string(1) "4" => int(16)
 int(2) ** array(0) { } => int(1)
 int(2) ** array(1) { [0]=> int(5) } => int(1)
 int(2) ** resource(4) of type (stream) => int(16)
-int(2) ** resource(5) of type (%s) => int(32)
-int(2) ** object(stdClass) (0) { } => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-int(2)
-int(2) ** object(stdClass) (1) { ["a"]=> int(1) } => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-int(2)
+int(2) ** resource(5) of type (Unknown) => int(32)
 int(2) ** object(ArrayObject) (1) { ["storage":"ArrayObject":private]=> array(1) { [0]=> int(11) } } => 
-Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 37
+Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 35
 int(2)
 float(3) ** NULL => float(1)
 float(3) ** bool(true) => float(3)
@@ -88,15 +64,9 @@ float(3) ** string(1) "4" => float(81)
 float(3) ** array(0) { } => int(1)
 float(3) ** array(1) { [0]=> int(5) } => int(1)
 float(3) ** resource(4) of type (stream) => float(81)
-float(3) ** resource(5) of type (%s) => float(243)
-float(3) ** object(stdClass) (0) { } => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-float(3)
-float(3) ** object(stdClass) (1) { ["a"]=> int(1) } => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-float(3)
+float(3) ** resource(5) of type (Unknown) => float(243)
 float(3) ** object(ArrayObject) (1) { ["storage":"ArrayObject":private]=> array(1) { [0]=> int(11) } } => 
-Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 37
+Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 35
 float(3)
 string(0) "" ** NULL => int(1)
 string(0) "" ** bool(true) => int(0)
@@ -108,15 +78,9 @@ string(0) "" ** string(1) "4" => int(0)
 string(0) "" ** array(0) { } => int(1)
 string(0) "" ** array(1) { [0]=> int(5) } => int(1)
 string(0) "" ** resource(4) of type (stream) => int(0)
-string(0) "" ** resource(5) of type (%s) => int(0)
-string(0) "" ** object(stdClass) (0) { } => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-int(0)
-string(0) "" ** object(stdClass) (1) { ["a"]=> int(1) } => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-int(0)
+string(0) "" ** resource(5) of type (Unknown) => int(0)
 string(0) "" ** object(ArrayObject) (1) { ["storage":"ArrayObject":private]=> array(1) { [0]=> int(11) } } => 
-Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 37
+Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 35
 int(0)
 string(1) "4" ** NULL => int(1)
 string(1) "4" ** bool(true) => int(4)
@@ -128,15 +92,9 @@ string(1) "4" ** string(1) "4" => int(256)
 string(1) "4" ** array(0) { } => int(1)
 string(1) "4" ** array(1) { [0]=> int(5) } => int(1)
 string(1) "4" ** resource(4) of type (stream) => int(256)
-string(1) "4" ** resource(5) of type (%s) => int(1024)
-string(1) "4" ** object(stdClass) (0) { } => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-int(4)
-string(1) "4" ** object(stdClass) (1) { ["a"]=> int(1) } => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-int(4)
+string(1) "4" ** resource(5) of type (Unknown) => int(1024)
 string(1) "4" ** object(ArrayObject) (1) { ["storage":"ArrayObject":private]=> array(1) { [0]=> int(11) } } => 
-Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 37
+Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 35
 int(4)
 array(0) { } ** NULL => int(0)
 array(0) { } ** bool(true) => int(0)
@@ -148,9 +106,7 @@ array(0) { } ** string(1) "4" => int(0)
 array(0) { } ** array(0) { } => int(0)
 array(0) { } ** array(1) { [0]=> int(5) } => int(0)
 array(0) { } ** resource(4) of type (stream) => int(0)
-array(0) { } ** resource(5) of type (%s) => int(0)
-array(0) { } ** object(stdClass) (0) { } => int(0)
-array(0) { } ** object(stdClass) (1) { ["a"]=> int(1) } => int(0)
+array(0) { } ** resource(5) of type (Unknown) => int(0)
 array(0) { } ** object(ArrayObject) (1) { ["storage":"ArrayObject":private]=> array(1) { [0]=> int(11) } } => int(0)
 array(1) { [0]=> int(5) } ** NULL => int(0)
 array(1) { [0]=> int(5) } ** bool(true) => int(0)
@@ -162,9 +118,7 @@ array(1) { [0]=> int(5) } ** string(1) "4" => int(0)
 array(1) { [0]=> int(5) } ** array(0) { } => int(0)
 array(1) { [0]=> int(5) } ** array(1) { [0]=> int(5) } => int(0)
 array(1) { [0]=> int(5) } ** resource(4) of type (stream) => int(0)
-array(1) { [0]=> int(5) } ** resource(5) of type (%s) => int(0)
-array(1) { [0]=> int(5) } ** object(stdClass) (0) { } => int(0)
-array(1) { [0]=> int(5) } ** object(stdClass) (1) { ["a"]=> int(1) } => int(0)
+array(1) { [0]=> int(5) } ** resource(5) of type (Unknown) => int(0)
 array(1) { [0]=> int(5) } ** object(ArrayObject) (1) { ["storage":"ArrayObject":private]=> array(1) { [0]=> int(11) } } => int(0)
 resource(4) of type (stream) ** NULL => int(1)
 resource(4) of type (stream) ** bool(true) => int(4)
@@ -176,178 +130,59 @@ resource(4) of type (stream) ** string(1) "4" => int(256)
 resource(4) of type (stream) ** array(0) { } => int(1)
 resource(4) of type (stream) ** array(1) { [0]=> int(5) } => int(1)
 resource(4) of type (stream) ** resource(4) of type (stream) => int(256)
-resource(4) of type (stream) ** resource(5) of type (%s) => int(1024)
-resource(4) of type (stream) ** object(stdClass) (0) { } => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-int(4)
-resource(4) of type (stream) ** object(stdClass) (1) { ["a"]=> int(1) } => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-int(4)
+resource(4) of type (stream) ** resource(5) of type (Unknown) => int(1024)
 resource(4) of type (stream) ** object(ArrayObject) (1) { ["storage":"ArrayObject":private]=> array(1) { [0]=> int(11) } } => 
-Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 37
+Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 35
 int(4)
-resource(5) of type (%s) ** NULL => int(1)
-resource(5) of type (%s) ** bool(true) => int(5)
-resource(5) of type (%s) ** bool(false) => int(1)
-resource(5) of type (%s) ** int(2) => int(25)
-resource(5) of type (%s) ** float(3) => float(125)
-resource(5) of type (%s) ** string(0) "" => int(1)
-resource(5) of type (%s) ** string(1) "4" => int(625)
-resource(5) of type (%s) ** array(0) { } => int(1)
-resource(5) of type (%s) ** array(1) { [0]=> int(5) } => int(1)
-resource(5) of type (%s) ** resource(4) of type (stream) => int(625)
-resource(5) of type (%s) ** resource(5) of type (%s) => int(3125)
-resource(5) of type (%s) ** object(stdClass) (0) { } => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
+resource(5) of type (Unknown) ** NULL => int(1)
+resource(5) of type (Unknown) ** bool(true) => int(5)
+resource(5) of type (Unknown) ** bool(false) => int(1)
+resource(5) of type (Unknown) ** int(2) => int(25)
+resource(5) of type (Unknown) ** float(3) => float(125)
+resource(5) of type (Unknown) ** string(0) "" => int(1)
+resource(5) of type (Unknown) ** string(1) "4" => int(625)
+resource(5) of type (Unknown) ** array(0) { } => int(1)
+resource(5) of type (Unknown) ** array(1) { [0]=> int(5) } => int(1)
+resource(5) of type (Unknown) ** resource(4) of type (stream) => int(625)
+resource(5) of type (Unknown) ** resource(5) of type (Unknown) => int(3125)
+resource(5) of type (Unknown) ** object(ArrayObject) (1) { ["storage":"ArrayObject":private]=> array(1) { [0]=> int(11) } } => 
+Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 35
 int(5)
-resource(5) of type (%s) ** object(stdClass) (1) { ["a"]=> int(1) } => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-int(5)
-resource(5) of type (%s) ** object(ArrayObject) (1) { ["storage":"ArrayObject":private]=> array(1) { [0]=> int(11) } } => 
-Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 37
-int(5)
-object(stdClass) (0) { } ** NULL => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-int(1)
-object(stdClass) (0) { } ** bool(true) => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-int(1)
-object(stdClass) (0) { } ** bool(false) => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-int(1)
-object(stdClass) (0) { } ** int(2) => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-int(1)
-object(stdClass) (0) { } ** float(3) => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-float(1)
-object(stdClass) (0) { } ** string(0) "" => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-int(1)
-object(stdClass) (0) { } ** string(1) "4" => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-int(1)
-object(stdClass) (0) { } ** array(0) { } => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-int(1)
-object(stdClass) (0) { } ** array(1) { [0]=> int(5) } => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-int(1)
-object(stdClass) (0) { } ** resource(4) of type (stream) => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-int(1)
-object(stdClass) (0) { } ** resource(5) of type (%s) => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-int(1)
-object(stdClass) (0) { } ** object(stdClass) (0) { } => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-int(1)
-object(stdClass) (0) { } ** object(stdClass) (1) { ["a"]=> int(1) } => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-int(1)
-object(stdClass) (0) { } ** object(ArrayObject) (1) { ["storage":"ArrayObject":private]=> array(1) { [0]=> int(11) } } => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-
-Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 37
-int(1)
-object(stdClass) (1) { ["a"]=> int(1) } ** NULL => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-int(1)
-object(stdClass) (1) { ["a"]=> int(1) } ** bool(true) => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-int(1)
-object(stdClass) (1) { ["a"]=> int(1) } ** bool(false) => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-int(1)
-object(stdClass) (1) { ["a"]=> int(1) } ** int(2) => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-int(1)
-object(stdClass) (1) { ["a"]=> int(1) } ** float(3) => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-float(1)
-object(stdClass) (1) { ["a"]=> int(1) } ** string(0) "" => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-int(1)
-object(stdClass) (1) { ["a"]=> int(1) } ** string(1) "4" => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-int(1)
-object(stdClass) (1) { ["a"]=> int(1) } ** array(0) { } => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-int(1)
-object(stdClass) (1) { ["a"]=> int(1) } ** array(1) { [0]=> int(5) } => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-int(1)
-object(stdClass) (1) { ["a"]=> int(1) } ** resource(4) of type (stream) => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-int(1)
-object(stdClass) (1) { ["a"]=> int(1) } ** resource(5) of type (%s) => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-int(1)
-object(stdClass) (1) { ["a"]=> int(1) } ** object(stdClass) (0) { } => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-int(1)
-object(stdClass) (1) { ["a"]=> int(1) } ** object(stdClass) (1) { ["a"]=> int(1) } => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-int(1)
-object(stdClass) (1) { ["a"]=> int(1) } ** object(ArrayObject) (1) { ["storage":"ArrayObject":private]=> array(1) { [0]=> int(11) } } => 
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-
-Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 37
-int(1)
 object(ArrayObject) (1) { ["storage":"ArrayObject":private]=> array(1) { [0]=> int(11) } } ** NULL => 
-Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 37
+Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 35
 int(1)
 object(ArrayObject) (1) { ["storage":"ArrayObject":private]=> array(1) { [0]=> int(11) } } ** bool(true) => 
-Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 37
+Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 35
 int(1)
 object(ArrayObject) (1) { ["storage":"ArrayObject":private]=> array(1) { [0]=> int(11) } } ** bool(false) => 
-Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 37
+Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 35
 int(1)
 object(ArrayObject) (1) { ["storage":"ArrayObject":private]=> array(1) { [0]=> int(11) } } ** int(2) => 
-Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 37
+Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 35
 int(1)
 object(ArrayObject) (1) { ["storage":"ArrayObject":private]=> array(1) { [0]=> int(11) } } ** float(3) => 
-Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 37
+Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 35
 float(1)
 object(ArrayObject) (1) { ["storage":"ArrayObject":private]=> array(1) { [0]=> int(11) } } ** string(0) "" => 
-Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 37
+Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 35
 int(1)
 object(ArrayObject) (1) { ["storage":"ArrayObject":private]=> array(1) { [0]=> int(11) } } ** string(1) "4" => 
-Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 37
+Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 35
 int(1)
 object(ArrayObject) (1) { ["storage":"ArrayObject":private]=> array(1) { [0]=> int(11) } } ** array(0) { } => 
-Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 37
+Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 35
 int(1)
 object(ArrayObject) (1) { ["storage":"ArrayObject":private]=> array(1) { [0]=> int(11) } } ** array(1) { [0]=> int(5) } => 
-Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 37
+Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 35
 int(1)
 object(ArrayObject) (1) { ["storage":"ArrayObject":private]=> array(1) { [0]=> int(11) } } ** resource(4) of type (stream) => 
-Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 37
+Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 35
 int(1)
-object(ArrayObject) (1) { ["storage":"ArrayObject":private]=> array(1) { [0]=> int(11) } } ** resource(5) of type (%s) => 
-Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 37
-int(1)
-object(ArrayObject) (1) { ["storage":"ArrayObject":private]=> array(1) { [0]=> int(11) } } ** object(stdClass) (0) { } => 
-Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 37
-
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
-int(1)
-object(ArrayObject) (1) { ["storage":"ArrayObject":private]=> array(1) { [0]=> int(11) } } ** object(stdClass) (1) { ["a"]=> int(1) } => 
-Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 37
-
-Notice: Object of class stdClass could not be converted to int in %s/power-grid.php on line 37
+object(ArrayObject) (1) { ["storage":"ArrayObject":private]=> array(1) { [0]=> int(11) } } ** resource(5) of type (Unknown) => 
+Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 35
 int(1)
 object(ArrayObject) (1) { ["storage":"ArrayObject":private]=> array(1) { [0]=> int(11) } } ** object(ArrayObject) (1) { ["storage":"ArrayObject":private]=> array(1) { [0]=> int(11) } } => 
-Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 37
+Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 35
 
-Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 37
+Notice: Object of class ArrayObject could not be converted to int in %s/power-grid.php on line 35
 int(1)
-

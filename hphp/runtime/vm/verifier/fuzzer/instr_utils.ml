@@ -141,7 +141,6 @@ let stk_data : instruct -> stack_sig = function
   | IOp CastDouble
   | IOp CastString
   | IOp CastArray
-  | IOp CastObject
   | IOp CastVec
   | IOp CastDict
   | IOp CastKeyset

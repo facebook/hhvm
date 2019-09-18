@@ -5,7 +5,6 @@ function main_parentheses_deref() {
 $array = [[[[0, 1]]], 1];
 var_dump(($array)[1]);
 var_dump((($array[0][0])[0])[1]);
-var_dump(((object) ['a' => 0, 'b' => 1])->b);
-$obj = (object) ['a' => 0, 'b' => ['var_dump', 1]];
+$obj = new stdClass(); $obj->a = 0; $obj->b = ['var_dump', 1];
 (clone $obj)->b[0](1);
 }

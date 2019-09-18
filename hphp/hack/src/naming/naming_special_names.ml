@@ -470,8 +470,6 @@ module Typehints = struct
 
   let callable = "callable"
 
-  let object_cast = "object"
-
   let unset_cast = "unset"
 
   let wildcard = "_"

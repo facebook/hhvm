@@ -736,7 +736,6 @@ and emit_cast env pos hint expr =
           instr (IOp CastBool)
         | _ when id = SN.Typehints.string || id = "binary" ->
           instr (IOp CastString)
-        | _ when id = SN.Typehints.object_cast -> instr (IOp CastObject)
         | _ when id = SN.Typehints.array -> instr (IOp CastArray)
         | _ when id = SN.Typehints.double || id = SN.Typehints.float ->
           instr (IOp CastDouble)

@@ -57,7 +57,6 @@ function convert_from($ks) {
   var_dump((int)$ks);
   var_dump((float)$ks);
   var_dump((string)$ks);
-  var_dump((object)$ks);
   var_dump(new Vector($ks));
   var_dump(new Map($ks));
 

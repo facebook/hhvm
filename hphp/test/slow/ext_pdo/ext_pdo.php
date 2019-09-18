@@ -96,7 +96,7 @@ try {
   }
 
   //Test fetching into an object
-  $object = (object)array();
+  $object = new stdClass();
   foreach ($dbh->query("select * from foo", PDO::FETCH_INTO, $object) as $row) {
 
   }

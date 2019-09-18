@@ -2681,13 +2681,6 @@ module Make (GetLocals : GetLocals) = struct
         | None ->
           begin
             match x with
-            | x when x = SN.Typehints.object_cast ->
-              (* (object) is a valid cast but not a valid type annotation *)
-              if Partial.should_check_error (fst env).in_mode 2055 then (
-                Errors.object_cast p None;
-                (p, N.Herr)
-              ) else
-                (p, N.Hany)
             | x when x = SN.Typehints.void ->
               Errors.void_cast p;
               (p, N.Herr)

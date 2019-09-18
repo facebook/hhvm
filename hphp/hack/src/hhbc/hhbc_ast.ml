@@ -274,7 +274,6 @@ type instruct_operator =
   | CastDouble
   | CastString
   | CastArray
-  | CastObject
   | CastVec
   | CastDict
   | CastKeyset

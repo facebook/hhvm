@@ -24,8 +24,6 @@ $args = [
   [5],
   fopen('php://memory', 'w+'),
   $closeme = fopen('php://memory', 'w+'),
-  (object)[],
-  (object)['a'=>1],
   new ArrayObject([11]),
 ];
 fclose($closeme);

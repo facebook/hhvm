@@ -63,7 +63,6 @@ function convert_from($v) {
   var_dump((int)$v);
   var_dump((float)$v);
   var_dump((string)$v);
-  var_dump((object)$v);
   var_dump(new Vector($v));
   var_dump(new Map($v));
 

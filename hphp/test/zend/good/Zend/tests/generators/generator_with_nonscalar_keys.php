@@ -2,7 +2,9 @@
 
 function gen() {
     yield [1, 2, 3] => [4, 5, 6];
-    yield (object) ['a' => 'b'] => (object) ['b' => 'a'];
+    $a = new stdClass(); $a->a = "b";
+    $b = new stdClass(); $b->b = "a";
+    yield $a => $b;
     yield 3.14 => 2.73;
     yield false => true;
     yield true => false;

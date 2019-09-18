@@ -154,7 +154,6 @@ let all_instrs (_ : IS.t) : lazy_instruct list =
     (fun () -> IOp CastDouble);
     (fun () -> IOp CastString);
     (fun () -> IOp CastArray);
-    (fun () -> IOp CastObject);
     (fun () -> IOp CastVec);
     (fun () -> IOp CastDict);
     (fun () -> IOp CastKeyset);

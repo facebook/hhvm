@@ -187,7 +187,6 @@ let string_of_operator instruction =
   | CastDouble -> "CastDouble"
   | CastString -> "CastString"
   | CastArray -> "CastArray"
-  | CastObject -> "CastObject"
   | CastVec -> "CastVec"
   | CastDict -> "CastDict"
   | CastKeyset -> "CastKeyset"

@@ -45,25 +45,21 @@ function main() {
   var_dump(array_key_exists("\0*fish\0prot", $o));
   var_dump(array_key_exists("priv", $o));
   var_dump(array_key_exists("prot", $o));
-
-  $o = (object)array(
-    '' => 0,
-    1 => 'two',
-    'three' => 'fore',
-    "\0ohgod\0why" => 1
-  );
-  echo "==== stdClass, extant ====\n";
-  var_dump(array_key_exists(null, $o));
-  var_dump(array_key_exists(__hhvm_intrinsics\launder_value(null), $o));
-  var_dump(array_key_exists('', $o));
-  var_dump(array_key_exists(1, $o));
-  var_dump(array_key_exists('three', $o));
-  var_dump(array_key_exists("\0ohgod\0why", $o));
-  echo "==== stdClass, bogus ====\n";
-  var_dump(array_key_exists(2, $o));
-  var_dump(array_key_exists("fife", $o));
-  var_dump(array_key_exists("\0stdClass\0three", $o));
-  var_dump(array_key_exists("\0*\0three", $o));
+$o = new stdClass();
+//$o->{''} = 0;
+$o->{'1'} = 'two';
+$o->{'three'} = 'fore';
+echo "==== stdClass, extant ====\n";
+var_dump(array_key_exists(null, $o));
+var_dump(array_key_exists(__hhvm_intrinsics\launder_value(null), $o));
+var_dump(array_key_exists('', $o));
+var_dump(array_key_exists(1, $o));
+var_dump(array_key_exists('three', $o));
+echo "==== stdClass, bogus ====\n";
+var_dump(array_key_exists(2, $o));
+var_dump(array_key_exists("fife", $o));
+var_dump(array_key_exists("\0stdClass\0three", $o));
+var_dump(array_key_exists("\0*\0three", $o));
 
   $o = new A();
   echo "==== class A ====\n";

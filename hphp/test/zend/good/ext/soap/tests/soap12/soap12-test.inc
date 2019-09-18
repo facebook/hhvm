@@ -1,4 +1,11 @@
 <?hh
+class SimpleStruct {
+	public function __construct(
+		public string $varString,
+		public int $varInt,
+		public float $varFloat){}
+}
+
 class Soap12test {
 	public $header;
 
@@ -69,9 +76,7 @@ class Soap12test {
 	}
 
 	function echoSimpleTypesAsStruct($string, $int, $float) {
-		return (object)array("varString" => $string,
-		 										 "varInt"    => $int,
-	  										 "varFloat"  => $float);
+		return new SimpleStruct($string, $int, $float);
 	}
 
 	function echoNestedStruct($struct) {

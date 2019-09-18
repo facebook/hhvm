@@ -123,11 +123,6 @@ function pg_fetch_array(
 <<__Native>>
 function pg_fetch_assoc(resource $result, ?int $row = null): mixed;
 
-function pg_fetch_object(resource $result, ?int $row = null): mixed {
-  return
-    ($return = pg_fetch_assoc($result, $row)) ? (object) $return : $return;
-}
-
 <<__Native>>
 function pg_fetch_result(
   resource $result,

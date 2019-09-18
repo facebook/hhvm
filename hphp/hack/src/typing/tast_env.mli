@@ -98,9 +98,6 @@ val get_class_ids : env -> Tast.ty -> string list
 (** Given some class type or unresolved union of class types, return the
     identifiers of all classes the type may represent. *)
 
-val fold_unresolved : env -> Tast.ty -> env * Tast.ty
-(** Try to unify all the types in an unresolved union. *)
-
 val flatten_unresolved : env -> Tast.ty -> Tast.ty list -> env * Tast.ty list
 (** Flatten nested unresolved unions, turning ((A | B) | C) to (A | B | C). *)
 

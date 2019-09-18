@@ -89,8 +89,7 @@ let get_first_suggested_type_as_string file type_map node =
     List.find_map tys ~f:(fun (env, phase_ty) ->
         match phase_ty with
         | Typing_defs.LoclTy ty ->
-          let (env, ty) = Tast_env.fold_unresolved env ty in
-          let (env, ty) = Tast_env.expand_type env ty in
+          let (env, ty) = Tast_env.simplify_unions env ty in
           begin
             match ty with
             | (_, ty_) ->

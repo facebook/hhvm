@@ -2526,7 +2526,6 @@ and expr_
     let (env, te1, ty1) =
       update_array_type ?lhs_of_null_coalesce p env e1 (Some e2) valkind
     in
-    let (env, ty1) = TUtils.fold_unresolved env ty1 in
     let (env, te2, ty2) = expr env e2 in
     let env = might_throw env in
     let is_lvalue = phys_equal valkind `lvalue in
@@ -6722,7 +6721,6 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
           ty
           Errors.unify_error
       in
-      let (env, ty) = TUtils.fold_unresolved env ty in
       match TUtils.get_base_type env ty with
       | (_, Tabstract (AKnewtype (classname, [the_cls]), _))
         when classname = SN.Classes.cClassname ->

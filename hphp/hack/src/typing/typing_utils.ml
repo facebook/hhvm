@@ -428,22 +428,6 @@ let flatten_unresolved env ty acc =
   (env, res)
 
 (*****************************************************************************)
-(*****************************************************************************)
-
-(* Try to unify all the types in a union *)
-let rec fold_unresolved env ty =
-  let (env, ety) = Env.expand_type env ty in
-  match ety with
-  | (r, Tunion []) -> (env, (r, Typing_defs.make_tany ()))
-  | (_, Tunion [x]) -> fold_unresolved env x
-  (* We don't want to use unification if new_inference is set.
-   * Just return the type unchanged: better would be to remove redundant
-   * elements, but let's postpone that until we have an improved
-   * representation of unions.
-   *)
-  | _ -> (env, ety)
-
-(*****************************************************************************)
 (* *)
 (*****************************************************************************)
 

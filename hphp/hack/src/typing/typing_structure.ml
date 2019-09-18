@@ -53,7 +53,6 @@ let rec transform_shapemap ?(nullable = false) env pos ty shape =
       ty
       Errors.unify_error
   in
-  let (env, ty) = TUtils.fold_unresolved env ty in
   (* If there are Tanys, be conservative and don't try to represent the
    * type more precisely
    *)

@@ -31,7 +31,6 @@ let collect_attrs_from_ty_sid ?(include_optional = false) env add bag sid =
 
 let rec collect_attrs_from_ty env set ty =
   let (_, ty) = Env.expand_type env ty in
-  let (_, ty) = Env.fold_unresolved env ty in
   match ty with
   | (_, Tunion (ty :: tys)) ->
     let collect = collect_attrs_from_ty env SSet.empty in

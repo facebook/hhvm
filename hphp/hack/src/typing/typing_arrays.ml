@@ -7,7 +7,6 @@
  *
  *)
 
-open Core_kernel
 open Common
 open Typing_defs
 open Typing_env_types
@@ -64,9 +63,7 @@ let union_keys = union
 let union_values env values =
   let unknown =
     List.find values (fun ty ->
-        match snd (snd (TUtils.fold_unresolved env ty)) with
-        | Tany _ -> true
-        | _ -> false)
+        TUtils.is_sub_type_for_union env (Reason.none, make_tany ()) ty)
   in
   match unknown with
   | Some (r, _) -> (env, (r, TUtils.tany env))

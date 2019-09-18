@@ -106,8 +106,6 @@ let fully_expand = Typing_expand.fully_expand
 
 let get_class_ids = Typing_utils.get_class_ids
 
-let fold_unresolved = Typing_utils.fold_unresolved
-
 let flatten_unresolved = Typing_utils.flatten_unresolved
 
 let non_null = Typing_solver.non_null

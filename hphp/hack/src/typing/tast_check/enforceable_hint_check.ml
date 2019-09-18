@@ -106,8 +106,8 @@ let validator =
         end
       | None -> acc
 
-    method! on_alias acc r _ tyl ty =
-      if tyl = [] then
+    method! on_alias acc r id tyl ty =
+      if tyl = [] || snd id = Naming_special_names.FB.cIncorrectType then
         this#on_type acc ty
       else
         this#invalid

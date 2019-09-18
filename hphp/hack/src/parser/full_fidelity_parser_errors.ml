@@ -4703,6 +4703,19 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
             _;
           } ->
         check_constant_expression errors e
+      | AsExpression
+          {
+            as_left_operand = e;
+            as_right_operand =
+              {
+                syntax = GenericTypeSpecifier { generic_class_type = s; _ };
+                _;
+              };
+            _;
+          }
+        when text s = SN.FB.cIncorrectType
+             || text s = Utils.strip_ns SN.FB.cIncorrectType ->
+        check_constant_expression errors e
       | _ ->
         make_error_from_node node SyntaxError.invalid_constant_initializer
         :: errors

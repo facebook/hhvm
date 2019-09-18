@@ -567,6 +567,8 @@ module FB = struct
   let idx = "\\HH\\idx"
 
   let cTypeStructure = "\\HH\\TypeStructure"
+
+  let cIncorrectType = "\\HH\\INCORRECT_TYPE"
 end
 
 module HH = struct

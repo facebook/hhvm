@@ -1706,6 +1706,12 @@ module Make (GetLocals : GetLocals) = struct
       else
         Errors.illegal_constant p
     | Aast.As (e, (_, Aast.Hlike _), _) -> check_constant_expr env e
+    | Aast.As (e, (_, Aast.Happly (id, [_])), _) ->
+      let (p, cn) = NS.elaborate_id (fst env).namespace NS.ElaborateClass id in
+      if cn = SN.FB.cIncorrectType then
+        check_constant_expr env e
+      else
+        Errors.illegal_constant p
     | _ -> Errors.illegal_constant pos
 
   and check_afield_constant_expr env afield =

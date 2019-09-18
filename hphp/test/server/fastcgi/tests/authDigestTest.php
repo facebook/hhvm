@@ -21,6 +21,7 @@ function GoodAuthDigestTestController($serverPort) {
   var_dump(request('localhost', $serverPort, "test_auth_digest.php",
                   [], [], $args));
 }
-
+<<__EntryPoint>> function main(): void {
 runTest("BadAuthDigestTestController");
 runTest("GoodAuthDigestTestController");
+}

@@ -1,34 +1,35 @@
 <?hh
 class C {
-	public $a = 1;
-	public $b = 2;
-	public $c = 3;
+    public $a = 1;
+    public $b = 2;
+    public $c = 3;
 
-	private $priv = 'secret';
+    private $priv = 'secret';
 }
 
 class UsesMagic extends ArrayObject {
 
-	public $b = "This should appear in storage";
+    public $b = "This should appear in storage";
 
-	function __get($name) {
-		$args = array($name);
-		echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
-	}
-	function __set($name, $value) {
-		$args = array($name, $value);
-		echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
-	}
-	function __isset($name) {
-		$args = array($name);
-		echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
-	}
-	function __unset($name) {
-		$args = array($name);
-		echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
-	}
+    function __get($name) {
+        $args = array($name);
+        echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
+    }
+    function __set($name, $value) {
+        $args = array($name, $value);
+        echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
+    }
+    function __isset($name) {
+        $args = array($name);
+        echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
+    }
+    function __unset($name) {
+        $args = array($name);
+        echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
+    }
 
 }
+<<__EntryPoint>> function main(): void {
 $obj = new C;
 $ao = new UsesMagic($obj);
 echo "\n--> Write existent, non-existent and dynamic:\n";
@@ -66,3 +67,4 @@ echo "  Original wrapped object:\n";
 var_dump($obj);
 echo "  Wrapping ArrayObject:\n";
 var_dump($ao);
+}

@@ -1,5 +1,6 @@
 <?hh
 
+<<__EntryPoint>> function main(): void {
 require_once('test_base.inc');
 
 // Limit the server to 1 thread only to ensure that both requests are served by
@@ -23,3 +24,4 @@ requestAll(
   ),
   $customArgs
 );
+}

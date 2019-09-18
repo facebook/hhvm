@@ -18,7 +18,7 @@ function createReq(){
              "Host: $host_name\r\nContent-Length:0\r\n\r\n";
   return $message;
 }
-
+<<__EntryPoint>> function main(): void {
 runTest(function ($serverPort) {
   $stream = createSocketStream($serverPort);
   fwrite($stream, createReq());
@@ -34,3 +34,4 @@ runTest(function ($serverPort) {
   var_dump(strlen($data));
   fclose($stream);
 });
+}

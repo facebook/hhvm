@@ -5,5 +5,7 @@ function func1(){
   preg_match_all_with_matches('/(?P<word>the)/', $string, inout $matches);
   return $matches['word'];
 }
+<<__EntryPoint>> function main(): void {
 $words = func1();
 var_dump($words);
+}

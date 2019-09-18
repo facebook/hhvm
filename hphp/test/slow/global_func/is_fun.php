@@ -22,6 +22,7 @@ function negative_tests() {
   var_dump(HH\is_fun(HH\class_meth('A', 'f_static')));
   var_dump(HH\is_fun($x ==> $x));
 }
-
+<<__EntryPoint>> function main(): void {
 positive_tests();
 negative_tests();
+}

@@ -7,3 +7,5 @@ class A {
   public function take_int(int $a = A::get_int()): void{}
 
 }
+
+<<__EntryPoint>> function main(): void {}

@@ -1,7 +1,7 @@
 <?hh
 
 include(__DIR__ . '/redis.inc');
-
+<<__EntryPoint>> function main(): void {
 $r = NewRedisTestInstance();
 $key = GetTestKeyName(__FILE__);
 $r->delete($key);
@@ -49,3 +49,4 @@ var_dump($r->pipeline()
   ->incrByFloat($key, 1.5)
   ->incrByFloat($key, -1.5)
   ->exec());
+}

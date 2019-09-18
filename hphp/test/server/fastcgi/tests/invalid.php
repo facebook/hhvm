@@ -24,5 +24,6 @@ function invalidTestController($port) {
   echo request($host, $port, 'hello.php');
   echo "\n";
 }
-
+<<__EntryPoint>> function main(): void {
 runTest("invalidTestController");
+}

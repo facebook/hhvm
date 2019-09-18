@@ -8,14 +8,14 @@
 function ut_main()
 {
     // Array with data for testing
-	$long_str = str_repeat('blah', 100);
+    $long_str = str_repeat('blah', 100);
     $attributes = array(
         'POSITIVE_PREFIX' => array( NumberFormatter::POSITIVE_PREFIX, '_+_', 12345.1234 ),
         'POSITIVE_SUFFIX' => array( NumberFormatter::POSITIVE_SUFFIX, '_+_', 12345.1234 ),
         'NEGATIVE_PREFIX' => array( NumberFormatter::NEGATIVE_PREFIX, '_-_', -12345.1234 ),
         'NEGATIVE_SUFFIX' => array( NumberFormatter::NEGATIVE_SUFFIX, '_-_', -12345.1234 ),
         'PADDING_CHARACTER' => array( NumberFormatter::PADDING_CHARACTER, '^', 12345.1234 ),
-	'POSITIVE_PREFIX-2' => array( NumberFormatter::POSITIVE_PREFIX, $long_str, 12345.1234 ),
+    'POSITIVE_PREFIX-2' => array( NumberFormatter::POSITIVE_PREFIX, $long_str, 12345.1234 ),
 //        'CURRENCY_CODE' => array( NumberFormatter::CURRENCY_CODE, '_C_', 12345.1234 )
 //        'DEFAULT_RULESET' => array( NumberFormatter::DEFAULT_RULESET, '_DR_', 12345.1234 ),
 //        'PUBLIC_RULESETS' => array( NumberFormatter::PUBLIC_RULESETS, '_PR_', 12345.1234 )
@@ -56,7 +56,7 @@ function ut_main()
             $res_str .= "ERROR: New $attr_name symbol value has not been set correctly.\n";
 
         // Restore attribute's value to default
-      	ut_nfmt_set_text_attribute( $fmt, $attr, (string)$def_val );
+        ut_nfmt_set_text_attribute( $fmt, $attr, (string)$def_val );
 
         if( $attr == NumberFormatter::PADDING_CHARACTER )
            ut_nfmt_set_attribute( $fmt, NumberFormatter::FORMAT_WIDTH, 0 );
@@ -71,5 +71,6 @@ function ut_main()
 }
 
 include_once( 'ut_common.inc' );
+<<__EntryPoint>> function main_entry(): void {
 ut_run();
-
+}

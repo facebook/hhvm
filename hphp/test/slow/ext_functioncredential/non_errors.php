@@ -47,7 +47,7 @@ class TestClass {
     };
   }
 }
-
+<<__EntryPoint>> function main(): void {
 $test_lambda = () ==> {
   echo "--test_lambda--".PHP_EOL;
   print_cred_info(__FUNCTION_CREDENTIAL__);
@@ -67,3 +67,4 @@ new TestClass()->test_trait_method();
 $test_lambda();
 TestClass::test_class_lambda()();
 $test_long_lambda();
+}

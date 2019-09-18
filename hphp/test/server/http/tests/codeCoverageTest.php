@@ -1,7 +1,7 @@
 <?hh
 
 require_once('test_base.inc');
-
+<<__EntryPoint>> function main(): void {
 echo "Enable Code Coverage = 0\n";
 
 requestAll(
@@ -30,3 +30,4 @@ requestAll(
   ],
   "-vEval.EnableCodeCoverage=2"
 );
+}

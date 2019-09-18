@@ -1,16 +1,18 @@
 <?hh
 class Foo {
-	public    $p1;
-	protected $p2;
-	private   $p3;
+    public    $p1;
+    protected $p2;
+    private   $p3;
 
-	function __isset($name) {
-		var_dump($name);
-		return false;
-	}
+    function __isset($name) {
+        var_dump($name);
+        return false;
+    }
 }
+<<__EntryPoint>> function main(): void {
 $obj = new ReflectionObject(new Foo());
 var_dump($obj->hasProperty("p1"));
 var_dump($obj->hasProperty("p2"));
 var_dump($obj->hasProperty("p3"));
 var_dump($obj->hasProperty("p4"));
+}

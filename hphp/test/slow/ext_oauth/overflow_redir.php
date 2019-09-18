@@ -1,6 +1,6 @@
 <?hh
 require 'server.inc';
-
+<<__EntryPoint>> function main(): void {
 $x = new OAuth('1234','1234');
 $x->setRequestEngine(OAUTH_REQENGINE_CURL);
 
@@ -32,4 +32,4 @@ foreach ($requests as $cur_request) {
 }
 
 http_server_kill($pid);
-
+}

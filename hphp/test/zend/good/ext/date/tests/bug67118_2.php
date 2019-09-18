@@ -12,6 +12,8 @@ class Foo extends DateTime {
         }
     }
 }
+<<__EntryPoint>> function main(): void {
 $date = '12 Sep 2007 15:49:12 UT';
 var_dump(new Foo($date));
 echo "Done";
+}

@@ -13,6 +13,7 @@ abstract final class ExtArrayArrayMapGlobals {
 
 
 
-
+<<__EntryPoint>> function main(): void {
 array_map(fun('check_global'), $GLOBALS['GLOBALS']);
 print ExtArrayArrayMapGlobals::$x."\n";
+}

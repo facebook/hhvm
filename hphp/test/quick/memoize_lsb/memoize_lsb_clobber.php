@@ -15,6 +15,7 @@ class A {
   }
 }
 
-
+<<__EntryPoint>> function main(): void {
 var_dump(A::get());
 var_dump(A::get());
+}

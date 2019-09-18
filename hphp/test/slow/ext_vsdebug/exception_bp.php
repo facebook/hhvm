@@ -1,6 +1,6 @@
 <?hh
 require(__DIR__ . '/common.inc');
-
+<<__EntryPoint>> function main(): void {
 $breakpoints = [
    array(
      "path" => __FILE__ . ".test",
@@ -139,3 +139,4 @@ if (substr($msg{'body'}{'output'}, 0, strlen($expected)) !== $expected) {
 vsDebugCleanup($testProcess);
 
 echo "OK!\n";
+}

@@ -9,7 +9,7 @@ function skipEvents() {
 
   return $msg;
 }
-
+<<__EntryPoint>> function main(): void {
 $path = __FILE__ . ".test";
 $testProcess = vsDebugLaunch($path, true, []);
 
@@ -124,3 +124,4 @@ checkObjEqualRecursively($msg, array(
   ]));
 
 echo "OK!\n";
+}

@@ -60,6 +60,7 @@ function main() {
   ];
   var_dump($results);
 }
-
+<<__EntryPoint>> function main_entry(): void {
 main();
 main();
+}

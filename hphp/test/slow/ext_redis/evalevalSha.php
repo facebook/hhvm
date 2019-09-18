@@ -1,7 +1,7 @@
 <?hh
 
 include(__DIR__ . '/redis.inc');
-
+<<__EntryPoint>> function main(): void {
 $r = NewRedisTestInstance();
 $key = GetTestKeyName(__FILE__);
 $prefix = $key . ':';
@@ -47,3 +47,4 @@ var_dump($r->script('kill'));
 var_dump(gettype($r->getLastError()));
 $r->clearLastError();
 var_dump(gettype($r->getLastError()));
+}

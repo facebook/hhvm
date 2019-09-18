@@ -1,7 +1,7 @@
 <?hh
 
 require __DIR__ . '/redis.inc';
-
+<<__EntryPoint>> function main(): void {
 // setup test
 $r = NewRedisTestInstance();
 $r->setOption(Redis::OPT_PREFIX, GetTestKeyName(__FILE__) . ':');
@@ -41,4 +41,5 @@ try {
   $r->set('test7', '11', ['nx', 'xx']);
 } catch (RedisException $e) {
   echo 'Redis Exception: ' . $e->getMessage() . PHP_EOL;
+}
 }

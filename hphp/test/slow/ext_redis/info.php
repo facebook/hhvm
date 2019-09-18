@@ -1,6 +1,6 @@
 <?hh
 require(__DIR__ . '/redis.inc');
-
+<<__EntryPoint>> function main(): void {
 $r = NewRedisTestInstance(true);
 $info = $r->info();
 var_dump(is_array($info));
@@ -11,3 +11,4 @@ var_dump($r->client('getname'));
 var_dump(count($r->client('LIST')) >= 1); // at least one connection
 $r2 = NewRedisTestInstance();
 var_dump(count($r->client('LIST')) >= 2); // at least two connections
+}

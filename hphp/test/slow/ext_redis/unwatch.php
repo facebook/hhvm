@@ -1,6 +1,6 @@
 <?hh
 require __DIR__ . '/redis.inc';
-
+<<__EntryPoint>> function main(): void {
 $key1 = 'testkey1';
 $value = '6379';
 
@@ -16,3 +16,4 @@ $r1->multi();
 $r1->del($key1);
 $r2->set($key1, 'different value');
 var_dump($r1->exec());
+}

@@ -43,7 +43,7 @@ class G extends F {
   }
 }
 
-
+<<__EntryPoint>> function main(): void {
 $a = A::instance();
 $b = B::instance();
 $c = C::instance();
@@ -69,3 +69,4 @@ var_dump($f === F::instance());
 var_dump($g === G::instance());
 
 var_dump(D::$sideEffect === $d);
+}

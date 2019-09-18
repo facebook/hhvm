@@ -1,12 +1,13 @@
 <?hh
 
 include 'server.inc';
+<<__EntryPoint>> function main(): void {
 $host = curl_cli_server_start();
 $ch = curl_init($host);
 
 $temp_file = dirname(__FILE__) . '/curl_file_deleted_before_curl_close.tmp';
 if (file_exists($temp_file)) {
-	unlink($temp_file); // file should not exist before test
+    unlink($temp_file); // file should not exist before test
 }
 
 $handle = fopen($temp_file, 'w');
@@ -25,3 +26,4 @@ curl_close($ch);
 echo "Closed correctly\n";
 error_reporting(0);
 unlink(dirname(__FILE__) . '/curl_file_deleted_before_curl_close.tmp');
+}

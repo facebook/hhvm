@@ -33,7 +33,7 @@ function doB(int $n) {
   var_dump(B::fibonacci($n));
   var_dump(B::$side_effects);
 }
-
+<<__EntryPoint>> function main(): void {
 doA(10);
 doA(5);
 doA(15);
@@ -42,3 +42,4 @@ doA(15);
 doB(10);
 doB(5);
 doB(15);
+}

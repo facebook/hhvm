@@ -1,7 +1,7 @@
 <?hh
 
 require_once(__DIR__ . '/test_base.inc');
-
+<<__EntryPoint>> function main(): void {
 $requests = array(
   array(
     '-dalways_populate_raw_post_data=1',
@@ -25,4 +25,5 @@ foreach($requests as $request) {
     $headers = array('Cookie' => 'var=COOKIE;cookie=3;');
     echo request('localhost', $port, $path, $post, $headers, $extra) . "\n";
   }, $request[0]);
+}
 }

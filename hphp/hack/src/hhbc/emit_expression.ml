@@ -281,8 +281,8 @@ let is_global_namespace env =
 let enable_intrinsics_extension () =
   Hhbc_options.enable_intrinsics_extension !Hhbc_options.compiler_options
 
-let optimize_null_check () =
-  Hhbc_options.optimize_null_check !Hhbc_options.compiler_options
+let optimize_null_checks () =
+  Hhbc_options.optimize_null_checks !Hhbc_options.compiler_options
 
 let hack_arr_compat_notices () =
   Hhbc_options.hack_arr_compat_notices !Hhbc_options.compiler_options
@@ -639,7 +639,7 @@ and emit_binop env annot op (e1 : Tast.expr) (e2 : Tast.expr) =
         instr_label end_label;
       ]
   | _ ->
-    if not (optimize_null_check ()) then
+    if not (optimize_null_checks ()) then
       default ()
     else (
       match op with
@@ -2079,7 +2079,7 @@ and emit_pipe env (e1 : Tast.expr) (e2 : Tast.expr) =
 and emit_jmpz env (expr : Tast.expr) label : emit_jmp_result =
   let ((pos, _), expr_) = expr in
   let with_pos i = emit_pos_then pos i in
-  let opt = optimize_null_check () in
+  let opt = optimize_null_checks () in
   let ns = Emit_env.get_namespace env in
   match Ast_constant_folder.expr_to_opt_typed_value ns expr with
   | Some v ->
@@ -2177,7 +2177,7 @@ and emit_jmpz env (expr : Tast.expr) label : emit_jmp_result =
 and emit_jmpnz env annot (expr_ : Tast.expr_) label : emit_jmp_result =
   let (pos, _) = annot in
   let with_pos i = emit_pos_then pos i in
-  let opt = optimize_null_check () in
+  let opt = optimize_null_checks () in
   match
     Ast_constant_folder.expr_to_opt_typed_value
       (Emit_env.get_namespace env)

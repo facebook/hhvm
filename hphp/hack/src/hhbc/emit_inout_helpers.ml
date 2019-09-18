@@ -28,7 +28,7 @@ let extract_inout_or_ref_param_locations ~is_sync ~is_closure_or_func params =
     (None, [])
   else
     let need_wrapper =
-      Hhbc_options.create_inout_wrapper_functions
+      Hhbc_options.create_in_out_wrapper_functions
         !Hhbc_options.compiler_options
       && ( Hhbc_options.reffiness_invariance !Hhbc_options.compiler_options = 2
          || is_closure_or_func )

@@ -13,14 +13,14 @@ module J = Hh_json
 (* Compiler configuration options, as set by -v key=value on the command line *)
 type t = {
   option_constant_folding: bool;
-  option_optimize_null_check: bool;
+  option_optimize_null_checks: bool;
   option_max_array_elem_size_on_the_stack: int;
   option_aliased_namespaces: (string * string) list option;
   option_source_mapping: bool;
   option_relabel: bool;
   option_php7_uvs: bool;
   option_php7_ltr_assign: bool;
-  option_create_inout_wrapper_functions: bool;
+  option_create_in_out_wrapper_functions: bool;
   option_reffiness_invariance: int;
   option_hack_arr_compat_notices: bool;
   option_hack_arr_dv_arrs: bool;
@@ -33,7 +33,7 @@ type t = {
   option_doc_root: string;
   option_include_search_paths: string list;
   option_include_roots: string SMap.t;
-  option_enable_perf_logging: bool;
+  option_log_extern_compiler_perf: bool;
   option_enable_intrinsics_extension: bool;
   option_phpism_disallow_execution_operator: bool;
   option_phpism_disable_nontoplevel_declarations: bool;
@@ -46,7 +46,7 @@ type t = {
   option_rx_is_enabled: bool;
   option_disable_lval_as_an_expression: bool;
   option_enable_pocket_universes: bool;
-  option_notice_on_byref_argument_typehint_violation: bool;
+  option_notice_on_by_ref_argument_typehint_violation: bool;
   option_array_provenance: bool;
   option_enable_constant_visibility_modifiers: bool;
   option_enable_class_level_where_clauses: bool;
@@ -62,7 +62,7 @@ type t = {
 let default =
   {
     option_constant_folding = true;
-    option_optimize_null_check = false;
+    option_optimize_null_checks = false;
     option_max_array_elem_size_on_the_stack = 64;
     option_aliased_namespaces = None;
     option_source_mapping = false;
@@ -72,7 +72,7 @@ let default =
      * body. Semantic diff doesn't care about labels, but for visual diff against
      * HHVM it's helpful to renumber in order that the labels match more closely *)
     option_relabel = true;
-    option_create_inout_wrapper_functions = true;
+    option_create_in_out_wrapper_functions = true;
     option_reffiness_invariance = 0;
     option_hack_arr_compat_notices = false;
     option_hack_arr_dv_arrs = false;
@@ -85,7 +85,7 @@ let default =
     option_doc_root = "";
     option_include_search_paths = [];
     option_include_roots = SMap.empty;
-    option_enable_perf_logging = false;
+    option_log_extern_compiler_perf = false;
     option_enable_intrinsics_extension = false;
     option_phpism_disallow_execution_operator = false;
     option_phpism_disable_nontoplevel_declarations = false;
@@ -98,7 +98,7 @@ let default =
     option_rx_is_enabled = false;
     option_disable_lval_as_an_expression = false;
     option_enable_pocket_universes = false;
-    option_notice_on_byref_argument_typehint_violation = false;
+    option_notice_on_by_ref_argument_typehint_violation = false;
     option_array_provenance = false;
     option_enable_constant_visibility_modifiers = false;
     option_enable_class_level_where_clauses = false;
@@ -113,7 +113,7 @@ let default =
 
 let constant_folding o = o.option_constant_folding
 
-let optimize_null_check o = o.option_optimize_null_check
+let optimize_null_checks o = o.option_optimize_null_checks
 
 let max_array_elem_size_on_the_stack o =
   o.option_max_array_elem_size_on_the_stack
@@ -128,7 +128,8 @@ let enable_uniform_variable_syntax o = o.option_php7_uvs
 
 let php7_ltr_assign o = o.option_php7_ltr_assign
 
-let create_inout_wrapper_functions o = o.option_create_inout_wrapper_functions
+let create_in_out_wrapper_functions o =
+  o.option_create_in_out_wrapper_functions
 
 let reffiness_invariance o = o.option_reffiness_invariance
 
@@ -154,7 +155,7 @@ let include_search_paths o = o.option_include_search_paths
 
 let include_roots o = o.option_include_roots
 
-let enable_perf_logging o = o.option_enable_perf_logging
+let log_extern_compiler_perf o = o.option_log_extern_compiler_perf
 
 let enable_intrinsics_extension o = o.option_enable_intrinsics_extension
 
@@ -182,8 +183,8 @@ let disable_lval_as_an_expression o = o.option_disable_lval_as_an_expression
 
 let enable_pocket_universes o = o.option_enable_pocket_universes
 
-let notice_on_byref_argument_typehint_violation o =
-  o.option_notice_on_byref_argument_typehint_violation
+let notice_on_by_ref_argument_typehint_violation o =
+  o.option_notice_on_by_ref_argument_typehint_violation
 
 let array_provenance o = o.option_array_provenance
 
@@ -222,7 +223,7 @@ let to_string o =
     ~sep:"\n"
     [
       Printf.sprintf "constant_folding: %B" @@ constant_folding o;
-      Printf.sprintf "optimize_null_check: %B" @@ optimize_null_check o;
+      Printf.sprintf "optimize_null_checks: %B" @@ optimize_null_checks o;
       Printf.sprintf "max_array_elem_size_on_the_stack: %d"
       @@ max_array_elem_size_on_the_stack o;
       Printf.sprintf "source_mapping: %B" @@ source_mapping o;
@@ -230,8 +231,8 @@ let to_string o =
       Printf.sprintf "enable_uniform_variable_syntax: %B"
       @@ enable_uniform_variable_syntax o;
       Printf.sprintf "php7_ltr_assign: %B" @@ php7_ltr_assign o;
-      Printf.sprintf "create_inout_wrapper_functions: %B"
-      @@ create_inout_wrapper_functions o;
+      Printf.sprintf "create_in_out_wrapper_functions: %B"
+      @@ create_in_out_wrapper_functions o;
       Printf.sprintf "reffiness_invariance: %d" @@ reffiness_invariance o;
       Printf.sprintf "hack_arr_compat_notices: %B" @@ hack_arr_compat_notices o;
       Printf.sprintf "hack_arr_dv_arrs: %B" @@ hack_arr_dv_arrs o;
@@ -245,7 +246,8 @@ let to_string o =
       Printf.sprintf "doc_root: %s" @@ doc_root o;
       Printf.sprintf "include_search_paths: [%s]" search_paths;
       Printf.sprintf "include_roots: {%s}" inc_roots;
-      Printf.sprintf "enable_perf_logging: %B" @@ enable_perf_logging o;
+      Printf.sprintf "log_extern_compiler_perf: %B"
+      @@ log_extern_compiler_perf o;
       Printf.sprintf "enable_intrinsics_extension: %B"
       @@ enable_intrinsics_extension o;
       Printf.sprintf "phpism_disallow_execution_operator %B"
@@ -263,8 +265,8 @@ let to_string o =
       Printf.sprintf "disable_lval_as_an_expression: %B"
       @@ disable_lval_as_an_expression o;
       Printf.sprintf "enable_pocket_universes: %B" @@ enable_pocket_universes o;
-      Printf.sprintf "notice_on_byref_argument_typehint_violation: %B"
-      @@ notice_on_byref_argument_typehint_violation o;
+      Printf.sprintf "notice_on_by_ref_argument_typehint_violation: %B"
+      @@ notice_on_by_ref_argument_typehint_violation o;
       Printf.sprintf "array_provenance: %B" @@ array_provenance o;
       Printf.sprintf "enable_constant_visibility_modifiers: %B"
       @@ enable_constant_visibility_modifiers o;
@@ -301,7 +303,7 @@ let set_option options name value =
   | "hack.compiler.constantfolding" ->
     { options with option_constant_folding = as_bool value }
   | "hack.compiler.optimizenullcheck" ->
-    { options with option_optimize_null_check = as_bool value }
+    { options with option_optimize_null_checks = as_bool value }
   (* Keep both for backwards compatibility until next release *)
   | "hack.compiler.sourcemapping"
   | "eval.disassemblersourcemapping" ->
@@ -311,7 +313,7 @@ let set_option options name value =
   | "hhvm.php7.uvs" -> { options with option_php7_uvs = as_bool value }
   | "hack.compiler.relabel" -> { options with option_relabel = as_bool value }
   | "eval.createinoutwrapperfunctions" ->
-    { options with option_create_inout_wrapper_functions = as_bool value }
+    { options with option_create_in_out_wrapper_functions = as_bool value }
   | "eval.reffinessinvariance" ->
     { options with option_reffiness_invariance = int_of_string value }
   | "eval.hackarrcompatnotices" ->
@@ -329,7 +331,7 @@ let set_option options name value =
   | "hack.lang.hacksperimental" ->
     { options with option_hacksperimental = as_bool value }
   | "eval.logexterncompilerperf" ->
-    { options with option_enable_perf_logging = as_bool value }
+    { options with option_log_extern_compiler_perf = as_bool value }
   | "eval.enableintrinsicsextension" ->
     { options with option_enable_intrinsics_extension = as_bool value }
   | "hack.lang.phpism.disallowexecutionoperator" ->
@@ -363,7 +365,7 @@ let set_option options name value =
   | "hhvm.notice_on_by_ref_argument_typehint_violation" ->
     {
       options with
-      option_notice_on_byref_argument_typehint_violation = as_bool value;
+      option_notice_on_by_ref_argument_typehint_violation = as_bool value;
     }
   | "hhvm.array_provenance" ->
     { options with option_array_provenance = as_bool value }
@@ -455,7 +457,7 @@ let value_setters =
     ( set_value "hack.compiler.constant_folding" get_value_from_config_int
     @@ (fun opts v -> { opts with option_constant_folding = v = 1 }) );
     ( set_value "hack.compiler.optimize_null_checks" get_value_from_config_int
-    @@ (fun opts v -> { opts with option_optimize_null_check = v = 1 }) );
+    @@ (fun opts v -> { opts with option_optimize_null_checks = v = 1 }) );
     ( set_value "eval.disassembler_source_mapping" get_value_from_config_int
     @@ (fun opts v -> { opts with option_source_mapping = v = 1 }) );
     ( set_value "hhvm.php7.uvs" get_value_from_config_int
@@ -464,7 +466,7 @@ let value_setters =
     @@ (fun opts v -> { opts with option_php7_ltr_assign = v = 1 }) );
     ( set_value "hhvm.create_in_out_wrapper_functions" get_value_from_config_int
     @@ fun opts v ->
-    { opts with option_create_inout_wrapper_functions = v = 1 } );
+    { opts with option_create_in_out_wrapper_functions = v = 1 } );
     ( set_value "hhvm.reffiness_invariance" get_value_from_config_int
     @@ (fun opts v -> { opts with option_reffiness_invariance = v }) );
     ( set_value "hhvm.hack_arr_compat_notices" get_value_from_config_int
@@ -504,7 +506,8 @@ let value_setters =
         "hhvm.notice_on_by_ref_argument_typehint_violation"
         get_value_from_config_int
     @@ fun opts v ->
-    { opts with option_notice_on_byref_argument_typehint_violation = v = 1 } );
+    { opts with option_notice_on_by_ref_argument_typehint_violation = v = 1 }
+    );
     ( set_value "doc_root" get_value_from_config_string
     @@ (fun opts v -> { opts with option_doc_root = v }) );
     ( set_value
@@ -514,7 +517,7 @@ let value_setters =
     ( set_value "hhvm.include_roots" get_value_from_config_string_to_string_map
     @@ (fun opts v -> { opts with option_include_roots = v }) );
     ( set_value "hhvm.log_extern_compiler_perf" get_value_from_config_int
-    @@ (fun opts v -> { opts with option_enable_perf_logging = v = 1 }) );
+    @@ (fun opts v -> { opts with option_log_extern_compiler_perf = v = 1 }) );
     ( set_value "hhvm.enable_intrinsics_extension" get_value_from_config_int
     @@ (fun opts v -> { opts with option_enable_intrinsics_extension = v = 1 })
     );

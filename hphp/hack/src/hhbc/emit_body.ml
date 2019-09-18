@@ -285,7 +285,7 @@ let emit_verify_out params =
       not @@ is_mixed_or_dynamic t
     | _ -> true
   and emit_verify_out_type_for_refs =
-    Hhbc_options.notice_on_byref_argument_typehint_violation
+    Hhbc_options.notice_on_by_ref_argument_typehint_violation
       !Hhbc_options.compiler_options
   in
   let param_instrs =

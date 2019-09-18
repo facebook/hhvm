@@ -583,7 +583,9 @@ let decl_and_run_mode compiler_options =
             ]
           in
           let msg =
-            if Hhbc_options.enable_perf_logging !Hhbc_options.compiler_options
+            if
+              Hhbc_options.log_extern_compiler_perf
+                !Hhbc_options.compiler_options
             then
               let json_microsec t = int_ @@ int_of_float @@ (t *. 1000000.0) in
               ("parsing_time", json_microsec !(debug_time.parsing_t))

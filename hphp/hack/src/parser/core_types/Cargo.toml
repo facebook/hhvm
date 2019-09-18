@@ -11,3 +11,4 @@ path = "../parser_core_types_lib.rs"
 line_break_map = {path = "../../utils/line_break_map", package = "hack_line_break_map"}
 ocamlpool_rust = { path = "../../utils/ocamlpool_rust", package = "hack_utils_ocamlpool" }
 oxidized = {path = "../../oxidized", package = "hack_oxidized"}
+itertools = "^0.7"

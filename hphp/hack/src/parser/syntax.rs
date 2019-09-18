@@ -11,6 +11,8 @@ use crate::token_kind::TokenKind;
 use std::fmt::Debug;
 use std::marker::Sized;
 
+use itertools::Either::{Left, Right};
+
 pub use crate::syntax_generated::*;
 pub use crate::syntax_type::*;
 
@@ -214,12 +216,12 @@ where
         self.kind() == SyntaxKind::SafeMemberSelectionExpression
     }
 
-    pub fn syntax_node_to_list<'a>(&'a self) -> Box<dyn DoubleEndedIterator<Item = &'a Self> + 'a> {
+    pub fn syntax_node_to_list<'a>(&'a self) -> impl DoubleEndedIterator<Item = &'a Self> {
         use std::iter::{empty, once};
         match &self.syntax {
-            SyntaxVariant::SyntaxList(x) => Box::new(x.iter()),
-            SyntaxVariant::Missing => Box::new(empty()),
-            _ => Box::new(once(self)),
+            SyntaxVariant::SyntaxList(x) => Left(x.iter()),
+            SyntaxVariant::Missing => Right(Left(empty())),
+            _ => Right(Right(once(self))),
         }
     }
 

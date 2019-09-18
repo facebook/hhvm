@@ -11,7 +11,7 @@ use ocamlpool_rust::{
     ocamlvalue::*,
     utils::{block_field, str_field},
 };
-use oxidized::{file_info, relative_path::RelativePath};
+use oxidized::{file_info, global_options::GlobalOptions, relative_path::RelativePath};
 use parser::{
     indexed_source_text::IndexedSourceText,
     mode_parser::parse_mode,
@@ -25,6 +25,7 @@ use parser::{
 };
 
 use lowerer::{Env as LowererEnv, Lowerer};
+use std::default::Default;
 
 type PositionedSyntaxParser<'a> = Parser<'a, WithKind<PositionedSmartConstructors>, NoState>;
 struct PositionedSyntaxLowerer {}
@@ -55,10 +56,14 @@ caml_raise!(parse_and_lower_from_text, |ocaml_source_text|, <res>, {
 
     let mut parser = PositionedSyntaxParser::make(&source_text, env);
     let script = parser.parse_script(None);
+    let parser_options = GlobalOptions::default();
     let mut env = LowererEnv::make(
-        false, /*elaborate namespace*/
+        false, /* codegen */
+        false, /* elaborate namespace */
+        false, /* quick mode */
         mode,
         &indexed_source_text,
+        &parser_options,
     );
 
     ocamlpool_enter();

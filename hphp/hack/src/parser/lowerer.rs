@@ -5,10 +5,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use oxidized::{
-    namespace_env::Env as NamespaceEnv,
-    pos::Pos,
-    prim_defs::Comment,
-    s_map, {aast, aast_defs, ast_defs, file_info},
+    aast, aast_defs, ast_defs, file_info, global_options::GlobalOptions,
+    namespace_env::Env as NamespaceEnv, pos::Pos, prim_defs::Comment, s_map,
 };
 
 use parser_rust::{
@@ -21,8 +19,12 @@ use escaper::*;
 
 use ocamlvalue_macro::Ocamlvalue;
 
-use std::collections::HashSet;
-use std::result::Result::{Err, Ok};
+use std::{
+    cell::{RefCell, RefMut},
+    collections::HashSet,
+    rc::Rc,
+    result::Result::{Err, Ok},
+};
 
 use crate::lowerer_modifier as modifier;
 
@@ -110,6 +112,28 @@ impl FunHdr {
     }
 }
 
+#[derive(Debug)]
+pub struct State {
+    /* Whether we've seen COMPILER_HALT_OFFSET. The value of COMPILER_HALT_OFFSET
+      defaults to 0 if HALT_COMPILER isn't called.
+      None -> COMPILER_HALT_OFFSET isn't in the source file
+      Some 0 -> COMPILER_HALT_OFFSET is in the source file, but HALT_COMPILER isn't
+      Some x -> COMPILER_HALT_OFFSET is in the source file,
+                HALT_COMPILER is at x bytes offset in the file.
+    */
+    pub saw_compiler_halt_offset: Option<usize>,
+    pub cls_reified_generics: HashSet<String>,
+    pub in_static_method: bool,
+    pub parent_maybe_reified: bool,
+    /* This provides a generic mechanism to delay raising parsing errors;
+     * since we're moving FFP errors away from CST to a stage after lowering
+     * _and_ want to prioritize errors before lowering, the lowering errors
+     * must be merely stored when the lowerer runs (until check for FFP runs (on AST)
+     * and raised _after_ FFP error checking (unless we run the lowerer twice,
+     * which would be expensive). */
+    pub lowpri_errors: Vec<(Pos, String)>,
+}
+
 #[derive(Debug, Clone)]
 pub struct Env<'a> {
     codegen: bool,
@@ -129,41 +153,34 @@ pub struct Env<'a> {
     pub saw_yield: bool, /* Information flowing back up */
     pub lifted_awaits: Option<LiftedAwaits>,
     pub tmp_var_counter: isize,
-    /* Whether we've seen COMPILER_HALT_OFFSET. The value of COMPILER_HALT_OFFSET
-      defaults to 0 if HALT_COMPILER isn't called.
-      None -> COMPILER_HALT_OFFSET isn't in the source file
-      Some 0 -> COMPILER_HALT_OFFSET is in the source file, but HALT_COMPILER isn't
-      Some x -> COMPILER_HALT_OFFSET is in the source file,
-                HALT_COMPILER is at x bytes offset in the file.
-    */
-    pub saw_compiler_halt_offset: Option<usize>,
-    pub cls_reified_generics: HashSet<String>,
-    pub in_static_method: bool,
-    pub parent_maybe_reified: bool,
-    /* This provides a generic mechanism to delay raising parsing errors;
-     * since we're moving FFP errors away from CST to a stage after lowering
-     * _and_ want to prioritize errors before lowering, the lowering errors
-     * must be merely stored when the lowerer runs (until check for FFP runs (on AST)
-     * and raised _after_ FFP error checking (unless we run the lowerer twice,
-     * which would be expensive). */
-    pub lowpri_errors: Vec<(Pos, String)>,
 
     pub indexed_source_text: &'a IndexedSourceText<'a>,
     pub auto_ns_map: &'a [(String, String)],
+    pub parser_options: &'a GlobalOptions,
+
+    state: Rc<RefCell<State>>,
 }
 
 impl<'a> Env<'a> {
     pub fn make(
+        codegen: bool,
         elaborate_namespaces: bool,
+        quick_mode: bool,
         mode: file_info::Mode,
         indexed_source_text: &'a IndexedSourceText<'a>,
+        parser_options: &'a GlobalOptions,
     ) -> Self {
+        use file_info::Mode::*;
         Env {
-            codegen: false,
+            codegen,
             elaborate_namespaces,
             include_line_comments: false,
             keep_errors: false,
-            quick_mode: false,
+            quick_mode: !codegen
+                && (match mode {
+                    Mdecl | Mphp => true,
+                    _ => quick_mode,
+                }),
             show_all_errors: false,
             lower_coroutines: true,
             fail_open: true,
@@ -172,13 +189,17 @@ impl<'a> Env<'a> {
             saw_yield: false,
             lifted_awaits: None,
             tmp_var_counter: 0,
-            saw_compiler_halt_offset: None,
-            cls_reified_generics: HashSet::new(),
-            in_static_method: false,
-            parent_maybe_reified: false,
-            lowpri_errors: vec![],
             indexed_source_text,
             auto_ns_map: &[],
+            parser_options,
+
+            state: Rc::new(RefCell::new(State {
+                saw_compiler_halt_offset: None,
+                cls_reified_generics: HashSet::new(),
+                in_static_method: false,
+                parent_maybe_reified: false,
+                lowpri_errors: vec![],
+            })),
         }
     }
 
@@ -208,6 +229,32 @@ impl<'a> Env<'a> {
 
     fn fail_open(&self) -> bool {
         self.fail_open
+    }
+
+    fn saw_compiler_halt_offset(&mut self) -> RefMut<Option<usize>> {
+        RefMut::map(self.state.borrow_mut(), |s| &mut s.saw_compiler_halt_offset)
+    }
+
+    fn cls_reified_generics(&mut self) -> RefMut<HashSet<String>> {
+        RefMut::map(self.state.borrow_mut(), |s| &mut s.cls_reified_generics)
+    }
+
+    fn in_static_method(&mut self) -> RefMut<bool> {
+        RefMut::map(self.state.borrow_mut(), |s| &mut s.in_static_method)
+    }
+
+    fn parent_maybe_reified(&mut self) -> RefMut<bool> {
+        RefMut::map(self.state.borrow_mut(), |s| &mut s.parent_maybe_reified)
+    }
+
+    fn lowpri_errors(&mut self) -> RefMut<Vec<(Pos, String)>> {
+        RefMut::map(self.state.borrow_mut(), |s| &mut s.lowpri_errors)
+    }
+
+    fn clone_non_tls(&self) -> Self {
+        let mut cloned = self.clone();
+        cloned.top_level_statements = false;
+        cloned
     }
 }
 
@@ -279,13 +326,13 @@ where
     }
 
     fn raise_parsing_error(node: &Syntax<T, V>, env: &mut Env, msg: &str) {
-        not_impl!()
+        // TODO
     }
 
     fn raise_parsing_error_pos(pos: Pos, env: &mut Env, msg: &str) {
         // TODO: enable should_surface_errors
         if env.codegen() && !env.lower_coroutines() {
-            env.lowpri_errors.push((pos, String::from(msg)))
+            env.lowpri_errors().push((pos, String::from(msg)))
         }
     }
 
@@ -309,7 +356,7 @@ where
     }
 
     fn lowering_error(env: &mut Env, pos: Pos, text: &str, syntax_kind: &str) {
-        if env.is_typechecker() && env.lowpri_errors.is_empty() {
+        if env.is_typechecker() && env.lowpri_errors().is_empty() {
             // TODO: Ocaml also checks Errors.currently_has_errors
             Self::raise_parsing_error_pos(
                 pos,
@@ -394,7 +441,7 @@ where
             _ => {
                 let mut name = node.text(env.indexed_source_text.source_text);
                 if name == "__COMPILER_HALT_OFFSET__" {
-                    env.saw_compiler_halt_offset = Some(0);
+                    *env.saw_compiler_halt_offset() = Some(0);
                 }
                 if let Some(prefix) = drop_prefix {
                     name = Self::drop_prefix(name, prefix);
@@ -1073,8 +1120,8 @@ where
                 let user_attributes = Self::p_user_attributes(&c.type_attribute_spec, env)?;
                 let is_reified = !&c.type_reified.is_missing();
                 if is_class && is_reified {
-                    env.cls_reified_generics
-                        .insert(Self::text(&c.type_name, env));
+                    let type_name = Self::text(&c.type_name, env);
+                    env.cls_reified_generics().insert(type_name);
                 }
                 let variance = match Self::token_kind(&c.type_variance) {
                     Some(TK::Plus) => ast_defs::Variance::Covariant,
@@ -1243,7 +1290,7 @@ where
                     }
                     _ => {
                         if !env.top_level_statements
-                            && (env.file_mode() == file_info::Mode::Mdecl && env.codegen()
+                            && (env.file_mode() == file_info::Mode::Mdecl && !env.codegen()
                                 || env.quick_mode)
                         {
                             mk_noop_result()
@@ -1393,7 +1440,7 @@ where
 
     fn extract_docblock(node: &Syntax<T, V>, env: &Env) -> Option<String> {
         #[derive(Copy, Clone, Eq, PartialEq)]
-        enum State {
+        enum ScanState {
             DocComment,
             EmbeddedCmt,
             EndDoc,
@@ -1404,11 +1451,11 @@ where
             MaybeDoc2,
             SawSlash,
         }
-        use State::*;
+        use ScanState::*;
         // `parse` mixes loop and recursion to use less stack space.
-        fn parse(str: &str, start: usize, state: State, idx: usize) -> Option<String> {
+        fn parse(str: &str, start: usize, state: ScanState, idx: usize) -> Option<String> {
             let is_whitespace = |c| c == ' ' || c == '\t' || c == '\n' || c == '\r';
-            let mut s = (start, state, idx); // (start, state, index)
+            let mut s = (start, state, idx);
             loop {
                 if s.2 == str.len() {
                     break None;
@@ -1721,7 +1768,7 @@ where
                 let kinds = Self::p_kinds(&h.function_modifiers, env)?;
                 let visibility = p_method_vis(&h.function_modifiers, env)?;
                 let is_static = kinds.has(modifier::STATIC);
-                env.in_static_method = is_static;
+                *env.in_static_method() = is_static;
                 let (mut body, body_has_yield) =
                     Self::mp_yielding(&Self::p_function_body, &c.methodish_function_body, env)?;
                 if env.codegen() {
@@ -1729,7 +1776,7 @@ where
                 }
                 member_init.append(&mut body);
                 let body = member_init;
-                env.in_static_method = false;
+                *env.in_static_method() = false;
                 let is_abstract = kinds.has(modifier::ABSTRACT);
                 let is_external = !is_abstract && c.methodish_function_body.is_external();
                 let user_attributes = Self::p_user_attributes(&c.methodish_attribute, env)?;
@@ -2083,10 +2130,12 @@ where
         match &node.syntax {
             Missing => Ok(vec![]),
             WhereClause(c) => {
-                if is_class {
-                    // TODO: check parser option
-                    // if not (ParserOptions.enable_class_level_where_clauses env.parser_options)
-                    // Self::raise_parsing_error(parent, "Class-level where clauses are disabled");
+                if is_class && !env.parser_options.po_enable_class_level_where_clauses {
+                    Self::raise_parsing_error(
+                        parent,
+                        env,
+                        "Class-level where clauses are disabled",
+                    );
                 }
                 let f = |n: &Syntax<T, V>, e: &mut Env| -> ret_aast!(WhereConstraint) {
                     match &n.syntax {
@@ -2128,7 +2177,7 @@ where
                 let function_attribute_spec = &child.function_attribute_spec;
                 let function_declaration_header = &child.function_declaration_header;
                 let function_body = &child.function_body;
-                // TOOD: env = non_tls env;
+                let env = &mut env.clone_non_tls();
                 let allowed_kinds =
                     modifier::KindSet::from_kinds(&[modifier::ASYNC, modifier::COROUTINE]);
                 let modifier_checker =
@@ -2175,7 +2224,7 @@ where
                 })])
             }
             ClassishDeclaration(c) if Self::contains_class_body(c) => {
-                // TOOD: env = non_tls env
+                let env = &mut env.clone_non_tls();
                 let mode = Self::mode_annotation(env.file_mode());
                 let user_attributes = Self::p_user_attributes(&c.classish_attribute, env)?;
                 let kinds = Self::p_kinds(&c.classish_modifiers, env)?;
@@ -2186,7 +2235,7 @@ where
                     _ => false,
                 };
                 let name = Self::pos_name(&c.classish_name, env)?;
-                env.cls_reified_generics = HashSet::new();
+                *env.cls_reified_generics() = HashSet::new();
                 let tparams = aast::ClassTparams {
                     list: Self::p_tparam_l(true, &c.classish_type_parameters, env)?,
                     constraints: s_map::SMap::new(),
@@ -2468,7 +2517,7 @@ where
                 EndOfFile(_) => break,
                 n if is_halt(n) => {
                     let pos = Self::p_pos(nodes[i], env);
-                    env.saw_compiler_halt_offset = Some(pos.end_cnum());
+                    *env.saw_compiler_halt_offset() = Some(pos.end_cnum());
                 }
                 _ => match Self::p_def(nodes[i], env) {
                     Err(Error::APIMissingSyntax { .. }) if env.fail_open => {}
@@ -2488,8 +2537,8 @@ where
         }
     }
 
-    fn elabarate_halt_compiler(ast: aast!(Program<,>), env: &Env) -> aast!(Program<,>) {
-        match env.saw_compiler_halt_offset {
+    fn elabarate_halt_compiler(ast: aast!(Program<,>), env: &mut Env) -> aast!(Program<,>) {
+        match *env.saw_compiler_halt_offset() {
             Some(_) => not_impl!(),
             _ => ast,
         }

@@ -475,15 +475,18 @@ namespace imm {
 
 #define IMM_MEM(which, n)          IMM_TY_##which IMM_NAME_##which(n)
 #define IMM_MEM_NA
-#define IMM_MEM_ONE(x)             IMM_MEM(x, 1);
-#define IMM_MEM_TWO(x, y)          IMM_MEM(x, 1); IMM_MEM(y, 2);
-#define IMM_MEM_THREE(x, y, z)     IMM_MEM(x, 1); IMM_MEM(y, 2); \
-                                   IMM_MEM(z, 3);
-#define IMM_MEM_FOUR(x, y, z, l)   IMM_MEM(x, 1); IMM_MEM(y, 2); \
-                                   IMM_MEM(z, 3); IMM_MEM(l, 4);
-#define IMM_MEM_FIVE(x, y, z, l, m) IMM_MEM(x, 1); IMM_MEM(y, 2); \
-                                   IMM_MEM(z, 3); IMM_MEM(l, 4); \
-                                   IMM_MEM(m, 5);
+#define IMM_MEM_ONE(x)                IMM_MEM(x, 1);
+#define IMM_MEM_TWO(x, y)             IMM_MEM(x, 1); IMM_MEM(y, 2);
+#define IMM_MEM_THREE(x, y, z)        IMM_MEM(x, 1); IMM_MEM(y, 2); \
+                                      IMM_MEM(z, 3);
+#define IMM_MEM_FOUR(x, y, z, l)      IMM_MEM(x, 1); IMM_MEM(y, 2); \
+                                      IMM_MEM(z, 3); IMM_MEM(l, 4);
+#define IMM_MEM_FIVE(x, y, z, l, m)   IMM_MEM(x, 1); IMM_MEM(y, 2); \
+                                      IMM_MEM(z, 3); IMM_MEM(l, 4); \
+                                      IMM_MEM(m, 5);
+#define IMM_MEM_SIX(x, y, z, l, m, n) IMM_MEM(x, 1); IMM_MEM(y, 2); \
+                                      IMM_MEM(z, 3); IMM_MEM(l, 4); \
+                                      IMM_MEM(m, 5); IMM_MEM(n, 6);
 
 #define IMM_EQ_WRAP(e, ...)       detail::eq_pairs(e, __VA_ARGS__)
 #define IMM_EQ(which, n)          detail::eq_operand<     \
@@ -494,11 +497,12 @@ namespace imm {
                                     o.IMM_NAME_##which(n) \
                                   }
 #define IMM_EQ_NA                 detail::eq_operand<void*,imm::NA> { 0, 0 }
-#define IMM_EQ_ONE(x)             IMM_EQ(x, 1)
-#define IMM_EQ_TWO(x, y)          IMM_EQ_ONE(x), IMM_EQ(y, 2)
-#define IMM_EQ_THREE(x, y, z)     IMM_EQ_TWO(x, y), IMM_EQ(z, 3)
-#define IMM_EQ_FOUR(x, y, z, l)   IMM_EQ_THREE(x, y, z), IMM_EQ(l, 4)
-#define IMM_EQ_FIVE(x, y, z, l, m) IMM_EQ_FOUR(x, y, z, l), IMM_EQ(m, 5)
+#define IMM_EQ_ONE(x)                IMM_EQ(x, 1)
+#define IMM_EQ_TWO(x, y)             IMM_EQ_ONE(x), IMM_EQ(y, 2)
+#define IMM_EQ_THREE(x, y, z)        IMM_EQ_TWO(x, y), IMM_EQ(z, 3)
+#define IMM_EQ_FOUR(x, y, z, l)      IMM_EQ_THREE(x, y, z), IMM_EQ(l, 4)
+#define IMM_EQ_FIVE(x, y, z, l, m)   IMM_EQ_FOUR(x, y, z, l), IMM_EQ(m, 5)
+#define IMM_EQ_SIX(x, y, z, l, m, n) IMM_EQ_FIVE(x, y, z, l, m), IMM_EQ(n, 6)
 
 #define IMM_HASH_WRAP(h, ...)       detail::hash_combine(h, __VA_ARGS__)
 #define IMM_HASH(which, n)          detail::hash_operand<     \
@@ -506,50 +510,59 @@ namespace imm {
                                       imm::IMM_ID_##which     \
                                     > { IMM_NAME_##which(n) }
 #define IMM_HASH_NA                 detail::hash_operand<void*,imm::NA> { 0 }
-#define IMM_HASH_ONE(x)             IMM_HASH(x, 1)
-#define IMM_HASH_TWO(x, y)          IMM_HASH_ONE(x), IMM_HASH(y, 2)
-#define IMM_HASH_THREE(x, y, z)     IMM_HASH_TWO(x, y), IMM_HASH(z, 3)
-#define IMM_HASH_FOUR(x, y, z, l)   IMM_HASH_THREE(x, y, z), IMM_HASH(l, 4)
-#define IMM_HASH_FIVE(x, y, z, l, m) IMM_HASH_FOUR(x, y, z, l), IMM_HASH(m, 5)
+#define IMM_HASH_ONE(x)                IMM_HASH(x, 1)
+#define IMM_HASH_TWO(x, y)             IMM_HASH_ONE(x), IMM_HASH(y, 2)
+#define IMM_HASH_THREE(x, y, z)        IMM_HASH_TWO(x, y), IMM_HASH(z, 3)
+#define IMM_HASH_FOUR(x, y, z, l)      IMM_HASH_THREE(x, y, z), IMM_HASH(l, 4)
+#define IMM_HASH_FIVE(x, y, z, l, m)   IMM_HASH_FOUR(x, y, z, l), IMM_HASH(m, 5)
+#define IMM_HASH_SIX(x, y, z, l, m, n) IMM_HASH_FIVE(x, y, z, l, m), IMM_HASH(n, 6)
 
 #define IMM_TARGETS_NA
-#define IMM_TARGETS_ONE(x)          IMM_TARGETS_##x(1)
-#define IMM_TARGETS_TWO(x,y)        IMM_TARGETS_ONE(x) IMM_TARGETS_##y(2)
-#define IMM_TARGETS_THREE(x,y,z)    IMM_TARGETS_TWO(x,y) IMM_TARGETS_##z(3)
-#define IMM_TARGETS_FOUR(x,y,z,l)   IMM_TARGETS_THREE(x,y,z) IMM_TARGETS_##l(4)
-#define IMM_TARGETS_FIVE(x,y,z,l,m) IMM_TARGETS_FOUR(x,y,z,l) IMM_TARGETS_##m(5)
+#define IMM_TARGETS_ONE(x)           IMM_TARGETS_##x(1)
+#define IMM_TARGETS_TWO(x,y)         IMM_TARGETS_ONE(x) IMM_TARGETS_##y(2)
+#define IMM_TARGETS_THREE(x,y,z)     IMM_TARGETS_TWO(x,y) IMM_TARGETS_##z(3)
+#define IMM_TARGETS_FOUR(x,y,z,l)    IMM_TARGETS_THREE(x,y,z) IMM_TARGETS_##l(4)
+#define IMM_TARGETS_FIVE(x,y,z,l,m)  IMM_TARGETS_FOUR(x,y,z,l) IMM_TARGETS_##m(5)
+#define IMM_TARGETS_SIX(x,y,z,l,m,n) IMM_TARGETS_FIVE(x,y,z,l,m) IMM_TARGETS_##n(6)
 
 #define IMM_EXTRA_NA
 #define IMM_EXTRA_ONE(x)           IMM_EXTRA_##x
-#define IMM_EXTRA_TWO(x,y)         IMM_EXTRA_ONE(x)       IMM_EXTRA_ONE(y)
-#define IMM_EXTRA_THREE(x,y,z)     IMM_EXTRA_TWO(x,y)     IMM_EXTRA_ONE(z)
-#define IMM_EXTRA_FOUR(x,y,z,l)    IMM_EXTRA_THREE(x,y,z) IMM_EXTRA_ONE(l)
-#define IMM_EXTRA_FIVE(x,y,z,l,m)  IMM_EXTRA_FOUR(x,y,z,l) IMM_EXTRA_ONE(m)
+#define IMM_EXTRA_TWO(x,y)         IMM_EXTRA_ONE(x)          IMM_EXTRA_ONE(y)
+#define IMM_EXTRA_THREE(x,y,z)     IMM_EXTRA_TWO(x,y)        IMM_EXTRA_ONE(z)
+#define IMM_EXTRA_FOUR(x,y,z,l)    IMM_EXTRA_THREE(x,y,z)    IMM_EXTRA_ONE(l)
+#define IMM_EXTRA_FIVE(x,y,z,l,m)  IMM_EXTRA_FOUR(x,y,z,l)   IMM_EXTRA_ONE(m)
+#define IMM_EXTRA_SIX(x,y,z,l,m,n) IMM_EXTRA_FIVE(x,y,z,l,m) IMM_EXTRA_ONE(n)
 
 #define IMM_CTOR(which, n)         IMM_TY_##which IMM_NAME_##which(n)
 #define IMM_CTOR_NA
-#define IMM_CTOR_ONE(x)            IMM_CTOR(x, 1)
-#define IMM_CTOR_TWO(x, y)         IMM_CTOR(x, 1), IMM_CTOR(y, 2)
-#define IMM_CTOR_THREE(x, y, z)    IMM_CTOR(x, 1), IMM_CTOR(y, 2), \
-                                   IMM_CTOR(z, 3)
-#define IMM_CTOR_FOUR(x, y, z, l)  IMM_CTOR(x, 1), IMM_CTOR(y, 2), \
-                                   IMM_CTOR(z, 3), IMM_CTOR(l, 4)
-#define IMM_CTOR_FIVE(x, y, z, l, m) IMM_CTOR(x, 1), IMM_CTOR(y, 2),     \
-                                     IMM_CTOR(z, 3), IMM_CTOR(l, 4),     \
-                                     IMM_CTOR(m, 5)
+#define IMM_CTOR_ONE(x)                IMM_CTOR(x, 1)
+#define IMM_CTOR_TWO(x, y)             IMM_CTOR(x, 1), IMM_CTOR(y, 2)
+#define IMM_CTOR_THREE(x, y, z)        IMM_CTOR(x, 1), IMM_CTOR(y, 2), \
+                                       IMM_CTOR(z, 3)
+#define IMM_CTOR_FOUR(x, y, z, l)      IMM_CTOR(x, 1), IMM_CTOR(y, 2), \
+                                       IMM_CTOR(z, 3), IMM_CTOR(l, 4)
+#define IMM_CTOR_FIVE(x, y, z, l, m)   IMM_CTOR(x, 1), IMM_CTOR(y, 2),     \
+                                       IMM_CTOR(z, 3), IMM_CTOR(l, 4),     \
+                                       IMM_CTOR(m, 5)
+#define IMM_CTOR_SIX(x, y, z, l, m, n) IMM_CTOR(x, 1), IMM_CTOR(y, 2),     \
+                                       IMM_CTOR(z, 3), IMM_CTOR(l, 4),     \
+                                       IMM_CTOR(m, 5), IMM_CTOR(n, 6)
 
 #define IMM_INIT(which, n)         IMM_NAME_##which(n) \
                                      ( std::move(IMM_NAME_##which(n)) )
 #define IMM_INIT_NA
-#define IMM_INIT_ONE(x)            : IMM_INIT(x, 1)
-#define IMM_INIT_TWO(x, y)         : IMM_INIT(x, 1), IMM_INIT(y, 2)
-#define IMM_INIT_THREE(x, y, z)    : IMM_INIT(x, 1), IMM_INIT(y, 2), \
-                                     IMM_INIT(z, 3)
-#define IMM_INIT_FOUR(x, y, z, l)  : IMM_INIT(x, 1), IMM_INIT(y, 2), \
-                                     IMM_INIT(z, 3), IMM_INIT(l, 4)
-#define IMM_INIT_FIVE(x, y, z, l, m) : IMM_INIT(x, 1), IMM_INIT(y, 2),   \
-                                       IMM_INIT(z, 3), IMM_INIT(l, 4),   \
-                                       IMM_INIT(m, 5)
+#define IMM_INIT_ONE(x)                : IMM_INIT(x, 1)
+#define IMM_INIT_TWO(x, y)             : IMM_INIT(x, 1), IMM_INIT(y, 2)
+#define IMM_INIT_THREE(x, y, z)        : IMM_INIT(x, 1), IMM_INIT(y, 2), \
+                                         IMM_INIT(z, 3)
+#define IMM_INIT_FOUR(x, y, z, l)      : IMM_INIT(x, 1), IMM_INIT(y, 2), \
+                                         IMM_INIT(z, 3), IMM_INIT(l, 4)
+#define IMM_INIT_FIVE(x, y, z, l, m)   : IMM_INIT(x, 1), IMM_INIT(y, 2),   \
+                                         IMM_INIT(z, 3), IMM_INIT(l, 4),   \
+                                         IMM_INIT(m, 5)
+#define IMM_INIT_SIX(x, y, z, l, m, n) : IMM_INIT(x, 1), IMM_INIT(y, 2),   \
+                                         IMM_INIT(z, 3), IMM_INIT(l, 4),   \
+                                         IMM_INIT(m, 5), IMM_INIT(n, 6)
 
 #define POP_UV  if (i == 0) return Flavor::U
 #define POP_CV  if (i == 0) return Flavor::C
@@ -821,6 +834,7 @@ OPCODES
 #undef IMM_TARGETS_THREE
 #undef IMM_TARGETS_FOUR
 #undef IMM_TARGETS_FIVE
+#undef IMM_TARGETS_SIX
 
 #undef IMM_EXTRA_BLA
 #undef IMM_EXTRA_SLA
@@ -847,6 +861,7 @@ OPCODES
 #undef IMM_MEM_THREE
 #undef IMM_MEM_FOUR
 #undef IMM_MEM_FIVE
+#undef IMM_MEM_SIX
 
 #undef IMM_EQ
 #undef IMM_EQ_NA
@@ -855,6 +870,7 @@ OPCODES
 #undef IMM_EQ_THREE
 #undef IMM_EQ_FOUR
 #undef IMM_EQ_FIVE
+#undef IMM_EQ_SIX
 
 #undef IMM_HASH
 #undef IMM_HASH_DO
@@ -864,6 +880,7 @@ OPCODES
 #undef IMM_HASH_THREE
 #undef IMM_HASH_FOUR
 #undef IMM_HASH_FIVE
+#undef IMM_HASH_SIX
 
 #undef IMM_CTOR
 #undef IMM_CTOR_NA
@@ -872,6 +889,7 @@ OPCODES
 #undef IMM_CTOR_THREE
 #undef IMM_CTOR_FOUR
 #undef IMM_CTOR_FIVE
+#undef IMM_CTOR_SIX
 
 #undef IMM_INIT
 #undef IMM_INIT_NA

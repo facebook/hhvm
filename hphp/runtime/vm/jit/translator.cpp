@@ -594,6 +594,7 @@ bool isAlwaysNop(const NormalizedInstruction& ni) {
 #define THREE(a, b, c) a(0) b(1) c(2)
 #define FOUR(a, b, c, d) a(0) b(1) c(2) d(3)
 #define FIVE(a, b, c, d, e) a(0) b(1) c(2) d(3) e(4)
+#define SIX(a, b, c, d, e, f) a(0) b(1) c(2) d(3) e(4) f(5)
 // Iterator bytecodes are handled specially here
 #define LA(n) assertx(idx == 0xff); idx = n;
 #define MA(n)
@@ -654,6 +655,7 @@ size_t memberKeyImmIdx(Op op) {
 #undef THREE
 #undef FOUR
 #undef FIVE
+#undef SIX
 #undef LA
 #undef MA
 #undef BLA
@@ -1137,11 +1139,12 @@ bool instrBreaksProfileBB(const NormalizedInstruction* inst) {
 #define IMM_LAR(n)     ni.imm[n].u_LAR
 #define IMM_FCA(n)     ni.imm[n].u_FCA
 
-#define ONE(x0)           , IMM_##x0(0)
-#define TWO(x0,x1)        , IMM_##x0(0), IMM_##x1(1)
-#define THREE(x0,x1,x2)   , IMM_##x0(0), IMM_##x1(1), IMM_##x2(2)
-#define FOUR(x0,x1,x2,x3) , IMM_##x0(0), IMM_##x1(1), IMM_##x2(2), IMM_##x3(3)
-#define FIVE(x0,x1,x2,x3,x4) , IMM_##x0(0), IMM_##x1(1), IMM_##x2(2), IMM_##x3(3), IMM_##x4(4)
+#define ONE(x0)                , IMM_##x0(0)
+#define TWO(x0,x1)             , IMM_##x0(0), IMM_##x1(1)
+#define THREE(x0,x1,x2)        , IMM_##x0(0), IMM_##x1(1), IMM_##x2(2)
+#define FOUR(x0,x1,x2,x3)      , IMM_##x0(0), IMM_##x1(1), IMM_##x2(2), IMM_##x3(3)
+#define FIVE(x0,x1,x2,x3,x4)   , IMM_##x0(0), IMM_##x1(1), IMM_##x2(2), IMM_##x3(3), IMM_##x4(4)
+#define SIX(x0,x1,x2,x3,x4,x5) , IMM_##x0(0), IMM_##x1(1), IMM_##x2(2), IMM_##x3(3), IMM_##x4(4), IMM_##x5(5)
 #define NA                   /*  */
 
 static void translateDispatch(irgen::IRGS& irgs,
@@ -1151,6 +1154,7 @@ static void translateDispatch(irgen::IRGS& irgs,
 #undef O
 }
 
+#undef SIX
 #undef FIVE
 #undef FOUR
 #undef THREE

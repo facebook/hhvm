@@ -433,23 +433,27 @@ void populate_block(ParseUnitState& puState,
                        }();
 
 #define IMM_NA
-#define IMM_ONE(x)           IMM_##x(1)
-#define IMM_TWO(x, y)        IMM_##x(1)          IMM_##y(2)
-#define IMM_THREE(x, y, z)   IMM_TWO(x, y)       IMM_##z(3)
-#define IMM_FOUR(x, y, z, n) IMM_THREE(x, y, z)  IMM_##n(4)
-#define IMM_FIVE(x, y, z, n, m) IMM_FOUR(x, y, z, n)  IMM_##m(5)
+#define IMM_ONE(x)                IMM_##x(1)
+#define IMM_TWO(x, y)             IMM_##x(1) IMM_##y(2)
+#define IMM_THREE(x, y, z)        IMM_TWO(x, y) IMM_##z(3)
+#define IMM_FOUR(x, y, z, n)      IMM_THREE(x, y, z) IMM_##n(4)
+#define IMM_FIVE(x, y, z, n, m)   IMM_FOUR(x, y, z, n) IMM_##m(5)
+#define IMM_SIX(x, y, z, n, m, o) IMM_FIVE(x, y, z, n, m) IMM_##o(6)
 
 #define IMM_ARG(which, n)         IMM_NAME_##which(n)
 #define IMM_ARG_NA
-#define IMM_ARG_ONE(x)            IMM_ARG(x, 1)
-#define IMM_ARG_TWO(x, y)         IMM_ARG(x, 1), IMM_ARG(y, 2)
-#define IMM_ARG_THREE(x, y, z)    IMM_ARG(x, 1), IMM_ARG(y, 2), \
-                                    IMM_ARG(z, 3)
-#define IMM_ARG_FOUR(x, y, z, l)  IMM_ARG(x, 1), IMM_ARG(y, 2), \
-                                   IMM_ARG(z, 3), IMM_ARG(l, 4)
-#define IMM_ARG_FIVE(x, y, z, l, m) IMM_ARG(x, 1), IMM_ARG(y, 2), \
-                                   IMM_ARG(z, 3), IMM_ARG(l, 4), \
-                                   IMM_ARG(m, 5)
+#define IMM_ARG_ONE(x)                IMM_ARG(x, 1)
+#define IMM_ARG_TWO(x, y)             IMM_ARG(x, 1), IMM_ARG(y, 2)
+#define IMM_ARG_THREE(x, y, z)        IMM_ARG(x, 1), IMM_ARG(y, 2), \
+                                      IMM_ARG(z, 3)
+#define IMM_ARG_FOUR(x, y, z, l)      IMM_ARG(x, 1), IMM_ARG(y, 2), \
+                                      IMM_ARG(z, 3), IMM_ARG(l, 4)
+#define IMM_ARG_FIVE(x, y, z, l, m)   IMM_ARG(x, 1), IMM_ARG(y, 2), \
+                                      IMM_ARG(z, 3), IMM_ARG(l, 4), \
+                                      IMM_ARG(m, 5)
+#define IMM_ARG_SIX(x, y, z, l, m, n) IMM_ARG(x, 1), IMM_ARG(y, 2), \
+                                      IMM_ARG(z, 3), IMM_ARG(l, 4), \
+                                      IMM_ARG(m, 5), IMM_ARG(n, 6)
 
 #define FLAGS_NF
 #define FLAGS_TF
@@ -582,6 +586,7 @@ void populate_block(ParseUnitState& puState,
 #undef IMM_ARG_THREE
 #undef IMM_ARG_FOUR
 #undef IMM_ARG_FIVE
+#undef IMM_ARG_SIX
 
   /*
    * If a block ends with an unconditional jump, change it to a

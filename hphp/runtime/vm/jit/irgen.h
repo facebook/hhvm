@@ -318,6 +318,7 @@ Type predictedType(const IRGS&, const Location&);
 #define THREE(x0, x1, x2)    , IMM_##x0, IMM_##x1, IMM_##x2
 #define FOUR(x0, x1, x2, x3) , IMM_##x0, IMM_##x1, IMM_##x2, IMM_##x3
 #define FIVE(x0, x1, x2, x3, x4) , IMM_##x0, IMM_##x1, IMM_##x2, IMM_##x3, IMM_##x4
+#define SIX(x0, x1, x2, x3, x4, x5) , IMM_##x0, IMM_##x1, IMM_##x2, IMM_##x3, IMM_##x4, IMM_##x5
 
 #define O(name, imms, ...) void emit##name(IRGS& imms);
   OPCODES
@@ -329,6 +330,7 @@ Type predictedType(const IRGS&, const Location&);
 #undef THREE
 #undef FOUR
 #undef FIVE
+#undef SIX
 
 #undef IMM_MA
 #undef IMM_BLA

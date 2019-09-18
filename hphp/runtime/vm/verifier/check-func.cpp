@@ -627,6 +627,7 @@ bool FuncChecker::checkImmediates(const char* name, PC const instr) {
 #define THREE(a, b, c) TWO(a, b); ok &= checkImm##c(pc, instr)
 #define FOUR(a, b, c, d) THREE(a, b, c); ok &= checkImm##d(pc, instr)
 #define FIVE(a, b, c, d, e) FOUR(a, b, c, d); ok &= checkImm##e(pc, instr)
+#define SIX(a, b, c, d, e, f) FIVE(a, b, c, d, e); ok &= checkImm##f(pc, instr)
 #define O(name, imm, in, out, flags) case Op::name: imm; break;
       OPCODES
 #undef NA
@@ -636,6 +637,7 @@ bool FuncChecker::checkImmediates(const char* name, PC const instr) {
 #undef THREE
 #undef FOUR
 #undef FIVE
+#undef SIX
 #undef O
     }
   } catch (const unknown_length&) {
@@ -702,6 +704,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #define THREE(a,b,c) { c, b, a },
   #define FOUR(a,b,c,d) { d, c, b, a },
   #define FIVE(a,b,c,d,e) { e, d, c, b, a },
+  #define SIX(a,b,c,d,e,f) { f, e, d, c, b, a },
   #define MFINAL { },
   #define C_MFINAL(n) { },
   #define O(name, imm, pop, push, flags) pop
@@ -715,6 +718,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #undef FCALL
   #undef CMANY
   #undef SMANY
+  #undef SIX
   #undef FIVE
   #undef FOUR
   #undef THREE
@@ -963,6 +967,7 @@ std::set<int> localImmediates(Op op) {
 #define THREE(a, b, c) TWO(a, b) c(2)
 #define FOUR(a, b, c, d) THREE(a, b, c) d(3)
 #define FIVE(a, b, c, d, e) FOUR(a, b, c, d) e(4)
+#define SIX(a, b, c, d, e, f) FIVE(a, b, c, d, f) f(5)
 #define LA(n) imms.insert(n);
 #define MA(n)
 #define BLA(n)
@@ -991,6 +996,7 @@ std::set<int> localImmediates(Op op) {
 #undef THREE
 #undef FOUR
 #undef FIVE
+#undef SIX
 #undef LA
 #undef MA
 #undef BLA
@@ -1346,9 +1352,11 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   #define THREE(a,b,c) { a, b, c },
   #define FOUR(a,b,c,d) { a, b, c, d },
   #define FIVE(a,b,c,d,e) { a, b, c, d, e },
+  #define SIX(a,b,c,d,e,f) { a, b, c, d, e, f },
   #define O(name, imm, pop, push, flags) push
     OPCODES
   #undef O
+  #undef SIX
   #undef FIVE
   #undef FOUR
   #undef THREE

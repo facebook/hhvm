@@ -39,7 +39,7 @@ struct Unit;
 struct UnitEmitter;
 struct Func;
 
-constexpr size_t kMaxHhbcImms = 5;
+constexpr size_t kMaxHhbcImms = 6;
 
 // A contiguous range of locals. The count is the number of locals
 // including the first. If the range is empty, count will be zero and

@@ -44,6 +44,7 @@ int numImmediates(Op opcode) {
 #define THREE(...) 3
 #define FOUR(...)  4
 #define FIVE(...)  5
+#define SIX(...)   6
 #define O(name, imm, unusedPop, unusedPush, unusedFlags) imm,
     OPCODES
 #undef O
@@ -53,6 +54,7 @@ int numImmediates(Op opcode) {
 #undef THREE
 #undef FOUR
 #undef FIVE
+#undef SIX
   };
   return values[size_t(opcode)];
 }
@@ -60,14 +62,15 @@ int numImmediates(Op opcode) {
 ArgType immType(const Op opcode, int idx) {
   assertx(isValidOpcode(opcode));
   assertx(idx >= 0 && idx < numImmediates(opcode));
-  always_assert(idx < kMaxHhbcImms); // No opcodes have more than 5 immediates
+  always_assert(idx < kMaxHhbcImms); // No opcodes have more than 6 immediates
   static const int8_t argTypes[][kMaxHhbcImms] = {
-#define NA                  {-1, -1, -1, -1, -1},
-#define ONE(a)              { a, -1, -1, -1, -1},
-#define TWO(a, b)           { a,  b, -1, -1, -1},
-#define THREE(a, b, c)      { a,  b,  c, -1, -1},
-#define FOUR(a, b, c, d)    { a,  b,  c,  d, -1},
-#define FIVE(a, b, c, d, e) { a,  b,  c,  d,  e},
+#define NA                    {-1, -1, -1, -1, -1, -1},
+#define ONE(a)                { a, -1, -1, -1, -1, -1},
+#define TWO(a, b)             { a,  b, -1, -1, -1, -1},
+#define THREE(a, b, c)        { a,  b,  c, -1, -1, -1},
+#define FOUR(a, b, c, d)      { a,  b,  c,  d, -1, -1},
+#define FIVE(a, b, c, d, e)   { a,  b,  c,  d,  e, -1},
+#define SIX(a, b, c, d, e, f) { a,  b,  c,  d,  e,  f},
 #define OA(x) OA
 #define O(name, imm, unusedPop, unusedPush, unusedFlags) imm
     OPCODES
@@ -79,6 +82,7 @@ ArgType immType(const Op opcode, int idx) {
 #undef THREE
 #undef FOUR
 #undef FIVE
+#undef SIX
   };
   auto opInt = size_t(opcode);
   return (ArgType)argTypes[opInt][idx];
@@ -267,12 +271,13 @@ OffsetList instrJumpOffsets(const PC origPC) {
 #define IMM_KA 0
 #define IMM_LAR 0
 #define IMM_FCA 0
-#define NA                  { 0,        0,        0,        0,        0      },
-#define ONE(a)              { IMM_##a,  0,        0,        0,        0      },
-#define TWO(a, b)           { IMM_##a,  IMM_##b,  0,        0,        0      },
-#define THREE(a, b, c)      { IMM_##a,  IMM_##b,  IMM_##c,  0,        0      },
-#define FOUR(a, b, c, d)    { IMM_##a,  IMM_##b,  IMM_##c,  IMM_##d,  0      },
-#define FIVE(a, b, c, d, e) { IMM_##a,  IMM_##b,  IMM_##c,  IMM_##d,  IMM_##e},
+#define NA                    { 0,        0,        0,        0,        0,       0      },
+#define ONE(a)                { IMM_##a,  0,        0,        0,        0,       0      },
+#define TWO(a, b)             { IMM_##a,  IMM_##b,  0,        0,        0,       0      },
+#define THREE(a, b, c)        { IMM_##a,  IMM_##b,  IMM_##c,  0,        0,       0      },
+#define FOUR(a, b, c, d)      { IMM_##a,  IMM_##b,  IMM_##c,  IMM_##d,  0,       0      },
+#define FIVE(a, b, c, d, e)   { IMM_##a,  IMM_##b,  IMM_##c,  IMM_##d,  IMM_##e, 0      },
+#define SIX(a, b, c, d, e, f) { IMM_##a,  IMM_##b,  IMM_##c,  IMM_##d,  IMM_##e, IMM_##f},
 #define OA(x) OA
 #define O(name, imm, unusedPop, unusedPush, unusedFlags) imm
     OPCODES
@@ -303,6 +308,7 @@ OffsetList instrJumpOffsets(const PC origPC) {
 #undef THREE
 #undef FOUR
 #undef FIVE
+#undef SIX
   };
 
   auto pc = origPC;
@@ -400,6 +406,7 @@ int instrNumPops(PC pc) {
 #define THREE(...) 3
 #define FOUR(...) 4
 #define FIVE(...) 5
+#define SIX(...) 6
 #define MFINAL -3
 #define C_MFINAL(n) -10 - (n)
 #define CUMANY -3
@@ -416,6 +423,7 @@ int instrNumPops(PC pc) {
 #undef THREE
 #undef FOUR
 #undef FIVE
+#undef SIX
 #undef MFINAL
 #undef C_MFINAL
 #undef CUMANY
@@ -469,6 +477,7 @@ int instrNumPushes(PC pc) {
 #define THREE(...) 3
 #define FOUR(...) 4
 #define FIVE(...) 5
+#define SIX(...) 6
 #define CMANY -2
 #define FCALL -1
 #define CALLNATIVE -3
@@ -480,6 +489,7 @@ int instrNumPushes(PC pc) {
 #undef THREE
 #undef FOUR
 #undef FIVE
+#undef SIX
 #undef CMANY
 #undef FCALL
 #undef CALLNATIVE
@@ -547,6 +557,7 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #define THREE(f1, f2, f3) return doFlavor(idx, f1, f2, f3);
 #define FOUR(f1, f2, f3, f4) return doFlavor(idx, f1, f2, f3, f4);
 #define FIVE(f1, f2, f3, f4, f5) return doFlavor(idx, f1, f2, f3, f4, f5);
+#define SIX(f1, f2, f3, f4, f5, f6) return doFlavor(idx, f1, f2, f3, f4, f5, f6);
 #define MFINAL return manyFlavor(op, idx, CV);
 #define C_MFINAL(n) return manyFlavor(op, idx, CV);
 #define CUMANY return manyFlavor(op, idx, CUV);
@@ -566,6 +577,7 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #undef THREE
 #undef FOUR
 #undef FIVE
+#undef SIX
 #undef MFINAL
 #undef C_MFINAL
 #undef CUMANY
@@ -793,6 +805,7 @@ std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u) {
 #define THREE(a, b, c) H_##a; H_##b; H_##c;
 #define FOUR(a, b, c, d) H_##a; H_##b; H_##c; H_##d;
 #define FIVE(a, b, c, d, e) H_##a; H_##b; H_##c; H_##d; H_##e;
+#define SIX(a, b, c, d, e, f) H_##a; H_##b; H_##c; H_##d; H_##e; H_##f;
 #define NA
 #define H_BLA READSVEC()
 #define H_SLA READSVEC()
@@ -848,6 +861,7 @@ OPCODES
 #undef THREE
 #undef FOUR
 #undef FIVE
+#undef SIX
 #undef NA
 #undef H_BLA
 #undef H_SLA

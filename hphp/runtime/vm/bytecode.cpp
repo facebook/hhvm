@@ -6754,6 +6754,8 @@ struct litstr_id {
   DECODE_THREE(a, b, c) auto const imm4 = DECODE_##d;
 #define DECODE_FIVE(a, b, c, d, e) \
   DECODE_FOUR(a, b, c, d) auto const imm5 = DECODE_##e;
+#define DECODE_SIX(a, b, c, d, e, f) \
+  DECODE_FIVE(a, b, c, d, e) auto const imm6 = DECODE_##f;
 
 #define PASS_NA
 #define PASS_ONE(...) , imm1
@@ -6761,6 +6763,7 @@ struct litstr_id {
 #define PASS_THREE(...) , imm1, imm2, imm3
 #define PASS_FOUR(...) , imm1, imm2, imm3, imm4
 #define PASS_FIVE(...) , imm1, imm2, imm3, imm4, imm5
+#define PASS_SIX(...) , imm1, imm2, imm3, imm4, imm5, imm6
 
 #define O(name, imm, in, out, flags)                                 \
   OPTBLD_INLINE TCA iopWrap##name(PC& pc) {                          \

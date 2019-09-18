@@ -985,17 +985,17 @@ where
             }
         };
 
-        let handle_left_brace = |parser: &mut Self, head: Option<S::Token>, acc: &mut Vec<S::R>| {
+        let handle_left_brace = |parser: &mut Self,
+                                 left_brace: S::Token,
+                                 head: Option<S::Token>,
+                                 acc: &mut Vec<S::R>| {
             // Note that here we use next_token_in_string because we need to know
             // whether there is trivia between the left brace and the $x which follows.
             let mut parser1 = parser.clone();
-            let left_brace = parser1.next_token_in_string(&literal_kind);
-            let mut parser2 = parser1.clone();
-            let token = parser2.next_token_in_string(&literal_kind);
+            let token = parser1.next_token_in_string(&literal_kind);
             // TODO: What about "{$$}" ?
             match token.kind() {
                 TokenKind::Dollar | TokenKind::Variable => {
-                    parser.continue_from(parser1);
                     put_opt(parser, head, acc); // TODO(leoo) check with kasper (was self)
                     let expr = parser.parse_braced_expression_in_string(
                         left_brace, /* dollar_inside_braces:*/ true,
@@ -1011,7 +1011,6 @@ where
                     // TODO: Give an error.
                     // We got a { not followed by a $. Ignore it.
                     // TODO: Give a warning?
-                    parser.continue_from(parser1);
                     merge(left_brace, head, parser.lexer.source())
                 }
             }
@@ -1060,31 +1059,22 @@ where
         let mut head = Some(head);
 
         loop {
-            let mut parser1 = self.clone();
-            let token = parser1.next_token_in_string(&literal_kind);
+            let token = self.next_token_in_string(&literal_kind);
             match token.kind() {
                 TokenKind::HeredocStringLiteralTail | TokenKind::DoubleQuotedStringLiteralTail => {
-                    self.continue_from(parser1);
                     let head = merge(token, head, self.lexer.source());
                     put_opt(self, head, &mut acc);
                     break;
                 }
-                TokenKind::LeftBrace => head = handle_left_brace(self, head, &mut acc),
+                TokenKind::LeftBrace => head = handle_left_brace(self, token, head, &mut acc),
                 TokenKind::Variable => {
-                    self.continue_from(parser1);
                     put_opt(self, head, &mut acc);
                     let expr = parse_embedded_expression(self, token);
                     head = None;
                     acc.push(expr)
                 }
-                TokenKind::Dollar => {
-                    self.continue_from(parser1);
-                    head = handle_dollar(self, token, head, &mut acc)
-                }
-                _ => {
-                    self.continue_from(parser1);
-                    head = merge(token, head, self.lexer.source())
-                }
+                TokenKind::Dollar => head = handle_dollar(self, token, head, &mut acc),
+                _ => head = merge(token, head, self.lexer.source()),
             }
         }
 

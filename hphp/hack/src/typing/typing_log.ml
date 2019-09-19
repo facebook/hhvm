@@ -271,6 +271,8 @@ and log_key_delta k d =
 
 let type_as_value env ty = Atom (Typing_print.debug env ty)
 
+let decl_type_as_value env ty = Atom (Typing_print.debug_decl env ty)
+
 let possibly_enforced_type_as_value env et =
   Atom
     ( if et.et_enforced then
@@ -501,19 +503,19 @@ let rec reactivity_to_string env r =
     ^
     (match opt_ty with
     | None -> ""
-    | Some ty -> " " ^ Typing_print.debug env ty)
+    | Some ty -> " " ^ Typing_print.debug_decl env ty)
   | Shallow opt_ty ->
     "shallow"
     ^
     (match opt_ty with
     | None -> ""
-    | Some ty -> " " ^ Typing_print.debug env ty)
+    | Some ty -> " " ^ Typing_print.debug_decl env ty)
   | Reactive opt_ty ->
     "reactive"
     ^
     (match opt_ty with
     | None -> ""
-    | Some ty -> " " ^ Typing_print.debug env ty)
+    | Some ty -> " " ^ Typing_print.debug_decl env ty)
   | MaybeReactive r -> "maybereactive " ^ reactivity_to_string env r
   | RxVar opt_r ->
     "rxvar"
@@ -567,9 +569,10 @@ let genv_as_value env genv =
     ( [
         ("return", return_info_as_value env return);
         ("params", local_id_map_as_value (param_as_value env) params);
-        ("condition_types", smap_as_value (type_as_value env) condition_types);
+        ( "condition_types",
+          smap_as_value (decl_type_as_value env) condition_types );
         ("parent_id", string_as_value parent_id);
-        ("parent", type_as_value env parent);
+        ("parent", decl_type_as_value env parent);
         ("self_id", string_as_value self_id);
         ("self", type_as_value env self);
         ("static", bool_as_value static);

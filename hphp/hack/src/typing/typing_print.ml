@@ -89,6 +89,105 @@ module Full = struct
     let fields = List.sort ~compare (Nast.ShapeMap.elements fdm) in
     List.map fields f_field
 
+  let rec fun_type ~ty to_doc st env ft =
+    let params = List.map ft.ft_params (fun_param ~ty to_doc st env) in
+    let variadic_param =
+      match ft.ft_arity with
+      | Fstandard _ -> None
+      | Fellipsis _ -> Some (text "...")
+      | Fvariadic (_, p) ->
+        Some
+          (Concat
+             [
+               (match ty to_doc st env p.fp_type.et_type with
+               | Text ("_", 1) ->
+                 (* Handle the case of missing a type by not printing it *)
+                 Nothing
+               | _ -> fun_param ~ty to_doc st env p);
+               text "...";
+             ])
+    in
+    let params =
+      match variadic_param with
+      | None -> params
+      | Some variadic_param -> params @ [variadic_param]
+    in
+    Span
+      [
+        (* only print tparams when they have been instantiated with targs
+         * so that they correctly express reified parameterization *)
+          (match ft.ft_tparams with
+          | ([], _)
+          | (_, FTKtparams) ->
+            Nothing
+          | (l, FTKinstantiated_targs) ->
+            list "<" (tparam ~ty to_doc st env) l ">");
+        list "(" id params "):";
+        Space;
+        possibly_enforced_ty ~ty to_doc st env ft.ft_ret;
+      ]
+
+  and possibly_enforced_ty ~ty to_doc st env { et_enforced; et_type } =
+    Concat
+      [
+        ( if show_verbose env && et_enforced then
+          text "enforced" ^^ Space
+        else
+          Nothing );
+        ty to_doc st env et_type;
+      ]
+
+  and fun_param ~ty to_doc st env { fp_name; fp_type; fp_kind; _ } =
+    Concat
+      [
+        (match fp_kind with
+        | FPinout -> text "inout" ^^ Space
+        | _ -> Nothing);
+        (match (fp_name, ty to_doc st env fp_type.et_type) with
+        | (None, _) -> possibly_enforced_ty ~ty to_doc st env fp_type
+        | (Some param_name, Text ("_", 1)) ->
+          (* Handle the case of missing a type by not printing it *)
+          text param_name
+        | (Some param_name, _) ->
+          Concat
+            [
+              possibly_enforced_ty ~ty to_doc st env fp_type;
+              Space;
+              text param_name;
+            ]);
+      ]
+
+  and tparam
+      ~ty
+      to_doc
+      st
+      env
+      { tp_name = (_, x); tp_constraints = cstrl; tp_reified = r; _ } =
+    Concat
+      [
+        begin
+          match r with
+          | Nast.Erased -> Nothing
+          | Nast.SoftReified -> text "<<__Soft>> reify" ^^ Space
+          | Nast.Reified -> text "reify" ^^ Space
+        end;
+        text x;
+        list_sep ~split:false Space (tparam_constraint ~ty to_doc st env) cstrl;
+      ]
+
+  and tparam_constraint ~ty to_doc st env (ck, cty) =
+    Concat
+      [
+        Space;
+        text
+          (match ck with
+          | Ast_defs.Constraint_as -> "as"
+          | Ast_defs.Constraint_super -> "super"
+          | Ast_defs.Constraint_eq -> "=");
+        Space;
+        ty to_doc st env cty;
+      ]
+
   let rec ty : type a. _ -> _ -> _ -> a ty -> Doc.t =
    fun to_doc st env (r, x) ->
     let d = ty_ to_doc st env x in
@@ -188,7 +287,7 @@ module Full = struct
           else
             Nothing );
           text "function";
-          fun_type to_doc st env ft;
+          fun_type ~ty to_doc st env ft;
           text ")";
           (match ft.ft_ret.et_type with
           | (Reason.Rdynamic_yield _, _) -> Space ^^ text "[DynamicYield]"
@@ -385,105 +484,6 @@ module Full = struct
     | Nast.Tnoreturn -> "noreturn"
     | Nast.Tatom s -> ":@" ^ s
 
-  and fun_type : type a. _ -> _ -> _ -> a ty fun_type -> _ =
-   fun to_doc st env ft ->
-    let params = List.map ft.ft_params (fun_param to_doc st env) in
-    let variadic_param =
-      match ft.ft_arity with
-      | Fstandard _ -> None
-      | Fellipsis _ -> Some (text "...")
-      | Fvariadic (_, p) ->
-        Some
-          (Concat
-             [
-               (match p.fp_type.et_type with
-               | (_, Tany _) -> Nothing
-               | _ -> fun_param to_doc st env p);
-               text "...";
-             ])
-    in
-    let params =
-      match variadic_param with
-      | None -> params
-      | Some variadic_param -> params @ [variadic_param]
-    in
-    Span
-      [
-        (* only print tparams when they have been instantiated with targs
-         * so that they correctly express reified parameterization *)
-          (match ft.ft_tparams with
-          | ([], _)
-          | (_, FTKtparams) ->
-            Nothing
-          | (l, FTKinstantiated_targs) -> list "<" (tparam to_doc st env) l ">");
-        list "(" id params "):";
-        Space;
-        possibly_enforced_ty to_doc st env ft.ft_ret;
-      ]
-
-  and possibly_enforced_ty :
-      type a. _ -> _ -> _ -> a ty possibly_enforced_ty -> _ =
-   fun to_doc st env { et_enforced; et_type } ->
-    Concat
-      [
-        ( if show_verbose env && et_enforced then
-          text "enforced" ^^ Space
-        else
-          Nothing );
-        ty to_doc st env et_type;
-      ]
-
-  and fun_param : type a. _ -> _ -> _ -> a ty fun_param -> _ =
-   fun to_doc st env { fp_name; fp_type; fp_kind; _ } ->
-    Concat
-      [
-        (match fp_kind with
-        | FPinout -> text "inout" ^^ Space
-        | _ -> Nothing);
-        (match (fp_name, fp_type) with
-        | (None, _) -> possibly_enforced_ty to_doc st env fp_type
-        | (Some param_name, { et_type = (_, Tany _); _ }) -> text param_name
-        | (Some param_name, _) ->
-          Concat
-            [
-              possibly_enforced_ty to_doc st env fp_type;
-              Space;
-              text param_name;
-            ]);
-      ]
-
-  and tparam : type a. _ -> _ -> _ -> a ty tparam -> _ =
-   fun to_doc
-       st
-       env
-       { tp_name = (_, x); tp_constraints = cstrl; tp_reified = r; _ } ->
-    Concat
-      [
-        begin
-          match r with
-          | Nast.Erased -> Nothing
-          | Nast.SoftReified -> text "<<__Soft>> reify" ^^ Space
-          | Nast.Reified -> text "reify" ^^ Space
-        end;
-        text x;
-        list_sep ~split:false Space (tparam_constraint to_doc st env) cstrl;
-      ]
-
-  and tparam_constraint :
-      type a. _ -> _ -> _ -> Ast_defs.constraint_kind * a ty -> _ =
-   fun to_doc st env (ck, cty) ->
-    Concat
-      [
-        Space;
-        text
-          (match ck with
-          | Ast_defs.Constraint_as -> "as"
-          | Ast_defs.Constraint_super -> "super"
-          | Ast_defs.Constraint_eq -> "=");
-        Space;
-        ty to_doc st env cty;
-      ]
-
   (* For a given type parameter, construct a list of its constraints *)
   let get_constraints_on_tparam env tparam =
     let lower = Env.get_lower_bounds env tparam in
@@ -504,8 +504,8 @@ module Full = struct
     |> Libhackfmt.format_doc_unbroken format_env
     |> String.strip
 
-  let constraints_for_type to_doc env ty =
-    let tparams = SSet.elements (Env.get_tparams env ty) in
+  let constraints_for_type to_doc env typ =
+    let tparams = SSet.elements (Env.get_tparams env typ) in
     let constraints =
       List.concat_map tparams (get_constraints_on_tparam env)
     in
@@ -522,11 +522,11 @@ module Full = struct
                  list_sep
                    comma_sep
                    begin
-                     fun (tparam, ck, ty) ->
+                     fun (tparam, ck, typ) ->
                      Concat
                        [
                          text tparam;
-                         tparam_constraint to_doc ISet.empty env (ck, ty);
+                         tparam_constraint ~ty to_doc ISet.empty env (ck, typ);
                        ]
                    end
                    constraints );
@@ -545,7 +545,7 @@ module Full = struct
 
   let fun_to_string tcopt (x : decl_fun_type) =
     let env = Typing_env.empty tcopt Relative_path.default ~droot:None in
-    fun_type Doc.text ISet.empty env x
+    fun_type ~ty Doc.text ISet.empty env x
     |> Libhackfmt.format_doc_unbroken format_env
     |> String.strip
 
@@ -578,7 +578,7 @@ module Full = struct
               text "function";
               Space;
               text_strip_ns name;
-              fun_type text_strip_ns ISet.empty env ft;
+              fun_type ~ty text_strip_ns ISet.empty env ft;
             ]
         | ({ type_ = Property _; name; _ }, _)
         | ({ type_ = ClassConst _; name; _ }, _)
@@ -697,7 +697,7 @@ module ErrorString = struct
         in
         "pocket universe dependent type " ^ ty ^ ":@" ^ access)
 
-  and array : type a. a ty option * a ty option -> _ = function
+  and array = function
     | (None, None) -> "an untyped array"
     | (Some _, None) -> "an array (used like a vector)"
     | (Some _, Some _) -> "an array (used like a hashtable)"
@@ -934,7 +934,7 @@ module Json = struct
           @ args [base]
           @ name (snd access)))
 
-  type 'a deserialized_result = ('a ty, deserialization_error) result
+  type deserialized_result = (locl_ty, deserialization_error) result
 
   let wrap_json_accessor f x =
     match f x with
@@ -966,14 +966,11 @@ module Json = struct
   let wrong_phase ~message ~keytrace =
     Error (Wrong_phase (message ^ Hh_json.Access.keytrace_to_string keytrace))
 
-  let to_locl_ty ?(keytrace = []) (json : Hh_json.json) :
-      locl_phase deserialized_result =
+  let to_locl_ty ?(keytrace = []) (json : Hh_json.json) : deserialized_result =
     let reason = Reason.none in
-    let ty (ty : locl_phase ty_) : locl_phase deserialized_result =
-      Ok (reason, ty)
-    in
+    let ty (ty : locl_phase ty_) : deserialized_result = Ok (reason, ty) in
     let rec aux (json : Hh_json.json) ~(keytrace : Hh_json.Access.keytrace) :
-        locl_phase deserialized_result =
+        deserialized_result =
       Result.Monad_infix.(
         get_string "kind" (json, keytrace)
         >>= fun (kind, kind_keytrace) ->
@@ -1770,6 +1767,8 @@ let full_rec env n ty = Full.to_string_rec env n ty
 
 let full_strip_ns env ty = Full.to_string_strip_ns env ty
 
+let full_strip_ns_decl env ty = Full.to_string_strip_ns env ty
+
 let full_with_identity = Full.to_string_with_identity
 
 let full_decl = Full.to_string_decl
@@ -1779,6 +1778,8 @@ let debug env ty =
   let f_str = full_strip_ns env ty in
   Full.debug_mode := false;
   f_str
+
+let debug_decl = debug
 
 let class_ tcopt c = PrintClass.class_type tcopt c
 

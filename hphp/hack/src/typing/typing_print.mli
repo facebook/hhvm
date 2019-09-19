@@ -19,7 +19,9 @@ val full : env -> Typing_defs.locl_ty -> string
 
 val full_rec : env -> int -> Typing_defs.locl_ty -> string
 
-val full_strip_ns : env -> 'a Typing_defs.ty -> string
+val full_strip_ns : env -> Typing_defs.locl_ty -> string
+
+val full_strip_ns_decl : env -> Typing_defs.decl_ty -> string
 
 val full_decl : TypecheckerOptions.t -> Typing_defs.decl_ty -> string
 
@@ -33,7 +35,9 @@ val full_with_identity :
   string
 (** Pretty print a type and all of its associated declaration information. *)
 
-val debug : env -> 'a Typing_defs.ty -> string
+val debug : env -> Typing_defs.locl_ty -> string
+
+val debug_decl : env -> Typing_defs.decl_ty -> string
 
 val with_blank_tyvars : (unit -> 'a) -> 'a
 

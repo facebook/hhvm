@@ -11,5 +11,5 @@ path = "lib.rs"
 ocamlpool_rust = { path = "../utils/ocamlpool_rust", package = "hack_utils_ocamlpool" }
 ocaml = "^0.7"
 lazy_static = "^1.3.0"
-parser_core_types = { path = "core_types", package = "hack_parser_core_types" }
+parser_core_types = { path = "cargo/core_types", package = "hack_parser_core_types" }
 oxidized = {path = "../oxidized", package = "hack_oxidized" }

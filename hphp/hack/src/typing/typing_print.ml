@@ -188,46 +188,112 @@ module Full = struct
         ty to_doc st env cty;
       ]
 
-  let rec ty : type a. _ -> _ -> _ -> a ty -> Doc.t =
-   fun to_doc st env (r, x) ->
-    let d = ty_ to_doc st env x in
-    match r with
-    | Typing_reason.Rsolve_fail _ -> Concat [text "{suggest:"; d; text "}"]
-    | _ -> d
+  let terr () =
+    text
+      ( if !debug_mode then
+        "err"
+      else
+        "_" )
 
-  and ty_ : type a. _ -> _ -> _ -> a ty_ -> Doc.t =
+  let tprim x =
+    text
+    @@
+    match x with
+    | Nast.Tnull -> "null"
+    | Nast.Tvoid -> "void"
+    | Nast.Tint -> "int"
+    | Nast.Tbool -> "bool"
+    | Nast.Tfloat -> "float"
+    | Nast.Tstring -> "string"
+    | Nast.Tnum -> "num"
+    | Nast.Tresource -> "resource"
+    | Nast.Tarraykey -> "arraykey"
+    | Nast.Tnoreturn -> "noreturn"
+    | Nast.Tatom s -> ":@" ^ s
+
+  let tdarray k x y = list "darray<" k [x; y] ">"
+
+  let tvarray k x = list "varray<" k [x] ">"
+
+  let tvarray_or_darray k x = list "varray_or_darray<" k [x] ">"
+
+  let tarray k x y =
+    match (x, y) with
+    | (None, None) -> text "array"
+    | (Some x, None) -> list "array<" k [x] ">"
+    | (Some x, Some y) -> list "array<" k [x; y] ">"
+    | (None, Some _) -> assert false
+
+  let tfun ~ty to_doc st env ft =
+    Concat
+      [
+        text "(";
+        ( if ft.ft_is_coroutine then
+          text "coroutine" ^^ Space
+        else
+          Nothing );
+        text "function";
+        fun_type ~ty to_doc st env ft;
+        text ")";
+        (match ft.ft_ret.et_type with
+        | (Reason.Rdynamic_yield _, _) -> Space ^^ text "[DynamicYield]"
+        | _ -> Nothing);
+      ]
+
+  let ttuple k tyl = list "(" k tyl ")"
+
+  let tshape k to_doc shape_kind fdm =
+    let fields =
+      let f_field (shape_map_key, { sft_optional; sft_ty }) =
+        let key_delim =
+          match shape_map_key with
+          | Ast_defs.SFlit_str _ -> text "'"
+          | _ -> Nothing
+        in
+        Concat
+          [
+            ( if sft_optional then
+              text "?"
+            else
+              Nothing );
+            key_delim;
+            to_doc (Env.get_shape_field_name shape_map_key);
+            key_delim;
+            Space;
+            text "=>";
+            Space;
+            k sft_ty;
+          ]
+      in
+      shape_map fdm f_field
+    in
+    let fields =
+      match shape_kind with
+      | Closed_shape -> fields
+      | Open_shape -> fields @ [text "..."]
+    in
+    list "shape(" id fields ")"
+
+  let tpu_access k ty' access = k ty' ^^ text (":@" ^ access)
+
+  let rec decl_ty to_doc st env (_, x) = decl_ty_ to_doc st env x
+
+  and decl_ty_ : _ -> _ -> _ -> decl_phase ty_ -> Doc.t =
    fun to_doc st env x ->
-    let k : type b. b ty -> _ = (fun x -> ty to_doc st env x) in
+    let ty = decl_ty in
+    let k x = ty to_doc st env x in
     match x with
     | Tany _ -> text "_"
-    | Terr ->
-      text
-        ( if !debug_mode then
-          "err"
-        else
-          "_" )
+    | Terr -> terr ()
     | Tthis -> text SN.Typehints.this
     | Tmixed -> text "mixed"
     | Tdynamic -> text "dynamic"
     | Tnonnull -> text "nonnull"
     | Tnothing -> text "nothing"
-    | Tdarray (x, y) -> list "darray<" k [x; y] ">"
-    | Tvarray x -> list "varray<" k [x] ">"
-    | Tvarray_or_darray x -> list "varray_or_darray<" k [x] ">"
-    | Tarraykind (AKvarray_or_darray x) -> list "varray_or_darray<" k [x] ">"
-    | Tarraykind AKany -> text "array"
-    | Tarraykind AKempty -> text "array (empty)"
-    | Tarray (None, None) -> text "array"
-    | Tarraykind (AKvarray x) -> list "varray<" k [x] ">"
-    | Tarraykind (AKvec x) -> list "array<" k [x] ">"
-    | Tarray (Some x, None) -> list "array<" k [x] ">"
-    | Tarray (Some x, Some y) -> list "array<" k [x; y] ">"
-    | Tarraykind (AKdarray (x, y)) -> list "darray<" k [x; y] ">"
-    | Tarraykind (AKmap (x, y)) -> list "array<" k [x; y] ">"
-    | Tarray (None, Some _) -> assert false
-    | Tclass ((_, s), Exact, []) when !debug_mode ->
-      Concat [text "exact"; Space; to_doc s]
-    | Tclass ((_, s), _, []) -> to_doc s
+    | Tdarray (x, y) -> tdarray k x y
+    | Tvarray x -> tvarray k x
+    | Tvarray_or_darray x -> tvarray_or_darray k x
+    | Tarray (x, y) -> tarray k x y
     | Tapply ((_, s), []) -> to_doc s
     | Tgeneric s -> to_doc s
     | Taccess (root_ty, ids) ->
@@ -240,6 +306,44 @@ module Full = struct
                ~f:(fun acc (_, sid) -> acc ^ "::" ^ sid)
                ~init:"");
         ]
+    | Toption x -> Concat [text "?"; k x]
+    | Tlike x -> Concat [text "~"; k x]
+    | Tprim x -> tprim x
+    | Tvar _ -> text "_"
+    | Tfun ft -> tfun ~ty to_doc st env ft
+    (* Don't strip_ns here! We want the FULL type, including the initial slash.
+      *)
+    | Tapply ((_, s), tyl) -> to_doc s ^^ list "<" k tyl ">"
+    | Ttuple tyl -> ttuple k tyl
+    | Tshape (shape_kind, fdm) -> tshape k to_doc shape_kind fdm
+    | Tpu_access (ty', (_, access)) -> tpu_access k ty' access
+
+  let rec locl_ty : _ -> _ -> _ -> locl_ty -> Doc.t =
+   fun to_doc st env (r, x) ->
+    let d = locl_ty_ to_doc st env x in
+    match r with
+    | Typing_reason.Rsolve_fail _ -> Concat [text "{suggest:"; d; text "}"]
+    | _ -> d
+
+  and locl_ty_ : _ -> _ -> _ -> locl_phase ty_ -> Doc.t =
+   fun to_doc st env x ->
+    let ty = locl_ty in
+    let k x = ty to_doc st env x in
+    match x with
+    | Tany _ -> text "_"
+    | Terr -> terr ()
+    | Tdynamic -> text "dynamic"
+    | Tnonnull -> text "nonnull"
+    | Tarraykind (AKvarray_or_darray x) -> tvarray_or_darray k x
+    | Tarraykind AKany -> tarray k None None
+    | Tarraykind AKempty -> text "array (empty)"
+    | Tarraykind (AKvarray x) -> tvarray k x
+    | Tarraykind (AKvec x) -> tarray k (Some x) None
+    | Tarraykind (AKdarray (x, y)) -> tdarray k x y
+    | Tarraykind (AKmap (x, y)) -> tarray k (Some x) (Some y)
+    | Tclass ((_, s), Exact, []) when !debug_mode ->
+      Concat [text "exact"; Space; to_doc s]
+    | Tclass ((_, s), _, []) -> to_doc s
     | Toption (_, Tnonnull) -> text "mixed"
     | Toption (r, Tunion tyl)
       when TypecheckerOptions.like_type_hints (Env.get_tcopt env)
@@ -248,8 +352,7 @@ module Full = struct
        * The Tunion case can better handle this *)
       k (r, Tunion ((r, Tprim Nast.Tnull) :: tyl))
     | Toption x -> Concat [text "?"; k x]
-    | Tlike x -> Concat [text "~"; k x]
-    | Tprim x -> text @@ prim x
+    | Tprim x -> tprim x
     | Tvar n ->
       let (_, n') = Env.get_var env n in
       let (_, ety) = Env.expand_type env (Reason.Rnone, Tvar n) in
@@ -278,21 +381,7 @@ module Full = struct
           let st = ISet.add n' st in
           Concat [prepend; ty to_doc st env ety]
       end
-    | Tfun ft ->
-      Concat
-        [
-          text "(";
-          ( if ft.ft_is_coroutine then
-            text "coroutine" ^^ Space
-          else
-            Nothing );
-          text "function";
-          fun_type ~ty to_doc st env ft;
-          text ")";
-          (match ft.ft_ret.et_type with
-          | (Reason.Rdynamic_yield _, _) -> Space ^^ text "[DynamicYield]"
-          | _ -> Nothing);
-        ]
+    | Tfun ft -> tfun ~ty to_doc st env ft
     | Tclass ((_, s), exact, tyl) ->
       let d = to_doc s ^^ list "<" k tyl ">" in
       begin
@@ -313,9 +402,8 @@ module Full = struct
       in
       Concat [to_doc @@ AbstractKind.to_string ak; cstr_info]
     (* Don't strip_ns here! We want the FULL type, including the initial slash.
-    *)
-    | Tapply ((_, s), tyl) -> to_doc s ^^ list "<" k tyl ">"
-    | Ttuple tyl -> list "(" k tyl ")"
+      *)
+    | Ttuple tyl -> ttuple k tyl
     | Tdestructure tyl -> list "list(" k tyl ")"
     | Tanon (_, id) ->
       begin
@@ -430,37 +518,7 @@ module Full = struct
     | Tintersection tyl ->
       delimited_list (Space ^^ text "&" ^^ Space) "(" k tyl ")"
     | Tobject -> text "object"
-    | Tshape (shape_kind, fdm) ->
-      let fields =
-        let f_field (shape_map_key, { sft_optional; sft_ty }) =
-          let key_delim =
-            match shape_map_key with
-            | Ast_defs.SFlit_str _ -> text "'"
-            | _ -> Nothing
-          in
-          Concat
-            [
-              ( if sft_optional then
-                text "?"
-              else
-                Nothing );
-              key_delim;
-              to_doc (Env.get_shape_field_name shape_map_key);
-              key_delim;
-              Space;
-              text "=>";
-              Space;
-              k sft_ty;
-            ]
-        in
-        shape_map fdm f_field
-      in
-      let fields =
-        match shape_kind with
-        | Closed_shape -> fields
-        | Open_shape -> fields @ [text "..."]
-      in
-      list "shape(" id fields ")"
+    | Tshape (shape_kind, fdm) -> tshape k to_doc shape_kind fdm
     | Tpu (ty', (_, enum), kind) ->
       let suffix =
         match kind with
@@ -468,21 +526,7 @@ module Full = struct
         | Pu_plain -> ""
       in
       k ty' ^^ text (":@" ^ enum ^ suffix)
-    | Tpu_access (ty', (_, access)) -> k ty' ^^ text (":@" ^ access)
-
-  and prim x =
-    match x with
-    | Nast.Tnull -> "null"
-    | Nast.Tvoid -> "void"
-    | Nast.Tint -> "int"
-    | Nast.Tbool -> "bool"
-    | Nast.Tfloat -> "float"
-    | Nast.Tstring -> "string"
-    | Nast.Tnum -> "num"
-    | Nast.Tresource -> "resource"
-    | Nast.Tarraykey -> "arraykey"
-    | Nast.Tnoreturn -> "noreturn"
-    | Nast.Tatom s -> ":@" ^ s
+    | Tpu_access (ty', (_, access)) -> tpu_access k ty' access
 
   (* For a given type parameter, construct a list of its constraints *)
   let get_constraints_on_tparam env tparam =
@@ -499,7 +543,7 @@ module Full = struct
       @ List.map (TySet.elements upper) (fun ty ->
             (tparam, Ast_defs.Constraint_as, ty))
 
-  let to_string to_doc env x =
+  let to_string ~ty to_doc env x =
     ty to_doc ISet.empty env x
     |> Libhackfmt.format_doc_unbroken format_env
     |> String.strip
@@ -526,30 +570,38 @@ module Full = struct
                      Concat
                        [
                          text tparam;
-                         tparam_constraint ~ty to_doc ISet.empty env (ck, typ);
+                         tparam_constraint
+                           ~ty:locl_ty
+                           to_doc
+                           ISet.empty
+                           env
+                           (ck, typ);
                        ]
                    end
                    constraints );
            ])
 
   let to_string_rec env n x =
-    ty Doc.text (ISet.add n ISet.empty) env x
+    locl_ty Doc.text (ISet.add n ISet.empty) env x
     |> Libhackfmt.format_doc_unbroken format_env
     |> String.strip
 
-  let to_string_strip_ns env x = to_string text_strip_ns env x
+  let to_string_strip_ns ~ty env x = to_string ~ty text_strip_ns env x
 
   let to_string_decl tcopt (x : decl_ty) =
+    let ty = decl_ty in
     let env = Typing_env.empty tcopt Relative_path.default ~droot:None in
-    to_string Doc.text env x
+    to_string ~ty Doc.text env x
 
   let fun_to_string tcopt (x : decl_fun_type) =
+    let ty = decl_ty in
     let env = Typing_env.empty tcopt Relative_path.default ~droot:None in
     fun_type ~ty Doc.text ISet.empty env x
     |> Libhackfmt.format_doc_unbroken format_env
     |> String.strip
 
   let to_string_with_identity env x occurrence definition_opt =
+    let ty = locl_ty in
     let prefix =
       SymbolDefinition.(
         let print_mod m = text (string_of_modifier m) ^^ Space in
@@ -711,7 +763,7 @@ module ErrorString = struct
           "<"
           ^ String.concat
               ~sep:", "
-              (List.map tyl ~f:(Full.to_string_strip_ns env))
+              (List.map tyl ~f:(Full.to_string_strip_ns ~ty:Full.locl_ty env))
           ^ ">")
 
   and abstract env ak cstr =
@@ -1761,13 +1813,13 @@ end
 
 let error env ty = ErrorString.to_string env ty
 
-let full env ty = Full.to_string Doc.text env ty
+let full env ty = Full.to_string ~ty:Full.locl_ty Doc.text env ty
 
 let full_rec env n ty = Full.to_string_rec env n ty
 
-let full_strip_ns env ty = Full.to_string_strip_ns env ty
+let full_strip_ns env ty = Full.to_string_strip_ns ~ty:Full.locl_ty env ty
 
-let full_strip_ns_decl env ty = Full.to_string_strip_ns env ty
+let full_strip_ns_decl env ty = Full.to_string_strip_ns ~ty:Full.decl_ty env ty
 
 let full_with_identity = Full.to_string_with_identity
 
@@ -1779,7 +1831,11 @@ let debug env ty =
   Full.debug_mode := false;
   f_str
 
-let debug_decl = debug
+let debug_decl env ty =
+  Full.debug_mode := true;
+  let f_str = full_strip_ns_decl env ty in
+  Full.debug_mode := false;
+  f_str
 
 let class_ tcopt c = PrintClass.class_type tcopt c
 

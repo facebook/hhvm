@@ -85,6 +85,10 @@ impl Default for GlobalOptions {
             po_parser_errors_only: false,
             tco_check_attribute_locations: false,
             po_disallow_func_ptrs_in_constants: false,
+            glean_service: String::new(),
+            glean_hostname: String::new(),
+            glean_port: 0,
+            glean_reponame: String::new(),
         }
     }
 }

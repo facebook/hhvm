@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<11ef95c64663d46bf5b462aefdad117e>>
+// @generated SignedSource<<f14d2e982362256d58ce308da9e24f18>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -103,6 +103,7 @@ pub enum Reason {
     Rshape(pos::Pos, String),
     Renforceable(pos::Pos),
     Rdestructure(pos::Pos, isize),
+    RkeyValueCollectionKey(pos::Pos),
 }
 
 #[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]

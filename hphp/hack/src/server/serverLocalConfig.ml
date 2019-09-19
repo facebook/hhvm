@@ -506,9 +506,10 @@ let load_ fn ~silent ~current_version overrides =
     match naming_sqlite_path with
     | Some _ -> true
     | None ->
-      bool_if_version
+      bool_if_min_version
         "enable_naming_table_fallback"
         ~default:default.enable_naming_table_fallback
+        ~current_version
         config
   in
   let symbolindex_search_provider =

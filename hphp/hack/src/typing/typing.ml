@@ -4512,12 +4512,12 @@ and arraykey_value
   let (env, (te, ty)) = array_value ~expected env x in
   let ty_arraykey = MakeType.arraykey (Reason.Ridx_dict pos) in
   let env =
-    Type.sub_type
+    Typing_coercion.coerce_type
       p
       (Reason.index_class class_name)
       env
       ty
-      ty_arraykey
+      { et_type = ty_arraykey; et_enforced = true }
       Errors.unify_error
   in
   (env, (te, ty))

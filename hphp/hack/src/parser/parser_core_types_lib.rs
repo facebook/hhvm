@@ -30,7 +30,6 @@ pub mod syntax_error;
 mod syntax_generated;
 pub mod syntax_kind;
 pub mod syntax_trait;
-pub mod syntax_tree;
 pub mod syntax_type;
 pub mod token_kind;
 pub mod trivia_kind;

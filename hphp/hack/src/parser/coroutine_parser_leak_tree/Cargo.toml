@@ -1,0 +1,13 @@
+[package]
+name = "coroutine_parser_leak_tree"
+version = "3.49.0"
+edition = "2018"
+
+[lib]
+name = "coroutine_parser_leak_tree"
+path = "../coroutine_parser_leak_tree.rs"
+
+[dependencies]
+parser_rust = { path = "..", package = "hack_parser" }
+syntax_smart_constructors = { path = "../syntax_smart_constructors", package = "syntax_smart_constructors" }
+coroutine_smart_constructors = { path = "../coroutine_smart_constructors", package = "coroutine_smart_constructors" }

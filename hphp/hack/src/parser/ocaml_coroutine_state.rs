@@ -4,14 +4,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use parser::coroutine_smart_constructors::CoroutineStateType;
-use parser::parser_env::ParserEnv;
-use parser::source_text::SourceText;
-use parser::syntax_smart_constructors::StateType;
-use parser_rust as parser;
-
 use crate::ocaml_syntax::Context;
-use crate::rust_to_ocaml::SerializationContext;
+use coroutine_smart_constructors::CoroutineStateType;
+use parser_rust::{parser_env::ParserEnv, source_text::SourceText};
+use rust_to_ocaml::SerializationContext;
+use syntax_smart_constructors::StateType;
 
 use std::marker::PhantomData;
 use std::rc::Rc;

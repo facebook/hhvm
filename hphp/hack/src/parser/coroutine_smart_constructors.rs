@@ -1,11 +1,18 @@
-use crate::parser_env::ParserEnv;
-use crate::syntax_smart_constructors::{StateType, SyntaxSmartConstructors};
-use parser_core_types::lexable_token::LexableToken;
-use parser_core_types::source_text::SourceText;
-use parser_core_types::syntax::*;
-use parser_core_types::token_kind::TokenKind;
+// Copyright (c) Facebook, Inc. and its affiliates.
+//
+// This source code is licensed under the MIT license found in the
+// LICENSE file in the "hack" directory of this source tree.
 
+mod coroutine_smart_constructors_generated;
+
+use ocaml::core::mlvalues::Value;
+use parser_core_types::{
+    lexable_token::LexableToken, source_text::SourceText, syntax::*, token_kind::TokenKind,
+};
+use parser_rust::parser_env::ParserEnv;
+use rust_to_ocaml::{SerializationContext, ToOcaml};
 use std::marker::PhantomData;
+use syntax_smart_constructors::{StateType, SyntaxSmartConstructors};
 
 const PPL_MACRO_STR: &str = "__PPL";
 
@@ -230,5 +237,11 @@ where
             argument_list,
             right_paren,
         )
+    }
+}
+
+impl<'a, S> ToOcaml for State<'a, S> {
+    unsafe fn to_ocaml(&self, _context: &SerializationContext) -> Value {
+        self.seen_ppl().to_ocaml(_context)
     }
 }

@@ -1,0 +1,15 @@
+[package]
+name = "decl_mode_parser"
+version = "3.49.0"
+edition = "2018"
+
+[lib]
+name = "decl_mode_parser"
+path = "../decl_mode_parser.rs"
+
+[dependencies]
+parser_core_types = { path = "../core_types", package = "hack_parser_core_types" }
+parser_rust = { path = "..", package = "hack_parser" }
+rust_to_ocaml = { path = "../rust_to_ocaml", package = "rust_to_ocaml" }
+ocaml = "^0.7"
+syntax_smart_constructors = { path = "../syntax_smart_constructors", package = "syntax_smart_constructors" }

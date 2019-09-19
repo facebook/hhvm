@@ -4,9 +4,16 @@
 // LICENSE file in the "hack" directory of this source tree.
 use std::cmp::Ordering;
 
-use crate::source_text::SourceText;
-use crate::syntax_error::SyntaxError;
+pub mod mode_parser;
+
+use crate::mode_parser::parse_mode;
 use oxidized::file_info::Mode;
+use parser_core_types::{source_text::SourceText, syntax_error::SyntaxError};
+use parser_rust::{
+    parser::Parser,
+    parser_env::ParserEnv,
+    smart_constructors::{NodeType, SmartConstructors},
+};
 
 pub struct SyntaxTree<'a, Syntax, State> {
     text: &'a SourceText<'a>,
@@ -132,10 +139,26 @@ where
     // is_in_body and and Hh_json.to_json
 }
 
+pub fn make_syntax_tree<'a, S, T>(
+    source: &'a SourceText<'a>,
+    env: ParserEnv,
+) -> SyntaxTree<<S::R as NodeType>::R, S>
+where
+    T: Clone,
+    S: SmartConstructors<'a, T>,
+    S::R: NodeType,
+{
+    let mode = parse_mode(&source);
+    let mut parser = Parser::make(&source, env);
+    let root = parser.parse_script(None);
+    let (_, errors, _, state) = parser.into_parts();
+    SyntaxTree::create(source, root, errors, mode, state, None)
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::syntax_error;
-    use crate::syntax_tree::process_errors;
+    use crate::process_errors;
+    use parser_core_types::syntax_error;
 
     #[test]
     fn test_process_errors() {

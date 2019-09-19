@@ -6,7 +6,7 @@
 use ocaml::core::mlvalues::Value;
 use ocamlpool_rust::ocamlvalue::Ocamlvalue;
 use ocamlpool_rust::utils::{caml_block, caml_tuple, u8_to_ocaml, usize_to_ocaml};
-use rust_to_ocaml::rust_to_ocaml::{to_list, SerializationContext, ToOcaml};
+use rust_to_ocaml::{to_list, SerializationContext, ToOcaml};
 
 use crate::editable_positioned_original_source_data::SourceData;
 use crate::editable_positioned_token::{EditablePositionedToken, SyntheticTokenData, TokenData};

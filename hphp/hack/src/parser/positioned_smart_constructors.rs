@@ -17,11 +17,11 @@
  *
  */
 use parser_core_types::source_text::SourceText;
-use crate::parser_env::ParserEnv;
-use crate::positioned_syntax::PositionedSyntax;
-use crate::positioned_token::PositionedToken;
-use crate::smart_constructors::{NoState, SmartConstructors};
-use crate::syntax_smart_constructors::{SyntaxSmartConstructors, StateType};
+use parser_rust::parser_env::ParserEnv;
+use parser_core_types::positioned_syntax::PositionedSyntax;
+use parser_core_types::positioned_token::PositionedToken;
+use parser_rust::smart_constructors::{NoState, SmartConstructors};
+use syntax_smart_constructors::{SyntaxSmartConstructors, StateType};
 
 #[derive(Clone)]
 pub struct PositionedSmartConstructors<State: Clone = NoState> {

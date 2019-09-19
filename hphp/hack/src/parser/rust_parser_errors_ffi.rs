@@ -13,7 +13,7 @@ use parser_rust as parser;
 use ocamlpool_rust::{caml_raise, ocamlvalue::Ocamlvalue, utils::*};
 use oxidized::{parser_options::ParserOptions, relative_path::RelativePath};
 use parser::{positioned_syntax::PositionedSyntax, source_text::SourceText};
-use parser_core_types::syntax_tree::SyntaxTree;
+use syntax_tree::SyntaxTree;
 
 extern "C" {
     fn ocamlpool_enter();

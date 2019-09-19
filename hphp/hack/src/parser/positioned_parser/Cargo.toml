@@ -1,0 +1,13 @@
+[package]
+name = "positioned_parser"
+version = "3.49.0"
+edition = "2018"
+
+[lib]
+name = "positioned_parser"
+path = "../positioned_parser.rs"
+
+[dependencies]
+parser_core_types = { path = "../core_types", package = "hack_parser_core_types" }
+parser_rust = { path = "..", package = "hack_parser" }
+syntax_smart_constructors = { path = "../syntax_smart_constructors", package = "syntax_smart_constructors" }

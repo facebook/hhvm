@@ -6,27 +6,16 @@
 
 pub mod hh_autoimport;
 pub mod lexer;
-pub mod mode_parser;
 pub mod operator;
 mod operator_generated;
 pub mod parser;
 pub mod parser_env;
 pub mod stack_limit;
 
-pub mod coroutine_smart_constructors;
-mod coroutine_smart_constructors_generated;
-pub mod decl_mode_smart_constructors;
-mod decl_mode_smart_constructors_generated;
-pub mod flatten_smart_constructors;
-pub mod verify_smart_constructors;
-mod verify_smart_constructors_generated;
-
 #[macro_use]
 pub mod smart_constructors; // must be before users of providing macros (*_parser)
-mod smart_constructors_generated;
+pub mod smart_constructors_generated;
 pub mod smart_constructors_wrappers;
-pub mod syntax_smart_constructors;
-mod syntax_smart_constructors_generated;
 
 pub mod parser_trait;
 
@@ -34,11 +23,6 @@ pub mod declaration_parser;
 pub mod expression_parser;
 pub mod statement_parser;
 pub mod type_parser;
-
-pub mod minimal_parser;
-mod minimal_smart_constructors;
-
-pub mod positioned_smart_constructors;
 
 // The "parser_core_types" crate contains data definitions for a variety of data structures
 // and types used by the parser and consumers of the parser. These data types were recently

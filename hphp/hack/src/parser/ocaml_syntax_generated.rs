@@ -17,7 +17,7 @@
  *
  */
 use crate::ocaml_syntax::{OcamlSyntax, Context};
-use crate::rust_to_ocaml::*;
+use rust_to_ocaml::*;
 
 use parser_rust as parser;
 use parser::syntax_kind::SyntaxKind;

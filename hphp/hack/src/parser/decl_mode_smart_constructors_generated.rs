@@ -25,9 +25,9 @@ use parser_core_types::{
   },
 };
 use crate::decl_mode_smart_constructors::*;
-use crate::parser_env::ParserEnv;
-use crate::smart_constructors::SmartConstructors;
-use crate::syntax_smart_constructors::SyntaxSmartConstructors;
+use parser_rust::parser_env::ParserEnv;
+use parser_rust::smart_constructors::SmartConstructors;
+use syntax_smart_constructors::SyntaxSmartConstructors;
 
 impl<'src, Token, Value>
 SmartConstructors<'src, State<'src, Syntax<Token, Value>>>

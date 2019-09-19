@@ -14,15 +14,15 @@ use ocamlpool_rust::{
 use oxidized::{file_info, global_options::GlobalOptions, relative_path::RelativePath};
 use parser::{
     indexed_source_text::IndexedSourceText,
-    mode_parser::parse_mode,
     parser::Parser,
     parser_env::ParserEnv,
-    positioned_smart_constructors::PositionedSmartConstructors,
     positioned_syntax::PositionedValue,
     positioned_token::PositionedToken,
     smart_constructors::{NoState, WithKind},
     source_text::SourceText,
 };
+use positioned_parser::positioned_smart_constructors::PositionedSmartConstructors;
+use syntax_tree::mode_parser::parse_mode;
 
 use lowerer::{Env as LowererEnv, Lowerer};
 use std::default::Default;

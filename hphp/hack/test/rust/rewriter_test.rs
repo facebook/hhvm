@@ -1,15 +1,10 @@
-use parser_rust as parser;
+// Copyright (c) Facebook, Inc. and its affiliates.
+//
+// This source code is licensed under the MIT license found in the
+// LICENSE file in the "hack" directory of this source tree.
 
 use oxidized::relative_path::{Prefix, RelativePath};
 
-use parser::parser::Parser;
-use parser::parser_env::ParserEnv;
-use parser::positioned_smart_constructors::PositionedSmartConstructors;
-use parser::rewriter::Rewriter;
-use parser::smart_constructors::NoState;
-use parser::smart_constructors_wrappers::WithKind;
-use parser::source_text::SourceText;
-use parser::syntax::SyntaxVariant;
 use parser_core_types::{
     lexable_token::LexableToken,
     positioned_syntax::PositionedSyntax,
@@ -17,6 +12,11 @@ use parser_core_types::{
     syntax::{Syntax, SyntaxTypeBase},
     token_kind::TokenKind,
 };
+use parser_rust::{
+    parser::Parser, parser_env::ParserEnv, rewriter::Rewriter, smart_constructors::NoState,
+    smart_constructors_wrappers::WithKind, source_text::SourceText, syntax::SyntaxVariant,
+};
+use positioned_parser::positioned_smart_constructors::PositionedSmartConstructors;
 
 use std::io::Read;
 

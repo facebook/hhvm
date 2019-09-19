@@ -21,9 +21,10 @@ use parser_core_types::{
   minimal_token::MinimalToken,
   source_text::SourceText,
 };
-use crate::parser_env::ParserEnv;
-use crate::smart_constructors::{NoState, SmartConstructors};
-use crate::syntax_smart_constructors::SyntaxSmartConstructors;
+
+use parser_rust::parser_env::ParserEnv;
+use parser_rust::smart_constructors::{NoState, SmartConstructors};
+use syntax_smart_constructors::SyntaxSmartConstructors;
 
 #[derive(Clone)]
 pub struct MinimalSmartConstructors {

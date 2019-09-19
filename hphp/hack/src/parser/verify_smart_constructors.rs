@@ -6,11 +6,9 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
 */
-use crate::parser_env::ParserEnv;
-use crate::positioned_syntax::PositionedSyntax;
-use crate::syntax_smart_constructors::{StateType, SyntaxSmartConstructors};
-use parser_core_types::source_text::SourceText;
-use parser_core_types::syntax_kind::SyntaxKind;
+use parser_core_types::{source_text::SourceText, syntax_kind::SyntaxKind};
+use parser_rust::{parser_env::ParserEnv, positioned_syntax::PositionedSyntax};
+use syntax_smart_constructors::{StateType, SyntaxSmartConstructors};
 
 // TODO: This parser is only used by the ffp tests, and should be moved out of
 // the parser crate into a separate crate colocated with the tests. This will

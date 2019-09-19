@@ -4,14 +4,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use parser_rust as parser;
-
 use oxidized::{file_info::Mode, relative_path::RelativePath};
-use parser::mode_parser::parse_mode;
-use parser::parser::Parser;
-use parser::parser_env::ParserEnv;
-use parser::smart_constructors_wrappers::WithKind;
-use parser::source_text::SourceText;
+use parser_rust::{
+    parser::Parser, parser_env::ParserEnv, smart_constructors_wrappers::WithKind,
+    source_text::SourceText,
+};
+use syntax_tree::mode_parser::parse_mode;
 
 use crate::facts::*;
 use crate::facts_smart_constructors::*;

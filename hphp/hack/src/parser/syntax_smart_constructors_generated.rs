@@ -20,9 +20,9 @@ use parser_core_types::{
   syntax::*,
   source_text::SourceText,
 };
-use crate::parser_env::ParserEnv;
-use crate::smart_constructors::{NoState, SmartConstructors};
-use crate::syntax_smart_constructors::StateType;
+use parser_rust::parser_env::ParserEnv;
+use parser_rust::smart_constructors::{NoState, SmartConstructors};
+use crate::StateType;
 
 pub trait SyntaxSmartConstructors<'src, S: SyntaxType<'src, State>, State = NoState>:
     SmartConstructors<'src, State, R=S, Token=S::Token>

@@ -4,16 +4,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::declaration_parser::DeclarationParser;
-use crate::lexer::Lexer;
-use crate::mode_parser::parse_mode;
-use crate::parser_env::ParserEnv;
-use crate::parser_trait::{Context, ParserTrait};
-use crate::smart_constructors::{NodeType, SmartConstructors};
-use crate::stack_limit::StackLimit;
-use parser_core_types::source_text::SourceText;
-use parser_core_types::syntax_error::SyntaxError;
-use parser_core_types::syntax_tree::SyntaxTree;
+use crate::{
+    declaration_parser::DeclarationParser,
+    lexer::Lexer,
+    parser_env::ParserEnv,
+    parser_trait::{Context, ParserTrait},
+    smart_constructors::{NodeType, SmartConstructors},
+    stack_limit::StackLimit,
+};
+use parser_core_types::{source_text::SourceText, syntax_error::SyntaxError};
 
 pub struct Parser<'a, S, T>
 where
@@ -41,18 +40,7 @@ where
         }
     }
 
-    pub fn make_syntax_tree(
-        source: &'a SourceText<'a>,
-        env: ParserEnv,
-    ) -> SyntaxTree<<S::R as NodeType>::R, S> {
-        let mode = parse_mode(&source);
-        let mut parser = Parser::make(&source, env);
-        let root = parser.parse_script(None);
-        let (_, errors, _, state) = parser.into_parts();
-        SyntaxTree::create(source, root, errors, mode, state, None)
-    }
-
-    fn into_parts(self) -> (Lexer<'a, S::Token>, Vec<SyntaxError>, ParserEnv, S) {
+    pub fn into_parts(self) -> (Lexer<'a, S::Token>, Vec<SyntaxError>, ParserEnv, S) {
         (self.lexer, self.errors, self.env, self.sc)
     }
 

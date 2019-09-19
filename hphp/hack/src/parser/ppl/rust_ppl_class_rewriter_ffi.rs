@@ -5,20 +5,16 @@
 
 use std::rc::Rc;
 
-use parser::parser::Parser;
-use parser::parser_env::ParserEnv;
-use parser::positioned_smart_constructors::PositionedSmartConstructors;
-use parser::smart_constructors::NoState;
-use parser::smart_constructors::WithKind;
-use parser::source_text::SourceText;
-use parser_rust as parser;
-
-use rust_editable_positioned_syntax::{EditablePositionedSyntax, EditablePositionedSyntaxTrait};
-
 use ocaml::caml;
 use ocamlpool_rust::utils::{block_field, str_field};
 use oxidized::relative_path::RelativePath;
-use rust_to_ocaml::rust_to_ocaml::{SerializationContext, ToOcaml};
+use parser_rust::{
+    parser::Parser, parser_env::ParserEnv, smart_constructors::NoState,
+    smart_constructors::WithKind, source_text::SourceText,
+};
+use positioned_parser::positioned_smart_constructors::PositionedSmartConstructors;
+use rust_editable_positioned_syntax::{EditablePositionedSyntax, EditablePositionedSyntaxTrait};
+use rust_to_ocaml::{SerializationContext, ToOcaml};
 
 type PositionedSyntaxParser<'a> = Parser<'a, WithKind<PositionedSmartConstructors>, NoState>;
 

@@ -18,7 +18,7 @@
  */
 use parser_rust as parser;
 use parser::source_text::SourceText;
-use parser::flatten_smart_constructors::*;
+use flatten_smart_constructors::*;
 use parser::smart_constructors::SmartConstructors;
 use parser::parser_env::ParserEnv;
 use parser::positioned_token::PositionedToken;

@@ -4,35 +4,18 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use parser_rust as parser;
-
-use crate::ocaml_coroutine_state::OcamlCoroutineState;
-use crate::ocaml_syntax::OcamlSyntax;
-
 use ocaml::core::mlvalues::{empty_list, Value};
 
 use std::iter::Iterator;
 
-use parser::coroutine_smart_constructors::{CoroutineStateType, State as CoroutineState};
-use parser::decl_mode_smart_constructors::State as DeclModeState;
-use parser::lexable_token::LexableToken;
-use parser::minimal_syntax::MinimalValue;
-use parser::minimal_token::MinimalToken;
-use parser::minimal_trivia::MinimalTrivia;
-use parser::positioned_syntax::PositionedValue;
-use parser::positioned_token::PositionedToken;
-use parser::positioned_trivia::PositionedTrivia;
-use parser::smart_constructors::NoState;
-use parser::source_text::SourceText;
-use parser::syntax::*;
-use parser::syntax_error::SyntaxError;
-use parser::syntax_kind::SyntaxKind;
-use parser::token_kind::TokenKind;
-use parser::trivia_kind::TriviaKind;
-use parser::verify_smart_constructors::State as VerifyState;
-
-use ocamlpool_rust::ocamlvalue::Ocamlvalue;
-use ocamlpool_rust::utils::*;
+use ocamlpool_rust::{ocamlvalue::Ocamlvalue, utils::*};
+use parser_rust::{
+    lexable_token::LexableToken, minimal_syntax::MinimalValue, minimal_token::MinimalToken,
+    minimal_trivia::MinimalTrivia, positioned_syntax::PositionedValue,
+    positioned_token::PositionedToken, positioned_trivia::PositionedTrivia,
+    smart_constructors::NoState, source_text::SourceText, syntax::*, syntax_error::SyntaxError,
+    syntax_kind::SyntaxKind, token_kind::TokenKind, trivia_kind::TriviaKind,
+};
 
 extern "C" {
     static mut ocamlpool_generation: usize;
@@ -73,12 +56,6 @@ impl ToOcaml for bool {
 impl ToOcaml for Vec<bool> {
     unsafe fn to_ocaml(&self, _context: &SerializationContext) -> Value {
         self.ocamlvalue()
-    }
-}
-
-impl<S> ToOcaml for DeclModeState<'_, S> {
-    unsafe fn to_ocaml(&self, context: &SerializationContext) -> Value {
-        self.stack().to_ocaml(context)
     }
 }
 
@@ -318,12 +295,6 @@ impl ToOcaml for SyntaxKind {
     }
 }
 
-impl ToOcaml for VerifyState {
-    unsafe fn to_ocaml(&self, context: &SerializationContext) -> Value {
-        to_list(self.stack(), context)
-    }
-}
-
 /// Blanket implementation for states of Smart Constructors that need to access SourceText;
 /// such SC by convention wrap their state into a pair (State, &SourceText).
 impl<'a, T> ToOcaml for (T, SourceText<'a>)
@@ -333,23 +304,5 @@ where
     unsafe fn to_ocaml(&self, _context: &SerializationContext) -> Value {
         // don't serialize .1 (source text) as it is not part the real state we care about
         self.0.to_ocaml(_context)
-    }
-}
-
-impl<'a, S> ToOcaml for CoroutineState<'a, S> {
-    unsafe fn to_ocaml(&self, _context: &SerializationContext) -> Value {
-        self.seen_ppl().to_ocaml(_context)
-    }
-}
-
-impl<'a, S> ToOcaml for OcamlCoroutineState<'a, S> {
-    unsafe fn to_ocaml(&self, context: &SerializationContext) -> Value {
-        self.seen_ppl().to_ocaml(context)
-    }
-}
-
-impl<V> ToOcaml for OcamlSyntax<V> {
-    unsafe fn to_ocaml(&self, _context: &SerializationContext) -> Value {
-        self.syntax
     }
 }

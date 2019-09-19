@@ -4,75 +4,30 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-mod ocaml_coroutine_state;
-mod ocaml_syntax;
-mod ocaml_syntax_generated;
-pub mod rust_to_ocaml;
-
-use parser_rust as parser;
-
-use parser::lexer::Lexer;
-use parser::minimal_parser::MinimalSyntaxParser;
-use parser::minimal_syntax::MinimalSyntax;
-use parser::minimal_token::MinimalToken;
-use parser::minimal_trivia::MinimalTrivia;
-use parser::mode_parser::parse_mode;
-use parser::parser_env::ParserEnv;
-use parser::source_text::SourceText;
-use parser::stack_limit::StackLimit;
-use parser_core_types::syntax_tree::SyntaxTree;
-
+use minimal_parser::MinimalSyntaxParser;
 use ocamlpool_rust::{caml_raise, ocamlvalue::Ocamlvalue, utils::*};
+use parser_rust::{
+    self as parser,
+    lexer::Lexer,
+    minimal_syntax::MinimalSyntax,
+    minimal_token::MinimalToken,
+    minimal_trivia::MinimalTrivia,
+    parser_env::ParserEnv,
+    positioned_syntax::{PositionedSyntax, PositionedValue},
+    source_text::SourceText,
+    stack_limit::StackLimit,
+};
+use positioned_coroutine_parser::ocaml_syntax::OcamlSyntax;
 use rust_to_ocaml::{to_list, SerializationContext, ToOcaml};
-
-use parser::parser::Parser;
-use parser::positioned_smart_constructors::*;
-use parser::positioned_syntax::{PositionedSyntax, PositionedValue};
-use parser::positioned_token::PositionedToken;
-use parser::smart_constructors::NoState;
-use parser::smart_constructors_wrappers::WithKind;
+use syntax_tree::{mode_parser::parse_mode, SyntaxTree};
 
 use oxidized::relative_path::RelativePath;
 
-type PositionedSyntaxParser<'a> = Parser<'a, WithKind<PositionedSmartConstructors>, NoState>;
-
-use crate::ocaml_coroutine_state::OcamlCoroutineState;
-use crate::ocaml_syntax::OcamlSyntax;
-use parser::coroutine_smart_constructors::{CoroutineSmartConstructors, State as CoroutineState};
-
-type CoroutineParser<'a> = Parser<
-    'a,
-    WithKind<
-        CoroutineSmartConstructors<
-            'a,
-            OcamlSyntax<PositionedValue>,
-            OcamlCoroutineState<'a, OcamlSyntax<PositionedValue>>,
-        >,
-    >,
-    OcamlCoroutineState<'a, OcamlSyntax<PositionedValue>>,
->;
-
-type CoroutineParserLeakTree<'a> = Parser<
-    'a,
-    WithKind<
-        CoroutineSmartConstructors<'a, PositionedSyntax, CoroutineState<'a, PositionedSyntax>>,
-    >,
-    CoroutineState<'a, PositionedSyntax>,
->;
-
-use parser::decl_mode_smart_constructors::DeclModeSmartConstructors;
-use parser::decl_mode_smart_constructors::State as DeclModeState;
-
-type DeclModeParser<'a> = Parser<
-    'a,
-    WithKind<DeclModeSmartConstructors<'a, PositionedSyntax, PositionedToken, PositionedValue>>,
-    DeclModeState<'a, PositionedSyntax>,
->;
-
-use parser::verify_smart_constructors::State as VerifyState;
-use parser::verify_smart_constructors::VerifySmartConstructors;
-
-type VerifyParser<'a> = Parser<'a, WithKind<VerifySmartConstructors>, VerifyState>;
+use coroutine_parser_leak_tree::CoroutineParserLeakTree;
+use decl_mode_parser::DeclModeParser;
+use positioned_coroutine_parser::CoroutineParser;
+use positioned_parser::PositionedSyntaxParser;
+use verify_parser::VerifyParser;
 
 extern "C" {
     fn ocamlpool_enter();

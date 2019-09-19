@@ -10,6 +10,14 @@ ocamlpool_rust = { path = "../../utils/ocamlpool_rust", package = "hack_utils_oc
 libc = "^0.2.60"
 ocaml = "^0.7"
 oxidized = {path = "../../oxidized", package = "hack_oxidized" }
+positioned_coroutine_parser = { path = "../positioned_coroutine_parser", package = "positioned_coroutine_parser" }
+minimal_parser = { path = "../minimal_parser", package = "minimal_parser" }
+syntax_tree = { path = "../syntax_tree", package = "syntax_tree" }
+rust_to_ocaml = { path = "../rust_to_ocaml", package = "rust_to_ocaml" }
+decl_mode_parser = { path = "../decl_mode_parser", package = "decl_mode_parser" }
+coroutine_parser_leak_tree = { path = "../coroutine_parser_leak_tree", package = "coroutine_parser_leak_tree" }
+verify_parser = { path = "../verify_parser", package = "verify_parser" }
+positioned_parser = { path = "../positioned_parser", package = "positioned_parser" }
 
 [lib]
 name = "rust_parser_ffi"

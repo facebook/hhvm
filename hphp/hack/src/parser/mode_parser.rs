@@ -4,14 +4,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::parser_env::ParserEnv;
+use minimal_parser::MinimalSyntaxParser;
 use oxidized::file_info::Mode;
-use parser_core_types::lexable_token::LexableToken;
-use parser_core_types::source_text::SourceText;
-use parser_core_types::syntax::{self, SyntaxVariant};
-use parser_core_types::token_kind::TokenKind;
-
-use crate::minimal_parser::MinimalSyntaxParser;
+use parser_core_types::{
+    lexable_token::LexableToken,
+    source_text::SourceText,
+    syntax::{self, SyntaxVariant},
+    token_kind::TokenKind,
+};
+use parser_rust::parser_env::ParserEnv;
 
 pub fn parse_mode(text: &SourceText) -> Option<Mode> {
     if let Some(header) = MinimalSyntaxParser::parse_header_only(ParserEnv::default(), text) {

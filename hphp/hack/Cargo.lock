@@ -46,6 +46,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "coroutine_parser_leak_tree_ffi"
+version = "3.49.0"
+dependencies = [
+ "coroutine_parser_leak_tree 3.49.0",
+ "hack_oxidized 3.49.0",
+ "hack_parser 3.49.0",
+ "hack_parser_core_types 3.49.0",
+ "hack_utils_ocamlpool 3.49.0",
+ "libc 0.2.60 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ocaml 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rust_parser_ffi 3.49.0",
+ "rust_to_ocaml 3.49.0",
+ "syntax_tree 3.49.0",
+]
+
+[[package]]
 name = "coroutine_smart_constructors"
 version = "3.49.0"
 dependencies = [
@@ -74,6 +90,23 @@ dependencies = [
  "ocaml 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rust_to_ocaml 3.49.0",
  "syntax_smart_constructors 3.49.0",
+]
+
+[[package]]
+name = "decl_mode_parser_ffi"
+version = "3.49.0"
+dependencies = [
+ "decl_mode_parser 3.49.0",
+ "hack_oxidized 3.49.0",
+ "hack_parser 3.49.0",
+ "hack_parser_core_types 3.49.0",
+ "hack_utils_ocamlpool 3.49.0",
+ "libc 0.2.60 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ocaml 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "positioned_parser 3.49.0",
+ "rust_parser_ffi 3.49.0",
+ "rust_to_ocaml 3.49.0",
+ "syntax_tree 3.49.0",
 ]
 
 [[package]]
@@ -227,20 +260,12 @@ dependencies = [
 name = "hack_parser_ffi"
 version = "3.49.0"
 dependencies = [
- "coroutine_parser_leak_tree 3.49.0",
- "decl_mode_parser 3.49.0",
- "hack_oxidized 3.49.0",
- "hack_parser 3.49.0",
- "hack_parser_core_types 3.49.0",
- "hack_utils_ocamlpool 3.49.0",
- "libc 0.2.60 (registry+https://github.com/rust-lang/crates.io-index)",
- "minimal_parser 3.49.0",
- "ocaml 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "positioned_coroutine_parser 3.49.0",
- "positioned_parser 3.49.0",
- "rust_to_ocaml 3.49.0",
- "syntax_tree 3.49.0",
- "verify_parser 3.49.0",
+ "coroutine_parser_leak_tree_ffi 3.49.0",
+ "decl_mode_parser_ffi 3.49.0",
+ "minimal_parser_ffi 3.49.0",
+ "positioned_coroutine_parser_ffi 3.49.0",
+ "positioned_parser_ffi 3.49.0",
+ "verify_parser_ffi 3.49.0",
 ]
 
 [[package]]
@@ -293,6 +318,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "minimal_parser_ffi"
+version = "3.49.0"
+dependencies = [
+ "hack_oxidized 3.49.0",
+ "hack_parser 3.49.0",
+ "hack_parser_core_types 3.49.0",
+ "hack_utils_ocamlpool 3.49.0",
+ "libc 0.2.60 (registry+https://github.com/rust-lang/crates.io-index)",
+ "minimal_parser 3.49.0",
+ "ocaml 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rust_parser_ffi 3.49.0",
+ "rust_to_ocaml 3.49.0",
+ "syntax_tree 3.49.0",
+]
+
+[[package]]
 name = "ocaml"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -319,12 +360,44 @@ dependencies = [
 ]
 
 [[package]]
+name = "positioned_coroutine_parser_ffi"
+version = "3.49.0"
+dependencies = [
+ "hack_oxidized 3.49.0",
+ "hack_parser 3.49.0",
+ "hack_parser_core_types 3.49.0",
+ "hack_utils_ocamlpool 3.49.0",
+ "libc 0.2.60 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ocaml 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "positioned_coroutine_parser 3.49.0",
+ "rust_parser_ffi 3.49.0",
+ "rust_to_ocaml 3.49.0",
+ "syntax_tree 3.49.0",
+]
+
+[[package]]
 name = "positioned_parser"
 version = "3.49.0"
 dependencies = [
  "hack_parser 3.49.0",
  "hack_parser_core_types 3.49.0",
  "syntax_smart_constructors 3.49.0",
+]
+
+[[package]]
+name = "positioned_parser_ffi"
+version = "3.49.0"
+dependencies = [
+ "hack_oxidized 3.49.0",
+ "hack_parser 3.49.0",
+ "hack_parser_core_types 3.49.0",
+ "hack_utils_ocamlpool 3.49.0",
+ "libc 0.2.60 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ocaml 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "positioned_parser 3.49.0",
+ "rust_parser_ffi 3.49.0",
+ "rust_to_ocaml 3.49.0",
+ "syntax_tree 3.49.0",
 ]
 
 [[package]]
@@ -411,6 +484,20 @@ dependencies = [
  "rand 0.3.23 (registry+https://github.com/rust-lang/crates.io-index)",
  "rustc-serialize 0.3.24 (registry+https://github.com/rust-lang/crates.io-index)",
  "time 0.1.42 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "rust_parser_ffi"
+version = "3.49.0"
+dependencies = [
+ "hack_oxidized 3.49.0",
+ "hack_parser 3.49.0",
+ "hack_parser_core_types 3.49.0",
+ "hack_utils_ocamlpool 3.49.0",
+ "libc 0.2.60 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ocaml 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rust_to_ocaml 3.49.0",
+ "syntax_tree 3.49.0",
 ]
 
 [[package]]
@@ -544,6 +631,22 @@ dependencies = [
  "ocaml 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rust_to_ocaml 3.49.0",
  "syntax_smart_constructors 3.49.0",
+]
+
+[[package]]
+name = "verify_parser_ffi"
+version = "3.49.0"
+dependencies = [
+ "hack_oxidized 3.49.0",
+ "hack_parser 3.49.0",
+ "hack_parser_core_types 3.49.0",
+ "hack_utils_ocamlpool 3.49.0",
+ "libc 0.2.60 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ocaml 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rust_parser_ffi 3.49.0",
+ "rust_to_ocaml 3.49.0",
+ "syntax_tree 3.49.0",
+ "verify_parser 3.49.0",
 ]
 
 [[package]]

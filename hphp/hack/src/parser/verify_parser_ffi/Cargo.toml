@@ -1,0 +1,20 @@
+[package]
+name = "verify_parser_ffi"
+version = "3.49.0"
+edition = "2018"
+
+[lib]
+name = "verify_parser_ffi"
+path = "../verify_parser_ffi.rs"
+
+[dependencies]
+verify_parser = { path = "../verify_parser", package = "verify_parser" }
+parser_core_types = { path = "../core_types", package = "hack_parser_core_types" }
+rust_parser_ffi = { path = "../rust_parser_ffi", package = "rust_parser_ffi" }
+rust_to_ocaml = { path = "../rust_to_ocaml", package = "rust_to_ocaml" }
+ocamlpool_rust = { path = "../../utils/ocamlpool_rust", package = "hack_utils_ocamlpool" }
+ocaml = "^0.7"
+parser_rust = { path = "..", package = "hack_parser" }
+syntax_tree = { path = "../syntax_tree", package = "syntax_tree" }
+libc = "^0.2.60"
+oxidized = { path = "../../oxidized", package = "hack_oxidized" }

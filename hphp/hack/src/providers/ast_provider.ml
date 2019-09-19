@@ -45,7 +45,7 @@ let parse_file_input
     ?(full = false)
     (file_name : Relative_path.t)
     (file_input : ServerCommandTypes.file_input) : Nast.program =
-  let popt = GlobalParserOptions.get () in
+  let popt = Parser_options_provider.get () in
   let parser_env =
     Full_fidelity_ast.make_env
       ~quick_mode:(not full)
@@ -76,7 +76,7 @@ let get_from_local_cache ~full file_name =
   match LocalParserCache.get file_name with
   | Some ast -> ast
   | None ->
-    let popt = GlobalParserOptions.get () in
+    let popt = Parser_options_provider.get () in
     let f contents =
       let contents =
         if FindUtils.file_filter fn then

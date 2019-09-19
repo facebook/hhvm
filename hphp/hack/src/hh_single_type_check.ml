@@ -1547,7 +1547,7 @@ let main_hack ({ files; mode; tcopt; _ } as opts) (sienv : SearchUtils.si_env)
       Relative_path.set_path_prefix Relative_path.Root (Path.make "/");
       Relative_path.set_path_prefix Relative_path.Hhi hhi_root;
       Relative_path.set_path_prefix Relative_path.Tmp (Path.make "tmp");
-      GlobalParserOptions.set tcopt;
+      Parser_options_provider.set tcopt;
       GlobalNamingOptions.set tcopt;
       match mode with
       | Ai ai_options ->

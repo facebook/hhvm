@@ -181,7 +181,7 @@ let initialize
         };
     }
   in
-  GlobalParserOptions.set server_env.ServerEnv.popt;
+  Parser_options_provider.set server_env.ServerEnv.popt;
   GlobalNamingOptions.set server_env.ServerEnv.tcopt;
 
   (* Use server_config to modify server_env with the correct symbol index *)

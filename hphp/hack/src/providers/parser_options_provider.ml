@@ -1,6 +1,5 @@
 (*
- * Copyright (c) 2019, Facebook, Inc.
- * All rights reserved.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the "hack" directory of this source tree.
@@ -22,21 +21,37 @@ module Store =
 
       let prefix = Prefix.make ()
 
-      let description = "GlobalParserOptions"
+      let description = "Parser_options_provider"
     end)
 
-let get () =
-  match Store.get () with
+let local_memory_popt : ParserOptions.t option ref = ref None
+
+let get_opt () : ParserOptions.t option =
+  match Provider_config.get_backend () with
+  | Provider_config.Lru_shared_memory
+  | Provider_config.Shared_memory ->
+    Store.get ()
+  | Provider_config.Local_memory _ -> !local_memory_popt
+
+let get () : ParserOptions.t =
+  match get_opt () with
   | Some popt -> popt
   | None ->
     Hh_logger.fatal "%s"
-    @@ "GlobalParserOptions: Attempt to read global parser options "
+    @@ "Parser_options_provider: Attempt to read global parser options "
     ^ "before they were set";
-    failwith "GlobalParserOptions: global parser options not set"
+    failwith "Parser_options_provider: global parser options not set"
 
-let set popt =
-  match Store.get () with
-  | None -> Store.add () popt
+let set (popt : ParserOptions.t) : unit =
+  match get_opt () with
+  | None ->
+    begin
+      match Provider_config.get_backend () with
+      | Provider_config.Lru_shared_memory
+      | Provider_config.Shared_memory ->
+        Store.add () popt
+      | Provider_config.Local_memory _ -> local_memory_popt := Some popt
+    end
   | Some _ ->
     (* We end up invoking ServerInit.init after setting the global parser
        options in the Unit_build tests, so we only log here instead of throwing

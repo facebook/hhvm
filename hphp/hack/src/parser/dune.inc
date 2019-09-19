@@ -83,7 +83,6 @@
     ast_check
     docblock_finder
     full_fidelity_ast
-    globalParserOptions
     hack_grammar_descriptor_helper
     html_entities
     ide_parser_cache

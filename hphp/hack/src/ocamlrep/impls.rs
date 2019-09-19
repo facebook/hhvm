@@ -5,7 +5,6 @@
 
 use std::collections::{btree_map, btree_set, BTreeMap, BTreeSet};
 use std::convert::TryInto;
-use std::mem;
 use std::path::PathBuf;
 use std::rc::Rc;
 
@@ -131,7 +130,7 @@ impl OcamlRep for char {
 impl OcamlRep for f64 {
     fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
         let mut block = arena.block_with_size_and_tag(1, block::DOUBLE_TAG);
-        block[0] = Value::bits(self.to_bits() as usize);
+        block[0] = unsafe { Value::from_bits(self.to_bits() as usize) };
         block.build()
     }
 
@@ -343,15 +342,15 @@ impl OcamlRep for String {
 }
 
 fn str_to_ocamlrep<'a>(s: &str, arena: &Arena<'a>) -> Value<'a> {
-    let bytes_in_word = mem::size_of::<usize>();
+    let bytes_in_word = std::mem::size_of::<Value>();
     let blocks_length = 1 + (s.len() / bytes_in_word);
     let padding: usize = bytes_in_word - 1 - (s.len() % bytes_in_word);
     let mut block = arena.block_with_size_and_tag(blocks_length, block::STRING_TAG);
 
-    block[blocks_length - 1] = Value::bits(padding << ((bytes_in_word - 1) * 8));
+    block[blocks_length - 1] = unsafe { Value::from_bits(padding << ((bytes_in_word - 1) * 8)) };
 
     let slice: &mut [u8] = unsafe {
-        let ptr: *mut u8 = mem::transmute(block.0.as_ptr().offset(1));
+        let ptr = block.0.as_ptr().add(1) as *mut u8;
         std::slice::from_raw_parts_mut(ptr, s.len())
     };
     slice.copy_from_slice(s.as_bytes());
@@ -362,10 +361,10 @@ fn str_to_ocamlrep<'a>(s: &str, arena: &Arena<'a>) -> Value<'a> {
 fn str_from_ocamlrep<'a>(value: Value<'a>) -> Result<&'a str, FromError> {
     let block = from::expect_block(value)?;
     from::expect_block_tag(block, block::STRING_TAG)?;
-    let block_size_in_bytes = block.size() * mem::size_of::<usize>();
+    let block_size_in_bytes = block.size() * std::mem::size_of::<Value>();
     let slice = unsafe {
-        let ptr: *mut u8 = mem::transmute(block.0.as_ptr().offset(1));
-        let padding = *ptr.offset(block_size_in_bytes as isize - 1);
+        let ptr = block.0.as_ptr().add(1) as *const u8;
+        let padding = *ptr.add(block_size_in_bytes - 1);
         let len = block_size_in_bytes - padding as usize - 1;
         std::slice::from_raw_parts(ptr, len)
     };

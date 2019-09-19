@@ -104,7 +104,7 @@ class AsyncMysqlClient {
 
 class AsyncMysqlConnectionPool {
   public function __construct(darray $options) { }
-  public function connect(string $host, int $port, string $dbname, string $user, string $password, int $timeout_micros = -1, string $caller = "") { }
+  public function connect(string $host, int $port, string $dbname, string $user, string $password, int $timeout_micros = -1, string $caller = ""): Awaitable<AsyncMysqlConnection> { }
   public function connectWithOpts(
     string $host,
     int $port,

@@ -52,7 +52,6 @@ caml_raise!(parse_and_lower_from_text, |ocaml_source_text|, <res>, {
         php5_compat_mode : false,
         codegen : false,
         allow_new_attribute_syntax : false,
-        disallow_func_ptrs_in_constants: false,
     };
 
     let mut parser = PositionedSyntaxParser::make(&source_text, env);

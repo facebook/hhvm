@@ -1,12 +1,12 @@
 <?hh
 
 class Cls {
-  public static function meth($_) {
+  public static function meth() {
     return __FUNCTION__;
   }
 }
 
-function foo($_) { return __FUNCTION__; }
+function foo() { return __FUNCTION__; }
 
 class A {
   public static $arr = dict[
@@ -22,8 +22,8 @@ class A {
 
 <<__EntryPoint>>
 function main_constant_functions() {
-  var_dump((A::$arr['foo'])(5));
-  var_dump((A::$arr['meth'])(5));
-  var_dump((A::arr2['foo'])(5));
-  var_dump((A::arr2['meth'])(5));
+  var_dump((A::$arr['foo'])());
+  var_dump((A::$arr['meth'])());
+  var_dump((A::arr2['foo'])());
+  var_dump((A::arr2['meth'])());
 }

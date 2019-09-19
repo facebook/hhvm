@@ -1,9 +1,9 @@
 <?hh
 
 class Cls {
-  public static function meth($_) {
+  public static function meth() {
     return 'method from include1';
   }
 }
 
-function foo($_) { return 'function from include1'; }
+function foo() { return 'function from include1'; }

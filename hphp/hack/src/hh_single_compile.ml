@@ -464,7 +464,6 @@ let extract_facts ~filename text =
         ~disable_legacy_soft_typehints:(disable_legacy_soft_typehints co)
         ~allow_new_attribute_syntax:(allow_new_attribute_syntax co)
         ~disable_legacy_attribute_syntax:(disable_legacy_attribute_syntax co)
-        ~disallow_func_ptrs_in_constants:(disallow_func_ptrs_in_constants co)
         ~filename
         ~text
       |> Option.value ~default:"");

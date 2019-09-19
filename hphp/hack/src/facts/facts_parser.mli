@@ -19,7 +19,6 @@ val extract_as_json_string :
   disable_legacy_soft_typehints:bool ->
   allow_new_attribute_syntax:bool ->
   disable_legacy_attribute_syntax:bool ->
-  disallow_func_ptrs_in_constants:bool ->
   filename:Relative_path.t ->
   text:string ->
   string option
@@ -31,7 +30,6 @@ val from_text :
   disable_legacy_soft_typehints:bool ->
   allow_new_attribute_syntax:bool ->
   disable_legacy_attribute_syntax:bool ->
-  disallow_func_ptrs_in_constants:bool ->
   filename:Relative_path.t ->
   text:string ->
   Facts.facts option

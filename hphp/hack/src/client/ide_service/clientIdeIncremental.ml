@@ -117,7 +117,6 @@ let compute_fileinfo_for_path (env : ServerEnv.env) (path : Relative_path.t) :
           ~disable_legacy_soft_typehints:false
           ~allow_new_attribute_syntax:false
           ~disable_legacy_attribute_syntax:false
-          ~disallow_func_ptrs_in_constants:false
           ~filename:path
           ~text:contents
       in

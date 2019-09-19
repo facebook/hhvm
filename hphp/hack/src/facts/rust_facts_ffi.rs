@@ -22,7 +22,6 @@ caml!(extract_as_json_ffi(
         ((1 << 0) & flags) != 0, // php5_compat_mode
         ((1 << 1) & flags) != 0, // hhvm_compat_mode
         ((1 << 2) & flags) != 0, // allow_new_attribute_syntax
-        ((1 << 3) & flags) != 0, // disallow_func_ptrs_in_constants
         RelativePath::from_ocamlvalue(&filename),
         ocaml::Str::from(text).as_str(),
         mangle_xhp.i32_val() != 0,
@@ -33,7 +32,6 @@ fn extract_as_json_ffi0(
     php5_compat_mode: bool,
     hhvm_compat_mode: bool,
     allow_new_attribute_syntax: bool,
-    disallow_func_ptrs_in_constants: bool,
     filename: RelativePath,
     text: &str,
     mangle_xhp: bool,
@@ -42,7 +40,6 @@ fn extract_as_json_ffi0(
         php5_compat_mode,
         hhvm_compat_mode,
         allow_new_attribute_syntax,
-        disallow_func_ptrs_in_constants,
         filename,
     };
     // return empty string in case of failure (ambiguous because "" is not a valid JSON)

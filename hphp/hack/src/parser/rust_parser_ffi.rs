@@ -90,14 +90,12 @@ macro_rules! parse {
             let codegen = bool_field(&opts, 3);
             let allow_new_attribute_syntax = bool_field(&opts, 4);
             let leak_rust_tree = bool_field(&opts, 5);
-            let disallow_func_ptrs_in_constants = bool_field(&opts, 6);
             let env = ParserEnv {
                 is_experimental_mode,
                 hhvm_compat_mode,
                 php5_compat_mode,
                 codegen,
                 allow_new_attribute_syntax,
-                disallow_func_ptrs_in_constants,
             };
 
             // Note: Determining the current thread size cannot be done portably,

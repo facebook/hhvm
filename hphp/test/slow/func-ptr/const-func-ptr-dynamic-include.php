@@ -27,9 +27,9 @@ function main_constant_functions() {
 
     echo "===== run with include$count ======\n";
 
-    var_dump((A::$arr['foo'])(5));
-    var_dump((A::$arr['meth'])(5));
-    var_dump((A::arr2['foo'])(5));
-    var_dump((A::arr2['meth'])(5));
+    var_dump((A::$arr['foo'])());
+    var_dump((A::$arr['meth'])());
+    var_dump((A::arr2['foo'])());
+    var_dump((A::arr2['meth'])());
   }
 }

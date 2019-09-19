@@ -35,5 +35,5 @@ function main_register_shutdown_function_simple() {
 }, ['foo' => 'bar'], 123);
 \register_shutdown_function(function (...$args) {
     \var_dump($args);
-}, (object) ['foo' => 'bar']);
+});
 }

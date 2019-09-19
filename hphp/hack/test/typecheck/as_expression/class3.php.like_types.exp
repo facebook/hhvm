@@ -1,0 +1,38 @@
+File "class3.php", line 15, characters 13-28:
+Invalid argument (Typing[4110])
+File "class3.php", line 26, characters 20-27:
+Expected ~B<mixed> because it is an unenforceable type
+File "class3.php", line 15, characters 28-28:
+But got B<T#1>
+File "class3.php", line 16, characters 13-28:
+Invalid argument (Typing[4110])
+File "class3.php", line 27, characters 20-28:
+Expected ~B<string> because it is an unenforceable type
+File "class3.php", line 16, characters 28-28:
+But got B<T#2>
+File "class3.php", line 18, characters 13-31:
+Invalid argument (Typing[4110])
+File "class3.php", line 26, characters 20-27:
+Expected ~B<mixed> because it is an unenforceable type
+File "class3.php", line 18, characters 28-31:
+But got B<T#3>
+File "class3.php", line 19, characters 13-31:
+Invalid argument (Typing[4110])
+File "class3.php", line 27, characters 20-28:
+Expected ~B<string> because it is an unenforceable type
+File "class3.php", line 19, characters 28-31:
+But got B<T#4>
+File "class3.php", line 21, characters 13-27:
+Invalid argument (Typing[4110])
+File "class3.php", line 26, characters 20-27:
+Expected ~B<mixed> because it is an unenforceable type
+File "class3.php", line 21, characters 24-27:
+But got B<string>
+File "class3.php", line 15, characters 28-28:
+The type B expects 1 type parameter(s) (Typing[4101])
+File "class3.php", line 4, characters 13-13:
+Definition is here
+File "class3.php", line 16, characters 28-28:
+The type B expects 1 type parameter(s) (Typing[4101])
+File "class3.php", line 4, characters 13-13:
+Definition is here

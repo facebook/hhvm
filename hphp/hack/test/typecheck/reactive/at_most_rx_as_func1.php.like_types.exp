@@ -1,0 +1,4 @@
+File "at_most_rx_as_func1.php", line 5, characters 10-13:
+Reactive functions can only call other reactive functions. (Typing[4200])
+File "at_most_rx_as_func1.php", line 4, characters 32-48:
+This function is non-reactive.

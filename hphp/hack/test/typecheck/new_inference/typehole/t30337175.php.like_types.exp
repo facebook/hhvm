@@ -1,0 +1,22 @@
+File "t30337175.php", line 15, characters 16-17:
+Invalid argument (Typing[4110])
+File "t30337175.php", line 13, characters 23-28:
+Expected string
+File "t30337175.php", line 14, characters 31-32:
+But got dynamic because it is an unenforceable type
+File "t30337175.php", line 18, characters 3-5:
+Some type constraint(s) here are violated (Typing[4323])
+File "t30337175.php", line 14, characters 14-14:
+'T' is a constrained type parameter
+File "t30337175.php", line 11, characters 19-21:
+Expected int
+File "t30337175.php", line 14, characters 57-58:
+  resulting from accessing the type constant 'Tc'
+File "t30337175.php", line 14, characters 19-19:
+  on an object of type E
+File "t30337175.php", line 8, characters 19-24:
+But got string
+File "t30337175.php", line 14, characters 57-58:
+  resulting from accessing the type constant 'Tc'
+File "t30337175.php", line 14, characters 24-24:
+  on an object of type D

@@ -25,7 +25,7 @@ class SplObjectStorage
    */
   public function rewind() {
     $__storage = $this->__storage;
-    reset(&$__storage);
+    reset(inout $__storage);
     $this->__storage = $__storage;
     $this->__key = 0;
   }
@@ -40,9 +40,7 @@ class SplObjectStorage
    *                     otherwise.
    */
   public function valid() {
-    $__storage = $this->__storage;
-    $ret = key(&$__storage) !== NULL;
-    $this->__storage = $__storage;
+    $ret = key($this->__storage) !== NULL;
     return $ret;
   }
 
@@ -68,9 +66,7 @@ class SplObjectStorage
    * @return     mixed   The object at the current iterator position.
    */
   public function current() {
-    $__storage = $this->__storage;
-    $obj = current(&$__storage)['obj'];
-    $this->__storage = $__storage;
+    $obj = current($this->__storage)['obj'];
     return $obj;
   }
 
@@ -84,7 +80,7 @@ class SplObjectStorage
    */
   public function next() {
     $__storage = $this->__storage;
-    next(&$__storage);
+    next(inout $__storage);
     $this->__storage = $__storage;
     $this->__key++;
   }
@@ -382,9 +378,7 @@ class SplObjectStorage
    * @return     mixed   No value is returned.
    */
   public function setInfo($data) {
-    $__storage = $this->__storage;
-    $key = key(&$__storage);
-    $this->__storage = $__storage;
+    $key = key($this->__storage);
     if ($key === null) {
       return;
     }
@@ -401,9 +395,7 @@ class SplObjectStorage
    *                     object pointed by the current iterator position.
    */
   public function getInfo() {
-    $__storage = $this->__storage;
-    $inf = current(&$__storage)['inf'];
-    $this->__storage = $__storage;
+    $inf = current($this->__storage)['inf'];
     return $inf;
   }
 }

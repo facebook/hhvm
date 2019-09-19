@@ -1,6 +1,0 @@
-(Verification Error \(unit [^\r\n]* func f\): mismatched class-ref state on edge B2->B3\, current \[1\]\[1\] target \[1\]\[0\]
-
-Verification Error \(unit [^\r\n]* func f\): NewObj uses MaybeGenerics flavor but a cls-ref slot that was not written by ClsRefGetTS
-
-Verification failed for unit [^\r\n]*\. Re-run with HHVM_VERIFY_VERBOSE=1 to see more details\.\n){1,2}
-Fatal error: A bytecode verification error was detected in [^\r\n]* on line -1

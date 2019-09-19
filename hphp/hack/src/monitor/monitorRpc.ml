@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -8,18 +8,18 @@
  *)
 
 type handoff_options = {
-  (** If server is dormant because it is waiting for Informant to start one,
+  (* If server is dormant because it is waiting for Informant to start one,
    * set this to true to start a server anyway. *)
-  force_dormant_start : bool;
+  force_dormant_start: bool;
   (* There can be multiple named channels between server and monitor in order
    * to prioritize some requests over others. Connecting code needs to specify
    * which channel it wants to use. *)
-  pipe_name : string;
+  pipe_name: string;
 }
 
 type command =
   | HANDOFF_TO_SERVER of handoff_options
-  (** Shut down all servers and then the monitor. *)
+  (* Shut down all servers and then the monitor. *)
   | SHUT_DOWN
   | SERVER_PROGRESS
 

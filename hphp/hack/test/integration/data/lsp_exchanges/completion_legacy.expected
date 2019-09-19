@@ -69,7 +69,7 @@
           "insertTextFormat": 1,
           "data": {
             "fullname": "ab:cd:alpha",
-            "filename": "${root_path}${path_sep}completion_extras.php",
+            "filename": "${root_path}/completion_extras.php",
             "line": 9,
             "char": 13,
             "base_class": null
@@ -84,7 +84,7 @@
           "insertTextFormat": 1,
           "data": {
             "fullname": "ab:cd:text",
-            "filename": "${root_path}${path_sep}completion_extras.php",
+            "filename": "${root_path}/completion_extras.php",
             "line": 4,
             "char": 13,
             "base_class": null
@@ -108,7 +108,7 @@
           "insertTextFormat": 1,
           "data": {
             "fullname": "ab:cd:alpha",
-            "filename": "${root_path}${path_sep}completion_extras.php",
+            "filename": "${root_path}/completion_extras.php",
             "line": 9,
             "char": 13,
             "base_class": null
@@ -123,7 +123,7 @@
           "insertTextFormat": 1,
           "data": {
             "fullname": "ab:cd:text",
-            "filename": "${root_path}${path_sep}completion_extras.php",
+            "filename": "${root_path}/completion_extras.php",
             "line": 4,
             "char": 13,
             "base_class": null
@@ -147,7 +147,7 @@
           "insertTextFormat": 1,
           "data": {
             "fullname": "ab:cd:alpha",
-            "filename": "${root_path}${path_sep}completion_extras.php",
+            "filename": "${root_path}/completion_extras.php",
             "line": 9,
             "char": 13,
             "base_class": null
@@ -162,7 +162,7 @@
           "insertTextFormat": 1,
           "data": {
             "fullname": "ab:cd:text",
-            "filename": "${root_path}${path_sep}completion_extras.php",
+            "filename": "${root_path}/completion_extras.php",
             "line": 4,
             "char": 13,
             "base_class": null
@@ -186,7 +186,7 @@
           "insertTextFormat": 1,
           "data": {
             "fullname": "width",
-            "filename": "${root_path}${path_sep}completion_extras.php",
+            "filename": "${root_path}/completion_extras.php",
             "line": 5,
             "char": 27,
             "base_class": "\\:ab:cd:text"
@@ -201,7 +201,7 @@
           "insertTextFormat": 1,
           "data": {
             "fullname": "color",
-            "filename": "${root_path}${path_sep}completion_extras.php",
+            "filename": "${root_path}/completion_extras.php",
             "line": 5,
             "char": 13,
             "base_class": "\\:ab:cd:text"
@@ -225,7 +225,7 @@
           "insertTextFormat": 1,
           "data": {
             "fullname": "width",
-            "filename": "${root_path}${path_sep}completion_extras.php",
+            "filename": "${root_path}/completion_extras.php",
             "line": 5,
             "char": 27,
             "base_class": "\\:ab:cd:text"
@@ -240,7 +240,7 @@
           "insertTextFormat": 1,
           "data": {
             "fullname": "color",
-            "filename": "${root_path}${path_sep}completion_extras.php",
+            "filename": "${root_path}/completion_extras.php",
             "line": 5,
             "char": 13,
             "base_class": "\\:ab:cd:text"
@@ -265,7 +265,7 @@
           "insertTextFormat": 1,
           "data": {
             "fullname": ":ab:cd:alpha",
-            "filename": "${root_path}${path_sep}completion_extras.php",
+            "filename": "${root_path}/completion_extras.php",
             "line": 9,
             "char": 13,
             "base_class": "\\:ab:cd:alpha"
@@ -281,7 +281,7 @@
           "insertTextFormat": 1,
           "data": {
             "fullname": ":ab:cd:text",
-            "filename": "${root_path}${path_sep}completion_extras.php",
+            "filename": "${root_path}/completion_extras.php",
             "line": 4,
             "char": 13,
             "base_class": "\\:ab:cd:text"
@@ -306,7 +306,7 @@
           "insertTextFormat": 1,
           "data": {
             "fullname": ":ab:cd:alpha",
-            "filename": "${root_path}${path_sep}completion_extras.php",
+            "filename": "${root_path}/completion_extras.php",
             "line": 9,
             "char": 13,
             "base_class": "\\:ab:cd:alpha"
@@ -322,7 +322,7 @@
           "insertTextFormat": 1,
           "data": {
             "fullname": ":ab:cd:text",
-            "filename": "${root_path}${path_sep}completion_extras.php",
+            "filename": "${root_path}/completion_extras.php",
             "line": 4,
             "char": 13,
             "base_class": "\\:ab:cd:text"
@@ -340,14 +340,10 @@
       "detail": "function(): :ab:cd:alpha",
       "inlineDetail": "()",
       "itemType": ":ab:cd:alpha",
-      "documentation": {
-        "kind": "markdown",
-        "value": ":ab:cd:alpha docblock"
-      },
       "insertText": ":ab:cd:alpha",
       "insertTextFormat": 1,
       "data": {
-        "filename": "${root_path}${path_sep}completion_extras.php",
+        "filename": "${root_path}/completion_extras.php",
         "line": 9,
         "char": 13
       }
@@ -368,7 +364,7 @@
           "insertTextFormat": 1,
           "data": {
             "fullname": ":width",
-            "filename": "${root_path}${path_sep}completion_extras.php",
+            "filename": "${root_path}/completion_extras.php",
             "line": 5,
             "char": 27,
             "base_class": "\\:ab:cd:text"
@@ -383,7 +379,7 @@
           "insertTextFormat": 1,
           "data": {
             "fullname": ":color",
-            "filename": "${root_path}${path_sep}completion_extras.php",
+            "filename": "${root_path}/completion_extras.php",
             "line": 5,
             "char": 13,
             "base_class": "\\:ab:cd:text"
@@ -407,7 +403,7 @@
           "insertTextFormat": 1,
           "data": {
             "fullname": ":width",
-            "filename": "${root_path}${path_sep}completion_extras.php",
+            "filename": "${root_path}/completion_extras.php",
             "line": 5,
             "char": 27,
             "base_class": "\\:ab:cd:text"
@@ -422,7 +418,7 @@
           "insertTextFormat": 1,
           "data": {
             "fullname": ":color",
-            "filename": "${root_path}${path_sep}completion_extras.php",
+            "filename": "${root_path}/completion_extras.php",
             "line": 5,
             "char": 13,
             "base_class": "\\:ab:cd:text"
@@ -447,7 +443,7 @@
           "insertTextFormat": 1,
           "data": {
             "fullname": "test_function",
-            "filename": "${root_path}${path_sep}completion.php",
+            "filename": "${root_path}/completion.php",
             "line": 8,
             "char": 10,
             "base_class": null
@@ -472,7 +468,7 @@
       "insertText": "test_function",
       "insertTextFormat": 1,
       "data": {
-        "filename": "${root_path}${path_sep}completion.php",
+        "filename": "${root_path}/completion.php",
         "line": 8,
         "char": 10
       }
@@ -494,14 +490,14 @@
       "items": [
         {
           "label": "class",
-          "kind": 12,
+          "kind": 21,
           "detail": "classname<this>",
           "inlineDetail": "classname<this>",
           "insertText": "class",
           "insertTextFormat": 1,
           "data": {
             "fullname": "class",
-            "filename": "${root_path}${path_sep}completion_extras.php",
+            "filename": "${root_path}/completion_extras.php",
             "line": 13,
             "char": 6,
             "base_class": "\\Elsa"
@@ -509,14 +505,14 @@
         },
         {
           "label": "Bard",
-          "kind": 12,
+          "kind": 21,
           "detail": "Elsa",
           "inlineDetail": "Elsa",
           "insertText": "Bard",
           "insertTextFormat": 1,
           "data": {
             "fullname": "Bard",
-            "filename": "${root_path}${path_sep}completion_extras.php",
+            "filename": "${root_path}/completion_extras.php",
             "line": 13,
             "char": 12,
             "base_class": "\\Elsa"
@@ -524,14 +520,14 @@
         },
         {
           "label": "Alonso",
-          "kind": 12,
+          "kind": 21,
           "detail": "Elsa",
           "inlineDetail": "Elsa",
           "insertText": "Alonso",
           "insertTextFormat": 1,
           "data": {
             "fullname": "Alonso",
-            "filename": "${root_path}${path_sep}completion_extras.php",
+            "filename": "${root_path}/completion_extras.php",
             "line": 13,
             "char": 12,
             "base_class": "\\Elsa"
@@ -547,7 +543,7 @@
           "insertTextFormat": 1,
           "data": {
             "fullname": "isValid",
-            "filename": "${hhi_path}${path_sep}BuiltinEnum.hhi",
+            "filename": "${hhi_path}/BuiltinEnum.hhi",
             "line": 49,
             "char": 32,
             "base_class": "\\Elsa"
@@ -563,7 +559,7 @@
           "insertTextFormat": 1,
           "data": {
             "fullname": "getValues",
-            "filename": "${hhi_path}${path_sep}BuiltinEnum.hhi",
+            "filename": "${hhi_path}/BuiltinEnum.hhi",
             "line": 34,
             "char": 32,
             "base_class": "\\Elsa"
@@ -579,7 +575,7 @@
           "insertTextFormat": 1,
           "data": {
             "fullname": "getNames",
-            "filename": "${hhi_path}${path_sep}BuiltinEnum.hhi",
+            "filename": "${hhi_path}/BuiltinEnum.hhi",
             "line": 43,
             "char": 32,
             "base_class": "\\Elsa"
@@ -595,7 +591,7 @@
           "insertTextFormat": 1,
           "data": {
             "fullname": "coerce",
-            "filename": "${hhi_path}${path_sep}BuiltinEnum.hhi",
+            "filename": "${hhi_path}/BuiltinEnum.hhi",
             "line": 56,
             "char": 32,
             "base_class": "\\Elsa"
@@ -611,7 +607,7 @@
           "insertTextFormat": 1,
           "data": {
             "fullname": "assertAll",
-            "filename": "${hhi_path}${path_sep}BuiltinEnum.hhi",
+            "filename": "${hhi_path}/BuiltinEnum.hhi",
             "line": 70,
             "char": 32,
             "base_class": "\\Elsa"
@@ -627,7 +623,7 @@
           "insertTextFormat": 1,
           "data": {
             "fullname": "assert",
-            "filename": "${hhi_path}${path_sep}BuiltinEnum.hhi",
+            "filename": "${hhi_path}/BuiltinEnum.hhi",
             "line": 63,
             "char": 32,
             "base_class": "\\Elsa"

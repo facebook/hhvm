@@ -30,7 +30,6 @@
 #include <folly/String.h>
 #include <folly/portability/SysMman.h>
 
-#include "hphp/util/debug.h"
 #include "hphp/util/numa.h"
 #include "hphp/util/portability.h"
 #include "hphp/util/ringbuffer.h"
@@ -97,6 +96,7 @@
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
+#include "hphp/runtime/vm/cti.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/event-hook.h"
@@ -110,7 +110,6 @@
 #include "hphp/runtime/vm/memo-cache.h"
 #include "hphp/runtime/vm/method-lookup.h"
 #include "hphp/runtime/vm/native.h"
-#include "hphp/runtime/vm/php-debug.h"
 #include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/repo.h"
@@ -131,6 +130,7 @@
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/unwind-itanium.h"
+#include "hphp/util/stacktrace-profiler.h"
 
 
 namespace HPHP {
@@ -147,10 +147,8 @@ using jit::TCA;
 // go overboard with that version.
 #if !defined(NDEBUG) || ((__GNUC__ == 4) && (__GNUC_MINOR__ == 8))
 #define OPTBLD_INLINE
-#define OPTBLD_FLT_INLINE
 #else
 #define OPTBLD_INLINE       ALWAYS_INLINE
-#define OPTBLD_FLT_INLINE   INLINE_FLATTEN
 #endif
 
 Class* arGetContextClass(const ActRec* ar) {
@@ -164,7 +162,6 @@ void frame_free_locals_no_hook(ActRec* fp) {
   frame_free_locals_inl_no_hook(fp, fp->func()->numLocals());
 }
 
-const StaticString s___call("__call");
 const StaticString s_file("file");
 const StaticString s_line("line");
 
@@ -194,11 +191,14 @@ inline const char* prettytype(SetRangeOp) { return "SetRangeOp"; }
 inline const char* prettytype(TypeStructResolveOp) {
   return "TypeStructResolveOp";
 }
-inline const char* prettytype(HasGenericsOp) { return "HasGenericsOp"; }
 inline const char* prettytype(CudOp) { return "CudOp"; }
 inline const char* prettytype(ContCheckOp) { return "ContCheckOp"; }
 inline const char* prettytype(SpecialClsRef) { return "SpecialClsRef"; }
 inline const char* prettytype(CollectionType) { return "CollectionType"; }
+inline const char* prettytype(ClsMethResolveOp) { return "ClsMethResolveOp"; }
+inline const char* prettytype(IsLogAsDynamicCallOp) {
+  return "IsLogAsDynamicCallOp";
+}
 
 // load a T value from *pc without incrementing
 template<class T> T peek(PC pc) {
@@ -233,26 +233,6 @@ struct local_var {
   TypedValue& operator*() const { return *ptr; }
 };
 
-// wrapper for class-ref slot CA(R|W) operand
-struct clsref_slot {
-  cls_ref* ptr;
-  uint32_t index;
-
-  std::pair<ArrayData*, Class*> take() const {
-    auto cls = ptr->cls;
-    auto ret = std::make_pair(ptr->reified_types, cls.get());
-    if (debug) {
-      cls->validate();
-      memset(ptr, kTrashClsRef, sizeof(*ptr));
-    }
-    return ret;
-  }
-
-  void put(ArrayData* reified_types, Class* cls) {
-    *ptr = cls_ref{reified_types, cls};
-  }
-};
-
 // wrapper to handle unaligned access to variadic immediates
 template<class T> struct imm_array {
   uint32_t const size;
@@ -281,12 +261,6 @@ ALWAYS_INLINE local_var decode_local(PC& pc) {
 ALWAYS_INLINE Iter* decode_iter(PC& pc) {
   auto ia = decode_iva(pc);
   return frame_iter(vmfp(), ia);
-}
-
-ALWAYS_INLINE clsref_slot decode_clsref_slot(PC& pc) {
-  uint32_t ca = decode_iva(pc);
-  assertx(ca < vmfp()->m_func->numClsRefSlots());
-  return clsref_slot{frame_clsref_slot(vmfp(), ca), ca};
 }
 
 template<typename T>
@@ -738,8 +712,6 @@ static std::string toStringElm(const TypedValue* tv) {
   case KindOfDict:
   case KindOfPersistentKeyset:
   case KindOfKeyset:
-  case KindOfPersistentShape:
-  case KindOfShape:
   case KindOfPersistentArray:
   case KindOfArray:
   case KindOfObject:
@@ -809,14 +781,6 @@ static std::string toStringElm(const TypedValue* tv) {
       print_count();
       os << ":Keyset";
       continue;
-    case KindOfPersistentShape:
-    case KindOfShape:
-      assertx(tv->m_data.parr->isShape());
-      assertx(tv->m_data.parr->checkCount());
-      os << tv->m_data.parr;
-      print_count();
-      os << ":Shape";
-      continue;
     case KindOfPersistentArray:
     case KindOfArray:
       assertx(tv->m_data.parr->isPHPArray());
@@ -874,19 +838,6 @@ static std::string toStringElm(const TypedValue* tv) {
   } while (0);
 
   return os.str();
-}
-
-static std::string toStringIter(const Iter* it) {
-  switch (it->arr().getIterType()) {
-  case ArrayIter::TypeUndefined:
-    return "I:Undefined";
-  case ArrayIter::TypeArray:
-    return "I:Array";
-  case ArrayIter::TypeIterator:
-    return "I:Iterator";
-  }
-  assertx(false);
-  return "I:?";
 }
 
 /*
@@ -959,7 +910,7 @@ static void toStringFrame(std::ostream& os, const ActRec* fp,
         os << " ";
       }
       if (checkIterScope(func, offset, i)) {
-        os << toStringIter(it);
+        os << it->toString();
       } else {
         os << "I:Undefined";
       }
@@ -967,17 +918,9 @@ static void toStringFrame(std::ostream& os, const ActRec* fp,
     os << "|";
   }
 
-  // Ideally we'd like to display the contents of the class-ref slots here, but
-  // we have no metadata to tell us which ones are currently occupied and valid.
-
   std::vector<std::string> stackElems;
   visitStackElems(
-    fp, ftop, offset,
-    [&](const ActRec* ar) {
-      stackElems.push_back(
-        folly::format("{{func:{}}}", ar->m_func->fullName()->data()).str()
-      );
-    },
+    fp, ftop,
     [&](const TypedValue* tv) {
       stackElems.push_back(toStringElm(tv));
     }
@@ -1162,9 +1105,11 @@ static void shuffleMagicArgs(ActRec* ar) {
       if (RuntimeOption::EvalHackArrDVArrs) {
         return nargs
           ? PackedArray::MakeVec(nargs, args)
-          : staticEmptyVecArray();
+          : ArrayData::CreateVec();
       }
-      return nargs ? PackedArray::MakeVArray(nargs, args) : staticEmptyVArray();
+      return nargs
+        ? PackedArray::MakeVArray(nargs, args)
+        : ArrayData::CreateVArray();
     }()
   );
 
@@ -1235,11 +1180,11 @@ static NEVER_INLINE void shuffleMagicArrayArgs(ActRec* ar, const Cell args,
         if (RuntimeOption::EvalHackArrDVArrs) {
           return nregular
             ? PackedArray::MakeVec(nregular, args)
-            : staticEmptyVecArray();
+            : ArrayData::CreateVec();
         }
         return nregular
           ? PackedArray::MakeVArray(nregular, args)
-          : staticEmptyVArray();
+          : ArrayData::CreateVArray();
       }()
     );
 
@@ -1545,9 +1490,9 @@ static void prepareFuncEntry(ActRec *ar, StackArgsState stk) {
       }
       if (UNLIKELY(func->hasVariadicCaptureParam())) {
         if (RuntimeOption::EvalHackArrDVArrs) {
-          stack.pushVecNoRc(staticEmptyVecArray());
+          stack.pushVecNoRc(ArrayData::CreateVec());
         } else {
-          stack.pushArrayNoRc(staticEmptyVArray());
+          stack.pushArrayNoRc(ArrayData::CreateVArray());
         }
       }
       if (func->attrs() & AttrMayUseVV) {
@@ -1590,13 +1535,10 @@ static void prepareFuncEntry(ActRec *ar, StackArgsState stk) {
     : func->getEntry();
   vmJitReturnAddr() = nullptr;
 
-  // cppext functions/methods have their own logic for raising
-  // warnings for missing arguments, so we only need to do this work
-  // for non-cppext functions/methods
-  if (raiseMissingArgumentWarnings && !func->isCPPBuiltin()) {
+  if (raiseMissingArgumentWarnings) {
     HPHP::jit::raiseMissingArgument(func, ar->numArgs());
   }
-  if (raiseTooManyArgumentsWarnings && !func->isCPPBuiltin()) {
+  if (raiseTooManyArgumentsWarnings) {
     // since shuffleExtraStackArgs changes ar->numArgs() we need to communicate
     // the value before it gets changed
     HPHP::jit::raiseTooManyArguments(func, *raiseTooManyArgumentsWarnings);
@@ -1609,8 +1551,7 @@ namespace {
 void checkForReifiedGenericsErrors(const ActRec* ar) {
   if (!ar->m_func->hasReifiedGenerics()) return;
   if (!ar->hasReifiedGenerics()) {
-    raise_error(Strings::REIFIED_GENERICS_NOT_GIVEN,
-      ar->m_func->fullName()->data());
+    throw_call_reified_func_without_generics(ar->m_func);
   }
   auto const tv = frame_local(ar, ar->m_func->numParams());
   assertx(tv && (RuntimeOption::EvalHackArrDVArrs ? tvIsVec(tv)
@@ -1621,7 +1562,41 @@ void checkForReifiedGenericsErrors(const ActRec* ar) {
 
 static void dispatch();
 
-void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk, VarEnv* varEnv) {
+void enterVMAtPseudoMain(ActRec* enterFnAr, VarEnv* varEnv) {
+  assertx(enterFnAr);
+  assertx(enterFnAr->func()->isPseudoMain());
+  assertx(!enterFnAr->resumed());
+  Stats::inc(Stats::VMEnter);
+
+  enterFnAr->setVarEnv(varEnv);
+  pushFrameSlots(enterFnAr->func());
+  if (varEnv != nullptr) {
+    auto oldFp = vmfp();
+    if (UNLIKELY(oldFp && oldFp->skipFrame())) {
+      oldFp = g_context->getPrevVMStateSkipFrame(oldFp);
+    }
+    varEnv->enterFP(oldFp, enterFnAr);
+  }
+  vmfp() = enterFnAr;
+  vmpc() = enterFnAr->func()->getEntry();
+
+  if (!EventHook::FunctionCall(enterFnAr, EventHook::NormalFunc)) return;
+  checkStack(vmStack(), enterFnAr->m_func, 0);
+  assertx(vmfp()->func()->contains(vmpc()));
+
+  if (RID().getJit() && !RID().getJitFolding()) {
+    jit::TCA start = enterFnAr->m_func->getFuncBody();
+    assert_flog(jit::tc::isValidCodeAddress(start),
+                "start = {} ; func = {} ({})\n",
+                start, enterFnAr->m_func, enterFnAr->m_func->fullName());
+    jit::enterTCAfterPrologue(start);
+  } else {
+    dispatch();
+  }
+}
+
+void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk,
+                   bool allowDynCallNoPointer /* = false */) {
   assertx(enterFnAr);
   assertx(!enterFnAr->resumed());
   Stats::inc(Stats::VMEnter);
@@ -1629,12 +1604,11 @@ void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk, VarEnv* varEnv) {
   const bool useJit = RID().getJit() && !RID().getJitFolding();
   const bool useJitPrologue = useJit && vmfp()
     && !enterFnAr->magicDispatch()
-    && !varEnv
     && (stk != StackArgsState::Trimmed);
   // The jit prologues only know how to do limited amounts of work; cannot
-  // be used for magic call/pseudo-main/extra-args already determined or
-  // ... or if the stack args have been explicitly been prepared (e.g. via
-  // entry as part of invoke func).
+  // be used for magic call/extra-args already determined or ... or if the
+  // stack args have been explicitly been prepared (e.g. via entry as part
+  // of invoke func).
 
   if (LIKELY(useJitPrologue)) {
     const int np = enterFnAr->m_func->numNonVariadicParams();
@@ -1645,25 +1619,12 @@ void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk, VarEnv* varEnv) {
     return;
   }
 
-  if (UNLIKELY(varEnv != nullptr)) {
-    enterFnAr->setVarEnv(varEnv);
-    assertx(enterFnAr->func()->isPseudoMain());
-    pushFrameSlots(enterFnAr->func());
-    auto oldFp = vmfp();
-    if (UNLIKELY(oldFp && oldFp->skipFrame())) {
-      oldFp = g_context->getPrevVMStateSkipFrame(oldFp);
-    }
-    varEnv->enterFP(oldFp, enterFnAr);
-    vmfp() = enterFnAr;
-    vmpc() = enterFnAr->func()->getEntry();
-  } else {
-    prepareFuncEntry(enterFnAr, stk);
-  }
+  prepareFuncEntry(enterFnAr, stk);
 
+  checkForReifiedGenericsErrors(enterFnAr);
   if (!EventHook::FunctionCall(enterFnAr, EventHook::NormalFunc)) return;
   checkStack(vmStack(), enterFnAr->m_func, 0);
-  checkForReifiedGenericsErrors(enterFnAr);
-  calleeDynamicCallChecks(enterFnAr);
+  calleeDynamicCallChecks(enterFnAr, allowDynCallNoPointer);
   checkForRequiredCallM(enterFnAr);
   assertx(vmfp()->func()->contains(vmpc()));
 
@@ -1702,7 +1663,6 @@ void pushFrameSlots(const Func* func, int nparams /*= 0*/) {
   for (int i = 0; i < func->numIterators(); i++) {
     vmStack().allocI();
   }
-  vmStack().allocClsRefSlots(func->numClsRefSlots());
 }
 
 void unwindPreventReturnToTC(ActRec* ar) {
@@ -1795,6 +1755,7 @@ static inline void lookup_sprop(ActRec* fp,
                                 Slot& slot,
                                 bool& visible,
                                 bool& accessible,
+                                bool& constant,
                                 bool ignoreLateInit) {
   name = lookup_name(key);
   auto const ctx = arGetContextClass(fp);
@@ -1806,6 +1767,7 @@ static inline void lookup_sprop(ActRec* fp,
   val = lookup.val;
   slot = lookup.slot;
   visible = lookup.val != nullptr;
+  constant = lookup.constant;
   accessible = lookup.accessible;
 }
 
@@ -1883,10 +1845,6 @@ OPTBLD_INLINE void iopNop() {
 OPTBLD_INLINE void iopEntryNop() {
 }
 
-OPTBLD_INLINE void iopDiscardClsRef(clsref_slot slot) {
-  slot.take();
-}
-
 OPTBLD_INLINE void iopPopC() {
   vmStack().popC();
 }
@@ -1903,6 +1861,16 @@ OPTBLD_INLINE void iopPopU2() {
   assertx(vmStack().indC(1)->m_type == KindOfUninit);
   *vmStack().indC(1) = *vmStack().topC();
   vmStack().discard();
+}
+
+OPTBLD_INLINE void iopPopFrame(uint32_t nout) {
+  assertx(vmStack().indC(nout + 0)->m_type == KindOfUninit);
+  assertx(vmStack().indC(nout + 1)->m_type == KindOfUninit);
+  assertx(vmStack().indC(nout + 2)->m_type == KindOfUninit);
+  for (int32_t i = nout - 1; i >= 0; --i) {
+    *vmStack().indC(i + 3) = *vmStack().indC(i);
+  }
+  vmStack().ndiscard(3);
 }
 
 OPTBLD_INLINE void iopPopL(local_var to) {
@@ -1965,10 +1933,14 @@ OPTBLD_INLINE void iopFuncCred() {
     FunctionCredential::newInstance(vmfp()->m_func));
 }
 
-OPTBLD_INLINE void iopClsRefName(clsref_slot slot) {
-  auto const cls  = slot.take().second;
-  auto const name = cls->name();
-  vmStack().pushStaticString(name);
+OPTBLD_INLINE void iopClassName() {
+  auto const cls  = vmStack().topC();
+  if (!isClassType(cls->m_type)) {
+    raise_error("Attempting to get name of non-class");
+  }
+  vmStack().replaceC<KindOfPersistentString>(
+    cls->m_data.pclass->name()
+  );
 }
 
 OPTBLD_INLINE void iopInt(int64_t imm) {
@@ -1989,6 +1961,11 @@ OPTBLD_INLINE void iopArray(const ArrayData* a) {
   vmStack().pushStaticArray(a);
 }
 
+OPTBLD_INLINE void iopVec(const ArrayData* a) {
+  assertx(a->isVecArray());
+  vmStack().pushStaticVec(a);
+}
+
 OPTBLD_INLINE void iopDict(const ArrayData* a) {
   assertx(a->isDict());
   vmStack().pushStaticDict(a);
@@ -1999,14 +1976,9 @@ OPTBLD_INLINE void iopKeyset(const ArrayData* a) {
   vmStack().pushStaticKeyset(a);
 }
 
-OPTBLD_INLINE void iopVec(const ArrayData* a) {
-  assertx(a->isVecArray());
-  vmStack().pushStaticVec(a);
-}
-
 OPTBLD_INLINE void iopNewArray(uint32_t capacity) {
   if (capacity == 0) {
-    vmStack().pushArrayNoRc(staticEmptyArray());
+    vmStack().pushArrayNoRc(ArrayData::Create());
   } else {
     vmStack().pushArrayNoRc(PackedArray::MakeReserve(capacity));
   }
@@ -2014,7 +1986,7 @@ OPTBLD_INLINE void iopNewArray(uint32_t capacity) {
 
 OPTBLD_INLINE void iopNewMixedArray(uint32_t capacity) {
   if (capacity == 0) {
-    vmStack().pushArrayNoRc(staticEmptyArray());
+    vmStack().pushArrayNoRc(ArrayData::Create());
   } else {
     vmStack().pushArrayNoRc(MixedArray::MakeReserveMixed(capacity));
   }
@@ -2022,12 +1994,8 @@ OPTBLD_INLINE void iopNewMixedArray(uint32_t capacity) {
 
 OPTBLD_INLINE void iopNewDictArray(uint32_t capacity) {
   auto const ad = capacity == 0
-    ? staticEmptyDictArray()
+    ? ArrayData::CreateDict()
     : MixedArray::MakeReserveDict(capacity);
-
-  if (RuntimeOption::EvalArrayProvenance) {
-    arrprov::setTag(ad, arrprov::tagFromProgramCounter());
-  }
   vmStack().pushDictNoRc(ad);
 }
 
@@ -2091,9 +2059,6 @@ OPTBLD_INLINE void iopNewStructDict(imm_array<int32_t> ids) {
 OPTBLD_INLINE void iopNewVecArray(uint32_t n) {
   // This constructor moves values, no inc/decref is necessary.
   auto const a = PackedArray::MakeVec(n, vmStack().topC());
-  if (RuntimeOption::EvalArrayProvenance) {
-    arrprov::setTag(a, arrprov::tagFromProgramCounter());
-  }
   vmStack().ndiscard(n);
   vmStack().pushVecNoRc(a);
 }
@@ -2116,14 +2081,17 @@ OPTBLD_INLINE void iopNewVArray(uint32_t n) {
 OPTBLD_INLINE void iopNewDArray(uint32_t capacity) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
   if (capacity == 0) {
-    vmStack().pushArrayNoRc(staticEmptyDArray());
+    vmStack().pushArrayNoRc(ArrayData::CreateDArray());
   } else {
     vmStack().pushArrayNoRc(MixedArray::MakeReserveDArray(capacity));
   }
 }
 
-// TODO (T29595301): Use id instead of StringData
-OPTBLD_INLINE void iopNewRecord(const StringData* s, imm_array<int32_t> ids) {
+namespace {
+template<typename CreatorFn, typename PushFn>
+void newRecordImpl(const StringData* s,
+                   const imm_array<int32_t>& ids,
+                   CreatorFn creatorFn, PushFn pushFn) {
   auto rec = Unit::getRecordDesc(s, true);
   if (!rec) {
     raise_error(Strings::UNKNOWN_RECORD, s->data());
@@ -2137,10 +2105,22 @@ OPTBLD_INLINE void iopNewRecord(const StringData* s, imm_array<int32_t> ids) {
     auto name = unit->lookupLitstrId(ids[i]);
     names.push_back(name);
   }
-  auto recdata =
-    RecordData::newRecord(rec, names.size(), names.data(), vmStack().topC());
+  auto recdata = creatorFn(rec, names.size(), names.data(), vmStack().topC());
   vmStack().ndiscard(n);
-  vmStack().pushRecordNoRc(recdata);
+  pushFn(vmStack(), recdata);
+}
+}
+
+// TODO (T29595301): Use id instead of StringData
+OPTBLD_INLINE void iopNewRecord(const StringData* s, imm_array<int32_t> ids) {
+  newRecordImpl(s, ids, RecordData::newRecord,
+                [] (Stack& st, RecordData* r) { st.pushRecordNoRc(r); });
+}
+
+OPTBLD_INLINE void iopNewRecordArray(const StringData* s,
+                                     imm_array<int32_t> ids) {
+  newRecordImpl(s, ids, RecordArray::newRecordArray,
+                [] (Stack& st, RecordArray* r) { st.pushRecordArrayNoRc(r); });
 }
 
 OPTBLD_INLINE void iopAddElemC() {
@@ -2235,8 +2215,13 @@ OPTBLD_INLINE void iopDefCns(const StringData* s) {
   vmStack().replaceTV<KindOfBoolean>(result);
 }
 
-OPTBLD_INLINE void iopClsCns(const StringData* clsCnsName, clsref_slot slot) {
-  auto const cls    = slot.take().second;
+OPTBLD_INLINE void iopClsCns(const StringData* clsCnsName) {
+  auto const clsTV = vmStack().topC();
+  if (!isClassType(clsTV->m_type)) {
+    raise_error("Attempting class constant access on non-class");
+  }
+
+  auto const cls = clsTV->m_data.pclass;
   auto const clsCns = cls->clsCnsGet(clsCnsName);
 
   if (clsCns.m_type == KindOfUninit) {
@@ -2244,7 +2229,7 @@ OPTBLD_INLINE void iopClsCns(const StringData* clsCnsName, clsref_slot slot) {
                 cls->name()->data(), clsCnsName->data());
   }
 
-  cellDup(clsCns, *vmStack().allocTV());
+  cellDup(clsCns, *clsTV);
 }
 
 OPTBLD_INLINE void iopClsCnsD(const StringData* clsCnsName, Id classId) {
@@ -2256,7 +2241,7 @@ OPTBLD_INLINE void iopClsCnsD(const StringData* clsCnsName, Id classId) {
   cellDup(clsCns, *c1);
 }
 
-OPTBLD_FLT_INLINE void iopConcat() {
+OPTBLD_INLINE void iopConcat() {
   auto const c1 = vmStack().topC();
   auto const c2 = vmStack().indC(1);
   auto const s2 = cellAsVariant(*c2).toString();
@@ -2473,11 +2458,6 @@ OPTBLD_INLINE void iopCastArray() {
   tvCastToArrayInPlace(c1);
 }
 
-OPTBLD_INLINE void iopCastObject() {
-  Cell* c1 = vmStack().topC();
-  tvCastToObjectInPlace(c1);
-}
-
 OPTBLD_INLINE void iopCastDict() {
   Cell* c1 = vmStack().topC();
   tvCastToDictInPlace(c1);
@@ -2657,19 +2637,6 @@ OPTBLD_INLINE void iopRecordReifiedGeneric() {
   } else {
     vmStack().pushStaticArray(result);
   }
-}
-
-OPTBLD_INLINE void iopReifiedName(const StringData* name) {
-  auto const tsList = vmStack().topC();
-  if (RuntimeOption::EvalHackArrDVArrs ?
-      !tvIsVec(tsList) : !tvIsArray(tsList)) {
-    raise_error("Invalid type-structure list in ReifiedName");
-  }
-  // recordReifiedGenericsAndGetName decrefs the tsList
-  auto const result = jit::recordReifiedGenericsAndGetName(tsList->m_data.parr);
-  auto const mangledName = mangleReifiedName(name, result);
-  vmStack().discard();
-  vmStack().pushStaticString(mangledName);
 }
 
 OPTBLD_INLINE void iopCheckReifiedGenericMismatch() {
@@ -2901,8 +2868,6 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
             case KindOfDict:
             case KindOfPersistentKeyset:
             case KindOfKeyset:
-            case KindOfPersistentShape:
-            case KindOfShape:
             case KindOfPersistentArray:
             case KindOfArray:
             case KindOfObject:
@@ -2933,12 +2898,6 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
         case KindOfKeyset:
           tvDecRefArr(val);
         case KindOfPersistentKeyset:
-          match = SwitchMatch::DEFAULT;
-          return;
-
-        case KindOfShape:
-          tvDecRefArr(val);
-        case KindOfPersistentShape:
           match = SwitchMatch::DEFAULT;
           return;
 
@@ -3169,7 +3128,7 @@ OPTBLD_INLINE TCA ret(PC& pc) {
     assertx(vmStack().topTV() == vmfp()->retSlot());
     // In case async eager return was requested by the caller, pretend that
     // we did not finish eagerly as we already boxed the value.
-    vmStack().topTV()->m_aux.u_asyncNonEagerReturnFlag = -1;
+    vmStack().topTV()->m_aux.u_asyncEagerReturnFlag = 0;
   } else if (vmfp()->func()->isAsyncFunction()) {
     // Mark the async function as succeeded and store the return value.
     assertx(!sfp);
@@ -3272,18 +3231,17 @@ OPTBLD_INLINE void iopThrow(PC&) {
   throw req::root<Object>(std::move(obj));
 }
 
-OPTBLD_INLINE void iopClsRefGetC(clsref_slot slot) {
+OPTBLD_INLINE void iopClassGetC() {
   auto const cell = vmStack().topC();
   if (isStringType(cell->m_type)) {
     raise_str_to_class_notice(cell->m_data.pstr);
   }
-  auto const cls  = lookupClsRef(cell);
-  ArrayData* reified_types = getReifiedGenericsOpt(*cell);
-  slot.put(reified_types, cls);
+  auto const cls = lookupClsRef(cell);
   vmStack().popC();
+  vmStack().pushClass(cls);
 }
 
-OPTBLD_INLINE void iopClsRefGetTS(clsref_slot slot) {
+OPTBLD_INLINE void iopClassGetTS() {
   auto const cell = vmStack().topC();
   if (!tvIsDictOrDArray(cell)) {
     raise_error("Reified type must be a type structure");
@@ -3297,7 +3255,6 @@ OPTBLD_INLINE void iopClsRefGetTS(clsref_slot slot) {
   assertx(isStringType(classname_field.type()));
   auto const name = classname_field.val().pstr;
   auto const generics_field = ts->rval(s_generic_types.get());
-  auto mangledName = name;
   ArrayData* reified_types = nullptr;
   if (generics_field.is_set()) {
     reified_types = generics_field.val().parr;
@@ -3305,12 +3262,23 @@ OPTBLD_INLINE void iopClsRefGetTS(clsref_slot slot) {
       makeStaticString(mangleReifiedGenericsName(reified_types));
     reified_types->incRefCount();
     reified_types = addToReifiedGenericsTable(mangledTypeName, reified_types);
-    mangledName = mangleReifiedName(name, mangledTypeName);
   }
-  auto tv = make_tv<KindOfString>(mangledName);
-  auto const cls = lookupClsRef(&tv);
-  slot.put(reified_types, cls);
+  auto const cls = Unit::loadClass(name);
+  if (cls == nullptr) {
+    raise_error(Strings::UNKNOWN_CLASS, name->data());
+  }
+
   vmStack().popC();
+  vmStack().pushClass(cls);
+  if (reified_types) {
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      vmStack().pushStaticVec(reified_types);
+    } else {
+      vmStack().pushStaticArray(reified_types);
+    }
+  } else {
+    vmStack().pushNull();
+  }
 }
 
 static void raise_undefined_local(ActRec* fp, Id pind) {
@@ -3339,7 +3307,7 @@ OPTBLD_INLINE void cgetl_body(ActRec* fp,
   }
 }
 
-OPTBLD_FLT_INLINE void iopCGetL(local_var fr) {
+OPTBLD_INLINE void iopCGetL(local_var fr) {
   Cell* to = vmStack().allocC();
   cgetl_body(vmfp(), fr.ptr, to, fr.index, true);
 }
@@ -3385,7 +3353,7 @@ OPTBLD_INLINE void iopCGetG() {
 }
 
 struct SpropState {
-  SpropState(Stack&, clsref_slot slot, bool ignoreLateInit);
+  SpropState(Stack&, bool ignoreLateInit);
   ~SpropState();
   StringData* name;
   Class* cls;
@@ -3395,23 +3363,30 @@ struct SpropState {
   Slot slot;
   bool visible;
   bool accessible;
+  bool constant;
+  Stack& vmstack;
 };
 
-SpropState::SpropState(Stack& vmstack, clsref_slot cslot, bool ignoreLateInit) {
-  cls = cslot.take().second;
-  auto nameCell = output = vmstack.topTV();
+SpropState::SpropState(Stack& vmstack, bool ignoreLateInit) : vmstack{vmstack} {
+  auto const clsCell = vmstack.topC();
+  auto const nameCell = output = vmstack.indTV(1);
+  if (!isClassType(clsCell->m_type)) {
+    raise_error("SpropState: expected class");
+  }
+  cls = clsCell->m_data.pclass;
   lookup_sprop(vmfp(), cls, name, nameCell, val,
-               slot, visible, accessible, ignoreLateInit);
+               slot, visible, accessible, constant, ignoreLateInit);
   oldNameCell = *nameCell;
 }
 
 SpropState::~SpropState() {
+  vmstack.discard();
   decRefStr(name);
   tvDecRefGen(oldNameCell);
 }
 
-OPTBLD_INLINE void iopCGetS(clsref_slot slot) {
-  SpropState ss(vmStack(), slot, false);
+OPTBLD_INLINE void iopCGetS() {
+  SpropState ss(vmStack(), false);
   if (!(ss.visible && ss.accessible)) {
     raise_error("Invalid static property access: %s::%s",
                 ss.cls->name()->data(),
@@ -3456,10 +3431,16 @@ OPTBLD_INLINE void iopBaseGL(local_var loc, MOpMode mode) {
   baseGImpl(tvToCell(loc.ptr), mode);
 }
 
-static inline tv_lval baseSImpl(TypedValue* key,
-                                clsref_slot slot,
-                                MOpMode mode) {
-  auto const class_ = slot.take().second;
+OPTBLD_INLINE void iopBaseSC(uint32_t keyIdx, uint32_t clsIdx, MOpMode mode) {
+  auto& mstate = initMState();
+
+  auto const clsCell = vmStack().indC(clsIdx);
+  auto const key = vmStack().indTV(keyIdx);
+
+  if (!isClassType(clsCell->m_type)) {
+    raise_error("Attempting to obtain static base on non-class");
+  }
+  auto const class_ = clsCell->m_data.pclass;
 
   auto const name = lookup_name(key);
   SCOPE_EXIT { decRefStr(name); };
@@ -3470,16 +3451,17 @@ static inline tv_lval baseSImpl(TypedValue* key,
                 name->data());
   }
 
+  if (lookup.constant && (mode == MOpMode::Define ||
+    mode == MOpMode::Unset || mode == MOpMode::InOut)) {
+      throw_cannot_modify_static_const_prop(class_->name()->data(),
+        name->data());
+  }
+
   if (RuntimeOption::EvalCheckPropTypeHints > 0 && mode == MOpMode::Define) {
     vmMInstrState().propState = MInstrPropState{class_, lookup.slot, true};
   }
 
-  return tv_lval(lookup.val);
-}
-
-OPTBLD_INLINE void iopBaseSC(uint32_t keyIdx, clsref_slot slot, MOpMode mode) {
-  auto& mstate = initMState();
-  mstate.base = baseSImpl(vmStack().indTV(keyIdx), slot, mode);
+  mstate.base = tv_lval(lookup.val);
 }
 
 OPTBLD_INLINE void baseLImpl(local_var loc, MOpMode mode) {
@@ -3678,7 +3660,7 @@ OPTBLD_INLINE void iopQueryM(uint32_t nDiscard, QueryMOp subop, MemberKey mk) {
   queryMImpl(mk, nDiscard, subop);
 }
 
-OPTBLD_FLT_INLINE void iopSetM(uint32_t nDiscard, MemberKey mk) {
+OPTBLD_INLINE void iopSetM(uint32_t nDiscard, MemberKey mk) {
   auto& mstate = vmMInstrState();
   auto const topC = vmStack().topC();
 
@@ -3906,7 +3888,7 @@ OPTBLD_INLINE void iopMemoGetEager(PC& pc,
 
   if (auto const c = memoGetImpl(keys)) {
     cellDup(*c, *vmStack().allocC());
-    if (c->m_aux.u_asyncNonEagerReturnFlag) {
+    if (!c->m_aux.u_asyncEagerReturnFlag) {
       assertx(tvIsObject(c) && c->m_data.pobj->isWaitHandle());
       pc = suspended;
     }
@@ -4023,7 +4005,7 @@ OPTBLD_INLINE void iopMemoSet(LocalRange keys) {
   assertx(val.m_type != KindOfUninit);
   if (vmfp()->m_func->isAsyncFunction()) {
     assertx(tvIsObject(val) && val.m_data.pobj->isWaitHandle());
-    val.m_aux.u_asyncNonEagerReturnFlag = -1;
+    val.m_aux.u_asyncEagerReturnFlag = 0;
   }
   memoSetImpl(keys, val);
 }
@@ -4033,7 +4015,7 @@ OPTBLD_INLINE void iopMemoSetEager(LocalRange keys) {
   assertx(!vmfp()->resumed());
   auto val = *vmStack().topC();
   assertx(val.m_type != KindOfUninit);
-  val.m_aux.u_asyncNonEagerReturnFlag = 0;
+  val.m_aux.u_asyncEagerReturnFlag = static_cast<uint32_t>(-1);
   memoSetImpl(keys, val);
 }
 
@@ -4060,8 +4042,8 @@ OPTBLD_INLINE void iopIssetG() {
   vmStack().replaceC<KindOfBoolean>(e);
 }
 
-OPTBLD_INLINE void iopIssetS(clsref_slot slot) {
-  SpropState ss(vmStack(), slot, true);
+OPTBLD_INLINE void iopIssetS() {
+  SpropState ss(vmStack(), true);
   bool e;
   if (!(ss.visible && ss.accessible)) {
     e = false;
@@ -4072,7 +4054,7 @@ OPTBLD_INLINE void iopIssetS(clsref_slot slot) {
   ss.output->m_type = KindOfBoolean;
 }
 
-OPTBLD_FLT_INLINE void iopIssetL(local_var tv) {
+OPTBLD_INLINE void iopIssetL(local_var tv) {
   bool ret = !is_null(tvToCell(tv.ptr));
   TypedValue* topTv = vmStack().allocTV();
   topTv->m_data.num = ret;
@@ -4088,20 +4070,32 @@ OPTBLD_INLINE static bool isTypeHelper(Cell* val, IsTypeOp op) {
   case IsTypeOp::Int:    return is_int(val);
   case IsTypeOp::Dbl:    return is_double(val);
   case IsTypeOp::Arr:
-    if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsArrayNotices &&
-        !vmfp()->m_func->isBuiltin())) {
-      if (isArrayOrShapeType(val->m_type)) {
-        return true;
-      } else if (isVecType(val->m_type)) {
+    if (LIKELY(!RuntimeOption::EvalHackArrCompatIsArrayNotices &&
+               !RuntimeOption::EvalLogArrayProvenance) ||
+        vmfp()->m_func->isBuiltin()) {
+      return is_array(val);
+    } else if (isArrayType(val->m_type)) {
+      return true;
+    } else if (isVecType(val->m_type)) {
+      if (RuntimeOption::EvalHackArrCompatIsArrayNotices) {
         raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_VEC_IS_ARR);
-      } else if (isDictOrShapeType(val->m_type)) {
+      }
+      if (RuntimeOption::EvalLogArrayProvenance) {
+        raise_array_serialization_notice("is_array", val->m_data.parr);
+      }
+    } else if (isDictType(val->m_type)) {
+      if (RuntimeOption::EvalHackArrCompatIsArrayNotices) {
         raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_DICT_IS_ARR);
-      } else if (isKeysetType(val->m_type)) {
+      }
+      if (RuntimeOption::EvalLogArrayProvenance) {
+        raise_array_serialization_notice("is_array", val->m_data.parr);
+      }
+    } else if (isKeysetType(val->m_type)) {
+      if (RuntimeOption::EvalHackArrCompatIsArrayNotices) {
         raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_KEYSET_IS_ARR);
       }
-      return false;
     }
-    return is_array(val);
+    return false;
   case IsTypeOp::Vec: {
     if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsVecDictNotices)) {
       if (isArrayType(val->m_type)) {
@@ -4119,7 +4113,7 @@ OPTBLD_INLINE static bool isTypeHelper(Cell* val, IsTypeOp op) {
   }
   case IsTypeOp::Dict: {
     if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsVecDictNotices)) {
-      if (isArrayOrShapeType(val->m_type)) {
+      if (isArrayType(val->m_type)) {
         if (val->m_data.parr->isDArray()) {
           raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_DARR_IS_DICT);
         }
@@ -4164,6 +4158,7 @@ OPTBLD_INLINE static bool isTypeHelper(Cell* val, IsTypeOp op) {
     }
     return is_darray(val);
   case IsTypeOp::ClsMeth: return is_clsmeth(val);
+  case IsTypeOp::Func: return is_fun(val);
   }
   not_reached();
 }
@@ -4180,7 +4175,7 @@ OPTBLD_INLINE void iopIsTypeC(IsTypeOp op) {
   vmStack().replaceC(make_tv<KindOfBoolean>(isTypeHelper(val, op)));
 }
 
-OPTBLD_FLT_INLINE void iopAssertRATL(local_var loc, RepoAuthType rat) {
+OPTBLD_INLINE void iopAssertRATL(local_var loc, RepoAuthType rat) {
   if (debug) {
     auto const tv = *loc.ptr;
     auto const func = vmfp()->func();
@@ -4238,8 +4233,8 @@ OPTBLD_INLINE void iopEmptyG() {
   vmStack().replaceC<KindOfBoolean>(e);
 }
 
-OPTBLD_INLINE void iopEmptyS(clsref_slot slot) {
-  SpropState ss(vmStack(), slot, true);
+OPTBLD_INLINE void iopEmptyS() {
+  SpropState ss(vmStack(), true);
   bool e;
   if (!(ss.visible && ss.accessible)) {
     e = true;
@@ -4277,25 +4272,17 @@ OPTBLD_INLINE void iopGetMemoKeyL(local_var loc) {
   cellCopy(key, *vmStack().allocC());
 }
 
-namespace {
-const StaticString s_idx("hh\\idx");
-
-TypedValue genericIdx(TypedValue obj, TypedValue key, TypedValue def) {
-  static auto func = Unit::loadFunc(s_idx.get());
-  assertx(func != nullptr);
-  TypedValue args[] = {
-    obj,
-    key,
-    def
-  };
-  return g_context->invokeFuncFew(func, nullptr, nullptr, 3, &args[0]);
-}
-}
-
 OPTBLD_INLINE void iopIdx() {
   TypedValue* def = vmStack().topTV();
   TypedValue* key = vmStack().indTV(1);
   TypedValue* arr = vmStack().indTV(2);
+
+  if (isNullType(key->m_type)) {
+    tvDecRefGen(arr);
+    *arr = *def;
+    vmStack().ndiscard(2);
+    return;
+  }
 
   TypedValue result;
   if (isArrayLikeType(arr->m_type)) {
@@ -4303,18 +4290,32 @@ OPTBLD_INLINE void iopIdx() {
                                      tvAsCVarRef(key),
                                      tvAsCVarRef(def));
     vmStack().popTV();
-  } else if (isNullType(key->m_type)) {
-    tvDecRefGen(arr);
-    *arr = *def;
-    vmStack().ndiscard(2);
-    return;
-  } else if (!isStringType(arr->m_type) &&
-             arr->m_type != KindOfObject) {
+  } else if (arr->m_type == KindOfObject) {
+    auto obj = arr->m_data.pobj;
+    if (obj->isCollection() && collections::contains(obj, tvAsCVarRef(key))) {
+      result = collections::at(obj, key).tv();
+      tvIncRefGen(result);
+      vmStack().popTV();
+    } else {
+      result = *def;
+      vmStack().discard();
+    }
+  } else if (isStringType(arr->m_type)) {
+    // This replicates the behavior of the hack implementation of idx, which
+    // first checks isset($arr[$idx]), then returns $arr[(int)$idx]
+    auto str = arr->m_data.pstr;
+    if (IssetEmptyElemString<false, KeyType::Any>(str, *key)) {
+      auto idx = tvCastToInt64(*key);
+      assertx(idx >= 0 && idx < str->size());
+      result = make_tv<KindOfPersistentString>(str->getChar(idx));
+      vmStack().popTV();
+    } else {
+      result = *def;
+      vmStack().discard();
+    }
+  } else {
     result = *def;
     vmStack().discard();
-  } else {
-    result = genericIdx(*arr, *key, *def);
-    vmStack().popTV();
   }
   vmStack().popTV();
   tvDecRefGen(arr);
@@ -4360,21 +4361,31 @@ OPTBLD_INLINE void iopSetG() {
   vmStack().discard();
 }
 
-OPTBLD_INLINE void iopSetS(clsref_slot cslot) {
+OPTBLD_INLINE void iopSetS() {
   TypedValue* tv1 = vmStack().topTV();
-  Class* cls = cslot.take().second;
-  TypedValue* propn = vmStack().indTV(1);
+  Cell* clsCell = vmStack().indC(1);
+  TypedValue* propn = vmStack().indTV(2);
   TypedValue* output = propn;
   StringData* name;
   TypedValue* val;
-  bool visible, accessible;
+  bool visible, accessible, constant;
   Slot slot;
-  lookup_sprop(vmfp(), cls, name, propn, val, slot, visible, accessible, true);
+
+  if (!isClassType(clsCell->m_type)) {
+    raise_error("Attempting static property access on non class");
+  }
+  auto const cls = clsCell->m_data.pclass;
+
+  lookup_sprop(vmfp(), cls, name, propn, val, slot, visible,
+               accessible, constant, true);
   SCOPE_EXIT { decRefStr(name); };
   if (!(visible && accessible)) {
     raise_error("Invalid static property access: %s::%s",
                 cls->name()->data(),
                 name->data());
+  }
+  if (constant) {
+    throw_cannot_modify_static_const_prop(cls->name()->data(), name->data());
   }
   if (RuntimeOption::EvalCheckPropTypeHints > 0) {
     auto const& sprop = cls->staticProperties()[slot];
@@ -4384,7 +4395,7 @@ OPTBLD_INLINE void iopSetS(clsref_slot cslot) {
   tvSet(*tv1, *val);
   tvDecRefGen(propn);
   memcpy(output, tv1, sizeof(TypedValue));
-  vmStack().ndiscard(1);
+  vmStack().ndiscard(2);
 }
 
 OPTBLD_INLINE void iopSetOpL(local_var loc, SetOpOp op) {
@@ -4411,23 +4422,32 @@ OPTBLD_INLINE void iopSetOpG(SetOpOp op) {
   vmStack().discard();
 }
 
-OPTBLD_INLINE void iopSetOpS(SetOpOp op, clsref_slot cslot) {
+OPTBLD_INLINE void iopSetOpS(SetOpOp op) {
   Cell* fr = vmStack().topC();
-  Class* cls = cslot.take().second;
-  TypedValue* propn = vmStack().indTV(1);
+  Cell* clsCell = vmStack().indC(1);
+  TypedValue* propn = vmStack().indTV(2);
   TypedValue* output = propn;
   StringData* name;
   TypedValue* val;
-  bool visible, accessible;
+  bool visible, accessible, constant;
   Slot slot;
-  lookup_sprop(vmfp(), cls, name, propn, val, slot, visible, accessible, false);
+
+  if (!isClassType(clsCell->m_type)) {
+    raise_error("Attempting static property access on non class");
+  }
+  auto const cls = clsCell->m_data.pclass;
+
+  lookup_sprop(vmfp(), cls, name, propn, val, slot, visible,
+               accessible, constant, false);
   SCOPE_EXIT { decRefStr(name); };
   if (!(visible && accessible)) {
     raise_error("Invalid static property access: %s::%s",
                 cls->name()->data(),
                 name->data());
   }
-
+  if (constant) {
+    throw_cannot_modify_static_const_prop(cls->name()->data(), name->data());
+  }
   val = tvToCell(val);
   auto const& sprop = cls->staticProperties()[slot];
   if (setOpNeedsTypeCheck(sprop.typeConstraint, op, val)) {
@@ -4446,7 +4466,7 @@ OPTBLD_INLINE void iopSetOpS(SetOpOp op, clsref_slot cslot) {
   tvDecRefGen(propn);
   tvDecRefGen(fr);
   cellDup(*val, *output);
-  vmStack().ndiscard(1);
+  vmStack().ndiscard(2);
 }
 
 OPTBLD_INLINE void iopIncDecL(local_var fr, IncDecOp op) {
@@ -4475,14 +4495,17 @@ OPTBLD_INLINE void iopIncDecG(IncDecOp op) {
   cellCopy(IncDecBody(op, tvToCell(gbl)), *nameCell);
 }
 
-OPTBLD_INLINE void iopIncDecS(IncDecOp op, clsref_slot slot) {
-  SpropState ss(vmStack(), slot, false);
+OPTBLD_INLINE void iopIncDecS(IncDecOp op) {
+  SpropState ss(vmStack(), false);
   if (!(ss.visible && ss.accessible)) {
     raise_error("Invalid static property access: %s::%s",
                 ss.cls->name()->data(),
                 ss.name->data());
   }
-
+  if (ss.constant) {
+    throw_cannot_modify_static_const_prop(ss.cls->name()->data(),
+                                          ss.name->data());
+  }
   auto const checkable_sprop = [&]() -> const Class::SProp* {
     if (RuntimeOption::EvalCheckPropTypeHints <= 0) return nullptr;
     auto const& sprop = ss.cls->staticProperties()[ss.slot];
@@ -4535,7 +4558,7 @@ bool doFCall(ActRec* ar, uint32_t numArgs, bool unpack) {
         Cell tmp = *c1;
         // argument_unpacking RFC dictates "containers and Traversables"
         raise_warning_unsampled("Only containers may be unpacked");
-        *c1 = make_persistent_array_like_tv(staticEmptyVArray());
+        *c1 = make_persistent_array_like_tv(ArrayData::CreateVArray());
         tvDecRefGen(&tmp);
       }
 
@@ -4563,26 +4586,50 @@ bool doFCall(ActRec* ar, uint32_t numArgs, bool unpack) {
     throw;
   }
 
+  checkForReifiedGenericsErrors(ar);
   if (UNLIKELY(!EventHook::FunctionCall(ar, EventHook::NormalFunc))) {
     return false;
   }
-  checkForReifiedGenericsErrors(ar);
   calleeDynamicCallChecks(ar);
   checkForRequiredCallM(ar);
   return true;
 }
 
-OPTBLD_INLINE ActRec* fPushFuncImpl(
-  const Func* func, int numArgs, ArrayData* reifiedGenerics
-) {
-  DEBUGGER_IF(phpBreakpointEnabled(func->name()->data()));
+namespace {
+
+template<bool dynamic, class InitActRec>
+void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
+               InitActRec initActRec, bool logAsDynamicCall = true) {
+  if (fca.enforceReffiness()) callerReffinessChecks(func, fca);
+  if (dynamic && logAsDynamicCall) callerDynamicCallChecks(func);
+  callerRxChecks(vmfp(), func);
+  checkStack(vmStack(), func, 0);
+
   assertx(kNumActRecCells == 3);
-  ActRec* ar = vmStack().indA(numArgs);
+  ActRec* ar = vmStack().indA(fca.numInputs());
   ar->m_func = func;
-  ar->initNumArgs(numArgs);
+  ar->initNumArgs(fca.numArgs + (fca.hasUnpack() ? 1 : 0));
+  if (dynamic) ar->setDynamicCall();
+  if (fca.numRets != 1) ar->setFCallM();
+  auto const asyncEagerReturn =
+    fca.asyncEagerOffset != kInvalidOffset && func->supportsAsyncEagerReturn();
+  if (asyncEagerReturn) ar->setAsyncEagerReturn();
+  ar->setReturn(vmfp(), origpc, jit::tc::ustubs().retHelper);
   ar->trashVarEnv();
-  if (reifiedGenerics != nullptr) ar->setReifiedGenerics(reifiedGenerics);
-  return ar;
+  if (fca.hasGenerics()) {
+    assertx(tvIsVecOrVArray(vmStack().topC()));
+    if (func->hasReifiedGenerics()) {
+      ar->setReifiedGenerics(vmStack().topC()->m_data.parr);
+      vmStack().discard();
+    } else {
+      vmStack().popC();
+    }
+  }
+
+  initActRec(ar);
+
+  doFCall(ar, fca.numArgs, fca.hasUnpack());
+  pc = vmpc();
 }
 
 ALWAYS_INLINE std::string concat_arg_list(imm_array<uint32_t> args) {
@@ -4594,122 +4641,90 @@ ALWAYS_INLINE std::string concat_arg_list(imm_array<uint32_t> args) {
   return ret;
 }
 
-OPTBLD_INLINE void iopResolveFunc(Id id) {
-  auto unit = vmfp()->m_func->unit();
-  auto const nep = unit->lookupNamedEntityPairId(id);
-  auto func = Unit::loadFunc(nep.second, nep.first);
-  if (func == nullptr) raise_resolve_undefined(unit->lookupLitstrId(id));
-  vmStack().pushFunc(func);
+ALWAYS_INLINE StringData* mangleInOutName(const StringData* name,
+                                          imm_array<uint32_t> args) {
+  return StringData::Make(
+    name, folly::sformat("${}$inout", concat_arg_list(args)));
 }
 
-OPTBLD_INLINE void iopFPushFunc(uint32_t numArgs, imm_array<uint32_t> args) {
-  auto const n = args.size;
-  std::string arglist;
-  if (UNLIKELY(n)) {
-    arglist = concat_arg_list(args);
+const StaticString s___invoke("__invoke");
+
+// This covers both closures and functors.
+OPTBLD_INLINE void fcallFuncObj(PC origpc, PC& pc, const FCallArgs& fca,
+                                imm_array<uint32_t> args) {
+  assertx(tvIsObject(vmStack().topC()));
+  auto obj = Object::attach(vmStack().topC()->m_data.pobj);
+  vmStack().discard();
+
+  auto const cls = obj->getVMClass();
+  auto const func = LIKELY(!args.size)
+    ? cls->lookupMethod(s___invoke.get())
+    : cls->lookupMethod(makeStaticString(
+        folly::sformat("__invoke${}$inout", concat_arg_list(args))
+      ));
+
+  if (func == nullptr) {
+    raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
   }
 
-  Cell* c1 = vmStack().topC();
-  if (c1->m_type == KindOfObject) {
-    // this covers both closures and functors
-    static StringData* invokeName = makeStaticString("__invoke");
-    ObjectData* origObj = c1->m_data.pobj;
-    const Class* cls = origObj->getVMClass();
-    auto const func = LIKELY(!n)
-      ? cls->lookupMethod(invokeName)
-      : cls->lookupMethod(
-        makeStaticString(folly::sformat("__invoke${}$inout", arglist))
-      );
-    if (func == nullptr) {
-      raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
-    }
-
-    callerRxChecks(vmfp(), func);
-
-    vmStack().discard();
-    ActRec* ar = fPushFuncImpl(func, numArgs, nullptr);
+  fcallImpl<false>(origpc, pc, fca, func, [&] (ActRec* ar) {
     if (func->isStaticInPrologue()) {
-      ar->setClass(origObj->getVMClass());
-      decRefObj(origObj);
+      ar->setClass(cls);
     } else {
-      ar->setThis(origObj);
       // Teleport the reference from the destroyed stack cell to the
       // ActRec. Don't try this at home.
+      ar->setThis(obj.detach());
     }
-    return;
+  });
+}
+
+/*
+ * Supports callables:
+ *   array($instance, 'method')
+ *   array('Class', 'method'),
+ *   vec[$instance, 'method'],
+ *   vec['Class', 'method'],
+ *   dict[0 => $instance, 1 => 'method'],
+ *   dict[0 => 'Class', 1 => 'method'],
+ *   array(Class*, Func*),
+ *   array(ObjectData*, Func*),
+ */
+OPTBLD_INLINE void fcallFuncArr(PC origpc, PC& pc, const FCallArgs& fca,
+                                imm_array<uint32_t> args) {
+  assertx(tvIsArrayLike(vmStack().topC()));
+  auto arr = Array::attach(vmStack().topC()->m_data.parr);
+  vmStack().discard();
+
+  // Handle inout name mangling
+  if (UNLIKELY(args.size) && arr->size() == 2) {
+    auto const methName = [&]() -> const StringData* {
+      auto const meth = arr->at(int64_t{1});
+      if (tvIsString(meth)) return meth.m_data.pstr;
+      if (tvIsFunc(meth)) return meth.m_data.pfunc->fullDisplayName();
+      return nullptr;
+    }();
+    if (methName) {
+      VArrayInit ai{2};
+      ai.append(arr->at(int64_t{0}));
+      ai.append(Variant::attach(mangleInOutName(methName, args)));
+      arr = ai.toArray();
+    }
   }
 
-  auto appendSuffix = [&] (const StringData* s) {
-    return StringData::Make(s, folly::sformat("${}$inout", arglist));
-  };
+  ObjectData* thiz = nullptr;
+  HPHP::Class* cls = nullptr;
+  StringData* invName = nullptr;
+  bool dynamic = false;
 
-  if (isArrayLikeType(c1->m_type) || isStringType(c1->m_type)) {
-    Variant v = Variant::wrap(*c1);
+  auto const func = vm_decode_function(const_variant_ref{arr}, vmfp(), thiz,
+                                       cls, invName, dynamic,
+                                       DecodeFlags::NoWarn);
+  assertx(dynamic);
+  if (UNLIKELY(func == nullptr)) {
+    raise_error("Invalid callable (array)");
+  }
 
-    auto wrapInOutName = [&] (Cell* c, const StringData* mth) {
-      VArrayInit ai{2};
-      ai.append(c->m_data.parr->at(int64_t(0)));
-      ai.append(Variant::attach(appendSuffix(mth)));
-      return ai.toVariant();
-    };
-
-    // Handle inout name mangling
-    if (UNLIKELY(n)) {
-      if (isStringType(c1->m_type)) {
-        v = Variant::attach(appendSuffix(c1->m_data.pstr));
-      } else if (c1->m_data.parr->size() == 2){
-        auto s = c1->m_data.parr->at(1);
-        if (isStringType(s.m_type)) {
-          v = wrapInOutName(c1, s.m_data.pstr);
-        } else if (isFuncType(s.m_type)) {
-          v = wrapInOutName(c1, s.m_data.pfunc->fullDisplayName());
-        }
-      }
-    }
-
-    // support:
-    //   array($instance, 'method')
-    //   array('Class', 'method'),
-    //   vec[$instance, 'method'],
-    //   vec['Class', 'method'],
-    //   array(Class*, Func*),
-    //   array(ObjectData*, Func*),
-    //   Func*,
-    //   'func_name'
-    //   'class::method'
-    // which are all valid callables
-    auto origCell = *c1;
-    ObjectData* thiz = nullptr;
-    HPHP::Class* cls = nullptr;
-    StringData* invName = nullptr;
-    bool dynamic = false;
-    ArrayData* reifiedGenerics = nullptr;
-
-    auto const func = vm_decode_function(
-      v,
-      vmfp(),
-      thiz,
-      cls,
-      invName,
-      dynamic,
-      reifiedGenerics,
-      DecodeFlags::NoWarn
-    );
-    assertx(dynamic);
-    if (func == nullptr) {
-      if (isArrayLikeType(origCell.m_type)) {
-        raise_error("Invalid callable (array)");
-      } else {
-        assertx(isStringType(origCell.m_type));
-        raise_call_to_undefined(origCell.m_data.pstr);
-      }
-    }
-
-    callerDynamicCallChecks(func);
-    callerRxChecks(vmfp(), func);
-
-    vmStack().discard();
-    auto const ar = fPushFuncImpl(func, numArgs, reifiedGenerics);
+  fcallImpl<true>(origpc, pc, fca, func, [&] (ActRec* ar) {
     if (thiz) {
       thiz->incRefCount();
       ar->setThis(thiz);
@@ -4719,90 +4734,48 @@ OPTBLD_INLINE void iopFPushFunc(uint32_t numArgs, imm_array<uint32_t> args) {
       ar->trashThis();
     }
 
-    ar->setDynamicCall();
-
     if (UNLIKELY(invName != nullptr)) {
+      assertx(!func->hasReifiedGenerics());
       ar->setMagicDispatch(invName);
     }
-    if (isArrayLikeType(origCell.m_type)) {
-      decRefArr(origCell.m_data.parr);
-    } else if (origCell.m_type == KindOfString) {
-      decRefStr(origCell.m_data.pstr);
-    }
-    return;
+
+    arr.reset();
+  });
+}
+
+/*
+ * Supports callables:
+ *   'func_name'
+ *   'class::method'
+ */
+OPTBLD_INLINE void fcallFuncStr(PC origpc, PC& pc, const FCallArgs& fca,
+                                imm_array<uint32_t> args) {
+  assertx(tvIsString(vmStack().topC()));
+  auto str = String::attach(vmStack().topC()->m_data.pstr);
+  vmStack().discard();
+
+  // Handle inout name mangling
+  if (UNLIKELY(args.size)) {
+    str = String::attach(mangleInOutName(str.get(), args));
   }
 
-  if (c1->m_type == KindOfFunc) {
-    const Func* func = c1->m_data.pfunc;
-    assertx(func != nullptr);
-    if (func->cls()) {
-      raise_error(Strings::CALL_ILLFORMED_FUNC);
-    }
-    ArrayData* reifiedGenerics = nullptr;
+  ObjectData* thiz = nullptr;
+  HPHP::Class* cls = nullptr;
+  StringData* invName = nullptr;
+  bool dynamic = false;
 
-    // Handle inout name mangling
-    if (UNLIKELY(n)) {
-      auto const func_name = func->fullDisplayName();
-      auto const v = Variant::attach(appendSuffix(func_name));
-      ObjectData* thiz = nullptr;
-      Class* cls = nullptr;
-      StringData* invName = nullptr;
-      bool dynamic = false;
-      func = vm_decode_function(
-        v,
-        vmfp(),
-        thiz,
-        cls,
-        invName,
-        dynamic,
-        reifiedGenerics,
-        DecodeFlags::NoWarn
-      );
-      if (func == nullptr) raise_call_to_undefined(func_name);
-    }
-
-    callerRxChecks(vmfp(), func);
-
-    vmStack().discard();
-    auto const ar = fPushFuncImpl(func, numArgs, reifiedGenerics);
-    ar->trashThis();
-    return;
+  auto const func = vm_decode_function(const_variant_ref{str}, vmfp(), thiz,
+                                       cls, invName, dynamic,
+                                       DecodeFlags::NoWarn);
+  assertx(dynamic);
+  if (UNLIKELY(func == nullptr)) {
+    raise_call_to_undefined(
+      args.size ? stripInOutSuffix(str.get()) : str.get());
   }
 
-  if (isClsMethType(c1->m_type)) {
-    auto const clsMeth = c1->m_data.pclsmeth;
-    assertx(clsMeth->getCls());
-    assertx(clsMeth->getFunc());
-
-    ArrayData* reifiedGenerics = nullptr;
-    const Func* func = clsMeth->getFunc();
-    ObjectData* thiz = nullptr;
-    Class* cls = clsMeth->getCls();
-
-    // Handle inout name mangling
-    if (UNLIKELY(n)) {
-      auto const func_name = func->fullDisplayName();
-      auto const v = Variant::attach(appendSuffix(func_name));
-      bool dynamic = false;
-      StringData* invName = nullptr;
-      func = vm_decode_function(
-        v,
-        vmfp(),
-        thiz,
-        cls,
-        invName,
-        dynamic,
-        reifiedGenerics,
-        DecodeFlags::NoWarn
-      );
-      if (func == nullptr) raise_call_to_undefined(func_name);
-    }
-
-    callerRxChecks(vmfp(), func);
-
-    vmStack().popC();
-    auto const ar = fPushFuncImpl(func, numArgs, reifiedGenerics);
+  fcallImpl<true>(origpc, pc, fca, func, [&] (ActRec* ar) {
     if (thiz) {
+      thiz->incRefCount();
       ar->setThis(thiz);
     } else if (cls) {
       ar->setClass(cls);
@@ -4810,108 +4783,142 @@ OPTBLD_INLINE void iopFPushFunc(uint32_t numArgs, imm_array<uint32_t> args) {
       ar->trashThis();
     }
 
-    return;
-  }
+    if (UNLIKELY(invName != nullptr)) {
+      assertx(!func->hasReifiedGenerics());
+      ar->setMagicDispatch(invName);
+    }
 
-  raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
+    str.reset();
+  });
 }
 
-namespace {
+OPTBLD_INLINE void fcallFuncFunc(PC origpc, PC& pc, const FCallArgs& fca,
+                                 imm_array<uint32_t> args) {
+  assertx(tvIsFunc(vmStack().topC()));
+  auto func = vmStack().topC()->m_data.pfunc;
+  vmStack().discard();
 
-void fPushFuncDImpl(uint32_t numArgs, Id id, ArrayData* tsList) {
-  const NamedEntityPair nep =
-    vmfp()->m_func->unit()->lookupNamedEntityPairId(id);
-  Func* func = Unit::loadFunc(nep.second, nep.first);
-  if (func == nullptr) {
-    raise_call_to_undefined(vmfp()->m_func->unit()->lookupLitstrId(id));
+  if (func->cls()) {
+    raise_error(Strings::CALL_ILLFORMED_FUNC);
   }
 
-  callerRxChecks(vmfp(), func);
+  // Handle inout name mangling
+  if (UNLIKELY(args.size)) {
+    auto const funcName = func->fullDisplayName();
+    auto const v = Variant::attach(mangleInOutName(funcName, args));
+    ObjectData* thiz = nullptr;
+    Class* cls = nullptr;
+    StringData* invName = nullptr;
+    bool dynamic = false;
+    func = vm_decode_function(v, vmfp(), thiz, cls, invName, dynamic,
+                              DecodeFlags::NoWarn);
+    if (func == nullptr) raise_call_to_undefined(funcName);
+    assertx(!thiz && !cls && !invName);
+  }
 
-  ActRec* ar = fPushFuncImpl(func, numArgs, tsList);
-  ar->trashThis();
+  fcallImpl<false>(origpc, pc, fca, func, [&] (ActRec* ar) {
+    ar->trashThis();
+  });
+}
+
+OPTBLD_INLINE void fcallFuncClsMeth(PC origpc, PC& pc, const FCallArgs& fca,
+                                    imm_array<uint32_t> args) {
+  assertx(tvIsClsMeth(vmStack().topC()));
+  auto const clsMeth = vmStack().topC()->m_data.pclsmeth;
+  vmStack().discard();
+
+  const Func* func = clsMeth->getFunc();
+  auto const cls = clsMeth->getCls();
+  assertx(func && cls);
+
+  // Handle inout name mangling
+  if (UNLIKELY(args.size)) {
+    auto const funcName = func->fullDisplayName();
+    auto const v = Variant::attach(mangleInOutName(funcName, args));
+    ObjectData* thiz = nullptr;
+    Class* cls2 = nullptr;
+    StringData* invName = nullptr;
+    bool dynamic = false;
+    func = vm_decode_function(v, vmfp(), thiz, cls2, invName, dynamic,
+                              DecodeFlags::NoWarn);
+    if (func == nullptr) raise_call_to_undefined(funcName);
+    assertx(!thiz && cls == cls2 && !invName);
+  }
+
+  fcallImpl<false>(origpc, pc, fca, func, [&] (ActRec* ar) {
+    ar->setClass(cls);
+  });
 }
 
 } // namespace
 
-OPTBLD_FLT_INLINE void iopFPushFuncD(uint32_t numArgs, Id id) {
-  fPushFuncDImpl(numArgs, id, nullptr);
+OPTBLD_INLINE void iopResolveFunc(Id id) {
+  auto unit = vmfp()->m_func->unit();
+  auto const nep = unit->lookupNamedEntityPairId(id);
+  auto func = Unit::loadFunc(nep.second, nep.first);
+  if (func == nullptr) raise_resolve_undefined(unit->lookupLitstrId(id));
+  vmStack().pushFunc(func);
 }
 
-OPTBLD_FLT_INLINE void iopFPushFuncRD(uint32_t numArgs, Id id) {
-  auto const tsList = *vmStack().topC();
-  assertx(tvIsVecOrVArray(tsList));
-  // no need to decref since it will will be stored on actrec
-  vmStack().discard();
-  fPushFuncDImpl(numArgs, id, tsList.m_data.parr);
+OPTBLD_INLINE void iopFCallFunc(PC origpc, PC& pc, FCallArgs fca,
+                                imm_array<uint32_t> args) {
+  auto const type = vmStack().topC()->m_type;
+  if (isObjectType(type)) return fcallFuncObj(origpc, pc, fca, args);
+  if (isArrayLikeType(type)) return fcallFuncArr(origpc, pc, fca, args);
+  if (isStringType(type)) return fcallFuncStr(origpc, pc, fca, args);
+  if (isFuncType(type)) return fcallFuncFunc(origpc, pc, fca, args);
+  if (isClsMethType(type)) return fcallFuncClsMeth(origpc, pc, fca, args);
+
+  raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
+}
+
+OPTBLD_INLINE void iopFCallFuncD(PC origpc, PC& pc, FCallArgs fca, Id id) {
+  auto const nep = vmfp()->unit()->lookupNamedEntityPairId(id);
+  auto const func = Unit::loadFunc(nep.second, nep.first);
+  if (UNLIKELY(func == nullptr)) {
+    raise_call_to_undefined(vmfp()->unit()->lookupLitstrId(id));
+  }
+
+  fcallImpl<false>(origpc, pc, fca, func, [&] (ActRec* ar) {
+    ar->trashThis();
+  });
 }
 
 namespace {
 
+template<bool dynamic>
 void fcallObjMethodImpl(PC origpc, PC& pc, const FCallArgs& fca,
-                        StringData* methName, bool dynamic,
-                        folly::Optional<Array> tsList) {
-  auto const numArgs = fca.numArgsInclUnpack();
-  const Func* f;
+                        StringData* methName) {
+  const Func* func;
   LookupResult res;
-  assertx(tvIsObject(vmStack().indC(numArgs + 2)));
-  auto const obj = vmStack().indC(numArgs + 2)->m_data.pobj;
+  assertx(tvIsObject(vmStack().indC(fca.numInputs() + 2)));
+  auto const obj = vmStack().indC(fca.numInputs() + 2)->m_data.pobj;
   auto cls = obj->getVMClass();
   // if lookup throws, obj will be decref'd via stack
   res = lookupObjMethod(
-    f, cls, methName, arGetContextClass(vmfp()), true);
-  assertx(f);
+    func, cls, methName, arGetContextClass(vmfp()), true);
+  assertx(func);
   if (res == LookupResult::MethodFoundNoThis) {
-    throw_has_this_need_static(f);
-  }
-
-  if (fca.enforceReffiness()) callerReffinessChecks(f, fca);
-  if (dynamic) callerDynamicCallChecks(f);
-  callerRxChecks(vmfp(), f);
-  checkStack(vmStack(), f, 0);
-
-  if (f->hasReifiedGenerics()) {
-    if (!isReifiedName(methName) && !tsList) {
-      raise_error(Strings::REIFIED_GENERICS_NOT_GIVEN, f->fullName()->data());
-    }
+    throw_has_this_need_static(func);
   }
   assertx(res == LookupResult::MethodFoundWithThis ||
           res == LookupResult::MagicCallFound);
-  assertx(kNumActRecCells == 3);
-  ActRec* ar = vmStack().indA(numArgs);
-  ar->m_func = f;
-  /* Transfer ownership of obj to the ActRec*/
-  ar->setThis(obj);
-  ar->initNumArgs(numArgs);
-  if (dynamic) ar->setDynamicCall();
-  if (res == LookupResult::MagicCallFound) {
-    ar->setMagicDispatch(methName);
-  } else {
-    ar->trashVarEnv();
-    decRefStr(methName);
+
+  if (func->hasReifiedGenerics() && !fca.hasGenerics()) {
+    throw_call_reified_func_without_generics(func);
   }
 
-  if (fca.numRets != 1) ar->setFCallM();
-  auto const asyncEagerReturn =
-    fca.asyncEagerOffset != kInvalidOffset && f->supportsAsyncEagerReturn();
-  if (asyncEagerReturn) ar->setAsyncEagerReturn();
-  ar->setReturn(vmfp(), origpc, jit::tc::ustubs().retHelper);
+  fcallImpl<dynamic>(origpc, pc, fca, func, [&] (ActRec* ar) {
+    /* Transfer ownership of obj to the ActRec*/
+    ar->setThis(obj);
 
-  if (f->hasReifiedGenerics()) {
-    auto reifiedGenerics = [&] {
-      if (!tsList) {
-        return getReifiedTypeList(stripClsOrFnNameFromReifiedName(methName));
-      }
-      auto tsListAD = tsList->detach();
-      // The array-data passed on the stack may not be static
-      ArrayData::GetScalarArray(&tsListAD);
-      return tsListAD;
-    }();
-    ar->setReifiedGenerics(reifiedGenerics);
-  }
-
-  doFCall(ar, fca.numArgs, fca.hasUnpack());
-  pc = vmpc();
+    if (res == LookupResult::MagicCallFound) {
+      assertx(!func->hasReifiedGenerics());
+      ar->setMagicDispatch(methName);
+    } else {
+      decRefStr(methName);
+    }
+  });
 }
 
 static void raise_resolve_non_object(const char* methodName,
@@ -4936,20 +4943,10 @@ static void throw_call_non_object(const char* methodName,
   raise_fatal_error(msg.c_str());
 }
 
-ALWAYS_INLINE StringData* mangleInOutName(
-  const StringData* name,
-  imm_array<uint32_t> args
-) {
-  return
-    StringData::Make(
-      name, folly::sformat("${}$inout", concat_arg_list(args))
-    );
-}
-
 ALWAYS_INLINE bool
 fcallObjMethodHandleInput(const FCallArgs& fca, ObjMethodOp op,
                           const StringData* methName, bool extraStk) {
-  Cell* obj = vmStack().indC(fca.numArgsInclUnpack() + 2 + (extraStk ? 1 : 0));
+  Cell* obj = vmStack().indC(fca.numInputs() + 2 + (extraStk ? 1 : 0));
   if (LIKELY(isObjectType(obj->m_type))) return false;
 
   if (UNLIKELY(op == ObjMethodOp::NullThrows || !isNullType(obj->m_type))) {
@@ -4961,6 +4958,7 @@ fcallObjMethodHandleInput(const FCallArgs& fca, ObjMethodOp op,
   // the null "object" and all uninits for inout returns, then push null.
   auto& stack = vmStack();
   if (extraStk) stack.popC();
+  if (fca.hasGenerics()) stack.popC();
   if (fca.hasUnpack()) stack.popC();
   for (uint32_t i = 0; i < fca.numArgs; ++i) stack.popTV();
   stack.popU();
@@ -4993,7 +4991,7 @@ iopFCallObjMethod(PC origpc, PC& pc, FCallArgs fca, const StringData*,
 
   // We handle decReffing method name in fcallObjMethodImpl
   vmStack().discard();
-  fcallObjMethodImpl(origpc, pc, fca, methName, true, folly::none);
+  fcallObjMethodImpl<true>(origpc, pc, fca, methName);
 }
 
 OPTBLD_INLINE void
@@ -5001,19 +4999,7 @@ iopFCallObjMethodD(PC origpc, PC& pc, FCallArgs fca, const StringData*,
                    ObjMethodOp op, const StringData* methName) {
   if (fcallObjMethodHandleInput(fca, op, methName, false)) return;
   auto const methNameC = const_cast<StringData*>(methName);
-  fcallObjMethodImpl(origpc, pc, fca, methNameC, false, folly::none);
-}
-
-OPTBLD_INLINE void
-iopFCallObjMethodRD(PC origpc, PC& pc, FCallArgs fca, const StringData*,
-                    ObjMethodOp op, const StringData* methName) {
-  if (fcallObjMethodHandleInput(fca, op, methName, true)) return;
-  auto const methNameC = const_cast<StringData*>(methName);
-  auto const tsListCell = vmStack().topC();
-  assertx(tvIsVecOrVArray(tsListCell));
-  auto const tsList = Array::attach(tsListCell->m_data.parr);
-  vmStack().discard();
-  fcallObjMethodImpl(origpc, pc, fca, methNameC, false, tsList);
+  fcallObjMethodImpl<false>(origpc, pc, fca, methNameC);
 }
 
 namespace {
@@ -5023,7 +5009,6 @@ void resolveMethodImpl(Cell* c1, Cell* c2) {
   HPHP::Class* cls = nullptr;
   StringData* invName = nullptr;
   bool dynamic = false;
-  ArrayData* reifiedGenerics = nullptr;
   auto arr = make_varray(cellAsVariant(*c2), cellAsVariant(*c1));
   auto const func = vm_decode_function(
     Variant{arr},
@@ -5032,7 +5017,6 @@ void resolveMethodImpl(Cell* c1, Cell* c2) {
     cls,
     invName,
     dynamic,
-    reifiedGenerics,
     DecodeFlags::NoWarn
   );
   assertx(dynamic);
@@ -5061,9 +5045,14 @@ void resolveMethodImpl(Cell* c1, Cell* c2) {
 }
 }
 
-OPTBLD_INLINE void iopResolveClsMethod() {
+OPTBLD_INLINE void iopResolveClsMethod(ClsMethResolveOp op) {
   Cell* func = vmStack().topC();
   Cell* cls = vmStack().indC(1);
+  if (op == ClsMethResolveOp::Warn &&
+      RuntimeOption::EvalWarnOnNonLiteralClsMeth) {
+    raise_warning(Strings::WARN_CLS_METH_WRONG_ARGS);
+  }
+
   if (!isStringType(func->m_type) || !isStringType(cls->m_type)) {
     raise_error(!isStringType(func->m_type) ?
       Strings::METHOD_NAME_MUST_BE_STRING : "class name must be a string.");
@@ -5111,77 +5100,56 @@ OPTBLD_INLINE void iopResolveObjMethod() {
 
 namespace {
 
-void pushClsMethodImpl(Class* cls,
-                       StringData* name,
-                       int numArgs,
-                       bool forwarding,
-                       bool dynamic,
-                       folly::Optional<Array> tsList) {
+template<bool dynamic>
+void fcallClsMethodImpl(PC origpc, PC& pc, const FCallArgs& fca, Class* cls,
+                        StringData* methName, bool forwarding,
+                        bool logAsDynamicCall = true) {
   auto const ctx = liveClass();
   auto obj = ctx && vmfp()->hasThis() ? vmfp()->getThis() : nullptr;
-  const Func* f;
-  auto const res = lookupClsMethod(f, cls, name, obj, ctx, true);
-
-  if (dynamic) callerDynamicCallChecks(f);
-  callerRxChecks(vmfp(), f);
+  const Func* func;
+  auto const res = lookupClsMethod(func, cls, methName, obj, ctx, true);
+  assertx(func);
 
   if (res == LookupResult::MethodFoundNoThis) {
-    if (!f->isStaticInPrologue()) {
-      throw_missing_this(f);
+    if (!func->isStaticInPrologue()) {
+      throw_missing_this(func);
     }
     obj = nullptr;
   } else {
     assertx(obj);
     assertx(res == LookupResult::MethodFoundWithThis ||
-           res == LookupResult::MagicCallFound);
-    obj->incRefCount();
-  }
-  assertx(f);
-  if (f->hasReifiedGenerics()) {
-    if (!isReifiedName(name) && !tsList) {
-      raise_error(Strings::REIFIED_GENERICS_NOT_GIVEN, f->fullName()->data());
-    }
-  }
-  assertx(kNumActRecCells == 3);
-  ActRec* ar = vmStack().indA(numArgs);
-  ar->m_func = f;
-  if (obj) {
-    ar->setThis(obj);
-  } else {
-    if (forwarding && ctx) {
-      /* Propagate the current late bound class if there is one, */
-      /* otherwise use the class given by this instruction's input */
-      if (vmfp()->hasThis()) {
-        cls = vmfp()->getThis()->getVMClass();
-      } else {
-        cls = vmfp()->getClass();
-      }
-    }
-    ar->setClass(cls);
-  }
-  ar->initNumArgs(numArgs);
-  if (dynamic) ar->setDynamicCall();
-  if (res == LookupResult::MagicCallFound) {
-    ar->setMagicDispatch(name);
-  } else {
-    ar->trashVarEnv();
-    decRefStr(const_cast<StringData*>(name));
+            res == LookupResult::MagicCallFound);
   }
 
-  if (f->hasReifiedGenerics()) {
-    // As long as a tsList is passed, we'll use that over reading it from
-    // the name
-    auto reifiedGenerics = [&] {
-      if (!tsList) {
-        return getReifiedTypeList(stripClsOrFnNameFromReifiedName(name));
-      }
-      auto tsListAD = tsList->detach();
-      // The array-data passed on the stack may not be static
-      ArrayData::GetScalarArray(&tsListAD);
-      return tsListAD;
-    }();
-    ar->setReifiedGenerics(reifiedGenerics);
+  if (func->hasReifiedGenerics() && !fca.hasGenerics()) {
+    throw_call_reified_func_without_generics(func);
   }
+
+  fcallImpl<dynamic>(origpc, pc, fca, func, [&] (ActRec* ar) {
+    if (obj) {
+      obj->incRefCount();
+      ar->setThis(obj);
+    } else {
+      if (forwarding && ctx) {
+        /* Propagate the current late bound class if there is one, */
+        /* otherwise use the class given by this instruction's input */
+        if (vmfp()->hasThis()) {
+          cls = vmfp()->getThis()->getVMClass();
+        } else {
+          cls = vmfp()->getClass();
+        }
+      }
+      ar->setClass(cls);
+    }
+
+    if (res == LookupResult::MagicCallFound) {
+      assertx(!func->hasReifiedGenerics());
+      ar->setMagicDispatch(methName);
+    } else {
+      decRefStr(const_cast<StringData*>(methName));
+    }
+  },
+  logAsDynamicCall);
 }
 
 Class* specialClsRefToCls(SpecialClsRef ref) {
@@ -5204,116 +5172,77 @@ Class* specialClsRefToCls(SpecialClsRef ref) {
 
 }
 
-OPTBLD_INLINE void iopFPushClsMethod(uint32_t numArgs, clsref_slot slot,
-                                     imm_array<uint32_t> args) {
-  auto const c1 = vmStack().topC(); // Method name.
-  if (!isStringType(c1->m_type)) {
+OPTBLD_INLINE void
+iopFCallClsMethod(PC origpc, PC& pc, FCallArgs fca, const StringData*,
+                  imm_array<uint32_t> args, IsLogAsDynamicCallOp op) {
+  auto const c1 = vmStack().topC();
+  if (!isClassType(c1->m_type)) {
+    raise_error("Attempting to use non-class in FCallClsMethod");
+  }
+  auto const cls = c1->m_data.pclass;
+
+  auto const c2 = vmStack().indC(1); // Method name.
+  if (!isStringType(c2->m_type)) {
     raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
   }
-  auto const cls = slot.take().second;
-  auto name = c1->m_data.pstr;
+  auto methName = c2->m_data.pstr;
 
   if (UNLIKELY(args.size)) {
-    String s = String::attach(name);
-    name = mangleInOutName(name, args);
+    String s = String::attach(methName);
+    methName = mangleInOutName(methName, args);
   }
 
-  // pushClsMethodImpl will take care of decReffing name
-  vmStack().ndiscard(1);
-  assertx(cls && name);
-  pushClsMethodImpl(cls, name, numArgs, false, true, folly::none);
+  // fcallClsMethodImpl will take care of decReffing method name
+  vmStack().ndiscard(2);
+  assertx(cls && methName);
+  auto const logAsDynamicCall = op == IsLogAsDynamicCallOp::LogAsDynamicCall ||
+    RuntimeOption::EvalLogKnownMethodsAsDynamicCalls;
+  fcallClsMethodImpl<true>(origpc, pc, fca, cls, methName, false,
+                           logAsDynamicCall);
 }
 
 
-namespace {
-
-ALWAYS_INLINE
-void implFPushClsMethodD(
-  uint32_t numArgs,
-  const StringData* name,
-  Id classId,
-  folly::Optional<Array> tsList
-) {
+OPTBLD_INLINE void
+iopFCallClsMethodD(PC origpc, PC& pc, FCallArgs fca, const StringData*,
+                   Id classId, const StringData* methName) {
   const NamedEntityPair &nep =
     vmfp()->m_func->unit()->lookupNamedEntityPairId(classId);
   Class* cls = Unit::loadClass(nep.second, nep.first);
   if (cls == nullptr) {
     raise_error(Strings::UNKNOWN_CLASS, nep.first->data());
   }
-  pushClsMethodImpl(cls, const_cast<StringData*>(name), numArgs,
-                    false, false, tsList);
+  auto const methNameC = const_cast<StringData*>(methName);
+  fcallClsMethodImpl<false>(origpc, pc, fca, cls, methNameC, false);
 }
 
-} // namespace
-
-OPTBLD_INLINE
-void iopFPushClsMethodD(uint32_t numArgs, const StringData* name, Id classId) {
-  implFPushClsMethodD(numArgs, name, classId, folly::none);
-}
-
-OPTBLD_INLINE
-void iopFPushClsMethodRD(uint32_t numArgs, const StringData* name, Id classId) {
-  auto const tsListCell = vmStack().topC();
-  assertx(tvIsVecOrVArray(tsListCell));
-  auto const tsList = Array::attach(tsListCell->m_data.parr);
-  vmStack().discard();
-  implFPushClsMethodD(numArgs, name, classId, tsList);
-}
-
-OPTBLD_INLINE void iopFPushClsMethodS(uint32_t numArgs, SpecialClsRef ref,
-                                      imm_array<uint32_t> args) {
+OPTBLD_INLINE void
+iopFCallClsMethodS(PC origpc, PC& pc, FCallArgs fca, const StringData*,
+                   SpecialClsRef ref, imm_array<uint32_t> args) {
   auto const c1 = vmStack().topC(); // Method name.
   if (!isStringType(c1->m_type)) {
     raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
   }
   auto const cls = specialClsRefToCls(ref);
-  auto name = c1->m_data.pstr;
+  auto methName = c1->m_data.pstr;
 
   if (UNLIKELY(args.size)) {
-    String s = String::attach(name);
-    name = mangleInOutName(name, args);
+    String s = String::attach(methName);
+    methName = mangleInOutName(methName, args);
   }
 
-  // pushClsMethodImpl will take care of decReffing name
+  // fcallClsMethodImpl will take care of decReffing name
   vmStack().ndiscard(1);
-  pushClsMethodImpl(
-    cls,
-    name,
-    numArgs,
-    ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent,
-    true,
-    folly::none
-  );
+  auto const fwd = ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent;
+  fcallClsMethodImpl<true>(origpc, pc, fca, cls, methName, fwd);
 }
 
-OPTBLD_INLINE void iopFPushClsMethodSD(uint32_t numArgs,
-                                       SpecialClsRef ref,
-                                       const StringData* name) {
-  pushClsMethodImpl(
-    specialClsRefToCls(ref),
-    const_cast<StringData*>(name),
-    numArgs,
-    ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent,
-    false,
-    folly::none
-  );
-}
-
-OPTBLD_INLINE void iopFPushClsMethodSRD(uint32_t numArgs,
-                                        SpecialClsRef ref,
-                                        const StringData* name) {
-  auto const tsListCell = vmStack().topC();
-  assertx(tvIsVecOrVArray(tsListCell));
-  auto const tsList = Array::attach(tsListCell->m_data.parr);
-  vmStack().discard();
-  pushClsMethodImpl(
-    specialClsRefToCls(ref),
-    const_cast<StringData*>(name),
-    numArgs,
-    ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent,
-    false,
-    tsList
-  );
+OPTBLD_INLINE void
+iopFCallClsMethodSD(PC origpc, PC& pc, FCallArgs fca, const StringData*,
+                    SpecialClsRef ref, const StringData* methName) {
+  auto const cls = specialClsRefToCls(ref);
+  auto const methNameC = const_cast<StringData*>(methName);
+  auto const fwd = ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent;
+  fcallClsMethodImpl<false>(origpc, pc, fca, cls, methNameC, fwd);
 }
 
 namespace {
@@ -5343,12 +5272,40 @@ void newObjDImpl(Id id, ArrayData* reified_types) {
 
 } // namespace
 
-OPTBLD_INLINE void iopNewObj(clsref_slot slot, HasGenericsOp op) {
-  auto cls_ref = slot.take();
-  callerDynamicConstructChecks(cls_ref.second);
-  auto const reified_types =
-    HasGenericsOp::NoGenerics != op ? cls_ref.first : nullptr;
-  auto this_ = newObjImpl(cls_ref.second, reified_types);
+OPTBLD_INLINE void iopNewObj() {
+  auto const clsCell = vmStack().topC();
+  if (!isClassType(clsCell->m_type)) {
+    raise_error("Attempting NewObj with non-class");
+  }
+  auto const cls = clsCell->m_data.pclass;
+
+  callerDynamicConstructChecks(cls);
+  auto this_ = newObjImpl(cls, nullptr);
+  vmStack().popC();
+  vmStack().pushObjectNoRc(this_);
+}
+
+OPTBLD_INLINE void iopNewObjR() {
+  auto const reifiedCell = vmStack().topC();
+  auto const clsCell = vmStack().indC(1);
+
+  if (!isClassType(clsCell->m_type)) {
+    raise_error("Attempting NewObjR with non-class");
+  }
+  auto const cls = clsCell->m_data.pclass;
+
+  auto const reified = [&] () -> ArrayData* {
+    if (reifiedCell->m_type == KindOfNull) return nullptr;
+    if (!tvIsVecOrVArray(reifiedCell)) {
+      raise_error("Attempting NewObjR with invalid reified generics");
+    }
+    return reifiedCell->m_data.parr;
+  }();
+
+  callerDynamicConstructChecks(cls);
+  auto this_ = newObjImpl(cls, reified);
+  vmStack().popC();
+  vmStack().popC();
   vmStack().pushObjectNoRc(this_);
 }
 
@@ -5358,8 +5315,15 @@ OPTBLD_INLINE void iopNewObjD(Id id) {
 
 OPTBLD_INLINE void iopNewObjRD(Id id) {
   auto const tsList = vmStack().topC();
-  assertx(tvIsVecOrVArray(tsList));
-  newObjDImpl(id, tsList->m_data.parr);
+
+  auto const reified = [&] () -> ArrayData* {
+    if (tsList->m_type == KindOfNull) return nullptr;
+    if (!tvIsVecOrVArray(tsList)) {
+      raise_error("Attempting NewObjRD with invalid reified generics");
+    }
+    return tsList->m_data.parr;
+  }();
+  newObjDImpl(id, reified);
 }
 
 OPTBLD_INLINE void iopNewObjS(SpecialClsRef ref) {
@@ -5377,30 +5341,18 @@ OPTBLD_INLINE void iopFCallCtor(PC origpc, PC& pc, FCallArgs fca,
                                 const StringData*) {
   assertx(fca.numRets == 1);
   assertx(fca.asyncEagerOffset == kInvalidOffset);
-  auto const numArgs = fca.numArgsInclUnpack();
-  assertx(tvIsObject(vmStack().indC(numArgs + 2)));
-  auto const obj = vmStack().indC(numArgs + 2)->m_data.pobj;
+  assertx(tvIsObject(vmStack().indC(fca.numInputs() + 2)));
+  auto const obj = vmStack().indC(fca.numInputs() + 2)->m_data.pobj;
 
   const Func* func;
   auto const ctx = arGetContextClass(vmfp());
   auto const res UNUSED = lookupCtorMethod(func, obj->getVMClass(), ctx, true);
   assertx(res == LookupResult::MethodFoundWithThis);
 
-  if (fca.enforceReffiness()) callerReffinessChecks(func, fca);
-  callerRxChecks(vmfp(), func);
-  checkStack(vmStack(), func, 0);
-
-  // Write new activation record.
-  assertx(kNumActRecCells == 3);
-  auto ar = vmStack().indA(numArgs);
-  ar->m_func = func;
-  ar->setThis(obj);
-  ar->initNumArgs(numArgs);
-  ar->trashVarEnv();
-  ar->setReturn(vmfp(), origpc, jit::tc::ustubs().retHelper);
-
-  doFCall(ar, fca.numArgs, fca.hasUnpack());
-  pc = vmpc();
+  fcallImpl<false>(origpc, pc, fca, func, [&] (ActRec* ar) {
+    /* Transfer ownership of obj to the ActRec*/
+    ar->setThis(obj);
+  });
 }
 
 OPTBLD_INLINE void iopLockObj() {
@@ -5409,20 +5361,11 @@ OPTBLD_INLINE void iopLockObj() {
   c1->m_data.pobj->lockObject();
 }
 
-namespace {
-
-// Find the AR for the current FPI region by indexing from sp
-inline ActRec* arFromSp(int32_t n) {
-  return reinterpret_cast<ActRec*>(vmStack().top() + n);
-}
-
-}
-
 bool doFCallUnpackTC(PC origpc, int32_t numArgsInclUnpack, void* retAddr) {
   assert_native_stack_aligned();
   assertx(tl_regState == VMRegState::DIRTY);
   tl_regState = VMRegState::CLEAN;
-  auto const ar = arFromSp(numArgsInclUnpack);
+  auto const ar = vmStack().indA(numArgsInclUnpack);
   assertx(ar->numArgs() == numArgsInclUnpack);
   ar->setReturn(vmfp(), origpc, jit::tc::ustubs().retHelper);
   ar->setJitReturn(retAddr);
@@ -5431,36 +5374,20 @@ bool doFCallUnpackTC(PC origpc, int32_t numArgsInclUnpack, void* retAddr) {
   return ret;
 }
 
-OPTBLD_FLT_INLINE
-void iopFCall(PC origpc, PC& pc, FCallArgs fca,
-              const StringData* /*clsName*/, const StringData* funcName) {
-  auto const ar = arFromSp(fca.numArgsInclUnpack());
-  auto const func = ar->func();
-  assertx(
-    funcName->empty() ||
-    RuntimeOption::EvalJitEnableRenameFunction ||
-    (func->attrs() & AttrInterceptable) ||
-    func->name()->isame(funcName)
-  );
-  assertx(fca.numArgsInclUnpack() == ar->numArgs());
-  if (fca.enforceReffiness()) callerReffinessChecks(func, fca);
-  checkStack(vmStack(), func, 0);
-  if (fca.numRets != 1) ar->setFCallM();
-  auto const asyncEagerReturn =
-    fca.asyncEagerOffset != kInvalidOffset && func->supportsAsyncEagerReturn();
-  if (asyncEagerReturn) ar->setAsyncEagerReturn();
-  ar->setReturn(vmfp(), origpc, jit::tc::ustubs().retHelper);
-  doFCall(ar, fca.numArgs, fca.hasUnpack());
-  pc = vmpc();
-}
-
-OPTBLD_FLT_INLINE
-void iopFCallBuiltin(uint32_t numArgs, uint32_t numNonDefault, Id id) {
+OPTBLD_INLINE
+void iopFCallBuiltin(
+  uint32_t numArgs, uint32_t numNonDefault, uint32_t numOut, Id id
+) {
   auto const ne = vmfp()->m_func->unit()->lookupNamedEntityId(id);
   auto const func = ne->uniqueFunc();
   if (func == nullptr || !func->isBuiltin()) {
     raise_error("Call to undefined function %s()",
                 vmfp()->m_func->unit()->lookupLitstrId(id)->data());
+  }
+
+  if (func->numInOutParams() != numOut) {
+    raise_error("Call to function %s() with incorrectly annotated inout "
+                "parameter", func->fullDisplayName()->data());
   }
 
   callerRxChecks(vmfp(), func);
@@ -5479,7 +5406,7 @@ void iopFCallBuiltin(uint32_t numArgs, uint32_t numNonDefault, Id id) {
         : isArrayType(args[1 - safe_cast<int32_t>(numArgs)].m_type)
     );
   }
-  Native::callFunc(func, ctx, args, numNonDefault, ret);
+  Native::callFunc(func, ctx, args, numNonDefault, ret, true);
 
   frame_free_args(args, numNonDefault);
   vmStack().ndiscard(numArgs);
@@ -5493,83 +5420,102 @@ void iopFCallBuiltin(uint32_t numArgs, uint32_t numNonDefault, Id id) {
 
 namespace {
 
-template <bool Local, bool Pop>
-bool initIterator(PC& pc, PC targetpc, Iter* it, Cell* c1) {
-  if (isClsMethType(type(c1))) {
-    raise_error(
-      "Invalid operand type was used: expects iterable, clsmeth was given");
+template <bool HasKey, bool Local>
+void initIterator(PC& pc, PC targetpc, Iter* it, TypedValue* base,
+                  TypedValue* val, TypedValue* key) {
+  // WARNING: This code requires caution regarding cells vs. refs. It takes
+  // some case analysis to show that it is correct:
+  //
+  //  - For IterInit / IterInitK bytecodes, the base is popped from the stack
+  //    and is always a cell. We can check for array-like before "unboxing".
+  //
+  //  - For LIterInit / LIterInitK bytecodes, we must do the array-like check
+  //    prior to unboxing ref bases. The local iterator optimization should
+  //    not kick in if the base is a ref to an array - these are non-local
+  //    iterators handled by the generic iterator init code below.
+  //
+  if (isArrayLikeType(type(base))) {
+    auto const arr = base->m_data.parr;
+    auto const res = HasKey ? new_iter_array_key<Local>(it, arr, val, key)
+                            : new_iter_array<Local>(it, arr, val);
+    if (res == 0) pc = targetpc;
+    if (!Local) vmStack().discard();
+    return;
   }
-  auto const hasElems = it->init<Local>(c1);
-  if (!hasElems) pc = targetpc;
-  if (Pop) vmStack().popC();
-  return hasElems;
+
+  // Now we can unbox the base and fall back to generic Iter methods.
+  //
+  // NOTE: It looks like we could call new_iter_object at this point. However,
+  // doing so is incorrect, for two reasons:
+  //
+  //  1. We may have unboxed an array-like. (This is the ref-to-array case
+  //     noted in the comment above.) As a result, we need to redo all checks
+  //     on the base again here to account for unboxing.
+  //
+  //  2. new_iter_array / new_iter_object only handle array-like and object
+  //     bases, respectively. We may have some other kind of base which the
+  //     generic Iter::init handles correctly.
+  //
+  // As a result, the simplest code we could have here is the generic case.
+  // It's also about as fast as it can get, because at this point, we're almost
+  // always going to create an object iter, which can't really be optimized.
+  //
+  base = Local ? tvToCell(base) : tvAssertCell(base);
+  if (isClsMethType(type(base))) {
+    raise_error("Invalid operand type was used: "
+                "expects iterable, clsmeth was given");
+  }
+
+  if (it->init(base)) {
+    tvAsVariant(val) = it->val();
+    if (HasKey) tvAsVariant(key) = it->key();
+  } else {
+    pc = targetpc;
+  }
+  if (!Local) vmStack().popC();
 }
 
 }
 
 OPTBLD_INLINE void iopIterInit(PC& pc, Iter* it, PC targetpc, local_var val) {
-  Cell* c1 = vmStack().topC();
-  if (initIterator<false, true>(pc, targetpc, it, c1)) {
-    tvAsVariant(val.ptr) = it->arr().second();
-  }
+  auto const base = vmStack().topC();
+  auto constexpr HasKey = false, Local = false;
+  initIterator<HasKey, Local>(pc, targetpc, it, base, val.ptr, nullptr);
 }
 
 OPTBLD_INLINE
 void iopIterInitK(PC& pc, Iter* it, PC targetpc, local_var val, local_var key) {
-  Cell* c1 = vmStack().topC();
-  if (initIterator<false, true>(pc, targetpc, it, c1)) {
-    tvAsVariant(val.ptr) = it->arr().second();
-    tvAsVariant(key.ptr) = it->arr().first();
-  }
+  auto const base = vmStack().topC();
+  auto constexpr HasKey = true, Local = false;
+  initIterator<HasKey, Local>(pc, targetpc, it, base, val.ptr, key.ptr);
 }
 
 OPTBLD_INLINE void iopLIterInit(PC& pc, Iter* it, local_var local,
                                 PC targetpc, local_var val) {
-  if (isArrayLikeType(local.ptr->m_type)) {
-    if (initIterator<true, false>(pc, targetpc, it, tvAssertCell(local.ptr))) {
-      tvAsVariant(val.ptr) = it->arr().secondLocal(local.ptr->m_data.parr);
-    }
-    return;
-  }
-
-  if (initIterator<false, false>(pc, targetpc, it, tvToCell(local.ptr))) {
-    tvAsVariant(val.ptr) = it->arr().second();
-  }
+  auto constexpr HasKey = false, Local = true;
+  initIterator<HasKey, Local>(pc, targetpc, it, local.ptr, val.ptr, nullptr);
 }
 
 OPTBLD_INLINE void iopLIterInitK(PC& pc, Iter* it, local_var local,
                                  PC targetpc, local_var val, local_var key) {
-  if (isArrayLikeType(local.ptr->m_type)) {
-    if (initIterator<true, false>(pc, targetpc, it, tvAssertCell(local.ptr))) {
-      tvAsVariant(val.ptr) = it->arr().secondLocal(local.ptr->m_data.parr);
-      tvAsVariant(key.ptr) = it->arr().firstLocal(local.ptr->m_data.parr);
-    }
-    return;
-  }
-
-  if (initIterator<false, false>(pc, targetpc, it, tvToCell(local.ptr))) {
-    tvAsVariant(val.ptr) = it->arr().second();
-    tvAsVariant(key.ptr) = it->arr().first();
-  }
+  auto constexpr HasKey = true, Local = true;
+  initIterator<HasKey, Local>(pc, targetpc, it, local.ptr, val.ptr, key.ptr);
 }
 
 OPTBLD_INLINE void iopIterNext(PC& pc, Iter* it, PC targetpc, local_var val) {
-  if (it->next()) {
+  if (iter_next_ind(it, tvToCell(val.ptr))) {
     vmpc() = targetpc;
     jmpSurpriseCheck(targetpc - pc);
     pc = targetpc;
-    tvAsVariant(val.ptr) = it->arr().second();
   }
 }
 
 OPTBLD_INLINE
 void iopIterNextK(PC& pc, Iter* it, PC targetpc, local_var val, local_var key) {
-  if (it->next()) {
+  if (iter_next_key_ind(it, tvToCell(val.ptr), tvToCell(key.ptr))) {
     vmpc() = targetpc;
     jmpSurpriseCheck(targetpc - pc);
     pc = targetpc;
-    tvAsVariant(val.ptr) = it->arr().second();
-    tvAsVariant(key.ptr) = it->arr().first();
   }
 }
 
@@ -5578,18 +5524,14 @@ OPTBLD_INLINE void iopLIterNext(PC& pc,
                                 local_var base,
                                 PC targetpc,
                                 local_var val) {
-  if (isArrayLikeType(base.ptr->m_type)) {
-    if (it->nextLocal(base.ptr->m_data.parr)) {
-      vmpc() = targetpc;
-      jmpSurpriseCheck(targetpc - pc);
-      pc = targetpc;
-      tvAsVariant(val.ptr) = it->arr().secondLocal(base.ptr->m_data.parr);
-    }
-  } else if (it->next()) {
+  auto valOut = tvToCell(val.ptr);
+  auto const hasMore = isArrayLikeType(base.ptr->m_type)
+    ? liter_next_ind(it, valOut, base.ptr->m_data.parr)
+    : iter_next_ind(it, valOut);
+  if (hasMore) {
     vmpc() = targetpc;
     jmpSurpriseCheck(targetpc - pc);
     pc = targetpc;
-    tvAsVariant(val.ptr) = it->arr().second();
   }
 }
 
@@ -5599,20 +5541,15 @@ OPTBLD_INLINE void iopLIterNextK(PC& pc,
                                  PC targetpc,
                                  local_var val,
                                  local_var key) {
-  if (isArrayLikeType(base.ptr->m_type)) {
-    if (it->nextLocal(base.ptr->m_data.parr)) {
-      vmpc() = targetpc;
-      jmpSurpriseCheck(targetpc - pc);
-      pc = targetpc;
-      tvAsVariant(val.ptr) = it->arr().secondLocal(base.ptr->m_data.parr);
-      tvAsVariant(key.ptr) = it->arr().firstLocal(base.ptr->m_data.parr);
-    }
-  } else if (it->next()) {
+  auto valOut = tvToCell(val.ptr);
+  auto keyOut = tvToCell(key.ptr);
+  auto const hasMore = isArrayLikeType(base.ptr->m_type)
+    ? liter_next_key_ind(it, valOut, keyOut, base.ptr->m_data.parr)
+    : iter_next_key_ind(it, valOut, keyOut);
+  if (hasMore) {
     vmpc() = targetpc;
     jmpSurpriseCheck(targetpc - pc);
     pc = targetpc;
-    tvAsVariant(val.ptr) = it->arr().second();
-    tvAsVariant(key.ptr) = it->arr().first();
   }
 }
 
@@ -5836,12 +5773,10 @@ OPTBLD_INLINE void iopChainFaults() {
   chainFaultObjects(current.m_data.pobj, prev.m_data.pobj);
 }
 
-OPTBLD_INLINE void iopLateBoundCls(clsref_slot slot) {
-  Class* cls = frameStaticClass(vmfp());
-  if (!cls) {
-    raise_error(HPHP::Strings::CANT_ACCESS_STATIC);
-  }
-  slot.put(nullptr, cls);
+OPTBLD_INLINE void iopLateBoundCls() {
+  auto const cls = frameStaticClass(vmfp());
+  if (!cls) raise_error(HPHP::Strings::CANT_ACCESS_STATIC);
+  vmStack().pushClass(cls);
 }
 
 OPTBLD_INLINE void iopVerifyParamType(local_var param) {
@@ -5963,24 +5898,18 @@ OPTBLD_INLINE TCA iopNativeImpl(PC& pc) {
   return jitReturnPost(jitReturn);
 }
 
-OPTBLD_INLINE void iopSelf(clsref_slot slot) {
-  Class* clss = arGetContextClass(vmfp());
-  if (!clss) {
-    raise_error(HPHP::Strings::CANT_ACCESS_SELF);
-  }
-  slot.put(nullptr, clss);
+OPTBLD_INLINE void iopSelf() {
+  auto const clss = arGetContextClass(vmfp());
+  if (!clss) raise_error(HPHP::Strings::CANT_ACCESS_SELF);
+  vmStack().pushClass(clss);
 }
 
-OPTBLD_INLINE void iopParent(clsref_slot slot) {
-  Class* clss = arGetContextClass(vmfp());
-  if (!clss) {
-    raise_error(HPHP::Strings::CANT_ACCESS_PARENT_WHEN_NO_CLASS);
-  }
-  Class* parent = clss->parent();
-  if (!parent) {
-    raise_error(HPHP::Strings::CANT_ACCESS_PARENT_WHEN_NO_PARENT);
-  }
-  slot.put(nullptr, parent);
+OPTBLD_INLINE void iopParent() {
+  auto const clss = arGetContextClass(vmfp());
+  if (!clss) raise_error(HPHP::Strings::CANT_ACCESS_PARENT_WHEN_NO_CLASS);
+  auto const parent = clss->parent();
+  if (!parent) raise_error(HPHP::Strings::CANT_ACCESS_PARENT_WHEN_NO_PARENT);
+  vmStack().pushClass(parent);
 }
 
 OPTBLD_INLINE void iopCreateCl(uint32_t numArgs, uint32_t clsIx) {
@@ -6185,7 +6114,7 @@ OPTBLD_INLINE void iopContAssignDelegate(Iter* iter) {
   // returns false then we know that we have an empty iterator (like `[]`) in
   // which case just set our delegate to Null so that ContEnterDelegate and
   // YieldFromDelegate know something is up.
-  if (tvIsGenerator(param) || iter->init<false>(&param)) {
+  if (tvIsGenerator(param) || iter->init(&param)) {
     cellSet(param, gen->m_delegate);
   } else {
     cellSetNull(gen->m_delegate);
@@ -6284,10 +6213,8 @@ TCA yieldFromIterator(PC& pc, Generator* gen, Iter* it, Offset resumeOffset) {
     return nullptr;
   }
 
-  // Otherwise, if iteration is finished we just return null.
-  auto arr = it->arr();
-  if (arr.end()) {
-    // Push our null return value onto the stack
+  // If iteration is complete, then this bytecode pushes null on the stack.
+  if (it->end()) {
     tvWriteNull(*vmStack().topTV());
     return nullptr;
   }
@@ -6298,9 +6225,9 @@ TCA yieldFromIterator(PC& pc, Generator* gen, Iter* it, Offset resumeOffset) {
   auto const sfp = fp->sfp();
   auto const callOff = fp->m_callOff;
 
-  auto key = *(arr.first().asTypedValue());
-  auto value = *(arr.second().asTypedValue());
-  gen->yield(resumeOffset, &key, value);
+  auto key = *it->key().asTypedValue();
+  auto val = *it->val().asTypedValue();
+  gen->yield(resumeOffset, &key, val);
 
   returnToCaller(pc, sfp, callOff);
 
@@ -6417,7 +6344,7 @@ OPTBLD_INLINE void asyncSuspendE(PC& pc) {
     vmStack().ndiscard(func->numSlotsInFrame());
     vmStack().ret();
     tvCopy(make_tv<KindOfObject>(waitHandle), *vmStack().topTV());
-    vmStack().topTV()->m_aux.u_asyncNonEagerReturnFlag = -1;
+    vmStack().topTV()->m_aux.u_asyncEagerReturnFlag = 0;
     assertx(vmStack().topTV() == fp->retSlot());
 
     // Return control to the caller.
@@ -6561,9 +6488,10 @@ OPTBLD_INLINE void iopCheckProp(const StringData* propName) {
   always_assert(propVec);
 
   auto* ctx = arGetContextClass(vmfp());
-  auto idx = ctx->lookupDeclProp(propName);
+  auto slot = ctx->lookupDeclProp(propName);
+  auto index = cls->propSlotToIndex(slot);
 
-  auto& tv = (*propVec)[idx];
+  auto& tv = (*propVec)[index];
   vmStack().pushBool(tv.m_type != KindOfUninit);
 }
 
@@ -6592,11 +6520,12 @@ OPTBLD_INLINE void iopInitProp(const StringData* propName, InitPropOp propOp) {
     case InitPropOp::NonStatic: {
       auto* propVec = cls->getPropData();
       always_assert(propVec);
-      auto const idx = ctx->lookupDeclProp(propName);
-      assertx(idx != kInvalidSlot);
-      tv = &(*propVec)[idx];
+      auto const slot = ctx->lookupDeclProp(propName);
+      auto const index = cls->propSlotToIndex(slot);
+      assertx(slot != kInvalidSlot);
+      tv = &(*propVec)[index];
       if (RuntimeOption::EvalCheckPropTypeHints > 0) {
-        auto const& prop = cls->declProperties()[idx];
+        auto const& prop = cls->declProperties()[slot];
         auto const& tc = prop.typeConstraint;
         if (tc.isCheckable()) tc.verifyProperty(fr, cls, prop.cls, prop.name);
       }
@@ -6796,15 +6725,12 @@ struct litstr_id {
 #define FLAG_NF
 #define FLAG_TF
 #define FLAG_CF , pc
-#define FLAG_PF
 #define FLAG_CF_TF FLAG_CF
 
 #define DECODE_IVA decode_iva(pc)
 #define DECODE_I64A decode<int64_t>(pc)
 #define DECODE_LA decode_local(pc)
 #define DECODE_IA decode_iter(pc)
-#define DECODE_CAR decode_clsref_slot(pc)
-#define DECODE_CAW DECODE_CAR
 #define DECODE_DA decode<double>(pc)
 #define DECODE_SA decode<litstr_id>(pc)
 #define DECODE_AA decode_litarr(pc)
@@ -6828,6 +6754,8 @@ struct litstr_id {
   DECODE_THREE(a, b, c) auto const imm4 = DECODE_##d;
 #define DECODE_FIVE(a, b, c, d, e) \
   DECODE_FOUR(a, b, c, d) auto const imm5 = DECODE_##e;
+#define DECODE_SIX(a, b, c, d, e, f) \
+  DECODE_FIVE(a, b, c, d, e) auto const imm6 = DECODE_##f;
 
 #define PASS_NA
 #define PASS_ONE(...) , imm1
@@ -6835,6 +6763,7 @@ struct litstr_id {
 #define PASS_THREE(...) , imm1, imm2, imm3
 #define PASS_FOUR(...) , imm1, imm2, imm3, imm4
 #define PASS_FIVE(...) , imm1, imm2, imm3, imm4, imm5
+#define PASS_SIX(...) , imm1, imm2, imm3, imm4, imm5, imm6
 
 #define O(name, imm, in, out, flags)                                 \
   OPTBLD_INLINE TCA iopWrap##name(PC& pc) {                          \
@@ -6848,15 +6777,12 @@ OPCODES
 #undef FLAG_NF
 #undef FLAG_TF
 #undef FLAG_CF
-#undef FLAG_PF
 #undef FLAG_CF_TF
 
 #undef DECODE_IVA
 #undef DECODE_I64A
 #undef DECODE_LA
 #undef DECODE_IA
-#undef DECODE_CAR
-#undef DECODE_CAW
 #undef DECODE_DA
 #undef DECODE_SA
 #undef DECODE_AA
@@ -6945,12 +6871,42 @@ OPCODES
 #undef O
 };
 
+// fast path to look up native pc; try entry point first.
+PcPair lookup_cti(const Func* func, PC pc) {
+  auto unitpc = func->unit()->entry();
+  auto cti_entry = func->ctiEntry();
+  if (!cti_entry) {
+    cti_entry = compile_cti(const_cast<Func*>(func), unitpc);
+  }
+  if (pc == unitpc + func->base()) {
+    return {cti_code().base() + cti_entry, pc};
+  }
+  return {lookup_cti(func, cti_entry, unitpc, pc), pc};
+}
+
+template <bool breakOnCtlFlow>
+TCA dispatchThreaded(bool coverage) {
+  auto modes = breakOnCtlFlow ? ExecMode::BB : ExecMode::Normal;
+  if (coverage) {
+    modes = modes | ExecMode::Coverage;
+  }
+  DEBUGGER_ATTACHED_ONLY(modes = modes | ExecMode::Debugger);
+  auto target = lookup_cti(vmfp()->func(), vmpc());
+  CALLEE_SAVED_BARRIER();
+  auto retAddr = g_enterCti(modes, target, rds::header());
+  CALLEE_SAVED_BARRIER();
+  return retAddr;
+}
+
 template <bool breakOnCtlFlow>
 TCA dispatchImpl() {
+  bool collectCoverage = RID().getCoverage();
+  if (cti_enabled()) {
+    return dispatchThreaded<breakOnCtlFlow>(collectCoverage);
+  }
+
   // Unfortunately, MSVC doesn't support computed
   // gotos, so use a switch instead.
-  bool collectCoverage = RID().getCoverage();
-
 #ifndef _MSC_VER
   static const void* const optabDirect[] = {
 #define O(name, imm, push, pop, flags) \
@@ -7023,6 +6979,13 @@ TCA dispatchImpl() {
     }                                                         \
     retAddr = iopWrap##name(pc);                              \
     vmpc() = pc;                                              \
+    if ((isFCallFunc(Op::name) ||                             \
+         Op::name == Op::NativeImpl ||                        \
+         Op::name == Op::FCallBuiltin) &&                     \
+        !collectCoverage && RID().getCoverage()) {            \
+      optab = optabCover;                                     \
+      collectCoverage = true;                                 \
+    }                                                         \
     if (breakOnCtlFlow) {                                     \
       isCtlFlow = instrIsControlFlow(Op::name);               \
     }                                                         \
@@ -7121,5 +7084,173 @@ TCA dispatchBB() {
   auto retAddr = dispatchImpl<true>();
   return switchModeForDebugger(retAddr);
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// Call-threaded entry points
+
+namespace {
+
+constexpr auto do_prof = false;
+
+static BoolProfiler PredictProf("predict"), LookupProf("lookup");
+
+constexpr unsigned NumPredictors = 16; // real cpus have 8-24
+static __thread unsigned s_predict{0};
+static __thread PcPair s_predictors[NumPredictors];
+static void pushPrediction(PcPair p) {
+  s_predictors[s_predict++ % NumPredictors] = p;
+}
+static PcPair popPrediction() {
+  return s_predictors[--s_predict % NumPredictors];
+}
+
+// callsites quick reference:
+//
+// simple opcodes, including throw
+//       call  #addr
+// conditional branch
+//       lea   [pc + instrLen(pc)], nextpc_saved
+//       call  #addr
+//       cmp   rdx, nextpc_saved
+//       jne   native-target
+// unconditional branch
+//       call  #addr
+//       jmp   native-target
+// indirect branch
+//       call  #addr
+//       jmp   rax
+// calls w/ return prediction
+//       lea   [pc + instrLen(pc)], nextpc_arg
+//       call  #addr
+//       jmp   rax
+
+NEVER_INLINE void execModeHelper(PC pc, ExecMode modes) {
+  if (modes & ExecMode::Debugger) phpDebuggerOpcodeHook(pc);
+  if (modes & ExecMode::Coverage) recordCodeCoverage(pc);
+  if (modes & ExecMode::BB) {
+    //Stats::inc(Stats::Instr_InterpBB##name);
+  }
+}
+
+template<Op opcode, bool repo_auth, class Iop>
+PcPair run(TCA* returnaddr, ExecMode modes, rds::Header* tl, PC nextpc, PC pc,
+           Iop iop) {
+  assert(vmpc() == pc);
+  assert(peek_op(pc) == opcode);
+  FTRACE(1, "dispatch: {}: {}\n", pcOff(),
+         instrToString(pc, vmfp()->m_func->unit()));
+  if (!repo_auth) {
+    if (UNLIKELY(modes != ExecMode::Normal)) {
+      execModeHelper(pc, modes);
+    }
+  }
+  DEBUG_ONLY auto origPc = pc;
+  pc += encoded_op_size(opcode); // skip the opcode
+  auto retAddr = iop(pc);
+  vmpc() = pc;
+  assert(!isThrow(opcode));
+  if (isSimple(opcode)) {
+    // caller ignores rax return value, invokes next bytecode
+    return {nullptr, pc};
+  }
+  if (isBranch(opcode) || isGoto(opcode)) {
+    // callsites have no ability to indirect-jump out of bytecode.
+    // so smash the return address to &g_exitCti
+    // if we need to exit because of dispatchBB() mode.
+    // TODO: t6019406 use surprise checks to eliminate BB mode
+    if (modes & ExecMode::BB) {
+      *returnaddr = g_exitCti;
+      return {nullptr, (PC)retAddr};  // exit stub will return retAddr
+    }
+    return {nullptr, pc};
+  }
+  // call & indirect branch: caller will jump to address returned in rax
+  if (instrCanHalt(opcode) && !pc) {
+    vmfp() = nullptr;
+    // We returned from the top VM frame in this nesting level. This means
+    // m_savedRip in our ActRec must have been callToExit, which should've
+    // been returned by jitReturnPost(), whether or not we were called from
+    // the TC. We only actually return callToExit to our caller if that
+    // caller is dispatchBB().
+    assert(retAddr == jit::tc::ustubs().callToExit);
+    if (!(modes & ExecMode::BB)) retAddr = nullptr;
+    return {g_exitCti, (PC)retAddr};
+  }
+  if (instrIsControlFlow(opcode) && (modes & ExecMode::BB)) {
+    return {g_exitCti, (PC)retAddr};
+  }
+  if (isReturnish(opcode)) {
+    auto target = popPrediction();
+    if (do_prof) PredictProf(pc == target.pc);
+    if (pc == target.pc) return target;
+  }
+  if (isFCall(opcode)) {
+    // call-like opcodes predict return to next bytecode
+    assert(nextpc == origPc + instrLen(origPc));
+    pushPrediction({*returnaddr + kCtiIndirectJmpSize, nextpc});
+  }
+  if (do_prof) LookupProf(pc == vmfp()->m_func->getEntry());
+  // return ip to jump to, caller will do jmp(rax)
+  return lookup_cti(vmfp()->m_func, pc);
+}
+}
+
+// register assignments inbetween calls to cti opcodes
+// rax = target of indirect branch instr (call, switch, etc)
+// rdx = pc (passed as 3rd arg register, 2nd return register)
+// rbx = next-pc after branch instruction, only if isBranch(op)
+// r12 = rds::Header* (vmtl)
+// r13 = modes
+// r14 = location of return address to cti caller on native stack
+
+#ifdef __clang__
+#define DECLARE_FIXED(TL,MODES,RA)\
+  rds::Header* TL; asm volatile("mov %%r12, %0" : "=r"(TL) ::);\
+  ExecMode MODES;  asm volatile("mov %%r13d, %0" : "=r"(MODES) ::);\
+  TCA* RA;         asm volatile("mov %%r14, %0" : "=r"(RA) ::);
+#else
+#define DECLARE_FIXED(TL,MODES,RA)\
+  register rds::Header* TL asm("r12");\
+  register ExecMode MODES  asm("r13");\
+  register TCA* RA         asm("r14");
+#endif
+
+namespace cti {
+// generate cti::op call-threaded function for each opcode
+#define O(opcode, imm, push, pop, flags)\
+PcPair opcode(PC nextpc, TCA*, PC pc) {\
+  DECLARE_FIXED(tl, modes, returnaddr);\
+  return run<Op::opcode,true>(returnaddr, modes, tl, nextpc, pc,\
+      [](PC& pc) {\
+    return iopWrap##opcode(pc);\
+  });\
+}
+OPCODES
+#undef O
+
+// generate debug/coverage-capable opcode bodies (for non-repo-auth)
+#define O(opcode, imm, push, pop, flags)\
+PcPair d##opcode(PC nextpc, TCA*, PC pc) {\
+  DECLARE_FIXED(tl, modes, returnaddr);\
+  return run<Op::opcode,false>(returnaddr, modes, tl, nextpc, pc,\
+      [](PC& pc) {\
+    return iopWrap##opcode(pc);\
+  });\
+}
+OPCODES
+#undef O
+}
+
+// generate table of opcode handler addresses, used by call-threaded emitter
+const CodeAddress cti_ops[] = {
+  #define O(opcode, imm, push, pop, flags) (CodeAddress)&cti::opcode,
+  OPCODES
+  #undef O
+};
+const CodeAddress ctid_ops[] = {
+  #define O(opcode, imm, push, pop, flags) (CodeAddress)&cti::d##opcode,
+  OPCODES
+  #undef O
+};
 
 }

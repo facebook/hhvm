@@ -1,7 +1,7 @@
 <?hh
 // https://github.com/facebook/hhvm/issues/3094
 include (__DIR__ . '/redis.inc');
-
+<<__EntryPoint>> function main(): void {
 try {
   $r = newRedisTestInstance();
   $st = microtime(true);
@@ -14,3 +14,4 @@ try {
   $et = microtime(true);
 }
 echo "Took: " . ($et-$st) . " to get the key\n"; // Should be 2.x seconds
+}

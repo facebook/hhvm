@@ -312,8 +312,6 @@ float(0)
 
 Notice: Vec to string conversion in %s on line %d
 string(3) "Vec"
-object(stdClass) (0) {
-}
 object(HH\Vector) (0) {
 }
 object(HH\Map) (0) {
@@ -361,16 +359,6 @@ float(1)
 
 Notice: Vec to string conversion in %s on line %d
 string(3) "Vec"
-object(stdClass) (4) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-  [3]=>
-  int(4)
-}
 object(HH\Vector) (4) {
   [0]=>
   int(1)
@@ -432,14 +420,6 @@ float(1)
 
 Notice: Vec to string conversion in %s on line %d
 string(3) "Vec"
-object(stdClass) (3) {
-  [0]=>
-  string(1) "z"
-  [1]=>
-  string(1) "y"
-  [2]=>
-  string(1) "x"
-}
 object(HH\Vector) (3) {
   [0]=>
   string(1) "z"
@@ -502,16 +482,6 @@ float(1)
 
 Notice: Vec to string conversion in %s on line %d
 string(3) "Vec"
-object(stdClass) (4) {
-  [0]=>
-  int(1)
-  [1]=>
-  string(1) "a"
-  [2]=>
-  int(2)
-  [3]=>
-  string(1) "b"
-}
 object(HH\Vector) (4) {
   [0]=>
   int(1)
@@ -585,19 +555,6 @@ float(1)
 
 Notice: Vec to string conversion in %s on line %d
 string(3) "Vec"
-object(stdClass) (2) {
-  [0]=>
-  vec(2) {
-    int(1)
-    int(2)
-  }
-  [1]=>
-  vec(3) {
-    int(3)
-    int(4)
-    int(5)
-  }
-}
 object(HH\Vector) (2) {
   [0]=>
   vec(2) {
@@ -666,18 +623,6 @@ float(1)
 
 Notice: Vec to string conversion in %s on line %d
 string(3) "Vec"
-object(stdClass) (5) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  bool(false)
-  [3]=>
-  string(1) "a"
-  [4]=>
-  string(1) "b"
-}
 object(HH\Vector) (5) {
   [0]=>
   int(1)
@@ -732,12 +677,6 @@ float(1)
 
 Notice: Vec to string conversion in %s on line %d
 string(3) "Vec"
-object(stdClass) (2) {
-  [0]=>
-  int(1)
-  [1]=>
-  string(1) "1"
-}
 object(HH\Vector) (2) {
   [0]=>
   int(1)
@@ -793,16 +732,6 @@ float(1)
 
 Notice: Vec to string conversion in %s on line %d
 string(3) "Vec"
-object(stdClass) (4) {
-  [0]=>
-  string(3) "abc"
-  [1]=>
-  int(123)
-  [2]=>
-  int(123)
-  [3]=>
-  string(3) "abc"
-}
 object(HH\Vector) (4) {
   [0]=>
   string(3) "abc"

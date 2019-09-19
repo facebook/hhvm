@@ -88,4 +88,7 @@ Caught InvalidOperationException: Invalid size 1 for double source
 Caught InvalidOperationException: Cannot set reverse range for primitive type boolean
 Caught InvalidOperationException: Cannot set reverse range for primitive type integer
 Caught InvalidOperationException: Cannot set reverse range for primitive type double
+string(34) "This string is 34 characters long."
+string(34) "This branch is 34 characters long."
+string(34) "This branch is 34 characters long?"
 >>> End of failure cases <<<

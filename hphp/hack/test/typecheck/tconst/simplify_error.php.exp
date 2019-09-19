@@ -1,10 +1,5 @@
-File "simplify_error.php", line 7, characters 16-16:
-Class C does not correctly implement all required members  (Typing[4110])
-File "simplify_error.php", line 7, characters 26-26:
-Some members are incompatible with those declared in type P
-Read the following to see why:
 File "simplify_error.php", line 13, characters 31-33:
-Member foo has the wrong type
+Member foo has the wrong type (Typing[4341])
 File "simplify_error.php", line 7, characters 28-34:
 Expected this::T
 File "simplify_error.php", line 4, characters 38-38:

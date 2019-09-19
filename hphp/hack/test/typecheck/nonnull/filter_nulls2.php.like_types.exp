@@ -1,0 +1,6 @@
+File "filter_nulls2.php", line 10, characters 10-16:
+Invalid return type (Typing[4110])
+File "filter_nulls2.php", line 3, characters 70-76:
+Expected ~vec<Tv> because it is an unenforceable type
+File "filter_nulls2.php", line 4, characters 13-17:
+But got vec<dynamic>

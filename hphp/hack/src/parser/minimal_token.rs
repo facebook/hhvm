@@ -6,6 +6,7 @@
 
 use crate::lexable_token::LexableToken;
 use crate::minimal_trivia::MinimalTrivia;
+use crate::source_text::SourceText;
 use crate::token_kind::TokenKind;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -16,7 +17,7 @@ pub struct MinimalToken {
     pub trailing: Vec<MinimalTrivia>,
 }
 
-impl LexableToken for MinimalToken {
+impl<'a> LexableToken<'a> for MinimalToken {
     type Trivia = MinimalTrivia;
 
     fn kind(&self) -> TokenKind {
@@ -25,6 +26,7 @@ impl LexableToken for MinimalToken {
 
     fn make(
         kind: TokenKind,
+        _source: &SourceText,
         _offset: usize,
         width: usize,
         leading: Vec<Self::Trivia>,

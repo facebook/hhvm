@@ -8,12 +8,6 @@ class B extends A { }
 
 class C extends B { }
 
-var_dump(get_class_vars('A'));
-var_dump(get_class_vars('B'));
-var_dump(get_class_vars('C'));
-
-print "---\n";
-
 class D extends B {
 	public function __construct() {
 		var_dump(get_class_vars('A'));
@@ -22,5 +16,14 @@ class D extends B {
 	}
 }
 
-new D;
+<<__EntryPoint>>
+function main_entry(): void {
 
+  var_dump(get_class_vars('A'));
+  var_dump(get_class_vars('B'));
+  var_dump(get_class_vars('C'));
+
+  print "---\n";
+
+  new D;
+}

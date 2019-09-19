@@ -8,8 +8,7 @@
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 0 "test"
-  FCall <> 0 1 "" - "" ""
+  FCallFuncD <> 0 1 "" - "test"
   PopC
   Int 1
   RetC
@@ -52,83 +51,73 @@
   Dup
   NullUninit
   NullUninit
-  FCallCtor <> 0 1 "" - ""
+  FCallCtor <LockWhileUnwinding> 0 1 "" - ""
   PopC
   LockObj
-  FPushFuncD 1 "use_class"
-  FCall <> 1 1 "" - "" ""
+  FCallFuncD <> 1 1 "" - "use_class"
   PopC
 
   NullUninit
   NullUninit
   NullUninit
   Null
-  FPushFuncD 1 "use_class"
-  FCall <> 1 1 "" - "" ""
+  FCallFuncD <> 1 1 "" - "use_class"
   PopC
 
   NullUninit
   NullUninit
   NullUninit
   Int 5
-  FPushFuncD 1 "use_int_soft"
-  FCall <> 1 1 "" - "" ""
+  FCallFuncD <> 1 1 "" - "use_int_soft"
   PopC
 
   NullUninit
   NullUninit
   NullUninit
   Array @A_0
-  FPushFuncD 1 "use_int_soft"
-  FCall <> 1 1 "" - "" ""
+  FCallFuncD <> 1 1 "" - "use_int_soft"
   PopC
 
   NullUninit
   NullUninit
   NullUninit
   Null
-  FPushFuncD 1 "use_int_soft"
-  FCall <> 1 1 "" - "" ""
+  FCallFuncD <> 1 1 "" - "use_int_soft"
   PopC
 
   NullUninit
   NullUninit
   NullUninit
   Int 6
-  FPushFuncD 1 "use_int_nullable"
-  FCall <> 1 1 "" - "" ""
+  FCallFuncD <> 1 1 "" - "use_int_nullable"
   PopC
 
   NullUninit
   NullUninit
   NullUninit
   Null
-  FPushFuncD 1 "use_int_nullable"
-  FCall <> 1 1 "" - "" ""
+  FCallFuncD <> 1 1 "" - "use_int_nullable"
   PopC
 
   NullUninit
   NullUninit
   NullUninit
   Int 5
-  FPushFuncD 1 "use_int"
-  FCall <> 1 1 "" - "" ""
+  FCallFuncD <> 1 1 "" - "use_int"
   PopC
 
   NullUninit
   NullUninit
   NullUninit
   Array @A_0
-  FPushFuncD 1 "use_mixed"
-  FCall <> 1 1 "" - "" ""
+  FCallFuncD <> 1 1 "" - "use_mixed"
   PopC
 
   NullUninit
   NullUninit
   NullUninit
   Array @A_0
-  FPushFuncD 1 "use_int"
-  FCall <> 1 1 "" - "" ""
+  FCallFuncD <> 1 1 "" - "use_int"
   PopC
 
   Null

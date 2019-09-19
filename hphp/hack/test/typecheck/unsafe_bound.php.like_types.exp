@@ -1,0 +1,6 @@
+File "unsafe_bound.php", line 26, characters 25-26:
+Invalid argument (Typing[4110])
+File "unsafe_bound.php", line 18, characters 13-29:
+Expected ~(function([unresolved]): [unresolved]) because it is an unenforceable type
+File "unsafe_bound.php", line 13, characters 19-23:
+But got (function(IE): ~IE::TID)

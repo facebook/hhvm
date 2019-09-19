@@ -44,7 +44,6 @@ static void populateImmediates(NormalizedInstruction& inst) {
 
 NormalizedInstruction::NormalizedInstruction(SrcKey sk, const Unit* u)
   : source(sk)
-  , funcd(nullptr)
   , m_unit(u)
   , immVec()
   , endsRegion(false)

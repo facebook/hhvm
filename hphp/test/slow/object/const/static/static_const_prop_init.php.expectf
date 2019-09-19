@@ -1,0 +1,1 @@
+Fatal error: A const static property must have an initializer. in %s/static_const_prop_init.php on line 5

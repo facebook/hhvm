@@ -1,0 +1,6 @@
+File "anon7.php", line 16, characters 10-11:
+Invalid return type (Typing[4110])
+File "anon7.php", line 12, characters 18-37:
+Expected ~(function(int): int) because it is an unenforceable type
+File "anon7.php", line 13, characters 8-43:
+But got (function(~?(bool | float | resource | arraykey | FormatString<[unresolved]> | HH\FormatString<[unresolved]>) $y): string)

@@ -53,12 +53,8 @@ template<typename T>
 const T* constVal(SSATmp*);
 template<>
 const Class* constVal<Class>(SSATmp* cls) { return cls->clsVal(); }
-// Records do not have constant value yet. This will never be called.
 template<>
-const RecordDesc* constVal<RecordDesc>(SSATmp*) {
-  always_assert(false);
-  return nullptr;
-}
+const RecordDesc* constVal<RecordDesc>(SSATmp* rec) { return rec->recVal(); }
 
 template<typename T>
 void implVerifyType(IRLS& env, const IRInstruction* inst) {
@@ -305,48 +301,106 @@ void cgVerifyProp(IRLS& env, const IRInstruction* inst) {
 ///////////////////////////////////////////////////////////////////////////////
 
 static void hackArrParamNoticeImpl(const Func* f, const ArrayData* a,
-                                   int64_t type, int64_t param) {
-  raise_hackarr_compat_type_hint_param_notice(f, a, AnnotType(type), param);
+                                   const StringData* name, int64_t param) {
+  raise_hackarr_compat_type_hint_param_notice(f, a, name->data(), param);
 }
 
 static void hackArrOutParamNoticeImpl(const Func* f, const ArrayData* a,
-                                      int64_t type, int64_t param) {
-  raise_hackarr_compat_type_hint_outparam_notice(f, a, AnnotType(type), param);
+                                      const StringData* name, int64_t param) {
+  raise_hackarr_compat_type_hint_outparam_notice(f, a, name->data(), param);
 }
 
 static void hackArrRetNoticeImpl(const Func* f, const ArrayData* a,
-                                 int64_t type) {
-  raise_hackarr_compat_type_hint_ret_notice(f, a, AnnotType(type));
+                                 const StringData* name) {
+  raise_hackarr_compat_type_hint_ret_notice(f, a, name->data());
 }
 
 template <bool IsStatic>
 static void hackArrPropNoticeImpl(const Class* cls, const ArrayData* ad,
-                                  Slot slot, int64_t type) {
+                                  Slot slot, const StringData* name) {
   const Class* declCls;
-  const StringData* name;
+  const StringData* propName;
   if (IsStatic) {
     assertx(slot < cls->numStaticProperties());
     declCls = cls;
-    name = cls->staticProperties()[slot].name;
+    propName = cls->staticProperties()[slot].name;
   } else {
     assertx(slot < cls->numDeclProperties());
     auto const& prop = cls->declProperties()[slot];
     declCls = prop.cls;
-    name = prop.name;
+    propName = prop.name;
   }
   raise_hackarr_compat_type_hint_property_notice(
     declCls,
     ad,
-    AnnotType(type),
-    name,
+    name->data(),
+    propName,
     IsStatic
   );
 }
 
+namespace {
+
+ArrayData::DVArray annotTypeToDVArrKind(AnnotType at) {
+  switch (at) {
+    case AnnotType::VArray: return ArrayData::kVArray;
+    case AnnotType::DArray: return ArrayData::kDArray;
+    case AnnotType::Array:  return ArrayData::kDVArrayMask;
+    case AnnotType::VArrOrDArr: return ArrayData::kDVArrayMask;
+    default: break;
+  }
+  not_reached();
+}
+
+void implRaiseHackArrTypehintNotice(IRLS& env, Vreg src,
+                                    const RaiseHackArrTypehintNoticeData* extra,
+                                    CallSpec target, const ArgGroup& args) {
+  auto& v = vmain(env);
+  auto const at = extra->tc.type();
+
+  auto const do_notice = [&] (Vout& v) {
+    cgCallHelper(v, env, target, kVoidDest, SyncOptions::Sync, args);
+  };
+
+  if (!RuntimeOption::EvalHackArrCompatTypeHintPolymorphism ||
+      at != AnnotType::VArrOrDArr) {
+    auto const dv = annotTypeToDVArrKind(at);
+    auto const sf = v.makeReg();
+    v << testbim{dv, src + ArrayData::offsetofDVArray(), sf};
+
+    auto const cc = at == AnnotType::Array ? CC_NZ : CC_Z;
+
+    return unlikelyIfThen(v, vcold(env), cc, sf, do_notice);
+  }
+
+  auto const dv = ArrayData::kDVArrayMask;
+  auto const sf = v.makeReg();
+  v << testbim{dv, src + ArrayData::offsetofDVArray(), sf};
+
+  unlikelyIfThenElse(v, vcold(env), CC_Z, sf, do_notice, [&] (Vout& v) {
+    implodingIFTE(v, v,
+      [&] (Vout& v, Vlabel next, Vlabel taken) {
+        auto const dv = ArrayData::kDArray;
+        auto const sf = v.makeReg();
+        v << testbim{dv, src + ArrayData::offsetofDVArray(), sf};
+        v << jcc{CC_Z, sf, {next, taken}};
+      },
+      do_notice, do_notice
+    );
+  });
+}
+
+}
+
 void cgRaiseHackArrParamNotice(IRLS& env, const IRInstruction* inst) {
+  auto const src = srcLoc(env, inst, 0).reg();
   auto const extra = inst->extra<RaiseHackArrParamNotice>();
 
-  auto args = argGroup(env, inst).ssa(1).ssa(0).imm(int64_t(extra->type));
+  auto args = argGroup(env, inst)
+    .ssa(1)
+    .ssa(0)
+    .imm(makeStaticString(extra->tc.displayName()));
+
   auto const target = [&] {
     if (extra->isReturn) {
       if (extra->id == TypeConstraint::ReturnId) {
@@ -360,32 +414,24 @@ void cgRaiseHackArrParamNotice(IRLS& env, const IRInstruction* inst) {
     }
   }();
 
-  cgCallHelper(
-    vmain(env),
-    env,
-    target,
-    kVoidDest,
-    SyncOptions::Sync,
-    args
-  );
+  implRaiseHackArrTypehintNotice(env, src, extra, target, args);
 }
 
 void cgRaiseHackArrPropNotice(IRLS& env, const IRInstruction* inst) {
+  auto const src = srcLoc(env, inst, 1).reg();
   auto const extra = inst->extra<RaiseHackArrPropNotice>();
-  cgCallHelper(
-    vmain(env),
-    env,
-    inst->src(3)->boolVal()
-      ? CallSpec::direct(hackArrPropNoticeImpl<true>)
-      : CallSpec::direct(hackArrPropNoticeImpl<false>),
-    kVoidDest,
-    SyncOptions::Sync,
-    argGroup(env, inst)
-      .ssa(0)
-      .ssa(1)
-      .ssa(2)
-      .imm(int64_t(extra->type))
-  );
+
+  auto const target = inst->src(3)->boolVal()
+    ? CallSpec::direct(hackArrPropNoticeImpl<true>)
+    : CallSpec::direct(hackArrPropNoticeImpl<false>);
+
+  auto args = argGroup(env, inst)
+    .ssa(0)
+    .ssa(1)
+    .ssa(2)
+    .imm(makeStaticString(extra->tc.displayName()));
+
+  implRaiseHackArrTypehintNotice(env, src, extra, target, args);
 }
 
 void cgRaiseStrToClassNotice(IRLS& env, const IRInstruction* inst) {

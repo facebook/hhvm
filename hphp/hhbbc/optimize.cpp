@@ -137,20 +137,18 @@ void insert_assertions_step(ArrayTypeTable::Builder& arrTable,
     if (op) gen(*op);
   };
 
-  /*
-   * This doesn't need to account for ActRecs on the fpiStack, because
-   * no instruction in an FPI region can ever consume a stack value
-   * from above the pre-live ActRec.
-   */
   for (auto i = size_t{0}; i < bcode.numPop(); ++i) assert_stack(i);
 
-  // The base instructions are special in that they don't pop anything, but do
-  // read from the stack. We want type assertions on the stack slots they'll
-  // read.
+  // The base instructions are special in that they may read from the
+  // stack without necessarily popping it. We want type assertions on
+  // the stack slots they'll read.
   switch (bcode.op) {
     case Op::BaseC:       assert_stack(bcode.BaseC.arg1);       break;
     case Op::BaseGC:      assert_stack(bcode.BaseGC.arg1);      break;
-    case Op::BaseSC:      assert_stack(bcode.BaseSC.arg1);      break;
+    case Op::BaseSC:
+      assert_stack(bcode.BaseSC.arg1);
+      assert_stack(bcode.BaseSC.arg2);
+      break;
     case Op::Dim: {
       switch (bcode.Dim.mkey.mcode) {
         case MEC: case MPC:
@@ -212,7 +210,7 @@ bool hasObviousStackOutput(const Bytecode& op, const Interp& interp) {
   case Op::AddNewElemC:
   case Op::NewCol:
   case Op::NewPair:
-  case Op::ClsRefName:
+  case Op::ClassName:
   case Op::File:
   case Op::Dir:
   case Op::Concat:
@@ -235,7 +233,6 @@ bool hasObviousStackOutput(const Bytecode& op, const Interp& interp) {
   case Op::CastDouble:
   case Op::CastString:
   case Op::CastArray:
-  case Op::CastObject:
   case Op::CastDict:
   case Op::CastVec:
   case Op::CastKeyset:
@@ -247,7 +244,6 @@ bool hasObviousStackOutput(const Bytecode& op, const Interp& interp) {
   case Op::IsTypeStructC:
   case Op::CombineAndResolveTypeStruct:
   case Op::RecordReifiedGeneric:
-  case Op::ReifiedName:
   case Op::InstanceOf:
   case Op::Print:
   case Op::Exit:
@@ -378,6 +374,7 @@ bool persistence_check(const php::Func* const func) {
         case Op::DefClsNop:
         case Op::DefCns:
         case Op::DefTypeAlias:
+        case Op::DefRecord:
         case Op::Null:
         case Op::True:
         case Op::False:
@@ -427,9 +424,6 @@ bool propagate_constants(const Bytecode& op, State& state, Gen gen) {
       return false;
     }
   }
-
-  auto const slot = visit(op, ReadClsRefSlotVisitor{});
-  if (slot != NoClsRefSlotId) gen(bc::DiscardClsRef { slot });
 
   // Pop the inputs, and push the constants.
   for (auto i = size_t{0}; i < numPop; ++i) {
@@ -1036,9 +1030,6 @@ Bytecode gen_constant(const Cell& cell) {
     case KindOfPersistentKeyset:
       assert(cell.m_data.parr->isKeyset());
       return bc::Keyset { cell.m_data.parr };
-    case KindOfShape:
-    case KindOfPersistentShape:
-      not_implemented();
     case KindOfArray:
       assert(cell.m_data.parr->isStatic());
     case KindOfPersistentArray:

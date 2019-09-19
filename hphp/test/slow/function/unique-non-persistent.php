@@ -6,7 +6,7 @@ function foo() { bar(); }
 
 <<__EntryPoint>>
 function main_unique_non_persistent() {
-if (apc_fetch('included') === false) {
+if (__hhvm_intrinsics\apc_fetch_no_check('included') === false) {
   include 'unique-non-persistent.inc';
 }
 apc_store('included', true);

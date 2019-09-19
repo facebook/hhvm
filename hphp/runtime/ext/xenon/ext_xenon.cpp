@@ -18,7 +18,6 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/backtrace.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/request-injection-data.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -26,9 +25,10 @@
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
+#include "hphp/util/thread-local.h"
+#include "hphp/util/rds-local.h"
 #include "hphp/util/struct-log.h"
 #include "hphp/util/sync-signal.h"
-#include "hphp/util/thread-local.h"
 
 #include <signal.h>
 #include <time.h>

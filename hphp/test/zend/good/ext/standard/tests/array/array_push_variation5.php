@@ -17,7 +17,7 @@ echo "\n-- Call array_push() --\n";
 var_dump($result = array_push(&$stack, $var0));
 
 echo "\n-- Position of Internal Pointer in Original Array: --\n";
-echo key(&$stack) . " => " . current (&$stack) . "\n";
+echo key($stack) . " => " . current($stack) . "\n";
 
 echo "Done";
 }

@@ -1,2 +1,2 @@
 (4,8)-(4,15) varray_intrinsic_expression is not allowed in write context
-(4,8)-(4,15) Only variables and the results of function calls can be used as references
+(4,8)-(4,15) Only variables can be used as references

@@ -104,8 +104,6 @@ bool is_tracked(Location l) {
     case LTag::MBase:
       return true;
     case LTag::Stack:
-    case LTag::CSlotCls:
-    case LTag::CSlotTS:
       return false;
   }
   not_reached();
@@ -119,9 +117,6 @@ Type& type_of(State& state, Location l) {
       return state.locals[locID];
     }
     case LTag::Stack:
-    case LTag::CSlotCls:
-    case LTag::CSlotTS:
-      always_assert(false);
     case LTag::MBase:
       return state.mbase;
   }

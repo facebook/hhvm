@@ -7,15 +7,14 @@
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 0 "main"
-  FCall <> 0 1 "" - "" ""
+  FCallFuncD <> 0 1 "" - "main"
   PopC
 
   NewObjD "Foo"
   Dup
   NullUninit
   NullUninit
-  FCallCtor <> 0 1 "" - ""
+  FCallCtor <LockWhileUnwinding> 0 1 "" - ""
   PopC
   LockObj
   SetL $x
@@ -25,7 +24,7 @@
   Dup
   NullUninit
   NullUninit
-  FCallCtor <> 0 1 "" - ""
+  FCallCtor <LockWhileUnwinding> 0 1 "" - ""
   PopC
   LockObj
   SetL $y
@@ -36,15 +35,13 @@
   NullUninit
   CGetL $x
   CGetL $y
-  FPushFuncD 2 "obj_type"
-  FCall <> 2 1 "" - "" ""
+  FCallFuncD <> 2 1 "" - "obj_type"
   PopC
 
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 0 "obj_type2"
-  FCall <> 0 1 "" - "" ""
+  FCallFuncD <> 0 1 "" - "obj_type2"
   PopC
 
   Int 1
@@ -84,7 +81,7 @@
   Dup
   NullUninit
   NullUninit
-  FCallCtor <> 0 1 "" - ""
+  FCallCtor <LockWhileUnwinding> 0 1 "" - ""
   AssertRATStk 0 InitNull
   AssertRATStk 1 Obj
   AssertRATStk 1 Obj=Bar
@@ -99,8 +96,7 @@
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 0 "make_bar"
-  FCall <> 0 1 "" - "" ""
+  FCallFuncD <> 0 1 "" - "make_bar"
   AssertRATStk 0 Obj
   AssertRATStk 0 Obj=Bar
   AssertRATL $x Uninit
@@ -122,7 +118,7 @@ stuff:
   Dup
   NullUninit
   NullUninit
-  FCallCtor <> 0 1 "" - ""
+  FCallCtor <LockWhileUnwinding> 0 1 "" - ""
   PopC
   LockObj
   SetL $obj

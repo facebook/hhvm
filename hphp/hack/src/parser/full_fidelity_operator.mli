@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2017, Facebook, Inc.
  * All rights reserved.
  *
@@ -14,16 +14,15 @@ end
 include Full_fidelity_operator_generated.Sig
 
 type assoc =
-| LeftAssociative
-| RightAssociative
-| NotAssociative
+  | LeftAssociative
+  | RightAssociative
+  | NotAssociative
 
 val precedence : Full_fidelity_parser_env.t -> t -> int
 
 val precedence_for_assignment_in_expressions : int
 
 val associativity : Full_fidelity_parser_env.t -> t -> assoc
-
 
 val prefix_unary_from_token : TokenKind.t -> t
 

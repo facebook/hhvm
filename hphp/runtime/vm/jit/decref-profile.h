@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_JIT_DECREF_PROFILE_H_
 #define incl_HPHP_JIT_DECREF_PROFILE_H_
 
+#include <folly/dynamic.h>
 #include <folly/Format.h>
 #include <folly/Optional.h>
 
@@ -76,6 +77,19 @@ struct DecRefProfile {
     );
   }
 
+  folly::dynamic toDynamic() const {
+    return folly::dynamic::object("total", total)
+                                 ("uncounted", uncounted())
+                                 ("percentUncounted", percent(uncounted()))
+                                 ("persistent", persistent())
+                                 ("percentPersistent", percent(persistent()))
+                                 ("destroyed", destroyed())
+                                 ("percentDestroyed", percent(destroyed()))
+                                 ("survived", survived())
+                                 ("percentSurvived", percent(survived()))
+                                 ("profileType", "DecRefProfile");
+  }
+
   // overflow handling isn't statistically correct; but its better
   // than overflowing, and we're expecting threads to all have similar
   // distributions.
@@ -124,10 +138,10 @@ inline const StringData* decRefProfileKey(const IRInstruction* inst) {
                             inst->extra<DecRefData>()->locId));
 }
 
-inline TargetProfile<DecRefProfile> decRefProfile(const TransContext&  context,
+inline TargetProfile<DecRefProfile> decRefProfile(const IRUnit& unit,
                                                   const IRInstruction* inst) {
   auto const profileKey = decRefProfileKey(inst);
-  return TargetProfile<DecRefProfile>(context, inst->marker(), profileKey);
+  return TargetProfile<DecRefProfile>(unit, inst->marker(), profileKey);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

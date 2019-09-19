@@ -3,7 +3,7 @@
  * Description: Format a GMT date/time
  * Source code: ext/date/php_date.c
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing gmdate() : usage variation ***\n";
 
 // Initialise all required variables
@@ -19,3 +19,4 @@ $timestamp = -123456789000;
 var_dump( gmdate($format, $timestamp) );
 
 echo "===DONE===\n";
+}

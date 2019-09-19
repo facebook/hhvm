@@ -1,9 +1,4 @@
-File "tconst_narrow_visibility.php", line 7, characters 7-7:
-Class B does not correctly implement all required members  (Typing[4113])
-File "tconst_narrow_visibility.php", line 7, characters 17-17:
-Some members are incompatible with those declared in type A
-Read the following to see why:
 File "tconst_narrow_visibility.php", line 8, characters 22-22:
-This member visibility is: private
+This member visibility is: private (Typing[4113])
 File "tconst_narrow_visibility.php", line 4, characters 30-30:
 public was expected

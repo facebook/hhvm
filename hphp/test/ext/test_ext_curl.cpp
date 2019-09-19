@@ -270,10 +270,10 @@ bool TestExtCurl::test_curl_multi_exec() {
   HHVM_FN(curl_multi_add_handle)(mh, c1.toResource());
   HHVM_FN(curl_multi_add_handle)(mh, c2.toResource());
 
-  Variant still_running;
+  int64_t still_running;
   do {
-    HHVM_FN(curl_multi_exec)(mh, ref(still_running));
-  } while (more(still_running, 0));
+    HHVM_FN(curl_multi_exec)(mh, still_running);
+  } while (still_running > 0);
 
   return Count(true);
 }
@@ -297,10 +297,10 @@ bool TestExtCurl::test_curl_multi_getcontent() {
   HHVM_FN(curl_multi_add_handle)(mh, c1.toResource());
   HHVM_FN(curl_multi_add_handle)(mh, c2.toResource());
 
-  Variant still_running;
+  int64_t still_running;
   do {
-    HHVM_FN(curl_multi_exec)(mh, ref(still_running));
-  } while (more(still_running, 0));
+    HHVM_FN(curl_multi_exec)(mh, still_running);
+  } while (still_running > 0);
 
   VS(HHVM_FN(curl_multi_getcontent)(c1.toResource()), "OK");
   VS(HHVM_FN(curl_multi_getcontent)(c1.toResource()), "OK");
@@ -318,12 +318,13 @@ bool TestExtCurl::test_curl_multi_info_read() {
   HHVM_FN(curl_multi_add_handle)(mh, c1.toResource());
   HHVM_FN(curl_multi_add_handle)(mh, c2.toResource());
 
-  Variant still_running;
+  int64_t still_running;
   do {
-    HHVM_FN(curl_multi_exec)(mh, ref(still_running));
-  } while (more(still_running, 0));
+    HHVM_FN(curl_multi_exec)(mh, still_running);
+  } while (still_running > 0);
 
-  Variant ret = HHVM_FN(curl_multi_info_read)(mh);
+  int64_t msgs_in_queue;
+  Variant ret = HHVM_FN(curl_multi_info_read)(mh, msgs_in_queue);
   VS(ret.toArray()[s_result], 0);
   return Count(true);
 }
@@ -337,10 +338,10 @@ bool TestExtCurl::test_curl_multi_close() {
   HHVM_FN(curl_multi_add_handle)(mh, c1.toResource());
   HHVM_FN(curl_multi_add_handle)(mh, c2.toResource());
 
-  Variant still_running;
+  int64_t still_running;
   do {
-    HHVM_FN(curl_multi_exec)(mh, ref(still_running));
-  } while (more(still_running, 0));
+    HHVM_FN(curl_multi_exec)(mh, still_running);
+  } while (still_running > 0);
 
   HHVM_FN(curl_multi_close)(mh);
   return Count(true);

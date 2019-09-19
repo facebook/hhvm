@@ -1,0 +1,22 @@
+diff --git a/third-party/mcrouter/src/mcrouter/lib/network/ThriftTransport.cpp b/third-party/mcrouter/src/mcrouter/lib/network/ThriftTransport.cpp
+index 279136a1..67967446 100644
+--- a/third-party/mcrouter/src/mcrouter/lib/network/ThriftTransport.cpp
++++ b/third-party/mcrouter/src/mcrouter/lib/network/ThriftTransport.cpp
+@@ -111,6 +111,7 @@ ThriftTransportBase::getConnectingSocket() {
+ }
+ 
+ apache::thrift::RocketClientChannel::Ptr ThriftTransportBase::createChannel() {
++#if FOLLY_OPENSSL_HAS_ALPN
+   auto socket = getConnectingSocket();
+   if (!socket) {
+     return nullptr;
+@@ -120,6 +121,9 @@ apache::thrift::RocketClientChannel::Ptr ThriftTransportBase::createChannel() {
+   channel->setProtocolId(apache::thrift::protocol::T_COMPACT_PROTOCOL);
+   channel->setCloseCallback(this);
+   return channel;
++#else
++  return nullptr;
++#endif
+ }
+ 
+ apache::thrift::RpcOptions ThriftTransportBase::getRpcOptions(

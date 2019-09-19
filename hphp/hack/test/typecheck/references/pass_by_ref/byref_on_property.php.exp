@@ -1,7 +1,7 @@
 File "byref_on_property.php", line 17, characters 22-31:
-Only variables and the results of function calls can be used as references (Parsing[1002])
+Only variables can be used as references (Parsing[1002])
 File "byref_on_property.php", line 19, characters 22-32:
-Only variables and the results of function calls can be used as references (Parsing[1002])
+Only variables can be used as references (Parsing[1002])
 File "byref_on_property.php", line 17, characters 21-32:
 Properties cannot be passed by reference (NastCheck[3079])
 File "byref_on_property.php", line 19, characters 21-33:

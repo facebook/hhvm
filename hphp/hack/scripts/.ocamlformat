@@ -1,0 +1,4 @@
+# -*- conf -*-
+
+# The .ml files in this directory are scripts for utop, not normal ocaml syntax.
+disable = true

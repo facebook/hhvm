@@ -1,0 +1,6 @@
+File "method_contravariant.php", line 27, characters 10-58:
+Invalid return type (Typing[4110])
+File "method_contravariant.php", line 26, characters 22-30:
+Expected ~(Y, X, Y) because it is an unenforceable type
+File "method_contravariant.php", line 27, characters 10-58:
+But got (~<expr#1>, ~X, ~Y)

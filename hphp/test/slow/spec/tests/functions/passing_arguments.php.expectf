@@ -46,6 +46,3 @@ int(200)
 g In:  $p1: 10.
 g Out: $p1: 200.
 int(200)
-int(10)
-g In:  $p1: 10.
-g Out: $p1: 200.

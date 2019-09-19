@@ -23,7 +23,6 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/plain-file.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-util.h"
@@ -32,6 +31,7 @@
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/alloc.h"
+#include "hphp/util/rds-local.h"
 
 #include "hphp/runtime/ext/gd/libgd/gd.h"
 #include "hphp/runtime/ext/gd/libgd/gdfontt.h"  /* 1 Tiny font */
@@ -1726,7 +1726,7 @@ Variant getImageSize(const req::ptr<File>& stream, VRefParam imageinfo) {
   }
 
   if (result) {
-    ArrayInit ret(7, ArrayInit::Mixed{});
+    DArrayInit ret(7);
     ret.set(0, (int64_t)result->width);
     ret.set(1, (int64_t)result->height);
     ret.set(2, itype);
@@ -2811,7 +2811,7 @@ static Variant php_imagettftext_common(int mode, int extended,
   }
 
   /* return array with the text's bounding box */
-  Array ret;
+  Array ret = Array::CreateDArray();
   for (int i = 0; i < 8; i++) {
     ret.set(i, brect[i]);
   }
@@ -2837,7 +2837,7 @@ const StaticString
   s_JIS_mapped_Japanese_Font_Support("JIS-mapped Japanese Font Support");
 
 Array HHVM_FUNCTION(gd_info) {
-  Array ret;
+  Array ret = Array::CreateDArray();
 
   ret.set(s_GD_Version, PHP_GD_VERSION_STRING);
 
@@ -6964,7 +6964,7 @@ static void exif_process_APP12(image_info_type *ImageInfo,
     exif_iif_add_tag(ImageInfo, SECTION_APP12, "Company",
                      TAG_NONE, TAG_FMT_STRING, l1, buffer+2);
     if (length > 2+l1+1) {
-      l2 = php_strnlen(buffer+2+l1+1, length-2-l1+1);
+      l2 = php_strnlen(buffer+2+l1+1, length-2-l1-1);
       exif_iif_add_tag(ImageInfo, SECTION_APP12, "Info",
                        TAG_NONE, TAG_FMT_STRING, l2, buffer+2+l1+1);
     }
@@ -7117,6 +7117,10 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo) {
       case M_SOF13:
       case M_SOF14:
       case M_SOF15:
+        if ((itemlen - 2) < 6) {
+          return 0;
+        }
+
         exif_process_SOFn(Data, marker, &sof_info);
         ImageInfo->Width  = sof_info.width;
         ImageInfo->Height = sof_info.height;

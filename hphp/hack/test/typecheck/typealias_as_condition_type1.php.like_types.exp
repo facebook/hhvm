@@ -1,0 +1,4 @@
+File "typealias_as_condition_type1.php", line 6, characters 3-15:
+Reactive functions can only call other reactive functions. (Typing[4200])
+File "typealias_as_condition_type1.php", line 4, characters 38-51:
+This function is non-reactive.

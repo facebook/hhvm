@@ -10,4 +10,5 @@ pub struct ParserEnv {
     pub is_experimental_mode: bool,
     pub hhvm_compat_mode: bool,
     pub php5_compat_mode: bool,
+    pub allow_new_attribute_syntax: bool,
 }

@@ -9,7 +9,7 @@
  *
  */
 
-/* HH_FIXME[4110] */
+/* HH_FIXME[4336] */
 function cached_result<T>(T $x): Awaitable<T> {
 }
 

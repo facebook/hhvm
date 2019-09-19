@@ -527,7 +527,7 @@ Variant HHVM_FUNCTION(curl_multi_remove_handle, const Resource& mh,
 }
 
 Variant HHVM_FUNCTION(curl_multi_exec, const Resource& mh,
-                      VRefParam still_running) {
+                      int64_t& still_running) {
   CHECK_MULTI_RESOURCE(curlm);
   int running = 0;
   IOStatusHelper io("curl_multi_exec");
@@ -547,7 +547,7 @@ Variant HHVM_FUNCTION(curl_multi_exec, const Resource& mh,
   }
   curlm->setInExec(false);
   curlm->check_exceptions();
-  still_running.assignIfRef(running);
+  still_running = running;
   return result;
 }
 
@@ -642,10 +642,10 @@ Array curl_convert_fd_to_stream(fd_set *fd, int max_fd) {
 }
 
 Variant HHVM_FUNCTION(fb_curl_multi_fdset, const Resource& mh,
-                      VRefParam read_fd_set,
-                      VRefParam write_fd_set,
-                      VRefParam exc_fd_set,
-                      VRefParam max_fd /* = null_object */) {
+                      Array& read_fd_set,
+                      Array& write_fd_set,
+                      Array& exc_fd_set,
+                      int64_t& max_fd) {
   CHECK_MULTI_RESOURCE(curlm);
 
   fd_set read_set;
@@ -658,10 +658,10 @@ Variant HHVM_FUNCTION(fb_curl_multi_fdset, const Resource& mh,
   FD_ZERO(&exc_set);
 
   int r = curl_multi_fdset(curlm->get(), &read_set, &write_set, &exc_set, &max);
-  read_fd_set.assignIfRef(curl_convert_fd_to_stream(&read_set, max));
-  write_fd_set.assignIfRef(curl_convert_fd_to_stream(&write_set, max));
-  exc_fd_set.assignIfRef(curl_convert_fd_to_stream(&exc_set, max));
-  max_fd.assignIfRef(max);
+  read_fd_set = curl_convert_fd_to_stream(&read_set, max);
+  write_fd_set = curl_convert_fd_to_stream(&write_set, max);
+  exc_fd_set = curl_convert_fd_to_stream(&exc_set, max);
+  max_fd = max;
 
   return r;
 }
@@ -672,7 +672,7 @@ const StaticString
   s_handle("handle");
 
 Variant HHVM_FUNCTION(curl_multi_info_read, const Resource& mh,
-                      VRefParam msgs_in_queue /* = null */) {
+                      int64_t& msgs_in_queue) {
   CHECK_MULTI_RESOURCE(curlm);
 
   int queued_msgs;
@@ -681,7 +681,7 @@ Variant HHVM_FUNCTION(curl_multi_info_read, const Resource& mh,
   if (tmp_msg == nullptr) {
     return false;
   }
-  msgs_in_queue.assignIfRef(queued_msgs);
+  msgs_in_queue = queued_msgs;
 
   Array ret;
   ret.set(s_msg, tmp_msg->msg);

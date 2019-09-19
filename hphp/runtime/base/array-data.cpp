@@ -47,8 +47,8 @@ namespace HPHP {
 
 const StaticString
   s_InvalidKeysetOperationMsg{"Invalid operation on keyset"},
-  s_VecUnsetMsg{"Vecs do not support unsetting non-end elements"};
-
+  s_VecUnsetMsg{"Vecs do not support unsetting non-end elements"},
+  s_NullHackArrayKey{"null used as key for Hack array in array_key_exists"};
 ///////////////////////////////////////////////////////////////////////////////
 
 __thread std::pair<const ArrayData*, size_t> s_cachedHash;
@@ -102,7 +102,6 @@ struct ScalarHash {
           case KindOfInt64:
           case KindOfDouble:
           case KindOfPersistentString:
-          case KindOfPersistentShape:
           case KindOfPersistentArray:
           case KindOfPersistentVec:
           case KindOfPersistentDict:
@@ -110,7 +109,6 @@ struct ScalarHash {
             ret = folly::hash::hash_combine(ret, v.m_data.num);
             break;
           case KindOfString:
-          case KindOfShape:
           case KindOfArray:
           case KindOfVec:
           case KindOfDict:
@@ -132,12 +130,15 @@ struct ScalarHash {
     if (ad1 == ad2) return true;
     if (ad1->size() != ad2->size()) return false;
     if (!ArrayData::dvArrayEqual(ad1, ad2)) return false;
-    if (ad1->isHackArray() || ad1->isShape()) {
-      if (!ad2->isHackArray() && !ad2->isShape()) return false;
+    if (ad1->isHackArray()) {
+      if (!ad2->isHackArray()) return false;
       if (ad1->kind() != ad2->kind()) return false;
-    } else if (ad2->isHackArray() || ad2->isShape()) {
+    } else if (ad2->isHackArray()) {
       return false;
     }
+
+    if (UNLIKELY(RuntimeOption::EvalArrayProvenance) &&
+        arrprov::getTag(ad1) != arrprov::getTag(ad2)) return false;
 
     auto check = [] (const TypedValue& tv1, const TypedValue& tv2) {
       if (tv1.m_type != tv2.m_type) {
@@ -187,13 +188,16 @@ void ArrayData::GetScalarArray(ArrayData** parr) {
     s_cachedHash.first = nullptr;
   };
 
-  if (arr->empty()) {
-    if (arr->isVecArray()) return replace(staticEmptyVecArray());
-    if (arr->isDict())     return replace(staticEmptyDictArray());
-    if (arr->isShape())    return replace(staticEmptyShapeArray());
+  auto const provenanceEnabled =
+    RuntimeOption::EvalArrayProvenance &&
+    arr->hasProvenanceData();
+
+  if (arr->empty() && LIKELY(!provenanceEnabled)) {
     if (arr->isKeyset())   return replace(staticEmptyKeysetArray());
     if (arr->isVArray())   return replace(staticEmptyVArray());
     if (arr->isDArray())   return replace(staticEmptyDArray());
+    if (arr->isVecArray()) return replace(staticEmptyVecArray());
+    if (arr->isDict())     return replace(staticEmptyDictArray());
     return replace(staticEmptyArray());
   }
 
@@ -255,7 +259,7 @@ static_assert(ArrayFunctions::NK == ArrayData::ArrayKind::kNumKinds,
     EmptyArray::entry,                          \
     APCLocalArray::entry,                       \
     GlobalsArray::entry,                        \
-    MixedArray::entry##Shape,  /* Shape */      \
+    RecordArray::entry,                         \
     MixedArray::entry##Dict,   /* Dict */       \
     PackedArray::entry##Vec,   /* Vec */        \
     SetArray::entry,           /* Keyset */     \
@@ -722,15 +726,6 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(ToPHPArrayIntishCast)
 
    /*
-   * ArrayData* ToShape(ArrayData*, bool)
-   *
-   *   Convert to a shape. If already a shape, it will be returned unchange
-   *   (without copying). If copy is false, it may be converted in place. If the
-   *   input array contains references, an exception will be thrown.
-   */
-  DISPATCH(ToShape)
-
-   /*
    * ArrayData* ToDict(ArrayData*, bool)
    *
    *   Convert to a dict. If already a dict, it will be returned unchange
@@ -825,24 +820,6 @@ ArrayData* ArrayData::Create(TypedValue name, TypedValue value) {
   ArrayInit init(1, ArrayInit::Map{});
   init.setValidKey(name, value);
   return init.create();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-ArrayData* ArrayData::toShapeInPlaceIfCompatible() {
-  if (size() == 0 && isStatic()) {
-    return staticEmptyShapeArray();
-  }
-  assertx((RuntimeOption::EvalHackArrDVArrs && isDict()) ||
-          (!RuntimeOption::EvalHackArrDVArrs && isMixed() && isDArray()));
-  if (!isRefCounted()) {
-    auto ad = MixedArray::Copy(this);
-    ad->m_kind = HeaderKind::Shape;
-    return ad;
-  }
-  assertx(!cowCheck());
-  m_kind = HeaderKind::Shape;
-  return this;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -974,10 +951,10 @@ int ArrayData::compare(const ArrayData* v2) const {
   if (isPHPArray()) {
     if (UNLIKELY(!v2->isPHPArray())) {
       if (UNLIKELY(checkHACCompare())) {
-        raiseHackArrCompatArrMixedCmp();
+        raiseHackArrCompatArrHackArrCmp();
       }
       if (v2->isVecArray()) throw_vec_compare_exception();
-      if (v2->isDictOrShape()) throw_dict_compare_exception();
+      if (v2->isDict()) throw_dict_compare_exception();
       if (v2->isKeyset()) throw_keyset_compare_exception();
       not_reached();
     }
@@ -987,7 +964,7 @@ int ArrayData::compare(const ArrayData* v2) const {
   if (isVecArray()) {
     if (UNLIKELY(!v2->isVecArray())) {
       if (UNLIKELY(checkHACCompare() && v2->isPHPArray())) {
-        raiseHackArrCompatArrMixedCmp();
+        raiseHackArrCompatArrHackArrCmp();
       }
       throw_vec_compare_exception();
     }
@@ -995,7 +972,7 @@ int ArrayData::compare(const ArrayData* v2) const {
   }
 
   if (UNLIKELY(checkHACCompare() && v2->isPHPArray())) {
-    raiseHackArrCompatArrMixedCmp();
+    raiseHackArrCompatArrHackArrCmp();
   }
 
   if (isDict()) throw_dict_compare_exception();
@@ -1009,22 +986,10 @@ bool ArrayData::equal(const ArrayData* v2, bool strict) const {
 
   auto const mixed = [&]{
     if (UNLIKELY(checkHACCompare() && v2->isHackArray())) {
-      raiseHackArrCompatArrMixedCmp();
+      raiseHackArrCompatArrHackArrCmp();
     }
     return false;
   };
-
-  if (isShape()) {
-    if (UNLIKELY(!v2->isDictOrDArrayOrShape())) return mixed();
-    return strict
-      ? MixedArray::ShapeSame(this, v2) : MixedArray::ShapeEqual(this, v2);
-  }
-
-  if (v2->isShape()) {
-    if (UNLIKELY(!isDictOrDArrayOrShape())) return mixed();
-    return strict
-      ? MixedArray::ShapeSame(this, v2) : MixedArray::ShapeEqual(this, v2);
-  }
 
   if (isPHPArray()) {
     if (UNLIKELY(!v2->isPHPArray())) return mixed();
@@ -1141,7 +1106,7 @@ const char* ArrayData::kindToString(ArrayKind kind) {
     "EmptyKind",
     "ApcKind",
     "GlobalsKind",
-    "ShapeKind",
+    "RecordKind",
     "DictKind",
     "VecKind",
     "KeysetKind"
@@ -1169,9 +1134,6 @@ std::string describeKeyType(const TypedValue* tv) {
   case KindOfDict:             return "dict";
   case KindOfPersistentKeyset:
   case KindOfKeyset:           return "keyset";
-  case KindOfPersistentShape:
-  case KindOfShape:
-    return RuntimeOption::EvalHackArrDVArrs ? "dict" : "array";
   case KindOfPersistentArray:
   case KindOfArray:            return "array";
   case KindOfResource:
@@ -1211,8 +1173,6 @@ std::string describeKeyValue(TypedValue tv) {
   case KindOfDict:
   case KindOfPersistentKeyset:
   case KindOfKeyset:
-  case KindOfPersistentShape:
-  case KindOfShape:
   case KindOfPersistentArray:
   case KindOfArray:
   case KindOfResource:
@@ -1351,8 +1311,12 @@ void raiseHackArrCompatAdd() {
   raise_hac_array_plus_notice("Using + operator on arrays");
 }
 
-void raiseHackArrCompatArrMixedCmp() {
-  raise_hac_compare_notice(Strings::HACKARR_COMPAT_ARR_MIXEDCMP);
+void raiseHackArrCompatArrHackArrCmp() {
+  raise_hac_compare_notice(Strings::HACKARR_COMPAT_ARR_HACK_ARR_CMP);
+}
+
+void raiseHackArrCompatArrNonArrCmp() {
+  raise_hac_compare_notice(Strings::HACKARR_COMPAT_ARR_NON_ARR_CMP);
 }
 
 void raiseHackArrCompatDVArrCmp(const ArrayData* ad1, const ArrayData* ad2) {
@@ -1383,6 +1347,40 @@ std::string makeHackArrCompatImplicitArrayKeyMsg(const TypedValue* key) {
 
 void raiseHackArrCompatImplicitArrayKey(const TypedValue* key) {
   raise_hac_array_key_cast_notice(makeHackArrCompatImplicitArrayKeyMsg(key));
+}
+
+StringData* getHackArrCompatNullHackArrayKeyMsg() {
+  return s_NullHackArrayKey.get();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+namespace {
+
+template<typename SrcArr>
+ArrayData* tagArrProvImpl(ArrayData* ad, const SrcArr* src) {
+  assertx(RuntimeOption::EvalArrayProvenance);
+  assertx(ad->hasExactlyOneRef() || ad->isUncounted());
+
+  if (src != nullptr) {
+    if (auto const tag = arrprov::getTag(src)) {
+      arrprov::setTag<arrprov::Mode::Emplace>(ad, *tag);
+      return ad;
+    }
+  }
+  if (auto const tag = arrprov::tagFromPC()) {
+    arrprov::setTag<arrprov::Mode::Emplace>(ad, *tag);
+  }
+  return ad;
+}
+
+}
+
+ArrayData* tagArrProv(ArrayData* ad, const ArrayData* src) {
+  return tagArrProvImpl(ad, src);
+}
+ArrayData* tagArrProv(ArrayData* ad, const APCArray* src) {
+  return tagArrProvImpl(ad, src);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

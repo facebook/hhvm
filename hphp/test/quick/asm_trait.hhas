@@ -14,8 +14,7 @@
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 0 "main"
-  FCall <> 0 1 "" - "" ""
+  FCallFuncD <> 0 1 "" - "main"
   RetC
 }
 
@@ -76,7 +75,7 @@
   Dup
   NullUninit
   NullUninit
-  FCallCtor <> 0 1 "" - ""
+  FCallCtor <LockWhileUnwinding> 0 1 "" - ""
   PopC
   LockObj
   SetL $obj
@@ -92,7 +91,7 @@
   Dup
   NullUninit
   NullUninit
-  FCallCtor <> 0 1 "" - ""
+  FCallCtor <LockWhileUnwinding> 0 1 "" - ""
   PopC
   LockObj
   SetL $obj
@@ -108,7 +107,7 @@
   Dup
   NullUninit
   NullUninit
-  FCallCtor <> 0 1 "" - ""
+  FCallCtor <LockWhileUnwinding> 0 1 "" - ""
   PopC
   LockObj
   SetL $obj
@@ -124,7 +123,7 @@
   Dup
   NullUninit
   NullUninit
-  FCallCtor <> 0 1 "" - ""
+  FCallCtor <LockWhileUnwinding> 0 1 "" - ""
   PopC
   LockObj
   SetL $obj

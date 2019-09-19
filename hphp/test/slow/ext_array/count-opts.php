@@ -11,7 +11,7 @@ class BadCounted implements Countable {
 }
 
 function res() { return count(STDIN); }
-function nvtw() { return count($GLOBALS); }
+function nvtw() { return count($GLOBALS['GLOBALS']); }
 function staticArr() { return count(array(3,2,1,0)); }
 function packed() { return count(array(3,2,1,new stdClass)); }
 function vect() { return count(HH\Vector{5,7,8,3}); }

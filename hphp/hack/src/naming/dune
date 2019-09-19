@@ -5,7 +5,8 @@
   (libraries
     collections
     core_kernel
-    utils_core))
+    utils_core)
+  (preprocess (pps ppx_deriving.std))) ; See T41851208
 
 (library
   (name nast)
@@ -19,15 +20,6 @@
   (preprocess (pps ppx_deriving.std)))
 
 (library
-  (name nast_pos_mapper)
-  (wrapped false)
-  (modules
-    nast_pos_mapper)
-  (libraries
-    core_kernel
-    nast))
-
-(library
   (name naming_attributes)
   (wrapped false)
   (modules
@@ -35,7 +27,8 @@
     nast_eval)
   (libraries
     core_kernel
-    nast))
+    nast)
+  (preprocess (pps ppx_deriving.std))) ; See T41851208
 
 (library
   (name naming_heap_api)
@@ -44,7 +37,8 @@
     naming_heap_api)
   (libraries
     ast_provider
-    naming))
+    naming)
+  (preprocess (pps ppx_deriving.std))) ; See T41851208
 
 (library
   (name naming)
@@ -59,6 +53,7 @@
     ast_provider
     common
     file_provider
+    fileutils
     full_fidelity
     naming_attributes
     nast

@@ -33,17 +33,20 @@ class TestSoapClient extends SoapClient {
 EOF;
 	}
 }
-for ($i = 0; $i < 10; $i++) {
-	$ws=new TestSoapClient(dirname(__FILE__).'/bug37083.wsdl',
-                   array('encoding'=>'ISO-8859-1',
-                         'cache_wsdl'=>WSDL_CACHE_BOTH));
-	$search=new stdClass();
-	$search->queryString='argo';
-	$search->ranges = array();
-	$search->ranges[]=$r=new stdClass();
-	$r->field='maxDateTime';
-	$r->min='2003-04-01';
-	$search->index='all';
-	$res=$ws->search($search,0,10);
+<<__EntryPoint>>
+function main_entry(): void {
+  for ($i = 0; $i < 10; $i++) {
+  	$ws=new TestSoapClient(dirname(__FILE__).'/bug37083.wsdl',
+                     array('encoding'=>'ISO-8859-1',
+                           'cache_wsdl'=>WSDL_CACHE_BOTH));
+  	$search=new stdClass();
+  	$search->queryString='argo';
+  	$search->ranges = array();
+  	$search->ranges[]=$r=new stdClass();
+  	$r->field='maxDateTime';
+  	$r->min='2003-04-01';
+  	$search->index='all';
+  	$res=$ws->search($search,0,10);
+  }
+  echo "ok\n";
 }
-echo "ok\n";

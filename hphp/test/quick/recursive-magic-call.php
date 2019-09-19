@@ -7,10 +7,7 @@ class Blah {
   }
 }
 
-Blah::$z = new Blah();
-function main() {
-
+<<__EntryPoint>> function main(): void {
+  Blah::$z = new Blah();
   Blah::$z->whatever();
 }
-
-main();;

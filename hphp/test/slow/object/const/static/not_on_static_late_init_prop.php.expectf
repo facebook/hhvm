@@ -1,0 +1,1 @@
+Fatal error: __Const properties may not also be __LateInit in %s/not_on_static_late_init_prop.php on line 4

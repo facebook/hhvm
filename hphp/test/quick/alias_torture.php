@@ -3,8 +3,6 @@
 <<__EntryPoint>>
 function foo() {
 
-  $GLOBALS['a'] = 123;
-  $b = $GLOBALS;
-  $b['a'] = "of"; // via SetM
-  var_dump($GLOBALS['a']);
+  $b = $GLOBALS; // This should fatal.
+  invariant_violation('should be unreachable');
 }

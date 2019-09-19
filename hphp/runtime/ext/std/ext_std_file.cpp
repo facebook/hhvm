@@ -30,7 +30,6 @@
 #include "hphp/runtime/base/pipe.h"
 #include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/temp-file.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stat-cache.h"
@@ -49,6 +48,7 @@
 #include "hphp/system/systemlib.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
+#include "hphp/util/rds-local.h"
 
 #include <folly/String.h>
 #include <folly/portability/Dirent.h>
@@ -264,7 +264,7 @@ const StaticString
   s_blocks("blocks");
 
 Array stat_impl(struct stat *stat_sb) {
-  ArrayInit ret(26, ArrayInit::Mixed{});
+  DArrayInit ret(26);
   ret.append((int64_t)stat_sb->st_dev);
   ret.append((int64_t)stat_sb->st_ino);
   ret.append((int64_t)stat_sb->st_mode);
@@ -673,8 +673,6 @@ Variant HHVM_FUNCTION(file_put_contents,
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
-    case KindOfPersistentShape:
-    case KindOfShape:
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfClsMeth: {

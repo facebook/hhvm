@@ -5,8 +5,9 @@
  */
 <<__EntryPoint>> function main(): void {
 $string = "My\nName\nIs\nStrange";
-preg_match("/M(.*)/", $string, &$matches);
+  $matches = null;
+  preg_match_with_matches("/M(.*)/", $string, inout $matches);
 
-var_dump($matches);
+  var_dump($matches);
 echo "===Done===";
 }

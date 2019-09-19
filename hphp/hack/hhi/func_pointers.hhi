@@ -192,7 +192,7 @@ function invariant(
  * http://docs.hhvm.com/hack/reference/function/HH.invariant_callback_register/
  */
 function invariant_callback_register(
-  (function(string, mixed...): void) $callback
+  (function(string, mixed ...): void) $callback
 ): void {}
 
 } // namespace HH

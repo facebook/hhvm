@@ -231,8 +231,8 @@ Type typeSetOp(SetOpOp op, Type lhs, Type rhs) {
 //////////////////////////////////////////////////////////////////////
 
 Type typeSame(const Type& a, const Type& b) {
-  auto const nsa = loosen_dvarrayness(a);
-  auto const nsb = loosen_dvarrayness(b);
+  auto const nsa = loosen_provenance(loosen_dvarrayness(a));
+  auto const nsb = loosen_provenance(loosen_dvarrayness(b));
   if (nsa.couldBe(BFunc | BCls) && nsb.couldBe(TStr)) return TBool;
   if (nsb.couldBe(BFunc | BCls) && nsa.couldBe(TStr)) return TBool;
   if (nsa.couldBe(BClsMeth) &&

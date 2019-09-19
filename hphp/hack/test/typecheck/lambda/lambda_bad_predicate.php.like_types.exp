@@ -1,0 +1,18 @@
+File "lambda_bad_predicate.php", line 40, characters 27-30:
+No method 'hell' in MyClass (did you mean 'hello'?) (Typing[4053])
+File "lambda_bad_predicate.php", line 32, characters 45-51:
+This is why I think it is an object of type MyClass
+File "lambda_bad_predicate.php", line 32, characters 45-51:
+Considering that this type argument is contravariant with respect to IPredicate
+File "lambda_bad_predicate.php", line 26, characters 7-13:
+Declaration of MyClass is here
+File "lambda_bad_predicate.php", line 15, characters 17-18:
+Invalid argument (Typing[4110])
+File "lambda_bad_predicate.php", line 11, characters 29-29:
+Expected T
+File "lambda_bad_predicate.php", line 12, characters 55-55:
+  via this generic T
+File "lambda_bad_predicate.php", line 5, characters 31-31:
+  via this generic T
+File "lambda_bad_predicate.php", line 13, characters 25-25:
+But got dynamic because it is an unenforceable type

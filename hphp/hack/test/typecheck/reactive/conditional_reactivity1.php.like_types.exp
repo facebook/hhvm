@@ -1,0 +1,4 @@
+File "conditional_reactivity1.php", line 22, characters 48-65:
+Reactive functions can only call other reactive functions. (Typing[4200])
+File "conditional_reactivity1.php", line 17, characters 23-57:
+This function is non-reactive.

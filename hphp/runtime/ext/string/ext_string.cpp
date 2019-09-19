@@ -29,7 +29,6 @@
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/plain-file.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/string-util.h"
@@ -41,8 +40,9 @@
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/server/http-request-handler.h"
-#include "hphp/util/lock.h"
 #include "hphp/util/concurrent-lru-cache.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/rds-local.h"
 #include "hphp/zend/html-table.h"
 #include "hphp/zend/zend-string.h"
 
@@ -55,7 +55,7 @@ static Mutex s_mutex;
 
 const StaticString
   s_HPHP_TRIM_CHARLIST("HPHP_TRIM_CHARLIST"),
-  k_HPHP_TRIM_CHARLIST("\n\r\t\x0b\x00 ", 6);
+  k_HPHP_TRIM_CHARLIST("\n\r\t\x0b\x00 ");
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -740,7 +740,19 @@ TypedValue HHVM_FUNCTION(str_replace,
   return tvReturn(str_replace(search, replace, subject, count));
 }
 
+TypedValue HHVM_FUNCTION(str_replace_with_count,
+                         const Variant& search, const Variant& replace,
+                         const Variant& subject, VRefParam count) {
+  return tvReturn(str_replace(search, replace, subject, count));
+}
+
 TypedValue HHVM_FUNCTION(str_ireplace,
+                         const Variant& search, const Variant& replace,
+                         const Variant& subject, VRefParam count) {
+  return tvReturn(str_ireplace(search, replace, subject, count));
+}
+
+TypedValue HHVM_FUNCTION(str_ireplace_with_count,
                          const Variant& search, const Variant& replace,
                          const Variant& subject, VRefParam count) {
   return tvReturn(str_ireplace(search, replace, subject, count));
@@ -982,12 +994,10 @@ String HHVM_FUNCTION(chr, const Variant& ascii) {
     case KindOfPersistentVec:
     case KindOfPersistentDict:
     case KindOfPersistentKeyset:
-    case KindOfPersistentShape:
     case KindOfPersistentArray:
     case KindOfVec:
     case KindOfDict:
     case KindOfKeyset:
-    case KindOfShape:
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:
@@ -2616,7 +2626,9 @@ struct StringExtension final : Extension {
     HHVM_FE(chunk_split);
     HHVM_FE(strtok);
     HHVM_FE(str_replace);
+    HHVM_FE(str_replace_with_count);
     HHVM_FE(str_ireplace);
+    HHVM_FE(str_ireplace_with_count);
     HHVM_FE(substr_replace);
     HHVM_FE(substr);
     HHVM_FE(str_pad);

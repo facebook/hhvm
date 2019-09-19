@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
@@ -7,8 +7,6 @@
  *
  *)
 
-type t = {
-  id: int;
-}
+type t = { id: int }
 
 let id t = t.id

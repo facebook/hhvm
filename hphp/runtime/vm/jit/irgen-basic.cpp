@@ -40,41 +40,38 @@ const StaticString s_new_instance_of_not_string(
 
 } // namespace
 
-void emitClsRefGetC(IRGS& env, uint32_t slot) {
+void emitClassGetC(IRGS& env) {
   auto const name = topC(env);
-  if (!name->type().subtypeOfAny(TObj, TStr)) {
+  if (!name->type().subtypeOfAny(TObj, TCls, TStr)) {
     interpOne(env);
     return;
   }
   popC(env);
+
+  if (name->isA(TCls)) {
+    push(env, name);
+    return;
+  }
+
   if (name->isA(TObj)) {
-    putClsRef(env, slot, gen(env, LdObjClass, name));
+    push(env, gen(env, LdObjClass, name));
     decRef(env, name);
     return;
   }
+
   if (!name->hasConstVal()) gen(env, RaiseStrToClassNotice, name);
+
   auto const cls = ldCls(env, name);
-  ifThenElse(
-    env,
-    [&] (Block* taken) {
-      auto const isreified = gen(env, IsReifiedName, name);
-      gen(env, JmpZero, taken, isreified);
-    },
-    [&] {
-      auto ts = gen(env, LdReifiedGeneric, name);
-      putClsRef(env, slot, cls, ts);
-    },
-    [&] { putClsRef(env, slot, cls); }
-  );
   decRef(env, name);
+  push(env, cls);
 }
 
-void emitClsRefGetTS(IRGS& env, uint32_t slot) {
+void emitClassGetTS(IRGS& env) {
   auto const required_ts_type = RuntimeOption::EvalHackArrDVArrs ? TDict : TArr;
   auto const ts = topC(env);
   if (!ts->isA(required_ts_type)) {
     if (ts->type().maybe(required_ts_type)) {
-      PUNT(ClsRefGetTS-UnguardedTS);
+      PUNT(ClassGetTS-UnguardedTS);
     } else {
       gen(env, RaiseError, cns(env, s_reified_type_must_be_ts.get()));
     }
@@ -100,7 +97,7 @@ void emitClsRefGetTS(IRGS& env, uint32_t slot) {
         IndexData { pos }, base, key
       );
     },
-    [&] (SSATmp* key) {
+    [&] (SSATmp* key, SizeHintData) {
       if (RuntimeOption::EvalHackArrDVArrs) return gen(env, DictGet, ts, key);
       return gen(env, ArrayGet, MOpModeData { MOpMode::Warn }, ts, key);
     }
@@ -120,7 +117,8 @@ void emitClsRefGetTS(IRGS& env, uint32_t slot) {
 
   auto const cls = ldCls(env, name);
   popDecRef(env);
-  putClsRef(env, slot, cls);
+  push(env, cls);
+  push(env, cns(env, TInitNull));
 }
 
 void emitCGetL(IRGS& env, int32_t id) {
@@ -311,7 +309,7 @@ void emitClone(IRGS& env) {
   decRef(env, obj);
 }
 
-void emitLateBoundCls(IRGS& env, uint32_t slot) {
+void emitLateBoundCls(IRGS& env) {
   auto const clss = curClass(env);
   if (!clss) {
     // no static context class, so this will raise an error
@@ -319,29 +317,30 @@ void emitLateBoundCls(IRGS& env, uint32_t slot) {
     return;
   }
   auto const ctx = ldCtx(env);
-  putClsRef(env, slot, gen(env, LdClsCtx, ctx));
+  push(env, gen(env, LdClsCtx, ctx));
 }
 
-void emitSelf(IRGS& env, uint32_t slot) {
+void emitSelf(IRGS& env) {
   auto const clss = curClass(env);
   if (clss == nullptr) {
     interpOne(env);
   } else {
-    putClsRef(env, slot, cns(env, clss));
+    push(env, cns(env, clss));
   }
 }
 
-void emitParent(IRGS& env, uint32_t slot) {
+void emitParent(IRGS& env) {
   auto const clss = curClass(env);
   if (clss == nullptr || clss->parent() == nullptr) {
     interpOne(env);
   } else {
-    putClsRef(env, slot, cns(env, clss->parent()));
+    push(env, cns(env, clss->parent()));
   }
 }
 
-void emitClsRefName(IRGS& env, uint32_t slot) {
-  auto const cls = takeClsRefCls(env, slot);
+void emitClassName(IRGS& env) {
+  auto const cls = popC(env);
+  if (!cls->isA(TCls)) PUNT(ClassName-NotClass);
   push(env, gen(env, LdClsName, cls));
 }
 
@@ -382,18 +381,18 @@ void emitCastVArray(IRGS& env) {
       }
       if (src->isA(TVec))    return gen(env, ConvVecToVArr, src);
       if (src->isA(TDict))   return gen(env, ConvDictToVArr, src);
-      if (src->isA(TShape))  return gen(env, ConvShapeToVArr, src);
       if (src->isA(TKeyset)) return gen(env, ConvKeysetToVArr, src);
+      if (src->isA(TClsMeth)) return gen(env, ConvClsMethToVArr, src);
       if (src->isA(TObj))    return gen(env, ConvObjToVArr, src);
+      if (src->isA(TRecord)) PUNT(CastVArrayRecord); // TODO: T53309767
       if (src->isA(TNull))   return raise("Null");
       if (src->isA(TBool))   return raise("Bool");
       if (src->isA(TInt))    return raise("Int");
       if (src->isA(TDbl))    return raise("Double");
       if (src->isA(TStr))    return raise("String");
+      if (src->isA(TFunc))   return raise("Func");
       if (src->isA(TRes))    return raise("Resource");
-      // Unexpected types may only be seen in unreachable code.
-      gen(env, Unreachable, ASSERT_REASON);
-      return cns(env, TBottom);
+      PUNT(CastVArrayUnknown);
     }()
   );
 }
@@ -428,18 +427,18 @@ void emitCastDArray(IRGS& env) {
       }
       if (src->isA(TVec))    return gen(env, ConvVecToDArr, src);
       if (src->isA(TDict))   return gen(env, ConvDictToDArr, src);
-      if (src->isA(TShape))  return gen(env, ConvShapeToDArr, src);
       if (src->isA(TKeyset)) return gen(env, ConvKeysetToDArr, src);
+      if (src->isA(TClsMeth)) return gen(env, ConvClsMethToDArr, src);
       if (src->isA(TObj))    return gen(env, ConvObjToDArr, src);
+      if (src->isA(TRecord)) PUNT(CastDArrayRecord); // TODO: T53309767
       if (src->isA(TNull))   return raise("Null");
       if (src->isA(TBool))   return raise("Bool");
       if (src->isA(TInt))    return raise("Int");
       if (src->isA(TDbl))    return raise("Double");
       if (src->isA(TStr))    return raise("String");
+      if (src->isA(TFunc))   return raise("Func");
       if (src->isA(TRes))    return raise("Resource");
-      // Unexpected types may only be seen in unreachable code.
-      gen(env, Unreachable, ASSERT_REASON);
-      return cns(env, TBottom);
+      PUNT(CastDArrayUnknown);
     }()
   );
 }
@@ -465,18 +464,18 @@ void emitCastVec(IRGS& env) {
       if (src->isA(TVec))    return src;
       if (src->isA(TArr))    return gen(env, ConvArrToVec, src);
       if (src->isA(TDict))   return gen(env, ConvDictToVec, src);
-      if (src->isA(TShape))  return gen(env, ConvShapeToVec, src);
       if (src->isA(TKeyset)) return gen(env, ConvKeysetToVec, src);
+      if (src->isA(TClsMeth)) return gen(env, ConvClsMethToVec, src);
       if (src->isA(TObj))    return gen(env, ConvObjToVec, src);
+      if (src->isA(TRecord)) PUNT(CastVecRecord); // TODO: T53309767
       if (src->isA(TNull))   return raise("Null");
       if (src->isA(TBool))   return raise("Bool");
       if (src->isA(TInt))    return raise("Int");
       if (src->isA(TDbl))    return raise("Double");
       if (src->isA(TStr))    return raise("String");
+      if (src->isA(TFunc))   return raise("Func");
       if (src->isA(TRes))    return raise("Resource");
-      // Unexpected types may only be seen in unreachable code.
-      gen(env, Unreachable, ASSERT_REASON);
-      return cns(env, TBottom);
+      PUNT(CastVecUnknown);
     }()
   );
 }
@@ -500,20 +499,20 @@ void emitCastDict(IRGS& env) {
     env,
     [&] {
       if (src->isA(TDict))    return src;
-      if (src->isA(TShape))   return gen(env, ConvShapeToDict, src);
       if (src->isA(TArr))     return gen(env, ConvArrToDict, src);
       if (src->isA(TVec))     return gen(env, ConvVecToDict, src);
       if (src->isA(TKeyset))  return gen(env, ConvKeysetToDict, src);
+      if (src->isA(TClsMeth)) return gen(env, ConvClsMethToDict, src);
       if (src->isA(TObj))     return gen(env, ConvObjToDict, src);
+      if (src->isA(TRecord))  PUNT(CastDictRecord); // TODO: T53309767
       if (src->isA(TNull))    return raise("Null");
       if (src->isA(TBool))    return raise("Bool");
       if (src->isA(TInt))     return raise("Int");
       if (src->isA(TDbl))     return raise("Double");
       if (src->isA(TStr))     return raise("String");
+      if (src->isA(TFunc))    return raise("Func");
       if (src->isA(TRes))     return raise("Resource");
-      // Unexpected types may only be seen in unreachable code.
-      gen(env, Unreachable, ASSERT_REASON);
-      return cns(env, TBottom);
+      PUNT(CastDictUnknown);
     }()
   );
 }
@@ -540,17 +539,17 @@ void emitCastKeyset(IRGS& env) {
       if (src->isA(TArr))     return gen(env, ConvArrToKeyset, src);
       if (src->isA(TVec))     return gen(env, ConvVecToKeyset, src);
       if (src->isA(TDict))    return gen(env, ConvDictToKeyset, src);
-      if (src->isA(TShape))   return gen(env, ConvShapeToKeyset, src);
+      if (src->isA(TClsMeth)) return gen(env, ConvClsMethToKeyset, src);
       if (src->isA(TObj))     return gen(env, ConvObjToKeyset, src);
+      if (src->isA(TRecord))  PUNT(CastKeysetRecord); // TODO: T53309767
       if (src->isA(TNull))    return raise("Null");
       if (src->isA(TBool))    return raise("Bool");
       if (src->isA(TInt))     return raise("Int");
       if (src->isA(TDbl))     return raise("Double");
       if (src->isA(TStr))     return raise("String");
+      if (src->isA(TFunc))    return raise("Func");
       if (src->isA(TRes))     return raise("Resource");
-      // Unexpected types may only be seen in unreachable code.
-      gen(env, Unreachable, ASSERT_REASON);
-      return cns(env, TBottom);
+      PUNT(CastKeysetUnknown);
     }()
   );
 }
@@ -571,11 +570,6 @@ void emitCastInt(IRGS& env) {
   auto const src = popC(env);
   push(env, gen(env, ConvCellToInt, src));
   decRef(env, src);
-}
-
-void emitCastObject(IRGS& env) {
-  auto const src = popC(env);
-  push(env, gen(env, ConvCellToObj, src));
 }
 
 void emitCastString(IRGS& env) {
@@ -604,8 +598,6 @@ void implIncStat(IRGS& env, uint32_t counter) {
 
 //////////////////////////////////////////////////////////////////////
 
-void emitDiscardClsRef(IRGS& env, uint32_t slot)   { killClsRef(env, slot); }
-
 void emitPopC(IRGS& env)   { popDecRef(env, DataTypeGeneric); }
 void emitPopV(IRGS& env)   { popDecRef(env, DataTypeGeneric); }
 void emitPopU(IRGS& env)   { popU(env); }
@@ -620,6 +612,13 @@ void emitPopL(IRGS& env, int32_t id) {
   auto const ldPMExit = makePseudoMainExit(env);
   auto const src = popC(env, DataTypeGeneric);
   stLocMove(env, id, ldrefExit, ldPMExit, src);
+}
+
+void emitPopFrame(IRGS& env, uint32_t nout) {
+  jit::vector<SSATmp*> v{nout, nullptr};
+  for (auto i = nout; i > 0; --i) v[i - 1] = pop(env, DataTypeGeneric);
+  for (uint32_t i = 0; i < 3; ++i) popU(env);
+  for (auto tmp : v) push(env, tmp);
 }
 
 void emitDir(IRGS& env)    { push(env, cns(env, curUnit(env)->dirpath())); }

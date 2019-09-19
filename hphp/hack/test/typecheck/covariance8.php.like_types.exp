@@ -1,0 +1,6 @@
+File "covariance8.php--file2.php", line 8, characters 12-13:
+Invalid argument (Typing[4110])
+File "covariance8.php--file2.php", line 6, characters 19-23:
+Expected ~ID<A> because it is an unenforceable type
+File "covariance8.php--file2.php", line 7, characters 15-20:
+But got UID<B>

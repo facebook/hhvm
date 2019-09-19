@@ -11,14 +11,14 @@ function ut_main()
 
     $locales = array(
         'uk-ua_CALIFORNIA@currency=;currency=GRN',
-	'root',
+    'root',
         'uk@currency=EURO',
         'Hindi',
 //Simple language subtag
         'de',
         'fr',
         'ja',
-      	'i-enochian', //(example of a grandfathered tag)
+        'i-enochian', //(example of a grandfathered tag)
 //Language subtag plus Script subtag:
         'zh-Hant',
         'zh-Hans',
@@ -75,5 +75,6 @@ function ut_main()
 }
 
 include_once( 'ut_common.inc' );
+<<__EntryPoint>> function main_entry(): void {
 ut_run();
-
+}

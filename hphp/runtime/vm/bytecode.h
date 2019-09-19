@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/rds-util.h"
+#include "hphp/runtime/base/record-array.h"
 #include "hphp/runtime/base/record-data.h"
 #include "hphp/runtime/base/tv-arith.h"
 #include "hphp/runtime/base/tv-conversions.h"
@@ -30,7 +31,6 @@
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
-#include "hphp/runtime/vm/cls-ref.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/name-value-table.h"
 #include "hphp/runtime/vm/unit.h"
@@ -226,10 +226,15 @@ inline ExtraArgsAction extra_args_action(const Func* func, uint32_t argc) {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Returns true iff ar represents a frame on the VM eval stack or a Resumable
+ * Returns true iff `ar` represents a frame on the VM eval stack or a Resumable
  * object on the PHP heap.
+ *
+ * The `may_be_non_runtime` flag should be set if we aren't guaranteed to be
+ * running in a "Hack runtime" context---e.g., if we're in the JIT or an
+ * extension thread, etc.  This function is pretty much guaranteed to return
+ * false if we're not in the runtime, but the caller might be runtime-agnostic.
  */
-bool isVMFrame(const ActRec* ar);
+bool isVMFrame(const ActRec* ar, bool may_be_non_runtime = false);
 
 /*
  * Returns true iff the given address is one of the special debugger return
@@ -252,10 +257,6 @@ void debuggerPreventReturnToTC(ActRec* ar);
 void debuggerPreventReturnsToTC();
 
 ///////////////////////////////////////////////////////////////////////////////
-
-inline ActRec* arAtOffset(const ActRec* ar, int32_t offset) {
-  return (ActRec*)(intptr_t(ar) + intptr_t(offset * sizeof(TypedValue)));
-}
 
 void frame_free_locals_no_hook(ActRec* fp);
 
@@ -280,15 +281,10 @@ struct CallCtx {
   Class* cls;
   StringData* invName;
   bool dynamic;
-  ArrayData* reifiedGenerics;
 };
 
 constexpr size_t kNumIterCells = sizeof(Iter) / sizeof(Cell);
 constexpr size_t kNumActRecCells = sizeof(ActRec) / sizeof(Cell);
-
-constexpr size_t clsRefCountToCells(size_t n) {
-  return (n * sizeof(cls_ref) + sizeof(Cell) - 1) / sizeof(Cell);
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -514,6 +510,7 @@ public:
   ALWAYS_INLINE void pushBool(bool v) { pushVal<KindOfBoolean>(v); }
   ALWAYS_INLINE void pushInt(int64_t v) { pushVal<KindOfInt64>(v); }
   ALWAYS_INLINE void pushDouble(double v) { pushVal<KindOfDouble>(v); }
+  ALWAYS_INLINE void pushClass(Class* v) { pushVal<KindOfClass>(v); }
 
   // This should only be called directly when the caller has
   // already adjusted the refcount appropriately
@@ -653,6 +650,13 @@ public:
   }
 
   ALWAYS_INLINE
+  void pushRecordArrayNoRc(RecordArray* r) {
+    assertx(m_top != m_elms);
+    m_top--;
+    *m_top = make_tv<KindOfArray>(r);
+  }
+
+  ALWAYS_INLINE
   void pushFunc(Func* f) {
     m_top--;
     *m_top = make_tv<KindOfFunc>(f);
@@ -704,15 +708,6 @@ public:
     assertx(kNumIterCells * sizeof(Cell) == sizeof(Iter));
     assertx((uintptr_t)(m_top - kNumIterCells) >= (uintptr_t)m_elms);
     m_top -= kNumIterCells;
-  }
-
-  ALWAYS_INLINE
-  void allocClsRefSlots(size_t n) {
-    assertx((uintptr_t)(m_top - clsRefCountToCells(n)) >= (uintptr_t)m_elms);
-    m_top -= clsRefCountToCells(n);
-    if (debug) {
-      memset(m_top, kTrashClsRef, clsRefCountToCells(n) * sizeof(Cell));
-    }
   }
 
   ALWAYS_INLINE
@@ -807,58 +802,21 @@ public:
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Visit all the slots and pre-live ActRecs on a live eval stack,
- * handling FPI regions and resumables correctly, and stopping when we
- * reach the supplied activation record.
+ * Visit all the slots on a live eval stack, stopping when we reach
+ * the supplied activation record.
  *
- * The stack elements are visited from lower address to higher, with
- * ActRecs visited after the stack slots below them.
+ * The stack elements are visited from lower address to higher.
  *
  * This will not read the VM registers (pc, fp, sp), so it will
  * perform the requested visitation independent of modifications to
  * the VM stack or frame pointer.
  */
-template<class TV, class ARFun, class TVFun>
+template<class TV, class TVFun>
 typename maybe_const<TV, TypedValue>::type
-visitStackElems(const ActRec* const fp,
-                TV* const stackTop,
-                Offset const bcOffset,
-                ARFun arFun,
-                TVFun tvFun) {
+visitStackElems(const ActRec* const fp, TV* const stackTop, TVFun tvFun) {
   const TypedValue* const base = Stack::anyFrameStackBase(fp);
   auto cursor = stackTop;
   assertx(cursor <= base);
-
-  if (auto fe = fp->m_func->findFPI(bcOffset)) {
-    for (;;) {
-      ActRec* ar;
-      if (!fp->resumed()) {
-        ar = arAtOffset(fp, -fe->m_fpOff);
-      } else {
-        // fp is pointing into the Resumable struct. Since fpOff is
-        // given as an offset from the frame pointer as if it were in
-        // the normal place on the main stack, we have to reconstruct
-        // that "normal place".
-        auto const fakePrevFP = reinterpret_cast<const ActRec*>(
-          base + fp->m_func->numSlotsInFrame()
-        );
-        ar = arAtOffset(fakePrevFP, -fe->m_fpOff);
-      }
-
-      while (cursor < reinterpret_cast<TypedValue*>(ar)) {
-        tvFun(cursor++);
-      }
-
-      if (cursor == reinterpret_cast<TypedValue*>(ar)) {
-        arFun(ar);
-        cursor += kNumActRecCells;
-      }
-
-      assertx(cursor >= reinterpret_cast<TypedValue*>(ar) + kNumActRecCells);
-      if (fe->m_parentIndex == -1) break;
-      fe = &fp->m_func->fpitab()[fe->m_parentIndex];
-    }
-  }
 
   while (cursor < base) {
     tvFun(cursor++);
@@ -884,7 +842,9 @@ enum class StackArgsState { // tells prepareFuncEntry how much work to do
   // have been teleported away into ExtraArgs and/or a variadic param
   Trimmed
 };
-void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk, VarEnv* varEnv);
+void enterVMAtPseudoMain(ActRec* enterFnAr, VarEnv* varEnv);
+void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk,
+                   bool allowDynCallNoPointer = false);
 void enterVMAtCurPC();
 void prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
                       int nregular, bool checkRefAnnot);

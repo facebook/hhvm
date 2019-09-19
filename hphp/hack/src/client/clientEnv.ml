@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -8,59 +8,64 @@
  *)
 
 type client_mode =
-| MODE_AI_QUERY of string
-| MODE_AUTO_COMPLETE
-| MODE_COLORING of string
-| MODE_COVERAGE of string
-| MODE_CREATE_CHECKPOINT of string
-| MODE_CST_SEARCH of string list option
-| MODE_DELETE_CHECKPOINT of string
-| MODE_DUMP_SYMBOL_INFO of string
-| MODE_EXTRACT_STANDALONE of string
-| MODE_FIND_CLASS_REFS of string
-| MODE_FIND_REFS of string
-| MODE_FORMAT of int * int
-| MODE_FULL_FIDELITY_PARSE of string
-| MODE_FULL_FIDELITY_SCHEMA
-| MODE_GEN_HOT_CLASSES of int * string
-| MODE_IDE_FIND_REFS of string
-| MODE_IDE_HIGHLIGHT_REFS of string
-| MODE_IDE_REFACTOR of string
-| MODE_IDENTIFY_SYMBOL1 of string
-| MODE_IDENTIFY_SYMBOL2 of string
-| MODE_IDENTIFY_SYMBOL3 of string
-| MODE_IN_MEMORY_DEP_TABLE_SIZE
-| MODE_LINT
-| MODE_LINT_ALL of int
-| MODE_LINT_STDIN of string
-| MODE_LINT_XCONTROLLER of string
-| MODE_LIST_FILES
-| MODE_METHOD_JUMP_ANCESTORS of string * string
-| MODE_METHOD_JUMP_ANCESTORS_BATCH of string list * string
-| MODE_METHOD_JUMP_CHILDREN of string
-| MODE_OUTLINE
-| MODE_OUTLINE2
-| MODE_REFACTOR of string * string * string
-| MODE_REMOVE_DEAD_FIXMES of int list
-| MODE_REWRITE_LAMBDA_PARAMETERS of string list
-| MODE_RETRIEVE_CHECKPOINT of string
-| MODE_SAVE_STATE of string
-(* TODO figure out why we can't reference FuzzySearchService from here *)
-| MODE_SEARCH of string * string
-| MODE_STATS
-| MODE_STATUS
-| MODE_STATUS_SINGLE of string (* filename *)
-| MODE_TYPE_AT_POS of string
-| MODE_TYPE_AT_POS_BATCH of string list
-| MODE_TYPED_FULL_FIDELITY_PARSE of string (* filename *)
-| MODE_FUN_DEPS_AT_POS_BATCH of string list
-| MODE_FUN_IS_LOCALLABLE_AT_POS_BATCH of string list
-| MODE_FILE_DEPENDENTS
+  | MODE_AI_QUERY of string
+  | MODE_AUTO_COMPLETE
+  | MODE_BIGCODE of string
+  | MODE_COLORING of string
+  | MODE_COVERAGE of string
+  | MODE_CREATE_CHECKPOINT of string
+  | MODE_CST_SEARCH of string list option
+  | MODE_DELETE_CHECKPOINT of string
+  | MODE_DUMP_SYMBOL_INFO of string
+  | MODE_EXTRACT_STANDALONE of string
+  | MODE_FIND_CLASS_REFS of string
+  | MODE_FIND_REFS of string
+  | MODE_FORMAT of int * int
+  | MODE_FULL_FIDELITY_PARSE of string
+  | MODE_FULL_FIDELITY_SCHEMA
+  | MODE_GEN_HOT_CLASSES of int * string
+  | MODE_IDE_FIND_REFS of string
+  | MODE_IDE_HIGHLIGHT_REFS of string
+  | MODE_IDE_REFACTOR of string
+  | MODE_IDENTIFY_SYMBOL1 of string
+  | MODE_IDENTIFY_SYMBOL2 of string
+  | MODE_IDENTIFY_SYMBOL3 of string
+  | MODE_IN_MEMORY_DEP_TABLE_SIZE
+  | MODE_LINT
+  | MODE_LINT_ALL of int
+  | MODE_LINT_STDIN of string
+  | MODE_LINT_XCONTROLLER of string
+  | MODE_LIST_FILES
+  | MODE_METHOD_JUMP_ANCESTORS of string * string
+  | MODE_METHOD_JUMP_ANCESTORS_BATCH of string list * string
+  | MODE_METHOD_JUMP_CHILDREN of string
+  | MODE_OUTLINE
+  | MODE_OUTLINE2
+  | MODE_PAUSE of bool
+  | MODE_REFACTOR of string * string * string
+  | MODE_REMOVE_DEAD_FIXMES of int list
+  | MODE_REWRITE_LAMBDA_PARAMETERS of string list
+  | MODE_REWRITE_RETURN_TYPE of string list
+  | MODE_REWRITE_PARAMETER_TYPES of string list
+  | MODE_REWRITE_TYPE_PARAMS_TYPE of string list
+  | MODE_RETRIEVE_CHECKPOINT of string
+  | MODE_SAVE_NAMING of string
+  | MODE_SAVE_STATE of string
+  (* TODO figure out why we can't reference FuzzySearchService from here *)
+  | MODE_SEARCH of string * string
+  | MODE_STATS
+  | MODE_STATUS
+  | MODE_STATUS_SINGLE of string (* filename *)
+  | MODE_TYPE_AT_POS of string
+  | MODE_TYPE_AT_POS_BATCH of string list
+  | MODE_FUN_DEPS_AT_POS_BATCH of string list
+  | MODE_FUN_IS_LOCALLABLE_AT_POS_BATCH of string list
+  | MODE_FILE_DEPENDENTS
 
 type client_check_env = {
   ai_mode: string option;
   autostart: bool;
-  config : (string * string) list;
+  config: (string * string) list;
   dynamic_view: bool;
   error_format: Errors.format;
   force_dormant_start: bool;
@@ -74,19 +79,21 @@ type client_check_env = {
   mode: client_mode;
   no_load: bool;
   output_json: bool;
-  prechecked : bool option;
+  prechecked: bool option;
   profile_log: bool;
+  remote: bool;
   replace_state_after_saving: bool;
   root: Path.t;
   sort_results: bool;
   deadline: float option;
   watchman_debug_logging: bool;
-  allow_non_opt_build : bool;
+  allow_non_opt_build: bool;
 }
 
 let mode_to_string = function
   | MODE_AI_QUERY _ -> "MODE_AI_QUERY"
   | MODE_AUTO_COMPLETE -> "MODE_AUTO_COMPLETE"
+  | MODE_BIGCODE _ -> "MODE_BIGCODE"
   | MODE_COLORING _ -> "MODE_COLORING"
   | MODE_COVERAGE _ -> "MODE_COVERAGE"
   | MODE_CREATE_CHECKPOINT _ -> "MODE_CREATE_CHECKPOINT"
@@ -117,10 +124,15 @@ let mode_to_string = function
   | MODE_METHOD_JUMP_CHILDREN _ -> "MODE_METHOD_JUMP_CHILDREN"
   | MODE_OUTLINE -> "MODE_OUTLINE"
   | MODE_OUTLINE2 -> "MODE_OUTLINE2"
+  | MODE_PAUSE _ -> "MODE_PAUSE"
   | MODE_REFACTOR _ -> "MODE_REFACTOR"
   | MODE_REMOVE_DEAD_FIXMES _ -> "MODE_REMOVE_DEAD_FIXMES"
   | MODE_REWRITE_LAMBDA_PARAMETERS _ -> "MODE_REWRITE_LAMBDA_PARAMETERS"
+  | MODE_REWRITE_RETURN_TYPE _ -> "MODE_REWRITE_RETURN_TYPE"
+  | MODE_REWRITE_PARAMETER_TYPES _ -> "MODE_REWRITE_PARAMETER_TYPES"
+  | MODE_REWRITE_TYPE_PARAMS_TYPE _ -> "MODE_REWRITE_TYPE_PARAMS_TYPE"
   | MODE_RETRIEVE_CHECKPOINT _ -> "MODE_RETRIEVE_CHECKPOINT"
+  | MODE_SAVE_NAMING _ -> "MODE_SAVE_NAMING"
   | MODE_SAVE_STATE _ -> "MODE_SAVE_STATE"
   | MODE_SEARCH _ -> "MODE_SEARCH"
   | MODE_STATS -> "MODE_STATS"
@@ -128,7 +140,7 @@ let mode_to_string = function
   | MODE_STATUS_SINGLE _ -> "MODE_STATUS_SINGLE"
   | MODE_TYPE_AT_POS _ -> "MODE_TYPE_AT_POS"
   | MODE_TYPE_AT_POS_BATCH _ -> "MODE_TYPE_AT_POS_BATCH"
-  | MODE_TYPED_FULL_FIDELITY_PARSE _ -> "MODE_TYPED_FULL_FIDELITY_PARSE"
   | MODE_FUN_DEPS_AT_POS_BATCH _ -> "MODE_FUN_DEPS_AT_POS_BATCH"
-  | MODE_FUN_IS_LOCALLABLE_AT_POS_BATCH _ -> "MODE_FUN_IS_LOCALLABLE_AT_POS_BATCH"
+  | MODE_FUN_IS_LOCALLABLE_AT_POS_BATCH _ ->
+    "MODE_FUN_IS_LOCALLABLE_AT_POS_BATCH"
   | MODE_FILE_DEPENDENTS -> "MODE_FILE_LEVEL_DEPENDENCIES"

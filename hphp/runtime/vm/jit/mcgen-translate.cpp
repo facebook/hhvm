@@ -206,7 +206,7 @@ void retranslateAll() {
     auto const mode = RuntimeOption::EvalJitSerdesMode;
     if (RuntimeOption::RepoAuthoritative &&
         !RuntimeOption::EvalJitSerdesFile.empty() &&
-        isJitSerializing(mode)) {
+        isJitSerializing()) {
       if (serverMode) Logger::Info("retranslateAll: serializing profile data");
       std::string errMsg;
       VMWorker([&errMsg] () {
@@ -237,7 +237,7 @@ void retranslateAll() {
     profData()->setFuncOrder(std::move(result.first));
     profData()->setBaseProfCount(result.second);
   } else {
-    assertx(isJitDeserializing(RuntimeOption::EvalJitSerdesMode));
+    assertx(isJitDeserializing());
   }
   setBaseInliningProfCount(globalProfData()->baseProfCount());
   auto const& sortedFuncs = globalProfData()->sortedFuncs();
@@ -362,10 +362,12 @@ translate(TransArgs args, FPInvOffset spOff,
       TransContext{env.transID, args.kind, args.flags, args.sk,
                    env.initSpOffset, args.optIndex};
 
-    env.unit = irGenRegion(*args.region, transContext,
-                           env.pconds, env.annotations);
+    env.unit = irGenRegion(*args.region, transContext, env.pconds);
+    auto const unitAnnotations = env.unit->annotationData->getAllAnnotations();
+    env.annotations.insert(env.annotations.end(),
+                           unitAnnotations.begin(), unitAnnotations.end());
     if (env.unit) {
-      env.vunit = irlower::lowerUnit(*env.unit, &env.annotations);
+      env.vunit = irlower::lowerUnit(*env.unit);
     }
   }
 
@@ -383,6 +385,7 @@ TCA retranslate(TransArgs args, const RegionContext& ctx) {
 
   auto sr = tc::findSrcRec(args.sk);
   auto const initialNumTrans = sr->numTrans();
+  auto const funcId = args.sk.funcID();
 
   if (isDebuggerAttachedProcess() && isSrcKeyInDbgBL(args.sk)) {
     // We are about to translate something known to be blacklisted by
@@ -405,7 +408,7 @@ TCA retranslate(TransArgs args, const RegionContext& ctx) {
   // trigger retranslation) and helps remove bias towards larger functions that
   // can cause variations in the size of code.prof.
   if (args.kind == TransKind::Profile &&
-      !profData()->profiling(args.sk.funcID()) &&
+      !profData()->profiling(funcId) &&
       !args.sk.func()->isEntry(args.sk.offset())) {
     return nullptr;
   }
@@ -418,13 +421,24 @@ TCA retranslate(TransArgs args, const RegionContext& ctx) {
   // chain ahead of the optimized translations.
   if (retranslateAllPending() && args.kind != TransKind::Profile &&
       profData() &&
-      (profData()->profiling(args.sk.funcID()) ||
-       profData()->optimized(args.sk.funcID()))) {
+      (profData()->profiling(funcId) ||
+       profData()->optimized(funcId))) {
     return nullptr;
   }
 
   LeaseHolder writer(args.sk.func(), args.kind);
-  if (!writer || !tc::shouldTranslate(args.sk, kind())) {
+  if (!writer) return nullptr;
+
+  // Update kind now that we have the write lease.
+  args.kind = kind();
+
+  if (!tc::shouldTranslate(args.sk, args.kind)) return nullptr;
+
+  // If the function is being profiled and hasn't been optimized yet, we don't
+  // want to emit Live translations for it, as these would be made unreachable
+  // once we clear the SrcRec to publish the optimized code.
+  if (args.kind != TransKind::Profile && profData() &&
+      profData()->profiling(funcId) && !profData()->optimized(funcId)) {
     return nullptr;
   }
 

@@ -1,10 +1,5 @@
-File "mayberx16.php", line 8, characters 11-11:
-Class B does not correctly implement all required members  (Typing[4255])
-File "mayberx16.php", line 8, characters 21-21:
-Some members are incompatible with those declared in type A
-Read the following to see why:
 File "mayberx16.php", line 18, characters 19-19:
-Member f has the wrong type
+Member f has the wrong type (Typing[4341])
 File "mayberx16.php", line 5, characters 39-40:
 This parameter does not satisfy __AtMostRxAsFunc condition defined on matching parameter in function super type.
 File "mayberx16.php", line 18, characters 59-60:

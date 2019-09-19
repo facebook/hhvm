@@ -8,8 +8,7 @@
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 0 "R"
-  FCall <> 0 1 "" - "" ""
+  FCallFuncD <> 0 1 "" - "R"
   IterInit 0 L0 $i
   .try {
   L1:

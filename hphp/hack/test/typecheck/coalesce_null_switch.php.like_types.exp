@@ -1,0 +1,6 @@
+File "coalesce_null_switch.php", line 9, characters 10-19:
+Invalid return type (Typing[4336])
+File "coalesce_null_switch.php", line 9, characters 10-19:
+Expected void because this function implicitly returns void
+File "coalesce_null_switch.php", line 9, characters 29-31:
+But got int

@@ -76,8 +76,15 @@ void RecordEmitter::commit(RepoTxn& txn) const {
 }
 
 PreRecordDesc* RecordEmitter::create(Unit& unit) const {
+  Attr attrs = m_attrs;
+  if (attrs & AttrPersistent &&
+      !RuntimeOption::RepoAuthoritative && SystemLib::s_inited) {
+    attrs = Attr(attrs & ~AttrPersistent);
+  }
+  assertx(attrs & AttrPersistent || SystemLib::s_inited);
+
   auto  rec = std::make_unique<PreRecordDesc>(
-      &unit, m_line1, m_line2, m_name, m_attrs, m_parent, m_docComment, m_id);
+      &unit, m_line1, m_line2, m_name, attrs, m_parent, m_docComment, m_id);
 
   PreRecordDesc::FieldMap::Builder fieldBuild;
   for (unsigned i = 0; i < m_fieldMap.size(); ++i) {

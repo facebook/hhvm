@@ -1,2 +1,2 @@
 File "superclass_not_const.php", line 6, characters 7-7:
-Cannot use experimental feature: The __Const attribute is not supported. (Other[0000])
+A __Const class may only extend other __Const classes (Typing[4197])

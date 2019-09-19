@@ -1,6 +1,6 @@
 { "description" :
   "@generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2019-05-20-0001",
+  "version" : "2019-08-22-0001",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -73,8 +73,6 @@
       "token_text" : "default" },
     { "token_kind" : "Define",
       "token_text" : "define" },
-    { "token_kind" : "Destruct",
-      "token_text" : "__destruct" },
     { "token_kind" : "Dict",
       "token_text" : "dict" },
     { "token_kind" : "Do",
@@ -1374,15 +1372,6 @@
         { "field_name" : "operator" },
         { "field_name" : "right_operand" }
       ] },
-    { "kind_name" : "InstanceofExpression",
-      "type_name" : "instanceof_expression",
-      "description" : "instanceof_expression",
-      "prefix" : "instanceof",
-      "fields" : [
-        { "field_name" : "left_operand" },
-        { "field_name" : "operator" },
-        { "field_name" : "right_operand" }
-      ] },
     { "kind_name" : "IsExpression",
       "type_name" : "is_expression",
       "description" : "is_expression",
@@ -1792,6 +1781,15 @@
       "type_name" : "type_constant",
       "description" : "type_constant",
       "prefix" : "type_constant",
+      "fields" : [
+        { "field_name" : "left_type" },
+        { "field_name" : "separator" },
+        { "field_name" : "right_type" }
+      ] },
+    { "kind_name" : "PUAccess",
+      "type_name" : "pu_access",
+      "description" : "pu_access",
+      "prefix" : "pu_access",
       "fields" : [
         { "field_name" : "left_type" },
         { "field_name" : "separator" },

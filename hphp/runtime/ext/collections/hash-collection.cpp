@@ -13,7 +13,7 @@ namespace HPHP {
 HashCollection::HashCollection(Class* cls, HeaderKind kind, uint32_t cap)
   : ObjectData(cls, NoInit{}, ObjectData::NoAttrs, kind)
   , m_unusedAndSize(0)
-  , m_arr(cap == 0 ? staticEmptyDictArrayAsMixed() :
+  , m_arr(cap == 0 ? CreateDictAsMixed() :
           MixedArray::asMixed(MixedArray::MakeReserveDict(cap)))
 {}
 
@@ -219,7 +219,7 @@ void HashCollection::resizeHelper(uint32_t newCap) {
   assertx(m_immCopy.isNull());
   // Allocate a new ArrayData with the specified capacity and dup
   // all the elements (without copying over tombstones).
-  auto ad = arrayData() == staticEmptyDictArrayAsMixed() ?
+  auto ad = arrayData()->isStatic() && arrayData()->empty() ?
     MixedArray::asMixed(MixedArray::MakeReserveDict(newCap)) :
     MixedArray::CopyReserve(m_arr, newCap);
   decRefArr(m_arr);
@@ -279,7 +279,7 @@ void HashCollection::shrink(uint32_t oldCap /* = 0 */) {
   } else {
     if (m_size == 0 && nextKI() == 0) {
       decRefArr(m_arr);
-      m_arr = staticEmptyDictArrayAsMixed();
+      m_arr = CreateDictAsMixed();
       return;
     }
     // If no old capacity was provided, we compute the largest capacity
@@ -299,6 +299,7 @@ void HashCollection::shrink(uint32_t oldCap /* = 0 */) {
     auto oldNextKI = nextKI();
     m_arr = MixedArray::asMixed(MixedArray::MakeReserveDict(newCap));
     m_arr->m_size = m_size;
+    m_arr->copyKeyTypes(*oldAd, /*compact=*/true);
     auto data = this->data();
     auto table = hashTab();
     auto table_mask = tableMask();

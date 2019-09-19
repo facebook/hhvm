@@ -25,8 +25,7 @@
   NullUninit
   NullUninit
   CGetL $foo
-  FPushFuncD 1 "var_dump"
-  FCall <> 1 1 "" - "" ""
+  FCallFuncD <> 1 1 "" - "var_dump"
   PopC
   RetC
 }

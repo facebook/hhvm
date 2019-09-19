@@ -14,14 +14,6 @@
     buildMain))
 
 (library
-  (name client_ide_service)
-  (wrapped false)
-  (modules
-    clientIdeService)
-  (libraries
-    lwt))
-
-(library
   (name debug_stubs)
   (wrapped false)
   (modules
@@ -31,10 +23,9 @@
     full_fidelity))
 
 (library
-  (name hackc_parse_delegator_stubs)
+  (name rust_ffi_stubs)
   (wrapped false)
-  (modules
-    hackc_parse_delegator))
+  (modules ))
 
 (library
   (name linting_stubs)
@@ -63,21 +54,48 @@
     clientMessages))
 
 (library
+  (name vfs_stubs)
+  (wrapped false)
+  (modules
+    vfs)
+  (libraries
+    relative_path))
+
+(library
+  (name remote_scheduler_stubs)
+  (wrapped false)
+  (modules
+    remoteScheduler)
+  (libraries
+    file_info
+    naming
+    procs_procs
+    relative_path
+    sys_utils))
+
+(library
+  (name remote_worker_stubs)
+  (wrapped false)
+  (modules
+    remoteWorker)
+  (libraries
+    errors
+    file_info
+    relative_path
+    sys_utils))
+
+(library
   (name state_loader_stubs)
   (wrapped false)
   (modules
     state_loader
+    saved_state_loader
+    state_loader_futures
+    state_loader_lwt
     xdb)
   (libraries
     hg
     server_monitor))
-
-(library
-  (name rust_parser_ffi_stubs)
-  (wrapped false)
-  (modules
-    rust_parser_ffi
-    rust_lazy_trivia_ffi))
 
 (library
   (name shared_lru_stubs)

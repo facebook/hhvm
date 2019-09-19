@@ -462,7 +462,8 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
                     true /* once */,
                     false /* warmupOnly */,
                     false /* richErrorMessage */,
-                    RuntimeOption::EvalPreludePath);
+                    RuntimeOption::EvalPreludePath,
+                    true /* allowDynCallNoPointer */);
 
   if (ret) {
     String content = context->obDetachContents();
@@ -487,7 +488,8 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
                         true /* once */,
                         false /* warmupOnly */,
                         false /* richErrorMessage */,
-                        RuntimeOption::EvalPreludePath);
+                        RuntimeOption::EvalPreludePath,
+                        true /* allowDynCallNoPointer */);
       if (ret) {
         String content = context->obDetachContents();
         transport->sendRaw(content.data(), content.size());

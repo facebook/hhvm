@@ -14,10 +14,15 @@ const PATTERNS = vec[
 function test(int $flags): void {
   foreach (PATTERNS as list($pattern, $text)) {
     $matches = [];
-    preg_match($pattern, $text, &$matches, $flags);
+    preg_match_with_matches($pattern, $text, inout $matches, $flags);
     printf("---\nRE: %s\nIn: %s\nPHP:\n", $pattern, $text);
     \var_dump($matches);
-    preg_match($pattern, $text, &$matches, PREG_FB__PRIVATE__HSL_IMPL | $flags);
+    preg_match_with_matches(
+      $pattern,
+      $text,
+      inout $matches,
+      PREG_FB__PRIVATE__HSL_IMPL | $flags,
+    );
     printf("HSL:\n", $pattern, $text);
     \var_dump($matches);
   }

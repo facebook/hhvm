@@ -17,7 +17,9 @@
 #pragma once
 
 #include <boost/variant.hpp>
+#include <folly/Range.h>
 
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/as.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 
@@ -69,8 +71,12 @@ using FfpResult = boost::variant<FfpJSONString, std::string>;
 ParseFactsResult extract_facts(const FactsParser&,
                                const std::string& filename,
                                const char* code,
-                               int len);
-FfpResult ffp_parse_file(std::string file, const char* contents, int size);
+                               int len,
+                               const RepoOptions& options);
+FfpResult ffp_parse_file(std::string file,
+                         const char* contents,
+                         int size,
+                         const RepoOptions& options);
 
 std::string hackc_version();
 
@@ -125,4 +131,15 @@ struct HackcUnitCompiler : public UnitCompiler {
   virtual const char* getName() const override { return "HackC"; }
 };
 
+using HhasHandler = std::string (*)(
+  const char*,
+  const SHA1&,
+  folly::StringPiece::size_type,
+  StructuredLogEntry&,
+  std::function<void(const char *)>,
+  std::function<std::string()>,
+  const RepoOptions&
+);
+
+extern HhasHandler g_hhas_handler;
 }

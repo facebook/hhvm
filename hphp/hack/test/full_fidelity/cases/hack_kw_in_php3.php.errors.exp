@@ -37,13 +37,13 @@
 (50,5)-(50,11) Unexpected node on right hand side of new or instanceof: tuple_expression
 (52,5)-(52,9) Unexpected node on right hand side of new or instanceof: token
 (52,10)-(52,10) An expression is expected here.
-(57,15)-(57,15) A name, __construct, or __destruct keyword is expected here.
-(59,15)-(59,15) A name, __construct, or __destruct keyword is expected here.
-(68,15)-(68,15) A name, __construct, or __destruct keyword is expected here.
-(74,18)-(74,18) A name, __construct, or __destruct keyword is expected here.
-(75,15)-(75,15) A name, __construct, or __destruct keyword is expected here.
-(77,15)-(77,15) A name, __construct, or __destruct keyword is expected here.
-(79,15)-(79,15) A name, __construct, or __destruct keyword is expected here.
+(57,15)-(57,15) A name or __construct keyword is expected here.
+(59,15)-(59,15) A name or __construct keyword is expected here.
+(68,15)-(68,15) A name or __construct keyword is expected here.
+(74,18)-(74,18) A name or __construct keyword is expected here.
+(75,15)-(75,15) A name or __construct keyword is expected here.
+(77,15)-(77,15) A name or __construct keyword is expected here.
+(79,15)-(79,15) A name or __construct keyword is expected here.
 (85,8)-(85,8) A lambda arrow ('==>') is expected here.
 (87,8)-(87,8) An expression is expected here.
 (91,12)-(91,12) A lambda arrow ('==>') is expected here.

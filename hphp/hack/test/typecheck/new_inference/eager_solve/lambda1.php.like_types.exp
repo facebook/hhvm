@@ -1,0 +1,10 @@
+File "lambda1.php", line 40, characters 17-33:
+Invalid return type (Typing[4110])
+File "lambda1.php", line 33, characters 24-36:
+Expected Awaitable<[unresolved]>
+File "lambda1.php", line 29, characters 35-54:
+But got dynamic because it is an unenforceable type
+File "lambda1.php", line 48, characters 41-43:
+Was expecting an object but type is unknown (Typing[4297])
+File "lambda1.php", line 48, characters 33-35:
+It is unknown because the type of the lambda parameter could not be determined. Please add a type hint to the parameter

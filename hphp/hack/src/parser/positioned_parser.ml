@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2017, Facebook, Inc.
  * All rights reserved.
  *
@@ -7,4 +7,4 @@
  *
  *)
 
-include Full_fidelity_parser.WithSyntax(Full_fidelity_positioned_syntax)
+include Full_fidelity_parser.WithSyntax (Full_fidelity_positioned_syntax)

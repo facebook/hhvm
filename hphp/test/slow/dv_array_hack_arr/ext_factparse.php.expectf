@@ -10,15 +10,16 @@ dict(3) {
       string(3) "CO4"
     }
     ["functions"]=>
-    vec(1) {
+    vec(2) {
       string(2) "f1"
+      string(4) "main"
     }
     ["md5sum0"]=>
-    int(7912239445824932007)
+    int(-7749799467369949883)
     ["md5sum1"]=>
-    int(-1763850095915877527)
+    int(3162611162081215593)
     ["sha1sum"]=>
-    string(40) "54477e30df72b872cefa7332938e9807b0d20907"
+    string(40) "842437fca7df5d1b394e8e78cc23237603cd41ea"
     ["typeAliases"]=>
     vec(3) {
       string(3) "TA0"
@@ -26,7 +27,7 @@ dict(3) {
       string(3) "TA2"
     }
     ["types"]=>
-    vec(10) {
+    vec(13) {
       dict(4) {
         ["baseTypes"]=>
         vec(0) {
@@ -122,6 +123,39 @@ dict(3) {
           string(3) "CL1"
         }
       }
+      dict(4) {
+        ["baseTypes"]=>
+        vec(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(9) "typeAlias"
+        ["name"]=>
+        string(3) "TA0"
+      }
+      dict(4) {
+        ["baseTypes"]=>
+        vec(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(9) "typeAlias"
+        ["name"]=>
+        string(3) "TA1"
+      }
+      dict(4) {
+        ["baseTypes"]=>
+        vec(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(9) "typeAlias"
+        ["name"]=>
+        string(3) "TA2"
+      }
       dict(6) {
         ["baseTypes"]=>
         vec(0) {
@@ -192,15 +226,16 @@ dict(3) {
       string(6) "NS\CO4"
     }
     ["functions"]=>
-    vec(1) {
+    vec(2) {
       string(5) "NS\f1"
+      string(7) "NS\main"
     }
     ["md5sum0"]=>
-    int(-6524520287888746400)
+    int(-1336492716029064691)
     ["md5sum1"]=>
-    int(-2442148009797625650)
+    int(-8683710134939842674)
     ["sha1sum"]=>
-    string(40) "b30219c72207318aa9190a36a0877adbd769e071"
+    string(40) "2645924e9493247ec4f737355647bce99f6d5d61"
     ["typeAliases"]=>
     vec(3) {
       string(6) "NS\TA0"
@@ -208,7 +243,7 @@ dict(3) {
       string(6) "NS\TA2"
     }
     ["types"]=>
-    vec(10) {
+    vec(13) {
       dict(4) {
         ["baseTypes"]=>
         vec(0) {
@@ -304,6 +339,39 @@ dict(3) {
           string(6) "NS\CL1"
         }
       }
+      dict(4) {
+        ["baseTypes"]=>
+        vec(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(9) "typeAlias"
+        ["name"]=>
+        string(6) "NS\TA0"
+      }
+      dict(4) {
+        ["baseTypes"]=>
+        vec(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(9) "typeAlias"
+        ["name"]=>
+        string(6) "NS\TA1"
+      }
+      dict(4) {
+        ["baseTypes"]=>
+        vec(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(9) "typeAlias"
+        ["name"]=>
+        string(6) "NS\TA2"
+      }
       dict(6) {
         ["baseTypes"]=>
         vec(0) {
@@ -374,15 +442,16 @@ dict(3) {
       string(9) "NS\NS\CO4"
     }
     ["functions"]=>
-    vec(1) {
+    vec(2) {
       string(8) "NS\NS\f1"
+      string(10) "NS\NS\main"
     }
     ["md5sum0"]=>
-    int(4326157067570146936)
+    int(-8931023166018215120)
     ["md5sum1"]=>
-    int(-5546976242100887183)
+    int(-9201173697536442419)
     ["sha1sum"]=>
-    string(40) "2b6ee62e181d96cce033bf30224429e66c3e5211"
+    string(40) "938843a9f43cc91f7f9dc4f3061877d4911f22c8"
     ["typeAliases"]=>
     vec(3) {
       string(9) "NS\NS\TA0"
@@ -390,7 +459,7 @@ dict(3) {
       string(9) "NS\NS\TA2"
     }
     ["types"]=>
-    vec(10) {
+    vec(13) {
       dict(4) {
         ["baseTypes"]=>
         vec(0) {
@@ -485,6 +554,39 @@ dict(3) {
         vec(1) {
           string(9) "NS\NS\CL1"
         }
+      }
+      dict(4) {
+        ["baseTypes"]=>
+        vec(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(9) "typeAlias"
+        ["name"]=>
+        string(9) "NS\NS\TA0"
+      }
+      dict(4) {
+        ["baseTypes"]=>
+        vec(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(9) "typeAlias"
+        ["name"]=>
+        string(9) "NS\NS\TA1"
+      }
+      dict(4) {
+        ["baseTypes"]=>
+        vec(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(9) "typeAlias"
+        ["name"]=>
+        string(9) "NS\NS\TA2"
       }
       dict(6) {
         ["baseTypes"]=>

@@ -16,6 +16,8 @@
 #ifndef incl_HPHP_COMPILATION_ALLOC_FLAGS_H
 #define incl_HPHP_COMPILATION_ALLOC_FLAGS_H
 
+#include <cstddef>
+
 #include <folly/CPortability.h>
 #include "hphp/util/low-ptr-def.h"
 

@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -8,4 +8,5 @@
  *)
 
 let output_facts _ _ = ()
+
 let go _ _ = ""

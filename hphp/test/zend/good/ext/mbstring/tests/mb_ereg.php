@@ -1,7 +1,4 @@
 <?hh
-	mb_regex_set_options( '' );
-
-	$encs = array( 'EUC-JP', 'Shift_JIS', 'SJIS', 'UTF-8' );
 
 	function test_ereg( $test_enc, $pat, $str, $in_enc = 'EUC-JP' ) {
 		mb_regex_encoding( $test_enc );
@@ -15,7 +12,13 @@
 		test_ereg( $enc, $pat, b'£á£â£ã ¤¢¤ª¤¤ ¤«¤³¤Ê ¤ï¤ñ¤ó' );
 		test_ereg( $enc, $pat, b'£í£ú£ø£æ£ð ¤¦¤ª¤« ¤­¤« ¤ò¤ð' );
 	}
+<<__EntryPoint>>
+function main_entry(): void {
+  	mb_regex_set_options( '' );
 
-	foreach( $encs as $enc ) {
-		do_tests( $enc );
-	}
+  	$encs = array( 'EUC-JP', 'Shift_JIS', 'SJIS', 'UTF-8' );
+
+  	foreach( $encs as $enc ) {
+  		do_tests( $enc );
+  	}
+}

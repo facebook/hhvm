@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2018, Facebook, Inc.
  * All rights reserved.
  *
@@ -21,24 +21,28 @@
 let gc_slice_sum_ref = ref 0.0
 
 let gc slice =
-  let {Gc.major_words; _ } = Gc.quick_stat () in
+  let { Gc.major_words; _ } = Gc.quick_stat () in
   let next_sum = !gc_slice_sum_ref +. float_of_int slice in
-  if major_words < next_sum then true else begin
-    let _ : int = Gc.major_slice slice in
+  if major_words < next_sum then
+    true
+  else
+    let (_ : int) = Gc.major_slice slice in
     gc_slice_sum_ref := next_sum;
     false
-  end
 
- let rec select ~slice ~deadline fd_list  =
-   let ready_fds, _, _ = Unix.select fd_list [] [] 0.0 in
-   let t = Unix.gettimeofday () in
-   match ready_fds with
-   | [] when slice = 0 -> []
-   | [] when t < deadline ->
-     let is_finished = gc slice in
-     if is_finished then ready_fds else select ~slice ~deadline fd_list
-   | _ -> ready_fds
+let rec select ~slice ~deadline fd_list =
+  let (ready_fds, _, _) = Unix.select fd_list [] [] 0.0 in
+  let t = Unix.gettimeofday () in
+  match ready_fds with
+  | [] when slice = 0 -> []
+  | [] when t < deadline ->
+    let is_finished = gc slice in
+    if is_finished then
+      ready_fds
+    else
+      select ~slice ~deadline fd_list
+  | _ -> ready_fds
 
 let select ~slice ~timeout fd_list =
-  let deadline = (Unix.gettimeofday ()) +. timeout in
+  let deadline = Unix.gettimeofday () +. timeout in
   select ~slice ~deadline fd_list

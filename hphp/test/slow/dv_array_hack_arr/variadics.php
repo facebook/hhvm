@@ -20,7 +20,7 @@ function test($x) {
   variadic(1, 2, 3, 4);
   variadic(1, 2, ...$x);
   if (count($x) > 0) variadic(...$x);
-  if (count($x) > 0) call_user_func_array('variadic', $x);
+  if (count($x) > 0) call_user_func_array(fun('variadic'), $x);
 
   $a = new A();
   if (count($x) > 0) $a->foobaz(...$x);

@@ -31,17 +31,20 @@ function test_preg_match() {
 
   // get host name from URL
   $matches = null;
-  preg_match("@^(?:http://)?([^/]+)@i",
-             "http://www.php.net/index.html", &$matches);
+  preg_match_with_matches(
+    "@^(?:http://)?([^/]+)@i",
+    "http://www.php.net/index.html",
+    inout $matches,
+  );
   $host = $matches[1];
   VS($host, "www.php.net");
 
   // get last two segments of host name
-  preg_match("/[^.]+\\.[^.]+$/", $host, &$matches);
+  preg_match_with_matches("/[^.]+\\.[^.]+$/", $host, inout $matches);
   VS($matches[0], "php.net");
 
   $str = "foobar: 2008";
-  preg_match("/(?<name>\\w+): (?<digit>\\d+)/", $str, &$matches);
+  preg_match_with_matches("/(?<name>\\w+): (?<digit>\\d+)/", $str, inout $matches);
   VS(print_r($matches, true),
      "Dict\n".
      "(\n".
@@ -55,8 +58,12 @@ function test_preg_match() {
 
 
 function test_preg_match_all() {
-  preg_match_all("/\\(?  (\\d{3})?  \\)?  (?(1)  [\\-\\s] ) \\d{3}-\\d{4}/x",
-                   "Call 555-1212 or 1-800-555-1212", &$matches);
+  $matches = null;
+  preg_match_all_with_matches(
+    "/\\(?  (\\d{3})?  \\)?  (?(1)  [\\-\\s] ) \\d{3}-\\d{4}/x",
+    "Call 555-1212 or 1-800-555-1212",
+    inout $matches,
+  );
   VS(print_r($matches, true),
      "Dict\n".
      "(\n".
@@ -79,8 +86,12 @@ function test_preg_match_all() {
   // itself, which would be the ([\w]+) in this case. The extra backslash is
   // required because the string is in double quotes.
   $html = "<b>bold text</b><a href=howdy.html>click me</a>";
-  preg_match_all("/(<([\\w]+)[^>]*>)(.*)(<\\/\\2>)/", $html, &$matches,
-                 PREG_SET_ORDER);
+  preg_match_all_with_matches(
+    "/(<([\\w]+)[^>]*>)(.*)(<\\/\\2>)/",
+    $html,
+    inout $matches,
+    PREG_SET_ORDER,
+  );
   VS(print_r($matches, true),
      "Dict\n".
      "(\n".
@@ -105,7 +116,11 @@ function test_preg_match_all() {
      ")\n");
 
   $str = "a: 1\nb: 2\nc: 3\n";
-  preg_match_all("/(?<name>\\w+): (?<digit>\\d+)/", $str, &$matches);
+  preg_match_all_with_matches(
+    "/(?<name>\\w+): (?<digit>\\d+)/",
+    $str,
+    inout $matches,
+  );
   VS(print_r($matches, true),
      "Dict\n".
      "(\n".
@@ -192,7 +207,7 @@ function test_preg_replace() {
   VS($str, "foo o");
 
   $count = 0;
-  preg_replace(array("/\\d/", "/\\s/"), "*", "xp 4 to", -1, &$count);
+  preg_replace_with_count(array("/\\d/", "/\\s/"), "*", "xp 4 to", -1, inout $count);
   VS($count, 3);
 
   VS(preg_replace("/xxx", "w", "xxxx"), NULL);
@@ -217,8 +232,9 @@ function next_year($m) {
 function test_preg_replace_callback() {
   $text = "April fools day is 04/01/2002\n".
     "Last christmas was 12/24/2001\n";
-  $text = preg_replace_callback("|(\\d{2}/\\d{2}/)(\\d{4})|", "next_year",
-                                $text);
+  $count = -1;
+  $text = preg_replace_callback("|(\\d{2}/\\d{2}/)(\\d{4})|", fun("next_year"),
+                                $text, -1, inout $count);
   VS($text, "April fools day is 04/01/2003\nLast christmas was 12/24/2002\n");
 }
 
@@ -323,20 +339,6 @@ function test_eregi_replace() {
   VS($body, ">whatever<span class=\"search\">suffix</span>");
 }
 
-function test_ereg() {
-  $date = "1973-04-30";
-  VERIFY(ereg("([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})", $date, &$regs) !== false);
-  VS($regs[3], "30");
-  VS($regs[2], "04");
-  VS($regs[1], "1973");
-  VS($regs[0], "1973-04-30");
-}
-
-function test_eregi() {
-  $str = "XYZ";
-  VERIFY(eregi("z", $str) !== false);
-}
-
 function test_split() {
   $mb = "\xe4\xbf\xa1\xe6\x81\xaf\x01  2366797";
   $ret = split("\x01", $mb);
@@ -376,8 +378,6 @@ test_preg_split();
 test_preg_quote();
 test_ereg_replace();
 test_eregi_replace();
-test_ereg();
-test_eregi();
 test_split();
 test_spliti();
 test_sql_regcase();

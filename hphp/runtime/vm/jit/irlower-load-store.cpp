@@ -92,7 +92,8 @@ void cgStLocRange(IRLS& env, const IRInstruction* inst) {
       v << subqi{int32_t{sizeof(Cell)}, i, res, v.makeReg()};
       v << cmpq{res, nreg, sf};
       return sf;
-    }
+    },
+    range->end - range->start
   );
 }
 
@@ -139,7 +140,12 @@ void cgLdStkAddr(IRLS& env, const IRInstruction* inst) {
 void cgStStk(IRLS& env, const IRInstruction* inst) {
   auto const sp = srcLoc(env, inst, 0).reg();
   auto const off = cellsToBytes(inst->extra<StStk>()->offset.offset);
-  storeTV(vmain(env), sp[off], srcLoc(env, inst, 1), inst->src(1));
+
+  auto const type = inst->hasTypeParam()
+    ? inst->typeParam()
+    : inst->src(1)->type();
+
+  storeTV(vmain(env), sp[off], srcLoc(env, inst, 1), inst->src(1), type);
 }
 
 void cgStOutValue(IRLS& env, const IRInstruction* inst) {
@@ -148,6 +154,14 @@ void cgStOutValue(IRLS& env, const IRInstruction* inst) {
     inst->extra<StOutValue>()->index + kNumActRecCells
   );
   storeTV(vmain(env), fp[off], srcLoc(env, inst, 1), inst->src(1));
+}
+
+void cgLdOutAddr(IRLS& env, const IRInstruction* inst) {
+  auto const fp = srcLoc(env, inst, 0).reg();
+  auto const off = cellsToBytes(
+    inst->extra<LdOutAddr>()->index + kNumActRecCells
+  );
+  vmain(env) << lea{fp[off], dstLoc(env, inst, 0).reg()};
 }
 
 void cgDbgTrashStk(IRLS& env, const IRInstruction* inst) {
@@ -175,82 +189,6 @@ const Func* funcFromFp(const SSATmp* fp) {
 
 }
 
-IMPL_OPCODE_CALL(IsReifiedName)
-IMPL_OPCODE_CALL(LdReifiedGeneric)
-
-void cgLdClsRefCls(IRLS& env, const IRInstruction* inst) {
-  auto const fp = srcLoc(env, inst, 0).reg();
-  auto const dst = dstLoc(env, inst, 0).reg();
-  auto const off = frame_clsref_offset(
-    funcFromFp(inst->src(0)),
-    inst->extra<ClsRefSlotData>()->slot
-  );
-  emitLdLowPtr(vmain(env), fp[off + cls_ref::clsOff()],
-               dst, sizeof(LowPtr<Class>));
-}
-
-void cgLdClsRefTS(IRLS& env, const IRInstruction* inst) {
-  auto const fp = srcLoc(env, inst, 0).reg();
-  auto const dst = dstLoc(env, inst, 0).reg();
-  auto const off = frame_clsref_offset(
-    funcFromFp(inst->src(0)),
-    inst->extra<ClsRefSlotData>()->slot
-  );
-  vmain(env) << load{fp[off + cls_ref::reifiedOff()], dst};
-}
-
-void cgStClsRefCls(IRLS& env, const IRInstruction* inst) {
-  auto const fp = srcLoc(env, inst, 0).reg();
-  auto const src = srcLoc(env, inst, 1).reg();
-  auto const off = frame_clsref_offset(
-    funcFromFp(inst->src(0)),
-    inst->extra<ClsRefSlotData>()->slot
-  );
-  auto& v = vmain(env);
-  emitStLowPtr(v, src, fp[off + cls_ref::clsOff()], sizeof(LowPtr<Class>));
-}
-
-void cgStClsRefTS(IRLS& env, const IRInstruction* inst) {
-  auto const fp = srcLoc(env, inst, 0).reg();
-  auto const src = srcLoc(env, inst, 1).reg();
-  auto const off = frame_clsref_offset(
-    funcFromFp(inst->src(0)),
-    inst->extra<ClsRefSlotData>()->slot
-  );
-  vmain(env) << store{src, fp[off + cls_ref::reifiedOff()]};
-}
-
-void cgKillClsRefCls(IRLS& env, const IRInstruction* inst) {
-  if (!debug) return;
-
-  auto& v = vmain(env);
-  auto const fp = srcLoc(env, inst, 0).reg();
-  auto const off = frame_clsref_offset(
-    funcFromFp(inst->src(0)),
-    inst->extra<ClsRefSlotData>()->slot
-  );
-
-  LowPtr<Class> trash;
-  memset(&trash, kTrashClsRef, sizeof(trash));
-  emitStLowPtr(v, v.cns(trash), fp[off + cls_ref::clsOff()],
-               sizeof(LowPtr<Class>));
-}
-
-void cgKillClsRefTS(IRLS& env, const IRInstruction* inst) {
-  if (!debug) return;
-
-  auto& v = vmain(env);
-  auto const fp = srcLoc(env, inst, 0).reg();
-  auto const off = frame_clsref_offset(
-    funcFromFp(inst->src(0)),
-    inst->extra<ClsRefSlotData>()->slot
-  );
-
-  ArrayData* trash;
-  memset(&trash, kTrashClsRef, sizeof(trash));
-  emitImmStoreq(v, trash, fp[off + cls_ref::reifiedOff()]);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void cgLdMem(IRLS& env, const IRInstruction* inst) {
@@ -268,7 +206,9 @@ void cgStMem(IRLS& env, const IRInstruction* inst) {
   auto const src    = inst->src(1);
   auto const srcLoc = tmpLoc(env, src);
 
-  storeTV(vmain(env), src->type(), srcLoc,
+  auto const type   = inst->hasTypeParam() ? inst->typeParam() : src->type();
+
+  storeTV(vmain(env), type, srcLoc,
           memTVTypePtr(ptr, ptrLoc), memTVValPtr(ptr, ptrLoc));
 }
 

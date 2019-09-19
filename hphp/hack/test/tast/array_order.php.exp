@@ -1,6 +1,6 @@
 [(Fun
     { f_span = [12:1-15:2]; f_annotation = (); f_mode = <opaque>;
-      f_ret = (Some ([12:18-22], (Hprim Tvoid)));
+      f_ret = ((void), (Some ([12:18-22], (Hprim Tvoid))));
       f_name = ([12:10-14], "\\test"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
       f_body =
@@ -48,7 +48,7 @@
       f_static = false });
   (Fun
      { f_span = [17:1-30]; f_annotation = (); f_mode = <opaque>;
-       f_ret = None; f_name = ([17:10-25], "\\my_php_function");
+       f_ret = ((_), None); f_name = ([17:10-25], "\\my_php_function");
        f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
        f_params = [];
        f_body =

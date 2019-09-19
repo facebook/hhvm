@@ -45,17 +45,17 @@ echo "*** Testing array_filter() : usage variation - different 'callback' functi
 $input = array(0, -1, 2, 3.4E-3, 'hello', "value", "key" => 4, 'null' => NULL);
 
 echo "-- Callback function without parameter and with return --\n";
-var_dump( array_filter($input, "callback1") );
+var_dump( array_filter($input, fun("callback1")) );
 
 echo "-- Callback funciton with parameter and without return --\n";
-var_dump( array_filter($input, "callback2") );
+var_dump( array_filter($input, fun("callback2")) );
 
 
 echo "-- Callback function without parameter and return --\n";
-var_dump( array_filter($input, "callback3") );
+var_dump( array_filter($input, fun("callback3")) );
 
 echo "-- Callback function with parameter and return --\n";
-var_dump( array_filter($input, "callback4") );
+var_dump( array_filter($input, fun("callback4")) );
 
 echo "Done";
 }

@@ -18,12 +18,12 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/req-optional.h"
 #include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/ext/asio/ext_waitable-wait-handle.h"
 #include "hphp/runtime/vm/native-data.h"
+#include "hphp/util/rds-local.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -19,8 +19,9 @@
 
 #include "hphp/util/alloc.h"
 
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/server/transport.h"
+
+#include "hphp/util/rds-local.h"
 
 #include <mutex>
 

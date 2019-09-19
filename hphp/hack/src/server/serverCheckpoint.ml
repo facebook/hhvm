@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -14,11 +14,14 @@ let checkpoints = ref SMap.empty
 
 let process_updates updates =
   (* Appending changed files to each checkpoint in the map *)
-  checkpoints := SMap.map !checkpoints begin fun cur_set ->
-    Relative_path.Map.fold updates ~f:begin fun path _ acc ->
-      Relative_path.Set.add acc path
-    end ~init:cur_set
-  end
+  checkpoints :=
+    SMap.map !checkpoints (fun cur_set ->
+        Relative_path.Map.fold
+          updates
+          ~f:begin
+               fun path _ acc -> Relative_path.Set.add acc path
+             end
+          ~init:cur_set)
 
 let create_checkpoint x =
   checkpoints := SMap.add !checkpoints ~key:x ~data:Relative_path.Set.empty
@@ -26,16 +29,13 @@ let create_checkpoint x =
 let retrieve_checkpoint x =
   match SMap.get !checkpoints x with
   | Some files ->
-      Some(
-        List.map
-          (Relative_path.Set.elements files)
-          Relative_path.to_absolute
-      )
+    Some
+      (List.map (Relative_path.Set.elements files) Relative_path.to_absolute)
   | None -> None
 
 let delete_checkpoint x =
   match SMap.get !checkpoints x with
   | Some _ ->
-      checkpoints := SMap.remove !checkpoints x;
-      true
+    checkpoints := SMap.remove !checkpoints x;
+    true
   | None -> false

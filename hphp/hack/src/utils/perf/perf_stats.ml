@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2018, Facebook, Inc.
  * All rights reserved.
  *
@@ -11,14 +11,21 @@
  * such that index/count values are smaller).  Assumes the input list is sorted
  * unless compare argument is given to first sort the list according to it.
  *)
- let quantiles ?compare xs count =
-   let a = Array.of_list xs in
-   begin match compare with None -> () | Some cmp -> Array.sort cmp a end;
-   let n = Array.length a in
-
-   let step = (float_of_int (n - 1)) /. (float_of_int count) in
-   let to_idx count = (int_of_float ((float_of_int count) *. step)) in
-   let rec work count acc = if count = 0 then acc else
-     let q = Array.get a (to_idx count) in
-     (work[@tailrec]) (count - 1) (q :: acc)
-   in work count []
+let quantiles ?compare xs count =
+  let a = Array.of_list xs in
+  begin
+    match compare with
+    | None -> ()
+    | Some cmp -> Array.sort cmp a
+  end;
+  let n = Array.length a in
+  let step = float_of_int (n - 1) /. float_of_int count in
+  let to_idx count = int_of_float (float_of_int count *. step) in
+  let rec work count acc =
+    if count = 0 then
+      acc
+    else
+      let q = a.(to_idx count) in
+      (work [@tailrec]) (count - 1) (q :: acc)
+  in
+  work count []

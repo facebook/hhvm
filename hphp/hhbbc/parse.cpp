@@ -171,7 +171,7 @@ std::set<Offset> findBasicBlocks(const FuncEmitter& fe) {
     auto const breaksBB =
       instrIsNonCallControlFlow(op) ||
       instrFlags(op) & TF ||
-      (hasFCallEffects(op) && !instrJumpOffsets(pc).empty());
+      (isFCall(op) && !instrJumpOffsets(pc).empty());
 
     if (options.TraceBytecodes.count(op)) traceBc = true;
 
@@ -374,18 +374,10 @@ void populate_block(ParseUnitState& puState,
   auto createcl = [&] (const Bytecode& b) {
     puState.createClMap[b.CreateCl.arg2].insert(&func);
   };
-  auto fpushfuncd = [&] (const Bytecode& b) {
-    if (b.FPushFuncD.str2 == s_class_alias.get()) {
+  auto fcallfuncd = [&] (const Bytecode& b) {
+    if (b.FCallFuncD.str2 == s_class_alias.get()) {
       puState.constPassFuncs.insert(&func);
     }
-  };
-  auto has_call_unpack = [&] {
-    auto const fpi = Func::findFPI(&*fe.fpitab.begin(),
-                                   &*fe.fpitab.end(), pc - ue.bc());
-    auto pc = ue.bc() + fpi->m_fpiEndOff;
-    auto const op = decode_op(pc);
-    if (!isLegacyFCall(op)) return false;
-    return decodeFCallArgs(op, pc).hasUnpack();
   };
 
 #define IMM_BLA(n)     auto targets = decode_switch(opPC);
@@ -403,16 +395,6 @@ void populate_block(ParseUnitState& puState,
                          IterId id = decode_iva(pc);             \
                          always_assert(id < func.numIters);      \
                          return id;                              \
-                       }();
-#define IMM_CAR(n)     auto slot = [&] {                                \
-                         ClsRefSlotId id = decode_iva(pc);              \
-                         always_assert(id >= 0 && id < func.numClsRefSlots); \
-                         return id;                                     \
-                       }();
-#define IMM_CAW(n)     auto slot = [&] {                                \
-                         ClsRefSlotId id = decode_iva(pc);              \
-                         always_assert(id >= 0 && id < func.numClsRefSlots); \
-                         return id;                                     \
                        }();
 #define IMM_DA(n)      auto dbl##n = decode<double>(pc);
 #define IMM_SA(n)      auto str##n = ue.lookupLitstr(decode<Id>(pc));
@@ -447,33 +429,36 @@ void populate_block(ParseUnitState& puState,
                          assertx(aeTarget == NoBlockId || next == past);     \
                          return FCallArgs(fca.flags, fca.numArgs,            \
                                           fca.numRets, std::move(byRefs),    \
-                                          aeTarget, fca.constructNoConst);   \
+                                          aeTarget, fca.lockWhileUnwinding); \
                        }();
 
 #define IMM_NA
-#define IMM_ONE(x)           IMM_##x(1)
-#define IMM_TWO(x, y)        IMM_##x(1)          IMM_##y(2)
-#define IMM_THREE(x, y, z)   IMM_TWO(x, y)       IMM_##z(3)
-#define IMM_FOUR(x, y, z, n) IMM_THREE(x, y, z)  IMM_##n(4)
-#define IMM_FIVE(x, y, z, n, m) IMM_FOUR(x, y, z, n)  IMM_##m(5)
+#define IMM_ONE(x)                IMM_##x(1)
+#define IMM_TWO(x, y)             IMM_##x(1) IMM_##y(2)
+#define IMM_THREE(x, y, z)        IMM_TWO(x, y) IMM_##z(3)
+#define IMM_FOUR(x, y, z, n)      IMM_THREE(x, y, z) IMM_##n(4)
+#define IMM_FIVE(x, y, z, n, m)   IMM_FOUR(x, y, z, n) IMM_##m(5)
+#define IMM_SIX(x, y, z, n, m, o) IMM_FIVE(x, y, z, n, m) IMM_##o(6)
 
 #define IMM_ARG(which, n)         IMM_NAME_##which(n)
 #define IMM_ARG_NA
-#define IMM_ARG_ONE(x)            IMM_ARG(x, 1)
-#define IMM_ARG_TWO(x, y)         IMM_ARG(x, 1), IMM_ARG(y, 2)
-#define IMM_ARG_THREE(x, y, z)    IMM_ARG(x, 1), IMM_ARG(y, 2), \
-                                    IMM_ARG(z, 3)
-#define IMM_ARG_FOUR(x, y, z, l)  IMM_ARG(x, 1), IMM_ARG(y, 2), \
-                                   IMM_ARG(z, 3), IMM_ARG(l, 4)
-#define IMM_ARG_FIVE(x, y, z, l, m) IMM_ARG(x, 1), IMM_ARG(y, 2), \
-                                   IMM_ARG(z, 3), IMM_ARG(l, 4), \
-                                   IMM_ARG(m, 5)
+#define IMM_ARG_ONE(x)                IMM_ARG(x, 1)
+#define IMM_ARG_TWO(x, y)             IMM_ARG(x, 1), IMM_ARG(y, 2)
+#define IMM_ARG_THREE(x, y, z)        IMM_ARG(x, 1), IMM_ARG(y, 2), \
+                                      IMM_ARG(z, 3)
+#define IMM_ARG_FOUR(x, y, z, l)      IMM_ARG(x, 1), IMM_ARG(y, 2), \
+                                      IMM_ARG(z, 3), IMM_ARG(l, 4)
+#define IMM_ARG_FIVE(x, y, z, l, m)   IMM_ARG(x, 1), IMM_ARG(y, 2), \
+                                      IMM_ARG(z, 3), IMM_ARG(l, 4), \
+                                      IMM_ARG(m, 5)
+#define IMM_ARG_SIX(x, y, z, l, m, n) IMM_ARG(x, 1), IMM_ARG(y, 2), \
+                                      IMM_ARG(z, 3), IMM_ARG(l, 4), \
+                                      IMM_ARG(m, 5), IMM_ARG(n, 6)
 
 #define FLAGS_NF
 #define FLAGS_TF
 #define FLAGS_CF
 #define FLAGS_FF
-#define FLAGS_PF auto hu = has_call_unpack();
 #define FLAGS_CF_TF
 #define FLAGS_CF_FF
 
@@ -481,7 +466,6 @@ void populate_block(ParseUnitState& puState,
 #define FLAGS_ARG_TF
 #define FLAGS_ARG_CF
 #define FLAGS_ARG_FF
-#define FLAGS_ARG_PF ,hu
 #define FLAGS_ARG_CF_TF
 #define FLAGS_ARG_CF_FF
 
@@ -500,7 +484,7 @@ void populate_block(ParseUnitState& puState,
       if (Op::opcode == Op::DefClsNop)   defclsnop(b);             \
       if (Op::opcode == Op::AliasCls)    aliascls(b);              \
       if (Op::opcode == Op::CreateCl)    createcl(b);              \
-      if (Op::opcode == Op::FPushFuncD)  fpushfuncd(b);            \
+      if (Op::opcode == Op::FCallFuncD)  fcallfuncd(b);            \
       blk.hhbcs.push_back(std::move(b));                           \
       assert(pc == next);                                          \
     }                                                              \
@@ -559,7 +543,6 @@ void populate_block(ParseUnitState& puState,
 #undef FLAGS_TF
 #undef FLAGS_CF
 #undef FLAGS_FF
-#undef FLAGS_PF
 #undef FLAGS_CF_TF
 #undef FLAGS_CF_FF
 
@@ -567,7 +550,6 @@ void populate_block(ParseUnitState& puState,
 #undef FLAGS_ARG_TF
 #undef FLAGS_ARG_CF
 #undef FLAGS_ARG_FF
-#undef FLAGS_ARG_PF
 #undef FLAGS_ARG_CF_TF
 #undef FLAGS_ARG_CF_FF
 
@@ -579,8 +561,6 @@ void populate_block(ParseUnitState& puState,
 #undef IMM_I64A
 #undef IMM_LA
 #undef IMM_IA
-#undef IMM_CAR
-#undef IMM_CAW
 #undef IMM_DA
 #undef IMM_SA
 #undef IMM_RATA
@@ -606,6 +586,7 @@ void populate_block(ParseUnitState& puState,
 #undef IMM_ARG_THREE
 #undef IMM_ARG_FOUR
 #undef IMM_ARG_FIVE
+#undef IMM_ARG_SIX
 
   /*
    * If a block ends with an unconditional jump, change it to a
@@ -743,7 +724,6 @@ void add_frame_variables(php::Func& func, const FuncEmitter& fe) {
   }
 
   func.numIters = fe.numIterators();
-  func.numClsRefSlots = fe.numClsRefSlots();
 }
 
 std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
@@ -792,7 +772,6 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
     if (it != RuntimeOption::ConstantFunctions.end()) {
       ret->locals.resize(fe.params.size());
       ret->numIters = 0;
-      ret->numClsRefSlots = 0;
       ret->attrs |= AttrIsFoldable;
 
       auto const mainEntry = BlockId{0};
@@ -923,7 +902,7 @@ std::unique_ptr<php::Record> parse_record(php::Unit* unit,
   ret->srcInfo            = php::SrcInfo {re.getLocation(), re.docComment()};
   ret->name               = re.name();
   ret->attrs              = static_cast<Attr>(re.attrs() & ~AttrNoOverride);
-  ret->parentName         = re.parentName();
+  ret->parentName         = re.parentName()->empty()? nullptr: re.parentName();
   ret->id                 = re.id();
   ret->userAttributes     = re.userAttributes();
 

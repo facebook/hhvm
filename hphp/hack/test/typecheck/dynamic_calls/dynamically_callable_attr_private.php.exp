@@ -1,0 +1,4 @@
+File "dynamically_callable_attr_private.php", line 15, characters 5-25:
+__DynamicallyCallable can only be used on public methods (Naming[2106])
+File "dynamically_callable_attr_private.php", line 16, characters 20-23:
+But this method is private

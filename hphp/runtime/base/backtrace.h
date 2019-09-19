@@ -13,27 +13,36 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #ifndef incl_HPHP_BACKTRACE_H_
 #define incl_HPHP_BACKTRACE_H_
 
 #include "hphp/runtime/base/resource-data.h"
+#include "hphp/runtime/base/types.h"
+
 #include "hphp/util/low-ptr.h"
 
+#include <folly/Optional.h>
 #include <folly/small_vector.h>
 
-#include <stdint.h>
+#include <cstdint>
+#include <type_traits>
 
 namespace HPHP {
 
+///////////////////////////////////////////////////////////////////////////////
+
 struct ActRec;
 struct Array;
-struct VMParserFrame;
-struct c_ResumableWaitHandle;
-struct c_WaitableWaitHandle;
 struct Class;
 struct Func;
 struct Resource;
 struct StructuredLogEntry;
+struct VMParserFrame;
+struct c_ResumableWaitHandle;
+struct c_WaitableWaitHandle;
+
+///////////////////////////////////////////////////////////////////////////////
 
 struct CompactTrace : SweepableResourceData {
   Array extract() const;
@@ -216,20 +225,101 @@ private:
   c_WaitableWaitHandle* m_fromWaitHandle{nullptr};
 };
 
+///////////////////////////////////////////////////////////////////////////////
+
+using IFrameID = int32_t;
+
+struct IFrame {
+  const Func* func; // callee (m_func)
+  int32_t callOff;  // caller offset (m_callOff)
+  IFrameID parent;  // parent frame (m_sfp)
+};
+
+struct IStack {
+  IFrameID frame; // leaf frame in this stack
+  uint32_t nframes;
+  uint32_t callOff;
+
+  template<class SerDe> void serde(SerDe& sd) {
+    sd(frame)
+      (nframes)
+      (callOff)
+      ;
+  }
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
 Array createBacktrace(const BacktraceArgs& backtraceArgs);
 void addBacktraceToStructLog(const Array& bt, StructuredLogEntry& cols);
 int64_t createBacktraceHash(bool consider_metadata);
 req::ptr<CompactTrace> createCompactBacktrace();
-const Func* GetCallerFunc();
-const Func* GetCallerFuncSkipBuiltins();
-const Func* GetCallerFuncSkipCPPBuiltins();
-Class* GetCallerClass();
-Class* GetCallerClassSkipBuiltins();
-Class* GetCallerClassSkipCPPBuiltins();
-c_ResumableWaitHandle* GetResumedWaitHandle();
-Array GetCallerInfo();
-ActRec* GetFrameForDebuggerUnsafe(int frameDepth);
 
-} // HPHP
+/*
+ * Walk the logical VM stack, including inlined frames.
+ *
+ * `func` should have the signature:
+ *
+ *    bool func(ActRec* fp, Offset prevPC);
+ *
+ *  If `func` returns true, the walk terminates; otherwise, it continues.
+ *
+ *  Note that the `fp` argument to `func` is not valid outside `func`; it may
+ *  refer to temporary stack-allocated memory.
+ */
+template<typename L>
+void walkStack(L func, bool skipTop = false);
+
+namespace backtrace_detail {
+
+template<typename F>
+using from_ret_t = std::result_of_t<F(const ActRec*, Offset)>;
+
+}
+
+/*
+ * Call `f` with the frame pointer and PC of the current Hack function (i.e.,
+ * the leafmost function which called into native code).
+ *
+ * If there is no such function, returns `def`; otherwise, forwards `f`'s
+ * return.
+ */
+template<typename F>
+backtrace_detail::from_ret_t<F> fromLeaf(
+  F f,
+  backtrace_detail::from_ret_t<F> def = backtrace_detail::from_ret_t<F>{}
+);
+
+/*
+ * Like fromLeaf(), but for the leaf function's caller.
+ */
+template<typename F>
+backtrace_detail::from_ret_t<F> fromCaller(
+  F f,
+  backtrace_detail::from_ret_t<F> def = backtrace_detail::from_ret_t<F>{}
+);
+
+/*
+ * Like fromLeaf() and fromCaller(), but for the first function whose frame
+ * satisfies `pred(fp)`.
+ */
+template<typename F, typename Pred>
+backtrace_detail::from_ret_t<F> fromLeaf(
+  F f, Pred pred,
+  backtrace_detail::from_ret_t<F> def = backtrace_detail::from_ret_t<F>{}
+);
+template<typename F, typename Pred>
+backtrace_detail::from_ret_t<F> fromCaller(
+  F f, Pred pred,
+  backtrace_detail::from_ret_t<F> def = backtrace_detail::from_ret_t<F>{}
+);
+
+///////////////////////////////////////////////////////////////////////////////
+
+}
+
+#define incl_HPHP_BACKTRACE_INL_H_
+#include "hphp/runtime/base/backtrace-inl.h"
+#undef incl_HPHP_BACKTRACE_INL_H_
 
 #endif // incl_HPHP_BACKTRACE_H_

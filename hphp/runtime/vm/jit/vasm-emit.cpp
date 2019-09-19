@@ -19,7 +19,6 @@
 #include "hphp/runtime/vm/jit/align.h"
 #include "hphp/runtime/vm/jit/asm-info.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
-#include "hphp/runtime/vm/jit/func-guard.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/relocation.h"
@@ -194,12 +193,6 @@ void emitVunit(Vunit& vunit, const IRUnit& unit,
 
   assertx(code.isLocal() || cold_in.frontier() == cold_start);
   assertx(code.isLocal() || main_in.frontier() == main_start);
-
-  assertx(!isPrologue(unit.context().kind) ||
-          funcGuardMatches(
-            funcGuardFromPrologue(unit.prologueStart, unit.context().func),
-            unit.context().func
-          ));
 
   if (do_relocate) {
     tc::relocateTranslation(&unit,

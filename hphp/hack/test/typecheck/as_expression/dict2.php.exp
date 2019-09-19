@@ -12,5 +12,9 @@ File "hackarray.hhi", line 11, characters 34-41:
 But got arraykey
 File "dict2.php", line 12, characters 31-34:
 The type dict expects 2 type parameter(s) (Typing[4101])
+File "hackarray.hhi", line 11, characters 22-25:
+Definition is here
 File "dict2.php", line 13, characters 31-34:
 The type dict expects 2 type parameter(s) (Typing[4101])
+File "hackarray.hhi", line 11, characters 22-25:
+Definition is here

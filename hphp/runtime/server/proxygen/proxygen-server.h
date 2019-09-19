@@ -245,6 +245,9 @@ struct ProxygenServer : Server,
 
   void updateTLSTicketSeeds(wangle::TLSTicketKeySeeds seeds);
 
+  virtual std::unique_ptr<HPHPSessionAcceptor> createAcceptor(
+    const proxygen::AcceptorConfiguration& config);
+
   // Forbidden copy constructor and assignment operator
   ProxygenServer(ProxygenServer const &) = delete;
   ProxygenServer& operator=(ProxygenServer const &) = delete;

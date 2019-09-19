@@ -3,9 +3,9 @@
 class Foo implements Iterator {
   private $data = array(1, 2, 3);
 
-  public function current() { $arr = $this->data; $x = current(&$arr); $this->data = $arr; return $x; }
-  public function key() { $arr = $this->data; $key = key(&$arr); $this->data = $arr; return $key; }
-  public function valid() { $arr = $this->data; $current = current(&$arr); $this->data = $arr; return $current; }
+  public function current() { $arr = $this->data; $x = current($arr); $this->data = $arr; return $x; }
+  public function key() { $arr = $this->data; $key = key($arr); $this->data = $arr; return $key; }
+  public function valid() { $arr = $this->data; $current = current($arr); $this->data = $arr; return $current; }
 
 
 
@@ -15,13 +15,13 @@ class Foo implements Iterator {
 
   public function next() {
     $__data = $this->data;
-    next(&$__data);
+    next(inout $__data);
     $this->data = $__data;
   }
   public function rewind() {
     echo "hagfish\n";
     $__data = $this->data;
-    reset(&$__data);
+    reset(inout $__data);
     $this->data = $__data;
   }
 

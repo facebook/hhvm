@@ -1,5 +1,6 @@
 <?hh
 
+<<__DynamicallyConstructible>>
 class X {
 }
 class Y {

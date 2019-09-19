@@ -63,10 +63,6 @@ inline Id FuncEmitter::numIterators() const {
   return m_numIterators;
 }
 
-inline Id FuncEmitter::numClsRefSlots() const {
-  return m_numClsRefSlots;
-}
-
 inline Id FuncEmitter::numLiveIterators() const {
   return m_nextFreeIterator;
 }
@@ -78,11 +74,6 @@ inline void FuncEmitter::setNumIterators(Id numIterators) {
 
 inline void FuncEmitter::setNumLiveIterators(Id id) {
   m_nextFreeIterator = id;
-}
-
-inline void FuncEmitter::setNumClsRefSlots(Id num) {
-  assertx(m_numClsRefSlots == 0);
-  m_numClsRefSlots = num;
 }
 
 inline bool FuncEmitter::hasVar(const StringData* name) const {

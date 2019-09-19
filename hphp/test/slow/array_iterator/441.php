@@ -12,10 +12,10 @@ function bar() {
 <<__EntryPoint>>
 function array_iterator_441() {
   $arr = ArrayIterator441::$arr;
-  reset(&$arr);
+  reset(inout $arr);
   while (true) {
     $arr = ArrayIterator441::$arr;
-    $func = each(&$arr);
+    $func = each(inout $arr);
     if (!$func) {
       break;
     }

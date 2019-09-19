@@ -1,0 +1,9 @@
+dict(0) {
+}
+Cannot modify static const property ca of class A.
+dict(2) {
+  [2]=>
+  string(5) "green"
+  [10]=>
+  string(4) "home"
+}

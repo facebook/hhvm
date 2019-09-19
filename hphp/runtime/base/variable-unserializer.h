@@ -33,7 +33,6 @@ enum class UnserializeMode {
   ColKey = 3,
   VecValue = 4,
   DictValue = 5,
-  ShapeValue = 6,
 };
 
 struct InvalidAllowedClassesException : Exception {
@@ -171,7 +170,6 @@ private:
     static RefInfo makeColValue(tv_lval v);
     static RefInfo makeVecValue(tv_lval v);
     static RefInfo makeDictValue(tv_lval v);
-    static RefInfo makeShapeValue(tv_lval v);
 
     tv_lval var() const;
 
@@ -185,7 +183,6 @@ private:
       ColValue,
       VecValue,
       DictValue,
-      ShapeValue
     };
     RefInfo(tv_lval, Type);
     // tv_lval with a Type tag.
@@ -211,12 +208,12 @@ private:
   void unserializeVariant(tv_lval self,
                           UnserializeMode mode = UnserializeMode::Value);
   Array unserializeArray();
+  folly::Optional<arrprov::Tag> unserializeProvenanceTag();
   Array unserializeDict();
   Array unserializeVec();
   Array unserializeKeyset();
   Array unserializeVArray();
   Array unserializeDArray();
-  Array unserializeShape();
   folly::StringPiece unserializeStringPiece(char delimiter0 = '"',
                                             char delimiter1 = '"');
   String unserializeString(char delimiter0 = '"', char delimiter1 = '"');

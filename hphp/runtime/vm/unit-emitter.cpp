@@ -176,11 +176,10 @@ Id UnitEmitter::mergeUnitLitstr(const StringData* litstr) {
 
 Id UnitEmitter::mergeArray(const ArrayData* a) {
   assertx(a->isStatic());
-  auto const emplaced = m_array2id.emplace(a, static_cast<Id>(m_arrays.size()));
-  if (emplaced.second) {
-    m_arrays.push_back(a);
-  }
-  return emplaced.first->second;
+  auto const id = static_cast<Id>(m_arrays.size());
+  m_array2id.emplace(a, id);
+  m_arrays.push_back(a);
+  return id;
 }
 
 
@@ -202,7 +201,7 @@ void UnitEmitter::addTrivialPseudoMain() {
   emitInt64(1);
   emitOp(OpRetC);
   mfe->maxStackCells = 1;
-  mfe->finish(bcPos(), false);
+  mfe->finish(bcPos());
 
   TypedValue mainReturn;
   mainReturn.m_data.num = 1;
@@ -487,6 +486,10 @@ RepoStatus UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
     for (unsigned i = 0; i < m_litstrs.size(); ++i) {
       urp.insertUnitLitstr[repoId].insert(txn, usn, i, m_litstrs[i]);
     }
+    for (unsigned i = 0; i < m_typeAliases.size(); ++i) {
+      urp.insertUnitTypeAlias[repoId].insert(*this, txn, usn, i,
+                                             m_typeAliases[i]);
+    }
     for (unsigned i = 0; i < m_arrays.size(); ++i) {
       // We check that arrays do not exceed a configurable maximum size in the
       // assembler, so just assume that they're okay here.
@@ -496,22 +499,7 @@ RepoStatus UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
         VarNR(const_cast<ArrayData*>(m_arrays[i]))
       ).toCppString();
 
-      if (RuntimeOption::EvalArrayProvenance) {
-        auto const tag = arrprov::getTag(m_arrays[i]);
-        auto const line = tag
-          ? folly::make_optional(tag->line())
-          : folly::none;
-        auto const file = (tag && tag->filename() != m_filepath)
-          ? tag->filename()
-          : nullptr;
-        urp.insertUnitArray[repoId].insert(
-          txn, usn, i, arr_str, line, file
-        );
-      } else {
-        urp.insertUnitArray[repoId].insert(
-          txn, usn, i, arr_str, folly::none, nullptr
-        );
-      }
+      urp.insertUnitArray[repoId].insert(txn, usn, i, arr_str);
     }
     urp.insertUnitArrayTypeTable[repoId].insert(txn, usn, *this);
     for (auto& fe : m_fes) {
@@ -835,7 +823,6 @@ void UnitEmitter::serdeMetaData(SerDe& sd) {
   sd(m_mainReturn)
     (m_mergeOnly)
     (m_isHHFile)
-    (m_typeAliases)
     (m_metaData)
     (m_fileAttributes)
     (m_symbol_refs)
@@ -882,8 +869,15 @@ void UnitRepoProxy::createSchema(int repoId, RepoTxn& txn) {
   {
     auto createQuery = folly::sformat(
       "CREATE TABLE {} "
+      "(unitSn INTEGER, typeAliasId INTEGER, name TEXT, data BLOB, "
+      " PRIMARY KEY (unitSn, typeAliasId));",
+      m_repo.table(repoId, "UnitTypeAlias"));
+    txn.exec(createQuery);
+  }
+  {
+    auto createQuery = folly::sformat(
+      "CREATE TABLE {} "
       "(unitSn INTEGER, arrayId INTEGER, array BLOB, "
-      " provenanceLine INTEGER, provenanceFile TEXT, "
       " PRIMARY KEY (unitSn, arrayId));",
       m_repo.table(repoId, "UnitArray"));
     txn.exec(createQuery);
@@ -949,6 +943,7 @@ std::unique_ptr<UnitEmitter> UnitRepoProxy::loadEmitter(
     getUnitArrayTypeTable[repoId].get(*ue);
     m_repo.pcrp().getPreClasses[repoId].get(*ue);
     m_repo.rrp().getRecords[repoId].get(*ue);
+    getUnitTypeAliases[repoId].get(*ue);
     getUnitMergeables[repoId].get(*ue);
     getUnitLineTable[repoId].get(ue->m_sn, ue->m_lineTable);
     m_repo.frp().getFuncs[repoId].get(*ue);
@@ -1145,13 +1140,10 @@ void UnitRepoProxy::GetUnitArrayTypeTableStmt
 
 void UnitRepoProxy::InsertUnitArrayStmt
                   ::insert(RepoTxn& txn, int64_t unitSn, Id arrayId,
-                           const std::string& array,
-                           folly::Optional<int> provenanceLine,
-                           const StringData* provenanceFile) {
+                           const std::string& array) {
   if (!prepared()) {
     auto insertQuery = folly::sformat(
-      "INSERT INTO {} VALUES(@unitSn, @arrayId, @array, "
-      "@provenanceLine, @provenanceFile);",
+      "INSERT INTO {} VALUES(@unitSn, @arrayId, @array);",
       m_repo.table(m_repoId, "UnitArray"));
     txn.prepare(*this, insertQuery);
   }
@@ -1159,16 +1151,6 @@ void UnitRepoProxy::InsertUnitArrayStmt
   query.bindInt64("@unitSn", unitSn);
   query.bindId("@arrayId", arrayId);
   query.bindStdString("@array", array);
-  if (provenanceLine) {
-    query.bindInt("@provenanceLine", *provenanceLine);
-  } else {
-    query.bindNull("@provenanceLine");
-  }
-  if (provenanceFile) {
-    query.bindStaticString("@provenanceFile", provenanceFile);
-  } else {
-    query.bindNull("@provenanceFile");
-  }
   query.exec();
 }
 
@@ -1177,7 +1159,7 @@ void UnitRepoProxy::GetUnitArraysStmt
   auto txn = RepoTxn{m_repo.begin()};
   if (!prepared()) {
     auto selectQuery = folly::sformat(
-      "SELECT arrayId, array, provenanceLine, provenanceFile FROM {} "
+      "SELECT arrayId, array FROM {} "
       " WHERE unitSn == @unitSn ORDER BY arrayId ASC;",
       m_repo.table(m_repoId, "UnitArray"));
     txn.prepare(*this, selectQuery);
@@ -1194,13 +1176,6 @@ void UnitRepoProxy::GetUnitArraysStmt
       Id arrayId;        /**/ query.getId(0, arrayId);
       std::string key;   /**/ query.getStdString(1, key);
 
-      int prov_line;
-      bool has_prov = !query.isNull(2);
-      if (has_prov) query.getInt(2, prov_line);
-
-      StringData* prov_file;
-      query.getStaticString(3, prov_file);
-
       Variant v = unserialize_from_buffer(
         key.data(),
         key.size(),
@@ -1208,11 +1183,6 @@ void UnitRepoProxy::GetUnitArraysStmt
       );
       assertx(v.isArray());
       ArrayData* ad = v.detach().m_data.parr;
-      if (has_prov) {
-        assertx(!ad->empty());
-        auto const file = prov_file ? prov_file : ue.m_filepath;
-        arrprov::setTag(ad, {file, prov_line});
-      }
       ArrayData::GetScalarArray(&ad);
       Id id DEBUG_ONLY = ue.mergeArray(ad);
       assertx(id == arrayId);
@@ -1364,6 +1334,57 @@ void UnitRepoProxy::GetUnitLineTableStmt::get(int64_t unitSn,
   txn.commit();
 }
 
+void UnitRepoProxy::InsertUnitTypeAliasStmt
+                  ::insert(const UnitEmitter& ue,
+                           RepoTxn& txn,
+                           int64_t unitSn,
+                           Id typeAliasId,
+                           const TypeAlias& typeAlias) {
+  if (!prepared()) {
+    auto insertQuery = folly::sformat(
+      "INSERT INTO {} VALUES (@unitSn, @typeAliasId, @name, @data);",
+      m_repo.table(m_repoId, "UnitTypeAlias"));
+    txn.prepare(*this, insertQuery);
+  }
+
+  BlobEncoder dataBlob{ue.useGlobalIds()};
+  RepoTxnQuery query(txn, *this);
+  query.bindInt64("@unitSn", unitSn);
+  query.bindInt64("@typeAliasId", typeAliasId);
+  query.bindStaticString("@name", typeAlias.name);
+
+  dataBlob(typeAlias);
+  query.bindBlob("@data", dataBlob, /* static */ true);
+  query.exec();
+}
+
+void UnitRepoProxy::GetUnitTypeAliasesStmt::get(UnitEmitter& ue) {
+  auto txn = RepoTxn{m_repo.begin()};
+  if (!prepared()) {
+    auto selectQuery = folly::sformat(
+      "SELECT typeAliasId, name, data FROM {} WHERE unitSn == @unitSn;",
+      m_repo.table(m_repoId, "UnitTypeAlias"));
+    txn.prepare(*this, selectQuery);
+  }
+  RepoTxnQuery query(txn, *this);
+
+  query.bindInt64("@unitSn", ue.m_sn);
+  do {
+    query.step();
+    if (query.row()) {
+      TypeAlias ta;
+      Id typeAliasId;        /**/ query.getId(0, typeAliasId);
+      StringData *name;      /**/ query.getStaticString(1, name);
+      ta.name = makeStaticString(name);
+      BlobDecoder dataBlob = /**/ query.getBlob(2, ue.useGlobalIds());
+      dataBlob(ta);
+      Id id UNUSED = ue.addTypeAlias(ta);
+      assertx(id == typeAliasId);
+    }
+  } while (!query.done());
+  txn.commit();
+}
+
 void UnitRepoProxy::InsertUnitSourceLocStmt
                   ::insert(RepoTxn& txn, int64_t unitSn, Offset pastOffset,
                            int line0, int char0, int line1, int char1) {
@@ -1437,7 +1458,7 @@ createFatalUnit(StringData* filename, const SHA1& sha1, FatalOp /*op*/,
   FuncEmitter* fe = ue->getMain();
   fe->maxStackCells = 1;
   // XXX line numbers are bogus
-  fe->finish(ue->bcPos(), false);
+  fe->finish(ue->bcPos());
   return ue;
 }
 

@@ -1,0 +1,6 @@
+File "transitive_simplify_2.php", line 26, characters 6-7:
+Invalid argument (Typing[4110])
+File "transitive_simplify_2.php", line 7, characters 36-41:
+Expected Inv<[unresolved]>
+File "transitive_simplify_2.php", line 15, characters 38-43:
+But got dynamic because it is an unenforceable type

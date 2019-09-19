@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
@@ -587,11 +587,6 @@ module type Syntax_S = sig
     ; binary_operator                                    : t
     ; binary_right_operand                               : t
     }
-  | InstanceofExpression              of
-    { instanceof_left_operand                            : t
-    ; instanceof_operator                                : t
-    ; instanceof_right_operand                           : t
-    }
   | IsExpression                      of
     { is_left_operand                                    : t
     ; is_operator                                        : t
@@ -834,6 +829,11 @@ module type Syntax_S = sig
     ; type_constant_separator                            : t
     ; type_constant_right_type                           : t
     }
+  | PUAccess                          of
+    { pu_access_left_type                                : t
+    ; pu_access_separator                                : t
+    ; pu_access_right_type                               : t
+    }
   | VectorTypeSpecifier               of
     { vector_type_keyword                                : t
     ; vector_type_left_angle                             : t
@@ -1053,15 +1053,24 @@ module type Syntax_S = sig
   val rust_parse :
     Full_fidelity_source_text.t ->
     Full_fidelity_parser_env.t ->
-    unit * t * Full_fidelity_syntax_error.t list
+    unit * t * Full_fidelity_syntax_error.t list * Rust_pointer.t option
   val rust_parse_with_coroutine_sc :
     Full_fidelity_source_text.t ->
     Full_fidelity_parser_env.t ->
-    bool * t * Full_fidelity_syntax_error.t list
+    bool * t * Full_fidelity_syntax_error.t list * Rust_pointer.t option
   val rust_parse_with_decl_mode_sc :
     Full_fidelity_source_text.t ->
     Full_fidelity_parser_env.t ->
-    bool list * t * Full_fidelity_syntax_error.t list
+    bool list * t * Full_fidelity_syntax_error.t list * Rust_pointer.t option
+  val rust_parse_with_verify_sc :
+    Full_fidelity_source_text.t ->
+    Full_fidelity_parser_env.t ->
+    t list * t * Full_fidelity_syntax_error.t list * Rust_pointer.t option
+  val rust_parser_errors :
+    Full_fidelity_source_text.t ->
+    Rust_pointer.t ->
+    ParserOptions.t ->
+    Full_fidelity_syntax_error.t list
   val has_leading_trivia : TriviaKind.t -> Token.t -> bool
   val to_json : ?with_value:bool -> t -> Hh_json.json
   val extract_text : t -> string option
@@ -1176,7 +1185,6 @@ module type Syntax_S = sig
   val make_prefix_unary_expression : t -> t -> t
   val make_postfix_unary_expression : t -> t -> t
   val make_binary_expression : t -> t -> t -> t
-  val make_instanceof_expression : t -> t -> t -> t
   val make_is_expression : t -> t -> t -> t
   val make_as_expression : t -> t -> t -> t
   val make_nullable_as_expression : t -> t -> t -> t
@@ -1220,6 +1228,7 @@ module type Syntax_S = sig
   val make_xhp_expression : t -> t -> t -> t
   val make_xhp_close : t -> t -> t -> t
   val make_type_constant : t -> t -> t -> t
+  val make_pu_access : t -> t -> t -> t
   val make_vector_type_specifier : t -> t -> t -> t -> t -> t
   val make_keyset_type_specifier : t -> t -> t -> t -> t -> t
   val make_tuple_type_explicit_specifier : t -> t -> t -> t -> t
@@ -1356,7 +1365,6 @@ module type Syntax_S = sig
   val is_prefix_unary_expression : t -> bool
   val is_postfix_unary_expression : t -> bool
   val is_binary_expression : t -> bool
-  val is_instanceof_expression : t -> bool
   val is_is_expression : t -> bool
   val is_as_expression : t -> bool
   val is_nullable_as_expression : t -> bool
@@ -1400,6 +1408,7 @@ module type Syntax_S = sig
   val is_xhp_expression : t -> bool
   val is_xhp_close : t -> bool
   val is_type_constant : t -> bool
+  val is_pu_access : t -> bool
   val is_vector_type_specifier : t -> bool
   val is_keyset_type_specifier : t -> bool
   val is_tuple_type_explicit_specifier : t -> bool
@@ -1444,7 +1453,6 @@ module type Syntax_S = sig
   val is_external       : t -> bool
   val is_name           : t -> bool
   val is_construct      : t -> bool
-  val is_destruct       : t -> bool
   val is_static         : t -> bool
   val is_private        : t -> bool
   val is_public         : t -> bool
@@ -1458,9 +1466,8 @@ module type Syntax_S = sig
   val is_ellipsis       : t -> bool
   val is_comma          : t -> bool
   val is_array          : t -> bool
-  val is_var            : t -> bool
   val is_ampersand      : t -> bool
   val is_inout          : t -> bool
 
 
-end (* Syntax_S *)
+end

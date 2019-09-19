@@ -1,0 +1,6 @@
+File "contravariance_unresolved_bad_2.php", line 38, characters 12-13:
+Invalid argument (Typing[4110])
+File "contravariance_unresolved_bad_2.php", line 16, characters 21-21:
+Expected ~[unresolved] because it is an unenforceable type
+File "contravariance_unresolved_bad_2.php", line 38, characters 12-13:
+But got int

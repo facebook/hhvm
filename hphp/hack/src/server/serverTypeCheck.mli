@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -18,17 +18,25 @@ type check_results = {
   total_rechecked_count: int;
 }
 
-val type_check: ServerEnv.genv -> ServerEnv.env -> check_kind ->
+val type_check :
+  ServerEnv.genv ->
+  ServerEnv.env ->
+  check_kind ->
   ServerEnv.env * check_results
 
 (* just add also some debugging information on stdout *)
-val check: ServerEnv.genv -> ServerEnv.env -> check_kind ->
+val check :
+  ServerEnv.genv ->
+  ServerEnv.env ->
+  check_kind ->
   ServerEnv.env * check_results
 
 (****************************************************************************)
 (* Debugging: Declared here to stop ocamlc yelling at us for unused defs *)
 (****************************************************************************)
 
-val print_defs: string -> ('a * string) list -> unit
-val print_fast_pos: (('a * string) list * ('b * string) list) SMap.t -> unit
-val print_fast: (SSet.t * SSet.t) SMap.t -> unit
+val print_defs : string -> ('a * string) list -> unit
+
+val print_fast_pos : (('a * string) list * ('b * string) list) SMap.t -> unit
+
+val print_fast : (SSet.t * SSet.t) SMap.t -> unit

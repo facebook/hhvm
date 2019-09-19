@@ -1,7 +1,5 @@
 <?hh
 
-error_reporting(E_ALL);
-
 class obj implements arrayaccess {
     private $container = array();
     public function __construct() {
@@ -28,5 +26,10 @@ class obj implements arrayaccess {
 function x() {
 	return new obj;
 }
-var_dump(x()['two']);
 
+<<__EntryPoint>>
+function main_entry(): void {
+
+  error_reporting(E_ALL);
+  var_dump(x()['two']);
+}

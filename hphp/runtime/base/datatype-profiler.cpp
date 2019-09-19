@@ -34,8 +34,6 @@ DataTypeProfiler::DataTypeProfiler(std::string name)
   , m_vec(name + "=KindOfVec")
   , m_persistent_dict(name + "=KindOfPersistentDict")
   , m_dict(name + "=KindOfDict")
-  , m_persistent_shape(name + "=KindOfPersistentShape")
-  , m_shape(name + "=KindOfShape")
   , m_persistent_keyset(name + "=KindOfPersistentKeyset")
   , m_keyset(name + "=KindOfKeyset")
   , m_object(name + "=KindOfObject")
@@ -62,8 +60,6 @@ DataType DataTypeProfiler::operator()(DataType type) {
     case KindOfDict:          m_dict.count(); break;
     case KindOfPersistentKeyset: m_persistent_keyset.count(); break;
     case KindOfKeyset:        m_keyset.count(); break;
-    case KindOfPersistentShape: m_persistent_shape.count(); break;
-    case KindOfShape:         m_shape.count(); break;
     case KindOfPersistentArray:  m_persistent_array.count(); break;
     case KindOfArray:         m_array.count(); break;
     case KindOfObject:        m_object.count(); break;
@@ -90,8 +86,6 @@ DataTypeProfiler::~DataTypeProfiler() {
                m_vec.hits() +
                m_persistent_dict.hits() +
                m_dict.hits() +
-               m_persistent_shape.hits() +
-               m_shape.hits() +
                m_persistent_keyset.hits() +
                m_keyset.hits() +
                m_persistent_array.hits() +
@@ -117,8 +111,6 @@ DataTypeProfiler::~DataTypeProfiler() {
                   "KindOfVec=%.1f%% "
                   "KindOfPersistentDict=%.1f%% "
                   "KindOfDict=%.1f%% "
-                  "KindOfPersistentShape=%.1f%% "
-                  "KindOfShape=%.1f%% "
                   "KindOfPersistentKeyset=%.1f%% "
                   "KindOfKeyset=%.1f%% "
                   "KindOfObject=%.1f%% "
@@ -142,8 +134,6 @@ DataTypeProfiler::~DataTypeProfiler() {
           100.0 * m_vec.hits() / total,
           100.0 * m_persistent_dict.hits() / total,
           100.0 * m_dict.hits() / total,
-          100.0 * m_persistent_shape.hits() / total,
-          100.0 * m_shape.hits() / total,
           100.0 * m_persistent_keyset.hits() / total,
           100.0 * m_keyset.hits() / total,
           100.0 * m_object.hits() / total,

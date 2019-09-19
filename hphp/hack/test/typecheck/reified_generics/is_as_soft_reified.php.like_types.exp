@@ -1,0 +1,4 @@
+File "is_as_soft_reified.php", line 8, characters 8-13:
+Invalid "as" expression hint (Typing[4195])
+File "is_as_soft_reified.php", line 8, characters 8-13:
+The "as" operator cannot be used with a type with an erased generic type argument, except in a like cast when the corresponding type parameter is covariant

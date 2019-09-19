@@ -108,13 +108,7 @@ using BlockIdToIRBlockMap = hphp_hash_map<RegionDesc::BlockId, Block*>;
  */
 struct TransContext {
   TransContext(TransID id, TransKind kind, TransFlags flags,
-               SrcKey sk, FPInvOffset spOff, int optIndex,
-               Op callerFPushOp = Op::Nop);
-
-  /*
-   * The SrcKey for this translation.
-   */
-  SrcKey srcKey() const;
+               SrcKey sk, FPInvOffset spOff, int optIndex);
 
   /*
    * Data members.
@@ -126,12 +120,7 @@ struct TransContext {
   TransKind kind{TransKind::Invalid};
   TransFlags flags;
   FPInvOffset initSpOffset;
-  Op callerFPushOp;
-  const Func* func;
-  Offset initBcOffset;
-  bool hasThis;
-  bool prologue;
-  ResumeMode resumeMode;
+  SrcKey initSrcKey;
 };
 
 
@@ -309,7 +298,6 @@ enum Operands {
   Stack2          = 1 << 1,
   Stack1          = 1 << 2,
   StackIns1       = 1 << 3,  // Insert an element under top of stack
-  FStack          = 1 << 5,  // output of FPushFuncD and friends
   Local           = 1 << 6,  // Writes to a local
   Iter            = 1 << 7,  // Iterator in imm[0]
   DontGuardStack1 = 1 << 9, // Dont force a guard on behalf of stack1 input
@@ -323,6 +311,7 @@ enum Operands {
   MKey            = 1 << 17, // member lookup key
   LocalRange      = 1 << 18, // read range of locals given in imm[1].u_LAR
   DontGuardBase   = 1 << 19, // Dont force a guard for the base
+  StackI2         = 1 << 20, // Consume 1 cell at index imm_[1].u_IVA
   StackTop2 = Stack1 | Stack2,
   StackTop3 = Stack1 | Stack2 | Stack3,
 };

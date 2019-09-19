@@ -1,14 +1,15 @@
 [(Fun
     { f_span = [3:1-7:2]; f_annotation = (); f_mode = <opaque>;
-      f_ret = (Some ([3:44-48], (Hprim Tvoid)));
+      f_ret = ((void), (Some ([3:44-48], (Hprim Tvoid))));
       f_name = ([3:10-30], "\\throwFromDoWhileLoop"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
       [{ param_annotation = ([3:36-41], bool);
-         param_hint = (Some ([3:31-35], (Hprim Tbool)));
+         param_type_hint = ((bool), (Some ([3:31-35], (Hprim Tbool))));
          param_is_reference = false; param_is_variadic = false;
          param_pos = [3:36-41]; param_name = "$cond"; param_expr = None;
-         param_callconv = None; param_user_attributes = [] }
+         param_callconv = None; param_user_attributes = [];
+         param_visibility = None }
         ];
       f_body =
       { fb_ast =

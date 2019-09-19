@@ -28,6 +28,7 @@
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/vm/as-shared.h"
 #include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/cti.h"
 #include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-global-data.h"
@@ -38,7 +39,6 @@
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/unit-util.h"
 
-#include "hphp/runtime/vm/jit/func-guard.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/types.h"
@@ -48,7 +48,6 @@
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/fixed-vector.h"
 #include "hphp/util/functional.h"
-#include "hphp/util/debug.h"
 #include "hphp/util/struct-log.h"
 #include "hphp/util/trace.h"
 
@@ -64,8 +63,9 @@ namespace HPHP {
 
 TRACE_SET_MOD(hhbc);
 
-const StringData*     Func::s___call       = makeStaticString("__call");
-std::atomic<bool>     Func::s_treadmill;
+const StaticString s___call("__call");
+
+std::atomic<bool> Func::s_treadmill;
 
 /*
  * FuncId high water mark and FuncId -> Func* table.
@@ -130,11 +130,6 @@ Func::~Func() {
   if (m_fullName != nullptr && m_maybeIntercepted != -1) {
     unregister_intercept_flag(fullNameStr(), &m_maybeIntercepted);
   }
-  if (jit::mcgen::initialized() && !RuntimeOption::EvalEnableReusableTC) {
-    // If Reusable TC is enabled then the prologue may have already been smashed
-    // and the memory may now be in use by another function.
-    jit::clobberFuncGuards(this);
-  }
 #ifndef NDEBUG
   validate();
   m_magic = ~m_magic;
@@ -184,8 +179,6 @@ void Func::freeClone() {
   if (jit::mcgen::initialized() && RuntimeOption::EvalEnableReusableTC) {
     // Free TC-space associated with func
     jit::tc::reclaimFunction(this);
-  } else {
-    jit::clobberFuncGuards(this);
   }
 
   if (m_funcId != InvalidFuncId) {
@@ -525,44 +518,6 @@ bool Func::isImmutableFrom(const Class* cls) const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Unit table entries.
-
-const FPIEnt* Func::findFPI(const FPIEnt* b, const FPIEnt* e, Offset o) {
-  /*
-   * We consider the "FCall" instruction part of the FPI region, but
-   * the corresponding push is not considered part of it.  (This
-   * means all offsets in the FPI region will have the partial
-   * ActRec on the stack.)
-   */
-
-  auto it =
-    std::lower_bound(b, e, o, [](const FPIEnt& f, Offset o) {
-      return f.m_fpushOff < o;
-    });
-
-  // Didn't find any candidates.
-  if (it == b) {
-    return nullptr;
-  }
-
-  const FPIEnt* fe = --it;
-
-  // Iterate through parents until we find a valid region.
-  while (true) {
-    if (fe->m_fpiEndOff >= o) {
-      return fe;
-    }
-
-    if (fe->m_parentIndex < 0) {
-      return nullptr;
-    }
-
-    fe = &b[fe->m_parentIndex];
-  }
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
 // JIT data.
 
 int Func::numPrologues() const {
@@ -685,8 +640,7 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
   }
   out << "maxStackCells: " << maxStackCells() << '\n'
       << "numLocals: " << numLocals() << '\n'
-      << "numIterators: " << numIterators() << '\n'
-      << "numClsRefSlots: " << numClsRefSlots() << '\n';
+      << "numIterators: " << numIterators() << '\n';
 
   const EHEntVec& ehtab = shared()->m_ehtab;
   size_t ehId = 0;
@@ -707,18 +661,6 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
       out << " parentIndex " << it->m_parentIndex;
     }
     out << std::endl;
-  }
-
-  if (opts.fpi) {
-    for (auto& fpi : fpitab()) {
-      out << " FPI " << fpi.m_fpushOff << "-" << fpi.m_fpiEndOff
-          << "; fpOff = " << fpi.m_fpOff;
-      if (fpi.m_parentIndex != -1) {
-        out << " parentIndex = " << fpi.m_parentIndex
-            << " (depth " << fpi.m_fpiDepth << ")";
-      }
-      out << '\n';
-    }
   }
 }
 
@@ -749,8 +691,8 @@ Func::SharedData::SharedData(PreClass* preClass, Offset base, Offset past,
   , m_isPhpLeafFn(isPhpLeafFn)
   , m_hasReifiedGenerics(false)
   , m_isRxDisabled(false)
-  , m_numClsRefSlots(0)
   , m_originalFilename(nullptr)
+  , m_cti_base(0)
 {
   m_pastDelta = std::min<uint32_t>(past - base, kSmallDeltaLimit);
   m_line2Delta = std::min<uint32_t>(line2 - line1, kSmallDeltaLimit);
@@ -758,6 +700,7 @@ Func::SharedData::SharedData(PreClass* preClass, Offset base, Offset past,
 
 Func::SharedData::~SharedData() {
   free(m_refBitPtr);
+  if (m_cti_base) free_cti(m_cti_base, m_cti_size);
 }
 
 void Func::SharedData::atomicRelease() {
@@ -792,7 +735,6 @@ void logFunc(const Func* func, StructuredLogEntry& ent) {
   ent.setInt("num_params", func->numNonVariadicParams());
   ent.setInt("num_locals", func->numLocals());
   ent.setInt("num_named_locals", func->numNamedLocals());
-  ent.setInt("num_class_refs", func->numClsRefSlots());
   ent.setInt("num_iterators", func->numIterators());
   ent.setInt("frame_cells", func->numSlotsInFrame());
   ent.setInt("max_stack_cells", func->maxStackCells());

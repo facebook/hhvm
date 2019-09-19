@@ -1,0 +1,12 @@
+File "multi_as_invoke_ambiguous.php", line 27, characters 21-22:
+Invalid argument (Typing[4110])
+File "multi_as_invoke_ambiguous.php", line 20, characters 28-28:
+Expected J
+File "multi_as_invoke_ambiguous.php", line 26, characters 30-31:
+But got dynamic because it is an unenforceable type
+File "multi_as_invoke_ambiguous.php", line 28, characters 31-32:
+Invalid argument (Typing[4110])
+File "multi_as_invoke_ambiguous.php", line 23, characters 28-28:
+Expected K
+File "multi_as_invoke_ambiguous.php", line 26, characters 30-31:
+But got dynamic because it is an unenforceable type

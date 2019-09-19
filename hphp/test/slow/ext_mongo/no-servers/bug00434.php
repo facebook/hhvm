@@ -1,5 +1,6 @@
 <?hh
 class m extends Mongo { function __construct() {} }
+<<__EntryPoint>> function main(): void {
 try {
     $m = new m;
     $m->connect();
@@ -7,3 +8,4 @@ try {
     var_dump($e->getMessage());
 }
 echo "===DONE===\n";
+}

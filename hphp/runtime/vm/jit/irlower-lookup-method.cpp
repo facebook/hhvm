@@ -102,24 +102,6 @@ void cgLdSmashableFunc(IRLS& env, const IRInstruction* inst) {
   v << shrqi{32, smashable, dst, v.makeReg()};
 }
 
-void cgCheckFuncMMNonMagic(IRLS& env, const IRInstruction* inst) {
-  auto const funcmm = srcLoc(env, inst, 0).reg();
-  auto const dst = dstLoc(env, inst, 0).reg();
-  auto& v = vmain(env);
-
-  auto const sf = v.makeReg();
-  v << testqi{0x1, funcmm, sf};
-  fwdJcc(v, env, CC_NZ, sf, inst->taken());
-  v << copy{funcmm, dst};
-}
-
-void cgLdFuncMFunc(IRLS& env, const IRInstruction* inst) {
-  auto const cls = srcLoc(env, inst, 0).reg();
-  auto const dst = dstLoc(env, inst, 0).reg();
-  auto& v = vmain(env);
-  v << decq{cls, dst, v.makeReg()};
-}
-
 void cgLdObjMethodD(IRLS& env, const IRInstruction* inst) {
   assertx(inst->taken() && inst->taken()->isCatch()); // must have catch block
   using namespace MethodCache;
@@ -161,74 +143,7 @@ void cgLdObjMethodS(IRLS& env, const IRInstruction* inst) {
 ///////////////////////////////////////////////////////////////////////////////
 
 IMPL_OPCODE_CALL(LdClsCtor)
-
-template<bool forward, bool dynamic>
-const Func* lookupClsMethodHelper(Class* cls, StringData* meth,
-                                  ActRec* ar, ActRec* fp) {
-  try {
-    const Func* f;
-    auto const ctx = fp->m_func->cls();
-    auto const obj = ctx && fp->hasThis() ? fp->getThis() : nullptr;
-    auto const res = lookupClsMethod(f, cls, meth, obj, ctx, true);
-
-    if (dynamic) callerDynamicCallChecks(f);
-    callerRxChecks(fp, f);
-
-    ar->m_func = f;
-
-    if (res == LookupResult::MethodFoundNoThis) {
-      if (!f->isStaticInPrologue()) {
-        throw_missing_this(f);
-      }
-      if (forward && ctx) {
-        if (fp->hasThis()) {
-          cls = fp->getThis()->getVMClass();
-        } else {
-          cls = fp->getClass();
-        }
-      }
-      ar->setClass(cls);
-    } else {
-      assertx(obj);
-      assertx(res == LookupResult::MethodFoundWithThis ||
-              res == LookupResult::MagicCallFound);
-      obj->incRefCount();
-      ar->setThis(obj);
-    }
-
-    if (res == LookupResult::MagicCallFound) {
-      ar->setMagicDispatch(meth);
-      meth->incRefCount();
-    }
-
-    return f;
-  } catch (...) {
-    *arPreliveOverwriteCells(ar) = make_tv<KindOfString>(meth);
-    throw;
-  }
-}
-
-void cgLookupClsMethod(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<LookupClsMethod>();
-  auto const sp = srcLoc(env, inst, 2).reg();
-
-  auto const args = argGroup(env, inst)
-    .ssa(0)
-    .ssa(1)
-    .addr(sp, cellsToBytes(extra->calleeAROffset.offset))
-    .ssa(3);
-
-  auto const helper = extra->forward
-    ? extra->dynamic
-      ? lookupClsMethodHelper<true, true>
-      : lookupClsMethodHelper<true, false>
-    : extra->dynamic
-      ? lookupClsMethodHelper<false, true>
-      : lookupClsMethodHelper<false, false>;
-
-  cgCallHelper(vmain(env), env, CallSpec::direct(helper), callDest(env, inst),
-               SyncOptions::Sync, args);
-}
+IMPL_OPCODE_CALL(LookupClsMethod)
 
 void cgProfileMethod(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<ProfileCallTargetData>();

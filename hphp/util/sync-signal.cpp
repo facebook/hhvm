@@ -127,6 +127,7 @@ void* handle_signals(void*) {
 
 // Clear state in child process after fork().
 void postfork_clear() {
+  reset_sync_signals();
   g_handler_thread_started.store(false, std::memory_order_release);
   g_handler_thread = pthread_t{};
 }
@@ -140,7 +141,7 @@ void block_sync_signals() {
   // If we ever fork(), avoid affecting child processes.
   static std::atomic_flag flag ATOMIC_FLAG_INIT;
   if (!flag.test_and_set()) {
-    pthread_atfork(reset_sync_signals, block_sync_signals, postfork_clear);
+    pthread_atfork(nullptr, nullptr, postfork_clear);
   }
 }
 

@@ -1,0 +1,54 @@
+File "wildcard_funcall.php", line 10, characters 11-22:
+Invalid argument (Typing[4110])
+File "wildcard_funcall.php", line 6, characters 15-15:
+Expected ~A<T#1> because it is an unenforceable type
+File "wildcard_funcall.php", line 10, characters 15-15:
+But got A<int>
+File "wildcard_funcall.php", line 11, characters 16-27:
+Invalid argument (Typing[4110])
+File "wildcard_funcall.php", line 6, characters 15-15:
+Expected ~A<string> because it is an unenforceable type
+File "wildcard_funcall.php", line 11, characters 20-20:
+But got A<int>
+File "wildcard_funcall.php", line 14, characters 11-25:
+Invalid argument (Typing[4110])
+File "wildcard_funcall.php", line 6, characters 15-15:
+Expected ~A<T#2> because it is an unenforceable type
+File "wildcard_funcall.php", line 14, characters 15-15:
+But got A<A<int>>
+File "wildcard_funcall.php", line 15, characters 14-28:
+Invalid argument (Typing[4110])
+File "wildcard_funcall.php", line 6, characters 15-15:
+Expected ~A<A<T#3>> because it is an unenforceable type
+File "wildcard_funcall.php", line 15, characters 18-18:
+But got A<A<int>>
+File "wildcard_funcall.php", line 16, characters 19-33:
+Invalid argument (Typing[4110])
+File "wildcard_funcall.php", line 6, characters 15-15:
+Expected ~A<A<string>> because it is an unenforceable type
+File "wildcard_funcall.php", line 16, characters 23-23:
+But got A<A<int>>
+File "wildcard_funcall.php", line 10, characters 7-7:
+Invalid reified hint (Typing[4305])
+File "wildcard_funcall.php", line 10, characters 7-7:
+This is a wildcard, it cannot be used as a reified type argument
+File "wildcard_funcall.php", line 4, characters 15-15:
+T is reified
+File "wildcard_funcall.php", line 14, characters 7-7:
+Invalid reified hint (Typing[4305])
+File "wildcard_funcall.php", line 14, characters 7-7:
+This is a wildcard, it cannot be used as a reified type argument
+File "wildcard_funcall.php", line 4, characters 15-15:
+T is reified
+File "wildcard_funcall.php", line 15, characters 7-10:
+Invalid reified hint (Typing[4305])
+File "wildcard_funcall.php", line 15, characters 9-9:
+This is a wildcard, it cannot be used as a reified type argument
+File "wildcard_funcall.php", line 4, characters 15-15:
+T is reified
+File "wildcard_funcall.php", line 15, characters 9-9:
+Invalid reified hint (Typing[4305])
+File "wildcard_funcall.php", line 15, characters 9-9:
+This is a wildcard, it cannot be used as a reified type argument
+File "wildcard_funcall.php", line 4, characters 15-15:
+T is reified

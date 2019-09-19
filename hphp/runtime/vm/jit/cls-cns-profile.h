@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_JIT_CLS_CNS_PROFILE_H_
 #define incl_HPHP_JIT_CLS_CNS_PROFILE_H_
 
+#include <folly/dynamic.h>
+
 #include "hphp/runtime/base/types.h"
 
 namespace HPHP {
@@ -36,6 +38,7 @@ struct ClsCnsProfile {
   {}
 
   std::string toString() const;
+  folly::dynamic toDynamic() const;
 
   /*
    * Obtain the profiled Slot

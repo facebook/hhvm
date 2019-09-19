@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -7,38 +7,40 @@
  *
  *)
 
-module Aast = Nast
-
 (** Module "naming" a program.
  * Transform all the local names into a unique identifier
  *)
 
-val program: Nast.program -> Nast.program
+val program : Nast.program -> Nast.program
 
 (* Solves the local names within a function *)
-val fun_: Nast.fun_ -> Nast.fun_
+val fun_ : Nast.fun_ -> Nast.fun_
 
 (* Solves the local names of a class *)
-val class_: Nast.class_ -> Nast.class_
+val class_ : Nast.class_ -> Nast.class_
 
 (* Solves the local names in an typedef *)
-val typedef: Nast.typedef -> Nast.typedef
+val typedef : Nast.typedef -> Nast.typedef
 
 (* Solves the local names in a global constant definition *)
-val global_const: Nast.gconst -> Nast.gconst
+val global_const : Nast.gconst -> Nast.gconst
 
 module type GetLocals = sig
-  val lvalue : Namespace_env.env * Pos.t SMap.t ->
-    Aast.expr -> Namespace_env.env * Pos.t SMap.t
-  val stmt : Namespace_env.env * Pos.t SMap.t ->
-    Aast.stmt -> Namespace_env.env * Pos.t SMap.t
+  val lvalue :
+    Namespace_env.env * Pos.t SMap.t ->
+    Nast.expr ->
+    Namespace_env.env * Pos.t SMap.t
+
+  val stmt :
+    Namespace_env.env * Pos.t SMap.t ->
+    Nast.stmt ->
+    Namespace_env.env * Pos.t SMap.t
 end
 
-module Make : functor (GetLocals : GetLocals) -> sig
+module Make (GetLocals : GetLocals) : sig
   (* Solves the local names in a function body *)
-  val func_body: Nast.fun_ -> Nast.func_body
+  val func_body : Nast.fun_ -> Nast.func_body
 
   (* Solves the local names in class method bodies *)
-  val class_meth_bodies: Nast.class_ -> Nast.class_
-
+  val class_meth_bodies : Nast.class_ -> Nast.class_
 end

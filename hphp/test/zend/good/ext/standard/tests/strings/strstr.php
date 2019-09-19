@@ -143,7 +143,7 @@ var_dump( strstr("Hello, world'S", "$needle'S") );  // works
 var_dump( strstr("Hello, worldS", "$needleS") );  // won't work
 
 /* String with curly braces, complex syntax */
-var_dump( strstr("Hello, worldS", "${needle}S") );  // works
+var_dump( strstr("Hello, worldS", "{$needle}S") );  // works
 var_dump( strstr("Hello, worldS", "{$needle}S") );  // works
 
 

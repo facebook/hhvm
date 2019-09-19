@@ -5,12 +5,15 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::lexable_trivia::LexableTrivia;
+use crate::source_text::SourceText;
 use crate::token_kind::TokenKind;
+use std::fmt::Debug;
 
-pub trait LexableToken: Clone {
+pub trait LexableToken<'a>: Clone {
     type Trivia: LexableTrivia;
     fn make(
         kind: TokenKind,
+        source_text: &SourceText<'a>,
         offset: usize,
         width: usize,
         leading: Vec<Self::Trivia>,
@@ -33,4 +36,10 @@ pub trait LexableToken: Clone {
     fn with_leading(self, trailing: Vec<Self::Trivia>) -> Self;
     fn with_trailing(self, trailing: Vec<Self::Trivia>) -> Self;
     fn with_kind(self, kind: TokenKind) -> Self;
+}
+
+pub trait LexablePositionedToken<'a>: LexableToken<'a>
+where
+    Self: Debug,
+{
 }

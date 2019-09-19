@@ -6,7 +6,7 @@
   Dup
   NullUninit
   NullUninit
-  FCallCtor <> 0 1 "" - ""
+  FCallCtor <LockWhileUnwinding> 0 1 "" - ""
   PopC
   LockObj
   SetL $object
@@ -19,7 +19,7 @@
    Dup
    NullUninit
    NullUninit
-   FCallCtor <> 0 1 "" - ""
+   FCallCtor <LockWhileUnwinding> 0 1 "" - ""
    PopC
    LockObj
   FCallObjMethodD <> 1 1 "" - "" NullThrows "main"

@@ -40,7 +40,9 @@ function main_get_return_types() {
   $gen->next();
   var_dump($gen->getReturn());
 
-  $gen = gen4((object) ['prop' => 321]);
+  $o = new stdClass();
+  $o->prop = 321;
+  $gen = gen4($o);
   $gen->next();
   var_dump($gen->getReturn());
 

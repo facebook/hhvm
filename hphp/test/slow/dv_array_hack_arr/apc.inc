@@ -19,7 +19,7 @@ function fail($a, $a2) {
 }
 
 function get($key, $a) {
-  $a2 = apc_fetch($key);
+  $a2 = __hhvm_intrinsics\apc_fetch_no_check($key);
   if ($a2 === false) {
     echo "=============== Error fetching $key ==============\n";
     return;
@@ -77,7 +77,7 @@ $values = dict[
   'darray6' => make_circular_darray()
 ];
 
-if (apc_fetch('second-time') === false) {
+if (__hhvm_intrinsics\apc_fetch_no_check('second-time') === false) {
   set_all($values);
   apc_store('second-time', true);
 } else {

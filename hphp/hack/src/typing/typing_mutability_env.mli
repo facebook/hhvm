@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2017, Facebook, Inc.
  * All rights reserved.
  *
@@ -21,9 +21,12 @@
   reassigned. They are essentially read only.
 *)
 type mut_type =
-  Mutable | Borrowed | MaybeMutable | Immutable
-type mutability =
-  Pos.t * mut_type
+  | Mutable
+  | Borrowed
+  | MaybeMutable
+  | Immutable
+
+type mutability = Pos.t * mut_type
 
 (* Mapping from local variables to their mutability
   Local mutability is stored in the local environment.
@@ -31,9 +34,10 @@ type mutability =
   and it is treated like any immutable variable in its
   enclosing function.
 *)
-type mutability_env =
-  mutability Local_id.Map.t
+type mutability_env = mutability Local_id.Map.t
 
 (* Given two mutability maps, intersect them. *)
-val intersect_mutability : mutability_env -> mutability_env -> mutability_env -> mutability_env
+val intersect_mutability :
+  mutability_env -> mutability_env -> mutability_env -> mutability_env
+
 val to_string : mutability -> string

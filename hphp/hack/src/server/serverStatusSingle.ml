@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2018, Facebook, Inc.
  * All rights reserved.
  *
@@ -10,15 +10,16 @@ open Hh_core
 open ServerCommandTypes
 
 let go fn tcopt =
-  let contents, path = match fn with
+  let (contents, path) =
+    match fn with
     | FileName file_name ->
       let path = Relative_path.create_detect_prefix file_name in
-      File_provider.get_contents path, path
-    | FileContent content -> Some content, Relative_path.default
+      (File_provider.get_contents path, path)
+    | FileContent content -> (Some content, Relative_path.default)
   in
   match contents with
   | None -> []
   | Some x ->
-    ServerIdeUtils.get_errors path x tcopt |>
-    Errors.get_sorted_error_list |>
-    List.map ~f:Errors.to_absolute
+    ServerIdeUtils.get_errors path x tcopt
+    |> Errors.get_sorted_error_list
+    |> List.map ~f:Errors.to_absolute

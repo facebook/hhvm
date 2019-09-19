@@ -7,24 +7,33 @@ int(3)
 ====================================================
 int(4)
 ====================================================
-
-Fatal error: Call to undefined function call3() in %s on line 48
-====================================================
-
-Fatal error: Call to undefined function call3() in %s on line 48
-====================================================
 array(1) {
   [0]=>
-  int(7)
+  int(5)
 }
 ====================================================
 array(1) {
   [0]=>
-  int(8)
+  int(6)
 }
 ====================================================
-
-Fatal error: Invalid callable (array) in %s on line 9
+int(7)
+====================================================
+int(8)
+====================================================
+int(9)
+====================================================
+int(10)
+====================================================
+array(1) {
+  [0]=>
+  int(11)
+}
+====================================================
+array(1) {
+  [0]=>
+  int(12)
+}
 ====================================================
 
 Fatal error: Invalid callable (array) in %s on line 9
@@ -34,8 +43,5 @@ Warning: Invalid argument: function: not a valid callback array in %s on line 10
 NULL
 ====================================================
 
-Warning: Invalid argument: function: not a valid callback array in %s on line 10
+Warning: array_map() expects parameter 1 to be a valid callback in %s on line 11
 NULL
-====================================================
-
-Fatal error: Call to undefined function call3() in %s on line 48

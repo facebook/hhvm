@@ -1,17 +1,18 @@
-(**
+(*
  * Copyright (c) 2017, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the "hack" directory of this source tree.
  *
-*)
+ *)
 
-module WithValue(Value: Set.OrderedType) = struct
+module WithValue (Value : Set.OrderedType) = struct
   module ValueSet = Set.Make (Value)
+
   type t = {
-    unique_set : ValueSet.t;
-    unique_list : Value.t list
+    unique_set: ValueSet.t;
+    unique_list: Value.t list;
   }
 
   let empty = { unique_set = ValueSet.empty; unique_list = [] }
@@ -21,27 +22,24 @@ module WithValue(Value: Set.OrderedType) = struct
       uniq_set
     else
       {
-        unique_set = (ValueSet.add item uniq_set.unique_set);
-        unique_list = item :: uniq_set.unique_list
+        unique_set = ValueSet.add item uniq_set.unique_set;
+        unique_list = item :: uniq_set.unique_list;
       }
 
-  let items uniq_set =
-    List.rev uniq_set.unique_list
+  let items uniq_set = List.rev uniq_set.unique_list
 
-  let items_set uniq_set =
-    uniq_set.unique_set
+  let items_set uniq_set = uniq_set.unique_set
 
   let remove item uniq_set =
     if ValueSet.mem item uniq_set.unique_set then
       {
-        unique_set = (ValueSet.remove item uniq_set.unique_set);
-        unique_list = List.filter (fun a -> a <> item) uniq_set.unique_list
+        unique_set = ValueSet.remove item uniq_set.unique_set;
+        unique_list = List.filter (fun a -> a <> item) uniq_set.unique_list;
       }
     else
       uniq_set
 
-  let diff s1 s2 =
-    ValueSet.fold remove s2.unique_set s1
+  let diff s1 s2 = ValueSet.fold remove s2.unique_set s1
 
   let cardinal uniq_set = ValueSet.cardinal uniq_set.unique_set
 end

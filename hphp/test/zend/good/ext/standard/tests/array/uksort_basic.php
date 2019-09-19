@@ -11,7 +11,7 @@ function cmp($a, $b) {
 }
 <<__EntryPoint>> function main(): void {
 $a = array(3, 2, 5, 6, 1);
-uasort(&$a, "cmp");
+uasort(&$a, fun("cmp"));
 foreach($a as $key => $value) {
     echo "$key: $value\n";
 }

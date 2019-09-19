@@ -39,5 +39,12 @@ inline bool opHasExtraData(Opcode op) {
   return opcodeHasFlags(op, HasExtra);
 }
 
+inline folly::Optional<Opcode> nameToOpcode(const std::string& str) {
+#define O(name, ...) if (str == #name) return Opcode::name;
+  IR_OPCODES
+#undef O
+  return folly::none;
+}
+
 } // namespace jit
 } // namespace HPHP

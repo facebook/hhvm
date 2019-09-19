@@ -10,7 +10,8 @@ echo "\n-- Testing is_callable() function with less than expected no. of argumen
 try { var_dump( is_callable() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Testing is_callable() function with more than expected no. of arguments --\n";
-try { var_dump( is_callable("string", TRUE, &$callable_name, "EXTRA") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+$callable_name = null;
+try { var_dump( is_callable_with_name("string", TRUE, inout $callable_name, "EXTRA") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "===DONE===\n";
 }

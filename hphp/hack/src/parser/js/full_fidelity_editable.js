@@ -11,7 +11,7 @@
  * THIS FILE IS @generated; DO NOT EDIT IT
  * To regenerate this file, run
  *
- *   buck run //hphp/hack/src:generate_full_fidelity -- --rust
+ *   buck run //hphp/hack/src:generate_full_fidelity
  *
  **
  *
@@ -266,8 +266,6 @@ class EditableSyntax
       return PostfixUnaryExpression.from_json(json, position, source);
     case 'binary_expression':
       return BinaryExpression.from_json(json, position, source);
-    case 'instanceof_expression':
-      return InstanceofExpression.from_json(json, position, source);
     case 'is_expression':
       return IsExpression.from_json(json, position, source);
     case 'as_expression':
@@ -354,6 +352,8 @@ class EditableSyntax
       return XHPClose.from_json(json, position, source);
     case 'type_constant':
       return TypeConstant.from_json(json, position, source);
+    case 'pu_access':
+      return PUAccess.from_json(json, position, source);
     case 'vector_type_specifier':
       return VectorTypeSpecifier.from_json(json, position, source);
     case 'keyset_type_specifier':
@@ -769,8 +769,6 @@ class EditableToken extends EditableSyntax
        return new DefaultToken(leading, trailing);
     case 'define':
        return new DefineToken(leading, trailing);
-    case '__destruct':
-       return new DestructToken(leading, trailing);
     case 'dict':
        return new DictToken(leading, trailing);
     case 'do':
@@ -1382,13 +1380,6 @@ class DefineToken extends EditableToken
   constructor(leading, trailing)
   {
     super('define', leading, trailing, 'define');
-  }
-}
-class DestructToken extends EditableToken
-{
-  constructor(leading, trailing)
-  {
-    super('__destruct', leading, trailing, '__destruct');
   }
 }
 class DictToken extends EditableToken
@@ -13172,89 +13163,6 @@ class BinaryExpression extends EditableSyntax
     return BinaryExpression._children_keys;
   }
 }
-class InstanceofExpression extends EditableSyntax
-{
-  constructor(
-    left_operand,
-    operator,
-    right_operand)
-  {
-    super('instanceof_expression', {
-      left_operand: left_operand,
-      operator: operator,
-      right_operand: right_operand });
-  }
-  get left_operand() { return this.children.left_operand; }
-  get operator() { return this.children.operator; }
-  get right_operand() { return this.children.right_operand; }
-  with_left_operand(left_operand){
-    return new InstanceofExpression(
-      left_operand,
-      this.operator,
-      this.right_operand);
-  }
-  with_operator(operator){
-    return new InstanceofExpression(
-      this.left_operand,
-      operator,
-      this.right_operand);
-  }
-  with_right_operand(right_operand){
-    return new InstanceofExpression(
-      this.left_operand,
-      this.operator,
-      right_operand);
-  }
-  rewrite(rewriter, parents)
-  {
-    if (parents == undefined)
-      parents = [];
-    let new_parents = parents.slice();
-    new_parents.push(this);
-    var left_operand = this.left_operand.rewrite(rewriter, new_parents);
-    var operator = this.operator.rewrite(rewriter, new_parents);
-    var right_operand = this.right_operand.rewrite(rewriter, new_parents);
-    if (
-      left_operand === this.left_operand &&
-      operator === this.operator &&
-      right_operand === this.right_operand)
-    {
-      return rewriter(this, parents);
-    }
-    else
-    {
-      return rewriter(new InstanceofExpression(
-        left_operand,
-        operator,
-        right_operand), parents);
-    }
-  }
-  static from_json(json, position, source)
-  {
-    let left_operand = EditableSyntax.from_json(
-      json.instanceof_left_operand, position, source);
-    position += left_operand.width;
-    let operator = EditableSyntax.from_json(
-      json.instanceof_operator, position, source);
-    position += operator.width;
-    let right_operand = EditableSyntax.from_json(
-      json.instanceof_right_operand, position, source);
-    position += right_operand.width;
-    return new InstanceofExpression(
-        left_operand,
-        operator,
-        right_operand);
-  }
-  get children_keys()
-  {
-    if (InstanceofExpression._children_keys == null)
-      InstanceofExpression._children_keys = [
-        'left_operand',
-        'operator',
-        'right_operand'];
-    return InstanceofExpression._children_keys;
-  }
-}
 class IsExpression extends EditableSyntax
 {
   constructor(
@@ -17421,6 +17329,89 @@ class TypeConstant extends EditableSyntax
     return TypeConstant._children_keys;
   }
 }
+class PUAccess extends EditableSyntax
+{
+  constructor(
+    left_type,
+    separator,
+    right_type)
+  {
+    super('pu_access', {
+      left_type: left_type,
+      separator: separator,
+      right_type: right_type });
+  }
+  get left_type() { return this.children.left_type; }
+  get separator() { return this.children.separator; }
+  get right_type() { return this.children.right_type; }
+  with_left_type(left_type){
+    return new PUAccess(
+      left_type,
+      this.separator,
+      this.right_type);
+  }
+  with_separator(separator){
+    return new PUAccess(
+      this.left_type,
+      separator,
+      this.right_type);
+  }
+  with_right_type(right_type){
+    return new PUAccess(
+      this.left_type,
+      this.separator,
+      right_type);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var left_type = this.left_type.rewrite(rewriter, new_parents);
+    var separator = this.separator.rewrite(rewriter, new_parents);
+    var right_type = this.right_type.rewrite(rewriter, new_parents);
+    if (
+      left_type === this.left_type &&
+      separator === this.separator &&
+      right_type === this.right_type)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new PUAccess(
+        left_type,
+        separator,
+        right_type), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let left_type = EditableSyntax.from_json(
+      json.pu_access_left_type, position, source);
+    position += left_type.width;
+    let separator = EditableSyntax.from_json(
+      json.pu_access_separator, position, source);
+    position += separator.width;
+    let right_type = EditableSyntax.from_json(
+      json.pu_access_right_type, position, source);
+    position += right_type.width;
+    return new PUAccess(
+        left_type,
+        separator,
+        right_type);
+  }
+  get children_keys()
+  {
+    if (PUAccess._children_keys == null)
+      PUAccess._children_keys = [
+        'left_type',
+        'separator',
+        'right_type'];
+    return PUAccess._children_keys;
+  }
+}
 class VectorTypeSpecifier extends EditableSyntax
 {
   constructor(
@@ -21242,7 +21233,6 @@ exports.CoroutineToken = CoroutineToken;
 exports.DarrayToken = DarrayToken;
 exports.DefaultToken = DefaultToken;
 exports.DefineToken = DefineToken;
-exports.DestructToken = DestructToken;
 exports.DictToken = DictToken;
 exports.DoToken = DoToken;
 exports.DoubleToken = DoubleToken;
@@ -21532,7 +21522,6 @@ exports.YieldFromExpression = YieldFromExpression;
 exports.PrefixUnaryExpression = PrefixUnaryExpression;
 exports.PostfixUnaryExpression = PostfixUnaryExpression;
 exports.BinaryExpression = BinaryExpression;
-exports.InstanceofExpression = InstanceofExpression;
 exports.IsExpression = IsExpression;
 exports.AsExpression = AsExpression;
 exports.NullableAsExpression = NullableAsExpression;
@@ -21576,6 +21565,7 @@ exports.XHPOpen = XHPOpen;
 exports.XHPExpression = XHPExpression;
 exports.XHPClose = XHPClose;
 exports.TypeConstant = TypeConstant;
+exports.PUAccess = PUAccess;
 exports.VectorTypeSpecifier = VectorTypeSpecifier;
 exports.KeysetTypeSpecifier = KeysetTypeSpecifier;
 exports.TupleTypeExplicitSpecifier = TupleTypeExplicitSpecifier;

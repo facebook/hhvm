@@ -10,12 +10,12 @@ function ut_main()
     $res_str = '';
 
     $locales = array(
-		"de_DE@currency=EUR;collation=PHONEBOOK",
+        "de_DE@currency=EUR;collation=PHONEBOOK",
         'uk-ua_CALIFORNIA@currency=GRN'
-	);
+    );
 
     $locales = array(
-	'de_DE@currency=EUR;collation=PHONEBOOK',
+    'de_DE@currency=EUR;collation=PHONEBOOK',
         'root',
         'uk@currency=EURO',
         'Hindi',
@@ -24,7 +24,7 @@ function ut_main()
         'fr',
         'ja',
         'i-enochian', //(example of a grandfathered tag)
-//Language subtag plus Script subtag:	
+//Language subtag plus Script subtag:
         'zh-Hant',
         'zh-Hans',
         'sr-Cyrl',
@@ -47,7 +47,7 @@ function ut_main()
 //Private use subtags:
         'de-CH-x-phonebk',
         'az-Arab-x-AZE-derbend',
-//Extended language subtags 
+//Extended language subtags
         'zh-min',
         'zh-min-nan-Hant-CN',
 //Private use registry values
@@ -72,14 +72,14 @@ function ut_main()
     {
         $keywords_arr = ut_loc_get_keywords( $locale);
         $res_str .= "$locale: ";
-		if( $keywords_arr){
-			foreach( $keywords_arr as $key => $value){
-        			$res_str .= "Key is $key and Value is $value \n";
-			}
-		}
-		else{
-			$res_str .= "No keywords found.";
-		}
+        if( $keywords_arr){
+            foreach( $keywords_arr as $key => $value){
+                    $res_str .= "Key is $key and Value is $value \n";
+            }
+        }
+        else{
+            $res_str .= "No keywords found.";
+        }
         $res_str .= "\n";
     }
 
@@ -89,5 +89,6 @@ function ut_main()
 }
 
 include_once( 'ut_common.inc' );
+<<__EntryPoint>> function main_entry(): void {
 ut_run();
-
+}

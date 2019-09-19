@@ -1,4 +1,5 @@
 #include "hphp/runtime/ext/icu/ext_icu_ucsdet.h"
+#include "hphp/runtime/base/array-init.h"
 
 namespace HPHP { namespace Intl {
 /////////////////////////////////////////////////////////////////////////////
@@ -84,11 +85,11 @@ static Array HHVM_METHOD(EncodingDetector, detectAll) {
     data->throwException("Could not detect all encodings, error %d (%s)",
                          error, u_errorName(error));
   }
-  Array ret = Array::Create();
+  VArrayInit ret{(uint32_t)count};
   for (int i = 0; i < count; ++i) {
     ret.append(EncodingMatch::newInstance(matches[i], detector));
   }
-  return ret;
+  return ret.toArray();
 }
 
 //////////////////////////////////////////////////////////////////////////////

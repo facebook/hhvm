@@ -1,5 +1,5 @@
 <?hh
-
+<<__EntryPoint>> function main(): void {
 /* Integer */
 $data = "-123";   var_dump(filter_var($data, FILTER_VALIDATE_INT));
 $data = "0";      var_dump(filter_var($data, FILTER_VALIDATE_INT));
@@ -38,4 +38,4 @@ $data = 0;        var_dump(filter_var($data, FILTER_VALIDATE_BOOLEAN));
 $data = true;     var_dump(filter_var($data, FILTER_VALIDATE_BOOLEAN));
 $data = false;    var_dump(filter_var($data, FILTER_VALIDATE_BOOLEAN));
 $data = "";       var_dump(filter_var($data, FILTER_VALIDATE_BOOLEAN));
-
+}

@@ -16,8 +16,9 @@
 function preg_filter(mixed $pattern,
                      mixed $replacement,
                      mixed $subject,
-                     int $limit = -1,
-                     ?int &$count = null): mixed;
+                     int $limit,
+                     <<__OutOnly("KindOfInt64")>>
+                     inout ?int $count): mixed;
 
 /**
  * Return array entries that match the pattern
@@ -83,9 +84,16 @@ function preg_last_error(): int;
 <<__Native, __Rx>>
 function preg_match_all(string $pattern,
                         string $subject,
-                        ?array &$matches = null,
                         int $flags = 0,
                         int $offset = 0): mixed;
+
+<<__Native, __Rx>>
+function preg_match_all_with_matches(string $pattern,
+                                     string $subject,
+                                     <<__OutOnly>>
+                                     inout mixed $matches,
+                                     int $flags = 0,
+                                     int $offset = 0): mixed;
 
 /**
  * Perform a regular expression match
@@ -116,9 +124,16 @@ function preg_match_all(string $pattern,
 <<__Native, __Rx>>
 function preg_match(string $pattern,
                     string $subject,
-                    ?array &$matches = null,
                     int $flags = 0,
                     int $offset = 0): mixed;
+
+<<__Native, __Rx>>
+function preg_match_with_matches(string $pattern,
+                                 string $subject,
+                                 <<__OutOnly>>
+                                 inout mixed $matches,
+                                 int $flags = 0,
+                                 int $offset = 0): mixed;
 
 /**
  * Quote regular expression characters
@@ -166,8 +181,9 @@ function preg_quote(string $str,
 function preg_replace_callback(mixed $pattern,
                                mixed $callback,
                                mixed $subject,
-                               int $limit = -1,
-                               ?int &$count = null): mixed;
+                               int $limit,
+                               <<__OutOnly("KindOfInt64")>>
+                               inout ?int $count): mixed;
 
 /**
  * Perform a regular expression search and replace using an associative array of
@@ -202,8 +218,9 @@ function preg_replace_callback(mixed $pattern,
 <<__Native, __Rx>>
 function preg_replace_callback_array(mixed $patterns_and_callbacks,
                                      mixed $subject,
-                                     int $limit = -1,
-                                     ?int &$count = null): mixed;
+                                     int $limit,
+                                     <<__OutOnly("KindOfInt64")>>
+                                     inout ?int $count): mixed;
 /**
  * Perform a regular expression search and replace
  *
@@ -257,8 +274,16 @@ function preg_replace_callback_array(mixed $patterns_and_callbacks,
 function preg_replace(mixed $pattern,
                       mixed $replacement,
                       mixed $subject,
-                      int $limit = -1,
-                      ?int &$count = null): mixed;
+                      int $limit = -1): mixed;
+
+<<__Native, __Rx>>
+function preg_replace_with_count(mixed $pattern,
+                                 mixed $replacement,
+                                 mixed $subject,
+                                 int $limit,
+                                 <<__OutOnly("KindOfInt64")>>
+                                 inout ?int $count): mixed;
+
 
 /**
  * Split string by a regular expression
@@ -310,29 +335,6 @@ function ereg_replace(string $pattern,
                       string $string): string;
 
 /**
- * Regular expression match
- *
- * @param string $pattern - Case sensitive regular expression.
- * @param string $string - The input string.
- * @param array $regs - If matches are found for parenthesized substrings
- *   of pattern and the function is called with the third argument regs,
- *   the matches will be stored in the elements of the array regs.
- *   $regs[1] will contain the substring which starts at the first left
- *   parenthesis; $regs[2] will contain the substring starting at the
- *   second, and so on. $regs[0] will contain a copy of the complete string
- *   matched.
- *
- * @return int - Returns the length of the matched string if a match for
- *   pattern was found in string, or FALSE if no matches were found or an
- *   error occurred.   If the optional parameter regs was not passed or the
- *   length of the matched string is 0, this function returns 1.
- */
-<<__Native, __Deprecated('As of PHP 5.3.0, preg_match is suggested instead')>>
-function ereg(string $pattern,
-              string $string,
-              ?array &$regs = null): mixed;
-
-/**
  * Replace regular expression case insensitive
  *
  * @param string $pattern - A POSIX extended regular expression.
@@ -351,29 +353,6 @@ function ereg(string $pattern,
 function eregi_replace(string $pattern,
                        string $replacement,
                        string $string): string;
-
-/**
- * Case insensitive regular expression match
- *
- * @param string $pattern - Case insensitive regular expression.
- * @param string $string - The input string.
- * @param array $regs - If matches are found for parenthesized substrings
- *   of pattern and the function is called with the third argument regs,
- *   the matches will be stored in the elements of the array regs.
- *   $regs[1] will contain the substring which starts at the first left
- *   parenthesis; $regs[2] will contain the substring starting at the
- *   second, and so on. $regs[0] will contain a copy of the complete string
- *   matched.
- *
- * @return int - Returns the length of the matched string if a match for
- *   pattern was found in string, or FALSE if no matches were found or an
- *   error occurred.   If the optional parameter regs was not passed or the
- *   length of the matched string is 0, this function returns 1.
- */
-<<__Native>>
-function eregi(string $pattern,
-               string $string,
-               ?array &$regs = null): mixed;
 
 /**
  * Split string into array by regular expression

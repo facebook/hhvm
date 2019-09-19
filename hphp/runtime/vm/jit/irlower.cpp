@@ -115,7 +115,6 @@ void optimize(Vunit& unit, CodeKind kind, bool regAlloc) {
 ///////////////////////////////////////////////////////////////////////////////
 
 std::unique_ptr<Vunit> lowerUnit(const IRUnit& unit,
-                                 Annotations* annotations,
                                  CodeKind kind,
                                  bool regAlloc /* = true */) noexcept {
   Timer timer(Timer::hhir_lower, unit.logEntry().get_pointer());
@@ -129,7 +128,7 @@ std::unique_ptr<Vunit> lowerUnit(const IRUnit& unit,
   Vasm vasm{*vunit};
   SCOPE_ASSERT_DETAIL("vasm unit") { return show(*vunit); };
 
-  IRLS env{unit, annotations};
+  IRLS env{unit};
   auto const blocks = rpoSortCfg(unit);
 
   // Create the initial set of vasm blocks, numbered the same as the
@@ -189,8 +188,10 @@ std::unique_ptr<Vunit> lowerUnit(const IRUnit& unit,
 }
 
 Vcost computeIRUnitCost(const IRUnit& unit) {
-  auto const vunit = lowerUnit(unit, nullptr /* annotations */,
-                               CodeKind::Trace, false /* regAlloc */);
+  auto vunit = lowerUnit(unit, CodeKind::Trace, false /* regAlloc */);
+  if (RuntimeOption::EvalHHIRInliningUseLayoutBlocks) {
+    layoutBlocks(*vunit);
+  }
   return computeVunitCost(*vunit);
 }
 

@@ -124,7 +124,6 @@ createCallGraph(jit::hash_map<hfsort::TargetId, FuncId>& funcID) {
         addCallerCount(nullptr, calleeTargetId, callerTransId, totalCalls);
       }
       addCallersCount(calleeTargetId, trec->mainCallers(),  totalCalls);
-      addCallersCount(calleeTargetId, trec->guardCallers(), totalCalls);
     }
     auto samples = cg.getSamples(calleeTargetId);
     cg.setSamples(calleeTargetId, std::max(totalCalls, samples));

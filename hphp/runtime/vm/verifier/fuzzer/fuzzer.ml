@@ -298,9 +298,7 @@ let mut_imms (is : IS.t) : IS.t =
     | CGetQuietL  id     -> CGetQuietL (mutate_local_id id !mag)
     | CGetL2      id     -> CGetL2     (mutate_local_id id !mag)
     | PushL       id     -> PushL      (mutate_local_id id !mag)
-    | CGetS       i      -> CGetS      (mutate_int      i  !mag)
     | VGetL       id     -> VGetL      (mutate_local_id id !mag)
-    | ClsRefGetC  i      -> ClsRefGetC (mutate_int      i  !mag)
     | _ -> s in  (*TODO: in general it might be worthwhile to get rid of wild
                    card cases like this. It would make the code more verbose,
                    but it will make adding new bytecodes easier since this will
@@ -308,9 +306,7 @@ let mut_imms (is : IS.t) : IS.t =
   let mutate_isset s =
     match s with
     | IssetL   id        -> IssetL  (mutate_local_id id !mag)
-    | IssetS   i         -> IssetS  (mutate_int      i  !mag)
     | EmptyL   id        -> EmptyL  (mutate_local_id id !mag)
-    | EmptyS   i         -> EmptyS  (mutate_int      i  !mag)
     | IsTypeL (id, op)   -> IsTypeL (mutate_local_id id !mag, op)
     | _ -> s in
   let mutate_mutator s =
@@ -319,13 +315,10 @@ let mut_imms (is : IS.t) : IS.t =
       if should_mutate () then random_incdec_op () else op in
     match s with
     | SetL      id       -> SetL    (mutate_local_id id !mag)
-    | SetS      i        -> SetS    (mutate_int      i  !mag)
     | SetOpL   (id, op)  -> SetOpL  (mutate_local_id id !mag, mutate_eq_op op)
     | SetOpG    op       -> SetOpG  (mutate_eq_op op)
-    | SetOpS   (op, i )  -> SetOpS  (mutate_eq_op op,         mutate_int i !mag)
     | IncDecL  (id, op)  -> IncDecL (mutate_local_id id !mag, mutate_inc_op op)
     | IncDecG   op       -> IncDecG (mutate_inc_op op)
-    | IncDecS  (op, i )  -> IncDecS (mutate_inc_op op,        mutate_int i !mag)
     | UnsetL    id       -> UnsetL  (mutate_local_id id !mag)
     | CheckProp p        -> CheckProp p
     | InitProp (p, Static) ->
@@ -356,7 +349,6 @@ let mut_imms (is : IS.t) : IS.t =
                               then Ast_defs.OG_nullthrows
                               else Ast_defs.OG_nullsafe),
                         m)
-    | NewObj    (id, op) -> NewObj    (mutate_int        id !mag, op)
     | _ -> s in
   let mutate_base s =
     match s with
@@ -433,10 +425,6 @@ let mut_imms (is : IS.t) : IS.t =
     | OODeclExists    k       -> OODeclExists    (mutate_kind            k)
     | VerifyParamType p       -> VerifyParamType (mutate_param_id p   !mag)
     | VerifyOutType p         -> VerifyOutType   (mutate_param_id p   !mag)
-    | Self            i       -> Self            (mutate_int      i   !mag)
-    | Parent          i       -> Parent          (mutate_int      i   !mag)
-    | LateBoundCls    i       -> LateBoundCls    (mutate_int      i   !mag)
-    | ClsRefName      i       -> ClsRefName      (mutate_int      i   !mag)
     | CreateCl       (i,  i') -> CreateCl        (mutate_int      i   !mag,
                                                   mutate_int      i'  !mag)
     | GetMemoKeyL    id       -> GetMemoKeyL     (mutate_local_id id !mag)
@@ -633,7 +621,6 @@ let mutate_metadata (input : HP.t)  =
       (body |> Hhas_body.instrs)
       (body |> Hhas_body.decl_vars)
       (body |> Hhas_body.num_iters)
-      (body |> Hhas_body.num_cls_ref_slots      |> fun n -> mutate_int n !mag)
       (body |> Hhas_body.is_memoize_wrapper     |> mutate_bool)
       (body |> Hhas_body.is_memoize_wrapper_lsb |> mutate_bool)
       (body |> Hhas_body.params                 |> delete_map mutate_param)
@@ -668,6 +655,7 @@ let mutate_metadata (input : HP.t)  =
       Hhas_property.make
         (prop |> Hhas_property.attributes)
         (prop |> Hhas_property.visibility         |> mutate_visibility)
+        (prop |> Hhas_property.is_abstract        |> mutate_bool)
         (prop |> Hhas_property.is_static          |> mutate_bool)
         (prop |> Hhas_property.is_deep_init       |> mutate_bool)
         (prop |> Hhas_property.is_const           |> mutate_bool)
@@ -697,8 +685,8 @@ let mutate_metadata (input : HP.t)  =
                                           |> option_lift mutate_typed_value) in
     let mutate_req ((trait, str) as pair) =
       if should_mutate() then match trait with
-                              | Ast.MustExtend -> Ast.MustImplement, str
-                              | Ast.MustImplement -> Ast.MustExtend, str
+                              | Hhas_class.MustExtend -> Hhas_class.MustImplement, str
+                              | Hhas_class.MustImplement -> Hhas_class.MustExtend, str
                          else pair in
     HC.make
       (cls |> HC.attributes         |> delete_map mutate_attribute)

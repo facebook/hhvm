@@ -177,6 +177,10 @@ bool RepoAuthType::operator==(RepoAuthType o) const {
   case T::ExactObj:
   case T::OptSubObj:
   case T::OptExactObj:
+  case T::SubCls:
+  case T::ExactCls:
+  case T::OptSubCls:
+  case T::OptExactCls:
     return clsName() == o.clsName();
   }
   not_reached();
@@ -403,6 +407,27 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
       return tv.m_type == KindOfObject && tv.m_data.pobj->getVMClass() == cls;
     }
 
+  case T::OptSubCls:
+    if (initNull) return true;
+    // fallthrough
+  case T::SubCls:
+    {
+      auto const cls = Unit::lookupClass(ty.clsName());
+      if (!cls) return false;
+      return tv.m_type == KindOfClass &&
+             tv.m_data.pclass->classof(cls);
+    }
+
+  case T::OptExactCls:
+    if (initNull) return true;
+    // fallthrough
+  case T::ExactCls:
+    {
+      auto const cls = Unit::lookupClass(ty.clsName());
+      if (!cls) return false;
+      return tv.m_type == KindOfClass && tv.m_data.pclass == cls;
+    }
+
   case T::InitUnc:
     if (tv.m_type == KindOfUninit) return false;
     // fallthrough
@@ -571,13 +596,24 @@ std::string show(RepoAuthType rat) {
   case T::OptExactObj:
   case T::SubObj:
   case T::ExactObj:
+  case T::OptSubCls:
+  case T::OptExactCls:
+  case T::SubCls:
+  case T::ExactCls:
     {
       auto ret = std::string{};
-      if (tag == T::OptSubObj || tag == T::OptExactObj) {
+      if (tag == T::OptSubObj || tag == T::OptExactObj ||
+          tag == T::OptSubCls || tag == T::OptExactCls) {
         ret += '?';
       }
-      ret += "Obj";
-      if (tag == T::OptSubObj || tag == T::SubObj) {
+      if (tag == T::OptSubObj || tag == T::OptExactObj ||
+          tag == T::SubObj || tag == T::ExactObj) {
+        ret += "Obj";
+      } else {
+        ret += "Cls";
+      }
+      if (tag == T::OptSubObj || tag == T::SubObj ||
+          tag == T::OptSubCls || tag == T::SubCls) {
         ret += "<";
       }
       ret += '=';

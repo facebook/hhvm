@@ -1,6 +1,6 @@
 <?hh // partial
 
-/* HH_FIXME[4110] */
+/* HH_FIXME[4336] */
 function my_compact<T>(Vector<?T> $vector): Vector<T> {
 }
 

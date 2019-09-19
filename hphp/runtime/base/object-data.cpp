@@ -68,17 +68,6 @@ const StaticString
   s_clone("__clone");
 
 ALWAYS_INLINE
-void invoke_destructor(ObjectData* obj, const Func* dtor) {
-  try {
-    // Call the destructor method
-    g_context->invokeMethodV(obj, dtor, InvokeArgs{}, false);
-  } catch (...) {
-    // Swallow any exceptions that escape the __destruct method
-    handle_destructor_exception();
-  }
-}
-
-ALWAYS_INLINE
 void verifyTypeHint(const Class* thisCls,
                     const Class::Prop* prop,
                     tv_rval val) {
@@ -105,10 +94,10 @@ void unsetTypeHint(const Class::Prop* prop) {
 //////////////////////////////////////////////////////////////////////
 
 // Check that the given property's type matches its type-hint.
-bool ObjectData::assertTypeHint(tv_rval prop, Slot propIdx) const {
+bool ObjectData::assertTypeHint(tv_rval prop, Slot slot) const {
   assertx(tvIsPlausible(*prop));
-  assertx(propIdx < m_cls->numDeclProperties());
-  auto const& propDecl = m_cls->declProperties()[propIdx];
+  assertx(slot < m_cls->numDeclProperties());
+  auto const& propDecl = m_cls->declProperties()[slot];
 
   // AttrLateInitSoft properties can be potentially anything due to default
   // values, so don't assume anything.
@@ -178,13 +167,13 @@ inline bool ObjectData::slowDestroyCheck() const {
   return m_aux16 & (HasDynPropArr | IsWeakRefed | UsedMemoCache);
 }
 
-NEVER_INLINE
+template<bool isSmallObject>
 void ObjectData::release(ObjectData* obj, const Class* cls) noexcept {
   assertx(obj->kindIsValid());
   assertx(!obj->hasInstanceDtor());
   assertx(!obj->hasNativeData());
   assertx(obj->getVMClass() == cls);
-  assertx(cls->releaseFunc() == &ObjectData::release);
+  assertx(isSmallObject == (cls->sizeIdx() < kNumSmallSizes));
 
   // Note: cleanups done in this function are only run for classes without an
   // instanceDtor. Some of these cleanups are duplicated in ~ObjectData, and
@@ -202,33 +191,31 @@ void ObjectData::release(ObjectData* obj, const Class* cls) noexcept {
   // `obj' is being torn down now---be careful about where/how you dereference
   // it from here on.
 
-  auto const nProps = size_t{cls->numDeclProperties()};
   auto prop = reinterpret_cast<TypedValue*>(obj + 1);
-  auto const stop = prop + nProps;
+  auto const stop = prop + cls->countablePropsEnd();
   for (; prop != stop; ++prop) {
     tvDecRefGen(prop);
   }
 
   if (UNLIKELY(obj->slowDestroyCheck())) obj->slowDestroyCases();
 
-  auto const size =
-    reinterpret_cast<char*>(stop) - reinterpret_cast<char*>(obj);
-  assertx(size == sizeForNProps(nProps));
-
-  if (cls->hasMemoSlots()) {
-    auto const memoSize = objOffFromMemoNode(cls);
-    assertx(
-      reinterpret_cast<const MemoNode*>(
-        reinterpret_cast<const char*>(obj) - memoSize
-      )->objOff() == memoSize
-    );
-    tl_heap->objFree(reinterpret_cast<char*>(obj) - memoSize,
-                     size + memoSize);
+  auto const memoSize = cls->memoSize();
+  auto const ptr = reinterpret_cast<char*>(obj) - memoSize;
+  assertx(memoSize == 0 ||
+          reinterpret_cast<const MemoNode*>(ptr)->objOff() == memoSize);
+  if (isSmallObject) {
+    tl_heap->freeSmallIndex(ptr, cls->sizeIdx());
   } else {
-    tl_heap->objFree(obj, size);
+    tl_heap->freeBigSize(ptr);
   }
+
   AARCH64_WALKABLE_FRAME();
 }
+
+template NEVER_INLINE void ObjectData::release<true>(ObjectData*,
+                                                     const Class*) noexcept;
+template NEVER_INLINE void ObjectData::release<false>(ObjectData*,
+                                                      const Class*) noexcept;
 
 ///////////////////////////////////////////////////////////////////////////////
 // class info
@@ -544,7 +531,7 @@ void ObjectData::o_getArray(Array& props,
       if (UNLIKELY(val.type() == KindOfUninit)) {
         if (!ignoreLateInit) {
           if (prop.attrs & AttrLateInitSoft) {
-            raise_soft_late_init_prop(cls, prop.name, false);
+            raise_soft_late_init_prop(prop.cls, prop.name, false);
             tvDup(
               *g_context->getSoftLateInitDefault().asTypedValue(),
               const_cast<ObjectData*>(this)->propLvalAtOffset(slot)
@@ -554,7 +541,7 @@ void ObjectData::o_getArray(Array& props,
               val.tv()
             );
           } else if (prop.attrs & AttrLateInit) {
-            throw_late_init_prop(cls, prop.name, false);
+            throw_late_init_prop(prop.cls, prop.name, false);
           }
         }
       } else if (!pubOnly || (prop.attrs & AttrPublic)) {
@@ -909,9 +896,10 @@ ObjectData* ObjectData::clone() {
   }
 
   auto const clonePropVec = clone->propVecForConstruct();
-  for (auto i = Slot{0}; i < nProps; i++) {
-    tvDupWithRef(propVec()[i], clonePropVec[i]);
-    assertx(assertTypeHint(&clonePropVec[i], i));
+  for (auto slot = Slot{0}; slot < nProps; slot++) {
+    auto index = m_cls->propSlotToIndex(slot);
+    tvDupWithRef(propVec()[index], clonePropVec[index]);
+    assertx(assertTypeHint(&clonePropVec[index], slot));
   }
 
   if (UNLIKELY(getAttribute(HasDynPropArr))) {
@@ -969,7 +957,6 @@ bool ObjectData::equal(const ObjectData& other) const {
   check_recursion_error();
 
   bool result = true;
-  auto cls = m_cls;
   IteratePropMemOrderNoInc(
     this,
     [&](Slot slot, const Class::Prop& prop, tv_rval thisVal) {
@@ -978,7 +965,7 @@ bool ObjectData::equal(const ObjectData& other) const {
            UNLIKELY(otherVal.type() == KindOfUninit)) &&
           (prop.attrs & AttrLateInit)) {
         if (prop.attrs & AttrLateInitSoft) {
-          raise_soft_late_init_prop(cls, prop.name, false);
+          raise_soft_late_init_prop(prop.cls, prop.name, false);
           auto const& d = g_context->getSoftLateInitDefault();
 
           if (thisVal.type() == KindOfUninit) {
@@ -994,7 +981,7 @@ bool ObjectData::equal(const ObjectData& other) const {
             );
           }
         } else {
-          throw_late_init_prop(cls, prop.name, false);
+          throw_late_init_prop(prop.cls, prop.name, false);
         }
       }
       if (!tvEqual(thisVal.tv(), otherVal.tv())) {
@@ -1080,7 +1067,6 @@ int64_t ObjectData::compare(const ObjectData& other) const {
   check_recursion_error();
 
   int64_t result = 0;
-  auto cls = m_cls;
   IteratePropToArrayOrderNoInc(
     this,
     [&](Slot slot, const Class::Prop& prop, tv_rval thisVal) {
@@ -1089,7 +1075,7 @@ int64_t ObjectData::compare(const ObjectData& other) const {
            UNLIKELY(otherVal.type() == KindOfUninit)) &&
           (prop.attrs & AttrLateInit)) {
         if (prop.attrs & AttrLateInitSoft) {
-          raise_soft_late_init_prop(cls, prop.name, false);
+          raise_soft_late_init_prop(prop.cls, prop.name, false);
           auto const& d = g_context->getSoftLateInitDefault();
 
           if (thisVal.type() == KindOfUninit) {
@@ -1105,7 +1091,7 @@ int64_t ObjectData::compare(const ObjectData& other) const {
             );
           }
         } else {
-          throw_late_init_prop(cls, prop.name, false);
+          throw_late_init_prop(prop.cls, prop.name, false);
         }
       }
       auto cmp = tvCompare(thisVal.tv(), otherVal.tv());
@@ -1244,16 +1230,17 @@ ObjectData::PropLookup ObjectData::getPropImpl(
   const Class* ctx,
   const StringData* key
 ) {
-  auto const lookup = m_cls->getDeclPropIndex(ctx, key);
-  auto const propIdx = lookup.slot;
+  auto const lookup = m_cls->getDeclPropSlot(ctx, key);
+  auto const propSlot = lookup.slot;
 
-  if (LIKELY(propIdx != kInvalidSlot)) {
+  if (LIKELY(propSlot != kInvalidSlot)) {
     // We found a visible property, but it might not be accessible.  No need to
     // check if there is a dynamic property with this name.
-    auto const prop = const_cast<TypedValue*>(&propVec()[propIdx]);
-    assertx(assertTypeHint(prop, propIdx));
+    auto const propIndex = m_cls->propSlotToIndex(propSlot);
+    auto const prop = const_cast<TypedValue*>(&propVec()[propIndex]);
+    assertx(assertTypeHint(prop, propSlot));
 
-    auto const& declProp = m_cls->declProperties()[propIdx];
+    auto const& declProp = m_cls->declProperties()[propSlot];
     if (!ignoreLateInit && lookup.accessible) {
       if (UNLIKELY(prop->m_type == KindOfUninit) &&
           (declProp.attrs & AttrLateInit)) {
@@ -1272,7 +1259,7 @@ ObjectData::PropLookup ObjectData::getPropImpl(
     return {
      prop,
      &declProp,
-     propIdx,
+     propSlot,
      lookup.accessible,
      // we always return true in the !forWrite case; this way the compiler
      // may optimize away this value, and if a caller intends to write but
@@ -1581,8 +1568,8 @@ tv_lval ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
 
     // Property exists, but it is either protected or private since accessible
     // is false.
-    auto const propInd = m_cls->lookupDeclProp(key);
-    auto const attrs = m_cls->declProperties()[propInd].attrs;
+    auto const propSlot = m_cls->lookupDeclProp(key);
+    auto const attrs = m_cls->declProperties()[propSlot].attrs;
     auto const priv = (attrs & AttrPrivate) ? "private" : "protected";
 
     raise_error(

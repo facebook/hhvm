@@ -1,4 +1,5 @@
 <?hh
+<<__EntryPoint>> function main(): void {
 // create dom document
 $dom = new DOMDocument;
 $xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -25,3 +26,4 @@ echo "Document is no longer standalone\n";
 var_dump( $test );
 
 echo "Done";
+}

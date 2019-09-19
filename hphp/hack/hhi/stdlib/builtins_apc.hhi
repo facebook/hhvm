@@ -13,7 +13,7 @@ function apc_add($key, $var, int $ttl = 0) { }
 <<__PHPStdLib, __NonRx('APC')>>
 function apc_store($key, $var, int $ttl = 0) { }
 <<__PHPStdLib, __NonRx('APC')>>
-function apc_fetch($key, &$success = null) { }
+function apc_fetch($key, inout $success) { }
 <<__PHPStdLib, __NonRx('APC')>>
 function apc_delete($key) { }
 <<__PHPStdLib, __NonRx('APC')>>
@@ -23,9 +23,9 @@ function apc_clear_cache(string $cache_id = "") { }
 <<__PHPStdLib, __NonRx('APC')>>
 function apc_sma_info(bool $limited = false) { }
 <<__PHPStdLib, __NonRx('APC')>>
-function apc_inc(string $key, int $step = 1, &$success = null) { }
+function apc_inc(string $key, int $step, inout $success) { }
 <<__PHPStdLib, __NonRx('APC')>>
-function apc_dec(string $key, int $step = 1, &$success = null) { }
+function apc_dec(string $key, int $step, inout $success) { }
 <<__PHPStdLib, __NonRx('APC')>>
 function apc_cas(string $key, int $old_cas, int $new_cas) { }
 <<__PHPStdLib, __NonRx('APC')>>

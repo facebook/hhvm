@@ -54,9 +54,6 @@ int ocamlpool_allocated_chunks(void);
 size_t ocamlpool_get_next_chunk_size(void);
 void ocamlpool_set_next_chunk_size(size_t sz);
 
-/* Unused memory from current chunk, in words */
-size_t ocamlpool_chunk_remaining_words(void);
-
 /* Return the current chunk to OCaml memory system */
 void ocamlpool_chunk_release(void);
 
@@ -68,5 +65,9 @@ void ocamlpool_chunk_release(void);
 
 value ocamlpool_reserve_string(size_t bytes);
 value ocamlpool_reserve_block(int tag, size_t words);
+
+extern color_t ocamlpool_color;
+extern value *ocamlpool_limit, *ocamlpool_cursor, *ocamlpool_bound;;
+extern uintnat ocamlpool_generation;
 
 #endif /*!OCAMLPOOL_H*/

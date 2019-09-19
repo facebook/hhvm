@@ -59,22 +59,22 @@ class DD extends D {
 
 <<__EntryPoint>>
 function main_686() {
-$obj = new B();
- $obj->bar();
-$obj = new C;
- $obj->bar();
- $obj->bar2();
-var_dump(serialize($obj));
-if (false) {
-  include '686.inc';
-}
-$d = new D;
-$d->qq();
-$d->q();
-$d->q0();
-$d = new DD;
-$d->qqq();
-$d->qq();
-$d->q();
-$d->q0();
+  $obj = new B();
+  $obj->bar();
+  $obj = new C;
+  $obj->bar();
+  $obj->bar2();
+  var_dump(serialize($obj));
+  if (__hhvm_intrinsics\launder_value(false)) {
+    include '686.inc';
+  }
+  $d = new D;
+  $d->qq();
+  $d->q();
+  $d->q0();
+  $d = new DD;
+  $d->qqq();
+  $d->qq();
+  $d->q();
+  $d->q0();
 }

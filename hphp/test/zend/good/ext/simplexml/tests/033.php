@@ -26,8 +26,6 @@ var_dump((string)$foo);
 var_dump((string)$people);
 var_dump((array)$foo);
 var_dump((array)$people);
-var_dump((object)$foo);
-var_dump((object)$people);
 
 echo "===DONE===\n";
 }

@@ -8,5 +8,5 @@ $obj = Map{'1' => 123, 1 => 123};
 $obj['1'] = $obj;
 
 apc_store('some-key', vec[$obj]);
-var_dump(apc_fetch('some-key'));
+var_dump(__hhvm_intrinsics\apc_fetch_no_check('some-key'));
 }

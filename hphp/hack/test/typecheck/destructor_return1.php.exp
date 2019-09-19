@@ -1,6 +1,0 @@
-File "destructor_return1.php", line 15, characters 12-16:
-Invalid return type (Typing[4110])
-File "destructor_return1.php", line 14, characters 19-28:
-Expected void
-File "destructor_return1.php", line 15, characters 12-16:
-But got string

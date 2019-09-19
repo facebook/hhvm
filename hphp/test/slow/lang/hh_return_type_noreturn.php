@@ -33,7 +33,7 @@ function main() {
 <<__EntryPoint>>
 function main_hh_return_type_noreturn() {
 error_reporting(-1);
-set_error_handler('handler');
+set_error_handler(fun('handler'));
 
 main();
 }

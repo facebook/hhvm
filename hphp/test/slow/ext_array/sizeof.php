@@ -22,6 +22,5 @@ $food = array(
   "fruits" => array("orange", "banana", "apple"),
   "veggie" => array("carrot", "collard", "pea")
 );
-var_dump(sizeof($food, COUNT_RECURSIVE));
 var_dump(sizeof($food));
 }

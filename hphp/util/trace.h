@@ -98,6 +98,7 @@ namespace Trace {
       TM(bcinterp)      \
       TM(bisector)      \
       TM(class_load)    \
+      TM(cti)           \
       TM(datablock)     \
       TM(debugger)      \
       TM(debuggerflow)  \
@@ -163,6 +164,7 @@ namespace Trace {
       TM(printir_json)  \
       TM(prof_branch)   \
       TM(prof_array)    \
+      TM(prof_prop)     \
       TM(rat)           \
       TM(refcount)      \
       TM(regalloc)      \
@@ -195,6 +197,7 @@ namespace Trace {
       TM(pdce_inline)   \
       TM(clisrv)        \
       TM(factparse)     \
+      TM(bccache)       \
       /* Stress categories, to exercise rare paths */ \
       TM(stress_txInterpPct)  \
       TM(stress_txInterpSeed) \

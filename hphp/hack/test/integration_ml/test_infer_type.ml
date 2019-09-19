@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
@@ -9,21 +9,20 @@
  *)
 
 open Hh_core
-
 module Test = Integration_test_base
 
-let id = "<?hh // strict
+let id =
+  "<?hh // strict
 function id(int $x): int {
   return $x;
   //     ^3:10
 }
 "
 
-let id_cases = [
-  ("id.php", 3, 10), "int";
-]
+let id_cases = [(("id.php", 3, 10), "int")]
 
-let class_A = "<?hh // strict
+let class_A =
+  "<?hh // strict
 class A {
   public function __construct(
     private int $id,
@@ -38,12 +37,10 @@ class A {
 }
 "
 
-let class_A_cases = [
-  ("A.php", 7, 12), "this";
-  ("A.php", 7, 19), "int";
-]
+let class_A_cases = [(("A.php", 7, 12), "this"); (("A.php", 7, 19), "int")]
 
-let mypair = "<?hh // strict
+let mypair =
+  "<?hh // strict
 class MyPair<T> {
   private T $fst;
   private T $snd;
@@ -67,7 +64,8 @@ class MyPair<T> {
 }
 "
 
-let test_mypair = "<?hh // strict
+let test_mypair =
+  "<?hh // strict
 class B extends A {}
 class C extends A {}
 
@@ -83,19 +81,21 @@ function test_mypair(MyPair<A> $v): MyPair<A> {
 }
 "
 
-let test_mypair_cases = [
-  ("test_mypair.php", 6, 8), "MyPair<A>";
-  ("test_mypair.php", 6, 15), "(function(): A)";
-  ("test_mypair.php", 6, 19), "A";
-  ("test_mypair.php", 8, 4), "MyPair<A>";
-  ("test_mypair.php", 8, 19), "B";
-  ("test_mypair.php", 10, 14), "A";
-  ("test_mypair.php", 12, 10), "(function(MyPair<A> $v): MyPair<A>)";
-  ("test_mypair.php", 12, 21), "MyPair<A>";
-  ("test_mypair.php", 12, 22), "MyPair<A>";
-]
+let test_mypair_cases =
+  [
+    (("test_mypair.php", 6, 8), "MyPair<A>");
+    (("test_mypair.php", 6, 15), "(function(): A)");
+    (("test_mypair.php", 6, 19), "A");
+    (("test_mypair.php", 8, 4), "MyPair<A>");
+    (("test_mypair.php", 8, 19), "B");
+    (("test_mypair.php", 10, 14), "A");
+    (("test_mypair.php", 12, 10), "(function(MyPair<A> $v): MyPair<A>)");
+    (("test_mypair.php", 12, 21), "MyPair<A>");
+    (("test_mypair.php", 12, 22), "MyPair<A>");
+  ]
 
-let loop_assignment = "<?hh // strict
+let loop_assignment =
+  "<?hh // strict
 function douse(mixed $item): void {}
 function cond(): bool { return true; }
 function loop_assignment(): void {
@@ -113,14 +113,16 @@ function loop_assignment(): void {
 }
 "
 
-let loop_assignment_cases = [
-  ("loop_assignment.php", 5, 4), "int";
-  ("loop_assignment.php", 8, 11), "(int | string)";
-  ("loop_assignment.php", 11, 7), "string";
-  ("loop_assignment.php", 14, 9), "(int | string)";
-]
+let loop_assignment_cases =
+  [
+    (("loop_assignment.php", 5, 4), "int");
+    (("loop_assignment.php", 8, 11), "(int | string)");
+    (("loop_assignment.php", 11, 7), "string");
+    (("loop_assignment.php", 14, 9), "(int | string)");
+  ]
 
-let lambda1 = "<?hh // strict
+let lambda1 =
+  "<?hh // strict
 function test_lambda1(): void {
   $s = 'foo';
   $f = $n ==> { return $n . $s . '\\n'; };
@@ -132,18 +134,20 @@ function test_lambda1(): void {
 }
 "
 
-let lambda_cases = [
-  ("lambda1.php", 4, 3), "[fun]";
-  ("lambda1.php", 4, 29), "string";
-  ("lambda1.php", 6, 3), "string";
-  ("lambda1.php", 6, 8), "[fun]";
-  ("lambda1.php", 6, 11), "int";
-  ("lambda1.php", 8, 3), "string";
-  ("lambda1.php", 8, 8), "[fun]";
-  ("lambda1.php", 8, 11), "string";
-]
+let lambda_cases =
+  [
+    (("lambda1.php", 4, 3), "[fun]");
+    (("lambda1.php", 4, 29), "string");
+    (("lambda1.php", 6, 3), "string");
+    (("lambda1.php", 6, 8), "[fun]");
+    (("lambda1.php", 6, 11), "int");
+    (("lambda1.php", 8, 3), "string");
+    (("lambda1.php", 8, 8), "[fun]");
+    (("lambda1.php", 8, 11), "string");
+  ]
 
-let callback = "<?hh // strict
+let callback =
+  "<?hh // strict
 function test_callback((function(int): string) $cb): void {
   $cb;
 //^3:3
@@ -152,13 +156,15 @@ function test_callback((function(int): string) $cb): void {
 }
 "
 
-let callback_cases = [
-  ("callback.php", 3, 3), "(function(int): string)";
-  ("callback.php", 5, 3), "(function(int): string)";
-  ("callback.php", 5, 8), "string";
-]
+let callback_cases =
+  [
+    (("callback.php", 3, 3), "(function(int): string)");
+    (("callback.php", 5, 3), "(function(int): string)");
+    (("callback.php", 5, 8), "string");
+  ]
 
-let nullthrows = "<?hh // strict
+let nullthrows =
+  "<?hh // strict
 function nullthrows<T>(?T $x): T {
   invariant($x !== null, 'got null');
 //          ^3:13
@@ -167,12 +173,11 @@ function nullthrows<T>(?T $x): T {
 }
 "
 
-let nullthrows_cases = [
-  ("nullthrows.php", 3, 13), "?T";
-  ("nullthrows.php", 5, 10), "T";
-]
+let nullthrows_cases =
+  [(("nullthrows.php", 3, 13), "?T"); (("nullthrows.php", 5, 10), "T")]
 
-let nullvec = "<?hh // strict
+let nullvec =
+  "<?hh // strict
 function foo() : vec<?int> {
   $x = vec[1, null];
   $x;
@@ -186,14 +191,15 @@ function foo() : vec<?int> {
 }
 "
 
-let nullvec_cases = [
-  ("nullvec.php", 4, 3), "vec<?int>";
-  ("nullvec.php", 7, 3), "vec<?(int | string)>";
-  ("nullvec.php", 10, 3), "vec<null>";
-]
+let nullvec_cases =
+  [
+    (("nullvec.php", 4, 3), "vec<?int>");
+    (("nullvec.php", 7, 3), "vec<?(int | string)>");
+    (("nullvec.php", 10, 3), "vec<null>");
+  ]
 
-
-let curried = "<?hh // strict
+let curried =
+  "<?hh // strict
 function curried(): (function(int): (function(bool): string)) {
   return $i ==> $b ==> $i > 0 && $b ? 'true' : 'false';
 }
@@ -204,14 +210,16 @@ function test_curried(bool $cond): void {
 }
 "
 
-let curried_cases = [
-  ("curried.php", 6, 3),
-    "(function(): (function(int): (function(bool): string)))";
-  ("curried.php", 7, 3),
-    "(function(): (function(int): (function(bool): string)))";
-]
+let curried_cases =
+  [
+    ( ("curried.php", 6, 3),
+      "(function(): (function(int): (function(bool): string)))" );
+    ( ("curried.php", 7, 3),
+      "(function(): (function(int): (function(bool): string)))" );
+  ]
 
-let multiple_type = "<?hh // strict
+let multiple_type =
+  "<?hh // strict
 class C1 { public function foo(): int { return 5; } }
 class C2 { public function foo(): string { return 's'; } }
 function test_multiple_type(C1 $c1, C2 $c2, bool $cond): arraykey {
@@ -221,12 +229,14 @@ function test_multiple_type(C1 $c1, C2 $c2, bool $cond): arraykey {
 }
 "
 
-let multiple_type_cases = [
-  ("multiple_type.php", 6, 10), "(C1 | C2)";
-  ("multiple_type.php", 6, 14), "((function(): int) | (function(): string))";
-]
+let multiple_type_cases =
+  [
+    (("multiple_type.php", 6, 10), "(C1 | C2)");
+    (("multiple_type.php", 6, 14), "(function(): (int | string))");
+  ]
 
-let lambda_param = "<?hh // strict
+let lambda_param =
+  "<?hh // strict
 function takes_func((function (int): num) $f): void {}
 function lambda_param(): void {
   $f1 = $s ==> 3;
@@ -236,14 +246,16 @@ function lambda_param(): void {
 }
 "
 
-let lambda_param_cases = [
-   ("lambda_param.php", 4, 9), "_";
-   ("lambda_param.php", 6, 14), "int";
-   ("lambda_param.php", 4, 12), "[fun]";
-   ("lambda_param.php", 6, 17), "(function(int $x): num)";
-]
+let lambda_param_cases =
+  [
+    (("lambda_param.php", 4, 9), "_");
+    (("lambda_param.php", 6, 14), "int");
+    (("lambda_param.php", 4, 12), "[fun]");
+    (("lambda_param.php", 6, 17), "(function(int $x): num)");
+  ]
 
-let class_id = "<?hh // strict
+let class_id =
+  "<?hh // strict
 function class_id(): void {
   $x = new A(5);
 //         ^3:12
@@ -253,25 +265,23 @@ function class_id(): void {
 //^7:3
   A::foo;
 //^9:3
-  if ($x instanceof B) {}
-//                  ^11:21
   $cls = A::class;
   $cls;
-// ^14:4
+// ^12:4
 }
 "
 
-let class_id_cases = [
-  ("class_id.php", 3, 12), "A";
-  ("class_id.php", 5, 3), "A";
-  ("class_id.php", 7, 3), "A";
-  ("class_id.php", 9, 3), "A";
-  ("class_id.php", 11, 21), "B";
-  ("class_id.php", 14, 4), "classname<A>";
-]
+let class_id_cases =
+  [
+    (("class_id.php", 3, 12), "A");
+    (("class_id.php", 5, 3), "A");
+    (("class_id.php", 7, 3), "A");
+    (("class_id.php", 9, 3), "A");
+    (("class_id.php", 12, 4), "classname<A>");
+  ]
 
-
-let dynamic_view = "<?hh
+let dynamic_view =
+  "<?hh
 function any() {
   return 'any';
 }
@@ -293,35 +303,37 @@ function foo($x) : void {
 }
 "
 
-let dynamic_view_cases = [
-  ("dynamic_view.php", 5, 14), "dynamic";
-  ("dynamic_view.php", 7, 3),  "num";
-  ("dynamic_view.php", 9, 3),  "dynamic";
-  ("dynamic_view.php", 11, 3), "dynamic";
-  ("dynamic_view.php", 13, 3), "dynamic";
-  ("dynamic_view.php", 15, 3), "string";
-  ("dynamic_view.php", 17, 3), "int";
-]
+let dynamic_view_cases =
+  [
+    (("dynamic_view.php", 5, 14), "dynamic");
+    (("dynamic_view.php", 7, 3), "num");
+    (("dynamic_view.php", 9, 3), "dynamic");
+    (("dynamic_view.php", 11, 3), "dynamic");
+    (("dynamic_view.php", 13, 3), "dynamic");
+    (("dynamic_view.php", 15, 3), "string");
+    (("dynamic_view.php", 17, 3), "int");
+  ]
 
-let files = [
-  "id.php", id;
-  "A.php", class_A;
-  "MyPair.php", mypair;
-  "test_mypair.php", test_mypair;
-  "loop_assignment.php", loop_assignment;
-  "lambda1.php", lambda1;
-  "callback.php", callback;
-  "nullthrows.php", nullthrows;
-  "nullvec.php", nullvec;
-  "curried.php", curried;
-  "multiple_type.php", multiple_type;
-  "lambda_param.php", lambda_param;
-  "class_id.php", class_id;
-  "dynamic_view.php", dynamic_view;
-]
+let files =
+  [
+    ("id.php", id);
+    ("A.php", class_A);
+    ("MyPair.php", mypair);
+    ("test_mypair.php", test_mypair);
+    ("loop_assignment.php", loop_assignment);
+    ("lambda1.php", lambda1);
+    ("callback.php", callback);
+    ("nullthrows.php", nullthrows);
+    ("nullvec.php", nullvec);
+    ("curried.php", curried);
+    ("multiple_type.php", multiple_type);
+    ("lambda_param.php", lambda_param);
+    ("class_id.php", class_id);
+    ("dynamic_view.php", dynamic_view);
+  ]
 
 let cases =
-    id_cases
+  id_cases
   @ class_A_cases
   @ test_mypair_cases
   @ loop_assignment_cases
@@ -336,33 +348,30 @@ let cases =
 
 let test () =
   let env =
-    Test.setup_server ()
+    Test.setup_server
+      ()
       ~hhi_files:(Hhi.get_raw_hhi_contents () |> Array.to_list)
   in
   let env = Test.setup_disk env files in
-
   let test_case ~dynamic ((file, line, col), expected_type) =
     let compare_type expected type_at =
       let ty_str =
         match type_at with
         | Some (env, ty) -> Tast_env.print_ty env ty
         | None ->
-          Test.fail (Printf.sprintf "No type inferred at %s:%d:%d" file line col);
+          Test.fail
+            (Printf.sprintf "No type inferred at %s:%d:%d" file line col);
           failwith "unreachable"
       in
       let fmt = Printf.sprintf "%s:%d:%d %s" file line col in
       Test.assertEqual (fmt expected) (fmt ty_str)
     in
-
     let fn = ServerCommandTypes.FileName ("/" ^ file) in
-
-    let ServerEnv.{tcopt; naming_table; _} = env in
+    let ServerEnv.{ tcopt; naming_table; _ } = env in
     let tcopt = { tcopt with GlobalOptions.tco_dynamic_view = dynamic } in
-    let _, tast = ServerIdeUtils.check_file_input tcopt naming_table fn in
-
+    let (_, tast) = ServerIdeUtils.check_file_input tcopt naming_table fn in
     let ty = ServerInferType.type_at_pos tast line col in
-    compare_type expected_type ty;
+    compare_type expected_type ty
   in
-
   List.iter cases ~f:(test_case ~dynamic:false);
   List.iter dynamic_view_cases ~f:(test_case ~dynamic:true)

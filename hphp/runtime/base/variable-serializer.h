@@ -25,9 +25,10 @@
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/type-variant.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
+
+#include "hphp/util/rds-local.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -54,6 +55,12 @@ struct VariableSerializer {
     PHPOutput, //used by compiler to output scalar values into byte code
     Last = PHPOutput,
   };
+
+  /*
+   * Set in m_option for APCSerialize to disable serializing static
+   * datastructures as their address
+   */
+  static constexpr auto kAPC_PRIME_SERIALIZE = 1;
 
   /**
    * Constructor and destructor.
@@ -107,7 +114,7 @@ struct VariableSerializer {
   // ignore uninitialized late init props and do not attempt to serialize them
   void setIgnoreLateInit() { m_ignoreLateInit = true; }
 
-  enum class ArrayKind { PHP, Dict, Shape, Vec, Keyset, VArray, DArray };
+  enum class ArrayKind { PHP, Dict, Vec, Keyset, VArray, DArray };
 
   // One entry for each vec or dict in the value being serialized (in a
   // pre-order walk). If the bool is true, and mode is PHPOutput, the vec or

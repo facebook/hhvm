@@ -10,7 +10,7 @@ object(Exception) (8) {
   ["line":protected]=>
   int(%d)
   ["trace":"Exception":private]=>
-  array(1) {
+  array(2) {
     [0]=>
     array(6) {
       ["file"]=>
@@ -23,6 +23,14 @@ object(Exception) (8) {
       string(3) "foo"
       ["type"]=>
       string(2) "->"
+      ["args"]=>
+      array(0) {
+      }
+    }
+    [1]=>
+    array(2) {
+      ["function"]=>
+      string(4) "main"
       ["args"]=>
       array(0) {
       }

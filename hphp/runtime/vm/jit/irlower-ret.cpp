@@ -78,39 +78,33 @@ Vreg adjustSPForReturn(IRLS& env, const IRInstruction* inst) {
  * ABI-specified return registers.
  */
 void prepare_return_regs(Vout& v, SSATmp* retVal, Vloc retLoc,
-                         folly::Optional<AuxUnion> aux) {
+                         const AuxUnion& aux) {
   using u_data_type = std::make_unsigned<data_type_t>::type;
 
   auto const tp = [&] {
     auto const mask = [&] {
-      if (!aux->u_raw) return uint64_t{};
-      if (aux->u_raw == static_cast<uint32_t>(-1)) {
+      if (!aux.u_raw) return uint64_t{};
+      if (aux.u_raw == static_cast<uint32_t>(-1)) {
         return static_cast<uint64_t>(-1) <<
           std::numeric_limits<u_data_type>::digits;
       }
-      return uint64_t{aux->u_raw} << 32;
-    };
+      return uint64_t{aux.u_raw} << 32;
+    }();
 
     if (!retLoc.hasReg(1)) {
       auto const dt = static_cast<u_data_type>(retVal->type().toDataType());
       static_assert(std::numeric_limits<u_data_type>::digits <= 32, "");
-      return aux ? v.cns(dt | mask()) : v.cns(dt);
+      return v.cns(dt | mask);
     }
+
     auto const type = retLoc.reg(1);
-
-    if (!aux) {
-      auto const ret = v.makeReg();
-      v << copy{type, ret};
-      return ret;
-    }
-
     auto const extended = v.makeReg();
     auto const result = v.makeReg();
 
     // DataType is signed. We're using movzbq here to clear out the upper 7
     // bytes of the register, not to actually extend the type value.
     v << movzbq{type, extended};
-    v << orq{extended, v.cns(mask()), result, v.makeReg()};
+    v << orq{extended, v.cns(mask), result, v.makeReg()};
     return result;
   }();
   auto const data = zeroExtendIfBool(v, retVal->type(), retLoc.reg(0));
@@ -141,7 +135,7 @@ void asyncFuncRetImpl(IRLS& env, const IRInstruction* inst, TCA target) {
 
 void traceRet(ActRec* fp, Cell* sp, void* rip) {
   if (rip == tc::ustubs().callToExit) return;
-  checkFrame(fp, sp, false /* fullCheck */, 0);
+  checkFrame(fp, sp, false /* fullCheck */);
   assertx(sp <= (Cell*)fp || fp->resumed());
 }
 
@@ -236,7 +230,7 @@ void cgReleaseVVAndSkip(IRLS& env, const IRInstruction* inst) {
   auto& vc = vcold(env);
 
   auto const profile = TargetProfile<ReleaseVVProfile> {
-    env.unit.context(), inst->marker(), s_ReleaseVV.get()
+    env.unit, inst->marker(), s_ReleaseVV.get()
   };
 
   if (profile.profiling()) {

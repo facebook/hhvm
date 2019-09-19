@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2019, Facebook, Inc.
  * All rights reserved.
  *
@@ -22,6 +22,9 @@ type backend = private
   | Local_memory of { decl_cache: decl_cache }
 
 val set_lru_shared_memory_backend : unit -> unit
+
 val set_shared_memory_backend : unit -> unit
+
 val set_local_memory_backend : max_size_in_words:int -> unit
+
 val get_backend : unit -> backend

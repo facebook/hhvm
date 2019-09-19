@@ -60,11 +60,6 @@ void cgExitPlaceholder(IRLS&, const IRInstruction*) {}
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void cgFuncGuard(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<FuncGuard>();
-  vmain(env) << funcguard{extra->func, extra->prologueAddrPtr};
-}
-
 void cgDefFP(IRLS&, const IRInstruction*) {}
 
 void cgDefSP(IRLS& env, const IRInstruction* inst) {
@@ -279,8 +274,8 @@ void doMemoSetValue(
   auto const aux = [&] () -> folly::Optional<AuxUnion> {
     if (!asyncEager) return folly::none;
     return *asyncEager
-      ? AuxUnion{0}
-      : AuxUnion{std::numeric_limits<uint32_t>::max()};
+      ? AuxUnion{std::numeric_limits<uint32_t>::max()}
+      : AuxUnion{0};
   }();
 
   auto const store = [&] {
@@ -425,8 +420,8 @@ void doMemoSetCache(
   auto const aux = [&] () -> folly::Optional<AuxUnion> {
     if (!extra->asyncEager) return folly::none;
     return *extra->asyncEager
-      ? AuxUnion{0}
-      : AuxUnion{std::numeric_limits<uint32_t>::max()};
+      ? AuxUnion{std::numeric_limits<uint32_t>::max()}
+      : AuxUnion{0};
   }();
 
   auto const addKeysAddr = [&] (ArgGroup& args) {
@@ -604,8 +599,8 @@ void cgMemoSetInstanceValue(IRLS& env, const IRInstruction* inst) {
   auto const aux = [&] () -> folly::Optional<AuxUnion> {
     if (!extra->asyncEager) return folly::none;
     return *extra->asyncEager
-      ? AuxUnion{0}
-      : AuxUnion{std::numeric_limits<uint32_t>::max()};
+      ? AuxUnion{std::numeric_limits<uint32_t>::max()}
+      : AuxUnion{0};
   }();
 
   auto const store = [&]{
@@ -779,8 +774,8 @@ void cgMemoSetInstanceCache(IRLS& env, const IRInstruction* inst) {
   auto const aux = [&] () -> folly::Optional<AuxUnion> {
     if (!extra->asyncEager) return folly::none;
     return *extra->asyncEager
-      ? AuxUnion{0}
-      : AuxUnion{std::numeric_limits<uint32_t>::max()};
+      ? AuxUnion{std::numeric_limits<uint32_t>::max()}
+      : AuxUnion{0};
   }();
 
   auto const addKeysAddr = [&] (ArgGroup& args) {

@@ -1,0 +1,12 @@
+File "list_lhs_use.php", line 7, characters 3-51:
+Invalid index type for this array (Typing[4324])
+File "list_lhs_use.php", line 7, characters 41-42:
+Expected int
+File "list_lhs_use.php", line 5, characters 44-53:
+This can only be indexed with integers
+File "list_lhs_use.php", line 5, characters 15-38:
+But got dynamic because it is an unenforceable type
+File "list_lhs_use.php", line 7, characters 18-19:
+Unsequenced modification and access to local variable. Modified here (Typing[4143])
+File "list_lhs_use.php", line 7, characters 41-42:
+And accessed here

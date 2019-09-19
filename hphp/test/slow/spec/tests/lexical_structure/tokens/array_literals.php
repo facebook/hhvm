@@ -1,13 +1,5 @@
 <?hh
 
-/*
-   +-------------------------------------------------------------+
-   | Copyright (c) 2015 Facebook, Inc. (http://www.facebook.com) |
-   +-------------------------------------------------------------+
-*/
-
-error_reporting(-1);
-
 class X
 {
     private $prop10 = array();
@@ -18,6 +10,10 @@ class X
     private $prop21 = [10, "a" => "red", TRUE];
     private $prop22 = [10, "red", "xx" => [2.3, NULL, "zz" => [12, FALSE, "zzz"]]];
 }
+<<__EntryPoint>>
+function main_entry(): void {
+  error_reporting(-1);
 
-$x = new X;
-var_dump($x);
+  $x = new X;
+  var_dump($x);
+}

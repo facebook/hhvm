@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -9,7 +9,8 @@
 
 module ValueKey = struct
   type t = Typed_value.t
-  let compare (x: t) (y: t) = Pervasives.compare x y
+
+  let compare (x : t) (y : t) = Pervasives.compare x y
 end
 
 include Unique_list.WithValue (ValueKey)

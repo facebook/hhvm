@@ -1,0 +1,4 @@
+File "array_append_pair_component_good.php", line 5, characters 3-17:
+You cannot mutate this (Typing[4011])
+File "array_append_pair_component_good.php", line 4, characters 15-39:
+This is an object of type Pair<int, Vector<string>>

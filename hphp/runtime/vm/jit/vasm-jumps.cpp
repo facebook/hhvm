@@ -274,6 +274,8 @@ void optimizeJmps(Vunit& unit, MaybeVinstrId clobber) {
   bool changed = false;
   bool ever_changed = false;
 
+  removeTrivialNops(unit);
+
   // The number of incoming edges from (reachable) predecessors for each block.
   jit::vector<int> npreds(unit.blocks.size(), 0);
 

@@ -8,7 +8,7 @@ abstract class Foo {
   const type type_const = Foo;
 
   public function method(Generic<Foo> $x, $y) {
-    if ($y instanceof Foo) {
+    if ($y is Foo) {
     }
     try {
       might_throw();

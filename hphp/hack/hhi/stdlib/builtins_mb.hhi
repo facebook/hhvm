@@ -29,7 +29,7 @@ function mb_convert_encoding(string $str, string $to_encoding, $from_encoding = 
 <<__PHPStdLib>>
 function mb_convert_kana(string $str, $option = null, $encoding = null) { }
 <<__PHPStdLib>>
-function mb_convert_variables(string $to_encoding, $from_encoding, &$vars, ...) { }
+function mb_convert_variables(string $to_encoding, $from_encoding, &$vars, ...$args) { }
 <<__PHPStdLib>>
 function mb_decode_mimeheader(string $str) { }
 <<__PHPStdLib>>

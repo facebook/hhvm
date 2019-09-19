@@ -16,8 +16,8 @@ echo "*** Testing next() : usage variations ***\n";
 $array_arg = array ('a' => 'z', array(9, 8, 7));
 
 echo "\n-- Pass a two-dimensional array as \$array_arg --\n";
-var_dump(next(&$array_arg));
-var_dump(next(&$array_arg));
+var_dump(next(inout $array_arg));
+var_dump(next(inout $array_arg));
 
 echo "===DONE===\n";
 }

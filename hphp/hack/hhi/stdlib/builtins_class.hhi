@@ -44,7 +44,7 @@ function get_object_vars(<<__MaybeMutable>> $object): ?darray;
 <<__PHPStdLib>>
 function call_user_method_array(string $method_name, &$obj, array $paramarr);
 <<__PHPStdLib>>
-function call_user_method(string $method_name, &$obj, ...);
+function call_user_method(string $method_name, &$obj, ...$args);
 }
 
 namespace HH {

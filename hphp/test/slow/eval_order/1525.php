@@ -1,10 +1,10 @@
 <?hh
 
 function f($x) {
-
   var_dump($x, EvalOrder1525Php::$a);
   return $x;
 }
+
 class X implements ArrayAccess {
   function OffsetGet($n) {
     echo 'get:';
@@ -28,9 +28,10 @@ class X implements ArrayAccess {
     return $this->OffsetSet($n, $v);
   }
 }
-EvalOrder1525Php::$a = new X;
+
 <<__EntryPoint>>
 function test() {
+  EvalOrder1525Php::$a = new X;
   EvalOrder1525Php::$a[f(0)]->{
     f(1)
   }[f(2)] = EvalOrder1525Php::$a[f(3)][f(4)][f(5)]->foo;

@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -9,15 +9,17 @@
 
 module type ReadOnly = sig
   type key
+
   type t
 
-  val get: key -> t option
-  val mem: key -> bool
-  val find_unsafe: key -> t
+  val get : key -> t option
+
+  val mem : key -> bool
+
+  val find_unsafe : key -> t
 end
 
 module Funs = Decl_heap.Funs
 module Typedefs = Decl_heap.Typedefs
 module GConsts = Decl_heap.GConsts
-
 module Classes = Typing_classes_heap.Classes

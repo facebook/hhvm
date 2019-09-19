@@ -7,5 +7,6 @@ function headerTestController($serverPort) {
   var_dump(request('localhost', $serverPort, "test_headers.php",
                   [], ['PROXY' => 'foobar'], $args));
 }
-
+<<__EntryPoint>> function main(): void {
 runTest("headerTestController");
+}

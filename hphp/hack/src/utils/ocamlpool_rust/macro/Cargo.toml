@@ -1,0 +1,15 @@
+[package]
+name = "hack_utils_ocamlvalue_macro"
+version = "3.49.0"
+edition = "2018"
+
+[lib]
+proc-macro = true
+name = "ocamlvalue_macro"
+path = "../macro.rs"
+
+[dependencies]
+proc-macro2 = "^0.4.30"
+quote ="^0.6.13"
+syn ="^0.15.42"
+synstructure = "^0.11.0"

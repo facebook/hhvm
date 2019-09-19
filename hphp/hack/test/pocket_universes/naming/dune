@@ -9,7 +9,7 @@
     (action (run %{project_root}/test/verify.py %{project_root}/test/pocket_universes/naming
     --program %{exe:../../../src/hh_single_type_check.exe}
     --in-extension .good.php
-    --flags --pocket-universes --tast-check)))
+    --flags --tast-check)))
 
 (alias
     (name pocket_universes_naming_bad)
@@ -22,7 +22,7 @@
     (action (run %{project_root}/test/verify.py %{project_root}/test/pocket_universes/naming
     --program %{exe:../../../src/hh_single_type_check.exe}
     --in-extension .bad.php --flags
-    --error-format raw --pocket-universes --tast-check)))
+    --error-format raw --tast-check)))
 
 (alias
     (name runtest)

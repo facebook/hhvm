@@ -45,8 +45,7 @@ struct FuncCache {
   };
 
   static rds::Handle alloc();
-  static const Func* lookup(rds::Handle, StringData* lookup, ActRec* ar,
-                            ActRec* fp);
+  static const Func* lookup(rds::Handle, StringData* lookup);
 
   Pair m_pairs[kNumLines];
 };
@@ -117,18 +116,18 @@ namespace MethodCache {
  */
 struct Entry {
   const Class* m_key;
-  uintptr_t m_value;
+  const Func* m_value;
 };
 
-uintptr_t handleDynamicCall(const Class* cls,
-                            const StringData* name,
-                            const Class* ctx);
+const Func* handleDynamicCall(const Class* cls,
+                              const StringData* name,
+                              const Class* ctx);
 
-uintptr_t handleStaticCall(const Class* cls,
-                           const StringData* name,
-                           const Class* ctx,
-                           rds::Handle mce_handle,
-                           uintptr_t mcePrime);
+const Func* handleStaticCall(const Class* cls,
+                             const StringData* name,
+                             const Class* ctx,
+                             rds::Handle mce_handle,
+                             uintptr_t mcePrime);
 
 } // namespace MethodCache
 

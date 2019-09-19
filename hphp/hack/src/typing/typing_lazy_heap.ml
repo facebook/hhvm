@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -12,16 +12,18 @@ open Typing_heap
 
 let check_cache_consistency x expected_kind expected_result =
   if
-    expected_result = Relative_path.default &&
-    (not @@ Naming_table.has_local_changes ())
-  then begin
+    expected_result = Relative_path.default
+    && (not @@ Naming_table.has_local_changes ())
+  then (
     Hh_logger.log "WARNING: found dummy path in shared heap for %s" x;
     match Naming_table.Types.get_pos ~bypass_cache:true x with
-    | Some (pos, kind) when kind = expected_kind &&
-      FileInfo.get_pos_filename pos = expected_result -> ()
+    | Some (pos, kind)
+      when kind = expected_kind
+           && FileInfo.get_pos_filename pos = expected_result ->
+      ()
     | _ ->
-      Hh_logger.log "WARNING: get and get_no_cache returned different results";
-  end
+      Hh_logger.log "WARNING: get and get_no_cache returned different results"
+  )
 
 let get_type_id_filename x expected_kind =
   match Naming_table.Types.get_pos x with
@@ -37,33 +39,39 @@ let get_fun x =
   match Funs.get x with
   | Some c -> Some c
   | None ->
-    match Naming_table.Funs.get_pos x with
+    (match Naming_table.Funs.get_pos x with
     | Some pos ->
       let filename = FileInfo.get_pos_filename pos in
-      let ft = Errors.run_in_decl_mode filename
-        (fun () -> Decl.declare_fun_in_file filename x) in
+      let ft =
+        Errors.run_in_decl_mode filename (fun () ->
+            Decl.declare_fun_in_file filename x)
+      in
       Some ft
-    | None -> None
+    | None -> None)
 
 let get_gconst cst_name =
   match GConsts.get cst_name with
   | Some c -> Some c
   | None ->
-    match Naming_table.Consts.get_pos cst_name with
+    (match Naming_table.Consts.get_pos cst_name with
     | Some pos ->
-        let filename = FileInfo.get_pos_filename pos in
-        let gconst = Errors.run_in_decl_mode filename
-          (fun () -> Decl.declare_const_in_file filename cst_name) in
-        Some gconst
-    | None -> None
+      let filename = FileInfo.get_pos_filename pos in
+      let gconst =
+        Errors.run_in_decl_mode filename (fun () ->
+            Decl.declare_const_in_file filename cst_name)
+      in
+      Some gconst
+    | None -> None)
 
 let get_typedef x =
   match Typedefs.get x with
   | Some c -> Some c
   | None ->
-    match get_type_id_filename x Naming_table.TTypedef with
+    (match get_type_id_filename x Naming_table.TTypedef with
     | Some filename ->
-      let tdecl = Errors.run_in_decl_mode filename
-        (fun () -> Decl.declare_typedef_in_file filename x) in
+      let tdecl =
+        Errors.run_in_decl_mode filename (fun () ->
+            Decl.declare_typedef_in_file filename x)
+      in
       Some tdecl
-    | None -> None
+    | None -> None)

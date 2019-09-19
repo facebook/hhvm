@@ -64,7 +64,7 @@ Flow of execution
 HipHop bytecode models the flow of execution using a stack of frames referred
 to as the "call stack". A "frame" is a structure that logically consists of a
 header, a program counter (PC), a local variable store, an iterator variable
-store, an evaluation stack, and a function parameter info (FPI) stack.
+store, and an evaluation stack.
 
 The frame at the top of the call stack is referred to as the "current frame".
 The current frame represents the function that is currently executing. The
@@ -99,7 +99,7 @@ Values
 
 HHBC instructions may push and pop values on the current frame's evaluation
 stack and they may read and write values to the current frame's local
-variables. Values come in three flavors: cells, refs, and classrefs.
+variables. Values come in two flavors: cells and refs.
 
 A "cell" is a structure that contains a type identifier and either data (for
 non-refcounted types) or a pointer to data (for refcounted types). When a cell
@@ -113,43 +113,33 @@ ref. When a ref is duplicated or destroyed, the execution engine is responsible
 for honoring the container's refcount logic. When the container is destroyed,
 the cell it contains is also destroyed.
 
-A "classref" is a structure that contains a reference to a class. Classrefs are
-never stored on the stack or in locals. They can only be manipulated via
-"classref slots". Certain HHBC operations will read or write classref slots as
-a side-effect. Classref slots have "move semantics" in that reading from one
-automatically invalidates its contents.
-
-Values on the evaluation stack and local variables may only be cells or refs.
-
-
 Functions
 ---------
 
 A unit's bytecode is organized into functions. Each function has its own
 metadata that provides essential information about the function, such as the
 name of the function, how many local variables it has, how many iterator
-variables it has, how many classref slots it has, how many formal parameters it
-has, the names of the local variables, the names of the formal parameters, how
-each parameter should be passed (pass by value vs. pass by reference), whether
-each parameter has a default value, and an upper bound for the maximum depth
-the evaluation stack can reach at run time.
+variables it has, how many formal parameters it has, the names of the local
+variables, the names of the formal parameters, how each parameter should be
+passed (pass by value vs. pass by reference), whether each parameter has a
+default value, and an upper bound for the maximum depth the evaluation stack
+can reach at run time.
 
-Each local variable, iterator variable, and classref slot has an id, and HHBC
-instructions can reference these variables using these ids. The id space for
-local variables, iterator variables, and classref slots are all distinct from
-each other. Thus local id 1 refers to a different variable than iterator id
-1. Local variable ids, iterator ids, and classref slots are signed 32-bit
-integer values. No function may have more than 2^31 - 1 each of local
-variables, iterator variables, and classref slots.
+Each local variable and iterator variable has an id, and HHBC instructions can
+reference these variables using these ids. The id space for local variables and
+iterator variables are all distinct from each other. Thus local id 1 refers to
+a different variable than iterator id 1. Local variable ids and iterator ids
+are signed 32-bit integer values. No function may have more than 2^31 - 1 each
+of local variables or iterator variables.
 
 Some local variables have names associated with them (called "named local
 variables"), while other local variables do not have names associated with them
 (called "unnamed local variables"). All local variables that reference formally
-declared parameters have names associated with them. Iterator variables and
-classref slots do not have names associated with them. Variables that have a
-name associated with them will appear in the current variable environment (if
-they are defined), while variables that do not have a name associated with them
-will never appear in the current variable environment.
+declared parameters have names associated with them. Iterator variables do not
+have names associated with them. Variables that have a name associated with
+them will appear in the current variable environment (if they are defined),
+while variables that do not have a name associated with them will never appear
+in the current variable environment.
 
 Formally declared parameters are considered to be local variables. Given a
 function with n formally declared parameters, local ids 0 through n-1 will be
@@ -320,50 +310,18 @@ be multiple rows that are marked as being hoisted with the same class name.
 Each class id must be between 0 and 2^31 - 2 inclusive.
 
 
-Function parameter info (FPI) structures and the FPI stack
-----------------------------------------------------------
-
-Every function has a function parameter info (FPI) structure associated with it
-that can be retrieved at run time. The FPI structure contains the bytecode
-address of the function, the number of parameters the function has, and a
-parameter table that indicates whether each parameter is pass by value or pass
-by reference.
-
-In addition to the evaluation stack, each frame also contains another stack
-called the FPI stack. Each entry on the FPI stack consists of a reference to an
-FPI structure and a bytecode address of entry point into the corresponding
-function. The entry on the top of the FPI stack is called the "current FPI".
-
-Arguments are pushed on the stack either as cells or as refs, but they may be
-refs only if the parameter is passed by ref. Then, the FPush* instructions push
-a new entry onto the FPI stack, initializing the entry with a reference to the
-FPI structure for a given function and the bytecode address of the appropriate
-entry point. Finally, the FCall instruction look at the current FPI to get the
-bytecode address of the function (the callee), transfers the parameters from the
-evaluation stack to the callee, pops the current FPI off of the FPI stack, and
-then invokes the dispatcher to call the function.
-
-Calls to builtin functions may be optimized to avoid pushing an entry on the
-FPI stack if it is known that the builtin function does not need access to the
-call stack. In this case, the arguments to the builtin are pushed on stack as
-Cells and Vars, and the builtin can be invoked with the FCallBuiltin
-instruction. Unless otherwise noted, subsequent references to the FCall
-instruction should be meant to refer to non-optimized FCall instruction, i.e.
-all FCall instructions other than FCallBuiltin.
-
-
 Calling convention
 ------------------
 
 The caller may pass any number of parameters to the callee by pushing zero or
-more cells or refs on the stack prior to executing an FPush*/FCall instruction
-sequence. The caller must pass the parameters in forward order, i.e. the first
-pushed value corresponds to the first parameter, and so forth.
+more cells or refs on the stack prior to executing a FCall* instruction. The
+caller must pass the parameters in forward order, i.e. the first pushed value
+corresponds to the first parameter, and so forth.
 
-The FPush*/FCall instructions can be used to call a global function, a method
-on an object, or a method from a class. The caller is responsible for
-evaluating all of the parameters in forward order. When the caller executes the
-FCall instruction, the dispatcher creates a new frame and moves the parameters
+The FCall* instructions can be used to call a global function, a method on
+an object, or a method from a class. The caller is responsible for evaluating
+all of the parameters in forward order. When the caller executes the FCall*
+instruction, the dispatcher creates a new frame and moves the parameters
 prepared by the caller into the callee's variable environment. The dispatcher
 then transfers control to the appropriate entry point of the callee (either the
 main entry point or a DV entry point) based on the number of parameters passed.
@@ -596,21 +554,6 @@ Note that instructions cannot create new static properties in a class that were
 not declared in the class definition.
 
 
-FPI regions
------------
-
-An FPI region is a contiguous range of bytecode that constitutes a call site.
-Each FPI region begins immediately after an FPush* instruction that pushes an
-FPI structure onto the FPI stack and should normally end with the corresponding
-FCall instruction that pops that FPI structure off of the FPI stack. Since there
-are no other instructions between FPush* and FCall, only the FCall instruction
-is considered to be a part of the FPI region.
-
-Each function has an "FPI region table". Each row in the FPI region table
-consists of offset of the FPush* instruction that begins the region, the FCall
-instruction that ends the region, and the number of parameters being passed.
-
-
 Flavor descriptors
 ------------------
 
@@ -630,9 +573,6 @@ Here is a description of each flavor descriptor:
   V - ref; specifies that the value must be a ref at run time
   U - uninit; specifies that the value must be an uninitialized null at run
       time; this is only used for FCallBuiltin, CreateCl, and CUGetL.
-
-Classrefs are not assigned a flavor as they only can appear within classref
-slots and thus are implicit.
 
 Verifiability
 -------------
@@ -669,63 +609,44 @@ available at that given point in the bytecode. Likewise, the flavor descriptor
 of each slot on the evaluation stack must be compatible with the instruction's
 inputs' flavor descriptors.
 
-3) The evaluation stack must be empty and all classref slots must be
-uninitialized at any offset listed as a catch entry point.
+3) The evaluation stack must be empty at any offset listed as a catch entry
+point.
 
 4) If a given instruction is not the target of a forward branch and it follows
 a Jmp, Switch, SSwitch, RetC, Fatal, Throw, or NativeImpl instruction, the
-evaluation stack before executing the given instruction must be empty, and all
-classref slots must be uninitialized.
+evaluation stack before executing the given instruction must be empty.
 
 5) Before executing the RetC instruction, the evaluation stack must contain
 exactly one value and the flavor descriptor of the value must be cell.
 Finally, before executing the NativeImpl instruction, the evaluation stack must
-be empty. In all the above cases, all classref slots must be uninitialized.
+be empty.
 
 6) The code for the function body must be laid out in one contiguous block.
 
 7) The last instruction of the function body must be either a control flow
 without fallthrough or a terminal instruction.
 
-8) Each FPI region enumerated in the FPI region table must start immediately
-after an FPush* instruction and it must end with the FCall instruction. Each
-use of the FPush* instruction must be the instruction immediately before
-exactly one FPI region. Likewise, each use of the FCall instruction must be
-the last instruction in exactly one FPI region.
-
-9) Each FPI region may not contain any other instruction than FCall, with the
-exception of assertion instructions. There may not be jumps anywhere in the
-function that transfer control from the outside of a given FPI region to the
-inside of that region. Finally, an entry point may not point to an instruction
-inside an FPI region.
-
-10) The initialization state of each iterator variable must be known at every
+8) The initialization state of each iterator variable must be known at every
 point in the code and must be the same for all control paths. There are two
 possible states: (1) uninitialized, and (2) "iter-initialized" (initialized
 via IterInit*). Every range of bytecode for which an iterator variable i is
 initialized must be protected by an EH entry with a catch handler that unsets
 i by calling IterFree.
 
-11) The iterator variable referenced by IterInit* must be in the uninitialized
+9) The iterator variable referenced by IterInit* must be in the uninitialized
 state when the instruction executes. An iterator variable referenced by
 IterNext* and IterFree must be in the "iter-initialized" state. Note that
 IterInit* conditionally initialize the iterator variable, and IterNext*
 conditionally free the iterator variable.
 
-12) Each EH table must follow all of the rules specified in the "Exception
+10) Each EH table must follow all of the rules specified in the "Exception
 handler (EH) table" section.
 
-13) The initialization state of each classref slot must be known at every point
-in the code and must be the same for all control paths. A classref slot must be
-initialized before being read and becomes uninitialized after being read. A
-classref slot must be uninitialized before being written to and becomes
-initialized after being written.
-
-14) Assertion (AssertRATL and AssertRATStk) instructions cannot be separated
+11) Assertion (AssertRATL and AssertRATStk) instructions cannot be separated
 from the following instruction by control flow. Practically speaking, this means
 that the instruction immediately following an assertion cannot be a jump target.
 
-15) Sequences of member instructions should be consistent and continuous. That
+12) Sequences of member instructions should be consistent and continuous. That
 is, only member instructions and asserts may appear in the sequence, control
 flow cannot interrupt the sequence, and the member op mode should be consistent
 across all instructions in the sequence. This is because in the case of
@@ -757,6 +678,7 @@ descriptions:
   Dict - denotes the dict type
   Keyset - denotes the keyset type
   Obj - denotes the object type
+  Rec - denotes the record type
   ArrLike - denotes array, vec, dict, or keyset
 
 Multiple type annotations may be combined together using the "|" symbol. For
@@ -792,7 +714,7 @@ location descriptors is given below:
   G - global name; location is the global variable whose name is given by the
       value of a cell.
   S - static property; location is the static property whose class is given by
-      a classref and whose name is given by value of a cell.
+      value of a cell, and whose name is given by value of a cell.
   C - cell; location is a temporary value given by a cell.
   H - $this; location is the $this pointer in the current frame. Must only be
       used in a frame that is known to have a non-null $this pointer; CheckThis
@@ -852,10 +774,6 @@ EntryNop []  ->  []
   avoid having jumps to the entry of a function. Contrary to a Nop, EntryNop
   is guaranteed to not be optimized away.
 
-DiscardClsRef <class-ref slot> []  ->  []
-
-  Discard the class in %1.
-
 PopC                  [C]  ->  []
 PopV                  [V]  ->  []
 PopU                  [U]  ->  []
@@ -865,6 +783,12 @@ PopU                  [U]  ->  []
 PopU2                 [U C:<T>]  ->  [C:<T>]
 
   Pop two. Discards the uninit underneath the cell on top of the stack.
+
+PopFrame<num-skip>    [UUUC..C] -> [C..C]
+
+  Pops three Uninit values from the stack which sit below num-skip cell values.
+  This instruction is used to pop the place holder uninit values pushed for a
+  frame that was never called.
 
 PopL <local variable id>    [C]  ->  []
 
@@ -1001,6 +925,20 @@ NewDArray <capacity hint>    []  ->  [C:Arr]
   pushes it onto the stack. The implementation may make use of the hint in %1
   to pre-size the array. The hint %1 must be greater than or equal to 0.
 
+NewRecord <record-name><litstr id vector>    [C..C]  ->  [C:Rec]
+
+  New record. Creates a new record of the record type corresponding to the name
+  in %1. The vector of litstr ids in %2 gives the field names to initialize.
+  One initial value for each name is popped from the stack. This instruction
+  throws errors if the initial values do not match their corresponding
+  type-hints or if a field in %2 is not declared in the record type or if any
+  field declared in the record type is left uninitialized.
+
+NewRecordArray <record-name><litstr id vector>    [C..C]  ->  [C:Arr]
+
+  New record-array. Same as NewRecord, except it creates a record-array
+  instead of a record.
+
 AddElemC    [C C C]  ->  [C:Arr|Dict]
 
   Add element. If $3 is an array or dict, this instruction executes $3[$2] = $1
@@ -1046,11 +984,11 @@ CnsE <litstr id>    []  ->  [C:Null|Bool|Int|Dbl|Str|Arr|Vec|Dict|Keyset|Resourc
   Get constant. Pushes the value of the global constant named %1 onto the stack
   as a cell. If there is no constant named %1, throws a fatal error.
 
-ClsCns <litstr id> <class-ref slot>  []  ->  [C:Null|Bool|Int|Dbl|Str|Arr|Vec|Dict|Keyset|Resource]
+ClsCns <litstr id>  [C:Class]  ->  [C:Null|Bool|Int|Dbl|Str|Arr|Vec|Dict|Keyset|Resource]
 
   Get class constant. This instruction pushes the value of the class constant
-  named %1 from class %2 onto the stack. If there is no class constant named %1
-  in class %2, this instruction throws a fatal error.
+  named %1 from the class $1 onto the stack. If there is no class
+  constant named %1 in class $1, this instruction throws a fatal error.
 
 ClsCnsD <litstr id> <litstr id>    []  ->  [C:Null|Bool|Int|Dbl|Str|Arr|Vec|Dict|Keyset|Resource]
 
@@ -1072,13 +1010,14 @@ Method  []  ->  [C:Static Str]
   Push string. File pushes __FILE__ onto the stack, Dir pushes __DIR__ onto
   the stack, and Method pushes __METHOD__.
 
-FuncCred []  -> [Object]
+FuncCred      []  -> [C:Obj]
+
   Push object holding information about current executing function
   onto the stack
 
-ClsRefName <class-ref slot>  [] ->  [C:Static Str]
+ClassName    [C:Class] ->  [C:Static Str]
 
-  Push the name of the class in %1 as a string.
+  Push the name of the class in $1 as a string.
 
 
 3. Operator instructions
@@ -1280,10 +1219,6 @@ CastArray    [C]  ->  [C:Arr]
 
   Cast to array ((array)). Pushes (array)$1 onto the stack.
 
-CastObject    [C]  ->  [C:Obj]
-
-  Cast to object ((object)). Pushes (object)$1 onto the stack.
-
 CastVec       [C]  ->  [C:Vec]
 
   Cast to vec array. Pushes vec($1) onto the stack.
@@ -1471,7 +1406,7 @@ RetM <num returns> [C..C] -> []
 
   RetM is a variant of RetC that allows multiple cells to be returned. The RetM
   bytecode must be the only form of return used in a single function, and all
-  callers must use FCall with the matching number of returned values to invoke
+  callers must use FCall* with the matching number of returned values to invoke
   the function.
 
 Throw    [C]  ->  []
@@ -1528,10 +1463,10 @@ CGetG    [C]  ->  [C]
   If there is not a global variable defined named x, this instruction pushes
   null onto the stack.
 
-CGetS <class-ref slot>    [C]  ->  [C]
+CGetS    [C C:Class]  ->  [C]
 
-  Get static property as cell. This instruction first checks if class %1 has a
-  visible and accessible static property named (string)$1. If it doesn't, this
+  Get static property as cell. This instruction first checks if class $1 has a
+  visible and accessible static property named (string)$2. If it doesn't, this
   instruction throws a fatal error. Otherwise, this instruction pushes the
   static property onto the stack as a cell.
 
@@ -1542,34 +1477,27 @@ VGetL <local variable id>    []  ->  [V]
   is not defined, this instruction defines it, sets it to null, boxes it, and
   pushes a the value of the local variable onto the stack as a ref.
 
-ClsRefGetC  <class-ref slot>                        [C]  ->  []
-ClsRefGetTS <class-ref slot>                        [C]  ->  []
+ClassGetC                          [C]  ->  [C:Class]
 
-  Fetch class. This instruction first loads a value into x as shown by the
-  following table:
+  Fetch class. This instruction checks if $1 is a string, object, or class. If
+  a class, it pushes the input unchanged. If a string, it checks if $1 is the
+  name of a defined class. If so, the class is pushed. If not, this instruction
+  will invoke the autoload facility passing in $1, and then it will again check
+  if $1 matches the name of a defined class. If still not defined, this
+  instruction throws a fatal error. If $1 is an object, it pushes the runtime
+  class of the object. If $1 is not any of the above cases, this instruction
+  throws a fatal error.
 
-      instruction    x
-    ---------------+----
-      ClsRefGetC   | $1
-      ClsRefGetTS  | $1['classname']
+ClassGetTS                         [C:DArr]  ->  [C:Class, C:StaticVArr|Null]
 
-  If the flavor is TS, then this instruction checks whether $1 is a type
-  structure. If not, it throws a fatal error. Loads the classname field onto
-  x and checks to see whether the type structure contains generics. If it does,
-  then mangles the name of those generics and performs the duties of the
-  RecordReifiedGeneric instruction.
+  Fetch class from type-structure. This instruction checks if $1 is a valid
+  type-structure (darray or dict). If not, this instruction throws a fatal
+  error. Otherwise, $1['classname'] is loaded, and mangled as dictated by the
+  type-structure's generics information (if present). The possibly mangled
+  classname is then processed like ClassGetC and the resulting class is
+  pushed. If present, the type-structure's generics information is processed as
+  in RecordReifiedGeneric and pushed. If not present, null is pushed.
 
-  Next this instruction checks if x is a string or an object. If x is not a
-  string or object, this instruction throws a fatal error. Otherwise, this
-  instruction executes y = (is_object(x) ? get_class(x) : (string)x) and checks
-  if y matches the name of a defined class. If y does not match the name of a
-  defined class, this instruction will invoke the autoload facility passing in
-  the class name y, and then it will again check if y matches the name of a
-  defined class. If y still does not match the name of a defined class this
-  instruction throws a fatal error.
-
-  Next, this instruction writes a classref that refers to the class named y to
-  %1.
 
 6. Isset, Empty, and type querying instructions
 -----------------------------------------------
@@ -1591,13 +1519,13 @@ IssetG    [C]  ->  [C:Bool]
   the global variable is undefined or null, this instruction pushes false onto
   the stack, otherwise it pushes true.
 
-IssetS <class-ref slot>    [C]  ->  [C:Bool]
+IssetS    [C C:Class]  ->  [C:Bool]
 
-  Isset static property. This instruction first computes x = (string)$1. Next
-  it checks if class %1 has an accessible static property named x. If it
+  Isset static property. This instruction first computes x = (string)$2. Next
+  it checks if class $1 has an accessible static property named x. If it
   doesn't, this instruction pushes false.
 
-  If class %1 does have an accessible property named x, this instruction reads
+  If class $1 does have an accessible property named x, this instruction reads
   the static property named x. If the static property is null, this instruction
   pushes false onto the stack, otherwise it pushes true.
 
@@ -1613,10 +1541,10 @@ EmptyG    [C]  ->  [C:Bool]
   into x. If the global variable is defined this instruction pushes !(x) onto
   the stack, otherwise it pushes true.
 
-EmptyS <class-ref slot>    [C]  ->  [C:Bool]
+EmptyS    [C C:Class]  ->  [C:Bool]
 
-  Empty static property. This instruction first checks if class %1 has an
-  accessible static property named (string)$1. If it doesn't, this instruction
+  Empty static property. This instruction first checks if $1 has an
+  accessible static property named (string)$2. If it doesn't, this instruction
   pushes true, otherwise this instruction reads the static property into x and
   pushes !(x) onto the stack.
 
@@ -1692,10 +1620,10 @@ SetG    [C C]  ->  [C]
   defined, assigns the value $1 to the global variable, and then pushes $1 onto
   the stack.
 
-SetS <class-ref slot>    [C C]  ->  [C]
+SetS    [C C:Class C]  ->  [C]
 
-  Set static property. First this instruction checks if class %1 has an
-  accessible static property named (string)$2. If it doesn't, this instruction
+  Set static property. First this instruction checks if the class $2 has an
+  accessible static property named (string)$3. If it doesn't, this instruction
   throws a fatal error. Otherwise, this instruction assigns the value $1 to the
   static property, and then it pushes $1 onto the stack.
 
@@ -1722,10 +1650,10 @@ SetOpG <op>    [C C]  ->  [C]
   opcodes:
     Add, Sub, Mul, Div, Mod, Shl, Shr, Concat, BitAnd, BitOr, BitXor.
 
-SetOpS <op> <class-ref slot>    [C C]  ->  [C]
+SetOpS <op>    [C C:Class C]  ->  [C]
 
-  Set op static property. This instruction first computes x = (string)$2. Next
-  it checks if class %2 has an accessible static property named x. If it
+  Set op static property. This instruction first computes x = (string)$3. Next
+  it checks if class $2 has an accessible static property named x. If it
   doesn't, this instruction throws a fatal error. Otherwise, this instruction
   reads the static property named x into y, executes z = y <op> $1, assigns z
   into the static property, and then pushes z onto the stack. The immediate
@@ -1772,10 +1700,10 @@ IncDecG <op>    [C]  ->  [C]
   If op is PostDec, this instruction pushes v onto the stack and then it
   executes --v.
 
-IncDecS <op> <class-ref slot>    [C]  ->  [C]
+IncDecS <op>    [C C:Class]  ->  [C]
 
   Increment/decrement static property. This instruction first computes x =
-  (string)$1. Next it checks if class %1 has an accessible static property
+  (string)$2. Next it checks if class $1 has an accessible static property
   named x. If it doesn't, this instruction throws a fatal error.
 
   Where s is the static property named x, this instruction performs the
@@ -1824,23 +1752,25 @@ InitProp <propName> <op> [C] -> []
 8. Call instructions
 --------------------
 
-NewObj <class-ref slot> <has-generics-op>  []  ->  [C:Obj]
-NewObjD <litstr id>                        []  ->  [C:Obj]
-NewObjRD <litstr id>                       [C:Vec/Arr]  ->  [C:Obj]
-NewObjS <mode>                             []  ->  [C:Obj]
+NewObj                                      [C:Class]              ->  [C:Obj]
+NewObjR                                     [C:Class, C:VArr|Null] ->  [C:Obj]
+NewObjD   <litstr id>                       []                     ->  [C:Obj]
+NewObjRD  <litstr id>                       [C:VArr|Null]          ->  [C:Obj]
+NewObjS   <mode>                            []                     ->  [C:Obj]
 
-  New object. First, these instructions load a value into x as given
+  New object. First, these instructions load a class into x as given
   by the following table:
 
     instruction   x
     ------------+----
-      NewObj    | %1
+      NewObj    | $1
+      NewObjR   | $2
       NewObjD   | %1
       NewObjRD  | %1
       NewObjS   | %1
 
-  When loading %1 into x, NewObjD will perform the work performed by the
-  ClsRefGetC instruction to convert the name given by %1 into a classref.
+  When loading %1 into x, NewObjD and NewObjRD will perform the work performed
+  by the ClassGetC instruction to convert the name given by %1 into a class.
   NewObjS will perform the same work as LateBoundCls/Self/Parent depending on
   the specified mode.
 
@@ -1848,110 +1778,12 @@ NewObjS <mode>                             []  ->  [C:Obj]
   initialization will complete by running a constructor with FCallCtor, and
   clearing the IsBeingConstructed flag using LockObj.
 
-  If HasGenerics is passed to NewObj, this indicates that the data at cls-ref
-  slot's reified generics portion is valid.
-  If MaybeGenerics is passed to NewObj, this indicates that data at cls-ref
-  slot's reified generics portion will be nulled out when there are no reified
-  generics.
-
-  NewObjRD's $1 contains a list of reified generics.
+  NewObjR's and NewObjRD's $1 contains a list of reified generics, or null if
+  none present.
 
 LockObj                                    [C:Obj] -> [C:Obj]
 
   Clears the IsBeingConstructed flag on the object, leaving it on the stack.
-
-FPush* opcodes
---------------
-
-FPushFunc <num params>                 [U U U C|V..C|V C]  ->  [C|V..C|V]
-FPushFuncD <num params> <litstr id>    [U U U C|V..C|V]  ->  [C|V..C|V]
-
-  FPI push function. First, these instructions load a value into x as given by
-  the following table:
-
-    instruction      x
-    --------------+----
-      FPushFunc   | $1
-      FPushFuncD  | %2
-
-  If x is a string, this instruction attempts to lookup a function named x. If
-  no function named x is defined, this instruction throws a fatal error.
-  Otherwise this instruction pushes a new entry on the FPI stack, initializing
-  it with the number of parameters being passed (given by %1) and a reference
-  to the FPI structure for the function named x. With FPushFuncD the litstr in
-  %2 must not start with a '\' character, or be of the form "Class::Method".
-  Function names should be normalized with respect to namespace and never start
-  with a '\'.
-
-  If x is an object, this instruction checks if the object has an __invoke
-  method. If the object does not have an __invoke method, this instruction
-  throws a fatal error. Otherwise this instruction pushes a new entry on the
-  FPI stack, initializing it with the number of parameters being passed (given
-  by %1) and a reference to the FPI structure for the __invoke method from
-  object x.
-
-  if x is an array, this instruction will check that the first array element is
-  either the name of a class, or an instance of one, and that the second array
-  element is the name of a method.  If no such class exists, or no such method
-  on that class exists, then this instruction throws a fatal error.  Otherwise
-  this instruction does the same FPI manipulation mentioned above.
-
-  If x is a func, this instruction will push a new entry on the FPI stack using
-  the function pointer contained in x.
-
-  If x is not a string, object, array, or func, this instruction throws a fatal
-  error.
-
-FPushClsMethod   <num params> <class-ref slot>
-  [U U U C|V..C|V C]  ->  [C|V..C|V]
-FPushClsMethodD  <num params> <litstr id> <litstr id>
-  [U U U C|V..C|V]    ->  [C|V..C|V]
-FPushClsMethodRD <num params> <litstr id> <litstr id>
-  [U U U C|V..C|V C]  ->  [C|V..C|V]
-FPushClsMethodS  <num params> <mode>
-  [U U U C|V..C|V C]  ->  [C|V..C|V]
-FPushClsMethodSD <num params> <mode> <litstr id>
-  [U U U C|V..C|V]    ->  [C|V..C|V]
-FPushClsMethodSRD <num params> <mode> <litstr id>
-  [U U U C|V..C|V C]  ->  [C|V..C|V]
-
-  FPI push class-based method. First, these instructions load values into x and
-  y as given by the following table:
-
-    instruction            x    y
-    --------------------+----+-----
-      FPushClsMethod    | %2 | $1
-      FPushClsMethodD   | %3 | %2
-      FPushClsMethodRD  | %3 | %2
-      FPushClsMethodS   | %2 | $1
-      FPushClsMethodSD  | %2 | %3
-      FPushClsMethodSRD | %2 | %3
-
-  When loading %3 into x, FPushClsMethodD will perform the work performed by
-  the ClsRefGetC instruction to convert the name given by %3 into a classref.
-
-  When loading %2 into x, FPushClsMethodS and FPushClsMethodSD will perform the
-  work performed by LateBoundCls/Self/Parent depending on the specified mode.
-
-  If y is not a string, this instruction throws a fatal error. Next, this
-  instruction checks if class x has an accessible method named y. If it does,
-  this instruction pushes a new entry on the FPI stack, initializing it with
-  the number of parameters being passed (given by %1) and a reference to the
-  FPI structure for the method named y from class x.
-
-  If class x does not have an accessible method named y, this instruction
-  checks if the current function's $this is non-null, if the class of $this is
-  the same or derived from class x, and if $this has a __call method. If a
-  suitable __call method is found, this instruction pushes a new entry on the
-  FPI stack, initializing it with the number of parameters being passed (given
-  by %1) and a reference to the FPI structure for the __call method that was
-  found, and stores the original name y in the FPI stack entry.
-
-  If class x does not have an accessible method named y, and if a suitable
-  __call method could not be found, this instruction throws a fatal error.
-
-  FPushClsMethodRD and FPushClsMethodSRD's $1 contains a list of reified
-  generics.
 
 FCall* opcodes
 --------------
@@ -1985,7 +1817,7 @@ FCall* opcodes
   If %5 was specified and the callee raised an exception, the exception will
   continue to propagate thru the caller instead of being wrapped into Awaitable.
   Note that for the purposes of exception handling inside the caller, the PC
-  will point after the FCall rather than %5 so it is not advised to have
+  will point after the FCall* rather than %5 so it is not advised to have
   different EH entries for these two locations.
 
   Async eager offset feature is used to avoid the cost of construction of short
@@ -1994,40 +1826,60 @@ FCall* opcodes
 
   The %1 contains a list of boolean flags:
 
-  Unpack: if enabled, the elements of the last value on the stack, which must be
-  an array, are transferred to the callee as parameters, following the regular
-  %2 parameters.
+  Unpack: if enabled, %2 arguments on the stack are followed by an additional
+  value, which must be an array. Its elements are transferred to the callee as
+  parameters, following the regular %2 parameters.
+
+  Generics: if enabled, %2 arguments and an optional unpack array on the stack
+  are followed by an additional value containing the list of reified generics.
+  Only FCall*D opcodes are allowed to pass generics.
 
   SupportsAER: hint from static analysis indicating whether the callee is known
   to support async eager return. Requires specified async eager offset in %5.
 
-FCall <fca> <class name> <func name>  [C|V..C|V]  ->  [C..C]
+FCallFunc <fca>                 [U U U C|V..C|V C]  ->  [C..C]
+FCallFuncD <fca> <litstr id>    [U U U C|V..C|V]  ->  [C..C]
 
-  FPI call. This instruction pops the current FPI off the FPI stack and calls
-  the function associated with it. The strings in %2 and %3 provide hints from
-  static analysis to assist the region selector in determining the callee:
+  Call a callable. First, these instructions load a value into x as given by
+  the following table:
 
-    %2          %3          callee
-    ----------+-----------+--------------
-    empty     | empty     | unknown
-    empty     | non-empty | function %3
-    non-empty | non-empty | method %2::%3
+    instruction      x
+    --------------+----
+      FCallFunc   | $1
+      FCallFuncD  | %2
+
+  If x is a string, this instruction attempts to lookup a function named x. If
+  a function named x is defined, this instruction calls it. Otherwise it throws
+  a fatal error. With FCallFunc*D the litstr in %2 must not start with a '\'
+  character, or be of the form "Class::Method". Function names should be
+  normalized with respect to namespace and never start with a '\'.
+
+  If x is an object, this instruction checks if the object has an __invoke
+  method. If the object does have an __invoke method, this instruction calls
+  it. Otherwise it throws a fatal error.
+
+  if x is an array, this instruction will check that the first array element is
+  either the name of a class, or an instance of one, and that the second array
+  element is the name of a method implemented by the class. If a method exists,
+  this instruction calls it. Otherwise it throws a fatal error.
+
+  If x is a func or a clsmeth, this instruction calls it.
+
+  If x is not a string, object, array, func, or clsmeth, this instruction
+  throws a fatal error.
 
 FCallObjMethod <fca> <class hint> <nullsafe>
   [C U U C|V..C|V C]  ->  [C..C]
 FCallObjMethodD <fca> <class hint> <nullsafe> <litstr id>
   [C U U C|V..C|V]  ->  [C..C]
-FCallObjMethodRD <fca> <class hint> <nullsafe> <litstr id>
-  [C U U C|V..C|V C]  ->  [C..C]
 
   Call an instance method. First, these instructions load values into x
   and y as given by the following table:
 
-    instruction        x                              y
-    -----------------+------------------------------+-----
-    FCallObjMethod   | $(num args + has unpack + 4) | $1
-    FCallObjMethodD  | $(num args + has unpack + 3) | %3
-    FCallObjMethodRD | $(num args + has unpack + 4) | %3
+    instruction        x                                             y
+    -----------------+---------------------------------------------+-----
+    FCallObjMethod   | $(num args + has unpack + 4)                | $1
+    FCallObjMethodD  | $(num args + has unpack + has generics + 3) | %3
 
   If x is not an object and nullsafe != ObjMethodOp::NullThrows, or if y is not
   a string, this instruction throws a fatal error. Next, this instruction checks
@@ -2045,7 +1897,52 @@ FCallObjMethodRD <fca> <class hint> <nullsafe> <litstr id>
   The string in %2 provides a static analysis hint. If it is non-empty, it is
   the class name with the implementation of method y that will be called.
 
-  FCallObjMethodRD's $1 contains a list of reified generics.
+FCallClsMethod <fca> <class hint> <op>
+  [U U U C|V..C|V C C:Class]  ->  [C..C]
+FCallClsMethodD <fca> <class hint> <litstr id> <litstr id>
+  [U U U C|V..C|V]    ->  [C..C]
+FCallClsMethodS <fca> <class hint> <mode>
+  [U U U C|V..C|V C]  ->  [C..C]
+FCallClsMethodSD <fca> <class hint> <mode> <litstr id>
+  [U U U C|V..C|V]    ->  [C..C]
+
+  Call a static method. First, these instructions load values into x and
+  y as given by the following table:
+
+    instruction            x    y
+    --------------------+----+-----
+      FCallClsMethod    | $1 | $2
+      FCallClsMethodD   | %3 | %4
+      FCallClsMethodS   | %3 | $1
+      FCallClsMethodSD  | %3 | %4
+
+  When loading litstr id %3 into x, FCallClsMethodD will perform the work
+  performed by the ClassGetC instruction to convert the name given by %3 into
+  a class.
+
+  When loading mode %3 into x, FCallClsMethodS and FCallClsMethodSD will
+  perform the work performed by LateBoundCls/Self/Parent depending on the
+  specified mode.
+
+  If y is not a string, this instruction throws a fatal error. Next, this
+  instruction checks if class x has an accessible method named y. If it does,
+  this instruction calls that method.
+
+  If class x does not have an accessible method named y, this instruction
+  checks if the current function's $this is non-null, if the class of $this is
+  the same or derived from class x, and if $this has a __call method. If a
+  suitable __call method is found, this instruction packs arguments into
+  a varray z and calls the __call method with two arguments -- string y and
+  varray z.
+
+  If class x does not have an accessible method named y, and if a suitable
+  __call method could not be found, this instruction throws a fatal error.
+
+  The string in %2 provides a static analysis hint. If it is non-empty, it is
+  the class name with the implementation of method y that will be called.
+
+  If op is DontLogAsDynamicCall all logging set up for dynamic calls will be
+  skipped.
 
 FCallCtor <fca> <class hint>  [C:Obj U U C|V..C|V]  ->  [C]
 
@@ -2057,7 +1954,8 @@ FCallCtor <fca> <class hint>  [C:Obj U U C|V..C|V]  ->  [C]
 
   Constructors do not support inout, so the "num returns" in %1 must be 1.
 
-FCallBuiltin  <total params> <passed params> <litstr id> [C|V|U..C|V|U]  -> [C]
+FCallBuiltin  <total params> <passed params> <num out> <litstr id>
+              [C|V|U..C|V|U]  -> [C]
 
   Optimized builtin call without an ActRec. This instruction attempts to lookup
   a builtin function named %3. If no function named %3 is defined, this
@@ -2149,10 +2047,10 @@ BaseGLD <local variable id>    []  ->  [B]
   global variable whose name is given by (string)%1 or (string)$1, defining it
   first if necessary.
 
-BaseSC <class-ref slot>                        [C]  ->  [B]
+BaseSC                         [C C:Class]  ->  [B]
 
-  Get base from static property. First, this operation computes x = (string)$1.
-  Then this instruction checks if class in %1 has an accessible property named
+  Get base from static property. First, this operation computes x = (string)$2.
+  Then this instruction checks if class $1 has an accessible property named
   x. If it does, this operation outputs a base that points to the static
   property. Otherwise, this operation throws a fatal error.
 
@@ -2991,10 +2889,10 @@ BaseGL <local id>    <member op mode>    []  ->  []
 
   BaseG{C,L}{,W,D} member operation.
 
-BaseSC <stack index> <class-ref slot> <member op mode>   []  ->  []
+BaseSC <stack index> <stack index> <member op mode>    []  ->  []
 
-  BaseSC member operation. %1 gives the location of the static property
-  name, and %2 gives the class input. The class is consumed.
+  BaseSC member operation. %1 gives the location of the static property name,
+  and %2 gives the location of the class.
 
 BaseL <local id> <member op mode>    []  ->  []
 
@@ -3334,6 +3232,12 @@ DefTypeAlias <litstr id>   []  ->  []
   the same name as %1, this function checks whether it is compatible with the
   type alias given by %1, and if it isn't it throws a fatal error.
 
+DefRecord <record id>    []  ->  []
+
+  Define record. Bind the record specified by %1. If the record specified by %1
+  is already bound, this instruction does nothing. If another record or class
+  or type alias is already bound to the associated name, this instruction throws
+  a fatal error.
 
 13. Miscellaneous instructions
 ------------------------------
@@ -3382,8 +3286,7 @@ OODeclExists <Class|Interface|Trait> [C C]  ->  [C:Bool]
 VerifyParamType <parameter id>    []  ->  []
 
   Verify parameter type. Functions and methods can optionally specify the types
-  of arguments they will accept. These type constraints are memoized into each
-  function's FPI structure.
+  of arguments they will accept.
 
   VerifyParamType checks the specified parameter against the enclosing
   function's corresponding parameter constraints. In case of a mismatch, a
@@ -3418,24 +3321,23 @@ VerifyRetTypeTS [C C]  ->  [C]
   an error is raised. This instruction also verifies the reified generic type
   parameters of $2.
 
-Self <class-ref slot>    []  ->  []
+Self                     []  ->  [C:Class]
 
-  Creates a classref that refers to the class in which the current function is
+  Push a class that refers to the class in which the current function is
   defined. This instruction throws a fatal error if the current method is
-  defined outside of a class, otherwise it writes a classref to %1.
+  defined outside of a class.
 
-Parent <class-ref slot>  []  ->  []
+Parent                   []  ->  [C:Class]
 
-  Creates a classref that refers to the parent of the class in which the
+  Push a class that refers to the parent of the class in which the
   current method is defined. This instruction throws a fatal error if the
   current method is defined outside of a class or if the class in which the
-  current method is defined has no parent, otherwise it writes a classref to
-  %1.
+  current method is defined has no parent.
 
-LateBoundCls <class-ref slot>    []  ->  []
+LateBoundCls             []  ->  [C:Class]
 
-  Late-bound class. Creates a classref that refers to the current late-bound
-  class and writes it to %1.
+  Late-bound class. Push a class that refers to the current late-bound
+  class.
 
 RecordReifiedGeneric [C:VArr] -> [C:VArr]
 
@@ -3444,14 +3346,6 @@ RecordReifiedGeneric [C:VArr] -> [C:VArr]
   these type structures to a static array that contains the runtime
   representation of these type structures to the global reified generics table.
   Pushes the resulting static list of type structures.
-
-ReifiedName <name> [C:VArr] -> [C:Str]
-
-  Takes a varray or vec based on runtime flag of type structures from $1
-  and mangles the type structures into the name given by %1. Pushes the mangled
-  name. This instruction also performs RecordReifiedGeneric instruction's
-  recording duty but it can be implemented more efficiently subsumed in this
-  instruction.
 
 CheckReifiedGenericMismatch [C:VArr] -> []
 
@@ -3612,11 +3506,14 @@ ResolveObjMethod [C C] -> [C]
   always $2. Fatal if the function resolves to a magic __call method. When
   resolution fails, raise an error.
 
-ResolveClsMethod [C C] -> [C]
+ResolveClsMethod <cls meth resolve op> [C C] -> [C]
 
   Resolve $1 as a class method of $2 to a method array, then push the array onto
   the top of stack. Fatal if there is an invoke name for PHP magic call. When
   resolution fails, raise an error.
+
+  If the cls meth resolve op is Warn, then raises warning about parameters used
+  in method not being string literals.
 
 14. Generator creation and execution
 ---------------------------------------

@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
@@ -7,4 +7,4 @@
  *
  *)
 
- type result = Ide_api_types.range list
+type result = Ide_api_types.range list

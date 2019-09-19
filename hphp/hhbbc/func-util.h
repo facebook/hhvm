@@ -63,6 +63,12 @@ bool check_nargs_in_range(const php::Func* func, uint32_t nArgs);
  */
 bool append_func(php::Func* dst, const php::Func& src);
 
+/*
+ * Based on runtime options returns action that should be taken on dynamic
+ * call to function: 0 - no action, 1 - notice, 2 -throw exception.
+*/
+int dyn_call_error_level(const php::Func*);
+
 //////////////////////////////////////////////////////////////////////
 
 }}

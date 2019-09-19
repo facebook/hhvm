@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -8,17 +8,15 @@
  *)
 
 let go result output_json =
-  if output_json
-  then begin
+  if output_json then
     let response =
-      (match result with
-        | None -> None, None
-        | Some (str, json) -> Some str, Some json
-      ) in
-    Nuclide_rpc_message_printer.
-      (infer_type_response_to_json response |> print_json)
-  end else begin
+      match result with
+      | None -> (None, None)
+      | Some (str, json) -> (Some str, Some json)
+    in
+    Nuclide_rpc_message_printer.(
+      infer_type_response_to_json response |> print_json)
+  else
     match result with
-      | Some (str, _) -> print_endline str
-      | None -> print_endline "(unknown)"
-  end
+    | Some (str, _) -> print_endline str
+    | None -> print_endline "(unknown)"

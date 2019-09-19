@@ -43,8 +43,8 @@
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/base/mem-file.h"
 #include "hphp/runtime/base/zend-functions.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/rds-local.h"
 
 #define PHP_NORMAL_READ 0x0001
 #define PHP_BINARY_READ 0x0002

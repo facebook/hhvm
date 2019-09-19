@@ -592,15 +592,17 @@ function ut_main()
 	    $arg0 = urlencode($test[0]);
 		$res_str .= "extract from \"$arg0\" \"".$test[1]."\" graphemes - grapheme_extract";
 		if ( 3 == count( $test ) ) {
-			$result = grapheme_extract($test[0], $test[1]);
+          $tmp = null;
+          $result = grapheme_extract($test[0], $test[1], GRAPHEME_EXTR_COUNT, 0, inout $tmp);
 		}
 		elseif ( 4 == count ( $test ) ) {
 			$res_str .= " starting at byte position ".(string)$test[2];
-			$result = grapheme_extract($test[0], $test[1], GRAPHEME_EXTR_COUNT, $test[2]);
+            $tmp = null;
+			$result = grapheme_extract($test[0], $test[1], GRAPHEME_EXTR_COUNT, $test[2], inout $tmp);
 		}
 		else {
 			$res_str .= " starting at byte position ".(string)$test[2]." with \$next";
-			$result = grapheme_extract($test[0], $test[1], GRAPHEME_EXTR_COUNT, $test[2], &$next);
+			$result = grapheme_extract($test[0], $test[1], GRAPHEME_EXTR_COUNT, $test[2], inout $next);
 		}
 		$res_str .= " = ";
 		if ( $result === false ) {
@@ -661,11 +663,13 @@ function ut_main()
 	    $arg0 = urlencode($test[0]);
 		$res_str .= "extract from \"$arg0\" \"".$test[1]."\" graphemes - grapheme_extract GRAPHEME_EXTR_MAXBYTES";
 		if ( 3 == count( $test ) ) {
-			$result = grapheme_extract($test[0], $test[1], GRAPHEME_EXTR_MAXBYTES);
+            $tmp = null;
+            $result = grapheme_extract($test[0], $test[1], GRAPHEME_EXTR_MAXBYTES, 0, inout $tmp);
 		}
 		else {
 			$res_str .= " starting at byte position ".$test[2];
-			$result = grapheme_extract($test[0], $test[1], GRAPHEME_EXTR_MAXBYTES, $test[2]);
+            $tmp = null;
+			$result = grapheme_extract($test[0], $test[1], GRAPHEME_EXTR_MAXBYTES, $test[2], inout $tmp);
 		}
 		$res_str .= " = ";
 		if ( $result === false ) {
@@ -725,11 +729,13 @@ function ut_main()
 	    $arg0 = urlencode($test[0]);
 		$res_str .= "extract from \"$arg0\" \"".$test[1]."\" graphemes - grapheme_extract GRAPHEME_EXTR_MAXCHARS";
 		if ( 3 == count( $test ) ) {
-			$result = grapheme_extract($test[0], $test[1], GRAPHEME_EXTR_MAXCHARS);
+            $tmp = null;
+            $result = grapheme_extract($test[0], $test[1], GRAPHEME_EXTR_MAXCHARS, 0, inout $tmp);
 		}
 		else {
 			$res_str .= " starting at byte position ".$test[2];
-			$result = grapheme_extract($test[0], $test[1], GRAPHEME_EXTR_MAXCHARS, $test[2]);
+            $tmp = null;
+			$result = grapheme_extract($test[0], $test[1], GRAPHEME_EXTR_MAXCHARS, $test[2], inout $tmp);
 		}
 		$res_str .= " = ";
 		if ( $result === false ) {
@@ -747,8 +753,6 @@ function ut_main()
 	return $res_str;
 }
 
-echo ut_main();
-
 function check_result($result, $expected) {
 
 	if ( $result === false ) {
@@ -761,4 +765,8 @@ function check_result($result, $expected) {
 
 	return "";
 }
+<<__EntryPoint>>
+function main_entry(): void {
 
+  echo ut_main();
+}

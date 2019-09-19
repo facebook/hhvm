@@ -1,0 +1,1 @@
+Fatal error: An abstract property must not have an initializer. in %s/abstract_with_init.php on line 5

@@ -1,0 +1,3 @@
+Cannot modify static const property x of class A.
+int(5)
+int(10)

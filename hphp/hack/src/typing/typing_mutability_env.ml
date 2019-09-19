@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2017, Facebook, Inc.
  * All rights reserved.
  *
@@ -8,18 +8,25 @@
  *)
 
 open Core_kernel
+
 (* Tracks the different types of mutability of a given local variable.
   See typing_mutability.ml for a description of the fields.
 *)
 module LMap = Local_id.Map
-type mut_type = Mutable | Borrowed | MaybeMutable | Immutable
+
+type mut_type =
+  | Mutable
+  | Borrowed
+  | MaybeMutable
+  | Immutable
+
 type mutability = Pos.t * mut_type
 
 let to_string_ = function
-| Mutable -> "mutably-owned"
-| Borrowed -> "mutably-borrowed"
-| MaybeMutable -> "maybe-mutable"
-| Immutable -> "immutable"
+  | Mutable -> "mutably-owned"
+  | Borrowed -> "mutably-borrowed"
+  | MaybeMutable -> "maybe-mutable"
+  | Immutable -> "immutable"
 
 let to_string (_, mut) = to_string_ mut
 
@@ -40,23 +47,28 @@ type mutability_env = mutability LMap.t
 
 (* Given two mutability maps, intersect them. *)
 let intersect_mutability
-  (parent_mut : mutability_env)
-  (m1 : mutability_env)
-  (m2 : mutability_env)
-  : mutability_env =
+    (parent_mut : mutability_env) (m1 : mutability_env) (m2 : mutability_env) :
+    mutability_env =
   let merge _id v1_opt v2_opt =
-    match v1_opt, v2_opt with
-    | Some (p1, mut1), Some (p2, mut2) ->
+    match (v1_opt, v2_opt) with
+    | (Some (p1, mut1), Some (p2, mut2)) ->
       let assumed_mut =
-        if mut1 = mut2 then mut1 else begin
-          Errors.inconsistent_mutability
-            p1 (to_string_ mut1)
-            (Some (p2, (to_string_ mut2)));
+        if mut1 = mut2 then
           mut1
-      end in
+        else (
+          Errors.inconsistent_mutability
+            p1
+            (to_string_ mut1)
+            (Some (p2, to_string_ mut2));
+          mut1
+        )
+      in
       Some (p1, assumed_mut)
-    | Some v, None | None, Some v -> Some v
-    | _ -> None in
+    | (Some v, None)
+    | (None, Some v) ->
+      Some v
+    | _ -> None
+  in
   (* ensure not conflicting mutability flavors in child scopes *)
   let acc = LMap.merge merge m1 m2 in
   (* ensure no conflicting flavors in child and parent scopes *)

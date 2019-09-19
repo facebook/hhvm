@@ -17,14 +17,12 @@
 #include "hphp/runtime/base/perf-warning.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 
-#include "hphp/runtime/vm/jit/annotation.h"
 #include "hphp/runtime/vm/jit/inlining-decider.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/location.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/punt.h"
-#include "hphp/runtime/vm/jit/ref-deps.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/analysis.h"
@@ -73,9 +71,9 @@ struct Env {
     // TODO(#5703534): this is using a different TransContext than actual
     // translation will use.
     , unit(TransContext{kInvalidTransID, kind, TransFlags{},
-                        sk, ctx.spOffset, 0})
+                        sk, ctx.spOffset, 0},
+           std::make_unique<AnnotationData>())
     , irgs(unit, nullptr, 0, nullptr)
-    , arState()
     , numJmps(0)
     , numBCInstrs(maxBCInstrs)
     , profiling(kind == TransKind::Profile)
@@ -98,7 +96,6 @@ struct Env {
   jit::hash_map<Offset, jit::vector<RegionDesc::Block*>> prevBlocks;
   IRUnit unit;
   irgen::IRGS irgs;
-  ActRecState arState;
   uint32_t numJmps;
   int32_t numBCInstrs;
   // This map memoizes reachability of IR blocks during tracelet
@@ -217,14 +214,9 @@ bool prepareInstruction(Env& env) {
     opcodeBreaksBB(env.inst.op(), env.inlining);
   env.inst.endsRegion = breaksBB ||
     (dontGuardAnyInputs(env.inst) && opcodeChangesPC(env.inst.op()));
-  env.inst.funcd = env.arState.knownFunc();
-  irgen::prepareForNextHHBC(env.irgs, &env.inst, env.sk);
+  irgen::prepareForNextHHBC(env.irgs, env.sk);
 
   auto const inputInfos = getInputs(env.inst, env.irgs.irb->fs().bcSPOff());
-
-  // This reads valueClass from the inputs so it used to need to
-  // happen after readMetaData.  But now readMetaData is gone ...
-  annotate(&env.inst);
 
   // Check all the inputs for unknown values.
   for (auto const& input : inputInfos) {
@@ -237,8 +229,7 @@ bool prepareInstruction(Env& env) {
 
   addInstruction(env);
 
-  if (isLegacyFPush(env.inst.op())) env.arState.pushFunc(env.inst);
-  if (hasFCallEffects(env.inst.op())) {
+  if (isFCall(env.inst.op())) {
     auto const asyncEagerOffset = env.inst.imm[0].u_FCA.asyncEagerOffset;
     if (asyncEagerOffset != kInvalidOffset) {
       // Note that the arc between the block containing asyncEagerOffset and
@@ -546,8 +537,6 @@ RegionDescPtr form_region(Env& env) {
 
     if (!prepareInstruction(env)) break;
 
-    env.curBlock->setKnownFunc(env.sk, env.inst.funcd);
-
     if (traceThroughJmp(env)) continue;
 
     env.inst.interp = env.interp.count(env.sk);
@@ -608,8 +597,6 @@ RegionDescPtr form_region(Env& env) {
              numGuards);
       break;
     }
-
-    if (isLegacyFCall(env.inst.op())) env.arState.pop();
   }
 
   if (env.region && !env.region->empty()) {

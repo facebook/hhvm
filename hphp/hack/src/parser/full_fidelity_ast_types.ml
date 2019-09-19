@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2018, Facebook, Inc.
  * All rights reserved.
  *
@@ -7,11 +7,10 @@
  *
  *)
 
-
- (* TODO: Make these not default to positioned_syntax *)
- module PositionedSyntax = Full_fidelity_positioned_syntax
- module CoroutineSC = Coroutine_smart_constructor.WithSyntax(PositionedSyntax)
- module PositionedSyntaxTree_ =
-   Full_fidelity_syntax_tree.WithSyntax(PositionedSyntax)
- module PositionedSyntaxTree =
-   PositionedSyntaxTree_.WithSmartConstructors(CoroutineSC)
+(* TODO: Make these not default to positioned_syntax *)
+module PositionedSyntax = Full_fidelity_positioned_syntax
+module CoroutineSC = Coroutine_smart_constructor.WithSyntax (PositionedSyntax)
+module PositionedSyntaxTree_ =
+  Full_fidelity_syntax_tree.WithSyntax (PositionedSyntax)
+module PositionedSyntaxTree =
+  PositionedSyntaxTree_.WithSmartConstructors (CoroutineSC)

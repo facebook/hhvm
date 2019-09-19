@@ -146,6 +146,12 @@ void raise_record_init_error(const StringData* recName,
   );
 }
 
+void raise_record_field_error(const StringData* recName,
+                              const StringData* fieldName) {
+  raise_error(folly::sformat("Field '{}' does not exist in record '{}'",
+                              fieldName, recName));
+}
+
 void raise_property_typehint_binding_error(const Class* declCls,
                                            const StringData* propName,
                                            bool isSoft) {
@@ -237,9 +243,27 @@ void raise_dynamically_sampled_notice(folly::StringPiece fmt, Args&& ... args) {
 }
 
 void raise_array_serialization_notice(const char* src, const ArrayData* arr) {
+  assertx(RuntimeOption::EvalLogArrayProvenance);
+  if (UNLIKELY(g_context->getThrowAllErrors())) {
+    throw Exception("Would have logged provenance");
+  }
   static auto const sampl_threshold =
     RAND_MAX / RuntimeOption::EvalLogArrayProvenanceSampleRatio;
   if (std::rand() >= sampl_threshold) return;
+  static auto knownCounter = ServiceData::createTimeSeries(
+    "vm.provlogging.known",
+    {ServiceData::StatsType::COUNT}
+  );
+  static decltype(knownCounter) unknownCounters[] = {
+    ServiceData::createTimeSeries("vm.provlogging.unknown.counted.nonempty",
+                                  {ServiceData::StatsType::COUNT}),
+    ServiceData::createTimeSeries("vm.provlogging.unknown.static.nonempty",
+                                  {ServiceData::StatsType::COUNT}),
+    ServiceData::createTimeSeries("vm.provlogging.unknown.counted.empty",
+                                  {ServiceData::StatsType::COUNT}),
+    ServiceData::createTimeSeries("vm.provlogging.unknown.static.empty",
+                                  {ServiceData::StatsType::COUNT}),
+  };
 
   auto const dvarray = ([&](){
     if (arr->isVArray()) return "varray";
@@ -250,11 +274,18 @@ void raise_array_serialization_notice(const char* src, const ArrayData* arr) {
   })();
 
   auto const bail = [&]() {
-    raise_notice("Observing %s in %s from unknown location",
-                 dvarray, src);
+    auto const isEmpty = arr->empty();
+    auto const isStatic = arr->isStatic();
+    auto const counterIdx = (isEmpty ? 2 : 0) + (isStatic ? 1 : 0);
+    unknownCounters[counterIdx]->addValue(1);
+    raise_dynamically_sampled_notice(
+      "Observing {}{}{} in {} from unknown location",
+      isEmpty ? "empty, " : "",
+      isStatic ? "static, " : "",
+      dvarray,
+      src);
   };
 
-  assertx(RuntimeOption::EvalLogArrayProvenance);
   auto const ann = arrprov::getTag(arr);
   if (!ann) { bail(); return; }
 
@@ -263,6 +294,7 @@ void raise_array_serialization_notice(const char* src, const ArrayData* arr) {
 
   if (!name) { bail(); return; }
 
+  knownCounter->addValue(1);
   raise_dynamically_sampled_notice("Observing {} in {} from {}:{}",
                                    dvarray, src, name->slice(), line);
 }
@@ -275,16 +307,6 @@ raise_hack_arr_compat_array_producing_func_notice(const std::string& name) {
 
 namespace {
 
-const char* arrayAnnotTypeToName(AnnotType at) {
-  switch (at) {
-    case AnnotType::VArray:     return "varray";
-    case AnnotType::DArray:     return "darray";
-    case AnnotType::VArrOrDArr: return "varray_or_darray";
-    case AnnotType::Array:      return "array";
-    default:                    always_assert(false);
-  }
-}
-
 const char* arrayToName(const ArrayData* ad) {
   if (ad->isVArray()) return "varray";
   if (ad->isDArray()) return "darray";
@@ -293,9 +315,8 @@ const char* arrayToName(const ArrayData* ad) {
 
 void raise_hackarr_compat_type_hint_impl(const Func* func,
                                          const ArrayData* ad,
-                                         AnnotType at,
+                                         const char* name,
                                          folly::Optional<int> param) {
-  auto const name = arrayAnnotTypeToName(at);
   auto const given = arrayToName(ad);
 
   if (param) {
@@ -312,6 +333,7 @@ void raise_hackarr_compat_type_hint_impl(const Func* func,
   }
 }
 
+[[noreturn]]
 void raise_func_undefined(const char* prefix, const StringData* name,
                           const Class* cls) {
   if (LIKELY(!needsStripInOut(name))) {
@@ -327,7 +349,7 @@ void raise_func_undefined(const char* prefix, const StringData* name,
         raise_error("%s method %s::%s() with incorrectly annotated inout "
                     "parameter", prefix, cls->name()->data(), stripped->data());
       }
-      raise_error("%s undefined method %s::%s()", cls->name()->data(), prefix,
+      raise_error("%s undefined method %s::%s()", prefix, cls->name()->data(),
                   stripped->data());
     } else if (Unit::lookupFunc(stripped)) {
       raise_error("%s function %s() with incorrectly annotated inout "
@@ -341,22 +363,21 @@ void raise_func_undefined(const char* prefix, const StringData* name,
 
 void raise_hackarr_compat_type_hint_param_notice(const Func* func,
                                                  const ArrayData* ad,
-                                                 AnnotType at,
+                                                 const char* name,
                                                  int param) {
-  raise_hackarr_compat_type_hint_impl(func, ad, at, param);
+  raise_hackarr_compat_type_hint_impl(func, ad, name, param);
 }
 
 void raise_hackarr_compat_type_hint_ret_notice(const Func* func,
                                                const ArrayData* ad,
-                                               AnnotType at) {
-  raise_hackarr_compat_type_hint_impl(func, ad, at, folly::none);
+                                               const char* name) {
+  raise_hackarr_compat_type_hint_impl(func, ad, name, folly::none);
 }
 
 void raise_hackarr_compat_type_hint_outparam_notice(const Func* func,
                                                     const ArrayData* ad,
-                                                    AnnotType at,
+                                                    const char* name,
                                                     int param) {
-  auto const name = arrayAnnotTypeToName(at);
   auto const given = arrayToName(ad);
   raise_notice(
     "Hack Array Compat: Argument %d returned from %s() as an inout parameter "
@@ -367,10 +388,9 @@ void raise_hackarr_compat_type_hint_outparam_notice(const Func* func,
 
 void raise_hackarr_compat_type_hint_property_notice(const Class* declCls,
                                                     const ArrayData* ad,
-                                                    AnnotType at,
+                                                    const char* name,
                                                     const StringData* propName,
                                                     bool isStatic) {
-  auto const name = arrayAnnotTypeToName(at);
   auto const given = arrayToName(ad);
   raise_notice(
     "Hack Array Compat: %s '%s::%s' declared as type %s, %s assigned",
@@ -385,15 +405,14 @@ void raise_hackarr_compat_type_hint_property_notice(const Class* declCls,
 void raise_hackarr_compat_type_hint_rec_field_notice(
     const StringData* recName,
     const ArrayData* ad,
-    AnnotType at,
+    const char* typeName,
     const StringData* fieldName) {
-  auto const name = arrayAnnotTypeToName(at);
   auto const given = arrayToName(ad);
   raise_notice(
     "Hack Array Compat: Record field '%s::%s' declared as type %s, %s assigned",
     recName->data(),
     fieldName->data(),
-    name,
+    typeName,
     given
   );
 }

@@ -20,12 +20,12 @@
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/heap-graph.h"
 #include "hphp/runtime/base/weakref-data.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/cycles.h"
 #include "hphp/util/process.h"
 #include "hphp/util/ptr-map.h"
+#include "hphp/util/rds-local.h"
 #include "hphp/util/struct-log.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
@@ -163,7 +163,6 @@ DEBUG_ONLY bool checkEnqueuedKind(const HeapObject* h) {
     case HeaderKind::Packed:
     case HeaderKind::Mixed:
     case HeaderKind::Dict:
-    case HeaderKind::Shape:
     case HeaderKind::VecArray:
     case HeaderKind::Keyset:
     case HeaderKind::Empty:
@@ -172,6 +171,7 @@ DEBUG_ONLY bool checkEnqueuedKind(const HeapObject* h) {
     case HeaderKind::BigMalloc:
     case HeaderKind::String:
     case HeaderKind::Record:
+    case HeaderKind::RecordArray:
       break;
     case HeaderKind::Free:
     case HeaderKind::Hole:

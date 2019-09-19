@@ -15,29 +15,28 @@
  */
 
 /**
- * `Pair` is a fixed-size collection with exactly two elements (possibly of
- * different types). HHVM provides a native implementation for this class.
- * The PHP class definition below is not actually used at run time; it is
- * simply provided for the typechecker and for developer reference.
+ * `Pair` is an immutable, fixed-size collection with exactly two elements
+ * (possibly of different types). HHVM provides a native implementation for
+ * this class.  The Hack class definition below is not actually used at run
+ * time; it is simply provided for the typechecker and for developer reference.
  *
  * Like all objects in PHP, `Pair`s have reference-like semantics. The elements
- * or a `Pair` cannot be mutated (i.e. you can assign to the elements of a
+ * of a `Pair` cannot be mutated (i.e. you can't assign to the elements of a
  * `Pair`) though `Pair`s may contain mutable objects.
  *
  * `Pair`s only support integer keys. If a non-integer key is used, an
  * exception will be thrown.
  *
- * `Pair`s support `$m[$k]` style syntax for getting and setting values by
- * key. `Pair`s also support `isset($m[$k])` and `empty($m[$k])` syntax, and
- * they provide similar semantics as arrays. Elements can be added to a `Pair`
- * using `$m[] = ..` syntax.
+ * `Pair`s support `$m[$k]` style syntax for getting values by key. `Pair`s
+ * also support `isset($m[$k])` and `empty($m[$k])` syntax, and they provide
+ * similar semantics as arrays.
  *
  * `Pair`s do not support taking elements by reference. If binding assignment
- * (`=&`) is used with an element of a `Pair`, or if an element of a `Pair` is
- * passed by reference, of if a `Pair` is used with foreach by reference, an
+ * (`=&`) is used with an element of a `Pair`, if an element of a `Pair` is
+ * passed by reference, or if a `Pair` is used with foreach by reference, an
  * exception will be thrown.
  *
- * `Pair` keys are always 0 and 1, repsectively.
+ * `Pair` keys are always 0 and 1, respectively.
  *
  * You may notice that many methods affecting the instace of `Pair` return an
  * `ImmVector` -- `Pair`s are essentially backed by 2-element `ImmVector`s.
@@ -63,7 +62,6 @@ final class Pair<+Tv1, +Tv2> implements ConstVector<mixed> {
    * @return - an `array` containing the values from the current `Pair`.
    */
   <<__Rx, __MaybeMutable, __PHPStdLib>>
-  /* HH_IGNORE_ERROR[2082] T30260145 */
   public function toArray(): array;
 
   /**
@@ -75,6 +73,7 @@ final class Pair<+Tv1, +Tv2> implements ConstVector<mixed> {
    */
   <<__Rx, __MaybeMutable>>
   /* HH_FIXME[4110] pair needs to extend ConstVector<Tv1|Tv2> */
+  /* HH_FIXME[4341] pair needs to extend ConstVector<Tv1|Tv2> */
   public function toValuesArray<Tu>(): varray<Tu>
     where Tv1 as Tu, Tv2 as Tu;
 
@@ -133,6 +132,7 @@ final class Pair<+Tv1, +Tv2> implements ConstVector<mixed> {
    */
   <<__Rx, __MutableReturn, __MaybeMutable>>
   /* HH_FIXME[4110] pair needs to extend ConstVector<Tv1|Tv2> */
+  /* HH_FIXME[4341] pair needs to extend ConstVector<Tv1|Tv2> */
   public function toSet(): Set<arraykey> where Tv1 as arraykey, Tv2 as arraykey;
 
   /**
@@ -142,6 +142,7 @@ final class Pair<+Tv1, +Tv2> implements ConstVector<mixed> {
    */
   <<__Rx, __MaybeMutable>>
   /* HH_FIXME[4110] pair needs to extend ConstVector<Tv1|Tv2> */
+  /* HH_FIXME[4341] pair needs to extend ConstVector<Tv1|Tv2> */
   public function toImmSet(): ImmSet<arraykey> where Tv1 as arraykey, Tv2 as arraykey;
 
   /**

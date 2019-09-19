@@ -30,13 +30,6 @@ functionProvider(((function (int...):void) ...$fns) ==> {
   }
 });
 
-print "Function provider (function (...):void) ...\$fns\n";
-functionProvider(((function (...):void) ...$fns) ==> {
-  foreach ($fns as $fn) {
-    $fn(1, 2, 3);
-  }
-});
-
 print "Function provider lambda1\n";
 $lambda1 = (...$fns) ==> {
   foreach($fns as $fn) {

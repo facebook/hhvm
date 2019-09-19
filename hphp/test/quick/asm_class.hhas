@@ -12,8 +12,7 @@
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 0 "main"
-  FCall <> 0 1 "" - "" ""
+  FCallFuncD <> 0 1 "" - "main"
   PopC
   True
   RetC
@@ -138,7 +137,7 @@
   Dup
   NullUninit
   NullUninit
-  FCallCtor <> 0 1 "" - ""
+  FCallCtor <LockWhileUnwinding> 0 1 "" - ""
   PopC
   LockObj
   SetL $obj
@@ -167,13 +166,11 @@
 }
 
 .function main {
-  .numclsrefslots 1;
-
   NewObjD "Base"
   Dup
   NullUninit
   NullUninit
-  FCallCtor <> 0 1 "" - ""
+  FCallCtor <LockWhileUnwinding> 0 1 "" - ""
   PopC
   LockObj
   SetL $base
@@ -185,16 +182,15 @@
   String "printing this string"
   String "print_it"
   String "Base"
-  ClsRefGetC 0
-  FPushClsMethod 1 0
-  FCall <> 1 1 "" - "" ""
+  ClassGetC
+  FCallClsMethod <> 1 1 "" - "" LogAsDynamicCall
   PopC
 
   NewObjD "Derived"
   Dup
   NullUninit
   NullUninit
-  FCallCtor <> 0 1 "" - ""
+  FCallCtor <LockWhileUnwinding> 0 1 "" - ""
   PopC
   LockObj
   SetL $derived
@@ -227,8 +223,7 @@
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 0 "prop_test"
-  FCall <> 0 1 "" - "" ""
+  FCallFuncD <> 0 1 "" - "prop_test"
   PopC
 
   Int 1

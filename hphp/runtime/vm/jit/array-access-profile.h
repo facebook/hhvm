@@ -17,6 +17,9 @@
 #ifndef incl_HPHP_JIT_ARRAY_OFFSET_PROFILE_H_
 #define incl_HPHP_JIT_ARRAY_OFFSET_PROFILE_H_
 
+#include "hphp/runtime/vm/jit/extra-data.h"
+
+#include <folly/dynamic.h>
 #include <folly/Optional.h>
 
 #include <cstdint>
@@ -31,14 +34,29 @@ namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Target profile for known MixedArray or SetArray access offsets.
+ * Target profile used to optimize MixedArray and SetArray hash table lookups.
+ * This profile can be used for two types of optimizations:
+ *
+ *  - Offset profiling: If the array used at a certain source location always
+ *    has the same "shape" (the same keys, inserted in the same order), then a
+ *    given string will always be at the same offset. We can check it directly.
+ *
+ *  - Size profiling: If the array used at a certain source location tends to
+ *    be small, we might want to do the lookup by scanning instead of hashing.
  */
 struct ArrayAccessProfile {
   /*
-   * Choose the "hot position" for the profiled array access using
-   * questionable heuristics.
+   * The result of both profiling types. Prefer the offset to the size hint.
    */
-  folly::Optional<uint32_t> choose() const;
+  struct Result {
+    folly::Optional<uint32_t> offset;
+    SizeHintData size_hint;
+  };
+
+  /*
+   * Returns profiling results based on questionable heuristics.
+   */
+  Result choose() const;
 
   /*
    * Update the profile to register an access at `key' in `ad'.
@@ -54,6 +72,7 @@ struct ArrayAccessProfile {
                      const ArrayAccessProfile& r);
 
   std::string toString() const;
+  folly::dynamic toDynamic() const;
 
 private:
   /*
@@ -82,6 +101,7 @@ private:
 private:
   Line m_hits[kNumTrackedSamples];
   uint32_t m_untracked{0};
+  uint32_t m_small{0};
   bool m_init{false};
 };
 

@@ -117,7 +117,7 @@ function openssl_verify(string $data, string $signature, $pub_key_id, $signature
 <<__PHPStdLib>>
 function openssl_x509_check_private_key($cert, $key);
 <<__PHPStdLib>>
-function openssl_x509_checkpurpose($x509cert, int $purpose, $cainfo = null, string $untrustedfile = "");
+function openssl_x509_checkpurpose($x509cert, int $purpose, varray $cainfo = varray[], string $untrustedfile = "");
 <<__PHPStdLib>>
 function openssl_x509_export_to_file($x509, string $outfilename, bool $notext = true);
 <<__PHPStdLib>>
@@ -134,6 +134,8 @@ function openssl_random_pseudo_bytes(int $length, &$crypto_strong = false);
 function openssl_cipher_iv_length(string $method);
 <<__PHPStdLib>>
 function openssl_encrypt(string $data, string $method, string $password, int $options = 0, string $iv = "", &$tag_out = null, string $aad = "", int $tag_length = 16);
+<<__PHPStdLib>>
+function openssl_encrypt_with_tag(string $data, string $method, string $password, int $options, string $iv, &$tag_out, string $aad = "", int $tag_length = 16);
 <<__PHPStdLib>>
 function openssl_decrypt(string $data, string $method, string $password, int $options = 0, string $iv = "", string $tag = "", string $aad = "");
 <<__PHPStdLib>>

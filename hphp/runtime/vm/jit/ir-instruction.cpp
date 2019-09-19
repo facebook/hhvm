@@ -153,7 +153,6 @@ bool consumesRefImpl(const IRInstruction* inst, int srcNo) {
     case StContArKey:
       return srcNo == 1;
 
-    case StARInvName:
     case InitCtx:
       return srcNo == 1;
 
@@ -564,6 +563,7 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #define DKeysetLastElem   return keysetFirstLastReturn(inst, false);
 #define DArrPacked      return Type::Array(ArrayData::kPackedKind);
 #define DArrMixed       return Type::Array(ArrayData::kMixedKind);
+#define DArrRecord      return Type::Array(ArrayData::kRecordKind);
 #define DVArr           return (RuntimeOption::EvalHackArrDVArrs \
                                 ? TVec : Type::Array(ArrayData::kPackedKind));
 #define DVArrOrNull     return ((RuntimeOption::EvalHackArrDVArrs             \
@@ -624,6 +624,7 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef DKeysetLastElem
 #undef DArrPacked
 #undef DArrMixed
+#undef DArrRecord
 #undef DVArr
 #undef DVArrOrNull
 #undef DDArr

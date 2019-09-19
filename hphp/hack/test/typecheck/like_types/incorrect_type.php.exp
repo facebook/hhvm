@@ -1,0 +1,10 @@
+File "incorrect_type.php", line 4, characters 3-13:
+  ~int
+File "incorrect_type.php", line 7, characters 3-13:
+  ~string
+File "incorrect_type.php", line 12, characters 3-13:
+  ~(function(int): void)
+File "incorrect_type.php", line 11, characters 9-49:
+Invalid "as" expression hint (Typing[4195])
+File "facebook/builtins_fb.hhi", line 155, characters 26-26:
+The "as" operator cannot be used with a function type

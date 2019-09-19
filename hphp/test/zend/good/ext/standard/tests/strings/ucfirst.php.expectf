@@ -62,7 +62,6 @@ string(7) "World'S"
 Notice: Undefined variable: strS in %s/ucfirst.php on line 107
 string(0) ""
 string(6) "WorldS"
-string(6) "WorldS"
 
 --- Nested ucfirst() ---
 string(5) "Hello"

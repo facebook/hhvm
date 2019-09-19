@@ -1,5 +1,5 @@
 File "trait_private_bad.php", line 24, characters 19-21:
-Could not find method foo in an object of type B (Typing[4053])
+No method 'foo' in B (did you mean 'bar'?) (Typing[4053])
 File "trait_private_bad.php", line 24, characters 12-16:
 This is why I think it is an object of type B
 File "trait_private_bad.php", line 22, characters 7-7:

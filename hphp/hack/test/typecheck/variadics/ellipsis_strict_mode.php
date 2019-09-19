@@ -3,29 +3,29 @@
 function bar((function(): void) $fn): void {}
 
 function test1(): (function(): int) {
-  return (...) ==> 4;
+  return (...$_) ==> 4;
 }
 
 function test2(): (function(): int) {
-  $x = (...) ==> {};
-  $y = (function(...) {});
+  $x = (...$_) ==> {};
+  $y = (function(...$_) {});
 
   bar($x);
   bar($y);
 
   return (
-    function(...): int {
+    function(...$_): int {
       return 4;
     }
   );
 }
 
 function test3(): void {
-  bar((...) ==> {});
+  bar((...$_) ==> {});
 }
 
 function test4(): void {
-  bar(function(...): void {});
+  bar(function(...$_): void {});
 }
 
-function test5(...): void {}
+function test5(...$_): void {}

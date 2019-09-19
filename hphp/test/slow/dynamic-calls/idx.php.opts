@@ -1,0 +1,1 @@
+-vEval.EmitFuncPointers=true -vEval.ForbidDynamicCallsToFunc=1 -vEval.ForbidDynamicCallsWithAttr=1

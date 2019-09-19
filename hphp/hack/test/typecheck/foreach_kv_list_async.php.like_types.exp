@@ -1,0 +1,6 @@
+File "foreach_kv_list_async.php", line 22, characters 15-16:
+Invalid argument (Typing[4110])
+File "foreach_kv_list_async.php", line 12, characters 20-22:
+Expected int
+File "foreach_kv_list_async.php", line 21, characters 12-16:
+But got dynamic because a type could not be determined here

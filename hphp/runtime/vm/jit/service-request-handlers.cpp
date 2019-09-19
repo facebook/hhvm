@@ -19,7 +19,6 @@
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
 
 #include "hphp/runtime/vm/jit/code-cache.h"
-#include "hphp/runtime/vm/jit/func-guard.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/perf-counters.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
@@ -75,10 +74,7 @@ RegionContext getContext(SrcKey sk) {
   // Track stack types.
   int32_t stackOff = 0;
   visitStackElems(
-    fp, sp, ctx.bcOffset,
-    [&] (const ActRec* ar) {
-      stackOff += kNumActRecCells;
-    },
+    fp, sp,
     [&] (const TypedValue* tv) {
       ctx.liveTypes.push_back(
         { Location::Stack{ctx.spOffset - stackOff}, typeFromTV(tv, ctxClass) }
@@ -350,8 +346,8 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
         // the next opcode, not honoring the request for async eager return.
         // If the callee returned eagerly, we need to wrap the result into
         // StaticWaitHandle.
-        assertx(ar->retSlot()->m_aux.u_asyncNonEagerReturnFlag + 1 < 2);
-        if (!ar->retSlot()->m_aux.u_asyncNonEagerReturnFlag) {
+        assertx(ar->retSlot()->m_aux.u_asyncEagerReturnFlag + 1 < 2);
+        if (ar->retSlot()->m_aux.u_asyncEagerReturnFlag) {
           auto const retval = tvAssertCell(*ar->retSlot());
           auto const waitHandle = c_StaticWaitHandle::CreateSucceeded(retval);
           cellCopy(make_tv<KindOfObject>(waitHandle), *ar->retSlot());
@@ -400,24 +396,17 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
   return start;
 }
 
-TCA handleBindCall(TCA toSmash, ActRec* calleeFrame, bool isImmutable) {
+TCA handleBindCall(TCA toSmash, ActRec* calleeFrame) {
   Func* func = const_cast<Func*>(calleeFrame->m_func);
   int nArgs = calleeFrame->numArgs();
   TRACE(2, "bindCall %s, ActRec %p\n", func->fullName()->data(), calleeFrame);
   TCA start = mcgen::getFuncPrologue(func, nArgs);
-  TRACE(2, "bindCall -> %p\n", start);
-  if (start && !isImmutable) {
-    // We dont know we're calling the right function, so adjust start to point
-    // to the dynamic check of ar->m_func.
-    start = funcGuardFromPrologue(start, func);
-  } else {
-    TRACE(2, "bindCall immutably %s -> %p\n", func->fullName()->data(), start);
-  }
+  TRACE(2, "bindCall immutably %s -> %p\n", func->fullName()->data(), start);
 
   if (start && !RuntimeOption::EvalFailJitPrologs) {
     // Using start is racy but bindCall will recheck the start address after
     // acquiring a lock on the ProfTransRec
-    tc::bindCall(toSmash, start, func, nArgs, isImmutable);
+    tc::bindCall(toSmash, start, func, nArgs);
   } else {
     // We couldn't get a prologue address. Return a stub that will finish
     // entering the callee frame in C++, then call handleResume at the callee's

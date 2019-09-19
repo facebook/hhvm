@@ -21,7 +21,7 @@
     //EXECUTE
     $running=0;
     do {
-        curl_multi_exec($mh,&$running);
+        curl_multi_exec($mh, inout $running);
     } while ($running>0);
 
 

@@ -3,7 +3,6 @@
 function err() {
   return true;
 }
-set_error_handler('err');
 
 function doswitch($foo) {
   echo "--------------------------------\n";
@@ -64,4 +63,8 @@ function main() {
     doswitch($t);
   }
 }
-main();
+<<__EntryPoint>>
+function main_entry(): void {
+  set_error_handler(fun('err'));
+  main();
+}

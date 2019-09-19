@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -28,7 +28,7 @@ type subst
  *)
 (*****************************************************************************)
 
-val make_subst: decl tparam list -> decl ty list -> subst
+val make_subst : decl_tparam list -> decl_ty list -> subst
 
 (*****************************************************************************)
 (* Primitive instantiating a type.
@@ -36,7 +36,8 @@ val make_subst: decl tparam list -> decl ty list -> subst
  *)
 (*****************************************************************************)
 
-val instantiate     : subst -> decl ty -> decl ty
-val instantiate_ce  : subst -> class_elt -> class_elt
-val instantiate_typeconst :
-  subst -> typeconst_type -> typeconst_type
+val instantiate : subst -> decl_ty -> decl_ty
+
+val instantiate_ce : subst -> class_elt -> class_elt
+
+val instantiate_typeconst : subst -> typeconst_type -> typeconst_type

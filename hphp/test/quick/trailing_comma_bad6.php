@@ -1,4 +1,2 @@
 <?hh
-function () use ($x,,) { }
-
-<<__EntryPoint>> function main(): void {}
+<<__EntryPoint>> function main(): void { function () use ($x,,) { } }

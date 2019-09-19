@@ -154,16 +154,6 @@ const StaticString
   s_HTTP_("HTTP_"),
   s_forwardslash("/");
 
-static auto const s_arraysToClear = {
-  s__SERVER,
-  s__GET,
-  s__POST,
-  s__FILES,
-  s__REQUEST,
-  s__ENV,
-  s__COOKIE,
-};
-
 static void PrepareEnv(Array& env, Transport *transport) {
   // $_ENV
   process_env_variables(env);
@@ -228,10 +218,14 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
                                           const RequestURI &r,
                                           const SourceRootInfo &sri) {
   auto const vhost = VirtualHost::GetCurrent();
-  auto const& emptyArr = empty_darray();
-  for (auto const& key : s_arraysToClear) {
-    php_global_set(key, emptyArr);
-  }
+  auto const emptyArr = empty_darray();
+  php_global_set(s__SERVER, emptyArr);
+  php_global_set(s__GET, emptyArr);
+  php_global_set(s__POST, emptyArr);
+  php_global_set(s__FILES, emptyArr);
+  php_global_set(s__REQUEST, emptyArr);
+  php_global_set(s__ENV, emptyArr);
+  php_global_set(s__COOKIE, emptyArr);
 
   // according to doc if content type is multipart/form-data
   // $HTTP_RAW_POST_DATA should always not available
@@ -244,7 +238,7 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   }
 
   if (shouldSetHttpRawPostData) {
-    php_global_set(s_HTTP_RAW_POST_DATA, empty_string_variant_ref);
+    php_global_set(s_HTTP_RAW_POST_DATA, empty_string());
   }
 
 #define X(name)                                       \
@@ -265,7 +259,6 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   SCOPE_EXIT {
     if (shouldSetHttpRawPostData) {
       php_global_set(s_HTTP_RAW_POST_DATA, std::move(HTTP_RAW_POST_DATA));
-
     }
   };
 
@@ -587,8 +580,8 @@ static void CopyServerInfo(Array& server,
   server.set(s_SERVER_PORT, transport->getServerPort());
   server.set(s_SERVER_SOFTWARE, transport->getServerSoftware());
   server.set(s_SERVER_PROTOCOL, "HTTP/" + transport->getHTTPVersion());
-  server.set(s_SERVER_ADMIN, empty_string_variant_ref);
-  server.set(s_SERVER_SIGNATURE, empty_string_variant_ref);
+  server.set(s_SERVER_ADMIN, empty_string_tv());
+  server.set(s_SERVER_SIGNATURE, empty_string_tv());
 }
 
 static void CopyRemoteInfo(Array& server, Transport *transport) {
@@ -739,10 +732,13 @@ static void CopyPathInfo(Array& server,
     }
     break;
   default:
-    server.set(s_REQUEST_METHOD, empty_string_variant_ref); break;
+    server.set(s_REQUEST_METHOD, empty_string_tv()); break;
   }
-  server.set(s_HTTPS, transport->isSSL() ? Variant(s_on) :
-                                           empty_string_variant_ref);
+  if (transport->isSSL()) {
+    server.set(s_HTTPS, s_on);
+  } else {
+    server.set(s_HTTPS, empty_string_tv());
+  }
   server.set(s_QUERY_STRING, r.queryString());
 
   server.set(s_argv, make_varray(r.queryString()));
@@ -845,8 +841,7 @@ void HttpProtocol::DecodeParameters(Array& variables, const char *data,
       register_variable(variables, (char*)sname.data(), value);
     } else if (!post) {
       String sname = url_decode(s, p - s);
-      register_variable(variables, (char*)sname.data(),
-                        empty_string_variant_ref);
+      register_variable(variables, (char*)sname.data(), empty_string());
     }
     s = p + 1;
   }
@@ -882,7 +877,7 @@ void HttpProtocol::DecodeCookies(Array& variables, char *data) {
         String sname = url_decode(var, strlen(var));
 
         register_variable(variables, (char*)sname.data(),
-                          empty_string_variant_ref, false);
+                          empty_string(), false);
       }
     }
 

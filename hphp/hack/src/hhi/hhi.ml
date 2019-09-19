@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -21,13 +21,12 @@ let write_hhi dir (filename, contents) =
   Sys_utils.mkdir_p (Filename.dirname file);
   Sys_utils.write_file ~file contents
 
-let extract_hhis dir =
-  Array.iter (write_hhi dir) hhi_contents
+let extract_hhis dir = Array.iter (write_hhi dir) hhi_contents
 
 (* Touch functionality for all hhis below root *)
 let touch_root r =
   let filter file = Filename.check_suffix file ".hhi" in
-  Find.iter_files ~filter [ r ] (Sys_utils.try_touch ~follow_symlinks:true)
+  Find.iter_files ~filter [r] (Sys_utils.try_touch ~follow_symlinks:true)
 
 let touch () =
   match !root with
@@ -42,13 +41,12 @@ let touch () =
 let get_hhi_root () =
   match !root with
   | Some r -> r
-  | None -> begin
-      let tmpdir = Path.make (Tmp.temp_dir GlobalConfig.tmp_dir "hhi") in
-      extract_hhis tmpdir;
-      root := Some tmpdir;
-      Relative_path.set_path_prefix Relative_path.Hhi tmpdir;
-      tmpdir
-  end
+  | None ->
+    let tmpdir = Path.make (Tmp.temp_dir GlobalConfig.tmp_dir "hhi") in
+    extract_hhis tmpdir;
+    root := Some tmpdir;
+    Relative_path.set_path_prefix Relative_path.Hhi tmpdir;
+    tmpdir
 
 let set_hhi_root_for_unit_test dir =
   (* no need to call realpath() on this; we never extract the hhi files for our

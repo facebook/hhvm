@@ -23,7 +23,6 @@
 #include "hphp/runtime/base/apc-handle.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/server/transport.h"
@@ -35,6 +34,7 @@
 
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/rds-local.h"
 #include "hphp/util/thread-local.h"
 
 #include <list>
@@ -462,20 +462,20 @@ private:
 public:
   void syncGdbState();
 
-  enum InvokeFlags {
-    InvokeNormal,
-    InvokePseudoMain
-  };
+  TypedValue invokePseudoMain(const Func* f,
+                              VarEnv* varEnv = nullptr,
+                              ObjectData* this_ = nullptr,
+                              Class* class_ = nullptr);
 
   TypedValue invokeFunc(const Func* f,
                         const Variant& args_ = init_null_variant,
                         ObjectData* this_ = nullptr,
                         Class* class_ = nullptr,
-                        VarEnv* varEnv = nullptr,
                         StringData* invName = nullptr,
-                        InvokeFlags flags = InvokeNormal,
                         bool dynamic = true,
-                        bool checkRefAnnot = false);
+                        bool checkRefAnnot = false,
+                        bool allowDynCallNoPointer = false,
+                        Array&& reifiedGenerics = Array());
 
   TypedValue invokeFunc(const CallCtx& ctx,
                         const Variant& args_);
@@ -485,7 +485,8 @@ public:
                            StringData* invName,
                            int argc,
                            const TypedValue* argv,
-                           bool dynamic = true);
+                           bool dynamic = true,
+                           bool allowDynCallNoPointer = false);
 
   TypedValue invokeFuncFew(const Func* f,
                            void* thisOrCls,
@@ -523,10 +524,11 @@ private:
   TypedValue invokeFuncImpl(const Func* f,
                             ObjectData* thiz, Class* cls, uint32_t argc,
                             StringData* invName,
-                            bool dynamic,
+                            bool dynamic, bool allowDynCallNoPointer,
                             FStackCheck doStackCheck,
                             FInitArgs doInitArgs,
-                            FEnterVM doEnterVM);
+                            FEnterVM doEnterVM,
+                            Array&& reifiedGenerics);
 
   struct ExcLoggerHook final : LoggerHook {
     explicit ExcLoggerHook(ExecutionContext& ec) : ec(ec) {}

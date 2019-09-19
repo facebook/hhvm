@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -6,9 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-open Core_kernel
 open Common
-
 module C = Typing_continuations
 module CMap = Typing_continuations.Map
 module LMap = Local_id.Map
@@ -18,8 +16,7 @@ type per_cont_entry = {
    * break continuation correspond to the local types that there were at the
    * last encountered break in the current scope. These are kept to be merged
    * at the appropriate merge points. *)
-  local_types        : Typing_local_types.t;
-
+  local_types: Typing_local_types.t;
   (* Fake members are used when we want member variables to be treated like
    * locals. We want to handle the following:
    * if($this->x) {
@@ -31,8 +28,7 @@ type per_cont_entry = {
    * All the fake members are thrown away at the first call.
    * We keep the invalidated fake members for better error messages.
    *)
-  fake_members       : Typing_fake_members.t;
-
+  fake_members: Typing_fake_members.t;
   (* Type parameter environment
    * Lower and upper bounds on generic type parameters and abstract types
    * For constraints of the form Tu <: Tv where both Tu and Tv are type
@@ -40,7 +36,7 @@ type per_cont_entry = {
    * Contrasting with tenv and subst, bounds are *assumptions* for type
    * inference, not conclusions.
    *)
-  tpenv              : Type_parameter_env.t;
+  tpenv: Type_parameter_env.t;
 }
 
 type t = per_cont_entry Typing_continuations.Map.t
@@ -49,38 +45,33 @@ type t = per_cont_entry Typing_continuations.Map.t
 (* Functions dealing with continuation based flow typing of local variables *)
 (*****************************************************************************)
 
-let empty_entry = {
-  local_types = Typing_local_types.empty;
-  fake_members = Typing_fake_members.empty;
-  tpenv = Type_parameter_env.empty;
-}
+let empty_entry =
+  {
+    local_types = Typing_local_types.empty;
+    fake_members = Typing_fake_members.empty;
+    tpenv = Type_parameter_env.empty;
+  }
 
 let initial_locals entry = CMap.add C.Next entry CMap.empty
 
 let get_cont_option = CMap.get
 
-exception Continuation_not_found of string
-
-let get_cont_exn cont m =
-  try CMap.find cont m
-  with Caml.Not_found ->
-    (* Programming error. This is not supposed to happen. *)
-    raise (Continuation_not_found ("There is no continuation " ^
-      (C.to_string cont) ^ " in the locals."))
+let all_continuations = Typing_continuations.Map.keys
 
 (* Update an entry if it exists *)
 let update_cont_entry name m f =
   match CMap.get name m with
-    | None -> m
-    | Some entry ->
-      CMap.add name (f entry) m
+  | None -> m
+  | Some entry -> CMap.add name (f entry) m
 
 let add_to_cont name key value m =
-  let cont = match CMap.get name m with
-    | None -> empty_entry
-    | Some c -> c in
-  let cont = { cont with local_types = LMap.add key value cont.local_types } in
-  CMap.add name cont m
+  match CMap.get name m with
+  | None -> m
+  | Some cont ->
+    let cont =
+      { cont with local_types = LMap.add key value cont.local_types }
+    in
+    CMap.add name cont m
 
 let remove_from_cont name key m =
   match CMap.get name m with
@@ -93,7 +84,7 @@ let drop_cont = CMap.remove
 let drop_conts conts map =
   List.fold ~f:(fun map cont -> drop_cont cont map) ~init:map conts
 
-let replace_cont key valueopt map = match valueopt with
+let replace_cont key valueopt map =
+  match valueopt with
   | None -> drop_cont key map
-  | Some value ->
-    CMap.add key value map
+  | Some value -> CMap.add key value map

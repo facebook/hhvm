@@ -1,0 +1,2 @@
+File "const_static_prop.php", line 4, characters 33-34:
+Cannot use experimental feature: Const properties cannot be static. (Other[0000])

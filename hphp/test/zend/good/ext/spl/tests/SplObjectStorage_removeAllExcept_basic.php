@@ -1,10 +1,13 @@
 <?hh
+class Ref{
+  public function __construct(private mixed $value){}
+}
 
-    $a = (object) 'a';
-    $b = (object) 'b';
-    $c = (object) 'c';
+    $a = new Ref('a');
+    $b = new Ref('b');
+    $c = new Ref('c');
 
-   $foo = new SplObjectStorage;
+    $foo = new SplObjectStorage;
     $foo->attach($a);
     $foo->attach($b);
 

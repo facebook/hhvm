@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-2015 Facebook. All Rights Reserved.
 
-function toto(mixed $x, ...): int {
+function toto(mixed $x, ...$_): int {
   return (int)$x;
 }
 <<__EntryPoint>> function main(): void {

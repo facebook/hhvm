@@ -72,4 +72,4 @@ a broken assert()
 Fatal error: Uncaught exception 'UnexpectedValueException' with message 'welp is not a valid value for Bar' in %s:77
 Stack trace:
 #0 %s(77): HH\BuiltinEnum::assert()
-#1 {main}
+%a {main}

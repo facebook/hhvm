@@ -1,5 +1,5 @@
 File "fun_explicit_targs.php", line 10, characters 3-3:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "fun_explicit_targs.php", line 4, characters 12-12:
 'T' is a constrained type parameter
 File "fun_explicit_targs.php", line 4, characters 17-19:

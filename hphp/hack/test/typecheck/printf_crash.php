@@ -8,7 +8,7 @@ newtype FormatString<T> = string;
 interface MyPlainSprintf {
 }
 
-function my_sprintf(FormatString<PlainSprintf> $f, ...): string;
+function my_sprintf(FormatString<PlainSprintf> $f, ...$_): string;
 
 //// use.php
 <?hh // strict

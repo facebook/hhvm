@@ -5,7 +5,8 @@ class M {
     echo $x;
   }
 }
-
+<<__EntryPoint>> function main(): void {
 $f = inst_meth(new M, "undef");
 
 $f();
+}

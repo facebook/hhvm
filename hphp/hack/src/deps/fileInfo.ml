@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -25,41 +25,46 @@ open Prim_defs
 (*****************************************************************************)
 
 type mode =
-  | Mphp          (* Do the best you can to support legacy PHP *)
-  | Mdecl         (* just declare signatures, don't check anything *)
-  | Mstrict       (* check everything! *)
-  | Mpartial      (* Don't fail if you see a function/class you don't know *)
+  | Mphp (* Do the best you can to support legacy PHP *)
+  | Mdecl (* just declare signatures, don't check anything *)
+  | Mstrict (* check everything! *)
+  | Mpartial (* Don't fail if you see a function/class you don't know *)
   | Mexperimental (* Strict mode + experimental features *)
 [@@deriving show]
 
 let parse_mode = function
-  | "strict" | "" -> Some Mstrict
+  | "strict"
+  | "" ->
+    Some Mstrict
   | "partial" -> Some Mpartial
   | "experimental" -> Some Mexperimental
   | _ -> None
 
 let is_strict = function
   | Mstrict
-  | Mexperimental -> true
+  | Mexperimental ->
+    true
   | Mphp
   | Mdecl
-  | Mpartial -> false
+  | Mpartial ->
+    false
 
 let string_of_mode = function
-  | Mphp          -> "php"
-  | Mdecl         -> "decl"
-  | Mstrict       -> "strict"
-  | Mpartial      -> "partial"
+  | Mphp -> "php"
+  | Mdecl -> "decl"
+  | Mstrict -> "strict"
+  | Mpartial -> "partial"
   | Mexperimental -> "experimental"
 
 let pp_mode fmt mode =
-  Format.pp_print_string fmt @@
-    match mode with
-    | Mphp          -> "Mphp"
-    | Mdecl         -> "Mdecl"
-    | Mstrict       -> "Mstrict"
-    | Mpartial      -> "Mpartial"
-    | Mexperimental -> "Mexperimental"
+  Format.pp_print_string fmt
+  @@
+  match mode with
+  | Mphp -> "Mphp"
+  | Mdecl -> "Mdecl"
+  | Mstrict -> "Mstrict"
+  | Mpartial -> "Mpartial"
+  | Mexperimental -> "Mexperimental"
 
 (*****************************************************************************)
 (* We define two types of positions establishing the location of a given name:
@@ -68,9 +73,20 @@ let pp_mode fmt mode =
  * allowing us to lazily retrieve the name's exact location if necessary.
  *)
 (*****************************************************************************)
-type name_type = Fun | Class | Typedef | Const [@@deriving show]
-type pos = Full of Pos.t | File of name_type * Relative_path.t [@@deriving show]
-type id = pos  * string [@@deriving show]
+type name_type =
+  | Fun
+  | Class
+  | Typedef
+  | Const
+[@@deriving show]
+
+type pos =
+  | Full of Pos.t
+  | File of name_type * Relative_path.t
+[@@deriving show]
+
+type id = pos * string [@@deriving show]
+
 (* The hash value of a decl AST.
   We use this to see if two versions of a file are "similar", i.e. their
   declarations only differ by position information.  *)
@@ -80,64 +96,65 @@ type id = pos  * string [@@deriving show]
 (*****************************************************************************)
 
 type hash_type = OpaqueDigest.t option
+
 let pp_hash_type fmt hash =
   match hash with
   | None -> Format.fprintf fmt "None"
   | Some hash -> Format.fprintf fmt "Some (%s)" (OpaqueDigest.to_hex hash)
 
 type t = {
-  hash : hash_type;
-  file_mode : mode option;
-  funs : id list;
-  classes : id list;
-  typedefs : id list;
-  consts : id list;
-  comments : (Pos.t * comment) list option;
-    (* None if loaded from saved state *)
-} [@@deriving show]
-
-let empty_t = {
-  hash = None;
-  file_mode = None;
-  funs = [];
-  classes = [];
-  typedefs = [];
-  consts = [];
-  comments = Some [];
+  hash: hash_type;
+  file_mode: mode option;
+  funs: id list;
+  classes: id list;
+  typedefs: id list;
+  consts: id list;
+  comments: (Pos.t * comment) list option; (* None if loaded from saved state *)
 }
+[@@deriving show]
 
-let pos_full (p, name) =
-  Full p, name
+let empty_t =
+  {
+    hash = None;
+    file_mode = None;
+    funs = [];
+    classes = [];
+    typedefs = [];
+    consts = [];
+    comments = Some [];
+  }
+
+let pos_full (p, name) = (Full p, name)
 
 let get_pos_filename = function
-| Full p -> Pos.filename p
-| File (_, fn) -> fn
+  | Full p -> Pos.filename p
+  | File (_, fn) -> fn
 
 (*****************************************************************************)
 (* The simplified record used after parsing. *)
 (*****************************************************************************)
 
 type names = {
-  n_funs    : SSet.t;
-  n_classes : SSet.t;
-  n_types   : SSet.t;
-  n_consts  : SSet.t;
+  n_funs: SSet.t;
+  n_classes: SSet.t;
+  n_types: SSet.t;
+  n_consts: SSet.t;
 }
 
 (* Data structure stored in the saved state *)
 type saved = {
-  s_names : names;
-  s_hash : OpaqueDigest.t option;
+  s_names: names;
+  s_hash: OpaqueDigest.t option;
   s_mode: mode option;
 }
 
-
-let empty_names = {
-  n_funs    = SSet.empty;
-  n_classes = SSet.empty;
-  n_types   = SSet.empty;
-  n_consts  = SSet.empty;
-}
+let empty_names =
+  {
+    n_funs = SSet.empty;
+    n_classes = SSet.empty;
+    n_types = SSet.empty;
+    n_consts = SSet.empty;
+  }
 
 (*****************************************************************************)
 (* Functions simplifying the file information. *)
@@ -147,37 +164,57 @@ let name_set_of_idl idl =
   List.fold_left idl ~f:(fun acc (_, x) -> SSet.add x acc) ~init:SSet.empty
 
 let simplify info =
-  let {funs; classes; typedefs; consts; file_mode = _; comments = _;
-      hash = _;} = info in
-  let n_funs    = name_set_of_idl funs in
+  let {
+    funs;
+    classes;
+    typedefs;
+    consts;
+    file_mode = _;
+    comments = _;
+    hash = _;
+  } =
+    info
+  in
+  let n_funs = name_set_of_idl funs in
   let n_classes = name_set_of_idl classes in
-  let n_types   = name_set_of_idl typedefs in
-  let n_consts  = name_set_of_idl consts in
-  {n_funs; n_classes; n_types; n_consts}
+  let n_types = name_set_of_idl typedefs in
+  let n_consts = name_set_of_idl consts in
+  { n_funs; n_classes; n_types; n_consts }
 
 let to_saved info =
-  let {funs; classes; typedefs; consts; file_mode= s_mode;
-      hash= s_hash; comments = _; } = info in
-      let n_funs    = name_set_of_idl funs in
-      let n_classes = name_set_of_idl classes in
-      let n_types   = name_set_of_idl typedefs in
-      let n_consts  = name_set_of_idl consts in
-  let s_names = { n_funs; n_classes; n_types; n_consts; } in
-  { s_names; s_mode; s_hash; }
+  let {
+    funs;
+    classes;
+    typedefs;
+    consts;
+    file_mode = s_mode;
+    hash = s_hash;
+    comments = _;
+  } =
+    info
+  in
+  let n_funs = name_set_of_idl funs in
+  let n_classes = name_set_of_idl classes in
+  let n_types = name_set_of_idl typedefs in
+  let n_consts = name_set_of_idl consts in
+  let s_names = { n_funs; n_classes; n_types; n_consts } in
+  { s_names; s_mode; s_hash }
 
 let from_saved fn saved =
-  let {s_names; s_mode; s_hash} = saved in
-  let {n_funs; n_classes; n_types; n_consts;} = s_names in
-  let funs = List.map (SSet.elements n_funs)
-    (fun x -> File (Fun, fn), x) in
-  let classes = List.map (SSet.elements n_classes)
-    (fun x -> File (Class, fn), x) in
-  let typedefs = List.map (SSet.elements n_types)
-    (fun x -> File (Typedef, fn), x) in
-  let consts = List.map (SSet.elements n_consts)
-    (fun x -> File (Const, fn), x) in
+  let { s_names; s_mode; s_hash } = saved in
+  let { n_funs; n_classes; n_types; n_consts } = s_names in
+  let funs = List.map (SSet.elements n_funs) (fun x -> (File (Fun, fn), x)) in
+  let classes =
+    List.map (SSet.elements n_classes) (fun x -> (File (Class, fn), x))
+  in
+  let typedefs =
+    List.map (SSet.elements n_types) (fun x -> (File (Typedef, fn), x))
+  in
+  let consts =
+    List.map (SSet.elements n_consts) (fun x -> (File (Const, fn), x))
+  in
   {
-    file_mode= s_mode;
+    file_mode = s_mode;
     hash = s_hash;
     funs;
     classes;
@@ -186,16 +223,15 @@ let from_saved fn saved =
     comments = None;
   }
 
-let saved_to_names saved =
-  saved.s_names
+let saved_to_names saved = saved.s_names
 
 let merge_names t_names1 t_names2 =
-  let {n_funs; n_classes; n_types; n_consts} = t_names1 in
+  let { n_funs; n_classes; n_types; n_consts } = t_names1 in
   {
-   n_funs    = SSet.union n_funs t_names2.n_funs;
-   n_classes = SSet.union n_classes t_names2.n_classes;
-   n_types   = SSet.union n_types t_names2.n_types;
-   n_consts  = SSet.union n_consts t_names2.n_consts;
+    n_funs = SSet.union n_funs t_names2.n_funs;
+    n_classes = SSet.union n_classes t_names2.n_classes;
+    n_types = SSet.union n_types t_names2.n_types;
+    n_consts = SSet.union n_consts t_names2.n_consts;
   }
 
 let print_names name =
@@ -212,13 +248,13 @@ let print_names name =
   ()
 
 let to_string fast =
-  ["funs",  fast.funs;
-  "classes", fast.classes;
-  "typedefs", fast.typedefs;
-  "consts", fast.consts;] |>
-  List.filter ~f:(fun (_, l) -> not @@ List.is_empty l) |>
-  List.map ~f:begin fun (kind, l) ->
-    Printf.sprintf "%s: %s"
-      kind (List.map l ~f:snd |> String.concat ",")
-  end |>
-  String.concat ";"
+  [
+    ("funs", fast.funs);
+    ("classes", fast.classes);
+    ("typedefs", fast.typedefs);
+    ("consts", fast.consts);
+  ]
+  |> List.filter ~f:(fun (_, l) -> not @@ List.is_empty l)
+  |> List.map ~f:(fun (kind, l) ->
+         Printf.sprintf "%s: %s" kind (List.map l ~f:snd |> String.concat ","))
+  |> String.concat ";"

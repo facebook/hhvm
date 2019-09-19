@@ -1,0 +1,8 @@
+File "generic_where_flatten.php", line 49, characters 13-19:
+A 'where' type constraint is violated here (Typing[4323])
+File "generic_where_flatten.php", line 7, characters 28-34:
+This is the method with 'where' type constraints
+File "generic_where_flatten.php", line 7, characters 64-73:
+Expected MyList<[unresolved]>
+File "generic_where_flatten.php", line 40, characters 38-46:
+But got dynamic because it is an unenforceable type

@@ -5,8 +5,8 @@ class C {
   public function foo():void { }
 }
 
-/* HH_FIXME[4110] */
 function my_array_map<T1,T2>((function(T1):T2) $f, vec<T1> $v): vec<T2> {
+  throw new Exception();
 }
 
 function testit():void {

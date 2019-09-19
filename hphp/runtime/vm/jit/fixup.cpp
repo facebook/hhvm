@@ -28,13 +28,17 @@
 
 namespace HPHP {
 
-bool isVMFrame(const ActRec* ar) {
+bool isVMFrame(const ActRec* ar, bool may_be_non_runtime) {
   assertx(ar);
   // Determine whether the frame pointer is outside the native stack, cleverly
   // using a single unsigned comparison to do both halves of the bounds check.
-  bool ret = uintptr_t(ar) - s_stackLimit >= s_stackSize;
-  assertx(!ret || isValidVMStackAddress(ar) ||
-         (ar->m_func->validate(), ar->resumed()));
+  auto const ret = uintptr_t(ar) - s_stackLimit >= s_stackSize;
+  assertx(
+    !ret ||
+    may_be_non_runtime ||
+    isValidVMStackAddress(ar) ||
+    (ar->m_func->validate(), ar->resumed())
+  );
   return ret;
 }
 
@@ -172,7 +176,7 @@ const Fixup* findFixup(CTCA tca) {
 
 size_t size() { return s_fixups.size(); }
 
-void fixupWork(ExecutionContext* /*ec*/, ActRec* nextRbp) {
+bool fixupWork(ActRec* nextRbp, bool soft) {
   assertx(RuntimeOption::EvalJit);
 
   TRACE(1, "fixup(begin):\n");
@@ -180,12 +184,15 @@ void fixupWork(ExecutionContext* /*ec*/, ActRec* nextRbp) {
   while (true) {
     auto const rbp = nextRbp;
     nextRbp = rbp->m_sfp;
+
+    if (UNLIKELY(soft) && (!nextRbp || nextRbp == rbp)) return false;
     assertx(nextRbp && nextRbp != rbp && "Missing fixup for native call");
+
     TRACE(2, "considering frame %p, %p\n", rbp, (void*)rbp->m_savedRip);
 
-    if (isVMFrame(nextRbp)) {
+    if (isVMFrame(nextRbp, soft)) {
       TRACE(2, "fixup checking vm frame %s\n",
-               nextRbp->m_func->name()->data());
+            nextRbp->m_func->name()->data());
       VMRegs regs;
       if (getFrameRegs(rbp, &regs)) {
         TRACE(2, "fixup(end): func %s fp %p sp %p pc %p\n",
@@ -196,10 +203,14 @@ void fixupWork(ExecutionContext* /*ec*/, ActRec* nextRbp) {
         vmRegs.pc = reinterpret_cast<PC>(regs.pc);
         vmRegs.stack.top() = regs.sp;
         vmRegs.jitReturnAddr = regs.retAddr;
-        return;
+        return true;
+      } else {
+        if (LIKELY(soft)) return false;
+        always_assert(false && "Fixup expected for leafmost VM frame");
       }
     }
   }
+  return false;
 }
 
 /* This is somewhat hacky. It decides which helpers/builtins should
@@ -227,7 +238,7 @@ bool eagerRecord(const Func* func) {
 }
 
 namespace detail {
-void syncVMRegsWork() {
+void syncVMRegsWork(bool soft) {
   assertx(tl_regState != VMRegState::CLEAN);
 
   // Start looking for fixup entries at the current (C++) frame.  This
@@ -236,9 +247,9 @@ void syncVMRegsWork() {
   auto fp = tl_regState >= VMRegState::GUARDED_THRESHOLD ?
     (ActRec*)tl_regState : framePtr;
 
-  FixupMap::fixupWork(g_context.getNoCheck(), fp);
+  auto const synced = FixupMap::fixupWork(fp, soft);
 
-  tl_regState = VMRegState::CLEAN;
+  if (synced) tl_regState = VMRegState::CLEAN;
   Stats::inc(Stats::TC_Sync);
 }
 }

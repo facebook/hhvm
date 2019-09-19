@@ -10,8 +10,8 @@
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
 
-ALWAYS_INLINE MixedArray* staticEmptyDictArrayAsMixed() {
-  return static_cast<MixedArray*>(staticEmptyDictArray());
+ALWAYS_INLINE MixedArray* CreateDictAsMixed() {
+  return MixedArray::asMixed(ArrayData::CreateDict());
 }
 
 // Common base class for BaseMap/BaseSet collections
@@ -19,7 +19,7 @@ struct HashCollection : ObjectData {
   explicit HashCollection(Class* cls, HeaderKind kind)
     : ObjectData(cls, NoInit{}, ObjectData::NoAttrs, kind)
     , m_unusedAndSize(0)
-    , m_arr(staticEmptyDictArrayAsMixed())
+    , m_arr(CreateDictAsMixed())
   {}
   explicit HashCollection(Class* cls, HeaderKind kind, ArrayData* arr)
     : ObjectData(cls, NoInit{}, ObjectData::NoAttrs, kind)
@@ -94,8 +94,9 @@ struct HashCollection : ObjectData {
   bool isDensityTooLow() const {
     bool b = (m_size < posLimit() / 2);
     assertx(IMPLIES(
-      arrayData() == staticEmptyDictArrayAsMixed(),
-      !b));
+      arrayData()->isStatic() && arrayData()->empty(),
+      !b
+    ));
     assertx(IMPLIES(cap() == 0, !b));
     return b;
   }
@@ -106,8 +107,9 @@ struct HashCollection : ObjectData {
     bool b = ((uint64_t(cap()) >= uint64_t(m_size) * 8) &&
               (cap() >= HashCollection::SmallSize * 8));
     assertx(IMPLIES(
-      arrayData() == staticEmptyDictArrayAsMixed(),
-      !b));
+      arrayData()->isStatic() && arrayData()->empty(),
+      !b
+    ));
     assertx(IMPLIES(cap() == 0, !b));
     return b;
   }
@@ -295,6 +297,7 @@ struct HashCollection : ObjectData {
     if (UNLIKELY(MixedArray::isValidPos(*p))) return nullptr;
     auto e = &allocElm(p);
     e->setIntKey(k, h);
+    arrayData()->recordIntKey();
     updateNextKI(k);
     return &e->data;
   }
@@ -305,6 +308,7 @@ struct HashCollection : ObjectData {
     if (UNLIKELY(MixedArray::isValidPos(*p))) return nullptr;
     auto e = &allocElm(p);
     e->setStrKey(key, h);
+    arrayData()->recordStrKey(key);
     return &e->data;
   }
 
@@ -326,6 +330,7 @@ struct HashCollection : ObjectData {
     int32_t unusedPos = -1;
     auto e = &allocElm(MixedArray::Inserter(&unusedPos));
     e->setStrKey(key, h);
+    arrayData()->recordStrKey(key);
     return &e->data;
   }
   /*
@@ -468,7 +473,7 @@ struct HashCollection : ObjectData {
 
   void setSize(uint32_t sz) {
     assertx(sz <= cap());
-    if (m_arr == staticEmptyDictArrayAsMixed()) {
+    if (m_arr->isStatic() && m_arr->empty()) {
       assertx(sz == 0);
       return;
     }
@@ -507,7 +512,7 @@ struct HashCollection : ObjectData {
   }
   void setPosLimit(uint32_t limit) {
     auto* a = arrayData();
-    if (a == staticEmptyDictArrayAsMixed()) {
+    if (a->isStatic() && a->empty()) {
       assertx(limit == 0);
       return;
     }

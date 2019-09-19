@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -14,19 +14,13 @@ type t = {
    * type is determined by context or is a type variable that may get resolved
    * when checking the body of the lambda.
    *)
-  return_type: Typing_defs.locl Typing_defs.ty;
-
-  return_type_decl: Typing_defs.decl Typing_defs.ty option;
-
+  return_type: Typing_defs.locl_possibly_enforced_ty;
   (* Does the function or function type have the <<__ReturnDisposable>> attribute? *)
-  return_disposable : bool;
-
+  return_disposable: bool;
   (* Does the function or function type have the <<__MutableReturn>> attribute? *)
   return_mutable: bool;
-
   (* Was there an explicit return type hint? *)
   return_explicit: bool;
-
   (* Is function return type in rx context treated as void? *)
   return_void_to_rx: bool;
 }

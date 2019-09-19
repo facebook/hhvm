@@ -1,5 +1,5 @@
 File "contravariance_constraint_bad.php", line 30, characters 16-27:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "contravariance_constraint_bad.php", line 22, characters 26-26:
 'T' is a constrained type parameter
 File "contravariance_constraint_bad.php", line 22, characters 31-37:

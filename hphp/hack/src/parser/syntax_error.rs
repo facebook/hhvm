@@ -7,25 +7,84 @@
 //
 
 use crate::token_kind::TokenKind;
+use ocamlpool_rust::{
+    ocamlvalue::Ocamlvalue,
+    utils::{caml_tuple, usize_to_ocaml},
+};
 use std::borrow::Cow;
 
 // many errors are static strings, but not all of them
 pub type Error = Cow<'static, str>;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ErrorType {
+    ParseError,
+    RuntimeError,
+}
+use ErrorType::*;
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SyntaxError {
+    pub child: Option<Box<SyntaxError>>,
     pub start_offset: usize,
     pub end_offset: usize,
+    pub error_type: ErrorType,
     pub message: Error,
 }
 
 impl SyntaxError {
-    pub fn make(start_offset: usize, end_offset: usize, message: Error) -> Self {
+    pub fn make_with_child_and_type(
+        child: Option<SyntaxError>,
+        start_offset: usize,
+        end_offset: usize,
+        error_type: ErrorType,
+        message: Error,
+    ) -> Self {
         Self {
+            child: child.map(|x| Box::new(x)),
             start_offset,
             end_offset,
+            error_type,
             message,
         }
+    }
+
+    pub fn make(start_offset: usize, end_offset: usize, message: Error) -> Self {
+        Self::make_with_child_and_type(
+            None,
+            start_offset,
+            end_offset,
+            ErrorType::ParseError,
+            message,
+        )
+    }
+}
+
+impl Ocamlvalue for ErrorType {
+    fn ocamlvalue(&self) -> usize {
+        match self {
+            ParseError => usize_to_ocaml(0),
+            RuntimeError => usize_to_ocaml(1),
+        }
+    }
+}
+impl Ocamlvalue for SyntaxError {
+    fn ocamlvalue(&self) -> usize {
+        // type error_type = ParseError | RuntimeError
+        //
+        // type t = {
+        //   child        : t option;
+        //   start_offset : int;
+        //   end_offset   : int;
+        //   error_type   : error_type;
+        //   message      : string;
+        // }
+        let child = self.child.ocamlvalue();
+        let start_offset = usize_to_ocaml(self.start_offset);
+        let end_offset = usize_to_ocaml(self.end_offset);
+        let error_type = self.error_type.ocamlvalue();
+        let message = self.message.ocamlvalue();
+        caml_tuple(&[child, start_offset, end_offset, error_type, message])
     }
 }
 
@@ -91,8 +150,7 @@ pub const error1038: Error =
 pub const error1039: Error = Cow::Borrowed("A closing XHP tag is expected here.");
 pub const error1041: Error =
     Cow::Borrowed("A function body or a semicolon (';') is expected here.");
-pub const error1044: Error =
-    Cow::Borrowed("A name, __construct, or __destruct keyword is expected here.");
+pub const error1044: Error = Cow::Borrowed("A name or __construct keyword is expected here.");
 pub const error1045: Error =
     Cow::Borrowed("An 'extends' or 'implements' keyword is expected here.");
 pub const error1046: Error = Cow::Borrowed("A lambda arrow ('==>') is expected here.");
@@ -157,18 +215,43 @@ pub const error2008: Error = Cow::Borrowed(concat!(
     "The first statement inside a switch statement must ",
     "be a case or default label statement."
 ));
+pub fn error2009(class_name: &str, method_name: &str) -> Error {
+    Cow::Owned(format!(
+        "Constructor {}::{}() cannot be static",
+        class_name.to_string(),
+        method_name.to_string(),
+    ))
+}
 pub const error2010: Error = Cow::Borrowed(concat!(
     "Parameters cannot have visibility modifiers (except in ",
     "parameter lists of constructors)."
 ));
-pub const error2011: Error = Cow::Borrowed("A destructor must have an empty parameter list.");
-pub const error2012: Error = Cow::Borrowed("A destructor can only have visibility modifiers.");
 pub const error2013: Error = Cow::Borrowed("A method declaration cannot have duplicate modifiers.");
 pub const error2014: Error = Cow::Borrowed("An abstract method cannot have a method body.");
+pub fn error2015(class_name: &str, method_name: &str) -> Error {
+    Cow::Owned(format!(
+        "Non-abstract method {}::{} must contain body",
+        class_name.to_string(),
+        method_name.to_string(),
+    ))
+}
+pub fn error2016(class_name: &str, method_name: &str) -> Error {
+    Cow::Owned(format!(
+        "Cannot declare abstract method {}::{} private",
+        class_name.to_string(),
+        method_name.to_string(),
+    ))
+}
 pub const error2017: Error =
     Cow::Borrowed("A method declaration cannot have multiple visibility modifiers.");
-pub const error2018: Error =
-    Cow::Borrowed("A constructor or destructor cannot have a non-void type annotation.");
+pub const error2018: Error = Cow::Borrowed("A constructor cannot have a non-void type annotation.");
+pub fn error2019(class_name: &str, method_name: &str) -> Error {
+    Cow::Owned(format!(
+        "Cannot declare abstract method {}::{} final",
+        class_name.to_string(),
+        method_name.to_string(),
+    ))
+}
 pub const error2020: Error = Cow::Borrowed(concat!(
     "Use of the '{}' subscript operator is deprecated; ",
     " use '[]' instead."
@@ -177,8 +260,19 @@ pub const error2021: Error = Cow::Borrowed(concat!(
     "A variadic parameter ('...') may only appear at the end of ",
     "a parameter list."
 ));
+pub const error2023: Error =
+    Cow::Borrowed("Abstract constructors cannot have parameters with visibility modifiers");
+pub const error2024: Error =
+    Cow::Borrowed("Traits or interfaces cannot have parameters with visibility modifiers");
 pub const error2022: Error =
     Cow::Borrowed("A variadic parameter ('...') may not be followed by a comma.");
+pub fn error2025(class_name: &str, prop_name: &str) -> Error {
+    Cow::Owned(format!(
+        "Cannot redeclare {}::{}",
+        class_name.to_string(),
+        prop_name.to_string(),
+    ))
+}
 pub const error2029: Error = Cow::Borrowed("Only traits and interfaces may use 'require extends'.");
 pub const error2030: Error = Cow::Borrowed("Only traits may use 'require implements'.");
 pub const error2031: Error =
@@ -198,6 +292,15 @@ pub const error2036: Error = Cow::Borrowed(concat!(
     "classes."
 ));
 pub const error2037: Error = Cow::Borrowed("A class may extend at most one other class.");
+pub fn error2038(constructor_name: &str) -> Error {
+    Cow::Owned(format!(
+        concat!(
+            "A constructor initializing an object must be passed a (possibly empty) ",
+            "list of arguments. Did you mean 'new {}()'?",
+        ),
+        constructor_name.to_string(),
+    ))
+}
 pub const error2040: Error = Cow::Borrowed(concat!(
     "Invalid use of 'list(...)'. A list expression may only be ",
     "used as the left side of a simple assignment, the value clause of a ",
@@ -262,6 +365,7 @@ pub const error2066: Error = Cow::Borrowed(concat!(
 ));
 pub const error2067: Error = Cow::Borrowed("A hack source file cannot contain '?>'.");
 pub const error2068: Error = Cow::Borrowed("hh blocks and php blocks cannot be mixed.");
+pub const invalid_octal_integer: Error = Cow::Borrowed("Invalid octal integers");
 pub const prefixed_invalid_string_kind: Error =
     Cow::Borrowed("Only double-quoted strings may be prefixed.");
 pub const illegal_interpolated_brace_with_embedded_dollar_expression: Error =
@@ -292,3 +396,576 @@ pub const expected_as_or_insteadof: Error =
     Cow::Borrowed("The 'as' keyword or the 'insteadof' keyword is expected here.");
 pub const missing_double_quote : Error = /* error0010 analogue */ Cow::Borrowed(
   "A double quote is expected here.");
+pub const instanceof_disabled: Error = Cow::Borrowed(
+    "The 'instanceof' operator is not supported in Hack; use the 'is' operator or 'is_a()'",
+);
+pub const abstract_instance_property: Error =
+    Cow::Borrowed("Instance property may not be abstract.");
+pub const memoize_lsb_on_non_static: Error =
+    Cow::Borrowed("<<__MemoizeLSB>> can only be applied to static methods");
+pub const memoize_lsb_on_non_method: Error =
+    Cow::Borrowed("<<__MemoizeLSB>> can only be applied to methods");
+pub const constants_as_attribute_arguments: Error =
+    Cow::Borrowed("User-defined constants are not allowed in user attribute expressions");
+pub const instanceof_invalid_scope_resolution: Error = Cow::Borrowed(concat!(
+    "A scope resolution (::) on the right side of an ",
+    "instanceof operator must start with a class name, `self`, `parent`, or `static`, and end with ",
+     "a variable",
+));
+pub const instanceof_memberselection_inside_scoperesolution: Error = Cow::Borrowed(concat!(
+    "A scope resolution (::) on the right ",
+    "side of an instanceof operator cannot contain a member selection (->)",
+));
+pub const instanceof_missing_subscript_index: Error = Cow::Borrowed(concat!(
+    "A subscript expression ([]) on the right side of an ",
+    "instanceof operator must have an index",
+));
+pub fn instanceof_new_unknown_node(msg: &str) -> Error {
+    Cow::Owned(format!(
+        "Unexpected node on right hand side of new or instanceof: {}",
+        msg.to_string(),
+    ))
+}
+pub const instanceof_reference: Error =
+    Cow::Borrowed("References are not allowed on the right side of an instanceof operation");
+pub const invalid_await_use: Error = Cow::Borrowed("Await cannot be used as an expression");
+pub const toplevel_await_use: Error = Cow::Borrowed("Await cannot be used in a toplevel statement");
+pub const invalid_constructor_method_call: Error = Cow::Borrowed(
+    "Method call following immediate constructor call requires parentheses around constructor call.",
+);
+pub const invalid_scope_resolution_qualifier: Error =
+    Cow::Borrowed("Only classnames and variables are allowed before '::'.");
+pub const invalid_variable_name: Error = Cow::Borrowed(
+    "A valid variable name starts with a letter or underscore, followed by any number of letters, numbers, or underscores",
+);
+pub const invalid_reference: Error = Cow::Borrowed("Only variables can be used as references");
+pub const invalid_variable_variable: Error = Cow::Borrowed("Variable Variables are not legal");
+pub fn function_modifier(s: &str) -> Error {
+    Cow::Owned(format!(
+        "Top-level function cannot have modifier '{}'",
+        s.to_string(),
+    ))
+}
+pub const invalid_yield: Error =
+    Cow::Borrowed("Yield can only appear as a statement or on the right of an assignment");
+pub const invalid_yield_from: Error = Cow::Borrowed(
+    "`yield from` can only appear as a statement, after `return`, or on the right of an assignment",
+);
+pub const invalid_class_in_collection_initializer: Error =
+    Cow::Borrowed("Cannot use collection initialization for non-collection class.");
+pub const invalid_brace_kind_in_collection_initializer: Error = Cow::Borrowed(
+    "Initializers of 'vec', 'dict' and 'keyset' should use '[...]' instead of '{...}'.",
+);
+pub const nested_ternary: Error = Cow::Borrowed(
+    "Nested ternary expressions inside ternary expressions are ambiguous. Please add parentheses",
+);
+pub const alternate_control_flow: Error =
+    Cow::Borrowed("Alternate control flow syntax is not allowed in Hack files");
+pub const execution_operator: Error =
+    Cow::Borrowed("The execution operator is not allowed in Hack files");
+pub const goto: Error = Cow::Borrowed("The `goto` operator is not allowed in Hack files");
+pub const goto_label: Error =
+    Cow::Borrowed("Labels are used only for `goto`, which is not allowed in Hack files");
+pub const non_re_prefix: Error = Cow::Borrowed("Only `re`-prefixed strings allowed.");
+pub const collection_intrinsic_generic: Error =
+    Cow::Borrowed("Cannot initialize collection builtins with type parameters");
+pub const collection_intrinsic_many_typeargs: Error =
+    Cow::Borrowed("Collection expression must have less than three type arguments");
+pub const invalid_hack_mode: Error =
+    Cow::Borrowed("Incorrect comment; possible values include strict, partial, or empty");
+pub const pair_initializer_needed: Error = Cow::Borrowed("Initializer needed for Pair object");
+pub const pair_initializer_arity: Error =
+    Cow::Borrowed("Pair objects must have exactly 2 elements");
+pub const nested_unary_reference: Error =
+    Cow::Borrowed("References cannot be followed by unary operators");
+pub const toplevel_statements: Error =
+    Cow::Borrowed("Toplevel statements are not allowed. Use __EntryPoint attribute instead");
+pub const invalid_reified: Error =
+    Cow::Borrowed("Reify keyword can only appear at function or class type parameter position");
+pub fn reified_in_invalid_classish(s: &str) -> Error {
+    Cow::Owned(format!(
+        "Invalid to use a reified type within {}'s type parameters",
+        s.to_string(),
+    ))
+}
+pub const shadowing_reified: Error = Cow::Borrowed("You may not shadow a reified parameter");
+pub const static_property_in_reified_class: Error =
+    Cow::Borrowed("You may not use static properties in a class with reified type parameters");
+pub const cls_reified_generic_in_static_method: Error =
+    Cow::Borrowed("You may not use reified generics of the class in a static method");
+pub const static_method_reified_obj_creation: Error = Cow::Borrowed(
+    "You may not use object creation for potentially reified self or parent from a static method",
+);
+pub const non_invariant_reified_generic: Error =
+    Cow::Borrowed("Reified generics cannot be covariant or contravariant");
+pub const no_generics_on_constructors: Error = Cow::Borrowed(
+    "Generic type parameters are not allowed on constructors. Consider adding a type parameter to the class",
+);
+pub const no_type_parameters_on_dynamic_method_calls: Error =
+    Cow::Borrowed("Generics type parameters are disallowed on dynamic method calls");
+pub const dollar_unary: Error =
+    Cow::Borrowed("The dollar sign ('$') cannot be used as a unary operator");
+pub const experimental_in_codegen_without_hacksperimental: Error = Cow::Borrowed(
+    "Experimental mode files are not allowed during codegen unless the hacksperimental flag is set",
+);
+pub const type_alias_to_type_constant: Error =
+    Cow::Borrowed("Type aliases to type constants are not supported");
+pub const interface_with_memoize: Error =
+    Cow::Borrowed("Memoize is not allowed on interface methods");
+pub const multiple_reactivity_annotations: Error = Cow::Borrowed(
+    "Only one of following annotations is allowed: __Rx, __RxShallow, __RxLocal, __NonRx.",
+);
+pub const functions_cannot_implement_reactive: Error =
+    Cow::Borrowed("__OnlyRxIfImpl annotations are only valid on class methods.");
+pub const missing_reactivity_for_condition: Error = Cow::Borrowed(concat!(
+    "__OnlyRxIfImpl and __AtMostRxAsArgs annotations cannot ",
+    "be used without __Rx, __RxShallow, or __RxLocal.",
+));
+pub const misplaced_owned_mutable: Error =
+    Cow::Borrowed("__OwnedMutable annotation can only be placed on parameters.");
+pub const conflicting_mutable_and_owned_mutable_attributes: Error =
+    Cow::Borrowed("Parameter cannot have both __Mutable and __OwnedMutable annotations.");
+pub const conflicting_mutable_and_maybe_mutable_attributes: Error =
+    Cow::Borrowed("Parameter cannot have both __Mutable and __MaybeMutable annotations.");
+pub const conflicting_owned_mutable_and_maybe_mutable_attributes: Error =
+    Cow::Borrowed("Parameter cannot have both __OwnedMutable and __MaybeMutable annotations.");
+pub const mutably_owned_attribute_on_non_rx_function: Error =
+    Cow::Borrowed("__OwnedMutable annotated parameters are only allowed in reactive functions.");
+pub const invalid_non_rx_argument_for_lambda: Error = Cow::Borrowed(
+    "Invalid argument list for __NonRx attribute that is placed on anonymous function. Argument list for __NonRx attribute that is used in this position should be empty.",
+);
+pub const invalid_non_rx_argument_for_declaration: Error = Cow::Borrowed(
+    "Invalid argument list for __NonRx attribute that is placed on a declaration of function or method. Argument list for __NonRx attribute that is used in this position should contain only one string literal value.",
+);
+pub const nested_concurrent_blocks: Error = Cow::Borrowed("Concurrent blocks cannot be nested.");
+pub const fewer_than_two_statements_in_concurrent_block: Error = Cow::Borrowed(concat!(
+    "Expected 2 or more statements in concurrent block. Concurrent wrapping ",
+    "nothing or a single statement is not useful or already implied.",
+));
+pub const invalid_syntax_concurrent_block: Error = Cow::Borrowed(concat!(
+    "Concurrent block must contain a compound statement of two or ",
+    "more expression statements, IE concurrent { <expr>; <expr>; }.",
+));
+pub const statement_without_await_in_concurrent_block: Error =
+    Cow::Borrowed("Statement without an await in a concurrent block");
+pub const concurrent_is_disabled: Error = Cow::Borrowed("Concurrent is disabled");
+pub const static_closures_are_disabled: Error =
+    Cow::Borrowed("Static closures are not supported in Hack");
+pub const invalid_await_position: Error = Cow::Borrowed(concat!(
+    "Await cannot be used as an expression in this ",
+    "location because it's conditionally executed.",
+));
+pub const invalid_await_position_dependent: Error = Cow::Borrowed(concat!(
+    "Await cannot be used as an expression inside another await expression. ",
+    "Pull the inner await out into it's own statement.",
+));
+pub const misplaced_reactivity_annotation: Error =
+    Cow::Borrowed("Reactive annotations are not allowed on classes, interfaces or traits.");
+pub const mutability_annotation_on_constructor: Error = Cow::Borrowed(
+    "__Mutable, __MaybeMutable, and __MutableReturn annotations are not allowed on constructors.",
+);
+pub const mutability_annotation_on_static_method: Error =
+    Cow::Borrowed("__Mutable and __MaybeMutable annotations are not allowed on static methods.");
+pub const mutability_annotation_on_inout_parameter: Error = Cow::Borrowed(
+    "__Mutable, __MaybeMutable and __OwnedMutable annotations are not allowed on inout parameters.",
+);
+pub fn mutable_parameter_in_memoize_function(is_this: bool) -> Error {
+    Cow::Owned(format!(
+        "Memoized functions cannot have mutable {}",
+        if is_this { "$this." } else { "parameters." }.to_string()
+    ))
+}
+pub const mutable_return_in_memoize_function: Error =
+    Cow::Borrowed("Memoized functions cannot return mutable objects.");
+pub const vararg_and_mutable: Error = Cow::Borrowed(
+      "__Mutable, __OwnedMutable and __MaybeMutable annotations cannot be used with variadic parameters."
+  );
+pub const tparams_in_tconst: Error =
+    Cow::Borrowed("Type parameters are not allowed on class type constants");
+pub const targs_not_allowed: Error =
+    Cow::Borrowed("Type arguments are not allowed in this position");
+pub const reified_attribute: Error =
+    Cow::Borrowed("__Reified and __HasReifiedParent attributes may not be provided by the user");
+pub const lval_as_expression: Error = Cow::Borrowed(
+    "Assignments can no longer be used as expressions. Pull the assignment out into a separate statement.",
+);
+pub const non_public_const_in_interface: Error =
+    Cow::Borrowed("Constants inside of interfaces must have 'public' visibility.");
+pub fn elt_abstract_private(elt: &str) -> Error {
+    Cow::Owned(format!(
+        "Cannot declare abstract {} private.",
+        elt.to_string(),
+    ))
+}
+pub const const_has_multiple_visibilities: Error =
+    Cow::Borrowed("A constant cannot have multiple visibility modifiers.");
+pub const const_has_duplicate_modifiers: Error =
+    Cow::Borrowed("A constant cannot have duplicate modifiers.");
+pub const only_soft_allowed: Error = Cow::Borrowed("Only the __Soft attribute is allowed here.");
+pub const soft_no_arguments: Error = Cow::Borrowed("The __Soft attribute does not take arguments.");
+pub const no_legacy_soft_typehints: Error = Cow::Borrowed(
+    "The @ syntax for soft typehints is not allowed. Use the __Soft attribute instead.",
+);
+pub const static_const: Error = Cow::Borrowed("Cannot declare constants static.");
+pub const outside_dollar_str_interp: Error =
+    Cow::Borrowed("The ${x} syntax is disallowed in Hack. Use {$x} instead.");
+pub const no_const_interfaces_traits_enums: Error =
+    Cow::Borrowed("Interfaces, traits and enums may not be declared __Const");
+pub const no_const_late_init_props: Error =
+    Cow::Borrowed("__Const properties may not also be __LateInit");
+pub const no_const_static_props: Error = Cow::Borrowed("Static properties may not be __Const");
+pub const no_const_abstract_final_class: Error =
+    Cow::Borrowed("Cannot apply __Const attribute to an abstract final class");
+pub const no_legacy_attribute_syntax: Error = Cow::Borrowed(
+    "The <<...>> syntax for user attributes is not allowed. Use the @ syntax instead.",
+);
+pub const no_silence: Error = Cow::Borrowed("The error suppression operator @ is not allowed");
+pub const const_mutation: Error = Cow::Borrowed("Cannot mutate a class constant");
+pub const no_attributes_on_variadic_parameter: Error =
+    Cow::Borrowed("Attributes on variadic parameters are not allowed");
+pub const invalid_constant_initializer: Error =
+    Cow::Borrowed("Invalid expression in constant initializer");
+pub const parent_static_prop_decl: Error =
+    Cow::Borrowed("Cannot use static or parent::class in property declaration");
+pub fn error2070(open_tag: &str, close_tag: &str) -> Error {
+    Cow::Owned(format!(
+        "XHP: mismatched tag: '{}' not the same as '{}'",
+        close_tag.to_string(),
+        open_tag.to_string(),
+    ))
+}
+pub fn error2071(s: &str) -> Error {
+    Cow::Owned(format!("Decimal number is too big: {}", s.to_string(),))
+}
+pub fn error2072(s: &str) -> Error {
+    Cow::Owned(format!("Hexadecimal number is too big: {}", s.to_string(),))
+}
+pub const error2073: Error = Cow::Borrowed(concat!(
+    "A variadic parameter ('...') cannot have a modifier ",
+    "that changes the calling convention, like 'inout'.",
+));
+pub fn error2074(call_modifier: &str) -> Error {
+    Cow::Owned(format!(
+        "An '{}' parameter must not have a default value.",
+        call_modifier.to_string(),
+    ))
+}
+pub fn error2075(call_modifier: &str) -> Error {
+    Cow::Owned(format!(
+        "An '{}' parameter cannot be passed by reference ('&').",
+        call_modifier.to_string(),
+    ))
+}
+pub const error2076: Error = Cow::Borrowed("Cannot use both 'inout' and '&' on the same argument.");
+pub const error2077: Error = Cow::Borrowed("Cannot use empty list");
+pub const error2078: Error = Cow::Borrowed("Superglobals may not be taken by reference.");
+pub fn not_allowed_in_write(what: &str) -> Error {
+    Cow::Owned(format!(
+        "{} is not allowed in write context",
+        what.to_string(),
+    ))
+}
+pub const reassign_this: Error = Cow::Borrowed("Cannot re-assign $this");
+pub const references_not_allowed: Error =
+    Cow::Borrowed("References are only allowed as function call arguments");
+pub const enum_elem_name_is_class: Error = Cow::Borrowed("Enum element cannot be named 'class'");
+pub const sealed_enum: Error = Cow::Borrowed("Enums cannot be sealed.");
+pub fn property_has_multiple_modifiers(name: &str) -> Error {
+    Cow::Owned(format!(
+        "Multiple modifiers are not allowed: properties of {}",
+        name.to_string(),
+    ))
+}
+pub fn property_has_multiple_visibilities(name: &str) -> Error {
+    Cow::Owned(format!(
+        "Multiple access type modifiers are not allowed: properties of {}",
+        name.to_string(),
+    ))
+}
+pub const property_requires_visibility: Error = Cow::Borrowed(concat!(
+    "Property declarations require a visibility modifier ",
+    "such as public, private or protected.",
+));
+pub const abstract_prop_init: Error =
+    Cow::Borrowed("An abstract property must not have an initializer.");
+pub const const_static_prop_init: Error =
+    Cow::Borrowed("A const static property must have an initializer.");
+pub fn namespace_name_is_already_in_use(name: &str, short_name: &str) -> Error {
+    Cow::Owned(format!(
+        "Cannot use namespace {} as {} because the name is already in use",
+        name.to_string(),
+        short_name.to_string()
+    ))
+}
+pub const strict_namespace_hh: Error = Cow::Borrowed(concat!(
+    "To use strict Hack, place // strict after the open tag. ",
+    "If it's already there, remove this line. ",
+    "Hack is strict already.",
+));
+pub fn name_is_already_in_use_hh(line_num: usize, name: &str, short_name: &str) -> Error {
+    Cow::Owned(format!(
+        "Cannot use {} as {} because the name was explicitly used earlier via a `use' statement on line {}",
+        name.to_string(),
+        short_name.to_string(),
+        line_num.to_string(),
+    ))
+}
+pub fn name_is_already_in_use_implicit_hh(line_num: usize, name: &str, short_name: &str) -> Error {
+    Cow::Owned(format!(
+        concat!(
+            "Cannot use {} as {} because the name was implicitly used on line {}",
+            "; implicit use of names from the HH namespace can be suppressed by adding an explicit",
+            " `use' statement earlier in the current namespace block",
+        ),
+        name.to_string(),
+        short_name.to_string(),
+        line_num.to_string(),
+    ))
+}
+pub fn name_is_already_in_use_php(name: &str, short_name: &str) -> Error {
+    Cow::Owned(format!(
+        "Cannot use {} as {} because the name is already in use",
+        name.to_string(),
+        short_name.to_string(),
+    ))
+}
+pub const original_definition: Error = Cow::Borrowed("Original definition");
+pub fn function_name_is_already_in_use(name: &str, short_name: &str) -> Error {
+    Cow::Owned(format!(
+        "Cannot use function {} as {} because the name is already in use",
+        name.to_string(),
+        short_name.to_string(),
+    ))
+}
+pub fn const_name_is_already_in_use(name: &str, short_name: &str) -> Error {
+    Cow::Owned(format!(
+        "Cannot use const {} as {} because the name is already in use",
+        name.to_string(),
+        short_name.to_string(),
+    ))
+}
+pub fn type_name_is_already_in_use(name: &str, short_name: &str) -> Error {
+    Cow::Owned(format!(
+        "Cannot use type {} as {} because the name is already in use",
+        name.to_string(),
+        short_name.to_string(),
+    ))
+}
+pub const namespace_decl_first_statement: Error = Cow::Borrowed(
+    "Namespace declaration statement has to be the very first statement in the script",
+);
+pub const code_outside_namespace: Error =
+    Cow::Borrowed("No code may exist outside of namespace {}");
+pub const global_in_const_decl: Error =
+    Cow::Borrowed("Cannot have globals in constant declaration");
+pub const parent_static_const_decl: Error =
+    Cow::Borrowed("Cannot use static or parent::class in constant declaration");
+pub const no_async_before_lambda_body: Error =
+    Cow::Borrowed("Unexpected use of async {...} as lambda expression");
+pub const halt_compiler_top_level_only: Error =
+    Cow::Borrowed("__halt_compiler function should appear only at the top level");
+pub const trait_alias_rule_allows_only_final_and_visibility_modifiers: Error =
+    Cow::Borrowed("Only 'final' and visibility modifiers are allowed in trait alias rule");
+pub fn invalid_number_of_args(name: &str, n: usize) -> Error {
+    Cow::Owned(format!(
+        "Method {} must take exactly {} arguments",
+        name.to_string(),
+        n.to_string(),
+    ))
+}
+pub fn invalid_args_by_ref(name: &str) -> Error {
+    Cow::Owned(format!(
+        "Method {} cannot take arguments by reference",
+        name.to_string(),
+    ))
+}
+pub fn redeclaration_error(name: &str) -> Error {
+    Cow::Owned(format!("Cannot redeclare {}", name.to_string(),))
+}
+pub fn declared_name_is_already_in_use_implicit_hh(
+    line_num: usize,
+    name: &str,
+    _short_name: &str,
+) -> Error {
+    Cow::Owned(format!(
+        concat!(
+            "Cannot declare class {} because the name was implicitly used on line {}; ",
+            "implicit use of names from the HH namespace can be suppressed by adding an explicit ",
+            "`use' statement earlier in the current namespace block",
+        ),
+        name.to_string(),
+        line_num.to_string(),
+    ))
+}
+pub fn declared_name_is_already_in_use(line_num: usize, name: &str, _short_name: &str) -> Error {
+    Cow::Owned(format!(
+        concat!(
+            "Cannot declare class {} because the name was explicitly used earlier via a `use' ",
+            "statement on line {}",
+        ),
+        name.to_string(),
+        line_num.to_string(),
+    ))
+}
+pub const type_const_visibility: Error =
+    Cow::Borrowed("Type constants cannot have visibility modifiers");
+pub const const_in_trait: Error = Cow::Borrowed("Traits cannot have constants");
+pub const const_visibility: Error =
+    Cow::Borrowed("Class constants cannot have visibility modifiers in Hack files");
+pub const sealed_val_not_classname: Error =
+    Cow::Borrowed("Values in sealed whitelist must be classname constants.");
+pub const list_must_be_lvar: Error =
+    Cow::Borrowed("list() can only be used as an lvar. Did you mean to use tuple()?");
+pub const async_not_last: Error =
+    Cow::Borrowed("The 'async' modifier must be directly before the 'function' keyword.");
+pub const using_st_function_scoped_top_level: Error = Cow::Borrowed(concat!(
+    "Using statement in function scoped form may only be used at the top ",
+    "level of a function or a method",
+));
+pub const variadic_reference: Error =
+    Cow::Borrowed("Variadic '...' should be followed by a '$variable'");
+pub const reference_variadic: Error =
+    Cow::Borrowed("Variadic parameters cannot be taken by reference");
+pub const double_variadic: Error =
+    Cow::Borrowed("Parameter redundantly marked as variadic ('...').");
+pub const double_reference: Error =
+    Cow::Borrowed("Parameter redundantly marked as reference ('&').");
+pub fn conflicting_trait_require_clauses(name: &str) -> Error {
+    Cow::Owned(format!(
+        "Conflicting requirements for '{}'",
+        name.to_string(),
+    ))
+}
+pub const shape_type_ellipsis_without_trailing_comma: Error =
+    Cow::Borrowed("A comma is required before the ... in a shape type");
+pub const yield_in_magic_methods: Error =
+    Cow::Borrowed("'yield' is not allowed in constructors or magic methods");
+pub const reference_not_allowed_on_key: Error =
+    Cow::Borrowed("Key of collection element cannot be marked as reference");
+pub const reference_not_allowed_on_value: Error =
+    Cow::Borrowed("Value of collection element cannot be marked as reference");
+pub const reference_not_allowed_on_element: Error =
+    Cow::Borrowed("Collection element cannot be marked as reference");
+pub const yield_outside_function: Error = Cow::Borrowed("Yield can only be used inside a function");
+pub const reference_param_in_construct: Error =
+    Cow::Borrowed("Constructors cannot take parameters by reference");
+pub const coloncolonclass_on_dynamic: Error =
+    Cow::Borrowed("Dynamic class names are not allowed in compile-time ::class fetch");
+pub const this_in_static: Error =
+    Cow::Borrowed("Don't use $this in a static method, use static:: instead");
+pub fn async_magic_method(name: &str) -> Error {
+    Cow::Owned(format!(
+        "cannot declare constructors and magic methods such as '{}' async",
+        name.to_string(),
+    ))
+}
+pub const call_static_method: Error = Cow::Borrowed("__callStatic methods are no longer supported");
+pub fn reserved_keyword_as_class_name(class_name: &str) -> Error {
+    Cow::Owned(format!(
+        "Cannot use '{}' as class name as it is reserved",
+        class_name.to_string(),
+    ))
+}
+pub const xhp_class_multiple_category_decls: Error =
+    Cow::Borrowed("An XHP class cannot have multiple category declarations");
+pub const xhp_class_multiple_children_decls: Error =
+    Cow::Borrowed("An XHP class cannot have multiple children declarations");
+pub const inout_param_in_generator: Error =
+    Cow::Borrowed("Parameters may not be marked inout on generators");
+pub const inout_param_in_async_generator: Error =
+    Cow::Borrowed("Parameters may not be marked inout on generators");
+pub const inout_param_in_async: Error =
+    Cow::Borrowed("Parameters may not be marked inout on async functions");
+pub const inout_param_in_construct: Error =
+    Cow::Borrowed("Parameters may not be marked inout on constructors");
+pub const fun_arg_inout_set: Error =
+    Cow::Borrowed("You cannot set an inout decorated argument while calling a function");
+pub const fun_arg_inout_const: Error = Cow::Borrowed("You cannot decorate a constant as inout");
+pub const fun_arg_invalid_arg: Error = Cow::Borrowed("You cannot decorate this argument as inout");
+pub const fun_arg_inout_containers: Error = Cow::Borrowed(concat!(
+    "Parameters marked inout must be contained in locals, vecs, dicts, keysets,",
+    " and arrays",
+));
+pub const memoize_with_inout: Error =
+    Cow::Borrowed("<<__Memoize>> cannot be used on functions with inout parameters");
+pub const fn_with_inout_and_ref_params: Error =
+    Cow::Borrowed("Functions may not use both reference and inout parameters");
+pub const method_calls_on_xhp_attributes: Error =
+    Cow::Borrowed("Method calls are not allowed on XHP attributes");
+pub const method_calls_on_xhp_expression: Error =
+    Cow::Borrowed("Please add parentheses around the XHP component");
+pub const no_args_in_halt_compiler: Error =
+    Cow::Borrowed("__halt_compiler function does not accept any arguments");
+pub fn class_with_abstract_method(name: &str) -> Error {
+    Cow::Owned(format!(
+        concat!(
+            "Class {} contains an abstract method and must ",
+            "therefore be declared abstract",
+        ),
+        name.to_string(),
+    ))
+}
+pub const interface_has_private_method: Error =
+    Cow::Borrowed("Access type for interface method must be omitted");
+pub fn redeclaration_of_function(name: &str, loc: &str) -> Error {
+    Cow::Owned(format!(
+        "Cannot redeclare {}() (previously declared in {})",
+        name.to_string(),
+        loc.to_string()
+    ))
+}
+pub fn redeclaration_of_method(name: &str) -> Error {
+    Cow::Owned(format!("Redeclared method {}", name.to_string(),))
+}
+pub fn self_or_parent_colon_colon_class_outside_of_class(name: &str) -> Error {
+    Cow::Owned(format!(
+        "Cannot access {}::class when no class scope is active",
+        name.to_string(),
+    ))
+}
+pub fn invalid_is_as_expression_hint(n: &str, hint: &str) -> Error {
+    Cow::Owned(format!(
+        "{} typehints cannot be used with {}-expressions",
+        hint.to_string(),
+        n.to_string(),
+    ))
+}
+pub const elvis_operator_space: Error = Cow::Borrowed("An Elvis operator ('?:') is expected here.");
+pub const autoload_takes_one_argument: Error =
+    Cow::Borrowed("__autoload() must take exactly 1 argument");
+pub fn clone_takes_no_arguments(class_name: &str, method_name: &str) -> Error {
+    Cow::Owned(format!(
+        "Method {}::{} cannot accept any arguments",
+        class_name.to_string(),
+        method_name.to_string(),
+    ))
+}
+pub fn clone_cannot_be_static(class_name: &str, method_name: &str) -> Error {
+    Cow::Owned(format!(
+        "Clone method {}::{}() cannot be static",
+        class_name.to_string(),
+        method_name.to_string(),
+    ))
+}
+pub const namespace_not_a_classname: Error =
+    Cow::Borrowed("Namespace cannot be used as a classname");
+pub const for_with_as_expression: Error =
+    Cow::Borrowed("For loops can not use as-expressions. Did you mean foreach?");
+pub const sealed_final: Error = Cow::Borrowed("Classes cannot be both final and sealed.");
+pub const interface_implements: Error =
+    Cow::Borrowed("Interfaces may not implement other interfaces or classes");
+pub const memoize_on_lambda: Error =
+    Cow::Borrowed("<<__Memoize>> attribute is not allowed on lambdas or anonymous functions.");
+pub fn declared_final(elt: &str) -> Error {
+    Cow::Owned(format!("{} cannot be declared final.", elt.to_string(),))
+}
+pub const empty_method_name: Error = Cow::Borrowed("Expected a method name");
+pub fn lowering_parsing_error(text: &str, syntax: &str) -> Error {
+    Cow::Owned(format!(
+        "Encountered unexpected text '{}', was expecting a {}.",
+        text.to_string(),
+        syntax.to_string(),
+    ))
+}
+pub const xhp_class_attribute_type_constant: Error =
+    Cow::Borrowed("Type constants are not allowed on xhp class attributes");

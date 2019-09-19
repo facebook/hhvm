@@ -55,23 +55,23 @@ class D extends C {
 function foo() {
   $obj = new A(111, 222, 333);
   apc_store('foobar', $obj);
-  $obj = apc_fetch('foobar');
-  $obj = apc_fetch('foobar');
+  $obj = __hhvm_intrinsics\apc_fetch_no_check('foobar');
+  $obj = __hhvm_intrinsics\apc_fetch_no_check('foobar');
   var_dump($obj);
   $obj = new B(111, 222, 333);
   apc_store('foobar', $obj);
-  $obj = apc_fetch('foobar');
-  $obj = apc_fetch('foobar');
+  $obj = __hhvm_intrinsics\apc_fetch_no_check('foobar');
+  $obj = __hhvm_intrinsics\apc_fetch_no_check('foobar');
   var_dump($obj);
   $obj = new C(111, 222, 333);
   apc_store('foobar', $obj);
-  $obj = apc_fetch('foobar');
-  $obj = apc_fetch('foobar');
+  $obj = __hhvm_intrinsics\apc_fetch_no_check('foobar');
+  $obj = __hhvm_intrinsics\apc_fetch_no_check('foobar');
   var_dump($obj);
   $obj = new D(111, 222, 333);
   apc_store('foobar', $obj);
-  $obj = apc_fetch('foobar');
-  $obj = apc_fetch('foobar');
+  $obj = __hhvm_intrinsics\apc_fetch_no_check('foobar');
+  $obj = __hhvm_intrinsics\apc_fetch_no_check('foobar');
   var_dump($obj);
 }
 

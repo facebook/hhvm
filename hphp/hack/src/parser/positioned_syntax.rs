@@ -6,11 +6,13 @@
 
 use std::rc::Rc;
 
-use crate::lexable_token::LexableToken;
-use crate::positioned_token::PositionedToken;
-use crate::syntax::*;
-use crate::syntax_kind::SyntaxKind;
-use crate::token_kind::TokenKind;
+use crate::{
+    indexed_source_text::IndexedSourceText, lexable_token::LexableToken,
+    positioned_token::PositionedToken, source_text::SourceText, syntax::*, syntax_kind::SyntaxKind,
+    syntax_trait::SyntaxTrait, token_kind::TokenKind,
+};
+
+use oxidized::pos::Pos;
 
 #[derive(Debug, Clone)]
 pub enum PositionedValue {
@@ -53,6 +55,22 @@ impl PositionedValue {
                 .leading_start_offset()
                 .expect("invariant violation for Positioned Syntax"),
             Missing { offset, .. } => *offset,
+        }
+    }
+
+    fn leading_width(&self) -> usize {
+        use PositionedValue::*;
+        match self {
+            TokenValue(t) | TokenSpan { left: t, .. } => t.leading_width(),
+            Missing { .. } => 0,
+        }
+    }
+
+    fn trailing_width(&self) -> usize {
+        use PositionedValue::*;
+        match self {
+            TokenValue(t) | TokenSpan { right: t, .. } => t.trailing_width(),
+            Missing { .. } => 0,
         }
     }
 
@@ -138,8 +156,8 @@ impl PositionedValue {
         syntax_variant: &'a SyntaxVariant<PositionedToken, Self>,
         f: &'b dyn Fn(&'a Self, Acc<'a>) -> Acc<'a>,
     ) -> Acc<'a> {
-        let f_ = |n: &'a Syntax<PositionedToken, Self>, acc: Acc<'a>| f(&n.value, acc);
-        Syntax::fold_over_children(&f_, acc, syntax_variant)
+        let f_ = |acc: Acc<'a>, n: &'a Syntax<PositionedToken, Self>| f(&n.value, acc);
+        syntax_variant.iter_children().fold(acc, f_)
     }
 
     // This function should be a closure in the caller,
@@ -213,3 +231,72 @@ impl SyntaxValueType<PositionedToken> for PositionedValue {
 }
 
 pub type PositionedSyntax = Syntax<PositionedToken, PositionedValue>;
+
+impl SyntaxTrait for PositionedSyntax {
+    fn offset(&self) -> Option<usize> {
+        Some(self.start_offset())
+    }
+
+    fn width(&self) -> usize {
+        self.value.width()
+    }
+
+    fn leading_width(&self) -> usize {
+        self.value.leading_width()
+    }
+
+    fn trailing_width(&self) -> usize {
+        self.value.trailing_width()
+    }
+
+    fn full_width(&self) -> usize {
+        self.leading_width() + self.width() + self.trailing_width()
+    }
+
+    fn leading_start_offset(&self) -> usize {
+        self.value.start_offset()
+    }
+
+    fn extract_text<'a>(&self, source_text: &'a SourceText) -> Option<&'a str> {
+        Some(self.text(source_text))
+    }
+}
+
+pub trait PositionedSyntaxTrait: SyntaxTrait {
+    fn start_offset(&self) -> usize;
+    fn end_offset(&self) -> usize;
+
+    /**
+     * Similar to position except that the end_offset does not include
+     * the last character. (the end offset is one larger than given by position)
+     */
+    fn position_exclusive(&self, source_text: &IndexedSourceText) -> Option<Pos>;
+    fn text<'a>(&self, source_text: &'a SourceText) -> &'a str;
+    fn leading_text<'a>(&self, source_text: &'a SourceText) -> &'a str;
+}
+
+impl PositionedSyntaxTrait for PositionedSyntax {
+    fn start_offset(&self) -> usize {
+        self.leading_start_offset() + self.leading_width()
+    }
+
+    fn end_offset(&self) -> usize {
+        let mut w = self.width();
+        w = if w <= 0 { 0 } else { w - 1 };
+        self.start_offset() + w
+    }
+
+    fn position_exclusive(&self, source_text: &IndexedSourceText) -> Option<Pos> {
+        let start_offset = self.start_offset();
+        let end_offset = self.end_offset() + 1;
+        Some(source_text.relative_pos(start_offset, end_offset))
+    }
+
+    fn text<'a>(&self, source_text: &'a SourceText) -> &'a str {
+        source_text.sub_as_str(self.start_offset(), self.width())
+    }
+
+    fn leading_text<'a>(&self, source_text: &'a SourceText) -> &'a str {
+        source_text.sub_as_str(self.leading_start_offset(), self.leading_width())
+    }
+}

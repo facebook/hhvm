@@ -10,7 +10,7 @@
   NullUninit
   NullUninit
   String "foo"
-  FCallCtor <> 1 1 "" - ""
+  FCallCtor <LockWhileUnwinding> 1 1 "" - ""
   PopC
   LockObj
   PopC
@@ -21,7 +21,7 @@
   NullUninit
   NullUninit
   String "foo"
-  FCallCtor <> 1 1 "" - ""
+  FCallCtor <LockWhileUnwinding> 1 1 "" - ""
   PopC
   LockObj
   PopC
@@ -32,7 +32,7 @@
   NullUninit
   NullUninit
   String "foo"
-  FCallCtor <> 1 1 "" - ""
+  FCallCtor <LockWhileUnwinding> 1 1 "" - ""
   PopC
   LockObj
   PopC
@@ -43,7 +43,7 @@
   NullUninit
   NullUninit
   String "foo"
-  FCallCtor <> 1 1 "" - ""
+  FCallCtor <LockWhileUnwinding> 1 1 "" - ""
   PopC
   LockObj
   PopC
@@ -54,7 +54,7 @@
   NullUninit
   NullUninit
   String "foo"
-  FCallCtor <> 1 1 "" - ""
+  FCallCtor <LockWhileUnwinding> 1 1 "" - ""
   PopC
   LockObj
   PopC

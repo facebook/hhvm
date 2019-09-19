@@ -54,7 +54,7 @@ union Value {
   int64_t       num;    // KindOfInt64, KindOfBool (must be zero-extended)
   double        dbl;    // KindOfDouble
   StringData*   pstr;   // KindOfString, KindOfPersistentString
-  ArrayData*    parr;   // KindOfArray, KindOfVec, KindOfDict, KindOfShape, KindOfKeyset
+  ArrayData*    parr;   // KindOfArray, KindOfVec, KindOfDict, KindOfKeyset
   ObjectData*   pobj;   // KindOfObject
   ResourceHdr*  pres;   // KindOfResource
   RefData*      pref;   // KindOfRef
@@ -95,10 +95,11 @@ struct ConstModifiers {
 union AuxUnion {
   // Undiscriminated raw value.
   uint32_t u_raw;
-  // Valid only if the async eager return optimization was requested.
-  // True if the function returned an Awaitable. The Awaitable may be
-  // already finished, as interpreter's RetC always boxes the result.
-  uint32_t u_asyncNonEagerReturnFlag;
+  // True if the function was supposed to return an Awaitable, but instead
+  // returned the value that would be packed inside that Awaitable. If this
+  // flag is false, it doesn't mean that the TV is a non-finished Awaitable,
+  // or an Awaitable at all.
+  uint32_t u_asyncEagerReturnFlag;
   // Key type and hash for MixedArray.
   int32_t u_hash;
   // Magic number for asserts in VarNR.
@@ -283,8 +284,6 @@ X(KindOfNull,         void);
 X(KindOfBoolean,      bool);
 X(KindOfInt64,        int64_t);
 X(KindOfDouble,       double);
-X(KindOfShape,        ArrayData*);
-X(KindOfPersistentShape,  const ArrayData*);
 X(KindOfArray,        ArrayData*);
 X(KindOfPersistentArray,  const ArrayData*);
 X(KindOfVec,          ArrayData*);

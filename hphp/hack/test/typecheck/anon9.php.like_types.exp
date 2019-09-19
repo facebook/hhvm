@@ -1,0 +1,6 @@
+File "anon9.php", line 16, characters 10-11:
+Invalid return type (Typing[4110])
+File "anon9.php", line 12, characters 18-43:
+Expected ~(function(string): string) because it is an unenforceable type
+File "anon9.php", line 13, characters 8-38:
+But got (function(): string)

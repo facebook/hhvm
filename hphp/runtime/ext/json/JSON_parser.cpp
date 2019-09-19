@@ -34,6 +34,7 @@ SOFTWARE.
 
 #include <folly/FBVector.h>
 
+#include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/string-buffer.h"
@@ -361,6 +362,7 @@ struct SimpleParser {
     , is_tsimplejson(is_tsimplejson)
   {
     assertx(input[length] == 0);  // Parser relies on sentinel to avoid checks.
+    prov_tag = arrprov::tagFromPC();
   }
 
   /*
@@ -512,22 +514,29 @@ struct SimpleParser {
     auto arr = [&] {
       if (container_type == JSONContainerType::HACK_ARRAYS) {
         return top == fp
+          ? ArrayData::CreateVec()
+          : PackedArray::MakeVecNatural(top - fp, fp);
+      }
+      if (container_type == JSONContainerType::LEGACY_HACK_ARRAYS) {
+        auto ret = top == fp
           ? staticEmptyVecArray()
           : PackedArray::MakeVecNatural(top - fp, fp);
+        ret->setLegacyArray(true);
+        return ret;
       }
       if (container_type == JSONContainerType::DARRAYS_AND_VARRAYS) {
         return top == fp
-          ? staticEmptyVArray()
+          ? ArrayData::CreateVArray()
           : PackedArray::MakeVArrayNatural(top - fp, fp);
       }
       if (container_type == JSONContainerType::DARRAYS) {
         return top == fp
-          ? staticEmptyDArray()
+          ? ArrayData::CreateDArray()
           : MixedArray::MakeDArrayNatural(top - fp, fp);
       }
       assertx(container_type == JSONContainerType::PHP_ARRAYS);
       return top == fp
-        ? staticEmptyArray()
+        ? ArrayData::Create()
         : PackedArray::MakePackedNatural(top - fp, fp);
     }();
     top = fp;
@@ -567,18 +576,24 @@ struct SimpleParser {
     auto arr = [&] {
       if (container_type == JSONContainerType::HACK_ARRAYS) {
         return top == fp
+          ? ArrayData::CreateDict()
+          : MixedArray::MakeDict((top - fp) >> 1, fp)->asArrayData();
+      }
+      if (container_type == JSONContainerType::LEGACY_HACK_ARRAYS) {
+        auto ret = top == fp
           ? staticEmptyDictArray()
           : MixedArray::MakeDict((top - fp) >> 1, fp)->asArrayData();
+        ret->setLegacyArray(true);
       }
       if (container_type == JSONContainerType::DARRAYS ||
           container_type == JSONContainerType::DARRAYS_AND_VARRAYS) {
         return top == fp
-          ? staticEmptyDArray()
+          ? ArrayData::CreateDArray()
           : MixedArray::MakeDArray((top - fp) >> 1, fp)->asArrayData();
       }
       assertx(container_type == JSONContainerType::PHP_ARRAYS);
       return top == fp
-        ? staticEmptyArray()
+        ? ArrayData::Create()
         : MixedArray::MakeMixed((top - fp) >> 1, fp)->asArrayData();
     }();
     // MixedArray::MakeMixed can return nullptr if there are duplicate keys
@@ -668,6 +683,10 @@ struct SimpleParser {
     auto const tv = top++;
     tv->m_type = data->toDataType();
     tv->m_data.parr = data;
+
+    if (RuntimeOption::EvalArrayProvenance && prov_tag) {
+      *tv = arrprov::tagTVKnown(*tv, *prov_tag);
+    }
   }
 
   const char* p;
@@ -675,6 +694,7 @@ struct SimpleParser {
   int array_depth;
   JSONContainerType container_type;
   bool is_tsimplejson;
+  folly::Optional<arrprov::Tag> prov_tag;
 };
 
 /*
@@ -742,6 +762,7 @@ struct json_parser {
   UncheckedBuffer sb_buf;
   UncheckedBuffer sb_key;
   int sb_cap{0};  // Capacity of each of sb_buf/key.
+  folly::Optional<arrprov::Tag> prov_tag;
 
   void initSb(int length) {
     if (UNLIKELY(length >= sb_cap)) {
@@ -943,8 +964,6 @@ static void json_create_zval(Variant &z, UncheckedBuffer &buf, DataType type,
     case KindOfUninit:
     case KindOfNull:
     case KindOfPersistentString:
-    case KindOfPersistentShape:
-    case KindOfShape:
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfPersistentVec:
@@ -1006,7 +1025,8 @@ void utf16_to_utf8(UncheckedBuffer &buf, unsigned short utf16) {
 
 StaticString s__empty_("_empty_");
 
-static void object_set(Variant &var,
+static void object_set(const json_parser* json,
+                       Variant &var,
                        const String& key,
                        const Variant& value,
                        int assoc,
@@ -1024,6 +1044,10 @@ static void object_set(Variant &var,
       collections::set(var.getObjectData(), &keyTV, value.toCell());
     } else if (container_type == JSONContainerType::HACK_ARRAYS) {
       forceToDict(var).set(key, value);
+      if (RuntimeOption::EvalArrayProvenance && json->prov_tag) {
+        auto const tv = var.asTypedValue();
+        *tv = arrprov::tagTVKnown(*tv, *json->prov_tag);
+      }
     } else if (container_type == JSONContainerType::DARRAYS ||
                container_type == JSONContainerType::DARRAYS_AND_VARRAYS) {
       int64_t i;
@@ -1062,7 +1086,7 @@ static void attach_zval(json_parser *json,
       root.toArrRef().append(child);
     }
   } else if (up_mode == Mode::OBJECT) {
-    object_set(root, key, child, assoc, container_type);
+    object_set(json, root, key, child, assoc, container_type);
   }
 }
 
@@ -1082,6 +1106,10 @@ JSONContainerType get_container_type_from_options(int64_t options) {
 
   if (options & k_JSON_FB_DARRAYS_AND_VARRAYS) {
     return JSONContainerType::DARRAYS_AND_VARRAYS;
+  }
+
+  if (options & k_JSON_FB_LEGACY_HACK_ARRAYS) {
+    return JSONContainerType::LEGACY_HACK_ARRAYS;
   }
 
   return JSONContainerType::PHP_ARRAYS;
@@ -1132,6 +1160,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
   // they exceed kMaxPersistentStringBufferCapacity at exit or if the thread
   // is explicitly flushed (e.g., due to being idle).
   json->initSb(length);
+  json->prov_tag = arrprov::tagFromPC();
   SCOPE_EXIT {
     constexpr int kMaxPersistentStringBufferCapacity = 256 * 1024;
     if (json->sb_cap > kMaxPersistentStringBufferCapacity) json->flushSb();
@@ -1145,7 +1174,8 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
                              k_JSON_FB_DARRAYS |
                              k_JSON_FB_DARRAYS_AND_VARRAYS |
                              k_JSON_FB_HACK_ARRAYS |
-                             k_JSON_FB_THRIFT_SIMPLE_JSON)) &&
+                             k_JSON_FB_THRIFT_SIMPLE_JSON |
+                             k_JSON_FB_LEGACY_HACK_ARRAYS)) &&
       depth >= SimpleParser::kMaxArrayDepth &&
       length <= RuntimeOption::EvalSimpleJsonMaxLength &&
       SimpleParser::TryParse(p, length, json->tl_buffer.tv, z,
@@ -1294,6 +1324,11 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
             {
               top = Array::CreateDArray();
             /* </fb> */
+            } else if (
+              container_type == JSONContainerType::LEGACY_HACK_ARRAYS) {
+              auto arr = Array::CreateDict().copy();
+              arr->setLegacyArray(true);
+              top = arr;
             } else {
               top = Array::Create();
             }
@@ -1327,7 +1362,8 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
           Variant mval;
           json_create_zval(mval, *buf, type, options);
           Variant &top = json->stack[json->top].val;
-          object_set(top, copy_and_clear(*key), mval, assoc, container_type);
+          object_set(json, top, copy_and_clear(*key),
+                     mval, assoc, container_type);
           buf->clear();
           reset_type();
         }
@@ -1367,6 +1403,10 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
             top = Array::CreateVArray();
           } else if (container_type == JSONContainerType::DARRAYS) {
             top = Array::CreateDArray();
+          } else if (container_type == JSONContainerType::LEGACY_HACK_ARRAYS) {
+            auto arr = Array::CreateVec().copy();
+            arr->setLegacyArray(true);
+            top = arr;
           } else {
             top = Array::Create();
           }
@@ -1448,6 +1488,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
               if (type != kInvalidDataType) {
                 Variant &top = json->stack[json->top].val;
                 object_set(
+                  json,
                   top,
                   copy_and_clear(*key),
                   mval,

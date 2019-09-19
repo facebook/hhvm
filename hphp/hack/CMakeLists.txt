@@ -83,15 +83,21 @@ else()
   list(APPEND extra_link_opts "$<TARGET_LINKER_FILE:sqlite3>")
 endif()
 
+get_filename_component(RUSTC_BIN_DIR "${RUSTC_EXECUTABLE}" DIRECTORY)
+get_filename_component(CARGO_BIN_DIR "${CARGO_EXECUTABLE}" DIRECTORY)
+
 function(invoke_dune name target)
   add_custom_target(
       ${name}
       COMMAND
+        export "RUSTC=${RUSTC_EXECUTABLE}" &&
+        export "CARGO_HOME=${CMAKE_CURRENT_BINARY_DIR}/cargo_home" &&
+        export "HACK_NO_CARGO_VENDOR=true" &&
         export OPAMROOT=${OPAMROOT} &&
         export PYTHONPATH="${HPHP_HOME}" && # needed for verify.py for `hack_dune_test`
         export HACK_SOURCE_ROOT="${CMAKE_CURRENT_SOURCE_DIR}" &&
         export HACK_BUILD_ROOT="${CMAKE_CURRENT_SOURCE_DIR}/_build/default" &&
-        PATH="${TP_BUILD_DIR}/ocaml/build/bin:$(PATH)"
+        PATH="${RUSTC_BIN_DIR}:${CARGO_BIN_DIR}:${TP_BUILD_DIR}/ocaml/build/bin:$(PATH)"
         opam config exec --
         $(MAKE) --makefile=Makefile.dune ${target}
         DUNE_BUILD_DIR="${DUNE_BUILD_DIR}"

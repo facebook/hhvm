@@ -41,6 +41,7 @@ main1();
 
 
 
+
 class C3 {
   public function __call($fn, $args) {
     echo "C3::__call\n";
@@ -48,10 +49,9 @@ class C3 {
     var_dump($fn, $args);
     echo "\n";
   }
+
   public static function test() {
-    // FPushClsMethodD
-    call_user_func(array('C3', 'foo'), "a", "b", "c", "d");
-    // FPushClsMethodF
+    // FCallClsMethodD
     call_user_func(array('C3', 'foo'), "a", "b", "c", "d");
   }
 }

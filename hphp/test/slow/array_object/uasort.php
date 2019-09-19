@@ -26,6 +26,6 @@ $arrayObject = new ArrayObject($array);
 print_r($arrayObject);
 
 // Sort and print the resulting array
-$arrayObject->uasort('cmp');
+$arrayObject->uasort(fun('cmp'));
 print_r($arrayObject);
 }

@@ -1,4 +1,4 @@
 File "trait_private_bad2.php", line 24, characters 18-20:
-Could not find static method foo in type B (Typing[4090])
+No static method 'foo' in B (did you mean instance method 'bar'?) (Typing[4090])
 File "trait_private_bad2.php", line 22, characters 7-7:
 Declaration of B is here

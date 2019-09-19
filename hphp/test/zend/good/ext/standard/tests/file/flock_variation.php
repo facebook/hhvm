@@ -4,7 +4,7 @@ Prototype: bool flock(resource $handle, int $operation [, int &$wouldblock]);
 Description: PHP supports a portable way of locking complete files
   in an advisory way
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing flock() fun with the various operation and
             wouldblock values                                ***\n";
 $file = dirname(__FILE__)."/flock.tmp";
@@ -60,3 +60,4 @@ fclose($fp);
 @unlink($file);
 
 echo "\n*** Done ***\n";
+}

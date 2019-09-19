@@ -1,17 +1,22 @@
 <?hh
+
 include "connect.inc";
 
-$tmp    = NULL;
-$link   = NULL;
+<<__EntryPoint>>
+function main_entry(): void {
 
-try { mysql_escape_string(); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+  $tmp    = NULL;
+  $link   = NULL;
 
-var_dump(@mysql_escape_string("Am I a unicode string in PHP 6?"));
-var_dump(@mysql_escape_string('\\'));
-var_dump(@mysql_escape_string('"'));
-var_dump(@mysql_escape_string("'"));
-var_dump(@mysql_escape_string("\n"));
-var_dump(@mysql_escape_string("\r"));
-var_dump(@mysql_escape_string("foo" . chr(0) . "bar"));
+  try { mysql_escape_string(); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
-print "done!";
+  var_dump(@mysql_escape_string("Am I a unicode string in PHP 6?"));
+  var_dump(@mysql_escape_string('\\'));
+  var_dump(@mysql_escape_string('"'));
+  var_dump(@mysql_escape_string("'"));
+  var_dump(@mysql_escape_string("\n"));
+  var_dump(@mysql_escape_string("\r"));
+  var_dump(@mysql_escape_string("foo" . chr(0) . "bar"));
+
+  print "done!";
+}

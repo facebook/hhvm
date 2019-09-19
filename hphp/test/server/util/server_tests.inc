@@ -28,32 +28,32 @@ function dumpLogFilesToStdoutAndDie() {
 
   sleep(1);
   error_log('-------------------------------------------');
-  error_log("Contents of '${LOG_ROOT}_test$test_run_id.log'");
-  readfile("${LOG_ROOT}_test$test_run_id.log");
+  error_log("Contents of '{$LOG_ROOT}_test$test_run_id.log'");
+  readfile("{$LOG_ROOT}_test$test_run_id.log");
   echo "\n";
   error_log('-------------------------------------------');
-  error_log("Contents of '${LOG_ROOT}_test_server$test_run_id.log'");
-  readfile("${LOG_ROOT}_test_server$test_run_id.log");
+  error_log("Contents of '{$LOG_ROOT}_test_server$test_run_id.log'");
+  readfile("{$LOG_ROOT}_test_server$test_run_id.log");
   echo "\n";
   error_log('-------------------------------------------');
-  error_log("Contents of '${LOG_ROOT}_test_server_stdout$test_run_id.log'");
-  readfile("${LOG_ROOT}_test_server_stdout$test_run_id.log");
+  error_log("Contents of '{$LOG_ROOT}_test_server_stdout$test_run_id.log'");
+  readfile("{$LOG_ROOT}_test_server_stdout$test_run_id.log");
   echo "\n";
   error_log('-------------------------------------------');
-  error_log("Contents of '${LOG_ROOT}_test_server_stderr$test_run_id.log'");
-  readfile("${LOG_ROOT}_test_server_stderr$test_run_id.log");
+  error_log("Contents of '{$LOG_ROOT}_test_server_stderr$test_run_id.log'");
+  readfile("{$LOG_ROOT}_test_server_stderr$test_run_id.log");
   echo "\n";
   error_log('-------------------------------------------');
-  error_log("Contents of '${LOG_ROOT}_test_client$test_run_id.log'");
-  readfile("${LOG_ROOT}_test_client$test_run_id.log");
+  error_log("Contents of '{$LOG_ROOT}_test_client$test_run_id.log'");
+  readfile("{$LOG_ROOT}_test_client$test_run_id.log");
   echo "\n";
   error_log('-------------------------------------------');
-  error_log("Contents of '${LOG_ROOT}_test_sandbox_access.log'");
-  readfile("${LOG_ROOT}_test_sandbox_access.log");
+  error_log("Contents of '{$LOG_ROOT}_test_sandbox_access.log'");
+  readfile("{$LOG_ROOT}_test_sandbox_access.log");
   echo "\n";
   error_log('-------------------------------------------');
-  error_log("Contents of '${LOG_ROOT}_curl$test_run_id.log'");
-  readfile("${LOG_ROOT}_curl$test_run_id.log");
+  error_log("Contents of '{$LOG_ROOT}_curl$test_run_id.log'");
+  readfile("{$LOG_ROOT}_curl$test_run_id.log");
   echo "\n";
   error_log('-------------------------------------------');
   throw new Exception("test failed");
@@ -84,14 +84,14 @@ function getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
 
   $portConfig = ' -vServer.Port='.$serverPort;
   $serverConfig = ' --config='.$home.'/config/server.ini';
-  $logFileConfig = ' -vLog.File='."${LOG_ROOT}_test_server$test_run_id.log";
+  $logFileConfig = ' -vLog.File='."{$LOG_ROOT}_test_server$test_run_id.log";
   $logFileConfig.= ' -vLog.Access.Default.File='.
-    "${LOG_ROOT}_access_log$test_run_id.log";
+    "{$LOG_ROOT}_access_log$test_run_id.log";
   $srcRootConfig = ' -vServer.SourceRoot='.$root;
   $includePathConfig = ' -vServer.IncludeSearchPaths.0='.$root;
   $adminPortConfig = $adminPort ? ' -vAdminServer.Port='.$adminPort : '';
   $debugPortConfig = $debugPort ? ' -vEval.Debugger.Port='.$debugPort : '';
-  $repoConfig = " -vRepo.Central.Path=${LOG_ROOT}_server{$test_run_id}_{$instance_id}.hhbc";
+  $repoConfig = " -vRepo.Central.Path={$LOG_ROOT}_server{$test_run_id}_{$instance_id}.hhbc";
   $useJit = array_key_exists('HHVM_JIT', $_ENV) && $_ENV['HHVM_JIT'] == 1;
   $jitConfig = ' -vEval.Jit='.($useJit ? "true" : "false");
   // To emulate sandbox setup, let Sandbox.Home be '$home'
@@ -116,7 +116,7 @@ function getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
     $repoKey = 'x'.$root.':'.$repoArgs;
     if (!isset(ServerUtilServerTests::$repo_builds[$repoKey])) {
       ServerUtilServerTests::$repo_builds[$repoKey] =
-        "${LOG_ROOT}_bytecode{$test_run_id}_{$instance_id}";
+        "{$LOG_ROOT}_bytecode{$test_run_id}_{$instance_id}";
       $cmd = "$hhvm --hphp -k1 -l2 -t hhbc -o " . ServerUtilServerTests::$repo_builds[$repoKey] .
         " --input-dir $root $repoArgs";
 
@@ -137,8 +137,8 @@ function getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
     $portConfig . $srcRootConfig .
     $includePathConfig . $sandboxHomeConfig . $adminPortConfig .
     $debugPortConfig . $repoConfig . $jitConfig . ' ' . $customArgs .
-    " > ${LOG_ROOT}_test_server_stdout$test_run_id.log" .
-    " 2> ${LOG_ROOT}_test_server_stderr$test_run_id.log";
+    " > {$LOG_ROOT}_test_server_stdout$test_run_id.log" .
+    " 2> {$LOG_ROOT}_test_server_stderr$test_run_id.log";
 
   return $cmd;
 }
@@ -181,7 +181,8 @@ function startServer(&$serverPort, &$adminPort, &$debugPort, $home, $root,
 function checkServerId($serverPort, $expectedIds) {
   $host = 'localhost';
   $r = request($host, $serverPort, "hello.php");
-  if (preg_match('/Hello, World!(.*+)/', $r ?? '', &$matches)) {
+  $matches = null;
+  if (preg_match_with_matches('/Hello, World!(.*+)/', $r ?? '', inout $matches)) {
     foreach ((array)$expectedIds as $id) {
       if ($matches[1] == $id) return true;
     }
@@ -227,18 +228,18 @@ function stopServer($adminPort, $serverProc) {
   }
   proc_close($serverProc);
 
-  @unlink("${LOG_ROOT}_test$test_run_id.log");
-  @unlink("${LOG_ROOT}_test_server$test_run_id.log");
-  @unlink("${LOG_ROOT}_test_server_stderr$test_run_id.log");
-  @unlink("${LOG_ROOT}_test_server_stdout$test_run_id.log");
-  @unlink("${LOG_ROOT}_test_client$test_run_id.log");
-  @unlink("${LOG_ROOT}_client$test_run_id.hhbc");
-  @unlink("${LOG_ROOT}_curl$test_run_id.log");
-  @unlink("${LOG_ROOT}_access_log$test_run_id.log");
+  @unlink("{$LOG_ROOT}_test$test_run_id.log");
+  @unlink("{$LOG_ROOT}_test_server$test_run_id.log");
+  @unlink("{$LOG_ROOT}_test_server_stderr$test_run_id.log");
+  @unlink("{$LOG_ROOT}_test_server_stdout$test_run_id.log");
+  @unlink("{$LOG_ROOT}_test_client$test_run_id.log");
+  @unlink("{$LOG_ROOT}_client$test_run_id.hhbc");
+  @unlink("{$LOG_ROOT}_curl$test_run_id.log");
+  @unlink("{$LOG_ROOT}_access_log$test_run_id.log");
 
   $next_instance_id = ServerUtilServerTests::$next_instance_id;
   for ($instance_id = 0; $instance_id < $next_instance_id; $instance_id++) {
-    @unlink("${LOG_ROOT}_server{$test_run_id}_{$instance_id}.hhbc");
+    @unlink("{$LOG_ROOT}_server{$test_run_id}_{$instance_id}.hhbc");
   }
 }
 
@@ -252,7 +253,7 @@ function takeoverOldServer($serverPort, $adminPort, $home, $root,
     tlog('Old server is not running');
     return;
   }
-  $customArgs .= " -vServer.TakeoverFilename=${socketFile}";
+  $customArgs .= " -vServer.TakeoverFilename={$socketFile}";
   $cmd = getServerCmd($serverPort, $adminPort, false, $home, $root,
                       $customArgs, $serverId);
   $pipes = array();
@@ -290,7 +291,7 @@ function http_request($host, $port, $path, $timeout = 1200, $curl_opts = '') {
 
   $LOG_ROOT = ServerUtilServerTests::$LOG_ROOT;
   $test_run_id = ServerUtilServerTests::$test_run_id;
-  $cmd = "curl $post --trace-ascii ${LOG_ROOT}_curl$test_run_id.log ".
+  $cmd = "curl $post --trace-ascii {$LOG_ROOT}_curl$test_run_id.log ".
     "--silent $curl_opts --connect-timeout $timeout ".
     "-H 'Host: $host_name' $headers --url \"$url\"";
   tlog("Requesting page with command: $cmd");

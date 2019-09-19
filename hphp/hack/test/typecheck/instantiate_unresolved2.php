@@ -15,7 +15,7 @@ class C {
   }
 }
 
-/* HH_FIXME[4110] */
+/* HH_FIXME[4336] */
 function nullthrows<T>(?T $x): T {
 }
 

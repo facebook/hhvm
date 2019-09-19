@@ -1,0 +1,8 @@
+File "stray_goto_label.php", line 5, characters 3-7:
+Labels are used only for `goto`, which is not allowed in Hack files (Parsing[1002])
+File "stray_goto_label.php", line 6, characters 13-19:
+Invalid argument (Typing[4110])
+File "stray_goto_label.php", line 4, characters 15-17:
+Expected int
+File "stray_goto_label.php", line 4, characters 24-29:
+But got string

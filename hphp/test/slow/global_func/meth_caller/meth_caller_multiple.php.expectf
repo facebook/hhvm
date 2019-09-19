@@ -21,4 +21,4 @@ Fatal error: Uncaught exception 'HH\InvariantException' with message 'object mus
 Stack trace:
 #0 (): HH\invariant_violation()
 #1 %s/meth_caller_multiple.php(20): MethCaller$Ans\A$afunc()
-#2 {main}
+%a {main}

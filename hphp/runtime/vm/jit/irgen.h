@@ -163,7 +163,7 @@ void ringbufferMsg(IRGS&, Trace::RingBufferType, const StringData*,
  * of the irgen module calls this function to move to the next
  * bytecode instruction (`newSk') to translate.
  */
-void prepareForNextHHBC(IRGS&, const NormalizedInstruction*, SrcKey newSk);
+void prepareForNextHHBC(IRGS&, SrcKey newSk);
 
 /*
  * After translating each bytecode instruction, the driver of the
@@ -208,10 +208,9 @@ uint16_t inlineDepth(const IRGS& env);
  *   sp   = DefSP<offset>
  *
  *   // ... normal stuff happens ...
- *
- *   // FPI region:
+ *   // ... probably some StStks due to argument expressions
+ *   // FCall*:
  *     SpillFrame sp, ...
- *     // ... probably some StStks due to argument expressions
  *             BeginInlining<offset> sp
  *     fp2   = DefInlineFP<func,retBC,retSP,off> sp
  *
@@ -227,12 +226,12 @@ void beginInlining(IRGS& env,
                    const FCallArgs& fca,
                    SSATmp* ctx,
                    Type ctxType,
+                   bool dynamicCall,
                    Op writeArOpc,
                    SrcKey startSk,
                    Offset callBcOffset,
                    InlineReturnTarget returnTarget,
-                   int cost,
-                   bool conjure);
+                   int cost);
 
 /*
  * End the current inlined frame, after all its blocks have been emitted.
@@ -303,8 +302,6 @@ Type predictedType(const IRGS&, const Location&);
 #define IMM_I64A       int64_t
 #define IMM_LA         int32_t
 #define IMM_IA         int32_t
-#define IMM_CAR        uint32_t
-#define IMM_CAW        uint32_t
 #define IMM_DA         double
 #define IMM_SA         const StringData*
 #define IMM_RATA       RepoAuthType
@@ -321,6 +318,7 @@ Type predictedType(const IRGS&, const Location&);
 #define THREE(x0, x1, x2)    , IMM_##x0, IMM_##x1, IMM_##x2
 #define FOUR(x0, x1, x2, x3) , IMM_##x0, IMM_##x1, IMM_##x2, IMM_##x3
 #define FIVE(x0, x1, x2, x3, x4) , IMM_##x0, IMM_##x1, IMM_##x2, IMM_##x3, IMM_##x4
+#define SIX(x0, x1, x2, x3, x4, x5) , IMM_##x0, IMM_##x1, IMM_##x2, IMM_##x3, IMM_##x4, IMM_##x5
 
 #define O(name, imms, ...) void emit##name(IRGS& imms);
   OPCODES
@@ -332,6 +330,7 @@ Type predictedType(const IRGS&, const Location&);
 #undef THREE
 #undef FOUR
 #undef FIVE
+#undef SIX
 
 #undef IMM_MA
 #undef IMM_BLA
@@ -343,8 +342,6 @@ Type predictedType(const IRGS&, const Location&);
 #undef IMM_I64A
 #undef IMM_LA
 #undef IMM_IA
-#undef IMM_CAR
-#undef IMM_CAW
 #undef IMM_DA
 #undef IMM_SA
 #undef IMM_RATA

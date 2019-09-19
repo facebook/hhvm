@@ -342,6 +342,18 @@ class Memcached {
     return $this->getByKey('', $key, $cache_cb, &$cas_token);
   }
 
+  public function getWithCasToken(mixed $key,
+                                  ?mixed $cache_cb,
+                                  inout mixed $cas_token): mixed {
+    $result = $this->getByKeyWithCasToken(
+      '',
+      $key,
+      $cache_cb,
+      inout $cas_token,
+    );
+    return $result;
+  }
+
   /* Memcached::getAllKeys() Gets the keys stored on all the servers
    * @return mixed - Returns the keys stored on all the servers on success or
    * FALSE on failure.
@@ -366,6 +378,13 @@ class Memcached {
                            string $key,
                            mixed $cache_cb = null,
                            mixed &$cas_token = null): mixed;
+
+  <<__Native>>
+  public function getByKeyWithCasToken(string $server_key,
+                                       string $key,
+                                       mixed $cache_cb,
+                                       <<__OutOnly>>
+                                       inout mixed $cas_token): mixed;
 
   /**
    * Request multiple items
@@ -414,6 +433,20 @@ class Memcached {
     return $this->getMultiByKey('', $keys, &$cas_tokens, $flags);
   }
 
+  public function getMultiWithCasTokens(
+    mixed $keys,
+    inout mixed $cas_tokens,
+    int $flags = 0,
+  ): mixed {
+    $result = $this->getMultiByKeyWithCasTokens(
+      '',
+      $keys,
+      inout $cas_tokens,
+      $flags,
+    );
+    return $result;
+  }
+
   /**
    * Retrieve multiple items from a specific server
    *
@@ -430,6 +463,13 @@ class Memcached {
                                 array $keys,
                                 mixed &$cas_tokens = null,
                                 int $flags = 0): mixed;
+
+  <<__Native>>
+  public function getMultiByKeyWithCasTokens(string $server_key,
+                                             array $keys,
+                                             <<__OutOnly>>
+                                             inout mixed $cas_tokens,
+                                             int $flags = 0): mixed;
 
   /**
    * Retrieve a Memcached option value

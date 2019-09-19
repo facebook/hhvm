@@ -31,8 +31,6 @@ namespace HPHP {
 
 namespace {
 
-const StaticString s___call("__call");
-
 /*
  * Looks for a Func named methodName in any of the interfaces cls implements,
  * including cls if it is an interface. Returns nullptr if none was found,
@@ -94,9 +92,6 @@ const Func* lookupMethodCtx(const Class* cls,
   } else {
     assertx(callType == CallType::ObjMethod || callType == CallType::ClsMethod);
     assertx(methodName != nullptr);
-    if (isReifiedName(methodName)) {
-      methodName = stripTypeFromReifiedName(methodName);
-    }
     method = cls->lookupMethod(methodName);
     if (!method) {
       // We didn't find any methods with the specified name in cls's method

@@ -132,7 +132,7 @@ function test_openssl_pkcs7_sign() {
   VS(file_get_contents($tmp), false);
   VERIFY(openssl_x509_export_to_file($scert, $tmp));
 
-  VS(openssl_pkcs7_verify($outfile, 0, $infile, (array)$tmp), true);
+  VS(openssl_pkcs7_verify($outfile, 0, $infile, varray[$tmp]), true);
   unlink($infile);
   unlink($outfile);
   unlink($tmp);
@@ -266,8 +266,8 @@ function test_openssl_x509_check_private_key() {
 function test_openssl_x509_checkpurpose() {
   $fcert = file_get_contents(__DIR__."/test_x509.crt");
   $cert = openssl_x509_read($fcert);
-  VS(openssl_x509_checkpurpose($cert, X509_PURPOSE_SSL_CLIENT), 0);
-  VS(openssl_x509_checkpurpose($cert, X509_PURPOSE_SSL_SERVER), 0);
+  VS(openssl_x509_checkpurpose($cert, X509_PURPOSE_SSL_CLIENT, varray[]), 0);
+  VS(openssl_x509_checkpurpose($cert, X509_PURPOSE_SSL_SERVER, varray[]), 0);
 }
 
 function test_openssl_x509_export_to_file() {

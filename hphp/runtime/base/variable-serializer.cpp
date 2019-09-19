@@ -24,7 +24,6 @@
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array-defs.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/type-variant.h"
@@ -42,21 +41,20 @@
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 
 #include "hphp/util/exception.h"
+#include "hphp/util/rds-local.h"
 
 #include <cmath>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-extern const StaticString
-  s_serializedNativeDataKey(std::string("\0native", 7));
-
 const StaticString
+  s_serializedNativeDataKey("\0native"),
   s_JsonSerializable("JsonSerializable"),
   s_jsonSerialize("jsonSerialize"),
   s_serialize("serialize"),
-  s_zero("\0", 1),
-  s_protected_prefix("\0*\0", 3),
+  s_zero("\0"),
+  s_protected_prefix("\0*\0"),
   s_PHP_DebugDisplay("__PHP_DebugDisplay"),
   s_PHP_Incomplete_Class("__PHP_Incomplete_Class"),
   s_PHP_Incomplete_Class_Name("__PHP_Incomplete_Class_Name"),
@@ -98,12 +96,9 @@ VariableSerializer::getKind(const ArrayData* arr) const {
         (arr->isLegacyArray() && getType() == Type::Serialize))) {
     return VariableSerializer::ArrayKind::PHP;
   }
-  if (arr->isShape() && getType() == Type::Internal) {
-    return VariableSerializer::ArrayKind::Shape;
-  }
-  if (arr->isDictOrShape())       return VariableSerializer::ArrayKind::Dict;
-  if (arr->isVecArray())          return VariableSerializer::ArrayKind::Vec;
-  if (arr->isKeyset())            return VariableSerializer::ArrayKind::Keyset;
+  if (arr->isDict())     return VariableSerializer::ArrayKind::Dict;
+  if (arr->isVecArray()) return VariableSerializer::ArrayKind::Vec;
+  if (arr->isKeyset())   return VariableSerializer::ArrayKind::Keyset;
   assertx(arr->isPHPArray());
   if (m_keepDVArrays) {
     if (arr->isVArray()) return VariableSerializer::ArrayKind::VArray;
@@ -599,7 +594,10 @@ void VariableSerializer::write(const char *v, int len /* = -1 */,
 }
 
 void VariableSerializer::write(const String& v) {
-  if (m_type == Type::APCSerialize && !v.isNull() && v.get()->isStatic()) {
+  if (m_type == Type::APCSerialize &&
+      !(m_option & kAPC_PRIME_SERIALIZE) &&
+      !v.isNull() &&
+      v.get()->isStatic()) {
     union {
       char buf[8];
       StringData *sd;
@@ -803,8 +801,6 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
       case ArrayKind::Dict:
         m_buf->append("Dict\n");
         break;
-      case ArrayKind::Shape:
-        always_assert_flog(false, "Shapes should not be serialized externally");
       case ArrayKind::Vec:
         m_buf->append("Vec\n");
         break;
@@ -843,8 +839,6 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
       m_buf->append("NULL");
     } else {
       switch (kind) {
-      case ArrayKind::Shape:
-        always_assert_flog(false, "Shapes should not be serialized externally");
       case ArrayKind::Dict:
         if (m_type == Type::PHPOutput && m_dvOverrides) {
           m_buf->append(
@@ -900,8 +894,6 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
       case ArrayKind::Dict:
         m_buf->append("dict");
         break;
-      case ArrayKind::Shape:
-        always_assert_flog(false, "Shapes should not be serialized externally");
       case ArrayKind::Vec:
         m_buf->append("vec");
         break;
@@ -954,14 +946,6 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
       switch (kind) {
       case ArrayKind::Dict:
         m_buf->append("D:");
-        break;
-      case ArrayKind::Shape:
-        if (m_type == Type::Internal) {
-          m_buf->append("H:");
-        } else {
-          always_assert_flog(false,
-              "Shapes should not be serialized externally");
-        }
         break;
       case ArrayKind::Vec:
         m_buf->append("v:");
@@ -1281,8 +1265,6 @@ void VariableSerializer::writeArrayFooter(
       }
     } else if (m_rsrcName.empty()) { // for rsrc, only write NULL in arrayHeader
       switch (kind) {
-      case ArrayKind::Shape:
-        always_assert_flog(false, "Shapes should not be serialized externally");
       case ArrayKind::Dict:
       case ArrayKind::Vec:
       case ArrayKind::Keyset:
@@ -1516,11 +1498,11 @@ void VariableSerializer::serializeClsMeth(
 
     case Type::VarExport:
     case Type::PHPOutput:
-      m_buf->append("classMeth{\n    class(");
+      m_buf->append("class_meth(");
       write(clsName->data(), clsName->size());
-      m_buf->append(")\n    fun(");
+      m_buf->append(", ");
       write(funcName->data(), funcName->size());
-      m_buf->append(")\n}");
+      m_buf->append(')');
       break;
 
     case Type::VarDump:
@@ -1594,13 +1576,6 @@ void VariableSerializer::serializeVariant(tv_rval tv,
     case KindOfKeyset:
       assertx(!isArrayKey);
       assertx(val(tv).parr->isKeyset());
-      serializeArray(val(tv).parr, skipNestCheck);
-      return;
-
-    case KindOfPersistentShape:
-    case KindOfShape:
-      assertx(!isArrayKey);
-      assertx(val(tv).parr->isShape());
       serializeArray(val(tv).parr, skipNestCheck);
       return;
 
@@ -1682,6 +1657,18 @@ void VariableSerializer::serializeArrayImpl(const ArrayData* arr) {
     kind
   );
 
+  if (m_type == Type::Internal && RuntimeOption::EvalArrayProvenance) {
+    if (kind == ArrayKind::Dict || kind == ArrayKind::Vec) {
+      if (auto tag = arrprov::getTag(arr)) {
+        auto const line = tag->line();
+        auto const filename = tag->filename();
+        m_buf->append("p:");
+        write(line);
+        write(filename->data(), filename->size());
+      }
+    }
+  }
+
   IterateKV(
     arr,
     [&](Cell k, TypedValue v) {
@@ -1700,7 +1687,7 @@ void VariableSerializer::serializeArray(const ArrayData* arr,
       raise_hack_arr_compat_serialize_notice(arr);
       m_hasHackWarned = true;
     }
-    if (UNLIKELY(m_dictWarn && !m_hasDictWarned && arr->isDictOrShape())) {
+    if (UNLIKELY(m_dictWarn && !m_hasDictWarned && arr->isDict())) {
       raise_hack_arr_compat_serialize_notice(arr);
       m_hasDictWarned = true;
     }
@@ -1711,10 +1698,12 @@ void VariableSerializer::serializeArray(const ArrayData* arr,
   }
 
   if (UNLIKELY(RuntimeOption::EvalLogArrayProvenance &&
+               !m_forcePHPArrays &&
                (arr->isDict() || arr->isVecArray()))) {
     auto const source = [&]() -> const char* {
       switch (getType()) {
-      case VariableSerializer::Type::JSON:      return "json_encode";
+      case VariableSerializer::Type::JSON:
+        return arr->isVecArray() ? nullptr : "json_encode";
       case VariableSerializer::Type::Serialize: return "serialize";
       case VariableSerializer::Type::VarExport: return "var_export";
       case VariableSerializer::Type::PrintR:    return "print_r";
@@ -1724,12 +1713,13 @@ void VariableSerializer::serializeArray(const ArrayData* arr,
     if (source) raise_array_serialization_notice(source, arr);
   }
 
-  if (arr->size() == 0) {
+  if (arr->size() == 0 && LIKELY(!RuntimeOption::EvalArrayProvenance)) {
     auto const kind = getKind(arr);
     writeArrayHeader(0, arr->isVectorData(), kind);
     writeArrayFooter(kind);
     return;
   }
+
   if (!skipNestCheck) {
     TypedValue tv = make_array_like_tv(const_cast<ArrayData*>(arr));
     if (incNestedLevel(&tv)) {
@@ -1979,7 +1969,7 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
           }
         }
 
-        auto const lookup = obj_cls->getDeclPropIndex(ctx, memberName.get());
+        auto const lookup = obj_cls->getDeclPropSlot(ctx, memberName.get());
         auto const slot = lookup.slot;
 
         if (slot != kInvalidSlot && lookup.accessible) {

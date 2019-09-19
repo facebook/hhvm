@@ -21,7 +21,6 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/system-profiler.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/zend-math.h"
@@ -32,6 +31,7 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/cycles.h"
+#include "hphp/util/rds-local.h"
 #include "hphp/util/timer.h"
 
 #include <iostream>
@@ -1394,7 +1394,7 @@ void end_profiler_frame(Profiler *p,
 ///////////////////////////////////////////////////////////////////////////////
 
 static struct HotProfilerExtension : Extension {
-  HotProfilerExtension(): Extension("hotprofiler", get_PHP_VERSION().data()) {}
+  HotProfilerExtension(): Extension("hotprofiler") {}
 
   void moduleInit() override {
 #ifdef CLOCK_REALTIME

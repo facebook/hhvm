@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
@@ -7,5 +7,6 @@
  *
  *)
 
-val parse: string -> string
-val create: string -> string
+val parse : string -> string
+
+val create : string -> string

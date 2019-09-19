@@ -23,7 +23,7 @@ class C {
     __OtherAttribute,
     __AnotherAttribute,
     __AFurtherAttribute,
-    __OneMoreAttribute
+    __OneMoreAttribute,
   >>
   private int $k;
 }

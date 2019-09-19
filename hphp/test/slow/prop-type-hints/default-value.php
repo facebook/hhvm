@@ -1,8 +1,6 @@
 <?hh
-// Copyright 2004-present Facebook. All Rights Reserved.
 
-class Cls1 {};
-
+class Cls1 {}
 enum Enum1 : int {
   VAL1 = 1;
   VAL2 = 2;
@@ -27,12 +25,6 @@ type Alias3 = vec;
 type Alias4 = Enum2;
 type Alias5 = ?dict;
 type Alias6 = ?Enum2;
-
-if (__hhvm_intrinsics\launder_value(true)) {
-  include 'redefine1.inc';
-} else {
-  include 'redefine2.inc';
-}
 
 class A {
   public int $p1;
@@ -293,5 +285,13 @@ function test($x) {
   var_dump(A::$sopt30);
   var_dump(A::$sopt31);
 }
+<<__EntryPoint>>
+function main_entry(): void {
+  if (__hhvm_intrinsics\launder_value(true)) {
+    include 'redefine1.inc';
+  } else {
+    include 'redefine2.inc';
+  }
 
-test(new A());
+  test(new A());
+}

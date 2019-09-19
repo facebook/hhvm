@@ -1,0 +1,11 @@
+use ocamlrep_derive::OcamlRep;
+use ocamlvalue_macro::Ocamlvalue;
+
+#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+pub enum A {
+    I,
+    J(isize),
+    K(isize, isize),
+    L((isize, isize)),
+    M { x: isize, y: isize },
+}

@@ -42,7 +42,7 @@ struct ClsPropLookup {
 };
 
 ClsPropLookup ldClsPropAddrKnown(IRGS&, const Class*, const StringData*, bool);
-ClsPropLookup ldClsPropAddr(IRGS&, SSATmp*, SSATmp*, bool, bool);
+ClsPropLookup ldClsPropAddr(IRGS&, SSATmp*, SSATmp*, bool, bool, bool);
 
 //////////////////////////////////////////////////////////////////////
 

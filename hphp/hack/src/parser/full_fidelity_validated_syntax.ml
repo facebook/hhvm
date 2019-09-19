@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
@@ -201,7 +201,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.PrefixUnaryExpression _ -> tag validate_prefix_unary_expression (fun x -> ExprPrefixUnary x) x
     | Syntax.PostfixUnaryExpression _ -> tag validate_postfix_unary_expression (fun x -> ExprPostfixUnary x) x
     | Syntax.BinaryExpression _ -> tag validate_binary_expression (fun x -> ExprBinary x) x
-    | Syntax.InstanceofExpression _ -> tag validate_instanceof_expression (fun x -> ExprInstanceof x) x
     | Syntax.IsExpression _ -> tag validate_is_expression (fun x -> ExprIs x) x
     | Syntax.AsExpression _ -> tag validate_as_expression (fun x -> ExprAs x) x
     | Syntax.NullableAsExpression _ -> tag validate_nullable_as_expression (fun x -> ExprNullableAs x) x
@@ -255,7 +254,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | ExprPrefixUnary                  thing -> invalidate_prefix_unary_expression        (value, thing)
     | ExprPostfixUnary                 thing -> invalidate_postfix_unary_expression       (value, thing)
     | ExprBinary                       thing -> invalidate_binary_expression              (value, thing)
-    | ExprInstanceof                   thing -> invalidate_instanceof_expression          (value, thing)
     | ExprIs                           thing -> invalidate_is_expression                  (value, thing)
     | ExprAs                           thing -> invalidate_as_expression                  (value, thing)
     | ExprNullableAs                   thing -> invalidate_nullable_as_expression         (value, thing)
@@ -399,6 +397,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.EchoStatement _ -> tag validate_echo_statement (fun x -> StmtEcho x) x
     | Syntax.ConcurrentStatement _ -> tag validate_concurrent_statement (fun x -> StmtConcurrent x) x
     | Syntax.TypeConstant _ -> tag validate_type_constant (fun x -> StmtTypeConstant x) x
+    | Syntax.PUAccess _ -> tag validate_pu_access (fun x -> StmtPUAccess x) x
     | s -> aggregation_fail Def.Statement s
   and invalidate_statement : statement invalidator = fun (value, thing) ->
     match thing with
@@ -428,6 +427,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | StmtEcho                         thing -> invalidate_echo_statement                 (value, thing)
     | StmtConcurrent                   thing -> invalidate_concurrent_statement           (value, thing)
     | StmtTypeConstant                 thing -> invalidate_type_constant                  (value, thing)
+    | StmtPUAccess                     thing -> invalidate_pu_access                      (value, thing)
   and validate_switch_label : switch_label validator = fun x ->
     match Syntax.syntax x with
     | Syntax.CaseLabel _ -> tag validate_case_label (fun x -> SwitchCase x) x
@@ -458,7 +458,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.PrefixUnaryExpression _ -> tag validate_prefix_unary_expression (fun x -> LambdaPrefixUnary x) x
     | Syntax.PostfixUnaryExpression _ -> tag validate_postfix_unary_expression (fun x -> LambdaPostfixUnary x) x
     | Syntax.BinaryExpression _ -> tag validate_binary_expression (fun x -> LambdaBinary x) x
-    | Syntax.InstanceofExpression _ -> tag validate_instanceof_expression (fun x -> LambdaInstanceof x) x
     | Syntax.IsExpression _ -> tag validate_is_expression (fun x -> LambdaIs x) x
     | Syntax.AsExpression _ -> tag validate_as_expression (fun x -> LambdaAs x) x
     | Syntax.NullableAsExpression _ -> tag validate_nullable_as_expression (fun x -> LambdaNullableAs x) x
@@ -512,7 +511,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | LambdaPrefixUnary                  thing -> invalidate_prefix_unary_expression        (value, thing)
     | LambdaPostfixUnary                 thing -> invalidate_postfix_unary_expression       (value, thing)
     | LambdaBinary                       thing -> invalidate_binary_expression              (value, thing)
-    | LambdaInstanceof                   thing -> invalidate_instanceof_expression          (value, thing)
     | LambdaIs                           thing -> invalidate_is_expression                  (value, thing)
     | LambdaAs                           thing -> invalidate_as_expression                  (value, thing)
     | LambdaNullableAs                   thing -> invalidate_nullable_as_expression         (value, thing)
@@ -564,7 +562,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.PrefixUnaryExpression _ -> tag validate_prefix_unary_expression (fun x -> CExprPrefixUnary x) x
     | Syntax.PostfixUnaryExpression _ -> tag validate_postfix_unary_expression (fun x -> CExprPostfixUnary x) x
     | Syntax.BinaryExpression _ -> tag validate_binary_expression (fun x -> CExprBinary x) x
-    | Syntax.InstanceofExpression _ -> tag validate_instanceof_expression (fun x -> CExprInstanceof x) x
     | Syntax.IsExpression _ -> tag validate_is_expression (fun x -> CExprIs x) x
     | Syntax.AsExpression _ -> tag validate_as_expression (fun x -> CExprAs x) x
     | Syntax.NullableAsExpression _ -> tag validate_nullable_as_expression (fun x -> CExprNullableAs x) x
@@ -618,7 +615,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | CExprPrefixUnary                  thing -> invalidate_prefix_unary_expression        (value, thing)
     | CExprPostfixUnary                 thing -> invalidate_postfix_unary_expression       (value, thing)
     | CExprBinary                       thing -> invalidate_binary_expression              (value, thing)
-    | CExprInstanceof                   thing -> invalidate_instanceof_expression          (value, thing)
     | CExprIs                           thing -> invalidate_is_expression                  (value, thing)
     | CExprAs                           thing -> invalidate_as_expression                  (value, thing)
     | CExprNullableAs                   thing -> invalidate_nullable_as_expression         (value, thing)
@@ -2383,22 +2379,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       }
     ; Syntax.value = v
     }
-  and validate_instanceof_expression : instanceof_expression validator = function
-  | { Syntax.syntax = Syntax.InstanceofExpression x; value = v } -> v,
-    { instanceof_right_operand = validate_expression x.instanceof_right_operand
-    ; instanceof_operator = validate_token x.instanceof_operator
-    ; instanceof_left_operand = validate_expression x.instanceof_left_operand
-    }
-  | s -> validation_fail (Some SyntaxKind.InstanceofExpression) s
-  and invalidate_instanceof_expression : instanceof_expression invalidator = fun (v, x) ->
-    { Syntax.syntax =
-      Syntax.InstanceofExpression
-      { instanceof_left_operand = invalidate_expression x.instanceof_left_operand
-      ; instanceof_operator = invalidate_token x.instanceof_operator
-      ; instanceof_right_operand = invalidate_expression x.instanceof_right_operand
-      }
-    ; Syntax.value = v
-    }
   and validate_is_expression : is_expression validator = function
   | { Syntax.syntax = Syntax.IsExpression x; value = v } -> v,
     { is_right_operand = validate_specifier x.is_right_operand
@@ -3141,6 +3121,22 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       }
     ; Syntax.value = v
     }
+  and validate_pu_access : pu_access validator = function
+  | { Syntax.syntax = Syntax.PUAccess x; value = v } -> v,
+    { pu_access_right_type = validate_token x.pu_access_right_type
+    ; pu_access_separator = validate_token x.pu_access_separator
+    ; pu_access_left_type = validate_specifier x.pu_access_left_type
+    }
+  | s -> validation_fail (Some SyntaxKind.PUAccess) s
+  and invalidate_pu_access : pu_access invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.PUAccess
+      { pu_access_left_type = invalidate_specifier x.pu_access_left_type
+      ; pu_access_separator = invalidate_token x.pu_access_separator
+      ; pu_access_right_type = invalidate_token x.pu_access_right_type
+      }
+    ; Syntax.value = v
+    }
   and validate_vector_type_specifier : vector_type_specifier validator = function
   | { Syntax.syntax = Syntax.VectorTypeSpecifier x; value = v } -> v,
     { vector_type_right_angle = validate_token x.vector_type_right_angle
@@ -3766,4 +3762,4 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; Syntax.value = v
     }
 
-end (* Make *)
+end

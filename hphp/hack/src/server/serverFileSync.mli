@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
@@ -8,11 +8,7 @@
  *)
 
 val open_file :
-  predeclare:bool ->
-  ServerEnv.env ->
-  string ->
-  string ->
-  ServerEnv.env
+  predeclare:bool -> ServerEnv.env -> string -> string -> ServerEnv.env
 
 val edit_file :
   predeclare:bool ->
@@ -31,6 +27,7 @@ val has_unsaved_changes : ServerEnv.env -> bool
 
 (* Determine which files are different in the IDE and on disk.
  * Returns a map from filename to a tuple of ide contents and disk contents. *)
-val get_unsaved_changes : ServerEnv.env -> (string * string) Relative_path.Map.t
+val get_unsaved_changes :
+  ServerEnv.env -> (string * string) Relative_path.Map.t
 
 val toggle_dynamic_view : ServerEnv.env -> bool -> ServerEnv.env

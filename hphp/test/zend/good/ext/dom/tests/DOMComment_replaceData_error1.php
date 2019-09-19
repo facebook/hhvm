@@ -1,5 +1,5 @@
 <?hh
-
+<<__EntryPoint>> function main(): void {
 //Negative offset
 $dom = new DomDocument();
 $comment = $dom->createComment('test-comment');
@@ -10,4 +10,4 @@ try {
     echo "Throws DOMException for -ve offest\n";
   }
 }
-
+}

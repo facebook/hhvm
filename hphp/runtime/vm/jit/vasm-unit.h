@@ -183,6 +183,7 @@ struct Vunit {
   /*
    * Create a new block in the given area and weight, returning its id.
    */
+  Vlabel makeBlock(AreaIndex area);
   Vlabel makeBlock(AreaIndex area, uint64_t weight);
 
   /*

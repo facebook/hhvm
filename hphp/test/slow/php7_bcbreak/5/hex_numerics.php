@@ -7,7 +7,7 @@
 function errorHandler($errno, $errstr, $errfile, $errline) {
   throw new Exception;
 }
-set_error_handler('errorHandler');
+set_error_handler(fun('errorHandler'));
 
 print("\n# is_numeric tests\n");
 printf("#%9s, %5s, %7s, %7s\n",

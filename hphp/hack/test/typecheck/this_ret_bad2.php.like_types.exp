@@ -1,0 +1,8 @@
+File "this_ret_bad2.php", line 35, characters 3-46:
+  ~Foo<<expr#1> as Bar>
+File "this_ret_bad2.php", line 41, characters 16-34:
+Invalid argument (Typing[4110])
+File "this_ret_bad2.php", line 25, characters 23-30:
+Expected ~Foo<Bar> because it is an unenforceable type
+File "this_ret_bad2.php", line 19, characters 34-42:
+But got Foo<<expr#1>>

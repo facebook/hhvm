@@ -19,10 +19,10 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/runtime-error.h"
+#include "hphp/util/rds-local.h"
 
 namespace HPHP {
 
@@ -39,7 +39,7 @@ GlobalsArray::GlobalsArray(NameValueTable* tab)
   : ArrayData(kGlobalsKind)
   , m_tab(tab)
 {
-  Variant arr(staticEmptyDArray());
+  Variant arr(ArrayData::CreateDArray());
 #define X(s,v) tab->set(makeStaticString(#s), v.asTypedValue());
 
   X(argc,                 init_null_variant);

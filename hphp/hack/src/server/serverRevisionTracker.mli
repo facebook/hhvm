@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2018, Facebook, Inc.
  * All rights reserved.
  *
@@ -8,19 +8,22 @@
 
 val initialize : Hg.global_rev -> unit
 
-val on_state_enter :
-  string -> (* state name *)
-  unit
+val on_state_enter : string -> (* state name *)
+                               unit
 
 val on_state_leave :
-  Path.t -> (* project root *)
-  string -> (* state name *)
-  Hh_json.json option -> (* state metadata *)
+  Path.t ->
+  (* project root *)
+  string ->
+  (* state name *)
+  Hh_json.json option ->
+  (* state metadata *)
   unit
 
 val is_hg_updating : unit -> bool
 
 val check_blocking : unit -> unit
+
 val check_non_blocking : ServerEnv.env -> unit
 
 (* This module tracks changes to mergebase, and is also informed (by functions below)
@@ -43,7 +46,9 @@ val check_non_blocking : ServerEnv.env -> unit
  * - even if we just want to treat files as prechecked, without fully processing
  *   them, it can require quiet a lot of work in incrmental mode to invalidate all
  *   things that need to be invalidated (which are absent during init)
- **)
+ * *)
 val files_changed : ServerLocalConfig.t -> int -> unit
+
 val decl_changed : ServerLocalConfig.t -> int -> unit
+
 val typing_changed : ServerLocalConfig.t -> int -> unit

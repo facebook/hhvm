@@ -1,10 +1,10 @@
 <?hh
 
 function test() {
- return array();
+  return array();
 }
 
  <<__EntryPoint>>
 function main_1263() {
-reset(&test());
+reset(inout test());
 }

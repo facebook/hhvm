@@ -23,16 +23,17 @@ Errors:
          m_variadic = FVnonVariadic;
          m_params =
          [{ param_annotation = ([6:29-31], Tc);
-            param_hint = (Some ([6:21-28], (Habstr "Tc")));
+            param_type_hint = ((Tc), (Some ([6:21-28], (Habstr "Tc"))));
             param_is_reference = false; param_is_variadic = false;
             param_pos = [6:29-31]; param_name = "$x"; param_expr = None;
-            param_callconv = None; param_user_attributes = [] }
+            param_callconv = None; param_user_attributes = [];
+            param_visibility = None }
            ];
          m_body =
          { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };
          m_fun_kind = FSync; m_user_attributes = [];
-         m_ret = (Some ([6:34-38], (Hprim Tvoid))); m_external = false;
-         m_doc_comment = None }
+         m_ret = ((void), (Some ([6:34-38], (Hprim Tvoid))));
+         m_external = false; m_doc_comment = None }
         ];
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
       c_namespace = <opaque>; c_user_attributes = []; c_file_attributes = [];
@@ -54,19 +55,21 @@ Errors:
           m_where_constraints = []; m_variadic = FVnonVariadic;
           m_params =
           [{ param_annotation = ([11:29-31], Tc<int>);
-             param_hint =
-             (Some ([11:21-28],
-                    (Happly (([11:21-23], "\\Tc"),
-                       [([11:24-27], (Hprim Tint))]))));
+             param_type_hint =
+             ((Tc<int>),
+              (Some ([11:21-28],
+                     (Happly (([11:21-23], "\\Tc"),
+                        [([11:24-27], (Hprim Tint))])))));
              param_is_reference = false; param_is_variadic = false;
              param_pos = [11:29-31]; param_name = "$x"; param_expr = None;
-             param_callconv = None; param_user_attributes = [] }
+             param_callconv = None; param_user_attributes = [];
+             param_visibility = None }
             ];
           m_body =
           { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };
           m_fun_kind = FSync; m_user_attributes = [];
-          m_ret = (Some ([11:34-38], (Hprim Tvoid))); m_external = false;
-          m_doc_comment = None }
+          m_ret = ((void), (Some ([11:34-38], (Hprim Tvoid))));
+          m_external = false; m_doc_comment = None }
          ];
        c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace = <opaque>; c_user_attributes = [];

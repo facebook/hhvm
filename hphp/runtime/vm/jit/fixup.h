@@ -159,10 +159,12 @@ const Fixup* findFixup(CTCA tca);
 size_t size();
 
 /*
- * Perform a fixup of the VM registers of ec for a stack whose first frame is
- * rbp.
+ * Perform a fixup of the VM registers for a stack whose first frame is `rbp`.
+ *
+ * Returns whether we successfully performed the fixup.  (We assert on failure
+ * if `soft` is not set).
  */
-void fixupWork(ExecutionContext* ec, ActRec* rbp);
+bool fixupWork(ActRec* rbp, bool soft = false);
 
 /*
  * Returns true if calls to func should use an EagerVMRegAnchor.
@@ -171,15 +173,15 @@ bool eagerRecord(const Func* func);
 }
 
 namespace detail {
-void syncVMRegsWork(); // internal sync work for a dirty vm state
+void syncVMRegsWork(bool soft); // internal sync work for a dirty vm state
 }
 
 /*
  * Sync VM registers for the first TC frame in the callstack.
  */
-inline void syncVMRegs() {
+inline void syncVMRegs(bool soft = false) {
   if (tl_regState == VMRegState::CLEAN) return;
-  detail::syncVMRegsWork();
+  detail::syncVMRegsWork(soft);
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -29,4 +29,6 @@ function ut_main()
 }
 
 include( 'ut_common.inc' );
+<<__EntryPoint>> function main_entry(): void {
 ut_run();
+}

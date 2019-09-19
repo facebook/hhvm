@@ -99,6 +99,10 @@ tc_unwind_personality(int version,
                       _Unwind_Exception* exceptionObj,
                       _Unwind_Context* context);
 
+using PersonalityFunc = _Unwind_Reason_Code(*)(int, _Unwind_Action, uint64_t,
+                                               _Unwind_Exception*,
+                                               _Unwind_Context*);
+
 /*
  * Resume unwinding of jitted PHP frames.
  *
@@ -117,7 +121,7 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp);
  * Called to initialize the unwinder and register an .eh_frame that covers the
  * TC.
  */
-void initUnwinder(TCA base, size_t size);
+void initUnwinder(TCA base, size_t size, PersonalityFunc fn);
 
 /*
  * Handle unknown exceptions for tc_unwind_personality

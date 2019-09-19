@@ -2,7 +2,7 @@
 
 abstract class Foo {
   abstract const type T;
-  /* HH_FIXME[4110] */
+  /* HH_FIXME[4336] */
   public function get(): this::T {
   }
   public function instance(): this::T {

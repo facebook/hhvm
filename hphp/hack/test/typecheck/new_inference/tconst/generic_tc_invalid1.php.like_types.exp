@@ -1,0 +1,6 @@
+File "generic_tc_invalid1.php", line 28, characters 10-11:
+Invalid return type (Typing[4110])
+File "generic_tc_invalid1.php", line 22, characters 19-24:
+Expected string
+File "generic_tc_invalid1.php", line 16, characters 55-56:
+But got dynamic because it is an unenforceable type

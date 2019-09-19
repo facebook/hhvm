@@ -18,23 +18,11 @@
 #error "func-inl.h should only be included by func.h"
 #endif
 
-#include "hphp/runtime/vm/cls-ref.h"
 #include "hphp/runtime/vm/unit-util.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-// EH and FPI tables.
-
-template<class SerDe>
-void FPIEnt::serde(SerDe& sd) {
-  sd(m_fpushOff)
-    (m_fpiEndOff)
-    (m_fpOff)
-    // These fields are recomputed by sortFPITab:
-    // (m_parentIndex)
-    // (m_fpiDepth)
-    ;
-}
+// EH table.
 
 template<class SerDe>
 void EHEnt::serde(SerDe& sd) {
@@ -169,7 +157,7 @@ inline const StringData* Func::fullDisplayName() const {
 
 inline const StringData* funcToStringHelper(const Func* func) {
   if (RuntimeOption::EvalRaiseFuncConversionWarning) {
-    raise_warning("Func to string conversion");
+    raise_warning(Strings::FUNC_TO_STRING);
   }
   return func->name();
 }
@@ -270,6 +258,20 @@ inline bool Func::contains(Offset offset) const {
   return offset >= base() && offset < past();
 }
 
+inline Offset Func::ctiEntry() const {
+  return shared()->m_cti_base.load(std::memory_order_acquire);
+}
+
+inline void Func::setCtiFunclet(int i, Offset cti_funclet) {
+  shared()->m_params[i].ctiFunclet = cti_funclet;
+}
+
+inline void Func::setCtiEntry(Offset base, uint32_t size) {
+  auto sd = shared();
+  sd->m_cti_size = size;
+  sd->m_cti_base.store(base, std::memory_order_release);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Return type.
 
@@ -357,12 +359,6 @@ inline int Func::numIterators() const {
   return shared()->m_numIterators;
 }
 
-inline int Func::numClsRefSlots() const {
-  auto const ex = extShared();
-  if (LIKELY(!ex)) return shared()->m_numClsRefSlots;
-  return ex->m_actualNumClsRefSlots;
-}
-
 inline Id Func::numNamedLocals() const {
   return shared()->m_localNames.size();
 }
@@ -381,9 +377,9 @@ inline int Func::maxStackCells() const {
 }
 
 inline int Func::numSlotsInFrame() const {
-  return shared()->m_numLocals +
-    shared()->m_numIterators * (sizeof(Iter) / sizeof(Cell)) +
-    (numClsRefSlots() * sizeof(cls_ref) + sizeof(Cell) - 1) / sizeof(Cell);
+  return
+    shared()->m_numLocals +
+    shared()->m_numIterators * (sizeof(Iter) / sizeof(Cell));
 }
 
 inline bool Func::hasForeignThis() const {
@@ -556,10 +552,6 @@ inline bool Func::isGenerated() const {
   return shared()->m_isGenerated;
 }
 
-inline bool Func::isMagicCallMethod() const {
-  return m_name->isame(s___call);
-}
-
 inline bool Func::isSpecial(const StringData* name) {
   return strncmp("86", name->data(), 2) == 0;
 }
@@ -630,10 +622,6 @@ inline const Func::EHEntVec& Func::ehtab() const {
   return shared()->m_ehtab;
 }
 
-inline const Func::FPIEntVec& Func::fpitab() const {
-  return shared()->m_fpitab;
-}
-
 inline const EHEnt* Func::findEH(Offset o) const {
   assertx(o >= base() && o < past());
   return findEH(shared()->m_ehtab, o);
@@ -650,11 +638,6 @@ Func::findEH(const Container& ehtab, Offset o) {
     }
   }
   return eh;
-}
-
-inline const FPIEnt* Func::findFPI(Offset o) const {
-  assertx(o >= base() && o < past());
-  return findFPI(fpitab().begin(), fpitab().end(), o);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

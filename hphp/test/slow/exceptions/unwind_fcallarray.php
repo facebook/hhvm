@@ -5,7 +5,7 @@ function handle_error() {
 }
 
 function main() {
-  set_error_handler('handle_error');
+  set_error_handler(fun('handle_error'));
   date_default_timezone_set(...array('America/Gotham_City'));
 }
 

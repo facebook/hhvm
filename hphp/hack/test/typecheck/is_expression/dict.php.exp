@@ -6,6 +6,8 @@ File "hackarray.hhi", line 11, characters 34-41:
 But got arraykey
 File "dict.php", line 4, characters 13-16:
 The type dict expects 2 type parameter(s) (Typing[4101])
+File "hackarray.hhi", line 11, characters 22-25:
+Definition is here
 File "dict.php", line 13, characters 18-19:
 Invalid argument (Typing[4110])
 File "dict.php", line 25, characters 28-30:

@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
@@ -9,17 +9,19 @@ open Reordered_argument_collections
 
 module CLKey : sig
   type t = Ide_api_types.coverage_level
+
   val compare : t -> t -> int
 end
+
 module CLMap : sig
-  include module type of MyMap.Make(CLKey)
+  include module type of MyMap.Make (CLKey)
 end
 
 type checked_stats = {
-  unchecked : int;
-  partial : int;
-  checked : int;
-  }
+  unchecked: int;
+  partial: int;
+  checked: int;
+}
 
 (* result is an association list from absolute position in the code file to the
  * coverage level of the expression at that position, paired with a count of
@@ -37,17 +39,17 @@ type result =
 
 type pos_stats_entry = {
   (* How many times this reason position has occured. *)
-  pos_count : int;
+  pos_count: int;
   (* Random sample of expressions where this reason position has occured, for
    * debugging purposes *)
-  samples : Pos.t list;
+  samples: Pos.t list;
 }
 
 type level_stats_entry = {
   (* Number of expressions of this level *)
-  count : int;
+  count: int;
   (* string of reason -> position of reason -> stats *)
-  reason_stats : (pos_stats_entry Pos.Map.t) SMap.t;
+  reason_stats: pos_stats_entry Pos.Map.t SMap.t;
 }
 
 (* An assoc list that counts the number of expressions at each coverage level,

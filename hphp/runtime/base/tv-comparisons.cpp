@@ -58,18 +58,17 @@ typename Op::RetType cellRelOp(Op op, Cell cell, bool val) {
   } else if (UNLIKELY(isKeysetType(cell.m_type))) {
     return op.keysetVsNonKeyset();
   } else if (UNLIKELY(isClsMethType(cell.m_type))) {
-    raiseClsMethToVecWarningHelper();
     if (RuntimeOption::EvalHackArrDVArrs) {
-      return op.vecVsNonVec();
+      return op.clsmethVsNonClsMeth();
     } else {
       if (UNLIKELY(op.noticeOnArrNonArr())) {
-        raiseHackArrCompatArrMixedCmp();
+        raiseHackArrCompatArrNonArrCmp();
       }
       return op(cellToBool(cell), val);
     }
   } else {
     if (UNLIKELY(op.noticeOnArrNonArr() && isArrayType(cell.m_type))) {
-      raiseHackArrCompatArrMixedCmp();
+      raiseHackArrCompatArrNonArrCmp();
     }
     return op(cellToBool(cell), val);
   }
@@ -117,17 +116,10 @@ typename Op::RetType cellRelOp(Op op, Cell cell, int64_t val) {
     case KindOfKeyset:
       return op.keysetVsNonKeyset();
 
-    case KindOfPersistentShape:
-    case KindOfShape:
-      if (RuntimeOption::EvalHackArrDVArrs) {
-        return op.dictVsNonDict();
-      }
-      // fallthrough
-
     case KindOfPersistentArray:
     case KindOfArray:
       if (UNLIKELY(op.noticeOnArrNonArr())) {
-        raiseHackArrCompatArrMixedCmp();
+        raiseHackArrCompatArrNonArrCmp();
       }
       return op(true, false);
 
@@ -146,12 +138,11 @@ typename Op::RetType cellRelOp(Op op, Cell cell, int64_t val) {
       return strRelOp(op, cell, val, classToStringHelper(cell.m_data.pclass));
 
     case KindOfClsMeth:
-      raiseClsMethToVecWarningHelper();
       if (RuntimeOption::EvalHackArrDVArrs) {
-        return op.vecVsNonVec();
+        return op.clsmethVsNonClsMeth();
       } else {
         if (UNLIKELY(op.noticeOnArrNonArr())) {
-          raiseHackArrCompatArrMixedCmp();
+          raiseHackArrCompatArrNonArrCmp();
         }
         return op(true, false);
       }
@@ -199,17 +190,10 @@ typename Op::RetType cellRelOp(Op op, Cell cell, double val) {
     case KindOfKeyset:
       return op.keysetVsNonKeyset();
 
-    case KindOfPersistentShape:
-    case KindOfShape:
-      if (RuntimeOption::EvalHackArrDVArrs) {
-        return op.dictVsNonDict();
-      }
-      // Fallthrough
-
     case KindOfPersistentArray:
     case KindOfArray:
       if (UNLIKELY(op.noticeOnArrNonArr())) {
-        raiseHackArrCompatArrMixedCmp();
+        raiseHackArrCompatArrNonArrCmp();
       }
       return op(true, false);
 
@@ -228,12 +212,11 @@ typename Op::RetType cellRelOp(Op op, Cell cell, double val) {
       return strRelOp(op, cell, val, classToStringHelper(cell.m_data.pclass));
 
     case KindOfClsMeth:
-      raiseClsMethToVecWarningHelper();
       if (RuntimeOption::EvalHackArrDVArrs) {
-        return op.vecVsNonVec();
+        return op.clsmethVsNonClsMeth();
       } else {
         if (UNLIKELY(op.noticeOnArrNonArr())) {
-          raiseHackArrCompatArrMixedCmp();
+          raiseHackArrCompatArrNonArrCmp();
         }
         return op(true, false);
       }
@@ -289,17 +272,10 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const StringData* val) {
     case KindOfKeyset:
       return op.keysetVsNonKeyset();
 
-    case KindOfPersistentShape:
-    case KindOfShape:
-      if (RuntimeOption::EvalHackArrDVArrs) {
-        return op.dictVsNonDict();
-      }
-      // Fallthrough
-
     case KindOfPersistentArray:
     case KindOfArray:
       if (UNLIKELY(op.noticeOnArrNonArr())) {
-        raiseHackArrCompatArrMixedCmp();
+        raiseHackArrCompatArrNonArrCmp();
       }
       return op(true, false);
 
@@ -325,12 +301,11 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const StringData* val) {
       return op(classToStringHelper(cell.m_data.pclass), val);
 
     case KindOfClsMeth:
-      raiseClsMethToVecWarningHelper();
       if (RuntimeOption::EvalHackArrDVArrs) {
-        return op.vecVsNonVec();
+        return op.clsmethVsNonClsMeth();
       } else {
         if (UNLIKELY(op.noticeOnArrNonArr())) {
-          raiseHackArrCompatArrMixedCmp();
+          raiseHackArrCompatArrNonArrCmp();
         }
         return op(true, false);
       }
@@ -347,17 +322,16 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const StringData* val) {
 template<class Op>
 typename Op::RetType cellRelOp(Op op, Cell cell, const ArrayData* ad) {
   assertx(cellIsPlausible(cell));
-
   assertx(ad->isPHPArray());
 
   auto const nonArr = [&]{
     if (UNLIKELY(op.noticeOnArrNonArr())) {
-      raiseHackArrCompatArrMixedCmp();
+      raiseHackArrCompatArrNonArrCmp();
     }
   };
   auto const hackArr = [&]{
     if (UNLIKELY(op.noticeOnArrHackArr())) {
-      raiseHackArrCompatArrMixedCmp();
+      raiseHackArrCompatArrHackArrCmp();
     }
   };
 
@@ -401,14 +375,6 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ArrayData* ad) {
       hackArr();
       return op.keysetVsNonKeyset();
 
-    case KindOfPersistentShape:
-    case KindOfShape:
-      if (RuntimeOption::EvalHackArrDVArrs) {
-        hackArr();
-        return op.dictVsNonDict();
-      }
-      // Fallthrough
-
     case KindOfPersistentArray:
     case KindOfArray:
       return op(cell.m_data.parr, ad);
@@ -426,11 +392,10 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ArrayData* ad) {
       return op(false, true);
 
     case KindOfClsMeth:
-      raiseClsMethToVecWarningHelper();
       if (RuntimeOption::EvalHackArrDVArrs) {
-        hackArr();
-        return op.vecVsNonVec();
+        return op.clsmethVsNonClsMeth();
       } else {
+        raiseClsMethToVecWarningHelper();
         return op(clsMethToVecHelper(cell.m_data.pclsmeth).get(), ad);
       }
 
@@ -489,17 +454,10 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ObjectData* od) {
     case KindOfKeyset:
       return op.keysetVsNonKeyset();
 
-    case KindOfPersistentShape:
-    case KindOfShape:
-      if (RuntimeOption::EvalHackArrDVArrs) {
-        return op.dictVsNonDict();
-      }
-      // Fallthrough
-
     case KindOfPersistentArray:
     case KindOfArray:
       if (UNLIKELY(op.noticeOnArrNonArr())) {
-        raiseHackArrCompatArrMixedCmp();
+        raiseHackArrCompatArrNonArrCmp();
       }
       return od->isCollection() ? op.collectionVsNonObj() : op(false, true);
 
@@ -516,12 +474,11 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ObjectData* od) {
       return strRelOp(classToStringHelper(cell.m_data.pclass));
 
     case KindOfClsMeth:
-      raiseClsMethToVecWarningHelper();
       if (RuntimeOption::EvalHackArrDVArrs) {
-        return op.vecVsNonVec();
+        return op.clsmethVsNonClsMeth();
       } else {
         if (UNLIKELY(op.noticeOnArrNonArr())) {
-          raiseHackArrCompatArrMixedCmp();
+          raiseHackArrCompatArrNonArrCmp();
         }
         return od->isCollection() ? op.collectionVsNonObj() : op(false, true);
       }
@@ -579,17 +536,10 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ResourceData* rd) {
     case KindOfKeyset:
       return op.keysetVsNonKeyset();
 
-    case KindOfPersistentShape:
-    case KindOfShape:
-      if (RuntimeOption::EvalHackArrDVArrs) {
-        return op.dictVsNonDict();
-      }
-      // Fallthrough
-
     case KindOfPersistentArray:
     case KindOfArray:
       if (UNLIKELY(op.noticeOnArrNonArr())) {
-        raiseHackArrCompatArrMixedCmp();
+        raiseHackArrCompatArrNonArrCmp();
       }
       return op(true, false);
 
@@ -615,7 +565,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ResourceData* rd) {
         return op.vecVsNonVec();
       } else {
         if (UNLIKELY(op.noticeOnArrNonArr())) {
-          raiseHackArrCompatArrMixedCmp();
+          raiseHackArrCompatArrNonArrCmp();
         }
         return op(true, false);
       }
@@ -639,15 +589,19 @@ typename Op::RetType cellRelOpVec(Op op, Cell cell, const ArrayData* a) {
   assertx(a->isVecArray());
 
   if (isClsMethType(cell.m_type)) {
-    raiseClsMethToVecWarningHelper();
-    return op.vec(clsMethToVecHelper(cell.m_data.pclsmeth).get(), a);
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      raiseClsMethToVecWarningHelper();
+      return op.vec(clsMethToVecHelper(cell.m_data.pclsmeth).get(), a);
+    } else {
+      return op.vecVsNonVec();
+    }
   }
 
   if (UNLIKELY(!isVecType(cell.m_type))) {
     if (isDictType(cell.m_type)) return op.dictVsNonDict();
     if (isKeysetType(cell.m_type)) return op.keysetVsNonKeyset();
     if (UNLIKELY(op.noticeOnArrHackArr() && isArrayType(cell.m_type))) {
-      raiseHackArrCompatArrMixedCmp();
+      raiseHackArrCompatArrHackArrCmp();
     }
     return op.vecVsNonVec();
   }
@@ -655,21 +609,15 @@ typename Op::RetType cellRelOpVec(Op op, Cell cell, const ArrayData* a) {
 }
 
 template<class Op>
-typename Op::RetType cellRelOpShape(Op op, Cell cell, const ArrayData* a) {
-  return RuntimeOption::EvalHackArrDVArrs ?
-    cellRelOpDict(op, cell, a) : cellRelOp(op, cell, a);
-}
-
-template<class Op>
 typename Op::RetType cellRelOpDict(Op op, Cell cell, const ArrayData* a) {
   assertx(cellIsPlausible(cell));
-  assertx(a->isDictOrShape());
+  assertx(a->isDict());
 
-  if (UNLIKELY(!isDictOrShapeType(cell.m_type))) {
+  if (UNLIKELY(!isDictType(cell.m_type))) {
     if (isVecType(cell.m_type)) return op.vecVsNonVec();
     if (isKeysetType(cell.m_type)) return op.keysetVsNonKeyset();
     if (UNLIKELY(op.noticeOnArrHackArr() && isArrayType(cell.m_type))) {
-      raiseHackArrCompatArrMixedCmp();
+      raiseHackArrCompatArrHackArrCmp();
     }
     return op.dictVsNonDict();
   }
@@ -686,7 +634,7 @@ typename Op::RetType cellRelOpKeyset(Op op, Cell cell, const ArrayData* a) {
     if (isVecType(cell.m_type)) return op.vecVsNonVec();
     if (isDictType(cell.m_type)) return op.dictVsNonDict();
     if (UNLIKELY(op.noticeOnArrHackArr() && isArrayType(cell.m_type))) {
-      raiseHackArrCompatArrMixedCmp();
+      raiseHackArrCompatArrHackArrCmp();
     }
     return op.keysetVsNonKeyset();
   }
@@ -707,43 +655,44 @@ typename Op::RetType cellRelOp(Op op, Cell cell, ClsMethDataRef clsMeth) {
     case KindOfString:
     case KindOfFunc:
     case KindOfClass:
-    case KindOfResource: return op(false, true);
-    case KindOfBoolean:  return op(cell.m_data.num, true);
+    case KindOfResource:
+      if (RuntimeOption::EvalHackArrDVArrs) return op.clsmethVsNonClsMeth();
+      else return op(false, true);
+    case KindOfBoolean:
+      if (RuntimeOption::EvalHackArrDVArrs) return op.clsmethVsNonClsMeth();
+      else return op(cell.m_data.num, true);
     case KindOfClsMeth:  return op(cell.m_data.pclsmeth, clsMeth);
-
     case KindOfPersistentDict:
     case KindOfDict:     return op.dictVsNonDict();
-
     case KindOfPersistentKeyset:
     case KindOfKeyset:   return op.keysetVsNonKeyset();
 
-    case KindOfPersistentShape:
-    case KindOfShape:
-      if (RuntimeOption::EvalHackArrDVArrs) {
-        return op.dictVsNonDict();
-      }
-      // fall through
     case KindOfPersistentArray:
     case KindOfArray: {
-      raiseClsMethToVecWarningHelper();
-      if (!RuntimeOption::EvalHackArrDVArrs) {
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        return op.clsmethVsNonClsMeth();
+      } else {
+        raiseClsMethToVecWarningHelper();
         return op(cell.m_data.parr, clsMethToVecHelper(clsMeth).get());
       }
-      return op.vecVsNonVec();
     }
 
     case KindOfPersistentVec:
     case KindOfVec: {
-      raiseClsMethToVecWarningHelper();
       if (RuntimeOption::EvalHackArrDVArrs) {
+        raiseClsMethToVecWarningHelper();
         return op.vec(cell.m_data.parr, clsMethToVecHelper(clsMeth).get());
-      }
-      return op.vecVsNonVec();
+      } else return op.vecVsNonVec();
     }
 
     case KindOfObject: {
-      auto const od = cell.m_data.pobj;
-      return od->isCollection() ? op.collectionVsNonObj() : op(true, false);
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        return op.clsmethVsNonClsMeth();
+      } else {
+        auto const od = cell.m_data.pobj;
+        return od->isCollection() ? op.collectionVsNonObj() : op(true, false);
+      }
+
     }
     case KindOfRecord:
       return op.recordVsNonRecord();
@@ -795,17 +744,10 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const Func* val) {
     case KindOfKeyset:
       return op.keysetVsNonKeyset();
 
-    case KindOfPersistentShape:
-    case KindOfShape:
-      if (RuntimeOption::EvalHackArrDVArrs) {
-        return op.dictVsNonDict();
-      }
-      // Fallthrough
-
     case KindOfPersistentArray:
     case KindOfArray:
       if (UNLIKELY(op.noticeOnArrNonArr())) {
-        raiseHackArrCompatArrMixedCmp();
+        raiseHackArrCompatArrNonArrCmp();
       }
       funcToStringHelper(val); // warn
       return op(true, false);
@@ -838,7 +780,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const Func* val) {
         return op.vecVsNonVec();
       } else {
         if (UNLIKELY(op.noticeOnArrNonArr())) {
-          raiseHackArrCompatArrMixedCmp();
+          raiseHackArrCompatArrNonArrCmp();
         }
         funcToStringHelper(val); // warn
         return op(true, false);
@@ -895,17 +837,10 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const Class* val) {
     case KindOfKeyset:
       return op.keysetVsNonKeyset();
 
-    case KindOfPersistentShape:
-    case KindOfShape:
-      if (RuntimeOption::EvalHackArrDVArrs) {
-        return op.dictVsNonDict();
-      }
-      // Fallthrough
-
     case KindOfPersistentArray:
     case KindOfArray:
       if (UNLIKELY(op.noticeOnArrNonArr())) {
-        raiseHackArrCompatArrMixedCmp();
+        raiseHackArrCompatArrNonArrCmp();
       }
       classToStringHelper(val); // warn
       return op(true, false);
@@ -938,7 +873,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const Class* val) {
         return op.vecVsNonVec();
       } else {
         if (UNLIKELY(op.noticeOnArrNonArr())) {
-          raiseHackArrCompatArrMixedCmp();
+          raiseHackArrCompatArrNonArrCmp();
         }
         classToStringHelper(val); // warn
         return op(true, false);
@@ -976,8 +911,6 @@ typename Op::RetType cellRelOp(Op op, Cell c1, Cell c2) {
   case KindOfDict:         return cellRelOpDict(op, c1, c2.m_data.parr);
   case KindOfPersistentKeyset:
   case KindOfKeyset:       return cellRelOpKeyset(op, c1, c2.m_data.parr);
-  case KindOfPersistentShape:
-  case KindOfShape:        return cellRelOpShape(op, c1, c2.m_data.parr);
   case KindOfPersistentArray:
   case KindOfArray:        return cellRelOp(op, c1, c2.m_data.parr);
   case KindOfObject:       return cellRelOp(op, c1, c2.m_data.pobj);
@@ -1055,8 +988,8 @@ struct Eq {
     return PackedArray::VecEqual(ad1, ad2);
   }
   bool dict(const ArrayData* ad1, const ArrayData* ad2) const {
-    assertx(ad1->isDictOrShape());
-    assertx(ad2->isDictOrShape());
+    assertx(ad1->isDict());
+    assertx(ad2->isDict());
     return MixedArray::DictEqual(ad1, ad2);
   }
   bool keyset(const ArrayData* ad1, const ArrayData* ad2) const {
@@ -1072,6 +1005,7 @@ struct Eq {
   bool recordVsNonRecord() const {
     throw_rec_non_rec_compare_exception();
   }
+  bool clsmethVsNonClsMeth() const { return false; }
 
   bool noticeOnArrNonArr() const { return false; }
   bool noticeOnArrHackArr() const {
@@ -1110,8 +1044,8 @@ struct CompareBase {
   }
 
   RetType dict(const ArrayData* ad1, const ArrayData* ad2) const {
-    assertx(ad1->isDictOrShape());
-    assertx(ad2->isDictOrShape());
+    assertx(ad1->isDict());
+    assertx(ad2->isDict());
     throw_dict_compare_exception();
   }
   RetType keyset(const ArrayData* ad1, const ArrayData* ad2) const {
@@ -1135,9 +1069,12 @@ struct CompareBase {
   RetType recordVsNonRecord() const {
     throw_rec_non_rec_compare_exception();
   }
+  RetType clsmethVsNonClsMeth() const {
+    throw_clsmeth_compare_exception();
+  }
 
   bool noticeOnArrNonArr() const {
-    return checkHACCompare();
+    return checkHACCompareNonAnyArray();
   }
   bool noticeOnArrHackArr() const {
     return checkHACCompare();
@@ -1310,7 +1247,7 @@ bool cellSame(Cell c1, Cell c2) {
 
   auto const phpArrayCheck = [&]{
     if (UNLIKELY(checkHACCompare() && isArrayType(c2.m_type))) {
-      raiseHackArrCompatArrMixedCmp();
+      raiseHackArrCompatArrHackArrCmp();
     }
   };
 
@@ -1352,8 +1289,8 @@ bool cellSame(Cell c1, Cell c2) {
     case KindOfPersistentVec:
     case KindOfVec:
       if (isClsMethType(c2.m_type)) {
-        raiseClsMethToVecWarningHelper();
         if (!RuntimeOption::EvalHackArrDVArrs) return false;
+        raiseClsMethToVecWarningHelper();
         return PackedArray::VecSame(
           c1.m_data.parr, clsMethToVecHelper(c2.m_data.pclsmeth).get());
       }
@@ -1365,7 +1302,7 @@ bool cellSame(Cell c1, Cell c2) {
 
     case KindOfPersistentDict:
     case KindOfDict:
-      if (!isDictOrShapeType(c2.m_type)) {
+      if (!isDictType(c2.m_type)) {
         phpArrayCheck();
         return false;
       }
@@ -1379,34 +1316,17 @@ bool cellSame(Cell c1, Cell c2) {
       }
       return SetArray::Same(c1.m_data.parr, c2.m_data.parr);
 
-    case KindOfPersistentShape:
-    case KindOfShape: // TODO(T31025155): Add warning.
-      if (RuntimeOption::EvalHackArrDVArrs) {
-        if (!isDictOrShapeType(c2.m_type)) {
-          phpArrayCheck();
-          return false;
-        }
-      } else {
-        if (!isArrayOrShapeType(c2.m_type)) {
-          if (UNLIKELY(checkHACCompare() && isHackArrayType(c2.m_type))) {
-            raiseHackArrCompatArrMixedCmp();
-          }
-          return false;
-        }
-      }
-      return MixedArray::ShapeSame(c1.m_data.parr, c2.m_data.parr);
-
     case KindOfPersistentArray:
     case KindOfArray:
       if (isClsMethType(c2.m_type)) {
-        raiseClsMethToVecWarningHelper();
         if (RuntimeOption::EvalHackArrDVArrs) return false;
+        raiseClsMethToVecWarningHelper();
         return ArrayData::Same(
           c1.m_data.parr, clsMethToVecHelper(c2.m_data.pclsmeth).get());
       }
-      if (!isArrayOrShapeType(c2.m_type)) {
+      if (!isArrayType(c2.m_type)) {
         if (UNLIKELY(checkHACCompare() && isHackArrayType(c2.m_type))) {
-          raiseHackArrCompatArrMixedCmp();
+          raiseHackArrCompatArrHackArrCmp();
         }
         return false;
       }
@@ -1428,7 +1348,7 @@ bool cellSame(Cell c1, Cell c2) {
             clsMethToVecHelper(c1.m_data.pclsmeth).get(), c2.m_data.parr);
         }
       } else {
-        if (isArrayOrShapeType(c2.m_type)) {
+        if (isArrayType(c2.m_type)) {
           raiseClsMethToVecWarningHelper();
           return ArrayData::Same(
             clsMethToVecHelper(c1.m_data.pclsmeth).get(), c2.m_data.parr);
@@ -1479,7 +1399,6 @@ bool cellEqual(Cell cell, const ArrayData* val) {
   if (val->isPHPArray()) return cellRelOp(Eq(), cell, val);
   if (val->isVecArray()) return cellRelOpVec(Eq(), cell, val);
   if (val->isDict()) return cellRelOpDict(Eq(), cell, val);
-  if (val->isShape()) return cellRelOpShape(Eq(), cell, val);
   if (val->isKeyset()) return cellRelOpKeyset(Eq(), cell, val);
   not_reached();
 }
@@ -1529,7 +1448,6 @@ bool cellLess(Cell cell, const ArrayData* val) {
   if (val->isPHPArray()) return cellRelOp(Lt(), cell, val);
   if (val->isVecArray()) return cellRelOpVec(Lt(), cell, val);
   if (val->isDict()) return cellRelOpDict(Lt(), cell, val);
-  if (val->isShape()) return cellRelOpShape(Lt(), cell, val);
   if (val->isKeyset()) return cellRelOpKeyset(Lt(), cell, val);
   not_reached();
 }
@@ -1577,7 +1495,6 @@ bool cellGreater(Cell cell, const ArrayData* val) {
   if (val->isPHPArray()) return cellRelOp(Gt(), cell, val);
   if (val->isVecArray()) return cellRelOpVec(Gt(), cell, val);
   if (val->isDict()) return cellRelOpDict(Gt(), cell, val);
-  if (val->isShape()) return cellRelOpShape(Gt(), cell, val);
   if (val->isKeyset()) return cellRelOpKeyset(Gt(), cell, val);
   not_reached();
 }
@@ -1627,7 +1544,6 @@ int64_t cellCompare(Cell cell, const ArrayData* val) {
   if (val->isPHPArray()) return cellRelOp(Cmp(), cell, val);
   if (val->isVecArray()) return cellRelOpVec(Cmp(), cell, val);
   if (val->isDict()) return cellRelOpDict(Cmp(), cell, val);
-  if (val->isShape()) return cellRelOpShape(Cmp(), cell, val);
   if (val->isKeyset()) return cellRelOpKeyset(Cmp(), cell, val);
   not_reached();
 }

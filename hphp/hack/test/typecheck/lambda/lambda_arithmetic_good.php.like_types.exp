@@ -1,0 +1,6 @@
+File "lambda_arithmetic_good.php", line 5, characters 15-16:
+Invalid argument (Typing[4110])
+File "lambda_arithmetic_good.php", line 4, characters 33-34:
+Expected T1
+File "lambda_arithmetic_good.php", line 4, characters 45-46:
+But got dynamic because it is an unenforceable type

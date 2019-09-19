@@ -1,0 +1,6 @@
+File "super_constraint_2.php", line 27, characters 12-26:
+Invalid return type (Typing[4110])
+File "super_constraint_2.php", line 26, characters 6-18:
+Expected FooDerived123
+File "super_constraint_2.php", line 10, characters 52-53:
+But got dynamic because it is an unenforceable type

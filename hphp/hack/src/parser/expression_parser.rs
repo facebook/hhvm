@@ -8,16 +8,17 @@ use std::borrow::Cow;
 use std::marker::PhantomData;
 
 use crate::declaration_parser::DeclarationParser;
-use crate::lexable_token::LexableToken;
 use crate::lexer::{Lexer, StringLiteralKind};
 use crate::operator::{Assoc, Operator};
 use crate::parser_env::ParserEnv;
 use crate::parser_trait::{Context, ParserTrait};
 use crate::smart_constructors::{NodeType, SmartConstructors};
+use crate::source_text::SourceText;
 use crate::statement_parser::StatementParser;
-use crate::syntax_error::{self as Errors, SyntaxError};
-use crate::token_kind::TokenKind;
 use crate::type_parser::TypeParser;
+use parser_core_types::lexable_token::LexableToken;
+use parser_core_types::syntax_error::{self as Errors, SyntaxError};
+use parser_core_types::token_kind::TokenKind;
 
 #[derive(PartialEq)]
 pub enum BinaryExpressionPrefixKind<P> {
@@ -42,9 +43,9 @@ where
 {
     lexer: Lexer<'a, S::Token>,
     env: ParserEnv,
-    context: Context<S::Token>,
+    context: Context<'a, S::Token>,
     errors: Vec<SyntaxError>,
-    sc_state: Option<T>,
+    sc: S,
     precedence: usize,
     allow_as_expressions: bool,
     _phantom: PhantomData<S>,
@@ -61,7 +62,7 @@ where
             context: self.context.clone(),
             env: self.env.clone(),
             errors: self.errors.clone(),
-            sc_state: self.sc_state.clone(),
+            sc: self.sc.clone(),
             precedence: self.precedence,
             _phantom: self._phantom,
             allow_as_expressions: self.allow_as_expressions,
@@ -77,9 +78,9 @@ where
     fn make(
         lexer: Lexer<'a, S::Token>,
         env: ParserEnv,
-        context: Context<S::Token>,
+        context: Context<'a, S::Token>,
         errors: Vec<SyntaxError>,
-        sc_state: T,
+        sc: S,
     ) -> Self {
         Self {
             lexer,
@@ -87,19 +88,21 @@ where
             precedence: 0,
             context,
             errors,
-            sc_state: Some(sc_state),
+            sc,
             allow_as_expressions: true,
             _phantom: PhantomData,
         }
     }
 
-    fn into_parts(self) -> (Lexer<'a, S::Token>, Context<S::Token>, Vec<SyntaxError>, T) {
-        (
-            self.lexer,
-            self.context,
-            self.errors,
-            self.sc_state.unwrap(),
-        )
+    fn into_parts(
+        self,
+    ) -> (
+        Lexer<'a, S::Token>,
+        Context<'a, S::Token>,
+        Vec<SyntaxError>,
+        S,
+    ) {
+        (self.lexer, self.context, self.errors, self.sc)
     }
 
     fn lexer(&self) -> &Lexer<'a, S::Token> {
@@ -114,11 +117,11 @@ where
     where
         T: Clone,
     {
-        let (lexer, context, errors, sc_state) = other.into_parts();
+        let (lexer, context, errors, sc) = other.into_parts();
         self.lexer = lexer;
         self.context = context;
         self.errors = errors;
-        self.sc_state = Some(sc_state);
+        self.sc = sc;
     }
 
     fn add_error(&mut self, error: SyntaxError) {
@@ -129,8 +132,8 @@ where
         &self.env
     }
 
-    fn sc_state_mut(&mut self) -> &mut Option<T> {
-        &mut self.sc_state
+    fn sc_mut(&mut self) -> &mut S {
+        &mut self.sc
     }
 
     fn skipped_tokens_mut(&mut self) -> &mut Vec<S::Token> {
@@ -141,11 +144,11 @@ where
         &self.context.skipped_tokens
     }
 
-    fn context_mut(&mut self) -> &mut Context<S::Token> {
+    fn context_mut(&mut self) -> &mut Context<'a, S::Token> {
         &mut self.context
     }
 
-    fn context(&self) -> &Context<S::Token> {
+    fn context(&self) -> &Context<'a, S::Token> {
         &self.context
     }
 }
@@ -159,7 +162,10 @@ where
         self.allow_as_expressions
     }
 
-    pub fn with_as_expressions<U>(&mut self, enabled: bool, f: &dyn Fn(&mut Self) -> U) -> U {
+    pub fn with_as_expressions<F, U>(&mut self, enabled: bool, f: F) -> U
+    where
+        F: Fn(&mut Self) -> U,
+    {
         let old_enabled = self.allow_as_expressions();
         self.allow_as_expressions = enabled;
         let r = f(self);
@@ -167,16 +173,17 @@ where
         r
     }
 
-    fn with_type_parser<U>(&mut self, f: &dyn Fn(&mut TypeParser<'a, S, T>) -> U) -> U
+    fn with_type_parser<F, U>(&mut self, f: F) -> U
     where
         T: Clone,
+        F: Fn(&mut TypeParser<'a, S, T>) -> U,
     {
         let mut type_parser: TypeParser<S, T> = TypeParser::make(
             self.lexer.clone(),
             self.env.clone(),
             self.context.clone(),
             self.errors.clone(),
-            self.sc_state.clone().unwrap(),
+            self.sc.clone(),
         );
         let res = f(&mut type_parser);
         self.continue_from(type_parser);
@@ -189,7 +196,7 @@ where
             self.env.clone(),
             self.context.clone(),
             self.errors.clone(),
-            self.sc_state.clone().unwrap(),
+            self.sc.clone(),
         );
         let res = type_parser.parse_remaining_type_specifier(name);
         self.continue_from(type_parser);
@@ -197,35 +204,37 @@ where
     }
 
     fn parse_generic_type_arguments(&mut self) -> (S::R, bool) {
-        self.with_type_parser(&|x| x.parse_generic_type_argument_list())
+        self.with_type_parser(|x| x.parse_generic_type_argument_list())
     }
 
-    fn with_decl_parser<U>(&mut self, f: &dyn Fn(&mut DeclarationParser<'a, S, T>) -> U) -> U
+    fn with_decl_parser<F, U>(&mut self, f: F) -> U
     where
         T: Clone,
+        F: Fn(&mut DeclarationParser<'a, S, T>) -> U,
     {
         let mut decl_parser: DeclarationParser<S, T> = DeclarationParser::make(
             self.lexer.clone(),
             self.env.clone(),
             self.context.clone(),
             self.errors.clone(),
-            self.sc_state.clone().unwrap(),
+            self.sc.clone(),
         );
         let res = f(&mut decl_parser);
         self.continue_from(decl_parser);
         res
     }
 
-    fn with_statement_parser<U>(&mut self, f: &dyn Fn(&mut StatementParser<'a, S, T>) -> U) -> U
+    fn with_statement_parser<F, U>(&mut self, f: F) -> U
     where
         T: Clone,
+        F: Fn(&mut StatementParser<'a, S, T>) -> U,
     {
         let mut statement_parser: StatementParser<S, T> = StatementParser::make(
             self.lexer.clone(),
             self.env.clone(),
             self.context.clone(),
             self.errors.clone(),
-            self.sc_state.clone().unwrap(),
+            self.sc.clone(),
         );
         let res = f(&mut statement_parser);
         self.continue_from(statement_parser);
@@ -233,11 +242,11 @@ where
     }
 
     fn parse_compound_statement(&mut self) -> S::R {
-        self.with_statement_parser(&|x| x.parse_compound_statement())
+        self.with_statement_parser(|x| x.parse_compound_statement())
     }
 
     fn parse_parameter_list_opt(&mut self) -> (S::R, S::R, S::R) {
-        self.with_decl_parser(&|x| x.parse_parameter_list_opt())
+        self.with_decl_parser(|x| x.parse_parameter_list_opt())
     }
 
     pub fn parse_expression(&mut self) -> S::R {
@@ -315,6 +324,7 @@ where
     fn parse_term(&mut self) -> S::R {
         let mut parser1 = self.clone();
         let token = parser1.next_xhp_class_name_or_other_token();
+        let allow_new_attr = self.env.allow_new_attribute_syntax;
         match token.kind() {
             | TokenKind::DecimalLiteral
             | TokenKind::OctalLiteral
@@ -419,8 +429,9 @@ where
             | TokenKind::Ampersand
             | TokenKind::Await
             | TokenKind::Clone
-            | TokenKind::Print
-            | TokenKind::At => self.parse_prefix_unary_expression(),
+            | TokenKind::Print => self.parse_prefix_unary_expression(),
+            // Allow error suppression prefix when not using new attributes
+            | TokenKind::At if !allow_new_attr => self.parse_prefix_unary_expression(),
             | TokenKind::LeftParen => self.parse_cast_or_parenthesized_or_lambda_expression(),
             | TokenKind::LessThan => {
                 self.continue_from(parser1);
@@ -441,7 +452,7 @@ where
                 let attribute_spec = S!(make_missing, self, self.pos());
                 self.parse_anon(attribute_spec)
             }
-            | TokenKind::DollarDollar => {
+             | TokenKind::DollarDollar => {
                 self.continue_from(parser1);
                 let token = S!(make_token, self, token);
                 S!(make_pipe_variable_expression, self, token)
@@ -451,6 +462,7 @@ where
             | TokenKind::LessThanLessThan
             | TokenKind::Async
             | TokenKind::Coroutine => self.parse_anon_or_lambda_or_awaitable(),
+            | TokenKind::At if allow_new_attr => self.parse_anon_or_lambda_or_awaitable(),
             | TokenKind::Include
             | TokenKind::Include_once
             | TokenKind::Require
@@ -793,8 +805,8 @@ where
         //
         // An embedded variable expression inside braces can be a much more complex
         // expression than indicated by the grammar above.  For example,
-        // {$c->x->y[0]} is good, and {$c[$x instanceof foo ? 0 : 1]} is good,
-        // but {$c instanceof foo ? $x : $y} is not.  It is not clear to me what
+        // {$c->x->y[0]} is good, and {$c[$x is foo ? 0 : 1]} is good,
+        // but {$c is foo ? $x : $y} is not.  It is not clear to me what
         // the legal grammar here is; it seems best in this situation to simply
         // parse any expression and do an error pass later.
         //
@@ -812,7 +824,7 @@ where
         //
         //
 
-        let merge = |token: S::Token, head: Option<S::Token>| {
+        let merge = |token: S::Token, head: Option<S::Token>, source: &SourceText<'a>| {
             // TODO: Assert that new head has no leading trivia, old head has no
             // trailing trivia.
             // Invariant: A token inside a list of string fragments is always a head,
@@ -857,7 +869,7 @@ where
                     let l = head.leading().to_vec();
                     let t = token.trailing().to_vec();
                     // TODO: Make a "position" type that is a tuple of source and offset.
-                    Some(S::Token::make(k, o, w, l, t))
+                    Some(S::Token::make(k, source, o, w, l, t))
                 }
                 None => {
                     let token = match token.kind() {
@@ -973,17 +985,17 @@ where
             }
         };
 
-        let handle_left_brace = |parser: &mut Self, head: Option<S::Token>, acc: &mut Vec<S::R>| {
+        let handle_left_brace = |parser: &mut Self,
+                                 left_brace: S::Token,
+                                 head: Option<S::Token>,
+                                 acc: &mut Vec<S::R>| {
             // Note that here we use next_token_in_string because we need to know
             // whether there is trivia between the left brace and the $x which follows.
             let mut parser1 = parser.clone();
-            let left_brace = parser1.next_token_in_string(&literal_kind);
-            let mut parser2 = parser1.clone();
-            let token = parser2.next_token_in_string(&literal_kind);
+            let token = parser1.next_token_in_string(&literal_kind);
             // TODO: What about "{$$}" ?
             match token.kind() {
                 TokenKind::Dollar | TokenKind::Variable => {
-                    parser.continue_from(parser1);
                     put_opt(parser, head, acc); // TODO(leoo) check with kasper (was self)
                     let expr = parser.parse_braced_expression_in_string(
                         left_brace, /* dollar_inside_braces:*/ true,
@@ -999,8 +1011,7 @@ where
                     // TODO: Give an error.
                     // We got a { not followed by a $. Ignore it.
                     // TODO: Give a warning?
-                    parser.continue_from(parser1);
-                    merge(left_brace, head)
+                    merge(left_brace, head, parser.lexer.source())
                 }
             }
         };
@@ -1039,7 +1050,7 @@ where
                     _ => {
                         // We got a $ not followed by a { or variable name. Ignore it.
                         // TODO: Give a warning?
-                        merge(dollar, head)
+                        merge(dollar, head, parser.lexer.source())
                     }
                 }
             };
@@ -1048,31 +1059,22 @@ where
         let mut head = Some(head);
 
         loop {
-            let mut parser1 = self.clone();
-            let token = parser1.next_token_in_string(&literal_kind);
+            let token = self.next_token_in_string(&literal_kind);
             match token.kind() {
                 TokenKind::HeredocStringLiteralTail | TokenKind::DoubleQuotedStringLiteralTail => {
-                    self.continue_from(parser1);
-                    let head = merge(token, head);
+                    let head = merge(token, head, self.lexer.source());
                     put_opt(self, head, &mut acc);
                     break;
                 }
-                TokenKind::LeftBrace => head = handle_left_brace(self, head, &mut acc),
+                TokenKind::LeftBrace => head = handle_left_brace(self, token, head, &mut acc),
                 TokenKind::Variable => {
-                    self.continue_from(parser1);
                     put_opt(self, head, &mut acc);
                     let expr = parse_embedded_expression(self, token);
                     head = None;
                     acc.push(expr)
                 }
-                TokenKind::Dollar => {
-                    self.continue_from(parser1);
-                    head = handle_dollar(self, token, head, &mut acc)
-                }
-                _ => {
-                    self.continue_from(parser1);
-                    head = merge(token, head)
-                }
+                TokenKind::Dollar => head = handle_dollar(self, token, head, &mut acc),
+                _ => head = merge(token, head, self.lexer.source()),
             }
         }
 
@@ -1330,7 +1332,11 @@ where
                         | TokenKind::QuestionQuestionEqual => {
                             self.parse_remaining_binary_expression(term, assignment_prefix_kind)
                         }
-                        TokenKind::Instanceof => self.parse_instanceof_expression(term),
+                        TokenKind::Instanceof => {
+                            self.with_error(Errors::instanceof_disabled);
+                            let _ = self.assert_token(TokenKind::Instanceof);
+                            term
+                        }
                         TokenKind::Is => self.parse_is_expression(term),
                         TokenKind::As if self.allow_as_expressions() => {
                             self.parse_as_expression(term)
@@ -1447,7 +1453,7 @@ where
             }
             (left_kind, _) => {
                 let left_token = S!(make_token, self, left);
-                let index = self.with_as_expressions(/* enabled :*/ true, &|x| {
+                let index = self.with_as_expressions(/* enabled :*/ true, |x| {
                     x.with_reset_precedence(|x| x.parse_expression())
                 });
                 let right = match left_kind {
@@ -1496,7 +1502,7 @@ where
         //   argument-expressions  ,  expression
         //
         // This function parses the parens as well.
-        self.parse_parenthesized_comma_list_opt_allow_trailing(&|x| {
+        self.parse_parenthesized_comma_list_opt_allow_trailing(|x| {
             x.with_reset_precedence(|x| x.parse_decorated_expression_opt())
         })
     }
@@ -1737,7 +1743,7 @@ where
         //
         // * If the thing in parens is one of the keywords mentioned above, then
         //   it's a cast.
-        // * If the token which follows (x) is "as" or "instanceof" then
+        // * If the token which follows (x) is "is" or "as" then
         //   it's a parenthesized expression.
         // * PHP-ism extension: if the token is "and", "or" or "xor", then it's a
         //   parenthesized expression.
@@ -1901,7 +1907,7 @@ where
         let expression =
             self.with_as_expressions(
                 /* enabled:*/ true,
-                &|p| p.with_reset_precedence(|p| p.parse_expression()),
+                |p| p.with_reset_precedence(|p| p.parse_expression()),
             );
         let right_paren = self.require_right_paren();
         S!(
@@ -1954,113 +1960,13 @@ where
         S!(make_prefix_unary_expression, self, dollar, operand)
     }
 
-    fn parse_instanceof_expression(&mut self, left: S::R) -> S::R {
-        // SPEC:
-        // instanceof-expression:
-        //   instanceof-subject  instanceof   instanceof-type-designator
-        //
-        // instanceof-subject:
-        //   expression
-        //
-        // instanceof-type-designator:
-        //   qualified-name
-        //   variable-name
-        //
-        // TODO: The spec is plainly wrong here. This is a bit of a mess and there
-        // are a number of issues.
-        //
-        // The issues arise from the fact that the thing on the right can be either
-        // a type, or an expression that evaluates to a string that names the type.
-        //
-        // The grammar in the spec, above, says that the only things that can be
-        // here are a qualified name -- in which case it names the type directly --
-        // or a variable of classname type, which names the type.  But this is
-        // not the grammar that is accepted by Hack / HHVM.  The accepted grammar
-        // treats "instanceof" as a binary operator which takes expressions on
-        // each side, and is of lower precedence than =>.  Thus
-        //
-        // $x instanceof $y => z
-        //
-        // must be parsed as ($x instanceof ($y => z)), and not, as the grammar
-        // implies, (($x instanceof $y) => z).
-        //
-        // But wait, it gets worse.
-        //
-        // The less-than operator is of lower precedence than instanceof, so
-        // "$x instanceof foo < 10" should be parsed as (($x instanceof foo) < 10).
-        // But it seems plausible that we might want to parse
-        // "$x instanceof foo<int>" someday, in which case now we have an ambiguity.
-        // How do we know when we see the < whether we are attempting to parse a type?
-        //
-        // Moreover: we need to be able to parse XHP class names on the right hand
-        // side of the operator.  That is, we need to be able to say
-        //
-        // $x instanceof :foo
-        //
-        // However, we cannot simply say that the grammar is
-        //
-        // instanceof-type-designator:
-        //   xhp-class-name
-        //   expression
-        //
-        // Why not?   Because that then gives the wrong parse for:
-        //
-        // class :foo { static $bar = "abc" }
-        // class abc { }
-        // ...
-        // $x instanceof :foo :: $bar
-        //
-        // We need to parse that as $x instanceof (:foo :: $bar).
-        //
-        // The solution to all this is as follows.
-        //
-        // First, an XHP class name must be a legal expression. I had thought that
-        // it might be possible to say that an XHP class name is a legal type, or
-        // legal in an expression context when immediately followed by ::, but
-        // that's not the case. We need to be able to parse both
-        //
-        // $x instanceof :foo :: $bar
-        //
-        // and
-        //
-        // $x instanceof :foo
-        //
-        // so the most expedient way to do that is to parse any expression on the
-        // right, and to make XHP class names into legal expressions.
-        //
-        // So, with all this in mind, the grammar we will actually parse here is:
-        //
-        // instanceof-type-designator:
-        //   expression
-        //
-        // This has the unfortunate property that the common case, say,
-        //
-        // $x instanceof C
-        //
-        // creates a parse node for C as a name token, not as a name token wrapped
-        // up as a simple type.
-        //
-        // Should we ever need to parse both arbitrary expressions and arbitrary
-        // types here, we'll have some tricky problems to solve.
-        //
-        //
-        let op = self.assert_token(TokenKind::Instanceof);
-        let precedence = Operator::InstanceofOperator.precedence(&self.env);
-        let right_term = self.parse_term();
-        let right = self.parse_remaining_binary_expression_helper(right_term, precedence);
-        let result = S!(make_instanceof_expression, self, left, op, right);
-        self.parse_remaining_expression(result)
-    }
-
-    fn parse_is_as_helper(
-        &mut self,
-        f: &dyn Fn(&mut Self, S::R, S::R, S::R) -> S::R,
-        left: S::R,
-        kw: TokenKind,
-    ) -> S::R {
+    fn parse_is_as_helper<F>(&mut self, f: F, left: S::R, kw: TokenKind) -> S::R
+    where
+        F: Fn(&mut Self, S::R, S::R, S::R) -> S::R,
+    {
         let op = self.assert_token(kw);
         let right = self
-            .with_type_parser(&|p: &mut TypeParser<'a, S, T>| p.parse_type_specifier(false, true));
+            .with_type_parser(|p: &mut TypeParser<'a, S, T>| p.parse_type_specifier(false, true));
         let result = f(self, left, op, right);
         self.parse_remaining_expression(result)
     }
@@ -2073,7 +1979,7 @@ where
         // is-subject:
         //   expression
         self.parse_is_as_helper(
-            &|p, x, y, z| S!(make_is_expression, p, x, y, z),
+            |p, x, y, z| S!(make_is_expression, p, x, y, z),
             left,
             TokenKind::Is,
         )
@@ -2087,7 +1993,7 @@ where
         // as-subject:
         //   expression
         self.parse_is_as_helper(
-            &|p, x, y, z| S!(make_as_expression, p, x, y, z),
+            |p, x, y, z| S!(make_as_expression, p, x, y, z),
             left,
             TokenKind::As,
         )
@@ -2098,7 +2004,7 @@ where
         // nullable-as-expression:
         //   as-subject  ?as  type-specifier
         self.parse_is_as_helper(
-            &|p, x, y, z| S!(make_nullable_as_expression, p, x, y, z),
+            |p, x, y, z| S!(make_nullable_as_expression, p, x, y, z),
             left,
             TokenKind::QuestionAs,
         )
@@ -2298,6 +2204,13 @@ where
                     name
                 }
             }
+            TokenKind::At => {
+                if self.peek_token_kind_with_lookahead(1) == TokenKind::LeftBracket {
+                    self.parse_record_creation_expression(name)
+                } else {
+                    name
+                }
+            }
             _ => name,
         }
     }
@@ -2311,17 +2224,23 @@ where
         //   record-field-initializer-list, record-field-initializer
         // record-field-initializer:
         //   field-name => expression
+        let array_token = match self.peek_token_kind() {
+            TokenKind::At => self.assert_token(TokenKind::At),
+            _ => S!(make_missing, self, self.pos()),
+        };
+
         let left_bracket = self.assert_token(TokenKind::LeftBracket);
         let members = self.parse_comma_list_opt_allow_trailing(
             TokenKind::RightBracket,
             Errors::error1015,
-            &|x| x.parse_keyed_element_initializer(),
+            |x| x.parse_keyed_element_initializer(),
         );
         let right_bracket = self.require_right_bracket();
         S!(
             make_record_creation_expression,
             self,
             name,
+            array_token,
             left_bracket,
             members,
             right_bracket
@@ -2356,7 +2275,7 @@ where
         // This work item is tracked by spec issue #109.
 
         let (left_brace, initialization_list, right_brace) =
-            self.parse_braced_comma_list_opt_allow_trailing(&|p| p.parse_init_expression());
+            self.parse_braced_comma_list_opt_allow_trailing(|p| p.parse_init_expression());
         // Validating the name is a collection type happens in a later phase
         S!(
             make_collection_literal_expression,
@@ -2411,7 +2330,7 @@ where
         // TODO: Produce an error later if the expressions in the list destructuring
         // are not lvalues.
         let keyword = self.assert_token(TokenKind::List);
-        let (left, items, right) = self.parse_parenthesized_comma_list_opt_items_opt(&|p| {
+        let (left, items, right) = self.parse_parenthesized_comma_list_opt_items_opt(|p| {
             p.parse_expression_with_reset_precedence()
         });
         S!(make_list_expression, self, keyword, left, items, right)
@@ -2422,7 +2341,7 @@ where
     fn parse_array_intrinsic_expression(&mut self) -> S::R {
         let array_keyword = self.assert_token(TokenKind::Array);
         let (left_paren, members, right_paren) = self
-            .parse_parenthesized_comma_list_opt_allow_trailing(&|p| p.parse_array_element_init());
+            .parse_parenthesized_comma_list_opt_allow_trailing(|p| p.parse_array_element_init());
         S!(
             make_array_intrinsic_expression,
             self,
@@ -2433,12 +2352,16 @@ where
         )
     }
 
-    fn parse_bracketed_collection_intrinsic_expression(
+    fn parse_bracketed_collection_intrinsic_expression<F, G>(
         &mut self,
         keyword_token: TokenKind,
-        parse_element_function: &dyn Fn(&mut Self) -> S::R,
-        make_intrinsic_function: &dyn Fn(&mut Self, S::R, S::R, S::R, S::R, S::R) -> S::R,
-    ) -> S::R {
+        parse_element_function: F,
+        make_intrinsic_function: G,
+    ) -> S::R
+    where
+        F: Fn(&mut Self) -> S::R,
+        G: Fn(&mut Self, S::R, S::R, S::R, S::R, S::R) -> S::R,
+    {
         let mut parser1 = self.clone();
         let keyword = parser1.assert_token(keyword_token);
         let explicit_type = match parser1.peek_token_kind_with_possible_attributized_type_list() {
@@ -2477,8 +2400,8 @@ where
         // TODO: Create the grammar and add it to the spec.
         self.parse_bracketed_collection_intrinsic_expression(
             TokenKind::Darray,
-            &|p| p.parse_keyed_element_initializer(),
-            &|p, a, b, c, d, e| S!(make_darray_intrinsic_expression, p, a, b, c, d, e),
+            |p| p.parse_keyed_element_initializer(),
+            |p, a, b, c, d, e| S!(make_darray_intrinsic_expression, p, a, b, c, d, e),
         )
     }
 
@@ -2487,16 +2410,16 @@ where
         // TODO: Can the list have a trailing comma?
         self.parse_bracketed_collection_intrinsic_expression(
             TokenKind::Dict,
-            &|p| p.parse_keyed_element_initializer(),
-            &|p, a, b, c, d, e| S!(make_dictionary_intrinsic_expression, p, a, b, c, d, e),
+            |p| p.parse_keyed_element_initializer(),
+            |p, a, b, c, d, e| S!(make_dictionary_intrinsic_expression, p, a, b, c, d, e),
         )
     }
 
     fn parse_keyset_intrinsic_expression(&mut self) -> S::R {
         self.parse_bracketed_collection_intrinsic_expression(
             TokenKind::Keyset,
-            &|p| p.parse_expression_with_reset_precedence(),
-            &|p, a, b, c, d, e| S!(make_keyset_intrinsic_expression, p, a, b, c, d, e),
+            |p| p.parse_expression_with_reset_precedence(),
+            |p, a, b, c, d, e| S!(make_keyset_intrinsic_expression, p, a, b, c, d, e),
         )
     }
 
@@ -2504,8 +2427,8 @@ where
         // TODO: Create the grammar and add it to the spec.
         self.parse_bracketed_collection_intrinsic_expression(
             TokenKind::Varray,
-            &|p| p.parse_expression_with_reset_precedence(),
-            &|p, a, b, c, d, e| S!(make_varray_intrinsic_expression, p, a, b, c, d, e),
+            |p| p.parse_expression_with_reset_precedence(),
+            |p, a, b, c, d, e| S!(make_varray_intrinsic_expression, p, a, b, c, d, e),
         )
     }
 
@@ -2514,8 +2437,8 @@ where
         // TODO: Can the list have a trailing comma?
         self.parse_bracketed_collection_intrinsic_expression(
             TokenKind::Vec,
-            &|p| p.parse_expression_with_reset_precedence(),
-            &|p, a, b, c, d, e| S!(make_vector_intrinsic_expression, p, a, b, c, d, e),
+            |p| p.parse_expression_with_reset_precedence(),
+            |p, a, b, c, d, e| S!(make_vector_intrinsic_expression, p, a, b, c, d, e),
         )
     }
 
@@ -2528,7 +2451,7 @@ where
     //   array-element-initializer , array-initializer-list
     fn parse_array_creation_expression(&mut self) -> S::R {
         let (left_bracket, members, right_bracket) =
-            self.parse_bracketted_comma_list_opt_allow_trailing(&|p| p.parse_array_element_init());
+            self.parse_bracketted_comma_list_opt_allow_trailing(|p| p.parse_array_element_init());
         S!(
             make_array_creation_expression,
             self,
@@ -2588,8 +2511,8 @@ where
         //   field-initializer
         //   field-initializers  ,  field-initializer
         let shape = self.assert_token(TokenKind::Shape);
-        let (left_paren, fields, right_paren) = self
-            .parse_parenthesized_comma_list_opt_allow_trailing(&|p| p.parse_field_initializer());
+        let (left_paren, fields, right_paren) =
+            self.parse_parenthesized_comma_list_opt_allow_trailing(|p| p.parse_field_initializer());
         S!(
             make_shape_expression,
             self,
@@ -2613,7 +2536,7 @@ where
         // TODO: We need to produce an error in a later pass if the list is empty.
         let keyword = self.assert_token(TokenKind::Tuple);
         let (left_paren, items, right_paren) = self
-            .parse_parenthesized_comma_list_opt_allow_trailing(&|p| {
+            .parse_parenthesized_comma_list_opt_allow_trailing(|p| {
                 p.parse_expression_with_reset_precedence()
             });
         S!(
@@ -2641,19 +2564,20 @@ where
         // Skip any async or coroutine declarations that may be present. When we
         // feed the original parser into the syntax parsers. they will take care of
         // them as appropriate.
-        let attribute_spec = self.with_decl_parser(&|p| p.parse_attribute_specification_opt());
-        let mut parser1 = self.clone();
-
-        let _ = parser1.optional_token(TokenKind::Static);
-        let _ = parser1.optional_token(TokenKind::Async);
-        let _ = parser1.optional_token(TokenKind::Coroutine);
-        match parser1.peek_token_kind() {
+        let parser1 = self.clone();
+        let attribute_spec = self.with_decl_parser(|p| p.parse_attribute_specification_opt());
+        let mut parser2 = self.clone();
+        let _ = parser2.optional_token(TokenKind::Static);
+        let _ = parser2.optional_token(TokenKind::Async);
+        let _ = parser2.optional_token(TokenKind::Coroutine);
+        match parser2.peek_token_kind() {
             TokenKind::Function => self.parse_anon(attribute_spec),
             TokenKind::LeftBrace => self.parse_async_block(attribute_spec),
             TokenKind::Variable | TokenKind::LeftParen => {
                 self.parse_lambda_expression(attribute_spec)
             }
             _ => {
+                self.continue_from(parser1);
                 let static_or_async_or_coroutine_as_name = self.next_token_as_name();
                 S!(make_token, self, static_or_async_or_coroutine_as_name)
             }
@@ -2692,7 +2616,7 @@ where
             use_token
         } else {
             let (left, vars, right) =
-                self.parse_parenthesized_comma_list_opt_allow_trailing(&|p| p.parse_use_variable());
+                self.parse_parenthesized_comma_list_opt_allow_trailing(|p| p.parse_use_variable());
             S!(
                 make_anonymous_function_use_clause,
                 self,
@@ -2710,7 +2634,7 @@ where
         let return_type = if colon.is_missing() {
             S!(make_missing, self, self.pos())
         } else {
-            self.with_type_parser(&|p| p.parse_return_type())
+            self.with_type_parser(|p| p.parse_return_type())
         };
         (colon, return_type)
     }
@@ -2998,7 +2922,7 @@ where
         left_angle: S::R,
         name: S::R,
     ) -> S::R {
-        let attrs = self.parse_list_until_none(&|p| p.parse_xhp_attribute());
+        let attrs = self.parse_list_until_none(|p| p.parse_xhp_attribute());
         let mut parser1 = self.clone();
         let (token, _) = parser1.next_xhp_element_token(/*no_trailing:*/ true);
         match token.kind() {
@@ -3022,7 +2946,7 @@ where
                 self.continue_from(parser1);
                 let token = S!(make_token, self, token);
                 let xhp_open = S!(make_xhp_open, self, left_angle, name, attrs, token);
-                let xhp_body = self.parse_list_until_none(&|p| p.parse_xhp_body_element());
+                let xhp_body = self.parse_list_until_none(|p| p.parse_xhp_body_element());
                 let xhp_close = self.parse_xhp_close(consume_trailing_trivia);
                 S!(make_xhp_expression, self, xhp_open, xhp_body, xhp_close)
             }

@@ -406,13 +406,6 @@ SSATmp* IRBuilder::preOptimizeLdStk(IRInstruction* inst) {
   return preOptimizeLdLocation(inst, stk(inst->extra<LdStk>()->offset));
 }
 
-SSATmp* IRBuilder::preOptimizeLdClsRefCls(IRInstruction* inst) {
-  return preOptimizeLdLocation(
-    inst,
-    cslotcls(inst->extra<LdClsRefCls>()->slot)
-  );
-}
-
 SSATmp* IRBuilder::preOptimizeLdMBase(IRInstruction* inst) {
   if (auto ptr = m_state.mbr().ptr) return ptr;
 
@@ -434,7 +427,6 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
   X(CheckMBase)
   X(LdLoc)
   X(LdStk)
-  X(LdClsRefCls)
   X(CheckCtxThis)
   X(LdCtx)
   X(LdCctx)
@@ -660,9 +652,7 @@ bool IRBuilder::constrainValue(SSATmp* const val, GuardConstraint gc) {
 
 bool IRBuilder::constrainLocation(Location l, GuardConstraint gc,
                                   const std::string& why) {
-  if (!shouldConstrainGuards() ||
-      l.tag() == LTag::CSlotCls || l.tag() == LTag::CSlotTS ||
-      gc.empty()) return false;
+  if (!shouldConstrainGuards() || gc.empty()) return false;
 
   ITRACE(1, "constraining {} to {} (for {})\n", show(l), gc, why);
   Indent _i;
@@ -793,14 +783,6 @@ const StackState& IRBuilder::stack(IRSPRelOffset offset, GuardConstraint gc) {
   return m_state.stack(offset);
 }
 
-const CSlotClsState& IRBuilder::clsRefClsSlot(uint32_t slot) {
-  return m_state.clsRefClsSlot(slot);
-}
-
-const CSlotTSState& IRBuilder::clsRefTSSlot(uint32_t slot) {
-  return m_state.clsRefTSSlot(slot);
-}
-
 SSATmp* IRBuilder::valueOf(Location l, GuardConstraint gc) {
   constrainLocation(l, gc, "");
   return m_state.valueOf(l);
@@ -832,7 +814,7 @@ Type IRBuilder::predictedMBaseInnerType() const {
 }
 
 /*
- * Wrap a local, stack ID, or class-ref slot into a Location.
+ * Wrap a local or stack ID into a Location.
  */
 Location IRBuilder::loc(uint32_t id) const {
   return Location::Local { id };
@@ -840,12 +822,6 @@ Location IRBuilder::loc(uint32_t id) const {
 Location IRBuilder::stk(IRSPRelOffset off) const {
   auto const fpRel = off.to<FPInvOffset>(m_state.irSPOff());
   return Location::Stack { fpRel };
-}
-Location IRBuilder::cslotcls(uint32_t slot) const {
-  return Location::CSlotCls { slot };
-}
-Location IRBuilder::cslotts(uint32_t slot) const {
-  return Location::CSlotTS { slot };
 }
 
 ///////////////////////////////////////////////////////////////////////////////

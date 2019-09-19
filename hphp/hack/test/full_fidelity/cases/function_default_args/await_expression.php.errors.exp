@@ -1,0 +1,2 @@
+(3,22)-(3,33) Await cannot be used as an expression in this location because it's conditionally executed.
+(3,22)-(3,33) Invalid expression in constant initializer

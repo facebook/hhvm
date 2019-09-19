@@ -1,0 +1,4 @@
+File "functional_type_arity.php", line 14, characters 17-22:
+The type A expects 2 type parameter(s) (Typing[4101])
+File "functional_type_arity.php", line 12, characters 7-7:
+Definition is here

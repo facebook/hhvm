@@ -38,6 +38,7 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+struct APCArray;
 struct Array;
 struct String;
 struct StringData;
@@ -87,11 +88,11 @@ struct ArrayData : MaybeCountable {
     kEmptyKind = 2,   // The singleton static empty array
     kApcKind = 3,     // APCLocalArray
     kGlobalsKind = 4, // GlobalsArray
-    kShapeKind = 5,   // Shape
+    kRecordKind = 5,  // RecordArray
     kDictKind = 6,    // Hack dict
     kVecKind = 7,     // Hack vec
     kKeysetKind = 8,  // Hack keyset
-    kNumKinds = 9     // insert new values before kNumKinds.
+    kNumKinds = 9    // insert new values before kNumKinds.
   };
 
   /*
@@ -144,7 +145,6 @@ public:
   static ArrayData* Create();
   static ArrayData* CreateVec();
   static ArrayData* CreateDict();
-  static ArrayData* CreateShape();
   static ArrayData* CreateKeyset();
   static ArrayData* CreateVArray();
   static ArrayData* CreateDArray();
@@ -181,26 +181,11 @@ public:
    */
   ArrayData* toPHPArray(bool copy);
   ArrayData* toPHPArrayIntishCast(bool copy);
-  ArrayData* toShape(bool copy);
   ArrayData* toDict(bool copy);
   ArrayData* toVec(bool copy);
   ArrayData* toKeyset(bool copy);
   ArrayData* toVArray(bool copy);
   ArrayData* toDArray(bool copy);
-
-  /*
-   * Converts this to a Shape in place if this is a compatible type with Shapes.
-   * If this is not refCounted it will instead make a copy before converting
-   * to a Shape.
-   *
-   * Dicts are compatible when RuntimeOption::EvalHackArrDVArrs is set and
-   * DArrays are compatible when it is not set. Empty arrays are always
-   * compatible. No other types are compatible.
-   *
-   * This function will return staticEmptyShapeArray when this is empty and it
-   * will return this otherwise.
-   */
-  ArrayData* toShapeInPlaceIfCompatible();
 
   /*
    * Return an array with identical contents to this array, but of an array
@@ -269,15 +254,13 @@ public:
    */
   bool isPacked() const;
   bool isMixed() const;
-  bool isMixedOrShape() const;
   bool isApcArray() const;
   bool isGlobalsArray() const;
   bool isEmptyArray() const;
   bool isDict() const;
-  bool isDictOrShape() const;
-  bool isShape() const;
   bool isVecArray() const;
   bool isKeyset() const;
+  bool isRecordArray() const;
 
   /*
    * Whether the ArrayData is backed by PackedArray or MixedArray.
@@ -308,10 +291,11 @@ public:
    * side table--see array-provenance.h
    */
   bool hasProvenanceData() const;
+
   /*
-   * Latches the provenance data bit to true
+   * Sets the provenance data bit
    */
-  void markHasProvenanceData();
+  void setHasProvenanceData(bool value);
 
   /*
    * Whether the array has legacy behaviors enabled (this bit can only be set
@@ -333,7 +317,6 @@ public:
   bool isNotDVArray() const;
   bool isVecOrVArray() const;
   bool isDictOrDArray() const;
-  bool isDictOrDArrayOrShape() const;
 
   static bool dvArrayEqual(const ArrayData* a, const ArrayData* b);
 
@@ -845,9 +828,9 @@ static_assert(ArrayData::kMixedKind == uint8_t(HeaderKind::Mixed), "");
 static_assert(ArrayData::kEmptyKind == uint8_t(HeaderKind::Empty), "");
 static_assert(ArrayData::kApcKind == uint8_t(HeaderKind::Apc), "");
 static_assert(ArrayData::kGlobalsKind == uint8_t(HeaderKind::Globals), "");
-static_assert(ArrayData::kShapeKind == uint8_t(HeaderKind::Shape), "");
 static_assert(ArrayData::kDictKind == uint8_t(HeaderKind::Dict), "");
 static_assert(ArrayData::kVecKind == uint8_t(HeaderKind::VecArray), "");
+static_assert(ArrayData::kRecordKind == uint8_t(HeaderKind::RecordArray), "");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -862,9 +845,6 @@ extern std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyVecArray;
 extern std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyVArray;
 extern std::aligned_storage<kEmptyMixedArraySize, 16>::type s_theEmptyDictArray;
 extern std::aligned_storage<kEmptyMixedArraySize, 16>::type s_theEmptyDArray;
-extern std::aligned_storage<kEmptyMixedArraySize, 16>::type
-  s_theEmptyShapeDArray;
-extern std::aligned_storage<kEmptyMixedArraySize, 16>::type s_theEmptyShapeDict;
 extern std::aligned_storage<kEmptySetArraySize, 16>::type s_theEmptySetArray;
 
 /*
@@ -879,7 +859,6 @@ ArrayData* staticEmptyVArray();
 ArrayData* staticEmptyDArray();
 ArrayData* staticEmptyVecArray();
 ArrayData* staticEmptyDictArray();
-ArrayData* staticEmptyShapeArray();
 ArrayData* staticEmptyKeysetArray();
 
 /*
@@ -961,7 +940,6 @@ struct ArrayFunctions {
   ArrayData* (*escalate[NK])(const ArrayData*);
   ArrayData* (*toPHPArray[NK])(ArrayData*, bool);
   ArrayData* (*toPHPArrayIntishCast[NK])(ArrayData*, bool);
-  ArrayData* (*toShape[NK])(ArrayData*, bool);
   ArrayData* (*toDict[NK])(ArrayData*, bool);
   ArrayData* (*toVec[NK])(ArrayData*, bool);
   ArrayData* (*toKeyset[NK])(ArrayData*, bool);
@@ -1000,7 +978,8 @@ void raiseHackArrCompatRefIter();
 
 void raiseHackArrCompatAdd();
 
-void raiseHackArrCompatArrMixedCmp();
+void raiseHackArrCompatArrHackArrCmp();
+void raiseHackArrCompatArrNonArrCmp();
 void raiseHackArrCompatDVArrCmp(const ArrayData*, const ArrayData*);
 
 void raiseHackArrCompatMissingIncDec();
@@ -1009,18 +988,32 @@ void raiseHackArrCompatMissingSetOp();
 std::string makeHackArrCompatImplicitArrayKeyMsg(const TypedValue* key);
 void raiseHackArrCompatImplicitArrayKey(const TypedValue* key);
 
+StringData* getHackArrCompatNullHackArrayKeyMsg();
+
 bool checkHACRefBind();
 bool checkHACFalseyPromote();
 bool checkHACEmptyStringPromote();
 bool checkHACCompare();
+bool checkHACCompareNonAnyArray();
 bool checkHACArrayPlus();
 bool checkHACArrayKeyCast();
+bool checkHACNullHackArrayKey();
 
 /*
  * Like isStrictlyInteger() but changes behavior with the value of `ic'.
  */
 template <IntishCast IC = IntishCast::None>
 folly::Optional<int64_t> tryIntishCast(const StringData* key);
+
+/*
+ * Add a provenance tag for the current vmpc to `ad`, copying instead from
+ * `src` if it's provided (and if it has a tag).  Returns `ad` for convenience.
+ *
+ * This function asserts that `ad` is singly reference counted.  It does not
+ * assert that `ad` does not have an existing tag, and instead overrides it.
+ */
+ArrayData* tagArrProv(ArrayData* ad, const ArrayData* src = nullptr);
+ArrayData* tagArrProv(ArrayData* ad, const APCArray* src);
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -1,0 +1,12 @@
+File "t21684610.php", line 23, characters 27-27:
+Invalid argument (Typing[4110])
+File "t21684610.php", line 11, characters 5-6:
+Expected ~[unresolved] because it is an unenforceable type
+File "t21684610.php", line 23, characters 27-27:
+But got int
+File "t21684610.php", line 27, characters 16-16:
+Invalid argument (Typing[4110])
+File "t21684610.php", line 11, characters 5-6:
+Expected ~[unresolved] because it is an unenforceable type
+File "t21684610.php", line 27, characters 16-16:
+But got int

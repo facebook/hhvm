@@ -13,7 +13,7 @@ interface MyPlainSprintf {
   public function format_s(mixed $s): string;
 }
 
-function my_sprintf(HH\FormatString<MyPlainSprintf> $f, ...): string {
+function my_sprintf(HH\FormatString<MyPlainSprintf> $f, ...$_): string {
   return 'hi';
 }
 

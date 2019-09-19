@@ -1,0 +1,11 @@
+[package]
+name = "hack_utils_ocamlpool"
+version = "3.49.0"
+edition = "2018"
+
+[dependencies]
+ocaml = "^0.7"
+
+[lib]
+name = "ocamlpool_rust"
+path = "lib.rs"

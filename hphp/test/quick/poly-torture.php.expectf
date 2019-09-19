@@ -11,7 +11,7 @@ T2::dubiousArgs 1
     randObj: C
     randObj: B
 T1::dubiousArgs 2, 2
---RuntimeException: noSuchMethodBoyeee() expects exactly 5 parameters, 0 given
+--RuntimeException: C::noSuchMethodBoyeee() expects exactly 5 parameters, 0 given
     randObj: A
     randObj: C
 C::__call dubiousArgs

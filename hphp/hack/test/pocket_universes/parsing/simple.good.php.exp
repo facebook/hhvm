@@ -1,21 +1,20 @@
-((script 694
-  ((list 694
+((script 684
+  ((list 684
     ((markup_section 4
       ((missing 0 ()) (() markup 0 ())
        (markup_suffix 4
         ((() <? 2 ())
-         (() name 2
-          ((whitespace 1) (single_line_comment 15) (end_of_line 1)))))
+         (() name 2 ((whitespace 1) (single_line_comment 9) (end_of_line 1)))))
        (missing 0 ())))
-     (classish_declaration 470
+     (classish_declaration 466
       ((missing 0 ())
        (list 8 ((((end_of_line 1)) abstract 8 ((whitespace 1)))))
        (() class 5 ((whitespace 1))) (() name 3 ((end_of_line 1)))
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ())
-       (classish_body 451
+       (classish_body 447
         ((() { 1 ((end_of_line 1)))
-         (list 445
+         (list 441
           ((pocket_enum_declaration 82
             ((missing 0 ()) (((whitespace 2)) enum 4 ((whitespace 1)))
              (() name 5 ((whitespace 1))) (() { 1 ((end_of_line 1)))
@@ -33,24 +32,24 @@
                  (simple_type_specifier 1 ((() name 1 ((whitespace 1)))))
                  (() name 13 ()) (() ";" 1 ((end_of_line 1)))))))
              (((whitespace 2)) } 1 ((end_of_line 1)))))
-           (methodish_declaration 107
+           (methodish_declaration 105
             ((missing 0 ())
-             (function_declaration_header 54
+             (function_declaration_header 52
               ((list 6
                 ((((end_of_line 1) (whitespace 2)) public 6 ((whitespace 1)))))
                (() function 8 ((whitespace 1))) (() name 3 ())
-               (type_parameters 21
+               (type_parameters 19
                 ((() < 1 ())
-                 (list 19
-                  ((list_item 19
-                    ((type_parameter 19
+                 (list 17
+                  ((list_item 17
+                    ((type_parameter 17
                       ((missing 0 ()) (missing 0 ()) (missing 0 ())
                        (() name 2 ((whitespace 1)))
-                       (list 16
-                        ((type_constraint 16
-                          ((() from 4 ((whitespace 1)))
-                           (type_constant 11
-                            ((() this 4 ()) (() :: 2 ()) (() name 5 ())))))))))
+                       (list 14
+                        ((type_constraint 14
+                          ((() as 2 ((whitespace 1)))
+                           (pu_access 11
+                            ((() this 4 ()) (() :@ 2 ()) (() name 5 ())))))))))
                      (missing 0 ())))))
                  (() > 1 ())))
                (() "(" 1 ())
@@ -62,8 +61,8 @@
                      (() variable 2 ()) (missing 0 ())))
                    (missing 0 ())))))
                (() ")" 1 ()) (() : 1 ((whitespace 1)))
-               (type_constant 5
-                ((() name 2 ()) (() :: 2 ()) (() name 1 ((end_of_line 1)))))
+               (pu_access 5
+                ((() name 2 ()) (() :@ 2 ()) (() name 1 ((end_of_line 1)))))
                (missing 0 ())))
              (compound_statement 50
               ((((whitespace 2)) { 1 ((end_of_line 1)))
@@ -82,24 +81,24 @@
                    (() ";" 1 ((end_of_line 1)))))))
                (((whitespace 2)) } 1 ((end_of_line 1)))))
              (missing 0 ())))
-           (methodish_declaration 102
+           (methodish_declaration 100
             ((missing 0 ())
-             (function_declaration_header 57
+             (function_declaration_header 55
               ((list 6
                 ((((end_of_line 1) (whitespace 2)) public 6 ((whitespace 1)))))
                (() function 8 ((whitespace 1))) (() name 5 ())
-               (type_parameters 21
+               (type_parameters 19
                 ((() < 1 ())
-                 (list 19
-                  ((list_item 19
-                    ((type_parameter 19
+                 (list 17
+                  ((list_item 17
+                    ((type_parameter 17
                       ((missing 0 ()) (missing 0 ()) (missing 0 ())
                        (() name 2 ((whitespace 1)))
-                       (list 16
-                        ((type_constraint 16
-                          ((() from 4 ((whitespace 1)))
-                           (type_constant 11
-                            ((() this 4 ()) (() :: 2 ()) (() name 5 ())))))))))
+                       (list 14
+                        ((type_constraint 14
+                          ((() as 2 ((whitespace 1)))
+                           (pu_access 11
+                            ((() this 4 ()) (() :@ 2 ()) (() name 5 ())))))))))
                      (missing 0 ())))))
                  (() > 1 ())))
                (() "(" 1 ())

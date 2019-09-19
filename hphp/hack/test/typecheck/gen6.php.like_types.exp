@@ -1,0 +1,6 @@
+File "gen6.php", line 26, characters 11-17:
+Invalid argument (Typing[4110])
+File "gen6.php", line 13, characters 23-23:
+Expected ~[unresolved] because it is an unenforceable type
+File "gen6.php", line 26, characters 15-15:
+But got Z

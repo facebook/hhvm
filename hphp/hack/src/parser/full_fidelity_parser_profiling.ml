@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2018, Facebook, Inc.
  * All rights reserved.
  *
@@ -9,11 +9,8 @@
 
 let parse_count_ref = ref 0
 
-let start_profiling () =
-  parse_count_ref := 0
+let start_profiling () = parse_count_ref := 0
 
-let record_parse () =
-  incr parse_count_ref
+let record_parse () = incr parse_count_ref
 
-let stop_profiling () =
-  !parse_count_ref
+let stop_profiling () = !parse_count_ref

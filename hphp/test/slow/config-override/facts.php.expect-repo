@@ -1,0 +1,16 @@
+array(2) {
+  ["SoIsThis"]=>
+  array(1) {
+    [0]=>
+    string(3) "ABC"
+  }
+  ["ThisIsAnAttribute"]=>
+  array(0) {
+  }
+}
+array(2) {
+  ["foo"]=>
+  int(2)
+  ["main"]=>
+  int(0)
+}

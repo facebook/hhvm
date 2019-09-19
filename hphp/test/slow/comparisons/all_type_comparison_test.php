@@ -1,5 +1,4 @@
 <?hh
-error_reporting(0);
 
 class A {
   public $a = 5;
@@ -102,7 +101,10 @@ function test_pair($k1, $v1, $k2, $v2) {
   echo "\n";
 }
 
-function test() {
+<<__EntryPoint>>
+function main(): void {
+  error_reporting(0);
+
   $a1 = new A;
   $a2 = new A;
   $a3 = new A(new A);
@@ -358,5 +360,3 @@ function test() {
     test_pair($p[1]['k'], $p[1]['v'], $p[0]['k'], $p[0]['v']);
   }
 }
-
-test();

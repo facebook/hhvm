@@ -97,10 +97,6 @@ public:
     return Array(ArrayData::CreateDict(), NoIncRef{});
   }
 
-  static Array CreateShape() {
-    return Array(ArrayData::CreateShape(), NoIncRef{});
-  }
-
   static Array CreateKeyset() {
     return Array(ArrayData::CreateKeyset(), NoIncRef{});
   }
@@ -204,7 +200,6 @@ public:
   Array copy() const { COPY_BODY(copy(), Array{}) }
   Array toVec() const { COPY_BODY(toVec(true), CreateVec()) }
   Array toDict() const { COPY_BODY(toDict(true), CreateDict()) }
-  Array toShape() const { COPY_BODY(toShape(true), CreateShape()) }
   Array toKeyset() const { COPY_BODY(toKeyset(true), CreateKeyset()) }
   Array toPHPArray() const { COPY_BODY(toPHPArray(true), Array{}) }
   Array toPHPArrayIntishCast() const {
@@ -234,7 +229,6 @@ public:
    */
   bool isVecArray() const { return m_arr && m_arr->isVecArray(); }
   bool isDict() const { return m_arr && m_arr->isDict(); }
-  bool isShape() const { return m_arr && m_arr->isShape(); }
   bool isKeyset() const { return m_arr && m_arr->isKeyset(); }
   bool isHackArray() const { return m_arr && m_arr->isHackArray(); }
   bool isPHPArray() const { return !m_arr || m_arr->isPHPArray(); }
@@ -242,9 +236,6 @@ public:
   bool isDArray() const { return m_arr && m_arr->isDArray(); }
   bool isVecOrVArray() const { return m_arr && m_arr->isVecOrVArray(); }
   bool isDictOrDArray() const { return m_arr && m_arr->isDictOrDArray(); }
-  bool isDictOrDArrayOrShape() const {
-    return m_arr && m_arr->isDictOrDArrayOrShape();
-  }
 
   /////////////////////////////////////////////////////////////////////////////
 
@@ -632,19 +623,23 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 
 ALWAYS_INLINE Array empty_array() {
-  return Array::attach(staticEmptyArray());
+  return Array::attach(ArrayData::Create());
 }
 
 ALWAYS_INLINE Array empty_varray() {
-  return Array::attach(staticEmptyVArray());
+  return Array::attach(ArrayData::CreateVArray());
 }
 
 ALWAYS_INLINE Array empty_darray() {
-  return Array::attach(staticEmptyDArray());
+  return Array::attach(ArrayData::CreateDArray());
 }
 
 ALWAYS_INLINE Array empty_vec_array() {
-  return Array::attach(staticEmptyVecArray());
+  return Array::attach(ArrayData::CreateVec());
+}
+
+ALWAYS_INLINE Array empty_dict_array() {
+  return Array::attach(ArrayData::CreateDict());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

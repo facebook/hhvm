@@ -8,7 +8,6 @@ async function foo(): Awaitable<void> {
   $x = (await genx())->foo;
   $x = Foo::FOO;
   $x = Foo::foo(await geny());
-  $x = (await genx()) instanceof (await geny());
   $x = (await genx()) is int;
   $x = (await genx()) as int;
   $x = (await genx()) ?as int;

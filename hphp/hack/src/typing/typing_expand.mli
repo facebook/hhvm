@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -6,7 +6,6 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-
 
 (*****************************************************************************)
 (* Gets rid of all the type variables,
@@ -17,7 +16,5 @@
  *)
 (*****************************************************************************)
 
-val fully_expand:
-  Typing_env.env ->
-  Typing_defs.locl Typing_defs.ty ->
-  Typing_defs.locl Typing_defs.ty
+val fully_expand :
+  Typing_env_types.env -> Typing_defs.locl_ty -> Typing_defs.locl_ty

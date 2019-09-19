@@ -1,10 +1,5 @@
-File "with_tconst_bad1.php", line 11, characters 7-13:
-Class CLoader does not correctly implement all required members  (Typing[4110])
-File "with_tconst_bad1.php", line 11, characters 23-29:
-Some members are incompatible with those declared in type ALoader
-Read the following to see why:
 File "with_tconst_bad1.php", line 7, characters 23-24:
-Unable to satisfy constraint on this type constant
+Unable to satisfy constraint on this type constant (Typing[4110])
 File "with_tconst_bad1.php", line 7, characters 29-29:
 Expected I
 File "with_tconst_bad1.php", line 12, characters 19-26:

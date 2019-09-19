@@ -1,0 +1,6 @@
+File "printf_opt_2.php", line 21, characters 11-14:
+Invalid argument (Typing[4110])
+File "printf_opt_2.php", line 18, characters 18-37:
+Expected ~FormatString<Dummy> because it is an unenforceable type
+File "printf_opt_2.php", line 21, characters 11-14:
+But got string

@@ -35,7 +35,6 @@
 #include "hphp/runtime/base/perf-mem-event.h"
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/plain-file.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stat-cache.h"
@@ -100,6 +99,7 @@
 #include "hphp/util/perf-event.h"
 #include "hphp/util/process-exec.h"
 #include "hphp/util/process.h"
+#include "hphp/util/rds-local.h"
 #include "hphp/util/service-data.h"
 #include "hphp/util/shm-counter.h"
 #include "hphp/util/stack-trace.h"
@@ -365,7 +365,7 @@ void register_variable(Array& variables, char *name, const Variant& value,
         SuppressHACFalseyPromoteNotices shacn;
         auto lval = symtable->lvalAt();
         type(lval) = KindOfPersistentArray;
-        val(lval).parr = staticEmptyArray();
+        val(lval).parr = ArrayData::Create();
         gpc_elements.push_back(uninit_null());
         gpc_elements.back().assignRef(lval);
       } else {
@@ -374,7 +374,7 @@ void register_variable(Array& variables, char *name, const Variant& value,
           symtable->convertKey<IntishCast::Cast>(key_str.toCell());
         auto const v = symtable->rvalAt(key).unboxed();
         if (isNullType(v.type()) || !isArrayLikeType(v.type())) {
-          symtable->set(key, make_tv<KindOfPersistentArray>(staticEmptyArray()));
+          symtable->set(key, make_tv<KindOfPersistentArray>(ArrayData::Create()));
         }
         gpc_elements.push_back(uninit_null());
         gpc_elements.back().assignRef(symtable->lvalAt(key));
@@ -740,7 +740,7 @@ init_command_line_globals(
     serverArr.set(s_REQUEST_START_TIME, now);
     serverArr.set(s_REQUEST_TIME, now);
     serverArr.set(s_REQUEST_TIME_FLOAT, now_double);
-    serverArr.set(s_DOCUMENT_ROOT, empty_string_variant_ref);
+    serverArr.set(s_DOCUMENT_ROOT, empty_string_tv());
     serverArr.set(s_SCRIPT_FILENAME, file);
     serverArr.set(s_SCRIPT_NAME, file);
     serverArr.set(s_PHP_SELF, file);
@@ -835,8 +835,30 @@ hugifyText(char* from, char* to) {
     // zero size or negative sizes.
     return;
   }
-
   size_t sz = to - from;
+
+  if (RuntimeOption::EvalNewTHPHotText) {
+    auto const hasKernelSupport = [] () -> bool {
+      KernelVersion version;
+      if (version.m_major < 5) return false;
+      if (version.m_major > 5) return true;
+      if (version.m_minor > 2) return true;
+#ifdef FACEBOOK
+      if ((version.m_minor == 2) && (version.m_minor >= 9)) return true;
+#endif
+      return false;
+    };
+    if (hasKernelSupport()) {
+      // The new way doesn't work if the region is locked. Note that this means
+      // Server.LockCodeMemory won't be applied to the region--there is no
+      // guarantee that the region would stay in memory, especially if the
+      // kernel fails to find huge pages for us.
+      munlock(from, sz);
+      madvise(from, sz, MADV_HUGEPAGE);
+      return;
+    }
+  }
+
   void* mem = malloc(sz);
   memcpy(mem, from, sz);
 
@@ -2423,7 +2445,7 @@ void hphp_process_init() {
       !RuntimeOption::EvalJitSerdesFile.empty() &&
       jit::mcgen::retranslateAllEnabled()) {
     auto const mode = RuntimeOption::EvalJitSerdesMode;
-    if (isJitDeserializing(RuntimeOption::EvalJitSerdesMode)) {
+    if (isJitDeserializing()) {
       if (RuntimeOption::ServerExecutionMode()) {
         Logger::FInfo("JitDeserializeFrom: {}",
                       RuntimeOption::EvalJitSerdesFile);
@@ -2667,7 +2689,8 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
                  const std::string &reqInitFunc, const std::string &reqInitDoc,
                  bool &error, std::string &errorMsg,
                  bool once, bool warmupOnly,
-                 bool richErrorMsg, const std::string& prelude) {
+                 bool richErrorMsg, const std::string& prelude,
+                 bool allowDynCallNoPointer /* = false */) {
   bool isServer =
     RuntimeOption::ServerExecutionMode() && !is_cli_mode();
   error = false;
@@ -2702,7 +2725,8 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
                 context->getCwd().data(), true);
       }
       if (func) {
-        funcRet.assignIfRef(invoke(cmd.c_str(), funcParams));
+        funcRet.assignIfRef(invoke(cmd.c_str(), funcParams, -1,
+                                   true, true, allowDynCallNoPointer));
       } else {
         if (isServer) hphp_chdir_file(cmd);
         include_impl_invoke(cmd.c_str(), once, "", true);

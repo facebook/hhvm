@@ -506,16 +506,19 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
         c = td->klass;
         break;
       case AnnotAction::VArrayCheck:
-        assertx(tvIsArrayOrShape(val));
+        assertx(tvIsArray(val));
         return Assert || val.val().parr->isVArray();
       case AnnotAction::DArrayCheck:
-        assertx(tvIsArrayOrShape(val));
+        assertx(tvIsArray(val));
         return Assert || val.val().parr->isDArray();
       case AnnotAction::VArrayOrDArrayCheck:
-        assertx(tvIsArrayOrShape(val));
-        return Assert || !val.val().parr->isNotDVArray();
+        assertx(tvIsArray(val));
+        return (Assert || (
+          !RuntimeOption::EvalHackArrCompatTypeHintPolymorphism &&
+          !val.val().parr->isNotDVArray()
+        ));
       case AnnotAction::NonVArrayOrDArrayCheck:
-        assertx(tvIsArrayOrShape(val));
+        assertx(tvIsArray(val));
         return Assert || val.val().parr->isNotDVArray();
       case AnnotAction::WarnFunc:
       case AnnotAction::WarnClass:
@@ -759,16 +762,19 @@ bool TypeConstraint::checkImpl(tv_rval val,
     case AnnotAction::VArrayCheck:
       // Since d/varray type-hints are always soft, we can never assert on their
       // correctness.
-      assertx(tvIsArrayOrShape(val));
+      assertx(tvIsArray(val));
       return isAssert || val.val().parr->isVArray();
     case AnnotAction::DArrayCheck:
-      assertx(tvIsArrayOrShape(val));
+      assertx(tvIsArray(val));
       return isAssert || val.val().parr->isDArray();
     case AnnotAction::VArrayOrDArrayCheck:
-      assertx(tvIsArrayOrShape(val));
-      return isAssert || !val.val().parr->isNotDVArray();
+      assertx(tvIsArray(val));
+      return (isAssert || (
+        !RuntimeOption::EvalHackArrCompatTypeHintPolymorphism &&
+        !val.val().parr->isNotDVArray()
+      ));
     case AnnotAction::NonVArrayOrDArrayCheck:
-      assertx(tvIsArrayOrShape(val));
+      assertx(tvIsArray(val));
       return isAssert || val.val().parr->isNotDVArray();
     case AnnotAction::WarnFunc:
     case AnnotAction::WarnClass:
@@ -983,9 +989,6 @@ std::string describe_actual_type(tv_rval val, bool isHHType) {
     case KindOfDict:          return "HH\\dict";
     case KindOfPersistentKeyset:
     case KindOfKeyset:        return "HH\\keyset";
-    case KindOfPersistentShape:
-    case KindOfShape:
-      return RuntimeOption::EvalHackArrDVArrs ? "HH\\dict" : "array";
     case KindOfPersistentArray:
     case KindOfArray:         return "array";
     case KindOfResource:
@@ -1023,7 +1026,8 @@ folly::Optional<AnnotType> TypeConstraint::checkDVArray(tv_rval val) const {
         assertx(!val.val().parr->isDArray());
         break;
       case AnnotType::VArrOrDArr:
-        assertx(val.val().parr->isNotDVArray());
+        assertx(RuntimeOption::EvalHackArrCompatTypeHintPolymorphism ||
+                val.val().parr->isNotDVArray());
         break;
       default:
         return folly::none;
@@ -1049,7 +1053,8 @@ void TypeConstraint::verifyParamFail(const Func* func, TypedValue* tv,
     isSoft() ||
     (isThis() && couldSeeMockObject()) ||
     (RuntimeOption::EvalHackArrCompatTypeHintNotices &&
-     isArrayType(tvToCell(tv)->m_type)) ||
+     (RuntimeOption::EvalHackArrCompatTypeHintPolymorphism ||
+      isArrayType(tvToCell(tv)->m_type))) ||
     check(tv, func->cls())
   );
 }
@@ -1076,20 +1081,20 @@ void TypeConstraint::verifyOutParamFail(const Func* func,
   }
 
   auto c = tvToCell(tv);
-  if (auto const at = checkDVArray(c)) {
+  if (checkDVArray(c)) {
     raise_hackarr_compat_type_hint_outparam_notice(
-      func, c->m_data.parr, *at, paramNum
+      func, c->m_data.parr, displayName(func->cls()).c_str(), paramNum
     );
     return;
   }
 
-  if (!isSoft() && (isFuncType(c->m_type) || isClassType(c->m_type))) {
+  if (isFuncType(c->m_type) || isClassType(c->m_type)) {
     if (isString() || (isObject() && interface_supports_string(m_typeName))) {
       if (RuntimeOption::EvalStringHintNotices) {
         if (isFuncType(c->m_type)) {
-          raise_notice("Implicit Func to string conversion for type-hint");
+          raise_notice(Strings::FUNC_TO_STRING_IMPLICIT);
         } else {
-          raise_notice("Implicit Class to string conversion for type-hint");
+          raise_notice(Strings::CLASS_TO_STRING_IMPLICIT);
         }
       }
       c->m_data.pstr = isFuncType(c->m_type)
@@ -1144,9 +1149,9 @@ void TypeConstraint::verifyRecFieldFail(tv_rval val,
                                      const StringData* fieldName) const {
   assertx(validForRecField());
 
-  if (auto const at = checkDVArray(val)) {
+  if (checkDVArray(val)) {
     raise_hackarr_compat_type_hint_rec_field_notice(
-      recordName, val.val().parr, *at, fieldName
+      recordName, val.val().parr, displayName().c_str(), fieldName
     );
     return;
   }
@@ -1171,9 +1176,9 @@ void TypeConstraint::verifyPropFail(const Class* thisCls,
   assertx(validForProp());
 
   val = tvToCell(val);
-  if (auto const at = checkDVArray(val)) {
+  if (checkDVArray(val)) {
     raise_hackarr_compat_type_hint_property_notice(
-      declCls, val.val().parr, *at, propName, isStatic
+      declCls, val.val().parr, displayName().c_str(), propName, isStatic
     );
     return;
   }
@@ -1229,18 +1234,18 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
 
   auto const c = tvToCell(tv);
 
-  if (auto const at = checkDVArray(c)) {
+  if (checkDVArray(c)) {
     if (id == ReturnId) {
       raise_hackarr_compat_type_hint_ret_notice(
         func,
         c->m_data.parr,
-        *at
+        name.c_str()
       );
     } else {
       raise_hackarr_compat_type_hint_param_notice(
         func,
         c->m_data.parr,
-        *at,
+        name.c_str(),
         id
       );
     }
@@ -1256,13 +1261,13 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
     }
   }
 
-  if (!isSoft() && (isFuncType(c->m_type) || isClassType(c->m_type))) {
+  if (isFuncType(c->m_type) || isClassType(c->m_type)) {
     if (isString() || (isObject() && interface_supports_string(m_typeName))) {
       if (RuntimeOption::EvalStringHintNotices) {
         if (isFuncType(c->m_type)) {
-          raise_notice("Implicit Func to string conversion for type-hint");
+          raise_notice(Strings::FUNC_TO_STRING_IMPLICIT);
         } else {
-          raise_notice("Implicit Class to string conversion for type-hint");
+          raise_notice(Strings::CLASS_TO_STRING_IMPLICIT);
         }
       }
       c->m_data.pstr = isFuncType(c->m_type)
@@ -1401,8 +1406,6 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
         case KindOfDict:
         case KindOfPersistentKeyset:
         case KindOfKeyset:
-        case KindOfPersistentShape:
-        case KindOfShape:
         case KindOfPersistentArray:
         case KindOfArray:
         case KindOfClsMeth:

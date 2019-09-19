@@ -116,7 +116,7 @@ void sync_regstate(TCA rip, _Unwind_Context* context) {
   fakeAR.m_savedRip = ip;
 
   Stats::inc(Stats::TC_SyncUnwind);
-  FixupMap::fixupWork(g_context.getNoCheck(), &fakeAR);
+  FixupMap::fixupWork(&fakeAR);
   tl_regState = VMRegState::CLEAN;
   FTRACE(2, "synced vmfp {}, vmsp {}, vmpc {}\n", vmfp(), vmsp(), vmpc());
 }
@@ -477,9 +477,8 @@ namespace {
  * basic instructions to the unwinder for rematerializing the call frame
  * registers.
  */
-void write_tc_cie(EHFrameWriter& ehfw) {
-  ehfw.begin_cie(dw_reg::IP,
-                 reinterpret_cast<const void*>(tc_unwind_personality));
+void write_tc_cie(EHFrameWriter& ehfw, PersonalityFunc personality) {
+  ehfw.begin_cie(dw_reg::IP, reinterpret_cast<const void*>(personality));
 
   // The part of the ActRec that mirrors the native frame record is the part
   // below ActRec::m_func, which at a minimum includes the saved frame pointer
@@ -532,9 +531,9 @@ void write_tc_cie(EHFrameWriter& ehfw) {
 std::vector<EHFrameDesc> s_ehFrames;
 }
 
-void initUnwinder(TCA base, size_t size) {
+void initUnwinder(TCA base, size_t size, PersonalityFunc personality) {
   EHFrameWriter ehfw;
-  write_tc_cie(ehfw);
+  write_tc_cie(ehfw, personality);
   ehfw.begin_fde(base);
   ehfw.end_fde(size);
   ehfw.null_fde();

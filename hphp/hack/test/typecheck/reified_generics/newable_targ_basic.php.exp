@@ -5,10 +5,6 @@ A newable type argument must be a concrete class or a newable type parameter. (T
 File "newable_targ_basic.php", line 11, characters 32-32:
 Type parameter T was declared __Newable here
 File "newable_targ_basic.php", line 15, characters 5-11:
-This is dynamic, it cannot be used as a reified type argument (Typing[4305])
-File "newable_targ_basic.php", line 11, characters 32-32:
-T is reified
-File "newable_targ_basic.php", line 15, characters 5-11:
 A newable type argument must be a concrete class or a newable type parameter. (Typing[4307])
 File "newable_targ_basic.php", line 11, characters 32-32:
 Type parameter T was declared __Newable here

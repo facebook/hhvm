@@ -1,4 +1,4 @@
-<?hh // experimental
+<?hh // strict
 
 abstract class Foo
 {
@@ -8,12 +8,12 @@ abstract class Foo
     case T default_value;
   }
 
-  public function get<TF from this::Field>(TF $f): TF::T
+  public function get<TF as this:@Field>(TF $f): TF:@T
   {
     return static:@Field::default_value($f);
   }
 
-  public function getID<TF from this::Field>(TF $f): string
+  public function getID<TF as this:@Field>(TF $f): string
   {
     return static:@Field::ident($f);
   }

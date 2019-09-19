@@ -1,7 +1,5 @@
 <?hh
 
-error_reporting(0);
-
 function foo($a, $b=22, $c=33) {
   echo "$a/$b/$c\n";
 }
@@ -23,4 +21,9 @@ function main() {
   try { $out_of_order(4); } catch (Exception $e) { var_dump($e->getMessage()); }
   try { $out_of_order(); } catch (Exception $e) { var_dump($e->getMessage()); }
 }
-main();
+<<__EntryPoint>>
+function main_entry(): void {
+
+  error_reporting(0);
+  main();
+}

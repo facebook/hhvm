@@ -4,6 +4,6 @@ shuffle(&$a);
 var_dump($a);
 
 $a = array(1 => 2);
-array_multisort(&$a);
+array_multisort1(&$a);
 var_dump($a);
 }

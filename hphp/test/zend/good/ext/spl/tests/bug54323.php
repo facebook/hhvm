@@ -4,12 +4,15 @@ class C {
 }
 class MyArrayObject extends ArrayObject {
 }
-$c = new C;
-$ao = new MyArrayObject($c);
-testAccess($c, $ao);
 function testAccess($c, $ao) {
         foreach ($ao as $key=>$value) {
         }
         unset($ao['prop']);
         var_dump($c->prop, $ao['prop']);
+}
+<<__EntryPoint>>
+function main_entry(): void {
+  $c = new C;
+  $ao = new MyArrayObject($c);
+  testAccess($c, $ao);
 }

@@ -19,7 +19,6 @@
 
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/perf-warning.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/debug/debug.h"
@@ -44,11 +43,16 @@
 #include "hphp/util/disasm.h"
 #include "hphp/util/mutex.h"
 #include "hphp/util/process.h"
+#include "hphp/util/rds-local.h"
 #include "hphp/util/trace.h"
 
 #include <tbb/concurrent_hash_map.h>
 
 #include <atomic>
+
+extern "C" _Unwind_Reason_Code
+__gxx_personality_v0(int, _Unwind_Action, uint64_t, _Unwind_Exception*,
+                     _Unwind_Context*);
 
 TRACE_SET_MOD(mcg);
 
@@ -304,8 +308,15 @@ void processInit() {
   g_code = new(low_malloc(sizeof(CodeCache))) CodeCache();
   g_ustubs.emitAll(*g_code, *Debug::DebugInfo::Get());
 
-  // Write an .eh_frame section that covers the whole TC.
-  initUnwinder(g_code->base(), g_code->codeSize());
+  // Write an .eh_frame section that covers the JIT portion of the TC.
+  initUnwinder(g_code->base(), g_code->tcSize(),
+               tc_unwind_personality);
+
+  if (auto cti_cap = g_code->bytecode().capacity()) {
+    // write an .eh_frame for cti code using default personality
+    initUnwinder(g_code->bytecode().base(), cti_cap, __gxx_personality_v0);
+  }
+
   Disasm::ExcludedAddressRange(g_code->base(), g_code->codeSize());
 
   recycleInit();
@@ -373,7 +384,7 @@ void freeProfCode() {
     // Clearing the inline stacks map is purely an optimization, and it barely
     // buys us anything when we're using jumpstart (because we have very few
     // profiling translations, if any), so we skip it in this case.
-    if (!isJitDeserializing(RuntimeOption::EvalJitSerdesMode)) {
+    if (!isJitDeserializing()) {
       auto metaLock = lockMetadata();
       auto const base     = code().prof().base();
       auto const frontier = code().prof().frontier();

@@ -1,9 +1,8 @@
 <?hh
-
 class Foo {
   public $x;
- }
- $this = new Foo();
- echo "You should not see this";
-
-<<__EntryPoint>> function main(): void {}
+}
+<<__EntryPoint>> function main(): void {
+  $this = new Foo();
+  echo "You should not see this";
+}

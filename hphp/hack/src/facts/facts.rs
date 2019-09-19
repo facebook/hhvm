@@ -19,6 +19,7 @@ pub enum TypeKind {
     Interface,
     Enum,
     Trait,
+    TypeAlias,
     Unknown,
     Mixed,
 }

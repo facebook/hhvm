@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
@@ -26,16 +26,15 @@
  *     current_state_of_process, and we just construct a process_result directly.
  *)
 type lifecycle =
-  | Lifecycle_running of { pid: int; } (* the process is still running *)
+  | Lifecycle_running of { pid: int } (* the process is still running *)
   | Lifecycle_exited of Unix.process_status (* the process exited *)
   | Lifecycle_killed_due_to_overflow_stdin
-
 
 (* Invocation info is internal book-keeping to record information about
  * the process's original invocation. *)
 type invocation_info = {
-  name : string;
-  args : string list;
+  name: string;
+  args: string list;
   stack: Utils.callstack;
 }
 
@@ -49,15 +48,14 @@ type environment =
  * From the information in 't' we can figure out if it has completed,
  * and if so then we can synthesize the process_result. *)
 type t = {
-  info : invocation_info;
-  stdin_fd : Unix.file_descr option ref;
-  stdout_fd : Unix.file_descr option ref;
-  stderr_fd : Unix.file_descr option ref;
-  acc : string Stack.t;
-  acc_err : string Stack.t;
-  lifecycle : lifecycle ref;
+  info: invocation_info;
+  stdin_fd: Unix.file_descr option ref;
+  stdout_fd: Unix.file_descr option ref;
+  stderr_fd: Unix.file_descr option ref;
+  acc: string Stack.t;
+  acc_err: string Stack.t;
+  lifecycle: lifecycle ref;
 }
-
 
 (* type 'process_results' represents the end-state of waiting for a process.
    It's obtained by invoking read_and_wait_pid, which runs until either
@@ -65,27 +63,33 @@ type t = {
 *)
 type process_result = (success, failure) result
 
-and success = { stdout: string; stderr: string; }
+and success = {
+  stdout: string;
+  stderr: string;
+}
 
 and failure =
   (* process terminated with an error code *)
-  | Abnormal_exit of { status: Unix.process_status; stdout: string; stderr: string; }
+  | Abnormal_exit of {
+      status: Unix.process_status;
+      stdout: string;
+      stderr: string;
+    }
   (* process didn't terminate within specified timeout *)
-  | Timed_out of { stdout: string; stderr: string; }
+  | Timed_out of {
+      stdout: string;
+      stderr: string;
+    }
   (* we initially tried to send a bigger stdin than the current implementation allows for *)
   | Overflow_stdin
 
-
-let dummy = {
-  info = {
-    name = "dummy";
-    args = [];
-    stack = Utils.Callstack "";
-  };
-  stdin_fd = ref None;
-  stdout_fd = ref None;
-  stderr_fd = ref None;
-  acc = Stack.create ();
-  acc_err = Stack.create ();
-  lifecycle = ref @@ Lifecycle_exited (Unix.WEXITED 0);
-}
+let dummy =
+  {
+    info = { name = "dummy"; args = []; stack = Utils.Callstack "" };
+    stdin_fd = ref None;
+    stdout_fd = ref None;
+    stderr_fd = ref None;
+    acc = Stack.create ();
+    acc_err = Stack.create ();
+    lifecycle = ref @@ Lifecycle_exited (Unix.WEXITED 0);
+  }

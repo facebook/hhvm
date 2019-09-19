@@ -28,7 +28,7 @@ $b = array(
 );
 
 $natural = SORT_NATURAL;
-array_multisort(&$b, &$natural, &$a);
+array_multisort3(&$b, &$natural, &$a);
 
 var_dump($a, $b);
 

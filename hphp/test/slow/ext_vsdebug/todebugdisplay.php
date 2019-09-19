@@ -1,6 +1,6 @@
 <?hh
 require(__DIR__ . '/common.inc');
-
+<<__EntryPoint>> function main(): void {
 $path = __FILE__ . ".test";
 $breakpoints = [
    array(
@@ -127,3 +127,4 @@ checkForOutput($testProcess, "hello world 2\n", "stdout");
 vsDebugCleanup($testProcess);
 
 echo "OK!\n";
+}

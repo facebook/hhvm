@@ -1,0 +1,4 @@
+File "concrete_redeclare_concrete_class_constant_bad.php", line 5, characters 9-11:
+Expected int (Typing[4348])
+File "concrete_redeclare_concrete_class_constant_bad.php", line 9, characters 9-16:
+But got arraykey

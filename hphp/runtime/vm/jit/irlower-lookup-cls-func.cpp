@@ -82,12 +82,6 @@ void implLdMeta(IRLS& env, const IRInstruction* inst) {
                  inst->marker().func()->fullName()->slice());
 
   auto args = argGroup(env, inst).imm(ch).ssa(0 /* name */);
-  if (is_func) {
-    args
-      .addr(srcLoc(env, inst, 1).reg(),
-            cellsToBytes(inst->extra<LdFunc>()->offset.offset))
-      .ssa(2);
-  }
   cgCallHelper(
     vmain(env),
     env,
@@ -305,75 +299,6 @@ void cgLdRecDescCachedSafe(IRLS& env, const IRInstruction* inst) {
 }
 
 IMPL_OPCODE_CALL(LookupClsRDS)
-
-///////////////////////////////////////////////////////////////////////////////
-
-const Func* loadFuncContextImpl(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
-  ObjectData* inst = nullptr;
-  Class* cls = nullptr;
-  StringData* invName = nullptr;
-  ArrayData* reifiedGenerics = nullptr;
-  bool dynamic = false;
-
-  auto func = vm_decode_function(
-    VarNR(arr).operator const Variant&(),
-    fp,
-    inst,
-    cls,
-    invName,
-    dynamic,
-    reifiedGenerics,
-    DecodeFlags::NoWarn
-  );
-  assertx(dynamic);
-  if (UNLIKELY(func == nullptr)) {
-    raise_error("Invalid callable (array)");
-  }
-
-  assertx(preLiveAR->isDynamicCall());
-  callerDynamicCallChecks(func);
-  callerRxChecks(fp, func);
-
-  preLiveAR->m_func = func;
-  if (inst) {
-    inst->incRefCount();
-    preLiveAR->setThis(inst);
-  } else if (cls) {
-    preLiveAR->setClass(cls);
-  } else {
-    preLiveAR->trashThis();
-  }
-  if (UNLIKELY(invName != nullptr)) {
-    preLiveAR->setMagicDispatch(invName);
-  }
-  if (func->hasReifiedGenerics()) {
-    preLiveAR->setReifiedGenerics(reifiedGenerics);
-  }
-  return func;
-}
-
-const Func*
-loadArrayFunctionContext(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
-  try {
-    return loadFuncContextImpl(arr, preLiveAR, fp);
-  } catch (...) {
-    *arPreliveOverwriteCells(preLiveAR) = make_array_like_tv(arr);
-    throw;
-  }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void cgLdArrFuncCtx(IRLS& env, const IRInstruction* inst) {
-  auto const args = argGroup(env, inst)
-    .ssa(0)
-    .addr(srcLoc(env, inst, 1).reg(),
-          cellsToBytes(inst->extra<LdArrFuncCtx>()->offset.offset))
-    .ssa(2);
-
-  cgCallHelper(vmain(env), env, CallSpec::direct(loadArrayFunctionContext),
-               callDest(env, inst), SyncOptions::Sync, args);
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 

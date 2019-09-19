@@ -1,7 +1,7 @@
 <?hh
 
 include (__DIR__ . '/redis.inc');
-
+<<__EntryPoint>> function main(): void {
 $r = NewRedisTestInstance();
 $r->setOption(Redis::OPT_PREFIX, GetTestKeyName(__FILE__) . ':');
 
@@ -15,3 +15,4 @@ var_dump($r->sContains('colors', 'aqua'));
 var_dump($r->sAdd('reds', 'red', 'pink', 'crimson'));
 var_dump($r->sInterStore('red-colors', 'colors', 'reds'));
 var_dump($r->sMembers('red-colors'));
+}

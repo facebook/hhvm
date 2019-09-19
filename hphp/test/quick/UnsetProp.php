@@ -62,7 +62,7 @@ function main() {
   print "Test end\n";
 }
 
-main();
+
 
 function getprop($o) {
   return $o->declprop;
@@ -83,5 +83,7 @@ function main2() {
   setprop($o, 'set2');
   var_dump(getprop($o));
 }
-
+<<__EntryPoint>> function main_entry(): void {
+main();
 main2();
+}

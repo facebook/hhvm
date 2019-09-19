@@ -1,0 +1,6 @@
+File "transitive_error_4.php", line 17, characters 6-7:
+Invalid argument (Typing[4110])
+File "transitive_error_4.php", line 6, characters 35-38:
+Expected C<[unresolved]>
+File "transitive_error_4.php", line 12, characters 15-20:
+But got dynamic because it is an unenforceable type

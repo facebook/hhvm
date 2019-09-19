@@ -1,0 +1,24 @@
+File "lambda_classname.php", line 10, characters 29-34:
+Invalid argument (Typing[4110])
+File "lambda_classname.php", line 6, characters 13-15:
+Expected Tv1
+File "lambda_classname.php", line 9, characters 12-23:
+But got dynamic because a type could not be determined here
+File "lambda_classname.php", line 12, characters 10-16:
+Invalid return type (Typing[4110])
+File "lambda_classname.php", line 7, characters 4-11:
+Expected ~vec<Tv2> because it is an unenforceable type
+File "lambda_classname.php", line 8, characters 13-17:
+But got vec<~Tv2>
+File "lambda_classname.php", line 21, characters 29-34:
+Invalid argument (Typing[4110])
+File "lambda_classname.php", line 16, characters 13-15:
+Expected Tv1
+File "lambda_classname.php", line 20, characters 12-23:
+But got dynamic because a type could not be determined here
+File "lambda_classname.php", line 23, characters 10-16:
+Invalid return type (Typing[4110])
+File "lambda_classname.php", line 18, characters 4-11:
+Expected ~vec<Tv2> because it is an unenforceable type
+File "lambda_classname.php", line 19, characters 13-17:
+But got vec<~Tv2>

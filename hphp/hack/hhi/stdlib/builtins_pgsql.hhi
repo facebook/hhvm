@@ -116,8 +116,6 @@ function pg_fetch_array(
 <<__PHPStdLib>>
 function pg_fetch_assoc(resource $result, ?int $row = null);
 <<__PHPStdLib>>
-function pg_fetch_object(resource $result, ?int $row = null);
-<<__PHPStdLib>>
 function pg_fetch_result(
   resource $result,
   ?int $row = null,

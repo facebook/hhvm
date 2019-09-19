@@ -1,0 +1,8 @@
+File "not_in_abstract_class.php", line 4, characters 7-7:
+This class must be declared abstract, or provide an implementation for the abstract property '$l' (Typing[4047])
+File "not_in_abstract_class.php", line 6, characters 26-28:
+Declaration is here
+File "not_in_abstract_class.php", line 4, characters 7-7:
+This class must be declared abstract, or provide an implementation for the abstract property '$p' (Typing[4047])
+File "not_in_abstract_class.php", line 5, characters 38-40:
+Declaration is here

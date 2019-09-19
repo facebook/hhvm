@@ -1,0 +1,6 @@
+File "covariant_this_type.php", line 8, characters 7-11:
+Invalid argument (Typing[4110])
+File "covariant_this_type.php", line 6, characters 27-35:
+Expected ~Cov<I<[unresolved]>> because it is an unenforceable type
+File "covariant_this_type.php", line 7, characters 14-19:
+But got Cov<D>

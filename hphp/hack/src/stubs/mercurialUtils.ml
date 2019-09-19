@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -7,4 +7,4 @@
  *
  *)
 
- let wait_until_stable_repository _ = true
+let wait_until_stable_repository _ = true

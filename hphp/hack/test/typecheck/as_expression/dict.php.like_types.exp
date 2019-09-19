@@ -1,0 +1,16 @@
+File "dict.php", line 6, characters 16-17:
+Invalid argument (Typing[4110])
+File "dict.php", line 22, characters 23-39:
+Expected ~dict<int, string> because it is an unenforceable type
+File "dict.php", line 4, characters 9-12:
+But got dict<arraykey, mixed>
+File "dict.php", line 4, characters 9-12:
+The type dict expects 2 type parameter(s) (Typing[4101])
+File "hackarray.hhi", line 11, characters 22-25:
+Definition is here
+File "dict.php", line 12, characters 16-17:
+Invalid argument (Typing[4110])
+File "dict.php", line 22, characters 23-39:
+Expected ~dict<int, string> because it is an unenforceable type
+File "dict.php", line 10, characters 9-18:
+But got dict<arraykey, mixed>

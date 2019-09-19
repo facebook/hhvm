@@ -44,6 +44,7 @@ int numImmediates(Op opcode) {
 #define THREE(...) 3
 #define FOUR(...)  4
 #define FIVE(...)  5
+#define SIX(...)   6
 #define O(name, imm, unusedPop, unusedPush, unusedFlags) imm,
     OPCODES
 #undef O
@@ -53,6 +54,7 @@ int numImmediates(Op opcode) {
 #undef THREE
 #undef FOUR
 #undef FIVE
+#undef SIX
   };
   return values[size_t(opcode)];
 }
@@ -60,14 +62,15 @@ int numImmediates(Op opcode) {
 ArgType immType(const Op opcode, int idx) {
   assertx(isValidOpcode(opcode));
   assertx(idx >= 0 && idx < numImmediates(opcode));
-  always_assert(idx < kMaxHhbcImms); // No opcodes have more than 5 immediates
+  always_assert(idx < kMaxHhbcImms); // No opcodes have more than 6 immediates
   static const int8_t argTypes[][kMaxHhbcImms] = {
-#define NA                  {-1, -1, -1, -1, -1},
-#define ONE(a)              { a, -1, -1, -1, -1},
-#define TWO(a, b)           { a,  b, -1, -1, -1},
-#define THREE(a, b, c)      { a,  b,  c, -1, -1},
-#define FOUR(a, b, c, d)    { a,  b,  c,  d, -1},
-#define FIVE(a, b, c, d, e) { a,  b,  c,  d,  e},
+#define NA                    {-1, -1, -1, -1, -1, -1},
+#define ONE(a)                { a, -1, -1, -1, -1, -1},
+#define TWO(a, b)             { a,  b, -1, -1, -1, -1},
+#define THREE(a, b, c)        { a,  b,  c, -1, -1, -1},
+#define FOUR(a, b, c, d)      { a,  b,  c,  d, -1, -1},
+#define FIVE(a, b, c, d, e)   { a,  b,  c,  d,  e, -1},
+#define SIX(a, b, c, d, e, f) { a,  b,  c,  d,  e,  f},
 #define OA(x) OA
 #define O(name, imm, unusedPop, unusedPush, unusedFlags) imm
     OPCODES
@@ -79,6 +82,7 @@ ArgType immType(const Op opcode, int idx) {
 #undef THREE
 #undef FOUR
 #undef FIVE
+#undef SIX
   };
   auto opInt = size_t(opcode);
   return (ArgType)argTypes[opInt][idx];
@@ -106,7 +110,7 @@ int immSize(Op op, ArgType type, PC immPC) {
 #undef ARGTYPEVEC
   };
 
-  if (type == IVA || type == LA || type == IA || type == CAR || type == CAW) {
+  if (type == IVA || type == LA || type == IA) {
     return encoded_iva_size(decode_raw<uint8_t>(pc));
   }
 
@@ -197,8 +201,7 @@ ArgUnion getImm(const PC origPC, int idx, const Unit* unit) {
   }
   always_assert(cursor == idx);
   auto const type = immType(op, idx);
-  if (type == IVA || type == LA || type == IA ||
-      type == CAR || type == CAW) {
+  if (type == IVA || type == LA || type == IA) {
     retval.u_IVA = decode_iva(pc);
   } else if (type == KA) {
     assertx(unit != nullptr);
@@ -223,8 +226,6 @@ ArgUnion* getImmPtr(const PC origPC, int idx) {
   assertx(immType(op, idx) != IVA);
   assertx(immType(op, idx) != LA);
   assertx(immType(op, idx) != IA);
-  assertx(immType(op, idx) != CAR);
-  assertx(immType(op, idx) != CAW);
   assertx(immType(op, idx) != RATA);
   for (int i = 0; i < idx; i++) {
     pc += immSize(op, immType(op, i), pc);
@@ -265,19 +266,18 @@ OffsetList instrJumpOffsets(const PC origPC) {
 #define IMM_SLA 3
 #define IMM_LA 0
 #define IMM_IA 0
-#define IMM_CAR 0
-#define IMM_CAW 0
 #define IMM_OA(x) 0
 #define IMM_VSA 0
 #define IMM_KA 0
 #define IMM_LAR 0
 #define IMM_FCA 0
-#define NA                  { 0,        0,        0,        0,        0      },
-#define ONE(a)              { IMM_##a,  0,        0,        0,        0      },
-#define TWO(a, b)           { IMM_##a,  IMM_##b,  0,        0,        0      },
-#define THREE(a, b, c)      { IMM_##a,  IMM_##b,  IMM_##c,  0,        0      },
-#define FOUR(a, b, c, d)    { IMM_##a,  IMM_##b,  IMM_##c,  IMM_##d,  0      },
-#define FIVE(a, b, c, d, e) { IMM_##a,  IMM_##b,  IMM_##c,  IMM_##d,  IMM_##e},
+#define NA                    { 0,        0,        0,        0,        0,       0      },
+#define ONE(a)                { IMM_##a,  0,        0,        0,        0,       0      },
+#define TWO(a, b)             { IMM_##a,  IMM_##b,  0,        0,        0,       0      },
+#define THREE(a, b, c)        { IMM_##a,  IMM_##b,  IMM_##c,  0,        0,       0      },
+#define FOUR(a, b, c, d)      { IMM_##a,  IMM_##b,  IMM_##c,  IMM_##d,  0,       0      },
+#define FIVE(a, b, c, d, e)   { IMM_##a,  IMM_##b,  IMM_##c,  IMM_##d,  IMM_##e, 0      },
+#define SIX(a, b, c, d, e, f) { IMM_##a,  IMM_##b,  IMM_##c,  IMM_##d,  IMM_##e, IMM_##f},
 #define OA(x) OA
 #define O(name, imm, unusedPop, unusedPush, unusedFlags) imm
     OPCODES
@@ -290,8 +290,6 @@ OffsetList instrJumpOffsets(const PC origPC) {
 #undef IMM_RATA
 #undef IMM_LA
 #undef IMM_IA
-#undef IMM_CAR
-#undef IMM_CAW
 #undef IMM_BA
 #undef IMM_BLA
 #undef IMM_ILA
@@ -310,13 +308,14 @@ OffsetList instrJumpOffsets(const PC origPC) {
 #undef THREE
 #undef FOUR
 #undef FIVE
+#undef SIX
   };
 
   auto pc = origPC;
   auto const op = decode_op(pc);
 
   OffsetList targets;
-  if (hasFCallEffects(op)) {
+  if (isFCall(op)) {
     auto const offset = decodeFCallArgs(op, pc).asyncEagerOffset;
     if (offset != kInvalidOffset) targets.emplace_back(offset);
     return targets;
@@ -407,13 +406,13 @@ int instrNumPops(PC pc) {
 #define THREE(...) 3
 #define FOUR(...) 4
 #define FIVE(...) 5
+#define SIX(...) 6
 #define MFINAL -3
 #define C_MFINAL(n) -10 - (n)
 #define CUMANY -3
-#define CVUMANY -3
-#define FPUSH(nin, nobj) C_MFINAL(nin + 3)
+#define CMANY_U3 C_MFINAL(3)
+#define CALLNATIVE -5
 #define FCALL(nin, nobj) -20 - (nin)
-#define FCALLO -4
 #define CMANY -3
 #define SMANY -1
 #define O(name, imm, pop, push, flags) pop,
@@ -424,13 +423,13 @@ int instrNumPops(PC pc) {
 #undef THREE
 #undef FOUR
 #undef FIVE
+#undef SIX
 #undef MFINAL
 #undef C_MFINAL
 #undef CUMANY
-#undef CVUMANY
-#undef FPUSH
+#undef CMANY_U3
+#undef CALLNATIVE
 #undef FCALL
-#undef FCALLO
 #undef CMANY
 #undef SMANY
 #undef O
@@ -443,17 +442,16 @@ int instrNumPops(PC pc) {
   // NewPackedArray and some final member operations specify how
   // many values are popped in their first immediate
   if (n == -3) return getImm(pc, 0).u_IVA;
-  // FCall pops numArgs, unpack and (numRets - 1) uninit values
-  if (n == -4) {
-    auto const fca = getImm(pc, 0).u_FCA;
-    return fca.numArgsInclUnpack() + fca.numRets - 1;
+  // FCallBuiltin pops numArgs and numOut uninit values
+  if (n == -5) {
+    return getImm(pc, 0).u_IVA + getImm(pc, 2).u_IVA;
   }
   // FCall* opcodes pop number of opcode specific inputs, unpack, numArgs,
   // 3 cells/uninits reserved for ActRec and (numRets - 1) uninit values.
   if (n <= -20) {
     auto const fca = getImm(pc, 0).u_FCA;
     auto const nin = -n - 20;
-    return nin + fca.numArgsInclUnpack() + 2 + fca.numRets;
+    return nin + fca.numInputs() + 2 + fca.numRets;
   }
   // Other final member operations pop their first immediate + n
   if (n <= -10) return getImm(pc, 0).u_IVA - n - 10;
@@ -479,8 +477,10 @@ int instrNumPushes(PC pc) {
 #define THREE(...) 3
 #define FOUR(...) 4
 #define FIVE(...) 5
-#define FPUSH -2
+#define SIX(...) 6
+#define CMANY -2
 #define FCALL -1
+#define CALLNATIVE -3
 #define O(name, imm, pop, push, flags) push,
     OPCODES
 #undef NOV
@@ -489,16 +489,20 @@ int instrNumPushes(PC pc) {
 #undef THREE
 #undef FOUR
 #undef FIVE
-#undef FPUSH
+#undef SIX
+#undef CMANY
 #undef FCALL
+#undef CALLNATIVE
 #undef O
   };
   auto const op = peek_op(pc);
   int n = numberOfPushes[size_t(op)];
 
-  // The FPush* opcodes push all arguments onto the stack
+  // FCallBuiltin pushes numOut + 1 return values
+  if (n == -3) return getImm(pc, 2).u_IVA + 1;
+  // The PopFrame opcode push all arguments onto the stack
   if (n == -2) return getImm(pc, 0).u_IVA;
-  // The FCall opcode pushes all return values onto the stack
+  // The FCall* opcodes pushes all return values onto the stack
   if (n == -1) return getImm(pc, 0).u_FCA.numRets;
 
   return n;
@@ -519,35 +523,26 @@ FlavorDesc manyFlavor(PC op, uint32_t i, FlavorDesc flavor) {
 }
 
 template<int nin, int nobj>
-FlavorDesc fpushFlavor(PC op, uint32_t i) {
-  always_assert(i < uint32_t(instrNumPops(op)));
-  if (i < nin) return CV;
-  i -= nin;
-  auto const numArgs = getImm(op, 0).u_IVA;
-  if (i < numArgs) return CVV;
-  i -= numArgs;
-  if (i < 2) return UV;
-  return nobj ? CV : UV;
-}
-
-template<int nin, int nobj>
 FlavorDesc fcallFlavor(PC op, uint32_t i) {
   always_assert(i < uint32_t(instrNumPops(op)));
   auto const fca = getImm(op, 0).u_FCA;
   if (i < nin) return CV;
   i -= nin;
+  if (i == 0 && fca.hasGenerics()) return CV;
+  i -= fca.hasGenerics() ? 1 : 0;
   if (i == 0 && fca.hasUnpack()) return CV;
-  if (i < fca.numArgsInclUnpack()) return CVV;
-  i -= fca.numArgsInclUnpack();
+  i -= fca.hasUnpack() ? 1 : 0;
+  if (i < fca.numArgs) return CVV;
+  i -= fca.numArgs;
   if (i == 2 && nobj) return CV;
   return UV;
 }
 
-FlavorDesc fcallOldFlavor(PC op, uint32_t i) {
-  always_assert(i < uint32_t(instrNumPops(op)));
-  auto const fca = getImm(op, 0).u_FCA;
-  if (i == 0 && fca.hasUnpack()) return CV;
-  return i < fca.numArgsInclUnpack() ? CVV : UV;
+FlavorDesc fcallBuiltinFlavor(PC op, uint32_t i) {
+  assertx(i < getImm(op, 0).u_IVA + getImm(op, 2).u_IVA);
+  auto const nargs = getImm(op, 0).u_IVA;
+  if (i < nargs) return CVUV;
+  return UV;
 }
 
 }
@@ -562,13 +557,13 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #define THREE(f1, f2, f3) return doFlavor(idx, f1, f2, f3);
 #define FOUR(f1, f2, f3, f4) return doFlavor(idx, f1, f2, f3, f4);
 #define FIVE(f1, f2, f3, f4, f5) return doFlavor(idx, f1, f2, f3, f4, f5);
+#define SIX(f1, f2, f3, f4, f5, f6) return doFlavor(idx, f1, f2, f3, f4, f5, f6);
 #define MFINAL return manyFlavor(op, idx, CV);
 #define C_MFINAL(n) return manyFlavor(op, idx, CV);
 #define CUMANY return manyFlavor(op, idx, CUV);
-#define CVUMANY return manyFlavor(op, idx, CVUV);
-#define FPUSH(nin, nobj) return fpushFlavor<nin, nobj>(op, idx);
+#define CMANY_U3 return manyFlavor(op, idx, CUV);
+#define CALLNATIVE return fcallBuiltinFlavor(op, idx);
 #define FCALL(nin, nobj) return fcallFlavor<nin, nobj>(op, idx);
-#define FCALLO return fcallOldFlavor(op, idx);
 #define CMANY return manyFlavor(op, idx, CV);
 #define SMANY return manyFlavor(op, idx, CV);
 #define O(name, imm, pop, push, flags) case Op::name: pop
@@ -582,13 +577,13 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #undef THREE
 #undef FOUR
 #undef FIVE
+#undef SIX
 #undef MFINAL
 #undef C_MFINAL
 #undef CUMANY
-#undef CVUMANY
-#undef FPUSH
+#undef CMANY_U3
+#undef CALLNATIVE
 #undef FCALL
-#undef FCALLO
 #undef CMANY
 #undef SMANY
 #undef O
@@ -597,7 +592,6 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 void staticArrayStreamer(const ArrayData* ad, std::string& out) {
   if (ad->isVecArray()) out += "vec(";
   else if (ad->isDict()) out += "dict(";
-  else if (ad->isShape()) out += "shape(";
   else if (ad->isKeyset()) out += "keyset(";
   else {
     assertx(ad->isPHPArray());
@@ -627,6 +621,14 @@ void staticArrayStreamer(const ArrayData* ad, std::string& out) {
     }
   }
   out += ")";
+
+  if (ad->hasProvenanceData() && RuntimeOption::EvalArrayProvenance) {
+    out += " [";
+    if (auto const tag = arrprov::getTag(ad)) {
+      out += tag->toString();
+    }
+    out += "]";
+  }
 }
 
 void staticStreamer(const TypedValue* tv, std::string& out) {
@@ -656,8 +658,6 @@ void staticStreamer(const TypedValue* tv, std::string& out) {
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
-    case KindOfPersistentShape:
-    case KindOfShape:
     case KindOfPersistentArray:
     case KindOfArray:
       staticArrayStreamer(tv->m_data.parr, out);
@@ -805,6 +805,7 @@ std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u) {
 #define THREE(a, b, c) H_##a; H_##b; H_##c;
 #define FOUR(a, b, c, d) H_##a; H_##b; H_##c; H_##d;
 #define FIVE(a, b, c, d, e) H_##a; H_##b; H_##c; H_##d; H_##e;
+#define SIX(a, b, c, d, e, f) H_##a; H_##b; H_##c; H_##d; H_##e; H_##f;
 #define NA
 #define H_BLA READSVEC()
 #define H_SLA READSVEC()
@@ -814,8 +815,6 @@ std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u) {
 #define H_I64A READ(int64_t)
 #define H_LA READLA()
 #define H_IA READV()
-#define H_CAR READV()
-#define H_CAW READV()
 #define H_DA READ(double)
 #define H_BA (out += ' ', out += showOffset(decode_ba(it)))
 #define H_OA(type) READOA(type)
@@ -862,6 +861,7 @@ OPCODES
 #undef THREE
 #undef FOUR
 #undef FIVE
+#undef SIX
 #undef NA
 #undef H_BLA
 #undef H_SLA
@@ -871,8 +871,6 @@ OPCODES
 #undef H_I64A
 #undef H_LA
 #undef H_IA
-#undef H_CAR
-#undef H_CAW
 #undef H_DA
 #undef H_BA
 #undef H_OA
@@ -986,12 +984,6 @@ static const char* TypeStructResolveOp_names[] = {
 #undef OP
 };
 
-static const char* HasGenericsOp_names[] = {
-#define OP(x) #x,
-  HAS_GENERICS_OPS
-#undef OP
-};
-
 static const char* MOpMode_names[] = {
 #define MODE(x) #x,
   M_OP_MODES
@@ -1010,10 +1002,22 @@ static const char* CudOp_names[] = {
 #undef CUD_OP
 };
 
+static const char* IsLogAsDynamicCallOp_names[] = {
+#define IS_LOG_AS_DYNAMIC_CALL_OP(x) #x,
+  IS_LOG_AS_DYNAMIC_CALL_OPS
+#undef IS_LOG_AS_DYNAMIC_CALL_OP
+};
+
 static const char* SpecialClsRef_names[] = {
 #define REF(x) #x,
   SPECIAL_CLS_REFS
 #undef REF
+};
+
+static const char* ClsMethResolveOp_names[] = {
+#define OP(x) #x,
+  CLS_METH_RESOLVE_OPS
+#undef OP
 };
 
 template<class T, size_t Sz>
@@ -1083,11 +1087,14 @@ X(QueryMOp,       static_cast<int>(QueryMOp::CGet))
 X(SetRangeOp,     static_cast<int>(SetRangeOp::Forward))
 X(TypeStructResolveOp,
                   static_cast<int>(TypeStructResolveOp::Resolve))
-X(HasGenericsOp,  static_cast<int>(HasGenericsOp::NoGenerics))
 X(MOpMode,        static_cast<int>(MOpMode::None))
 X(ContCheckOp,    static_cast<int>(ContCheckOp::IgnoreStarted))
 X(CudOp,          static_cast<int>(CudOp::IgnoreIter))
 X(SpecialClsRef,  static_cast<int>(SpecialClsRef::Self))
+X(ClsMethResolveOp,
+                  static_cast<int>(ClsMethResolveOp::NoWarn))
+X(IsLogAsDynamicCallOp,
+                  static_cast<int>(IsLogAsDynamicCallOp::LogAsDynamicCall))
 #undef X
 
 //////////////////////////////////////////////////////////////////////
@@ -1095,7 +1102,7 @@ X(SpecialClsRef,  static_cast<int>(SpecialClsRef::Self))
 namespace {
 
 bool instrIsVMCall(Op opcode) {
-  if (hasFCallEffects(opcode)) return true;
+  if (isFCall(opcode)) return true;
   switch (opcode) {
     case OpContEnter:
     case OpContEnterDelegate:
@@ -1210,8 +1217,9 @@ std::string show(const FCallArgsBase& fca, const uint8_t* byRefsRaw,
 
   std::vector<std::string> flags;
   if (fca.hasUnpack()) flags.push_back("Unpack");
+  if (fca.hasGenerics()) flags.push_back("Generics");
   if (fca.supportsAsyncEagerReturn()) flags.push_back("SupportsAER");
-  if (fca.constructNoConst) flags.push_back("NoConst");
+  if (fca.lockWhileUnwinding) flags.push_back("LockWhileUnwinding");
   return folly::sformat(
     "<{}> {} {} {} {}",
     folly::join(' ', flags), fca.numArgs, fca.numRets, byRefs, asyncEagerLabel

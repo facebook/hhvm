@@ -1,0 +1,104 @@
+File "unpack_call1.php", line 38, characters 3-13:
+Too few arguments (required 1 but got 0) (Typing[4104])
+File "unpack_call1.php", line 3, characters 10-10:
+Definition is here
+File "unpack_call1.php", line 39, characters 15-16:
+Too few arguments (required 1 but got 0) (Typing[4104])
+File "unpack_call1.php", line 8, characters 19-29:
+Definition is here
+File "unpack_call1.php", line 40, characters 3-20:
+Too few arguments (required 1 but got 0) (Typing[4104])
+File "unpack_call1.php", line 12, characters 19-19:
+Definition is here
+File "unpack_call1.php", line 41, characters 15-16:
+Too few arguments (required 1 but got 0) (Typing[4104])
+File "unpack_call1.php", line 16, characters 19-29:
+Definition is here
+File "unpack_call1.php", line 42, characters 3-20:
+Too few arguments (required 1 but got 0) (Typing[4104])
+File "unpack_call1.php", line 12, characters 19-19:
+Definition is here
+File "unpack_call1.php", line 51, characters 8-22:
+Invalid argument (Typing[4110])
+File "unpack_call1.php", line 51, characters 8-22:
+Expected Traversable<int> (it is unpacked with '...')
+File "unpack_call1.php", line 25, characters 27-40:
+But got dynamic because it is an unenforceable type
+File "unpack_call1.php", line 51, characters 8-22:
+Invalid argument (Typing[4110])
+File "unpack_call1.php", line 51, characters 8-22:
+Expected Traversable<_> (it is unpacked with '...')
+File "unpack_call1.php", line 25, characters 27-40:
+But got dynamic because it is an unenforceable type
+File "unpack_call1.php", line 51, characters 3-23:
+Too few arguments (required 1 but got 0) (Typing[4104])
+File "unpack_call1.php", line 3, characters 10-10:
+Definition is here
+File "unpack_call1.php", line 53, characters 8-14:
+Invalid argument (Typing[4110])
+File "unpack_call1.php", line 53, characters 8-14:
+Expected Traversable<int> (it is unpacked with '...')
+File "unpack_call1.php", line 25, characters 27-40:
+But got dynamic because it is an unenforceable type
+File "unpack_call1.php", line 53, characters 8-14:
+Invalid argument (Typing[4110])
+File "unpack_call1.php", line 53, characters 8-14:
+Expected Traversable<_> (it is unpacked with '...')
+File "unpack_call1.php", line 25, characters 27-40:
+But got dynamic because it is an unenforceable type
+File "unpack_call1.php", line 53, characters 3-15:
+Too few arguments (required 1 but got 0) (Typing[4104])
+File "unpack_call1.php", line 3, characters 10-10:
+Definition is here
+File "unpack_call1.php", line 55, characters 11-27:
+Invalid argument (Typing[4110])
+File "unpack_call1.php", line 55, characters 11-27:
+Expected Traversable<_> (it is unpacked with '...')
+File "unpack_call1.php", line 29, characters 29-40:
+But got dynamic because it is an unenforceable type
+File "unpack_call1.php", line 57, characters 11-17:
+Invalid argument (Typing[4110])
+File "unpack_call1.php", line 57, characters 11-17:
+Expected Traversable<_> (it is unpacked with '...')
+File "unpack_call1.php", line 29, characters 29-40:
+But got dynamic because it is an unenforceable type
+File "unpack_call1.php", line 69, characters 3-13:
+Too few arguments (required 1 but got 0) (Typing[4104])
+File "unpack_call1.php", line 3, characters 10-10:
+Definition is here
+File "unpack_call1.php", line 75, characters 3-13:
+Too few arguments (required 1 but got 0) (Typing[4104])
+File "unpack_call1.php", line 3, characters 10-10:
+Definition is here
+File "unpack_call1.php", line 85, characters 8-19:
+Invalid argument (Typing[4110])
+File "unpack_call1.php", line 85, characters 8-19:
+Expected Traversable<int> (it is unpacked with '...')
+File "unpack_call1.php", line 90, characters 24-28:
+But got mixed
+File "unpack_call1.php", line 85, characters 8-19:
+Invalid argument (Typing[4110])
+File "unpack_call1.php", line 85, characters 8-19:
+Expected Traversable<_> (it is unpacked with '...')
+File "unpack_call1.php", line 90, characters 24-28:
+But got mixed
+File "unpack_call1.php", line 85, characters 3-20:
+Too few arguments (required 1 but got 0) (Typing[4104])
+File "unpack_call1.php", line 3, characters 10-10:
+Definition is here
+File "unpack_call1.php", line 87, characters 8-14:
+Invalid argument (Typing[4110])
+File "unpack_call1.php", line 87, characters 8-14:
+Expected Traversable<int> (it is unpacked with '...')
+File "unpack_call1.php", line 90, characters 24-28:
+But got mixed
+File "unpack_call1.php", line 87, characters 8-14:
+Invalid argument (Typing[4110])
+File "unpack_call1.php", line 87, characters 8-14:
+Expected Traversable<_> (it is unpacked with '...')
+File "unpack_call1.php", line 90, characters 24-28:
+But got mixed
+File "unpack_call1.php", line 87, characters 3-15:
+Too few arguments (required 1 but got 0) (Typing[4104])
+File "unpack_call1.php", line 3, characters 10-10:
+Definition is here

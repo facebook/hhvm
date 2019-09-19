@@ -2,7 +2,7 @@
 
 <<__EntryPoint>>
 function main() {
-  $iter = (int)apc_fetch('iter_id');
+  $iter = (int)__hhvm_intrinsics\apc_fetch_no_check('iter_id');
   apc_store('iter_id', $iter + 1);
 
   if ($iter === 0) {
@@ -11,8 +11,8 @@ function main() {
     apc_store('cachebreaker', $cachebreaker);
     apc_store('tmpfile', $file);
   } else {
-    $cachebreaker = apc_fetch('cachebreaker');
-    $file = apc_fetch('tmpfile');
+    $cachebreaker = __hhvm_intrinsics\apc_fetch_no_check('cachebreaker');
+    $file = __hhvm_intrinsics\apc_fetch_no_check('tmpfile');
   }
 
   $last_line = $iter > 3 ? "// iter: $iter" : "// empty";

@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2018, Facebook, Inc.
  * All rights reserved.
  *
@@ -32,7 +32,9 @@ val class_decl_if_missing : Nast.class_ -> shallow_class
     Raises [Failure] if [shallow_class_decl] is not enabled. *)
 
 val push_local_changes : unit -> unit
+
 val pop_local_changes : unit -> unit
 
 val oldify_batch : SSet.t -> unit
+
 val remove_old_batch : SSet.t -> unit

@@ -75,7 +75,6 @@ struct RunFlags {
 //////////////////////////////////////////////////////////////////////
 
 constexpr int kMaxTrackedLocals = 512;
-constexpr int kMaxTrackedClsRefSlots = 64;
 
 /*
  * StepFlags are information about the effects of a single opcode.
@@ -207,18 +206,15 @@ void default_dispatch(ISS&, const Bytecode&);
 /*
  * Can this call be converted to an FCallBuiltin
  */
-bool can_emit_builtin(const php::Func* func,
-                      int numParams, bool hasUnpack);
+bool can_emit_builtin(ISS& env, const php::Func* func, const FCallArgs& fca);
 
-void finish_builtin(ISS& env,
-                    const php::Func* func,
-                    uint32_t numParams,
-                    bool unpack);
+void finish_builtin(ISS& env, const php::Func* func, const FCallArgs& fca);
 
-bool handle_function_exists(ISS& env, int numArgs, bool allowConstProp);
+bool handle_function_exists(ISS& env, const Type& name);
 
 folly::Optional<Type>
-const_fold(ISS& env, uint32_t nArgs, const php::Func& phpFunc);
+const_fold(ISS& env, uint32_t nArgs, uint32_t numExtraInputs,
+           const php::Func& phpFunc, bool variadicsPacked);
 
 folly::Optional<Type> thisType(const Index& index, Context ctx);
 

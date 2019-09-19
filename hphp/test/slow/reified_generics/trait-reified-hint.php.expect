@@ -1,0 +1,2 @@
+Argument 1 passed to g() must be an instance of MyTrait, int given
+Argument 1 passed to f() must be an instance of MyTrait, int given

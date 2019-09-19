@@ -11,20 +11,20 @@
  * THIS FILE IS @generated; DO NOT EDIT IT
  * To regenerate this file, run
  *
- *   buck run //hphp/hack/src:generate_full_fidelity -- --rust
+ *   buck run //hphp/hack/src:generate_full_fidelity
  *
  **
  *
  */
 use crate::ocaml_syntax::{OcamlSyntax, Context};
-use crate::rust_to_ocaml::*;
+use rust_to_ocaml::*;
 
 use parser_rust as parser;
 use parser::syntax_kind::SyntaxKind;
 use parser::syntax::{SyntaxType, SyntaxValueType};
 use parser::positioned_token::PositionedToken;
 
-impl<V, C> SyntaxType<C> for OcamlSyntax<V>
+impl<V, C> SyntaxType<'_, C> for OcamlSyntax<V>
 where
     C: Context,
     V: SyntaxValueType<PositionedToken> + ToOcaml,
@@ -935,7 +935,7 @@ where
       Self { syntax, value }
     }
 
-    fn make_attribute_specification(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
+    fn make_old_attribute_specification(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
       let children = [
           &arg0.value, 
           &arg1.value, 
@@ -944,12 +944,46 @@ where
       let value = V::from_values(&children);
       let syntax = Self::make(
           ctx,
-          SyntaxKind::AttributeSpecification,
+          SyntaxKind::OldAttributeSpecification,
           &value,
           &[
               arg0.syntax, 
               arg1.syntax, 
               arg2.syntax
+          ],
+      );
+      Self { syntax, value }
+    }
+
+    fn make_attribute_specification(ctx: &C, arg0: Self) -> Self {
+      let children = [
+          &arg0.value
+      ];
+      let value = V::from_values(&children);
+      let syntax = Self::make(
+          ctx,
+          SyntaxKind::AttributeSpecification,
+          &value,
+          &[
+              arg0.syntax
+          ],
+      );
+      Self { syntax, value }
+    }
+
+    fn make_attribute(ctx: &C, arg0: Self, arg1: Self) -> Self {
+      let children = [
+          &arg0.value, 
+          &arg1.value
+      ];
+      let value = V::from_values(&children);
+      let syntax = Self::make(
+          ctx,
+          SyntaxKind::Attribute,
+          &value,
+          &[
+              arg0.syntax, 
+              arg1.syntax
           ],
       );
       Self { syntax, value }
@@ -2037,26 +2071,6 @@ where
       Self { syntax, value }
     }
 
-    fn make_instanceof_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
-      ];
-      let value = V::from_values(&children);
-      let syntax = Self::make(
-          ctx,
-          SyntaxKind::InstanceofExpression,
-          &value,
-          &[
-              arg0.syntax, 
-              arg1.syntax, 
-              arg2.syntax
-          ],
-      );
-      Self { syntax, value }
-    }
-
     fn make_is_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
       let children = [
           &arg0.value, 
@@ -2397,12 +2411,13 @@ where
       Self { syntax, value }
     }
 
-    fn make_record_creation_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self) -> Self {
+    fn make_record_creation_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self) -> Self {
       let children = [
           &arg0.value, 
           &arg1.value, 
           &arg2.value, 
-          &arg3.value
+          &arg3.value, 
+          &arg4.value
       ];
       let value = V::from_values(&children);
       let syntax = Self::make(
@@ -2413,7 +2428,8 @@ where
               arg0.syntax, 
               arg1.syntax, 
               arg2.syntax, 
-              arg3.syntax
+              arg3.syntax, 
+              arg4.syntax
           ],
       );
       Self { syntax, value }
@@ -2959,6 +2975,26 @@ where
       let syntax = Self::make(
           ctx,
           SyntaxKind::TypeConstant,
+          &value,
+          &[
+              arg0.syntax, 
+              arg1.syntax, 
+              arg2.syntax
+          ],
+      );
+      Self { syntax, value }
+    }
+
+    fn make_pu_access(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
+      let children = [
+          &arg0.value, 
+          &arg1.value, 
+          &arg2.value
+      ];
+      let value = V::from_values(&children);
+      let syntax = Self::make(
+          ctx,
+          SyntaxKind::PUAccess,
           &value,
           &[
               arg0.syntax, 

@@ -1,8 +1,13 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-var_dump(preg_match('@^(/([a-z]*))*$@', '//abcde', &$m)); var_dump($m);
-var_dump(preg_match('@^(/(?:[a-z]*))*$@', '//abcde', &$m)); var_dump($m);
+  $m = null;
+  var_dump(preg_match_with_matches('@^(/([a-z]*))*$@', '//abcde', inout $m));
+  var_dump($m);
+  var_dump(preg_match_with_matches('@^(/(?:[a-z]*))*$@', '//abcde', inout $m));
+  var_dump($m);
 
-var_dump(preg_match('@^(/([a-z]+))+$@', '/a/abcde', &$m)); var_dump($m);
-var_dump(preg_match('@^(/(?:[a-z]+))+$@', '/a/abcde', &$m)); var_dump($m);
+  var_dump(preg_match_with_matches('@^(/([a-z]+))+$@', '/a/abcde', inout $m));
+  var_dump($m);
+  var_dump(preg_match_with_matches('@^(/(?:[a-z]+))+$@', '/a/abcde', inout $m));
+  var_dump($m);
 }

@@ -5,6 +5,12 @@ function main() {
   apc_store('mainf', fun('main'));
   apc_store('maina', array(1, fun('main'), 'foo'));
 
-  var_dump(apc_fetch('mainf'));
-  var_dump(apc_fetch('maina'));
+  apc_store('sysf', fun('array_map'));
+  apc_store('sysa', array(10, fun('apc_fetch'), 'foo'));
+
+  var_dump(__hhvm_intrinsics\apc_fetch_no_check('mainf'));
+  var_dump(__hhvm_intrinsics\apc_fetch_no_check('maina'));
+
+  var_dump(__hhvm_intrinsics\apc_fetch_no_check('sysf'));
+  var_dump(__hhvm_intrinsics\apc_fetch_no_check('sysa'));
 }

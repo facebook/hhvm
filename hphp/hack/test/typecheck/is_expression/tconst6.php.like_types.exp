@@ -1,0 +1,4 @@
+File "tconst6.php", line 16, characters 13-24:
+Invalid "is" expression hint (Typing[4195])
+File "tconst6.php", line 12, characters 18-25:
+The "is" operator cannot be used with a type with an erased generic type argument, except in a like cast when the corresponding type parameter is covariant

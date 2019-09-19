@@ -1,0 +1,29 @@
+(library
+  (name client_ide_service)
+  (wrapped false)
+  (modules
+    clientIdeDaemon
+    clientIdeIncremental
+    clientIdeService)
+  (libraries
+    client_ide_message
+    lwt
+    server
+    server_env
+    state_loader
+    sys_utils)
+  (preprocess
+    (pps lwt_ppx)))
+
+(library
+  (name client_ide_message)
+  (wrapped false)
+  (modules clientIdeMessage)
+  (libraries
+    facts
+    lwt_utils
+    server_command_types
+    server_services
+    sys_utils)
+  (preprocess
+    (pps lwt_ppx)))

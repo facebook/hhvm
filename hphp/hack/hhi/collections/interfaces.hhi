@@ -1444,6 +1444,7 @@ interface ConstSet<+Tv as arraykey> extends ConstCollection<Tv>,
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   /* HH_FIXME[4110] explicitly not compatible with parent */
+  /* HH_FIXME[4341] explicitly not compatible with parent */
   public function map<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $fn): ConstSet<Tu>;
   /**
    * Returns a `ConstSet` containing the values after an operation has been
@@ -1464,6 +1465,7 @@ interface ConstSet<+Tv as arraykey> extends ConstCollection<Tv>,
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   /* HH_FIXME[4110] explicitly not compatible with parent */
+  /* HH_FIXME[4341] explicitly not compatible with parent */
   public function mapWithKey<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(arraykey, Tv): Tu) $fn): ConstSet<Tu>;
   /**
    * Returns a `ConstSet` containing the values of the current `ConstSet` that

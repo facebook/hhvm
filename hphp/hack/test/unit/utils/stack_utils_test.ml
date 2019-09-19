@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -18,9 +18,6 @@ let merge_bytes_test () =
   Asserter.String_asserter.assert_equals "abcdef" result "";
   true
 
-let tests = [
-  ("merge_bytes_test", merge_bytes_test);
-]
+let tests = [("merge_bytes_test", merge_bytes_test)]
 
-let () =
-  Unit_test.run_all tests
+let () = Unit_test.run_all tests

@@ -18,8 +18,8 @@ class SpoofChecker {
   const CHAR_LIMIT = 0;
 
   public function __construct();
-  public function isSuspicious(string $text, &$issuesFound = null);
-  public function areConfusable(string $s1, string $s2, &$issuesFound = null);
+  public function isSuspicious(string $text, inout $issuesFound);
+  public function areConfusable(string $s1, string $s2, inout $issuesFound);
   public function setAllowedLocales(string $localesList);
   public function setChecks(int $checks);
 }

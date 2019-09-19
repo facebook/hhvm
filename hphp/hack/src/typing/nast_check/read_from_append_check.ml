@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2018, Facebook, Inc.
  * All rights reserved.
  *
@@ -7,15 +7,16 @@
  *
  *)
 
-open Nast
+open Aast
 open Nast_check_env
 
-let handler = object
-  inherit Nast_visitor.handler_base
+let handler =
+  object
+    inherit Nast_visitor.handler_base
 
-  method! at_expr env s =
-    match (snd s) with
-    | Array_get ((p, _), None) when not env.array_append_allowed ->
-      Errors.reading_from_append p
-    | _ -> ()
-end
+    method! at_expr env s =
+      match snd s with
+      | Array_get ((p, _), None) when not env.array_append_allowed ->
+        Errors.reading_from_append p
+      | _ -> ()
+  end

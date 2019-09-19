@@ -1,0 +1,6 @@
+File "tparam_where_constraint.php", line 10, characters 5-22:
+Invalid argument (Typing[4110])
+File "tparam_where_constraint.php", line 3, characters 28-43:
+Expected ~dict<[unresolved], string> because it is an unenforceable type
+File "tparam_where_constraint.php", line 10, characters 5-22:
+But got dict<string, string>

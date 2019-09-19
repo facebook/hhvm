@@ -5,10 +5,10 @@ final record Foo {
 }
 
 <<__EntryPoint>> function main():void {
-$foo = Foo['x' => 10, 'y' => 20];
-$foo['x'] = 100;
-$bar = $foo['x'];
-$baz = $foo['y'];
-var_dump($bar);
-var_dump($baz);
+  $foo = Foo['x' => 10, 'y' => 20];
+  $bar = $foo;
+  $foo['x'] = 100;
+  var_dump($foo['x']);
+  var_dump($foo['y']);
+  var_dump($bar['x']);
 }

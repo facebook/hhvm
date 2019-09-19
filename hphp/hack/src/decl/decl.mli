@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -17,24 +17,23 @@
  * about classes, functions, typedefs, respectively in the globals
  * in Typing_env.Class, Typing_env.Fun, and Typing_env.Typedef.
  *)
-val name_and_declare_types_program: Nast.program -> unit
+val name_and_declare_types_program : Nast.program -> unit
 
-val make_env: Relative_path.t -> unit
+val make_env : Relative_path.t -> unit
 
-val fun_decl_in_env:
-  Decl_env.env -> Nast.fun_ -> Typing_defs.decl Typing_defs.fun_type
+val fun_decl_in_env : Decl_env.env -> Nast.fun_ -> Typing_defs.decl_fun_type
 
-val declare_const_in_file:
-  Relative_path.t -> string -> Typing_defs.decl Typing_defs.ty * Errors.t
+val declare_const_in_file :
+  Relative_path.t -> string -> Typing_defs.decl_ty * Errors.t
 
-val declare_typedef_in_file:
+val declare_typedef_in_file :
   Relative_path.t -> string -> Typing_defs.typedef_type
 
-val declare_class_in_file:
+val declare_class_in_file :
   Relative_path.t -> string -> Decl_defs.decl_class_type option
 
-val declare_fun_in_file:
-  Relative_path.t -> string -> Typing_defs.decl Typing_defs.fun_type
+val declare_fun_in_file :
+  Relative_path.t -> string -> Typing_defs.decl_fun_type
 
 val start_tracking : unit -> unit
 

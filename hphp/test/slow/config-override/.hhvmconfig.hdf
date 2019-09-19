@@ -1,0 +1,4 @@
+Parser {
+  Hack.Lang.AllowNewAttributeSyntax = 1
+  Hack.Lang.Hacksperimental = 1
+}

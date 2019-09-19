@@ -1,0 +1,6 @@
+File "shape_with_known_fields_is_not_subtype_of_shape_with_known_subset_of_fields.php", line 4, characters 10-33:
+Invalid return type (Typing[4110])
+File "shape_with_known_fields_is_not_subtype_of_shape_with_known_subset_of_fields.php", line 3, characters 63-69:
+Expected ~shape() because it is an unenforceable type
+File "shape_with_known_fields_is_not_subtype_of_shape_with_known_subset_of_fields.php", line 3, characters 15-34:
+But got shape('a' => string)

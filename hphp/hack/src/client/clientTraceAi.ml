@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -9,10 +9,9 @@
 
 open Hh_json
 
-let print_json res =
-  print_endline (Hh_json.json_to_string (JSON_String res))
+let print_json res = print_endline (Hh_json.json_to_string (JSON_String res))
 
-let go res output_json  =
+let go res output_json =
   if output_json then
     print_json res
   else

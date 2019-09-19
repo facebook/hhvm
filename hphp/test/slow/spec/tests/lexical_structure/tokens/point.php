@@ -1,13 +1,5 @@
 <?hh
 
-/*
-   +-------------------------------------------------------------+
-   | Copyright (c) 2015 Facebook, Inc. (http://www.facebook.com) |
-   +-------------------------------------------------------------+
-*/
-
-error_reporting(-1);
-
 class Point
 {
     private $x;     // Cartesian x-coordinate
@@ -23,7 +15,7 @@ class Point
     {
         $this->x = $x;
         $this->y = $y;
-    }   
+    }
 
     public function translate($x, $y)
     {
@@ -34,5 +26,9 @@ class Point
     public function __toString()
     {
         return '(' . $this->x . ',' . $this->y . ')';
-    }   
+    }
+}
+<<__EntryPoint>>
+function main_entry(): void {
+  error_reporting(-1);
 }

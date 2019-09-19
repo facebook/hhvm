@@ -30,27 +30,30 @@ const T_26 = "1" + 2 + "3";
 
 // Allow T_POW
 const T_27 = 2 ** 3;
+<<__EntryPoint>>
+function main_entry(): void {
 
-var_dump(T_1);
-var_dump(T_2);
-var_dump(T_3);
-var_dump(T_4);
-var_dump(T_5);
-var_dump(T_6);
-var_dump(T_7);
-var_dump(T_8);
-var_dump(T_9);
-var_dump(T_10);
-var_dump(T_11);
-var_dump(T_13);
-var_dump(T_17);
-var_dump(T_18);
-var_dump(T_19);
-var_dump(T_20);
-var_dump(T_21);
-var_dump(T_22);
-var_dump(T_23);
-var_dump(T_24);
-var_dump(T_25);
-var_dump(T_26);
-var_dump(T_27);
+  var_dump(T_1);
+  var_dump(T_2);
+  var_dump(T_3);
+  var_dump(T_4);
+  var_dump(T_5);
+  var_dump(T_6);
+  var_dump(T_7);
+  var_dump(T_8);
+  var_dump(T_9);
+  var_dump(T_10);
+  var_dump(T_11);
+  var_dump(T_13);
+  var_dump(T_17);
+  var_dump(T_18);
+  var_dump(T_19);
+  var_dump(T_20);
+  var_dump(T_21);
+  var_dump(T_22);
+  var_dump(T_23);
+  var_dump(T_24);
+  var_dump(T_25);
+  var_dump(T_26);
+  var_dump(T_27);
+}

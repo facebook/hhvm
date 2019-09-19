@@ -6,9 +6,11 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
 */
+mod minimal_smart_constructors;
+
 use crate::minimal_smart_constructors::MinimalSmartConstructors;
-use crate::parser::Parser;
-use crate::smart_constructors::NoState;
-use crate::smart_constructors_wrappers::WithKind;
+use parser_rust::{
+    parser::Parser, smart_constructors::NoState, smart_constructors_wrappers::WithKind,
+};
 
 pub type MinimalSyntaxParser<'a> = Parser<'a, WithKind<MinimalSmartConstructors>, NoState>;

@@ -29,4 +29,6 @@
   (modules
     clientLogCommand)
   (libraries
-    sys_utils))
+    sys_utils)
+  (preprocess
+    (pps lwt_ppx))) ; See T41851208

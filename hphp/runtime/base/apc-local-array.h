@@ -122,7 +122,6 @@ struct APCLocalArray final : ArrayData,
   static constexpr auto ToKeyset = &ArrayCommon::ToKeyset;
   static constexpr auto ToVArray = &ArrayCommon::ToVArray;
   static constexpr auto ToDArray = &ArrayCommon::ToDArray;
-  static constexpr auto ToShape = &ArrayCommon::ToShape;
 
 public:
   using ArrayData::decRefCount;
@@ -149,7 +148,7 @@ public:
   size_t heapSize() const;
 
 private:
-  explicit APCLocalArray(const APCArray* source);
+  explicit APCLocalArray(const APCArray* source, size_t heapSize);
   ~APCLocalArray() = delete;
 
   static bool checkInvariants(const ArrayData*);

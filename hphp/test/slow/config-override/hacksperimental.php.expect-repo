@@ -1,0 +1,15 @@
+array(2) {
+  ["Hello"]=>
+  array(0) {
+  }
+  ["World"]=>
+  array(0) {
+  }
+}
+array(2) {
+  ["foo"]=>
+  int(2)
+  ["main"]=>
+  int(0)
+}
+int(42)

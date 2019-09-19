@@ -4,4 +4,3 @@
 (8,12)-(8,43) Redeclared method C::__construct
 (9,12)-(9,43) Redeclared method C::__construct
 (10,3)-(10,48) Redeclared method C::__construct
-(12,12)-(12,40) Redeclared method C::__destruct

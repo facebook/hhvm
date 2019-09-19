@@ -48,6 +48,7 @@ Variant HHVM_FUNCTION(unpack, const String& format, const String& data);
 Array HHVM_FUNCTION(sys_getloadavg);
 String HHVM_FUNCTION(hphp_to_string, const Variant& v);
 Variant HHVM_FUNCTION(enable_legacy_behavior, const Variant& v);
+bool HHVM_FUNCTION(is_legacy_behavior_enabled, const Variant& v);
 Variant HHVM_FUNCTION(SystemLib_max2, const Variant& arg1, const Variant& arg2);
 Variant HHVM_FUNCTION(SystemLib_min2, const Variant& arg1, const Variant& arg2);
 extern const double k_INF;

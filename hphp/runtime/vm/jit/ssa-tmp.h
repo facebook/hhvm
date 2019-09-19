@@ -58,8 +58,10 @@ struct SSATmp {
   const ArrayData*   vecVal() const       { return type().vecVal(); }
   const ArrayData*   dictVal() const      { return type().dictVal(); }
   const ArrayData*   keysetVal() const    { return type().keysetVal(); }
+  const ArrayData*   arrLikeVal() const   { return type().arrLikeVal(); }
   const Func*        funcVal() const      { return type().funcVal(); }
   const Class*       clsVal() const       { return type().clsVal(); }
+  const RecordDesc*  recVal() const       { return type().recVal(); }
   const ClsMethDataRef clsmethVal() const { return type().clsmethVal(); }
   ConstCctx          cctxVal() const      { return type().cctxVal(); }
   rds::Handle        rdsHandleVal() const { return type().rdsHandleVal(); }

@@ -71,10 +71,6 @@ inline ArrayData* ArrayData::toPHPArrayIntishCast(bool copy) {
   return g_array_funcs.toPHPArrayIntishCast[kind()](this, copy);
 }
 
-inline ArrayData* ArrayData::toShape(bool copy) {
-  return g_array_funcs.toShape[kind()](this, copy);
-}
-
 inline ArrayData* ArrayData::toDict(bool copy) {
   return g_array_funcs.toDict[kind()](this, copy);
 }
@@ -105,9 +101,6 @@ inline bool ArrayData::isVectorData() const {
 
 inline void ArrayData::release() noexcept {
   assertx(!hasMultipleRefs());
-  if (RuntimeOption::EvalArrayProvenance) {
-    arrprov::clearTag(this);
-  }
   g_array_funcs.release[kind()](this);
   AARCH64_WALKABLE_FRAME();
 }

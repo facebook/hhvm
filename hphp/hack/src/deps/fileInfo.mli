@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -24,63 +24,84 @@ open Prim_defs
 (*****************************************************************************)
 
 type mode =
-  | Mphp          (* Do the best you can to support legacy PHP *)
-  | Mdecl         (* just declare signatures, don't check anything *)
-  | Mstrict       (* check everything! *)
-  | Mpartial      (* Don't fail if you see a function/class you don't know *)
+  | Mphp (* Do the best you can to support legacy PHP *)
+  | Mdecl (* just declare signatures, don't check anything *)
+  | Mstrict (* check everything! *)
+  | Mpartial (* Don't fail if you see a function/class you don't know *)
   | Mexperimental (* Experimental mode - strict mode plus experimental features *)
 [@@deriving show]
 
 val is_strict : mode -> bool
+
 val parse_mode : string -> mode option
+
 val string_of_mode : mode -> string
 
 (*****************************************************************************)
 (* The record produced by the parsing phase. *)
 (*****************************************************************************)
 
-type name_type = Fun | Class | Typedef | Const [@@deriving show]
-type pos = Full of Pos.t | File of name_type * Relative_path.t [@@deriving show]
-type id = pos  * string [@@deriving show]
-val pos_full : (Pos.t * string) -> id
+type name_type =
+  | Fun
+  | Class
+  | Typedef
+  | Const
+[@@deriving show]
+
+type pos =
+  | Full of Pos.t
+  | File of name_type * Relative_path.t
+[@@deriving show]
+
+type id = pos * string [@@deriving show]
+
+val pos_full : Pos.t * string -> id
+
 val get_pos_filename : pos -> Relative_path.t
 
 type t = {
-  hash : OpaqueDigest.t option;
-  file_mode : mode option;
-  funs : id list;
-  classes : id list;
-  typedefs : id list;
-  consts : id list;
-  comments : (Pos.t * comment) list option;
-} [@@deriving show]
+  hash: OpaqueDigest.t option;
+  file_mode: mode option;
+  funs: id list;
+  classes: id list;
+  typedefs: id list;
+  consts: id list;
+  comments: (Pos.t * comment) list option;
+}
+[@@deriving show]
 
-val empty_t: t
+val empty_t : t
 
 (*****************************************************************************)
 (* The simplified record used after parsing. *)
 (*****************************************************************************)
 type names = {
-  n_funs    : SSet.t;
-  n_classes : SSet.t;
-  n_types   : SSet.t;
-  n_consts  : SSet.t;
+  n_funs: SSet.t;
+  n_classes: SSet.t;
+  n_types: SSet.t;
+  n_consts: SSet.t;
 }
-
 
 (*****************************************************************************)
 (* The record used in our saved state. *)
 (*****************************************************************************)
 type saved
-val empty_names: names
+
+val empty_names : names
 
 (*****************************************************************************)
 (* Functions simplifying the file information. *)
 (*****************************************************************************)
-val simplify: t -> names
-val merge_names: names -> names -> names
+val simplify : t -> names
+
+val merge_names : names -> names -> names
+
 val print_names : names -> unit
+
 val to_saved : t -> saved
+
 val from_saved : Relative_path.t -> saved -> t
+
 val saved_to_names : saved -> names
-val to_string: t -> string
+
+val to_string : t -> string

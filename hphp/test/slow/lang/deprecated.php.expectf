@@ -22,7 +22,4 @@ E_USER_DEPRECATED: fMem: message for %s/lang/deprecated.php:45
 fMem
 E_USER_DEPRECATED: fMem: message for %s/lang/deprecated.php:45
 
-= builtin =
-E_DEPRECATED: ereg: As of PHP 5.3.0, preg_match is suggested instead for %s/lang/deprecated.php:67
-
 Done

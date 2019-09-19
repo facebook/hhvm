@@ -78,13 +78,6 @@ struct IRGS {
   TransID profTransID{kInvalidTransID};
 
   /*
-   * Some information is only passed through the nearly-dead
-   * NormalizedInstruction structure.  Don't add new uses since we're gradually
-   * removing this (the long, ugly name is deliberate).
-   */
-  const NormalizedInstruction* currentNormalizedInstruction{nullptr};
-
-  /*
    * True if we're on the first HHBC instruction that will be executed
    * for this instruction.  This is the first bytecode instruction in
    * either the region entry block or any other block in its

@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
@@ -8,12 +8,11 @@
 open Core_kernel
 
 let go_ctx
-    ~(ctx: ServerIdeContext.t)
-    ~(entry: ServerIdeContext.entry)
-    ~(line: int)
-    ~(char: int)
-    : ServerCommandTypes.Go_to_definition.result =
-  let results = ServerIdentifyFunction.go_ctx ~ctx ~entry ~line ~char in
+    ~(ctx : Provider_context.t)
+    ~(entry : Provider_context.entry)
+    ~(line : int)
+    ~(column : int) : ServerCommandTypes.Go_to_definition.result =
+  let results = ServerIdentifyFunction.go_ctx ~ctx ~entry ~line ~column in
   let results = List.filter_map results ~f:Utils.unwrap_snd in
   (* What's it like when we return multiple definitions? For instance, if you ask *)
   (* for the definition of "new C()" then we've now got the definition of the     *)
@@ -27,48 +26,62 @@ let go_ctx
   (* and a derived class "C" without a constructor, and click on "new C()", then  *)
   (* Typescript and VS Code will pop up a little window with both options. This   *)
   (* seems like a reasonable compromise, so Hack should do the same.              *)
-  let cls = List.fold results ~init:`None ~f:begin fun class_opt (occ, _) ->
-    match class_opt, SymbolOccurrence.enclosing_class occ with
-    | `None, Some c -> `Single c
-    | `Single c, Some c2 when c = c2 -> `Single c
-    | `Single _, Some _ ->
-      (* Symbol occurrences for methods/properties that only exist in a base
+  let cls =
+    List.fold results ~init:`None ~f:(fun class_opt (occ, _) ->
+        match (class_opt, SymbolOccurrence.enclosing_class occ) with
+        | (`None, Some c) -> `Single c
+        | (`Single c, Some c2) when c = c2 -> `Single c
+        | (`Single _, Some _) ->
+          (* Symbol occurrences for methods/properties that only exist in a base
          class still have the derived class as their enclosing class, even
          though it doesn't explicitly override that member. Because of that, if
          we hit this case then we know that we're dealing with a union type. In
          that case, it's not really possible to do the rest of this filtration,
          since it would have to be decided on a per-class basis. *)
-      `Multiple
-    | class_opt, _ -> class_opt
-  end in
-  let results = match cls with
+          `Multiple
+        | (class_opt, _) -> class_opt)
+  in
+  let results =
+    match cls with
     | `None
-    | `Multiple -> results
+    | `Multiple ->
+      results
     | `Single _ ->
-      let open SymbolOccurrence in
-      let explicitly_defined = List.fold results ~init:[] ~f:begin fun acc (occ, def) ->
-        let cls = get_class_name occ in
-        match cls with
-        | None -> acc
-        | Some cls ->
-          if String_utils.string_starts_with def.SymbolDefinition.full_name (Utils.strip_ns cls)
-          then (occ, def) :: acc
-          else acc
-      end |> List.rev in
-      let is_result_constructor (occ, _) = is_constructor occ in
-      let has_explicit_constructor = List.exists explicitly_defined ~f:is_result_constructor in
-      let has_constructor = List.exists results ~f:is_result_constructor in
-      let has_class = List.exists results ~f:(fun (occ, _) -> is_class occ) in
-      (* If we have a constructor but it's derived, then we'd like to show both
+      SymbolOccurrence.(
+        let explicitly_defined =
+          List.fold results ~init:[] ~f:(fun acc (occ, def) ->
+              let cls = get_class_name occ in
+              match cls with
+              | None -> acc
+              | Some cls ->
+                if
+                  String_utils.string_starts_with
+                    def.SymbolDefinition.full_name
+                    (Utils.strip_ns cls)
+                then
+                  (occ, def) :: acc
+                else
+                  acc)
+          |> List.rev
+        in
+        let is_result_constructor (occ, _) = is_constructor occ in
+        let has_explicit_constructor =
+          List.exists explicitly_defined ~f:is_result_constructor
+        in
+        let has_constructor = List.exists results ~f:is_result_constructor in
+        let has_class =
+          List.exists results ~f:(fun (occ, _) -> is_class occ)
+        in
+        (* If we have a constructor but it's derived, then we'd like to show both
          the class and the constructor. If the constructor is explicitly
          defined, though, we'd like to filter the class out and only show the
          constructor. *)
-      if has_constructor && has_class && has_explicit_constructor
-      then List.filter results ~f:is_result_constructor
-      else results
-    in
-    List.map results ~f:(fun (occurrence, definition) ->
+        if has_constructor && has_class && has_explicit_constructor then
+          List.filter results ~f:is_result_constructor
+        else
+          results)
+  in
+  List.map results ~f:(fun (occurrence, definition) ->
       let occurrence = SymbolOccurrence.to_absolute occurrence in
       let definition = SymbolDefinition.to_absolute definition in
-      (occurrence, definition)
-    )
+      (occurrence, definition))

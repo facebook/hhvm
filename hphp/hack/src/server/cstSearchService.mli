@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2018, Facebook, Inc.
  * All rights reserved.
  *
@@ -8,28 +8,28 @@
  *)
 
 open Core_kernel
+
 type pattern
+
 type result
 
-val compile_pattern:
-  Hh_json.json ->
-  (pattern, string) Result.t
+val compile_pattern : Hh_json.json -> (pattern, string) Result.t
 (** Compile JSON input into a pattern that can be searched for. *)
 
-val result_to_json: sort_results:bool -> result option -> Hh_json.json
+val result_to_json : sort_results:bool -> result option -> Hh_json.json
 (** Convert the result of a search into JSON output that can be sent back to the
     user. *)
 
-val go:
+val go :
   ServerEnv.genv ->
   ServerEnv.env ->
   sort_results:bool ->
-  files_to_search:string list option  ->
+  files_to_search:string list option ->
   Hh_json.json ->
   (Hh_json.json, string) Result.t
 (** Search for the given pattern across the given set of files. *)
 
-val search:
+val search :
   TypecheckerOptions.t ->
   Relative_path.t ->
   FileInfo.t ->

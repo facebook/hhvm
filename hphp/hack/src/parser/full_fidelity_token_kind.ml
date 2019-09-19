@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
@@ -47,7 +47,6 @@ type t =
   | Darray
   | Default
   | Define
-  | Destruct
   | Dict
   | Do
   | Double
@@ -265,7 +264,6 @@ let from_string keyword ~only_reserved =
   | "darray"          when not only_reserved -> Some Darray
   | "default"                                -> Some Default
   | "define"          when not only_reserved -> Some Define
-  | "__destruct"                             -> Some Destruct
   | "dict"            when not only_reserved -> Some Dict
   | "do"                                     -> Some Do
   | "double"          when not only_reserved -> Some Double
@@ -457,7 +455,6 @@ let to_string kind =
   | Darray                        -> "darray"
   | Default                       -> "default"
   | Define                        -> "define"
-  | Destruct                      -> "__destruct"
   | Dict                          -> "dict"
   | Do                            -> "do"
   | Double                        -> "double"

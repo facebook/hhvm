@@ -42,32 +42,12 @@ namespace HPHP {
 namespace Verifier {
 
 /**
- * State for one entry on the FPI stack which corresponds to one call-site
- * in progress.
- */
-struct FpiState {
-  Offset fpush;   // offset of fpush (can get num_params from this)
-  int stkmin;     // stklen before FPush repushes args
-  bool operator==(const FpiState& s) const {
-    return fpush == s.fpush && stkmin == s.stkmin;
-  }
-  bool operator!=(const FpiState& s) const {
-    return !(*this == s);
-  }
-};
-
-/**
  * Facts about a Func's current frame at various program points
  */
 struct State {
   FlavorDesc* stk{};  // Evaluation stack.
-  FpiState* fpi{};    // FPI stack.
   bool* iters{};      // defined/not-defined state of each iter var.
-  boost::dynamic_bitset<> clsRefSlots; // init state of class-ref slots
-  boost::dynamic_bitset<> writtenByClsRefGetTSSlots; // cls-ref slots written
-                                                     // by ClsRefGetTS
   int stklen{0};       // length of evaluation stack.
-  int fpilen{0};       // length of FPI stack.
   bool mbr_live{false};    // liveness of member base register
   folly::Optional<MOpMode> mbr_mode; // mode of member base register
   boost::dynamic_bitset<> silences; // set of silenced local variables
@@ -128,11 +108,8 @@ struct FuncChecker {
   bool checkOutputs(State* cur, PC, Block* b);
   bool checkRxOp(State* cur, PC, Op);
   bool checkSig(PC pc, int len, const FlavorDesc* args, const FlavorDesc* sig);
-  bool checkEHStack(const EHEnt&, Block* b);
   bool checkTerminal(State* cur, PC pc);
-  bool checkLegacyFCall(State* cur, PC pc);
   bool checkIter(State* cur, PC pc);
-  bool checkClsRefSlots(State* cur, PC pc);
   bool checkIterBreak(State* cur, PC pc);
   bool checkLocal(PC pc, int val);
   bool checkString(PC pc, Id id);
@@ -144,7 +121,6 @@ struct FuncChecker {
   std::string stateToString(const State& cur) const;
   std::string sigToString(int len, const FlavorDesc* sig) const;
   std::string stkToString(int len, const FlavorDesc* args) const;
-  std::string fpiToString(const FpiState&) const;
   std::string iterToString(const State& cur) const;
   std::string slotsToString(const boost::dynamic_bitset<>&) const;
   void copyState(State* to, const State* from);
@@ -153,11 +129,9 @@ struct FuncChecker {
   Offset offset(PC pc) const { return pc - unit()->bc(); }
   PC at(Offset off) const { return unit()->bc() + off; }
   int maxStack() const { return m_func->maxStackCells; }
-  int maxFpi() const { return m_func->fpitab.size(); }
   int numIters() const { return m_func->numIterators(); }
   int numLocals() const { return m_func->numLocals(); }
   int numParams() const { return m_func->params.size(); }
-  int numClsRefSlots() const { return m_func->numClsRefSlots(); }
   const UnitEmitter* unit() const { return &m_func->ue(); }
   IterKindIdTable iterBreakIds(PC& pc) const;
 
@@ -240,7 +214,6 @@ bool checkFunc(const FuncEmitter* func, ErrorMode mode) {
     if (!func->pce()) {
       printf("  FuncId %d\n", func->id());
     }
-    printFPI(func);
   }
   FuncChecker v(func, mode);
   return v.checkOffsets() &&
@@ -283,7 +256,6 @@ Offset findSection(SectionMap& sections, Offset off) {
 bool FuncChecker::checkOffsets() {
   bool ok = true;
   assertx(unit()->bcPos() >= 0);
-  PC bc = unit()->bc();
   Offset base = m_func->base;
   Offset past = m_func->past;
   checkRegion("func", base, past, "unit", 0, unit()->bcPos(), false);
@@ -295,12 +267,6 @@ bool FuncChecker::checkOffsets() {
       ok &= checkOffset("dv-entry", param.funcletOff, "func body", base,
                         past);
     }
-  }
-  // Every FPI region must be contained within the primary body
-  for (auto& fpi : m_func->fpitab) {
-    Offset fpi_base = fpiBase(fpi, bc);
-    Offset fpi_past = fpiPast(fpi, bc);
-    ok &= checkRegion("fpi", fpi_base, fpi_past, "func", base, past);
   }
   return ok;
 }
@@ -422,12 +388,13 @@ bool FuncChecker::checkImmSLA(PC& pc, PC const /*instr*/) {
 
 bool FuncChecker::checkImmI32LA(PC& pc, PC const instr) {
   auto inst_copy = instr;
-  decode_op(inst_copy);
-  auto const nargs = decode_iva(inst_copy);
+  auto const op = decode_op(inst_copy);
+  assertx(isFCall(op));
+  auto const fca = decodeFCallArgs(op, inst_copy);
   auto const count = decode_iva(pc);
   for (int i = 0; i < count; ++i) {
     auto const num = decode_raw<uint32_t>(pc);
-    if (nargs <= num) {
+    if (fca.numArgs <= num) {
       error("invalid argument number (%i) in inout argument vector\n", i);
       return false;
     }
@@ -506,24 +473,6 @@ bool FuncChecker::checkImmIA(PC& pc, PC const instr) {
   auto const k = decode_iva(pc);
   if (k >= numIters()) {
     error("invalid iterator variable id %d at %d\n", k, offset(instr));
-    return false;
-  }
-  return true;
-}
-
-bool FuncChecker::checkImmCAR(PC& pc, PC const instr) {
-  auto const slot = decode_iva(pc);
-  if (slot >= numClsRefSlots()) {
-    error("invalid class-ref slot %d at %d\n", slot, offset(instr));
-    return false;
-  }
-  return true;
-}
-
-bool FuncChecker::checkImmCAW(PC& pc, PC const instr) {
-  auto const slot = decode_iva(pc);
-  if (slot >= numClsRefSlots()) {
-    error("invalid class-ref slot %d at %d\n", slot, offset(instr));
     return false;
   }
   return true;
@@ -678,6 +627,7 @@ bool FuncChecker::checkImmediates(const char* name, PC const instr) {
 #define THREE(a, b, c) TWO(a, b); ok &= checkImm##c(pc, instr)
 #define FOUR(a, b, c, d) THREE(a, b, c); ok &= checkImm##d(pc, instr)
 #define FIVE(a, b, c, d, e) FOUR(a, b, c, d); ok &= checkImm##e(pc, instr)
+#define SIX(a, b, c, d, e, f) FIVE(a, b, c, d, e); ok &= checkImm##f(pc, instr)
 #define O(name, imm, in, out, flags) case Op::name: imm; break;
       OPCODES
 #undef NA
@@ -687,6 +637,7 @@ bool FuncChecker::checkImmediates(const char* name, PC const instr) {
 #undef THREE
 #undef FOUR
 #undef FIVE
+#undef SIX
 #undef O
     }
   } catch (const unknown_length&) {
@@ -743,10 +694,9 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   static const FlavorDesc inputSigs[][kMaxHhbcImms] = {
   #define NOV { },
   #define CUMANY { },
-  #define CVUMANY { },
-  #define FPUSH(nin, nobj) { nobj ? CV : UV },
+  #define CMANY_U3 { },
+  #define CALLNATIVE { },
   #define FCALL(nin, nobj) { nobj ? CV : UV },
-  #define FCALLO { },
   #define CMANY { },
   #define SMANY { },
   #define ONE(a) { a },
@@ -754,6 +704,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #define THREE(a,b,c) { c, b, a },
   #define FOUR(a,b,c,d) { d, c, b, a },
   #define FIVE(a,b,c,d,e) { e, d, c, b, a },
+  #define SIX(a,b,c,d,e,f) { f, e, d, c, b, a },
   #define MFINAL { },
   #define C_MFINAL(n) { },
   #define O(name, imm, pop, push, flags) pop
@@ -762,12 +713,12 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #undef MFINAL
   #undef C_MFINAL
   #undef CUMANY
-  #undef CVUMANY
-  #undef FPUSH
+  #undef CMANY_U3
+  #undef CALLNATIVE
   #undef FCALL
-  #undef FCALLO
   #undef CMANY
   #undef SMANY
+  #undef SIX
   #undef FIVE
   #undef FOUR
   #undef THREE
@@ -786,30 +737,15 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
       m_tmp_sig[i] = CV;
     }
     return m_tmp_sig;
-  case Op::FPushFunc:
-  case Op::FPushFuncD:
-  case Op::FPushFuncRD:
-  case Op::FPushClsMethod:
-  case Op::FPushClsMethodRD:
-  case Op::FPushClsMethodS:
-  case Op::FPushClsMethodSD:
-  case Op::FPushClsMethodSRD:
-  case Op::FPushClsMethodD: {  // IVA..., FPUSH, FPUSH
-    auto const numArgs = getImm(pc, 0).u_IVA;
-    auto const numPops = instrNumPops(pc);
-    auto idx = 0;
-    m_tmp_sig[idx++] = inputSigs[size_t(peek_op(pc))][0];
-    m_tmp_sig[idx++] = UV;
-    m_tmp_sig[idx++] = UV;
-    for (int i = 0; i < numArgs; ++i) m_tmp_sig[idx++] = CVV;
-    assertx(idx == numPops || idx + 1 == numPops);
-    while (idx < numPops) m_tmp_sig[idx++] = CV;
-    return m_tmp_sig;
-  }
+  case Op::FCallClsMethod:
+  case Op::FCallClsMethodD:
+  case Op::FCallClsMethodS:
+  case Op::FCallClsMethodSD:
   case Op::FCallCtor:
+  case Op::FCallFunc:
+  case Op::FCallFuncD:
   case Op::FCallObjMethod:
-  case Op::FCallObjMethodD:
-  case Op::FCallObjMethodRD: {  // FCA..., FCALL, FCALL
+  case Op::FCallObjMethodD: {  // FCA..., FCALL, FCALL
     auto const fca = getImm(pc, 0).u_FCA;
     auto const numPops = instrNumPops(pc);
     assertx(fca.numRets != 0);
@@ -820,26 +756,25 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
     m_tmp_sig[idx++] = UV;
     for (int i = 0; i < fca.numArgs; ++i) m_tmp_sig[idx++] = CVV;
     if (fca.hasUnpack()) m_tmp_sig[idx++] = CV;
-    assertx(idx == numPops || idx + 1 == numPops);
+    if (fca.hasGenerics()) m_tmp_sig[idx++] = CV;
+    assertx(idx == numPops || idx + 1 == numPops || idx + 2 == numPops);
     while (idx < numPops) m_tmp_sig[idx++] = CV;
     return m_tmp_sig;
   }
-  case Op::FCall: {      // THREE(FCA,SA,SA), FCALLO, FCALL
-    auto const fca = getImm(pc, 0).u_FCA;
-    assertx(fca.numRets != 0);
-    auto idx = 0;
-    for (int i = 0; i < fca.numRets - 1; ++i) m_tmp_sig[idx++] = UV;
-    for (int i = 0; i < fca.numArgs; ++i) m_tmp_sig[idx++] = CVV;
-    if (fca.hasUnpack()) m_tmp_sig[idx++] = CV;
-    assertx(idx == instrNumPops(pc));
-    return m_tmp_sig;
-  }
-  case Op::FCallBuiltin: //TWO(IVA, SA), CVUMANY,  ONE(CV)
-    for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
+  case Op::FCallBuiltin: { //TWO(IVA, SA), CALLNATIVE,  CALLNATIVE
+    auto const nargs = getImm(pc, 0).u_IVA;
+    auto const nout  = getImm(pc, 2).u_IVA;
+    assertx(instrNumPops(pc) == nargs + nout);
+    for (int i = 0; i < nout; ++i) {
+      m_tmp_sig[i] = UV;
+    }
+    for (int i = nout; i < nargs + nout; i++) {
       m_tmp_sig[i] = CVUV;
     }
     return m_tmp_sig;
+  }
   case Op::CreateCl:  // TWO(IVA,SA),  CUMANY,   ONE(CV)
+  case Op::PopFrame:  // ONE(IVA),     CMANY_U3, CMANY
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = CUV;
     }
@@ -852,6 +787,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   case Op::NewKeysetArray:  // ONE(IVA),     CMANY,   ONE(CV)
   case Op::NewVArray:       // ONE(IVA),     CMANY,   ONE(CV)
   case Op::NewRecord:       // TWO(SA,VSA),  SMANY,   ONE(CV)
+  case Op::NewRecordArray:  // TWO(SA,VSA),  SMANY,   ONE(CV)
   case Op::ConcatN:         // ONE(IVA),     CMANY,   ONE(CV)
   case Op::CombineAndResolveTypeStruct:
                             // ONE(IVA),     CMANY,   ONE(CV)
@@ -921,11 +857,7 @@ bool FuncChecker::checkMemberKey(State* cur, PC pc, Op op) {
 
 bool FuncChecker::checkInputs(State* cur, PC pc, Block* b) {
   auto const numPops = instrNumPops(pc);
-  auto fpiAdj = isLegacyFCall(peek_op(pc)) ? 2 : 1;
-  int min = cur->fpilen > fpiAdj - 1
-    ? cur->fpi[cur->fpilen - fpiAdj].stkmin
-    : 0;
-  if (numPops > 0 && cur->stklen - numPops < min) {
+  if (numPops > cur->stklen) {
     reportStkUnderflow(b, *cur, pc);
     cur->stklen = 0;
     return false;
@@ -984,15 +916,6 @@ bool FuncChecker::checkInputs(State* cur, PC pc, Block* b) {
     cur->mbr_mode = op_mode;
   }
 
-  if (cur->fpilen > 0 && isJmp(op)) {
-    auto offset = getImm(pc, 0).u_BA;
-    if (offset < 0) {
-      error("FPI contains backwards jump at %s\n",
-            opcodeToName(op));
-      ok = false;
-    }
-  }
-
   return ok;
 }
 
@@ -1003,43 +926,8 @@ bool FuncChecker::checkTerminal(State* cur, PC pc) {
              cur->stklen);
       return false;
     }
-    if (cur->clsRefSlots.any() || cur->writtenByClsRefGetTSSlots.any()) {
-      ferror("all class-ref slots must be uninitialized after Ret*; "
-             "got [{}][{}]\n",
-             slotsToString(cur->clsRefSlots),
-             slotsToString(cur->writtenByClsRefGetTSSlots));
-      return false;
-    }
   }
   return true;
-}
-
-bool FuncChecker::checkLegacyFCall(State* cur, PC pc) {
-  assertx(isLegacyFCall(peek_op(pc)));
-
-  if (cur->fpilen <= 0) {
-    error("%s", "cannot access empty FPI stack\n");
-    return false;
-  }
-  bool ok = true;
-  FpiState& fpi = cur->fpi[cur->fpilen - 1];
-  --cur->fpilen;
-  auto const fca = getImm(pc, 0).u_FCA;
-  int call_params = fca.numArgsInclUnpack();
-  int push_params = getImmIva(at(fpi.fpush));
-  if (call_params != push_params) {
-    error("FCall* param_count (%d) doesn't match FPush* (%d)\n",
-           call_params, push_params);
-    ok = false;
-  }
-  if (cur->stklen != fpi.stkmin - fca.numRets + 1) {
-    error("wrong # of params were passed; got %d expected %d\n",
-          push_params + cur->stklen + fca.numRets - 1 - fpi.stkmin,
-          push_params);
-    ok = false;
-  }
-
-  return ok;
 }
 
 // Check that the initialization state of the iterator referenced by the current
@@ -1069,36 +957,6 @@ bool FuncChecker::checkIter(State* cur, PC const pc) {
   return ok;
 }
 
-std::array<int32_t, 4> getReadClsRefSlots(PC pc) {
-  std::array<int32_t, 4> ret = { -1, -1, -1, -1 };
-  size_t index = 0;
-
-  auto const op = peek_op(pc);
-  auto const numImmeds = numImmediates(op);
-  for (int i = 0; i < numImmeds; ++i) {
-    if (immType(op, i) == ArgType::CAR) {
-      assertx(index < ret.size());
-      ret[index++] = getImm(pc, i).u_CAR;
-    }
-  }
-  return ret;
-}
-
-std::array<int32_t, 4> getWrittenClsRefSlots(PC pc) {
-  std::array<int32_t, 4> ret = { -1, -1, -1, -1 };
-  size_t index = 0;
-
-  auto const op = peek_op(pc);
-  auto const numImmeds = numImmediates(op);
-  for (int i = 0; i < numImmeds; ++i) {
-    if (immType(op, i) == ArgType::CAW) {
-      assertx(index < ret.size());
-      ret[index++] = getImm(pc, i).u_CAW;
-    }
-  }
-  return ret;
-}
-
 /* Returns a set of the immediates to op that are a local id */
 std::set<int> localImmediates(Op op) {
   std::set<int> imms;
@@ -1109,6 +967,7 @@ std::set<int> localImmediates(Op op) {
 #define THREE(a, b, c) TWO(a, b) c(2)
 #define FOUR(a, b, c, d) THREE(a, b, c) d(3)
 #define FIVE(a, b, c, d, e) FOUR(a, b, c, d) e(4)
+#define SIX(a, b, c, d, e, f) FIVE(a, b, c, d, f) f(5)
 #define LA(n) imms.insert(n);
 #define MA(n)
 #define BLA(n)
@@ -1118,8 +977,6 @@ std::set<int> localImmediates(Op op) {
 #define IVA(n)
 #define I64A(n)
 #define IA(n)
-#define CAR(n)
-#define CAW(n)
 #define DA(n)
 #define SA(n)
 #define AA(n)
@@ -1139,6 +996,7 @@ std::set<int> localImmediates(Op op) {
 #undef THREE
 #undef FOUR
 #undef FIVE
+#undef SIX
 #undef LA
 #undef MA
 #undef BLA
@@ -1148,8 +1006,6 @@ std::set<int> localImmediates(Op op) {
 #undef IVA
 #undef I64A
 #undef IA
-#undef CAR
-#undef CAW
 #undef DA
 #undef SA
 #undef AA
@@ -1164,37 +1020,6 @@ std::set<int> localImmediates(Op op) {
 #undef O
   }
   return imms;
-}
-
-bool FuncChecker::checkClsRefSlots(State* cur, PC const pc) {
-  bool ok = true;
-
-  auto const op = peek_op(pc);
-
-  for (auto const read : getReadClsRefSlots(pc)) {
-    if (read < 0) continue;
-    if (!cur->clsRefSlots[read]) {
-      ferror("{} trying to read from uninitialized class-ref slot {} at {}\n",
-             opcodeToName(op), read, offset(pc));
-      ok = false;
-    }
-    cur->clsRefSlots[read] = false;
-    cur->writtenByClsRefGetTSSlots[read] = false;
-  }
-  for (auto const write : getWrittenClsRefSlots(pc)) {
-    if (write < 0) continue;
-    if (cur->clsRefSlots[write]) {
-      ferror(
-        "{} trying to write to already initialized class-ref slot {} at {}\n",
-        opcodeToName(op), write, offset(pc)
-      );
-      ok = false;
-    }
-    cur->clsRefSlots[write] = true;
-    cur->writtenByClsRefGetTSSlots[write] = op == Op::ClsRefGetTS;
-  }
-
-  return ok;
 }
 
 bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
@@ -1359,12 +1184,26 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
       if (op == Op::AssertRATL) break;
     }
     case Op::BaseGC:
-    case Op::BaseSC:
     case Op::BaseC: {
       auto const stackIdx = getImm(pc, 0).u_IVA;
       if (stackIdx >= cur->stklen) {
         ferror("{} indexes ({}) past end of stack ({})\n", opcodeToName(op),
                stackIdx, cur->stklen);
+        return false;
+      }
+      break;
+    }
+    case Op::BaseSC: {
+      auto const keyIdx = getImm(pc, 0).u_IVA;
+      auto const clsIdx = getImm(pc, 1).u_IVA;
+      if (keyIdx >= cur->stklen) {
+        ferror("{} indexes key index ({}) past end of stack ({})\n",
+               opcodeToName(op), keyIdx, cur->stklen);
+        return false;
+      }
+      if (clsIdx >= cur->stklen) {
+        ferror("{} indexes class index ({}) past end of stack ({})\n",
+               opcodeToName(op), clsIdx, cur->stklen);
         return false;
       }
       break;
@@ -1413,11 +1252,6 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
         ferror("{} may only appear in an async function\n", opcodeToName(op));
         return false;
       }
-      if (cur->fpilen != 0) {
-        ferror("{} may not appear in the middle of an FPI region\n",
-               opcodeToName(op));
-        return false;
-      }
       if (cur->stklen != instrNumPops(pc)) {
         ferror("{} may not be used with non-empty stack\n", opcodeToName(op));
         return false;
@@ -1460,20 +1294,6 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
                     "IVA should be unsigned");
       if (elems == 0 || elems > ArrayData::MaxElemsOnStack) {
         ferror("{} has an illegal element count\n", opcodeToName(op));
-        return false;
-      }
-      break;
-    }
-
-    case Op::NewObj: {
-      auto new_pc = pc;
-      decode_op(new_pc);
-      auto const slot = decode_iva(new_pc);
-      auto const has_generic_op = decode_oa<HasGenericsOp>(new_pc);
-      if (has_generic_op == HasGenericsOp::MaybeGenerics &&
-          !cur->writtenByClsRefGetTSSlots[slot]) {
-        ferror("NewObj uses MaybeGenerics flavor but a cls-ref slot that "
-               "was not written by ClsRefGetTS\n");
         return false;
       }
       break;
@@ -1524,22 +1344,25 @@ bool FuncChecker::checkIterBreak(State* cur, PC pc) {
 bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   static const FlavorDesc outputSigs[][kMaxHhbcImms] = {
   #define NOV { },
-  #define FPUSH { },
+  #define CMANY { },
   #define FCALL { },
+  #define CALLNATIVE { },
   #define ONE(a) { a },
   #define TWO(a,b) { a, b },
   #define THREE(a,b,c) { a, b, c },
   #define FOUR(a,b,c,d) { a, b, c, d },
   #define FIVE(a,b,c,d,e) { a, b, c, d, e },
+  #define SIX(a,b,c,d,e,f) { a, b, c, d, e, f },
   #define O(name, imm, pop, push, flags) push
     OPCODES
   #undef O
+  #undef SIX
   #undef FIVE
   #undef FOUR
   #undef THREE
   #undef TWO
   #undef ONE
-  #undef FPUSH
+  #undef CMANY
   #undef FCALL
   #undef NOV
   };
@@ -1549,22 +1372,9 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   if (cur->stklen + pushes > maxStack()) reportStkOverflow(b, *cur, pc);
   FlavorDesc *outs = &cur->stk[cur->stklen];
   cur->stklen += pushes;
-  if (op == Op::BaseSC) {
-    if (pushes == 1) outs[0] = outs[1];
-  } else if (isLegacyFPush(op)) {
-    for (int i = 0; i < pushes; ++i) {
-      outs[i] = outs[i + 3];
-    }
-
-    if (cur->fpilen >= maxFpi()) {
-      error("%s", "more FPush* instructions than FPI regions\n");
-      return false;
-    }
-    FpiState& fpi = cur->fpi[cur->fpilen];
-    cur->fpilen++;
-    fpi.fpush = offset(pc);
-    fpi.stkmin = cur->stklen - pushes;
-  } else if (hasFCallEffects(op)) {
+  if (op == OpPopFrame) {
+    for (int i = 0; i < pushes; ++i) outs[i] = outs[i + 3];
+  } else if (isFCall(op) || op == OpFCallBuiltin) {
     for (int i = 0; i < pushes; ++i) {
       outs[i] = CV;
     }
@@ -1585,13 +1395,6 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   } else if (isMemberFinalOp(op)) {
     cur->mbr_live = false;
     cur->mbr_mode.clear();
-  }
-
-  if (cur->fpilen > 0 && (op == Op::RetC || op == Op::RetCSuspended ||
-                          op == Op::RetM)) {
-    error("%s instruction encountered inside of FPI region\n",
-          opcodeToName(op));
-    ok = false;
   }
 
   return ok;
@@ -1628,6 +1431,7 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::NewLikeArrayL:
     case Op::NewPackedArray:
     case Op::NewRecord:
+    case Op::NewRecordArray:
     case Op::NewStructArray:
     case Op::NewStructDArray:
     case Op::NewStructDict:
@@ -1689,7 +1493,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::CastDouble:
     case Op::CastString:
     case Op::CastArray:
-    case Op::CastObject:
     case Op::CastDict:
     case Op::CastKeyset:
     case Op::CastVec:
@@ -1707,7 +1510,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::ThrowAsTypeStructException:
     case Op::CombineAndResolveTypeStruct:
     case Op::RecordReifiedGeneric:
-    case Op::ReifiedName:
     case Op::CheckReifiedGenericMismatch:
     case Op::VerifyOutType:
     case Op::VerifyParamType:
@@ -1725,6 +1527,7 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::PopC:
     case Op::PopU:
     case Op::PopU2:
+    case Op::PopFrame:
     case Op::PopL:
     case Op::CGetL:
     case Op::CGetQuietL:
@@ -1749,14 +1552,13 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::InitThisLoc:
       return true;
 
-    // classref and related
+    // classes and related
     case Op::Self:
     case Op::Parent:
     case Op::LateBoundCls:
-    case Op::ClsRefGetC:
-    case Op::ClsRefGetTS:
-    case Op::DiscardClsRef:
-    case Op::ClsRefName:
+    case Op::ClassGetC:
+    case Op::ClassGetTS:
+    case Op::ClassName:
     case Op::OODeclExists:
       return true;
 
@@ -1790,23 +1592,19 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
       return true;
 
     // function calling and object construction
-    case Op::FPushFunc:
-    case Op::FPushFuncD:
-    case Op::FPushFuncRD:
-    case Op::FPushClsMethod:
-    case Op::FPushClsMethodD:
-    case Op::FPushClsMethodRD:
-    case Op::FPushClsMethodS:
-    case Op::FPushClsMethodSD:
-    case Op::FPushClsMethodSRD:
-    case Op::FCall:
     case Op::FCallBuiltin:
+    case Op::FCallClsMethod:
+    case Op::FCallClsMethodD:
+    case Op::FCallClsMethodS:
+    case Op::FCallClsMethodSD:
     case Op::FCallCtor:
+    case Op::FCallFunc:
+    case Op::FCallFuncD:
     case Op::FCallObjMethod:
     case Op::FCallObjMethodD:
-    case Op::FCallObjMethodRD:
     case Op::NativeImpl:
     case Op::NewObj:
+    case Op::NewObjR:
     case Op::NewObjD:
     case Op::NewObjRD:
     case Op::NewObjS:
@@ -2059,29 +1857,17 @@ FuncChecker::slotsToString(const boost::dynamic_bitset<>& slots) const {
 
 std::string FuncChecker::stateToString(const State& cur) const {
   return folly::sformat(
-    "{}{}[{}][{}]",
+    "{}{}",
     iterToString(cur),
-    stkToString(cur.stklen, cur.stk),
-    slotsToString(cur.clsRefSlots),
-    slotsToString(cur.writtenByClsRefGetTSSlots)
+    stkToString(cur.stklen, cur.stk)
   );
-}
-
-std::string FuncChecker::fpiToString(const FpiState& fpi) const {
-  std::stringstream out;
-  out << '(' << fpi.fpush << ':' << fpi.stkmin << ')';
-  return out.str();
 }
 
 void FuncChecker::initState(State* s) {
   s->stk = new (m_arena) FlavorDesc[maxStack()];
-  s->fpi = new (m_arena) FpiState[maxFpi()];
   s->iters = new (m_arena) bool[numIters()];
   for (int i = 0, n = numIters(); i < n; ++i) s->iters[i] = false;
-  s->clsRefSlots.resize(numClsRefSlots());
-  s->writtenByClsRefGetTSSlots.resize(numClsRefSlots());
   s->stklen = 0;
-  s->fpilen = 0;
   s->mbr_live = false;
   s->mbr_mode.clear();
   s->silences.clear();
@@ -2095,12 +1881,8 @@ void FuncChecker::copyState(State* to, const State* from) {
   assertx(from->stk);
   if (!to->stk) initState(to);
   memcpy(to->stk, from->stk, from->stklen * sizeof(*to->stk));
-  memcpy(to->fpi, from->fpi, from->fpilen * sizeof(*to->fpi));
   memcpy(to->iters, from->iters, numIters() * sizeof(*to->iters));
-  to->clsRefSlots = from->clsRefSlots;
-  to->writtenByClsRefGetTSSlots = from->writtenByClsRefGetTSSlots;
   to->stklen = from->stklen;
-  to->fpilen = from->fpilen;
   to->mbr_live = from->mbr_live;
   to->mbr_mode = from->mbr_mode;
   to->silences = from->silences;
@@ -2110,27 +1892,18 @@ void FuncChecker::copyState(State* to, const State* from) {
 }
 
 bool FuncChecker::checkExnEdge(State cur, Block* b) {
-  // Reachable catch blocks have just the exception on the stack and
-  // non-initialized class-ref slots. Checking an edge to the catch block
-  // right before every instruction is unnecessary since not every instruction
-  // can throw; there is room for improvement here if we want to note in the
+  // Reachable catch blocks have just the exception on the
+  // stack. Checking an edge to the catch block right before every
+  // instruction is unnecessary since not every instruction can throw;
+  // there is room for improvement here if we want to note in the
   // bytecode table which instructions can actually throw.
   auto save_stklen = cur.stklen;
   auto save_stktop = cur.stklen ? cur.stk[0] : CV;
-  auto save_fpilen = cur.fpilen;
-  auto save_slots = cur.clsRefSlots;
-  auto save_slots_clsrefgetts = cur.writtenByClsRefGetTSSlots;
   cur.stklen = 1;
   cur.stk[0] = CV;
-  cur.fpilen = 0;
-  cur.clsRefSlots.reset();
-  cur.writtenByClsRefGetTSSlots.reset();
   auto const ok = checkEdge(b, cur, b->exn);
   cur.stklen = save_stklen;
   cur.stk[0] = save_stktop;
-  cur.fpilen = save_fpilen;
-  cur.clsRefSlots = std::move(save_slots);
-  cur.writtenByClsRefGetTSSlots = std::move(save_slots_clsrefgetts);
   return ok;
 }
 
@@ -2167,10 +1940,8 @@ bool FuncChecker::checkBlock(State& cur, Block* b) {
     ok &= checkInputs(&cur, pc, b);
     auto const flags = instrFlags(op);
     if (flags & TF) ok &= checkTerminal(&cur, pc);
-    if (isLegacyFCall(op)) ok &= checkLegacyFCall(&cur, pc);
     if (isIter(pc)) ok &= checkIter(&cur, pc);
     if (op == Op::IterBreak) ok &= checkIterBreak(&cur, pc);
-    ok &= checkClsRefSlots(&cur, pc);
     ok &= checkOutputs(&cur, pc, b);
     if (verify_rx) ok &= checkRxOp(&cur, pc, op);
   }
@@ -2202,10 +1973,6 @@ bool FuncChecker::checkFlow() {
     m_last_rpo_id = b->rpo_id;
     copyState(&cur, &m_info[b->id].state_in);
     ok &= checkBlock(cur, b);
-  }
-  // Make sure eval stack is correct at start of each try region
-  for (auto& handler : m_func->ehtab) {
-    ok &= checkEHStack(handler, builder.at(handler.m_base));
   }
 
   return ok;
@@ -2292,16 +2059,6 @@ bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
   return ok;
 }
 
-bool FuncChecker::checkEHStack(const EHEnt& /*handler*/, Block* b) {
-  const State& state = m_info[b->id].state_in;
-  if (!state.stk) return true; // ignore unreachable block
-  if (state.fpilen != 0) {
-    error("EH region starts with non-empty FPI stack at B%d\n", b->id);
-    return false;
-  }
-  return true;
-}
-
 /**
  * Check the edge b->t, given the current state at the end of b.
  * If this is the first edge ->t we've seen, copy the state to t.
@@ -2358,20 +2115,6 @@ bool FuncChecker::checkEdge(Block* b, const State& cur, Block *t) {
       }
     }
   }
-  // Check FPI stack.
-  if (state.fpilen != cur.fpilen) {
-    error("FPI stack depth mismatch on edge B%d->B%d, "
-           "current %d target %d\n", b->id, t->id, cur.fpilen, state.fpilen);
-    return false;
-  }
-  for (int i = 0, n = cur.fpilen; i < n; i++) {
-    if (state.fpi[i] != cur.fpi[i]) {
-      error("FPI mismatch on edge B%d->B%d, current %s target %s\n",
-             b->id, t->id, fpiToString(cur.fpi[i]).c_str(),
-             fpiToString(state.fpi[i]).c_str());
-      return false;
-    }
-  }
   // Check iterator variable state.
   if (false /* TODO(#1097182): Iterator verification disabled */) {
     for (int i = 0, n = numIters(); i < n; i++) {
@@ -2382,21 +2125,6 @@ bool FuncChecker::checkEdge(Block* b, const State& cur, Block *t) {
         return false;
       }
     }
-  }
-
-  // Check class-ref slot state.
-  if (state.clsRefSlots != cur.clsRefSlots ||
-      state.writtenByClsRefGetTSSlots != cur.writtenByClsRefGetTSSlots) {
-    ferror(
-      "mismatched class-ref state on edge B{}->B{}, "
-      "current [{}][{}] target [{}][{}]\n",
-      b->id, t->id,
-      slotsToString(cur.clsRefSlots),
-      slotsToString(cur.writtenByClsRefGetTSSlots),
-      slotsToString(state.clsRefSlots),
-      slotsToString(state.writtenByClsRefGetTSSlots)
-    );
-    return false;
   }
 
   // t's state has changed, but we've already visited it, so we need to visit
@@ -2412,9 +2140,7 @@ bool FuncChecker::checkEdge(Block* b, const State& cur, Block *t) {
 }
 
 void FuncChecker::reportStkUnderflow(Block*, const State& cur, PC pc) {
-  int min = cur.fpilen > 0 ? cur.fpi[cur.fpilen - 1].stkmin : 0;
-  error("Rule2: Stack underflow at PC %d, min depth %d\n",
-         offset(pc), min);
+  error("Rule2: Stack underflow at PC %d\n", offset(pc));
 }
 
 void FuncChecker::reportStkOverflow(Block*, const State& /*cur*/, PC pc) {

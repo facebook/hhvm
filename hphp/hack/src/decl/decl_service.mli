@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -7,10 +7,13 @@
  *
  *)
 
-
 (*****************************************************************************)
 (* Starts the process *)
 (*****************************************************************************)
-val go: MultiWorker.worker list option -> bucket_size:int ->
-  Naming_table.fast -> Errors.t
-val decl_file: Errors.t -> Relative_path.t -> Errors.t
+val go :
+  MultiWorker.worker list option ->
+  bucket_size:int ->
+  Naming_table.fast ->
+  Errors.t
+
+val decl_file : Errors.t -> Relative_path.t -> Errors.t

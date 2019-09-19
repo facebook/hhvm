@@ -31,15 +31,26 @@
 #include "hphp/util/text-color.h"
 #include "hphp/util/text-util.h"
 
+#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/stats.h"
 
+#include "hphp/runtime/vm/jit/array-access-profile.h"
+#include "hphp/runtime/vm/jit/array-kind-profile.h"
 #include "hphp/runtime/vm/jit/asm-info.h"
 #include "hphp/runtime/vm/jit/block.h"
+#include "hphp/runtime/vm/jit/call-target-profile.h"
 #include "hphp/runtime/vm/jit/cfg.h"
+#include "hphp/runtime/vm/jit/cls-cns-profile.h"
+#include "hphp/runtime/vm/jit/decref-profile.h"
+#include "hphp/runtime/vm/jit/incref-profile.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/guard-constraints.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
+#include "hphp/runtime/vm/jit/meth-profile.h"
+#include "hphp/runtime/vm/jit/release-vv-profile.h"
+#include "hphp/runtime/vm/jit/switch-profile.h"
+#include "hphp/runtime/vm/jit/type-profile.h"
 
 #include "hphp/ppc64-asm/asm-ppc64.h"
 #include "hphp/ppc64-asm/dasm-ppc64.h"
@@ -108,6 +119,13 @@ struct InstAreaRange {
                (m_instRange.begin() < other.m_instRange.begin() ||
                 (m_instRange.begin() == other.m_instRange.begin() &&
                  (m_instRange.end() < other.m_instRange.end())))))));
+  }
+
+  bool isContiguous(const InstAreaRange& other) const {
+    // TODO(T52857006) - check assertions as described in D16623372
+    return (m_instRange.end() == other.m_instRange.begin() &&
+            m_area == other.m_area &&
+            m_instIdx == other.m_instIdx);
   }
 
   InstAreaRange(size_t instIdx,
@@ -190,6 +208,7 @@ dynamic getOpcode(const IRInstruction* inst,
 }
 
 dynamic getSrcs(const IRInstruction* inst) {
+  // TODO(T52857257)
   if (inst->op() == IncStat) {
     return dynamic::object("counterName",
                            Stats::g_counterNames[inst->src(0)->intVal()]);
@@ -220,7 +239,7 @@ dynamic getIRInstruction(const IRInstruction& inst,
     markerObj = dynamic(nullptr);
   } else {
     auto func = newMarker.func();
-    func->prettyPrint(mStr, Func::PrintOpts().noFpi());
+    func->prettyPrint(mStr, Func::PrintOpts());
     mStr << std::string(kIndent, ' ')
          << newMarker.show()
          << '\n';
@@ -267,11 +286,13 @@ dynamic getIRInstruction(const IRInstruction& inst,
   const Block* taken = inst.taken();
   const dynamic takenObj = taken ? getLabel(taken) : dynamic(nullptr);
 
+  auto const offset = inst.marker().bcOff() + inst.iroff();
   result.update(dynamic::merge(getOpcode(&inst, guards),
                                dynamic::object("id", id)
                                               ("taken", takenObj)
                                               ("srcs", getSrcs(&inst))
-                                              ("dsts", getDsts(&inst))));
+                                              ("dsts", getDsts(&inst))
+                                              ("offset", offset)));
   return result;
 }
 
@@ -288,10 +309,49 @@ dynamic getTCRange(const AreaIndex area,
                         ("disasm", disasmStr.str());
 }
 
+namespace {
+// TODO(T52856776) - move into AnnotationData class
+struct TargetProfileVisitor {
+  explicit TargetProfileVisitor(const TransContext& ctx) : ctx(ctx) {}
+
+  template<typename T>
+  dynamic getProfileDynamic(const rds::Profile<T>& prof,
+                            const dynamic& linkObj) {
+    return dynamic::object("offset", prof.bcOff)
+                          ("name", folly::sformat("{}", prof.name))
+                          ("data", linkObj);
+  }
+
+  dynamic operator() (const rds::Profile<jit::SwitchProfile>& prof) {
+    auto const link = rds::bind<jit::SwitchProfile, rds::Mode::Local>(prof);
+    auto const func = ctx.initSrcKey.func();
+    assert(func->contains(prof.bcOff));
+    auto const funcBCOffset = func->unit()->at(func->base() + prof.bcOff);
+    auto const bcSize = getImmVector(funcBCOffset).size();
+    return getProfileDynamic(prof, link.get()->toDynamic(bcSize));
+  }
+
+  template<typename T>
+  dynamic operator() (const rds::Profile<T>& prof) {
+    auto const link = rds::bind<T, rds::Mode::Local>(prof);
+    return getProfileDynamic(prof, link.get()->toDynamic());;
+  }
+
+  template<typename T>
+  dynamic operator() (T&&) {
+    assertx(false);
+    return dynamic();
+  }
+
+  const TransContext& ctx;
+};
+}
+
 dynamic getBlock(const Block* block,
                  const TransKind kind,
                  const AsmInfo* asmInfo,
-                 const GuardConstraints* guards) {
+                 const GuardConstraints* guards,
+                 const IRUnit& unit) {
   dynamic result = dynamic::object;
 
   result["label"] = getLabel(block);
@@ -354,6 +414,23 @@ dynamic getBlock(const Block* block,
 
     std::sort(instRanges.begin(), instRanges.end());
 
+    std::vector<InstAreaRange> collatedInstRanges;
+    for (auto const& inst : instRanges) {
+      if (collatedInstRanges.empty()) {
+        collatedInstRanges.push_back(inst);
+        continue;
+      }
+
+      auto& prevRange = collatedInstRanges.back();
+      if (prevRange.isContiguous(inst)) {
+        prevRange.m_instRange = TcaRange(prevRange.m_instRange.begin(),
+                                         inst.m_instRange.end());
+      } else {
+        collatedInstRanges.push_back(inst);
+      }
+    }
+    instRanges = collatedInstRanges;
+
     const IRInstruction* lastInst = nullptr;
     AreaIndex lastArea = AreaIndex::Main;
     bool printArea = false;
@@ -408,27 +485,46 @@ dynamic getBlock(const Block* block,
     }
   } else {
     for (auto it = block->begin(); it != block->end(); ++it) {
-      result["instrs"].push_back(getIRInstruction(*it, guards));
+      result["instrs"].push_back(dynamic::merge(getIRInstruction(*it, guards),
+                                                dynamic::object("tc_ranges",
+                                                                dynamic())));
     }
+  }
+
+  auto const& ctx = unit.context();
+
+  for (auto& inst : result["instrs"]) {
+    auto const& offset = inst["offset"].asInt();
+    dynamic profileObjs = dynamic::array;
+    for (auto const& key : unit.annotationData->profileKeys) {
+      auto const profile = boost::apply_visitor(TargetProfileVisitor(ctx), key);
+      if (profile["offset"].asInt() == offset) profileObjs.push_back(profile);
+    }
+    inst["profileData"] = profileObjs;
   }
 
   return result;
 }
 
-dynamic getOpcodeStats(const BlockList& blocks) {
-  std::array<uint32_t, kNumOpcodes> counts;
+dynamic getSrcKey(const SrcKey& sk) {
+  return dynamic::object("func", sk.func()->name()->slice())
+                        ("unit", sk.unit()->filepath()->slice())
+                        ("prologue", sk.prologue())
+                        ("offset", sk.offset())
+                        ("resumeMode", resumeModeShortName(sk.resumeMode()))
+                        ("hasThis", sk.hasThis());
+}
 
-  for (auto const block : blocks) {
-    for (auto const& inst : *block) ++counts[static_cast<size_t>(inst.op())];
-  }
-
-  dynamic result = dynamic::object;
-  for (unsigned i = 0; i < kNumOpcodes; ++i) {
-    if (counts[i] == 0) continue;
-    auto const op = safe_cast<Opcode>(i);
-    result[opcodeName(op)] = counts[i];
-  }
-  return result;
+dynamic getTransContext(const TransContext& ctx) {
+  auto const func = ctx.initSrcKey.func();
+  return dynamic::object("kind", show(ctx.kind))
+                        ("id", ctx.transID)
+                        ("optIndex", ctx.optIndex)
+                        ("srcKey", getSrcKey(ctx.initSrcKey))
+                        ("funcName", func->fullDisplayName()->data())
+                        ("sourceFile", func->filename()->data())
+                        ("startLine", func->line1())
+                        ("endLine", func->line2());
 }
 
 dynamic getUnit(const IRUnit& unit,
@@ -436,12 +532,13 @@ dynamic getUnit(const IRUnit& unit,
                 const GuardConstraints* guards) {
   dynamic result = dynamic::object;
 
-  auto const kind = unit.context().kind;
+  auto const& ctx = unit.context();
+  auto const kind = ctx.kind;
+  result["translation"] = getTransContext(ctx);
 
-  result["transKind"] = show(kind);
-  if (kind == TransKind::Optimize) {
-    result["optIndex"] =  unit.context().optIndex;
-  }
+  result["inliningDecisions"] = unit.annotationData ?
+    unit.annotationData->getInliningDynamic() :
+    dynamic::array();
 
   auto blocks = rpoSortCfg(unit);
   // Partition into main, cold and frozen, without changing relative order.
@@ -455,8 +552,6 @@ dynamic getUnit(const IRUnit& unit,
     [&] (Block* b) { return b->hint() == Block::Hint::Unlikely; }
   );
 
-  result["opcodeStats"] = getOpcodeStats(blocks);
-
   dynamic blockObjs = dynamic::array;
 
   AreaIndex currArea = AreaIndex::Main;
@@ -469,7 +564,7 @@ dynamic getUnit(const IRUnit& unit,
     }
 
     blockObjs.push_back(dynamic::merge(
-                          getBlock(*it, kind, asmInfo, guards),
+                          getBlock(*it, kind, asmInfo, guards, unit),
                           dynamic::object("area", areaAsString(currArea))));
   }
   result["blocks"] = blockObjs;
@@ -672,7 +767,7 @@ void printIRInstruction(std::ostream& os,
     } else {
       auto func = newMarker.func();
       if (!curMarker.hasFunc() || func != curMarker.func()) {
-        func->prettyPrint(mStr, Func::PrintOpts().noFpi());
+        func->prettyPrint(mStr, Func::PrintOpts());
       }
       mStr << std::string(kIndent, ' ')
            << newMarker.show()
@@ -1034,7 +1129,7 @@ void printUnit(int level, const IRUnit& unit, const char* caption,
         HPHP::Trace::traceRelease("%s\n", str.str().c_str());
       }
     } else if (dumpJsonIR(level)) {
-      str << get_json::getUnit(unit, ai, guards);
+      str << "json:" << get_json::getUnit(unit, ai, guards);
       if (HPHP::Trace::moduleEnabledRelease(HPHP::Trace::printir_json, level)) {
         HPHP::Trace::traceRelease("%s\n", str.str().c_str());
       }

@@ -1,0 +1,6 @@
+File "map_append1.php", line 4, characters 3-11:
+Invalid assignment (Typing[4110])
+File "map_append1.php", line 4, characters 3-11:
+Expected Pair<string, int> because you can only append a Pair<Tkey, Tvalue> to an Map<Tkey, Tvalue>
+File "map_append1.php", line 3, characters 35-51:
+But got dynamic because it is an unenforceable type

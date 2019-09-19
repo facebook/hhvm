@@ -11,8 +11,7 @@
   AssertRATStk 3 Cell
 target_label:
   Int 42
-  FPushFuncD 1 "var_dump"
-  FCall <> 1 1 "" - "" ""
+  FCallFuncD <> 1 1 "" - "var_dump"
   PopC
   PopC
   Int 1

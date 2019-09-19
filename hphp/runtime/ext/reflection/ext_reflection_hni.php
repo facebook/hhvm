@@ -245,6 +245,9 @@ abstract class ReflectionFunctionAbstract implements Reflector {
     return $this->getReturnTypeHint() ?: false;
   }
 
+  <<__Native, __Rx, __MaybeMutable>>
+  public function getReifiedTypeParamInfo(): array;
+
   /**
    * ( excerpt from
    * http://php.net/manual/en/reflectionfunctionabstract.hasreturntype.php

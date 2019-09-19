@@ -1,0 +1,6 @@
+File "array_filter2.php", line 6, characters 21-36:
+Invalid argument (Typing[4110])
+File "array_filter2.php", line 11, characters 27-39:
+Expected ~array<[unresolved], [unresolved]> because it is an unenforceable type
+File "array_filter2.php", line 5, characters 15-27:
+But got array<arraykey, X>

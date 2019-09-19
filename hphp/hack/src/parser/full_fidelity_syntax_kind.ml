@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
@@ -114,7 +114,6 @@ type t =
   | PrefixUnaryExpression
   | PostfixUnaryExpression
   | BinaryExpression
-  | InstanceofExpression
   | IsExpression
   | AsExpression
   | NullableAsExpression
@@ -158,6 +157,7 @@ type t =
   | XHPExpression
   | XHPClose
   | TypeConstant
+  | PUAccess
   | VectorTypeSpecifier
   | KeysetTypeSpecifier
   | TupleTypeExplicitSpecifier
@@ -296,7 +296,6 @@ let to_string kind =
   | PrefixUnaryExpression             -> "prefix_unary_expression"
   | PostfixUnaryExpression            -> "postfix_unary_expression"
   | BinaryExpression                  -> "binary_expression"
-  | InstanceofExpression              -> "instanceof_expression"
   | IsExpression                      -> "is_expression"
   | AsExpression                      -> "as_expression"
   | NullableAsExpression              -> "nullable_as_expression"
@@ -340,6 +339,7 @@ let to_string kind =
   | XHPExpression                     -> "xhp_expression"
   | XHPClose                          -> "xhp_close"
   | TypeConstant                      -> "type_constant"
+  | PUAccess                          -> "pu_access"
   | VectorTypeSpecifier               -> "vector_type_specifier"
   | KeysetTypeSpecifier               -> "keyset_type_specifier"
   | TupleTypeExplicitSpecifier        -> "tuple_type_explicit_specifier"

@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -11,9 +11,9 @@ type env = {
   root: Path.t;
   from: string;
   no_load: bool;
-  watchman_debug_logging : bool;
-  log_inference_constraints : bool;
-  profile_log : bool;
+  watchman_debug_logging: bool;
+  log_inference_constraints: bool;
+  profile_log: bool;
   silent: bool;
   exit_on_failure: bool;
   ai_mode: string option;
@@ -21,10 +21,11 @@ type env = {
   ignore_hh_version: bool;
   saved_state_ignore_hhconfig: bool;
   dynamic_view: bool;
-  prechecked : bool option;
-  config : (string * string) list;
-  allow_non_opt_build : bool;
+  prechecked: bool option;
+  config: (string * string) list;
+  allow_non_opt_build: bool;
 }
 
 val main : env -> Exit_status.t Lwt.t
+
 val start_server : env -> unit

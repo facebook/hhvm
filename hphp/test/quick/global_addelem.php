@@ -4,4 +4,8 @@
 // sure the emitter uses a vector instruction instead of trying to do SetS.
 
 function f() { $GLOBALS[] = 1; }
-f();
+
+<<__EntryPoint>>
+function main_entry(): void {
+  f();
+}

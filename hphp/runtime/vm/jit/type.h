@@ -38,6 +38,7 @@ namespace HPHP {
 struct ArrayData;
 struct Class;
 struct Func;
+struct RecordDesc;
 struct StringData;
 struct TypeConstraint;
 struct TypedValue;
@@ -315,25 +316,23 @@ constexpr bool operator>(Mem a, Mem b) {
   c(StaticArr,       bits_t::bit<8>())                                  \
   c(UncountedArr,    bits_t::bit<9>())                                  \
   c(CountedArr,      bits_t::bit<10>())                                 \
-  c(PersistentShape, bits_t::bit<11>())                                 \
-  c(CountedShape,    bits_t::bit<12>())                                 \
-  c(StaticVec,       bits_t::bit<13>())                                 \
-  c(UncountedVec,    bits_t::bit<14>())                                 \
-  c(CountedVec,      bits_t::bit<15>())                                 \
-  c(StaticDict,      bits_t::bit<16>())                                 \
-  c(UncountedDict,   bits_t::bit<17>())                                 \
-  c(CountedDict,     bits_t::bit<18>())                                 \
-  c(StaticKeyset,    bits_t::bit<19>())                                 \
-  c(UncountedKeyset, bits_t::bit<20>())                                 \
-  c(CountedKeyset,   bits_t::bit<21>())                                 \
-  c(Obj,             bits_t::bit<22>())                                 \
-  c(Res,             bits_t::bit<23>())                                 \
-  c(Func,            bits_t::bit<24>())                                 \
-  c(Cls,             bits_t::bit<25>())                                 \
-  c(ClsMeth,         bits_t::bit<26>())                                 \
-  c(Record,          bits_t::bit<27>())                                 \
-  c(RecDesc,         bits_t::bit<28>())                                 \
-// Boxed*:           29-57
+  c(StaticVec,       bits_t::bit<11>())                                 \
+  c(UncountedVec,    bits_t::bit<12>())                                 \
+  c(CountedVec,      bits_t::bit<13>())                                 \
+  c(StaticDict,      bits_t::bit<14>())                                 \
+  c(UncountedDict,   bits_t::bit<15>())                                 \
+  c(CountedDict,     bits_t::bit<16>())                                 \
+  c(StaticKeyset,    bits_t::bit<17>())                                 \
+  c(UncountedKeyset, bits_t::bit<18>())                                 \
+  c(CountedKeyset,   bits_t::bit<19>())                                 \
+  c(Obj,             bits_t::bit<20>())                                 \
+  c(Res,             bits_t::bit<21>())                                 \
+  c(Func,            bits_t::bit<22>())                                 \
+  c(Cls,             bits_t::bit<23>())                                 \
+  c(ClsMeth,         bits_t::bit<24>())                                 \
+  c(Record,          bits_t::bit<25>())                                 \
+  c(RecDesc,         bits_t::bit<26>())                                 \
+// Boxed*:           27-55
 
 /*
  * This list should be in non-decreasing order of specificity.
@@ -358,15 +357,14 @@ constexpr bool operator>(Mem a, Mem b) {
   c(Str,                 kPersistentStr|kCountedStr)                    \
   c(PersistentArr,       kStaticArr|kUncountedArr)                      \
   c(Arr,                 kPersistentArr|kCountedArr)                    \
-  c(Shape,               kPersistentShape|kCountedShape)                \
   c(PersistentVec,       kStaticVec|kUncountedVec)                      \
   c(Vec,                 kPersistentVec|kCountedVec)                    \
   c(PersistentDict,      kStaticDict|kUncountedDict)                    \
   c(Dict,                kPersistentDict|kCountedDict)                  \
   c(PersistentKeyset,    kStaticKeyset|kUncountedKeyset)                \
   c(Keyset,              kPersistentKeyset|kCountedKeyset)              \
-  c(PersistentArrLike,   kPersistentArr|kPersistentShape|kPersistentVec|kPersistentDict|kPersistentKeyset) \
-  c(ArrLike,             kArr|kShape|kVec|kDict|kKeyset)                \
+  c(PersistentArrLike,   kPersistentArr|kPersistentVec|kPersistentDict|kPersistentKeyset) \
+  c(ArrLike,             kArr|kVec|kDict|kKeyset)                \
   c(NullableObj,         kObj|kInitNull|kUninit)                        \
   c(Persistent,          kPersistentStr|kPersistentArrLike)             \
   c(UncountedInit,       UNCCOUNTED_INIT_UNION)                         \
@@ -391,9 +389,7 @@ constexpr bool operator>(Mem a, Mem b) {
   IRT(RDSHandle,   bits_t::bit<kRuntime+8>()) /* rds::Handle */         \
   IRT(Nullptr,     bits_t::bit<kRuntime+9>())                           \
   IRT(MIPropSPtr,  bits_t::bit<kRuntime+10>()) /* Ptr to MInstrPropState */ \
-  IRT(Smashable,   bits_t::bit<kRuntime+11>()) /* Smashable uint64_t */     \
-  IRT(FuncM,       bits_t::bit<kRuntime+12>()) /* Func* with the lowest */  \
-                                      /* bit set indicating magic call */
+  IRT(Smashable,   bits_t::bit<kRuntime+11>()) /* Smashable uint64_t */
   /* bits above this are unused */
 
 /*
@@ -403,10 +399,10 @@ constexpr bool operator>(Mem a, Mem b) {
  */
 #ifdef USE_LOWPTR
 #define COUNTED_INIT_UNION \
-  kCountedStr|kCountedArr|kCountedShape|kCountedVec|kCountedDict|kCountedKeyset|kObj|kRes|kBoxedCell|kRecord
+  kCountedStr|kCountedArr|kCountedVec|kCountedDict|kCountedKeyset|kObj|kRes|kBoxedCell|kRecord
 #else
 #define COUNTED_INIT_UNION \
-  kCountedStr|kCountedArr|kCountedShape|kCountedVec|kCountedDict|kCountedKeyset|kObj|kRes|kBoxedCell|kRecord|kClsMeth
+  kCountedStr|kCountedArr|kCountedVec|kCountedDict|kCountedKeyset|kObj|kRes|kBoxedCell|kRecord|kClsMeth
 #endif
 
 #define IRT_SPECIAL                                           \
@@ -414,10 +410,8 @@ constexpr bool operator>(Mem a, Mem b) {
   IRTX(Bottom,       Bottom, kBottom)                         \
   IRTX(Top,          Top,    kTop)                            \
   IRT(Ctx,                   kObj|kCctx)                      \
-  IRT(FuncMM,                kFunc|kFuncM)                    \
   IRTX(AnyObj,       Top,    kAnyObj)                         \
   IRTX(AnyArr,       Top,    kAnyArr)                         \
-  IRTX(AnyShape,     Top,    kAnyShape)                       \
   IRTX(AnyVec,       Top,    kAnyVec)                         \
   IRTX(AnyDict,      Top,    kAnyDict)                        \
   IRTX(AnyKeyset,    Top,    kAnyKeyset)                      \
@@ -489,7 +483,7 @@ struct ConstCctx {
  */
 struct Type {
 private:
-  static constexpr size_t kBoxShift = 29;
+  static constexpr size_t kBoxShift = 27;
   static constexpr size_t kRuntime = kBoxShift * 2;
   static constexpr size_t numRuntime = 13;
   using bits_t = BitSet<kRuntime + numRuntime>;
@@ -511,7 +505,6 @@ public:
 #undef IRTX
 
   static constexpr bits_t kAnyArr       = kArr | kBoxedArr;
-  static constexpr bits_t kAnyShape     = kShape | kBoxedShape;
   static constexpr bits_t kAnyVec       = kVec | kBoxedVec;
   static constexpr bits_t kAnyDict      = kDict | kBoxedDict;
   static constexpr bits_t kAnyKeyset    = kKeyset | kBoxedKeyset;
@@ -761,8 +754,10 @@ public:
   const ArrayData* dictVal() const;
   const ArrayData* shapeVal() const;
   const ArrayData* keysetVal() const;
+  const ArrayData* arrLikeVal() const;
   const HPHP::Func* funcVal() const;
   const Class* clsVal() const;
+  const RecordDesc* recVal() const;
   ClsMethDataRef clsmethVal() const;
   ConstCctx cctxVal() const;
   rds::Handle rdsHandleVal() const;
@@ -781,20 +776,17 @@ public:
   static Type Array(ArrayData::ArrayKind, const RepoAuthType::Array*);
   static Type Vec(const RepoAuthType::Array*);
   static Type Dict(const RepoAuthType::Array*);
-  static Type Shape(const RepoAuthType::Array*);
   static Type Keyset(const RepoAuthType::Array*);
 
   /*
    * Return a specialized TStaticArr/TStaticVec/
-   * TStaticDict/TPersistentShape/TStaticKeyset.
+   * TStaticDict/TStaticKeyset.
    */
   static Type StaticArray(ArrayData::ArrayKind kind);
   static Type StaticArray(const RepoAuthType::Array* rat);
   static Type StaticArray(ArrayData::ArrayKind, const RepoAuthType::Array*);
   static Type StaticVec(const RepoAuthType::Array*);
   static Type StaticDict(const RepoAuthType::Array*);
-  static Type StaticShape(ArrayData::ArrayKind kind);
-  static Type StaticShape(const RepoAuthType::Array*);
   static Type StaticKeyset(const RepoAuthType::Array*);
 
   /*
@@ -975,6 +967,7 @@ private:
     const ArrayData* m_keysetVal;
     const HPHP::Func* m_funcVal;
     const Class* m_clsVal;
+    const RecordDesc* m_recVal;
     ClsMethDataRef m_clsmethVal;
     ConstCctx m_cctxVal;
     jit::TCA m_tcaVal;
@@ -994,6 +987,10 @@ using OptType = folly::Optional<Type>;
 /*
  * Return the most refined Type that can be used to represent the type of a
  * live TypedValue or a RepoAuthType.
+ *
+ * For these methods, ctx may be null in general. propCls may be null during
+ * Class initialization, but only if the type-hints involved are not "this",
+ * "self", or other hints that use propCls. We always check this constraint.
  */
 Type typeFromTV(tv_rval tv, const Class* ctx);
 Type typeFromRAT(RepoAuthType ty, const Class* ctx);

@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2017, Facebook, Inc.
  * All rights reserved.
  *
@@ -18,9 +18,7 @@ let test_write_and_read_directly_cwd () =
   let contents = Disk.cat "./a.txt" in
   contents = "hello"
 
-let tests = [
-  ("test_write_and_read_directly_cwd", test_write_and_read_directly_cwd);
-]
+let tests =
+  [("test_write_and_read_directly_cwd", test_write_and_read_directly_cwd)]
 
-let () =
-  Unit_test.run_all tests
+let () = Unit_test.run_all tests

@@ -42,26 +42,10 @@ extern RawDestructor g_destructors[kDestrTableSize];
 
 /*
  * Return true iff decreffing `tv' will cause any helper function to be called.
- *
- * Note that there are cases (specifically, for RefData) where this function
- * returns true but tvDecRefWillRelease() will return false.
  */
 ALWAYS_INLINE bool tvDecRefWillCallHelper(const TypedValue tv) {
   if (noop_decref) return false;
   return isRefcountedType(tv.m_type) && tv.m_data.pcnt->decWillRelease();
-}
-
-/*
- * Return true iff decreffing `tv' will free heap-allocated data.
- *
- * Always returns false for non-refcounted types.
- */
-ALWAYS_INLINE bool tvDecRefWillRelease(TypedValue tv) {
-  if (noop_decref) return false;
-  if (!isRefcountedType(tv.m_type)) {
-    return false;
-  }
-  return tv.m_data.pcnt->decWillRelease();
 }
 
 /*
@@ -177,7 +161,6 @@ enable_if_lval_t<T, void> tvDecRefArr(T tv) {
   assertx(type(tv) == KindOfArray ||
          type(tv) == KindOfVec ||
          type(tv) == KindOfDict ||
-         type(tv) == KindOfShape ||
          type(tv) == KindOfKeyset);
   decRefArr(val(tv).parr);
 }
@@ -228,6 +211,18 @@ ALWAYS_INLINE void tvIncRefCountable(TypedValue tv) {
  */
 ALWAYS_INLINE void tvIncRefGen(TypedValue tv) {
   assertx(tvIsPlausible(tv));
+  if (isRefcountedType(tv.m_type)) {
+    tvIncRefCountable(tv);
+  }
+}
+
+/*
+ * Incref `tv', or do nothing if it's not refcounted. This method allows tv to
+ * have kInvalidDataType, which is never refcounted; that means that we can use
+ * it for MixedArray values (which may be tombstones with kInvalidDataType).
+ */
+ALWAYS_INLINE void tvIncRefGenUnsafe(TypedValue tv) {
+  assertx(tv.m_type == kInvalidDataType || tvIsPlausible(tv));
   if (isRefcountedType(tv.m_type)) {
     tvIncRefCountable(tv);
   }

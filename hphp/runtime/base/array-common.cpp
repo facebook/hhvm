@@ -59,7 +59,7 @@ ArrayData* ArrayCommon::Dequeue(ArrayData* a, Variant &value) {
 
 ArrayData* ArrayCommon::ToVec(ArrayData* a, bool) {
   auto const size = a->size();
-  if (!size) return staticEmptyVecArray();
+  if (!size) return ArrayData::CreateVec();
   VecArrayInit init{size};
   IterateVNoInc(
     a,
@@ -72,12 +72,15 @@ ArrayData* ArrayCommon::ToVec(ArrayData* a, bool) {
       init.append(v);
     }
   );
-  return init.create();
+  auto const out = init.create();
+  return RuntimeOption::EvalArrayProvenance && out->isRefCounted()
+    ? tagArrProv(out, a)
+    : out;
 }
 
 ArrayData* ArrayCommon::ToDict(ArrayData* a, bool) {
   auto const size = a->size();
-  if (!size) return staticEmptyDictArray();
+  if (!size) return ArrayData::CreateDict();
   DictInit init{size};
   IterateKVNoInc(
     a,
@@ -90,12 +93,15 @@ ArrayData* ArrayCommon::ToDict(ArrayData* a, bool) {
       init.setValidKey(k, v);
     }
   );
-  return init.create();
+  auto const out = init.create();
+  return RuntimeOption::EvalArrayProvenance && out->isRefCounted()
+    ? tagArrProv(out, a)
+    : out;
 }
 
 ArrayData* ArrayCommon::ToKeyset(ArrayData* a, bool) {
   auto const size = a->size();
-  if (!size) return staticEmptyKeysetArray();
+  if (!size) return ArrayData::CreateKeyset();
   KeysetInit init{size};
   IterateVNoInc(
     a,
@@ -123,7 +129,7 @@ ArrayData* ArrayCommon::ToKeyset(ArrayData* a, bool) {
 ArrayData* ArrayCommon::ToVArray(ArrayData* a, bool) {
   if (a->isVArray()) return a;
   auto const size = a->size();
-  if (!size) return staticEmptyVArray();
+  if (!size) return ArrayData::CreateVArray();
   VArrayInit init{size};
   IterateVNoInc(a, [&](TypedValue v) { init.appendWithRef(v); });
   return init.create();
@@ -132,7 +138,7 @@ ArrayData* ArrayCommon::ToVArray(ArrayData* a, bool) {
 ArrayData* ArrayCommon::ToDArray(ArrayData* a, bool) {
   if (a->isDArray()) return a;
   auto const size = a->size();
-  if (!size) return staticEmptyDArray();
+  if (!size) return ArrayData::CreateDArray();
   DArrayInit init{size};
   IterateKV(
     a,
@@ -141,14 +147,6 @@ ArrayData* ArrayCommon::ToDArray(ArrayData* a, bool) {
     }
   );
   return init.create();
-}
-
-ArrayData* ArrayCommon::ToShape(ArrayData* a, bool copy) {
-  auto arr = RuntimeOption::EvalHackArrDVArrs
-    ? ArrayCommon::ToDict(a, copy)
-    : ArrayCommon::ToDArray(a, copy);
-  arr = arr->toShapeInPlaceIfCompatible();
-  return arr;
 }
 
 ArrayCommon::RefCheckResult
@@ -200,7 +198,10 @@ ArrayData* castObjToHackArrImpl(ObjectData* obj,
 
   auto arr = empty();
   for (ArrayIter iter(iterObj); iter; ++iter) add(arr, iter);
-  return arr.detach();
+  auto const out = arr.detach();
+  return RuntimeOption::EvalArrayProvenance && out->isRefCounted()
+    ? tagArrProv(out)
+    : out;
 }
 
 }

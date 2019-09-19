@@ -1,0 +1,263 @@
+Hack Array Compat: Argument 1 to fun1() must be of type HH\varray, darray given
+
+Hack Array Compat: Value returned from fun1() must be of type HH\varray, darray given
+
+Hack Array Compat: Argument 1 to fun1() must be of type HH\varray, array given
+
+Hack Array Compat: Value returned from fun1() must be of type HH\varray, array given
+
+Hack Array Compat: Argument 1 to fun2() must be of type HH\darray, varray given
+
+Hack Array Compat: Value returned from fun2() must be of type HH\darray, varray given
+
+Hack Array Compat: Argument 1 to fun2() must be of type HH\darray, array given
+
+Hack Array Compat: Value returned from fun2() must be of type HH\darray, array given
+
+Hack Array Compat: Argument 1 to fun3() must be of type HH\varray_or_darray, varray given
+
+Hack Array Compat: Value returned from fun3() must be of type HH\varray_or_darray, varray given
+
+Hack Array Compat: Argument 1 to fun3() must be of type HH\varray_or_darray, darray given
+
+Hack Array Compat: Value returned from fun3() must be of type HH\varray_or_darray, darray given
+
+Hack Array Compat: Argument 1 to fun3() must be of type HH\varray_or_darray, array given
+
+Hack Array Compat: Value returned from fun3() must be of type HH\varray_or_darray, array given
+
+Hack Array Compat: Argument 1 to fun4() must be of type array, varray given
+
+Hack Array Compat: Value returned from fun4() must be of type array, varray given
+
+Hack Array Compat: Argument 1 to fun4() must be of type array, darray given
+
+Hack Array Compat: Value returned from fun4() must be of type array, darray given
+
+Hack Array Compat: Argument 1 to opt_fun1() must be of type ?HH\varray, darray given
+
+Hack Array Compat: Value returned from opt_fun1() must be of type ?HH\varray, darray given
+
+Hack Array Compat: Argument 1 to opt_fun1() must be of type ?HH\varray, array given
+
+Hack Array Compat: Value returned from opt_fun1() must be of type ?HH\varray, array given
+
+Hack Array Compat: Argument 1 to opt_fun2() must be of type ?HH\darray, varray given
+
+Hack Array Compat: Value returned from opt_fun2() must be of type ?HH\darray, varray given
+
+Hack Array Compat: Argument 1 to opt_fun2() must be of type ?HH\darray, array given
+
+Hack Array Compat: Value returned from opt_fun2() must be of type ?HH\darray, array given
+
+Hack Array Compat: Argument 1 to opt_fun3() must be of type ?HH\varray_or_darray, varray given
+
+Hack Array Compat: Value returned from opt_fun3() must be of type ?HH\varray_or_darray, varray given
+
+Hack Array Compat: Argument 1 to opt_fun3() must be of type ?HH\varray_or_darray, darray given
+
+Hack Array Compat: Value returned from opt_fun3() must be of type ?HH\varray_or_darray, darray given
+
+Hack Array Compat: Argument 1 to opt_fun3() must be of type ?HH\varray_or_darray, array given
+
+Hack Array Compat: Value returned from opt_fun3() must be of type ?HH\varray_or_darray, array given
+
+Hack Array Compat: Argument 1 to opt_fun4() must be of type ?array, varray given
+
+Hack Array Compat: Value returned from opt_fun4() must be of type ?array, varray given
+
+Hack Array Compat: Argument 1 to opt_fun4() must be of type ?array, darray given
+
+Hack Array Compat: Value returned from opt_fun4() must be of type ?array, darray given
+
+Hack Array Compat: Argument 1 to tuple_fun() must be of type HH\varray, darray given
+
+Hack Array Compat: Value returned from tuple_fun() must be of type HH\varray, darray given
+
+Hack Array Compat: Argument 1 to tuple_fun() must be of type HH\varray, array given
+
+Hack Array Compat: Value returned from tuple_fun() must be of type HH\varray, array given
+
+Hack Array Compat: Argument 1 to shape_fun() must be of type HH\darray, varray given
+
+Hack Array Compat: Value returned from shape_fun() must be of type HH\darray, varray given
+
+Hack Array Compat: Argument 1 to shape_fun() must be of type HH\darray, array given
+
+Hack Array Compat: Value returned from shape_fun() must be of type HH\darray, array given
+
+Hack Array Compat: Argument 1 to opt_tuple_fun() must be of type ?HH\varray, darray given
+
+Hack Array Compat: Value returned from opt_tuple_fun() must be of type ?HH\varray, darray given
+
+Hack Array Compat: Argument 1 to opt_tuple_fun() must be of type ?HH\varray, array given
+
+Hack Array Compat: Value returned from opt_tuple_fun() must be of type ?HH\varray, array given
+
+Hack Array Compat: Argument 1 to opt_shape_fun() must be of type ?HH\darray, varray given
+
+Hack Array Compat: Value returned from opt_shape_fun() must be of type ?HH\darray, varray given
+
+Hack Array Compat: Argument 1 to opt_shape_fun() must be of type ?HH\darray, array given
+
+Hack Array Compat: Value returned from opt_shape_fun() must be of type ?HH\darray, array given
+
+Hack Array Compat: Argument 1 to alias_fun1() must be of type T1, darray given
+
+Hack Array Compat: Value returned from alias_fun1() must be of type T1, darray given
+
+Hack Array Compat: Argument 1 to alias_fun1() must be of type T1, array given
+
+Hack Array Compat: Value returned from alias_fun1() must be of type T1, array given
+
+Hack Array Compat: Argument 1 to alias_fun2() must be of type T2, varray given
+
+Hack Array Compat: Value returned from alias_fun2() must be of type T2, varray given
+
+Hack Array Compat: Argument 1 to alias_fun2() must be of type T2, array given
+
+Hack Array Compat: Value returned from alias_fun2() must be of type T2, array given
+
+Hack Array Compat: Argument 1 to alias_fun3() must be of type T3, varray given
+
+Hack Array Compat: Value returned from alias_fun3() must be of type T3, varray given
+
+Hack Array Compat: Argument 1 to alias_fun3() must be of type T3, darray given
+
+Hack Array Compat: Value returned from alias_fun3() must be of type T3, darray given
+
+Hack Array Compat: Argument 1 to alias_fun3() must be of type T3, array given
+
+Hack Array Compat: Value returned from alias_fun3() must be of type T3, array given
+
+Hack Array Compat: Argument 1 to alias_fun4() must be of type T4, varray given
+
+Hack Array Compat: Value returned from alias_fun4() must be of type T4, varray given
+
+Hack Array Compat: Argument 1 to alias_fun4() must be of type T4, darray given
+
+Hack Array Compat: Value returned from alias_fun4() must be of type T4, darray given
+
+Hack Array Compat: Argument 1 to alias_fun5() must be of type T5, darray given
+
+Hack Array Compat: Value returned from alias_fun5() must be of type T5, darray given
+
+Hack Array Compat: Argument 1 to alias_fun5() must be of type T5, array given
+
+Hack Array Compat: Value returned from alias_fun5() must be of type T5, array given
+
+Hack Array Compat: Argument 1 to alias_fun6() must be of type T6, varray given
+
+Hack Array Compat: Value returned from alias_fun6() must be of type T6, varray given
+
+Hack Array Compat: Argument 1 to alias_fun6() must be of type T6, array given
+
+Hack Array Compat: Value returned from alias_fun6() must be of type T6, array given
+
+Hack Array Compat: Argument 1 to alias_fun7() must be of type T7, darray given
+
+Hack Array Compat: Value returned from alias_fun7() must be of type T7, darray given
+
+Hack Array Compat: Argument 1 to alias_fun7() must be of type T7, array given
+
+Hack Array Compat: Value returned from alias_fun7() must be of type T7, array given
+
+Hack Array Compat: Argument 1 to opt_alias_fun1() must be of type ?T1, darray given
+
+Hack Array Compat: Value returned from opt_alias_fun1() must be of type ?T1, darray given
+
+Hack Array Compat: Argument 1 to opt_alias_fun1() must be of type ?T1, array given
+
+Hack Array Compat: Value returned from opt_alias_fun1() must be of type ?T1, array given
+
+Hack Array Compat: Argument 1 to opt_alias_fun2() must be of type ?T2, varray given
+
+Hack Array Compat: Value returned from opt_alias_fun2() must be of type ?T2, varray given
+
+Hack Array Compat: Argument 1 to opt_alias_fun2() must be of type ?T2, array given
+
+Hack Array Compat: Value returned from opt_alias_fun2() must be of type ?T2, array given
+
+Hack Array Compat: Argument 1 to opt_alias_fun3() must be of type ?T3, varray given
+
+Hack Array Compat: Value returned from opt_alias_fun3() must be of type ?T3, varray given
+
+Hack Array Compat: Argument 1 to opt_alias_fun3() must be of type ?T3, darray given
+
+Hack Array Compat: Value returned from opt_alias_fun3() must be of type ?T3, darray given
+
+Hack Array Compat: Argument 1 to opt_alias_fun3() must be of type ?T3, array given
+
+Hack Array Compat: Value returned from opt_alias_fun3() must be of type ?T3, array given
+
+Hack Array Compat: Argument 1 to opt_alias_fun4() must be of type ?T4, varray given
+
+Hack Array Compat: Value returned from opt_alias_fun4() must be of type ?T4, varray given
+
+Hack Array Compat: Argument 1 to opt_alias_fun4() must be of type ?T4, darray given
+
+Hack Array Compat: Value returned from opt_alias_fun4() must be of type ?T4, darray given
+
+Hack Array Compat: Argument 1 to opt_alias_fun5() must be of type ?T5, darray given
+
+Hack Array Compat: Value returned from opt_alias_fun5() must be of type ?T5, darray given
+
+Hack Array Compat: Argument 1 to opt_alias_fun5() must be of type ?T5, array given
+
+Hack Array Compat: Value returned from opt_alias_fun5() must be of type ?T5, array given
+
+Hack Array Compat: Argument 1 to opt_alias_fun6() must be of type ?T6, varray given
+
+Hack Array Compat: Value returned from opt_alias_fun6() must be of type ?T6, varray given
+
+Hack Array Compat: Argument 1 to opt_alias_fun6() must be of type ?T6, array given
+
+Hack Array Compat: Value returned from opt_alias_fun6() must be of type ?T6, array given
+
+Hack Array Compat: Argument 1 to opt_alias_fun7() must be of type ?T7, darray given
+
+Hack Array Compat: Value returned from opt_alias_fun7() must be of type ?T7, darray given
+
+Hack Array Compat: Argument 1 to opt_alias_fun7() must be of type ?T7, array given
+
+Hack Array Compat: Value returned from opt_alias_fun7() must be of type ?T7, array given
+
+Hack Array Compat: Argument 1 returned from inout_fun1() as an inout parameter must be of type HH\varray, darray given
+
+Hack Array Compat: Argument 1 returned from inout_fun1() as an inout parameter must be of type HH\varray, array given
+
+Hack Array Compat: Argument 1 returned from inout_fun2() as an inout parameter must be of type HH\darray, varray given
+
+Hack Array Compat: Argument 1 returned from inout_fun2() as an inout parameter must be of type HH\darray, array given
+
+Hack Array Compat: Argument 1 to inout_fun3() must be of type HH\varray_or_darray, darray given
+
+Hack Array Compat: Argument 1 returned from inout_fun3() as an inout parameter must be of type HH\varray_or_darray, varray given
+
+Hack Array Compat: Argument 1 returned from inout_fun3() as an inout parameter must be of type HH\varray_or_darray, darray given
+
+Hack Array Compat: Argument 1 returned from inout_fun3() as an inout parameter must be of type HH\varray_or_darray, array given
+
+Hack Array Compat: Argument 1 returned from inout_fun4() as an inout parameter must be of type array, varray given
+
+Hack Array Compat: Argument 1 returned from inout_fun4() as an inout parameter must be of type array, darray given
+
+Hack Array Compat: Argument 1 returned from opt_inout_fun1() as an inout parameter must be of type ?HH\varray, darray given
+
+Hack Array Compat: Argument 1 returned from opt_inout_fun1() as an inout parameter must be of type ?HH\varray, array given
+
+Hack Array Compat: Argument 1 returned from opt_inout_fun2() as an inout parameter must be of type ?HH\darray, varray given
+
+Hack Array Compat: Argument 1 returned from opt_inout_fun2() as an inout parameter must be of type ?HH\darray, array given
+
+Hack Array Compat: Argument 1 to opt_inout_fun3() must be of type ?HH\varray_or_darray, darray given
+
+Hack Array Compat: Argument 1 returned from opt_inout_fun3() as an inout parameter must be of type ?HH\varray_or_darray, varray given
+
+Hack Array Compat: Argument 1 returned from opt_inout_fun3() as an inout parameter must be of type ?HH\varray_or_darray, darray given
+
+Hack Array Compat: Argument 1 returned from opt_inout_fun3() as an inout parameter must be of type ?HH\varray_or_darray, array given
+
+Hack Array Compat: Argument 1 returned from opt_inout_fun4() as an inout parameter must be of type ?array, varray given
+
+Hack Array Compat: Argument 1 returned from opt_inout_fun4() as an inout parameter must be of type ?array, darray given

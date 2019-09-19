@@ -25,73 +25,29 @@ Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec 
 Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
 * clsmeth vs array:
 bool(false)
-
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 10
 bool(false)
-
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 12
 bool(false)
-
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 13
 bool(false)
-
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 16
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 21
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 27
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 32
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 38
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 43
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 49
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 54
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
 bool(false)
-
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 10
 bool(false)
-
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 12
 bool(false)
-
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 13
 bool(false)
-
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 16
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 21
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 27
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 32
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 38
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 43
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 49
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 54
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
 * vec vs vec:
 bool(true)
 bool(true)
@@ -119,76 +75,76 @@ bool(false)
 bool(true)
 * clsmeth vs vec:
 
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 9
+Notice: Implicit clsmeth to vec conversion in %s/test/slow/global_func/class_meth/dv_arr_hack_arr/cmp_warn.php on line 9
 bool(true)
 
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 10
+Notice: Implicit clsmeth to vec conversion in %s/test/slow/global_func/class_meth/dv_arr_hack_arr/cmp_warn.php on line 10
 bool(true)
 
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 12
+Notice: Implicit clsmeth to vec conversion in %s/test/slow/global_func/class_meth/dv_arr_hack_arr/cmp_warn.php on line 12
 bool(true)
 
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 13
+Notice: Implicit clsmeth to vec conversion in %s/test/slow/global_func/class_meth/dv_arr_hack_arr/cmp_warn.php on line 13
 bool(true)
 
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 16
+Notice: Implicit clsmeth to vec conversion in %s/test/slow/global_func/class_meth/dv_arr_hack_arr/cmp_warn.php on line 16
 bool(false)
 
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 21
+Notice: Implicit clsmeth to vec conversion in %s/test/slow/global_func/class_meth/dv_arr_hack_arr/cmp_warn.php on line 21
 bool(false)
 
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 27
+Notice: Implicit clsmeth to vec conversion in %s/test/slow/global_func/class_meth/dv_arr_hack_arr/cmp_warn.php on line 27
 bool(true)
 
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 32
+Notice: Implicit clsmeth to vec conversion in %s/test/slow/global_func/class_meth/dv_arr_hack_arr/cmp_warn.php on line 32
 bool(true)
 
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 38
+Notice: Implicit clsmeth to vec conversion in %s/test/slow/global_func/class_meth/dv_arr_hack_arr/cmp_warn.php on line 38
 bool(false)
 
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 43
+Notice: Implicit clsmeth to vec conversion in %s/test/slow/global_func/class_meth/dv_arr_hack_arr/cmp_warn.php on line 43
 bool(false)
 
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 49
+Notice: Implicit clsmeth to vec conversion in %s/test/slow/global_func/class_meth/dv_arr_hack_arr/cmp_warn.php on line 49
 bool(true)
 
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 54
+Notice: Implicit clsmeth to vec conversion in %s/test/slow/global_func/class_meth/dv_arr_hack_arr/cmp_warn.php on line 54
 bool(true)
 
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 9
+Notice: Implicit clsmeth to vec conversion in %s/test/slow/global_func/class_meth/dv_arr_hack_arr/cmp_warn.php on line 9
 bool(false)
 
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 10
+Notice: Implicit clsmeth to vec conversion in %s/test/slow/global_func/class_meth/dv_arr_hack_arr/cmp_warn.php on line 10
 bool(false)
 
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 12
+Notice: Implicit clsmeth to vec conversion in %s/test/slow/global_func/class_meth/dv_arr_hack_arr/cmp_warn.php on line 12
 bool(false)
 
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 13
+Notice: Implicit clsmeth to vec conversion in %s/test/slow/global_func/class_meth/dv_arr_hack_arr/cmp_warn.php on line 13
 bool(false)
 
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 16
+Notice: Implicit clsmeth to vec conversion in %s/test/slow/global_func/class_meth/dv_arr_hack_arr/cmp_warn.php on line 16
 bool(true)
 
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 21
+Notice: Implicit clsmeth to vec conversion in %s/test/slow/global_func/class_meth/dv_arr_hack_arr/cmp_warn.php on line 21
 bool(false)
 
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 27
+Notice: Implicit clsmeth to vec conversion in %s/test/slow/global_func/class_meth/dv_arr_hack_arr/cmp_warn.php on line 27
 bool(true)
 
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 32
+Notice: Implicit clsmeth to vec conversion in %s/test/slow/global_func/class_meth/dv_arr_hack_arr/cmp_warn.php on line 32
 bool(false)
 
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 38
+Notice: Implicit clsmeth to vec conversion in %s/test/slow/global_func/class_meth/dv_arr_hack_arr/cmp_warn.php on line 38
 bool(false)
 
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 43
+Notice: Implicit clsmeth to vec conversion in %s/test/slow/global_func/class_meth/dv_arr_hack_arr/cmp_warn.php on line 43
 bool(true)
 
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 49
+Notice: Implicit clsmeth to vec conversion in %s/test/slow/global_func/class_meth/dv_arr_hack_arr/cmp_warn.php on line 49
 bool(false)
 
-Notice: Implicit clsmeth to vec conversion in %s/cmp_warn.php on line 54
+Notice: Implicit clsmeth to vec conversion in %s/test/slow/global_func/class_meth/dv_arr_hack_arr/cmp_warn.php on line 54
 bool(true)
 * clsmeth vs clsmeth:
 bool(true)

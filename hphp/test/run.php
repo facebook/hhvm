@@ -257,10 +257,6 @@ function hphp_home() {
   return realpath(__DIR__.'/../..');
 }
 
-function idx($array, $key, $default = null) {
-  return isset($array[$key]) ? $array[$key] : $default;
-}
-
 function hhvm_path() {
   $file = "";
   if (getenv("HHVM_BIN") !== false) {
@@ -670,6 +666,22 @@ function serial_only_tests($tests) {
   return $serial_tests;
 }
 
+// NOTE: If "files" is very long, then the shell may reject the desired
+// "find" command (especially because "escapeshellarg()" adds two single
+// quote characters to each file), so we split "files" into chunks below.
+function exec_find(mixed $files, string $extra): mixed {
+  $results = array();
+  foreach (array_chunk($files, 500) as $chunk) {
+    $efa = implode(' ', array_map(fun('escapeshellarg'), $chunk));
+    $output = shell_exec("find $efa $extra");
+    foreach (explode("\n", $output) as $result) {
+      // Collect the (non-empty) results, which should all be file paths.
+      if ($result !== "") $results[] = $result;
+    }
+  }
+  return $results;
+}
+
 function find_tests($files, array $options = null) {
   if (!$files) {
     $files = array('quick');
@@ -693,16 +705,14 @@ function find_tests($files, array $options = null) {
     $file = preg_replace(',^'.getcwd().'/,', '', $file);
     $files[$idx] = $file;
   }
-  $files = array_map('escapeshellarg', $files);
-  $files = implode(' ', $files);
   if (isset($options['typechecker'])) {
-    $tests = explode("\n", shell_exec(
-      "find $files ".
+    $tests = exec_find(
+      $files,
       "-name '*.php' ".
       "-o -name '*.php.type-errors' ".
       "-o -name '*.hack' ".
       "-o -name '*.hack.type-errors'"
-    ));
+    );
     // The above will get all the php files. Now filter out only the ones
     // that have a .hhconfig associated with it.
     $tests = array_filter(
@@ -714,17 +724,18 @@ function find_tests($files, array $options = null) {
       }
     );
   } else {
-    $tests = explode("\n", shell_exec(
-      "find $files '(' " .
-          "-name '*.php' " .
-          "-o -name '*.hack' " .
-          "-o -name '*.js' " .
-          "-o -name '*.php.type-errors' " .
-          "-o -name '*.hack.type-errors' " .
-          "-o -name '*.hhas' " .
-        "')' " .
-        "-not -regex '.*round_trip[.]hhas'"
-    ));
+    $tests = exec_find(
+      $files,
+      "'(' " .
+      "-name '*.php' " .
+      "-o -name '*.hack' " .
+      "-o -name '*.js' " .
+      "-o -name '*.php.type-errors' " .
+      "-o -name '*.hack.type-errors' " .
+      "-o -name '*.hhas' " .
+      "')' " .
+      "-not -regex '.*round_trip[.]hhas'"
+    );
   }
   if (!$tests) {
     error("Could not find any tests associated with your options.\n" .
@@ -853,11 +864,11 @@ function extra_args($options): string {
   return $args;
 }
 
-function hhvm_cmd_impl($options, $config, ...$extra_args) {
+function hhvm_cmd_impl($options, $config, $test, ...$extra_args) {
   $modes = (array)mode_cmd($options);
 
   $cmds = array();
-  foreach ($modes as $mode) {
+  foreach ($modes as $mode_num => $mode) {
     $args = array(
       hhvm_path(),
       '-c',
@@ -865,6 +876,7 @@ function hhvm_cmd_impl($options, $config, ...$extra_args) {
       '-vEval.EnableArgsInBacktraces=true',
       '-vEval.EnableIntrinsicsExtension=true',
       '-vEval.HHIRInliningIgnoreHints=false',
+      '-vAutoload.DBPath='.escapeshellarg("$test.$mode_num.autoloadDB"),
       $mode,
       isset($options['wholecfg']) ? '-vEval.JitPGORegionSelector=wholecfg' : '',
 
@@ -954,6 +966,7 @@ function hhvm_cmd($options, $test, $test_run = null, $is_temp_file = false) {
   $cmds = hhvm_cmd_impl(
     $options,
     find_test_ext($test, 'ini'),
+    $test,
     $hdf,
     find_debug_config($test, 'hphpd.ini'),
     read_opts_file(find_test_ext($test, 'opts')),
@@ -1082,7 +1095,7 @@ function hphp_cmd($options, $test, $program) {
     $compiler_args = implode(" ", array(
       '-vRuntime.Eval.HackCompilerUseEmbedded=false',
       "-vRuntime.Eval.HackCompilerInheritConfig=true",
-      "-vRuntime.Eval.HackCompilerCommand=\"${hh_single_compile} -v Hack.Compiler.SourceMapping=1 --daemon --dump-symbol-refs\""
+      "-vRuntime.Eval.HackCompilerCommand=\"{$hh_single_compile} -v Hack.Compiler.SourceMapping=1 --daemon --dump-symbol-refs\""
     ));
   }
 
@@ -1246,6 +1259,197 @@ function hh_server_cmd($options, $test) {
   return array($cmd, ' ', $temp_dir);
 }
 
+
+// Minimal support for sending messages between processes over named pipes.
+//
+// Non-buffered pipe writes of up to 512 bytes (PIPE_BUF) are atomic.
+//
+// Packet format:
+//   8 byte zero-padded hex pid
+//   4 byte zero-padded hex type
+//   4 byte zero-padded hex body size
+//   N byte string body
+//
+// NOTE: The first call to "getInput()" or "getOutput()" in any process will
+// block until some other process calls the other method.
+//
+class Queue {
+  // The path to the FIFO, until destroyed.
+  private ?string $path = null;
+
+  // TODO: Use proper types.
+  private mixed $input = null;
+  private mixed $output = null;
+
+  // Pipes writes are atomic up to 512 bytes (up to 4096 bytes on linux),
+  // and we use a 16 byte header, leaving this many bytes available for
+  // each chunk of "body" (see "$partials").
+  const int CHUNK = 512 - 16;
+
+  // If a message "body" is larger than CHUNK bytes, then writers must break
+  // it into chunks, and send all but the last chunk with type 0.  The reader
+  // collects those chunks in this dict (indexed by pid), until the final chunk
+  // is received, and the chunks can be reassembled.
+  private dict $partials = dict[];
+
+
+  // NOTE: Only certain directories support "posix_mkfifo()".
+  public function __construct(?string $dir = null): void {
+    $path = \tempnam($dir ?? \sys_get_temp_dir(), "queue.mkfifo.");
+    \unlink($path);
+    if (!\posix_mkfifo($path, 0700)) {
+      throw new \Exception("Failed to create FIFO at '$path'");
+    }
+    $this->path = $path;
+  }
+
+  private function getInput(): mixed {
+    $input = $this->input;
+    if ($input is null) {
+      $path = $this->path;
+      if ($path is null) {
+        throw new \Exception("Missing FIFO path");
+      }
+      $input = \fopen($path, "r");
+      $this->input = $input;
+    }
+    return $input;
+  }
+
+  private function getOutput(): mixed {
+    $output = $this->output;
+    if ($output is null) {
+      $path = $this->path;
+      if ($path is null) {
+        throw new \Exception("Missing FIFO path");
+      }
+      $output = \fopen($path, "a");
+      $this->output = $output;
+    }
+    return $output;
+  }
+
+  private function validate(int $pid, int $type, int $blen): void {
+    if ($pid < 0 || $pid >= (1 << 22)) {
+      throw new \Exception("Illegal pid $pid");
+    }
+    if ($type < 0 || $type >= 0x10000) {
+      throw new \Exception("Illegal type $type");
+    }
+    if ($blen < 0 || $blen > static::CHUNK) {
+      throw new \Exception("Illegal blen $blen");
+    }
+  }
+
+  // Read one packet header or body.
+  private function read(int $n): string {
+    $input = $this->getInput();
+    $result = "";
+    while (\strlen($result) < $n) {
+      $r = fread($input, $n - \strlen($result));
+      if ($r is string) {
+        $result .= $r;
+      } else {
+        throw new \Exception("Failed to read $n bytes");
+      }
+    }
+    return $result;
+  }
+
+  // Receive one raw message (pid, type, body).
+  public function receive(): (int, int, string) {
+    $type = null;
+    $body = "";
+    while (true) {
+      $header = $this->read(16);
+      $pid = intval(substr($header, 0, 8) as string, 16);
+      $type = intval(substr($header, 8, 4) as string, 16);
+      $blen = intval(substr($header, 12, 4) as string, 16);
+      $this->validate($pid, $type, $blen);
+      $body = $this->read($blen);
+      if ($type === 0) {
+        if (isset($this->partials[$pid])) {
+          $this->partials[$pid][] = $body;
+        } else {
+          $this->partials[$pid] = vec[$body];
+        }
+      } else {
+        if (isset($this->partials[$pid])) {
+          $this->partials[$pid][] = $body;
+          $body = \join("", $this->partials[$pid]);
+          unset($this->partials[$pid]);
+        }
+        return tuple($pid, $type, $body);
+      }
+    }
+  }
+
+  // Receive one message (pid, type, message).
+  // Note that the raw body is processed using "unserialize()".
+  public function receiveMessage(): (int, int, mixed) {
+    list($pid, $type, $body) = $this->receive();
+    $msg = unserialize($body);
+    return tuple($pid, $type, $msg);
+  }
+
+  private function write(int $pid, int $type, string $body): void {
+    $output = $this->getOutput();
+    $blen = \strlen($body);
+    $this->validate($pid, $type, $blen);
+    $packet = sprintf("%08x%04x%04x%s", $pid, $type, $blen, $body);
+    $n = \strlen($packet);
+    if ($n !== 16 + $blen) {
+      throw new \Exception("Illegal packet");
+    }
+    // NOTE: Hack's "fwrite()" is never buffered, which is especially
+    // critical for pipe writes, to ensure that they are actually atomic.
+    // See the documentation for "PlainFile::writeImpl()".  But just in
+    // case, we add an explicit "fflush()" below.
+    if (fwrite($output, $packet, $n) !== $n) {
+      throw new \Exception("Failed to write $n bytes");
+    }
+    fflush($output);
+  }
+
+  // Send one raw message.
+  public function send(int $type, string $body): void {
+    $pid = \posix_getpid();
+    $blen = \strlen($body);
+    $chunk = static::CHUNK;
+    if ($blen > $chunk) {
+      for ($i = 0; $i + $chunk < $blen; $i += $chunk) {
+        $this->write($pid, 0, \substr($body, $i, $chunk) as string);
+      }
+      $this->write($pid, $type, \substr($body, $i) as string);
+    } else {
+      $this->write($pid, $type, $body);
+    }
+  }
+
+  // Send one message.
+  // Note that the raw body is computed using "serialize()".
+  public function sendMessage(int $type, mixed $msg): void {
+    $body = serialize($msg);
+    $this->send($type, $body);
+  }
+
+  function destroy(): void {
+    if ($this->input is nonnull) {
+      fclose($this->input);
+      $this->input = null;
+    }
+    if ($this->output is nonnull) {
+      fclose($this->output);
+      $this->output = null;
+    }
+    if ($this->path is nonnull) {
+      \unlink($this->path);
+      $this->path = null;
+    }
+  }
+}
+
+
 class Status {
   private static $results = array();
   private static $mode = 0;
@@ -1253,9 +1457,8 @@ class Status {
   private static $use_color = false;
 
   public static $nofork = false;
-  private static $queue = null;
+  private static ?Queue $queue = null;
   private static $killed = false;
-  public static $key;
 
   private static $overall_start_time = 0;
   private static $overall_end_time = 0;
@@ -1288,7 +1491,7 @@ class Status {
   const SKIP_SERVER = 1;
   const PASS_CLI = 2;
 
-  private static function getTempDir() {
+  public static function createTempDir(): void {
     self::$tempdir = sys_get_temp_dir();
     // Apparently some systems might not put the trailing slash
     if (substr(self::$tempdir, -1) !== "/") {
@@ -1298,7 +1501,7 @@ class Status {
     mkdir(self::$tempdir);
   }
 
-  public static function getTestTmpDir() {
+  public static function getTestTmpDir(): string {
     $test_tmp_dir = self::$tempdir . "/test-data";
     mkdir($test_tmp_dir);
     return $test_tmp_dir;
@@ -1320,7 +1523,7 @@ class Status {
     rmdir($dir);
   }
 
-  public static function removeTempDir() {
+  private static function removeTempDir() {
     self::removeDirectory(self::$tempdir);
   }
 
@@ -1365,7 +1568,6 @@ class Status {
   }
 
   public static function started() {
-    self::getTempDir();
     self::send(self::MSG_STARTED, null);
     self::$overall_start_time = microtime(true);
   }
@@ -1375,11 +1577,12 @@ class Status {
     self::send(self::MSG_FINISHED, null);
   }
 
-  public static function killQueue() {
+  public static function destroy(): void {
     if (!self::$killed) {
-      msg_remove_queue(self::$queue);
-      self::$queue = null;
       self::$killed = true;
+      self::$queue->destroy();
+      self::$queue = null;
+      self::removeTempDir();
     }
   }
 
@@ -1499,7 +1702,7 @@ class Status {
             Status::sayColor("$test ", Status::YELLOW, "skipped");
 
             if ($reason !== null) {
-              Status::sayColor(" - $reason");
+              Status::sayColor(" - reason: $reason");
             }
             Status::sayColor(sprintf(" (%.2fs)\n", $time));
             break;
@@ -1554,7 +1757,7 @@ class Status {
       self::handle_message($type, $msg);
       return;
     }
-    msg_send(self::getQueue(), $type, $msg);
+    self::getQueue()->sendMessage($type, $msg);
   }
 
   /**
@@ -1570,7 +1773,7 @@ class Status {
       if (is_integer($str)) {
         $color = $str;
         if (self::$use_color) {
-          print "\033[0;${color}m";
+          print "\033[0;{$color}m";
         }
         $str = $args[$i++];
       }
@@ -1656,7 +1859,8 @@ class Status {
 
   public static function getQueue() {
     if (!self::$queue) {
-      self::$queue = msg_get_queue(self::$key);
+      if (self::$killed) error("Killed!");
+      self::$queue = new Queue(self::$tempdir);
     }
     return self::$queue;
   }
@@ -1677,6 +1881,14 @@ function clean_intermediate_files($test, $options) {
     // tests in --hhbbc2 mode
     'before.round_trip.hhas',
     'after.round_trip.hhas',
+    // temporary autoloader DB and associated cruft
+    // We have at most two modes for now - see hhvm_cmd_impl
+    '0.autoloadDB',
+    '0.autoloadDB-shm',
+    '0.autoloadDB-wal',
+    '1.autoloadDB',
+    '1.autoloadDB-shm',
+    '1.autoloadDB-wal',
   );
   foreach ($exts as $ext) {
     $file = "$test.$ext";
@@ -1904,12 +2116,13 @@ function generate_array_diff($ar1, $ar2, $is_reg, $w) {
 
 function generate_diff($wanted, $wanted_re, $output)
 {
+  $m = null;
   $w = explode("\n", $wanted);
   $o = explode("\n", $output);
   if (is_null($wanted_re)) {
     $r = $w;
   } else {
-    if (preg_match('/^\((.*)\)\{(\d+)\}$/s', $wanted_re, &$m)) {
+    if (preg_match_with_matches('/^\((.*)\)\{(\d+)\}$/s', $wanted_re, inout $m)) {
       $t = explode("\n", $m[1]);
       $r = array();
       $w2 = array();
@@ -1957,6 +2170,7 @@ function can_run_server_test($test) {
     !find_test_ext($test, 'opts') &&
     !is_file("$test.ini") &&
     !is_file("$test.onlyrepo") &&
+    !is_file("$test.onlyjumpstart") &&
     !is_file("$test.use.for.ini.migration.testing.only.hdf") &&
     strpos($test, 'quick/debugger') === false &&
     strpos($test, 'quick/xenon') === false &&
@@ -2346,6 +2560,10 @@ function run_test($options, $test) {
     if (preg_grep('/-m debug/', (array)$hhvm) || file_exists($test.'.norepo')) {
       return 'skip-norepo';
     }
+    if (file_exists($test.'.onlyjumpstart') &&
+       (!isset($options['jit-serialize']) || $options['jit-serialize'] < 1)) {
+      return 'skip-onlyjumpstart';
+    }
 
     $hphp_hhvm_repo = "$test.repo/hhvm.hhbc";
     $hhbbc_hhvm_repo = "$test.repo/hhvm.hhbbc";
@@ -2411,8 +2629,8 @@ function run_test($options, $test) {
     return run_one_config($options, $test, $hhvm, $hhvm_env);
   }
 
-  if (file_exists($test.'.onlyrepo')) {
-    return 'skip-onlyrepo';
+  if (file_exists($test.'.onlyrepo') || file_exists($test.'.onlyjumpstart')) {
+    return 'skip-onlyrepo or skip-onlyjumpstart';
   }
 
   if (isset($options['hhas-round-trip'])) {
@@ -2508,6 +2726,7 @@ function print_commands($tests, $options) {
   }
 }
 
+// This runs only in the "printer" child.
 function msg_loop($num_tests, $queue) {
   $do_progress =
     (
@@ -2518,23 +2737,18 @@ function msg_loop($num_tests, $queue) {
 
   if ($do_progress) {
     $stty = strtolower(Status::getSTTY());
-    preg_match_all("/columns ([0-9]+);/", $stty, &$output);
-    if (!isset($output[1][0])) {
-      // because BSD has to be different
-      preg_match_all("/([0-9]+) columns;/", $stty, &$output);
-    }
-    if (!isset($output[1][0])) {
-      $do_progress = false;
+    $matches = null;
+    if (preg_match_with_matches("/columns ([0-9]+);/", $stty, inout $matches) ||
+        // because BSD has to be different
+        preg_match_with_matches("/([0-9]+) columns;/", $stty, inout $matches)) {
+      $cols = $matches[1];
     } else {
-      $cols = $output[1][0];
+      $do_progress = false;
     }
   }
 
   while (true) {
-    if (!msg_receive($queue, 0, &$type, 1024, &$message)) {
-      error("msg_receive failed");
-    }
-
+    list($pid, $type, $message) = $queue->receiveMessage();
     if (!Status::handle_message($type, $message)) break;
 
     if ($do_progress) {
@@ -2616,7 +2830,7 @@ CLOWN
     print "\nSKIP-ALOO: Only skipped tests!\n";
     if (!($options['no-fun'] ?? false)) {
       print <<<SKIPPER
-                        .".
+                          .".
                          /  |
                         /  /
                        / ,"
@@ -2905,11 +3119,6 @@ function start_servers($options, $configs) {
   return $servers;
 }
 
-function drain_queue($queue) {
-  while (@msg_receive($queue, 0, &$type, 1024, &$message, true,
-                      MSG_IPC_NOWAIT | MSG_NOERROR));
-}
-
 function get_num_threads($options, $tests) {
   if ($options['typechecker'] ?? false) {
     // hh_server spawns a child per CPU; things get flakey with CPU^2 forks
@@ -3119,17 +3328,31 @@ function main($argv) {
   }
   Status::setUseColor(isset($options['color']) ? true : posix_isatty(STDOUT));
 
-  Status::$key = rand();
-  Status::$nofork = count($tests) == 1 && !$servers;
-  if (!Status::$nofork) {
-    $queue = Status::getQueue();
-    drain_queue($queue);
-  }
+  Status::createTempDir();
 
-  Status::started();
+  // NOTE: This is passed down to forked test processes.
   $_ENV['HPHP_TEST_TMPDIR'] = Status::getTestTmpDir();
 
-  // Spawn off worker threads.
+  Status::$nofork = count($tests) == 1 && !$servers;
+
+  if (!Status::$nofork) {
+    // Create the Queue before any children are forked.
+    $queue = Status::getQueue();
+
+    // Fork a "printer" child to process status messages.
+    $printer_pid = pcntl_fork();
+    if ($printer_pid == -1) {
+      error("failed to fork");
+    } else if ($printer_pid == 0) {
+      msg_loop(count($tests), $queue);
+      return 0;
+    }
+  }
+
+  // NOTE: This unblocks the Queue (if needed).
+  Status::started();
+
+  // Fork "worker" children (if needed).
   $children = array();
   // A poor man's shared memory.
   $bad_test_files = array();
@@ -3151,23 +3374,14 @@ function main($argv) {
       }
     }
 
-    // Fork off a child to receive messages and print status, and have the parent
-    // wait for all children to exit.
-    $printer_pid = pcntl_fork();
-    if ($printer_pid == -1) {
-      error("failed to fork");
-    } else if ($printer_pid == 0) {
-      msg_loop(count($tests), $queue);
-      return 0;
-    }
-
-    // In case we exit in a crazy way, have the parent blow up the queue.
+    // Make sure to clean up on exit, or on SIGTERM/SIGINT.
     // Do this here so no children inherit this.
-    $kill_queue = function() { Status::killQueue(); };
-    register_shutdown_function($kill_queue);
-    pcntl_signal(SIGTERM, $kill_queue);
-    pcntl_signal(SIGINT, $kill_queue);
+    $destroy = function(): void { Status::destroy(); };
+    register_shutdown_function($destroy);
+    pcntl_signal(SIGTERM, $destroy);
+    pcntl_signal(SIGINT, $destroy);
 
+    // Have the parent wait for all forked children to exit.
     $return_value = 0;
     while (count($children) && $printer_pid != 0) {
       $pid = pcntl_wait(&$status);
@@ -3200,7 +3414,16 @@ function main($argv) {
 
   Status::finished();
 
-  // Kill the server.
+  // Wait for the printer child to die, if needed.
+  if (!Status::$nofork && $printer_pid != 0) {
+    $status = 0;
+    $pid = pcntl_waitpid($printer_pid, inout $status);
+    if (!pcntl_wifexited($status) && !pcntl_wifsignaled($status)) {
+      error("Unexpected exit status from child");
+    }
+  }
+
+  // Kill the servers.
   if ($servers) {
     foreach ($servers['pids'] as $ref) {
       proc_terminate($ref->server['proc']);
@@ -3270,8 +3493,6 @@ function main($argv) {
                    Status::BLUE,
                    sprintf("%.2fs\n",
                    Status::addTestTimesSerial()));
-
-  Status::removeTempDir();
 
   return $return_value;
 }

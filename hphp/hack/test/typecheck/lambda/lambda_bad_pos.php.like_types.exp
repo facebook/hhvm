@@ -1,0 +1,34 @@
+File "lambda_bad_pos.php", line 13, characters 10-16:
+Invalid return type (Typing[4110])
+File "lambda_bad_pos.php", line 8, characters 4-15:
+Expected ~dict<Tv, Tk> because it is an unenforceable type
+File "lambda_bad_pos.php", line 9, characters 13-18:
+But got dict<dynamic, dynamic>
+File "lambda_bad_pos.php", line 21, characters 33-38:
+Invalid argument (Typing[4110])
+File "lambda_bad_pos.php", line 17, characters 13-15:
+Expected Tv1
+File "lambda_bad_pos.php", line 20, characters 12-23:
+But got dynamic because a type could not be determined here
+File "lambda_bad_pos.php", line 23, characters 10-16:
+Invalid return type (Typing[4110])
+File "lambda_bad_pos.php", line 18, characters 4-16:
+Expected ~dict<Tk, Tv2> because it is an unenforceable type
+File "lambda_bad_pos.php", line 19, characters 13-18:
+But got dict<dynamic, ~Tv2>
+File "lambda_bad_pos.php", line 26, characters 34-35:
+Invalid return type (Typing[4323])
+File "lambda_bad_pos.php", line 6, characters 27-34:
+Some type constraint(s) are violated here
+File "lambda_bad_pos.php", line 6, characters 21-22:
+Tv is a constrained type parameter
+File "lambda_bad_pos.php", line 6, characters 27-34:
+Expected arraykey
+File "lambda_bad_pos.php", line 25, characters 22-22:
+But got C
+File "hackarray.hhi", line 13, characters 61-61:
+  via this generic T
+File "interfaces.hhi", line 118, characters 84-85:
+  via this generic Tv
+File "rx/interfaces.hhi", line 35, characters 60-61:
+  via this generic Tv

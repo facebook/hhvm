@@ -21,7 +21,6 @@
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/init-fini-node.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/root-map.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
@@ -29,6 +28,7 @@
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/util/alloc.h"
+#include "hphp/util/rds-local.h"
 
 #include <libxml/parserInternals.h>
 #include <libxml/tree.h>

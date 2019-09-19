@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -23,13 +23,10 @@ let stamp_file = Filename.concat GlobalConfig.tmp_dir "stamp"
 
 let touch_stamp () =
   Sys_utils.mkdir_no_fail (Filename.dirname stamp_file);
-  Sys_utils.with_umask
-    0o111
-    (fun () ->
-     (* Open and close the file to set its mtime. Don't use the Unix.utimes
-      * function since that will fail if the stamp file doesn't exist. *)
-     close_out (open_out stamp_file)
-    )
+  Sys_utils.with_umask 0o111 (fun () ->
+      (* Open and close the file to set its mtime. Don't use the Unix.utimes
+       * function since that will fail if the stamp file doesn't exist. *)
+      close_out (open_out stamp_file))
 
 let touch_stamp_errors l1 l2 =
   (* We don't want to needlessly touch the stamp file if the error list is
@@ -40,6 +37,7 @@ let touch_stamp_errors l1 l2 =
   let rec length_greater_than n = function
     | [] -> false
     | _ when n = 0 -> true
-    | _::l -> length_greater_than (n-1) l in
-  if length_greater_than 5 l1 || length_greater_than 5 l2 || l1 <> l2
-  then touch_stamp ()
+    | _ :: l -> length_greater_than (n - 1) l
+  in
+  if length_greater_than 5 l1 || length_greater_than 5 l2 || l1 <> l2 then
+    touch_stamp ()

@@ -291,6 +291,10 @@ int main() {
 if (NOT OPENSSL_HAVE_RAND_EGD)
   add_definitions("-DOPENSSL_NO_RAND_EGD")
 endif()
+CHECK_CXX_SOURCE_COMPILES("#include <openssl/ssl.h>
+int main() {
+  return SSL_set_alpn_protos(nullptr, nullptr, 0);
+}" OPENSSL_HAVE_ALPN)
 SET(CMAKE_REQUIRED_INCLUDES)
 SET(CMAKE_REQUIRED_LIBRARIES)
 
@@ -437,6 +441,9 @@ macro(hphp_link target)
 
   add_dependencies(${target} boostMaybeBuild)
   target_link_libraries(${target} boost)
+  add_dependencies(${target} libsodiumMaybeBuild)
+  target_link_libraries(${target} libsodium)
+
   target_link_libraries(${target} ${MYSQL_CLIENT_LIBS})
   if (ENABLE_ASYNC_MYSQL)
     target_link_libraries(${target} squangle)

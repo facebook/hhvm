@@ -1,4 +1,17 @@
 <?hh
+class T {
+  public $str;
+  public $int;
+  function __construct() {
+    $this->str = '';
+    $this->int = 0;
+  }
+  function bongo($a, $b) {
+    $this->str .= $a;
+    $this->int += $b;
+  }
+}
+<<__EntryPoint>> function main(): void {
 error_reporting(0);
 
 print "Test begin\n";
@@ -13,19 +26,6 @@ $arr[] -= 1;
 
 var_dump($arr);
 
-class T {
-  public $str;
-  public $int;
-  function __construct() {
-    $this->str = '';
-    $this->int = 0;
-  }
-  function bongo($a, $b) {
-    $this->str .= $a;
-    $this->int += $b;
-  }
-}
-
 $t = new T();
 $t->bongo("eine", 1);
 $t->bongo(":zwei", 2);
@@ -37,4 +37,4 @@ $a[$zero] += 1;
 var_dump($a);
 
 print "Test end\n";
-
+}

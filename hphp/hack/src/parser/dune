@@ -1,133 +1,59 @@
-(copy_files smart_constructors/*.ml)
+(* -*- tuareg -*- *)
 
+let dune_file s =
+  String.concat "\n"
+    [ s
+    ; ""
+    ; "(include dune.inc)"
+    ]
+
+let rust =
+{|
+; FFI OCaml to Rust (../../target/*/librust_parser_ffi.a)
+; contains "external" function definition in .ml and
+; the symbol is provided by the ocaml-rs Rust package via caml! macro
 (library
-  (name full_fidelity)
-  (wrapped false)
-  (modules
-   full_fidelity_ast_types
-   full_fidelity_parser_env
-   full_fidelity_declaration_parser
-   full_fidelity_declaration_parser_type
-   full_fidelity_editable_positioned_original_source_data
-   full_fidelity_editable_positioned_syntax
-   full_fidelity_editable_positioned_token
-   full_fidelity_editable_syntax
-   full_fidelity_editable_token
-   full_fidelity_editable_trivia
-   full_fidelity_expression_parser
-   full_fidelity_expression_parser_type
-   full_fidelity_lexer
-   full_fidelity_lexer_sig
-   full_fidelity_minimal_syntax
-   full_fidelity_minimal_token
-   full_fidelity_minimal_trivia
-   full_fidelity_operator_generated
-   full_fidelity_operator
-   full_fidelity_parser
-   full_fidelity_parser_errors
-   full_fidelity_parser_helpers
-   full_fidelity_parser_profiling
-   full_fidelity_positioned_syntax
-   full_fidelity_positioned_token
-   full_fidelity_positioned_trivia
-   full_fidelity_precedence_parser
-   full_fidelity_rewriter
-   full_fidelity_simple_parser
-   full_fidelity_source_text
-   full_fidelity_statement_parser
-   full_fidelity_statement_parser_type
-   stats_container
-   full_fidelity_token_kind
-   full_fidelity_syntax
-   full_fidelity_syntax_error
-   full_fidelity_syntax_kind
-   full_fidelity_syntax_tree
-   full_fidelity_syntax_type
-   full_fidelity_trivia_kind
-   full_fidelity_type_lexer
-   full_fidelity_type_parser
-   full_fidelity_type_parser_type
-   full_fidelity_validated_syntax
-   lambda_analyzer
-   full_fidelity_parser_context
-   little_cache
-   lexable_trivia_sig
-   lexable_token_sig
-   lexable_positioned_token_sig
-   minimal_parser
-   positioned_parser
-   positioned_syntax_sig
-   syntax_sig
-   parserSig
-   syntaxTransforms
+  (name rust_parser_ffi)
+  (modules)
+  (preprocess (pps visitors.ppx ppx_deriving.std)) ; See T41851208
+  (libraries ocamlpool)
+  (c_library_flags -lpthread)
+  (self_build_stubs_archive (rust_parser_ffi))
+)
 
-   ; from smart_constructors
-   coroutine_smart_constructor
-   smartConstructors
-   smartConstructorsWrappers
-   verifySmartConstructors
-   declModeSmartConstructors
-   syntaxSmartConstructors)
-  (libraries
-    common
-    file_info
-    hh_autoimport
-    naming_special_names
-    parser_options
-    parser_schema
-    parser_schema_def
-    partial_provider
-    relative_path
-    rust_parser_ffi_stubs ; temp stub, to be replaced by rust_to_ocaml
+(rule
+  (targets librust_parser_ffi_stubs.a)
+  (deps (source_tree %{workspace_root}/src))
+  (locks /cargo)
+  (action
+    (run %{workspace_root}/scripts/build_rust_to_ocaml.sh
+      hack_parser_ffi
+      rust_parser_ffi
+    )
   )
-  (preprocess (pps visitors.ppx ppx_deriving.std)))
+)
 
 (library
-  (name parser)
-  (wrapped false)
-  (modules
-    ast_check
-    docblock_finder
-    full_fidelity_ast
-    globalParserOptions
-    hack_grammar_descriptor_for_old
-    hack_grammar_descriptor_helper
-    hack_grammar_descriptor
-    html_entities
-    ide_parser_cache
-    limited_width_pretty_printing_library
-    namespaces
-    parser_return
-    pretty_printing_library
-    pretty_printing_library_sig
-    random_ast_generator_config
-    random_ast_generator)
-  (libraries
-    ast
-    fixme_provider
-    full_fidelity
-    heap_shared_mem
-    logging
-    namespace_env
-    nast
-    parser_ppl
-    partial_provider
-    utils_lint
-    utils_php_escape))
+  (name rust_parser_errors_ffi)
+  (modules)
+  (preprocess (pps visitors.ppx ppx_deriving.std)) ; See T41851208
+  (libraries ocamlpool)
+  (c_library_flags -lpthread)
+  (self_build_stubs_archive (rust_parser_errors_ffi))
+)
 
-(library
-  (name hh_autoimport)
-  (wrapped false)
-  (modules hh_autoimport)
-  (libraries
-    collections
-    core_kernel))
+(rule
+  (targets librust_parser_errors_ffi_stubs.a)
+  (deps (source_tree %{workspace_root}/src))
+  (locks /cargo)
+  (action
+    (run %{workspace_root}/scripts/build_rust_to_ocaml.sh
+      hack_parser_errors_ffi
+      rust_parser_errors_ffi
+    )
+  )
+)
+|}
 
-(library
-  (name parsing_service)
-  (wrapped false)
-  (modules
-    parsing_service)
-  (libraries
-    ast_provider
-    procs_procs))
+let () =
+  Jbuild_plugin.V1.send @@ dune_file rust

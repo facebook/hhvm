@@ -1,0 +1,12 @@
+File "lambda_as_awaitable_result.php", line 45, characters 5-17:
+Invalid argument (Typing[4110])
+File "stdlib/builtins_array.hhi", line 115, characters 10-18:
+Expected Container<[unresolved]>
+File "lambda_as_awaitable_result.php", line 39, characters 35-45:
+But got dynamic because it is an unenforceable type
+File "lambda_as_awaitable_result.php", line 63, characters 10-45:
+Invalid return type (Typing[4110])
+File "lambda_as_awaitable_result.php", line 62, characters 36-48:
+Expected ~vec<arraykey> because it is an unenforceable type
+File "lambda_as_awaitable_result.php", line 63, characters 10-45:
+But got vec<(bool | float | string)>

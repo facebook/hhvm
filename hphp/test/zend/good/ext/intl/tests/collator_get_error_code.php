@@ -4,6 +4,7 @@
  * Retreive error code.
  */
 
+include_once( 'ut_common.inc' );
 
 /*
  * Check if error code equals to expected one.
@@ -11,7 +12,7 @@
 function check_rc( $rc, $expected )
 {
     return ( $rc === $expected ? "ok" : "failed" ) . "\n";
-} 
+}
 
 function ut_main()
 {
@@ -30,9 +31,11 @@ function ut_main()
 
     return $res;
 }
+<<__EntryPoint>>
+function main_entry(): void {
 
-# Suppress warning messages.
-error_reporting( E_ERROR );
+  # Suppress warning messages.
+  error_reporting( E_ERROR );
 
-include_once( 'ut_common.inc' );
-ut_run();
+  ut_run();
+}

@@ -59,14 +59,14 @@ std::string nameAndReason(int bcOff, std::string caller, std::string callee,
 }
 
 bool traceRefusal(SrcKey callerSk, const Func* callee, std::string why,
-                  Annotations* annotations) {
+                  AnnotationData* annotations) {
   // This is not under Trace::enabled so that we can collect the data in prod.
   const Func* caller = callerSk.func();
   int bcOff = callerSk.offset();
   auto calleeName = callee ? callee->fullName()->data() : "(unknown)";
   if (annotations && RuntimeOption::EvalDumpInlDecision > 0) {
-    annotations->emplace_back("NoInline",
-      nameAndReason(bcOff, caller->fullName()->data(), calleeName, why));
+    annotations->inliningDecisions.emplace_back(false, bcOff, caller, callee,
+                                                why);
   }
   if (Trace::enabled) {
     assertx(caller);
@@ -99,12 +99,12 @@ const StaticString
   s_NeverInline("__NEVER_INLINE");
 
 /*
- * Check if the funcd of `inst' has any characteristics which prevent inlining,
+ * Check if the `callee' has any characteristics which prevent inlining,
  * without peeking into its bytecode or regions.
  */
 bool isCalleeInlinable(SrcKey callSK, const Func* callee,
-                       Annotations* annotations) {
-  assertx(hasFCallEffects(callSK.op()));
+                       AnnotationData* annotations) {
+  assertx(isFCall(callSK.op()));
   auto refuse = [&] (const char* why) {
     return traceRefusal(callSK, callee, why, annotations);
   };
@@ -127,8 +127,8 @@ bool isCalleeInlinable(SrcKey callSK, const Func* callee,
       return refuse("callee has variadic capture with non-empty value");
     }
   }
-  if (callee->isMagicCallMethod()) {
-    return refuse("magic callee");
+  if (callee->hasReifiedGenerics() && !callee->cls()) {
+    return refuse("reified generics on non-method");
   }
   if (callee->isGenerator()) {
     return refuse("callee is generator");
@@ -149,8 +149,10 @@ bool isCalleeInlinable(SrcKey callSK, const Func* callee,
 /*
  * Check that we don't have any missing or extra arguments.
  */
-bool checkNumArgs(SrcKey callSK, const Func* callee, Annotations* annotations) {
-  assertx(hasFCallEffects(callSK.op()));
+bool checkNumArgs(SrcKey callSK,
+                  const Func* callee,
+                  AnnotationData* annotations) {
+  assertx(isFCall(callSK.op()));
   assertx(callee);
 
   auto refuse = [&] (const char* why) {
@@ -167,10 +169,6 @@ bool checkNumArgs(SrcKey callSK, const Func* callee, Annotations* annotations) {
 
   if (fca.hasUnpack()) {
     return refuse("callee called with variadic arguments");
-  }
-
-  if (fca.numRets != 1) {
-    return refuse("callee with multiple returns");
   }
 
   if (fca.enforceReffiness()) {
@@ -197,8 +195,10 @@ bool checkNumArgs(SrcKey callSK, const Func* callee, Annotations* annotations) {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-bool canInlineAt(SrcKey callSK, const Func* callee, Annotations* annotations) {
-  assertx(hasFCallEffects(callSK.op()));
+bool canInlineAt(SrcKey callSK,
+                 const Func* callee,
+                 AnnotationData* annotations) {
+  assertx(isFCall(callSK.op()));
 
   if (!callee) {
     return traceRefusal(callSK, callee, "unknown callee", annotations);
@@ -213,10 +213,6 @@ bool canInlineAt(SrcKey callSK, const Func* callee, Annotations* annotations) {
   }
   if (callee->attrs() & AttrInterceptable) {
     return traceRefusal(callSK, callee, "callee is interceptable", annotations);
-  }
-  if (callee->takesInOutParams()) {
-    return traceRefusal(callSK, callee, "callee takes inout params",
-                        annotations);
   }
 
   // TODO(#4238160): Inlining into pseudomain callsites is still buggy.
@@ -248,12 +244,6 @@ bool isInlinableCPPBuiltin(const Func* f) {
       (f->attrs() & AttrNoFCallBuiltin) ||
       (f->numParams() > Native::maxFCallBuiltinArgs()) ||
       !f->nativeFuncPtr()) {
-    return false;
-  }
-
-  // ARM currently can't handle floating point returns.
-  if (f->hniReturnType() == KindOfDouble &&
-      !Native::allowFCallBuiltinDoubles()) {
     return false;
   }
 
@@ -378,9 +368,9 @@ using InlineCostCache = jit::fast_map<
   InlineRegionKey::Eq
 >;
 
-Vcost computeTranslationCostSlow(SrcKey at, Op callerFPushOp,
+Vcost computeTranslationCostSlow(SrcKey at,
                                  const RegionDesc& region,
-                                 Annotations& annotations) {
+                                 AnnotationData* annotationData) {
   TransContext ctx {
     kInvalidTransID,
     TransKind::Optimize,
@@ -389,14 +379,16 @@ Vcost computeTranslationCostSlow(SrcKey at, Op callerFPushOp,
     // We can pretend the stack is empty, but we at least need to account for
     // the locals, iters, and slots, etc.
     FPInvOffset{at.func()->numSlotsInFrame()},
-    0,
-    callerFPushOp
+    0
   };
 
   rqtrace::DisableTracing notrace;
 
-  auto const unit = irGenInlineRegion(ctx, region, annotations);
+  auto const unit = irGenInlineRegion(ctx, region);
   if (!unit) return {0, true};
+
+  // TODO(T52856776) - annotations should be copied from unit into outer unit
+  // via annotationData
 
   SCOPE_ASSERT_DETAIL("Inline-IRUnit") { return show(*unit); };
   return irlower::computeIRUnitCost(*unit);
@@ -404,17 +396,16 @@ Vcost computeTranslationCostSlow(SrcKey at, Op callerFPushOp,
 
 folly::Synchronized<InlineCostCache, folly::RWSpinLock> s_inlCostCache;
 
-int computeTranslationCost(SrcKey at, Op callerFPushOp,
+int computeTranslationCost(SrcKey at,
                            const RegionDesc& region,
-                           Annotations& annotations) {
+                           AnnotationData* annotationData) {
   InlineRegionKey irk{region};
   SYNCHRONIZED_CONST(s_inlCostCache) {
     auto f = s_inlCostCache.find(irk);
     if (f != s_inlCostCache.end()) return f->second;
   }
 
-  auto const info = computeTranslationCostSlow(at, callerFPushOp, region,
-                                              annotations);
+  auto const info = computeTranslationCostSlow(at, region, annotationData);
   auto cost = info.cost;
 
   // We normally store the computed cost into the cache.  However, if the region
@@ -501,33 +492,30 @@ uint64_t adjustedMaxVasmCost(const irgen::IRGS& env,
  * Return the cost of inlining the given callee.
  */
 int costOfInlining(SrcKey callerSk,
-                   Op callerFPushOp,
                    const Func* callee,
                    const RegionDesc& region,
-                   Annotations& annotations) {
+                   AnnotationData* annotationData) {
   auto const alwaysInl =
     !RuntimeOption::EvalHHIRInliningIgnoreHints &&
     callee->userAttributes().count(s_AlwaysInline.get());
 
   // Functions marked as always inline don't contribute to overall cost
-  return alwaysInl
-    ? 0
-    : computeTranslationCost(callerSk, callerFPushOp, region, annotations);
+  return alwaysInl ?
+    0 :
+    computeTranslationCost(callerSk, region, annotationData);
 }
 
 bool shouldInline(const irgen::IRGS& irgs,
                   SrcKey callerSk,
-                  Op callerFPushOp,
                   const Func* callee,
                   const RegionDesc& region,
-                  uint32_t maxTotalCost,
-                  Annotations& annotations) {
+                  uint32_t maxTotalCost) {
   auto sk = region.empty() ? SrcKey() : region.start();
   assertx(callee);
   assertx(sk.func() == callee);
 
   auto annotationsPtr = mcgen::dumpTCAnnotation(irgs.context.kind) ?
-                        &annotations : nullptr;
+                        irgs.unit.annotationData.get() : nullptr;
 
   // Tracing return lambdas.
   auto refuse = [&] (const std::string& why) {
@@ -541,11 +529,10 @@ bool shouldInline(const irgen::IRGS& irgs,
     inlineAccepts->addValue(1);
 
     if (annotationsPtr && RuntimeOption::EvalDumpInlDecision >= 2) {
-      auto str = nameAndReason(callerSk.offset(),
-                               callerSk.func()->fullName()->data(),
-                               callee->fullName()->data(),
-                               why);
-      annotationsPtr->emplace_back("DoInline", str);
+      auto const decision = AnnotationData::InliningDecision{
+        true, callerSk.offset(), callerSk.func(), callee, why
+      };
+      annotationsPtr->inliningDecisions.push_back(decision);
     }
 
     UNUSED auto const topFunc = [&] {
@@ -613,11 +600,6 @@ bool shouldInline(const irgen::IRGS& irgs,
                                     opcodeToName(op)).str().c_str());
       }
 
-      // RetM is currently not supported in the callee region.
-      if (op == OpRetM) {
-        return refuse("RetM is not supported");
-      }
-
       // Detect that the region contains a return.
       if (isReturnish(op)) {
         hasRet = true;
@@ -643,6 +625,11 @@ bool shouldInline(const irgen::IRGS& irgs,
   // Ignore cost computation for functions marked __ALWAYS_INLINE
   if (!RuntimeOption::EvalHHIRInliningIgnoreHints &&
       callee->userAttributes().count(s_AlwaysInline.get())) {
+    // In debug builds compute the cost anyway to catch bugs in the inlining
+    // machinery. Many inlining tests utilize the __ALWAYS_INLINE attribute.
+    if (debug) {
+      computeTranslationCost(callerSk, region, annotationsPtr);
+    }
     return accept("callee marked as __ALWAYS_INLINE");
   }
 
@@ -650,8 +637,7 @@ bool shouldInline(const irgen::IRGS& irgs,
   // We measure the cost of inlining each callstack and stop when it exceeds a
   // certain threshold.  (Note that we do not measure the total cost of all the
   // inlined calls for a given caller---just the cost of each nested stack.)
-  const int cost = computeTranslationCost(callerSk, callerFPushOp, region,
-                                          annotations);
+  const int cost = computeTranslationCost(callerSk, region, annotationsPtr);
   if (cost <= RuntimeOption::EvalHHIRAlwaysInlineVasmCostLimit) {
     return accept(folly::sformat("cost={} within always-inline limit", cost));
   }
@@ -775,7 +761,7 @@ RegionDescPtr selectCalleeCFG(SrcKey callerSk, const Func* callee,
                               const int numArgs,
                               Type ctxType, std::vector<Type>& argTypes,
                               int32_t maxBCInstrs,
-                              Annotations* annotations) {
+                              AnnotationData* annotations) {
   auto const profData = jit::profData();
   if (!profData) {
     traceRefusal(callerSk, callee, "no profData", annotations);
@@ -830,17 +816,15 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
                                  const Func* callee,
                                  const FCallArgs& fca,
                                  Type ctxType,
-                                 Op writeArOpc,
-                                 const SrcKey& sk,
-                                 Annotations& annotations) {
-  assertx(hasFCallEffects(sk.op()));
+                                 const SrcKey& sk) {
+  assertx(isFCall(sk.op()));
   auto static inlineAttempts = ServiceData::createTimeSeries(
     "jit.inline.attempts", {ServiceData::StatsType::COUNT});
   inlineAttempts->addValue(1);
 
   auto kind = irgs.context.kind;
   auto annotationsPtr = mcgen::dumpTCAnnotation(kind) ?
-                        &annotations : nullptr;
+                        irgs.unit.annotationData.get() : nullptr;
 
   if (ctxType == TBottom) {
     traceRefusal(sk, callee, "ctx is TBottom", annotationsPtr);
@@ -858,7 +842,7 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
     // Bail out if calling a static methods with an object ctx.
     if (ctxType.maybe(TObj) &&
         (callee->isStaticInPrologue() ||
-         (!sk.hasThis() && isFPushClsMethod(writeArOpc)))) {
+         (!sk.hasThis() && isFCallClsMethod(sk.op())))) {
       traceRefusal(sk, callee, "calling static method with an object",
                    annotationsPtr);
       return nullptr;
@@ -866,22 +850,23 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
   }
 
   FTRACE(2, "selectCalleeRegion: callee = {}\n", callee->fullName()->data());
+  auto const firstArgPos = static_cast<int32_t>(fca.numInputs()) - 1;
   std::vector<Type> argTypes;
-  for (int i = fca.numArgs - 1; i >= 0; --i) {
+  for (int32_t i = 0; i < fca.numArgs; ++i) {
     // DataTypeGeneric is used because we're just passing the locals into the
     // callee.  It's up to the callee to constrain further if needed.
-    auto type = irgen::publicTopType(irgs, BCSPRelOffset{i});
+    auto type = irgen::publicTopType(irgs, BCSPRelOffset{firstArgPos - i});
     assertx(type <= TGen);
 
     // If we don't have sufficient type information to inline the region return
     // early
     if (type == TBottom) return nullptr;
     if (!(type <= TCell) && !(type <= TBoxedCell)) {
-      traceRefusal(sk, callee, folly::sformat("maybe boxed arg num: {}", i),
+      traceRefusal(sk, callee, folly::sformat("maybe boxed arg num: {}", i + 1),
                    annotationsPtr);
       return nullptr;
     }
-    FTRACE(2, "arg {}: {}\n", i, type);
+    FTRACE(2, "arg {}: {}\n", i + 1, type);
     argTypes.push_back(type);
   }
 
@@ -890,8 +875,8 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
     auto region = selectCalleeCFG(sk, callee, fca.numArgs, ctxType, argTypes,
                                   irgs.budgetBCInstrs, annotationsPtr);
     if (region &&
-        shouldInline(irgs, sk, writeArOpc, callee, *region,
-                     adjustedMaxVasmCost(irgs, *region, depth), annotations)) {
+        shouldInline(irgs, sk, callee, *region,
+                     adjustedMaxVasmCost(irgs, *region, depth))) {
       return region;
     }
     return nullptr;
@@ -901,8 +886,8 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
                                      irgs.budgetBCInstrs);
 
   if (region &&
-      shouldInline(irgs, sk, writeArOpc, callee, *region,
-                   adjustedMaxVasmCost(irgs, *region, depth), annotations)) {
+      shouldInline(irgs, sk, callee, *region,
+                   adjustedMaxVasmCost(irgs, *region, depth))) {
     return region;
   }
 

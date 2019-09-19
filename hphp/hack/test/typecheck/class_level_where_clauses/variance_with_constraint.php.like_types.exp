@@ -1,0 +1,18 @@
+File "variance_with_constraint.php", line 19, characters 10-15:
+Invalid return type (Typing[4110])
+File "variance_with_constraint.php", line 18, characters 54-72:
+Expected ~CovarianceBase<int> because it is an unenforceable type
+File "variance_with_constraint.php", line 18, characters 25-43:
+But got CovarianceBase<num>
+File "variance_with_constraint.php", line 27, characters 10-15:
+Invalid return type (Typing[4110])
+File "variance_with_constraint.php", line 26, characters 5-27:
+Expected ~ContravarianceBase<num> because it is an unenforceable type
+File "variance_with_constraint.php", line 25, characters 30-52:
+But got ContravarianceBase<int>
+File "variance_with_constraint.php", line 30, characters 10-15:
+Invalid return type (Typing[4110])
+File "variance_with_constraint.php", line 29, characters 41-49:
+Expected ~Base<num> because it is an unenforceable type
+File "variance_with_constraint.php", line 29, characters 22-30:
+But got Base<int>

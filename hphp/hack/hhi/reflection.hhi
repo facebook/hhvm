@@ -226,6 +226,8 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   public function hasReturnType(): bool;
   <<__Rx, __MaybeMutable>>
   public function getReturnType(): ?ReflectionType;
+  <<__Rx, __MaybeMutable>>
+  public function getReifiedTypeParamInfo(): varray<darray<string, bool>>;
 }
 
 class ReflectionFunction extends ReflectionFunctionAbstract implements Reflector {
@@ -240,7 +242,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract implements Reflector
   public static function export($name, $return = null);
   <<__Rx, __MaybeMutable>>
   public function isDisabled();
-  public function invoke(...);
+  public function invoke(...$args);
   public function invokeArgs(varray $args);
   public function getClosure();
   <<__Rx, __MaybeMutable>>
@@ -281,7 +283,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract implements Reflector {
   public function getClosure($object);
   <<__Rx, __MaybeMutable>>
   public function getModifiers();
-  public function invoke($object, ...);
+  public function invoke($object, ...$args);
   public function invokeArgs($object, varray $args);
   <<__Rx, __MaybeMutable>>
   public function getDeclaringClass();

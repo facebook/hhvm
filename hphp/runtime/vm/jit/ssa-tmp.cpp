@@ -48,8 +48,8 @@ int typeNeededWords(Type t) {
   if (t.maybe(TNullptr)) {
     return typeNeededWords(t - TNullptr);
   }
-  if (t <= TCtx || t <= TFuncMM || t <= TPtrToGen) {
-    // Ctx, FuncMM and PtrTo* may be statically unknown but always need just one
+  if (t <= TCtx || t <= TPtrToGen) {
+    // Ctx and PtrTo* may be statically unknown but always need just one
     // register.
     return 1;
   }
@@ -103,9 +103,6 @@ Variant SSATmp::variantVal() const {
     case KindOfPersistentKeyset:
       return Variant{keysetVal(), KindOfPersistentKeyset,
                      Variant::PersistentArrInit{}};
-    case KindOfPersistentShape:
-      return Variant{shapeVal(), KindOfPersistentShape,
-                     Variant::PersistentArrInit{}};
     case KindOfPersistentArray:
       return Variant{arrVal(), KindOfPersistentArray,
                      Variant::PersistentArrInit{}};
@@ -120,7 +117,6 @@ Variant SSATmp::variantVal() const {
     case KindOfVec:
     case KindOfDict:
     case KindOfKeyset:
-    case KindOfShape:
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:

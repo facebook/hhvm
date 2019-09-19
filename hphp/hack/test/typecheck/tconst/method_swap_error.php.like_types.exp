@@ -1,0 +1,8 @@
+File "method_swap_error.php", line 17, characters 14-23:
+Invalid argument (Typing[4110])
+File "method_swap_error.php", line 12, characters 24-30:
+Expected ~<expr#1>::T because it is an unenforceable type
+File "method_swap_error.php", line 8, characters 26-32:
+But got <expr#2>::T
+File "method_swap_error.php", line 17, characters 14-16:
+  where '<expr#2>' is a reference to this expression

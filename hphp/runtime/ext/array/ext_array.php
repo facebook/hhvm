@@ -512,12 +512,12 @@ function array_slice(
  * @return mixed - Returns the array consisting of the extracted elements.
  *
  */
-<<__Native>>
+<<__Native, __Rx, __AtMostRxAsArgs>>
 function array_splice(
-  mixed &$input,
+  <<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> mixed &$input,
   int $offset,
   mixed $length = null,
-  mixed $replacement = null,
+  <<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> mixed $replacement = null,
 ): mixed;
 
 /**
@@ -593,171 +593,6 @@ function array_values(
 ): mixed;
 
 /**
- * Applies the user-defined function funcname to each element of the input
- *   array. This function will recur into deeper arrays.
- *
- * @param mixed $input - The input array.
- * @param mixed $funcname - Typically, funcname takes on two parameters. The
- *   input parameter's value being the first, and the key/index second. If
- *   funcname needs to be working with the actual values of the array, specify
- *   the first parameter of funcname as a reference. Then, any changes made to
- *   those elements will be made in the original array itself.
- * @param mixed $userdata - If the optional userdata parameter is supplied, it
- *   will be passed as the third parameter to the callback funcname.
- *
- * @return bool - Returns TRUE on success or FALSE on failure.
- *
- */
-<<__Deprecated('This function is scheduled for removal')>>
-function array_walk_recursive(
-  mixed &$input,
-  mixed $funcname,
-  mixed $userdata = null,
-): bool {
-  $box = new stdClass();
-  $box->closure = $a ==> {
-    foreach ($a as $v) {
-      if (is_array($v)) {
-        $check_inner = $box->closure;
-        if (!$check_inner($v)) {
-          return false;
-        }
-      } else if (HH\is_any_array($v)) {
-        return false;
-      }
-    }
-    return true;
-  };
-  $check_inner = $box->closure;
-  if (!is_array($input) || !$check_inner($input)) {
-    trigger_error(
-      "Invalid operand type was used: array_walk_recursive expects array(s)",
-      E_WARNING
-    );
-    return false;
-  }
-
-  $box = new stdClass();
-  $rf = new ReflectionFunction($funcname);
-  if ($rf->getParameters()[0]->isPassedByReference()) {
-    if ($userdata === null) {
-      $box->closure = (&$input) ==> {
-        foreach ($input as $k => $v) {
-          if (is_array($v)) {
-            $walk = $box->closure;
-            $walk(&$v);
-          } else {
-            $funcname(&$v, $k);
-          }
-          $input[$k] = $v;
-        }
-      };
-    } else {
-      $box->closure = (&$input) ==> {
-        foreach ($input as $k => $v) {
-          if (is_array($v)) {
-            $walk = $box->closure;
-            $walk(&$v);
-          } else {
-            $funcname(&$v, $k, $userdata);
-          }
-          $input[$k] = $v;
-        }
-      };
-    }
-    $walk = $box->closure;
-    $walk(&$input);
-  } else {
-    if ($userdata === null) {
-      $box->closure = ($input) ==> {
-        foreach ($input as $k => $v) {
-          if (is_array($v)) {
-            $walk = $box->closure;
-            $walk($v);
-          } else {
-            $funcname($v, $k);
-          }
-        }
-      };
-    } else {
-      $box->closure = ($input) ==> {
-        foreach ($input as $k => $v) {
-          if (is_array($v)) {
-            $walk = $box->closure;
-            $walk($v);
-          } else {
-            $funcname($v, $k, $userdata);
-          }
-        }
-      };
-    }
-    $walk = $box->closure;
-    $walk($input);
-  }
-
-  return true;
-}
-
-/**
- * @param mixed $input - The input array.
- *
- * @param mixed $funcname - Typically, funcname takes on two parameters. The
- *   array parameter's value being the first, and the key/index second. If
- *   funcname needs to be working with the actual values of the array, specify
- *   the first parameter of funcname as a reference. Then, any changes made to
- *   those elements will be made in the original array itself. Users may not
- *   change the array itself from the callback function. e.g. Add/delete
- *   elements, unset elements, etc. If the array that array_walk() is applied to
- *   is changed, the behavior of this function is undefined, and unpredictable.
- * @param mixed $userdata - If the optional userdata parameter is supplied, it
- *   will be passed as the third parameter to the callback funcname.
- *
- * @return bool - Returns TRUE on success or FALSE on failure.
- *
- */
-<<__Deprecated('This function is scheduled for removal')>>
-function array_walk(
-  mixed &$input,
-  mixed $funcname,
-  mixed $userdata = null,
-): bool {
-  if (!is_array($input)) {
-    trigger_error(
-      "Invalid operand type was used: array_walk expects array(s)",
-      E_WARNING
-    );
-    return false;
-  }
-
-  $rf = new ReflectionFunction($funcname);
-  if ($rf->getParameters()[0]->isPassedByReference()) {
-    if ($userdata === null) {
-      foreach ($input as $k => $v) {
-        $funcname(&$v, $k);
-        $input[$k] = $v;
-      }
-    } else {
-      foreach ($input as $k => $v) {
-        $funcname(&$v, $k, $userdata);
-        $input[$k] = $v;
-      }
-    }
-  } else {
-    if ($userdata === null) {
-      foreach ($input as $k => $v) {
-        $funcname($v, $k);
-      }
-    } else {
-      foreach ($input as $k => $v) {
-        $funcname($v, $k, $userdata);
-      }
-    }
-  }
-
-  return true;
-}
-
-/**
  * This function shuffles (randomizes the order of the elements in) an array.
  *
  * @param mixed $array - The array.
@@ -800,16 +635,11 @@ function count(
 
 /**
  * @param mixed $var
- * @param int $mode
- *
  * @return int
- *
- * T35863429 for removing second arg
  */
 <<__Native, __IsFoldable, __Rx, __AtMostRxAsArgs>>
 function sizeof(
   <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class), __MaybeMutable>>mixed $var,
-  int $mode = COUNT_NORMAL,
 ): int;
 
 /**
@@ -829,7 +659,7 @@ function sizeof(
  *
  */
 <<__Native>>
-function each(mixed &$array): mixed;
+function each(inout mixed $array): mixed;
 
 /**
  * Every array has an internal pointer to its "current" element, which is
@@ -848,7 +678,11 @@ function each(mixed &$array): mixed;
  *
  */
 <<__Native>>
-function current(mixed &$array): mixed;
+function current(mixed $array): mixed;
+
+function current_ref(inout mixed $array): mixed {
+  return current($array);
+}
 
 /**
  * next() behaves like current(), with one difference. It advances the
@@ -867,16 +701,7 @@ function current(mixed &$array): mixed;
  *
  */
 <<__Native>>
-function next(mixed &$array): mixed;
-
-/**
- * @param mixed $array
- *
- * @return mixed
- *
- */
-<<__Native>>
-function pos(mixed &$array): mixed;
+function next(inout mixed $array): mixed;
 
 /**
  * Rewind the internal array pointer. prev() behaves just like next(), except
@@ -890,7 +715,7 @@ function pos(mixed &$array): mixed;
  *
  */
 <<__Native>>
-function prev(mixed &$array): mixed;
+function prev(inout mixed $array): mixed;
 
 /**
  * reset() rewinds array's internal pointer to the first element and returns
@@ -903,7 +728,7 @@ function prev(mixed &$array): mixed;
  *
  */
 <<__Native>>
-function reset(mixed &$array): mixed;
+function reset(inout mixed $array): mixed;
 
 /**
  * end() advances array's internal pointer to the last element, and returns
@@ -919,7 +744,7 @@ function reset(mixed &$array): mixed;
  *
  */
 <<__Native>>
-function end(mixed &$array): mixed;
+function end(inout mixed $array): mixed;
 
 /**
  * key() returns the index element of the current array position.
@@ -933,7 +758,11 @@ function end(mixed &$array): mixed;
  *
  */
 <<__Native>>
-function key(mixed &$array): mixed;
+function key(mixed $array): mixed;
+
+function key_ref(inout mixed $array): mixed {
+  return key($array);
+}
 
 /**
  * Searches haystack for needle.
@@ -1335,8 +1164,11 @@ function array_intersect_ukey(
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
-function sort(mixed &$array, int $sort_flags = 0): bool;
+<<__Native, __Rx, __AtMostRxAsArgs>>
+function sort(
+  <<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> mixed &$array,
+  int $sort_flags = 0,
+): bool;
 
 /**
  * This function sorts an array in reverse order (highest to lowest).
@@ -1348,8 +1180,11 @@ function sort(mixed &$array, int $sort_flags = 0): bool;
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
-function rsort(mixed &$array, int $sort_flags = 0): bool;
+<<__Native, __Rx, __AtMostRxAsArgs>>
+function rsort(
+  <<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> mixed &$array,
+  int $sort_flags = 0,
+): bool;
 
 /**
  * This function sorts an array such that array indices maintain their
@@ -1364,8 +1199,11 @@ function rsort(mixed &$array, int $sort_flags = 0): bool;
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
-function asort(mixed &$array, int $sort_flags = 0): bool;
+<<__Native, __Rx, __AtMostRxAsArgs>>
+function asort(
+  <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> mixed &$array,
+  int $sort_flags = 0,
+): bool;
 
 /**
  * This function sorts an array such that array indices maintain their
@@ -1380,8 +1218,11 @@ function asort(mixed &$array, int $sort_flags = 0): bool;
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
-function arsort(mixed &$array, int $sort_flags = 0): bool;
+<<__Native, __Rx, __AtMostRxAsArgs>>
+function arsort(
+  <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> mixed &$array,
+  int $sort_flags = 0,
+): bool;
 
 /**
  * Sorts an array by key, maintaining key to data correlations. This is useful
@@ -1394,8 +1235,11 @@ function arsort(mixed &$array, int $sort_flags = 0): bool;
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
-function ksort(mixed &$array, int $sort_flags = 0): bool;
+<<__Native, __Rx, __AtMostRxAsArgs>>
+function ksort(
+  <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> mixed &$array,
+  int $sort_flags = 0,
+): bool;
 
 /**
  * Sorts an array by key in reverse order, maintaining key to data
@@ -1408,8 +1252,11 @@ function ksort(mixed &$array, int $sort_flags = 0): bool;
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
-function krsort(mixed &$array, int $sort_flags = 0): bool;
+<<__Native, __Rx, __AtMostRxAsArgs>>
+function krsort(
+  <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> mixed &$array,
+  int $sort_flags = 0,
+): bool;
 
 /**
  * This function will sort an array by its values using a user-supplied
@@ -1429,8 +1276,11 @@ function krsort(mixed &$array, int $sort_flags = 0): bool;
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
-function usort(mixed &$array, mixed $cmp_function): bool;
+<<__Native, __Rx, __AtMostRxAsArgs>>
+function usort(
+  <<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> mixed &$array,
+  <<__AtMostRxAsFunc>> mixed $cmp_function,
+): bool;
 
 /**
  * This function sorts an array such that array indices maintain their
@@ -1445,8 +1295,11 @@ function usort(mixed &$array, mixed $cmp_function): bool;
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
-function uasort(mixed &$array, mixed $cmp_function): bool;
+<<__Native, __Rx, __AtMostRxAsArgs>>
+function uasort(
+  <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> mixed &$array,
+  <<__AtMostRxAsFunc>> mixed $cmp_function,
+): bool;
 
 /**
  * uksort() will sort the keys of an array using a user-supplied comparison
@@ -1463,8 +1316,11 @@ function uasort(mixed &$array, mixed $cmp_function): bool;
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
-function uksort(mixed &$array, mixed $cmp_function): bool;
+<<__Native, __Rx, __AtMostRxAsArgs>>
+function uksort(
+  <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> mixed &$array,
+  <<__AtMostRxAsFunc>> mixed $cmp_function,
+): bool;
 
 /**
  * This function implements a sort algorithm that orders alphanumeric strings
@@ -1554,6 +1410,87 @@ function array_multisort(
   mixed &$arg9 = null,
 ): bool;
 
+<<__Native>>
+function array_multisort1(
+  mixed &$arg1,
+): bool;
+
+<<__Native>>
+function array_multisort2(
+  mixed &$arg1,
+  mixed &$arg2,
+): bool;
+
+<<__Native>>
+function array_multisort3(
+  mixed &$arg1,
+  mixed &$arg2,
+  mixed &$arg3,
+): bool;
+
+<<__Native>>
+function array_multisort4(
+  mixed &$arg1,
+  mixed &$arg2,
+  mixed &$arg3,
+  mixed &$arg4,
+): bool;
+
+<<__Native>>
+function array_multisort5(
+  mixed &$arg1,
+  mixed &$arg2,
+  mixed &$arg3,
+  mixed &$arg4,
+  mixed &$arg5,
+): bool;
+
+<<__Native>>
+function array_multisort6(
+  mixed &$arg1,
+  mixed &$arg2,
+  mixed &$arg3,
+  mixed &$arg4,
+  mixed &$arg5,
+  mixed &$arg6,
+): bool;
+
+<<__Native>>
+function array_multisort7(
+  mixed &$arg1,
+  mixed &$arg2,
+  mixed &$arg3,
+  mixed &$arg4,
+  mixed &$arg5,
+  mixed &$arg6,
+  mixed &$arg7,
+): bool;
+
+<<__Native>>
+function array_multisort8(
+  mixed &$arg1,
+  mixed &$arg2,
+  mixed &$arg3,
+  mixed &$arg4,
+  mixed &$arg5,
+  mixed &$arg6,
+  mixed &$arg7,
+  mixed &$arg8,
+): bool;
+
+<<__Native>>
+function array_multisort9(
+  mixed &$arg1,
+  mixed &$arg2,
+  mixed &$arg3,
+  mixed &$arg4,
+  mixed &$arg5,
+  mixed &$arg6,
+  mixed &$arg7,
+  mixed &$arg8,
+  mixed &$arg9,
+): bool;
+
 } // root namespace
 
 namespace __SystemLib {
@@ -1636,4 +1573,7 @@ namespace HH {
 
   <<__Native>>
   function get_provenance(mixed $key): string;
+
+  <<__Native>>
+  function tag_provenance_here(mixed $key): mixed;
 }

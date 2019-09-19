@@ -1,10 +1,5 @@
 <?hh 
 
-$arr = array(array(1,2),2);
-$arrOb = new ArrayObject($arr);
-
-$recArrIt = new RecursiveArrayIterator($arrOb->getIterator());
-
 class MyRecursiveIteratorIterator extends RecursiveIteratorIterator {
     
     function nextelement() {
@@ -12,8 +7,16 @@ class MyRecursiveIteratorIterator extends RecursiveIteratorIterator {
     }
 }
 
+<<__EntryPoint>>
+function main_entry(): void {
 
-$recItIt = new MyRecursiveIteratorIterator($recArrIt, RecursiveIteratorIterator::CHILD_FIRST);
+  $arr = array(array(1,2),2);
+  $arrOb = new ArrayObject($arr);
 
-foreach ($recItIt as $key => $val) echo "$key\n";
+  $recArrIt = new RecursiveArrayIterator($arrOb->getIterator());
 
+
+  $recItIt = new MyRecursiveIteratorIterator($recArrIt, RecursiveIteratorIterator::CHILD_FIRST);
+
+  foreach ($recItIt as $key => $val) echo "$key\n";
+}

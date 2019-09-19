@@ -1,14 +1,6 @@
-File "tapply_class.php", line 12, characters 17-23:
+File "tapply_class.php", line 13, characters 10-11:
 Invalid return type (Typing[4110])
 File "tapply_class.php", line 12, characters 30-35:
 Expected E<int>
 File "tapply_class.php", line 12, characters 17-23:
 But got dynamic
-File "tapply_class.php", line 24, characters 45-51:
-This is dynamic, it cannot be used as a reified type argument (Typing[4305])
-File "tapply_class.php", line 6, characters 15-15:
-T is reified
-File "tapply_class.php", line 24, characters 29-35:
-This is dynamic, it cannot be used as a reified type argument (Typing[4305])
-File "tapply_class.php", line 6, characters 15-15:
-T is reified

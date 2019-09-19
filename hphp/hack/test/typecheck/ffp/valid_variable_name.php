@@ -11,5 +11,5 @@
 
 function test() {
   $foo = 5;
-  $x = "${foo}";
+  $x = "{$foo}";
 }

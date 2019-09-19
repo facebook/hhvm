@@ -10,6 +10,8 @@ namespace __hhvm_intrinsics {
 <<__Native, __HipHopSpecific>>
 function trigger_oom(bool $oom): void;
 
+class ReffyNativeMeth { <<__Native>> static function meth(mixed &$i): string; }
+
 /**
  * Return the given value. This function is purposefully not optimized. It can
  * be used to hide information about values from the optimizer for unit testing.
@@ -40,6 +42,51 @@ function dummy_dict_builtin(dict $x): dict;
 
 <<__Native, __HipHopSyntax>>
 function create_class_pointer(string $name): mixed;
+
+function apc_fetch_no_check(mixed $key) {
+  $ignored = false;
+  return \apc_fetch($key, inout $ignored);
+}
+
+<<__Native, __IsFoldable>>
+function builtin_io_foldable(
+  int $a,
+  inout int $b,
+  inout int $c,
+  inout int $d,
+): int;
+
+<<__Native>>
+function builtin_io(
+  string $s,
+  inout string $str,
+  inout int $num,
+  int $i,
+  inout object $obj,
+  object $o,
+  mixed $m,
+  inout mixed $mix,
+  bool $retOrig,
+  <<__OutOnly("KindOfBoolean")>> inout mixed $out1,
+  <<__OutOnly("KindOfArray")>> inout mixed $out2,
+  <<__OutOnly("KindOfObject")>> inout mixed $out3,
+): array;
+
+<<__Native("NoFCallBuiltin")>>
+function builtin_io_no_fca(
+  string $s,
+  inout string $str,
+  inout int $num,
+  int $i,
+  inout object $obj,
+  object $o,
+  mixed $m,
+  inout mixed $mix,
+  bool $retOrig,
+  <<__OutOnly("KindOfBoolean")>> inout mixed $out1,
+  <<__OutOnly("KindOfArray")>> inout mixed $out2,
+  <<__OutOnly("KindOfObject")>> inout mixed $out3,
+): array;
 
 /*
  * Like serialize(), but serialize d/varrays into their own format so that they

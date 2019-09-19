@@ -5,6 +5,7 @@
     annotated_ast
     ast
     collections
+    pos
     tast
     typing_defs
     utils_core))

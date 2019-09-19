@@ -1363,6 +1363,7 @@ namespace HH {
     // for functions
     'param_types' => ?varray,
     'return_type' => ?darray,
+    ?'variadic_type' => darray,
     // for arrays, classes
     'generic_types' => ?varray,
     // for shapes

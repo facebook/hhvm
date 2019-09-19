@@ -139,12 +139,6 @@ struct Options {
   bool RemoveUnusedLocals = true;
 
   /*
-   * Whether to remove completely unused class-ref slots.  This requires
-   * GlobalDCE.
-   */
-  bool RemoveUnusedClsRefSlots = true;
-
-  /*
    * If true, insert opcodes that assert inferred types, so we can assume them
    * at runtime.
    */
@@ -161,7 +155,7 @@ struct Options {
 
   /*
    * Whether to replace bytecode with less expensive bytecodes when we can.
-   * E.g. InstanceOf -> InstanceOfD or FPushFunc -> FPushFuncD.
+   * E.g. InstanceOf -> InstanceOfD or FCallFunc -> FCallFuncD.
    */
   bool StrengthReduce = true;
 

@@ -64,8 +64,7 @@ void CertReloader::find_paths(
   std::vector<std::string> crt_dir_files;
   std::unordered_set<std::string> crt_files;
   std::unordered_set<std::string> key_files;
-  FileUtil::find(crt_dir_files, "/", path,
-                 /* php */ false, /* js */ false, /* other */ true);
+  FileUtil::find(crt_dir_files, "/", path, /* php */ false);
 
   for (auto it = crt_dir_files.begin(); it != crt_dir_files.end(); ++it) {
     size_t filename_len = it->size() - path.size();

@@ -103,24 +103,21 @@ int64_t HHVM_FUNCTION(count,
                       const Variant& var,
                       int64_t mode = 0);
 int64_t HHVM_FUNCTION(sizeof,
-                      const Variant& var,
-                      int64_t mode = 0);
+                      const Variant& var);
 Variant HHVM_FUNCTION(each,
-                      VRefParam array);
+                      Variant& array);
 Variant HHVM_FUNCTION(current,
-                      VRefParam array);
-Variant HHVM_FUNCTION(pos,
-                      VRefParam array);
+                      const Variant& array);
 Variant HHVM_FUNCTION(key,
-                      VRefParam array);
+                      const Variant& array);
 Variant HHVM_FUNCTION(next,
-                      VRefParam array);
+                      Variant& array);
 Variant HHVM_FUNCTION(prev,
-                      VRefParam array);
+                      Variant& array);
 Variant HHVM_FUNCTION(reset,
-                      VRefParam array);
+                      Variant& array);
 Variant HHVM_FUNCTION(end,
-                      VRefParam array);
+                      Variant& array);
 bool HHVM_FUNCTION(in_array,
                    const Variant& needle,
                    const Variant& haystack,

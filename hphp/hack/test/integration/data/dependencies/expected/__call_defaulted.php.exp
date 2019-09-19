@@ -1,0 +1,16 @@
+<?hh
+function call_defaulted(int $arg): void {
+  with_defaults($arg);
+  with_defaults();
+}
+function with_defaults(
+  int $arg = extract_standalone_make_default<int>(),
+  float $argf = extract_standalone_make_default<float>(),
+): void {
+  throw new \Exception();
+}
+function extract_standalone_make_default<T>(): T {
+  throw new Exception();
+}
+
+

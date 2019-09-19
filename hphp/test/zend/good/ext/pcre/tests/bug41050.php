@@ -5,8 +5,9 @@ $regex = '/(insert|drop|create|select|delete|update)([^;\']*('."('[^']*')+".')?)
 
 $sql = 'SELECT * FROM #__components';
 
-if (preg_match($regex,$sql, &$m)) echo 'matched';
-else echo 'not matched';
+  $m = null;
+  if (preg_match_with_matches($regex, $sql, inout $m)) echo 'matched';
+  else echo 'not matched';
 
 print_r($m);
 }

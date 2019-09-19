@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2017, Facebook, Inc.
  * All rights reserved.
  *
@@ -7,14 +7,13 @@
  *
  *)
 
-let send (env: ServerEnv.env) (status: ServerCommandTypes.busy_status) : unit =
+let send (env : ServerEnv.env) (status : ServerCommandTypes.busy_status) : unit
+    =
   match env.ServerEnv.persistent_client with
   | None -> ()
-  | Some client -> begin
-      let message = ServerCommandTypes.BUSY_STATUS status in
-      try
-        ClientProvider.send_push_message_to_client client message
-      with
-      | ClientProvider.Client_went_away -> ()
-      | e -> Hh_logger.log "Failed to send busy status - %s" (Printexc.to_string e)
-    end
+  | Some client ->
+    let message = ServerCommandTypes.BUSY_STATUS status in
+    (try ClientProvider.send_push_message_to_client client message with
+    | ClientProvider.Client_went_away -> ()
+    | e ->
+      Hh_logger.log "Failed to send busy status - %s" (Printexc.to_string e))

@@ -16,6 +16,8 @@
 #ifndef incl_HPHP_JIT_IRGEN_BUILTIN_H_
 #define incl_HPHP_JIT_IRGEN_BUILTIN_H_
 
+#include <cstdint>
+
 namespace HPHP {
 
 struct Func;
@@ -37,6 +39,7 @@ SSATmp* optimizedCallIsObject(IRGS&, SSATmp*);
 // failures). Appropriate for CallBuiltin. For regular PHP calls to a builtin,
 // use callReturnType() instead.
 Type builtinReturnType(const Func* builtin);
+Type builtinOutType(const Func* builtin, uint32_t i);
 
 //////////////////////////////////////////////////////////////////////
 

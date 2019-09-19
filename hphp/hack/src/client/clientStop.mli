@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -13,4 +13,5 @@ type env = {
 }
 
 val kill_server : Path.t -> string -> unit
+
 val main : env -> Exit_status.t Lwt.t

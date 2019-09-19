@@ -1,5 +1,4 @@
 <?hh
-ini_set('soap.wsdl_cache_enabled','0');
 
 function checkAuth($peid,$auth) {
 	return $peid;
@@ -21,11 +20,15 @@ class TestSoap extends SoapClient {
 		return $response;
 	}
 }
+<<__EntryPoint>>
+function main_entry(): void {
+  ini_set('soap.wsdl_cache_enabled','0');
 
-$client = new TestSoap(dirname(__FILE__) . "/bug42692.wsdl", array("trace"=>1));
-try {
-	$result = $client->checkAuth(1,"two");
-	echo "Auth for 1 is $result\n";
-} catch (Exception $e) {
-	echo $e->getMessage();
+  $client = new TestSoap(dirname(__FILE__) . "/bug42692.wsdl", array("trace"=>1));
+  try {
+  	$result = $client->checkAuth(1,"two");
+  	echo "Auth for 1 is $result\n";
+  } catch (Exception $e) {
+  	echo $e->getMessage();
+  }
 }

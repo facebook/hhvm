@@ -1,7 +1,7 @@
 <?hh // strict
 
-/* HH_FIXME[4110] */
 function concat(string $first, string ...$rest): string {
+  throw new Exception();
 }
 
 class Inv<T> {

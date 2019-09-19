@@ -250,7 +250,6 @@ inline void MemoryManager::freeSmallIndex(void* ptr, size_t index) {
   assertx((reinterpret_cast<uintptr_t>(ptr) & kSmallSizeAlignMask) == 0);
 
   if (UNLIKELY(m_bypassSlabAlloc)) {
-    --currentSmallAllocs[index];
     return freeBigSize(ptr);
   }
 

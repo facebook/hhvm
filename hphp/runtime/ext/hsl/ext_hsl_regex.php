@@ -16,6 +16,35 @@
 */
 
 namespace HH\Lib\Regex {
+  /**
+   * A shape representing a regular expression match and capture groups.
+   *
+   * See `Pattern<T>` for details.
+   */
   type Match = shape(...);
+
+  /**
+   * The type of regular expression prefix-strings, e.g. `re"/foo/"`.
+   *
+   * Regular expression patterns must be string literals, and must include
+   * delimiters.
+   *
+   * The generic type `T` is inferred from capture groups in the pattern;
+   * for example:
+   * - `re"/foo/"` is a `Pattern<shape(0 => string)>`
+   * - `re"/(foo)?bar/"` is a `Pattern<shape(0 => string, 1 => string)>`
+   * - `re"/(?<name>foo)?bar/"` is a
+   *   `Pattern<shape(0 => string, 1 => string, 'name' => string)>`
+   *
+   * Given the integer keys, these `Match` types can not be explicitly
+   * declared in Hack code.
+   *
+   * Other delimiters can be used such as:
+   * - `re",/useful/if/pattern/contains/literal/slashes,"`
+   * - `re"(bracket-like delimiters are matched pairs)"`
+   *
+   * Standard modifiers can follow the final delimiter, such as
+   * `re"/this regular-expression is case-insensitive/i"`.
+   */
   newtype Pattern<+T as Match> = string;
 }

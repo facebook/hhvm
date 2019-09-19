@@ -65,6 +65,7 @@ const StaticString
   s_kind("kind"),
   s_elem_types("elem_types"),
   s_return_type("return_type"),
+  s_variadic_type("variadic_type"),
   s_param_types("param_types"),
   s_generic_types("generic_types"),
   s_root_name("root_name"),
@@ -132,7 +133,11 @@ void functionTypeName(const Array& arr, std::string& name, bool forDisplay) {
     sep = ", ";
   }
 
-  // add funciton return type
+  if (arr.exists(s_variadic_type)) {
+    auto const variadicType = arr[s_variadic_type].toCArrRef();
+    folly::toAppend(sep, fullName(variadicType, forDisplay), "...", &name);
+  }
+
   folly::toAppend("): ", fullName(retType, forDisplay), ")", &name);
 }
 
@@ -663,6 +668,14 @@ Array resolveTS(TSEnv& env,
       auto const paramTypes =
         resolveList(env, paramsArr, typeCns, typeCnsCls, generics);
       newarr.set(s_param_types, Variant(paramTypes));
+
+      if (arr.exists(s_variadic_type)) {
+        auto const variadicArr = arr[s_variadic_type].toCArrRef();
+        auto const variadicType =
+          resolveTS(env, variadicArr, typeCns, typeCnsCls, generics);
+        newarr.set(s_variadic_type, Variant(variadicType));
+      }
+
       break;
     }
     case TypeStructure::Kind::T_array:
@@ -1011,6 +1024,12 @@ bool TypeStructure::isValidResolvedTypeStructure(const Array& arr) {
       if (!TypeStructure::isValidResolvedTypeStructure(
             ArrNR(rtype.val().parr))) {
         return false;
+      }
+      auto const vtype = arr.rvalAt(s_variadic_type);
+      if (vtype.is_set()) {
+        if (!isDictOrArrayType(vtype.type())) return false;
+        auto const varr = ArrNR(rtype.val().parr);
+        if (!TypeStructure::isValidResolvedTypeStructure(varr)) return false;
       }
       auto const ptypes = arr.rvalAt(s_param_types);
       if (!ptypes.is_set() || !isVecOrArrayType(ptypes.type())) return false;

@@ -8,3 +8,9 @@ File "tconst_on_generics8.php", line 65, characters 35-37:
 But got int
 File "tconst_on_generics8.php", line 65, characters 35-37:
 Considering that this type argument is contravariant with respect to Contra
+File "tconst_on_generics8.php", line 50, characters 44-45:
+Illegal usage of a contravariant type parameter (Typing[4121])
+File "tconst_on_generics8.php", line 42, characters 13-14:
+This is where the parameter was declared as contravariant (-)
+File "tconst_on_generics8.php", line 50, characters 44-45:
+`where _ = _` constraints are invariant on the left and right

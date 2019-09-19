@@ -99,6 +99,10 @@ struct MockHeaders : ITransportHeaders {
     return nullptr;
   }
 
+  std::string getCommand() override {
+    return "";
+  }
+
   std::string getHeader(const char *name) override {
     static const std::string emptyStr;
     auto it = reqHeaders.find(name);

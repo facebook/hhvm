@@ -1,5 +1,4 @@
 <?hh
-error_reporting(E_ALL);
 
 trait Counter {
 
@@ -20,11 +19,15 @@ class C2 {
    use Counter;
 }
 
-$o = new C1();
-$o->inc();
-$o->inc();
+<<__EntryPoint>>
+function main_entry(): void {
+  error_reporting(E_ALL);
 
-$p = new C2();
-$p->inc();
-$p->inc();
+  $o = new C1();
+  $o->inc();
+  $o->inc();
 
+  $p = new C2();
+  $p->inc();
+  $p->inc();
+}

@@ -84,30 +84,41 @@ void cgRaiseHackArrCompatNotice(IRLS& env, const IRInstruction* inst) {
 }
 
 static void raiseForbiddenDynCall(const Func* func) {
-  assertx(RuntimeOption::EvalForbidDynamicCalls > 0);
-  assertx(!func->isDynamicallyCallable());
+  assertx(!func->isDynamicallyCallable() ||
+          RuntimeOption::EvalForbidDynamicCallsWithAttr);
+  int dynCallErrorLevel = func->isMethod() ?
+    (
+      func->isStatic() ?
+        RuntimeOption::EvalForbidDynamicCallsToClsMeth :
+        RuntimeOption::EvalForbidDynamicCallsToInstMeth
+    ) :
+    RuntimeOption::EvalForbidDynamicCallsToFunc;
+  if (dynCallErrorLevel <= 0) return;
 
-  if (RuntimeOption::EvalForbidDynamicCalls >= 2) {
+  auto error_msg = func->isDynamicallyCallable() ?
+    Strings::FUNCTION_CALLED_DYNAMICALLY_WITH_ATTRIBUTE :
+    Strings::FUNCTION_CALLED_DYNAMICALLY_WITHOUT_ATTRIBUTE;
+  if (dynCallErrorLevel >= 2) {
     std::string msg;
     string_printf(
       msg,
-      Strings::FUNCTION_CALLED_DYNAMICALLY,
+      error_msg,
       func->fullDisplayName()->data()
     );
     throw_invalid_operation_exception(makeStaticString(msg));
   } else {
     raise_notice(
-      Strings::FUNCTION_CALLED_DYNAMICALLY,
+      error_msg,
       func->fullDisplayName()->data()
     );
   }
 }
 
 static void raiseForbiddenDynConstruct(const Class* cls) {
-  assertx(RuntimeOption::EvalForbidDynamicCalls > 0);
+  assertx(RuntimeOption::EvalForbidDynamicConstructs > 0);
   assertx(!cls->isDynamicallyConstructible());
 
-  if (RuntimeOption::EvalForbidDynamicCalls >= 2) {
+  if (RuntimeOption::EvalForbidDynamicConstructs >= 2) {
     std::string msg;
     string_printf(
       msg,
@@ -162,6 +173,7 @@ IMPL_OPCODE_CALL(ThrowArithmeticError)
 IMPL_OPCODE_CALL(ThrowArrayIndexException)
 IMPL_OPCODE_CALL(ThrowArrayKeyException)
 IMPL_OPCODE_CALL(ThrowAsTypeStructException)
+IMPL_OPCODE_CALL(ThrowCallReifiedFunctionWithoutGenerics)
 IMPL_OPCODE_CALL(ThrowDivisionByZeroError)
 IMPL_OPCODE_CALL(ThrowDivisionByZeroException)
 IMPL_OPCODE_CALL(ThrowHasThisNeedStatic)

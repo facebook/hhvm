@@ -30,14 +30,22 @@ function f() {
   var_dump(isset($a["foo"]));
 }
 
-f();
-
-/*********/
-
 function get_index() {
   echo "I've made a huge mistake\n";
   return 0;
 }
+
+function g($dontTake, &$toFillIn, $id, $key, $value) {
+  $toFillIn = array();
+  if (isset($toFillIn[$id])) {
+    $cur = $toFillIn[$id];
+  }
+  $toFillIn[$id] = $value;
+}
+
+/*********/
+<<__EntryPoint>> function main(): void {
+f();
 
 $a = 4;
 $arr = array("get_index should not be called");
@@ -49,14 +57,7 @@ var_dump(isset($a, $b, $arr[get_index()]));
  * local to morph into a cell.
  */
 
-function g($dontTake, &$toFillIn, $id, $key, $value) {
-  $toFillIn = array();
-  if (isset($toFillIn[$id])) {
-    $cur = $toFillIn[$id];
-  }
-  $toFillIn[$id] = $value;
-}
-
 $a = null;
 g(null, &$a, "127.0.0.1", null, null );
 var_dump($a);
+}

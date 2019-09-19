@@ -42,6 +42,14 @@ struct APCTypedValue {
     m_data.dbl = data;
   }
 
+  explicit APCTypedValue(const Func* data)
+    : m_handle(APCKind::PersistentFunc, KindOfFunc) {
+    assertx(data->isPersistent());
+    assertx(!data->isMethod());
+    m_data.func = data;
+    assertx(checkInvariants());
+  }
+
   enum class StaticStr {};
   APCTypedValue(StaticStr, StringData* data)
     : m_handle(APCKind::StaticString, KindOfPersistentString) {
@@ -109,24 +117,6 @@ struct APCTypedValue {
     assertx(data->isDict());
     assertx(data->isUncounted());
     m_data.dict = data;
-    assertx(checkInvariants());
-  }
-
-  enum class StaticShape {};
-  APCTypedValue(StaticShape, ArrayData* data)
-    : m_handle(APCKind::StaticShape, KindOfPersistentShape) {
-    assertx(data->isShape());
-    assertx(data->isStatic());
-    m_data.shape = data;
-    assertx(checkInvariants());
-  }
-
-  enum class UncountedShape {};
-  APCTypedValue(UncountedShape, ArrayData* data)
-    : m_handle(APCKind::UncountedShape, KindOfPersistentShape) {
-    assertx(data->isShape());
-    assertx(data->isUncounted());
-    m_data.shape = data;
     assertx(checkInvariants());
   }
 
@@ -213,13 +203,6 @@ struct APCTypedValue {
     return m_data.dict;
   }
 
-  ArrayData* getShapeData() const {
-    assertx(checkInvariants());
-    assertx(m_handle.kind() == APCKind::StaticShape ||
-            m_handle.kind() == APCKind::UncountedShape);
-    return m_data.shape;
-  }
-
   ArrayData* getKeysetData() const {
     assertx(checkInvariants());
     assertx(m_handle.kind() == APCKind::StaticKeyset ||
@@ -276,6 +259,7 @@ private:
     ArrayData* dict;
     ArrayData* shape;
     ArrayData* keyset;
+    const Func* func;
   } m_data;
   APCHandle m_handle;
 };

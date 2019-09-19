@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -8,13 +8,18 @@
  *)
 
 open Typing_defs
-
-module Env = Typing_env
+open Typing_env_types
 module Reason = Typing_reason
 module Utils = Typing_utils
 
-val non : Env.env -> Reason.t -> locl ty -> approx:Utils.approx-> Env.env * locl ty
-val intersect : Env.env -> r:Reason.t -> locl ty -> locl ty -> Env.env * locl ty
-val intersect_list : Env.env -> Reason.t -> locl ty list -> Env.env * locl ty
-val simplify_intersections : Env.env -> ?on_tyvar:(Env.env -> Reason.t -> int -> Env.env * locl ty)
-  -> locl ty -> Env.env * locl ty
+val non : env -> Reason.t -> locl_ty -> approx:Utils.approx -> env * locl_ty
+
+val intersect : env -> r:Reason.t -> locl_ty -> locl_ty -> env * locl_ty
+
+val intersect_list : env -> Reason.t -> locl_ty list -> env * locl_ty
+
+val simplify_intersections :
+  env ->
+  ?on_tyvar:(env -> Reason.t -> int -> env * locl_ty) ->
+  locl_ty ->
+  env * locl_ty

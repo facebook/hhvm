@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -8,13 +8,16 @@
  *)
 
 let do_ _ _ _ _ = ()
+
 let go _ _ _ _ _ _ = Errors.empty
-let go_incremental _ _ _ _ _ =  Errors.empty
+
+let go_incremental _ _ _ _ _ = Errors.empty
+
 let modify_shared_mem_sizes
     global_size heap_size dep_table_pow hash_table_pow _ =
-  global_size, heap_size, dep_table_pow, hash_table_pow
-let modify_worker_count worker_count =
-  worker_count
+  (global_size, heap_size, dep_table_pow, hash_table_pow)
+
+let modify_worker_count worker_count = worker_count
 
 module InfoService = struct
   type target_type =
@@ -31,8 +34,10 @@ module InfoService = struct
   }
 
   type throws = {
-    thrower: string; (* the name of a function or method that throws/leaks *)
-    filename: string; (* location of the function or method *)
+    thrower: string;
+    (* the name of a function or method that throws/leaks *)
+    filename: string;
+    (* location of the function or method *)
     exceptions: string list; (* names of types of thrown exceptions *)
   }
 
@@ -44,7 +49,6 @@ module InfoService = struct
   let empty_result = { fun_calls = []; throws = [] }
 
   let go _ _ _ _ _ = empty_result
-
 end
 
 module ServerFindDepFiles = struct
@@ -63,9 +67,14 @@ module ServerFindRefs = struct
     | Member of string * member
     | Function of string
     | GConst of string
-    | LocalVar of { filename: Relative_path.t; file_content: string; line: int; char: int }
+    | LocalVar of {
+        filename: Relative_path.t;
+        file_content: string;
+        line: int;
+        char: int;
+      }
 
-  let go _  _ _ = []
+  let go _ _ _ = []
 end
 
 module TraceService = struct
@@ -80,7 +89,12 @@ module TraceService = struct
     | Member of string * member
     | Function of string
     | GConst of string
-    | LocalVar of { filename: Relative_path.t; file_content: string; line: int; char: int }
+    | LocalVar of {
+        filename: Relative_path.t;
+        file_content: string;
+        line: int;
+        char: int;
+      }
 
   let go _ _ _ _ = ""
 end

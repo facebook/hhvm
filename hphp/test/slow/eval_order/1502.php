@@ -13,12 +13,12 @@ class MyIterator implements Iterator{
     echo "rewinding
 ";
     $__var = $this->var;
-    reset(&$__var);
+    reset(inout $__var);
     $this->var = $__var;
   }
   public function current() {
     $__var = $this->var;
-    $var = current(&$__var);
+    $var = current($__var);
     $this->var = $__var;
     echo "current: $var
 ";
@@ -26,7 +26,7 @@ class MyIterator implements Iterator{
   }
   public function key() {
     $__var = $this->var;
-    $var = key(&$__var);
+    $var = key($__var);
     $this->var = $__var;
     echo "key: $var
 ";
@@ -34,7 +34,7 @@ class MyIterator implements Iterator{
   }
   public function next() {
     $__var = $this->var;
-    $var = next(&$__var);
+    $var = next(inout $__var);
     $this->var = $__var;
     echo "next: $var
 ";

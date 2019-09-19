@@ -77,11 +77,9 @@ instruction on tmps whose must-alias-sets say they "will_be_used_again" to
 DecRefNZ.
 
 One rule this pass relies on is that it is illegal to DecRef an object in a way
-that takes its refcount to zero, and then IncRef it again after that.  This is
-not illegal for trivial reasons, because object __destruct methods can
-ressurect an object in PHP.  But within one JIT region, right now we declare it
-illegal to generate IR that uses an object after a DecRef that might take it to
-zero.
+that takes its refcount to zero, and then IncRef it again after that.  Within
+one JIT region, right now we declare it illegal to generate IR that uses an
+object after a DecRef that might take it to zero.
 
 Since this pass converts instructions that may (in general) re-enter the
 VM---running arbitrary PHP code for a destructor---it's potentially profitable
@@ -2068,7 +2066,8 @@ void pure_spill_frame(Env& env,
    * frames even within our region (via DefInlineFP).  However, in the
    * meantime, we need to treat the store of the context like a normal
    * pure_store, because there are various IR instructions that can decref the
-   * context on a pre-live ActRec through memory (e.g. LdFunc).
+   * context on a pre-live ActRec through memory (FIXME: this may no longer
+   * be the case).
    *
    * If the frame becomes live via DefInlineFP, we don't need to treat it as
    * memory support for this set anymore, for the same reason that LdCtx
@@ -2153,9 +2152,6 @@ void analyze_mem_effects(Env& env,
 bool consumes_reference_taken(const IRInstruction& inst, uint32_t srcID) {
   switch (inst.op()) {
   // The following consume some arguments only in the event of an exception.
-  case LookupClsMethod:
-    return srcID == 1;
-  case LdArrFuncCtx:
   case SuspendHookAwaitEF:
   case SuspendHookAwaitEG:
   case SuspendHookCreateCont:
@@ -2551,19 +2547,6 @@ bool can_sink_inc_through(const IRInstruction& inst) {
   }
 }
 
-bool can_sink(Env& env, const IRInstruction* inst, const Block* block) {
-  assertx(inst->is(IncRef));
-  if (!block->taken() || !block->next()) return false;
-  if (inst->src(0)->inst()->is(DefConst)) return true;
-  // We've split critical edges, so `next' and 'taken' blocks can't
-  // have other predecessors.
-  assertx(block->taken()->numPreds() == 1);
-  assertx(block->next()->numPreds() == 1);
-  auto const defBlock = findDefiningBlock(inst->src(0), env.idoms);
-  return dominates(defBlock, block->taken(), env.idoms) &&
-         dominates(defBlock, block->next(), env.idoms);
-}
-
 void sink_incs(Env& env) {
   FTRACE(2, "sink_incs ---------------------------------\n");
   jit::vector<IRInstruction*> incs;
@@ -2597,9 +2580,11 @@ void sink_incs(Env& env) {
     auto const& succ = *iter;
     if (succ.is(CheckType, CheckLoc, CheckStk,
                 CheckMBase, CheckVArray, CheckDArray)) {
-      // try to sink past Check* instructions
-      if (!can_sink(env, inc, block)) continue;
-
+      // We've split critical edges, so `next' and 'taken' blocks can't have
+      // other predecessors.  Therefore, `block' dominates both the 'next' and
+      // the 'taken' block, and so does the block defining `tmp'.
+      assertx(block->taken()->numPreds() == 1);
+      assertx(block->next()->numPreds() == 1);
       auto const new_taken = env.unit.gen(IncRef, bcctx, tmp);
       auto const new_next  = env.unit.gen(IncRef, bcctx, tmp);
       block->taken()->prepend(new_taken);
@@ -2608,6 +2593,17 @@ void sink_incs(Env& env) {
       incs.push_back(new_next);
       FTRACE(2, "    ** sink_incs: {} -> {}, {}\n",
              *inc, *new_taken, *new_next);
+      remove_helper(env.unit, inc);
+
+    } else if (succ.is(Jmp)) {
+      // try to sink through trivial jumps (to blocks with one predecessor)
+      assertx(block->taken() != nullptr);
+      if (block->taken()->numPreds() > 1) continue;
+
+      auto const new_taken = env.unit.gen(IncRef, bcctx, tmp);
+      block->taken()->prepend(new_taken);
+      incs.push_back(new_taken);
+      FTRACE(2, "    ** sink_incs: {} -> {}\n", *inc, *new_taken);
       remove_helper(env.unit, inc);
 
     } else if (iter != iterOrigSucc) {
@@ -3487,7 +3483,7 @@ void selectiveWeakenDecRefs(IRUnit& unit) {
   for (auto& block : blocks) {
     for (auto& inst : *block) {
       if (inst.is(DecRef)) {
-        const auto profile = decRefProfile(unit.context(), &inst);
+        const auto profile = decRefProfile(unit, &inst);
         if (profile.optimizing()) {
           const auto data = profile.data();
           const auto decrefdPct = data.percent(data.destroyed()) +

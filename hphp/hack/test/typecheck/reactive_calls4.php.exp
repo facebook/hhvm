@@ -1,6 +1,6 @@
-File "reactive_calls4.php", line 26, characters 17-31:
-Invalid argument (Typing[4203])
-File "reactive_calls4.php", line 14, characters 24-45:
-This function is reactive.
-File "reactive_calls4.php", line 10, characters 27-44:
-This function is non-reactive.
+File "reactive_calls4.php", line 5, characters 10-24:
+Invalid return type (Typing[4336])
+File "reactive_calls4.php", line 5, characters 10-24:
+Expected void because this function implicitly returns void
+File "reactive_calls4.php", line 5, characters 29-50:
+But got (function(): void)

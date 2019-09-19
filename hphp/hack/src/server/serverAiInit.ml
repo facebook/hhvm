@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2018, Facebook, Inc.
  * All rights reserved.
  *
@@ -11,34 +11,41 @@ open Hh_core
 open ServerEnv
 
 let ai_check
-    (genv: ServerEnv.genv)
-    (files_info: Naming_table.t)
-    (env: ServerEnv.env)
-    (t: float)
-  : ServerEnv.env * float =
+    (genv : ServerEnv.genv)
+    (files_info : Naming_table.t)
+    (env : ServerEnv.env)
+    (t : float) : ServerEnv.env * float =
   match ServerArgs.ai_mode genv.options with
   | Some ai_opt ->
     let failures =
-      List.map ~f:(fun k -> (k, Errors.get_failed_files env.errorl k))
-          [ Errors.Parsing; Errors.Decl; Errors.Naming; Errors.Typing ]
+      List.map
+        ~f:(fun k -> (k, Errors.get_failed_files env.errorl k))
+        [Errors.Parsing; Errors.Decl; Errors.Naming; Errors.Typing]
     in
-    let all_passed = List.for_all failures
-        ~f:(fun (k, m) ->
-          if Relative_path.Set.is_empty m then true
-          else begin
-            Hh_logger.log "Cannot run AI because of errors in source in phase %s"
+    let all_passed =
+      List.for_all failures ~f:(fun (k, m) ->
+          if Relative_path.Set.is_empty m then
+            true
+          else (
+            Hh_logger.log
+              "Cannot run AI because of errors in source in phase %s"
               (Errors.phase_to_string k);
             false
-          end)
+          ))
     in
-    if not all_passed then env, t
+    if not all_passed then
+      (env, t)
     else
       let check_mode = ServerArgs.check_mode genv.options in
-      let errorl = Ai.go
-          Typing_check_utils.type_file genv.workers files_info
-          env.tcopt ai_opt check_mode in
-      let env = { env with
-                  errorl  (* Just Zonk errors. *)
-                } in
-      env, (Hh_logger.log_duration "Ai" t)
-  | None -> env, t
+      let errorl =
+        Ai.go
+          Typing_check_utils.type_file
+          genv.workers
+          files_info
+          env.tcopt
+          ai_opt
+          check_mode
+      in
+      let env = { env with errorl (* Just Zonk errors. *) } in
+      (env, Hh_logger.log_duration "Ai" t)
+  | None -> (env, t)

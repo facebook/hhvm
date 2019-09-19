@@ -494,14 +494,16 @@ void binary_deserialize_spec(const Object& dest, PHPInputTransport& transport,
     }
     if (fields[i].isUnion) {
       if (s__type.equal(prop[numFields].name)) {
-        tvAsVariant(&objProp[numFields]) = Variant(fieldNum);
+        auto index = cls->propSlotToIndex(numFields);
+        tvAsVariant(&objProp[index]) = Variant(fieldNum);
       } else {
         return binary_deserialize_slow(
           dest, spec, fieldNum, fieldType, transport);
       }
     }
     ArrNR fieldSpec(fields[i].spec);
-    tvAsVariant(&objProp[i]) =
+    auto index = cls->propSlotToIndex(i);
+    tvAsVariant(&objProp[index]) =
       binary_deserialize(fieldType, transport, fieldSpec.asArray());
     if (!fields[i].noTypeCheck) {
       dest->verifyPropTypeHint(i);
@@ -647,32 +649,33 @@ void binary_serialize_spec(const Object& obj, PHPOutputTransport& transport,
   const size_t numProps = cls->numDeclProperties();
   const size_t numFields = fields.size();
   // Write each member
-  for (int i = 0; i < numFields; ++i) {
-    if (i < numProps && fields[i].name == prop[i].name) {
-      auto const& fieldVal = tvAsCVarRef(&objProp[i]);
+  for (int slot = 0; slot < numFields; ++slot) {
+    if (slot < numProps && fields[slot].name == prop[slot].name) {
+      auto index = cls->propSlotToIndex(slot);
+      auto const& fieldVal = tvAsCVarRef(&objProp[index]);
       if (!fieldVal.isNull()) {
-        TType fieldType = fields[i].type;
-        ArrNR fieldSpec(fields[i].spec);
+        TType fieldType = fields[slot].type;
+        ArrNR fieldSpec(fields[slot].spec);
         transport.writeI8(fieldType);
-        transport.writeI16(fields[i].fieldNum);
+        transport.writeI16(fields[slot].fieldNum);
         binary_serialize(fieldType, transport, fieldVal, fieldSpec);
       } else if (UNLIKELY(fieldVal.is(KindOfUninit)) &&
-                 (prop[i].attrs & AttrLateInit)) {
-        if (prop[i].attrs & AttrLateInitSoft) {
-          raise_soft_late_init_prop(prop[i].cls, prop[i].name, false);
+                 (prop[slot].attrs & AttrLateInit)) {
+        if (prop[slot].attrs & AttrLateInitSoft) {
+          raise_soft_late_init_prop(prop[slot].cls, prop[slot].name, false);
           tvDup(
             *g_context->getSoftLateInitDefault().asTypedValue(),
-            *const_cast<TypedValue*>(&objProp[i])
+            *const_cast<TypedValue*>(&objProp[index])
           );
           // Loop over this property again
-          --i;
+          --slot;
           continue;
         } else {
-          throw_late_init_prop(prop[i].cls, prop[i].name, false);
+          throw_late_init_prop(prop[slot].cls, prop[slot].name, false);
         }
       }
     } else {
-      binary_serialize_slow(fields[i], obj, transport);
+      binary_serialize_slow(fields[slot], obj, transport);
     }
   }
   transport.writeI8(T_STOP); // struct end

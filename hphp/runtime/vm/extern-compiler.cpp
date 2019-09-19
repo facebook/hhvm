@@ -30,7 +30,6 @@
 #include <folly/FileUtil.h>
 
 #include "hphp/runtime/base/ini-setting.h"
-#include "hphp/runtime/server/source-root-info.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/unit-emitter.h"
@@ -50,6 +49,8 @@
 namespace HPHP {
 
 TRACE_SET_MOD(extern_compiler);
+
+HhasHandler g_hhas_handler = nullptr;
 
 namespace {
 
@@ -297,14 +298,15 @@ struct ExternCompiler {
 
   std::string extract_facts(
     const std::string& filename,
-    folly::StringPiece code
+    folly::StringPiece code,
+    const RepoOptions& options
   ) {
     if (!isRunning()) {
       start();
     }
     std::string facts;
     try {
-      writeExtractFacts(filename, code);
+      writeExtractFacts(filename, code, options);
       return readResult(nullptr /* structured log entry */);
     }
     catch (CompileException& ex) {
@@ -318,13 +320,14 @@ struct ExternCompiler {
 
   std::string ffp_parse_file(
     const std::string& filename,
-    folly::StringPiece code
+    folly::StringPiece code,
+    const RepoOptions& options
   ) {
     if (!isRunning()) {
       start();
     }
     try {
-      writeParseFile(filename, code);
+      writeParseFile(filename, code, options);
       return readResult(nullptr /* structured log entry */);
     }
     catch (CompileException& ex) {
@@ -360,21 +363,46 @@ struct ExternCompiler {
     bool wantsSymbolRefs,
     const RepoOptions& options
   ) {
-    if (!isRunning()) {
-      start();
-    }
-
+    auto isHookInstalled = nullptr != g_hhas_handler;
     std::string prog;
     std::unique_ptr<Unit> u;
     try {
       m_compilations++;
       StructuredLogEntry log;
       log.setStr("filename", filename);
-      int64_t t = logTime(log, 0, nullptr, true);
-      writeProgram(filename, sha1, code, forDebuggerEval, options);
-      t = logTime(log, t, "send_source");
-      prog = readResult(&log);
-      t = logTime(log, t, "receive_hhas");
+      int64_t startTime = logTime(log, 0, nullptr, true);
+      int64_t t = startTime;
+
+      auto statefulLogTime = [&](const char* name) {
+        t = logTime(log, t, name);
+      };
+
+      auto compile = [&]() {
+        if (!isRunning()) {
+          start();
+        }
+        writeProgram(filename, sha1, code, forDebuggerEval, options);
+        statefulLogTime("send_source");
+        auto hhas = readResult(&log);
+        statefulLogTime("receive_hhas");
+        return hhas;
+      };
+
+      if (isHookInstalled) {
+        prog = g_hhas_handler(
+          filename,
+          sha1,
+          code.size(),
+          log,
+          statefulLogTime,
+          compile,
+          options
+        );
+      } else {
+        prog = compile();
+      }
+      t = logTime(log, startTime, "total_hhas_retrieval");
+
       auto ue = assemble_string(prog.data(),
                                 prog.length(),
                                 filename,
@@ -383,7 +411,8 @@ struct ExternCompiler {
                                 false /* swallow errors */,
                                 wantsSymbolRefs
                               );
-      logTime(log, t, "assemble_hhas");
+      statefulLogTime("assemble_hhas");
+      log.setInt("total_time", t - startTime);
       if (RuntimeOption::EvalLogExternCompilerPerf) {
         StructuredLog::log("hhvm_detailed_frontend_performance", log);
       }
@@ -448,8 +477,10 @@ private:
   void writeConfigs();
   void writeProgram(const char* filename, SHA1 sha1, folly::StringPiece code,
                     bool forDebuggerEval, const RepoOptions& options);
-  void writeExtractFacts(const std::string& filename, folly::StringPiece code);
-  void writeParseFile(const std::string& filename, folly::StringPiece code);
+  void writeExtractFacts(const std::string& filename, folly::StringPiece code,
+                         const RepoOptions&);
+  void writeParseFile(const std::string& filename, folly::StringPiece code,
+                      const RepoOptions&);
 
   std::string readVersion() const;
   std::string readResult(StructuredLogEntry* log) const;
@@ -487,11 +518,13 @@ struct CompilerPool {
                          bool wantsSymbolRefs,
                          bool& internal_error,
                          const RepoOptions& options);
-  FfpResult parse(std::string name, const char* code, int len);
+  FfpResult parse(std::string name, const char* code, int len,
+                  const RepoOptions&);
   ParseFactsResult extract_facts(const CompilerGuard& compiler,
                                  const std::string& filename,
                                  const char* code,
-                                 int len);
+                                 int len,
+                                 const RepoOptions& options);
   std::string getVersionString() { return m_version; }
   std::pair<uint64_t, bool> getMaxRetriesAndVerbosity() const {
     return std::make_pair(m_options.maxRetries, m_options.verboseErrors);
@@ -639,10 +672,12 @@ ParseFactsResult extract_facts_worker(const CompilerGuard& compiler,
                                const char* code,
                                int len,
                                int maxRetries,
-                               bool verboseErrors
+                               bool verboseErrors,
+                               const RepoOptions& options
 ) {
   auto extract = [&](const CompilerGuard& c) {
-    auto result = c->extract_facts(filename, folly::StringPiece(code, len));
+    auto result = c->extract_facts(filename, folly::StringPiece(code, len),
+                                   options);
     return FactsJSONString { result };
   };
   auto internal_error = false;
@@ -681,9 +716,15 @@ CompilerResult CompilerPool::compile(const char* code,
     internal_error);
 }
 
-FfpResult CompilerPool::parse(std::string file, const char* code, int len) {
+FfpResult CompilerPool::parse(
+  std::string file,
+  const char* code,
+  int len,
+  const RepoOptions& options
+) {
   auto compile = [&](const CompilerGuard& c) {
-    auto result = c->ffp_parse_file(file, folly::StringPiece(code, len));
+    auto result = c->ffp_parse_file(file, folly::StringPiece(code, len),
+                                    options);
     return FfpJSONString { result };
   };
   auto internal_error = false;
@@ -860,29 +901,31 @@ void ExternCompiler::writeProgram(
     ("file", filename)
     ("is_systemlib", !SystemLib::s_inited)
     ("for_debugger_eval", forDebuggerEval)
-    ("config_overrides", options.toDynamic())
-    ("root", SourceRootInfo::GetCurrentSourceRoot());
+    ("config_overrides", options.toDynamic());
   writeMessage(header, code);
 }
 
 void ExternCompiler::writeExtractFacts(
   const std::string& filename,
-  folly::StringPiece code
+  folly::StringPiece code,
+  const RepoOptions& options
 ) {
   folly::dynamic header = folly::dynamic::object
     ("type", "facts")
     ("file", filename)
-    ("root", SourceRootInfo::GetCurrentSourceRoot());
+    ("config_overrides", options.toDynamic());
   writeMessage(header, code);
 }
 
 void ExternCompiler::writeParseFile(
   const std::string& filename,
-  folly::StringPiece code
+  folly::StringPiece code,
+  const RepoOptions& options
 ) {
   folly::dynamic header = folly::dynamic::object
     ("type", "parse")
-    ("file", filename);
+    ("file", filename)
+    ("config_overrides", options.toDynamic());
   writeMessage(header, code);
 }
 
@@ -1164,7 +1207,8 @@ ParseFactsResult extract_facts(
   const FactsParser& facts_parser,
   const std::string& filename,
   const char* code,
-  int len
+  int len,
+  const RepoOptions& options
 ) {
   size_t maxRetries;
   bool verboseErrors;
@@ -1176,11 +1220,17 @@ ParseFactsResult extract_facts(
     code,
     len,
     maxRetries,
-    verboseErrors);
+    verboseErrors,
+    options);
 }
 
-FfpResult ffp_parse_file(std::string file, const char *contents, int size) {
-  return s_manager.get_hackc_pool().parse(file, contents, size);
+FfpResult ffp_parse_file(
+  std::string file,
+  const char *contents,
+  int size,
+  const RepoOptions& options
+) {
+  return s_manager.get_hackc_pool().parse(file, contents, size, options);
 }
 
 

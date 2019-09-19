@@ -3,8 +3,7 @@
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 0 "main"
-  FCall <> 0 1 "" - "" ""
+  FCallFuncD <> 0 1 "" - "main"
   PopC
 
   String "DONE\n"
@@ -69,7 +68,7 @@ end:
   Dup
   NullUninit
   NullUninit
-  FCallCtor <> 0 1 "" - ""
+  FCallCtor <LockWhileUnwinding> 0 1 "" - ""
   PopC
   LockObj
   SetL $obj
@@ -80,8 +79,7 @@ end:
   CGetL $obj
   CGetL $type
   CGetL $x
-  FPushFuncD 3 "test"
-  FCall <> 3 1 "" - "" ""
+  FCallFuncD <> 3 1 "" - "test"
   RetC
 
 cls2:
@@ -89,7 +87,7 @@ cls2:
   Dup
   NullUninit
   NullUninit
-  FCallCtor <> 0 1 "" - ""
+  FCallCtor <LockWhileUnwinding> 0 1 "" - ""
   PopC
   LockObj
   SetL $obj
@@ -100,8 +98,7 @@ cls2:
   CGetL $obj
   CGetL $type
   CGetL $x
-  FPushFuncD 3 "test"
-  FCall <> 3 1 "" - "" ""
+  FCallFuncD <> 3 1 "" - "test"
   RetC
 }
 
@@ -121,8 +118,7 @@ header:
   NullUninit
   CGetL $type
   Int 1
-  FPushFuncD 2 "test_outer"
-  FCall <> 2 1 "" - "" ""
+  FCallFuncD <> 2 1 "" - "test_outer"
   PopC
 
   IncDecL $count PreInc
@@ -140,8 +136,7 @@ end:
   NullUninit
   False
   Int 40
-  FPushFuncD 2 "loop"
-  FCall <> 2 1 "" - "" ""
+  FCallFuncD <> 2 1 "" - "loop"
   PopC
 
   NullUninit
@@ -149,7 +144,6 @@ end:
   NullUninit
   True
   Int 100
-  FPushFuncD 2 "loop"
-  FCall <> 2 1 "" - "" ""
+  FCallFuncD <> 2 1 "" - "loop"
   RetC
 }

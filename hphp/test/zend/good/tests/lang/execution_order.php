@@ -3,8 +3,8 @@
 /* strings and concat */
 
 class strclass {
-   var $str = "bad";
-   static $statstr = "bad";
+  public $str = "bad";
+  static $statstr = "bad";
 }
 
 $a = "bad";
@@ -144,8 +144,8 @@ echo "\r\n";
 
 
 class c {
-   var $val = 10;
-   static $stat = 20;
+  public $val = 10;
+  static $stat = 20;
 }
 
 echo "21)";

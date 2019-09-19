@@ -60,12 +60,16 @@ bool Vout::closed() const {
 }
 
 Vout Vout::makeBlock() {
-  uint64_t weight = 0;
-  if (m_irctx.origin != nullptr) {
-    weight = m_irctx.origin->block()->profCount();
-  }
-  weight = weight * areaWeightFactor(area());
-  return {m_unit, m_unit.makeBlock(area(), weight), m_irctx};
+  auto weight = m_irctx.origin
+    ? m_irctx.origin->block()->profCount()
+    : 1;
+  weight *= (m_weight_scale * areaWeightFactor(area()));
+  return {m_unit, m_unit.makeBlock(area(), weight), m_irctx, m_weight_scale};
+}
+
+void Vout::addWeightScale(uint64_t scale) {
+  m_weight_scale *= scale;
+  m_unit.blocks[m_block].weight *= scale;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

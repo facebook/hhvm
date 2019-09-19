@@ -11,7 +11,7 @@ function runTakeoverTest() {
   $debugPort = false;
   $serverHome = __DIR__.'/..';
   $serverRoot = __DIR__.'/../server_root';
-  $customArgs = " -vServer.TakeoverFilename=${takeoverFile}";
+  $customArgs = " -vServer.TakeoverFilename={$takeoverFile}";
 
   try {
     $serverProc = startServer(&$serverPort, &$adminPort, &$debugPort,

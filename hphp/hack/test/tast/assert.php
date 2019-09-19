@@ -12,5 +12,5 @@
 class A {}
 
 function foo(?A $x): void {
-  assert($x instanceof A);
+  assert($x is A);
 }

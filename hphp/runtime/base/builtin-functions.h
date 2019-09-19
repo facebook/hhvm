@@ -34,6 +34,7 @@ extern const StaticString s_cmpWithCollection;
 extern const StaticString s_cmpWithVec;
 extern const StaticString s_cmpWithDict;
 extern const StaticString s_cmpWithKeyset;
+extern const StaticString s_cmpWithClsMeth;
 extern const StaticString s_cmpWithRecord;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -52,6 +53,9 @@ String concat4(const String& s1, const String& s2, const String& s3,
 [[noreturn]] void NEVER_INLINE throw_missing_this(const Func* f);
 [[noreturn]] void NEVER_INLINE throw_has_this_need_static(const Func* f);
 void NEVER_INLINE throw_invalid_property_name(const String& name);
+
+[[noreturn]]
+void NEVER_INLINE throw_call_reified_func_without_generics(const Func* f);
 
 [[noreturn]]
 void throw_exception(const Object& e);
@@ -99,7 +103,8 @@ inline bool is_string(const Cell* c) {
 inline bool is_array(const Cell* c) {
   assertx(cellIsPlausible(*c));
   if (tvIsClsMeth(c)) {
-    if (!RuntimeOption::EvalHackArrDVArrs) {
+    if (RuntimeOption::EvalIsCompatibleClsMethType &&
+        !RuntimeOption::EvalHackArrDVArrs) {
       if (RuntimeOption::EvalIsVecNotices) {
         raise_notice(Strings::CLSMETH_COMPAT_IS_ARR);
       }
@@ -107,7 +112,7 @@ inline bool is_array(const Cell* c) {
     }
     return false;
   }
-  return tvIsArrayOrShape(c);
+  return tvIsArray(c);
 }
 
 inline bool is_vec(const Cell* c) {
@@ -126,7 +131,7 @@ inline bool is_vec(const Cell* c) {
 
 inline bool is_dict(const Cell* c) {
   assertx(cellIsPlausible(*c));
-  return tvIsDictOrShape(c);
+  return tvIsDict(c);
 }
 
 inline bool is_keyset(const Cell* c) {
@@ -151,7 +156,7 @@ inline bool is_varray(const Cell* c) {
 
 inline bool is_darray(const Cell* c) {
   return RuntimeOption::EvalHackArrDVArrs
-    ? tvIsDictOrShape(c)
+    ? tvIsDict(c)
     : (tvIsArray(c) && c->m_data.parr->isDArray());
 }
 
@@ -166,6 +171,11 @@ inline bool is_clsmeth(const Cell* c) {
   return tvIsClsMeth(c);
 }
 
+inline bool is_fun(const Cell* c) {
+  assertx(cellIsPlausible(*c));
+  return tvIsFunc(c);
+}
+
 inline bool is_empty_string(const Cell* c) {
   return tvIsString(c) && c->m_data.pstr->empty();
 }
@@ -177,7 +187,7 @@ inline bool is_empty_string(const Cell* c) {
  * Semantics of is_callable defined here:
  * http://php.net/manual/en/function.is-callable.php
  */
-bool is_callable(const Variant& v, bool syntax_only, RefData* name);
+bool is_callable(const Variant& v, bool syntax_only, Variant* name);
 /*
  * Equivalent to is_callable(v, false, nullptr)
  */
@@ -192,16 +202,17 @@ vm_decode_function(const_variant_ref function,
                    HPHP::Class*& cls,
                    StringData*& invName,
                    bool& dynamic,
-                   ArrayData*& reifiedGenerics,
-                   DecodeFlags flags = DecodeFlags::Warn);
+                   DecodeFlags flags = DecodeFlags::Warn,
+                   bool genericsAlreadyGiven = false);
 
 inline void
 vm_decode_function(const_variant_ref function,
                    CallCtx& ctx,
-                   DecodeFlags flags = DecodeFlags::Warn) {
+                   DecodeFlags flags = DecodeFlags::Warn,
+                   bool genericsAlreadyGiven = false) {
   ctx.func = vm_decode_function(function, nullptr, ctx.this_, ctx.cls,
-                                ctx.invName, ctx.dynamic, ctx.reifiedGenerics,
-                                flags);
+                                ctx.invName, ctx.dynamic, flags,
+                                genericsAlreadyGiven);
 }
 
 std::pair<Class*, Func*> decode_for_clsmeth(
@@ -212,13 +223,14 @@ std::pair<Class*, Func*> decode_for_clsmeth(
   DecodeFlags flags = DecodeFlags::Warn);
 
 Variant vm_call_user_func(const_variant_ref function, const Variant& params,
-                          bool checkRef = false);
+                          bool checkRef = false,
+                          bool allowDynCallNoPointer = false);
 template<typename T>
-Variant vm_call_user_func(T&& t, const Variant& params,
-                          bool checkRef = false) {
+Variant vm_call_user_func(T&& t, const Variant& params, bool checkRef = false,
+                          bool allowDynCallNoPointer = false) {
   const Variant function{std::forward<T>(t)};
   return vm_call_user_func(
-    const_variant_ref{function}, params, checkRef
+    const_variant_ref{function}, params, checkRef, allowDynCallNoPointer
   );
 }
 
@@ -229,7 +241,7 @@ Variant o_invoke_failed(const char *cls, const char *meth,
                         bool fatal = true);
 
 bool is_constructor_name(const char* func);
-void throw_instance_method_fatal(const char *name);
+[[noreturn]] void throw_instance_method_fatal(const char *name);
 
 [[noreturn]] void throw_invalid_collection_parameter();
 [[noreturn]] void throw_invalid_operation_exception(StringData*);
@@ -242,6 +254,7 @@ void throw_instance_method_fatal(const char *name);
 [[noreturn]] void throw_vec_compare_exception();
 [[noreturn]] void throw_dict_compare_exception();
 [[noreturn]] void throw_keyset_compare_exception();
+[[noreturn]] void throw_clsmeth_compare_exception();
 [[noreturn]] void throw_record_compare_exception();
 [[noreturn]] void throw_rec_non_rec_compare_exception();
 [[noreturn]] void throw_param_is_not_container();
@@ -251,6 +264,8 @@ void throw_instance_method_fatal(const char *name);
 [[noreturn]] void throw_object_forbids_dynamic_props(const char* className);
 [[noreturn]] void throw_cannot_modify_const_prop(const char* className,
                                                  const char* propName);
+[[noreturn]] void throw_cannot_modify_static_const_prop(const char* className,
+                                                        const char* propName);
 [[noreturn]] void throw_late_init_prop(const Class* cls,
                                        const StringData* propName,
                                        bool isSProp);
@@ -281,19 +296,8 @@ void throw_object(const String& s, const Array& params, bool init = true) {
   throw_object(create_object(s, params, init));
 }
 
-/**
- * Argument count handling.
- *   - When level is 2, it's from constructors that turn these into fatals
- *   - When level is 1, it's from system funcs that turn both into warnings
- *   - When level is 0, it's from user funcs that turn missing arg in warnings
- */
-void throw_wrong_argument_count_nr(const char *fn, int expected, int got,
-                                   const char *expectDesc)
-  __attribute__((__cold__));
 void throw_missing_arguments_nr(const char *fn, int expected, int got)
 
-  __attribute__((__cold__));
-void throw_wrong_arguments_nr(const char *fn, int count, int cmin, int cmax)
   __attribute__((__cold__));
 
 /**

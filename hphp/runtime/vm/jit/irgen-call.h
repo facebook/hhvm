@@ -44,6 +44,7 @@ void emitCallerRxChecksKnown(IRGS& env, const Func* callee);
 
 Type callReturnType(const Func* callee);
 Type awaitedCallReturnType(const Func* callee);
+Type callOutType(const Func* callee, uint32_t index);
 
 //////////////////////////////////////////////////////////////////////
 

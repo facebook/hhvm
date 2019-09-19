@@ -1,0 +1,13 @@
+object(HH\Vector) (2) {
+  [0]=>
+  int(5)
+  [1]=>
+  int(6)
+}
+Cannot modify static const property ca of class A.
+vec(1) {
+  object(HH\Vector) (1) {
+    [0]=>
+    int(6)
+  }
+}

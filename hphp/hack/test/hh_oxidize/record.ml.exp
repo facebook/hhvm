@@ -1,0 +1,8 @@
+use ocamlrep_derive::OcamlRep;
+use ocamlvalue_macro::Ocamlvalue;
+
+#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+pub struct A {
+    pub x: isize,
+    pub y: isize,
+}

@@ -84,11 +84,7 @@ rds::Handle FuncCache::alloc() {
   return link.handle();
 }
 
-const Func* FuncCache::lookup(rds::Handle handle,
-                              StringData* sd,
-                              ActRec* ar,
-                              ActRec* fp) {
-  assertx(ar->isDynamicCall());
+const Func* FuncCache::lookup(rds::Handle handle, StringData* sd) {
   auto const thiz = rds::handleToPtr<FuncCache, rds::Mode::Normal>(handle);
   if (!rds::isHandleInit(handle, rds::NormalTag{})) {
     for (std::size_t i = 0; i < FuncCache::kNumLines; ++i) {
@@ -98,71 +94,25 @@ const Func* FuncCache::lookup(rds::Handle handle,
     rds::initHandle(handle);
   }
   auto const pair = keyToPair(thiz, sd);
-  const StringData* pairSd = pair->m_key;
-  if (!stringMatches(pairSd, sd)) {
-    // Miss. Does it actually exist?
-    auto const* func = Unit::lookupFunc(sd);
-    bool noEffects = true;
-    try {
-      if (LIKELY(func != nullptr)) {
-        noEffects &= callerDynamicCallChecks(func);
-        noEffects &= callerRxChecks(fp, func);
-      } else {
-        ObjectData *this_ = nullptr;
-        Class* self_ = nullptr;
-        StringData* inv = nullptr;
-        ArrayData* reifiedGenerics = nullptr;
-        bool dynamic = false;
-        func = vm_decode_function(
-          Variant{sd},
-          fp,
-          this_,
-          self_,
-          inv,
-          dynamic,
-          reifiedGenerics,
-          DecodeFlags::NoWarn);
-        if (!func) {
-          raise_call_to_undefined(sd);
-        }
-        assertx(dynamic);
-        noEffects &= callerDynamicCallChecks(func);
-        noEffects &= callerRxChecks(fp, func);
-
-        if (this_) {
-          ar->m_func = func;
-          ar->setThis(this_);
-          this_->incRefCount();
-          if (UNLIKELY(inv != nullptr)) ar->setMagicDispatch(inv);
-          return func;
-        }
-        if (self_) {
-          ar->m_func = func;
-          ar->setClass(self_);
-          if (UNLIKELY(inv != nullptr)) ar->setMagicDispatch(inv);
-          return func;
-        }
-      }
-    } catch (...) {
-      *arPreliveOverwriteCells(ar) = make_tv<KindOfString>(sd);
-      throw;
-    }
-    assertx(!func->implCls());
-    func->validate();
-    if (UNLIKELY(!noEffects)) {
-      ar->m_func = func;
-      ar->trashThis();
-      return func;
-    }
-    pair->m_key =
-      const_cast<StringData*>(func->displayName()); // use a static name
-    pair->m_value = func;
+  if (stringMatches(pair->m_key, sd)) {
+    assertx(stringMatches(pair->m_key, pair->m_value->displayName()));
+    pair->m_value->validate();
+    return pair->m_value;
   }
-  ar->m_func = pair->m_value;
-  ar->trashThis();
-  assertx(stringMatches(pair->m_key, pair->m_value->displayName()));
-  pair->m_value->validate();
-  return pair->m_value;
+
+  // Handle "cls::meth" in interpreter.
+  if (!notClassMethodPair(sd)) return nullptr;
+
+  // Miss. Does it actually exist?
+  auto const* func = Unit::loadFunc(sd);
+  if (UNLIKELY(func == nullptr)) raise_call_to_undefined(sd);
+
+  assertx(!func->implCls());
+  func->validate();
+  // use a static name
+  pair->m_key = const_cast<StringData*>(func->displayName());
+  pair->m_value = func;
+  return func;
 }
 
 void invalidateForRenameFunction(const StringData* name) {
@@ -216,26 +166,24 @@ namespace {
 ///////////////////////////////////////////////////////////////////////////////
 
 NEVER_INLINE
-uintptr_t lookup(const Class* cls, const StringData* name, const Class* ctx) {
+const Func* lookup(const Class* cls, const StringData* name, const Class* ctx) {
   auto const func = lookupMethodCtx(cls, name, ctx, CallType::ObjMethod, false);
   if (LIKELY(func != nullptr)) {
     if (UNLIKELY(func->isStaticInPrologue())) {
       throw_has_this_need_static(func);
     }
-    return reinterpret_cast<uintptr_t>(func);
+    return func;
   }
 
+  // Handle magic calls in the interpreter.
   auto const magicFunc = cls->lookupMethod(s_call.get());
-  if (LIKELY(magicFunc != nullptr)) {
-    assertx(!magicFunc->isStatic());
-    return reinterpret_cast<uintptr_t>(magicFunc) | 0x1u;
-  }
+  if (LIKELY(magicFunc != nullptr)) return nullptr;
 
   lookupMethodCtx(cls, name, ctx, CallType::ObjMethod, true /* raise */);
   not_reached();
 }
 
-void smashImmediate(TCA movAddr, const Class* cls, uintptr_t funcVal) {
+void smashImmediate(TCA movAddr, const Class* cls, const Func* func) {
   // The inline cache is a 64-bit immediate, and we need to atomically
   // set both the Func* and the Class*.  We also can only cache these
   // values if the Func* and Class* can't be deallocated, so this is
@@ -259,16 +207,17 @@ void smashImmediate(TCA movAddr, const Class* cls, uintptr_t funcVal) {
   //
   // If the situation is not cacheable, we just put a value into the
   // immediate that will cause it to always call out to handleStaticCall.
-  assertx(cls && funcVal);
+  assertx(cls);
   auto const clsVal = reinterpret_cast<uintptr_t>(cls);
-  bool const cacheable =
+  auto const funcVal = reinterpret_cast<uintptr_t>(func);
+  auto const cacheable =
     RuntimeOption::RepoAuthoritative &&
-    !(funcVal & 0x1) &&
+    funcVal &&
     clsVal < std::numeric_limits<uint32_t>::max() &&
     funcVal < std::numeric_limits<uint32_t>::max();
 
   if (cacheable) {
-    assertx(!(funcVal & 0x1));
+    assertx(funcVal);
     smashMovq(movAddr, funcVal << 32 | clsVal);
   } else {
     smashMovq(movAddr, 0x1);
@@ -278,13 +227,13 @@ void smashImmediate(TCA movAddr, const Class* cls, uintptr_t funcVal) {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-EXTERNALLY_VISIBLE uintptr_t
+EXTERNALLY_VISIBLE const Func*
 handleDynamicCall(const Class* cls, const StringData* name, const Class* ctx) {
   // Perform lookup without any caching.
   return lookup(cls, name, ctx);
 }
 
-EXTERNALLY_VISIBLE uintptr_t
+EXTERNALLY_VISIBLE const Func*
 handleStaticCall(const Class* cls, const StringData* name, const Class* ctx,
                  rds::Handle mceHandle, uintptr_t mcePrime) {
   assertx(name->isStatic());
@@ -306,21 +255,20 @@ handleStaticCall(const Class* cls, const StringData* name, const Class* ctx,
     }
 
     // Otherwise, use TC's mcePrime as a starting point for request local cache.
-    mce = Entry { nullptr, mcePrime >> 32 };
+    mce = Entry { nullptr, reinterpret_cast<const Func*>(mcePrime >> 32) };
     rds::initHandle(mceHandle);
   } else if (LIKELY(mce.m_key == cls)) {
     // Fast path -- hit in the request local cache.
     return mce.m_value;
-  } else if (UNLIKELY(mce.m_value & 0x1)) {
+  } else if (UNLIKELY(mce.m_value == nullptr)) {
     // Snail path -- the cache missed func is magic, can't use it.
     auto const func = lookup(cls, name, ctx);
     mce = Entry { cls, func };
     return func;
   }
 
-  assertx(mce.m_value && !(mce.m_value & 0x1));
-  auto const oldFunc = reinterpret_cast<const Func*>(mce.m_value);
-  assertx(!oldFunc->isStaticInPrologue());
+  auto const oldFunc = mce.m_value;
+  assertx(oldFunc && !oldFunc->isStaticInPrologue());
 
   // Note: if you manually CSE oldFunc->methodSlot() here, gcc 4.8
   // will strangely generate two loads instead of one.
@@ -340,7 +288,7 @@ handleStaticCall(const Class* cls, const StringData* name, const Class* ctx,
   // the method, but neither overrode the method.
   if (LIKELY(cand == oldFunc)) {
     mce.m_key = cls;
-    return reinterpret_cast<uintptr_t>(oldFunc);
+    return oldFunc;
   }
 
   // If the previously called function (oldFunc) was private, then
@@ -360,7 +308,7 @@ handleStaticCall(const Class* cls, const StringData* name, const Class* ctx,
         cls->classVec()[oldCls->classVecLen() - 1] == oldCls) {
       // cls <: oldCls -- choose the same function as last time.
       mce.m_key = cls;
-      return reinterpret_cast<uintptr_t>(oldFunc);
+      return oldFunc;
     }
   }
 
@@ -388,9 +336,8 @@ handleStaticCall(const Class* cls, const StringData* name, const Class* ctx,
         throw_has_this_need_static(cand);
       }
 
-      auto const func = reinterpret_cast<uintptr_t>(cand);
-      mce = Entry { cls, func };
-      return func;
+      mce = Entry { cls, cand };
+      return cand;
     }
 
     // If the candidate function and the old function are originally
@@ -404,9 +351,8 @@ handleStaticCall(const Class* cls, const StringData* name, const Class* ctx,
     // can't be static, because the last one wasn't.
     if (LIKELY(cand->baseCls() == oldFunc->baseCls())) {
       assertx(!cand->isStaticInPrologue());
-      auto const func = reinterpret_cast<uintptr_t>(cand);
-      mce = Entry { cls, func };
-      return func;
+      mce = Entry { cls, cand };
+      return cand;
     }
   }
 
@@ -424,7 +370,7 @@ handleStaticCall(const Class* cls, const StringData* name, const Class* ctx,
 static const StringData* mangleSmcName(const StringData* cls,
                                        const StringData* meth,
                                        const char* ctx) {
-  // Implementation detail of FPushClsMethodD/F: we use "C::M:ctx" as
+  // Implementation detail of FCallClsMethodD/S: we use "C::M:ctx" as
   // the key for invoking static method "M" on class "C". This
   // composes such a key. "::" is semi-arbitrary, though whatever we
   // choose must delimit possible class and method names, so we might
@@ -518,7 +464,7 @@ StaticMethodFCache::lookup(rds::Handle handle, const Class* cls,
     // or MethodNotFound. It will always return the same f and if we do give it
     // a this it will return MethodFoundWithThis iff (this->instanceof(cls) &&
     // !f->isStatic()). this->instanceof(cls) is always true for
-    // FPushClsMethodF because it is only used for self:: and parent::
+    // FCallClsMethodS because it is only used for self:: and parent::
     // calls. So, if we store f and its staticness we can handle calls with and
     // without this completely in assembly.
     f->validate();

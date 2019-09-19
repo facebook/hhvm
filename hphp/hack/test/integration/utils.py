@@ -5,12 +5,15 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import os
 import signal
 from types import FrameType
-from typing import BinaryIO, Iterable, Mapping, Union, _ForwardRef
+from typing import BinaryIO, Callable, Iterable, Mapping, Union, _ForwardRef
 
 
 JsonObject = Mapping[str, _ForwardRef("Json")]
 JsonArray = Iterable[_ForwardRef("Json")]
-Json = Union[JsonObject, JsonArray, str, int, float, bool, None]
+JsonScalar = Union[str, int, float, bool, None]
+Json = Union[JsonObject, JsonArray, JsonScalar]
+
+VariableMap = Mapping[str, str]
 
 
 def touch(fn: str) -> None:
@@ -52,3 +55,48 @@ def ensure_output_contains(f: BinaryIO, s: str, timeout: int = 20) -> None:
             lines.append(line)
     finally:
         signal.alarm(0)
+
+
+def map_json_scalars(json: Json, f: Callable[[JsonScalar], JsonScalar]) -> Json:
+    if isinstance(json, dict):
+        return {
+            map_json_scalars(json=k, f=f): map_json_scalars(json=v, f=f)
+            for k, v in json.items()
+        }
+    elif isinstance(json, list):
+        return [map_json_scalars(json=i, f=f) for i in json]
+    elif isinstance(json, (str, int, float, bool, type(None))):
+        return f(json)
+    else:
+        assert False, f"Unhandled JSON case: {json.__class__.__name__}"
+
+
+def interpolate_variables(payload: Json, variables: VariableMap) -> Json:
+    for variable, value in variables.items():
+
+        def interpolate(json: JsonScalar) -> JsonScalar:
+            if isinstance(json, str):
+                return json.replace("${" + variable + "}", value)
+            else:
+                return json
+
+        payload = map_json_scalars(json=payload, f=interpolate)
+    return payload
+
+
+def uninterpolate_variables(payload: Json, variables: VariableMap) -> Json:
+    # Sort so that we process the variable with the longest-length bindings first.
+    variable_bindings = sorted(
+        variables.items(), key=lambda kv: len(kv[1]), reverse=True
+    )
+
+    for variable, value in variable_bindings:
+
+        def uninterpolate(json: JsonScalar) -> JsonScalar:
+            if isinstance(json, str):
+                return json.replace(value, "${" + variable + "}")
+            else:
+                return json
+
+        payload = map_json_scalars(json=payload, f=uninterpolate)
+    return payload

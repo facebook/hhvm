@@ -1,5 +1,5 @@
 <?hh
-
+<<__EntryPoint>> function main(): void {
 // 1. nonexisting connect.
 $m = new Memcache();
 var_dump($m->connect('nonexistinghost', 123));
@@ -20,3 +20,4 @@ var_dump($m->set('foo', 'bar'));
 var_dump($m->set('baz', 'qux'));
 var_dump($m->get('foo'));
 var_dump($m->get(array('foo', 'baz')));
+}

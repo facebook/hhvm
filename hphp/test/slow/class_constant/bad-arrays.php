@@ -43,7 +43,7 @@ const TESTS = vec[
 ];
 
 function main() {
-  $count = apc_fetch('test-count');
+  $count = __hhvm_intrinsics\apc_fetch_no_check('test-count');
   if ($count === false) $count = 0;
   if ($count >= count(TESTS)) return;
 

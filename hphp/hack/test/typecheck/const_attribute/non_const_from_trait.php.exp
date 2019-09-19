@@ -1,0 +1,2 @@
+File "non_const_from_trait.php", line 5, characters 19-19:
+Trait declaration of non-const property p is incompatible with a const class (Typing[4344])

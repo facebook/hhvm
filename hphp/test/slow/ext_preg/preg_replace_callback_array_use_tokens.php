@@ -18,6 +18,7 @@ $input = <<<'end'
 $a = 3; // variable initialisation
 end;
 
+$count = -1;
 $ret = preg_replace_callback_array(
   [
     '~\$[a-z_][a-z\d_]*~i' => function ($match) use ($tokenStream) {
@@ -36,7 +37,9 @@ $ret = preg_replace_callback_array(
       $tokenStream->stream[] = ['T_COMMENT', $match[0]];
     }
   ],
-  $input
+  $input,
+  -1,
+  inout $count,
 );
 
 var_dump($ret);

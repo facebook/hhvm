@@ -7,7 +7,7 @@
 class C {
   const type T as arraykey = arraykey;
 
-  /* HH_FIXME[4110] */
+  /* HH_FIXME[4336] */
   public function get(): this::T {
   }
 

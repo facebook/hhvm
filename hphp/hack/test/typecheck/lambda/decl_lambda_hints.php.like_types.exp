@@ -1,0 +1,8 @@
+File "decl_lambda_hints.php", line 16, characters 5-14:
+Break/continue N operators are not supported. (NastCheck[3040])
+File "decl_lambda_hints.php", line 13, characters 11-20:
+Invalid argument (Typing[4110])
+File "decl_lambda_hints.php", line 13, characters 11-20:
+Expected array<int>
+File "decl_lambda_hints.php", line 13, characters 11-20:
+But got dynamic because it is an unenforceable type

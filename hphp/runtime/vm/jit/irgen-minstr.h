@@ -36,6 +36,18 @@ namespace HPHP { namespace jit { namespace irgen {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
+ * Returns true if the given property may have a countable type. This check
+ * is allowed to have false positives; in particular: if property type-hint
+ * enforcement is disabled, it will usually return true. (It may still return
+ * false in RepoAuthoritative mode if HHBBC can prove a property is uncounted.)
+ *
+ * It is safe to call this method during Class initialization.
+ */
+bool propertyMayBeCountable(const Class::Prop& prop);
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
  * Use profiling data from an ArrayAccessProfile to conditionally optimize
  * the array access represented by `generic' as `direct'.
  *
@@ -44,28 +56,36 @@ namespace HPHP { namespace jit { namespace irgen {
  * this branches on a CheckMixedArrayOffset/CheckDictOffset/CheckKeysetOffset
  * to either `direct' or `generic'; otherwise, we fall back to `generic'.
  *
+ * When we call `generic`, if we're optimizing, we'll pass it SizeHintData
+ * that can be used to optimize generic lookups.
+ *
  * The callback function signatures should be:
  *
  *    SSATmp* direct(SSATmp* key, uint32_t pos);
- *    SSATmp* generic(SSATmp* key);
+ *    SSATmp* generic(SSATmp* key, SizeHintData data);
  */
 template<class DirectFn, class GenericFn>
 SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key,
                             DirectFn direct, GenericFn generic,
                             bool cow_check = false) {
-  const bool is_dict = arr->isA(TDict);
-  const bool is_keyset = arr->isA(TKeyset);
+  // These locals should be const, but we need to work around a bug in older
+  // versions of GCC that cause the hhvm-cmake build to fail. See the issue:
+  // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80543
+  bool is_dict = arr->isA(TDict);
+  bool is_keyset = arr->isA(TKeyset);
   assertx(is_dict || is_keyset || arr->isA(TArr));
 
   // If the access is statically known, don't bother profiling as we'll probably
   // optimize it away completely.
-  if (arr->hasConstVal() && key->hasConstVal()) return generic(key);
+  if (arr->hasConstVal() && key->hasConstVal()) {
+    return generic(key, SizeHintData{});
+  }
 
   static const StaticString s_DictAccess{"DictAccess"};
   static const StaticString s_KeysetAccess{"KeysetAccess"};
   static const StaticString s_MixedArrayAccess{"MixedArrayAccess"};
   auto const profile = TargetProfile<ArrayAccessProfile> {
-    env.context,
+    env.unit,
     env.irb->curMarker(),
     is_dict ? s_DictAccess.get() :
     is_keyset ? s_KeysetAccess.get() :
@@ -82,54 +102,53 @@ SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key,
       arr,
       key
     );
-    return generic(key);
+    return generic(key, SizeHintData{});
   }
 
   if (profile.optimizing()) {
-    auto const data = profile.data();
+    auto const result = profile.data().choose();
+    if (!result.offset) return generic(key, result.size_hint);
 
-    if (auto const pos = data.choose()) {
-      return cond(
-        env,
-        [&] (Block* taken) {
-          SSATmp* marr;
-          if (!is_dict && !is_keyset) {
-            env.irb->constrainValue(
-              arr,
-              GuardConstraint(DataTypeSpecialized).setWantArrayKind()
-            );
-            auto const TMixedArr = Type::Array(ArrayData::kMixedKind);
-            marr = gen(env, CheckType, TMixedArr, taken, arr);
-          } else {
-            marr = arr;
-          }
-
-          auto const extra = IndexData { *pos };
-          gen(
-            env,
-            is_dict ? CheckDictOffset :
-              is_keyset ? CheckKeysetOffset :
-              CheckMixedArrayOffset,
-            extra,
-            taken,
-            marr,
-            key
+    return cond(
+      env,
+      [&] (Block* taken) {
+        auto const marr = [&](){
+          if (is_dict || is_keyset) return arr;
+          env.irb->constrainValue(
+            arr,
+            GuardConstraint(DataTypeSpecialized).setWantArrayKind()
           );
+          auto const TMixedArr = Type::Array(ArrayData::kMixedKind);
+          return gen(env, CheckType, TMixedArr, taken, arr);
+        }();
 
-          if (cow_check) {
-            gen(env, CheckArrayCOW, taken, marr);
-          }
-          return marr;
-        },
-        [&] (SSATmp* tmp) { return direct(tmp, key, *pos); },
-        [&] {
-          hint(env, Block::Hint::Unlikely);
-          return generic(key);
+        gen(
+          env,
+          is_dict ? CheckDictOffset :
+            is_keyset ? CheckKeysetOffset :
+            CheckMixedArrayOffset,
+          IndexData { *result.offset },
+          taken,
+          marr,
+          key
+        );
+
+        if (cow_check) {
+          gen(env, CheckArrayCOW, taken, marr);
         }
-      );
-    }
+        return marr;
+      },
+      [&] (SSATmp* tmp) { return direct(tmp, key, *result.offset); },
+      [&] {
+        // NOTE: We could pass result.size_hint here, but that's the size hint
+        // for the overall distribution, not the conditional distribution when
+        // the likely offset profile misses. We pass a default profile instead.
+        hint(env, Block::Hint::Unlikely);
+        return generic(key, SizeHintData{});
+      }
+    );
   }
-  return generic(key);
+  return generic(key, SizeHintData{});
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -151,7 +170,7 @@ SSATmp* profiledType(IRGS& env, SSATmp* tmp, Finish finish) {
   }
 
   static const StaticString s_TypeProfile{"TypeProfile"};
-  TargetProfile<TypeProfile> prof(env.context, env.irb->curMarker(),
+  TargetProfile<TypeProfile> prof(env.unit, env.irb->curMarker(),
                                   s_TypeProfile.get());
 
   if (prof.profiling()) {

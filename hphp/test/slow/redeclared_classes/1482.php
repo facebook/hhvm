@@ -20,8 +20,8 @@ function test() {
 
 <<__EntryPoint>>
 function main_1482() {
-if (false) {
-  include '1482.inc';
-}
-test();
+  if (__hhvm_intrinsics\launder_value(false)) {
+    include '1482.inc';
+  }
+  test();
 }

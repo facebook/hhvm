@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/apc-array.h"
 #include "hphp/runtime/base/apc-object.h"
 #include "hphp/runtime/base/apc-collection.h"
+#include "hphp/runtime/base/apc-named-entity.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/base/apc-local-array.h"
@@ -57,7 +58,24 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
       auto const value = new APCTypedValue(val(cell).dbl);
       return {value->getHandle(), sizeof(APCTypedValue)};
     }
-    case KindOfFunc:
+    case KindOfFunc: {
+      auto const func = val(cell).pfunc;
+      auto const serialize_func =
+        RuntimeOption::EvalAPCSerializeFuncs &&
+        // Right now cls_meth() can serialize as an array, and attempting to
+        // recursively serialize elements in the array will eventually attempt
+        // to serialize a method pointer.
+        !func->isMethod();
+      if (serialize_func) {
+        if (func->isPersistent()) {
+          auto const value = new APCTypedValue(func);
+          return {value->getHandle(), sizeof(APCTypedValue)};
+        }
+        auto const value = new APCNamedEntity(func);
+        return {value->getHandle(), sizeof(APCNamedEntity)};
+      }
+      // fallthrough to string serialization
+    }
     case KindOfClass:
     case KindOfPersistentString:
     case KindOfString: {
@@ -110,13 +128,6 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
       return APCArray::MakeSharedKeyset(ad, level, unserializeObj);
     }
 
-    case KindOfPersistentShape:
-    case KindOfShape: {
-      auto ad = source.getArrayData();
-      assertx(ad->isShape());
-      return APCArray::MakeSharedShape(ad, level, unserializeObj);
-    }
-
     case KindOfPersistentArray:
     case KindOfArray: {
       auto const ad = val(cell).parr;
@@ -167,6 +178,7 @@ Variant APCHandle::toLocalHelper() const {
     case APCKind::Bool:
     case APCKind::Int:
     case APCKind::Double:
+    case APCKind::PersistentFunc:
     case APCKind::StaticString:
     case APCKind::UncountedString:
     case APCKind::StaticArray:
@@ -175,11 +187,13 @@ Variant APCHandle::toLocalHelper() const {
     case APCKind::UncountedVec:
     case APCKind::StaticDict:
     case APCKind::UncountedDict:
-    case APCKind::StaticShape:
-    case APCKind::UncountedShape:
     case APCKind::StaticKeyset:
     case APCKind::UncountedKeyset:
       not_reached();
+
+    case APCKind::FuncEntity:
+      return APCNamedEntity::fromHandle(this)->getEntityOrNull();
+
     case APCKind::SharedString:
       return Variant::attach(
         StringData::MakeProxy(APCString::fromHandle(this))
@@ -200,12 +214,6 @@ Variant APCHandle::toLocalHelper() const {
       auto const serDict = APCString::fromHandle(this)->getStringData();
       auto const v = apc_unserialize(serDict->data(), serDict->size());
       assertx(v.isDict());
-      return v;
-    }
-    case APCKind::SerializedShape: {
-      auto const serShape = APCString::fromHandle(this)->getStringData();
-      auto const v = apc_unserialize(serShape->data(), serShape->size());
-      assertx(v.isShape());
       return v;
     }
     case APCKind::SerializedKeyset: {
@@ -237,10 +245,6 @@ Variant APCHandle::toLocalHelper() const {
       return Variant::attach(
         APCArray::fromHandle(this)->toLocalDict()
       );
-    case APCKind::SharedShape:
-      return Variant::attach(
-        APCArray::fromHandle(this)->toLocalShape()
-      );
     case APCKind::SharedKeyset:
       return Variant::attach(
         APCArray::fromHandle(this)->toLocalKeyset()
@@ -270,16 +274,19 @@ void APCHandle::deleteShared() {
     case APCKind::StaticArray:
     case APCKind::StaticVec:
     case APCKind::StaticDict:
-    case APCKind::StaticShape:
     case APCKind::StaticKeyset:
+    case APCKind::PersistentFunc:
       delete APCTypedValue::fromHandle(this);
+      return;
+
+    case APCKind::FuncEntity:
+      delete APCNamedEntity::fromHandle(this);
       return;
 
     case APCKind::SharedString:
     case APCKind::SerializedArray:
     case APCKind::SerializedVec:
     case APCKind::SerializedDict:
-    case APCKind::SerializedShape:
     case APCKind::SerializedKeyset:
     case APCKind::SerializedObject:
       APCString::Delete(APCString::fromHandle(this));
@@ -292,7 +299,6 @@ void APCHandle::deleteShared() {
     case APCKind::SharedArray:
     case APCKind::SharedVec:
     case APCKind::SharedDict:
-    case APCKind::SharedShape:
     case APCKind::SharedKeyset:
       APCArray::Delete(this);
       return;
@@ -308,7 +314,6 @@ void APCHandle::deleteShared() {
     case APCKind::UncountedArray:
     case APCKind::UncountedVec:
     case APCKind::UncountedDict:
-    case APCKind::UncountedShape:
     case APCKind::UncountedKeyset:
     case APCKind::UncountedString:
       assertx(false);
@@ -334,6 +339,9 @@ bool APCHandle::checkInvariants() const {
     case APCKind::Double:
       assertx(m_type == KindOfDouble);
       return true;
+    case APCKind::PersistentFunc:
+      assertx(m_type == KindOfFunc);
+      return true;
     case APCKind::StaticString:
     case APCKind::UncountedString:
       assertx(m_type == KindOfPersistentString);
@@ -350,10 +358,6 @@ bool APCHandle::checkInvariants() const {
     case APCKind::UncountedDict:
       assertx(m_type == KindOfPersistentDict);
       return true;
-    case APCKind::StaticShape:
-    case APCKind::UncountedShape:
-      assertx(m_type == KindOfPersistentShape);
-      return true;
     case APCKind::StaticKeyset:
     case APCKind::UncountedKeyset:
       assertx(m_type == KindOfPersistentKeyset);
@@ -361,19 +365,18 @@ bool APCHandle::checkInvariants() const {
     case APCKind::SharedVArray:
     case APCKind::SharedDArray:
       assertx(!RuntimeOption::EvalHackArrDVArrs);
+    case APCKind::FuncEntity:
     case APCKind::SharedString:
     case APCKind::SharedArray:
     case APCKind::SharedPackedArray:
     case APCKind::SharedVec:
     case APCKind::SharedDict:
-    case APCKind::SharedShape:
     case APCKind::SharedKeyset:
     case APCKind::SharedObject:
     case APCKind::SharedCollection:
     case APCKind::SerializedArray:
     case APCKind::SerializedVec:
     case APCKind::SerializedDict:
-    case APCKind::SerializedShape:
     case APCKind::SerializedKeyset:
     case APCKind::SerializedObject:
       assertx(m_type == kInvalidDataType);

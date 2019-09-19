@@ -12,7 +12,7 @@ class A {
 }
 
 <<__EntryPoint>> function test(): void {
-  set_error_handler('error_handler');
+  set_error_handler(fun('error_handler'));
 
   HH\set_soft_late_init_default(vec[]);
 

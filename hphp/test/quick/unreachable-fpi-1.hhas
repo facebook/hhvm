@@ -5,15 +5,14 @@
   NullUninit
   NullUninit
   String "foo"
-  FCallCtor <> 1 1 "" - ""
+  FCallCtor <LockWhileUnwinding> 1 1 "" - ""
   PopC
   LockObj
   Throw
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 0 "bar"
-  FCall <> 0 1 "" - "" ""
+  FCallFuncD <> 0 1 "" - "bar"
   PopC
   Int 1
   RetC

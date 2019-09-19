@@ -15,20 +15,22 @@
          m_where_constraints = []; m_variadic = FVnonVariadic;
          m_params =
          [{ param_annotation = ([6:49-51], dict<string, int>);
-            param_hint =
-            (Some ([6:31-48],
-                   (Happly (([6:31-35], "\\dict"),
-                      [([6:36-42], (Hprim Tstring));
-                        ([6:44-47], (Hprim Tint))]
-                      ))));
+            param_type_hint =
+            ((dict<string, int>),
+             (Some ([6:31-48],
+                    (Happly (([6:31-35], "\\dict"),
+                       [([6:36-42], (Hprim Tstring));
+                         ([6:44-47], (Hprim Tint))]
+                       )))));
             param_is_reference = false; param_is_variadic = false;
             param_pos = [6:49-51]; param_name = "$_"; param_expr = None;
-            param_callconv = None; param_user_attributes = [] }
+            param_callconv = None; param_user_attributes = [];
+            param_visibility = None }
            ];
          m_body =
          { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };
          m_fun_kind = FSync; m_user_attributes = [];
-         m_ret = (Some ([6:19-30], (Happly (([6:19-30], "void"), []))));
+         m_ret = ((void), (Some ([6:19-30], (Hprim Tvoid))));
          m_external = false; m_doc_comment = None }
         ];
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
@@ -345,12 +347,12 @@
        c_enum = None; c_pu_enums = []; c_doc_comment = None });
   (Fun
      { f_span = [19:1-20:60]; f_annotation = (); f_mode = <opaque>;
-       f_ret = (Some ([20:53-57], (Hprim Tvoid)));
+       f_ret = ((void), (Some ([20:53-57], (Hprim Tvoid))));
        f_name = ([20:10-12], "\\ff"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic;
        f_params =
        [{ param_annotation = ([20:48-50], int);
-          param_hint = (Some ([20:44-47], (Hprim Tint)));
+          param_type_hint = ((int), (Some ([20:44-47], (Hprim Tint))));
           param_is_reference = false; param_is_variadic = false;
           param_pos = [20:48-50]; param_name = "$i"; param_expr = None;
           param_callconv = None;
@@ -367,8 +369,8 @@
                   )))
                ]
              }
-            ]
-          }
+            ];
+          param_visibility = None }
          ];
        f_body =
        { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };
@@ -400,7 +402,8 @@
        c_implements = []; c_where_constraints = []; c_consts = [];
        c_typeconsts = [];
        c_vars =
-       [{ cv_final = false; cv_xhp_attr = None; cv_visibility = Private;
+       [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false;
+          cv_visibility = Private;
           cv_type = (Some ([27:18-21], (Hprim Tint)));
           cv_id = ([27:22-27], "smem");
           cv_expr = (Some (([27:30-32], int), (Int "42")));
@@ -419,8 +422,9 @@
              }
             ];
           cv_doc_comment = None; cv_is_promoted_variadic = false;
-          cv_is_static = true };
-         { cv_final = false; cv_xhp_attr = None; cv_visibility = Private;
+          cv_is_static = true; cv_span = [27:22-32] };
+         { cv_final = false; cv_xhp_attr = None; cv_abstract = false;
+           cv_visibility = Private;
            cv_type = (Some ([25:11-14], (Hprim Tint)));
            cv_id = ([25:15-19], "mem");
            cv_expr = (Some (([25:22-23], int), (Int "4")));
@@ -439,7 +443,7 @@
               }
              ];
            cv_doc_comment = None; cv_is_promoted_variadic = false;
-           cv_is_static = false }
+           cv_is_static = false; cv_span = [25:15-23] }
          ];
        c_methods =
        [{ m_span = [28:3-29:34]; m_annotation = (); m_final = false;
@@ -464,8 +468,8 @@
                ]
              }
             ];
-          m_ret = (Some ([29:27-31], (Hprim Tvoid))); m_external = false;
-          m_doc_comment = None }
+          m_ret = ((void), (Some ([29:27-31], (Hprim Tvoid))));
+          m_external = false; m_doc_comment = None }
          ];
        c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace = <opaque>;

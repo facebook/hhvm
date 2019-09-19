@@ -97,7 +97,7 @@ test_all();
 echo "============== literals ==============================\n";
 test_literals();
 
-set_error_handler('handler');
+set_error_handler(fun('handler'));
 
 echo "============== test_all (exn) ========================\n";
 test_all();

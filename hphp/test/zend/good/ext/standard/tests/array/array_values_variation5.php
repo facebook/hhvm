@@ -16,9 +16,9 @@ echo "\n-- Call array_values() --\n";
 var_dump($result = array_values($input));
 
 echo "-- Position of Internal Pointer in Result: --\n";
-echo key(&$result) . " => " . current(&$result) . "\n";
+echo key($result) . " => " . current($result) . "\n";
 echo "\n-- Position of Internal Pointer in Original Array: --\n";
-echo key(&$input) . " => " . current (&$input) . "\n";
+echo key($input) . " => " . current($input) . "\n";
 
 echo "Done";
 }

@@ -57,6 +57,7 @@ let () =
   let typecheck_deps = deps files_tc in
   let cmds = [ "--flags"
              ; "--new-inference-lambda"
+             ; "--coercion-from-dynamic"
              ; "--shallow-class-decl"
              ; "--error-format raw"
              ] in
@@ -74,6 +75,7 @@ let () =
              ; "--flags"
              ; "--out-extension .legacy_decl.out"
              ; "--new-inference-lambda"
+             ; "--coercion-from-dynamic"
              ; "--error-format raw" ] in
   let cmd = String.concat " " cmds in
   let typecheck_legacy_decl =
@@ -81,6 +83,29 @@ let () =
 
 (alias
       (name typecheck_legacy_decl)
+      %s
+      %s)" (deps files_tc)
+    (command true cmd) in
+  (* like types *)
+  let cmds = [ "--out-extension .like_types.out"
+    ; "--expect-extension .like_types.exp"
+    ; "--fallback-expect-extension .exp"
+    ; "--flags"
+    ; "--new-inference-lambda"
+    ; "--like-type-hints"
+    ; "--like-casts"
+    ; "--coercion-from-dynamic"
+    ; "--coercion-from-union"
+    ; "--complex-coercion"
+    ; "--simple-pessimize 1.0"
+    ; "--error-format raw"
+    ; "--out-extension .like_types.out" ] in
+  let cmd = String.concat " " cmds in
+  let typecheck_like_types =
+    Printf.sprintf "
+
+(alias
+      (name typecheck_like_types)
       %s
       %s)" (deps files_tc)
     (command true cmd) in
@@ -114,10 +139,13 @@ let () =
 
 (alias
     (name runtest)
-    (deps (alias typecheck)
-      (alias decl_compare) (alias typecheck_legacy_decl)))" in
+    (deps
+      (alias typecheck)
+      (alias decl_compare)
+      (alias typecheck_legacy_decl)
+      (alias typecheck_like_types)))" in
 
   let dune_file = typecheck ^
-                  typecheck_legacy_decl ^ decl_compare ^
+                  typecheck_legacy_decl ^ typecheck_like_types ^ decl_compare ^
                   run_tests in
   Jbuild_plugin.V1.send dune_file

@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
@@ -7,31 +7,37 @@
  *
  *)
 
-module WithSyntax : functor (Syntax : Syntax_sig.Syntax_S) -> sig
-module WithSmartConstructors : functor (SmartConstructors : SmartConstructors.SmartConstructors_S
-  with type r = Syntax.t
-  with module Token = Syntax.Token
-) -> sig
-  type error_level = Minimum | Typical | Maximum
+module WithSyntax (Syntax : Syntax_sig.Syntax_S) : sig
+  module WithSmartConstructors
+      (SmartConstructors : SmartConstructors.SmartConstructors_S
+                             with type r = Syntax.t
+                             with module Token = Syntax.Token) : sig
+    type error_level =
+      | Minimum
+      | Typical
+      | Maximum
 
-  type hhvm_compat_mode = NoCompat | HHVMCompat
+    type hhvm_compat_mode =
+      | NoCompat
+      | HHVMCompat
 
-  type env
-  val make_env :
-    (* Optional parts *)
-       ?level:error_level
-    -> ?hhvm_compat_mode:hhvm_compat_mode
-    -> ?hhi_mode:bool
-    (* Required parts *)
-    -> parser_options:ParserOptions.t
-    -> Full_fidelity_syntax_tree.WithSyntax(Syntax).WithSmartConstructors(SmartConstructors).t
-    -> codegen:bool
-    -> env
+    type env
 
-  val parse_errors : env -> Full_fidelity_syntax_error.t list
+    val make_env :
+      ?level:(* Optional parts *)
+             error_level ->
+      ?hhvm_compat_mode:hhvm_compat_mode ->
+      ?hhi_mode:bool (* Required parts *) ->
+      parser_options:ParserOptions.t ->
+      Full_fidelity_syntax_tree.WithSyntax(Syntax).WithSmartConstructors
+        (SmartConstructors)
+      .t ->
+      codegen:bool ->
+      env
 
-end (* WithSmartConstructors *)
+    val parse_errors : env -> Full_fidelity_syntax_error.t list
+  end
 
-include module type of WithSmartConstructors(SyntaxSmartConstructors.WithSyntax(Syntax))
-
-end (* WithSyntax *)
+  include module type of
+      WithSmartConstructors (SyntaxSmartConstructors.WithSyntax (Syntax))
+end

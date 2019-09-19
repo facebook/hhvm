@@ -19,6 +19,9 @@
 
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/vm-regs.h"
+
 #include "hphp/runtime/ext/asio/asio-context.h"
 #include "hphp/runtime/ext/asio/asio-session.h"
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
@@ -26,13 +29,35 @@
 #include "hphp/runtime/ext/asio/ext_resumable-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_waitable-wait-handle.h"
 #include "hphp/runtime/ext/std/ext_std_errorfunc.h"
-#include "hphp/runtime/vm/vm-regs.h"
+
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {
+
+c_ResumableWaitHandle* GetResumedWaitHandle() {
+  c_ResumableWaitHandle* ret = nullptr;
+  walkStack([&] (const ActRec* fp, Offset) {
+    if (fp->resumed() && fp->func()->isAsync()) {
+      if (fp->func()->isGenerator()) {
+        // async generator
+        auto generator = frame_async_generator(fp);
+        if (!generator->isEagerlyExecuted()) {
+          ret = generator->getWaitHandle();
+          return true;
+        }
+      } else {
+        // async function
+        ret = frame_afwh(fp);
+        return true;
+      }
+    }
+    return false;
+  }, true);
+  return ret;
+}
 
 int64_t HHVM_FUNCTION(asio_get_current_context_idx) {
   return AsioSession::Get()->getCurrentContextIdx();

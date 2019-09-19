@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2018, Facebook, Inc.
  * All rights reserved.
  *
@@ -6,8 +6,6 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-
-val is_check_mode : ServerArgs.options -> bool
 
 val indexing : ServerEnv.genv -> Relative_path.t list Bucket.next * float
 
@@ -21,11 +19,7 @@ val parsing :
   trace:bool ->
   ServerEnv.env * float
 
-val update_files :
-  ServerEnv.genv ->
-  Naming_table.t ->
-  float ->
-  float
+val update_files : ServerEnv.genv -> Naming_table.t -> float -> float
 
 val naming : ServerEnv.env -> float -> ServerEnv.env * float
 

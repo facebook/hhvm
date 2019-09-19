@@ -133,6 +133,22 @@ function dynamic_fun(string $name): mixed;
 <<__Native>>
 function dynamic_class_meth(string $cls, string $meth): mixed;
 
+/**
+ * Same as dynamic_fun but can't be used in RepoAuthoritative mode and
+ * doesn't raise warnings or errors
+ * on functions not marked __DynamicallyCallable.
+ */
+<<__Native>>
+function dynamic_fun_force(string $name): mixed;
+
+/**
+ * Same as dynamic_class_meth but can't be used in RepoAuthoritative mode
+ * and doesn't raise warnings or errors
+ * on methods not marked __DynamicallyCallable.
+ */
+<<__Native>>
+function dynamic_class_meth_force(string $cls, string $meth): mixed;
+
 // class-like
 interface ClassLikeAttribute {}
 interface ClassAttribute extends ClassLikeAttribute {}
@@ -227,22 +243,16 @@ namespace HH\ReifiedGenerics {
   /**
    * Returns the type structure representation of the reified type
    */
-  function getTypeStructure<reify T>(): mixed {
+  function get_type_structure<reify T>(): mixed {
     return ${'0ReifiedGenerics'}[0];
-  }
-
-  // Old API for getTypeStructure
-  // TODO(T46695073): Kill after next HHVM release
-  function getType<reify T>(): mixed {
-    return getTypeStructure<T>();
   }
 
   /**
    * Returns the name of the class represented by this reified type.
    * If this type does not represent a class, throws an exception
    */
-  function getClassname<reify T>(): classname<T> {
-    $clsname = idx(getType<T>(), 'classname', null);
+  function get_classname<reify T>(): classname<T> {
+    $clsname = idx(namespace\get_type_structure<T>(), 'classname', null);
     if ($clsname is null) {
       throw new \Exception('Trying to get the classname out of a reified type'.
                            ' that does not represent a class');

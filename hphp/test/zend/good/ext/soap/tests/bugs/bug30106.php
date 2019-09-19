@@ -1,5 +1,4 @@
 <?hh
-ini_set("soap.wsdl_cache_enabled", 0);
 
 function getContinentList() {
 	return array("getContinentListResult"=>array(
@@ -24,9 +23,13 @@ class LocalSoapClient extends SoapClient {
     return $response;
   }
 }
+<<__EntryPoint>>
+function main_entry(): void {
+  ini_set("soap.wsdl_cache_enabled", 0);
 
-$client = new LocalSoapClient(dirname(__FILE__)."/bug30106.wsdl");
-var_dump($client->__getFunctions());
-var_dump($client->__getTypes());
-$x = $client->getContinentList(array("AFFILIATE_ID"=>1,"PASSWORD"=>"x"));
-var_dump($x);
+  $client = new LocalSoapClient(dirname(__FILE__)."/bug30106.wsdl");
+  var_dump($client->__getFunctions());
+  var_dump($client->__getTypes());
+  $x = $client->getContinentList(array("AFFILIATE_ID"=>1,"PASSWORD"=>"x"));
+  var_dump($x);
+}

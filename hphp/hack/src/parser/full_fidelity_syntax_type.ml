@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
@@ -700,11 +700,6 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; binary_operator                                    : t
     ; binary_right_operand                               : t
     }
-  | InstanceofExpression              of
-    { instanceof_left_operand                            : t
-    ; instanceof_operator                                : t
-    ; instanceof_right_operand                           : t
-    }
   | IsExpression                      of
     { is_left_operand                                    : t
     ; is_operator                                        : t
@@ -947,6 +942,11 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; type_constant_separator                            : t
     ; type_constant_right_type                           : t
     }
+  | PUAccess                          of
+    { pu_access_left_type                                : t
+    ; pu_access_separator                                : t
+    ; pu_access_right_type                               : t
+    }
   | VectorTypeSpecifier               of
     { vector_type_keyword                                : t
     ; vector_type_left_angle                             : t
@@ -1162,7 +1162,7 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; pocket_mapping_type_type                           : t
     }
 
-end (* MakeSyntaxType *)
+end
 
 module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   type 'a value = SyntaxValue.t * 'a [@@deriving show]
@@ -1228,7 +1228,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | ExprPrefixUnary                  of prefix_unary_expression
   | ExprPostfixUnary                 of postfix_unary_expression
   | ExprBinary                       of binary_expression
-  | ExprInstanceof                   of instanceof_expression
   | ExprIs                           of is_expression
   | ExprAs                           of as_expression
   | ExprNullableAs                   of nullable_as_expression
@@ -1325,6 +1324,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | StmtEcho                         of echo_statement
   | StmtConcurrent                   of concurrent_statement
   | StmtTypeConstant                 of type_constant
+  | StmtPUAccess                     of pu_access
   and switch_label =
   | SwitchCase    of case_label
   | SwitchDefault of default_label
@@ -1348,7 +1348,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | LambdaPrefixUnary                  of prefix_unary_expression
   | LambdaPostfixUnary                 of postfix_unary_expression
   | LambdaBinary                       of binary_expression
-  | LambdaInstanceof                   of instanceof_expression
   | LambdaIs                           of is_expression
   | LambdaAs                           of as_expression
   | LambdaNullableAs                   of nullable_as_expression
@@ -1399,7 +1398,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | CExprPrefixUnary                  of prefix_unary_expression
   | CExprPostfixUnary                 of postfix_unary_expression
   | CExprBinary                       of binary_expression
-  | CExprInstanceof                   of instanceof_expression
   | CExprIs                           of is_expression
   | CExprAs                           of as_expression
   | CExprNullableAs                   of nullable_as_expression
@@ -2008,11 +2006,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; binary_operator: Token.t value
     ; binary_right_operand: expression value
     }
-  and instanceof_expression =
-    { instanceof_left_operand: expression value
-    ; instanceof_operator: Token.t value
-    ; instanceof_right_operand: expression value
-    }
   and is_expression =
     { is_left_operand: expression value
     ; is_operator: Token.t value
@@ -2255,6 +2248,11 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; type_constant_separator: Token.t value
     ; type_constant_right_type: Token.t value
     }
+  and pu_access =
+    { pu_access_left_type: specifier value
+    ; pu_access_separator: Token.t value
+    ; pu_access_right_type: Token.t value
+    }
   and vector_type_specifier =
     { vector_type_keyword: Token.t value
     ; vector_type_left_angle: Token.t value
@@ -2464,4 +2462,4 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     }
 
 [@@deriving show]
-end (* MakeValidated *)
+end

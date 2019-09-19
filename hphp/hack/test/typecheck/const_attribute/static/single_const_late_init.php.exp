@@ -1,0 +1,4 @@
+File "single_const_late_init.php", line 4, characters 3-50:
+__Const properties may not also be __LateInit (Parsing[1002])
+File "single_const_late_init.php", line 4, characters 45-46:
+A late-initialized property cannot have a default value (Typing[4277])

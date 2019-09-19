@@ -55,6 +55,9 @@ function throws1(varray $x) { return $x; }
 function throws2($x): varray { return $x; }
 function throws3(inout varray $x) { $x = darray[]; }
 
+function vsoft(@varray $x) { return $x; }
+function dsoft(@darray $x) { return $x; }
+
 function handler($errno, $errstr) { throw new Exception($errstr); }
 
 function test() {
@@ -323,7 +326,19 @@ function test() {
   $x = [];
   opt_inout_fun4(&$x, null);
 
-  set_error_handler('handler');
+  vsoft(tuple(true, false));
+  vsoft(shape('a' => true, 'b' => false));
+  vsoft(varray[]);
+  vsoft(darray[]);
+  vsoft([]);
+
+  dsoft(tuple(true, false));
+  dsoft(shape('a' => true, 'b' => false));
+  dsoft(varray[]);
+  dsoft(darray[]);
+  dsoft([]);
+
+  set_error_handler(fun('handler'));
 
   try {
     throws1(darray[]);

@@ -75,8 +75,6 @@ size_t smashableAlignTo();
  */
 TCA emitSmashableMovq(CodeBlock& cb, CGMeta& fixups, uint64_t imm,
                       PhysReg d);
-TCA emitSmashableCmpq(CodeBlock& cb, CGMeta& fixups, int32_t imm,
-                      PhysReg r, int8_t disp);
 TCA emitSmashableCall(CodeBlock& cb, CGMeta& fixups, TCA target);
 TCA emitSmashableJmp(CodeBlock& cb, CGMeta& fixups, TCA target);
 TCA emitSmashableJcc(CodeBlock& cb, CGMeta& fixups, TCA target,

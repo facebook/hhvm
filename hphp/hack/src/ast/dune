@@ -4,9 +4,7 @@
   (modules
     ast
     ast_defs
-    ast_defs_visitors_ancestors
-    ast_utils
-    ast_visitor)
+    ast_defs_visitors_ancestors)
   (libraries
     file_info
     namespace_env
@@ -22,4 +20,6 @@
   (libraries
     collections
     core_kernel
-    parser_options))
+    parser_options)
+  (preprocess
+    (pps visitors.ppx ppx_deriving.std))) ; See T41851208

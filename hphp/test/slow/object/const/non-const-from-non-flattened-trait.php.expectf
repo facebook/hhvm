@@ -1,0 +1,1 @@
+Fatal error: trait's non-const declaration of property 'p' is incompatible with a const class in %s/non-const-from-non-flattened-trait.php on line 4

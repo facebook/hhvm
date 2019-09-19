@@ -11,15 +11,15 @@ Expected num because this is used in an arithmetic operation
 File "arities02.php", line 3, characters 35-40:
 But got string
 File "arities02.php", line 34, characters 17-19:
-You are trying to access the member bar but this is not an object, it is a string (Typing[4062])
+You are trying to access the method 'bar' but this is a string (Typing[4062])
 File "arities02.php", line 3, characters 35-40:
 Definition is here
 File "arities02.php", line 34, characters 17-19:
-You are trying to access the member bar but this is not an object, it is an int (Typing[4062])
+You are trying to access the method 'bar' but this is an int (Typing[4062])
 File "arities02.php", line 3, characters 51-53:
 Definition is here
 File "arities02.php", line 40, characters 17-19:
-You are trying to access the member bar but this is not an object, it is a string (Typing[4062])
+You are trying to access the method 'bar' but this is a string (Typing[4062])
 File "arities02.php", line 39, characters 29-30:
 Definition is here
 File "arities02.php", line 45, characters 13-48:

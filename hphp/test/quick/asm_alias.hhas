@@ -12,23 +12,21 @@
   NullUninit
   NullUninit
   Int 0
-  FPushFuncD 1 "foo"
-  FCall <> 1 1 "" - "" ""
+  FCallFuncD <> 1 1 "" - "foo"
   PopC
 
   NullUninit
   NullUninit
   NullUninit
   String "hi"
-  FPushFuncD 1 "foo"
-  FCall <> 1 1 "" - "" ""
+  FCallFuncD <> 1 1 "" - "foo"
   PopC
 
   NewObjD "C"
   Dup
   NullUninit
   NullUninit
-  FCallCtor <> 0 1 "" - ""
+  FCallCtor <LockWhileUnwinding> 0 1 "" - ""
   PopC
   LockObj
   SetL $x
@@ -38,72 +36,63 @@
   NullUninit
   NullUninit
   CGetL $x
-  FPushFuncD 1 "bar"
-  FCall <> 1 1 "" - "" ""
+  FCallFuncD <> 1 1 "" - "bar"
   PopC
 
   NullUninit
   NullUninit
   NullUninit
   String "hi"
-  FPushFuncD 1 "bar"
-  FCall <> 1 1 "" - "" ""
+  FCallFuncD <> 1 1 "" - "bar"
   PopC
 
   NullUninit
   NullUninit
   NullUninit
   Null
-  FPushFuncD 1 "bar"
-  FCall <> 1 1 "" - "" ""
+  FCallFuncD <> 1 1 "" - "bar"
   PopC
 
   NullUninit
   NullUninit
   NullUninit
   CGetL $x
-  FPushFuncD 1 "baz"
-  FCall <> 1 1 "" - "" ""
+  FCallFuncD <> 1 1 "" - "baz"
   PopC
 
   NullUninit
   NullUninit
   NullUninit
   String "hi"
-  FPushFuncD 1 "baz"
-  FCall <> 1 1 "" - "" ""
+  FCallFuncD <> 1 1 "" - "baz"
   PopC
 
   NullUninit
   NullUninit
   NullUninit
   Null
-  FPushFuncD 1 "baz"
-  FCall <> 1 1 "" - "" ""
+  FCallFuncD <> 1 1 "" - "baz"
   PopC
 
   NullUninit
   NullUninit
   NullUninit
   CGetL $x
-  FPushFuncD 1 "quux"
-  FCall <> 1 1 "" - "" ""
+  FCallFuncD <> 1 1 "" - "quux"
   PopC
 
   NullUninit
   NullUninit
   NullUninit
   String "hi"
-  FPushFuncD 1 "quux"
-  FCall <> 1 1 "" - "" ""
+  FCallFuncD <> 1 1 "" - "quux"
   PopC
 
   NullUninit
   NullUninit
   NullUninit
   Null
-  FPushFuncD 1 "quux"
-  FCall <> 1 1 "" - "" ""
+  FCallFuncD <> 1 1 "" - "quux"
   PopC
 
   Int 1

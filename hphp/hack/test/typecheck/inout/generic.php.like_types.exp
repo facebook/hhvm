@@ -1,0 +1,12 @@
+File "generic.php", line 7, characters 11-15:
+Expected argument marked inout to be contained in a local or a value-typed container (e.g. vec, dict, keyset, array). To use inout here, assign to/from a temporary local variable. (Typing[4208])
+File "generic.php", line 6, characters 20-30:
+This is a dynamic value or an object of type vec<string> because it is an unenforceable type
+File "generic.php", line 11, characters 11-15:
+Expected argument marked inout to be contained in a local or a value-typed container (e.g. vec, dict, keyset, array). To use inout here, assign to/from a temporary local variable. (Typing[4208])
+File "generic.php", line 10, characters 39-39:
+This is a dynamic value or a value of generic type T because it is an unenforceable type
+File "generic.php", line 15, characters 11-15:
+Expected argument marked inout to be contained in a local or a value-typed container (e.g. vec, dict, keyset, array). To use inout here, assign to/from a temporary local variable. (Typing[4208])
+File "generic.php", line 14, characters 24-24:
+This is a dynamic value or a value of generic type T because it is an unenforceable type

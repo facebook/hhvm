@@ -1,0 +1,6 @@
+File "list_varray.php", line 24, characters 10-11:
+Invalid return type (Typing[4110])
+File "list_varray.php", line 22, characters 33-36:
+Expected bool
+File "list_varray.php", line 22, characters 16-26:
+But got dynamic because it is an unenforceable type

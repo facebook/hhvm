@@ -24,6 +24,6 @@ $arr1 = array(
   array(1 => 'a', 'b' => 2)
 );
 
-var_dump( array_map('callback', $arr1));
+var_dump( array_map(fun('callback'), $arr1));
 echo "Done";
 }

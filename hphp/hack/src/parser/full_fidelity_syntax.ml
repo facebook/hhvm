@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
@@ -153,7 +153,6 @@ module WithToken(Token: TokenType) = struct
       | PrefixUnaryExpression             _ -> SyntaxKind.PrefixUnaryExpression
       | PostfixUnaryExpression            _ -> SyntaxKind.PostfixUnaryExpression
       | BinaryExpression                  _ -> SyntaxKind.BinaryExpression
-      | InstanceofExpression              _ -> SyntaxKind.InstanceofExpression
       | IsExpression                      _ -> SyntaxKind.IsExpression
       | AsExpression                      _ -> SyntaxKind.AsExpression
       | NullableAsExpression              _ -> SyntaxKind.NullableAsExpression
@@ -197,6 +196,7 @@ module WithToken(Token: TokenType) = struct
       | XHPExpression                     _ -> SyntaxKind.XHPExpression
       | XHPClose                          _ -> SyntaxKind.XHPClose
       | TypeConstant                      _ -> SyntaxKind.TypeConstant
+      | PUAccess                          _ -> SyntaxKind.PUAccess
       | VectorTypeSpecifier               _ -> SyntaxKind.VectorTypeSpecifier
       | KeysetTypeSpecifier               _ -> SyntaxKind.KeysetTypeSpecifier
       | TupleTypeExplicitSpecifier        _ -> SyntaxKind.TupleTypeExplicitSpecifier
@@ -341,7 +341,6 @@ module WithToken(Token: TokenType) = struct
     let is_prefix_unary_expression              = has_kind SyntaxKind.PrefixUnaryExpression
     let is_postfix_unary_expression             = has_kind SyntaxKind.PostfixUnaryExpression
     let is_binary_expression                    = has_kind SyntaxKind.BinaryExpression
-    let is_instanceof_expression                = has_kind SyntaxKind.InstanceofExpression
     let is_is_expression                        = has_kind SyntaxKind.IsExpression
     let is_as_expression                        = has_kind SyntaxKind.AsExpression
     let is_nullable_as_expression               = has_kind SyntaxKind.NullableAsExpression
@@ -385,6 +384,7 @@ module WithToken(Token: TokenType) = struct
     let is_xhp_expression                       = has_kind SyntaxKind.XHPExpression
     let is_xhp_close                            = has_kind SyntaxKind.XHPClose
     let is_type_constant                        = has_kind SyntaxKind.TypeConstant
+    let is_pu_access                            = has_kind SyntaxKind.PUAccess
     let is_vector_type_specifier                = has_kind SyntaxKind.VectorTypeSpecifier
     let is_keyset_type_specifier                = has_kind SyntaxKind.KeysetTypeSpecifier
     let is_tuple_type_explicit_specifier        = has_kind SyntaxKind.TupleTypeExplicitSpecifier
@@ -465,7 +465,6 @@ module WithToken(Token: TokenType) = struct
 
     let is_name       = is_specific_token TokenKind.Name
     let is_construct  = is_specific_token TokenKind.Construct
-    let is_destruct   = is_specific_token TokenKind.Destruct
     let is_static     = is_specific_token TokenKind.Static
     let is_private    = is_specific_token TokenKind.Private
     let is_public     = is_specific_token TokenKind.Public
@@ -479,7 +478,6 @@ module WithToken(Token: TokenType) = struct
     let is_ellipsis   = is_specific_token TokenKind.DotDotDot
     let is_comma      = is_specific_token TokenKind.Comma
     let is_array      = is_specific_token TokenKind.Array
-    let is_var        = is_specific_token TokenKind.Var
     let is_ampersand  = is_specific_token TokenKind.Ampersand
     let is_inout      = is_specific_token TokenKind.Inout
 
@@ -1521,15 +1519,6 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc binary_operator in
          let acc = f acc binary_right_operand in
          acc
-      | InstanceofExpression {
-        instanceof_left_operand;
-        instanceof_operator;
-        instanceof_right_operand;
-      } ->
-         let acc = f acc instanceof_left_operand in
-         let acc = f acc instanceof_operator in
-         let acc = f acc instanceof_right_operand in
-         acc
       | IsExpression {
         is_left_operand;
         is_operator;
@@ -1970,6 +1959,15 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc type_constant_left_type in
          let acc = f acc type_constant_separator in
          let acc = f acc type_constant_right_type in
+         acc
+      | PUAccess {
+        pu_access_left_type;
+        pu_access_separator;
+        pu_access_right_type;
+      } ->
+         let acc = f acc pu_access_left_type in
+         let acc = f acc pu_access_separator in
+         let acc = f acc pu_access_right_type in
          acc
       | VectorTypeSpecifier {
         vector_type_keyword;
@@ -3390,15 +3388,6 @@ module WithToken(Token: TokenType) = struct
         binary_operator;
         binary_right_operand;
       ]
-      | InstanceofExpression {
-        instanceof_left_operand;
-        instanceof_operator;
-        instanceof_right_operand;
-      } -> [
-        instanceof_left_operand;
-        instanceof_operator;
-        instanceof_right_operand;
-      ]
       | IsExpression {
         is_left_operand;
         is_operator;
@@ -3839,6 +3828,15 @@ module WithToken(Token: TokenType) = struct
         type_constant_left_type;
         type_constant_separator;
         type_constant_right_type;
+      ]
+      | PUAccess {
+        pu_access_left_type;
+        pu_access_separator;
+        pu_access_right_type;
+      } -> [
+        pu_access_left_type;
+        pu_access_separator;
+        pu_access_right_type;
       ]
       | VectorTypeSpecifier {
         vector_type_keyword;
@@ -5260,15 +5258,6 @@ module WithToken(Token: TokenType) = struct
         "binary_operator";
         "binary_right_operand";
       ]
-      | InstanceofExpression {
-        instanceof_left_operand;
-        instanceof_operator;
-        instanceof_right_operand;
-      } -> [
-        "instanceof_left_operand";
-        "instanceof_operator";
-        "instanceof_right_operand";
-      ]
       | IsExpression {
         is_left_operand;
         is_operator;
@@ -5709,6 +5698,15 @@ module WithToken(Token: TokenType) = struct
         "type_constant_left_type";
         "type_constant_separator";
         "type_constant_right_type";
+      ]
+      | PUAccess {
+        pu_access_left_type;
+        pu_access_separator;
+        pu_access_right_type;
+      } -> [
+        "pu_access_left_type";
+        "pu_access_separator";
+        "pu_access_right_type";
       ]
       | VectorTypeSpecifier {
         vector_type_keyword;
@@ -7278,16 +7276,6 @@ module WithToken(Token: TokenType) = struct
           binary_operator;
           binary_right_operand;
         }
-      | (SyntaxKind.InstanceofExpression, [
-          instanceof_left_operand;
-          instanceof_operator;
-          instanceof_right_operand;
-        ]) ->
-        InstanceofExpression {
-          instanceof_left_operand;
-          instanceof_operator;
-          instanceof_right_operand;
-        }
       | (SyntaxKind.IsExpression, [
           is_left_operand;
           is_operator;
@@ -7771,6 +7759,16 @@ module WithToken(Token: TokenType) = struct
           type_constant_left_type;
           type_constant_separator;
           type_constant_right_type;
+        }
+      | (SyntaxKind.PUAccess, [
+          pu_access_left_type;
+          pu_access_separator;
+          pu_access_right_type;
+        ]) ->
+        PUAccess {
+          pu_access_left_type;
+          pu_access_separator;
+          pu_access_right_type;
         }
       | (SyntaxKind.VectorTypeSpecifier, [
           vector_type_keyword;
@@ -9640,19 +9638,6 @@ module WithToken(Token: TokenType) = struct
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value
 
-      let make_instanceof_expression
-        instanceof_left_operand
-        instanceof_operator
-        instanceof_right_operand
-      =
-        let syntax = InstanceofExpression {
-          instanceof_left_operand;
-          instanceof_operator;
-          instanceof_right_operand;
-        } in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
       let make_is_expression
         is_left_operand
         is_operator
@@ -10262,6 +10247,19 @@ module WithToken(Token: TokenType) = struct
           type_constant_left_type;
           type_constant_separator;
           type_constant_right_type;
+        } in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_pu_access
+        pu_access_left_type
+        pu_access_separator
+        pu_access_right_type
+      =
+        let syntax = PUAccess {
+          pu_access_left_type;
+          pu_access_separator;
+          pu_access_right_type;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value
@@ -11070,6 +11068,6 @@ module WithToken(Token: TokenType) = struct
         | _ -> failwith "get_closure_type_specifier: not a ClosureTypeSpecifier"
 
 
-    end (* WithValueBuilder *)
-  end (* WithSyntaxValue *)
-end (* WithToken *)
+    end
+  end
+end

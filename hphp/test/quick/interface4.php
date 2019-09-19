@@ -1,8 +1,5 @@
 <?hh
 
-// disable array -> "Array" conversion notice
-error_reporting(error_reporting() & ~E_NOTICE);
-
 interface I {
   function foo($x, $y=0);
 }
@@ -23,8 +20,13 @@ class C implements I, J, K, L, M {
     echo "$x $y $z\n";
   }
 }
+<<__EntryPoint>> function main(): void {
+// disable array -> "Array" conversion notice
+error_reporting(error_reporting() & ~E_NOTICE);
+
 $obj = new C;
 $obj->foo(1);
 $obj->foo(1, 2);
 $obj->foo(1, 2, null);
 $obj->foo(1, 2, array());
+}

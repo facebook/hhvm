@@ -1,0 +1,11 @@
+[package]
+name = "hack_escaper"
+version = "3.49.0"
+edition = "2018"
+
+[lib]
+name = "escaper"
+path = "../escaper.rs"
+
+[dev-dependencies]
+pretty_assertions = "^0.6.1"

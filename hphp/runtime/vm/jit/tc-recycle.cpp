@@ -22,7 +22,6 @@
 
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/vm/jit/func-guard.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
@@ -30,11 +29,10 @@
 #include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 
-#include "hphp/runtime/base/rds-local.h"
-
 #include "hphp/util/arch.h"
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/match.h"
+#include "hphp/util/rds-local.h"
 #include "hphp/util/trace.h"
 
 #include "hphp/ppc64-asm/asm-ppc64.h"
@@ -102,7 +100,6 @@ struct FuncInfo {
 
 struct SmashedCall {
   FuncId fid;
-  bool isGuard;
   ProfTransRec* rec;
 };
 
@@ -161,15 +158,11 @@ std::unique_lock<std::mutex> lockData() {
  * Removes meta-data about a caller to a proflogue from prof-data to ensure that
  * a call to an optimized translation isn't wrongly smashed later.
  */
-void clearProfCaller(TCA toSmash, bool isGuard, ProfTransRec* rec) {
+void clearProfCaller(TCA toSmash, ProfTransRec* rec) {
   if (!rec || !rec->isProflogue()) return;
 
   auto lock = rec->lockCallerList();
-  if (isGuard) {
-    rec->removeGuardCaller(toSmash);
-  } else {
-    rec->removeMainCaller(toSmash);
-  }
+  rec->removeMainCaller(toSmash);
 }
 
 /*
@@ -243,7 +236,7 @@ void clearTCMaps(TCA start, TCA end) {
     eraseInlineStack(start);
     if (isCall) {
       if (auto call = eraseSmashedCall(start)) {
-        clearProfCaller(start, call->isGuard, call->rec);
+        clearProfCaller(start, call->rec);
       }
     }
     start += instSz;
@@ -399,7 +392,7 @@ void reclaimFunctionSync(const StringData* fname, FuncId fid) {
 
   for (auto& caller : data->callers) {
     ITRACE(1, "Unsmashing call @ {}\n", caller);
-    smashCall(caller, us.bindCallStub);
+    smashCall(caller, us.immutableBindCallStub);
   }
 
   // We just smashed all of those callers-- treadmill the free to avoid a
@@ -432,15 +425,14 @@ int recordedFuncs()   { return s_funcTCData.size(); }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void recordFuncCaller(const Func* func, TCA toSmash, bool immutable,
-                      ProfTransRec* rec) {
+void recordFuncCaller(const Func* func, TCA toSmash, ProfTransRec* rec) {
   auto dataLock = lockData();
 
   FTRACE(1, "Recording smashed call @ {} to func {} (id = {})\n",
          toSmash, func->fullName()->data(), func->getFuncId());
 
   s_funcTCData[func->getFuncId()].callers.emplace(toSmash);
-  s_smashedCalls[toSmash] = SmashedCall{func->getFuncId(), !immutable, rec};
+  s_smashedCalls[toSmash] = SmashedCall{func->getFuncId(), rec};
 }
 
 void recordFuncSrcRec(const Func* func, SrcRec* rec) {
@@ -470,7 +462,6 @@ void recordJump(TCA toSmash, SrcRec* sr) {
 ////////////////////////////////////////////////////////////////////////////////
 
 void reclaimFunction(const Func* func) {
-  clobberFuncGuards(func); // do this before func is freed
   enqueueJob(FuncJob {func->name(), func->getFuncId()});
 }
 

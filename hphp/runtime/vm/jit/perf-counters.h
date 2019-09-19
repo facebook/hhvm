@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_JIT_PERF_COUNTERS_H_
 #define incl_HPHP_JIT_PERF_COUNTERS_H_
 
-#include "hphp/runtime/base/rds-local.h"
+#include "hphp/util/rds-local.h"
 
 #include <cstdint>
 

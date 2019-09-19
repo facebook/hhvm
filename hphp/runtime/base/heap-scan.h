@@ -27,7 +27,6 @@
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/rds-header.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/ref-data.h"
 #include "hphp/runtime/base/req-root.h"
 #include "hphp/runtime/base/resource-data.h"
@@ -53,13 +52,14 @@
 
 #include "hphp/util/hphp-config.h"
 
+#include "hphp/util/rds-local.h"
 #include "hphp/util/type-scan.h"
 
 namespace HPHP {
 
 inline void scanFrameSlots(const ActRec* ar, type_scan::Scanner& scanner) {
-  // layout: [clsrefs][iters][locals][ActRec]
-  //                                 ^ar
+  // layout: [iters][locals][ActRec]
+  //                        ^ar
   auto num_locals = ar->func()->numLocals();
   auto locals = frame_local(ar, num_locals - 1);
   scanner.scan(*locals, num_locals * sizeof(TypedValue));
@@ -117,7 +117,6 @@ inline void scanHeapObject(const HeapObject* h, type_scan::Scanner& scanner) {
       return PackedArray::scan(static_cast<const ArrayData*>(h), scanner);
     case HeaderKind::Mixed:
     case HeaderKind::Dict:
-    case HeaderKind::Shape:
       return static_cast<const MixedArray*>(h)->scan(scanner);
     case HeaderKind::Keyset:
       return static_cast<const SetArray*>(h)->scan(scanner);
@@ -125,6 +124,8 @@ inline void scanHeapObject(const HeapObject* h, type_scan::Scanner& scanner) {
       return static_cast<const APCLocalArray*>(h)->scan(scanner);
     case HeaderKind::Globals:
       return static_cast<const GlobalsArray*>(h)->scan(scanner);
+    case HeaderKind::RecordArray:
+      return static_cast<const RecordArray*>(h)->scan(scanner);
     case HeaderKind::Closure:
       scanner.scan(*static_cast<const c_Closure*>(h)->hdr());
       return static_cast<const c_Closure*>(h)->scan(scanner);
@@ -220,9 +221,19 @@ inline void c_Awaitable::scan(type_scan::Scanner& scanner) const {
   ObjectData::scan(scanner);
 }
 
-inline void RecordData::scan(type_scan::Scanner& scanner) const {
+inline void RecordBase::scan(type_scan::Scanner& scanner) const {
   auto fields = fieldVec();
   scanner.scan(*fields, m_record->numFields() * sizeof(*fields));
+}
+
+inline void RecordData::scan(type_scan::Scanner& scanner) const {
+  RecordBase::scan(scanner);
+}
+
+inline void RecordArray::scan(type_scan::Scanner& scanner) const {
+  RecordBase::scan(scanner);
+  auto const extraMap = extraFieldMap();
+  scanner.scan(*extraMap);
 }
 
 inline void ObjectData::scan(type_scan::Scanner& scanner) const {

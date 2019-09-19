@@ -28,7 +28,7 @@ function test(string $name, mixed $recursive_thing): void {
 }
 
 function main(): void {
-  test("GLOBALS", $GLOBALS);
+  test("GLOBALS", $GLOBALS['GLOBALS']);
 
   $r = array();
   test("shallow array", $r);

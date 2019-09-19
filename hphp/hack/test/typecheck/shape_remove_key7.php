@@ -6,7 +6,7 @@
 
 interface I<-T> {}
 
-/* HH_FIXME[4110] */
+/* HH_FIXME[4336] */
 function f<Tv>(Tv $_): I<Tv> {
 }
 

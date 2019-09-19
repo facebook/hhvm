@@ -1,0 +1,2 @@
+File "typedef_string_concat1.php--use.php", line 8, characters 33-40:
+Expected an object convertible to string but got a dynamic value or a value of type TDef (Typing[4318])

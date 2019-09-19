@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2017, Facebook, Inc.
  * All rights reserved.
  *
@@ -7,6 +7,14 @@
  *
  *)
 
+open Typing_env_types
+
+val get_spread_attributes :
+  env ->
+  Pos.t ->
+  Decl_provider.class_decl ->
+  Typing_defs.locl_ty ->
+  env * (Aast.pstring * (Pos.t * Typing_defs.locl_ty)) list
 (**
  * This is used in computing all possible attributes for XHP spreads.
  *
@@ -14,18 +22,8 @@
  * XHP attributes and their localized types to verify compatibility with the
  * XHP onto which we are spreading.
  *)
-val get_spread_attributes :
-  Typing_env.env ->
-  Pos.t ->
-  Decl_provider.class_decl ->
-  Typing_defs.locl Typing_defs.ty ->
-  Typing_env.env * (Nast.pstring * (Nast.PosAnnotation.t * Typing_defs.locl Typing_defs.ty)) list
 
+val is_xhp_child : env -> Pos.t -> Typing_defs.locl_ty -> bool
 (**
  * Verify that an XHP body expression is legal.
  *)
-val is_xhp_child :
-  Typing_env.env ->
-  Pos.t ->
-  Typing_defs.locl Typing_defs.ty ->
-  bool

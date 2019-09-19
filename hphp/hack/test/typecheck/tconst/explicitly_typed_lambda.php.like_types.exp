@@ -1,0 +1,6 @@
+File "explicitly_typed_lambda.php", line 20, characters 8-34:
+Invalid argument (Typing[4110])
+File "explicitly_typed_lambda.php", line 20, characters 8-34:
+Expected this::TMyContainer::TMyElem
+File "explicitly_typed_lambda.php", line 20, characters 8-34:
+But got dynamic because it is an unenforceable type

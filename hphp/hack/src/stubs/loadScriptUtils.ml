@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -8,4 +8,5 @@
  *)
 
 let delete_corrupted_saved_state _ = ()
+
 let lock_saved_state _ = ()

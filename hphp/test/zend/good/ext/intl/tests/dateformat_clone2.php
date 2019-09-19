@@ -1,5 +1,6 @@
 <?hh
 include_once( 'ut_common.inc' );
+<<__EntryPoint>> function main(): void {
 $GLOBALS['oo-mode'] = true;
 $res_str = '';
 /*
@@ -20,4 +21,4 @@ $formatted = ut_datefmt_format($fmt_clone,0);
 $res_str .= "\nResult of clone formatting timestamp=0 is :  \n$formatted";
 
 echo $res_str;
-
+}

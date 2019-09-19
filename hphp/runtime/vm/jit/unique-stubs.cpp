@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-variant.h"
+#include "hphp/runtime/vm/cti.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/event-hook.h"
@@ -530,12 +531,11 @@ TCA emitDebuggerInterpGenRet(CodeBlock& cb, DataBlock& data) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-template<bool immutable>
 TCA emitBindCallStub(CodeBlock& cb, DataBlock& data) {
   return vwrap(cb, data, [] (Vout& v) {
     v << phplogue{rvmfp()};
 
-    auto args = VregList { v.makeReg(), v.makeReg(), v.makeReg() };
+    auto args = VregList { v.makeReg(), v.makeReg() };
 
     // Reconstruct the address of the call from the saved RIP.
     auto const savedRIP = v.makeReg();
@@ -544,7 +544,6 @@ TCA emitBindCallStub(CodeBlock& cb, DataBlock& data) {
     v << subqi{callLen, savedRIP, args[0], v.makeReg()};
 
     v << copy{rvmfp(), args[1]};
-    v << movb{v.cns(immutable), args[2]};
 
     auto const ret = v.makeReg();
 
@@ -1127,8 +1126,7 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
       view,
       emitDebuggerInterpGenRet<true>(cold, data));
 
-  ADD(bindCallStub,          view, emitBindCallStub<false>(cold, data));
-  ADD(immutableBindCallStub, view, emitBindCallStub<true>(cold, data));
+  ADD(immutableBindCallStub, view, emitBindCallStub(cold, data));
   ADD(fcallUnpackHelper,
       hotView(),
       emitFCallUnpackHelper(hot(), cold, data, *this));
@@ -1154,6 +1152,7 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
   emitInterpOneCFHelpers(cold, data, *this, view, rh, code, dbg);
 
   emitAllResumable(code, dbg);
+  if (cti_enabled()) compile_cti_stubs();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

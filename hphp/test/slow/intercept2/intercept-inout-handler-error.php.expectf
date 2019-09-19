@@ -1,0 +1,1 @@
+Fatal error: fb_intercept2 used with an inout handler with a bad signature (expected parameter three to be inout) in %s on line 12

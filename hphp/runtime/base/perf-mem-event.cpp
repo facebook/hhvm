@@ -306,7 +306,6 @@ bool record_request_heap_mem_event(const void* addr,
 
     case HeaderKind::Mixed:
     case HeaderKind::Dict:
-    case HeaderKind::Shape:
       fill_record(static_cast<const MixedArray*>(hdr), addr, record);
       break;
 
@@ -321,6 +320,9 @@ bool record_request_heap_mem_event(const void* addr,
       try_member(static_cast<const GlobalsArray*>(hdr), addr, record);
       break;
     case HeaderKind::Empty:
+      break;
+    case HeaderKind::RecordArray:
+      // TODO: T47449944
       break;
 
     case HeaderKind::Object:

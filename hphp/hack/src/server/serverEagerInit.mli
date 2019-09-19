@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2018, Facebook, Inc.
  * All rights reserved.
  *
@@ -10,7 +10,4 @@
 open ServerInitTypes
 
 val init :
-  ServerEnv.genv ->
-  lazy_level ->
-  ServerEnv.env ->
-  (ServerEnv.env * float)
+  ServerEnv.genv -> lazy_level -> ServerEnv.env -> ServerEnv.env * float

@@ -39,44 +39,6 @@ struct FuncAnalysis;
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Types of a FPI regions.  (What sort of function call is being
- * made.)
- */
-enum class FPIKind {
-  Unknown,     // Nothing is known.
-  CallableArr, // May be an ObjMeth or a ClsMeth.
-  Func,        // Definitely a non-member function.
-  ClsMeth,     // Definitely a static method on a class.
-  ObjInvoke,   // Closure invoke or __invoke on an object.
-  Builtin,     // Resolved builtin call; we will convert params and FCall as
-               // we go
-};
-
-/*
- * Information about a pre-live ActRec.  Part of state tracked in
- * State.
- */
-struct ActRec {
-  explicit ActRec(FPIKind kind,
-                  Type calledOn,
-                  folly::Optional<res::Class> c = folly::none,
-                  folly::Optional<res::Func> f = folly::none)
-    : kind(kind)
-    , cls(std::move(c))
-    , func(std::move(f))
-    , context(std::move(calledOn))
-  {}
-
-  FPIKind kind;
-  bool foldable{false};
-  BlockId pushBlk{NoBlockId};
-  folly::Optional<res::Class> cls;
-  folly::Optional<res::Func> func;
-  // isCtx of context is whether it matches caller's context
-  Type context;
-};
-
-/*
  * State of an iterator in the program.
  *
  * We track iterator liveness precisely, so if an iterator is DeadIter, its
@@ -362,17 +324,14 @@ private:
  *    o It allows us to determine arbitrary mid-block positions where code
  *      becomes unreachable, and eliminate that code in optimize.cpp.
  *
- *    o HHBC invariants can complicate removing unreachable code in FPI
- *      regions---see the rules in bytecode.specification.  Inside FPI regions,
- *      we still do abstract interpretation of the unreachable code, but this
- *      flag is used when merging states to allow the interpreter to analyze
- *      blocks that are unreachable without pessimizing states for reachable
- *      blocks that would've been their successors.
+ *    o We may still do abstract interpretation of the unreachable code, but
+ *      this flag is used when merging states to allow the interpreter to
+ *      analyze blocks that are unreachable without pessimizing states for
+ *      reachable blocks that would've been their successors.
  *
- * One other note: having the interpreter visit blocks when they are
- * unreachable still potentially merges types into object properties that
- * aren't possible at runtime.  We're only doing this to handle FPI regions for
- * now, but it's not ideal.
+ * TODO: having the interpreter visit blocks when they are unreachable still
+ * potentially merges types into object properties that aren't possible at
+ * runtime.
  *
  * We split off a base class from State as a convenience to enable the use
  * default copy construction and assignment.
@@ -394,8 +353,6 @@ struct StateBase {
   Type thisType;
   CompactVector<Type> locals;
   CompactVector<Iter> iters;
-  CompactVector<Type> clsRefSlots;
-  CompactVector<ActRec> fpiStack;
 
   /*
    * Mapping of a local to other locals which are known to have
@@ -449,15 +406,8 @@ struct State : StateBase {
 };
 
 /*
- * States are EqualityComparable (provided they are in-states for the
- * same block).
- */
-bool operator==(const ActRec&, const ActRec&);
-bool operator!=(const ActRec&, const ActRec&);
-
-/*
- * Return a copy of a State without copying either the evaluation
- * stack or FPI stack, pushing Throwable on the stack.
+ * Return a copy of a State without copying the evaluation stack, pushing
+ * Throwable on the stack.
  */
 State with_throwable_only(const Index& env, const State&);
 
@@ -607,7 +557,6 @@ struct CollectedInfo {
  *
  * These return true if the destination state changed.
  */
-bool merge_into(ActRec&, const ActRec&);
 bool merge_into(State&, const State&);
 
 /*
@@ -622,7 +571,6 @@ void widen_props(PropState&);
 /*
  * Functions to show various aspects of interpreter state as strings.
  */
-std::string show(const ActRec& a);
 std::string show(const php::Func&, const Base& b);
 std::string show(const php::Func&, const CollectedInfo::MInstrState&);
 std::string show(const php::Func&, const Iter&);

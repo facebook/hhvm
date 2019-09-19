@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2018, Facebook, Inc.
  * All rights reserved.
  *
@@ -10,21 +10,19 @@
 (* Typing code concerned the <<__PPL>> attribute. *)
 open Core_kernel
 open Typing_defs
-open Tast
-
+open Aast
 module Cls = Decl_provider.Class
 module Env = Tast_env
 module TLazyHeap = Decl_provider
 
 let has_ppl_attribute c =
-  List.exists
-    c.c_user_attributes
-    (fun { ua_name; _ } -> SN.UserAttributes.uaProbabilisticModel = snd ua_name)
+  List.exists c.c_user_attributes (fun { ua_name; _ } ->
+      SN.UserAttributes.uaProbabilisticModel = snd ua_name)
 
 (* If an object's type is wrapped in a Tabstract, recurse until we've hit the base *)
 let rec base_type ty =
   match snd ty with
-  | Tabstract(_, Some ty) -> base_type ty
+  | Tabstract (_, Some ty) -> base_type ty
   | _ -> ty
 
 (**
@@ -36,23 +34,29 @@ let check_ppl_class c =
   let child_class_string = Ast_defs.string_of_class_kind c.c_kind in
   let c_pos = fst c.c_name in
   let error = Errors.extend_ppl c_pos child_class_string is_ppl in
-  let check verb parent_class_string =
-    function
-    | _, Nast.Happly ((_, name), _) ->
-      begin match TLazyHeap.get_class name with
+  let check verb parent_class_string = function
+    | (_, Happly ((_, name), _)) ->
+      begin
+        match TLazyHeap.get_class name with
         | Some parent_type ->
-          if Cls.ppl parent_type <> is_ppl
-          then error (Cls.pos parent_type) parent_class_string (Cls.name parent_type) verb
-          else ()
+          if Cls.ppl parent_type <> is_ppl then
+            error
+              (Cls.pos parent_type)
+              parent_class_string
+              (Cls.name parent_type)
+              verb
+          else
+            ()
         | None -> ()
       end
-    | _ -> () in
-  List.iter (c.c_extends) (check "extend" "class");
-  List.iter (c.c_implements) (check "implement" "interface");
-  List.iter (c.c_uses) (check "use" "trait");
-  let c_extends, c_implements = split_reqs c in
-  List.iter (c_extends) (check "require" "class");
-  List.iter (c_implements) (check "require" "interface")
+    | _ -> ()
+  in
+  List.iter c.c_extends (check "extend" "class");
+  List.iter c.c_implements (check "implement" "interface");
+  List.iter c.c_uses (check "use" "trait");
+  let (c_extends, c_implements) = split_reqs c in
+  List.iter c_extends (check "require" "class");
+  List.iter c_implements (check "require" "interface")
 
 (**
  * When we call a method on an object, if the object is a <<__PPL>> object,
@@ -67,18 +71,22 @@ let check_ppl_obj_get env ((p, ty), e) =
       begin
         match TLazyHeap.get_class name with
         | Some cls when Cls.ppl cls ->
-          if not @@ Env.get_inside_ppl_class env
-          then Errors.invalid_ppl_call p "from a different class";
-          if Env.get_inside_constructor env
-          then Errors.invalid_ppl_call p "from inside a <<__PPL>> class constructor";
-          if not (phys_equal e This)
-          then Errors.invalid_ppl_call p
-            "inside a <<__PPL>> class unless using $this-> or $this:: syntax";
+          if not @@ Env.get_inside_ppl_class env then
+            Errors.invalid_ppl_call p "from a different class";
+          if Env.get_inside_constructor env then
+            Errors.invalid_ppl_call
+              p
+              "from inside a <<__PPL>> class constructor";
+          if not (phys_equal e This) then
+            Errors.invalid_ppl_call
+              p
+              "inside a <<__PPL>> class unless using $this-> or $this:: syntax";
           ()
         | _ -> ()
       end
-    | _ -> () in
-  let _, type_list = Env.get_concrete_supertypes env ty in
+    | _ -> ()
+  in
+  let (_, type_list) = Env.get_concrete_supertypes env ty in
   List.iter type_list check_type
 
 (**
@@ -88,8 +96,8 @@ let check_ppl_obj_get env ((p, ty), e) =
  * We will have already considered parent::__construct.
  *)
 let check_ppl_parent_method env p =
-  if Env.get_inside_ppl_class env && Env.get_inside_constructor env
-  then Errors.invalid_ppl_static_call p "inside a <<__PPL>> class constructor"
+  if Env.get_inside_ppl_class env && Env.get_inside_constructor env then
+    Errors.invalid_ppl_static_call p "inside a <<__PPL>> class constructor"
 
 (**
  * When we call a static method on a class, do not allow ClassName::method
@@ -101,14 +109,17 @@ let check_ppl_class_const env p e =
   | CIself
   | CIparent
   | CIstatic ->
-    if Env.get_inside_ppl_class env && Env.get_inside_constructor env
-    then Errors.invalid_ppl_static_call p "inside a <<__PPL>> class constructor"
-    else ()
+    if Env.get_inside_ppl_class env && Env.get_inside_constructor env then
+      Errors.invalid_ppl_static_call p "inside a <<__PPL>> class constructor"
+    else
+      ()
   | CI (_, name) ->
     begin
       match TLazyHeap.get_class name with
       | Some cls when Cls.ppl cls ->
-        Errors.invalid_ppl_static_call p "by classname. Use self::, static::, or parent::"
+        Errors.invalid_ppl_static_call
+          p
+          "by classname. Use self::, static::, or parent::"
       | _ -> ()
     end
   | CIexpr e -> check_ppl_obj_get env e
@@ -127,31 +138,37 @@ let check_ppl_inst_meth env ((p, ty), _) =
         | Some cls when Cls.ppl cls -> Errors.ppl_meth_pointer p "inst_meth"
         | _ -> ()
       end
-    | _ -> () in
-  let _, type_list = Env.get_concrete_supertypes env ty in
+    | _ -> ()
+  in
+  let (_, type_list) = Env.get_concrete_supertypes env ty in
   List.iter type_list check_type
 
 let on_call_expr env ((p, _), x) =
   match x with
   | Obj_get (e, (_, _), _) -> check_ppl_obj_get env e
-  | Class_const ((_, CIparent), (_, construct)) when construct = SN.Members.__construct -> ()
+  | Class_const ((_, CIparent), (_, construct))
+    when construct = SN.Members.__construct ->
+    ()
   | Class_const ((_, CIparent), _) -> check_ppl_parent_method env p
   | Class_const ((_, e), _) -> check_ppl_class_const env p e
   | _ -> ()
 
-let handler = object
-  inherit Tast_visitor.handler_base
+let handler =
+  object
+    inherit Tast_visitor.handler_base
 
-  method! at_expr env ((p, _), x) =
-    match x with
-    | Call (_, e, _, _, _) -> on_call_expr env e
-    (* class_meth *)
-    | Smethod_id ((_, classname), _) -> check_ppl_meth_pointers p classname "class_meth"
-    (* meth_caller *)
-    | Method_caller ((_, classname), _) -> check_ppl_meth_pointers p classname "meth_caller"
-    (* inst_meth *)
-    | Method_id (instance, _) -> check_ppl_inst_meth env instance
-    | _ -> ()
+    method! at_expr env ((p, _), x) =
+      match x with
+      | Call (_, e, _, _, _) -> on_call_expr env e
+      (* class_meth *)
+      | Smethod_id ((_, classname), _) ->
+        check_ppl_meth_pointers p classname "class_meth"
+      (* meth_caller *)
+      | Method_caller ((_, classname), _) ->
+        check_ppl_meth_pointers p classname "meth_caller"
+      (* inst_meth *)
+      | Method_id (instance, _) -> check_ppl_inst_meth env instance
+      | _ -> ()
 
-  method! at_class_ _env c = check_ppl_class c
-end
+    method! at_class_ _env c = check_ppl_class c
+  end

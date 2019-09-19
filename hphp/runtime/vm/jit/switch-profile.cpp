@@ -47,6 +47,15 @@ sortedSwitchProfile(TargetProfile<SwitchProfile>& profile, int32_t nCases) {
   return values;
 }
 
+folly::dynamic SwitchProfile::toDynamic(uint32_t size) const {
+ folly::dynamic casesArray = folly::dynamic::array;
+ auto const nCases = size / sizeof(uint32_t);
+ for (int i = 0; i < nCases; ++i) casesArray.push_back(cases()[i]);
+
+ return folly::dynamic::object("profileType", "SwitchProfile")
+                              ("cases", casesArray);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}

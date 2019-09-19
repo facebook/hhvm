@@ -24,15 +24,11 @@ def write_echo_json(f: TextIO, obj: T) -> None:
 class SaveStateCommandResult(NamedTuple):
     retcode: int
     edges_added: Optional[int]
-    naming_table_rows_changed: Optional[int]
 
     def get_edges_added(self) -> int:
         assert self.edges_added is not None
+        # pyre-fixme[7]: Expected `int` but got `Optional[int]`.
         return self.edges_added
-
-    def get_naming_table_rows_changed(self) -> int:
-        assert self.naming_table_rows_changed is not None
-        return self.naming_table_rows_changed
 
 
 class SaveStateResult(NamedTuple):
@@ -69,6 +65,13 @@ class SavedStateTestDriver(common_tests.CommonTestDriver):
         return os.path.join(cls.saved_state_dir, "foo")
 
     @classmethod
+    def naming_saved_state_path(cls, base_path: Optional[str]) -> str:
+        if base_path is None:
+            return os.path.join(cls.saved_state_dir, "naming.sql")
+        else:
+            return base_path + "_naming.sql"
+
+    @classmethod
     def exec_save_command(
         cls,
         hh_command: List[str],
@@ -82,7 +85,6 @@ class SavedStateTestDriver(common_tests.CommonTestDriver):
             )
 
         edges_added = None
-        naming_table_rows_changed = None
         if assert_edges_added is not None:
             print(stdout)
             obj = json.loads(stdout)
@@ -97,7 +99,6 @@ class SavedStateTestDriver(common_tests.CommonTestDriver):
 
             if obj is not None:
                 edges_added = obj.get("dep_table_edges_added", None)
-                naming_table_rows_changed = obj.get("naming_table_rows_changed", None)
 
             if edges_added is None:
                 raise Exception(
@@ -105,7 +106,7 @@ class SavedStateTestDriver(common_tests.CommonTestDriver):
                     % (stdout, stderr)
                 )
 
-        return SaveStateCommandResult(retcode, edges_added, naming_table_rows_changed)
+        return SaveStateCommandResult(retcode, edges_added)
 
     @classmethod
     def save_command(
@@ -131,16 +132,18 @@ class SavedStateTestDriver(common_tests.CommonTestDriver):
             "max_workers=2",
         ]
 
-        if cls.enable_naming_table_fallback:
-            hh_command.extend(["--config", "enable_naming_table_fallback=true"])
-
         if ignore_errors:
             hh_command.append("--gen-saved-ignore-type-errors")
 
         if replace_state_after_saving:
             hh_command.append("--replace-state-after-saving")
 
-        return cls.exec_save_command(hh_command, assert_edges_added, ignore_errors)
+        result = cls.exec_save_command(hh_command, assert_edges_added, ignore_errors)
+
+        if cls.enable_naming_table_fallback:
+            cls.dump_naming_saved_state(init_dir, saved_state_path)
+
+        return result
 
     @classmethod
     def dump_saved_state(
@@ -162,10 +165,23 @@ class SavedStateTestDriver(common_tests.CommonTestDriver):
 
         return SaveStateResult(saved_state_path, result)
 
-    def dump_naming_saved_state(self) -> str:
-        saved_state_path = os.path.join(tempfile.mkdtemp(), "new_saved_naming.sql")
-        self.start_hh_server(args=["--check", "--save-naming", saved_state_path])
-        return saved_state_path
+    @classmethod
+    def dump_naming_saved_state(
+        cls, init_dir: str, saved_state_path: Optional[str] = None
+    ) -> str:
+        naming_saved_state_path = cls.naming_saved_state_path(saved_state_path)
+        cls.proc_call(
+            [
+                hh_client,
+                "--json",
+                "--save-naming",
+                naming_saved_state_path,
+                init_dir,
+                "--config",
+                "max_workers=2",
+            ]
+        )
+        return naming_saved_state_path
 
     def write_local_conf(self) -> None:
         with open(os.path.join(self.repo_dir, "hh.conf"), "w") as f:
@@ -262,11 +278,19 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
     def start_hh_server(
         self,
         changed_files: Optional[Iterable[ChangedFile]] = None,
+        changed_naming_files: Optional[Iterable[str]] = None,
         saved_state_path: Optional[str] = None,
+        naming_saved_state_path: Optional[str] = None,
         args: Optional[List[str]] = None,
     ) -> None:
         if changed_files is None:
             changed_files = []
+
+        if changed_naming_files is None:
+            changed_naming_files = []
+
+        if naming_saved_state_path is None:
+            naming_saved_state_path = self.naming_saved_state_path(saved_state_path)
 
         # Yeah, gross again. This function's default value for a parameter
         # is from the object's state.
@@ -282,6 +306,7 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
             "is_cached": True,
             "deptable": saved_state_path + ".sql",
             "changes": changed_files,
+            "naming_changes": changed_naming_files,
         }
 
         with_state_arg = {"data_dump": state}
@@ -295,6 +320,14 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
             "--max-procs",
             "2",
         ] + args
+
+        if self.enable_naming_table_fallback:
+            cmd += [
+                "--config",
+                "enable_naming_table_fallback=true",
+                "--config",
+                "naming_sqlite_path={nt}".format(nt=naming_saved_state_path),
+            ]
 
         self.proc_call(cmd)
         self.wait_until_server_ready()

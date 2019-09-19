@@ -139,7 +139,7 @@ inline bool useAddrForCountedCheck() {
 
 }
 
-static auto const s_IncRef = makeStaticString("IncRefProfile");
+static const StaticString s_IncRef("IncRefProfile");
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -152,9 +152,9 @@ void cgIncRef(IRLS& env, const IRInstruction* inst) {
   auto const loc = srcLoc(env, inst, 0);
   auto& v = vmain(env);
 
-  auto const profile = TargetProfile<IncRefProfile>(env.unit.context(),
+  auto const profile = TargetProfile<IncRefProfile>(env.unit,
                                                     inst->marker(),
-                                                    s_IncRef);
+                                                    s_IncRef.get());
 
   auto const incr = incrAmount(v, profile);
   incrementProfile(v, profile, incr, offsetof(IncRefProfile, total));
@@ -285,8 +285,6 @@ CallSpec getDtorCallSpec(Vout& v, Vreg obj, DataType type, ArgGroup& args) {
   switch (type) {
     case KindOfString:
       return CallSpec::method(&StringData::release);
-    case KindOfShape:
-      return CallSpec::direct(MixedArray::Release);
     case KindOfArray:
       return CallSpec::method(&ArrayData::release);
     case KindOfVec:
@@ -651,7 +649,7 @@ void cgDecRef(IRLS& env, const IRInstruction *inst) {
 
   emitDecRefTypeStat(v, env, inst);
 
-  const auto profile = decRefProfile(env.unit.context(), inst);
+  const auto profile = decRefProfile(env.unit, inst);
 
   if (Trace::moduleEnabled(Trace::irlower, 3) && profile.optimizing()) {
     FTRACE(3, "irlower-refcount: DecRefProfile<{}, {}>: {}\n",
@@ -756,7 +754,7 @@ void cgDecRefNZ(IRLS& env, const IRInstruction* inst) {
   auto const loc = srcLoc(env, inst, 0);
   auto& v = vmain(env);
 
-  auto const profile = decRefProfile(env.unit.context(), inst);
+  auto const profile = decRefProfile(env.unit, inst);
 
   auto const incr = incrAmount(v, profile);
 

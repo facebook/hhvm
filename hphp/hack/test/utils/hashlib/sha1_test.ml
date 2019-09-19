@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2017, Facebook, Inc.
  * All rights reserved.
  *
@@ -12,13 +12,12 @@ open Asserter
 
 let test_sha1sum_cmd () =
   let result = Sha1.digest "hello" in
-  String_asserter.assert_equals "aaf4c61ddcc5e8a2dabede0f3b482cd9aea9434d"
-      result "sha1 hello with newline digest";
-    true
+  String_asserter.assert_equals
+    "aaf4c61ddcc5e8a2dabede0f3b482cd9aea9434d"
+    result
+    "sha1 hello with newline digest";
+  true
 
-let tests = [
-  ("test_sha1sum_cmd", test_sha1sum_cmd);
-]
+let tests = [("test_sha1sum_cmd", test_sha1sum_cmd)]
 
-let () =
-  Unit_test.run_all tests
+let () = Unit_test.run_all tests

@@ -24,6 +24,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/autoload-handler.h"
+#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
@@ -293,8 +294,6 @@ void serialize_memoize_tv(StringBuffer& sb, int depth, TypedValue tv) {
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
-    case KindOfPersistentShape:
-    case KindOfShape:
     case KindOfPersistentArray:
     case KindOfArray:
       serialize_memoize_array(sb, depth, tv.m_data.parr);
@@ -450,7 +449,12 @@ bool HHVM_FUNCTION(clear_static_memoization,
 String HHVM_FUNCTION(ffp_parse_string_native, const String& str) {
   std::string program = str.get()->data();
 
-  auto result = ffp_parse_file("", program.c_str(), program.size());
+  auto const file = fromCaller(
+    [] (const ActRec* fp, Offset) { return fp->unit()->filepath()->data(); }
+  );
+
+  auto result = ffp_parse_file("", program.c_str(), program.size(),
+                               RepoOptions::forFile(file));
 
   FfpJSONString res;
   match<void>(
@@ -555,7 +559,7 @@ TypedValue HHVM_FUNCTION(all_request_stats) {
   if (auto const trace = g_context->getRequestTrace()) {
     return tvReturn(from_stats_list(trace->stats()));
   }
-  return tvReturn(staticEmptyDArray());
+  return tvReturn(ArrayData::CreateDArray());
 }
 
 TypedValue HHVM_FUNCTION(all_process_stats) {
@@ -603,55 +607,113 @@ Array HHVM_FUNCTION(get_compiled_units, int64_t kind) {
   return init.toArray();
 }
 
-TypedValue HHVM_FUNCTION(dynamic_fun, StringArg fun) {
-  auto const func = Unit::loadFunc(fun.get());
+namespace {
+
+TypedValue dynamicFun(const StringData* fun, bool bypassUnmarked = false) {
+  auto const func = Unit::loadFunc(fun);
   if (!func) {
     SystemLib::throwInvalidArgumentExceptionObject(
-      folly::sformat("Unable to find function {}", fun.get()->data())
+      folly::sformat("Unable to find function {}", fun->data())
     );
   }
-  if (!func->isDynamicallyCallable()) {
+  if (!func->isDynamicallyCallable() && !bypassUnmarked) {
     auto const level = RuntimeOption::EvalDynamicFunLevel;
     if (level == 2) {
       SystemLib::throwInvalidArgumentExceptionObject(
-        folly::sformat("Function {} not marked dynamic", fun.get()->data())
+        folly::sformat("Function {} not marked dynamic", fun->data())
       );
     }
     if (level == 1) {
-      raise_warning("Function %s not marked dynamic", fun.get()->data());
+      raise_warning("Function %s not marked dynamic", fun->data());
     }
   }
   return tvReturn(func);
 }
 
-TypedValue HHVM_FUNCTION(dynamic_class_meth, StringArg cls, StringArg meth) {
-  auto const c = Unit::loadClass(cls.get());
+TypedValue dynamicClassMeth(const StringData* cls, const StringData* meth,
+                            bool bypassUnmarked = false) {
+  auto const c = Unit::loadClass(cls);
   if (!c) {
     SystemLib::throwInvalidArgumentExceptionObject(
-      folly::sformat("Unable to find class {}", cls.get()->data())
+      folly::sformat("Unable to find class {}", cls->data())
     );
   }
-  auto const func = c->lookupMethod(meth.get());
+  auto const func = c->lookupMethod(meth);
   if (!func) {
     SystemLib::throwInvalidArgumentExceptionObject(
-      folly::sformat("Unable to method {}::{}",
-                     cls.get()->data(), meth.get()->data())
+      folly::sformat("Unable to find method {}::{}",
+                     cls->data(), meth->data())
     );
   }
-  if (!func->isDynamicallyCallable()) {
+  if (!func->isStatic()) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+      folly::sformat("Method {}::{} is not static",
+                     cls->data(), meth->data())
+    );
+  }
+  if (!func->isPublic()) {
+    auto const ctx = fromCaller(
+      [] (const ActRec* fp, Offset) { return fp->func()->cls(); }
+    );
+    if (func->attrs() & AttrPrivate) {
+      if (func->cls() != ctx) {
+        SystemLib::throwInvalidArgumentExceptionObject(
+          folly::sformat("Method {}::{} is marked Private",
+                         cls->data(), meth->data())
+        );
+      }
+    } else if (func->attrs() & AttrProtected) {
+      if (!ctx || !ctx->classof(func->cls())) {
+        SystemLib::throwInvalidArgumentExceptionObject(
+          folly::sformat("Method {}::{} is marked Protected",
+                         cls->data(), meth->data())
+        );
+      }
+    }
+  }
+  if (!func->isDynamicallyCallable() && !bypassUnmarked) {
     auto const level = RuntimeOption::EvalDynamicClsMethLevel;
     if (level == 2) {
       SystemLib::throwInvalidArgumentExceptionObject(
         folly::sformat("Method {}::{} not marked dynamic",
-                       cls.get()->data(), meth.get()->data())
+                       cls->data(), meth->data())
       );
     }
     if (level == 1) {
       raise_warning("Method %s::%s not marked dynamic",
-                    cls.get()->data(), meth.get()->data());
+                    cls->data(), meth->data());
     }
   }
   return tvReturn(ClsMethDataRef::create(c, func));
+}
+
+} // end anonymous namespace
+
+TypedValue HHVM_FUNCTION(dynamic_fun, StringArg fun) {
+  return dynamicFun(fun.get());
+}
+
+TypedValue HHVM_FUNCTION(dynamic_fun_force, StringArg fun) {
+  if (RuntimeOption::RepoAuthoritative) {
+    raise_error(
+      "You can't use dynamic_fun_force in RepoAuthoritative mode"
+    );
+  }
+  return dynamicFun(fun.get(), true);
+}
+
+TypedValue HHVM_FUNCTION(dynamic_class_meth, StringArg cls, StringArg meth) {
+  return dynamicClassMeth(cls.get(), meth.get());
+}
+
+TypedValue HHVM_FUNCTION(dynamic_class_meth_force, StringArg cls,
+                         StringArg meth) {
+  if (RuntimeOption::RepoAuthoritative) {
+    raise_error(
+      "You can't use dynamic_class_meth_force in RepoAuthoritative mode"
+    );
+  }
+  return dynamicClassMeth(cls.get(), meth.get(), true);
 }
 
 }
@@ -684,7 +746,11 @@ static struct HHExtension final : Extension {
     HHVM_NAMED_FE(HH\\rqtrace\\process_event_stats,
                   HHVM_FN(process_event_stats));
     HHVM_NAMED_FE(HH\\dynamic_fun, HHVM_FN(dynamic_fun));
+    HHVM_NAMED_FE(HH\\dynamic_fun_force,
+                  HHVM_FN(dynamic_fun_force));
     HHVM_NAMED_FE(HH\\dynamic_class_meth, HHVM_FN(dynamic_class_meth));
+    HHVM_NAMED_FE(HH\\dynamic_class_meth_force,
+                  HHVM_FN(dynamic_class_meth_force));
     loadSystemlib();
   }
 } s_hh_extension;

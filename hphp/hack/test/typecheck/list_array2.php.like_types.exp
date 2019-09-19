@@ -1,0 +1,6 @@
+File "list_array2.php", line 14, characters 10-11:
+Invalid return type (Typing[4110])
+File "list_array2.php", line 12, characters 34-36:
+Expected int
+File "list_array2.php", line 12, characters 16-27:
+But got dynamic because it is an unenforceable type

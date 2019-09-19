@@ -21,57 +21,26 @@
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/vm/record.h"
 
-#include "hphp/util/hash-set.h"
-
 namespace HPHP {
 
 RecordData::RecordData(const RecordDesc* record)
-  : m_record(record) {
+  : RecordBase(record) {
   initHeader(HeaderKind::Record, OneReference);
-  static_assert(KindOfUninit == static_cast<DataType>(0),
-                "RecordData assumes KindOfUninit == 0");
-  memset(const_cast<TypedValue*>(fieldVec()), 0, fieldSize(record));
+  static_assert(sizeof(RecordData) == sizeof(RecordBase) + sizeof(Countable),
+                "RecordData must not have any fields of its own");
 }
 
 RecordData* RecordData::newRecord(const RecordDesc* rec,
                                   uint32_t initSize,
-                                  const StringData* const *keys,
+                                  const StringData* const* keys,
                                   const TypedValue* values) {
-  if (rec->attrs() & AttrAbstract) {
-    raise_error("Cannot instantiate abstract record %s", rec->name()->data());
-  }
-  auto const size = sizeWithFields(rec);
-  auto const recdata =
-    new (NotNull{}, tl_heap->objMalloc(size)) RecordData(rec);
-  assertx(recdata->hasExactlyOneRef());
-  try {
-    for (auto i = 0; i < initSize; ++i) {
-      auto const name = keys[i];
-      const auto&  field = rec->field(name);
-      auto const& val = values[initSize - i -1];
-      auto const& tc = field.typeConstraint();
-      if (tc.isCheckable()) {
-        tc.verifyRecField(&val, rec->name(), field.name());
-      }
-      auto const& tv = recdata->fieldLval(name);
-      tvCopy(val, tv);
-    }
-    for (auto const &field : rec->allFields()) {
-      auto const name = field.name();
-      auto const& tv = recdata->fieldLval(name);
-      if (type(tv) != KindOfUninit) continue;
-      auto const& val = field.val();
-      if (val.m_type != KindOfUninit) {
-        tvDup(val, tv);
-      } else {
-        raise_record_init_error(rec->name(), name);
-      }
-    }
-  } catch (...) {
-    recdata->decRefAndRelease();
-    throw;
-  }
-  return recdata;
+  return newRecordImpl<RecordData>(rec, initSize, keys, values);
+}
+
+RecordData* RecordData::copyRecord() const {
+  auto const rd = copyRecordBase(this);
+  rd->initHeader(this->kind(), OneReference);
+  return rd;
 }
 
 NEVER_INLINE
@@ -84,16 +53,6 @@ void RecordData::release() noexcept {
   }
   tl_heap->objFree(this, heapSize());
   AARCH64_WALKABLE_FRAME();
-}
-
-tv_rval RecordData::fieldRval(const StringData* fieldName) const {
-  auto const idx = m_record->lookupField(fieldName);
-  return tv_rval(&fieldVec()[idx]);
-}
-
-tv_lval RecordData::fieldLval(const StringData* fieldName) {
-  auto const idx = m_record->lookupField(fieldName);
-  return tv_lval(const_cast<TypedValue*>(&fieldVec()[idx]));
 }
 
 template<bool(*fieldEq)(TypedValue, TypedValue)>

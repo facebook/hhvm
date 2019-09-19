@@ -131,7 +131,23 @@ struct Repo::GlobalData {
    * Should the runtime emit notices or throw whenever a function is called
    * dynamically and that function has not been marked as allowing that?
    */
-  int32_t ForbidDynamicCalls = 0;
+  int32_t ForbidDynamicCallsToFunc = 0;
+  int32_t ForbidDynamicCallsToClsMeth = 0;
+  int32_t ForbidDynamicCallsToInstMeth = 0;
+  int32_t ForbidDynamicConstructs = 0;
+  bool ForbidDynamicCallsWithAttr = false;
+
+  /*
+  * If set to true will raise warning on uses of HH\class_meth if arguments
+  * are not string/class constant followed by string.
+  */
+  bool WarnOnNonLiteralClsMeth = false;
+  /*
+  * If set to true calls to class methods of form $cls::meth() will not be
+  * logged as dynamic calls, which means behavior for such calls would be
+  * as if ForbidDynamicCallsToClsMeth was set to 0.
+  */
+  bool LogKnownMethodsAsDynamicCalls = true;
 
   /*
    * Should the runtime emit notices whenever a builtin is called dynamically?
@@ -204,7 +220,13 @@ struct Repo::GlobalData {
       (HackArrDVArrs)
       (EnableIntrinsicsExtension)
       (ReffinessInvariance)
-      (ForbidDynamicCalls)
+      (ForbidDynamicCallsToFunc)
+      (ForbidDynamicCallsToClsMeth)
+      (ForbidDynamicCallsToInstMeth)
+      (ForbidDynamicConstructs)
+      (ForbidDynamicCallsWithAttr)
+      (WarnOnNonLiteralClsMeth)
+      (LogKnownMethodsAsDynamicCalls)
       (NoticeOnBuiltinDynamicCalls)
       (Signature)
       (AbortBuildOnVerifyError)

@@ -8,8 +8,7 @@
   NullUninit
   NullUninit
   String "main"
-  FPushFunc 0
-  FCall <> 0 1 "" - "" "" # allow the JIT why not
+  FCallFunc <> 0 1 "" - # allow the JIT why not
   PopC
 
   Int 1
@@ -24,16 +23,14 @@
 }
 
 .function ArrayMember() {
-  .numclsrefslots 1;
   NullUninit
   NullUninit
   NullUninit
     String "arr"
     String "ClassWithArray"
-    ClsRefGetC 0
-    CGetS 0
-  FPushFuncD 1 "var_dump"
-  FCall <> 1 1 "" - "" ""
+    ClassGetC
+    CGetS
+  FCallFuncD <> 1 1 "" - "var_dump"
   PopC
 
   String "ClassWithArray"
@@ -46,11 +43,10 @@
     String "arr"
     Int 2
     CGetL $x
-    ClsRefGetC 0
-    BaseSC 1 0 Warn
-    QueryM 2 CGet EC:0
-  FPushFuncD 1 "var_dump"
-  FCall <> 1 1 "" - "" ""
+    ClassGetC
+    BaseSC 2 0 Warn
+    QueryM 3 CGet EC:1
+  FCallFuncD <> 1 1 "" - "var_dump"
   PopC
 
   True
@@ -61,8 +57,7 @@
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 0 "ArrayMember"
-  FCall <> 0 1 "" - "" ""
+  FCallFuncD <> 0 1 "" - "ArrayMember"
   PopC
 
   Array @my_array
@@ -115,8 +110,7 @@ unset_label:  String "win\n"
               NullUninit
               NullUninit
               CGetL $arr
-              FPushFuncD 1 "var_dump"
-              FCall <> 1 1 "" - "" ""
+              FCallFuncD <> 1 1 "" - "var_dump"
               PopC
 
               NullUninit
@@ -125,8 +119,7 @@ unset_label:  String "win\n"
               Int 1
               String "b"
               NewPackedArray 2
-              FPushFuncD 1 "var_dump"
-              FCall <> 1 1 "" - "" ""
+              FCallFuncD <> 1 1 "" - "var_dump"
               PopC
 
               Null

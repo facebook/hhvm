@@ -13,10 +13,10 @@ const int PASSWORD_DEFAULT = 0;
 const int PASSWORD_BCRYPT = 0;
 
 <<__PHPStdLib>>
-function password_hash(string $password, int $algo, array $options = array()): ?string;
+function password_hash(string $password, int $algo, darray $options = darray[]): ?string;
 <<__PHPStdLib>>
 function password_verify(string $password, string $hash): bool;
 <<__PHPStdLib>>
-function password_get_info(string $hash): array;
+function password_get_info(string $hash): darray;
 <<__PHPStdLib>>
-function password_needs_rehash(string $password, int $algo, array $options = array()): bool;
+function password_needs_rehash(string $password, int $algo, darray $options = darray[]): bool;

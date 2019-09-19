@@ -1,0 +1,6 @@
+File "key_exists_refines_bad1.php", line 7, characters 19-38:
+Invalid argument (Typing[4110])
+File "key_exists_refines_bad1.php", line 3, characters 24-29:
+Expected string
+File "key_exists_refines_bad1.php", line 7, characters 19-38:
+But got dynamic because it is an unenforceable type

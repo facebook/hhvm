@@ -83,9 +83,9 @@ let rec random_typed_value () : Typed_value.t =
    (fun () -> Typed_value.String "");
    (fun () -> Typed_value.Null);
    (fun () -> Typed_value.Array [random_typed_value (), random_typed_value ()]);
-   (fun () -> Typed_value.Vec [random_typed_value ()]);
+   (fun () -> Typed_value.Vec ([random_typed_value ()], None));
    (fun () -> Typed_value.Keyset [random_typed_value ()]);
-   (fun () -> Typed_value.Dict [random_typed_value (), random_typed_value ()])]
+   (fun () -> Typed_value.Dict ([random_typed_value (), random_typed_value ()], None))]
    |> rand_elt) ()
 
 let random_key () : MemberKey.t =
@@ -107,8 +107,7 @@ let random_adata_id () : adata_id =  "A_" ^ (Random.int 10 |> string_of_int)
  TODO(T20108993): autogenerate this somehow; this doesn't scale well for adding
  instructions at all. Perhaps the project for generating code based on the
  bytecode spec could handle this *)
-let all_instrs (fn : IS.t) : lazy_instruct list =
-   let cls_ref_slts = IS.get_num_cls_ref_slots fn in
+let all_instrs (_ : IS.t) : lazy_instruct list =
    [(fun () -> IBasic Nop);
     (fun () -> IBasic EntryNop);
     (fun () -> IGet (VGetL (random_local ())));
@@ -155,7 +154,6 @@ let all_instrs (fn : IS.t) : lazy_instruct list =
     (fun () -> IOp CastDouble);
     (fun () -> IOp CastString);
     (fun () -> IOp CastArray);
-    (fun () -> IOp CastObject);
     (fun () -> IOp CastVec);
     (fun () -> IOp CastDict);
     (fun () -> IOp CastKeyset);
@@ -241,38 +239,16 @@ let all_instrs (fn : IS.t) : lazy_instruct list =
     (fun () -> IMisc (GetMemoKeyL (random_local ())));
     (*(fun () -> IMisc VarEnvDynCall);*)
     (fun () -> IAsync WHResult);
-    (fun () -> IAsync Await)] @
-    begin
-      if cls_ref_slts <= 0 then [] else
-      [(fun () -> IMisc (Self (Random.int cls_ref_slts)));
-       (fun () -> IIsset (IssetS (Random.int cls_ref_slts)));
-       (fun () -> IIsset (EmptyS (Random.int cls_ref_slts)));
-       (fun () -> IMisc (Parent (Random.int cls_ref_slts)));
-       (fun () -> IMisc (LateBoundCls (Random.int cls_ref_slts)));
-       (fun () -> IMutator (SetOpS (random_eq_op (), Random.int cls_ref_slts)));
-       (fun () -> IGet (CGetS (Random.int cls_ref_slts)));
-       (fun () -> ILitConst (ClsCns ((Const.from_raw_string ""),
-                                      Random.int cls_ref_slts)));
-       (fun () -> IMutator (SetS (Random.int cls_ref_slts)));
-       (fun () -> IMisc (ClsRefName (Random.int cls_ref_slts)));
-       (fun () -> IMutator (IncDecS (random_incdec_op (),
-                                     Random.int cls_ref_slts)));
-       (fun () -> IGet (ClsRefGetC (Random.int cls_ref_slts)))]
-    end
+    (fun () -> IAsync Await)]
 
 (* Generators for base instructions *)
-let base_instrs (fn : IS.t) : lazy_instruct list =
-  let cls_ref_slts = IS.get_num_cls_ref_slots fn in
+let base_instrs (_ : IS.t) : lazy_instruct list =
   [(fun () -> IBase (BaseGC (Random.int 10, random_mode ())));
    (fun () -> IBase (BaseGL (random_local (), random_mode ())));
    (fun () -> IBase (BaseL (random_local (), random_mode ())));
    (fun () -> IBase (BaseC (Random.int 10, random_mode ())));
    (fun () -> IBase BaseH);
-   (fun () -> IBase (Dim (random_mode(), random_key ())))] @
-   begin
-     if cls_ref_slts <= 0 then [] else
-     [(fun () -> IBase (BaseSC (Random.int 10, Random.int 10, random_mode ())))]
-    end
+   (fun () -> IBase (Dim (random_mode(), random_key ())))]
 
 (* Generators for final instructions *)
 let final_instrs (_ : IS.t) : lazy_instruct list =

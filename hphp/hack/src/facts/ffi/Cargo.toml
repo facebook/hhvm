@@ -1,0 +1,14 @@
+[package]
+name = "hack_facts_ffi"
+version = "3.49.0"
+edition = "2018"
+
+[dependencies]
+facts_rust = { path = "..", package = "hack_facts" }
+ocaml = "^0.7"
+oxidized = {path = "../../oxidized", package = "hack_oxidized" }
+
+[lib]
+name = "rust_facts_ffi"
+path = "../rust_facts_ffi.rs"
+crate-type = ["lib", "staticlib"]

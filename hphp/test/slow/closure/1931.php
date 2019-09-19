@@ -10,7 +10,8 @@ $myfunc = function() {
 $myfunc();
 call_user_func($myfunc);
 call_user_func_array($myfunc, array());
-$isc = is_callable($myfunc, false, &$p);
+$p = null;
+$isc = is_callable_with_name($myfunc, false, inout $p);
 echo "is_callable(\$myfunc) = $isc\n";
 var_dump($p);
 }

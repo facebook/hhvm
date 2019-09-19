@@ -2,4 +2,4 @@ Fatal error: Uncaught Error: Can use "yield from" only with arrays and Traversab
 Stack trace:
 #0 (): gen()
 #1 %s(8): Generator->rewind()
-#2 {main}
+%a {main}

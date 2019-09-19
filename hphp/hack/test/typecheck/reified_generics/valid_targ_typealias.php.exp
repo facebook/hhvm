@@ -1,4 +1,1 @@
-File "valid_targ_typealias.php", line 7, characters 14-19:
-This is an opaque type alias, it cannot be used as a reified type argument (Typing[4305])
-File "valid_targ_typealias.php", line 3, characters 15-15:
-T is reified
+No errors

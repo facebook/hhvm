@@ -1,4 +1,4 @@
 File "pass_by_ref_annotation3.php", line 7, characters 9-10:
 This argument should be annotated with 'inout' (Typing[4182])
-File "container_functions.hhi", line 36, characters 62-65:
+File "container_functions.hhi", line 49, characters 62-65:
 Because this is an inout parameter

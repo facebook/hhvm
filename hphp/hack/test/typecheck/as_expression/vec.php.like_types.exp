@@ -1,0 +1,16 @@
+File "vec.php", line 6, characters 15-16:
+Invalid argument (Typing[4110])
+File "vec.php", line 22, characters 22-32:
+Expected ~vec<string> because it is an unenforceable type
+File "vec.php", line 4, characters 9-11:
+But got vec<mixed>
+File "vec.php", line 4, characters 9-11:
+The type vec expects 1 type parameter(s) (Typing[4101])
+File "hackarray.hhi", line 13, characters 22-24:
+Definition is here
+File "vec.php", line 12, characters 15-16:
+Invalid argument (Typing[4110])
+File "vec.php", line 22, characters 22-32:
+Expected ~vec<string> because it is an unenforceable type
+File "vec.php", line 10, characters 9-14:
+But got vec<mixed>

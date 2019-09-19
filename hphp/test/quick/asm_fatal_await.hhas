@@ -6,10 +6,8 @@
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 0 "main"
-  FCall <> 0 1 "" - "" ""
-  FPushFuncD 1 "HH\\Asio\\join"
-  FCall <> 1 1 "" - "" ""
+  FCallFuncD <> 0 1 "" - "main"
+  FCallFuncD <> 1 1 "" - "HH\\Asio\\join"
   PopC
   Null
   RetC
@@ -24,7 +22,7 @@
   Dup
   NullUninit
   NullUninit
-  FCallCtor <> 0 1 "" - ""
+  FCallCtor <LockWhileUnwinding> 0 1 "" - ""
   PopC
   LockObj
   SetL $x

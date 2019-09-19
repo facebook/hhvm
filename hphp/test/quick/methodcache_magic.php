@@ -1,8 +1,5 @@
 <?hh
 
-// disable array -> "Array" conversion notice
-error_reporting(error_reporting() & ~E_NOTICE);
-
 class base {
   public function __call($x, $y) {
     echo "base::__call: $x, $y " . static::class . "\n";
@@ -33,5 +30,11 @@ function main() {
     }
   }
 }
+<<__EntryPoint>>
+function main_entry(): void {
 
-main();
+  // disable array -> "Array" conversion notice
+  error_reporting(error_reporting() & ~E_NOTICE);
+
+  main();
+}

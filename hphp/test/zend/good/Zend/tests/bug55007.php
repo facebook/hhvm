@@ -10,7 +10,7 @@ function shutdown() {
 }
 
 <<__EntryPoint>> function main(): void {
-register_shutdown_function('shutdown');
+register_shutdown_function(fun('shutdown'));
 
 new CompileErrorClass();
 }

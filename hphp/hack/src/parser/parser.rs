@@ -4,16 +4,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::marker::PhantomData;
-
-use crate::declaration_parser::DeclarationParser;
-use crate::lexer::Lexer;
-use crate::parser_env::ParserEnv;
-use crate::parser_trait::{Context, ParserTrait};
-use crate::smart_constructors::{NodeType, SmartConstructors};
-use crate::source_text::SourceText;
-use crate::stack_limit::StackLimit;
-use crate::syntax_error::SyntaxError;
+use crate::{
+    declaration_parser::DeclarationParser,
+    lexer::Lexer,
+    parser_env::ParserEnv,
+    parser_trait::{Context, ParserTrait},
+    smart_constructors::{NodeType, SmartConstructors},
+    stack_limit::StackLimit,
+};
+use parser_core_types::{source_text::SourceText, syntax_error::SyntaxError};
 
 pub struct Parser<'a, S, T>
 where
@@ -23,8 +22,7 @@ where
     lexer: Lexer<'a, S::Token>,
     errors: Vec<SyntaxError>,
     env: ParserEnv,
-    sc_state: T,
-    _phantom: PhantomData<S>,
+    sc: S,
 }
 
 impl<'a, S, T: Clone> Parser<'a, S, T>
@@ -33,47 +31,43 @@ where
     S::R: NodeType,
 {
     pub fn make(source: &'a SourceText<'a>, env: ParserEnv) -> Self {
-        let sc_state = S::initial_state(&env, &source);
+        let sc = S::new(&env, source);
         Self {
             lexer: Lexer::make(source, env.is_experimental_mode),
             errors: vec![],
             env,
-            sc_state,
-            _phantom: PhantomData,
+            sc,
         }
     }
 
-    fn into_parts(self) -> (Lexer<'a, S::Token>, Vec<SyntaxError>, ParserEnv, T) {
-        (self.lexer, self.errors, self.env, self.sc_state)
+    pub fn into_parts(self) -> (Lexer<'a, S::Token>, Vec<SyntaxError>, ParserEnv, S) {
+        (self.lexer, self.errors, self.env, self.sc)
     }
 
     pub fn parse_header_only(
         env: ParserEnv,
         text: &'a SourceText<'a>,
     ) -> Option<<S::R as NodeType>::R> {
-        let (lexer, errors, env, sc_state) = Self::make(text, env).into_parts();
+        let (lexer, errors, env, sc) = Self::make(text, env).into_parts();
         let mut decl_parser: DeclarationParser<S, T> =
-            DeclarationParser::make(lexer, env, Context::empty(None), errors, sc_state);
+            DeclarationParser::make(lexer, env, Context::empty(None), errors, sc);
         decl_parser
             .parse_leading_markup_section()
             .map(|r| r.extract())
     }
 
-    pub fn parse_script(
-        &mut self,
-        stack_limit: Option<std::rc::Rc<StackLimit>>,
-    ) -> <S::R as NodeType>::R {
+    pub fn parse_script(&mut self, stack_limit: Option<&'a StackLimit>) -> <S::R as NodeType>::R {
         let mut decl_parser: DeclarationParser<S, T> = DeclarationParser::make(
             self.lexer.clone(),
             self.env.clone(),
             Context::empty(stack_limit),
             vec![],
-            self.sc_state.clone(),
+            self.sc.clone(),
         );
         let root = decl_parser.parse_script().extract();
-        let (lexer, _context, errors, sc_state) = decl_parser.into_parts();
+        let (lexer, _context, errors, sc) = decl_parser.into_parts();
         self.errors = errors;
-        self.sc_state = sc_state;
+        self.sc = sc;
         self.lexer = lexer;
         root
     }
@@ -86,7 +80,7 @@ where
         res
     }
 
-    pub fn sc_state(&self) -> &T {
-        &self.sc_state
+    pub fn sc_state(&mut self) -> &T {
+        self.sc.state_mut()
     }
 }

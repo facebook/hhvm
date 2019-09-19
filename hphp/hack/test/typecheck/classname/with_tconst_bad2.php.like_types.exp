@@ -1,0 +1,6 @@
+File "with_tconst_bad2.php", line 13, characters 29-34:
+Wrong type hint (Typing[4338])
+File "with_tconst_bad2.php", line 13, characters 9-27:
+Expected ~classname<C> because it is an unenforceable type
+File "classes.hhi", line 201, characters 13-20:
+But got classname<stdClass>; implicitly defined constant ::class is a string that contains the fully qualified name of stdClass

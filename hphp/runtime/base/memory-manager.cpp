@@ -175,12 +175,6 @@ void MemoryManager::resetAllStats() {
   m_stats.totalAlloc = 0;
   m_stats.peakIntervalUsage = 0;
   m_stats.peakIntervalCap = 0;
-  if (m_bypassSlabAlloc) {
-    totalSmallAllocs.insert(totalSmallAllocs.begin(),
-        totalSmallAllocs.size(), 0);
-    currentSmallAllocs.insert(currentSmallAllocs.begin(),
-        currentSmallAllocs.size(), 0);
-  }
   m_enableStatsSync = false;
   if (Trace::enabled) tl_heap_id = ++s_heap_id;
   if (s_statsEnabled) {
@@ -385,9 +379,6 @@ void MemoryManager::resetAllocator() {
   m_front = m_limit = 0;
   tl_sweeping = false;
   m_exiting = false;
-  if (StructuredLog::coinflip(RuntimeOption::TotalAllocSampleF)) {
-    publishStats("total", totalSmallAllocs, RuntimeOption::TotalAllocSampleF);
-  }
   resetAllStats();
   setGCEnabled(RuntimeOption::EvalEnableGC);
   resetGC();
@@ -450,8 +441,8 @@ void MemoryManager::flush() {
  */
 
 const std::array<char*,NumHeaderKinds> header_names = {{
-  "PackedArray", "MixedArray", "EmptyArray", "ApcArray",
-  "GlobalsArray", "ShapeArray", "DictArray", "VecArray", "KeysetArray",
+  "PackedArray", "MixedArray", "EmptyArray", "ApcArray", "GlobalsArray",
+  "RecordArray", "DictArray", "VecArray", "KeysetArray",
   "String", "Resource", "Ref", "ClsMeth", "Record",
   "Object", "NativeObject", "WaitHandle", "AsyncFuncWH", "AwaitAllWH",
   "Closure", "Vector", "Map", "Set", "Pair", "ImmVector", "ImmMap", "ImmSet",
@@ -540,7 +531,6 @@ void MemoryManager::checkHeap(const char* phase) {
         break;
       case HeaderKind::Packed:
       case HeaderKind::Mixed:
-      case HeaderKind::Shape:
       case HeaderKind::Dict:
       case HeaderKind::Empty:
       case HeaderKind::VecArray:
@@ -570,6 +560,7 @@ void MemoryManager::checkHeap(const char* phase) {
       case HeaderKind::SmallMalloc:
       case HeaderKind::BigMalloc:
       case HeaderKind::Record:
+      case HeaderKind::RecordArray:
         break;
       case HeaderKind::Hole:
       case HeaderKind::Slab:
@@ -779,15 +770,6 @@ inline void* MemoryManager::slabAlloc(size_t nbytes, size_t index) {
   assertx((uintptr_t(m_front) & kSmallSizeAlignMask) == 0);
 
   if (UNLIKELY(m_bypassSlabAlloc)) {
-    totalSmallAllocs.resize(kNumSmallSizes, 0);
-    currentSmallAllocs.resize(kNumSmallSizes, 0);
-    ++totalSmallAllocs[index];
-    ++currentSmallAllocs[index];
-    if (StructuredLog::coinflip(RuntimeOption::PerAllocSampleF)) {
-      publishStats("current", currentSmallAllocs,
-          RuntimeOption::PerAllocSampleF);
-    }
-
     // Stats correction; mallocBigSize() updates m_stats. Add to mm_udebt rather
     // than adding to mm_freed because we're adjusting for double-counting, not
     // actually freeing anything.
@@ -1151,20 +1133,6 @@ bool MemoryManager::isGCEnabled() {
 void MemoryManager::setGCEnabled(bool isGCEnabled) {
   m_gc_enabled = isGCEnabled;
   updateNextGc();
-}
-
-void MemoryManager::publishStats(const char* name,
-    const std::vector<int64_t> &stats, uint32_t sampleRate) {
-  if (stats.size() == 0) return;
-  StructuredLogEntry log;
-  for (size_t i = 0; i < stats.size(); ++i) {
-    std::array<char, 32> log_name;
-    snprintf(&log_name[0], log_name.size(), "%s[%lu]", name,
-        kSizeIndex2Size[i]);
-    log.setInt(&log_name[0], stats[i]);
-  }
-  log.setInt("sample_rate", sampleRate);
-  StructuredLog::log("hhvm_allocs", log);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

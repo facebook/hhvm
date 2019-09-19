@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -15,20 +15,31 @@ type env = {
   ns_fun_uses: string SMap.t;
   ns_const_uses: string SMap.t;
   ns_name: string option;
-  ns_popt: ParserOptions.t;
+  ns_auto_ns_map: (string * string) list;
+  ns_is_codegen: bool;
 }
+[@@deriving show]
 
-let empty popt = {
-  ns_ns_uses = SMap.empty;
-  ns_class_uses = SMap.empty;
-  ns_fun_uses = SMap.empty;
-  ns_const_uses = SMap.empty;
-  ns_name = None;
-  ns_popt = popt;
-}
+let empty auto_ns_map is_code_gen =
+  {
+    ns_ns_uses = SMap.empty;
+    ns_class_uses = SMap.empty;
+    ns_fun_uses = SMap.empty;
+    ns_const_uses = SMap.empty;
+    ns_name = None;
+    ns_auto_ns_map = auto_ns_map;
+    ns_is_codegen = is_code_gen;
+  }
 
-let empty_with_default_popt =
-  empty ParserOptions.default
+let empty_with_default =
+  let popt = ParserOptions.default in
+  let auto_ns_map = ParserOptions.auto_namespace_map popt in
+  let codegen = ParserOptions.codegen popt in
+  empty auto_ns_map codegen
 
-let is_global_namespace env =
-  Option.is_none env.ns_name
+let empty_from_env env = empty env.ns_auto_ns_map env.ns_is_codegen
+
+let empty_from_popt popt =
+  empty (ParserOptions.auto_namespace_map popt) (ParserOptions.codegen popt)
+
+let is_global_namespace env = Option.is_none env.ns_name

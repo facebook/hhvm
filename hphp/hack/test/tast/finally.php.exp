@@ -4,14 +4,15 @@ Errors:
 [(Fun
     { f_span = [4:1-6:2]; f_annotation = (); f_mode = <opaque>;
       f_ret =
-      (Some ([4:35-53],
-             (Happly (([4:35-44], "\\Awaitable"),
-                [([4:45-52],
-                  (Hshape
-                     { nsi_allows_unknown_fields = false; nsi_field_map = []
-                       }))
-                  ]
-                ))));
+      ((Awaitable<shape()>),
+       (Some ([4:35-53],
+              (Happly (([4:35-44], "\\Awaitable"),
+                 [([4:45-52],
+                   (Hshape
+                      { nsi_allows_unknown_fields = false; nsi_field_map = []
+                        }))
+                   ]
+                 )))));
       f_name = ([4:16-31], "\\gen_empty_shape"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
       f_body =
@@ -24,9 +25,10 @@ Errors:
   (Fun
      { f_span = [8:1-16:2]; f_annotation = (); f_mode = <opaque>;
        f_ret =
-       (Some ([8:24-39],
-              (Happly (([8:24-33], "\\Awaitable"),
-                 [([8:34-38], (Hprim Tvoid))]))));
+       ((Awaitable<void>),
+        (Some ([8:24-39],
+               (Happly (([8:24-33], "\\Awaitable"),
+                  [([8:34-38], (Hprim Tvoid))])))));
        f_name = ([8:16-20], "\\test"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
        f_body =

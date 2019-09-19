@@ -1,21 +1,21 @@
-(**
+(*
  * Copyright (c) 2017, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the "hack" directory of this source tree.
  *
-*)
+ *)
 open Ast_class_expr
 open Core_kernel
-
-module A = Tast
+module A = Aast
 module TV = Typed_value
 module SN = Naming_special_names
 module SU = Hhbc_string_utils
 module TVL = Unique_list_typed_value
 
 exception NotLiteral
+
 exception UserDefinedConstant
 
 let hack_arr_compat_notices () =
@@ -24,32 +24,42 @@ let hack_arr_compat_notices () =
 let hack_arr_dv_arrs () =
   Hhbc_options.hack_arr_dv_arrs !Hhbc_options.compiler_options
 
-let radix (s : string) : [`Oct | `Hex | `Dec | `Bin ] =
+let radix (s : string) : [ `Oct | `Hex | `Dec | `Bin ] =
   if String.length s > 1 && s.[0] = '0' then
     match s.[1] with
     (* Binary *)
-    | 'b' | 'B' -> `Bin
+    | 'b'
+    | 'B' ->
+      `Bin
     (* Hex *)
-    | 'x' | 'X' -> `Hex
+    | 'x'
+    | 'X' ->
+      `Hex
     (* Octal *)
     | _ -> `Oct
-  else `Dec
+  else
+    `Dec
 
 let float_of_string_radix (s : string) (radix : int) : float =
   let float_radix = float_of_int radix in
-  let float_of_char (c : char) : float = float_of_int @@ int_of_char c - 48 in
+  let float_of_char (c : char) : float =
+    float_of_int @@ (int_of_char c - 48)
+  in
   let rec loop (idx : int) (acc : float) =
     if idx < String.length s then
-      loop (idx + 1) ((acc *. float_radix) +. (float_of_char s.[idx]))
+      loop (idx + 1) ((acc *. float_radix) +. float_of_char s.[idx])
     else
-      acc in
+      acc
+  in
   loop 0 0.
 
 let float_of_string_custom (s : string) : float =
   match radix s with
-    | `Bin -> float_of_string_radix (String_utils.string_after s 2) 2
-    | `Hex | `Dec -> float_of_string s
-    | `Oct -> float_of_string_radix (String_utils.string_after s 1) 8
+  | `Bin -> float_of_string_radix (String_utils.string_after s 2) 2
+  | `Hex
+  | `Dec ->
+    float_of_string s
+  | `Oct -> float_of_string_radix (String_utils.string_after s 1) 8
 
 (* TODO: once we don't need to be PHP5 compliant, we may want to get rid of
 this octal truncation at the first non-octal digit, and instead throw an error
@@ -57,8 +67,8 @@ either somewhere around here or in the lexer. *)
 let int64_of_octal_opt (s : string) (truncate : bool) : Int64.t option =
   (* If we have a partial result that is strictly larger than this value,
    * then we are in danger of overflowing and should return None *)
-  let limit = Int64.(/) Caml.Int64.max_int (Int64.of_int 8) in
-  let to_int64 c = Int64.of_int @@ int_of_char c - 48 in
+  let limit = Int64.( / ) Caml.Int64.max_int (Int64.of_int 8) in
+  let to_int64 c = Int64.of_int @@ (int_of_char c - 48) in
   let is_octal_digit ch = '0' <= ch && ch <= '7' in
   let rec loop (idx : int) (acc : Int64.t) =
     (* Given a new least significant digit [digit] and an orginal value [base]
@@ -66,16 +76,21 @@ let int64_of_octal_opt (s : string) (truncate : bool) : Int64.t option =
      * [(push 0o133 0o7) = 0o1337]
      *)
     let push base digit =
-      Int64.(+) (Int64.( * ) base (Int64.of_int 8)) digit in
+      Int64.( + ) (Int64.( * ) base (Int64.of_int 8)) digit
+    in
     if idx >= String.length s then
       Some acc
     else if Int64.compare acc limit > 0 then
-      (** In this case we would overflow *)
+      (* In this case we would overflow *)
       None
     else if not (is_octal_digit s.[idx]) then
-      if truncate then Some acc else None
+      if truncate then
+        Some acc
+      else
+        None
     else
-      loop (idx + 1) (push acc (to_int64 s.[idx])) in
+      loop (idx + 1) (push acc (to_int64 s.[idx]))
+  in
   loop 0 Int64.zero
 
 (* Return None if this overflows *)
@@ -85,29 +100,35 @@ let try_type_intlike (s : string) : TV.t option =
     (* Ocaml source: ints.c: parse_sign_and_base treat
        dec form as signed so overflows are properly detected and reported *)
     Option.map (Caml.Int64.of_string_opt s) ~f:(fun v -> TV.Int v)
-  | `Bin | `Hex -> begin
-    (* Ocaml source: ints.c: parse_sign_and_base interprets hex/bin forms as
+  | `Bin
+  | `Hex ->
+    begin
+      (* Ocaml source: ints.c: parse_sign_and_base interprets hex/bin forms as
        unsigned so if the input exceeds Int64.max_int it is converted
        to the signed integer Int64.min_int + input - Int64.max_int - 1.*)
-    match Int64.of_string s with
-    | i ->
-      let input_is_negative = String.get s 0 = '-' in
-      (* treat as overflow if result has changed the sign comparing to input *)
-      if input_is_negative = (i < 0L) then Some (TV.Int i) else None
-    | exception _ -> None
-  end
+      match Int64.of_string s with
+      | i ->
+        let input_is_negative = s.[0] = '-' in
+        (* treat as overflow if result has changed the sign comparing to input *)
+        if input_is_negative = (i < 0L) then
+          Some (TV.Int i)
+        else
+          None
+      | exception _ -> None
+    end
   | `Oct ->
-    Option.map ~f:(fun v -> TV.Int v)
+    Option.map
+      ~f:(fun v -> TV.Int v)
       (int64_of_octal_opt (String_utils.string_after s 1) true)
 
 (* Literal expressions can be converted into values *)
 (* Restrict_keys flag forces keys to be only ints or strings *)
 let rec expr_to_typed_value
-    ?(allow_maps=false)
-    ?(restrict_keys=false)
-    ns (_, expr_) =
+    ?(allow_maps = false) ?(restrict_keys = false) ns ((_, expr_) as expr) =
+  let pos = Tast_annotate.get_pos expr in
   match expr_ with
-  | A.Int s -> begin
+  | A.Int s ->
+    begin
       match try_type_intlike s with
       | Some v -> v
       | None -> TV.Int Caml.Int64.max_int
@@ -119,132 +140,146 @@ let rec expr_to_typed_value
   | A.Float s -> TV.Float (float_of_string s)
   | A.Id (_, id) when id = "NAN" -> TV.Float Float.nan
   | A.Id (_, id) when id = "INF" -> TV.Float Float.infinity
-  | A.Call (_, (_, A.Id (_, "__hhas_adata")), _, [ (_, A.String data) ], [])
-    ->
-      TV.HhasAdata data
+  | A.Call (_, (_, A.Id (_, "__hhas_adata")), _, [(_, A.String data)], []) ->
+    TV.HhasAdata data
   | A.Array fields -> array_to_typed_value ns fields
   | A.Varray (_, fields) -> varray_to_typed_value ns fields
   | A.Darray (_, fields) -> darray_to_typed_value ns fields
   | A.Collection ((_, "vec"), _, fields) ->
-     TV.Vec (List.map fields (value_afield_to_typed_value ns))
-  | A.ValCollection (`Vec, _, el)
-  | A.ValCollection (`Vector, _, el) ->
-     let fields = List.map el ~f:(fun e -> Tast.AFvalue e) in
-     TV.Vec (List.map fields (value_afield_to_typed_value ns))
+    TV.Vec (List.map fields (value_afield_to_typed_value ns), Some pos)
+  | A.ValCollection (A.Vec, _, el)
+  | A.ValCollection (A.Vector, _, el) ->
+    let fields = List.map el ~f:(fun e -> Aast.AFvalue e) in
+    TV.Vec (List.map fields (value_afield_to_typed_value ns), Some pos)
   | A.Collection ((_, "keyset"), _, fields) ->
-    let l = List.fold_left fields
-      ~f:(fun l x -> TVL.add l (keyset_value_afield_to_typed_value ns x))
-      ~init:TVL.empty in
+    let l =
+      List.fold_left
+        fields
+        ~f:(fun l x -> TVL.add l (keyset_value_afield_to_typed_value ns x))
+        ~init:TVL.empty
+    in
     TV.Keyset (TVL.items l)
-  | A.ValCollection (`Keyset, _, el) ->
-    let fields = List.map el ~f:(fun e -> Tast.AFvalue e) in
-    let l = List.fold_left fields
-      ~f:(fun l x -> TVL.add l (keyset_value_afield_to_typed_value ns x))
-      ~init:TVL.empty in
+  | A.ValCollection (A.Keyset, _, el) ->
+    let fields = List.map el ~f:(fun e -> Aast.AFvalue e) in
+    let l =
+      List.fold_left
+        fields
+        ~f:(fun l x -> TVL.add l (keyset_value_afield_to_typed_value ns x))
+        ~init:TVL.empty
+    in
     TV.Keyset (TVL.items l)
   | A.Collection ((_, kind), _, fields)
-    when kind = "dict" ||
-      (allow_maps &&
-      (SU.cmp ~case_sensitive:false ~ignore_ns:true kind "Map" ||
-      SU.cmp ~case_sensitive:false ~ignore_ns:true kind "ImmMap")) ->
+    when kind = "dict"
+         || allow_maps
+            && ( SU.cmp ~case_sensitive:false ~ignore_ns:true kind "Map"
+               || SU.cmp ~case_sensitive:false ~ignore_ns:true kind "ImmMap" )
+    ->
     let values =
       List.map fields ~f:(afield_to_typed_value_pair ~restrict_keys ns)
     in
     let d = update_duplicates_in_map values in
-    TV.Dict d
-  | A.KeyValCollection (`Dict, _, fields)
-  | A.KeyValCollection (`Map, _, fields)
-  | A.KeyValCollection (`ImmMap, _, fields) ->
-    let fields = List.map fields ~f:(fun (e1, e2) -> Tast.AFkvalue (e1, e2)) in
+    TV.Dict (d, Some pos)
+  | A.KeyValCollection (A.Dict, _, fields)
+  | A.KeyValCollection (A.Map, _, fields)
+  | A.KeyValCollection (A.ImmMap, _, fields) ->
+    let fields = List.map fields ~f:(fun (e1, e2) -> Aast.AFkvalue (e1, e2)) in
     let values =
-      List.map fields ~f:(afield_to_typed_value_pair ~restrict_keys ns) in
-    let d = update_duplicates_in_map values in
-    TV.Dict d
-  | A.Collection ((_, kind), _, fields)
-    when allow_maps &&
-      (SU.cmp ~case_sensitive:false ~ignore_ns:true kind "Set" ||
-      SU.cmp ~case_sensitive:false ~ignore_ns:true kind "ImmSet") ->
-    let values = List.map fields ~f:(set_afield_to_typed_value_pair ns) in
-    let d = update_duplicates_in_map values in
-    TV.Dict d
-  | A.ValCollection (`Set, _, el)
-  | A.ValCollection (`ImmSet, _, el) ->
-    let fields = List.map el ~f:(fun e -> Tast.AFvalue e) in
-    let values =
-      List.map fields ~f:(set_afield_to_typed_value_pair ns)
+      List.map fields ~f:(afield_to_typed_value_pair ~restrict_keys ns)
     in
     let d = update_duplicates_in_map values in
-    TV.Dict d
-  | A.Shape fields ->
-    shape_to_typed_value ns fields
-  | A.Class_const (cid, id) ->
-    class_const_to_typed_value ns cid id
-  | A.BracedExpr e ->
+    TV.Dict (d, Some pos)
+  | A.Collection ((_, kind), _, fields)
+    when allow_maps
+         && ( SU.cmp ~case_sensitive:false ~ignore_ns:true kind "Set"
+            || SU.cmp ~case_sensitive:false ~ignore_ns:true kind "ImmSet" ) ->
+    let values = List.map fields ~f:(set_afield_to_typed_value_pair ns) in
+    let d = update_duplicates_in_map values in
+    TV.Dict (d, Some pos)
+  | A.ValCollection (A.Set, _, el)
+  | A.ValCollection (A.ImmSet, _, el) ->
+    let fields = List.map el ~f:(fun e -> Aast.AFvalue e) in
+    let values = List.map fields ~f:(set_afield_to_typed_value_pair ns) in
+    let d = update_duplicates_in_map values in
+    TV.Dict (d, Some pos)
+  | A.Shape fields -> shape_to_typed_value ns fields
+  | A.Class_const (cid, id) -> class_const_to_typed_value ns cid id
+  | A.BracedExpr e -> expr_to_typed_value ~allow_maps ~restrict_keys ns e
+  | A.Id _
+  | A.Class_get _ ->
+    raise UserDefinedConstant
+  | A.As (e, (_, A.Hlike _), _nullable) ->
     expr_to_typed_value ~allow_maps ~restrict_keys ns e
-  | A.Id _ | A.Class_get _ -> raise UserDefinedConstant
-  | _ ->
-    raise NotLiteral
+  | _ -> raise NotLiteral
 
 and update_duplicates_in_map kvs =
   (* map key -> (the latest value for the given key) *)
-  let unique_values_map = List.fold_left kvs ~init:TV.TVMap.empty
-    ~f:(fun m (k, v) -> TV.TVMap.add k v m)
+  let unique_values_map =
+    List.fold_left kvs ~init:TV.TVMap.empty ~f:(fun m (k, v) ->
+        TV.TVMap.add k v m)
   in
-  let values, _ = List.fold_left kvs ~init:([], unique_values_map)
-    ~f:(fun (result, uniq_map) (k, _) ->
-      (* map stores the latest value for a key
+  let (values, _) =
+    List.fold_left
+      kvs
+      ~init:([], unique_values_map)
+      ~f:(fun (result, uniq_map) (k, _) ->
+        (* map stores the latest value for a key
          if map has an value for a given key, put value in the result list
          and remove if from the map to ignore similar keys later *)
-      match TV.TVMap.get k uniq_map with
-      | Some v -> (k, v)::result, TV.TVMap.remove k uniq_map
-      | None -> result, uniq_map)
+        match TV.TVMap.get k uniq_map with
+        | Some v -> ((k, v) :: result, TV.TVMap.remove k uniq_map)
+        | None -> (result, uniq_map))
   in
   List.rev values
 
 and class_const_to_typed_value ns cid id =
-  if snd id = SN.Members.mClass
-  then
+  if snd id = SN.Members.mClass then
     let cexpr = class_id_to_class_expr ~resolve_self:true [] cid in
-    begin match cexpr with
-      | Class_id cid ->
-        let fq_id = Hhbc_id.Class.elaborate_id ns cid in
-        TV.String (Hhbc_id.Class.to_raw_string fq_id)
-      | _ -> raise UserDefinedConstant
-    end
-  else raise UserDefinedConstant
+    match cexpr with
+    | Class_id cid ->
+      let fq_id = Hhbc_id.Class.elaborate_id ns cid in
+      TV.String (Hhbc_id.Class.to_raw_string fq_id)
+    | _ -> raise UserDefinedConstant
+  else
+    raise UserDefinedConstant
 
 and array_to_typed_value ns fields =
   let update_max_index newindex maxindex =
     if Int64.compare newindex maxindex >= 0 then
-      Int64.(+) newindex Int64.one else maxindex in
+      Int64.( + ) newindex Int64.one
+    else
+      maxindex
+  in
   let default key value pairs maxindex =
     let k_tv = key_expr_to_typed_value ns key in
-    let maxindex = match k_tv with
-      | TV.Int newindex ->
-        update_max_index newindex maxindex
-      | _ -> maxindex in
-    (k_tv, expr_to_typed_value ns value) :: pairs, maxindex
+    let maxindex =
+      match k_tv with
+      | TV.Int newindex -> update_max_index newindex maxindex
+      | _ -> maxindex
+    in
+    ((k_tv, expr_to_typed_value ns value) :: pairs, maxindex)
   in
-  let pairs, _ =
-    List.fold_left fields ~init:([], Int64.zero)
+  let (pairs, _) =
+    List.fold_left
+      fields
+      ~init:([], Int64.zero)
       ~f:(fun (pairs, maxindex) afield ->
         match afield with
-        | A.AFkvalue (key, value) ->
-          default key value pairs maxindex
+        | A.AFkvalue (key, value) -> default key value pairs maxindex
         | A.AFvalue value ->
-          (TV.Int maxindex, expr_to_typed_value ns value) :: pairs,
-            Int64.(+) maxindex Int64.one)
+          ( (TV.Int maxindex, expr_to_typed_value ns value) :: pairs,
+            Int64.( + ) maxindex Int64.one ))
   in
   let a = update_duplicates_in_map @@ List.rev pairs in
   TV.Array a
 
 and varray_to_typed_value ns fields =
-  let tv_fields = (List.map fields ~f:(expr_to_typed_value ns)) in
+  let tv_fields = List.map fields ~f:(expr_to_typed_value ns) in
   TV.VArray tv_fields
 
 and darray_to_typed_value ns fields =
-  let fields = List.map fields ~f:(fun (v1,v2) ->
-    (key_expr_to_typed_value ns v1, expr_to_typed_value ns v2))
+  let fields =
+    List.map fields ~f:(fun (v1, v2) ->
+        (key_expr_to_typed_value ns v1, expr_to_typed_value ns v2))
   in
   let a = update_duplicates_in_map fields in
   TV.DArray a
@@ -253,36 +288,41 @@ and shape_to_typed_value ns fields =
   let aux (sf, expr) =
     let key =
       match sf with
-      | Ast.SFlit_int (pos, str) ->
+      | Ast_defs.SFlit_int (pos, str) ->
         begin
-          match expr_to_typed_value ns (Tast_annotate.with_pos pos (A.Int str)) with
+          match
+            expr_to_typed_value ns (Tast_annotate.with_pos pos (A.Int str))
+          with
           | TV.Int _ as tv -> tv
           | _ -> failwith (str ^ " is not a valid integer index")
         end
-      | Ast.SFlit_str id ->
-        TV.String (snd id)
-      | Ast.SFclass_const (class_id, id) ->
-        class_const_to_typed_value ns (Tast_annotate.make (A.CI class_id)) id in
-    (key, expr_to_typed_value ns expr) in
+      | Ast_defs.SFlit_str id -> TV.String (snd id)
+      | Ast_defs.SFclass_const (class_id, id) ->
+        class_const_to_typed_value ns (Tast_annotate.make (A.CI class_id)) id
+    in
+    (key, expr_to_typed_value ns expr)
+  in
   let a = List.map fields ~f:aux in
   TV.DArray a
 
-and key_expr_to_typed_value ?(restrict_keys=false) ns expr =
+and key_expr_to_typed_value ?(restrict_keys = false) ns expr =
   let tv = expr_to_typed_value ns expr in
   match tv with
-  | TV.Int _ | TV.String _ -> tv
+  | TV.Int _
+  | TV.String _ ->
+    tv
   | _ when restrict_keys || hack_arr_compat_notices () -> raise NotLiteral
-  | _ -> match TV.cast_to_arraykey tv with
+  | _ ->
+    (match TV.cast_to_arraykey tv with
     | Some tv -> tv
-    | None -> raise NotLiteral
+    | None -> raise NotLiteral)
 
-and afield_to_typed_value_pair ?(restrict_keys=false) ns afield =
+and afield_to_typed_value_pair ?(restrict_keys = false) ns afield =
   match afield with
-  | A.AFvalue (_value) ->
-    failwith "afield_to_typed_value_pair: unexpected value"
+  | A.AFvalue _value -> failwith "afield_to_typed_value_pair: unexpected value"
   | A.AFkvalue (key, value) ->
-    (key_expr_to_typed_value ~restrict_keys ns key,
-      expr_to_typed_value ns value)
+    ( key_expr_to_typed_value ~restrict_keys ns key,
+      expr_to_typed_value ns value )
 
 and value_afield_to_typed_value ns afield =
   match afield with
@@ -292,20 +332,25 @@ and value_afield_to_typed_value ns afield =
 
 and keyset_value_afield_to_typed_value ns afield =
   let tv = value_afield_to_typed_value ns afield in
-  begin match tv with
-  | TV.Int _ | TV.String _ -> ()
-  | _ -> raise NotLiteral end;
+  begin
+    match tv with
+    | TV.Int _
+    | TV.String _ ->
+      ()
+    | _ -> raise NotLiteral
+  end;
   tv
 
 and set_afield_to_typed_value_pair ns afield =
   match afield with
-  | A.AFvalue (value) ->
-     let tv = key_expr_to_typed_value ~restrict_keys:true ns value
-     in (tv, tv)
+  | A.AFvalue value ->
+    let tv = key_expr_to_typed_value ~restrict_keys:true ns value in
+    (tv, tv)
   | A.AFkvalue (_, _) ->
     failwith "set_afield_to_typed_value_pair: unexpected key=>value"
 
-let expr_to_opt_typed_value ?(restrict_keys=false) ?(allow_maps=false) ns e =
+let expr_to_opt_typed_value ?(restrict_keys = false) ?(allow_maps = false) ns e
+    =
   match expr_to_typed_value ~restrict_keys ~allow_maps ns e with
   | x -> Some x
   | exception (NotLiteral | UserDefinedConstant) -> None
@@ -326,11 +371,13 @@ let rec value_to_expr_ p v =
   | TV.Array pairs -> A.Array (List.map pairs (value_pair_to_afield p))
   | TV.VArray values -> A.Varray (None, List.map values (value_to_expr p))
   | TV.DArray pairs ->
-     A.Darray (None, List.map pairs (fun (v1,v2) -> (value_to_expr p v1, value_to_expr p v2)))
+    A.Darray
+      ( None,
+        List.map pairs (fun (v1, v2) ->
+            (value_to_expr p v1, value_to_expr p v2)) )
   | TV.Dict _ -> failwith "value_to_expr: dict NYI"
 
-and value_to_expr p v =
-  Tast_annotate.make (value_to_expr_ p v)
+and value_to_expr p v = Tast_annotate.make (value_to_expr_ p v)
 
 and value_pair_to_afield p (v1, v2) =
   A.AFkvalue (value_to_expr p v1, value_to_expr p v2)
@@ -339,23 +386,23 @@ and value_pair_to_afield p (v1, v2) =
  * Return None if we can't or won't determine the result *)
 let unop_on_value unop v =
   match unop with
-  | Ast.Unot -> TV.not v
-  | Ast.Uplus -> TV.add TV.zero v
-  | Ast.Uminus -> TV.neg v
-  | Ast.Utild -> TV.bitwise_not v
-  | Ast.Usilence -> Some v
+  | Ast_defs.Unot -> TV.not v
+  | Ast_defs.Uplus -> TV.add TV.zero v
+  | Ast_defs.Uminus -> TV.neg v
+  | Ast_defs.Utild -> TV.bitwise_not v
+  | Ast_defs.Usilence -> Some v
   | _ -> None
 
 (* Likewise for binary operations *)
 let binop_on_values binop v1 v2 =
   match binop with
-  | Ast.Dot -> TV.concat v1 v2
-  | Ast.Plus -> TV.add v1 v2
-  | Ast.Minus -> TV.sub v1 v2
-  | Ast.Star -> TV.mul v1 v2
-  | Ast.Ltlt -> TV.shift_left v1 v2
-  | Ast.Slash -> TV.div v1 v2
-  | Ast.Bar -> TV.bitwise_or v1 v2
+  | Ast_defs.Dot -> TV.concat v1 v2
+  | Ast_defs.Plus -> TV.add v1 v2
+  | Ast_defs.Minus -> TV.sub v1 v2
+  | Ast_defs.Star -> TV.mul v1 v2
+  | Ast_defs.Ltlt -> TV.shift_left v1 v2
+  | Ast_defs.Slash -> TV.div v1 v2
+  | Ast_defs.Bar -> TV.bitwise_or v1 v2
   (* temporarily disabled *)
   (*
   | A.Gtgt -> TV.shift_right v1 v2
@@ -381,22 +428,19 @@ let binop_on_values binop v1 v2 =
 (* try to apply type cast to a value *)
 let cast_value hint v =
   match hint with
-  | A.Happly((_, id), []) ->
-    if id = SN.Typehints.int || id = SN.Typehints.integer
-    then
+  | A.Happly ((_, id), []) ->
+    if id = SN.Typehints.int || id = SN.Typehints.integer then
       (* temporarily disabled *)
       (* TV.cast_to_int v *)
       None
+    else if id = SN.Typehints.bool || id = SN.Typehints.boolean then
+      TV.cast_to_bool v
+    else if id = SN.Typehints.string then
+      TV.cast_to_string v
+    else if id = SN.Typehints.double || id = SN.Typehints.float then
+      TV.cast_to_float v
     else
-    if id = SN.Typehints.bool || id = SN.Typehints.boolean
-    then TV.cast_to_bool v
-    else
-    if id = SN.Typehints.string
-    then TV.cast_to_string v
-    else if id = SN.Typehints.double ||
-            id = SN.Typehints.float
-    then TV.cast_to_float v
-    else None
+      None
   | _ -> None
 
 (* We build a visitor over the syntax tree that recursively transforms unary and
@@ -407,77 +451,86 @@ let cast_value hint v =
  * In future we might try and maintain typed values and avoid going back to
  * expressions. *)
 let folder_visitor =
-object (self)
-  inherit [_] A.endo as super
+  object (self)
+    inherit [_] A.endo as super
 
-  method! on_class_ _env cd =
-    super#on_class_ cd.A.c_namespace cd
+    method on_'ex _ ex = ex
 
-  method! on_fun_ _env fd =
-    super#on_fun_ fd.A.f_namespace fd
+    method on_'fb _ fb = fb
 
-  (* Type casts. cast_expr is A.Cast(hint, e) *)
-  method! on_Cast env cast_expr hint e =
-    let enew = self#on_expr env e in
-    let default () =
-      if phys_equal enew e
-      then cast_expr
-      else A.Cast(hint, enew) in
-    match expr_to_opt_typed_value env enew with
-    | None -> default ()
-    | Some v ->
-      match cast_value (snd hint) v with
+    method on_'en _ en = en
+
+    method on_'hi _ hi = hi
+
+    method! on_class_ _env cd = super#on_class_ cd.A.c_namespace cd
+
+    method! on_fun_ _env fd = super#on_fun_ fd.A.f_namespace fd
+
+    (* Type casts. cast_expr is A.Cast(hint, e) *)
+    method! on_Cast env cast_expr hint e =
+      let enew = self#on_expr env e in
+      let default () =
+        if phys_equal enew e then
+          cast_expr
+        else
+          A.Cast (hint, enew)
+      in
+      match expr_to_opt_typed_value env enew with
       | None -> default ()
-      | Some v -> value_to_expr_ (fst e) v
-
-  (* Unary operations. unop_expr is A.Unop(unop, e) *)
-  method! on_Unop env unop_expr unop e =
-    let enew = self#on_expr env e in
-    let default () =
-      if phys_equal enew e
-      then unop_expr
-      else A.Unop (unop, enew) in
-    match expr_to_opt_typed_value env enew with
-    | None -> default ()
-    | Some v ->
-      match unop_on_value unop v with
-      | None -> default ()
-      | Some result -> value_to_expr_ (fst e) result
-
-  (* Binary operations. binop_expr is A.Binop (binop, e1, e2) *)
-  method! on_Binop env binop_expr binop e1 e2 =
-    let e1new = self#on_expr env e1 in
-    let e2new = self#on_expr env e2 in
-    let default () =
-      if phys_equal e1new e1 && phys_equal e2new e2
-      then binop_expr
-      else (A.Binop (binop, e1new, e2new)) in
-    match expr_to_opt_typed_value env e1new,
-          expr_to_opt_typed_value env e2new with
-    | Some v1, Some v2 ->
-      begin
-        match binop_on_values binop v1 v2 with
+      | Some v ->
+        (match cast_value (snd hint) v with
         | None -> default ()
-        | Some result -> value_to_expr_ (fst e1) result
-      end
-    | _, _ -> default ()
-end
+        | Some v -> value_to_expr_ (fst e) v)
 
-let fold_expr ns e =
-  folder_visitor#on_expr ns e
+    (* Unary operations. unop_expr is A.Unop(unop, e) *)
+    method! on_Unop env unop_expr unop e =
+      let enew = self#on_expr env e in
+      let default () =
+        if phys_equal enew e then
+          unop_expr
+        else
+          A.Unop (unop, enew)
+      in
+      match expr_to_opt_typed_value env enew with
+      | None -> default ()
+      | Some v ->
+        (match unop_on_value unop v with
+        | None -> default ()
+        | Some result -> value_to_expr_ (fst e) result)
+
+    (* Binary operations. binop_expr is A.Binop (binop, e1, e2) *)
+    method! on_Binop env binop_expr binop e1 e2 =
+      let e1new = self#on_expr env e1 in
+      let e2new = self#on_expr env e2 in
+      let default () =
+        if phys_equal e1new e1 && phys_equal e2new e2 then
+          binop_expr
+        else
+          A.Binop (binop, e1new, e2new)
+      in
+      match
+        (expr_to_opt_typed_value env e1new, expr_to_opt_typed_value env e2new)
+      with
+      | (Some v1, Some v2) ->
+        begin
+          match binop_on_values binop v1 v2 with
+          | None -> default ()
+          | Some result -> value_to_expr_ (fst e1) result
+        end
+      | (_, _) -> default ()
+  end
+
+let fold_expr ns e = folder_visitor#on_expr ns e
 
 let fold_program p =
-  folder_visitor#on_program Namespace_env.empty_with_default_popt p
+  folder_visitor#on_program Namespace_env.empty_with_default p
 
 let literals_from_exprs_with_index ns exprs =
   try
     List.concat_mapi exprs (fun index e ->
-      [TV.Int (Int64.of_int index); expr_to_typed_value ns (fold_expr ns e)])
-  with
-  | NotLiteral -> failwith "literals_from_exprs_with_index: not literal"
+        [TV.Int (Int64.of_int index); expr_to_typed_value ns (fold_expr ns e)])
+  with NotLiteral -> failwith "literals_from_exprs_with_index: not literal"
 
 let literals_from_exprs ns exprs =
-  try
-    List.map exprs ~f:(fun e -> expr_to_typed_value ns (fold_expr ns e))
-  with
-  | NotLiteral -> failwith "literals_from_exprs: not literal"
+  try List.map exprs ~f:(fun e -> expr_to_typed_value ns (fold_expr ns e))
+  with NotLiteral -> failwith "literals_from_exprs: not literal"

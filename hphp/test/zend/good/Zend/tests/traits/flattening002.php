@@ -1,5 +1,4 @@
 <?hh
-error_reporting(E_ALL);
 
 class Base {
    public function sayHello() {
@@ -17,6 +16,10 @@ trait SayWorld {
 class MyHelloWorld extends Base {
    use SayWorld;
 }
+<<__EntryPoint>>
+function main_entry(): void {
+  error_reporting(E_ALL);
 
-$o = new MyHelloWorld();
-$o->sayHello();
+  $o = new MyHelloWorld();
+  $o->sayHello();
+}

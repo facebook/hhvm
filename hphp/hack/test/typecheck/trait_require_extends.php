@@ -5,14 +5,14 @@ trait T {
 }
 
 class X {
-  /* HH_FIXME[4110] */
+  /* HH_FIXME[4336] */
   public static function foo(): X {
 
   }
 }
 
 class A extends X {
-  /* HH_FIXME[4110] */
+  /* HH_FIXME[4336] */
   public static function foo(): A {
 
   }

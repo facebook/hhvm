@@ -5,12 +5,15 @@
 
 function dump($exp) {
   $ret = print_r($exp, true);
+  $count = -1;
   $ret = preg_replace_callback(
     '/\d+\.\d+/',
     function ($matches) {
       return sprintf('%.3f', $matches[0]);
     },
-    $ret
+    $ret,
+    -1,
+    inout $count
   );
   echo "$ret\n";
 }

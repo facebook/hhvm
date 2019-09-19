@@ -1,0 +1,6 @@
+File "conditional_type_constants.php", line 14, characters 5-17:
+Cannot invoke conditionally reactive function in reactive context, because at least one reactivity condition is not met. (Typing[4237])
+File "conditional_type_constants.php", line 13, characters 30-40:
+Argument type must be a subtype of \MyRxConditionalClass, now ~this::TTest#\IRxMyTestClass::TTest.
+File "conditional_type_constants.php", line 18, characters 26-28:
+This is the function declaration

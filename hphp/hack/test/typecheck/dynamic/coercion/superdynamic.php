@@ -4,7 +4,7 @@ function foo<T super dynamic>(): T {
   return 5 as dynamic;
 }
 
-function bar(): ?dynamic {
+function bar(): dynamic {
   return 5;
 }
 

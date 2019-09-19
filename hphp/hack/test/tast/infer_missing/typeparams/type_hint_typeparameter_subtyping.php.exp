@@ -1,0 +1,88 @@
+File "type_hint_typeparameter_subtyping.php", line 5, characters 5-17:
+  function_pos File "type_hint_typeparameter_subtyping.php", line 4, characters 10-10:
+  genv 
+    params 
+      +$x[#0] D<#2051, #2052>
+    return 
+      return_explicit true
+      return_type void
+  lenv 
+    local_mutability 
+      +$x[#0] immutable
+    per_cont_env 
+      Next 
+        local_types 
+          +$x[#0] D<#2051, #2052>
+  tvenv 
+    +#2051
+      appears_contravariantly true
+      appears_covariantly true
+      eager_solve_fail false
+      lower_bounds {}
+      type_constants {}
+      tyvar_pos File "type_hint_typeparameter_subtyping.php", line 4, characters 12-12:
+      upper_bounds {int}
+    +#2052
+      appears_contravariantly true
+      appears_covariantly true
+      eager_solve_fail false
+      lower_bounds {string}
+      type_constants {}
+      tyvar_pos File "type_hint_typeparameter_subtyping.php", line 4, characters 12-12:
+      upper_bounds {}
+  tyvars_stack [[],[],[#2052,#2051]]
+Errors:
+  [4:12-13] The type D expects 2 type parameter(s)
+  [3:7-8] Definition is here
+[(Class
+    { c_span = [3:1-39]; c_annotation = (); c_mode = <opaque>;
+      c_final = false; c_is_xhp = false; c_kind = Cnormal;
+      c_name = ([3:7-8], "\\D");
+      c_tparams =
+      { c_tparam_list =
+        [{ tp_variance = Invariant; tp_name = ([3:9-11], "Ta");
+           tp_constraints = [(Constraint_as, ([3:15-18], (Hprim Tint)))];
+           tp_reified = Erased; tp_user_attributes = [] };
+          { tp_variance = Invariant; tp_name = ([3:20-22], "Tb");
+            tp_constraints =
+            [(Constraint_super, ([3:29-35], (Hprim Tstring)))];
+            tp_reified = Erased; tp_user_attributes = [] }
+          ];
+        c_tparam_constraints = <opaque> };
+      c_extends = []; c_uses = []; c_use_as_alias = [];
+      c_insteadof_alias = []; c_method_redeclarations = [];
+      c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
+      c_implements = []; c_where_constraints = []; c_consts = [];
+      c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = [];
+      c_xhp_children = []; c_xhp_attrs = []; c_namespace = <opaque>;
+      c_user_attributes = []; c_file_attributes = []; c_enum = None;
+      c_pu_enums = []; c_doc_comment = None });
+  (Fun
+     { f_span = [4:1-6:2]; f_annotation = (); f_mode = <opaque>;
+       f_ret = ((void), (Some ([4:19-23], (Hprim Tvoid))));
+       f_name = ([4:10-11], "\\g"); f_tparams = []; f_where_constraints = [];
+       f_variadic = FVnonVariadic;
+       f_params =
+       [{ param_annotation = ([4:14-16], D<nothing, string>);
+          param_type_hint =
+          ((D<nothing, string>),
+           (Some ([4:12-13], (Happly (([4:12-13], "\\D"), [])))));
+          param_is_reference = false; param_is_variadic = false;
+          param_pos = [4:14-16]; param_name = "$x"; param_expr = None;
+          param_callconv = None; param_user_attributes = [];
+          param_visibility = None }
+         ];
+       f_body =
+       { fb_ast =
+         [([5:5-19],
+           (Expr
+              (([5:5-18], nothing),
+               (Call (Cnormal,
+                  (([5:5-16], _), (Id ([5:5-16], "\\hh_show_env"))), 
+                  [], [], [])))))
+           ];
+         fb_annotation = No unsafe blocks };
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
+       f_static = false })
+  ]

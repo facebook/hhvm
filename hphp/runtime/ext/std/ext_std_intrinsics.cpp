@@ -14,6 +14,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/request-tracing.h"
 #include "hphp/runtime/base/surprise-flags.h"
@@ -48,7 +49,7 @@ TypedValue HHVM_FUNCTION(dummy_varr_or_darr_builtin, const Variant& var) {
     if (arr.isVecOrVArray() ||
         arr.isDictOrDArray()) return tvReturn(arr);
   }
-  return tvReturn(staticEmptyVArray());
+  return tvReturn(ArrayData::CreateVArray());
 }
 
 TypedValue HHVM_FUNCTION(dummy_arraylike_builtin, const Variant& var) {
@@ -56,7 +57,7 @@ TypedValue HHVM_FUNCTION(dummy_arraylike_builtin, const Variant& var) {
     auto const& arr = var.asCArrRef();
     return tvReturn(arr);
   }
-  return tvReturn(staticEmptyKeysetArray());
+  return tvReturn(ArrayData::CreateKeyset());
 }
 
 Array HHVM_FUNCTION(dummy_array_builtin, const Array& arr) {
@@ -157,14 +158,97 @@ void HHVM_FUNCTION(
   g.finish(from_micros(end_us));
 }
 
+static String HHVM_STATIC_METHOD(ReffyNativeMeth, meth, VRefParam& i) {
+  String ret = "Got: ";
+  ret += i.toInt64();
+  i.assignIfRef(i.toInt64() * i.toInt64());
+  return ret;
+}
+
 void HHVM_FUNCTION(hhbbc_fail_verification) {
   g_context->write("PASS\n", 5);
+}
+
+/*
+ * function builtin_io(
+ *   string $s,
+ *   inout string $str,
+ *   inout int $num,
+ *   int $i,
+ *   inout object $obj
+ *   object $o,
+ *   mixed $m,
+ *   inout mixed $mix,
+ *   bool retOrig,
+ *   <<__OutOnly("KindOfBoolean")>> inout mixed $out1,
+ *   <<__OutOnly("KindOfArray")>> inout mixed $out2,
+ *   <<__OutOnly("KindOfObject")>> inout mixed $out3,
+ * ): array;
+ */
+Array HHVM_FUNCTION(
+  builtin_io,
+  StringArg s,
+  String& str,
+  int64_t& num,
+  int i,
+  Object& obj,
+  ObjectArg o,
+  const Variant& m,
+  Variant& mix,
+  bool retOrig,
+  bool& outBool,
+  Array& outArr,
+  Variant& outObj
+) {
+  auto const orig = retOrig
+    ? make_packed_array(s.get(), str, num, i, obj, o.get(), m, mix)
+    : Array::Create();
+
+  str += ";; IN =\"";
+  str += StrNR{s.get()};
+  str += "\"";
+
+  num = num + i * i;
+
+  if (retOrig) mix = obj;
+  else         mix = m;
+
+  obj = Object{o.get()};
+
+  outArr = retOrig
+    ? make_packed_array(outBool, outArr, outObj)
+    : Array::Create();
+  outBool = true;
+  outObj = SystemLib::AllocStdClassObject();
+
+  return orig;
+}
+
+int64_t HHVM_FUNCTION(
+  builtin_io_foldable,
+  int64_t a,
+  int64_t& b,
+  int64_t& c,
+  int64_t& d
+) {
+  auto const t1 = b * c * d;
+  auto const t2 = a * c * d;
+  auto const t3 = a * b * d;
+  auto const t4 = a * b * c;
+  b = t2;
+  c = t3;
+  d = t4;
+  return t1;
 }
 
 }
 
 void StandardExtension::initIntrinsics() {
   if (!RuntimeOption::EnableIntrinsicsExtension) return;
+
+  HHVM_FALIAS(__hhvm_intrinsics\\builtin_io, builtin_io);
+  HHVM_FALIAS(__hhvm_intrinsics\\builtin_io_no_fca, builtin_io);
+  HHVM_FALIAS(__hhvm_intrinsics\\builtin_io_foldable, builtin_io_foldable);
 
   HHVM_FALIAS(__hhvm_intrinsics\\trigger_oom, trigger_oom);
   HHVM_FALIAS(__hhvm_intrinsics\\launder_value, launder_value);
@@ -187,6 +271,9 @@ void StandardExtension::initIntrinsics() {
 
   HHVM_FALIAS(__hhvm_intrinsics\\hhbbc_fail_verification,
               hhbbc_fail_verification);
+
+  HHVM_STATIC_MALIAS(__hhvm_intrinsics\\ReffyNativeMeth, meth,
+                     ReffyNativeMeth, meth);
 
   loadSystemlib("std_intrinsics");
 }

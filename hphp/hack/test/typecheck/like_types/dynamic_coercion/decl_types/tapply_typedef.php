@@ -6,7 +6,6 @@ function dyn(): dynamic { return 4; }
 type X = int;
 newtype Y = int;
 
-// TODO(T45690473): being overly conservative in this case
 function f(): X {
   return dyn(); // error
 }

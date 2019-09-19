@@ -164,7 +164,13 @@ bool builtin_defined(ISS& env, const bc::FCallBuiltin& op) {
 }
 
 bool builtin_function_exists(ISS& env, const bc::FCallBuiltin& op) {
-  return handle_function_exists(env, op.arg1, true);
+  if (op.arg1 < 1 || op.arg1 > 2) return false;
+  if (!handle_function_exists(env, topT(env, op.arg1 - 1))) return false;
+
+  constprop(env);
+  for (int i = 0; i < op.arg1; i++) popC(env);
+  push(env, TTrue);
+  return true;
 }
 
 bool handle_oodecl_exists(ISS& env,
@@ -345,10 +351,9 @@ ArrayData* impl_type_structure_opts(ISS& env, const bc::FCallBuiltin& op,
   auto const cns_sd = cns_name->m_data.pstr;
   if (!cls_or_obj) {
     if (auto const last = op_from_slot(env, 1)) {
-      if (last->op == Op::ClsRefName) {
+      if (last->op == Op::ClassName) {
         if (auto const prev = op_from_slot(env, 1, 1)) {
-          if (prev->op == Op::LateBoundCls &&
-              last->ClsRefName.slot == prev->LateBoundCls.slot) {
+          if (prev->op == Op::LateBoundCls) {
             if (!env.ctx.cls) return fail();
             return result(env.index.resolve_class(env.ctx.cls), cns_sd, true);
           }
@@ -435,7 +440,7 @@ bool builtin_type_structure_classname(ISS& env, const bc::FCallBuiltin& op) {
 #undef X
 
 bool handle_builtin(ISS& env, const bc::FCallBuiltin& op) {
-#define X(x, y) if (op.str3->isame(s_##x.get())) return builtin_##x(env, op);
+#define X(x, y) if (op.str4->isame(s_##x.get())) return builtin_##x(env, op);
   SPECIAL_BUILTINS
 #undef X
 
@@ -449,15 +454,50 @@ bool handle_builtin(ISS& env, const bc::FCallBuiltin& op) {
 namespace interp_step {
 
 void in(ISS& env, const bc::FCallBuiltin& op) {
-  auto const name = op.str3;
+  auto const name = op.str4;
   auto const func = env.index.resolve_func(env.ctx, name);
 
   if (options.ConstantFoldBuiltins && func.isFoldable()) {
     assertx(func.exactFunc());
-    if (auto val = const_fold(env, op.arg1, *func.exactFunc())) {
+    if (auto val = const_fold(env, op.arg1, 0, *func.exactFunc(), true)) {
       constprop(env);
-      discard(env, op.arg1);
-      return push(env, std::move(*val));
+
+      // If there's no in-out parameters, we're done and can just push
+      // the result.
+      if (!op.arg3) {
+        discard(env, op.arg1);
+        return push(env, std::move(*val));
+      }
+
+      // Otherwise what we got from evaluating the function is
+      // actually a tuple of all the results. We need to extract the
+      // values out of the tuple and push them onto the stack in their
+      // proper order.
+      auto const v = tv(*val);
+      assertx(v);
+
+      assertx(tvIsVecOrVArray(*v));
+      auto const ad = v->m_data.parr;
+      assertx(ad->isStatic());
+      assertx(ad->size() == op.arg3 + 1);
+
+      BytecodeVec repl;
+      // Pop the arguments
+      for (uint32_t i = 0; i < op.arg1; ++i) {
+        repl.push_back(bc::PopC {});
+      }
+      // Pop the placeholder uninit values
+      for (uint32_t i = 0; i < op.arg3; ++i) {
+        repl.push_back(bc::PopU {});
+      }
+      // Push the in-out returns
+      for (uint32_t i = 0; i < op.arg3; ++i) {
+        repl.push_back(gen_constant(ad->atPos(op.arg3 - i)));
+      }
+      // And push the actual function return
+      repl.push_back(gen_constant(ad->atPos(0)));
+
+      return reduce(env, std::move(repl));
     }
   }
 
@@ -495,19 +535,30 @@ void in(ISS& env, const bc::FCallBuiltin& op) {
     return *precise_ty;
   }();
 
-  for (auto i = uint32_t{0}; i < num_args; ++i) popT(env);
+  auto const num_out = op.arg3;
+  for (auto i = uint32_t{0}; i < num_args + num_out; ++i) popT(env);
+
+  for (auto i = num_out; i > 0; --i) {
+    if (auto const f = func.exactFunc()) {
+      push(env, native_function_out_type(f, i - 1));
+    } else {
+      push(env, TInitCell);
+    }
+  }
+
   push(env, rt);
 }
 
 }
 
-bool can_emit_builtin(const php::Func* func,
-                      int numArgs, bool hasUnpack) {
-  if (func->attrs & (AttrInterceptable | AttrNoFCallBuiltin |
-                     AttrTakesInOutParams) ||
+bool can_emit_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
+  if (!will_reduce(env) ||
+      any(env.collect.opts & CollectionOpts::Speculating) ||
+      func->attrs & (AttrInterceptable | AttrNoFCallBuiltin) ||
       (func->cls && !(func->attrs & AttrStatic))  ||
       !func->nativeInfo ||
       func->params.size() >= Native::maxFCallBuiltinArgs() ||
+      fca.hasGenerics() ||
       !RuntimeOption::EvalEnableCallBuiltin) {
     return false;
   }
@@ -519,60 +570,46 @@ bool can_emit_builtin(const php::Func* func,
     return false;
   }
 
-  auto variadic = func->params.size() && func->params.back().isVariadic;
+  auto const variadic = func->params.size() && func->params.back().isVariadic;
+  auto const concrete_params = func->params.size() - (variadic ? 1 : 0);
 
   // Only allowed to overrun the signature if we have somewhere to put it
-  if (numArgs > func->params.size() && !variadic) return false;
+  if (!variadic && (fca.hasUnpack() || fca.numArgs > concrete_params)) {
+    return false;
+  }
 
-  // Don't convert an FCall with unpack unless we're calling a variadic function
-  // with the unpack in the right place to pass it directly.
-  if (hasUnpack &&
-      (!variadic || numArgs != func->params.size())) {
+  // Don't convert an FCall* with unpack unless we're calling a variadic
+  // function with the unpack in the right place to pass it directly.
+  if (variadic && fca.hasUnpack() && fca.numArgs != concrete_params) {
     return false;
   }
 
   // Don't convert to FCallBuiltin if there are too many variadic args.
-  if (variadic && !hasUnpack &&
-      numArgs - func->params.size() + 1 > ArrayData::MaxElemsOnStack) {
+  if (variadic && !fca.hasUnpack() &&
+      fca.numArgs - concrete_params > ArrayData::MaxElemsOnStack) {
     return false;
   }
 
-  auto const allowDoubleArgs = Native::allowFCallBuiltinDoubles();
-
-  if (!allowDoubleArgs && func->nativeInfo->returnType == KindOfDouble) {
-    return false;
-  }
-
-  auto const concrete_params = func->params.size() - (variadic ? 1 : 0);
-
-  for (int i = 0; i < concrete_params; i++) {
+  // Check for missing non-optional arguments.
+  for (int i = fca.numArgs; i < concrete_params; i++) {
     auto const& pi = func->params[i];
-    if (!allowDoubleArgs && pi.builtinType == KindOfDouble) {
+    if (pi.defaultValue.m_type == KindOfUninit) {
       return false;
-    }
-    if (i >= numArgs) {
-      if (pi.isVariadic) continue;
-      if (pi.defaultValue.m_type == KindOfUninit) {
-        return false;
-      }
     }
   }
 
   return true;
 }
 
-void finish_builtin(ISS& env,
-                    const php::Func* func,
-                    uint32_t numArgs,
-                    bool unpack) {
+void finish_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
   BytecodeVec repl;
-  assert(!unpack ||
-         (numArgs + 1 == func->params.size() &&
-          func->params.back().isVariadic));
+  assertx(!fca.hasGenerics());
+  assertx(!fca.hasUnpack() ||
+          (fca.numArgs + 1 == func->params.size() &&
+           func->params.back().isVariadic));
 
-  if (unpack) {
-    ++numArgs;
-  } else {
+  auto numArgs = fca.numInputs();
+  if (!fca.hasUnpack()) {
     for (auto i = numArgs; i < func->params.size(); i++) {
       auto const& pi = func->params[i];
       if (pi.isVariadic) {
@@ -606,35 +643,33 @@ void finish_builtin(ISS& env,
 
   auto const numParams = static_cast<uint32_t>(func->params.size());
   if (func->cls == nullptr) {
-    repl.emplace_back(bc::FCallBuiltin { numParams, numArgs, func->name });
+    repl.emplace_back(
+      bc::FCallBuiltin { numParams, numArgs, fca.numRets - 1, func->name });
   } else {
     assertx(func->attrs & AttrStatic);
     auto const fullname =
       makeStaticString(folly::sformat("{}::{}", func->cls->name, func->name));
-    repl.emplace_back(bc::FCallBuiltin { numParams, numArgs, fullname });
+    repl.emplace_back(
+      bc::FCallBuiltin { numParams, numArgs, fca.numRets - 1, fullname });
   }
-  repl.emplace_back(bc::PopU2 {});
-  repl.emplace_back(bc::PopU2 {});
-  repl.emplace_back(bc::PopU2 {});
+  if (fca.numRets != 1) {
+    repl.emplace_back(bc::PopFrame { fca.numRets });
+  } else {
+    repl.emplace_back(bc::PopU2 {});
+    repl.emplace_back(bc::PopU2 {});
+    repl.emplace_back(bc::PopU2 {});
+  }
 
   reduce(env, std::move(repl));
 }
 
-bool handle_function_exists(ISS& env, int numArgs, bool allowConstProp) {
-  if (numArgs < 1 || numArgs > 2) return false;
-  auto const& name = topT(env, numArgs - 1);
+bool handle_function_exists(ISS& env, const Type& name) {
   if (!name.strictSubtypeOf(TStr)) return false;
   auto const v = tv(name);
   if (!v) return false;
   auto const rfunc = env.index.resolve_func(env.ctx, v->m_data.pstr);
   if (auto const func = rfunc.exactFunc()) {
-    if (is_systemlib_part(*func->unit)) {
-      if (!allowConstProp) return false;
-      constprop(env);
-      for (int i = 0; i < numArgs; i++) popC(env);
-      push(env, TTrue);
-      return true;
-    }
+    if (is_systemlib_part(*func->unit)) return true;
     if (!any(env.collect.opts & CollectionOpts::Inlining)) {
       func->unit->persistent.store(false, std::memory_order_relaxed);
     }
@@ -644,14 +679,17 @@ bool handle_function_exists(ISS& env, int numArgs, bool allowConstProp) {
 
 folly::Optional<Type> const_fold(ISS& env,
                                  uint32_t nArgs,
-                                 const php::Func& phpFunc) {
+                                 uint32_t numExtraInputs,
+                                 const php::Func& phpFunc,
+                                 bool variadicsPacked) {
   assert(phpFunc.attrs & AttrIsFoldable);
 
   std::vector<Cell> args(nArgs);
+  auto const firstArgPos = numExtraInputs + nArgs - 1;
   for (auto i = uint32_t{0}; i < nArgs; ++i) {
-    auto const val = tv(topT(env, i));
+    auto const val = tv(topT(env, firstArgPos - i));
     if (!val || val->m_type == KindOfUninit) return folly::none;
-    args[nArgs - i - 1] = *val;
+    args[i] = *val;
   }
 
   Class* cls = nullptr;
@@ -668,10 +706,10 @@ folly::Optional<Type> const_fold(ISS& env,
 
   if (!func) return folly::none;
 
-  // If the function is variadic, all the variadic parameters are already packed
-  // into an array as the last parameter. invokeFuncFew, however, expects them
-  // to be unpacked, so do so here.
-  if (func->hasVariadicCaptureParam()) {
+  // If the function is variadic and all the variadic parameters are already
+  // packed into an array as the last parameter, we need to unpack them, as
+  // invokeFuncFew expects them to be unpacked.
+  if (func->hasVariadicCaptureParam() && variadicsPacked) {
     if (args.empty()) return folly::none;
     if (!isArrayType(args.back().m_type) && !isVecType(args.back().m_type)) {
       return folly::none;
@@ -692,7 +730,7 @@ folly::Optional<Type> const_fold(ISS& env,
       auto retVal = g_context->invokeFuncFew(
         func, HPHP::ActRec::encodeClass(cls), nullptr,
         args.size(), args.data(),
-        false
+        false, false
       );
 
       assert(cellIsPlausible(retVal));

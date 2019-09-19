@@ -31,7 +31,8 @@ namespace {
 const StaticString
   s_SimpleXMLElement("SimpleXMLElement"),
   s_Closure("Closure"),
-  s_MockClass("__MockClass");
+  s_MockClass("__MockClass"),
+  s_NoFlatten("__NoFlatten");
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -63,6 +64,11 @@ bool is_special_method_name(SString name) {
 
 bool is_mock_class(const php::Class* cls) {
   return cls->userAttributes.count(s_MockClass.get());
+}
+
+bool is_noflatten_trait(const php::Class* cls) {
+  assertx(cls->attrs & AttrTrait);
+  return cls->userAttributes.count(s_NoFlatten.get());
 }
 
 bool is_closure(const php::Class& c) {

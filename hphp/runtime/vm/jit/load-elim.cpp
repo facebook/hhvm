@@ -292,9 +292,7 @@ bool refinable_load_eligible(const IRInstruction& inst) {
     case LdLoc:
     case LdStk:
     case LdMBase:
-    case LdClsRefCls:
     case LdMem:
-    case LdARFuncPtr:
     case LdARCtx:
       assertx(inst.hasTypeParam());
       return true;
@@ -516,14 +514,12 @@ Flags handle_call_effects(Local& env,
   }
 
   /*
-   * Keep types for stack, locals, class-ref slots, and iterators, and throw
-   * away the values.  We are just doing this to avoid extending lifetimes
+   * Keep types for stack, locals, and iterators, and throw away the
+   * values.  We are just doing this to avoid extending lifetimes
    * across php calls, which currently always leads to spilling.
    */
   auto const keep = env.global.ainfo.all_stack          |
-                    env.global.ainfo.all_frame          |
-                    env.global.ainfo.all_clsRefClsSlot  |
-                    env.global.ainfo.all_clsRefTSSlot;
+                    env.global.ainfo.all_frame;
   env.state.avail &= keep;
   for (auto aloc = uint32_t{0};
       aloc < env.global.ainfo.locations.size();
@@ -1272,7 +1268,7 @@ void optimizeLoads(IRUnit& unit) {
       logPerfWarning(
         "optimize_loads_max_iters", 1,
         [&](StructuredLogEntry& cols) {
-          auto const func = unit.context().func;
+          auto const func = unit.context().initSrcKey.func();
           cols.setStr("func", func->fullName()->slice());
           cols.setStr("filename", func->unit()->filepath()->slice());
           cols.setStr("hhir_unit", show(unit));

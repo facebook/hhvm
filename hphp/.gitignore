@@ -46,4 +46,3 @@ TAGS
 tools/gdb/hhvm-gdb
 
 *.merlin
-*_build*

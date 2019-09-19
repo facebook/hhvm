@@ -39,7 +39,7 @@ struct UnitChecker {
   bool checkFuncs();
   bool checkBytecode();
   bool checkMetadata();
-  bool checkStructor(
+  bool checkConstructor(
     const FuncEmitter* structor,
     const PreClassEmitter* preclass
   );
@@ -141,7 +141,7 @@ bool UnitChecker::checkArrays() {
   return ok;
 }
 
-bool UnitChecker::checkStructor(
+bool UnitChecker::checkConstructor(
   const FuncEmitter* structor,
   const PreClassEmitter* preclass
 ) {
@@ -299,11 +299,7 @@ bool UnitChecker::checkPreClasses() {
                       ::tolower);
 
       if (name == std::string("__construct")) {
-        ok &= checkStructor(method, preclass);
-      }
-
-      if (name == std::string("__destruct")) {
-        ok &= checkStructor(method, preclass);
+        ok &= checkConstructor(method, preclass);
       }
     }
   }

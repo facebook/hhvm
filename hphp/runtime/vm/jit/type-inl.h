@@ -124,7 +124,6 @@ inline Type for_const(const StringData* sd) {
 }
 inline Type for_const(const ArrayData* ad) {
   assertx(ad->isStatic());
-  if (ad->isShape()) return TPersistentShape;
   if (ad->isPHPArray()) return Type::StaticArray(ad->kind());
   if (ad->isVecArray()) return TStaticVec;
   if (ad->isDict()) return TStaticDict;
@@ -134,6 +133,7 @@ inline Type for_const(const ArrayData* ad) {
 inline Type for_const(double)        { return TDbl; }
 inline Type for_const(const Func*)   { return TFunc; }
 inline Type for_const(const Class*)  { return TCls; }
+inline Type for_const(const RecordDesc*)  { return TRecDesc; }
 inline Type for_const(ClsMethDataRef) { return TClsMeth; }
 inline Type for_const(ConstCctx)     { return TCctx; }
 inline Type for_const(TCA)           { return TTCA; }
@@ -233,7 +233,7 @@ inline bool Type::isKnownDataType() const {
   assertx(*this <= TGen);
 
   // Some unions correspond to single KindOfs.
-  return subtypeOfAny(TStr, TArr, TVec, TDict, TShape,
+  return subtypeOfAny(TStr, TArr, TVec, TDict,
                       TKeyset, TBoxedCell) || !isUnion();
 }
 
@@ -313,11 +313,6 @@ inline Type Type::cns(const TypedValue& tv) {
         assertx(tv.m_data.parr->isKeyset());
         return type_detail::for_const(tv.m_data.parr);
 
-      case KindOfPersistentShape:
-      case KindOfShape:
-        assertx(tv.m_data.parr->isShape());
-        return type_detail::for_const(tv.m_data.parr);
-
       case KindOfPersistentArray:
       case KindOfArray:
         assertx(tv.m_data.parr->isPHPArray());
@@ -390,10 +385,10 @@ IMPLEMENT_CNS_VAL(TStaticStr,  str,  const StringData*)
 IMPLEMENT_CNS_VAL(TStaticArr,  arr,  const ArrayData*)
 IMPLEMENT_CNS_VAL(TStaticVec,  vec,  const ArrayData*)
 IMPLEMENT_CNS_VAL(TStaticDict, dict, const ArrayData*)
-IMPLEMENT_CNS_VAL(TPersistentShape, shape, const ArrayData*)
 IMPLEMENT_CNS_VAL(TStaticKeyset, keyset, const ArrayData*)
 IMPLEMENT_CNS_VAL(TFunc,       func, const HPHP::Func*)
 IMPLEMENT_CNS_VAL(TCls,        cls,  const Class*)
+IMPLEMENT_CNS_VAL(TRecDesc,    rec,  const RecordDesc*)
 IMPLEMENT_CNS_VAL(TClsMeth,    clsmeth,  ClsMethDataRef)
 IMPLEMENT_CNS_VAL(TCctx,       cctx, ConstCctx)
 IMPLEMENT_CNS_VAL(TTCA,        tca,  jit::TCA)
@@ -432,10 +427,6 @@ inline Type Type::Dict(const RepoAuthType::Array* rat) {
   return Type(TDict, ArraySpec(rat));
 }
 
-inline Type Type::Shape(const RepoAuthType::Array* rat) {
-  return Type(TShape, ArraySpec(rat));
-}
-
 inline Type Type::Keyset(const RepoAuthType::Array* rat) {
   return Type(TKeyset, ArraySpec(rat));
 }
@@ -465,10 +456,6 @@ inline Type Type::StaticVec(const RepoAuthType::Array* rat) {
 
 inline Type Type::StaticDict(const RepoAuthType::Array* rat) {
   return Type(TStaticDict, ArraySpec(rat));
-}
-
-inline Type Type::StaticShape(const RepoAuthType::Array* rat) {
-  return Type(TPersistentShape, ArraySpec(rat));
 }
 
 inline Type Type::StaticKeyset(const RepoAuthType::Array* rat) {

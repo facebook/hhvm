@@ -1,0 +1,24 @@
+File "shape_idx_refine.php", line 10, characters 10-11:
+Invalid return type (Typing[4110])
+File "shape_idx_refine.php", line 6, characters 22-22:
+Expected ~shape('a' => int, ...) because it is an unenforceable type
+File "shape_idx_refine.php", line 6, characters 12-15:
+But got shape(?'a' => int)
+File "shape_idx_refine.php", line 17, characters 10-11:
+Invalid return type (Typing[4110])
+File "shape_idx_refine.php", line 13, characters 28-28:
+Expected ~shape('a' => int, ...) because it is an unenforceable type
+File "shape_idx_refine.php", line 13, characters 12-21:
+But got shape(...)
+File "shape_idx_refine.php", line 22, characters 12-13:
+Invalid return type (Typing[4110])
+File "shape_idx_refine.php", line 20, characters 23-23:
+Expected ~shape('a' => int, ...) because it is an unenforceable type
+File "shape_idx_refine.php", line 20, characters 13-16:
+But got shape(?'a' => int)
+File "shape_idx_refine.php", line 30, characters 12-13:
+Invalid return type (Typing[4110])
+File "shape_idx_refine.php", line 28, characters 29-29:
+Expected ~shape('a' => int, ...) because it is an unenforceable type
+File "shape_idx_refine.php", line 28, characters 13-22:
+But got shape(...)

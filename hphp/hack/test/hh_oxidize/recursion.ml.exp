@@ -1,0 +1,14 @@
+use ocamlrep_derive::OcamlRep;
+use ocamlvalue_macro::Ocamlvalue;
+
+#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+pub enum IntList {
+    Nil,
+    Cons(isize, Box<IntList>),
+}
+
+#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+pub enum NAryTree<A> {
+    Leaf(A),
+    Children(Vec<NAryTree<A>>),
+}

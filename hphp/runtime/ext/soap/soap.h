@@ -23,11 +23,11 @@
 #include <memory>
 #include <vector>
 #include "hphp/runtime/ext/soap/sdl.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/http-client.h"
-#include "hphp/util/lock.h"
 #include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/rds-local.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // defines

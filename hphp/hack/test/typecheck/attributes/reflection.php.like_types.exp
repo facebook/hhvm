@@ -1,0 +1,6 @@
+File "reflection.php", line 18, characters 26-37:
+Invalid argument (Typing[4110])
+File "reflection.hhi", line 77, characters 71-82:
+Expected ~classname<[unresolved]> because it is an unenforceable type
+File "reflection.php", line 8, characters 7-11:
+But got classname<FAttr>; implicitly defined constant ::class is a string that contains the fully qualified name of FAttr

@@ -2,5 +2,5 @@
 
 <<__Rx>>
 function f($x) {
-  $a = $GLOBALS;
+  $a = $GLOBALS['_SERVER'];
 }

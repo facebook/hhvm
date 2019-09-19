@@ -1,7 +1,7 @@
 <?hh
 
 include (__DIR__ . '/redis.inc');
-
+<<__EntryPoint>> function main(): void {
 $redis = NewRedisTestInstance();
 $connect = $redis->connect('127.0.0.1',6379);
 var_dump($connect);
@@ -10,3 +10,4 @@ $result = $redis->zScore('myzset',"one");
 var_dump($result);
 $result = $redis->zScore('myzset',"one3");
 var_dump ($result);
+}

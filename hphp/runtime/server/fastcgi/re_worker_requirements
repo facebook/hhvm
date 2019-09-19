@@ -1,0 +1,22 @@
+{
+    "fastcgi#compile-fastcgi-worker.cpp.o19d01eec,platform007-gcc,v8165034": {
+        "workerSize": "MEDIUM",
+        "platformType": "LINUX"
+    },
+    "fastcgi#compile-fastcgi-server.cpp.o253c9422,platform007-gcc,v8165034": {
+        "workerSize": "MEDIUM",
+        "platformType": "LINUX"
+    },
+    "fastcgi#compile-fastcgi-transport.cpp.o7ca2e7ce,platform007-gcc,v8165034": {
+        "workerSize": "MEDIUM",
+        "platformType": "LINUX"
+    },
+    "fastcgi#compile-fastcgi-session.cpp.ob8302e15,platform007-gcc,v8165034": {
+        "workerSize": "MEDIUM",
+        "platformType": "LINUX"
+    },
+    "fastcgi#compile-fastcgi-server-factory.cpp.o87cac59e,platform007-gcc,v8165034": {
+        "workerSize": "MEDIUM",
+        "platformType": "LINUX"
+    }
+}

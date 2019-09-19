@@ -1,7 +1,5 @@
 <?hh
 
-error_reporting(E_ALL);
-
 trait A {
    public function __construct() {
      echo 'a';
@@ -27,6 +25,11 @@ class Foo {
 	}
 }
 
-$t = new Foo;
-$t->__construct();
+<<__EntryPoint>>
+function main_entry(): void {
 
+  error_reporting(E_ALL);
+
+  $t = new Foo;
+  $t->__construct();
+}

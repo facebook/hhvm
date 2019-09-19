@@ -7,7 +7,7 @@ class ConfigChooser<-TContextProvider, +TResult> {
     private IConfigChooserProcessor<TContextProvider, TResult> $processor,
   ) {}
 
-  /* HH_FIXME[4110] */
+  /* HH_FIXME[4336] */
   public function getValue(TContextProvider $context_provider): TResult {
   }
 }

@@ -113,7 +113,10 @@ const StaticString
   s_reflectionextension("ReflectionExtension"),
   s_type_hint("type_hint"),
   s_type_hint_builtin("type_hint_builtin"),
-  s_type_hint_nullable("type_hint_nullable");
+  s_type_hint_nullable("type_hint_nullable"),
+  s_is_reified("is_reified"),
+  s_is_soft("is_soft"),
+  s_is_warn("is_warn");
 
 Class* Reflection::s_ReflectionExceptionClass = nullptr;
 Class* Reflection::s_ReflectionExtensionClass = nullptr;
@@ -181,7 +184,7 @@ Array HHVM_FUNCTION(hphp_get_extension_info, const String& name) {
 
   ret.set(s_name,      name);
   ret.set(s_version,   ext ? ext->getVersion() : "");
-  ret.set(s_info,      empty_string_variant_ref);
+  ret.set(s_info,      empty_string_tv());
   ret.set(s_ini,       Array::Create());
   ret.set(s_constants, Array::Create());
   ret.set(s_functions, Array::Create());
@@ -513,11 +516,14 @@ void HHVM_FUNCTION(hphp_set_static_property, const String& cls,
   );
   if (!lookup.val) {
     raise_error("Class %s does not have a property named %s",
-                cls.get()->data(), prop.get()->data());
+                sd->data(), prop.get()->data());
   }
   if (!lookup.accessible) {
     raise_error("Invalid access to class %s's property %s",
                 sd->data(), prop.get()->data());
+  }
+  if (lookup.constant) {
+    throw_cannot_modify_static_const_prop(sd->data(), prop.get()->data());
   }
 
   auto const& sprop = class_->staticProperties()[lookup.slot];
@@ -840,6 +846,20 @@ static Array HHVM_METHOD(ReflectionFunctionAbstract, getRetTypeInfo) {
   }
   retTypeInfo.set(s_type_hint, name);
   return retTypeInfo;
+}
+
+static Array HHVM_METHOD(ReflectionFunctionAbstract, getReifiedTypeParamInfo) {
+  auto const func = ReflectionFuncHandle::GetFuncFor(this_);
+  auto const& info = func->getReifiedGenericsInfo();
+  VArrayInit arr(info.m_typeParamInfo.size());
+  for (auto tparam : info.m_typeParamInfo) {
+    DArrayInit tparamArr(3);
+    tparamArr.set(s_is_reified, make_tv<KindOfBoolean>(tparam.m_isReified));
+    tparamArr.set(s_is_soft, make_tv<KindOfBoolean>(tparam.m_isSoft));
+    tparamArr.set(s_is_warn, make_tv<KindOfBoolean>(tparam.m_isWarn));
+    arr.append(tparamArr.toArray());
+  }
+  return arr.toArray();
 }
 
 ALWAYS_INLINE
@@ -1269,6 +1289,7 @@ static Object HHVM_STATIC_METHOD(
   // At each step, we fetch from the PreClass is important because the
   // order in which getMethods returns matters
   req::StringIFastSet visitedMethods;
+  req::StringIFastSet visitedInterfaces;
   auto st = req::make<c_Set>();
   st->reserve(cls->numMethods());
 
@@ -1312,6 +1333,7 @@ static Object HHVM_STATIC_METHOD(
 
   collectInterface = [&] (const Class* iface) {
     if (!iface) return;
+    if (!visitedInterfaces.insert(iface->nameStr()).second) return;
 
     size_t const numMethods = iface->preClass()->numMethods();
     Func* const* methods = iface->preClass()->methods();
@@ -1520,8 +1542,9 @@ static Array HHVM_STATIC_METHOD(
   auto ret = Array::Create();
   for (auto const& declProp : properties) {
     auto slot = declProp.serializationIdx;
+    auto index = cls->propSlotToIndex(slot);
     auto const& prop = properties[slot];
-    auto const& default_val = tvAsCVarRef(&propInitVec[slot]);
+    auto const& default_val = tvAsCVarRef(&propInitVec[index]);
     if (((prop.attrs & AttrPrivate) == AttrPrivate) && (prop.cls != cls)) {
       continue;
     }
@@ -1724,7 +1747,7 @@ static void HHVM_METHOD(ReflectionProperty, __construct,
   auto data = Native::data<ReflectionPropHandle>(this_);
 
   // is there a declared instance property?
-  auto lookup = cls->getDeclPropIndex(cls, prop_name.get());
+  auto lookup = cls->getDeclPropSlot(cls, prop_name.get());
   auto propIdx = lookup.slot;
   if (propIdx != kInvalidSlot) {
     auto const prop = &cls->declProperties()[propIdx];
@@ -1920,14 +1943,16 @@ static TypedValue HHVM_METHOD(ReflectionProperty, getDefaultValue) {
       // the prop vector of a child class but it will always point to the class
       // it was declared in); so if we don't want to store propIdx we have to
       // look it up by name.
-      auto lookup = prop->cls->getDeclPropIndex(prop->cls, prop->name);
-      auto propIdx = lookup.slot;
-      assertx(propIdx != kInvalidSlot);
-      prop->cls->initialize();
-      auto const& propInitVec = prop->cls->getPropData()
-        ? *prop->cls->getPropData()
-        : prop->cls->declPropInit();
-      return tvReturn(tvAsCVarRef(&propInitVec[propIdx]));
+      auto cls = prop->cls;
+      auto lookup = cls->getDeclPropSlot(cls, prop->name);
+      auto propSlot = lookup.slot;
+      assertx(propSlot != kInvalidSlot);
+      auto propIndex = cls->propSlotToIndex(propSlot);
+      cls->initialize();
+      auto const& propInitVec = cls->getPropData()
+        ? *cls->getPropData()
+        : cls->declPropInit();
+      return tvReturn(tvAsCVarRef(&propInitVec[propIndex]));
     }
     case ReflectionPropHandle::Type::Static: {
       auto const prop = data->getSProp();
@@ -2056,6 +2081,7 @@ struct ReflectionExtension final : Extension {
     HHVM_ME(ReflectionFunctionAbstract, getParamInfo);
     HHVM_ME(ReflectionFunctionAbstract, getAttributesNamespaced);
     HHVM_ME(ReflectionFunctionAbstract, getRetTypeInfo);
+    HHVM_ME(ReflectionFunctionAbstract, getReifiedTypeParamInfo);
 
     HHVM_ME(ReflectionMethod, __init);
     HHVM_ME(ReflectionMethod, isFinal);
@@ -2290,7 +2316,7 @@ Array get_class_info(const String& name) {
 
   Array ret;
   ret.set(s_name, make_tv<KindOfPersistentString>(cls->name()));
-  ret.set(s_extension, empty_string_variant_ref);
+  ret.set(s_extension, empty_string_tv());
   ret.set(s_parent, make_tv<KindOfPersistentString>(cls->preClass()->parent()));
 
   // interfaces
@@ -2395,9 +2421,10 @@ Array get_class_info(const String& name) {
     auto const& propInitVec = cls->declPropInit();
     auto const nProps = cls->numDeclProperties();
 
-    for (Slot i = 0; i < nProps; ++i) {
-      auto const& prop = properties[i];
-      auto const& default_val = tvAsCVarRef(&propInitVec[i]);
+    for (Slot slot = 0; slot < nProps; ++slot) {
+      auto index = cls->propSlotToIndex(slot);
+      auto const& prop = properties[slot];
+      auto const& default_val = tvAsCVarRef(&propInitVec[index]);
       auto info = Array::Create();
       if ((prop.attrs & AttrPrivate) == AttrPrivate) {
         if (prop.cls == cls) {

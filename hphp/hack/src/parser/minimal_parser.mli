@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2017, Facebook, Inc.
  * All rights reserved.
  *
@@ -8,7 +8,12 @@
  *)
 
 type t
+
 val make : Full_fidelity_parser_env.t -> Full_fidelity_source_text.t -> t
+
 val errors : t -> Full_fidelity_syntax_error.t list
+
 val env : t -> Full_fidelity_parser_env.t
-val parse_script : t -> t * Full_fidelity_minimal_syntax.t
+
+val parse_script :
+  t -> t * Full_fidelity_minimal_syntax.t * Rust_pointer.t option

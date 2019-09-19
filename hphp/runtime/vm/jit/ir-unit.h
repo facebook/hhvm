@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_IR_UNIT_H_
 #define incl_HPHP_IR_UNIT_H_
 
+#include "hphp/runtime/vm/jit/annotation-data.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/check.h"
 #include "hphp/runtime/vm/jit/containers.h"
@@ -85,7 +86,8 @@ struct IRUnit {
   /*
    * Construct an IRUnit with a single, empty entry Block.
    */
-  explicit IRUnit(TransContext context);
+  explicit IRUnit(TransContext context,
+                  std::unique_ptr<AnnotationData> = nullptr);
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -156,9 +158,8 @@ struct IRUnit {
   // TODO(#3538578): The above should return `const Block*'.
 
   /*
-   * Starting positions, from the TransContext.
+   * Starting position, from the TransContext.
    */
-  uint32_t bcOff() const;
   SrcKey initSrcKey() const;
 
   /*
@@ -248,12 +249,8 @@ struct IRUnit {
   void expandJmp(IRInstruction* jmp, SSATmp* value);
 
   /////////////////////////////////////////////////////////////////////////////
-
-  /*
-   * For prologue contexts, the address of the start of the prologue
-   * (ie the address after the prologue guard) gets written here.
-   */
-  TCA prologueStart{nullptr};
+  // Annotation data
+  std::unique_ptr<AnnotationData> annotationData;
 
 private:
   template<class... Args> SSATmp* newSSATmp(Args&&...);

@@ -1,0 +1,8 @@
+File "protected_static_member_01.php", line 20, characters 11-12:
+No static method 'me' in T (did you mean instance method 'foo'?) (Typing[4090])
+File "protected_static_member_01.php", line 17, characters 7-7:
+Declaration of T is here
+File "protected_static_member_01.php", line 29, characters 11-12:
+No static method 'me' in T2 (did you mean 'accessible'?) (Typing[4090])
+File "protected_static_member_01.php", line 24, characters 7-8:
+Declaration of T2 is here

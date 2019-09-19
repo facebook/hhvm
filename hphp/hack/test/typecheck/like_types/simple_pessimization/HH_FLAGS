@@ -1,0 +1,6 @@
+--coercion-from-dynamic
+--coercion-from-union
+--complex-coercion
+--like-type-hints
+--like-casts
+--simple-pessimize 1.0

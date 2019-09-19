@@ -102,13 +102,13 @@ void normalReturn(IRGS& env, SSATmp* retval, bool suspended) {
   // If we're on the eager side of an async function, we have to zero-out the
   // TV aux of the return value, because it might be used as a flag if async
   // eager return was requested.
-  auto const aux = [&] () -> folly::Optional<AuxUnion> {
-    if (suspended) return AuxUnion{std::numeric_limits<uint32_t>::max()};
+  auto const aux = [&] {
+    if (suspended) return AuxUnion{0};
     if (curFunc(env)->isAsyncFunction() &&
         resumeMode(env) == ResumeMode::None) {
-      return AuxUnion{0};
+      return AuxUnion{std::numeric_limits<uint32_t>::max()};
     }
-    return folly::none;
+    return AuxUnion{0};
   }();
 
   auto const data = RetCtrlData { offsetToReturnSlot(env), false, aux };
@@ -186,7 +186,7 @@ void generatorReturn(IRGS& env, SSATmp* retval) {
 
   // Return control to the caller (Gen::next()).
   auto const spAdjust = offsetFromIRSP(env, BCSPRelOffset{-1});
-  auto const retData = RetCtrlData { spAdjust, true };
+  auto const retData = RetCtrlData { spAdjust, true, AuxUnion{0} };
   gen(env, RetCtrl, retData, sp(env), fp(env), retval);
 }
 
@@ -249,10 +249,14 @@ void emitRetC(IRGS& env) {
 }
 
 void emitRetM(IRGS& env, uint32_t nvals) {
-  assertx(!isInlining(env));
   assertx(resumeMode(env) == ResumeMode::None);
   assertx(!curFunc(env)->isResumable());
   assertx(nvals > 1);
+
+  if (isInlining(env)) {
+    retFromInlined(env);
+    return;
+  }
 
   // Pop the return values. Since they will be teleported to their places in
   // memory, we don't care about their types.

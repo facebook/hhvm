@@ -1,0 +1,12 @@
+[package]
+name = "hack_ocamlrep"
+version = "3.49.0"
+edition = "2018"
+
+[lib]
+name = "ocamlrep"
+path = "lib.rs"
+
+[dependencies]
+ocaml = "^0.7"
+ocamlrep_derive = {path = "../ocamlrep_derive", package = "hack_ocamlrep_derive"}

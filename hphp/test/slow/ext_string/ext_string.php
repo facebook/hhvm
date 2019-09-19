@@ -176,8 +176,8 @@ var_dump($tokens);
   var_dump(str_replace($healthy, $yummy, $phrase));
 }
 {
-  $str = str_replace("ll", "", "good golly miss molly!",
-                              &$count);
+  $count = 0;
+  $s = str_replace_with_count("ll", "", "good golly miss molly!", inout $count);
   var_dump($count);
 }
 {

@@ -96,6 +96,7 @@
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/vm/as-shared.h"
 #include "hphp/runtime/vm/bc-pattern.h"
+#include "hphp/runtime/vm/extern-compiler.h"
 #include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/native.h"
@@ -427,12 +428,6 @@ private:
 
 struct StackDepth;
 
-struct FPIReg {
-  Offset fpushOff;
-  StackDepth* stackDepth;
-  int fpOff;
-};
-
 /*
  * Tracks the depth of the stack in a given block of instructions.
  *
@@ -646,41 +641,6 @@ struct AsmState {
     labelMap[name].stackDepth.setBase(*this, 0);
   }
 
-  void beginFpi(Offset fpushOff) {
-    fpiRegs.push_back(FPIReg{
-      fpushOff,
-      currentStackDepth,
-      currentStackDepth->currentOffset
-    });
-    fdescDepth += kNumActRecCells;
-    currentStackDepth->adjust(*this, 0);
-  }
-
-  void endFpi() {
-    if (fpiRegs.empty()) {
-      error("endFpi called with no active fpi region");
-    }
-
-    auto& ent = fe->addFPIEnt();
-    const auto& reg = fpiRegs.back();
-    ent.m_fpushOff = reg.fpushOff;
-    ent.m_fpiEndOff = ue->bcPos();
-    ent.m_fpOff = reg.fpOff;
-    if (reg.stackDepth->baseValue) {
-      ent.m_fpOff += *reg.stackDepth->baseValue;
-    } else {
-      // Base value still unknown, this will need to be updated later.
-
-      // Store the FPIEnt's index in the FuncEmitter's entry table.
-      assertx(&fe->fpitab[fe->fpitab.size()-1] == &ent);
-      fpiToUpdate.emplace_back(fe->fpitab.size() - 1, reg.stackDepth);
-    }
-
-    fpiRegs.pop_back();
-    always_assert(fdescDepth >= kNumActRecCells);
-    fdescDepth -= kNumActRecCells;
-  }
-
   void finishClass() {
     assertx(!fe && !re);
     ue->addPreClassEmitter(pce);
@@ -719,15 +679,6 @@ struct AsmState {
 
       patchLabelOffsets(label.second);
     }
-
-    // Patch the FPI structures
-    for (auto& kv : fpiToUpdate) {
-      if (!kv.second->baseValue) {
-        error("created a FPI from an unreachable instruction");
-      }
-
-      fe->fpitab[kv.first].m_fpOff += *kv.second->baseValue;
-    }
   }
 
   void finishFunction() {
@@ -744,23 +695,18 @@ struct AsmState {
 
     fe->maxStackCells +=
       fe->numLocals() +
-      fe->numIterators() * kNumIterCells +
-      clsRefCountToCells(fe->numClsRefSlots());
+      fe->numIterators() * kNumIterCells;
 
-    fe->finish(ue->bcPos(), false);
+    fe->finish(ue->bcPos());
 
     fe = 0;
-    fpiRegs.clear();
     labelMap.clear();
     numItersSet = false;
-    numClsRefSlotsSet = false;
     initStackDepth = StackDepth();
     initStackDepth.setBase(*this, 0);
     currentStackDepth = &initStackDepth;
     unnamedStackDepths.clear();
-    fdescDepth = 0;
     maxUnnamed = -1;
-    fpiToUpdate.clear();
   }
 
   int getLocalId(const std::string& name) {
@@ -784,14 +730,6 @@ struct AsmState {
       error("iterator id exceeded number of iterators in the function");
     }
     return id;
-  }
-
-  int getClsRefSlot(int32_t slot) {
-    if (slot >= fe->numClsRefSlots()) {
-      error("class-ref slot id exceeded number of class-ref "
-            "slots in the function");
-    }
-    return slot;
   }
 
   UnitEmitter* ue;
@@ -832,18 +770,14 @@ struct AsmState {
 
   // When we're doing a function or method body, this state is active.
   FuncEmitter* fe{nullptr};
-  std::vector<FPIReg> fpiRegs;
   std::map<std::string,Label> labelMap;
   bool numItersSet{false};
-  bool numClsRefSlotsSet{false};
   bool enumTySet{false};
   StackDepth initStackDepth;
   StackDepth* currentStackDepth{&initStackDepth};
   std::vector<std::unique_ptr<StackDepth>> unnamedStackDepths;
-  int fdescDepth{0};
   int minStackDepth{0};
   int maxUnnamed{-1};
-  std::vector<std::pair<size_t, StackDepth*>> fpiToUpdate;
   std::set<std::string,stdltistr> hoistables;
   std::unordered_map<uint32_t,Offset> defClsOffsets;
   Location::Range srcLoc{-1,-1,-1,-1};
@@ -860,7 +794,7 @@ void StackDepth::adjust(AsmState& as, int delta) {
     // The absolute stack depth is unknown. We only store the min
     // and max offsets, and we will take a decision later, when the
     // base value will be known.
-    maxOffset = std::max(currentOffset + as.fdescDepth, maxOffset);
+    maxOffset = std::max(currentOffset, maxOffset);
     if (currentOffset < minOffset) {
       minOffsetLine = as.in.getLineNumber();
       minOffset = currentOffset;
@@ -872,7 +806,7 @@ void StackDepth::adjust(AsmState& as, int delta) {
     as.error("opcode sequence caused stack depth to go negative");
   }
 
-  as.adjustStackHighwater(*baseValue + currentOffset + as.fdescDepth);
+  as.adjustStackHighwater(*baseValue + currentOffset);
 }
 
 void StackDepth::addListener(AsmState& as, StackDepth* target) {
@@ -1018,14 +952,7 @@ std::pair<ArrayData*, std::string> read_litarray(AsmState& as) {
         as.error(".adata only supports serialized arrays");
       }
 
-      auto const line = as.srcLoc.line0;
-      auto const filename = as.ue->m_filepath;
       auto data = var.detach().m_data.parr;
-      if (RuntimeOption::EvalArrayProvenance &&
-          !data->empty() &&
-          !(as.fe->attrs & AttrProvenanceSkipFrame)) {
-        arrprov::setTag(data, {filename, line});
-      }
       ArrayData::GetScalarArray(&data);
       as.adataMap[name] = std::make_pair(data, std::move(overrides));
       as.adataDecls.erase(decl);
@@ -1065,6 +992,10 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   Y("?Obj=",    T::OptExactObj);
   Y("?Obj<=",   T::OptSubObj);
   Y("Obj<=",    T::SubObj);
+  Y("Cls=",     T::ExactCls);
+  Y("?Cls=",    T::OptExactCls);
+  Y("?Cls<=",   T::OptSubCls);
+  Y("Cls<=",    T::SubCls);
   X("Arr",      T::Arr);
   X("?Arr",     T::OptArr);
   X("VArr",     T::VArr);
@@ -1204,6 +1135,10 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   case T::SubObj:
   case T::OptExactObj:
   case T::OptSubObj:
+  case T::ExactCls:
+  case T::SubCls:
+  case T::OptExactCls:
+  case T::OptSubCls:
     break;
   }
 
@@ -1392,7 +1327,7 @@ LocalRange read_local_range(AsmState& as) {
 std::pair<FCallArgs::Flags, bool>
 read_fcall_flags(AsmState& as, Op thisOpcode) {
   uint8_t flags = 0;
-  bool constructNoConst = false;
+  bool lockWhileUnwinding = false;
 
   as.in.skipSpaceTab();
   as.in.expect('<');
@@ -1407,20 +1342,22 @@ read_fcall_flags(AsmState& as, Op thisOpcode) {
         continue;
       }
     }
-    if (flag == "NoConst") {
+    if (flag == "LockWhileUnwinding") {
       if (thisOpcode == Op::FCallCtor) {
-        constructNoConst = true;
+        lockWhileUnwinding = true;
         continue;
       } else {
-        as.error("FCall flag NoConst is only valid for FCallCtor");
+        as.error("FCall flag LockWhileUnwinding is only valid for FCallCtor");
       }
     }
     if (flag == "Unpack") { flags |= FCallArgs::HasUnpack; continue; }
+    if (flag == "Generics") { flags |= FCallArgs::HasGenerics; continue; }
     as.error("unrecognized FCall flag `" + flag + "'");
   }
   as.in.expectWs('>');
 
-  return std::make_pair(static_cast<FCallArgs::Flags>(flags), constructNoConst);
+  return std::make_pair(static_cast<FCallArgs::Flags>(flags),
+                        lockWhileUnwinding);
 }
 
 // Read a vector of booleans formatted as a quoted string of '0' and '1'.
@@ -1449,14 +1386,14 @@ std::unique_ptr<uint8_t[]> read_by_refs(AsmState& as, uint32_t numArgs) {
 std::tuple<FCallArgsBase, std::unique_ptr<uint8_t[]>, std::string>
 read_fcall_args(AsmState& as, Op thisOpcode) {
   FCallArgs::Flags flags;
-  bool constructNoConst;
-  std::tie(flags, constructNoConst) = read_fcall_flags(as, thisOpcode);
+  bool lockWhileUnwinding;
+  std::tie(flags, lockWhileUnwinding) = read_fcall_flags(as, thisOpcode);
   auto const numArgs = read_opcode_arg<uint32_t>(as);
   auto const numRets = read_opcode_arg<uint32_t>(as);
   auto byRefs = read_by_refs(as, numArgs);
   auto asyncEagerLabel = read_opcode_arg<std::string>(as);
   return std::make_tuple(
-    FCallArgsBase(flags, numArgs, numRets, constructNoConst),
+    FCallArgsBase(flags, numArgs, numRets, lockWhileUnwinding),
     std::move(byRefs),
     std::move(asyncEagerLabel)
   );
@@ -1479,6 +1416,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
 #define IMM_THREE(t1, t2, t3) IMM_TWO(t1, t2); ++immIdx; IMM_##t3
 #define IMM_FOUR(t1, t2, t3, t4) IMM_THREE(t1, t2, t3); ++immIdx; IMM_##t4
 #define IMM_FIVE(t1, t2, t3, t4, t5) IMM_FOUR(t1, t2, t3, t4); ++immIdx; IMM_##t5
+#define IMM_SIX(t1, t2, t3, t4, t5, t6) IMM_FIVE(t1, t2, t3, t4, t5); ++immIdx; IMM_##t6
 
 // Some bytecodes need to know an iva imm for (PUSH|POP)_*.
 #define IMM_IVA do {                                      \
@@ -1502,10 +1440,6 @@ std::map<std::string,ParserFunc> opcode_parsers;
 #define IMM_LA     as.ue->emitIVA(as.getLocalId(  \
                      read_opcode_arg<std::string>(as)))
 #define IMM_IA     as.ue->emitIVA(as.getIterId( \
-                     read_opcode_arg<int32_t>(as)))
-#define IMM_CAR    as.ue->emitIVA(as.getClsRefSlot( \
-                     read_opcode_arg<int32_t>(as)))
-#define IMM_CAW    as.ue->emitIVA(as.getClsRefSlot( \
                      read_opcode_arg<int32_t>(as)))
 #define IMM_OA(ty) as.ue->emitByte(read_subop<ty>(as));
 #define IMM_LAR    encodeLocalRange(*as.ue, read_local_range(as))
@@ -1590,8 +1524,9 @@ std::map<std::string,ParserFunc> opcode_parsers;
 #define NUM_PUSH_ONE(a) 1
 #define NUM_PUSH_TWO(a,b) 2
 #define NUM_PUSH_THREE(a,b,c) 3
-#define NUM_PUSH_FPUSH immIVA[0]
+#define NUM_PUSH_CMANY immIVA[0]
 #define NUM_PUSH_FCALL immFCA.numRets
+#define NUM_PUSH_CALLNATIVE (immIVA[2] + 1)
 #define NUM_POP_NOV 0
 #define NUM_POP_ONE(a) 1
 #define NUM_POP_TWO(a,b) 2
@@ -1599,11 +1534,9 @@ std::map<std::string,ParserFunc> opcode_parsers;
 #define NUM_POP_MFINAL immIVA[0]
 #define NUM_POP_C_MFINAL(n) (immIVA[0] + n)
 #define NUM_POP_CUMANY immIVA[0] /* number of arguments */
-#define NUM_POP_CVUMANY immIVA[0] /* number of arguments */
-#define NUM_POP_FPUSH(nin, nobj) (immIVA[0] + nin + 3)
-#define NUM_POP_FCALL(nin, nobj) \
-  (nin + immFCA.numArgsInclUnpack() + 2 + immFCA.numRets)
-#define NUM_POP_FCALLO (immFCA.numArgsInclUnpack() + immFCA.numRets - 1)
+#define NUM_POP_CMANY_U3 immIVA[0] + 3
+#define NUM_POP_CALLNATIVE (immIVA[0] + immIVA[2]) /* number of args + nout */
+#define NUM_POP_FCALL(nin, nobj) (nin + immFCA.numInputs() + 2 + immFCA.numRets)
 #define NUM_POP_CMANY immIVA[0] /* number of arguments */
 #define NUM_POP_SMANY vecImmStackValues
 
@@ -1629,20 +1562,12 @@ std::map<std::string,ParserFunc> opcode_parsers;
       as.enterReachableRegion(0);                                      \
     }                                                                  \
                                                                        \
-    if (isLegacyFCall(Op##name)) {                                     \
-      as.endFpi();                                                     \
-    }                                                                  \
-                                                                       \
     as.ue->emitOp(Op##name);                                           \
                                                                        \
     UNUSED size_t immIdx = 0;                                          \
     IMM_##imm;                                                         \
                                                                        \
     as.adjustStack(-NUM_POP_##pop);                                    \
-                                                                       \
-    if (isLegacyFPush(Op##name)) {                                     \
-      as.beginFpi(curOpcodeOff);                                       \
-    }                                                                  \
                                                                        \
     if (thisOpcode == OpMemoGet) {                                     \
       /* MemoGet pushes after branching */                             \
@@ -1670,7 +1595,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
     }                                                                  \
                                                                        \
     /* FCalls with unpack perform their own bounds checking. */        \
-    if (hasFCallEffects(Op##name) && !immFCA.hasUnpack()) {            \
+    if (isFCall(Op##name) && !immFCA.hasUnpack()) {                    \
       as.fe->containsCalls = true;                                     \
     }                                                                  \
                                                                        \
@@ -1711,8 +1636,6 @@ OPCODES
 #undef IMM_DA
 #undef IMM_IVA
 #undef IMM_LA
-#undef IMM_CAR
-#undef IMM_CAW
 #undef IMM_BA
 #undef IMM_ILA
 #undef IMM_I32LA
@@ -1730,21 +1653,19 @@ OPCODES
 #undef NUM_PUSH_ONE
 #undef NUM_PUSH_TWO
 #undef NUM_PUSH_THREE
-#undef NUM_PUSH_POS_N
-#undef NUM_PUSH_FPUSH
+#undef NUM_PUSH_CMANY
 #undef NUM_PUSH_FCALL
+#undef NUM_PUSH_CALLNATIVE
 #undef NUM_POP_NOV
 #undef NUM_POP_ONE
 #undef NUM_POP_TWO
 #undef NUM_POP_THREE
-#undef NUM_POP_POS_N
 #undef NUM_POP_MFINAL
 #undef NUM_POP_C_MFINAL
 #undef NUM_POP_CUMANY
-#undef NUM_POP_CVUMANY
-#undef NUM_POP_FPUSH
+#undef NUM_POP_CMANY_U3
+#undef NUM_POP_CALLNATIVE
 #undef NUM_POP_FCALL
-#undef NUM_POP_FCALLO
 #undef NUM_POP_CMANY
 #undef NUM_POP_SMANY
 
@@ -1917,21 +1838,6 @@ void parse_numiters(AsmState& as) {
   int32_t count = read_opcode_arg<int32_t>(as);
   as.numItersSet = true;
   as.fe->setNumIterators(count);
-  as.in.expectWs(';');
-}
-
-/*
- * directive-numclsrefslots : integer ';'
- *                          ;
- */
-void parse_numclsrefslots(AsmState& as) {
-  if (as.numClsRefSlotsSet) {
-    as.error("only one .numclsrefslots directive may appear "
-             "in a given function");
-  }
-  int32_t count = read_opcode_arg<int32_t>(as);
-  as.numClsRefSlotsSet = true;
-  as.fe->setNumClsRefSlots(count);
   as.in.expectWs(';');
 }
 
@@ -2195,7 +2101,6 @@ void fixup_default_values(AsmState& as, FuncEmitter* fe) {
  *               ;
  *
  * fbody-line :  ".numiters" directive-numiters
- *            |  ".numclsrefslots" directive-numclsrefslots
  *            |  ".declvars" directive-declvars
  *            |  ".try_fault" directive-fault
  *            |  ".try_catch" directive-catch
@@ -2243,7 +2148,6 @@ void parse_function_body(AsmState& as, int nestLevel /* = 0 */) {
       }
       if (word == ".numiters")  { parse_numiters(as); continue; }
       if (word == ".declvars")  { parse_declvars(as); continue; }
-      if (word == ".numclsrefslots") { parse_numclsrefslots(as); continue; }
       if (word == ".try_catch") { parse_catch(as, nestLevel); continue; }
       if (word == ".try") { parse_try_catch(as, nestLevel); continue; }
       if (word == ".srcloc") { parse_srcloc(as, nestLevel); continue; }
@@ -2652,9 +2556,9 @@ static const StaticString
  * attribute map and sets the isNative flag accoringly
  * If the give function is op code implementation, then isNative is not set
  */
-void check_native(AsmState& as, bool is_construct_or_destruct) {
+void check_native(AsmState& as, bool is_construct) {
   if (as.fe->userAttributes.count(s_native.get())) {
-    as.fe->hniReturnType = is_construct_or_destruct
+    as.fe->hniReturnType = is_construct
       ? KindOfNull
       : type_constraint_to_data_type(as.fe->retUserType,
         as.fe->retTypeConstraint);
@@ -2793,7 +2697,7 @@ void parse_method(AsmState& as) {
   // parse_function_flabs relies on as.fe already having valid attrs
   parse_function_flags(as);
 
-  check_native(as, name == "__construct" || name == "__destruct");
+  check_native(as, name == "__construct");
 
   as.in.expectWs('{');
 
@@ -2896,9 +2800,6 @@ void parse_property(AsmState& as, bool class_is_const) {
       if (attrs & AttrIsConst) {
         if (attrs & (AttrLateInit | AttrLateInitSoft)) {
           as.error("const properties may not also be late init");
-        }
-        if (attrs & AttrStatic) {
-          as.error("static properties may not be const");
         }
       } else if (class_is_const && !(attrs & AttrStatic)) {
         as.error("all instance properties of a const class must be const");
@@ -3315,7 +3216,7 @@ void parse_class(AsmState& as) {
  *                  ;
  */
 void parse_record(AsmState& as) {
-  if (!RuntimeOption::EvalHackRecords) {
+  if (!RuntimeOption::EvalHackRecords && !RuntimeOption::EvalHackRecordArrays) {
     as.error("Records not supported");
   }
 
@@ -3366,7 +3267,10 @@ void parse_record(AsmState& as) {
  */
 void parse_filepath(AsmState& as) {
   auto const str = read_litstr(as);
-  as.ue->m_filepath = str;
+  if (nullptr == g_hhas_handler) {
+    // We don't want to use file path from cached HHAS
+    as.ue->m_filepath = str;
+  }
   as.in.expectWs(';');
 }
 

@@ -1,0 +1,6 @@
+File "immvector.php", line 39, characters 10-66:
+Invalid return type (Typing[4110])
+File "immvector.php", line 38, characters 20-47:
+Expected ~ImmVector<ImmVector<string>> because it is an unenforceable type
+File "immvector.php", line 39, characters 10-66:
+But got ImmVector<~ImmVector<string>>

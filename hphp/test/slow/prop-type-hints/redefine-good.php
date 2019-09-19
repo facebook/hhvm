@@ -1,5 +1,4 @@
 <?hh
-// Copyright 2004-present Facebook. All Rights Reserved.
 
 class Cls1 {}
 class Cls2 {}
@@ -26,12 +25,6 @@ enum Enum4 : mixed {
   VAL1 = 1;
   VAL2 = 'val2';
   VAL3 = 3;
-}
-
-if (__hhvm_intrinsics\launder_value(true)) {
-  include 'redefine1.inc';
-} else {
-  include 'redefine2.inc';
 }
 
 type Alias1 = int;
@@ -449,7 +442,16 @@ class G extends F {
     new G();
   }
 }
+<<__EntryPoint>>
+function main_entry(): void {
 
-G::test();
-G::test();
-echo "DONE\n";
+  if (__hhvm_intrinsics\launder_value(true)) {
+    include 'redefine1.inc';
+  } else {
+    include 'redefine2.inc';
+  }
+
+  G::test();
+  G::test();
+  echo "DONE\n";
+}

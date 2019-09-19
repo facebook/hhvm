@@ -176,39 +176,39 @@ static_assert(!isRefcountedType(KindOfPersistentDict),   "");
 static_assert(!isRefcountedType(KindOfPersistentKeyset), "");
 
 /* Too many cases to test exhaustively, so try to capture most scenarios */
-static_assert(!sameDataTypes(KindOfNull, KindOfUninit),             "");
-static_assert(sameDataTypes(KindOfArray, KindOfPersistentArray),   "");
-static_assert(sameDataTypes(KindOfVec, KindOfPersistentVec),       "");
-static_assert(sameDataTypes(KindOfDict, KindOfPersistentDict),     "");
-static_assert(sameDataTypes(KindOfKeyset, KindOfPersistentKeyset), "");
-static_assert(sameDataTypes(KindOfString, KindOfPersistentString), "");
-static_assert(!sameDataTypes(KindOfNull, KindOfString),            "");
-static_assert(!sameDataTypes(KindOfNull, KindOfInt64),             "");
-static_assert(!sameDataTypes(KindOfNull, KindOfVec),               "");
-static_assert(!sameDataTypes(KindOfBoolean, KindOfInt64),          "");
-static_assert(!sameDataTypes(KindOfUninit, KindOfArray),           "");
-static_assert(!sameDataTypes(KindOfUninit, KindOfDict),            "");
-static_assert(!sameDataTypes(KindOfUninit, KindOfKeyset),          "");
-static_assert(!sameDataTypes(KindOfObject, KindOfResource),        "");
-static_assert(!sameDataTypes(KindOfObject, KindOfVec),             "");
-static_assert(!sameDataTypes(KindOfObject, KindOfPersistentVec),   "");
-static_assert(!sameDataTypes(KindOfObject, KindOfKeyset),          "");
-static_assert(!sameDataTypes(KindOfObject, KindOfPersistentKeyset),"");
-static_assert(!sameDataTypes(KindOfArray, KindOfString),           "");
-static_assert(!sameDataTypes(KindOfArray, KindOfPersistentString), "");
-static_assert(!sameDataTypes(KindOfArray, KindOfObject),           "");
-static_assert(!sameDataTypes(KindOfArray, KindOfVec),              "");
-static_assert(!sameDataTypes(KindOfArray, KindOfDict),             "");
-static_assert(!sameDataTypes(KindOfArray, KindOfKeyset),           "");
-static_assert(!sameDataTypes(KindOfArray, KindOfPersistentVec),    "");
-static_assert(!sameDataTypes(KindOfArray, KindOfPersistentDict),   "");
-static_assert(!sameDataTypes(KindOfArray, KindOfPersistentKeyset), "");
-static_assert(!sameDataTypes(KindOfString, KindOfVec),             "");
-static_assert(!sameDataTypes(KindOfString, KindOfDict),            "");
-static_assert(!sameDataTypes(KindOfString, KindOfKeyset),          "");
-static_assert(!sameDataTypes(KindOfString, KindOfPersistentVec),   "");
-static_assert(!sameDataTypes(KindOfString, KindOfPersistentDict),  "");
-static_assert(!sameDataTypes(KindOfString, KindOfPersistentKeyset),"");
+static_assert(!equivDataTypes(KindOfNull, KindOfUninit),             "");
+static_assert(equivDataTypes(KindOfArray, KindOfPersistentArray),   "");
+static_assert(equivDataTypes(KindOfVec, KindOfPersistentVec),       "");
+static_assert(equivDataTypes(KindOfDict, KindOfPersistentDict),     "");
+static_assert(equivDataTypes(KindOfKeyset, KindOfPersistentKeyset), "");
+static_assert(equivDataTypes(KindOfString, KindOfPersistentString), "");
+static_assert(!equivDataTypes(KindOfNull, KindOfString),            "");
+static_assert(!equivDataTypes(KindOfNull, KindOfInt64),             "");
+static_assert(!equivDataTypes(KindOfNull, KindOfVec),               "");
+static_assert(!equivDataTypes(KindOfBoolean, KindOfInt64),          "");
+static_assert(!equivDataTypes(KindOfUninit, KindOfArray),           "");
+static_assert(!equivDataTypes(KindOfUninit, KindOfDict),            "");
+static_assert(!equivDataTypes(KindOfUninit, KindOfKeyset),          "");
+static_assert(!equivDataTypes(KindOfObject, KindOfResource),        "");
+static_assert(!equivDataTypes(KindOfObject, KindOfVec),             "");
+static_assert(!equivDataTypes(KindOfObject, KindOfPersistentVec),   "");
+static_assert(!equivDataTypes(KindOfObject, KindOfKeyset),          "");
+static_assert(!equivDataTypes(KindOfObject, KindOfPersistentKeyset),"");
+static_assert(!equivDataTypes(KindOfArray, KindOfString),           "");
+static_assert(!equivDataTypes(KindOfArray, KindOfPersistentString), "");
+static_assert(!equivDataTypes(KindOfArray, KindOfObject),           "");
+static_assert(!equivDataTypes(KindOfArray, KindOfVec),              "");
+static_assert(!equivDataTypes(KindOfArray, KindOfDict),             "");
+static_assert(!equivDataTypes(KindOfArray, KindOfKeyset),           "");
+static_assert(!equivDataTypes(KindOfArray, KindOfPersistentVec),    "");
+static_assert(!equivDataTypes(KindOfArray, KindOfPersistentDict),   "");
+static_assert(!equivDataTypes(KindOfArray, KindOfPersistentKeyset), "");
+static_assert(!equivDataTypes(KindOfString, KindOfVec),             "");
+static_assert(!equivDataTypes(KindOfString, KindOfDict),            "");
+static_assert(!equivDataTypes(KindOfString, KindOfKeyset),          "");
+static_assert(!equivDataTypes(KindOfString, KindOfPersistentVec),   "");
+static_assert(!equivDataTypes(KindOfString, KindOfPersistentDict),  "");
+static_assert(!equivDataTypes(KindOfString, KindOfPersistentKeyset),"");
 
 static_assert(KindOfUninit == static_cast<DataType>(0),
               "Several things assume this tag is 0, especially RDS");
@@ -277,37 +277,12 @@ MaybeDataType get_datatype(
   return KindOfObject;
 }
 
-bool isArrayOrShapeType(DataType t) {
-  return isArrayType(t) ||
-    (!RuntimeOption::EvalHackArrDVArrs && isShapeType(t));
-}
-bool isArrayOrShapeType(MaybeDataType t) {
-  return t && isArrayOrShapeType(*t);
-}
-
 bool isVecOrArrayType(DataType t) {
   return RuntimeOption::EvalHackArrDVArrs ? isVecType(t) : isArrayType(t);
 }
 
 bool isDictOrArrayType(DataType t) {
   return RuntimeOption::EvalHackArrDVArrs ? isDictType(t) : isArrayType(t);
-}
-
-bool isDictOrShapeType(DataType t) {
-  return isDictType(t) ||
-    (RuntimeOption::EvalHackArrDVArrs && isShapeType(t));
-}
-bool isDictOrShapeType(MaybeDataType t) {
-  return t && isDictOrShapeType(*t);
-}
-
-bool equivDataTypes(DataType t1, DataType t2) {
-  return sameDataTypes(t1, t2) ||
-    (RuntimeOption::EvalHackArrDVArrs ?
-      ((isShapeType(t1) && isDictType(t2)) ||
-      (isDictType(t1) && isShapeType(t2))) :
-      ((isShapeType(t1) && isArrayType(t2)) ||
-      (isArrayType(t1) && isShapeType(t2))));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

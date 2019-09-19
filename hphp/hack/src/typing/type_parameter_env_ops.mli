@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -9,20 +9,21 @@
 
 module Env = Typing_env
 open Typing_defs
+open Typing_env_types
 
+val simplify_tpenv :
+  env ->
+  (('a tparam * string) option * locl_ty) list ->
+  Typing_reason.t ->
+  env * locl_ty SMap.t
 (** Given a list of type parameter names, attempt to simplify away those
 type parameters by looking for a type to which they are equal in the tpenv.
 If such a type exists, remove the type parameter from the tpenv.
 Returns a set of substitutions mapping each type parameter name to the type
 to which it is equal if found, otherwise to itself. *)
-val simplify_tpenv :
-  Env.env ->
-  (('a tparam * string) option * locl ty) list ->
-  Typing_reason.t ->
-  Env.env * locl ty SMap.t
 
 val join :
-  Env.env ->
+  env ->
   Type_parameter_env.t ->
   Type_parameter_env.t ->
-  Env.env * Type_parameter_env.t
+  env * Type_parameter_env.t

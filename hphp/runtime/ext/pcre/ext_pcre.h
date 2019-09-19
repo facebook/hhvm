@@ -27,22 +27,21 @@ namespace HPHP {
 Variant HHVM_FUNCTION(preg_filter, const Variant& pattern,
                                    const Variant& replacement,
                                    const Variant& subject,
-                                   int limit = -1,
-                                   VRefParam count = uninit_null());
+                                   int limit,
+                                   int64_t& count);
 Variant HHVM_FUNCTION(preg_grep, const String& pattern, const Variant& input,
                                  int flags = 0);
 Variant HHVM_FUNCTION(preg_replace, const Variant& pattern, const Variant& replacement,
-                                    const Variant& subject, int limit = -1,
-                                    VRefParam count = uninit_null());
+                                    const Variant& subject, int limit = -1);
 Variant HHVM_FUNCTION(preg_replace_callback, const Variant& pattern,
                                              const Variant& callback,
                                              const Variant& subject,
-                                             int limit = -1,
-                                             VRefParam count = uninit_null());
+                                             int limit,
+                                             int64_t& count);
 Variant HHVM_FUNCTION(
     preg_replace_callback_array, const Variant& patterns_and_callbacks,
-                                 const Variant& subject, int limit = -1,
-                                 VRefParam count = uninit_null());
+                                 const Variant& subject, int limit,
+                                 int64_t& count);
 Variant HHVM_FUNCTION(preg_split, const String& pattern, const String& subject,
                                   const Variant& limit, int flags = 0);
 String HHVM_FUNCTION(preg_quote, const String& str,
@@ -56,10 +55,6 @@ String HHVM_FUNCTION(ereg_replace, const String& pattern,
                                 const String& replacement, const String& str);
 String HHVM_FUNCTION(eregi_replace, const String& pattern,
                                 const String& replacement, const String& str);
-Variant HHVM_FUNCTION(ereg, const String& pattern, const String& str,
-                            VRefParam regs = uninit_null());
-Variant HHVM_FUNCTION(eregi, const String& pattern, const String& str,
-                             VRefParam regs = uninit_null());
 Variant HHVM_FUNCTION(split, const String& pattern, const String& str,
                              int limit = -1);
 Variant HHVM_FUNCTION(spliti, const String& pattern, const String& str,

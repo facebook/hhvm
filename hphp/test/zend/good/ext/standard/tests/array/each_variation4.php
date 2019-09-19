@@ -19,9 +19,9 @@ $val2 = 'bar';
 $arr1 = array('one' => $val1, $val2);
 
 echo "-- Call each until at the end of the array: --\n";
-var_dump( each(&$arr1) );
-var_dump( each(&$arr1) );
-var_dump( each(&$arr1) );
+var_dump( each(inout $arr1) );
+var_dump( each(inout $arr1) );
+var_dump( each(inout $arr1) );
 
 echo "Done";
 }

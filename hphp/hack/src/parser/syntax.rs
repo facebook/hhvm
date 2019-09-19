@@ -8,7 +8,10 @@ use crate::lexable_token::LexableToken;
 use crate::syntax_kind::SyntaxKind;
 use crate::token_kind::TokenKind;
 
+use std::fmt::Debug;
 use std::marker::Sized;
+
+use itertools::Either::{Left, Right};
 
 pub use crate::syntax_generated::*;
 pub use crate::syntax_type::*;
@@ -27,7 +30,10 @@ where
     fn text_range(&self) -> Option<(usize, usize)>; // corresponds to extract_text in OCaml impl.
 }
 
-pub trait SyntaxValueWithKind {
+pub trait SyntaxValueWithKind
+where
+    Self: Debug,
+{
     fn is_missing(&self) -> bool;
     fn token_kind(&self) -> Option<TokenKind>;
 }
@@ -38,8 +44,8 @@ pub struct Syntax<T, V> {
     pub value: V,
 }
 
-pub trait SyntaxTypeBase<C> {
-    type Token: LexableToken;
+pub trait SyntaxTypeBase<'a, C> {
+    type Token: LexableToken<'a>;
     type Value: SyntaxValueType<Self::Token>;
 
     fn make_missing(ctx: &C, offset: usize) -> Self;
@@ -51,9 +57,9 @@ pub trait SyntaxTypeBase<C> {
     fn value(&self) -> &Self::Value;
 }
 
-impl<T, V, C> SyntaxTypeBase<C> for Syntax<T, V>
+impl<'a, T, V, C> SyntaxTypeBase<'a, C> for Syntax<T, V>
 where
-    T: LexableToken,
+    T: LexableToken<'a>,
     V: SyntaxValueType<T>,
 {
     type Token = T;
@@ -90,21 +96,160 @@ where
     }
 }
 
-impl<T, V> Syntax<T, V>
+impl<'src, T, V> Syntax<T, V>
 where
-    T: LexableToken,
+    T: LexableToken<'src>,
     V: SyntaxValueType<T>,
 {
     pub fn make(syntax: SyntaxVariant<T, V>, value: V) -> Self {
         Self { syntax, value }
     }
 
-    pub fn children<'a>(&'a self) -> Vec<&'a Self> {
-        let f = |node: &'a Self, mut acc: Vec<&'a Self>| {
+    fn is_specific_token(&self, kind: TokenKind) -> bool {
+        match &self.syntax {
+            SyntaxVariant::Token(t) => t.kind() == kind,
+            _ => false,
+        }
+    }
+
+    pub fn is_public(&self) -> bool {
+        self.is_specific_token(TokenKind::Public)
+    }
+
+    pub fn is_private(&self) -> bool {
+        self.is_specific_token(TokenKind::Private)
+    }
+
+    pub fn is_protected(&self) -> bool {
+        self.is_specific_token(TokenKind::Protected)
+    }
+
+    pub fn is_abstract(&self) -> bool {
+        self.is_specific_token(TokenKind::Abstract)
+    }
+
+    pub fn is_static(&self) -> bool {
+        self.is_specific_token(TokenKind::Static)
+    }
+
+    pub fn is_ampersand(&self) -> bool {
+        self.is_specific_token(TokenKind::Ampersand)
+    }
+
+    pub fn is_ellipsis(&self) -> bool {
+        self.is_specific_token(TokenKind::DotDotDot)
+    }
+
+    pub fn is_final(&self) -> bool {
+        self.is_specific_token(TokenKind::Final)
+    }
+
+    pub fn is_async(&self) -> bool {
+        self.is_specific_token(TokenKind::Async)
+    }
+
+    pub fn is_yield(&self) -> bool {
+        self.is_specific_token(TokenKind::Yield)
+    }
+
+    pub fn is_construct(&self) -> bool {
+        self.is_specific_token(TokenKind::Construct)
+    }
+
+    pub fn is_void(&self) -> bool {
+        self.is_specific_token(TokenKind::Void)
+    }
+
+    pub fn is_left_brace(&self) -> bool {
+        self.is_specific_token(TokenKind::LeftBrace)
+    }
+
+    pub fn is_comma(&self) -> bool {
+        self.is_specific_token(TokenKind::Comma)
+    }
+
+    pub fn is_inout(&self) -> bool {
+        self.is_specific_token(TokenKind::Inout)
+    }
+
+    pub fn is_name(&self) -> bool {
+        self.is_specific_token(TokenKind::Name)
+    }
+
+    pub fn is_as_expression(&self) -> bool {
+        self.kind() == SyntaxKind::AsExpression
+    }
+
+    pub fn is_missing(&self) -> bool {
+        self.kind() == SyntaxKind::Missing
+    }
+
+    pub fn is_external(&self) -> bool {
+        self.is_specific_token(TokenKind::Semicolon) || self.is_missing()
+    }
+
+    pub fn is_namespace_empty_body(&self) -> bool {
+        self.kind() == SyntaxKind::NamespaceEmptyBody
+    }
+
+    pub fn is_attribute_specification(&self) -> bool {
+        self.kind() == SyntaxKind::AttributeSpecification
+    }
+
+    pub fn is_old_attribute_specification(&self) -> bool {
+        self.kind() == SyntaxKind::OldAttributeSpecification
+    }
+
+    pub fn is_file_attribute_specification(&self) -> bool {
+        self.kind() == SyntaxKind::FileAttributeSpecification
+    }
+
+    pub fn is_return_statement(&self) -> bool {
+        self.kind() == SyntaxKind::ReturnStatement
+    }
+
+    pub fn is_conditional_expression(&self) -> bool {
+        self.kind() == SyntaxKind::ConditionalExpression
+    }
+
+    pub fn is_safe_member_selection_expression(&self) -> bool {
+        self.kind() == SyntaxKind::SafeMemberSelectionExpression
+    }
+
+    pub fn syntax_node_to_list<'a>(&'a self) -> impl DoubleEndedIterator<Item = &'a Self> {
+        use std::iter::{empty, once};
+        match &self.syntax {
+            SyntaxVariant::SyntaxList(x) => Left(x.iter()),
+            SyntaxVariant::Missing => Right(Left(empty())),
+            _ => Right(Right(once(self))),
+        }
+    }
+
+    pub fn is_namespace_prefix(&self) -> bool {
+        if let SyntaxVariant::QualifiedName(x) = &self.syntax {
+            x.qualified_name_parts
+                .syntax_node_to_list()
+                .last()
+                .map_or(false, |p| match &p.syntax {
+                    SyntaxVariant::ListItem(x) => !&x.list_separator.is_missing(),
+                    _ => false,
+                })
+        } else {
+            false
+        }
+    }
+
+    pub fn drain_children(&mut self) -> Vec<Self> {
+        let f = |node: Self, mut acc: Vec<Self>| {
             acc.push(node);
             acc
         };
-        Self::fold_over_children(&f, vec![], &self.syntax)
+        let syntax = std::mem::replace(&mut self.syntax, SyntaxVariant::Missing);
+        Self::fold_over_children_owned(&f, vec![], syntax)
+    }
+
+    pub fn replace_children(&mut self, kind: SyntaxKind, children: Vec<Self>) {
+        std::mem::replace(&mut self.syntax, Syntax::from_children(kind, children));
     }
 
     fn get_token(&self) -> Option<&T> {
@@ -118,7 +263,7 @@ where
         match self.get_token() {
             Some(token) => Some(token),
             None => {
-                for node in self.children() {
+                for node in self.iter_children() {
                     if let Some(token) = node.leading_token() {
                         return Some(token);
                     }
@@ -132,7 +277,7 @@ where
         match self.get_token() {
             Some(token) => Some(token),
             None => {
-                for node in self.children().iter().rev() {
+                for node in self.iter_children().rev() {
                     if let Some(token) = node.trailing_token() {
                         return Some(token);
                     }
@@ -140,5 +285,38 @@ where
                 None
             }
         }
+    }
+
+    pub fn iter_children<'a>(&'a self) -> SyntaxChildrenIterator<'a, T, V> {
+        self.syntax.iter_children()
+    }
+}
+
+pub struct SyntaxChildrenIterator<'a, T, V> {
+    pub syntax: &'a SyntaxVariant<T, V>,
+    pub index: usize,
+    pub index_back: usize,
+}
+
+impl<'src, T, V> SyntaxVariant<T, V> {
+    pub fn iter_children<'a>(&'a self) -> SyntaxChildrenIterator<'a, T, V> {
+        SyntaxChildrenIterator {
+            syntax: &self,
+            index: 0,
+            index_back: 0,
+        }
+    }
+}
+
+impl<'a, T, V> Iterator for SyntaxChildrenIterator<'a, T, V> {
+    type Item = &'a Syntax<T, V>;
+    fn next(&mut self) -> Option<Self::Item> {
+        self.next_impl(true)
+    }
+}
+
+impl<'a, T, V> DoubleEndedIterator for SyntaxChildrenIterator<'a, T, V> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        self.next_impl(false)
     }
 }

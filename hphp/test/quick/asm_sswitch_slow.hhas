@@ -6,8 +6,7 @@
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 0 "main"
-  FCall <> 0 1 "" - "" ""
+  FCallFuncD <> 0 1 "" - "main"
   RetC
 }
 
@@ -48,8 +47,7 @@ fail:
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 0 "get_three"
-  FCall <> 0 1 "" - "" ""
+  FCallFuncD <> 0 1 "" - "get_three"
   SetL $foo
   PopC
 
@@ -57,8 +55,7 @@ fail:
   NullUninit
   NullUninit
   CGetL $foo
-  FPushFuncD 1 "sswitch_on"
-  FCall <> 1 1 "" - "" ""
+  FCallFuncD <> 1 1 "" - "sswitch_on"
   RetC
 }
 
@@ -75,7 +72,7 @@ fail:
   Dup
   NullUninit
   NullUninit
-  FCallCtor <> 0 1 "" - ""
+  FCallCtor <LockWhileUnwinding> 0 1 "" - ""
   PopC
   LockObj
   SetL $obj
@@ -85,8 +82,7 @@ fail:
   NullUninit
   NullUninit
   CGetL $obj
-  FPushFuncD 1 "sswitch_on"
-  FCall <> 1 1 "" - "" ""
+  FCallFuncD <> 1 1 "" - "sswitch_on"
   RetC
 }
 
@@ -95,8 +91,7 @@ fail:
   NullUninit
   NullUninit
   String "kujhasekguheku"
-  FPushFuncD 1 "sswitch_on"
-  FCall <> 1 1 "" - "" ""
+  FCallFuncD <> 1 1 "" - "sswitch_on"
   RetC
 }
 
@@ -104,22 +99,19 @@ fail:
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 0 "case_three"
-  FCall <> 0 1 "" - "" ""
+  FCallFuncD <> 0 1 "" - "case_three"
   PopC
 
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 0 "with_obj"
-  FCall <> 0 1 "" - "" ""
+  FCallFuncD <> 0 1 "" - "with_obj"
   PopC
 
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 0 "case_default"
-  FCall <> 0 1 "" - "" ""
+  FCallFuncD <> 0 1 "" - "case_default"
   PopC
 
   String "Done\n"

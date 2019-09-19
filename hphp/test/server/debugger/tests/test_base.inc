@@ -15,8 +15,8 @@ function startDebuggerClient($debugPort, $input_path, &$pipes) {
   $port = ' --debug-port '.$debugPort;
   $user = ' --user debugger';
   $config = ' --config '.$home.'/config/client.ini';
-  $logFileConfig = ' -vLog.File='."${LOG_ROOT}_test_client$test_run_id.log";
-  $repoConfig = " -vRepo.Central.Path=${LOG_ROOT}_client$test_run_id.hhbc";
+  $logFileConfig = ' -vLog.File='."{$LOG_ROOT}_test_client$test_run_id.log";
+  $repoConfig = " -vRepo.Central.Path={$LOG_ROOT}_client$test_run_id.hhbc";
   $debugConfig = ' --debug-config '.$home.'/config/hphpd.ini';
 
   $cmd = $hhvm.' -m debug' . $host . $port . $user .

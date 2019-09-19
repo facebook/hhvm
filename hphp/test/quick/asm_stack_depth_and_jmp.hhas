@@ -4,8 +4,7 @@
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 0 "test"
-  FCall <> 0 1 "" - "" ""
+  FCallFuncD <> 0 1 "" - "test"
   PopC
   String "\n"
   Print

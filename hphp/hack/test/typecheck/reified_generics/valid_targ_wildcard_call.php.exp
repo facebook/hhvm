@@ -1,8 +1,18 @@
 File "valid_targ_wildcard_call.php", line 8, characters 5-5:
-This is a wildcard, it cannot be used as a reified type argument (Typing[4305])
+Invalid reified hint (Typing[4305])
+File "valid_targ_wildcard_call.php", line 8, characters 5-5:
+This is a wildcard, it cannot be used as a reified type argument
+File "valid_targ_wildcard_call.php", line 5, characters 18-19:
+Tf is reified
+File "valid_targ_wildcard_call.php", line 9, characters 5-8:
+Invalid reified hint (Typing[4305])
+File "valid_targ_wildcard_call.php", line 9, characters 7-7:
+This is a wildcard, it cannot be used as a reified type argument
 File "valid_targ_wildcard_call.php", line 5, characters 18-19:
 Tf is reified
 File "valid_targ_wildcard_call.php", line 9, characters 7-7:
-This is a wildcard, it cannot be used as a reified type argument (Typing[4305])
+Invalid reified hint (Typing[4305])
+File "valid_targ_wildcard_call.php", line 9, characters 7-7:
+This is a wildcard, it cannot be used as a reified type argument
 File "valid_targ_wildcard_call.php", line 4, characters 15-16:
 Tc is reified

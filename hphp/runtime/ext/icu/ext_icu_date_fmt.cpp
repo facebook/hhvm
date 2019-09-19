@@ -334,7 +334,7 @@ static void add_to_localtime_arr(Array &ret, const UCalendar *cal,
 }
 
 static Variant HHVM_METHOD(IntlDateFormatter, localtime,
-                           const String& value, VRefParam position) {
+                           const String& value, Variant& position) {
   DATFMT_GET(data, this_, uninit_null());
   int32_t parse_pos = -1;
   if (!position.isNull()) {
@@ -382,12 +382,12 @@ static Variant HHVM_METHOD(IntlDateFormatter, localtime,
   }
   ret.set(s_tm_isdst, isDST ? 1 : 0);
 
-  position.assignIfRef((int64_t)parse_pos);
+  position = (int64_t)parse_pos;
   return ret;
 }
 
-static Variant HHVM_METHOD(IntlDateFormatter, parse,
-                           const String& value, VRefParam position) {
+static Variant HHVM_METHOD(IntlDateFormatter, parseWithPosition,
+                           const String& value, Variant& position) {
   DATFMT_GET(data, this_, 0);
   data->clearError();
   int32_t pos = position.toInt64();
@@ -405,7 +405,7 @@ static Variant HHVM_METHOD(IntlDateFormatter, parse,
   UDate timestamp = udat_parse(data->datefmt(),
                                str.getBuffer(), str.length(),
                                &pos, &error);
-  position.assignIfRef((int64_t)pos);
+  position = (int64_t)pos;
   if (U_FAILURE(error)) {
     data->setError(error, "Date parsing failed");
     return false;
@@ -483,7 +483,7 @@ void IntlExtension::initDateFormatter() {
   HHVM_ME(IntlDateFormatter, getTimeZone);
   HHVM_ME(IntlDateFormatter, isLenient);
   HHVM_ME(IntlDateFormatter, localtime);
-  HHVM_ME(IntlDateFormatter, parse);
+  HHVM_ME(IntlDateFormatter, parseWithPosition);
   HHVM_ME(IntlDateFormatter, setCalendar);
   HHVM_ME(IntlDateFormatter, setLenient);
   HHVM_ME(IntlDateFormatter, setPattern);

@@ -1,0 +1,6 @@
+File "object_not_subtype_of_class.php", line 7, characters 10-17:
+Invalid return type (Typing[4110])
+File "object_not_subtype_of_class.php", line 6, characters 36-36:
+Expected C
+File "object_not_subtype_of_class.php", line 7, characters 14-15:
+But got object; this class name is unknown to Hack

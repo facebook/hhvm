@@ -27,7 +27,7 @@ namespace HPHP { namespace jit { namespace irgen {
 namespace {
 
 BCMarker initial_marker(TransContext ctx) {
-  return BCMarker { ctx.srcKey(), ctx.initSpOffset, ctx.transID, nullptr };
+  return BCMarker { ctx.initSrcKey, ctx.initSpOffset, ctx.transID, nullptr };
 }
 
 }
@@ -41,22 +41,20 @@ IRGS::IRGS(IRUnit& unit, const RegionDesc* region, int32_t budgetBCInstrs,
   , region(region)
   , unit(unit)
   , irb(new IRBuilder(unit, initial_marker(context)))
-  , bcState(context.srcKey())
+  , bcState(context.initSrcKey)
   , budgetBCInstrs(budgetBCInstrs)
   , retryContext(retryContext)
 {
   updateMarker(*this);
   auto const frame = gen(*this, DefFP);
-  if (context.prologue) {
-    gen(*this, FuncGuard, FuncGuardData { context.func, &unit.prologueStart });
-  }
+
   // Now that we've defined the FP, update the BC marker appropriately.
   updateMarker(*this);
   gen(*this, DefSP, FPInvOffsetData { context.initSpOffset }, frame);
 
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     // Assert that we're in the correct function.
-    gen(*this, DbgAssertFunc, frame, cns(*this, context.func));
+    gen(*this, DbgAssertFunc, frame, cns(*this, bcState.func()));
   }
 }
 
@@ -82,42 +80,11 @@ std::string show(const IRGS& irgs) {
     --spOffset;
   };
 
-  auto fpi = curFunc(irgs)->findFPI(bcOff(irgs));
-  auto checkFpi = [&]() {
-    if (fpi && spOffset + frameCells == fpi->m_fpOff) {
-      auto fpushOff = fpi->m_fpushOff;
-      auto after = fpushOff + instrLen(curUnit(irgs)->at(fpushOff));
-      std::ostringstream msg;
-      msg << "ActRec from ";
-      curUnit(irgs)->prettyPrint(
-        msg,
-        Unit::PrintOpts().range(fpushOff, after)
-                         .noLineNumbers()
-                         .indent(0)
-                         .noFuncs()
-      );
-      auto msgStr = msg.str();
-      assertx(msgStr.back() == '\n');
-      msgStr.erase(msgStr.size() - 1);
-      for (unsigned i = 0; i < kNumActRecCells; ++i) elem(msgStr);
-      fpi = fpi->m_parentIndex != -1
-        ? &curFunc(irgs)->fpitab()[fpi->m_parentIndex]
-        : nullptr;
-      return true;
-    }
-    return false;
-  };
-
   header(folly::format(" {} stack element(s): ",
                        stackDepth).str());
   assertx(spOffset <= curFunc(irgs)->maxStackCells());
 
   for (auto i = 0; i < stackDepth; ) {
-    if (checkFpi()) {
-      i += kNumActRecCells;
-      continue;
-    }
-
     auto const spRel = offsetFromIRSP(irgs, BCSPRelOffset{i});
     auto const stkTy  = irgs.irb->stack(spRel, DataTypeGeneric).type;
     auto const stkVal = irgs.irb->stack(spRel, DataTypeGeneric).value;

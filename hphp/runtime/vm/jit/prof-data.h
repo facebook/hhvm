@@ -18,9 +18,9 @@
 #define incl_HPHP_PROF_TRANS_DATA_H_
 
 #include "hphp/util/atomic-vector.h"
+#include "hphp/util/rds-local.h"
 
 #include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/base/rds-local.h"
 
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/srckey.h"
@@ -207,7 +207,7 @@ struct ProfTransRec {
   }
 
   /*
-   * All calls in the TC which target this proflogue (directly|via the guard).
+   * All calls in the TC which target this proflogue directly.
    *
    * The vector can only be used while the caller list is locked.
    *
@@ -220,14 +220,6 @@ struct ProfTransRec {
   }
   auto const& mainCallers() const {
     return const_cast<ProfTransRec*>(this)->mainCallers();
-  }
-  auto& guardCallers() {
-    assertx(m_kind == TransKind::ProfPrologue);
-    m_callers->lock.assertOwnedBySelf();
-    return m_callers->guard;
-  }
-  auto const& guardCallers() const {
-    return const_cast<ProfTransRec*>(this)->guardCallers();
   }
   auto& profCallers() {
     assertx(m_kind == TransKind::ProfPrologue);
@@ -243,8 +235,7 @@ struct ProfTransRec {
   }
 
   /*
-   * (Record|Erase) a call at address caller (directly|via the guard) to this
-   * proflogue.
+   * (Record|Erase) a call at address caller directly to this proflogue.
    *
    * These functions may only be called when the caller list is locked.
    *
@@ -255,13 +246,7 @@ struct ProfTransRec {
     m_callers->lock.assertOwnedBySelf();
     m_callers->main.emplace_back(caller);
   }
-  void addGuardCaller(TCA caller) {
-    assertx(m_kind == TransKind::ProfPrologue);
-    m_callers->lock.assertOwnedBySelf();
-    m_callers->guard.emplace_back(caller);
-  }
   void removeMainCaller(TCA caller) { removeCaller(m_callers->main, caller); }
-  void removeGuardCaller(TCA caller) { removeCaller(m_callers->guard, caller); }
 
   /*
    * Erase the record of all calls to this proflogue.
@@ -274,20 +259,17 @@ struct ProfTransRec {
     assertx(m_kind == TransKind::ProfPrologue);
     m_callers->lock.assertOwnedBySelf();
     m_callers->main.clear();
-    m_callers->guard.clear();
   }
 
   void setAsmSize(uint32_t asmSize) { m_asmSize = asmSize; }
 
 private:
   struct CallerRec {
-    // main and guard are populated by profiling, and are used both to
-    // smash callers when we optimize, and to build the
-    // call-graph. profCallers is only populated via deserialization
-    // (where main and guard are not used), and is only used to build
+    // main is populated by profiling, and is used both to smash callers when
+    // we optimize, and to build the call-graph. profCallers is only populated
+    // via deserialization (where main is not used), and is only used to build
     // the call-graph.
     CompactVector<TCA> main;
-    CompactVector<TCA> guard;
     CompactVector<TransID> profCallers;
     mutable Mutex lock;
   };
@@ -357,8 +339,14 @@ struct ProfData {
   static const StringData* buildHost() {
     return s_buildHost.load(std::memory_order_relaxed);
   }
-  static void setDeserialized(const std::string& buildHost, int64_t buildTime) {
+  static const StringData* tag() {
+    return s_tag.load(std::memory_order_relaxed);
+  }
+  static void setDeserialized(const std::string& buildHost,
+                              const std::string& tag,
+                              int64_t buildTime) {
     s_buildHost.store(makeStaticString(buildHost), std::memory_order_relaxed);
+    s_tag.store(makeStaticString(tag), std::memory_order_relaxed);
     s_buildTime.store(buildTime, std::memory_order_relaxed);
     s_wasDeserialized.store(true, std::memory_order_relaxed);
   }
@@ -755,6 +743,7 @@ struct ProfData {
   static std::atomic_bool s_triedDeserialization;
   static std::atomic_bool s_wasDeserialized;
   static std::atomic<StringData*> s_buildHost;
+  static std::atomic<StringData*> s_tag;
   static std::atomic<int64_t> s_buildTime;
 };
 

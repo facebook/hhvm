@@ -205,6 +205,24 @@ struct VregSet {
   bool operator==(const VregSet& o) const { return regs == o.regs; }
   bool operator!=(const VregSet& o) const { return regs != o.regs; }
 
+  // Returns (*this & o).any() without actually calculating the set.
+  bool intersects(const VregSet& o) const {
+    auto first1 = regs.begin();
+    auto first2 = o.regs.begin();
+    auto const last1 = regs.end();
+    auto const last2 = o.regs.end();
+    while (first1 != last1 && first2 != last2) {
+      if (*first1 < *first2) {
+        ++first1;
+      } else if (*first2 < *first1) {
+        ++first2;
+      } else {
+        return true;
+      }
+    }
+    return false;
+  }
+
   /*
    * Mutators
    */

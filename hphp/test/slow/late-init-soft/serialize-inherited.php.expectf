@@ -1,0 +1,14 @@
+---- serialize ----
+
+Notice: Accessing <<__SoftLateInit>> property 'A::x' before initialization. Providing default. in %s/serialize-inherited.php on line 12
+string(22) "O:1:"B":1:{s:1:"x";N;}"
+---- json_encode ----
+
+Notice: Accessing <<__SoftLateInit>> property 'A::x' before initialization. Providing default. in %s/serialize-inherited.php on line 19
+string(10) "{"x":null}"
+---- var_dump ----
+object(B) (0) {
+}
+---- var_export ----
+B::__set_state(array(
+))

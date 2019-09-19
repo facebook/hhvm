@@ -1,0 +1,6 @@
+File "inter_tconst.php", line 16, characters 10-11:
+Invalid argument (Typing[4110])
+File "inter_tconst.php", line 10, characters 27-27:
+Expected ~[unresolved] because it is an unenforceable type
+File "inter_tconst.php", line 15, characters 13-13:
+But got (<expr#1> & <expr#1>) from this is expression test

@@ -21,8 +21,7 @@
   NullUninit
     PushL $a
     PushL $b
-  FPushFuncD 2 "main"
-  FCall <> 2 1 "" - "" ""
+  FCallFuncD <> 2 1 "" - "main"
   RetC
 }
 

@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2019, Facebook, Inc.
  * All rights reserved.
  *
@@ -7,4 +7,4 @@
  *
  *)
 
- val should_check_error : FileInfo.mode -> int -> bool
+val should_check_error : FileInfo.mode -> int -> bool

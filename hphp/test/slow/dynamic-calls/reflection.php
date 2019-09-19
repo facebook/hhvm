@@ -29,6 +29,7 @@ function negative_tests() {
   (new ReflectionMethod('B::func5'))->invoke(new B);
   (new ReflectionMethod('B::func6'))->invoke(new B);
 }
-
+<<__EntryPoint>> function main(): void {
 positive_tests();
 negative_tests();
+}

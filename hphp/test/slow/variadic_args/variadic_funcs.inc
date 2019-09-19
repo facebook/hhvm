@@ -6,12 +6,12 @@ function compare($args, $args_manual, $var_args, $var_arg_start = 0) {
     $n = $i + $var_arg_start;
     $args_val = $args_manual[$n];
     if ($args_val !== $val) {
-      echo "func_get_arg(${n}) is: ${args_val} expected: ${val}", "\n";
+      echo "func_get_arg({$n}) is: {$args_val} expected: {$val}", "\n";
       $success = false;
     }
     $args_val = $args[$n];
     if ($args_val !== $val) {
-      echo "func_get_args()[${n}] is: ${args_val} expected: ${val}", "\n";
+      echo "func_get_args()[{$n}] is: {$args_val} expected: {$val}", "\n";
       $success = false;
     }
   }

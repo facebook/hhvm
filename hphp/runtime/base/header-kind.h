@@ -45,8 +45,8 @@ namespace HPHP {
 enum class HeaderKind : uint8_t {
   // ArrayKind aliases
   Packed, Mixed, Empty, Apc, Globals,
-  // Shape
-  Shape,
+  // Record array
+  RecordArray,
   // Hack arrays
   Dict, VecArray, Keyset,
   // Other ordinary refcounted heap objects
@@ -137,16 +137,24 @@ enum class GCBits : uint8_t {};
  * Refcounted types have a 32-bit RefCount normally, or 8-bit plus 24 bits of
  * padding with ONE_BIT_REFCOUNT.
  *
- * 0       32     40      48        50  56
- * [ cnt | kind | marks | DVArray | X  | sizeClass ] Packed, VecArray
- * [ cnt | kind | marks | DVArray | X  |           ] Mixed, Dict
- * [ cnt | kind | marks |                          ] Empty, Apc, Globals, Keyset
+ * 0       32     40      48        53  56
+ * [ cnt | kind | marks | arrBits | X  | sizeClass ] Packed, VecArray,
+ *                                                   APCLocalArray, RecordArray
+ * [ cnt | kind | marks | arrBits | X  | keyTypes  ] Mixed, Dict
+ * [ cnt | kind | marks |                          ] Empty, Globals, Keyset
  * [ cnt | kind | marks | sizeClass:16             ] String
  * [ cnt | kind | marks | heapSize:16              ] Resource (ResourceHdr)
  * [ cnt | kind | marks |                          ] Ref (RefData)
  * [ cnt | kind | marks | Attribute    |           ] Object..ImmSet (ObjectData)
  *
- * Note: X in bit 50 is the kHasApcTv flag; see array-data.h
+ * Note: arrBits includes several flags, mostly from the Hack array migration:
+ *  - 2 bits for DVArrray
+ *  - 1 bit for hasAPCTypedValue
+ *  - 1 bit for isLegacyArray
+ *  - 1 bit for hasProvenanceData
+ *
+ * When HAM is complete, we can eliminate DVArray and hasProvenanceData and move
+ * the MixedArray keyTypes bitset (which uses 4 bits) to byte 6.
  *
  * Note: when an ObjectData is preceded by a special header (AsyncFuncFrame,
  * NativeData, ClosureHeader, or MemoData), only the special header is marked

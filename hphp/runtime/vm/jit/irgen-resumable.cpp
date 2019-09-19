@@ -104,9 +104,7 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset resumeOffset) {
 
     // Return control to the caller.
     auto const spAdjust = offsetToReturnSlot(env);
-    auto const retData = RetCtrlData {
-      spAdjust, false, AuxUnion{ std::numeric_limits<uint32_t>::max() }
-    };
+    auto const retData = RetCtrlData { spAdjust, false, AuxUnion{0} };
     gen(env, RetCtrl, retData, sp(env), fp(env), waitHandle);
   } else {
     assertx(!isInlining(env));
@@ -122,7 +120,7 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset resumeOffset) {
 
     // Return control to the caller (AG::next()).
     auto const spAdjust = offsetFromIRSP(env, BCSPRelOffset{-1});
-    auto const retData = RetCtrlData { spAdjust, true };
+    auto const retData = RetCtrlData { spAdjust, true, AuxUnion{0} };
     gen(env, RetCtrl, retData, sp(env), fp(env), waitHandle);
   }
 }
@@ -239,7 +237,7 @@ void implYield(IRGS& env, bool withKey) {
 
   // Return control to the caller (Gen::next()).
   auto const spAdjust = offsetFromIRSP(env, BCSPRelOffset{-1});
-  auto const retData = RetCtrlData { spAdjust, true };
+  auto const retData = RetCtrlData { spAdjust, true, AuxUnion{0} };
   gen(env, RetCtrl, retData, sp(env), fp(env), retVal);
 }
 
@@ -534,8 +532,9 @@ void emitCreateCont(IRGS& env) {
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     gen(env, DbgTrashRetVal, fp(env));
   }
-  auto const ret_data = RetCtrlData { offsetToReturnSlot(env), false };
-  gen(env, RetCtrl, ret_data, sp(env), fp(env), cont);
+  auto const spAdjust = offsetToReturnSlot(env);
+  auto const retData = RetCtrlData { spAdjust, false, AuxUnion{0} };
+  gen(env, RetCtrl, retData, sp(env), fp(env), cont);
 }
 
 void emitContEnter(IRGS& env) {

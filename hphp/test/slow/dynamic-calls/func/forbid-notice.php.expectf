@@ -1,0 +1,54 @@
+=============== positive tests =====================
+
+Notice: 'func' called dynamically but is not __DynamicallyCallable in %s on line 171
+
+Notice: 'async_func' called dynamically but is not __DynamicallyCallable in %s on line 172
+
+Warning: Decoding instance method func without $this! in %s on line 173
+
+Warning: Decoding instance method async_func without $this! in %s on line 175
+
+Warning: Decoding instance method func without $this! in %s on line 178
+
+Warning: Decoding instance method async_func without $this! in %s on line 180
+
+Notice: 'func' called dynamically but is not __DynamicallyCallable in %s on line 209
+
+Warning: Decoding instance method func without $this! in %s on line 210
+
+Warning: Decoding instance method func without $this! in %s on line 213
+
+Notice: 'func' called dynamically but is not __DynamicallyCallable in %s on line 221
+
+Notice: 'func' called dynamically but is not __DynamicallyCallable in %s on line 232
+
+Notice: 'func' called dynamically but is not __DynamicallyCallable in %s on line 243
+
+Notice: 'cmp' called dynamically but is not __DynamicallyCallable in %s on line 251
+=============== negative tests =====================
+
+Warning: Decoding instance method func2 without $this! in %s on line 349
+
+Warning: Decoding instance method async_func2 without $this! in %s on line 351
+
+Warning: Decoding instance method func2 without $this! in %s on line 354
+
+Warning: Decoding instance method async_func2 without $this! in %s on line 356
+
+Warning: Decoding instance method func2 without $this! in %s on line 383
+
+Warning: Decoding instance method func2 without $this! in %s on line 386
+=============== positive tests (exceptions) ========
+Exception: 'func' called dynamically but is not __DynamicallyCallable
+Exception: 'async_func' called dynamically but is not __DynamicallyCallable
+Exception: Decoding instance method func without $this!
+Exception: Decoding instance method async_func without $this!
+Exception: Decoding instance method func without $this!
+Exception: Decoding instance method async_func without $this!
+Exception: 'func' called dynamically but is not __DynamicallyCallable
+Exception: Decoding instance method func without $this!
+Exception: Decoding instance method func without $this!
+Exception: 'func' called dynamically but is not __DynamicallyCallable
+Exception: 'func' called dynamically but is not __DynamicallyCallable
+Exception: 'func' called dynamically but is not __DynamicallyCallable
+Exception: 'cmp' called dynamically but is not __DynamicallyCallable

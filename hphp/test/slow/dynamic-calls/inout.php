@@ -81,6 +81,7 @@ function negative_tests() {
 
 
 }
-
+<<__EntryPoint>> function main(): void {
 positive_tests();
 negative_tests();
+}

@@ -1,7 +1,6 @@
 <?hh
 
 
-error_reporting(-1);
 function handler($errno, $errmsg) {
   $pos = strpos($errmsg, ", Closure");
   if ($pos !== false) {
@@ -17,7 +16,6 @@ function handler($errno, $errmsg) {
     return false;
   }
 }
-set_error_handler('handler');
 
 type my_t = int;
 
@@ -96,7 +94,9 @@ function call_wrapper($fn, $arg) {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
+  error_reporting(-1);
+  set_error_handler(fun('handler'));
   for ($i = 1; $i <= 20; $i++) {
     foreach (array('', '_soft') as $suffix) {
       if ($suffix !== '' && $i === 1) {
@@ -165,4 +165,3 @@ function main() {
   }
   echo "Done\n";
 }
-main();

@@ -75,7 +75,7 @@ Type get_type_of_reified_list(const UserAttributeMap& ua) {
   assertx(numGenerics > 0);
   std::vector<Type> types(numGenerics,
                           RuntimeOption::EvalHackArrDVArrs ? TDictN : TDArrN);
-  return RuntimeOption::EvalHackArrDVArrs ? vec(types)
+  return RuntimeOption::EvalHackArrDVArrs ? vec(types, folly::none)
                                           : arr_packed_varray(types);
 }
 
@@ -85,12 +85,10 @@ State pseudomain_entry_state(const php::Func* func) {
   ret.thisType = TOptObj;
   ret.locals.resize(func->locals.size());
   ret.iters.resize(func->numIters);
-  ret.clsRefSlots.resize(func->numClsRefSlots);
   for (auto i = 0; i < ret.locals.size(); ++i) {
     // Named pseudomain locals are bound to $GLOBALS.
     ret.locals[i] = func->locals[i].name ? TGen : TUninit;
   }
-  for (auto& s : ret.clsRefSlots) s = TCls;
   return ret;
 }
 
@@ -117,7 +115,6 @@ State entry_state(const Index& index, Context const ctx,
   }();
   ret.locals.resize(ctx.func->locals.size());
   ret.iters.resize(ctx.func->numIters);
-  ret.clsRefSlots.resize(ctx.func->numClsRefSlots, TCls);
 
   auto locId = uint32_t{0};
   for (; locId < ctx.func->params.size(); ++locId) {
@@ -130,7 +127,7 @@ State entry_state(const Index& index, Context const ctx,
                                  knownArgs->args.end());
           for (auto& p : pack) p = unctx(std::move(p));
           ret.locals[locId] = RuntimeOption::EvalHackArrDVArrs
-            ? vec(std::move(pack))
+            ? vec(std::move(pack), folly::none)
             : arr_packed_varray(std::move(pack));
         } else {
           ret.locals[locId] = unctx(knownArgs->args[locId]);

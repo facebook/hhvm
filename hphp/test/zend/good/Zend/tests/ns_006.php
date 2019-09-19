@@ -1,6 +1,7 @@
 <?hh
 namespace test\ns1;
 
+<<__DynamicallyConstructible>>
 class Exception {
 }
 <<__EntryPoint>> function main(): void {

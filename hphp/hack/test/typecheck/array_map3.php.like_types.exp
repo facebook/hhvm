@@ -1,0 +1,6 @@
+File "array_map3.php", line 10, characters 23-24:
+Invalid argument (Typing[4110])
+File "stdlib/builtins_array.hhi", line 115, characters 10-18:
+Expected (function([unresolved], [unresolved]): [unresolved])
+File "array_map3.php", line 6, characters 3-31:
+But got dynamic because it is an unenforceable type

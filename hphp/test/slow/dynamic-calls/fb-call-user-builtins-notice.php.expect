@@ -1,0 +1,4 @@
+main
+
+Notice: 'foo' called dynamically but is not __DynamicallyCallable
+foo

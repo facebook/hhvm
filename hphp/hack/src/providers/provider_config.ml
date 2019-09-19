@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2019, Facebook, Inc.
  * All rights reserved.
  *
@@ -30,16 +30,13 @@ type backend =
 
 let backend_ref = ref Shared_memory
 
-let set_lru_shared_memory_backend (): unit =
-  backend_ref := Lru_shared_memory
+let set_lru_shared_memory_backend () : unit = backend_ref := Lru_shared_memory
 
-let set_shared_memory_backend (): unit =
-  backend_ref := Shared_memory
+let set_shared_memory_backend () : unit = backend_ref := Shared_memory
 
-let set_local_memory_backend ~(max_size_in_words : int): unit =
-  backend_ref := Local_memory {
-    decl_cache = Memory_bounded_lru_cache.make ~max_size_in_words;
-  }
+let set_local_memory_backend ~(max_size_in_words : int) : unit =
+  backend_ref :=
+    Local_memory
+      { decl_cache = Memory_bounded_lru_cache.make ~max_size_in_words }
 
-let get_backend (): backend =
-  !backend_ref
+let get_backend () : backend = !backend_ref

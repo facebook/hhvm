@@ -192,7 +192,8 @@ function curl_multi_close(resource $mh): mixed;
  */
 <<__Native("NoFCallBuiltin")>>
 function curl_multi_exec(resource $mh,
-                         mixed &$still_running): ?int;
+                         <<__OutOnly("KindOfInt64")>>
+                         inout mixed $still_running): ?int;
 
 /**
  * Return the content of a cURL handle if  is set
@@ -221,7 +222,8 @@ function curl_multi_getcontent(resource $ch): ?string;
  */
 <<__Native>>
 function curl_multi_info_read(resource $mh,
-                              mixed &$msgs_in_queue = NULL): mixed;
+                              <<__OutOnly("KindOfInt64")>>
+                              inout mixed $msgs_in_queue): mixed;
 
 /**
  * Returns a new cURL multi handle
@@ -386,9 +388,15 @@ function fb_curl_getopt(resource $ch, int $opt = 0): mixed;
  * @return mixed - Returns 0 on success, or one of the CURLM_XXX errors code.
  */
 <<__Native, __HipHopSpecific>>
-function fb_curl_multi_fdset(resource $mh, mixed &$read_fd_set,
-                             mixed &$write_fd_set, mixed &$exc_fd_set,
-                             ?int &$max_fd = null): mixed;
+function fb_curl_multi_fdset(resource $mh,
+                              <<__OutOnly("KindOfArray")>>
+                             inout mixed $read_fd_set,
+                              <<__OutOnly("KindOfArray")>>
+                             inout mixed $write_fd_set,
+                              <<__OutOnly("KindOfArray")>>
+                             inout mixed $exc_fd_set,
+                              <<__OutOnly("KindOfInt64")>>
+                             inout ?int $max_fd): mixed;
 
 /**
 * Returns a new cURL share handle

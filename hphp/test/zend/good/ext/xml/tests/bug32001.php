@@ -90,8 +90,7 @@ HERE;
 		$parser = xml_parser_create(NULL);
 		xml_parser_set_option($parser, XML_OPTION_CASE_FOLDING, 0);
     xml_set_element_handler($parser, "start_element", "end_element");
-    $thiz = $this;
-		xml_set_object($parser, &$thiz);
+		xml_set_object($parser, $this);
 
 		if ($this->chunk_size == 0) {
 			$success = @xml_parse($parser, $data, true);
@@ -120,37 +119,40 @@ HERE;
 		}
 	}
 }
-$suite = array(
-	new testcase("UTF-8",     0, 0, 0),
-	new testcase("UTF-8",     0, 0, 1),
-	new testcase("UTF-8",     0, 1, 0),
-	new testcase("UTF-8",     0, 1, 1),
-	new testcase("UTF-16BE",  0, 0, 0),
-	new testcase("UTF-16BE",  0, 1, 0),
-	new testcase("UTF-16BE",  0, 1, 1),
-	new testcase("UTF-16LE",  0, 0, 0),
-	new testcase("UTF-16LE",  0, 1, 0),
-	new testcase("UTF-16LE",  0, 1, 1),
-	new testcase("UTF-8",     1, 0, 0),
-	new testcase("UTF-8",     1, 0, 1),
-	new testcase("UTF-8",     1, 1, 0),
-	new testcase("UTF-8",     1, 1, 1),
-	new testcase("UTF-16BE",  1, 0, 0),
-	new testcase("UTF-16BE",  1, 1, 0),
-	new testcase("UTF-16BE",  1, 1, 1),
-	new testcase("UTF-16LE",  1, 0, 0),
-	new testcase("UTF-16LE",  1, 1, 0),
-	new testcase("UTF-16LE",  1, 1, 1),
-);
-
-if (XML_SAX_IMPL == 'libxml') {
-  echo "libxml2 Version => " . LIBXML_DOTTED_VERSION. "\n";
-} else {
-  echo "libxml2 Version => NONE\n";
-}
-
-foreach ($suite as $testcase) {
-	$testcase->run();
-}
 
 // vim600: sts=4 sw=4 ts=4 encoding=UTF-8
+<<__EntryPoint>>
+function main_entry(): void {
+  $suite = array(
+  	new testcase("UTF-8",     0, 0, 0),
+  	new testcase("UTF-8",     0, 0, 1),
+  	new testcase("UTF-8",     0, 1, 0),
+  	new testcase("UTF-8",     0, 1, 1),
+  	new testcase("UTF-16BE",  0, 0, 0),
+  	new testcase("UTF-16BE",  0, 1, 0),
+  	new testcase("UTF-16BE",  0, 1, 1),
+  	new testcase("UTF-16LE",  0, 0, 0),
+  	new testcase("UTF-16LE",  0, 1, 0),
+  	new testcase("UTF-16LE",  0, 1, 1),
+  	new testcase("UTF-8",     1, 0, 0),
+  	new testcase("UTF-8",     1, 0, 1),
+  	new testcase("UTF-8",     1, 1, 0),
+  	new testcase("UTF-8",     1, 1, 1),
+  	new testcase("UTF-16BE",  1, 0, 0),
+  	new testcase("UTF-16BE",  1, 1, 0),
+  	new testcase("UTF-16BE",  1, 1, 1),
+  	new testcase("UTF-16LE",  1, 0, 0),
+  	new testcase("UTF-16LE",  1, 1, 0),
+  	new testcase("UTF-16LE",  1, 1, 1),
+  );
+
+  if (XML_SAX_IMPL == 'libxml') {
+    echo "libxml2 Version => " . LIBXML_DOTTED_VERSION. "\n";
+  } else {
+    echo "libxml2 Version => NONE\n";
+  }
+
+  foreach ($suite as $testcase) {
+  	$testcase->run();
+  }
+}

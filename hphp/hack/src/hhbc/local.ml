@@ -1,11 +1,11 @@
-(**
+(*
  * Copyright (c) 2017, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the "hack" directory of this source tree.
  *
-*)
+ *)
 
 (* Type of locals as they appear in instructions.
  * Named variables are those appearing in the .declvars declaration. These
@@ -13,30 +13,32 @@
  * variables n and above not appearing in .declvars
  *)
 type t =
- | Unnamed of int
-   (* Named local, necessarily starting with `$` *)
- | Named of string
+  | Unnamed of int
+  (* Named local, necessarily starting with `$` *)
+  | Named of string
 
 module SN = Naming_special_names
 
 (* use dedicated locals to store label id and return value similar to HHVM *)
 let label_id_local = ref None
+
 let retval_local = ref None
 
 let next_local = ref 0
+
 let temp_local_map = ref SMap.empty
 
 let rec get_unnamed_local_id () =
   let current = !next_local in
   next_local := current + 1;
+
   (* make sure that newly allocated local don't stomp on dedicated locals  *)
   match !label_id_local with
   | Some (Unnamed v) when current = v -> get_unnamed_local_id ()
   | _ ->
-  match !retval_local with
-  | Some (Unnamed v) when current = v -> get_unnamed_local_id ()
-  | _ ->
-  current
+    (match !retval_local with
+    | Some (Unnamed v) when current = v -> get_unnamed_local_id ()
+    | _ -> current)
 
 let get_unnamed_local () = Unnamed (get_unnamed_local_id ())
 
@@ -45,8 +47,7 @@ let get_unnamed_local_for_tempname s =
   let temp_local_map_ = !temp_local_map in
   match SMap.get s temp_local_map_ with
   | Some x -> x
-  | None ->
-    failwith "Unnamed local never init'ed"
+  | None -> failwith "Unnamed local never init'ed"
 
 let init_unnamed_local_for_tempname s =
   SN.SpecialIdents.assert_tmp_var s;
@@ -68,6 +69,7 @@ let get_or_allocate_unnamed r =
   | Some l -> l
 
 let get_label_id_local () = get_or_allocate_unnamed label_id_local
+
 let get_retval_local () = get_or_allocate_unnamed retval_local
 
 let reserve_retval_and_label_id_locals () =
@@ -89,4 +91,4 @@ let reset_local base =
   next_local := base;
   label_id_local := None;
   retval_local := None;
-  temp_local_map := SMap.empty;
+  temp_local_map := SMap.empty

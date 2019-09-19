@@ -5,7 +5,7 @@ function mymeth(string... $y):void {
 }
 
 class C {
-  public function foo((function(...):void) $func) {
+  public function foo((function(string...):void) $func) {
     $func("some", "string");
   }
 }

@@ -1,10 +1,5 @@
-File "rx_if_implements23.php", line 11, characters 16-17:
-Class A0 does not correctly implement all required members  (Typing[4203])
-File "rx_if_implements23.php", line 11, characters 27-27:
-Some members are incompatible with those declared in type A
-Read the following to see why:
 File "rx_if_implements23.php", line 14, characters 19-31:
-Member condshallowrx has the wrong type
+Member condshallowrx has the wrong type (Typing[4341])
 File "rx_if_implements23.php", line 8, characters 28-40:
 This function is conditionally shallow reactive (condition type: \Rx1).
 File "rx_if_implements23.php", line 14, characters 19-31:

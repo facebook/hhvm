@@ -1,5 +1,4 @@
 <?hh
-set_error_handler('handler');
 function handler() { throw new Exception; }
 function foo(&$r) {}
 function test() {
@@ -9,4 +8,8 @@ function test() {
   }
   var_dump('ok');
 }
-test();
+<<__EntryPoint>>
+function main_entry(): void {
+  set_error_handler(fun('handler'));
+  test();
+}

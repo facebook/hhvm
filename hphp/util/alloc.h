@@ -30,6 +30,7 @@
 #include "hphp/util/alloc-defs.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/exception.h"
+#include "hphp/util/jemalloc-util.h"
 #include "hphp/util/low-ptr-def.h"
 #include "hphp/util/slab-manager.h"
 
@@ -120,9 +121,6 @@ SlabManager* get_local_slab_manager(uint32_t node);
 
 void setup_arena0(PageSpec);
 
-void mallctl_epoch();
-size_t mallctl_pactive(unsigned arenaId);
-
 #if USE_JEMALLOC_EXTENT_HOOKS
 
 // Explicit per-thread tcache for high arena.
@@ -189,12 +187,6 @@ void flush_thread_caches();
 void flush_thread_stack();
 
 /**
- * Free all unused memory back to system. On error, returns false and, if
- * not null, sets an error message in *errStr.
- */
-bool purge_all(std::string* errStr = nullptr);
-
-/**
  * Like scoped_ptr, but calls free() on destruct
  */
 struct ScopedMem {
@@ -254,60 +246,6 @@ void set_numa_binding(int node);
  * Allocate on a specific NUMA node, with alignment requirement.
  */
 void* mallocx_on_node(size_t size, int node, size_t align);
-
-/*
- * mallctl wrappers.
- */
-
-/*
- * Call mallctl, reading/writing values of type <T> if out/in are non-null,
- * respectively.  Assert/log on error, depending on errOk.
- */
-template <typename T, bool ErrOK>
-int mallctlHelper(const char *cmd, T* out, T* in) {
-#ifdef USE_JEMALLOC
-  size_t outLen = sizeof(T);
-  int err = mallctl(cmd,
-                    out, out ? &outLen : nullptr,
-                    in, in ? sizeof(T) : 0);
-  assert(err != 0 || outLen == sizeof(T));
-#else
-  int err = ENOENT;
-#endif
-  if (!ErrOK && err != 0) {
-    char msg[128];
-    snprintf(msg, sizeof(msg), "mallctl %s failed with error %d", cmd, err);
-    throw std::runtime_error{msg};
-  }
-  return err;
-}
-
-template <typename T, bool ErrOK = false>
-int mallctlReadWrite(const char *cmd, T* out, T in) {
-  return mallctlHelper<T, ErrOK>(cmd, out, &in);
-}
-
-template <typename T, bool ErrOK = false>
-int mallctlRead(const char* cmd, T* out) {
-  return mallctlHelper<T, ErrOK>(cmd, out, static_cast<T*>(nullptr));
-}
-
-template <typename T, bool ErrOK = false>
-int mallctlWrite(const char* cmd, T in) {
-  return mallctlHelper<T, ErrOK>(cmd, static_cast<T*>(nullptr), &in);
-}
-
-template <bool ErrOK = false> int mallctlCall(const char* cmd) {
-  // Use <unsigned> rather than <void> to avoid sizeof(void).
-  return mallctlHelper<unsigned, ErrOK>(cmd, nullptr, nullptr);
-}
-
-/*
- * jemalloc pprof utility functions.
- */
-int jemalloc_pprof_enable();
-int jemalloc_pprof_disable();
-int jemalloc_pprof_dump(const std::string& prefix, bool force);
 
 ///////////////////////////////////////////////////////////////////////////////
 

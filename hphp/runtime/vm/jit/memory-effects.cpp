@@ -293,8 +293,7 @@ InlineExitEffects inline_exit_effects(SSATmp* fp) {
     return AFrame {fp, AliasIdSet::IdRange(0, func->numLocals())};
   }();
   auto const stack = stack_below(fp, FPRelOffset{2});
-  AliasClass clsref = func->numClsRefSlots() ? AClsRefSlotAny : AEmpty;
-  return InlineExitEffects{ stack, frame, clsref | AMIStateAny };
+  return InlineExitEffects{ stack, frame, AMIStateAny };
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -455,19 +454,17 @@ GeneralEffects may_load_store_move(AliasClass loads,
 
 /*
  * Helper for iterator instructions.  They all affect some locals, but are
- * otherwise the same.
- *
- * N.B. Currently the memory for frame iterator slots is not part of the
- * AliasClass lattice, since we never really manipulate them from the TC yet,
- * so we don't report the effect these instructions have on it.
+ * otherwise the same. Value iters touch one local; key-value iters touch two.
  */
 GeneralEffects iter_effects(const IRInstruction& inst,
                             SSATmp* fp,
                             AliasClass locals) {
   auto const iterID = inst.extra<IterData>()->iterId;
-  AliasClass const iterPos = AIterPos { fp, iterID };
   AliasClass const iterBase = AIterBase { fp, iterID };
-  auto const iterMem = iterPos | iterBase;
+  AliasClass const iterType = AIterType { fp, iterID };
+  AliasClass const iterPos  = AIterPos  { fp, iterID };
+  AliasClass const iterEnd  = AIterEnd  { fp, iterID };
+  auto const iterMem = iterBase | iterType | iterPos | iterEnd;
   return may_reenter(
     inst,
     may_load_store_kill(
@@ -499,17 +496,6 @@ GeneralEffects interp_one_effects(const IRInstruction& inst) {
   } else {
     for (auto i = uint32_t{0}; i < extra->nChangedLocals; ++i) {
       stores = stores | AFrame { inst.src(1), extra->changedLocals[i].id };
-    }
-  }
-
-  for (auto i = uint32_t{0}; i < extra->nChangedClsRefSlots; ++i) {
-    auto const& slot = extra->changedClsRefSlots[i];
-    if (slot.write) {
-      stores = stores | AClsRefClsSlot { inst.src(1), slot.id } |
-               AClsRefTSSlot { inst.src(1), slot.id };
-    } else {
-      loads = loads | AClsRefClsSlot { inst.src(1), slot.id } |
-              AClsRefTSSlot { inst.src(1), slot.id };
     }
   }
 
@@ -668,7 +654,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       return UnknownEffects {};
     }
     return ReturnEffects {
-      AStackAny | AFrameAny | AClsRefSlotAny | AMIStateAny
+      AStackAny | AFrameAny | AMIStateAny
     };
 
   case AsyncFuncRet:
@@ -736,14 +722,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     AliasClass frame = func->numLocals()
       ? AFrame{inst.dst(), AliasIdSet::IdRange(0, func->numLocals())}
       : AEmpty;
-    AliasClass clsrefs = func->numClsRefSlots() ? AClsRefSlotAny : AEmpty;
     /*
      * Notice that the stack positions and frame locals described here are
      * exactly the set of alias locations that are about to be overlapping
-     * inside the inlined frame. Likewise, ClsRefSlots from the caller and the
-     * callee are about to be jumbled.
+     * inside the inlined frame.
      */
-    return InlineEnterEffects{ stack, frame | clsrefs, inline_fp_frame(&inst) };
+    return InlineEnterEffects{ stack, frame, inline_fp_frame(&inst) };
   }
 
   /*
@@ -906,6 +890,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case CallBuiltin:
     {
+      AliasClass out_stk = AEmpty;
+      auto const callee = inst.extra<CallBuiltin>()->callee;
       auto const stk = [&] () -> AliasClass {
         AliasClass ret = AEmpty;
         for (auto i = uint32_t{2}; i < inst.numSrcs(); ++i) {
@@ -913,18 +899,23 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
             auto const cls = pointee(inst.src(i));
             if (cls.maybe(AStackAny)) {
               ret = ret | cls;
+              auto const paramOff = callee->isMethod() ? 3 : 2;
+              if (i >= paramOff && callee->params()[i - paramOff].inout) {
+                out_stk = out_stk | cls;
+              }
             }
           }
         }
         return ret;
       }();
-      auto const callee = inst.extra<CallBuiltin>()->callee;
       if (callee->isFoldable()) {
-        return may_load_store_kill(stk | AHeapAny, AHeapAny, AMIStateAny);
+        return may_load_store_kill(
+          stk | AHeapAny, out_stk | AHeapAny, AMIStateAny
+        );
       } else {
         return may_load_store_kill(
           stk | AHeapAny | ARdsAny,
-          AHeapAny | ARdsAny,
+          out_stk | AHeapAny | ARdsAny,
           AMIStateAny
         );
       }
@@ -947,16 +938,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
         ? AFrame { fp, AliasIdSet::IdRange(0, nlocals)}
         : AEmpty;
     }();
-    auto const clsrefs = [&] () -> AliasClass {
-      if (fpInst->is(DefFP)) return AClsRefSlotAny;
-      assertx(fpInst->is(DefInlineFP));
-      auto const nrefs = fpInst->extra<DefInlineFP>()->target->numClsRefSlots();
-      return nrefs ? AClsRefSlotAny : AEmpty;
-    }();
     return may_load_store_move(
-      frame | clsrefs,
+      frame,
       AHeapAny,
-      frame | clsrefs
+      frame
     );
   }
 
@@ -1078,45 +1063,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     // This can store to globals or locals, but we don't have globals supported
     // in AliasClass yet.
     return PureStore { AUnknown, inst.src(1), nullptr };
-
-  //////////////////////////////////////////////////////////////////////
-  // Instructions that manipulate class-ref slots
-
-  case LdClsRefCls:
-    return PureLoad {
-      AClsRefClsSlot { inst.src(0), inst.extra<LdClsRefCls>()->slot }
-    };
-
-  case LdClsRefTS:
-    return PureLoad {
-      AClsRefTSSlot { inst.src(0), inst.extra<LdClsRefTS>()->slot }
-    };
-
-  case StClsRefCls:
-    return PureStore {
-      AClsRefClsSlot { inst.src(0), inst.extra<StClsRefCls>()->slot },
-      inst.src(1),
-      nullptr
-    };
-
-  case StClsRefTS:
-    return PureStore {
-      AClsRefTSSlot { inst.src(0), inst.extra<StClsRefTS>()->slot },
-      inst.src(1),
-      nullptr
-    };
-
-  case KillClsRefCls:
-    return may_load_store_kill(
-      AEmpty, AEmpty,
-      AClsRefClsSlot { inst.src(0), inst.extra<KillClsRefCls>()->slot }
-    );
-
-  case KillClsRefTS:
-    return may_load_store_kill(
-      AEmpty, AEmpty,
-      AClsRefTSSlot { inst.src(0), inst.extra<KillClsRefTS>()->slot }
-    );
 
   //////////////////////////////////////////////////////////////////////
   // Pointer-based loads and stores
@@ -1281,6 +1227,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     }
 
   case NewRecord:
+  case NewRecordArray:
     {
       auto const extra = inst.extra<NewStructData>();
       auto const stack_in = AStack {
@@ -1461,12 +1408,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case NSameKeyset:
     return may_load_store(AElemAny, AEmpty);
 
-  case SameShape:
-  case NSameShape:
-    return may_load_store(
-        RuntimeOption::EvalHackArrDVArrs ? AElemAny : AEmpty,
-        AEmpty);
-
   case AKExistsObj:
     return may_load_store(AHeapAny, AHeapAny);
 
@@ -1600,6 +1541,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvBoolToArr:
   case ConvDblToStr:
   case ConvDblToArr:
+  case ConvFuncToArr:
   case ConvIntToArr:
   case ConvIntToStr:
   case Box:  // conditional allocation
@@ -1634,6 +1576,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     // occur once on any exit path from a function.
     return may_load_store(AEmpty, AEmpty);
 
+  case LdOutAddr:
+    return IrrelevantEffects{};
+
   case SpillFrame:
     {
       auto const spOffset = inst.extra<SpillFrame>()->spOffset;
@@ -1655,16 +1600,15 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return PureLoad {
       actrec_ctx(inst.src(0), inst.extra<LdARCtx>()->offset)
     };
-  case LdARFuncPtr:
-    return PureLoad {
-      actrec_func(inst.src(0), inst.extra<LdARFuncPtr>()->offset)
-    };
 
   case DbgAssertARFunc:
     return may_load_store(
       actrec_func(inst.src(0), inst.extra<DbgAssertARFunc>()->offset),
       AEmpty
     );
+
+  case DbgTraceCall:
+    return may_load_store(AStackAny | AFrameAny, AEmpty);
 
   case Unreachable:
     // Unreachable code kills every memory location.
@@ -1693,8 +1637,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case AssertLoc:
   case AssertStk:
   case AssertMBase:
-  case AssertARFunc:
-  case FuncGuard:
   case DefFP:
   case DefSP:
   case EndGuards:
@@ -1751,7 +1693,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case AssertNonNull:
   case CheckNonNull:
   case CheckNullptr:
-  case CheckFuncMMNonMagic:
   case CheckSmashableClass:
   case Ceil:
   case Floor:
@@ -1791,11 +1732,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case FuncHasAttr:
   case IsFunReifiedGenericsMatched:
   case IsClsDynConstructible:
-  case LdFuncMFunc:
   case LdFuncRxLevel:
   case LdSmashable:
   case LdSmashableFunc:
-  case IsReifiedName:
   case LdARNumParams:
   case LdRDSAddr:
   case ExitPlaceholder:
@@ -1803,14 +1742,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ProfileType:
   case LdIfaceMethod:
   case InstanceOfIfaceVtable:
-  case CheckARMagicFlag:
   case LdARNumArgsAndFlags:
-  case StARNumArgsAndFlags:
   case LdARReifiedGenerics:
   case KillARReifiedGenerics:
   case LdTVAux:
-  case LdARInvName:
-  case StARInvName:
   case MethodExists:
   case GetTime:
   case GetTimeNs:
@@ -1818,7 +1753,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case Select:
   case LookupSPropSlot:
   case ConvPtrToLval:
-  case MangleReifiedName:
+  case ProfileProp:
     return IrrelevantEffects {};
 
   case StClosureArg:
@@ -1879,7 +1814,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CountArrayFast:
   case CountVec:
   case CountDict:
-  case CountShape:
   case CountKeyset:
   case InstanceOf:
   case InstanceOfBitmask:
@@ -1977,12 +1911,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdWHResult:
   case LdWHState:
   case LdWHNotDone:
+  case LookupClsMethod:
   case LookupClsRDS:
-  case DbgTraceCall:
   case InitCtx:
-  case PackMagicArgs:
   case StrictlyIntegerConv:
   case DbgAssertFunc:
+  case ProfileCall:
   case ProfileMethod:
     return may_load_store(AEmpty, AEmpty);
 
@@ -2035,21 +1969,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case GetMemoKeyScalar:
     return IrrelevantEffects{};
 
-  case LdArrFuncCtx:
-  case LdFunc: // these all can autoload
-    {
-      AliasClass effects =
-        actrec(inst.src(1), inst.extra<IRSPRelOffsetData>()->offset);
-      return may_load_store(effects, effects);
-    }
-
-  case LookupClsMethod:   // autoload, and it writes part of the new actrec
-    {
-      AliasClass effects =
-        actrec(inst.src(2), inst.extra<LookupClsMethod>()->calleeAROffset);
-      return may_load_store(effects, effects);
-    }
-
   case LdClsPropAddrOrNull:   // may run 86{s,p}init, which can autoload
   case LdClsPropAddrOrRaise:  // raises errors, and 86{s,p}init
   case BaseG:
@@ -2091,13 +2010,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case EqArr:
   case NeqArr:
   case CmpArr:
-  case GtShape:
-  case GteShape:
-  case LtShape:
-  case LteShape:
-  case EqShape:
-  case NeqShape:
-  case CmpShape:
   case GtVec:
   case GteVec:
   case LtVec:
@@ -2108,7 +2020,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case EqDict:
   case NeqDict:
   case ConvCellToArr:  // decrefs src, may read obj props
-  case ConvCellToObj:  // decrefs src
   case ConvObjToArr:   // decrefs src
   case ConvObjToVArr:  // can invoke PHP
   case ConvObjToDArr:  // can invoke PHP
@@ -2116,6 +2027,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case DefCls:         // autoload
   case LdCls:          // autoload
   case LdClsCached:    // autoload
+  case LdFunc:         // autoload
   case LdFuncCached:   // autoload
   case LdRecDescCached:    // autoload
   case LdSwitchObjIndex:  // decrefs arg
@@ -2162,7 +2074,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvCellToDbl:
   case ConvArrToVec:
   case ConvArrToDict:
-  case ConvShapeToDict:
   case ConvObjToVec:
   case ConvObjToDict:
   case ConvObjToKeyset:
@@ -2170,6 +2081,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ThrowInvalidArrayKey:
   case ThrowInvalidOperation:
   case ThrowArithmeticError:
+  case ThrowCallReifiedFunctionWithoutGenerics:
   case ThrowDivisionByZeroError:
   case ThrowDivisionByZeroException:
   case ThrowHasThisNeedStatic:
@@ -2187,34 +2099,33 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case AddNewElemVec:
   case IsTypeStruct:
-  case LdReifiedGeneric:
-  case RecordReifiedGenericsAndGetName:
   case RecordReifiedGenericsAndGetTSList:
     return may_load_store(AElemAny, AEmpty);
 
   case ConvArrToKeyset: // Decrefs input values
   case ConvVecToKeyset:
   case ConvDictToKeyset:
-  case ConvShapeToKeyset:
   case ConvDictToDArr: // These 4 may raise Hack array compat notices
-  case ConvShapeToDArr:
   case ConvKeysetToDArr:
   case ConvDictToArr:
-  case ConvShapeToArr:
   case ConvKeysetToArr:
+  case ConvClsMethToArr:
+  case ConvClsMethToDArr:
+  case ConvClsMethToDict:
+  case ConvClsMethToKeyset:
+  case ConvClsMethToVArr:
+  case ConvClsMethToVec:
     return may_load_store(AElemAny, AEmpty);
 
   case ConvVecToArr:
   case ConvArrToNonDVArr:
   case ConvDictToVec:
-  case ConvShapeToVec:
   case ConvKeysetToVec:
   case ConvVecToDict:
   case ConvKeysetToDict:
   case ConvArrToVArr:
   case ConvVecToVArr:
   case ConvDictToVArr:
-  case ConvShapeToVArr:
   case ConvKeysetToVArr:
   case ConvArrToDArr:
   case ConvVecToDArr:
@@ -2290,8 +2201,6 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
 
   auto check = [&] (AliasClass a) {
     if (auto const fr = a.frame()) check_fp(fr->base);
-    if (auto const sl = a.clsRefClsSlot()) check_fp(sl->base);
-    if (auto const sl = a.clsRefTSSlot()) check_fp(sl->base);
     if (auto const pr = a.prop())  check_obj(pr->obj);
   };
 

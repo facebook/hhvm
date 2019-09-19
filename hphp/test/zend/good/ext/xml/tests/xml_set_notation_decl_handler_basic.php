@@ -30,8 +30,7 @@ class XML_Parser
     function parse($data)
     {
         $parser = xml_parser_create();
-        $thiz = $this;
-        xml_set_object($parser, &$thiz);
+        xml_set_object($parser, $this);
         xml_set_notation_decl_handler($parser, "notation_decl_handler");
         xml_set_unparsed_entity_decl_handler($parser, "unparsed_entity_decl_handler");
         xml_parse($parser, $data, true);

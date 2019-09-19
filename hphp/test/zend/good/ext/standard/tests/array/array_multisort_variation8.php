@@ -21,7 +21,7 @@ function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_multisort() : usage variation  - test sort order of all types***\n";
 
-set_error_handler('test_error_handler');
+set_error_handler(fun('test_error_handler'));
 
 $inputs = array(
       'int 0' => 0,
@@ -37,7 +37,7 @@ $inputs = array(
 );
 
 $string = SORT_STRING;
-var_dump(array_multisort(&$inputs, &$string));
+var_dump(array_multisort2(&$inputs, &$string));
 var_dump($inputs);
 
 echo "===DONE===\n";

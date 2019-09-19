@@ -7,6 +7,7 @@ abstract class C {
   abstract public function f(): Bar;
 }
 
-/* HH_FIXME[4110] */ abstract class D extends C {
+abstract class D extends C {
+  /* HH_FIXME[4341] */
   abstract public function f(): Foo;
 }

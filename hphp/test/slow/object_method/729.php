@@ -1,7 +1,7 @@
 <?hh
 
 class A {
-  var $a;
+  public $a;
   function f() {
     var_dump($this->a);
   }

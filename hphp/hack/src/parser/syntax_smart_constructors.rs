@@ -3,22 +3,21 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::parser_env::ParserEnv;
-use crate::smart_constructors::NoState;
-use crate::source_text::SourceText;
+mod syntax_smart_constructors_generated;
+
+use parser_core_types::source_text::SourceText;
+use parser_rust::{parser_env::ParserEnv, smart_constructors::NoState};
 
 pub use crate::syntax_smart_constructors_generated::*;
 
-pub trait StateType<'src, R> {
+pub trait StateType<'src, R>: Clone {
     fn initial(env: &ParserEnv, source_text: &SourceText<'src>) -> Self;
-    fn next(t: Self, inputs: &[&R]) -> Self;
+    fn next(&mut self, inputs: &[&R]);
 }
 
 impl<'src, R> StateType<'src, R> for NoState {
     fn initial(_env: &ParserEnv, _: &SourceText<'src>) -> Self {
         NoState {}
     }
-    fn next(t: Self, _inputs: &[&R]) -> Self {
-        t
-    }
+    fn next(&mut self, _inputs: &[&R]) {}
 }

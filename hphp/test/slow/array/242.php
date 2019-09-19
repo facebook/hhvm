@@ -6,7 +6,7 @@ function test($q, $a, $b, $c) {
     var_dump(isset($x[0][1]), isset($x['foo'][1]));
     var_dump(isset($x[$b][1]), isset($x[$c][1]));
     $xx = $x[0];
-    var_dump(end(&$xx));
+    var_dump(end(inout $xx));
   }
 }
 

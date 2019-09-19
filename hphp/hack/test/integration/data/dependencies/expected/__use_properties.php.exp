@@ -1,0 +1,18 @@
+<?hh
+class WithProperties {
+
+  public function __construct(int $arg) {
+    $this->first = extract_standalone_make_default<int>();
+    $this->second = extract_standalone_make_default<int>();
+  }
+  public int $second;
+  public int $first;
+}
+function use_properties(WithProperties $arg): int {
+  return $arg->first + $arg->second;
+}
+function extract_standalone_make_default<T>(): T {
+  throw new Exception();
+}
+
+

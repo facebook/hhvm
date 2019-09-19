@@ -1,21 +1,5 @@
 <?hh
 
-/*
-   +-------------------------------------------------------------+
-   | Copyright (c) 2015 Facebook, Inc. (http://www.facebook.com) |
-   +-------------------------------------------------------------+
-*/
-
-error_reporting(-1);
-
-$table = array();
-$table[0] = [34];
-$table[0][1] = -3;
-$table[0][2] = 345;
-$table[1] = [123];
-$table[1][1] = 9854;
-$table[1][2] = -765;
-
 function findValue($table, $v)  // where $table is 2x3 array
 {
         for ($row = 0; $row <= 1; ++$row)
@@ -35,9 +19,6 @@ done:
         ;
 }
 
-findValue($table, 123);
-findValue($table, -23);
-
 // break;  // can't break from the outer-most level
 
 function f($i)
@@ -45,23 +26,38 @@ function f($i)
         echo "$i\n";
         break;  // break is not rejected here until runtime
 }
+<<__EntryPoint>>
+function main_entry(): void {
+  error_reporting(-1);
 
-//f(12);        // fails
+  $table = array();
+  $table[0] = [34];
+  $table[0][1] = -3;
+  $table[0][2] = 345;
+  $table[1] = [123];
+  $table[1][1] = 9854;
+  $table[1][2] = -765;
 
-for ($i = 1; $i <= 3; ++$i)
-{
-//        f($i);        // fails
+  findValue($table, 123);
+  findValue($table, -23);
+
+  //f(12);        // fails
+
+  for ($i = 1; $i <= 3; ++$i)
+  {
+  //        f($i);        // fails
+  }
+
+  for ($i = 10; $i <= 40; $i +=10)
+  {
+          echo "\n\$i = $i: ";
+          switch($i)
+          {
+          case 10: echo "ten"; break;
+          case 20: echo "twenty"; break 2;
+          case 30: echo "thirty"; break;
+          }
+          echo "\nJust beyond the switch";
+  }
+  echo "\n----------\n";
 }
-
-for ($i = 10; $i <= 40; $i +=10)
-{
-        echo "\n\$i = $i: ";
-        switch($i)
-        {
-        case 10: echo "ten"; break;
-        case 20: echo "twenty"; break 2;
-        case 30: echo "thirty"; break;
-        }
-        echo "\nJust beyond the switch";
-}
-echo "\n----------\n";

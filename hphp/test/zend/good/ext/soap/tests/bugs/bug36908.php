@@ -4,6 +4,7 @@ class PublisherService {
     return $publisher->region_id;
   }
 }
+<<__EntryPoint>> function main(): void {
 $input =
 '<?xml version="1.0" encoding="UTF-8"?>
 <soapenv:Envelope
@@ -31,3 +32,4 @@ ini_set('soap.wsdl_cache_enabled', false);
 $server = new SoapServer(dirname(__FILE__)."/bug36908.wsdl");
 $server->setClass("PublisherService");
 $server->handle($input);
+}

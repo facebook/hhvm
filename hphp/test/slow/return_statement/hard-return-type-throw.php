@@ -3,7 +3,7 @@
 function error_handler() {
   throw new Exception('nooo');
 }
-set_error_handler('error_handler');
+set_error_handler(fun('error_handler'));
 
 class Media {}
 

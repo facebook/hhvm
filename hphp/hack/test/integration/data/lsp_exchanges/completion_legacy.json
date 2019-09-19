@@ -13,6 +13,11 @@
 },
 {
   "jsonrpc": "2.0",
+  "method": "$test/waitForHhServerReady",
+  "params": {}
+},
+{
+  "jsonrpc": "2.0",
   "method": "textDocument/didOpen",
   "params": {
      "textDocument": {
@@ -240,7 +245,7 @@
     "insertText": ":ab:cd:alpha",
     "insertTextFormat": 1,
     "data": {
-      "filename": "${root_path}${path_sep}completion_extras.php",
+      "filename": "${root_path}/completion_extras.php",
       "line": 9,
       "char": 13
     }
@@ -347,7 +352,7 @@
     "insertText": "test_function",
     "insertTextFormat": 1,
     "data": {
-      "filename": "${root_path}${path_sep}completion.php",
+      "filename": "${root_path}/completion.php",
       "line": 8,
       "char": 10
     }

@@ -11,14 +11,14 @@
  * THIS FILE IS @generated; DO NOT EDIT IT
  * To regenerate this file, run
  *
- *   buck run //hphp/hack/src:generate_full_fidelity -- --rust
+ *   buck run //hphp/hack/src:generate_full_fidelity
  *
  **
  *
  */
 use crate::syntax::*;
 
-pub trait SyntaxType<C>: SyntaxTypeBase<C>
+pub trait SyntaxType<'a, C>: SyntaxTypeBase<'a, C>
 {
     fn make_end_of_file(ctx: &C, end_of_file_token: Self) -> Self;
     fn make_script(ctx: &C, script_declarations: Self) -> Self;
@@ -61,7 +61,9 @@ pub trait SyntaxType<C>: SyntaxTypeBase<C>
     fn make_decorated_expression(ctx: &C, decorated_expression_decorator: Self, decorated_expression_expression: Self) -> Self;
     fn make_parameter_declaration(ctx: &C, parameter_attribute: Self, parameter_visibility: Self, parameter_call_convention: Self, parameter_type: Self, parameter_name: Self, parameter_default_value: Self) -> Self;
     fn make_variadic_parameter(ctx: &C, variadic_parameter_call_convention: Self, variadic_parameter_type: Self, variadic_parameter_ellipsis: Self) -> Self;
-    fn make_attribute_specification(ctx: &C, attribute_specification_left_double_angle: Self, attribute_specification_attributes: Self, attribute_specification_right_double_angle: Self) -> Self;
+    fn make_old_attribute_specification(ctx: &C, old_attribute_specification_left_double_angle: Self, old_attribute_specification_attributes: Self, old_attribute_specification_right_double_angle: Self) -> Self;
+    fn make_attribute_specification(ctx: &C, attribute_specification_attributes: Self) -> Self;
+    fn make_attribute(ctx: &C, attribute_at: Self, attribute_attribute_name: Self) -> Self;
     fn make_inclusion_expression(ctx: &C, inclusion_require: Self, inclusion_filename: Self) -> Self;
     fn make_inclusion_directive(ctx: &C, inclusion_expression: Self, inclusion_semicolon: Self) -> Self;
     fn make_compound_statement(ctx: &C, compound_left_brace: Self, compound_statements: Self, compound_right_brace: Self) -> Self;
@@ -111,7 +113,6 @@ pub trait SyntaxType<C>: SyntaxTypeBase<C>
     fn make_prefix_unary_expression(ctx: &C, prefix_unary_operator: Self, prefix_unary_operand: Self) -> Self;
     fn make_postfix_unary_expression(ctx: &C, postfix_unary_operand: Self, postfix_unary_operator: Self) -> Self;
     fn make_binary_expression(ctx: &C, binary_left_operand: Self, binary_operator: Self, binary_right_operand: Self) -> Self;
-    fn make_instanceof_expression(ctx: &C, instanceof_left_operand: Self, instanceof_operator: Self, instanceof_right_operand: Self) -> Self;
     fn make_is_expression(ctx: &C, is_left_operand: Self, is_operator: Self, is_right_operand: Self) -> Self;
     fn make_as_expression(ctx: &C, as_left_operand: Self, as_operator: Self, as_right_operand: Self) -> Self;
     fn make_nullable_as_expression(ctx: &C, nullable_as_left_operand: Self, nullable_as_operator: Self, nullable_as_right_operand: Self) -> Self;
@@ -128,7 +129,7 @@ pub trait SyntaxType<C>: SyntaxTypeBase<C>
     fn make_collection_literal_expression(ctx: &C, collection_literal_name: Self, collection_literal_left_brace: Self, collection_literal_initializers: Self, collection_literal_right_brace: Self) -> Self;
     fn make_object_creation_expression(ctx: &C, object_creation_new_keyword: Self, object_creation_object: Self) -> Self;
     fn make_constructor_call(ctx: &C, constructor_call_type: Self, constructor_call_left_paren: Self, constructor_call_argument_list: Self, constructor_call_right_paren: Self) -> Self;
-    fn make_record_creation_expression(ctx: &C, record_creation_type: Self, record_creation_left_bracket: Self, record_creation_members: Self, record_creation_right_bracket: Self) -> Self;
+    fn make_record_creation_expression(ctx: &C, record_creation_type: Self, record_creation_array_token: Self, record_creation_left_bracket: Self, record_creation_members: Self, record_creation_right_bracket: Self) -> Self;
     fn make_array_creation_expression(ctx: &C, array_creation_left_bracket: Self, array_creation_members: Self, array_creation_right_bracket: Self) -> Self;
     fn make_array_intrinsic_expression(ctx: &C, array_intrinsic_keyword: Self, array_intrinsic_left_paren: Self, array_intrinsic_members: Self, array_intrinsic_right_paren: Self) -> Self;
     fn make_darray_intrinsic_expression(ctx: &C, darray_intrinsic_keyword: Self, darray_intrinsic_explicit_type: Self, darray_intrinsic_left_bracket: Self, darray_intrinsic_members: Self, darray_intrinsic_right_bracket: Self) -> Self;
@@ -155,6 +156,7 @@ pub trait SyntaxType<C>: SyntaxTypeBase<C>
     fn make_xhp_expression(ctx: &C, xhp_open: Self, xhp_body: Self, xhp_close: Self) -> Self;
     fn make_xhp_close(ctx: &C, xhp_close_left_angle: Self, xhp_close_name: Self, xhp_close_right_angle: Self) -> Self;
     fn make_type_constant(ctx: &C, type_constant_left_type: Self, type_constant_separator: Self, type_constant_right_type: Self) -> Self;
+    fn make_pu_access(ctx: &C, pu_access_left_type: Self, pu_access_separator: Self, pu_access_right_type: Self) -> Self;
     fn make_vector_type_specifier(ctx: &C, vector_type_keyword: Self, vector_type_left_angle: Self, vector_type_type: Self, vector_type_trailing_comma: Self, vector_type_right_angle: Self) -> Self;
     fn make_keyset_type_specifier(ctx: &C, keyset_type_keyword: Self, keyset_type_left_angle: Self, keyset_type_type: Self, keyset_type_trailing_comma: Self, keyset_type_right_angle: Self) -> Self;
     fn make_tuple_type_explicit_specifier(ctx: &C, tuple_type_keyword: Self, tuple_type_left_angle: Self, tuple_type_types: Self, tuple_type_right_angle: Self) -> Self;

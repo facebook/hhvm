@@ -1,0 +1,14 @@
+File "const_static_prop.php", line 10, characters 5-16:
+Invalid lvalue (Parsing[1002])
+File "const_static_prop.php", line 16, characters 5-12:
+Invalid lvalue (Parsing[1002])
+File "const_static_prop.php", line 26, characters 6-23:
+Cannot mutate a __Const property (Typing[4196])
+File "const_static_prop.php", line 9, characters 12-29:
+Cannot mutate a __Const property (Typing[4196])
+File "const_static_prop.php", line 15, characters 8-25:
+Cannot mutate a __Const property (Typing[4196])
+File "const_static_prop.php", line 17, characters 12-21:
+Cannot mutate a __Const property (Typing[4196])
+File "const_static_prop.php", line 21, characters 13-30:
+Cannot mutate a __Const property (Typing[4196])

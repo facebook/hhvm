@@ -168,8 +168,9 @@ class NumberFormatter {
    */
   <<__Native>>
   public function parseCurrency(string $value,
-                                mixed &$currency,
-                                mixed &$position = null): mixed;
+                                <<__OutOnly("KindOfString")>>
+                                inout mixed $currency,
+                                inout mixed $position): mixed;
 
   /**
    * Parse a number
@@ -183,10 +184,17 @@ class NumberFormatter {
    *
    * @return mixed - The value of the parsed number or FALSE on error.
    */
-  <<__Native>>
   public function parse(string $value,
                         int $type = NumberFormatter::TYPE_DOUBLE,
-                        mixed &$position = null): mixed;
+                        mixed &$position = null): mixed {
+    $result = $this->parseWithPosition($value, $type, inout $position);
+    return $result;
+  }
+
+  <<__Native>>
+  public function parseWithPosition(string $value,
+                                    int $type,
+                                    inout mixed $position): mixed;
 
   /**
    * Set an attribute
@@ -395,9 +403,9 @@ function numfmt_get_text_attribute(NumberFormatter $fmt, $attr) {
  */
 function numfmt_parse_currency(NumberFormatter $fmt,
                                $value,
-                               &$currency,
-                               &$position = null): mixed {
-  return $fmt->parseCurrency($value, &$currency, &$position);
+                               inout $currency,
+                               inout $position): mixed {
+  return $fmt->parseCurrency($value, inout $currency, inout $position);
 }
 
 /**
@@ -414,9 +422,9 @@ function numfmt_parse_currency(NumberFormatter $fmt,
  */
 function numfmt_parse(NumberFormatter $fmt,
                       $value,
-                      $type = NumberFormatter::TYPE_DOUBLE,
-                      &$position = null): mixed {
-  return $fmt->parse($value, $type, &$position);
+                      $type,
+                      inout $position): mixed {
+  return $fmt->parseWithPosition($value, $type, inout $position);
 }
 
 /**
@@ -480,4 +488,3 @@ function numfmt_set_text_attribute(NumberFormatter $fmt,
                                    $value): bool {
   return $fmt->setTextAttribute($attr, $value);
 }
-

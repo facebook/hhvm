@@ -306,15 +306,6 @@ private:
  */
 struct Func {
   /*
-   * Returns whether two res::Funcs definitely mean the func at
-   * runtime.
-   *
-   * Note: this is potentially pessimistic for its use in ActRec state
-   * merging right now, but not incorrect.
-   */
-  bool same(const Func&) const;
-
-  /*
    * Returns the name of this function.  Non-null guarantee.
    */
   SString name() const;
@@ -976,9 +967,9 @@ struct Index {
                                       DependencyContextSet& deps);
 
   /*
-   * Identify the persistent classes, functions and typeAliases.
+   * Identify the persistent classes, records, functions and typeAliases.
    */
-  void mark_persistent_classes_and_functions(php::Program& program);
+  void mark_persistent_types_and_functions(php::Program& program);
 
   /*
    * Mark any properties in cls that definitely do not redeclare a property in
@@ -1082,11 +1073,11 @@ struct PublicSPropMutations {
    * give up all information it knows about any public static properties.
    */
   void merge(const Index& index, Context ctx, const Type& cls,
-             const Type& name, const Type& val);
+             const Type& name, const Type& val, bool ignoreConst = false);
   void merge(const Index& index, Context ctx, ClassInfo* cinfo,
-             const Type& name, const Type& val);
+             const Type& name, const Type& val, bool ignoreConst = false);
   void merge(const Index& index, Context ctx, const php::Class& cls,
-             const Type& name, const Type& val);
+             const Type& name, const Type& val, bool ignoreConst = false);
 
 private:
   friend struct Index;

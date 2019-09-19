@@ -2,13 +2,13 @@
 // Copyright 2004-2015 Facebook. All Rights Reserved.
 
 
-// tests FPushFuncD
+// tests FCallFuncD
 function hello() {
   echo "hello";
   return 1;
 }
 
-// tests FPushFunc
+// tests FCallFunc
 function doCall($f) {
   echo "doCall(";
   if ($f()) {

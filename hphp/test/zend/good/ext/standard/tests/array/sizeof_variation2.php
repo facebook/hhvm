@@ -1,8 +1,8 @@
 <?hh
-/* Prototype  : int sizeof($mixed var[, int $mode])
+/* Prototype  : int sizeof($mixed var)
  * Description: Counts an elements in an array. If Standard PHP library is installed, 
  * it will return the properties of an object.
- * Source code: ext/standard/basic_functions.c
+ *
  * Alias to functions: count()
  */
 <<__EntryPoint>> function main(): void {
@@ -39,20 +39,12 @@ for($i = 0; $i < count($values); $i++)
   echo "-- Iteration $counter --\n";
   $var = $values[$i];
 
-  echo "Default Mode: "; 
+  echo "Default Mode: ";
   var_dump( sizeof($var) );
-  echo "\n";
-  
-  echo "COUNT_NORMAL Mode: ";
-  var_dump( sizeof($var, COUNT_NORMAL) );
-  echo "\n";
-
-  echo "COUNT_RECURSIVE Mode: ";
-  var_dump( sizeof($var, COUNT_RECURSIVE) );
   echo "\n";
 
   $counter++;
 }
-         
+
 echo "Done";
 }

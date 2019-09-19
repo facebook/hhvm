@@ -92,6 +92,7 @@
 #include "hphp/zend/zend-strtod.h"
 
 #include "hphp/util/assertions.h"
+#include "hphp/util/rds-local.h"
 
 #include <new>
 #include <stdint.h>
@@ -390,8 +391,6 @@ typedef struct Bigint Bigint;
 
 void destroy_freelist(Bigint** freelist);
 
-namespace {
-
 struct BigintData {
   BigintData() : p5s(nullptr) {
     freelist = (Bigint **)calloc(Kmax + 1, sizeof(Bigint *));
@@ -404,30 +403,12 @@ struct BigintData {
   Bigint **freelist;
   Bigint *p5s;
 };
-
-} // namespace
-
-static __thread BigintData* s_bigint_data;
-
-namespace {
-
-struct BigintDataGuard {
-  ~BigintDataGuard() {
-    delete s_bigint_data;
-    s_bigint_data = nullptr;
-  }
-};
-
-} // namespace
-
-static thread_local BigintDataGuard s_bigint_data_guard;
+static RDS_LOCAL_NO_CHECK(BigintData, s_bigint_data);
 
 // NOTE: If this has not been called, various functions in this file,
 // and in other files (e.g. "zend-printf.cpp"), will crash when called.
 void zend_get_bigint_data() {
-  if (s_bigint_data == nullptr) {
-    s_bigint_data = new BigintData;
-  }
+  s_bigint_data.getCheck();
 }
 
 static Bigint * Balloc(int k)
@@ -2501,7 +2482,7 @@ ret:
     *se = (char *)s;
   result = sign ? -value(rv) : value(rv);
 
-  if (s_bigint_data == nullptr) {
+  if (s_bigint_data.isNull()) {
     return result;
   }
 

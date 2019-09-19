@@ -7,6 +7,5 @@ function c<reify T>(C<T> $x): void {
 
 <<__EntryPoint>>
 function f(): void {
-  // TODO(T46022709): Handle variadic args
-  c<(function(int):void)>(new C<(function(int, ...):void)>);
+  c<(function(int):void)>(new C<(function(int, mixed...):void)>);
 }

@@ -1,0 +1,6 @@
+File "funcall_explicit_arg_infer_error.php", line 7, characters 16-17:
+Invalid argument (Typing[4110])
+File "funcall_explicit_arg_infer_error.php", line 4, characters 16-16:
+Expected ~[unresolved] because it is an unenforceable type
+File "funcall_explicit_arg_infer_error.php", line 6, characters 26-28:
+But got int

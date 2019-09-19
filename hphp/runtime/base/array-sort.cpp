@@ -109,9 +109,11 @@ SortFlavor SetArray::preSort(const AccessorT& acc, bool checkTypes) {
  */
 void MixedArray::postSort(bool resetKeys) {   // nothrow guarantee
   assertx(m_size > 0);
+  assertx(m_size == m_used);
   auto const ht = initHash(m_scale);
   auto const mask = this->mask();
   if (resetKeys) {
+    mutableKeyTypes() = kIntKey;
     for (uint32_t pos = 0; pos < m_used; ++pos) {
       auto& e = data()[pos];
       if (e.hasStrKey()) decRefStr(e.skey);
@@ -121,12 +123,14 @@ void MixedArray::postSort(bool resetKeys) {   // nothrow guarantee
     }
     m_nextKI = m_size;
   } else {
+    mutableKeyTypes() &= ~kTombstoneKey;
     auto data = this->data();
     for (uint32_t pos = 0; pos < m_used; ++pos) {
       auto& e = data[pos];
       *findForNewInsert(ht, mask, e.probe()) = pos;
     }
   }
+  assertx(checkInvariants());
 }
 
 /**

@@ -140,7 +140,7 @@ const TESTS = vec[
 
 <<__EntryPoint>>
 function main() {
-  $count = apc_fetch("count");
+  $count = __hhvm_intrinsics\apc_fetch_no_check("count");
   if ($count === false) {
     $count = 0;
   }

@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2019, Facebook, Inc.
  * All rights reserved.
  *
@@ -43,3 +43,7 @@ its value, then [add]s it to the cache and returns that value.
 The value is always guaranteed to be returned (whether by lookup or
 calculation), although it may be evicted immediately from the cache (see note on
 [add]). *)
+
+val remove : ('k, 'v) t -> key:'k -> unit
+(** Remove the entry with the given key from the cache. If the key is not
+present, does nothing. *)

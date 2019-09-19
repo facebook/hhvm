@@ -8,6 +8,6 @@ class a {
 function main_1817() {
 $x = new a;
 apc_store('x', array($x));
-$x = apc_fetch('x');
+$x = __hhvm_intrinsics\apc_fetch_no_check('x');
 var_dump($x[0]);
 }

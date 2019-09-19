@@ -1,6 +1,6 @@
 <?hh // partial
 
-function f(int $x, ...): void {}
+function f(int $x, ...$_): void {}
 
 function test(): void {
   $v = 123;

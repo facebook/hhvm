@@ -1,0 +1,6 @@
+File "generic_primitive.php", line 5, characters 12-18:
+Invalid return type (Typing[4110])
+File "generic_primitive.php", line 4, characters 30-32:
+Expected int
+File "generic_primitive.php", line 5, characters 12-18:
+But got num because this is the result of an arithmetic operation

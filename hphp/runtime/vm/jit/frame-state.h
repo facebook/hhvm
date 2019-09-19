@@ -44,44 +44,6 @@ namespace irgen {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct FPIInfo {
-  /*
-   * Value of IRSP after the call returns.
-   */
-  SSATmp* returnSP;
-
-  /*
-   * Offset relative to IR SP where this frame is located.
-   */
-  IRSPRelOffset irSPOff;
-
-  /*
-   * Union of observed context Class* types, and its value if known.
-   */
-  Type ctxType;
-  SSATmp* ctx;
-
-  /*
-   * Bytecode for the FPush* of the call.
-   */
-  Op fpushOpc;
-
-  /*
-   * Function being called.
-   */
-  const Func* func;
-
-  /*
-   * Whether this func was pushed as part of a dynamic call
-   */
-  SSATmp* dynamicCall;
-
-  bool inlineEligible;
-  bool spansCall;
-};
-
-///////////////////////////////////////////////////////////////////////////////
-
 /*
  * Information about a Location in the current function; used by FrameState.
  */
@@ -90,21 +52,10 @@ struct LocationState {
   static_assert(tag == LTag::Stack ||
                 tag == LTag::Local ||
                 tag == LTag::MBase ||
-                tag == LTag::CSlotCls ||
-                tag == LTag::CSlotTS ||
                 false,
                 "invalid LTag for LocationState");
 
-  static constexpr Type default_type() {
-    switch (tag) {
-      case LTag::CSlotCls:
-        return TCls;
-      case LTag::CSlotTS:
-        return RuntimeOption::EvalHackArrDVArrs ? TVec : TArr;
-      default:
-        return TGen;
-    }
-  }
+  static constexpr Type default_type() { return TGen; }
 
   template<LTag other>
   LocationState<tag>& operator=(const LocationState<other>& o) {
@@ -159,8 +110,6 @@ struct LocationState {
 using LocalState = LocationState<LTag::Local>;
 using StackState = LocationState<LTag::Stack>;
 using MBaseState = LocationState<LTag::MBase>;
-using CSlotClsState = LocationState<LTag::CSlotCls>;
-using CSlotTSState = LocationState<LTag::CSlotTS>;
 
 /*
  * MBRState tracks the value and type of the member base register pointer.
@@ -226,13 +175,6 @@ struct FrameState {
   bool stackModified{false};
 
   /*
-   * The FPI stack is used for inlining---when we start inlining at an FCall,
-   * we look in here to find a definition of the StkPtr,offset that can be used
-   * after the inlined callee "returns".
-   */
-  jit::vector<FPIInfo> fpiStack;
-
-  /*
    * The values in the eval stack in memory, either above or below the current
    * spValue pointer.  These are indexed relative to the base of the eval stack
    * for the whole function.
@@ -244,13 +186,6 @@ struct FrameState {
    * (if the state is initialized).
    */
   jit::vector<LocalState> locals;
-
-  /*
-   * Vector of class-ref slot information; sized for numClsRefSlots on the
-   * curFunc (if the state is initialized).
-   */
-  jit::vector<CSlotClsState> clsRefClsSlots;
-  jit::vector<CSlotTSState> clsRefTSSlots;
 
   /*
    * Values and types of the member base register and its pointee.
@@ -361,12 +296,6 @@ struct FrameStateMgr final {
    */
   const PostConditions& postConds(Block* exitBlock) const;
 
-  /*
-   * Set an override for the next FPI region's fpushOp.
-   */
-  void setFPushOverride(Op op)  { m_fpushOverride = op; }
-  bool hasFPushOverride() const { return m_fpushOverride.hasValue(); }
-
   /////////////////////////////////////////////////////////////////////////////
 
   /*
@@ -384,7 +313,6 @@ struct FrameStateMgr final {
   bool        needRatchet()       const { return cur().needRatchet; }
   bool        frameMaySpanCall()  const { return cur().frameMaySpanCall; }
   bool        stackModified()     const { return cur().stackModified; }
-  const jit::vector<FPIInfo>& fpiStack() const { return cur().fpiStack; }
 
   /*
    * Current inlining depth (not including the toplevel frame).
@@ -420,8 +348,6 @@ struct FrameStateMgr final {
   const LocalState& local(uint32_t id) const;
   const StackState& stack(IRSPRelOffset off) const;
   const StackState& stack(FPInvOffset off) const;
-  const CSlotClsState& clsRefClsSlot(uint32_t slot) const;
-  const CSlotTSState& clsRefTSSlot(uint32_t slot) const;
 
   /*
    * Generic accessors for LocationState members.
@@ -464,20 +390,12 @@ private:
    */
   Location loc(uint32_t) const;
   Location stk(IRSPRelOffset) const;
-  Location cslotcls(uint32_t) const;
-  Location cslotts(uint32_t) const;
 
   LocalState& localState(uint32_t);
   LocalState& localState(Location l); // @requires: l.tag() == LTag::Local
   StackState& stackState(IRSPRelOffset);
   StackState& stackState(FPInvOffset);
   StackState& stackState(Location l); // @requires: l.tag() == LTag::Stack
-  CSlotClsState& clsRefClsSlotState(uint32_t);
-  // @requires: l.tag() == LTag::CSlotCls
-  CSlotClsState& clsRefClsSlotState(Location l);
-  CSlotTSState& clsRefTSSlotState(uint32_t);
-  // @requires: l.tag() == LTag::CSlotTS
-  CSlotTSState& clsRefTSSlotState(Location l);
 
   /*
    * Helpers for update().
@@ -526,17 +444,6 @@ private:
   void dropLocalRefsInnerTypes();
   void clearLocals();
 
-  /*
-   * Stack state update helpers.
-   */
-  void spillFrameStack(const IRInstruction*);
-  void writeToSpilledFrame(IRSPRelOffset, const SSATmp*);
-
-  /*
-   * Class-ref slot state update helpers.
-   */
-  void clearClsRefSlots();
-
 private:
   struct BlockState {
     // Mandatory in-state computed from predecessors.
@@ -567,12 +474,6 @@ private:
    * Post-conditions for exit blocks.
    */
   jit::hash_map<Block*,PostConditions> m_exitPostConds;
-
-  /*
-   * Override for the current fpush* bytecode so we can convert bytecodes
-   * to php calls.
-   */
-  folly::Optional<Op> m_fpushOverride;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

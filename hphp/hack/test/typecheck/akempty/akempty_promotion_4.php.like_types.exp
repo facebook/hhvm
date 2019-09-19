@@ -1,0 +1,6 @@
+File "akempty_promotion_4.php", line 9, characters 5-6:
+Invalid argument (Typing[4110])
+File "akempty_promotion_4.php", line 12, characters 12-27:
+Expected ~ConstVector<int> because it is an unenforceable type
+File "akempty_promotion_4.php", line 7, characters 8-25:
+But got Vector<array (empty)>

@@ -1,0 +1,6 @@
+File "assign_vec_property_bad.php", line 9, characters 3-19:
+Invalid assignment (Typing[4110])
+File "assign_vec_property_bad.php", line 5, characters 10-17:
+Expected ~vec<int> because it is an unenforceable type
+File "assign_vec_property_bad.php", line 5, characters 10-17:
+But got vec<(int | string)>

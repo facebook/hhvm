@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2017, Facebook, Inc.
  * All rights reserved.
  *
@@ -8,7 +8,6 @@
  *)
 
 open Core_kernel
-
 module C = Typing_continuations
 module Cont = Typing_per_cont_env
 module LEnvOps = Typing_per_cont_ops
@@ -16,6 +15,7 @@ module Env = Typing_env
 module LEnv = Typing_lenv
 module Reason = Typing_reason
 
+type gamma = Typing_per_cont_env.per_cont_entry
 (**
  * This type represents the structure refered to using the greek alphabet
  * letter 'gamma' in the type system specification.
@@ -23,16 +23,17 @@ module Reason = Typing_reason
  * It is essentially a map from local ids to types.
  * For now, we reuse Typing_env.local_id_map but this may change.
  *)
-type gamma = Typing_per_cont_env.per_cont_entry
+
+type delta = gamma Typing_continuations.Map.t
 (**
  * This type represents the structure refered to using the greek alphabet
  * letter 'delta' in the type system specification.
  *
  * It is a map from continuations to gammas
  *)
-type delta = gamma Typing_continuations.Map.t
 
 let empty_gamma : gamma = Typing_per_cont_env.empty_entry
+
 let empty_delta : delta = Typing_continuations.Map.empty
 
 (* For now we dummify the local id, i.e. we replace the unique integer part of
@@ -48,15 +49,21 @@ let lookup local_id gamma =
   (* Convert from type (local = ty * expression_id) to
    * (Tast.annotation = Pos.t * ty). Ignore the expression id.
    * TODO Avoid this conversion? Do we need the expression ids? *)
-  let local_to_pos_ty ((r, _ as ty), _expr_id) = (Reason.to_pos r, ty) in
+  let local_to_pos_ty (((r, _) as ty), _expr_id) = (Reason.to_pos r, ty) in
   Option.map tyopt local_to_pos_ty
 
 let add_to_gamma local_id ty gamma =
   let local_id = dummify_local_id local_id in
   let pos_ty_to_local (p, (_r, ty)) = ((Reason.Rwitness p, ty), 0) in
   let ty = pos_ty_to_local ty in
-  { gamma with Typing_per_cont_env.local_types =
-      Typing_local_types.add_to_local_types local_id ty gamma.Typing_per_cont_env.local_types }
+  {
+    gamma with
+    Typing_per_cont_env.local_types =
+      Typing_local_types.add_to_local_types
+        local_id
+        ty
+        gamma.Typing_per_cont_env.local_types;
+  }
 
 let get_cont = Cont.get_cont_option
 
@@ -78,19 +85,26 @@ let empty_delta_with_next_cont = empty_delta_with_cont C.Next
  *)
 let union env delta1 delta2 =
   let union env local1 local2 =
-    let env, (ty, eid) = LEnv.union env local1 local2 in
-    let env, ty = Env.expand_type env ty in
-    env, (ty, eid) in
-  let _env, delta = LEnvOps.union_by_cont env union delta1 delta2 in
+    let (env, (ty, eid)) = LEnv.union env local1 local2 in
+    let (env, ty) = Env.expand_type env ty in
+    (env, (ty, eid))
+  in
+  let (_env, delta) = LEnvOps.union_by_cont env union delta1 delta2 in
   delta
 
 (**
  * Apply a list of updates to a gamma.
  *)
-let update_gamma gamma (updates:gamma) =
+let update_gamma gamma (updates : gamma) =
   let local_types = gamma.Typing_per_cont_env.local_types in
   let updates = updates.Typing_per_cont_env.local_types in
-  { gamma with Typing_per_cont_env.local_types =
-    Local_id.Map.fold Typing_local_types.add_to_local_types updates local_types }
+  {
+    gamma with
+    Typing_per_cont_env.local_types =
+      Local_id.Map.fold
+        Typing_local_types.add_to_local_types
+        updates
+        local_types;
+  }
 
-let make_local_id (name:string) : Local_id.t = Local_id.make_unscoped name
+let make_local_id (name : string) : Local_id.t = Local_id.make_unscoped name

@@ -1,5 +1,5 @@
 <?hh
-$a = new ArrayObject($GLOBALS);
+$a = new ArrayObject($GLOBALS['GLOBALS']);
 $x = "ok\n";
 echo $x;
 $a->offsetUnset('x');

@@ -134,7 +134,7 @@ void cgInlineReturnNoFrame(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    if (env.unit.context().resumeMode == ResumeMode::None) {
+    if (env.unit.context().initSrcKey.resumeMode() == ResumeMode::None) {
       auto const extra = inst->extra<InlineReturnNoFrame>();
       auto const offset = cellsToBytes(extra->offset.offset);
       for (auto i = 0; i < kNumActRecCells; ++i) {

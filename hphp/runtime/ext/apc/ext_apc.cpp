@@ -310,7 +310,7 @@ Variant HHVM_FUNCTION(apc_store,
       apc_store().set(key.toString(), v, ttl);
     }
 
-    return Variant(staticEmptyArray());
+    return Variant(ArrayData::Create());
   }
 
   if (!key_or_array.isString()) {
@@ -368,7 +368,7 @@ Variant HHVM_FUNCTION(apc_add,
   return apc_store().add(strKey, var, ttl);
 }
 
-TypedValue HHVM_FUNCTION(apc_fetch, const Variant& key, VRefParam success) {
+TypedValue HHVM_FUNCTION(apc_fetch, const Variant& key, bool& success) {
   if (!apcExtension::Enable) return make_tv<KindOfBoolean>(false);
 
   Variant v;
@@ -389,14 +389,14 @@ TypedValue HHVM_FUNCTION(apc_fetch, const Variant& key, VRefParam success) {
         init.set(strKey, v);
       }
     }
-    success.assignIfRef(tmp);
+    success = tmp;
     return tvReturn(init.toVariant());
   }
 
   if (apc_store().get(key.toString(), v)) {
-    success.assignIfRef(true);
+    success = true;
   } else {
-    success.assignIfRef(false);
+    success = false;
     v = false;
   }
   return tvReturn(std::move(v));
@@ -445,26 +445,26 @@ bool HHVM_FUNCTION(apc_clear_cache, const String& /*cache_type*/ /* = "" */) {
 
 Variant HHVM_FUNCTION(apc_inc,
                       const String& key,
-                      int64_t step /* = 1 */,
-                      VRefParam success /* = null */) {
+                      int64_t step,
+                      bool& success) {
   if (!apcExtension::Enable) return false;
 
   bool found = false;
   int64_t newValue = apc_store().inc(key, step, found);
-  success.assignIfRef(found);
+  success = found;
   if (!found) return false;
   return newValue;
 }
 
 Variant HHVM_FUNCTION(apc_dec,
                       const String& key,
-                      int64_t step /* = 1 */,
-                      VRefParam success /* = null */) {
+                      int64_t step,
+                      bool& success) {
   if (!apcExtension::Enable) return false;
 
   bool found = false;
   int64_t newValue = apc_store().inc(key, -step, found);
-  success.assignIfRef(found);
+  success = found;
   if (!found) return false;
   return newValue;
 }
@@ -1052,12 +1052,17 @@ int apc_rfc1867_progress(apc_rfc1867_data* rfc1867ApcData, unsigned int event,
 ///////////////////////////////////////////////////////////////////////////////
 // apc serialization
 
-String apc_serialize(const_variant_ref value) {
+String apc_serialize(const_variant_ref value,
+                     APCSerializeMode mode /* = Normal */) {
+  auto const enableApcSerialize = apcExtension::EnableApcSerialize;
   VariableSerializer::Type sType =
-    apcExtension::EnableApcSerialize ?
+    enableApcSerialize ?
       VariableSerializer::Type::APCSerialize :
       VariableSerializer::Type::Internal;
-  VariableSerializer vs(sType);
+  auto const options = enableApcSerialize && mode == APCSerializeMode::Prime
+    ? VariableSerializer::kAPC_PRIME_SERIALIZE
+    : 0;
+  VariableSerializer vs(sType, options);
   return vs.serialize(value, true);
 }
 

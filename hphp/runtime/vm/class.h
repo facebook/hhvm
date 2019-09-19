@@ -175,6 +175,9 @@ struct Class : AtomicCountable {
     /* Most derived class that declared this property. */
     LowPtr<Class> cls;
 
+    /* Least derived class that declared this property. */
+    LowPtr<Class> baseCls;
+
     Attr attrs;
     Slot serializationIdx;
   };
@@ -237,6 +240,9 @@ struct Class : AtomicCountable {
    * This is a vector which contains default values for all of a Class's
    * declared instance properties.  It is used when instantiating new objects
    * from a Class.
+   *
+   * This vector is indexed by the physical index of the property within the
+   * objects (and not by its logical slot).
    */
   struct PropInitVec {
     PropInitVec();
@@ -653,6 +659,12 @@ public:
   size_t numStaticProperties() const;
 
   /*
+   * An exclusive upper limit on the post-sort indices of properties of this
+   * class that may be countable. See m_countablePropsEnd for more details.
+   */
+  uint32_t countablePropsEnd() const { return m_countablePropsEnd; }
+
+  /*
    * Number of declared instance properties that are actually accessible from
    * this class's context.
     *
@@ -778,6 +790,8 @@ public:
    * Vector of 86pinit non-scalar instance property initializer functions.
    *
    * These are invoked during initProps() to populate the copied PropInitVec.
+   *
+   * This vector is indexed by the properties' logical slot number.
    */
   const VMFixedVector<const Func*>& pinitVec() const;
 
@@ -830,6 +844,16 @@ public:
    */
   TypedValue* getSPropData(Slot index) const;
 
+  /*
+   * Map the logical slot of a property to its physical index within the object
+   * in memory.
+   */
+  uint16_t propSlotToIndex(Slot slot) const { return m_slotIndex[slot]; }
+
+  /*
+   * Map the physical index of a property within the object to its logical slot.
+   */
+  Slot propIndexToSlot(uint16_t index) const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Property lookup and accessibility.                                 [const]
@@ -838,11 +862,13 @@ public:
     TypedValue* val;
     Slot slot;
     bool accessible;
+    bool constant;
   };
 
   struct PropSlotLookup {
     Slot slot;
     bool accessible;
+    bool constant;
   };
 
   /*
@@ -856,10 +882,10 @@ public:
    * this class or any ancestor.  Note that if the return is marked as
    * accessible, then the property must exist.
    */
-  PropSlotLookup getDeclPropIndex(const Class*, const StringData*) const;
+  PropSlotLookup getDeclPropSlot(const Class*, const StringData*) const;
 
   /*
-   * The equivalent of getDeclPropIndex(), but for static properties.
+   * The equivalent of getDeclPropSlot(), but for static properties.
    */
   PropSlotLookup findSProp(const Class*, const StringData*) const;
 
@@ -1006,10 +1032,10 @@ public:
   // Objects.                                                           [const]
 
   /*
-   * Offset of the declared instance property at `index' on an ObjectData
+   * Offset of the declared instance property at `slot' on an ObjectData
    * instantiated from this class.
    */
-  size_t declPropOffset(Slot index) const;
+  size_t declPropOffset(Slot slot) const;
 
   /*
    * Whether instances of this class implement Throwable interface, which
@@ -1097,6 +1123,18 @@ public:
    * must be a memoize wrapper.
    */
   std::pair<Slot, bool> memoSlotForFunc(FuncId func) const;
+
+  /*
+   * Returns an offset from the object base pointer to be used for memory
+   * free routines
+   */
+  uint32_t memoSize() const;
+
+  /*
+   * Returns an index that represent the size bin of the MemoryManager
+   */
+  uint8_t sizeIdx() const;
+
 
   /////////////////////////////////////////////////////////////////////////////
   // LSB Memoize methods
@@ -1200,7 +1238,7 @@ public:
   OFF(vtableVec)
   OFF(funcVecLen)
   OFF(RTAttrs)
-  OFF(release)
+  OFF(releaseFunc)
 #undef OFF
 
   static constexpr ptrdiff_t constantsVecOff() {
@@ -1374,9 +1412,17 @@ private:
   void initProp(SProp& prop, const PreClass::Prop* preProp);
   template<typename XProp>
   void checkPrePropVal(XProp& prop, const PreClass::Prop* preProp);
+  void sortOwnProps(const PropMap::Builder& curPropMap,
+                    uint32_t first,
+                    uint32_t past,
+                    std::vector<uint16_t>& slotIndex);
+  void sortOwnPropsInitVec(uint32_t first,
+                           uint32_t past,
+                           const std::vector<uint16_t>& slotIndex);
   void importTraitProps(int traitIdx,
                         PropMap::Builder& curPropMap,
                         SPropMap::Builder& curSPropMap,
+                        std::vector<uint16_t>& slotIndex,
                         Slot& serializationIdx,
                         std::vector<bool>& serializationVisited,
                         Slot& staticSerializationIdx,
@@ -1385,6 +1431,7 @@ private:
                                const TypedValue& traitPropVal,
                                PropMap::Builder& curPropMap,
                                SPropMap::Builder& curSPropMap,
+                               std::vector<uint16_t>& slotIndex,
                                Slot& serializationIdx,
                                std::vector<bool>& serializationVisited);
   void importTraitStaticProp(SProp&   traitProp,
@@ -1416,6 +1463,7 @@ private:
   void setNativeDataInfo();
   void setInstanceMemoCacheInfo();
   void setLSBMemoCacheInfo();
+  void setReleaseFunc();
 
   template<bool setParents> void setInstanceBitsImpl();
   void addInterfacesFromUsedTraits(InterfaceMap::Builder& builder) const;
@@ -1557,8 +1605,9 @@ private:
    * property index is already known (as may be the case when executing via the
    * TC), property metadata in m_declPropInfo can be directly accessed.
    *
-   * m_declPropInit is indexed by the Slot values from m_declProperties, and
-   * contains initialization information.
+   * m_declPropInit is indexed by the physical index of the property within the
+   * objects (and not by the logical slot), and contains initialization
+   * information.
    *
    * There are two ways to index m_declProperties.
    * 1. Key can be either name or Slot, value is Prop. When used this way,
@@ -1596,19 +1645,36 @@ private:
 
   mutable rds::Link<PropInitVec*, rds::Mode::Normal> m_propDataCache;
 
+  /* Indexed by logical Slot number, gives the corresponding index within the
+   * objects in memory. */
+  VMFixedVector<uint16_t> m_slotIndex;
+
   /*
    * Cache of m_preClass->attrs().
    */
   unsigned m_attrCopy;
 
+  // Pointer to a function that releases object instances of this class type.
+  ObjReleaseFunc m_releaseFunc;
+  // Determines the offset to the base pointer to be released
+  uint32_t m_memoSize;
+  // An index that represent the size bin in the MemoryManager
+  uint8_t m_sizeIdx;
+
   /*
-   * Function to release object instances of this class type.
+   * An exclusive upper limit on the post-sort indices of properties of this
+   * class that may be countable. Properties that may be countable will have
+   * indices less than this bound. If we can guarantee that all properties of
+   * this class are uncounted, the bound will be 0.
+   *
+   * (Note that there may still be uncounted properties with indices less than
+   * this bound; in particular, we can't sort parent class properties freely.)
    */
-  ObjReleaseFunc m_release;
+  uint32_t m_countablePropsEnd;
 
   /*
    * Vector of Class pointers that encodes the inheritance hierarchy, including
-   * this Class as the last element.
+    * this Class as the last element.
    */
   LowPtr<Class> m_classVec[1]; // Dynamically sized; must come last.
 };

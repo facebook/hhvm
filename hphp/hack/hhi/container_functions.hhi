@@ -24,27 +24,51 @@ function array_sum/*<T>*/(/*Container<T>*/ $input)/*: num*/;
 <<__PHPStdLib, __Rx>>
 function array_product/*<T>*/(/*Container<T>*/ $input)/*: num*/;
 
-<<__PHPStdLib>>
-function sort<T as Container<mixed>>(inout T $arg, int $sort_flags = SORT_REGULAR): bool;
-<<__PHPStdLib>>
-function rsort<T as Container<mixed>>(inout T $arg, int $sort_flags = SORT_REGULAR): bool;
-<<__PHPStdLib>>
-function asort<T as KeyedContainer<arraykey, mixed>>(inout T $arg, int $sort_flags = SORT_REGULAR): bool;
-<<__PHPStdLib>>
-function arsort<T as KeyedContainer<arraykey, mixed>>(inout T $arg, int $sort_flags = SORT_REGULAR): bool;
-<<__PHPStdLib>>
-function ksort<T as KeyedContainer<arraykey, mixed>>(inout T $arg, int $sort_flags = SORT_REGULAR): bool;
-<<__PHPStdLib>>
-function krsort<T as KeyedContainer<arraykey, mixed>>(inout T $arg, int $sort_flags = SORT_REGULAR): bool;
-// $c is a callable of type (function(Tv,Tv): bool)
-<<__PHPStdLib>>
-function usort<T as KeyedContainer<arraykey, mixed>>(inout T $arg, mixed $c): bool;
-// $c is a callable of type (function(Tv,Tv): bool)
-<<__PHPStdLib>>
-function uasort<T as KeyedContainer<arraykey, mixed>>(inout T $arg, mixed $c): bool;
-// $c is a callable of type (function(Tk,Tk): bool)
-<<__PHPStdLib>>
-function uksort<T as KeyedContainer<arraykey, mixed>>(inout T $arg, mixed $c): bool;
+<<__PHPStdLib, __Rx, __AtMostRxAsArgs>>
+function sort<T as Container<mixed>>(
+  <<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> inout T $arg,
+  int $sort_flags = SORT_REGULAR,
+): bool;
+<<__PHPStdLib, __Rx, __AtMostRxAsArgs>>
+function rsort<T as Container<mixed>>(
+  <<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> inout T $arg,
+  int $sort_flags = SORT_REGULAR,
+): bool;
+<<__PHPStdLib, __Rx, __AtMostRxAsArgs>>
+function asort<T as KeyedContainer<arraykey, mixed>>(
+  <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> inout T $arg,
+  int $sort_flags = SORT_REGULAR,
+): bool;
+<<__PHPStdLib, __Rx, __AtMostRxAsArgs>>
+function arsort<T as KeyedContainer<arraykey, mixed>>(
+  <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> inout T $arg,
+  int $sort_flags = SORT_REGULAR,
+): bool;
+<<__PHPStdLib, __Rx, __AtMostRxAsArgs>>
+function ksort<T as KeyedContainer<arraykey, mixed>>(
+  <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> inout T $arg,
+  int $sort_flags = SORT_REGULAR,
+): bool;
+<<__PHPStdLib, __Rx, __AtMostRxAsArgs>>
+function krsort<T as KeyedContainer<arraykey, mixed>>(
+  <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> inout T $arg,
+  int $sort_flags = SORT_REGULAR,
+): bool;
+<<__PHPStdLib, __Rx, __AtMostRxAsArgs>>
+function usort<Tv, T as Container<Tv>>(
+  <<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> inout T $arg,
+  <<__AtMostRxAsFunc>> (function(Tv, Tv): int) $c,
+): bool;
+<<__PHPStdLib, __Rx, __AtMostRxAsArgs>>
+function uasort<Tv, T as KeyedContainer<arraykey, Tv>>(
+  <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> inout T $arg,
+  <<__AtMostRxAsFunc>> (function(Tv, Tv): int) $c,
+): bool;
+<<__PHPStdLib, __Rx, __AtMostRxAsArgs>>
+function uksort<Tk as arraykey, T as KeyedContainer<Tk, mixed>>(
+  <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> inout T $arg,
+  <<__AtMostRxAsFunc>> (function(Tk, Tk): int) $c,
+): bool;
 
 }
 

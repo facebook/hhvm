@@ -6,6 +6,8 @@ File "hackarray.hhi", line 12, characters 35-42:
 But got arraykey
 File "keyset.php", line 4, characters 9-14:
 The type keyset expects 1 type parameter(s) (Typing[4101])
+File "hackarray.hhi", line 12, characters 22-27:
+Definition is here
 File "keyset.php", line 12, characters 18-19:
 Invalid argument (Typing[4110])
 File "keyset.php", line 22, characters 32-37:

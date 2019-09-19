@@ -39,15 +39,13 @@ struct TransContext;
  */
 std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
                                     const TransContext& context,
-                                    PostConditions& pconds,
-                                    Annotations& annotations) noexcept;
+                                    PostConditions& pconds) noexcept;
 
 /*
  * Try to inline a FCall.
  */
 bool irGenTryInlineFCall(irgen::IRGS& irgs, const Func* callee,
-                         const FCallArgs& fca, SSATmp* ctx, Type ctxType,
-                         Op writeArOpc);
+                         const FCallArgs& fca, SSATmp* ctx, bool dynamicCall);
 
 /*
  * Generate an IRUnit which simulates the inlining of region. This unit should
@@ -57,8 +55,7 @@ bool irGenTryInlineFCall(irgen::IRGS& irgs, const Func* callee,
  * function call.
  */
 std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,
-                                          const RegionDesc& region,
-                                          Annotations& annotations);
+                                          const RegionDesc& region);
 
 //////////////////////////////////////////////////////////////////////
 

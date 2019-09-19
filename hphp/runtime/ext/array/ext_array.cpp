@@ -28,7 +28,6 @@
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/double-to-int64.h"
 #include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/sort-flags.h"
 #include "hphp/runtime/base/request-info.h"
@@ -44,6 +43,7 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/rds-local.h"
 
 #include <vector>
 
@@ -344,7 +344,10 @@ bool HHVM_FUNCTION(array_key_exists,
   switch (cell->m_type) {
     case KindOfUninit:
     case KindOfNull:
-      if (checkHACArrayKeyCast() && ad->useWeakKeys()) {
+      if (checkHACNullHackArrayKey() && ad->isHackArray()) {
+        raise_hackarr_compat_notice(
+          getHackArrCompatNullHackArrayKeyMsg()->data());
+      } else if (checkHACArrayKeyCast() && ad->useWeakKeys()) {
         raiseHackArrCompatImplicitArrayKey(cell);
       }
       return ad->useWeakKeys() && ad->exists(staticEmptyString());
@@ -360,8 +363,6 @@ bool HHVM_FUNCTION(array_key_exists,
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
-    case KindOfPersistentShape:
-    case KindOfShape:
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
@@ -805,8 +806,6 @@ TypedValue HHVM_FUNCTION(array_product,
       case KindOfDict:
       case KindOfPersistentKeyset:
       case KindOfKeyset:
-      case KindOfPersistentShape:
-      case KindOfShape:
       case KindOfPersistentArray:
       case KindOfArray:
       case KindOfObject:
@@ -834,7 +833,6 @@ DOUBLE:
       case KindOfVec:
       case KindOfDict:
       case KindOfKeyset:
-      case KindOfShape:
       case KindOfArray:
       case KindOfClsMeth:
       case KindOfObject:
@@ -980,7 +978,7 @@ TypedValue HHVM_FUNCTION(array_slice,
   }
 
   if (len <= 0) {
-    return make_tv<KindOfPersistentArray>(staticEmptyArray());
+    return make_tv<KindOfPersistentArray>(ArrayData::Create());
   }
 
   bool input_is_packed = isClsMethType(cell_input.m_type) ||
@@ -1100,8 +1098,6 @@ TypedValue HHVM_FUNCTION(array_sum,
       case KindOfDict:
       case KindOfPersistentKeyset:
       case KindOfKeyset:
-      case KindOfPersistentShape:
-      case KindOfShape:
       case KindOfPersistentArray:
       case KindOfArray:
       case KindOfObject:
@@ -1129,7 +1125,6 @@ DOUBLE:
       case KindOfVec:
       case KindOfDict:
       case KindOfKeyset:
-      case KindOfShape:
       case KindOfArray:
       case KindOfClsMeth:
       case KindOfObject:
@@ -1170,8 +1165,14 @@ TypedValue HHVM_FUNCTION(array_unshift,
       ref_array->asArrRef().prepend(var);
     } else {
       {
-        auto newArray = Array::attach(
-          MixedArray::MakeReserveSame(cell_array->m_data.parr, 0));
+        Array newArray;
+        if (cell_array->m_data.parr->isHackArray()) {
+          newArray = Array::attach(
+            MixedArray::MakeReserveSame(cell_array->m_data.parr, 0));
+        } else {
+          newArray = Array::attach(
+            MixedArray::MakeReserveDArray(cell_array->m_data.parr->size()));
+        }
         newArray.append(var);
         if (!args.empty()) {
           auto pos_limit = args->iter_end();
@@ -1346,8 +1347,6 @@ int64_t HHVM_FUNCTION(count,
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
-    case KindOfPersistentShape:
-    case KindOfShape:
     case KindOfPersistentArray:
     case KindOfArray:
       if ((CountMode)mode == CountMode::RECURSIVE) {
@@ -1381,31 +1380,30 @@ int64_t HHVM_FUNCTION(count,
 }
 
 int64_t HHVM_FUNCTION(sizeof,
-                      const Variant& var,
-                      int64_t mode /* = 0 */) {
-  return HHVM_FN(count)(var, mode);
+                      const Variant& var) {
+  return HHVM_FN(count)(var, 0);
 }
 
 namespace {
 
 enum class NoCow {};
 template<class DoCow = void, class NonArrayRet, class OpPtr>
-static Variant iter_op_impl(VRefParam refParam, OpPtr op, const String& objOp,
+static Variant iter_op_impl(Variant& refParam, OpPtr op, const String& objOp,
                             NonArrayRet nonArray,
                             const std::string& fnName,
                             bool(ArrayData::*pred)() const =
                               &ArrayData::isInvalid) {
-  auto& cell = *refParam.wrapped().toCell();
+  auto& cell = *refParam.toCell();
   if (!isArrayLikeType(cell.m_type)) {
     if (cell.m_type == KindOfObject) {
-      auto obj = refParam.wrapped().toObject();
+      auto obj = cell.m_data.pobj;
       if (obj->instanceof(SystemLib::s_ArrayObjectClass)) {
         return obj->o_invoke_few_args(objOp, 0);
       }
     }
     throw_bad_type_exception("%s() expects array, was %s",
                              fnName.c_str(),
-                             getDataTypeString(refParam->getType()).c_str());
+                             getDataTypeString(refParam.getType()).c_str());
     return Variant(nonArray);
   }
 
@@ -1414,12 +1412,7 @@ static Variant iter_op_impl(VRefParam refParam, OpPtr op, const String& objOp,
   if (doCow && ad->cowCheck() && !(ad->*pred)() &&
       !ad->noCopyOnWrite()) {
     ad = ad->copy();
-    if (LIKELY(refParam.isRefData())) {
-      cellMove(make_array_like_tv(ad), *refParam.getRefData()->cell());
-    } else {
-      req::ptr<ArrayData> tmp(ad, req::ptr<ArrayData>::NoIncRef{});
-      return (ad->*op)();
-    }
+    refParam = Variant::attach(ad);
   }
   return (ad->*op)();
 }
@@ -1437,7 +1430,7 @@ const StaticString
 
 
 Variant HHVM_FUNCTION(each,
-                      VRefParam refParam) {
+                      Variant& refParam) {
   return iter_op_impl(
     refParam,
     &ArrayData::each,
@@ -1448,9 +1441,11 @@ Variant HHVM_FUNCTION(each,
 }
 
 Variant HHVM_FUNCTION(current,
-                      VRefParam refParam) {
+                      const Variant& refParam) {
   return iter_op_impl<NoCow>(
-    refParam,
+    // NoCow version never actually modifies refParam but
+    // yet still requires non-const reference
+    const_cast<Variant&>(refParam),
     &ArrayData::current,
     s___current,
     false,
@@ -1458,15 +1453,12 @@ Variant HHVM_FUNCTION(current,
   );
 }
 
-Variant HHVM_FUNCTION(pos,
-                      VRefParam refParam) {
-  return HHVM_FN(current)(refParam);
-}
-
 Variant HHVM_FUNCTION(key,
-                      VRefParam refParam) {
+                      const Variant& refParam) {
   return iter_op_impl<NoCow>(
-    refParam,
+    // NoCow version never actually modifies refParam but
+    // yet still requires non-const reference
+    const_cast<Variant&>(refParam),
     &ArrayData::key,
     s___key,
     false,
@@ -1475,7 +1467,7 @@ Variant HHVM_FUNCTION(key,
 }
 
 Variant HHVM_FUNCTION(next,
-                      VRefParam refParam) {
+                      Variant& refParam) {
   return iter_op_impl(
     refParam,
     &ArrayData::next,
@@ -1486,7 +1478,7 @@ Variant HHVM_FUNCTION(next,
 }
 
 Variant HHVM_FUNCTION(prev,
-                      VRefParam refParam) {
+                      Variant& refParam) {
   return iter_op_impl(
     refParam,
     &ArrayData::prev,
@@ -1497,7 +1489,7 @@ Variant HHVM_FUNCTION(prev,
 }
 
 Variant HHVM_FUNCTION(reset,
-                      VRefParam refParam) {
+                      Variant& refParam) {
   return iter_op_impl(
     refParam,
     &ArrayData::reset,
@@ -1509,7 +1501,7 @@ Variant HHVM_FUNCTION(reset,
 }
 
 Variant HHVM_FUNCTION(end,
-                      VRefParam refParam) {
+                      Variant& refParam) {
   return iter_op_impl(
     refParam,
     &ArrayData::end,
@@ -1807,7 +1799,7 @@ TypedValue HHVM_FUNCTION(array_diff,
   }
   /* If container1 is empty, we can stop here and return the empty array */
   if (!getContainerSize(c1)) {
-    return make_tv<KindOfPersistentArray>(staticEmptyArray());
+    return make_tv<KindOfPersistentArray>(ArrayData::Create());
   }
   /* If all of the containers (except container1) are empty, we can just
      return container1 (converting it to an array if needed) */
@@ -2017,7 +2009,7 @@ TypedValue HHVM_FUNCTION(array_diff_key,
     return make_tv<KindOfNull>();
   }
   if (getContainerSize(c1) == 0) {
-    return make_tv<KindOfPersistentArray>(staticEmptyArray());
+    return make_tv<KindOfPersistentArray>(ArrayData::Create());
   }
   if (largestSize == 0) {
     if (isArrayLikeType(c1.m_type)) {
@@ -2416,7 +2408,7 @@ TypedValue HHVM_FUNCTION(array_intersect,
   /* If any of the containers were empty, we can stop here and return the
      empty array */
   if (!getContainerSize(c1) || !smallestSize) {
-    return make_tv<KindOfPersistentArray>(staticEmptyArray());
+    return make_tv<KindOfPersistentArray>(ArrayData::Create());
   }
 
   Array ret = Array::Create();
@@ -2471,7 +2463,7 @@ TypedValue HHVM_FUNCTION(array_intersect_key,
     return make_tv<KindOfNull>();
   }
   if ((getContainerSize(c1) == 0) || empty_arg) {
-    return make_tv<KindOfPersistentArray>(staticEmptyArray());
+    return make_tv<KindOfPersistentArray>(ArrayData::Create());
   }
 
   auto intersect_step = [](TypedValue left, TypedValue right) {
@@ -3272,6 +3264,89 @@ bool HHVM_FUNCTION(array_multisort,
   return Array::MultiSort(data);
 }
 
+bool HHVM_FUNCTION(array_multisort1,
+                   VRefParam arg1) {
+  return HHVM_FN(array_multisort)(arg1);
+}
+
+bool HHVM_FUNCTION(array_multisort2,
+                   VRefParam arg1,
+                   VRefParam arg2) {
+  return HHVM_FN(array_multisort)(arg1, arg2);
+}
+
+bool HHVM_FUNCTION(array_multisort3,
+                   VRefParam arg1,
+                   VRefParam arg2,
+                   VRefParam arg3) {
+  return HHVM_FN(array_multisort)(arg1, arg2, arg3);
+}
+
+bool HHVM_FUNCTION(array_multisort4,
+                   VRefParam arg1,
+                   VRefParam arg2,
+                   VRefParam arg3,
+                   VRefParam arg4) {
+  return HHVM_FN(array_multisort)(arg1, arg2, arg3, arg4);
+}
+
+bool HHVM_FUNCTION(array_multisort5,
+                   VRefParam arg1,
+                   VRefParam arg2,
+                   VRefParam arg3,
+                   VRefParam arg4,
+                   VRefParam arg5) {
+  return HHVM_FN(array_multisort)(arg1, arg2, arg3, arg4, arg5);
+}
+
+bool HHVM_FUNCTION(array_multisort6,
+                   VRefParam arg1,
+                   VRefParam arg2,
+                   VRefParam arg3,
+                   VRefParam arg4,
+                   VRefParam arg5,
+                   VRefParam arg6) {
+  return HHVM_FN(array_multisort)(arg1, arg2, arg3, arg4, arg5, arg6);
+}
+
+bool HHVM_FUNCTION(array_multisort7,
+                   VRefParam arg1,
+                   VRefParam arg2,
+                   VRefParam arg3,
+                   VRefParam arg4,
+                   VRefParam arg5,
+                   VRefParam arg6,
+                   VRefParam arg7) {
+  return HHVM_FN(array_multisort)(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+}
+
+bool HHVM_FUNCTION(array_multisort8,
+                   VRefParam arg1,
+                   VRefParam arg2,
+                   VRefParam arg3,
+                   VRefParam arg4,
+                   VRefParam arg5,
+                   VRefParam arg6,
+                   VRefParam arg7,
+                   VRefParam arg8) {
+  return HHVM_FN(array_multisort)(
+      arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
+}
+
+bool HHVM_FUNCTION(array_multisort9,
+                   VRefParam arg1,
+                   VRefParam arg2,
+                   VRefParam arg3,
+                   VRefParam arg4,
+                   VRefParam arg5,
+                   VRefParam arg6,
+                   VRefParam arg7,
+                   VRefParam arg8,
+                   VRefParam arg9) {
+  return HHVM_FN(array_multisort)(
+      arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+}
+
 // HH\\dict
 Array HHVM_FUNCTION(HH_dict, const Variant& input) {
   return input.toDict();
@@ -3340,17 +3415,6 @@ TypedValue HHVM_FUNCTION(HH_array_key_cast, const Variant& input) {
       SystemLib::throwInvalidArgumentExceptionObject(
         "Keysets cannot be cast to an array-key"
       );
-    case KindOfPersistentShape:
-    case KindOfShape:
-      if (RuntimeOption::EvalHackArrDVArrs) {
-        SystemLib::throwInvalidArgumentExceptionObject(
-          "Dicts cannot be cast to an array-key"
-        );
-      } else {
-        SystemLib::throwInvalidArgumentExceptionObject(
-          "Arrays cannot be cast to an array-key"
-        );
-      }
     case KindOfPersistentArray:
     case KindOfArray:
       SystemLib::throwInvalidArgumentExceptionObject(
@@ -3386,6 +3450,18 @@ String HHVM_FUNCTION(HH_get_provenance, const Variant& in) {
   } else {
     return "<none>";
   }
+}
+
+TypedValue HHVM_FUNCTION(HH_tag_provenance_here, TypedValue in) {
+  if (!isArrayLikeType(type(in))) return in;
+  if (!RuntimeOption::EvalArrayProvenance) return in;
+
+  auto const ad = in.m_data.parr;
+  if (auto const tag = arrprov::tagFromPC()) {
+    arrprov::setTag<arrprov::Mode::Emplace>(ad, *tag);
+  }
+
+  return in;
 }
 
 Array HHVM_FUNCTION(merge_xhp_attr_declarations,
@@ -3503,7 +3579,6 @@ struct ArrayExtension final : Extension {
     HHVM_FE(each);
     HHVM_FE(current);
     HHVM_FE(next);
-    HHVM_FE(pos);
     HHVM_FE(prev);
     HHVM_FE(reset);
     HHVM_FE(end);
@@ -3544,6 +3619,15 @@ struct ArrayExtension final : Extension {
     HHVM_FE(i18n_loc_get_error_code);
     HHVM_FE(hphp_array_idx);
     HHVM_FE(array_multisort);
+    HHVM_FE(array_multisort1);
+    HHVM_FE(array_multisort2);
+    HHVM_FE(array_multisort3);
+    HHVM_FE(array_multisort4);
+    HHVM_FE(array_multisort5);
+    HHVM_FE(array_multisort6);
+    HHVM_FE(array_multisort7);
+    HHVM_FE(array_multisort8);
+    HHVM_FE(array_multisort9);
     HHVM_FALIAS(HH\\dict, HH_dict);
     HHVM_FALIAS(HH\\vec, HH_vec);
     HHVM_FALIAS(HH\\keyset, HH_keyset);
@@ -3551,6 +3635,7 @@ struct ArrayExtension final : Extension {
     HHVM_FALIAS(HH\\darray, HH_darray);
     HHVM_FALIAS(HH\\array_key_cast, HH_array_key_cast);
     HHVM_FALIAS(HH\\get_provenance, HH_get_provenance);
+    HHVM_FALIAS(HH\\tag_provenance_here, HH_tag_provenance_here);
     HHVM_FALIAS(__SystemLib\\merge_xhp_attr_declarations,
                 merge_xhp_attr_declarations);
 

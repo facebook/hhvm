@@ -1,5 +1,4 @@
 <?hh
-// Copyright 2004-present Facebook. All Rights Reserved.
 
 
 
@@ -217,5 +216,8 @@ function test($tests, $a) {
   $a->unset();
   foreach ($tests as $test) run_test($a, $test);
 }
-test(TESTS, new A());
-test(TESTS, new B());
+<<__EntryPoint>>
+function main_entry(): void {
+  test(TESTS, new A());
+  test(TESTS, new B());
+}

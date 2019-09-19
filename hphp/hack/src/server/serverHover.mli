@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -7,11 +7,11 @@
  *
  *)
 
+val go_ctx :
+  ctx:Provider_context.t ->
+  entry:Provider_context.entry ->
+  line:int ->
+  column:int ->
+  HoverService.result
 (** Returns detailed information about the symbol or expression at the given
     location. *)
-val go_ctx :
-  ctx:ServerIdeContext.t ->
-  entry:ServerIdeContext.entry ->
-  line:int ->
-  char:int ->
-  HoverService.result

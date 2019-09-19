@@ -19,7 +19,6 @@
 #include "hphp/runtime/vm/jit/asm-info.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/containers.h"
-#include "hphp/runtime/vm/jit/func-guard.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
@@ -245,11 +244,6 @@ bool emit(Venv& env, const movqs& i) {
   return true;
 }
 
-bool emit(Venv& env, const funcguard& i) {
-  emitFuncGuard(i.func, *env.cb, env.meta, i.watch);
-  return true;
-}
-
 bool emit(Venv& env, const debugguardjmp& i) {
   auto const jmp = emitSmashableJmp(*env.cb, env.meta, i.realCode);
   if (i.watch) {
@@ -358,7 +352,7 @@ void emit_svcreq_stub(Venv& env, const Venv::SvcReqPatch& p) {
  * replaced by jmp instructions.
  */
 void computeFrames(Vunit& unit) {
-  auto const topFunc = unit.context ? unit.context->func : nullptr;
+  auto const topFunc = unit.context ? unit.context->initSrcKey.func() : nullptr;
 
   auto const rpo = sortBlocks(unit);
 

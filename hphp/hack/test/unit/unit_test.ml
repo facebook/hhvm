@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -10,8 +10,8 @@
 
 open Core_kernel
 
-
 exception Expected_throw_missing
+
 exception Thrown_exception_mismatched of (exn * exn)
 
 let expect_throws e f x =
@@ -19,31 +19,41 @@ let expect_throws e f x =
     let _ = f x in
     Printf.eprintf "Error. Did not throw expected: %s\n" (Exn.to_string e);
     false
-  with | err ->
+  with err ->
     if e <> err then
-      let () = Printf.eprintf "Error. Expected exn: %s. But got : %s\n"
-      (Exn.to_string e) (Exn.to_string err) in
+      let () =
+        Printf.eprintf
+          "Error. Expected exn: %s. But got : %s\n"
+          (Exn.to_string e)
+          (Exn.to_string err)
+      in
       false
     else
       true
 
 let run (name, f) =
   Printf.printf "Running %s ... %!" name;
-  let result = try f () with
-    | e ->
+  let result =
+    try f ()
+    with e ->
       let () = Printf.printf "Exception %s\n" (Exn.to_string e) in
       let () = Printf.printf "Backtrace %s\n" (Printexc.get_backtrace ()) in
       false
   in
-  (if result
-  then Printf.printf "ok\n%!"
-  else Printf.printf "fail\n%!");
+  if result then
+    Printf.printf "ok\n%!"
+  else
+    Printf.printf "fail\n%!";
   result
 
 (** List.for_all but without shortcircuiting "&&", so runs all failures too. *)
 let for_all_non_shortcircuit tests f =
-  List.fold_left tests ~init:true ~f:(fun acc test -> (f test) && acc)
+  List.fold_left tests ~init:true ~f:(fun acc test -> f test && acc)
 
-let run_all (tests: (string * (unit -> bool)) list ) =
+let run_all (tests : (string * (unit -> bool)) list) =
   Printexc.record_backtrace true;
-  exit (if for_all_non_shortcircuit tests run then 0 else 1)
+  exit
+    ( if for_all_non_shortcircuit tests run then
+      0
+    else
+      1 )

@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -9,122 +9,131 @@
 
 include Aast_defs
 
-module type AnnotationType = sig
-  type t
-  val pp : Format.formatter -> t -> unit
-end
-
-module type ASTAnnotationTypes = sig
-  module ExprAnnotation : AnnotationType
-  module EnvAnnotation : AnnotationType
-  module FuncBodyAnnotation : AnnotationType
-end
-
-module AnnotatedAST(Annotations: ASTAnnotationTypes) =
-struct
-
-module ExprAnnotation = Annotations.ExprAnnotation
-module EnvAnnotation = Annotations.EnvAnnotation
-module FuncBodyAnnotation = Annotations.FuncBodyAnnotation
-
-type program = def list
+(* Aast.program represents the top-level definitions in a Hack program.
+ ex: Expression annotation type (when typechecking, the inferred dtype)
+ fb: Function body tag (e.g. has naming occurred)
+ en: Environment (tracking state inside functions and classes)
+ hi: Hint annotation (when typechecking it will be the localized type hint or the
+     inferred missing type if the hint is missing)
+ *)
+type ('ex, 'fb, 'en, 'hi) program = ('ex, 'fb, 'en, 'hi) def list
 [@@deriving
   show { with_path = false },
-  visitors {
-    variety = "iter";
-    nude = true;
-    visit_prefix = "on_";
-    ancestors = ["iter_defs"];
-  },
-  visitors {
-    variety = "reduce";
-    nude = true;
-    visit_prefix = "on_";
-    ancestors = ["reduce_defs"];
-  },
-  visitors {
-    variety = "map";
-    nude = true;
-    visit_prefix = "on_";
-    ancestors = ["map_defs"];
-  },
-  visitors {
-    variety = "endo";
-    nude = true;
-    visit_prefix = "on_";
-    ancestors = ["endo_defs"];
-  }]
+    visitors
+      {
+        variety = "iter";
+        nude = true;
+        visit_prefix = "on_";
+        ancestors = ["iter_defs"];
+      },
+    visitors
+      {
+        variety = "reduce";
+        nude = true;
+        visit_prefix = "on_";
+        ancestors = ["reduce_defs"];
+      },
+    visitors
+      {
+        variety = "map";
+        nude = true;
+        visit_prefix = "on_";
+        ancestors = ["map_defs"];
+      },
+    visitors
+      {
+        variety = "endo";
+        nude = true;
+        visit_prefix = "on_";
+        ancestors = ["endo_defs"];
+      }]
 
-and expr_annotation = ExprAnnotation.t [@visitors.opaque]
-and env_annotation = EnvAnnotation.t [@visitors.opaque]
-and funcbody_annotation = Annotations.FuncBodyAnnotation.t [@visitors.opaque]
+and ('ex, 'fb, 'en, 'hi) stmt = pos * ('ex, 'fb, 'en, 'hi) stmt_
 
-and stmt = pos * stmt_
-
-and stmt_ =
+and ('ex, 'fb, 'en, 'hi) stmt_ =
   | Fallthrough
-  | Expr of expr
+  | Expr of ('ex, 'fb, 'en, 'hi) expr
   | Break
   (* Temporarily need to support `break int` for codegen but not typecheck *)
-  | TempBreak of expr
+  | TempBreak of ('ex, 'fb, 'en, 'hi) expr
   | Continue
   (* Temporarily need to support `continue int` for codegen but not typecheck *)
-  | TempContinue of expr
-  | Throw of expr
-  | Return of expr option
+  | TempContinue of ('ex, 'fb, 'en, 'hi) expr
+  | Throw of ('ex, 'fb, 'en, 'hi) expr
+  | Return of ('ex, 'fb, 'en, 'hi) expr option
   | GotoLabel of pstring
   | Goto of pstring
-  | Awaitall of ((lid option * expr) list * block)
-  | If of expr * block * block
-  | Do of block * expr
-  | While of expr * block
-  | Using of using_stmt
-  | For of expr * expr * expr * block
-  | Switch of expr * case list
+  | Awaitall of
+      ( (lid option * ('ex, 'fb, 'en, 'hi) expr) list
+      * ('ex, 'fb, 'en, 'hi) block )
+  | If of
+      ('ex, 'fb, 'en, 'hi) expr
+      * ('ex, 'fb, 'en, 'hi) block
+      * ('ex, 'fb, 'en, 'hi) block
+  | Do of ('ex, 'fb, 'en, 'hi) block * ('ex, 'fb, 'en, 'hi) expr
+  | While of ('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) block
+  | Using of ('ex, 'fb, 'en, 'hi) using_stmt
+  | For of
+      ('ex, 'fb, 'en, 'hi) expr
+      * ('ex, 'fb, 'en, 'hi) expr
+      * ('ex, 'fb, 'en, 'hi) expr
+      * ('ex, 'fb, 'en, 'hi) block
+  | Switch of ('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) case list
   (* Dropped the Pos.t option *)
-  | Foreach of expr * as_expr * block
-  | Try of block * catch list * block
-  | Def_inline of def
-  | Let of lid * hint option * expr
+  | Foreach of
+      ('ex, 'fb, 'en, 'hi) expr
+      * ('ex, 'fb, 'en, 'hi) as_expr
+      * ('ex, 'fb, 'en, 'hi) block
+  | Try of
+      ('ex, 'fb, 'en, 'hi) block
+      * ('ex, 'fb, 'en, 'hi) catch list
+      * ('ex, 'fb, 'en, 'hi) block
+  | Def_inline of ('ex, 'fb, 'en, 'hi) def
+  | Let of lid * hint option * ('ex, 'fb, 'en, 'hi) expr
   | Noop
-  | Block of block
-  | Markup of pstring * expr option
+  | Block of ('ex, 'fb, 'en, 'hi) block
+  | Markup of pstring * ('ex, 'fb, 'en, 'hi) expr option
 
-and using_stmt = {
+and ('ex, 'fb, 'en, 'hi) using_stmt = {
   us_is_block_scoped: bool;
   us_has_await: bool;
-  us_expr: expr;
-  us_block: block;
+  us_expr: ('ex, 'fb, 'en, 'hi) expr;
+  us_block: ('ex, 'fb, 'en, 'hi) block;
 }
 
-and as_expr =
-  | As_v of expr
-  | As_kv of expr * expr
+and ('ex, 'fb, 'en, 'hi) as_expr =
+  | As_v of ('ex, 'fb, 'en, 'hi) expr
+  | As_kv of ('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) expr
   (* This is not in AST *)
-  | Await_as_v of pos * expr
-  | Await_as_kv of pos * expr * expr
+  | Await_as_v of pos * ('ex, 'fb, 'en, 'hi) expr
+  | Await_as_kv of pos * ('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) expr
 
-and block = stmt list
+and ('ex, 'fb, 'en, 'hi) block = ('ex, 'fb, 'en, 'hi) stmt list
 
 (* This is not in AST *)
-and class_id = expr_annotation * class_id_
-and class_id_ =
+and ('ex, 'fb, 'en, 'hi) class_id = 'ex * ('ex, 'fb, 'en, 'hi) class_id_
+
+and ('ex, 'fb, 'en, 'hi) class_id_ =
   | CIparent
   | CIself
   | CIstatic
-  | CIexpr of expr
+  | CIexpr of ('ex, 'fb, 'en, 'hi) expr
   | CI of sid
 
-and expr = expr_annotation * expr_
-and expr_ =
-  | Array of afield list
-  | Darray of (targ * targ) option * (expr * expr) list
-  | Varray of targ option * expr list
-  | Shape of (Ast_defs.shape_field_name * expr) list
-    (* TODO: T38184446 Consolidate collections in AAST *)
-  | ValCollection of vc_kind * targ option * expr list
-    (* TODO: T38184446 Consolidate collections in AAST *)
-  | KeyValCollection of kvc_kind * (targ * targ) option * field list
+and ('ex, 'fb, 'en, 'hi) expr = 'ex * ('ex, 'fb, 'en, 'hi) expr_
+
+and ('ex, 'fb, 'en, 'hi) expr_ =
+  | Array of ('ex, 'fb, 'en, 'hi) afield list
+  | Darray of
+      (targ * targ) option
+      * (('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) expr) list
+  | Varray of targ option * ('ex, 'fb, 'en, 'hi) expr list
+  | Shape of (Ast_defs.shape_field_name * ('ex, 'fb, 'en, 'hi) expr) list
+  (* TODO: T38184446 Consolidate collections in AAST *)
+  | ValCollection of vc_kind * targ option * ('ex, 'fb, 'en, 'hi) expr list
+  (* TODO: T38184446 Consolidate collections in AAST *)
+  | KeyValCollection of
+      kvc_kind * (targ * targ) option * ('ex, 'fb, 'en, 'hi) field list
   | Null
   | This
   | True
@@ -134,66 +143,87 @@ and expr_ =
   | Lvar of lid
   | ImmutableVar of lid
   | Dollardollar of lid
-  | Clone of expr
-  | Obj_get of expr * expr * og_null_flavor
-  | Array_get of expr * expr option
-  | Class_get of class_id * class_get_expr
-  | Class_const of class_id * pstring
-  | Call of call_type
-    * expr (* function *)
-    * targ list (* explicit type annotations *)
-    * expr list (* positional args *)
-    * expr list (* unpacked args *)
+  | Clone of ('ex, 'fb, 'en, 'hi) expr
+  | Obj_get of
+      ('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) expr * og_null_flavor
+  | Array_get of ('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) expr option
+  | Class_get of
+      ('ex, 'fb, 'en, 'hi) class_id * ('ex, 'fb, 'en, 'hi) class_get_expr
+  | Class_const of ('ex, 'fb, 'en, 'hi) class_id * pstring
+  | Call of
+      call_type
+      * ('ex, 'fb, 'en, 'hi) expr
+      (* function *)
+      * targ list
+      (* explicit type annotations *)
+      * ('ex, 'fb, 'en, 'hi) expr list
+      (* positional args *)
+      * ('ex, 'fb, 'en, 'hi) expr list (* unpacked args *)
   | Int of string
   | Float of string
   | String of string
-  | String2 of expr list
-  | PrefixedString of string * expr
-  | Yield of afield
+  | String2 of ('ex, 'fb, 'en, 'hi) expr list
+  | PrefixedString of string * ('ex, 'fb, 'en, 'hi) expr
+  | Yield of ('ex, 'fb, 'en, 'hi) afield
   | Yield_break
-  | Yield_from of expr
-  | Await of expr
-  | Suspend of expr
-  | List of expr list
-  | Expr_list of expr list
-  | Cast of hint * expr
-  | Unop of Ast_defs.uop * expr
-  | Binop of Ast_defs.bop * expr * expr
-  (** The ID of the $$ that is implicitly declared by this pipe. *)
-  | Pipe of lid * expr * expr
-  | Eif of expr * expr option * expr
-  | InstanceOf of expr * class_id
-  | Is of expr * hint
-  | As of expr * hint * (* is nullable *) bool
-  | New of class_id * targ list * expr list * expr list * (* constructor *) expr_annotation
-  | Record of class_id * (* is array *) bool * (expr * expr) list
-  | Efun of fun_ * lid list
-  | Lfun of fun_ * lid list
-  | Xml of sid * xhp_attribute list * expr list
-  | Callconv of Ast_defs.param_kind * expr
-  | Import of import_flavor * expr
+  | Yield_from of ('ex, 'fb, 'en, 'hi) expr
+  | Await of ('ex, 'fb, 'en, 'hi) expr
+  | Suspend of ('ex, 'fb, 'en, 'hi) expr
+  | List of ('ex, 'fb, 'en, 'hi) expr list
+  | Expr_list of ('ex, 'fb, 'en, 'hi) expr list
+  | Cast of hint * ('ex, 'fb, 'en, 'hi) expr
+  | Unop of Ast_defs.uop * ('ex, 'fb, 'en, 'hi) expr
+  | Binop of
+      Ast_defs.bop * ('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) expr
+      (** The ID of the $$ that is implicitly declared by this pipe. *)
+  | Pipe of lid * ('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) expr
+  | Eif of
+      ('ex, 'fb, 'en, 'hi) expr
+      * ('ex, 'fb, 'en, 'hi) expr option
+      * ('ex, 'fb, 'en, 'hi) expr
+  | Is of ('ex, 'fb, 'en, 'hi) expr * hint
+  | As of ('ex, 'fb, 'en, 'hi) expr * hint * (* is nullable *) bool
+  | New of
+      ('ex, 'fb, 'en, 'hi) class_id
+      * targ list
+      * ('ex, 'fb, 'en, 'hi) expr list
+      * ('ex, 'fb, 'en, 'hi) expr list
+      * 'ex (* constructor *)
+  | Record of
+      ('ex, 'fb, 'en, 'hi) class_id
+      * (* is array *) bool
+      * (('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) expr) list
+  | Efun of ('ex, 'fb, 'en, 'hi) fun_ * lid list
+  | Lfun of ('ex, 'fb, 'en, 'hi) fun_ * lid list
+  | Xml of
+      sid
+      * ('ex, 'fb, 'en, 'hi) xhp_attribute list
+      * ('ex, 'fb, 'en, 'hi) expr list
+  | Callconv of Ast_defs.param_kind * ('ex, 'fb, 'en, 'hi) expr
+  | Import of import_flavor * ('ex, 'fb, 'en, 'hi) expr
   (* TODO: T38184446 Consolidate collections in AAST *)
-  | Collection of sid * collection_targ option * afield list
-  | BracedExpr of expr
-  | ParenthesizedExpr of expr
+  | Collection of
+      sid * collection_targ option * ('ex, 'fb, 'en, 'hi) afield list
+  | BracedExpr of ('ex, 'fb, 'en, 'hi) expr
+  | ParenthesizedExpr of ('ex, 'fb, 'en, 'hi) expr
   (* None of these constructors exist in the AST *)
   | Lplaceholder of pos
   | Fun_id of sid
-  | Method_id of expr * pstring
+  | Method_id of ('ex, 'fb, 'en, 'hi) expr * pstring
   (* meth_caller('Class name', 'method name') *)
   | Method_caller of sid * pstring
   | Smethod_id of sid * pstring
-  | Special_func of special_func
-  | Pair of expr * expr
-  | Assert of assert_expr
+  | Special_func of ('ex, 'fb, 'en, 'hi) special_func
+  | Pair of ('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) expr
+  | Assert of ('ex, 'fb, 'en, 'hi) assert_expr
   | Typename of sid
   | PU_atom of string
-  | PU_identifier of class_id * pstring * pstring
+  | PU_identifier of ('ex, 'fb, 'en, 'hi) class_id * pstring * pstring
   | Any
 
-and class_get_expr =
+and ('ex, 'fb, 'en, 'hi) class_get_expr =
   | CGstring of pstring
-  | CGexpr of expr
+  | CGexpr of ('ex, 'fb, 'en, 'hi) expr
 
 (* These are "very special" constructs that we look for in, among
  * other places, terminality checks. invariant does not appear here
@@ -201,67 +231,78 @@ and class_get_expr =
  *
  * TODO: get rid of assert_expr entirely in favor of rewriting to if
  * and noreturn *)
-and assert_expr =
-  | AE_assert of expr
+and ('ex, 'fb, 'en, 'hi) assert_expr = AE_assert of ('ex, 'fb, 'en, 'hi) expr
 
-and case =
-  | Default of block
-  | Case of expr * block
+and ('ex, 'fb, 'en, 'hi) case =
+  | Default of pos * ('ex, 'fb, 'en, 'hi) block
+  | Case of ('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) block
 
-and catch = sid * lid * block
+and ('ex, 'fb, 'en, 'hi) catch = sid * lid * ('ex, 'fb, 'en, 'hi) block
 
-and field = expr * expr
-and afield =
-  | AFvalue of expr
-  | AFkvalue of expr * expr
+and ('ex, 'fb, 'en, 'hi) field =
+  ('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) expr
 
-and xhp_attribute =
-  | Xhp_simple of pstring * expr
-  | Xhp_spread of expr
+and ('ex, 'fb, 'en, 'hi) afield =
+  | AFvalue of ('ex, 'fb, 'en, 'hi) expr
+  | AFkvalue of ('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) expr
 
-and special_func =
-  | Genva of expr list
+and ('ex, 'fb, 'en, 'hi) xhp_attribute =
+  | Xhp_simple of pstring * ('ex, 'fb, 'en, 'hi) expr
+  | Xhp_spread of ('ex, 'fb, 'en, 'hi) expr
+
+and ('ex, 'fb, 'en, 'hi) special_func =
+  | Genva of ('ex, 'fb, 'en, 'hi) expr list
 
 and is_reference = bool
+
 and is_variadic = bool
-and fun_param = {
-  param_annotation : expr_annotation;
-  param_hint : hint option;
-  param_is_reference : is_reference;
-  param_is_variadic : is_variadic;
-  param_pos : pos;
-  param_name : string;
-  param_expr : expr option;
-  param_callconv : Ast_defs.param_kind option;
-  param_user_attributes : user_attribute list;
+
+and ('ex, 'fb, 'en, 'hi) fun_param = {
+  param_annotation: 'ex;
+  param_type_hint: 'hi type_hint;
+  param_is_reference: is_reference;
+  param_is_variadic: is_variadic;
+  param_pos: pos;
+  param_name: string;
+  param_expr: ('ex, 'fb, 'en, 'hi) expr option;
+  param_callconv: Ast_defs.param_kind option;
+  param_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;
+  param_visibility: visibility option;
 }
 
-and fun_variadicity = (* does function take varying number of args? *)
-  | FVvariadicArg of fun_param (* PHP5.6 ...$args finishes the func declaration *)
+and ('ex, 'fb, 'en, 'hi) fun_variadicity =
+  (* does function take varying number of args? *)
+  | FVvariadicArg of ('ex, 'fb, 'en, 'hi) fun_param (* PHP5.6 ...$args finishes the func declaration *)
   | FVellipsis of pos (* HH ... finishes the declaration; deprecate for ...$args? *)
-  | FVnonVariadic (* standard non variadic function *)
+  | FVnonVariadic
 
-and fun_ = {
-  f_span     : pos;
-  f_annotation : env_annotation;
-  f_mode     : FileInfo.mode [@opaque];
-  f_ret      : hint option;
-  f_name     : sid;
-  f_tparams  : tparam list;
-  f_where_constraints : where_constraint list;
-  f_variadic : fun_variadicity;
-  f_params   : fun_param list;
-  f_body     : func_body;
-  f_fun_kind : Ast_defs.fun_kind;
-  f_user_attributes : user_attribute list;
-  f_file_attributes : file_attribute list;
-  f_external : bool;  (* true if this declaration has no body because it is an
+(* standard non variadic function *)
+and ('ex, 'fb, 'en, 'hi) fun_ = {
+  f_span: pos;
+  f_annotation: 'en;
+  f_mode: FileInfo.mode; [@opaque]
+  f_ret: 'hi type_hint;
+  f_name: sid;
+  f_tparams: ('ex, 'fb, 'en, 'hi) tparam list;
+  f_where_constraints: where_constraint list;
+  f_variadic: ('ex, 'fb, 'en, 'hi) fun_variadicity;
+  f_params: ('ex, 'fb, 'en, 'hi) fun_param list;
+  f_body: ('ex, 'fb, 'en, 'hi) func_body;
+  f_fun_kind: Ast_defs.fun_kind;
+  f_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;
+  f_file_attributes: ('ex, 'fb, 'en, 'hi) file_attribute list;
+  f_external: bool;
+  (* true if this declaration has no body because it is an
                          external function declaration (e.g. from an HHI file)*)
-  f_namespace : nsenv;
-  f_doc_comment : string option;
-  f_static : bool;
+  f_namespace: nsenv;
+  f_doc_comment: string option;
+  f_static: bool;
 }
 
+and ('ex, 'fb, 'en, 'hi) func_body = {
+  fb_ast: ('ex, 'fb, 'en, 'hi) block;
+  fb_annotation: 'fb;
+}
 (**
  * Naming has two phases and the annotation helps to indicate the phase.
  * In the first pass, it will perform naming on everything except for function
@@ -270,91 +311,102 @@ and fun_ = {
  * have named and unnamed variants of the annotation.
  * See BodyNamingAnnotation in nast.ml and the comment in naming.ml
  *)
-and func_body = {
-  fb_ast : block;
-  fb_annotation : funcbody_annotation
-}
 
-and user_attribute = {
+(* A type annotation is two things:
+  - the localized hint, or if the hint is missing, the inferred type
+  - The typehint associated to this expression if it exists *)
+and 'hi type_hint = 'hi * type_hint_
+
+and type_hint_ = hint option
+
+and ('ex, 'fb, 'en, 'hi) user_attribute = {
   ua_name: sid;
-  ua_params: expr list (* user attributes are restricted to scalar values *)
+  ua_params: ('ex, 'fb, 'en, 'hi) expr list;
+      (* user attributes are restricted to scalar values *)
 }
 
-and file_attribute = {
-  fa_user_attributes: user_attribute list;
+and ('ex, 'fb, 'en, 'hi) file_attribute = {
+  fa_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;
   fa_namespace: nsenv;
 }
 
-and tparam = {
+and ('ex, 'fb, 'en, 'hi) tparam = {
   tp_variance: Ast_defs.variance;
   tp_name: sid;
   tp_constraints: (Ast_defs.constraint_kind * hint) list;
   tp_reified: reify_kind;
-  tp_user_attributes: user_attribute list
+  tp_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;
 }
 
-and class_tparams = {
-  c_tparam_list: tparam list;
+and ('ex, 'fb, 'en, 'hi) class_tparams = {
+  c_tparam_list: ('ex, 'fb, 'en, 'hi) tparam list;
   (* TODO: remove this and use tp_constraints *)
   (* keeping around the ast version of the constraint only
    * for the purposes of Naming.class_meth_bodies *)
-  c_tparam_constraints: (reify_kind * (Ast_defs.constraint_kind * hint) list) SMap.t [@opaque]
+  c_tparam_constraints:
+    (reify_kind * (Ast_defs.constraint_kind * hint) list) SMap.t;
+      [@opaque]
 }
 
 and use_as_alias = sid option * pstring * sid option * use_as_visibility list
+
 and insteadof_alias = sid * pstring * sid list
+
 and is_extends = bool
 
-and class_ = {
-  c_span           : pos              ;
-  c_annotation     : env_annotation   ;
-  c_mode           : FileInfo.mode [@opaque];
-  c_final          : bool             ;
-  c_is_xhp         : bool;
-  c_kind           : Ast_defs.class_kind   ;
-  c_name           : sid              ;
+and ('ex, 'fb, 'en, 'hi) class_ = {
+  c_span: pos;
+  c_annotation: 'en;
+  c_mode: FileInfo.mode; [@opaque]
+  c_final: bool;
+  c_is_xhp: bool;
+  c_kind: Ast_defs.class_kind;
+  c_name: sid;
   (* The type parameters of a class A<T> (T is the parameter) *)
-  c_tparams        : class_tparams    ;
-  c_extends        : hint list        ;
-  c_uses           : hint list        ;
-  c_use_as_alias   : use_as_alias list;
+  c_tparams: ('ex, 'fb, 'en, 'hi) class_tparams;
+  c_extends: hint list;
+  c_uses: hint list;
+  c_use_as_alias: use_as_alias list;
   c_insteadof_alias: insteadof_alias list;
-  c_method_redeclarations : method_redeclaration list;
-  c_xhp_attr_uses  : hint list        ;
-  c_xhp_category   : (pos * pstring list) option;
-  c_reqs           : (hint * is_extends) list;
-  c_implements     : hint list        ;
-  c_where_constraints : where_constraint list;
-  c_consts         : class_const list ;
-  c_typeconsts     : class_typeconst list;
-  c_vars           : class_var list   ;
-  c_methods        : method_ list     ;
-  c_attributes     : class_attr list  ;
-  c_xhp_children   : (pos * xhp_child) list;
-  c_xhp_attrs      : xhp_attr list    ;
-  c_namespace      : nsenv            ;
-  c_user_attributes: user_attribute list;
-  c_file_attributes: file_attribute list;
-  c_enum           : enum_ option     ;
-  c_pu_enums       : pu_enum list     ;
-  c_doc_comment    : string option    ;
+  c_method_redeclarations: ('ex, 'fb, 'en, 'hi) method_redeclaration list;
+  c_xhp_attr_uses: hint list;
+  c_xhp_category: (pos * pstring list) option;
+  c_reqs: (hint * is_extends) list;
+  c_implements: hint list;
+  c_where_constraints: where_constraint list;
+  c_consts: ('ex, 'fb, 'en, 'hi) class_const list;
+  c_typeconsts: ('ex, 'fb, 'en, 'hi) class_typeconst list;
+  c_vars: ('ex, 'fb, 'en, 'hi) class_var list;
+  c_methods: ('ex, 'fb, 'en, 'hi) method_ list;
+  c_attributes: ('ex, 'fb, 'en, 'hi) class_attr list;
+  c_xhp_children: (pos * xhp_child) list;
+  c_xhp_attrs: ('ex, 'fb, 'en, 'hi) xhp_attr list;
+  c_namespace: nsenv;
+  c_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;
+  c_file_attributes: ('ex, 'fb, 'en, 'hi) file_attribute list;
+  c_enum: enum_ option;
+  c_pu_enums: ('ex, 'fb, 'en, 'hi) pu_enum list;
+  c_doc_comment: string option;
 }
 
 and xhp_attr_tag =
   | Required
   | LateInit
 
-and xhp_attr = hint option * class_var * xhp_attr_tag option *
-  ((pos * bool * expr list) option)
+and ('ex, 'fb, 'en, 'hi) xhp_attr =
+  hint option
+  * ('ex, 'fb, 'en, 'hi) class_var
+  * xhp_attr_tag option
+  * (pos * bool * ('ex, 'fb, 'en, 'hi) expr list) option
 
-and class_attr =
+and ('ex, 'fb, 'en, 'hi) class_attr =
   | CA_name of sid
-  | CA_field of ca_field
+  | CA_field of ('ex, 'fb, 'en, 'hi) ca_field
 
-and ca_field = {
+and ('ex, 'fb, 'en, 'hi) ca_field = {
   ca_type: ca_type;
   ca_id: sid;
-  ca_value: expr option;
+  ca_value: ('ex, 'fb, 'en, 'hi) expr option;
   ca_required: bool;
 }
 
@@ -363,11 +415,12 @@ and ca_type =
   | CA_enum of string list
 
 (* expr = None indicates an abstract const *)
-and class_const = {
+and ('ex, 'fb, 'en, 'hi) class_const = {
   cc_visibility: visibility;
   cc_type: hint option;
   cc_id: sid;
-  cc_expr: expr option;
+  cc_expr: ('ex, 'fb, 'en, 'hi) expr option;
+  cc_doc_comment: string option;
 }
 
 and typeconst_abstract_kind =
@@ -381,90 +434,92 @@ and typeconst_abstract_kind =
  *
  * If the type const is not abstract then a type must be specified.
  *)
-and class_typeconst = {
-  c_tconst_abstract : typeconst_abstract_kind;
-  c_tconst_visibility : visibility;
-  c_tconst_name : sid;
-  c_tconst_constraint : hint option;
-  c_tconst_type : hint option;
-  c_tconst_user_attributes : user_attribute list;
-  c_tconst_span : pos;
+and ('ex, 'fb, 'en, 'hi) class_typeconst = {
+  c_tconst_abstract: typeconst_abstract_kind;
+  c_tconst_visibility: visibility;
+  c_tconst_name: sid;
+  c_tconst_constraint: hint option;
+  c_tconst_type: hint option;
+  c_tconst_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;
+  c_tconst_span: pos;
+  c_tconst_doc_comment: string option;
 }
 
-and xhp_attr_info = {
-  xai_tag : xhp_attr_tag option;
+and xhp_attr_info = { xai_tag: xhp_attr_tag option }
+
+and ('ex, 'fb, 'en, 'hi) class_var = {
+  cv_final: bool;
+  cv_xhp_attr: xhp_attr_info option;
+  cv_abstract: bool;
+  cv_visibility: visibility;
+  cv_type: hint option;
+  cv_id: sid;
+  cv_expr: ('ex, 'fb, 'en, 'hi) expr option;
+  cv_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;
+  cv_doc_comment: string option;
+  cv_is_promoted_variadic: bool;
+  cv_is_static: bool;
+  cv_span: pos;
 }
 
-and class_var = {
-  cv_final           : bool               ;
-  cv_xhp_attr        : xhp_attr_info option;
-  cv_visibility      : visibility         ;
-  cv_type            : hint option        ;
-  cv_id              : sid                ;
-  cv_expr            : expr option        ;
-  cv_user_attributes : user_attribute list;
-  cv_doc_comment     : string option      ;
-  cv_is_promoted_variadic : bool          ;
-  cv_is_static        : bool              ;
+and ('ex, 'fb, 'en, 'hi) method_ = {
+  m_span: pos;
+  m_annotation: 'en;
+  m_final: bool;
+  m_abstract: bool;
+  m_static: bool;
+  m_visibility: visibility;
+  m_name: sid;
+  m_tparams: ('ex, 'fb, 'en, 'hi) tparam list;
+  m_where_constraints: where_constraint list;
+  m_variadic: ('ex, 'fb, 'en, 'hi) fun_variadicity;
+  m_params: ('ex, 'fb, 'en, 'hi) fun_param list;
+  m_body: ('ex, 'fb, 'en, 'hi) func_body;
+  m_fun_kind: Ast_defs.fun_kind;
+  m_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;
+  m_ret: 'hi type_hint;
+  m_external: bool;
+  (* see f_external above for context *)
+  m_doc_comment: string option;
 }
 
-and method_ = {
-  m_span            : pos                 ;
-  m_annotation      : env_annotation      ;
-  m_final           : bool                ;
-  m_abstract        : bool                ;
-  m_static          : bool                ;
-  m_visibility      : visibility          ;
-  m_name            : sid                 ;
-  m_tparams         : tparam list         ;
-  m_where_constraints : where_constraint list;
-  m_variadic        : fun_variadicity     ;
-  m_params          : fun_param list      ;
-  m_body            : func_body           ;
-  m_fun_kind        : Ast_defs.fun_kind        ;
-  m_user_attributes : user_attribute list ;
-  m_ret             : hint option         ;
-  m_external        : bool                ;  (* see f_external above for context *)
-  m_doc_comment     : string option       ;
+and ('ex, 'fb, 'en, 'hi) method_redeclaration = {
+  mt_final: bool;
+  mt_abstract: bool;
+  mt_static: bool;
+  mt_visibility: visibility;
+  mt_name: sid;
+  mt_tparams: ('ex, 'fb, 'en, 'hi) tparam list;
+  mt_where_constraints: where_constraint list;
+  mt_variadic: ('ex, 'fb, 'en, 'hi) fun_variadicity;
+  mt_params: ('ex, 'fb, 'en, 'hi) fun_param list;
+  mt_fun_kind: Ast_defs.fun_kind;
+  mt_ret: 'hi type_hint;
+  mt_trait: hint;
+  mt_method: pstring;
+  mt_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;
 }
 
-and method_redeclaration = {
-  mt_final           : bool                ;
-  mt_abstract        : bool                ;
-  mt_static          : bool                ;
-  mt_visibility      : visibility          ;
-  mt_name            : sid                 ;
-  mt_tparams         : tparam list         ;
-  mt_where_constraints : where_constraint list;
-  mt_variadic        : fun_variadicity     ;
-  mt_params          : fun_param list      ;
-  mt_fun_kind        : Ast_defs.fun_kind        ;
-  mt_ret             : hint option         ;
-  mt_trait           : hint                ;
-  mt_method          : pstring             ;
-  mt_user_attributes : user_attribute list;
+and nsenv = (Namespace_env.env[@opaque])
+
+and ('ex, 'fb, 'en, 'hi) typedef = {
+  t_annotation: 'en;
+  t_name: sid;
+  t_tparams: ('ex, 'fb, 'en, 'hi) tparam list;
+  t_constraint: hint option;
+  t_kind: hint;
+  t_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;
+  t_mode: FileInfo.mode; [@opaque]
+  t_vis: typedef_visibility;
+  t_namespace: nsenv;
 }
 
-and nsenv = Namespace_env.env [@opaque]
-
-and typedef = {
-  t_annotation : env_annotation;
-  t_name : sid;
-  t_tparams : tparam list;
-  t_constraint : hint option;
-  t_kind : hint;
-  t_user_attributes : user_attribute list;
-  t_mode : FileInfo.mode [@opaque];
-  t_vis : typedef_visibility;
-  t_namespace : nsenv;
-}
-
-and gconst = {
-  cst_annotation : env_annotation;
-  cst_mode: FileInfo.mode [@opaque];
+and ('ex, 'fb, 'en, 'hi) gconst = {
+  cst_annotation: 'en;
+  cst_mode: FileInfo.mode; [@opaque]
   cst_name: sid;
   cst_type: hint option;
-  cst_value: expr;
+  cst_value: ('ex, 'fb, 'en, 'hi) expr;
   cst_namespace: nsenv;
   cst_span: pos;
 }
@@ -493,33 +548,32 @@ and gconst = {
      ...
    }
 *)
-
-and pu_enum = {
+and ('ex, 'fb, 'en, 'hi) pu_enum = {
   pu_name: sid;
   pu_is_final: bool;
   pu_case_types: sid list;
   pu_case_values: (sid * hint) list;
-  pu_members: pu_member list;
+  pu_members: ('ex, 'fb, 'en, 'hi) pu_member list;
 }
 
-and pu_member = {
+and ('ex, 'fb, 'en, 'hi) pu_member = {
   pum_atom: sid;
   pum_types: (sid * hint) list;
-  pum_exprs: (sid * expr) list;
+  pum_exprs: (sid * ('ex, 'fb, 'en, 'hi) expr) list;
 }
 
-and fun_def = fun_
+and ('ex, 'fb, 'en, 'hi) fun_def = ('ex, 'fb, 'en, 'hi) fun_
 
-and def =
-  | Fun of fun_def
-  | Class of class_
-  | Stmt of stmt
-  | Typedef of typedef
-  | Constant of gconst
-  | Namespace of sid * program
+and ('ex, 'fb, 'en, 'hi) def =
+  | Fun of ('ex, 'fb, 'en, 'hi) fun_def
+  | Class of ('ex, 'fb, 'en, 'hi) class_
+  | Stmt of ('ex, 'fb, 'en, 'hi) stmt
+  | Typedef of ('ex, 'fb, 'en, 'hi) typedef
+  | Constant of ('ex, 'fb, 'en, 'hi) gconst
+  | Namespace of sid * ('ex, 'fb, 'en, 'hi) program
   | NamespaceUse of (ns_kind * sid * sid) list
   | SetNamespaceEnv of nsenv
-  | FileAttributes of file_attribute
+  | FileAttributes of ('ex, 'fb, 'en, 'hi) file_attribute
 
 and ns_kind =
   | NSNamespace
@@ -533,115 +587,54 @@ and reify_kind =
   | SoftReified
   | Reified
 
-let expr_to_string expr =
-  match expr with
-  | Any -> "Any"
-  | Array _ -> "Array"
-  | Darray _ -> "Darray"
-  | Varray _ -> "Varray"
-  | Shape _ -> "Shape"
-  | ValCollection _ -> "ValCollection"
-  | KeyValCollection _ -> "KeyValCollection"
-  | This -> "This"
-  | Id _ -> "Id"
-  | Lvar _ -> "Lvar"
-  | ImmutableVar _ -> "ImmutableVar"
-  | Lplaceholder _ -> "Lplaceholder"
-  | Dollardollar _ -> "Dollardollar"
-  | Fun_id _ -> "Fun_id"
-  | Method_id _ -> "Method_id"
-  | Method_caller _ -> "Method_caller"
-  | Smethod_id _ -> "Smethod_id"
-  | Obj_get _ -> "Obj_get"
-  | Array_get _ -> "Array_get"
-  | Class_get _  -> "Class_get"
-  | Class_const _  -> "Class_const"
-  | Call _  -> "Call"
-  | True -> "True"
-  | False -> "False"
-  | Int _  -> "Int"
-  | Float _  -> "Float"
-  | Null -> "Null"
-  | String _  -> "String"
-  | String2 _  -> "String2"
-  | PrefixedString _ -> "PrefixedString"
-  | Special_func _  -> "Special_func"
-  | Yield_break -> "Yield_break"
-  | Yield _  -> "Yield"
-  | Yield_from _ -> "Yield_from"
-  | Await _  -> "Await"
-  | Suspend _ -> "Suspend"
-  | List _  -> "List"
-  | Pair _  -> "Pair"
-  | Expr_list _  -> "Expr_list"
-  | Cast _  -> "Cast"
-  | Unop _  -> "Unop"
-  | Binop _  -> "Binop"
-  | Pipe _  -> "Pipe"
-  | Eif _  -> "Eif"
-  | InstanceOf _  -> "InstanceOf"
-  | Is _ -> "Is"
-  | As _ -> "As"
-  | New _  -> "New"
-  | Record _ -> "Record"
-  | Efun _  -> "Efun"
-  | Xml _  -> "Xml"
-  | Callconv _ -> "Callconv"
-  | Assert _  -> "Assert"
-  | Clone _  -> "Clone"
-  | Typename _  -> "Typename"
-  | Omitted -> "Omitted"
-  | Lfun _ -> "Lfun"
-  | Import _ -> "Import"
-  | Collection _ -> "Collection"
-  | BracedExpr _ -> "BracedExpr"
-  | ParenthesizedExpr _ -> "ParenthesizedExpr"
-  | PU_atom _ -> "PU_atom"
-  | PU_identifier _ -> "PU_identifier"
+(* Splits the methods on a class into the constructor, statics, dynamics *)
 
 (**
  * Methods, properties, and requirements are order dependent in bytecode
  * emission, which is observable in user code via `ReflectionClass`.
  *)
-(* Splits the methods on a class into the constructor, statics, dynamics *)
 let split_methods class_ =
-  let constr, statics, res =
+  let (constr, statics, res) =
     List.fold_left
       (fun (constr, statics, rest) m ->
-        if snd m.m_name = "__construct"
-        then Some m, statics, rest
-        else if m.m_static
-        then constr, m :: statics, rest
-        else constr, statics, m :: rest)
+        if snd m.m_name = "__construct" then
+          (Some m, statics, rest)
+        else if m.m_static then
+          (constr, m :: statics, rest)
+        else
+          (constr, statics, m :: rest))
       (None, [], [])
-      class_.c_methods in
-  constr, List.rev statics, List.rev res
+      class_.c_methods
+  in
+  (constr, List.rev statics, List.rev res)
 
 (* Splits class properties into statics, dynamics *)
 let split_vars class_ =
-  let statics, res =
+  let (statics, res) =
     List.fold_left
       (fun (statics, rest) v ->
-        if v.cv_is_static
-        then
-          v :: statics, rest
+        if v.cv_is_static then
+          (v :: statics, rest)
         else
-          statics, v :: rest)
+          (statics, v :: rest))
       ([], [])
-      class_.c_vars in
-  List.rev statics, List.rev res
+      class_.c_vars
+  in
+  (List.rev statics, List.rev res)
 
 (* Splits `require`s into extends, implements *)
 let split_reqs class_ =
-  let extends, implements =
+  let (extends, implements) =
     List.fold_left
       (fun (extends, implements) (h, is_extends) ->
-        if is_extends
-        then h :: extends, implements
-        else extends, h :: implements)
+        if is_extends then
+          (h :: extends, implements)
+        else
+          (extends, h :: implements))
       ([], [])
-      class_.c_reqs in
-  List.rev extends, List.rev implements
+      class_.c_reqs
+  in
+  (List.rev extends, List.rev implements)
 
 type break_continue_level =
   | Level_ok of int option
@@ -652,10 +645,21 @@ let get_break_continue_level level_opt =
   match level_opt with
   | (_, Int s) ->
     let i = int_of_string s in
-    if i <= 0
-    then Level_non_positive
-    else Level_ok (Some i)
+    if i <= 0 then
+      Level_non_positive
+    else
+      Level_ok (Some i)
   | _ -> Level_non_literal
   | exception _ -> Level_non_literal
 
-end (* of AnnotatedAST functor *)
+(* map a function over the second part of a type annotation *)
+let type_hint_option_map ~f ta =
+  let mapped_hint =
+    match snd ta with
+    | Some hint -> Some (f hint)
+    | None -> None
+  in
+  (fst ta, mapped_hint)
+
+(* extract an hint from a type annotation *)
+let hint_of_type_hint = snd

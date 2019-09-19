@@ -6,7 +6,7 @@ function make_counted_str($s) {
 }
 
 function main() {
-  $ks = apc_fetch('keyset-key');
+  $ks = __hhvm_intrinsics\apc_fetch_no_check('keyset-key');
   if ($ks === false) {
     $ks = keyset[
       make_counted_str('val1'),

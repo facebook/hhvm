@@ -289,11 +289,12 @@ static void logFrame(const Vunit& unit, const size_t frame) {
   ent.setInt("num_inner_frames", unit.frames[frame].num_inner_frames);
   ent.setInt("entry_weight", unit.frames[frame].entry_weight);
 
+  auto const sk = unit.context->initSrcKey;
   ent.setStr("version", "6");
   ent.setStr("trans_kind", show(unit.context->kind));
-  ent.setStr("prologue", unit.context->prologue ? "true" : "false");
-  ent.setStr("has_this", unit.context->hasThis ? "true" : "false");
-  ent.setStr("resumed", unit.context->resumeMode != ResumeMode::None
+  ent.setStr("prologue", sk.prologue() ? "true" : "false");
+  ent.setStr("has_this", sk.hasThis() ? "true" : "false");
+  ent.setStr("resumed", sk.resumeMode() != ResumeMode::None
                         ? "true" : "false");
 
   logFunc(func, ent);
@@ -318,8 +319,9 @@ void logTranslation(const TransEnv& env, const TransRange& range) {
   auto& context = env.unit->context();
   auto kind = show(context.kind);
   cols.setStr("trans_kind", !debug ? kind : kind + "_debug");
-  if (context.func) {
-    cols.setStr("func", context.func->fullName()->data());
+  if (context.initSrcKey.valid()) {
+    auto const func = context.initSrcKey.func();
+    cols.setStr("func", func->fullName()->data());
     switch (RuntimeOption::EvalJitSerdesMode) {
     case JitSerdesMode::Off:
     case JitSerdesMode::Serialize:
@@ -330,7 +332,7 @@ void logTranslation(const TransEnv& env, const TransRange& range) {
     case JitSerdesMode::DeserializeOrGenerate:
     case JitSerdesMode::DeserializeAndDelete:
     case JitSerdesMode::DeserializeAndExit:
-      cols.setInt("func_id", context.func->getFuncId());
+      cols.setInt("func_id", func->getFuncId());
       break;
     }
   }

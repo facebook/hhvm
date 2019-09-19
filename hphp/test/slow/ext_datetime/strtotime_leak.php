@@ -1,7 +1,5 @@
 <?hh
 
-error_reporting(0);
-
 function test() {
   for ($i = 0; $i < 10000; $i++) {
     strtotime("10 September 2000");
@@ -26,10 +24,15 @@ function main($report) {
     }
   }
 }
+<<__EntryPoint>>
+function main_entry(): void {
 
-var_dump(strtotime("10 September 2000 UTC"));
-var_dump(strtotime("null"));
+  error_reporting(0);
 
-main(false);
-main(false);
-main(true);
+  var_dump(strtotime("10 September 2000 UTC"));
+  var_dump(strtotime("null"));
+
+  main(false);
+  main(false);
+  main(true);
+}

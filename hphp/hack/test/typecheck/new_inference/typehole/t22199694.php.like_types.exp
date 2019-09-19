@@ -1,0 +1,6 @@
+File "t22199694.php", line 12, characters 15-38:
+Invalid argument (Typing[4110])
+File "t22199694.php", line 5, characters 40-40:
+Expected ~[unresolved] because it is an unenforceable type
+File "t22199694.php", line 12, characters 15-38:
+But got vec<~int>

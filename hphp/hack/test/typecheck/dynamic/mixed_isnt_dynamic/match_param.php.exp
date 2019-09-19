@@ -1,10 +1,5 @@
-File "match_param.php", line 13, characters 7-9:
-Class Bad does not correctly implement all required members  (Typing[4110])
-File "match_param.php", line 13, characters 22-31:
-Some members are incompatible with those declared in type FunAsClass
-Read the following to see why:
 File "match_param.php", line 14, characters 19-20:
-Member do has the wrong type
+Member do has the wrong type (Typing[4341])
 File "match_param.php", line 14, characters 22-28:
 Expected dynamic
 File "match_param.php", line 13, characters 33-37:

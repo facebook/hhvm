@@ -1,0 +1,6 @@
+File "bad_contra_constraint_2.php", line 25, characters 21-34:
+Invalid argument (Typing[4110])
+File "bad_contra_constraint_2.php", line 11, characters 28-43:
+Expected ~KeyedTraversable<string, string> because it is an unenforceable type
+File "bad_contra_constraint_2.php", line 19, characters 3-25:
+But got <expr#1> because it is an unenforceable type

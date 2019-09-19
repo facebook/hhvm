@@ -1,0 +1,14 @@
+File "shape_idx3.php", line 14, characters 3-28:
+  int
+File "shape_idx3.php", line 15, characters 3-28:
+  arraykey
+File "shape_idx3.php", line 16, characters 3-36:
+  ~arraykey
+File "shape_idx3.php", line 17, characters 3-36:
+  ~arraykey
+File "shape_idx3.php", line 14, characters 15-17:
+Invalid argument (Typing[4110])
+File "idx.hhi", line 32, characters 4-25:
+Expected KeyedContainer<[unresolved], [unresolved]>
+File "shape_idx3.php", line 9, characters 3-25:
+But got dynamic because it is an unenforceable type

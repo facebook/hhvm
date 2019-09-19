@@ -22,13 +22,13 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/externals.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/root-map.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/base/utf8-decode.h"
+#include "hphp/util/rds-local.h"
 #include <expat.h>
 
 #define XML_MAXLEVEL 255
@@ -449,7 +449,7 @@ void _xml_endElementHandler(void *userData, const XML_Char *name) {
       if (parser->lastwasopen) {
         parser->ctag.toArrRef().set(s_type, s_complete);
       } else {
-        ArrayInit tag(3, ArrayInit::Map{});
+        DArrayInit tag(3);
         _xml_add_to_info(parser, tag_name.substr(parser->toffset));
         tag.set(s_tag, tag_name.substr(parser->toffset));
         tag.set(s_type, s_close);
@@ -584,7 +584,7 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
     if (parser->startElementHandler.toBoolean()) {
       args.append(Variant(parser));
       args.append(tag_name);
-      args.append(Array::Create());
+      args.append(Array::CreateDArray());
 
       while (attributes && *attributes) {
         String att = _xml_decode_tag(parser, (const char*)attributes[0]);
@@ -603,8 +603,8 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
       if (parser->level <= XML_MAXLEVEL) {
         Array tag, atr;
         int atcnt = 0;
-        tag = Array::Create();
-        atr = Array::Create();
+        tag = Array::CreateDArray();
+        atr = Array::CreateDArray();
 
         _xml_add_to_info(parser, tag_name.substr(parser->toffset));
 
@@ -806,15 +806,18 @@ int64_t HHVM_FUNCTION(xml_parse,
 int64_t HHVM_FUNCTION(xml_parse_into_struct,
                       const Resource& parser,
                       const String& data,
-                      VRefParam values,
-                      VRefParam index /* = null */) {
+                      Array& values,
+                      Array& index) {
   SYNC_VM_REGS_SCOPED();
   int ret;
   auto p = cast<XmlParser>(parser);
-  p->data.setWithRef(values);
   p->data = Array::Create();
-  p->info.setWithRef(index);
   p->info = Array::Create();
+  SCOPE_EXIT {
+    values = p->data;
+    index = p->info;
+  };
+
   p->level = 0;
   p->ltags = (char**)malloc(XML_MAXLEVEL * sizeof(char*));
 
@@ -966,9 +969,9 @@ bool HHVM_FUNCTION(xml_set_notation_decl_handler,
 
 bool HHVM_FUNCTION(xml_set_object,
                    const Resource& parser,
-                   VRefParam object) {
+                   const Variant& object) {
   auto p = cast<XmlParser>(parser);
-  p->object.setWithRef(object);
+  p->object = object;
   return true;
 }
 

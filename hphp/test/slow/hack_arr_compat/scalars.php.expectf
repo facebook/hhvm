@@ -58,58 +58,58 @@ array(2) {
   string(1) "c"
 }
 
-Notice: Hack Array Compat: Comparing array with non-array in %s/scalars.php on line 14
+Notice: Hack Array Compat: Comparing PHP array with Hack array in %s/scalars.php on line 14
 bool(false)
 
-Notice: Hack Array Compat: Comparing array with non-array in %s/scalars.php on line 15
+Notice: Hack Array Compat: Comparing PHP array with Hack array in %s/scalars.php on line 15
 bool(true)
 
-Notice: Hack Array Compat: Comparing array with non-array in %s/scalars.php on line 16
+Notice: Hack Array Compat: Comparing PHP array with Hack array in %s/scalars.php on line 16
 bool(false)
 
-Notice: Hack Array Compat: Comparing array with non-array in %s/scalars.php on line 17
+Notice: Hack Array Compat: Comparing PHP array with Hack array in %s/scalars.php on line 17
 bool(true)
 
-Notice: Hack Array Compat: Comparing array with non-array in %s/scalars.php on line 18
+Notice: Hack Array Compat: Comparing PHP array with non any-array in %s/scalars.php on line 18
 bool(false)
 
-Notice: Hack Array Compat: Comparing array with non-array in %s/scalars.php on line 19
+Notice: Hack Array Compat: Comparing PHP array with non any-array in %s/scalars.php on line 19
 bool(true)
 
-Notice: Hack Array Compat: Comparing array with non-array in %s/scalars.php on line 20
+Notice: Hack Array Compat: Comparing PHP array with non any-array in %s/scalars.php on line 20
 bool(false)
 
-Notice: Hack Array Compat: Comparing array with non-array in %s/scalars.php on line 21
+Notice: Hack Array Compat: Comparing PHP array with non any-array in %s/scalars.php on line 21
 bool(true)
 
-Notice: Hack Array Compat: Comparing array with non-array in %s/scalars.php on line 22
+Notice: Hack Array Compat: Comparing PHP array with non any-array in %s/scalars.php on line 22
 int(0)
 
-Notice: Hack Array Compat: Comparing array with non-array in %s/scalars.php on line 24
+Notice: Hack Array Compat: Comparing PHP array with Hack array in %s/scalars.php on line 24
 bool(false)
 
-Notice: Hack Array Compat: Comparing array with non-array in %s/scalars.php on line 25
+Notice: Hack Array Compat: Comparing PHP array with Hack array in %s/scalars.php on line 25
 bool(true)
 
-Notice: Hack Array Compat: Comparing array with non-array in %s/scalars.php on line 26
+Notice: Hack Array Compat: Comparing PHP array with Hack array in %s/scalars.php on line 26
 bool(false)
 
-Notice: Hack Array Compat: Comparing array with non-array in %s/scalars.php on line 27
+Notice: Hack Array Compat: Comparing PHP array with Hack array in %s/scalars.php on line 27
 bool(true)
 
-Notice: Hack Array Compat: Comparing array with non-array in %s/scalars.php on line 28
+Notice: Hack Array Compat: Comparing PHP array with non any-array in %s/scalars.php on line 28
 bool(false)
 
-Notice: Hack Array Compat: Comparing array with non-array in %s/scalars.php on line 29
+Notice: Hack Array Compat: Comparing PHP array with non any-array in %s/scalars.php on line 29
 bool(true)
 
-Notice: Hack Array Compat: Comparing array with non-array in %s/scalars.php on line 30
+Notice: Hack Array Compat: Comparing PHP array with non any-array in %s/scalars.php on line 30
 bool(false)
 
-Notice: Hack Array Compat: Comparing array with non-array in %s/scalars.php on line 31
+Notice: Hack Array Compat: Comparing PHP array with non any-array in %s/scalars.php on line 31
 bool(true)
 
-Notice: Hack Array Compat: Comparing array with non-array in %s/scalars.php on line 32
+Notice: Hack Array Compat: Comparing PHP array with non any-array in %s/scalars.php on line 32
 int(0)
 
 Notice: Hack Array Compat: Using + operator on arrays in %s/scalars.php on line 36

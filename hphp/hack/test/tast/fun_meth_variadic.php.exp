@@ -1,14 +1,15 @@
 [(Fun
     { f_span = [3:1-42]; f_annotation = (); f_mode = <opaque>;
-      f_ret = (Some ([3:35-39], (Hprim Tvoid)));
+      f_ret = ((void), (Some ([3:35-39], (Hprim Tvoid))));
       f_name = ([3:10-22], "\\takes_string"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
       [{ param_annotation = ([3:30-32], string);
-         param_hint = (Some ([3:23-29], (Hprim Tstring)));
+         param_type_hint = ((string), (Some ([3:23-29], (Hprim Tstring))));
          param_is_reference = false; param_is_variadic = false;
          param_pos = [3:30-32]; param_name = "$s"; param_expr = None;
-         param_callconv = None; param_user_attributes = [] }
+         param_callconv = None; param_user_attributes = [];
+         param_visibility = None }
         ];
       f_body =
       { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };
@@ -17,15 +18,17 @@
       f_static = false });
   (Fun
      { f_span = [5:1-9:2]; f_annotation = (); f_mode = <opaque>;
-       f_ret = (Some ([5:30-34], (Hprim Tvoid)));
+       f_ret = ((void), (Some ([5:30-34], (Hprim Tvoid))));
        f_name = ([5:10-11], "\\f"); f_tparams = []; f_where_constraints = [];
        f_variadic =
        (FVvariadicArg
           { param_annotation = ([5:22-27], varray<string>);
-            param_hint = (Some ([5:12-18], (Hprim Tstring)));
+            param_type_hint =
+            ((varray<string>), (Some ([5:12-18], (Hprim Tstring))));
             param_is_reference = false; param_is_variadic = true;
             param_pos = [5:22-27]; param_name = "$args"; param_expr = None;
-            param_callconv = None; param_user_attributes = [] });
+            param_callconv = None; param_user_attributes = [];
+            param_visibility = None });
        f_params = [];
        f_body =
        { fb_ast =
@@ -65,17 +68,18 @@
           m_where_constraints = [];
           m_variadic =
           (FVvariadicArg
-             { param_annotation = ([12:27-32], varray<_>); param_hint = None;
+             { param_annotation = ([12:27-32], varray<_>);
+               param_type_hint = ((varray<_>), None);
                param_is_reference = false; param_is_variadic = true;
                param_pos = [12:27-32]; param_name = "$args";
                param_expr = None; param_callconv = None;
-               param_user_attributes = [] });
+               param_user_attributes = []; param_visibility = None });
           m_params = [];
           m_body =
           { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };
           m_fun_kind = FSync; m_user_attributes = [];
-          m_ret = (Some ([12:35-39], (Hprim Tvoid))); m_external = false;
-          m_doc_comment = None }
+          m_ret = ((void), (Some ([12:35-39], (Hprim Tvoid))));
+          m_external = false; m_doc_comment = None }
          ];
        c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace = <opaque>; c_user_attributes = [];

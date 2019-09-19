@@ -1,4 +1,4 @@
 File "accessing_type_constant_of_nonnull.php", line 5, characters 15-15:
-You are trying to access the member C but this is not an object, it is a nonnull value (Typing[4062])
+You are trying to access the property 'C' but this is a nonnull value (Typing[4062])
 File "accessing_type_constant_of_nonnull.php", line 5, characters 12-12:
 Definition is here

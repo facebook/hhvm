@@ -1,9 +1,4 @@
-File "lateinit5.php", line 8, characters 13-13:
-Class D does not correctly implement all required members  (Typing[4282])
-  File "lateinit5.php", line 8, characters 23-23:
-  Some members are incompatible with those declared in type C
-Read the following to see why:
-  File "lateinit5.php", line 9, characters 10-12:
-  Redeclared properties must be consistently declared as late-initialized
-  File "lateinit5.php", line 5, characters 10-12:
-  The property is late-initialized here
+File "lateinit5.php", line 9, characters 10-12:
+Redeclared properties must be consistently declared __LateInit (Typing[4282])
+File "lateinit5.php", line 5, characters 10-12:
+The property is declared __LateInit here

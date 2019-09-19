@@ -1,9 +1,10 @@
 <?hh
 
-if (true) {
-  require_once 'copied-from-non-flattened-trait.1.inc';
-} else {
-  require_once 'copied-from-non-flattened-trait.2.inc';
+<<__NoFlatten>> trait T {
+  <<__Const>>
+  public int $ti = 0;
+  <<__Const>>
+  public vec $tv = vec[1];
 }
 
 class C {
@@ -22,9 +23,6 @@ class C {
 }
 
 class D extends C {
-  // incompatible with the second version of T
-  const type INCOMPATIBLE = int;
-
   public static function makeParent() { return new parent(); }
 }
 

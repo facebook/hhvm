@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -7,13 +7,14 @@
  *
  *)
 
-val make_local_changes: unit -> unit
-val revert_local_changes: unit -> unit
+val make_local_changes : unit -> unit
+
+val revert_local_changes : unit -> unit
+
 (* When typechecking a content buffer in IDE mode,
 * this is the path that will be assigned to it *)
-val path: Relative_path.t
+val path : Relative_path.t
 
-(** Runs the declaration, naming, and typecheck phases on a single file. *)
 val check_file_input :
   TypecheckerOptions.t ->
   (* What are the definitions in each file. *)
@@ -24,27 +25,25 @@ val check_file_input :
    * that. The declarations will be removed from shared memory afterwards. *)
   ServerCommandTypes.file_input ->
   Relative_path.t * Tast.program
+(** Runs the declaration, naming, and typecheck phases on a single file. *)
 
 val check_fileinfo :
-  TypecheckerOptions.t ->
-  Relative_path.t ->
-  FileInfo.t ->
-  Tast.program
+  TypecheckerOptions.t -> Relative_path.t -> FileInfo.t -> Tast.program
 
+val check_ast : TypecheckerOptions.t -> Nast.program -> Tast.program
 (** Runs the declaration, naming, and typecheck phases on an already-parsed
     AST. *)
-val check_ast :
-  TypecheckerOptions.t ->
-  Ast.program ->
-  Tast.program
 
 (* Parses, names, declares and typechecks the content buffer, then run f
  * while the declared definitions are still available in shared memory.
  * The declarations will be removed from shared memory afterwards. *)
-val declare_and_check : string ->
-  f:(Relative_path.t -> FileInfo.t -> Tast.program -> 'a) -> TypecheckerOptions.t -> 'a
+val declare_and_check :
+  string ->
+  f:(Relative_path.t -> FileInfo.t -> Tast.program -> 'a) ->
+  TypecheckerOptions.t ->
+  'a
 
-val get_errors: Relative_path.t ->  string -> TypecheckerOptions.t -> Errors.t
+val get_errors : Relative_path.t -> string -> TypecheckerOptions.t -> Errors.t
 
 (* Run the typing phase on a list of files and definitions they contain. *)
 val recheck :

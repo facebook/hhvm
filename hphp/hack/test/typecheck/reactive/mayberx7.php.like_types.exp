@@ -1,0 +1,4 @@
+File "mayberx7.php", line 6, characters 10-13:
+Reactive functions can only call other reactive functions. (Typing[4200])
+File "mayberx7.php", line 5, characters 38-54:
+This function is non-reactive.

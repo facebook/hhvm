@@ -35,5 +35,5 @@ function main_register_postsend_function_simple() {
 }, ['foo' => 'bar'], 123);
 \register_postsend_function(function (...$args) {
     \var_dump($args);
-}, (object) ['foo' => 'bar']);
+});
 }

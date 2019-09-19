@@ -1,0 +1,6 @@
+File "rx_of_scope10.php", line 9, characters 14-15:
+Invalid argument (Typing[4110])
+File "rx_of_scope10.php", line 13, characters 21-41:
+Expected ~(function(): int) because it is an unenforceable type
+File "rx_of_scope10.php", line 7, characters 10-33:
+But got (function(): int)

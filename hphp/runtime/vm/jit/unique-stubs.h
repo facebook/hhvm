@@ -134,7 +134,7 @@ struct UniqueStubs {
    * prologue instead of this stub.
    *
    * @reached:  callphp from TC
-   *            jmp from bindCallStub
+   *            jmp from immutableBindCallStub
    *            jmp from funcPrologueRedispatch
    * @context:  func prologue
    */
@@ -260,12 +260,11 @@ struct UniqueStubs {
   // Function calls.
 
   /*
-   * Stubs for immutable/non-immutable PHP calls.
+   * Stub for immutable PHP calls.
    *
    * @reached:  callphp from TC
    * @context:  func prologue
    */
-  TCA bindCallStub;
   TCA immutableBindCallStub;
 
   /*

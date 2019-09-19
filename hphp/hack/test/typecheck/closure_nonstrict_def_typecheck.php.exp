@@ -1,4 +1,4 @@
 File "closure_nonstrict_def_typecheck.php", line 15, characters 28-29:
-Could not find static method f1 in type Foo (Typing[4090])
+No static method 'f1' in Foo (did you mean instance method 'bar'?) (Typing[4090])
 File "closure_nonstrict_def_typecheck.php", line 12, characters 7-9:
 Declaration of Foo is here

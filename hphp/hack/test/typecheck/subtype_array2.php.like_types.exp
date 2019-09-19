@@ -1,0 +1,6 @@
+File "subtype_array2.php", line 20, characters 11-12:
+Invalid argument (Typing[4110])
+File "subtype_array2.php", line 16, characters 18-28:
+Expected ~array<bool> because it is an unenforceable type
+File "subtype_array2.php", line 12, characters 21-30:
+But got array<int>

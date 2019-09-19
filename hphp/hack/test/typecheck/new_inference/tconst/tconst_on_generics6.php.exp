@@ -1,5 +1,5 @@
 File "tconst_on_generics6.php", line 43, characters 19-20:
-Invalid argument (Typing[4110])
+Invalid argument (Typing[4326])
 File "tconst_on_generics6.php", line 10, characters 18-20:
 Expected int
 File "tconst_on_generics6.php", line 30, characters 86-86:
@@ -13,7 +13,7 @@ File "tconst_on_generics6.php", line 30, characters 86-86:
 File "tconst_on_generics6.php", line 39, characters 12-20:
   on an object of exactly the class StringBox
 File "tconst_on_generics6.php", line 44, characters 20-21:
-Invalid argument (Typing[4110])
+Invalid argument (Typing[4326])
 File "tconst_on_generics6.php", line 10, characters 18-20:
 Expected int
 File "tconst_on_generics6.php", line 30, characters 86-86:

@@ -58,17 +58,6 @@ void throwParamRefMismatchRange(const Func* func, unsigned firstBit,
                                 uint64_t mask, uint64_t vals);
 void raiseRxCallViolation(const ActRec* caller, const Func* callee);
 
-inline intptr_t frame_clsref_offset(const Func* f, uint32_t slot) {
-  return
-    -((f->numLocals() + f->numIterators() * kNumIterCells) * sizeof(Cell) +
-      (slot + 1) * sizeof(cls_ref));
-}
-
-inline cls_ref*
-frame_clsref_slot(const ActRec* fp, uint32_t slot) {
-  return (cls_ref*)(uintptr_t(fp) + frame_clsref_offset(fp->m_func, slot));
-}
-
 inline Iter*
 frame_iter(const ActRec* fp, int i) {
   return (Iter*)(uintptr_t(fp)

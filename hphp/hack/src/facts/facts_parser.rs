@@ -4,26 +4,51 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use parser_rust as parser;
-
-use parser::parser::Parser;
-use parser::parser_env::ParserEnv;
-use parser::smart_constructors_wrappers::WithKind;
-use parser::source_text::SourceText;
+use oxidized::{file_info::Mode, relative_path::RelativePath};
+use parser_rust::{
+    parser::Parser, parser_env::ParserEnv, smart_constructors_wrappers::WithKind,
+    source_text::SourceText,
+};
+use syntax_tree::mode_parser::parse_mode;
 
 use crate::facts::*;
 use crate::facts_smart_constructors::*;
 
-pub type FactsParser<'a> = Parser<'a, WithKind<FactsSmartConstructors>, HasScriptContent<'a>>;
+pub type FactsParser<'a> = Parser<'a, WithKind<FactsSmartConstructors<'a>>, HasScriptContent<'a>>;
 
 pub struct ExtractAsJsonOpts {
     pub php5_compat_mode: bool,
     pub hhvm_compat_mode: bool,
-    pub filename: String, // TODO(leoo,kasper) should eventually be Relative_path
+    pub allow_new_attribute_syntax: bool,
+    pub filename: RelativePath,
 }
 
 pub fn extract_as_json(text: &str, opts: ExtractAsJsonOpts) -> Option<String> {
     from_text(text, opts).map(|facts| facts.to_json(text))
+}
+
+pub fn from_text(text: &str, opts: ExtractAsJsonOpts) -> Option<Facts> {
+    let text = SourceText::make(&opts.filename, text.as_bytes());
+    let is_experimental = match parse_mode(&text) {
+        Some(Mode::Mexperimental) => true,
+        _ => false,
+    };
+    let env = ParserEnv {
+        php5_compat_mode: opts.php5_compat_mode,
+        hhvm_compat_mode: opts.hhvm_compat_mode,
+        is_experimental_mode: is_experimental,
+        allow_new_attribute_syntax: opts.allow_new_attribute_syntax,
+        ..ParserEnv::default()
+    };
+    let mut parser = FactsParser::make(&text, env);
+    let root = parser.parse_script(None);
+
+    // report errors only if result of parsing is non-empty *)
+    if parser.sc_state().0 && !parser.errors().is_empty() {
+        None
+    } else {
+        Some(collect(("".to_owned(), Facts::default()), root).1)
+    }
 }
 
 pub fn without_xhp_mangling<T>(f: impl FnOnce() -> T) -> T {
@@ -69,11 +94,15 @@ fn qualified_name(namespace: &str, name: Node) -> Option<String> {
         let mut leading_backslash = false;
         for (index, part) in parts.into_iter().enumerate() {
             match part {
-                Name(name) => qualified_name.push_str(&String::from_utf8_lossy(name.as_slice())),
+                Name(name) => {
+                    qualified_name.push_str(&String::from_utf8_lossy(name.get().as_slice()))
+                }
                 Backslash if index == 0 => leading_backslash = true,
-                ListItem(box (Name(name), Backslash)) => {
-                    qualified_name.push_str(&String::from_utf8_lossy(name.as_slice()));
-                    qualified_name.push_str("\\");
+                ListItem(listitem) => {
+                    if let (Name(name), Backslash) = *listitem {
+                        qualified_name.push_str(&String::from_utf8_lossy(name.get().as_slice()));
+                        qualified_name.push_str("\\");
+                    }
                 }
                 _ => return None,
             }
@@ -88,7 +117,7 @@ fn qualified_name(namespace: &str, name: Node) -> Option<String> {
     match name {
         Name(name) => {
             // always a simple name
-            let name = String::from_utf8_lossy(&name).to_string();
+            let name = name.to_string();
             Some(if namespace.is_empty() {
                 name
             } else {
@@ -97,7 +126,7 @@ fn qualified_name(namespace: &str, name: Node) -> Option<String> {
         }
         XhpName(name) => {
             // xhp names are always unqualified
-            let name = String::from_utf8_lossy(&name).to_string();
+            let name = name.to_string();
             Some(mangle_xhp_id(name))
         }
         Node::QualifiedName(parts) => qualified_name_from_parts(namespace, parts),
@@ -140,8 +169,10 @@ fn defines_from_method_body(constants: Vec<String>, body: Node) -> Vec<String> {
     fn aux(mut acc: Vec<String>, list: Node) -> Vec<String> {
         match list {
             Node::List(nodes) => nodes.into_iter().fold(acc, aux),
-            Node::Define(box Node::Name(name)) => {
-                acc.push(define_name(&name));
+            Node::Define(define) => {
+                if let Node::Name(name) = *define {
+                    acc.push(define_name(&name.get()));
+                }
                 acc
             }
             _ => acc,
@@ -159,24 +190,24 @@ fn type_info_from_class_body(
     type_facts: &mut TypeFacts,
 ) {
     let aux = |mut constants: Vec<String>, node| {
-        if let RequireExtendsClause(box name) = node {
+        if let RequireExtendsClause(name) = node {
             if check_require {
-                if let Some(name) = qualified_name(namespace, name) {
+                if let Some(name) = qualified_name(namespace, *name) {
                     type_facts.require_extends.insert(name);
                 }
             }
-        } else if let RequireImplementsClause(box name) = node {
+        } else if let RequireImplementsClause(name) = node {
             if check_require {
-                if let Some(name) = qualified_name(namespace, name) {
+                if let Some(name) = qualified_name(namespace, *name) {
                     type_facts.require_implements.insert(name);
                 }
             }
-        } else if let TraitUseClause(box uses) = node {
-            typenames_from_list(uses, namespace, &mut type_facts.base_types);
-        } else if let MethodDecl(box body) = node {
+        } else if let TraitUseClause(uses) = node {
+            typenames_from_list(*uses, namespace, &mut type_facts.base_types);
+        } else if let MethodDecl(body) = node {
             if namespace.is_empty() {
                 // in methods we collect only defines
-                constants = defines_from_method_body(constants, body);
+                constants = defines_from_method_body(constants, *body);
             }
         }
         constants
@@ -185,24 +216,24 @@ fn type_info_from_class_body(
         let facts_constants = std::mem::replace(&mut facts.constants, vec![]);
         facts.constants = nodes.into_iter().fold(facts_constants, aux);
     }
-    type_facts.attributes = attributes_into_facts(attributes);
+    type_facts.attributes = attributes_into_facts(namespace, attributes);
 }
 
-fn attributes_into_facts(attributes: Node) -> Attributes {
+fn attributes_into_facts(namespace: &str, attributes: Node) -> Attributes {
     match attributes {
         Node::List(nodes) => nodes
             .into_iter()
             .fold(Attributes::new(), |mut attributes, node| match node {
-                Node::ListItem(box item) => {
+                Node::ListItem(item) => {
                     let attribute_values_aux = |attribute_node| match attribute_node {
                         Node::Name(name) => {
                             let mut attribute_values = Vec::new();
-                            attribute_values.push(String::from_utf8_lossy(&name).to_string());
+                            attribute_values.push(name.to_string());
                             attribute_values
                         }
                         Node::String(name) => {
                             let mut attribute_values = Vec::new();
-                            attribute_values.push(String::from_utf8_lossy(&name).to_string());
+                            attribute_values.push(name.to_unescaped_string());
                             attribute_values
                         }
                         Node::List(nodes) => {
@@ -210,23 +241,22 @@ fn attributes_into_facts(attributes: Node) -> Attributes {
                                 .into_iter()
                                 .fold(Vec::new(), |mut attribute_values, node| match node {
                                     Node::Name(name) => {
-                                        attribute_values
-                                            .push(String::from_utf8_lossy(&name).to_string());
+                                        attribute_values.push(name.to_string());
                                         attribute_values
                                     }
                                     Node::String(name) => {
-                                        attribute_values
-                                            .push(String::from_utf8_lossy(&name).to_string());
+                                        // TODO(T47593892) fold constant
+                                        attribute_values.push(name.to_unescaped_string());
                                         attribute_values
                                     }
-                                    Node::ScopeResolutionExpression(box (
-                                        Node::Name(name),
-                                        Node::Class,
-                                    )) => {
-                                        attribute_values.push(format!(
-                                            "{}::class",
-                                            String::from_utf8_lossy(&name).to_string()
-                                        ));
+                                    Node::ScopeResolutionExpression(expr) => {
+                                        if let (Node::Name(name), Node::Class) = *expr {
+                                            attribute_values.push(if namespace.is_empty() {
+                                                name.to_string()
+                                            } else {
+                                                namespace.to_owned() + "\\" + &name.to_string()
+                                            });
+                                        }
                                         attribute_values
                                     }
                                     _ => attribute_values,
@@ -236,17 +266,12 @@ fn attributes_into_facts(attributes: Node) -> Attributes {
                     };
                     match &(item.0) {
                         Node::Name(name) => {
-                            attributes.insert(
-                                String::from_utf8_lossy(name).to_string(),
-                                attribute_values_aux(item.1),
-                            );
+                            attributes.insert(name.to_string(), attribute_values_aux(item.1));
                             attributes
                         }
                         Node::String(name) => {
-                            attributes.insert(
-                                String::from_utf8_lossy(name).to_string(),
-                                attribute_values_aux(item.1),
-                            );
+                            attributes
+                                .insert(name.to_unescaped_string(), attribute_values_aux(item.1));
                             attributes
                         }
                         _ => attributes,
@@ -319,12 +344,12 @@ type CollectAcc = (String, Facts);
 fn collect(mut acc: CollectAcc, node: Node) -> CollectAcc {
     match node {
         List(nodes) => acc = nodes.into_iter().fold(acc, collect),
-        ClassDecl(box decl) => {
-            class_decl_into_facts(decl, &acc.0, &mut acc.1);
+        ClassDecl(decl) => {
+            class_decl_into_facts(*decl, &acc.0, &mut acc.1);
         }
-        EnumDecl(box decl) => {
+        EnumDecl(decl) => {
             if let Some(name) = qualified_name(&acc.0, decl.name) {
-                let attributes = attributes_into_facts(decl.attributes);
+                let attributes = attributes_into_facts(&acc.0, decl.attributes);
                 let enum_facts = TypeFacts {
                     flags: Flag::Final as isize,
                     kind: TypeKind::Enum,
@@ -336,60 +361,57 @@ fn collect(mut acc: CollectAcc, node: Node) -> CollectAcc {
                 add_or_update_classish_decl(name, enum_facts, &mut acc.1.types);
             }
         }
-        FunctionDecl(box name) => {
-            if let Some(name) = qualified_name(&acc.0, name) {
+        FunctionDecl(name) => {
+            if let Some(name) = qualified_name(&acc.0, *name) {
                 acc.1.functions.push(name);
             }
         }
-        ConstDecl(box name) => {
-            if let Some(name) = qualified_name(&acc.0, name) {
+        ConstDecl(name) => {
+            if let Some(name) = qualified_name(&acc.0, *name) {
                 acc.1.constants.push(name);
             }
         }
-        TypeAliasDecl(box name) => {
-            if let Some(name) = qualified_name(&acc.0, name) {
+        TypeAliasDecl(decl) => {
+            if let Some(name) = qualified_name(&acc.0, decl.name) {
+                let attributes = attributes_into_facts(&acc.0, decl.attributes);
+                let type_alias_facts = TypeFacts {
+                    flags: Flag::default() as isize,
+                    kind: TypeKind::TypeAlias,
+                    attributes,
+                    base_types: StringSet::new(),
+                    require_extends: StringSet::new(),
+                    require_implements: StringSet::new(),
+                };
+                add_or_update_classish_decl(name.clone(), type_alias_facts, &mut acc.1.types);
                 acc.1.type_aliases.push(name);
             }
         }
-        Define(box Node::String(ref name)) if acc.0.is_empty() => {
-            acc.1.constants.push(define_name(name));
-        }
-        NamespaceDecl(box name, box Node::EmptyBody) => {
-            if let Some(name) = qualified_name("", name) {
-                acc.0 = name;
+        Define(define) => {
+            if acc.0.is_empty() {
+                if let Node::String(ref name) = *define {
+                    acc.1.constants.push(define_name(&name.get()));
+                }
             }
         }
-        NamespaceDecl(box name, box body) => {
-            let name = if let Ignored = name {
-                Some(acc.0.clone())
+        NamespaceDecl(name, body) => {
+            if let Node::EmptyBody = *body {
+                if let Some(name) = qualified_name("", *name) {
+                    acc.0 = name;
+                }
             } else {
-                qualified_name(&acc.0, name)
-            };
-            if let Some(name) = name {
-                acc.1 = collect((name, acc.1), body).1;
+                let name = if let Ignored = *name {
+                    Some(acc.0.clone())
+                } else {
+                    qualified_name(&acc.0, *name)
+                };
+                if let Some(name) = name {
+                    acc.1 = collect((name, acc.1), *body).1;
+                }
             }
         }
         _ => (),
     };
     acc
-}
-
-fn from_text(text: &str, opts: ExtractAsJsonOpts) -> Option<Facts> {
-    let env = ParserEnv {
-        php5_compat_mode: opts.php5_compat_mode,
-        hhvm_compat_mode: opts.hhvm_compat_mode,
-        ..ParserEnv::default()
-    };
-    let text = SourceText::make(&opts.filename, text.as_bytes());
-    let mut parser = FactsParser::make(&text, env);
-    let root = parser.parse_script(None);
-
-    // report errors only if result of parsing is non-empty *)
-    if parser.sc_state().0 && !parser.errors().is_empty() {
-        None
-    } else {
-        Some(collect(("".to_owned(), Facts::default()), root).1)
-    }
 }
 
 #[cfg(test)]

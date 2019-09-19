@@ -230,6 +230,7 @@ struct ActiveSubscription {
           processNextUpdate();
         }
       })
+      .via(WatchmanThreadEventBase::Get())
       .thenValue([this](watchman::SubscriptionPtr wm_sub) { // (ASYNC)
         m_subscriptionPtr = wm_sub;
         return folly::unit;
@@ -260,6 +261,7 @@ struct ActiveSubscription {
     // we just need to sync to make sure all the outstanding threads complete.
     if (checkConnection()) {
       unsubscribe_future = m_watchmanClient->unsubscribe(m_subscriptionPtr)
+        .via(WatchmanThreadEventBase::Get())
         .thenValue([this] (const folly::dynamic& result) { // (ASYNC)
           m_unsubscribeData = toJson(result).data();
           return sync(std::chrono::milliseconds::zero());
@@ -352,11 +354,15 @@ struct ActiveSubscription {
         str_socket_path.toCell(),
       };
       tvDecRefGen(
-          context->invokeFuncFew(func,
-                                 nullptr, // thisOrCls
-                                 nullptr, // invName
-                                 5, // argc
-                                 args)
+        context->invokeFuncFew(
+          func,
+          nullptr, // thisOrCls
+          nullptr, // invName
+          5, // argc
+          args,
+          true, // dynamic
+          true  // allowDynCallNoPointer
+        )
       );
     } catch(Exception& e) {
       if (m_error.empty()) {
@@ -431,7 +437,8 @@ struct ActiveSubscription {
   ) {
     return !checkConnection() || m_unsubcribeInProgress || !m_subscriptionPtr
       ? folly::makeFuture(folly::Optional<folly::dynamic>())
-      : m_watchmanClient->flushSubscription(m_subscriptionPtr, timeout);
+      : m_watchmanClient->flushSubscription(m_subscriptionPtr, timeout)
+          .via(WatchmanThreadEventBase::Get());
   }
 
   // (PHP / ASYNC)
@@ -546,6 +553,7 @@ getWatchmanClientForSocket(const std::string& socket_path) {
     [](folly::exception_wrapper& /*ex*/) { /* (ASYNC) error handler */ }
   );
   return client->connect()
+    .via(WatchmanThreadEventBase::Get())
     .thenValue([client](const folly::dynamic& /*connect_info*/) {
       // (ASYNC)
       return client;
@@ -588,6 +596,7 @@ Object HHVM_FUNCTION(HH_watchman_run,
     .thenValue([dynamic_query] (std::shared_ptr<watchman::WatchmanClient> client) {
       // (ASYNC)
       return client->run(dynamic_query)
+        .via(WatchmanThreadEventBase::Get())
         // pass client shared_ptr through to keep client alive
         .thenValue([client] (const folly::dynamic& result) {
           return std::string(toJson(result).data());

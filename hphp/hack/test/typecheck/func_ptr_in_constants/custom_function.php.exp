@@ -1,0 +1,6 @@
+File "custom_function.php", line 6, characters 24-27:
+Invalid expression in constant initializer (Parsing[1002])
+File "custom_function.php", line 10, characters 21-24:
+Invalid expression in constant initializer (Parsing[1002])
+File "custom_function.php", line 10, characters 21-25:
+Illegal constant value (Naming[2023])

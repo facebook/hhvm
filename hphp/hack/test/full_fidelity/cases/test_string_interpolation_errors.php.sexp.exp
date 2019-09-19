@@ -1,5 +1,5 @@
-((script 2325
-  ((list 2325
+((script 2317
+  ((list 2317
     ((markup_section 4
       ((missing 0 ()) (() markup 0 ())
        (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))
@@ -709,16 +709,16 @@
                    (() double_quoted_string_literal_tail 1 ())))))))
              (() ";" 1 ((end_of_line 1)))))))
          (() } 1 ((end_of_line 1)))))))
-     (function_declaration 640
+     (function_declaration 632
       ((missing 0 ())
        (function_declaration_header 19
         ((missing 0 ()) (((end_of_line 1)) function 8 ((whitespace 1)))
          (() name 8 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
          (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
          (missing 0 ())))
-       (compound_statement 620
+       (compound_statement 612
         ((() { 1 ((end_of_line 1)))
-         (list 614
+         (list 606
           ((expression_statement 11
             ((binary_expression 10
               ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
@@ -888,18 +888,19 @@
                    (variable 2 ((() variable 2 ())))
                    (() double_quoted_string_literal_tail 2 ())))))))
              (() ";" 1 ((end_of_line 1)))))
-           (expression_statement 25
-            ((binary_expression 24
+           (expression_statement 17
+            ((binary_expression 16
               ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
                (() = 1 ((whitespace 1)))
-               (literal 19
-                ((list 19
+               (literal 11
+                ((list 11
                   ((() double_quoted_string_literal_head 1 ())
-                   (embedded_braced_expression 17
+                   (embedded_braced_expression 9
                     ((() { 1 ())
-                     (instanceof_expression 15
+                     (is_expression 7
                       ((variable 2 ((() variable 2 ((whitespace 1)))))
-                       (() instanceof 10 ((whitespace 1))) (() name 1 ())))
+                       (() is 2 ((whitespace 1)))
+                       (simple_type_specifier 1 ((() name 1 ())))))
                      (() } 1 ())))
                    (() double_quoted_string_literal_tail 1 ())))))))
              (() ";" 1 ((end_of_line 1)))))

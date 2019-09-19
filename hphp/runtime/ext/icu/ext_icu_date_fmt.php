@@ -202,7 +202,7 @@ class IntlDateFormatter {
    */
   <<__Native>>
   public function localtime(string $value,
-                            mixed &$position): mixed;
+                            inout mixed $position): mixed;
 
   /**
    * Parse string to a timestamp value
@@ -218,9 +218,15 @@ class IntlDateFormatter {
    * @return int - timestamp parsed value, or FALSE if value can't be
    *   parsed.
    */
-  <<__Native>>
   public function parse(string $value,
-                        mixed &$position = null): mixed;
+                        mixed &$position = null): mixed {
+    $result = $this->parseWithPosition($value, inout $position);
+    return $result;
+  }
+
+  <<__Native>>
+  public function parseWithPosition(string $value,
+                                    inout mixed $position): mixed;
 
   /**
    * Sets the calendar type used by the formatter
@@ -507,8 +513,9 @@ function datefmt_is_lenient(IntlDateFormatter $fmt): bool {
  */
 function datefmt_localtime(IntlDateFormatter $fmt,
                            $value,
-                           &$position): mixed {
-  return $fmt->localTime($value, &$position);
+                           inout $position): mixed {
+  $result = $fmt->localTime($value, inout $position);
+  return $result;
 }
 
 /**
@@ -528,8 +535,9 @@ function datefmt_localtime(IntlDateFormatter $fmt,
  */
 function datefmt_parse(IntlDateFormatter $fmt,
                        $value,
-                       &$position = null): mixed {
-  return $fmt->parse($value, &$position);
+                       inout $position): mixed {
+  $result = $fmt->parseWithPosition($value, inout $position);
+  return $result;
 }
 
 /**

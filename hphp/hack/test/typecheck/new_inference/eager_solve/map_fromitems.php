@@ -3,18 +3,18 @@
 
 
 class MyMap<Tk, Tv> {
-  /* HH_FIXME[4110] */
   public function at(Tk $key):Tv {
+    throw new Exception();
   }
-  /* HH_FIXME[4110] */
   public static function fromItems(?Traversable<Pair<Tk, Tv>> $items)
     : MyMap<Tk, Tv> {
+    throw new Exception();
   }
 }
 
-/* HH_FIXME[4110] */
 function my_fromItems<Tk,Tv>(?Traversable<Pair<Tk, Tv>> $items)
   : MyMap<Tk, Tv> {
+  throw new Exception();
 }
 
 class C {

@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -12,15 +12,11 @@ type elaborate_kind =
   | ElaborateClass
   | ElaborateConst
 
-val elaborate_id : Namespace_env.env ->
-                   elaborate_kind ->
-                   Ast_defs.id ->
-                   Ast_defs.id
+val elaborate_id :
+  Namespace_env.env -> elaborate_kind -> Ast_defs.id -> Ast_defs.id
 
-val elaborate_id_impl : Namespace_env.env ->
-                        elaborate_kind ->
-                        string ->
-                        bool * string
+val elaborate_id_impl :
+  Namespace_env.env -> elaborate_kind -> string -> bool * string
 
 (* This function processes only top-level declarations and does not dive
   into inline classes/functions - those are disallowed in Hack and doing it will
@@ -28,12 +24,9 @@ val elaborate_id_impl : Namespace_env.env ->
   namespaces are propagated to inline declarations
   during closure conversion process *)
 val elaborate_toplevel_defs : ParserOptions.t -> Ast.program -> Ast.program
-val elaborate_toplevel_defs_nast :
-  ParserOptions.t ->
-  Nast.program ->
-  Nast.program
 
-val elaborate_def:
-  Namespace_env.env ->
-  Ast.def ->
-  Namespace_env.env * Ast.def list
+val elaborate_toplevel_defs_nast :
+  ParserOptions.t -> Nast.program -> Nast.program
+
+val elaborate_def :
+  Namespace_env.env -> Ast.def -> Namespace_env.env * Ast.def list

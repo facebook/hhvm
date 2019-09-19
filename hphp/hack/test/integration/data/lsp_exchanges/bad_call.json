@@ -11,5 +11,16 @@
        "text":"${php_file}"
      }
    }
+},
+{
+  "jsonrpc": "2.0",
+  "method": "$test/waitForHhServerReady",
+  "params": {}
+},
+{
+  "jsonrpc": "2.0",
+  "id": 99,
+  "method": "shutdown",
+  "params": {}
 }
 ]

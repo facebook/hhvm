@@ -20,7 +20,6 @@
 #include "hphp/runtime/vm/jit/tc-internal.h"
 #include "hphp/runtime/vm/jit/tc-record.h"
 
-#include "hphp/runtime/vm/jit/func-guard.h"
 #include "hphp/runtime/vm/jit/perf-counters.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
@@ -113,7 +112,7 @@ TCA bindAddr(TCA toSmash, SrcKey destSk, TransFlags /*trflags*/,
   return tDest;
 }
 
-void bindCall(TCA toSmash, TCA start, Func* callee, int nArgs, bool immutable) {
+void bindCall(TCA toSmash, TCA start, Func* callee, int nArgs) {
   // Return if already smashed.  Note that smashableCallTarget returns nullptr
   // when the target was smashed if the call was able to be optimized in place
   // (so that it doesn't look like a smashable call anymore).
@@ -144,7 +143,6 @@ void bindCall(TCA toSmash, TCA start, Func* callee, int nArgs, bool immutable) {
     // It's possible that the callee prologue was reset before we acquired the
     // lock. Make sure we have the right one.
     start = mcgen::getFuncPrologue(callee, nArgs);
-    if (start && !immutable) start = funcGuardFromPrologue(start, callee);
 
     // Do these checks again with the lock.
     if (start == nullptr || !smashableCallTarget(toSmash) ||
@@ -153,11 +151,7 @@ void bindCall(TCA toSmash, TCA start, Func* callee, int nArgs, bool immutable) {
     }
 
     if (code().prof().contains(start)) {
-      if (immutable) {
-        rec->addMainCaller(toSmash);
-      } else {
-        rec->addGuardCaller(toSmash);
-      }
+      rec->addMainCaller(toSmash);
     } else {
       rec = nullptr;
       recLock.unlock();
@@ -173,10 +167,10 @@ void bindCall(TCA toSmash, TCA start, Func* callee, int nArgs, bool immutable) {
   // callers that will need to be re-smashed
   //
   // Additionally for profiled calls we need to remove them from the main
-  // and guard caller maps.
+  // caller map.
   if (RuntimeOption::EvalEnableReusableTC) {
-    if (debug || rec || !immutable) {
-      recordFuncCaller(callee, toSmash, immutable, rec);
+    if (debug || rec) {
+      recordFuncCaller(callee, toSmash, rec);
     }
   }
 }

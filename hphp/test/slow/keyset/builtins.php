@@ -57,11 +57,11 @@ function with_keyset($k1) {
   echo "array_uintersect: ";
   var_dump(array_uintersect($k1, $k3, 'nocase'));
   echo "array_filter: ";
-  var_dump(array_filter($k1, 'vowel'));
+  var_dump(array_filter($k1, fun('vowel')));
   echo "array_flip: ";
   var_dump(array_flip($k1));
   echo "array_map: ";
-  var_dump(array_map('concat', keyset['H', 'A', 'L']));
+  var_dump(array_map(fun('concat'), keyset['H', 'A', 'L']));
   echo "array_merge: ";
   var_dump(array_merge(keyset[1, 2, 3], keyset['a', 'b', 'c']));
   echo "array_reverse: ";
@@ -97,27 +97,27 @@ function with_keyset($k1) {
   echo "array_sum: ";
   var_dump(array_sum($k1));
   echo "current 1: ";
-  var_dump(current(&$k));
+  var_dump(current($k));
   echo "each: ";
-  var_dump(each(&$k));
+  var_dump(each(inout $k));
   echo "current 2: ";
-  var_dump(current(&$k));
+  var_dump(current($k));
   echo "end: ";
-  var_dump(end(&$k));
+  var_dump(end(inout $k));
   echo "in_array: ";
   var_dump([in_array('x', $k1), in_array('q', $k1)]);
   echo "key: ";
-  var_dump(key(&$k));
+  var_dump(key($k));
   // list() could be tested here, but it's just weird with keysets
   echo "next: ";
-  var_dump(next(&$k));
+  var_dump(next(inout $k));
   echo "prev 1: ";
-  var_dump(prev(&$k));
-  end(&$k);
+  var_dump(prev(inout $k));
+  end(inout $k);
   echo "prev 2: ";
-  var_dump(prev(&$k));
+  var_dump(prev(inout $k));
   echo "reset: ";
-  var_dump(reset(&$k));
+  var_dump(reset(inout $k));
   echo "count: ";
   var_dump(count($k1));
   echo "array_pad 1: ";
@@ -148,7 +148,7 @@ function with_keyset($k1) {
 echo "apc_add: ";
 var_dump(apc_add('foo', keyset[1, 2, 3]));
 echo "apc_fetch: ";
-var_dump(apc_fetch('foo'));
+var_dump(__hhvm_intrinsics\apc_fetch_no_check('foo'));
 
 // All the functions below must see keysets (and dicts, vecs)
 // as arrays and return an array.
@@ -198,7 +198,7 @@ var_dump(array_replace_recursive($ar1, ["colors" => ["green" => "blue"]]));
 // hack array.
 //
 echo "array_multisort: ";
-var_dump(array_multisort(&$k1));
+var_dump(array_multisort1(&$k1));
 
 // Those should simply return a php array.
 //

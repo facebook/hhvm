@@ -3,7 +3,7 @@
 function ref(&$x) {
 }
 
-function foo($r, inout $a, inout $b, $q, inout $c, ...) {
+function foo($r, inout $a, inout $b, $q, inout $c, ...$_) {
   $a = 'FOO:A';
   $b = 'FOO:B';
   $c = 'FOO:C';
@@ -96,7 +96,7 @@ function main() {
     $b,
     inout $c[0],
     ref(&$a),
-    ref(&ref(&ref(&$c))),
+    ref(&$c),
   );
   var_dump($a[0], $b[0], $c[0]);
 

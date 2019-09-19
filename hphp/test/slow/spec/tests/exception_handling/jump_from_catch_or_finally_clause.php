@@ -1,13 +1,5 @@
 <?hh
 
-/*
-   +-------------------------------------------------------------+
-   | Copyright (c) 2015 Facebook, Inc. (http://www.facebook.com) |
-   +-------------------------------------------------------------+
-*/
-
-error_reporting(-1);
-
 function msg()
 {
     echo "In msg\n";
@@ -45,6 +37,10 @@ function f()
 end:
     return 1;
 }
+<<__EntryPoint>>
+function main_entry(): void {
+  error_reporting(-1);
 
-$r = f();
-var_dump($r);
+  $r = f();
+  var_dump($r);
+}

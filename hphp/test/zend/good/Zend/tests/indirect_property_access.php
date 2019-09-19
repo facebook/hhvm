@@ -1,9 +1,11 @@
 <?hh
 
+<<__DynamicallyConstructible>>
 class foo {
     public $x = 1;
 }
 
+<<__DynamicallyConstructible>>
 class bar {
     public $y = 'foo';
 }

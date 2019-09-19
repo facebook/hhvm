@@ -1,92 +1,79 @@
 [@@@warning "-33"]
+
 open Core_kernel
 open Common
+
 [@@@warning "+33"]
+
 open Typing_defs
+open Typing_env_types
 
-module Env = Typing_env
-
-type method_instantiation =
-{
+type method_instantiation = {
   use_pos: Pos.t;
   use_name: string;
-  explicit_targs: decl ty list;
+  explicit_targs: decl_ty list;
 }
 
-type env = expand_env
+val env_with_self : env -> expand_env
 
-val env_with_self:
-  Env.env ->
-  expand_env
-val localize_with_self:
-  Env.env ->
-  decl ty ->
-  Env.env * locl ty
+val localize_with_self : env -> decl_ty -> env * locl_ty
 
-val localize:
-  ety_env:expand_env ->
-  Env.env ->
-  decl ty ->
-  Env.env * locl ty
-val localize_ft:
+val localize_possibly_enforced_with_self :
+  env -> decl_possibly_enforced_ty -> env * locl_possibly_enforced_ty
+
+val localize : ety_env:expand_env -> env -> decl_ty -> env * locl_ty
+
+val localize_ft :
   ?instantiation:method_instantiation ->
   ety_env:expand_env ->
-  Env.env ->
-  decl fun_type ->
-  Env.env * locl fun_type
-val localize_hint_with_self:
-  Env.env ->
-  Nast.hint ->
-  Env.env * locl ty
-val localize_hint:
+  env ->
+  decl_fun_type ->
+  env * locl_fun_type
+
+val localize_hint_with_self : env -> Aast.hint -> env * locl_ty
+
+val localize_hint : ety_env:expand_env -> env -> Aast.hint -> env * locl_ty
+
+val localize_generic_parameters_with_bounds :
   ety_env:expand_env ->
-  Env.env ->
-  Nast.hint ->
-  Env.env * locl ty
-val localize_generic_parameters_with_bounds:
-  ety_env:expand_env ->
-  Env.env ->
-  Nast.tparam list ->
-  Env.env * (locl ty * Ast.constraint_kind * locl ty) list
-val localize_where_constraints:
-  ety_env:expand_env ->
-  Env.env ->
-  Nast.where_constraint list ->
-  Env.env
-val localize_with_dty_validator:
-  Env.env ->
-  decl ty ->
-  (env -> decl ty -> unit) ->
-  Env.env * locl ty
-val sub_type_decl:
-  Env.env ->
-  decl ty ->
-  decl ty ->
-  Errors.typing_error_callback ->
-  unit
-val unify_decl:
-  Env.env ->
-  decl ty ->
-  decl ty ->
-  Errors.typing_error_callback ->
-  unit
-val check_tparams_constraints:
-  use_pos:Pos.t ->
-  ety_env:expand_env ->
-  Env.env ->
-  decl tparam list ->
-  Env.env
-val check_where_constraints:
+  env ->
+  decl_tparam list ->
+  env * (locl_ty * Ast_defs.constraint_kind * locl_ty) list
+
+val localize_where_constraints :
+  ety_env:expand_env -> env -> Aast.where_constraint list -> env
+
+val sub_type_decl :
+  env -> decl_ty -> decl_ty -> Errors.typing_error_callback -> unit
+
+val unify_decl :
+  env -> decl_ty -> decl_ty -> Errors.typing_error_callback -> unit
+
+val check_tparams_constraints :
+  use_pos:Pos.t -> ety_env:expand_env -> env -> decl_tparam list -> env
+
+val check_where_constraints :
   in_class:bool ->
   use_pos:Pos.t ->
   ety_env:expand_env ->
   definition_pos:Pos.t ->
-  Env.env ->
-  decl where_constraint list ->
-  Env.env
-val decl:
-  decl ty ->
-  phase_ty
-val locl:
-  locl ty ->
-  phase_ty
+  env ->
+  decl_where_constraint list ->
+  env
+
+val decl : decl_ty -> phase_ty
+
+val locl : locl_ty -> phase_ty
+
+val resolve_type_argument_hint : env -> Aast.hint -> env * locl_ty
+
+val resolve_type_arguments_and_check_constraints :
+  exact:exact ->
+  check_constraints:bool ->
+  env ->
+  Pos.t ->
+  Ast_defs.id ->
+  Nast.class_id_ ->
+  decl_tparam sexp_list ->
+  decl_ty sexp_list ->
+  env * (Reason.t * locl_phase ty_) * locl_ty sexp_list

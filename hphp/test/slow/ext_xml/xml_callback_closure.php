@@ -2,7 +2,7 @@
 
 // Stems from https://github.com/facebook/hhvm/issues/4892
 
-function elementOpen( $parser, $name, $attribs ) {
+function elementOpen( $parser, $name, darray $attribs ) {
     print "<$name>";
 }
 

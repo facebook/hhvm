@@ -26,6 +26,21 @@
 
 namespace HPHP {
 
+inline void mapSetAndConvertStaticKeys(Array& map,
+                                       StringData* str,
+                                       Variant&& v) {
+  int64_t i;
+  if (map->convertKey<IntishCast::Cast>(str, i)) {
+    map.set(i, *v.asTypedValue());
+  } else if (auto sstr = str->isStatic()
+             ? str
+             : lookupStaticString(str)) {
+    map.set(String::attach(sstr), *v.asTypedValue());
+  } else {
+    map.set(String(str), *v.asTypedValue());
+  }
+}
+
 enum VariantControllerHackArraysMode {
   // Do not serialize Hack arrays and unserialize as PHP arrays
   OFF,
@@ -59,14 +74,6 @@ struct VariantControllerImpl {
       case KindOfPersistentString:
       case KindOfString:     return HPHP::serialize::Type::STRING;
       case KindOfObject:     return HPHP::serialize::Type::OBJECT;
-      case KindOfPersistentShape:
-      case KindOfShape: { // TODO(T31134050)
-        if (RuntimeOption::EvalHackArrDVArrs &&
-            HackArraysMode == VariantControllerHackArraysMode::OFF) {
-          throw HPHP::serialize::HackArraySerializeError{};
-        }
-        return HPHP::serialize::Type::MAP;
-      }
       case KindOfPersistentArray:
       case KindOfArray:
         if (HackArraysMode == VariantControllerHackArraysMode::MIGRATORY) {
@@ -157,15 +164,15 @@ struct VariantControllerImpl {
     ArrayData* empty;
     switch (HackArraysMode) {
       case VariantControllerHackArraysMode::ON:
-        empty = staticEmptyDictArray();
+        empty = ArrayData::CreateDict();
         break;
       case VariantControllerHackArraysMode::OFF:
-        empty = staticEmptyDArray();
+        empty = ArrayData::CreateDArray();
         break;
       case VariantControllerHackArraysMode::MIGRATORY:
         empty = RuntimeOption::EvalHackArrDVArrs
-          ? staticEmptyDictArray()
-          : staticEmptyDArray();
+          ? ArrayData::CreateDict()
+          : ArrayData::CreateDArray();
         break;
     }
     return MapType(empty);
@@ -179,9 +186,7 @@ struct VariantControllerImpl {
   }
 
   static void mapSet(MapType& map, StringType&& k, VariantType&& v) {
-    auto const arrkey = map.convertKey<IntishCast::Cast>(k);
-    Variant val(std::move(v));
-    map.set(arrkey, *val.asTypedValue());
+    mapSetAndConvertStaticKeys(map, k.get(), std::forward<VariantType>(v));
   }
 
   static void mapSet(MapType& map, int64_t k, VariantType&& v) {

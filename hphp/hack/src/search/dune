@@ -5,9 +5,10 @@
     ast
     ast_provider
     facts
-    fetcher
     file_info
     full_fidelity
+    future
+    glean_options
     heap_shared_mem
     index_builder
     logging
@@ -16,4 +17,5 @@
     pos
     search_utils
     sqlite3
+    state_loader
     trie))

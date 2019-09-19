@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2018, Facebook, Inc.
  * All rights reserved.
  *
@@ -21,6 +21,7 @@ open Core_kernel
 let current_mergebase : Hg.global_rev option ref = ref None
 
 let is_in_hg_update_state = ref false
+
 let is_in_hg_transaction_state = ref false
 
 (* Do we think that this server have processed a mergebase change? If we are
@@ -39,30 +40,32 @@ let is_in_hg_transaction_state = ref false
  *)
 let did_change_mergebase = ref false
 
-let mergebase_queries : (Hg.hg_rev, (Hg.global_rev Future.t)) Caml.Hashtbl.t = Caml.Hashtbl.create 200
+let mergebase_queries : (Hg.hg_rev, Hg.global_rev Future.t) Caml.Hashtbl.t =
+  Caml.Hashtbl.create 200
+
 (* Keys from mergebase_queries that contain futures that were not resolved yet *)
 let pending_queries : Hg.hg_rev Queue.t = Queue.create ()
 
 let initialize mergebase =
-  Hh_logger.log "ServerRevisionTracker: Initializing mergebase to r%d" mergebase;
+  Hh_logger.log
+    "ServerRevisionTracker: Initializing mergebase to r%d"
+    mergebase;
   current_mergebase := Some mergebase
 
 let add_query ~hg_rev root =
   if Caml.Hashtbl.mem mergebase_queries hg_rev then
     ()
-  else begin
+  else (
     Hh_logger.log "ServerRevisionTracker: Seen new HG revision: %s" hg_rev;
     let future = Hg.get_closest_global_ancestor hg_rev (Path.to_string root) in
     Caml.Hashtbl.add mergebase_queries hg_rev future;
     Queue.enqueue pending_queries hg_rev
-  end
+  )
 
 let on_state_enter state_name =
   match state_name with
-  | "hg.update" ->
-    is_in_hg_update_state := true;
-  | "hg.transaction" ->
-    is_in_hg_transaction_state := true;
+  | "hg.update" -> is_in_hg_update_state := true
+  | "hg.transaction" -> is_in_hg_transaction_state := true
   | _ -> ()
 
 let on_state_leave root state_name state_metadata =
@@ -70,15 +73,15 @@ let on_state_leave root state_name state_metadata =
   | "hg.update" ->
     is_in_hg_update_state := false;
     Hh_logger.log "ServerRevisionTracker: leaving hg.update";
-    let open Option.Monad_infix in
-    Option.iter (state_metadata >>= Watchman_utils.rev_in_state_change)
-      ~f:begin fun hg_rev ->
-        match state_metadata >>= Watchman_utils.merge_in_state_change with
-        | Some true -> Hh_logger.log "ServerRevisionTracker: Ignoring merge rev %s" hg_rev;
-        | _ -> add_query ~hg_rev root
-      end
-  | "hg.transaction" ->
-    is_in_hg_transaction_state := false
+    Option.Monad_infix.(
+      Option.iter
+        (state_metadata >>= Watchman_utils.rev_in_state_change)
+        ~f:(fun hg_rev ->
+          match state_metadata >>= Watchman_utils.merge_in_state_change with
+          | Some true ->
+            Hh_logger.log "ServerRevisionTracker: Ignoring merge rev %s" hg_rev
+          | _ -> add_query ~hg_rev root))
+  | "hg.transaction" -> is_in_hg_transaction_state := false
   | _ -> ()
 
 let is_hg_updating () = !is_in_hg_update_state || !is_in_hg_transaction_state
@@ -88,76 +91,94 @@ let check_query future ~timeout ~current_t =
   | Error e ->
     let e = Future.error_to_string e in
     HackEventLogger.check_mergebase_failed current_t e;
-    Hh_logger.log "ServerRevisionTracker: %s" e;
+    Hh_logger.log "ServerRevisionTracker: %s" e
   | Ok new_global_rev ->
     HackEventLogger.check_mergebase_success current_t;
-    match !current_mergebase with
+    (match !current_mergebase with
     | Some global_rev when global_rev <> new_global_rev ->
-        current_mergebase := Some new_global_rev;
-        did_change_mergebase := true;
-        HackEventLogger.set_changed_mergebase true;
-        Hh_logger.log "ServerRevisionTracker: Changing mergebase from r%d to r%d"
-          global_rev new_global_rev;
-        ()
+      current_mergebase := Some new_global_rev;
+      did_change_mergebase := true;
+      HackEventLogger.set_changed_mergebase true;
+      Hh_logger.log
+        "ServerRevisionTracker: Changing mergebase from r%d to r%d"
+        global_rev
+        new_global_rev;
+      ()
     | Some _ -> ()
-    | None -> initialize new_global_rev
+    | None -> initialize new_global_rev)
 
 let check_blocking () =
   if Queue.is_empty pending_queries then
     ()
-  else begin
+  else
     let start_t = Unix.gettimeofday () in
     Hh_logger.log "Querying Mercurial for mergebase changes";
-    Queue.iter ~f:begin fun hg_rev ->
-      let current_t = Unix.gettimeofday () in
-      let elapsed_t = current_t -. start_t in
-      let timeout = max 0 (int_of_float (30.0 -. elapsed_t)) in
-      let future = Caml.Hashtbl.find mergebase_queries hg_rev in
-      check_query future ~timeout ~current_t
-    end pending_queries;
+    Queue.iter
+      ~f:
+        begin
+          fun hg_rev ->
+          let current_t = Unix.gettimeofday () in
+          let elapsed_t = current_t -. start_t in
+          let timeout = max 0 (int_of_float (30.0 -. elapsed_t)) in
+          let future = Caml.Hashtbl.find mergebase_queries hg_rev in
+          check_query future ~timeout ~current_t
+        end
+      pending_queries;
     Queue.clear pending_queries;
-    let _ : float = Hh_logger.log_duration "Finished querying Mercurial" start_t in
+    let (_ : float) =
+      Hh_logger.log_duration "Finished querying Mercurial" start_t
+    in
     ()
-  end
 
 let rec check_non_blocking env =
-  if Queue.is_empty pending_queries then begin
-    if ServerEnv.(env.full_check = Full_check_done) && !did_change_mergebase then begin
-      Hh_logger.log "ServerRevisionTracker: Full check completed despite mergebase changes";
+  if Queue.is_empty pending_queries then (
+    if ServerEnv.(env.full_check = Full_check_done) && !did_change_mergebase
+    then (
+      Hh_logger.log
+        "ServerRevisionTracker: Full check completed despite mergebase changes";
+
       (* Clearing this flag because we somehow managed to get through this rebase,
        * so no need to restart anymore *)
       did_change_mergebase := false;
-      HackEventLogger.set_changed_mergebase false;
-    end
-  end else
+      HackEventLogger.set_changed_mergebase false
+    )
+  ) else
     let hg_rev = Queue.peek_exn pending_queries in
     let future = Caml.Hashtbl.find mergebase_queries hg_rev in
-    if Future.is_ready future then begin
-      let _ : Hg.hg_rev = Queue.dequeue_exn pending_queries in
+    if Future.is_ready future then (
+      let (_ : Hg.hg_rev) = Queue.dequeue_exn pending_queries in
       check_query future ~timeout:30 ~current_t:(Unix.gettimeofday ());
       check_non_blocking env
-    end
+    )
 
 let make_decision threshold count name =
-  if threshold = 0 || count < threshold then () else begin
+  if threshold = 0 || count < threshold then
+    ()
+  else (
     (* Enough files / declarations / typings have changed to possibly warrant
      * a restart. Let's wait for Mercurial to decide if we want to before
      * proceeding. *)
     check_blocking ();
-    if !did_change_mergebase then begin
+    if !did_change_mergebase then (
       Hh_logger.log "Changed %d %s due to rebase. Restarting!" count name;
       Exit_status.(exit Big_rebase_detected)
-    end
-  end
+    )
+  )
 
 let files_changed local_config count =
-  make_decision (local_config.ServerLocalConfig.hg_aware_parsing_restart_threshold)
-    count "files"
+  make_decision
+    local_config.ServerLocalConfig.hg_aware_parsing_restart_threshold
+    count
+    "files"
 
 let decl_changed local_config count =
-  make_decision (local_config.ServerLocalConfig.hg_aware_redecl_restart_threshold)
-  count "declarations"
+  make_decision
+    local_config.ServerLocalConfig.hg_aware_redecl_restart_threshold
+    count
+    "declarations"
 
 let typing_changed local_config count =
-  make_decision (local_config.ServerLocalConfig.hg_aware_recheck_restart_threshold)
-    count "file typings"
+  make_decision
+    local_config.ServerLocalConfig.hg_aware_recheck_restart_threshold
+    count
+    "file typings"

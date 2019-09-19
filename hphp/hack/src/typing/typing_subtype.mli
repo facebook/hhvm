@@ -1,65 +1,40 @@
 module Env = Typing_env
-
 open Typing_defs
+open Typing_env_types
 
 type reactivity_extra_info = {
-  method_info: ((* method_name *) string * (* is_static *) bool) option;
+  method_info: (* method_name *) (string * (* is_static *) bool) option;
   class_ty: phase_ty option;
-  parent_class_ty: phase_ty option
+  parent_class_ty: phase_ty option;
 }
 
 module ConditionTypes : sig
   val try_get_class_for_condition_type :
-    Env.env ->
-    decl ty ->
-    ((Ast.pos * string) * Decl_provider.class_decl) option
+    env ->
+    decl_ty ->
+    ((Ast_defs.pos * string) * Decl_provider.class_decl) option
 
   val try_get_method_from_condition_type :
-    Env.env ->
-    decl ty ->
-    bool ->
-    string ->
-    class_elt option
+    env -> decl_ty -> bool -> string -> class_elt option
 
-  val localize_condition_type :
-    Env.env ->
-    decl ty ->
-    locl ty
+  val localize_condition_type : env -> decl_ty -> locl_ty
 end
 
-val is_sub_type_LEGACY_DEPRECATED :
-  Env.env ->
-  locl ty ->
-  locl ty ->
-  bool
+val is_sub_type_LEGACY_DEPRECATED : env -> locl_ty -> locl_ty -> bool
 
+val is_sub_type : env -> locl_ty -> locl_ty -> bool
 (** Non-side-effecting test for subtypes.
     result = true implies ty1 <: ty2
     result = false implies NOT ty1 <: ty2 OR we don't know
 *)
-val is_sub_type :
-  Env.env ->
-  locl ty ->
-  locl ty ->
-  bool
 
-val is_sub_type_ignore_generic_params :
-  Env.env ->
-  locl ty ->
-  locl ty ->
-  bool
+val is_sub_type_ignore_generic_params : env -> locl_ty -> locl_ty -> bool
 
-val is_sub_type_for_union :
-  Env.env ->
-  locl ty ->
-  locl ty ->
-  bool
+val is_sub_type_for_union : env -> locl_ty -> locl_ty -> bool
 
-val can_sub_type :
-  Env.env ->
-  locl ty ->
-  locl ty ->
-  bool
+val can_sub_type : env -> locl_ty -> locl_ty -> bool
+
+val sub_type : env -> locl_ty -> locl_ty -> Errors.typing_error_callback -> env
 (**
   Checks that ty_sub is a subtype of ty_super, and returns an env.
 
@@ -69,78 +44,29 @@ val can_sub_type :
     sub_type env ?int alpha => env where alpha==?int
     sub_type env int string => error
  *)
-val sub_type :
-  Env.env ->
-  locl ty ->
-  locl ty ->
-  Errors.typing_error_callback ->
-  Env.env
 
-(** Make a type a subtype of string. *)
-val sub_string :
-  Pos.t ->
-  Env.env ->
-  locl ty ->
-  Env.env
-
-(** Check that the method with signature ft_sub can be used to override
-(is a subtype of) method with signature ft_super. *)
 val subtype_method :
   check_return:bool ->
   extra_info:reactivity_extra_info ->
-  Env.env ->
+  env ->
   Reason.t ->
-  decl fun_type ->
+  decl_fun_type ->
   Reason.t ->
-  decl fun_type ->
+  decl_fun_type ->
   Errors.typing_error_callback ->
-  Env.env
+  env
+(** Check that the method with signature ft_sub can be used to override
+(is a subtype of) method with signature ft_super. *)
 
 val subtype_reactivity :
   ?extra_info:reactivity_extra_info ->
   ?is_call_site:bool ->
-  Env.env ->
+  env ->
   reactivity ->
   reactivity ->
   bool
 
 val add_constraint :
-  Pos.t ->
-  Env.env ->
-  Ast.constraint_kind ->
-  locl ty ->
-  locl ty ->
-  Env.env
+  Pos.t -> env -> Ast_defs.constraint_kind -> locl_ty -> locl_ty -> env
 
-(* Force solve all remaining unsolved type variables *)
-val solve_all_unsolved_tyvars :
-  Env.env ->
-  Errors.typing_error_callback ->
-  Env.env
-
-val expand_type_and_solve :
-  Env.env ->
-  description_of_expected:string ->
-  Pos.t ->
-  locl ty ->
-  Errors.typing_error_callback ->
-  Env.env * locl ty
-
-val expand_type_and_narrow :
-  Env.env ->
-  ?default:locl ty ->
-  description_of_expected:string ->
-  (Env.env -> locl ty -> Env.env * locl ty option) ->
-  Pos.t ->
-  locl ty ->
-  Errors.typing_error_callback ->
-  Env.env * locl ty
-
-val close_tyvars_and_solve :
-  Env.env ->
-  Errors.typing_error_callback ->
-  Env.env
-
-val log_prop :
-  Env.env ->
-  unit
+val log_prop : env -> unit

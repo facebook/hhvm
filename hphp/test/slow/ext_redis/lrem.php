@@ -1,7 +1,7 @@
 <?hh
 
 include (__DIR__ . '/redis.inc');
-
+<<__EntryPoint>> function main(): void {
 $r = NewRedisTestInstance();
 $r->setOption(Redis::OPT_PREFIX, GetTestKeyName(__FILE__) . ':');
 
@@ -25,3 +25,4 @@ var_dump($r->lRemove($key, "B", 1));  // 1 item req, 0 rm'ed (it's already gone)
 
 var_dump($r->lIndex($key, 0));   // A
 var_dump($r->lIndex($key, 1));   // C
+}

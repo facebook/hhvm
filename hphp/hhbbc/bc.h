@@ -113,8 +113,8 @@ struct FCallArgs : FCallArgsBase {
     : FCallArgs(Flags::None, numArgs, 1, nullptr, NoBlockId, false) {}
   explicit FCallArgs(Flags flags, uint32_t numArgs, uint32_t numRets,
                      std::unique_ptr<uint8_t[]> byRefs,
-                     BlockId asyncEagerTarget, bool constructNoConst)
-    : FCallArgsBase(flags, numArgs, numRets, constructNoConst)
+                     BlockId asyncEagerTarget, bool lockWhileUnwinding)
+    : FCallArgsBase(flags, numArgs, numRets, lockWhileUnwinding)
     , asyncEagerTarget(asyncEagerTarget)
     , byRefs(std::move(byRefs)) {
     assertx(IMPLIES(asyncEagerTarget == NoBlockId,
@@ -122,7 +122,7 @@ struct FCallArgs : FCallArgsBase {
   }
   FCallArgs(const FCallArgs& o)
     : FCallArgs(o.flags, o.numArgs, o.numRets, nullptr, o.asyncEagerTarget,
-                o.constructNoConst) {
+                o.lockWhileUnwinding) {
     if (o.byRefs) {
       auto const numBytes = (numArgs + 7) / 8;
       byRefs = std::make_unique<uint8_t[]>(numBytes);
@@ -131,13 +131,20 @@ struct FCallArgs : FCallArgsBase {
   }
   FCallArgs(FCallArgs&& o)
     : FCallArgs(o.flags, o.numArgs, o.numRets, std::move(o.byRefs),
-                o.asyncEagerTarget, o.constructNoConst) {}
+                o.asyncEagerTarget, o.lockWhileUnwinding) {}
 
   bool enforceReffiness() const { return byRefs.get() != nullptr; }
   bool byRef(uint32_t i) const {
     assertx(enforceReffiness());
     return byRefs[i / 8] & (1 << (i % 8));
   }
+
+  FCallArgs withoutGenerics() const {
+    auto fca = *this;
+    fca.flags = static_cast<Flags>(fca.flags & ~Flags::HasGenerics);
+    return fca;
+  }
+
   BlockId asyncEagerTarget;
   std::unique_ptr<uint8_t[]> byRefs;
 };
@@ -153,7 +160,7 @@ inline bool operator==(const FCallArgs& a, const FCallArgs& b) {
     a.flags == b.flags && a.numArgs == b.numArgs && a.numRets == b.numRets &&
     eq(a.byRefs.get(), b.byRefs.get(), (a.numArgs + 7) / 8) &&
     a.asyncEagerTarget == b.asyncEagerTarget &&
-    a.constructNoConst == b.constructNoConst;
+    a.lockWhileUnwinding == b.lockWhileUnwinding;
 }
 
 inline bool operator!=(const FCallArgs& a, const FCallArgs& b) {
@@ -240,7 +247,7 @@ struct hasher_impl {
       hash = HPHP::hash_int64_pair(hash, hash_br);
     }
     hash = HPHP::hash_int64_pair(hash, fca.asyncEagerTarget);
-    hash = HPHP::hash_int64_pair(hash, fca.constructNoConst);
+    hash = HPHP::hash_int64_pair(hash, fca.lockWhileUnwinding);
     return static_cast<size_t>(hash);
   }
 
@@ -375,8 +382,6 @@ namespace imm {
 #define IMM_ID_I64A     I64A
 #define IMM_ID_LA       LA
 #define IMM_ID_IA       IA
-#define IMM_ID_CAR      CAR
-#define IMM_ID_CAW      CAW
 #define IMM_ID_DA       DA
 #define IMM_ID_SA       SA
 #define IMM_ID_RATA     RATA
@@ -396,8 +401,6 @@ namespace imm {
 #define IMM_TY_I64A     int64_t
 #define IMM_TY_LA       LocalId
 #define IMM_TY_IA       IterId
-#define IMM_TY_CAR      ClsRefSlotId
-#define IMM_TY_CAW      ClsRefSlotId
 #define IMM_TY_DA       double
 #define IMM_TY_SA       LSString
 #define IMM_TY_RATA     RepoAuthType
@@ -417,8 +420,6 @@ namespace imm {
 #define IMM_NAME_I64A(n)    arg##n
 #define IMM_NAME_LA(n)      loc##n
 #define IMM_NAME_IA(n)      iter##n
-#define IMM_NAME_CAR(n)     slot
-#define IMM_NAME_CAW(n)     slot
 #define IMM_NAME_DA(n)      dbl##n
 #define IMM_NAME_SA(n)      str##n
 #define IMM_NAME_RATA(n)    rat
@@ -439,8 +440,6 @@ namespace imm {
 #define IMM_TARGETS_I64A(n)
 #define IMM_TARGETS_LA(n)
 #define IMM_TARGETS_IA(n)
-#define IMM_TARGETS_CAR(n)
-#define IMM_TARGETS_CAW(n)
 #define IMM_TARGETS_DA(n)
 #define IMM_TARGETS_SA(n)
 #define IMM_TARGETS_RATA(n)
@@ -463,8 +462,6 @@ namespace imm {
 #define IMM_EXTRA_I64A
 #define IMM_EXTRA_LA
 #define IMM_EXTRA_IA
-#define IMM_EXTRA_CAR       using has_car_flag = std::true_type;
-#define IMM_EXTRA_CAW       using has_caw_flag = std::true_type;
 #define IMM_EXTRA_DA
 #define IMM_EXTRA_SA
 #define IMM_EXTRA_RATA
@@ -478,15 +475,18 @@ namespace imm {
 
 #define IMM_MEM(which, n)          IMM_TY_##which IMM_NAME_##which(n)
 #define IMM_MEM_NA
-#define IMM_MEM_ONE(x)             IMM_MEM(x, 1);
-#define IMM_MEM_TWO(x, y)          IMM_MEM(x, 1); IMM_MEM(y, 2);
-#define IMM_MEM_THREE(x, y, z)     IMM_MEM(x, 1); IMM_MEM(y, 2); \
-                                   IMM_MEM(z, 3);
-#define IMM_MEM_FOUR(x, y, z, l)   IMM_MEM(x, 1); IMM_MEM(y, 2); \
-                                   IMM_MEM(z, 3); IMM_MEM(l, 4);
-#define IMM_MEM_FIVE(x, y, z, l, m) IMM_MEM(x, 1); IMM_MEM(y, 2); \
-                                   IMM_MEM(z, 3); IMM_MEM(l, 4); \
-                                   IMM_MEM(m, 5);
+#define IMM_MEM_ONE(x)                IMM_MEM(x, 1);
+#define IMM_MEM_TWO(x, y)             IMM_MEM(x, 1); IMM_MEM(y, 2);
+#define IMM_MEM_THREE(x, y, z)        IMM_MEM(x, 1); IMM_MEM(y, 2); \
+                                      IMM_MEM(z, 3);
+#define IMM_MEM_FOUR(x, y, z, l)      IMM_MEM(x, 1); IMM_MEM(y, 2); \
+                                      IMM_MEM(z, 3); IMM_MEM(l, 4);
+#define IMM_MEM_FIVE(x, y, z, l, m)   IMM_MEM(x, 1); IMM_MEM(y, 2); \
+                                      IMM_MEM(z, 3); IMM_MEM(l, 4); \
+                                      IMM_MEM(m, 5);
+#define IMM_MEM_SIX(x, y, z, l, m, n) IMM_MEM(x, 1); IMM_MEM(y, 2); \
+                                      IMM_MEM(z, 3); IMM_MEM(l, 4); \
+                                      IMM_MEM(m, 5); IMM_MEM(n, 6);
 
 #define IMM_EQ_WRAP(e, ...)       detail::eq_pairs(e, __VA_ARGS__)
 #define IMM_EQ(which, n)          detail::eq_operand<     \
@@ -497,11 +497,12 @@ namespace imm {
                                     o.IMM_NAME_##which(n) \
                                   }
 #define IMM_EQ_NA                 detail::eq_operand<void*,imm::NA> { 0, 0 }
-#define IMM_EQ_ONE(x)             IMM_EQ(x, 1)
-#define IMM_EQ_TWO(x, y)          IMM_EQ_ONE(x), IMM_EQ(y, 2)
-#define IMM_EQ_THREE(x, y, z)     IMM_EQ_TWO(x, y), IMM_EQ(z, 3)
-#define IMM_EQ_FOUR(x, y, z, l)   IMM_EQ_THREE(x, y, z), IMM_EQ(l, 4)
-#define IMM_EQ_FIVE(x, y, z, l, m) IMM_EQ_FOUR(x, y, z, l), IMM_EQ(m, 5)
+#define IMM_EQ_ONE(x)                IMM_EQ(x, 1)
+#define IMM_EQ_TWO(x, y)             IMM_EQ_ONE(x), IMM_EQ(y, 2)
+#define IMM_EQ_THREE(x, y, z)        IMM_EQ_TWO(x, y), IMM_EQ(z, 3)
+#define IMM_EQ_FOUR(x, y, z, l)      IMM_EQ_THREE(x, y, z), IMM_EQ(l, 4)
+#define IMM_EQ_FIVE(x, y, z, l, m)   IMM_EQ_FOUR(x, y, z, l), IMM_EQ(m, 5)
+#define IMM_EQ_SIX(x, y, z, l, m, n) IMM_EQ_FIVE(x, y, z, l, m), IMM_EQ(n, 6)
 
 #define IMM_HASH_WRAP(h, ...)       detail::hash_combine(h, __VA_ARGS__)
 #define IMM_HASH(which, n)          detail::hash_operand<     \
@@ -509,50 +510,59 @@ namespace imm {
                                       imm::IMM_ID_##which     \
                                     > { IMM_NAME_##which(n) }
 #define IMM_HASH_NA                 detail::hash_operand<void*,imm::NA> { 0 }
-#define IMM_HASH_ONE(x)             IMM_HASH(x, 1)
-#define IMM_HASH_TWO(x, y)          IMM_HASH_ONE(x), IMM_HASH(y, 2)
-#define IMM_HASH_THREE(x, y, z)     IMM_HASH_TWO(x, y), IMM_HASH(z, 3)
-#define IMM_HASH_FOUR(x, y, z, l)   IMM_HASH_THREE(x, y, z), IMM_HASH(l, 4)
-#define IMM_HASH_FIVE(x, y, z, l, m) IMM_HASH_FOUR(x, y, z, l), IMM_HASH(m, 5)
+#define IMM_HASH_ONE(x)                IMM_HASH(x, 1)
+#define IMM_HASH_TWO(x, y)             IMM_HASH_ONE(x), IMM_HASH(y, 2)
+#define IMM_HASH_THREE(x, y, z)        IMM_HASH_TWO(x, y), IMM_HASH(z, 3)
+#define IMM_HASH_FOUR(x, y, z, l)      IMM_HASH_THREE(x, y, z), IMM_HASH(l, 4)
+#define IMM_HASH_FIVE(x, y, z, l, m)   IMM_HASH_FOUR(x, y, z, l), IMM_HASH(m, 5)
+#define IMM_HASH_SIX(x, y, z, l, m, n) IMM_HASH_FIVE(x, y, z, l, m), IMM_HASH(n, 6)
 
 #define IMM_TARGETS_NA
-#define IMM_TARGETS_ONE(x)          IMM_TARGETS_##x(1)
-#define IMM_TARGETS_TWO(x,y)        IMM_TARGETS_ONE(x) IMM_TARGETS_##y(2)
-#define IMM_TARGETS_THREE(x,y,z)    IMM_TARGETS_TWO(x,y) IMM_TARGETS_##z(3)
-#define IMM_TARGETS_FOUR(x,y,z,l)   IMM_TARGETS_THREE(x,y,z) IMM_TARGETS_##l(4)
-#define IMM_TARGETS_FIVE(x,y,z,l,m) IMM_TARGETS_FOUR(x,y,z,l) IMM_TARGETS_##m(5)
+#define IMM_TARGETS_ONE(x)           IMM_TARGETS_##x(1)
+#define IMM_TARGETS_TWO(x,y)         IMM_TARGETS_ONE(x) IMM_TARGETS_##y(2)
+#define IMM_TARGETS_THREE(x,y,z)     IMM_TARGETS_TWO(x,y) IMM_TARGETS_##z(3)
+#define IMM_TARGETS_FOUR(x,y,z,l)    IMM_TARGETS_THREE(x,y,z) IMM_TARGETS_##l(4)
+#define IMM_TARGETS_FIVE(x,y,z,l,m)  IMM_TARGETS_FOUR(x,y,z,l) IMM_TARGETS_##m(5)
+#define IMM_TARGETS_SIX(x,y,z,l,m,n) IMM_TARGETS_FIVE(x,y,z,l,m) IMM_TARGETS_##n(6)
 
 #define IMM_EXTRA_NA
 #define IMM_EXTRA_ONE(x)           IMM_EXTRA_##x
-#define IMM_EXTRA_TWO(x,y)         IMM_EXTRA_ONE(x)       IMM_EXTRA_ONE(y)
-#define IMM_EXTRA_THREE(x,y,z)     IMM_EXTRA_TWO(x,y)     IMM_EXTRA_ONE(z)
-#define IMM_EXTRA_FOUR(x,y,z,l)    IMM_EXTRA_THREE(x,y,z) IMM_EXTRA_ONE(l)
-#define IMM_EXTRA_FIVE(x,y,z,l,m)  IMM_EXTRA_FOUR(x,y,z,l) IMM_EXTRA_ONE(m)
+#define IMM_EXTRA_TWO(x,y)         IMM_EXTRA_ONE(x)          IMM_EXTRA_ONE(y)
+#define IMM_EXTRA_THREE(x,y,z)     IMM_EXTRA_TWO(x,y)        IMM_EXTRA_ONE(z)
+#define IMM_EXTRA_FOUR(x,y,z,l)    IMM_EXTRA_THREE(x,y,z)    IMM_EXTRA_ONE(l)
+#define IMM_EXTRA_FIVE(x,y,z,l,m)  IMM_EXTRA_FOUR(x,y,z,l)   IMM_EXTRA_ONE(m)
+#define IMM_EXTRA_SIX(x,y,z,l,m,n) IMM_EXTRA_FIVE(x,y,z,l,m) IMM_EXTRA_ONE(n)
 
 #define IMM_CTOR(which, n)         IMM_TY_##which IMM_NAME_##which(n)
 #define IMM_CTOR_NA
-#define IMM_CTOR_ONE(x)            IMM_CTOR(x, 1)
-#define IMM_CTOR_TWO(x, y)         IMM_CTOR(x, 1), IMM_CTOR(y, 2)
-#define IMM_CTOR_THREE(x, y, z)    IMM_CTOR(x, 1), IMM_CTOR(y, 2), \
-                                   IMM_CTOR(z, 3)
-#define IMM_CTOR_FOUR(x, y, z, l)  IMM_CTOR(x, 1), IMM_CTOR(y, 2), \
-                                   IMM_CTOR(z, 3), IMM_CTOR(l, 4)
-#define IMM_CTOR_FIVE(x, y, z, l, m) IMM_CTOR(x, 1), IMM_CTOR(y, 2),     \
-                                     IMM_CTOR(z, 3), IMM_CTOR(l, 4),     \
-                                     IMM_CTOR(m, 5)
+#define IMM_CTOR_ONE(x)                IMM_CTOR(x, 1)
+#define IMM_CTOR_TWO(x, y)             IMM_CTOR(x, 1), IMM_CTOR(y, 2)
+#define IMM_CTOR_THREE(x, y, z)        IMM_CTOR(x, 1), IMM_CTOR(y, 2), \
+                                       IMM_CTOR(z, 3)
+#define IMM_CTOR_FOUR(x, y, z, l)      IMM_CTOR(x, 1), IMM_CTOR(y, 2), \
+                                       IMM_CTOR(z, 3), IMM_CTOR(l, 4)
+#define IMM_CTOR_FIVE(x, y, z, l, m)   IMM_CTOR(x, 1), IMM_CTOR(y, 2),     \
+                                       IMM_CTOR(z, 3), IMM_CTOR(l, 4),     \
+                                       IMM_CTOR(m, 5)
+#define IMM_CTOR_SIX(x, y, z, l, m, n) IMM_CTOR(x, 1), IMM_CTOR(y, 2),     \
+                                       IMM_CTOR(z, 3), IMM_CTOR(l, 4),     \
+                                       IMM_CTOR(m, 5), IMM_CTOR(n, 6)
 
 #define IMM_INIT(which, n)         IMM_NAME_##which(n) \
                                      ( std::move(IMM_NAME_##which(n)) )
 #define IMM_INIT_NA
-#define IMM_INIT_ONE(x)            : IMM_INIT(x, 1)
-#define IMM_INIT_TWO(x, y)         : IMM_INIT(x, 1), IMM_INIT(y, 2)
-#define IMM_INIT_THREE(x, y, z)    : IMM_INIT(x, 1), IMM_INIT(y, 2), \
-                                     IMM_INIT(z, 3)
-#define IMM_INIT_FOUR(x, y, z, l)  : IMM_INIT(x, 1), IMM_INIT(y, 2), \
-                                     IMM_INIT(z, 3), IMM_INIT(l, 4)
-#define IMM_INIT_FIVE(x, y, z, l, m) : IMM_INIT(x, 1), IMM_INIT(y, 2),   \
-                                       IMM_INIT(z, 3), IMM_INIT(l, 4),   \
-                                       IMM_INIT(m, 5)
+#define IMM_INIT_ONE(x)                : IMM_INIT(x, 1)
+#define IMM_INIT_TWO(x, y)             : IMM_INIT(x, 1), IMM_INIT(y, 2)
+#define IMM_INIT_THREE(x, y, z)        : IMM_INIT(x, 1), IMM_INIT(y, 2), \
+                                         IMM_INIT(z, 3)
+#define IMM_INIT_FOUR(x, y, z, l)      : IMM_INIT(x, 1), IMM_INIT(y, 2), \
+                                         IMM_INIT(z, 3), IMM_INIT(l, 4)
+#define IMM_INIT_FIVE(x, y, z, l, m)   : IMM_INIT(x, 1), IMM_INIT(y, 2),   \
+                                         IMM_INIT(z, 3), IMM_INIT(l, 4),   \
+                                         IMM_INIT(m, 5)
+#define IMM_INIT_SIX(x, y, z, l, m, n) : IMM_INIT(x, 1), IMM_INIT(y, 2),   \
+                                         IMM_INIT(z, 3), IMM_INIT(l, 4),   \
+                                         IMM_INIT(m, 5), IMM_INIT(n, 6)
 
 #define POP_UV  if (i == 0) return Flavor::U
 #define POP_CV  if (i == 0) return Flavor::C
@@ -602,47 +612,35 @@ namespace imm {
                       return Flavor::CU;                      \
                     }
 
-#define POP_CVUMANY uint32_t numPop() const { return arg1; }  \
-                    Flavor popFlavor(uint32_t i) const {      \
-                      assert(i < numPop());                   \
-                      return Flavor::CVU;                     \
+#define POP_CMANY_U3                                              \
+                    uint32_t numPop() const { return arg1 + 3; }  \
+                    Flavor popFlavor(uint32_t i) const {          \
+                      assert(i < numPop());                       \
+                      return i < arg1 ? Flavor::C : Flavor::U;    \
                     }
 
-#define POP_FPUSH(nin, nobj)                                                   \
-                    uint32_t numPop() const { return arg1 + nin + 3; }         \
-                    Flavor popFlavor(uint32_t i) const {                       \
-                      assert(i < numPop());                                    \
-                      if (i < nin) return Flavor::C;                           \
-                      i -= nin;                                                \
-                      if (i < arg1) return Flavor::CV;                         \
-                      i -= arg1;                                               \
-                      if (i < 2) return Flavor::U;                             \
-                      return nobj ? Flavor::C : Flavor::U;                     \
-                    }
+#define POP_CALLNATIVE uint32_t numPop() const { return arg1 + arg3; }  \
+                       Flavor popFlavor(uint32_t i) const {             \
+                         assert(i < numPop());                          \
+                         return i < arg1 ? Flavor::CVU : Flavor::U;     \
+                       }
 
 #define POP_FCALL(nin, nobj)                                                   \
                     uint32_t numPop() const {                                  \
-                      return nin + fca.numArgsInclUnpack() + 2 + fca.numRets;  \
+                      return nin + fca.numInputs() + 2 + fca.numRets;          \
                     }                                                          \
                     Flavor popFlavor(uint32_t i) const {                       \
                       assert(i < numPop());                                    \
                       if (i < nin) return Flavor::C;                           \
                       i -= nin;                                                \
+                      if (i == 0 && fca.hasGenerics()) return Flavor::C;       \
+                      i -= fca.hasGenerics() ? 1 : 0;                          \
                       if (i == 0 && fca.hasUnpack()) return Flavor::C;         \
-                      if (i < fca.numArgsInclUnpack()) return Flavor::CV;      \
-                      i -= fca.numArgsInclUnpack();                            \
+                      i -= fca.hasUnpack() ? 1 : 0;                            \
+                      if (i < fca.numArgs) return Flavor::CV;                  \
+                      i -= fca.numArgs;                                        \
                       if (i == 2 && nobj) return Flavor::C;                    \
                       return Flavor::U;                                        \
-                    }
-
-#define POP_FCALLO  uint32_t numPop() const {                                  \
-                      return fca.numArgsInclUnpack() + fca.numRets - 1;        \
-                    }                                                          \
-                    Flavor popFlavor(uint32_t i) const {                       \
-                      assert(i < numPop());                                    \
-                      if (i == 0 && fca.hasUnpack()) return Flavor::C;         \
-                      auto const cv = fca.numArgsInclUnpack();                 \
-                      return i < cv ? Flavor::CV : Flavor::U;                  \
                     }
 
 #define PUSH_NOV          uint32_t numPush() const { return 0; }
@@ -651,14 +649,14 @@ namespace imm {
 
 #define PUSH_TWO(x, y)    uint32_t numPush() const { return 2; }
 
-#define PUSH_FPUSH        uint32_t numPush() const { return arg1; }
+#define PUSH_CMANY        uint32_t numPush() const { return arg1; }
 #define PUSH_FCALL        uint32_t numPush() const { return fca.numRets; }
+#define PUSH_CALLNATIVE   uint32_t numPush() const { return arg3 + 1; }
 
 #define FLAGS_NF
 #define FLAGS_TF
 #define FLAGS_CF
 #define FLAGS_FF
-#define FLAGS_PF bool has_unpack;
 #define FLAGS_CF_TF
 #define FLAGS_CF_FF
 
@@ -666,7 +664,6 @@ namespace imm {
 #define FLAGS_CTOR_TF
 #define FLAGS_CTOR_CF
 #define FLAGS_CTOR_FF
-#define FLAGS_CTOR_PF ,bool hu
 #define FLAGS_CTOR_CF_TF
 #define FLAGS_CTOR_CF_FF
 
@@ -674,7 +671,6 @@ namespace imm {
 #define FLAGS_INIT_TF
 #define FLAGS_INIT_CF
 #define FLAGS_INIT_FF
-#define FLAGS_INIT_PF ,has_unpack(hu)
 #define FLAGS_INIT_CF_TF
 #define FLAGS_INIT_CF_FF
 
@@ -733,7 +729,6 @@ OPCODES
 #undef FLAGS_TF
 #undef FLAGS_CF
 #undef FLAGS_FF
-#undef FLAGS_PF
 #undef FLAGS_CF_TF
 #undef FLAGS_CF_FF
 
@@ -741,7 +736,6 @@ OPCODES
 #undef FLAGS_CTOR_TF
 #undef FLAGS_CTOR_CF
 #undef FLAGS_CTOR_FF
-#undef FLAGS_CTOR_PF
 #undef FLAGS_CTOR_CF_TF
 #undef FLAGS_CTOR_CF_FF
 
@@ -749,15 +743,15 @@ OPCODES
 #undef FLAGS_INIT_TF
 #undef FLAGS_INIT_CF
 #undef FLAGS_INIT_FF
-#undef FLAGS_INIT_PF
 #undef FLAGS_INIT_CF_TF
 #undef FLAGS_INIT_CF_FF
 
 #undef PUSH_NOV
 #undef PUSH_ONE
 #undef PUSH_TWO
-#undef PUSH_FPUSH
+#undef PUSH_CMANY
 #undef PUSH_FCALL
+#undef PUSH_CALLNATIVE
 
 #undef POP_UV
 #undef POP_CV
@@ -772,10 +766,9 @@ OPCODES
 #undef POP_CMANY
 #undef POP_SMANY
 #undef POP_CUMANY
-#undef POP_CVUMANY
-#undef POP_FPUSH
+#undef POP_CMANY_U3
+#undef POP_CALLNATIVE
 #undef POP_FCALL
-#undef POP_FCALLO
 
 #undef IMM_TY_MA
 #undef IMM_TY_BLA
@@ -786,8 +779,6 @@ OPCODES
 #undef IMM_TY_I64A
 #undef IMM_TY_LA
 #undef IMM_TY_IA
-#undef IMM_TY_CAR
-#undef IMM_TY_CAW
 #undef IMM_TY_DA
 #undef IMM_TY_SA
 #undef IMM_TY_RATA
@@ -809,8 +800,6 @@ OPCODES
 // #undef IMM_NAME_I64A
 // #undef IMM_NAME_LA
 // #undef IMM_NAME_IA
-// #undef IMM_NAME_CAR
-// #undef IMM_NAME_CAW
 // #undef IMM_NAME_DA
 // #undef IMM_NAME_SA
 // #undef IMM_NAME_RATA
@@ -829,8 +818,6 @@ OPCODES
 #undef IMM_TARGETS_I64A
 #undef IMM_TARGETS_LA
 #undef IMM_TARGETS_IA
-#undef IMM_TARGETS_CAR
-#undef IMM_TARGETS_CAW
 #undef IMM_TARGETS_DA
 #undef IMM_TARGETS_SA
 #undef IMM_TARGETS_RATA
@@ -847,6 +834,7 @@ OPCODES
 #undef IMM_TARGETS_THREE
 #undef IMM_TARGETS_FOUR
 #undef IMM_TARGETS_FIVE
+#undef IMM_TARGETS_SIX
 
 #undef IMM_EXTRA_BLA
 #undef IMM_EXTRA_SLA
@@ -856,8 +844,6 @@ OPCODES
 #undef IMM_EXTRA_I64A
 #undef IMM_EXTRA_LA
 #undef IMM_EXTRA_IA
-#undef IMM_EXTRA_CAR
-#undef IMM_EXTRA_CAW
 #undef IMM_EXTRA_DA
 #undef IMM_EXTRA_SA
 #undef IMM_EXTRA_RATA
@@ -875,6 +861,7 @@ OPCODES
 #undef IMM_MEM_THREE
 #undef IMM_MEM_FOUR
 #undef IMM_MEM_FIVE
+#undef IMM_MEM_SIX
 
 #undef IMM_EQ
 #undef IMM_EQ_NA
@@ -883,6 +870,7 @@ OPCODES
 #undef IMM_EQ_THREE
 #undef IMM_EQ_FOUR
 #undef IMM_EQ_FIVE
+#undef IMM_EQ_SIX
 
 #undef IMM_HASH
 #undef IMM_HASH_DO
@@ -892,6 +880,7 @@ OPCODES
 #undef IMM_HASH_THREE
 #undef IMM_HASH_FOUR
 #undef IMM_HASH_FIVE
+#undef IMM_HASH_SIX
 
 #undef IMM_CTOR
 #undef IMM_CTOR_NA
@@ -900,6 +889,7 @@ OPCODES
 #undef IMM_CTOR_THREE
 #undef IMM_CTOR_FOUR
 #undef IMM_CTOR_FIVE
+#undef IMM_CTOR_SIX
 
 #undef IMM_INIT
 #undef IMM_INIT_NA
@@ -1111,36 +1101,6 @@ auto visit(const Bytecode& b, Visit v) {
 #undef O
   not_reached();
 }
-
-//////////////////////////////////////////////////////////////////////
-
-struct ReadClsRefSlotVisitor {
-  ReadClsRefSlotVisitor() {}
-
-  template<typename T>
-  auto fun(T&, int) const { return NoClsRefSlotId; }
-
-  template<typename T>
-  auto fun(T& t, bool) const -> decltype(typename T::has_car_flag{},t.slot) {
-    return t.slot;
-  }
-
-  template<typename T>
-  ClsRefSlotId operator()(T& t) const { return fun(t, true); }
-};
-
-struct WriteClsRefSlotVisitor {
-  template<typename T>
-  auto fun(T&, int) const { return NoClsRefSlotId; }
-
-  template<typename T>
-  auto fun(T& t, bool) const -> decltype(typename T::has_caw_flag{},t.slot) {
-    return t.slot;
-  }
-
-  template<typename T>
-  ClsRefSlotId operator()(T& t) const { return fun(t, true); }
-};
 
 //////////////////////////////////////////////////////////////////////
 

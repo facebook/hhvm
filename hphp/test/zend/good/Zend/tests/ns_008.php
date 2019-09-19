@@ -1,6 +1,7 @@
 <?hh
 namespace test;
 
+<<__DynamicallyConstructible>>
 class foo {
 }
 <<__EntryPoint>> function main(): void {

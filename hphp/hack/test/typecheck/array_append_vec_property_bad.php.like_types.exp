@@ -1,0 +1,6 @@
+File "array_append_vec_property_bad.php", line 9, characters 3-18:
+Invalid assignment (Typing[4110])
+File "array_append_vec_property_bad.php", line 5, characters 10-17:
+Expected ~vec<int> because it is an unenforceable type
+File "array_append_vec_property_bad.php", line 5, characters 10-17:
+But got vec<(int | string)>

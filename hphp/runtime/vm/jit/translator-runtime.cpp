@@ -46,6 +46,7 @@
 
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/method-lookup.h"
@@ -219,15 +220,6 @@ ArrayData* convDictToArrHelper(ArrayData* adIn) {
   return a;
 }
 
-ArrayData* convShapeToArrHelper(ArrayData* adIn) {
-  assertx(adIn->isShape());
-  auto a = MixedArray::ToPHPArrayShape(adIn, adIn->cowCheck());
-  if (a != adIn) decRefArr(adIn);
-  assertx(a->isPHPArray());
-  assertx(a->isNotDVArray());
-  return a;
-}
-
 ArrayData* convKeysetToArrHelper(ArrayData* adIn) {
   assertx(adIn->isKeyset());
   auto a = SetArray::ToPHPArray(adIn, adIn->cowCheck());
@@ -252,14 +244,6 @@ ArrayData* convDictToVecHelper(ArrayData* adIn) {
   return a;
 }
 
-ArrayData* convShapeToVecHelper(ArrayData* adIn) {
-  assertx(adIn->isShape());
-  auto a = MixedArray::ToVecShape(adIn, adIn->cowCheck());
-  assertx(a != adIn);
-  decRefArr(adIn);
-  return a;
-}
-
 ArrayData* convKeysetToVecHelper(ArrayData* adIn) {
   assertx(adIn->isKeyset());
   auto a = SetArray::ToVec(adIn, adIn->cowCheck());
@@ -278,13 +262,6 @@ ArrayData* convObjToVecHelper(ObjectData* obj) {
 ArrayData* convArrToDictHelper(ArrayData* adIn) {
   assertx(adIn->isPHPArray());
   auto a = adIn->toDict(adIn->cowCheck());
-  if (a != adIn) decRefArr(adIn);
-  return a;
-}
-
-ArrayData* convShapeToDictHelper(ArrayData* adIn) {
-  assertx(adIn->isShape());
-  auto a = MixedArray::ToDictShape(adIn, adIn->cowCheck());
   if (a != adIn) decRefArr(adIn);
   return a;
 }
@@ -333,17 +310,55 @@ ArrayData* convDictToKeysetHelper(ArrayData* adIn) {
   return a;
 }
 
-ArrayData* convShapeToKeysetHelper(ArrayData* adIn) {
-  assertx(adIn->isShape());
-  auto a = MixedArray::ToKeysetShape(adIn, adIn->cowCheck());
-  if (a != adIn) decRefArr(adIn);
-  return a;
-}
-
 ArrayData* convObjToKeysetHelper(ObjectData* obj) {
   auto a = castObjToKeyset(obj);
   assertx(a->isKeyset());
   decRefObj(obj);
+  return a;
+}
+
+ArrayData* convClsMethToArrHealper(ClsMethDataRef clsmeth) {
+  raiseClsMethConvertWarningHelper("array");
+  auto a = make_varray(clsmeth->getCls(), clsmeth->getFunc()).detach();
+  decRefClsMeth(clsmeth);
+  return a;
+}
+
+ArrayData* convClsMethToVArrHealper(ClsMethDataRef clsmeth) {
+  raiseClsMethConvertWarningHelper("varray");
+  auto a = make_varray(clsmeth->getCls(), clsmeth->getFunc()).detach();
+  decRefClsMeth(clsmeth);
+  return a;
+}
+
+ArrayData* convClsMethToVecHealper(ClsMethDataRef clsmeth) {
+  raiseClsMethConvertWarningHelper("vec");
+  auto a = make_vec_array(clsmeth->getCls(), clsmeth->getFunc()).detach();
+  decRefClsMeth(clsmeth);
+  return a;
+}
+
+ArrayData* convClsMethToDArrHealper(ClsMethDataRef clsmeth) {
+  raiseClsMethConvertWarningHelper("darray");
+  auto a = make_darray(0, clsmeth->getCls(), 1, clsmeth->getFunc()).detach();
+  decRefClsMeth(clsmeth);
+  return a;
+}
+
+ArrayData* convClsMethToDictHealper(ClsMethDataRef clsmeth) {
+  raiseClsMethConvertWarningHelper("dict");
+  auto a = make_dict_array(
+    0, clsmeth->getCls(), 1, clsmeth->getFunc()).detach();
+  decRefClsMeth(clsmeth);
+  return a;
+}
+
+ArrayData* convClsMethToKeysetHealper(ClsMethDataRef clsmeth) {
+  raiseClsMethConvertWarningHelper("keyset");
+  auto a = make_keyset_array(
+    const_cast<StringData*>(classToStringHelper(clsmeth->getCls())),
+    const_cast<StringData*>(funcToStringHelper(clsmeth->getFunc()))).detach();
+  decRefClsMeth(clsmeth);
   return a;
 }
 
@@ -365,19 +380,6 @@ double convResToDblHelper(const ResourceHdr* r) {
 
 double convCellToDblHelper(TypedValue tv) {
   return tvCastToDouble(tv);
-}
-
-ObjectData* convCellToObjHelper(TypedValue tv) {
-  // Note: the call sites of this function all assume that
-  // no user code will run and no recoverable exceptions will
-  // occur while running this code. This seems trivially true
-  // in all cases but converting arrays to objects. It also
-  // seems true for that case as well, since the source array
-  // is essentially metadata for the object. If that is not true,
-  // you might end up looking at this code in a debugger and now
-  // you know why.
-  tvCastToObjectInPlace(&tv); // consumes a ref on counted values
-  return tv.m_data.pobj;
 }
 
 StringData* convDblToStrHelper(double d) {
@@ -566,6 +568,7 @@ void VerifyReifiedReturnTypeImpl(TypedValue cell, ArrayData* ts) {
 }
 
 namespace {
+
 ALWAYS_INLINE
 TypedValue getDefaultIfNullCell(tv_rval rval, const TypedValue& def) {
   return UNLIKELY(!rval) ? def : rval.tv();
@@ -577,6 +580,34 @@ TypedValue arrayIdxSSlow(ArrayData* a, StringData* key, TypedValue def) {
   return getDefaultIfNullCell(a->rval(key), def);
 }
 
+ALWAYS_INLINE
+bool isMixedArrayWithStaticKeys(const ArrayData* arr) {
+  // In one comparison we check both the kind and the fact that the array only
+  // has static string keys (no tombstones, int keys, or counted str keys).
+  auto const test = static_cast<uint32_t>(HeaderKind::Mixed);
+  auto const mask = static_cast<uint32_t>(~MixedArray::kStaticStrKey) << 24 |
+                    static_cast<uint32_t>(0xff);
+  return (*(reinterpret_cast<const uint32_t*>(arr) + 1) & mask) == test;
+}
+
+ALWAYS_INLINE
+TypedValue doScan(const MixedArray* arr, StringData* key, TypedValue def) {
+  assertx(key->isStatic());
+  assertx((arr->keyTypes() & ~MixedArray::kStaticStrKey) == 0x00);
+  auto used = arr->iterLimit();
+  for (auto elm = arr->data(); used; used--, elm++) {
+    assertx(elm->hasStrKey());
+    assertx(elm->strKey()->isStatic());
+    if (key == elm->strKey()) return *elm->datatv();
+  }
+  return def;
+}
+
+}
+
+TypedValue arrayIdxI(ArrayData* a, int64_t key, TypedValue def) {
+  assertx(a->isPHPArray());
+  return getDefaultIfNullCell(a->rval(key), def);
 }
 
 TypedValue arrayIdxS(ArrayData* a, StringData* key, TypedValue def) {
@@ -585,9 +616,11 @@ TypedValue arrayIdxS(ArrayData* a, StringData* key, TypedValue def) {
   return getDefaultIfNullCell(MixedArray::RvalStr(a, key), def);
 }
 
-TypedValue arrayIdxI(ArrayData* a, int64_t key, TypedValue def) {
+TypedValue arrayIdxScan(ArrayData* a, StringData* key, TypedValue def) {
   assertx(a->isPHPArray());
-  return getDefaultIfNullCell(a->rval(key), def);
+  return LIKELY(isMixedArrayWithStaticKeys(a))
+    ? doScan(MixedArray::asMixed(a), key, def)
+    : arrayIdxSSlow(a, key, def);
 }
 
 TypedValue dictIdxI(ArrayData* a, int64_t key, TypedValue def) {
@@ -595,9 +628,18 @@ TypedValue dictIdxI(ArrayData* a, int64_t key, TypedValue def) {
   return getDefaultIfNullCell(MixedArray::RvalIntDict(a, key), def);
 }
 
+NEVER_INLINE
 TypedValue dictIdxS(ArrayData* a, StringData* key, TypedValue def) {
   assertx(a->isDict());
   return getDefaultIfNullCell(MixedArray::RvalStrDict(a, key), def);
+}
+
+TypedValue dictIdxScan(ArrayData* a, StringData* key, TypedValue def) {
+  assertx(a->isDict());
+  auto ad = MixedArray::asMixed(a);
+  return LIKELY((ad->keyTypes() & ~MixedArray::kStaticStrKey) == 0)
+    ? doScan(ad, key, def)
+    : dictIdxS(a, key, def);
 }
 
 TypedValue keysetIdxI(ArrayData* a, int64_t key, TypedValue def) {
@@ -638,11 +680,14 @@ template TypedValue arrFirstLast<false, true>(ArrayData*);
 TypedValue* getSPropOrNull(const Class* cls,
                            const StringData* name,
                            Class* ctx,
-                           bool ignoreLateInit) {
+                           bool ignoreLateInit,
+                           bool disallowConst) {
   auto const lookup = ignoreLateInit
     ? cls->getSPropIgnoreLateInit(ctx, name)
     : cls->getSProp(ctx, name);
-
+  if (disallowConst && UNLIKELY(lookup.constant)) {
+    throw_cannot_modify_static_const_prop(cls->name()->data(), name->data());
+  }
   if (UNLIKELY(!lookup.val || !lookup.accessible)) return nullptr;
 
   return lookup.val;
@@ -651,8 +696,9 @@ TypedValue* getSPropOrNull(const Class* cls,
 TypedValue* getSPropOrRaise(const Class* cls,
                             const StringData* name,
                             Class* ctx,
-                            bool ignoreLateInit) {
-  auto sprop = getSPropOrNull(cls, name, ctx, ignoreLateInit);
+                            bool ignoreLateInit,
+                            bool disallowConst) {
+  auto sprop = getSPropOrNull(cls, name, ctx, ignoreLateInit, disallowConst);
   if (UNLIKELY(!sprop)) {
     raise_error("Invalid static property access: %s::%s",
                 cls->name()->data(), name->data());
@@ -707,8 +753,6 @@ int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets) {
       case KindOfDict:
       case KindOfPersistentKeyset:
       case KindOfKeyset:
-      case KindOfPersistentShape:
-      case KindOfShape:
       case KindOfPersistentArray:
       case KindOfArray:
       case KindOfObject:
@@ -735,7 +779,7 @@ int64_t switchObjHelper(ObjectData* o, int64_t base, int64_t nTargets) {
 
 //////////////////////////////////////////////////////////////////////
 
-void checkFrame(ActRec* fp, Cell* sp, bool fullCheck, Offset bcOff) {
+void checkFrame(ActRec* fp, Cell* sp, bool fullCheck) {
   const Func* func = fp->m_func;
   func->validate();
   if (func->cls()) {
@@ -758,10 +802,7 @@ void checkFrame(ActRec* fp, Cell* sp, bool fullCheck, Offset bcOff) {
   }
 
   visitStackElems(
-    fp, sp, bcOff,
-    [](const ActRec* ar) {
-      ar->func()->validate();
-    },
+    fp, sp,
     [](const TypedValue* tv) {
       assertx(tvIsPlausible(*tv));
     }
@@ -779,10 +820,32 @@ const Func* loadClassCtor(Class* cls, ActRec* fp) {
   return f;
 }
 
+const Func* lookupClsMethodHelper(const Class* cls, const StringData* methName,
+                                  ObjectData* obj, const Class* ctx) {
+  const Func* f;
+  auto const res = lookupClsMethod(f, cls, methName, obj, ctx, true);
+
+  if (res == LookupResult::MethodFoundWithThis ||
+      res == LookupResult::MagicCallFound) {
+    // Handled by interpreter.
+    return nullptr;
+  }
+
+  assertx(res == LookupResult::MethodFoundNoThis);
+  if (!f->isStaticInPrologue()) {
+    throw_missing_this(f);
+  }
+
+  return f;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 void raiseArgumentImpl(const Func* func, int got, bool missing) {
-  if (!missing && !RuntimeOption::EvalWarnOnTooManyArguments) return;
+  if (!missing && !RuntimeOption::EvalWarnOnTooManyArguments &&
+      !func->isCPPBuiltin()) {
+    return;
+  }
   const auto total = func->numNonVariadicParams();
   const auto variadic = func->hasVariadicCaptureParam();
   const Func::ParamInfoVec& params = func->params();
@@ -806,13 +869,14 @@ void raiseArgumentImpl(const Func* func, int got, bool missing) {
 
   auto const value = atmost ? total : expected;
   auto const msg = folly::sformat("{}() expects {} {} parameter{}, {} given",
-                                  func->displayName()->data(),
+                                  func->fullDisplayName()->data(),
                                   amount,
                                   value,
                                   value == 1 ? "" : "s",
                                   got);
 
-  if (missing || RuntimeOption::EvalWarnOnTooManyArguments > 1) {
+  if (missing || RuntimeOption::EvalWarnOnTooManyArguments > 1 ||
+      func->isCPPBuiltin()) {
     SystemLib::throwRuntimeExceptionObject(Variant(msg));
   } else {
     raise_warning(msg);
@@ -893,12 +957,6 @@ void throwAsTypeStructExceptionHelper(ArrayData* a, Cell c) {
 ArrayData* errorOnIsAsExpressionInvalidTypesHelper(ArrayData* a) {
   errorOnIsAsExpressionInvalidTypes(ArrNR(a), false);
   return a;
-}
-
-StringData* recordReifiedGenericsAndGetName(ArrayData* tsList) {
-  auto const mangledName = makeStaticString(mangleReifiedGenericsName(tsList));
-  addToReifiedGenericsTable(mangledName, tsList);
-  return mangledName;
 }
 
 ArrayData* recordReifiedGenericsAndGetTSList(ArrayData* tsList) {

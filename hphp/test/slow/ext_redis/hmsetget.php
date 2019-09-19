@@ -1,7 +1,7 @@
 <?hh
 
 include (__DIR__ . '/redis.inc');
-
+<<__EntryPoint>> function main(): void {
 $r = NewRedisTestInstance();
 $r->setOption(Redis::OPT_PREFIX, GetTestKeyName(__FILE__) . ':');
 $r->delete('A');
@@ -22,3 +22,4 @@ var_dump($r->hMGet('A', ['foo', 'baz1', 'baz2', 'nofield']));
 
 
 $r->delete('A');
+}

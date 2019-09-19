@@ -1,6 +1,6 @@
 <?hh
 
-if (!apc_fetch('foo')) {
+if (!__hhvm_intrinsics\apc_fetch_no_check('foo')) {
   apc_store('foo', 1);
   include 'fpushclsmethod-unique-volatile.inc';
 } else {

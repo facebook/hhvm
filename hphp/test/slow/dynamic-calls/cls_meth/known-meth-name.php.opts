@@ -1,0 +1,3 @@
+-vEval.ForbidDynamicCallsToClsMeth=1
+-vEval.LogKnownMethodsAsDynamicCalls=false
+-vEval.EmitClsMethPointers=1

@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -7,19 +7,17 @@
  *
  *)
 
-val add_position_to_results :
-  SearchUtils.si_results ->
-  SearchUtils.result
+val add_position_to_results : SearchUtils.si_results -> SearchUtils.result
 
 val autocomplete_result_to_json :
-  AutocompleteTypes.complete_autocomplete_result ->
-  Hh_json.json
+  AutocompleteTypes.complete_autocomplete_result -> Hh_json.json
 
 val go :
   tcopt:TypecheckerOptions.t ->
   content_funs:Reordered_argument_collections.SSet.t ->
   content_classes:Reordered_argument_collections.SSet.t ->
-  autocomplete_context: AutocompleteTypes.legacy_autocomplete_context ->
+  autocomplete_context:AutocompleteTypes.legacy_autocomplete_context ->
   sienv:SearchUtils.si_env ->
   Tast.program ->
-  AutocompleteTypes.complete_autocomplete_result list Utils.With_complete_flag.t
+  AutocompleteTypes.complete_autocomplete_result list
+  Utils.With_complete_flag.t

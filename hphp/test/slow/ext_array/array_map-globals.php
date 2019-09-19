@@ -8,11 +8,12 @@ function check_global($arg) {
 }
 
 abstract final class ExtArrayArrayMapGlobals {
-  public static $x;
+  public static $x = 0;
 }
 
-$x = 0;
-ExtArrayArrayMapGlobals::$x = 0;
 
-array_map('check_global', $GLOBALS);
+
+<<__EntryPoint>> function main(): void {
+array_map(fun('check_global'), $GLOBALS['GLOBALS']);
 print ExtArrayArrayMapGlobals::$x."\n";
+}

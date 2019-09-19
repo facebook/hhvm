@@ -1,4 +1,5 @@
 <?hh
+<<__EntryPoint>> function main(): void {
 // Create a blank image and add some text
 $im = imagecreatetruecolor(120, 20);
 $text_color = imagecolorallocate($im, 255, 255, 255);
@@ -15,3 +16,4 @@ imagedestroy($im);
 png2wbmp($file, '', 20, 120, 8);
 error_reporting(0);
 unlink(dirname(__FILE__) .'/simpletext.png');
+}

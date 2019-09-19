@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2017, Facebook, Inc.
  * All rights reserved.
  *
@@ -14,9 +14,10 @@ type t = {
   line_width: int;
 }
 
-let default = {
-  add_trailing_commas = true;
-  indent_width = 2;
-  indent_with_tabs = false;
-  line_width = 80;
-}
+let default =
+  {
+    add_trailing_commas = true;
+    indent_width = 2;
+    indent_with_tabs = false;
+    line_width = 80;
+  }

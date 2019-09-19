@@ -195,7 +195,7 @@ void TestServer::RunServer() {
   argv[0] = HHVM_PATH;
 #endif
 
-  proc::exec(argv[0], argv, nullptr, out, &err);
+  HPHP::proc::exec(argv[0], argv, nullptr, out, &err);
 }
 
 void TestServer::StopServer() {
@@ -231,7 +231,7 @@ void TestServer::KillServer() {
   std::string out, err;
   const char *argv[] = {"kill", buf, nullptr};
   for (int i = 0; i < 10; i++) {
-    auto ret = proc::exec(argv[0], argv, nullptr, out, &err);
+    auto ret = HPHP::proc::exec(argv[0], argv, nullptr, out, &err);
     if (ret) {
       return;
     }
@@ -240,7 +240,7 @@ void TestServer::KillServer() {
   // Last resort
   const char *argv9[] = {"kill", "-9", buf, nullptr};
   for (int i = 0; i < 10; i++) {
-    auto ret = proc::exec(argv9[0], argv9, nullptr, out, &err);
+    auto ret = HPHP::proc::exec(argv9[0], argv9, nullptr, out, &err);
     if (ret) {
       return;
     }

@@ -18,7 +18,6 @@
 #include "hphp/runtime/ext/thrift/ext_thrift.h"
 
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -35,6 +34,7 @@
 #include "hphp/runtime/vm/jit/perf-counters.h"
 
 #include "hphp/util/fixed-vector.h"
+#include "hphp/util/rds-local.h"
 
 #include <folly/AtomicHashMap.h>
 #include <folly/Format.h>
@@ -46,6 +46,10 @@
 
 namespace HPHP { namespace thrift {
 /////////////////////////////////////////////////////////////////////////////
+
+namespace {
+const StaticString SKIP_CHECKS_ATTR("ThriftDeprecatedSkipSerializerChecks");
+}
 
 const uint8_t VERSION_MASK = 0x1f;
 const uint8_t VERSION = 2;
@@ -177,7 +181,21 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(CompactRequestData, s_compact_request_data);
 namespace {
 struct FieldInfo {
   Class* cls = nullptr;
+  // A pointer to a property which may be set lazily by calling
+  // cls->lookupDeclProp(fieldName) first time we need the property.
+  const Class::Prop *prop = nullptr;
+  const StringData* fieldName = nullptr;
   int16_t fieldNum = 0;
+
+  const Class::Prop* getProp() {
+    if (!prop) {
+      auto slot = cls->lookupDeclProp(fieldName);
+      if (slot != kInvalidSlot) {
+        prop = &cls->declProperties()[slot];
+      }
+    }
+    return prop;
+  }
 };
 }
 
@@ -227,8 +245,11 @@ struct CompactWriter {
         TType fieldType = field.type;
         writeFieldBegin(field.fieldNum, fieldType);
         ArrNR fieldSpec(field.spec);
-        writeField(fieldVal, fieldSpec.asArray(), fieldType,
-            FieldInfo{obj->getVMClass(), field.fieldNum});
+        auto fieldInfo = FieldInfo();
+        fieldInfo.cls = obj->getVMClass();
+        fieldInfo.fieldName = field.name;
+        fieldInfo.fieldNum = field.fieldNum;
+        writeField(fieldVal, fieldSpec.asArray(), fieldType, fieldInfo);
         writeFieldEnd();
       }
     }
@@ -249,33 +270,37 @@ struct CompactWriter {
       const size_t numProps = cls->numDeclProperties();
       const size_t numFields = fields.size();
       // Write each member
-      for (int i = 0; i < numFields; ++i) {
-        if (i < numProps && fields[i].name == prop[i].name) {
-          auto const& fieldVal = tvAsCVarRef(&objProp[i]);
+      for (int slot = 0; slot < numFields; ++slot) {
+        if (slot < numProps && fields[slot].name == prop[slot].name) {
+          auto index = cls->propSlotToIndex(slot);
+          auto const& fieldVal = tvAsCVarRef(&objProp[index]);
           if (!fieldVal.isNull()) {
-            TType fieldType = fields[i].type;
-            ArrNR fieldSpec(fields[i].spec);
-            writeFieldBegin(fields[i].fieldNum, fieldType);
-            writeField(fieldVal, fieldSpec.asArray(), fieldType,
-                FieldInfo{cls, fields[i].fieldNum});
+            TType fieldType = fields[slot].type;
+            ArrNR fieldSpec(fields[slot].spec);
+            writeFieldBegin(fields[slot].fieldNum, fieldType);
+            auto fieldInfo = FieldInfo();
+            fieldInfo.cls = cls;
+            fieldInfo.prop = &prop[slot];
+            fieldInfo.fieldNum = fields[slot].fieldNum;
+            writeField(fieldVal, fieldSpec.asArray(), fieldType, fieldInfo);
             writeFieldEnd();
           } else if (UNLIKELY(fieldVal.is(KindOfUninit)) &&
-                     (prop[i].attrs & AttrLateInit)) {
-            if (prop[i].attrs & AttrLateInitSoft) {
-              raise_soft_late_init_prop(prop[i].cls, prop[i].name, false);
+                     (prop[slot].attrs & AttrLateInit)) {
+            if (prop[slot].attrs & AttrLateInitSoft) {
+              raise_soft_late_init_prop(prop[slot].cls, prop[slot].name, false);
               tvDup(
                 *g_context->getSoftLateInitDefault().asTypedValue(),
-                *const_cast<TypedValue*>(&objProp[i])
+                *const_cast<TypedValue*>(&objProp[index])
               );
               // Loop over this property again
-              --i;
+              --slot;
               continue;
             } else {
-              throw_late_init_prop(prop[i].cls, prop[i].name, false);
+              throw_late_init_prop(prop[slot].cls, prop[slot].name, false);
             }
           }
         } else {
-          writeSlow(fields[i], obj);
+          writeSlow(fields[slot], obj);
         }
       }
 
@@ -320,7 +345,7 @@ struct CompactWriter {
     void writeField(const Variant& value,
                     const Array& valueSpec,
                     TType type,
-                    const FieldInfo& fieldInfo) {
+                    FieldInfo& fieldInfo) {
       switch (type) {
         case T_STOP:
         case T_VOID:
@@ -422,7 +447,7 @@ struct CompactWriter {
     }
 
     void writeMap(
-        const Variant& map, const Array& spec, const FieldInfo& fieldInfo) {
+        const Variant& map, const Array& spec, FieldInfo& fieldInfo) {
       TType keyType = (TType)(char)tvCastToInt64(
         spec.rvalAt(s_ktype, AccessFlags::ErrorKey).tv()
       );
@@ -460,7 +485,7 @@ struct CompactWriter {
         const Variant& list,
         const Array& spec,
         CListType listType,
-        const FieldInfo& fieldInfo) {
+        FieldInfo& fieldInfo) {
       TType valueType = (TType)(char)tvCastToInt64(
         spec.rvalAt(s_etype, AccessFlags::ErrorKey).tv()
       );
@@ -543,19 +568,26 @@ struct CompactWriter {
     }
 
     template <typename T>
-    void writeIChecked(const Variant& value, const FieldInfo& fieldInfo) {
+    void writeIChecked(const Variant& value, FieldInfo& fieldInfo) {
       static_assert(std::is_integral<T>::value, "not an integral type");
       auto n = value.toInt64();
       using limits = std::numeric_limits<T>;
       auto forbidInvalid =
         RuntimeOption::EvalForbidThriftIntegerValuesOutOfRange;
       if (forbidInvalid != 0 && (n < limits::min() || n > limits::max())) {
+        const auto& structName = fieldInfo.cls->nameStr();
         std::string message = folly::sformat(
             "Value {} is out of range in field {} of {}",
             n,
             fieldInfo.fieldNum,
-            fieldInfo.cls->nameStr().c_str());
-        if (forbidInvalid == 1) {
+            structName.c_str());
+        auto hasSkipChecksAttr = [&]() {
+          const Class::Prop* prop = fieldInfo.getProp();
+          return prop &&
+            prop->preProp->userAttributes().count(
+                LowStringPtr(SKIP_CHECKS_ATTR.get())) != 0;
+        };
+        if (forbidInvalid == 1 || hasSkipChecksAttr()) {
           raise_warning(message);
         } else {
           thrift_error(message, ERR_INVALID_DATA);
@@ -687,28 +719,31 @@ struct CompactReader {
       }
       auto objProp = dest->propVecForConstruct();
       auto prop = cls->declProperties().begin();
-      int i = -1;
+      int slot = -1;
       while (fieldType != T_STOP) {
         do {
-          ++i;
-        } while (i < numFields && fields[i].fieldNum != fieldNum);
-        if (i == numFields ||
-            prop[i].name != fields[i].name ||
-            !typesAreCompatible(fieldType, fields[i].type)) {
+          ++slot;
+        } while (slot < numFields && fields[slot].fieldNum != fieldNum);
+        if (slot == numFields ||
+            prop[slot].name != fields[slot].name ||
+            !typesAreCompatible(fieldType, fields[slot].type)) {
           return readStructSlow(dest, spec, fieldNum, fieldType);
         }
-        if (fields[i].isUnion) {
+        if (fields[slot].isUnion) {
           if (s__type.equal(prop[numFields].name)) {
-            tvAsVariant(&objProp[numFields]) = Variant(fieldNum);
+            auto index = cls->propSlotToIndex(numFields);
+            tvAsVariant(&objProp[index]) = Variant(fieldNum);
           } else {
             return readStructSlow(dest, spec, fieldNum, fieldType);
           }
         }
-        ArrNR fieldSpec(fields[i].spec);
-        tvAsVariant(&objProp[i]) = readField(fieldSpec.asArray(), fieldType);
-        if (!fields[i].noTypeCheck) {
-          dest->verifyPropTypeHint(i);
-          if (fields[i].isUnion) dest->verifyPropTypeHint(numFields);
+        ArrNR fieldSpec(fields[slot].spec);
+        auto index = cls->propSlotToIndex(slot);
+        tvAsVariant(&objProp[index]) = readField(fieldSpec.asArray(),
+                                                 fieldType);
+        if (!fields[slot].noTypeCheck) {
+          dest->verifyPropTypeHint(slot);
+          if (fields[slot].isUnion) dest->verifyPropTypeHint(numFields);
         }
         readFieldEnd();
         readFieldBegin(fieldNum, fieldType);

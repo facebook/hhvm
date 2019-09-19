@@ -4,7 +4,7 @@
 <<__EntryPoint>>
 function main_440() {
 $a = array(1, 2, 3, 4, 5, 6);
-while ($v = each(&$a)) {
+while ($v = each(inout $a)) {
  if ($v[1] < 4) $a[] = $v[1] + $v[1];
  }
 var_dump($a);

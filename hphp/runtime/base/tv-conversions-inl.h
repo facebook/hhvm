@@ -55,8 +55,6 @@ inline bool cellToBool(Cell cell) {
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
-    case KindOfPersistentShape:
-    case KindOfShape:
     case KindOfPersistentArray:
     case KindOfArray:         return !cell.m_data.parr->empty();
     case KindOfObject:        return cell.m_data.pobj->toBoolean();
@@ -64,7 +62,10 @@ inline bool cellToBool(Cell cell) {
     case KindOfRecord:        raise_convert_record_to_type("bool");
     case KindOfRef:           break;
     case KindOfFunc:
-      return funcToStringHelper(cell.m_data.pfunc)->toBoolean();
+      if (RuntimeOption::EvalRaiseFuncConversionWarning) {
+        raise_warning("Func to bool conversion");
+      }
+      return true;
     case KindOfClass:
       return classToStringHelper(cell.m_data.pclass)->toBoolean();
     case KindOfClsMeth:       return true;
@@ -89,8 +90,6 @@ inline int64_t cellToInt(Cell cell) {
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
-    case KindOfPersistentShape:
-    case KindOfShape:
     case KindOfPersistentArray:
     case KindOfArray:         return cell.m_data.parr->empty() ? 0 : 1;
     case KindOfObject:        return cell.m_data.pobj->toInt64();
@@ -98,7 +97,10 @@ inline int64_t cellToInt(Cell cell) {
     case KindOfRecord:        raise_convert_record_to_type("int");
     case KindOfRef:           break;
     case KindOfFunc:
-      return funcToStringHelper(cell.m_data.pfunc)->toInt64(10);
+      if (RuntimeOption::EvalRaiseFuncConversionWarning) {
+        raise_warning("Func to int conversion");
+      }
+      return 0;
     case KindOfClass:
       return classToStringHelper(cell.m_data.pclass)->toInt64(10);
     case KindOfClsMeth:
@@ -165,8 +167,6 @@ inline Cell cellToKey(Cell cell, const ArrayData* ad) {
       return make_tv<KindOfInt64>(cell.m_data.pres->data()->o_toInt64());
 
     case KindOfClsMeth:
-    case KindOfPersistentShape:
-    case KindOfShape:
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfPersistentVec:

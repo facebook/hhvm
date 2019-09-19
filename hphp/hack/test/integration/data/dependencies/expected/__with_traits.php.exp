@@ -1,0 +1,28 @@
+<?hh
+class TraitBase extends AbstractBase {
+  use ImplementingAbstractBase, T;
+
+
+}
+function with_traits(TraitBase $arg): void {
+  $arg->routine();
+}
+abstract class AbstractBase {
+
+}
+trait T {
+  require extends AbstractBase;
+
+
+  public function routine(): void {
+    throw new Exception();
+  }
+}
+trait ImplementingAbstractBase {
+
+}
+function extract_standalone_make_default<T>(): T {
+  throw new Exception();
+}
+
+

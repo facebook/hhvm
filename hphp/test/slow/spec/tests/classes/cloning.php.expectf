@@ -33,7 +33,7 @@ object(Point2) (2) {
   ["y"]=>
   int(0)
 }
-================= use chained cloning in a class heirarchy =================
+================= use chained cloning in a class hierarchy =================
 object(Manager) (2) {
   ["level":"Manager":private]=>
   int(23)

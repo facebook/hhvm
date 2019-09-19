@@ -1,2 +1,4 @@
 --coercion-from-dynamic
---like-types
+--coercion-from-union
+--complex-coercion
+--like-type-hints

@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
@@ -52,48 +52,57 @@ type t = {
   length: int;
 }
 
-let default_chunk = {
-  spans = [];
-  is_appendable = true;
-  space_if_not_split = false;
-  comma = None;
-  rule = Rule.null_rule_id;
-  nesting = Nesting.dummy;
-  start_char = -1;
-  end_char = -1;
-  indentable = true;
-  atoms = [];
-  length = -1;
-}
+let default_chunk =
+  {
+    spans = [];
+    is_appendable = true;
+    space_if_not_split = false;
+    comma = None;
+    rule = Rule.null_rule_id;
+    nesting = Nesting.dummy;
+    start_char = -1;
+    end_char = -1;
+    indentable = true;
+    atoms = [];
+    length = -1;
+  }
 
 let make rule nesting start_char =
-  let c = match rule with
+  let c =
+    match rule with
     | None -> default_chunk
-    | Some rule -> {default_chunk with rule}
+    | Some rule -> { default_chunk with rule }
   in
-  {c with start_char; nesting}
+  { c with start_char; nesting }
 
-let add_atom c ?(leading_space=false) text width source_offset =
-  let range = source_offset, source_offset + width in
-  {c with atoms = {text; range; leading_space} :: c.atoms}
+let add_atom c ?(leading_space = false) text width source_offset =
+  let range = (source_offset, source_offset + width) in
+  { c with atoms = { text; range; leading_space } :: c.atoms }
 
 let finalize chunk rule ra space comma end_char =
   if List.is_empty chunk.atoms then failwith "Cannot finalize empty chunk";
   let end_char = max chunk.start_char end_char in
-  let rule = if Rule_allocator.get_rule_kind ra rule = Rule.Always
-    || chunk.rule = Rule.null_rule_id
-    then rule
-    else chunk.rule
+  let rule =
+    if
+      Rule_allocator.get_rule_kind ra rule = Rule.Always
+      || chunk.rule = Rule.null_rule_id
+    then
+      rule
+    else
+      chunk.rule
   in
   let atom_length atom =
-    (if atom.leading_space then 1 else 0) + String.length atom.text
+    ( if atom.leading_space then
+      1
+    else
+      0 )
+    + String.length atom.text
   in
   let length =
-    chunk.atoms
-    |> List.map ~f:atom_length
-    |> List.fold ~init:0 ~f:(+)
+    chunk.atoms |> List.map ~f:atom_length |> List.fold ~init:0 ~f:( + )
   in
-  {chunk with
+  {
+    chunk with
     is_appendable = false;
     rule;
     space_if_not_split = space;
@@ -103,8 +112,7 @@ let finalize chunk rule ra space comma end_char =
     length;
   }
 
-let get_nesting_id chunk =
-  chunk.nesting.Nesting.id
+let get_nesting_id chunk = chunk.nesting.Nesting.id
 
 let get_range chunk =
   if chunk.is_appendable then failwith "Can't get range of non-finalized chunk";
@@ -125,8 +133,7 @@ let is_empty chunk =
 
 let text chunk =
   let buf = Buffer.create chunk.length in
-  List.iter chunk.atoms ~f:begin fun atom ->
-    if atom.leading_space then Buffer.add_char buf ' ';
-    Buffer.add_string buf atom.text;
-  end;
+  List.iter chunk.atoms ~f:(fun atom ->
+      if atom.leading_space then Buffer.add_char buf ' ';
+      Buffer.add_string buf atom.text);
   Buffer.contents buf

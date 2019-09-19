@@ -4,9 +4,17 @@ array(0) {
 }
 array(0) {
 }
-object(stdClass) (0) {
+int(0)
+int(0)
+bool(false)
+bool(false)
+float(0)
+float(0)
+string(0) ""
+string(0) ""
+array(0) {
 }
-object(stdClass) (0) {
+array(0) {
 }
 int(0)
 int(0)
@@ -20,9 +28,17 @@ array(0) {
 }
 array(0) {
 }
-object(stdClass) (0) {
+int(0)
+int(0)
+bool(false)
+bool(false)
+float(0)
+float(0)
+string(0) ""
+string(0) ""
+array(0) {
 }
-object(stdClass) (0) {
+array(0) {
 }
 int(0)
 int(0)
@@ -36,10 +52,6 @@ array(0) {
 }
 array(0) {
 }
-object(stdClass) (0) {
-}
-object(stdClass) (0) {
-}
 int(0)
 int(0)
 bool(false)
@@ -51,42 +63,6 @@ string(0) ""
 array(0) {
 }
 array(0) {
-}
-object(stdClass) (0) {
-}
-object(stdClass) (0) {
-}
-int(0)
-int(0)
-bool(false)
-bool(false)
-float(0)
-float(0)
-string(0) ""
-string(0) ""
-array(0) {
-}
-array(0) {
-}
-object(stdClass) (0) {
-}
-object(stdClass) (0) {
-}
-int(0)
-int(0)
-bool(false)
-bool(false)
-float(0)
-float(0)
-string(0) ""
-string(0) ""
-array(0) {
-}
-array(0) {
-}
-object(stdClass) (0) {
-}
-object(stdClass) (0) {
 }
 int(0)
 int(0)

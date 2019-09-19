@@ -1,0 +1,4 @@
+File "invalid_hint_class_with_generics.php", line 6, characters 9-14:
+Invalid "as" expression hint (Typing[4195])
+File "invalid_hint_class_with_generics.php", line 6, characters 9-14:
+The "as" operator cannot be used with a type with an erased generic type argument, except in a like cast when the corresponding type parameter is covariant

@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -6,7 +6,6 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-
 
 (**
  * Hack for HipHop: type checker's client code.
@@ -38,18 +37,21 @@
  *)
 
 let exit_on_parent_exit () = Parent.exit_on_parent_exit 10 60
+
 let () = Random.self_init ()
 
 let () =
   (* no-op, needed at entry-point for Daemon hookup *)
   Daemon.check_entry_point ();
+
   (* Ignore SIGPIPE since we might get a server hangup and don't care (can
    * detect and handle better than a signal). Ignore SIGUSR1 since we sometimes
    * use that for the server to tell us when it's done initializing, but if we
    * aren't explicitly listening we don't care. *)
   Sys_utils.set_signal Sys.sigpipe Sys.Signal_ignore;
-  Sys_utils.set_signal Sys.sigint (Sys.Signal_handle (fun _ ->
-    raise Exit_status.(Exit_with Interrupted)));
+  Sys_utils.set_signal
+    Sys.sigint
+    (Sys.Signal_handle (fun _ -> raise Exit_status.(Exit_with Interrupted)));
   let command = ClientArgs.parse_args () in
   let root = ClientArgs.root command in
   HackEventLogger.client_init ~exit_on_parent_exit root;
@@ -64,18 +66,13 @@ let () =
   let exit_status =
     try
       match command with
-        | ClientCommand.CCheck check_env ->
-          Lwt_main.run (ClientCheck.main check_env)
-        | ClientCommand.CStart env ->
-          Lwt_main.run (ClientStart.main env)
-        | ClientCommand.CStop env ->
-          Lwt_main.run (ClientStop.main env)
-        | ClientCommand.CRestart env ->
-          Lwt_main.run (ClientRestart.main env)
-        | ClientCommand.CLsp env ->
-          Lwt_main.run (ClientLsp.main env)
-        | ClientCommand.CDebug env ->
-          Lwt_main.run (ClientDebug.main env)
+      | ClientCommand.CCheck check_env ->
+        Lwt_main.run (ClientCheck.main check_env)
+      | ClientCommand.CStart env -> Lwt_main.run (ClientStart.main env)
+      | ClientCommand.CStop env -> Lwt_main.run (ClientStop.main env)
+      | ClientCommand.CRestart env -> Lwt_main.run (ClientRestart.main env)
+      | ClientCommand.CLsp env -> Lwt_main.run (ClientLsp.main env)
+      | ClientCommand.CDebug env -> Lwt_main.run (ClientDebug.main env)
     with Exit_status.Exit_with es ->
       HackEventLogger.client_bad_exit ~command:(command_name command) es;
       es

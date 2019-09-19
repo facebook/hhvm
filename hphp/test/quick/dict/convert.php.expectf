@@ -382,8 +382,6 @@ float(0)
 
 Notice: Dict to string conversion in %s on line %d
 string(4) "Dict"
-object(stdClass) (0) {
-}
 object(HH\Vector) (0) {
 }
 object(HH\Map) (0) {
@@ -429,17 +427,6 @@ float(1)
 
 Notice: Dict to string conversion in %s on line %d
 string(4) "Dict"
-object(stdClass) (4) {
-  [1]=>
-  int(1)
-  [2]=>
-  bool(true)
-  [3]=>
-  NULL
-  [4]=>
-  array(0) {
-  }
-}
 object(HH\Vector) (4) {
   [0]=>
   int(1)
@@ -498,14 +485,6 @@ float(1)
 
 Notice: Dict to string conversion in %s on line %d
 string(4) "Dict"
-object(stdClass) (3) {
-  ["key1"]=>
-  string(4) "val1"
-  ["key2"]=>
-  string(4) "val2"
-  ["key3"]=>
-  string(4) "val3"
-}
 object(HH\Vector) (3) {
   [0]=>
   string(4) "val1"
@@ -568,16 +547,6 @@ float(1)
 
 Notice: Dict to string conversion in %s on line %d
 string(4) "Dict"
-object(stdClass) (4) {
-  ["key1"]=>
-  int(100)
-  ["key2"]=>
-  string(4) "val1"
-  [200]=>
-  int(300)
-  [400]=>
-  string(4) "val2"
-}
 object(HH\Vector) (4) {
   [0]=>
   int(100)
@@ -633,12 +602,6 @@ float(1)
 
 Notice: Dict to string conversion in %s on line %d
 string(4) "Dict"
-object(stdClass) (2) {
-  ["12345"]=>
-  int(100)
-  [12345]=>
-  int(200)
-}
 object(HH\Vector) (2) {
   [0]=>
   int(100)
@@ -699,18 +662,6 @@ float(1)
 
 Notice: Dict to string conversion in %s on line %d
 string(4) "Dict"
-object(stdClass) (2) {
-  [1]=>
-  dict(1) {
-    [5]=>
-    int(10)
-  }
-  ["a"]=>
-  dict(1) {
-    ["b"]=>
-    string(1) "c"
-  }
-}
 object(HH\Vector) (2) {
   [0]=>
   dict(1) {

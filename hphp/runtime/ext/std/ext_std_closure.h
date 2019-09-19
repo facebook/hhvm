@@ -58,6 +58,7 @@ struct ClosureHdr : HeapObject {
 
 struct c_Closure final : ObjectData {
 
+  static bool initialized() { return cls_Closure != nullptr; }
   static Class* classof() { assertx(cls_Closure); return cls_Closure; }
   static c_Closure* fromObject(ObjectData* obj) {
     assertx(obj->instanceof(classof()));

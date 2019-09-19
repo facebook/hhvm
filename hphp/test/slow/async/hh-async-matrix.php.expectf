@@ -1,4 +1,4 @@
-HH\Asio\v() => object(HH\Vector) (8) {
+HH\Asio\v() => object(HH\Vector) (7) {
   [0]=>
   NULL
   [1]=>
@@ -16,23 +16,8 @@ HH\Asio\v() => object(HH\Vector) (8) {
     [0]=>
     float(3.14)
   }
-  [7]=>
-  object(stdClass) (6) {
-    [0]=>
-    int(4)
-    [1]=>
-    int(8)
-    [2]=>
-    int(15)
-    [3]=>
-    int(16)
-    [4]=>
-    int(23)
-    [5]=>
-    int(42)
-  }
 }
-HH\Asio\vw() => object(HH\Vector) (8) {
+HH\Asio\vw() => object(HH\Vector) (7) {
   [0]=>
   NULL
   [1]=>
@@ -50,23 +35,8 @@ HH\Asio\vw() => object(HH\Vector) (8) {
     [0]=>
     float(3.14)
   }
-  [7]=>
-  object(stdClass) (6) {
-    [0]=>
-    int(4)
-    [1]=>
-    int(8)
-    [2]=>
-    int(15)
-    [3]=>
-    int(16)
-    [4]=>
-    int(23)
-    [5]=>
-    int(42)
-  }
 }
-HH\Asio\vf() => object(HH\Vector) (6) {
+HH\Asio\vf() => object(HH\Vector) (5) {
   [0]=>
   bool(true)
   [1]=>
@@ -80,23 +50,8 @@ HH\Asio\vf() => object(HH\Vector) (6) {
     [0]=>
     float(3.14)
   }
-  [5]=>
-  object(stdClass) (6) {
-    [0]=>
-    int(4)
-    [1]=>
-    int(8)
-    [2]=>
-    int(15)
-    [3]=>
-    int(16)
-    [4]=>
-    int(23)
-    [5]=>
-    int(42)
-  }
 }
-HH\Asio\vfw() => object(HH\Vector) (6) {
+HH\Asio\vfw() => object(HH\Vector) (5) {
   [0]=>
   bool(true)
   [1]=>
@@ -110,23 +65,8 @@ HH\Asio\vfw() => object(HH\Vector) (6) {
     [0]=>
     float(3.14)
   }
-  [5]=>
-  object(stdClass) (6) {
-    [0]=>
-    int(4)
-    [1]=>
-    int(8)
-    [2]=>
-    int(15)
-    [3]=>
-    int(16)
-    [4]=>
-    int(23)
-    [5]=>
-    int(42)
-  }
 }
-HH\Asio\vm() => object(HH\Vector) (8) {
+HH\Asio\vm() => object(HH\Vector) (7) {
   [0]=>
   string(4) "NULL"
   [1]=>
@@ -143,17 +83,8 @@ HH\Asio\vm() => object(HH\Vector) (8) {
   string(22) "array (
   0 => 3.14,
 )"
-  [7]=>
-  string(107) "stdClass::__set_state(array(
-  '0' => 4,
-  '1' => 8,
-  '2' => 15,
-  '3' => 16,
-  '4' => 23,
-  '5' => 42,
-))"
 }
-HH\Asio\vmw() => object(HH\Vector) (8) {
+HH\Asio\vmw() => object(HH\Vector) (7) {
   [0]=>
   string(4) "NULL"
   [1]=>
@@ -170,17 +101,8 @@ HH\Asio\vmw() => object(HH\Vector) (8) {
   string(22) "array (
   0 => 3.14,
 )"
-  [7]=>
-  string(107) "stdClass::__set_state(array(
-  '0' => 4,
-  '1' => 8,
-  '2' => 15,
-  '3' => 16,
-  '4' => 23,
-  '5' => 42,
-))"
 }
-HH\Asio\vfk() => object(HH\Vector) (6) {
+HH\Asio\vfk() => object(HH\Vector) (5) {
   [0]=>
   bool(true)
   [1]=>
@@ -194,23 +116,8 @@ HH\Asio\vfk() => object(HH\Vector) (6) {
     [0]=>
     float(3.14)
   }
-  [5]=>
-  object(stdClass) (6) {
-    [0]=>
-    int(4)
-    [1]=>
-    int(8)
-    [2]=>
-    int(15)
-    [3]=>
-    int(16)
-    [4]=>
-    int(23)
-    [5]=>
-    int(42)
-  }
 }
-HH\Asio\vfkw() => object(HH\Vector) (6) {
+HH\Asio\vfkw() => object(HH\Vector) (5) {
   [0]=>
   bool(true)
   [1]=>
@@ -224,23 +131,8 @@ HH\Asio\vfkw() => object(HH\Vector) (6) {
     [0]=>
     float(3.14)
   }
-  [5]=>
-  object(stdClass) (6) {
-    [0]=>
-    int(4)
-    [1]=>
-    int(8)
-    [2]=>
-    int(15)
-    [3]=>
-    int(16)
-    [4]=>
-    int(23)
-    [5]=>
-    int(42)
-  }
 }
-HH\Asio\vmk() => object(HH\Vector) (8) {
+HH\Asio\vmk() => object(HH\Vector) (7) {
   [0]=>
   string(22) "array (
   0 => NULL,
@@ -272,20 +164,8 @@ HH\Asio\vmk() => object(HH\Vector) (8) {
     0 => 3.14,
   ),
 )"
-  [7]=>
-  string(142) "array (
-  7 => 
-  stdClass::__set_state(array(
-    '0' => 4,
-    '1' => 8,
-    '2' => 15,
-    '3' => 16,
-    '4' => 23,
-    '5' => 42,
-  )),
-)"
 }
-HH\Asio\vmkw() => object(HH\Vector) (8) {
+HH\Asio\vmkw() => object(HH\Vector) (7) {
   [0]=>
   string(22) "array (
   0 => NULL,
@@ -317,20 +197,8 @@ HH\Asio\vmkw() => object(HH\Vector) (8) {
     0 => 3.14,
   ),
 )"
-  [7]=>
-  string(142) "array (
-  7 => 
-  stdClass::__set_state(array(
-    '0' => 4,
-    '1' => 8,
-    '2' => 15,
-    '3' => 16,
-    '4' => 23,
-    '5' => 42,
-  )),
-)"
 }
-HH\Asio\m() => object(HH\Map) (8) {
+HH\Asio\m() => object(HH\Map) (7) {
   [0]=>
   NULL
   [1]=>
@@ -348,23 +216,8 @@ HH\Asio\m() => object(HH\Map) (8) {
     [0]=>
     float(3.14)
   }
-  [7]=>
-  object(stdClass) (6) {
-    [0]=>
-    int(4)
-    [1]=>
-    int(8)
-    [2]=>
-    int(15)
-    [3]=>
-    int(16)
-    [4]=>
-    int(23)
-    [5]=>
-    int(42)
-  }
 }
-HH\Asio\mw() => object(HH\Map) (8) {
+HH\Asio\mw() => object(HH\Map) (7) {
   [0]=>
   NULL
   [1]=>
@@ -382,23 +235,8 @@ HH\Asio\mw() => object(HH\Map) (8) {
     [0]=>
     float(3.14)
   }
-  [7]=>
-  object(stdClass) (6) {
-    [0]=>
-    int(4)
-    [1]=>
-    int(8)
-    [2]=>
-    int(15)
-    [3]=>
-    int(16)
-    [4]=>
-    int(23)
-    [5]=>
-    int(42)
-  }
 }
-HH\Asio\mf() => object(HH\Map) (6) {
+HH\Asio\mf() => object(HH\Map) (5) {
   [1]=>
   bool(true)
   [3]=>
@@ -412,23 +250,8 @@ HH\Asio\mf() => object(HH\Map) (6) {
     [0]=>
     float(3.14)
   }
-  [7]=>
-  object(stdClass) (6) {
-    [0]=>
-    int(4)
-    [1]=>
-    int(8)
-    [2]=>
-    int(15)
-    [3]=>
-    int(16)
-    [4]=>
-    int(23)
-    [5]=>
-    int(42)
-  }
 }
-HH\Asio\mfw() => object(HH\Map) (6) {
+HH\Asio\mfw() => object(HH\Map) (5) {
   [1]=>
   bool(true)
   [3]=>
@@ -442,23 +265,8 @@ HH\Asio\mfw() => object(HH\Map) (6) {
     [0]=>
     float(3.14)
   }
-  [7]=>
-  object(stdClass) (6) {
-    [0]=>
-    int(4)
-    [1]=>
-    int(8)
-    [2]=>
-    int(15)
-    [3]=>
-    int(16)
-    [4]=>
-    int(23)
-    [5]=>
-    int(42)
-  }
 }
-HH\Asio\mm() => object(HH\Map) (8) {
+HH\Asio\mm() => object(HH\Map) (7) {
   [0]=>
   string(4) "NULL"
   [1]=>
@@ -475,17 +283,8 @@ HH\Asio\mm() => object(HH\Map) (8) {
   string(22) "array (
   0 => 3.14,
 )"
-  [7]=>
-  string(107) "stdClass::__set_state(array(
-  '0' => 4,
-  '1' => 8,
-  '2' => 15,
-  '3' => 16,
-  '4' => 23,
-  '5' => 42,
-))"
 }
-HH\Asio\mmw() => object(HH\Map) (8) {
+HH\Asio\mmw() => object(HH\Map) (7) {
   [0]=>
   string(4) "NULL"
   [1]=>
@@ -502,17 +301,8 @@ HH\Asio\mmw() => object(HH\Map) (8) {
   string(22) "array (
   0 => 3.14,
 )"
-  [7]=>
-  string(107) "stdClass::__set_state(array(
-  '0' => 4,
-  '1' => 8,
-  '2' => 15,
-  '3' => 16,
-  '4' => 23,
-  '5' => 42,
-))"
 }
-HH\Asio\mfk() => object(HH\Map) (6) {
+HH\Asio\mfk() => object(HH\Map) (5) {
   [1]=>
   bool(true)
   [3]=>
@@ -526,23 +316,8 @@ HH\Asio\mfk() => object(HH\Map) (6) {
     [0]=>
     float(3.14)
   }
-  [7]=>
-  object(stdClass) (6) {
-    [0]=>
-    int(4)
-    [1]=>
-    int(8)
-    [2]=>
-    int(15)
-    [3]=>
-    int(16)
-    [4]=>
-    int(23)
-    [5]=>
-    int(42)
-  }
 }
-HH\Asio\mfkw() => object(HH\Map) (6) {
+HH\Asio\mfkw() => object(HH\Map) (5) {
   [1]=>
   bool(true)
   [3]=>
@@ -556,23 +331,8 @@ HH\Asio\mfkw() => object(HH\Map) (6) {
     [0]=>
     float(3.14)
   }
-  [7]=>
-  object(stdClass) (6) {
-    [0]=>
-    int(4)
-    [1]=>
-    int(8)
-    [2]=>
-    int(15)
-    [3]=>
-    int(16)
-    [4]=>
-    int(23)
-    [5]=>
-    int(42)
-  }
 }
-HH\Asio\mmk() => object(HH\Map) (8) {
+HH\Asio\mmk() => object(HH\Map) (7) {
   [0]=>
   string(22) "array (
   0 => NULL,
@@ -604,20 +364,8 @@ HH\Asio\mmk() => object(HH\Map) (8) {
     0 => 3.14,
   ),
 )"
-  [7]=>
-  string(142) "array (
-  7 => 
-  stdClass::__set_state(array(
-    '0' => 4,
-    '1' => 8,
-    '2' => 15,
-    '3' => 16,
-    '4' => 23,
-    '5' => 42,
-  )),
-)"
 }
-HH\Asio\mmkw() => object(HH\Map) (8) {
+HH\Asio\mmkw() => object(HH\Map) (7) {
   [0]=>
   string(22) "array (
   0 => NULL,
@@ -648,17 +396,5 @@ HH\Asio\mmkw() => object(HH\Map) (8) {
   array (
     0 => 3.14,
   ),
-)"
-  [7]=>
-  string(142) "array (
-  7 => 
-  stdClass::__set_state(array(
-    '0' => 4,
-    '1' => 8,
-    '2' => 15,
-    '3' => 16,
-    '4' => 23,
-    '5' => 42,
-  )),
 )"
 }

@@ -19,6 +19,8 @@
 
 #include <vector>
 
+#include <folly/Optional.h>
+
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/types.h"
 
@@ -103,6 +105,13 @@ inline std::string show(TransKind k) {
   switch (k) { TRANS_KINDS }
 #undef DO
   not_reached();
+}
+
+inline folly::Optional<TransKind> nameToTransKind(const std::string& str) {
+#define DO(name) if (str == "Trans" #name) return TransKind::name;
+  TRANS_KINDS
+#undef DO
+  return folly::none;
 }
 
 inline bool isProfiling(TransKind k) {
@@ -212,6 +221,13 @@ inline std::string areaAsString(AreaIndex area) {
     return "Frozen";
   }
   always_assert(false);
+}
+
+inline folly::Optional<AreaIndex> nameToAreaIndex(const std::string name) {
+  if (name == "Main") return AreaIndex::Main;
+  if (name == "Cold") return AreaIndex::Cold;
+  if (name == "Frozen") return AreaIndex::Frozen;
+  return folly::none;
 }
 
 /*

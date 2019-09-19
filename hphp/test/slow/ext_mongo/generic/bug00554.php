@@ -1,6 +1,6 @@
 <?hh
 require_once __DIR__."/../utils/server.inc";
-
+<<__EntryPoint>> function main(): void {
 $valid = array(
     str_repeat("abcdef123456", 2),
     new MongoId,
@@ -27,4 +27,4 @@ foreach($invalid as $id) {
         var_dump($e->getMessage(), $e->getCode());
     }
 }
-
+}

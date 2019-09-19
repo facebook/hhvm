@@ -1,5 +1,5 @@
 File "void_usage_5.php", line 5, characters 5-61:
-Invalid return type (Typing[4110])
+Invalid return type (Typing[4336])
 File "void_usage_5.php", line 5, characters 5-61:
 Expected void because this function implicitly returns void
 File "void_usage_5.php", line 10, characters 11-16:

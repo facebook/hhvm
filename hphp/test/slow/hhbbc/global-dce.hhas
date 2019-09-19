@@ -9,18 +9,15 @@
   String "a"
   String "b"
   String "c"
-  FPushFuncD 3 "test"
-  FCall <> 3 1 "" - "" ""
+  FCallFuncD <> 3 1 "" - "test"
   NullUninit
   NullUninit
   NullUninit
   Null
   String "b"
   String "c"
-  FPushFuncD 3 "test"
-  FCall <> 3 1 "" - "" ""
-  FPushFuncD 2 "var_dump"
-  FCall <> 2 1 "" - "" ""
+  FCallFuncD <> 3 1 "" - "test"
+  FCallFuncD <> 2 1 "" - "var_dump"
   PopC
   Int 1
   RetC

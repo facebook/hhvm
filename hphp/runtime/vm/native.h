@@ -218,10 +218,6 @@ inline int maxFCallBuiltinArgs() {
   return kMaxBuiltinArgs;
 }
 
-inline bool allowFCallBuiltinDoubles() {
-  return true;
-}
-
 enum Attr {
   AttrNone         = 0,
 
@@ -246,7 +242,7 @@ void coerceFCallArgs(TypedValue* args,
  */
 void callFunc(const Func* func, const void* ctx,
               const TypedValue* args, int32_t numNonDefault,
-              TypedValue& ret);
+              TypedValue& ret, bool isFCallBuiltin);
 
 /**
  * Extract the name used to invoke the function from the ActRec where name
@@ -254,7 +250,7 @@ void callFunc(const Func* func, const void* ctx,
  */
 const StringData* getInvokeName(ActRec* ar);
 
-#define NATIVE_TYPES                                \
+#define NATIVE_TYPES                                  \
   /* kind       arg type              return type */  \
   X(Int32,      int32_t,              int32_t)        \
   X(Int64,      int64_t,              int64_t)        \
@@ -277,6 +273,17 @@ const StringData* getInvokeName(ActRec* ar);
   X(MixedRef,   const VRefParamValue&,VRefParamValue) \
   X(This,       ObjectData*,          ObjectData*)    \
   X(Void,       void,                 void)           \
+  X(IntIO,      int64_t&,             int64_t&)       \
+  X(DoubleIO,   double&,              double&)        \
+  X(BoolIO,     bool&,                bool&)          \
+  X(ObjectIO,   Object&,              Object&)        \
+  X(StringIO,   String&,              String&)        \
+  X(ArrayIO,    Array&,               Array&)         \
+  X(ResourceIO, Resource&,            Resource&)      \
+  X(FuncIO,     Func*&,               Func*&)         \
+  X(ClassIO,    Class*&,              Class*&)        \
+  X(ClsMethIO,  ClsMethDataRef&,      ClsMethDataRef&)\
+  X(MixedIO,    Variant&,             Variant&)       \
   /**/
 
 template <class T>
@@ -432,6 +439,15 @@ struct NativeFunctionInfo {
   NativeSig sig;
   NativeFunction ptr;
 };
+
+/*
+ * Known output types for inout parameters on builtins and optional default
+ * values to be passed to builtins which use inout paramaters purely as out
+ * values, ignoring their inputs.
+ */
+MaybeDataType builtinOutType(const TypeConstraint&, const UserAttributeMap&);
+MaybeDataType builtinOutType(const Func* builtin, uint32_t i);
+folly::Optional<TypedValue> builtinInValue(const Func* builtin, uint32_t i);
 
 /////////////////////////////////////////////////////////////////////////////
 

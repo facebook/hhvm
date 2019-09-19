@@ -658,6 +658,14 @@ public:
   static RecordDesc* lookupRecordDesc(const StringData* name);
 
   /*
+   * Finds a record which is guaranteed to be unique.
+   * The record has not necessarily been loaded in the current request.
+   *
+   * Return nullptr if there is no such record.
+   */
+  static const RecordDesc* lookupUniqueRecDesc(const StringData* name);
+
+  /*
    * Autoload the RecordDesc with name `name' and bind it `ne' in this request.
    *
    * @requires: NamedEntity::get(name) == ne

@@ -15,8 +15,6 @@
 */
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 
-#include "hphp/runtime/vm/jit/normalized-instruction.h"
-
 #include "hphp/runtime/vm/jit/irgen-inlining.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
@@ -116,7 +114,7 @@ Block* makeExitSlow(IRGS& env) {
   BlockPusher bp(*env.irb, makeMarker(env, bcOff(env)), exit);
   interpOne(env);
   // If it changes the PC, InterpOneCF will get us to the new location.
-  if (!opcodeChangesPC(env.currentNormalizedInstruction->op())) {
+  if (!opcodeChangesPC(curSrcKey(env).op())) {
     gen(env, Jmp, makeExit(env, nextBcOff(env)));
   }
   return exit;

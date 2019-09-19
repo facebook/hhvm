@@ -20,7 +20,7 @@
 #include <openssl/rand.h>
 
 #include "hphp/runtime/base/zend-math.h"
-#include "hphp/runtime/base/rds-local.h"
+#include "hphp/util/rds-local.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -1,11 +1,11 @@
 <?hh
 
-if (true) {
+if (__hhvm_intrinsics\launder_value(true)) {
   include '1463-1.inc';
-}
- else {
+} else {
   include '1463-2.inc';
 }
+
 class child1 extends base {
   public $child1Val = 'child1';
   public $childProp = 'IamChild1';
@@ -20,6 +20,7 @@ class child1 extends base {
     return parent::childMeth();
   }
 }
+
 class child2 extends child1 {
   public $child2Val = 'child2';
   public $childProp = 'IamChild2';
@@ -34,26 +35,28 @@ class child2 extends child1 {
     return parent::childMeth();
   }
   function testChildMeth2() {
- return $this->childMeth();
- }
+    return $this->childMeth();
+  }
 }
-if (true) {
+
+if (__hhvm_intrinsics\launder_value(true)) {
   include '1463-3.inc';
-}
- else {
+} else {
   include '1463-4.inc';
 }
+
 function test($val, $exp, $feature) {
   if ($val !== $exp) {
     echo $feature . " failed. Got:\n";
     var_dump($val);
     echo "But expected:\n";
     var_dump($exp);
-  }
- else {
+  } else {
     echo $feature . " passed\n";
   }
 }
+
+<<__EntryPoint>>
 function run() {
   $base = new base;
   test($base->baseVal, 'base', 'Base object member');
@@ -101,4 +104,3 @@ function run() {
   test(child3::$child3Static, 'child3Stat', 'RddRedec static prop');
   test($child3->parentChildMeth(), 'I am child2', 'RddRedec parent method');
 }
-run();

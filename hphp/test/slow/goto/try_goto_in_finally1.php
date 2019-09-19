@@ -1,9 +1,12 @@
 <?hh
-  try {
-  } finally {
+<<__EntryPoint>>
+function main_entry(): void {
     try {
-       goto foo;
+    } finally {
+      try {
+         goto foo;
+      }
+      finally {}
+      foo:
     }
-    finally {}
-    foo:
-  }
+}

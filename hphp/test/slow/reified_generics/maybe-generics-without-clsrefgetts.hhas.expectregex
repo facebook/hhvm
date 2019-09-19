@@ -1,4 +1,0 @@
-(Verification Error \([^\r\n]* func f\): NewObj uses MaybeGenerics flavor but a cls-ref slot that was not written by ClsRefGetTS
-
-Verification failed for unit [^\r\n]*\. Re-run with HHVM_VERIFY_VERBOSE=1 to see more details\.\n){1,2}
-Fatal error: A bytecode verification error was detected in [^\r\n]* on line -1

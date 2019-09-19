@@ -1,0 +1,6 @@
+File "byval_collection_as_property4.php", line 7, characters 5-31:
+Invalid assignment (Typing[4110])
+File "byval_collection_as_property4.php", line 3, characters 13-39:
+Expected ~darray<string, varray<int>> because it is an unenforceable type
+File "byval_collection_as_property4.php", line 3, characters 13-39:
+But got darray<string, ~varray<int>>

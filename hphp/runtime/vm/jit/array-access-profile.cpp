@@ -36,23 +36,59 @@ namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+namespace {
+
+template<typename Arr>
+int32_t findStringKey(const Arr* ad, const StringData* sd) {
+  // We can only optimize cases where the strings compare equal as pointers.
+  auto const pos = ad->find(sd, sd->hash());
+  return validPos(pos) && ad->data()[pos].strKey() == sd ? pos : -1;
+}
+
+bool isSmallStaticArray(const ArrayData* ad) {
+  if (!ad->hasMixedLayout()) return false;
+  auto const arr = MixedArray::asMixed(ad);
+  return arr->iterLimit() <= MixedArray::SmallSize &&
+         (arr->keyTypes() & ~MixedArray::kStaticStrKey) == 0x00;
+}
+
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 std::string ArrayAccessProfile::toString() const {
   if (!m_init) return std::string("uninitialized");
   std::ostringstream out;
   for (auto const& line : m_hits) {
     out << folly::format("{}:{},", line.pos, line.count);
   }
-  out << folly::format("untracked:{}", m_untracked);
+  out << folly::format("untracked:{},small:{}", m_untracked, m_small);
   return out.str();
 }
 
-folly::Optional<uint32_t>
-ArrayAccessProfile::choose() const {
+folly::dynamic ArrayAccessProfile::toDynamic() const {
+  using folly::dynamic;
+  if (!m_init) return dynamic();
+
+  uint32_t total = 0;
+  dynamic hits = dynamic::array;
+  for (auto const& line : m_hits) {
+    hits.push_back(dynamic::object("position", line.pos)
+                                  ("count", line.count));
+    total += line.count;
+  }
+  return dynamic::object("hits", hits)
+                        ("untracked", m_untracked)
+                        ("small", m_small)
+                        ("total", total)
+                        ("profileType", "ArrayAccessProfile");
+}
+
+ArrayAccessProfile::Result ArrayAccessProfile::choose() const {
+  if (!m_init) return Result{};
+
   Line hottest;
   uint32_t total = 0;
-
-  if (!m_init) return folly::none;
-
   for (auto i = 0; i < kNumTrackedSamples; ++i) {
     auto const& line = m_hits[i];
     if (!validPos(line.pos)) break;
@@ -62,10 +98,14 @@ ArrayAccessProfile::choose() const {
   }
   total += m_untracked;
 
-  auto const bound = total * RuntimeOption::EvalHHIRMixedArrayProfileThreshold;
-  return hottest.count >= bound
-    ? folly::make_optional(safe_cast<uint32_t>(hottest.pos))
-    : folly::none;
+  auto const idx_threshold  = RuntimeOption::EvalHHIRMixedArrayProfileThreshold;
+  auto const size_threshold = RuntimeOption::EvalHHIRSmallArrayProfileThreshold;
+  if (hottest.count >= total * idx_threshold) {
+    return Result{safe_cast<uint32_t>(hottest.pos), {}};
+  } else if (m_small >= total * size_threshold) {
+    return Result{{}, SizeHintData(SizeHintData::SmallStatic)};
+  }
+  return Result{};
 }
 
 bool ArrayAccessProfile::update(int32_t pos, uint32_t count) {
@@ -95,47 +135,35 @@ bool ArrayAccessProfile::update(int32_t pos, uint32_t count) {
 }
 
 void ArrayAccessProfile::update(const ArrayData* ad, int64_t i, bool cowCheck) {
-  // We shouldn't count accesses that would fail to be detected by the offset
-  // optimization.
-  if (cowCheck && ad->cowCheck()) {
-    update(-1, 1);
-    return;
-  }
-  auto h = hash_int64(i);
+  // Don't count accesses that would require a COW, as we can't optimize them.
+  auto const h = hash_int64(i);
   auto const pos =
+    cowCheck && ad->cowCheck() ? -1 :
     ad->hasMixedLayout() ? MixedArray::asMixed(ad)->find(i, h) :
     ad->isKeyset() ? SetArray::asSet(ad)->find(i, h) :
     -1;
   update(pos, 1);
+  if (isSmallStaticArray(ad)) m_small++;
 }
 
 void ArrayAccessProfile::update(const ArrayData* ad, const StringData* sd,
                                 bool cowCheck) {
-  // We shouldn't count accesses that would fail to be detected by the offset
-  // optimization.  These include cases that require a COW, and cases where we
-  // need to walk the string.
-  if (cowCheck && ad->cowCheck()) {
-    update(-1, 1);
-    return;
-  }
-  auto pos = -1;
-  if (ad->hasMixedLayout()) {
-    pos = MixedArray::asMixed(ad)->find(sd, sd->hash());
-    if (pos != -1 && MixedArray::asMixed(ad)->data()[pos].strKey() != sd) {
-      pos = -1;
-    }
-  } else if (ad->isKeyset()) {
-    pos = SetArray::asSet(ad)->find(sd, sd->hash());
-    if (pos != -1 && SetArray::asSet(ad)->data()[pos].strKey() != sd) {
-      pos = -1;
-    }
-  }
+  // Don't count accesses that would require a COW, as we can't optimize them.
+  // Additionally, only count cases where the string keys compare equal as
+  // pointers (checked within findStringKey).
+  auto const pos =
+    cowCheck && ad->cowCheck() ? -1 :
+    ad->hasMixedLayout() ? findStringKey(MixedArray::asMixed(ad), sd) :
+    ad->isKeyset() ? findStringKey(SetArray::asSet(ad), sd) :
+    -1;
   update(pos, 1);
+  if (isSmallStaticArray(ad)) m_small++;
 }
 
 void ArrayAccessProfile::reduce(ArrayAccessProfile& l,
                                 const ArrayAccessProfile& r) {
   if (!r.m_init) return;
+  if (!l.m_init) l.init();
 
   Line scratch[2 * kNumTrackedSamples];
   auto n = uint32_t{0};
@@ -150,6 +178,7 @@ void ArrayAccessProfile::reduce(ArrayAccessProfile& l,
     }
   }
   l.m_untracked += r.m_untracked;
+  l.m_small += r.m_small;
 
   if (n == 0) return;
   assertx(n <= kNumTrackedSamples);

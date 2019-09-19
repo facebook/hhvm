@@ -4,18 +4,16 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::marker::PhantomData;
-
 use crate::declaration_parser::DeclarationParser;
 use crate::expression_parser::ExpressionParser;
-use crate::lexable_token::LexableToken;
 use crate::lexer::Lexer;
 use crate::parser_env::ParserEnv;
 use crate::parser_trait::Context;
 use crate::parser_trait::ParserTrait;
 use crate::smart_constructors::{NodeType, SmartConstructors};
-use crate::syntax_error::{self as Errors, SyntaxError};
-use crate::token_kind::TokenKind;
+use parser_core_types::lexable_token::LexableToken;
+use parser_core_types::syntax_error::{self as Errors, SyntaxError};
+use parser_core_types::token_kind::TokenKind;
 
 pub struct TypeParser<'a, S, T>
 where
@@ -24,10 +22,9 @@ where
 {
     lexer: Lexer<'a, S::Token>,
     env: ParserEnv,
-    context: Context<S::Token>,
+    context: Context<'a, S::Token>,
     errors: Vec<SyntaxError>,
-    sc_state: Option<T>,
-    _phantom: PhantomData<S>,
+    sc: S,
 }
 
 impl<'a, S, T: Clone> std::clone::Clone for TypeParser<'a, S, T>
@@ -41,8 +38,7 @@ where
             env: self.env.clone(),
             context: self.context.clone(),
             errors: self.errors.clone(),
-            sc_state: self.sc_state.clone(),
-            _phantom: self._phantom,
+            sc: self.sc.clone(),
         }
     }
 }
@@ -55,9 +51,9 @@ where
     fn make(
         mut lexer: Lexer<'a, S::Token>,
         env: ParserEnv,
-        context: Context<S::Token>,
+        context: Context<'a, S::Token>,
         errors: Vec<SyntaxError>,
-        sc_state: T,
+        sc: S,
     ) -> Self {
         lexer.set_in_type(true);
         Self {
@@ -65,19 +61,20 @@ where
             env,
             context,
             errors,
-            sc_state: Some(sc_state),
-            _phantom: PhantomData,
+            sc,
         }
     }
 
-    fn into_parts(mut self) -> (Lexer<'a, S::Token>, Context<S::Token>, Vec<SyntaxError>, T) {
+    fn into_parts(
+        mut self,
+    ) -> (
+        Lexer<'a, S::Token>,
+        Context<'a, S::Token>,
+        Vec<SyntaxError>,
+        S,
+    ) {
         self.lexer.set_in_type(false);
-        (
-            self.lexer,
-            self.context,
-            self.errors,
-            self.sc_state.unwrap(),
-        )
+        (self.lexer, self.context, self.errors, self.sc)
     }
 
     fn lexer(&self) -> &Lexer<'a, S::Token> {
@@ -92,12 +89,12 @@ where
     where
         T: Clone,
     {
-        let (mut lexer, context, errors, sc_state) = other.into_parts();
+        let (mut lexer, context, errors, sc) = other.into_parts();
         lexer.set_in_type(true);
         self.lexer = lexer;
         self.context = context;
         self.errors = errors;
-        self.sc_state = Some(sc_state);
+        self.sc = sc;
     }
 
     fn add_error(&mut self, error: SyntaxError) {
@@ -108,8 +105,8 @@ where
         &self.env
     }
 
-    fn sc_state_mut(&mut self) -> &mut Option<T> {
-        &mut self.sc_state
+    fn sc_mut(&mut self) -> &mut S {
+        &mut self.sc
     }
 
     fn skipped_tokens_mut(&mut self) -> &mut Vec<S::Token> {
@@ -120,11 +117,11 @@ where
         &self.context.skipped_tokens
     }
 
-    fn context_mut(&mut self) -> &mut Context<S::Token> {
+    fn context_mut(&mut self) -> &mut Context<'a, S::Token> {
         &mut self.context
     }
 
-    fn context(&self) -> &Context<S::Token> {
+    fn context(&self) -> &Context<'a, S::Token> {
         &self.context
     }
 }
@@ -134,7 +131,10 @@ where
     S: SmartConstructors<'a, T>,
     S::R: NodeType,
 {
-    fn with_expression_parser<U>(&mut self, f: &dyn Fn(&mut ExpressionParser<'a, S, T>) -> U) -> U {
+    fn with_expression_parser<F, U>(&mut self, f: F) -> U
+    where
+        F: Fn(&mut ExpressionParser<'a, S, T>) -> U,
+    {
         let mut lexer = self.lexer.clone();
         lexer.set_in_type(false);
         let mut expression_parser: ExpressionParser<S, T> = ExpressionParser::make(
@@ -142,7 +142,7 @@ where
             self.env.clone(),
             self.context.clone(),
             self.errors.clone(),
-            self.sc_state.clone().unwrap(),
+            self.sc.clone(),
         );
         let res = f(&mut expression_parser);
         self.continue_from(expression_parser);
@@ -150,10 +150,13 @@ where
     }
 
     fn parse_expression(&mut self) -> S::R {
-        self.with_expression_parser(&|p: &mut ExpressionParser<'a, S, T>| p.parse_expression())
+        self.with_expression_parser(|p: &mut ExpressionParser<'a, S, T>| p.parse_expression())
     }
 
-    fn with_decl_parser<U>(&mut self, f: &dyn Fn(&mut DeclarationParser<'a, S, T>) -> U) -> U {
+    fn with_decl_parser<F, U>(&mut self, f: F) -> U
+    where
+        F: Fn(&mut DeclarationParser<'a, S, T>) -> U,
+    {
         let mut lexer = self.lexer.clone();
         lexer.set_in_type(false);
 
@@ -162,7 +165,7 @@ where
             self.env.clone(),
             self.context.clone(),
             self.errors.clone(),
-            self.sc_state.clone().unwrap(),
+            self.sc.clone(),
         );
         let res = f(&mut declaration_parser);
         self.continue_from(declaration_parser);
@@ -175,6 +178,7 @@ where
         // a simple type specifier here.
         let mut parser1 = self.clone();
         let token = parser1.next_xhp_class_name_or_other_token();
+        let new_attr_syntax = self.env.allow_new_attribute_syntax;
         match token.kind() {
             | TokenKind::Var if allow_var => {
                 self.continue_from(parser1);
@@ -228,7 +232,8 @@ where
             | TokenKind::Shape => self.parse_shape_specifier(),
             | TokenKind::Question => self.parse_nullable_type_specifier(),
             | TokenKind::Tilde => self.parse_like_type_specifier(),
-            | TokenKind::At => self.parse_soft_type_specifier(),
+            | TokenKind::At if !new_attr_syntax => self.parse_soft_type_specifier(),
+            | TokenKind::At if new_attr_syntax => self.parse_attributized_specifier(),
             | TokenKind::LessThanLessThan if allow_attr => self.parse_attributized_specifier(),
             | TokenKind::Classname => self.parse_classname_type_specifier(),
             | _ => {
@@ -269,6 +274,35 @@ where
         }
     }
 
+    //  SPEC
+    // pocket-universe-access:
+    //   name  :@  name
+    //   self  :@  name
+    //   this  :@  name
+    //   parent  :@  name
+    //   pocket-universe-access :@  name
+    fn parse_remaining_pocket_universe_access(&mut self, left: S::R) -> S::R {
+        let separator = self.fetch_token();
+        let right = self.next_token_as_name();
+        if right.kind() == TokenKind::Name {
+            let right = S!(make_token, self, right);
+            let syntax = S!(make_pu_access, self, left, separator, right);
+            let token = self.peek_token();
+            if token.kind() == TokenKind::ColonAt {
+                self.parse_remaining_pocket_universe_access(syntax)
+            } else {
+                syntax
+            }
+        } else {
+            // ERROR RECOVERY: Assume that the thing following the :@
+            // that is not a name belongs to the next thing to be
+            // parsed; treat the name as missing.
+            self.with_error(Errors::error1004);
+            let missing = S!(make_missing, self, self.pos());
+            S!(make_pu_access, self, left, separator, missing)
+        }
+    }
+
     fn parse_remaining_generic(&mut self, name: S::R) -> S::R {
         let (arguments, _) = self.parse_generic_type_argument_list();
         S!(make_generic_type_specifier, self, name, arguments)
@@ -288,6 +322,7 @@ where
         let token = self.peek_token();
         match token.kind() {
             TokenKind::ColonColon => self.parse_remaining_type_constant(name),
+            TokenKind::ColonAt => self.parse_remaining_pocket_universe_access(name),
             _ => S!(make_simple_type_specifier, self, name),
         }
     }
@@ -332,7 +367,7 @@ where
         let mut parser1 = self.clone();
         let token = parser1.next_token();
         match token.kind() {
-            TokenKind::As | TokenKind::Super | TokenKind::From => {
+            TokenKind::As | TokenKind::Super => {
                 self.continue_from(parser1);
                 let constraint_token = S!(make_token, self, token);
                 let matched_type = self.parse_type_specifier(false, true);
@@ -365,14 +400,14 @@ where
     // https://github.com/hhvm/hack-langspec/issues/83
     // TODO: Update the spec with reified
     fn parse_type_parameter(&mut self) -> S::R {
-        let attributes = self.with_decl_parser(&|x: &mut DeclarationParser<'a, S, T>| {
+        let attributes = self.with_decl_parser(|x: &mut DeclarationParser<'a, S, T>| {
             x.parse_attribute_specification_opt()
         });
         let reified = self.optional_token(TokenKind::Reify);
         let variance = self.parse_variance_opt();
         let type_name = self.require_name_allow_all_keywords();
         let constraints =
-            self.parse_list_until_none(&|x: &mut Self| x.parse_generic_type_constraint_opt());
+            self.parse_list_until_none(|x: &mut Self| x.parse_generic_type_constraint_opt());
         S!(
             make_type_parameter,
             self,
@@ -398,7 +433,7 @@ where
         let (params, _) = self.parse_comma_list_allow_trailing(
             TokenKind::GreaterThan,
             Errors::error1007,
-            &|x: &mut Self| x.parse_type_parameter(),
+            |x: &mut Self| x.parse_type_parameter(),
         );
 
         let right = self.require_right_angle();
@@ -414,7 +449,7 @@ where
         //   type-specifier
         //   type-specifiers  ,  type-specifier
         let (items, _) =
-            self.parse_comma_list_allow_trailing(close_kind, Errors::error1007, &|x: &mut Self| {
+            self.parse_comma_list_allow_trailing(close_kind, Errors::error1007, |x: &mut Self| {
                 x.parse_type_specifier(false, true)
             });
         items
@@ -452,7 +487,7 @@ where
 
     fn parse_closure_param_list(&mut self, close_kind: TokenKind) -> S::R {
         let (items, _) =
-            self.parse_comma_list_allow_trailing(close_kind, Errors::error1007, &|x: &mut Self| {
+            self.parse_comma_list_allow_trailing(close_kind, Errors::error1007, |x: &mut Self| {
                 x.parse_closure_param_type_or_ellipsis()
             });
         items
@@ -529,7 +564,7 @@ where
         let (args, no_arg_is_missing) = self.parse_comma_list_allow_trailing(
             TokenKind::GreaterThan,
             Errors::error1007,
-            &|x: &mut Self| x.parse_optionally_reified_type(),
+            |x: &mut Self| x.parse_optionally_reified_type(),
         );
         match self.peek_token_kind() {
             TokenKind::GreaterThan => {
@@ -646,7 +681,7 @@ where
             let left_angle = self.assert_left_angle_in_type_list_with_possible_attribute();
             let value_type = self.parse_type_specifier(false, true);
             let optional_comma = self.optional_token(TokenKind::Comma);
-            let right_angle = self.fetch_token();
+            let right_angle = self.require_right_angle();
             S!(
                 make_varray_type_specifier,
                 self,
@@ -776,7 +811,7 @@ where
             let (arguments, _) = self.parse_comma_list_allow_trailing(
                 TokenKind::GreaterThan,
                 Errors::error1007,
-                &|x: &mut Self| x.parse_return_type(),
+                |x: &mut Self| x.parse_return_type(),
             );
             let right = self.require_right_angle();
             S!(
@@ -924,7 +959,7 @@ where
         // SPEC
         // attributized-specifier:
         // attribute-specification-opt type-specifier
-        let attribute_spec_opt = self.with_decl_parser(&|x: &mut DeclarationParser<'a, S, T>| {
+        let attribute_spec_opt = self.with_decl_parser(|x: &mut DeclarationParser<'a, S, T>| {
             x.parse_attribute_specification_opt()
         });
         let attributized_type = self.parse_type_specifier(false, true);
@@ -1037,7 +1072,7 @@ where
         let fields = self.parse_comma_list_opt_allow_trailing_predicate(
             &is_closing_token,
             Errors::error1025,
-            &|x: &mut Self| x.parse_field_specifier(),
+            |x: &mut Self| x.parse_field_specifier(),
         );
         let ellipsis = if self.peek_token_kind() == TokenKind::DotDotDot {
             self.assert_token(TokenKind::DotDotDot)

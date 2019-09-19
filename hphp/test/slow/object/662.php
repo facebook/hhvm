@@ -1,10 +1,10 @@
 <?hh
 
 class A {
-  var $a;
-  var $b;
-  var $c;
-  var $d;
+  public $a;
+  public $b;
+  public $c;
+  public $d;
   public function __construct($p1, $p2, $p3, $p4) {
     $this->a = $p1;
     $this->b = $p2;
@@ -18,12 +18,10 @@ function gen() {
     yield null;
     if($val == 2) {
       $obj->$key = 0;
-    }
- else if($val == 3) {
+    } else if($val == 3) {
       var_dump($key);
       unset($obj->$key);
-    }
- else {
+    } else {
       $obj->$key++;
     }
   }
@@ -31,8 +29,6 @@ function gen() {
 }
 
 <<__EntryPoint>>
-function main_662() {
-;
-foreach (gen() as $_) {
-}
+function main() {
+  foreach (gen() as $_) {}
 }

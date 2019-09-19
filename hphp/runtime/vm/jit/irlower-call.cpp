@@ -72,47 +72,7 @@ TCA getCallTarget(IRLS& env, const IRInstruction* inst, Vreg sp) {
   auto const extra = inst->extra<Call>();
   auto const callee = extra->callee;
   if (callee != nullptr) return tc::ustubs().immutableBindCallStub;
-
-  if (!RuntimeOption::RepoAuthoritative) return tc::ustubs().bindCallStub;
-
-  auto profile = TargetProfile<CallTargetProfile>(env.unit.context(),
-                                                  inst->marker(),
-                                                  callTargetProfileKey());
-  if (profile.profiling()) {
-    auto const spOff = cellsToBytes(extra->spOffset.offset + extra->numParams);
-    auto const args = argGroup(env, inst)
-      .addr(rvmtl(), safe_cast<int32_t>(profile.handle()))
-      .addr(sp, spOff);
-    cgCallHelper(vmain(env), env, CallSpec::method(&CallTargetProfile::report),
-                 kVoidDest, SyncOptions::Sync, args);
-    return tc::ustubs().bindCallStub;
-  }
-
-  if (profile.optimizing()) {
-    auto const data = profile.data();
-
-    // Dump annotations if requested.
-    if (env.annotations != nullptr && RuntimeOption::EvalDumpCallTargets &&
-        mcgen::dumpTCAnnotation(TransKind::Optimize)) {
-      env.annotations->emplace_back(
-        "CallTargets",
-        folly::sformat("BC={} IR={}: {}\n",
-                       inst->marker().bcOff(), inst->id(), data.toString())
-      );
-    }
-
-    // Get the result of the profiling data.  If it's strongly biased towards
-    // one function, bind the call.  Otherwise, call funcPrologueRedispatch
-    // directly.
-    double bias = 0;
-    data.choose(bias);
-    if (bias * 100 >= RuntimeOption::EvalJitPGOBindCallThreshold) {
-      return tc::ustubs().bindCallStub;
-    }
-    return tc::ustubs().funcPrologueRedispatch;
-  }
-
-  return tc::ustubs().bindCallStub;
+  return tc::ustubs().funcPrologueRedispatch;
 }
 
 }
@@ -128,7 +88,6 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
   auto const callOff = safe_cast<int32_t>(extra->callOffset);
 
   auto& v = vmain(env);
-  auto& vc = vcold(env);
   auto const catchBlock = label(env, inst->taken());
 
   auto const calleeSP = sp[cellsToBytes(extra->spOffset.offset)];
@@ -153,68 +112,6 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
       calleeAR + AROFF(m_numArgsAndFlags),
       v.makeReg()
     };
-  }
-
-  auto const isNativeImplCall = callee &&
-                                callee->arFuncPtr() &&
-                                !callee->nativeFuncPtr() &&
-                                argc == callee->numParams();
-  if (isNativeImplCall) {
-    // The assumption here is that for builtins, the generated func contains
-    // only a single opcode (NativeImpl), and there are no non-argument locals.
-    if (debug) {
-      assertx(argc == callee->numLocals());
-      assertx(callee->numIterators() == 0);
-      assertx(callee->numClsRefSlots() == 0);
-
-      auto addr = callee->getEntry();
-      while (peek_op(addr) == Op::AssertRATL) {
-        addr += instrLen(addr);
-      }
-      assertx(peek_op(addr) == Op::NativeImpl);
-      assertx(addr + instrLen(addr) ==
-              callee->unit()->entry() + callee->past());
-    }
-
-    v << store{v.cns(tc::ustubs().retHelper), calleeAR + AROFF(m_savedRip)};
-    if (callee->attrs() & AttrMayUseVV) {
-      v << storeqi{0, calleeAR + AROFF(m_invName)};
-    }
-    v << lea{calleeAR, rvmfp()};
-
-    emitCheckSurpriseFlagsEnter(v, vc, fp, Fixup(0, argc), catchBlock);
-
-    auto const arFuncPtr = callee->arFuncPtr();
-    TRACE(2, "Calling builtin preClass %p func %p\n",
-          callee->preClass(), arFuncPtr);
-
-    // We sometimes call this while curFunc() isn't really the builtin, so make
-    // sure to record the sync point as if we are inside the builtin.
-    if (FixupMap::eagerRecord(callee)) {
-      auto const syncSP = v.makeReg();
-      v << lea{calleeSP, syncSP};
-      emitEagerSyncPoint(v, callee->getEntry(), rvmtl(), rvmfp(), syncSP);
-    }
-
-    // Call the ArFunction. This will free the locals for us in the
-    // normal case. In the case where an exception is thrown, the VM unwinder
-    // will handle it for us.
-    auto const done = v.makeBlock();
-    v << vinvoke{CallSpec::direct(arFuncPtr, nullptr),
-                 v.makeVcallArgs({{rvmfp()}}),
-                 v.makeTuple({}), {done, catchBlock}, Fixup(0, argc)};
-
-    v = done;
-    // The native implementation already put the return value on the stack for
-    // us, and handled cleaning up the arguments.  We have to update the frame
-    // pointer and the stack pointer, and load the return value into the return
-    // register so the trace we are returning to has it where it expects.
-    // TODO(#1273094): We should probably modify the actual builtins to return
-    // values via registers using the C ABI and do a reg-to-reg move.
-    loadTV(v, inst->dst(), dstLoc(env, inst, 0), rvmfp()[kArRetOff], true);
-    v << load{rvmfp()[AROFF(m_sfp)], rvmfp()};
-    emitRB(v, Trace::RBTypeFuncExit, callee->fullName()->data());
-    return;
   }
 
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
@@ -394,7 +291,7 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
   if (dest.reg0.isValid()) dest.reg0 = tmpData;
   if (dest.reg1.isValid()) dest.reg1 = tmpType;
 
-  auto const isInlined = env.unit.context().func != callee;
+  auto const isInlined = env.unit.context().initSrcKey.func() != callee;
   if (isInlined) v << inlinestart{callee, 0};
 
   // Call epilogue: handle array provenance and inlining accounting.
@@ -537,7 +434,7 @@ static void traceCallback(ActRec* fp, Cell* sp, Offset bcOff) {
            fp->m_func->fullName()->data(), bcOff, fp, sp,
            __builtin_return_address(0));
   }
-  checkFrame(fp, sp, true /* fullCheck */, bcOff);
+  checkFrame(fp, sp, true /* fullCheck */);
 }
 
 void cgDbgTraceCall(IRLS& env, const IRInstruction* inst) {
@@ -557,6 +454,19 @@ void cgDbgTraceCall(IRLS& env, const IRInstruction* inst) {
 void cgEnterFrame(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 0).reg();
   vmain(env) << phplogue{fp};
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void cgProfileCall(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<ProfileCallTargetData>();
+
+  auto const args = argGroup(env, inst)
+    .addr(rvmtl(), safe_cast<int32_t>(extra->handle))
+    .ssa(0);
+
+  cgCallHelper(vmain(env), env, CallSpec::method(&CallTargetProfile::report),
+               kVoidDest, SyncOptions::None, args);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

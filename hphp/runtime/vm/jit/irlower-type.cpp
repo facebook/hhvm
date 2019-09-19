@@ -297,7 +297,6 @@ void cgProfileType(IRLS& env, const IRInstruction* inst) {
 ///////////////////////////////////////////////////////////////////////////////
 
 IMPL_OPCODE_CALL(RecordReifiedGenericsAndGetTSList)
-IMPL_OPCODE_CALL(RecordReifiedGenericsAndGetName)
 
 void cgResolveTypeStruct(IRLS& env, const IRInstruction* inst) {
   auto const sp = srcLoc(env, inst, 0).reg();
@@ -315,8 +314,6 @@ void cgResolveTypeStruct(IRLS& env, const IRInstruction* inst) {
   cgCallHelper(v, env, CallSpec::direct(resolveTypeStructHelper),
                callDest(env, inst), SyncOptions::Sync, args);
 }
-
-IMPL_OPCODE_CALL(MangleReifiedName)
 
 ///////////////////////////////////////////////////////////////////////////////
 

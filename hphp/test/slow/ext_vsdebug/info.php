@@ -23,7 +23,7 @@ function getInfo($sym) {
   checkObjEqualRecursively($msg, $response);
   echo $msg['body']['info'] . "\n";
 }
-
+<<__EntryPoint>> function main(): void {
 $path = __FILE__ . ".test";
 
 $breakpoints = [
@@ -76,3 +76,4 @@ resumeTarget();
 vsDebugCleanup($testProcess);
 
 echo "OK!\n";
+}

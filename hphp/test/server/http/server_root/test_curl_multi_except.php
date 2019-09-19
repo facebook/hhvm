@@ -21,7 +21,7 @@ function main() {
 
   $active = null;
   do {
-    $mrc = curl_multi_exec($mh, &$active);
+    $mrc = curl_multi_exec($mh, inout $active);
   } while ($mrc == CURLM_CALL_MULTI_PERFORM);
 
   $ret = "";
@@ -29,7 +29,7 @@ function main() {
     if (curl_multi_select($mh) != -1) {
       do {
         try {
-          $mrc = curl_multi_exec($mh, &$active);
+          $mrc = curl_multi_exec($mh, inout $active);
         } catch (Exception $e) {
           $ret .= ":::Exception: " . $e->getMessage() . "\n";
         }

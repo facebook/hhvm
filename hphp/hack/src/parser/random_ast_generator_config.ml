@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
@@ -18,21 +18,18 @@
 type t = (string * float list) list
 
 let exists name config = List.mem_assoc name config
+
 let get name config = List.assoc name config
+
 let default = []
 
-let long_assignment_config = [
-  ("SimpleAssignmentExpression", [
-    0.6; 0.2; 0.2;
-  ]);
-  ("CompoundAssignmentExpression", [
-    0.6; 0.2; 0.2;
-  ]);
-]
+let long_assignment_config =
+  [
+    ("SimpleAssignmentExpression", [0.6; 0.2; 0.2]);
+    ("CompoundAssignmentExpression", [0.6; 0.2; 0.2]);
+  ]
 
-let mapping = [
-  ("Default", default);
-  ("LongAssignmentConfig", long_assignment_config);
-]
+let mapping =
+  [("Default", default); ("LongAssignmentConfig", long_assignment_config)]
 
 let find_config name = List.assoc name mapping

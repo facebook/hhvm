@@ -1,7 +1,5 @@
 <?hh
 
-print "Test begin\n";
-
 class E implements ArrayAccess {
   public function __construct() {
     $this->i = ++self::$count;
@@ -54,8 +52,6 @@ function main1() {
   var_dump($x);
   $c['x']['y'][0][0] = "goodbye";
 }
-
-main1();
 
 class cls implements arrayaccess {
   private $container = array();
@@ -131,7 +127,6 @@ function main2() {
 
   print "Test end\n";
 }
-main2();
 
 class stringdoubler implements ArrayAccess {
   public function offsetExists($i) {
@@ -148,4 +143,12 @@ function main3($a, $b, $c) {
   if (false) {}
   return $a[$b][$c];
 }
-var_dump(main3(array(new stringdoubler()), 0, 'hello'));
+<<__EntryPoint>>
+function main_entry(): void {
+
+  print "Test begin\n";
+
+  main1();
+  main2();
+  var_dump(main3(array(new stringdoubler()), 0, 'hello'));
+}

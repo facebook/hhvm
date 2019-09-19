@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/apc-local-array-defs.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/packed-array-defs.h"
+#include "hphp/runtime/base/record-array.h"
 #include "hphp/runtime/base/set-array.h"
 
 #include "hphp/runtime/vm/class-meth-data.h"
@@ -51,8 +52,6 @@
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
-
-using HdrBlock = MemRange<HeapObject*>;
 
 /*
  * Struct Slab encapsulates the header attached to each large block of memory
@@ -259,7 +258,7 @@ inline size_t allocSize(const HeapObject* h) {
     sizeClass<ArrayData>(), /* Empty */
     0, /* APCLocalArray */
     sizeClass<GlobalsArray>(),
-    0, /* Shape */
+    0, /* RecordArray */
     0, /* Dict */
     0, /* VecArray */
     0, /* KeySet */
@@ -313,6 +312,7 @@ inline size_t allocSize(const HeapObject* h) {
   CHECKSIZE(Packed)
   CHECKSIZE(Mixed)
   CHECKSIZE(Apc)
+  CHECKSIZE(RecordArray)
   CHECKSIZE(Dict)
   CHECKSIZE(VecArray)
   CHECKSIZE(Keyset)
@@ -347,16 +347,13 @@ inline size_t allocSize(const HeapObject* h) {
   switch (kind) {
     case HeaderKind::Packed:
     case HeaderKind::VecArray:
+    case HeaderKind::Apc:
+    case HeaderKind::RecordArray:
       // size = kSizeIndex2Size[h->aux16>>8]
       size = PackedArray::heapSize(static_cast<const ArrayData*>(h));
       assertx(size == MemoryManager::sizeClass(size));
       return size;
-    case HeaderKind::Apc:
-      // size = h->m_size * 16 + sizeof(APCLocalArray)
-      size = static_cast<const APCLocalArray*>(h)->heapSize();
-      break;
     case HeaderKind::Mixed:
-    case HeaderKind::Shape:
     case HeaderKind::Dict:
       // size = fn of h->m_scale
       size = static_cast<const MixedArray*>(h)->heapSize();

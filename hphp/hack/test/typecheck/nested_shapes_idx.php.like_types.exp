@@ -1,0 +1,6 @@
+File "nested_shapes_idx.php", line 8, characters 5-33:
+Invalid argument (Typing[4110])
+File "Shapes.hhi", line 34, characters 5-5:
+Expected ~[unresolved] because it is an unenforceable type
+File "nested_shapes_idx.php", line 4, characters 28-45:
+But got null

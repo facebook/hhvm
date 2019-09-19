@@ -85,7 +85,6 @@ struct Vunit;
   O(phijmp, Inone, U(uses), Dn)\
   O(conjure, Inone, Un, D(c))\
   O(conjureuse, Inone, U(c), Dn)\
-  O(funcguard, Inone, Un, Dn)\
   O(debugguardjmp, Inone, Un, Dn)\
   O(inlinestart, Inone, Un, Dn)\
   O(inlineend, Inone, Un, Dn)\
@@ -572,13 +571,6 @@ struct reload { Vreg s, d; };
  * (regardless of what definition d is dominated by).
  */
 struct ssaalias { Vreg s; Vreg d; };
-
-/*
- * Emit a function prologue guard.
- *
- * *watch will be set to the address following the guard.
- */
-struct funcguard { const Func* func; TCA* watch; };
 
 /*
  * Emit a smashable jmp to realCode.

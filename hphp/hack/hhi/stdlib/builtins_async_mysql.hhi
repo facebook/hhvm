@@ -198,10 +198,10 @@ class AsyncMysqlQueryResult extends AsyncMysqlResult {
   public function numRowsAffected(): int { }
   public function lastInsertId(): int { }
   public function numRows(): int { }
-  public function mapRows(): Vector<Map<string, string>>{ }
-  public function vectorRows() { }
+  public function mapRows(): Vector<Map<string, ?string>> { }
+  public function vectorRows(): Vector<KeyedContainer<int, ?string>> { }
   public function mapRowsTyped(): Vector<Map<string, mixed>> { }
-  public function vectorRowsTyped() { }
+  public function vectorRowsTyped(): Vector<KeyedContainer<int, mixed>> { }
  /* Can't put a return type for rowBlocks as it will ask that the type is
   * iterable because of the usage and then we can't have the AsyncMysqlRowBlock
   * implement the Iterable interface because mocks will complain they don't

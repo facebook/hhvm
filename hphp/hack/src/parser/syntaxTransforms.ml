@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2018, Facebook, Inc.
  * All rights reserved.
  *
@@ -11,7 +11,7 @@ module ES = Full_fidelity_editable_syntax
 module PS = Full_fidelity_positioned_syntax
 module ET = ES.Token
 module PT = PS.Token
-module PositionedSyntaxTree = Full_fidelity_syntax_tree.WithSyntax(PS)
+module PositionedSyntaxTree = Full_fidelity_syntax_tree.WithSyntax (PS)
 
 let editable_from_positioned tree =
   let rec aux text positioned_node offset =
@@ -21,15 +21,15 @@ let editable_from_positioned tree =
       let width = PT.width token in
       let leading =
         Full_fidelity_editable_trivia.from_positioned_list
-        source_text
-        (PT.leading token)
-        offset
+          source_text
+          (PT.leading token)
+          offset
       in
       let trailing =
         Full_fidelity_editable_trivia.from_positioned_list
-        source_text
-        (PT.trailing token)
-        (offset + (PT.leading_width token) + width)
+          source_text
+          (PT.trailing token)
+          (offset + PT.leading_width token + width)
       in
       let editable_token =
         ET.make
@@ -46,7 +46,8 @@ let editable_from_positioned tree =
       let folder (acc, offset) child =
         let new_child = aux text child offset in
         let w = PS.full_width child in
-        (new_child :: acc, offset + w) in
+        (new_child :: acc, offset + w)
+      in
       let kind = PS.kind positioned_node in
       let positioneds = PS.children positioned_node in
       let (editables, _) = List.fold_left folder ([], offset) positioneds in

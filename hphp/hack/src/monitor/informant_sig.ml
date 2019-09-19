@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
@@ -7,11 +7,10 @@
  *
  *)
 
-
 type report =
-  (** Nothing to see here. *)
+  (* Nothing to see here. *)
   | Move_along
-  (** Kill the server (if one is running) and start a new one. *)
+  (* Kill the server (if one is running) and start a new one. *)
   | Restart_server of ServerMonitorUtils.target_saved_state option
 
 type server_state =
@@ -28,8 +27,11 @@ type server_state =
  * than an incremental type check. *)
 module type S = sig
   type t
+
   type init_env
+
   val init : init_env -> t
+
   (* Same as init, except it preserves internal Revision_map cache.
    * This is used when server decides to restart itself due to rebase - we don't
    * want Informant to then restart the server again. Reinitializing will discard
@@ -37,12 +39,16 @@ module type S = sig
    * in order to "synchronize" base revision understanding between server and
    * monitor. *)
   val reinit : t -> unit
+
   val report : t -> server_state -> report
-  (**
+
+  (*
    * Returns true if the informant is actually running and will
    * manage server lifetime.
    *)
   val is_managing : t -> bool
+
   val should_start_first_server : t -> bool
+
   val should_ignore_hh_version : init_env -> bool
 end

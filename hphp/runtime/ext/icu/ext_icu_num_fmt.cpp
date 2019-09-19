@@ -339,8 +339,8 @@ static String HHVM_METHOD(NumberFormatter, getTextAttribute, int64_t attr) {
 }
 
 static Variant HHVM_METHOD(NumberFormatter, parseCurrency,
-                           const String& value, VRefParam currency,
-                           VRefParam position) {
+                           const String& value, String& currency,
+                           Variant& position) {
   NUMFMT_GET(obj, this_, false);
   UErrorCode error = U_ZERO_ERROR;
   icu::UnicodeString val(u16(value, error));
@@ -352,16 +352,16 @@ static Variant HHVM_METHOD(NumberFormatter, parseCurrency,
                         val.getBuffer(), val.length(),
                         &pos, cur, &error);
   NUMFMT_CHECK(obj, error, false);
-  position.assignIfRef((int64_t)pos);
+  position = (int64_t)pos;
   error = U_ZERO_ERROR;
-  currency.assignIfRef(u8(cur, u_strlen(cur), error));
+  currency = u8(cur, u_strlen(cur), error);
   NUMFMT_CHECK(obj, error, false);
   return parsed;
 }
 
-static Variant HHVM_METHOD(NumberFormatter, parse,
+static Variant HHVM_METHOD(NumberFormatter, parseWithPosition,
                            const String& value, int64_t type,
-                           VRefParam position) {
+                           Variant& position) {
   NUMFMT_GET(obj, this_, false);
   UErrorCode error = U_ZERO_ERROR;
   icu::UnicodeString val(u16(value, error));
@@ -387,7 +387,7 @@ static Variant HHVM_METHOD(NumberFormatter, parse,
       return false;
   }
   NUMFMT_CHECK(obj, error, false);
-  position.assignIfRef(pos);
+  position = pos;
   return ret;
 }
 
@@ -483,7 +483,7 @@ void IntlExtension::initNumberFormatter() {
   HHVM_ME(NumberFormatter, getSymbol);
   HHVM_ME(NumberFormatter, getTextAttribute);
   HHVM_ME(NumberFormatter, parseCurrency);
-  HHVM_ME(NumberFormatter, parse);
+  HHVM_ME(NumberFormatter, parseWithPosition);
   HHVM_ME(NumberFormatter, setAttribute);
   HHVM_ME(NumberFormatter, setPattern);
   HHVM_ME(NumberFormatter, setSymbol);

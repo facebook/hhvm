@@ -1,5 +1,5 @@
 File "constraint_gen_fail2.php", line 21, characters 7-12:
-Invalid argument (Typing[4110])
+Invalid argument (Typing[4323])
 File "constraint_gen_fail2.php", line 16, characters 19-19:
 Some type constraint(s) are violated here
 File "constraint_gen_fail2.php", line 16, characters 14-14:

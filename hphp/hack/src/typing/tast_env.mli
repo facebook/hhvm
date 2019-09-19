@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2018, Facebook, Inc.
  * All rights reserved.
  *
@@ -8,18 +8,21 @@
  *)
 
 type env [@@deriving show]
+
 type t = env [@@deriving show]
 
 exception Not_in_class
 
-val print_ty : env -> 'a Typing_defs.ty -> string
+val print_ty : env -> Typing_defs.locl_ty -> string
 (** Return a string representation of the given type using Hack-like syntax. *)
 
-val print_error_ty : env -> Typing_defs.locl Typing_defs.ty -> string
+val print_decl_ty : env -> Typing_defs.decl_ty -> string
+
+val print_error_ty : env -> Typing_defs.locl_ty -> string
 
 val print_ty_with_identity :
   env ->
-  'a Typing_defs.ty ->
+  Typing_defs.phase_ty ->
   'b SymbolOccurrence.t ->
   'b SymbolDefinition.t option ->
   string
@@ -28,13 +31,13 @@ val print_ty_with_identity :
     information from the {!SymbolOccurrence.t} and (if provided)
     {!SymbolDefinition.t}. *)
 
-val ty_to_json : env -> 'a Typing_defs.ty -> Hh_json.json
+val ty_to_json : env -> Typing_defs.locl_ty -> Hh_json.json
 (** Return a JSON representation of the given type. *)
 
 val json_to_locl_ty :
-  ?keytrace: Hh_json.Access.keytrace ->
+  ?keytrace:Hh_json.Access.keytrace ->
   Hh_json.json ->
-  (Typing_defs.locl Typing_defs.ty, Typing_defs.deserialization_error) result
+  (Typing_defs.locl_ty, Typing_defs.deserialization_error) result
 (** Convert a JSON representation of a type back into a locl-phase type. *)
 
 val get_self_id_exn : env -> string
@@ -57,10 +60,13 @@ val fresh_type : env -> Pos.t -> env * Tast.ty
 (** Return a type consisting of a fresh type variable *)
 
 val open_tyvars : env -> Pos.t -> env
+
 val close_tyvars_and_solve : env -> Errors.typing_error_callback -> env
+
 val set_tyvar_variance : env -> Tast.ty -> env
 
-val get_class : env -> Decl_provider.class_key -> Decl_provider.class_decl option
+val get_class :
+  env -> Decl_provider.class_key -> Decl_provider.class_decl option
 (** Return the info of the given class from the typing heap. *)
 
 val is_static : env -> bool
@@ -76,6 +82,7 @@ val get_tcopt : env -> TypecheckerOptions.t
 (** Return the {!TypecheckerOptions.t} with which this TAST was checked. *)
 
 val get_file : env -> Relative_path.t
+
 (* Return the {!Relative_path.t} of the file the env is from *)
 
 val expand_type : env -> Tast.ty -> env * Tast.ty
@@ -89,13 +96,10 @@ val get_class_ids : env -> Tast.ty -> string list
 (** Given some class type or unresolved union of class types, return the
     identifiers of all classes the type may represent. *)
 
-val fold_unresolved : env -> Tast.ty -> env * Tast.ty
-(** Try to unify all the types in an unresolved union. *)
-
 val flatten_unresolved : env -> Tast.ty -> Tast.ty list -> env * Tast.ty list
 (** Flatten nested unresolved unions, turning ((A | B) | C) to (A | B | C). *)
 
-val push_option_out : env -> Tast.ty -> env * Tast.ty
+val non_null : env -> Pos.t -> Tast.ty -> env * Tast.ty
 (** Strip away all Toptions that we possibly can in a type, expanding type
     variables along the way, turning ?T -> T. *)
 
@@ -116,77 +120,78 @@ val is_visible :
     {class_id_}, if provided) allows the current class (the one returned by
     {!get_self}) to access its members with the given {visibility}. *)
 
-val assert_nontrivial : Pos.t -> Ast.bop -> env -> Tast.ty -> Tast.ty -> unit
+val assert_nontrivial :
+  Pos.t -> Ast_defs.bop -> env -> Tast.ty -> Tast.ty -> unit
 (** Assert that the types of values involved in a strict (non-)equality
     comparison are compatible; e.g., that the types are not statically
     known to be disjoint, in which case the comparison will always return
     true or false. *)
 
-val assert_nullable : Pos.t -> Ast.bop -> env -> Tast.ty -> unit
+val assert_nullable : Pos.t -> Ast_defs.bop -> env -> Tast.ty -> unit
 (** Assert that the type of a value involved in a strict (non-)equality
     comparsion to null is nullable (otherwise it is known to always
     return true or false). *)
 
-val hint_to_ty : env -> Aast.hint -> Typing_defs.decl Typing_defs.ty
+val hint_to_ty : env -> Aast.hint -> Typing_defs.decl_ty
 (** Return the declaration-phase type the given hint represents. *)
 
-val localize : env -> Typing_defs.expand_env -> Typing_defs.decl Typing_defs.ty -> env * Tast.ty
-val localize_with_self : env -> Typing_defs.decl Typing_defs.ty -> env * Tast.ty
-(** Transforms a declaration phase type ({!Typing_defs.decl Typing_defs.ty})
-    into a localized type ({!Typing_defs.locl Typing_defs.ty} = {!Tast.ty}).
+val localize :
+  env -> Typing_defs.expand_env -> Typing_defs.decl_ty -> env * Tast.ty
+
+val localize_with_self : env -> Typing_defs.decl_ty -> env * Tast.ty
+(** Transforms a declaration phase type ({!Typing_defs.decl_ty})
+    into a localized type ({!Typing_defs.locl_ty} = {!Tast.ty}).
     Performs no substitutions of generics and initializes the late static bound
     type ({!Typing_defs.Tthis}) to the current class type (the type returned by
     {!get_self}).
 
     This is mostly provided as legacy support for {!AutocompleteService}, and
-    should not be considered a general mechanism for transforming a {decl ty} to
+    should not be considered a general mechanism for transforming a {decl_ty} to
     a {!Tast.ty}. *)
 
-val localize_with_dty_validator:
-  env ->
-  Typing_defs.decl Typing_defs.ty ->
-  (Typing_defs.expand_env -> Typing_defs.decl Typing_defs.ty -> unit) ->
-  env * Tast.ty
-(** Identical to localize_with_self, but also takes a validator that is applied
-    to every expanded decl type on the way to becoming a locl type. *)
-
-val get_upper_bounds: env -> string -> Type_parameter_env.tparam_bounds
+val get_upper_bounds : env -> string -> Type_parameter_env.tparam_bounds
 (** Get the upper bounds of the type parameter with the given name. *)
 
-val get_reified: env -> string -> Nast.reify_kind
+val get_reified : env -> string -> Aast.reify_kind
 (** Get the reification of the type parameter with the given name. *)
 
-val get_enforceable: env -> string -> bool
+val get_enforceable : env -> string -> bool
 (** Get whether the type parameter supports testing with is/as. *)
 
-val get_newable: env -> string -> bool
+val get_newable : env -> string -> bool
 (** Indicates whether the type parameter with the given name is <<__Newable>>. *)
 
-val is_fresh_generic_parameter: string -> bool
+val is_fresh_generic_parameter : string -> bool
 (** Return whether the type parameter with the given name was implicity created
     as part of an `instanceof`, `is`, or `as` expression (instead of being
     explicitly declared in code by the user). *)
 
-val assert_subtype: Pos.t -> Typing_reason.ureason -> env -> Tast.ty -> Tast.ty ->
-  Errors.typing_error_callback -> env
+val assert_subtype :
+  Pos.t ->
+  Typing_reason.ureason ->
+  env ->
+  Tast.ty ->
+  Tast.ty ->
+  Errors.typing_error_callback ->
+  env
 (** Assert that one type is a subtype of another, resolving unbound type
     variables in both types (if any), with {!env} reflecting the new state of
     these type variables. Produce an error if they cannot be subtypes. *)
 
-val is_sub_type: env -> Tast.ty -> Tast.ty -> bool
+val is_sub_type : env -> Tast.ty -> Tast.ty -> bool
 (** Return {true} when the first type is a subtype of the second type
     regardless of the values of unbound type variables in both types (if any). *)
 
-val can_subtype: env -> Tast.ty -> Tast.ty -> bool
+val can_subtype : env -> Tast.ty -> Tast.ty -> bool
 (** Return {true} when the first type can be considered a subtype of the second
     type after resolving unbound type variables in both types (if any). *)
 
-val is_sub_type_for_union: env -> Tast.ty -> Tast.ty -> bool
+val is_sub_type_for_union : env -> Tast.ty -> Tast.ty -> bool
 (** Return {true} when the first type is a subtype of the second type. There is
     no type T such that for all T', T <: T' and T' <: T (which is the case for Tany
     and Terr in `can_subtype`) *)
 
-val simplify_unions: env -> Tast.ty -> env * Tast.ty
+val simplify_unions : env -> Tast.ty -> env * Tast.ty
 (** Simplify unions in a type. *)
 
 val referenced_typeconsts :
@@ -197,6 +202,12 @@ val referenced_typeconsts :
 val set_static : env -> env
 (** Return an {!env} for which {!is_static} will return {true}.
     If you are using {!Tast_visitor}, you should have no need of this. *)
+
+val set_val_kind : env -> Typing_defs.val_kind -> env
+(** Return an {!env} for which {!val_kind} is set to the second argument. *)
+
+val get_val_kind : env -> Typing_defs.val_kind
+(** Returns the val_kind of the typing environment *)
 
 val set_inside_constructor : env -> env
 (** Returns an {!env} for which {!inside_constructor} is set to {true}.
@@ -235,28 +246,33 @@ val set_ppl_lambda : env -> env
 
 val get_anonymous_lambda_types : env -> int -> Tast.ty list
 
-val typing_env_as_tast_env : Typing_env.env -> env
-val tast_env_as_typing_env : env -> Typing_env.env
+val typing_env_as_tast_env : Typing_env_types.env -> env
 
-val can_coerce : env -> Tast.ty ->
-  ?ty_expect_decl: Typing_defs.decl Typing_defs.ty -> Tast.ty -> Errors.typing_error_callback -> env option
-(** Return None when coercion cannot occur from the second arg to the third,
-    otherwise return Some env where env is the first arg updated with coercion
-    constraints. *)
+val tast_env_as_typing_env : env -> Typing_env_types.env
 
 val is_xhp_child : env -> Pos.t -> Tast.ty -> bool
 (** Verify that an XHP body expression is legal. *)
 
 val get_enum : env -> string -> Decl_provider.class_decl option
+
+val get_typedef : env -> string -> Decl_provider.typedef_decl option
+
 val is_enum : env -> string -> bool
-val env_reactivity: env -> Typing_defs.reactivity
-val function_is_mutable: env -> Tast.type_param_mutability option
-val local_is_mutable: include_borrowed: bool -> env -> Local_id.t -> bool
-val get_env_mutability: env -> Typing_mutability_env.mutability_env
-val get_fun: env -> Decl_provider.fun_key -> Decl_provider.fun_decl option
-val set_env_reactive: env -> Typing_defs.reactivity -> env
 
-val set_allow_wildcards: env -> env
-val get_allow_wildcards: env -> bool
+val env_reactivity : env -> Typing_defs.reactivity
 
-val condition_type_matches: is_self:bool -> env -> Tast.ty -> Tast.ty -> bool
+val function_is_mutable : env -> Tast.type_param_mutability option
+
+val local_is_mutable : include_borrowed:bool -> env -> Local_id.t -> bool
+
+val get_env_mutability : env -> Typing_mutability_env.mutability_env
+
+val get_fun : env -> Decl_provider.fun_key -> Decl_provider.fun_decl option
+
+val set_env_reactive : env -> Typing_defs.reactivity -> env
+
+val set_allow_wildcards : env -> env
+
+val get_allow_wildcards : env -> bool
+
+val condition_type_matches : is_self:bool -> env -> Tast.ty -> Tast.ty -> bool

@@ -84,10 +84,22 @@ static inline RequestKind getRequestKind() {
 void profileRequestStart() {
   rl_typeProfileLocals->requestKind = getRequestKind();
 
+  auto const codeCoverageForceInterp = []{
+    if (RuntimeOption::EvalEnableCodeCoverage > 1) return true;
+    if (RuntimeOption::EvalEnableCodeCoverage == 1) {
+      if (RuntimeOption::RepoAuthoritative) return false;
+      auto const tport = g_context->getTransport();
+      return tport &&
+             tport->getParam("enable_code_coverage").compare("true") == 0;
+    }
+    return false;
+  }();
+
   // Force the request to use interpreter (not even running jitted code) during
   // retranslateAll when we need to dump out precise profile data.
-  auto const forceInterp = jit::mcgen::pendingRetranslateAllScheduled() &&
-                           RuntimeOption::DumpPreciseProfData;
+  auto const forceInterp = (jit::mcgen::pendingRetranslateAllScheduled() &&
+                            RuntimeOption::DumpPreciseProfData) ||
+                           codeCoverageForceInterp;
   bool okToJit = !forceInterp && isStandardRequest();
   if (!RequestInfo::s_requestInfo.isNull()) {
     if (RID().isJittingDisabled()) {

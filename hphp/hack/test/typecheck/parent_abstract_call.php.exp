@@ -1,4 +1,4 @@
-File "parent_abstract_call.php", line 9, characters 12-24:
+File "parent_abstract_call.php", line 9, characters 20-22:
 Cannot call parent::XYZ(); it is abstract (Typing[4073])
 File "parent_abstract_call.php", line 4, characters 28-30:
 Declaration is here

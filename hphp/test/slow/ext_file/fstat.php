@@ -10,7 +10,9 @@ fputs($f, "testing fseek");
 fclose($f);
 
 $f = fopen($tempfile, "r");
-var_dump(fstat($f)['size']);
+$stats = fstat($f);
+var_dump($stats['size']);
+var_dump(is_darray($stats));
 
 unlink($tempfile);
 }

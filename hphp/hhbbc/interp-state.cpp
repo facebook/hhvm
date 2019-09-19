@@ -160,16 +160,6 @@ CollectedInfo::CollectedInfo(const Index& index,
 
 //////////////////////////////////////////////////////////////////////
 
-bool operator==(const ActRec& a, const ActRec& b) {
-  auto const fsame =
-    a.func.hasValue() != b.func.hasValue() ? false :
-    a.func.hasValue() ? a.func->same(*b.func) :
-    true;
-  return a.kind == b.kind && fsame &&
-         equivalently_refined(a.context, b.context);
-}
-bool operator!=(const ActRec& a, const ActRec& b) { return !(a == b); }
-
 State with_throwable_only(const Index& index, const State& src) {
   auto throwable = subObj(index.builtin_class(s_Throwable.get()));
   auto ret          = State{};
@@ -195,7 +185,6 @@ State with_throwable_only(const Index& index, const State& src) {
   }
 
   ret.locals        = src.locals;
-  ret.clsRefSlots   = src.clsRefSlots;
   ret.iters         = src.iters;
   ret.stack.push_elem(std::move(throwable), NoLocalId);
   return ret;
@@ -263,22 +252,6 @@ void widen_props(PropState& props) {
   }
 }
 
-bool merge_into(ActRec& dst, const ActRec& src) {
-  if (dst != src) {
-    if (dst.kind != src.kind) {
-      dst = ActRec { FPIKind::Unknown, TTop };
-    } else {
-      dst = ActRec { src.kind, union_of(dst.context, src.context) };
-    }
-    return true;
-  }
-  if (dst.foldable != src.foldable) {
-    dst.foldable = false;
-    return true;
-  }
-  return false;
-}
-
 template<class JoinOp>
 bool merge_impl(State& dst, const State& src, JoinOp join) {
   if (!dst.initialized) {
@@ -289,9 +262,7 @@ bool merge_impl(State& dst, const State& src, JoinOp join) {
   assert(src.initialized);
   assert(dst.locals.size() == src.locals.size());
   assert(dst.iters.size() == src.iters.size());
-  assert(dst.clsRefSlots.size() == src.clsRefSlots.size());
   assert(dst.stack.size() == src.stack.size());
-  assert(dst.fpiStack.size() + src.fpiStack.size() == 0);
 
   if (src.unreachable) {
     // If we're coming from unreachable code and the dst is already
@@ -341,23 +312,8 @@ bool merge_impl(State& dst, const State& src, JoinOp join) {
     }
   }
 
-  for (auto i = size_t{0}; i < dst.clsRefSlots.size(); ++i) {
-    auto newT = join(dst.clsRefSlots[i], src.clsRefSlots[i]);
-    assert(newT.subtypeOf(BCls));
-    if (!equivalently_refined(dst.clsRefSlots[i], newT)) {
-      changed = true;
-      dst.clsRefSlots[i] = std::move(newT);
-    }
-  }
-
   for (auto i = size_t{0}; i < dst.iters.size(); ++i) {
     if (merge_into(dst.iters[i], src.iters[i], join)) {
-      changed = true;
-    }
-  }
-
-  for (auto i = size_t{0}; i < dst.fpiStack.size(); ++i) {
-    if (merge_into(dst.fpiStack[i], src.fpiStack[i])) {
       changed = true;
     }
   }
@@ -546,32 +502,6 @@ void InterpStack::peek(int numPop,
 
 //////////////////////////////////////////////////////////////////////
 
-static std::string fpiKindStr(FPIKind k) {
-  switch (k) {
-  case FPIKind::Unknown:     return "unk";
-  case FPIKind::CallableArr: return "arr";
-  case FPIKind::Func:        return "func";
-  case FPIKind::ClsMeth:     return "clsm";
-  case FPIKind::ObjInvoke:   return "invoke";
-  case FPIKind::Builtin:     return "builtin";
-  }
-  not_reached();
-}
-
-std::string show(const ActRec& a) {
-  return folly::to<std::string>(
-    "ActRec { ",
-    fpiKindStr(a.kind),
-    a.cls || a.func ? ": " : "",
-    a.cls ? show(*a.cls) : "",
-    a.cls && a.func ? "::" : "",
-    a.func ? show(*a.func) : "",
-    a.foldable ? " (foldable)" : "",
-    " ", show(a.context),
-    " }"
-  );
-}
-
 std::string show(const php::Func& f, const Base& b) {
   auto const locName = [&]{
     return b.locName ? folly::sformat("\"{}\"", b.locName) : "-";
@@ -653,11 +583,6 @@ std::string state_string(const php::Func& f, const State& st,
 
   for (auto i = size_t{0}; i < st.iters.size(); ++i) {
     folly::format(&ret, "iter {: <2}  :: {}\n", i, show(f, st.iters[i]));
-  }
-
-  for (auto i = size_t{0}; i < st.clsRefSlots.size(); ++i) {
-    folly::format(&ret, "class-ref slot {: <2}   :: {}\n",
-                  i, show(st.clsRefSlots[i]));
   }
 
   for (auto i = size_t{0}; i < st.stack.size(); ++i) {

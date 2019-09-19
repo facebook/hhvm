@@ -2,13 +2,13 @@
 
 -- Testing preg_replace_callback() function with Zero arguments --
 
-Warning: preg_replace_callback() expects at least 3 parameters, 0 given in %s/preg_replace_callback_error.php on line 9
+Warning: preg_replace_callback() expects exactly 5 parameters, 0 given in %s/preg_replace_callback_error.php on line 9
 
 -- Testing preg_replace_callback() function with more than expected no. of arguments --
 
-Warning: preg_replace_callback() expects at most 5 parameters, 6 given in %s/preg_replace_callback_error.php on line 21
+Warning: preg_replace_callback() expects exactly 5 parameters, 6 given in %s/preg_replace_callback_error.php on line 22
 
 -- Testing preg_replace_callback() function with less than expected no. of arguments --
 
-Warning: preg_replace_callback() expects at least 3 parameters, 2 given in %s/preg_replace_callback_error.php on line 25
+Warning: preg_replace_callback() expects exactly 5 parameters, 2 given in %s/preg_replace_callback_error.php on line 26
 Done

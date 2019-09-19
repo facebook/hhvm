@@ -1,0 +1,6 @@
+File "lambda_dict_arraykey.php", line 6, characters 10-11:
+Invalid return type (Typing[4110])
+File "lambda_dict_arraykey.php", line 4, characters 37-60:
+Expected ~(function(arraykey): int) because it is an unenforceable type
+File "lambda_dict_arraykey.php", line 5, characters 8-20:
+But got (function(arraykey $x): ~int)

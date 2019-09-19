@@ -6,8 +6,7 @@ $context = "<simpletag an_attribute=\"simpleValueInside\">";
 
 $match = array();
 
-if ($result =preg_match_all($pattern, $context, &$match))
-{
+  if ($result = preg_match_all_with_matches($pattern, $context, inout $match)) {
 
 var_dump($result);
 var_dump($match);

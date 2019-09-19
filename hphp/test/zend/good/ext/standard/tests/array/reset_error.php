@@ -1,6 +1,6 @@
 <?hh
 /* Prototype  : mixed reset(&array $array_arg)
- * Description: Set array argument's internal pointer to the first element and return it 
+ * Description: Set array argument's internal pointer to the first element and return it
  * Source code: ext/standard/array.c
  */
 
@@ -18,6 +18,6 @@ try { var_dump( reset() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->ge
 echo "\n-- Testing reset() function with more than expected no. of arguments --\n";
 $array_arg = array(1, 2);
 $extra_arg = 10;
-try { var_dump( reset(&$array_arg, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( reset(inout $array_arg, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 echo "===DONE===\n";
 }

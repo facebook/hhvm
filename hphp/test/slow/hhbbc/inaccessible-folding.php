@@ -38,7 +38,7 @@ $tests = vec[
   'test6',
 ];
 
-$count = apc_fetch('count');
+$count = __hhvm_intrinsics\apc_fetch_no_check('count');
 if ($count === false) $count = 0;
 if ($count < count($tests)) {
   $test = $tests[$count];

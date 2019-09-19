@@ -1,0 +1,4 @@
+use crate::other_module;
+
+pub use other_module::Bar;
+pub use other_module::Foo;

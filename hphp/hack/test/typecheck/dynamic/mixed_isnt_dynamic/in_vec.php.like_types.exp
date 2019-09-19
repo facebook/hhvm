@@ -1,0 +1,6 @@
+File "in_vec.php", line 8, characters 10-11:
+Invalid return type (Typing[4110])
+File "in_vec.php", line 7, characters 30-41:
+Expected vec<dynamic>
+File "in_vec.php", line 7, characters 14-23:
+But got dynamic because it is an unenforceable type

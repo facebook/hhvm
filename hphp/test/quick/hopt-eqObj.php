@@ -5,12 +5,6 @@ class X {}
 function foo($x, $y) {
   return $x == $y;
 }
-$x = new X;
-foo($x, $x);
-
-
-$x = new X;
-$y = new stdClass;
 
 function baz($r, $s) {
   switch ($r) {
@@ -18,7 +12,6 @@ function baz($r, $s) {
   default: echo 'def ';
   }
 }
-baz($x, $y);
 
 function bal($r, $s) {
   if ($r == $s) {
@@ -27,7 +20,17 @@ function bal($r, $s) {
     echo 'def ';
   }
 }
-bal($x, $y);
 
-printf("\n");
+<<__EntryPoint>>
+function main_entry(): void {
+  $x = new X;
+  foo($x, $x);
 
+
+  $x = new X;
+  $y = new stdClass;
+  baz($x, $y);
+  bal($x, $y);
+
+  printf("\n");
+}

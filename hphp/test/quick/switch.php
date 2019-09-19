@@ -38,8 +38,6 @@ function main() {
       break;
   }
 }
-main();
-main();
 
 function strswitch() {
   $a = 'luke';
@@ -77,5 +75,10 @@ function strswitch() {
 
   return true;
 }
-var_dump(strswitch());
-var_dump(strswitch());
+<<__EntryPoint>>
+function main_entry(): void {
+  main();
+  main();
+  var_dump(strswitch());
+  var_dump(strswitch());
+}

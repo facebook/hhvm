@@ -83,7 +83,7 @@ function apc_store_as_primed_do_not_use(string $key,
  */
 <<__Native, __NonRx('APC')>>
 function apc_fetch(mixed $key,
-                   mixed &$success = null): mixed;
+                   <<__OutOnly("KindOfBoolean")>> inout mixed $success): mixed;
 
 /**
  * Removes a stored variable from the cache.
@@ -152,8 +152,9 @@ function apc_sma_info(bool $limited = false): darray;
  */
 <<__Native, __NonRx('APC')>>
 function apc_inc(string $key,
-                 int $step = 1,
-                 mixed &$success = null): mixed;
+                 int $step,
+                 <<__OutOnly("KindOfBoolean")>>
+                 inout mixed $success): mixed;
 
 /**
  * Decreases a stored integer value.
@@ -169,8 +170,9 @@ function apc_inc(string $key,
  */
 <<__Native, __NonRx('APC')>>
 function apc_dec(string $key,
-                 int $step = 1,
-                 mixed &$success = null): mixed;
+                 int $step,
+                 <<__OutOnly("KindOfBoolean")>>
+                 inout mixed $success): mixed;
 
 /**
  * Update an existing old value to a new value.

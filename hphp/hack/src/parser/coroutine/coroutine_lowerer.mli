@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2017, Facebook, Inc.
  * All rights reserved.
  *
@@ -8,6 +8,7 @@
 
 module Syntax = Full_fidelity_editable_positioned_syntax
 
+val lower_coroutines : Syntax.t -> Syntax.t
 (**
  * Transforms a full-fidelity syntax tree to generate the required constructs
  * for coroutines. The resulting full-fidelity syntax tree should contain the
@@ -19,4 +20,3 @@ module Syntax = Full_fidelity_editable_positioned_syntax
  * Kotlin. You can read more about Kotlin's design and implementation details at
  * https://github.com/Kotlin/kotlin-coroutines/blob/master/kotlin-coroutines-informal.md.
  *)
-val lower_coroutines : Syntax.t -> Syntax.t

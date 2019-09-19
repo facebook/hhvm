@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2018, Facebook, Inc.
  * All rights reserved.
  *
@@ -10,22 +10,21 @@
 open Printf
 open Buffer
 
-module GenErr(M: Errors.Error_category) = struct
+module GenErr (M : Errors.Error_category) = struct
   let generate_errors buffer name =
     add_string buffer @@ sprintf "%s Errors:\n" name;
     for i = M.min to M.max do
       match M.of_enum i with
-      | Some err -> add_string buffer @@ sprintf "%s = %d\n" (M.show err) i;
-      | None -> ();
+      | Some err -> add_string buffer @@ sprintf "%s = %d\n" (M.show err) i
+      | None -> ()
     done;
     add_string buffer "\n"
-
 end
 
-module P = GenErr(Errors.Parsing)
-module N = GenErr(Errors.Naming)
-module NC = GenErr(Errors.NastCheck)
-module T = GenErr(Errors.Typing)
+module P = GenErr (Errors.Parsing)
+module N = GenErr (Errors.Naming)
+module NC = GenErr (Errors.NastCheck)
+module T = GenErr (Errors.Typing)
 
 let gen_error_map_content () : string =
   let buffer = create 4096 in
@@ -35,14 +34,15 @@ let gen_error_map_content () : string =
   T.generate_errors buffer "Typing";
   contents buffer
 
- (*
+(*
    Please modify the error map below if you have changed the error codes.
   *)
 
 let%expect_test "error_map" =
   let map = gen_error_map_content () in
   Printf.printf "%s\n" map;
-  [%expect {|
+  [%expect
+    {|
 Parsing Errors:
 FixmeFormat = 1001
 ParsingError = 1002
@@ -118,7 +118,7 @@ ReturnOnlyTypehint = 2063
 UnexpectedTypeArguments = 2064
 TooManyTypeArguments = 2065
 ClassnameParam = 2066
-InvalidInstanceof = 2067
+InvalidInstanceofDEPRECATED = 2067
 NameIsReserved = 2068
 DollardollarUnused = 2069
 IllegalMemberVariableClass = 2070
@@ -157,6 +157,7 @@ UnsupportedTraitUseAs = 2102
 UnsupportedInsteadOf = 2103
 InvalidTraitUseAsVisibility = 2104
 InvalidFunPointer = 2105
+IllegalUseOfDynamicallyCallable = 2106
 
 NastCheck Errors:
 AbstractBody = 3001
@@ -206,7 +207,7 @@ InoutParamsMixByref = 3044
 InoutParamsMemoize = 3045
 InoutParamsRetByRefDEPRECATED = 3046
 ReadingFromAppend = 3047
-ConstAttributeProhibited = 3048
+ConstAttributeProhibitedDEPRECATED = 3048
 RetiredError3049DEPRECATED = 3049
 InoutArgumentBadExpr = 3050
 MutableParamsOutsideOfSyncDEPRECATED = 3051
@@ -234,11 +235,13 @@ RequiresFinalClass = 3072
 InterfaceUsesTrait = 3073
 NonstaticMethodInAbstractFinalClass = 3074
 MutableOnStaticDEPRECATED = 3075
-ClassnameConstInstanceOf = 3076
+ClassnameConstInstanceOfDEPRECATED = 3076
 ByRefParamOnConstruct = 3077
 ByRefDynamicCall = 3078
 ByRefProperty = 3079
 ByRefCall = 3080
+SwitchNonTerminalDefault = 3081
+SwitchMultipleDefault = 3082
 
 Typing Errors:
 AbstractClassFinalDEPRECATED = 4001
@@ -250,7 +253,7 @@ ArrayAppend = 4006
 ArrayCast = 4007
 ArrayGetArity = 4008
 BadCall = 4009
-ClassArity = 4010
+ClassArityDEPRECATED = 4010
 ConstMutation = 4011
 ConstructorNoArgs = 4012
 CyclicClassDef = 4013
@@ -271,9 +274,9 @@ ExpectedLiteralFormatString = 4027
 ExpectedStaticIntDEPRECATED = 4028
 ExpectedTparam = 4029
 ExpectingReturnTypeHint = 4030
-ExpectingReturnTypeHintSuggest = 4031
+ExpectingReturnTypeHintSuggestDEPRECATED = 4031
 ExpectingTypeHint = 4032
-ExpectingTypeHintSuggest = 4033
+ExpectingTypeHintVariadic = 4033
 RetiredError4034DEPRECATED = 4034
 ExtendFinal = 4035
 FieldKinds = 4036
@@ -288,7 +291,7 @@ GenaExpectsArrayDEPRECATED = 4044
 GenericArrayStrict = 4045
 GenericStatic = 4046
 ImplementAbstract = 4047
-InterfaceFinal = 4048
+InterfaceFinalDEPRECATED = 4048
 InvalidShapeFieldConst = 4049
 InvalidShapeFieldLiteral = 4050
 InvalidShapeFieldName = 4051
@@ -312,7 +315,7 @@ OptionMixed = 4068
 OverflowDEPRECATED = 4069
 OverrideFinal = 4070
 OverridePerTrait = 4071
-PairArity = 4072
+PairArityDEPRECATED = 4072
 AbstractCall = 4073
 ParentInTrait = 4074
 ParentOutsideClass = 4075
@@ -336,13 +339,13 @@ StaticOverflowDEPRECATED = 4092
 RetiredError4093DEPRECATED = 4093
 ThisInStaticDEPRECATED = 4094
 ThisVarOutsideClass = 4095
-TraitFinal = 4096
+TraitFinalDEPRECATED = 4096
 TupleArityDEPRECATED = 4097
 TupleArityMismatchDEPRECATED = 4098
 TupleIndexTooLargeDEPRECATED = 4099
 TupleSyntax = 4100
 TypeArityMismatch = 4101
-TypeParamArity = 4102
+TypeParamArityDEPRECATED = 4102
 RetiredError4103DEPRECATED = 4103
 TypingTooFewArgs = 4104
 TypingTooManyArgs = 4105
@@ -438,7 +441,7 @@ MustExtendDisposable = 4194
 InvalidIsAsExpressionHint = 4195
 AssigningToConst = 4196
 SelfConstParentNot = 4197
-ParentConstSelfNot = 4198
+ParentConstSelfNotDEPRECATED = 4198
 PartiallyValidIsAsExpressionHintDEPRECATED = 4199
 NonreactiveFunctionCall = 4200
 NonreactiveIndexing = 4201
@@ -567,7 +570,7 @@ TypeConstraintViolation = 4323
 IndexTypeMismatch = 4324
 ExpectedStringlike = 4325
 TypeConstantMismatch = 4326
-TypeConstantRedeclaration = 4327
+TypeConstantRedeclarationDEPRECATED = 4327
 ConstantDoesNotMatchEnumType = 4328
 EnumConstraintMustBeArraykey = 4329
 EnumSubtypeMustHaveCompatibleConstraint = 4330
@@ -576,11 +579,19 @@ NewtypeAliasMustSatisfyConstraint = 4332
 BadFunctionTypevar = 4333
 BadClassTypevar = 4334
 BadMethodTypevar = 4335
-ReturnTypeMismatch = 4336
+MissingReturnInNonVoidFunction = 4336
 InoutReturnTypeMismatch = 4337
 ClassConstantValueDoesNotMatchHint = 4338
 ClassPropertyInitializerTypeDoesNotMatchHint = 4339
 BadDeclOverride = 4340
 BadMethodOverride = 4341
 BadEnumExtends = 4342
+XhpAttributeValueDoesNotMatchHint = 4343
+TraitPropConstClass = 4344
+EnumUnderlyingTypeMustBeArraykey = 4345
+ClassGetReified = 4346
+RequireGenericExplicit = 4347
+ClassConstantTypeMismatch = 4348
+PocketUniversesExpansion = 4349
+PocketUniversesTyping = 4350
   |}]

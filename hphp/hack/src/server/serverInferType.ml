@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -49,77 +49,82 @@ open Option.Monad_infix
  * cannot assume that the structure of the CST is reflected in the TAST.
  *)
 
+let base_visitor line char =
+  object (self)
+    inherit [_] Tast_visitor.reduce as super
 
-let base_visitor line char = object (self)
-  inherit [_] Tast_visitor.reduce as super
-  inherit [Pos.t * _ * _] Ast.option_monoid
+    inherit [Pos.t * _ * _] Ast_defs.option_monoid
 
-  method private merge lhs rhs =
-    (* A node with position P is not always a parent of every other node with
-     * a position contained by P. Some desugaring can cause nodes to be
-     * rearranged so that this is no longer the case (e.g., `invariant`).
-     *
-     * To deal with this, we simply take the smaller node. *)
-    let lpos, _, _ = lhs in
-    let rpos, _, _ = rhs in
-    if Pos.length lpos <= Pos.length rpos then lhs else rhs
+    method private merge lhs rhs =
+      (* A node with position P is not always a parent of every other node with
+       * a position contained by P. Some desugaring can cause nodes to be
+       * rearranged so that this is no longer the case (e.g., `invariant`).
+       *
+       * To deal with this, we simply take the smaller node. *)
+      let (lpos, _, _) = lhs in
+      let (rpos, _, _) = rhs in
+      if Pos.length lpos <= Pos.length rpos then
+        lhs
+      else
+        rhs
 
-  method! on_expr_annotation env (pos, ty) =
-    if Pos.inside pos line char
-    then Some (pos, env, ty)
-    else None
+    method! on_'ex env (pos, ty) =
+      if Pos.inside pos line char then
+        Some (pos, env, ty)
+      else
+        None
 
-  method! on_class_id env cid =
-    match cid with
-    (* Don't use the resolved class type (the expr_annotation on the class_id
+    method! on_class_id env cid =
+      match cid with
+      (* Don't use the resolved class type (the expr_annotation on the class_id
        type) when hovering over a CIexpr--we will want to show the type the
        expression is annotated with (e.g., classname<C>) and it will not have a
        smaller position. *)
-    | _, Tast.CIexpr e -> self#on_expr env e
-    | _ -> super#on_class_id env cid
-end
+      | (_, Aast.CIexpr e) -> self#on_expr env e
+      | _ -> super#on_class_id env cid
+  end
 
 (** Return the type of the node associated with exactly the given range.
 
     When more than one node has the given range, return the type of the first
     node visited in a preorder traversal.
 *)
-let range_visitor startl startc endl endc = object
-  inherit [_] Tast_visitor.reduce
-  inherit [_] Ast.option_monoid
-  method merge x _ = x
-  method! on_expr_annotation env (pos, ty) =
-    if Pos.exactly_matches_range pos startl startc endl endc
-    then Some (env, ty)
-    else None
-end
+let range_visitor startl startc endl endc =
+  object
+    inherit [_] Tast_visitor.reduce
 
-let type_at_pos
-  (tast : Tast.program)
-  (line : int)
-  (char : int)
-: (Tast_env.env * Tast.ty) option =
-  (base_visitor line char)#go tast
-  >>| (fun (_, env, ty) -> (env, ty))
+    inherit [_] Ast_defs.option_monoid
+
+    method merge x _ = x
+
+    method! on_'ex env (pos, ty) =
+      if Pos.exactly_matches_range pos startl startc endl endc then
+        Some (env, ty)
+      else
+        None
+  end
+
+let type_at_pos (tast : Tast.program) (line : int) (char : int) :
+    (Tast_env.env * Tast.ty) option =
+  (base_visitor line char)#go tast >>| (fun (_, env, ty) -> (env, ty))
 
 let type_at_range
-  (tast : Tast.program)
-  (start_line : int)
-  (start_char : int)
-  (end_line : int)
-  (end_char : int)
-: (Tast_env.env * Tast.ty) option =
+    (tast : Tast.program)
+    (start_line : int)
+    (start_char : int)
+    (end_line : int)
+    (end_char : int) : (Tast_env.env * Tast.ty) option =
   (range_visitor start_line start_char end_line end_char)#go tast
 
-let go:
-  ServerEnv.env ->
-  (ServerCommandTypes.file_input * int * int * bool) ->
-  (string * string) option =
-fun env (file, line, char, dynamic_view) ->
-  let ServerEnv.{tcopt; naming_table; _} = env in
-  let tcopt = { tcopt with GlobalOptions.tco_dynamic_view = dynamic_view; } in
-  let _, tast = ServerIdeUtils.check_file_input tcopt naming_table file in
+let go :
+    ServerEnv.env ->
+    ServerCommandTypes.file_input * int * int * bool ->
+    (string * string) option =
+ fun env (file, line, char, dynamic_view) ->
+  let ServerEnv.{ tcopt; naming_table; _ } = env in
+  let tcopt = { tcopt with GlobalOptions.tco_dynamic_view = dynamic_view } in
+  let (_, tast) = ServerIdeUtils.check_file_input tcopt naming_table file in
   type_at_pos tast line char
   >>| fun (env, ty) ->
-  Tast_env.print_ty env ty,
-  Tast_env.ty_to_json env ty |> Hh_json.json_to_string
+  ( Tast_env.print_ty env ty,
+    Tast_env.ty_to_json env ty |> Hh_json.json_to_string )

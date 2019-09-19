@@ -9,11 +9,11 @@
       c_implements = []; c_where_constraints = []; c_consts = [];
       c_typeconsts = [];
       c_vars =
-      [{ cv_final = false; cv_xhp_attr = None; cv_visibility = Private;
-         cv_type = (Some ([4:11-14], (Hprim Tint)));
+      [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false;
+         cv_visibility = Private; cv_type = (Some ([4:11-14], (Hprim Tint)));
          cv_id = ([4:15-17], "x"); cv_expr = None; cv_user_attributes = [];
          cv_doc_comment = None; cv_is_promoted_variadic = false;
-         cv_is_static = false }
+         cv_is_static = false; cv_span = [4:15-17] }
         ];
       c_methods =
       [{ m_span = [6:3-8:4]; m_annotation = (); m_final = false;
@@ -22,10 +22,11 @@
          m_where_constraints = []; m_variadic = FVnonVariadic;
          m_params =
          [{ param_annotation = ([6:35-37], int);
-            param_hint = (Some ([6:31-34], (Hprim Tint)));
+            param_type_hint = ((int), (Some ([6:31-34], (Hprim Tint))));
             param_is_reference = false; param_is_variadic = false;
             param_pos = [6:35-37]; param_name = "$x"; param_expr = None;
-            param_callconv = None; param_user_attributes = [] }
+            param_callconv = None; param_user_attributes = [];
+            param_visibility = None }
            ];
          m_body =
          { fb_ast =
@@ -41,7 +42,7 @@
              ];
            fb_annotation = No unsafe blocks };
          m_fun_kind = FSync; m_user_attributes = [];
-         m_ret = (Some ([6:19-30], (Happly (([6:19-30], "void"), []))));
+         m_ret = ((void), (Some ([6:19-30], (Hprim Tvoid))));
          m_external = false; m_doc_comment = None };
         { m_span = [10:3-12:4]; m_annotation = (); m_final = false;
           m_abstract = false; m_static = false; m_visibility = Public;
@@ -59,8 +60,8 @@
               ];
             fb_annotation = No unsafe blocks };
           m_fun_kind = FSync; m_user_attributes = [];
-          m_ret = (Some ([10:27-30], (Hprim Tint))); m_external = false;
-          m_doc_comment = None }
+          m_ret = ((int), (Some ([10:27-30], (Hprim Tint))));
+          m_external = false; m_doc_comment = None }
         ];
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
       c_namespace = <opaque>; c_user_attributes = []; c_file_attributes = [];

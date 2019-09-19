@@ -100,15 +100,6 @@ bool cellInstanceOfImpl(const Cell* tv, F lookupClass) {
       return cls && interface_supports_keyset(cls->name());
     }
 
-    case KindOfPersistentShape:
-    case KindOfShape: {
-      auto const cls = lookupClass();
-      if (RuntimeOption::EvalHackArrDVArrs) {
-        return cls && interface_supports_dict(cls->name());
-      }
-      return cls && interface_supports_array(cls->name());
-    }
-
     case KindOfPersistentArray:
     case KindOfArray: {
       auto const cls = lookupClass();
@@ -320,7 +311,7 @@ bool typeStructureIsType(
           // This is safe since we already checked this above
           auto cleanedInput = inputField->remove(s_optional_shape_field.get());
           auto cleanedType = typeField->remove(s_optional_shape_field.get());
-          if (!typeStructureIsType(cleanedInput, cleanedType, strict, warn)) {
+          if (!typeStructureIsType(cleanedInput, cleanedType, warn, strict)) {
             if (warn || is_ts_soft(typeField)) {
               willWarn = true;
               warn = false;
@@ -342,20 +333,23 @@ bool typeStructureIsType(
       // Only true if the typevar is a wildcard
       return type->exists(s_name.get()) &&
         get_ts_name(type)->equal(s_wildcard.get());
-    case TypeStructure::Kind::T_fun:
-      // TODO(T46022709): Handle variadic args
-      return typeStructureIsType(
-        get_ts_return_type(input),
-        get_ts_return_type(type),
-        warn,
-        strict
-      ) && typeStructureIsTypeList(
-        get_ts_param_types(input),
-        get_ts_param_types(type),
-        nullptr,
-        warn,
-        strict
-      );
+    case TypeStructure::Kind::T_fun: {
+      auto const inputR = get_ts_return_type(input);
+      auto const typeR = get_ts_return_type(type);
+      if (!typeStructureIsType(inputR, typeR, warn, strict)) {
+        return false;
+      }
+      auto const inputP = get_ts_param_types(input);
+      auto const typeP = get_ts_param_types(type);
+      if (!typeStructureIsTypeList(inputP, typeP, nullptr, warn, strict)) {
+        return false;
+      }
+      auto const inputV = get_ts_variadic_type_opt(input);
+      auto const typeV = get_ts_variadic_type_opt(type);
+      return inputV && typeV
+        ? typeStructureIsType(inputV, typeV, warn, strict)
+        : inputV == typeV;
+    }
     case TypeStructure::Kind::T_array:
     case TypeStructure::Kind::T_darray:
     case TypeStructure::Kind::T_varray:
@@ -630,7 +624,7 @@ bool checkTypeStructureMatchesCellImpl(
           raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_DARR_IS_DICT);
         }
       }
-      result = isDictOrShapeType(type);
+      result = isDictType(type);
       if (result && UNLIKELY(RuntimeOption::EvalLogArrayProvenance)) {
         raise_array_serialization_notice("is_dict", data.parr);
       }
@@ -672,7 +666,7 @@ bool checkTypeStructureMatchesCellImpl(
         }
         break;
       }
-      result = isVecType(type) || isDictOrShapeType(type);
+      result = isVecType(type) || isDictType(type);
       if (result && UNLIKELY(RuntimeOption::EvalLogArrayProvenance)) {
         raise_array_serialization_notice(isVecType(type) ? "is_vec" : "is_dict",
                                          data.parr);
@@ -687,7 +681,7 @@ bool checkTypeStructureMatchesCellImpl(
         break;
       }
       result = isArrayType(type) || isVecType(type) ||
-               isDictType(type) || isShapeType(type) || isKeysetType(type);
+               isDictType(type) || isKeysetType(type);
       break;
     case TypeStructure::Kind::T_enum: {
       assertx(ts.exists(s_classname));
@@ -695,6 +689,10 @@ bool checkTypeStructureMatchesCellImpl(
       result = cls && enumHasValue(cls, &c1);
       break;
     }
+    case TypeStructure::Kind::T_trait:
+      // For is/as, we will not get here since we'll throw an error on the
+      // resolution pass.
+      // For parameter/return type verification, we treat it as a class type.
     case TypeStructure::Kind::T_class:
     case TypeStructure::Kind::T_interface:
     case TypeStructure::Kind::T_xhp: {
@@ -734,6 +732,10 @@ bool checkTypeStructureMatchesCellImpl(
           result = false;
           break;
         }
+      }
+      if (!isOrAsOp) {
+        result = true;
+        break;
       }
       assertx(ts.exists(s_elem_types));
       auto const tsElems = ts[s_elem_types].getArrayData();
@@ -776,7 +778,7 @@ bool checkTypeStructureMatchesCellImpl(
       }
       if (elemsDidMatch && warn) elemsDidMatch = false;
       if (UNLIKELY(
-        RuntimeOption::EvalHackArrCompatIsArrayNotices &&
+        RuntimeOption::EvalHackArrCompatTypeHintNotices &&
         elemsDidMatch &&
         elems->isPHPArray()
       )) {
@@ -804,6 +806,10 @@ bool checkTypeStructureMatchesCellImpl(
           result = false;
           break;
         }
+      }
+      if (!isOrAsOp) {
+        result = true;
+        break;
       }
       assertx(ts.exists(s_fields));
       auto const tsFields = ts[s_fields].getArrayData();
@@ -868,7 +874,7 @@ bool checkTypeStructureMatchesCellImpl(
         break;
       }
       if (UNLIKELY(
-        RuntimeOption::EvalHackArrCompatIsArrayNotices &&
+        RuntimeOption::EvalHackArrCompatTypeHintNotices &&
         !warn &&
         fields->isPHPArray()
       )) {
@@ -893,10 +899,14 @@ bool checkTypeStructureMatchesCellImpl(
       break;
     case TypeStructure::Kind::T_fun:
     case TypeStructure::Kind::T_typevar:
-    case TypeStructure::Kind::T_trait:
+      // For is/as, we will not get here since we'll throw an error on the
+      // resolution pass.
+      // For parameter/return type verification, we don't check these types, so
+      // just return true.
+      result = true;
+      break;
     case TypeStructure::Kind::T_reifiedtype:
-      // Not supported, should have already thrown an error
-      // on these during resolution
+      // This type should have been removed in the resolution phase.
       always_assert(false);
   }
   if (!warn && is_ts_soft(ts.get())) warn = true;

@@ -38,46 +38,49 @@ function test_array($array, $which, $flags = 0)
     echo $k , ' => ', $fruit, "\n";
   }
 }
+<<__EntryPoint>>
+function main_entry(): void {
 
-$array = array(
-  1 => array(
+  $array = array(
     1 => array(
-      1 => 'apple',
+      1 => array(
+        1 => 'apple',
+      ),
+      2 => array(
+        1 => 'grape',
+      ),
     ),
-    2 => array(
-      1 => 'grape',
-    ),
-  ),
-);
+  );
 
-test_array($array, 'Default with array');
+  test_array($array, 'Default with array');
 
-$array = array(
-  1 => array(
+  $array = array(
     1 => array(
-      1 => new FruitPublic('apple'),
+      1 => array(
+        1 => new FruitPublic('apple'),
+      ),
+      2 => array(
+        1 => new FruitPublic('grape'),
+      ),
     ),
-    2 => array(
-      1 => new FruitPublic('grape'),
-    ),
-  ),
-);
+  );
 
-test_array($array, 'Public Property');
+  test_array($array, 'Public Property');
 
-$array = array(
-  1 => array(
+  $array = array(
     1 => array(
-      1 => new FruitProtected('apple'),
+      1 => array(
+        1 => new FruitProtected('apple'),
+      ),
+      2 => array(
+        1 => new FruitProtected('grape'),
+      ),
     ),
-    2 => array(
-      1 => new FruitProtected('grape'),
-    ),
-  ),
-);
+  );
 
-test_array($array, 'Protected Property');
+  test_array($array, 'Protected Property');
 
-test_array($array, 'Public Property New', RecursiveArrayIterator::CHILD_ARRAYS_ONLY);
-test_array($array, 'Protected Property New', RecursiveArrayIterator::CHILD_ARRAYS_ONLY);
-echo "===DONE===\n";
+  test_array($array, 'Public Property New', RecursiveArrayIterator::CHILD_ARRAYS_ONLY);
+  test_array($array, 'Protected Property New', RecursiveArrayIterator::CHILD_ARRAYS_ONLY);
+  echo "===DONE===\n";
+}

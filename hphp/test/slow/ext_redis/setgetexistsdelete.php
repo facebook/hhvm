@@ -1,7 +1,7 @@
 <?hh
 
 include (__DIR__ . '/redis.inc');
-
+<<__EntryPoint>> function main(): void {
 $r = NewRedisTestInstance();
 $key = GetTestKeyName(__FILE__);
 $r->delete($key);
@@ -36,3 +36,4 @@ var_dump($r->pipeline()
            ->delete($key)
            ->exists($key)
            ->exec());
+}

@@ -156,7 +156,7 @@ finish_class() {
   cls->m_extra.raw()->m_instanceCtor = asioInstanceCtor;
   cls->m_extra.raw()->m_instanceCtorUnlocked = asioInstanceCtor;
   cls->m_extra.raw()->m_instanceDtor = T::instanceDtor;
-  cls->m_release = T::instanceDtor;
+  cls->m_releaseFunc = T::instanceDtor;
 }
 
 void AsioExtension::finishClasses() {

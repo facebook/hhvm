@@ -81,6 +81,11 @@ std::string array_string(SArray arr) {
   return str;
 }
 
+std::string provtag_string(const folly::Optional<arrprov::Tag>& tag) {
+  if (!tag) return "";
+  return folly::sformat(" [{}]", tag->toString());
+}
+
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -194,8 +199,6 @@ std::string show(const Func& func, const Bytecode& bc) {
 #define IMM_I64A(n)    folly::toAppend(" ", data.arg##n, &ret);
 #define IMM_LA(n)      ret += " " + local_string(func, data.loc##n);
 #define IMM_IA(n)      folly::toAppend(" iter:", data.iter##n, &ret);
-#define IMM_CAR(n)     folly::toAppend(" rslot:", data.slot, &ret);
-#define IMM_CAW(n)     folly::toAppend(" wslot:", data.slot, &ret);
 #define IMM_DA(n)      folly::toAppend(" ", data.dbl##n, &ret);
 #define IMM_SA(n)      folly::toAppend(" ", escaped_string(data.str##n), &ret);
 #define IMM_RATA(n)    folly::toAppend(" ", show(data.rat), &ret);
@@ -215,11 +218,12 @@ std::string show(const Func& func, const Bytecode& bc) {
 } while (false);
 
 #define IMM_NA
-#define IMM_ONE(x)           IMM_##x(1)
-#define IMM_TWO(x, y)        IMM_##x(1);         IMM_##y(2);
-#define IMM_THREE(x, y, z)   IMM_TWO(x, y);      IMM_##z(3);
-#define IMM_FOUR(x, y, z, n) IMM_THREE(x, y, z); IMM_##n(4);
-#define IMM_FIVE(x, y, z, n, m) IMM_FOUR(x, y, z, n); IMM_##m(5);
+#define IMM_ONE(x)                IMM_##x(1)
+#define IMM_TWO(x, y)             IMM_##x(1); IMM_##y(2);
+#define IMM_THREE(x, y, z)        IMM_TWO(x, y); IMM_##z(3);
+#define IMM_FOUR(x, y, z, n)      IMM_THREE(x, y, z); IMM_##n(4);
+#define IMM_FIVE(x, y, z, n, m)   IMM_FOUR(x, y, z, n); IMM_##m(5);
+#define IMM_SIX(x, y, z, n, m, o) IMM_FIVE(x, y, z, n, m); IMM_##o(6);
 
 #define O(opcode, imms, inputs, outputs, flags) \
   case Op::opcode:                              \
@@ -243,8 +247,6 @@ std::string show(const Func& func, const Bytecode& bc) {
 #undef IMM_I64A
 #undef IMM_LA
 #undef IMM_IA
-#undef IMM_CAR
-#undef IMM_CAW
 #undef IMM_DA
 #undef IMM_SA
 #undef IMM_RATA
@@ -262,6 +264,7 @@ std::string show(const Func& func, const Bytecode& bc) {
 #undef IMM_THREE
 #undef IMM_FOUR
 #undef IMM_FIVE
+#undef IMM_SIX
 
   return ret;
 }
@@ -463,7 +466,6 @@ std::string show(const Type& t) {
   case DataTag::Obj:
   case DataTag::Cls:
   case DataTag::RefInner:
-  case DataTag::ReifiedName:
   case DataTag::ArrLikePacked:
   case DataTag::ArrLikePackedN:
   case DataTag::ArrLikeMap:
@@ -525,17 +527,15 @@ std::string show(const Type& t) {
   case DataTag::ArrLikePacked:
     folly::format(
       &ret,
-      "({})",
+      "({}){}",
       [&] {
         using namespace folly::gen;
         return from(t.m_data.packed->elems)
           | map([&] (const Type& t) { return show(t); })
           | unsplit<std::string>(",");
-      }()
+      }(),
+      provtag_string(t.m_data.packed->provenance)
     );
-    break;
-  case DataTag::ReifiedName:
-    folly::format(&ret, "<{}>", t.m_data.rname.name);
     break;
   case DataTag::ArrLikePackedN:
     folly::format(&ret, "([{}])", show(t.m_data.packedn->type));
@@ -543,7 +543,7 @@ std::string show(const Type& t) {
   case DataTag::ArrLikeMap:
     folly::format(
       &ret,
-      "({})",
+      "({}){}",
       [&] {
         using namespace folly::gen;
         return from(t.m_data.map->map)
@@ -551,7 +551,8 @@ std::string show(const Type& t) {
               return showElem(from_cell(kv.first), kv.second);
             })
           | unsplit<std::string>(",");
-      }()
+      }(),
+      provtag_string(t.m_data.map->provenance)
     );
     break;
   case DataTag::ArrLikeMapN:

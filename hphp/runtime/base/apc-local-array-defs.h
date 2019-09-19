@@ -24,7 +24,7 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-inline APCLocalArray::APCLocalArray(const APCArray* source)
+inline APCLocalArray::APCLocalArray(const APCArray* source, size_t heapSize)
   : ArrayData(kApcKind)
   , m_arr(source)
 {
@@ -33,16 +33,18 @@ inline APCLocalArray::APCLocalArray(const APCArray* source)
   tl_heap->addApcArray(this);
   memset(localCache(), static_cast<data_type_t>(KindOfUninit),
          m_size * sizeof(TypedValue));
+  auto const sizeIdx = MemoryManager::size2Index(heapSize);
+  m_aux16 = static_cast<uint16_t>(sizeIdx) << 8;
   assertx(hasExactlyOneRef());
 }
 
 inline size_t APCLocalArray::heapSize() const {
-  return sizeof(*this) + m_size * sizeof(TypedValue);
+  return PackedArray::heapSize(this);
 }
 
 inline APCLocalArray* APCLocalArray::Make(const APCArray* aa) {
   auto size = sizeof(APCLocalArray) + aa->size() * sizeof(TypedValue);
-  auto local = new (tl_heap->objMalloc(size)) APCLocalArray(aa);
+  auto local = new (tl_heap->objMalloc(size)) APCLocalArray(aa, size);
   assertx(local->heapSize() == size);
   return local;
 }

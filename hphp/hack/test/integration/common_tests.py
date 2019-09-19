@@ -916,7 +916,7 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
             [
                 "{root}foo_4.php:3:19,21: Name already bound: Foo (Naming[2012])",
                 "  {root}foo_3.php:7:15,17: Previous definition is here",
-                "{root}foo_5.php:6:28,29: Could not find class variable $y in type Bar (Typing[4090])",
+                "{root}foo_5.php:6:28,29: No class variable '$y' in Bar (did you mean '$x'?) (Typing[4090])",
                 "  {root}foo_5.php:3:19,21: Declaration of Bar is here",
             ]
         )
@@ -924,7 +924,7 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
         os.remove(os.path.join(self.test_driver.repo_dir, "foo_4.php"))
         self.test_driver.check_cmd(
             [
-                "{root}foo_5.php:6:28,29: Could not find class variable $y in type Bar (Typing[4090])",
+                "{root}foo_5.php:6:28,29: No class variable '$y' in Bar (Typing[4090])",
                 "  {root}foo_5.php:3:19,21: Declaration of Bar is here",
             ]
         )

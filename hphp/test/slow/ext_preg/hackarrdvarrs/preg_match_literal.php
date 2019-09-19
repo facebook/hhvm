@@ -12,27 +12,31 @@ var_dump(preg_match("%bcd%", "abcdef"));
 var_dump(preg_match("%^bcd%", "abcdef"));
 
 $matches = [];
-var_dump(preg_match("%bcd%", "abcdbcdef", &$matches));
-var_dump(count($matches));
+  var_dump(preg_match_with_matches("%bcd%", "abcdbcdef", inout $matches));
+  var_dump(count($matches));
 var_dump(utf8_decode($matches[0]));
 
-var_dump(preg_match("%bcd%", "abcdbcdef", &$matches,
-  $flags = PREG_OFFSET_CAPTURE));
-var_dump(utf8_decode($matches[0][0]));
+  var_dump(preg_match_with_matches(
+    "%bcd%",
+    "abcdbcdef",
+    inout $matches,
+    $flags = PREG_OFFSET_CAPTURE,
+  ));
+  var_dump(utf8_decode($matches[0][0]));
 var_dump($matches[0][1]);
 // Matching the end of the string
-var_dump(preg_match("#bcd\$#", "abcdbcdbcd", &$matches));
-var_dump(count($matches));
+  var_dump(preg_match_with_matches("#bcd\$#", "abcdbcdbcd", inout $matches));
+  var_dump(count($matches));
 // var_dump(utf8_decode($matches[0])); /* Missing byte? */
 
 // Multiple subpatterns
-var_dump(preg_match("#bcd#", "abcdbcdbcd", &$matches));
-var_dump(count($matches));
+  var_dump(preg_match_with_matches("#bcd#", "abcdbcdbcd", inout $matches));
+  var_dump(count($matches));
 var_dump(utf8_decode($matches[0]));
 
 // preg_match_all should still work
-var_dump(preg_match_all("#bcd#", "abcdbcdbcd", &$matches));
-var_dump(count($matches));
+  var_dump(preg_match_all_with_matches("#bcd#", "abcdbcdbcd", inout $matches));
+  var_dump(count($matches));
 var_dump(count($matches[0]));
 var_dump(($matches[0][0]));
 var_dump(($matches[0][1]));
@@ -78,14 +82,45 @@ var_dump(preg_match('/abc\\\\/', 'abc\\'));
 var_dump(preg_match('//', 'abc'));
 
 // Offsets
-var_dump(preg_match('/def/', 'abcdef', &$matches, PREG_OFFSET_CAPTURE, 2));
-var_dump($matches);
-var_dump(preg_match('/def/', 'abcdef', &$matches, PREG_OFFSET_CAPTURE, 4));
-var_dump($matches);
-var_dump(preg_match('//', 'abcdef', &$matches, PREG_OFFSET_CAPTURE, 3));
-var_dump($matches);
-var_dump(preg_match('/^def/', 'abcdef', &$matches, PREG_OFFSET_CAPTURE, 3));
-var_dump($matches);
-var_dump(preg_match('/def$/', 'abcdef', &$matches, PREG_OFFSET_CAPTURE, 3));
-var_dump($matches);
+  var_dump(preg_match_with_matches(
+    '/def/',
+    'abcdef',
+    inout $matches,
+    PREG_OFFSET_CAPTURE,
+    2,
+  ));
+  var_dump($matches);
+  var_dump(preg_match_with_matches(
+    '/def/',
+    'abcdef',
+    inout $matches,
+    PREG_OFFSET_CAPTURE,
+    4,
+  ));
+  var_dump($matches);
+  var_dump(
+    preg_match_with_matches(
+      '//',
+      'abcdef',
+      inout $matches,
+      PREG_OFFSET_CAPTURE,
+      3
+  ));
+  var_dump($matches);
+  var_dump(preg_match_with_matches(
+    '/^def/',
+    'abcdef',
+    inout $matches,
+    PREG_OFFSET_CAPTURE,
+    3,
+  ));
+  var_dump($matches);
+  var_dump(preg_match_with_matches(
+    '/def$/',
+    'abcdef',
+    inout $matches,
+    PREG_OFFSET_CAPTURE,
+    3,
+  ));
+  var_dump($matches);
 }

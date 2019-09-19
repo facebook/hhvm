@@ -14,5 +14,10 @@ Stack trace:
 #11 (): HH\ExperimentalParserUtils\ffp_json_dfs()
 #12 (): HH\ExperimentalParserUtils\ffp_json_dfs()
 #13 (): HH\ExperimentalParserUtils\ffp_json_dfs()
-#14 %s: HH\ExperimentalParserUtils\find_all_functions()
-#15 {main}
+#14 (): HH\ExperimentalParserUtils\ffp_json_dfs()
+#15 (): HH\ExperimentalParserUtils\ffp_json_dfs()
+#16 (): HH\ExperimentalParserUtils\ffp_json_dfs()
+#17 (): HH\ExperimentalParserUtils\ffp_json_dfs()
+#18 %s/lambda_extractor_fatal.php(6): HH\ExperimentalParserUtils\find_all_functions()
+#19 (): main()
+#20 {main}

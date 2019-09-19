@@ -1,0 +1,2 @@
+(3,9)-(3,9) The 'instanceof' operator is not supported in Hack; use the 'is' operator or 'is_a()'
+(3,20)-(3,23) Encountered unexpected token 'Foo'.

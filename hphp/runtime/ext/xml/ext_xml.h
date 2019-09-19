@@ -34,8 +34,8 @@ int64_t HHVM_FUNCTION(xml_parse,
 int64_t HHVM_FUNCTION(xml_parse_into_struct,
                       const Resource& parser,
                       const String& data,
-                      VRefParam values,
-                      VRefParam index = uninit_null());
+                      Array& values,
+                      Array& index);
 Resource HHVM_FUNCTION(xml_parser_create_ns,
                        const Variant& encoding = uninit_variant,
                        const Variant& separator = uninit_variant);
@@ -76,7 +76,7 @@ bool HHVM_FUNCTION(xml_set_notation_decl_handler,
                    const Variant& handler);
 bool HHVM_FUNCTION(xml_set_object,
                    const Resource& parser,
-                   VRefParam object);
+                   const Variant& object);
 int64_t HHVM_FUNCTION(xml_get_current_byte_index,
                       const Resource& parser);
 int64_t HHVM_FUNCTION(xml_get_current_column_number,

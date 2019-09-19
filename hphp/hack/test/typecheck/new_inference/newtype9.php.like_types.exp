@@ -1,0 +1,2 @@
+File "newtype9.php--useit.php", line 6, characters 24-49:
+Expected an object convertible to string but got a dynamic value or a value of type OpaqueInt (Typing[4318])

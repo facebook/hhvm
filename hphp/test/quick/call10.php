@@ -21,8 +21,6 @@ function main1() {
   $obj->$fn("a", "b", "c", "d");
 }
 
-main1();
-
 class C2 {
   public function __call($fn, $args) {
     echo "C2::__call\n";
@@ -31,11 +29,11 @@ class C2 {
     echo "\n";
   }
   public function test() {
-    // FPushClsMethodD
+    // FCallClsMethodD
     C2::__call("a", "b", "c", "d");
     C2::foo("a", "b", "c", "d");
 
-    // FPushClsMethod
+    // FCallClsMethod
     $cls = 'C2';
     $cls::__call("a", "b", "c", "d");
     $cls::foo("a", "b", "c", "d");
@@ -48,7 +46,7 @@ class C2 {
     $fn = 'foo';
     $cls::$fn("a", "b", "c", "d");
 
-    // FPushClsMethodF
+    // FCallClsMethodSD
     self::__call("a", "b", "c", "d");
     self::foo("a", "b", "c", "d");
   }
@@ -58,8 +56,6 @@ function main2() {
   $obj = new C2;
   $obj->test();
 }
-
-main2();
 
 class B3 {
   public function __call($fn, $args) {
@@ -84,8 +80,6 @@ function main3() {
   $obj->$fn("a", "b", "c", "d");
 }
 
-main3();
-
 class A4 {
   public function foo($w, $x, $y, $z) {
     echo "A4::foo\n";
@@ -106,7 +100,6 @@ function main4() {
   $fn = 'foo';
   $obj->$fn("a", "b", "c", "d");
 }
-main4();
 
 class A5 {
 }
@@ -126,8 +119,6 @@ function main5() {
   $obj->test();
 }
 
-main5();
-
 class A6 {
   public function __call($fn, $args) {
     var_dump($fn, $args);
@@ -145,5 +136,17 @@ function main6() {
   $obj = new C6;
   $obj->test();
 }
+<<__EntryPoint>>
+function main_entry(): void {
 
-main6();
+  main1();
+
+  main2();
+
+  main3();
+  main4();
+
+  main5();
+
+  main6();
+}

@@ -3,7 +3,7 @@
 
 <<__EntryPoint>>
 function main_1054() {
-$x = (object)null;
+$x = new stdClass();
 var_dump ($x == 1 && 1 == $x);
 var_dump ($x == 1.0 && 1.0 == $x);
 var_dump ($x > 0);

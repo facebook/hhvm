@@ -64,6 +64,7 @@ function main() {
   var_dump($results);
   var_dump(Base::$side_effects);
 }
-
+<<__EntryPoint>> function main_entry(): void {
 main();
 main();
+}

@@ -20,6 +20,9 @@ function do_translit($st) {
     }
     return $st;
 }
+<<__EntryPoint>>
+function main_entry(): void {
 
-mb_regex_encoding('ISO-8859-1');
-echo do_translit("Пеар");
+  mb_regex_encoding('ISO-8859-1');
+  echo do_translit("Пеар");
+}

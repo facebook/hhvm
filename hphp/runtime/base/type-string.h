@@ -69,7 +69,7 @@ std::string convDblToStrWithPhpFormat(double n);
  * literal string handling (to avoid string copying).
  */
 struct String {
-private:
+protected:
   req::ptr<StringData> m_str;
 
 protected:
@@ -480,19 +480,24 @@ private:
 
 /**
  * A StaticString can be co-accessed by multiple threads, therefore they are
- * not thread local, and they have to be allocated BEFORE any thread starts,
- * so that they won't be garbage collected by MemoryManager. This is used by
- * constant strings, so they can be pre-allocated before request handling.
+ * not thread local.
  */
 struct StaticString : String {
-  explicit StaticString(const char* s);
-  StaticString(const char* s, int length); // binary string
-  explicit StaticString(std::string s);
+  TYPE_SCAN_IGNORE_BASES(String);
+
+  template<size_t N> explicit StaticString(const char(&s)[N]) {
+    construct(s, N - 1);
+  }
+  template<size_t N> explicit StaticString(char(&s)[N]) = delete;
+
   ~StaticString() {
     // prevent ~req::ptr from destroying contents.
     detach();
   }
-  StaticString& operator=(const StaticString &str);
+  StaticString& operator=(const StaticString& other) = delete;
+
+ private:
+  void construct(const char* s, size_t len);
 };
 
 StaticString getDataTypeString(DataType t);
@@ -513,6 +518,10 @@ inline String& String::operator=(const StaticString& v) {
 
 ALWAYS_INLINE String empty_string() {
   return String::attach(staticEmptyString());
+}
+
+ALWAYS_INLINE TypedValue empty_string_tv() {
+  return make_tv<KindOfPersistentString>(staticEmptyString());
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -437,10 +437,10 @@ const StaticString
   s_default_output_handler("default output handler");
 
 Array ExecutionContext::obGetStatus(bool full) {
-  Array ret = Array::CreateVArray();
+  Array ret = empty_varray();
   int level = 0;
   for (auto& buffer : m_buffers) {
-    Array status = Array::CreateDArray();
+    Array status = empty_darray();
     if (level < m_protectedLevel || buffer.handler.isNull()) {
       status.set(s_name, s_default_output_handler);
       status.set(s_type, 0);
@@ -496,7 +496,7 @@ void ExecutionContext::obSetImplicitFlush(bool on) {
 }
 
 Array ExecutionContext::obGetHandlers() {
-  Array ret = Array::CreateVArray();
+  Array ret = empty_varray();
   for (auto& ob : m_buffers) {
     auto& handler = ob.handler;
     ret.append(handler.isNull() ? s_default_output_handler : handler);
@@ -899,8 +899,8 @@ bool ExecutionContext::callUserErrorHandler(const Exception& e, int errnum,
     }
     try {
       ErrorStateHelper esh(this, ErrorState::ExecutingUserHandler);
-      m_deferredErrors = Array::CreateVec();
-      SCOPE_EXIT { m_deferredErrors = Array::CreateVec(); };
+      m_deferredErrors = empty_vec_array();
+      SCOPE_EXIT { m_deferredErrors = empty_vec_array(); };
       if (!same(vm_call_user_func
                 (m_userErrorHandlers.back().first,
                  make_vec_array(errnum, String(e.getMessage()),
@@ -1134,7 +1134,7 @@ ObjectData* ExecutionContext::initObject(const Class* class_,
   if (!isContainerOrNull(params)) {
     throw_param_is_not_container();
   }
-  tvDecRefGen(invokeFunc(ctor, params, o));
+  tvDecRefGen(invokeFunc(ctor, params, o, nullptr, nullptr, true, false, true));
   return o;
 }
 
@@ -1172,8 +1172,9 @@ void ExecutionContext::onLoadWithOptions(
     return;
   }
   if (m_requestOptions != opts) {
-    auto const path =
-      opts.path().empty() ? "{default options}" : opts.path().data();
+    // The data buffer has to stay alive for the call to raise_error.
+    auto const path_str = opts.path();
+    auto const path = path_str.empty() ? "{default options}" : path_str.data();
     raise_error(
       "Attempting to load file %s with incompatible parser settings from %s, "
       "this request is using parser settings from %s",
@@ -1205,12 +1206,21 @@ int ExecutionContext::getLine() {
   return unit->getLineNumber(pc);
 }
 
-const StaticString s___call("__call");
+ActRec* ExecutionContext::getFrameAtDepthForDebuggerUnsafe(int frameDepth) {
+  ActRec* ret = nullptr;
+  walkStack([&] (ActRec* fp, Offset) {
+    if (frameDepth == 0) {
+      if (fp && !fp->localsDecRefd()) {
+        ret = fp;
+      }
+      return true;
+    }
 
-ActRec* ExecutionContext::getFrameAtDepthForDebuggerUnsafe(int frame) {
-  auto fp = GetFrameForDebuggerUnsafe(frame);
-  assertx(!fp || !fp->magicDispatch());
-  return fp;
+    frameDepth--;
+    return false;
+  });
+  assertx(!ret || !ret->magicDispatch());
+  return ret;
 }
 
 void ExecutionContext::setVar(StringData* name, tv_rval v) {
@@ -1345,7 +1355,8 @@ void pseudomainHelper(const Unit* unit, bool callByHPHPInvoke) {
   }
 }
 
-const static StaticString s_entry_point("__SystemLib\\enter_async_entry_point");
+const static StaticString
+  s_enter_async_entry_point("__SystemLib\\enter_async_entry_point");
 
 TypedValue ExecutionContext::invokeUnit(const Unit* unit,
                                         bool callByHPHPInvoke) {
@@ -1355,9 +1366,7 @@ TypedValue ExecutionContext::invokeUnit(const Unit* unit,
     throw PhpNotSupportedException(unit->filepath()->data());
   }
 
-  auto const func = unit->getMain(nullptr);
-  auto ret = invokeFunc(func, init_null_variant, nullptr, nullptr,
-                    m_globalVarEnv, nullptr, InvokePseudoMain);
+  auto ret = invokePseudoMain(unit->getMain(nullptr), m_globalVarEnv);
 
   pseudomainHelper(unit, callByHPHPInvoke);
 
@@ -1365,13 +1374,13 @@ TypedValue ExecutionContext::invokeUnit(const Unit* unit,
   if (callByHPHPInvoke && it != nullptr) {
     if (it->isAsync()) {
       invokeFunc(
-        Unit::lookupFunc(s_entry_point.get()),
-        make_vec_array(VarNR{it->fullDisplayName()}),
-        nullptr, nullptr, nullptr, nullptr, InvokeNormal
+        Unit::lookupFunc(s_enter_async_entry_point.get()),
+        make_vec_array(Variant{it}),
+        nullptr, nullptr, nullptr, false
       );
     } else {
       invokeFunc(it, init_null_variant, nullptr, nullptr,
-                    nullptr, nullptr, InvokeNormal);
+                 nullptr, false);
     }
   }
   return ret;
@@ -1549,7 +1558,7 @@ void ExecutionContext::requestExit() {
     clearLastError();
   }
 
-  m_deferredErrors = Array::CreateVec();
+  m_deferredErrors = empty_vec_array();
 
   if (Logger::UseRequestLog) Logger::SetThreadHook(nullptr);
   if (m_requestTrace) record_trace(std::move(*m_requestTrace));
@@ -1570,9 +1579,11 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
                                             ObjectData* thiz, Class* cls,
                                             uint32_t argc, StringData* invName,
                                             bool dynamic,
+                                            bool allowDynCallNoPointer,
                                             FStackCheck doStackCheck,
                                             FInitArgs doInitArgs,
-                                            FEnterVM doEnterVM) {
+                                            FEnterVM doEnterVM,
+                                            Array&& reifiedGenerics) {
   assertx(f);
   // If `f' is a regular function, `thiz' and `cls' must be null.
   assertx(IMPLIES(!f->implCls(), (!thiz && !cls)));
@@ -1586,12 +1597,11 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
   VMRegAnchor _;
   auto const reentrySP = vmStack().top();
 
-  if (dynamic) callerDynamicCallChecks(f);
+  if (dynamic) callerDynamicCallChecks(f, allowDynCallNoPointer);
 
   if (thiz != nullptr) thiz->incRefCount();
 
-  TypedValue retval;
-  if (doStackCheck(retval)) return retval;
+  doStackCheck();
 
   if (UNLIKELY(f->takesInOutParams())) {
     for (auto i = f->numInOutParams(); i > 0; --i) vmStack().pushNull();
@@ -1643,6 +1653,8 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
     throw;
   }
 
+  if (reifiedGenerics.get()) ar->setReifiedGenerics(reifiedGenerics.detach());
+
   {
     pushVMState(reentrySP);
     SCOPE_EXIT {
@@ -1676,7 +1688,7 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
       auto arr = varr.toArray();
       return make_array_like_tv(arr.detach());
     } else {
-      tvCopy(*vmStack().topTV(), retval);
+      auto const retval = *vmStack().topTV();
       vmStack().discard();
       return retval;
     }
@@ -1711,23 +1723,62 @@ static inline void enterVM(ActRec* ar, Action action) {
   enterVMCustomHandler(ar, [&] { exception_handler(action); });
 }
 
+TypedValue ExecutionContext::invokePseudoMain(const Func* f,
+                                              VarEnv* varEnv /* = NULL */,
+                                              ObjectData* thiz /* = NULL */,
+                                              Class* cls /* = NULL */) {
+  assertx(f->isPseudoMain());
+  auto toMerge = f->unit();
+  toMerge->merge();
+  if (toMerge->isMergeOnly()) {
+    Stats::inc(Stats::PseudoMain_Skipped);
+    return *toMerge->getMainReturn();
+  }
+
+  Stats::inc(Stats::PseudoMain_Executed);
+
+  auto const doCheckStack = [&]() {
+    // We must do a stack overflow check for leaf functions on re-entry,
+    // because we won't have checked that the stack is deep enough for a
+    // leaf function /after/ re-entry, and the prologue for the leaf
+    // function will not make a check.
+    if (f->isPhpLeafFn()) {
+      // Check both the native stack and VM stack for overflow.
+      checkStack(vmStack(), f, kNumActRecCells);
+    } else {
+      // invokePseudoMain() must always check the native stack for overflow no
+      // matter what.
+      checkNativeStack();
+    }
+  };
+
+  auto const doInitArgs = [&] (ActRec* ar) {};
+
+  auto const doEnterVM = [&] (ActRec* ar) {
+    enterVM(ar, [&] { enterVMAtPseudoMain(ar, varEnv); });
+  };
+
+  return invokeFuncImpl(f, thiz, cls, 0, nullptr, false, false,
+                        doCheckStack, doInitArgs, doEnterVM, Array());
+}
+
 TypedValue ExecutionContext::invokeFunc(const Func* f,
                                         const Variant& args_,
                                         ObjectData* thiz /* = NULL */,
                                         Class* cls /* = NULL */,
-                                        VarEnv* varEnv /* = NULL */,
                                         StringData* invName /* = NULL */,
-                                        InvokeFlags flags /* = InvokeNormal */,
                                         bool dynamic /* = true */,
-                                        bool checkRefAnnot /* = false */) {
+                                        bool checkRefAnnot /* = false */,
+                                        bool allowDynCallNoPointer
+                                                              /* = false */,
+                                        Array&& reifiedGenerics
+                                                              /* = Array() */) {
   const auto& args = *args_.toCell();
   assertx(isContainerOrNull(args));
 
   auto const argc = cellIsNull(&args) ? 0 : getContainerSize(args);
-  // If we are inheriting a variable environment, then `args' must be empty.
-  assertx(IMPLIES(varEnv, argc == 0));
 
-  auto const doCheckStack = [&](TypedValue& retval) {
+  auto const doCheckStack = [&]() {
     // We must do a stack overflow check for leaf functions on re-entry,
     // because we won't have checked that the stack is deep enough for a
     // leaf function /after/ re-entry, and the prologue for the leaf
@@ -1742,46 +1793,24 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
       // matter what.
       checkNativeStack();
     }
-
-    // Handle includes of pseudomains.
-    if (flags & InvokePseudoMain) {
-      assertx(f->isPseudoMain());
-      assertx(cellIsNull(&args) || !getContainerSize(args));
-
-      auto toMerge = f->unit();
-      toMerge->merge();
-      if (toMerge->isMergeOnly()) {
-        Stats::inc(Stats::PseudoMain_Skipped);
-        retval = *toMerge->getMainReturn();
-        return true;
-      }
-      Stats::inc(Stats::PseudoMain_Executed);
-    }
-    return false;
   };
 
   auto const doInitArgs = [&] (ActRec* ar) {
-    if (!varEnv) {
-      auto const& prepArgs = cellIsNull(&args)
-        ? make_array_like_tv(staticEmptyVArray())
-        : args;
-      prepareArrayArgs(ar, prepArgs, vmStack(), 0, checkRefAnnot);
-    }
+    auto const& prepArgs = cellIsNull(&args)
+      ? make_array_like_tv(ArrayData::CreateVArray())
+      : args;
+    prepareArrayArgs(ar, prepArgs, vmStack(), 0, checkRefAnnot);
   };
 
   auto const doEnterVM = [&] (ActRec* ar) {
     enterVM(ar, [&] {
-      enterVMAtFunc(
-        ar,
-        varEnv ? StackArgsState::Untrimmed : StackArgsState::Trimmed,
-        varEnv
-      );
+      enterVMAtFunc(ar, StackArgsState::Trimmed, allowDynCallNoPointer);
     });
   };
 
-  return invokeFuncImpl(f, thiz, cls, argc, invName,
-                        dynamic && !(flags & InvokePseudoMain),
-                        doCheckStack, doInitArgs, doEnterVM);
+  return invokeFuncImpl(f, thiz, cls, argc, invName, dynamic,
+                        allowDynCallNoPointer, doCheckStack, doInitArgs,
+                        doEnterVM, std::move(reifiedGenerics));
 }
 
 TypedValue ExecutionContext::invokeFuncFew(const Func* f,
@@ -1789,8 +1818,10 @@ TypedValue ExecutionContext::invokeFuncFew(const Func* f,
                                            StringData* invName,
                                            int argc,
                                            const TypedValue* argv,
-                                           bool dynamic /* = true */) {
-  auto const doCheckStack = [&](TypedValue&) {
+                                           bool dynamic /* = true */,
+                                           bool allowDynCallNoPointer
+                                                                /* = false */) {
+  auto const doCheckStack = [&]() {
     // See comments in invokeFunc().
     if (f->isPhpLeafFn() ||
         !(argc <= kStackCheckReenterPadding - kNumActRecCells)) {
@@ -1798,7 +1829,6 @@ TypedValue ExecutionContext::invokeFuncFew(const Func* f,
     } else {
       checkNativeStack();
     }
-    return false;
   };
 
   auto const doInitArgs = [&](ActRec* /*ar*/) {
@@ -1814,14 +1844,14 @@ TypedValue ExecutionContext::invokeFuncFew(const Func* f,
   };
 
   auto const doEnterVM = [&] (ActRec* ar) {
-    enterVM(ar, [&] { enterVMAtFunc(ar, StackArgsState::Untrimmed, nullptr); });
+    enterVM(ar, [&] { enterVMAtFunc(ar, StackArgsState::Untrimmed); });
   };
 
   return invokeFuncImpl(f,
                         ActRec::decodeThis(thisOrCls),
                         ActRec::decodeClass(thisOrCls),
-                        argc, invName, dynamic,
-                        doCheckStack, doInitArgs, doEnterVM);
+                        argc, invName, dynamic, allowDynCallNoPointer,
+                        doCheckStack, doInitArgs, doEnterVM, Array());
 }
 
 static void prepareAsyncFuncEntry(ActRec* enterFnAr, Resumable* resumable) {
@@ -2016,9 +2046,7 @@ Variant ExecutionContext::getEvaledArg(const StringData* val,
   assertx(unit != nullptr);
   // Default arg values are not currently allowed to depend on class context.
   auto v = Variant::attach(
-    g_context->invokeFunc(unit->getMain(nullptr),
-                          init_null_variant, nullptr, nullptr, nullptr, nullptr,
-                          InvokePseudoMain)
+    g_context->invokePseudoMain(unit->getMain(nullptr))
   );
   SuppressHACFalseyPromoteNotices shacn;
   auto const lv = m_evaledArgs.lvalAt(key, AccessFlags::Key);
@@ -2219,9 +2247,8 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
     // current function on the stack, optionally passing a this pointer or
     // class used to execute the current function.
     return {false, Variant::attach(
-        invokeFunc(unit->getMain(functionClass), init_null_variant,
-                   this_, frameClass, fp ? fp->m_varEnv : nullptr, nullptr,
-                   InvokePseudoMain)
+      invokePseudoMain(unit->getMain(functionClass),
+                       fp ? fp->m_varEnv : nullptr, this_, frameClass)
     ), ""};
   } catch (FatalErrorException& e) {
     errorString << s_fatal.data();

@@ -28,7 +28,6 @@
 #include <folly/String.h>
 
 #include "hphp/util/assertions.h"
-#include "hphp/util/map-walker.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/jit/guard-constraint.h"
@@ -74,10 +73,6 @@ RegionMode regionMode() {
   return RegionMode::None;
 }
 
-template<typename Container>
-void truncateMap(Container& c, SrcKey final) {
-  c.erase(c.upper_bound(final), c.end());
-}
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -660,8 +655,6 @@ void RegionDesc::Block::truncateAfter(SrcKey final) {
   m_length = newLen;
   m_last = final.offset();
 
-  truncateMap(m_knownFuncs, final);
-
   checkInstructions();
   checkMetadata();
 }
@@ -683,14 +676,6 @@ void RegionDesc::Block::addPreCondition(const GuardedLocation& locGuard) {
   assertx(locGuard.type.isSpecialized() ||
           typeFitsConstraint(locGuard.type, locGuard.category));
   m_typePreConditions.push_back(locGuard);
-}
-
-void RegionDesc::Block::setKnownFunc(SrcKey sk, const Func* func) {
-  FTRACE(2, "Block::setKnownFunc({}, {})\n", showShort(sk),
-         func ? func->fullName()->data() : "nullptr");
-  assertx(m_knownFuncs.find(sk) == m_knownFuncs.end());
-  assertx(contains(sk));
-  m_knownFuncs.insert(std::make_pair(sk, func));
 }
 
 void RegionDesc::Block::setPostConds(const PostConditions& conds) {
@@ -738,22 +723,14 @@ void RegionDesc::Block::checkInstruction(Op op) const {
 /*
  * Check invariants about the metadata for this Block.
  *
- * 1. Each SrcKey in m_typePredictions, m_preConditions, and m_knownFuncs is
- *    within the bounds of the block.
+ * 1. Each SrcKey in m_typePredictions and m_preConditions is within
+ *    the bounds of the block.
  *
  * 2. Each local id referred to in the type prediction list is valid.
  *
  * 3. (Unchecked) each stack offset in the type prediction list is valid.
 */
 void RegionDesc::Block::checkMetadata() const {
-  auto rangeCheck = [&](const char* type, Offset o) {
-    if (o < m_start || o > m_last) {
-      std::cerr << folly::format("{} at {} outside range [{}, {}]\n",
-                                 type, o, m_start, m_last);
-      assertx(!"Region::Block contained out-of-range metadata");
-    }
-  };
-
   auto checkTypedLocations = [&](const char* /*msg*/, const TypedLocVec& vec) {
     for (auto& typedLoc : vec) {
       auto& loc = typedLoc.location;
@@ -763,10 +740,6 @@ void RegionDesc::Block::checkMetadata() const {
           break;
         case LTag::Stack:
         case LTag::MBase:
-          break;
-        case LTag::CSlotCls:
-        case LTag::CSlotTS:
-          assertx("Class-ref slot type-prediction" && false);
           break;
       }
     }
@@ -785,20 +758,12 @@ void RegionDesc::Block::checkMetadata() const {
         case LTag::Stack:
         case LTag::MBase:
           break;
-        case LTag::CSlotCls:
-        case LTag::CSlotTS:
-          assertx("Class-ref slot type-precondition" && false);
-          break;
       }
     }
   };
 
   checkTypedLocations("type prediction", m_typePredictions);
   checkGuardedLocations("type precondition", m_typePreConditions);
-
-  for (auto& func : m_knownFuncs) {
-    rangeCheck("known Func*", func.first.offset());
-  }
 }
 
 RegionDescPtr selectRegion(const RegionContext& context,
@@ -1213,10 +1178,7 @@ std::string show(const RegionDesc::Block& b) {
 
   auto& predictions   = b.typePredictions();
   auto& preconditions = b.typePreConditions();
-  auto  knownFuncs    = makeMapWalker(b.knownFuncs());
   auto  skIter        = b.start();
-
-  const Func* topFunc = nullptr;
 
   for (auto const& p : predictions) {
     folly::toAppend("  predict: ", show(p), "\n", &ret);
@@ -1226,16 +1188,6 @@ std::string show(const RegionDesc::Block& b) {
   }
 
   for (int i = 0; i < b.length(); ++i) {
-    std::string knownFunc;
-    if (knownFuncs.hasNext(skIter)) {
-      topFunc = knownFuncs.next();
-    }
-    if (topFunc) {
-      const char* inlined = "";
-      knownFunc = folly::format(" (top func: {}{})",
-                                topFunc->fullName(), inlined).str();
-    }
-
     std::string instrString;
     folly::toAppend(instrToString(b.unit()->at(skIter.offset()), b.unit()),
                     &instrString);
@@ -1244,9 +1196,7 @@ std::string show(const RegionDesc::Block& b) {
       "    ",
       skIter.offset(),
       "  ",
-      knownFunc.empty() ? instrString
-                        : folly::format("{:<40}", instrString).str(),
-      knownFunc,
+      instrString,
       "\n",
       &ret
     );

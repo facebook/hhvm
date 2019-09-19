@@ -329,27 +329,6 @@ const RepoOptions& RepoOptions::forFile(const char* path) {
   return ret ? *ret : defaults();
 }
 
-static inline std::string hhjsBabelTransformDefault() {
-  std::vector<folly::StringPiece> searchPaths;
-  folly::split(":", hhjsBabelTransform(), searchPaths);
-  std::string here = current_executable_directory();
-
-  for (folly::StringPiece searchPath : searchPaths) {
-    std::string transform = searchPath.toString();
-    std::size_t found = transform.find("{}");
-
-    if (found != std::string::npos) {
-      transform.replace(found, 2, here);
-    }
-
-    if (::access(transform.data(), X_OK) == 0) {
-      return transform;
-    }
-  }
-
-  return "";
-}
-
 std::string RepoOptions::cacheKeyRaw() const {
   return std::string("")
 #define N(_, n, ...) + mangleForKey(n)
@@ -517,6 +496,7 @@ uint32_t RuntimeOption::EvalInitialStaticStringTableSize =
 uint32_t RuntimeOption::EvalInitialNamedEntityTableSize = 30000;
 JitSerdesMode RuntimeOption::EvalJitSerdesMode{};
 int RuntimeOption::ProfDataTTLHours = 24;
+std::string RuntimeOption::ProfDataTag;
 std::string RuntimeOption::EvalJitSerdesFile;
 
 std::map<std::string, ErrorLogFileData> RuntimeOption::ErrorLogs = {
@@ -585,6 +565,7 @@ bool RuntimeOption::ServerStatCache = false;
 bool RuntimeOption::ServerFixPathInfo = false;
 bool RuntimeOption::ServerAddVaryEncoding = true;
 bool RuntimeOption::ServerLogSettingsOnStartup = false;
+bool RuntimeOption::ServerLogReorderProps = false;
 bool RuntimeOption::ServerForkEnabled = true;
 bool RuntimeOption::ServerForkLogging = false;
 bool RuntimeOption::ServerWarmupConcurrently = false;
@@ -679,6 +660,9 @@ std::string RuntimeOption::SSLTicketSeedFile;
 bool RuntimeOption::TLSDisableTLS1_2 = false;
 std::string RuntimeOption::TLSClientCipherSpec;
 bool RuntimeOption::EnableSSLWithPlainText = false;
+int RuntimeOption::SSLClientAuthLevel = 0;
+std::string RuntimeOption::SSLClientCAFile = "";
+uint32_t RuntimeOption::SSLClientAuthLoggingSampleRatio = 0;
 
 std::vector<std::shared_ptr<VirtualHost>> RuntimeOption::VirtualHosts;
 std::shared_ptr<IpBlockMap> RuntimeOption::IpBlocks;
@@ -706,6 +690,8 @@ std::string RuntimeOption::SourceRoot = Process::GetCurrentDirectory() + '/';
 std::vector<std::string> RuntimeOption::IncludeSearchPaths;
 std::map<std::string, std::string> RuntimeOption::IncludeRoots;
 std::map<std::string, std::string> RuntimeOption::AutoloadRoots;
+bool RuntimeOption::AutoloadEnabled;
+std::string RuntimeOption::AutoloadDBPath;
 std::string RuntimeOption::FileCache;
 std::string RuntimeOption::DefaultDocument;
 std::string RuntimeOption::ErrorDocument404;
@@ -744,6 +730,7 @@ std::string RuntimeOption::TakeoverFilename;
 std::string RuntimeOption::AdminServerIP;
 int RuntimeOption::AdminServerPort = 0;
 int RuntimeOption::AdminThreadCount = 1;
+bool RuntimeOption::AdminServerStatsNeedPassword = true;
 std::string RuntimeOption::AdminPassword;
 std::set<std::string> RuntimeOption::AdminPasswords;
 std::set<std::string> RuntimeOption::HashedAdminPasswords;
@@ -805,9 +792,6 @@ bool RuntimeOption::DisableSmallAllocator = true;
 bool RuntimeOption::DisableSmallAllocator = false;
 #endif
 
-int RuntimeOption::PerAllocSampleF = 100 * 1000 * 1000;
-int RuntimeOption::TotalAllocSampleF = 1 * 1000 * 1000;
-
 std::map<std::string, std::string> RuntimeOption::ServerVariables;
 std::map<std::string, std::string> RuntimeOption::EnvVariables;
 
@@ -828,7 +812,7 @@ bool RuntimeOption::DisableReservedVariables = true;
 uint64_t RuntimeOption::DisableConstant = 0;
 bool RuntimeOption::DisableNontoplevelDeclarations = false;
 bool RuntimeOption::DisableStaticClosures = false;
-bool RuntimeOption::DisableInstanceof = true;
+bool RuntimeOption::DisableHaltCompiler = false;
 bool RuntimeOption::EnableClassLevelWhereClauses = false;
 
 #ifdef HHVM_DYNAMIC_EXTENSION_DIR
@@ -975,6 +959,13 @@ static inline uint32_t hotTextHugePagesDefault() {
   return arch() == Arch::ARM ? 12 : 8;
 }
 
+static inline std::string reorderPropsDefault() {
+  if (isJitDeserializing()) {
+    return "countedness-hotness";
+  }
+  return debug ? "alphabetical" : "countedness";
+}
+
 static inline uint32_t profileRequestsDefault() {
   return debug ? std::numeric_limits<uint32_t>::max() : 2500;
 }
@@ -1009,6 +1000,38 @@ static inline bool layoutPrologueSplitHotColdDefault() {
 
 uint64_t ahotDefault() {
   return RuntimeOption::RepoAuthoritative ? 4 << 20 : 0;
+}
+
+folly::Optional<folly::fs::path> RuntimeOption::GetHomePath(
+  const folly::StringPiece user) {
+
+  auto homePath = folly::fs::path{RuntimeOption::SandboxHome}
+    / folly::fs::path{user};
+  if (folly::fs::is_directory(homePath)) {
+    return {std::move(homePath)};
+  }
+
+  if (!RuntimeOption::SandboxFallback.empty()) {
+    homePath = folly::fs::path{RuntimeOption::SandboxFallback}
+      / folly::fs::path{user};
+    if (folly::fs::is_directory(homePath)) {
+      return {std::move(homePath)};
+    }
+  }
+
+  return {};
+}
+
+bool RuntimeOption::ReadPerUserSettings(const folly::fs::path& confFileName,
+                                        IniSettingMap& ini, Hdf& config) {
+  try {
+    Config::ParseConfigFile(confFileName.native(), ini, config, false);
+    return true;
+  } catch (HdfException& e) {
+    Logger::Error("%s ignored: %s", confFileName.native().c_str(),
+                  e.getMessage().c_str());
+    return false;
+  }
 }
 
 std::string RuntimeOption::getTraceOutputFile() {
@@ -1099,6 +1122,7 @@ std::string RuntimeOption::DebuggerStartupDocument;
 int RuntimeOption::DebuggerSignalTimeout = 1;
 std::string RuntimeOption::DebuggerAuthTokenScriptBin;
 std::string RuntimeOption::DebuggerSessionAuthScriptBin;
+bool RuntimeOption::ForceDebuggerBpToInterp = false;
 
 std::string RuntimeOption::SendmailPath = "sendmail -t -i";
 std::string RuntimeOption::MailForceExtraParameters;
@@ -1348,6 +1372,7 @@ void RuntimeOption::Load(
         [&] (const String& f) {
           if (access(f.data(), R_OK) == 0) {
             fullpath = f.toCppString();
+            FTRACE_MOD(Trace::watchman_autoload, 3, "Parsing {}\n", fullpath);
             Config::ParseConfigFile(fullpath, ini, config);
             return true;
           }
@@ -1614,9 +1639,9 @@ void RuntimeOption::Load(
     Config::Bind(DisableStaticClosures, ini, config,
                  "Hack.Lang.Phpism.DisableStaticClosures",
                  DisableStaticClosures);
-    Config::Bind(DisableInstanceof, ini, config,
-                 "Hack.Lang.Phpism.DisableInstanceof",
-                 DisableInstanceof);
+    Config::Bind(DisableHaltCompiler, ini, config,
+                 "Hack.Lang.Phpism.DisableHaltCompiler",
+                 DisableHaltCompiler);
     Config::Bind(DisableConstant, ini, config,
                  "Hack.Lang.Phpism.DisableConstant",
                  DisableConstant);
@@ -1735,15 +1760,17 @@ void RuntimeOption::Load(
     // few places.  The config file should never need to explicitly set
     // DumpPreciseProfileData to true.
     auto const couldDump = !EvalJitSerdesFile.empty() &&
-      (isJitSerializing(EvalJitSerdesMode) ||
+      (isJitSerializing() ||
        (EvalJitSerdesMode == JitSerdesMode::DeserializeOrGenerate));
     Config::Bind(DumpPreciseProfData, ini, config,
                  "Eval.DumpPreciseProfData", couldDump);
     Config::Bind(ProfDataTTLHours, ini, config,
                  "Eval.ProfDataTTLHours", ProfDataTTLHours);
+    Config::Bind(ProfDataTag, ini, config, "Eval.ProfDataTag", ProfDataTag);
 
     Config::Bind(CheckSymLink, ini, config, "Eval.CheckSymLink", true);
-    Config::Bind(TrustAutoloaderPath, ini, config, "Eval.TrustAutoloaderPath", false);
+    Config::Bind(TrustAutoloaderPath, ini, config,
+                 "Eval.TrustAutoloaderPath", false);
 
 #define F(type, name, defaultVal) \
     Config::Bind(Eval ## name, ini, config, "Eval."#name, defaultVal);
@@ -1817,11 +1844,6 @@ void RuntimeOption::Load(
                  "Eval.DisableSmallAllocator", DisableSmallAllocator);
     SetArenaSlabAllocBypass(DisableSmallAllocator);
 
-    Config::Bind(PerAllocSampleF, ini, config, "Eval.PerAllocSampleF",
-                 PerAllocSampleF);
-    Config::Bind(TotalAllocSampleF, ini, config, "Eval.TotalAllocSampleF",
-                 TotalAllocSampleF);
-
     if (RecordCodeCoverage) CheckSymLink = true;
     Config::Bind(CodeCoverageOutputFile, ini, config,
                  "Eval.CodeCoverageOutputFile");
@@ -1867,6 +1889,8 @@ void RuntimeOption::Load(
                    "Eval.Debugger.Auth.TokenScriptBin");
       Config::Bind(DebuggerSessionAuthScriptBin, ini, config,
                    "Eval.Debugger.Auth.SessionAuthScriptBin");
+      Config::Bind(ForceDebuggerBpToInterp, ini, config,
+                   "Eval.Debugger.ForceDebuggerBpToInterp");
     }
   }
   {
@@ -1881,6 +1905,8 @@ void RuntimeOption::Load(
                  24 << 20);
     Config::Bind(CodeCache::AFrozenSize, ini, config, "Eval.JitAFrozenSize",
                  40 << 20);
+    Config::Bind(CodeCache::ABytecodeSize, ini, config,
+                 "Eval.JitABytecodeSize", 0);
     Config::Bind(CodeCache::GlobalDataSize, ini, config,
                  "Eval.JitGlobalDataSize", CodeCache::ASize >> 2);
 
@@ -2001,6 +2027,8 @@ void RuntimeOption::Load(
                  ServerAddVaryEncoding);
     Config::Bind(ServerLogSettingsOnStartup, ini, config,
                  "Server.LogSettingsOnStartup", false);
+    Config::Bind(ServerLogReorderProps, ini, config,
+                 "Server.LogReorderProps", false);
     Config::Bind(ServerWarmupConcurrently, ini, config,
                  "Server.WarmupConcurrently", false);
     Config::Bind(ServerWarmupThreadCount, ini, config,
@@ -2130,6 +2158,26 @@ void RuntimeOption::Load(
                  "Server.TLSClientCipherSpec");
     Config::Bind(EnableSSLWithPlainText, ini, config,
                  "Server.EnableSSLWithPlainText");
+    Config::Bind(SSLClientAuthLevel, ini, config,
+                 "Server.SSLClientAuthLevel", 0);
+    if (SSLClientAuthLevel < 0) SSLClientAuthLevel = 0;
+    if (SSLClientAuthLevel > 2) SSLClientAuthLevel = 2;
+    Config::Bind(SSLClientCAFile, ini, config, "Server.SSLClientCAFile", "");
+    if (!SSLClientAuthLevel) {
+      SSLClientCAFile = "";
+    } else if (SSLClientCAFile.empty()) {
+      throw std::runtime_error(
+          "SSLClientCAFile is required to enable client auth");
+    }
+
+    Config::Bind(SSLClientAuthLoggingSampleRatio, ini, config,
+                 "Server.SSLClientAuthLoggingSampleRatio", 0);
+    if (SSLClientAuthLoggingSampleRatio < 0) {
+      SSLClientAuthLoggingSampleRatio = 0;
+    }
+    if (SSLClientAuthLoggingSampleRatio > 100) {
+      SSLClientAuthLoggingSampleRatio = 100;
+    }
 
     // SourceRoot has been default to: Process::GetCurrentDirectory() + '/'
     auto defSourceRoot = SourceRoot;
@@ -2145,6 +2193,9 @@ void RuntimeOption::Load(
       IncludeSearchPaths[i] = FileUtil::normalizeDir(IncludeSearchPaths[i]);
     }
     IncludeSearchPaths.insert(IncludeSearchPaths.begin(), ".");
+
+    Config::Bind(AutoloadEnabled, ini, config, "Autoload.Enabled", false);
+    Config::Bind(AutoloadDBPath, ini, config, "Autoload.DBPath");
 
     Config::Bind(FileCache, ini, config, "Server.FileCache");
     Config::Bind(DefaultDocument, ini, config, "Server.DefaultDocument",
@@ -2342,6 +2393,8 @@ void RuntimeOption::Load(
     Config::Bind(AdminServerIP, ini, config, "AdminServer.IP", ServerIP);
     Config::Bind(AdminServerPort, ini, config, "AdminServer.Port", 0);
     Config::Bind(AdminThreadCount, ini, config, "AdminServer.ThreadCount", 1);
+    Config::Bind(AdminServerStatsNeedPassword, ini, config,
+                 "AdminServer.StatsNeedPassword", AdminServerStatsNeedPassword);
     Config::Bind(AdminPassword, ini, config, "AdminServer.Password");
     Config::Bind(AdminPasswords, ini, config, "AdminServer.Passwords");
     Config::Bind(HashedAdminPasswords, ini, config,
@@ -2655,6 +2708,10 @@ void RuntimeOption::Load(
 
   if (!RuntimeOption::EvalEmitClsMethPointers) {
     RuntimeOption::EvalIsCompatibleClsMethType = false;
+  }
+
+  if (RuntimeOption::EvalArrayProvenance) {
+    RuntimeOption::EvalJitForceVMRegSync = true;
   }
 
   // Initialize defaults for repo-specific parser configuration options.

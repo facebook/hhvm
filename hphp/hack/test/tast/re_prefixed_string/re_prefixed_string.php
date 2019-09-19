@@ -15,7 +15,7 @@ function f(): void {
   $z = $x.", world!";
 }
 
-/* HH_FIXME[4110] Don't care what this returns, just that it is of type T */
+/* HH_FIXME[4336] Don't care what this returns, just that it is of type T */
 function goodbye<T as HH\Lib\Regex\Match>(HH\Lib\Regex\Pattern<T> $pattern): T {
 }
 

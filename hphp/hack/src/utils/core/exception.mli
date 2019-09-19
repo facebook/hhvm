@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2018-present, Facebook, Inc.
  *
  * This source code is licensed under the MIT license found in the
@@ -7,14 +7,16 @@
 
 type t
 
-val wrap: exn -> t
+val wrap : exn -> t
 
-val reraise: t -> 'a
+val reraise : t -> 'a
 
-val to_string: t -> string
-val get_ctor_string: t -> string
-val get_backtrace_string: t -> string
+val to_string : t -> string
 
-val get_current_callstack_string: int -> string
+val get_ctor_string : t -> string
 
-val record_backtrace: bool -> unit
+val get_backtrace_string : t -> string
+
+val get_current_callstack_string : int -> string
+
+val record_backtrace : bool -> unit

@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
@@ -7,13 +7,12 @@
  *
  *)
 
-
 type action = string * int * int (* file contents, offset start, offset end *)
+
 type result = (string, string) Pervasives.result
 
-
 type ide_action =
-  | Document of string  (* filename *)
+  | Document of string (* filename *)
   | Range of Ide_api_types.file_range
   | Position of Ide_api_types.file_position
 

@@ -4,7 +4,3 @@ File "tapply_class.php", line 14, characters 20-25:
 Expected E<int>
 File "tapply_class.php", line 4, characters 17-23:
 But got dynamic
-File "tapply_class.php", line 26, characters 31-37:
-This is dynamic, it cannot be used as a reified type argument (Typing[4305])
-File "tapply_class.php", line 8, characters 15-15:
-T is reified

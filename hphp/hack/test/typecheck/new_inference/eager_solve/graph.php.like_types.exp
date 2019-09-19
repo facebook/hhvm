@@ -1,0 +1,6 @@
+File "graph.php", line 34, characters 21-29:
+Invalid argument (Typing[4110])
+File "graph.php", line 20, characters 13-41:
+Expected ~Map<[unresolved], ([unresolved], Set<[unresolved]>)> because it is an unenforceable type
+File "graph.php", line 25, characters 17-22:
+But got Map<[unresolved], ([unresolved], Set<[unresolved]>)>

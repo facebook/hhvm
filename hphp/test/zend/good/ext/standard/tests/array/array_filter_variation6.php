@@ -33,7 +33,7 @@ $value2 = array(5, 6, 4);
 $input = array($value1, 10, $value2, 'value');
 
 // with 'callback' argument
-var_dump( array_filter($input, 'callback') );
+var_dump( array_filter($input, fun('callback')) );
 
 // with default 'callback' argument
 var_dump( array_filter($input) );

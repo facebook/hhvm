@@ -12,7 +12,4 @@ File "tapply_class.php", line 29, characters 3-13:
   E<~int>
 File "tapply_class.php", line 33, characters 3-13:
   R<~int>
-File "tapply_class.php", line 24, characters 28-34:
-This is dynamic, it cannot be used as a reified type argument (Typing[4305])
-File "tapply_class.php", line 6, characters 15-15:
-T is reified
+No errors

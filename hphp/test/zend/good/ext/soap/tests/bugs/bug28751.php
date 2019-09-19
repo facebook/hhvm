@@ -2,7 +2,7 @@
 function __autoload($className) {
   include 'bug28751.inc';
 }
-
+<<__EntryPoint>> function main(): void {
 $server = new SoapServer(NULL, array('uri'=>"http://testuri.org"));
 $server->setClass("SoapServerActions");
 
@@ -22,3 +22,4 @@ EOF;
 
 $server->handle($HTTP_RAW_POST_DATA);
 echo "ok\n";
+}

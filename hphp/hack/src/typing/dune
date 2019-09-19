@@ -28,7 +28,8 @@
   (libraries
     core_kernel
     decl
-    typing_defs))
+    typing_defs)
+  (preprocess (pps ppx_deriving.std))) ; See T41851208
 
 (library
   (name tast)
@@ -43,9 +44,11 @@
     nast_check_env
     type_mapper
     type_parameter_env_ops
+    type_validator
     type_visitor
     typing_arrays
     typing_async
+    typing_coercion
     typing_continuations
     typing_deferred_members
     typing_dependent_type
@@ -54,12 +57,12 @@
     typing_env_from_def
     typing_env_return_info
     typing_env_types
-    typing_env_types_sig
     typing_equality_check
     typing_expand
     typing_fake_members
     typing_generic
     typing_generic_constraint
+    typing_generic_rules
     typing_local_types
     typing_intersection
     typing_log
@@ -73,6 +76,8 @@
     typing_phase
     typing_print
     typing_reactivity
+    typing_solver
+    typing_substring
     typing_subtype
     typing_subtype_tconst
     typing_taccess
@@ -80,10 +85,10 @@
     typing_unify
     typing_union
     typing_utils
+    typing_variance
     typing_visibility
+    typing_global_inference
     typing_xhp)
-  (modules_without_implementation
-    typing_env_types_sig)
   (libraries
     common
     decl
@@ -101,10 +106,9 @@
   (preprocess (pps ppx_deriving.std)))
 
 (library
-  (name typed_positioned_syntax)
+  (name tast_type_collector)
   (wrapped false)
   (modules
-    full_fidelity_typed_positioned_syntax
     tast_type_collector)
   (libraries
     core_kernel
@@ -125,7 +129,8 @@
     full_fidelity
     nast
     tast
-    typing_defs))
+    typing_defs)
+  (preprocess (pps ppx_deriving.std))) ; See T41851208
 
 (library
   (name typing)
@@ -137,7 +142,6 @@
     typing_alias
     typing_array_access
     typing_attributes
-    typing_coercion
     typing_debug
     typing_disposable
     typing_enum
@@ -154,8 +158,7 @@
     typing_sequencing
     typing_shapes
     typing_structure
-    typing_try
-    typing_variance)
+    typing_try)
   (libraries
     logging
     pcre
@@ -163,7 +166,8 @@
     tast
     tast_check
     nast_check
-    typing_naming_body))
+    typing_naming_body)
+  (preprocess (pps ppx_deriving.std))) ; See T41851208
 
 (library
   (name typing_ast)
@@ -178,9 +182,11 @@
     ast
     core_kernel
     errors
-    naming
+    naming_attributes
+    nast
     parser
-    typing_defs)
+    typing_defs
+    typechecker_options)
   (preprocess (pps ppx_deriving.std)))
 
 (library
@@ -192,15 +198,17 @@
     core_kernel
     ide_rpc_api_types
     tast
-    typing_defs))
+    typing_defs)
+  (preprocess (pps ppx_deriving.std))) ; See T41851208
 
 (library
   (name typing_check)
   (wrapped false)
   (modules
     typing_check_service
+    typing_check_utils
     typing_lru_check_service
-    typing_check_utils)
+    typing_remote_check_service)
   (libraries
     core_kernel
     decl
@@ -210,20 +218,13 @@
     global_options
     heap_global_storage
     procs_bucket
+    remote_scheduler_stubs
     server_monitor
     shared_lru_stubs
     typing
-    typing_defs))
-
-(library
-  (name typed_syntax_transforms)
-  (wrapped false)
-  (modules
-    typedSyntaxTransforms)
-  (libraries
-    core_kernel
-    full_fidelity
-    typed_positioned_syntax))
+    typing_defs
+    vfs_stubs)
+  (preprocess (pps ppx_deriving.std))) ; See T41851208
 
 (library
   (name tast_typecheck)
@@ -235,7 +236,8 @@
     core_kernel
     tast
     typing
-    utils_core))
+    utils_core)
+  (preprocess (pps ppx_deriving.std))) ; See T41851208
 
 (library
   (name typing_symbol_info)
@@ -248,4 +250,5 @@
     typing_ast
     procs_procs
     server_services
-    utils_core))
+    utils_core)
+  (preprocess (pps ppx_deriving.std))) ; See T41851208

@@ -25,10 +25,6 @@ $obj = new sizeof_class();
 
 echo "-- Testing sizeof() in default mode --\n";
 var_dump( sizeof($obj) );
-echo "-- Testing sizeof() in COUNT_NORMAL mode --\n";
-var_dump( sizeof($obj, COUNT_NORMAL) );
-echo "-- Testing sizeof() in COUNT_RECURSIVE mode --\n";
-var_dump( sizeof($obj, COUNT_RECURSIVE) );
 
 echo "Done";
 }

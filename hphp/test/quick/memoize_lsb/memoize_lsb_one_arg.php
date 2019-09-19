@@ -30,9 +30,10 @@ function main($suffix) {
   ]);
   var_dump(Base::$side_effects);
 }
-
+<<__EntryPoint>> function main_entry(): void {
 main("X");
 main("Y");
 
 main("X");
 main("Y");
+}

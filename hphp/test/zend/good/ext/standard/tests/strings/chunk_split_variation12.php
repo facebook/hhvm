@@ -6,10 +6,10 @@
 */
 
 /*
-* passing different heredoc strings as 'ending' argument to chunk_split() 
+* passing different heredoc strings as 'ending' argument to chunk_split()
 * 'chunklen' argument is set to 10
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing chunk_split() : different heredoc strings for 'ending' argument ***\n";
 
 // Initializing required variables
@@ -77,5 +77,6 @@ foreach($heredoc_arr as $value) {
   var_dump( chunk_split( $str, $chunklen, $value) );
   $count++;
 };
- 
+
 echo "Done";
+}

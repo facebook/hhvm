@@ -152,6 +152,8 @@ ALWAYS_INLINE bool MaybeCountable::checkCount() const {
     return m_count == OneReference || m_count == MultiReference || m_count < 0;
   }
 
+  // If this assertion fails, it indicates a double-free. Check it separately.
+  assertx(m_count < RefCountMaxRealistic);
   return m_count >= 1 || m_count <= UncountedValue || m_count == StaticValue;
 }
 

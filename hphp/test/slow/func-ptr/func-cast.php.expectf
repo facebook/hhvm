@@ -1,0 +1,18 @@
+string(3) "foo"
+bool(true)
+float(0)
+int(0)
+array(1) {
+  [0]=>
+  string(3) "foo"
+}
+Exception: String to varray conversion
+string(3) "foo"
+bool(true)
+float(0)
+int(0)
+array(1) {
+  [0]=>
+  function(foo)
+}
+Exception: Func to varray conversion

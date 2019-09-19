@@ -164,7 +164,7 @@ echo "1 1 13 34 12 == ",$g->F(1)," ", $g->F1(1),"  ",
      " ",$g->F4(0),"\n";
 
 // check SimpleFunctionCall::outputCPPParamOrderControlled
-$prev_handler=set_error_handler("error_handler");
+$prev_handler=set_error_handler(fun("error_handler"));
 $g->f4missing(3);
 // $b="G"; $b::f4(4);
 

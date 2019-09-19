@@ -242,11 +242,6 @@ VariableUnserializer::RefInfo::makeDictValue(tv_lval v) {
   return RefInfo{v, Type::DictValue};
 }
 
-VariableUnserializer::RefInfo
-VariableUnserializer::RefInfo::makeShapeValue(tv_lval v) {
-  return RefInfo{v, Type::ShapeValue};
-}
-
 tv_lval VariableUnserializer::RefInfo::var() const {
   return m_data.drop_tag();
 }
@@ -331,8 +326,6 @@ void VariableUnserializer::add(tv_lval v, UnserializeMode mode) {
     m_refs.emplace_back(RefInfo::makeDictValue(v));
   } else if (mode == UnserializeMode::ColValue) {
     m_refs.emplace_back(RefInfo::makeColValue(v));
-  } else if (mode == UnserializeMode::ShapeValue) {
-    m_refs.emplace_back(RefInfo::makeShapeValue(v));
   } else {
     assertx(mode == UnserializeMode::ColKey);
     // We don't currently support using the 'R' encoding to refer to collection
@@ -597,7 +590,7 @@ void VariableUnserializer::unserializeProp(ObjectData* obj,
                                            int nProp) {
 
   auto const cls = obj->getVMClass();
-  auto const lookup = cls->getDeclPropIndex(ctx, key.get());
+  auto const lookup = cls->getDeclPropSlot(ctx, key.get());
   auto const slot = lookup.slot;
   tv_lval t;
 
@@ -908,13 +901,6 @@ void VariableUnserializer::unserializeVariant(
       throwUnknownType(type);
     }
     break;
-  case 'H': // Shape
-    {
-      check_recursion_throw();
-      auto a = unserializeShape();
-      tvMove(make_array_like_tv(a.detach()), self);
-    }
-    return; // Shape has '}' terminating
   case 'a': // PHP array
   case 'D': // Dict
     {
@@ -1094,6 +1080,7 @@ void VariableUnserializer::unserializeVariant(
             auto const declProps = objCls->declProperties();
             for (auto const& p : declProps) {
               auto slot = p.serializationIdx;
+              auto index = objCls->propSlotToIndex(slot);
               auto const& prop = declProps[slot];
               if (prop.name == s_86reified_prop.get()) continue;
               if (!matchString(prop.mangledName->slice())) {
@@ -1104,7 +1091,7 @@ void VariableUnserializer::unserializeVariant(
               // don't need to worry about overwritten list, because
               // this is definitely the first time we're setting this
               // property.
-              TypedValue* tv = objProps + slot;
+              TypedValue* tv = objProps + index;
               auto const t = tv_lval{tv};
               unserializePropertyValue(t, remainingProps--);
 
@@ -1320,15 +1307,38 @@ Array VariableUnserializer::unserializeArray() {
   return arr;
 }
 
+folly::Optional<arrprov::Tag> VariableUnserializer::unserializeProvenanceTag() {
+  if (type() != VariableUnserializer::Type::Internal) return {};
+  if (peek() != 'p') return {};
+  expectChar('p');
+  expectChar(':');
+  expectChar('i');
+  expectChar(':');
+  auto const line = static_cast<int>(readInt());
+  expectChar(';');
+  expectChar('s');
+  expectChar(':');
+  auto const filename = unserializeString();
+  expectChar(';');
+  if (!RuntimeOption::EvalArrayProvenance) return {};
+  return arrprov::Tag{ makeStaticString(filename.get()), line };
+}
+
 Array VariableUnserializer::unserializeDict() {
   if (m_dvOverrides) m_dvOverrides->push_back(false);
 
   int64_t size = readInt();
   expectChar(':');
   expectChar('{');
+
+  auto const provTag = unserializeProvenanceTag();
+
   if (size == 0) {
     expectChar('}');
-    return Array::CreateDict();
+    return Array::attach(provTag
+      ? arrprov::makeEmptyDict(provTag)
+      : staticEmptyDictArray()
+    );
   }
   if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
     throwArraySizeOutOfBounds();
@@ -1378,6 +1388,7 @@ Array VariableUnserializer::unserializeDict() {
 
   check_non_safepoint_surprise();
   expectChar('}');
+  if (provTag) arrprov::setTag<arrprov::Mode::Emplace>(arr.get(), *provTag);
   return arr;
 }
 
@@ -1387,9 +1398,15 @@ Array VariableUnserializer::unserializeVec() {
   int64_t size = readInt();
   expectChar(':');
   expectChar('{');
+
+  auto const provTag = unserializeProvenanceTag();
+
   if (size == 0) {
     expectChar('}');
-    return Array::CreateVec();
+    return Array::attach(provTag
+      ? arrprov::makeEmptyVec(provTag)
+      : staticEmptyVecArray()
+    );
   }
   if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
     throwArraySizeOutOfBounds();
@@ -1423,6 +1440,7 @@ Array VariableUnserializer::unserializeVec() {
   }
   check_non_safepoint_surprise();
   expectChar('}');
+  if (provTag) arrprov::setTag<arrprov::Mode::Emplace>(arr.get(), *provTag);
   return arr;
 }
 
@@ -1576,14 +1594,6 @@ Array VariableUnserializer::unserializeDArray() {
 
   check_non_safepoint_surprise();
   expectChar('}');
-  return arr;
-}
-
-Array VariableUnserializer::unserializeShape() {
-  // Shapes need to behave like DArrays externally in the serializer. Calling
-  // unserializeDict here produces incompatible behaviour with getDefaultValueText()
-  auto arr = unserializeDArray();
-  arr = arr->toShapeInPlaceIfCompatible();
   return arr;
 }
 

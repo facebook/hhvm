@@ -43,6 +43,9 @@ function execution_context(): string;
 <<__Native>>
 function enable_legacy_behavior(vec_or_dict $v): vec_or_dict;
 
+<<__Native>>
+function is_legacy_behavior_enabled(vec_or_dict $v): bool;
+
 /**
  * This function is a kludge that returns the last argument it receives
  */
@@ -53,33 +56,33 @@ function sequence(mixed ... $args): mixed;
 
 namespace {
 
-/* Checks whether the client disconnected.
+/** Checks whether the client disconnected.
  * @return int - Returns 1 if client disconnected, 0 otherwise.
  */
 <<__Native>>
 function connection_aborted(): int;
 
-/* Gets the connection status bitfield.
+/** Gets the connection status bitfield.
  * @return int - Returns the connection status bitfield, which can be used
  * against the CONNECTION_XXX constants to determine the connection status.
  */
 <<__Native>>
 function connection_status(): int;
 
-/* Determines whether the script timed out.
+/** Determines whether the script timed out.
  * @return int - Returns 1 if the script timed out, 0 otherwise.
  */
 <<__Native>>
 function connection_timeout(): int;
 
-/* @param string $name - The constant name.
+/** @param string $name - The constant name.
  * @return mixed - Returns the value of the constant, or NULL if the constant
  * is not defined.
  */
 <<__Native>>
 function constant(string $name): mixed;
 
-/* Checks whether the given constant exists and is defined.  If you want to
+/** Checks whether the given constant exists and is defined.  If you want to
  * see if a variable exists, use isset() as defined() only applies to
  * constants. If you want to see if a function exists, use function_exists().
  * @param string $name - The constant name.
@@ -91,7 +94,7 @@ function constant(string $name): mixed;
 function defined(string $name,
                  bool $autoload = true): bool;
 
-/* Sets whether a client disconnect should cause a script to be aborted.  When
+/** Sets whether a client disconnect should cause a script to be aborted.  When
  * running PHP as a command line script, and the script's tty goes away
  * without the script being terminated then the script will die the next time
  * it tries to write anything, unless value is set to TRUE
@@ -103,7 +106,7 @@ function defined(string $name,
 <<__Native>>
 function ignore_user_abort(bool $setting = false): int;
 
-/* Pack given arguments into binary string according to format.  The idea for
+/** Pack given arguments into binary string according to format.  The idea for
  * this function was taken from Perl and all formatting codes work the same as
  * in Perl. However, there are some formatting codes that are missing such as
  * Perl's "u" format code.  Note that the distinction between signed and
@@ -138,7 +141,7 @@ function ignore_user_abort(bool $setting = false): int;
 <<__Native, __IsFoldable, __Rx>>
 function pack(string $format, ...$args): mixed;
 
-/* @param int $seconds - Halt time in seconds.
+/** @param int $seconds - Halt time in seconds.
  * @return int - Returns zero on success, or FALSE on errors. If the call was
  * interrupted by a signal, sleep() returns the number of seconds left to
  * sleep.
@@ -150,7 +153,7 @@ function pack(string $format, ...$args): mixed;
 <<__Native("NoFCallBuiltin")>>
 function sleep(int $seconds): int;
 
-/* Delays program execution for the given number of micro seconds.
+/** Delays program execution for the given number of micro seconds.
  * @param int $micro_seconds - Halt time in micro seconds. A micro second is
  * one millionth of a second.
  *
@@ -159,7 +162,7 @@ function sleep(int $seconds): int;
 <<__Native("NoFCallBuiltin")>>
 function usleep(int $micro_seconds): void;
 
-/* Delays program execution for the given number of seconds and nanoseconds.
+/** Delays program execution for the given number of seconds and nanoseconds.
  * @param int $seconds - Must be a positive integer.
  * @param int $nanoseconds - Must be a positive integer less than 1 billion.
  * @return mixed - Returns TRUE on success or FALSE on failure.  If the delay
@@ -173,7 +176,7 @@ function usleep(int $micro_seconds): void;
 function time_nanosleep(int $seconds,
                         int $nanoseconds): mixed;
 
-/* Makes the script sleep until the specified timestamp.
+/** Makes the script sleep until the specified timestamp.
  * @param float $timestamp - The timestamp when the script should wake.
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
@@ -182,7 +185,7 @@ function time_nanosleep(int $seconds,
 <<__Native("NoFCallBuiltin")>>
 function time_sleep_until(float $timestamp): bool;
 
-/* Gets a prefixed unique identifier based on the current time in
+/** Gets a prefixed unique identifier based on the current time in
  * microseconds.
  * @param string $prefix - Can be useful, for instance, if you generate
  * identifiers simultaneously on several hosts that might happen to generate
@@ -198,7 +201,7 @@ function time_sleep_until(float $timestamp): bool;
 function uniqid(string $prefix = "",
                 bool $more_entropy = false): string;
 
-/* Unpacks from a binary string into an array according to the given format.
+/** Unpacks from a binary string into an array according to the given format.
  * unpack() works slightly different from Perl as the unpacked data is stored
  * in an associative array. To accomplish this you have to name the different
  * format codes and separate them by a slash /.
@@ -211,7 +214,7 @@ function uniqid(string $prefix = "",
 function unpack(string $format,
                 string $data): mixed;
 
-/* Returns three samples representing the average system load (the number of
+/** Returns three samples representing the average system load (the number of
  * processes in the system run queue) over the last 1, 5 and 15 minutes,
  * respectively.
  * @return array - Returns an array with three samples (last 1, 5 and 15
@@ -220,7 +223,7 @@ function unpack(string $format,
 <<__Native>>
 function sys_getloadavg(): varray;
 
-/* Casts a given value to a string.
+/** Casts a given value to a string.
  * @param mixed $v - The value being casted to a string.
  * @return string - The result of the string cast.
  */
@@ -237,7 +240,7 @@ function __hhas_adata(string $incorrect_hhas_adata) {
 
 namespace __SystemLib {
 
-/* max2() returns the max of two operands (optimized FCallBuiltin for max).
+/** max2() returns the max of two operands (optimized FCallBuiltin for max).
  * @param mixed $arg1 - The first operand of max.
  * @param mixed $arg2 - The second operand of max.
  * @return mixed - The max of two operands.
@@ -245,7 +248,7 @@ namespace __SystemLib {
 <<__Native, __HipHopSpecific, __IsFoldable, __Rx>>
 function max2(mixed $arg1, mixed $arg2): mixed;
 
-/* min2() returns the min of two operands (optimized FCallBuiltin for min).
+/** min2() returns the min of two operands (optimized FCallBuiltin for min).
  * @param mixed $arg1 - The first operand of min.
  * @param mixed $arg2 - The second operand of min.
  * @return mixed - The min of two operands.

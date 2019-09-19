@@ -59,8 +59,7 @@ struct TypeAlias {
   template<class SerDe>
   typename std::enable_if<!SerDe::deserializing>::type
   serde(SerDe& sd) {
-    sd(name)
-      (value)
+    sd(value)
       (type)
       (nullable)
       (userAttrs)
@@ -76,8 +75,7 @@ struct TypeAlias {
   template<class SerDe>
   typename std::enable_if<SerDe::deserializing>::type
   serde(SerDe& sd) {
-    sd(name)
-      (value)
+    sd(value)
       (type)
       (nullable)
       (userAttrs)

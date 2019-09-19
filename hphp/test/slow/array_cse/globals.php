@@ -16,5 +16,5 @@ function foo($x) {
 for ($i = 0; $i < 100; ++$i) {
   $x = 0;
   $a = new obj;
-  var_dump(foo($GLOBALS));
+  var_dump(foo($GLOBALS['GLOBALS']));
 }

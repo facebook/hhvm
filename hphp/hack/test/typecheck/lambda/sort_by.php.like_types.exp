@@ -1,0 +1,8 @@
+File "sort_by.php", line 20, characters 70-76:
+Invalid return type (Typing[4110])
+File "sort_by.php", line 13, characters 23-25:
+Expected int
+File "sort_by.php", line 20, characters 70-76:
+But got float because this is the result of an arithmetic operation with a float as the first argument.
+File "sort_by.php", line 20, characters 62-63:
+Here is why I think the argument is a float: this is a float because the type of the lambda parameter could not be determined. Please add a type hint to the parameter

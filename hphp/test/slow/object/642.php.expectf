@@ -10,7 +10,3 @@ array(1) {
   ["test"]=>
   string(2) "ok"
 }
-object(A) (1) {
-  ["test"]=>
-  string(2) "ok"
-}

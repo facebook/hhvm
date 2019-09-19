@@ -1,0 +1,4 @@
+File "cond_reactivity_default1.php", line 13, characters 3-19:
+Reactive functions can only call other reactive functions. (Typing[4200])
+File "cond_reactivity_default1.php", line 7, characters 10-24:
+This function is local reactive.

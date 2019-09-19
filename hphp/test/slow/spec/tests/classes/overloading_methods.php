@@ -1,7 +1,5 @@
 <?hh
 
-error_reporting(-1);
-
 class Widget
 {
     public function iDoit()
@@ -26,14 +24,19 @@ class Widget
     }
 //*/
 }
+<<__EntryPoint>>
+function main_entry(): void {
 
-$obj = new Widget;
-$v = $obj->iDoit();
-$obj->__call('iDoit', []);
+  error_reporting(-1);
 
-$v = $obj->iMethod(10, TRUE, "abc");
-var_dump($v);
-$obj->__call('iMethod', array(10, TRUE, "abc"));
-$obj->__call('123#$%', []);
+  $obj = new Widget;
+  $v = $obj->iDoit();
+  $obj->__call('iDoit', []);
 
-$v = Widget::sDoit();
+  $v = $obj->iMethod(10, TRUE, "abc");
+  var_dump($v);
+  $obj->__call('iMethod', array(10, TRUE, "abc"));
+  $obj->__call('123#$%', []);
+
+  $v = Widget::sDoit();
+}

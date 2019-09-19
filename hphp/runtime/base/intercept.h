@@ -33,7 +33,8 @@ struct Variant;
  * return.
  */
 bool register_intercept(const String& name, const Variant& callback,
-                        const Variant& data, bool checkForDebugger);
+                        const Variant& data, bool checkForDebugger,
+                        bool newCallback);
 
 /**
  * Check to see if it is actually intercepted for current request.

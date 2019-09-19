@@ -1,0 +1,5 @@
+File "goto4.php", line 26, characters 3-13:
+  (A | exact B | exact C | exact F)
+File "goto4.php", line 29, characters 3-13:
+  (exact B | exact D)
+No errors

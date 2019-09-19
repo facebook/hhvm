@@ -1,0 +1,6 @@
+File "double_nullable2.php", line 8, characters 14-24:
+Invalid argument (Typing[4110])
+File "idx.hhi", line 32, characters 3-25:
+Expected ?KeyedContainer<[unresolved], ?[unresolved]>
+File "double_nullable2.php", line 7, characters 35-57:
+But got <expr#1> because it is an unenforceable type

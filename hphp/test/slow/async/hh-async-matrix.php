@@ -19,7 +19,6 @@ $vals = array(
   2.0,
   "Hello World",
   array(3.14),
-  (object)array(4, 8, 15, 16, 23, 42),
 );
 
 

@@ -13,31 +13,31 @@ final class PairIterator implements HH\Rx\KeyedIterator {
   <<__Rx>>
   public function __construct(): void {}
 
-  /* Returns the current value that the iterator points to.
+  /** Returns the current value that the iterator points to.
    * @return mixed
    */
   <<__Native, __Rx, __MaybeMutable>>
   public function current(): mixed;
 
-  /* Returns the current key that the iterator points to.
+  /** Returns the current key that the iterator points to.
    * @return mixed
    */
   <<__Native, __Rx, __MaybeMutable>>
   public function key(): mixed;
 
-  /* Returns true if the iterator points to a valid value, returns false
+  /** Returns true if the iterator points to a valid value, returns false
    * otherwise.
    * @return bool
    */
   <<__Native, __Rx, __MaybeMutable>>
   public function valid(): bool;
 
-  /* Advance this iterator forward one position.
+  /** Advance this iterator forward one position.
    */
   <<__Native, __Rx, __Mutable>>
   public function next(): void;
 
-  /* Move this iterator back to the first position.
+  /** Move this iterator back to the first position.
    */
   <<__Native, __Rx, __Mutable>>
   public function rewind(): void;

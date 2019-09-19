@@ -92,13 +92,6 @@ struct AliasAnalysis {
   LocationMap loc_expand_map;
 
   /*
-   * Similar to `stack_ranges', if an AClsRefSlot covers multiple locations, it
-   * will have an entry in this map.
-   */
-  LocationMap clsrefcls_expand_map;
-  LocationMap clsrefts_expand_map;
-
-  /*
    * Short-hand to find an alias class in the locations map, or get folly::none
    * if the alias class wasn't assigned an ALocMeta structure.
    */
@@ -113,12 +106,12 @@ struct AliasAnalysis {
   ALocBits all_elemSs;
   ALocBits all_frame;
   ALocBits all_stack;
-  ALocBits all_clsRefClsSlot;
-  ALocBits all_clsRefTSSlot;
   ALocBits all_rds;
   ALocBits all_ref;
-  ALocBits all_iterPos;
   ALocBits all_iterBase;
+  ALocBits all_iterType;
+  ALocBits all_iterPos;
+  ALocBits all_iterEnd;
 
   /*
    * Return the number of distinct locations we're tracking by id

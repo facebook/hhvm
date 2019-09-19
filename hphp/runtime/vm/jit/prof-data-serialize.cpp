@@ -46,6 +46,7 @@
 #include "hphp/runtime/vm/jit/type-profile.h"
 #include "hphp/runtime/vm/named-entity-defs.h"
 #include "hphp/runtime/vm/named-entity.h"
+#include "hphp/runtime/vm/property-profile.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/treadmill.h"
@@ -72,6 +73,8 @@ namespace {
 TRACE_SET_MOD(hhbc);
 
 StaticString s_invoke("__invoke");
+
+constexpr uint32_t kMagic = 0x4d564848;
 
 constexpr uint32_t k86pinitSlot = 0x80000000u;
 constexpr uint32_t k86sinitSlot = 0x80000001u;
@@ -222,12 +225,6 @@ void write_region_block(ProfDataSerializer& ser,
   write_raw(ser, block->profTransID());
   write_container(ser, block->typePredictions(), write_typed_location);
   write_container(ser, block->typePreConditions(), write_guarded_location);
-  write_container(ser, block->knownFuncs(),
-                  [] (ProfDataSerializer& s,
-                      std::pair<SrcKey, const Func*> knownFunc) {
-                    write_srckey(s, knownFunc.first);
-                    write_func(s, knownFunc.second);
-                  });
   write_container(ser, block->postConds().changed, write_typed_location);
   write_container(ser, block->postConds().refined, write_typed_location);
 }
@@ -256,13 +253,6 @@ RegionDesc::BlockPtr read_region_block(ProfDataDeserializer& ser) {
   read_container(ser,
                  [&] {
                    block->addPreCondition(read_guarded_location(ser));
-                 });
-
-  read_container(ser,
-                 [&] {
-                   auto const sk = read_srckey(ser);
-                   auto const func = read_func(ser);
-                   block->setKnownFunc(sk, func);
                  });
 
   PostConditions postConds;
@@ -352,7 +342,6 @@ void write_prof_trans_rec(ProfDataSerializer& ser,
       callers.push_back(callerTransId);
     };
     for (auto const caller : ptr->mainCallers()) addCaller(caller);
-    for (auto const caller : ptr->guardCallers()) addCaller(caller);
     write_container(ser, callers, write_raw<TransID>);
     write_raw(ser, ptr->asmSize());
   }
@@ -1327,6 +1316,7 @@ std::string serializeProfData(const std::string& filename) {
   try {
     ProfDataSerializer ser{filename};
 
+    write_raw(ser, kMagic);
     write_raw(ser, Repo::get().global().Signature);
     auto schema = repoSchemaId();
     write_raw(ser, schema.size());
@@ -1335,6 +1325,9 @@ std::string serializeProfData(const std::string& filename) {
     auto host = Process::GetHostName();
     write_raw(ser, host.size());
     write_raw(ser, &host[0], host.size());
+    auto& tag = RuntimeOption::ProfDataTag;
+    write_raw(ser, tag.size());
+    write_raw(ser, &tag[0], tag.size());
     write_raw(ser, TimeStamp::Current());
 
     Func::s_treadmill = true;
@@ -1348,6 +1341,7 @@ std::string serializeProfData(const std::string& filename) {
       Func::s_treadmill = false;
     };
 
+    PropertyProfile::serialize(ser);
     InstanceBits::init();
     InstanceBits::serialize(ser);
     write_global_array_map(ser);
@@ -1377,6 +1371,9 @@ std::string deserializeProfData(const std::string& filename, int numWorkers) {
 
     ProfDataDeserializer ser{filename};
 
+    if (read_raw<decltype(kMagic)>(ser) != kMagic) {
+      throw std::runtime_error("Not a profile-data dump");
+    }
     auto signature = read_raw<decltype(Repo::get().global().Signature)>(ser);
     if (signature != Repo::get().global().Signature) {
       throw std::runtime_error("Mismatched repo-schema");
@@ -1394,6 +1391,11 @@ std::string deserializeProfData(const std::string& filename, int numWorkers) {
     buildHost.resize(size);
     read_raw(ser, &buildHost[0], size);
 
+    size = read_raw<size_t>(ser);
+    std::string tag;
+    tag.resize(size);
+    read_raw(ser, &tag[0], size);
+
     int64_t buildTime;
     read_raw(ser, buildTime);
     auto const currTime = TimeStamp::Current();
@@ -1406,13 +1408,14 @@ std::string deserializeProfData(const std::string& filename, int numWorkers) {
                          buildTime, currTime).c_str());
     }
 
+    PropertyProfile::deserialize(ser);
     InstanceBits::deserialize(ser);
     read_global_array_map(ser);
 
     ProfData::Session pds;
     auto const pd = profData();
     read_prof_data(ser, pd);
-    pd->setDeserialized(buildHost, buildTime);
+    pd->setDeserialized(buildHost, tag, buildTime);
 
     read_target_profiles(ser);
 

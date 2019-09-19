@@ -1,2 +1,2 @@
-File "enum_7.php", line 11, characters 24-28:
-Enums must be int or string, not a mixed value (Typing[4024])
+File "enum_7.php", line 11, characters 7-9:
+Enums must be int or string or arraykey, not mixed (Typing[4024])

@@ -1,7 +1,5 @@
 <?hh
 
-print "Test begin\n";
-
 class C {
   public $p = 0;
 }
@@ -27,6 +25,8 @@ class E {
     $this->container[$k] = $v;
   }
 }
+<<__EntryPoint>> function main(): void {
+print "Test begin\n";
 
 $o = new C;
 $o->a .= "<a>";
@@ -71,3 +71,4 @@ print_r($o);
 print "\n";
 
 print "Test end\n";
+}

@@ -2,11 +2,11 @@
 
 class Cov<+T> {}
 
-/* HH_FIXME[4110] */
+/* HH_FIXME[4336] */
 function UseAs<Tv, Tu as Tv>(Cov<Tv> $x, Cov<Tu> $y): Tu {
 }
 
-/* HH_FIXME[4110] */
+/* HH_FIXME[4336] */
 function UseSuper<Tv super Tu, Tu>(Cov<Tv> $x, Cov<Tu> $y): Tu {
 }
 

@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
@@ -6,11 +6,11 @@
  *
  *)
 
-val go_ctx:
-  ctx:ServerIdeContext.t ->
-  entry:ServerIdeContext.entry ->
+val go_ctx :
+  ctx:Provider_context.t ->
+  entry:Provider_context.entry ->
   line:int ->
-  char:int ->
+  column:int ->
   ServerCommandTypes.Go_to_definition.result
 (** Returns the definition of the symbol at the given position in the document.
 

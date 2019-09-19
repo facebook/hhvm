@@ -1,0 +1,6 @@
+File "function_hint_with_variadic_parameter_not_covariant_2.php", line 12, characters 19-35:
+Invalid argument (Typing[4110])
+File "function_hint_with_variadic_parameter_not_covariant_2.php", line 9, characters 26-47:
+Expected ~(function(A...): void) because it is an unenforceable type
+File "function_hint_with_variadic_parameter_not_covariant_2.php", line 7, characters 10-19:
+But got (function(B $y...): void)

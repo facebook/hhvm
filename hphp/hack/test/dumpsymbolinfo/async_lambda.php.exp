@@ -36,7 +36,7 @@
     },
     {
       "pos":{"filename":"async_lambda.php","line":9,"char_start":3,"char_end":5},
-      "type":"(function(string $x): Awaitable<_>)",
+      "type":"(function(string $x): Awaitable<void>)",
       "ident":0
     },
     {

@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -7,4 +7,4 @@
  *
  *)
 
-val check_class : Typing_env.env -> Decl_provider.class_decl -> unit
+val check_class : Typing_env_types.env -> Decl_provider.class_decl -> unit

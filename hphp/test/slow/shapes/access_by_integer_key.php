@@ -16,8 +16,6 @@ function f(Tshape $s): string {
   return $s[1];
 }
 
-f(darray[0 => 0, 1 => 'one']);
-
 enum KeyType2: arraykey as arraykey {
   ZERO = 'zero';
   ONE = 'one';
@@ -36,5 +34,10 @@ function g(Tshape $s): float {
   var_dump($s[2]);
   return $s[2];
 }
+<<__EntryPoint>>
+function main_entry(): void {
 
-g(darray['zero' => 0, 'one' => 'one', 2 => 2.]);
+  f(darray[0 => 0, 1 => 'one']);
+
+  g(darray['zero' => 0, 'one' => 'one', 2 => 2.]);
+}

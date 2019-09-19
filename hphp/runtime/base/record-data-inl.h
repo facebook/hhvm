@@ -21,21 +21,12 @@
 #include "hphp/runtime/vm/record.h"
 
 namespace HPHP {
-namespace {
-inline size_t fieldSize(const RecordDesc* rec) {
-  return sizeof(TypedValue) * rec->numFields();
-}
-
-inline size_t sizeWithFields(const RecordDesc* rec) {
-  return sizeof(RecordData) + fieldSize(rec);
-}
-}
 
 inline size_t RecordData::heapSize() const {
   return sizeWithFields(m_record);
 }
 
-inline const RecordDesc* RecordData::record() const {
+inline const RecordDesc* RecordBase::record() const {
   return m_record;
 }
 
@@ -43,7 +34,7 @@ inline bool RecordData::kindIsValid() const {
   return m_kind == HeaderKind::Record;
 }
 
-inline const TypedValue* RecordData::fieldVec() const {
+inline const TypedValue* RecordBase::fieldVec() const {
   return reinterpret_cast<const TypedValue*>(uintptr_t(this + 1));
 }
 

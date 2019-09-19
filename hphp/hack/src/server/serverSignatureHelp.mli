@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -8,7 +8,9 @@
  *)
 
 val go :
-  ServerEnv.env ->
-  (ServerCommandTypes.file_input * int * int) ->
+  env:ServerEnv.env ->
+  file:ServerCommandTypes.file_input ->
+  line:int ->
+  column:int ->
   Lsp.SignatureHelp.result
 (** Returns signature help for the given location. *)

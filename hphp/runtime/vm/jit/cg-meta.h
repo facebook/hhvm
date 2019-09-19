@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_JIT_CODE_GEN_FIXUPS_H_
 #define incl_HPHP_JIT_CODE_GEN_FIXUPS_H_
 
+#include "hphp/runtime/base/backtrace.h"
+
 #include "hphp/runtime/vm/jit/alignment.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/fixup.h"
@@ -30,28 +32,6 @@
 #include <vector>
 
 namespace HPHP { namespace jit {
-
-using IFrameID = int32_t;
-
-struct IFrame {
-  const Func* func; // callee (m_func)
-  int32_t callOff;  // caller offset (m_callOff)
-  IFrameID parent;  // parent frame (m_sfp)
-};
-
-struct IStack {
-  IFrameID frame; // leaf frame in this stack
-  uint32_t nframes;
-  uint32_t callOff;
-
-  template<class SerDe> void serde(SerDe& sd) {
-    sd
-      (frame)
-      (nframes)
-      (callOff)
-      ;
-  }
-};
 
 /*
  * CGMeta contains a variety of different metadata information that is
@@ -240,9 +220,9 @@ void eraseInlineStacksInRange(CTCA start, CTCA end);
 }}
 
 namespace folly {
-template<> class FormatValue<HPHP::jit::IFrame> {
+template<> class FormatValue<HPHP::IFrame> {
 public:
-  explicit FormatValue(HPHP::jit::IFrame ifr) : m_ifr(ifr) {}
+  explicit FormatValue(HPHP::IFrame ifr) : m_ifr(ifr) {}
 
   template<typename Callback>
   void format(FormatArg& arg, Callback& cb) const {
@@ -256,7 +236,7 @@ public:
   }
 
 private:
-  HPHP::jit::IFrame m_ifr;
+  HPHP::IFrame m_ifr;
 };
 }
 

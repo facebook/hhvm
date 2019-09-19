@@ -1,66 +1,74 @@
-(**
+(*
  * Copyright (c) 2017, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the "hack" directory of this source tree.
  *
-*)
+ *)
 open Core_kernel
-
 module SN = Naming_special_names
 
 let quote_string s = "\"" ^ Php_escaping.escape s ^ "\""
+
 let quote_string_with_escape ?(f = Php_escaping.escape_char) s =
   "\\\"" ^ Php_escaping.escape ~f s ^ "\\\""
+
 let single_quote_string_with_escape ?(f = Php_escaping.escape_char) s =
   "'" ^ Php_escaping.escape ~f s ^ "'"
+
 let triple_quote_string s = "\"\"\"" ^ Php_escaping.escape s ^ "\"\"\""
 
 let prefix_namespace n s = n ^ "\\" ^ s
+
 let strip_global_ns s =
-  if String.length s > 0 || s.[0] = '\\'
-  then String_utils.lstrip s "\\"
-  else s
+  if String.length s > 0 && s.[0] = '\\' then
+    String_utils.lstrip s "\\"
+  else
+    s
+
 let strip_ns =
   let rx = Str.regexp {|.*\\|} in
   (* strip zero or more chars followed by a backslash *)
-  fun s -> Str.replace_first rx "" s
+  (fun s -> Str.replace_first rx "" s)
+
 let has_ns =
   let rx = Str.regexp {|.+\\.+|} in
-  fun s -> Str.string_match rx s 0
+  (fun s -> Str.string_match rx s 0)
+
 let strip_type_list =
   let rx = Str.regexp {|<.*>|} in
-  fun s -> Str.global_replace rx "" s
+  (fun s -> Str.global_replace rx "" s)
 
-let cmp ?(case_sensitive=true) ?(ignore_ns=false) s1 s2 =
-  let s1, s2 =
-    if case_sensitive then s1, s2 else
-    String.lowercase s1, String.lowercase s2
+let cmp ?(case_sensitive = true) ?(ignore_ns = false) s1 s2 =
+  let (s1, s2) =
+    if case_sensitive then
+      (s1, s2)
+    else
+      (String.lowercase s1, String.lowercase s2)
   in
-  let s1, s2 =
-    if not ignore_ns then s1, s2 else
-    strip_ns s1, strip_ns s2
+  let (s1, s2) =
+    if not ignore_ns then
+      (s1, s2)
+    else
+      (strip_ns s1, strip_ns s2)
   in
   s1 = s2
 
-let is_self s =
-  String.lowercase s = SN.Classes.cSelf
+let is_self s = String.lowercase s = SN.Classes.cSelf
 
-let is_parent s =
-  String.lowercase s = SN.Classes.cParent
+let is_parent s = String.lowercase s = SN.Classes.cParent
 
-let is_static s =
-  String.lowercase s = SN.Classes.cStatic
+let is_static s = String.lowercase s = SN.Classes.cStatic
 
-let is_class s =
-  String.lowercase s = SN.Members.mClass
+let is_class s = String.lowercase s = SN.Members.mClass
 
 let mangle_meth_caller mangled_cls_name f_name =
   "\\MethCaller$" ^ mangled_cls_name ^ "$" ^ f_name
 
 module Types = struct
-  let fix_casing s = match String.lowercase s with
+  let fix_casing s =
+    match String.lowercase s with
     | "vector" -> "Vector"
     | "immvector" -> "ImmVector"
     | "set" -> "Set"
@@ -74,16 +82,24 @@ end
 (* Integers are represented as strings *)
 module Integer = struct
   (* Dont accidentally convert 0 to 0o *)
-  let to_decimal s = Int64.to_string @@ Int64.of_string @@
+  let to_decimal s =
+    Int64.to_string
+    @@ Int64.of_string
+    @@
     if String.length s > 1 && s.[0] = '0' then
-    match s.[1] with
-    (* Binary *)
-    | 'b' | 'B'
-    (* Hex *)
-    | 'x' | 'X' -> s
-    (* Octal *)
-    | _ -> "0o" ^ String_utils.lstrip s "0"
-    else s
+      match s.[1] with
+      (* Binary *)
+      | 'b'
+      | 'B'
+      (* Hex *)
+
+      | 'x'
+      | 'X' ->
+        s
+      (* Octal *)
+      | _ -> "0o" ^ String_utils.lstrip s "0"
+    else
+      s
 
   (* In order for this to be true, every char has to be a number as well as
    * if the first digit is a zero, then there cannot be more digits
@@ -95,13 +111,15 @@ module Integer = struct
    * 08 -> false (octal)
    * 0b1 -> false (binary)
    *
-   **)
-  let is_decimal_int s = if s = "-0" then false else
-    let s = String_utils.lstrip s "-" in
-    String_utils.fold_left s
-      ~acc:true
-      ~f:(fun acc i -> String_utils.is_decimal_digit i && acc)
-    && (String.length s = 1 || (s.[0] <> '0'))
+   * *)
+  let is_decimal_int s =
+    if s = "-0" then
+      false
+    else
+      let s = String_utils.lstrip s "-" in
+      String_utils.fold_left s ~acc:true ~f:(fun acc i ->
+          String_utils.is_decimal_digit i && acc)
+      && (String.length s = 1 || s.[0] <> '0')
 end
 
 module Float = struct
@@ -115,23 +133,26 @@ module Float = struct
   (* Unfortunately the g flag does not provide enough of a match with hhvm,
    * hence we go for manual manipulation *)
   let with_scientific_notation f =
-    if String.contains f 'E' || String.contains f 'e'
-    then Printf.sprintf "%0.1E" (float_of_string f)
-    else f
+    if String.contains f 'E' || String.contains f 'e' then
+      Printf.sprintf "%0.1E" (float_of_string f)
+    else
+      f
 end
 
 module Locals = struct
-
   let strip_dollar s = String_utils.lstrip s "$"
-
 end
 
 module Classes = struct
-
   let mangle_class prefix scope ix =
-    prefix ^ "$"
+    prefix
+    ^ "$"
     ^ scope
-    ^ (if ix = 1 then "" else "#" ^ string_of_int ix)
+    ^
+    if ix = 1 then
+      ""
+    else
+      "#" ^ string_of_int ix
 
   (* Anonymous classes have names of the form
    *   class@anonymous$ scope ix ; num
@@ -143,17 +164,15 @@ module Classes = struct
    *   ix ::=
    *     # <digits>
    *)
-  let mangle_anonymous_class scope ix =
-    mangle_class "class@anonymous" scope ix
+  let mangle_anonymous_class scope ix = mangle_class "class@anonymous" scope ix
 
   let is_anonymous_class_name n =
     String_utils.string_starts_with n "class@anonymous"
 end
 
 module Closures = struct
+  let is_closure_name s = String_utils.string_starts_with s "Closure$"
 
-  let is_closure_name s =
-    String_utils.string_starts_with s "Closure$"
   (* Closure classes have names of the form
    *   Closure prefix $ scope ix ; num
    * where
@@ -171,7 +190,8 @@ module Closures = struct
     let strip_index s =
       match String.lsplit2 s ~on:'#' with
       | Some (prefix, _) -> prefix
-      | None -> s in
+      | None -> s
+    in
     fun s ->
       match String.split s ~on:'$' with
       | ["Closure"; _prefix; scope] -> Some (strip_index scope)
@@ -180,7 +200,7 @@ module Closures = struct
 
   let mangle_closure scope ix name =
     match name with
-    | Some s -> Classes.mangle_class ("Closure$" ^ s)  scope ix
+    | Some s -> Classes.mangle_class ("Closure$" ^ s) scope ix
     | None -> Classes.mangle_class "Closure" scope ix
 end
 
@@ -190,7 +210,11 @@ module Xhp = struct
 
   let strip_colon s = String_utils.lstrip s ":"
 
-  let clean s = if not (is_xhp s) then s else strip_colon s
+  let clean s =
+    if not (is_xhp s) then
+      s
+    else
+      strip_colon s
 
   let ignore_id s =
     Classes.is_anonymous_class_name s || Closures.is_closure_name s
@@ -200,58 +224,86 @@ module Xhp = struct
     let rx_colon = Str.regexp ":" in
     let rx_dash = Str.regexp "-" in
     fun s ->
-      if ignore_id s then s
-      else
-      let need_prefix = is_xhp s in
-      let s = if need_prefix then (strip_colon s) else s in
-      let s =
+      if ignore_id s then
         s
-        |> Str.global_replace rx_colon "__"
-        |> Str.global_replace rx_dash "_" in
-      if need_prefix then "xhp_" ^ s else s
+      else
+        let need_prefix = is_xhp s in
+        let s =
+          if need_prefix then
+            strip_colon s
+          else
+            s
+        in
+        let s =
+          s
+          |> Str.global_replace rx_colon "__"
+          |> Str.global_replace rx_dash "_"
+        in
+        if need_prefix then
+          "xhp_" ^ s
+        else
+          s
 
   let mangle_id s =
-    if ignore_id s then s else mangle_id_worker s
+    if ignore_id s then
+      s
+    else
+      mangle_id_worker s
 
   (* Mangle a possibly-qualified ID *)
   let mangle =
     let rx = Str.regexp "\\" in
     fun s ->
-      if ignore_id s then s
+      if ignore_id s then
+        s
       else
-      match List.rev (Str.split_delim rx s) with
-      | [] -> ""
-      | id::rest ->
-        String.concat ~sep:"\\" (List.rev (mangle_id_worker id :: rest))
+        match List.rev (Str.split_delim rx s) with
+        | [] -> ""
+        | id :: rest ->
+          String.concat ~sep:"\\" (List.rev (mangle_id_worker id :: rest))
 
   let unmangle_id_worker =
     let rx_dunder = Str.regexp "__" in
     let rx_under = Str.regexp "_" in
     fun s ->
       let has_prefix = String_utils.string_starts_with s "xhp_" in
-      let s = if has_prefix then String_utils.lstrip s "xhp_" else s in
+      let s =
+        if has_prefix then
+          String_utils.lstrip s "xhp_"
+        else
+          s
+      in
       let s =
         s
         |> Str.global_replace rx_dunder ":"
-        |>Str.global_replace rx_under "-" in
-      if has_prefix then ":" ^ s else s
+        |> Str.global_replace rx_under "-"
+      in
+      if has_prefix then
+        ":" ^ s
+      else
+        s
 
   let unmangle =
     let rx = Str.regexp "\\" in
     fun s ->
-      if ignore_id s then s
+      if ignore_id s then
+        s
       else
-      match List.rev (Str.split_delim rx s) with
-      | [] -> ""
-      | id::rest ->
-        String.concat ~sep:"\\" (List.rev (unmangle_id_worker id :: rest))
-
+        match List.rev (Str.split_delim rx s) with
+        | [] -> ""
+        | id :: rest ->
+          String.concat ~sep:"\\" (List.rev (unmangle_id_worker id :: rest))
 end
 
 (* Reified param mangling *)
 module Reified = struct
   let mangle_reified_param ?(nodollar = false) s =
-    (if nodollar then "" else "$") ^ "__reified$" ^ s
+    ( if nodollar then
+      ""
+    else
+      "$" )
+    ^ "__reified$"
+    ^ s
 
   let reified_prop_name = "86reified_prop"
 
@@ -262,18 +314,24 @@ module Reified = struct
   let reified_generics_local_name = "$0ReifiedGenerics"
 
   let reified_generic_captured_name is_fun i =
-    let type_ = if is_fun then "function" else "class" in
+    let type_ =
+      if is_fun then
+        "function"
+      else
+        "class"
+    in
     Printf.sprintf "$__captured$reifiedgeneric$%s$%d" type_ i
 
   let is_captured_generic id =
     let prefix = "$__captured$reifiedgeneric$" in
-    let (>>=) = Option.(>>=) in
+    let ( >>= ) = Option.( >>= ) in
     String.chop_prefix ~prefix id
     >>= String.lsplit2 ~on:'$'
-    >>= (fun v -> try match v with
-          | ("function", i) -> Some (true, int_of_string i)
-          | ("class", i) -> Some (false, int_of_string i)
-          | _ -> None
-          with _ -> None
-        )
+    >>= fun v ->
+    try
+      match v with
+      | ("function", i) -> Some (true, int_of_string i)
+      | ("class", i) -> Some (false, int_of_string i)
+      | _ -> None
+    with _ -> None
 end

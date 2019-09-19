@@ -162,6 +162,12 @@ void raise_record_init_error(const StringData* recName,
                              const StringData* fieldName);
 
 /*
+ * Raise error if a record field is not declared.
+ */
+[[noreturn]] void raise_record_field_error(const StringData* recName,
+                                           const StringData* fieldName);
+
+/*
  * Raise the appropriate warning or error if we try to bind a property to a ref,
  * and that property has a type-hint which we're enforcing.
  */
@@ -178,7 +184,8 @@ void raise_property_typehint_unset_error(const Class* declCls,
                                          bool isSoft);
 
 void raise_resolve_undefined(const StringData* name, const Class* c = nullptr);
-void raise_call_to_undefined(const StringData* name, const Class* c = nullptr);
+[[noreturn]] void raise_call_to_undefined(const StringData* name,
+                                          const Class* c = nullptr);
 
 void raise_convert_object_to_string(const char* cls_name);
 void raise_convert_record_to_type(const char* typeName);
@@ -194,24 +201,24 @@ void raise_hack_arr_compat_array_producing_func_notice(const std::string& name);
 
 void raise_hackarr_compat_type_hint_param_notice(const Func* func,
                                                  const ArrayData* ad,
-                                                 AnnotType at,
+                                                 const char* name,
                                                  int param);
 void raise_hackarr_compat_type_hint_ret_notice(const Func* func,
                                                const ArrayData* ad,
-                                               AnnotType at);
+                                               const char* name);
 void raise_hackarr_compat_type_hint_outparam_notice(const Func* func,
                                                     const ArrayData* ad,
-                                                    AnnotType at,
+                                                    const char* name,
                                                     int param);
 void raise_hackarr_compat_type_hint_property_notice(const Class* declCls,
                                                     const ArrayData* ad,
-                                                    AnnotType at,
+                                                    const char* name,
                                                     const StringData* propName,
                                                     bool isStatic);
 void raise_hackarr_compat_type_hint_rec_field_notice(
     const StringData* recName,
     const ArrayData* ad,
-    AnnotType at,
+    const char* name,
     const StringData* fieldName);
 void raise_hackarr_compat_is_operator(const char* source, const char* target);
 

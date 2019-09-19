@@ -4,10 +4,10 @@
  * Source code: ext/standard/array.c
  * Alias to functions:
  */
+include('compare_function.inc');
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_udiff_assoc() : variation - testing with multiple array arguments ***\n";
 
-include('compare_function.inc');
 $key_compare_function = 'compare_function';
 
 // Initialise all required variables

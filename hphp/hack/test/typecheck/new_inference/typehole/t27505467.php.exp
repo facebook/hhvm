@@ -1,5 +1,5 @@
 File "t27505467.php", line 15, characters 7-9:
-Could not find method foo in an object of type D (Typing[4053])
+No method 'foo' in D (Typing[4053])
 File "t27505467.php", line 12, characters 43-43:
 This is why I think it is an object of type D
 File "t27505467.php", line 7, characters 7-7:

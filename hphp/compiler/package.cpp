@@ -107,15 +107,10 @@ void Package::addDirectory(const std::string &path, bool force) {
   m_directories[path] |= force;
 }
 
-void Package::addHHJSDirectory(const std::string &path, bool force) {
-  m_hhjsDirectories[path] |= force;
-}
-
 std::shared_ptr<FileCache> Package::getFileCache() {
   for (auto const& dir : m_directories) {
     std::vector<std::string> files;
-    FileUtil::find(files, m_root, dir.first,
-                   /* php */ false, /* js */ true, /* other */ true,
+    FileUtil::find(files, m_root, dir.first, /* php */ false,
                    &Option::PackageExcludeStaticDirs,
                    &Option::PackageExcludeStaticFiles);
     Option::FilterFiles(files, Option::PackageExcludeStaticPatterns);
@@ -129,8 +124,7 @@ std::shared_ptr<FileCache> Package::getFileCache() {
   }
   for (auto const& dir : m_staticDirectories) {
     std::vector<std::string> files;
-    FileUtil::find(files, m_root, dir,
-                   /* php */ false, /* js */ true, /* other */ true);
+    FileUtil::find(files, m_root, dir, /* php */ false);
     for (auto& file : files) {
       auto const rpath = file.substr(m_root.size());
       if (!m_fileCache->fileExists(rpath.c_str())) {
@@ -168,25 +162,22 @@ std::shared_ptr<FileCache> Package::getFileCache() {
 namespace {
 
 struct ParseItem {
-  ParseItem() : fileName(nullptr), check(false), force(false), js(false) {}
-  ParseItem(const std::string* file, bool check, bool js) :
+  ParseItem() : fileName(nullptr), check(false), force(false) {}
+  ParseItem(const std::string* file, bool check) :
       fileName(file),
       check(check),
-      force(false),
-      js(js)
+      force(false)
     {}
-  ParseItem(const std::string& dir, bool force, bool js) :
+  ParseItem(const std::string& dir, bool force) :
       dirName(dir),
       fileName(nullptr),
       check(false),
-      force(force),
-      js(js)
+      force(force)
     {}
   std::string dirName;
   const std::string* fileName;
   bool check; // whether its an error if the file isn't found
   bool force; // true to skip filters
-  bool js; // whether to check for JS files
 };
 
 struct ParserWorker
@@ -199,7 +190,7 @@ struct ParserWorker
         if (job.fileName) {
           return m_context->parseImpl(job.fileName);
         }
-        m_context->addSourceDirectory(job.dirName, job.force, job.js);
+        m_context->addSourceDirectory(job.dirName, job.force);
         return true;
       } catch (Exception& e) {
         Logger::Error(e.getMessage());
@@ -230,8 +221,7 @@ using ParserDispatcher = JobQueueDispatcher<ParserWorker>;
 ///////////////////////////////////////////////////////////////////////////////
 
 void Package::addSourceFile(const std::string& fileName,
-                            bool check /* = false */,
-                            bool js /* = false */) {
+                            bool check /* = false */) {
   if (!fileName.empty()) {
     auto canonFileName =
       FileUtil::canonicalize(String(fileName)).toCppString();
@@ -242,16 +232,15 @@ void Package::addSourceFile(const std::string& fileName,
     }();
 
     if (file) {
-      static_cast<ParserDispatcher*>(m_dispatcher)->enqueue({file, check, js});
+      static_cast<ParserDispatcher*>(m_dispatcher)->enqueue({file, check});
     }
   }
 }
 
 void Package::addSourceDirectory(const std::string& path,
-                                 bool force,
-                                 bool js /* = false */) {
-  FileUtil::find(m_root, path,
-    /* php */ true, /* js */ js, /* other */ false,
+                                 bool force) {
+  FileUtil::find(
+    m_root, path, /* php */ true,
     [&] (const std::string& name, bool dir) {
       if (!dir) {
         if (!force) {
@@ -260,7 +249,7 @@ void Package::addSourceDirectory(const std::string& path,
             return false;
           }
         }
-        addSourceFile(name, true, js);
+        addSourceFile(name, true);
         return true;
       }
       if (!force && Option::PackageExcludeDirs.count(name)) {
@@ -276,15 +265,14 @@ void Package::addSourceDirectory(const std::string& path,
         return true;
       }
       // Process the directory as a new job
-      static_cast<ParserDispatcher*>(m_dispatcher)->enqueue({name, force, js});
+      static_cast<ParserDispatcher*>(m_dispatcher)->enqueue({name, force});
       // Don't iterate the directory in this job.
       return false;
     });
 }
 
 bool Package::parse(bool check) {
-  if (m_filesToParse.empty() && m_directories.empty() &&
-      m_hhjsDirectories.empty()) {
+  if (m_filesToParse.empty() && m_directories.empty()) {
     return true;
   }
 
@@ -355,11 +343,6 @@ bool Package::parse(bool check) {
   }
   for (auto const& dir : m_directories) {
     addSourceDirectory(dir.first, dir.second);
-  }
-  if (RuntimeOption::EvalEnableHHJS) {
-    for (auto const& dir : m_hhjsDirectories) {
-      addSourceDirectory(dir.first, dir.second, /* js */ true);
-    }
   }
   dispatcher.waitEmpty();
   if (!m_cache_only) {

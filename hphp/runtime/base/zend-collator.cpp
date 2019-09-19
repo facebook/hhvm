@@ -602,7 +602,11 @@ static bool collator_sort_internal(bool renumber, Variant &array,
     errcode->setError(error, "Error converting array from UTF-16 to UTF-8");
     return false;
   }
-  array = temp;
+  if (renumber) {
+    array = temp.toVArray();
+  } else {
+    array = temp.toDArray();
+  }
   return true;
 }
 

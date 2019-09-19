@@ -1,4 +1,4 @@
 File "anonymous_shape4.php", line 4, characters 7-7:
-You are trying to access the member x but this is not an object, it is a shape. Did you mean $foo['x'] instead? (Typing[4062])
+You are trying to access the property 'x' but this is a shape. Did you mean $foo['x'] instead? (Typing[4062])
 File "anonymous_shape4.php", line 3, characters 15-31:
 Definition is here

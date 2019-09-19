@@ -15,7 +15,7 @@
 */
 #include "hphp/util/arena.h"
 #include "hphp/util/assertions.h"
-#include "hphp/util/malloc-size-class.h"
+#include "hphp/util/jemalloc-util.h"
 
 namespace HPHP {
 

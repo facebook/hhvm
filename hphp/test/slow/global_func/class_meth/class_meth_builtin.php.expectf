@@ -7,4 +7,8 @@ function(A::func1)
 string(1) "A"
 string(5) "func1"
 
-Fatal error: Argument 1 passed to class_meth_get_class must be a class_meth in %s/class_meth_builtin.php on line 32
+Fatal error: Uncaught exception 'InvalidArgumentException' with message 'Argument 1 passed to class_meth_get_class() must be a class_meth' in %s/test/slow/global_func/class_meth/class_meth_builtin.php:32
+Stack trace:
+#0 %s/test/slow/global_func/class_meth/class_meth_builtin.php(32): HH\class_meth_get_class()
+#1 (): main()
+#2 {main}

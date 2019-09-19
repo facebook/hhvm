@@ -42,6 +42,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+extern const StaticString s___call;
+
 struct ActRec;
 struct Class;
 struct NamedEntity;
@@ -81,7 +83,7 @@ enum class ParamMode : uint8_t {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-// EH and FPI tables.
+// EH table.
 
 /*
  * Exception handler table entry.
@@ -93,19 +95,6 @@ struct EHEnt {
   int m_parentIndex;
   Offset m_handler;
   Offset m_end;
-
-  template<class SerDe> void serde(SerDe& sd);
-};
-
-/*
- * Function parameter info region table entry.
- */
-struct FPIEnt {
-  Offset m_fpushOff;
-  Offset m_fpiEndOff;
-  Offset m_fpOff; // evaluation stack depth to current frame pointer
-  int m_parentIndex;
-  int m_fpiDepth;
 
   template<class SerDe> void serde(SerDe& sd);
 };
@@ -164,7 +153,8 @@ struct Func final {
     LowStringPtr phpCode{nullptr};
     // User-annotated type.
     LowStringPtr userType{nullptr};
-
+    // offset of dvi funclet from cti section base.
+    Offset ctiFunclet{InvalidAbsoluteOffset};
     TypeConstraint typeConstraint;
     UserAttributeMap userAttributes;
   };
@@ -181,7 +171,6 @@ struct Func final {
   using ParamInfoVec = VMFixedVector<ParamInfo>;
   using SVInfoVec = VMFixedVector<SVInfo>;
   using EHEntVec = VMFixedVector<EHEnt>;
-  using FPIEntVec = VMFixedVector<FPIEnt>;
 
   /////////////////////////////////////////////////////////////////////////////
   // Creation and destruction.
@@ -453,6 +442,11 @@ struct Func final {
    */
   Offset getEntryForNumArgs(int numArgsPassed) const;
 
+  // CTI entry points
+  Offset ctiEntry() const;
+  void setCtiFunclet(int i, Offset);
+  void setCtiEntry(Offset entry, uint32_t size);
+
   /////////////////////////////////////////////////////////////////////////////
   // Return type.                                                       [const]
 
@@ -570,11 +564,10 @@ struct Func final {
   // Locals, iterators, and stack.                                      [const]
 
   /*
-   * Number of locals, iterators, class-ref slots, or named locals.
+   * Number of locals, iterators, or named locals.
    */
   int numLocals() const;
   int numIterators() const;
-  int numClsRefSlots() const;
   Id numNamedLocals() const;
 
   /*
@@ -603,14 +596,12 @@ struct Func final {
    * Access to the maximum stack cells this function can use.  This is
    * used for stack overflow checks.
    *
-   * The maximum cells for a function includes all its locals, all
-   * cells for its iterators, all temporary eval stack slots, and all
-   * cells it pushes for ActRecs in FPI regions.  It does not include
-   * its own ActRec, because whoever called it must have(+) included
-   * the size of the ActRec in an FPI region for itself.  The reason
-   * it must still count its parameter locals is that the caller may
-   * or may not pass any of the parameters, regardless of how many are
-   * declared.
+   * The maximum cells for a function includes all its locals, all cells
+   * for its iterators, and all temporary eval stack slots. It does not
+   * include its own ActRec, because whoever called it must have(+) included
+   * the stack slot space reserved for this ActRec.  The reason it must still
+   * count its parameter locals is that the caller may or may not pass any of
+   * the parameters, regardless of how many are declared.
    *
    *   + Except in a re-entry situation.  That must be handled
    *     specially in bytecode.cpp.
@@ -872,16 +863,6 @@ struct Func final {
   bool isGenerated() const;
 
   /*
-   * Is this function __destruct()?
-   */
-  bool isDestructor() const;
-
-  /*
-   * Is this function __call()?
-   */
-  bool isMagicCallMethod() const;
-
-  /*
    * Is `name' the name of a special initializer function?
    */
   static bool isSpecial(const StringData* name);
@@ -972,8 +953,7 @@ struct Func final {
   /*
    * Indicates that a function does not make any explicit calls to other PHP
    * functions.  It may still call other user-level functions via re-entry
-   * (e.g., for destructors and autoload), and it may make calls to builtins
-   * using FCallBuiltin.
+   * (e.g., for autoload), and it may make calls to builtins using FCallBuiltin.
    */
   bool isPhpLeafFn() const;
 
@@ -992,7 +972,6 @@ struct Func final {
   // Unit table entries.                                                [const]
 
   const EHEntVec& ehtab() const;
-  const FPIEntVec& fpitab() const;
 
   /*
    * Find the first EHEnt that covers a given offset, or return null.
@@ -1006,17 +985,6 @@ struct Func final {
   template<class Container>
   static const typename Container::value_type*
   findEH(const Container& ehtab, Offset o);
-
-  /*
-   * Locate FPI regions by offset.
-   */
-  const FPIEnt* findFPI(Offset o) const;
-
-  /*
-   * Same as non-static findFPI(), but takes as an operand the start and end
-   * iterators of an fpitab.
-   */
-  static const FPIEnt* findFPI(const FPIEnt* b, const FPIEnt* e, Offset o);
 
   bool shouldSampleJit() const { return m_shouldSampleJit; }
 
@@ -1059,21 +1027,14 @@ struct Func final {
 
   struct PrintOpts {
     PrintOpts()
-      : fpi(true)
-      , metadata(true)
+      : metadata(true)
     {}
-
-    PrintOpts& noFpi() {
-      fpi = false;
-      return *this;
-    }
 
     PrintOpts& noMetadata() {
       metadata = false;
       return *this;
     }
 
-    bool fpi;
     bool metadata;
   };
 
@@ -1207,7 +1168,6 @@ private:
     ParamInfoVec m_params;
     NamedLocalsMap m_localNames;
     EHEntVec m_ehtab;
-    FPIEntVec m_fpitab;
 
     /*
      * Up to 32 bits.
@@ -1225,10 +1185,6 @@ private:
     bool m_isPhpLeafFn : 1;
     bool m_hasReifiedGenerics : 1;
     bool m_isRxDisabled : 1;
-    // Needing more than 2 class ref slots basically doesn't happen, so just use
-    // two bits normally. If we actually need more than that, we'll store the
-    // count in ExtendedSharedData.
-    unsigned int m_numClsRefSlots : 2;
 
     // 16 bits of padding here in LOWPTR builds
 
@@ -1252,6 +1208,8 @@ private:
     uint16_t m_line2Delta;
     uint16_t m_pastDelta;
 
+    std::atomic<Offset> m_cti_base; // relative to CodeCache cti section
+    uint32_t m_cti_size; // size of cti code
     // 32 bits free here.
   };
 
@@ -1277,7 +1235,6 @@ private:
     ReifiedGenericsInfo m_reifiedGenericsInfo;
     Offset m_past;  // Only read if SharedData::m_pastDelta is kSmallDeltaLimit
     int m_line2;    // Only read if SharedData::m_line2 is kSmallDeltaLimit
-    Id m_actualNumClsRefSlots;
   };
 
   /*
@@ -1427,7 +1384,6 @@ private:
     return static_cast<uint32_t>(arg) / kBitsPerQword - 1;
   }
   static constexpr int kBitsPerQword = 64;
-  static const StringData* s___call;
   static constexpr int kMagic = 0xba5eba11;
   static constexpr intptr_t kNeedsFullName = 0x1;
 

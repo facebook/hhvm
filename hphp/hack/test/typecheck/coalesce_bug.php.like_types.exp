@@ -1,0 +1,6 @@
+File "coalesce_bug.php", line 19, characters 10-11:
+Invalid return type (Typing[4110])
+File "coalesce_bug.php", line 17, characters 47-47:
+Expected C
+File "coalesce_bug.php", line 8, characters 4-5:
+But got dynamic because it is an unenforceable type

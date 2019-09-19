@@ -105,8 +105,6 @@ private:
   ServiceData::ExportedCounter* m_serVec;
   // Number of serialized dicts
   ServiceData::ExportedCounter* m_serDict;
-  // Number of serialized shapes
-  ServiceData::ExportedCounter* m_serShape;
   // Number of serialized keysets
   ServiceData::ExportedCounter* m_serKeyset;
   // Number of APC arrays
@@ -115,8 +113,6 @@ private:
   ServiceData::ExportedCounter* m_apcVec;
   // Number of APC dicts
   ServiceData::ExportedCounter* m_apcDict;
-  // Number of APC shapes
-  ServiceData::ExportedCounter* m_apcShape;
   // Number of APC keysets
   ServiceData::ExportedCounter* m_apcKeyset;
   // Number of uncounted arrays. Uncounted arrays are kind of
@@ -128,9 +124,6 @@ private:
   // Number of uncounted dicts. Uncounted dicts are kind of
   // static dicts whose lifetime is controlled by the treadmill
   ServiceData::ExportedCounter* m_uncDict;
-  // Number of uncounted shapes. Uncounted shapes are kind of
-  // static shapes whose lifetime is controlled by the treadmill
-  ServiceData::ExportedCounter* m_uncShape;
   // Number of uncounted keysets. Uncounted keysets are kind of
   // static keysets whose lifetime is controlled by the treadmill
   ServiceData::ExportedCounter* m_uncKeyset;

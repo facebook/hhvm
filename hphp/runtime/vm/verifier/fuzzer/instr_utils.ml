@@ -72,10 +72,6 @@ let stk_data : instruct -> stack_sig = function
   | IIncludeEvalDefine DefCls _
   | IIncludeEvalDefine DefTypeAlias _
   | IGenerator ContCheck _                 -> [], []
-  | ICall FPushFuncD _
-  | ICall FPushFuncRD _
-  | ICall FPushClsMethodD _                -> ["U"; "U"; "U"], []
-  | ICall FPushFunc _                      -> ["U"; "U"; "U"; "C"], []
   | IOp Fatal _
   | IContFlow JmpZ _
   | IContFlow JmpNZ _
@@ -83,8 +79,6 @@ let stk_data : instruct -> stack_sig = function
   | IContFlow SSwitch _
   | IContFlow RetC
   | IContFlow Throw
-  | IGet ClsRefGetC _
-  | IGet ClsRefGetTS _
   | IMutator UnsetG
   | IMutator InitProp _
   | IIterator IterInit _
@@ -128,7 +122,6 @@ let stk_data : instruct -> stack_sig = function
   | IGenerator ContValid
   | IGenerator ContKey
   | IGenerator ContGetReturn
-  | ICall NewObj _
   | ICall NewObjD _
   | ICall NewObjRD _
   | IGet CGetQuietL _                      -> [], ["C"]
@@ -148,7 +141,6 @@ let stk_data : instruct -> stack_sig = function
   | IOp CastDouble
   | IOp CastString
   | IOp CastArray
-  | IOp CastObject
   | IOp CastVec
   | IOp CastDict
   | IOp CastKeyset
@@ -168,7 +160,6 @@ let stk_data : instruct -> stack_sig = function
   | IGenerator _
   | IAsync _
   | IMisc RecordReifiedGeneric
-  | IMisc ReifiedName _
   | ILitConst ColFromArray _               -> ["C"], ["C"]
   | IOp CombineAndResolveTypeStruct n      -> produce "C" n, ["C"]
   | ILitConst NewPair
@@ -177,7 +168,7 @@ let stk_data : instruct -> stack_sig = function
   | ICall FCall ((f, n, r, _, _))       ->
     produce "C" (n + (if f.has_unpack then 1 else 0)),
     produce "C" r
-  | ICall FCallBuiltin (n, _, _)           -> produce "C" n, ["C"]
+  | ICall FCallBuiltin (n, _, _, _)        -> produce "C" n, ["C"]
   | ILitConst _                            -> [], ["C"]
   | ICall _                                -> ["C"], []
   | _ -> [], []

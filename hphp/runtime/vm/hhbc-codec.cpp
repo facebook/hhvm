@@ -92,7 +92,7 @@ void encodeFCallArgsBase(UnitEmitter& ue, const FCallArgsBase& fca,
   if (fca.numRets != 1) flags |= FCallArgsBase::HasInOut;
   if (byRefs != nullptr) flags |= FCallArgsBase::EnforceReffiness;
   if (hasAsyncEagerOffset) flags |= FCallArgsBase::HasAsyncEagerOffset;
-  if (fca.constructNoConst) {
+  if (fca.lockWhileUnwinding) {
     // intentionally re-using the SupportsAsyncEagerReturn bit
     assertx(!(flags & FCallArgsBase::SupportsAsyncEagerReturn));
     flags |= FCallArgsBase::SupportsAsyncEagerReturn;
@@ -109,13 +109,13 @@ void encodeFCallArgsBase(UnitEmitter& ue, const FCallArgsBase& fca,
 }
 
 FCallArgs decodeFCallArgs(Op thisOpcode, PC& pc) {
-  assertx(hasFCallEffects(thisOpcode));
-  bool constructNoConst = false;
+  assertx(isFCall(thisOpcode));
+  bool lockWhileUnwinding = false;
   auto const flags = [&]() {
     auto rawFlags = decode_byte(pc);
     if (thisOpcode == Op::FCallCtor &&
         (rawFlags & FCallArgs::SupportsAsyncEagerReturn)) {
-      constructNoConst = true;
+      lockWhileUnwinding = true;
       rawFlags &= ~FCallArgs::SupportsAsyncEagerReturn;
     }
     return rawFlags;
@@ -129,7 +129,7 @@ FCallArgs decodeFCallArgs(Op thisOpcode, PC& pc) {
     ? decode_ba(pc) : kInvalidOffset;
   return FCallArgs(
     static_cast<FCallArgs::Flags>(flags & FCallArgs::kInternalFlags),
-    numArgs, numRets, byRefs, asyncEagerOffset, constructNoConst
+    numArgs, numRets, byRefs, asyncEagerOffset, lockWhileUnwinding
   );
 }
 

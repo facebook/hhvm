@@ -25,7 +25,6 @@
 #include "hphp/runtime/vm/jit/array-access-profile.h"
 #include "hphp/runtime/vm/jit/array-kind-profile.h"
 #include "hphp/runtime/vm/jit/guard-constraint.h"
-#include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/minstr-effects.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/type-array-elem.h"
@@ -79,6 +78,7 @@ enum class SimpleOp {
   Vector, // c_Vector* or c_ImmVector*
   Map,    // c_Map*
   Pair,   // c_Pair*
+  RecordArray,
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -180,7 +180,7 @@ PropInfo getPropertyOffset(IRGS& env,
   }
 
   // Lookup the index of the property based on ctx and baseClass
-  auto const lookup = baseClass->getDeclPropIndex(ctx, name);
+  auto const lookup = baseClass->getDeclPropSlot(ctx, name);
   auto const idx = lookup.slot;
 
   // If we couldn't find a property that is accessible in the current context,
@@ -192,6 +192,15 @@ PropInfo getPropertyOffset(IRGS& env,
   // offset.
 
   auto const& prop = baseClass->declProperties()[idx];
+
+  // If we're going to serialize the profile data, we emit a ProfileProp here to
+  // profile property accesses.  We only do this here, when we can resolve the
+  // property at JIT time, in order to make profiling simpler and cheaper.  And
+  // this should cover the vast majority of the property accesses anyway.
+  if (env.context.kind == TransKind::Profile && isJitSerializing()) {
+    gen(env, ProfileProp, cns(env, prop.baseCls->name()), cns(env, name));
+  }
+
   // If we want the AttrLateInitSoft default value behavior here, resort to the
   // runtime helpers to handle it.
   if ((prop.attrs & AttrLateInitSoft) && !ignoreLateInit) return PropInfo();
@@ -228,7 +237,7 @@ bool prop_ignores_tvref(IRGS& env, SSATmp* base, const SSATmp* key) {
   if (key->hasConstVal(TStr)) {
     auto const keyStr = key->strVal();
     auto const ctx = curClass(env);
-    auto const lookup = cls->getDeclPropIndex(ctx, keyStr);
+    auto const lookup = cls->getDeclPropSlot(ctx, keyStr);
     if (lookup.slot != kInvalidSlot && lookup.accessible) {
       isDeclared = true;
       auto const& prop = cls->declProperties()[lookup.slot];
@@ -266,6 +275,8 @@ folly::Optional<GuardConstraint> simpleOpConstraint(SimpleOp op) {
     case SimpleOp::Dict:
     case SimpleOp::Keyset:
     case SimpleOp::String:
+    // TODO: T47925625: DatatypeSpecialized GuardConstraint for RecordArray
+    case SimpleOp::RecordArray:
       return GuardConstraint(DataTypeSpecific);
 
     case SimpleOp::PackedArray:
@@ -741,7 +752,7 @@ SSATmp* emitDictKeysetGet(IRGS& env, SSATmp* base, SSATmp* key,
       return gen(env, is_dict ? DictGetK : KeysetGetK, IndexData { pos },
                  base, key);
     },
-    [&] (SSATmp* key) {
+    [&] (SSATmp* key, SizeHintData data) {
       return gen(
         env,
         is_dict
@@ -763,7 +774,7 @@ SSATmp* emitArrayGet(IRGS& env, SSATmp* base, SSATmp* key, MOpMode mode,
     [&] (SSATmp* arr, SSATmp* key, uint32_t pos) {
       return gen(env, MixedArrayGetK, IndexData { pos }, arr, key);
     },
-    [&] (SSATmp* key) {
+    [&] (SSATmp* key, SizeHintData data) {
       return gen(env, ArrayGet, MOpModeData { mode }, base, key);
     }
   );
@@ -779,7 +790,7 @@ SSATmp* emitArrayGet(IRGS& env, SSATmp* base, SSATmp* key, MOpMode mode,
 template<class Finish>
 SSATmp* emitProfiledPackedArrayGet(IRGS& env, SSATmp* base, SSATmp* key,
                                    MOpMode mode, Finish finish) {
-  TargetProfile<ArrayKindProfile> prof(env.context,
+  TargetProfile<ArrayKindProfile> prof(env.unit,
                                        env.irb->curMarker(),
                                        s_ArrayKindProfile.get());
   if (prof.profiling()) {
@@ -1028,6 +1039,9 @@ SSATmp* emitCGetElem(IRGS& env, SSATmp* base, SSATmp* key,
     case SimpleOp::Map:
       assertx(mode != MOpMode::InOut);
       return gen(env, MapGet, base, key);
+    case SimpleOp::RecordArray:
+      assertx(mode != MOpMode::InOut);
+      return gen(env, ArrayGet, MOpModeData{mode}, base, key);
     case SimpleOp::None:
       return gen(env, CGetElem, MOpModeData{mode}, base, key);
   }
@@ -1056,6 +1070,7 @@ SSATmp* emitCGetElemQuiet(IRGS& env, SSATmp* base, SSATmp* key,
     case SimpleOp::Pair:
     case SimpleOp::Map:
       assertx(mode != MOpMode::InOut);
+    case SimpleOp::RecordArray:
     case SimpleOp::None:
       return gen(env, CGetElem, MOpModeData{mode}, ldMBase(env), key);
   }
@@ -1066,6 +1081,7 @@ SSATmp* emitIssetElem(IRGS& env, SSATmp* base, SSATmp* key, SimpleOp simpleOp) {
   switch (simpleOp) {
   case SimpleOp::Array:
   case SimpleOp::ProfiledPackedArray:
+  case SimpleOp::RecordArray:
     return gen(env, ArrayIsset, base, key);
   case SimpleOp::PackedArray:
     return emitPackedArrayIsset(env, base, key);
@@ -1106,6 +1122,7 @@ SSATmp* emitEmptyElem(IRGS& env, SSATmp* base,
     case SimpleOp::Vector:
     case SimpleOp::Pair:
     case SimpleOp::Map:
+    case SimpleOp::RecordArray:
     case SimpleOp::None:
       return gen(env, EmptyElem, ldMBase(env), key);
   }
@@ -1124,6 +1141,9 @@ SimpleOp simpleCollectionOp(Type baseType, Type keyType, bool readInst,
   if (baseType <= TArr) {
     auto isPacked = false;
     if (auto arrSpec = baseType.arrSpec()) {
+      if (arrSpec.kind() == ArrayData::kRecordKind) {
+        return SimpleOp::RecordArray;
+      }
       isPacked = arrSpec.kind() == ArrayData::kPackedKind;
     }
     if (keyType <= TInt || keyType <= TStr) {
@@ -1257,14 +1277,6 @@ void baseGImpl(IRGS& env, SSATmp* name, MOpMode mode) {
   auto gblPtr = gen(env, BaseG, MOpModeData{base_mode}, name);
   stMBase(env, gblPtr);
   setEmptyMIPropState(env, gblPtr, mode);
-}
-
-void baseSImpl(IRGS& env, SSATmp* name, uint32_t clsRefSlot, MOpMode mode) {
-  if (!name->isA(TStr)) PUNT(BaseS-non-string-name);
-  auto const cls = takeClsRefCls(env, clsRefSlot);
-  auto const spropPtr = ldClsPropAddr(env, cls, name, true, false).propPtr;
-  stMBase(env, spropPtr);
-  setClsMIPropState(env, spropPtr, mode, cls, name);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1496,7 +1508,7 @@ SSATmp* dictElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
     [&] (SSATmp* dict, SSATmp* key, uint32_t pos) {
       return gen(env, ElemDictK, IndexData { pos }, dict, key);
     },
-    [&] (SSATmp* key) {
+    [&] (SSATmp* key, SizeHintData data) {
       if (define || unset) {
         return gen(env, unset ? ElemDictU : ElemDictD,
                    baseType, ldMBase(env), key);
@@ -1539,7 +1551,7 @@ SSATmp* keysetElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
     [&] (SSATmp* keyset, SSATmp* key, uint32_t pos) {
       return gen(env, ElemKeysetK, IndexData { pos }, keyset, key);
     },
-    [&] (SSATmp* key) {
+    [&] (SSATmp* key, SizeHintData data) {
       if (unset) return gen(env, ElemKeysetU, baseType, ldMBase(env), key);
       assertx(
         mode == MOpMode::Warn ||
@@ -1575,7 +1587,7 @@ SSATmp* elemImpl(IRGS& env, MOpMode mode, SSATmp* key) {
       [&] (SSATmp* arr, SSATmp* key, uint32_t pos) {
         return gen(env, ElemMixedArrayK, IndexData { pos }, arr, key);
       },
-      [&] (SSATmp* key) {
+      [&] (SSATmp* key, SizeHintData data) {
         if (define || unset) {
           return gen(env, unset ? ElemArrayU : ElemArrayD,
                      base->type(), ldMBase(env), key);
@@ -1661,7 +1673,7 @@ SSATmp* cGetPropImpl(IRGS& env, SSATmp* base, SSATmp* key,
   return gen(env, CGetPropQ, base, key);
 }
 
-Block* makeCatchSet(IRGS& env) {
+Block* makeCatchSet(IRGS& env, uint32_t nDiscard) {
   auto block = defBlock(env, Block::Hint::Unused);
 
   BlockPusher bp(*env.irb, makeMarker(env, bcOff(env)), block);
@@ -1686,7 +1698,6 @@ Block* makeCatchSet(IRGS& env) {
   // For consistency with the interpreter, decref the rhs before we decref the
   // stack inputs, and decref the ratchet storage after the stack inputs.
   popDecRef(env, DataTypeGeneric);
-  auto const nDiscard = env.currentNormalizedInstruction->imm[0].u_IVA;
   for (int i = 0; i < nDiscard; ++i) {
     popDecRef(env, DataTypeGeneric);
   }
@@ -1702,7 +1713,7 @@ Block* makeCatchSet(IRGS& env) {
   return block;
 }
 
-SSATmp* setPropImpl(IRGS& env, SSATmp* key) {
+SSATmp* setPropImpl(IRGS& env, uint32_t nDiscard, SSATmp* key) {
   auto const value = topC(env, BCSPRelOffset{0}, DataTypeGeneric);
 
   auto const base = extractBaseIfObj(env);
@@ -1752,7 +1763,7 @@ SSATmp* setPropImpl(IRGS& env, SSATmp* key) {
     gen(
       env,
       SetProp,
-      makeCatchSet(env),
+      makeCatchSet(env, nDiscard),
       base,
       key,
       value,
@@ -1763,7 +1774,7 @@ SSATmp* setPropImpl(IRGS& env, SSATmp* key) {
   return value;
 }
 
-void handleStrTestResult(IRGS& env, SSATmp* strTestResult) {
+void handleStrTestResult(IRGS& env, uint32_t nDiscard, SSATmp* strTestResult) {
   // We expected SetElem's base to not be a Str but might be wrong. Make an
   // exit trace to side exit to the next instruction, replacing our guess with
   // the correct stack output.
@@ -1776,7 +1787,6 @@ void handleStrTestResult(IRGS& env, SSATmp* strTestResult) {
       hint(env, Block::Hint::Unlikely);
       auto const str = gen(env, AssertNonNull, strTestResult);
       popDecRef(env, DataTypeSpecific);
-      auto const nDiscard = env.currentNormalizedInstruction->imm[0].u_IVA;
       for (int i = 0; i < nDiscard; ++i) {
         popDecRef(env, DataTypeSpecific);
       }
@@ -1846,8 +1856,6 @@ SSATmp* emitArrayLikeSet(IRGS& env, SSATmp* key, SSATmp* value) {
         case LTag::Stack:
           return top(env, offsetFromBCSP(env, baseLoc->stackIdx()));
         case LTag::MBase:
-        case LTag::CSlotCls:
-        case LTag::CSlotTS:
           always_assert(false);
       }
       not_reached();
@@ -1878,14 +1886,13 @@ SSATmp* emitArrayLikeSet(IRGS& env, SSATmp* key, SSATmp* value) {
           sp(env), newArr);
       break;
     case LTag::MBase:
-    case LTag::CSlotCls:
-    case LTag::CSlotTS:
       always_assert(false);
   }
   return value;
 }
 
-void setNewElemPackedArrayDataImpl(IRGS& env, SSATmp* basePtr, Type baseType,
+void setNewElemPackedArrayDataImpl(IRGS& env, uint32_t nDiscard,
+                                   SSATmp* basePtr, Type baseType,
                                    SSATmp* value) {
   ifThen(
     env,
@@ -1911,9 +1918,9 @@ void setNewElemPackedArrayDataImpl(IRGS& env, SSATmp* basePtr, Type baseType,
     },
     [&] {
       if (baseType <= Type::Array(ArrayData::kPackedKind)) {
-        gen(env, SetNewElemArray, makeCatchSet(env), basePtr, value);
+        gen(env, SetNewElemArray, makeCatchSet(env, nDiscard), basePtr, value);
       } else if (baseType <= TVec) {
-        gen(env, SetNewElemVec, makeCatchSet(env), basePtr, value);
+        gen(env, SetNewElemVec, makeCatchSet(env, nDiscard), basePtr, value);
       } else {
         always_assert(false);
       }
@@ -1921,7 +1928,7 @@ void setNewElemPackedArrayDataImpl(IRGS& env, SSATmp* basePtr, Type baseType,
   );
 }
 
-SSATmp* setNewElemImpl(IRGS& env) {
+SSATmp* setNewElemImpl(IRGS& env, uint32_t nDiscard) {
   auto const value = topC(env);
 
   auto const baseType = predictedBaseType(env);
@@ -1934,23 +1941,23 @@ SSATmp* setNewElemImpl(IRGS& env) {
   env.irb->constrainLocation(Location::MBase{}, gc);
 
   if (baseType <= Type::Array(ArrayData::kPackedKind) || baseType <= TVec) {
-    setNewElemPackedArrayDataImpl(env, basePtr, baseType, value);
+    setNewElemPackedArrayDataImpl(env, nDiscard, basePtr, baseType, value);
   } else if (baseType <= TArr) {
     constrainBase(env);
-    gen(env, SetNewElemArray, makeCatchSet(env), basePtr, value);
+    gen(env, SetNewElemArray, makeCatchSet(env, nDiscard), basePtr, value);
   } else if (baseType <= TKeyset) {
     constrainBase(env);
     if (!value->isA(TInt | TStr)) {
       auto const base = extractBase(env);
-      gen(env, ThrowInvalidArrayKey, makeCatchSet(env), base, value);
+      gen(env, ThrowInvalidArrayKey, makeCatchSet(env, nDiscard), base, value);
     } else {
-      gen(env, SetNewElemKeyset, makeCatchSet(env), basePtr, value);
+      gen(env, SetNewElemKeyset, makeCatchSet(env, nDiscard), basePtr, value);
     }
   } else {
     gen(
       env,
       SetNewElem,
-      makeCatchSet(env),
+      makeCatchSet(env, nDiscard),
       basePtr,
       value,
       propStatePtrElem(env, basePtr)
@@ -1959,7 +1966,7 @@ SSATmp* setNewElemImpl(IRGS& env) {
   return value;
 }
 
-SSATmp* setElemImpl(IRGS& env, SSATmp* key) {
+SSATmp* setElemImpl(IRGS& env, uint32_t nDiscard, SSATmp* key) {
   auto value = topC(env, BCSPRelOffset{0}, DataTypeGeneric);
 
   auto const baseType = predictedBaseType(env);
@@ -1994,11 +2001,12 @@ SSATmp* setElemImpl(IRGS& env, SSATmp* key) {
       // If we couldn't emit ArraySet, fall through to the generic path.
 
     case SimpleOp::Pair:
+    case SimpleOp::RecordArray:
     case SimpleOp::None:
       // We load the member base pointer before calling makeCatchSet() to avoid
       // mismatched in-states for any catch block edges we emit later on.
       auto const basePtr = ldMBase(env);
-      auto const result = gen(env, SetElem, makeCatchSet(env),
+      auto const result = gen(env, SetElem, makeCatchSet(env, nDiscard),
                               basePtr, key, value,
                               propStatePtrElem(env, basePtr));
       auto const t = result->type();
@@ -2014,7 +2022,7 @@ SSATmp* setElemImpl(IRGS& env, SSATmp* key) {
         assertx(t == (TStaticStr | TNullptr));
         // Base might be a string. Emit a check to verify the result before
         // returning the optimistic result.
-        handleStrTestResult(env, result);
+        handleStrTestResult(env, nDiscard, result);
       }
       break;
   }
@@ -2043,6 +2051,22 @@ SSATmp* memberKey(IRGS& env, MemberKey mk) {
 
 }
 
+//////////////////////////////////////////////////////////////////////
+
+bool propertyMayBeCountable(const Class::Prop& prop) {
+  // We can't call `knownTypeForProp` for type-hints that involve objects
+  // here because the classes they refer to may not yet be defined. We return
+  // `true` for these cases. Doing so doesn't cause unnecessary pessimization,
+  // because subtypes of Object are going to be countable anyway.
+  auto const& tc = prop.typeConstraint;
+  if (tc.isObject() || tc.isThis()) return true;
+  if (prop.repoAuthType.hasClassName()) return true;
+  auto const type = knownTypeForProp(prop, nullptr, nullptr, true);
+  return type.maybe(jit::TCounted);
+}
+
+//////////////////////////////////////////////////////////////////////
+
 void emitBaseGC(IRGS& env, uint32_t idx, MOpMode mode) {
   initTvRefs(env);
   auto name = top(env, BCSPRelOffset{safe_cast<int32_t>(idx)});
@@ -2056,10 +2080,22 @@ void emitBaseGL(IRGS& env, int32_t locId, MOpMode mode) {
   baseGImpl(env, name, mode);
 }
 
-void emitBaseSC(IRGS& env, uint32_t propIdx, uint32_t slot, MOpMode mode) {
+void emitBaseSC(IRGS& env, uint32_t propIdx, uint32_t clsIdx, MOpMode mode) {
   initTvRefs(env);
-  auto name = top(env, BCSPRelOffset{safe_cast<int32_t>(propIdx)});
-  baseSImpl(env, name, slot, mode);
+
+  auto const cls = topC(env, BCSPRelOffset{safe_cast<int32_t>(clsIdx)});
+  if (!cls->isA(TCls)) PUNT(BaseSC-NotClass);
+
+  auto const name = top(env, BCSPRelOffset{safe_cast<int32_t>(propIdx)});
+  if (!name->isA(TStr)) PUNT(BaseS-non-string-name);
+
+  auto const disallowConst = mode == MOpMode::Define ||
+    mode == MOpMode::Unset || mode == MOpMode::InOut;
+  auto const spropPtr = ldClsPropAddr(
+    env, cls, name, true, false, disallowConst
+  ).propPtr;
+  stMBase(env, spropPtr);
+  setClsMIPropState(env, spropPtr, mode, cls, name);
 }
 
 void emitBaseL(IRGS& env, int32_t locId, MOpMode mode) {
@@ -2206,9 +2242,9 @@ void emitSetM(IRGS& env, uint32_t nDiscard, MemberKey mk) {
 
   auto const key = memberKey(env, mk);
   auto const result =
-    mk.mcode == MW        ? setNewElemImpl(env) :
-    mcodeIsElem(mk.mcode) ? setElemImpl(env, key) :
-                            setPropImpl(env, key);
+    mk.mcode == MW        ? setNewElemImpl(env, nDiscard) :
+    mcodeIsElem(mk.mcode) ? setElemImpl(env, nDiscard, key) :
+                            setPropImpl(env, nDiscard, key);
 
   popC(env, DataTypeGeneric);
   mFinalImpl(env, nDiscard, result);

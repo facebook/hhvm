@@ -4,7 +4,7 @@
 // disallowed in RepoAuthoritative mode. Thus, this test
 // is set to be norepo.
 function err($code, $msg) {
-  echo "Handled ${code}: $msg", "\n";
+  echo "Handled {$code}: $msg", "\n";
   return true;
 }
 
@@ -132,7 +132,7 @@ function test_reflection() {
 
 <<__EntryPoint>>
 function main_stringish() {
-set_error_handler('err');
+set_error_handler(fun('err'));
 
 test_functionality();
 test_reflection();

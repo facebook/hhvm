@@ -1,0 +1,5 @@
+File "awaitable.php", line 14, characters 3-17:
+  int
+File "awaitable.php", line 17, characters 3-19:
+  ~Awaitable<int>
+No errors

@@ -63,11 +63,11 @@ void initThrowable(IRGS& env, const Class* cls, SSATmp* throwable) {
   auto const rootCls = cls->classof(SystemLib::s_ExceptionClass)
     ? SystemLib::s_ExceptionClass : SystemLib::s_ErrorClass;
 
-  auto const propAddr = [&] (Slot idx) {
+  auto const propAddr = [&] (Slot slot) {
     return gen(
       env,
       LdPropAddr,
-      ByteOffsetData { (ptrdiff_t)rootCls->declPropOffset(idx) },
+      ByteOffsetData { (ptrdiff_t)rootCls->declPropOffset(slot) },
       TUncounted.lval(Ptr::Prop),
       throwable
     );
@@ -129,23 +129,23 @@ void initThrowable(IRGS& env, const Class* cls, SSATmp* throwable) {
   );
 
   // $throwable->trace = $trace
-  auto const traceIdx = rootCls->lookupDeclProp(s_trace.get());
-  assertx(traceIdx != kInvalidSlot);
-  assertx(!rootCls->declPropTypeConstraint(traceIdx).isCheckable());
-  gen(env, StMem, propAddr(traceIdx), trace);
+  auto const traceSlot = rootCls->lookupDeclProp(s_trace.get());
+  assertx(traceSlot != kInvalidSlot);
+  assertx(!rootCls->declPropTypeConstraint(traceSlot).isCheckable());
+  gen(env, StMem, propAddr(traceSlot), trace);
 
   // Populate $throwable->{file,line}
   if (UNLIKELY(curFunc(env)->isBuiltin())) {
     gen(env, InitThrowableFileAndLine, throwable);
   } else {
-    auto const fileIdx = rootCls->lookupDeclProp(s_file.get());
-    auto const lineIdx = rootCls->lookupDeclProp(s_line.get());
+    auto const fileSlot = rootCls->lookupDeclProp(s_file.get());
+    auto const lineSlot = rootCls->lookupDeclProp(s_line.get());
     auto const unit = curFunc(env)->unit();
     auto const line = unit->getLineNumber(bcOff(env));
-    assertx(rootCls->declPropTypeConstraint(fileIdx).isString());
-    assertx(rootCls->declPropTypeConstraint(lineIdx).isInt());
-    gen(env, StMem, propAddr(fileIdx), cns(env, unit->filepath()));
-    gen(env, StMem, propAddr(lineIdx), cns(env, line));
+    assertx(rootCls->declPropTypeConstraint(fileSlot).isString());
+    assertx(rootCls->declPropTypeConstraint(lineSlot).isInt());
+    gen(env, StMem, propAddr(fileSlot), cns(env, unit->filepath()));
+    gen(env, StMem, propAddr(lineSlot), cns(env, line));
   }
 }
 
@@ -210,7 +210,8 @@ void checkPropInitialValues(IRGS& env, const Class* cls) {
         if (prop.attrs & AttrInitialSatisfiesTC) continue;
         auto const& tc = prop.typeConstraint;
         if (!tc.isCheckable()) continue;
-        const TypedValue& tv = cls->declPropInit()[slot];
+        auto index = cls->propSlotToIndex(slot);
+        const TypedValue& tv = cls->declPropInit()[index];
         if (tv.m_type == KindOfUninit) continue;
         verifyPropType(
           env,
@@ -240,13 +241,14 @@ void initObjProps(IRGS& env, const Class* cls, SSATmp* obj) {
     if (cls->hasMemoSlots()) {
       gen(env, InitObjMemoSlots, ClassData(cls), obj);
     }
-    for (int i = 0; i < nprops; ++i) {
-      const TypedValue& tv = cls->declPropInit()[i];
+    for (int slot = 0; slot < nprops; ++slot) {
+      auto index = cls->propSlotToIndex(slot);
+      const TypedValue& tv = cls->declPropInit()[index];
       auto const val = cns(env, tv);
       auto const addr = gen(
         env,
         LdPropAddr,
-        ByteOffsetData { (ptrdiff_t)(cls->declPropOffset(i)) },
+        ByteOffsetData { (ptrdiff_t)(cls->declPropOffset(slot)) },
         TLvalToPropGen,
         obj
       );
@@ -387,7 +389,7 @@ void emitCreateCl(IRGS& env, uint32_t numParams, uint32_t clsIx) {
 
 void emitNewArray(IRGS& env, uint32_t capacity) {
   if (capacity == 0) {
-    push(env, cns(env, staticEmptyArray()));
+    push(env, cns(env, ArrayData::Create()));
   } else {
     push(env, gen(env, NewArray, cns(env, capacity)));
   }
@@ -395,7 +397,7 @@ void emitNewArray(IRGS& env, uint32_t capacity) {
 
 void emitNewMixedArray(IRGS& env, uint32_t capacity) {
   if (capacity == 0) {
-    push(env, cns(env, staticEmptyArray()));
+    push(env, cns(env, ArrayData::Create()));
   } else {
     push(env, gen(env, NewMixedArray, cns(env, capacity)));
   }
@@ -404,7 +406,7 @@ void emitNewMixedArray(IRGS& env, uint32_t capacity) {
 void emitNewDArray(IRGS& env, uint32_t capacity) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
   if (capacity == 0) {
-    push(env, cns(env, staticEmptyDArray()));
+    push(env, cns(env, ArrayData::CreateDArray()));
   } else {
     push(env, gen(env, NewDArray, cns(env, capacity)));
   }
@@ -605,8 +607,13 @@ void emitNewPair(IRGS& env) {
   push(env, gen(env, NewPair, c2, c1));
 }
 
-void emitNewRecord(IRGS& env, const StringData* name, const ImmVector& immVec) {
-  auto const cachedRec = gen(env, LdRecDescCached, RecNameData{name});
+void emitNewRecordImpl(IRGS& env, const StringData* name,
+                       const ImmVector& immVec,
+                       Opcode newRecordOp) {
+  auto const recDesc = Unit::lookupUniqueRecDesc(name);
+  auto const isPersistent = recordHasPersistentRDS(recDesc);
+  auto const cachedRec = isPersistent ?
+    cns(env, recDesc) : gen(env, LdRecDescCached, RecNameData{name});
   auto const numArgs = immVec.size();
   auto const ids = immVec.vec32();
   NewStructData extra;
@@ -616,9 +623,18 @@ void emitNewRecord(IRGS& env, const StringData* name, const ImmVector& immVec) {
   for (auto i = size_t{0}; i < numArgs; ++i) {
     extra.keys[i] = curUnit(env)->lookupLitstrId(ids[i]);
   }
-  auto const recData = gen(env, NewRecord, extra, cachedRec, sp(env));
+  auto const recData = gen(env, newRecordOp, extra, cachedRec, sp(env));
   discard(env, numArgs);
   push(env, recData);
+}
+
+void emitNewRecord(IRGS& env, const StringData* name, const ImmVector& immVec) {
+  emitNewRecordImpl(env, name, immVec, NewRecord);
+}
+
+void emitNewRecordArray(IRGS& env, const StringData* name,
+                        const ImmVector& immVec) {
+  emitNewRecordImpl(env, name, immVec, NewRecordArray);
 }
 
 void emitColFromArray(IRGS& env, CollectionType type) {

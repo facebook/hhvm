@@ -1,0 +1,12 @@
+File "protected_non_static_member_03.php", line 30, characters 12-13:
+No method 'me' in T (did you mean 'foo'?) (Typing[4053])
+File "protected_non_static_member_03.php", line 30, characters 5-9:
+This is why I think it is an object of type T
+File "protected_non_static_member_03.php", line 27, characters 7-7:
+Declaration of T is here
+File "protected_non_static_member_03.php", line 40, characters 12-13:
+No method 'me' in Treq (did you mean 'foo'?) (Typing[4053])
+File "protected_non_static_member_03.php", line 40, characters 5-9:
+This is why I think it is an object of type Treq
+File "protected_non_static_member_03.php", line 34, characters 7-10:
+Declaration of Treq is here

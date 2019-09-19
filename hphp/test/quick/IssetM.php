@@ -1,7 +1,5 @@
 <?hh
 
-print "Test begin\n";
-
 function r($r) {
   print ($r ? " true" : "false")."\n";
 }
@@ -31,6 +29,10 @@ function main() {
   r(isset($arr["X"]["X"]));
   r(isset($arr["X"]["X"]["X"]));
 }
+<<__EntryPoint>> function main_entry(): void {
+print "Test begin\n";
+
 main();
 
 print "Test end\n";
+}

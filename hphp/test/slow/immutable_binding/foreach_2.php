@@ -10,7 +10,10 @@ function foo(Vector<int> $arr): void {
   echo "sum is ";
   var_dump($sum);
 }
+<<__EntryPoint>>
+function main_entry(): void {
 
-foo(Vector{});
-foo(Vector{1});
-foo(Vector{1, 2, 3, 4, 5});
+  foo(Vector{});
+  foo(Vector{1});
+  foo(Vector{1, 2, 3, 4, 5});
+}

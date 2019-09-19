@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2018, Facebook, Inc.
  * All rights reserved.
  *
@@ -7,8 +7,5 @@
  *
  *)
 
-val select:
-  slice:int ->
-  timeout:float ->
-  Unix.file_descr list ->
-  Unix.file_descr list
+val select :
+  slice:int -> timeout:float -> Unix.file_descr list -> Unix.file_descr list

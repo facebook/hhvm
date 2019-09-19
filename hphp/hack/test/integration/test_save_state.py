@@ -5,6 +5,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import json
 import os
 import shlex
+import shutil
 import sqlite3
 import stat
 import time
@@ -79,8 +80,6 @@ class SavedStateTests(TestCase[SavedStateTestDriver]):
     @classmethod
     def get_test_driver(cls) -> SavedStateTestDriver:
         return SavedStateTestDriver()
-
-    assert_naming_table_rows = False
 
     def test_hhconfig_change(self) -> None:
         """
@@ -193,8 +192,6 @@ watchman_init_timeout = 1
             self.test_driver.dump_saved_state(assert_edges_added=True)
         )
         assert new_saved_state.returned_values.get_edges_added() > 0
-        if self.assert_naming_table_rows:
-            assert new_saved_state.returned_values.get_naming_table_rows_changed() > 0
 
         self.change_return_type_on_base_class(
             os.path.join(self.test_driver.repo_dir, "class_1.php")
@@ -246,13 +243,13 @@ watchman_init_timeout = 1
         # Hack server is now started with a saved state
         self.test_driver.check_cmd(["No errors!"], assert_loaded_saved_state=True)
         old_saved_state = self.test_driver.dump_saved_state()
+
         new_file = os.path.join(self.test_driver.repo_dir, "class_3b.php")
         self.add_file_that_depends_on_class_a(new_file)
         self.test_driver.check_cmd(["No errors!"], assert_loaded_saved_state=True)
         new_saved_state = self.test_driver.dump_saved_state(assert_edges_added=True)
+
         assert new_saved_state.returned_values.get_edges_added() > 0
-        if self.assert_naming_table_rows:
-            assert new_saved_state.returned_values.get_naming_table_rows_changed() > 0
 
         self.change_return_type_on_base_class(
             os.path.join(self.test_driver.repo_dir, "class_1.php")
@@ -373,18 +370,12 @@ watchman_init_timeout = 1
         # Save state
         result = self.test_driver.dump_saved_state(assert_edges_added=True)
         assert result.returned_values.get_edges_added() > 0
-        if self.assert_naming_table_rows:
-            assert result.returned_values.get_naming_table_rows_changed() > 0
 
         # Save state again - confirm the same number of edges is dumped
         result2 = self.test_driver.dump_saved_state(assert_edges_added=True)
         self.assertEqual(
             result.returned_values.get_edges_added(),
             result2.returned_values.get_edges_added(),
-        )
-        self.assertEqual(
-            result.returned_values.get_naming_table_rows_changed(),
-            result2.returned_values.get_naming_table_rows_changed(),
         )
 
         # Save state with the 'replace' arg
@@ -395,10 +386,6 @@ watchman_init_timeout = 1
         self.assertEqual(
             result.returned_values.get_edges_added(),
             replace_result1.returned_values.get_edges_added(),
-        )
-        self.assertEqual(
-            result.returned_values.get_naming_table_rows_changed(),
-            replace_result1.returned_values.get_naming_table_rows_changed(),
         )
 
         # Save state with the new arg - confirm there are 0 new edges
@@ -489,28 +476,26 @@ class ReverseNamingTableSavedStateHierarchyTests(hierarchy_tests.HierarchyTests)
 
 
 class ReverseNamingTableSavedStateTests(SavedStateTests):
-    assert_naming_table_rows = True
-
     @classmethod
     def get_test_driver(cls) -> ReverseNamingTableFallbackTestDriver:
         return ReverseNamingTableFallbackTestDriver()
 
-    def test_save_naming_table(self) -> None:
-        """
-        We just verify that the naming tables match.  We don't verify anything
-        deeper than that.
-        """
-        saved_state_db = self.test_driver.dump_saved_state().path + ".sql"
-        naming_db = self.test_driver.dump_naming_saved_state()
+    def test_file_moved(self) -> None:
+        new_file = os.path.join(self.test_driver.repo_dir, "class_3b.php")
+        self.add_file_that_depends_on_class_a(new_file)
+        self.test_driver.check_cmd(["No errors!"], assert_loaded_saved_state=False)
+        naming_table_path = self.test_driver.dump_naming_saved_state(
+            self.test_driver.repo_dir,
+            saved_state_path=os.path.join(self.test_driver.repo_dir, "new"),
+        )
 
-        saved_conn = sqlite3.connect(saved_state_db)
-        naming_conn = sqlite3.connect(naming_db)
+        self.test_driver.proc_call([hh_client, "stop", self.test_driver.repo_dir])
+        new_file2 = os.path.join(self.test_driver.repo_dir, "class_3c.php")
+        shutil.move(new_file, new_file2)
 
-        tables = ["NAMING_CONSTS", "NAMING_FILE_INFO", "NAMING_FUNS", "NAMING_TYPES"]
-        for table in tables:
-            sqlite = "SELECT * FROM " + table
-            saved_entries = saved_conn.execute(sqlite).fetchall()
-            naming_entries = naming_conn.execute(sqlite).fetchall()
-            self.assertNotEqual(0, len(saved_entries))
-            self.assertNotEqual(0, len(naming_entries))
-            self.assertListEqual(saved_entries, naming_entries)
+        self.test_driver.start_hh_server(
+            changed_files=[],
+            changed_naming_files=["class_3c.php"],
+            naming_saved_state_path=naming_table_path,
+        )
+        self.test_driver.check_cmd(["No errors!"], assert_loaded_saved_state=True)

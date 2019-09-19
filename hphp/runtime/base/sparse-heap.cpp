@@ -102,7 +102,7 @@ HeapObject* SparseHeap::allocSlab(MemoryUsageStats& stats) {
       stats.mmap_volume += kSlabSize;
       stats.mmap_cap += kSlabSize;
       stats.peakCap = std::max(stats.peakCap, stats.capacity());
-      m_pooled_slabs.emplace_back(slab.ptr(), kSlabSize, slab.tag());
+      m_pooled_slabs.emplace_back(slab.ptr(), slab.tag());
       m_bigs.insert((HeapObject*)slab.ptr(), kSlabSize);
       m_hugeBytes += kSlabSize;
       return finish(slab.ptr());

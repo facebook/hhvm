@@ -8,5 +8,5 @@ class A {
 function main() {
   $k = 'keya';
   apc_store($k, HH\class_meth(A::class, 'func1'));
-  var_dump(apc_fetch($k));
+  var_dump(__hhvm_intrinsics\apc_fetch_no_check($k));
 }

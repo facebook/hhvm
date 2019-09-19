@@ -10,83 +10,81 @@
 */
 
 //define a class
-class test
-{
-  var $t = 10;
-  function __toString()
-  {
+class test {
+  public $t = 10;
+  function __toString() {
     return "object";
   }
 }
-<<__EntryPoint>> function main(): void {
-echo "*** Testing shuffle() : with unexpected values for 'array_arg' argument ***\n";
 
+<<__EntryPoint>>
+function main(): void {
+  echo "*** Testing shuffle() : with unexpected values for 'array_arg' argument ***\n";
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
+  //get an unset variable
+  $unset_var = 10;
+  unset($unset_var);
 
-//get a resource variable
-$fp = fopen(__FILE__, "r");
+  //get a resource variable
+  $fp = fopen(__FILE__, "r");
 
-//array of values to iterate over
-$values = array(
+  //array of values to iterate over
+  $values = array(
+         // int data
+  /*1*/  0,
+         1,
+         12345,
+         -2345,
 
-       // int data
-/*1*/  0,
-       1,
-       12345,
-       -2345,
+         // float data
+  /*5*/  10.5,
+         -10.5,
+         12.3456789000e10,
+         12.3456789000E-10,
+         .5,
 
-       // float data
-/*5*/  10.5,
-       -10.5,
-       12.3456789000e10,
-       12.3456789000E-10,
-       .5,
+         // null data
+  /*10*/ NULL,
+         null,
 
-       // null data
-/*10*/ NULL,
-       null,
+         // boolean data
+  /*12*/ true,
+         false,
+         TRUE,
+         FALSE,
 
-       // boolean data
-/*12*/ true,
-       false,
-       TRUE,
-       FALSE,
+         // empty data
+  /*16*/ "",
+         '',
 
-       // empty data
-/*16*/ "",
-       '',
+         // string data
+  /*18*/ "string",
+         'string',
 
-       // string data
-/*18*/ "string",
-       'string',
+         // object data
+  /*20*/ new test(),
 
-       // object data
-/*20*/ new test(),
+         // undefined data
+  /*21*/ @$undefined_var,
 
-       // undefined data
-/*21*/ @$undefined_var,
+         // unset data
+  /*22*/ @$unset_var,
 
-       // unset data
-/*22*/ @$unset_var,
+  /*23*/ // resource data
+         $fp
+  );
 
-/*23*/ // resource data
-       $fp
-);
+  // loop through the array to test shuffle() function
+  // with each element of the array
+  $count = 1;
+  foreach ($values as $value) {
+    echo "\n-- Iteration $count --\n";
+    var_dump(shuffle(&$value));
+    $count++;
+  }
 
-// loop through the array to test shuffle() function
-// with each element of the array
-$count = 1;
-foreach($values as $value) {
-  echo "\n-- Iteration $count --\n";
-  var_dump( shuffle(&$value) );
-  $count++;
-};
+  // closing the resource
+  fclose($fp);
 
-// closing the resource
-fclose($fp);
-
-echo "Done";
+  echo "Done";
 }

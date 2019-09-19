@@ -233,12 +233,8 @@ inline Block* IRUnit::entry() const {
   return m_entry;
 }
 
-inline uint32_t IRUnit::bcOff() const {
-  return m_context.initBcOffset;
-}
-
 inline SrcKey IRUnit::initSrcKey() const {
-  return m_context.srcKey();
+  return m_context.initSrcKey;
 }
 
 inline uint32_t IRUnit::numTmps() const {
@@ -278,7 +274,6 @@ inline SSATmp* IRUnit::mainFP() const {
 inline SSATmp* IRUnit::mainSP() const {
   assertx(!entry()->empty() && entry()->begin()->is(DefFP));
   auto it = ++entry()->begin();
-  if (it != entry()->end() && it->is(FuncGuard)) ++it;
   assertx(it != entry()->end() && it->is(DefSP));
   return it->dst();
 }

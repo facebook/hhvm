@@ -22,9 +22,9 @@ function thread_main() {
   );
   $res = false;
   var_dump(apc_cas  ('whoops', 1, 2));
-  var_dump(apc_inc  ('whoops', 1, &$res), $res);
-  var_dump(apc_fetch('whoops', &$res), $res);
-  var_dump(apc_fetch('whoops', &$res), $res);
+  var_dump(apc_inc  ('whoops', 1, inout $res), $res);
+  var_dump(apc_fetch('whoops', inout $res), $res);
+  var_dump(apc_fetch('whoops', inout $res), $res);
 }
 
 <<__EntryPoint>>

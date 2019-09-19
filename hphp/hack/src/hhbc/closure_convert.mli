@@ -1,13 +1,15 @@
-(**
+(*
  * Copyright (c) 2017, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the "hack" directory of this source tree.
  *
-*)
+ *)
 
-type hoist_kind = TopLevel | Hoisted
+type hoist_kind =
+  | TopLevel
+  | Hoisted
 
 type convert_result = {
   ast_defs: (hoist_kind * Tast.def) list;
@@ -16,6 +18,4 @@ type convert_result = {
 
 (* Convert entire program *)
 val convert_toplevel_prog :
-  popt:ParserOptions.t ->
-  Tast.program ->
-  convert_result
+  popt:ParserOptions.t -> Tast.program -> convert_result

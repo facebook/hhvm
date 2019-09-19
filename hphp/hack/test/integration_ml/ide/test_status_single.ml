@@ -1,3 +1,4 @@
+open Integration_test_base_types
 (**
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
@@ -7,36 +8,41 @@
  *
  *
  *)
-open Integration_test_base_types
 
 module Test = Integration_test_base
 
 let foo_name = "foo.php"
 
-let foo_contents = {|<?hh //strict
+let foo_contents =
+  {|<?hh //strict
 function foo(): int {
   /* HH_FIXME[4110] */
   return "4";
 }
 |}
 
-let status_single_request = ServerCommandTypes.(STATUS_SINGLE (FileName "/foo.php"))
+let status_single_request =
+  ServerCommandTypes.(STATUS_SINGLE (FileName "/foo.php", None))
 
 let check_status_single_response = function
-| None -> Test.fail "Expected STATUS_SINGLE response"
-| Some [] -> ()
-| Some _ -> Test.fail "Expected no errors"
+  | None -> Test.fail "Expected STATUS_SINGLE response"
+  | Some ([], _) -> ()
+  | Some _ -> Test.fail "Expected no errors"
 
 let test () =
   let env = Test.setup_server () in
-  let env = Test.setup_disk env [
-    foo_name, foo_contents;
-  ] in
+  let env = Test.setup_disk env [(foo_name, foo_contents)] in
   Test.assert_no_errors env;
 
-  let env, loop_output = Test.(run_loop_once env { default_loop_input with
-    new_client = Some (RequestResponse status_single_request)
-  }) in
+  let (env, loop_output) =
+    Test.(
+      run_loop_once
+        env
+        {
+          default_loop_input with
+          new_client = Some (RequestResponse status_single_request);
+        })
+  in
   check_status_single_response loop_output.new_client_response;
   ignore env;
   ()

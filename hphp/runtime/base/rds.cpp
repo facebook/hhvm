@@ -32,11 +32,11 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/maphuge.h"
 #include "hphp/util/numa.h"
+#include "hphp/util/rds-local.h"
 #include "hphp/util/smalllocks.h"
 #include "hphp/util/type-scan.h"
 
 #include "hphp/runtime/base/rds-header.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
@@ -876,6 +876,50 @@ folly::Optional<Symbol> reverseLink(Handle handle) {
     return acc->second;
   }
   return folly::none;
+}
+
+namespace {
+local::RegisterConfig s_rdsLocalConfigRegistration({
+  .rdsInitFunc =
+    [] (size_t size) -> uint32_t {
+      return rds::detail::allocUnlocked(rds::Mode::Local,
+                                        std::max(size, 16UL), 16U,
+                                        type_scan::kIndexUnknown);
+    },
+  .initFunc =
+    [](size_t size, uint32_t handle) -> void* {
+      if (rds::tl_base) {
+        return rds::handleToPtr<void, rds::Mode::Local>(handle);
+      }
+      return local_malloc(size);
+    },
+  .finiFunc =
+    [](void* ptr) -> void{
+      local_free(ptr);
+    },
+  .inRdsFunc =
+    [](void* ptr, size_t size) -> bool {
+      return tl_base &&
+             std::less_equal<void>()(localSection().cbegin(), ptr)
+                && std::less_equal<void>()(
+                  (const char*)ptr
+                  + size, localSection().cend());
+    },
+  .initRequestEventHandler =
+    [](RequestEventHandler* h) -> void {
+      h->setInited(true);
+      // This registration makes sure obj->requestShutdown() will be called.
+      // Do it before calling requestInit() so that obj is reachable to the
+      // GC no matter what the callback does.
+      auto index = g_context->registerRequestEventHandler(h);
+      SCOPE_FAIL {
+        h->setInited(false);
+        g_context->unregisterRequestEventHandler(h, index);
+      };
+
+      h->requestInit();
+    }
+});
 }
 
 //////////////////////////////////////////////////////////////////////

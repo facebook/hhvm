@@ -39,10 +39,9 @@ extern const StaticString dict_string; // String("Dict")
 extern const StaticString keyset_string; // String("Keyset")
 
 // Use empty_string() if you're returning String
-// Use empty_string_variant() if you're returning Variant
+// Use empty_string_tv() if you're returning TypedValue
 // Or use these if you need to pass by const reference:
 extern const StaticString empty_string_ref; // const StaticString&
-extern const Variant empty_string_variant_ref; // const Variant&
 
 struct StringData;
 using LowStringPtr = LowPtr<const StringData>;

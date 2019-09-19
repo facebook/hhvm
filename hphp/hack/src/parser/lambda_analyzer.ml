@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2017, Facebook, Inc.
  * All rights reserved.
  *
@@ -8,7 +8,6 @@
  *)
 
 open Core_kernel
-
 module SourceText = Full_fidelity_source_text
 module Syntax = Full_fidelity_editable_positioned_syntax
 module Token = Syntax.Token
@@ -64,8 +63,7 @@ work correctly. String identity on locals doesn't really work here.
 
 let fold_no_lambdas folder acc node =
   let rec aux acc node =
-    if is_lambda_expression node || is_anonymous_function node
-    then
+    if is_lambda_expression node || is_anonymous_function node then
       acc
     else
       let acc = folder acc node in
@@ -80,14 +78,17 @@ let token_to_string node =
 
 let param_name node =
   match syntax node with
-  | ListItem { list_item = {
-      syntax = ParameterDeclaration { parameter_name; _ }; _
-    }; _ } -> token_to_string parameter_name
+  | ListItem
+      {
+        list_item = { syntax = ParameterDeclaration { parameter_name; _ }; _ };
+        _;
+      } ->
+    token_to_string parameter_name
   | _ -> None
 
 let use_name node =
   match syntax node with
-  | ListItem { list_item = ({ syntax = Token _; _ } as list_item); _ } ->
+  | ListItem { list_item = { syntax = Token _; _ } as list_item; _ } ->
     token_to_string list_item
   | _ -> None
 
@@ -99,10 +100,8 @@ let rec get_params_list node =
     function_parameter_list
   | LambdaExpression { lambda_signature; _ } ->
     get_params_list lambda_signature
-  | LambdaSignature { lambda_parameters; _ } ->
-    lambda_parameters
-  | AnonymousFunction { anonymous_parameters; _ } ->
-    anonymous_parameters
+  | LambdaSignature { lambda_parameters; _ } -> lambda_parameters
+  | AnonymousFunction { anonymous_parameters; _ } -> anonymous_parameters
   | MethodishDeclaration { methodish_function_decl_header; _ } ->
     get_params_list methodish_function_decl_header
   | _ -> make_missing SourceText.empty 0
@@ -118,13 +117,14 @@ let get_body node =
   | FunctionDeclaration { function_body; _ } -> function_body
   | LambdaExpression { lambda_body; _ } -> lambda_body
   | AnonymousFunction { anonymous_body; _ } -> anonymous_body
-  | MethodishDeclaration { methodish_function_body; _ } -> methodish_function_body
+  | MethodishDeclaration { methodish_function_body; _ } ->
+    methodish_function_body
   | _ -> make_missing SourceText.empty 0
 
 (* TODO: This does not consider situations like "${x}" as the use of a local.*)
 let add_local acc node =
   match syntax node with
-  | Token ({ Token.kind = TokenKind.Variable; _; } as token) ->
+  | Token ({ Token.kind = TokenKind.Variable; _ } as token) ->
     SSet.add (Token.text token) acc
   | _ -> acc
 
@@ -135,12 +135,11 @@ let add_local acc node =
  * Excludes `$this`
  *)
 let all_locals node =
-  fold_no_lambdas add_local SSet.empty node
-  |> SSet.remove "$this"
+  fold_no_lambdas add_local SSet.empty node |> SSet.remove "$this"
 
 let outer_from_use use_clause =
   match syntax use_clause with
-  | AnonymousFunctionUseClause { anonymous_use_variables; _; } ->
+  | AnonymousFunctionUseClause { anonymous_use_variables; _ } ->
     let use_list = syntax_node_to_list anonymous_use_variables in
     let use_list = List.filter_map use_list ~f:use_name in
     SSet.of_list use_list
@@ -168,13 +167,17 @@ let filter_parents parents =
   let rec aux acc parents =
     match parents with
     | [] -> acc
-    | h :: t -> begin
-      match syntax h with
-      | FunctionDeclaration _
-      | MethodishDeclaration _
-      | AnonymousFunction _ -> h :: acc
-      | LambdaExpression _ -> aux (h :: acc) t
-      | _ -> aux acc t end in
+    | h :: t ->
+      begin
+        match syntax h with
+        | FunctionDeclaration _
+        | MethodishDeclaration _
+        | AnonymousFunction _ ->
+          h :: acc
+        | LambdaExpression _ -> aux (h :: acc) t
+        | _ -> aux acc t
+      end
+  in
   List.rev (aux [] parents)
 
 let compute_outer_variables parents node =
@@ -186,18 +189,20 @@ let compute_outer_variables parents node =
 
 let partition_used_locals parents node =
   (* Set of function parameters *)
-  let params = get_params_list node
-  |> syntax_node_to_list
-  |> List.filter_map ~f:param_name in
+  let params =
+    get_params_list node
+    |> syntax_node_to_list
+    |> List.filter_map ~f:param_name
+  in
   let param_set = SSet.of_list params in
   (* Set of all variables referenced in the body except for $this *)
-  let all_used = fold_no_lambdas add_local SSet.empty (get_body node)
-  |> SSet.remove "$this" in
+  let all_used =
+    fold_no_lambdas add_local SSet.empty (get_body node) |> SSet.remove "$this"
+  in
   let all_outer = compute_outer_variables parents node in
-  let used_outer =
-    SSet.diff (SSet.inter all_used all_outer) param_set in
+  let used_outer = SSet.diff (SSet.inter all_used all_outer) param_set in
   let inner = SSet.diff all_used (SSet.union param_set used_outer) in
   let inner_strings = SSet.to_string inner in
   let used_outer_strings = SSet.to_string used_outer in
-  let _ = inner_strings, used_outer_strings in
+  let _ = (inner_strings, used_outer_strings) in
   (inner, used_outer, params)

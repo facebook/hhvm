@@ -25,7 +25,6 @@
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/code-cache.h"
-#include "hphp/runtime/vm/jit/func-guard.h"
 #include "hphp/runtime/vm/jit/func-prologue.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
@@ -82,7 +81,7 @@ bool mcGenUnit(TransEnv& env, CodeCache::View codeView, CGMeta& fixups) {
     }
   }
 
-  auto const startSk = unit.context().srcKey();
+  auto const startSk = unit.context().initSrcKey;
   if (unit.context().kind == TransKind::Profile) {
     profData()->setProfiling(startSk.func()->getFuncId());
   }

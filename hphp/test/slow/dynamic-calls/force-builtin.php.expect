@@ -1,0 +1,10 @@
+function(foo)
+function(bar)
+classMeth{
+    class(Cls)
+    function(foo)
+}
+classMeth{
+    class(Cls)
+    function(bar)
+}

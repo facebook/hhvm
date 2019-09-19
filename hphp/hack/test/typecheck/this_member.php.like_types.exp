@@ -1,0 +1,6 @@
+File "this_member.php", line 16, characters 5-20:
+Invalid assignment (Typing[4110])
+File "this_member.php", line 13, characters 38-41:
+Expected ~<expr#1> because it is an unenforceable type
+File "this_member.php", line 16, characters 13-17:
+But got this

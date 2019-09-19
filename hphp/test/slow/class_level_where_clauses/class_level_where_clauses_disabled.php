@@ -10,3 +10,5 @@
  */
 
 class Base <T> where T = int {}
+
+<<__EntryPoint>> function main(): void {}

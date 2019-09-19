@@ -59,7 +59,7 @@
     "id": 2,
     "result": [
       {
-        "uri": "file://${root_path}${path_sep}definition.php",
+        "uri": "file://${root_path}/definition.php",
         "range": {
           "start": {
             "line": 6,
@@ -79,7 +79,7 @@
     "id": 3,
     "result": [
       {
-        "uri": "file://${root_path}${path_sep}definition.php",
+        "uri": "file://${root_path}/definition.php",
         "range": {
           "start": {
             "line": 11,
@@ -99,7 +99,7 @@
     "id": 4,
     "result": [
       {
-        "uri": "file://${root_path}${path_sep}definition.php",
+        "uri": "file://${root_path}/definition.php",
         "range": {
           "start": {
             "line": 14,
@@ -113,7 +113,7 @@
         "title": "CC"
       },
       {
-        "uri": "file://${root_path}${path_sep}definition.php",
+        "uri": "file://${root_path}/definition.php",
         "range": {
           "start": {
             "line": 11,
@@ -133,7 +133,7 @@
     "id": 5,
     "result": [
       {
-        "uri": "file://${root_path}${path_sep}definition.php",
+        "uri": "file://${root_path}/definition.php",
         "range": {
           "start": {
             "line": 17,
@@ -147,7 +147,7 @@
         "title": "DD"
       },
       {
-        "uri": "file://${root_path}${path_sep}definition.php",
+        "uri": "file://${root_path}/definition.php",
         "range": {
           "start": {
             "line": 11,
@@ -167,7 +167,7 @@
     "id": 6,
     "result": [
       {
-        "uri": "file://${root_path}${path_sep}definition.php",
+        "uri": "file://${root_path}/definition.php",
         "range": {
           "start": {
             "line": 21,
@@ -187,7 +187,7 @@
     "id": 7,
     "result": [
       {
-        "uri": "file://${root_path}${path_sep}definition.php",
+        "uri": "file://${root_path}/definition.php",
         "range": {
           "start": {
             "line": 26,
@@ -207,7 +207,7 @@
     "id": 8,
     "result": [
       {
-        "uri": "file://${root_path}${path_sep}definition.php",
+        "uri": "file://${root_path}/definition.php",
         "range": {
           "start": {
             "line": 40,

@@ -7,7 +7,7 @@ function read_xml($skip_white) {
   xml_parser_set_option($parser,XML_OPTION_TARGET_ENCODING,"UTF-8");
   $array=array();
   $index=array();
-  xml_parse_into_struct($parser,$xml,&$array,&$index);
+  xml_parse_into_struct($parser,$xml,inout $array, inout $index);
   return $array;
 }
 

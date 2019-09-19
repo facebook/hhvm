@@ -1,0 +1,8 @@
+File "variance_transfer.php", line 15, characters 5-26:
+Invalid assignment (Typing[4110])
+File "variance_transfer.php", line 9, characters 10-11:
+Expected T1
+File "variance_transfer.php", line 10, characters 19-20:
+  via this generic T1
+File "variance_transfer.php", line 15, characters 18-26:
+But got dynamic, the result of calling a dynamic type as a function

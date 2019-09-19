@@ -90,10 +90,14 @@ class Memcached {
   public function flush(int $delay = 0);
   public function get($key, $cache_cb = null, &$cas_token = null);
   public function getByKey(string $server_key, string $key, $cache_cb = null, &$cas_token = null);
+  public function getWithCasToken($key, $cache_cb, inout $cas_token);
+  public function getByKeyWithCasToken(string $server_key, string $key, $cache_cb, inout $cas_token);
   public function getDelayed($keys, $with_cas = false, $value_cb = null);
   public function getDelayedByKey(string $server_key, $keys, bool $with_cas = false, $value_cb = null);
   public function getMulti($keys, &$cas_tokens = null, int $flags = 0);
   public function getMultiByKey(string $server_key, $keys, &$cas_tokens = null, int $flags = 0);
+  public function getMultiWithCasTokens($keys, inout $cas_tokens, int $flags = 0);
+  public function getMultiByKeyWithCasTokens(string $server_key, $keys, inout $cas_tokens, int $flags = 0);
   public function getOption(int $option);
   public function getResultCode();
   public function getResultMessage();

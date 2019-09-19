@@ -16,6 +16,8 @@
 #ifndef incl_HPHP_JIT_IRGEN_CREATE_H_
 #define incl_HPHP_JIT_IRGEN_CREATE_H_
 
+#include <cstdint>
+
 namespace HPHP {
 
 struct Class;
@@ -32,6 +34,9 @@ struct IRGS;
 
 void initSProps(IRGS&, const Class*);
 SSATmp* allocObjFast(IRGS&, const Class*);
+
+void emitNewVecArray(IRGS& env, uint32_t numArgs);
+void emitNewVArray(IRGS& env, uint32_t numArgs);
 
 //////////////////////////////////////////////////////////////////////
 

@@ -1,0 +1,27 @@
+=============== positive tests =====================
+
+Warning: Decoding instance method func without $this! in %s on line 172
+
+Warning: Decoding instance method async_func without $this! in %s on line 174
+
+Warning: Decoding instance method func without $this! in %s on line 177
+
+Warning: Decoding instance method async_func without $this! in %s on line 179
+Exception: 'A' constructed dynamically
+
+Warning: Decoding instance method func without $this! in %s on line 209
+
+Warning: Decoding instance method func without $this! in %s on line 212
+=============== negative tests =====================
+
+Warning: Decoding instance method func2 without $this! in %s on line 348
+
+Warning: Decoding instance method async_func2 without $this! in %s on line 350
+
+Warning: Decoding instance method func2 without $this! in %s on line 353
+
+Warning: Decoding instance method async_func2 without $this! in %s on line 355
+
+Warning: Decoding instance method func2 without $this! in %s on line 382
+
+Warning: Decoding instance method func2 without $this! in %s on line 385

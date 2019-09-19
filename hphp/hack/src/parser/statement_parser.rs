@@ -4,20 +4,18 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::marker::PhantomData;
-
 use crate::declaration_parser::DeclarationParser;
 use crate::expression_parser::ExpressionParser;
-use crate::lexable_token::LexableToken;
-use crate::lexable_trivia::LexableTrivia;
 use crate::lexer::Lexer;
 use crate::parser_env::ParserEnv;
 use crate::parser_trait::{Context, ExpectedTokens, ParserTrait};
 use crate::smart_constructors::{NodeType, SmartConstructors};
-use crate::syntax_error::{self as Errors, SyntaxError};
-use crate::token_kind::TokenKind;
-use crate::trivia_kind::TriviaKind;
 use crate::type_parser::TypeParser;
+use parser_core_types::lexable_token::LexableToken;
+use parser_core_types::lexable_trivia::LexableTrivia;
+use parser_core_types::syntax_error::{self as Errors, SyntaxError};
+use parser_core_types::token_kind::TokenKind;
+use parser_core_types::trivia_kind::TriviaKind;
 
 pub struct StatementParser<'a, S, T>
 where
@@ -26,13 +24,12 @@ where
 {
     lexer: Lexer<'a, S::Token>,
     env: ParserEnv,
-    context: Context<S::Token>,
+    context: Context<'a, S::Token>,
     errors: Vec<SyntaxError>,
-    sc_state: Option<T>,
-    _phantom: PhantomData<S>,
+    sc: S,
 }
 
-impl<'a, S, T: Clone> std::clone::Clone for StatementParser<'a, S, T>
+impl<'a, S, T: Clone> Clone for StatementParser<'a, S, T>
 where
     S: SmartConstructors<'a, T>,
     S::R: NodeType,
@@ -43,8 +40,7 @@ where
             env: self.env.clone(),
             context: self.context.clone(),
             errors: self.errors.clone(),
-            sc_state: self.sc_state.clone(),
-            _phantom: self._phantom,
+            sc: self.sc.clone(),
         }
     }
 }
@@ -57,27 +53,28 @@ where
     fn make(
         lexer: Lexer<'a, S::Token>,
         env: ParserEnv,
-        context: Context<S::Token>,
+        context: Context<'a, S::Token>,
         errors: Vec<SyntaxError>,
-        sc_state: T,
+        sc: S,
     ) -> Self {
         Self {
             lexer,
             env,
             context,
             errors,
-            sc_state: Some(sc_state),
-            _phantom: PhantomData,
+            sc,
         }
     }
 
-    fn into_parts(self) -> (Lexer<'a, S::Token>, Context<S::Token>, Vec<SyntaxError>, T) {
-        (
-            self.lexer,
-            self.context,
-            self.errors,
-            self.sc_state.unwrap(),
-        )
+    fn into_parts(
+        self,
+    ) -> (
+        Lexer<'a, S::Token>,
+        Context<'a, S::Token>,
+        Vec<SyntaxError>,
+        S,
+    ) {
+        (self.lexer, self.context, self.errors, self.sc)
     }
 
     fn lexer(&self) -> &Lexer<'a, S::Token> {
@@ -92,11 +89,11 @@ where
     where
         T: Clone,
     {
-        let (lexer, context, errors, sc_state) = other.into_parts();
+        let (lexer, context, errors, sc) = other.into_parts();
         self.lexer = lexer;
         self.context = context;
         self.errors = errors;
-        self.sc_state = Some(sc_state);
+        self.sc = sc;
     }
 
     fn add_error(&mut self, error: SyntaxError) {
@@ -107,8 +104,8 @@ where
         &self.env
     }
 
-    fn sc_state_mut(&mut self) -> &mut Option<T> {
-        &mut self.sc_state
+    fn sc_mut(&mut self) -> &mut S {
+        &mut self.sc
     }
 
     fn skipped_tokens_mut(&mut self) -> &mut Vec<S::Token> {
@@ -119,11 +116,11 @@ where
         &self.context.skipped_tokens
     }
 
-    fn context_mut(&mut self) -> &mut Context<S::Token> {
+    fn context_mut(&mut self) -> &mut Context<'a, S::Token> {
         &mut self.context
     }
 
-    fn context(&self) -> &Context<S::Token> {
+    fn context(&self) -> &Context<'a, S::Token> {
         &self.context
     }
 }
@@ -133,13 +130,16 @@ where
     S: SmartConstructors<'a, T>,
     S::R: NodeType,
 {
-    fn with_type_parser<U>(&mut self, f: &dyn Fn(&mut TypeParser<'a, S, T>) -> U) -> U {
+    fn with_type_parser<F, U>(&mut self, f: F) -> U
+    where
+        F: Fn(&mut TypeParser<'a, S, T>) -> U,
+    {
         let mut type_parser: TypeParser<S, T> = TypeParser::make(
             self.lexer.clone(),
             self.env.clone(),
             self.context.clone(),
             self.errors.clone(),
-            self.sc_state.clone().unwrap(),
+            self.sc.clone(),
         );
         let res = f(&mut type_parser);
         self.continue_from(type_parser);
@@ -147,29 +147,35 @@ where
     }
 
     fn parse_type_specifier(&mut self) -> S::R {
-        self.with_type_parser(&|x: &mut TypeParser<'a, S, T>| x.parse_type_specifier(false, true))
+        self.with_type_parser(|x: &mut TypeParser<'a, S, T>| x.parse_type_specifier(false, true))
     }
 
-    fn with_expression_parser<U>(&mut self, f: &dyn Fn(&mut ExpressionParser<'a, S, T>) -> U) -> U {
+    fn with_expression_parser<F, U>(&mut self, f: F) -> U
+    where
+        F: Fn(&mut ExpressionParser<'a, S, T>) -> U,
+    {
         let mut expression_parser: ExpressionParser<S, T> = ExpressionParser::make(
             self.lexer.clone(),
             self.env.clone(),
             self.context.clone(),
             self.errors.clone(),
-            self.sc_state.clone().unwrap(),
+            self.sc.clone(),
         );
         let res = f(&mut expression_parser);
         self.continue_from(expression_parser);
         res
     }
 
-    fn with_decl_parser<U>(&mut self, f: &dyn Fn(&mut DeclarationParser<'a, S, T>) -> U) -> U {
+    fn with_decl_parser<F, U>(&mut self, f: F) -> U
+    where
+        F: Fn(&mut DeclarationParser<'a, S, T>) -> U,
+    {
         let mut decl_parser: DeclarationParser<S, T> = DeclarationParser::make(
             self.lexer.clone(),
             self.env.clone(),
             self.context.clone(),
             self.errors.clone(),
-            self.sc_state.clone().unwrap(),
+            self.sc.clone(),
         );
         let res = f(&mut decl_parser);
         self.continue_from(decl_parser);
@@ -187,7 +193,7 @@ where
             | TokenKind::Trait
             | TokenKind::Class => {
                 self.with_error(Errors::decl_outside_global_scope);
-                self.with_decl_parser(&|x| {
+                self.with_decl_parser(|x| {
                     let missing = S!(make_missing, x, x.pos());
                     x.parse_classish_declaration(missing)
                 })
@@ -325,7 +331,7 @@ where
             | (TokenKind::Async, TokenKind::LeftBrace) // Async block
                 => self.parse_expression_statement(),
             | _ => {
-                let missing = self.with_decl_parser(&|x: &mut DeclarationParser<'a, S, T>| {
+                let missing = self.with_decl_parser(|x: &mut DeclarationParser<'a, S, T>| {
                     let missing = S!(make_missing, x, x.pos());
                     x.parse_function_declaration(missing)
                 });
@@ -361,17 +367,17 @@ where
         let for_keyword_token = self.assert_token(TokenKind::For);
         let for_left_paren = self.require_left_paren();
         let for_initializer_expr =
-            self.parse_comma_list_opt(TokenKind::Semicolon, Errors::error1015, &|x| {
+            self.parse_comma_list_opt(TokenKind::Semicolon, Errors::error1015, |x| {
                 x.parse_expression()
             });
         let for_first_semicolon = self.require_semicolon();
         let for_control_expr =
-            self.parse_comma_list_opt(TokenKind::Semicolon, Errors::error1015, &|x| {
+            self.parse_comma_list_opt(TokenKind::Semicolon, Errors::error1015, |x| {
                 x.parse_expression()
             });
         let for_second_semicolon = self.require_semicolon();
         let for_end_of_loop_expr =
-            self.parse_comma_list_opt(TokenKind::RightParen, Errors::error1015, &|x| {
+            self.parse_comma_list_opt(TokenKind::RightParen, Errors::error1015, |x| {
                 x.parse_expression()
             });
         let for_right_paren = self.require_right_paren();
@@ -396,8 +402,8 @@ where
         let foreach_left_paren = self.require_left_paren();
         self.expect_in_new_scope(ExpectedTokens::RightParen);
         let foreach_collection_name =
-            self.with_expression_parser(&|x: &mut ExpressionParser<'a, S, T>| {
-                x.with_as_expressions(false, &|x| x.parse_expression())
+            self.with_expression_parser(|x: &mut ExpressionParser<'a, S, T>| {
+                x.with_as_expressions(false, |x| x.parse_expression())
             });
         let await_token = self.optional_token(TokenKind::Await);
         let as_token = self.require_as();
@@ -534,7 +540,7 @@ where
         //
         let mut parser1 = self.clone();
         let expr = if token_kind == TokenKind::LeftParen {
-            parser1.with_expression_parser(&|p: &mut ExpressionParser<'a, S, T>| {
+            parser1.with_expression_parser(|p: &mut ExpressionParser<'a, S, T>| {
                 p.parse_cast_or_parenthesized_or_lambda_expression()
             })
         } else {
@@ -557,7 +563,7 @@ where
             _ => {
                 let left_paren = self.require_left_paren();
                 let expressions =
-                    self.parse_comma_list(TokenKind::RightParen, Errors::error1015, &|x| {
+                    self.parse_comma_list(TokenKind::RightParen, Errors::error1015, |x| {
                         x.parse_expression()
                     });
                 let right_paren = self.require_right_paren();
@@ -587,7 +593,7 @@ where
         // TODO: TokenKind::Unset is case-insentive. Should non-lowercase be an error?
         let keyword = self.assert_token(TokenKind::Unset);
         let (left_paren, variables, right_paren) =
-            self.parse_parenthesized_comma_list_opt_allow_trailing(&|x| x.parse_expression());
+            self.parse_parenthesized_comma_list_opt_allow_trailing(|x| x.parse_expression());
         let semi = self.require_semicolon();
         S!(
             make_unset_statement,
@@ -659,7 +665,7 @@ where
         //   else   statement
         let if_keyword_token = self.assert_token(TokenKind::If);
         let (if_left_paren, if_expr, if_right_paren, if_consequence) = self.parse_if_body_helper();
-        let elseif_syntax = self.parse_list_until_none(&|x| x.parse_elseif_opt());
+        let elseif_syntax = self.parse_list_until_none(|x| x.parse_elseif_opt());
         let else_syntax = self.parse_else_opt();
         S!(
             make_if_statement,
@@ -759,7 +765,7 @@ where
                     S!(make_list, self, vec![], self.pos())
                 }
                 _ => {
-                    self.parse_terminated_list(&|x| x.parse_switch_section(), TokenKind::RightBrace)
+                    self.parse_terminated_list(|x| x.parse_switch_section(), TokenKind::RightBrace)
                 }
             }
         };
@@ -842,11 +848,11 @@ where
 
     fn parse_switch_section(&mut self) -> S::R {
         // See parse_switch_statement for grammar
-        let labels = self.parse_list_until_none(&|x| x.parse_switch_section_label());
+        let labels = self.parse_list_until_none(|x| x.parse_switch_section_label());
         if labels.is_missing() {
             self.with_error(Errors::error2008);
         };
-        let statements = self.parse_list_until_none(&|x| x.parse_switch_section_statement());
+        let statements = self.parse_list_until_none(|x| x.parse_switch_section_statement());
         let fallthrough = self.parse_switch_fallthrough_opt();
         S!(make_switch_section, self, labels, statements, fallthrough)
     }
@@ -943,7 +949,7 @@ where
         //   try  compound-statement   catch-clauses   finally-clause
         let try_keyword_token = self.assert_token(TokenKind::Try);
         let try_compound_stmt = self.parse_compound_statement();
-        let catch_clauses = self.parse_list_until_none(&|x| x.parse_catch_clause_opt());
+        let catch_clauses = self.parse_list_until_none(|x| x.parse_catch_clause_opt());
         let finally_clause = self.parse_finally_clause_opt();
         // If the catch and finally are both missing then we give an error in
         // a later pass.
@@ -1107,10 +1113,9 @@ where
 
     fn parse_echo_statement(&mut self) -> S::R {
         let token = self.assert_token(TokenKind::Echo);
-        let expression_list =
-            self.parse_comma_list(TokenKind::Semicolon, Errors::error1015, &|x| {
-                x.parse_expression()
-            });
+        let expression_list = self.parse_comma_list(TokenKind::Semicolon, Errors::error1015, |x| {
+            x.parse_expression()
+        });
         let semicolon = self.require_semicolon();
         S!(make_echo_statement, self, token, expression_list, semicolon)
     }
@@ -1154,7 +1159,7 @@ where
             _ => {
                 let left_brace_token = self.require_left_brace();
                 let statement_list =
-                    self.parse_terminated_list(&|x| x.parse_statement(), TokenKind::RightBrace);
+                    self.parse_terminated_list(|x| x.parse_statement(), TokenKind::RightBrace);
                 let right_brace_token = self.require_right_brace();
                 S!(
                     make_compound_statement,
@@ -1168,6 +1173,6 @@ where
     }
 
     fn parse_expression(&mut self) -> S::R {
-        self.with_expression_parser(&|p: &mut ExpressionParser<'a, S, T>| p.parse_expression())
+        self.with_expression_parser(|p: &mut ExpressionParser<'a, S, T>| p.parse_expression())
     }
 }

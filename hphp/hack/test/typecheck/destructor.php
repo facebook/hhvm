@@ -10,7 +10,6 @@
  */
 
 class Foo {
-  <<__OptionalDestruct>>
   public function __destruct() {
   }
 }

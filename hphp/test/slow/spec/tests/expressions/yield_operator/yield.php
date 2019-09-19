@@ -1,13 +1,5 @@
 <?hh
 
-/*
-   +-------------------------------------------------------------+
-   | Copyright (c) 2015 Facebook, Inc. (http://www.facebook.com) |
-   +-------------------------------------------------------------+
-*/
-
-error_reporting(-1);
-
 // define a simple generator that returns a series of consecutive values
 
 function series($start, $end)
@@ -17,29 +9,6 @@ function series($start, $end)
         yield $i;
     }
 }
-
-///*
-foreach (series(1, 5) as $key => $val)
-{
-    echo "key: $key, value: $val\n";
-}
-//*/
-
-///*
-
-// Just what does a function generator return?
-
-echo "===========================\n";
-$a = series(5, 15);
-var_dump($a);   // PHP5 and HHVM: type Generator
-echo "This type " . (($a is Generator)
-                     ? "is"
-                     : "is not")
-                  . " an instance of Generator\n";
-
-// $serialString = serialize($a);   // Uncaught exception
-
-echo "===========================\n";
 //*/
 
 ///*
@@ -68,12 +37,6 @@ function getTextFileLines($filename)
         fclose($infile);
     }
 }
-
-foreach (getTextFileLines(__DIR__."/Testfile.txt") as $line)
-{
-    echo ">$line<\n";
-}
-echo "===========================\n";
 //*/
 
 ///*
@@ -102,12 +65,6 @@ function f()
 //  return $n;      // error: Generators cannot return values using "return"
 //  return 0;       // error: Generators cannot return values using "return"
 }
-
-foreach (f() as $key => $val)
-{
-    echo "key: $key, value: $val\n";
-}
-echo "===========================\n";
 //*/
 
 ///*
@@ -124,10 +81,49 @@ function series2($start, $end, $keyPrefix = "")
 //      var_dump($x);
     }
 }
-
-foreach (series2(1, 5, "X") as $key => $val)
-{
-    echo "key: $key, value: $val\n";
-//  echo ($val == NULL) ? "value is NULL\n" : "value is not NULL\n";
-}
 //*/
+<<__EntryPoint>>
+function main_entry(): void {
+  error_reporting(-1);
+
+  ///*
+  foreach (series(1, 5) as $key => $val)
+  {
+      echo "key: $key, value: $val\n";
+  }
+  //*/
+
+  ///*
+
+  // Just what does a function generator return?
+
+  echo "===========================\n";
+  $a = series(5, 15);
+  var_dump($a);   // PHP5 and HHVM: type Generator
+  echo "This type " . (($a is Generator)
+                       ? "is"
+                       : "is not")
+                    . " an instance of Generator\n";
+
+  // $serialString = serialize($a);   // Uncaught exception
+
+  echo "===========================\n";
+
+  foreach (getTextFileLines(__DIR__."/Testfile.txt") as $line)
+  {
+      echo ">$line<\n";
+  }
+  echo "===========================\n";
+
+  foreach (f() as $key => $val)
+  {
+      echo "key: $key, value: $val\n";
+  }
+  echo "===========================\n";
+
+  foreach (series2(1, 5, "X") as $key => $val)
+  {
+      echo "key: $key, value: $val\n";
+  //  echo ($val == NULL) ? "value is NULL\n" : "value is not NULL\n";
+  }
+}

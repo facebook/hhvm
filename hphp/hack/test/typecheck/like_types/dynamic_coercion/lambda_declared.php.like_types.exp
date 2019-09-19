@@ -1,0 +1,12 @@
+File "lambda_declared.php", line 14, characters 9-21:
+Invalid argument (Typing[4110])
+File "lambda_declared.php", line 14, characters 9-21:
+Expected (int, string)
+File "lambda_declared.php", line 14, characters 9-21:
+But got dynamic because it is an unenforceable type
+File "lambda_declared.php", line 15, characters 12-13:
+Invalid return type (Typing[4110])
+File "lambda_declared.php", line 14, characters 28-40:
+Expected (int, string)
+File "lambda_declared.php", line 13, characters 12-18:
+But got dynamic

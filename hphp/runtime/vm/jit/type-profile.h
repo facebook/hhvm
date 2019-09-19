@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_JIT_TYPE_PROFILE_H_
 #define incl_HPHP_JIT_TYPE_PROFILE_H_
 
+#include <folly/dynamic.h>
+
 #include "hphp/runtime/vm/jit/type.h"
 
 #include "hphp/util/type-scan.h"
@@ -32,6 +34,11 @@ namespace HPHP { namespace jit {
  */
 struct TypeProfile {
   std::string toString() const { return type.toString(); }
+
+  folly::dynamic toDynamic() const {
+    return folly::dynamic::object("profileType", "TypeProfile")
+                                 ("typeStr", type.toString());
+  }
 
   void report(TypedValue tv) {
     type |= typeFromTV(&tv, nullptr);

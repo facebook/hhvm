@@ -8,14 +8,17 @@ class test2 {
 	}
 
 }
+<<__EntryPoint>>
+function main_entry(): void {
 
-$foo = new test2();
+  $foo = new test2();
 
-if (is_object($foo)) {
-  include 'bug39721.inc';
+  if (is_object($foo)) {
+    include 'bug39721.inc';
+  }
+
+  $child = new test2_child();
+
+  echo $foo->instance . "\n";
+  echo $child->instance . "\n";
 }
-
-$child = new test2_child();
-
-echo $foo->instance . "\n";
-echo $child->instance . "\n";

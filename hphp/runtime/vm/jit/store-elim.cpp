@@ -603,8 +603,6 @@ void visit(Local& env, IRInstruction& inst) {
       // things.
       addAllLoad(env);
       killSet(env, env.global.ainfo.all_frame);
-      killSet(env, env.global.ainfo.all_clsRefClsSlot);
-      killSet(env, env.global.ainfo.all_clsRefTSSlot);
       kill(env, l.kills);
     },
 
@@ -617,19 +615,19 @@ void visit(Local& env, IRInstruction& inst) {
       load(env, l.inlStack);
       load(env, l.actrec);
 
-      // This is a lie, but we can't push StLoc instructions from the parent
-      // frame into the callee as the frame pointer has been updated. Ideally
-      // this wouldn't be an issue but the TFramePtr is still stored in a
-      // reserved register.
-      mayStore(env, AFrameAny);
-      mayStore(env, AClsRefSlotAny);
+      // This effect is a lie, but we can't push any stores that use a caller
+      // frame pointer into the callee, as the frame pointer will be updated.
+      // Ideally, this wouldn't be an issue, but the TFramePtr is still stored
+      // as a reserved register. Both locals and iterators are on the frame.
+      mayStore(env, AFrameAny | AIterAny);
     },
 
     [&] (InlineExitEffects l) {
-      // These locations are dead, but it's unsafe to sync stores passed
-      // InlineReturn as they reference the callee safe. Kill sets are
-      // conservative so we must also indicate mayStore. In practice this value
-      // will generally be AMIStateAny | AClsRefSlotAny so this is fine.
+      // These locations are dead, but it's unsafe to sync stores
+      // passed InlineReturn as they reference the callee safe. Kill
+      // sets are conservative so we must also indicate mayStore. In
+      // practice this value will generally be AMIStateAny so this is
+      // fine.
       mayStore(env, l.inlMeta);
 
       // The same applies to the frame, but we're more likely to end up with

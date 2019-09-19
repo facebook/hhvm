@@ -18,6 +18,7 @@
 #define incl_HPHP_RUNTIME_OPTION_H_
 
 #include <folly/dynamic.h>
+#include <folly/experimental/io/FsUtil.h>
 
 #include <unordered_map>
 #include <algorithm>
@@ -50,6 +51,9 @@ struct IniSettingMap;
 constexpr int kDefaultInitialStaticStringTableSize = 500000;
 
 enum class JitSerdesMode {
+  // NB: if changing the encoding here, make sure to update isJitSerializing()
+  // and isJitDeserializing() as needed.
+  //
   // Bit 0: serialize
   // Bit 1: deserialize
   Off                   = 0x0,
@@ -61,14 +65,6 @@ enum class JitSerdesMode {
   DeserializeAndDelete  = 0xe,          // 01110
   DeserializeAndExit    = 0x12,         // 10010
 };
-
-inline constexpr bool isJitDeserializing(JitSerdesMode m) {
-  return static_cast<std::underlying_type<JitSerdesMode>::type>(m) & 0x2;
-}
-
-inline constexpr bool isJitSerializing(JitSerdesMode m) {
-  return static_cast<std::underlying_type<JitSerdesMode>::type>(m) & 0x1;
-}
 
 struct RepoOptions {
   RepoOptions(const RepoOptions&) = default;
@@ -84,18 +80,17 @@ struct RepoOptions {
   H(bool,           EnableCoroutines,               true)             \
   H(bool,           Hacksperimental,                false)            \
   H(bool,           DisableLvalAsAnExpression,      false)            \
-  H(bool,           HackCompilerUseRustParser,      false)            \
   H(bool,           AllowNewAttributeSyntax,        false)            \
+  H(bool,           ConstDefaultFuncArgs,           false)            \
+  H(bool,           ConstStaticProps,               false)            \
+  H(bool,           AbstractStaticProps,            false)            \
+  H(bool,           DisableUnsetClassConst,         false)            \
+  H(bool,           DisallowFuncPtrsInConstants,    false)            \
   E(bool,           CreateInOutWrapperFunctions,    true)             \
-  E(std::string,    HHJSAdditionalTransform,        "")               \
-  E(bool,           HHJSNoBabel,                    false)            \
-  E(bool,           HHJSUniqueFilenames,            true)             \
-  E(std::string,    HHJSBabelTransform,                               \
-                                         hhjsBabelTransformDefault()) \
-  E(bool,           HHJSSetLocs,                    false)            \
-  E(std::string,    HHJSNodeModules,                "")               \
   E(bool,           EmitFuncPointers,               true)             \
   E(bool,           EmitInstMethPointers,           EmitFuncPointers) \
+  /**/
+
   /**/
 
 #define AUTOLOADFLAGS() \
@@ -174,6 +169,18 @@ struct RuntimeOption {
     std::set<std::string>& xboxPasswords
   );
 
+  static folly::Optional<folly::fs::path> GetHomePath(
+    const folly::StringPiece user);
+
+  /**
+   * Find a config file corresponding to the given user and parse its
+   * settings into the given ini and hdf objects.
+   *
+   * Return true on success and false on failure.
+   */
+  static bool ReadPerUserSettings(const folly::fs::path& confFileName,
+                                  IniSettingMap& ini, Hdf& config);
+
   static std::string getTraceOutputFile();
 
   static bool ServerMode;
@@ -248,6 +255,7 @@ struct RuntimeOption {
   static bool ServerFixPathInfo;
   static bool ServerAddVaryEncoding;
   static bool ServerLogSettingsOnStartup;
+  static bool ServerLogReorderProps;
   static bool ServerForkEnabled;
   static bool ServerForkLogging;
   static bool ServerWarmupConcurrently;
@@ -360,6 +368,16 @@ struct RuntimeOption {
   static bool TLSDisableTLS1_2;
   static std::string TLSClientCipherSpec;
   static bool EnableSSLWithPlainText;
+  // Level of TLS client auth. Valid values are
+  // 0 => disabled (default)
+  // 1 => optional (verify if client presents a cert)
+  // 2 => required (client must present a valid cert)
+  static int SSLClientAuthLevel;
+  // CA file to verify client cert against.
+  static std::string SSLClientCAFile;
+  // Sampling ratio for client auth logging. Must be an int within [0, 100].
+  // 0 => disabled; 100 => log all connections.
+  static uint32_t SSLClientAuthLoggingSampleRatio;
 
   static int XboxServerThreadCount;
   static int XboxServerMaxQueueLength;
@@ -391,6 +409,9 @@ struct RuntimeOption {
    */
   static std::map<std::string, std::string> IncludeRoots;
   static std::map<std::string, std::string> AutoloadRoots;
+
+  static bool AutoloadEnabled;
+  static std::string AutoloadDBPath;
 
   static std::string FileCache;
   static std::string DefaultDocument;
@@ -431,6 +452,7 @@ struct RuntimeOption {
   static std::string AdminServerIP;
   static int AdminServerPort;
   static int AdminThreadCount;
+  static bool AdminServerStatsNeedPassword;
   static std::string AdminPassword;
   static std::set<std::string> AdminPasswords;
   static std::set<std::string> HashedAdminPasswords;
@@ -493,9 +515,6 @@ struct RuntimeOption {
 
   static bool DisableSmallAllocator;
 
-  static int PerAllocSampleF;
-  static int TotalAllocSampleF;
-
   static std::map<std::string, std::string> ServerVariables;
 
   static std::map<std::string, std::string> EnvVariables;
@@ -525,6 +544,7 @@ struct RuntimeOption {
   static JitSerdesMode EvalJitSerdesMode;
   static int ProfDataTTLHours;
   static std::string EvalJitSerdesFile;
+  static std::string ProfDataTag;
   static bool DumpPreciseProfData;
   static bool EnablePocketUniverses;
 
@@ -571,9 +591,9 @@ struct RuntimeOption {
   // Disables static closures
   // true => error, false => default behaviour
   static bool DisableStaticClosures;
-  // Disables the `instanceof` operator
+  // Disables __halt_compiler()
   // true => error, false => default behaviour
-  static bool DisableInstanceof;
+  static bool DisableHaltCompiler;
   // Enables the class-level where constraints
   // true => allow the feature, false => disable the feature
   static bool EnableClassLevelWhereClauses;
@@ -641,6 +661,12 @@ struct RuntimeOption {
   F(bool, WarnOnCoerceBuiltinParams,   false)                           \
   F(bool, FatalOnParserOptionMismatch, true)                            \
   F(bool, WarnOnSkipFrameLookup,       true)                            \
+  /*                                                                    \
+   *  0 - Code coverage cannot be enabled through request param         \
+   *  1 - Code coverage can be enabled through request param            \
+   *  2 - Code coverage enabled                                         \
+   */                                                                   \
+  F(uint32_t, EnableCodeCoverage,      0)                               \
   /* Whether to use the embedded hackc binary */                        \
   F(bool, HackCompilerUseEmbedded,     facebook)                        \
   /* Whether to trust existing versions of the extracted compiler */    \
@@ -676,8 +702,6 @@ struct RuntimeOption {
   F(bool, EmitSwitch,                  true)                            \
   F(bool, LogThreadCreateBacktraces,   false)                           \
   F(bool, FailJitPrologs,              false)                           \
-  F(bool, EnableHHJS,                  false)                           \
-  F(bool, DumpHHJS,                    false)                           \
   F(bool, UseHHBBC,                    !getenv("HHVM_DISABLE_HHBBC"))   \
   F(bool, EnablePerRepoOptions,        true)                            \
   F(bool, CachePerRepoOptionsPath,     true)                            \
@@ -744,7 +768,6 @@ struct RuntimeOption {
   F(uint32_t, WarnOnIncDecInvalidType, 0)                               \
   F(bool, PromoteEmptyObject,          false)                           \
   F(bool, LibXMLUseSafeSubtrees,       true)                            \
-  F(bool, AllDestructorsOptional,      false)                           \
   F(bool, AllowScopeBinding,           false)                           \
   F(bool, JitNoGdb,                    true)                            \
   F(bool, SpinOnCrash,                 false)                           \
@@ -770,6 +793,7 @@ struct RuntimeOption {
   F(bool, ProfileHWFastReads,          false)                           \
   F(bool, ProfileHWStructLog,          false)                           \
   F(int32_t, ProfileHWExportInterval,  30)                              \
+  F(string, ReorderProps,              reorderPropsDefault())           \
   F(bool, JitAlwaysInterpOne,          false)                           \
   F(int32_t, JitNopInterval,           0)                               \
   F(uint32_t, JitMaxTranslations,      10)                              \
@@ -809,6 +833,8 @@ struct RuntimeOption {
   F(uint32_t, JitWarmupRateSeconds,    64)                              \
   F(uint32_t, JitWriteLeaseExpiration, 1500) /* in microseconds */      \
   F(int, JitRetargetJumps,             1)                               \
+  /* Sync VM reg state for all native calls. */                         \
+  F(bool, JitForceVMRegSync,           false)                           \
   F(bool, HHIRLICM,                    false)                           \
   F(bool, HHIRSimplification,          true)                            \
   F(bool, HHIRGenOpts,                 true)                            \
@@ -817,10 +843,10 @@ struct RuntimeOption {
   F(uint32_t, HHIRInliningCostFactorMain, 100)                          \
   F(uint32_t, HHIRInliningCostFactorCold, 32)                           \
   F(uint32_t, HHIRInliningCostFactorFrozen, 10)                         \
-  F(uint32_t, HHIRInliningVasmCostLimit, 17500)                         \
+  F(uint32_t, HHIRInliningVasmCostLimit, 10500)                         \
   F(uint32_t, HHIRInliningMinVasmCostLimit, 10000)                      \
   F(uint32_t, HHIRInliningMaxVasmCostLimit, 40000)                      \
-  F(uint32_t, HHIRAlwaysInlineVasmCostLimit, 8000)                      \
+  F(uint32_t, HHIRAlwaysInlineVasmCostLimit, 4800)                      \
   F(uint32_t, HHIRInliningMaxDepth,    1000)                            \
   F(double,   HHIRInliningVasmCallerExp, .5)                            \
   F(double,   HHIRInliningVasmCalleeExp, .5)                            \
@@ -830,7 +856,8 @@ struct RuntimeOption {
   F(uint32_t, HHIRInliningMaxInitObjProps, 12)                          \
   F(bool,     HHIRInliningIgnoreHints, !debug)                          \
   F(bool,     HHIRInliningUseStackedCost, true)                         \
-  F(bool,     HHIRInliningUseReachableCost, false)                      \
+  F(bool,     HHIRInliningUseReachableCost, true)                       \
+  F(bool,     HHIRInliningUseLayoutBlocks, false)                       \
   F(bool, HHIRInlineFrameOpts,         true)                            \
   F(bool, HHIRPartialInlineFrameOpts,  true)                            \
   F(bool, HHIRGenerateAsserts,         false)                           \
@@ -844,6 +871,7 @@ struct RuntimeOption {
   F(bool, HHIRStorePRE,                true)                            \
   F(bool, HHIROutlineGenericIncDecRef, true)                            \
   F(double, HHIRMixedArrayProfileThreshold, 0.8554)                     \
+  F(double, HHIRSmallArrayProfileThreshold, 0.8)                        \
   /* Register allocation flags */                                       \
   F(bool, HHIREnablePreColoring,       true)                            \
   F(bool, HHIREnableCoalescing,        true)                            \
@@ -908,6 +936,7 @@ struct RuntimeOption {
   F(bool, DumpAst,                     false)                           \
   F(bool, DumpTargetProfiles,          false)                           \
   F(bool, MapTgtCacheHuge,             false)                           \
+  F(bool, NewTHPHotText,               false)                           \
   F(uint32_t, MaxHotTextHugePages,     hotTextHugePagesDefault())       \
   F(uint32_t, MaxLowMemHugePages,      hugePagesSoundNice() ? 8 : 0)    \
   F(uint32_t, MaxHighArenaHugePages,   0)                               \
@@ -993,8 +1022,10 @@ struct RuntimeOption {
   F(bool, HackArrCompatCheckFalseyPromote, false)                       \
   F(bool, HackArrCompatCheckEmptyStringPromote, false)                  \
   F(bool, HackArrCompatCheckCompare, false)                             \
+  F(bool, HackArrCompatCheckCompareNonAnyArray, false)                  \
   F(bool, HackArrCompatCheckArrayPlus, false)                           \
   F(bool, HackArrCompatCheckArrayKeyCast, false)                        \
+  F(bool, HackArrCompatCheckNullHackArrayKey, false)                    \
   /* Raise notices when is_array is called with any hack array */       \
   F(bool, HackArrCompatIsArrayNotices, false)                           \
   /* Raise notices when is_vec or is_dict  is called with a v/darray */ \
@@ -1009,6 +1040,7 @@ struct RuntimeOption {
    */                                                                   \
   F(bool, HackArrCompatCheckImplicitVarrayAppend, false)                \
   F(bool, HackArrCompatTypeHintNotices, false)                          \
+  F(bool, HackArrCompatTypeHintPolymorphism, false)                     \
   F(bool, HackArrCompatDVCmpNotices, false)                             \
   F(bool, HackArrCompatSerializeNotices, false)                         \
   /* Raise notices when fb_compact_*() would change behavior */         \
@@ -1025,6 +1057,8 @@ struct RuntimeOption {
    * RepoAuthoritativeMode wasn't built with this flag or if the        \
    * flag LogArrayProvenance is unset */                                \
   F(bool, ArrayProvenance, false)                                       \
+  /* Tag _all_ empty arrays we create at runtime. */                    \
+  F(bool, ArrayProvenanceEmpty, false)                                  \
   /* Enable logging the source of vecs/dicts whose vec/dict-ness is     \
    * observed, e.g. through serialization */                            \
   F(bool, LogArrayProvenance, false)                                    \
@@ -1081,6 +1115,7 @@ struct RuntimeOption {
   F(bool, NoticeOnByRefArgumentTypehintViolation, false)                \
   /* Enables Hack records. */                                           \
   F(bool, HackRecords, false)                                           \
+  F(bool, HackRecordArrays, false)                                           \
   /*                                                                    \
    * Control dynamic calls to functions and dynamic constructs of       \
    * classes which haven't opted into being called that way.            \
@@ -1090,7 +1125,18 @@ struct RuntimeOption {
    * 2 - Throw exception                                                \
    *                                                                    \
    */                                                                   \
-  F(int32_t, ForbidDynamicCalls, 0)                                     \
+  F(int32_t, ForbidDynamicCallsToFunc, 0)                               \
+  F(int32_t, ForbidDynamicCallsToClsMeth, 0)                            \
+  F(int32_t, ForbidDynamicCallsToInstMeth, 0)                           \
+  F(int32_t, ForbidDynamicConstructs, 0)                                \
+  /*                                                                    \
+   * Keep logging dynamic calls according to options above even if      \
+   * __DynamicallyCallable attribute is present at declaration.         \
+   */                                                                   \
+  F(bool, ForbidDynamicCallsWithAttr, false)                            \
+  F(bool, WarnOnNonLiteralClsMeth, false)                               \
+  /* Toggles logging for expressions of type $var::name() */            \
+  F(bool, LogKnownMethodsAsDynamicCalls, true)                          \
   /*                                                                    \
    * Control handling of out-of-range integer values in the compact     \
    * Thrift serializer.                                                 \
@@ -1183,6 +1229,7 @@ struct RuntimeOption {
      1 - raise a warning
      2 - throw */                                                       \
   F(uint64_t, DynamicClsMethLevel, 1)                                   \
+  F(bool, APCSerializeFuncs, true)                                      \
   /* */
 
 private:
@@ -1258,6 +1305,7 @@ public:
   static int DebuggerSignalTimeout;
   static std::string DebuggerAuthTokenScriptBin;
   static std::string DebuggerSessionAuthScriptBin;
+  static bool ForceDebuggerBpToInterp;
 
   // Mail options
   static std::string SendmailPath;
@@ -1291,6 +1339,16 @@ public:
   static bool SetProfileNullThisObject;
 };
 static_assert(sizeof(RuntimeOption) == 1, "no instance variables");
+
+inline bool isJitDeserializing() {
+  auto const m = RuntimeOption::EvalJitSerdesMode;
+  return static_cast<std::underlying_type<JitSerdesMode>::type>(m) & 0x2;
+}
+
+inline bool isJitSerializing() {
+  auto const m = RuntimeOption::EvalJitSerdesMode;
+  return static_cast<std::underlying_type<JitSerdesMode>::type>(m) & 0x1;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

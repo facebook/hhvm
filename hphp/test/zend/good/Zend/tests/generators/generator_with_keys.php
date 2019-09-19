@@ -1,10 +1,10 @@
 <?hh
 
 function reverse(array $array) {
-    end(&$array);
-    while (null !== $key = key(&$array)) {
-        yield $key => current(&$array);
-        prev(&$array);
+    end(inout $array);
+    while (null !== $key = key($array)) {
+        yield $key => current($array);
+        prev(inout $array);
     }
 }
 <<__EntryPoint>> function main(): void {

@@ -1,0 +1,8 @@
+File "protected_static_member_03.php", line 31, characters 11-12:
+No static method 'me' in T (did you mean instance method 'foo'?) (Typing[4090])
+File "protected_static_member_03.php", line 28, characters 7-7:
+Declaration of T is here
+File "protected_static_member_03.php", line 41, characters 11-12:
+No static method 'me' in Treq (did you mean 'accessible'?) (Typing[4090])
+File "protected_static_member_03.php", line 35, characters 7-10:
+Declaration of Treq is here

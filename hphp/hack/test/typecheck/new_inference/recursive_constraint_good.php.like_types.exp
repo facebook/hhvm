@@ -1,0 +1,12 @@
+File "recursive_constraint_good.php", line 19, characters 9-35:
+This comparison has invalid types.  Only comparisons in which both arguments are strings, nums, DateTime, or DateTimeImmutable are allowed (Typing[4240])
+File "recursive_constraint_good.php", line 18, characters 23-23:
+This is a dynamic value or an int because it is an unenforceable type
+File "recursive_constraint_good.php", line 19, characters 35-35:
+This is an int
+File "recursive_constraint_good.php", line 22, characters 9-35:
+This comparison has invalid types.  Only comparisons in which both arguments are strings, nums, DateTime, or DateTimeImmutable are allowed (Typing[4240])
+File "recursive_constraint_good.php", line 18, characters 23-23:
+This is a dynamic value or an int because it is an unenforceable type
+File "recursive_constraint_good.php", line 22, characters 35-35:
+This is an int

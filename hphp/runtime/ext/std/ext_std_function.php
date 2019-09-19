@@ -16,8 +16,13 @@ namespace {
  * @return mixed -  Returns TRUE if name is callable, FALSE otherwise.
  */
 <<__Native, __Rx>>
-function is_callable(mixed $callback, bool $syntax_only = false,
-                     mixed &$callable_name = null): bool;
+function is_callable(mixed $callback, bool $syntax_only = false): bool;
+
+<<__Native, __Rx>>
+function is_callable_with_name(mixed $callback,
+                               bool $syntax_only,
+                               <<__OutOnly>>
+                               inout mixed $callable_name): bool;
 
 /**
  * Call a callback with an array of parameters
@@ -97,4 +102,14 @@ function register_shutdown_function(mixed $callback,
 function register_postsend_function(mixed $callback,
                                     ...$parameters): void;
 
+}
+
+namespace HH {
+  /**
+   * Get function name from fun
+   * @param mixed $fun
+   * @return function name
+   */
+  <<__Native, __Rx>>
+  function fun_get_function(mixed $fun): string;
 }

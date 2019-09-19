@@ -1,10 +1,5 @@
-File "constraint_gen_fail3.php", line 23, characters 7-7:
-Class U does not correctly implement all required members  (Typing[4110])
-File "constraint_gen_fail3.php", line 23, characters 20-20:
-Some members are incompatible with those declared in type L
-Read the following to see why:
 File "constraint_gen_fail3.php", line 24, characters 19-21:
-Member get has the wrong type
+Member get has the wrong type (Typing[4341])
 File "constraint_gen_fail3.php", line 20, characters 26-27:
 Expected ?A
 File "constraint_gen_fail3.php", line 23, characters 9-9:

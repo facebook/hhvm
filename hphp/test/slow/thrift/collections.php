@@ -108,12 +108,17 @@ function main() {
     [10 => 1.2, 43 => 5.33],
     [10 => 'doesnt', 11 => 'matter']
   );
-  test(
-    "sadly, this is legal",
-    (object)[13.3, 23.4, 3576.2],
-    (object)[10 => 1.2, 43 => 5.33],
-    (object)[10 => 'doesnt', 11 => 'matter']
-  );
+  $listObj = new stdClass();
+  $listObj->{0} = 13.3;
+  $listObj->{1} = 23.4;
+  $listObj->{2} = 3576.2;
+  $mapObj = new stdClass();
+  $mapObj->{10} = 1.2;
+  $mapObj->{43} = 5.33;
+  $setObj = new stdClass();
+  $setObj->{10} = 'doesnt';
+  $setObj->{11} = 'matter';
+  test("sadly, this is legal", $listObj, $mapObj, $setObj);
 }
 
 <<__EntryPoint>>

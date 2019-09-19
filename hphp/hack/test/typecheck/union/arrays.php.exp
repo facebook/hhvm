@@ -119,7 +119,7 @@ Expected string
 File "arrays.php", line 112, characters 17-17:
 But got int
 File "arrays.php", line 4, characters 16-16:
-Wrong type hint (Typing[4110])
+Wrong type hint (Typing[4338])
 File "arrays.php", line 4, characters 9-14:
 Expected string
 File "arrays.php", line 4, characters 20-20:

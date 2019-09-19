@@ -74,6 +74,15 @@ constexpr Type::bits_t Type::kClsSpecBits;
 
 ///////////////////////////////////////////////////////////////////////////////
 
+const ArrayData* Type::arrLikeVal() const {
+  assertx(hasConstVal(TArrLike));
+  if (*this <= TArr)    return m_arrVal;
+  if (*this <= TVec)    return m_vecVal;
+  if (*this <= TDict)   return m_dictVal;
+  if (*this <= TKeyset) return m_keysetVal;
+  always_assert(false);
+}
+
 std::string Type::constValString() const {
   if (*this <= TBottom)   return "Bottom";
   if (*this <= TUninit)   return "Uninit";
@@ -119,12 +128,6 @@ std::string Type::constValString() const {
     }
     return folly::format("Dict({})", m_dictVal).str();
   }
-  if (*this <= TPersistentShape) {
-    if (m_shapeVal->empty()) {
-      return "shape()";
-    }
-    return folly::format("Shape({})", m_shapeVal).str();
-  }
   if (*this <= TStaticKeyset) {
     if (m_keysetVal->empty()) {
       return "keyset()";
@@ -146,6 +149,10 @@ std::string Type::constValString() const {
       m_clsmethVal->getFunc() ?
       m_clsmethVal->getFunc()->fullName()->data() : "nullptr"
     ).str();
+  }
+  if (*this <= TRecDesc) {
+    return folly::format("RecDesc({})", m_recVal ? m_recVal->name()->data()
+                                                 : "nullptr").str();
   }
   if (*this <= TCctx) {
     if (!m_intVal) {
@@ -246,6 +253,9 @@ std::string Type::toString() const {
   if (m_hasConstVal) {
     if (*this <= TCls) {
       return folly::sformat("Cls={}", m_clsVal->name()->data());
+    }
+    if (*this <= TRecDesc) {
+      return folly::sformat("RecDesc={}", m_recVal->name()->data());
     }
     return folly::sformat("{}<{}>",
                           dropConstVal().toString(), constValString());
@@ -519,12 +529,10 @@ Type::bits_t Type::bitsFromDataType(DataType outer, DataType inner) {
     case KindOfPersistentVec    : return kPersistentVec;
     case KindOfPersistentDict   : return kPersistentDict;
     case KindOfPersistentKeyset : return kPersistentKeyset;
-    case KindOfPersistentShape  : return kPersistentShape;
     case KindOfPersistentArray  : return kPersistentArr;
     case KindOfVec              : return kVec;
     case KindOfDict             : return kDict;
     case KindOfKeyset           : return kKeyset;
-    case KindOfShape            : return kShape;
     case KindOfArray            : return kArr;
     case KindOfResource         : return kRes;
     case KindOfObject           : return kObj;
@@ -554,8 +562,6 @@ DataType Type::toDataType() const {
   if (*this <= TStr)         return KindOfString;
   if (*this <= TPersistentArr) return KindOfPersistentArray;
   if (*this <= TArr)         return KindOfArray;
-  if (*this <= TPersistentShape) return KindOfPersistentShape;
-  if (*this <= TShape)       return KindOfShape;
   if (*this <= TPersistentVec) return KindOfPersistentVec;
   if (*this <= TVec)         return KindOfVec;
   if (*this <= TPersistentDict) return KindOfPersistentDict;
@@ -871,7 +877,6 @@ Type typeFromTV(tv_rval tv, const Class* ctx) {
   if (outer == KindOfPersistentString) outer = KindOfString;
   else if (outer == KindOfPersistentVec) outer = KindOfVec;
   else if (outer == KindOfPersistentDict) outer = KindOfDict;
-  else if (outer == KindOfPersistentShape) outer = KindOfShape;
   else if (outer == KindOfPersistentKeyset) outer = KindOfKeyset;
 
   if (isRefType(outer)) {
@@ -880,7 +885,6 @@ Type typeFromTV(tv_rval tv, const Class* ctx) {
     else if (inner == KindOfPersistentArray) inner = KindOfArray;
     else if (inner == KindOfPersistentVec) inner = KindOfVec;
     else if (inner == KindOfPersistentDict) inner = KindOfDict;
-    else if (inner == KindOfPersistentShape) inner = KindOfShape;
     else if (inner == KindOfPersistentKeyset) inner = KindOfKeyset;
   }
   return Type(outer, inner);
@@ -999,6 +1003,26 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
       }
       return base;
     }
+
+    case T::SubCls:
+    case T::ExactCls:
+    case T::OptSubCls:
+    case T::OptExactCls: {
+      auto base = TCls;
+
+      if (auto const cls = Unit::lookupUniqueClassInContext(ty.clsName(),
+                                                            ctx)) {
+        if (ty.tag() == T::ExactCls || ty.tag() == T::OptExactCls) {
+          base = Type::ExactCls(cls);
+        } else {
+          base = Type::SubCls(cls);
+        }
+      }
+      if (ty.tag() == T::OptSubCls || ty.tag() == T::OptExactCls) {
+        base |= TInitNull;
+      }
+      return base;
+    }
   }
   not_reached();
 }
@@ -1042,6 +1066,7 @@ Type typeFromPropTC(const HPHP::TypeConstraint& tc,
       case A::VecOrDict:  return TVec | TDict;
       case A::ArrayLike:  return TArrLike;
       case A::This:
+        always_assert(propCls != nullptr);
         return (isSProp && !tc.couldSeeMockObject())
           ? Type::ExactObj(propCls)
           : Type::SubObj(propCls);
@@ -1116,7 +1141,6 @@ Type negativeCheckType(Type srcType, Type typeParam) {
   if (typeParam.maybe(TPersistent)) {
     if (tmp.maybe(TCountedStr)) tmp |= TStr;
     if (tmp.maybe(TCountedArr)) tmp |= TArr;
-    if (tmp.maybe(TCountedShape)) tmp |= TShape;
     if (tmp.maybe(TCountedVec)) tmp |= TVec;
     if (tmp.maybe(TCountedDict)) tmp |= TDict;
     if (tmp.maybe(TCountedKeyset)) tmp |= TKeyset;
@@ -1135,8 +1159,6 @@ Type boxType(Type t) {
     t = TStr;
   } else if (t <= TArr) {
     t = TArr;
-  } else if (t <= TShape) {
-    t = TShape;
   } else if (t <= TVec) {
     t = TVec;
   } else if (t <= TDict) {
@@ -1200,7 +1222,6 @@ Type relaxToGuardable(Type ty) {
   // ty is unspecialized and we don't support guarding on CountedArr or
   // StaticArr, so widen any subtypes of Arr to Arr.
   if (ty <= TArr) return TArr;
-  if (ty <= TShape) return TShape;
   if (ty <= TVec) return TVec;
   if (ty <= TDict) return TDict;
   if (ty <= TKeyset) return TKeyset;

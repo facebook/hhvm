@@ -6,6 +6,7 @@ function main_preg_replace_named_subpat() {
 $content = 'b';
 $pattern = '/(?P<a>.*)/';
 
+$count = -1;
 preg_replace_callback(
   $pattern,
   $m ==> {
@@ -13,5 +14,7 @@ preg_replace_callback(
     var_dump(is_darray($m));
   },
   $content,
+  -1,
+  inout $count
 );
 }

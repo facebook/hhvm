@@ -1,11 +1,11 @@
-(**
+(*
  * Copyright (c) 2017, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the "hack" directory of this source tree.
  *
-*)
+ *)
 
 (* Given an AST for a block, compute (needs_local_this, decl_vars).
  * `needs_local_this` is true if the method must use InitThisLoc and reference
@@ -20,20 +20,20 @@
  * or (c) it appears in a bare position as a function parameter.
  *)
 val from_ast :
-  is_closure_body: bool ->
-  has_this: bool ->
-  params: Hhas_param.t list ->
-  is_toplevel: bool ->
-  is_in_static_method: bool ->
-  explicit_use_set: SSet.t ->
+  is_closure_body:bool ->
+  has_this:bool ->
+  params:Hhas_param.t list ->
+  is_toplevel:bool ->
+  is_in_static_method:bool ->
+  explicit_use_set:SSet.t ->
   Tast.program ->
   bool * string list
 
 val vars_from_ast :
-  is_closure_body: bool ->
-  has_this: bool ->
-  params: Tast.fun_param list ->
-  is_toplevel: bool ->
-  is_in_static_method: bool ->
+  is_closure_body:bool ->
+  has_this:bool ->
+  params:Tast.fun_param list ->
+  is_toplevel:bool ->
+  is_in_static_method:bool ->
   Tast.program ->
   SSet.t

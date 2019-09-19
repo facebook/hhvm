@@ -1,6 +1,6 @@
 <?hh
 $pwd = getcwd();
-$f = basename(current(&get_included_files()), ".php");
+$included_files = get_included_files(); $f = basename(current($included_files), ".php");
 ZendGoodExtStandardTestsFileFopenIncludePathInc::$dir1 = $pwd."/".$f.".dir1";
 ZendGoodExtStandardTestsFileFopenIncludePathInc::$dir2 = $pwd."/".$f.".dir2";
 ZendGoodExtStandardTestsFileFopenIncludePathInc::$dir3 = $pwd."/".$f.".dir3";
@@ -12,7 +12,7 @@ ZendGoodExtStandardTestsFileFopenIncludePathInc::$newdirs = array(
   ZendGoodExtStandardTestsFileFopenIncludePathInc::$dir3,
 );
 
-ZendGoodExtStandardTestsFileFopenIncludePathInc::$reldirs = array("dir1", "dir2", "dir3");
+
 
 function generate_next_rel_path() {
 
@@ -91,7 +91,7 @@ function teardown_relative_path() {
 }
 
 abstract final class ZendGoodExtStandardTestsFileFopenIncludePathInc {
-  public static $reldirs;
+  public static $reldirs = ["dir1", "dir2", "dir3"];
   public static $newdirs;
   public static $dir1;
   public static $dir2;

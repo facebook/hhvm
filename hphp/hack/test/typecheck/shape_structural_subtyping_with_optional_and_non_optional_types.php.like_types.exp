@@ -1,0 +1,6 @@
+File "shape_structural_subtyping_with_optional_and_non_optional_types.php", line 13, characters 7-13:
+Invalid argument (Typing[4110])
+File "shape_structural_subtyping_with_optional_and_non_optional_types.php", line 10, characters 14-50:
+Expected ~shape(?'a' => int, 'b' => int) because it is an unenforceable type
+File "shape_structural_subtyping_with_optional_and_non_optional_types.php", line 13, characters 7-13:
+But got shape()

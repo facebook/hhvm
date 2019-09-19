@@ -1,0 +1,8 @@
+in D::f
+bool(true)
+in C::f
+bool(true)
+in D::f
+bool(false)
+in C::f
+bool(false)

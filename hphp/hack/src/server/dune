@@ -15,6 +15,7 @@
     diagnostic_subscription
     errors
     file_info
+    glean_options
     parser_options
     procs_bucket
     pos
@@ -25,7 +26,8 @@
     typechecker_options
     utils_core
     utils_www_root
-    version))
+    version)
+  (preprocess (pps lwt_ppx ppx_deriving.std))) ; See T41851208
 
 (library
   (name diagnostic_subscription)
@@ -40,7 +42,31 @@
     naming
     pos
     relative_path
-    utils_core))
+    utils_core)
+  (preprocess (pps lwt_ppx ppx_deriving.std))) ; See T41851208
+
+(library
+  (name server_ide_utils)
+  (wrapped false)
+  (modules
+    serverIdeUtils)
+  (libraries
+    ast_provider
+    decl
+    decl_provider
+    errors
+    typing_check
+    file_provider
+    fixme_provider
+    parser
+    provider_context
+    relative_path
+    typechecker_options
+    typing
+    typing_deps
+    utils_core
+    )
+  (preprocess (pps lwt_ppx ppx_deriving.std))) ; See T41851208
 
 (library
   (name server_utils)
@@ -60,7 +86,8 @@
     server_monitor
     sys_utils
     utils_core
-    watchman))
+    watchman)
+  (preprocess (pps lwt_ppx ppx_deriving.std))) ; See T41851208
 
 (library
   (name server_command_types)
@@ -91,7 +118,7 @@
     symbol
     typing_defs
     utils_lint)
-    )
+  (preprocess (pps lwt_ppx ppx_deriving.std))) ; See T41851208
 
 (library
   (name server_client_provider)
@@ -106,7 +133,8 @@
     libancillary
     server_command_types
     server_utils
-    utils_core))
+    utils_core)
+  (preprocess (pps lwt_ppx ppx_deriving.std)))  ; See T41851208
 
 (library
   (name server_services)
@@ -129,8 +157,6 @@
     serverFunDepsBatch
     serverFunIsLocallableBatch
     serverGlobalState
-    serverIdeContext
-    serverIdeUtils
     serverIdentifyFunction
     serverRxApiShared
     serverSymbolDefinition
@@ -142,17 +168,20 @@
     fileutils
     heap_shared_mem
     parser
+    provider_context
+    provider_utils
     search
     server_command_types
     server_env
     sys_utils
     tast_check
+    tast_type_collector
     typechecker_options
-    typed_positioned_syntax
     typing
     typing_check
     typing_deps
-    utils_core))
+    utils_core)
+  (preprocess (pps lwt_ppx ppx_deriving.std)))  ; See T41851208
 
 (library
   (name server)
@@ -161,6 +190,7 @@
     colorFile
     fullFidelityParseService
     searchServiceRunner
+    serverBigCode
     serverBusyStatus
     serverCheckUtils
     serverCheckpoint
@@ -193,13 +223,16 @@
     serverRefactor
     serverRevisionTracker
     serverRewriteLambdaParameters
+    codemodTypePrinter
+    serverRewriteReturnType
+    serverRewriteParameterTypes
+    serverRewriteTypeParamsType
     serverSearch
     serverSignatureHelp
     serverStamp
     serverStatusSingle
     serverTypeCheck
     serverTypeDefinition
-    serverTypedAst
     serverWorker
     symbolInfoService)
   (libraries
@@ -217,8 +250,6 @@
     server_services
     shared_lru_stubs
     sys_utils
-    typed_positioned_syntax
-    typed_syntax_transforms
     typing
     utils_core
     version
@@ -229,7 +260,8 @@
     (select serverInvalidateUnits.ml from
     (facebook signed_source_fb -> facebook/serverInvalidateUnits.ml)
     (-> ../stubs/serverInvalidateUnits.ml))
-  ))
+  )
+  (preprocess (pps lwt_ppx ppx_deriving.std))) ; See T41851208
 
 (library
   (name hh_server_monitor)
@@ -248,6 +280,7 @@
     serverInitTypes
     serverLazyInit
     serverMain
+    serverRemoteInit
     serverRpc)
   (libraries
     build
@@ -255,9 +288,10 @@
     bad_files
     lwt
     parent
+    provider_config
+    remote_worker_stubs
     server
     state_loader
     typing_symbol_info
     watchman_client)
-  (preprocess
-    (pps lwt_ppx)))
+  (preprocess (pps lwt_ppx ppx_deriving.std)))

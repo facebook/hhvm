@@ -1,0 +1,6 @@
+File "fun_contra_bad.php", line 8, characters 11-12:
+Invalid argument (Typing[4110])
+File "fun_contra_bad.php", line 4, characters 18-47:
+Expected ~(function(arraykey): arraykey) because it is an unenforceable type
+File "fun_contra_bad.php", line 7, characters 15-34:
+But got (function(int): int)

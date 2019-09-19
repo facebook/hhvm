@@ -78,21 +78,19 @@ Variant HHVM_FUNCTION(apc_store,
 bool HHVM_FUNCTION(apc_store_as_primed_do_not_use,
                    const String& key,
                    const Variant& var);
-TypedValue HHVM_FUNCTION(apc_fetch,
-                         const Variant& key,
-                         VRefParam success = uninit_null());
+TypedValue HHVM_FUNCTION(apc_fetch, const Variant& key, bool& success);
 Variant HHVM_FUNCTION(apc_delete,
                       const Variant& key);
 bool HHVM_FUNCTION(apc_clear_cache,
                    const String& cache_type = "");
 Variant HHVM_FUNCTION(apc_inc,
                       const String& key,
-                      int64_t step = 1,
-                      VRefParam success = uninit_null());
+                      int64_t step,
+                      bool& success);
 Variant HHVM_FUNCTION(apc_dec,
                       const String& key,
-                      int64_t step = 1,
-                      VRefParam success = uninit_null());
+                      int64_t step,
+                      bool& success);
 bool HHVM_FUNCTION(apc_cas,
                    const String& key,
                    int64_t old_cas,
@@ -172,9 +170,16 @@ static_assert(sizeof(int64_t) == sizeof(long long),
 ///////////////////////////////////////////////////////////////////////////////
 // apc serialization
 
-String apc_serialize(const_variant_ref value);
-inline String apc_serialize(const Variant& var) {
-  return apc_serialize(const_variant_ref{var});
+enum APCSerializeMode {
+  Normal,
+  Prime
+};
+
+String apc_serialize(const_variant_ref value,
+                     APCSerializeMode mode = APCSerializeMode::Normal);
+inline String apc_serialize(const Variant& var,
+                            APCSerializeMode mode = APCSerializeMode::Normal) {
+  return apc_serialize(const_variant_ref{var}, mode);
 }
 Variant apc_unserialize(const char* data, int len);
 String apc_reserialize(const String& str);

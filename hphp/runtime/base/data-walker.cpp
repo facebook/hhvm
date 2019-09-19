@@ -106,6 +106,8 @@ bool DataWalker::visitTypedValue(TypedValue rval,
     rval = *rval.m_data.pref->cell();
   }
 
+  auto const serialize_funcs = RuntimeOption::EvalAPCSerializeFuncs;
+
   if (rval.m_type == KindOfObject) {
     features.hasObjectOrResource = true;
     traverseData(rval.m_data.pobj, features, visited);
@@ -113,6 +115,8 @@ bool DataWalker::visitTypedValue(TypedValue rval,
     traverseData(rval.m_data.parr, features, visited, seenArrs);
   } else if (rval.m_type == KindOfResource) {
     features.hasObjectOrResource = true;
+  } else if (serialize_funcs && rval.m_type == KindOfFunc) {
+    if (!rval.m_data.pfunc->isPersistent()) features.hasObjectOrResource = true;
   }
   return canStopWalk(features);
 }

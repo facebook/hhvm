@@ -31,6 +31,7 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 struct Func;
+struct ClsMethDataRef;
 struct Iter;
 struct MInstrState;
 struct TypeConstraint;
@@ -62,16 +63,13 @@ ArrayData* convCellToArrHelper(TypedValue tv);
 ArrayData* convArrToNonDVArrHelper(ArrayData* a);
 ArrayData* convVecToArrHelper(ArrayData* a);
 ArrayData* convDictToArrHelper(ArrayData* a);
-ArrayData* convShapeToArrHelper(ArrayData* a);
 ArrayData* convKeysetToArrHelper(ArrayData* a);
 ArrayData* convArrToVecHelper(ArrayData* a);
 ArrayData* convDictToVecHelper(ArrayData* a);
-ArrayData* convShapeToVecHelper(ArrayData* a);
 ArrayData* convKeysetToVecHelper(ArrayData* a);
 ArrayData* convObjToVecHelper(ObjectData* o);
 ArrayData* convCellToVecHelper(TypedValue tv);
 ArrayData* convArrToDictHelper(ArrayData* a);
-ArrayData* convShapeToDictHelper(ArrayData* a);
 ArrayData* convVecToDictHelper(ArrayData* a);
 ArrayData* convKeysetToDictHelper(ArrayData* a);
 ArrayData* convObjToDictHelper(ObjectData* o);
@@ -79,15 +77,19 @@ ArrayData* convCellToDictHelper(TypedValue tv);
 ArrayData* convArrToKeysetHelper(ArrayData* a);
 ArrayData* convVecToKeysetHelper(ArrayData* a);
 ArrayData* convDictToKeysetHelper(ArrayData* a);
-ArrayData* convShapeToKeysetHelper(ArrayData* a);
 ArrayData* convObjToKeysetHelper(ObjectData* o);
 ArrayData* convCellToKeysetHelper(TypedValue tv);
+ArrayData* convClsMethToArrHealper(ClsMethDataRef clsmeth);
+ArrayData* convClsMethToVArrHealper(ClsMethDataRef clsmeth);
+ArrayData* convClsMethToVecHealper(ClsMethDataRef clsmeth);
+ArrayData* convClsMethToDArrHealper(ClsMethDataRef clsmeth);
+ArrayData* convClsMethToDictHealper(ClsMethDataRef clsmeth);
+ArrayData* convClsMethToKeysetHealper(ClsMethDataRef clsmeth);
 double convObjToDblHelper(const ObjectData* o);
 double convArrToDblHelper(ArrayData* a);
 double convStrToDblHelper(const StringData* s);
 double convResToDblHelper(const ResourceHdr* r);
 double convCellToDblHelper(TypedValue tv);
-ObjectData* convCellToObjHelper(TypedValue tv);
 StringData* convDblToStrHelper(double i);
 StringData* convIntToStrHelper(int64_t i);
 StringData* convObjToStrHelper(ObjectData* o);
@@ -126,9 +128,11 @@ void raise_error_sd(const StringData* sd);
 
 TypedValue arrayIdxI(ArrayData*, int64_t, TypedValue);
 TypedValue arrayIdxS(ArrayData*, StringData*, TypedValue);
+TypedValue arrayIdxScan(ArrayData*, StringData*, TypedValue);
 
 TypedValue dictIdxI(ArrayData*, int64_t, TypedValue);
 TypedValue dictIdxS(ArrayData*, StringData*, TypedValue);
+TypedValue dictIdxScan(ArrayData*, StringData*, TypedValue);
 
 TypedValue keysetIdxI(ArrayData*, int64_t, TypedValue);
 TypedValue keysetIdxS(ArrayData*, StringData*, TypedValue);
@@ -144,21 +148,25 @@ TypedValue* ldGblAddrDefHelper(StringData* name);
 TypedValue* getSPropOrNull(const Class* cls,
                            const StringData* name,
                            Class* ctx,
-                           bool ignoreLateInit);
+                           bool ignoreLateInit,
+                           bool disallowConst);
 TypedValue* getSPropOrRaise(const Class* cls,
                             const StringData* name,
                             Class* ctx,
-                            bool ignoreLateInit);
+                            bool ignoreLateInit,
+                            bool disallowConst);
 
 int64_t switchDoubleHelper(double val, int64_t base, int64_t nTargets);
 int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets);
 int64_t switchObjHelper(ObjectData* o, int64_t base, int64_t nTargets);
 
-void checkFrame(ActRec* fp, Cell* sp, bool fullCheck, Offset bcOff);
+void checkFrame(ActRec* fp, Cell* sp, bool fullCheck);
 
 void loadArrayFunctionContext(ArrayData*, ActRec* preLiveAR, ActRec* fp);
 
 const Func* loadClassCtor(Class* cls, ActRec* fp);
+const Func* lookupClsMethodHelper(const Class* cls, const StringData* methName,
+                                  ObjectData* obj, const Class* ctx);
 
 // These shuffle* functions are the JIT's version of bytecode.cpp's
 // shuffleExtraStackArgs
@@ -191,7 +199,6 @@ ArrayData* errorOnIsAsExpressionInvalidTypesHelper(ArrayData*);
 /* Reified generics helpers
  * Both functions decref the input array by turning it into a static array
  */
-StringData* recordReifiedGenericsAndGetName(ArrayData*);
 ArrayData* recordReifiedGenericsAndGetTSList(ArrayData*);
 /*
  * Throw a VMSwitchMode exception.

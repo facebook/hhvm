@@ -1,6 +1,6 @@
+File "constraint_implements_interface_01.php", line 14, characters 7-9:
+A 'where' type constraint is violated here (Typing[4323])
 File "constraint_implements_interface_01.php", line 14, characters 22-22:
-A 'where' type constraint is violated here (Typing[4110])
-File "constraint_implements_interface_01.php", line 17, characters 11-11:
 This is the class with 'where' type constraints
 File "constraint_implements_interface_01.php", line 17, characters 27-30:
 Expected Test

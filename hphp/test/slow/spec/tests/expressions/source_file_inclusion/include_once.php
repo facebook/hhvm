@@ -1,58 +1,54 @@
 <?hh
+<<__EntryPoint>>
+function main_entry(): void {
+  error_reporting(-1);
 
-/*
-   +-------------------------------------------------------------+
-   | Copyright (c) 2015 Facebook, Inc. (http://www.facebook.com) |
-   +-------------------------------------------------------------+
-*/
+  // Try to include a non-existant file
 
-error_reporting(-1);
+  $inc = include_once 'XXPositions.inc';
+  var_dump($inc);
 
-// Try to include a non-existant file
+  echo "----------------------------------\n";
 
-$inc = include_once 'XXPositions.inc';
-var_dump($inc);
+  // Include an existing file
 
-echo "----------------------------------\n";
+  $inc = include 'Positions.inc';
+  //$inc = include_once 'Positions.inc';
+  var_dump($inc);
 
-// Include an existing file
+  // Include an existing file. It doesn't matter if the first include was with/without
+  // _once; subsequent use of include_once returns true
 
-$inc = include 'Positions.inc';
-//$inc = include_once 'Positions.inc';
-var_dump($inc);
+  $inc = include_once 'Positions.inc';
+  var_dump($inc);
 
-// Include an existing file. It doesn't matter if the first include was with/without
-// _once; subsequent use of include_once returns true
+  var_dump(Positions\LEFT);
+  var_dump(Positions\TOP);
 
-$inc = include_once 'Positions.inc';
-var_dump($inc);
+  echo "----------------------------------\n";
 
-var_dump(Positions\LEFT);
-var_dump(Positions\TOP);
+  ///*
+  // Include Point.inc to get at the Point class type
 
-echo "----------------------------------\n";
+  $inc = include 'Point.inc';
+  var_dump($inc);
 
-///*
-// Include Point.inc to get at the Point class type
+  $p1 = new Point(10,20);
+  //*/
 
-$inc = include 'Point.inc';
-var_dump($inc);
+  echo "----------------------------------\n";
 
-$p1 = new Point(10,20);
-//*/
+  // Include Circle.inc to get at the Circle class type, which in turn uses the Point type
 
-echo "----------------------------------\n";
+  $inc = include('Circle.inc');
+  var_dump($inc);
 
-// Include Circle.inc to get at the Circle class type, which in turn uses the Point type
+  $p2 = new Point(5, 6);
+  $c1 = new Circle(9, 7, 2.4);
 
-$inc = include('Circle.inc');
-var_dump($inc);
+  echo "----------------------------------\n";
 
-$p2 = new Point(5, 6);
-$c1 = new Circle(9, 7, 2.4);
+  // get the set of included files
 
-echo "----------------------------------\n";
-
-// get the set of included files
-
-print_r(get_included_files());
+  print_r(get_included_files());
+}

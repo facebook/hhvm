@@ -1,0 +1,14 @@
+File "extend_generic2.php", line 18, characters 25-28:
+Some type constraint(s) here are violated (Typing[4323])
+File "extend_generic2.php", line 15, characters 9-9:
+'T' is a constrained type parameter
+File "extend_generic2.php", line 15, characters 14-14:
+Expected B
+File "extend_generic2.php", line 18, characters 27-27:
+But got T
+File "extend_generic2.php", line 18, characters 27-27:
+Typing error (Typing[4110])
+File "extend_generic2.php", line 15, characters 14-14:
+Expected B
+File "extend_generic2.php", line 18, characters 27-27:
+But got T

@@ -1,7 +1,7 @@
 <?hh
 
 function foo() {
-  $count = apc_fetch('rec-parent-count');
+  $count = __hhvm_intrinsics\apc_fetch_no_check('rec-parent-count');
   if ($count === false) $count = 0;
   if ($count >= 2) return;
 

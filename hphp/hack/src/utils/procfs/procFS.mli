@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
@@ -13,4 +13,6 @@ type status = {
   rss_hwm: int;
 }
 
-val status_for_pid: int -> (status, string) result
+val status_for_pid : int -> (status, string) result
+
+val first_cgroup_for_pid : int -> (string, string) result

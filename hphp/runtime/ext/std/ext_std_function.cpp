@@ -55,9 +55,13 @@ bool HHVM_FUNCTION(function_exists, const String& function_name,
      function_exists(function_name));
 }
 
-bool HHVM_FUNCTION(is_callable, const Variant& v, bool syntax /* = false */,
-                   OutputArg name /* = null */) {
-  return is_callable(v, syntax, name.get());
+bool HHVM_FUNCTION(is_callable, const Variant& v, bool syntax /* = false */) {
+  return is_callable(v, syntax, nullptr);
+}
+
+bool HHVM_FUNCTION(is_callable_with_name, const Variant& v, bool syntax,
+                   Variant& name) {
+  return is_callable(v, syntax, &name);
 }
 
 Variant HHVM_FUNCTION(call_user_func, const Variant& function,
@@ -155,12 +159,26 @@ void StandardExtension::initFunction() {
   HHVM_FE(get_defined_functions);
   HHVM_FE(function_exists);
   HHVM_FE(is_callable);
+  HHVM_FE(is_callable_with_name);
   HHVM_FE(call_user_func);
   HHVM_FE(call_user_func_array);
   HHVM_FE(register_postsend_function);
   HHVM_FE(register_shutdown_function);
+  HHVM_FALIAS(HH\\fun_get_function, HH_fun_get_function);
 
   loadSystemlib("std_function");
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+String HHVM_FUNCTION(HH_fun_get_function, TypedValue v) {
+  if (!tvIsFunc(v)) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+      folly::sformat("Argument 1 passed to {}() must be a fun",
+      __FUNCTION__+5));
+  }
+  auto const f = val(v).pfunc;
+  return f->nameStr();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

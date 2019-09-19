@@ -23,7 +23,6 @@
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/align.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
-#include "hphp/runtime/vm/jit/func-guard.h"
 #include "hphp/runtime/vm/jit/func-prologue.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
@@ -130,7 +129,6 @@ void emitFuncPrologueImpl(Func* func, int argc, TransKind kind,
 
   info.finalView = std::make_unique<CodeCache::View>(codeView);
 
-  assertx(funcGuardMatches(funcGuardFromPrologue(info.start, func), func));
   assertx(code().isValidCodeAddress(info.start));
 }
 
@@ -191,7 +189,6 @@ bool publishFuncPrologueMeta(Func* func, int nArgs, TransKind kind,
   }
   meta.process(nullptr);
 
-  assertx(funcGuardMatches(funcGuardFromPrologue(start, func), func));
   assertx(code().isValidCodeAddress(start));
   assertx(isPrologue(kind));
 
@@ -229,21 +226,12 @@ void smashFuncCallers(TCA start, ProfTransRec* rec) {
   assertOwnsMetadataLock();
   assertx(rec->isProflogue());
 
-  const auto func = rec->func();
   auto lock = rec->lockCallerList();
 
   for (auto toSmash : rec->mainCallers()) {
     smashCall(toSmash, start);
   }
 
-  // If the prologue has a matching guard, then smash its guard-callers as
-  // well.
-  auto const guard = funcGuardFromPrologue(start, func);
-  if (funcGuardMatches(guard, func)) {
-    for (auto toSmash : rec->guardCallers()) {
-      smashCall(toSmash, guard);
-    }
-  }
   rec->clearAllCallers();
 }
 

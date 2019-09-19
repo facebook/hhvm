@@ -1,0 +1,6 @@
+File "generic_attr_constraint.php", line 8, characters 15-17:
+Invalid xhp value for attribute :foo in :my-xhp (Typing[4343])
+File "generic_attr_constraint.php", line 4, characters 13-13:
+Expected ~[unresolved] because it is an unenforceable type
+File "generic_attr_constraint.php", line 8, characters 15-17:
+But got string

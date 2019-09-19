@@ -1,0 +1,2 @@
+(8,7)-(8,7) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(8,7)-(8,11) Property declarations require a visibility modifier such as public, private or protected.

@@ -1,2 +1,6 @@
 File "list_pair2.php", line 13, characters 3-15:
-A pair has exactly 2 elements (Typing[4072])
+Invalid assignment (Typing[4110])
+File "list_pair2.php", line 13, characters 3-10:
+Expected list([unresolved]) resulting from a list destructuring assignment of length 1
+File "list_pair2.php", line 12, characters 15-34:
+But got Pair<string, string>

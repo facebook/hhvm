@@ -11,7 +11,7 @@ $arr1 = array (4,3,3,3);
 $arr2 = array (9,3,2,2);
 $arr3 = array (9,9,2,1);
 
-var_dump(array_multisort(&$arr1, &$arr2, &$arr3));
+var_dump(array_multisort3(&$arr1, &$arr2, &$arr3));
 
 var_dump($arr1);
 var_dump($arr2);

@@ -11,9 +11,9 @@ Errors:
   [58:14-22] Bad regex pattern; Missing delimiter(s).
 [(Fun
     { f_span = [3:1-16:2]; f_annotation = (); f_mode = <opaque>;
-      f_ret = (Some ([3:15-19], (Hprim Tvoid))); f_name = ([3:10-11], "\\f");
-      f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
-      f_params = [];
+      f_ret = ((void), (Some ([3:15-19], (Hprim Tvoid))));
+      f_name = ([3:10-11], "\\f"); f_tparams = []; f_where_constraints = [];
+      f_variadic = FVnonVariadic; f_params = [];
       f_body =
       { fb_ast =
         [([4:3-20],
@@ -69,7 +69,7 @@ Errors:
       f_static = false });
   (Fun
      { f_span = [19:1-20:2]; f_annotation = (); f_mode = <opaque>;
-       f_ret = (Some ([19:78-79], (Habstr "T")));
+       f_ret = ((T), (Some ([19:78-79], (Habstr "T"))));
        f_name = ([19:10-17], "\\goodbye");
        f_tparams =
        [{ tp_variance = Invariant; tp_name = ([19:18-19], "T");
@@ -83,13 +83,15 @@ Errors:
        f_where_constraints = []; f_variadic = FVnonVariadic;
        f_params =
        [{ param_annotation = ([19:67-75], HH\Lib\Regex\Pattern<T>);
-          param_hint =
-          (Some ([19:43-66],
-                 (Happly (([19:43-63], "\\HH\\Lib\\Regex\\Pattern"),
-                    [([19:64-65], (Habstr "T"))]))));
+          param_type_hint =
+          ((HH\Lib\Regex\Pattern<T>),
+           (Some ([19:43-66],
+                  (Happly (([19:43-63], "\\HH\\Lib\\Regex\\Pattern"),
+                     [([19:64-65], (Habstr "T"))])))));
           param_is_reference = false; param_is_variadic = false;
           param_pos = [19:67-75]; param_name = "$pattern"; param_expr = None;
-          param_callconv = None; param_user_attributes = [] }
+          param_callconv = None; param_user_attributes = [];
+          param_visibility = None }
          ];
        f_body =
        { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };
@@ -98,7 +100,7 @@ Errors:
        f_static = false });
   (Fun
      { f_span = [24:1-42:2]; f_annotation = (); f_mode = <opaque>;
-       f_ret = (Some ([24:25-29], (Hprim Tvoid)));
+       f_ret = ((void), (Some ([24:25-29], (Hprim Tvoid))));
        f_name = ([24:10-21], "\\bad_pattern"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
        f_body =
@@ -118,17 +120,17 @@ Errors:
             (Expr
                (([26:3-36], _),
                 (Binop ((Eq None), (([26:3-8], _), (Lvar ([26:3-8], $bad1))),
-                   (([26:13-36], _), Any))))));
+                   (([26:13-36], _), (String "/He(?'l'\\D)(?'l'\\D)o/")))))));
            ([27:3-31],
             (Expr
                (([27:3-30], _),
                 (Binop ((Eq None), (([27:3-8], _), (Lvar ([27:3-8], $bad2))),
-                   (([27:13-30], _), Any))))));
+                   (([27:13-30], _), (String "/He(?'42'\\D)lo/")))))));
            ([28:3-20],
             (Expr
                (([28:3-19], _),
                 (Binop ((Eq None), (([28:3-8], _), (Lvar ([28:3-8], $bad3))),
-                   (([28:13-19], _), Any))))));
+                   (([28:13-19], _), (String "/\\c/")))))));
            ([29:3-65],
             (Expr
                (([29:3-64], HH\Lib\Regex\Pattern<shape(0 => string, 2 => string, 4 => string, 5 => string, 'one' => string, 'six' => string, 'three' => string)>),
@@ -291,7 +293,7 @@ Errors:
        f_static = false });
   (Fun
      { f_span = [46:1-59:2]; f_annotation = (); f_mode = <opaque>;
-       f_ret = (Some ([46:31-35], (Hprim Tvoid)));
+       f_ret = ((void), (Some ([46:31-35], (Hprim Tvoid))));
        f_name = ([46:10-27], "\\missing_delimiter"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
        f_body =
@@ -300,7 +302,7 @@ Errors:
            (Expr
               (([47:3-20], _),
                (Binop ((Eq None), (([47:3-8], _), (Lvar ([47:3-8], $bad0))),
-                  (([47:13-20], _), Any))))));
+                  (([47:13-20], _), (String "Hello")))))));
            ([48:3-24],
             (Expr
                (([48:3-23], HH\Lib\Regex\Pattern<shape(0 => string)>),
@@ -315,7 +317,7 @@ Errors:
             (Expr
                (([49:3-21], _),
                 (Binop ((Eq None), (([49:3-8], _), (Lvar ([49:3-8], $bad2))),
-                   (([49:13-21], _), Any))))));
+                   (([49:13-21], _), (String "/Hello")))))));
            ([50:3-24],
             (Expr
                (([50:3-23], HH\Lib\Regex\Pattern<shape(0 => string)>),
@@ -330,12 +332,12 @@ Errors:
             (Expr
                (([51:3-22], _),
                 (Binop ((Eq None), (([51:3-8], _), (Lvar ([51:3-8], $bad4))),
-                   (([51:13-22], _), Any))))));
+                   (([51:13-22], _), (String "#Hello/")))))));
            ([52:3-22],
             (Expr
                (([52:3-21], _),
                 (Binop ((Eq None), (([52:3-8], _), (Lvar ([52:3-8], $bad5))),
-                   (([52:13-21], _), Any))))));
+                   (([52:13-21], _), (String "#Hello")))))));
            ([53:3-24],
             (Expr
                (([53:3-23], HH\Lib\Regex\Pattern<shape(0 => string)>),
@@ -360,7 +362,7 @@ Errors:
             (Expr
                (([55:3-22], _),
                 (Binop ((Eq None), (([55:3-8], _), (Lvar ([55:3-8], $bad8))),
-                   (([55:13-22], _), Any))))));
+                   (([55:13-22], _), (String "(Hello(")))))));
            ([56:3-24],
             (Expr
                (([56:3-23], HH\Lib\Regex\Pattern<shape(0 => string)>),
@@ -376,13 +378,13 @@ Errors:
                (([57:3-25], _),
                 (Binop ((Eq None),
                    (([57:3-9], _), (Lvar ([57:3-9], $bad10))),
-                   (([57:14-25], _), Any))))));
+                   (([57:14-25], _), (String "\\Hello\\")))))));
            ([58:3-23],
             (Expr
                (([58:3-22], _),
                 (Binop ((Eq None),
                    (([58:3-9], _), (Lvar ([58:3-9], $bad11))),
-                   (([58:14-22], _), Any))))))
+                   (([58:14-22], _), (String "HelloH")))))))
            ];
          fb_annotation = No unsafe blocks };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
@@ -390,7 +392,7 @@ Errors:
        f_static = false });
   (Fun
      { f_span = [61:1-65:2]; f_annotation = (); f_mode = <opaque>;
-       f_ret = (Some ([61:35-39], (Hprim Tvoid)));
+       f_ret = ((void), (Some ([61:35-39], (Hprim Tvoid))));
        f_name = ([61:10-31], "\\parentheses_are_weird"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
        f_body =

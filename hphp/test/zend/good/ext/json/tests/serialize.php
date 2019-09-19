@@ -45,8 +45,14 @@ $adata = array(
 );
 
 $ndata = array_values($adata);
-
-$odata = (object)$adata;
+$odata = new stdClass();
+$odata->str = 'foo';
+$odata->int = 1;
+$odata->float = 2.3;
+$odata->bool = false;
+$odata->nil = null;
+$odata->arr = array(1,2,3);
+$odata->obj = new stdClass();
 
 foreach(array('NonSerializingTest','SerializingTest','ValueSerializingTest','SelfSerializingTest') as $class) {
     echo "==$class==\n";

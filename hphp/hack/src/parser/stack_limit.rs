@@ -18,18 +18,22 @@ pub struct StackLimit {
 ///
 /// # Usage:
 /// ```
-/// let limit = std::sync::Arc::new(StackLimit::relative(3_000_000)); // some thread
-/// let deeply_recursive_task = || {
-///      if limit.check_exceeded() {
-///          // terminate (*resets* the internal state but not the "exceeded" flag)
-///          ... // e.g., panic!
+/// use parser_rust::stack_limit::StackLimit;
+/// let limit = std::sync::Arc::new(StackLimit::relative(3_000_000));
+/// limit.reset(); // set the baseline (when the stack is low)
+/// let limit_ref = limit.clone();
+/// let deeply_recursive_task = move || {
+///      if limit_ref.check_exceeded() {
+///          // abort early
 ///      }
 ///  };
 ///  deeply_recursive_task();  // detect if it would consume >3MB of stack
 ///  if limit.exceeded() {
 ///      // handle stack overflow preemptively (e.g., retry with custom stack space)
-///      std::thread::Builder::new().stack_size(...)
-///          .spawn(deeply_recursive_task).join()
+///      std::thread::Builder::new().stack_size(16_000_000)
+///          .spawn(deeply_recursive_task)
+///          .expect("ERROR: thread::spawn")
+///          .join();
 ///  }
 ///  ```
 /// *Notes*:
@@ -60,9 +64,14 @@ impl StackLimit {
         if overflow {
             // Note: we never store false, so Release constraint (write reordering suffices)
             self.overflow.store(true, Ordering::Release);
-            StackGuard::reset();
         }
         overflow
+    }
+
+    pub fn panic_if_exceeded(&self) {
+        if self.check_exceeded() {
+            panic!("stack overflow prevented by StackLimit");
+        }
     }
 
     pub fn exceeded(&self) -> bool {
@@ -73,6 +82,29 @@ impl StackLimit {
     pub fn reset(&self) {
         StackGuard::reset();
     }
+}
+
+/// Initializes the global state, more precisely modifes panic hook such that:
+/// - panics raised from StackLimit::panic_if_exceeded() are silenced;
+/// - other panics are passed through the original panic hook.
+pub fn init() {
+    use std::sync::Once;
+    static INIT: Once = Once::new();
+    INIT.call_once(|| {
+        let original_hook = std::panic::take_hook();
+        std::panic::set_hook(Box::new(move |panic_info| {
+            let mut swallow = false;
+            if let Some(location) = panic_info.location() {
+                if location.file() == file!() {
+                    // if panic comes from this file, it must be due to StackOverflow
+                    swallow = true;
+                }
+            }
+            if !swallow {
+                original_hook(&panic_info);
+            }
+        }));
+    });
 }
 
 // Implementation details (hidden to facilitate swapping in something less hacky)

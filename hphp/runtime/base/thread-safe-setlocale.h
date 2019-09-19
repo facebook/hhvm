@@ -20,9 +20,8 @@
 #include <vector>
 #include <string>
 #include "hphp/util/locale-portability.h"
+#include "hphp/util/rds-local.h"
 #include "hphp/util/thread-local.h"
-
-#include "hphp/runtime/base/rds-local.h"
 
 namespace HPHP {
 

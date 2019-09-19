@@ -222,6 +222,7 @@ void StandardExtension::initMisc() {
     HHVM_FE(sys_getloadavg);
     HHVM_FE(hphp_to_string);
     HHVM_FALIAS(HH\\enable_legacy_behavior, enable_legacy_behavior);
+    HHVM_FALIAS(HH\\is_legacy_behavior_enabled, is_legacy_behavior_enabled);
     HHVM_FALIAS(__SystemLib\\max2, SystemLib_max2);
     HHVM_FALIAS(__SystemLib\\min2, SystemLib_min2);
 
@@ -583,6 +584,14 @@ Variant HHVM_FUNCTION(enable_legacy_behavior, const Variant& v) {
     raise_warning("enable_legacy_behavior expects a dict or vec");
     return v;
   }
+}
+
+bool HHVM_FUNCTION(is_legacy_behavior_enabled, const Variant& v) {
+  if (!v.isVecArray() && !v.isDict()) {
+    raise_warning("is_legacy_behavior_enabled expects a dict or vec");
+    return false;
+  }
+  return v.asCArrRef()->isLegacyArray();
 }
 
 String HHVM_FUNCTION(hphp_to_string, const Variant& v) {

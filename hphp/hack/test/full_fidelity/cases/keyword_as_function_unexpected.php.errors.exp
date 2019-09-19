@@ -1,292 +1,125 @@
-(4,18)-(4,18) A name, __construct, or __destruct keyword is expected here.
-(5,15)-(5,15) A name, __construct, or __destruct keyword is expected here.
-(6,12)-(6,12) A name, __construct, or __destruct keyword is expected here.
-(7,15)-(7,15) A name, __construct, or __destruct keyword is expected here.
-(8,15)-(8,15) A name, __construct, or __destruct keyword is expected here.
-(9,15)-(9,15) A name, __construct, or __destruct keyword is expected here.
-(10,14)-(10,14) A name, __construct, or __destruct keyword is expected here.
-(11,15)-(11,15) A name, __construct, or __destruct keyword is expected here.
-(12,15)-(12,15) A name, __construct, or __destruct keyword is expected here.
-(13,15)-(13,15) A name, __construct, or __destruct keyword is expected here.
-(14,15)-(14,15) A name, __construct, or __destruct keyword is expected here.
-(15,18)-(15,18) A name, __construct, or __destruct keyword is expected here.
-(16,17)-(16,17) A name, __construct, or __destruct keyword is expected here.
-(17,12)-(17,12) A name, __construct, or __destruct keyword is expected here.
-(18,14)-(18,14) A name, __construct, or __destruct keyword is expected here.
-(19,14)-(19,14) A name, __construct, or __destruct keyword is expected here.
-(20,16)-(20,16) A name, __construct, or __destruct keyword is expected here.
-(21,16)-(21,16) A name, __construct, or __destruct keyword is expected here.
-(22,20)-(22,20) A name, __construct, or __destruct keyword is expected here.
-(23,15)-(23,15) A name, __construct, or __destruct keyword is expected here.
-(24,19)-(24,19) A name, __construct, or __destruct keyword is expected here.
-(25,18)-(25,18) A name, __construct, or __destruct keyword is expected here.
-(26,14)-(26,14) A name, __construct, or __destruct keyword is expected here.
-(27,17)-(27,17) A name, __construct, or __destruct keyword is expected here.
-(28,15)-(28,15) A name, __construct, or __destruct keyword is expected here.
-(29,17)-(29,17) A name, __construct, or __destruct keyword is expected here.
-(30,13)-(30,13) A name, __construct, or __destruct keyword is expected here.
-(31,17)-(31,17) A name, __construct, or __destruct keyword is expected here.
-(32,18)-(32,18) A name, __construct, or __destruct keyword is expected here.
-(33,16)-(33,16) A name, __construct, or __destruct keyword is expected here.
-(34,14)-(34,14) A name, __construct, or __destruct keyword is expected here.
-(35,12)-(35,12) A name, __construct, or __destruct keyword is expected here.
-(36,20)-(36,20) A name, __construct, or __destruct keyword is expected here.
-(37,17)-(37,17) A name, __construct, or __destruct keyword is expected here.
-(38,22)-(38,22) A name, __construct, or __destruct keyword is expected here.
-(39,15)-(39,15) A name, __construct, or __destruct keyword is expected here.
-(40,20)-(40,20) A name, __construct, or __destruct keyword is expected here.
-(41,19)-(41,19) A name, __construct, or __destruct keyword is expected here.
-(42,19)-(42,19) A name, __construct, or __destruct keyword is expected here.
-(43,14)-(43,14) A name, __construct, or __destruct keyword is expected here.
-(45,13)-(45,13) A name, __construct, or __destruct keyword is expected here.
-(46,15)-(46,15) A name, __construct, or __destruct keyword is expected here.
-(47,17)-(47,17) A name, __construct, or __destruct keyword is expected here.
-(48,19)-(48,19) A name, __construct, or __destruct keyword is expected here.
-(49,16)-(49,16) A name, __construct, or __destruct keyword is expected here.
-(50,17)-(50,17) A name, __construct, or __destruct keyword is expected here.
-(51,22)-(51,22) A name, __construct, or __destruct keyword is expected here.
-(52,16)-(52,16) A name, __construct, or __destruct keyword is expected here.
-(53,15)-(53,15) A name, __construct, or __destruct keyword is expected here.
-(54,16)-(54,16) A name, __construct, or __destruct keyword is expected here.
-(55,16)-(55,16) A name, __construct, or __destruct keyword is expected here.
-(56,15)-(56,15) A name, __construct, or __destruct keyword is expected here.
-(57,15)-(57,15) A name, __construct, or __destruct keyword is expected here.
-(58,13)-(58,13) A name, __construct, or __destruct keyword is expected here.
-(59,13)-(59,13) A name, __construct, or __destruct keyword is expected here.
-(60,15)-(60,15) A name, __construct, or __destruct keyword is expected here.
-(61,13)-(61,13) A name, __construct, or __destruct keyword is expected here.
-(62,15)-(62,15) A name, __construct, or __destruct keyword is expected here.
-(63,15)-(63,15) A name, __construct, or __destruct keyword is expected here.
-(65,9)-(65,9) The 'class' keyword is expected here.
-(65,10)-(65,10) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(65,11)-(65,11) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(65,12)-(66,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(66,6)-(66,6) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(66,7)-(66,7) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(66,8)-(66,8) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(66,9)-(67,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(67,3)-(67,3) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(67,4)-(67,4) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(67,5)-(67,5) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(67,6)-(68,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(68,7)-(68,7) A type specifier is expected here.
-(68,8)-(68,8) A variable name is expected here.
-(69,6)-(69,6) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(69,7)-(69,7) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(69,8)-(69,8) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(69,9)-(70,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(70,6)-(70,6) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(70,7)-(70,7) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(70,8)-(70,8) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(70,9)-(71,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(71,5)-(71,5) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(71,6)-(71,6) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(71,7)-(71,7) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(71,8)-(72,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(72,6)-(72,6) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(72,7)-(72,7) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(72,8)-(72,8) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(72,9)-(73,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(73,6)-(73,6) A name is expected here.
-(73,7)-(73,7) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(73,8)-(73,8) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(73,9)-(74,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(74,6)-(74,6) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(74,7)-(74,7) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(74,8)-(74,8) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(74,9)-(75,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(4,18)-(4,18) A name or __construct keyword is expected here.
+(5,15)-(5,15) A name or __construct keyword is expected here.
+(6,12)-(6,12) A name or __construct keyword is expected here.
+(7,15)-(7,15) A name or __construct keyword is expected here.
+(8,15)-(8,15) A name or __construct keyword is expected here.
+(9,15)-(9,15) A name or __construct keyword is expected here.
+(10,14)-(10,14) A name or __construct keyword is expected here.
+(11,15)-(11,15) A name or __construct keyword is expected here.
+(12,15)-(12,15) A name or __construct keyword is expected here.
+(13,15)-(13,15) A name or __construct keyword is expected here.
+(14,15)-(14,15) A name or __construct keyword is expected here.
+(15,18)-(15,18) A name or __construct keyword is expected here.
+(16,17)-(16,17) A name or __construct keyword is expected here.
+(17,12)-(17,12) A name or __construct keyword is expected here.
+(18,14)-(18,14) A name or __construct keyword is expected here.
+(19,14)-(19,14) A name or __construct keyword is expected here.
+(20,16)-(20,16) A name or __construct keyword is expected here.
+(21,16)-(21,16) A name or __construct keyword is expected here.
+(22,20)-(22,20) A name or __construct keyword is expected here.
+(23,15)-(23,15) A name or __construct keyword is expected here.
+(24,19)-(24,19) A name or __construct keyword is expected here.
+(25,18)-(25,18) A name or __construct keyword is expected here.
+(26,14)-(26,14) A name or __construct keyword is expected here.
+(27,17)-(27,17) A name or __construct keyword is expected here.
+(28,15)-(28,15) A name or __construct keyword is expected here.
+(29,17)-(29,17) A name or __construct keyword is expected here.
+(30,13)-(30,13) A name or __construct keyword is expected here.
+(31,17)-(31,17) A name or __construct keyword is expected here.
+(32,18)-(32,18) A name or __construct keyword is expected here.
+(33,16)-(33,16) A name or __construct keyword is expected here.
+(34,14)-(34,14) A name or __construct keyword is expected here.
+(35,12)-(35,12) A name or __construct keyword is expected here.
+(36,20)-(36,20) A name or __construct keyword is expected here.
+(37,17)-(37,17) A name or __construct keyword is expected here.
+(38,22)-(38,22) A name or __construct keyword is expected here.
+(39,15)-(39,15) A name or __construct keyword is expected here.
+(40,20)-(40,20) A name or __construct keyword is expected here.
+(41,19)-(41,19) A name or __construct keyword is expected here.
+(42,19)-(42,19) A name or __construct keyword is expected here.
+(43,14)-(43,14) A name or __construct keyword is expected here.
+(45,13)-(45,13) A name or __construct keyword is expected here.
+(46,15)-(46,15) A name or __construct keyword is expected here.
+(47,17)-(47,17) A name or __construct keyword is expected here.
+(48,19)-(48,19) A name or __construct keyword is expected here.
+(49,16)-(49,16) A name or __construct keyword is expected here.
+(50,17)-(50,17) A name or __construct keyword is expected here.
+(51,22)-(51,22) A name or __construct keyword is expected here.
+(52,16)-(52,16) A name or __construct keyword is expected here.
+(53,15)-(53,15) A name or __construct keyword is expected here.
+(54,16)-(54,16) A name or __construct keyword is expected here.
+(55,16)-(55,16) A name or __construct keyword is expected here.
+(56,15)-(56,15) A name or __construct keyword is expected here.
+(57,15)-(57,15) A name or __construct keyword is expected here.
+(58,13)-(58,13) A name or __construct keyword is expected here.
+(59,13)-(59,13) A name or __construct keyword is expected here.
+(60,15)-(60,15) A name or __construct keyword is expected here.
+(61,13)-(61,13) A name or __construct keyword is expected here.
+(62,15)-(62,15) A name or __construct keyword is expected here.
+(63,15)-(63,15) A name or __construct keyword is expected here.
+(67,3)-(67,3) An expression is expected here.
+(68,8)-(68,8) A lambda arrow ('==>') is expected here.
+(69,8)-(69,8) An expression is expected here.
+(70,8)-(70,8) An expression is expected here.
+(71,7)-(71,7) An expression is expected here.
+(71,7)-(71,7) A colon (':') is expected here.
+(71,8)-(72,1) A case statement may only appear directly inside a switch.
+(72,6)-(72,6) An expression is expected here.
+(74,8)-(74,8) An expression is expected here.
 (75,6)-(75,6) A name is expected here.
 (75,6)-(75,6) A concrete constant declaration must have an initializer.
-(75,7)-(75,7) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(75,8)-(75,8) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(75,9)-(76,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(76,9)-(76,9) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(76,10)-(76,10) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(76,11)-(76,11) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(76,12)-(77,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(77,8)-(77,8) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(77,9)-(77,9) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(77,10)-(77,10) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(77,11)-(78,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(78,8)-(78,8) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(78,9)-(78,9) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(78,10)-(78,10) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(78,11)-(79,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(79,3)-(79,3) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(79,4)-(79,4) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(79,5)-(79,5) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(79,6)-(80,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(80,5)-(80,5) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(80,6)-(80,6) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(80,7)-(80,7) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(80,8)-(81,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(81,5)-(81,5) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(81,6)-(81,6) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(81,7)-(81,7) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(81,8)-(82,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(82,7)-(82,7) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(82,8)-(82,8) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(82,9)-(82,9) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(82,10)-(83,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(83,7)-(83,7) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(83,8)-(83,8) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(83,9)-(83,9) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(83,10)-(84,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(84,11)-(84,11) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(84,12)-(84,12) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(84,13)-(84,13) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(84,14)-(85,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(85,11)-(85,11) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(85,12)-(85,12) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(85,13)-(85,13) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(85,14)-(86,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(86,6)-(86,6) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(86,7)-(86,7) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(86,8)-(86,8) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(86,9)-(87,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(87,10)-(87,10) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(87,11)-(87,11) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(87,12)-(87,12) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(87,13)-(88,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(88,9)-(88,9) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(88,10)-(88,10) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(88,11)-(88,11) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(88,12)-(89,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(89,5)-(89,5) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(89,6)-(89,6) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(89,7)-(89,7) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(89,8)-(90,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(90,8)-(90,8) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(90,9)-(90,9) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(90,10)-(90,10) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(90,11)-(91,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(91,7)-(91,7) A type specifier is expected here.
-(91,8)-(91,8) A variable name is expected here.
-(92,8)-(92,8) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(92,9)-(92,9) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(92,10)-(92,10) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(92,11)-(93,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(93,4)-(93,4) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(93,5)-(93,5) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(93,6)-(93,6) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(93,7)-(94,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(94,8)-(94,8) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(94,9)-(94,9) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(94,10)-(94,10) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(94,11)-(95,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(95,11)-(95,11) Non-abstract method :: must contain body
-(96,7)-(96,7) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(96,8)-(96,8) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(96,9)-(96,9) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(96,10)-(97,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(97,5)-(97,5) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(97,6)-(97,6) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(97,7)-(97,7) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(97,8)-(98,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(98,3)-(98,3) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(98,4)-(98,4) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(98,5)-(98,5) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(98,6)-(99,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(99,11)-(99,11) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(99,12)-(99,12) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(99,13)-(99,13) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(99,14)-(100,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(100,8)-(100,8) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(100,9)-(100,9) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(100,10)-(100,10) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(100,11)-(101,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(101,13)-(101,13) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(101,14)-(101,14) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(101,15)-(101,15) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(101,16)-(102,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(102,6)-(102,6) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(102,7)-(102,7) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(102,8)-(102,8) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(102,9)-(103,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(103,11)-(103,11) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(103,12)-(103,12) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(103,13)-(103,13) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(103,14)-(104,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(104,10)-(104,10) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(104,11)-(104,11) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(104,12)-(104,12) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(104,13)-(105,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(105,10)-(105,10) A name is expected here.
-(105,11)-(105,11) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(105,12)-(105,12) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(105,13)-(106,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(106,5)-(106,5) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(106,6)-(106,6) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(106,7)-(106,7) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(106,8)-(107,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(107,10)-(107,10) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(107,11)-(107,11) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(107,12)-(107,12) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(107,13)-(108,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(108,4)-(108,4) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(108,5)-(108,5) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(108,6)-(108,6) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(108,7)-(109,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(109,6)-(109,6) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(109,7)-(109,7) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(109,8)-(109,8) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(109,9)-(110,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(110,9)-(110,9) A type specifier is expected here.
-(110,10)-(110,10) A variable name is expected here.
-(111,11)-(111,11) A type specifier is expected here.
-(111,12)-(111,12) A variable name is expected here.
-(112,8)-(112,8) A type specifier is expected here.
-(112,9)-(112,9) A variable name is expected here.
-(113,1)-(113,7) Conflicting requirements for ''
-(113,8)-(113,8) An 'extends' or 'implements' keyword is expected here.
-(113,9)-(113,9) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(113,10)-(113,10) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(113,11)-(114,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(114,13)-(114,13) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(114,14)-(114,14) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(114,15)-(114,15) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(114,16)-(115,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(115,7)-(115,7) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(115,8)-(115,8) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(115,9)-(115,9) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(115,10)-(116,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(116,6)-(116,6) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(116,7)-(116,7) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(116,8)-(116,8) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(116,9)-(117,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(117,8)-(117,8) A type specifier is expected here.
-(117,9)-(117,9) A variable name is expected here.
-(118,7)-(118,7) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(118,8)-(118,8) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(118,9)-(118,9) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(118,10)-(119,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(119,6)-(119,6) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(119,7)-(119,7) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(119,8)-(119,8) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(119,9)-(120,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(120,6)-(120,6) A name is expected here.
-(120,7)-(120,7) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(120,8)-(120,8) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(120,9)-(121,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(121,4)-(121,4) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(121,5)-(121,5) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(121,6)-(121,6) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(121,7)-(122,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(75,8)-(75,8) An expression is expected here.
+(76,11)-(76,11) An expression is expected here.
+(78,8)-(78,8) A colon (':') is expected here.
+(78,10)-(78,10) An expression is expected here.
+(79,5)-(79,5) An expression is expected here.
+(79,6)-(80,1) The 'while' keyword is expected here.
+(80,1)-(80,5) Encountered unexpected token 'echo'.
+(80,7)-(80,7) An expression is expected here.
+(81,5)-(81,5) An expression is expected here.
+(82,7)-(82,7) An expression is expected here.
+(83,7)-(83,7) An expression is expected here.
+(84,11)-(84,11) An expression is expected here.
+(86,6)-(86,6) An expression is expected here.
+(87,10)-(87,10) An expression is expected here.
+(88,9)-(88,9) An expression is expected here.
+(89,7)-(89,7) An expression is expected here.
+(90,8)-(90,8) An expression is expected here.
+(92,8)-(92,8) An expression is expected here.
+(93,6)-(93,6) An expression is expected here.
+(94,8)-(94,8) An expression is expected here.
+(95,12)-(96,1) A right parenthesis (')') is expected here.
+(96,7)-(96,7) An expression is expected here.
+(97,6)-(97,7) Encountered unexpected token ')'.
+(98,5)-(98,5) An expression is expected here.
+(99,11)-(99,11) An expression is expected here.
+(100,10)-(100,10) An expression is expected here.
+(101,15)-(101,15) An expression is expected here.
+(102,6)-(102,6) An expression is expected here.
+(103,11)-(103,11) An expression is expected here.
+(104,10)-(104,10) An expression is expected here.
+(107,1)-(107,9) No code may exist outside of namespace {}
+(107,1)-(107,9) Namespace declaration statement has to be the very first statement in the script
+(107,10)-(107,10) A name is expected here.
+(107,12)-(107,12) An expression is expected here.
+(108,4)-(108,5) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new ()()'?
+(108,6)-(108,6) An expression is expected here.
+(109,8)-(109,8) An expression is expected here.
+(110,8)-(110,8) An expression is expected here.
+(111,10)-(111,10) An expression is expected here.
+(112,7)-(112,7) An expression is expected here.
+(113,10)-(113,10) An expression is expected here.
+(114,15)-(114,15) An expression is expected here.
+(115,9)-(115,9) An expression is expected here.
+(117,1)-(117,7) Encountered unexpected token 'static'.
+(117,9)-(117,9) A lambda arrow ('==>') is expected here.
+(119,8)-(119,8) An expression is expected here.
 (122,4)-(122,4) A name is expected here.
-(122,5)-(122,5) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(122,6)-(122,6) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(122,7)-(123,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(123,6)-(123,6) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(123,7)-(123,7) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(123,8)-(123,8) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(123,9)-(124,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(124,5)-(124,5) A type specifier is expected here.
-(124,6)-(124,6) A variable name is expected here.
-(125,6)-(125,6) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(125,7)-(125,7) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(125,8)-(125,8) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(125,9)-(126,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(126,6)-(126,6) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(126,7)-(126,7) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(126,8)-(126,8) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(126,9)-(127,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(122,6)-(122,6) An expression is expected here.
+(123,1)-(123,8) Using statement in function scoped form may only be used at the top level of a function or a method
+(123,8)-(123,8) An expression is expected here.
+(124,4)-(124,4) An expression is expected here.
+(125,8)-(125,8) An expression is expected here.
+(126,1)-(126,7) Yield can only be used inside a function
+(126,8)-(126,8) An expression is expected here.
+(69,1)-(69,8) Await cannot be used in a toplevel statement

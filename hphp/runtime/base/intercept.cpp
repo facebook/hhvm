@@ -18,7 +18,6 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/req-optional.h"
 #include "hphp/runtime/base/unit-cache.h"
@@ -27,6 +26,7 @@
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/util/lock.h"
+#include "hphp/util/rds-local.h"
 #include "hphp/util/trace.h"
 
 using namespace HPHP::Trace;
@@ -91,7 +91,8 @@ static void flag_maybe_intercepted(std::vector<int8_t*> &flags) {
 }
 
 bool register_intercept(const String& name, const Variant& callback,
-                        const Variant& data, bool checkForDebugger) {
+                        const Variant& data, bool checkForDebugger,
+                        bool newCallback) {
 
   SCOPE_EXIT {
     if (checkForDebugger) {
@@ -127,7 +128,7 @@ bool register_intercept(const String& name, const Variant& callback,
 
   EventHook::EnableIntercept();
 
-  Array handler = make_vec_array(callback, data);
+  Array handler = make_vec_array(callback, data, newCallback);
 
   if (name.empty()) {
     s_intercept_data->global_handler() = handler;

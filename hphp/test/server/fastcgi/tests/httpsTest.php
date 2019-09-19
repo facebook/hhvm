@@ -7,5 +7,6 @@ function httpsTestController($serverPort) {
   var_dump(request('localhost', $serverPort, "test_https.php",
                   [], [], $args));
 }
-
+<<__EntryPoint>> function main(): void {
 runTest("httpsTestController");
+}

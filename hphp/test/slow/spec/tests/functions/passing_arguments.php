@@ -94,13 +94,3 @@ $z = 10;
 g(&$z);              // create a reference to a modifiable lvalue
 var_dump($z);
 //*/
-
-///*
-function k() { return 10; }
-var_dump(k());
-g(&k());        // PHP5 32, allowed quietly, but (presumably) does not change the original argument
-                    // PHP5 64  allowed with warning "PHP Strict standards:  Only variables
-                    //     should be passed by reference", but (presumably) does not change the original argument
-// k() = 10;   // All 3, Error: Can't use function return value in write context
-                    // HHVM, allowed quietly, but (presumably) does not change the original argument
-//*/

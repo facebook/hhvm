@@ -16,7 +16,7 @@ Errors:
       c_pu_enums = []; c_doc_comment = None });
   (Fun
      { f_span = [6:1-8:2]; f_annotation = (); f_mode = <opaque>;
-       f_ret = (Some ([6:21-25], (Hprim Tvoid)));
+       f_ret = ((void), (Some ([6:21-25], (Hprim Tvoid))));
        f_name = ([6:10-11], "\\f");
        f_tparams =
        [{ tp_variance = Invariant; tp_name = ([6:12-16], "Tcat");
@@ -37,7 +37,7 @@ Errors:
        f_static = false });
   (Fun
      { f_span = [10:1-12:2]; f_annotation = (); f_mode = <opaque>;
-       f_ret = (Some ([10:15-19], (Hprim Tvoid)));
+       f_ret = ((void), (Some ([10:15-19], (Hprim Tvoid))));
        f_name = ([10:10-11], "\\g"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
        f_body =

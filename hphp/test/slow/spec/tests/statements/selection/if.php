@@ -50,8 +50,8 @@ foreach ($scalarValueList as $e)
 
 class Name
 {
-    var $firstName;
-    var $lastName;
+    public $firstName;
+    public $lastName;
 }
 
 $aName = new Name();

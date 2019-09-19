@@ -129,12 +129,12 @@ the main block that can either be transformed to stack relative uses or adjusted
 to use the parent frame pointer (generally with some additional fixup in any
 associated catch traces) are also accepted.
 
-All pure memory access and pointer logic can be transformed, in particular:
-LdLoc, StLoc, LdLocAddr, CheckLoc, HintLocInner, AssertLoc, LdClsRef, StClsRef,
-and KillClsRef.
+All pure memory access and pointer logic can be transformed, in
+particular: LdLoc, StLoc, LdLocAddr, CheckLoc, HintLocInner, and
+AssertLoc.
 
-Currently only EagerSyncVMRegs, CallBuiltin, Call, LdClsRef, StClsRef, and
-KillClsRef can be adjusted to use the parent frame.
+Currently only EagerSyncVMRegs, CallBuiltin, and Call can be adjusted
+to use the parent frame.
 
 A special list of instructions known to access the current frame without
 explicitly depending on it are also blacklisted.
@@ -170,6 +170,7 @@ ensure that the callee frame is visited by the unwinder.
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/mutation.h"
+#include "hphp/runtime/vm/jit/pass-tracer.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/util/trace.h"
@@ -206,8 +207,11 @@ struct InlineAnalysis {
   /*
    * Cache of a SSATmp (defined by a DefLabel), to the "resolved"
    * operands of that DefLabel.
+   *
+   * NB: This has to be a hash_map because we rely on iterator
+   * stability during insertions.
    */
-  jit::fast_map<SSATmp*, SSATmpSet> defLabelCache;
+  jit::hash_map<SSATmp*, SSATmpSet> defLabelCache;
 };
 
 struct OptimizeContext {
@@ -289,21 +293,18 @@ bool isDangerousActRecInst(IRInstruction& inst) {
  * by a DefFP or DefInlineFP (not a DefLabel) that ultimately feed
  * into that DefLabel (perhaps through intermediate DefLabels).
  */
-const SSATmpSet& resolveDefLabel(InlineAnalysis& ia,
-                                 SSATmp* tmp,
-                                 SSATmpSet& visited) {
+void resolveDefLabel(InlineAnalysis& ia,
+                     SSATmpSet& resolved,
+                     SSATmp* tmp,
+                     SSATmpSet& visited) {
   assertx(tmp->isA(TFramePtr));
 
   auto const defLabel = tmp->inst();
   assertx(defLabel->is(DefLabel));
 
-  // Utilize the cache to avoid doing redundant walks.
-  auto const it = ia.defLabelCache.find(tmp);
-  if (it != ia.defLabelCache.end()) return it->second;
-
-  // We shouldn't be generated self-referential DefLabels with
-  // FramePtrs.
-  always_assert(!visited[tmp]);
+  // We can generate self-referential DefLabels because of
+  // loops. Ignore that part.
+  if (visited[tmp]) return;
   visited.add(tmp);
 
   auto const dests = defLabel->dsts();
@@ -313,23 +314,18 @@ const SSATmpSet& resolveDefLabel(InlineAnalysis& ia,
 
   // Visit every operand of this DefLabel. If that comes from a
   // DefLabel, recurse. Otherwise add it to the set.
-  SSATmpSet aliases;
   defLabel->block()->forEachSrc(
     destIdx,
     [&] (const IRInstruction*, SSATmp* src) {
       if (src->inst()->is(DefLabel)) {
-        aliases |= resolveDefLabel(ia, src, visited);
+        resolveDefLabel(ia, resolved, src, visited);
         return;
       }
       if (src->inst()->is(DefFP) || src->inst()->is(DefInlineFP)) {
-        aliases.add(src);
+        resolved.add(src);
       }
     }
   );
-
-  // Store it for later lookups. This lets us return references
-  // instead of copies as well.
-  return ia.defLabelCache.emplace(tmp, std::move(aliases)).first->second;
 }
 
 /*
@@ -343,8 +339,18 @@ template <typename F>
 void resolve(InlineAnalysis& ia, SSATmp* tmp, F&& f) {
   if (!tmp->isA(TFramePtr)) return;
   if (tmp->inst()->is(DefLabel)) {
-    SSATmpSet visited;
-    resolveDefLabel(ia, tmp, visited).forEach(
+    // Utilize the cache to avoid doing redundant walks.
+    auto it = ia.defLabelCache.find(tmp);
+    if (it == ia.defLabelCache.end()) {
+      SSATmpSet visited;
+      it = ia.defLabelCache.emplace(tmp, SSATmpSet{}).first;
+      resolveDefLabel(ia, it->second, tmp, visited);
+    }
+    assertx(!it->second.none());
+    // NB: It should be okay if the callback calls back into resolve()
+    // and mutates the cache because defLabelCache preserves iterators
+    // during insertion.
+    it->second.forEach(
       [&] (size_t id) { f(ia.unit->findSSATmp(id)); }
     );
     return;
@@ -603,24 +609,13 @@ bool canConvertToStack(IRInstruction& inst) {
   return inst.is(LdLoc, CheckLoc, AssertLoc, HintLocInner, LdLocAddr);
 }
 
-bool canRewriteToParent(const IRInstruction& inst) {
-  return inst.is(LdClsRefCls, LdClsRefTS, StClsRefCls, StClsRefTS,
-                 KillClsRefCls, KillClsRefTS);
-}
-
 /*
  * Instructions which require a FramePtr for chaining but will accept a parent
  * FramePtr. (NB: these instructions will likely require a DefInlineFP in their
  * catch blocks to ensure that the callee is visited by the unwinder).
  */
 bool canAdjustFrame(IRInstruction& inst) {
-  switch (inst.op()) {
-  case Call:
-  case CallBuiltin:
-  case EagerSyncVMRegs: return true;
-  default: break;
-  }
-  return false;
+  return inst.is(Call, CallBuiltin, EagerSyncVMRegs);
 }
 
 /*
@@ -931,11 +926,6 @@ void transformUses(InlineAnalysis& ia,
 
       // We may have change the types of some pointers
       reflow = true;
-    } else if (canRewriteToParent(*inst)) {
-      assertx(ctx.mainBlocks.count(block) != 0);
-      ITRACE(3, "Converting to use parent frame for instruction: {}\n", *inst);
-      rewriteToParentFrame(*ctx.unit, *inst);
-      recordNewUse(ia, ctx, inst, parentFp);
     } else if (canAdjustFrame(*inst)) {
       assertx(ctx.mainBlocks.count(block) != 0);
       ITRACE(3, "Using parent frame for instruction: {}\n", *inst);
@@ -945,7 +935,7 @@ void transformUses(InlineAnalysis& ia,
       // It's okay to have these in side exits
       always_assert(ctx.mainBlocks.count(block) == 0);
     } else if (inst->is(InitCtx)) {
-      always_assert(inst->src(1)->type().hasConstVal());
+      always_assert(inst->src(1)->type().admitsSingleVal());
       always_assert(ctx.initCtx == inst);
       inst->convertToNop();
     } else {
@@ -965,9 +955,9 @@ void transformUses(InlineAnalysis& ia,
  * Normally this is straight-forward, but if the parent is DefLabel,
  * we may have do a recursive walk.
  */
-int32_t findSPOffset(const IRUnit& unit,
-                     const SSATmp* fp,
-                     SSATmpSet& visited) {
+folly::Optional<int32_t> findSPOffset(const IRUnit& unit,
+                                      const SSATmp* fp,
+                                      SSATmpSet& visited) {
   assertx(fp->isA(TFramePtr));
   auto const inst = fp->inst();
 
@@ -980,9 +970,9 @@ int32_t findSPOffset(const IRUnit& unit,
 
   assertx(inst->is(DefLabel));
 
-  // We shouldn't be generating self-referential DefLabels for
-  // FramePtrs, so fail loudly if we ever encounter one.
-  always_assert(!visited[fp]);
+  // We can encounter self-referential DefLabels because of loops, so
+  // ignore those.
+  if (visited[fp]) return folly::none;
   visited.add(fp);
 
   auto const dests = inst->dsts();
@@ -994,23 +984,20 @@ int32_t findSPOffset(const IRUnit& unit,
   // same offset. So, just recurse down an arbitrary source and use
   // the offset from that. In debug builds, we'll visit all the
   // sources and assert that the offsets are all the same.
-  auto first = true;
-  int32_t spOff;
+  folly::Optional<int32_t> spOff;
   inst->block()->forEachSrc(
     destIdx,
     [&] (const IRInstruction*, const SSATmp* tmp) {
-      if (first) {
+      if (!spOff) {
         spOff = findSPOffset(unit, tmp, visited);
-        first = false;
         return;
       }
       if (!debug) return;
       auto const off = findSPOffset(unit, tmp, visited);
-      always_assert(off == spOff);
+      always_assert(!off || *off == *spOff);
     }
   );
 
-  assertx(!first);
   return spOff;
 }
 
@@ -1023,7 +1010,9 @@ void adjustBCMarkers(OptimizeContext& ctx) {
     assertx(def->is(DefInlineFP));
     auto const curSpOff = def->extra<DefInlineFP>()->spOffset.offset;
     SSATmpSet visited;
-    return findSPOffset(*ctx.unit, parentFp, visited) - curSpOff;
+    auto const spOff = findSPOffset(*ctx.unit, parentFp, visited);
+    assertx(spOff);
+    return *spOff - curSpOff;
   }();
 
   /*
@@ -1120,15 +1109,12 @@ bool optimize(InlineAnalysis& env, IRInstruction* inlineReturn, bool& reflow) {
   assertx(env.fpUses.count(fp));
   assertx(def->is(DefInlineFP));
 
-  auto const parentResumed =
-    def->src(1)->inst()->marker().resumeMode() != ResumeMode::None;
-
   OptimizeContext ctx {env.unit, fp, inlineReturn, &env.fpUses};
   ctx.mainBlocks = findMainBlocks(def->block(), inlineReturn->block());
 
   auto canMoveInitCtx = [&] (const IRInstruction& inst) {
-    if (ctx.initCtx) return false;
-    if (inst.is(InitCtx) && inst.src(1)->type().hasConstVal()) {
+    if (ctx.initCtx && ctx.initCtx != &inst) return false;
+    if (inst.is(InitCtx) && inst.src(1)->type().admitsSingleVal()) {
       ctx.initCtx = &inst;
       return true;
     }
@@ -1137,20 +1123,20 @@ bool optimize(InlineAnalysis& env, IRInstruction* inlineReturn, bool& reflow) {
 
   // Check if this callee is a candidate for DefInlineFP sinking
   auto& uses = env.fpUses[fp];
-  auto hasMainUse = std::any_of(
-    uses.begin(),
-    uses.end(),
-    [&] (IRInstruction* inst) {
-      return
-        ctx.mainBlocks.count(inst->block()) &&
-        !canConvertToStack(*inst) &&
-        (parentResumed || !canRewriteToParent(*inst)) &&
-        !canAdjustFrame(*inst) &&
-        !canMoveInitCtx(*inst);
+  auto const hasMainUse = [&](IRInstruction* inst) {
+    return ctx.mainBlocks.count(inst->block()) &&
+           !canConvertToStack(*inst) &&
+           !canAdjustFrame(*inst) &&
+           !canMoveInitCtx(*inst);
+  };
+  auto numMainUses = std::count_if(uses.begin(), uses.end(), hasMainUse);
+  if (numMainUses > 0) {
+    ITRACE(2, "skipping unsuitable InlineReturn (uses = {})\n", numMainUses);
+    if (Trace::moduleEnabled(Trace::pdce_inline, 3)) {
+      for (auto const inst : uses) {
+        if (hasMainUse(inst)) ITRACE(3, "  use: {}\n", inst->toString());
       }
-  );
-  if (hasMainUse) {
-    ITRACE(2, "skipping unsuitable InlineReturn (uses = {})\n", uses.size());
+    }
     return false;
   }
 
@@ -1212,6 +1198,7 @@ bool optimize(InlineAnalysis& env, IRInstruction* inlineReturn, bool& reflow) {
 ////////////////////////////////////////////////////////////////////////////////
 
 void optimizeInlineReturns(IRUnit& unit) {
+  PassTracer tracer{&unit, Trace::pdce_inline, "optimizeInlineReturns"};
   Timer timer(Timer::partial_dce_DefInlineFP, unit.logEntry().get_pointer());
 
   ITRACE(1, "optimize_inline_returns()\n");

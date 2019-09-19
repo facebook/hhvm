@@ -4,15 +4,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-extern crate ocaml;
-
-use crate::rust_to_ocaml::*;
 use ocaml::core::mlvalues::Value as OcamlValue;
-use parser::lexable_token::LexableToken;
-use parser::positioned_token::PositionedToken;
-use parser::syntax::{SyntaxTypeBase, SyntaxValueType};
-use parser::syntax_kind::SyntaxKind;
-use parser_rust as parser;
+use ocamlpool_rust::utils::*;
+use parser_rust::{
+    lexable_token::LexableToken,
+    positioned_token::PositionedToken,
+    syntax::{SyntaxTypeBase, SyntaxValueType},
+    syntax_kind::SyntaxKind,
+};
+use rust_to_ocaml::*;
 
 pub use crate::ocaml_syntax_generated::*;
 
@@ -43,7 +43,7 @@ where
     }
 }
 
-impl<V, C> SyntaxTypeBase<C> for OcamlSyntax<V>
+impl<V, C> SyntaxTypeBase<'_, C> for OcamlSyntax<V>
 where
     C: Context,
     V: SyntaxValueType<PositionedToken> + ToOcaml,

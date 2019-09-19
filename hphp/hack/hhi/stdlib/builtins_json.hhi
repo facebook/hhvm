@@ -49,12 +49,13 @@ const int JSON_FB_WARN_VEC_LIKE_DARRAYS = 0;
 const int JSON_FB_WARN_DICT_LIKE_DARRAYS = 0;
 const int JSON_FB_IGNORE_LATEINIT = 0;
 const int JSON_FB_THRIFT_SIMPLE_JSON = 0;
+const int JSON_FB_LEGACY_HACK_ARRAYS = 0;
 
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function json_encode($value, int $options = 0, int $depth = 512);
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function json_decode(string $json, bool $assoc = false, int $depth = 512, int $options = 0);
-<<__PHPStdLib>>
+<<__PHPStdLib, __NonRx('Reads from a global')>>
 function json_last_error();
-<<__PHPStdLib>>
+<<__PHPStdLib, __NonRx('Reads from a global')>>
 function json_last_error_msg();

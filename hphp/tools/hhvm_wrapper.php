@@ -9,7 +9,8 @@ require_once $FBCODE_ROOT.'/hphp/tools/command_line_lib.php';
 function my_option_map(): OptionInfoMap {
   return Map {
 'help'            => Pair { 'h', 'Print help message' },
-'gdb'             => Pair { 'g', 'Run the whole command in gdb' },
+'bin:'            => Pair { 'b', 'Use a specific HHVM binary' },
+'gdb'             => Pair { 'g', 'Run the whole command in agdb' },
 'server'          => Pair { 's', 'Run a server, port 80, pwd as the root' },
 'interp'          => Pair { 'i', 'Disable the JIT compiler' },
 'opt-ir'          => Pair { 'o', 'Disable debug assertions in IR output' },
@@ -40,13 +41,15 @@ function my_option_map(): OptionInfoMap {
 'build-root:'     => Pair { '',
                             'Override the default directory for hhvm and hphp'},
 'perf:'           => Pair { '', 'Run perf record'},
-'hhjs'            => Pair { '', 'Enable HHJS' },
   };
 }
 
-function get_paths(OptionMap $opts): Map<string,string> {
-  $root = __DIR__.'/..';
+function get_hhvm_path(OptionMap $opts): string {
+  if ($opts->containsKey('bin')) {
+    return $opts['bin'];
+  }
 
+  $root = __DIR__.'/..';
   $buck = __DIR__.'/../../buck-out/gen/hphp';
   if (is_dir($buck)) {
     $root = $buck;
@@ -69,17 +72,7 @@ function get_paths(OptionMap $opts): Map<string,string> {
     $root = realpath($opts['build-root']);
   }
 
-  if ($root === $buck) {
-    return Map {
-      'hhvm' => $root.'/hhvm/hhvm/hhvm',
-      'hphp' => $root.'/hhvm/hhvm/hhvm --hphp',
-    };
-  }
-
-  return Map {
-    'hhvm' => $root.'/hhvm/hhvm',
-    'hphp' => $root.'/hhvm/hhvm --hphp',
-  };
+  return $root === $buck ? $root.'/hhvm/hhvm/hhvm' : $root.'/hhvm/hhvm';
 }
 
 function determine_flags(OptionMap $opts): string {
@@ -107,6 +100,14 @@ function determine_flags(OptionMap $opts): string {
     if (file_exists($facebook_cli_config_file_name)) {
       $flags .= "-c $facebook_cli_config_file_name ";
     }
+  }
+
+  // Switch to single-threaded mode when tracing to avoid mixing traces.
+  if (determine_trace_env($opts)) {
+    $flags .=
+      '-v Eval.JitThreads=1 '.
+      '-v Eval.JitWorkerThreads=1 '.
+      '';
   }
 
   if (!$opts->containsKey('no-defaults')) {
@@ -167,7 +168,6 @@ function determine_flags(OptionMap $opts): string {
     'no-pgo'          => '-v Eval.JitPGO=false ',
     'hphpd'           => '-m debug ',
     'server'          => '-m server ',
-    'hhjs'            => '-v Eval.EnableHHJS=1 ',
   };
 
   if ($opts->containsKey('pgo-threshold')) {
@@ -200,12 +200,13 @@ function parse_config_options(Set $options, string $kind): Pair<string, bool> {
   return Pair {$flags, $has_file};
 }
 
-function determine_env(OptionMap $opts): string {
+// If we're tracing, colorize the trace and print it to stdout.
+// If we're not tracing, the result will be empty.
+function determine_trace_env(OptionMap $opts): string {
   $trace_opts = Map {
     'trace-hhir'     => 'hhir',
     'trace-printir'  => 'printir',
   };
-  $fixed_env = 'HPHP_TRACE_FILE=/dev/stdout HPHP_TRACE_TTY=1 ';
 
   $traces = Vector {};
   foreach ($trace_opts as $k => $v) {
@@ -213,12 +214,13 @@ function determine_env(OptionMap $opts): string {
       $traces->add("$v:".((string)$opts[$k]));
     }
   }
-  if ($traces->isEmpty()) return $fixed_env;
 
   $env = getenv("TRACE");
-  if ($env) $env .= ',';
-  return $fixed_env.
-         'TRACE=' . $env . implode(',', $traces->toArray()) . ' ';
+  if ($traces->isEmpty() && !$env) return '';
+
+  $formatting = 'HPHP_TRACE_FILE=/dev/stdout HPHP_TRACE_TTY=1 ';
+  if (!$traces->isEmpty() && $env) $env .= ',';
+  return $formatting.'TRACE='.$env.implode(',', $traces->toArray()).' ';
 }
 
 function argv_for_shell(): string {
@@ -237,7 +239,8 @@ function compile_a_repo(bool $unoptimized, OptionMap $opts): string {
     |> preg_replace("/-v\s*/", "-vRuntime.", $$)
     |> preg_replace("/--count=[0-9]+\s*/", "", $$);
   $hphp_out='/tmp/hphp_out'.posix_getpid();
-  $cmd = get_paths($opts)['hphp'].' '.
+  $cmd = get_hhvm_path($opts).' '.
+    '--hphp '.
     ($unoptimized ? '-v UseHHBBC=0 ' : '').
     ($opts->containsKey('php7') ? '-d hhvm.php7.all=1 ' : '').
     '-t hhbc -k1 -l3 '.
@@ -296,12 +299,12 @@ function run_hhvm(OptionMap $opts): void {
     $flags = compile_with_hphp($flags, $opts);
   }
 
-  $pfx = determine_env($opts);
-  $pfx .= $opts->containsKey('gdb') ? 'gdb --args ' : '';
+  $pfx = determine_trace_env($opts);
+  $pfx .= $opts->containsKey('gdb') ? 'agdb --args ' : '';
   if ($opts->containsKey('perf')) {
     $pfx .= 'perf record -g -o ' . $opts['perf'] . ' ';
   }
-  $hhvm = get_paths($opts)['hhvm'];
+  $hhvm = get_hhvm_path($opts);
   $cmd = "$pfx $hhvm $flags ".argv_for_shell();
   if ($opts->containsKey('print-command')) {
     echo "\n$cmd\n\n";

@@ -104,6 +104,8 @@ using std::string;
 
 ///////////////////////////////////////////////////////////////////////////////
 
+AdminCommandExt* AdminCommandExt::s_head{nullptr};
+
 THREAD_LOCAL(AccessLog::ThreadData, AdminRequestHandler::s_accessLogThreadData);
 
 AccessLog AdminRequestHandler::s_accessLog(
@@ -275,6 +277,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "\n"
         "/instance-id:     instance id that's passed in from command line\n"
         "/compiler-id:     returns the compiler id that built this app\n"
+        "/config-id:       returns the config id passed in from command line\n"
         "/repo-schema:     return the repo schema id used by this app\n"
         "/ini-get-all:     dump all settings as JSON\n"
         "/check-load:      how many threads are actively handling requests\n"
@@ -433,13 +436,18 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         }
 #endif // USE_JEMALLOC
 
+      AdminCommandExt::iterate([&](AdminCommandExt* ace) {
+        usage.append(ace->usage());
+        return false;
+      });
+
       transport->sendString(usage);
       break;
     }
 
     bool needs_password = (cmd != "build-id") && (cmd != "compiler-id") &&
                           (cmd != "instance-id") && (cmd != "flush-logs") &&
-                          (cmd != "warmup-status")
+                          (cmd != "warmup-status") && (cmd != "config-id")
 #if defined(ENABLE_HHPROF) && defined(USE_JEMALLOC)
                           && (mallctl == nullptr || (
                                  (cmd != "hhprof/start")
@@ -450,6 +458,18 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
                               && (cmd != "pprof/symbol")))
 #endif
                           ;
+    // When configured, we allow read-only stats to be read without a password.
+    if (needs_password && !RuntimeOption::AdminServerStatsNeedPassword) {
+      if ((strncmp(cmd.c_str(), "memory.", 7) == 0) ||
+          (strncmp(cmd.c_str(), "stats.", 6) == 0) ||
+          (strncmp(cmd.c_str(), "check-", 6) == 0) ||
+          (strncmp(cmd.c_str(), "static-strings", 14) == 0) ||
+          cmd == "hugepage" || cmd == "pcre-cache-size" ||
+          cmd == "vm-tcspace" || cmd == "vm-tcaddr" ||
+          cmd == "vm-namedentities" || cmd == "jemalloc-stats") {
+        needs_password = false;
+      }
+    }
 
     if (needs_password && !RuntimeOption::HashedAdminPasswords.empty()) {
       bool matched = false;
@@ -597,6 +617,10 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
     }
     if (cmd == "compiler-id") {
       transport->sendString(compilerId().begin(), 200);
+      break;
+    }
+    if (cmd == "config-id") {
+      transport->sendString(std::to_string(RuntimeOption::ConfigId), 200);
       break;
     }
     if (cmd == "repo-schema") {
@@ -836,64 +860,6 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       break;
     }
 
-#ifdef USE_TCMALLOC
-    if (MallocExtensionInstance) {
-      if (cmd == "tcmalloc-stats") {
-        std::ostringstream stats;
-        size_t user_allocated, heap_size, slack_bytes;
-        size_t pageheap_free, pageheap_unmapped;
-        size_t tc_max, tc_allocated;
-
-        MallocExtensionInstance()->
-          GetNumericProperty("generic.current_allocated_bytes",
-              &user_allocated);
-        MallocExtensionInstance()->
-          GetNumericProperty("generic.heap_size", &heap_size);
-        MallocExtensionInstance()->
-          GetNumericProperty("tcmalloc.slack_bytes", &slack_bytes);
-        MallocExtensionInstance()->
-          GetNumericProperty("tcmalloc.pageheap_free_bytes", &pageheap_free);
-        MallocExtensionInstance()->
-          GetNumericProperty("tcmalloc.pageheap_unmapped_bytes",
-              &pageheap_unmapped);
-        MallocExtensionInstance()->
-          GetNumericProperty("tcmalloc.max_total_thread_cache_bytes",
-              &tc_max);
-        MallocExtensionInstance()->
-          GetNumericProperty("tcmalloc.current_total_thread_cache_bytes",
-              &tc_allocated);
-        stats << "<tcmalloc-stats>" << endl;
-        stats << "  <user_allocated>" << user_allocated << "</user_allocated>"
-          << endl;
-        stats << "  <heap_size>" << heap_size << "</heap_size>" << endl;
-        stats << "  <slack_bytes>" << slack_bytes << "</slack_bytes>" << endl;
-        stats << "  <pageheap_free>" << pageheap_free
-          << "</pageheap_free>" << endl;
-        stats << "  <pageheap_unmapped>" << pageheap_unmapped
-          << "</pageheap_unmapped>" << endl;
-        stats << "  <thread_cache_max>" << tc_max
-          << "</thread_cache_max>" << endl;
-        stats << "  <thread_cache_allocated>" << tc_allocated
-          << "</thread_cache_allocated>" << endl;
-        stats << "</tcmalloc-stats>" << endl;
-        transport->sendString(stats.str());
-        break;
-      }
-      if (cmd == "tcmalloc-set-tc") {
-        size_t tc_max;
-
-        MallocExtensionInstance()->
-          GetNumericProperty("tcmalloc.max_total_thread_cache_bytes", &tc_max);
-
-        size_t tcache = transport->getInt64Param("s");
-        bool retval = MallocExtensionInstance()->
-          SetNumericProperty("tcmalloc.max_total_thread_cache_bytes", tcache);
-        transport->sendString(retval == true ? "OK\n" : "FAILED\n");
-        break;
-      }
-    }
-#endif
-
 #ifdef USE_JEMALLOC
     assertx(mallctlnametomib && mallctlbymib);
     if (cmd == "jemalloc-stats") {
@@ -911,32 +877,24 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       size_t allocated = call_mallctl("stats.allocated");
       size_t active = call_mallctl("stats.active");
       size_t mapped = call_mallctl("stats.mapped");
+
+#if USE_JEMALLOC_EXTENT_HOOKS
+      size_t low_mapped = 0;
+      // The low range [1G, 4G) is divided into two ranges, and shared by 3
+      // arenas.
+      low_mapped += alloc::getRange(alloc::AddrRangeClass::VeryLow).used();
+      low_mapped += alloc::getRange(alloc::AddrRangeClass::Low).used();
+#else
       size_t low_mapped = call_mallctl(
           folly::sformat("stats.arenas.{}.mapped",
                          low_arena).c_str());
-      size_t low_small_allocated = call_mallctl(
-          folly::sformat("stats.arenas.{}.small.allocated",
-                         low_arena).c_str());
-      size_t low_large_allocated = call_mallctl(
-          folly::sformat("stats.arenas.{}.large.allocated",
-                         low_arena).c_str());
-      size_t low_active = call_mallctl(
-          folly::sformat("stats.arenas.{}.pactive",
-                         low_arena).c_str()) * sysconf(_SC_PAGESIZE);
-
+#endif
       std::ostringstream stats;
       stats << "<jemalloc-stats>" << endl;
       stats << "  <allocated>" << allocated << "</allocated>" << endl;
       stats << "  <active>" << active << "</active>" << endl;
       stats << "  <mapped>" << mapped << "</mapped>" << endl;
       stats << "  <low_mapped>" << low_mapped << "</low_mapped>" << endl;
-      stats << "  <low_allocated>"
-            << (low_small_allocated + low_large_allocated)
-            << "</low_allocated>" << endl;
-      stats << "  <low_active>"
-            << low_active
-            << "</low_active>" << endl;
-      stats << "  <error>" << error << "</error>" << endl;
       stats << "</jemalloc-stats>" << endl;
       transport->sendString(stats.str());
       break;
@@ -1038,6 +996,12 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       );
       out << "}" << endl;
       transport->sendString(out.str());
+      break;
+    }
+
+    if (AdminCommandExt::iterate([&](AdminCommandExt* ace) {
+          return ace->handleRequest(transport);
+       })) {
       break;
     }
 

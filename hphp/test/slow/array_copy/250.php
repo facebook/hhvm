@@ -2,11 +2,11 @@
 
 function h1() {
   $x = array(1,2,3,4);
-  next(&$x);
+  next(inout $x);
   $y = $x;
   unset($y[2]);
-  var_dump(current(&$x));
-  var_dump(current(&$y));
+  var_dump(current($x));
+  var_dump(current($y));
 }
 
 <<__EntryPoint>>

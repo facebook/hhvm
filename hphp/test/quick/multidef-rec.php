@@ -1,7 +1,7 @@
 <?hh
 
 function main() {
-  $count = apc_fetch('rec-test-count');
+  $count = __hhvm_intrinsics\apc_fetch_no_check('rec-test-count');
   if ($count === false) $count = 0;
   if ($count >= 2) return;
 

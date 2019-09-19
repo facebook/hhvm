@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2018, Facebook, Inc.
  * All rights reserved.
  *
@@ -8,19 +8,21 @@
  *)
 
 open Core_kernel
-open Tast
+open Aast
 
 let check_tparams tps =
   let check_tparam tp =
     match tp.tp_variance with
-    | Ast.Invariant -> ()
+    | Ast_defs.Invariant -> ()
     | _ -> Errors.method_variance (fst tp.tp_name)
-  in List.iter tps check_tparam
+  in
+  List.iter tps check_tparam
 
-let handler = object
-  inherit Tast_visitor.handler_base
+let handler =
+  object
+    inherit Tast_visitor.handler_base
 
-  method! at_method_ _ m = check_tparams m.m_tparams
+    method! at_method_ _ m = check_tparams m.m_tparams
 
-  method! at_fun_ _ f = check_tparams f.f_tparams
-end
+    method! at_fun_ _ f = check_tparams f.f_tparams
+  end

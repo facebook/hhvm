@@ -20,12 +20,13 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/req-list.h"
 #include "hphp/runtime/base/request-event-handler.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-resource.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-variant.h"
+
+#include "hphp/util/rds-local.h"
 
 struct stat;
 

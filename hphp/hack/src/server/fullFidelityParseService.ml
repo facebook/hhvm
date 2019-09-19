@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
@@ -7,8 +7,8 @@
  *
  *)
 
-module SyntaxTree = Full_fidelity_syntax_tree
-  .WithSyntax(Full_fidelity_minimal_syntax)
+module SyntaxTree =
+  Full_fidelity_syntax_tree.WithSyntax (Full_fidelity_minimal_syntax)
 
 (* Entry Point *)
 let go filename =

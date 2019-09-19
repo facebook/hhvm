@@ -42,6 +42,10 @@ void HHVM_FUNCTION(register_shutdown_function,
   const Variant& function, const Array& params = null_array);
 
 ///////////////////////////////////////////////////////////////////////////////
+
+String HHVM_FUNCTION(HH_fun_get_function, TypedValue v);
+
+///////////////////////////////////////////////////////////////////////////////
 }
 
 #endif // incl_HPHP_EXT_FUNCTION_H_

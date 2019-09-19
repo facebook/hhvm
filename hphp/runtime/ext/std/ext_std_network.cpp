@@ -24,7 +24,6 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/file.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/sockets/ext_sockets.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
@@ -32,6 +31,7 @@
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/network.h"
+#include "hphp/util/rds-local.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -322,9 +322,10 @@ Array HHVM_FUNCTION(headers_list) {
   return ret;
 }
 
-bool HHVM_FUNCTION(headers_sent, VRefParam file /* = null */,
-                                 VRefParam line /* = null */) {
-  Transport *transport = g_context->getTransport();
+bool HHVM_FUNCTION(headers_sent_with_file_line,
+                   VRefParam file,
+                   VRefParam line) {
+ Transport *transport = g_context->getTransport();
   if (transport) {
     file.assignIfRef(String(transport->getFirstHeaderFile()));
     line.assignIfRef(transport->getFirstHeaderLine());
@@ -333,6 +334,11 @@ bool HHVM_FUNCTION(headers_sent, VRefParam file /* = null */,
     return g_context->getStdoutBytesWritten() > 0;
   }
   return false;
+}
+
+bool HHVM_FUNCTION(headers_sent, VRefParam file /* = null */,
+                                 VRefParam line /* = null */) {
+  return HHVM_FN(headers_sent_with_file_line)(file, line);
 }
 
 Variant HHVM_FUNCTION(header_register_callback, const Variant& callback) {
@@ -476,6 +482,7 @@ void StandardExtension::initNetwork() {
   HHVM_FE(http_response_code);
   HHVM_FE(headers_list);
   HHVM_FE(headers_sent);
+  HHVM_FE(headers_sent_with_file_line);
   HHVM_FE(header_register_callback);
   HHVM_FE(header_remove);
   HHVM_FE(get_http_request_size);

@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
@@ -8,7 +8,9 @@
  *)
 
 type t
+
 val save : logging_init:(unit -> unit) -> t
+
 val restore : t -> unit
 
 val to_string : t -> string

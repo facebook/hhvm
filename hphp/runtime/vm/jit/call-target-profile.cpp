@@ -41,9 +41,8 @@ void CallTargetProfile::init() {
   }
 }
 
-void CallTargetProfile::report(const ActRec* ar) {
-  assertx(ar);
-  auto const func = ar->func();
+void CallTargetProfile::report(const Func* func) {
+  assertx(func);
   auto const funcId = func->getFuncId();
   FTRACE(5, "CallTargetProfile::report: funcId {} ({})\n", funcId,
          func->fullName());
@@ -176,6 +175,38 @@ std::string CallTargetProfile::toString() const {
   out << folly::format("Untracked: {} ({:.1f}%)", m_untracked,
                        total == 0 ? 0 : 100.0 * m_untracked / total);
   return out.str();
+}
+
+folly::dynamic CallTargetProfile::toDynamic() const {
+  using folly::dynamic;
+
+  if (!m_init) return dynamic();
+
+  uint64_t total = m_untracked;
+  for (auto const& entry : m_entries) {
+    if (entry.funcId != InvalidFuncId) {
+      total += entry.count;
+    }
+  }
+
+  dynamic entries = dynamic::array;
+  for (auto const& entry : m_entries) {
+    if (entry.funcId != InvalidFuncId) {
+      auto percent = total == 0 ? 0 : 100.0 * entry.count / total;
+      entries.push_back(dynamic::object("funcId", entry.funcId)
+                                       ("count", entry.count)
+                                       ("percent", percent));
+    }
+  }
+
+  auto percent = total == 0 ? 0 : 100.0 * m_untracked / total;
+  dynamic untracked = dynamic::object("count", m_untracked)
+                                     ("percent", percent);
+
+  return dynamic::object("entries", entries)
+                        ("untracked", untracked)
+                        ("total", total)
+                        ("profileType", "CallTargetProfile");
 }
 
 void CallTargetProfile::serialize(ProfDataSerializer& ser) const {

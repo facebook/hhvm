@@ -22,19 +22,22 @@ class book{
 function book_from_xml($xml) {
 	throw new SoapFault("Client", "Conversion Error");
 }
+<<__EntryPoint>>
+function main_entry(): void {
 
-$options=array(
-		'actor' =>'http://schemas.nothing.com',
-		'typemap' => array(array("type_ns"   => "http://schemas.nothing.com",
-		                         "type_name" => "book",
-		                         "from_xml"  => "book_from_xml"))
-		);
+  $options=array(
+  		'actor' =>'http://schemas.nothing.com',
+  		'typemap' => array(array("type_ns"   => "http://schemas.nothing.com",
+  		                         "type_name" => "book",
+  		                         "from_xml"  => "book_from_xml"))
+  		);
 
-$client = new TestSoapClient(dirname(__FILE__)."/classmap.wsdl",$options);
-try {
-	$ret = $client->dotest2("???");
-} catch (SoapFault $e) {
-	$ret = "SoapFault = " . $e->faultcode . " - " . $e->faultstring;
+  $client = new TestSoapClient(dirname(__FILE__)."/classmap.wsdl",$options);
+  try {
+  	$ret = $client->dotest2("???");
+  } catch (SoapFault $e) {
+  	$ret = "SoapFault = " . $e->faultcode . " - " . $e->faultstring;
+  }
+  var_dump($ret);
+  echo "ok\n";
 }
-var_dump($ret);
-echo "ok\n";

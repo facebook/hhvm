@@ -286,7 +286,7 @@ function openssl_pkcs7_sign(string $infilename,
 function openssl_pkcs7_verify(string $filename,
                               int $flags,
                               ?string $outfilename = null,
-                              ?array $cainfo = null,
+                              ?varray<string> $cainfo = null,
                               ?string $extracerts = null,
                               ?string $content = null): mixed;
 
@@ -576,7 +576,7 @@ function openssl_x509_check_private_key(mixed $cert,
 <<__Native>>
 function openssl_x509_checkpurpose(mixed $x509cert,
                                    int $purpose,
-                                   array $cainfo = [],
+                                   varray $cainfo = varray[],
                                    string $untrustedfile = ""): mixed;
 
 /* openssl_x509_export_to_file() stores x509 into a file named by outfilename
@@ -699,6 +699,16 @@ function openssl_encrypt(string $data,
                          mixed &$tag_out = null,
                          string $aad = "",
                          int $tag_length = 16): mixed;
+
+<<__Native>>
+function openssl_encrypt_with_tag(string $data,
+                                  string $method,
+                                  string $password,
+                                  int $options,
+                                  string $iv,
+                                  mixed &$tag_out,
+                                  string $aad = "",
+                                  int $tag_length = 16): mixed;
 
 /* Takes a raw or base64 encoded string and decrypts it using a given method
  * and key.

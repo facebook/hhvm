@@ -1,0 +1,6 @@
+File "unresolved_container2.php", line 19, characters 10-14:
+Invalid return type (Typing[4110])
+File "unresolved_container2.php", line 12, characters 51-53:
+Expected int
+File "unresolved_container2.php", line 12, characters 15-26:
+But got dynamic because it is an unenforceable type

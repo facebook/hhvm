@@ -58,5 +58,3 @@ class UnexpectedSerializedClass extends Exception {}
           'include_subclasses' => true,
           'throw' => 'MadeUp'));
 }
-
-main();

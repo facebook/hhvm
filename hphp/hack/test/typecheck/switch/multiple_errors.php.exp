@@ -1,0 +1,4 @@
+File "multiple_errors.php", line 7, characters 5-12:
+There can be only one default case in switch (NastCheck[3082])
+File "multiple_errors.php", line 10, characters 10-12:
+Default case in switch must be terminal (NastCheck[3081])

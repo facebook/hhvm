@@ -1,6 +1,6 @@
 <?hh // strict
 
-/* HH_FIXME[4110] */
+/* HH_FIXME[4336] */
 function ts<T>(typename<T> $tn): TypeStructure<T> {
 }
 

@@ -3,12 +3,15 @@
 function autoload() {
     foo();
 }
-spl_autoload_register('autoload');
 
 function testGenerator() {
     new SyntaxError('param');
     yield;
 }
 
-foreach (testGenerator() as $i);
+<<__EntryPoint>>
+function main_entry(): void {
+  spl_autoload_register('autoload');
 
+  foreach (testGenerator() as $i);
+}

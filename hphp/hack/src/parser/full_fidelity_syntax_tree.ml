@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
@@ -17,148 +17,145 @@
  *)
 
 open Core_kernel
-
 module SourceText = Full_fidelity_source_text
 module Env = Full_fidelity_parser_env
 module SyntaxError = Full_fidelity_syntax_error
 
-module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
-module WithSmartConstructors(SCI : SmartConstructors.SmartConstructors_S
-  with type r = Syntax.t
-  with module Token = Syntax.Token
-) = struct
+module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
+  module WithSmartConstructors
+      (SCI : SmartConstructors.SmartConstructors_S
+               with type r = Syntax.t
+               with module Token = Syntax.Token) =
+  struct
+    module Parser_ = Full_fidelity_parser.WithSyntax (Syntax)
+    module Parser = Parser_.WithSmartConstructors (SCI)
+    open Syntax
 
-module Parser_ = Full_fidelity_parser.WithSyntax(Syntax)
-module Parser = Parser_.WithSmartConstructors(SCI)
+    type t = {
+      text: SourceText.t;
+      root: Syntax.t;
+      rust_tree: Rust_pointer.t option;
+      errors: SyntaxError.t list;
+      mode: FileInfo.mode option;
+      state: SCI.t;
+    }
+    [@@deriving show]
 
-open Syntax
+    let remove_duplicates errors equals =
+      (* Assumes the list is sorted so that equal items are together. *)
+      let rec aux errors acc =
+        match errors with
+        | [] -> acc
+        | h1 :: t1 ->
+          begin
+            match t1 with
+            | [] -> h1 :: acc
+            | h2 :: t2 ->
+              if equals h1 h2 then
+                aux (h1 :: t2) acc
+              else
+                aux t1 (h1 :: acc)
+          end
+      in
+      let result = aux errors [] in
+      List.rev result
 
-type t = {
-  text : SourceText.t;
-  root : Syntax.t;
-  errors : SyntaxError.t list;
-  mode : FileInfo.mode option;
-  state : SCI.t;
-} [@@deriving show]
+    let build
+        (text : SourceText.t)
+        (root : Syntax.t)
+        (rust_tree : Rust_pointer.t option)
+        (errors : SyntaxError.t list)
+        (mode : FileInfo.mode option)
+        (state : SCI.t) : t =
+      { text; root; rust_tree; errors; mode; state }
 
-let remove_duplicates errors equals =
-  (* Assumes the list is sorted so that equal items are together. *)
-  let rec aux errors acc =
-    match errors with
-    | [] -> acc
-    | h1 :: t1 ->
-      begin
-        match t1 with
-        | [] -> h1 :: acc
-        | h2 :: t2 ->
-        if equals h1 h2 then
-          aux (h1 :: t2) acc
-        else
-          aux t1 (h1 :: acc)
-      end in
-  let result = aux errors [] in
-  List.rev result
-
-let build
-    (text: SourceText.t)
-    (root: Syntax.t)
-    (errors: SyntaxError.t list)
-    (mode: FileInfo.mode option)
-    (state: SCI.t): t =
-  { text; root; errors; mode; state }
-
-let process_errors errors =
-  (* We've got the lexical errors and the parser errors together, both
+    let process_errors errors =
+      (* We've got the lexical errors and the parser errors together, both
   with lexically later errors earlier in the list. We want to reverse the
   list so that later errors come later, and then do a stable sort to put the
   lexical and parser errors together. *)
-  let errors = List.rev errors in
-  let errors = List.stable_sort SyntaxError.compare errors in
-  remove_duplicates errors SyntaxError.exactly_equal
+      let errors = List.rev errors in
+      let errors = List.stable_sort SyntaxError.compare errors in
+      remove_duplicates errors SyntaxError.exactly_equal
 
-let create text root errors mode state =
-  let errors = process_errors errors in
-  build text root errors mode state
+    let create text root rust_tree errors mode state =
+      let errors = process_errors errors in
+      build text root rust_tree errors mode state
 
-let make_impl ?(env = Env.default) text =
-  let mode = Full_fidelity_parser.parse_mode ~rust:(Env.rust env) text in
-  let parser = Parser.make env text in
-  let (parser, root) = Parser.parse_script parser in
-  let errors = Parser.errors parser in
-  let state = Parser.sc_state parser in
-  create text root errors mode state
+    let make_impl ?(env = Env.default) text =
+      let mode = Full_fidelity_parser.parse_mode text in
+      let parser = Parser.make env text in
+      let (parser, root, rust_tree) = Parser.parse_script parser in
+      let errors = Parser.errors parser in
+      let state = Parser.sc_state parser in
+      create text root rust_tree errors mode state
 
-let make ?(env = Env.default) text =
-  Stats_container.wrap_nullary_fn_timing
-    ?stats:(Env.stats env)
-    ~key:"Syntax_tree.make"
-    ~f:(fun () -> make_impl ~env text)
+    let make ?(env = Env.default) text =
+      Stats_container.wrap_nullary_fn_timing
+        ?stats:(Env.stats env)
+        ~key:"Syntax_tree.make"
+        ~f:(fun () -> make_impl ~env text)
 
-let root tree =
-  tree.root
+    let root tree = tree.root
 
-let text tree =
-  tree.text
+    let rust_tree tree = tree.rust_tree
 
-let all_errors tree =
-  tree.errors
+    let text tree = tree.text
 
-let remove_cascading errors =
-  let equals e1 e2 = (SyntaxError.compare e1 e2) = 0 in
-  remove_duplicates errors equals
+    let all_errors tree = tree.errors
 
-let mode tree =
-  tree.mode
+    let remove_cascading errors =
+      let equals e1 e2 = SyntaxError.compare e1 e2 = 0 in
+      remove_duplicates errors equals
 
-let sc_state tree =
-  tree.state
+    let mode tree = tree.mode
 
-let is_hack tree =
-  tree.mode <> Some FileInfo.Mphp
+    let sc_state tree = tree.state
 
-let is_php tree =
-  tree.mode = Some FileInfo.Mphp
+    let is_hack tree = tree.mode <> Some FileInfo.Mphp
 
-let is_strict tree =
-  match tree.mode with
-  | Some mode -> FileInfo.is_strict mode
-  | None -> false
+    let is_php tree = tree.mode = Some FileInfo.Mphp
 
-let is_decl tree = tree.mode = Some FileInfo.Mdecl
+    let is_strict tree =
+      match tree.mode with
+      | Some mode -> FileInfo.is_strict mode
+      | None -> false
 
-let errors_no_bodies tree =
-  let not_in_body error =
-    not (is_in_body tree.root error.SyntaxError.start_offset) in
-  List.filter ~f:not_in_body tree.errors
+    let is_decl tree = tree.mode = Some FileInfo.Mdecl
 
-(* By default we strip out (1) all cascading errors, and (2) in decl mode,
+    let errors_no_bodies tree =
+      let not_in_body error =
+        not (is_in_body tree.root error.SyntaxError.start_offset)
+      in
+      List.filter ~f:not_in_body tree.errors
+
+    (* By default we strip out (1) all cascading errors, and (2) in decl mode,
 all errors that happen in a body. *)
 
-let errors tree =
-  let e =
-    if is_decl tree then begin
-      errors_no_bodies tree end
-    else
-      all_errors tree in
-  remove_cascading e
+    let errors tree =
+      let e =
+        if is_decl tree then
+          errors_no_bodies tree
+        else
+          all_errors tree
+      in
+      remove_cascading e
 
-let to_json ?with_value tree =
-  let version = Full_fidelity_schema.full_fidelity_schema_version_number in
-  let root = Syntax.to_json ?with_value tree.root in
-  let text = Hh_json.JSON_String (SourceText.text tree.text) in
-  Hh_json.JSON_Object [
-    "parse_tree", root;
-    "program_text", text;
-    "version", Hh_json.JSON_String version
-  ]
-end (* WithSmartConstructors *)
+    let to_json ?with_value tree =
+      let version = Full_fidelity_schema.full_fidelity_schema_version_number in
+      let root = Syntax.to_json ?with_value tree.root in
+      let text = Hh_json.JSON_String (SourceText.text tree.text) in
+      Hh_json.JSON_Object
+        [
+          ("parse_tree", root);
+          ("program_text", text);
+          ("version", Hh_json.JSON_String version);
+        ]
+  end
 
-include WithSmartConstructors(SyntaxSmartConstructors.WithSyntax(Syntax))
+  include WithSmartConstructors (SyntaxSmartConstructors.WithSyntax (Syntax))
 
-let create text root errors mode =
-  create text root errors mode ()
+  let create text root errors mode = create text root None errors mode ()
 
-let build text root errors mode =
-  build text root errors mode ()
-
-end (* WithSyntax *)
+  let build text root errors mode = build text root None errors mode ()
+end

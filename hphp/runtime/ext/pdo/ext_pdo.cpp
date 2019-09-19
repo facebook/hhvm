@@ -21,13 +21,13 @@
 
 #include "hphp/system/systemlib.h"
 #include "hphp/util/hphp-config.h"
+#include "hphp/util/rds-local.h"
 #include "hphp/util/string-vsnprintf.h"
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/ini-setting.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -2523,8 +2523,6 @@ safe:
               case KindOfDict:
               case KindOfPersistentKeyset:
               case KindOfKeyset:
-              case KindOfPersistentShape:
-              case KindOfShape:
               case KindOfPersistentArray:
               case KindOfArray:
               case KindOfObject:

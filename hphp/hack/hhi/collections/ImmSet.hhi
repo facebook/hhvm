@@ -146,12 +146,12 @@ final class ImmSet<+Tv as arraykey> implements ConstSet<Tv> {
    * Returns an `ImmSet` containing all the values from the specified
    * `array`(s).
    *
-   * @param ... - The `array`(s) to convert to an `ImmSet`.
+   * @param ...$argv - The `array`(s) to convert to an `ImmSet`.
    *
    * @return - An `ImmSet` with the values from the passed `array`(s).
    */
   <<__Rx>>
-  public static function fromArrays(...): ImmSet<Tv>;
+  public static function fromArrays(...$argv): ImmSet<Tv>;
 
   /**
    * Creates an `ImmSet` from the keys of the specified container.

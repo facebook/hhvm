@@ -1,0 +1,6 @@
+File "generic_type_structure.php", line 11, characters 10-24:
+Invalid return type (Typing[4110])
+File "generic_type_structure.php", line 9, characters 4-41:
+Expected ~(HH\TypeStructure<T2>, HH\TypeStructure<T1>) because it is an unenforceable type
+File "generic_type_structure.php", line 11, characters 10-24:
+But got (~HH\TypeStructure<T2>, ~HH\TypeStructure<T1>)

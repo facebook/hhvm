@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2018, Facebook, Inc.
  * All rights reserved.
  *
@@ -8,7 +8,9 @@
  *)
 
 exception Empty_regex_pattern
+
 exception Missing_delimiter
+
 exception Invalid_global_option
 
-val type_pattern : Nast.expr -> Typing_defs.Reason.t * Typing_defs.locl Typing_defs.ty_
+val type_pattern : Nast.expr -> Typing_defs.locl_ty

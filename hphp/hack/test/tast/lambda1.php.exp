@@ -1,6 +1,6 @@
 [(Fun
     { f_span = [2:1-7:2]; f_annotation = (); f_mode = <opaque>;
-      f_ret = (Some ([2:26-30], (Hprim Tvoid)));
+      f_ret = ((void), (Some ([2:26-30], (Hprim Tvoid))));
       f_name = ([2:10-22], "\\test_lambda1"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
       f_body =
@@ -12,24 +12,27 @@
                  (([3:8-13], string), (String "foo")))))));
           ([4:3-42],
            (Expr
-              (([4:3-41], (function(?(dynamic | bool | float | resource | arraykey | Stringish) $n): string)),
+              (([4:3-41], (function(?(dynamic | bool | float | resource | arraykey | FormatString<nothing>) $n): string)),
                (Binop ((Eq None),
-                  (([4:3-5], (function(?(dynamic | bool | float | resource | arraykey | Stringish) $n): string)),
+                  (([4:3-5], (function(?(dynamic | bool | float | resource | arraykey | FormatString<nothing>) $n): string)),
                    (Lvar ([4:3-5], $f))),
-                  (([4:8-41], (function(?(dynamic | bool | float | resource | arraykey | Stringish) $n): string)),
+                  (([4:8-41], (function(?(dynamic | bool | float | resource | arraykey | FormatString<nothing>) $n): string)),
                    (Lfun (
                       { f_span = [4:8-41]; f_annotation = ();
-                        f_mode = <opaque>; f_ret = None;
+                        f_mode = <opaque>; f_ret = ((string), None);
                         f_name = ([4:8-41], ";anonymous"); f_tparams = [];
                         f_where_constraints = []; f_variadic = FVnonVariadic;
                         f_params =
                         [{ param_annotation =
-                           ([4:8-10], ?(dynamic | bool | float | resource | arraykey | Stringish));
-                           param_hint = None; param_is_reference = false;
+                           ([4:8-10], ?(dynamic | bool | float | resource | arraykey | FormatString<nothing>));
+                           param_type_hint =
+                           ((?(dynamic | bool | float | resource | arraykey | FormatString<nothing>)),
+                            None);
+                           param_is_reference = false;
                            param_is_variadic = false; param_pos = [4:8-10];
                            param_name = "$n"; param_expr = None;
-                           param_callconv = None; param_user_attributes = []
-                           }
+                           param_callconv = None; param_user_attributes = [];
+                           param_visibility = None }
                           ];
                         f_body =
                         { fb_ast =
@@ -39,7 +42,7 @@
                                       (Binop (Dot,
                                          (([4:24-31], string),
                                           (Binop (Dot,
-                                             (([4:24-26], ?(dynamic | bool | float | resource | arraykey | Stringish)),
+                                             (([4:24-26], ?(dynamic | bool | float | resource | arraykey | FormatString<nothing>)),
                                               (Lvar ([4:24-26], $n))),
                                              (([4:29-31], string),
                                               (Lvar ([4:29-31], $s)))
@@ -60,7 +63,7 @@
                (Binop ((Eq None), (([5:3-5], string), (Lvar ([5:3-5], $x))),
                   (([5:8-13], string),
                    (Call (Cnormal,
-                      (([5:8-10], (function(?(dynamic | bool | float | resource | arraykey | Stringish) $n): string)),
+                      (([5:8-10], (function(?(dynamic | bool | float | resource | arraykey | FormatString<nothing>) $n): string)),
                        (Lvar ([5:8-10], $f))),
                       [], [(([5:11-12], int), (Int "4"))], [])))
                   )))));
@@ -70,7 +73,7 @@
                (Binop ((Eq None), (([6:3-5], string), (Lvar ([6:3-5], $y))),
                   (([6:8-17], string),
                    (Call (Cnormal,
-                      (([6:8-10], (function(?(dynamic | bool | float | resource | arraykey | Stringish) $n): string)),
+                      (([6:8-10], (function(?(dynamic | bool | float | resource | arraykey | FormatString<nothing>) $n): string)),
                        (Lvar ([6:8-10], $f))),
                       [], [(([6:11-16], string), (String "bar"))], [])))
                   )))))

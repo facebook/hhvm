@@ -48,7 +48,6 @@ struct Reflection {
   static void ThrowReflectionExceptionObject(const Variant& message);
 };
 
-extern const StaticString s_ReflectionFileHandle;
 struct ReflectionFileHandle {
   ReflectionFileHandle(): m_unit(nullptr) {}
   explicit ReflectionFileHandle(const Unit* unit): m_unit(unit) {};
@@ -79,7 +78,6 @@ struct ReflectionFileHandle {
 
 /* A ReflectionFuncHandle is a NativeData object wrapping a Func*
  * for the purposes of ReflectionFunction and ReflectionMethod. */
-extern const StaticString s_ReflectionFuncHandle;
 struct ReflectionFuncHandle {
   ReflectionFuncHandle(): m_func(nullptr) {}
   explicit ReflectionFuncHandle(const Func* func): m_func(func) {};
@@ -110,7 +108,6 @@ struct ReflectionFuncHandle {
 
 /* A ReflectionClassHandle is a NativeData object wrapping a Class* for the
  * purposes of ReflectionClass. */
-extern const StaticString s_ReflectionClassHandle;
 struct ReflectionClassHandle {
   ReflectionClassHandle(): m_cls(nullptr) {}
   explicit ReflectionClassHandle(const Class* cls): m_cls(cls) {};
@@ -153,7 +150,6 @@ struct ReflectionClassHandle {
 
 /* A ReflectionConstHandle is a NativeData object wrapping a Const*
  * for the purposes of ReflectionTypeConstant. */
-extern const StaticString s_ReflectionConstHandle;
 struct ReflectionConstHandle {
   ReflectionConstHandle(): m_const(nullptr), m_cls(nullptr) {}
   explicit ReflectionConstHandle(const Class::Const* cns, const Class* cls):

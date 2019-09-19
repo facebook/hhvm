@@ -11,22 +11,23 @@ function foo() {
     };
 }
 <<__EntryPoint>> function main(): void {
+$name = null;
 $test = new Foo;
-var_dump(is_callable($test, true, &$name));
+var_dump(is_callable_with_name($test, true, inout $name));
 echo $name."\n";
-var_dump(is_callable($test, false, &$name));
+var_dump(is_callable_with_name($test, false, inout $name));
 echo $name."\n";
-var_dump(is_callable(array($test,"__invoke"), true, &$name));
+var_dump(is_callable_with_name(array($test,"__invoke"), true, inout $name));
 echo $name."\n";
-var_dump(is_callable(array($test,"__invoke"), false, &$name));
+var_dump(is_callable_with_name(array($test,"__invoke"), false, inout $name));
 echo $name."\n";
 $test = foo();
-var_dump(is_callable($test, true, &$name));
+var_dump(is_callable_with_name($test, true, inout $name));
 echo $name."\n";
-var_dump(is_callable($test, false, &$name));
+var_dump(is_callable_with_name($test, false, inout $name));
 echo $name."\n";
-var_dump(is_callable(array($test,"__invoke"), true, &$name));
+var_dump(is_callable_with_name(array($test,"__invoke"), true, inout $name));
 echo $name."\n";
-var_dump(is_callable(array($test,"__invoke"), false, &$name));
+var_dump(is_callable_with_name(array($test,"__invoke"), false, inout $name));
 echo $name."\n";
 }

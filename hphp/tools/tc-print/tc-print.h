@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_TCPRINT_H_
 #define incl_HPHP_TCPRINT_H_
 
+#include "hphp/tools/tc-print/annotation-cache.h"
 #include "hphp/tools/tc-print/offline-trans-data.h"
 #include "hphp/tools/tc-print/repo-wrapper.h"
 #include "hphp/tools/tc-print/tc-print-logger.h"
@@ -35,5 +36,6 @@ template<typename... Args>
 extern HPHP::jit::RepoWrapper* g_repo;
 extern HPHP::jit::OfflineTransData* g_transData;
 extern HPHP::TCPrintLogger* g_logger;
+extern std::unique_ptr<HPHP::AnnotationCache> g_annotations;
 
 #endif

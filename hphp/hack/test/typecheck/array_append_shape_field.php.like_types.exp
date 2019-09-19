@@ -1,0 +1,6 @@
+File "array_append_shape_field.php", line 6, characters 10-11:
+Invalid return type (Typing[4110])
+File "array_append_shape_field.php", line 4, characters 43-64:
+Expected ~shape('x' => vec<num>) because it is an unenforceable type
+File "array_append_shape_field.php", line 4, characters 15-36:
+But got shape('x' => ~vec<num>)

@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -8,9 +8,10 @@
  *)
 
 open Typing_defs
-
+open Typing_env_types
 module Env = Typing_env
 
+val union : env -> locl_ty -> locl_ty -> env * locl_ty
 (** Performs the union of two types.
 The union is the least upper bound of the subtyping relation.
 
@@ -21,19 +22,15 @@ then
 This approximation is necessary to avoid type growing exponentially in size.
 We have seen cases where it would otherwise generate unions involving all
 the subsets of a set of types. *)
-val union: Env.env -> locl ty -> locl ty -> Env.env * locl ty
+
+val union_list : env -> Reason.t -> locl_ty list -> env * locl_ty
 (** Computes the union of a list of types by union types two by two.
 This is quadratic, so if this requires more than 20 two by two unions,
 fall back to simply flatten the unions, bubble up the option and remove
 duplicates. *)
-val union_list: Env.env -> Reason.t -> locl ty list -> Env.env * locl ty
-(** Simplify unions in a type. *)
-val simplify_unions:
-  Env.env ->
-  ?on_tyvar:(Env.env -> Reason.t -> Ident.t -> Env.env * locl ty) ->
-  locl ty ->
-  Env.env * locl ty
-(** A cheap type difference. If ty1 is a union, remove ty2 from this union.
-Assumes ty1 is a flattened union or an option of a flattened union,
-and ty2 is a type variable *)
-val diff: locl ty -> locl ty -> locl ty
+
+val simplify_unions :
+  env ->
+  ?on_tyvar:(env -> Reason.t -> Ident.t -> env * locl_ty) ->
+  locl_ty ->
+  env * locl_ty

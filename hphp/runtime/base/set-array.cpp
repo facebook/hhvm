@@ -105,7 +105,7 @@ ArrayData* SetArray::MakeSet(uint32_t size, const TypedValue* values) {
   for (uint32_t i = 0; i < size; ++i) {
     auto& tv = values[i];
     if (!isIntType(tv.m_type) && !isStringType(tv.m_type)) {
-      throwInvalidArrayKeyException(&tv, staticEmptyKeysetArray());
+      throwInvalidArrayKeyException(&tv, ArrayData::CreateKeyset());
     }
   }
   auto ad = asSet(MakeReserveSet(size));
@@ -874,7 +874,7 @@ ArrayData* SetArray::ToArrayImpl(ArrayData* ad, bool toDArray) {
   auto a = asSet(ad);
   auto size = a->size();
 
-  if (!size) return toDArray ? staticEmptyDArray() : staticEmptyArray();
+  if (!size) return toDArray ? ArrayData::CreateDArray() : ArrayData::Create();
 
   Init init{size};
 
@@ -918,14 +918,6 @@ ArrayData* SetArray::ToDArray(ArrayData* ad, bool copy) {
   auto out = ToArrayImpl<DArrayInit, IntishCast::None>(ad, true);
   assertx(out->isDArray());
   return out;
-}
-
-ArrayData* SetArray::ToShape(ArrayData* ad, bool copy) {
-  auto arr = RuntimeOption::EvalHackArrDVArrs
-    ? SetArray::ToDict(ad, copy)
-    : SetArray::ToDArray(ad, copy);
-  arr = arr->toShapeInPlaceIfCompatible();
-  return arr;
 }
 
 ArrayData* SetArray::ToKeyset(ArrayData* ad, bool /*copy*/) {

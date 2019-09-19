@@ -26,8 +26,8 @@ namespace HPHP {
 namespace detail {
 
 ALWAYS_INLINE void hackArrCompatCheck(const Array& arr) {
-  if (UNLIKELY(checkHACCompare() && !arr.isNull())) {
-    raiseHackArrCompatArrMixedCmp();
+  if (UNLIKELY(checkHACCompareNonAnyArray() && !arr.isNull())) {
+    raiseHackArrCompatArrNonArrCmp();
   }
 }
 

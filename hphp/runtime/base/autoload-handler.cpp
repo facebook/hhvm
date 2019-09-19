@@ -79,8 +79,7 @@ Variant vm_call_decoded_handler(const AutoloadHandler::DecodedHandler& handler,
     invName->incRefCount();
   }
   return Variant::attach(
-    g_context->invokeFunc(f, params, obj, cls, nullptr, invName,
-                          ExecutionContext::InvokeNormal, false,
+    g_context->invokeFunc(f, params, obj, cls, invName, false,
                           handler.m_dynamic)
   );
 }
@@ -133,7 +132,12 @@ void AutoloadHandler::requestInit() {
   auto* factory = AutoloadMapFactory::getInstance();
   if (factory) {
     auto* map = getAutoloadMapFromFactory(*factory);
-    if (map && map->sync()) {
+    if (map) {
+      if (!map->ensureUpdated()) {
+        Logger::Warning(
+            "Failed to update native autoloader, proceeding with stale data.\n"
+        );
+      }
       m_map = map;
     }
   }
@@ -276,11 +280,7 @@ AutoloadHandler::loadFromMapImpl(const String& clsName,
                                  RuntimeOption::TrustAutoloaderPath);
     if (unit) {
       if (initial) {
-        tvDecRefGen(
-            ec->invokeFunc(unit->getMain(nullptr), init_null_variant,
-                           nullptr, nullptr, nullptr, nullptr,
-                           ExecutionContext::InvokePseudoMain)
-        );
+        tvDecRefGen(ec->invokePseudoMain(unit->getMain(nullptr)));
       }
       ok = true;
     }

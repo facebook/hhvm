@@ -1,9 +1,10 @@
 <?hh
 
 function Test() {
- var_dump(__FUNCTION__);
+  var_dump(__FUNCTION__);
 }
- var_dump(__FUNCTION__);
- test();
 
-<<__EntryPoint>> function main(): void {}
+var_dump(__FUNCTION__);
+<<__EntryPoint>> function main(): void {
+test();
+}

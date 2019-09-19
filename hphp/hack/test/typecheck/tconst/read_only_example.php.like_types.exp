@@ -1,0 +1,8 @@
+File "read_only_example.php", line 36, characters 30-40:
+Invalid return type (Typing[4110])
+File "read_only_example.php", line 35, characters 65-72:
+Expected arraykey
+File "read_only_example.php", line 35, characters 65-72:
+Considering that this type argument is invariant with respect to Vector
+File "read_only_example.php", line 6, characters 26-26:
+But got dynamic because it is an unenforceable type

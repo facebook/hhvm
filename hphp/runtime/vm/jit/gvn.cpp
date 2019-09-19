@@ -191,6 +191,7 @@ bool supportsGVN(const IRInstruction* inst) {
   case XorBool:
   case ConvBoolToArr:
   case ConvDblToArr:
+  case ConvFuncToArr:
   case ConvIntToArr:
   case ConvDblToBool:
   case ConvIntToBool:
@@ -289,7 +290,6 @@ bool supportsGVN(const IRInstruction* inst) {
   case LdClsInitData:
   case LdClsFromClsMeth:
   case LdSmashableFunc:
-  case LdFuncMFunc:
   case LdFuncFromClsMeth:
   case LdFuncVecLen:
   case LdClsMethod:
@@ -310,7 +310,6 @@ bool supportsGVN(const IRInstruction* inst) {
   case CountArrayFast:
   case CountVec:
   case CountDict:
-  case CountShape:
   case CountKeyset:
   case Select:
   case StrictlyIntegerConv:

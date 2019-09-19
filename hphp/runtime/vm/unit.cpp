@@ -722,26 +722,10 @@ Func* Unit::loadFunc(const StringData* name) {
     name = normStr.get();
   }
 
-  // Autoload the function if not reified
-  if (LIKELY(!isReifiedName(name))) {
-    return AutoloadHandler::s_instance->autoloadFunc(
-        const_cast<StringData*>(name))
-      ? ne->getCachedFunc() : nullptr;
-  }
-
-  // We are loading a reified function for the first time
-  name = stripTypeFromReifiedName(name);
-  auto generic_ne = NamedEntity::get(name, true, &normStr);
-  if (normStr) {
-    name = normStr.get();
-  }
-  func_ = loadFunc(generic_ne, name);
-  // If the function still does not exist, return null
-  if (!func_) return nullptr;
-  ne->m_cachedFunc.bind(
-    func_->isPersistent() ? rds::Mode::Persistent : rds::Mode::Normal);
-  ne->setCachedFunc(func_);
-  return func_;
+  // Autoload the function
+  return AutoloadHandler::s_instance->autoloadFunc(
+    const_cast<StringData*>(name)
+  ) ? ne->getCachedFunc() : nullptr;
 }
 
 void Unit::bindFunc(Func *func) {
@@ -857,6 +841,17 @@ const char* checkSameName(NamedEntity* nameList) {
     return "class";
   }
   return nullptr;
+}
+
+void setupRecord(RecordDesc* newRecord, NamedEntity* nameList) {
+  bool const isPersistent =
+    (!SystemLib::s_inited || RuntimeOption::RepoAuthoritative) &&
+    newRecord->verifyPersistent();
+  nameList->m_cachedRecordDesc.bind(
+      isPersistent? rds::Mode::Persistent : rds::Mode::Normal);
+  newRecord->setRecordDescHandle(nameList->m_cachedRecordDesc);
+  newRecord->incAtomicCount();
+  nameList->pushRecordDesc(newRecord);
 }
 
 void setupClass(Class* newClass, NamedEntity* nameList) {
@@ -1157,10 +1152,9 @@ RecordDesc* Unit::defRecordDesc(PreRecordDesc* preRecord,
       top = nameList->recordList();
       continue;
     }
-    nameList->m_cachedRecordDesc.bind(rds::Mode::Normal);
-    newRecord->setRecordDescHandle(nameList->m_cachedRecordDesc);
-    newRecord->incAtomicCount();
-    nameList->pushRecordDesc(newRecord.get());
+
+    setupRecord(newRecord.get(), nameList);
+
     newRecord->setCached();
     return newRecord.get();
   }
@@ -1499,7 +1493,8 @@ bool Unit::defTypeAlias(Id id) {
   nameList->m_cachedTypeAlias.bind(
     [thisType, &resolved] {
       auto const persistent = (thisType->attrs & AttrPersistent) &&
-        (!resolved.klass || classHasPersistentRDS(resolved.klass));
+        (!resolved.klass || classHasPersistentRDS(resolved.klass)) &&
+        (!resolved.rec || recordHasPersistentRDS(resolved.rec));
 
       auto const handle = persistent ?
         rds::alloc<TypeAliasReq, rds::Mode::Persistent>().handle() :
@@ -2110,7 +2105,6 @@ void Unit::mergeImpl(MergeInfo* mi) {
 
           unit->mergeImpl<debugger>(unit->mergeInfo());
           if (UNLIKELY(!unit->isMergeOnly())) {
-            Stats::inc(Stats::PseudoMain_Reentered);
             VarEnv* ve = nullptr;
             ActRec* fp = vmfp();
             if (!fp) {
@@ -2124,10 +2118,13 @@ void Unit::mergeImpl(MergeInfo* mi) {
                 // local scope.
               }
             }
+
+            // Move the count from executed to reentered.
+            Stats::inc(Stats::PseudoMain_Reentered);
+            Stats::inc(Stats::PseudoMain_Executed, -1);
+
             tvDecRefGen(
-              g_context->invokeFunc(unit->getMain(nullptr),
-                                    init_null_variant,
-                                    nullptr, nullptr, ve)
+              g_context->invokePseudoMain(unit->getMain(nullptr), ve)
             );
           } else {
             Stats::inc(Stats::PseudoMain_SkipDeep);

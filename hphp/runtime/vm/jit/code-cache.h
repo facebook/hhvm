@@ -55,6 +55,7 @@ struct CodeCache {
   static uint32_t AProfSize;
   static uint32_t AColdSize;
   static uint32_t AFrozenSize;
+  static uint32_t ABytecodeSize;
 
   static uint32_t GlobalDataSize;
 
@@ -80,6 +81,7 @@ struct CodeCache {
     body("prof", m_prof);
     body("cold", m_cold);
     body("frozen", m_frozen);
+    body("bytecode", m_bytecode);
   }
 
   /*
@@ -93,12 +95,14 @@ struct CodeCache {
     body("cold");
     body("frozen");
     body("data");
+    body("bytecode");
   }
 
   static uint32_t maxUsage(uint32_t total) {
     return total - total / 128;
   }
 
+  size_t tcSize() const { return m_tcSize; }
   size_t codeSize() const { return m_codeSize; }
 
   /*
@@ -146,6 +150,9 @@ struct CodeCache {
   const CodeBlock& frozen() const { return m_frozen; }
   const CodeBlock& prof()   const { return m_prof; }
 
+  const CodeBlock& bytecode() const { return m_bytecode; }
+        CodeBlock& bytecode()       { return m_bytecode; }
+
   const DataBlock& data() const { return m_data; }
 
   /*
@@ -177,7 +184,8 @@ struct CodeCache {
 private:
   Address m_threadLocalStart{nullptr};
   CodeAddress m_base;
-  size_t m_codeSize;
+  size_t m_tcSize; // jit output
+  size_t m_codeSize; // all code (jit+bytecode)
   size_t m_totalSize;
   size_t m_threadLocalSize;
   bool m_useHot;
@@ -188,6 +196,7 @@ private:
   CodeBlock m_hot;
   CodeBlock m_prof;
   CodeBlock m_frozen;
+  CodeBlock m_bytecode;
   DataBlock m_data;
 };
 

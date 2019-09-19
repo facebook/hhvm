@@ -2,7 +2,7 @@
 
 namespace HH {
 
-/* A wait handle representing asynchronous operation
+/** A wait handle representing asynchronous operation
  */
 <<__Sealed(StaticWaitHandle::class, WaitableWaitHandle::class)>>
 abstract class Awaitable {
@@ -13,25 +13,25 @@ abstract class Awaitable {
     );
   }
 
-  /* Set callback for when the scheduler enters I/O wait
+  /** Set callback for when the scheduler enters I/O wait
    * @param mixed $callback - A Closure to be called when I/O wait is entered
    */
   <<__HipHopSpecific, __Native>>
   final public static function setOnIOWaitEnterCallback(mixed $callback): void;
 
-  /* Set callback for when the scheduler exits I/O wait
+  /** Set callback for when the scheduler exits I/O wait
    * @param mixed $callback - A Closure to be called when I/O wait is exited
    */
   <<__HipHopSpecific, __Native>>
   final public static function setOnIOWaitExitCallback(mixed $callback): void;
 
-  /* Set callback for when \HH\Asio\join() is called
+  /** Set callback for when \HH\Asio\join() is called
    * @param mixed $callback - A Closure to be called on \HH\Asio\join()
    */
   <<__HipHopSpecific, __Native>>
   final public static function setOnJoinCallback(mixed $callback): void;
 
-  /* Check if this wait handle finished (succeeded or failed)
+  /** Check if this wait handle finished (succeeded or failed)
    * @return bool - A boolean indicating whether this wait handle finished
    *
    * DEPRECATED: use HH\Asio\has_finished()
@@ -39,7 +39,7 @@ abstract class Awaitable {
   <<__Native>>
   final public function isFinished(): bool;
 
-  /* Check if this wait handle succeeded
+  /** Check if this wait handle succeeded
    * @return bool - A boolean indicating whether this wait handle succeeded
    *
    * DEPRECATED: use HH\Asio\has_succeeded()
@@ -47,7 +47,7 @@ abstract class Awaitable {
   <<__Native>>
   final public function isSucceeded(): bool;
 
-  /* Check if this wait handle failed
+  /** Check if this wait handle failed
    * @return bool - A boolean indicating whether this wait handle failed
    *
    * DEPRECATED: use HH\Asio\has_failed()
@@ -55,7 +55,7 @@ abstract class Awaitable {
   <<__Native>>
   final public function isFailed(): bool;
 
-  /* Get name of the operation behind this wait handle
+  /** Get name of the operation behind this wait handle
    * @return string - A name of the operation behind this wait handle
    *
    * TODO: replace this with a HH\Asio equivalent
@@ -64,11 +64,11 @@ abstract class Awaitable {
   final public function getName(): string;
 }
 
-/* A wait handle that is always finished
+/** A wait handle that is always finished
  */
 final class StaticWaitHandle extends Awaitable {}
 
-/* A wait handle that can be waited upon
+/** A wait handle that can be waited upon
  */
 <<__Sealed(
   AwaitAllWaitHandle::class,
@@ -81,33 +81,33 @@ final class StaticWaitHandle extends Awaitable {}
 abstract class WaitableWaitHandle extends Awaitable {
 }
 
-/* A wait handle that can resume execution of PHP code
+/** A wait handle that can resume execution of PHP code
  */
 <<__Sealed(AsyncFunctionWaitHandle::class, AsyncGeneratorWaitHandle::class)>>
 abstract class ResumableWaitHandle extends WaitableWaitHandle {
 
-  /* Set callback to be called when a ResumableWaitHandle is created
+  /** Set callback to be called when a ResumableWaitHandle is created
    * @param mixed $callback - A Closure to be called when a ResumableWaitHandle
    * is created
    */
   <<__HipHopSpecific, __Native>>
   final public static function setOnCreateCallback(mixed $callback): void;
 
-  /* Set callback to be called when an async function blockingly awaits
+  /** Set callback to be called when an async function blockingly awaits
    * @param mixed $callback - A Closure to be called when an async function
    * blockingly await
    */
   <<__HipHopSpecific, __Native>>
   final public static function setOnAwaitCallback(mixed $callback): void;
 
-  /* Set callback to be called when a ResumableWaitHandle finishes successfully
+  /** Set callback to be called when a ResumableWaitHandle finishes successfully
    * @param mixed $callback - A Closure to be called when a ResumableWaitHandle
    * finishes
    */
   <<__HipHopSpecific, __Native>>
   final public static function setOnSuccessCallback(mixed $callback): void;
 
-  /* Set callback to be called when a ResumableWaitHandle fails
+  /** Set callback to be called when a ResumableWaitHandle fails
    * @param mixed $callback - A Closure to be called when a ResumableWaitHandle
    * fails
    */
@@ -115,19 +115,19 @@ abstract class ResumableWaitHandle extends WaitableWaitHandle {
   final public static function setOnFailCallback(mixed $callback): void;
 }
 
-/* A wait handle representing asynchronous execution of async function
+/** A wait handle representing asynchronous execution of async function
  */
 final class AsyncFunctionWaitHandle extends ResumableWaitHandle {}
 
-/* A wait handle representing asynchronous execution of async generator
+/** A wait handle representing asynchronous execution of async generator
  */
 final class AsyncGeneratorWaitHandle extends ResumableWaitHandle {}
 
-/* A wait handle that waits for a list of other wait handles
+/** A wait handle that waits for a list of other wait handles
  */
 final class AwaitAllWaitHandle extends WaitableWaitHandle {
 
-  /* Create a wait handle that waits for a given array of dependencies
+  /** Create a wait handle that waits for a given array of dependencies
    * @param array $dependencies - An Array of dependencies to wait for
    * @return object - A WaitHandle that will wait for a given array of
    * dependencies
@@ -135,7 +135,7 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle {
   <<__Native>>
   public static function fromArray(array $dependencies): Awaitable;
 
-  /* Create a wait handle that waits for a given array of dependencies
+  /** Create a wait handle that waits for a given array of dependencies
    * @param array $dependencies - A DArray of dependencies to wait for
    * @return object - A WaitHandle that will wait for a given array of
    * dependencies
@@ -143,7 +143,7 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle {
   <<__Native>>
   public static function fromDArray(darray $dependencies): Awaitable;
 
-  /* Create a wait handle that waits for a given array of dependencies
+  /** Create a wait handle that waits for a given array of dependencies
    * @param array $dependencies - A VArray of dependencies to wait for
    * @return object - A WaitHandle that will wait for a given array of
    * dependencies
@@ -151,7 +151,7 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle {
   <<__Native>>
   public static function fromVArray(varray $dependencies): Awaitable;
 
-  /* Create a wait handle that waits for a given vec of dependencies
+  /** Create a wait handle that waits for a given vec of dependencies
    * @param array $dependencies - A vec of dependencies to wait for
    * @return object - A WaitHandle that will wait for a given vec of
    * dependencies
@@ -159,7 +159,7 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle {
   <<__Native>>
   public static function fromVec(vec $dependencies): Awaitable;
 
-  /* Create a wait handle that waits for a given dict of dependencies
+  /** Create a wait handle that waits for a given dict of dependencies
    * @param array $dependencies - A dict of dependencies to wait for
    * @return object - A WaitHandle that will wait for a given dict of
    * dependencies
@@ -167,7 +167,7 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle {
   <<__Native>>
   public static function fromDict(dict $dependencies): Awaitable;
 
-  /* Create a wait handle that waits for a given Map of dependencies
+  /** Create a wait handle that waits for a given Map of dependencies
    * @param mixed $dependencies - A Map of dependencies to wait for
    * @return object - A WaitHandle that will wait for a given Map of
    * dependencies
@@ -175,7 +175,7 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle {
   <<__Native>>
   public static function fromMap(mixed $dependencies): Awaitable;
 
-  /* Create a wait handle that waits for a given Vector of dependencies
+  /** Create a wait handle that waits for a given Vector of dependencies
    * @param mixed $dependencies - A Vector of dependencies to wait for
    * @return object - A WaitHandle that will wait for a given Vector of
    * dependencies
@@ -183,18 +183,28 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle {
   <<__Native>>
   public static function fromVector(mixed $dependencies): Awaitable;
 
-  /* Set callback for when a AwaitAllWaitHandle is created
+  /** Create a wait handle that can, generically, wait for a given Container<_>
+   * of dependencies.
+   *
+   * This should only be used if accepting a generic Container
+   * _and_ it's required to reuse the same container for performance reasons.
+   * otherwise prefer to use `fromVec` or `fromDict`
+   */
+  <<__Native>>
+  public static function fromContainer(mixed $dependencies): Awaitable;
+
+  /** Set callback for when a AwaitAllWaitHandle is created
    * @param mixed $callback - A Closure to be called on creation
    */
   <<__HipHopSpecific, __Native>>
   public static function setOnCreateCallback(mixed $callback): void;
 }
 
-/* A wait handle representing a condition variable waiting for a notification
+/** A wait handle representing a condition variable waiting for a notification
  */
 final class ConditionWaitHandle extends WaitableWaitHandle {
 
-  /* Create a wait handle that waits for a notification
+  /** Create a wait handle that waits for a notification
    * @param mixed $child - A WaitHandle representing job responsible for
    * notifying the condition variable
    * @return object - A WaitHandle that will wait for a notification
@@ -202,31 +212,31 @@ final class ConditionWaitHandle extends WaitableWaitHandle {
   <<__Native>>
   public static function create(mixed $child): \HH\ConditionWaitHandle;
 
-  /* Set callback for when a ConditionWaitHandle is created
+  /** Set callback for when a ConditionWaitHandle is created
    * @param mixed $callback - A Closure to be called on creation
    */
   <<__HipHopSpecific, __Native>>
   public static function setOnCreateCallback(mixed $callback): void;
 
-  /* Notify the condition variable and mark the ConditionWaitHandle as succeeded
+  /** Notify the condition variable and mark the ConditionWaitHandle as succeeded
    * @param mixed $result - A result to be set
    */
   <<__Native>>
   public function succeed(mixed $result): void;
 
-  /* Notify the condition variable and mark the ConditionWaitHandle as failed
+  /** Notify the condition variable and mark the ConditionWaitHandle as failed
    * @param mixed $exception - An exception to be set
    */
   <<__Native>>
   public function fail(\Exception $exception): void;
 }
 
-/* A wait handle that succeeds with null once desired scheduling priority is
+/** A wait handle that succeeds with null once desired scheduling priority is
  * eligible for execution
  */
 final class RescheduleWaitHandle extends WaitableWaitHandle {
 
-  /* Create a wait handle that succeeds once desired scheduling priority is
+  /** Create a wait handle that succeeds once desired scheduling priority is
    * eligible for execution
    * @param int $queue - A scheduling queue to use (defined by QUEUE_*
    * constants)
@@ -242,11 +252,11 @@ final class RescheduleWaitHandle extends WaitableWaitHandle {
   ): \HH\RescheduleWaitHandle;
 }
 
-/* A wait handle that succeeds with null after the desired timeout expires
+/** A wait handle that succeeds with null after the desired timeout expires
  */
 final class SleepWaitHandle extends WaitableWaitHandle {
 
-  /* Create a wait handle that succeeds after the desired timeout expires
+  /** Create a wait handle that succeeds after the desired timeout expires
    * @param int $usecs - Non-negative number of microseconds to sleep for
    * @return object - A SleepWaitHandle that succeeds after the desired timeout
    * expires
@@ -254,14 +264,14 @@ final class SleepWaitHandle extends WaitableWaitHandle {
   <<__Native>>
   public static function create(int $usecs): \HH\SleepWaitHandle;
 
-  /* Set callback to be called when a SleepWaitHandle is created
+  /** Set callback to be called when a SleepWaitHandle is created
    * @param mixed $callback - A Closure to be called when a SleepWaitHandle is
    * created
    */
   <<__HipHopSpecific, __Native>>
   final public static function setOnCreateCallback(mixed $callback): void;
 
-  /* Set callback to be called when a SleepWaitHandle finishes successfully
+  /** Set callback to be called when a SleepWaitHandle finishes successfully
    * @param mixed $callback - A Closure to be called when a SleepWaitHandle
    * finishes
    */
@@ -269,18 +279,18 @@ final class SleepWaitHandle extends WaitableWaitHandle {
   final public static function setOnSuccessCallback(mixed $callback): void;
 }
 
-/* A wait handle that synchronizes against C++ operation in external thread
+/** A wait handle that synchronizes against C++ operation in external thread
  */
 final class ExternalThreadEventWaitHandle extends WaitableWaitHandle {
 
-  /* Set callback to be called when an ExternalThreadEventWaitHandle is created
+  /** Set callback to be called when an ExternalThreadEventWaitHandle is created
    * @param mixed $callback - A Closure to be called when an
    * ExternalThreadEventWaitHandle is created
    */
   <<__HipHopSpecific, __Native>>
   public static function setOnCreateCallback(mixed $callback): void;
 
-  /* Set callback to be called when an ExternalThreadEventWaitHandle finishes
+  /** Set callback to be called when an ExternalThreadEventWaitHandle finishes
    * successfully
    * @param mixed $callback - A Closure to be called when an
    * ExternalThreadEventWaitHandle finishes
@@ -288,7 +298,7 @@ final class ExternalThreadEventWaitHandle extends WaitableWaitHandle {
   <<__HipHopSpecific, __Native>>
   public static function setOnSuccessCallback(mixed $callback): void;
 
-  /* Set callback to be called when an ExternalThreadEventWaitHandle fails
+  /** Set callback to be called when an ExternalThreadEventWaitHandle fails
    * @param mixed $callback - A Closure to be called when an
    * ExternalThreadEventWaitHandle fails
    */

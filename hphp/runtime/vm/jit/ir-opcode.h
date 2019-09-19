@@ -168,6 +168,7 @@ bool isGuardOp(Opcode opc);
 folly::Optional<Opcode> negateCmpOp(Opcode opc);
 
 const char* opcodeName(Opcode opcode);
+folly::Optional<Opcode> nameToOpcode(const std::string&);
 
 bool opHasExtraData(Opcode op);
 

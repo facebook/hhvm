@@ -62,7 +62,7 @@ function var() {}
 function while() {}
 function yield() {}
 
-abstract();
+// abstract(); // can't test this; this token kicks us into parse_classish_declaration and makes the parser think the rest of the test is a classish body
 array();
 as();
 async();
@@ -70,7 +70,7 @@ await();
 break();
 case();
 catch();
-class();
+// class(); // can't test this; this token kicks us into parse_classish_declaration and makes the parser think the rest of the test is a classish body
 clone();
 const();
 continue();
@@ -88,7 +88,7 @@ endswitch();
 endwhile();
 eval();
 extends();
-final();
+// final(); // can't test this; this token kicks us into parse_classish_declaration and makes the parser think the rest of the test is a classish body
 finally();
 for();
 foreach();
@@ -102,7 +102,7 @@ include_once();
 inout();
 instanceof();
 insteadof();
-interface();
+// interface(); // can't test this; this token kicks us into parse_classish_declaration and makes the parser think the rest of the test is a classish body
 list();
 namespace();
 new();
@@ -115,10 +115,10 @@ require_once();
 return();
 shape();
 static();
-switch();
+// switch(); // can't test this; this token kicks us into parse_switch_statement and makes the parser think the rest of the test is a switch body
 throw();
-trait();
-try();
+// trait(); // can't test this; this token kicks us into parse_classish_declaration and makes the parser think the rest of the test is a classish body
+// try(); // can't test this; this token kicks us into parse_try_statement and makes the parser think the rest of the test is the body of a try
 use();
 using();
 var();

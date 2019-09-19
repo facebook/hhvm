@@ -50,4 +50,7 @@ function main() {
 abstract final class Coverage {
   public static $y;
 }
-main();
+<<__EntryPoint>>
+function main_entry(): void {
+  main();
+}

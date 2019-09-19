@@ -9,14 +9,14 @@ class A {
     if (isset($args[1])) {
  var_dump($args[1]);
  }
-    reset(&$args);
-    if (key(&$args) === 0) {
+    reset(inout $args);
+    if (key($args) === 0) {
        $args = array(5);
     }
-    if (current(&$args) === 0) {
+    if (current($args) === 0) {
        $args = array(5);
     }
-    if (next(&$args) === 0) {
+    if (next(inout $args) === 0) {
        $args = array(5);
     }
     try { var_dump($args['1']); }

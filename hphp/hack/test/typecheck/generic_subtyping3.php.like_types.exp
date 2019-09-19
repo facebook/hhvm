@@ -1,0 +1,6 @@
+File "generic_subtyping3.php", line 29, characters 10-17:
+Invalid return type (Typing[4110])
+File "generic_subtyping3.php", line 24, characters 68-76:
+Expected ~Vector<T> because it is an unenforceable type
+File "generic_subtyping3.php", line 25, characters 14-22:
+But got Vector<[unresolved]>

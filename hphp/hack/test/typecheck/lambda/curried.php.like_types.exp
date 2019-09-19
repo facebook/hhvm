@@ -1,0 +1,12 @@
+File "curried.php", line 15, characters 15-17:
+Invalid argument (Typing[4110])
+File "curried.php", line 11, characters 13-14:
+Expected T1
+File "curried.php", line 12, characters 3-4:
+But got dynamic because it is an unenforceable type
+File "curried.php", line 15, characters 20-22:
+Invalid argument (Typing[4110])
+File "curried.php", line 11, characters 28-29:
+Expected T2
+File "curried.php", line 13, characters 3-4:
+But got dynamic because it is an unenforceable type

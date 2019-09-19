@@ -1,0 +1,8 @@
+File "add_vector.php", line 20, characters 5-19:
+Invalid assignment (Typing[4110])
+File "add_vector.php", line 12, characters 21-21:
+Expected T
+File "add_vector.php", line 13, characters 18-18:
+  via this generic T
+File "add_vector.php", line 19, characters 23-23:
+But got dynamic because it is an unenforceable type

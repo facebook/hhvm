@@ -96,6 +96,7 @@ std::string s_source;
 Unit* s_unit = nullptr;
 Unit* s_hhas_unit = nullptr;
 Func* s_nullFunc = nullptr;
+Func* s_singleArgNullFunc = nullptr;
 Func* s_nullCtor = nullptr;
 
 /////////////////////////////////////////////////////////////////////////////
@@ -319,15 +320,11 @@ void mergePersistentUnits() {
   }
 }
 
-Func* setupNullClsMethod(Class* cls, StringData* name) {
-  if (!s_nullFunc) {
-    s_nullFunc =
-      Unit::lookupFunc(makeStaticString("__SystemLib\\__86null"));
-    assertx(s_nullFunc);
-    assertx(s_nullFunc->isPhpLeafFn());
-  }
+namespace {
 
-  auto clone = s_nullFunc->clone(cls, name);
+Func* setupNullClsMethod(Func* f, Class* cls, StringData* name) {
+  assertx(f && f->isPhpLeafFn());
+  auto clone = f->clone(cls, name);
   clone->setNewFuncId();
   clone->setAttrs(static_cast<Attr>(
                     AttrPublic | AttrNoInjection | AttrRequiresThis |
@@ -336,14 +333,32 @@ Func* setupNullClsMethod(Class* cls, StringData* name) {
   return clone;
 }
 
+Func* setup86ctorMethod(Class* cls) {
+  if (!s_nullFunc) {
+    s_nullFunc =
+      Unit::lookupFunc(makeStaticString("__SystemLib\\__86null"));
+  }
+  return setupNullClsMethod(s_nullFunc, cls, s_86ctor.get());
+}
+
+Func* setup86ReifiedInitMethod(Class* cls) {
+  if (!s_singleArgNullFunc) {
+    s_singleArgNullFunc =
+      Unit::lookupFunc(makeStaticString("__SystemLib\\__86single_arg_null"));
+  }
+  return setupNullClsMethod(s_singleArgNullFunc, cls, s_86reifiedinit.get());
+}
+
+} // namespace
+
 void setupNullCtor(Class* cls) {
   assertx(!s_nullCtor);
-  s_nullCtor = setupNullClsMethod(cls, s_86ctor.get());
+  s_nullCtor = setup86ctorMethod(cls);
   s_nullCtor->setHasForeignThis(true);
 }
 
 Func* getNull86reifiedinit(Class* cls) {
-  auto f = setupNullClsMethod(cls, s_86reifiedinit.get());
+  auto f = setup86ReifiedInitMethod(cls);
   f->setBaseCls(cls);
   f->setGenerated(true);
   return f;

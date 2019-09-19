@@ -257,6 +257,8 @@ void cgEmptyProp(IRLS& env, const IRInstruction* i) {
   implIssetEmptyProp(env, i);
 }
 
+IMPL_OPCODE_CALL(ProfileProp);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {
@@ -691,11 +693,12 @@ void cgArrayIdx(IRLS& env, const IRInstruction* inst) {
   auto const keyType = getKeyType(inst->src(1));
 
   auto const target = [&] () -> CallSpec {
-    if (keyType == KeyType::Int) {
-      return CallSpec::direct(arrayIdxI);
-    }
+    if (keyType == KeyType::Int) return CallSpec::direct(arrayIdxI);
     assertx(keyType == KeyType::Str);
-    return CallSpec::direct(arrayIdxS);
+    auto const scan =
+      inst->extra<SizeHintData>()->hint == SizeHintData::SmallStatic &&
+      inst->src(1)->isA(TStaticStr);
+    return CallSpec::direct(scan ? arrayIdxScan : arrayIdxS);
   }();
 
   auto& v = vmain(env);
@@ -1084,10 +1087,17 @@ void cgDictEmptyElem(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgDictIdx(IRLS& env, const IRInstruction* inst) {
-  auto const key     = inst->src(1);
-  auto const target  = getKeyType(key) == KeyType::Int
-    ? CallSpec::direct(dictIdxI)
-    : CallSpec::direct(dictIdxS);
+  auto const keyType = getKeyType(inst->src(1));
+
+  auto const target = [&] () -> CallSpec {
+    if (keyType == KeyType::Int) return CallSpec::direct(dictIdxI);
+    assertx(keyType == KeyType::Str);
+    auto const scan =
+      inst->extra<SizeHintData>()->hint == SizeHintData::SmallStatic &&
+      inst->src(1)->isA(TStaticStr);
+    return CallSpec::direct(scan ? dictIdxScan : dictIdxS);
+  }();
+
   auto args = argGroup(env, inst).ssa(0).ssa(1).typedValue(2);
   auto& v = vmain(env);
   cgCallHelper(v, env, target, callDestTV(env, inst),

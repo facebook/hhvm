@@ -36,6 +36,7 @@
 #include "hphp/runtime/ext/string/ext_string.h"
 
 #include "hphp/runtime/vm/event-hook.h"
+#include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/method-lookup.h"
@@ -65,7 +66,6 @@ using std::string;
 
 const StaticString
   s_offsetExists("offsetExists"),
-  s___call("__call"),
   s___invoke("__invoke"),
   s_self("self"),
   s_parent("parent"),
@@ -91,7 +91,10 @@ const StaticString s_cmpWithRecord(
   "Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare "
   "records"
 );
-
+const StaticString s_cmpWithClsMeth(
+  "Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare "
+  "a clsmeth with a non-clsmeth"
+);
 const StaticString s_cmpWithNonRecord(
   "Cannot compare records with non-records"
 );
@@ -99,7 +102,7 @@ const StaticString s_cmpWithNonRecord(
 ///////////////////////////////////////////////////////////////////////////////
 
 bool array_is_valid_callback(const Array& arr) {
-  if (!arr.isPHPArray() && !arr.isVecArray()) return false;
+  if (!arr.isPHPArray() && !arr.isVecArray() && !arr.isDict()) return false;
   if (arr.size() != 2 || !arr.exists(int64_t(0)) || !arr.exists(int64_t(1))) {
     return false;
   }
@@ -130,7 +133,7 @@ bool is_callable(const Variant& v) {
   return ctx.func != nullptr && !ctx.func->isAbstract();
 }
 
-bool is_callable(const Variant& v, bool syntax_only, RefData* name) {
+bool is_callable(const Variant& v, bool syntax_only, Variant* name) {
   bool ret = true;
   if (LIKELY(!syntax_only)) {
     ret = is_callable(v);
@@ -140,16 +143,27 @@ bool is_callable(const Variant& v, bool syntax_only, RefData* name) {
   auto const tv_func = v.toCell();
   if (isFuncType(tv_func->m_type)) {
     auto func_name = tv_func->m_data.pfunc->fullDisplayName();
-    if (name) *name->var() = Variant{func_name, Variant::PersistentStrInit{}};
+    if (name) *name = Variant{func_name, Variant::PersistentStrInit{}};
+    return true;
+  }
+
+  if (isClsMethType(tv_func->m_type)) {
+    auto const clsmeth = tv_func->m_data.pclsmeth;
+    if (name) {
+      *name = concat3(
+        clsmeth->getCls()->nameStr(), "::", clsmeth->getFunc()->nameStr());
+    }
     return true;
   }
 
   if (isStringType(tv_func->m_type)) {
-    if (name) *name->var() = v;
+    if (name) *name = v;
     return ret;
   }
 
-  if (isArrayType(tv_func->m_type) || isVecType(tv_func->m_type)) {
+  if (isArrayType(tv_func->m_type) ||
+      isVecType(tv_func->m_type) ||
+      isDictType(tv_func->m_type)) {
     auto const arr = Array(tv_func->m_data.parr);
     auto const clsname = arr.rvalAt(int64_t(0)).unboxed();
     auto const mthname = arr.rvalAt(int64_t(1)).unboxed();
@@ -157,7 +171,7 @@ bool is_callable(const Variant& v, bool syntax_only, RefData* name) {
     if (arr.size() != 2 ||
         clsname.is_dummy() ||
         (!isStringType(mthname.type()) && !isFuncType(mthname.type()))) {
-      if (name) *name->var() = array_string;
+      if (name) *name = array_string;
       return false;
     }
 
@@ -169,20 +183,20 @@ bool is_callable(const Variant& v, bool syntax_only, RefData* name) {
     } else if (isClassType(clsname.type())) {
       clsString = const_cast<StringData*>(clsname.val().pclass->name());
     } else {
-      if (name) *name->var() = array_string;
+      if (name) *name = array_string;
       return false;
     }
 
     if (isFuncType(mthname.type())) {
       if (name) {
-        *name->var() = Variant{mthname.val().pfunc->fullDisplayName(),
+        *name = Variant{mthname.val().pfunc->fullDisplayName(),
                                Variant::PersistentStrInit{}};
       }
       return true;
     }
 
     if (name) {
-      *name->var() = concat3(String{clsString},
+      *name = concat3(String{clsString},
                              s_colon2,
                              String{mthname.val().pstr});
     }
@@ -195,9 +209,9 @@ bool is_callable(const Variant& v, bool syntax_only, RefData* name) {
     if (name) {
       if (d->instanceof(c_Closure::classof())) {
         // Hack to stop the mangled name from showing up
-        *name->var() = s_Closure__invoke;
+        *name = s_Closure__invoke;
       } else {
-        *name->var() = d->getClassName().asString() + "::__invoke";
+        *name = d->getClassName().asString() + "::__invoke";
       }
     }
     return invoke != nullptr;
@@ -407,8 +421,8 @@ vm_decode_function(const_variant_ref function,
                    HPHP::Class*& cls,
                    StringData*& invName,
                    bool& dynamic,
-                   ArrayData*& reifiedGenerics,
-                   DecodeFlags flags /* = DecodeFlags::Warn */) {
+                   DecodeFlags flags /* = DecodeFlags::Warn */,
+                   bool genericsAlreadyGiven /* = false */) {
   bool forwarding = false;
   invName = nullptr;
   dynamic = true;
@@ -421,7 +435,7 @@ vm_decode_function(const_variant_ref function,
   }
 
   if (function.isClsMeth()) {
-    dynamic = true;
+    dynamic = false;
     this_ = nullptr;
     auto const clsmeth = function.toClsMethVal();
     cls = clsmeth->getCls();
@@ -574,15 +588,11 @@ vm_decode_function(const_variant_ref function,
         return nullptr;
       }
       assertx(f && f->preClass() == nullptr);
-      if (f->hasReifiedGenerics()) {
-        if (!isReifiedName(name.get())) {
-          throw_invalid_argument("You may not call the reified function '%s' "
-                                 "without reified arguments",
-                                 f->fullName()->data());
-          return nullptr;
-        }
-        reifiedGenerics =
-          getReifiedTypeList(stripClsOrFnNameFromReifiedName(name.get()));
+      if (f->hasReifiedGenerics() && !genericsAlreadyGiven) {
+        throw_invalid_argument("You may not call the reified function '%s' "
+                               "without reified arguments",
+                               f->fullName()->data());
+        return nullptr;
       }
       return f;
     }
@@ -614,7 +624,8 @@ vm_decode_function(const_variant_ref function,
 }
 
 Variant vm_call_user_func(const_variant_ref function, const Variant& params,
-                          bool checkRef /* = false */) {
+                          bool checkRef /* = false */,
+                          bool allowDynCallNoPointer /* = false */) {
   CallCtx ctx;
   vm_decode_function(function, ctx);
   if (ctx.func == nullptr || (!isContainer(params) && !params.isNull())) {
@@ -622,8 +633,8 @@ Variant vm_call_user_func(const_variant_ref function, const Variant& params,
   }
   auto ret = Variant::attach(
     g_context->invokeFunc(ctx.func, params, ctx.this_, ctx.cls,
-                          nullptr, ctx.invName, ExecutionContext::InvokeNormal,
-                          ctx.dynamic, checkRef)
+                          ctx.invName, ctx.dynamic, checkRef,
+                          allowDynCallNoPointer)
   );
   if (UNLIKELY(isRefType(ret.getRawType()))) {
     tvUnbox(*ret.asTypedValue());
@@ -646,12 +657,14 @@ static Variant invoke_failed(const char *func,
 
 static Variant
 invoke(const String& function, const Variant& params, strhash_t /*hash*/,
-       bool /*tryInterp*/, bool fatal) {
+       bool /*tryInterp*/, bool fatal /* = true */,
+       bool allowDynCallNoPointer /* = false */) {
   Func* func = Unit::loadFunc(function.get());
   if (func && (isContainer(params) || params.isNull())) {
     auto ret = Variant::attach(
-      g_context->invokeFunc(func, params, nullptr, nullptr,
-                            nullptr, nullptr, ExecutionContext::InvokeNormal)
+      g_context->invokeFunc(func, params, nullptr, nullptr, nullptr, true,
+                            false, allowDynCallNoPointer)
+
     );
     if (UNLIKELY(isRefType(ret.getRawType()))) {
       tvUnbox(*ret.asTypedValue());
@@ -664,9 +677,11 @@ invoke(const String& function, const Variant& params, strhash_t /*hash*/,
 // Declared in externals.h.  If you're considering calling this
 // function for some new code, please reconsider.
 Variant invoke(const char *function, const Variant& params, strhash_t hash /* = -1 */,
-               bool tryInterp /* = true */, bool fatal /* = true */) {
+               bool tryInterp /* = true */, bool fatal /* = true */,
+               bool allowDynCallNoPointer /* = false */) {
   String funcName(function, CopyString);
-  return invoke(funcName, params, hash, tryInterp, fatal);
+  return invoke(funcName, params, hash, tryInterp, fatal,
+                allowDynCallNoPointer);
 }
 
 Variant invoke_static_method(const String& s, const String& method,
@@ -742,9 +757,15 @@ void NEVER_INLINE throw_invalid_property_name(const String& name) {
 }
 
 void throw_instance_method_fatal(const char *name) {
-  if (!strstr(name, "::__destruct")) {
-    raise_error("Non-static method %s() cannot be called statically", name);
-  }
+  raise_error("Non-static method %s() cannot be called statically", name);
+}
+
+void throw_call_reified_func_without_generics(const Func* f) {
+  auto const msg = folly::sformat(
+    "Cannot call the reified function '{}' without the reified generics",
+    f->fullName()->data()
+  );
+  SystemLib::throwBadMethodCallExceptionObject(msg);
 }
 
 void throw_iterator_not_valid() {
@@ -802,6 +823,10 @@ void throw_keyset_compare_exception() {
   SystemLib::throwInvalidOperationExceptionObject(s_cmpWithKeyset);
 }
 
+void throw_clsmeth_compare_exception() {
+  SystemLib::throwInvalidOperationExceptionObject(s_cmpWithClsMeth);
+}
+
 void throw_param_is_not_container() {
   static const string msg("Parameter must be an array or collection");
   SystemLib::throwInvalidArgumentExceptionObject(msg);
@@ -844,6 +869,16 @@ void throw_cannot_modify_const_prop(const char* className,
   auto msg = folly::sformat(
     "Cannot modify const property {} of class {} after construction",
     propName, className
+  );
+  SystemLib::throwInvalidOperationExceptionObject(msg);
+}
+
+void throw_cannot_modify_static_const_prop(const char* className,
+                                           const char* propName)
+{
+  auto msg = folly::sformat(
+   "Cannot modify static const property {} of class {}.",
+   propName, className
   );
   SystemLib::throwInvalidOperationExceptionObject(msg);
 }
@@ -945,40 +980,14 @@ bool is_constructor_name(const char* fn) {
   return false;
 }
 
-void throw_wrong_argument_count_nr(const char *fn, int expected, int got,
-                                   const char *expectDesc) {
-  auto const msg = folly::sformat("{}() expects {} {} parameter{}, {} given",
-                                  fn,
-                                  expectDesc,
-                                  expected,
-                                  expected == 1 ? "" : "s",
-                                  got);
-
-  SystemLib::throwRuntimeExceptionObject(msg);
-}
-
 void throw_missing_arguments_nr(const char *fn, int expected, int got) {
-  throw_wrong_argument_count_nr(fn, expected, got, "exactly");
-}
-
-void throw_wrong_arguments_nr(const char *fn, int count, int cmin, int cmax) {
-  if (cmin >= 0 && count < cmin) {
-    if (cmin != cmax) {
-      throw_wrong_argument_count_nr(fn, cmin, count, "at least");
-    } else {
-      throw_wrong_argument_count_nr(fn, cmin, count, "exactly");
-    }
-    return;
-  }
-  if (cmax >= 0 && count > cmax) {
-    if (cmin != cmax) {
-      throw_wrong_argument_count_nr(fn, cmax, count, "at most");
-    } else {
-      throw_wrong_argument_count_nr(fn, cmax, count, "exactly");
-    }
-    return;
-  }
-  assertx(false);
+  SystemLib::throwRuntimeExceptionObject(folly::sformat(
+    "{}() expects exactly {} parameter{}, {} given",
+    fn,
+    expected,
+    expected == 1 ? "" : "s",
+    got
+  ));
 }
 
 void throw_bad_type_exception(const char *fmt, ...) {
@@ -1046,8 +1055,8 @@ Variant unserialize_ex(const char* str, int len,
     );
     return false;
   } catch (Exception& e) {
-    raise_notice("Unable to unserialize: [%.1000s]. %s.", str,
-                 e.getMessage().c_str());
+    raise_notice("Unable to unserialize: [%.*s]. %s.",
+                 std::min(len, 1000), str, e.getMessage().c_str());
     return false;
   }
   return v;

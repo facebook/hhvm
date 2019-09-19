@@ -1,7 +1,7 @@
 <?hh
 
 require_once('test_base.inc');
-
+<<__EntryPoint>> function main(): void {
 requestAll(array(
   "test_status.php",
   "test_get.php?name=Foo",
@@ -36,3 +36,4 @@ requestAll(array(
   "test_curl_multi_except.php",
   "test_pagelet.php",
 ));
+}

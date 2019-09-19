@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -7,10 +7,14 @@
  *
  *)
 
-let lowercase_constant                    = 5001 (* DONT MODIFY!!!! *)
-let use_collection_literal                = 5002 (* DONT MODIFY!!!! *)
-let static_string                         = 5003 (* DONT MODIFY!!!! *)
-let shape_idx_required_field              = 5005 (* DONT MODIFY!!!! *)
+let lowercase_constant = 5001 (* DONT MODIFY!!!! *)
+
+let use_collection_literal = 5002 (* DONT MODIFY!!!! *)
+
+let static_string = 5003 (* DONT MODIFY!!!! *)
+
+(* DONT MODIFY!!!! *)
+let shape_idx_required_field = 5005
 
 (* Values 5501 - 5999 are reserved for FB-internal use *)
 

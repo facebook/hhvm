@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2018, Facebook, Inc.
  * All rights reserved.
  *
@@ -6,6 +6,6 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
- let toggle : bool ref = ref false
+let toggle : bool ref = ref false
 
- let dynamic_view_on () : bool = !toggle
+let dynamic_view_on () : bool = !toggle

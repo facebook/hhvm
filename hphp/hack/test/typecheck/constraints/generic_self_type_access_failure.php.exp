@@ -1,5 +1,5 @@
 File "generic_self_type_access_failure.php", line 18, characters 36-53:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "generic_self_type_access_failure.php", line 11, characters 32-33:
 'TX' is a constrained type parameter
 File "generic_self_type_access_failure.php", line 11, characters 38-40:
@@ -7,14 +7,14 @@ Expected Box
 File "generic_self_type_access_failure.php", line 18, characters 52-52:
 But got T
 File "generic_self_type_access_failure.php", line 18, characters 30-33:
-Could not find type constant T in type Intf (Typing[4090])
+No type constant 'T' in Intf (Typing[4090])
 File "generic_self_type_access_failure.php", line 5, characters 11-14:
 Declaration of Intf is here
 File "generic_self_type_access_failure.php", line 20, characters 11-11:
-A 'where' type constraint is violated here (Typing[4090])
+A 'where' type constraint is violated here (Typing[4323])
 File "generic_self_type_access_failure.php", line 12, characters 28-28:
 This method's where constraints contain a generic type access
 File "generic_self_type_access_failure.php", line 18, characters 30-33:
-Could not find type constant T in type Intf
+No type constant 'T' in Intf
 File "generic_self_type_access_failure.php", line 5, characters 11-14:
 Declaration of Intf is here

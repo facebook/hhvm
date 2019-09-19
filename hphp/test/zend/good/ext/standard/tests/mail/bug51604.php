@@ -1,4 +1,5 @@
 <?hh
+<<__EntryPoint>> function main(): void {
 // Initialise all required variables
 $to = 'user@example.com';
 $subject = 'Test Subject';
@@ -13,3 +14,4 @@ echo file_get_contents($outFile);
 unlink($outFile);
 
 echo "===DONE===\n";
+}

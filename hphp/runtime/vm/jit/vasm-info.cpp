@@ -359,7 +359,6 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::fallback:
     case Vinstr::fallbackcc:
     case Vinstr::fallthru:
-    case Vinstr::funcguard:
     case Vinstr::idiv:
     case Vinstr::inclm:
     case Vinstr::incqm:

@@ -82,8 +82,7 @@ void logFrames(const Vunit& unit);
  * need to be erased before a translation with a call to a Proflogue is
  * reclaimed.
  */
-void recordFuncCaller(const Func* func, TCA toSmash, bool immutable,
-                      ProfTransRec* rec);
+void recordFuncCaller(const Func* func, TCA toSmash, ProfTransRec* rec);
 
 /*
  * When a function is treadmilled its bytecode may no longer be available,

@@ -367,22 +367,8 @@ void String::dump() const {
 ///////////////////////////////////////////////////////////////////////////////
 // StaticString
 
-StaticString::StaticString(const char* s)
-: String(makeStaticStringSafe(s), NoIncRef{}) { }
-
-StaticString::StaticString(const char* s, int length)
-: String(makeStaticStringSafe(s, length), NoIncRef{}) { }
-
-StaticString::StaticString(std::string s)
-: String(makeStaticStringSafe(s.c_str(), s.size()), NoIncRef{}) { }
-
-StaticString& StaticString::operator=(const StaticString& /*str*/) {
-  // Assignment to a StaticString is ignored. Generated code
-  // should never use a StaticString on the left-hand side of
-  // assignment. A StaticString can only be initialized by a
-  // StaticString constructor or StaticString::init().
-  always_assert(false);
-  return *this;
+void StaticString::construct(const char* s, size_t len) {
+  m_str = makeStaticStringSafe(s, len);
 }
 
 const StaticString
@@ -418,9 +404,6 @@ StaticString getDataTypeString(DataType t) {
     case KindOfDict:       return s_dict;
     case KindOfPersistentKeyset:
     case KindOfKeyset:     return s_keyset;
-    case KindOfPersistentShape:
-    case KindOfShape:
-      return RuntimeOption::EvalHackArrDVArrs ? s_dict : s_array;
     case KindOfPersistentArray:
     case KindOfArray:      return s_array;
     case KindOfObject:     return s_object;

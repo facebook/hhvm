@@ -41,8 +41,6 @@ opam_switch_create_if_needed () {
         fi
     done
     if [ "$switch_exists" = "no" ]; then
-        # Creates an empty switch so we can fetch ocaml source code
-        # and patch it for arm64 builds
         opam switch create "$name" "$switch"
         eval "$(opam env)"
     fi

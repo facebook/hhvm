@@ -128,6 +128,7 @@ void BaseSet::addImpl(int64_t k) {
   }
   auto& e = allocElm(p);
   e.setIntKey(k, h);
+  arrayData()->recordIntKey();
   e.data.m_type = KindOfInt64;
   e.data.m_data.num = k;
   updateNextKI(k);
@@ -153,6 +154,7 @@ void BaseSet::addImpl(StringData *key) {
   // This increments the string's refcount twice, once for
   // the key and once for the value
   e.setStrKey(key, h);
+  arrayData()->recordStrKey(key);
   cellDup(make_tv<KindOfString>(key), e.data);
 }
 
@@ -191,6 +193,7 @@ void BaseSet::addFront(int64_t k) {
   }
   auto& e = allocElmFront(p);
   e.setIntKey(k, h);
+  arrayData()->recordIntKey();
   e.data.m_type = KindOfInt64;
   e.data.m_data.num = k;
   updateNextKI(k);
@@ -212,6 +215,7 @@ void BaseSet::addFront(StringData *key) {
   // This increments the string's refcount twice, once for
   // the key and once for the value
   e.setStrKey(key, h);
+  arrayData()->recordStrKey(key);
   cellDup(make_tv<KindOfString>(key), e.data);
 }
 
@@ -403,7 +407,8 @@ BaseSet::php_map(const Variant& callback) {
   auto set = req::make<TSet>();
   if (!m_size) return Object{std::move(set)};
   assertx(posLimit() != 0);
-  assertx(set->arrayData() == staticEmptyDictArrayAsMixed());
+  assertx(set->arrayData()->isStatic() &&
+          set->arrayData()->empty());
   auto oldCap = set->cap();
   set->reserve(posLimit()); // presume minimum collisions ...
   assertx(set->canMutateBuffer());
@@ -532,6 +537,7 @@ BaseSet::php_take(const Variant& n) {
   set->reserve(sz);
   set->setSize(sz);
   set->setPosLimit(sz);
+  set->arrayData()->copyKeyTypes(*arrayData(), /*compact=*/true);
   auto table = set->hashTab();
   auto mask = set->tableMask();
   for (uint32_t frPos = 0, toPos = 0; toPos < sz; ++toPos, ++frPos) {
@@ -603,6 +609,7 @@ BaseSet::php_skip(const Variant& n) {
   set->reserve(sz);
   set->setSize(sz);
   set->setPosLimit(sz);
+  set->arrayData()->copyKeyTypes(*arrayData(), /*compact=*/true);
   uint32_t frPos = nthElmPos(len);
   auto table = set->hashTab();
   auto mask = set->tableMask();
@@ -678,6 +685,7 @@ BaseSet::php_slice(const Variant& start, const Variant& len) {
   set->reserve(sz);
   set->setSize(sz);
   set->setPosLimit(sz);
+  set->arrayData()->copyKeyTypes(*arrayData(), /*compact=*/true);
   uint32_t frPos = nthElmPos(skipAmt);
   auto table = set->hashTab();
   auto mask = set->tableMask();
@@ -733,7 +741,7 @@ Object BaseSet::getIterator() {
 void c_Set::clear() {
   dropImmCopy();
   decRefArr(arrayData());
-  m_arr = staticEmptyDictArrayAsMixed();
+  m_arr = CreateDictAsMixed();
   m_size = 0;
 }
 

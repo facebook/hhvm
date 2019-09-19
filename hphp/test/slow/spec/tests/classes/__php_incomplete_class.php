@@ -1,13 +1,5 @@
 <?hh
 
-/*
-   +-------------------------------------------------------------+
-   | Copyright (c) 2015 Facebook, Inc. (http://www.facebook.com) |
-   +-------------------------------------------------------------+
-*/
-
-error_reporting(-1);
-
 class Point
 {
     private $x;
@@ -24,25 +16,29 @@ class Point
     public function __toString()
     {
         return '(' . $this->x . ',' . $this->y . ')';
-    }   
+    }
 }
+<<__EntryPoint>>
+function main_entry(): void {
+  error_reporting(-1);
 
-echo "---------------- create, serialize, and unserialize a Point -------------------\n";
+  echo "---------------- create, serialize, and unserialize a Point -------------------\n";
 
-$p = new Point(2, 5);
-echo "Point \$p = $p\n";
+  $p = new Point(2, 5);
+  echo "Point \$p = $p\n";
 
-$s = serialize($p);     // all instance properties get serialized
-var_dump($s);
+  $s = serialize($p);     // all instance properties get serialized
+  var_dump($s);
 
-echo "------\n";
+  echo "------\n";
 
-$v = unserialize($s);   // without a __wakeup method, any instance property present
-                        // in the string takes on its default value.
-var_dump($v);
+  $v = unserialize($s);   // without a __wakeup method, any instance property present
+                          // in the string takes on its default value.
+  var_dump($v);
 
-$s[5] = 'J';        // change class name, so a unserialize failure occurs
-var_dump($s);
-$v = unserialize($s);
-var_dump($v);
-print_r($v);
+  $s[5] = 'J';        // change class name, so a unserialize failure occurs
+  var_dump($s);
+  $v = unserialize($s);
+  var_dump($v);
+  print_r($v);
+}

@@ -3,7 +3,7 @@
 function foo() {
 
   apc_store('x', array(Vector {1, 2, 3}));
-  ApcApcShutdown::$z = apc_fetch('x');
+  ApcApcShutdown::$z = __hhvm_intrinsics\apc_fetch_no_check('x');
   apc_store('x', null);
 }
 

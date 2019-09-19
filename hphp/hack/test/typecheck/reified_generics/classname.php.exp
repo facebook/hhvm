@@ -1,0 +1,36 @@
+File "classname.php", line 11, characters 13-24:
+Invalid reified hint (Typing[4305])
+File "classname.php", line 11, characters 13-24:
+This is a classname, it cannot be used as a reified type argument
+File "classname.php", line 3, characters 15-15:
+T is reified
+File "classname.php", line 12, characters 13-24:
+Invalid reified hint (Typing[4305])
+File "classname.php", line 12, characters 13-24:
+This is a typename, it cannot be used as a reified type argument
+File "classname.php", line 3, characters 15-15:
+T is reified
+File "classname.php", line 13, characters 13-14:
+Invalid reified hint (Typing[4305])
+File "classname.php", line 8, characters 11-22:
+This is a classname, it cannot be used as a reified type argument
+File "classname.php", line 3, characters 15-15:
+T is reified
+File "classname.php", line 14, characters 13-14:
+Invalid reified hint (Typing[4305])
+File "classname.php", line 9, characters 11-22:
+This is a typename, it cannot be used as a reified type argument
+File "classname.php", line 3, characters 15-15:
+T is reified
+File "classname.php", line 15, characters 13-27:
+Invalid reified hint (Typing[4305])
+File "classname.php", line 15, characters 15-26:
+This is a classname, it cannot be used as a reified type argument
+File "classname.php", line 3, characters 15-15:
+T is reified
+File "classname.php", line 16, characters 13-27:
+Invalid reified hint (Typing[4305])
+File "classname.php", line 16, characters 15-26:
+This is a typename, it cannot be used as a reified type argument
+File "classname.php", line 3, characters 15-15:
+T is reified

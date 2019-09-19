@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -8,4 +8,5 @@
  *)
 
 let go _ _ _ _ = ()
+
 let get_live_targets _ = ([], [])

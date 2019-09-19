@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_JIT_INLINING_H_
 #define incl_HPHP_JIT_INLINING_H_
 
+#include "hphp/runtime/vm/jit/annotation-data.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 
 #include <vector>
@@ -66,20 +67,14 @@ namespace irgen { struct IRGS; }
 /*
  * Can we perform inlining of `callee' at `callSK' from within `region'?
  *
- * This is a shallow check---it asks whether `callSK' is an FCall with an
- * appropriate FPush* in the same region, and verifies that the call does not
- * block inlining (e.g., due to missing arguments, recursion, resumable
- * callee, etc.).  It does not peek into the callee's bytecode or regions,
- * and it is insensitive to inlining costs.
- *
- * This function assumes that region is fully-formed up to and including
- * `inst', because we reach backwards through the region to find the
- * corresponding FPush and validate the FPI region.
- *
- * NOTE: Inlining will fail during translation if the FPush was interpreted.
- * It is up to the client to ensure that this is not the case.
+ * This is a shallow check---it asks whether `callSK' is an appropriate FCall*
+ * and verifies that the call does not block inlining (e.g., due to missing
+ * arguments, recursion, resumable callee, etc.).  It does not peek into the
+ * callee's bytecode or regions, and it is insensitive to inlining costs.
  */
-bool canInlineAt(SrcKey callSK, const Func* callee, Annotations* annotations);
+bool canInlineAt(SrcKey callSK,
+                 const Func* callee,
+                 AnnotationData* annotations);
 
 /*
  * Check that `region' of `callee' can be inlined (possibly via other inlined
@@ -90,18 +85,16 @@ bool canInlineAt(SrcKey callSK, const Func* callee, Annotations* annotations);
  * moreover, based on global inlining heuristics, we submit that the tracelet
  * selector /ought/ to do so.
  */
-bool shouldInline(const irgen::IRGS& irgs, SrcKey callerSk, Op callerFPushOp,
-                  const Func* callee, const RegionDesc& region,
-                  uint32_t maxTotalCost);
+bool shouldInline(const irgen::IRGS& irgs, SrcKey callerSk, const Func* callee,
+                  const RegionDesc& region, uint32_t maxTotalCost);
 
 /*
  * Return the cost of inlining the given callee.
  */
 int costOfInlining(SrcKey callerSk,
-                   Op callerFPushOp,
                    const Func* callee,
                    const RegionDesc& region,
-                   Annotations& annotations);
+                   AnnotationData* annotationData);
 
 /*
  * Select an inlining region for the call to `callee' at `sk'.
@@ -110,9 +103,7 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
                                  const Func* callee,
                                  const FCallArgs& fca,
                                  Type ctxType,
-                                 Op writeArOpc,
-                                 const SrcKey& sk,
-                                 Annotations& annotations);
+                                 const SrcKey& sk);
 
 void setBaseInliningProfCount(uint64_t value);
 

@@ -30,6 +30,7 @@
 #include "hphp/util/bloom-filter.h"
 #include "hphp/util/compilation-flags.h"
 #include "hphp/util/radix-map.h"
+#include "hphp/util/rds-local.h"
 #include "hphp/util/slab-manager.h"
 #include "hphp/util/struct-log.h"
 #include "hphp/util/thread-local.h"
@@ -41,7 +42,6 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/sweepable.h"
 #include "hphp/runtime/base/header-kind.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/req-malloc.h"
 #include "hphp/runtime/base/req-ptr.h"
 
@@ -391,7 +391,7 @@ static_assert(kMaxSmallSize < kMaxSizeClass,
  */
 constexpr char kSmallFreeFill   = 0x6a;
 constexpr char kRDSTrashFill    = 0x6b; // used by RDS for "normal" section
-constexpr char kTrashClsRef     = 0x6c; // used for class-ref slots
+constexpr char kIterTrashFill   = 0x6c; // used by ArrayIters at their end
 constexpr char kTVTrashFill     = 0x7a; // used by interpreter
 constexpr char kTVTrashFill2    = 0x7b; // used by req::ptr dtors
 constexpr char kTVTrashJITStk   = 0x7c; // used by the JIT for stack slots
@@ -400,6 +400,11 @@ constexpr char kTVTrashJITHeap  = 0x7e; // used by the JIT for heap
 constexpr char kTVTrashJITRetVal = 0x7f; // used by the JIT for ActRec::m_r
 constexpr uintptr_t kSmallFreeWord = 0x6a6a6a6a6a6a6a6aLL;
 constexpr uintptr_t kMallocFreeWord = 0x5a5a5a5a5a5a5a5aLL;
+
+// In debug builds, we check if refcounts are higher than RefCountMaxRealistic.
+// This check is only useful if a trashed refcount is above the bound. We check
+// kMallocFreeWord here because it's the smallest of the trash fill bytes.
+static_assert(RefCountMaxRealistic < (kMallocFreeWord >> 4), "");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -541,11 +546,8 @@ struct SparseHeap {
 
  protected:
   struct SlabInfo {
-    SlabInfo(void* p, size_t s, uint16_t v)
-      : ptr(p), size(s), version(v) {}
-
+    SlabInfo(void* p, uint16_t v) : ptr(p), version(v) {}
     void* ptr;
-    uint32_t size;
     uint16_t version{0};                // tag used with SlabManager
   };
   std::vector<SlabInfo> m_pooled_slabs;
@@ -979,12 +981,6 @@ private:
     std::string filename{};
   };
 
-  /*
-   * Pushes some allocation stats to scuba.
-   */
-  void publishStats(const char* name, const std::vector<int64_t> &stats,
-      uint32_t sampleRate);
-
   /////////////////////////////////////////////////////////////////////////////
 
 private:
@@ -1059,11 +1055,6 @@ private:
   int64_t m_req_start_micros;
 
   TYPE_SCAN_IGNORE_ALL; // heap-scan handles MemoryManager fields itself.
-
-  // This are memory intensive, a counter per slab. As such, they're only
-  // allocated when we skip the small allocator.
-  std::vector<int64_t> totalSmallAllocs;
-  std::vector<int64_t> currentSmallAllocs;
 };
 
 extern THREAD_LOCAL_FLAT(MemoryManager, tl_heap);

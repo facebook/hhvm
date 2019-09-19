@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
@@ -6,7 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree. An additional grant
  * of patent rights can be found in the PATENTS file in the same directory.
  *
-*)
+ *)
 
 type index_builder_context = {
   repo_folder: string;
@@ -14,9 +14,12 @@ type index_builder_context = {
   text_filename: string option;
   json_filename: string option;
   json_chunk_size: int;
+  json_repo_name: string option;
   custom_service: string option;
   custom_repo_name: string option;
-  include_builtins: bool;
+  hhi_root_folder: Path.t option;
+  set_paths_for_worker: bool;
+  silent: bool;
 }
 
 (* Fully parsed data structure *)

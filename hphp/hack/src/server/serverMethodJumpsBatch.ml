@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2017, Facebook, Inc.
  * All rights reserved.
  *
@@ -8,20 +8,21 @@
  *)
 
 open Core_kernel
-
 module TLazyHeap = Decl_provider
 
 let get_ancestors_single class_ ~filter =
   let class_ = MethodJumps.add_ns class_ in
   let class_ = TLazyHeap.get_class class_ in
   Option.map class_ ~f:(fun c ->
-    MethodJumps.get_ancestor_classes_and_methods c ~filter []
-  )
+      MethodJumps.get_ancestor_classes_and_methods c ~filter [])
 
 let get_ancestors_multiple acc classes ~filter =
-  let result = List.concat (List.filter_map
-    classes ~f:(fun class_ -> get_ancestors_single class_ ~filter))
-  in result :: acc
+  let result =
+    List.concat
+      (List.filter_map classes ~f:(fun class_ ->
+           get_ancestors_single class_ ~filter))
+  in
+  result :: acc
 
 let parallel_helper workers classes filter =
   MultiWorker.call
@@ -32,20 +33,22 @@ let parallel_helper workers classes filter =
     ~next:(MultiWorker.next workers classes)
 
 (* Entry Point *)
-let go:
-  MultiWorker.worker list option ->
-  Decl_provider.class_key list ->
-  ServerCommandTypes.Method_jumps.filter ->
-  ServerCommandTypes.Method_jumps.result list =
-fun workers classes filter ->
+let go :
+    MultiWorker.worker list option ->
+    Decl_provider.class_key list ->
+    ServerCommandTypes.Method_jumps.filter ->
+    ServerCommandTypes.Method_jumps.result list =
+ fun workers classes filter ->
   (* Sort and dedup identical queries *)
   let deduped =
-    List.remove_consecutive_duplicates ~equal:(=)
+    List.remove_consecutive_duplicates
+      ~equal:( = )
       (List.sort ~compare classes)
   in
   let results =
-    if (List.length deduped) < 10
-    then get_ancestors_multiple [] deduped filter
-    else parallel_helper workers deduped filter
+    if List.length deduped < 10 then
+      get_ancestors_multiple [] deduped filter
+    else
+      parallel_helper workers deduped filter
   in
   List.concat results

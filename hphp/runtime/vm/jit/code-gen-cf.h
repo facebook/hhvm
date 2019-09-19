@@ -326,14 +326,24 @@ void implodingIFTE(Vout& v, Vout& vc, Branch do_branch,
  * `loopBlock' is the lambda responsible for generating the code.  It takes
  * both the input phidef and output phijmp loop registers as arguments, and
  * should return a single SF Vreg to be tested against `cc'.
+ *
+ * `count' is an optional hint specifying how many times the loop is
+ * likely to execute. This will be used to adjust the block weights
+ * appropriately.
  */
 template <class Loop>
 VregList doWhile(Vout& v, ConditionCode cc,
-                 const VregList& regs, Loop loopBlock) {
-  auto const loop = v.makeBlock();
+                 const VregList& regs, Loop loopBlock,
+                 int64_t count = 10) {
+  auto loop = v.makeBlock();
   auto const done = v.makeBlock();
-  auto const loopSplit = v.makeBlock();
+  auto loopSplit = v.makeBlock();
   auto const doneSplit = v.makeBlock();
+
+  if (count >= 0) {
+    loop.addWeightScale(count);
+    loopSplit.addWeightScale(count > 0 ? (count - 1) : 0);
+  }
 
   auto const freshRegs = [&] {
     auto copy = regs;

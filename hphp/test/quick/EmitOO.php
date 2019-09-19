@@ -1,7 +1,5 @@
 <?hh
 
-print "Test begin\n";
-
 interface I {
   public function f($a);
 }
@@ -70,4 +68,9 @@ function main() {
 
   print "Test end\n";
 }
-main();
+<<__EntryPoint>>
+function main_entry(): void {
+
+  print "Test begin\n";
+  main();
+}

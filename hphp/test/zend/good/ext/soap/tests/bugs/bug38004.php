@@ -21,13 +21,16 @@ class TestSoapClient extends SoapClient {
   }
 }
 
-$client = new TestSoapClient(dirname(__FILE__).'/bug38004.wsdl');
-$strA = 'test &amp; test';
-$strB = 'test & test';
-$res = $client->Test(array('strA'=>$strA, 'strB'=>$strB));
-print_r($res);
-print_r(ZendGoodExtSoapTestsBugsBug38004::$g);
-
 abstract final class ZendGoodExtSoapTestsBugsBug38004 {
   public static $g;
+}
+<<__EntryPoint>>
+function main_entry(): void {
+
+  $client = new TestSoapClient(dirname(__FILE__).'/bug38004.wsdl');
+  $strA = 'test &amp; test';
+  $strB = 'test & test';
+  $res = $client->Test(array('strA'=>$strA, 'strB'=>$strB));
+  print_r($res);
+  print_r(ZendGoodExtSoapTestsBugsBug38004::$g);
 }

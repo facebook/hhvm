@@ -6,7 +6,7 @@ $memc->addServer('localhost', '11211');
 $key = 'cas_test';
 var_dump($memc->set($key, 10, 60));
 $cas = null;
-var_dump($memc->get($key, null, &$cas));
+var_dump($memc->getWithCasToken($key, null, inout $cas));
 
 var_dump(is_double($cas));
 var_dump($memc->cas($cas, $key, 11, 60));

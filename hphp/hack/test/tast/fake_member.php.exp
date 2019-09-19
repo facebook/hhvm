@@ -9,12 +9,13 @@
       c_implements = []; c_where_constraints = []; c_consts = [];
       c_typeconsts = [];
       c_vars =
-      [{ cv_final = false; cv_xhp_attr = None; cv_visibility = Private;
+      [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false;
+         cv_visibility = Private;
          cv_type = (Some ([4:11-15], (Hoption ([4:12-15], (Hprim Tint)))));
          cv_id = ([4:16-20], "foo");
          cv_expr = (Some (([4:23-27], null), Null)); cv_user_attributes = [];
          cv_doc_comment = None; cv_is_promoted_variadic = false;
-         cv_is_static = false }
+         cv_is_static = false; cv_span = [4:16-27] }
         ];
       c_methods =
       [{ m_span = [6:3-10:4]; m_annotation = (); m_final = false;
@@ -40,8 +41,8 @@
              ];
            fb_annotation = No unsafe blocks };
          m_fun_kind = FSync; m_user_attributes = [];
-         m_ret = (Some ([6:26-30], (Hprim Tvoid))); m_external = false;
-         m_doc_comment = None }
+         m_ret = ((void), (Some ([6:26-30], (Hprim Tvoid))));
+         m_external = false; m_doc_comment = None }
         ];
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
       c_namespace = <opaque>; c_user_attributes = []; c_file_attributes = [];

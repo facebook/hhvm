@@ -254,6 +254,11 @@ void Repo::loadGlobalData(bool readArrayTable /* = true */) {
     if (s_globalData.ThisTypeHintLevel == 3) {
       RuntimeOption::EvalThisTypeHintLevel = s_globalData.ThisTypeHintLevel;
     }
+
+    RuntimeOption::EvalIsCompatibleClsMethType =
+      s_globalData.IsCompatibleClsMethType;
+    RuntimeOption::EvalEmitClsMethPointers = s_globalData.EmitClsMethPointers;
+
     RuntimeOption::ConstantFunctions.clear();
     for (auto const& elm : s_globalData.ConstantFunctions) {
       RuntimeOption::ConstantFunctions.insert(elm);

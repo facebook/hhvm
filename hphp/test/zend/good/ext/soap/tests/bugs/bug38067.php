@@ -21,14 +21,17 @@ class TestSoapClient extends SoapClient {
   }
 }
 
-$client = new TestSoapClient(dirname(__FILE__).'/bug38067.wsdl',
-	array('encoding' => 'ISO-8859-1'));
-$str = 'test: Ä';
-$res = $client->Test(array('str'=>$str));
-echo $str."\n";
-echo $res."\n";
-echo ZendGoodExtSoapTestsBugsBug38067::$g."\n";
-
 abstract final class ZendGoodExtSoapTestsBugsBug38067 {
   public static $g;
+}
+<<__EntryPoint>>
+function main_entry(): void {
+
+  $client = new TestSoapClient(dirname(__FILE__).'/bug38067.wsdl',
+  	array('encoding' => 'ISO-8859-1'));
+  $str = 'test: Ä';
+  $res = $client->Test(array('str'=>$str));
+  echo $str."\n";
+  echo $res."\n";
+  echo ZendGoodExtSoapTestsBugsBug38067::$g."\n";
 }

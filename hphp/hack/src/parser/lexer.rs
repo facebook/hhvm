@@ -4,12 +4,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::lexable_token::LexableToken;
-use crate::lexable_trivia::LexableTrivia;
-use crate::source_text::{SourceText, INVALID};
-use crate::syntax_error::{self as Errors, Error, SyntaxError};
-use crate::token_kind::TokenKind;
-use crate::trivia_kind::TriviaKind;
+use parser_core_types::lexable_token::LexableToken;
+use parser_core_types::lexable_trivia::LexableTrivia;
+use parser_core_types::source_text::{SourceText, INVALID};
+use parser_core_types::syntax_error::{self as Errors, Error, SyntaxError};
+use parser_core_types::token_kind::TokenKind;
+use parser_core_types::trivia_kind::TriviaKind;
 
 use std::cell::RefCell;
 use std::ops::DerefMut;
@@ -30,8 +30,8 @@ struct LexerPostSnapshot {
     errors: Vec<SyntaxError>,
 }
 
-impl<'a, Token: LexableToken> PartialEq<Lexer<'a, Token>> for LexerPreSnapshot {
-    fn eq(&self, other: &Lexer<Token>) -> bool {
+impl<'a, Token: LexableToken<'a>> PartialEq<Lexer<'a, Token>> for LexerPreSnapshot {
+    fn eq(&self, other: &Lexer<'a, Token>) -> bool {
         self.start == other.start && self.offset == other.offset && self.in_type == other.in_type
     }
 }
@@ -62,7 +62,7 @@ prove no new error added. Actually it is observed that new errors are added betw
 struct LexerCache<Token>(LexerPreSnapshot, Token, LexerPostSnapshot);
 
 #[derive(Debug, Clone)]
-pub struct Lexer<'a, Token: LexableToken> {
+pub struct Lexer<'a, Token: LexableToken<'a>> {
     source: SourceText<'a>,
     start: usize,
     offset: usize,
@@ -86,7 +86,7 @@ pub enum KwSet {
     NoKeywords,
 }
 
-impl<'a, Token: LexableToken> Lexer<'a, Token> {
+impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
     fn to_lexer_pre_snapshot(&self) -> LexerPreSnapshot {
         LexerPreSnapshot {
             start: self.start,
@@ -106,7 +106,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
 
     pub fn make_at(source: &SourceText<'a>, is_experimental_mode: bool, offset: usize) -> Self {
         Self {
-            source: *source,
+            source: source.clone(),
             start: offset,
             offset,
             errors: vec![],
@@ -120,7 +120,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
         Self::make_at(source, is_experimental_mode, 0)
     }
 
-    fn continue_from(&mut self, l: Lexer<Token>) {
+    fn continue_from(&mut self, l: Lexer<'a, Token>) {
         self.start = l.start;
         self.offset = l.offset;
         self.errors = l.errors
@@ -158,11 +158,6 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
 
     pub fn advance(&mut self, i: usize) {
         self.offset += i
-    }
-
-    pub fn skip_to_end(&mut self) {
-        let length = self.source.length();
-        self.with_start_offset(length, length)
     }
 
     fn is_experimental_mode(&self) -> bool {
@@ -1602,14 +1597,12 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
                 }
             },
             ':' => {
-                // In experimental mode only: try to scan for a pocket universes atom
-                // of the form `:@`
                 let ch1 = self.peek_char(1);
 
                 if ch1 == ':' {
                     self.advance(2);
                     TokenKind::ColonColon
-                } else if self.is_experimental_mode && ch1 == '@' {
+                } else if ch1 == '@' {
                     self.advance(2);
                     TokenKind::ColonAt
                 } else {
@@ -2038,7 +2031,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
             }
             _ => self.scan_trailing_php_trivia(),
         };
-        Token::make(kind, token_start, w, leading, trailing)
+        Token::make(kind, self.source(), token_start, w, leading, trailing)
     }
 
     fn scan_assert_progress(&mut self, tokenizer: impl Fn(&mut Self) -> Token) -> Token {
@@ -2132,7 +2125,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
             let token_start = x.offset;
             let (kind, w, leading) =
                 x.scan_token_and_leading_trivia(&Self::scan_token_outside_type, KwSet::NoKeywords);
-            Token::make(kind, token_start, w, leading, vec![])
+            Token::make(kind, x.source(), token_start, w, leading, vec![])
         };
         self.scan_assert_progress(&tokenizer)
     }
@@ -2150,7 +2143,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
             }
             _ => vec![],
         };
-        Token::make(kind, token_start, w, vec![], trailing)
+        Token::make(kind, self.source(), token_start, w, vec![], trailing)
     }
 
     pub fn next_docstring_header(&mut self) -> (Token, &'a [u8]) {
@@ -2163,6 +2156,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
         let w = self.width();
         let token = Token::make(
             TokenKind::HeredocStringLiteralHead,
+            self.source(),
             token_start,
             w,
             leading,
@@ -2190,11 +2184,11 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
             // of the body token.
             match kind {
                 TokenKind::GreaterThan | TokenKind::SlashGreaterThan if no_trailing => {
-                    Token::make(kind, token_start, w, leading, vec![])
+                    Token::make(kind, lexer.source(), token_start, w, leading, vec![])
                 }
                 _ => {
                     let trailing = lexer.scan_trailing_php_trivia();
-                    Token::make(kind, token_start, w, leading, trailing)
+                    Token::make(kind, lexer.source(), token_start, w, leading, trailing)
                 }
             }
         };
@@ -2222,7 +2216,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
              if kind == TokenKind::XHPBody
              { lexer.scan_trailing_xhp_trivia() }
              else  { vec!() };
-            Token::make(kind, token_start, w, leading, trailing)
+            Token::make(kind, lexer.source(), token_start, w, leading, trailing)
         };
         self.scan_assert_progress(&scanner)
     }
@@ -2237,7 +2231,14 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
     }
 
     fn make_markup_token(&self) -> Token {
-        Token::make(TokenKind::Markup, self.start, self.width(), vec![], vec![])
+        Token::make(
+            TokenKind::Markup,
+            self.source(),
+            self.start,
+            self.width(),
+            vec![],
+            vec![],
+        )
     }
 
     fn make_long_tag(
@@ -2253,14 +2254,27 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
         // determine the file check mode, read the trailing trivia and attach it
         // to the language token
         let trailing = self.scan_trailing_php_trivia();
-        let name = Token::make(TokenKind::Name, name_token_offset, size, vec![], trailing);
+        let name = Token::make(
+            TokenKind::Name,
+            self.source(),
+            name_token_offset,
+            size,
+            vec![],
+            trailing,
+        );
         (markup_text, Some((less_than_question_token, Some(name))))
     }
 
     fn make_markup_and_suffix(&mut self) -> (Token, Option<(Token, Option<Token>)>) {
         let markup_text = self.make_markup_token();
-        let less_than_question_token =
-            Token::make(TokenKind::LessThanQuestion, self.offset, 2, vec![], vec![]);
+        let less_than_question_token = Token::make(
+            TokenKind::LessThanQuestion,
+            self.source(),
+            self.offset,
+            2,
+            vec![],
+            vec![],
+        );
         // skip <?
         self.advance(2);
         let name_token_offset = self.offset;
@@ -2277,7 +2291,14 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
             ('=', _, _) => {
                 // skip =
                 self.advance(1);
-                let equal = Token::make(TokenKind::Equal, name_token_offset, 1, vec![], vec![]);
+                let equal = Token::make(
+                    TokenKind::Equal,
+                    self.source(),
+                    name_token_offset,
+                    1,
+                    vec![],
+                    vec![],
+                );
 
                 (markup_text, Some((less_than_question_token, Some(equal))))
             }

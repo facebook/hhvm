@@ -1,0 +1,6 @@
+File "generic_fun_2.php", line 18, characters 10-22:
+Invalid return type (Typing[4110])
+File "generic_fun_2.php", line 16, characters 18-67:
+Expected ~((function(int): int), (function(string): string)) because it is an unenforceable type
+File "generic_fun_2.php", line 18, characters 10-22:
+But got ((function<T>(~[unresolved] $x): ~[unresolved]), (function<T>(~[unresolved] $x): ~[unresolved]))

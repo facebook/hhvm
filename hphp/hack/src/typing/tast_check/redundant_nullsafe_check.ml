@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2018, Facebook, Inc.
  * All rights reserved.
  *
@@ -8,22 +8,27 @@
  *)
 
 [@@@warning "-33"]
-open Core_kernel
-[@@@warning "+33"]
-open Tast
-open Typing_defs
 
+open Core_kernel
+
+[@@@warning "+33"]
+
+open Aast
+open Typing_defs
 module Env = Tast_env
 module Utils = Tast_utils
 
-let handler = object
-  inherit Tast_visitor.handler_base
+let handler =
+  object
+    inherit Tast_visitor.handler_base
 
-  method! at_expr env = function
-    | (p, _), Obj_get (((_, ty), _), _, OG_nullsafe)
+    method! at_expr env =
+      function
+      | ((p, _), Obj_get (((_, ty), _), _, OG_nullsafe))
         when Utils.type_non_nullable env ty ->
-      let _, (r, _) = Env.expand_type env ty in
-      Errors.nullsafe_not_needed p
-        (Reason.to_string "This is what makes me believe it cannot be null" r)
-    | _ -> ()
-end
+        let (_, (r, _)) = Env.expand_type env ty in
+        Errors.nullsafe_not_needed
+          p
+          (Reason.to_string "This is what makes me believe it cannot be null" r)
+      | _ -> ()
+  end

@@ -1,0 +1,6 @@
+File "rx_if_arg_impl1.php", line 25, characters 5-6:
+Invalid argument (Typing[4110])
+File "rx_if_arg_impl1.php", line 10, characters 42-42:
+Expected A
+File "rx_if_arg_impl1.php", line 23, characters 16-16:
+But got dynamic because it is an unenforceable type

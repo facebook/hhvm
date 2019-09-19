@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -7,5 +7,4 @@
  *
  *)
 
-let go result =
-  print_endline result
+let go result = print_endline result

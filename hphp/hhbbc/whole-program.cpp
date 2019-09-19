@@ -621,7 +621,7 @@ void whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues,
       }
     }
     cleanup_pre = std::thread([&] { index->cleanup_for_final(); });
-    index->mark_persistent_classes_and_functions(*program);
+    index->mark_persistent_types_and_functions(*program);
     index->join_iface_vtable_thread();
     if (parallel::num_threads > parallel::final_threads) {
       parallel::num_threads = parallel::final_threads;

@@ -32,10 +32,10 @@ const StaticString s_line("line");
 const StaticString s_trace("trace");
 const StaticString s_traceOpts("traceOpts");
 const StaticString s___toString("__toString");
-const Slot s_fileIdx{3};
-const Slot s_lineIdx{4};
-const Slot s_traceIdx{5};
-const Slot s_traceOptsIdx{0};
+const Slot s_fileSlot{3};
+const Slot s_lineSlot{4};
+const Slot s_traceSlot{5};
+const Slot s_traceOptsSlot{0};
 
 RDS_LOCAL(int, rl_exit_code);
 
@@ -205,32 +205,32 @@ namespace {
   DEBUG_ONLY bool throwable_has_expected_props() {
     auto const erCls = SystemLib::s_ErrorClass;
     auto const exCls = SystemLib::s_ExceptionClass;
-    if (erCls->lookupDeclProp(s_file.get()) != s_fileIdx ||
-        exCls->lookupDeclProp(s_file.get()) != s_fileIdx ||
-        erCls->lookupDeclProp(s_line.get()) != s_lineIdx ||
-        exCls->lookupDeclProp(s_line.get()) != s_lineIdx ||
-        erCls->lookupDeclProp(s_trace.get()) != s_traceIdx ||
-        exCls->lookupDeclProp(s_trace.get()) != s_traceIdx) {
+    if (erCls->lookupDeclProp(s_file.get()) != s_fileSlot ||
+        exCls->lookupDeclProp(s_file.get()) != s_fileSlot ||
+        erCls->lookupDeclProp(s_line.get()) != s_lineSlot ||
+        exCls->lookupDeclProp(s_line.get()) != s_lineSlot ||
+        erCls->lookupDeclProp(s_trace.get()) != s_traceSlot ||
+        exCls->lookupDeclProp(s_trace.get()) != s_traceSlot) {
       return false;
     }
     // Check that we don't have the expected type-hints on these props so we
     // don't need to verify anything.
     return
-      erCls->declPropTypeConstraint(s_fileIdx).isString() &&
-      exCls->declPropTypeConstraint(s_fileIdx).isString() &&
-      erCls->declPropTypeConstraint(s_lineIdx).isInt() &&
-      exCls->declPropTypeConstraint(s_lineIdx).isInt() &&
-      !erCls->declPropTypeConstraint(s_traceIdx).isCheckable() &&
-      !exCls->declPropTypeConstraint(s_traceIdx).isCheckable();
+      erCls->declPropTypeConstraint(s_fileSlot).isString() &&
+      exCls->declPropTypeConstraint(s_fileSlot).isString() &&
+      erCls->declPropTypeConstraint(s_lineSlot).isInt() &&
+      exCls->declPropTypeConstraint(s_lineSlot).isInt() &&
+      !erCls->declPropTypeConstraint(s_traceSlot).isCheckable() &&
+      !exCls->declPropTypeConstraint(s_traceSlot).isCheckable();
   }
 
   int64_t exception_get_trace_options() {
     auto const exCls = SystemLib::s_ExceptionClass;
-    assertx(exCls->lookupSProp(s_traceOpts.get()) == s_traceOptsIdx);
+    assertx(exCls->lookupSProp(s_traceOpts.get()) == s_traceOptsSlot);
     assertx(exCls->needInitialization());
 
     exCls->initialize();
-    auto const traceOptsTV = exCls->getSPropData(s_traceOptsIdx);
+    auto const traceOptsTV = exCls->getSPropData(s_traceOptsSlot);
     return traceOptsTV->m_type == KindOfInt64
       ? traceOptsTV->m_data.num : 0;
   }
@@ -239,7 +239,7 @@ namespace {
     assertx(is_throwable(throwable));
     assertx(throwable_has_expected_props());
 
-    auto const trace_rval = throwable->propRvalAtOffset(s_traceIdx);
+    auto const trace_rval = throwable->propRvalAtOffset(s_traceSlot);
 
     if (trace_rval.type() == KindOfResource) {
       auto bt = dyn_cast<CompactTrace>(Resource(trace_rval.val().pres));
@@ -251,18 +251,18 @@ namespace {
         auto const ln = f.func->unit()->getLineNumber(f.prevPc);
         tvSetIgnoreRef(
           make_tv<KindOfInt64>(ln),
-          throwable->propLvalAtOffset(s_lineIdx)
+          throwable->propLvalAtOffset(s_lineSlot)
         );
 
         if (auto fn = f.func->originalFilename()) {
           tvSetIgnoreRef(
             make_tv<KindOfPersistentString>(fn),
-            throwable->propLvalAtOffset(s_fileIdx)
+            throwable->propLvalAtOffset(s_fileSlot)
           );
         } else {
           tvSetIgnoreRef(
             make_tv<KindOfPersistentString>(f.func->unit()->filepath()),
-            throwable->propLvalAtOffset(s_fileIdx)
+            throwable->propLvalAtOffset(s_fileSlot)
           );
         }
         return;
@@ -287,14 +287,14 @@ namespace {
           auto const tv = file.tv();
           tvSetIgnoreRef(
             tvAssertCell(tv),
-            throwable->propLvalAtOffset(s_fileIdx)
+            throwable->propLvalAtOffset(s_fileSlot)
           );
         }
         if (line) {
           auto const tv = line.tv();
           tvSetIgnoreRef(
             tvAssertCell(tv),
-            throwable->propLvalAtOffset(s_lineIdx)
+            throwable->propLvalAtOffset(s_lineSlot)
           );
         }
         return;
@@ -307,7 +307,7 @@ void throwable_init(ObjectData* throwable) {
   assertx(is_throwable(throwable));
   assertx(throwable_has_expected_props());
 
-  auto const trace_lval = throwable->propLvalAtOffset(s_traceIdx);
+  auto const trace_lval = throwable->propLvalAtOffset(s_traceSlot);
   auto opts = exception_get_trace_options();
   auto const filterOpts = opts & ~k_DEBUG_BACKTRACE_IGNORE_ARGS;
   if (
@@ -338,11 +338,11 @@ void throwable_init(ObjectData* throwable) {
     auto const line = unit->getLineNumber(unit->offsetOf(vmpc()));
     tvSetIgnoreRef(
       make_tv<KindOfString>(file),
-      throwable->propLvalAtOffset(s_fileIdx)
+      throwable->propLvalAtOffset(s_fileSlot)
     );
     tvSetIgnoreRef(
       make_tv<KindOfInt64>(line),
-      throwable->propLvalAtOffset(s_lineIdx)
+      throwable->propLvalAtOffset(s_lineSlot)
     );
   }
 }
@@ -358,7 +358,7 @@ void throwable_recompute_backtrace_from_wh(ObjectData* throwable,
   assertx(throwable_has_expected_props());
   assertx(wh);
 
-  auto const trace_lval = throwable->propLvalAtOffset(s_traceIdx);
+  auto const trace_lval = throwable->propLvalAtOffset(s_traceSlot);
   auto opts = exception_get_trace_options();
   bool provide_object = opts & k_DEBUG_BACKTRACE_PROVIDE_OBJECT;
   bool provide_metadata = opts & k_DEBUG_BACKTRACE_PROVIDE_METADATA;

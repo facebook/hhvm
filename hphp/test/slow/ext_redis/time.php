@@ -1,7 +1,7 @@
 <?hh
 
 include (__DIR__ . '/redis.inc');
-
+<<__EntryPoint>> function main(): void {
 $r = NewRedisTestInstance();
 $tm = $r->time();
 var_dump(count($tm));
@@ -10,3 +10,4 @@ $now = microtime(true);
 $delta = abs($now - $tm);
 // Server should be within five seconds of client
 var_dump($delta < 5);
+}

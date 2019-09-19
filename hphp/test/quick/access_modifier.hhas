@@ -9,7 +9,7 @@
   NullUninit
   NullUninit
   String "foo"
-  FCallCtor <> 1 1 "" - ""
+  FCallCtor <LockWhileUnwinding> 1 1 "" - ""
   PopC
   LockObj
   SetL $x
@@ -27,8 +27,7 @@
   NullUninit
   NullUninit
   FCallObjMethodD <> 0 1 "" - "" NullThrows "get"
-  FPushFuncD 1 "var_dump"
-  FCall <> 1 1 "" - "" ""
+  FCallFuncD <> 1 1 "" - "var_dump"
   PopC
   Int 1
   RetC

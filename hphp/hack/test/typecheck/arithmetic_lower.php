@@ -1,8 +1,9 @@
 <?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function expectFloat(float $x):void { }
-function expectInt(int $x):void { }
+function expectFloat(float $x): void {}
+function expectInt(int $x): void {}
+function expectNum(num $x): void {}
 
 function testfloat(num $n):void {
   $m = Vector { 3.4 };
@@ -66,7 +67,7 @@ function testfloat2(bool $b, num $n):void {
 }
 */
 
-function testint():void {
+function testints():void {
   $m = Vector { 3 };
   $x = $m[0] + $m[0];
   expectInt($x);
@@ -79,4 +80,21 @@ function testint():void {
   $m = Vector { 3 };
   $x = -$m[0];
   expectInt($x);
+}
+
+function testint(): void {
+  $m = Vector {};
+  expectNum($m[0] + 1);
+  $m[] = 0.1; // ok
+  $m[] = 1; // ok
+
+  $m = Vector {};
+  expectFloat($m[0] + 1);
+  $m[] = 0.1; // ok
+  $m[] = 1; // nok
+
+  $m = Vector {};
+  expectInt($m[0] + 1);
+  $m[] = 1; // ok
+  $m[] = 0.1; // nok
 }

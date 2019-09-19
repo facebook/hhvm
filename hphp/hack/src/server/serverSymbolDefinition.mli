@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -8,7 +8,7 @@
  *)
 
 val go :
-  Ast.program ->
+  Nast.program option ->
   Relative_path.t SymbolOccurrence.t ->
   Relative_path.t SymbolDefinition.t option
 

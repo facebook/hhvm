@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -9,13 +9,12 @@
 
 open Core_kernel
 open Decl_defs
-
 module Dep = Typing_deps.Dep
 
 type env = {
-  mode : FileInfo.mode;
-  droot : Typing_deps.Dep.variant option;
-  decl_tcopt : TypecheckerOptions.t;
+  mode: FileInfo.mode;
+  droot: Typing_deps.Dep.variant option;
+  decl_tcopt: TypecheckerOptions.t;
 }
 
 let mode env = env.mode
@@ -26,11 +25,10 @@ let add_wclass env x =
   ()
 
 let add_extends_dependency env x =
-  Option.iter env.droot begin fun root ->
-    let dep = Dep.Class x in
-    Typing_deps.add_idep root (Dep.Extends x);
-    Typing_deps.add_idep root dep;
-  end;
+  Option.iter env.droot (fun root ->
+      let dep = Dep.Class x in
+      Typing_deps.add_idep root (Dep.Extends x);
+      Typing_deps.add_idep root dep);
   ()
 
 let get_class_dep env x =
@@ -40,7 +38,7 @@ let get_class_dep env x =
 
 let get_construct env class_ =
   add_wclass env class_.dc_name;
-  let dep = Dep.Cstr (class_.dc_name) in
+  let dep = Dep.Cstr class_.dc_name in
   Option.iter env.droot (fun root -> Typing_deps.add_idep root dep);
   class_.dc_construct
 

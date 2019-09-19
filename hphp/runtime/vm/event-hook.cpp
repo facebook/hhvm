@@ -155,6 +155,9 @@ void addFramePointers(const ActRec* ar, Array& frameinfo, bool isEnter) {
   if ((g_context->m_setprofileFlags & EventHook::ProfileFramePointers) == 0) {
     return;
   }
+  if (frameinfo.isNull()) {
+    frameinfo = Array::CreateDArray();
+  }
 
   if (isEnter) {
     auto this_ = ar->func()->cls() && ar->hasThis() ?
@@ -224,8 +227,6 @@ void runUserProfilerOnFunctionExit(const ActRec* ar, const TypedValue* retval,
   vm_call_user_func(g_context->m_setprofileCallback, params);
 }
 
-}
-
 static Array get_frame_args(const ActRec* ar, bool with_ref) {
   int numNonVariadic = ar->func()->numNonVariadicParams();
   int numArgs = ar->numArgs();
@@ -273,19 +274,19 @@ static Variant call_intercept_handler(
   Array& args,
   const Variant& ctx,
   Variant& done,
-  ActRec* ar
+  ActRec* ar,
+  bool newCallback
 ) {
   CallCtx callCtx;
   vm_decode_function(function, callCtx);
   auto f = callCtx.func;
-  if (!f) {
-    return uninit_null();
-  }
+  if (!f) return uninit_null();
 
   auto const inout = [&] {
+    std::vector<uint32_t> ind = {2};
+    if (!newCallback) ind.push_back(4);
     if (f->isInOutWrapper()) {
-      auto const name = mangleInOutFuncName(f->name(), {2,4});
-
+      auto const name = mangleInOutFuncName(f->name(), ind);
       if (!f->isMethod()) {
         f = Unit::lookupFunc(name.get());
       } else {
@@ -294,13 +295,15 @@ static Variant call_intercept_handler(
       }
       if (!f) {
         raise_error(
-          "fb_intercept used with an inout handler with a bad signature "
-          "(expected parameters three and five to be inout)"
+          "fb_intercept%s used with an inout handler with a bad signature "
+          "(expected parameter%s to be inout)",
+          newCallback ? "2" : "",
+          newCallback ? " three" : "s three and five"
         );
       }
       return true;
     } else if (f->isClosureBody() && f->anyByRef()) {
-      auto const name = mangleInOutFuncName(f->name(), {2,4});
+      auto const name = mangleInOutFuncName(f->name(), ind);
       auto const impl = f->implCls();
       assertx(impl);
 
@@ -314,40 +317,89 @@ static Variant call_intercept_handler(
 
   args = get_frame_args(ar, !inout);
 
-  PackedArrayInit par(5);
+  PackedArrayInit par(newCallback ? 3 : 5);
   par.append(called);
   par.append(called_on);
   par.append(args);
-  par.append(ctx);
+  if (!newCallback) par.append(ctx);
 
-  Variant intArgs;
-
-  if (inout) {
-    intArgs = par.append(done).toArray();
-  } else {
+  Variant intArgs = [&] {
+    if (newCallback) return par.toArray();
+    if (inout) return par.append(done).toArray();
     SuppressHACRefBindNotices _guard;
     Variant tmp;
     tmp.assignRef(done);
-    intArgs = par.appendWithRef(tmp).toArray();
-  }
+    return par.appendWithRef(tmp).toArray();
+  }();
 
   auto ret = Variant::attach(
     g_context->invokeFunc(f, intArgs, callCtx.this_, callCtx.cls,
-                          nullptr, callCtx.invName,
-                          ExecutionContext::InvokeNormal,
-                          callCtx.dynamic, false)
+                          callCtx.invName, callCtx.dynamic)
   );
 
   if (inout) {
     auto& arr = ret.asCArrRef();
     if (arr[1].isArray()) args = arr[1].toArray();
-    if (arr[2].isBoolean()) done = arr[2].toBoolean();
+    if (!newCallback && arr[2].isBoolean()) done = arr[2].toBoolean();
     return arr[0];
   } else if (!ar->func()->takesInOutParams()) {
     args.reset();
   }
   return ret;
 }
+
+const StaticString
+  s_value("value"),
+  s_callback("callback"),
+  s_prepend_this("prepend_this");
+
+static Variant call_intercept_handler_callback(
+  ActRec* ar,
+  const Variant& function,
+  bool prepend_this
+) {
+  CallCtx callCtx;
+  auto const origCallee = ar->func();
+  auto const reifiedGenerics = [&]() -> ArrayData* {
+    if (!origCallee->hasReifiedGenerics()) return nullptr;
+    // Reified generics is the first non param local
+    auto const tv =
+      reinterpret_cast<TypedValue*>(ar) - origCallee->numParams() - 1;
+    assertx(tvIsVecOrVArray(tv));
+    return tv->m_data.parr;
+  }();
+  vm_decode_function(function, callCtx, DecodeFlags::Warn, true);
+  auto f = callCtx.func;
+  if (!f) return uninit_null();
+  if (origCallee->hasReifiedGenerics() ^ f->hasReifiedGenerics()) {
+    SystemLib::throwRuntimeExceptionObject(
+      Variant("Mismatch between reifiedness of callee and callback"));
+  }
+  if (f->takesInOutParams() || f->isInOutWrapper()) {
+    //TODO(T52751806): Support inout arguments on fb_intercept2 callback
+    SystemLib::throwRuntimeExceptionObject(
+      Variant("The callback for fb_intercept2 cannot have inout parameters"));
+  }
+  auto const curArgs = get_frame_args(ar, false);
+  PackedArrayInit args(prepend_this + curArgs.size());
+  if (prepend_this) {
+    auto const thiz = [&] {
+      if (!origCallee->cls()) return make_tv<KindOfNull>();
+      if (ar->hasThis()) return make_tv<KindOfObject>(ar->getThis());
+      return make_tv<KindOfClass>(ar->getClass());
+    }();
+    args.append(thiz);
+  }
+  IterateV(curArgs.get(), [&](TypedValue v) { args.append(v); });
+  auto ret = Variant::attach(
+    g_context->invokeFunc(f, args.toArray(), callCtx.this_, callCtx.cls,
+                          callCtx.invName, callCtx.dynamic, false, false,
+                          Array::attach(reifiedGenerics))
+  );
+  return ret;
+}
+
+} // namespace
 
 bool EventHook::RunInterceptHandler(ActRec* ar) {
   const Func* func = ar->func();
@@ -400,9 +452,34 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
   Array args;
   VarNR called(ar->func()->fullDisplayName());
 
+  auto const& hArr = h->asCArrRef();
+  auto const newCallback = hArr[2].toBoolean();
   Variant ret = call_intercept_handler(
-    h->asCArrRef()[0], called, called_on, args, h->asCArrRef()[1], doneFlag, ar
+    hArr[0], called, called_on, args, hArr[1], doneFlag, ar, newCallback
   );
+
+  if (newCallback) {
+    if (!ret.isArray()) {
+      SystemLib::throwRuntimeExceptionObject(
+        Variant("fb_intercept2 requires a darray to be returned"));
+    }
+    assertx(ret.isArray());
+    auto const retArr = ret.toDArray();
+    if (retArr.exists(s_value)) {
+      ret = retArr[s_value];
+    } else if (retArr.exists(s_callback)) {
+      bool prepend_this = retArr.exists(s_prepend_this) ?
+        retArr[s_prepend_this].toBoolean() : false;
+      ret = call_intercept_handler_callback(
+        ar,
+        retArr[s_callback],
+        prepend_this
+      );
+    } else {
+      // neither value or callback are present, call the original function
+      doneFlag = false;
+    }
+  }
 
   auto const rebind_locals = [&] {
     auto local = reinterpret_cast<TypedValue*>(
@@ -465,7 +542,7 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
     }
 
     cellDup(*ret.toCell(), *stack.allocTV());
-    stack.topTV()->m_aux.u_asyncNonEagerReturnFlag = -1;
+    stack.topTV()->m_aux.u_asyncEagerReturnFlag = 0;
 
     vmfp() = outer;
     vmpc() = outer ? outer->func()->unit()->at(pcOff) : nullptr;

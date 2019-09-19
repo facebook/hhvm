@@ -1,0 +1,6 @@
+File "this_tparam2.php", line 27, characters 10-24:
+Invalid return type (Typing[4110])
+File "this_tparam2.php", line 26, characters 48-62:
+Expected OtherPreparable
+File "this_tparam2.php", line 27, characters 10-24:
+But got dynamic

@@ -1,1 +1,3 @@
-Fatal error: Cannot call the reified function 'C::f' without the reified generics in %s on line %d
+Fatal error: Uncaught exception 'BadMethodCallException' with message 'Cannot call the reified function 'C::f' without the reified generics' in %s:%d
+Stack trace:
+%A

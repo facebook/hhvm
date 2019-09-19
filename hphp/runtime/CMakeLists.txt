@@ -29,12 +29,14 @@ if(NOT HAVE_CUSTOM_LIBEVENT)
 endif()
 
 add_custom_command(
-  OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/ir-opcode-generated.h"
-  COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/../doc/generate-ir-opcodes.sh"
-  DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/../doc/ir.specification"
-          "${CMAKE_CURRENT_SOURCE_DIR}/../doc/generate-ir-opcodes.pl"
-          "${CMAKE_CURRENT_SOURCE_DIR}/../doc/generate-ir-opcodes.sh"
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/ir-opcode-generated.h"
+  COMMAND
+          "INSTALL_DIR=${CMAKE_CURRENT_BINARY_DIR}"
+          "./generate-ir-opcodes.sh"
+  DEPENDS "${HPHP_HOME}/hphp/doc/ir.specification"
+          "${HPHP_HOME}/hphp/doc/generate-ir-opcodes.pl"
+          "${HPHP_HOME}/hphp/doc/generate-ir-opcodes.sh"
+  WORKING_DIRECTORY "${HPHP_HOME}/hphp/doc"
   COMMENT "Generating HHIR opcode table"
   VERBATIM)
 
@@ -46,7 +48,7 @@ add_precompiled_header(
 
 add_object_library(hphp_runtime_static
             ${CXX_SOURCES} ${C_SOURCES} ${ASM_SOURCES} ${HEADER_SOURCES}
-            "ir-opcode-generated.h")
+            "${CMAKE_CURRENT_BINARY_DIR}/ir-opcode-generated.h")
 auto_source_group("hphp_runtime_static" "${CMAKE_CURRENT_SOURCE_DIR}"
   ${ASM_SOURCES} ${C_SOURCES} ${CXX_SOURCES} ${HEADER_SOURCES})
 SET_TARGET_PROPERTIES(hphp_runtime_static PROPERTIES OUTPUT_NAME "hphp_runtime")

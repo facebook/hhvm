@@ -112,6 +112,8 @@ function get_http_request_size();
 <<__PHPStdLib>>
 function headers_sent(&$file = null, &$line = null);
 <<__PHPStdLib>>
+function headers_sent_with_file_line(&$file, &$line);
+<<__PHPStdLib>>
 function header_register_callback($callback);
 <<__PHPStdLib>>
 function header_remove($name = null);

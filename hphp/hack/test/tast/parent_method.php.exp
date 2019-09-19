@@ -15,16 +15,17 @@
          m_variadic = FVnonVariadic;
          m_params =
          [{ param_annotation = ([4:25-27], int);
-            param_hint = (Some ([4:21-24], (Hprim Tint)));
+            param_type_hint = ((int), (Some ([4:21-24], (Hprim Tint))));
             param_is_reference = false; param_is_variadic = false;
             param_pos = [4:25-27]; param_name = "$i"; param_expr = None;
-            param_callconv = None; param_user_attributes = [] }
+            param_callconv = None; param_user_attributes = [];
+            param_visibility = None }
            ];
          m_body =
          { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };
          m_fun_kind = FSync; m_user_attributes = [];
-         m_ret = (Some ([4:30-34], (Hprim Tvoid))); m_external = false;
-         m_doc_comment = None }
+         m_ret = ((void), (Some ([4:30-34], (Hprim Tvoid))));
+         m_external = false; m_doc_comment = None }
         ];
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
       c_namespace = <opaque>; c_user_attributes = []; c_file_attributes = [];
@@ -59,8 +60,8 @@
               ];
             fb_annotation = No unsafe blocks };
           m_fun_kind = FSync; m_user_attributes = [];
-          m_ret = (Some ([7:24-28], (Hprim Tvoid))); m_external = false;
-          m_doc_comment = None }
+          m_ret = ((void), (Some ([7:24-28], (Hprim Tvoid))));
+          m_external = false; m_doc_comment = None }
          ];
        c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace = <opaque>; c_user_attributes = [];

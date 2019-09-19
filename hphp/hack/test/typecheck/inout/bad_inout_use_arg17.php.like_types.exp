@@ -1,0 +1,4 @@
+File "bad_inout_use_arg17.php", line 6, characters 11-27:
+Expected argument marked inout to be contained in a local or a value-typed container (e.g. vec, dict, keyset, array). To use inout here, assign to/from a temporary local variable. (Typing[4208])
+File "bad_inout_use_arg17.php", line 5, characters 15-47:
+This is a dynamic value or an object of type Map<string, int> because it is an unenforceable type

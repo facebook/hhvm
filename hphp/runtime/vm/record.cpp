@@ -96,6 +96,12 @@ void RecordDesc::setRecordDescHandle(
   m_cachedRecordDesc = link;
 }
 
+bool RecordDesc::verifyPersistent() const {
+  if (!isPersistent()) return false;
+  if (m_parent && !recordHasPersistentRDS(m_parent.get())) return false;
+  return true;
+}
+
 void RecordDesc::destroy() {
   if (!m_cachedRecordDesc.bound()) return;
 
@@ -113,16 +119,12 @@ void RecordDesc::destroy() {
 }
 
 Slot RecordDesc::lookupField(const StringData* fieldName) const {
-  auto idx = m_fields.findIndex(fieldName);
-  if (idx == kInvalidSlot) {
-    raise_error(folly::sformat("Field '{}' does not exist in record '{}'",
-                               fieldName, name()));
-  }
-  return idx;
+  return m_fields.findIndex(fieldName);
 }
 
-const RecordDesc::Field& RecordDesc::field(const StringData* fieldName) const {
-  return m_fields[lookupField(fieldName)];
+const RecordDesc::Field& RecordDesc::field(Slot idx) const {
+  assertx(idx != kInvalidSlot && idx < numFields());
+  return m_fields[idx];
 }
 
 RecordDesc::Avail RecordDesc::availWithParent(

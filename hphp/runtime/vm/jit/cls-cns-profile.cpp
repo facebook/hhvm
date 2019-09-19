@@ -79,6 +79,14 @@ std::string ClsCnsProfile::toString() const {
   return folly::sformat("Slot {}", getSlot());
 }
 
+folly::dynamic ClsCnsProfile::toDynamic() const {
+  if (!m_curSlot) return folly::dynamic();
+  return folly::dynamic::object("slot", m_curSlot == kInvalidSlot ?
+                                        folly::dynamic() :
+                                        getSlot())
+                               ("profileType", "ClsCnsProfile");
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}

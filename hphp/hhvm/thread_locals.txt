@@ -97,7 +97,12 @@ HPHP::s_cachedHash
 HPHP::jit::irgen::IRBuilder::optimizeInst(HPHP::jit::IRInstruction*, HPHP::jit::irgen::IRBuilder::CloneFlag, HPHP::jit::Block*)::instNest
 HPHP::Trace::dumpEntry(HPHP::Trace::RingBufferEntry const*)::indentDepth
 HPHP::high_arena_tcache # Only needed in lowptr builds.
-HPHP::s_bigint_data # hphp/zend/ is also used by Hack Native
-HPHP::s_bigint_data_guard # hphp/zend/ is also used by Hack Native
 HPHP::(anonymous namespace)::s_localCounters
 HPHP::WatchmanAutoload::t_adb
+
+# TODO: (T9683397) Un-whitelist these Call Threaded Interpreter TLS vars.
+HPHP::(anonymous namespace)::cc_lookups
+HPHP::(anonymous namespace)::cc_misses
+HPHP::(anonymous namespace)::s_predict
+HPHP::(anonymous namespace)::s_predictors
+HPHP::(anonymous namespace)::tl_cti_cache

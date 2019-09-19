@@ -629,12 +629,11 @@ std::string FileUtil::normalizeDir(const std::string &dirname) {
 }
 
 void FileUtil::find(std::vector<std::string> &out,
-                    const std::string &root, const std::string& path,
-                    bool php, bool js, bool other,
+                    const std::string &root, const std::string& path, bool php,
                     const std::set<std::string> *excludeDirs /* = NULL */,
                     const std::set<std::string> *excludeFiles /* = NULL */) {
 
-  find(root, path, php, js, other,
+  find(root, path, php,
        [&] (const std::string& rpath, bool isDir) {
          if (isDir) {
            return !excludeDirs || !excludeDirs->count(rpath);

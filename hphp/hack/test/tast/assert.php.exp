@@ -16,29 +16,30 @@
       });
   (Fun
      { f_span = [14:1-16:2]; f_annotation = (); f_mode = <opaque>;
-       f_ret = (Some ([14:22-26], (Hprim Tvoid)));
+       f_ret = ((void), (Some ([14:22-26], (Hprim Tvoid))));
        f_name = ([14:10-13], "\\foo"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic;
        f_params =
        [{ param_annotation = ([14:17-19], ?A);
-          param_hint =
-          (Some ([14:14-16],
-                 (Hoption ([14:15-16], (Happly (([14:15-16], "\\A"), []))))));
+          param_type_hint =
+          ((?A),
+           (Some ([14:14-16],
+                  (Hoption ([14:15-16], (Happly (([14:15-16], "\\A"), [])))))));
           param_is_reference = false; param_is_variadic = false;
           param_pos = [14:17-19]; param_name = "$x"; param_expr = None;
-          param_callconv = None; param_user_attributes = [] }
+          param_callconv = None; param_user_attributes = [];
+          param_visibility = None }
          ];
        f_body =
        { fb_ast =
-         [([15:3-27],
+         [([15:3-19],
            (Expr
-              (([15:3-26], void),
+              (([15:3-18], void),
                (Assert
                   (AE_assert
-                     (([15:10-25], bool),
-                      (InstanceOf (
-                         (([15:10-12], ?A), (Lvar ([15:10-12], $x))),
-                         (([15:24-25], A), (CI ([15:24-25], "\\A")))))))))))
+                     (([15:10-17], bool),
+                      (Is ((([15:10-12], ?A), (Lvar ([15:10-12], $x))),
+                         ([15:16-17], (Happly (([15:16-17], "\\A"), [])))))))))))
            ];
          fb_annotation = No unsafe blocks };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];

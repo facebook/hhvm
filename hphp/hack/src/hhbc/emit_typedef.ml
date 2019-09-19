@@ -1,37 +1,51 @@
-(**
+(*
  * Copyright (c) 2017, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the "hack" directory of this source tree.
  *
-*)
+ *)
 
 open Core_kernel
-
-module T = Tast
+module T = Aast
 
 let kind_to_type_info ~tparams ~namespace h =
   let nullable =
     match snd h with
     | Aast.Hoption _ -> true
-    | _ -> false in
-  Emit_type_hint.(hint_to_type_info
-    ~kind:TypeDef ~skipawaitable:false ~nullable ~tparams ~namespace h)
+    | _ -> false
+  in
+  Emit_type_hint.(
+    hint_to_type_info
+      ~kind:TypeDef
+      ~skipawaitable:false
+      ~nullable
+      ~tparams
+      ~namespace
+      h)
 
 let kind_to_type_structure ~tparams ~namespace ~is_opaque h =
-  Emit_type_constant.hint_to_type_constant ~is_typedef:true ~is_opaque ~tparams
-    ~namespace ~targ_map:SMap.empty h
+  Emit_type_constant.hint_to_type_constant
+    ~is_typedef:true
+    ~is_opaque
+    ~tparams
+    ~namespace
+    ~targ_map:SMap.empty
+    h
 
 let emit_typedef ast_typedef : Hhas_typedef.t =
   let namespace = ast_typedef.T.t_namespace in
   let typedef_name =
-    Hhbc_id.Class.elaborate_id namespace ast_typedef.T.t_name in
+    Hhbc_id.Class.elaborate_id namespace ast_typedef.T.t_name
+  in
   let typedef_attributes =
-    Emit_attribute.from_asts namespace ast_typedef.T.t_user_attributes in
+    Emit_attribute.from_asts namespace ast_typedef.T.t_user_attributes
+  in
   let tparams = Emit_body.tparams_to_strings ast_typedef.T.t_tparams in
   let typedef_type_info =
-    kind_to_type_info ~tparams ~namespace ast_typedef.T.t_kind in
+    kind_to_type_info ~tparams ~namespace ast_typedef.T.t_kind
+  in
   let is_opaque = ast_typedef.T.t_vis = T.Opaque in
   let typedef_type_structure =
     kind_to_type_structure ~tparams ~namespace ~is_opaque ast_typedef.T.t_kind
@@ -46,5 +60,6 @@ let emit_typedefs_from_program (ast : Tast.def list) =
   let aux def =
     match def with
     | T.Typedef td -> Some (emit_typedef td)
-    | _ -> None in
+    | _ -> None
+  in
   List.filter_map ast ~f:aux

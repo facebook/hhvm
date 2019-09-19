@@ -32,17 +32,18 @@ function error_handler3() {
   make_error();
   echo "==============================================================\n";
 }
-
+<<__EntryPoint>> function main(): void {
 error_reporting(0);
 
 var_dump(HH\deferred_errors());
 
-set_error_handler('error_handler1');
+set_error_handler(fun('error_handler1'));
 make_error();
 
-set_error_handler('error_handler2');
+set_error_handler(fun('error_handler2'));
 make_error();
 
-set_error_handler('error_handler3');
+set_error_handler(fun('error_handler3'));
 make_error();
 var_dump(HH\deferred_errors());
+}

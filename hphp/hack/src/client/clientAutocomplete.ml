@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -10,16 +10,13 @@
 open Core_kernel
 
 let go results output_json =
-  if output_json
-  then begin
+  if output_json then
     let results =
       List.map results AutocompleteService.autocomplete_result_to_json
     in
     print_endline (Hh_json.json_to_string (Hh_json.JSON_Array results))
-  end else begin
-    List.iter results begin fun res ->
-      let name = res.AutocompleteTypes.res_name in
-      let ty = res.AutocompleteTypes.res_ty in
-      print_endline (name^" "^ty)
-    end
-  end
+  else
+    List.iter results (fun res ->
+        let name = res.AutocompleteTypes.res_name in
+        let ty = res.AutocompleteTypes.res_ty in
+        print_endline (name ^ " " ^ ty))

@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/types.h"
 
 #include "hphp/runtime/vm/jit/bc-marker.h"
+#include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/types.h"
 
@@ -128,17 +129,23 @@ struct TargetProfile {
     , m_key{profTransID, bcOff, name}
   {}
 
-  TargetProfile(const TransContext& context,
+  TargetProfile(const IRUnit& unit,
                 BCMarker marker,
                 const StringData* name,
                 size_t extraSize = 0)
-    : TargetProfile(context.kind == TransKind::Profile ? context.transID
-                                                       : marker.profTransID(),
-                    context.kind,
+    : TargetProfile(unit.context().kind == TransKind::Profile ?
+                      unit.context().transID :
+                      marker.profTransID(),
+                    unit.context().kind,
                     marker.bcOff(),
                     name,
                     extraSize)
-  {}
+  {
+    if (dumpIREnabled(unit.context().kind)) {
+      auto const profile = rds::Profile<T>{m_key.transId, marker.bcOff(), name};
+      unit.annotationData->profileKeys.push_back(profile);
+    }
+  }
 
   /*
    * Calls T::reduce to fold the data from each local RDS slot.

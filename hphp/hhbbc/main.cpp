@@ -35,7 +35,6 @@
 
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/vm-worker.h"
 #include "hphp/hhvm/process-init.h"
 #include "hphp/runtime/vm/native.h"
@@ -47,6 +46,8 @@
 #include "hphp/hhbbc/options.h"
 #include "hphp/hhbbc/stats.h"
 #include "hphp/hhbbc/parallel.h"
+
+#include "hphp/util/rds-local.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -176,7 +177,6 @@ void parse_options(int argc, char** argv) {
     ("local-dce",               po::value(&options.LocalDCE))
     ("global-dce",              po::value(&options.GlobalDCE))
     ("remove-unused-locals",    po::value(&options.RemoveUnusedLocals))
-    ("remove-unused-clsref-slots", po::value(&options.RemoveUnusedClsRefSlots))
     ("insert-assertions",       po::value(&options.InsertAssertions))
     ("insert-stack-assertions", po::value(&options.InsertStackAssertions))
     ("filter-assertions",       po::value(&options.FilterAssertions))
@@ -255,11 +255,6 @@ UNUSED void validate_options() {
     std::cerr << "-fremove-unused-locals requires -fglobal-dce\n";
     std::exit(1);
   }
-
-  if (options.RemoveUnusedClsRefSlots && !options.GlobalDCE) {
-    std::cerr << "-fremove-unused-clsref-slots requires -fglobal-dce\n";
-    std::exit(1);
-  }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -287,10 +282,23 @@ std::pair<std::vector<std::unique_ptr<UnitEmitter>>,
     RuntimeOption::EvalHackArrCompatCheckRefBind =
     RuntimeOption::EvalHackArrCompatCheckFalseyPromote =
     RuntimeOption::EvalHackArrCompatCheckCompare =
+    RuntimeOption::EvalHackArrCompatCheckCompareNonAnyArray =
     RuntimeOption::EvalHackArrCompatCheckArrayPlus =
     RuntimeOption::EvalHackArrCompatCheckArrayKeyCast =
+    RuntimeOption::EvalHackArrCompatCheckNullHackArrayKey =
       gd.HackArrCompatNotices;
-  RuntimeOption::EvalForbidDynamicCalls      = gd.ForbidDynamicCalls;
+  RuntimeOption::EvalForbidDynamicCallsToFunc = gd.ForbidDynamicCallsToFunc;
+  RuntimeOption::EvalForbidDynamicCallsToClsMeth =
+    gd.ForbidDynamicCallsToClsMeth;
+  RuntimeOption::EvalForbidDynamicCallsToInstMeth =
+    gd.ForbidDynamicCallsToInstMeth;
+  RuntimeOption::EvalForbidDynamicConstructs = gd.ForbidDynamicConstructs;
+  RuntimeOption::EvalForbidDynamicCallsWithAttr =
+    gd.ForbidDynamicCallsWithAttr;
+  RuntimeOption::EvalWarnOnNonLiteralClsMeth =
+    gd.WarnOnNonLiteralClsMeth;
+  RuntimeOption::EvalLogKnownMethodsAsDynamicCalls =
+    gd.LogKnownMethodsAsDynamicCalls;
   RuntimeOption::EvalNoticeOnBuiltinDynamicCalls =
     gd.NoticeOnBuiltinDynamicCalls;
   RuntimeOption::EvalHackArrCompatIsArrayNotices =
@@ -370,7 +378,18 @@ void write_global_data(
   gd.EnableIntrinsicsExtension   = RuntimeOption::EnableIntrinsicsExtension;
   gd.APCProfile                  = std::move(apcProfile);
   gd.ReffinessInvariance         = RuntimeOption::EvalReffinessInvariance;
-  gd.ForbidDynamicCalls          = RuntimeOption::EvalForbidDynamicCalls;
+  gd.ForbidDynamicCallsToFunc    = RuntimeOption::EvalForbidDynamicCallsToFunc;
+  gd.ForbidDynamicCallsToClsMeth =
+    RuntimeOption::EvalForbidDynamicCallsToClsMeth;
+  gd.ForbidDynamicCallsToInstMeth =
+    RuntimeOption::EvalForbidDynamicCallsToInstMeth;
+  gd.ForbidDynamicConstructs     = RuntimeOption::EvalForbidDynamicConstructs;
+  gd.ForbidDynamicCallsWithAttr =
+    RuntimeOption::EvalForbidDynamicCallsWithAttr;
+  gd.WarnOnNonLiteralClsMeth =
+    RuntimeOption::EvalWarnOnNonLiteralClsMeth;
+  gd.LogKnownMethodsAsDynamicCalls =
+    RuntimeOption::EvalLogKnownMethodsAsDynamicCalls;
   gd.AbortBuildOnVerifyError     = RuntimeOption::EvalAbortBuildOnVerifyError;
   gd.EnableArgsInBacktraces      = RuntimeOption::EnableArgsInBacktraces;
   gd.NoticeOnBuiltinDynamicCalls =

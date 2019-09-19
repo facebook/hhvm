@@ -1,0 +1,4 @@
+File "bad_inout_use_arg15.php", line 9, characters 11-20:
+Expected argument marked inout to be contained in a local or a value-typed container (e.g. vec, dict, keyset, array). To use inout here, assign to/from a temporary local variable. (Typing[4208])
+File "bad_inout_use_arg15.php", line 8, characters 8-38:
+This is an object of type Map<string, ~Vector<int>>

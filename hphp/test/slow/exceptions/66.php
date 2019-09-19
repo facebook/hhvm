@@ -18,8 +18,10 @@ class C {
     $this->g();
   }
 }
+<<__EntryPoint>> function main(): void {
 $obj = new C;
 $obj->f();
 echo "------------------------\n";
 Exception::setTraceOptions(DEBUG_BACKTRACE_PROVIDE_OBJECT);
 $obj->f();
+}

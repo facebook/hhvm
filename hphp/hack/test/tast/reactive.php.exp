@@ -3,8 +3,11 @@
       f_ret =
       (((function(int): void)),
        (Some ([4:18-45],
-              (Hfun (FReactive, false, [([4:32-35], (Hprim Tint))], [None],
-                 [None], None, ([4:39-43], (Hprim Tvoid)), false)))));
+              Hfun {reactive_kind = FReactive; is_coroutine = false;
+                param_tys = [([4:32-35], (Hprim Tint))];
+                param_kinds = [None]; param_mutability = [None];
+                variadic_ty = None; return_ty = ([4:39-43], (Hprim Tvoid));
+                is_mutable_return = false})));
       f_name = ([4:10-13], "\\foo"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
       f_body =

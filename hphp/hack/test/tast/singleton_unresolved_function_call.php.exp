@@ -14,8 +14,12 @@
           param_type_hint =
           (((function(int): int)),
            (Some ([3:24-45],
-                  (Hfun (FNonreactive, false, [([3:35-38], (Hprim Tint))],
-                     [None], [None], None, ([3:41-44], (Hprim Tint)), false)))));
+                  Hfun {reactive_kind = FNonreactive; is_coroutine = false;
+                    param_tys = [([3:35-38], (Hprim Tint))];
+                    param_kinds = [None]; param_mutability = [None];
+                    variadic_ty = None;
+                    return_ty = ([3:41-44], (Hprim Tint));
+                    is_mutable_return = false})));
           param_is_reference = false; param_is_variadic = false;
           param_pos = [3:46-48]; param_name = "$f"; param_expr = None;
           param_callconv = None; param_user_attributes = [];

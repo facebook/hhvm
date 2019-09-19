@@ -68,7 +68,17 @@ and hint_ p env = function
     let h = hint env h in
     Toption h
   | Hlike h -> Tlike (hint env h)
-  | Hfun (reactivity, is_coroutine, hl, kl, muts, vh, h, mut_ret) ->
+  | Hfun
+      {
+        reactive_kind = reactivity;
+        is_coroutine;
+        param_tys = hl;
+        param_kinds = kl;
+        param_mutability = muts;
+        variadic_ty = vh;
+        return_ty = h;
+        is_mutable_return = mut_ret;
+      } ->
     let make_param ((p, _) as x) k mut =
       let fp_mutability =
         match mut with

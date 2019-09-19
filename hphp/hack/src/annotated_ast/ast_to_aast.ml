@@ -124,14 +124,16 @@ let converter
     | Hfun (is_coroutine, hl, param_kinds, variadic, h) ->
       ( p,
         Aast.Hfun
-          ( Aast.FNonreactive,
-            is_coroutine,
-            on_list on_hint hl,
-            param_kinds,
-            [],
-            on_variadic_hint variadic,
-            on_hint h,
-            true ) )
+          {
+            reactive_kind = Aast.FNonreactive;
+            is_coroutine;
+            param_tys = on_list on_hint hl;
+            param_kinds;
+            param_mutability = [];
+            variadic_ty = on_variadic_hint variadic;
+            return_ty = on_hint h;
+            is_mutable_return = true;
+          } )
     | Htuple hl -> (p, Aast.Htuple (on_list on_hint hl))
     | Happly (x, hl) -> (p, Aast.Happly (x, on_list on_hint hl))
     | Hshape s -> (p, Aast.Hshape (on_shape_info s))

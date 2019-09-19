@@ -3202,8 +3202,30 @@ and fixup_type_arg (env : Emit_env.t) ~isas (hint : Aast.hint) : Aast.hint =
     match hint with
     | Aast.Hoption h -> (p, Aast.Hoption (aux h))
     | Aast.Hlike h -> (p, Aast.Hlike (aux h))
-    | Aast.Hfun (fr, ic, hl, pkl, pml, vh, h, mr) ->
-      (p, Aast.Hfun (fr, ic, List.map ~f:aux hl, pkl, pml, vh, aux h, mr))
+    | Aast.Hfun
+        {
+          reactive_kind;
+          is_coroutine;
+          param_tys;
+          param_kinds;
+          param_mutability;
+          variadic_ty;
+          return_ty;
+          is_mutable_return;
+        } ->
+      ( p,
+        Aast.Hfun
+          {
+            reactive_kind;
+            is_coroutine;
+            param_tys = List.map ~f:aux param_tys;
+            param_kinds;
+            param_mutability;
+            (* TODO: shouldn't we also replace the hint in here? *)
+            variadic_ty;
+            return_ty = aux return_ty;
+            is_mutable_return;
+          } )
     | Aast.Htuple hl -> (p, Aast.Htuple (List.map ~f:aux hl))
     | Aast.Happly ((_, id), _)
       when List.mem ~equal:String.equal erased_tparams id ->

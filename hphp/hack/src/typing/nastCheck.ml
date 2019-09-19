@@ -96,7 +96,17 @@ and hint_ env p = function
   | Hsoft h
   | Hlike h ->
     hint env h
-  | Hfun (_, _, hl, _, _, variadic_hint, h, _) ->
+  | Hfun
+      {
+        reactive_kind = _;
+        is_coroutine = _;
+        param_tys = hl;
+        param_kinds = _;
+        param_mutability = _;
+        variadic_ty = variadic_hint;
+        return_ty = h;
+        is_mutable_return = _;
+      } ->
     List.iter hl (hint env);
     hint env h;
     Option.iter variadic_hint (hint env)

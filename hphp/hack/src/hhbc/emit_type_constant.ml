@@ -242,9 +242,19 @@ and hint_to_type_constant_list ~tparams ~namespace ~targ_map (h : Aast.hint) =
       ]
   | Aast.Haccess _ ->
     failwith "Structure not translated according to ast_to_nast"
-  | Aast.Hfun (_, true (* is_coroutine *), _, _, _, _, _, _) ->
+  | Aast.Hfun { is_coroutine = true; _ } ->
     failwith "Codegen for coroutine functions is not supported"
-  | Aast.Hfun (_, false (* is_coroutine *), hl, _kl, _, vh, h, _) ->
+  | Aast.Hfun
+      {
+        reactive_kind = _;
+        is_coroutine = false;
+        param_tys = hl;
+        param_kinds = _;
+        param_mutability = _;
+        variadic_ty = vh;
+        return_ty = h;
+        is_mutable_return = _;
+      } ->
     (* TODO(mqian): Implement for inout parameters *)
     let kind = get_kind ~tparams "fun" in
     let single_hint name h =

@@ -8,8 +8,11 @@
          param_type_hint =
          (((function(int): num)),
           (Some ([3:20-41],
-                 (Hfun (FNonreactive, false, [([3:31-34], (Hprim Tint))],
-                    [None], [None], None, ([3:37-40], (Hprim Tnum)), false)))));
+                 Hfun {reactive_kind = FNonreactive; is_coroutine = false;
+                   param_tys = [([3:31-34], (Hprim Tint))];
+                   param_kinds = [None]; param_mutability = [None];
+                   variadic_ty = None; return_ty = ([3:37-40], (Hprim Tnum));
+                   is_mutable_return = false})));
          param_is_reference = false; param_is_variadic = false;
          param_pos = [3:42-44]; param_name = "$f"; param_expr = None;
          param_callconv = None; param_user_attributes = [];

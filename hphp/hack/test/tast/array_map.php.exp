@@ -8,8 +8,12 @@
          param_type_hint =
          (((function(int): bool)),
           (Some ([4:3-24],
-                 (Hfun (FNonreactive, false, [([4:13-16], (Hprim Tint))],
-                    [None], [None], None, ([4:19-23], (Hprim Tbool)), false)))));
+                 Hfun {reactive_kind = FNonreactive; is_coroutine = false;
+                   param_tys = [([4:13-16], (Hprim Tint))];
+                   param_kinds = [None]; param_mutability = [None];
+                   variadic_ty = None;
+                   return_ty = ([4:19-23], (Hprim Tbool));
+                   is_mutable_return = false})));
          param_is_reference = false; param_is_variadic = false;
          param_pos = [4:25-27]; param_name = "$f"; param_expr = None;
          param_callconv = None; param_user_attributes = [];
@@ -18,11 +22,13 @@
           param_type_hint =
           (((function(int, string): bool)),
            (Some ([5:3-32],
-                  (Hfun (FNonreactive, false,
-                     [([5:13-16], (Hprim Tint)); ([5:18-24], (Hprim Tstring))
-                       ],
-                     [None; None], [None; None], None,
-                     ([5:27-31], (Hprim Tbool)), false)))));
+                  Hfun {reactive_kind = FNonreactive; is_coroutine = false;
+                    param_tys =
+                    [([5:13-16], (Hprim Tint)); ([5:18-24], (Hprim Tstring))];
+                    param_kinds = [None; None];
+                    param_mutability = [None; None]; variadic_ty = None;
+                    return_ty = ([5:27-31], (Hprim Tbool));
+                    is_mutable_return = false})));
           param_is_reference = false; param_is_variadic = false;
           param_pos = [5:33-35]; param_name = "$g"; param_expr = None;
           param_callconv = None; param_user_attributes = [];
@@ -32,15 +38,18 @@
           param_type_hint =
           (((function(int, string, num): Container<int>)),
            (Some ([6:3-47],
-                  (Hfun (FNonreactive, false,
-                     [([6:13-16], (Hprim Tint));
-                       ([6:18-24], (Hprim Tstring));
-                       ([6:26-29], (Hprim Tnum))],
-                     [None; None; None], [None; None; None], None,
-                     ([6:32-46],
-                      (Happly (([6:32-41], "\\Container"),
-                         [([6:42-45], (Hprim Tint))]))),
-                     false)))));
+                  Hfun {reactive_kind = FNonreactive; is_coroutine = false;
+                    param_tys =
+                    [([6:13-16], (Hprim Tint)); ([6:18-24], (Hprim Tstring));
+                      ([6:26-29], (Hprim Tnum))];
+                    param_kinds = [None; None; None];
+                    param_mutability = [None; None; None];
+                    variadic_ty = None;
+                    return_ty =
+                    ([6:32-46],
+                     (Happly (([6:32-41], "\\Container"),
+                        [([6:42-45], (Hprim Tint))])));
+                    is_mutable_return = false})));
           param_is_reference = false; param_is_variadic = false;
           param_pos = [6:48-50]; param_name = "$h"; param_expr = None;
           param_callconv = None; param_user_attributes = [];
@@ -49,9 +58,12 @@
           param_type_hint =
           (((function(num): bool)),
            (Some ([7:3-24],
-                  (Hfun (FNonreactive, false, [([7:13-16], (Hprim Tnum))],
-                     [None], [None], None, ([7:19-23], (Hprim Tbool)), false
-                     )))));
+                  Hfun {reactive_kind = FNonreactive; is_coroutine = false;
+                    param_tys = [([7:13-16], (Hprim Tnum))];
+                    param_kinds = [None]; param_mutability = [None];
+                    variadic_ty = None;
+                    return_ty = ([7:19-23], (Hprim Tbool));
+                    is_mutable_return = false})));
           param_is_reference = false; param_is_variadic = false;
           param_pos = [7:25-27]; param_name = "$i"; param_expr = None;
           param_callconv = None; param_user_attributes = [];

@@ -1687,8 +1687,10 @@ module Make (GetLocals : GetLocals) = struct
       (* Only check the values because shape field names are always legal *)
       List.iter fdl ~f:(fun (_, e) -> check_constant_expr env e)
     | Aast.Call (_, (_, Aast.Id (_, cn)), _, el, uel)
-      when cn = SN.SpecialFunctions.tuple ->
-      (* Tuples are not really function calls, they are just parsed that way*)
+      when cn = SN.SpecialFunctions.fun_
+           || cn = SN.SpecialFunctions.class_meth
+           (* Tuples are not really function calls, they are just parsed that way*)
+           || cn = SN.SpecialFunctions.tuple ->
       arg_unpack_unexpected uel;
       List.iter el ~f:(check_constant_expr env)
     | Aast.Collection (id, _, l) ->

@@ -379,10 +379,10 @@ let convert_to_tast ast =
     (* Ignore these errors to match legacy AST behavior *)
     | 2086
     (* Naming.MethodNeedsVisibility *)
-
+    
     | 2102
     (* Naming.UnsupportedTraitUseAs *)
-
+    
     | 2103 (* Naming.UnsupportedInsteadOf *) ->
       acc
     | _ (* Emit fatal parse otherwise *) ->
@@ -464,6 +464,7 @@ let extract_facts ~filename text =
         ~disable_legacy_soft_typehints:(disable_legacy_soft_typehints co)
         ~allow_new_attribute_syntax:(allow_new_attribute_syntax co)
         ~disable_legacy_attribute_syntax:(disable_legacy_attribute_syntax co)
+        ~disallow_func_ptrs_in_constants:(disallow_func_ptrs_in_constants co)
         ~filename
         ~text
       |> Option.value ~default:"");
@@ -518,7 +519,8 @@ let make_popt () =
       ~disallow_silence:false
       ~const_static_props:(const_static_props co)
       ~abstract_static_props:(abstract_static_props co)
-      ~disable_unset_class_const:(disable_unset_class_const co))
+      ~disable_unset_class_const:(disable_unset_class_const co)
+      ~disallow_func_ptrs_in_constants:(disallow_func_ptrs_in_constants co))
 
 let process_single_source_unit
     compiler_options handle_output handle_exception filename source_text =

@@ -4490,12 +4490,19 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
           (syntax_to_list_no_separators clauses)
       | _ -> (names, errors)
 
-    let rec check_constant_expression errors node =
+    let rec check_constant_expression env errors node =
       (* __FUNTION_CREDENTIAL__ emits an object,
   so it cannot be used in a constant expression*)
       let not_function_credential token =
         let to_upper = String.uppercase (Token.text token) in
         String.compare to_upper "__FUNCTION_CREDENTIAL__" <> 0
+      in
+      let is_whitelisted_function receiver_token =
+        (not (ParserOptions.disallow_func_ptrs_in_constants env.parser_options))
+        && SSet.mem
+             (Token.text receiver_token)
+             (SSet.of_list
+                [SN.SpecialFunctions.fun_; SN.SpecialFunctions.class_meth])
       in
       let is_namey token =
         match Token.kind token with
@@ -4586,7 +4593,7 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
                | Tilde ->
                  true
                | _ -> false) ->
-        check_constant_expression errors prefix_unary_operand
+        check_constant_expression env errors prefix_unary_operand
       | BinaryExpression
           {
             binary_left_operand;
@@ -4622,8 +4629,12 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
                | QuestionColon ->
                  true
                | _ -> false) ->
-        let errors = check_constant_expression errors binary_left_operand in
-        let errors = check_constant_expression errors binary_right_operand in
+        let errors =
+          check_constant_expression env errors binary_left_operand
+        in
+        let errors =
+          check_constant_expression env errors binary_right_operand
+        in
         errors
       | ConditionalExpression
           {
@@ -4632,12 +4643,12 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
             conditional_alternative;
             _;
           } ->
-        let errors = check_constant_expression errors conditional_test in
+        let errors = check_constant_expression env errors conditional_test in
         let errors =
-          check_constant_expression errors conditional_consequence
+          check_constant_expression env errors conditional_consequence
         in
         let errors =
-          check_constant_expression errors conditional_alternative
+          check_constant_expression env errors conditional_alternative
         in
         errors
       | SimpleInitializer
@@ -4656,7 +4667,7 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
       | SimpleInitializer { simple_initializer_value = e; _ }
       | ParenthesizedExpression { parenthesized_expression_expression = e; _ }
         ->
-        check_constant_expression errors e
+        check_constant_expression env errors e
       | CollectionLiteralExpression
           {
             collection_literal_name =
@@ -4673,7 +4684,7 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
           }
         when is_namey token ->
         syntax_to_list_no_separators lst
-        |> List.fold_left ~init:errors ~f:check_constant_expression
+        |> List.fold_left ~init:errors ~f:(check_constant_expression env)
       | TupleExpression { tuple_expression_items = lst; _ }
       | KeysetIntrinsicExpression { keyset_intrinsic_members = lst; _ }
       | VarrayIntrinsicExpression { varray_intrinsic_members = lst; _ }
@@ -4684,12 +4695,12 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
       | ArrayCreationExpression { array_creation_members = lst; _ }
       | ShapeExpression { shape_expression_fields = lst; _ } ->
         syntax_to_list_no_separators lst
-        |> List.fold_left ~init:errors ~f:check_constant_expression
+        |> List.fold_left ~init:errors ~f:(check_constant_expression env)
       | ElementInitializer { element_key = n; element_value = v; _ }
       | FieldInitializer
           { field_initializer_name = n; field_initializer_value = v; _ } ->
-        let errors = check_constant_expression errors n in
-        let errors = check_constant_expression errors v in
+        let errors = check_constant_expression env errors n in
+        let errors = check_constant_expression env errors v in
         errors
       | ScopeResolutionExpression
           { scope_resolution_qualifier; scope_resolution_name; _ }
@@ -4702,7 +4713,7 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
             as_right_operand = { syntax = LikeTypeSpecifier _; _ };
             _;
           } ->
-        check_constant_expression errors e
+        check_constant_expression env errors e
       | AsExpression
           {
             as_left_operand = e;
@@ -4715,7 +4726,21 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
           }
         when text s = SN.FB.cIncorrectType
              || text s = Utils.strip_ns SN.FB.cIncorrectType ->
-        check_constant_expression errors e
+        check_constant_expression env errors e
+      | FunctionCallExpression
+          {
+            function_call_receiver = { syntax = Token receiver_token; _ };
+            function_call_argument_list;
+            _;
+          } ->
+        TokenKind.(
+          (match Token.kind receiver_token with
+          | Name when is_whitelisted_function receiver_token ->
+            syntax_to_list_no_separators function_call_argument_list
+            |> List.fold_left ~init:errors ~f:(check_constant_expression env)
+          | _ ->
+            make_error_from_node node SyntaxError.invalid_constant_initializer
+            :: errors))
       | _ ->
         make_error_from_node node SyntaxError.invalid_constant_initializer
         :: errors
@@ -4776,7 +4801,10 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
             cd.constant_declarator_initializer
         in
         let errors =
-          check_constant_expression errors cd.constant_declarator_initializer
+          check_constant_expression
+            env
+            errors
+            cd.constant_declarator_initializer
         in
         let errors =
           produce_error
@@ -5026,7 +5054,7 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
         errors
       | _ -> errors
 
-    let enumerator_errors node errors =
+    let enumerator_errors env node errors =
       match syntax node with
       | Enumerator { enumerator_name = name; enumerator_value = value; _ } ->
         let errors =
@@ -5036,7 +5064,7 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
           else
             errors
         in
-        let errors = check_constant_expression errors value in
+        let errors = check_constant_expression env errors value in
         errors
       | _ -> errors
 
@@ -5259,7 +5287,7 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
       match syntax node with
       | ParameterDeclaration { parameter_default_value; _ }
         when ParserOptions.const_default_func_args env.parser_options ->
-        check_constant_expression errors parameter_default_value
+        check_constant_expression env errors parameter_default_value
       | _ -> errors
 
     let find_syntax_errors env =
@@ -5454,7 +5482,7 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
             let errors = enum_decl_errors node errors in
             (trait_require_clauses, names, errors)
           | Enumerator _ ->
-            let errors = enumerator_errors node errors in
+            let errors = enumerator_errors env node errors in
             (trait_require_clauses, names, errors)
           | PostfixUnaryExpression _
           | BinaryExpression _
@@ -5474,10 +5502,10 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
                 SyntaxError.parent_static_prop_decl
                 init
             in
-            let errors = check_constant_expression errors init in
+            let errors = check_constant_expression env errors init in
             (trait_require_clauses, names, errors)
           | XHPClassAttribute { xhp_attribute_decl_initializer = init; _ } ->
-            let errors = check_constant_expression errors init in
+            let errors = check_constant_expression env errors init in
             (trait_require_clauses, names, errors)
           | SoftTypeSpecifier _ ->
             let errors =

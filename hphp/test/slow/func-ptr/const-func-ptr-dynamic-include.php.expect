@@ -1,0 +1,10 @@
+===== run with include1 ======
+string(22) "function from include1"
+string(20) "method from include1"
+string(22) "function from include1"
+string(20) "method from include1"
+===== run with include2 ======
+string(22) "function from include2"
+string(20) "method from include2"
+string(22) "function from include2"
+string(20) "method from include2"

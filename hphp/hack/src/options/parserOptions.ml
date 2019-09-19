@@ -92,6 +92,12 @@ let disable_halt_compiler = GlobalOptions.po_disable_halt_compiler
 let with_disable_halt_compiler po b =
   { po with GlobalOptions.po_disable_halt_compiler = b }
 
+let disallow_func_ptrs_in_constants =
+  GlobalOptions.po_disallow_func_ptrs_in_constants
+
+let with_disallow_func_ptrs_in_constants po b =
+  { po with GlobalOptions.po_disallow_func_ptrs_in_constants = b }
+
 let make
     ~auto_namespace_map
     ~codegen
@@ -109,7 +115,8 @@ let make
     ~const_static_props
     ~abstract_static_props
     ~disable_unset_class_const
-    ~disable_halt_compiler =
+    ~disable_halt_compiler
+    ~disallow_func_ptrs_in_constants =
   GlobalOptions.
     {
       default with
@@ -131,4 +138,5 @@ let make
       po_abstract_static_props = abstract_static_props;
       po_disable_unset_class_const = disable_unset_class_const;
       po_disable_halt_compiler = disable_halt_compiler;
+      po_disallow_func_ptrs_in_constants = disallow_func_ptrs_in_constants;
     }

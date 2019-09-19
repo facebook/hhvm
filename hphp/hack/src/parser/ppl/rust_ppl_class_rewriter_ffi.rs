@@ -42,6 +42,7 @@ caml!(parse_and_rewrite_ppl_classes, |ocaml_source_text|, <res>, {
         php5_compat_mode : false,
         codegen : false,
         allow_new_attribute_syntax : false,
+        disallow_func_ptrs_in_constants : false,
     };
 
     let mut parser = PositionedSyntaxParser::make(&source_text, env);

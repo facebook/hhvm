@@ -396,6 +396,8 @@ let load config_filename options =
       ?glean_hostname:(string_opt "glean_hostname" config)
       ?glean_port:(int_opt "glean_port" config)
       ?glean_reponame:(string_opt "glean_reponame" config)
+      ?po_disallow_func_ptrs_in_constants:
+        (bool_opt "disallow_func_ptrs_in_constants" config)
       ()
   in
   Errors.ignored_fixme_codes := GlobalOptions.ignored_fixme_codes global_opts;

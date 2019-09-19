@@ -38,6 +38,7 @@ fn parse(file_path: String, parse_only: bool) {
         php5_compat_mode: true,
         hhvm_compat_mode: true,
         allow_new_attribute_syntax: false,
+        disallow_func_ptrs_in_constants: false,
         filename: path,
     };
 

@@ -1,0 +1,6 @@
+File "meth_caller.php", line 10, characters 24-53:
+Invalid expression in constant initializer (Parsing[1002])
+File "meth_caller.php", line 14, characters 21-50:
+Invalid expression in constant initializer (Parsing[1002])
+File "meth_caller.php", line 14, characters 21-51:
+Illegal constant value (Naming[2023])

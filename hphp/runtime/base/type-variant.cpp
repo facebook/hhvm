@@ -370,6 +370,8 @@ static bool isAllowedAsConstantValueImpl(TypedValue tv) {
     case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfResource:
+    case KindOfFunc:
+    case KindOfClsMeth:
       return true;
 
     case KindOfVec:
@@ -391,9 +393,7 @@ static bool isAllowedAsConstantValueImpl(TypedValue tv) {
     case KindOfUninit:
     case KindOfObject:
     case KindOfRef:
-    case KindOfFunc:
     case KindOfClass:
-    case KindOfClsMeth:
     case KindOfRecord:
       return false;
   }

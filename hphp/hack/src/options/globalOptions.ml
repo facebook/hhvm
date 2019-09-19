@@ -119,6 +119,7 @@ type t = {
   glean_hostname: string;
   glean_port: int;
   glean_reponame: string;
+  po_disallow_func_ptrs_in_constants: bool;
 }
 [@@deriving show]
 
@@ -278,6 +279,7 @@ let default =
     glean_hostname = "";
     glean_port = 0;
     glean_reponame = "www.autocomplete";
+    po_disallow_func_ptrs_in_constants = false;
   }
 
 let make
@@ -374,6 +376,8 @@ let make
     ?(glean_hostname = default.glean_hostname)
     ?(glean_port = default.glean_port)
     ?(glean_reponame = default.glean_reponame)
+    ?(po_disallow_func_ptrs_in_constants =
+      default.po_disallow_func_ptrs_in_constants)
     () =
   {
     tco_safe_array;
@@ -456,6 +460,7 @@ let make
     glean_hostname;
     glean_port;
     glean_reponame;
+    po_disallow_func_ptrs_in_constants;
   }
 
 let tco_safe_array t = t.tco_safe_array
@@ -632,3 +637,5 @@ let glean_reponame t = t.glean_reponame
 let set_infer_missing t w = { t with tco_infer_missing = w }
 
 let po_parser_errors_only t = t.po_parser_errors_only
+
+let po_disallow_func_ptrs_in_constants t = t.po_disallow_func_ptrs_in_constants

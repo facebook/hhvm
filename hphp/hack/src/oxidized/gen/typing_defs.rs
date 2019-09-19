@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4cd424616336ab71964ca8d198b899ef>>
+// @generated SignedSource<<a38d9ba2a4cbdbfa37d5f352de46503e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -130,7 +130,6 @@ pub enum FunTparamsKind {
 pub struct FunType<Ty> {
     pub pos: pos::Pos,
     pub deprecated: Option<String>,
-    pub abstract_: bool,
     pub is_coroutine: bool,
     pub arity: FunArity<Ty>,
     pub tparams: (Vec<Tparam<Ty>>, FunTparamsKind),

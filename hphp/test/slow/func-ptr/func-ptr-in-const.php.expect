@@ -1,0 +1,19 @@
+dict(2) {
+  ["foo"]=>
+  function(foo)
+  ["meth"]=>
+classMeth{
+    class(Cls)
+    function(meth)
+}
+}
+dict(2) {
+  ["foo"]=>
+  function(foo)
+  ["meth"]=>
+classMeth{
+    class(Cls)
+    function(meth)
+}
+}
+bool(true)

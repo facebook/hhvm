@@ -22,6 +22,7 @@ pub struct ExtractAsJsonOpts {
     pub php5_compat_mode: bool,
     pub hhvm_compat_mode: bool,
     pub allow_new_attribute_syntax: bool,
+    pub disallow_func_ptrs_in_constants: bool,
     pub filename: RelativePath,
 }
 
@@ -40,6 +41,7 @@ pub fn from_text(text: &str, opts: ExtractAsJsonOpts) -> Option<Facts> {
         hhvm_compat_mode: opts.hhvm_compat_mode,
         is_experimental_mode: is_experimental,
         allow_new_attribute_syntax: opts.allow_new_attribute_syntax,
+        disallow_func_ptrs_in_constants: opts.disallow_func_ptrs_in_constants,
         ..ParserEnv::default()
     };
     let mut parser = FactsParser::make(&text, env);

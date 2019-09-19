@@ -279,6 +279,8 @@ type t = {
   glean_port: int;
   (* Reponame used for glean connection, default to "www.autocomplete" *)
   glean_reponame: string;
+  (* Flag to disallow HH\fun and HH\class_meth in constants and constant initializers *)
+  po_disallow_func_ptrs_in_constants: bool;
 }
 [@@deriving show]
 
@@ -362,6 +364,7 @@ val make :
   ?glean_hostname:string ->
   ?glean_port:int ->
   ?glean_reponame:string ->
+  ?po_disallow_func_ptrs_in_constants:bool ->
   unit ->
   t
 
@@ -552,3 +555,5 @@ val glean_hostname : t -> string
 val glean_port : t -> int
 
 val glean_reponame : t -> string
+
+val po_disallow_func_ptrs_in_constants : t -> bool

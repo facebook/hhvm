@@ -24,20 +24,14 @@ class ExtractStandaloneDriver(CommonTestDriver):
         func = func.replace("::", "++")
         return func.replace("\\", "__")
 
-    def equals_to_expected(self, output: str, fname_expected: str) -> bool:
+    def assert_output_matches(self, output: str, fname_expected: str) -> None:
         expected_file = os.path.join(
             self.repo_dir, "expected/{}.php.exp".format(fname_expected)
         )
         with open(expected_file) as expected:
             expected = expected.read().strip()
             output = output.strip()
-            if output != expected:
-                print("Generated code is not equal to expected:", file=stderr)
-                print(
-                    "\n".join(ndiff(expected.splitlines(), output.splitlines())),
-                    file=stderr,
-                )
-            return output == expected
+            self.assertMultiLineEqual(output, expected)
 
     def check_extract_standalone(
         self, function_to_extract: str, typecheck=True
@@ -62,7 +56,7 @@ class ExtractStandaloneDriver(CommonTestDriver):
             assert self.run_single_typecheck(extracted_file) == 0
         # Check if the generated code is the same as expected
         expected_fname = self.function_to_filename(function_to_extract)
-        assert self.equals_to_expected(generated_code, expected_fname)
+        self.assert_output_matches(generated_code, expected_fname)
 
     def check_failing(self, function_to_extract: str) -> None:
         self.check_extract_standalone(function_to_extract, typecheck=False)
@@ -81,35 +75,34 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
     def get_test_driver(cls) -> ExtractStandaloneDriver:
         return ExtractStandaloneDriver()
 
-    def test(self) -> None:
-        list(
-            map(
-                self.test_driver.check_extract_standalone,
-                [
-                    "\\shallow_toplevel",
-                    "\\with_typedefs",
-                    "\\with_generics",
-                    "\\Ns\\same_name_different_namespaces",
-                    "\\with_interface",
-                    "\\with_overriding",
-                    "\\with_enum_and_constant",
-                    "\\with_traits",
-                    "\\with_requiring_trait",
-                    "\\with_nontrivial_fun_decls",
-                    "\\call_defaulted",
-                    "\\use_properties",
-                    "\\call_constructors",
-                    "\\with_constants",
-                    "\\SimpleClass::simple_method",
-                    "\\with_type_constants",
-                    "\\WithAbstractConst::with_abstract_type_constants",
-                    "\\WithConst::with_type_constants",
-                    "\\with_generic_type",
-                    "\\with_generic_method",
-                    "\\builtin_argument_types",
-                ],
-            )
-        )
+    def test_extract(self) -> None:
+        paths = [
+            "\\shallow_toplevel",
+            "\\with_typedefs",
+            "\\with_generics",
+            "\\Ns\\same_name_different_namespaces",
+            "\\with_interface",
+            "\\with_overriding",
+            "\\with_enum_and_constant",
+            "\\with_traits",
+            "\\with_requiring_trait",
+            "\\with_nontrivial_fun_decls",
+            "\\call_defaulted",
+            "\\use_properties",
+            "\\call_constructors",
+            "\\with_constants",
+            "\\SimpleClass::simple_method",
+            "\\with_type_constants",
+            "\\WithAbstractConst::with_abstract_type_constants",
+            "\\WithConst::with_type_constants",
+            "\\with_generic_type",
+            "\\with_generic_method",
+            "\\builtin_argument_types",
+        ]
+
+        for path in paths:
+            with self.subTest(path=path):
+                self.test_driver.check_extract_standalone(path)
 
     def test_failing(self) -> None:
         self.test_driver.check_failing("\\nonexistent_function")

@@ -1,7 +1,6 @@
 <?hh
 
 
-<<__DynamicallyConstructible>>
 class C {
   const x = "C::x constant";
 }

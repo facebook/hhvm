@@ -47,7 +47,7 @@ caml_raise!(parse_and_lower_from_text, |ocaml_source_text|, <res>, {
     let mode = parse_mode(&source_text).unwrap_or(file_info::Mode::Mpartial);
 
     let env = ParserEnv {
-        is_experimental_mode : false,
+        is_experimental_mode : mode == file_info::Mode::Mexperimental,
         hhvm_compat_mode : false,
         php5_compat_mode : false,
         codegen : false,

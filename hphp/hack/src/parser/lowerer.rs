@@ -326,13 +326,13 @@ where
     }
 
     fn raise_parsing_error(node: &Syntax<T, V>, env: &mut Env, msg: &str) {
-        // TODO
+        //TODO:
     }
 
-    fn raise_parsing_error_pos(pos: Pos, env: &mut Env, msg: &str) {
+    fn raise_parsing_error_pos(pos: &Pos, env: &mut Env, msg: &str) {
         // TODO: enable should_surface_errors
         if env.codegen() && !env.lower_coroutines() {
-            env.lowpri_errors().push((pos, String::from(msg)))
+            env.lowpri_errors().push((pos.clone(), String::from(msg)))
         }
     }
 
@@ -355,7 +355,7 @@ where
         node.text(env.source_text())
     }
 
-    fn lowering_error(env: &mut Env, pos: Pos, text: &str, syntax_kind: &str) {
+    fn lowering_error(env: &mut Env, pos: &Pos, text: &str, syntax_kind: &str) {
         if env.is_typechecker() && env.lowpri_errors().is_empty() {
             // TODO: Ocaml also checks Errors.currently_has_errors
             Self::raise_parsing_error_pos(
@@ -374,7 +374,7 @@ where
     ) -> ret!(N) {
         let pos = Self::p_pos(node, env);
         let text = Self::text(node, env);
-        Self::lowering_error(env, pos, &text, expecting);
+        Self::lowering_error(env, &pos, &text, expecting);
         Err(Error::APIMissingSyntax {
             expecting: String::from(expecting),
             pos: Self::p_pos(node, env),
@@ -398,8 +398,24 @@ where
         }
     }
 
-    fn pos_qualified_name(node: &Syntax<T, V>, env: &Env) -> ret_aast!(Sid) {
-        not_impl!()
+    fn pos_qualified_name(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Sid) {
+        if let QualifiedName(c) = &node.syntax {
+            if let SyntaxList(l) = &c.qualified_name_parts.syntax {
+                let p = Self::p_pos(node, env);
+                let mut s = String::with_capacity(node.width());
+                for i in l.iter() {
+                    match &i.syntax {
+                        ListItem(li) => {
+                            s += li.list_item.text(env.source_text());
+                            s += li.list_separator.text(env.source_text());
+                        }
+                        _ => s += i.text(env.source_text()),
+                    }
+                }
+                return Ok(ast_defs::Id(p, s));
+            }
+        }
+        Self::missing_syntax(None, "qualified name", node, env)
     }
 
     #[inline]
@@ -805,12 +821,62 @@ where
         Ok(aast::Stmt(pos, Box::new(aast::Stmt_::Block(body))))
     }
 
+    fn is_simple_assignment_await_expression(node: &Syntax<T, V>) -> bool {
+        match &node.syntax {
+            BinaryExpression(c) => {
+                Self::token_kind(&c.binary_operator) == Some(TK::Equal)
+                    && Self::is_simple_await_expression(&c.binary_right_operand)
+            }
+            _ => false,
+        }
+    }
+
+    fn is_simple_await_expression(node: &Syntax<T, V>) -> bool {
+        match &node.syntax {
+            PrefixUnaryExpression(c) => {
+                Self::token_kind(&c.prefix_unary_operator) == Some(TK::Await)
+            }
+            _ => false,
+        }
+    }
+
+    fn lift_awaits_in_statement<F>(f: F, node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Stmt<,>)
+    where
+        F: FnOnce(&mut Env) -> ret_aast!(Stmt<,>),
+    {
+        f(env)
+    }
+
     fn p_stmt(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Stmt<,>) {
         // TODO: clear_statement_scope & extract_and_push_docblock
         // TODO: add lift_awaits_in_statement
         let pos = Self::p_pos(node, env);
+        use aast::{Stmt as S, Stmt_ as S_};
         match &node.syntax {
+            SwitchStatement(c) => not_impl!(),
+            IfStatement(c) => not_impl!(),
+            ExpressionStatement(c) => {
+                let expr = &c.expression_statement_expression;
+                let f = |e: &mut Env| -> ret_aast!(Stmt<,>) {
+                    if expr.is_missing() {
+                        Ok(S::new(pos, S_::Noop))
+                    } else {
+                        Ok(S::new(
+                            pos,
+                            S_::Expr(Self::p_expr_with_loc(ExprLocation::AsStatement, expr, e)?),
+                        ))
+                    }
+                };
+                if Self::is_simple_assignment_await_expression(expr)
+                    || Self::is_simple_await_expression(expr)
+                {
+                    f(env)
+                } else {
+                    Self::lift_awaits_in_statement(f, node, env)
+                }
+            }
             CompoundStatement(c) => Self::handle_loop_body(pos, &c.compound_statements, env),
+            SyntaxList(_) => Self::handle_loop_body(pos, node, env),
             ReturnStatement(c) => {
                 let expr = match &c.return_expression.syntax {
                     Missing => None,
@@ -2170,6 +2236,69 @@ where
         }
     }
 
+    fn p_namespace_use_kind(kind: &Syntax<T, V>, env: &mut Env) -> ret_aast!(NsKind) {
+        use aast::NsKind::*;
+        match &kind.syntax {
+            Missing => Ok(NSClassAndNamespace),
+            _ => match Self::token_kind(kind) {
+                Some(TK::Namespace) => Ok(NSNamespace),
+                Some(TK::Type) => Ok(NSClass),
+                Some(TK::Function) => Ok(NSFun),
+                Some(TK::Const) => Ok(NSConst),
+                _ => Self::missing_syntax(None, "namespace use kind", kind, env),
+            },
+        }
+    }
+
+    fn p_namespace_use_clause(
+        prefix: Option<&Syntax<T, V>>,
+        kind: ret_aast!(NsKind),
+        node: &Syntax<T, V>,
+        env: &mut Env,
+    ) -> ret!((aast!(NsKind), aast!(Sid), aast!(Sid))) {
+        lazy_static! {
+            static ref NAMESPACE_USE: regex::Regex = regex::Regex::new("[^\\\\]*$").unwrap();
+        }
+
+        match &node.syntax {
+            NamespaceUseClause(c) => {
+                let clause_kind = &c.namespace_use_clause_kind;
+                let alias = &c.namespace_use_alias;
+                let name = &c.namespace_use_name;
+                let ast_defs::Id(p, n) = match (prefix, Self::pos_name(name, env)?) {
+                    (None, id) => id,
+                    (Some(prefix), ast_defs::Id(p, n)) => {
+                        ast_defs::Id(p, Self::pos_name(prefix, env)?.1 + &n)
+                    }
+                };
+                let alias = if alias.is_missing() {
+                    let x = NAMESPACE_USE.find(&n).unwrap().as_str();
+                    ast_defs::Id(p.clone(), x.to_string())
+                } else {
+                    Self::pos_name(alias, env)?
+                };
+                let kind = if clause_kind.is_missing() {
+                    kind
+                } else {
+                    Self::p_namespace_use_kind(clause_kind, env)
+                }?;
+                Ok((
+                    kind,
+                    ast_defs::Id(
+                        p,
+                        if n.len() > 0 && n.chars().nth(0) == Some('\\') {
+                            n
+                        } else {
+                            String::from("\\") + &n
+                        },
+                    ),
+                    alias,
+                ))
+            }
+            _ => Self::missing_syntax(None, "namespace use clause", node, env),
+        }
+    }
+
     fn p_def(node: &Syntax<T, V>, env: &mut Env) -> ret!(Vec<aast!(Def<,>)>) {
         let doc_comment_opt = Self::extract_docblock(node, env);
         match &node.syntax {
@@ -2482,9 +2611,51 @@ where
                     Box::new(aast::Stmt_::Expr(expr)),
                 ))])
             }
-            NamespaceDeclaration(_) => not_impl!(),
-            NamespaceGroupUseDeclaration(_) => not_impl!(),
-            NamespaceUseDeclaration(_) => not_impl!(),
+            NamespaceDeclaration(c) => {
+                let name = &c.namespace_name;
+                let defs = match &c.namespace_body.syntax {
+                    NamespaceBody(c) => {
+                        let env1 = &mut env.clone_non_tls();
+                        itertools::concat(
+                            Self::as_list(&c.namespace_declarations)
+                                .iter()
+                                .map(|n| Self::p_def(n, env1))
+                                .collect::<std::result::Result<Vec<Vec<_>>, _>>()?,
+                        )
+                    }
+                    _ => vec![],
+                };
+                Ok(vec![aast::Def::Namespace(Self::pos_name(name, env)?, defs)])
+            }
+            NamespaceGroupUseDeclaration(c) => {
+                let uses: std::result::Result<Vec<_>, _> =
+                    Self::as_list(&c.namespace_group_use_clauses)
+                        .iter()
+                        .map(|n| {
+                            Self::p_namespace_use_clause(
+                                Some(&c.namespace_group_use_prefix),
+                                Self::p_namespace_use_kind(&c.namespace_group_use_kind, env),
+                                n,
+                                env,
+                            )
+                        })
+                        .collect();
+                Ok(vec![aast::Def::NamespaceUse(uses?)])
+            }
+            NamespaceUseDeclaration(c) => {
+                let uses: std::result::Result<Vec<_>, _> = Self::as_list(&c.namespace_use_clauses)
+                    .iter()
+                    .map(|n| {
+                        Self::p_namespace_use_clause(
+                            None,
+                            Self::p_namespace_use_kind(&c.namespace_use_kind, env),
+                            n,
+                            env,
+                        )
+                    })
+                    .collect();
+                Ok(vec![aast::Def::NamespaceUse(uses?)])
+            }
             FileAttributeSpecification(_) => {
                 Ok(vec![aast::Def::FileAttributes(aast::FileAttribute {
                     user_attributes: Self::p_user_attribute(node, env)?,
@@ -2497,6 +2668,65 @@ where
                 Ok(vec![])
             }
             _ => Ok(vec![aast::Def::Stmt(Self::p_stmt(node, env)?)]),
+        }
+    }
+
+    // TODO:
+    fn partial_should_check_error() -> bool {
+        true
+    }
+
+    fn post_process(env: &mut Env, program: aast!(Program<,>), acc: &mut aast!(Program<,>)) {
+        use aast::{Def::*, Expr_::*, Stmt_::*};
+        let mut saw_ns: Option<(aast!(Sid), aast!(Program<,>))> = None;
+        for def in program.into_iter() {
+            if let Namespace(_, _) = &def {
+                if let Some((n, ns_acc)) = saw_ns {
+                    acc.push(Namespace(n, ns_acc));
+                    saw_ns = None;
+                }
+            }
+
+            if let Namespace(n, defs) = def {
+                if defs.is_empty() {
+                    saw_ns = Some((n, vec![]));
+                } else {
+                    let mut acc_ = vec![];
+                    Self::post_process(env, defs, &mut acc_);
+                    acc.push(Namespace(n, acc_));
+                }
+
+                continue;
+            }
+
+            if let Stmt(s) = &def {
+                if Self::is_noop(&s) {
+                    continue;
+                }
+                let raise_error = if let Markup(_, _) = *s.1 {
+                    false
+                } else if let Expr(aast::Expr(_, ref e)) = *s.1 {
+                    if let Import(_, _) = **e {
+                        env.parser_options.po_disallow_toplevel_requires
+                    } else {
+                        true
+                    }
+                } else {
+                    env.keep_errors && env.is_typechecker() && Self::partial_should_check_error()
+                };
+                if raise_error {
+                    Self::raise_parsing_error_pos(&s.0, env, &syntax_error::toplevel_statements);
+                }
+            }
+
+            if let Some((_, ns_acc)) = &mut saw_ns {
+                ns_acc.push(def);
+            } else {
+                acc.push(def);
+            };
+        }
+        if let Some((n, defs)) = saw_ns {
+            acc.push(Namespace(n, defs));
         }
     }
 
@@ -2526,8 +2756,9 @@ where
                 },
             }
         }
-        // TODO: post process
-        Ok(acc)
+        let mut program = vec![];
+        Self::post_process(env, acc, &mut program);
+        Ok(program)
     }
 
     fn p_script(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Program<,>) {

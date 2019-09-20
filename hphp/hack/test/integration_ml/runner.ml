@@ -118,6 +118,7 @@ let tests =
     ("server_config_overrides", run Test_serverConfig_overrides.test);
     ("server_hover", run Test_server_hover.test);
     ("unbound_name", run Test_unbound_name.test);
+    ("unbound_name_2", run Test_unbound_name_2.test);
   ]
 
 let () =

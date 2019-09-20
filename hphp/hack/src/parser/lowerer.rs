@@ -3078,13 +3078,14 @@ where
         fn parse(str: &str, start: usize, state: ScanState, idx: usize) -> Option<String> {
             let is_whitespace = |c| c == ' ' || c == '\t' || c == '\n' || c == '\r';
             let mut s = (start, state, idx);
+            let chars = str.as_bytes();
             loop {
                 if s.2 == str.len() {
                     break None;
                 }
 
                 let next = s.2 + 1;
-                match (s.1, str.chars().nth(s.2).unwrap()) {
+                match (s.1, chars[s.2] as char) {
                     (LineCmt, '\n') => s = (next, Free, next),
                     (EndEmbedded, '/') => s = (next, Free, next),
                     (EndDoc, '/') => {

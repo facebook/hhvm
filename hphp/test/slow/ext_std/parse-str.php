@@ -2,7 +2,8 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function test() {
-  parse_str("a=1&b=3&c=10", &$output);
+  $output = null;
+  parse_str("a=1&b=3&c=10", inout $output);
   var_dump($output);
 }
 

@@ -139,7 +139,7 @@ function mb_convert_kana(string $str,
 <<__Native>>
 function mb_convert_variables(string $to_encoding,
                               mixed $from_encoding,
-                              mixed &$vars,
+                              inout mixed $vars,
                               ...$argv): mixed;
 
 /**
@@ -418,7 +418,10 @@ function mb_ereg_search(?string $pattern = null, ?string $option = null): mixed;
  *
  */
 <<__Native>>
-function mb_ereg(mixed $pattern, string $str, mixed &$regs = null): mixed;
+function mb_ereg(mixed $pattern,
+                 string $str,
+                 <<__OutOnly>>
+                 inout mixed $regs): mixed;
 
 /**
  * @param mixed $pattern - The regular expression pattern. Multibyte
@@ -451,7 +454,10 @@ function mb_eregi_replace(mixed $pattern,
  *
  */
 <<__Native>>
-function mb_eregi(mixed $pattern, string $str, mixed &$regs = null): mixed;
+function mb_eregi(mixed $pattern,
+                  string $str,
+                  <<__OutOnly>>
+                  inout mixed $regs): mixed;
 
 /**
  * @param string $type - If type isn't specified or is specified to "all", an
@@ -559,7 +565,9 @@ function mb_output_handler(string $contents, int $status): string;
  *
  */
 <<__Native>>
-function mb_parse_str(string $encoded_string, mixed &$result = null): bool;
+function mb_parse_str(string $encoded_string,
+                      <<__OutOnly("KindOfArray")>>
+                      inout mixed $result): bool;
 
 /**
  * Get a MIME charset string for a specific encoding.

@@ -67,12 +67,13 @@ $inputs = array(
 
 // loop through each element of $inputs to check the behavior of mb_ereg()
 $iterator = 1;
+$regs = null;
 foreach($inputs as $input) {
     if (@is_array($regs)){
         $regs = null;
     }
     echo "\n-- Iteration $iterator --\n";
-    var_dump( mb_ereg($input, $string, &$regs) );
+    var_dump( mb_ereg($input, $string, inout $regs) );
     var_dump($regs);
     $iterator++;
 };

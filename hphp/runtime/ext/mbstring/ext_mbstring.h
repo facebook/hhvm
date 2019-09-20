@@ -46,7 +46,7 @@ Variant HHVM_FUNCTION(mb_convert_kana,
 Variant HHVM_FUNCTION(mb_convert_variables,
                       const String& to_encoding,
                       const Variant& from_encoding,
-                      VRefParam vars,
+                      Variant& vars,
                       const Array& args = null_array);
 Variant HHVM_FUNCTION(mb_decode_mimeheader,
                       const String& str);
@@ -102,7 +102,7 @@ Variant HHVM_FUNCTION(mb_ereg_search,
 Variant HHVM_FUNCTION(mb_ereg,
                       const Variant& pattern,
                       const String& str,
-                      VRefParam regs = uninit_null());
+                      Variant& regs);
 Variant HHVM_FUNCTION(mb_eregi_replace,
                       const Variant& pattern,
                       const String& replacement,
@@ -111,7 +111,7 @@ Variant HHVM_FUNCTION(mb_eregi_replace,
 Variant HHVM_FUNCTION(mb_eregi,
                       const Variant& pattern,
                       const String& str,
-                      VRefParam regs = uninit_null());
+                      Variant& regs);
 Variant HHVM_FUNCTION(mb_get_info,
                       const Variant& opt_type = uninit_variant);
 Variant HHVM_FUNCTION(mb_http_input,
@@ -127,7 +127,7 @@ String HHVM_FUNCTION(mb_output_handler,
                      int status);
 bool HHVM_FUNCTION(mb_parse_str,
                    const String& encoded_string,
-                   VRefParam result = uninit_null());
+                   Array& result);
 Variant HHVM_FUNCTION(mb_preferred_mime_name,
                       const String& encoding);
 Variant HHVM_FUNCTION(mb_regex_encoding,

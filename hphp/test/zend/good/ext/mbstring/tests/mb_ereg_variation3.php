@@ -50,13 +50,14 @@ function main_entry(): void {
                               b'3b5D'   => b'[[:xdigit:]]+'); /*12*/
 
   $iterator = 1;
+  $regs = null;
   foreach($character_classes as $string => $pattern) {
   	if (is_array(@$regs)) {
   		$regs = null;
   	}
   	// make sure any multibyte output is in base 64
   	echo "\n-- Iteration $iterator --\n";
-  	var_dump(mb_ereg($pattern, (string)$string, &$regs));
+  	var_dump(mb_ereg($pattern, (string)$string, inout $regs));
   	base64_encode_var_dump($regs);
   	$iterator++;
   }

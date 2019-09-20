@@ -419,18 +419,20 @@ var_dump(str_word_count("1 2", 2));
 
 var_dump(levenshtein("carrrot", "carrot"));
 
-var_dump(similar_text("carrrot", "carrot"));
+$percent = -1.0;
+var_dump(similar_text("carrrot", "carrot", inout $percent));
 
 var_dump(soundex("carrot"));
 
 var_dump(metaphone("carrot"));
 
-parse_str("first=value&arr[]=foo+bar&arr[]=baz", &$output);
+$output = null;
+parse_str("first=value&arr[]=foo+bar&arr[]=baz", inout $output);
 var_dump($output['first']);
 var_dump($output['arr'][0]);
 var_dump($output['arr'][1]);
 
-parse_str('a[2][i]=3&a[4][i]=5', &$output);
+parse_str('a[2][i]=3&a[4][i]=5', inout $output);
 var_dump($output['a'][2]['i']);
 var_dump($output['a'][4]['i']);
 

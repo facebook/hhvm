@@ -2,7 +2,7 @@
 <<__EntryPoint>>
 function main() {
 $post = $GLOBALS['_POST'];
-parse_str("a[][]=1&a[][]=3&b[a][b][c]=1&b[a][b][d]=1", &$post);
+parse_str("a[][]=1&a[][]=3&b[a][b][c]=1&b[a][b][d]=1", inout $post);
 $GLOBALS['_POST'] = $post;
 $_REQUEST = array_merge($_REQUEST, $_POST);
 

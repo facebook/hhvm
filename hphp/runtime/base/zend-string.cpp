@@ -1514,7 +1514,7 @@ static int string_similar_char(const char *txt1, int len1,
 }
 
 int string_similar_text(const char *t1, int len1,
-                        const char *t2, int len2, float *percent) {
+                        const char *t2, int len2, double *percent) {
   if (len1 == 0 && len2 == 0) {
     if (percent) *percent = 0.0;
     return 0;

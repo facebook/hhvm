@@ -130,13 +130,11 @@ TypedValue HHVM_FUNCTION(strtok,
 TypedValue HHVM_FUNCTION(str_replace,
                          const Variant& search,
                          const Variant& replace,
-                         const Variant& subject,
-                         VRefParam count = uninit_null());
+                         const Variant& subject);
 TypedValue HHVM_FUNCTION(str_ireplace,
                          const Variant& search,
                          const Variant& replace,
-                         const Variant& subject,
-                         VRefParam count = uninit_null());
+                         const Variant& subject);
 TypedValue HHVM_FUNCTION(substr_replace,
                          const Variant& str,
                          const Variant& replacement,
@@ -353,7 +351,7 @@ int64_t HHVM_FUNCTION(levenshtein,
 int64_t HHVM_FUNCTION(similar_text,
                       const String& first,
                       const String& second,
-                      VRefParam percent = uninit_null());
+                      double& percent);
 Variant HHVM_FUNCTION(soundex,
                       const String& str);
 Variant HHVM_FUNCTION(metaphone,

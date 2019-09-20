@@ -1,9 +1,9 @@
 
 -- Testing similar_text() function with more than expected no. of arguments --
 
-Warning: similar_text() expects at most 3 parameters, 4 given in %s/similar_text_error.php on line 9
+Warning: similar_text() expects exactly 3 parameters, 4 given in %s/similar_text_error.php on line %d
 
 -- Testing similar_text() function with less than expected no. of arguments --
 
-Warning: similar_text() expects at least 2 parameters, 1 given in %s/similar_text_error.php on line 12
+Warning: similar_text() expects exactly 3 parameters, 1 given in %s/similar_text_error.php on line %d
 ===DONE===

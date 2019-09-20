@@ -641,7 +641,7 @@ TypedValue HHVM_FUNCTION(strtok, const String& str, const Variant& token) {
 namespace {
 
 Variant str_replace(const Variant& search, const Variant& replace,
-                    const String& subject, int &count, bool caseSensitive) {
+                    const String& subject, int64_t& count, bool caseSensitive) {
   count = 0;
   if (search.isArray()) {
     String ret = subject;
@@ -678,17 +678,20 @@ Variant str_replace(const Variant& search, const Variant& replace,
   if (replace.isArray()) {
     raise_notice("Array to string conversion");
   }
-  return string_replace(subject, search.toString(), replace.toString(), count,
-                        caseSensitive);
+  int icount;
+  auto ret = string_replace(subject, search.toString(), replace.toString(), icount,
+                            caseSensitive);
+  count = icount;
+  return ret;
 }
 
 Variant str_replace(const Variant& search, const Variant& replace,
-                    const Variant& subject, int &count, bool caseSensitive) {
+                    const Variant& subject, int64_t& count, bool caseSensitive) {
   count = 0;
   if (subject.isArray()) {
     Array arr = subject.toArray();
     Array ret = Array::Create();
-    int c;
+    int64_t c;
     for (ArrayIter iter(arr); iter; ++iter) {
       if (iter.second().isArray() || iter.second().is(KindOfObject)) {
         ret.set(iter.first(), iter.second());
@@ -708,27 +711,26 @@ Variant str_replace(const Variant& search, const Variant& replace,
 }
 
 Variant str_replace(const Variant& search, const Variant& replace,
-                    const Variant& subject, VRefParam count) {
-  int nCount = 0;
+                    const Variant& subject, int64_t& count) {
   Variant ret;
+  count = 0;
   if (LIKELY(search.isString() && replace.isString() && subject.isString())) {
+    int icount;
     // Short-cut for the most common (and simplest) case
     ret = string_replace(subject.asCStrRef(), search.asCStrRef(),
-                         replace.asCStrRef(), nCount, true);
+                         replace.asCStrRef(), icount, true);
+    count = icount;
   } else {
     // search, replace, and subject can all be arrays. str_replace() reduces all
     // the valid combinations to multiple string_replace() calls.
-    ret = str_replace(search, replace, subject, nCount, true);
+    ret = str_replace(search, replace, subject, count, true);
   }
-  if (auto ref = count.getRefDataOrNull()) *ref->var() = nCount;
   return ret;
 }
 
 Variant str_ireplace(const Variant& search, const Variant& replace,
-                     const Variant& subject, VRefParam count) {
-  int nCount = 0;
-  Variant ret = str_replace(search, replace, subject, nCount, false);
-  if (auto ref = count.getRefDataOrNull()) *ref->var() = nCount;
+                     const Variant& subject, int64_t& count) {
+  Variant ret = str_replace(search, replace, subject, count, false);
   return ret;
 }
 
@@ -736,25 +738,27 @@ Variant str_ireplace(const Variant& search, const Variant& replace,
 
 TypedValue HHVM_FUNCTION(str_replace,
                          const Variant& search, const Variant& replace,
-                         const Variant& subject, VRefParam count) {
+                         const Variant& subject) {
+  int64_t count;
   return tvReturn(str_replace(search, replace, subject, count));
 }
 
 TypedValue HHVM_FUNCTION(str_replace_with_count,
                          const Variant& search, const Variant& replace,
-                         const Variant& subject, VRefParam count) {
+                         const Variant& subject, int64_t& count) {
   return tvReturn(str_replace(search, replace, subject, count));
 }
 
 TypedValue HHVM_FUNCTION(str_ireplace,
                          const Variant& search, const Variant& replace,
-                         const Variant& subject, VRefParam count) {
+                         const Variant& subject) {
+  int64_t count;
   return tvReturn(str_ireplace(search, replace, subject, count));
 }
 
 TypedValue HHVM_FUNCTION(str_ireplace_with_count,
                          const Variant& search, const Variant& replace,
-                         const Variant& subject, VRefParam count) {
+                         const Variant& subject, int64_t& count) {
   return tvReturn(str_ireplace(search, replace, subject, count));
 }
 
@@ -1676,11 +1680,9 @@ int64_t HHVM_FUNCTION(levenshtein,
 int64_t HHVM_FUNCTION(similar_text,
                       const String& first,
                       const String& second,
-                      VRefParam percent /* = uninit_null() */) {
-  float p;
+                      double& percent) {
   int ret = string_similar_text(first.data(), first.size(),
-                                second.data(), second.size(), &p);
-  percent.assignIfRef(p);
+                                second.data(), second.size(), &percent);
   return ret;
 }
 

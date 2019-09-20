@@ -213,7 +213,10 @@ function ldap_unbind(resource $link): bool;
  *
  */
 <<__Native>>
-function ldap_get_option(resource $link, int $option, mixed &$retval): bool;
+function ldap_get_option(resource $link,
+                         int $option,
+                         <<__OutOnly>>
+                         inout mixed $retval): bool;
 
 /**
  * Sets the value of the specified option to be newval.
@@ -624,15 +627,20 @@ function ldap_next_reference(resource $link, resource $result_entry): mixed;
 <<__Native>>
 function ldap_parse_reference(resource $link,
                               resource $result_entry,
-                              mixed &$referrals): bool;
+                              <<__OutOnly("KindOfArray")>>
+                              inout mixed $referrals): bool;
 
 <<__Native>>
 function ldap_parse_result(resource $link,
                            resource $result,
-                           mixed &$errcode,
-                           mixed &$matcheddn = null,
-                           mixed &$errmsg = null,
-                           mixed &$referrals = null): bool;
+                           <<__OutOnly("KindOfInt64")>>
+                           inout mixed $errcode,
+                           <<__OutOnly("KindOfString")>>
+                           inout mixed $matcheddn,
+                           <<__OutOnly("KindOfString")>>
+                           inout mixed $errmsg,
+                           <<__OutOnly("KindOfArray")>>
+                           inout mixed $referrals): bool;
 
 /**
  * Frees up the memory allocated internally to store the result. All result
@@ -735,8 +743,10 @@ function ldap_control_paged_result(resource $link,
 <<__Native>>
 function ldap_control_paged_result_response(resource $link,
                                             resource $result,
-                                            mixed &$cookie = null,
-                                            mixed &$estimated = null): bool;
+                                            <<__OutOnly("KindOfString")>>
+                                            inout mixed $cookie,
+                                            <<__OutOnly("KindOfInt64")>>
+                                            inout mixed $estimated): bool;
 
 /**
  * Escape a string for use in an LDAP filter or DN.

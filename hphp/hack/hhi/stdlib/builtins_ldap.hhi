@@ -39,7 +39,7 @@ function ldap_start_tls(resource $link);
 <<__PHPStdLib>>
 function ldap_unbind(resource $link);
 <<__PHPStdLib>>
-function ldap_get_option(resource $link, int $option, &$retval);
+function ldap_get_option(resource $link, int $option, inout $retval);
 <<__PHPStdLib>>
 function ldap_set_option($link, int $option, $newval);
 <<__PHPStdLib>>
@@ -81,9 +81,10 @@ function ldap_first_reference(resource $link, resource $result);
 <<__PHPStdLib>>
 function ldap_next_reference(resource $link, resource $result_entry);
 <<__PHPStdLib>>
-function ldap_parse_reference(resource $link, resource $result_entry, &$referrals);
+function ldap_parse_reference(resource $link, resource $result_entry, inout $referrals);
 <<__PHPStdLib>>
-function ldap_parse_result(resource $link, resource $result, &$errcode, &$matcheddn = null, &$errmsg = null, &$referrals = null);
+function ldap_parse_result(resource $link, resource $result, inout $errcode,
+                           inout $matcheddn, inout $errmsg, inout $referrals);
 <<__PHPStdLib>>
 function ldap_free_result(resource $result);
 <<__PHPStdLib>>
@@ -93,7 +94,8 @@ function ldap_get_values(resource $link, resource $result_entry, string $attribu
 <<__PHPStdLib>>
 function ldap_control_paged_result(resource $link, int $pagesize, bool $iscritical = false, string $cookie = '');
 <<__PHPStdLib>>
-function ldap_control_paged_result_response(resource $link, resource $result, &$cookie = null, &$estimated = null);
+function ldap_control_paged_result_response(resource $link, resource $result,
+                                            inout $cookie, inout $estimated);
 <<__PHPStdLib>>
 function ldap_escape(string $value, string $ignore = '', int $flags = 0);
 

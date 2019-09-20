@@ -16,7 +16,8 @@ ldap_set_option($link, LDAP_OPT_DEREF, LDAP_DEREF_NEVER);
 $result = ldap_search($link, "$base", "(cn=*)");
 $ref = ldap_first_reference($link, $result);
 var_dump($ref2 = ldap_next_reference($link, $ref));
-ldap_parse_reference($link, $ref2, $refs);
+$refs = null;
+ldap_parse_reference($link, $ref2, inout $refs);
 var_dump($refs);
 echo "===DONE===\n";
 <?hh

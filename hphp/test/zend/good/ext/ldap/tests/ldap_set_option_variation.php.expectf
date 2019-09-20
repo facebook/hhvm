@@ -11,9 +11,9 @@ bool(true)
 bool(true)
 bool(false)
 bool(true)
-int(0)
+NULL
 bool(true)
-int(0)
+NULL
 bool(true)
 string(14) "dc=test,dc=com"
 ===DONE===

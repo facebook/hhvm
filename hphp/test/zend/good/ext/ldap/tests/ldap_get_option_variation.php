@@ -21,21 +21,21 @@ function main_entry(): void {
   ldap_set_option($link, LDAP_OPT_RESTART, false);
 
   var_dump(
-  	ldap_get_option($link, LDAP_OPT_DEREF, &$option),
+  	ldap_get_option($link, LDAP_OPT_DEREF, inout $option),
   	$option,
-  	ldap_get_option($link, LDAP_OPT_SIZELIMIT, &$option),
+  	ldap_get_option($link, LDAP_OPT_SIZELIMIT, inout $option),
   	$option,
-  	ldap_get_option($link, LDAP_OPT_TIMELIMIT, &$option),
+  	ldap_get_option($link, LDAP_OPT_TIMELIMIT, inout $option),
   	$option,
-  	ldap_get_option($link, LDAP_OPT_NETWORK_TIMEOUT, &$option),
+  	ldap_get_option($link, LDAP_OPT_NETWORK_TIMEOUT, inout $option),
   	$option,
-  	ldap_get_option($link, LDAP_OPT_REFERRALS, &$option),
+  	ldap_get_option($link, LDAP_OPT_REFERRALS, inout $option),
   	$option,
-  	ldap_get_option($link, LDAP_OPT_RESTART, &$option),
+  	ldap_get_option($link, LDAP_OPT_RESTART, inout $option),
   	$option,
-  	ldap_get_option($link, LDAP_OPT_SERVER_CONTROLS, &$option),
+  	ldap_get_option($link, LDAP_OPT_SERVER_CONTROLS, inout $option),
   	$option,
-  	ldap_get_option($link, LDAP_OPT_CLIENT_CONTROLS, &$option),
+  	ldap_get_option($link, LDAP_OPT_CLIENT_CONTROLS, inout $option),
   	$option
   );
   echo "===DONE===\n";

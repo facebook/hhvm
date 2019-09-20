@@ -15,9 +15,12 @@ function msg_get_queue(int $key, int $perms = 0666);
 <<__PHPStdLib>>
 function msg_queue_exists(int $key);
 <<__PHPStdLib>>
-function msg_send(resource $queue, int $msgtype, $message, bool $serialize = true, bool $blocking = true, &$errorcode = null);
+function msg_send(resource $queue, int $msgtype, $message, bool $serialize,
+                  bool $blocking, inout $errorcode);
 <<__PHPStdLib>>
-function msg_receive(resource $queue, int $desiredmsgtype, &$msgtype, int $maxsize, &$message, bool $unserialize = true, int $flags = 0, &$errorcode = null);
+function msg_receive(resource $queue, int $desiredmsgtype, inout $msgtype,
+                     int $maxsize, inout $message, bool $unserialize,
+                     int $flags, inout $errorcode);
 <<__PHPStdLib>>
 function msg_remove_queue(resource $queue);
 <<__PHPStdLib>>

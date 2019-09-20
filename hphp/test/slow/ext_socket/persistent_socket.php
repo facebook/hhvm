@@ -97,15 +97,15 @@ $certdata = array('countryName' => 'US',
 
 // Generate the certificate
 $pkey = openssl_pkey_new();
-$cert = openssl_csr_new($certdata, &$pkey);
+$cert = openssl_csr_new($certdata, inout $pkey);
 $cert = openssl_csr_sign($cert, null, $pkey, 1);
 
 // Generate and save the PEM file
 $pem_passphrase = 'testing';
 $pem0 = null;
 $pem1 = null;
-openssl_x509_export($cert, &$pem0);
-openssl_pkey_export($pkey, &$pem1, $pem_passphrase);
+openssl_x509_export($cert, inout $pem0);
+openssl_pkey_export($pkey, inout $pem1, $pem_passphrase);
 if (file_put_contents($pemfile, $pem0.$pem1) === false) {
   echo "Error writing PEM file.\n";
   die;

@@ -10,10 +10,13 @@ class test {
 }
 $obj = new test;
 
-var_dump(openssl_private_encrypt($data, &$encrypted, $privkey));
-var_dump(openssl_private_encrypt($data, &$encrypted, $pubkey));
-var_dump(openssl_private_encrypt($data, &$encrypted, $wrong));
-var_dump(openssl_private_encrypt($data, &$encrypted, $obj));
-try { var_dump(openssl_private_encrypt($obj, &$encrypted, $privkey)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-openssl_public_decrypt($encrypted, &$output, $pubkey);
+$encrypted = null;
+$encrypted_bad = null;
+var_dump(openssl_private_encrypt($data, inout $encrypted, $privkey));
+var_dump(openssl_private_encrypt($data, inout $encrypted_bad, $pubkey));
+var_dump(openssl_private_encrypt($data, inout $encrypted_bad, $wrong));
+var_dump(openssl_private_encrypt($data, inout $encrypted_bad, $obj));
+try { var_dump(openssl_private_encrypt($obj, inout $encrypted_bad, $privkey)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+$output = null;
+openssl_public_decrypt($encrypted, inout $output, $pubkey);
 var_dump($output);

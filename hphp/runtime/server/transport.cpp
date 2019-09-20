@@ -701,8 +701,11 @@ void Transport::prepareHeaders(bool precompressed, bool chunked,
     String ip = this->getServerAddr();
     String key = RuntimeOption::XFBDebugSSLKey;
     String cipher("AES-256-CBC");
+    bool crypto_strong = false;
     auto const iv_len = HHVM_FN(openssl_cipher_iv_length)(cipher).toInt32();
-    auto const iv = HHVM_FN(openssl_random_pseudo_bytes)(iv_len).toString();
+    auto const iv = HHVM_FN(openssl_random_pseudo_bytes)(
+      iv_len, crypto_strong
+    ).toString();
     auto const encrypted = HHVM_FN(openssl_encrypt)(
       ip, cipher, key, k_OPENSSL_RAW_DATA, iv
     ).toString();

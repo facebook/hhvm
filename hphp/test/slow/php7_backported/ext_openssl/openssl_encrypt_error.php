@@ -17,5 +17,5 @@ try { var_dump(openssl_encrypt($data, $arr, $object)); } catch (Exception $e) { 
 try { var_dump(openssl_encrypt($data, $method, $arr)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // invalid using of an authentication tag
-var_dump(openssl_encrypt_with_tag($data, $method, $password, 0, $iv, &$wrong));
+var_dump(openssl_encrypt_with_tag($data, $method, $password, 0, $iv, inout $wrong));
 }

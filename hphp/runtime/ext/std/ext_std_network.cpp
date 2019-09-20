@@ -323,21 +323,19 @@ Array HHVM_FUNCTION(headers_list) {
 }
 
 bool HHVM_FUNCTION(headers_sent_with_file_line,
-                   VRefParam file,
-                   VRefParam line) {
- Transport *transport = g_context->getTransport();
+                   Variant& file,
+                   Variant& line) {
+  Transport *transport = g_context->getTransport();
   if (transport) {
-    file.assignIfRef(String(transport->getFirstHeaderFile()));
-    line.assignIfRef(transport->getFirstHeaderLine());
+    file = String(transport->getFirstHeaderFile());
+    line = transport->getFirstHeaderLine();
     return transport->headersSent();
-  } else {
-    return g_context->getStdoutBytesWritten() > 0;
   }
-  return false;
+  return g_context->getStdoutBytesWritten() > 0;
 }
 
-bool HHVM_FUNCTION(headers_sent, VRefParam file /* = null */,
-                                 VRefParam line /* = null */) {
+bool HHVM_FUNCTION(headers_sent) {
+  Variant file, line;
   return HHVM_FN(headers_sent_with_file_line)(file, line);
 }
 

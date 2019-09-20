@@ -13,7 +13,10 @@ if (!socket_bind($socket, $address, 1223)) {
     die("Unable to bind to $address:1223");
 }
 
-var_dump(socket_recvfrom($socket, &$buf, 12, 0, &$from, &$port)); //false (EAGAIN - no warning)
+$buf = null;
+$from = null;
+$port = null;
+var_dump(socket_recvfrom($socket, inout $buf, 12, 0, inout $from, inout $port)); //false (EAGAIN - no warning)
 
 $msg = "Ping!";
 $len = strlen($msg);
@@ -26,9 +29,7 @@ if ($bytes_sent == -1) {
 
 $from = "";
 $port = 0;
-try { socket_recvfrom($socket, &$buf, 12, 0); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // cause warning
-try { socket_recvfrom($socket, &$buf, 12, 0, &$from); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // cause warning
-$bytes_received = socket_recvfrom($socket, &$buf, 12, 0, &$from, &$port);
+$bytes_received = socket_recvfrom($socket, inout $buf, 12, 0, inout $from, inout $port);
 if ($bytes_received == -1) {
     die('An error occurred while receiving from the socket');
 } else if ($bytes_received != $len) {

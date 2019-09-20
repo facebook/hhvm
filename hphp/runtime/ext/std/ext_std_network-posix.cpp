@@ -480,9 +480,9 @@ static unsigned char *php_parserr(unsigned char *cp, unsigned char* end,
   return cp;
 }
 
-Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int type /*= -1*/,
-                      VRefParam authnsRef /* = null */,
-                      VRefParam addtlRef /* = null */) {
+Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int type,
+                      Variant& authnsRef,
+                      Variant& addtlRef) {
   IOStatusHelper io("dns_get_record", hostname.data(), type);
   if (type < 0) type = PHP_DNS_ALL;
   if (type & ~PHP_DNS_ALL && type != PHP_DNS_ANY) {
@@ -601,14 +601,14 @@ Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int type /*= -1*/,
     }
   }
 
-  authnsRef.assignIfRef(authns);
-  addtlRef.assignIfRef(addtl);
+  authnsRef = authns;
+  addtlRef = addtl;
   return ret;
 }
 
 bool HHVM_FUNCTION(getmxrr, const String& hostname,
-                            VRefParam mxhostsRef,
-                            VRefParam weightsRef /* = null */) {
+                            Variant& mxhostsRef,
+                            Variant& weightsRef) {
   IOStatusHelper io("dns_get_mx", hostname.data());
   int count, qdc;
   unsigned short type, weight;
@@ -619,8 +619,8 @@ bool HHVM_FUNCTION(getmxrr, const String& hostname,
   Array mxhosts;
   Array weights;
   SCOPE_EXIT {
-    mxhostsRef.assignIfRef(mxhosts);
-    weightsRef.assignIfRef(weights);
+    mxhostsRef = mxhosts;
+    weightsRef = weights;
   };
 
   /* Go! */

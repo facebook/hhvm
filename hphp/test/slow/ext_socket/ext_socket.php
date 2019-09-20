@@ -67,7 +67,8 @@ $s2 = false;
 var_dump(create_listen_random_port(&$s2) != 0);
 var_dump($s2);
 
-var_dump(socket_create_pair(AF_UNIX, SOCK_STREAM, 0, &$fds));
+$fds = null;
+var_dump(socket_create_pair(AF_UNIX, SOCK_STREAM, 0, inout $fds));
 var_dump(count($fds));
 var_dump($fds[0]);
 var_dump($fds[1]);
@@ -91,7 +92,8 @@ var_dump(socket_select(inout $reads, inout $ignore1, inout $ignore2, 1, 0));
 list($client, $s) = get_client_server();
 $text = "send/recv";
 var_dump(socket_send($client, $text, 4, 0));
-var_dump(socket_recv($s, &$buffer, 100, 0));
+$buffer = null;
+var_dump(socket_recv($s, inout $buffer, 100, 0));
 var_dump($buffer);
 
 list($client, $s) = get_client_server();
@@ -102,7 +104,9 @@ for ($i = 0; $i < 100; $i++) {
   if ($res !== false) break;
 }
 var_dump($res);
-var_dump(socket_recvfrom($s, &$buffer, 100, 0, &$name, &$vport));
+$name = null;
+$vport = null;
+var_dump(socket_recvfrom($s, inout $buffer, 100, 0, inout $name, inout $vport));
 var_dump($buffer);
 
 $s = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);

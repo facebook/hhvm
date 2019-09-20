@@ -7,7 +7,7 @@ $msg = "Hello";
 $len = strlen($msg);
 
 $sockets = array();
-socket_create_pair(AF_UNIX, SOCK_STREAM, 0, &$sockets);
+socket_create_pair(AF_UNIX, SOCK_STREAM, 0, inout $sockets);
 socket_write($sockets[0], $msg, $len);
 
 $fdset = array( 1 => $sockets[1] );

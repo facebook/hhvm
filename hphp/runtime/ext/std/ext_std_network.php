@@ -63,8 +63,9 @@ function dns_check_record(mixed $host, mixed $type = 'MX'): bool {
 /**
  * Alias of getmxrr
  */
-function dns_get_mx(mixed $host, mixed &$mxhosts, mixed &$weight = null) {
-  return getmxrr($host, &$mxhosts, &$weight);
+function dns_get_mx(mixed $host, inout mixed $mxhosts, inout mixed $weight) {
+  $ret = getmxrr($host, inout $mxhosts, inout $weight);
+  return $ret;
 }
 
 /**
@@ -138,9 +139,11 @@ function dns_get_mx(mixed $host, mixed &$mxhosts, mixed &$weight = null) {
  */
 <<__Native>>
 function dns_get_record(string $hostname,
-                        int $type = DNS_ANY,
-                        mixed &$authns = null,
-                        mixed &$addtl = null): mixed;
+                        int $type,
+                        <<__OutOnly>>
+                        inout mixed $authns,
+                        <<__OutOnly>>
+                        inout mixed $addtl): mixed;
 
 /**
  * Open Internet or Unix domain socket connection
@@ -243,8 +246,10 @@ function gethostname(): mixed;
  */
 <<__Native>>
 function getmxrr(string $hostname,
-                 mixed &$mxhosts,
-                 mixed &$weight = null): bool;
+                 <<__OutOnly>>
+                 inout mixed $mxhosts,
+                 <<__OutOnly>>
+                 inout mixed $weight): bool;
 
 /**
  * Get protocol number associated with protocol name
@@ -363,12 +368,14 @@ function headers_list(): varray<string>;
  *   have already been sent or TRUE otherwise.
  */
 <<__Native>>
-function headers_sent(mixed &$file = null,
-                      mixed &$line = null): bool;
+function headers_sent(): bool;
 
 <<__Native>>
-function headers_sent_with_file_line(mixed &$file,
-                                     mixed &$line): bool;
+function headers_sent_with_file_line(
+  <<__OutOnly>>
+  inout mixed $file,
+  <<__OutOnly>>
+  inout mixed $line): bool;
 
 /**
  * Get or Set the HTTP response code

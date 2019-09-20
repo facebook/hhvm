@@ -15,7 +15,9 @@ function tryopen($u, $p = -1) {
 
 function get_addresses($host) {
   $r = array();
-  if (($records = dns_get_record($host))) {
+  $authns = null;
+  $addtl = null;
+  if (($records = dns_get_record($host, DNS_ANY, inout $authns, inout $addtl))) {
     foreach ($records as $record) {
       if (isset($record['ipv6'])) {
         $r []= '['.$record['ipv6'].']';

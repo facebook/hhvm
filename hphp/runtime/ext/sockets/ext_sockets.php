@@ -101,7 +101,8 @@ function socket_create_listen(int $port, int $backlog = 128): mixed;
 function socket_create_pair(int $domain,
                             int $type,
                             int $protocol,
-                            mixed &$fd): bool;
+                            <<__OutOnly>>
+                            inout mixed $fd): bool;
 
 /**
  * The socket_get_option() function retrieves the value for the option
@@ -137,8 +138,10 @@ function socket_get_option(resource $socket, int $level, int $optname): mixed;
  */
 <<__Native>>
 function socket_getpeername(resource $socket,
-                            mixed &$address,
-                            mixed &$port = null): bool;
+                            <<__OutOnly>>
+                            inout mixed $address,
+                            <<__OutOnly>>
+                            inout mixed $port): bool;
 
 /**
  * @param resource $socket - A valid socket resource created with
@@ -160,8 +163,10 @@ function socket_getpeername(resource $socket,
  */
 <<__Native>>
 function socket_getsockname(resource $socket,
-                            mixed &$address,
-                            mixed &$port = null): bool;
+                            <<__OutOnly>>
+                            inout mixed $address,
+                            <<__OutOnly>>
+                            inout mixed $port): bool;
 
 /**
  * The socket_set_block() function removes the O_NONBLOCK flag on the socket
@@ -507,7 +512,8 @@ function socket_sendto(resource $socket,
  */
 <<__Native>>
 function socket_recv(resource $socket,
-                     mixed &$buf,
+                     <<__OutOnly>>
+                     inout mixed $buf,
                      int $len,
                      int $flags): mixed;
 
@@ -551,11 +557,14 @@ function socket_recv(resource $socket,
  */
 <<__Native>>
 function socket_recvfrom(resource $socket,
-                         mixed &$buf,
+                         <<__OutOnly>>
+                         inout mixed $buf,
                          int $len,
                          int $flags,
-                         mixed &$name,
-                         mixed &$port = -1): mixed;
+                         <<__OutOnly>>
+                         inout mixed $name,
+                         <<__OutOnly>>
+                         inout mixed $port): mixed;
 
 /**
  * The socket_shutdown() function allows you to stop incoming, outgoing or all

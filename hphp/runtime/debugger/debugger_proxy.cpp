@@ -54,7 +54,7 @@ DebuggerProxy::DebuggerProxy(req::ptr<Socket> socket, bool local)
   Variant port;
   std::string clientDetails;
   if (!local) {
-    if (getClientConnectionInfo(ref(address), ref(port))) {
+    if (getClientConnectionInfo(address, port)) {
       clientDetails = folly::stringPrintf("From %s:%d",
                                           address.toString().data(),
                                           port.toInt32());
@@ -486,8 +486,8 @@ void DebuggerProxy::pollSignal() {
 }
 
 // Grab the ip address and port of the client that is connected to this proxy.
-bool DebuggerProxy::getClientConnectionInfo(VRefParam address,
-                                            VRefParam port) {
+bool DebuggerProxy::getClientConnectionInfo(Variant& address,
+                                            Variant& port) {
   Resource s(m_thrift.getSocket().get());
   return HHVM_FN(socket_getpeername)(s, address, port);
 }

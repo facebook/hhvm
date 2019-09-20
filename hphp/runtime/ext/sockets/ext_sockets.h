@@ -25,7 +25,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-bool socket_create_pair_impl(int domain, int type, int protocol, VRefParam fd,
+bool socket_create_pair_impl(int domain, int type, int protocol, Variant& fd,
                              bool asStream);
 
 Variant HHVM_FUNCTION(socket_create,
@@ -39,19 +39,19 @@ bool HHVM_FUNCTION(socket_create_pair,
                    int domain,
                    int type,
                    int protocol,
-                   VRefParam fd);
+                   Variant& fd);
 Variant HHVM_FUNCTION(socket_get_option,
                       const Resource& socket,
                       int level,
                       int optname);
 bool HHVM_FUNCTION(socket_getpeername,
                    const Resource& socket,
-                   VRefParam address,
-                   VRefParam port = uninit_null());
+                   Variant& address,
+                   Variant& port);
 bool HHVM_FUNCTION(socket_getsockname,
                    const Resource& socket,
-                   VRefParam address,
-                   VRefParam port = uninit_null());
+                   Variant& address,
+                   Variant& port);
 bool HHVM_FUNCTION(socket_set_block,
                    const Resource& socket);
 bool HHVM_FUNCTION(socket_set_nonblock,
@@ -107,16 +107,16 @@ Variant HHVM_FUNCTION(socket_sendto,
                       int port = -1);
 Variant HHVM_FUNCTION(socket_recv,
                       const Resource& socket,
-                      VRefParam buf,
+                      Variant& buf,
                       int len,
                       int flags);
 Variant HHVM_FUNCTION(socket_recvfrom,
                       const Resource& socket,
-                      VRefParam buf,
+                      Variant& buf,
                       int len,
                       int flags,
-                      VRefParam name,
-                      VRefParam port = -1);
+                      Variant& name,
+                      Variant& port);
 bool HHVM_FUNCTION(socket_shutdown,
                    const Resource& socket,
                    int how = 0);

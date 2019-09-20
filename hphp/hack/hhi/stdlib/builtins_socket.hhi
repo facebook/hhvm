@@ -165,13 +165,13 @@ function socket_create(int $domain, int $type, int $protocol) { }
 <<__PHPStdLib>>
 function socket_create_listen(int $port, int $backlog = 128) { }
 <<__PHPStdLib>>
-function socket_create_pair(int $domain, int $type, int $protocol, &$fd) { }
+function socket_create_pair(int $domain, int $type, int $protocol, inout $fd) { }
 <<__PHPStdLib>>
 function socket_get_option(resource $socket, int $level, int $optname) { }
 <<__PHPStdLib>>
-function socket_getpeername(resource $socket, &$address, &$port = null) { }
+function socket_getpeername(resource $socket, inout $address, inout $port) { }
 <<__PHPStdLib>>
-function socket_getsockname(resource $socket, &$address, &$port = null) { }
+function socket_getsockname(resource $socket, inout $address, inout $port) { }
 <<__PHPStdLib>>
 function socket_set_block(resource $socket) { }
 <<__PHPStdLib>>
@@ -199,9 +199,9 @@ function socket_send(resource $socket, string $buf, int $len, int $flags) { }
 <<__PHPStdLib>>
 function socket_sendto(resource $socket, string $buf, int $len, int $flags, string $addr, int $port = 0) { }
 <<__PHPStdLib>>
-function socket_recv(resource $socket, &$buf, int $len, int $flags) { }
+function socket_recv(resource $socket, inout $buf, int $len, int $flags) { }
 <<__PHPStdLib>>
-function socket_recvfrom(resource $socket, &$buf, int $len, int $flags, &$name, &$port = 0) { }
+function socket_recvfrom(resource $socket, inout $buf, int $len, int $flags, inout $name, inout $port) { }
 <<__PHPStdLib>>
 function socket_shutdown(resource $socket, int $how = 0) { }
 <<__PHPStdLib>>

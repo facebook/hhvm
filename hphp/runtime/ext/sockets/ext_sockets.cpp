@@ -633,7 +633,7 @@ Variant HHVM_FUNCTION(socket_create_listen,
 const StaticString
   s_socktype_generic("generic_socket");
 
-bool socket_create_pair_impl(int domain, int type, int protocol, VRefParam fd,
+bool socket_create_pair_impl(int domain, int type, int protocol, Variant& fd,
                              bool asStream) {
   check_socket_parameters(domain, type);
 
@@ -646,19 +646,19 @@ bool socket_create_pair_impl(int domain, int type, int protocol, VRefParam fd,
   }
 
   if (asStream) {
-    fd.assignIfRef(make_varray(
+    fd = make_varray(
       Variant(req::make<StreamSocket>(fds_array[0], domain, nullptr, 0, 0.0,
                                       s_socktype_generic)),
       Variant(req::make<StreamSocket>(fds_array[1], domain, nullptr, 0, 0.0,
                                       s_socktype_generic))
-    ));
+    );
   } else {
-    fd.assignIfRef(make_varray(
+    fd = make_varray(
       Variant(req::make<ConcreteSocket>(fds_array[0], domain, nullptr, 0, 0.0,
                                         s_socktype_generic)),
       Variant(req::make<ConcreteSocket>(fds_array[1], domain, nullptr, 0, 0.0,
                                         s_socktype_generic))
-    ));
+    );
   }
   return true;
 }
@@ -667,7 +667,7 @@ bool HHVM_FUNCTION(socket_create_pair,
                    int domain,
                    int type,
                    int protocol,
-                   VRefParam fd) {
+                   Variant& fd) {
   return socket_create_pair_impl(domain, type, protocol, fd, false);
 }
 
@@ -734,8 +734,8 @@ Variant HHVM_FUNCTION(socket_get_option,
 
 bool HHVM_FUNCTION(socket_getpeername,
                    const Resource& socket,
-                   VRefParam address,
-                   VRefParam port /* = null */) {
+                   Variant& address,
+                   Variant& port) {
   auto sock = cast<Socket>(socket);
 
   sockaddr_storage sa_storage;
@@ -747,15 +747,15 @@ bool HHVM_FUNCTION(socket_getpeername,
   }
   Variant a, p;
   auto ret = get_sockaddr(sa, salen, a, p);
-  address.assignIfRef(a);
-  port.assignIfRef(p);
+  address = a;
+  port = p;
   return ret;
 }
 
 bool HHVM_FUNCTION(socket_getsockname,
                    const Resource& socket,
-                   VRefParam address,
-                   VRefParam port /* = null */) {
+                   Variant& address,
+                   Variant& port) {
   auto sock = cast<Socket>(socket);
 
   sockaddr_storage sa_storage;
@@ -767,8 +767,8 @@ bool HHVM_FUNCTION(socket_getsockname,
   }
   Variant a, p;
   auto ret = get_sockaddr(sa, salen, a, p);
-  address.assignIfRef(a);
-  port.assignIfRef(p);
+  address = a;
+  port = p;
   return ret;
 }
 
@@ -1247,7 +1247,7 @@ Variant HHVM_FUNCTION(socket_sendto,
 
 Variant HHVM_FUNCTION(socket_recv,
                       const Resource& socket,
-                      VRefParam buf,
+                      Variant& buf,
                       int len,
                       int flags) {
   if (len <= 0) {
@@ -1259,10 +1259,10 @@ Variant HHVM_FUNCTION(socket_recv,
   int retval;
   if ((retval = recv(sock->fd(), recv_buf, len, flags)) < 1) {
     free(recv_buf);
-    buf.assignIfRef(init_null());
+    buf = init_null();
   } else {
     recv_buf[retval] = '\0';
-    buf.assignIfRef(String(recv_buf, retval, AttachString));
+    buf = String(recv_buf, retval, AttachString);
   }
 
   if (retval == -1) {
@@ -1274,11 +1274,11 @@ Variant HHVM_FUNCTION(socket_recv,
 
 Variant HHVM_FUNCTION(socket_recvfrom,
                       const Resource& socket,
-                      VRefParam buf,
+                      Variant& buf,
                       int len,
                       int flags,
-                      VRefParam name,
-                      VRefParam port /* = -1*/) {
+                      Variant& name,
+                      Variant& port) {
   if (len <= 0) {
     return false;
   }
@@ -1308,18 +1308,13 @@ Variant HHVM_FUNCTION(socket_recvfrom,
       }
 
       recv_buf[retval] = 0;
-      buf.assignIfRef(String(recv_buf, retval, AttachString));
-      name.assignIfRef(String(s_un.sun_path, CopyString));
+      buf = String(recv_buf, retval, AttachString);
+      name = String(s_un.sun_path, CopyString);
 #endif
     }
     break;
   case AF_INET:
     {
-      if (int(port) == -1) {
-        throw_missing_arguments_nr("socket_recvfrom", 5, 4);
-        return false;
-      }
-
       struct sockaddr_in sin;
       slen = sizeof(sin);
       memset(&sin, 0, slen);
@@ -1333,27 +1328,22 @@ Variant HHVM_FUNCTION(socket_recvfrom,
         return false;
       }
       recv_buf[retval] = 0;
-      buf.assignIfRef(String(recv_buf, retval, AttachString));
+      buf = String(recv_buf, retval, AttachString);
 
       try {
         folly::SocketAddress addr;
         addr.setFromSockaddr(&sin);
 
-        name.assignIfRef(String(addr.getAddressStr(), CopyString));
-        port.assignIfRef(addr.getPort());
+        name = String(addr.getAddressStr(), CopyString);
+        port = addr.getPort();
       } catch (...) {
-        name.assignIfRef(s_0_0_0_0);
-        port.assignIfRef(0);
+        name = s_0_0_0_0;
+        port = 0;
       }
     }
     break;
   case AF_INET6:
     {
-      if (int(port) == -1) {
-        throw_missing_arguments_nr("socket_recvfrom", 5, 4);
-        return false;
-      }
-
       struct sockaddr_in6 sin6;
       slen = sizeof(sin6);
       memset(&sin6, 0, slen);
@@ -1368,17 +1358,17 @@ Variant HHVM_FUNCTION(socket_recvfrom,
       }
 
       recv_buf[retval] = 0;
-      buf.assignIfRef(String(recv_buf, retval, AttachString));
+      buf = String(recv_buf, retval, AttachString);
 
       try {
         folly::SocketAddress addr;
         addr.setFromSockaddr(&sin6);
 
-        name.assignIfRef(String(addr.getAddressStr(), CopyString));
-        port.assignIfRef(addr.getPort());
+        name = String(addr.getAddressStr(), CopyString);
+        port = addr.getPort();
       } catch (...) {
-        name.assignIfRef(s_2colons);
-        port.assignIfRef(0);
+        name = s_2colons;
+        port = 0;
       }
     }
     break;

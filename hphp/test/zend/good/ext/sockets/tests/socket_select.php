@@ -5,7 +5,7 @@ if (strtolower(substr(PHP_OS, 0, 3)) == 'win') {
 } else {
     $domain = AF_UNIX;
 }
-socket_create_pair($domain, SOCK_STREAM, 0, &$sockets);
+socket_create_pair($domain, SOCK_STREAM, 0, inout $sockets);
 
 $write  = null;
 $except = null;

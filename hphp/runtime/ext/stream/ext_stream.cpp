@@ -767,9 +767,9 @@ Variant HHVM_FUNCTION(stream_socket_get_name,
   Variant address, port;
   bool ret;
   if (want_peer) {
-    ret = HHVM_FN(socket_getpeername)(handle, ref(address), ref(port));
+    ret = HHVM_FN(socket_getpeername)(handle, address, port);
   } else {
-    ret = HHVM_FN(socket_getsockname)(handle, ref(address), ref(port));
+    ret = HHVM_FN(socket_getsockname)(handle, address, port);
   }
   if (ret && port.isInteger()) {
     return address.toString() + ":" + port.toString();
@@ -784,7 +784,7 @@ Variant HHVM_FUNCTION(stream_socket_pair,
                       int type,
                       int protocol) {
   Variant fd;
-  if (!socket_create_pair_impl(domain, type, protocol, ref(fd), true)) {
+  if (!socket_create_pair_impl(domain, type, protocol, fd, true)) {
     return false;
   }
   return fd;
@@ -796,8 +796,8 @@ Variant HHVM_FUNCTION(stream_socket_recvfrom,
                       int flags,
                       Variant& address) {
   Variant ret, host, port;
-  Variant retval = HHVM_FN(socket_recvfrom)(socket, ref(ret), length, flags,
-                                            ref(host), ref(port));
+  Variant retval = HHVM_FN(socket_recvfrom)(socket, ret, length, flags,
+                                            host, port);
   if (!same(retval, false) && retval.toInt64() >= 0) {
     auto sock = cast<Socket>(socket);
     if (sock->getType() == AF_INET6) {

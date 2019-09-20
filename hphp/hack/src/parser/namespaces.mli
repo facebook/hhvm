@@ -10,6 +10,7 @@
 type elaborate_kind =
   | ElaborateFun
   | ElaborateClass
+  | ElaborateRecord
   | ElaborateConst
 
 val elaborate_id :

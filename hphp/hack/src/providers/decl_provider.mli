@@ -10,6 +10,8 @@ type fun_key = string
 
 type class_key = string
 
+type record_def_key = string
+
 type typedef_key = string
 
 type gconst_key = string
@@ -21,6 +23,8 @@ end
 type fun_decl = Typing_defs.decl_fun_type
 
 type class_decl = Class.t
+
+type record_def_decl = Typing_defs.record_def_type
 
 type typedef_decl = Typing_defs.typedef_type
 
@@ -35,6 +39,8 @@ val get_class_constructor : class_key -> fun_decl option
 val get_class_method : class_key -> fun_key -> fun_decl option
 
 val get_static_method : class_key -> fun_key -> fun_decl option
+
+val get_record_def : record_def_key -> record_def_decl option
 
 val get_typedef : typedef_key -> typedef_decl option
 

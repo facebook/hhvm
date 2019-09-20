@@ -699,7 +699,6 @@ let mutate_metadata (input : HP.t)  =
       (cls |> HC.is_abstract        |> mutate_bool)
       (cls |> HC.is_interface       |> mutate_bool)
       (cls |> HC.is_trait           |> mutate_bool)
-      (cls |> HC.is_record          |> mutate_bool)
       (cls |> HC.is_xhp             |> mutate_bool)
       (cls.HC.class_hoisted         |> mutate_hoisted)
       (cls |> HC.is_const           |> mutate_bool)
@@ -750,6 +749,7 @@ let mutate_metadata (input : HP.t)  =
       (prog |> HP.adata           |> delete_map mutate_adata)
       (prog |> HP.functions       |> delete_map mutate_fun_data)
       (prog |> HP.classes         |> delete_map (mutate_class_data ids))
+      []
       (prog |> HP.typedefs        |> delete_map mutate_typedef)
       (prog |> HP.file_attributes |> delete_map mutate_attribute)
       (prog |> HP.main            |> mutate_body_data)

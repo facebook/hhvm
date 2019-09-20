@@ -22,6 +22,8 @@ val class_def :
   Nast.class_ ->
   (Tast.class_ * Typing_env_types.global_tvenv list) option
 
+val record_def_def : TypecheckerOptions.t -> Nast.record_def -> Tast.record_def
+
 val typedef_def : TypecheckerOptions.t -> Nast.typedef -> Tast.typedef
 
 val gconst_def : TypecheckerOptions.t -> Nast.gconst -> Tast.gconst

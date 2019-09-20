@@ -282,6 +282,8 @@ let json_of_symbol_occurrence_shared symbol_occurrence progress symbol_def =
             ("property_name", key_ (JSON_String s2));
           ] )
     | GConst -> (7, JSON_Null)
+    (* TODO(T44306013): Update schema to support records. See D15927952 for an example. *)
+    | Record -> (0, JSON_Null)
   in
   let type_object =
     match class_attribute with

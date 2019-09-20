@@ -818,6 +818,21 @@ let converter
         t_vis;
         t_namespace = t.t_namespace;
       }
+  and on_record_def rd =
+    let on_field (sid, hint, expr) =
+      (sid, on_hint hint, Option.map expr on_expr)
+    in
+    Aast.
+      {
+        rd_name = rd.Ast.rd_name;
+        rd_final = rd.Ast.rd_final;
+        rd_extends = optional on_hint (List.hd rd.Ast.rd_extends);
+        rd_fields = on_list on_field rd.Ast.rd_fields;
+        rd_user_attributes = on_list on_user_attribute rd.rd_user_attributes;
+        rd_namespace = rd.Ast.rd_namespace;
+        rd_span = rd.Ast.rd_span;
+        rd_doc_comment = rd.Ast.rd_doc_comment;
+      }
   and on_constant (c : gconst) =
     Aast.
       {
@@ -842,6 +857,7 @@ let converter
   and on_def = function
     | Fun f -> Aast.Fun (on_fun f)
     | Class c -> Aast.Class (on_class c)
+    | RecordDef rd -> Aast.RecordDef (on_record_def rd)
     | Stmt s -> Aast.Stmt (on_stmt s)
     | Typedef t -> Aast.Typedef (on_typedef t)
     | Constant c -> Aast.Constant (on_constant c)
@@ -860,6 +876,8 @@ let converter
     method on_fun = on_fun
 
     method on_typedef = on_typedef
+
+    method on_record_def = on_record_def
 
     method on_constant = on_constant
   end

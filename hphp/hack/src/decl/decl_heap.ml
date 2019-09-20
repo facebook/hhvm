@@ -36,6 +36,14 @@ module Fun = struct
   let description = "Fun"
 end
 
+module RecordDef = struct
+  type t = Typing_defs.record_def_type
+
+  let prefix = Prefix.make ()
+
+  let description = "RecordDef"
+end
+
 module Typedef = struct
   type t = Typing_defs.typedef_type
 
@@ -56,6 +64,8 @@ module Funs =
   SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Fun)
 module Classes =
   SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Class)
+module RecordDefs =
+  SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (RecordDef)
 module Typedefs =
   SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Typedef)
 module GConsts =

@@ -14,6 +14,7 @@ module Dep : sig
     | Const of string * string
     | AllMembers of string
     | Class of string
+    | RecordDef of string
     | Fun of string
     | FunName of string
     | Prop of string * string

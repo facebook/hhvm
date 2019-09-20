@@ -31,8 +31,17 @@ let get_file_input ~(ctx : t) ~(path : Relative_path.t) :
   | None -> ServerCommandTypes.FileName (Relative_path.to_absolute path)
 
 let get_fileinfo ~(entry : entry) : FileInfo.t =
-  let (funs, classes, typedefs, consts) = Nast.get_defs entry.ast in
-  { FileInfo.empty_t with FileInfo.funs; classes; typedefs; consts }
+  let (funs, classes, record_defs, typedefs, consts) =
+    Nast.get_defs entry.ast
+  in
+  {
+    FileInfo.empty_t with
+    FileInfo.funs;
+    classes;
+    record_defs;
+    typedefs;
+    consts;
+  }
 
 let get_global_context () : t option = !global_context
 

@@ -117,13 +117,22 @@ let debug_print_fast_keys genv name fast =
         in
         let decls =
           Relative_path.Map.fold fast ~init:[] ~f:(fun _k v acc ->
-              let { FileInfo.n_funs; n_classes; n_types; n_consts } = v in
+              let {
+                FileInfo.n_funs;
+                n_classes;
+                n_record_defs;
+                n_types;
+                n_consts;
+              } =
+                v
+              in
               let prepend_json_strings decls acc =
                 SSet.fold decls ~init:acc ~f:(fun n acc ->
                     JSON_String n :: acc)
               in
               let acc = prepend_json_strings n_funs acc in
               let acc = prepend_json_strings n_classes acc in
+              let acc = prepend_json_strings n_record_defs acc in
               let acc = prepend_json_strings n_types acc in
               let acc = prepend_json_strings n_consts acc in
               acc)
@@ -188,6 +197,7 @@ let remove_decls env fast_parsed =
           {
             FileInfo.funs = funl;
             classes = classel;
+            record_defs = record_defsl;
             typedefs = typel;
             consts = constl;
             file_mode = _;
@@ -196,9 +206,10 @@ let remove_decls env fast_parsed =
           } ->
         let funs = set_of_idl funl in
         let classes = set_of_idl classel in
+        let record_defs = set_of_idl record_defsl in
         let typedefs = set_of_idl typel in
         let consts = set_of_idl constl in
-        NamingGlobal.remove_decls ~funs ~classes ~typedefs ~consts)
+        NamingGlobal.remove_decls ~funs ~classes ~record_defs ~typedefs ~consts)
 
 (* If the only things that would change about file analysis are positions,
  * we're not going to recheck it, and positions in its error list might

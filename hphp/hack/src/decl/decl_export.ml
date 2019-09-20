@@ -51,6 +51,7 @@ let keys_to_sset smap =
 let get_class_filename cid =
   match Naming_table.Types.get_pos cid with
   | None
+  | Some (_, Naming_table.TRecordDef)
   | Some (_, Naming_table.TTypedef) ->
     None
   | Some (pos, Naming_table.TClass) -> Some (FileInfo.get_pos_filename pos)

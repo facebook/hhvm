@@ -168,13 +168,20 @@ let test_process_file_deferring () =
   Relative_path.Map.iter fast ~f:(fun name info ->
       let {
         FileInfo.n_classes = classes;
+        n_record_defs = record_defs;
         n_types = typedefs;
         n_funs = funs;
         n_consts = consts;
       } =
         info
       in
-      NamingGlobal.ndecl_file_fast name ~funs ~classes ~typedefs ~consts);
+      NamingGlobal.ndecl_file_fast
+        name
+        ~funs
+        ~classes
+        ~record_defs
+        ~typedefs
+        ~consts);
 
   (* Construct one instance of file type check computation. Class \Foo depends
     on class \Bar being declared, so processing \Foo once should result in

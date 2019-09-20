@@ -33,6 +33,10 @@ module GEnv = struct
         let res = unsafe_opt (Ast_provider.find_class_in_file fn name) in
         let (p', _) = res.Aast.c_name in
         (p', name)
+      | FileInfo.File (FileInfo.RecordDef, fn) ->
+        let res = unsafe_opt (Ast_provider.find_record_def_in_file fn name) in
+        let (p', _) = res.Aast.rd_name in
+        (p', name)
       | FileInfo.File (FileInfo.Typedef, fn) ->
         let res = unsafe_opt (Ast_provider.find_typedef_in_file fn name) in
         let (p', _) = res.Aast.t_name in
@@ -68,10 +72,9 @@ module GEnv = struct
   let type_pos name =
     let name = Option.value (type_canon_name name) ~default:name in
     match Naming_table.Types.get_pos name with
-    | Some (pos, Naming_table.TClass) ->
-      let (p, _) = get_full_pos (pos, name) in
-      Some p
-    | Some (pos, Naming_table.TTypedef) ->
+    | Some (pos, Naming_table.TClass)
+    | Some (pos, Naming_table.TTypedef)
+    | Some (pos, Naming_table.TRecordDef) ->
       let (p, _) = get_full_pos (pos, name) in
       Some p
     | None -> None
@@ -88,6 +91,9 @@ module GEnv = struct
     | Some (pos, Naming_table.TTypedef) ->
       let (p, _) = get_full_pos (pos, name) in
       Some (p, Naming_table.TTypedef)
+    | Some (pos, Naming_table.TRecordDef) ->
+      let (p, _) = get_full_pos (pos, name) in
+      Some (p, Naming_table.TRecordDef)
     | None -> None
 
   let fun_canon_name name = Naming_table.Funs.get_canon_name (canon_key name)
@@ -109,6 +115,7 @@ module GEnv = struct
       let (p, _) = get_full_pos (pos, name) in
       Some p
     | Some (_, Naming_table.TClass)
+    | Some (_, Naming_table.TRecordDef)
     | None ->
       None
 
@@ -157,6 +164,7 @@ module Env = struct
       match cid_kind with
       | Naming_table.TClass -> FileInfo.Class
       | Naming_table.TTypedef -> FileInfo.Typedef
+      | Naming_table.TRecordDef -> FileInfo.RecordDef
     in
     match Naming_table.Types.get_canon_name name_key with
     | Some _ -> ()
@@ -166,6 +174,9 @@ module Env = struct
       Naming_table.Types.add name (FileInfo.File (mode, fn), cid_kind)
 
   let new_class_fast fn name = new_cid_fast fn name Naming_table.TClass
+
+  let new_record_decl_fast fn name =
+    new_cid_fast fn name Naming_table.TRecordDef
 
   let new_typedef_fast fn name = new_cid_fast fn name Naming_table.TTypedef
 
@@ -235,6 +246,8 @@ module Env = struct
 
   let new_class = new_cid Naming_table.TClass
 
+  let new_record_decl = new_cid Naming_table.TRecordDef
+
   let new_typedef = new_cid Naming_table.TTypedef
 
   let new_global_const (p, x) =
@@ -250,8 +263,9 @@ end
 (*****************************************************************************)
 (* Updating the environment *)
 (*****************************************************************************)
-let remove_decls ~funs ~classes ~typedefs ~consts =
+let remove_decls ~funs ~classes ~record_defs ~typedefs ~consts =
   let types = SSet.union classes typedefs in
+  let types = SSet.union types record_defs in
   Naming_table.Types.remove_batch types;
   Naming_table.Funs.remove_batch funs;
   Naming_table.Consts.remove_batch consts
@@ -260,15 +274,17 @@ let remove_decls ~funs ~classes ~typedefs ~consts =
 (* The entry point to build the naming environment *)
 (*****************************************************************************)
 
-let make_env ~funs ~classes ~typedefs ~consts =
+let make_env ~funs ~classes ~record_defs ~typedefs ~consts =
   List.iter funs Env.new_fun;
   List.iter classes Env.new_class;
+  List.iter record_defs Env.new_record_decl;
   List.iter typedefs Env.new_typedef;
   List.iter consts Env.new_global_const
 
-let make_env_from_fast fn ~funs ~classes ~typedefs ~consts =
+let make_env_from_fast fn ~funs ~classes ~record_defs ~typedefs ~consts =
   SSet.iter (Env.new_fun_fast fn) funs;
   SSet.iter (Env.new_class_fast fn) classes;
+  SSet.iter (Env.new_record_decl_fast fn) record_defs;
   SSet.iter (Env.new_typedef_fast fn) typedefs;
   SSet.iter (Env.new_global_const_fast fn) consts
 
@@ -290,8 +306,8 @@ let add_files_to_rename failed defl defs_in_env =
     ~init:failed
     defl
 
-let ndecl_file_fast fn ~funs ~classes ~typedefs ~consts =
-  make_env_from_fast fn ~funs ~classes ~typedefs ~consts
+let ndecl_file_fast fn ~funs ~classes ~record_defs ~typedefs ~consts =
+  make_env_from_fast fn ~funs ~classes ~record_defs ~typedefs ~consts
 
 let ndecl_file
     fn
@@ -299,6 +315,7 @@ let ndecl_file
       FileInfo.file_mode = _;
       funs;
       classes;
+      record_defs;
       typedefs;
       consts;
       comments = _;
@@ -307,7 +324,7 @@ let ndecl_file
   let (errors, _) =
     Errors.do_with_context fn Errors.Naming (fun () ->
         dn ("Naming decl: " ^ Relative_path.to_absolute fn);
-        make_env ~funs ~classes ~typedefs ~consts)
+        make_env ~funs ~classes ~record_defs ~typedefs ~consts)
   in
   if Errors.is_empty errors then
     (errors, Relative_path.Set.empty)
@@ -346,6 +363,7 @@ let ndecl_file
     let failed = Relative_path.Set.singleton fn in
     let failed = add_files_to_rename failed funs GEnv.fun_canon_pos in
     let failed = add_files_to_rename failed classes GEnv.type_canon_pos in
+    let failed = add_files_to_rename failed record_defs GEnv.type_canon_pos in
     let failed = add_files_to_rename failed typedefs GEnv.type_canon_pos in
     let failed = add_files_to_rename failed consts GEnv.gconst_pos in
     (errors, failed)

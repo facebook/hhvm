@@ -38,18 +38,25 @@ end
 val make_env :
   funs:FileInfo.id list ->
   classes:FileInfo.id list ->
+  record_defs:FileInfo.id list ->
   typedefs:FileInfo.id list ->
   consts:FileInfo.id list ->
   unit
 
 (* Removing declarations *)
 val remove_decls :
-  funs:SSet.t -> classes:SSet.t -> typedefs:SSet.t -> consts:SSet.t -> unit
+  funs:SSet.t ->
+  classes:SSet.t ->
+  record_defs:SSet.t ->
+  typedefs:SSet.t ->
+  consts:SSet.t ->
+  unit
 
 val ndecl_file_fast :
   Relative_path.t ->
   funs:SSet.t ->
   classes:SSet.t ->
+  record_defs:SSet.t ->
   typedefs:SSet.t ->
   consts:SSet.t ->
   unit

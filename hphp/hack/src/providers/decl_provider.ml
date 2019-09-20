@@ -14,6 +14,8 @@ type fun_key = string
 
 type class_key = string
 
+type record_def_key = string
+
 type typedef_key = string
 
 type gconst_key = string
@@ -21,6 +23,8 @@ type gconst_key = string
 type fun_decl = Typing_defs.decl_fun_type
 
 type class_decl = Typing_classes_heap.Api.t
+
+type record_def_decl = Typing_defs.record_def_type
 
 type typedef_decl = Typing_defs.typedef_type
 
@@ -133,6 +137,34 @@ let get_typedef (typedef_name : string) : typedef_decl option =
     let result : typedef_decl option = Obj.obj result in
     result
 
+let get_record_def (record_name : string) : record_def_decl option =
+  match Provider_config.get_backend () with
+  | Provider_config.Lru_shared_memory ->
+    Decl_lru_cache.get_record_def record_name
+  | Provider_config.Shared_memory ->
+    Typing_lazy_heap.get_record_def record_name
+  | Provider_config.Local_memory { decl_cache } ->
+    let result : Obj.t =
+      Memory_bounded_lru_cache.find_or_add
+        decl_cache
+        ~key:(Provider_config.Record_decl record_name)
+        ~default:(fun () ->
+          let result : record_def_decl option =
+            match Naming_table.Consts.get_pos record_name with
+            | Some pos ->
+              let filename = FileInfo.get_pos_filename pos in
+              let rdecl =
+                Errors.run_in_decl_mode filename (fun () ->
+                    Decl.declare_record_def_in_file filename record_name)
+              in
+              Some rdecl
+            | None -> None
+          in
+          Obj.repr result)
+    in
+    let result : record_def_decl option = Obj.obj result in
+    result
+
 let get_gconst (gconst_name : string) : gconst_decl option =
   match Provider_config.get_backend () with
   | Provider_config.Lru_shared_memory -> Decl_lru_cache.get_gconst gconst_name
@@ -182,6 +214,18 @@ let invalidate_class (class_name : class_key) : unit =
       decl_cache
       (Provider_config.Class_decl class_name)
 
+let invalidate_record_def (record_name : record_def_key) : unit =
+  match Provider_config.get_backend () with
+  | Provider_config.Lru_shared_memory ->
+    failwith
+      "Record def decl invalidation not yet supported with LRU shared memory"
+  | Provider_config.Shared_memory ->
+    Decl_heap.RecordDefs.remove_batch (SSet.singleton record_name)
+  | Provider_config.Local_memory { decl_cache } ->
+    Memory_bounded_lru_cache.remove
+      decl_cache
+      (Provider_config.Record_decl record_name)
+
 let invalidate_typedef (typedef_name : typedef_key) : unit =
   match Provider_config.get_backend () with
   | Provider_config.Lru_shared_memory ->
@@ -210,12 +254,14 @@ let invalidate_context_decls ~(ctx : Provider_context.t) =
   match Provider_config.get_backend () with
   | Provider_config.Local_memory _ ->
     Relative_path.Map.iter ctx.Provider_context.entries ~f:(fun _ entry ->
-        let (funs, classes, typedefs, gconsts) =
+        let (funs, classes, record_defs, typedefs, gconsts) =
           Nast.get_defs entry.Provider_context.ast
         in
         List.iter funs ~f:(fun (_, fun_name) -> invalidate_fun fun_name);
         List.iter classes ~f:(fun (_, class_name) ->
             invalidate_class class_name);
+        List.iter record_defs ~f:(fun (_, record_name) ->
+            invalidate_record_def record_name);
         List.iter typedefs ~f:(fun (_, typedef_name) ->
             invalidate_typedef typedef_name);
         List.iter gconsts ~f:(fun (_, gconst_name) ->
@@ -233,6 +279,7 @@ let local_changes_push_stack () =
   changes heap. After it uses the `Decl_provider` interface, we'll move the
   below into the following `Shared_memory` match case. *)
   Decl_heap.Funs.LocalChanges.push_stack ();
+  Decl_heap.RecordDefs.LocalChanges.push_stack ();
   Decl_heap.Constructors.LocalChanges.push_stack ();
   Decl_heap.Props.LocalChanges.push_stack ();
   Decl_heap.StaticProps.LocalChanges.push_stack ();
@@ -252,6 +299,7 @@ let local_changes_push_stack () =
 let local_changes_pop_stack () =
   (* See comment in [local_changes_push_stack] above. *)
   Decl_heap.Funs.LocalChanges.pop_stack ();
+  Decl_heap.RecordDefs.LocalChanges.pop_stack ();
   Decl_heap.Constructors.LocalChanges.pop_stack ();
   Decl_heap.Props.LocalChanges.pop_stack ();
   Decl_heap.StaticProps.LocalChanges.pop_stack ();

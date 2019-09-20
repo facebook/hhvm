@@ -50,6 +50,7 @@ let get_class_name (dep : Typing_deps.Dep.variant) =
     | AllMembers cls
     | Extends cls ->
       cls
+    | RecordDef _
     | Fun _
     | FunName _
     | GConst _
@@ -312,7 +313,6 @@ let get_class_declaration (cls : Decl_provider.class_decl) =
       | Ast_defs.Cinterface -> "interface"
       | Ast_defs.Ctrait -> "trait"
       | Ast_defs.Cenum -> "enum"
-      | Ast_defs.Crecord -> "record"
     in
     let name = strip_ns @@ Class.name cls in
     let tparams =
@@ -946,6 +946,8 @@ let get_signature_dependencies obj deps =
       in
       Sequence.iter (Decl_provider.Class.consts cls) (fun (_, c) ->
           add_dep deps ~cls:(Some cls_name) c.cc_type)
+    (* We don't currently support extracting standalone examples with records. *)
+    | RecordDef _ -> ()
     (* Ignore, we fetch class hierarchy when we call get_signature_dependencies on a class dep *)
     | Extends _ -> ())
 

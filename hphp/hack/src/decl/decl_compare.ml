@@ -553,3 +553,36 @@ let get_classes_deps ~conservative_redecl old_classes new_classes classes =
        (ref DepSet.empty))
     classes
     (DepSet.empty, DepSet.empty, DepSet.empty)
+
+(*****************************************************************************)
+(* Determine which top level definitions have to be rechecked if the record
+ * changed.
+ *)
+(*****************************************************************************)
+let get_record_def_deps
+    ~conservative_redecl old_record_defs rdid (changed, to_redecl, to_recheck)
+    =
+  let _ = conservative_redecl in
+  match
+    (SMap.find_unsafe rdid old_record_defs, Decl_heap.RecordDefs.get rdid)
+  with
+  | (None, _)
+  | (_, None) ->
+    let dep = Dep.RecordDef rdid in
+    let where_record_is_used = Typing_deps.get_ideps dep in
+    let to_recheck = DepSet.union where_record_is_used to_recheck in
+    (add_changed changed dep, to_redecl, to_recheck)
+  | (Some rd1, Some rd2) ->
+    if rd1 = rd2 then
+      (changed, to_redecl, to_recheck)
+    else
+      let dep = Dep.RecordDef rdid in
+      let where_record_is_used = Typing_deps.get_ideps dep in
+      let to_recheck = DepSet.union where_record_is_used to_recheck in
+      (add_changed changed dep, to_redecl, to_recheck)
+
+let get_record_defs_deps ~conservative_redecl old_record_defs record_defs =
+  SSet.fold
+    (get_record_def_deps ~conservative_redecl old_record_defs)
+    record_defs
+    (DepSet.empty, DepSet.empty, DepSet.empty)

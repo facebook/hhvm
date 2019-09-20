@@ -34,7 +34,6 @@ let class_const env c cc =
       match c.c_kind with
       | Ast_defs.Ctrait -> `trait
       | Ast_defs.Cenum -> `enum
-      | Ast_defs.Crecord -> `record
       | _ -> assert false
     in
     Errors.cannot_declare_constant kind pos c.c_name;
@@ -42,8 +41,7 @@ let class_const env c cc =
   | Ast_defs.Cnormal
   | Ast_defs.Cabstract
   | Ast_defs.Cinterface
-  | Ast_defs.Cenum
-  | Ast_defs.Crecord ->
+  | Ast_defs.Cenum ->
     let (ty, abstract) =
       (* Optional hint h, optional expression e *)
       match (h, e) with
@@ -87,13 +85,11 @@ let typeconst_abstract_kind env = function
 let typeconst env c tc =
   match c.c_kind with
   | Ast_defs.Ctrait
-  | Ast_defs.Cenum
-  | Ast_defs.Crecord ->
+  | Ast_defs.Cenum ->
     let kind =
       match c.c_kind with
       | Ast_defs.Ctrait -> `trait
       | Ast_defs.Cenum -> `enum
-      | Ast_defs.Crecord -> `record
       | _ -> assert false
     in
     Errors.cannot_declare_constant kind (fst tc.c_tconst_name) c.c_name;

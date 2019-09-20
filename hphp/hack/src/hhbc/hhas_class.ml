@@ -32,7 +32,6 @@ type t = {
   class_is_abstract: bool;
   class_is_interface: bool;
   class_is_trait: bool;
-  class_is_record: bool;
   class_is_xhp: bool;
   class_hoisted: Closure_convert.hoist_kind;
   class_is_const: bool;
@@ -65,7 +64,6 @@ let make
     class_is_abstract
     class_is_interface
     class_is_trait
-    class_is_record
     class_is_xhp
     class_hoisted
     class_is_const
@@ -93,7 +91,6 @@ let make
     class_is_abstract;
     class_is_interface;
     class_is_trait;
-    class_is_record;
     class_is_xhp;
     class_hoisted;
     class_is_const;
@@ -131,8 +128,6 @@ let is_abstract hhas_class = hhas_class.class_is_abstract
 let is_interface hhas_class = hhas_class.class_is_interface
 
 let is_trait hhas_class = hhas_class.class_is_trait
-
-let is_record hhas_class = hhas_class.class_is_record
 
 let is_xhp hhas_class = hhas_class.class_is_xhp
 

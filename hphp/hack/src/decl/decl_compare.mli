@@ -42,3 +42,9 @@ val get_gconsts_deps :
   GConsts.t option SMap.t ->
   SSet.t ->
   DepSet.t * DepSet.t * DepSet.t
+
+val get_record_defs_deps :
+  conservative_redecl:bool ->
+  Decl_heap.RecordDefs.Cache.ConfValue.value option SMap.t ->
+  SSet.t ->
+  Typing_deps.DepSet.t * Typing_deps.DepSet.t * Typing_deps.DepSet.t

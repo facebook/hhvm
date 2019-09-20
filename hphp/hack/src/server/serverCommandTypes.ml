@@ -114,6 +114,7 @@ module Find_refs = struct
 
   type action =
     | Class of string
+    | Record of string
     | Member of string * member
     | Function of string
     | GConst of string

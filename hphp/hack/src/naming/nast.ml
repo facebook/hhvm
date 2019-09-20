@@ -59,6 +59,8 @@ type fun_variadicity = (Pos.t, func_body_ann, unit, unit) Aast.fun_variadicity
 
 type typedef = (Pos.t, func_body_ann, unit, unit) Aast.typedef
 
+type record_def = (Pos.t, func_body_ann, unit, unit) Aast.record_def
+
 type tparam = (Pos.t, func_body_ann, unit, unit) Aast.tparam
 
 type gconst = (Pos.t, func_body_ann, unit, unit) Aast.gconst
@@ -184,14 +186,19 @@ let get_defs ast =
     List.fold_right
       ast
       ~init:acc
-      ~f:(fun def ((acc1, acc2, acc3, acc4) as acc) ->
+      ~f:(fun def ((acc1, acc2, acc3, acc4, acc5) as acc) ->
         Aast.(
           match def with
-          | Fun f -> (FileInfo.pos_full f.f_name :: acc1, acc2, acc3, acc4)
-          | Class c -> (acc1, FileInfo.pos_full c.c_name :: acc2, acc3, acc4)
-          | Typedef t -> (acc1, acc2, FileInfo.pos_full t.t_name :: acc3, acc4)
+          | Fun f ->
+            (FileInfo.pos_full f.f_name :: acc1, acc2, acc3, acc4, acc5)
+          | Class c ->
+            (acc1, FileInfo.pos_full c.c_name :: acc2, acc3, acc4, acc5)
+          | RecordDef rd ->
+            (acc1, acc2, FileInfo.pos_full rd.rd_name :: acc3, acc4, acc5)
+          | Typedef t ->
+            (acc1, acc2, acc3, FileInfo.pos_full t.t_name :: acc4, acc5)
           | Constant cst ->
-            (acc1, acc2, acc3, FileInfo.pos_full cst.cst_name :: acc4)
+            (acc1, acc2, acc3, acc4, FileInfo.pos_full cst.cst_name :: acc5)
           | Namespace (_, defs) -> get_defs defs acc
           | NamespaceUse _
           | SetNamespaceEnv _ ->
@@ -201,9 +208,10 @@ let get_defs ast =
           | Stmt _ ->
             acc))
   in
-  get_defs ast ([], [], [], [])
+  get_defs ast ([], [], [], [], [])
 
 type ignore_attribute_env = { ignored_attributes: string list }
+
 (** Some utility functions **)
 
 let ast_deregister_attributes_mapper =
@@ -580,6 +588,8 @@ module Visitor_DEPRECATED = struct
       method on_fun_ : 'a -> fun_ -> 'a
 
       method on_class_ : 'a -> class_ -> 'a
+
+      method on_record_def : 'a -> record_def -> 'a
 
       method on_gconst : 'a -> gconst -> 'a
 
@@ -1174,6 +1184,10 @@ module Visitor_DEPRECATED = struct
 
       method on_class_req acc (h, _) = this#on_hint acc h
 
+      method on_record_def acc rd =
+        let acc = this#on_id acc rd.rd_name in
+        acc
+
       method on_gconst acc g =
         let acc = this#on_id acc g.cst_name in
         let acc = this#on_expr acc g.cst_value in
@@ -1202,6 +1216,7 @@ module Visitor_DEPRECATED = struct
         function
         | Fun f -> this#on_fun_ acc f
         | Class c -> this#on_class_ acc c
+        | RecordDef rd -> this#on_record_def acc rd
         | Stmt s -> this#on_stmt acc s
         | Typedef t -> this#on_typedef acc t
         | Constant g -> this#on_gconst acc g

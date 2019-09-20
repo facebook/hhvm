@@ -691,11 +691,14 @@ let parse_name_and_decl popt files_contents =
               in
               (* If the feature is turned on, deregister functions with attribute
         __PHPStdLib. This does it for all functions, not just hhi files *)
-              let (funs, classes, typedefs, consts) = Nast.get_defs ast in
+              let (funs, classes, record_defs, typedefs, consts) =
+                Nast.get_defs ast
+              in
               {
                 FileInfo.file_mode;
                 funs;
                 classes;
+                record_defs;
                 typedefs;
                 consts;
                 comments = Some comments;
@@ -706,8 +709,16 @@ let parse_name_and_decl popt files_contents =
       in
       Relative_path.Map.iter files_info (fun fn fileinfo ->
           Errors.run_in_context fn Errors.Naming (fun () ->
-              let { FileInfo.funs; classes; typedefs; consts; _ } = fileinfo in
-              NamingGlobal.make_env ~funs ~classes ~typedefs ~consts));
+              let { FileInfo.funs; classes; record_defs; typedefs; consts; _ }
+                  =
+                fileinfo
+              in
+              NamingGlobal.make_env
+                ~funs
+                ~classes
+                ~record_defs
+                ~typedefs
+                ~consts));
 
       Relative_path.Map.iter parsed_files (fun fn parsed_file ->
           Errors.run_in_context fn Errors.Decl (fun () ->

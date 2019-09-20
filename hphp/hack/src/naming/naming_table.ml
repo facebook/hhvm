@@ -180,6 +180,7 @@ let canonize_set = SSet.map to_canon_name_key
 type type_of_type =
   | TClass
   | TTypedef
+  | TRecordDef
 [@@deriving enum]
 
 module Sqlite : sig
@@ -1198,6 +1199,7 @@ module Types = struct
         match entry_type with
         | TClass -> FileInfo.Class
         | TTypedef -> FileInfo.Typedef
+        | TRecordDef -> FileInfo.RecordDef
       in
       Some (FileInfo.File (name_type, path), entry_type)
     in
@@ -1234,6 +1236,17 @@ module Types = struct
               Ast_provider.find_typedef_in_file ~case_insensitive:true path id
             with
             | Some typedef -> Some (snd typedef.Aast.t_name)
+            | None ->
+              Hh_logger.log
+                "Failed to get canonical name for %s in file %s"
+                id
+                path_str;
+              None
+          end
+        | TRecordDef ->
+          begin
+            match Ast_provider.find_record_def_in_file path id with
+            | Some cls -> Some (snd cls.Aast.rd_name)
             | None ->
               Hh_logger.log
                 "Failed to get canonical name for %s in file %s"

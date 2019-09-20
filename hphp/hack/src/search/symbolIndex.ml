@@ -296,7 +296,8 @@ let get_position_for_symbol (symbol : string) (kind : si_kind) :
     | SI_Trait
     | SI_Enum
     | SI_Typedef
-    | SI_Class ->
+    | SI_Class
+    | SI_RecordDef ->
       let fipos =
         match Naming_table.Types.get_pos name_with_ns with
         | None -> None

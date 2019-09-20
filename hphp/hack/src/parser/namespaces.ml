@@ -23,6 +23,7 @@ type autoimport_ns =
 type elaborate_kind =
   | ElaborateFun
   | ElaborateClass
+  | ElaborateRecord
   | ElaborateConst
 
 (**
@@ -153,6 +154,7 @@ let get_autoimport_name_namespace id kind =
       Some (Global, HH)
     else
       lookup_name autoimport_types
+  | ElaborateRecord -> lookup_name autoimport_types
   | ElaborateFun -> lookup_name autoimport_funcs
   | ElaborateConst -> lookup_name autoimport_consts
 
@@ -270,6 +272,7 @@ let elaborate_id_impl nsenv kind id =
             | ElaborateClass -> nsenv.ns_class_uses
             | ElaborateFun -> nsenv.ns_fun_uses
             | ElaborateConst -> nsenv.ns_const_uses
+            | ElaborateRecord -> nsenv.ns_record_def_uses
         in
         match SMap.get prefix uses with
         | Some use -> (true, use ^ String_utils.lstrip id prefix)
@@ -390,6 +393,14 @@ module ElaborateDefs = struct
              c_body = List.map c.c_body (class_def nsenv);
              c_namespace = nsenv;
            })
+    | RecordDef rd ->
+      let (name, nsenv, updated_nsenv) =
+        elaborate_defined_id nsenv ElaborateRecord rd.rd_name
+      in
+      finish
+        nsenv
+        updated_nsenv
+        (RecordDef { rd with rd_name = name; rd_namespace = nsenv })
     | Fun f ->
       let (name, nsenv, updated_nsenv) =
         elaborate_defined_id nsenv ElaborateFun f.f_name

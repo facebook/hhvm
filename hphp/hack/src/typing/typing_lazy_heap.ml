@@ -63,6 +63,19 @@ let get_gconst cst_name =
       Some gconst
     | None -> None)
 
+let get_record_def x =
+  match RecordDefs.get x with
+  | Some c -> Some c
+  | None ->
+    (match get_type_id_filename x Naming_table.TRecordDef with
+    | Some filename ->
+      let tdecl =
+        Errors.run_in_decl_mode filename (fun () ->
+            Decl.declare_record_def_in_file filename x)
+      in
+      Some tdecl
+    | None -> None)
+
 let get_typedef x =
   match Typedefs.get x with
   | Some c -> Some c

@@ -52,6 +52,7 @@ and fimode = (FileInfo.mode[@visitors.opaque])
 and def =
   | Fun of fun_
   | Class of class_
+  | RecordDef of record_def
   | Stmt of stmt
   | Typedef of typedef
   | Constant of gconst
@@ -122,6 +123,17 @@ and tconstraint = hint option
 and typedef_kind =
   | Alias of hint
   | NewType of hint
+
+and record_def = {
+  rd_name: id;
+  rd_extends: hint list;
+  rd_final: bool;
+  rd_fields: (id * hint * expr option) list;
+  rd_user_attributes: user_attribute list;
+  rd_namespace: nsenv;
+  rd_span: pos;
+  rd_doc_comment: string option;
+}
 
 and class_ = {
   c_mode: fimode;

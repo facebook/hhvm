@@ -375,7 +375,6 @@ let emit_class (ast_class, hoisted) =
   let class_no_dynamic_props = class_is_const in
   let class_id = Hhbc_id.Class.elaborate_id namespace ast_class.A.c_name in
   let class_is_trait = ast_class.A.c_kind = Ast_defs.Ctrait in
-  let class_is_record = ast_class.A.c_kind = Ast_defs.Crecord in
   let class_is_interface = ast_class.A.c_kind = Ast_defs.Cinterface in
   let class_uses =
     List.filter_map ast_class.A.c_uses (fun (p, h) ->
@@ -667,7 +666,6 @@ let emit_class (ast_class, hoisted) =
     class_is_abstract
     class_is_interface
     class_is_trait
-    class_is_record
     ast_class.A.c_is_xhp
     hoisted
     class_is_const

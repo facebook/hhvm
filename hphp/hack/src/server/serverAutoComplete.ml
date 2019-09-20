@@ -20,7 +20,12 @@ let get_results
     (tast : Tast.program) :
     AutocompleteTypes.complete_autocomplete_result list
     Utils.With_complete_flag.t =
-  let { FileInfo.n_funs = content_funs; n_classes = content_classes; _ } =
+  let {
+    FileInfo.n_funs = content_funs;
+    n_classes = content_classes;
+    n_record_defs = content_record_defs;
+    _;
+  } =
     FileInfo.simplify file_info
   in
   AutocompleteService.go
@@ -28,6 +33,7 @@ let get_results
     ~tcopt
     ~content_funs
     ~content_classes
+    ~content_record_defs
     ~autocomplete_context
     ~sienv
 
@@ -163,6 +169,9 @@ let auto_complete_at_position_ctx
         (Core_kernel.List.map fileinfo.FileInfo.funs ~f:snd |> SSet.of_list)
       ~content_classes:
         (Core_kernel.List.map fileinfo.FileInfo.classes ~f:snd |> SSet.of_list)
+      ~content_record_defs:
+        ( Core_kernel.List.map fileinfo.FileInfo.record_defs ~f:snd
+        |> SSet.of_list )
       ~autocomplete_context
       ~sienv
       (Provider_utils.compute_tast ~ctx ~entry))

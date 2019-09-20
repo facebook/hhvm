@@ -60,20 +60,30 @@ let declare_and_check_ast ?(path = path) ?content ~make_ast ~f tcopt =
   @@ make_then_revert_local_changes (fun () ->
          Fixme_provider.remove_batch (Relative_path.Set.singleton path);
          let ast = make_ast () in
-         let (funs, classes, typedefs, consts) = Nast.get_defs ast in
-         let file_info =
-           { FileInfo.empty_t with FileInfo.funs; classes; typedefs; consts }
+         let (funs, classes, record_defs, typedefs, consts) =
+           Nast.get_defs ast
          in
-         let { FileInfo.n_funs; n_classes; n_types; n_consts } =
+         let file_info =
+           {
+             FileInfo.empty_t with
+             FileInfo.funs;
+             classes;
+             record_defs;
+             typedefs;
+             consts;
+           }
+         in
+         let { FileInfo.n_funs; n_classes; n_record_defs; n_types; n_consts } =
            FileInfo.simplify file_info
          in
          Ast_provider.provide_ast_hint path ast Ast_provider.Full;
          NamingGlobal.remove_decls
            ~funs:n_funs
            ~classes:n_classes
+           ~record_defs:n_record_defs
            ~typedefs:n_types
            ~consts:n_consts;
-         NamingGlobal.make_env ~funs ~classes ~typedefs ~consts;
+         NamingGlobal.make_env ~funs ~classes ~record_defs ~typedefs ~consts;
 
          (* Decl is not necessary to run typing, since typing would get
           * whatever it needs using lazy decl, but we run it anyway in order to

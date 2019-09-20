@@ -8377,7 +8377,6 @@ and check_parent_sealed child_type parent_type =
       | (Ast_defs.Cnormal, _) ->
         check "class" "extend"
       | (Ast_defs.Cenum, _) -> ()
-      | (Ast_defs.Crecord, _) -> ()
     end
 
 and check_parents_sealed env child_def child_type =
@@ -9295,6 +9294,47 @@ and method_def env cls m =
       ( Typing_lambda_ambiguous.suggest_method_def env method_def,
         env.global_tvenv ))
 
+and record_field env f =
+  let (id, hint, e) = f in
+  let ((p, _) as cty) = hint in
+  let (env, cty) =
+    let cty = Decl_hint.hint env.decl_env cty in
+    Phase.localize_with_self env cty
+  in
+  let expected = ExpectedTy.make p Reason.URhint cty in
+  match e with
+  | Some e ->
+    let (env, te, ty) = expr ~expected env e in
+    let _env =
+      Typing_coercion.coerce_type
+        p
+        Reason.URhint
+        env
+        ty
+        (MakeType.unenforced cty)
+        Errors.record_init_value_does_not_match_hint
+    in
+    (id, hint, Some te)
+  | None -> (id, hint, None)
+
+(* Type check records to ensure their initial values match the field
+   type. TODO, see T44306013 *)
+and record_def_def tcopt rd =
+  let env = EnvFromDef.record_def_env tcopt rd in
+  let (env, attributes) =
+    List.map_env env rd.rd_user_attributes user_attribute
+  in
+  {
+    T.rd_name = rd.rd_name;
+    T.rd_extends = rd.rd_extends;
+    T.rd_final = rd.rd_final;
+    T.rd_fields = List.map rd.rd_fields (record_field env);
+    T.rd_user_attributes = attributes;
+    T.rd_namespace = rd.rd_namespace;
+    T.rd_span = rd.rd_span;
+    T.rd_doc_comment = rd.rd_doc_comment;
+  }
+
 and typedef_def tcopt typedef =
   let env = EnvFromDef.typedef_env tcopt typedef in
   let tdecl = Env.get_typedef env (snd typedef.t_name) in
@@ -9547,6 +9587,7 @@ let nast_to_tast opts nast =
           failwith
           @@ Printf.sprintf "Error in declaration of class: %s" (snd c.c_name)
       end
+    | RecordDef rd -> T.RecordDef (record_def_def opts rd)
     (* We don't typecheck top level statements:
      * https://docs.hhvm.com/hack/unsupported/top-level
      * so just create the minimal env for us to construct a Stmt.

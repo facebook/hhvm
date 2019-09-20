@@ -266,7 +266,7 @@ let rec ancestor_linearization
         |> Option.value_map ~default:false ~f:(fun c ->
                match c.sc_kind with
                | Ast_defs.(Cnormal | Cabstract) -> true
-               | Ast_defs.(Ctrait | Cinterface | Cenum | Crecord) -> false)
+               | Ast_defs.(Ctrait | Cinterface | Cenum) -> false)
       in
       if not ancestor_checks_requirements then
         rest
@@ -420,8 +420,7 @@ and next_state
                   (* Otherwise, keep them only if they represent a requirement that
                  we will need to validate later. *)
                   
-                  | (Some _, Ast_defs.(Cnormal | Cabstract | Cenum | Crecord))
-                    ->
+                  | (Some _, Ast_defs.(Cnormal | Cabstract | Cenum)) ->
                     if List.exists synths ~f:(mro_elements_equal next) then
                       synths
                     else

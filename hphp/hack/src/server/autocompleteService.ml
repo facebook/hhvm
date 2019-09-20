@@ -320,7 +320,8 @@ let compute_complete_global
     ~(tcopt : TypecheckerOptions.t)
     ~(autocomplete_context : AutocompleteTypes.legacy_autocomplete_context)
     ~(content_funs : Reordered_argument_collections.SSet.t)
-    ~(content_classes : Reordered_argument_collections.SSet.t) : unit =
+    ~(content_classes : Reordered_argument_collections.SSet.t)
+    ~(content_record_defs : Reordered_argument_collections.SSet.t) : unit =
   let completion_type = !argument_global_type in
   let gname = Utils.strip_ns !auto_complete_for_global in
   let gname = strip_suffix gname in
@@ -396,10 +397,7 @@ let compute_complete_global
                     SearchUtils.SI_Class
                   | Ast_defs.Cinterface -> SearchUtils.SI_Interface
                   | Ast_defs.Ctrait -> SearchUtils.SI_Trait
-                  | Ast_defs.Cenum
-                  | Ast_defs.Crecord ->
-                    SearchUtils.SI_Enum
-                  (* TODO(T36697624): Add Record_kind *)
+                  | Ast_defs.Cenum -> SearchUtils.SI_Enum
                 in
                 let ty =
                   ( Typing_reason.Rwitness (Cls.pos c),
@@ -410,6 +408,28 @@ let compute_complete_global
                   (Phase.decl ty)
                   kind
                   None)
+    in
+    let on_record name ~seen =
+      if SSet.mem seen name then
+        None
+      else if not (should_complete_fun completion_type) then
+        None
+      else if not (does_fully_qualified_name_match_prefix name) then
+        None
+      else
+        Option.map (Decl_provider.get_record_def name) ~f:(fun rd ->
+            incr result_count;
+
+            (* TODO: don't assume records are mixed, T44306013 *)
+            let ty =
+              ( Typing_reason.Rwitness rd.Typing_defs.rdt_pos,
+                Typing_defs.Tmixed )
+            in
+            get_partial_result
+              (string_to_replace_prefix name)
+              (Phase.decl ty)
+              SearchUtils.SI_RecordDef
+              None)
     in
     let on_function name ~seen =
       if autocomplete_context.is_xhp_classname then
@@ -459,6 +479,11 @@ let compute_complete_global
       (List.filter_map
          (SSet.elements content_classes)
          (on_class ~seen:SSet.empty))
+      add_res;
+    List.iter
+      (List.filter_map
+         (SSet.elements content_record_defs)
+         (on_record ~seen:SSet.empty))
       add_res;
     List.iter
       (List.filter_map
@@ -846,6 +871,7 @@ let find_global_results
     ~(tcopt : TypecheckerOptions.t)
     ~(content_funs : Reordered_argument_collections.SSet.t)
     ~(content_classes : Reordered_argument_collections.SSet.t)
+    ~(content_record_defs : Reordered_argument_collections.SSet.t)
     ~(autocomplete_context : AutocompleteTypes.legacy_autocomplete_context)
     ~(sienv : SearchUtils.si_env)
     ~(tast_env : Tast_env.t) : unit =
@@ -857,7 +883,8 @@ let find_global_results
       ~tcopt
       ~autocomplete_context
       ~content_funs
-      ~content_classes;
+      ~content_classes
+      ~content_record_defs;
 
     (* If only traits are valid, filter to that *)
     if completion_type = Some Actrait_only then
@@ -942,6 +969,7 @@ let go
     ~(tcopt : TypecheckerOptions.t)
     ~(content_funs : Reordered_argument_collections.SSet.t)
     ~(content_classes : Reordered_argument_collections.SSet.t)
+    ~(content_record_defs : Reordered_argument_collections.SSet.t)
     ~(autocomplete_context : AutocompleteTypes.legacy_autocomplete_context)
     ~(sienv : SearchUtils.si_env)
     tast =
@@ -971,6 +999,7 @@ let go
           ~autocomplete_context
           ~content_funs
           ~content_classes
+          ~content_record_defs
           ~sienv
           ~tast_env;
 

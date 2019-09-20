@@ -44,6 +44,14 @@ let record_class s =
     tracked_names :=
       Some FileInfo.{ names with n_classes = SSet.add s names.n_classes }
 
+let record_record_def s =
+  match !tracked_names with
+  | None -> ()
+  | Some names ->
+    tracked_names :=
+      Some
+        FileInfo.{ names with n_record_defs = SSet.add s names.n_record_defs }
+
 let record_typedef s =
   match !tracked_names with
   | None -> ()
@@ -861,8 +869,7 @@ and typeconst_structure c stc =
 and typeconst_fold c ((typeconsts, consts) as acc) stc =
   match c.sc_kind with
   | Ast_defs.Ctrait
-  | Ast_defs.Cenum
-  | Ast_defs.Crecord ->
+  | Ast_defs.Cenum ->
     acc
   | Ast_defs.Cinterface
   | Ast_defs.Cabstract
@@ -1001,6 +1008,26 @@ and method_decl_acc ~is_static c (acc, condition_types) m =
   (acc, condition_types)
 
 (*****************************************************************************)
+(* Dealing with records *)
+(*****************************************************************************)
+
+let record_def_decl rd : Typing_defs.record_def_type =
+  { rdt_name = rd.rd_name; rdt_pos = rd.rd_span; rdt_errors = None }
+
+let record_def_decl_if_missing rd =
+  let (_, rdid) = rd.rd_name in
+  if not (Decl_heap.RecordDefs.mem rdid) then
+    Decl_heap.RecordDefs.add rdid (record_def_decl rd)
+
+and type_record_def_naming_and_decl rd =
+  let rd = Errors.ignore_ (fun () -> Naming.record_def rd) in
+  let (errors, tdecl) = Errors.do_ (fun () -> record_def_decl rd) in
+  record_record_def (snd rd.rd_name);
+  let tdecl = { tdecl with rdt_errors = Some errors } in
+  Decl_heap.RecordDefs.add (snd rd.rd_name) tdecl;
+  tdecl
+
+(*****************************************************************************)
 (* Dealing with typedefs *)
 (*****************************************************************************)
 
@@ -1092,6 +1119,7 @@ let rec name_and_declare_types_program prog =
         let class_env = { stack = SSet.empty } in
         let (_ : decl_class_type option) = class_decl_if_missing class_env c in
         ()
+      | RecordDef rd -> record_def_decl_if_missing rd
       | Typedef typedef -> type_typedef_decl_if_missing typedef
       | Stmt _ -> ()
       | Constant cst ->
@@ -1118,6 +1146,11 @@ let declare_class_in_file file name =
 let declare_fun_in_file file name =
   match Ast_provider.find_fun_in_file file name with
   | Some f -> ifun_decl f
+  | None -> err_not_found file name
+
+let declare_record_def_in_file file name =
+  match Ast_provider.find_record_def_in_file file name with
+  | Some rd -> type_record_def_naming_and_decl rd
   | None -> err_not_found file name
 
 let declare_typedef_in_file file name =

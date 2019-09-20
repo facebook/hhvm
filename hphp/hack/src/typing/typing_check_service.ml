@@ -138,6 +138,18 @@ let type_class
     def_opt
   | None -> None
 
+let type_record_def opts fn x =
+  match Ast_provider.find_record_def_in_file ~full:true fn x with
+  | Some rd ->
+    let rd = Naming.record_def rd in
+    Nast_check.def (Aast.RecordDef rd);
+
+    (* TODO: type check records T44306013 *)
+    let def = Typing.record_def_def opts rd |> (fun rd -> Aast.RecordDef rd) in
+    Tast_check.def opts def;
+    Some def
+  | None -> None
+
 let check_typedef
     (opts : TypecheckerOptions.t)
     (fn : Relative_path.t)
@@ -185,7 +197,12 @@ let process_file
         Relative_path.Set.mem dynamic_view_files fn;
     }
   in
-  let { FileInfo.n_funs; n_classes; n_types; n_consts } = file_infos in
+  let { FileInfo.n_funs; n_classes; n_record_defs; n_types; n_consts } =
+    file_infos
+  in
+  let ignore_type_record_def opts fn name =
+    ignore (type_record_def opts fn name)
+  in
   let ignore_check_typedef opts fn name =
     ignore (check_typedef opts fn name)
   in
@@ -204,6 +221,7 @@ let process_file
             |> List.map ~f:snd
             |> List.concat
           in
+          SSet.iter (ignore_type_record_def opts fn) n_record_defs;
           SSet.iter (ignore_check_typedef opts fn) n_types;
           SSet.iter (ignore_check_const opts fn) n_consts;
           fun_global_tvenvs @ class_global_tvenvs)

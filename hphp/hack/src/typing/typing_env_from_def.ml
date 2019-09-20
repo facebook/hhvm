@@ -45,9 +45,7 @@ let class_env tcopt c =
    * want *)
   let (env, self) =
     match c.c_kind with
-    | Ast_defs.Cenum
-    | Ast_defs.Crecord ->
-      (env, MakeType.class_type (fst self) (snd c.c_name) [])
+    | Ast_defs.Cenum -> (env, MakeType.class_type (fst self) (snd c.c_name) [])
     | Ast_defs.Cinterface
     | Ast_defs.Cabstract
     | Ast_defs.Ctrait
@@ -67,6 +65,12 @@ let class_env tcopt c =
         SN.UserAttributes.uaProbabilisticModel = snd ua_name)
   in
   let env = Env.set_inside_ppl_class env is_ppl in
+  env
+
+let record_def_env tcopt rd =
+  let file = Pos.filename (fst rd.rd_name) in
+  let droot = Some (Typing_deps.Dep.Class (snd rd.rd_name)) in
+  let env = Env.empty tcopt file ~droot in
   env
 
 let typedef_env tcopt t =

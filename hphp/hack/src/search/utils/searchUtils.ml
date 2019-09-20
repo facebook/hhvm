@@ -95,6 +95,7 @@ type si_kind =
   | SI_LocalVariable
   | SI_Keyword
   | SI_Constructor
+  | SI_RecordDef
 [@@deriving show]
 
 (* Individual result object as known by the autocomplete system *)
@@ -136,6 +137,7 @@ let kind_to_int (kind : si_kind) : int =
   | SI_LocalVariable -> 16
   | SI_Keyword -> 17
   | SI_Constructor -> 18
+  | SI_RecordDef -> 19
 
 (* Convert an integer back to an enum *)
 let int_to_kind (kind_num : int) : si_kind =
@@ -158,6 +160,7 @@ let int_to_kind (kind_num : int) : si_kind =
   | 16 -> SI_LocalVariable
   | 17 -> SI_Keyword
   | 18 -> SI_Constructor
+  | 19 -> SI_RecordDef
   | _ -> SI_Unknown
 
 (* Internal representation of a single item stored by the symbol list *)
@@ -189,6 +192,7 @@ let kind_to_string (kind : si_kind) : string =
   | SI_LocalVariable -> "local variable"
   | SI_Keyword -> "keyword"
   | SI_Constructor -> "constructor"
+  | SI_RecordDef -> "record"
 
 (* Sigh, yet another string to enum conversion *)
 let string_to_kind (type_ : string) : si_kind option =

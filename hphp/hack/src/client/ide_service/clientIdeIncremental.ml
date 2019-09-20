@@ -120,11 +120,11 @@ let compute_fileinfo_for_path (env : ServerEnv.env) (path : Relative_path.t) :
           ~filename:path
           ~text:contents
       in
-      let (funs, classes, typedefs, consts) =
+      let (funs, classes, record_defs, typedefs, consts) =
         match facts with
         | None ->
           (* File failed to parse or was not a Hack file. *)
-          ([], [], [], [])
+          ([], [], [], [], [])
         | Some facts ->
           let to_ids name_type names =
             List.map names ~f:(fun name ->
@@ -149,9 +149,17 @@ let compute_fileinfo_for_path (env : ServerEnv.env) (path : Relative_path.t) :
                      | TKUnknown
                      | TKMixed ->
                        true
-                     | TKTypeAlias -> false))
+                     | TKTypeAlias
+                     | TKRecord ->
+                       false))
             |> Facts.InvSMap.keys
             |> to_ids FileInfo.Class
+          in
+          let record_defs =
+            facts.Facts.types
+            |> Facts.InvSMap.filter (fun _k v -> Facts.(v.kind = TKRecord))
+            |> Facts.InvSMap.keys
+            |> to_ids FileInfo.RecordDef
           in
           let typedefs =
             facts.Facts.types
@@ -164,13 +172,14 @@ let compute_fileinfo_for_path (env : ServerEnv.env) (path : Relative_path.t) :
                      | TKEnum
                      | TKTrait
                      | TKUnknown
-                     | TKMixed ->
+                     | TKMixed
+                     | TKRecord ->
                        false))
             |> Facts.InvSMap.keys
             |> to_ids FileInfo.Typedef
           in
           let consts = facts.Facts.constants |> to_ids FileInfo.Const in
-          (funs, classes, typedefs, consts)
+          (funs, classes, record_defs, typedefs, consts)
       in
       let fi_mode =
         Full_fidelity_parser.parse_mode
@@ -183,6 +192,7 @@ let compute_fileinfo_for_path (env : ServerEnv.env) (path : Relative_path.t) :
           FileInfo.file_mode = Some fi_mode;
           funs;
           classes;
+          record_defs;
           typedefs;
           consts;
           hash = None;
@@ -208,6 +218,7 @@ let update_naming_table
         NamingGlobal.remove_decls
           ~funs:(strip_positions old_file_info.funs)
           ~classes:(strip_positions old_file_info.classes)
+          ~record_defs:(strip_positions old_file_info.record_defs)
           ~typedefs:(strip_positions old_file_info.typedefs)
           ~consts:(strip_positions old_file_info.consts);
 
@@ -229,6 +240,7 @@ let update_naming_table
           path
           ~funs:(strip_positions new_file_info.funs)
           ~classes:(strip_positions new_file_info.classes)
+          ~record_defs:(strip_positions new_file_info.record_defs)
           ~typedefs:(strip_positions new_file_info.typedefs)
           ~consts:(strip_positions new_file_info.consts);
 

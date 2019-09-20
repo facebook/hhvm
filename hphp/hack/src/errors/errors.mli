@@ -140,7 +140,8 @@ val error_name_already_bound : string -> string -> Pos.t -> Pos.t -> unit
 val error_class_attribute_already_bound :
   string -> string -> Pos.t -> Pos.t -> unit
 
-val unbound_name : Pos.t -> string -> [< `cls | `func | `const ] -> unit
+val unbound_name :
+  Pos.t -> string -> [< `cls | `func | `const | `record ] -> unit
 
 val invalid_fun_pointer : Pos.t -> string -> unit
 
@@ -463,6 +464,8 @@ val class_constant_value_does_not_match_hint : typing_error_callback
 val class_property_initializer_type_does_not_match_hint : typing_error_callback
 
 val xhp_attribute_does_not_match_hint : typing_error_callback
+
+val record_init_value_does_not_match_hint : typing_error_callback
 
 val static_redeclared_as_dynamic :
   Pos.t -> Pos.t -> string -> elt_type:[ `Method | `Property ] -> unit

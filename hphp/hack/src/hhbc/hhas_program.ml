@@ -12,6 +12,7 @@ type t = {
   hhas_adata: Hhas_adata.t list;
   hhas_fun: Hhas_function.t list;
   hhas_classes: Hhas_class.t list;
+  hhas_record_defs: Hhas_record_def.t list;
   hhas_typedefs: Hhas_typedef.t list;
   hhas_file_attributes: Hhas_attribute.t list;
   hhas_main: Hhas_body.t;
@@ -23,6 +24,7 @@ let make
     hhas_adata
     hhas_fun
     hhas_classes
+    hhas_record_defs
     hhas_typedefs
     hhas_file_attributes
     hhas_main
@@ -32,6 +34,7 @@ let make
     hhas_adata;
     hhas_fun;
     hhas_classes;
+    hhas_record_defs;
     hhas_typedefs;
     hhas_file_attributes;
     hhas_main;
@@ -43,6 +46,8 @@ let is_hh hhas_prog = hhas_prog.hhas_is_hh
 let functions hhas_prog = hhas_prog.hhas_fun
 
 let classes hhas_prog = hhas_prog.hhas_classes
+
+let record_defs hhas_prog = hhas_prog.hhas_record_defs
 
 let typedefs hhas_prog = hhas_prog.hhas_typedefs
 

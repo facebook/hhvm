@@ -14,6 +14,13 @@ val find_class_in_file :
   string ->
   Nast.class_ option
 
+val find_record_def_in_file :
+  ?full:bool ->
+  ?case_insensitive:bool ->
+  Relative_path.t ->
+  string ->
+  Nast.record_def option
+
 val find_fun_in_file :
   ?full:bool ->
   ?case_insensitive:bool ->

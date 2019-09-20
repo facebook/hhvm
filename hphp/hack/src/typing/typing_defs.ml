@@ -580,6 +580,12 @@ and enum_type = {
   te_constraint: decl_ty option;
 }
 
+and record_def_type = {
+  rdt_name: Nast.sid;
+  rdt_pos: Pos.t;
+  rdt_errors: Errors.t option;
+}
+
 and typedef_type = {
   td_pos: Pos.t;
   td_vis: Aast.typedef_visibility;

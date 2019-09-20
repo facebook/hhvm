@@ -480,19 +480,8 @@ let make_defcls cd n =
 
 (* Make a stub record purely for the purpose of emitting the DefRecord instruction
  *)
-let make_defrecord (cd : class_) n : class_ =
-  {
-    cd with
-    c_method_redeclarations = [];
-    c_consts = [];
-    c_typeconsts = [];
-    c_vars = [];
-    c_methods = [];
-    c_xhp_children = [];
-    c_xhp_attrs = [];
-    c_kind = Ast_defs.Crecord;
-    c_name = (fst cd.c_name, string_of_int n);
-  }
+let make_defrecord rd n =
+  { rd with rd_fields = []; rd_name = (fst rd.rd_name, string_of_int n) }
 
 (* Def inline is not implemented yet *)
 (** let add_class env st cd =
@@ -1721,6 +1710,27 @@ and convert_gconst env st gconst =
   let (st, expr) = convert_expr env st gconst.cst_value in
   (st, { gconst with cst_value = expr })
 
+and convert_record_fields env st fields =
+  let convert_field st (sid, hint, init) =
+    let (st, init) =
+      match init with
+      | Some e ->
+        let (st, e) = convert_expr env st e in
+        (st, Some e)
+      | None -> (st, None)
+    in
+    (st, (sid, hint, init))
+  in
+  let rec aux st fields =
+    match fields with
+    | f :: fs ->
+      let (st, f) = convert_field st f in
+      let (st, fs) = aux st fs in
+      (st, f :: fs)
+    | [] -> (st, [])
+  in
+  aux st fields
+
 and convert_defs env class_count record_count typedef_count st dl =
   match dl with
   | [] -> (st, [])
@@ -1738,17 +1748,9 @@ and convert_defs env class_count record_count typedef_count st dl =
     let let_vars_copy = st.let_vars in
     let st = { st with let_vars = SMap.empty } in
     let (st, cd) = convert_class env st cd in
-    let stub_class =
-      if cd.c_kind = Ast_defs.Crecord then
-        make_defrecord cd record_count
-      else
-        make_defcls cd class_count
-    in
+    let stub_class = make_defcls cd class_count in
     let (st, dl) =
-      if cd.c_kind = Ast_defs.Crecord then
-        convert_defs env class_count (record_count + 1) typedef_count st dl
-      else
-        convert_defs env (class_count + 1) record_count typedef_count st dl
+      convert_defs env (class_count + 1) record_count typedef_count st dl
     in
     ( { st with let_vars = let_vars_copy },
       (TopLevel, Class cd)
@@ -1760,6 +1762,17 @@ and convert_defs env class_count record_count typedef_count st dl =
       convert_defs env class_count record_count typedef_count st dl
     in
     (st, (TopLevel, Stmt stmt) :: dl)
+  | RecordDef rd :: dl ->
+    let (st, rd_fields) = convert_record_fields env st rd.rd_fields in
+    let stub_record = make_defrecord rd record_count in
+    let stub_stmt = Stmt (Pos.none, Def_inline (RecordDef stub_record)) in
+    let (st, dl) =
+      convert_defs env class_count (record_count + 1) typedef_count st dl
+    in
+    ( st,
+      (TopLevel, RecordDef { rd with rd_fields })
+      :: (TopLevel, stub_stmt)
+      :: dl )
   | Typedef td :: dl ->
     let (st, dl) =
       convert_defs env class_count record_count (typedef_count + 1) st dl
@@ -1806,12 +1819,12 @@ and convert_defs env class_count record_count typedef_count st dl =
 
 let count_classes (defs : program) =
   List.count defs ~f:(function
-      | Class { c_kind; _ } when c_kind <> Ast_defs.Crecord -> true
+      | Class _ -> true
       | _ -> false)
 
 let count_records defs =
   List.count defs ~f:(function
-      | Class { c_kind = Ast_defs.Crecord; _ } -> true
+      | RecordDef _ -> true
       | _ -> false)
 
 let hoist_toplevel_functions all_defs =

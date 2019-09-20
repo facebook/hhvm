@@ -123,6 +123,8 @@ type tparam = (Pos.t * ty, func_body_ann, saved_env, ty) Aast.tparam
 
 type typedef = (Pos.t * ty, func_body_ann, saved_env, ty) Aast.typedef
 
+type record_def = (Pos.t * ty, func_body_ann, saved_env, ty) Aast.record_def
+
 type gconst = (Pos.t * ty, func_body_ann, saved_env, ty) Aast.gconst
 
 type pu_enum = (Pos.t * ty, func_body_ann, saved_env, ty) Aast.pu_enum

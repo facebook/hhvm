@@ -101,3 +101,17 @@ module Const = struct
     let (_, fq_id) = elaborate_id ns Namespaces.ElaborateConst id in
     fq_id
 end
+
+module Record = struct
+  type t = string
+
+  let from_ast_name s = SU.strip_global_ns s
+
+  let from_raw_string s = s
+
+  let to_raw_string s = s
+
+  let elaborate_id ns id =
+    let (_, fq_id) = elaborate_id ns Namespaces.ElaborateRecord id in
+    fq_id
+end

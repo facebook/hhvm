@@ -57,22 +57,20 @@ let emit_return (env : Emit_env.t) =
 let emit_def_inline def =
   match def with
   | A.Class cd ->
-    (match cd.A.c_kind with
-    | Ast_defs.Crecord ->
-      Emit_pos.emit_pos_then (fst cd.A.c_name)
-      @@ instr_defrecord (int_of_string (snd cd.A.c_name))
-    | _ ->
-      let defcls_fn =
-        if Emit_env.is_systemlib () then
-          instr_defclsnop
-        else
-          instr_defcls
-      in
-      Emit_pos.emit_pos_then (fst cd.A.c_name)
-      @@ defcls_fn (int_of_string (snd cd.A.c_name)))
+    let defcls_fn =
+      if Emit_env.is_systemlib () then
+        instr_defclsnop
+      else
+        instr_defcls
+    in
+    Emit_pos.emit_pos_then (fst cd.A.c_name)
+    @@ defcls_fn (int_of_string (snd cd.A.c_name))
   | A.Typedef td ->
     Emit_pos.emit_pos_then (fst td.A.t_name)
     @@ instr_deftypealias (int_of_string (snd td.A.t_name))
+  | A.RecordDef rd ->
+    Emit_pos.emit_pos_then (fst rd.A.rd_name)
+    @@ instr_defrecord (int_of_string (snd rd.A.rd_name))
   | _ -> failwith "Define inline: Invalid inline definition"
 
 let emit_markup env s echo_expr_opt ~check_for_hashbang =

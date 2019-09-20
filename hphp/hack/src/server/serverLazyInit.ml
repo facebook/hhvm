@@ -248,13 +248,20 @@ let naming_with_fast (fast : FileInfo.names Relative_path.Map.t) (t : float) :
   Relative_path.Map.iter fast ~f:(fun k info ->
       let {
         FileInfo.n_classes = classes;
+        n_record_defs = record_defs;
         n_types = typedefs;
         n_funs = funs;
         n_consts = consts;
       } =
         info
       in
-      NamingGlobal.ndecl_file_fast k ~funs ~classes ~typedefs ~consts);
+      NamingGlobal.ndecl_file_fast
+        k
+        ~funs
+        ~classes
+        ~record_defs
+        ~typedefs
+        ~consts);
   HackEventLogger.fast_naming_end t;
   let hs = SharedMem.heap_size () in
   Hh_logger.log "Heap size: %d" hs;
@@ -367,7 +374,9 @@ let get_dirty_fast
     ~init:Relative_path.Map.empty
 
 let names_to_deps (names : FileInfo.names) : DepSet.t =
-  let { FileInfo.n_funs; n_classes; n_types; n_consts } = names in
+  let { FileInfo.n_funs; n_classes; n_record_defs; n_types; n_consts } =
+    names
+  in
   let add_deps_of_sset dep_ctor sset depset =
     SSet.fold sset ~init:depset ~f:(fun n acc ->
         DepSet.add acc (Dep.make (dep_ctor n)))
@@ -375,6 +384,7 @@ let names_to_deps (names : FileInfo.names) : DepSet.t =
   let deps = add_deps_of_sset (fun n -> Dep.Fun n) n_funs DepSet.empty in
   let deps = add_deps_of_sset (fun n -> Dep.FunName n) n_funs deps in
   let deps = add_deps_of_sset (fun n -> Dep.Class n) n_classes deps in
+  let deps = add_deps_of_sset (fun n -> Dep.RecordDef n) n_record_defs deps in
   let deps = add_deps_of_sset (fun n -> Dep.Class n) n_types deps in
   let deps = add_deps_of_sset (fun n -> Dep.GConst n) n_consts deps in
   let deps = add_deps_of_sset (fun n -> Dep.GConstName n) n_consts deps in

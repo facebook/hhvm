@@ -594,4 +594,5 @@ RequireGenericExplicit = 4347
 ClassConstantTypeMismatch = 4348
 PocketUniversesExpansion = 4349
 PocketUniversesTyping = 4350
+RecordInitValueDoesNotMatchHint = 4351
   |}]

@@ -127,8 +127,12 @@ let pu_enum
   let hint_assoc (k, hint) = (k, Decl_hint.hint env hint) in
   let spu_case_values = List.map ~f:hint_assoc pu_case_values in
   let spu_members =
-    let case_member { pum_atom; pum_types; _ } =
-      { spum_atom = pum_atom; spum_types = List.map ~f:hint_assoc pum_types }
+    let case_member { pum_atom; pum_types; pum_exprs } =
+      {
+        spum_atom = pum_atom;
+        spum_types = List.map ~f:hint_assoc pum_types;
+        spum_exprs = List.map ~f:fst pum_exprs;
+      }
     in
     List.map ~f:case_member pu_members
   in

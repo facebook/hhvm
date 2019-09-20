@@ -345,20 +345,29 @@ let pu_enum_fold acc spu =
             spu.spu_members
             ~init:tpu.tpu_members
             ~f:(fun acc sm ->
-              let tm =
+              let tpum_types =
                 match SMap.find_opt (snd sm.spum_atom) acc with
                 | None -> SMap.empty
                 | Some tm -> tm.tpum_types
               in
-              let tm =
+              let tpum_exprs =
+                match SMap.find_opt (snd sm.spum_atom) acc with
+                | None -> SMap.empty
+                | Some tm -> tm.tpum_exprs
+              in
+              let tpum_types =
                 List.fold_left
                   sm.spum_types
-                  ~init:tm
+                  ~init:tpum_types
                   ~f:(fun acc (((_, k), _) as item) -> SMap.add k item acc)
+              in
+              let tpum_exprs =
+                List.fold_left sm.spum_exprs ~init:tpum_exprs ~f:(fun acc k ->
+                    SMap.add (snd k) k acc)
               in
               SMap.add
                 (snd sm.spum_atom)
-                { tpum_atom = sm.spum_atom; tpum_types = tm }
+                { tpum_atom = sm.spum_atom; tpum_types; tpum_exprs }
                 acc);
       }
   in

@@ -33,6 +33,7 @@ type shallow_typeconst = {
 type shallow_pu_member = {
   spum_atom: Aast.sid;
   spum_types: (Aast.sid * decl_ty) list;
+  spum_exprs: Aast.sid list;
 }
 [@@deriving show]
 

@@ -243,6 +243,9 @@ struct
         SMap.map begin
                    fun (id, t) -> (string_id id, ty t)
                  end pum.tpum_types;
+      tpum_exprs = SMap.map begin
+                              fun id -> string_id id
+                            end pum.tpum_exprs;
     }
 
   and pu_enum pu =

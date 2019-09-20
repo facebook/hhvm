@@ -299,7 +299,7 @@ let si_kind_to_completion_kind (kind : SearchUtils.si_kind) :
   | SearchUtils.SI_Literal -> Some Completion.Value
   | SearchUtils.SI_GlobalConstant -> Some Completion.Constant
   | SearchUtils.SI_Typedef -> Some Completion.TypeParameter
-  | SearchUtils.SI_RecordDef -> Some Completion.RecordDef
+  | SearchUtils.SI_RecordDef -> Some Completion.Struct
   | SearchUtils.SI_Unknown -> None
 
 (** We keep a log of server state over the past 2mins. When adding a new server
@@ -1713,7 +1713,7 @@ let do_workspaceSymbol
         | SearchUtils.SI_Property -> SymbolInformation.Property
         | SearchUtils.SI_LocalVariable -> SymbolInformation.Variable
         | SearchUtils.SI_Constructor -> SymbolInformation.Constructor
-        | SearchUtils.SI_RecordDef -> SymbolInformation.RecordDef
+        | SearchUtils.SI_RecordDef -> SymbolInformation.Struct
         (* Do these happen in practice? *)
         | SearchUtils.SI_Keyword
         | SearchUtils.SI_Unknown ->
@@ -1744,7 +1744,7 @@ let rec hack_symbol_tree_to_lsp
       | SymbolDefinition.Class -> SymbolInformation.Class
       | SymbolDefinition.Method -> SymbolInformation.Method
       | SymbolDefinition.Property -> SymbolInformation.Property
-      | SymbolDefinition.RecordDef -> SymbolInformation.RecordDef
+      | SymbolDefinition.RecordDef -> SymbolInformation.Struct
       | SymbolDefinition.Const -> SymbolInformation.Constant
       | SymbolDefinition.Enum -> SymbolInformation.Enum
       | SymbolDefinition.Interface -> SymbolInformation.Interface

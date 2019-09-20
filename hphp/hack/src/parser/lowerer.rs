@@ -277,7 +277,7 @@ pub enum Error {
         node_name: String,
         kind: syntax_kind::SyntaxKind,
     },
-    LowererInvariantFailure(String, String),
+    LowererInvariantFailure(Pos, String),
     Failwith(String),
 }
 
@@ -351,6 +351,11 @@ where
         // A placehold for error raised in ast_to_aast.ml
     }
 
+    fn invariant_failure_error<N>(node: &Syntax<T, V>, env: &Env, msg: &str) -> ret!(N) {
+        let pos = Self::p_pos(node, env);
+        Err(Error::LowererInvariantFailure(pos, String::from(msg)))
+    }
+
     #[inline]
     fn failwith<N>(msg: &str) -> ret!(N) {
         Err(Error::Failwith(String::from(msg)))
@@ -386,6 +391,11 @@ where
         let pos = Self::p_pos(node, env);
         let text = Self::text(node, env);
         Self::lowering_error(env, &pos, &text, expecting);
+        if let Some(x) = fallback {
+            if env.fail_open {
+                return Ok(x);
+            }
+        }
         Err(Error::APIMissingSyntax {
             expecting: String::from(expecting),
             pos: Self::p_pos(node, env),
@@ -560,6 +570,104 @@ where
         // TODO:
     }
 
+    fn p_closure_parameter(
+        node: &Syntax<T, V>,
+        env: &mut Env,
+    ) -> ret!((aast!(Hint), Option<ast_defs::ParamKind>)) {
+        match &node.syntax {
+            ClosureParameterTypeSpecifier(c) => {
+                let kind = Self::mp_optional(
+                    &Self::p_param_kind,
+                    &c.closure_parameter_call_convention,
+                    env,
+                )?;
+                let hint = Self::p_hint(&c.closure_parameter_type, env)?;
+                Ok((hint, kind))
+            }
+            _ => Self::missing_syntax(None, "closure parameter", node, env),
+        }
+    }
+
+    fn mp_shape_expression_field<F, R>(
+        f: F,
+        node: &Syntax<T, V>,
+        env: &mut Env,
+    ) -> ret!((ast_defs::ShapeFieldName, R))
+    where
+        F: Fn(&Syntax<T, V>, &mut Env) -> ret!(R),
+    {
+        match &node.syntax {
+            FieldInitializer(c) => {
+                let name = Self::p_shape_field_name(&c.field_initializer_name, env)?;
+                let value = f(&c.field_initializer_value, env)?;
+                Ok((name, value))
+            }
+            _ => Self::missing_syntax(None, "shape field", node, env),
+        }
+    }
+
+    fn p_shape_field_name(node: &Syntax<T, V>, env: &mut Env) -> ret!(ast_defs::ShapeFieldName) {
+        use ast_defs::ShapeFieldName::*;
+        let is_valid_shape_literal = |t: &T| {
+            let is_str = t.kind() == TK::SingleQuotedStringLiteral
+                || t.kind() == TK::DoubleQuotedStringLiteral;
+            let text = t.text(env.source_text());
+            let is_empty = text == "\'\'" || text == "\"\"";
+            is_str && !is_empty
+        };
+        if let LiteralExpression(c) = &node.syntax {
+            if let Token(t) = &c.literal_expression.syntax {
+                if is_valid_shape_literal(t) {
+                    let ast_defs::Id(p, n) = Self::pos_name(node, env)?;
+                    let str_ = Self::mk_str(node, env, &Self::unesc_dbl, &n);
+                    match isize::from_str_radix(&str_, 10) {
+                        Ok(_) => Self::raise_parsing_error(
+                            node,
+                            env,
+                            &syntax_error::shape_field_int_like_string,
+                        ),
+                        _ => {}
+                    }
+                    return Ok(SFlitStr((p, str_)));
+                }
+            }
+        }
+        match &node.syntax {
+            ScopeResolutionExpression(c) => Ok(SFclassConst(
+                Self::pos_name(&c.scope_resolution_qualifier, env)?,
+                Self::p_pstring(&c.scope_resolution_name, env)?,
+            )),
+            _ => {
+                Self::raise_parsing_error(node, env, &syntax_error::invalid_shape_field_name);
+                let ast_defs::Id(p, n) = Self::pos_name(node, env)?;
+                Ok(SFlitStr((p, Self::mk_str(node, env, &Self::unesc_dbl, &n))))
+            }
+        }
+    }
+
+    fn p_shape_field(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(ShapeFieldInfo) {
+        match &node.syntax {
+            FieldSpecifier(c) => {
+                let optional = !c.field_question.is_missing();
+                let name = Self::p_shape_field_name(&c.field_name, env)?;
+                let hint = Self::p_hint(&c.field_type, env)?;
+                Ok(aast::ShapeFieldInfo {
+                    optional,
+                    hint,
+                    name,
+                })
+            }
+            _ => {
+                let (name, hint) = Self::mp_shape_expression_field(&Self::p_hint, node, env)?;
+                Ok(aast::ShapeFieldInfo {
+                    optional: false,
+                    name,
+                    hint,
+                })
+            }
+        }
+    }
+
     fn p_hint_(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Hint_) {
         use aast_defs::Hint_::*;
         let unary = |kw, ty, env: &mut Env| {
@@ -581,7 +689,26 @@ where
             Token(_) | SimpleTypeSpecifier(_) | QualifiedName(_) => {
                 Ok(Happly(Self::pos_name(node, env)?, vec![]))
             }
-            ShapeTypeSpecifier(_) => not_impl!(),
+            ShapeTypeSpecifier(c) => {
+                let allows_unknown_fields = !c.shape_type_ellipsis.is_missing();
+                /* if last element lacks a separator and ellipsis is present, error */
+                if let Some(l) = Self::syntax_to_list(true, &c.shape_type_fields).last() {
+                    if l.is_missing() && allows_unknown_fields {
+                        Self::raise_parsing_error(
+                            node,
+                            env,
+                            &syntax_error::shape_type_ellipsis_without_trailing_comma,
+                        )
+                    }
+                }
+
+                let field_map = Self::could_map(&Self::p_shape_field, &c.shape_type_fields, env)?;
+
+                Ok(Hshape(aast::NastShapeInfo {
+                    allows_unknown_fields,
+                    field_map,
+                }))
+            }
             TupleTypeSpecifier(c) => {
                 Ok(Htuple(Self::could_map(&Self::p_hint, &c.tuple_types, env)?))
             }
@@ -610,16 +737,12 @@ where
             }
             GenericTypeSpecifier(c) => {
                 let name = Self::pos_name(&c.generic_class_type, env)?;
-                let type_args = match &c.generic_argument_list.syntax {
+                let args = &c.generic_argument_list;
+                let type_args = match &args.syntax {
                     TypeArguments(c) => {
                         Self::could_map(&Self::p_hint, &c.type_arguments_types, env)?
                     }
-                    _ => Self::missing_syntax(
-                        None,
-                        "generic type arguments",
-                        &c.generic_argument_list,
-                        env,
-                    )?,
+                    _ => Self::missing_syntax(None, "generic type arguments", args, env)?,
                 };
                 if env.codegen() {
                     not_impl!()
@@ -630,10 +753,100 @@ where
             NullableTypeSpecifier(c) => Ok(Hoption(Self::p_hint(&c.nullable_type, env)?)),
             LikeTypeSpecifier(c) => Ok(Hlike(Self::p_hint(&c.like_type, env)?)),
             SoftTypeSpecifier(c) => Ok(Hsoft(Self::p_hint(&c.soft_type, env)?)),
-            ClosureTypeSpecifier(_) => not_impl!(),
-            AttributizedSpecifier(_) => not_impl!(),
-            TypeConstant(_) => not_impl!(),
-            ReifiedTypeArgument(_) => not_impl!(),
+            ClosureTypeSpecifier(c) => {
+                let (param_list, variadic_hints): (Vec<&Syntax<T, V>>, Vec<&Syntax<T, V>>) =
+                    Self::as_list(&c.closure_parameter_list)
+                        .iter()
+                        .partition(|n| match &n.syntax {
+                            VariadicParameter(_) => false,
+                            _ => true,
+                        });
+                let (type_hints, kinds) = param_list
+                    .iter()
+                    .map(|p| Self::p_closure_parameter(p, env))
+                    .collect::<std::result::Result<Vec<_>, _>>()?
+                    .into_iter()
+                    .unzip();
+                let variadic_hints = variadic_hints
+                    .iter()
+                    .map(|v| match &v.syntax {
+                        VariadicParameter(c) => {
+                            let vtype = &c.variadic_parameter_type;
+                            if vtype.is_missing() {
+                                Self::raise_parsing_error(
+                                    v,
+                                    env,
+                                    "Cannot use ... without a typehint",
+                                );
+                            }
+                            Ok(Some(Self::p_hint(vtype, env)?))
+                        }
+                        _ => panic!("expect variadic parameter"),
+                    })
+                    .collect::<std::result::Result<Vec<_>, _>>()?;
+                if variadic_hints.len() > 1 {
+                    let msg = format!(
+                        "{} variadic parameters found. There should be no more than one.",
+                        variadic_hints.len().to_string()
+                    );
+                    Self::invariant_failure_error(node, env, &msg)?;
+                }
+                Ok(Hfun {
+                    reactive_kind: aast::FuncReactive::FNonreactive,
+                    is_coroutine: !c.closure_coroutine.is_missing(),
+                    param_tys: type_hints,
+                    param_kinds: kinds,
+                    param_mutability: vec![],
+                    variadic_ty: variadic_hints.into_iter().next().unwrap_or(None),
+                    return_ty: Self::p_hint(&c.closure_return_type, env)?,
+                    is_mutable_return: true,
+                })
+            }
+            AttributizedSpecifier(c) => {
+                let attrs = Self::p_user_attribute(&c.attributized_specifier_attribute_spec, env)?;
+                let hint = Self::p_hint(&c.attributized_specifier_type, env)?;
+                if attrs.iter().any(|attr| attr.name.1 != "__Soft") {
+                    Self::raise_parsing_error(node, env, &syntax_error::only_soft_allowed);
+                }
+                Ok(*Self::soften_hint(&attrs, hint).1)
+            }
+            TypeConstant(c) => {
+                let child = Self::pos_name(&c.type_constant_right_type, env)?;
+                match Self::p_hint_(&c.type_constant_left_type, env)? {
+                    Haccess(root, mut cs) => {
+                        cs.push(child);
+                        Ok(Haccess(root, cs))
+                    }
+                    Happly(ty, param) => {
+                        if param.is_empty() {
+                            let root = aast::Hint::new(ty.0.clone(), Happly(ty, param));
+                            Ok(Haccess(root, vec![child]))
+                        } else {
+                            Self::missing_syntax(None, "type constant base", node, env)
+                        }
+                    }
+                    _ => Self::missing_syntax(None, "type constant base", node, env),
+                }
+            }
+            PUAccess(c) => {
+                let pos = Self::p_pos(&c.pu_access_left_type, env);
+                let child = Self::pos_name(&c.pu_access_right_type, env)?;
+                match Self::p_hint_(&c.pu_access_left_type, env)? {
+                    h @ HpuAccess(_, _) => Ok(HpuAccess(aast::Hint::new(pos, h), child)),
+                    Happly(id, hints) => {
+                        if hints.is_empty() {
+                            Ok(HpuAccess(aast::Hint::new(pos, Happly(id, hints)), child))
+                        } else {
+                            Self::missing_syntax(None, "pocket universe access base", node, env)
+                        }
+                    }
+                    _ => Self::missing_syntax(None, "pocket universe access base", node, env),
+                }
+            }
+            ReifiedTypeArgument(_) => {
+                Self::raise_parsing_error(node, env, &syntax_error::invalid_reified);
+                Self::missing_syntax(None, "refied type", node, env)
+            }
             _ => Self::missing_syntax(None, "type hint", node, env),
         }
     }
@@ -641,7 +854,7 @@ where
     fn p_hint(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Hint) {
         let hint_ = Self::p_hint_(node, env)?;
         let pos = Self::p_pos(node, env);
-        let hint = aast_defs::Hint(pos, Box::new(hint_));
+        let hint = aast::Hint::new(pos, hint_);
         Self::check_valid_reified_hint(env, node, &hint);
         Ok(hint)
     }
@@ -1489,7 +1702,13 @@ where
                     env,
                 )?,
             )),
-            ShapeExpression(c) => not_impl!(),
+            ShapeExpression(c) => Ok(E_::Shape(Self::could_map(
+                &|n: &Syntax<T, V>, e: &mut Env| {
+                    Self::mp_shape_expression_field(&Self::p_expr, n, e)
+                },
+                &c.shape_expression_fields,
+                env,
+            )?)),
             ObjectCreationExpression(c) => {
                 Self::p_expr_impl_(location, &c.object_creation_object, env, Some(pos))
             }
@@ -1700,8 +1919,33 @@ where
             PocketAtomExpression(c) => Ok(E_::PUAtom(
                 Self::pos_name(&c.pocket_atom_expression, env)?.1,
             )),
-            PocketIdentifierExpression(c) => not_impl!(),
-            _ => not_impl!(),
+            PocketIdentifierExpression(c) => {
+                let mk_class_id = |e: aast!(Expr<,>)| aast::ClassId(pos, aast::ClassId_::CIexpr(e));
+                let qual = Self::p_expr(&c.pocket_identifier_qualifier, env)?;
+                let qual = if env.codegen() {
+                    mk_class_id(qual)
+                } else if let E_::Lvar(a) = *qual.1 {
+                    let p = qual.0;
+                    let expr = E::new(p.clone(), E_::Id(ast_defs::Id(p, (a.1).1)));
+                    mk_class_id(expr)
+                } else {
+                    mk_class_id(qual)
+                };
+                let E(p, expr_) = Self::p_expr(&c.pocket_identifier_field, env)?;
+                let field = match *expr_ {
+                    E_::String(id) => (p, id),
+                    E_::Id(ast_defs::Id(p, n)) => (p, n),
+                    _ => Self::missing_syntax(None, "PocketIdentifierExpression field", node, env)?,
+                };
+                let E(p, expr_) = Self::p_expr(&c.pocket_identifier_name, env)?;
+                let name = match *expr_ {
+                    E_::String(id) => (p, id),
+                    E_::Id(ast_defs::Id(p, n)) => (p, n),
+                    _ => Self::missing_syntax(None, "PocketIdentifierExpression name", node, env)?,
+                };
+                Ok(E_::PUIdentifier(qual, field, name))
+            }
+            _ => Self::missing_syntax(Some(E_::Null), "expression", node, env),
         }
     }
 
@@ -2065,7 +2309,7 @@ where
             }
             GotoLabel(c) => {
                 if env.is_typechecker() && !env.parser_options.po_allow_goto {
-                    Self::raise_parsing_error(node, env, "&syntax_error::goto_label");
+                    Self::raise_parsing_error(node, env, &syntax_error::goto_label);
                 }
                 Ok(S::new(
                     pos,
@@ -2077,7 +2321,7 @@ where
             }
             GotoStatement(c) => {
                 if env.is_typechecker() && !env.parser_options.po_allow_goto {
-                    Self::raise_parsing_error(node, env, "&syntax_error::goto_label");
+                    Self::raise_parsing_error(node, env, &syntax_error::goto_label);
                 }
                 Ok(S::new(
                     pos,
@@ -2138,8 +2382,14 @@ where
                     .map_or(S_::Continue, S_::TempContinue);
                 Ok(S::new(pos, ctn))
             }
+            ConcurrentStatement(c) => not_impl!(),
             MarkupSection(_) => Self::p_markup(node, env),
-            _ => not_impl!(),
+            _ => Self::missing_syntax(
+                Some(S::new(Pos::make_none(), S_::Noop)),
+                "statement",
+                node,
+                env,
+            ),
         }
     }
 
@@ -2147,7 +2397,7 @@ where
         match *(e.1) {
             aast::Expr_::ArrayGet(ref e, Some(_)) => Self::check_mutate_class_const(e, node, env),
             aast::Expr_::ClassConst(_, _) => {
-                Self::raise_parsing_error(node, env, "&syntax_error::const_mutation")
+                Self::raise_parsing_error(node, env, &syntax_error::const_mutation)
             }
             _ => {}
         }
@@ -2294,7 +2544,7 @@ where
 
     fn soften_hint(attrs: &[aast!(UserAttribute<,>)], hint: aast!(Hint)) -> aast!(Hint) {
         if Self::has_soft(attrs) {
-            aast::Hint(hint.0.clone(), Box::new(aast::Hint_::Hsoft(hint)))
+            aast::Hint::new(hint.0.clone(), aast::Hint_::Hsoft(hint))
         } else {
             hint
         }
@@ -2541,7 +2791,13 @@ where
                     fh_return_type,
                 })
             }
-            LambdaSignature(_) => not_impl!(),
+            LambdaSignature(c) => {
+                let mut header = FunHdr::make_empty();
+                header.fh_parameters =
+                    Self::could_map(&Self::p_fun_param, &c.lambda_parameters, env)?;
+                header.fh_return_type = Self::mp_optional(&Self::p_hint, &c.lambda_type, env)?;
+                Ok(header)
+            }
             Token(_) => Ok(FunHdr::make_empty()),
             _ => Self::missing_syntax(None, "function header", node, env),
         }
@@ -2624,7 +2880,16 @@ where
                     }
                 }
             }
-            _ => not_impl!(),
+            _ => {
+                let f = |e: &mut Env| {
+                    let expr = Self::p_expr(node, e)?;
+                    Ok(aast::Stmt::new(
+                        expr.0.clone(),
+                        aast::Stmt_::Return(Some(expr)),
+                    ))
+                };
+                Ok(vec![Self::lift_awaits_in_statement(f, node, env)?])
+            }
         }
     }
 

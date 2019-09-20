@@ -166,4 +166,8 @@ impl PartialEq for PositionedToken {
 }
 impl Eq for PositionedToken {}
 
-impl<'a> LexablePositionedToken<'a> for PositionedToken {}
+impl<'a> LexablePositionedToken<'a> for PositionedToken {
+    fn text<'b>(&self, source_text: &'b SourceText) -> &'b str {
+        source_text.sub_as_str(self.start_offset(), self.width())
+    }
+}

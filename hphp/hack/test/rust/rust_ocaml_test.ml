@@ -354,6 +354,10 @@ let get_files_in_path ~args path =
            @@ String_utils.string_ends_with
                 f
                 "runs_out_of_retries_in_line_splitter.php"
+        && not
+           @@ String_utils.string_ends_with
+                f
+                "ffp/tests/const_initializers.php"
       | _ -> true)
     files
 

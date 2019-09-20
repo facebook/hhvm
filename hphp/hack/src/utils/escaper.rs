@@ -198,7 +198,7 @@ fn unescape_literal(literal_kind: LiteralKind, s: &str) -> Result<String, Invali
                     if literal_kind == LiteralKind::LiteralBacktick {
                         push(&mut output, '`')
                     } else {
-                        push_str(&mut output, "\\'")
+                        push_str(&mut output, "\\`")
                     }
                 }
                 '\"' => {
@@ -332,7 +332,7 @@ pub fn extract_unquoted_string(
         // quoted) and end with a line containing only the terminator and a
         // semicolon followed by a blank line. We need to drop the opening line
         // as well as the blank line and preceding terminator line.
-        match (content.find('\n'), content.rfind('\n')) {
+        match (content.find('\n'), content[..start + len - 1].rfind('\n')) {
             (Some(start_), Some(end_)) =>
             // An empty heredoc, this way, will have start >= end
             {
@@ -342,9 +342,7 @@ pub fn extract_unquoted_string(
                     Ok(content[start_ + 1..end_].to_string())
                 }
             }
-            _ => Err(InvalidString {
-                msg: String::from("out of bounds"),
-            }),
+            _ => Ok(String::from(content)),
         }
     } else {
         static SINGLE_QUOTE: u8 = '\'' as u8;
@@ -389,6 +387,7 @@ mod tests {
         assert_eq!(unescape_nowdoc("home \\$").unwrap(), "home \\$".to_string());
         assert_eq!(unescape_single("home \\'").unwrap(), "home '".to_string());
         assert_eq!(unescape_nowdoc("home \\'").unwrap(), "home \\'".to_string());
+        assert_eq!(unescape_nowdoc("\\`").unwrap(), "\\`");
         assert_eq!(unescape_single("\\a\\\'").unwrap(), "\\a'");
         assert_eq!(unescape_long_string("\\a").unwrap(), "\x07");
         assert_eq!(unescape_long_string("\\v").unwrap(), "\x0b");
@@ -401,6 +400,7 @@ mod tests {
         assert_eq!(unescape_long_string("\\e").unwrap(), "\x1b");
         assert_eq!(unescape_long_string("\\f").unwrap(), "\x0c");
         assert_eq!(unescape_long_string("\\\"").unwrap(), "\"");
+        assert_eq!(unescape_long_string("\\`").unwrap(), "\\`");
         assert_eq!(unescape_heredoc("\\\"").unwrap(), "\\\"");
         assert_eq!(unescape_heredoc("\\p").unwrap(), "\\p");
         assert_eq!(unescape_long_string("\\r").unwrap(), "");
@@ -416,6 +416,14 @@ mod tests {
             unescape_backtick("\\a\\b\\n\\r\\t").unwrap(),
             "\\a\\b\n\r\t".to_string()
         );
+        assert_eq!(unescape_long_string("\\xb1").unwrap().as_bytes(), &[177u8]);
+
+        let euro = "\u{20AC}"; // as bytes [226, 130, 172]
+        assert_eq!(
+            unescape_long_string(euro).unwrap().as_bytes(),
+            &[226u8, 130u8, 172u8]
+        );
+        assert_eq!(unescape_backtick("\\`").unwrap(), "`");
         assert_eq!(unescape_long_string("\\xb1").unwrap().as_bytes(), &[177u8]);
 
         let euro = "\u{20AC}"; // as bytes [226, 130, 172]
@@ -465,6 +473,14 @@ mod tests {
         );
         assert_eq!(
             extract_unquoted_string("<<<EOT\na\nEOT;", 0, 13).unwrap(),
+            "a"
+        );
+        assert_eq!(
+            extract_unquoted_string("<<<EOT\n\nEOT;\n", 0, 13).unwrap(),
+            ""
+        );
+        assert_eq!(
+            extract_unquoted_string("<<<EOT\na\nEOT;\n", 0, 14).unwrap(),
             "a"
         );
     }

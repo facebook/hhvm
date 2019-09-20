@@ -4,19 +4,26 @@ if (file_exists("/tmp/$uniqid.sock"))
     die('Temporary socket already exists.');
 
 /* Setup socket server */
-$server = stream_socket_server("unix:///tmp/$uniqid.sock");
+$errno = null;
+$errstr = null;
+$server = stream_socket_server(
+  "unix:///tmp/$uniqid.sock",
+  inout $errno,
+  inout $errstr
+);
 if (!$server) {
     die('Unable to create AF_UNIX socket [server]');
 }
 
 /* Connect to it */
-$client = stream_socket_client("unix:///tmp/$uniqid.sock");
+$client = stream_socket_client("unix:///tmp/$uniqid.sock", inout $errno, inout $errstr);
 if (!$client) {
     die('Unable to create AF_UNIX socket [client]');
 }
 
 /* Accept that connection */
-$socket = stream_socket_accept($server);
+$peername = null;
+$socket = stream_socket_accept($server, -1.0, inout $peername);
 if (!$socket) {
     die('Unable to accept connection');
 }

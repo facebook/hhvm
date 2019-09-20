@@ -335,17 +335,19 @@ function socket_listen(resource $socket, int $backlog = 0): bool;
  *
  */
 <<__Native>>
-function socket_select(mixed &$read,
-                       mixed &$write,
-                       mixed &$except,
+function socket_select(inout mixed $read,
+                       inout mixed $write,
+                       inout mixed $except,
                        mixed $vtv_sec,
                        int $tv_usec = 0): mixed;
 
 <<__Native>>
 function socket_server(string $hostname,
-                       int $port = -1,
-                       mixed &$errnum = null,
-                       mixed &$errstr = null): mixed;
+                       int $port,
+                       <<__OutOnly>>
+                       inout mixed $errnum,
+                       <<__OutOnly>>
+                       inout mixed $errstr): mixed;
 
 /**
  * After the socket socket has been created using socket_create(), bound to a

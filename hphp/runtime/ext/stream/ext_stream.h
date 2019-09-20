@@ -185,9 +185,9 @@ Variant HHVM_FUNCTION(stream_resolve_include_path,
                       const Variant& context = uninit_variant);
 
 Variant HHVM_FUNCTION(stream_select,
-                      VRefParam read,
-                      VRefParam write,
-                      VRefParam except,
+                      Variant& read,
+                      Variant& write,
+                      Variant& except,
                       const Variant& vtv_sec,
                       int tv_usec = 0);
 
@@ -226,20 +226,20 @@ int64_t HHVM_FUNCTION(set_file_buffer,
 
 Variant HHVM_FUNCTION(stream_socket_accept,
                       const Resource& server_socket,
-                      double timeout = -1.0,
-                      VRefParam peername = uninit_null());
+                      double timeout,
+                      Variant& peername);
 
 Variant HHVM_FUNCTION(stream_socket_server,
                       const String& local_socket,
-                      VRefParam errnum = uninit_null(),
-                      VRefParam errstr = uninit_null(),
+                      Variant& errnum,
+                      Variant& errstr,
                       int flags = k_STREAM_SERVER_BIND|k_STREAM_SERVER_LISTEN,
                       const Variant& context = uninit_variant);
 
 Variant HHVM_FUNCTION(stream_socket_client,
                       const String& remote_socket,
-                      VRefParam errnum = uninit_null(),
-                      VRefParam errstr = uninit_null(),
+                      Variant& errnum,
+                      Variant& errstr,
                       double timeout = -1.0,
                       int flags = 0,
                       const Variant& context = uninit_variant);
@@ -262,8 +262,8 @@ Variant HHVM_FUNCTION(stream_socket_pair,
 Variant HHVM_FUNCTION(stream_socket_recvfrom,
                       const Resource& socket,
                       int length,
-                      int flags = 0,
-                      VRefParam address = uninit_null());
+                      int flags,
+                      Variant& address);
 
 Variant HHVM_FUNCTION(stream_socket_sendto,
                       const Resource& socket,

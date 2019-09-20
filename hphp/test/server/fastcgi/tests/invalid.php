@@ -15,7 +15,9 @@ function invalidTestController($port) {
   // use-after-free in the FastCGI support.
   $req_dat = $req_dat . $req_dat . $req_dat;
 
-  $sock = fsockopen($host, $port);
+  $errno = null;
+  $errstr = null;
+  $sock = fsockopen($host, $port, inout $errno, inout $errstr);
   fwrite($sock, $req_dat);
   fclose($sock);
 

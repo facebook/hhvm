@@ -148,8 +148,8 @@ function dns_get_record(string $hostname,
  * @param string $hostname - If OpenSSL support is installed, you may
  *   prefix the hostname with either ssl:// or tls:// to use an SSL or TLS
  *   client connection over TCP/IP to connect to the remote host.
- * @param int $port - The port number. This can be omitted and skipped
- *   with -1 for transports that do not use ports, such as unix://.
+ * @param int $port - The port number. This can be skipped with -1
+ * for transports that do not use ports, such as unix://.
  * @param int $errno - If provided, holds the system level error number
  *   that occurred in the system-level connect() call.   If the value
  *   returned in errno is 0 and the function returned FALSE, it is an
@@ -168,9 +168,11 @@ function dns_get_record(string $hostname,
  */
 <<__Native>>
 function fsockopen(string $hostname,
-                   int $port = -1,
-                   mixed &$errno = null,
-                   mixed &$errstr = null,
+                   int $port,
+                   <<__OutOnly>>
+                   inout mixed $errno,
+                   <<__OutOnly>>
+                   inout mixed $errstr,
                    float $timeout = -1.0): mixed;
 
 /**
@@ -477,9 +479,11 @@ function openlog(string $ident,
  */
 <<__Native>>
 function pfsockopen(string $hostname,
-                    int $port = -1,
-                    mixed &$errno = null,
-                    mixed &$errstr = null,
+                    int $port,
+                    <<__OutOnly>>
+                    inout mixed $errno,
+                    <<__OutOnly>>
+                    inout mixed $errstr,
                     float $timeout = -1.0): mixed;
 
 /**

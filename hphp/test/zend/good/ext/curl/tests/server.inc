@@ -34,7 +34,16 @@ function curl_cli_server_start() {
 	// note: even when server prints 'Listening on localhost:8964...Press Ctrl-C to quit.'
 	//       it might not be listening yet...need to wait until fsockopen() call returns
     $i = 0;
-    while (($i++ < 30) && !($fp = @fsockopen(PHP_CURL_SERVER_HOSTNAME, PHP_CURL_SERVER_PORT))) {
+    $errno = null;
+    $errstr = null;
+    while (($i++ < 30) &&
+           !($fp = @fsockopen(
+               PHP_CURL_SERVER_HOSTNAME,
+               PHP_CURL_SERVER_PORT,
+               inout $errno,
+               inout $errstr,
+             ))
+          ) {
         usleep(10000);
     }
 

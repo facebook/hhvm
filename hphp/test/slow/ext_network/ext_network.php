@@ -4,7 +4,9 @@
 
 function tryopen($u, $p = -1) {
   for ($i = 0; $i < 100; $i++) {
-    @$r = $p >= 0 ? fsockopen($u, $p) : fsockopen($u);
+    $errno = null;
+    $errstr = null;
+    @$r = fsockopen($u, $p, inout $errno, inout $errstr);
     if ($r) return $r;
     usleep(1000);
   }

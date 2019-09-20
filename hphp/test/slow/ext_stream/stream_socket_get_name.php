@@ -13,7 +13,7 @@ for ($i = 0; !$stream && $i < 10; $i++) {
   // unlucky and tempnam in another test uses the same name.
   $name =  tempnam(sys_get_temp_dir(), "socket");
   unlink($name);
-  $socket = stream_socket_server("unix://".$name, &$errno, &$errstr);
+  $socket = stream_socket_server("unix://".$name, inout $errno, inout $errstr);
 }
 if (!$socket) {
   echo "$errstr ($errno)\n";

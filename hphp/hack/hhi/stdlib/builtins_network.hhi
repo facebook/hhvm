@@ -92,9 +92,9 @@ function dns_get_mx($hostname, &$mxhosts, &$weights = null);
 <<__PHPStdLib>>
 function getmxrr(string $hostname, &$mxhosts, &$weight = null);
 <<__PHPStdLib>>
-function fsockopen(string $hostname, int $port = -1, &$errnum = null, &$errstr = null, float $timeout = 0.0);
+function fsockopen(string $hostname, int $port, inout $errnum, inout $errstr, float $timeout = 0.0);
 <<__PHPStdLib>>
-function pfsockopen(string $hostname, int $port = -1, &$errnum = null, &$errstr = null, float $timeout = 0.0);
+function pfsockopen(string $hostname, int $port, inout $errnum, inout $errstr, float $timeout = 0.0);
 <<__PHPStdLib>>
 function socket_get_status($stream);
 <<__PHPStdLib>>

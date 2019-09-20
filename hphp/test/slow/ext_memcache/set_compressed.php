@@ -15,7 +15,9 @@ function main_entry(): void {
   $memcache->addServer('localhost', 11211);
   $memcache->set($key, $tmp_object, MEMCACHE_COMPRESSED);
 
-  $socket = stream_socket_client('localhost:11211');
+  $errno = null;
+  $errstr = null;
+  $socket = stream_socket_client('localhost:11211', inout $errno, inout $errstr);
   fwrite($socket, "get " . $key . "\r\n");
   $line1 = fgets( $socket );
   $line2 = fgets( $socket );

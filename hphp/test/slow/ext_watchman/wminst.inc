@@ -70,7 +70,9 @@ class WatchmanInstance {
       if (!file_exists($sockname)) {
         usleep(30000);
       }
-      $this->sock = @fsockopen('unix://' . $sockname);
+      $errno = null;
+      $errstr = null;
+      $this->sock = @fsockopen('unix://' . $sockname, -1, inout $errno, inout $errstr);
       if ($this->sock) {
         break;
       }

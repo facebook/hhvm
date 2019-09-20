@@ -18,7 +18,8 @@ function read_all_data( $conn, $bytes ) {
 function test_server($server) {
   // The server only accepts once, but the client will call
   // stream_socket_client multiple times with the persistent flag.
-  if( $conn = stream_socket_accept($server) ) {
+  $peername = null;
+  if( $conn = stream_socket_accept($server, -1.0, inout $peername) ) {
     $requests_remaining = 3;
     while( $requests_remaining > 0 ) {
       $requests_remaining--;
@@ -51,10 +52,12 @@ function test_client($scheme, $port) {
 }
 
 function do_request($scheme, $port, $context) {
+  $errno = null;
+  $errstr = null;
   $client = stream_socket_client(
     "$scheme://127.0.0.1:$port",
-    &$errno,
-    &$errstr,
+    inout $errno,
+    inout $errstr,
     1.0,
     STREAM_CLIENT_CONNECT|STREAM_CLIENT_PERSISTENT,
     $context
@@ -124,10 +127,12 @@ foreach ($schemes as $i => $scheme) {
   $port = 0;
   while (!$server) {
     $port = rand(50000, 65535);
+    $errno = null;
+    $errstr = null;
     $server = @stream_socket_server(
       "$scheme://127.0.0.1:$port",
-      &$errno,
-      &$errstr,
+      inout $errno,
+      inout $errstr,
       STREAM_SERVER_BIND|STREAM_SERVER_LISTEN,
       $contexts[$i]
     );

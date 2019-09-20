@@ -1,6 +1,6 @@
 <?hh
 /* Prototype  : proto bool stream_set_timeout(resource stream, int seconds, int microseconds)
- * Description: Set timeout on stream read to seconds + microseonds 
+ * Description: Set timeout on stream read to seconds + microseonds
  * Source code: ext/standard/streamsfuncs.c
  * Alias to functions: socket_set_timeout
  */
@@ -13,13 +13,19 @@ echo "\n-- Testing stream_set_timeout() function with more than expected no. of 
 for ($i=0; $i<100; $i++) {
   $port = rand(10000, 65000);
   /* Setup socket server */
-  $server = @stream_socket_server("tcp://127.0.0.1:$port");
+  $errno = null;
+  $errstr = null;
+  $server = @stream_socket_server(
+    "tcp://127.0.0.1:$port",
+    inout $errno,
+    inout $errstr
+  );
   if ($server) {
     break;
   }
 }
 /* Connect to it */
-$client = fsockopen("tcp://127.0.0.1:$port");
+$client = fsockopen("tcp://127.0.0.1:$port", -1, inout $errno, inout $errstr);
 
 $seconds = 10;
 $microseconds = 10;

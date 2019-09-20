@@ -1156,7 +1156,12 @@ function exec_with_stack($cmd) {
     $read = array($pipes[1], $pipes[2]);
     $write = null;
     $except = null;
-    $available = @stream_select(&$read, &$write, &$except, (int)($end - $now));
+    $available = @stream_select(
+      inout $read,
+      inout $write,
+      inout $except,
+      (int)($end - $now),
+    );
     if ($available === false) {
       usleep(1000);
       $s .= "select failed:\n" . print_r(error_get_last(), true);

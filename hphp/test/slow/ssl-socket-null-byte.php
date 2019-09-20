@@ -11,7 +11,9 @@ $opt_choices = array(
   array('ssl' => array('local_cert' => $file)),
 );
 
-$socket = stream_socket_server('tcp://localhost:0', &$errno, &$errstr);
+$errno = null;
+$errstr = null;
+$socket = stream_socket_server('tcp://localhost:0', inout $errno, inout $errstr);
 $name = stream_socket_get_name($socket, false);
 
 $port = explode(":", $name)[1];
@@ -20,8 +22,8 @@ foreach ($opt_choices as $opts) {
   $ctx = stream_context_create($opts);
   $sock = stream_socket_client(
     sprintf('tls://localhost:%d', $port),
-    &$errno,
-    &$errstr,
+    inout $errno,
+    inout $errstr,
     600.0,
     STREAM_CLIENT_CONNECT,
     $ctx

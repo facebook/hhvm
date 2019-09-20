@@ -185,9 +185,9 @@ function socket_bind(resource $socket, string $address, int $port = 0) { }
 <<__PHPStdLib>>
 function socket_listen(resource $socket, int $backlog = 0) { }
 <<__PHPStdLib>>
-function socket_select(&$read, &$write, &$except, $vtv_sec, int $tv_usec = 0) { }
+function socket_select(inout $read, inout $write, inout $except, $vtv_sec, int $tv_usec = 0) { }
 <<__PHPStdLib>>
-function socket_server(string $hostname, int $port = -1, &$errnum = null, &$errstr = null) { }
+function socket_server(string $hostname, int $port, inout $errnum, inout $errstr) { }
 <<__PHPStdLib>>
 function socket_accept(resource $socket) { }
 <<__PHPStdLib>>

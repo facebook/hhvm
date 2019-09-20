@@ -73,16 +73,16 @@ bool HHVM_FUNCTION(socket_listen,
                    const Resource& socket,
                    int backlog = 0);
 Variant HHVM_FUNCTION(socket_select,
-                      VRefParam read,
-                      VRefParam write,
-                      VRefParam except,
+                      Variant& read,
+                      Variant& write,
+                      Variant& except,
                       const Variant& vtv_sec,
                       int tv_usec = 0);
 Variant HHVM_FUNCTION(socket_server,
                       const String& hostname,
-                      int port = -1,
-                      VRefParam errnum = uninit_null(),
-                      VRefParam errstr = uninit_null());
+                      int port,
+                      Variant& errnum,
+                      Variant& errstr);
 Variant HHVM_FUNCTION(socket_accept,
                       const Resource& socket);
 Variant HHVM_FUNCTION(socket_read,
@@ -142,27 +142,26 @@ Variant HHVM_FUNCTION(getaddrinfo,
 
 Variant HHVM_FUNCTION(fsockopen,
                       const String& hostname,
-                      int port = -1,
-                      VRefParam errnum = uninit_null(),
-                      VRefParam errstr = uninit_null(),
+                      int port,
+                      Variant& errnum,
+                      Variant& errstr,
                       double timeout = -1.0);
 Variant HHVM_FUNCTION(pfsockopen,
                       const String& hostname,
-                      int port = -1,
-                      VRefParam errnum = uninit_null(),
-                      VRefParam errstr = uninit_null(),
+                      int port,
+                      Variant& errnum,
+                      Variant& errstr,
                       double timeout = -1.0);
 
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant socket_server_impl(const HostURL &hosturl,
-                           int flags = k_STREAM_SERVER_BIND |
-                             k_STREAM_SERVER_LISTEN,
-                           VRefParam errnum = uninit_null(),
-                           VRefParam errstr = uninit_null(),
+                           int flags,
+                           Variant& errnum,
+                           Variant& errstr,
                            const Variant& context = uninit_variant);
-Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
-                      VRefParam errstr, double timeout, bool persistent,
+Variant sockopen_impl(const HostURL &hosturl, Variant& errnum,
+                      Variant& errstr, double timeout, bool persistent,
                       const Variant& context);
 
 ///////////////////////////////////////////////////////////////////////////////

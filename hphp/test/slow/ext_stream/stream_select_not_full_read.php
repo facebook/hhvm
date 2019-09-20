@@ -19,7 +19,7 @@ $process2 = proc_open('cat', $descriptorspec, inout $io2);
 while (!feof($io[1])) {
   $r = array($io[1], $io2[1]);
   $w = $e = null;
-  $i = stream_select(&$r, &$w, &$e, 1);
+  $i = stream_select(inout $r, inout $w, inout $e, 1);
   var_dump($i);
   if ($i) {
     foreach ($r as $resource) {

@@ -11,5 +11,5 @@ $write  = null;
 $except = null;
 $time   = 0;
 $usec   = 2000000;
-var_dump(socket_select(&$sockets, &$write, &$except, $time, $usec));
+var_dump(socket_select(inout $sockets, inout $write, inout $except, $time, $usec));
 }

@@ -9,6 +9,8 @@ use oxidized::{
     namespace_env::Env as NamespaceEnv, pos::Pos, prim_defs::Comment, s_map,
 };
 
+use naming_special_names_rust::special_idents;
+
 use parser_rust::{
     indexed_source_text::IndexedSourceText, lexable_token::LexablePositionedToken,
     positioned_syntax::PositionedSyntaxTrait, source_text::SourceText, syntax::*, syntax_error,
@@ -22,6 +24,7 @@ use ocamlvalue_macro::Ocamlvalue;
 use std::{
     cell::{Ref, RefCell, RefMut},
     collections::HashSet,
+    mem,
     rc::Rc,
     result::Result::{Err, Ok},
 };
@@ -61,12 +64,6 @@ pub enum LiftedAwaitKind {
 pub struct LiftedAwaits {
     pub awaits: Vec<(Option<aast::Id>, aast!(Expr<,>))>,
     lift_kind: LiftedAwaitKind,
-}
-
-impl LiftedAwaits {
-    fn lift_kind(&self) -> LiftedAwaitKind {
-        self.lift_kind.clone()
-    }
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
@@ -157,6 +154,9 @@ pub struct Env<'a> {
     file_mode: file_info::Mode,
     top_level_statements: bool, /* Whether we are (still) considering TLSs*/
 
+    // Cache none pos, lazy_static doesn't allow Rc.
+    pos_none: Pos,
+
     pub saw_yield: bool, /* Information flowing back up */
     pub lifted_awaits: Option<LiftedAwaits>,
     pub tmp_var_counter: isize,
@@ -195,10 +195,11 @@ impl<'a> Env<'a> {
             top_level_statements: false,
             saw_yield: false,
             lifted_awaits: None,
-            tmp_var_counter: 0,
+            tmp_var_counter: 1,
             indexed_source_text,
             auto_ns_map: &[],
             parser_options,
+            pos_none: Pos::make_none(),
 
             state: Rc::new(RefCell::new(State {
                 saw_compiler_halt_offset: None,
@@ -277,6 +278,16 @@ impl<'a> Env<'a> {
 
     fn pop_docblock(&mut self) {
         RefMut::map(self.state.borrow_mut(), |s| &mut s.doc_comments).pop();
+    }
+
+    fn make_tmp_var_name(&mut self) -> String {
+        let name = String::from(special_idents::TMP_VAR_PREFIX) + &self.tmp_var_counter.to_string();
+        self.tmp_var_counter += 1;
+        name
+    }
+
+    fn pos_none(&self) -> &Pos {
+        &self.pos_none
     }
 }
 
@@ -1523,7 +1534,7 @@ where
                         }
                     }
                     Some(TK::Inout) => Ok(E_::Callconv(ast_defs::ParamKind::Pinout, expr)),
-                    Some(TK::Await) => not_impl!(), // lift_await expr env location
+                    Some(TK::Await) => Self::lift_await(pos, expr, env, location),
                     Some(TK::Suspend) => Ok(E_::Suspend(expr)),
                     Some(TK::Clone) => Ok(E_::Clone(expr)),
                     Some(TK::Print) => Ok(E_::Call(
@@ -1572,12 +1583,11 @@ where
                 } else {
                     TopLevel
                 };
-                let bop_ast_node = Self::p_bop(
-                    &c.binary_operator,
-                    Self::p_expr(&c.binary_left_operand, env)?,
-                    Self::p_expr_with_loc(rlocation, &c.binary_right_operand, env)?,
-                    env,
-                )?;
+                // Ocaml evaluates right first then left, ordering will affect
+                // tmp var count in lifted await statement.
+                let right = Self::p_expr_with_loc(rlocation, &c.binary_right_operand, env)?;
+                let left = Self::p_expr(&c.binary_left_operand, env)?;
+                let bop_ast_node = Self::p_bop(&c.binary_operator, left, right, env)?;
                 match &bop_ast_node {
                     // TODO: Ast_check.check_lvalue (fun pos error -> raise_parsing_error env (`Pos pos) error) lhs
                     E_::Binop(ast_defs::Bop::Eq(_), lhs, _) => {}
@@ -2073,20 +2083,109 @@ where
         }
     }
 
+    fn process_lifted_awaits(
+        mut awaits: LiftedAwaits,
+        env: &Env,
+    ) -> ret!(Vec<(Option<aast!(Lid)>, aast!(Expr<,>))>) {
+        for await_ in awaits.awaits.iter() {
+            if &(await_.1).0 == env.pos_none() {
+                return Self::failwith("none pos in lifted awaits");
+            }
+        }
+        awaits
+            .awaits
+            .sort_unstable_by(|a1, a2| Pos::compare(&(a1.1).0, &(a2.1).0));
+        Ok(awaits.awaits)
+    }
+
+    fn clear_statement_scope<F, R>(f: F, env: &mut Env) -> R
+    where
+        F: FnOnce(&mut Env) -> R,
+    {
+        use LiftedAwaitKind::*;
+        match &env.lifted_awaits {
+            Some(LiftedAwaits { lift_kind, .. }) if *lift_kind == LiftedFromStatement => {
+                let saved_lifted_awaits = env.lifted_awaits.take();
+                let result = f(env);
+                env.lifted_awaits = saved_lifted_awaits;
+                result
+            }
+            _ => f(env),
+        }
+    }
+
     fn lift_awaits_in_statement<F>(f: F, node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Stmt<,>)
     where
         F: FnOnce(&mut Env) -> ret_aast!(Stmt<,>),
     {
-        f(env)
+        use LiftedAwaitKind::*;
+        let (lifted_awaits, result) = match env.lifted_awaits {
+            Some(LiftedAwaits { lift_kind, .. }) if lift_kind == LiftedFromConcurrent => {
+                (None, f(env)?)
+            }
+            _ => {
+                let saved = env.lifted_awaits.replace(LiftedAwaits {
+                    awaits: vec![],
+                    lift_kind: LiftedFromStatement,
+                });
+                let result = f(env);
+                let lifted_awaits = mem::replace(&mut env.lifted_awaits, saved);
+                let result = result?;
+                (lifted_awaits, result)
+            }
+        };
+        if let Some(lifted_awaits) = lifted_awaits {
+            if !lifted_awaits.awaits.is_empty() {
+                let awaits = Self::process_lifted_awaits(lifted_awaits, env)?;
+                return Ok(aast::Stmt::new(
+                    Self::p_pos(node, env),
+                    aast::Stmt_::Awaitall((awaits, vec![result])),
+                ));
+            }
+        }
+        Ok(result)
+    }
+
+    fn lift_await(
+        parent_pos: Pos,
+        expr: aast!(Expr<,>),
+        env: &mut Env,
+        location: ExprLocation,
+    ) -> ret_aast!(Expr_<,>) {
+        use ExprLocation::*;
+        match (&env.lifted_awaits, location) {
+            (_, UsingStatement) | (_, RightOfAssignmentInUsingStatement) | (None, _) => {
+                Ok(aast::Expr_::Await(expr))
+            }
+            (Some(_), _) => {
+                if location != AsStatement {
+                    let name = env.make_tmp_var_name();
+                    let lid = aast::Lid::new(parent_pos, name.clone());
+                    let await_lid = aast::Lid::new(expr.0.clone(), name);
+                    let await_ = (Some(await_lid), expr);
+                    env.lifted_awaits.as_mut().map(|aw| aw.awaits.push(await_));
+                    Ok(aast::Expr_::Lvar(lid))
+                } else {
+                    env.lifted_awaits
+                        .as_mut()
+                        .map(|aw| aw.awaits.push((None, expr)));
+                    Ok(aast::Expr_::Null)
+                }
+            }
+        }
     }
 
     fn p_stmt(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Stmt<,>) {
-        // TODO: clear_statement_scope
-        let docblock = Self::extract_docblock(node, env);
-        env.push_docblock(docblock);
-        let result = Self::p_stmt_(node, env);
-        env.pop_docblock();
-        result
+        Self::clear_statement_scope(
+            |e: &mut Env| {
+                let docblock = Self::extract_docblock(node, e);
+                e.push_docblock(docblock);
+                let result = Self::p_stmt_(node, e);
+                e.pop_docblock();
+                result
+            },
+            env,
+        )
     }
 
     fn p_stmt_(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Stmt<,>) {
@@ -2315,16 +2414,22 @@ where
                 ),
             )),
             ReturnStatement(c) => {
-                let expr = match &c.return_expression.syntax {
-                    Missing => None,
-                    _ => Some(Self::p_expr_with_loc(
-                        ExprLocation::RightOfReturn,
-                        &c.return_expression,
-                        env,
-                    )?),
+                let f = |e: &mut Env| -> ret_aast!(Stmt<,>) {
+                    let expr = match &c.return_expression.syntax {
+                        Missing => None,
+                        _ => Some(Self::p_expr_with_loc(
+                            ExprLocation::RightOfReturn,
+                            &c.return_expression,
+                            e,
+                        )?),
+                    };
+                    Ok(aast::Stmt::new(pos, aast::Stmt_::Return(expr)))
                 };
-
-                Ok(aast::Stmt::new(pos, aast::Stmt_::Return(expr)))
+                if Self::is_simple_await_expression(&c.return_expression) {
+                    f(env)
+                } else {
+                    Self::lift_awaits_in_statement(f, node, env)
+                }
             }
             GotoLabel(c) => {
                 if env.is_typechecker() && !env.parser_options.po_allow_goto {

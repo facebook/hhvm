@@ -10,7 +10,7 @@ use std::fmt::{Display, Formatter, Result};
 use std::path::PathBuf;
 use std::rc::Rc;
 
-#[derive(Clone, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
 pub enum Prefix {
     Root,
     Hhi,
@@ -58,6 +58,10 @@ impl RelativePath {
 
     pub fn path_str(&self) -> &str {
         (self.0).1.to_str().unwrap()
+    }
+
+    pub fn prefix(&self) -> Prefix {
+        (self.0).0
     }
 }
 

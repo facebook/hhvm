@@ -6,9 +6,13 @@ if ($iswin) {
     $s = str_repeat(' ', 4097);
     $s .= '1';
     file_put_contents($f, $s);
-    exec('type ' . $f, &$output);
+    $output = null;
+    $return_var = -1;
+    exec('type ' . $f, inout $output, inout $return_var);
 } else {
-    exec("printf %4098d 1", &$output);
+    $output = null;
+    $return_var = -1;
+    exec("printf %4098d 1", inout $output, inout $return_var);
 }
 var_dump($output);
 if ($iswin) {

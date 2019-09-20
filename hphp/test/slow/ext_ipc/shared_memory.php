@@ -27,7 +27,8 @@ if ($pid == 0) {
   exit(0);
 }
 
-pcntl_waitpid($pid, &$status);
+$status = null;
+pcntl_waitpid($pid, inout $status);
 var_dump($status);
 
 // Verify that shm_remove_var worked

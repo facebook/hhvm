@@ -144,7 +144,8 @@ foreach ($schemes as $i => $scheme) {
   $pid = pcntl_fork();
   if( $pid ) {
     test_server($server);
-    pcntl_wait(&$status);
+    $status = null;
+    pcntl_wait(inout $status);
     exit;
   } else {
     test_client($scheme, $port);

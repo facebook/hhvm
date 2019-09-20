@@ -18,7 +18,8 @@ function list_system_locales() {
   ob_start();
 
   // run the command 'locale -a' to fetch all locales available in the system
-  system('locale -a');
+  $return_var = -1;
+  system('locale -a', inout $return_var);
 
   // get the contents from the internal output buffer
   $all_locales = ob_get_contents();

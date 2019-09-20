@@ -1,4 +1,6 @@
 <?hh <<__EntryPoint>> function main(): void {
-exec("echo x", &$output);
+$output = null;
+$return_var = -1;
+exec("echo x", inout $output, inout $return_var);
 var_dump($output);
 }

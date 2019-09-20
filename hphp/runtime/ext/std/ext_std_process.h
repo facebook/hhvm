@@ -28,21 +28,21 @@ Variant HHVM_FUNCTION(shell_exec,
                       const String& cmd);
 String HHVM_FUNCTION(exec,
                      const String& command,
-                     VRefParam output = uninit_null(),
-                     VRefParam return_var = uninit_null());
+                     Array& output,
+                     int64_t& return_var);
 void HHVM_FUNCTION(passthru,
                    const String& command,
-                   VRefParam return_var = uninit_null());
+                   int64_t& return_var);
 String HHVM_FUNCTION(system,
                      const String& command,
-                     VRefParam return_var = uninit_null());
+                     int64_t& return_var);
 
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant HHVM_FUNCTION(proc_open,
                       const String& cmd,
                       const Array& descriptorspec,
-                      VRefParam pipes,
+                      Array& pipes,
                       const Variant& cwd = uninit_variant,
                       const Variant& env = uninit_variant,
                       const Variant& other_options = uninit_variant);

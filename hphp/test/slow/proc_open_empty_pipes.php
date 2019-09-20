@@ -10,7 +10,7 @@ $descriptors = array(
 );
 
 $pipes = array(1, 2, 3, 4, 5);
-$proc = proc_open($command, $descriptors, &$pipes);
+$proc = proc_open($command, $descriptors, inout $pipes);
 var_dump($proc);
 var_dump($pipes);
 }

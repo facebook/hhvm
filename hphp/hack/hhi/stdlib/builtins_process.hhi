@@ -25,9 +25,9 @@ function pcntl_setpriority(int $priority, int $pid = 0, int $process_identifier 
 function pcntl_signal(int $signo, $handler, bool $restart_syscalls = true);
 
 <<__PHPStdLib>>
-function pcntl_wait(&$status, int $options = 0);
+function pcntl_wait(inout $status, int $options = 0);
 <<__PHPStdLib>>
-function pcntl_waitpid(int $pid, &$status, int $options = 0);
+function pcntl_waitpid(int $pid, inout $status, int $options = 0);
 <<__PHPStdLib>>
 function pcntl_wexitstatus(int $status);
 <<__PHPStdLib>>
@@ -45,13 +45,13 @@ function pcntl_signal_dispatch();
 <<__PHPStdLib>>
 function shell_exec(string $cmd);
 <<__PHPStdLib>>
-function exec(string $command, &$output = null, &$return_var = null);
+function exec(string $command, inout $output, inout $return_var);
 <<__PHPStdLib>>
-function passthru(string $command, &$return_var = null);
+function passthru(string $command, inout $return_var);
 <<__PHPStdLib>>
-function system(string $command, &$return_var = null);
+function system(string $command, inout $return_var);
 <<__PHPStdLib>>
-function proc_open(string $cmd, darray<int, mixed> $descriptorspec, &$pipes, $cwd = null, $env = null, $other_options = null);
+function proc_open(string $cmd, darray<int, mixed> $descriptorspec, inout $pipes, $cwd = null, $env = null, $other_options = null);
 <<__PHPStdLib>>
 function proc_terminate(resource $process, int $signal = 0);
 <<__PHPStdLib>>

@@ -57,7 +57,8 @@ msg_set_queue($queue, array('msg_qbytes' => $qb() - 1));
 var_dump($qb());
 
 msg_remove_queue($queue);
-pcntl_waitpid($pid, &$status);
+$status = null;
+pcntl_waitpid($pid, inout $status);
 
 unlink($filename);
 }

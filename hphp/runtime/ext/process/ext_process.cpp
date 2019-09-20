@@ -491,7 +491,7 @@ bool HHVM_FUNCTION(pcntl_signal,
 bool HHVM_FUNCTION(pcntl_sigprocmask,
                    int how,
                    const Array& set,
-                   VRefParam oldset) {
+                   Array& oldset) {
   auto const invalid_argument = [&] {
     raise_warning("pcntl_sigprocmask(): Invalid argument");
     return false;
@@ -522,46 +522,45 @@ bool HHVM_FUNCTION(pcntl_sigprocmask,
     return false;
   }
 
-  auto aoldset = Array::Create();
+  oldset = Array::Create();
   for (int signum = 1; signum < Process::kNSig; ++signum) {
     auto const result = sigismember(&coldset, signum);
     if (result == 1) {
-      aoldset.append(signum);
+      oldset.append(signum);
     } else if (result == -1) {
       // Invalid signal number.
       break;
     }
   }
 
-  oldset.assignIfRef(aoldset);
   return true;
 }
 
 int64_t HHVM_FUNCTION(pcntl_wait,
-                      VRefParam status,
+                      int64_t& status,
                       int options /* = 0 */) {
-  int nstatus = status;
+  int nstatus = -1;
   auto const child_id = LightProcess::pcntl_waitpid(-1, &nstatus, options);
 /*  if (options) {
     child_id = wait3(&nstatus, options, NULL);
   } else {
     child_id = wait(&nstatus);
   }*/
-  status.assignIfRef(nstatus);
+  status = nstatus;
   return child_id;
 }
 
 int64_t HHVM_FUNCTION(pcntl_waitpid,
                       int pid,
-                      VRefParam status,
+                      int64_t& status,
                       int options /* = 0 */) {
-  int nstatus = status;
+  int nstatus = -1;
   auto const child_id = LightProcess::pcntl_waitpid(
     (pid_t)pid,
     &nstatus,
     options
   );
-  status.assignIfRef(nstatus);
+  status = nstatus;
   return child_id;
 }
 

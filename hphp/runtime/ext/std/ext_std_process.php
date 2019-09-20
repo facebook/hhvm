@@ -17,10 +17,7 @@ function shell_exec(string $cmd): mixed;
  * @param string $command - The command that will be executed.
  * @param mixed $output - If the output argument is present, then the
  *   specified array will be filled with every line of output from the command.
- *   Trailing whitespace, such as \n, is not included in this array. Note that
- *   if the array already contains some elements, exec() will append to the end
- *   of the array. If you do not want the function to append elements, call
- *   unset() on the array before passing it to exec().
+ *   Trailing whitespace, such as \n, is not included in this array.
  * @param mixed $return_var - If the return_var argument is present along with
  *   the output argument, then the return status of the executed command will be
  *   written to this variable.
@@ -34,8 +31,10 @@ function shell_exec(string $cmd): mixed;
  */
 <<__Native>>
 function exec(string $command,
-              mixed &$output = null,
-              mixed &$return_var = null): string;
+              <<__OutOnly("KindOfArray")>>
+              inout mixed $output,
+              <<__OutOnly("KindOfInt64")>>
+              inout mixed $return_var): string;
 
 /**
  * The passthru() function is similar to the exec() function in that it
@@ -54,7 +53,9 @@ function exec(string $command,
  *
  */
 <<__Native>>
-function passthru(string $command, mixed &$return_var = null): void;
+function passthru(string $command,
+                  <<__OutOnly("KindOfInt64")>>
+                  inout mixed $return_var): void;
 
 /**
  * system() is just like the C version of the function in that it executes the
@@ -73,7 +74,9 @@ function passthru(string $command, mixed &$return_var = null): void;
  *
  */
 <<__Native>>
-function system(string $command, mixed &$return_var = null): string;
+function system(string $command,
+                <<__OutOnly("KindOfInt64")>>
+                inout mixed $return_var): string;
 
 /**
  * proc_open() is similar to popen() but provides a much greater degree of
@@ -120,7 +123,8 @@ function system(string $command, mixed &$return_var = null): string;
 <<__Native>>
 function proc_open(string $cmd,
                    darray<int, mixed> $descriptorspec,
-                   mixed &$pipes,
+                   <<__OutOnly("KindOfArray")>>
+                   inout mixed $pipes,
                    ?string $cwd = null,
                    mixed $env = null,
                    mixed $other_options = null): mixed;

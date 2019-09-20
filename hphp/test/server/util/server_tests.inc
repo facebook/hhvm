@@ -121,7 +121,9 @@ function getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
         " --input-dir $root $repoArgs";
 
       tlog('Building repo with command: '.$cmd);
-      tlog(exec($cmd));
+      $output = null;
+      $return_var = -1;
+      tlog(exec($cmd, inout $output, inout $return_var));
     }
     $repoConfig .=
       " -vRepo.Local.Path=".ServerUtilServerTests::$repo_builds[$repoKey]."/hhvm.hhbc".
@@ -151,9 +153,11 @@ function startServer(&$serverPort, &$adminPort, &$debugPort, $home, $root,
   $chooseAdmin = $adminPort === null;
   $chooseDebug = $debugPort === null;
   $pid = posix_getpid();
+  $output = null;
+  $return_var = -1;
   $safe_children = array_flip(array_map(
     $v ==> (int)$v,
-    explode(',', exec("pgrep -f -d , -P $pid")),
+    explode(',', exec("pgrep -f -d , -P $pid", inout $output, inout $return_var)),
   ));
 
   for ($i = 0; $i < 5; $i++) {
@@ -295,7 +299,9 @@ function http_request($host, $port, $path, $timeout = 1200, $curl_opts = '') {
     "--silent $curl_opts --connect-timeout $timeout ".
     "-H 'Host: $host_name' $headers --url \"$url\"";
   tlog("Requesting page with command: $cmd");
-  if (exec($cmd, &$result) === null) return null;
+  $result = null;
+  $return_var = -1;
+  if (exec($cmd, inout $result, inout $return_var) === null) return null;
   return implode("\n", $result);
 }
 
@@ -318,11 +324,13 @@ if (!function_exists("request")) {
 }
 
 function killChildren($pid, $safe_children = array()) {
-  $childIds = exec("pgrep -f -d , -P $pid");
+  $output = null;
+  $return_var = -1;
+  $childIds = exec("pgrep -f -d , -P $pid", inout $output, inout $return_var);
   foreach (array_map($v ==> (int)$v, explode(",", $childIds ?? '')) as $cid) {
     if (!$cid) continue;
     if (isset($safe_children[$cid])) continue;
-    tlog("killing ".exec("ps -f -p ".$cid));
+    tlog("killing ".exec("ps -f -p ".$cid, inout $output, inout $return_var));
     killChildren($cid, $safe_children);
     posix_kill($cid, SIGKILL);
   }

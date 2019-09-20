@@ -16,11 +16,11 @@ $asc = SORT_ASC;
 $regular = SORT_REGULAR;
 $desc = SORT_DESC;
 $string = SORT_STRING;
-var_dump(array_multisort6(&$ar1, &$asc, &$regular, &$ar2, &$desc, &$string));
+var_dump(array_multisort6(inout $ar1, inout $asc, inout $regular, inout $ar2, inout $desc, inout $string));
 var_dump($ar1, $ar2);
 
 echo "\n-- Testing array_multisort() function with one argument --\n";
-var_dump( array_multisort1(&$ar2) );
+var_dump( array_multisort1(inout $ar2) );
 var_dump($ar2);
 
 

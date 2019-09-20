@@ -13,13 +13,13 @@ $string = SORT_STRING;
 $numeric = SORT_NUMERIC;
 $desc = SORT_DESC;
 
-array_multisort3(&$ar, &$regular, &$desc);
+array_multisort3(inout $ar, inout $regular, inout $desc);
 var_dump($ar);
 
-array_multisort3(&$ar, &$string, &$desc);
+array_multisort3(inout $ar, inout $string, inout $desc);
 var_dump($ar);
 
-array_multisort3(&$ar, &$numeric, &$desc);
+array_multisort3(inout $ar, inout $numeric, inout $desc);
 var_dump($ar);
 
 

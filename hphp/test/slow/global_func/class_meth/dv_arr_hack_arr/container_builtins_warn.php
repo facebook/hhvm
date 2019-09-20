@@ -49,7 +49,7 @@ function test_warning($c, $f, $cmp) {
   $x = HH\class_meth($c, $f); var_dump(usort(&$x, $cmp));
   $x = HH\class_meth($c, $f); var_dump(uasort(&$x, $cmp));
   $x = HH\class_meth($c, $f); var_dump(uksort(&$x, $cmp));
-  $x = HH\class_meth($c, $f); var_dump(array_multisort1(&$x));
+  $x = HH\class_meth($c, $f); var_dump(array_multisort1(inout $x));
 }
 
 function test_string_builtins($c, $f) {

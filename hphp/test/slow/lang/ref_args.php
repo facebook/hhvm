@@ -7,10 +7,10 @@ function main4() {
   $x = array(1, 54, 3, 23, 5, 2);
   $y = array("a", "b", "c", "d", "e", "f");
   var_dump($x, $y);
-  array_multisort2(&$x, &$y);
+  array_multisort2(inout $x, inout $y);
   var_dump($x, $y);
   $desc = SORT_DESC;
-  array_multisort3(&$x, &$desc, &$y);
+  array_multisort3(inout $x, inout $desc, inout $y);
   var_dump($x, $y);
 }
 

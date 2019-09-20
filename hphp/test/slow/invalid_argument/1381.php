@@ -47,7 +47,7 @@ var_dump(strlen(basename($tmpfname)));
 unlink($tmpfname);
 $ar1 = array(10, 100, 100, 0);
 $ar2 = array(1, 3, 2);
-var_dump(array_multisort2(&$ar1, &$ar2));
+var_dump(array_multisort2(inout $ar1, inout $ar2));
 $phrase  = 'eat fruits, vegetables, and fiber every day.';
 $healthy = array('fruits', 'vegetables');
 $yummy   = array('pizza', 'beer', 'ice cream');

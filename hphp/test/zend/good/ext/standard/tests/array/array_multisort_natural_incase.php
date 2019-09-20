@@ -28,7 +28,7 @@ $b = array(
 );
 
 $natural_case = SORT_NATURAL | SORT_FLAG_CASE;
-array_multisort3(&$b, &$natural_case, &$a);
+array_multisort3(inout $b, inout $natural_case, inout $a);
 
 var_dump($a, $b);
 

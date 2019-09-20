@@ -55,15 +55,15 @@ void throwSodiumException(const String& message) {
   throw_object("SodiumException", params, true /* init */);
 }
 
-const StaticString s_non_string_reference(
-  "ByRef parameter is not a string"
+const StaticString s_non_string_inout(
+  "inout parameter is not a string"
 );
 
-String sodium_separate_string(VRefParam string_ref) {
-  if (!string_ref.isString()) {
-    throwSodiumException(s_non_string_reference);
+String sodium_separate_string(Variant& string_inout) {
+  if (!string_inout.isString()) {
+    throwSodiumException(s_non_string_inout);
   }
-  auto string = string_ref.toString();
+  auto string = string_inout.toString();
   auto data = string.get();
   if (!data->cowCheck()) {
     FOLLY_SDT(hhvm, hhvm_mut_sodium, data->size());
@@ -71,7 +71,7 @@ String sodium_separate_string(VRefParam string_ref) {
   }
   FOLLY_SDT(hhvm, hhvm_cow_sodium, string.size());
   String copy(string, CopyString);
-  string_ref.assignIfRef(copy);
+  string_inout = copy;
   return copy;
 }
 
@@ -135,8 +135,7 @@ String HHVM_FUNCTION(sodium_hex2bin,
 
 const StaticString s_memzero_needs_string("memzero: a PHP string is required");
 
-void HHVM_FUNCTION(sodium_memzero,
-                   VRefParam buffer) {
+void HHVM_FUNCTION(sodium_memzero, Variant& buffer) {
   if (!buffer.isString()) {
     throwSodiumException(s_memzero_needs_string);
   }
@@ -159,20 +158,19 @@ void HHVM_FUNCTION(sodium_memzero,
     FOLLY_SDT(hhvm, hhvm_mut_sodium, data->size());
     sodium_memzero(data->mutableData(), data->size());
   }
-  buffer.assignIfRef(init_null());
+  buffer = init_null();
 }
 
 const StaticString s_increment_needs_string(
   "a PHP string is required"
 );
 
-void HHVM_FUNCTION(sodium_increment,
-                   VRefParam buffer_ref) {
-  if (!buffer_ref.isString()) {
+void HHVM_FUNCTION(sodium_increment, Variant& buffer_inout) {
+  if (!buffer_inout.isString()) {
     throwSodiumException(s_increment_needs_string);
   }
 
-  String buffer = sodium_separate_string(buffer_ref);
+  String buffer = sodium_separate_string(buffer_inout);
 
   if (buffer.empty()) {
     return;
@@ -189,13 +187,13 @@ const StaticString
   s_add_same_lengths("values must have the same length");
 
 void HHVM_FUNCTION(sodium_add,
-                   VRefParam value_ref,
+                   Variant& value_inout,
                    const String& add) {
-  if (!value_ref.isString()) {
+  if (!value_inout.isString()) {
     throwSodiumException(s_add_needs_string);
   }
 
-  String value = sodium_separate_string(value_ref);
+  String value = sodium_separate_string(value_inout);
   if (value.size() != add.size()) {
     throwSodiumException(s_add_same_lengths);
   }
@@ -378,21 +376,21 @@ String HHVM_FUNCTION(sodium_crypto_generichash_init,
 }
 
 const StaticString
-  s_crypto_generichash_update_state_reference_required(
-    "a reference to a state is required"
+  s_crypto_generichash_update_state_string_required(
+    "incorrect state type, a string is required"
   ),
   s_crypto_generichash_update_incorrect_state_length(
     "incorrect state length"
   );
 
 bool HHVM_FUNCTION(sodium_crypto_generichash_update,
-                   VRefParam /* string& */ state_ref,
+                   Variant& /* string& */ state_inout,
                    const String& msg) {
-  if (!state_ref.isString()) {
-    throwSodiumException(s_crypto_generichash_update_state_reference_required);
+  if (!state_inout.isString()) {
+    throwSodiumException(s_crypto_generichash_update_state_string_required);
   }
 
-  auto state = sodium_separate_string(state_ref);
+  auto state = sodium_separate_string(state_inout);
   size_t state_len = sizeof(crypto_generichash_state);
   if (state.size() != state_len) {
     throwSodiumException(s_crypto_generichash_update_incorrect_state_length);
@@ -417,8 +415,8 @@ bool HHVM_FUNCTION(sodium_crypto_generichash_update,
 }
 
 const StaticString
-  s_crypto_generichash_final_state_reference_required(
-    "a reference to a state is required"
+  s_crypto_generichash_final_state_string_required(
+    "incorrect state type, a string is required"
   ),
   s_crypto_generichash_final_incorrect_state_length(
     "incorrect state length"
@@ -428,13 +426,13 @@ const StaticString
   );
 
 String HHVM_FUNCTION(sodium_crypto_generichash_final,
-                     VRefParam /* string& */ state_ref,
+                     Variant& /* string& */ state_inout,
                      const Variant& /* ?int */ length) {
-  if (!state_ref.isString()) {
-    throwSodiumException(s_crypto_generichash_final_state_reference_required);
+  if (!state_inout.isString()) {
+    throwSodiumException(s_crypto_generichash_final_state_string_required);
   }
 
-  auto state = sodium_separate_string(state_ref);
+  auto state = sodium_separate_string(state_inout);
   size_t state_len = sizeof(crypto_generichash_state);
   if (state.size() != state_len) {
     throwSodiumException(s_crypto_generichash_final_incorrect_state_length);
@@ -468,7 +466,7 @@ String HHVM_FUNCTION(sodium_crypto_generichash_final,
   hash.setSize(hash_len);
 
   sodium_memzero(state.mutableData(), state_len);
-  state_ref.assignIfRef(init_null());
+  state_inout = init_null();
 
   return hash;
 }

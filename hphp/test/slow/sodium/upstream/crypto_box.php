@@ -47,8 +47,8 @@ try {
     echo $ex->getMessage(), PHP_EOL;
 }
 
-sodium_memzero(&$alice_box_kp);
-sodium_memzero(&$bob_box_kp);
+sodium_memzero(inout $alice_box_kp);
+sodium_memzero(inout $bob_box_kp);
 
 $alice_box_kp = sodium_crypto_box_seed_keypair($seed_x);
 $bob_box_kp = sodium_crypto_box_seed_keypair($seed_y);

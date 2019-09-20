@@ -34,6 +34,15 @@ let parse filename =
   In_channel.close ic;
   phrases
 
+let mod_customization =
+  SMap.of_list
+    [("aast", (fun () -> Output.add_mod_use "doc_comment::DocComment"))]
+
+let get_mod_customizer name =
+  match SMap.find_opt name mod_customization with
+  | None -> (fun () -> ())
+  | Some x -> x
+
 let oxidize filename =
   let phrases = parse filename in
   let in_basename = Filename.basename filename in
@@ -43,6 +52,7 @@ let oxidize filename =
   let oxidized_module =
     Utils.with_log_indent (fun () ->
         Output.with_output_context ~module_name (fun () ->
+            get_mod_customizer module_name ();
             List.iter phrases Convert_toplevel_phrase.toplevel_phrase))
   in
   (module_name, oxidized_module)

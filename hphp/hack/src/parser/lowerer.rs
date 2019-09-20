@@ -5,7 +5,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use oxidized::{
-    aast, aast_defs, ast_defs, file_info, global_options::GlobalOptions,
+    aast, aast_defs, ast_defs, doc_comment::DocComment, file_info, global_options::GlobalOptions,
     namespace_env::Env as NamespaceEnv, pos::Pos, prim_defs::Comment, s_map,
 };
 
@@ -20,7 +20,7 @@ use escaper::*;
 use ocamlvalue_macro::Ocamlvalue;
 
 use std::{
-    cell::{RefCell, RefMut},
+    cell::{Ref, RefCell, RefMut},
     collections::HashSet,
     rc::Rc,
     result::Result::{Err, Ok},
@@ -138,6 +138,7 @@ pub struct State {
      * and raised _after_ FFP error checking (unless we run the lowerer twice,
      * which would be expensive). */
     pub lowpri_errors: Vec<(Pos, String)>,
+    pub doc_comments: Vec<Option<DocComment>>,
 }
 
 #[derive(Debug, Clone)]
@@ -205,6 +206,7 @@ impl<'a> Env<'a> {
                 in_static_method: false,
                 parent_maybe_reified: false,
                 lowpri_errors: vec![],
+                doc_comments: vec![],
             })),
         }
     }
@@ -263,9 +265,18 @@ impl<'a> Env<'a> {
         cloned
     }
 
-    fn top_doc(&self) -> Option<String> {
-        //TODO:
-        None
+    fn top_docblock(&self) -> Ref<Option<DocComment>> {
+        Ref::map(self.state.borrow(), |s| {
+            s.doc_comments.last().unwrap_or(&None)
+        })
+    }
+
+    fn push_docblock(&mut self, doc_comment: Option<DocComment>) {
+        RefMut::map(self.state.borrow_mut(), |s| &mut s.doc_comments).push(doc_comment)
+    }
+
+    fn pop_docblock(&mut self) {
+        RefMut::map(self.state.borrow_mut(), |s| &mut s.doc_comments).pop();
     }
 }
 
@@ -1836,7 +1847,8 @@ where
                 env1.top_level_statements = false;
                 let (body, yield_) =
                     Self::mp_yielding(&Self::p_function_body, &c.anonymous_body, &mut env1)?;
-                let doc_comment = Self::extract_docblock(node, env).or_else(|| env.top_doc());
+                let doc_comment =
+                    Self::extract_docblock(node, env).or_else(|| env.top_docblock().clone());
                 let user_attributes = Self::p_user_attributes(&c.anonymous_attribute_spec, env)?;
                 let external = c.anonymous_body.is_external();
                 let params = Self::could_map(&Self::p_fun_param, &c.anonymous_parameters, env)?;
@@ -2069,8 +2081,15 @@ where
     }
 
     fn p_stmt(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Stmt<,>) {
-        // TODO: clear_statement_scope & extract_and_push_docblock
-        // TODO: add lift_awaits_in_statement
+        // TODO: clear_statement_scope
+        let docblock = Self::extract_docblock(node, env);
+        env.push_docblock(docblock);
+        let result = Self::p_stmt_(node, env);
+        env.pop_docblock();
+        result
+    }
+
+    fn p_stmt_(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Stmt<,>) {
         let pos = Self::p_pos(node, env);
         use aast::{Stmt as S, Stmt_ as S_};
         match &node.syntax {
@@ -3041,7 +3060,7 @@ where
         NamespaceEnv::empty(env.auto_ns_map.to_vec(), env.codegen())
     }
 
-    fn extract_docblock(node: &Syntax<T, V>, env: &Env) -> Option<String> {
+    fn extract_docblock(node: &Syntax<T, V>, env: &Env) -> Option<DocComment> {
         #[derive(Copy, Clone, Eq, PartialEq)]
         enum ScanState {
             DocComment,
@@ -3105,7 +3124,7 @@ where
             }
         }
         let str = node.leading_text(env.indexed_source_text.source_text);
-        parse(str, 0, Free, 0)
+        parse(str, 0, Free, 0).map(Rc::new)
     }
 
     fn p_xhp_child(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(XhpChild) {

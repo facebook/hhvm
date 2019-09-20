@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<81e144b418696ee1ce08d4e9e75d4b78>>
+// @generated SignedSource<<1a603c61b4bd0b80023ba5a71d51c6eb>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -13,6 +13,7 @@ use ocamlvalue_macro::Ocamlvalue;
 
 use crate::aast_defs;
 use crate::ast_defs;
+use crate::doc_comment::DocComment;
 use crate::file_info;
 use crate::namespace_env;
 use crate::s_map;
@@ -314,7 +315,7 @@ pub struct Fun_<Ex, Fb, En, Hi> {
     pub file_attributes: Vec<FileAttribute<Ex, Fb, En, Hi>>,
     pub external: bool,
     pub namespace: Nsenv,
-    pub doc_comment: Option<String>,
+    pub doc_comment: Option<DocComment>,
     pub static_: bool,
 }
 
@@ -401,7 +402,7 @@ pub struct Class_<Ex, Fb, En, Hi> {
     pub file_attributes: Vec<FileAttribute<Ex, Fb, En, Hi>>,
     pub enum_: Option<Enum_>,
     pub pu_enums: Vec<PuEnum<Ex, Fb, En, Hi>>,
-    pub doc_comment: Option<String>,
+    pub doc_comment: Option<DocComment>,
 }
 
 #[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
@@ -444,7 +445,7 @@ pub struct ClassConst<Ex, Fb, En, Hi> {
     pub type_: Option<Hint>,
     pub id: Sid,
     pub expr: Option<Expr<Ex, Fb, En, Hi>>,
-    pub doc_comment: Option<String>,
+    pub doc_comment: Option<DocComment>,
 }
 
 #[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
@@ -463,7 +464,7 @@ pub struct ClassTypeconst<Ex, Fb, En, Hi> {
     pub type_: Option<Hint>,
     pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
     pub span: Pos,
-    pub doc_comment: Option<String>,
+    pub doc_comment: Option<DocComment>,
 }
 
 #[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
@@ -481,7 +482,7 @@ pub struct ClassVar<Ex, Fb, En, Hi> {
     pub id: Sid,
     pub expr: Option<Expr<Ex, Fb, En, Hi>>,
     pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
-    pub doc_comment: Option<String>,
+    pub doc_comment: Option<DocComment>,
     pub is_promoted_variadic: bool,
     pub is_static: bool,
     pub span: Pos,
@@ -505,7 +506,7 @@ pub struct Method_<Ex, Fb, En, Hi> {
     pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
     pub ret: TypeHint<Hi>,
     pub external: bool,
-    pub doc_comment: Option<String>,
+    pub doc_comment: Option<DocComment>,
 }
 
 #[derive(Clone, Debug, OcamlRep, Ocamlvalue)]

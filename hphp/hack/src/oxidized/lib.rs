@@ -7,6 +7,7 @@ mod manual;
 
 pub use manual::aast_defs_impl;
 pub use manual::aast_impl;
+pub use manual::doc_comment;
 pub use manual::file_info_impl;
 pub use manual::file_pos_large;
 pub use manual::file_pos_small;

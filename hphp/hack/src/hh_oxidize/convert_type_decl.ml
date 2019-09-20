@@ -52,6 +52,22 @@ let renamed_types = [(("typing_reason", "TypingReason"), "Reason")]
    alias in Rust. *)
 let tuple_aliases = [("ast_defs", "Pstring")]
 
+let override_field_type =
+  SMap.of_list
+    [
+      ("Fun_", SMap.of_list [("doc_comment", "Option<DocComment>")]);
+      ("Method_", SMap.of_list [("doc_comment", "Option<DocComment>")]);
+      ("Class_", SMap.of_list [("doc_comment", "Option<DocComment>")]);
+      ("ClassConst", SMap.of_list [("doc_comment", "Option<DocComment>")]);
+      ("ClassTypeconst", SMap.of_list [("doc_comment", "Option<DocComment>")]);
+      ("ClassVar", SMap.of_list [("doc_comment", "Option<DocComment>")]);
+    ]
+
+let get_overrides name =
+  match SMap.find_opt name override_field_type with
+  | None -> SMap.empty
+  | Some x -> x
+
 let blacklisted ty_name =
   let ty = (curr_module_name (), ty_name) in
   List.mem blacklisted_types ty ~equal:( = )
@@ -73,7 +89,7 @@ let type_params params =
   else
     params |> map_and_concat ~f:type_param ~sep:", " |> sprintf "<%s>"
 
-let record_label_declaration ?(pub = false) ?(prefix = "") ld =
+let record_label_declaration ?(pub = false) ?(prefix = "") overrides ld =
   let pub =
     if pub then
       "pub "
@@ -83,10 +99,14 @@ let record_label_declaration ?(pub = false) ?(prefix = "") ld =
   let name =
     ld.pld_name.txt |> String.chop_prefix_exn ~prefix |> convert_field_name
   in
-  let ty = core_type ld.pld_type in
+  let ty =
+    match SMap.find_opt name overrides with
+    | None -> core_type ld.pld_type
+    | Some x -> x
+  in
   sprintf "%s%s: %s,\n" pub name ty
 
-let record_declaration ?(pub = false) labels =
+let record_declaration ?(pub = false) overrides labels =
   let prefix =
     labels |> List.map ~f:(fun ld -> ld.pld_name.txt) |> common_prefix_of_list
   in
@@ -100,12 +120,12 @@ let record_declaration ?(pub = false) labels =
     String.sub prefix 0 !idx
   in
   labels
-  |> map_and_concat ~f:(record_label_declaration ~pub ~prefix)
+  |> map_and_concat ~f:(record_label_declaration ~pub ~prefix overrides)
   |> sprintf "{\n%s}"
 
 let constructor_arguments = function
   | Pcstr_tuple types -> tuple types
-  | Pcstr_record labels -> record_declaration labels
+  | Pcstr_record labels -> record_declaration SMap.empty labels
 
 let variant_constructor_declaration cd =
   let name = convert_type_name cd.pcd_name.txt in
@@ -233,7 +253,7 @@ let type_declaration name td =
     sprintf "%s enum %s%s {\n%s}" (attrs_and_vis derives) name tparams ctors
   (* Record types. *)
   | (Ptype_record labels, None) ->
-    let labels = record_declaration labels ~pub:true in
+    let labels = record_declaration (get_overrides name) labels ~pub:true in
     sprintf "%s struct %s%s %s" (attrs_and_vis []) name tparams labels
   (* `type foo`; an abstract type with no specified implementation. This doesn't
      mean much outside of an .mli, I don't think. *)

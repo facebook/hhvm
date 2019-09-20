@@ -9,7 +9,7 @@ use oxidized::{
     namespace_env::Env as NamespaceEnv, pos::Pos, prim_defs::Comment, s_map,
 };
 
-use naming_special_names_rust::special_idents;
+use naming_special_names_rust::{special_functions, special_idents};
 
 use parser_rust::{
     indexed_source_text::IndexedSourceText, lexable_token::LexablePositionedToken,
@@ -60,9 +60,11 @@ pub enum LiftedAwaitKind {
     LiftedFromConcurrent,
 }
 
+type LiftedAwaitExprs = Vec<(Option<aast!(Lid)>, aast!(Expr<,>))>;
+
 #[derive(Debug, Clone)]
 pub struct LiftedAwaits {
-    pub awaits: Vec<(Option<aast::Id>, aast!(Expr<,>))>,
+    pub awaits: LiftedAwaitExprs,
     lift_kind: LiftedAwaitKind,
 }
 
@@ -2083,10 +2085,35 @@ where
         }
     }
 
-    fn process_lifted_awaits(
-        mut awaits: LiftedAwaits,
-        env: &Env,
-    ) -> ret!(Vec<(Option<aast!(Lid)>, aast!(Expr<,>))>) {
+    fn with_new_nonconcurrent_scrope<F, R>(f: F, env: &mut Env) -> R
+    where
+        F: FnOnce(&mut Env) -> R,
+    {
+        let saved_lifted_awaits = env.lifted_awaits.take();
+        let result = f(env);
+        env.lifted_awaits = saved_lifted_awaits;
+        result
+    }
+
+    fn with_new_concurrent_scrope<F, R>(f: F, env: &mut Env) -> ret!((LiftedAwaitExprs, R))
+    where
+        F: FnOnce(&mut Env) -> ret!(R),
+    {
+        let saved_lifted_awaits = env.lifted_awaits.replace(LiftedAwaits {
+            awaits: vec![],
+            lift_kind: LiftedAwaitKind::LiftedFromConcurrent,
+        });
+        let result = f(env);
+        let lifted_awaits = mem::replace(&mut env.lifted_awaits, saved_lifted_awaits);
+        let result = result?;
+        let awaits = match lifted_awaits {
+            Some(la) => Self::process_lifted_awaits(la, env)?,
+            None => Self::failwith("lifted awaits should not be None")?,
+        };
+        Ok((awaits, result))
+    }
+
+    fn process_lifted_awaits(mut awaits: LiftedAwaits, env: &Env) -> ret!(LiftedAwaitExprs) {
         for await_ in awaits.awaits.iter() {
             if &(await_.1).0 == env.pos_none() {
                 return Self::failwith("none pos in lifted awaits");
@@ -2506,7 +2533,69 @@ where
                     .map_or(S_::Continue, S_::TempContinue);
                 Ok(S::new(pos, ctn))
             }
-            ConcurrentStatement(c) => not_impl!(),
+            ConcurrentStatement(c) => {
+                let (lifted_awaits, S(stmt_pos, stmt)) = Self::with_new_concurrent_scrope(
+                    |e: &mut Env| Self::p_stmt(&c.concurrent_statement, e),
+                    env,
+                )?;
+                let stmt = match *stmt {
+                    S_::Block(stmts) => {
+                        use aast::{Expr as E, Expr_ as E_};
+                        use ast_defs::Bop::Eq;
+                        /* Reuse tmp vars from lifted_awaits, this is safe because there will
+                         * always be more awaits with tmp vars than statements with assignments */
+                        let mut tmp_vars = lifted_awaits
+                            .iter()
+                            .filter_map(|lifted_await| lifted_await.0.as_ref().map(|x| &x.1));
+                        let mut body_stmts = vec![];
+                        let mut assign_stmts = vec![];
+                        for n in stmts.into_iter() {
+                            if !n.is_assign_expr() {
+                                body_stmts.push(n);
+                                continue;
+                            }
+
+                            if let Some(tv) = tmp_vars.next() {
+                                let S(p1, s_) = n;
+                                if let S_::Expr(E(p2, e_)) = *s_ {
+                                    if let E_::Binop(Eq(op), e1, e2) = *e_ {
+                                        let tmp_n = E::mk_lvar(&e2.0, &(tv.1));
+                                        if tmp_n.lvar_name() != e2.lvar_name() {
+                                            let new_n = S::new(
+                                                p1.clone(),
+                                                S_::Expr(E::new(
+                                                    p2.clone(),
+                                                    E_::Binop(Eq(None), tmp_n.clone(), e2.clone()),
+                                                )),
+                                            );
+                                            body_stmts.push(new_n);
+                                        }
+                                        let assign_stmt = S::new(
+                                            p1,
+                                            S_::Expr(E::new(p2, E_::Binop(Eq(op), e1, tmp_n))),
+                                        );
+                                        assign_stmts.push(assign_stmt);
+                                        continue;
+                                    }
+                                }
+
+                                Self::failwith("Expect assignment stmt")?;
+                            } else {
+                                Self::raise_parsing_error_pos(
+                                    &stmt_pos,
+                                    env,
+                                    &syntax_error::statement_without_await_in_concurrent_block,
+                                );
+                                body_stmts.push(n)
+                            }
+                        }
+                        body_stmts.append(&mut assign_stmts);
+                        S::new(stmt_pos, S_::Block(body_stmts))
+                    }
+                    _ => Self::failwith("Unexpected concurrent stmt structure")?,
+                };
+                Ok(S::new(pos, S_::Awaitall((lifted_awaits, vec![stmt]))))
+            }
             MarkupSection(_) => Self::p_markup(node, env),
             _ => Self::missing_syntax(
                 Some(S::new(Pos::make_none(), S_::Noop)),
@@ -2880,9 +2969,8 @@ where
                 let function_type_parameter_list = &child.function_type_parameter_list;
                 let function_parameter_list = &child.function_parameter_list;
                 let function_type = &child.function_type;
-                // TODO: use Naming_special_names
-                let is_autoload =
-                    Self::text_str(function_name, env).eq_ignore_ascii_case("__autoload");
+                let is_autoload = Self::text_str(function_name, env)
+                    .eq_ignore_ascii_case(special_functions::AUTOLOAD);
                 if function_name.value.is_missing() {
                     Self::raise_parsing_error(node, env, &syntax_error::empty_method_name);
                 }
@@ -2980,41 +3068,43 @@ where
 
     fn p_function_body(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Block<,>) {
         let mk_noop_result = || Ok(vec![Self::mk_noop()]);
-        // TODO: with_new_nonconcurrent_scrope
-        match &node.syntax {
-            Missing => Ok(vec![]),
-            CompoundStatement(c) => {
-                let compound_statements = &c.compound_statements.syntax;
-                let compound_right_brace = &c.compound_right_brace.syntax;
-                match (compound_statements, compound_right_brace) {
-                    (Missing, Token(_)) => mk_noop_result(),
-                    (SyntaxList(t), _) if t.len() == 1 && t[0].is_yield() => {
-                        env.saw_yield = true;
-                        mk_noop_result()
-                    }
-                    _ => {
-                        if !env.top_level_statements
-                            && (env.file_mode() == file_info::Mode::Mdecl && !env.codegen()
-                                || env.quick_mode)
-                        {
+        let f = |e: &mut Env| -> ret_aast!(Block<,>) {
+            match &node.syntax {
+                Missing => Ok(vec![]),
+                CompoundStatement(c) => {
+                    let compound_statements = &c.compound_statements.syntax;
+                    let compound_right_brace = &c.compound_right_brace.syntax;
+                    match (compound_statements, compound_right_brace) {
+                        (Missing, Token(_)) => mk_noop_result(),
+                        (SyntaxList(t), _) if t.len() == 1 && t[0].is_yield() => {
+                            e.saw_yield = true;
                             mk_noop_result()
-                        } else {
-                            Self::p_block(false /*remove noop*/, node, env)
+                        }
+                        _ => {
+                            if !e.top_level_statements
+                                && (e.file_mode() == file_info::Mode::Mdecl && !e.codegen()
+                                    || e.quick_mode)
+                            {
+                                mk_noop_result()
+                            } else {
+                                Self::p_block(false /*remove noop*/, node, e)
+                            }
                         }
                     }
                 }
+                _ => {
+                    let f = |e: &mut Env| {
+                        let expr = Self::p_expr(node, e)?;
+                        Ok(aast::Stmt::new(
+                            expr.0.clone(),
+                            aast::Stmt_::Return(Some(expr)),
+                        ))
+                    };
+                    Ok(vec![Self::lift_awaits_in_statement(f, node, e)?])
+                }
             }
-            _ => {
-                let f = |e: &mut Env| {
-                    let expr = Self::p_expr(node, e)?;
-                    Ok(aast::Stmt::new(
-                        expr.0.clone(),
-                        aast::Stmt_::Return(Some(expr)),
-                    ))
-                };
-                Ok(vec![Self::lift_awaits_in_statement(f, node, env)?])
-            }
-        }
+        };
+        Self::with_new_nonconcurrent_scrope(f, env)
     }
 
     fn mk_suspension_kind(

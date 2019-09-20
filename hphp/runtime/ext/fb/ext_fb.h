@@ -28,18 +28,18 @@ extern const int64_t k_FB_SERIALIZE_HACK_ARRAYS;
 Variant HHVM_FUNCTION(fb_serialize, const Variant& thing, int64_t options = 0);
 Variant HHVM_FUNCTION(fb_unserialize,
                       const Variant& thing,
-                      VRefParam success,
+                      bool& success,
                       int64_t options = 0);
 Variant HHVM_FUNCTION(fb_compact_serialize, const Variant& thing);
 Variant HHVM_FUNCTION(fb_compact_unserialize,
-                      const Variant& thing, VRefParam success,
-                      VRefParam errcode = uninit_variant);
+                      const Variant& thing, bool& success,
+                      Variant& errcode);
 bool HHVM_FUNCTION(fb_intercept, const String& name, const Variant& handler,
                    const Variant& data = uninit_variant);
 bool HHVM_FUNCTION(fb_intercept2, const String& name, const Variant& handler);
 bool HHVM_FUNCTION(fb_rename_function, const String& orig_func_name,
                           const String& new_func_name);
-bool HHVM_FUNCTION(fb_utf8ize, VRefParam input);
+bool HHVM_FUNCTION(fb_utf8ize, Variant& input);
 int64_t HHVM_FUNCTION(fb_utf8_strlen_deprecated, const String& input);
 int64_t HHVM_FUNCTION(fb_utf8_strlen, const String& input);
 String HHVM_FUNCTION(fb_utf8_substr, const String& str,
@@ -63,12 +63,12 @@ int64_t HHVM_FUNCTION(HH_int_mul_add_overflow,
 
 Variant fb_unserialize(const char* str,
                        int len,
-                       VRefParam success,
+                       bool& success,
                        int64_t options);
 String fb_compact_serialize(const Variant& thing);
 Variant fb_compact_unserialize(const char* str, int len,
-                               VRefParam success,
-                               VRefParam errcode = uninit_variant);
+                               bool& success,
+                               Variant& errcode);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

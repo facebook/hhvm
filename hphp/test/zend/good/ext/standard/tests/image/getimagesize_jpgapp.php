@@ -13,7 +13,7 @@ $arr['this'] = "will";
 $arr['all'] = "be destroyed!";
 $arr['APP1'] = "and this too";
 
-getimagesize( dirname(__FILE__)."/testAPP.jpg", &$arr);
+getimagesize(dirname(__FILE__)."/testAPP.jpg", inout $arr);
 
 foreach ($arr as $key => $value) {
     echo "$key - length: ". strlen($value) ."; md5: " . md5($value) .  "\n" ;

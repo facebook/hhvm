@@ -19,7 +19,7 @@ function roundtrip($input) {
   $ret = null;
   $out = fb_unserialize(
     fb_serialize($input, FB_SERIALIZE_VARRAY_DARRAY),
-    &$ret,
+    inout $ret,
     FB_SERIALIZE_VARRAY_DARRAY,
   );
   invariant($ret, 'Failed to unserialize: %s', var_export($input, true));

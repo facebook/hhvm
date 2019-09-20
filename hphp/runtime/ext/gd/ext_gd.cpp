@@ -1656,30 +1656,18 @@ gdImagePtr get_valid_image_resource(const Resource& image) {
   return img_res->get();
 }
 
-Variant getImageSize(const req::ptr<File>& stream, VRefParam imageinfo) {
+Variant getImageSize(const req::ptr<File>& stream, Array& imageinfo) {
   int itype = 0;
   struct gfxinfo *result = nullptr;
-  auto imageInfoPtr = imageinfo.getVariantOrNull();
-  if (imageInfoPtr) {
-    *imageInfoPtr = Array::Create();
-  }
 
+  imageinfo = Array::Create();
   itype = php_getimagetype(stream);
   switch( itype) {
   case IMAGE_FILETYPE_GIF:
     result = php_handle_gif(stream);
     break;
   case IMAGE_FILETYPE_JPEG:
-    {
-      Array infoArr;
-      if (imageInfoPtr) {
-        infoArr = Array::Create();
-      }
-      result = php_handle_jpeg(stream, infoArr);
-      if (imageInfoPtr) {
-        *imageInfoPtr = infoArr;
-      }
-    }
+    result = php_handle_jpeg(stream, imageinfo);
     break;
   case IMAGE_FILETYPE_PNG:
     result = php_handle_png(stream);
@@ -1750,7 +1738,7 @@ Variant getImageSize(const req::ptr<File>& stream, VRefParam imageinfo) {
 }
 
 Variant HHVM_FUNCTION(getimagesize, const String& filename,
-                      VRefParam imageinfo /*=null */) {
+                      Array& imageinfo) {
   if (auto stream = File::Open(filename, "rb")) {
     return getImageSize(stream, imageinfo);
   }
@@ -1758,7 +1746,7 @@ Variant HHVM_FUNCTION(getimagesize, const String& filename,
 }
 
 Variant HHVM_FUNCTION(getimagesizefromstring, const String& imagedata,
-                      VRefParam imageinfo /*=null */) {
+                      Array& imageinfo) {
   String data = "data://text/plain;base64,";
   data += StringUtil::Base64Encode(imagedata);
   if (auto stream = File::Open(data, "r")) {
@@ -8172,9 +8160,9 @@ Variant HHVM_FUNCTION(exif_read_data,
 }
 
 Variant HHVM_FUNCTION(exif_thumbnail, const String& filename,
-                         VRefParam width /* = null */,
-                         VRefParam height /* = null */,
-                         VRefParam imagetype /* = null */) {
+                         int64_t& width,
+                         int64_t& height,
+                         int64_t& imagetype) {
   image_info_type ImageInfo;
 
   memset(&ImageInfo, 0, sizeof(ImageInfo));
@@ -8193,9 +8181,9 @@ Variant HHVM_FUNCTION(exif_thumbnail, const String& filename,
   if (!ImageInfo.Thumbnail.width || !ImageInfo.Thumbnail.height) {
     exif_scan_thumbnail(&ImageInfo);
   }
-  width.assignIfRef((int64_t)ImageInfo.Thumbnail.width);
-  height.assignIfRef((int64_t)ImageInfo.Thumbnail.height);
-  imagetype.assignIfRef(ImageInfo.Thumbnail.filetype);
+  width = ImageInfo.Thumbnail.width;
+  height = ImageInfo.Thumbnail.height;
+  imagetype = ImageInfo.Thumbnail.filetype;
   String str(ImageInfo.Thumbnail.data, ImageInfo.Thumbnail.size, CopyString);
   exif_discard_imageinfo(&ImageInfo);
   return str;

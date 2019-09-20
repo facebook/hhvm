@@ -19,7 +19,7 @@ function fb_serde($val) {
 
   print "* fb_unserialize result:\n";
   $ret = false;
-  $unser = fb_unserialize($ser, &$ret);
+  $unser = fb_unserialize($ser, inout $ret);
   var_dump($ret, $unser);
 }
 

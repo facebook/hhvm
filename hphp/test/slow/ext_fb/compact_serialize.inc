@@ -48,7 +48,8 @@ function fb_cs_test_impl($v) {
   var_dump((bool)($ss_ ?? false));
   /* check high bit of first character always set */
   var_dump(preg_match("/^[\x80-\xff]/", $ss_));
-  $compact_unserialize_result = fb_compact_unserialize($s_, &$ret);
+  $err = null;
+  $compact_unserialize_result = fb_compact_unserialize($s_, inout $ret, inout $err);
   printf(
     "fb_compact_unserialize(fb_compact_serialize(%s)) === %s: %s\n"
     ."gettype(fb_compact_unserialize(fb_compact_serialize(%s))) === %s\n"
@@ -206,12 +207,13 @@ function fb_cs_entrypoint(): void {
   // C++ code in serialized strings)
   $s = "\xfe\x01\x02\x03\xfc";  // VECTOR, 1, 2, 3, STOP
   $ret = null;
-  var_dump(fb_compact_unserialize($s, &$ret));
+  $err = null;
+  var_dump(fb_compact_unserialize($s, inout $ret, inout $err));
 
   // Demonstrate vector deserialize issue.
   // This should be illegal and result in an error.
   $s = "\xfe\x01\xfd\xfd\x03\xfc";  // VECTOR, 1, SKIP, SKIP, 2, STOP
   $ret = null;
-  var_dump(fb_compact_unserialize($s, &$ret));
+  var_dump(fb_compact_unserialize($s, inout $ret, inout $err));
   var_dump($ret);
 }

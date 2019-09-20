@@ -35,10 +35,11 @@ $imagetype_filenames = array(
 
 echo "*** Testing getimagesize() : basic functionality ***\n";
 
+$info = null;
 // loop through each element of the array for imagetype
 foreach($imagetype_filenames as $key => $filename) {
       echo "\n-- $key ($filename) --\n";
-      var_dump( getimagesize(dirname(__FILE__)."/$filename", &$info) );
+      var_dump( getimagesize(dirname(__FILE__)."/$filename", inout $info) );
       var_dump( $info );
 };
 echo "===DONE===\n";

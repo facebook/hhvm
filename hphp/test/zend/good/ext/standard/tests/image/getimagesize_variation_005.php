@@ -6,7 +6,8 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing getimagesize() : basic functionality ***\n";
 
-var_dump( getimagesize(dirname(__FILE__)."/test13pix.swf", &$info) );
+$info = null;
+var_dump( getimagesize(dirname(__FILE__)."/test13pix.swf", inout $info) );
 var_dump( $info );
 echo "===DONE===\n";
 }

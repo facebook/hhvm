@@ -22,7 +22,7 @@ function fb_serde($x) {
 
   print "* fb_unserialize result:\n";
   $ret = false;
-  $unser = fb_unserialize($ser, &$ret, FB_SERIALIZE_HACK_ARRAYS);
+  $unser = fb_unserialize($ser, inout $ret, FB_SERIALIZE_HACK_ARRAYS);
   if ($ret) {
     var_dump($unser);
   }

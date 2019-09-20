@@ -19,14 +19,16 @@ function gd_info(): darray;
  */
 <<__Native>>
 function getimagesize(string $filename,
-                      mixed &$imageinfo = null): mixed;
+                      <<__OutOnly("KindOfArray")>>
+                      inout mixed $imageinfo): mixed;
 
 /* Identical to getimagesize() except that getimagesizefromstring() accepts
  * a string instead of a file name as the first parameter.
  */
 <<__Native>>
 function getimagesizefromstring(string $filename,
-                      mixed &$imageinfo = null): mixed;
+                      <<__OutOnly("KindOfArray")>>
+                      inout mixed $imageinfo): mixed;
 
 /* Returns the extension for the given IMAGETYPE_XXX constant.
  */

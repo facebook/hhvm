@@ -6,7 +6,8 @@
  */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing getimagesize() : xbm format ***\n";
-var_dump(getimagesize(dirname(__FILE__) . "/75x50.xbm", &$arr));
+$arr = null;
+var_dump(getimagesize(dirname(__FILE__) . "/75x50.xbm", inout $arr));
 var_dump($arr);
 
 echo "===DONE===\n";

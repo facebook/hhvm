@@ -1,2 +1,2 @@
 
-Warning: php_imagepolygon/2595: failed to allocate 18446744073709551608 bytes in %s/imagefilledpolygon_negative.php on line 4
+Warning: php_imagepolygon/%d: failed to allocate 18446744073709551608 bytes in %s/imagefilledpolygon_negative.php on line 4

@@ -6,7 +6,8 @@
  */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing getimagesize() : wbmp format ***\n";
-var_dump(getimagesize(dirname(__FILE__) . "/75x50.wbmp", &$arr));
+$arr = null;
+var_dump(getimagesize(dirname(__FILE__) . "/75x50.wbmp", inout $arr));
 var_dump($arr);
 
 echo "===DONE===\n";

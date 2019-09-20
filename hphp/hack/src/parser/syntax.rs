@@ -216,6 +216,14 @@ where
         self.kind() == SyntaxKind::SafeMemberSelectionExpression
     }
 
+    pub fn is_object_creation_expression(&self) -> bool {
+        self.kind() == SyntaxKind::ObjectCreationExpression
+    }
+
+    pub fn is_compound_statement(&self) -> bool {
+        self.kind() == SyntaxKind::CompoundStatement
+    }
+
     pub fn syntax_node_to_list<'a>(&'a self) -> impl DoubleEndedIterator<Item = &'a Self> {
         use std::iter::{empty, once};
         match &self.syntax {

@@ -337,6 +337,23 @@ let get_files_in_path ~args path =
                 "parser_reasonable_nested_array.php"
         && (not @@ String_utils.string_ends_with f "bug64555.php")
         && (not @@ String_utils.string_ends_with f "bug64660.php")
+        && (not @@ String_utils.string_ends_with f "www_repro_2.php")
+        && not
+           @@ String_utils.string_ends_with
+                f
+                "test/quick/parser_reasonable_add_exp.php"
+        && not
+           @@ String_utils.string_ends_with
+                f
+                "test/quick/parser_reasonable_concat_exp.php"
+        && not
+           @@ String_utils.string_ends_with
+                f
+                "test/quick/parser_reasonable_nested_array.php"
+        && not
+           @@ String_utils.string_ends_with
+                f
+                "runs_out_of_retries_in_line_splitter.php"
       | _ -> true)
     files
 
@@ -521,6 +538,8 @@ module LowererTest_ = struct
   let test args ~ocaml_env ~rust_env file contents =
     let source_text = SourceText.make file contents in
     let path = Relative_path.to_absolute file in
+    Printf.printf "Start %s\n" path;
+    flush stdout;
     let ocaml_tree = build_ocaml_tree ocaml_env file source_text in
     let rust_tree = build_rust_tree rust_env file source_text in
     (match (ocaml_tree, rust_tree) with

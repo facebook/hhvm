@@ -343,11 +343,12 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     {
       auto const extra = inst->extra<Call>();
       // Remove tracked state for the slots for args and the actrec.
-      for (auto i = uint32_t{0}; i < kNumActRecCells + extra->numParams; ++i) {
+      uint32_t numCells = kNumActRecCells + extra->numParams;
+      for (auto i = uint32_t{0}; i < numCells; ++i) {
         setValue(stk(extra->spOffset + i), nullptr);
       }
       // Mark out parameter locations as being at least InitCell
-      auto const base = extra->spOffset + kNumActRecCells + extra->numParams;
+      auto const base = extra->spOffset + numCells;
       for (auto i = uint32_t{0}; i < extra->numOut; ++i) {
         auto const ty = extra->callee && extra->callee->takesInOutParams()
           ? irgen::callOutType(extra->callee, i)
@@ -355,14 +356,9 @@ void FrameStateMgr::update(const IRInstruction* inst) {
         setType(stk(base + i), ty);
       }
       trackCall();
-      // The return value is known to be at least a Gen.
-      setType(
-        stk(extra->spOffset + kNumActRecCells + extra->numParams - 1),
-        extra->numOut ? TInitCell : TGen
-      );
       // We consider popping an ActRec and args to be synced to memory.
       assertx(cur().bcSPOff == inst->marker().spOff());
-      cur().bcSPOff -= extra->numParams + kNumActRecCells;
+      cur().bcSPOff -= numCells;
     }
     break;
 
@@ -380,10 +376,6 @@ void FrameStateMgr::update(const IRInstruction* inst) {
         setType(stk(base + i), TInitCell);
       }
       trackCall();
-      setType(
-        stk(extra->spOffset + numCells - 1),
-        extra->numOut ? TInitCell : TGen
-      );
       // A CallUnpack pops the ActRec, actual args, and an array arg.
       assertx(cur().bcSPOff == inst->marker().spOff());
       cur().bcSPOff -= numCells;

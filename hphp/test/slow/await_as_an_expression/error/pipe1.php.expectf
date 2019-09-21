@@ -1,2 +1,2 @@
 
-Fatal error: Await cannot be used as an expression in this location because it's conditionally executed. in %s/pipe1.php on line 5
+Fatal error: Await cannot be used as an expression right of a pipe operator. in %s/pipe1.php on line 5

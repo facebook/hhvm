@@ -2988,6 +2988,16 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
         | DecoratedExpression { decorated_expression_decorator = operator; _ }
           when unop_allows_await operator ->
           go tail n
+        (* Special case the pipe operator error message *)
+        | BinaryExpression
+            { binary_right_operand = r; binary_operator = op; _ }
+          when phys_equal node r
+               && token_kind op = Some TokenKind.BarGreaterThan ->
+          [
+            make_error_from_node
+              await_node
+              SyntaxError.invalid_await_position_pipe;
+          ]
         (*
        left or right operand of binary expressions are considered legal locations
        if operator is not short-circuiting and containing expression

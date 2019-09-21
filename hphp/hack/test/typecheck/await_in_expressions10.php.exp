@@ -1,2 +1,2 @@
 File "await_in_expressions10.php", line 4, characters 16-22:
-Await cannot be used as an expression in this location because it's conditionally executed. (Parsing[1002])
+Await cannot be used as an expression right of a pipe operator. (Parsing[1002])

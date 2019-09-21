@@ -1178,19 +1178,11 @@ let unset_cast pos =
     pos
     "Don't use (unset), just assign null!"
 
+(* Unused parameter cls_opt *)
 let object_cast pos cls_opt =
-  let msg1 = "Object casts are unsupported." in
-  let msg2 =
-    match cls_opt with
-    | Some c ->
-      " Try 'if ($var instanceof "
-      ^ c
-      ^ ")' or 'invariant($var instanceof "
-      ^ c
-      ^ ", ...)'."
-    | None -> ""
-  in
-  add (Naming.err_code Naming.ObjectCast) pos (msg1 ^ msg2)
+  add (Naming.err_code Naming.ObjectCast)
+    pos
+    "Object casts are unsupported. Refactor code to use KeyedContainer<_, _> instead."
 
 let this_hint_outside_class pos =
   add

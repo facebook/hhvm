@@ -46,7 +46,7 @@ class WatchmanInstance {
       0 => array('file', '/dev/null', 'r'),
       1 => array('file', $this->logfile, 'a'),
       2 => array('file', $this->logfile, 'a'),
-    ), &$pipes, $this->repo_root);
+    ), inout $pipes, $this->repo_root);
     if (!$this->proc) {
       throw new Exception("Failed to spawn $cmd");
     }
@@ -59,7 +59,8 @@ class WatchmanInstance {
   }
   public function dumpLog() {
     print("Dumping log:\n");
-    system("cat $this->logfile");
+    $return_var = -1;
+    system("cat $this->logfile", inout $return_var);
     print($this->run_details."\n");
   }
   private function openSock() {
@@ -69,7 +70,9 @@ class WatchmanInstance {
       if (!file_exists($sockname)) {
         usleep(30000);
       }
-      $this->sock = @fsockopen('unix://' . $sockname);
+      $errno = null;
+      $errstr = null;
+      $this->sock = @fsockopen('unix://' . $sockname, -1, inout $errno, inout $errstr);
       if ($this->sock) {
         break;
       }

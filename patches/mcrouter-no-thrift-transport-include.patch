@@ -1,0 +1,11 @@
+Index: hhvm-nightly-2019.09.20/third-party/mcrouter/mcrouter/lib/network/gen/MemcacheRouterInfo.h
+===================================================================
+--- hhvm-nightly-2019.09.20.orig/third-party/mcrouter/mcrouter/lib/network/gen/MemcacheRouterInfo.h
++++ hhvm-nightly-2019.09.20/third-party/mcrouter/mcrouter/lib/network/gen/MemcacheRouterInfo.h
+@@ -105,5 +105,3 @@ struct MemcacheRouterInfo {
+ };
+ } // namespace memcache
+ } // namespace facebook
+-
+-#include "mcrouter/lib/network/gen/MemcacheThriftTransport.h"
+\ No newline at end of file

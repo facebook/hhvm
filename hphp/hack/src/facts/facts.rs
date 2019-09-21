@@ -16,6 +16,7 @@ use serde_json::json;
 #[serde(rename_all = "camelCase")]
 pub enum TypeKind {
     Class,
+    Record,
     Interface,
     Enum,
     Trait,

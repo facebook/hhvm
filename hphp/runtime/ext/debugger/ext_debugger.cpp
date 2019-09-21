@@ -153,7 +153,7 @@ Array HHVM_FUNCTION(debugger_get_info) {
   if (!proxy) return ret;
   Variant address;
   Variant port;
-  if (proxy->getClientConnectionInfo(ref(address), ref(port))) {
+  if (proxy->getClientConnectionInfo(address, port)) {
     ret.set(s_clientIP, address);
     ret.set(s_clientPort, port);
   }

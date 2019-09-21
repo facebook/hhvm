@@ -119,6 +119,7 @@ module Env : sig
   val global_const : genv * lenv -> Ast_defs.id -> Ast_defs.id
 
   val type_name :
+    ?elaborate_kind:NS.elaborate_kind ->
     genv * lenv ->
     Ast_defs.id ->
     allow_typedef:bool ->
@@ -230,6 +231,7 @@ end = struct
       | `func -> Typing_deps.Dep.Fun name
       | `cls -> Typing_deps.Dep.Class name
       | `const -> Typing_deps.Dep.GConst name
+      | `record -> Typing_deps.Dep.GConst name
     end
     |> Typing_deps.add_idep genv.droot;
     Errors.unbound_name pos name kind
@@ -497,7 +499,12 @@ end = struct
     let fq_x = NS.elaborate_id genv.namespace NS.ElaborateConst x in
     get_name genv Naming_table.Consts.get_pos fq_x
 
-  let type_name (genv, _) x ~allow_typedef ~allow_generics =
+  let type_name
+      ?(elaborate_kind = NS.ElaborateClass)
+      (genv, _)
+      x
+      ~allow_typedef
+      ~allow_generics =
     let (p, name) = x in
     match SMap.find_opt name genv.type_params with
     | Some (reified, _) ->
@@ -511,7 +518,7 @@ end = struct
       x
     | None ->
       let ((pos, name) as x) =
-        NS.elaborate_id genv.namespace NS.ElaborateClass x
+        NS.elaborate_id genv.namespace elaborate_kind x
       in
       (match Naming_table.Types.get_pos name with
       | Some (_def_pos, Naming_table.TClass) ->
@@ -531,6 +538,7 @@ end = struct
         Errors.unexpected_typedef pos full_pos;
         (pos, name)
       | Some (_def_pos, Naming_table.TTypedef) -> (pos, name)
+      | Some (_def_pos, Naming_table.TRecordDef) -> (pos, name)
       | None ->
         handle_unbound_name genv GEnv.type_pos GEnv.type_canon_name x `cls)
 
@@ -2812,7 +2820,7 @@ module Make (GetLocals : GetLocals) = struct
       let l = List.map l (fun (e1, e2) -> (expr env e1, expr env e2)) in
       if (fst env).in_mode = FileInfo.Mstrict then
         Errors.dynamic_new_in_strict_mode p;
-      N.Record (make_class_id env (p, SN.Classes.cUnknown), is_array, l)
+      N.Record (make_record_id env (p, SN.Classes.cUnknown), is_array, l)
     | Aast.Efun (f, idl) ->
       let idl =
         List.fold_right idl ~init:[] ~f:(fun ((p, x) as id) acc ->
@@ -2963,6 +2971,16 @@ module Make (GetLocals : GetLocals) = struct
       | _ ->
         N.CI (Env.type_name env cid ~allow_typedef:false ~allow_generics:true)
     )
+
+  and make_record_id env ((p, _) as rdid) =
+    ( p,
+      N.CI
+        (Env.type_name
+           ~elaborate_kind:NS.ElaborateRecord
+           env
+           rdid
+           ~allow_typedef:false
+           ~allow_generics:true) )
 
   and casel env l = List.map l (case env)
 
@@ -3217,6 +3235,21 @@ module Make (GetLocals : GetLocals) = struct
     let methods = List.map nc.N.c_methods (meth_body genv) in
     { nc with N.c_methods = methods }
 
+  let record_def rd =
+    let env = Env.make_top_level_env () in
+    let attrs = user_attributes env rd.Aast.rd_user_attributes in
+    {
+      N.rd_name = rd.Aast.rd_name;
+      rd_final = rd.Aast.rd_final;
+      (* TODO: look at hint_ and see if the checks make sense for records. *)
+      rd_extends = rd.Aast.rd_extends;
+      rd_fields = rd.Aast.rd_fields;
+      rd_user_attributes = attrs;
+      rd_namespace = rd.Aast.rd_namespace;
+      rd_span = rd.Aast.rd_span;
+      rd_doc_comment = rd.Aast.rd_doc_comment;
+    }
+
   (**************************************************************************)
   (* Typedefs *)
   (**************************************************************************)
@@ -3291,6 +3324,7 @@ module Make (GetLocals : GetLocals) = struct
       | Aast.Stmt (_, Aast.Markup _) ->
         acc
       | Aast.Stmt s -> N.Stmt (stmt !top_level_env s) :: acc
+      | Aast.RecordDef rd -> N.RecordDef (record_def rd) :: acc
       | Aast.Typedef t -> N.Typedef (typedef t) :: acc
       | Aast.Constant cst -> N.Constant (global_const cst) :: acc
       | Aast.Namespace (_ns, aast) -> List.fold_left ~f:aux ~init:[] aast @ acc

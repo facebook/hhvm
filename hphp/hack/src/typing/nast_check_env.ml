@@ -89,6 +89,7 @@ let def_env x =
   | Fun f -> fun_env empty_env f
   | Class c -> class_env empty_env c
   | Typedef t -> typedef_env empty_env t
+  | RecordDef _
   | Constant _
   | Stmt _
   | Namespace _

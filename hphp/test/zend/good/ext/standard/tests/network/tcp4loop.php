@@ -5,7 +5,13 @@ function main_entry(): void {
     for ($i=0; $i<100; $i++) {
       $port = rand(10000, 65000);
       /* Setup socket server */
-      $server = @stream_socket_server("tcp://127.0.0.1:$port");
+      $errno = null;
+      $errstr = null;
+      $server = @stream_socket_server(
+        "tcp://127.0.0.1:$port",
+        inout $errno,
+        inout $errstr
+      );
       if ($server) {
         break;
       }
@@ -15,13 +21,14 @@ function main_entry(): void {
   	}
 
   	/* Connect to it */
-  	$client = stream_socket_client("tcp://127.0.0.1:$port");
+  	$client = stream_socket_client("tcp://127.0.0.1:$port", inout $errno, inout $errstr);
   	if (!$client) {
   		die('Unable to create AF_INET socket [client]');
   	}
 
   	/* Accept that connection */
-  	$socket = stream_socket_accept($server);
+    $peername = null;
+	$socket = stream_socket_accept($server, -1.0, inout $peername);
   	if (!$socket) {
   		die('Unable to accept connection');
   	}

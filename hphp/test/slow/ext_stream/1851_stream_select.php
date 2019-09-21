@@ -9,7 +9,12 @@ $read_streams = array($stream);
 $write_streams = array();
 $except = null;
 
-$result = stream_select(&$read_streams, &$write_streams, &$except, 0);
+$result = stream_select(
+  inout $read_streams,
+  inout $write_streams,
+  inout $except,
+  0,
+);
 
 var_dump($write_streams);
 

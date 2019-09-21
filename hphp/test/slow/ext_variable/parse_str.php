@@ -2,7 +2,8 @@
 function testme() {
   $data='a=1&b=2&c=3';
   echo 'parse_data(): ',$data,EOL;
-  parse_str($data, &$output);
+  $output = null;
+  parse_str($data, inout $output);
   if (isset($output['b'])) {
     echo 'isset b='.$output['b'],EOL;
   } else {
@@ -22,7 +23,8 @@ function main_parse_str() {
 $data='a=1&b=2&c=3';
 echo 'global scope',EOL;
 echo 'parse_data(): ',$data,EOL;
-parse_str($data, &$output);
+$output = null;
+parse_str($data, inout $output);
 if (isset($output['b'])) {
   echo 'isset b='.$output['b'],EOL;
 } else {

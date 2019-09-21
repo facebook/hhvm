@@ -12,7 +12,13 @@ echo "Open a server socket\n";
 for ($i=0; $i<100; $i++) {
   $port = rand(10000, 65000);
   /* Setup socket server */
-  $server = @stream_socket_server("tcp://127.0.0.1:$port");
+  $errno = null;
+  $errstr = null;
+  $server = @stream_socket_server(
+    "tcp://127.0.0.1:$port",
+    inout $errno,
+    inout $errstr
+  );
   if ($server) {
     break;
   }
@@ -25,18 +31,18 @@ $errstr = null;
 $timeout = 1.5;
 
 echo "\nCalling fsockopen() with all possible arguments:\n";
-$client = fsockopen($hostname, $port, &$errno, &$errstr, $timeout);
+$client = fsockopen($hostname, $port, inout $errno, inout $errstr, $timeout);
 var_dump($client);
 fclose($client);
 
 echo "\nCalling fsockopen() with mandatory arguments:\n";
-$second_client = fsockopen($hostname, $port);
+$second_client = fsockopen($hostname, $port, inout $errno, inout $errstr);
 var_dump($second_client);
 fclose($second_client);
 
 echo "\nCalling fsockopen() with address and port in same string:\n";
 $address = $hostname . ':' . $port;
-$third_client = fsockopen($address);
+$third_client = fsockopen($address, -1, inout $errno, inout $errstr);
 var_dump($third_client);
 fclose($third_client);
 

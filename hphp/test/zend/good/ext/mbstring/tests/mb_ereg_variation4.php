@@ -54,12 +54,13 @@ function main_entry(): void {
                               b'[[:xdigit:]]+'); /*13*/
 
   $iterator = 1;
+  $regs = null;
   foreach ($character_classes as $pattern) {
   	if (is_array(@$regs)) {
   		$regs = null;
   	}
   	echo "\n-- Iteration $iterator --\n";
-  	var_dump(mb_ereg($pattern, $string_mb, &$regs));
+  	var_dump(mb_ereg($pattern, $string_mb, inout $regs));
   	if ($regs) {
   		base64_encode_var_dump($regs);
   	}

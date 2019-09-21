@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<799befa728f17b6d95b38f72b995d659>>
+// @generated SignedSource<<7557d1eccb165d62f4c3b89c3e7cb2bc>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -96,16 +96,16 @@ pub type VariadicHint = Option<Hint>;
 pub enum Hint_ {
     Hoption(Hint),
     Hlike(Hint),
-    Hfun(
-        FuncReactive,
-        IsCoroutine,
-        Vec<Hint>,
-        Vec<Option<ast_defs::ParamKind>>,
-        Vec<Option<ParamMutability>>,
-        VariadicHint,
-        Hint,
-        MutableReturn,
-    ),
+    Hfun {
+        reactive_kind: FuncReactive,
+        is_coroutine: IsCoroutine,
+        param_tys: Vec<Hint>,
+        param_kinds: Vec<Option<ast_defs::ParamKind>>,
+        param_mutability: Vec<Option<ParamMutability>>,
+        variadic_ty: VariadicHint,
+        return_ty: Hint,
+        is_mutable_return: MutableReturn,
+    },
     Htuple(Vec<Hint>),
     Happly(Sid, Vec<Hint>),
     Hshape(NastShapeInfo),

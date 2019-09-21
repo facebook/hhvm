@@ -92,13 +92,13 @@ function strtok(string $str, $token = null);
 <<__PHPStdLib>>
 function str_getcsv(string $input, string $delimiter = ",", string $enclosure = "\"", string $escape = "\\"): array<?string>;
 <<__PHPStdLib>>
-function str_replace($search, $replace, $subject, &$count = null);
+function str_replace($search, $replace, $subject);
 <<__PHPStdLib>>
-function str_replace_with_count($search, $replace, $subject, &$count);
+function str_replace_with_count($search, $replace, $subject, inout $count);
 <<__PHPStdLib>>
-function str_ireplace($search, $replace, $subject, &$count = null);
+function str_ireplace($search, $replace, $subject);
 <<__PHPStdLib>>
-function str_ireplace_with_count($search, $replace, $subject, &$count);
+function str_ireplace_with_count($search, $replace, $subject, inout $count);
 <<__PHPStdLib, __Rx>>
 function substr_replace($str, $replacement, $start, $length = 0x7FFFFFFF);
 <<__PHPStdLib, __Rx>>
@@ -210,9 +210,9 @@ function str_word_count(string $str, int $format = 0, string $charlist = "");
 <<__PHPStdLib, __Rx>>
 function levenshtein(string $str1, string $str2, int $cost_ins = 1, int $cost_rep = 1, int $cost_del = 1);
 <<__PHPStdLib>>
-function similar_text(string $first, string $second, &$percent = null);
+function similar_text(string $first, string $second, inout $percent);
 <<__PHPStdLib, __Rx>>
 function soundex(string $str);
 <<__PHPStdLib, __Rx>>
 function metaphone(string $str, int $phones = 0);
-function parse_str(string $str, &$arr);
+function parse_str(string $str, inout $arr);

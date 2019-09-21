@@ -42,7 +42,6 @@ and class_kind =
   | Cinterface
   | Ctrait
   | Cenum
-  | Crecord
 
 and param_kind = Pinout
 
@@ -148,7 +147,6 @@ let string_of_class_kind = function
   | Cinterface -> "an interface"
   | Ctrait -> "a trait"
   | Cenum -> "an enum"
-  | Crecord -> "a record"
 
 let string_of_param_kind = function
   | Pinout -> "inout"

@@ -86,15 +86,15 @@ function dns_check_record($host, $type = null);
 <<__PHPStdLib>>
 function checkdnsrr(string $host, string $type = "MX");
 <<__PHPStdLib>>
-function dns_get_record(string $hostname, int $type = -1, &$authns = null, &$addtl = null);
+function dns_get_record(string $hostname, int $type, inout $authns, inout $addtl);
 <<__PHPStdLib>>
-function dns_get_mx($hostname, &$mxhosts, &$weights = null);
+function dns_get_mx($hostname, inout $mxhosts, inout $weights);
 <<__PHPStdLib>>
-function getmxrr(string $hostname, &$mxhosts, &$weight = null);
+function getmxrr(string $hostname, inout $mxhosts, inout $weight);
 <<__PHPStdLib>>
-function fsockopen(string $hostname, int $port = -1, &$errnum = null, &$errstr = null, float $timeout = 0.0);
+function fsockopen(string $hostname, int $port, inout $errnum, inout $errstr, float $timeout = 0.0);
 <<__PHPStdLib>>
-function pfsockopen(string $hostname, int $port = -1, &$errnum = null, &$errstr = null, float $timeout = 0.0);
+function pfsockopen(string $hostname, int $port, inout $errnum, inout $errstr, float $timeout = 0.0);
 <<__PHPStdLib>>
 function socket_get_status($stream);
 <<__PHPStdLib>>
@@ -110,9 +110,9 @@ function headers_list();
 <<__PHPStdLib>>
 function get_http_request_size();
 <<__PHPStdLib>>
-function headers_sent(&$file = null, &$line = null);
+function headers_sent();
 <<__PHPStdLib>>
-function headers_sent_with_file_line(&$file, &$line);
+function headers_sent_with_file_line(inout $file, inout $line);
 <<__PHPStdLib>>
 function header_register_callback($callback);
 <<__PHPStdLib>>

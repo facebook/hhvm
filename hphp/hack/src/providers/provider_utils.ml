@@ -24,7 +24,9 @@ let with_context ~(ctx : Provider_context.t) ~(f : unit -> 'a) : 'a =
            Relative_path.Map.iter
              ctx.Provider_context.entries
              ~f:(fun _path { Provider_context.ast; _ } ->
-               let (funs, classes, typedefs, consts) = Nast.get_defs ast in
+               let (funs, classes, record_defs, typedefs, consts) =
+                 Nast.get_defs ast
+               in
                (* Update the positions of the symbols present in the AST by redeclaring
         them. Note that this doesn't handle *removing* any entries from the
         naming table if they've disappeared since the last time we updated the
@@ -33,9 +35,15 @@ let with_context ~(ctx : Provider_context.t) ~(f : unit -> 'a) : 'a =
                NamingGlobal.remove_decls
                  ~funs:(get_names funs)
                  ~classes:(get_names classes)
+                 ~record_defs:(get_names record_defs)
                  ~typedefs:(get_names typedefs)
                  ~consts:(get_names consts);
-               NamingGlobal.make_env ~funs ~classes ~typedefs ~consts);
+               NamingGlobal.make_env
+                 ~funs
+                 ~classes
+                 ~record_defs
+                 ~typedefs
+                 ~consts);
 
            f ())
   in

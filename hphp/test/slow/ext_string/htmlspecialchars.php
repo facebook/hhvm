@@ -58,7 +58,7 @@ function test_htmlspecialchars() {
     "\xe0\x80\xbc".
     "\xc2";
   $tmp = $input;
-  fb_utf8ize(&$tmp);
+  fb_utf8ize(inout $tmp);
   $sanitized = $tmp;
 
   VS(fb_htmlspecialchars($input, ENT_QUOTES, "UtF-8", array()),

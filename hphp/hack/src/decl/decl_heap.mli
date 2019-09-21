@@ -34,6 +34,14 @@ module Typedef : sig
   val description : string
 end
 
+module RecordDef : sig
+  type t = record_def_type
+
+  val prefix : Prefix.t
+
+  val description : string
+end
+
 module GConst : sig
   type t = decl_ty * Errors.t
 
@@ -91,6 +99,10 @@ module Funs :
 module Classes :
     module type of
       SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Class)
+
+module RecordDefs :
+    module type of
+      SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (RecordDef)
 
 module Typedefs :
     module type of

@@ -12,6 +12,7 @@ open Core_kernel
 type env = {
   ns_ns_uses: string SMap.t;
   ns_class_uses: string SMap.t;
+  ns_record_def_uses: string SMap.t;
   ns_fun_uses: string SMap.t;
   ns_const_uses: string SMap.t;
   ns_name: string option;
@@ -24,6 +25,7 @@ let empty auto_ns_map is_code_gen =
   {
     ns_ns_uses = SMap.empty;
     ns_class_uses = SMap.empty;
+    ns_record_def_uses = SMap.empty;
     ns_fun_uses = SMap.empty;
     ns_const_uses = SMap.empty;
     ns_name = None;

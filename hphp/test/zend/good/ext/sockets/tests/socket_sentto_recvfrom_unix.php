@@ -7,7 +7,10 @@ if (!$socket) {
 if (!socket_set_nonblock($socket)) {
     die('Unable to set nonblocking mode for socket');
 }
-var_dump(socket_recvfrom($socket, &$buf, 12, 0, &$from, &$port)); //false (EAGAIN, no warning)
+$buf = null;
+$from = null;
+$port = null;
+var_dump(socket_recvfrom($socket, inout $buf, 12, 0, inout $from, inout $port)); //false (EAGAIN, no warning)
 $address = sprintf("/tmp/%s.sock", uniqid());
 if (!socket_bind($socket, $address)) {
     die("Unable to bind to $address");
@@ -26,8 +29,9 @@ if ($bytes_sent == -1) {
 }
 
 $from = "";
-var_dump(socket_recvfrom($socket, &$buf, 0, 0, &$from)); // expect false
-$bytes_received = socket_recvfrom($socket, &$buf, 12, 0, &$from);
+$port = null;
+var_dump(socket_recvfrom($socket, inout $buf, 0, 0, inout $from, inout $port)); // expect false
+$bytes_received = socket_recvfrom($socket, inout $buf, 12, 0, inout $from, inout $port);
 if ($bytes_received == -1) {
     @unlink($address);
     die('An error occurred while receiving from the socket');

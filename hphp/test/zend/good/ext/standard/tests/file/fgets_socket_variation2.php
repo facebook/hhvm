@@ -14,21 +14,28 @@ fclose($fd);
 for ($i=0; $i<100; $i++) {
   $port = rand(10000, 65000);
   /* Setup socket server */
-  $server = @stream_socket_server("tcp://127.0.0.1:$port");
+  $errno = null;
+  $errstr = null;
+  $server = @stream_socket_server(
+    "tcp://127.0.0.1:$port",
+    inout $errno,
+    inout $errstr
+  );
   if ($server) {
     break;
   }
 }
 
 /* Connect to it */
-$client = fsockopen("tcp://127.0.0.1:$port");
+$client = fsockopen("tcp://127.0.0.1:$port", -1, inout $errno, inout $errstr);
 
 if (!$client) {
     die("Unable to create socket");
 }
 
 /* Accept that connection */
-$socket = stream_socket_accept($server);
+$peername = null;
+$socket = stream_socket_accept($server, -1.0, inout $peername);
 
 echo "Write data from the file:\n";
 $data = file_get_contents($filename);

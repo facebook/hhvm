@@ -83,12 +83,13 @@ $inputs = array(
 
 // loop through each element of $inputs to check the behavior of mb_ereg()
 $iterator = 1;
+$regs = null;
 foreach($inputs as $input) {
     if (@is_array($regs)){
         $regs = null;
     }
     echo "\n-- Iteration $iterator --\n";
-    try { var_dump( mb_ereg($pattern, $input, &$regs) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+    try { var_dump( mb_ereg($pattern, $input, inout $regs) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
     var_dump($regs);
     $iterator++;
 };

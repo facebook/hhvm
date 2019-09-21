@@ -26,6 +26,7 @@ module Dep = struct
     (* There is a dependency on all members of a class *)
     | AllMembers of string
     | Class of string
+    | RecordDef of string
     | Fun of string
     | FunName of string
     | Prop of string * string
@@ -66,6 +67,7 @@ module Dep = struct
     | GConstName s -> "GConstName " ^ Utils.strip_ns s
     | Const (cls, s) -> spf "Const %s::%s" (Utils.strip_ns cls) s
     | Class s -> "Class " ^ Utils.strip_ns s
+    | RecordDef s -> "RecordDef " ^ Utils.strip_ns s
     | Fun s -> "Fun " ^ Utils.strip_ns s
     | FunName s -> "FunName " ^ Utils.strip_ns s
     | Prop (cls, s) -> spf "Prop %s::%s" (Utils.strip_ns cls) s
@@ -170,6 +172,7 @@ let update_file filename info =
   let {
     FileInfo.funs;
     classes;
+    record_defs;
     typedefs;
     consts;
     comments = _;
@@ -206,6 +209,15 @@ let update_file filename info =
           DepSet.add acc (Dep.make (Dep.Class class_id))
         end
       ~init:DepSet.empty
+  in
+  let classes =
+    List.fold_left
+      record_defs
+      ~f:
+        begin
+          fun acc (_, type_id) -> DepSet.add acc (Dep.make (Dep.Class type_id))
+        end
+      ~init:classes
   in
   let classes =
     List.fold_left

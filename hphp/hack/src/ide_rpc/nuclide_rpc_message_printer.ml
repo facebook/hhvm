@@ -47,6 +47,7 @@ let identify_symbol_response_to_json results =
       match x.type_ with
       | Class -> "class"
       | Method _ -> "method"
+      | Record -> "record"
       | Function -> "function"
       | LocalVar -> "local"
       | Property _ -> "property"

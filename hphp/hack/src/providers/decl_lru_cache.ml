@@ -16,10 +16,13 @@ type fun_decl = Typing_defs.decl_fun_type
 
 type typedef_decl = Typing_defs.typedef_type
 
+type record_def_decl = Typing_defs.record_def_type
+
 type gconst_decl = Typing_defs.decl_ty * Errors.t
 
 module Funs = SharedMem.LocalCache (StringKey) (Decl_heap.Fun)
 module GConsts = SharedMem.LocalCache (StringKey) (Decl_heap.GConst)
+module RecordDef = SharedMem.LocalCache (StringKey) (Decl_heap.RecordDef)
 module Typedefs = SharedMem.LocalCache (StringKey) (Decl_heap.Typedef)
 
 let get_type_id_filename x expected_kind =
@@ -74,6 +77,27 @@ let get_gconst gconst_name =
           Some gconst
         | None -> None)
     end
+
+let get_record_def (record_name : string) : record_def_decl option =
+  match RecordDef.get record_name with
+  | Some s -> Some s
+  | None ->
+    let record_name_key = Provider_config.Record_decl record_name in
+    (match Lru_worker.get_with_offset record_name_key with
+    | Some s -> Some s
+    | None ->
+      (match get_type_id_filename record_name Naming_table.TRecordDef with
+      | Some filename ->
+        let rdecl =
+          Errors.run_in_decl_mode filename (fun () ->
+              Decl.declare_record_def_in_file filename record_name)
+        in
+        (* Add to shared LRU cache *)
+        let _success = Lru_worker.set record_name_key rdecl in
+        (* Add to worker local cache *)
+        RecordDef.add record_name rdecl;
+        Some rdecl
+      | None -> None))
 
 let get_typedef (typedef_name : string) : typedef_decl option =
   match Typedefs.get typedef_name with

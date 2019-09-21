@@ -53,25 +53,25 @@ const int OPENSSL_CIPHER_3DES = 0;
 <<__PHPStdLib>>
 function openssl_csr_export_to_file($csr, string $outfilename, bool $notext = true);
 <<__PHPStdLib>>
-function openssl_csr_export($csr, &$out, bool $notext = true);
+function openssl_csr_export($csr, inout $out, bool $notext = true);
 <<__PHPStdLib>>
 function openssl_csr_get_public_key($csr);
 <<__PHPStdLib>>
 function openssl_csr_get_subject($csr, bool $use_shortnames = true);
 <<__PHPStdLib>>
-function openssl_csr_new($dn, &$privkey, $configargs = null, $extraattribs = null);
+function openssl_csr_new($dn, inout $privkey, $configargs = null, $extraattribs = null);
 <<__PHPStdLib>>
 function openssl_csr_sign($csr, $cacert, $priv_key, int $days, $configargs = null, int $serial = 0);
 <<__PHPStdLib>>
 function openssl_error_string();
 <<__PHPStdLib>>
-function openssl_open(string $sealed_data, &$open_data, string $env_key, $priv_key_id);
+function openssl_open(string $sealed_data, inout $open_data, string $env_key, $priv_key_id);
 <<__PHPStdLib>>
 function openssl_pkcs12_export_to_file($x509, string $filename, $priv_key, string $pass, $args = null);
 <<__PHPStdLib>>
-function openssl_pkcs12_export($x509, &$out, $priv_key, string $pass, $args = null);
+function openssl_pkcs12_export($x509, inout $out, $priv_key, string $pass, $args = null);
 <<__PHPStdLib>>
-function openssl_pkcs12_read(string $pkcs12, &$certs, string $pass);
+function openssl_pkcs12_read(string $pkcs12, inout $certs, string $pass);
 <<__PHPStdLib>>
 function openssl_pkcs7_decrypt(string $infilename, string $outfilename, $recipcert, $recipkey = null);
 <<__PHPStdLib>>
@@ -83,7 +83,7 @@ function openssl_pkcs7_verify(string $filename, int $flags, $outfilename = null,
 <<__PHPStdLib>>
 function openssl_pkey_export_to_file($key, string $outfilename, string $passphrase = "", $configargs = null);
 <<__PHPStdLib>>
-function openssl_pkey_export($key, &$out, string $passphrase = "", $configargs = null);
+function openssl_pkey_export($key, inout $out, string $passphrase = "", $configargs = null);
 <<__PHPStdLib>>
 function openssl_pkey_free(resource $key);
 <<__PHPStdLib>>
@@ -101,17 +101,18 @@ function openssl_get_publickey($certificate);
 <<__PHPStdLib>>
 function openssl_pkey_new($configargs = null);
 <<__PHPStdLib>>
-function openssl_private_decrypt(string $data, &$decrypted, $key, int $padding = OPENSSL_PKCS1_PADDING);
+function openssl_private_decrypt(string $data, inout $decrypted, $key, int $padding = OPENSSL_PKCS1_PADDING);
 <<__PHPStdLib>>
-function openssl_private_encrypt(string $data, &$crypted, $key, int $padding = OPENSSL_PKCS1_PADDING);
+function openssl_private_encrypt(string $data, inout $crypted, $key, int $padding = OPENSSL_PKCS1_PADDING);
 <<__PHPStdLib>>
-function openssl_public_decrypt(string $data, &$decrypted, $key, int $padding = OPENSSL_PKCS1_PADDING);
+function openssl_public_decrypt(string $data, inout $decrypted, $key, int $padding = OPENSSL_PKCS1_PADDING);
 <<__PHPStdLib>>
-function openssl_public_encrypt(string $data, &$crypted, $key, int $padding = OPENSSL_PKCS1_PADDING);
+function openssl_public_encrypt(string $data, inout $crypted, $key, int $padding = OPENSSL_PKCS1_PADDING);
 <<__PHPStdLib>>
-function openssl_seal(string $data, &$sealed_data, &$env_keys, $pub_key_ids);
+function openssl_seal(string $data, inout $sealed_data, inout $env_keys,
+                      array $pub_key_ids, string $method, inout $iv);
 <<__PHPStdLib>>
-function openssl_sign(string $data, &$signature, $priv_key_id, $signature_alg = OPENSSL_ALGO_SHA1);
+function openssl_sign(string $data, inout $signature, $priv_key_id, $signature_alg = OPENSSL_ALGO_SHA1);
 <<__PHPStdLib>>
 function openssl_verify(string $data, string $signature, $pub_key_id, $signature_alg = OPENSSL_ALGO_SHA1);
 <<__PHPStdLib>>
@@ -121,7 +122,7 @@ function openssl_x509_checkpurpose($x509cert, int $purpose, varray $cainfo = var
 <<__PHPStdLib>>
 function openssl_x509_export_to_file($x509, string $outfilename, bool $notext = true);
 <<__PHPStdLib>>
-function openssl_x509_export($x509, &$output, bool $notext = true);
+function openssl_x509_export($x509, inout $output, bool $notext = true);
 <<__PHPStdLib>>
 function openssl_x509_free(resource $x509cert);
 <<__PHPStdLib>>
@@ -129,13 +130,13 @@ function openssl_x509_parse($x509cert, bool $shortnames = true);
 <<__PHPStdLib>>
 function openssl_x509_read($x509certdata);
 <<__PHPStdLib>>
-function openssl_random_pseudo_bytes(int $length, &$crypto_strong = false);
+function openssl_random_pseudo_bytes(int $length, inout $crypto_strong);
 <<__PHPStdLib>>
 function openssl_cipher_iv_length(string $method);
 <<__PHPStdLib>>
-function openssl_encrypt(string $data, string $method, string $password, int $options = 0, string $iv = "", &$tag_out = null, string $aad = "", int $tag_length = 16);
+function openssl_encrypt(string $data, string $method, string $password, int $options = 0, string $iv = "", string $aad = "", int $tag_length = 16);
 <<__PHPStdLib>>
-function openssl_encrypt_with_tag(string $data, string $method, string $password, int $options, string $iv, &$tag_out, string $aad = "", int $tag_length = 16);
+function openssl_encrypt_with_tag(string $data, string $method, string $password, int $options, string $iv, inout $tag_out, string $aad = "", int $tag_length = 16);
 <<__PHPStdLib>>
 function openssl_decrypt(string $data, string $method, string $password, int $options = 0, string $iv = "", string $tag = "", string $aad = "");
 <<__PHPStdLib>>

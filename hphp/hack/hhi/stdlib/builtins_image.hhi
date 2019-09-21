@@ -32,7 +32,7 @@ const IMAGETYPE_ICO = 17;
 <<__PHPStdLib>>
 function gd_info();
 <<__PHPStdLib>>
-function getimagesize(string $filename, &$imageinfo = null);
+function getimagesize(string $filename, inout $imageinfo);
 <<__PHPStdLib>>
 function image_type_to_extension(int $imagetype, bool $include_dot = true);
 <<__PHPStdLib>>
@@ -241,4 +241,5 @@ function read_exif_data(string $filename, string $sections = "", bool $arrays = 
 <<__PHPStdLib>>
 function exif_tagname(int $index);
 <<__PHPStdLib>>
-function exif_thumbnail(string $filename, &$width = null, &$height = null, &$imagetype = null);
+function exif_thumbnail(string $filename, inout $width,
+                        inout $height, inout $imagetype);

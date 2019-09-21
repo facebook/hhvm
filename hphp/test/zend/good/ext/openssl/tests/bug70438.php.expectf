@@ -1,4 +1,2 @@
-Warning: Cipher algorithm requires an IV to be supplied as a sixth parameter in %s on line %d
-
 Warning: Unknown cipher algorithm in %s on line %d
 openssl_seal() test

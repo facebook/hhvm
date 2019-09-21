@@ -82,3 +82,15 @@ module Const : sig
 
   val elaborate_id : Namespace_env.env -> Ast_defs.id -> t
 end
+
+module Record : sig
+  type t
+
+  val from_ast_name : string -> t
+
+  val from_raw_string : string -> t
+
+  val to_raw_string : t -> string
+
+  val elaborate_id : Namespace_env.env -> Ast_defs.id -> t
+end

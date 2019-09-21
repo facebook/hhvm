@@ -11,8 +11,9 @@ while (($file = readdir($dir)) !== FALSE) {
 }
 closedir($dir);
 sort(&$files);
+$info = null;
 foreach($files as $file) {
-    $result[$file] = getimagesize(dirname(__FILE__)."/$file");
+    $result[$file] = getimagesize(dirname(__FILE__)."/$file", inout $info);
 }
 var_dump($result);
 }

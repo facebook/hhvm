@@ -50,7 +50,6 @@ let convert_fileinfo_to_contents
           let converted_kind =
             match real_kind with
             | Ast_defs.Cnormal
-            | Ast_defs.Crecord
             | Ast_defs.Cabstract ->
               SI_Class
             | Ast_defs.Cinterface -> SI_Interface

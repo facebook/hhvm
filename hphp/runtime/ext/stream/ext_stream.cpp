@@ -420,12 +420,12 @@ Variant HHVM_FUNCTION(stream_resolve_include_path, const String& filename,
 }
 
 Variant HHVM_FUNCTION(stream_select,
-                      VRefParam read,
-                      VRefParam write,
-                      VRefParam except,
+                      Variant& read,
+                      Variant& write,
+                      Variant& except,
                       const Variant& vtv_sec,
                       int tv_usec /* = 0 */) {
-  return HHVM_FN(socket_select)(ref(read), ref(write), ref(except),
+  return HHVM_FN(socket_select)(read, write, except,
                                 vtv_sec, tv_usec);
 }
 
@@ -647,8 +647,8 @@ static String get_sockaddr_name(struct sockaddr *sa, socklen_t sl) {
 
 Variant HHVM_FUNCTION(stream_socket_accept,
                       const Resource& server_socket,
-                      double timeout /* = -1.0 */,
-                      VRefParam peername /* = null */) {
+                      double timeout,
+                      Variant& peername) {
   auto sock = cast<Socket>(server_socket);
   pollfd p;
   int n;
@@ -657,7 +657,7 @@ Variant HHVM_FUNCTION(stream_socket_accept,
   p.events = (POLLIN|POLLERR|POLLHUP);
   p.revents = 0;
   IOStatusHelper io("socket_accept");
-  if (timeout == -1) {
+  if (timeout < 0.0) {
     timeout = RequestInfo::s_requestInfo.getNoCheck()->
       m_reqInjectionData.getSocketDefaultTimeout();
   }
@@ -666,9 +666,7 @@ Variant HHVM_FUNCTION(stream_socket_accept,
     struct sockaddr sa;
     socklen_t salen = sizeof(sa);
     auto new_sock = socket_accept_impl(server_socket, &sa, &salen);
-    if (auto ref = peername.getVariantOrNull()) {
-      *ref = get_sockaddr_name(&sa, salen);
-    }
+    peername = get_sockaddr_name(&sa, salen);
     return new_sock;
   } else if (n < 0) {
     sock->setError(errno);
@@ -680,8 +678,8 @@ Variant HHVM_FUNCTION(stream_socket_accept,
 
 Variant HHVM_FUNCTION(stream_socket_server,
                       const String& local_socket,
-                      VRefParam errnum /* = null */,
-                      VRefParam errstr /* = null */,
+                      Variant& errnum,
+                      Variant& errstr,
                       int flags /* = 0 */,
                       const Variant& context /* = uninit_variant */) {
   HostURL hosturl(static_cast<const std::string>(local_socket));
@@ -690,8 +688,8 @@ Variant HHVM_FUNCTION(stream_socket_server,
 
 Variant HHVM_FUNCTION(stream_socket_client,
                       const String& remote_socket,
-                      VRefParam errnum /* = null */,
-                      VRefParam errstr /* = null */,
+                      Variant& errnum,
+                      Variant& errstr,
                       double timeout /* = -1.0 */,
                       int flags /* = 0 */,
                       const Variant& context /* = uninit_variant */) {
@@ -769,9 +767,9 @@ Variant HHVM_FUNCTION(stream_socket_get_name,
   Variant address, port;
   bool ret;
   if (want_peer) {
-    ret = HHVM_FN(socket_getpeername)(handle, ref(address), ref(port));
+    ret = HHVM_FN(socket_getpeername)(handle, address, port);
   } else {
-    ret = HHVM_FN(socket_getsockname)(handle, ref(address), ref(port));
+    ret = HHVM_FN(socket_getsockname)(handle, address, port);
   }
   if (ret && port.isInteger()) {
     return address.toString() + ":" + port.toString();
@@ -786,7 +784,7 @@ Variant HHVM_FUNCTION(stream_socket_pair,
                       int type,
                       int protocol) {
   Variant fd;
-  if (!socket_create_pair_impl(domain, type, protocol, ref(fd), true)) {
+  if (!socket_create_pair_impl(domain, type, protocol, fd, true)) {
     return false;
   }
   return fd;
@@ -795,19 +793,17 @@ Variant HHVM_FUNCTION(stream_socket_pair,
 Variant HHVM_FUNCTION(stream_socket_recvfrom,
                       const Resource& socket,
                       int length,
-                      int flags /* = 0 */,
-                      VRefParam address /* = null_string */) {
+                      int flags,
+                      Variant& address) {
   Variant ret, host, port;
-  Variant retval = HHVM_FN(socket_recvfrom)(socket, ref(ret), length, flags,
-                                            ref(host), ref(port));
+  Variant retval = HHVM_FN(socket_recvfrom)(socket, ret, length, flags,
+                                            host, port);
   if (!same(retval, false) && retval.toInt64() >= 0) {
-    if (auto ref = address.getVariantOrNull()) {
-      auto sock = cast<Socket>(socket);
-      if (sock->getType() == AF_INET6) {
-        *ref = "[" + host.toString() + "]:" + port.toInt32();
-      } else {
-        *ref = host.toString() + ":" + port.toInt32();
-      }
+    auto sock = cast<Socket>(socket);
+    if (sock->getType() == AF_INET6) {
+      address = "[" + host.toString() + "]:" + port.toInt32();
+    } else {
+      address = host.toString() + ":" + port.toInt32();
     }
     return ret.toString(); // watch out, "ret", not "retval"
   }

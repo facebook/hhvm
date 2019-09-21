@@ -15,6 +15,7 @@ module InvSSet : Caml.Set.S with type elt = InvStringKey.t
 
 type type_kind =
   | TKClass
+  | TKRecord
   | TKInterface
   | TKEnum
   | TKTrait

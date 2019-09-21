@@ -8,7 +8,8 @@ $descriptorspec = array(
 	2 => array("pipe", "w")   // stderr is a pipe that the child will write to
 );
 
-$process=proc_open("echo testtext",$descriptorspec,&$pipes);
+$pipes = null;
+$process=proc_open("echo testtext", $descriptorspec, inout $pipes);
 if(is_resource($process))
 {
 	stream_set_blocking($pipes[0],false);

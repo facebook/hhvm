@@ -34,7 +34,6 @@ let class_const env c cc =
       match c.c_kind with
       | Ast_defs.Ctrait -> `trait
       | Ast_defs.Cenum -> `enum
-      | Ast_defs.Crecord -> `record
       | _ -> assert false
     in
     Errors.cannot_declare_constant kind pos c.c_name;
@@ -42,8 +41,7 @@ let class_const env c cc =
   | Ast_defs.Cnormal
   | Ast_defs.Cabstract
   | Ast_defs.Cinterface
-  | Ast_defs.Cenum
-  | Ast_defs.Crecord ->
+  | Ast_defs.Cenum ->
     let (ty, abstract) =
       (* Optional hint h, optional expression e *)
       match (h, e) with
@@ -87,13 +85,11 @@ let typeconst_abstract_kind env = function
 let typeconst env c tc =
   match c.c_kind with
   | Ast_defs.Ctrait
-  | Ast_defs.Cenum
-  | Ast_defs.Crecord ->
+  | Ast_defs.Cenum ->
     let kind =
       match c.c_kind with
       | Ast_defs.Ctrait -> `trait
       | Ast_defs.Cenum -> `enum
-      | Ast_defs.Crecord -> `record
       | _ -> assert false
     in
     Errors.cannot_declare_constant kind (fst tc.c_tconst_name) c.c_name;
@@ -131,8 +127,12 @@ let pu_enum
   let hint_assoc (k, hint) = (k, Decl_hint.hint env hint) in
   let spu_case_values = List.map ~f:hint_assoc pu_case_values in
   let spu_members =
-    let case_member { pum_atom; pum_types; _ } =
-      { spum_atom = pum_atom; spum_types = List.map ~f:hint_assoc pum_types }
+    let case_member { pum_atom; pum_types; pum_exprs } =
+      {
+        spum_atom = pum_atom;
+        spum_types = List.map ~f:hint_assoc pum_types;
+        spum_exprs = List.map ~f:fst pum_exprs;
+      }
     in
     List.map ~f:case_member pu_members
   in

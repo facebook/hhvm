@@ -18,6 +18,7 @@ depending on `Provider_config` transitively.
 type decl_cache_key =
   | Fun_decl of string
   | Class_decl of string
+  | Record_decl of string
   | Typedef_decl of string
   | Gconst_decl of string
 

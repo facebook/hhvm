@@ -16,7 +16,9 @@ function retry_bind_server() {
     $port = get_random_port();
     $address = "tcp://127.0.0.1:" . $port;
 
-    $server = @stream_socket_server($address);
+    $errno = null;
+    $errstr = null;
+    $server = @stream_socket_server($address, inout $errno, inout $errstr);
     if ($server !== false) {
       return array($port, $address, $server);
     }
@@ -28,13 +30,15 @@ function retry_bind_server() {
 <<__EntryPoint>>
 function main_tcp_transport_is_assumed() {
 list($port, $_, $server) = retry_bind_server();
-
-$stream = stream_socket_client('127.0.0.1:'.$port);
-stream_socket_accept($server);
+$errno = null;
+$errstr = null;
+$stream = stream_socket_client('127.0.0.1:'.$port, inout $errno, inout $errstr);
+$peername = null;
+stream_socket_accept($server, -1.0, inout $peername);
 var_dump(stream_get_meta_data($stream)['wrapper_type']);
-$stream = stream_socket_client('tcp://127.0.0.1:'.$port);
-stream_socket_accept($server);
+$stream = stream_socket_client('tcp://127.0.0.1:'.$port, inout $errno, inout $errstr);
+stream_socket_accept($server, -1.0, inout $peername);
 var_dump(stream_get_meta_data($stream)['wrapper_type']);
-$stream = stream_socket_client('udp://127.0.0.1:'.$port);
+$stream = stream_socket_client('udp://127.0.0.1:'.$port, inout $errno, inout $errstr);
 var_dump(stream_get_meta_data($stream)['wrapper_type']);
 }

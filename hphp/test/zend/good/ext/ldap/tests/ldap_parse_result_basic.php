@@ -11,7 +11,14 @@ ldap_add($link, "cn=userref,$base", array(
 $result = ldap_search($link, "cn=userref,$base", "(cn=user*)");
 $errcode = $dn = $errmsg = $refs =  null;
 var_dump(
-	ldap_parse_result($link, $result, $errcode, $dn, $errmsg, $refs),
+	ldap_parse_result(
+	  $link,
+	  $result,
+	  inout $errcode,
+	  inout $dn,
+	  inout $errmsg,
+	  inout $refs
+	),
 	$errcode, $dn, $errmsg, $refs
 );
 echo "===DONE===\n";

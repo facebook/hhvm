@@ -261,8 +261,8 @@ Variant HHVM_FUNCTION(shell_exec,
 
 String HHVM_FUNCTION(exec,
                      const String& command,
-                     VRefParam output /* = null */,
-                     VRefParam return_var /* = null */) {
+                     Array& output,
+                     int64_t& return_var) {
   ShellExecContext ctx;
   FILE *fp = ctx.exec(command);
   if (!fp) return empty_string();
@@ -272,7 +272,7 @@ String HHVM_FUNCTION(exec,
   Array lines = StringUtil::Explode(sbuf.detach(), "\n").toArray();
   int ret = ctx.exit();
   MAYBE_WIFEXITED(ret);
-  return_var.assignIfRef(ret);
+  return_var = ret;
   int count = lines.size();
   if (count > 0 && lines[count - 1].toString().empty()) {
     count--; // remove explode()'s last empty line
@@ -282,7 +282,7 @@ String HHVM_FUNCTION(exec,
   for (int i = 0; i < count; i++) {
     pai.append(HHVM_FN(rtrim)(lines[i].toString(), "\f\n\r\t\x0b\x00 "));
   }
-  output.assignIfRef(pai.toArray());
+  output = pai.toArray();
 
   if (!count || lines.empty()) {
     return String();
@@ -293,7 +293,7 @@ String HHVM_FUNCTION(exec,
 
 void HHVM_FUNCTION(passthru,
                    const String& command,
-                   VRefParam return_var /* = null */) {
+                   int64_t& return_var) {
   ShellExecContext ctx;
   FILE *fp = ctx.exec(command);
   if (!fp) return;
@@ -308,12 +308,12 @@ void HHVM_FUNCTION(passthru,
   }
   int ret = ctx.exit();
   MAYBE_WIFEXITED(ret);
-  return_var.assignIfRef(ret);
+  return_var = ret;
 }
 
 String HHVM_FUNCTION(system,
                      const String& command,
-                     VRefParam return_var /* = null */) {
+                     int64_t& return_var) {
   ShellExecContext ctx;
   FILE *fp = ctx.exec(command);
   if (!fp) return empty_string();
@@ -325,7 +325,7 @@ String HHVM_FUNCTION(system,
   Array lines = StringUtil::Explode(sbuf.detach(), "\n").toArray();
   int ret = ctx.exit();
   MAYBE_WIFEXITED(ret);
-  return_var.assignIfRef(ret);
+  return_var = ret;
   int count = lines.size();
   if (count > 0 && lines[count - 1].toString().empty()) {
     count--; // remove explode()'s last empty line
@@ -654,7 +654,7 @@ static bool pre_proc_open(const Array& descriptorspec,
   return false;
 }
 
-static Variant post_proc_open(const String& cmd, Variant& pipes,
+static Variant post_proc_open(const String& cmd, Array& pipes,
                               const Variant& env,
                               std::vector<DescriptorItem> &items,
                               pid_t child
@@ -682,13 +682,13 @@ static Variant post_proc_open(const String& cmd, Variant& pipes,
 
   // need to set pipes to a new empty array, ignoring whatever it was
   // previously set to
-  pipes = Variant(Array::Create());
+  pipes = Array::Create();
 
   for (auto& item : items) {
     Resource f = item.dupParent();
     if (!f.isNull()) {
       proc->pipes.append(f);
-      pipes.toArrRef().set(item.index, f);
+      pipes.set(item.index, f);
     }
   }
   return Variant(std::move(proc));
@@ -696,7 +696,7 @@ static Variant post_proc_open(const String& cmd, Variant& pipes,
 
 Variant
 HHVM_FUNCTION(proc_open, const String& cmd, const Array& descriptorspec,
-              VRefParam pipesParam, const Variant& cwd /* = uninit_variant */,
+              Array& pipes, const Variant& cwd /* = uninit_variant */,
               const Variant& env /* = uninit_variant */,
               const Variant& /*other_options*/ /* = uninit_variant */) {
   if (RuntimeOption::WhitelistExec && !check_cmd(cmd.data())) {
@@ -706,7 +706,6 @@ HHVM_FUNCTION(proc_open, const String& cmd, const Array& descriptorspec,
     raise_warning("NULL byte detected. Possible attack");
     return false;
   }
-  Variant pipes(pipesParam, Variant::WithRefBind{});
 
   std::vector<DescriptorItem> items;
 

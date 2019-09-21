@@ -178,7 +178,8 @@ function check_executable($path, $typechecker) {
     error($msg);
   }
   $output = array();
-  exec($rpath . " --help 2> /dev/null", &$output);
+  $return_var = -1;
+  exec($rpath . " --help 2> /dev/null", inout $output, inout $return_var);
   $str = implode($output);
   $msg = "Provided file (".$rpath.") is not a/an ".$type." executable.\n"
        . "If using ".$type."_BIN, make sure that is set correctly.";
@@ -267,7 +268,9 @@ function hhvm_path() {
 
   if (!is_file($file)) {
     if (is_testing_dso_extension()) {
-      exec("which hhvm 2> /dev/null", &$output);
+      $output = null;
+      $return_var = -1;
+      exec("which hhvm 2> /dev/null", inout $output, inout $return_var);
       if (isset($output[0]) && $output[0]) {
         return $output[0];
       }
@@ -1137,10 +1140,11 @@ function hhbbc_cmd($options, $test, $program) {
 // Execute $cmd and return its output, including any stacktrace.log
 // file it generated.
 function exec_with_stack($cmd) {
+  $pipes = null;
   $proc = proc_open($cmd,
                     array(0 => array('pipe', 'r'),
                           1 => array('pipe', 'w'),
-                          2 => array('pipe', 'w')), &$pipes);
+                          2 => array('pipe', 'w')), inout $pipes);
   fclose($pipes[0]);
   $s = '';
   $all_selects_failed=true;
@@ -1152,7 +1156,12 @@ function exec_with_stack($cmd) {
     $read = array($pipes[1], $pipes[2]);
     $write = null;
     $except = null;
-    $available = @stream_select(&$read, &$write, &$except, (int)($end - $now));
+    $available = @stream_select(
+      inout $read,
+      inout $write,
+      inout $except,
+      (int)($end - $now),
+    );
     if ($available === false) {
       usleep(1000);
       $s .= "select failed:\n" . print_r(error_get_last(), true);
@@ -1177,7 +1186,9 @@ function exec_with_stack($cmd) {
     $now = microtime(true);
     if ($now >= $end) {
       $timedout = true;
-      exec('pkill -P ' . $status['pid'] . ' 2> /dev/null');
+      $output = null;
+      $return_var = -1;
+      exec('pkill -P ' . $status['pid'] . ' 2> /dev/null', inout $output, inout $return_var);
       posix_kill($status['pid'], SIGTERM);
     }
     usleep(1000);
@@ -1827,8 +1838,9 @@ class Status {
 
   public static function getSTTY() {
     $descriptorspec = array(1 => array("pipe", "w"), 2 => array("pipe", "w"));
+    $pipes = null;
     $process = proc_open(
-      'stty -a', $descriptorspec, &$pipes, null, null,
+      'stty -a', $descriptorspec, inout $pipes, null, null,
       array('suppress_errors' => true)
     );
     $stty = stream_get_contents($pipes[1]);
@@ -1970,7 +1982,7 @@ function skip_test($options, $test) {
     2 => array("pipe", "w"),
   );
   $pipes = null;
-  $process = proc_open("$hhvm $test 2>&1", $descriptorspec, &$pipes);
+  $process = proc_open("$hhvm $test 2>&1", $descriptorspec, inout $pipes);
   if (!is_resource($process)) {
     // This is weird. We can't run HHVM but we probably shouldn't skip the test
     // since on a broken build everything will show up as skipped and give you a
@@ -2159,7 +2171,8 @@ function dump_hhas_cmd($hhvm_cmd, $test, $hhas_file) {
 function dump_hhas_to_temp($hhvm_cmd, $test) {
   $temp_file = $test . '.round_trip.hhas';
   $cmd = dump_hhas_cmd($hhvm_cmd, $test, $temp_file);
-  system("$cmd &> /dev/null", &$ret);
+  $ret = -1;
+  system("$cmd &> /dev/null", inout $ret);
   return $ret === 0 ? $temp_file : false;
 }
 
@@ -2230,10 +2243,12 @@ function run_config_cli($options, $test, $cmd, $cmd_env) {
   $pipes = null;
   if (isset($options['typechecker'])) {
     $process = proc_open(
-      "$cmd 2>/dev/null", $descriptorspec, &$pipes, null, $cmd_env
+      "$cmd 2>/dev/null", $descriptorspec, inout $pipes, null, $cmd_env
     );
   } else {
-    $process = proc_open("$cmd 2>&1", $descriptorspec, &$pipes, null, $cmd_env);
+    $process = proc_open(
+      "$cmd 2>&1", $descriptorspec, inout $pipes, null, $cmd_env
+    );
   }
   if (!is_resource($process)) {
     file_put_contents("$test.diff", "Couldn't invoke $cmd");
@@ -2667,7 +2682,9 @@ function num_cpus() {
       return $cores;
     case 'Darwin':
     case 'FreeBSD':
-      return exec('sysctl -n hw.ncpu');
+      $output = null;
+      $return_var = -1;
+      return exec('sysctl -n hw.ncpu', inout $output, inout $return_var);
   }
   return 2; // default when we don't know how to detect.
 }
@@ -3046,7 +3063,8 @@ function start_server_proc($options, $config, $port) {
     2 => array('file', '/dev/null', 'w'),
   );
 
-  $proc = proc_open($command, $descriptors, &$dummy);
+  $dummy = null;
+  $proc = proc_open($command, $descriptors, inout $dummy);
   if (!$proc) {
     error("Failed to start server process");
   }
@@ -3384,7 +3402,8 @@ function main($argv) {
     // Have the parent wait for all forked children to exit.
     $return_value = 0;
     while (count($children) && $printer_pid != 0) {
-      $pid = pcntl_wait(&$status);
+      $status = null;
+      $pid = pcntl_wait(inout $status);
       if (!pcntl_wifexited($status) && !pcntl_wifsignaled($status)) {
         error("Unexpected exit status from child");
       }

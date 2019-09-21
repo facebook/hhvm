@@ -3,6 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+pub mod aast_defs_impl;
+pub mod aast_impl;
+pub mod doc_comment;
 pub mod file_info_impl;
 pub mod file_pos_large;
 pub mod file_pos_small;

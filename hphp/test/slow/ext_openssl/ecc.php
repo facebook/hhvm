@@ -42,13 +42,13 @@ $dn = array(
 echo "Testing openssl_csr_new with key generation\n";
 $keyGenerate = null;
 var_dump($keyGenerate);
-$csr = openssl_csr_new($dn, &$keyGenerate, $args);
+$csr = openssl_csr_new($dn, inout $keyGenerate, $args);
 
 var_dump($keyGenerate);
 
 $args["digest_alg"] = "sha1";
 echo "Testing openssl_csr_new with existing ecc key\n";
-$csr = openssl_csr_new($dn, &$key1, $args);
+$csr = openssl_csr_new($dn, inout $key1, $args);
 var_dump($csr);
 
 $pubkey1 = openssl_pkey_get_details(openssl_csr_get_public_key($csr));

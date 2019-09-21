@@ -1258,7 +1258,7 @@ bool HHVM_FUNCTION(ldap_unbind, const Resource& link) {
 bool HHVM_FUNCTION(ldap_get_option,
                    const Resource& link,
                    int option,
-                   VRefParam retval) {
+                   Variant& retval) {
   auto ld = get_valid_ldap_link_resource(link);
   if (!ld) {
     return false;
@@ -1280,7 +1280,7 @@ bool HHVM_FUNCTION(ldap_get_option,
       if (ldap_get_option(ld->link, option, &val)) {
         return false;
       }
-      retval.assignIfRef((int64_t)val);
+      retval = (int64_t)val;
     } break;
 #ifdef LDAP_OPT_NETWORK_TIMEOUT
   case LDAP_OPT_NETWORK_TIMEOUT:
@@ -1293,7 +1293,7 @@ bool HHVM_FUNCTION(ldap_get_option,
         }
         return false;
       }
-      retval.assignIfRef((int64_t)timeout->tv_sec);
+      retval = (int64_t)timeout->tv_sec;
       ldap_memfree(timeout);
     } break;
 #elif defined(LDAP_X_OPT_CONNECT_TIMEOUT)
@@ -1303,7 +1303,7 @@ bool HHVM_FUNCTION(ldap_get_option,
       if (ldap_get_option(ld->link, LDAP_X_OPT_CONNECT_TIMEOUT, &timeout)) {
         return false;
       }
-      retval.assignIfRef((int64_t)(timeout / 1000));
+      retval = (int64_t)(timeout / 1000);
     } break;
 #endif
   /* options with string value */
@@ -1329,7 +1329,7 @@ bool HHVM_FUNCTION(ldap_get_option,
         }
         return false;
       }
-      retval.assignIfRef(String(val, CopyString));
+      retval = String(val, CopyString);
       ldap_memfree(val);
     } break;
 /* options not implemented
@@ -1853,7 +1853,7 @@ Variant HHVM_FUNCTION(ldap_next_reference,
 bool HHVM_FUNCTION(ldap_parse_reference,
                    const Resource& link,
                    const Resource& result_entry,
-                   VRefParam referrals) {
+                   Array& referrals) {
   auto ld = get_valid_ldap_link_resource(link);
   if (!ld) {
     return false;
@@ -1869,26 +1869,25 @@ bool HHVM_FUNCTION(ldap_parse_reference,
     return false;
   }
 
-  Array arr = Array::Create();
+  referrals = Array::Create();
   if (lreferrals != NULL) {
     refp = lreferrals;
     while (*refp) {
-      arr.append(String(*refp, CopyString));
+      referrals.append(String(*refp, CopyString));
       refp++;
     }
     ldap_value_free(lreferrals);
   }
-  referrals.assignIfRef(arr);
   return true;
 }
 
 bool HHVM_FUNCTION(ldap_parse_result,
                    const Resource& link,
                    const Resource& result,
-                   VRefParam errcode,
-                   VRefParam matcheddn /* = null */,
-                   VRefParam errmsg /* = null */,
-                   VRefParam referrals /* = null */) {
+                   int64_t& errcode,
+                   String& matcheddn,
+                   String& errmsg,
+                   Array& referrals) {
   auto ld = get_valid_ldap_link_resource(link);
   if (!ld) {
     return false;
@@ -1909,31 +1908,30 @@ bool HHVM_FUNCTION(ldap_parse_result,
     return false;
   }
 
-  errcode.assignIfRef(lerrcode);
+  errcode = lerrcode;
 
   /* Reverse -> fall through */
-  Array arr = Array::Create();
+  referrals = Array::Create();
   if (lreferrals != NULL) {
     refp = lreferrals;
     while (*refp) {
-      arr.append(String(*refp, CopyString));
+      referrals.append(String(*refp, CopyString));
       refp++;
     }
     ldap_value_free(lreferrals);
   }
-  referrals.assignIfRef(arr);
 
   if (lerrmsg == NULL) {
-    errmsg.assignIfRef(empty_string_variant());
+    errmsg = staticEmptyString();
   } else {
-    errmsg.assignIfRef(String(lerrmsg, CopyString));
+    errmsg = String(lerrmsg, CopyString);
     ldap_memfree(lerrmsg);
   }
 
   if (lmatcheddn == NULL) {
-    matcheddn.assignIfRef(empty_string_variant());
+    matcheddn = staticEmptyString();
   } else {
-    matcheddn.assignIfRef(String(lmatcheddn, CopyString));
+    matcheddn = String(lmatcheddn, CopyString);
     ldap_memfree(lmatcheddn);
   }
   return true;
@@ -2039,8 +2037,8 @@ bool HHVM_FUNCTION(ldap_control_paged_result,
 bool HHVM_FUNCTION(ldap_control_paged_result_response,
                    const Resource& link,
                    const Resource& result,
-                   VRefParam cookie,
-                   VRefParam estimated) {
+                   String& cookie,
+                   int64_t& estimated) {
   auto ld = get_valid_ldap_link_resource(link);
   if (!ld) {
     return false;
@@ -2109,8 +2107,8 @@ bool HHVM_FUNCTION(ldap_control_paged_result_response,
     return false;
   }
 
-  cookie.assignIfRef(String(lcookie.bv_val, lcookie.bv_len, CopyString));
-  estimated.assignIfRef(lestimated);
+  cookie = String(lcookie.bv_val, lcookie.bv_len, CopyString);
+  estimated = lestimated;
 
   ber_memfree(lcookie.bv_val);
   return true;

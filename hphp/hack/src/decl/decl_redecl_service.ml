@@ -104,6 +104,20 @@ let compute_types_deps
   let to_recheck = DepSet.union rdc to_recheck in
   (changed, to_redecl, to_recheck)
 
+let compute_record_defs_deps
+    ~conservative_redecl old_record_defs acc record_defs =
+  let (changed, to_redecl, to_recheck) = acc in
+  let (rc, rdd, rdc) =
+    Decl_compare.get_record_defs_deps
+      ~conservative_redecl
+      old_record_defs
+      record_defs
+  in
+  let changed = DepSet.union rc changed in
+  let to_redecl = DepSet.union rdd to_redecl in
+  let to_recheck = DepSet.union rdc to_recheck in
+  (changed, to_redecl, to_recheck)
+
 (*****************************************************************************)
 (* Given a set of global constants, compare the old and the new type and
  * deduce what must be rechecked accordingly.
@@ -143,13 +157,23 @@ let compute_deps ~conservative_redecl fast filel =
   let names =
     List.fold_left infol ~f:FileInfo.merge_names ~init:FileInfo.empty_names
   in
-  let { FileInfo.n_classes; n_funs; n_types; n_consts } = names in
+  let { FileInfo.n_classes; n_record_defs; n_funs; n_types; n_consts } =
+    names
+  in
   let acc = (DepSet.empty, DepSet.empty, DepSet.empty) in
   (* Fetching everything at once is faster *)
   let old_funs = Decl_heap.Funs.get_old_batch n_funs in
   let acc = compute_funs_deps ~conservative_redecl old_funs acc n_funs in
   let old_types = Decl_heap.Typedefs.get_old_batch n_types in
   let acc = compute_types_deps ~conservative_redecl old_types acc n_types in
+  let old_record_defs = Decl_heap.RecordDefs.get_old_batch n_record_defs in
+  let acc =
+    compute_record_defs_deps
+      ~conservative_redecl
+      old_record_defs
+      acc
+      n_record_defs
+  in
   let old_consts = Decl_heap.GConsts.get_old_batch n_consts in
   let acc =
     compute_gconsts_deps ~conservative_redecl old_consts acc n_consts
@@ -228,33 +252,41 @@ let parallel_otf_decl ~conservative_redecl workers bucket_size fast fnl =
 (* Code invalidating the heap *)
 (*****************************************************************************)
 let oldify_defs
-    { FileInfo.n_funs; n_classes; n_types; n_consts } elems ~collect_garbage =
+    { FileInfo.n_funs; n_classes; n_record_defs; n_types; n_consts }
+    elems
+    ~collect_garbage =
   Decl_heap.Funs.oldify_batch n_funs;
   Decl_class_elements.oldify_all elems;
   Decl_heap.Classes.oldify_batch n_classes;
   Shallow_classes_heap.oldify_batch n_classes;
   Decl_linearize.remove_batch n_classes;
+  Decl_heap.RecordDefs.oldify_batch n_record_defs;
   Decl_heap.Typedefs.oldify_batch n_types;
   Decl_heap.GConsts.oldify_batch n_consts;
   if collect_garbage then SharedMem.collect `gentle;
   ()
 
-let remove_old_defs { FileInfo.n_funs; n_classes; n_types; n_consts } elems =
+let remove_old_defs
+    { FileInfo.n_funs; n_classes; n_record_defs; n_types; n_consts } elems =
   Decl_heap.Funs.remove_old_batch n_funs;
   Decl_class_elements.remove_old_all elems;
   Decl_heap.Classes.remove_old_batch n_classes;
   Shallow_classes_heap.remove_old_batch n_classes;
+  Decl_heap.RecordDefs.remove_old_batch n_record_defs;
   Decl_heap.Typedefs.remove_old_batch n_types;
   Decl_heap.GConsts.remove_old_batch n_consts;
   SharedMem.collect `gentle;
   ()
 
 let remove_defs
-    { FileInfo.n_funs; n_classes; n_types; n_consts } elems ~collect_garbage =
+    { FileInfo.n_funs; n_classes; n_record_defs; n_types; n_consts }
+    elems
+    ~collect_garbage =
   Decl_heap.Funs.remove_batch n_funs;
   Decl_class_elements.remove_all elems;
   Decl_heap.Classes.remove_batch n_classes;
   Decl_linearize.remove_batch n_classes;
+  Decl_heap.RecordDefs.remove_batch n_record_defs;
   Decl_heap.Typedefs.remove_batch n_types;
   Decl_heap.GConsts.remove_batch n_consts;
   if collect_garbage then SharedMem.collect `gentle;

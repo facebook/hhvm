@@ -1946,7 +1946,7 @@ if there already is one, since that one will likely be better than this one. *)
             | (_, Some TK.HexadecimalLiteral)
             (* We allow underscores while lexing the integer literals. This gets rid of them before
              * the literal is created. *)
-
+            
             | (_, Some TK.BinaryLiteral) ->
               Int (Str.global_replace underscore "" s)
             | (_, Some TK.FloatingLiteral) -> Float s
@@ -3825,41 +3825,23 @@ if there already is one, since that one will likely be better than this one. *)
               _;
             } ->
           fun env ->
-            ClassVars
-              {
-                cv_kinds = [];
-                cv_hint = Some (pHint ftype env);
-                cv_is_promoted_variadic = false;
-                cv_names =
-                  [
-                    ( pPos node env,
-                      pos_name name env,
-                      mpOptional pSimpleInitializer init env );
-                  ];
-                cv_doc_comment = None;
-                cv_user_attributes = [];
-              }
+            let hint = pHint ftype env in
+            let name = pos_name name env in
+            let init = mpOptional pSimpleInitializer init env in
+            (name, hint, init)
         | _ -> missing_syntax "record_field" node env
       in
       [
-        Class
+        RecordDef
           {
-            c_mode = mode_annotation env.fi_mode;
-            c_user_attributes = pUserAttributes env attrs;
-            c_file_attributes = [];
-            c_final = token_kind modifier = Some TK.Final;
-            c_kind = Crecord;
-            c_is_xhp = false;
-            c_name = pos_name name env;
-            c_tparams = [];
-            c_extends = couldMap ~f:pHint exts env;
-            c_implements = [];
-            c_where_constraints = [];
-            c_body = couldMap fields env ~f:pFields;
-            c_namespace = mk_empty_ns_env env;
-            c_span = pPos node env;
-            c_enum = None;
-            c_doc_comment = doc_comment_opt;
+            rd_name = pos_name name env;
+            rd_extends = couldMap ~f:pHint exts env;
+            rd_final = token_kind modifier = Some TK.Final;
+            rd_fields = couldMap fields env ~f:pFields;
+            rd_user_attributes = pUserAttributes env attrs;
+            rd_namespace = Namespace_env.empty_from_popt env.parser_options;
+            rd_span = pPos node env;
+            rd_doc_comment = doc_comment_opt;
           };
       ]
     | InclusionDirective { inclusion_expression; inclusion_semicolon = _ }
@@ -3968,7 +3950,7 @@ if there already is one, since that one will likely be better than this one. *)
     let rec aux env acc = function
       | []
       (* EOF happens only as the last token in the list. *)
-
+      
       | [{ syntax = EndOfFile _; _ }] ->
         List.concat (List.rev acc)
       (* HaltCompiler stops processing the list in PHP but can be disabled in Hack *)

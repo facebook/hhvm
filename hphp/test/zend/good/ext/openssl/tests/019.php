@@ -4,7 +4,8 @@ $privkey = "file://" . dirname(__FILE__) . "/private.key";
 $pubkey = "file://" . dirname(__FILE__) . "/public.key";
 $wrong = "wrong";
 
-openssl_sign($data, &$sign, $privkey);
+$sign = null;
+openssl_sign($data, inout $sign, $privkey);
 var_dump(openssl_verify($data, $sign, $pubkey));
 var_dump(openssl_verify($data, $sign, $privkey));
 var_dump(openssl_verify($data, $sign, $wrong));

@@ -1066,7 +1066,8 @@ class Runner {
     echo "\nAttributes of the machine used to collect the data";
     echo "\n--------------------------------------------------";
     echo "\nComputer Name\t\t\t";
-    system('hostname');
+    $return_var = -1;
+    system('hostname', inout $return_var);
     echo "Number of Processors\t\t" . "{$processorcount}";
     echo "\nProcessor Model\t\t\t" . "{$processormodel}";
     echo "\nProcessor MHz\t\t\t" . "{$processorspeed}";
@@ -1081,9 +1082,9 @@ class Runner {
     }
     echo "Memory \t\t\t\t" . "{$memsize}";
     echo "\nOperating System\t\t";
-    system('cat /etc/system-release');
+    system('cat /etc/system-release', inout $return_var);
     echo "OS Version\t\t\t";
-    system('uname -mrs');
+    system('uname -mrs', inout $return_var);
     echo "Compile Type\t\t\t" .
       "JIT-compiled, repo authoritative mode, inlining turned off";
     echo "\n";

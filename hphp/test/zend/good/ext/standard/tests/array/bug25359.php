@@ -9,7 +9,7 @@ function does_not_work()
     ZendGoodExtStandardTestsArrayBug25359::$data = array('first', 'fifth', 'second', 'forth', 'third');
     $sort = array(1, 5, 2, 4, 3);
     $data = ZendGoodExtStandardTestsArrayBug25359::$data;
-    array_multisort2(&$sort, &$data);
+    array_multisort2(inout $sort, inout $data);
     ZendGoodExtStandardTestsArrayBug25359::$data = $data;
 
     var_dump(ZendGoodExtStandardTestsArrayBug25359::$data);

@@ -250,7 +250,9 @@ function vsDebugLaunch($scriptPath, $sendDefaultInit = true, $breakpoints = []) 
     // Grab an available port.
     $sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
     socket_bind($sock, "localhost", 0) || die("Could not bind socket");
-    socket_getsockname($sock, &$ip, &$port);
+    $ip = null;
+    $port = null;
+    socket_getsockname($sock, inout $ip, inout $port);
     socket_close($sock);
 
     $addr = gethostbyname("localhost");
@@ -277,7 +279,8 @@ function vsDebugLaunch($scriptPath, $sendDefaultInit = true, $breakpoints = []) 
   }
 
   $cmd = $cmd |> array_map($x ==> escapeshellarg($x), $$) |> implode(' ', $$);
-  $process = proc_open($cmd, $descriptorspec, &$pipes);
+  $pipes = null;
+  $process = proc_open($cmd, $descriptorspec, inout $pipes);
   if (!is_resource($process)) {
     throw new UnexpectedValueException("Failed to open child process!");
   }
@@ -286,10 +289,10 @@ function vsDebugLaunch($scriptPath, $sendDefaultInit = true, $breakpoints = []) 
   $client = $GLOBALS['client'];
   $tries = 0;
   while ($client === false) {
-    unset($errno);
-    unset($errorMessage);
+    $errno = null;
+    $errorMessage = null;
     try {
-      $client = @stream_socket_client($uri, &$errno, &$errorMessage);
+      $client = @stream_socket_client($uri, inout $errno, inout $errorMessage);
     } catch (Exception $e) {
     }
     if ($client === false && $tries > 5) {

@@ -26,6 +26,9 @@ val fun_decl_in_env : Decl_env.env -> Nast.fun_ -> Typing_defs.decl_fun_type
 val declare_const_in_file :
   Relative_path.t -> string -> Typing_defs.decl_ty * Errors.t
 
+val declare_record_def_in_file :
+  Relative_path.t -> string -> Typing_defs.record_def_type
+
 val declare_typedef_in_file :
   Relative_path.t -> string -> Typing_defs.typedef_type
 

@@ -4,6 +4,7 @@
 
 <<__EntryPoint>>
 function main_parse_str() {
-parse_str('123=value&456[]=foo+bar&789[]=baz', &$output);
+$output = null;
+parse_str('123=value&456[]=foo+bar&789[]=baz', inout $output);
 var_dump($output);
 }

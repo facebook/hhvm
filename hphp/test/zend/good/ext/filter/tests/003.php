@@ -3,12 +3,12 @@
 <<__EntryPoint>>
 function main() {
 $get = $GLOBALS['_GET'];
-parse_str("a=1&b=&c=3", &$get);
+parse_str("a=1&b=&c=3", inout $get);
 $GLOBALS['_GET'] = $get;
 $_REQUEST = array_merge($_REQUEST, $_GET);
 
 $post = $GLOBALS['_POST'];
-parse_str("d=4&e=5", &$post);
+parse_str("d=4&e=5", inout $post);
 $GLOBALS['_POST'] = $post;
 $_REQUEST = array_merge($_REQUEST, $_POST);
 echo $_GET['a'];

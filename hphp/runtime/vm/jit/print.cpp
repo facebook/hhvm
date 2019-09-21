@@ -316,13 +316,13 @@ struct TargetProfileVisitor {
 
   template<typename T>
   dynamic getProfileDynamic(const rds::Profile<T>& prof,
-                            const dynamic& linkObj) {
+                            const dynamic& linkObj) const {
     return dynamic::object("offset", prof.bcOff)
                           ("name", folly::sformat("{}", prof.name))
                           ("data", linkObj);
   }
 
-  dynamic operator() (const rds::Profile<jit::SwitchProfile>& prof) {
+  dynamic operator() (const rds::Profile<jit::SwitchProfile>& prof) const {
     auto const link = rds::bind<jit::SwitchProfile, rds::Mode::Local>(prof);
     auto const func = ctx.initSrcKey.func();
     assert(func->contains(prof.bcOff));
@@ -332,13 +332,13 @@ struct TargetProfileVisitor {
   }
 
   template<typename T>
-  dynamic operator() (const rds::Profile<T>& prof) {
+  dynamic operator() (const rds::Profile<T>& prof) const {
     auto const link = rds::bind<T, rds::Mode::Local>(prof);
     return getProfileDynamic(prof, link.get()->toDynamic());;
   }
 
   template<typename T>
-  dynamic operator() (T&&) {
+  dynamic operator() (T&&) const {
     assertx(false);
     return dynamic();
   }

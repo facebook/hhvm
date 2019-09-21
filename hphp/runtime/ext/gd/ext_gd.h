@@ -53,7 +53,7 @@ private:
 
 Array HHVM_FUNCTION(gd_info);
 Variant HHVM_FUNCTION(getimagesize,
-  const String& filename, VRefParam imageinfo = uninit_null());
+  const String& filename, Array& imageinfo);
 Variant HHVM_FUNCTION(image_type_to_extension,
   int64_t imagetype, bool include_dot = true);
 String HHVM_FUNCTION(image_type_to_mime_type, int64_t imagetype);
@@ -260,8 +260,7 @@ Variant HHVM_FUNCTION(read_exif_data,
   bool arrays = false, bool thumbnail = false);
 Variant HHVM_FUNCTION(exif_tagname, int64_t index);
 Variant HHVM_FUNCTION(exif_thumbnail,
-  const String& filename, VRefParam width = uninit_null(),
-  VRefParam height = uninit_null(), VRefParam imagetype = uninit_null());
+  const String& filename, int64_t& width, int64_t& height, int64_t& imagetype);
 Variant HHVM_FUNCTION(imagepalettecopy,
   const Resource& dest, const Resource& src);
 ///////////////////////////////////////////////////////////////////////////////

@@ -44,6 +44,7 @@ val string_of_mode : mode -> string
 type name_type =
   | Fun
   | Class
+  | RecordDef
   | Typedef
   | Const
 [@@deriving show]
@@ -64,6 +65,7 @@ type t = {
   file_mode: mode option;
   funs: id list;
   classes: id list;
+  record_defs: id list;
   typedefs: id list;
   consts: id list;
   comments: (Pos.t * comment) list option;
@@ -78,6 +80,7 @@ val empty_t : t
 type names = {
   n_funs: SSet.t;
   n_classes: SSet.t;
+  n_record_defs: SSet.t;
   n_types: SSet.t;
   n_consts: SSet.t;
 }

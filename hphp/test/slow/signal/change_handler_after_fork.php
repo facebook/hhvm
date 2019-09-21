@@ -22,7 +22,8 @@ function handler($signo) {
   } else if ($signo == SIGUSR1) {
     if (SignalChangeHandlerAfterForkPhp::$child != 0) {
       echo "parent: received SIGUSR1 from child\n";
-      pcntl_waitpid(SignalChangeHandlerAfterForkPhp::$child, &$status);
+      $status = null;
+      pcntl_waitpid(SignalChangeHandlerAfterForkPhp::$child, inout $status);
       echo "child exit with code $status";
       exit(0);
     }
@@ -32,7 +33,8 @@ function handler($signo) {
 function newhandler($signo) {
 
   echo "parent: new handler invoked\n";
-  pcntl_waitpid(SignalChangeHandlerAfterForkPhp::$child, &$status);
+  $status = null;
+  pcntl_waitpid(SignalChangeHandlerAfterForkPhp::$child, inout $status);
   exit(0);
 }
 

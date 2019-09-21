@@ -276,6 +276,7 @@ let update_def d =
   | Class c -> Class (update_class c)
   | Stmt s -> Stmt (erase_stmt s)
   | Fun f -> Fun (erase_fun f)
+  | RecordDef _
   | Typedef _
   | Constant _
   | Namespace _

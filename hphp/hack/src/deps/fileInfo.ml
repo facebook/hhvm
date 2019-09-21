@@ -76,6 +76,7 @@ let pp_mode fmt mode =
 type name_type =
   | Fun
   | Class
+  | RecordDef
   | Typedef
   | Const
 [@@deriving show]
@@ -107,6 +108,7 @@ type t = {
   file_mode: mode option;
   funs: id list;
   classes: id list;
+  record_defs: id list;
   typedefs: id list;
   consts: id list;
   comments: (Pos.t * comment) list option; (* None if loaded from saved state *)
@@ -119,6 +121,7 @@ let empty_t =
     file_mode = None;
     funs = [];
     classes = [];
+    record_defs = [];
     typedefs = [];
     consts = [];
     comments = Some [];
@@ -137,6 +140,7 @@ let get_pos_filename = function
 type names = {
   n_funs: SSet.t;
   n_classes: SSet.t;
+  n_record_defs: SSet.t;
   n_types: SSet.t;
   n_consts: SSet.t;
 }
@@ -152,6 +156,7 @@ let empty_names =
   {
     n_funs = SSet.empty;
     n_classes = SSet.empty;
+    n_record_defs = SSet.empty;
     n_types = SSet.empty;
     n_consts = SSet.empty;
   }
@@ -167,6 +172,7 @@ let simplify info =
   let {
     funs;
     classes;
+    record_defs;
     typedefs;
     consts;
     file_mode = _;
@@ -177,14 +183,16 @@ let simplify info =
   in
   let n_funs = name_set_of_idl funs in
   let n_classes = name_set_of_idl classes in
+  let n_record_defs = name_set_of_idl record_defs in
   let n_types = name_set_of_idl typedefs in
   let n_consts = name_set_of_idl consts in
-  { n_funs; n_classes; n_types; n_consts }
+  { n_funs; n_classes; n_record_defs; n_types; n_consts }
 
 let to_saved info =
   let {
     funs;
     classes;
+    record_defs;
     typedefs;
     consts;
     file_mode = s_mode;
@@ -195,17 +203,21 @@ let to_saved info =
   in
   let n_funs = name_set_of_idl funs in
   let n_classes = name_set_of_idl classes in
+  let n_record_defs = name_set_of_idl record_defs in
   let n_types = name_set_of_idl typedefs in
   let n_consts = name_set_of_idl consts in
-  let s_names = { n_funs; n_classes; n_types; n_consts } in
+  let s_names = { n_funs; n_classes; n_record_defs; n_types; n_consts } in
   { s_names; s_mode; s_hash }
 
 let from_saved fn saved =
   let { s_names; s_mode; s_hash } = saved in
-  let { n_funs; n_classes; n_types; n_consts } = s_names in
+  let { n_funs; n_classes; n_record_defs; n_types; n_consts } = s_names in
   let funs = List.map (SSet.elements n_funs) (fun x -> (File (Fun, fn), x)) in
   let classes =
     List.map (SSet.elements n_classes) (fun x -> (File (Class, fn), x))
+  in
+  let record_defs =
+    List.map (SSet.elements n_record_defs) (fun x -> (File (RecordDef, fn), x))
   in
   let typedefs =
     List.map (SSet.elements n_types) (fun x -> (File (Typedef, fn), x))
@@ -218,6 +230,7 @@ let from_saved fn saved =
     hash = s_hash;
     funs;
     classes;
+    record_defs;
     typedefs;
     consts;
     comments = None;
@@ -226,10 +239,11 @@ let from_saved fn saved =
 let saved_to_names saved = saved.s_names
 
 let merge_names t_names1 t_names2 =
-  let { n_funs; n_classes; n_types; n_consts } = t_names1 in
+  let { n_funs; n_classes; n_record_defs; n_types; n_consts } = t_names1 in
   {
     n_funs = SSet.union n_funs t_names2.n_funs;
     n_classes = SSet.union n_classes t_names2.n_classes;
+    n_record_defs = SSet.union n_record_defs t_names2.n_record_defs;
     n_types = SSet.union n_types t_names2.n_types;
     n_consts = SSet.union n_consts t_names2.n_consts;
   }

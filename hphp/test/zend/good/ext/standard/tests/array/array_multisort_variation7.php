@@ -29,7 +29,7 @@ $inputs = array(
       'undefined var' => @$undefined_var,
 );
 
-var_dump(array_multisort1(&$inputs));
+var_dump(array_multisort1(inout $inputs));
 var_dump($inputs);
 
 echo "===DONE===\n";

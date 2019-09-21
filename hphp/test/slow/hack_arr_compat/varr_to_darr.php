@@ -41,7 +41,7 @@ function test_unset() {
 function test_serialization($x) {
   $str = fb_serialize($x);
   $success = false;
-  $_ = fb_unserialize($str, &$success);
+  $_ = fb_unserialize($str, inout $success);
   invariant($success, 'unable to round-trip %s', var_export($x, true));
 }
 

@@ -524,6 +524,17 @@ and ('ex, 'fb, 'en, 'hi) gconst = {
   cst_span: pos;
 }
 
+and ('ex, 'fb, 'en, 'hi) record_def = {
+  rd_name: sid;
+  rd_extends: hint option;
+  rd_final: bool;
+  rd_fields: (sid * hint * ('ex, 'fb, 'en, 'hi) expr option) list;
+  rd_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;
+  rd_namespace: nsenv;
+  rd_span: pos;
+  rd_doc_comment: string option;
+}
+
 (* Pocket Universe Enumeration, e.g.
    enum Foo { // pu_name
      // pu_case_types
@@ -567,6 +578,7 @@ and ('ex, 'fb, 'en, 'hi) fun_def = ('ex, 'fb, 'en, 'hi) fun_
 and ('ex, 'fb, 'en, 'hi) def =
   | Fun of ('ex, 'fb, 'en, 'hi) fun_def
   | Class of ('ex, 'fb, 'en, 'hi) class_
+  | RecordDef of ('ex, 'fb, 'en, 'hi) record_def
   | Stmt of ('ex, 'fb, 'en, 'hi) stmt
   | Typedef of ('ex, 'fb, 'en, 'hi) typedef
   | Constant of ('ex, 'fb, 'en, 'hi) gconst

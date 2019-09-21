@@ -234,9 +234,9 @@ bool HHVM_FUNCTION(msg_send,
                    const Resource& queue,
                    int64_t msgtype,
                    const Variant& message,
-                   bool serialize /* = true */,
-                   bool blocking /* = true */,
-                   VRefParam errorcode /* = null */) {
+                   bool serialize,
+                   bool blocking,
+                   Variant& errorcode) {
   auto q = cast<MessageQueue>(queue);
   if (!q) {
     raise_warning("Invalid message queue was specified");
@@ -261,7 +261,7 @@ bool HHVM_FUNCTION(msg_send,
     int err = errno;
     raise_warning("Unable to send message: %s",
                     folly::errnoStr(err).c_str());
-    errorcode.assignIfRef(err);
+    errorcode = err;
     return false;
   }
   return true;
@@ -270,11 +270,12 @@ bool HHVM_FUNCTION(msg_send,
 bool HHVM_FUNCTION(msg_receive,
                    const Resource& queue,
                    int64_t desiredmsgtype,
-                   VRefParam msgtype,
-                   int64_t maxsize, VRefParam message,
-                   bool unserialize /* = true */,
-                   int64_t flags /* = 0 */,
-                   VRefParam errorcode /* = null */) {
+                   int64_t& msgtype,
+                   int64_t maxsize,
+                   Variant& message,
+                   bool unserialize,
+                   int64_t flags,
+                   Variant& errorcode) {
   auto q = cast<MessageQueue>(queue);
   if (!q) {
     raise_warning("Invalid message queue was specified");
@@ -300,18 +301,18 @@ bool HHVM_FUNCTION(msg_receive,
 
   int result = msgrcv(q->id, buffer, maxsize, desiredmsgtype, realflags);
   if (result < 0) {
-    errorcode.assignIfRef(errno);
+    errorcode = errno;
     return false;
   }
 
-  msgtype.assignIfRef((int)buffer->mtype);
+  msgtype = buffer->mtype;
   if (unserialize) {
     const char *bufText = (const char *)buffer->mtext;
     uint32_t bufLen = strlen(bufText);
     VariableUnserializer vu(bufText, bufLen,
                             VariableUnserializer::Type::Serialize);
     try {
-      message.assignIfRef(vu.unserialize());
+      message = vu.unserialize();
     } catch (ResourceExceededException&) {
       throw;
     } catch (Exception&) {
@@ -319,7 +320,7 @@ bool HHVM_FUNCTION(msg_receive,
       return false;
     }
   } else {
-    message.assignIfRef(String((const char *)buffer->mtext));
+    message = String((const char *)buffer->mtext);
   }
 
   return true;

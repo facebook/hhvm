@@ -68,7 +68,9 @@ module WorkerApi = struct
   (* We don't have full info here, so we give File positions and None for *)
   (* class kind. We then lazily populate class methods for search later *)
   let update_from_fast fn (names : FileInfo.names) =
-    let { FileInfo.n_funs; n_types; n_consts; n_classes } = names in
+    let { FileInfo.n_funs; n_types; n_consts; n_classes; n_record_defs } =
+      names
+    in
     (* Fold all the functions *)
     let (fuzzy, trie, auto) =
       SSet.fold
@@ -84,6 +86,15 @@ module WorkerApi = struct
           let pos = FileInfo.File (FileInfo.Class, fn) in
           let (f, t) = update_defs (pos, name) SI_Class f t in
           (f, t, add_autocomplete_term (pos, name) SI_Class a))
+    in
+    let (fuzzy, trie, auto) =
+      SSet.fold
+        n_record_defs
+        ~init:(fuzzy, trie, auto)
+        ~f:(fun name (f, t, a) ->
+          let pos = FileInfo.File (FileInfo.RecordDef, fn) in
+          let (f, t) = update_defs (pos, name) SI_RecordDef f t in
+          (f, t, add_autocomplete_term (pos, name) SI_RecordDef a))
     in
     let (fuzzy, trie, auto) =
       SSet.fold n_types ~init:(fuzzy, trie, auto) ~f:(fun name (f, t, _a) ->

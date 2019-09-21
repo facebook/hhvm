@@ -6,7 +6,7 @@ $descriptors = array(
 
 $pipes = array();
 
-$process = proc_open('/bin/sleep 120', $descriptors, &$pipes);
+$process = proc_open('/bin/sleep 120', $descriptors, inout $pipes);
 
 proc_terminate($process, 9);
 sleep(1); // wait a bit to let the process finish

@@ -4,7 +4,8 @@ if ($pid == -1) {
  echo "Unable to fork";
  exit;
 } elseif ($pid) {
- $epid = pcntl_waitpid(-1,&$status);
+ $status = null;
+ $epid = pcntl_waitpid(-1, inout $status);
  var_dump(pcntl_wexitstatus($status));
 } else {
  exit(128);

@@ -1689,6 +1689,8 @@ class Redis {
       }
     }
 
+    $errno = null;
+    $errstr = null;
     if ($persistent) {
       if ($persistent_id ?? false) {
         $pid     = array('id' => array('persistent_id' => $persistent_id));
@@ -1696,12 +1698,12 @@ class Redis {
         $sok     = $host;
         if ($port > 0) $sok .= ':' . $port;
         $conn    = stream_socket_client(
-          $sok, &$errno, &$errstr, $timeout, 2, $context);
+          $sok, inout $errno, inout $errstr, $timeout, 2, $context);
       } else {
-        $conn = pfsockopen($host, $port, &$errno, &$errstr, $timeout);
+        $conn = pfsockopen($host, $port, inout $errno, inout $errstr, $timeout);
       }
     } else {
-        $conn = fsockopen($host, $port, &$errno, &$errstr, $timeout);
+        $conn = fsockopen($host, $port, inout $errno, inout $errstr, $timeout);
     }
     $this->last_connect = time();
     $this->host = $host;

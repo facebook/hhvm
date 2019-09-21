@@ -186,9 +186,9 @@ void SnapshotLoader::load(ConcurrentTableSharedStore& s) {
           s.constructPrime(value, item, true);
           break;
         case SnapshotBuilder::kSnapThrift: {
-          Variant success;
-          Variant v = HHVM_FN(fb_unserialize)(value, ref(success));
-          if (same(success, false)) {
+          bool success;
+          Variant v = HHVM_FN(fb_unserialize)(value, success);
+          if (success == false) {
             throw Exception("bad apc archive, fb_unserialize failed");
           }
           s.constructPrime(v, item);

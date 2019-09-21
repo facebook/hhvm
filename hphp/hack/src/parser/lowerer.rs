@@ -5,9 +5,11 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use oxidized::{
-    aast, aast_defs, ast_defs, file_info, global_options::GlobalOptions,
+    aast, aast_defs, ast_defs, doc_comment::DocComment, file_info, global_options::GlobalOptions,
     namespace_env::Env as NamespaceEnv, pos::Pos, prim_defs::Comment, s_map,
 };
+
+use naming_special_names_rust::{special_functions, special_idents};
 
 use parser_rust::{
     indexed_source_text::IndexedSourceText, lexable_token::LexablePositionedToken,
@@ -20,8 +22,9 @@ use escaper::*;
 use ocamlvalue_macro::Ocamlvalue;
 
 use std::{
-    cell::{RefCell, RefMut},
+    cell::{Ref, RefCell, RefMut},
     collections::HashSet,
+    mem,
     rc::Rc,
     result::Result::{Err, Ok},
 };
@@ -57,16 +60,12 @@ pub enum LiftedAwaitKind {
     LiftedFromConcurrent,
 }
 
+type LiftedAwaitExprs = Vec<(Option<aast!(Lid)>, aast!(Expr<,>))>;
+
 #[derive(Debug, Clone)]
 pub struct LiftedAwaits {
-    pub awaits: Vec<(Option<aast::Id>, aast!(Expr<,>))>,
+    pub awaits: LiftedAwaitExprs,
     lift_kind: LiftedAwaitKind,
-}
-
-impl LiftedAwaits {
-    fn lift_kind(&self) -> LiftedAwaitKind {
-        self.lift_kind.clone()
-    }
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
@@ -80,6 +79,12 @@ pub enum ExprLocation {
     RightOfAssignmentInUsingStatement,
     RightOfReturn,
     UsingStatement,
+}
+
+impl ExprLocation {
+    fn in_string(self) -> bool {
+        self == Self::InDoubleQuotedString || self == Self::InBacktickedString
+    }
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
@@ -132,6 +137,7 @@ pub struct State {
      * and raised _after_ FFP error checking (unless we run the lowerer twice,
      * which would be expensive). */
     pub lowpri_errors: Vec<(Pos, String)>,
+    pub doc_comments: Vec<Option<DocComment>>,
 }
 
 #[derive(Debug, Clone)]
@@ -149,6 +155,9 @@ pub struct Env<'a> {
     fail_open: bool,
     file_mode: file_info::Mode,
     top_level_statements: bool, /* Whether we are (still) considering TLSs*/
+
+    // Cache none pos, lazy_static doesn't allow Rc.
+    pos_none: Pos,
 
     pub saw_yield: bool, /* Information flowing back up */
     pub lifted_awaits: Option<LiftedAwaits>,
@@ -188,10 +197,11 @@ impl<'a> Env<'a> {
             top_level_statements: false,
             saw_yield: false,
             lifted_awaits: None,
-            tmp_var_counter: 0,
+            tmp_var_counter: 1,
             indexed_source_text,
             auto_ns_map: &[],
             parser_options,
+            pos_none: Pos::make_none(),
 
             state: Rc::new(RefCell::new(State {
                 saw_compiler_halt_offset: None,
@@ -199,6 +209,7 @@ impl<'a> Env<'a> {
                 in_static_method: false,
                 parent_maybe_reified: false,
                 lowpri_errors: vec![],
+                doc_comments: vec![],
             })),
         }
     }
@@ -256,6 +267,30 @@ impl<'a> Env<'a> {
         cloned.top_level_statements = false;
         cloned
     }
+
+    fn top_docblock(&self) -> Ref<Option<DocComment>> {
+        Ref::map(self.state.borrow(), |s| {
+            s.doc_comments.last().unwrap_or(&None)
+        })
+    }
+
+    fn push_docblock(&mut self, doc_comment: Option<DocComment>) {
+        RefMut::map(self.state.borrow_mut(), |s| &mut s.doc_comments).push(doc_comment)
+    }
+
+    fn pop_docblock(&mut self) {
+        RefMut::map(self.state.borrow_mut(), |s| &mut s.doc_comments).pop();
+    }
+
+    fn make_tmp_var_name(&mut self) -> String {
+        let name = String::from(special_idents::TMP_VAR_PREFIX) + &self.tmp_var_counter.to_string();
+        self.tmp_var_counter += 1;
+        name
+    }
+
+    fn pos_none(&self) -> &Pos {
+        &self.pos_none
+    }
 }
 
 #[derive(Debug)]
@@ -266,7 +301,7 @@ pub enum Error {
         node_name: String,
         kind: syntax_kind::SyntaxKind,
     },
-    LowererInvariantFailure(String, String),
+    LowererInvariantFailure(Pos, String),
     Failwith(String),
 }
 
@@ -326,18 +361,23 @@ where
     }
 
     fn raise_parsing_error(node: &Syntax<T, V>, env: &mut Env, msg: &str) {
-        // TODO
+        //TODO:
     }
 
-    fn raise_parsing_error_pos(pos: Pos, env: &mut Env, msg: &str) {
+    fn raise_parsing_error_pos(pos: &Pos, env: &mut Env, msg: &str) {
         // TODO: enable should_surface_errors
         if env.codegen() && !env.lower_coroutines() {
-            env.lowpri_errors().push((pos, String::from(msg)))
+            env.lowpri_errors().push((pos.clone(), String::from(msg)))
         }
     }
 
     fn raise_nast_error(msg: &str) {
         // A placehold for error raised in ast_to_aast.ml
+    }
+
+    fn invariant_failure_error<N>(node: &Syntax<T, V>, env: &Env, msg: &str) -> ret!(N) {
+        let pos = Self::p_pos(node, env);
+        Err(Error::LowererInvariantFailure(pos, String::from(msg)))
     }
 
     #[inline]
@@ -355,7 +395,7 @@ where
         node.text(env.source_text())
     }
 
-    fn lowering_error(env: &mut Env, pos: Pos, text: &str, syntax_kind: &str) {
+    fn lowering_error(env: &mut Env, pos: &Pos, text: &str, syntax_kind: &str) {
         if env.is_typechecker() && env.lowpri_errors().is_empty() {
             // TODO: Ocaml also checks Errors.currently_has_errors
             Self::raise_parsing_error_pos(
@@ -374,7 +414,12 @@ where
     ) -> ret!(N) {
         let pos = Self::p_pos(node, env);
         let text = Self::text(node, env);
-        Self::lowering_error(env, pos, &text, expecting);
+        Self::lowering_error(env, &pos, &text, expecting);
+        if let Some(x) = fallback {
+            if env.fail_open {
+                return Ok(x);
+            }
+        }
         Err(Error::APIMissingSyntax {
             expecting: String::from(expecting),
             pos: Self::p_pos(node, env),
@@ -398,13 +443,39 @@ where
         }
     }
 
-    fn pos_qualified_name(node: &Syntax<T, V>, env: &Env) -> ret_aast!(Sid) {
-        not_impl!()
+    fn pos_qualified_name(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Sid) {
+        if let QualifiedName(c) = &node.syntax {
+            if let SyntaxList(l) = &c.qualified_name_parts.syntax {
+                let p = Self::p_pos(node, env);
+                let mut s = String::with_capacity(node.width());
+                for i in l.iter() {
+                    match &i.syntax {
+                        ListItem(li) => {
+                            s += li.list_item.text(env.source_text());
+                            s += li.list_separator.text(env.source_text());
+                        }
+                        _ => s += i.text(env.source_text()),
+                    }
+                }
+                return Ok(ast_defs::Id(p, s));
+            }
+        }
+        Self::missing_syntax(None, "qualified name", node, env)
     }
 
     #[inline]
     fn pos_name(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Sid) {
         Self::pos_name_(node, env, None)
+    }
+
+    fn lid_from_pos_name(pos: Pos, name: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Lid) {
+        let name = Self::pos_name(name, env)?;
+        Ok(aast::Lid::new(pos, name.1))
+    }
+
+    fn lid_from_name(name: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Lid) {
+        let name = Self::pos_name(name, env)?;
+        Ok(aast::Lid::new(name.0, name.1))
     }
 
     // TODO: after porting unify Sid and Pstring
@@ -523,6 +594,104 @@ where
         // TODO:
     }
 
+    fn p_closure_parameter(
+        node: &Syntax<T, V>,
+        env: &mut Env,
+    ) -> ret!((aast!(Hint), Option<ast_defs::ParamKind>)) {
+        match &node.syntax {
+            ClosureParameterTypeSpecifier(c) => {
+                let kind = Self::mp_optional(
+                    &Self::p_param_kind,
+                    &c.closure_parameter_call_convention,
+                    env,
+                )?;
+                let hint = Self::p_hint(&c.closure_parameter_type, env)?;
+                Ok((hint, kind))
+            }
+            _ => Self::missing_syntax(None, "closure parameter", node, env),
+        }
+    }
+
+    fn mp_shape_expression_field<F, R>(
+        f: F,
+        node: &Syntax<T, V>,
+        env: &mut Env,
+    ) -> ret!((ast_defs::ShapeFieldName, R))
+    where
+        F: Fn(&Syntax<T, V>, &mut Env) -> ret!(R),
+    {
+        match &node.syntax {
+            FieldInitializer(c) => {
+                let name = Self::p_shape_field_name(&c.field_initializer_name, env)?;
+                let value = f(&c.field_initializer_value, env)?;
+                Ok((name, value))
+            }
+            _ => Self::missing_syntax(None, "shape field", node, env),
+        }
+    }
+
+    fn p_shape_field_name(node: &Syntax<T, V>, env: &mut Env) -> ret!(ast_defs::ShapeFieldName) {
+        use ast_defs::ShapeFieldName::*;
+        let is_valid_shape_literal = |t: &T| {
+            let is_str = t.kind() == TK::SingleQuotedStringLiteral
+                || t.kind() == TK::DoubleQuotedStringLiteral;
+            let text = t.text(env.source_text());
+            let is_empty = text == "\'\'" || text == "\"\"";
+            is_str && !is_empty
+        };
+        if let LiteralExpression(c) = &node.syntax {
+            if let Token(t) = &c.literal_expression.syntax {
+                if is_valid_shape_literal(t) {
+                    let ast_defs::Id(p, n) = Self::pos_name(node, env)?;
+                    let str_ = Self::mk_str(node, env, &Self::unesc_dbl, &n);
+                    match isize::from_str_radix(&str_, 10) {
+                        Ok(_) => Self::raise_parsing_error(
+                            node,
+                            env,
+                            &syntax_error::shape_field_int_like_string,
+                        ),
+                        _ => {}
+                    }
+                    return Ok(SFlitStr((p, str_)));
+                }
+            }
+        }
+        match &node.syntax {
+            ScopeResolutionExpression(c) => Ok(SFclassConst(
+                Self::pos_name(&c.scope_resolution_qualifier, env)?,
+                Self::p_pstring(&c.scope_resolution_name, env)?,
+            )),
+            _ => {
+                Self::raise_parsing_error(node, env, &syntax_error::invalid_shape_field_name);
+                let ast_defs::Id(p, n) = Self::pos_name(node, env)?;
+                Ok(SFlitStr((p, Self::mk_str(node, env, &Self::unesc_dbl, &n))))
+            }
+        }
+    }
+
+    fn p_shape_field(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(ShapeFieldInfo) {
+        match &node.syntax {
+            FieldSpecifier(c) => {
+                let optional = !c.field_question.is_missing();
+                let name = Self::p_shape_field_name(&c.field_name, env)?;
+                let hint = Self::p_hint(&c.field_type, env)?;
+                Ok(aast::ShapeFieldInfo {
+                    optional,
+                    hint,
+                    name,
+                })
+            }
+            _ => {
+                let (name, hint) = Self::mp_shape_expression_field(&Self::p_hint, node, env)?;
+                Ok(aast::ShapeFieldInfo {
+                    optional: false,
+                    name,
+                    hint,
+                })
+            }
+        }
+    }
+
     fn p_hint_(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Hint_) {
         use aast_defs::Hint_::*;
         let unary = |kw, ty, env: &mut Env| {
@@ -544,7 +713,26 @@ where
             Token(_) | SimpleTypeSpecifier(_) | QualifiedName(_) => {
                 Ok(Happly(Self::pos_name(node, env)?, vec![]))
             }
-            ShapeTypeSpecifier(_) => not_impl!(),
+            ShapeTypeSpecifier(c) => {
+                let allows_unknown_fields = !c.shape_type_ellipsis.is_missing();
+                /* if last element lacks a separator and ellipsis is present, error */
+                if let Some(l) = Self::syntax_to_list(true, &c.shape_type_fields).last() {
+                    if l.is_missing() && allows_unknown_fields {
+                        Self::raise_parsing_error(
+                            node,
+                            env,
+                            &syntax_error::shape_type_ellipsis_without_trailing_comma,
+                        )
+                    }
+                }
+
+                let field_map = Self::could_map(&Self::p_shape_field, &c.shape_type_fields, env)?;
+
+                Ok(Hshape(aast::NastShapeInfo {
+                    allows_unknown_fields,
+                    field_map,
+                }))
+            }
             TupleTypeSpecifier(c) => {
                 Ok(Htuple(Self::could_map(&Self::p_hint, &c.tuple_types, env)?))
             }
@@ -573,16 +761,12 @@ where
             }
             GenericTypeSpecifier(c) => {
                 let name = Self::pos_name(&c.generic_class_type, env)?;
-                let type_args = match &c.generic_argument_list.syntax {
+                let args = &c.generic_argument_list;
+                let type_args = match &args.syntax {
                     TypeArguments(c) => {
                         Self::could_map(&Self::p_hint, &c.type_arguments_types, env)?
                     }
-                    _ => Self::missing_syntax(
-                        None,
-                        "generic type arguments",
-                        &c.generic_argument_list,
-                        env,
-                    )?,
+                    _ => Self::missing_syntax(None, "generic type arguments", args, env)?,
                 };
                 if env.codegen() {
                     not_impl!()
@@ -593,10 +777,100 @@ where
             NullableTypeSpecifier(c) => Ok(Hoption(Self::p_hint(&c.nullable_type, env)?)),
             LikeTypeSpecifier(c) => Ok(Hlike(Self::p_hint(&c.like_type, env)?)),
             SoftTypeSpecifier(c) => Ok(Hsoft(Self::p_hint(&c.soft_type, env)?)),
-            ClosureTypeSpecifier(_) => not_impl!(),
-            AttributizedSpecifier(_) => not_impl!(),
-            TypeConstant(_) => not_impl!(),
-            ReifiedTypeArgument(_) => not_impl!(),
+            ClosureTypeSpecifier(c) => {
+                let (param_list, variadic_hints): (Vec<&Syntax<T, V>>, Vec<&Syntax<T, V>>) =
+                    Self::as_list(&c.closure_parameter_list)
+                        .iter()
+                        .partition(|n| match &n.syntax {
+                            VariadicParameter(_) => false,
+                            _ => true,
+                        });
+                let (type_hints, kinds) = param_list
+                    .iter()
+                    .map(|p| Self::p_closure_parameter(p, env))
+                    .collect::<std::result::Result<Vec<_>, _>>()?
+                    .into_iter()
+                    .unzip();
+                let variadic_hints = variadic_hints
+                    .iter()
+                    .map(|v| match &v.syntax {
+                        VariadicParameter(c) => {
+                            let vtype = &c.variadic_parameter_type;
+                            if vtype.is_missing() {
+                                Self::raise_parsing_error(
+                                    v,
+                                    env,
+                                    "Cannot use ... without a typehint",
+                                );
+                            }
+                            Ok(Some(Self::p_hint(vtype, env)?))
+                        }
+                        _ => panic!("expect variadic parameter"),
+                    })
+                    .collect::<std::result::Result<Vec<_>, _>>()?;
+                if variadic_hints.len() > 1 {
+                    let msg = format!(
+                        "{} variadic parameters found. There should be no more than one.",
+                        variadic_hints.len().to_string()
+                    );
+                    Self::invariant_failure_error(node, env, &msg)?;
+                }
+                Ok(Hfun {
+                    reactive_kind: aast::FuncReactive::FNonreactive,
+                    is_coroutine: !c.closure_coroutine.is_missing(),
+                    param_tys: type_hints,
+                    param_kinds: kinds,
+                    param_mutability: vec![],
+                    variadic_ty: variadic_hints.into_iter().next().unwrap_or(None),
+                    return_ty: Self::p_hint(&c.closure_return_type, env)?,
+                    is_mutable_return: true,
+                })
+            }
+            AttributizedSpecifier(c) => {
+                let attrs = Self::p_user_attribute(&c.attributized_specifier_attribute_spec, env)?;
+                let hint = Self::p_hint(&c.attributized_specifier_type, env)?;
+                if attrs.iter().any(|attr| attr.name.1 != "__Soft") {
+                    Self::raise_parsing_error(node, env, &syntax_error::only_soft_allowed);
+                }
+                Ok(*Self::soften_hint(&attrs, hint).1)
+            }
+            TypeConstant(c) => {
+                let child = Self::pos_name(&c.type_constant_right_type, env)?;
+                match Self::p_hint_(&c.type_constant_left_type, env)? {
+                    Haccess(root, mut cs) => {
+                        cs.push(child);
+                        Ok(Haccess(root, cs))
+                    }
+                    Happly(ty, param) => {
+                        if param.is_empty() {
+                            let root = aast::Hint::new(ty.0.clone(), Happly(ty, param));
+                            Ok(Haccess(root, vec![child]))
+                        } else {
+                            Self::missing_syntax(None, "type constant base", node, env)
+                        }
+                    }
+                    _ => Self::missing_syntax(None, "type constant base", node, env),
+                }
+            }
+            PUAccess(c) => {
+                let pos = Self::p_pos(&c.pu_access_left_type, env);
+                let child = Self::pos_name(&c.pu_access_right_type, env)?;
+                match Self::p_hint_(&c.pu_access_left_type, env)? {
+                    h @ HpuAccess(_, _) => Ok(HpuAccess(aast::Hint::new(pos, h), child)),
+                    Happly(id, hints) => {
+                        if hints.is_empty() {
+                            Ok(HpuAccess(aast::Hint::new(pos, Happly(id, hints)), child))
+                        } else {
+                            Self::missing_syntax(None, "pocket universe access base", node, env)
+                        }
+                    }
+                    _ => Self::missing_syntax(None, "pocket universe access base", node, env),
+                }
+            }
+            ReifiedTypeArgument(_) => {
+                Self::raise_parsing_error(node, env, &syntax_error::invalid_reified);
+                Self::missing_syntax(None, "refied type", node, env)
+            }
             _ => Self::missing_syntax(None, "type hint", node, env),
         }
     }
@@ -604,7 +878,7 @@ where
     fn p_hint(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Hint) {
         let hint_ = Self::p_hint_(node, env)?;
         let pos = Self::p_pos(node, env);
-        let hint = aast_defs::Hint(pos, Box::new(hint_));
+        let hint = aast::Hint::new(pos, hint_);
         Self::check_valid_reified_hint(env, node, &hint);
         Ok(hint)
     }
@@ -616,38 +890,159 @@ where
         }
     }
 
+    fn p_member(node: &Syntax<T, V>, env: &mut Env) -> ret!((aast!(Expr<,>), aast!(Expr<,>))) {
+        match &node.syntax {
+            ElementInitializer(c) => Ok((
+                Self::p_expr(&c.element_key, env)?,
+                Self::p_expr(&c.element_value, env)?,
+            )),
+            _ => Self::missing_syntax(None, "darray intrinsic expression element", node, env),
+        }
+    }
+
+    fn expand_type_args(ty: &Syntax<T, V>, env: &mut Env) -> ret!(Vec<aast!(Hint)>) {
+        match &ty.syntax {
+            TypeArguments(c) => Self::could_map(&Self::p_hint, &c.type_arguments_types, env),
+            _ => Ok(vec![]),
+        }
+    }
+
+    fn p_afield(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Afield<,>) {
+        match &node.syntax {
+            ElementInitializer(c) => Ok(aast::Afield::AFkvalue(
+                Self::p_expr(&c.element_key, env)?,
+                Self::p_expr(&c.element_value, env)?,
+            )),
+            _ => Ok(aast::Afield::AFvalue(Self::p_expr(node, env)?)),
+        }
+    }
+
+    fn check_intrinsic_type_arg_varity(
+        node: &Syntax<T, V>,
+        env: &mut Env,
+        tys: Vec<aast!(Hint)>,
+    ) -> Option<aast!(CollectionTarg)> {
+        let count = tys.len();
+        let mut tys = tys.into_iter();
+        match count {
+            2 => Some(aast::CollectionTarg::CollectionTKV(
+                tys.next().unwrap(),
+                tys.next().unwrap(),
+            )),
+            1 => Some(aast::CollectionTarg::CollectionTV(tys.next().unwrap())),
+            _ => {
+                Self::raise_parsing_error(
+                    node,
+                    env,
+                    &syntax_error::collection_intrinsic_many_typeargs,
+                );
+                None
+            }
+        }
+    }
+
+    fn p_import_flavor(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(ImportFlavor) {
+        use aast::ImportFlavor::*;
+        match Self::token_kind(node) {
+            Some(TK::Include) => Ok(Include),
+            Some(TK::Require) => Ok(Require),
+            Some(TK::Include_once) => Ok(IncludeOnce),
+            Some(TK::Require_once) => Ok(RequireOnce),
+            _ => Self::missing_syntax(None, "import flavor", node, env),
+        }
+    }
+
+    fn p_null_flavor(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(OgNullFlavor) {
+        use aast::OgNullFlavor::*;
+        match Self::token_kind(node) {
+            Some(TK::QuestionMinusGreaterThan) => Ok(OGNullsafe),
+            Some(TK::MinusGreaterThan) => Ok(OGNullthrows),
+            _ => Self::missing_syntax(None, "null flavor", node, env),
+        }
+    }
+
+    #[inline]
+    fn wrap_unescaper(
+        unescaper: &dyn Fn(&str) -> std::result::Result<String, InvalidString>,
+        s: &str,
+    ) -> ret!(String) {
+        unescaper(s).map_err(|e| Error::Failwith(e.msg))
+    }
+
+    fn fail_if_invalid_reified_generic(node: &Syntax<T, V>, env: &mut Env, id: &str) {
+        let in_static_method = *env.in_static_method();
+        if in_static_method && env.cls_reified_generics().contains(id) {
+            Self::raise_parsing_error(
+                node,
+                env,
+                &syntax_error::cls_reified_generic_in_static_method,
+            );
+        }
+    }
+
+    fn p_expr_l(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Expr<,>) {
+        Self::p_expr_l_with_loc(ExprLocation::TopLevel, node, env)
+    }
+
+    fn p_expr_l_with_loc(
+        loc: ExprLocation,
+        node: &Syntax<T, V>,
+        env: &mut Env,
+    ) -> ret_aast!(Expr<,>) {
+        let p_expr = |n: &Syntax<T, V>, e: &mut Env| -> ret_aast!(Expr<,>) {
+            Self::p_expr_with_loc(loc, n, e)
+        };
+        Ok(aast::Expr::new(
+            Self::p_pos(node, env),
+            aast::Expr_::ExprList(Self::could_map(&p_expr, node, env)?),
+        ))
+    }
+
     #[inline]
     fn p_expr(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Expr<,>) {
         Self::p_expr_with_loc(ExprLocation::TopLevel, node, env)
     }
 
+    #[inline]
     fn p_expr_with_loc(
         location: ExprLocation,
         node: &Syntax<T, V>,
         env: &mut Env,
     ) -> ret_aast!(Expr<,>) {
+        Self::p_expr_impl(location, node, env, None)
+    }
+
+    fn p_expr_impl(
+        location: ExprLocation,
+        node: &Syntax<T, V>,
+        env: &mut Env,
+        parent_pos: Option<Pos>,
+    ) -> ret_aast!(Expr<,>) {
         match &node.syntax {
             BracedExpression(child) => {
                 let expr = &child.braced_expression_expression;
-                let inner = Self::p_expr_with_loc(location, expr, env)?;
+                let inner = Self::p_expr_impl(location, expr, env, parent_pos)?;
                 let inner_pos = &inner.0;
                 let inner_expr_ = inner.1.as_ref();
                 use aast::Expr_::*;
                 match inner_expr_ {
                     Lvar(_) | String(_) | Int(_) | Float(_) => Ok(inner),
-                    _ => Ok(aast::Expr(
+                    _ => Ok(aast::Expr::new(
                         inner_pos.clone(),
-                        Box::new(aast::Expr_::BracedExpr(inner)),
+                        aast::Expr_::BracedExpr(inner),
                     )),
                 }
             }
-            ParenthesizedExpression(child) => {
-                Self::p_expr_with_loc(location, &child.parenthesized_expression_expression, env)
-            }
+            ParenthesizedExpression(child) => Self::p_expr_impl(
+                location,
+                &child.parenthesized_expression_expression,
+                env,
+                parent_pos,
+            ),
             _ => {
-                let expr_ = Self::p_expr_with_loc_(location, node, env)?;
-                let p = Self::p_pos(node, env);
-                Ok(aast::Expr(p, Box::new(expr_)))
+                let pos = Self::p_pos(node, env);
+                let expr_ = Self::p_expr_impl_(location, node, env, parent_pos)?;
+                Ok(aast::Expr::new(pos, expr_))
             }
         }
     }
@@ -723,27 +1118,485 @@ where
         }
     }
 
-    #[inline]
-    fn wrap_unescaper(
-        unescaper: &dyn Fn(&str) -> std::result::Result<String, InvalidString>,
-        s: &str,
-    ) -> ret!(String) {
-        unescaper(s).map_err(|e| Error::Failwith(e.msg))
-    }
-
     fn p_expr_with_loc_(
         location: ExprLocation,
         node: &Syntax<T, V>,
         env: &mut Env,
     ) -> ret_aast!(Expr_<,>) {
-        let mk_lvar = |name, env| {
-            let name = Self::pos_name(name, env)?;
-            let lid = aast::Lid(name.0, (0, name.1));
-            Ok(aast::Expr_::Lvar(lid))
+        Self::p_expr_impl_(location, node, env, None)
+    }
+
+    fn p_expr_impl_(
+        location: ExprLocation,
+        node: &Syntax<T, V>,
+        env: &mut Env,
+        parent_pos: Option<Pos>,
+    ) -> ret_aast!(Expr_<,>) {
+        use aast::{Expr as E, Expr_ as E_};
+        let split_args_varargs = |arg_list_node: &Syntax<T, V>,
+                                  e: &mut Env|
+         -> ret!((Vec<aast!(Expr<,>)>, Vec<aast!(Expr<,>)>)) {
+            let mut arg_list = Self::as_list(arg_list_node);
+            if let Some(last_arg) = arg_list.last() {
+                if let DecoratedExpression(c) = &last_arg.syntax {
+                    if Self::token_kind(&c.decorated_expression_decorator) == Some(TK::DotDotDot) {
+                        let _ = arg_list.pop();
+                        let args: std::result::Result<Vec<_>, _> =
+                            arg_list.iter().map(|a| Self::p_expr(a, e)).collect();
+                        let args = args?;
+                        let vararg = Self::p_expr(&c.decorated_expression_expression, e)?;
+                        return Ok((args, vec![vararg]));
+                    }
+                }
+            }
+            Ok((Self::could_map(&Self::p_expr, arg_list_node, e)?, vec![]))
         };
-        let pos = Self::p_pos(node, env);
+        let mk_lid = |p: Pos, s: String| aast::Lid(p, (0, s));
+        let mk_name_lid = |name: &Syntax<T, V>, env: &mut Env| {
+            let name = Self::pos_name(name, env)?;
+            Ok(mk_lid(name.0, name.1))
+        };
+        let mk_lvar = |name: &Syntax<T, V>, env: &mut Env| Ok(E_::Lvar(mk_name_lid(name, env)?));
+        let mk_id_expr = |name: aast!(Sid)| E::new(name.0.clone(), E_::Id(name));
+        let p_intri_expr = |kw, ty, v, e: &mut Env| {
+            let hints = Self::expand_type_args(ty, e)?;
+            let hints = Self::check_intrinsic_type_arg_varity(node, e, hints);
+            Ok(E_::Collection(
+                Self::pos_name(kw, e)?,
+                hints,
+                Self::could_map(&Self::p_afield, v, e)?,
+            ))
+        };
+        let p_special_call =
+            |recv: &Syntax<T, V>, args: &Syntax<T, V>, e: &mut Env| -> ret_aast!(Expr_<,>) {
+                let pos_if_has_parens = match &recv.syntax {
+                    ParenthesizedExpression(_) => Some(Self::p_pos(recv, e)),
+                    _ => None,
+                };
+                let recv = Self::p_expr(recv, e)?;
+                let recv = match (recv.1.as_ref(), pos_if_has_parens) {
+                    (E_::ObjGet(_, _, _), Some(p)) => E::new(p, E_::ParenthesizedExpr(recv)),
+                    (E_::ClassGet(_, _), Some(p)) => E::new(p, E_::ParenthesizedExpr(recv)),
+                    _ => recv,
+                };
+                let (args, varargs) = split_args_varargs(args, e)?;
+                Ok(E_::Call(
+                    aast::CallType::Cnormal,
+                    recv,
+                    vec![],
+                    args,
+                    varargs,
+                ))
+            };
+        let p_obj_get = |recv: &Syntax<T, V>,
+                         op: &Syntax<T, V>,
+                         name: &Syntax<T, V>,
+                         e: &mut Env|
+         -> ret_aast!(Expr_<,>) {
+            if recv.is_object_creation_expression() && !e.codegen() {
+                Self::raise_parsing_error(recv, e, &syntax_error::invalid_constructor_method_call);
+            }
+            let recv = Self::p_expr(recv, e)?;
+            let name = Self::p_expr_with_loc(ExprLocation::MemberSelect, name, e)?;
+            let op = Self::p_null_flavor(op, e)?;
+            Ok(E_::ObjGet(recv, name, op))
+        };
+        let pos = match parent_pos {
+            None => Self::p_pos(node, env),
+            Some(p) => p,
+        };
         match &node.syntax {
-            VariableExpression(c) => mk_lvar(&c.variable_expression, env),
+            LambdaExpression(c) => {
+                let suspension_kind =
+                    Self::mk_suspension_kind(node, env, &c.lambda_async, &c.lambda_coroutine);
+                let (params, ret) = match &c.lambda_signature.syntax {
+                    LambdaSignature(c) => (
+                        Self::could_map(&Self::p_fun_param, &c.lambda_parameters, env)?,
+                        Self::mp_optional(&Self::p_hint, &c.lambda_type, env)?,
+                    ),
+                    Token(_) => {
+                        let ast_defs::Id(p, n) = Self::pos_name(&c.lambda_signature, env)?;
+                        (
+                            vec![aast::FunParam {
+                                annotation: p.clone(),
+                                type_hint: aast::TypeHint((), None),
+                                is_reference: false,
+                                is_variadic: false,
+                                pos: p,
+                                name: n,
+                                expr: None,
+                                callconv: None,
+                                user_attributes: vec![],
+                                visibility: None,
+                            }],
+                            None,
+                        )
+                    }
+                    _ => Self::missing_syntax(None, "lambda signature", &c.lambda_signature, env)?,
+                };
+                let (body, yield_) = if !c.lambda_body.is_compound_statement() {
+                    Self::mp_yielding(&Self::p_function_body, &c.lambda_body, env)?
+                } else {
+                    let env1 = &mut env.clone_non_tls();
+                    Self::mp_yielding(&Self::p_function_body, &c.lambda_body, env1)?
+                };
+                let external = c.lambda_body.is_external();
+                let fun = aast::Fun_ {
+                    span: pos.clone(),
+                    annotation: (),
+                    mode: Self::mode_annotation(env.file_mode()),
+                    ret: aast::TypeHint((), ret),
+                    name: ast_defs::Id(pos, String::from(";anonymous")),
+                    tparams: vec![],
+                    where_constraints: vec![],
+                    body: aast::FuncBody {
+                        ast: body,
+                        annotation: (),
+                    },
+                    fun_kind: Self::mk_fun_kind(suspension_kind, yield_),
+                    variadic: Self::determine_variadicity(&params),
+                    params,
+                    user_attributes: Self::p_user_attributes(&c.lambda_attribute_spec, env)?,
+                    file_attributes: vec![],
+                    external,
+                    namespace: Self::mk_empty_ns_env(env),
+                    doc_comment: None,
+                    static_: false,
+                };
+                Ok(E_::Lfun(fun, vec![]))
+            }
+            BracedExpression(c) => {
+                Self::p_expr_with_loc_(location, &c.braced_expression_expression, env)
+            }
+            EmbeddedBracedExpression(c) => {
+                Self::p_expr_with_loc_(location, &c.embedded_braced_expression_expression, env)
+            }
+            ParenthesizedExpression(c) => {
+                Self::p_expr_with_loc_(location, &c.parenthesized_expression_expression, env)
+            }
+            DictionaryIntrinsicExpression(c) => p_intri_expr(
+                &c.dictionary_intrinsic_keyword,
+                &c.dictionary_intrinsic_explicit_type,
+                &c.dictionary_intrinsic_members,
+                env,
+            ),
+            KeysetIntrinsicExpression(c) => p_intri_expr(
+                &c.keyset_intrinsic_keyword,
+                &c.keyset_intrinsic_explicit_type,
+                &c.keyset_intrinsic_members,
+                env,
+            ),
+            VectorIntrinsicExpression(c) => p_intri_expr(
+                &c.vector_intrinsic_keyword,
+                &c.vector_intrinsic_explicit_type,
+                &c.vector_intrinsic_members,
+                env,
+            ),
+            CollectionLiteralExpression(c) => {
+                let collection_name = &c.collection_literal_name;
+                let (collection_name, hints) = match &collection_name.syntax {
+                    SimpleTypeSpecifier(c) => {
+                        (Self::pos_name(&c.simple_type_specifier, env)?, None)
+                    }
+                    GenericTypeSpecifier(c) => {
+                        let hints = Self::expand_type_args(&c.generic_argument_list, env)?;
+                        let hints = Self::check_intrinsic_type_arg_varity(node, env, hints);
+                        (Self::pos_name(&c.generic_class_type, env)?, hints)
+                    }
+                    _ => (Self::pos_name(collection_name, env)?, None),
+                };
+                Ok(E_::Collection(
+                    collection_name,
+                    hints,
+                    Self::could_map(&Self::p_afield, &c.collection_literal_initializers, env)?,
+                ))
+            }
+            VarrayIntrinsicExpression(c) => {
+                let hints = Self::expand_type_args(&c.varray_intrinsic_explicit_type, env)?;
+                let hints = Self::check_intrinsic_type_arg_varity(node, env, hints);
+                let targ = match hints {
+                    Some(aast_defs::CollectionTarg::CollectionTV(ty)) => Some(ty),
+                    None => None,
+                    _ => Self::missing_syntax(
+                        None,
+                        "VarrayIntrinsicExpression type args",
+                        node,
+                        env,
+                    )?,
+                };
+                Ok(E_::Varray(
+                    targ,
+                    Self::could_map(&Self::p_expr, &c.varray_intrinsic_members, env)?,
+                ))
+            }
+            DarrayIntrinsicExpression(c) => {
+                let hints = Self::expand_type_args(&c.darray_intrinsic_explicit_type, env)?;
+                let hints = Self::check_intrinsic_type_arg_varity(node, env, hints);
+                match hints {
+                    Some(aast_defs::CollectionTarg::CollectionTKV(tk, tv)) => Ok(E_::Darray(
+                        Some((tk, tv)),
+                        Self::could_map(&Self::p_member, &c.darray_intrinsic_members, env)?,
+                    )),
+                    None => Ok(E_::Darray(
+                        None,
+                        Self::could_map(&Self::p_member, &c.darray_intrinsic_members, env)?,
+                    )),
+                    _ => {
+                        Self::missing_syntax(None, "DarrayIntrinsicExpression type args", node, env)
+                    }
+                }
+            }
+            ArrayIntrinsicExpression(c) => {
+                /* TODO: Or tie in with other intrinsics and post-process to Array */
+                Ok(E_::Array(Self::could_map(
+                    &Self::p_afield,
+                    &c.array_intrinsic_members,
+                    env,
+                )?))
+            }
+            ArrayCreationExpression(c) => {
+                /* TODO: Or tie in with other intrinsics and post-process to Array */
+                Ok(E_::Array(Self::could_map(
+                    &Self::p_afield,
+                    &c.array_creation_members,
+                    env,
+                )?))
+            }
+            ListExpression(c) => {
+                /* TODO: Or tie in with other intrinsics and post-process to List */
+                let p_binder_or_ignore = |n: &Syntax<T, V>, e: &mut Env| -> ret_aast!(Expr<,>) {
+                    match &n.syntax {
+                        Missing => Ok(E::new(Pos::make_none(), E_::Omitted)),
+                        _ => Self::p_expr(n, e),
+                    }
+                };
+                Ok(E_::List(Self::could_map(
+                    &p_binder_or_ignore,
+                    &c.list_members,
+                    env,
+                )?))
+            }
+            EvalExpression(c) => p_special_call(&c.eval_keyword, &c.eval_argument, env),
+            IssetExpression(c) => p_special_call(&c.isset_keyword, &c.isset_argument_list, env),
+            TupleExpression(c) => {
+                p_special_call(&c.tuple_expression_keyword, &c.tuple_expression_items, env)
+            }
+            FunctionCallExpression(c) => {
+                let recv = &c.function_call_receiver;
+                let args = &c.function_call_argument_list;
+                let get_hhas_adata = || {
+                    if Self::text_str(recv, env) == "__hhas_adata" {
+                        if let SyntaxList(l) = &args.syntax {
+                            if let Some(li) = l.first() {
+                                if let ListItem(i) = &li.syntax {
+                                    if let LiteralExpression(le) = &i.list_item.syntax {
+                                        let expr = &le.literal_expression;
+                                        if Self::token_kind(expr) == Some(TK::NowdocStringLiteral) {
+                                            return Some(expr);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    None
+                };
+                match get_hhas_adata() {
+                    Some(expr) => {
+                        let literal_expression_pos = Self::p_pos(expr, env);
+                        let s = extract_unquoted_string(Self::text_str(expr, env), 0, expr.width())
+                            .map_err(|e| Error::Failwith(e.msg))?;
+                        Ok(E_::Call(
+                            aast::CallType::Cnormal,
+                            Self::p_expr(recv, env)?,
+                            vec![],
+                            vec![E::new(literal_expression_pos, E_::String(s))],
+                            vec![],
+                        ))
+                    }
+                    None => {
+                        let hints = match (&recv.syntax, &c.function_call_type_args.syntax) {
+                            (_, TypeArguments(c)) => {
+                                Self::could_map(&Self::p_hint, &c.type_arguments_types, env)?
+                            }
+                            /* TODO might not be needed */
+                            (GenericTypeSpecifier(c), _) => match &c.generic_argument_list.syntax {
+                                TypeArguments(c) => {
+                                    Self::could_map(&Self::p_hint, &c.type_arguments_types, env)?
+                                }
+                                _ => vec![],
+                            },
+                            _ => vec![],
+                        };
+
+                        /* preserve parens on receiver of call expression
+                        to allow distinguishing between
+                        ($a->b)() // invoke on callable property
+                        $a->b()   // method call */
+                        let pos_if_has_parens = match &recv.syntax {
+                            ParenthesizedExpression(_) => Some(Self::p_pos(recv, env)),
+                            _ => None,
+                        };
+                        let recv = Self::p_expr(recv, env)?;
+                        let recv = match (recv.1.as_ref(), pos_if_has_parens) {
+                            (E_::ObjGet(_, _, _), Some(p)) => {
+                                E::new(p, E_::ParenthesizedExpr(recv))
+                            }
+                            (E_::ClassGet(_, _), Some(p)) => E::new(p, E_::ParenthesizedExpr(recv)),
+                            _ => recv,
+                        };
+                        let (args, varargs) = split_args_varargs(args, env)?;
+                        Ok(E_::Call(
+                            aast::CallType::Cnormal,
+                            recv,
+                            hints,
+                            args,
+                            varargs,
+                        ))
+                    }
+                }
+            }
+            QualifiedName(_) => {
+                if location.in_string() {
+                    let ast_defs::Id(_, n) = Self::pos_qualified_name(node, env)?;
+                    Ok(E_::String(n))
+                } else {
+                    Ok(E_::Id(Self::pos_qualified_name(node, env)?))
+                }
+            }
+            VariableExpression(c) => Ok(E_::Lvar(Self::lid_from_pos_name(
+                pos,
+                &c.variable_expression,
+                env,
+            )?)),
+            PipeVariableExpression(_) => Ok(E_::Lvar(mk_lid(pos, String::from("$$")))),
+            InclusionExpression(c) => Ok(E_::Import(
+                Self::p_import_flavor(&c.inclusion_require, env)?,
+                Self::p_expr(&c.inclusion_filename, env)?,
+            )),
+            MemberSelectionExpression(c) => {
+                p_obj_get(&c.member_object, &c.member_operator, &c.member_name, env)
+            }
+            SafeMemberSelectionExpression(c) => p_obj_get(
+                &c.safe_member_object,
+                &c.safe_member_operator,
+                &c.safe_member_name,
+                env,
+            ),
+            EmbeddedMemberSelectionExpression(c) => p_obj_get(
+                &c.embedded_member_object,
+                &c.embedded_member_operator,
+                &c.embedded_member_name,
+                env,
+            ),
+            PrefixUnaryExpression(_) | PostfixUnaryExpression(_) | DecoratedExpression(_) => {
+                let (operand, op, postfix) = match &node.syntax {
+                    PrefixUnaryExpression(c) => {
+                        (&c.prefix_unary_operand, &c.prefix_unary_operator, false)
+                    }
+                    PostfixUnaryExpression(c) => {
+                        (&c.postfix_unary_operand, &c.postfix_unary_operator, true)
+                    }
+                    DecoratedExpression(c) => (
+                        &c.decorated_expression_expression,
+                        &c.decorated_expression_decorator,
+                        false,
+                    ),
+                    _ => Self::missing_syntax(None, "unary exppr", node, env)?,
+                };
+
+                let expr = Self::p_expr(operand, env)?;
+                /**
+                 * FFP does not destinguish between ++$i and $i++ on the level of token
+                 * kind annotation. Prevent duplication by switching on `postfix` for
+                 * the two operatores for which AST /does/ differentiate between
+                 * fixities.
+                 */
+                use ast_defs::Uop::*;
+                match Self::token_kind(op) {
+                    Some(TK::PlusPlus) if postfix => Ok(E_::Unop(Upincr, expr)),
+                    Some(TK::MinusMinus) if postfix => Ok(E_::Unop(Updecr, expr)),
+                    Some(TK::PlusPlus) => Ok(E_::Unop(Uincr, expr)),
+                    Some(TK::MinusMinus) => Ok(E_::Unop(Udecr, expr)),
+                    Some(TK::Exclamation) => Ok(E_::Unop(Unot, expr)),
+                    Some(TK::Tilde) => Ok(E_::Unop(Utild, expr)),
+                    Some(TK::Plus) => Ok(E_::Unop(Uplus, expr)),
+                    Some(TK::Minus) => Ok(E_::Unop(Uminus, expr)),
+                    Some(TK::Ampersand) => Ok(E_::Unop(Uref, expr)),
+                    Some(TK::At) => {
+                        if env.parser_options.po_disallow_silence {
+                            Self::raise_parsing_error(op, env, &syntax_error::no_silence);
+                        }
+                        if env.codegen() {
+                            Ok(E_::Unop(Usilence, expr))
+                        } else {
+                            let expr =
+                                Self::p_expr_impl(ExprLocation::TopLevel, operand, env, Some(pos))?;
+                            Ok(*expr.1)
+                        }
+                    }
+                    Some(TK::Inout) => Ok(E_::Callconv(ast_defs::ParamKind::Pinout, expr)),
+                    Some(TK::Await) => Self::lift_await(pos, expr, env, location),
+                    Some(TK::Suspend) => Ok(E_::Suspend(expr)),
+                    Some(TK::Clone) => Ok(E_::Clone(expr)),
+                    Some(TK::Print) => Ok(E_::Call(
+                        aast::CallType::Cnormal,
+                        E::new(pos.clone(), E_::Id(ast_defs::Id(pos, String::from("echo")))),
+                        vec![],
+                        vec![expr],
+                        vec![],
+                    )),
+                    Some(TK::Dollar) => {
+                        let E(p, expr_) = expr;
+                        match *expr_ {
+                            E_::String(s) | E_::Int(s) | E_::Float(s) => {
+                                if !env.codegen() {
+                                    Self::raise_parsing_error(
+                                        op,
+                                        env,
+                                        &syntax_error::invalid_variable_name,
+                                    )
+                                }
+                                let id = String::with_capacity(1 + s.len()) + "$" + &s;
+                                let lid = aast::Lid(pos, (0, id));
+                                Ok(E_::Lvar(lid))
+                            }
+                            _ => {
+                                Self::raise_parsing_error(
+                                    op,
+                                    env,
+                                    &syntax_error::invalid_variable_variable,
+                                );
+                                Ok(E_::Omitted)
+                            }
+                        }
+                    }
+                    _ => Self::missing_syntax(None, "unary operator", node, env),
+                }
+            }
+            BinaryExpression(c) => {
+                use ExprLocation::*;
+                let rlocation = if Self::token_kind(&c.binary_operator) == Some(TK::Equal) {
+                    match location {
+                        AsStatement => RightOfAssignment,
+                        UsingStatement => RightOfAssignmentInUsingStatement,
+                        _ => TopLevel,
+                    }
+                } else {
+                    TopLevel
+                };
+                // Ocaml evaluates right first then left, ordering will affect
+                // tmp var count in lifted await statement.
+                let right = Self::p_expr_with_loc(rlocation, &c.binary_right_operand, env)?;
+                let left = Self::p_expr(&c.binary_left_operand, env)?;
+                let bop_ast_node = Self::p_bop(&c.binary_operator, left, right, env)?;
+                match &bop_ast_node {
+                    // TODO: Ast_check.check_lvalue (fun pos error -> raise_parsing_error env (`Pos pos) error) lhs
+                    E_::Binop(ast_defs::Bop::Eq(_), lhs, _) => {}
+                    _ => {}
+                }
+                Ok(bop_ast_node)
+            }
             Token(t) => {
                 use ExprLocation::*;
                 match (location, t.kind()) {
@@ -765,10 +1618,419 @@ where
                     | (RightOfReturn, _) => Ok(aast::Expr_::Id(Self::pos_name(node, env)?)),
                 }
             }
+            YieldExpression(c) => {
+                use ExprLocation::*;
+                env.saw_yield = true;
+                if location != AsStatement
+                    && location != RightOfAssignment
+                    && location != RightOfAssignmentInUsingStatement
+                {
+                    Self::raise_parsing_error(node, env, &syntax_error::invalid_yield);
+                }
+                if c.yield_operand.text(env.source_text()) == "break" {
+                    Ok(E_::YieldBreak)
+                } else if c.yield_operand.is_missing() {
+                    Ok(E_::Yield(aast::Afield::AFvalue(E::new(pos, E_::Null))))
+                } else {
+                    Ok(E_::Yield(Self::p_afield(&c.yield_operand, env)?))
+                }
+            }
+            YieldFromExpression(c) => {
+                use ExprLocation::*;
+                env.saw_yield = true;
+                if location != AsStatement
+                    && location != RightOfAssignment
+                    && location != RightOfAssignmentInUsingStatement
+                    && location != RightOfReturn
+                {
+                    Self::raise_parsing_error(node, env, &syntax_error::invalid_yield_from);
+                }
+                Ok(E_::YieldFrom(Self::p_expr(&c.yield_from_operand, env)?))
+            }
+            DefineExpression(c) => {
+                let name = Self::pos_name(&c.define_keyword, env)?;
+                Ok(E_::Call(
+                    aast_defs::CallType::Cnormal,
+                    mk_id_expr(name),
+                    vec![],
+                    Self::as_list(&c.define_argument_list)
+                        .iter()
+                        .map(|x| Self::p_expr(x, env))
+                        .collect::<std::result::Result<Vec<_>, _>>()?,
+                    vec![],
+                ))
+            }
+            ScopeResolutionExpression(c) => {
+                let qual = Self::p_expr(&c.scope_resolution_qualifier, env)?;
+                let qual = if env.codegen() {
+                    qual
+                } else if let E_::Lvar(a) = *qual.1 {
+                    let pos = qual.0;
+                    E::new(pos.clone(), E_::Id(ast_defs::Id(pos, (a.1).1)))
+                } else {
+                    qual
+                };
+                if let E_::Id(ast_defs::Id(_, x)) = qual.1.as_ref() {
+                    Self::fail_if_invalid_reified_generic(node, env, &x);
+                }
+                match &c.scope_resolution_name.syntax {
+                    Token(token) if token.kind() == TK::Variable => {
+                        let ast_defs::Id(p, name) = Self::pos_name(&c.scope_resolution_name, env)?;
+                        Ok(E_::ClassGet(
+                            aast::ClassId(pos, aast::ClassId_::CIexpr(qual)),
+                            aast::ClassGetExpr::CGstring((p, name)),
+                        ))
+                    }
+                    _ => {
+                        let E(p, expr_) = Self::p_expr(&c.scope_resolution_name, env)?;
+                        match *expr_ {
+                            E_::String(id) => Ok(E_::ClassConst(
+                                aast::ClassId(pos, aast::ClassId_::CIexpr(qual)),
+                                (p, id),
+                            )),
+                            E_::Id(ast_defs::Id(p, n)) => Ok(E_::ClassConst(
+                                aast::ClassId(pos, aast::ClassId_::CIexpr(qual)),
+                                (p, n),
+                            )),
+                            E_::Lvar(aast::Lid(p, (_, n))) => Ok(E_::ClassGet(
+                                aast::ClassId(pos, aast::ClassId_::CIexpr(qual)),
+                                aast::ClassGetExpr::CGstring((p, n)),
+                            )),
+                            _ => Ok(E_::ClassGet(
+                                aast::ClassId(pos, aast::ClassId_::CIexpr(qual)),
+                                aast::ClassGetExpr::CGexpr(E(p, expr_)),
+                            )),
+                        }
+                    }
+                }
+            }
+            CastExpression(c) => Ok(E_::Cast(
+                Self::p_hint(&c.cast_type, env)?,
+                Self::p_expr(&c.cast_operand, env)?,
+            )),
+            ConditionalExpression(c) => Ok(E_::Eif(
+                Self::p_expr(&c.conditional_test, env)?,
+                Self::mp_optional(&Self::p_expr, &c.conditional_consequence, env)?,
+                Self::p_expr(&c.conditional_alternative, env)?,
+            )),
+            SubscriptExpression(c) => Ok(E_::ArrayGet(
+                Self::p_expr(&c.subscript_receiver, env)?,
+                Self::mp_optional(&Self::p_expr, &c.subscript_index, env)?,
+            )),
+            EmbeddedSubscriptExpression(c) => Ok(E_::ArrayGet(
+                Self::p_expr(&c.embedded_subscript_receiver, env)?,
+                Self::mp_optional(
+                    &|n, e| Self::p_expr_with_loc(location, n, e),
+                    &c.embedded_subscript_index,
+                    env,
+                )?,
+            )),
+            ShapeExpression(c) => Ok(E_::Shape(Self::could_map(
+                &|n: &Syntax<T, V>, e: &mut Env| {
+                    Self::mp_shape_expression_field(&Self::p_expr, n, e)
+                },
+                &c.shape_expression_fields,
+                env,
+            )?)),
+            ObjectCreationExpression(c) => {
+                Self::p_expr_impl_(location, &c.object_creation_object, env, Some(pos))
+            }
+            ConstructorCall(c) => {
+                let (args, varargs) = split_args_varargs(&c.constructor_call_argument_list, env)?;
+                let (e, hl) = match &c.constructor_call_type.syntax {
+                    GenericTypeSpecifier(c) => {
+                        let name = Self::pos_name(&c.generic_class_type, env)?;
+                        let hints = match &c.generic_argument_list.syntax {
+                            TypeArguments(c) => {
+                                Self::could_map(&Self::p_hint, &c.type_arguments_types, env)?
+                            }
+                            _ => Self::missing_syntax(
+                                None,
+                                "generic type arguments",
+                                &c.generic_argument_list,
+                                env,
+                            )?,
+                        };
+                        (mk_id_expr(name), hints)
+                    }
+                    SimpleTypeSpecifier(_) => {
+                        let name = Self::pos_name(&c.constructor_call_type, env)?;
+                        (mk_id_expr(name), vec![])
+                    }
+                    _ => (Self::p_expr(&c.constructor_call_type, env)?, vec![]),
+                };
+                match e.1.as_ref() {
+                    E_::Id(_) => {
+                        // TODO: report
+                    }
+                    _ => {}
+                }
+                Ok(E_::New(
+                    aast::ClassId(pos.clone(), aast::ClassId_::CIexpr(e)),
+                    hl,
+                    args,
+                    varargs,
+                    pos,
+                ))
+            }
+            GenericTypeSpecifier(c) => {
+                if !c.generic_argument_list.is_missing() {
+                    Self::raise_parsing_error(
+                        &c.generic_argument_list,
+                        env,
+                        &syntax_error::targs_not_allowed,
+                    )
+                }
+                let name = Self::pos_name(&c.generic_class_type, env)?;
+                Ok(E_::Id(name))
+            }
+            RecordCreationExpression(c) => {
+                let rec_type = &c.record_creation_type;
+                let e = match &rec_type.syntax {
+                    SimpleTypeSpecifier(_) => {
+                        let name = Self::pos_name(rec_type, env)?;
+                        E::new(name.0.clone(), E_::Id(name))
+                    }
+                    _ => Self::p_expr(rec_type, env)?,
+                };
+                let is_record_array =
+                    Self::token_kind(&c.record_creation_array_token) == Some(TK::At);
+                Ok(E_::Record(
+                    aast::ClassId(pos, aast::ClassId_::CIexpr(e)),
+                    is_record_array,
+                    Self::could_map(&Self::p_member, &c.record_creation_members, env)?,
+                ))
+            }
             LiteralExpression(child) => {
                 Self::p_expr_lit(location, node, &child.literal_expression, env)
             }
-            _ => not_impl!(),
+            PrefixedStringExpression(c) => {
+                /* Temporarily allow only`re`- prefixed strings */
+                let name_text = Self::text(&c.prefixed_string_name, env);
+                if name_text != "re" {
+                    Self::raise_parsing_error(node, env, &syntax_error::non_re_prefix);
+                }
+                Ok(E_::PrefixedString(
+                    name_text,
+                    Self::p_expr(&c.prefixed_string_str, env)?,
+                ))
+            }
+            IsExpression(c) => Ok(E_::Is(
+                Self::p_expr(&c.is_left_operand, env)?,
+                Self::p_hint(&c.is_right_operand, env)?,
+            )),
+            AsExpression(c) => Ok(E_::As(
+                Self::p_expr(&c.as_left_operand, env)?,
+                Self::p_hint(&c.as_right_operand, env)?,
+                false,
+            )),
+            NullableAsExpression(c) => Ok(E_::As(
+                Self::p_expr(&c.nullable_as_left_operand, env)?,
+                Self::p_hint(&c.nullable_as_right_operand, env)?,
+                true,
+            )),
+            AnonymousFunction(c) => {
+                if env.parser_options.po_disable_static_closures
+                    && Self::token_kind(&c.anonymous_static_keyword) == Some(TK::Static)
+                {
+                    Self::raise_parsing_error(
+                        node,
+                        env,
+                        &syntax_error::static_closures_are_disabled,
+                    );
+                }
+                let p_arg = |n: &Syntax<T, V>, e: &mut Env| match &n.syntax {
+                    Token(_) => mk_name_lid(n, e),
+                    _ => Self::missing_syntax(None, "use variable", n, e),
+                };
+                let p_use = |n: &Syntax<T, V>, e: &mut Env| match &n.syntax {
+                    AnonymousFunctionUseClause(c) => {
+                        Self::could_map(&p_arg, &c.anonymous_use_variables, e)
+                    }
+                    _ => Ok(vec![]),
+                };
+                let suspension_kind = Self::mk_suspension_kind(
+                    node,
+                    env,
+                    &c.anonymous_async_keyword,
+                    &c.anonymous_coroutine_keyword,
+                );
+                let mut env1 = env.clone();
+                env1.top_level_statements = false;
+                let (body, yield_) =
+                    Self::mp_yielding(&Self::p_function_body, &c.anonymous_body, &mut env1)?;
+                let doc_comment =
+                    Self::extract_docblock(node, env).or_else(|| env.top_docblock().clone());
+                let user_attributes = Self::p_user_attributes(&c.anonymous_attribute_spec, env)?;
+                let external = c.anonymous_body.is_external();
+                let params = Self::could_map(&Self::p_fun_param, &c.anonymous_parameters, env)?;
+                let name_pos = Self::p_function(node, env);
+                let fun = aast::Fun_ {
+                    span: Self::p_pos(node, env),
+                    annotation: (),
+                    mode: Self::mode_annotation(env.file_mode()),
+                    ret: aast::TypeHint(
+                        (),
+                        Self::mp_optional(&Self::p_hint, &c.anonymous_type, env)?,
+                    ),
+                    name: ast_defs::Id(name_pos, String::from(";anonymous")),
+                    tparams: vec![],
+                    where_constraints: vec![],
+                    body: aast::FuncBody {
+                        ast: body,
+                        annotation: (),
+                    },
+                    fun_kind: Self::mk_fun_kind(suspension_kind, yield_),
+                    variadic: Self::determine_variadicity(&params),
+                    params,
+                    user_attributes,
+                    file_attributes: vec![],
+                    external,
+                    namespace: Self::mk_empty_ns_env(env),
+                    doc_comment,
+                    static_: !c.anonymous_static_keyword.is_missing(),
+                };
+                let uses = p_use(&c.anonymous_use, env).unwrap_or_else(|_| vec![]);
+                Ok(E_::Efun(fun, uses))
+            }
+            AwaitableCreationExpression(c) => {
+                let suspension_kind =
+                    Self::mk_suspension_kind(node, env, &c.awaitable_async, &c.awaitable_coroutine);
+                let (blk, yld) = Self::mp_yielding(
+                    &Self::p_function_body,
+                    &c.awaitable_compound_statement,
+                    env,
+                )?;
+                let user_attributes = Self::p_user_attributes(&c.awaitable_attribute_spec, env)?;
+                let external = c.awaitable_compound_statement.is_external();
+                let name_pos = Self::p_function(node, env);
+                let body = aast::Fun_ {
+                    span: pos.clone(),
+                    annotation: (),
+                    mode: Self::mode_annotation(env.file_mode()),
+                    ret: aast::TypeHint((), None),
+                    name: ast_defs::Id(name_pos, String::from(";anonymous")),
+                    tparams: vec![],
+                    where_constraints: vec![],
+                    body: aast::FuncBody {
+                        ast: if blk.len() == 0 {
+                            let pos = Self::p_pos(&c.awaitable_compound_statement, env);
+                            vec![aast::Stmt::noop(pos)]
+                        } else {
+                            blk
+                        },
+                        annotation: (),
+                    },
+                    fun_kind: Self::mk_fun_kind(suspension_kind, yld),
+                    variadic: Self::determine_variadicity(&[]),
+                    params: vec![],
+                    user_attributes,
+                    file_attributes: vec![],
+                    external,
+                    namespace: Self::mk_empty_ns_env(env),
+                    doc_comment: None,
+                    static_: false,
+                };
+                Ok(E_::Call(
+                    aast::CallType::Cnormal,
+                    E::new(pos, E_::Lfun(body, vec![])),
+                    vec![],
+                    vec![],
+                    vec![],
+                ))
+            }
+            XHPExpression(c) => not_impl!(),
+            PocketAtomExpression(c) => Ok(E_::PUAtom(
+                Self::pos_name(&c.pocket_atom_expression, env)?.1,
+            )),
+            PocketIdentifierExpression(c) => {
+                let mk_class_id = |e: aast!(Expr<,>)| aast::ClassId(pos, aast::ClassId_::CIexpr(e));
+                let qual = Self::p_expr(&c.pocket_identifier_qualifier, env)?;
+                let qual = if env.codegen() {
+                    mk_class_id(qual)
+                } else if let E_::Lvar(a) = *qual.1 {
+                    let p = qual.0;
+                    let expr = E::new(p.clone(), E_::Id(ast_defs::Id(p, (a.1).1)));
+                    mk_class_id(expr)
+                } else {
+                    mk_class_id(qual)
+                };
+                let E(p, expr_) = Self::p_expr(&c.pocket_identifier_field, env)?;
+                let field = match *expr_ {
+                    E_::String(id) => (p, id),
+                    E_::Id(ast_defs::Id(p, n)) => (p, n),
+                    _ => Self::missing_syntax(None, "PocketIdentifierExpression field", node, env)?,
+                };
+                let E(p, expr_) = Self::p_expr(&c.pocket_identifier_name, env)?;
+                let name = match *expr_ {
+                    E_::String(id) => (p, id),
+                    E_::Id(ast_defs::Id(p, n)) => (p, n),
+                    _ => Self::missing_syntax(None, "PocketIdentifierExpression name", node, env)?,
+                };
+                Ok(E_::PUIdentifier(qual, field, name))
+            }
+            _ => Self::missing_syntax(Some(E_::Null), "expression", node, env),
+        }
+    }
+
+    fn p_bop(
+        node: &Syntax<T, V>,
+        lhs: aast!(Expr<,>),
+        rhs: aast!(Expr<,>),
+        env: &mut Env,
+    ) -> ret_aast!(Expr_<,>) {
+        use aast::Expr_ as E_;
+        use ast_defs::Bop::*;
+        let mk = |op, l, r| Ok(E_::Binop(op, l, r));
+        let mk_eq = |op, l, r| Ok(E_::Binop(Eq(Some(Box::new(op))), l, r));
+        match Self::token_kind(node) {
+            Some(TK::Equal) => mk(Eq(None), lhs, rhs),
+            Some(TK::Bar) => mk(Bar, lhs, rhs),
+            Some(TK::Ampersand) => mk(Amp, lhs, rhs),
+            Some(TK::Plus) => mk(Plus, lhs, rhs),
+            Some(TK::Minus) => mk(Minus, lhs, rhs),
+            Some(TK::Star) => mk(Star, lhs, rhs),
+            Some(TK::Carat) => mk(Xor, lhs, rhs),
+            Some(TK::Slash) => mk(Slash, lhs, rhs),
+            Some(TK::Dot) => mk(Dot, lhs, rhs),
+            Some(TK::Percent) => mk(Percent, lhs, rhs),
+            Some(TK::LessThan) => mk(Lt, lhs, rhs),
+            Some(TK::GreaterThan) => mk(Gt, lhs, rhs),
+            Some(TK::EqualEqual) => mk(Eqeq, lhs, rhs),
+            Some(TK::LessThanEqual) => mk(Lte, lhs, rhs),
+            Some(TK::GreaterThanEqual) => mk(Gte, lhs, rhs),
+            Some(TK::StarStar) => mk(Starstar, lhs, rhs),
+            Some(TK::ExclamationEqual) => mk(Diff, lhs, rhs),
+            Some(TK::BarEqual) => mk_eq(Bar, lhs, rhs),
+            Some(TK::PlusEqual) => mk_eq(Plus, lhs, rhs),
+            Some(TK::MinusEqual) => mk_eq(Minus, lhs, rhs),
+            Some(TK::StarEqual) => mk_eq(Star, lhs, rhs),
+            Some(TK::StarStarEqual) => mk_eq(Starstar, lhs, rhs),
+            Some(TK::SlashEqual) => mk_eq(Slash, lhs, rhs),
+            Some(TK::DotEqual) => mk_eq(Dot, lhs, rhs),
+            Some(TK::PercentEqual) => mk_eq(Percent, lhs, rhs),
+            Some(TK::CaratEqual) => mk_eq(Xor, lhs, rhs),
+            Some(TK::AmpersandEqual) => mk_eq(Amp, lhs, rhs),
+            Some(TK::BarBar) => mk(Barbar, lhs, rhs),
+            Some(TK::AmpersandAmpersand) => mk(Ampamp, lhs, rhs),
+            Some(TK::LessThanLessThan) => mk(Ltlt, lhs, rhs),
+            Some(TK::GreaterThanGreaterThan) => mk(Gtgt, lhs, rhs),
+            Some(TK::EqualEqualEqual) => mk(Eqeqeq, lhs, rhs),
+            Some(TK::LessThanLessThanEqual) => mk_eq(Ltlt, lhs, rhs),
+            Some(TK::GreaterThanGreaterThanEqual) => mk_eq(Gtgt, lhs, rhs),
+            Some(TK::ExclamationEqualEqual) => mk(Diff2, lhs, rhs),
+            Some(TK::LessThanEqualGreaterThan) => mk(Cmp, lhs, rhs),
+            Some(TK::QuestionQuestion) => mk(QuestionQuestion, lhs, rhs),
+            Some(TK::QuestionQuestionEqual) => mk_eq(QuestionQuestion, lhs, rhs),
+            /* The ugly duckling; In the FFP, `|>` is parsed as a
+            * `BinaryOperator`, whereas the typed AST has separate constructors for
+            * Pipe and Binop. This is why we don't just project onto a
+            * `bop`, but a `expr -> expr -> expr_`.
+            */
+            //Some(TK::BarGreaterThan) => E_::Pipe(lhs, rhs),
+            Some(TK::BarGreaterThan) => not_impl!(),
+            Some(TK::QuestionColon) => Ok(E_::Eif(lhs, None, rhs)),
+            _ => Self::missing_syntax(None, "binary operator", node, env),
         }
     }
 
@@ -788,8 +2050,7 @@ where
             match &n.syntax {
                 UsingStatementFunctionScoped(_) => not_impl!(),
                 _ => {
-                    let mut h = Self::p_stmt_unsafe(n, env)?;
-                    result.append(&mut h);
+                    result.push(Self::p_stmt(n, env)?);
                 }
             }
         }
@@ -802,29 +2063,556 @@ where
         } else {
             blk
         };
-        Ok(aast::Stmt(pos, Box::new(aast::Stmt_::Block(body))))
+        Ok(aast::Stmt::new(pos, aast::Stmt_::Block(body)))
+    }
+
+    fn is_simple_assignment_await_expression(node: &Syntax<T, V>) -> bool {
+        match &node.syntax {
+            BinaryExpression(c) => {
+                Self::token_kind(&c.binary_operator) == Some(TK::Equal)
+                    && Self::is_simple_await_expression(&c.binary_right_operand)
+            }
+            _ => false,
+        }
+    }
+
+    fn is_simple_await_expression(node: &Syntax<T, V>) -> bool {
+        match &node.syntax {
+            PrefixUnaryExpression(c) => {
+                Self::token_kind(&c.prefix_unary_operator) == Some(TK::Await)
+            }
+            _ => false,
+        }
+    }
+
+    fn with_new_nonconcurrent_scrope<F, R>(f: F, env: &mut Env) -> R
+    where
+        F: FnOnce(&mut Env) -> R,
+    {
+        let saved_lifted_awaits = env.lifted_awaits.take();
+        let result = f(env);
+        env.lifted_awaits = saved_lifted_awaits;
+        result
+    }
+
+    fn with_new_concurrent_scrope<F, R>(f: F, env: &mut Env) -> ret!((LiftedAwaitExprs, R))
+    where
+        F: FnOnce(&mut Env) -> ret!(R),
+    {
+        let saved_lifted_awaits = env.lifted_awaits.replace(LiftedAwaits {
+            awaits: vec![],
+            lift_kind: LiftedAwaitKind::LiftedFromConcurrent,
+        });
+        let result = f(env);
+        let lifted_awaits = mem::replace(&mut env.lifted_awaits, saved_lifted_awaits);
+        let result = result?;
+        let awaits = match lifted_awaits {
+            Some(la) => Self::process_lifted_awaits(la, env)?,
+            None => Self::failwith("lifted awaits should not be None")?,
+        };
+        Ok((awaits, result))
+    }
+
+    fn process_lifted_awaits(mut awaits: LiftedAwaits, env: &Env) -> ret!(LiftedAwaitExprs) {
+        for await_ in awaits.awaits.iter() {
+            if &(await_.1).0 == env.pos_none() {
+                return Self::failwith("none pos in lifted awaits");
+            }
+        }
+        awaits
+            .awaits
+            .sort_unstable_by(|a1, a2| Pos::compare(&(a1.1).0, &(a2.1).0));
+        Ok(awaits.awaits)
+    }
+
+    fn clear_statement_scope<F, R>(f: F, env: &mut Env) -> R
+    where
+        F: FnOnce(&mut Env) -> R,
+    {
+        use LiftedAwaitKind::*;
+        match &env.lifted_awaits {
+            Some(LiftedAwaits { lift_kind, .. }) if *lift_kind == LiftedFromStatement => {
+                let saved_lifted_awaits = env.lifted_awaits.take();
+                let result = f(env);
+                env.lifted_awaits = saved_lifted_awaits;
+                result
+            }
+            _ => f(env),
+        }
+    }
+
+    fn lift_awaits_in_statement<F>(f: F, node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Stmt<,>)
+    where
+        F: FnOnce(&mut Env) -> ret_aast!(Stmt<,>),
+    {
+        use LiftedAwaitKind::*;
+        let (lifted_awaits, result) = match env.lifted_awaits {
+            Some(LiftedAwaits { lift_kind, .. }) if lift_kind == LiftedFromConcurrent => {
+                (None, f(env)?)
+            }
+            _ => {
+                let saved = env.lifted_awaits.replace(LiftedAwaits {
+                    awaits: vec![],
+                    lift_kind: LiftedFromStatement,
+                });
+                let result = f(env);
+                let lifted_awaits = mem::replace(&mut env.lifted_awaits, saved);
+                let result = result?;
+                (lifted_awaits, result)
+            }
+        };
+        if let Some(lifted_awaits) = lifted_awaits {
+            if !lifted_awaits.awaits.is_empty() {
+                let awaits = Self::process_lifted_awaits(lifted_awaits, env)?;
+                return Ok(aast::Stmt::new(
+                    Self::p_pos(node, env),
+                    aast::Stmt_::Awaitall((awaits, vec![result])),
+                ));
+            }
+        }
+        Ok(result)
+    }
+
+    fn lift_await(
+        parent_pos: Pos,
+        expr: aast!(Expr<,>),
+        env: &mut Env,
+        location: ExprLocation,
+    ) -> ret_aast!(Expr_<,>) {
+        use ExprLocation::*;
+        match (&env.lifted_awaits, location) {
+            (_, UsingStatement) | (_, RightOfAssignmentInUsingStatement) | (None, _) => {
+                Ok(aast::Expr_::Await(expr))
+            }
+            (Some(_), _) => {
+                if location != AsStatement {
+                    let name = env.make_tmp_var_name();
+                    let lid = aast::Lid::new(parent_pos, name.clone());
+                    let await_lid = aast::Lid::new(expr.0.clone(), name);
+                    let await_ = (Some(await_lid), expr);
+                    env.lifted_awaits.as_mut().map(|aw| aw.awaits.push(await_));
+                    Ok(aast::Expr_::Lvar(lid))
+                } else {
+                    env.lifted_awaits
+                        .as_mut()
+                        .map(|aw| aw.awaits.push((None, expr)));
+                    Ok(aast::Expr_::Null)
+                }
+            }
+        }
     }
 
     fn p_stmt(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Stmt<,>) {
-        // TODO: clear_statement_scope & extract_and_push_docblock
-        // TODO: add lift_awaits_in_statement
-        let pos = Self::p_pos(node, env);
-        match &node.syntax {
-            CompoundStatement(c) => Self::handle_loop_body(pos, &c.compound_statements, env),
-            ReturnStatement(c) => {
-                let expr = match &c.return_expression.syntax {
-                    Missing => None,
-                    _ => Some(Self::p_expr_with_loc(
-                        ExprLocation::RightOfReturn,
-                        &c.return_expression,
-                        env,
-                    )?),
-                };
+        Self::clear_statement_scope(
+            |e: &mut Env| {
+                let docblock = Self::extract_docblock(node, e);
+                e.push_docblock(docblock);
+                let result = Self::p_stmt_(node, e);
+                e.pop_docblock();
+                result
+            },
+            env,
+        )
+    }
 
-                Ok(aast::Stmt(pos, Box::new(aast::Stmt_::Return(expr))))
+    fn p_stmt_(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Stmt<,>) {
+        let pos = Self::p_pos(node, env);
+        use aast::{Stmt as S, Stmt_ as S_};
+        match &node.syntax {
+            SwitchStatement(c) => {
+                let p_label = |n: &Syntax<T, V>, e: &mut Env| -> ret_aast!(Case<,>) {
+                    match &n.syntax {
+                        CaseLabel(c) => Ok(aast::Case::Case(
+                            Self::p_expr(&c.case_expression, e)?,
+                            vec![],
+                        )),
+                        DefaultLabel(_) => Ok(aast::Case::Default(Self::p_pos(n, e), vec![])),
+                        _ => Self::missing_syntax(None, "switch label", n, e),
+                    }
+                };
+                let p_section = |n: &Syntax<T, V>, e: &mut Env| -> ret!(Vec<aast!(Case<,>)>) {
+                    match &n.syntax {
+                        SwitchSection(c) => {
+                            let mut blk =
+                                Self::could_map(&Self::p_stmt, &c.switch_section_statements, e)?;
+                            if !c.switch_section_fallthrough.is_missing() {
+                                blk.push(S::new(Pos::make_none(), S_::Fallthrough));
+                            }
+                            let mut labels =
+                                Self::could_map(&p_label, &c.switch_section_labels, e)?;
+                            match labels.last_mut() {
+                                Some(aast::Case::Default(_, b)) => *b = blk,
+                                Some(aast::Case::Case(_, b)) => *b = blk,
+                                _ => Self::raise_parsing_error(n, e, "Malformed block result"),
+                            }
+                            Ok(labels)
+                        }
+                        _ => Self::missing_syntax(None, "switch section", n, e),
+                    }
+                };
+                let f = |env: &mut Env| -> ret_aast!(Stmt<,>) {
+                    Ok(S::new(
+                        pos,
+                        S_::Switch(
+                            Self::p_expr(&c.switch_expression, env)?,
+                            itertools::concat(Self::could_map(
+                                &p_section,
+                                &c.switch_sections,
+                                env,
+                            )?),
+                        ),
+                    ))
+                };
+                Self::lift_awaits_in_statement(f, node, env)
+            }
+            IfStatement(c) => {
+                let p_else_if =
+                    |n: &Syntax<T, V>, e: &mut Env| -> ret!((aast!(Expr<,>), aast!(Block<,>))) {
+                        match &n.syntax {
+                            ElseifClause(c) => Ok((
+                                Self::p_expr(&c.elseif_condition, e)?,
+                                Self::p_block(true, &c.elseif_statement, e)?,
+                            )),
+                            _ => Self::missing_syntax(None, "elseif clause", n, e),
+                        }
+                    };
+                let f = |env: &mut Env| -> ret_aast!(Stmt<,>) {
+                    let condition = Self::p_expr(&c.if_condition, env)?;
+                    let statement =
+                        Self::p_block(true /* remove noop */, &c.if_statement, env)?;
+                    let else_ = match &c.if_else_clause.syntax {
+                        ElseClause(c) => Self::p_block(true, &c.else_statement, env)?,
+                        Missing => vec![Self::mk_noop()],
+                        _ => Self::missing_syntax(None, "else clause", &c.if_else_clause, env)?,
+                    };
+                    let else_ifs = Self::could_map(&p_else_if, &c.if_elseif_clauses, env)?;
+                    let else_if = else_ifs
+                        .into_iter()
+                        .rev()
+                        .fold(else_, |child, (cond, stmts)| {
+                            vec![S::new(pos.clone(), S_::If(cond, stmts, child))]
+                        });
+                    Ok(S::new(pos, S_::If(condition, statement, else_if)))
+                };
+                Self::lift_awaits_in_statement(f, node, env)
+            }
+            ExpressionStatement(c) => {
+                let expr = &c.expression_statement_expression;
+                let f = |e: &mut Env| -> ret_aast!(Stmt<,>) {
+                    if expr.is_missing() {
+                        Ok(S::new(pos, S_::Noop))
+                    } else {
+                        Ok(S::new(
+                            pos,
+                            S_::Expr(Self::p_expr_with_loc(ExprLocation::AsStatement, expr, e)?),
+                        ))
+                    }
+                };
+                if Self::is_simple_assignment_await_expression(expr)
+                    || Self::is_simple_await_expression(expr)
+                {
+                    f(env)
+                } else {
+                    Self::lift_awaits_in_statement(f, node, env)
+                }
+            }
+            CompoundStatement(c) => Self::handle_loop_body(pos, &c.compound_statements, env),
+            SyntaxList(_) => Self::handle_loop_body(pos, node, env),
+            ThrowStatement(c) => Self::lift_awaits_in_statement(
+                |e: &mut Env| -> ret_aast!(Stmt<,>) {
+                    Ok(S::new(
+                        pos,
+                        S_::Throw(Self::p_expr(&c.throw_expression, e)?),
+                    ))
+                },
+                node,
+                env,
+            ),
+            DoStatement(c) => Ok(S::new(
+                pos,
+                S_::Do(
+                    Self::p_block(false /* remove noop */, &c.do_body, env)?,
+                    Self::p_expr(&c.do_condition, env)?,
+                ),
+            )),
+            WhileStatement(c) => Ok(S::new(
+                pos,
+                S_::While(
+                    Self::p_expr(&c.while_condition, env)?,
+                    Self::p_block(true, &c.while_body, env)?,
+                ),
+            )),
+            UsingStatementBlockScoped(c) => {
+                let f = |e: &mut Env| -> ret_aast!(Stmt<,>) {
+                    Ok(S::new(
+                        pos,
+                        S_::Using(aast::UsingStmt {
+                            is_block_scoped: true,
+                            has_await: !&c.using_block_await_keyword.is_missing(),
+                            expr: Self::p_expr_l_with_loc(
+                                ExprLocation::UsingStatement,
+                                &c.using_block_expressions,
+                                e,
+                            )?,
+                            block: Self::p_block(false, &c.using_block_body, e)?,
+                        }),
+                    ))
+                };
+                Self::lift_awaits_in_statement(f, node, env)
+            }
+            UsingStatementFunctionScoped(c) => {
+                let f = |e: &mut Env| -> ret_aast!(Stmt<,>) {
+                    Ok(S::new(
+                        pos,
+                        S_::Using(aast::UsingStmt {
+                            is_block_scoped: false,
+                            has_await: !&c.using_function_await_keyword.is_missing(),
+                            expr: Self::p_expr_l_with_loc(
+                                ExprLocation::UsingStatement,
+                                &c.using_function_expression,
+                                e,
+                            )?,
+                            block: vec![Self::mk_noop()],
+                        }),
+                    ))
+                };
+                Self::lift_awaits_in_statement(f, node, env)
+            }
+            LetStatement(c) => {
+                let f = |e: &mut Env| -> ret_aast!(Stmt<,>) {
+                    let id = Self::lid_from_pos_name(pos.clone(), &c.let_statement_name, e)?;
+                    let ty = Self::mp_optional(&Self::p_hint, &c.let_statement_type, e)?;
+                    let expr = Self::p_simple_initializer(&c.let_statement_initializer, e)?;
+                    Ok(S::new(pos, S_::Let(id, ty, expr)))
+                };
+                Self::lift_awaits_in_statement(f, node, env)
+            }
+            ForStatement(c) => {
+                let f = |e: &mut Env| -> ret_aast!(Stmt<,>) {
+                    let ini = Self::p_expr_l(&c.for_initializer, e)?;
+                    let ctr = Self::p_expr_l(&c.for_control, e)?;
+                    let eol = Self::p_expr_l(&c.for_end_of_loop, e)?;
+                    let blk = Self::p_block(true, &c.for_body, e)?;
+                    Ok(S::new(pos, S_::For(ini, ctr, eol, blk)))
+                };
+                Self::lift_awaits_in_statement(f, node, env)
+            }
+            ForeachStatement(c) => {
+                let f = |e: &mut Env| -> ret_aast!(Stmt<,>) {
+                    let col = Self::p_expr(&c.foreach_collection, e)?;
+                    let akw = match Self::token_kind(&c.foreach_await_keyword) {
+                        Some(TK::Await) => Some(Self::p_pos(&c.foreach_await_keyword, e)),
+                        _ => None,
+                    };
+                    let value = Self::p_expr(&c.foreach_value, e)?;
+                    let akv = match (akw, &c.foreach_key.syntax) {
+                        (Some(p), Missing) => aast::AsExpr::AwaitAsV(p, value),
+                        (None, Missing) => aast::AsExpr::AsV(value),
+                        (Some(p), _) => {
+                            aast::AsExpr::AwaitAsKv(p, Self::p_expr(&c.foreach_key, e)?, value)
+                        }
+                        (None, _) => aast::AsExpr::AsKv(Self::p_expr(&c.foreach_key, e)?, value),
+                    };
+                    let blk = Self::p_block(true, &c.foreach_body, e)?;
+                    Ok(S::new(pos, S_::Foreach(col, akv, blk)))
+                };
+                Self::lift_awaits_in_statement(f, node, env)
+            }
+            TryStatement(c) => Ok(S::new(
+                pos,
+                S_::Try(
+                    Self::p_block(false, &c.try_compound_statement, env)?,
+                    Self::could_map(
+                        &|n: &Syntax<T, V>, e| match &n.syntax {
+                            CatchClause(c) => Ok(aast::Catch(
+                                Self::pos_name(&c.catch_type, e)?,
+                                Self::lid_from_name(&c.catch_variable, e)?,
+                                Self::p_block(true, &c.catch_body, e)?,
+                            )),
+                            _ => Self::missing_syntax(None, "catch clause", n, e),
+                        },
+                        &c.try_catch_clauses,
+                        env,
+                    )?,
+                    match &c.try_finally_clause.syntax {
+                        FinallyClause(c) => Self::p_block(false, &c.finally_body, env)?,
+                        _ => vec![],
+                    },
+                ),
+            )),
+            ReturnStatement(c) => {
+                let f = |e: &mut Env| -> ret_aast!(Stmt<,>) {
+                    let expr = match &c.return_expression.syntax {
+                        Missing => None,
+                        _ => Some(Self::p_expr_with_loc(
+                            ExprLocation::RightOfReturn,
+                            &c.return_expression,
+                            e,
+                        )?),
+                    };
+                    Ok(aast::Stmt::new(pos, aast::Stmt_::Return(expr)))
+                };
+                if Self::is_simple_await_expression(&c.return_expression) {
+                    f(env)
+                } else {
+                    Self::lift_awaits_in_statement(f, node, env)
+                }
+            }
+            GotoLabel(c) => {
+                if env.is_typechecker() && !env.parser_options.po_allow_goto {
+                    Self::raise_parsing_error(node, env, &syntax_error::goto_label);
+                }
+                Ok(S::new(
+                    pos,
+                    S_::GotoLabel((
+                        Self::p_pos(&c.goto_label_name, env),
+                        Self::text(&c.goto_label_name, env),
+                    )),
+                ))
+            }
+            GotoStatement(c) => {
+                if env.is_typechecker() && !env.parser_options.po_allow_goto {
+                    Self::raise_parsing_error(node, env, &syntax_error::goto_label);
+                }
+                Ok(S::new(
+                    pos,
+                    S_::Goto(Self::p_pstring(&c.goto_statement_label_name, env)?),
+                ))
+            }
+            EchoStatement(c) => {
+                let f = |e: &mut Env| -> ret_aast!(Stmt<,>) {
+                    let echo = match &c.echo_keyword.syntax {
+                        QualifiedName(_) | SimpleTypeSpecifier(_) | Token(_) => {
+                            let name = Self::pos_name(&c.echo_keyword, e)?;
+                            aast::Expr::new(name.0.clone(), aast::Expr_::Id(name))
+                        }
+                        _ => Self::missing_syntax(None, "id", &c.echo_keyword, e)?,
+                    };
+                    let args = Self::could_map(&Self::p_expr, &c.echo_expressions, e)?;
+                    Ok(S::new(
+                        pos.clone(),
+                        S_::Expr(aast::Expr::new(
+                            pos,
+                            aast::Expr_::Call(aast::CallType::Cnormal, echo, vec![], args, vec![]),
+                        )),
+                    ))
+                };
+                Self::lift_awaits_in_statement(f, node, env)
+            }
+            UnsetStatement(c) => {
+                let f = |e: &mut Env| -> ret_aast!(Stmt<,>) {
+                    let args = Self::could_map(&Self::p_expr, &c.unset_variables, e)?;
+                    if e.parser_options.po_disable_unset_class_const {
+                        args.iter()
+                            .for_each(|arg| Self::check_mutate_class_const(arg, node, e))
+                    }
+                    let unset = match &c.unset_keyword.syntax {
+                        QualifiedName(_) | SimpleTypeSpecifier(_) | Token(_) => {
+                            let name = Self::pos_name(&c.unset_keyword, e)?;
+                            aast::Expr::new(name.0.clone(), aast::Expr_::Id(name))
+                        }
+                        _ => Self::missing_syntax(None, "id", &c.unset_keyword, e)?,
+                    };
+                    Ok(S::new(
+                        pos.clone(),
+                        S_::Expr(aast::Expr::new(
+                            pos,
+                            aast::Expr_::Call(aast::CallType::Cnormal, unset, vec![], args, vec![]),
+                        )),
+                    ))
+                };
+                Self::lift_awaits_in_statement(f, node, env)
+            }
+            BreakStatement(c) => {
+                let brk = Self::mp_optional(&Self::p_expr, &c.break_level, env)?
+                    .map_or(S_::Break, S_::TempBreak);
+                Ok(S::new(pos, brk))
+            }
+            ContinueStatement(c) => {
+                let ctn = Self::mp_optional(&Self::p_expr, &c.continue_level, env)?
+                    .map_or(S_::Continue, S_::TempContinue);
+                Ok(S::new(pos, ctn))
+            }
+            ConcurrentStatement(c) => {
+                let (lifted_awaits, S(stmt_pos, stmt)) = Self::with_new_concurrent_scrope(
+                    |e: &mut Env| Self::p_stmt(&c.concurrent_statement, e),
+                    env,
+                )?;
+                let stmt = match *stmt {
+                    S_::Block(stmts) => {
+                        use aast::{Expr as E, Expr_ as E_};
+                        use ast_defs::Bop::Eq;
+                        /* Reuse tmp vars from lifted_awaits, this is safe because there will
+                         * always be more awaits with tmp vars than statements with assignments */
+                        let mut tmp_vars = lifted_awaits
+                            .iter()
+                            .filter_map(|lifted_await| lifted_await.0.as_ref().map(|x| &x.1));
+                        let mut body_stmts = vec![];
+                        let mut assign_stmts = vec![];
+                        for n in stmts.into_iter() {
+                            if !n.is_assign_expr() {
+                                body_stmts.push(n);
+                                continue;
+                            }
+
+                            if let Some(tv) = tmp_vars.next() {
+                                let S(p1, s_) = n;
+                                if let S_::Expr(E(p2, e_)) = *s_ {
+                                    if let E_::Binop(Eq(op), e1, e2) = *e_ {
+                                        let tmp_n = E::mk_lvar(&e2.0, &(tv.1));
+                                        if tmp_n.lvar_name() != e2.lvar_name() {
+                                            let new_n = S::new(
+                                                p1.clone(),
+                                                S_::Expr(E::new(
+                                                    p2.clone(),
+                                                    E_::Binop(Eq(None), tmp_n.clone(), e2.clone()),
+                                                )),
+                                            );
+                                            body_stmts.push(new_n);
+                                        }
+                                        let assign_stmt = S::new(
+                                            p1,
+                                            S_::Expr(E::new(p2, E_::Binop(Eq(op), e1, tmp_n))),
+                                        );
+                                        assign_stmts.push(assign_stmt);
+                                        continue;
+                                    }
+                                }
+
+                                Self::failwith("Expect assignment stmt")?;
+                            } else {
+                                Self::raise_parsing_error_pos(
+                                    &stmt_pos,
+                                    env,
+                                    &syntax_error::statement_without_await_in_concurrent_block,
+                                );
+                                body_stmts.push(n)
+                            }
+                        }
+                        body_stmts.append(&mut assign_stmts);
+                        S::new(stmt_pos, S_::Block(body_stmts))
+                    }
+                    _ => Self::failwith("Unexpected concurrent stmt structure")?,
+                };
+                Ok(S::new(pos, S_::Awaitall((lifted_awaits, vec![stmt]))))
             }
             MarkupSection(_) => Self::p_markup(node, env),
-            _ => not_impl!(),
+            _ => Self::missing_syntax(
+                Some(S::new(Pos::make_none(), S_::Noop)),
+                "statement",
+                node,
+                env,
+            ),
+        }
+    }
+
+    fn check_mutate_class_const(e: &aast!(Expr<,>), node: &Syntax<T, V>, env: &mut Env) {
+        match *(e.1) {
+            aast::Expr_::ArrayGet(ref e, Some(_)) => Self::check_mutate_class_const(e, node, env),
+            aast::Expr_::ClassConst(_, _) => {
+                Self::raise_parsing_error(node, env, &syntax_error::const_mutation)
+            }
+            _ => {}
         }
     }
 
@@ -856,7 +2644,7 @@ where
                     _ => Self::failwith("expression expected")?,
                 };
                 let stmt_ = aast::Stmt_::Markup((pos.clone(), Self::text(&markup_text, env)), expr);
-                Ok(aast::Stmt(pos, Box::new(stmt_)))
+                Ok(aast::Stmt::new(pos, stmt_))
             }
             _ => Self::failwith("invalid node"),
         }
@@ -969,7 +2757,7 @@ where
 
     fn soften_hint(attrs: &[aast!(UserAttribute<,>)], hint: aast!(Hint)) -> aast!(Hint) {
         if Self::has_soft(attrs) {
-            aast::Hint(hint.0.clone(), Box::new(aast::Hint_::Hsoft(hint)))
+            aast::Hint::new(hint.0.clone(), aast::Hint_::Hsoft(hint))
         } else {
             hint
         }
@@ -1181,9 +2969,8 @@ where
                 let function_type_parameter_list = &child.function_type_parameter_list;
                 let function_parameter_list = &child.function_parameter_list;
                 let function_type = &child.function_type;
-                // TODO: use Naming_special_names
-                let is_autoload =
-                    Self::text_str(function_name, env).eq_ignore_ascii_case("__autoload");
+                let is_autoload = Self::text_str(function_name, env)
+                    .eq_ignore_ascii_case(special_functions::AUTOLOAD);
                 if function_name.value.is_missing() {
                     Self::raise_parsing_error(node, env, &syntax_error::empty_method_name);
                 }
@@ -1216,7 +3003,13 @@ where
                     fh_return_type,
                 })
             }
-            LambdaSignature(_) => not_impl!(),
+            LambdaSignature(c) => {
+                let mut header = FunHdr::make_empty();
+                header.fh_parameters =
+                    Self::could_map(&Self::p_fun_param, &c.lambda_parameters, env)?;
+                header.fh_return_type = Self::mp_optional(&Self::p_hint, &c.lambda_type, env)?;
+                Ok(header)
+            }
             Token(_) => Ok(FunHdr::make_empty()),
             _ => Self::missing_syntax(None, "function header", node, env),
         }
@@ -1255,53 +3048,77 @@ where
         }
     }
 
-    fn p_stmt_unsafe(node: &Syntax<T, V>, env: &mut Env) -> ret!(Vec<aast!(Stmt<,>)>) {
-        Ok(vec![Self::p_stmt(node, env)?])
-    }
-
-    fn p_block(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Block<,>) {
-        let mut stmts = Self::p_stmt_unsafe(node, env)?;
-        let last = stmts.pop();
-        if let Some(stmt) = last {
-            if let aast::Stmt_::Block(mut b) = *stmt.1 {
-                stmts.append(&mut b)
+    fn p_block(remove_noop: bool, node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Block<,>) {
+        let aast::Stmt(p, stmt_) = Self::p_stmt(node, env)?;
+        if let aast::Stmt_::Block(blk) = *stmt_ {
+            if remove_noop && blk.len() == 1 {
+                if let aast::Stmt_::Noop = *(blk[0].1) {
+                    return Ok(vec![]);
+                }
             }
+            return Ok(blk);
+        } else {
+            Ok(vec![aast::Stmt(p, stmt_)])
         }
-        Ok(stmts)
     }
 
     fn mk_noop() -> aast!(Stmt<,>) {
-        aast::Stmt(Pos::make_none(), Box::new(aast::Stmt_::Noop))
+        aast::Stmt::noop(Pos::make_none())
     }
 
     fn p_function_body(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Block<,>) {
         let mk_noop_result = || Ok(vec![Self::mk_noop()]);
-        // TODO: with_new_nonconcurrent_scrope
-        match &node.syntax {
-            Missing => Ok(vec![]),
-            CompoundStatement(c) => {
-                let compound_statements = &c.compound_statements.syntax;
-                let compound_right_brace = &c.compound_right_brace.syntax;
-                match (compound_statements, compound_right_brace) {
-                    (Missing, Token(_)) => mk_noop_result(),
-                    (SyntaxList(t), _) if t.len() == 1 && t[0].is_yield() => {
-                        env.saw_yield = true;
-                        mk_noop_result()
-                    }
-                    _ => {
-                        if !env.top_level_statements
-                            && (env.file_mode() == file_info::Mode::Mdecl && !env.codegen()
-                                || env.quick_mode)
-                        {
+        let f = |e: &mut Env| -> ret_aast!(Block<,>) {
+            match &node.syntax {
+                Missing => Ok(vec![]),
+                CompoundStatement(c) => {
+                    let compound_statements = &c.compound_statements.syntax;
+                    let compound_right_brace = &c.compound_right_brace.syntax;
+                    match (compound_statements, compound_right_brace) {
+                        (Missing, Token(_)) => mk_noop_result(),
+                        (SyntaxList(t), _) if t.len() == 1 && t[0].is_yield() => {
+                            e.saw_yield = true;
                             mk_noop_result()
-                        } else {
-                            Self::p_block(node, env)
+                        }
+                        _ => {
+                            if !e.top_level_statements
+                                && (e.file_mode() == file_info::Mode::Mdecl && !e.codegen()
+                                    || e.quick_mode)
+                            {
+                                mk_noop_result()
+                            } else {
+                                Self::p_block(false /*remove noop*/, node, e)
+                            }
                         }
                     }
                 }
+                _ => {
+                    let f = |e: &mut Env| {
+                        let expr = Self::p_expr(node, e)?;
+                        Ok(aast::Stmt::new(
+                            expr.0.clone(),
+                            aast::Stmt_::Return(Some(expr)),
+                        ))
+                    };
+                    Ok(vec![Self::lift_awaits_in_statement(f, node, e)?])
+                }
             }
-            _ => not_impl!(),
-        }
+        };
+        Self::with_new_nonconcurrent_scrope(f, env)
+    }
+
+    fn mk_suspension_kind(
+        node: &Syntax<T, V>,
+        env: &mut Env,
+        async_keyword: &Syntax<T, V>,
+        coroutine_keyword: &Syntax<T, V>,
+    ) -> SuspensionKind {
+        Self::mk_suspension_kind_(
+            node,
+            env,
+            !async_keyword.is_missing(),
+            !coroutine_keyword.is_missing(),
+        )
     }
 
     fn mk_suspension_kind_(
@@ -1429,16 +3246,16 @@ where
         let outer_saw_yield = env.saw_yield;
         env.saw_yield = false;
         let r = p(node, env);
+        let saw_yield = env.saw_yield;
         env.saw_yield = outer_saw_yield;
-        let result = (r?, env.saw_yield);
-        Ok(result)
+        Ok((r?, saw_yield))
     }
 
     fn mk_empty_ns_env(env: &Env) -> NamespaceEnv {
         NamespaceEnv::empty(env.auto_ns_map.to_vec(), env.codegen())
     }
 
-    fn extract_docblock(node: &Syntax<T, V>, env: &Env) -> Option<String> {
+    fn extract_docblock(node: &Syntax<T, V>, env: &Env) -> Option<DocComment> {
         #[derive(Copy, Clone, Eq, PartialEq)]
         enum ScanState {
             DocComment,
@@ -1456,13 +3273,14 @@ where
         fn parse(str: &str, start: usize, state: ScanState, idx: usize) -> Option<String> {
             let is_whitespace = |c| c == ' ' || c == '\t' || c == '\n' || c == '\r';
             let mut s = (start, state, idx);
+            let chars = str.as_bytes();
             loop {
                 if s.2 == str.len() {
                     break None;
                 }
 
                 let next = s.2 + 1;
-                match (s.1, str.chars().nth(s.2).unwrap()) {
+                match (s.1, chars[s.2] as char) {
                     (LineCmt, '\n') => s = (next, Free, next),
                     (EndEmbedded, '/') => s = (next, Free, next),
                     (EndDoc, '/') => {
@@ -1502,7 +3320,7 @@ where
             }
         }
         let str = node.leading_text(env.indexed_source_text.source_text);
-        parse(str, 0, Free, 0)
+        parse(str, 0, Free, 0).map(Rc::new)
     }
 
     fn p_xhp_child(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(XhpChild) {
@@ -1709,15 +3527,15 @@ where
                             _ => p.clone(),
                         };
                         let e = |expr_: aast!(Expr_<,>)| -> aast!(Expr<,>) {
-                            aast::Expr(p.clone(), Box::new(expr_))
+                            aast::Expr::new(p.clone(), expr_)
                         };
                         let lid =
                             |s: &str| -> aast!(Lid) { aast::Lid(p.clone(), (0, s.to_string())) };
                         use aast::Expr_::*;
                         (
-                            aast::Stmt(
+                            aast::Stmt::new(
                                 p.clone(),
-                                Box::new(aast::Stmt_::Expr(e(Binop(
+                                aast::Stmt_::Expr(e(Binop(
                                     ast_defs::Bop::Eq(None),
                                     e(ObjGet(
                                         e(Lvar(lid("$this"))),
@@ -1725,7 +3543,7 @@ where
                                         aast::OgNullFlavor::OGNullthrows,
                                     )),
                                     e(Lvar(lid(&param.name))),
-                                )))),
+                                ))),
                             ),
                             aast::ClassVar {
                                 final_: false,
@@ -2170,6 +3988,69 @@ where
         }
     }
 
+    fn p_namespace_use_kind(kind: &Syntax<T, V>, env: &mut Env) -> ret_aast!(NsKind) {
+        use aast::NsKind::*;
+        match &kind.syntax {
+            Missing => Ok(NSClassAndNamespace),
+            _ => match Self::token_kind(kind) {
+                Some(TK::Namespace) => Ok(NSNamespace),
+                Some(TK::Type) => Ok(NSClass),
+                Some(TK::Function) => Ok(NSFun),
+                Some(TK::Const) => Ok(NSConst),
+                _ => Self::missing_syntax(None, "namespace use kind", kind, env),
+            },
+        }
+    }
+
+    fn p_namespace_use_clause(
+        prefix: Option<&Syntax<T, V>>,
+        kind: ret_aast!(NsKind),
+        node: &Syntax<T, V>,
+        env: &mut Env,
+    ) -> ret!((aast!(NsKind), aast!(Sid), aast!(Sid))) {
+        lazy_static! {
+            static ref NAMESPACE_USE: regex::Regex = regex::Regex::new("[^\\\\]*$").unwrap();
+        }
+
+        match &node.syntax {
+            NamespaceUseClause(c) => {
+                let clause_kind = &c.namespace_use_clause_kind;
+                let alias = &c.namespace_use_alias;
+                let name = &c.namespace_use_name;
+                let ast_defs::Id(p, n) = match (prefix, Self::pos_name(name, env)?) {
+                    (None, id) => id,
+                    (Some(prefix), ast_defs::Id(p, n)) => {
+                        ast_defs::Id(p, Self::pos_name(prefix, env)?.1 + &n)
+                    }
+                };
+                let alias = if alias.is_missing() {
+                    let x = NAMESPACE_USE.find(&n).unwrap().as_str();
+                    ast_defs::Id(p.clone(), x.to_string())
+                } else {
+                    Self::pos_name(alias, env)?
+                };
+                let kind = if clause_kind.is_missing() {
+                    kind
+                } else {
+                    Self::p_namespace_use_kind(clause_kind, env)
+                }?;
+                Ok((
+                    kind,
+                    ast_defs::Id(
+                        p,
+                        if n.len() > 0 && n.chars().nth(0) == Some('\\') {
+                            n
+                        } else {
+                            String::from("\\") + &n
+                        },
+                    ),
+                    alias,
+                ))
+            }
+            _ => Self::missing_syntax(None, "namespace use clause", node, env),
+        }
+    }
+
     fn p_def(node: &Syntax<T, V>, env: &mut Env) -> ret!(Vec<aast!(Def<,>)>) {
         let doc_comment_opt = Self::extract_docblock(node, env);
         match &node.syntax {
@@ -2477,14 +4358,56 @@ where
                     || env.codegen() =>
             {
                 let expr = Self::p_expr(&child.inclusion_expression, env)?;
-                Ok(vec![aast::Def::Stmt(aast::Stmt(
+                Ok(vec![aast::Def::Stmt(aast::Stmt::new(
                     Self::p_pos(node, env),
-                    Box::new(aast::Stmt_::Expr(expr)),
+                    aast::Stmt_::Expr(expr),
                 ))])
             }
-            NamespaceDeclaration(_) => not_impl!(),
-            NamespaceGroupUseDeclaration(_) => not_impl!(),
-            NamespaceUseDeclaration(_) => not_impl!(),
+            NamespaceDeclaration(c) => {
+                let name = &c.namespace_name;
+                let defs = match &c.namespace_body.syntax {
+                    NamespaceBody(c) => {
+                        let env1 = &mut env.clone_non_tls();
+                        itertools::concat(
+                            Self::as_list(&c.namespace_declarations)
+                                .iter()
+                                .map(|n| Self::p_def(n, env1))
+                                .collect::<std::result::Result<Vec<Vec<_>>, _>>()?,
+                        )
+                    }
+                    _ => vec![],
+                };
+                Ok(vec![aast::Def::Namespace(Self::pos_name(name, env)?, defs)])
+            }
+            NamespaceGroupUseDeclaration(c) => {
+                let uses: std::result::Result<Vec<_>, _> =
+                    Self::as_list(&c.namespace_group_use_clauses)
+                        .iter()
+                        .map(|n| {
+                            Self::p_namespace_use_clause(
+                                Some(&c.namespace_group_use_prefix),
+                                Self::p_namespace_use_kind(&c.namespace_group_use_kind, env),
+                                n,
+                                env,
+                            )
+                        })
+                        .collect();
+                Ok(vec![aast::Def::NamespaceUse(uses?)])
+            }
+            NamespaceUseDeclaration(c) => {
+                let uses: std::result::Result<Vec<_>, _> = Self::as_list(&c.namespace_use_clauses)
+                    .iter()
+                    .map(|n| {
+                        Self::p_namespace_use_clause(
+                            None,
+                            Self::p_namespace_use_kind(&c.namespace_use_kind, env),
+                            n,
+                            env,
+                        )
+                    })
+                    .collect();
+                Ok(vec![aast::Def::NamespaceUse(uses?)])
+            }
             FileAttributeSpecification(_) => {
                 Ok(vec![aast::Def::FileAttributes(aast::FileAttribute {
                     user_attributes: Self::p_user_attribute(node, env)?,
@@ -2497,6 +4420,65 @@ where
                 Ok(vec![])
             }
             _ => Ok(vec![aast::Def::Stmt(Self::p_stmt(node, env)?)]),
+        }
+    }
+
+    // TODO:
+    fn partial_should_check_error() -> bool {
+        true
+    }
+
+    fn post_process(env: &mut Env, program: aast!(Program<,>), acc: &mut aast!(Program<,>)) {
+        use aast::{Def::*, Expr_::*, Stmt_::*};
+        let mut saw_ns: Option<(aast!(Sid), aast!(Program<,>))> = None;
+        for def in program.into_iter() {
+            if let Namespace(_, _) = &def {
+                if let Some((n, ns_acc)) = saw_ns {
+                    acc.push(Namespace(n, ns_acc));
+                    saw_ns = None;
+                }
+            }
+
+            if let Namespace(n, defs) = def {
+                if defs.is_empty() {
+                    saw_ns = Some((n, vec![]));
+                } else {
+                    let mut acc_ = vec![];
+                    Self::post_process(env, defs, &mut acc_);
+                    acc.push(Namespace(n, acc_));
+                }
+
+                continue;
+            }
+
+            if let Stmt(s) = &def {
+                if Self::is_noop(&s) {
+                    continue;
+                }
+                let raise_error = if let Markup(_, _) = *s.1 {
+                    false
+                } else if let Expr(aast::Expr(_, ref e)) = *s.1 {
+                    if let Import(_, _) = **e {
+                        env.parser_options.po_disallow_toplevel_requires
+                    } else {
+                        true
+                    }
+                } else {
+                    env.keep_errors && env.is_typechecker() && Self::partial_should_check_error()
+                };
+                if raise_error {
+                    Self::raise_parsing_error_pos(&s.0, env, &syntax_error::toplevel_statements);
+                }
+            }
+
+            if let Some((_, ns_acc)) = &mut saw_ns {
+                ns_acc.push(def);
+            } else {
+                acc.push(def);
+            };
+        }
+        if let Some((n, defs)) = saw_ns {
+            acc.push(Namespace(n, defs));
         }
     }
 
@@ -2526,8 +4508,9 @@ where
                 },
             }
         }
-        // TODO: post process
-        Ok(acc)
+        let mut program = vec![];
+        Self::post_process(env, acc, &mut program);
+        Ok(program)
     }
 
     fn p_script(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Program<,>) {

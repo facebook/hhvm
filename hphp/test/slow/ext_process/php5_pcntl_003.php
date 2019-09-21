@@ -5,22 +5,24 @@
 // also makes less assumptions about what the blocked signal set looks like
 // coming into the test.
 <<__EntryPoint>> function main(): void {
-pcntl_sigprocmask(SIG_SETMASK, array(), &$old);
+$old = null;
+$first_set = null;
+pcntl_sigprocmask(SIG_SETMASK, array(), inout $old);
 
-pcntl_sigprocmask(SIG_BLOCK, array(SIGCHLD,SIGTERM), &$first_set);
+pcntl_sigprocmask(SIG_BLOCK, array(SIGCHLD,SIGTERM), inout $first_set);
 
-pcntl_sigprocmask(SIG_BLOCK, array(SIGINT), &$old);
+pcntl_sigprocmask(SIG_BLOCK, array(SIGINT), inout $old);
 var_dump(count($old) - count($first_set));
 
-pcntl_sigprocmask(SIG_UNBLOCK, array(SIGINT), &$old);
+pcntl_sigprocmask(SIG_UNBLOCK, array(SIGINT), inout $old);
 var_dump(count($old) - count($first_set));
 
-pcntl_sigprocmask(SIG_SETMASK, array(SIGINT), &$old);
+pcntl_sigprocmask(SIG_SETMASK, array(SIGINT), inout $old);
 var_dump(count($old) - count($first_set));
 
-pcntl_sigprocmask(SIG_SETMASK, array(), &$old);
+pcntl_sigprocmask(SIG_SETMASK, array(), inout $old);
 var_dump(count($old));
 
-pcntl_sigprocmask(SIG_SETMASK, array(), &$old);
+pcntl_sigprocmask(SIG_SETMASK, array(), inout $old);
 var_dump(count($old));
 }

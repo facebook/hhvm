@@ -824,9 +824,9 @@ void apc_load_impl_compressed
         item.readOnly = readOnly;
         p += thrift_lens[i + i + 2] + 1; // skip \0
         String value(p, thrift_lens[i + i + 3], CopyString);
-        Variant success;
-        Variant v = HHVM_FN(fb_unserialize)(value, ref(success));
-        if (same(success, false)) {
+        bool success;
+        Variant v = HHVM_FN(fb_unserialize)(value, success);
+        if (success ==  false) {
           throw Exception("bad apc archive, fb_unserialize failed");
         }
         s.constructPrime(v, item);

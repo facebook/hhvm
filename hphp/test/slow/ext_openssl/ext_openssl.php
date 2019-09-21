@@ -10,7 +10,8 @@ function VERIFY($x) { VS($x != false, true); }
 //////////////////////////////////////////////////////////////////////
 
 function test_openssl_csr_export_to_file() {
-  $csr = openssl_csr_new(null, &$ignore);
+  $ignore = null;
+  $csr = openssl_csr_new(null, inout $ignore);
   VERIFY($csr != null);
 
   $tmp = tempnam('/tmp', 'vmopenssltest');
@@ -22,7 +23,8 @@ function test_openssl_csr_export_to_file() {
 }
 
 function test_openssl_csr_get_public_key() {
-  $csr = openssl_csr_new(null, &$ignore);
+  $ignore = null;
+  $csr = openssl_csr_new(null, inout $ignore);
   VERIFY($csr != null);
   $publickey = openssl_csr_get_public_key($csr);
   VERIFY($publickey != false);
@@ -30,7 +32,8 @@ function test_openssl_csr_get_public_key() {
 }
 
 function test_openssl_csr_get_subject() {
-  $csr = openssl_csr_new(null, &$ignore);
+  $ignore = null;
+  $csr = openssl_csr_new(null, inout $ignore);
   VERIFY($csr != null);
   $subject = openssl_csr_get_subject($csr)['O'];
   VERIFY($subject == "Internet Widgits Pty Ltd" ||
@@ -53,12 +56,15 @@ function test_openssl_csr_sign() {
 
   $privkey = openssl_pkey_new();
   VERIFY($privkey != null);
-  $csr = openssl_csr_new($dn, &$privkey);
+  $csr = openssl_csr_new($dn, inout $privkey);
   VERIFY($csr != null);
   $scert = openssl_csr_sign($csr, null, $privkey, $numberofdays);
-  openssl_x509_export($scert, &$publickey);
-  openssl_pkey_export($privkey, &$privatekey, $privkeypass);
-  openssl_csr_export($csr, &$csrStr);
+  $publickey = null;
+  openssl_x509_export($scert, inout $publickey);
+  $privatekey = null;
+  openssl_pkey_export($privkey, inout $privatekey, $privkeypass);
+  $csrStr = null;
+  openssl_csr_export($csr, inout $csrStr);
 
   VERIFY(strlen($privatekey) > 500);
   VERIFY(strlen($publickey) > 800);
@@ -70,7 +76,8 @@ function test_openssl_error_string() {
 }
 
 function test_openssl_free_key() {
-  $csr = openssl_csr_new(null, &$ignore);
+  $ignore = null;
+  $csr = openssl_csr_new(null, inout $ignore);
   VERIFY($csr != null);
   $publickey = openssl_csr_get_public_key($csr);
   VERIFY($publickey != false);
@@ -81,7 +88,7 @@ function test_openssl_free_key() {
 function test_openssl_pkcs12_export_to_file() {
   $privkey = openssl_pkey_new();
   VERIFY($privkey != null);
-  $csr = openssl_csr_new(null, &$privkey);
+  $csr = openssl_csr_new(null, inout $privkey);
   VERIFY($csr != null);
   $scert = openssl_csr_sign($csr, null, $privkey, 365);
 
@@ -96,13 +103,15 @@ function test_openssl_pkcs12_export_to_file() {
 function test_openssl_pkcs12_read() {
   $privkey = openssl_pkey_new();
   VERIFY($privkey != null);
-  $csr = openssl_csr_new(null, &$privkey);
+  $csr = openssl_csr_new(null, inout $privkey);
   VERIFY($csr != null);
   $scert = openssl_csr_sign($csr, null, $privkey, 365);
 
-  openssl_pkcs12_export($scert, &$pkcs12, $privkey, "1234");
+  $pkcs12 = null;
+  openssl_pkcs12_export($scert, inout $pkcs12, $privkey, "1234");
 
-  VERIFY(openssl_pkcs12_read($pkcs12, &$certs, "1234"));
+  $certs = null;
+  VERIFY(openssl_pkcs12_read($pkcs12, inout $certs, "1234"));
   VERIFY(strlen($certs['cert']) > 500);
   VERIFY(strlen($certs['pkey']) > 500);
 }
@@ -110,7 +119,7 @@ function test_openssl_pkcs12_read() {
 function test_openssl_pkcs7_sign() {
   $privkey = openssl_pkey_new();
   VERIFY($privkey != null);
-  $csr = openssl_csr_new(null, &$privkey);
+  $csr = openssl_csr_new(null, inout $privkey);
   VERIFY($csr != null);
   $scert = openssl_csr_sign($csr, null, $privkey, 365);
   $pubkey = openssl_csr_get_public_key($csr);
@@ -154,7 +163,8 @@ function test_openssl_pkey_export_to_file() {
 function test_openssl_pkey_export() {
   $privkey = openssl_pkey_new();
   VERIFY($privkey != null);
-  openssl_pkey_export($privkey, &$out, "1234");
+  $out = null;
+  openssl_pkey_export($privkey, inout $out, "1234");
   VERIFY(strlen($out) > 500);
 }
 
@@ -186,70 +196,82 @@ function test_openssl_pkey_get_details() {
 function test_openssl_private_encrypt() {
   $privkey = openssl_pkey_new();
   VERIFY($privkey != null);
-  $csr = openssl_csr_new(null, &$privkey);
+  $csr = openssl_csr_new(null, inout $privkey);
   VERIFY($csr != null);
   $pubkey = openssl_csr_get_public_key($csr);
   VERIFY($pubkey != null);
 
   $data = "some secret data";
-  VERIFY(openssl_private_encrypt($data, &$out, $privkey));
-  VERIFY(openssl_public_decrypt($out, &$out2, $pubkey));
+  $out = null;
+  $out2 = null;
+  VERIFY(openssl_private_encrypt($data, inout $out, $privkey));
+  VERIFY(openssl_public_decrypt($out, inout $out2, $pubkey));
   VS($out2, $data);
 }
 
 function test_openssl_public_encrypt() {
   $privkey = openssl_pkey_new();
   VERIFY($privkey != null);
-  $csr = openssl_csr_new(null, &$privkey);
+  $csr = openssl_csr_new(null, inout $privkey);
   VERIFY($csr != null);
   $pubkey = openssl_csr_get_public_key($csr);
   VERIFY($pubkey != null);
 
   $data = "some secret data";
-  VERIFY(openssl_public_encrypt($data, &$out, $pubkey));
-  VERIFY(openssl_private_decrypt($out, &$out2, $privkey));
+  $out = null;
+  $out2 = null;
+  VERIFY(openssl_public_encrypt($data, inout $out, $pubkey));
+  VERIFY(openssl_private_decrypt($out, inout $out2, $privkey));
   VS($out2, $data);
 }
 
 function test_openssl_seal() {
   $privkey = openssl_pkey_new();
   VERIFY($privkey != null);
-  $csr = openssl_csr_new(null, &$privkey);
+  $csr = openssl_csr_new(null, inout $privkey);
   VERIFY($csr != null);
   $pubkey = openssl_csr_get_public_key($csr);
   VERIFY($pubkey != null);
 
   $data = "some secret messages";
-  VERIFY(openssl_seal($data, &$sealed, &$ekeys, array($pubkey)));
+  $sealed = null;
+  $ekeys = null;
+  $iv = null;
+  VERIFY(openssl_seal($data, inout $sealed, inout $ekeys, array($pubkey),
+                      '', inout $iv));
   VERIFY(strlen($sealed) > 0);
   VS(count($ekeys), 1);
   VERIFY(strlen($ekeys[0]) > 0);
 
-  VERIFY(openssl_open($sealed, &$open_data, $ekeys[0], $privkey));
+  $open_data = null;
+  VERIFY(openssl_open($sealed, inout $open_data, $ekeys[0], $privkey));
   VS($open_data, $data);
 
-  VERIFY(openssl_open($sealed, &$open_data, $ekeys[0], $privkey, 'RC4'));
+  VERIFY(openssl_open($sealed, inout $open_data, $ekeys[0], $privkey, 'RC4'));
   VS($open_data, $data);
 
-  VERIFY(openssl_seal($data, &$sealed, &$ekeys, array($pubkey), 'AES-256-ECB'));
+  VERIFY(openssl_seal($data, inout $sealed, inout $ekeys, array($pubkey),
+                      'AES-256-ECB', inout $iv));
   VERIFY(strlen($sealed) > 0);
   VS(count($ekeys), 1);
   VERIFY(strlen($ekeys[0]) > 0);
 
-  VERIFY(openssl_open($sealed, &$open_data, $ekeys[0], $privkey, 'AES-256-ECB'));
+  VERIFY(openssl_open($sealed, inout $open_data, $ekeys[0], $privkey,
+                      'AES-256-ECB'));
   VS($open_data, $data);
 }
 
 function test_openssl_sign() {
   $privkey = openssl_pkey_new();
   VERIFY($privkey != null);
-  $csr = openssl_csr_new(null, &$privkey);
+  $csr = openssl_csr_new(null, inout $privkey);
   VERIFY($csr != null);
   $pubkey = openssl_csr_get_public_key($csr);
   VERIFY($pubkey != null);
 
   $data = "some secret messages";
-  VERIFY(openssl_sign($data, &$signature, $privkey));
+  $signature = null;
+  VERIFY(openssl_sign($data, inout $signature, $privkey));
   VS(openssl_verify($data, $signature, $pubkey), 1);
 
 }
@@ -257,7 +279,7 @@ function test_openssl_sign() {
 function test_openssl_x509_check_private_key() {
   $privkey = openssl_pkey_new();
   VERIFY($privkey != null);
-  $csr = openssl_csr_new(null, &$privkey);
+  $csr = openssl_csr_new(null, inout $privkey);
   VERIFY($csr != null);
   $scert = openssl_csr_sign($csr, null, $privkey, 365);
   VERIFY(openssl_x509_check_private_key($scert, $privkey));
@@ -290,7 +312,8 @@ function test_openssl_x509_export_to_file() {
 function test_openssl_x509_export() {
   $fcert = file_get_contents(__DIR__."/test_x509.crt");
   $cert = openssl_x509_read($fcert);
-  VERIFY(openssl_x509_export($cert, &$out));
+  $out = null;
+  VERIFY(openssl_x509_export($cert, inout $out));
   $cert2 = openssl_x509_read($out);
   $info = openssl_x509_parse($cert2);
   VS($info['subject']['O'], "RSA Data Security, Inc.");
@@ -321,7 +344,8 @@ function test_openssl_encrypt() {
   $secret = "supersecretthing";
   $cipher = "AES-256-CBC";
   $iv_len = openssl_cipher_iv_length($cipher);
-  $iv = openssl_random_pseudo_bytes($iv_len);
+  $crypto_strong = false;
+  $iv = openssl_random_pseudo_bytes($iv_len, inout $crypto_strong);
 
   $data = openssl_encrypt($test, $cipher, $secret, 0, $iv);
   VS($test, openssl_decrypt($data, $cipher, $secret, 0, $iv));

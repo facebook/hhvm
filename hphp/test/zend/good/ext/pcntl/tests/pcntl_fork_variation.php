@@ -4,7 +4,8 @@ echo "*** Testing the process isolations between a process and its forks ***\n";
 $pid = pcntl_fork();
 
 if ($pid > 0) {
-  pcntl_wait(&$status);
+  $status = null;
+  pcntl_wait(inout $status);
   echo "father is $pid\n";
 
   if (!isset($pid2))
@@ -18,7 +19,8 @@ else
   $pid2 = pcntl_fork();
   if ($pid2 > 0)
   {
-    pcntl_wait(&$status2);
+    $status2 = null;
+    pcntl_wait(inout $status2);
     echo "son is father of $pid2\n";
   }
   else

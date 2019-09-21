@@ -28,7 +28,7 @@ $b = array(
 );
 
 $string_case = SORT_STRING | SORT_FLAG_CASE;
-array_multisort3(&$b, &$string_case, &$a);
+array_multisort3(inout $b, inout $string_case, inout $a);
 
 var_dump($a, $b);
 

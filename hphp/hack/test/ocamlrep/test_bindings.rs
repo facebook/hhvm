@@ -17,14 +17,17 @@ fn val<T: OcamlRep>(value: T) -> ocaml::Value {
     let value = T::from_ocamlrep(value).unwrap();
     let value = value.into_ocamlrep(&arena);
     mem::forget(arena);
-    ocaml::Value::new(unsafe { value.as_usize() })
+    ocaml::Value::new(unsafe { value.to_bits() })
 }
 
 caml!(convert_to_ocamlrep, |value|, <result>, {
-    let mut arena = ocamlrep::Arena::new();
-    let value = arena.add_from_ocaml(value.0);
-    mem::forget(arena);
-    result = ocaml::Value::new(value.as_usize());
+    let mut slab = ocamlrep::OwnedSlab::from_ocaml(value.0);
+    let value = match &mut slab {
+        Some(slab) => slab.value().to_bits(),
+        None => value.0,
+    };
+    mem::forget(slab);
+    result = ocaml::Value::new(value);
 } -> result);
 
 // Primitive Tests

@@ -179,7 +179,7 @@ String string_number_format(double d, int dec,
 int string_levenshtein(const char *s1, int l1, const char *s2, int l2,
                        int cost_ins, int cost_rep, int cost_del);
 int string_similar_text(const char *t1, int len1,
-                        const char *t2, int len2, float *percent);
+                        const char *t2, int len2, double *percent);
 String string_soundex(const String& str);
 
 String string_metaphone(const char *input, int word_len, long max_phonemes,

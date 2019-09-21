@@ -126,7 +126,12 @@ function pcntl_signal(int $signo,
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
 <<__Native>>
-function pcntl_sigprocmask(int $how, array $set, mixed &$oldset = null): bool;
+function pcntl_sigprocmask(
+  int $how,
+  array $set,
+  <<__OutOnly("KindOfArray")>>
+  inout mixed $oldset
+): bool;
 
 /**
  * The wait function suspends execution of the current process until a child
@@ -157,7 +162,11 @@ function pcntl_sigprocmask(int $how, array $set, mixed &$oldset = null): bool;
  *
  */
 <<__Native>>
-function pcntl_wait(mixed &$status, int $options = 0): int;
+function pcntl_wait(
+  <<__OutOnly("KindOfInt64")>>
+  inout mixed $status,
+  int $options = 0
+): int;
 
 /**
  * Suspends execution of the current process until a child as specified by the
@@ -191,7 +200,8 @@ function pcntl_wait(mixed &$status, int $options = 0): int;
  */
 <<__Native>>
 function pcntl_waitpid(int $pid,
-                       mixed &$status,
+                       <<__OutOnly("KindOfInt64")>>
+                       inout mixed $status,
                        int $options = 0): int;
 
 /**

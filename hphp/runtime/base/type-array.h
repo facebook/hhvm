@@ -367,7 +367,7 @@ public:
    * Sort multiple arrays at once similar to how ORDER BY clause works in SQL.
    */
   struct SortData {
-    const Variant* original;
+    Variant* original;
     const Array*   array;
     bool           by_key;
     PFUNC_CMP      cmp_func;

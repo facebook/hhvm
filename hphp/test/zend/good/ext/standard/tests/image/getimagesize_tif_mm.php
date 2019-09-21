@@ -6,7 +6,8 @@
  */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing getimagesize() : tiff_mm format ***\n";
-var_dump(getimagesize(dirname(__FILE__) . "/2x2mm.tif", &$arr));
+$arr = null;
+var_dump(getimagesize(dirname(__FILE__) . "/2x2mm.tif", inout $arr));
 var_dump($arr);
 
 echo "===DONE===\n";

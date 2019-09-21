@@ -212,6 +212,9 @@ module SymbolInformation = struct
     containerName: string option; (* the symbol containing this symbol *)
   }
 
+  (* These numbers should match
+   * https://microsoft.github.io/language-server-protocol/specification#textDocument_documentSymbol
+   *)
   and symbolKind =
     | File (* 1 *)
     | Module (* 2 *)
@@ -230,9 +233,14 @@ module SymbolInformation = struct
     | String (* 15 *)
     | Number (* 16 *)
     | Boolean (* 17 *)
-    | Array
+    | Array (* 18 *)
+    | Object (* 19 *)
+    | Key (* 20 *)
+    | Null (* 21 *)
+    | EnumMember (* 22 *)
+    | Struct
 
-  (* 18 *)
+  (* 23 *)
 end
 
 (* For showing messages (not diagnostics) in the user interface. *)

@@ -91,6 +91,7 @@ module Classes = struct
         | None ->
           (match Naming_table.Types.get_pos class_name with
           | Some (_, Naming_table.TTypedef)
+          | Some (_, Naming_table.TRecordDef)
           | None ->
             raise Exit
           | Some (pos, Naming_table.TClass) ->

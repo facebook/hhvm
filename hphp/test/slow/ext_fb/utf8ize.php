@@ -18,34 +18,34 @@ function main_utf8ize() {
 $INVALID_UTF_8_STRING = "\xe2\x82\x28";
 
 $s = "hon\xE7k";
-var_dump(fb_utf8ize(&$s));
+var_dump(fb_utf8ize(inout $s));
 var_dump($s);
 
 $s = "test\xE0\xB0\xB1\xE0";
-var_dump(fb_utf8ize(&$s));
+var_dump(fb_utf8ize(inout $s));
 var_dump($s);
 
 $s = "test\xE0\xB0\xB1\xE0\xE0";
-var_dump(fb_utf8ize(&$s));
+var_dump(fb_utf8ize(inout $s));
 var_dump($s);
 
 $s = "\xfc";
-var_dump(fb_utf8ize(&$s));
+var_dump(fb_utf8ize(inout $s));
 var_dump($s);
 
 $s = "\xfc\xfc";
-var_dump(fb_utf8ize(&$s));
+var_dump(fb_utf8ize(inout $s));
 var_dump($s);
 
 // We intentionally consider null bytes invalid sequences.
 $s = "abc\x00def";
-var_dump(fb_utf8ize(&$s));
+var_dump(fb_utf8ize(inout $s));
 var_dump($s);
 
 // ICU treats this as as two code points.
 // The old implementation treated this as three code points.
 $s = $INVALID_UTF_8_STRING;
-var_dump(fb_utf8ize(&$s));
+var_dump(fb_utf8ize(inout $s));
 var_dump($s);
 
 //// utf8_strlen
@@ -61,7 +61,7 @@ var_dump(fb_utf8_strlen($INVALID_UTF_8_STRING));
 $s = "abc\x00def";
 var_dump(strlen($s));
 var_dump(fb_utf8_strlen($s));
-fb_utf8ize(&$s);
+fb_utf8ize(inout $s);
 var_dump(strlen($s));
 var_dump(fb_utf8_strlen($s));
 }

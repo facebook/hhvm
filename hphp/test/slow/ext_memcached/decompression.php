@@ -29,9 +29,11 @@ $keys = array(
   ),
 );
 
+$errno = null;
+$errstr = null;
 // Write the values to memcache using a raw socket connection
 // to make sure that they are not transformed in any way.
-$socket = fsockopen('localhost', 11211);
+$socket = fsockopen('localhost', 11211, inout $errno, inout $errstr);
 $socket || die("Couldn't connect to memcache.\n");
 foreach($keys as $key => $value) {
   extract($value, EXTR_OVERWRITE);

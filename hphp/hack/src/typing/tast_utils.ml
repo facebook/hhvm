@@ -121,8 +121,7 @@ let rec truthiness env ty =
       | Some cls ->
         (match Cls.kind cls with
         | Cnormal
-        | Cabstract
-        | Crecord ->
+        | Cabstract ->
           Always_truthy
         | Cinterface
         | Cenum ->
@@ -216,8 +215,7 @@ let rec find_sketchy_types env acc ty =
         | Cnormal
         | Cabstract
         | Ctrait
-        | Cenum
-        | Crecord ->
+        | Cenum ->
           acc)
     )
   | Tunion tyl -> List.fold tyl ~init:acc ~f:(find_sketchy_types env)

@@ -957,6 +957,9 @@ let invalid_await_position =
   "Await cannot be used as an expression in this "
   ^ "location because it's conditionally executed."
 
+let invalid_await_position_pipe =
+  "Await cannot be used as an expression right of a pipe operator."
+
 let invalid_await_position_dependent =
   "Await cannot be used as an expression inside another await expression. "
   ^ "Pull the inner await out into it's own statement."

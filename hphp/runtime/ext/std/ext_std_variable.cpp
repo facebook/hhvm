@@ -625,10 +625,9 @@ Variant HHVM_FUNCTION(hhvm_intrinsics_unserialize_keep_dvarrays,
 
 void HHVM_FUNCTION(parse_str,
                    const String& str,
-                   VRefParam arr) {
-  Array result = Array::Create();
-  HttpProtocol::DecodeParameters(result, str.data(), str.size());
-  arr.assignIfRef(result);
+                   Array& arr) {
+  arr = Array::Create();
+  HttpProtocol::DecodeParameters(arr, str.data(), str.size());
 }
 
 /////////////////////////////////////////////////////////////////////////////

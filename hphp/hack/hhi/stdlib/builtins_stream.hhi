@@ -123,7 +123,7 @@ function stream_get_wrappers();
 <<__PHPStdLib>>
 function stream_resolve_include_path(string $filename, $context = null);
 <<__PHPStdLib>>
-function stream_select(&$read, &$write, &$except, $vtv_sec, int $tv_usec = 0);
+function stream_select(inout $read, inout $write, inout $except, $vtv_sec, int $tv_usec = 0);
 <<__PHPStdLib>>
 function stream_set_blocking(resource $stream, bool $mode);
 <<__PHPStdLib>>
@@ -133,11 +133,11 @@ function stream_set_write_buffer(resource $stream, int $buffer);
 <<__PHPStdLib>>
 function set_file_buffer(resource $stream, int $buffer);
 <<__PHPStdLib>>
-function stream_socket_accept(resource $server_socket, float $timeout = 0.0, &$peername = null);
+function stream_socket_accept(resource $server_socket, float $timeout, inout $peername);
 <<__PHPStdLib>>
-function stream_socket_server(string $local_socket, &$errnum = null, &$errstr = null, int $flags = 0, $context = null);
+function stream_socket_server(string $local_socket, inout $errnum, inout $errstr, int $flags = 0, $context = null);
 <<__PHPStdLib>>
-function stream_socket_client(string $remote_socket, &$errnum = null, &$errstr = null, float $timeout = 0.0, int $flags = 0, $context = null);
+function stream_socket_client(string $remote_socket, inout $errnum, inout $errstr, float $timeout = 0.0, int $flags = 0, $context = null);
 <<__PHPStdLib>>
 function stream_socket_enable_crypto(resource $stream, bool $enable, int $crypto_type = 0, $session_stream = null);
 <<__PHPStdLib>>
@@ -145,7 +145,7 @@ function stream_socket_get_name(resource $handle, bool $want_peer);
 <<__PHPStdLib>>
 function stream_socket_pair(int $domain, int $type, int $protocol);
 <<__PHPStdLib>>
-function stream_socket_recvfrom(resource $socket, int $length, int $flags = 0, &$address = null);
+function stream_socket_recvfrom(resource $socket, int $length, int $flags, inout $address);
 <<__PHPStdLib>>
 function stream_socket_sendto(resource $socket, string $data, int $flags = 0, $address = null);
 <<__PHPStdLib>>

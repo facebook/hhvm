@@ -63,8 +63,9 @@ function dns_check_record(mixed $host, mixed $type = 'MX'): bool {
 /**
  * Alias of getmxrr
  */
-function dns_get_mx(mixed $host, mixed &$mxhosts, mixed &$weight = null) {
-  return getmxrr($host, &$mxhosts, &$weight);
+function dns_get_mx(mixed $host, inout mixed $mxhosts, inout mixed $weight) {
+  $ret = getmxrr($host, inout $mxhosts, inout $weight);
+  return $ret;
 }
 
 /**
@@ -138,9 +139,11 @@ function dns_get_mx(mixed $host, mixed &$mxhosts, mixed &$weight = null) {
  */
 <<__Native>>
 function dns_get_record(string $hostname,
-                        int $type = DNS_ANY,
-                        mixed &$authns = null,
-                        mixed &$addtl = null): mixed;
+                        int $type,
+                        <<__OutOnly>>
+                        inout mixed $authns,
+                        <<__OutOnly>>
+                        inout mixed $addtl): mixed;
 
 /**
  * Open Internet or Unix domain socket connection
@@ -148,8 +151,8 @@ function dns_get_record(string $hostname,
  * @param string $hostname - If OpenSSL support is installed, you may
  *   prefix the hostname with either ssl:// or tls:// to use an SSL or TLS
  *   client connection over TCP/IP to connect to the remote host.
- * @param int $port - The port number. This can be omitted and skipped
- *   with -1 for transports that do not use ports, such as unix://.
+ * @param int $port - The port number. This can be skipped with -1
+ * for transports that do not use ports, such as unix://.
  * @param int $errno - If provided, holds the system level error number
  *   that occurred in the system-level connect() call.   If the value
  *   returned in errno is 0 and the function returned FALSE, it is an
@@ -168,9 +171,11 @@ function dns_get_record(string $hostname,
  */
 <<__Native>>
 function fsockopen(string $hostname,
-                   int $port = -1,
-                   mixed &$errno = null,
-                   mixed &$errstr = null,
+                   int $port,
+                   <<__OutOnly>>
+                   inout mixed $errno,
+                   <<__OutOnly>>
+                   inout mixed $errstr,
                    float $timeout = -1.0): mixed;
 
 /**
@@ -241,8 +246,10 @@ function gethostname(): mixed;
  */
 <<__Native>>
 function getmxrr(string $hostname,
-                 mixed &$mxhosts,
-                 mixed &$weight = null): bool;
+                 <<__OutOnly>>
+                 inout mixed $mxhosts,
+                 <<__OutOnly>>
+                 inout mixed $weight): bool;
 
 /**
  * Get protocol number associated with protocol name
@@ -361,12 +368,14 @@ function headers_list(): varray<string>;
  *   have already been sent or TRUE otherwise.
  */
 <<__Native>>
-function headers_sent(mixed &$file = null,
-                      mixed &$line = null): bool;
+function headers_sent(): bool;
 
 <<__Native>>
-function headers_sent_with_file_line(mixed &$file,
-                                     mixed &$line): bool;
+function headers_sent_with_file_line(
+  <<__OutOnly>>
+  inout mixed $file,
+  <<__OutOnly>>
+  inout mixed $line): bool;
 
 /**
  * Get or Set the HTTP response code
@@ -477,9 +486,11 @@ function openlog(string $ident,
  */
 <<__Native>>
 function pfsockopen(string $hostname,
-                    int $port = -1,
-                    mixed &$errno = null,
-                    mixed &$errstr = null,
+                    int $port,
+                    <<__OutOnly>>
+                    inout mixed $errno,
+                    <<__OutOnly>>
+                    inout mixed $errstr,
                     float $timeout = -1.0): mixed;
 
 /**

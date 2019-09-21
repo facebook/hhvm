@@ -35,6 +35,5 @@ let check_class env tc =
       (check_fulfillment env (Cls.get_ancestor tc))
   | Ast_defs.Ctrait
   | Ast_defs.Cinterface
-  | Ast_defs.Cenum
-  | Ast_defs.Crecord ->
+  | Ast_defs.Cenum ->
     ()

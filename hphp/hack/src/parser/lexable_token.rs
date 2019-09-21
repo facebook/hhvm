@@ -42,4 +42,5 @@ pub trait LexablePositionedToken<'a>: LexableToken<'a>
 where
     Self: Debug,
 {
+    fn text<'b>(&self, source_text: &'b SourceText) -> &'b str;
 }

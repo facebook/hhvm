@@ -18,7 +18,8 @@ function read_all_data( $conn, $bytes ) {
 function test_server($server) {
   // The server only accepts once, but the client will call
   // stream_socket_client multiple times with the persistent flag.
-  if( $conn = stream_socket_accept($server) ) {
+  $peername = null;
+  if( $conn = stream_socket_accept($server, -1.0, inout $peername) ) {
     $requests_remaining = 3;
     while( $requests_remaining > 0 ) {
       $requests_remaining--;
@@ -51,10 +52,12 @@ function test_client($scheme, $port) {
 }
 
 function do_request($scheme, $port, $context) {
+  $errno = null;
+  $errstr = null;
   $client = stream_socket_client(
     "$scheme://127.0.0.1:$port",
-    &$errno,
-    &$errstr,
+    inout $errno,
+    inout $errstr,
     1.0,
     STREAM_CLIENT_CONNECT|STREAM_CLIENT_PERSISTENT,
     $context
@@ -94,15 +97,15 @@ $certdata = array('countryName' => 'US',
 
 // Generate the certificate
 $pkey = openssl_pkey_new();
-$cert = openssl_csr_new($certdata, &$pkey);
+$cert = openssl_csr_new($certdata, inout $pkey);
 $cert = openssl_csr_sign($cert, null, $pkey, 1);
 
 // Generate and save the PEM file
 $pem_passphrase = 'testing';
 $pem0 = null;
 $pem1 = null;
-openssl_x509_export($cert, &$pem0);
-openssl_pkey_export($pkey, &$pem1, $pem_passphrase);
+openssl_x509_export($cert, inout $pem0);
+openssl_pkey_export($pkey, inout $pem1, $pem_passphrase);
 if (file_put_contents($pemfile, $pem0.$pem1) === false) {
   echo "Error writing PEM file.\n";
   die;
@@ -124,10 +127,12 @@ foreach ($schemes as $i => $scheme) {
   $port = 0;
   while (!$server) {
     $port = rand(50000, 65535);
+    $errno = null;
+    $errstr = null;
     $server = @stream_socket_server(
       "$scheme://127.0.0.1:$port",
-      &$errno,
-      &$errstr,
+      inout $errno,
+      inout $errstr,
       STREAM_SERVER_BIND|STREAM_SERVER_LISTEN,
       $contexts[$i]
     );
@@ -144,7 +149,8 @@ foreach ($schemes as $i => $scheme) {
   $pid = pcntl_fork();
   if( $pid ) {
     test_server($server);
-    pcntl_wait(&$status);
+    $status = null;
+    pcntl_wait(inout $status);
     exit;
   } else {
     test_client($scheme, $port);

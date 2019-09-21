@@ -14,7 +14,8 @@ $descriptorspec = array(
 );
 
 $cmd = getHhvmPath() . " " . __DIR__ . "/not_enabled.php.test";
-$process = proc_open($cmd, $descriptorspec, &$pipes);
+$pipes = null;
+$process = proc_open($cmd, $descriptorspec, inout $pipes);
 if (!is_resource($process)) {
   throw new UnexpectedValueException("Failed to open child process!");
 }

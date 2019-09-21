@@ -146,6 +146,11 @@ module SymbolInformation : sig
     | Number
     | Boolean
     | Array
+    | Object
+    | Key
+    | Null
+    | EnumMember
+    | Struct
 end
 
 module MessageType : sig

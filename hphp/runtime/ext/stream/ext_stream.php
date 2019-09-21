@@ -260,9 +260,9 @@ function stream_resolve_include_path(string $filename,
  *
  */
 <<__Native>>
-function stream_select(mixed &$read,
-                       mixed &$write,
-                       mixed &$except,
+function stream_select(inout mixed $read,
+                       inout mixed $write,
+                       inout mixed $except,
                        mixed $vtv_sec,
                        int $tv_usec = 0): mixed;
 
@@ -377,7 +377,8 @@ function set_file_buffer(resource $stream, int $buffer): int;
  * @param resource $server_socket - The server socket to accept a connection
  *   from.
  * @param float $timeout - Override the default socket accept timeout. Time
- *   should be given in seconds.
+ *   should be given in seconds. Negative value are interpretted as default
+ *   timeout.
  * @param mixed $peername - Will be set to the name (address) of the client
  *   which connected, if included and available from the selected transport.
  *   Can also be determined later using stream_socket_get_name().
@@ -388,8 +389,9 @@ function set_file_buffer(resource $stream, int $buffer): int;
  */
 <<__Native>>
 function stream_socket_accept(resource $server_socket,
-                              float $timeout = -1.0,
-                              mixed &$peername = null): mixed;
+                              float $timeout,
+                              <<__OutOnly>>
+                              inout mixed $peername): mixed;
 
 /**
  * Creates a stream or datagram socket on the specified local_socket.  This
@@ -424,8 +426,10 @@ function stream_socket_accept(resource $server_socket,
  */
 <<__Native>>
 function stream_socket_server(string $local_socket,
-                              mixed &$errnum = null,
-                              mixed &$errstr = null,
+                              <<__OutOnly>>
+                              inout mixed $errnum,
+                              <<__OutOnly>>
+                              inout mixed $errstr,
                               int $flags = STREAM_SERVER_BIND |
                                 STREAM_SERVER_LISTEN,
                               ?resource $context = null): mixed;
@@ -465,8 +469,10 @@ function stream_socket_server(string $local_socket,
  */
 <<__Native>>
 function stream_socket_client(string $remote_socket,
-                              mixed &$errnum = null,
-                              mixed &$errstr = null,
+                              <<__OutOnly>>
+                              inout mixed $errnum,
+                              <<__OutOnly>>
+                              inout mixed $errstr,
                               float $timeout = -1.0,
                               int $flags = 0,
                               ?resource $context = null): mixed;
@@ -564,8 +570,9 @@ function stream_socket_pair(int $domain, int $type, int $protocol): mixed;
 <<__Native>>
 function stream_socket_recvfrom(resource $socket,
                                 int $length,
-                                int $flags = 0,
-                                mixed &$address = null): mixed;
+                                int $flags,
+                                <<__OutOnly>>
+                                inout mixed $address): mixed;
 
 /**
  * Sends the specified data through the socket.

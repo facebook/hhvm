@@ -1935,12 +1935,12 @@ let class_special_attributes c =
   in
   text
 
-let add_extends buf class_base =
-  match class_base with
+let add_extends buf name =
+  match name with
   | None -> ()
   | Some name ->
     Acc.add buf " extends ";
-    Acc.add buf (Hhbc_id.Class.to_raw_string name)
+    Acc.add buf name
 
 let add_implements buf class_implements =
   match class_implements with
@@ -2049,8 +2049,6 @@ let add_property (class_def : Hhas_class.t) buf property =
     Hhas_class.is_closure_class class_def
     || initial_value = Some Typed_value.Uninit
   then
-    Acc.add buf "uninit;"
-  else if Hhas_class.is_record class_def && initial_value = None then
     Acc.add buf "uninit;"
   else (
     Acc.add buf "\"\"\"";
@@ -2188,17 +2186,14 @@ let add_uses buf c =
 let add_class_def buf class_def =
   let class_name = Hhas_class.name class_def in
   (* TODO: user attributes *)
-  Acc.add
-    buf
-    ( if Hhas_class.is_record class_def then
-      "\n.record "
-    else
-      "\n.class " );
+  Acc.add buf "\n.class ";
   Acc.add buf (class_special_attributes class_def);
   Acc.add buf (Hhbc_id.Class.to_raw_string class_name);
   if Hhbc_options.source_mapping !Hhbc_options.compiler_options then
     Acc.add buf (" " ^ string_of_span (Hhas_class.span class_def));
-  add_extends buf (Hhas_class.base class_def);
+  add_extends
+    buf
+    (Option.map ~f:Hhbc_id.Class.to_raw_string (Hhas_class.base class_def));
   add_implements buf (Hhas_class.implements class_def);
   Acc.add buf " {";
   add_doc buf 2 (Hhas_class.doc_comment class_def);
@@ -2211,6 +2206,40 @@ let add_class_def buf class_def =
   List.iter ~f:(add_method_def buf) (Hhas_class.methods class_def);
 
   (* TODO: other members *)
+  Acc.add buf "\n}\n"
+
+let record_field_attributes init_val =
+  match init_val with
+  | Some _ -> "[public] "
+  | None -> "[public sys_initial_val] "
+
+let record_field_type_info tinfo =
+  string_of_type_info ~is_enum:false tinfo ^ " "
+
+let add_record_field buf field =
+  let (name, type_info, initial_value) = field in
+  Acc.add buf "\n  .property ";
+  Acc.add buf (record_field_attributes initial_value);
+  Acc.add buf (record_field_type_info type_info);
+  Acc.add buf name;
+  Acc.add buf " =\n    ";
+  match initial_value with
+  | None -> Acc.add buf "uninit;"
+  | Some value ->
+    Acc.add buf "\"\"\"";
+    Emit_adata.adata_to_buffer buf value;
+    Acc.add buf "\"\"\";"
+
+let add_record_def buf rd =
+  let name = Hhas_record_def.name rd in
+  Acc.add buf "\n.record ";
+  if Hhas_record_def.is_final rd then Acc.add buf "[final] ";
+  Acc.add buf (Hhbc_id.Record.to_raw_string name);
+  add_extends
+    buf
+    (Option.map ~f:Hhbc_id.Record.to_raw_string (Hhas_record_def.base rd));
+  Acc.add buf " {";
+  List.iter ~f:(add_record_field buf) (Hhas_record_def.fields rd);
   Acc.add buf "\n}\n"
 
 let add_data_region_element buf argument =
@@ -2335,12 +2364,14 @@ let add_program_content ?path dump_symbol_refs buf hhas_prog =
   let functions = Hhas_program.functions hhas_prog in
   let top_level_body = Hhas_program.main hhas_prog in
   let classes = Hhas_program.classes hhas_prog in
+  let records = Hhas_program.record_defs hhas_prog in
   let adata = Hhas_program.adata hhas_prog in
   let symbol_refs = Hhas_program.symbol_refs hhas_prog in
   add_data_region buf adata;
   add_top_level buf top_level_body;
   List.iter ~f:(add_fun_def buf) functions;
   List.iter ~f:(add_class_def buf) classes;
+  List.iter ~f:(add_record_def buf) records;
   List.iter ~f:(add_typedef buf) (Hhas_program.typedefs hhas_prog);
   add_file_attributes buf (Hhas_program.file_attributes hhas_prog);
   if dump_symbol_refs then (

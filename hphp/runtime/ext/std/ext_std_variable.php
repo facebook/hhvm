@@ -182,7 +182,9 @@ function import_request_variables(string $types,
  * $_POST, etc. variables.
  */
 <<__Native>>
-function parse_str(string $str, mixed &$arr): void;
+function parse_str(string $str,
+                   <<__OutOnly("KindOfArray")>>
+                   inout mixed $arr): void;
 
 }
 

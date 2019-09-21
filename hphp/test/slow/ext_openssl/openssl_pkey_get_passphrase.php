@@ -35,6 +35,8 @@ PK;
 $_passPhrase = 'test';
 $publicKey = openssl_pkey_get_public(array($_publicKeyString, $_passPhrase));
 $privateKey = openssl_pkey_get_private(array($_privateKeyString, $_passPhrase));
-var_dump(openssl_public_encrypt($_passPhrase, &$crypted, $publicKey));
-var_dump(openssl_private_decrypt($crypted, &$decrypted, $privateKey));
+$crypted = null;
+$decrypted = null;
+var_dump(openssl_public_encrypt($_passPhrase, inout $crypted, $publicKey));
+var_dump(openssl_private_decrypt($crypted, inout $decrypted, $privateKey));
 }

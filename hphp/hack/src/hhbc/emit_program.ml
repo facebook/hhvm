@@ -61,7 +61,16 @@ let emit_fatal_program ~ignore_message op pos message =
       None
     (* env *)
   in
-  Hhas_program.make true [] [] [] [] [] body Emit_symbol_refs.empty_symbol_refs
+  Hhas_program.make
+    true
+    []
+    []
+    []
+    []
+    []
+    []
+    body
+    Emit_symbol_refs.empty_symbol_refs
 
 let debugger_eval_should_modify ast =
   (* The AST currently always starts with a Markup statement, so a length of 2
@@ -110,6 +119,9 @@ let from_ast
           let compiled_classes =
             Emit_class.emit_classes_from_program closed_ast
           in
+          let compiled_records =
+            Emit_record_def.emit_record_defs_from_program closed_ast
+          in
           let compiled_typedefs =
             Emit_typedef.emit_typedefs_from_program flat_closed_ast
           in
@@ -125,6 +137,7 @@ let from_ast
               adata
               compiled_funs
               compiled_classes
+              compiled_records
               compiled_typedefs
               compiled_file_attributes
               compiled_defs

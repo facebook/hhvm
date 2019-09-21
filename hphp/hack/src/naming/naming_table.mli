@@ -95,6 +95,7 @@ end
 type type_of_type =
   | TClass
   | TTypedef
+  | TRecordDef
 [@@deriving enum]
 
 module Types : sig

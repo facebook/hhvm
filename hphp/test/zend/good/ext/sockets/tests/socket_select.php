@@ -5,9 +5,9 @@ if (strtolower(substr(PHP_OS, 0, 3)) == 'win') {
 } else {
     $domain = AF_UNIX;
 }
-socket_create_pair($domain, SOCK_STREAM, 0, &$sockets);
+socket_create_pair($domain, SOCK_STREAM, 0, inout $sockets);
 
 $write  = null;
 $except = null;
-var_dump(socket_select(&$sockets, &$write, &$except, 0));
+var_dump(socket_select(inout $sockets, inout $write, inout $except, 0));
 }

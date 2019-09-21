@@ -4,7 +4,8 @@
 		mb_regex_encoding( $test_enc );
 		$pat = mb_convert_encoding( $pat, $test_enc, $in_enc );
 		$str = mb_convert_encoding( $str, $test_enc, $in_enc );
-		printf( "(%d)%s\n", mb_ereg( $pat, $str, &$reg ), ( is_array( $reg )? bin2hex(mb_convert_encoding( implode( b' ', $reg ), $in_enc, $test_enc )) : '' ) );
+		$reg = null;
+		printf( "(%d)%s\n", mb_ereg( $pat, $str, inout $reg ), ( is_array( $reg )? bin2hex(mb_convert_encoding( implode( b' ', $reg ), $in_enc, $test_enc )) : '' ) );
 	}
 	function do_tests( $enc ) {
 		test_ereg( $enc, b'abc ([a-z]+) ([a-z]+) ([a-z]+)$', b"abc def ghi jkl" );

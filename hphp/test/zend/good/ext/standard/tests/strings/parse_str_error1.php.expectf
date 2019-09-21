@@ -6,5 +6,5 @@ Warning: parse_str() expects exactly 2 parameters, 0 given in %s/parse_str_error
 
 -- Testing htmlentities() function with more than expected no. of arguments --
 
-Warning: parse_str() expects exactly 2 parameters, 3 given in %s/parse_str_error1.php on line 13
+Warning: parse_str() expects exactly 2 parameters, 3 given in %s/parse_str_error1.php on line 14
 ===DONE===

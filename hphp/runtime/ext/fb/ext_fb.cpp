@@ -150,48 +150,49 @@ Variant HHVM_FUNCTION(fb_serialize, const Variant& thing, int64_t options) {
 
 Variant HHVM_FUNCTION(fb_unserialize,
                       const Variant& thing,
-                      VRefParam success,
+                      bool& success,
                       int64_t options) {
   if (thing.isString()) {
     String sthing = thing.toString();
 
     if (sthing.size() && (sthing.data()[0] & 0x80)) {
+      Variant error;
       return fb_compact_unserialize(sthing.data(), sthing.size(),
-                                    success);
+                                    success, error);
     } else {
       return fb_unserialize(sthing.data(), sthing.size(), success, options);
     }
   }
 
-  success.assignIfRef(false);
+  success = false;
   return false;
 }
 
 Variant fb_unserialize(const char* str,
                        int len,
-                       VRefParam success,
+                       bool& success,
                        int64_t options) {
   try {
     if (options & k_FB_SERIALIZE_HACK_ARRAYS) {
       auto res = HPHP::serialize
         ::FBUnserializer<VariantControllerUsingHackArrays>
         ::unserialize(folly::StringPiece(str, len));
-      success.assignIfRef(true);
+      success = true;
       return res;
     } else if (options & k_FB_SERIALIZE_VARRAY_DARRAY) {
       auto res = HPHP::serialize
         ::FBUnserializer<VariantControllerUsingVarrayDarray>
         ::unserialize(folly::StringPiece(str, len));
-      success.assignIfRef(true);
+      success = true;
       return res;
     } else {
       auto res = HPHP::serialize::FBUnserializer<VariantController>
         ::unserialize(folly::StringPiece(str, len));
-      success.assignIfRef(true);
+      success = true;
       return res;
     }
   } catch (const HPHP::serialize::UnserializeError&) {
-    success.assignIfRef(false);
+    success = false;
     return false;
   }
 }
@@ -827,39 +828,38 @@ int fb_compact_unserialize_from_buffer(
 }
 
 Variant fb_compact_unserialize(const char* str, int len,
-                               VRefParam success,
-                               VRefParam errcode /* = uninit_variant */) {
+                               bool& success,
+                               Variant& errcode) {
 
   Variant ret;
   int p = 0;
   int err = fb_compact_unserialize_from_buffer(ret, str, len, p);
   if (err) {
-    success.assignIfRef(false);
-    errcode.assignIfRef(err);
+    success = false;
+    errcode = err;
     return false;
   }
-  success.assignIfRef(true);
-  errcode.assignIfRef(init_null());
+  success = true;
+  errcode = init_null();
   return ret;
 }
 
 Variant HHVM_FUNCTION(fb_compact_unserialize,
-                      const Variant& thing, VRefParam success,
-                      VRefParam errcode /* = uninit_variant */) {
+                      const Variant& thing, bool& success,
+                      Variant& errcode) {
   if (!thing.isString()) {
-    success.assignIfRef(false);
-    errcode.assignIfRef(FB_UNSERIALIZE_NONSTRING_VALUE);
+    success = false;
+    errcode = FB_UNSERIALIZE_NONSTRING_VALUE;
     return false;
   }
 
   String s = thing.toString();
-  return fb_compact_unserialize(s.data(), s.size(), ref(success),
-                                ref(errcode));
+  return fb_compact_unserialize(s.data(), s.size(), success, errcode);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool HHVM_FUNCTION(fb_utf8ize, VRefParam input) {
+bool HHVM_FUNCTION(fb_utf8ize, Variant& input) {
   String s = input.toString();
   const char* const srcBuf = s.data();
   int32_t srcLenBytes = s.size();
@@ -932,7 +932,7 @@ bool HHVM_FUNCTION(fb_utf8ize, VRefParam input) {
     U8_APPEND_UNSAFE(dstBuf, dstPosBytes, curCodePoint);
   }
   assertx(dstPosBytes <= dstMaxLenBytes);
-  input.assignIfRef(dstStr.shrink(dstPosBytes));
+  input = dstStr.shrink(dstPosBytes);
   return true;
 }
 

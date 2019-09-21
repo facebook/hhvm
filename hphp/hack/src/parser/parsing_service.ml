@@ -21,6 +21,7 @@ let empty_file_info : FileInfo.t =
     file_mode = None;
     FileInfo.funs = [];
     classes = [];
+    record_defs = [];
     typedefs = [];
     consts = [];
     comments = Some [];
@@ -56,7 +57,7 @@ let process_parse_result
       File_provider.Disk content
   in
   if file_mode <> None then (
-    let (funs, classes, typedefs, consts) = Nast.get_defs ast in
+    let (funs, classes, record_defs, typedefs, consts) = Nast.get_defs ast in
     (* If this file was parsed from a tmp directory,
       save it to the main directory instead *)
     let fn =
@@ -79,7 +80,16 @@ let process_parse_result
     let comments = None in
     let hash = Some (Nast.generate_ast_decl_hash ast) in
     let defs =
-      { FileInfo.hash; funs; classes; typedefs; consts; comments; file_mode }
+      {
+        FileInfo.hash;
+        funs;
+        classes;
+        record_defs;
+        typedefs;
+        consts;
+        comments;
+        file_mode;
+      }
     in
     let acc = Relative_path.Map.add acc ~key:fn ~data:defs in
     let errorl = Errors.merge errorl' errorl in

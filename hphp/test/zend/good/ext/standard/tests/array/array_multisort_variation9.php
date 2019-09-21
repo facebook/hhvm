@@ -30,7 +30,7 @@ $inputs = array(
 );
 
 $numeric = SORT_NUMERIC;
-var_dump(array_multisort2(&$inputs, &$numeric));
+var_dump(array_multisort2(inout $inputs, inout $numeric));
 var_dump($inputs);
 
 echo "===DONE===\n";

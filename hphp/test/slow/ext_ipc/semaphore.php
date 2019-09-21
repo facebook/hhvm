@@ -32,5 +32,6 @@ if ($pid == 0) {
 
 sleep(3); // aha
 sem_release($sem);
-pcntl_waitpid($pid, &$status);
+$status = null;
+pcntl_waitpid($pid, inout $status);
 }

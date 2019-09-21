@@ -29,7 +29,7 @@ function mb_convert_encoding(string $str, string $to_encoding, $from_encoding = 
 <<__PHPStdLib>>
 function mb_convert_kana(string $str, $option = null, $encoding = null) { }
 <<__PHPStdLib>>
-function mb_convert_variables(string $to_encoding, $from_encoding, &$vars, ...$args) { }
+function mb_convert_variables(string $to_encoding, $from_encoding, inout $vars, ...$args) { }
 <<__PHPStdLib>>
 function mb_decode_mimeheader(string $str) { }
 <<__PHPStdLib>>
@@ -61,11 +61,11 @@ function mb_ereg_search_setpos(int $position) { }
 <<__PHPStdLib>>
 function mb_ereg_search($pattern = null, $option = null) { }
 <<__PHPStdLib>>
-function mb_ereg($pattern, string $str, &$regs = null) { }
+function mb_ereg($pattern, string $str, inout $regs) { }
 <<__PHPStdLib>>
 function mb_eregi_replace($pattern, string $replacement, string $str, $option = null) { }
 <<__PHPStdLib>>
-function mb_eregi($pattern, string $str, &$regs = null) { }
+function mb_eregi($pattern, string $str, inout $regs) { }
 <<__PHPStdLib>>
 function mb_get_info($type = null) { }
 <<__PHPStdLib>>
@@ -79,7 +79,7 @@ function mb_language($language = null) { }
 <<__PHPStdLib>>
 function mb_output_handler(string $contents, int $status) { }
 <<__PHPStdLib>>
-function mb_parse_str(string $encoded_string, &$result = null) { }
+function mb_parse_str(string $encoded_string, inout $result) { }
 <<__PHPStdLib>>
 function mb_preferred_mime_name(string $encoding) { }
 <<__PHPStdLib>>

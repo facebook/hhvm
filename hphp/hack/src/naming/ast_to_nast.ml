@@ -20,3 +20,5 @@ let on_fun = converter#on_fun
 let on_typedef = converter#on_typedef
 
 let on_constant = converter#on_constant
+
+let on_record_def = converter#on_record_def

@@ -1049,6 +1049,7 @@ let unbound_name pos name kind =
     | `cls -> "an object type"
     | `func -> "a global function"
     | `const -> "a global constant"
+    | `record -> "a record type"
   in
   add
     (Naming.err_code Naming.UnboundName)
@@ -3509,6 +3510,9 @@ let class_property_initializer_type_does_not_match_hint =
 
 let xhp_attribute_does_not_match_hint =
   maybe_unify_error Typing.XhpAttributeValueDoesNotMatchHint
+
+let record_init_value_does_not_match_hint =
+  maybe_unify_error Typing.RecordInitValueDoesNotMatchHint
 
 let elt_type_to_string = function
   | `Method -> "method"

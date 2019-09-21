@@ -27,7 +27,7 @@ $input =
   "\xc2";
 
 $tmp = $input;
-fb_utf8ize(&$tmp);
+fb_utf8ize(inout $tmp);
 $sanitized = $tmp;
 
 VS(fb_htmlspecialchars($input, ENT_QUOTES, "", array()), $sanitized);

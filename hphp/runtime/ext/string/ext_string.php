@@ -446,14 +446,14 @@ function strtok(string $str, mixed $token = null): mixed;
 <<__IsFoldable, __Native, __Rx>>
 function str_replace(mixed $search,
                      mixed $replace,
-                     mixed $subject,
-                     mixed &$count = null): mixed;
+                     mixed $subject): mixed;
 
 <<__IsFoldable, __Native, __Rx>>
 function str_replace_with_count(mixed $search,
                                 mixed $replace,
                                 mixed $subject,
-                                mixed &$count): mixed;
+                                <<__OutOnly("KindOfInt64")>>
+                                inout mixed $count): mixed;
 
 /**
  * This function returns a string or an array with all occurrences of search
@@ -481,14 +481,14 @@ function str_replace_with_count(mixed $search,
 <<__IsFoldable, __Native, __Rx>>
 function str_ireplace(mixed $search,
                       mixed $replace,
-                      mixed $subject,
-                      mixed &$count = null): mixed;
+                      mixed $subject): mixed;
 
 <<__IsFoldable, __Native, __Rx>>
 function str_ireplace_with_count(mixed $search,
                                  mixed $replace,
                                  mixed $subject,
-                                 mixed &$count): mixed;
+                                 <<__OutOnly("KindOfInt64")>>
+                                 inout mixed $count): mixed;
 
 /**
  * substr_replace() replaces a copy of string delimited by the start and
@@ -1692,7 +1692,8 @@ function levenshtein(string $str1,
 <<__IsFoldable, __Native, __Rx>>
 function similar_text(string $first,
                       string $second,
-                      mixed &$percent = null): int;
+                      <<__OutOnly("KindOfDouble")>>
+                      inout mixed $percent): int;
 
 /**
  * Calculates the soundex key of str.  Soundex keys have the property that

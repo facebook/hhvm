@@ -20,7 +20,8 @@ function fb_serialize(mixed $thing, int $options = 0): mixed;
  */
 <<__HipHopSpecific, __Native>>
 function fb_unserialize(mixed $thing,
-                        mixed &$success,
+                        <<__OutOnly("KindOfBoolean")>>
+                        inout mixed $success,
                         int $options = 0): mixed;
 
 /** Serialize data into a compact format that can be unserialized by
@@ -45,8 +46,10 @@ function fb_compact_serialize(mixed $thing): mixed;
  */
 <<__HipHopSpecific, __Native>>
 function fb_compact_unserialize(mixed $thing,
-                                mixed &$success,
-                                mixed &$errcode = null): mixed;
+                                <<__OutOnly("KindOfBoolean")>>
+                                inout mixed $success,
+                                <<__OutOnly>>
+                                inout mixed $errcode): mixed;
 
 /** Invokes a user handler upon calling a function or a class method. If this
  * handler returns FALSE, code will continue with original function.
@@ -125,8 +128,8 @@ function fb_rename_function(string $orig_func_name,
  * @param mixed $input - What string to sanitize.
  * @return bool - Sanitized string.
  */
-<<__HipHopSpecific, __Native, __IsFoldable, __Rx>>
-function fb_utf8ize(mixed &$input): bool;
+<<__HipHopSpecific, __Native, __Rx>>
+function fb_utf8ize(inout mixed $input): bool;
 
 /** Count the number of UTF-8 code points in string or byte count if it's not
  * valid UTF-8.

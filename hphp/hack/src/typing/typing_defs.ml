@@ -573,11 +573,18 @@ and pu_enum_type = {
 and pu_member_type = {
   tpum_atom: Nast.sid;
   tpum_types: (Nast.sid * decl_ty) SMap.t;
+  tpum_exprs: Nast.sid SMap.t;
 }
 
 and enum_type = {
   te_base: decl_ty;
   te_constraint: decl_ty option;
+}
+
+and record_def_type = {
+  rdt_name: Nast.sid;
+  rdt_pos: Pos.t;
+  rdt_errors: Errors.t option;
 }
 
 and typedef_type = {

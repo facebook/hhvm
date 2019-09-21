@@ -6,7 +6,10 @@ if (!$socket) {
 if (!socket_set_nonblock($socket)) {
     die('Unable to set nonblocking mode for socket');
 }
-var_dump(socket_recvfrom($socket, $buf, 12, 0, $from, $port)); // false (EAGAIN, no warning)
+$buf = null;
+$from = null;
+$port = null;
+var_dump(socket_recvfrom($socket, inout $buf, 12, 0, inout $from, inout $port)); // false (EAGAIN, no warning)
 $address = '::1';
 socket_sendto($socket, '', 1, 0, $address); // cause warning
 if (!socket_bind($socket, $address, 1223)) {
@@ -24,9 +27,9 @@ if ($bytes_sent == -1) {
 
 $from = "";
 $port = 0;
-socket_recvfrom($socket, $buf, 12, 0); // cause warning
-socket_recvfrom($socket, $buf, 12, 0, $from); // cause warning
-$bytes_received = socket_recvfrom($socket, $buf, 12, 0, $from, $port);
+socket_recvfrom($socket, inout $buf, 12, 0); // cause warning
+socket_recvfrom($socket, inout $buf, 12, 0, inout $from); // cause warning
+$bytes_received = socket_recvfrom($socket, inout $buf, 12, 0, inout $from, inout $port);
 if ($bytes_received == -1) {
     die('An error occurred while receiving from the socket');
 } else if ($bytes_received != $len) {

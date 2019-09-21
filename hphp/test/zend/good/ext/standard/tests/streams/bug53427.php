@@ -7,7 +7,7 @@ $except = NULL;
 
 var_dump($read);
 
-stream_select(&$read, &$write, &$except, 0);
+stream_select(inout $read, inout $write, inout $except, 0);
 
 var_dump($read);
 }

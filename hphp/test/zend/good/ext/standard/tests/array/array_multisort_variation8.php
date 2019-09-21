@@ -37,7 +37,7 @@ $inputs = array(
 );
 
 $string = SORT_STRING;
-var_dump(array_multisort2(&$inputs, &$string));
+var_dump(array_multisort2(inout $inputs, inout $string));
 var_dump($inputs);
 
 echo "===DONE===\n";

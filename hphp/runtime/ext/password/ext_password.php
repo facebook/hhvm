@@ -112,7 +112,8 @@ function password_hash(?string $password,
       }
     }
     if (!$buffer_valid && function_exists('openssl_random_pseudo_bytes')) {
-      $buffer = openssl_random_pseudo_bytes($raw_salt_len);
+      $crypto_strong = false;
+      $buffer = openssl_random_pseudo_bytes($raw_salt_len, inout $crypto_strong);
       if ($buffer) {
         $buffer_valid = true;
       }

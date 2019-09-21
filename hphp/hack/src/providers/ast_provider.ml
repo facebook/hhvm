@@ -142,6 +142,33 @@ let get_class ?(case_insensitive = false) defs class_name =
   in
   get None defs
 
+let get_record_def ?(case_insensitive = false) defs record_name =
+  let record_name =
+    if case_insensitive then
+      Caml.String.lowercase_ascii record_name
+    else
+      record_name
+  in
+  let rec get acc defs =
+    List.fold_left defs ~init:acc ~f:(fun acc def ->
+        match def with
+        | Aast.RecordDef rd ->
+          let def_name = snd rd.Aast.rd_name in
+          let def_name =
+            if case_insensitive then
+              Caml.String.lowercase_ascii def_name
+            else
+              def_name
+          in
+          if def_name = record_name then
+            Some rd
+          else
+            acc
+        | Aast.Namespace (_, defs) -> get acc defs
+        | _ -> acc)
+  in
+  get None defs
+
 let get_fun ?(case_insensitive = false) defs fun_name =
   let fun_name =
     if case_insensitive then
@@ -242,6 +269,10 @@ let get_ast ?(full = false) file_name =
 let find_class_in_file
     ?(full = false) ?(case_insensitive = false) file_name class_name =
   get_class (get_ast ~full file_name) ~case_insensitive class_name
+
+let find_record_def_in_file
+    ?(full = false) ?(case_insensitive = false) file_name record_name =
+  get_record_def (get_ast ~full file_name) ~case_insensitive record_name
 
 let find_fun_in_file
     ?(full = false) ?(case_insensitive = false) file_name fun_name =

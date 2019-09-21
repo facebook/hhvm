@@ -256,8 +256,8 @@ let with_dependency_table_reads full_recheck_needed f =
 (* Given a set of declaration names, put them in shared memory. We do it here, because
  * declarations computed while handling IDE commands will likely be useful for subsequent IDE
  * commands too, but are not persisted outside of make_then_revert_local_changes closure. *)
-let predeclare_ide_deps genv { FileInfo.n_funs; n_classes; n_types; n_consts }
-    =
+let predeclare_ide_deps
+    genv { FileInfo.n_funs; n_classes; n_record_defs; n_types; n_consts } =
   if genv.ServerEnv.local_config.ServerLocalConfig.predeclare_ide_deps then
     Utils.try_finally
       ~f:
@@ -290,6 +290,7 @@ let predeclare_ide_deps genv { FileInfo.n_funs; n_classes; n_types; n_consts }
           in
           iter Decl_heap.Funs.mem Decl_provider.get_fun n_funs;
           iter Decl_heap.Classes.mem declare_class n_classes;
+          iter Decl_heap.RecordDefs.mem declare_class n_record_defs;
           iter Decl_heap.Typedefs.mem Decl_provider.get_typedef n_types;
           iter Decl_heap.GConsts.mem Decl_provider.get_gconst n_consts
         end

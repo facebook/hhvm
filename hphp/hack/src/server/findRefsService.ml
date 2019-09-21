@@ -26,6 +26,7 @@ type member_class =
 
 type action_internal =
   | IClass of string
+  | IRecord of string
   | IMember of member_class * member
   | IFunction of string
   | IGConst of string
@@ -285,7 +286,16 @@ let get_definitions = function
         >>= (fun class_ -> Some [(class_name, Cls.pos class_)])
       | (_, Naming_table.TTypedef) ->
         Decl_provider.get_typedef class_name
-        >>= (fun type_ -> Some [(class_name, type_.td_pos)]) )
+        >>= (fun type_ -> Some [(class_name, type_.td_pos)])
+      | (_, Naming_table.TRecordDef) ->
+        Decl_provider.get_record_def class_name
+        >>= (fun rd -> Some [(class_name, rd.rdt_pos)]) )
+  | IRecord record_name ->
+    begin
+      match Decl_provider.get_record_def record_name with
+      | Some rd -> [(record_name, rd.rdt_pos)]
+      | None -> []
+    end
   | IFunction fun_name ->
     begin
       match Decl_provider.get_fun fun_name with

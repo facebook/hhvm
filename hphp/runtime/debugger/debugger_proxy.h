@@ -106,7 +106,7 @@ struct DebuggerProxy : Synchronizable,
   void stop();
   bool cleanup(int timeout);
 
-  bool getClientConnectionInfo(VRefParam address, VRefParam port);
+  bool getClientConnectionInfo(Variant& address, Variant& port);
 
   enum ExecutePHPFlags {
     ExecutePHPFlagsNone = 0x0, // No logging, not at an interrupt

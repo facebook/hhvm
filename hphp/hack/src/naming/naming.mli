@@ -19,6 +19,8 @@ val fun_ : Nast.fun_ -> Nast.fun_
 (* Solves the local names of a class *)
 val class_ : Nast.class_ -> Nast.class_
 
+val record_def : Nast.record_def -> Nast.record_def
+
 (* Solves the local names in an typedef *)
 val typedef : Nast.typedef -> Nast.typedef
 

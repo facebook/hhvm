@@ -12,7 +12,7 @@ try { var_dump(ldap_get_option($link, LDAP_OPT_PROTOCOL_VERSION)); } catch (Exce
 // Too many parameters
 try {
 	var_dump(
-		ldap_get_option($link, LDAP_OPT_PROTOCOL_VERSION, &$option, "Additional data"),
+		ldap_get_option($link, LDAP_OPT_PROTOCOL_VERSION, inout $option, "Additional data"),
 		$option
 	);
 } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }

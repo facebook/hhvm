@@ -98,7 +98,7 @@ let get_local_var_def ast name p =
   let def = List.hd (ServerFindLocals.go_from_ast ast line char) in
   Option.map def ~f:(FileOutline.summarize_local name)
 
-(* summarize a class or typedef carried with SymbolOccurrence.Class *)
+(* summarize a class, typedef or record *)
 let summarize_class_typedef x =
   Naming_table.Types.get_pos x
   >>= fun (pos, ct) ->
@@ -110,6 +110,9 @@ let summarize_class_typedef x =
   | Naming_table.TTypedef ->
     Ast_provider.find_typedef_in_file fn x
     >>= (fun tdef -> Some (FileOutline.summarize_typedef tdef))
+  | Naming_table.TRecordDef ->
+    Ast_provider.find_record_def_in_file fn x
+    >>= (fun rd -> Some (FileOutline.summarize_record_decl rd))
 
 let go ast result =
   match result.SymbolOccurrence.type_ with
@@ -157,6 +160,8 @@ let go ast result =
     >>= (fun cst -> Some (FileOutline.summarize_gconst cst))
   | SymbolOccurrence.Class ->
     summarize_class_typedef result.SymbolOccurrence.name
+  | SymbolOccurrence.Record ->
+    summarize_class_typedef result.SymbolOccurrence.name
   | SymbolOccurrence.Typeconst (c_name, typeconst_name) ->
     Decl_provider.get_class c_name
     >>= fun class_ ->
@@ -191,6 +196,7 @@ let get_definition_cst_node_from_pos kind source_text pos =
         | (SymbolDefinition.Class, SyntaxKind.ClassishDeclaration)
         | (SymbolDefinition.Method, SyntaxKind.MethodishDeclaration)
         | (SymbolDefinition.Property, SyntaxKind.PropertyDeclaration)
+        | (SymbolDefinition.RecordDef, SyntaxKind.RecordDeclaration)
         | (SymbolDefinition.Const, SyntaxKind.ConstDeclaration)
         | (SymbolDefinition.Enum, SyntaxKind.EnumDeclaration)
         | (SymbolDefinition.Interface, SyntaxKind.ClassishDeclaration)

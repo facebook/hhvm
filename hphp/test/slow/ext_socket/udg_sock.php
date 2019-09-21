@@ -14,8 +14,10 @@ var_dump($ret);
 $ret = socket_bind($server, $socket , 0);
 var_dump($ret);
 
+$errno = null;
+$errstr = null;
 // Create the client and send/receive the data
-$client = stream_socket_client("udg://$socket");
+$client = stream_socket_client("udg://$socket", inout $errno, inout $errstr);
 var_dump($client);
 
 fwrite($client, $data);

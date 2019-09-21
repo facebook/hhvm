@@ -70,7 +70,7 @@ $values = array(
 
 foreach($values as $key => $value) {
       echo "\n-- Arg value $key --\n";
-      getimagesize($imagefile, &$value);
+      getimagesize($imagefile, inout $value);
       var_dump(bin2hex($value["APP0"]));
 };
 

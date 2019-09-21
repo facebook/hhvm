@@ -5,11 +5,8 @@ $ds = array(
         2 => array("pipe", "w")
         );
 
-$cat = proc_open(
-        "/bin/cat",
-        $ds,
-        &$pipes
-        );
+$pipes = null;
+$cat = proc_open("/bin/cat", $ds, inout $pipes);
 
 proc_close($cat);
 

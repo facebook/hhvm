@@ -246,16 +246,6 @@ TypedValue HHVM_FUNCTION(hphp_array_idx,
                          const Variant& search,
                          const Variant& key,
                          const Variant& def);
-bool HHVM_FUNCTION(array_multisort,
-                   VRefParam arg1,
-                   VRefParam arg2 = uninit_null(),
-                   VRefParam arg3 = uninit_null(),
-                   VRefParam arg4 = uninit_null(),
-                   VRefParam arg5 = uninit_null(),
-                   VRefParam arg6 = uninit_null(),
-                   VRefParam arg7 = uninit_null(),
-                   VRefParam arg8 = uninit_null(),
-                   VRefParam arg9 = uninit_null());
 
 ///////////////////////////////////////////////////////////////////////////////
 

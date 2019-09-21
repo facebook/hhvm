@@ -28,7 +28,7 @@ $b = array(
 );
 
 $string = SORT_STRING;
-array_multisort3(&$b, &$string, &$a);
+array_multisort3(inout $b, inout $string, inout $a);
 
 var_dump($a, $b);
 

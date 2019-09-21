@@ -77,9 +77,10 @@ function msg_queue_exists(int $key): bool;
 function msg_send(resource $queue,
                   int $msgtype,
                   mixed $message,
-                  bool $serialize = true,
-                  bool $blocking = true,
-                  mixed &$errorcode = null): bool;
+                  bool $serialize,
+                  bool $blocking,
+                  <<__OutOnly>>
+                  inout mixed $errorcode): bool;
 
 /**
  * msg_receive() will receive the first message from the specified queue of
@@ -130,12 +131,15 @@ function msg_send(resource $queue,
 <<__Native>>
 function msg_receive(resource $queue,
                      int $desiredmsgtype,
-                     mixed &$msgtype,
+                     <<__OutOnly("KindOfInt64")>>
+                     inout mixed $msgtype,
                      int $maxsize,
-                     mixed &$message,
-                     bool $unserialize = true,
-                     int $flags = 0,
-                     mixed &$errorcode = null): bool;
+                     <<__OutOnly>>
+                     inout mixed $message,
+                     bool $unserialize,
+                     int $flags,
+                     <<__OutOnly>>
+                     inout mixed $errorcode): bool;
 
 /**
  * msg_remove_queue() destroys the message queue specified by the queue. Only

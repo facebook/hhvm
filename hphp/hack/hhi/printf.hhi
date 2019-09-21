@@ -43,7 +43,7 @@ interface PlainSprintf {
   // It's common to pass floats; would be nice to type this as
   // 'number' once that type becomes available in userland.
  <<__Rx>>
-  public function format_d(mixed $s) : string;
+  public function format_d(num $s) : string;
  <<__Rx>>
   public function format_s(mixed $s) : string;
  <<__Rx>>

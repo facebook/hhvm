@@ -360,14 +360,6 @@ static Variant call_intercept_handler_callback(
 ) {
   CallCtx callCtx;
   auto const origCallee = ar->func();
-  auto const reifiedGenerics = [&]() -> ArrayData* {
-    if (!origCallee->hasReifiedGenerics()) return nullptr;
-    // Reified generics is the first non param local
-    auto const tv =
-      reinterpret_cast<TypedValue*>(ar) - origCallee->numParams() - 1;
-    assertx(tvIsVecOrVArray(tv));
-    return tv->m_data.parr;
-  }();
   vm_decode_function(function, callCtx, DecodeFlags::Warn, true);
   auto f = callCtx.func;
   if (!f) return uninit_null();
@@ -391,10 +383,18 @@ static Variant call_intercept_handler_callback(
     args.append(thiz);
   }
   IterateV(curArgs.get(), [&](TypedValue v) { args.append(v); });
+  auto reifiedGenerics = [&] {
+    if (!origCallee->hasReifiedGenerics()) return Array();
+    // Reified generics is the first non param local
+    auto const tv =
+      reinterpret_cast<TypedValue*>(ar) - origCallee->numParams() - 1;
+    assertx(tvIsVecOrVArray(tv));
+    return Array(tv->m_data.parr);
+  }();
   auto ret = Variant::attach(
     g_context->invokeFunc(f, args.toArray(), callCtx.this_, callCtx.cls,
                           callCtx.invName, callCtx.dynamic, false, false,
-                          Array::attach(reifiedGenerics))
+                          std::move(reifiedGenerics))
   );
   return ret;
 }

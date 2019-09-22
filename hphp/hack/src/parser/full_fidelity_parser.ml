@@ -53,6 +53,9 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
       let (sc_state, root, errors, rust_tree) =
         SCI.rust_parse parser.text parser.env
       in
+      (match rust_tree with
+      | Some tree -> Rust_pointer.register_leaked_pointer tree
+      | None -> ());
       ({ parser with errors; sc_state }, root, rust_tree)
 
     let parse_script parser = rust_parse_script parser

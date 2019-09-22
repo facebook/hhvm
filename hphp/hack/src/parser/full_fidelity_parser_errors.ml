@@ -5776,6 +5776,7 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
     let find_syntax_errors env =
       match SyntaxTree.rust_tree env.syntax_tree with
       | Some rust_tree ->
+        Rust_pointer.unregister_leaked_pointer rust_tree;
         Syntax.rust_parser_errors
           (SyntaxTree.text env.syntax_tree)
           rust_tree

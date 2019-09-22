@@ -76,6 +76,13 @@ where
     }
 }
 
+caml_raise!(drop_tree_positioned, |ocaml_tree|, <res>, {
+    let tree_pointer = ocaml_tree.usize_val() as *mut SyntaxTree<PositionedSyntax, ()>;
+    let mut tree = Box::from_raw(tree_pointer);
+    drop_tree(tree);
+    res = ocaml::Value::unit();
+} -> res);
+
 caml_raise!(rust_parser_errors_positioned, |ocaml_source_text, ocaml_tree, ocaml_parser_options|, <res>, {
     let (parser_options, (hhvm_compat_mode, hhi_mode, codegen)) =
         parser_options_from_ocaml_only_for_parser_errors(&ocaml_parser_options);

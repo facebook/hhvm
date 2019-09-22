@@ -4385,7 +4385,8 @@ let lower_tree
         String_utils.string_ends_with Relative_path.(suffix env.file) "hhi"
       in
       match PositionedSyntaxTree.errors tree with
-      | [] when env.quick_mode -> ()
+      | [] when env.quick_mode ->
+        Rust_pointer.free_leaked_pointer ~warn:false ()
       | [] when ParserOptions.parser_errors_only env.parser_options -> ()
       | [] ->
         let error_env =
@@ -4398,7 +4399,9 @@ let lower_tree
         in
         let errors = find_errors error_env in
         List.iter ~f:report_error errors
-      | error :: _ -> report_error error
+      | error :: _ ->
+        Rust_pointer.free_leaked_pointer ~warn:false ();
+        report_error error
   in
   (* check_for_syntax_errors *)
   let mode = Option.value mode ~default:FileInfo.Mpartial in
@@ -4491,6 +4494,8 @@ let defensive_program
     in
     legacy @@ from_text env source
   with e ->
+    Rust_pointer.free_leaked_pointer ();
+
     (* If we fail to lower, try to just make a source text and get the file mode *)
     (* If even THAT fails, we just have to give up and return an empty php file*)
     let mode =

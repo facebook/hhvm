@@ -189,7 +189,7 @@ module FullFidelityParseArgs = struct
     let set_show_file_name () = show_file_name := true in
     let files = ref [] in
     let push_file file = files := file :: !files in
-    let rust_parser_errors = ref false in
+    let rust_parser_errors = ref true in
     let enable_constant_visibility_modifiers = ref false in
     let enable_class_level_where_clauses = ref false in
     let disable_legacy_soft_typehints = ref false in

@@ -4259,16 +4259,14 @@ let parse_text (env : env) (source_text : SourceText.t) :
     let p = pos_of_error env.file source_text e in
     raise @@ SyntaxError.ParserFatal (e, p) );
   let leak_rust_tree =
-    (* DANGER: only for use in tests for now. Needs to be kept in sync with other
-       logic in this file, ensuring that the tree created here is later passed to
-       ParserErrors. The cases where it currently may not happen:
-       - we are in codegen and file contains coroutines (which is IMHO a bug)
-       - when parser_errors_only is enabled
-       - when an exception is thrown between parsing and error checking
+    (* DANGER: Needs to be kept in sync with other logic in this file, ensuring
+       that the tree created here is later passed to ParserErrors. This can
+       currently leak memory when an exception is thrown between parsing and
+       error checking
      *)
     ParserOptions.rust_parser_errors env.parser_options
     && (not @@ ParserOptions.parser_errors_only env.parser_options)
-    && env.keep_errors
+    && (env.codegen || env.keep_errors)
   in
   let tree =
     let env' =

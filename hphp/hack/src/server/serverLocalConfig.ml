@@ -124,6 +124,8 @@ type t = {
   profile_type_check_duration_threshold: float;
   (* Use shared_lru workers *)
   use_lru_workers: bool;
+  (* Use Rust version of full_fidelity_parser_errors.ml  *)
+  rust_parser_errors: bool;
 }
 
 let default =
@@ -196,6 +198,7 @@ let default =
     profile_type_check_duration_threshold = 0.05;
     (* seconds *)
     use_lru_workers = false;
+    rust_parser_errors = true;
   }
 
 let path =
@@ -546,6 +549,13 @@ let load_ fn ~silent ~current_version overrides =
   let use_lru_workers =
     bool_if_version "use_lru_workers" ~default:default.use_lru_workers config
   in
+  let rust_parser_errors =
+    bool_if_min_version
+      "rust_parser_errors"
+      ~default:default.rust_parser_errors
+      ~current_version
+      config
+  in
   {
     use_watchman;
     watchman_init_timeout;
@@ -613,6 +623,7 @@ let load_ fn ~silent ~current_version overrides =
     tico_invalidate_smart;
     profile_type_check_duration_threshold;
     use_lru_workers;
+    rust_parser_errors;
   }
 
 let load ~silent ~current_version config_overrides =

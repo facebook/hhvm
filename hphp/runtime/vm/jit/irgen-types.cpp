@@ -1016,6 +1016,10 @@ const ArrayData* staticallyResolveTypeStructure(
 ) {
   auto const declaringCls = curFunc(env) ? curClass(env) : nullptr;
   bool persistent = false;
+  // This shouldn't do a difference, but does on GCC 8.3 on Ubuntu 19.04;
+  // if we take the catch then return `ts`, it's a bogus value and we
+  // segfault... sometimes...
+  const ArrayData* ts_copy = ts;
   try {
     auto newTS = TypeStructure::resolvePartial(
       ArrNR(ts), nullptr, declaringCls, persistent, partial, invalidType);
@@ -1024,7 +1028,7 @@ const ArrayData* staticallyResolveTypeStructure(
   // We are here because either we threw in the resolution or it wasn't
   // persistent resolution which means we didn't really resolve it
   partial = true;
-  return ts;
+  return ts_copy;
 }
 
 SSATmp* check_nullable(IRGS& env, SSATmp* res, SSATmp* var) {

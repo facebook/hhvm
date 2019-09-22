@@ -366,5 +366,5 @@ let rust_parse_with_verify_sc text env =
 external rust_parser_errors :
   Full_fidelity_source_text.t ->
   Rust_pointer.t ->
-  ParserOptions.t ->
+  ParserOptions.ffi_t ->
   Full_fidelity_syntax_error.t list = "rust_parser_errors_positioned"

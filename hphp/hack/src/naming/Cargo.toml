@@ -1,0 +1,11 @@
+[package]
+name = "naming_special_names"
+version = "1.0.0"
+edition = "2018"
+
+[lib]
+name = "naming_special_names"
+path = "naming_special_names.rs"
+
+[dependencies]
+lazy_static = "^1.3.0"

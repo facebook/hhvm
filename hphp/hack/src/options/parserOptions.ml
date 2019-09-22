@@ -140,3 +140,20 @@ let make
       po_disable_halt_compiler = disable_halt_compiler;
       po_disallow_func_ptrs_in_constants = disallow_func_ptrs_in_constants;
     }
+
+(* Changes here need to be synchronized with rust_parser_errors_ffi.rs *)
+type ffi_t =
+  bool * bool * bool * bool * bool * bool * bool * bool * bool * bool * bool
+
+let to_rust_ffi_t po ~hhvm_compat_mode ~hhi_mode ~codegen =
+  ( hhvm_compat_mode,
+    hhi_mode,
+    codegen,
+    disable_lval_as_an_expression po,
+    enable_constant_visibility_modifiers po,
+    disable_legacy_soft_typehints po,
+    const_static_props po,
+    disable_legacy_attribute_syntax po,
+    const_default_func_args po,
+    abstract_static_props po,
+    disallow_func_ptrs_in_constants po )

@@ -18,7 +18,7 @@
  */
 
 #[allow(non_camel_case_types)] // allow Include_once and Require_once
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq, Ord, Eq, PartialOrd)]
 pub enum TokenKind {
     // No text tokens
     EndOfFile,

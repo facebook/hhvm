@@ -5779,7 +5779,11 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
         Syntax.rust_parser_errors
           (SyntaxTree.text env.syntax_tree)
           rust_tree
-          env.parser_options
+          (ParserOptions.to_rust_ffi_t
+             env.parser_options
+             ~hhvm_compat_mode:(env.hhvm_compat_mode <> NoCompat)
+             ~hhi_mode:env.hhi_mode
+             ~codegen:env.codegen)
       | None -> find_syntax_errors env
 
     let parse_errors_impl env =

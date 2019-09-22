@@ -881,7 +881,7 @@ SYNTAX
   val rust_parser_errors :
     Full_fidelity_source_text.t ->
     Rust_pointer.t ->
-    ParserOptions.t ->
+    ParserOptions.ffi_t ->
     Full_fidelity_syntax_error.t list
   val has_leading_trivia : TriviaKind.t -> Token.t -> bool
   val to_json : ?with_value:bool -> t -> Hh_json.json
@@ -3573,7 +3573,7 @@ module GenerateFFRustTokenKind = struct
     ^ "
 
 #[allow(non_camel_case_types)] // allow Include_once and Require_once
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq, Ord, Eq, PartialOrd)]
 pub enum TokenKind {
     // No text tokens
 KIND_DECLARATIONS_NO_TEXT    // Given text tokens

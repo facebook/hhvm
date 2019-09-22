@@ -53,6 +53,29 @@ unsafe fn parser_options_from_ocaml_only_for_parser_errors(
     (parser_options, (hhvm_compat_mode, hhi_mode, codegen))
 }
 
+// See similar method in rust_parser_errors::parse_errors for explanation.
+// TODO: factor this out to separate crate
+fn drop_tree<T, S>(tree: Box<SyntaxTree<T, S>>)
+where
+    S: Clone,
+{
+    match tree.required_stack_size() {
+        None => std::mem::drop(tree),
+        Some(stack_size) => {
+            let raw_pointer = Box::leak(tree) as *mut SyntaxTree<T, S> as usize;
+            std::thread::Builder::new()
+                .stack_size(stack_size)
+                .spawn(move || {
+                    let tree = unsafe { Box::from_raw(raw_pointer as *mut SyntaxTree<T, S>) };
+                    std::mem::drop(tree)
+                })
+                .expect("ERROR: thread::spawn")
+                .join()
+                .expect("ERROR: failed to wait on new thread")
+        }
+    }
+}
+
 caml_raise!(rust_parser_errors_positioned, |ocaml_source_text, ocaml_tree, ocaml_parser_options|, <res>, {
     let (parser_options, (hhvm_compat_mode, hhi_mode, codegen)) =
         parser_options_from_ocaml_only_for_parser_errors(&ocaml_parser_options);
@@ -72,6 +95,7 @@ caml_raise!(rust_parser_errors_positioned, |ocaml_source_text, ocaml_tree, ocaml
     tree.replace_text_unsafe(&source_text);
 
     let errors = rust_parser_errors::ParserErrors::parse_errors(&tree, parser_options, hhvm_compat_mode, hhi_mode, codegen);
+    drop_tree(tree);
     ocamlpool_enter();
     let ocaml_errors = errors.ocamlvalue();
     ocamlpool_leave();

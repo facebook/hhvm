@@ -702,7 +702,7 @@ pub const strict_namespace_hh: Error = Cow::Borrowed(concat!(
     "If it's already there, remove this line. ",
     "Hack is strict already.",
 ));
-pub fn name_is_already_in_use_hh(line_num: usize, name: &str, short_name: &str) -> Error {
+pub fn name_is_already_in_use_hh(line_num: isize, name: &str, short_name: &str) -> Error {
     Cow::Owned(format!(
         "Cannot use {} as {} because the name was explicitly used earlier via a `use' statement on line {}",
         name.to_string(),
@@ -710,7 +710,7 @@ pub fn name_is_already_in_use_hh(line_num: usize, name: &str, short_name: &str) 
         line_num.to_string(),
     ))
 }
-pub fn name_is_already_in_use_implicit_hh(line_num: usize, name: &str, short_name: &str) -> Error {
+pub fn name_is_already_in_use_implicit_hh(line_num: isize, name: &str, short_name: &str) -> Error {
     Cow::Owned(format!(
         concat!(
             "Cannot use {} as {} because the name was implicitly used on line {}",
@@ -873,7 +873,7 @@ pub const xhp_class_multiple_children_decls: Error =
 pub const inout_param_in_generator: Error =
     Cow::Borrowed("Parameters may not be marked inout on generators");
 pub const inout_param_in_async_generator: Error =
-    Cow::Borrowed("Parameters may not be marked inout on generators");
+    Cow::Borrowed("Parameters may not be marked inout on async generators");
 pub const inout_param_in_async: Error =
     Cow::Borrowed("Parameters may not be marked inout on async functions");
 pub const inout_param_in_construct: Error =
@@ -969,3 +969,6 @@ pub fn lowering_parsing_error(text: &str, syntax: &str) -> Error {
 }
 pub const xhp_class_attribute_type_constant: Error =
     Cow::Borrowed("Type constants are not allowed on xhp class attributes");
+pub const globals_without_subscript: Error = Cow::Borrowed("$GLOBALS access requires a subscript.");
+pub const invalid_await_position_pipe: Error =
+    Cow::Borrowed("Await cannot be used as an expression right of a pipe operator.");

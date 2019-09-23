@@ -71,28 +71,28 @@ function ut_main()
         'variant1' => array(),
         'extlang2' => false
     );
-        $loc_parts_arr12 = array(
-                Locale::LANG_TAG =>'en' ,
-                Locale::SCRIPT_TAG =>'Hans' ,
-                Locale::REGION_TAG =>'CN',
-                Locale::VARIANT_TAG => array('nedis', 'rozaj'),
+    $loc_parts_arr12 = array(
+        Locale::LANG_TAG =>'en' ,
+        Locale::SCRIPT_TAG =>'Hans' ,
+        Locale::REGION_TAG =>'CN',
+        Locale::VARIANT_TAG => array('nedis', 'rozaj'),
         Locale::PRIVATE_TAG => array('prv1', 'prv2'),
         Locale::EXTLANG_TAG => array('lng', 'ing')
-        );
+    );
 
 
     $loc_parts_arr = array(
-        'loc1' => $loc_parts_arr1   ,
-        'loc2' => $loc_parts_arr2   ,
-        'loc3' => $loc_parts_arr3   ,
-        'loc4' => $loc_parts_arr4   ,
-        'loc5' => $loc_parts_arr5   ,
-        'loc6' => $loc_parts_arr6   ,
-        'loc7' => $loc_parts_arr7   ,
-        'loc8' => $loc_parts_arr8   ,
-        'loc9' => $loc_parts_arr9   ,
-        'loc10' => $loc_parts_arr10 ,
-        'loc11' => $loc_parts_arr11 ,
+        'loc1' => $loc_parts_arr1,
+        'loc2' => $loc_parts_arr2,
+        'loc3' => $loc_parts_arr3,
+        'loc4' => $loc_parts_arr4,
+        'loc5' => $loc_parts_arr5,
+        'loc6' => $loc_parts_arr6,
+        'loc7' => $loc_parts_arr7,
+        'loc8' => $loc_parts_arr8,
+        'loc9' => $loc_parts_arr9,
+        'loc10' => $loc_parts_arr10,
+        'loc11' => $loc_parts_arr11,
         'loc12' => $loc_parts_arr12
     );
 
@@ -111,9 +111,9 @@ function ut_main()
 
         $locale = ut_loc_locale_compose( $value);
         $res_str .= "\n\nComposed Locale: ";
-        if( $locale){
+        if ($locale) {
             $res_str .= "$locale";
-        }else{
+        } else {
             $res_str .= "No values found from Locale compose due to the following error:\n";
             $res_str .= intl_get_error_message() ;
         }

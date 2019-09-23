@@ -1,6 +1,0 @@
-File "rx_returns_mutable.php", line 14, characters 30-34:
-Invalid argument (Typing[4110])
-File "stdlib/builtins_array.hhi", line 115, characters 10-18:
-Expected Container<[unresolved]>
-File "rx_returns_mutable.php", line 13, characters 12-22:
-But got dynamic because it is an unenforceable type

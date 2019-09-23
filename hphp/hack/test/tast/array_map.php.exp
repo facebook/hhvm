@@ -126,7 +126,7 @@
            (Expr
               (([15:3-21], array<arraykey, bool>),
                (Call (Cnormal,
-                  (([15:3-12], (function((function(int): bool), Container<int>): array<arraykey, bool>)),
+                  (([15:3-12], (function<T1, Tr>((function(int): bool) $callback, Container<int>): array<arraykey, bool>)),
                    (Id ([15:3-12], "\\array_map"))),
                   [],
                   [(([15:13-15], (function(int): bool)),
@@ -137,7 +137,7 @@
            (Expr
               (([16:3-26], array<bool>),
                (Call (Cnormal,
-                  (([16:3-12], (function((function(int, string): bool), Container<int>, Container<string>): array<bool>)),
+                  (([16:3-12], (function<T1, T2, Tr>((function(int, string): bool) $callback, Container<int>, Container<string>): array<bool>)),
                    (Id ([16:3-12], "\\array_map"))),
                   [],
                   [(([16:13-15], (function(int, string): bool)),
@@ -151,7 +151,7 @@
            (Expr
               (([17:3-31], array<Container<int>>),
                (Call (Cnormal,
-                  (([17:3-12], (function((function(int, string, num): Container<int>), Container<int>, Container<string>, Container<num>): array<Container<int>>)),
+                  (([17:3-12], (function<T1, T2, T3, Tr>((function(int, string, num): Container<int>) $callback, Container<int>, Container<string>, Container<num>): array<Container<int>>)),
                    (Id ([17:3-12], "\\array_map"))),
                   [],
                   [(([17:13-15], (function(int, string, num): Container<int>)),
@@ -167,7 +167,7 @@
            (Expr
               (([18:3-29], array<arraykey, bool>),
                (Call (Cnormal,
-                  (([18:3-12], (function((function(num): bool), Container<num>): array<arraykey, bool>)),
+                  (([18:3-12], (function<T1, Tr>((function(num): bool) $callback, Container<num>): array<arraykey, bool>)),
                    (Id ([18:3-12], "\\array_map"))),
                   [],
                   [(([18:13-15], (function(num): bool)),

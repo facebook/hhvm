@@ -11,6 +11,7 @@ open Core_kernel
 open Typing_defs
 module SN = Naming_special_names
 module MakeType = Typing_make_type
+module TUtils = Typing_utils
 
 let update_param p ty = { p with fp_type = { p.fp_type with et_type = ty } }
 
@@ -64,5 +65,92 @@ let transform_special_fun_ty fty id nargs =
       | _ -> (fty.ft_params, fty.ft_ret.et_type)
     in
     { fty with ft_params = params; ft_ret = { fty.ft_ret with et_type = ret } }
+  else if
+    (*
+      Builds a function with signature:
+
+      function<T1, ..., Tn, Tr>(
+        (function(T1, ..., Tn):Tr),
+        Container<T1>,
+        ...,
+        Container<Tn>,
+      ): array<Tr>
+
+      where n is one fewer than the actual number of arguments. The hhi
+      file just has the untyped declaration
+
+      function array_map($callback, $arr1, ...$args);
+    *)
+    id = SN.StdlibFunctions.array_map && nargs > 0
+  then
+    let arity = nargs - 1 in
+    if arity = 0 then
+      fty
+    else
+      let (param1, param2) =
+        match fty.ft_params with
+        | param1 :: param2 :: _ -> (param1, param2)
+        | _ -> assert false
+      in
+      let r1 = fst param1.fp_type.et_type in
+      let r2 = fst param2.fp_type.et_type in
+      let rret = fst fty.ft_ret.et_type in
+      let tr = (rret, Tgeneric "Tr") in
+      let rec make_tparam_names i =
+        if i = 0 then
+          []
+        else
+          ("T" ^ string_of_int i) :: make_tparam_names (i - 1)
+      in
+      let tparam_names = List.rev (make_tparam_names arity) in
+      let vars = List.map tparam_names (fun name -> (r2, Tgeneric name)) in
+      let make_tparam name =
+        {
+          tp_variance = Ast_defs.Invariant;
+          tp_name = (fty.ft_pos, name);
+          tp_constraints = [];
+          tp_reified = Aast.Erased;
+          tp_user_attributes = [];
+        }
+      in
+      let ft_tparams =
+        (List.map tparam_names make_tparam @ [make_tparam "Tr"], FTKtparams)
+      in
+      (* Construct type of first parameter *)
+      let param1 =
+        update_param
+          param1
+          ( r1,
+            Tfun
+              {
+                ft_pos = fty.ft_pos;
+                ft_deprecated = None;
+                ft_is_coroutine = false;
+                ft_arity = Fstandard (arity, arity);
+                ft_tparams = ([], FTKtparams);
+                ft_where_constraints = [];
+                ft_params = List.map vars TUtils.default_fun_param;
+                ft_ret = MakeType.unenforced tr;
+                ft_fun_kind = fty.ft_fun_kind;
+                ft_reactive = fty.ft_reactive;
+                ft_mutability = fty.ft_mutability;
+                ft_returns_mutable = fty.ft_returns_mutable;
+                ft_return_disposable = fty.ft_return_disposable;
+                ft_decl_errors = None;
+                ft_returns_void_to_rx = fty.ft_returns_void_to_rx;
+              } )
+      in
+      let param_rest =
+        List.map vars (fun var ->
+            let tc = Tapply ((fty.ft_pos, SN.Collections.cContainer), [var]) in
+            TUtils.default_fun_param (r2, tc))
+      in
+      {
+        fty with
+        ft_arity = Fstandard (arity + 1, arity + 1);
+        ft_params = param1 :: param_rest;
+        ft_tparams;
+        ft_ret = MakeType.unenforced (rret, Tarray (Some tr, None));
+      }
   else
     fty

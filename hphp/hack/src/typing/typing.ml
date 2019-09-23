@@ -4913,181 +4913,89 @@ and dispatch_call
   | Id ((_, array_map) as x)
     when array_map = SN.StdlibFunctions.array_map && el <> [] && uel = [] ->
     check_function_in_suspend SN.StdlibFunctions.array_map;
-    let (env, fty) = fun_type_of_id env x [] el in
+
+    (* This uses the arity to determine a signature for array_map. But there
+     * is more: for two-argument use of array_map, we specialize the return
+     * type to the collection that's passed in, below. *)
+    let (env, fty) = fun_type_of_id env x tal el in
     let (env, fty) = Env.expand_type env fty in
-    let (env, fty) =
-      match (fty, el) with
-      | ((r_fty, Tfun fty), _ :: args) when args <> [] ->
-        let arity = List.length args in
-        (*
-            Builds a function with signature:
-
-            function<T1, ..., Tn, Tr>(
-              (function(T1, ..., Tn):Tr),
-              Container<T1>,
-              ...,
-              Container<Tn>,
-            ): R
-
-            where R is constructed by build_output_container applied to Tr
-          *)
-        let build_function env build_output_container =
-          let (env, vars, tr) =
-            (* If T1, ... Tn, Tr are provided explicitly, instantiate the function parameters with
-             * those directly. *)
-            if List.is_empty tal then
-              let (env, tr) = Env.fresh_type env p in
-              let (env, vars) =
-                List.map_env env args ~f:(fun env _ -> Env.fresh_type env p)
-              in
-              (env, vars, tr)
-            else if List.length tal <> List.length args + 1 then (
-              let (env, tr) = Env.fresh_type env p in
-              Errors.expected_tparam
-                ~use_pos:fpos
-                ~definition_pos:fty.ft_pos
-                (1 + List.length args);
-              let (env, vars) =
-                List.map_env env args ~f:(fun env _ -> Env.fresh_type env p)
-              in
-              (env, vars, tr)
-            ) else
-              let (env, vars_and_tr) =
-                List.map_env env tal Phase.localize_hint_with_self
-              in
-              let (vars, trl) =
-                List.split_n vars_and_tr (List.length vars_and_tr - 1)
-              in
-              (* Since we split the arguments and return type at the last index and the length is
-                 non-zero this is safe. *)
-              let tr = List.hd_exn trl in
-              (env, vars, tr)
-          in
-          let f =
-            TUtils.default_fun_param
-              ( r_fty,
-                Tfun
-                  {
-                    ft_pos = fty.ft_pos;
-                    ft_deprecated = None;
-                    ft_is_coroutine = false;
-                    ft_arity = Fstandard (arity, arity);
-                    ft_tparams = ([], FTKtparams);
-                    ft_where_constraints = [];
-                    ft_params = List.map vars TUtils.default_fun_param;
-                    ft_ret = MakeType.unenforced tr;
-                    ft_fun_kind = fty.ft_fun_kind;
-                    ft_reactive = fty.ft_reactive;
-                    ft_mutability = fty.ft_mutability;
-                    ft_returns_mutable = fty.ft_returns_mutable;
-                    ft_return_disposable = fty.ft_return_disposable;
-                    ft_decl_errors = None;
-                    ft_returns_void_to_rx = fty.ft_returns_void_to_rx;
-                  } )
-          in
-          let containers =
-            List.map vars (fun var ->
-                let tc =
-                  Tclass
-                    ((fty.ft_pos, SN.Collections.cContainer), Nonexact, [var])
-                in
-                TUtils.default_fun_param (r_fty, tc))
-          in
-          ( env,
-            ( r_fty,
-              Tfun
-                {
-                  fty with
-                  ft_arity = Fstandard (arity + 1, arity + 1);
-                  ft_params = f :: containers;
-                  ft_ret = MakeType.unenforced (build_output_container tr);
-                } ) )
+    let r_fty = fst fty in
+    (*
+        Takes a Container type and returns a function that can "pack" a type
+        into an array of appropriate shape, preserving the key type, i.e.:
+        array                 -> f, where f R = array
+        array<X>              -> f, where f R = array<R>
+        array<X, Y>           -> f, where f R = array<X, R>
+        Vector<X>             -> f  where f R = array<R>
+        KeyedContainer<X, Y>  -> f, where f R = array<X, R>
+        Container<X>          -> f, where f R = array<arraykey, R>
+        X                     -> f, where f R = Y
+      *)
+    let rec build_output_container env (x : locl_ty) :
+        env * (locl_ty -> locl_ty) =
+      let (env, x) = Env.expand_type env x in
+      match x with
+      | (_, Tarraykind (AKany | AKempty)) as array_type ->
+        (env, (fun _ -> array_type))
+      | (r, Tarraykind (AKvec _ | AKvarray _)) ->
+        (env, (fun tr -> (r, Tarraykind (AKvec tr))))
+      | (r, Tany _) -> (env, (fun _ -> (r, Typing_utils.tany env)))
+      | (r, Terr) -> (env, (fun _ -> (r, Typing_utils.terr env)))
+      | (r, Tunion x) ->
+        let (env, x) = List.map_env env x build_output_container in
+        (env, (fun tr -> (r, Tunion (List.map x (fun f -> f tr)))))
+      | (r, Tintersection tyl) ->
+        let (env, builders) = List.map_env env tyl build_output_container in
+        ( env,
+          (fun tr -> (r, Tintersection (List.map builders (fun f -> f tr)))) )
+      | (r, _) ->
+        let (env, tk) = Env.fresh_type env p in
+        let (env, tv) = Env.fresh_type env p in
+        let try_vector env =
+          let vector_type = MakeType.const_vector r_fty tv in
+          let env = SubType.sub_type env x vector_type Errors.unify_error in
+          (env, (fun tr -> (r, Tarraykind (AKvec tr))))
         in
-        (*
-            Takes a Container type and returns a function that can "pack" a type
-            into an array of appropriate shape, preserving the key type, i.e.:
-            array                 -> f, where f R = array
-            array<X>              -> f, where f R = array<R>
-            array<X, Y>           -> f, where f R = array<X, R>
-            Vector<X>             -> f  where f R = array<R>
-            KeyedContainer<X, Y>  -> f, where f R = array<X, R>
-            Container<X>          -> f, where f R = array<arraykey, R>
-            X                     -> f, where f R = Y
-          *)
-        let rec build_output_container env (x : locl_ty) :
-            env * (locl_ty -> locl_ty) =
-          let (env, x) = Env.expand_type env x in
-          match x with
-          | (_, Tarraykind (AKany | AKempty)) as array_type ->
-            (env, (fun _ -> array_type))
-          | (r, Tarraykind (AKvec _ | AKvarray _)) ->
-            (env, (fun tr -> (r, Tarraykind (AKvec tr))))
-          | (r, Tany _) -> (env, (fun _ -> (r, Typing_utils.tany env)))
-          | (r, Terr) -> (env, (fun _ -> (r, Typing_utils.terr env)))
-          | (r, Tunion x) ->
-            let (env, x) = List.map_env env x build_output_container in
-            (env, (fun tr -> (r, Tunion (List.map x (fun f -> f tr)))))
-          | (r, Tintersection tyl) ->
-            let (env, builders) =
-              List.map_env env tyl build_output_container
-            in
-            ( env,
-              (fun tr -> (r, Tintersection (List.map builders (fun f -> f tr))))
-            )
-          | (r, _) ->
-            let (env, tk) = Env.fresh_type env p in
-            let (env, tv) = Env.fresh_type env p in
-            let try_vector env =
-              let vector_type = MakeType.const_vector r_fty tv in
-              let env =
-                SubType.sub_type env x vector_type Errors.unify_error
-              in
-              (env, (fun tr -> (r, Tarraykind (AKvec tr))))
-            in
-            let try_keyed_container env =
-              let keyed_container_type =
-                MakeType.keyed_container r_fty tk tv
-              in
-              let env =
-                SubType.sub_type env x keyed_container_type Errors.unify_error
-              in
-              (env, (fun tr -> (r, Tarraykind (AKmap (tk, tr)))))
-            in
-            let try_container env =
-              let container_type = MakeType.container r_fty tv in
-              let env =
-                SubType.sub_type env x container_type Errors.unify_error
-              in
-              ( env,
-                (fun tr -> (r, Tarraykind (AKmap (MakeType.arraykey r, tr))))
-              )
-            in
-            let (env, tr) =
+        let try_keyed_container env =
+          let keyed_container_type = MakeType.keyed_container r_fty tk tv in
+          let env =
+            SubType.sub_type env x keyed_container_type Errors.unify_error
+          in
+          (env, (fun tr -> (r, Tarraykind (AKmap (tk, tr)))))
+        in
+        let try_container env =
+          let container_type = MakeType.container r_fty tv in
+          let env = SubType.sub_type env x container_type Errors.unify_error in
+          (env, (fun tr -> (r, Tarraykind (AKmap (MakeType.arraykey r, tr)))))
+        in
+        let (env, tr) =
+          Errors.try_
+            (fun () -> try_vector env)
+            (fun _ ->
               Errors.try_
-                (fun () -> try_vector env)
+                (fun () -> try_keyed_container env)
                 (fun _ ->
                   Errors.try_
-                    (fun () -> try_keyed_container env)
+                    (fun () -> try_container env)
                     (fun _ ->
-                      Errors.try_
-                        (fun () -> try_container env)
-                        (fun _ ->
-                          ( env,
-                            fun _ ->
-                              (Reason.Rwitness p, Typing_utils.tany env) ))))
-            in
-            (env, tr)
+                      ( env,
+                        (fun _ -> (Reason.Rwitness p, Typing_utils.tany env))
+                      ))))
         in
-        (*
-            Single argument calls preserve the key type, multi argument
-            calls always return an array<Tr>
-          *)
-        (match args with
-        | [x] ->
-          let (env, _tx, x) = expr env x in
-          let (env, output_container) = build_output_container env x in
-          build_function env output_container
-        | _ -> build_function env (fun tr -> (r_fty, Tarraykind (AKvec tr))))
+        (env, tr)
+    in
+    let (env, fty) =
+      match (fty, el) with
+      | ((_, Tfun funty), [_; x]) ->
+        let (env, _tx, x) = expr env x in
+        let (env, output_container) = build_output_container env x in
+        begin
+          match get_akvec_inst funty.ft_ret.et_type with
+          | None -> (env, fty)
+          | Some elem_ty ->
+            let ft_ret = MakeType.unenforced (output_container elem_ty) in
+            (env, (r_fty, Tfun { funty with ft_ret }))
+        end
       | _ -> (env, fty)
     in
     let (env, (tel, tuel, ty)) = call ~expected p env fty el [] in

@@ -5,4 +5,3 @@ class C {
   function f() {}
 }
 
-<<__EntryPoint>> function main(): void {}

@@ -10,4 +10,3 @@ class MyClass {
     }
 }
 
-<<__EntryPoint>> function main(): void {}

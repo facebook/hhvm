@@ -4,4 +4,3 @@
 <<__Memoize>>
 function variadicFn($a, ...$args) { return $args; }
 
-<<__EntryPoint>> function main(): void {}

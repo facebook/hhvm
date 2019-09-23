@@ -5,4 +5,3 @@ abstract class foo {
   abstract protected static function bar();
 }
 
-<<__EntryPoint>> function main(): void {}

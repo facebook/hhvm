@@ -5,4 +5,3 @@ class A {
   const FOO = $GLOBALS;
 }
 
-<<__EntryPoint>> function main(): void {}

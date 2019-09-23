@@ -7,4 +7,3 @@ function test(): void {
   };
 }
 
-<<__EntryPoint>> function main(): void {}

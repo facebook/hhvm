@@ -19,4 +19,3 @@ class Ref{
     var_dump($foo->contains($a));
     var_dump($foo->contains($b));
 
-<<__EntryPoint>> function main(): void {}

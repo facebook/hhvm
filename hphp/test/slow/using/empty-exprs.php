@@ -5,4 +5,3 @@ function main() {
   }
 }
 
-<<__EntryPoint>> function main_entry(): void {}

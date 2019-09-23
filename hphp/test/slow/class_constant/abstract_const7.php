@@ -10,4 +10,3 @@ trait Tr2 {
   abstract const X;
 }
 
-<<__EntryPoint>> function main(): void {}

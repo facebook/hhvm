@@ -8,4 +8,3 @@ class X {
     echo $this->baz(bar(1), bar(''));
   }
 }
-<<__EntryPoint>> function main(): void {}

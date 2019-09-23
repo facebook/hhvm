@@ -5,5 +5,4 @@ namespace Foo\Bar {
         const Baz = static::class;
     }
 
-    <<__EntryPoint>> function main(): void {}
 }

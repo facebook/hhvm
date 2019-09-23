@@ -2,4 +2,3 @@
 
 type ShapeWithOptionalField = shape(?);
 
-<<__EntryPoint>> function main(): void {}

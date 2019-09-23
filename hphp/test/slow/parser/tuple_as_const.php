@@ -9,4 +9,3 @@ class A {
   public function f((int, int)$mt = tuple(get_int(), get_int())): void{}
 }
 
-<<__EntryPoint>> function main(): void {}

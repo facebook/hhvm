@@ -5,4 +5,3 @@ class C {
   const type T = int;
 }
 
-<<__EntryPoint>> function main(): void {}

@@ -11,4 +11,3 @@ class C {
     }
 }
 
-<<__EntryPoint>> function main(): void {}

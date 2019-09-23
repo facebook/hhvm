@@ -68,4 +68,3 @@
 
     echo "$res\n";
 
-<<__EntryPoint>> function main(): void {}

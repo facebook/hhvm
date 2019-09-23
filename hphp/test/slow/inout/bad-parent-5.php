@@ -8,4 +8,3 @@ class C extends P {
   function foo() {}
 }
 
-<<__EntryPoint>> function main(): void {}

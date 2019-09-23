@@ -8,4 +8,3 @@ class C<reify Ta, reify Tb> extends A<int> {
   }
 }
 
-<<__EntryPoint>> function main(): void {}

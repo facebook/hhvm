@@ -7,4 +7,3 @@ namespace B;
 class Cl { public function __construct() { return "b"; } }
 use A\Cl;
 
-<<__EntryPoint>> function main(): void {}

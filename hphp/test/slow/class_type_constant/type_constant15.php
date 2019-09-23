@@ -8,4 +8,3 @@ class C extends P {
   const T = 'int';
 }
 
-<<__EntryPoint>> function main(): void {}

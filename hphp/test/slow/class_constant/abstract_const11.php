@@ -14,4 +14,3 @@ interface K {
 
 class D implements I, J, K {}
 
-<<__EntryPoint>> function main(): void {}

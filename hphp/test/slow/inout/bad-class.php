@@ -2,4 +2,3 @@
 
 class inout {}
 
-<<__EntryPoint>> function main(): void {}

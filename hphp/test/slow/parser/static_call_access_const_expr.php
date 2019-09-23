@@ -10,4 +10,3 @@ class C {
   const Y = C::f()::X;
 }
 
-<<__EntryPoint>> function main(): void {}

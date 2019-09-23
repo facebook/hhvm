@@ -5,4 +5,3 @@ enum Bar : welp {
   BAR = 1;
 }
 
-<<__EntryPoint>> function main(): void {}

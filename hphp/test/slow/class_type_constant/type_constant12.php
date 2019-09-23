@@ -10,4 +10,3 @@ abstract class P {
 
 class C extends P implements I {}
 
-<<__EntryPoint>> function main(): void {}

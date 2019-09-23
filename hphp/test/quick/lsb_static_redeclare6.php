@@ -11,4 +11,3 @@ class C extends B {
     public string $x;
 }
 
-<<__EntryPoint>> function main(): void {}

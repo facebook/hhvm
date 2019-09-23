@@ -5,4 +5,3 @@ class A {
   public nothing $x;
 }
 
-<<__EntryPoint>> function main(): void {}

@@ -8,4 +8,3 @@ function f(): shape(
   );
 }
 
-<<__EntryPoint>> function main(): void {}

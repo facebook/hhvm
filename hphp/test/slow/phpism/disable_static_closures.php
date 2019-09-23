@@ -24,4 +24,3 @@ class StaticClosureTest {
   }
 }
 
-<<__EntryPoint>> function main(): void {}

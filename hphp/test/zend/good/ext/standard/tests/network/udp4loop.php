@@ -25,4 +25,3 @@
     fclose($client);
     fclose($server);
 
-<<__EntryPoint>> function main(): void {}

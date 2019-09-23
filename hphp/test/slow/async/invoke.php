@@ -6,4 +6,3 @@ class Foo {
   }
 }
 
-<<__EntryPoint>> function main(): void {}

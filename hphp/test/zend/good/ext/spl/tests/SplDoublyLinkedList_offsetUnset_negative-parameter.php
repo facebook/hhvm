@@ -14,4 +14,3 @@
         echo $e->getMessage() . "\n";
     }
 
-<<__EntryPoint>> function main(): void {}

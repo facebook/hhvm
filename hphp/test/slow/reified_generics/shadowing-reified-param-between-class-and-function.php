@@ -5,4 +5,3 @@ class C<reify T> {
   public function g<reify T>() {}
 }
 
-<<__EntryPoint>> function main(): void {}

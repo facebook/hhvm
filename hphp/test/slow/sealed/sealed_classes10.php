@@ -9,4 +9,3 @@ trait SomeTrait {
   use SomeTrait2;
 }
 
-<<__EntryPoint>> function main(): void {}

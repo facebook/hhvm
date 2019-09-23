@@ -4,4 +4,3 @@ function test() : shape('' => int) {
   return $x;
 }
 
-<<__EntryPoint>> function main(): void {}

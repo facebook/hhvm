@@ -5,4 +5,3 @@ function f(): shape(
   123 => int
 ) {}
 
-<<__EntryPoint>> function main(): void {}

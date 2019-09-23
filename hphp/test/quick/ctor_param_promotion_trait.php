@@ -5,4 +5,3 @@ trait A {
   public function foo() {}
 }
 
-<<__EntryPoint>> function main(): void {}

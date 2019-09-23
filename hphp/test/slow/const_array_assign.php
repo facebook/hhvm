@@ -8,4 +8,3 @@ class ConstArrayAssign {
   }
 }
 
-<<__EntryPoint>> function main(): void {}

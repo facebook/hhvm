@@ -6,4 +6,3 @@ interface I {
   }
 }
 
-<<__EntryPoint>> function main(): void {}

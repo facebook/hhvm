@@ -4,4 +4,3 @@ class Sub implements ArrayAccess {
     }
 }
 
-<<__EntryPoint>> function main(): void {}

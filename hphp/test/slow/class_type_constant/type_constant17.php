@@ -7,4 +7,3 @@ abstract class Base {
 class Child extends Base {
 }
 
-<<__EntryPoint>> function main(): void {}

@@ -6,4 +6,3 @@ interface IUseMemoize {
   public function alwaysMemoize(): int;
 }
 
-<<__EntryPoint>> function main(): void {}

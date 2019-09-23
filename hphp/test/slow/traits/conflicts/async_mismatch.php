@@ -11,4 +11,3 @@ class C {
   public function b() = T::b;
 }
 
-<<__EntryPoint>> function main(): void {}

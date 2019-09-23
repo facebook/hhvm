@@ -3,4 +3,3 @@
 <<__HasReifiedParent>>
 class C {}
 
-<<__EntryPoint>> function main(): void {}

@@ -5,4 +5,3 @@ class A {
   public noreturn $x;
 }
 
-<<__EntryPoint>> function main(): void {}

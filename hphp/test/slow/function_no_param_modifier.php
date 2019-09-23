@@ -5,4 +5,3 @@
 //
 function f(public $a) {}
 
-<<__EntryPoint>> function main(): void {}

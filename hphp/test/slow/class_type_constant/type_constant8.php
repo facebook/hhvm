@@ -14,4 +14,3 @@ class Incompat implements I {
   public function foo($t): void {}
 }
 
-<<__EntryPoint>> function main(): void {}

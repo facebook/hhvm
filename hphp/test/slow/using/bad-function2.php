@@ -6,4 +6,3 @@ function main($x) {
   }
 }
 
-<<__EntryPoint>> function main_entry(): void {}

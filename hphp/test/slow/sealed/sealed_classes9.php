@@ -9,4 +9,3 @@ class SomeclassWithConstant {
 <<__Sealed(SomeclassWithConstant::CONSTANT)>>
 class SomeSealedClass {}
 
-<<__EntryPoint>> function main(): void {}

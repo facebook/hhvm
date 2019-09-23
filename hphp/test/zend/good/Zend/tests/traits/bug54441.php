@@ -11,4 +11,3 @@ class Boo {
   }
 }
 
-<<__EntryPoint>> function main(): void {}

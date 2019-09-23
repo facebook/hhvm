@@ -11,4 +11,3 @@ interface MyInterface {
 
 }
 
-<<__EntryPoint>> function main(): void {}

@@ -5,4 +5,3 @@ class A {
   public parent $x;
 }
 
-<<__EntryPoint>> function main(): void {}

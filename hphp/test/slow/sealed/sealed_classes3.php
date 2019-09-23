@@ -7,4 +7,3 @@ class SomeOtherClass implements SomeSealedInterface {}
 
 class SomeOtherOtherClass implements SomeSealedInterface {}
 
-<<__EntryPoint>> function main(): void {}

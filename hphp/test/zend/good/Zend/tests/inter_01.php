@@ -11,4 +11,3 @@ class foobar implements foo {
     }
 }
 
-<<__EntryPoint>> function main(): void {}

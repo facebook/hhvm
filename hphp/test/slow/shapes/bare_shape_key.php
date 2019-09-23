@@ -8,4 +8,3 @@ type b = shape(
   y => int,
 );
 
-<<__EntryPoint>> function main(): void {}

@@ -4,4 +4,3 @@
 
     var_dump($dll->isEmpty());
 
-<<__EntryPoint>> function main(): void {}

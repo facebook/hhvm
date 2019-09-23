@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<473b941949a5c02b7af84a5acdb28f69>>
+// @generated SignedSource<<2709da57c03569cf6378c43557a82145>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -52,7 +52,6 @@ pub enum ClassKind {
     Cinterface,
     Ctrait,
     Cenum,
-    Crecord,
 }
 
 #[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1a603c61b4bd0b80023ba5a71d51c6eb>>
+// @generated SignedSource<<1511a234e90d3999454f65c51d7ee0e7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -554,6 +554,18 @@ pub struct Gconst<Ex, Fb, En, Hi> {
 }
 
 #[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+pub struct RecordDef<Ex, Fb, En, Hi> {
+    pub name: Sid,
+    pub extends: Option<Hint>,
+    pub final_: bool,
+    pub fields: Vec<(Sid, Hint, Option<Expr<Ex, Fb, En, Hi>>)>,
+    pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
+    pub namespace: Nsenv,
+    pub span: Pos,
+    pub doc_comment: Option<DocComment>,
+}
+
+#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 pub struct PuEnum<Ex, Fb, En, Hi> {
     pub name: Sid,
     pub is_final: bool,
@@ -575,6 +587,7 @@ pub type FunDef<Ex, Fb, En, Hi> = Fun_<Ex, Fb, En, Hi>;
 pub enum Def<Ex, Fb, En, Hi> {
     Fun(FunDef<Ex, Fb, En, Hi>),
     Class(Class_<Ex, Fb, En, Hi>),
+    RecordDef(RecordDef<Ex, Fb, En, Hi>),
     Stmt(Stmt<Ex, Fb, En, Hi>),
     Typedef(Typedef<Ex, Fb, En, Hi>),
     Constant(Gconst<Ex, Fb, En, Hi>),

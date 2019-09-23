@@ -55,6 +55,7 @@ impl Default for GlobalOptions {
             tco_ignore_collection_expr_type_arguments: false,
             tco_shallow_class_decl: false,
             po_rust_parser_errors: false,
+            po_rust_lowerer: false,
             profile_type_check_duration_threshold: 0.0,
             tco_like_type_hints: false,
             tco_like_casts: false,

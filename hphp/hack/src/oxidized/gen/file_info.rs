@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d1c7c0db6a9ff09179b3a82815d26393>>
+// @generated SignedSource<<80efa5ccf7f2be394734c9d2c0341d58>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -31,6 +31,7 @@ pub enum Mode {
 pub enum NameType {
     Fun,
     Class,
+    RecordDef,
     Typedef,
     Const,
 }
@@ -52,6 +53,7 @@ pub struct FileInfo {
     pub file_mode: Option<Mode>,
     pub funs: Vec<Id>,
     pub classes: Vec<Id>,
+    pub record_defs: Vec<Id>,
     pub typedefs: Vec<Id>,
     pub consts: Vec<Id>,
     pub comments: Option<Vec<(pos::Pos, Comment)>>,
@@ -61,6 +63,7 @@ pub struct FileInfo {
 pub struct Names {
     pub funs: s_set::SSet,
     pub classes: s_set::SSet,
+    pub record_defs: s_set::SSet,
     pub types: s_set::SSet,
     pub consts: s_set::SSet,
 }

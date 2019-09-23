@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a16b9c992a41fdb1d478fb7c534ac31a>>
+// @generated SignedSource<<a7034a7eafea75c6b4e8d8eb573ff336>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -57,6 +57,8 @@ pub type FunParam = aast::FunParam<pos::Pos, FuncBodyAnn, (), ()>;
 pub type FunVariadicity = aast::FunVariadicity<pos::Pos, FuncBodyAnn, (), ()>;
 
 pub type Typedef = aast::Typedef<pos::Pos, FuncBodyAnn, (), ()>;
+
+pub type RecordDef = aast::RecordDef<pos::Pos, FuncBodyAnn, (), ()>;
 
 pub type Tparam = aast::Tparam<pos::Pos, FuncBodyAnn, (), ()>;
 

@@ -13,6 +13,7 @@ impl Env {
             class_uses: SMap::new(),
             fun_uses: SMap::new(),
             const_uses: SMap::new(),
+            record_def_uses: SMap::new(),
             name: None,
             auto_ns_map,
             is_codegen,

@@ -61,6 +61,7 @@ let override_field_type =
       ("ClassConst", SMap.of_list [("doc_comment", "Option<DocComment>")]);
       ("ClassTypeconst", SMap.of_list [("doc_comment", "Option<DocComment>")]);
       ("ClassVar", SMap.of_list [("doc_comment", "Option<DocComment>")]);
+      ("RecordDef", SMap.of_list [("doc_comment", "Option<DocComment>")]);
     ]
 
 let get_overrides name =

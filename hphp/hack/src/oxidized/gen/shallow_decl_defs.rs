@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<29d18f13e6449238e7e9f739c1afccc9>>
+// @generated SignedSource<<4d1d105e7d935ede08ec287483e5143c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -46,6 +46,7 @@ pub struct ShallowTypeconst {
 pub struct ShallowPuMember {
     pub atom: aast::Sid,
     pub types: Vec<(aast::Sid, DeclTy)>,
+    pub exprs: Vec<aast::Sid>,
 }
 
 #[derive(Clone, Debug, OcamlRep, Ocamlvalue)]

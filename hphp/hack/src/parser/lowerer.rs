@@ -4292,64 +4292,25 @@ where
                 })])
             }
             RecordDeclaration(c) => {
-                let p_field = |n: &Syntax<T, V>, e: &mut Env| -> ret_aast!(ClassVar<,>) {
-                    match &n.syntax {
-                        RecordField(c) => Ok(aast::ClassVar {
-                            final_: false,
-                            type_: Some(Self::p_hint(&c.record_field_type, e)?),
-                            is_promoted_variadic: false,
-                            span: Self::p_pos(n, e),
-                            id: Self::pos_name(&c.record_field_name, e)?,
-                            expr: Self::mp_optional(
-                                &Self::p_simple_initializer,
-                                &c.record_field_init,
-                                e,
-                            )?,
-                            doc_comment: None,
-                            user_attributes: vec![],
-                            is_static: false,
-                            abstract_: false,
-                            visibility: aast::Visibility::Public,
-                            xhp_attr: None,
-                        }),
-                        _ => Self::missing_syntax(None, "record_field", n, e),
-                    }
+                let p_field = |n: &Syntax<T, V>, e: &mut Env| match &n.syntax {
+                    RecordField(c) => Ok((
+                        Self::pos_name(&c.record_field_name, e)?,
+                        Self::p_hint(&c.record_field_type, e)?,
+                        Self::mp_optional(&Self::p_simple_initializer, &c.record_field_init, e)?,
+                    )),
+                    _ => Self::missing_syntax(None, "record_field", n, e),
                 };
-                Ok(vec![aast::Def::Class(aast::Class_ {
-                    annotation: (),
-                    mode: Self::mode_annotation(env.file_mode()),
-                    user_attributes: Self::p_user_attributes(&c.record_attribute_spec, env)?,
-                    file_attributes: vec![],
-                    final_: Self::token_kind(&c.record_modifier) == Some(TK::Final),
-                    kind: ast_defs::ClassKind::Crecord,
-                    is_xhp: false,
+                Ok(vec![aast::Def::RecordDef(aast::RecordDef {
                     name: Self::pos_name(&c.record_name, env)?,
-                    tparams: aast::ClassTparams {
-                        list: vec![],
-                        constraints: s_map::SMap::new(),
-                    },
-                    extends: Self::could_map(&Self::p_hint, &c.record_extends_list, env)?,
-                    implements: vec![],
-                    where_constraints: vec![],
-                    vars: Self::could_map(&p_field, &c.record_fields, env)?,
+                    extends: Self::could_map(&Self::p_hint, &c.record_extends_list, env)?
+                        .into_iter()
+                        .next(),
+                    final_: Self::token_kind(&c.record_modifier) == Some(TK::Final),
+                    user_attributes: Self::p_user_attributes(&c.record_attribute_spec, env)?,
+                    fields: Self::could_map(&p_field, &c.record_fields, env)?,
                     namespace: Self::mk_empty_ns_env(env),
                     span: Self::p_pos(node, env),
-                    enum_: None,
                     doc_comment: doc_comment_opt,
-                    uses: vec![],
-                    use_as_alias: vec![],
-                    insteadof_alias: vec![],
-                    method_redeclarations: vec![],
-                    xhp_attr_uses: vec![],
-                    xhp_category: None,
-                    reqs: vec![],
-                    consts: vec![],
-                    typeconsts: vec![],
-                    methods: vec![],
-                    attributes: vec![],
-                    xhp_children: vec![],
-                    xhp_attrs: vec![],
-                    pu_enums: vec![],
                 })])
             }
             InclusionDirective(child)

@@ -86,6 +86,7 @@ type t = {
   tco_ignore_collection_expr_type_arguments: bool;
   tco_shallow_class_decl: bool;
   po_rust_parser_errors: bool;
+  po_rust_lowerer: bool;
   profile_type_check_duration_threshold: float;
   tco_like_type_hints: bool;
   tco_like_casts: bool;
@@ -246,6 +247,7 @@ let default =
     tco_ignore_collection_expr_type_arguments = false;
     tco_shallow_class_decl = false;
     po_rust_parser_errors = false;
+    po_rust_lowerer = false;
     profile_type_check_duration_threshold = 0.05;
     tco_like_type_hints = false;
     tco_like_casts = false;
@@ -335,6 +337,7 @@ let make
       default.tco_ignore_collection_expr_type_arguments)
     ?(tco_shallow_class_decl = default.tco_shallow_class_decl)
     ?(po_rust_parser_errors = default.po_rust_parser_errors)
+    ?(po_rust_lowerer = default.po_rust_lowerer)
     ?(profile_type_check_duration_threshold =
       default.profile_type_check_duration_threshold)
     ?(tco_like_type_hints = default.tco_like_type_hints)
@@ -427,6 +430,7 @@ let make
     tco_ignore_collection_expr_type_arguments;
     tco_shallow_class_decl;
     po_rust_parser_errors;
+    po_rust_lowerer;
     profile_type_check_duration_threshold;
     tco_like_type_hints;
     tco_like_casts;
@@ -563,6 +567,8 @@ let tco_typecheck_xhp_cvars t = t.tco_typecheck_xhp_cvars
 let tco_shallow_class_decl t = t.tco_shallow_class_decl
 
 let po_rust_parser_errors t = t.po_rust_parser_errors
+
+let po_rust_lowerer t = t.po_rust_lowerer
 
 let profile_type_check_duration_threshold t =
   t.profile_type_check_duration_threshold

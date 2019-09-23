@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a38d9ba2a4cbdbfa37d5f352de46503e>>
+// @generated SignedSource<<8fe6c1bc15133577e3a819041fd79f41>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -308,12 +308,20 @@ pub struct PuEnumType {
 pub struct PuMemberType {
     pub atom: nast::Sid,
     pub types: s_map::SMap<(nast::Sid, DeclTy)>,
+    pub exprs: s_map::SMap<nast::Sid>,
 }
 
 #[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 pub struct EnumType {
     pub base: DeclTy,
     pub constraint: Option<DeclTy>,
+}
+
+#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+pub struct RecordDefType {
+    pub name: nast::Sid,
+    pub pos: pos::Pos,
+    pub errors: Option<errors::Errors>,
 }
 
 #[derive(Clone, Debug, OcamlRep, Ocamlvalue)]

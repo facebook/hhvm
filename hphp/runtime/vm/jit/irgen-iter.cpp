@@ -91,7 +91,8 @@ void emitIterInit(IRGS& env, int32_t iterId, Offset relOffset,
   if (!base->type().subtypeOfAny(TArrLike, TObj)) PUNT(IterInit);
   if (iterInitEmptyBase(env, relOffset, base)) return;
 
-  auto const data = IterInitData(iterId, uint32_t(-1), valLocalId, true);
+  auto const type = IterTypeOp::NonLocal;
+  auto const data = IterInitData(iterId, uint32_t(-1), valLocalId, type);
   auto const result = gen(env, IterInit, data, base, fp(env));
   implIterInitJmp(env, relOffset, result);
 }
@@ -102,7 +103,8 @@ void emitIterInitK(IRGS& env, int32_t iterId, Offset relOffset,
   if (!base->type().subtypeOfAny(TArrLike, TObj)) PUNT(IterInitK);
   if (iterInitEmptyBase(env, relOffset, base)) return;
 
-  auto const data = IterInitData(iterId, keyLocalId, valLocalId, true);
+  auto const type = IterTypeOp::NonLocal;
+  auto const data = IterInitData(iterId, keyLocalId, valLocalId, type);
   auto const result = gen(env, IterInitK, data, base, fp(env));
   implIterInitJmp(env, relOffset, result);
 }
@@ -142,7 +144,7 @@ void emitLIterInit(IRGS& env,
   if (iterInitEmptyBase(env, relOffset, base)) return;
 
   if (base->isA(TObj)) gen(env, IncRef, base);
-  auto const data = IterInitData(iterId, uint32_t(-1), valLocalId, false);
+  auto const data = IterInitData(iterId, uint32_t(-1), valLocalId, subop);
   auto const op = base->isA(TArrLike) ? LIterInit : IterInit;
   auto const result = gen(env, op, data, base, fp(env));
   implIterInitJmp(env, relOffset, result);
@@ -161,7 +163,7 @@ void emitLIterInitK(IRGS& env,
   if (iterInitEmptyBase(env, relOffset, base)) return;
 
   if (base->isA(TObj)) gen(env, IncRef, base);
-  auto const data = IterInitData(iterId, keyLocalId, valLocalId, false);
+  auto const data = IterInitData(iterId, keyLocalId, valLocalId, subop);
   auto const op = base->isA(TArrLike) ? LIterInitK : IterInitK;
   auto const result = gen(env, op, data, base, fp(env));
   implIterInitJmp(env, relOffset, result);

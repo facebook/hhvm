@@ -115,11 +115,12 @@ bool ArrayIter::checkInvariants(const ArrayData* ad /* = nullptr */) const {
   DEBUG_ONLY auto const arr = ad ? ad : m_data;
 
   // Check that array's vtable index is compatible with the array's layout.
-  if (m_nextHelperIdx == IterNextIndex::ArrayPacked) {
+  if (m_nextHelperIdx == IterNextIndex::ArrayPacked ||
+      m_nextHelperIdx == IterNextIndex::ArrayPackedPointer) {
     assertx(arr->hasPackedLayout());
   } else if (m_nextHelperIdx == IterNextIndex::ArrayMixed) {
     assertx(arr->hasMixedLayout());
-  } else if (m_nextHelperIdx == IterNextIndex::ArrayMixedNoTombstones) {
+  } else if (m_nextHelperIdx == IterNextIndex::ArrayMixedPointer) {
     assertx(arr->hasMixedLayout());
     assertx(arr->getSize() == MixedArray::asMixed(arr)->iterLimit());
   } else {
@@ -136,9 +137,12 @@ bool ArrayIter::checkInvariants(const ArrayData* ad /* = nullptr */) const {
   }
 
   // Check the consistency of the pos and end fields.
-  if (m_nextHelperIdx == IterNextIndex::ArrayMixedNoTombstones) {
-    assertx(m_pos_diff < m_end_diff);
-    assertx(m_end_diff == MixedArray::elmOff(arr->getSize()));
+  if (m_nextHelperIdx == IterNextIndex::ArrayPackedPointer) {
+    assertx(m_packed_elm < m_packed_end);
+    assertx(m_packed_end == packedData(arr) + arr->getSize());
+  } else if (m_nextHelperIdx == IterNextIndex::ArrayMixedPointer) {
+    assertx(m_mixed_elm < m_mixed_end);
+    assertx(m_mixed_end == MixedArray::asMixed(arr)->data() + arr->getSize());
   } else {
     assertx(m_pos < m_end);
     assertx(m_end == arr->iter_end());
@@ -348,7 +352,8 @@ bool Iter::next() {
   // The emitter should never generate bytecode where the iterator is at the
   // end before IterNext is executed. checkInvariants tests this invariant.
   assertx(m_iter.checkInvariants());
-  assertx(m_iter.getHelperIndex() != IterNextIndex::ArrayMixedNoTombstones);
+  assertx(m_iter.getHelperIndex() != IterNextIndex::ArrayPackedPointer);
+  assertx(m_iter.getHelperIndex() != IterNextIndex::ArrayMixedPointer);
   m_iter.next();
   // If the iterator is now at the end, dec-ref the base. (For local iterators,
   // m_data is null, so the destructor won't free it.)
@@ -525,9 +530,12 @@ int64_t new_iter_array_cold(Iter* dest, ArrayData* arr, TypedValue* valOut,
   return 0LL;
 }
 
-template <bool Local>
+template <IterTypeOp Type>
 int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
   TRACE(2, "%s: I %p, ad %p\n", __func__, dest, ad);
+  auto constexpr BaseConst = Type != IterTypeOp::LocalBaseMutable;
+  auto constexpr Local     = Type != IterTypeOp::NonLocal;
+
   auto const size = ad->getSize();
   if (UNLIKELY(size == 0)) {
     if (!Local) {
@@ -550,19 +558,25 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
   aiter.m_data = Local ? nullptr : ad;
 
   if (LIKELY(ad->hasPackedLayout())) {
-    aiter.m_pos = 0;
-    aiter.m_end = size;
-    aiter.setArrayNext(IterNextIndex::ArrayPacked);
+    if (BaseConst) {
+      aiter.m_packed_elm = packedData(ad);
+      aiter.m_packed_end = aiter.m_packed_elm + size;
+      aiter.setArrayNext(IterNextIndex::ArrayPackedPointer);
+    } else {
+      aiter.m_pos = 0;
+      aiter.m_end = size;
+      aiter.setArrayNext(IterNextIndex::ArrayPacked);
+    }
     cellDup(*tvToCell(PackedArray::GetValueRef(ad, 0)), *valOut);
     return 1;
   }
 
   if (LIKELY(ad->hasMixedLayout())) {
     auto const mixed = MixedArray::asMixed(ad);
-    if (LIKELY(mixed->keyTypes() & MixedArray::kTombstoneKey) == 0) {
-      aiter.m_pos_diff = mixed->elmOff(0);
-      aiter.m_end_diff = mixed->elmOff(size);
-      aiter.setArrayNext(IterNextIndex::ArrayMixedNoTombstones);
+    if (BaseConst && LIKELY(mixed->iterLimit() == size)) {
+      aiter.m_mixed_elm = mixed->data();
+      aiter.m_mixed_end = aiter.m_mixed_elm + size;
+      aiter.setArrayNext(IterNextIndex::ArrayMixedPointer);
       mixed->getArrayElm(0, valOut);
       return 1;
     }
@@ -576,14 +590,27 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
   return new_iter_array_cold<Local>(dest, ad, valOut, nullptr);
 }
 
-template int64_t new_iter_array<false>(Iter*, ArrayData*, TypedValue*);
-template int64_t new_iter_array<true>(Iter*, ArrayData*, TypedValue*);
+IterInitArr new_iter_array_helper(IterTypeOp type) {
+  switch (type) {
+    case IterTypeOp::LocalBaseConst:
+      return new_iter_array<IterTypeOp::LocalBaseConst>;
+    case IterTypeOp::LocalBaseMutable:
+      return new_iter_array<IterTypeOp::LocalBaseMutable>;
+    case IterTypeOp::NonLocal:
+      return new_iter_array<IterTypeOp::NonLocal>;
+  }
+  always_assert(false);
+}
 
-template<bool Local>
+template<IterTypeOp Type>
 int64_t new_iter_array_key(Iter*       dest,
                            ArrayData*  ad,
                            TypedValue* valOut,
                            TypedValue* keyOut) {
+  TRACE(2, "%s: I %p, ad %p\n", __func__, dest, ad);
+  auto constexpr BaseConst = Type != IterTypeOp::LocalBaseMutable;
+  auto constexpr Local     = Type != IterTypeOp::NonLocal;
+
   auto const size = ad->getSize();
   if (UNLIKELY(size == 0)) {
     if (!Local) {
@@ -624,10 +651,10 @@ int64_t new_iter_array_key(Iter*       dest,
 
   if (ad->hasMixedLayout()) {
     auto const mixed = MixedArray::asMixed(ad);
-    if (LIKELY(mixed->keyTypes() & MixedArray::kTombstoneKey) == 0) {
-      aiter.m_pos_diff = mixed->elmOff(0);
-      aiter.m_end_diff = mixed->elmOff(size);
-      aiter.setArrayNext(IterNextIndex::ArrayMixedNoTombstones);
+    if (BaseConst && LIKELY(mixed->iterLimit() == size)) {
+      aiter.m_mixed_elm = mixed->data();
+      aiter.m_mixed_end = aiter.m_mixed_elm + size;
+      aiter.setArrayNext(IterNextIndex::ArrayMixedPointer);
       mixed->getArrayElm(0, valOut, keyOut);
       return 1;
     }
@@ -641,12 +668,17 @@ int64_t new_iter_array_key(Iter*       dest,
   return new_iter_array_cold<Local>(dest, ad, valOut, keyOut);
 }
 
-template int64_t new_iter_array_key<true>(Iter* dest, ArrayData* ad,
-                                          TypedValue* valOut,
-                                          TypedValue* keyOut);
-template int64_t new_iter_array_key<false>(Iter* dest, ArrayData* ad,
-                                           TypedValue* valOut,
-                                           TypedValue* keyOut);
+IterInitArrKey new_iter_array_key_helper(IterTypeOp type) {
+  switch (type) {
+    case IterTypeOp::LocalBaseConst:
+      return new_iter_array_key<IterTypeOp::LocalBaseConst>;
+    case IterTypeOp::LocalBaseMutable:
+      return new_iter_array_key<IterTypeOp::LocalBaseMutable>;
+    case IterTypeOp::NonLocal:
+      return new_iter_array_key<IterTypeOp::NonLocal>;
+  }
+  always_assert(false);
+}
 
 struct FreeObj {
   FreeObj() : m_obj(0) {}
@@ -739,21 +771,20 @@ int64_t new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
   if (UNLIKELY(!obj->isCollection())) {
     return new_iter_object_any(dest, obj, ctx, valOut, keyOut);
   }
+  auto constexpr Type = IterTypeOp::NonLocal;
 
   if (auto ad = collections::asArray(obj)) {
     ad->incRefCount();
     decRefObj(obj);
-    return keyOut
-      ? new_iter_array_key<false>(dest, ad, valOut, keyOut)
-      : new_iter_array<false>(dest, ad, valOut);
+    return keyOut ? new_iter_array_key<Type>(dest, ad, valOut, keyOut)
+                  : new_iter_array<Type>(dest, ad, valOut);
   }
 
   assertx(obj->collectionType() == CollectionType::Pair);
   auto arr = collections::toArray(obj);
   decRefObj(obj);
-  return keyOut
-    ? new_iter_array_key<false>(dest, arr.detach(), valOut, keyOut)
-    : new_iter_array<false>(dest, arr.detach(), valOut);
+  return keyOut ? new_iter_array_key<Type>(dest, arr.detach(), valOut, keyOut)
+                : new_iter_array<Type>(dest, arr.detach(), valOut);
 }
 
 // Generic next implementation for non-local iterators. This method is used for
@@ -888,10 +919,26 @@ int64_t liter_next_cold_inc_val(Iter* it,
 // This method return trues (= 1) because we only call it after advancing the
 // iterator's position and checking that the new position is in bounds.
 NEVER_INLINE
-int64_t iter_next_mixed_no_tombstones_cold(Iter* it,
-                                           Cell* valOut,
-                                           Cell* keyOut,
-                                           MixedArrayElm* elm) {
+int64_t iter_next_packed_pointer_cold(Iter* it,
+                                      Cell* valOut,
+                                      TypedValue* elm) {
+  auto const oldVal = *valOut;
+  cellDup(*tvToCell(elm), *valOut);
+  tvDecRefGen(oldVal);
+  return 1;
+}
+
+// We call this function if valOut->decWillRelease(). It should be relatively
+// cold but it happens if the value is an array which gets COWed in the loop.
+// Not releasing the value here can cause a significant memory regression.
+//
+// This method return trues (= 1) because we only call it after advancing the
+// iterator's position and checking that the new position is in bounds.
+NEVER_INLINE
+int64_t iter_next_mixed_pointer_cold(Iter* it,
+                                     Cell* valOut,
+                                     Cell* keyOut,
+                                     MixedArrayElm* elm) {
   auto const oldVal = *valOut;
   cellDup(*tvToCell(elm->datatv()), *valOut);
   tvDecRefGen(oldVal);
@@ -909,10 +956,10 @@ int64_t iter_next_mixed_no_tombstones_cold(Iter* it,
 // This method return trues (= 1) because we only call it after advancing the
 // iterator's position and checking that the new position is in bounds.
 NEVER_INLINE
-int64_t iter_next_mixed_no_tombstones_cold_key(Iter* it,
-                                               Cell* valOut,
-                                               Cell* keyOut,
-                                               MixedArrayElm* elm) {
+int64_t iter_next_mixed_pointer_cold_key(Iter* it,
+                                         Cell* valOut,
+                                         Cell* keyOut,
+                                         MixedArrayElm* elm) {
   cellDup(*tvToCell(elm->datatv()), *valOut);
   if (keyOut != nullptr) {
     auto const oldKey = *keyOut;
@@ -924,10 +971,44 @@ int64_t iter_next_mixed_no_tombstones_cold_key(Iter* it,
 
 }
 
-// "virtual" method implementation of *IterNext* for ArrayMixedNoTombstones.
-// Since we know the array is mixed and free of tombstones, we can simply add
-// sizeof(MixedArrayElm) to the pointer offset, and then used MixedArrayElm
-// helpers to extract the key and value.
+// "virtual" method implementation of *IterNext* for ArrayPackedPointer.
+// We don't use this iteration mode for key-value iterators, so it's simple.
+//
+// See array-iterator.cpp for the meaning of a "local" iterator. At this point,
+// we have the base, but we only dec-ref it when non-local iters hit the end.
+//
+// The result is false (= 0) if iteration is done, or true (= 1) otherwise.
+template<bool Local>
+ALWAYS_INLINE
+int64_t iter_next_packed_pointer(Iter* it, Cell* valOut, ArrayData* arr) {
+  auto& iter = *unwrap(it);
+  auto const elm = iter.m_packed_elm + 1;
+  if (elm == iter.m_packed_end) {
+    if (!Local) {
+      if (UNLIKELY(arr->decWillRelease())) {
+        return iter_next_free_packed(it, arr);
+      }
+      arr->decRefCount();
+    }
+    iter.kill();
+    return 0;
+  }
+  iter.m_packed_elm = elm;
+
+  if (isRefcountedType(valOut->m_type)) {
+    if (UNLIKELY(valOut->m_data.pcnt->decWillRelease())) {
+      return iter_next_packed_pointer_cold(it, valOut, elm);
+    }
+    valOut->m_data.pcnt->decRefCount();
+  }
+
+  cellDup(*tvToCell(elm), *valOut);
+  return 1;
+}
+
+// "virtual" method implementation of *IterNext* for ArrayMixedPointer.
+// Since we know the base is mixed and free of tombstones, we can simply
+// increment the element pointer and compare it to the end pointer.
 //
 // HasKey is true for key-value iters. HasKey is true iff keyOut != nullptr.
 // See array-iterator.cpp for the meaning of a "local" iterator. At this point,
@@ -936,18 +1017,13 @@ int64_t iter_next_mixed_no_tombstones_cold_key(Iter* it,
 // The result is false (= 0) if iteration is done, or true (= 1) otherwise.
 template<bool HasKey, bool Local>
 ALWAYS_INLINE
-int64_t iter_next_mixed_no_tombstones(Iter* it,
-                                      Cell* valOut,
-                                      Cell* keyOut,
-                                      ArrayData* arr) {
-  assertx(arr->hasMixedLayout());
-  assertx(arr->size() == MixedArray::asMixed(arr)->iterLimit());
-
+int64_t iter_next_mixed_pointer(Iter* it,
+                                Cell* valOut,
+                                Cell* keyOut,
+                                ArrayData* arr) {
   auto& iter = *unwrap(it);
-  auto const diff = iter.m_pos_diff + sizeof(MixedArrayElm);
-  assertx((diff - MixedArray::elmOff(0)) % sizeof(MixedArrayElm) == 0);
-
-  if (diff == iter.m_end_diff) {
+  auto const elm = iter.m_mixed_elm + 1;
+  if (elm == iter.m_mixed_end) {
     if (!Local) {
       if (UNLIKELY(arr->decWillRelease())) {
         return iter_next_free_mixed(it, arr);
@@ -957,19 +1033,17 @@ int64_t iter_next_mixed_no_tombstones(Iter* it,
     iter.kill();
     return 0;
   }
-
-  iter.m_pos_diff = diff;
-  auto const elm = reinterpret_cast<MixedArrayElm*>(uintptr_t(arr) + diff);
+  iter.m_mixed_elm = elm;
 
   if (isRefcountedType(valOut->m_type)) {
     if (UNLIKELY(valOut->m_data.pcnt->decWillRelease())) {
-      return iter_next_mixed_no_tombstones_cold(it, valOut, keyOut, elm);
+      return iter_next_mixed_pointer_cold(it, valOut, keyOut, elm);
     }
     valOut->m_data.pcnt->decRefCount();
   }
   if (HasKey && isRefcountedType(keyOut->m_type)) {
     if (UNLIKELY(keyOut->m_data.pcnt->decWillRelease())) {
-      return iter_next_mixed_no_tombstones_cold_key(it, valOut, keyOut, elm);
+      return iter_next_mixed_pointer_cold_key(it, valOut, keyOut, elm);
     }
     keyOut->m_data.pcnt->decRefCount();
   }
@@ -1197,28 +1271,47 @@ int64_t literNextKObject(Iter*, Cell*, Cell*, ArrayData*) {
   always_assert(false);
 }
 
-int64_t iterNextArrayMixedNoTombstones(Iter* it, Cell* valOut) {
-  TRACE(2, "iterNextArrayMixedNoTombstones: I %p\n", it);
+int64_t iterNextArrayPackedPointer(Iter* it, Cell* valOut) {
+  TRACE(2, "iterNextArrayPackedPointer: I %p\n", it);
   auto const ad = const_cast<ArrayData*>(unwrap(it)->getArrayData());
-  return iter_next_mixed_no_tombstones<false, false>(it, valOut, nullptr, ad);
+  return iter_next_packed_pointer<false>(it, valOut, ad);
 }
 
-int64_t iterNextKArrayMixedNoTombstones(Iter* it, Cell* valOut, Cell* keyOut) {
-  TRACE(2, "iterNextKArrayMixedNoTombstones: I %p\n", it);
+int64_t iterNextKArrayPackedPointer(Iter* it, Cell* valOut, Cell* keyOut) {
+  always_assert(false);
+}
+
+int64_t literNextArrayPackedPointer(Iter* it, Cell* valOut, ArrayData* ad) {
+  TRACE(2, "literNextArrayPackedPointer: I %p\n", it);
+  return iter_next_packed_pointer<true>(it, valOut, ad);
+}
+
+int64_t literNextKArrayPackedPointer(Iter* it, Cell* valOut,
+                                     Cell* keyOut, ArrayData* ad) {
+  always_assert(false);
+}
+
+int64_t iterNextArrayMixedPointer(Iter* it, Cell* valOut) {
+  TRACE(2, "iterNextArrayMixedPointer: I %p\n", it);
   auto const ad = const_cast<ArrayData*>(unwrap(it)->getArrayData());
-  return iter_next_mixed_no_tombstones<true, false>(it, valOut, keyOut, ad);
+  return iter_next_mixed_pointer<false, false>(it, valOut, nullptr, ad);
 }
 
-int64_t literNextArrayMixedNoTombstones(Iter* it, Cell* valOut,
-                                        ArrayData* ad) {
-  TRACE(2, "literNextArrayMixedNoTombstones: I %p\n", it);
-  return iter_next_mixed_no_tombstones<false, true>(it, valOut, nullptr, ad);
+int64_t iterNextKArrayMixedPointer(Iter* it, Cell* valOut, Cell* keyOut) {
+  TRACE(2, "iterNextKArrayMixedPointer: I %p\n", it);
+  auto const ad = const_cast<ArrayData*>(unwrap(it)->getArrayData());
+  return iter_next_mixed_pointer<true, false>(it, valOut, keyOut, ad);
 }
 
-int64_t literNextKArrayMixedNoTombstones(Iter* it, Cell* valOut,
-                                         Cell* keyOut, ArrayData* ad) {
-  TRACE(2, "literNextKArrayMixedNoTombstones: I %p\n", it);
-  return iter_next_mixed_no_tombstones<true, true>(it, valOut, keyOut, ad);
+int64_t literNextArrayMixedPointer(Iter* it, Cell* valOut, ArrayData* ad) {
+  TRACE(2, "literNextArrayMixedPointer: I %p\n", it);
+  return iter_next_mixed_pointer<false, true>(it, valOut, nullptr, ad);
+}
+
+int64_t literNextKArrayMixedPointer(Iter* it, Cell* valOut,
+                                    Cell* keyOut, ArrayData* ad) {
+  TRACE(2, "literNextKArrayMixedPointer: I %p\n", it);
+  return iter_next_mixed_pointer<true, true>(it, valOut, keyOut, ad);
 }
 
 using IterNextHelper  = int64_t (*)(Iter*, Cell*);
@@ -1231,7 +1324,8 @@ const IterNextHelper g_iterNextHelpers[] = {
   &iterNextArrayMixed,
   &iterNextArray,
   &iterNextObject,
-  &iterNextArrayMixedNoTombstones,
+  &iterNextArrayPackedPointer,
+  &iterNextArrayMixedPointer,
 };
 
 const IterNextKHelper g_iterNextKHelpers[] = {
@@ -1239,7 +1333,8 @@ const IterNextKHelper g_iterNextKHelpers[] = {
   &iterNextKArrayMixed,
   &iterNextKArray,
   &iter_next_cold, // iterNextKObject
-  &iterNextKArrayMixedNoTombstones,
+  &iterNextKArrayPackedPointer,
+  &iterNextKArrayMixedPointer,
 };
 
 const LIterNextHelper g_literNextHelpers[] = {
@@ -1247,7 +1342,8 @@ const LIterNextHelper g_literNextHelpers[] = {
   &literNextArrayMixed,
   &literNextArray,
   &literNextObject,
-  &literNextArrayMixedNoTombstones,
+  &literNextArrayPackedPointer,
+  &literNextArrayMixedPointer,
 };
 
 const LIterNextKHelper g_literNextKHelpers[] = {
@@ -1255,7 +1351,8 @@ const LIterNextKHelper g_literNextKHelpers[] = {
   &literNextKArrayMixed,
   &literNextKArray,
   &literNextKObject,
-  &literNextKArrayMixedNoTombstones,
+  &literNextKArrayPackedPointer,
+  &literNextKArrayMixedPointer,
 };
 
 int64_t iter_next_ind(Iter* iter, Cell* valOut) {

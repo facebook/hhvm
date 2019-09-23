@@ -435,12 +435,27 @@ struct IterData : IRExtraData {
 };
 
 struct IterInitData : public IterData {
-  IterInitData(uint32_t iter, uint32_t key,
-               uint32_t val, bool stack)
+  IterInitData(uint32_t iter, uint32_t key, uint32_t val, IterTypeOp op)
     : IterData{iter, key, val}
-    , fromStack{stack}
+    , sourceOp(op)
   {}
-  bool fromStack;
+
+  std::string show() const {
+    auto const op_name = [&]{
+      switch (sourceOp) {
+        case IterTypeOp::LocalBaseConst:   return "LocalBaseConst";
+        case IterTypeOp::LocalBaseMutable: return "LocalBaseMutable";
+        case IterTypeOp::NonLocal:         return "NonLocal";
+      }
+      always_assert(false);
+    }();
+    return folly::format("{}::{}", IterData(*this).show(), op_name).str();
+  }
+
+  // The IterTypeOp of the source bytecode for this IR op, which may not match
+  // the type of the op. For example, we sometimes generate non-local IterInit
+  // ops for an LIterInit bytecode, in which case sourceOp will still be local.
+  IterTypeOp sourceOp;
 };
 
 /*

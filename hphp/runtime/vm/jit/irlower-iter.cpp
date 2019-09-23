@@ -79,17 +79,13 @@ void implIterInit(IRLS& env, const IRInstruction* inst) {
       args.addr(fp, localOffset(extra->keyId));
     }
 
-    auto const target = [&] {
-      if (isLInit) {
-        if (isInitK) return CallSpec::direct(new_iter_array_key<true>);
-        return CallSpec::direct(new_iter_array<true>);
-      } else if (isInitK) {
-        return CallSpec::direct(new_iter_array_key<false>);
-      } else {
-        return CallSpec::direct(new_iter_array<false>);
-      }
-    }();
+    // For array bases, the bytecode iter type must match the HHIR iter type.
+    auto const local = extra->sourceOp != IterTypeOp::NonLocal;
+    always_assert(local == isLInit);
 
+    auto const target = isInitK
+      ? CallSpec::direct(new_iter_array_key_helper(extra->sourceOp))
+      : CallSpec::direct(new_iter_array_helper(extra->sourceOp));
     cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
     return;
   }
@@ -108,12 +104,11 @@ void implIterInit(IRLS& env, const IRInstruction* inst) {
   // new_iter_object decrefs its src object if it propagates an exception
   // out, so we use SyncAdjustOne, which adjusts the stack pointer by 1 stack
   // element on an unwind, skipping over the src object.
-  cgCallHelper(
-    v, env, CallSpec::direct(new_iter_object),
-    callDest(env, inst),
-    extra->fromStack ? SyncOptions::SyncAdjustOne : SyncOptions::Sync,
-    args
-  );
+  auto const sync = extra->sourceOp == IterTypeOp::NonLocal
+    ? SyncOptions::SyncAdjustOne
+    : SyncOptions::Sync;
+  auto const target = CallSpec::direct(new_iter_object);
+  cgCallHelper(v, env, target, callDest(env, inst), sync, args);
 }
 
 void implIterNext(IRLS& env, const IRInstruction* inst) {

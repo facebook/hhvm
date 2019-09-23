@@ -44,9 +44,20 @@ enum class IterNextIndex : uint8_t {
   ArrayMixed,
   Array,
   Object,
-  // Used by the JIT, for MixedArrays without tombstones. For these arrays,
-  // instead of tracking integer indices, we track element pointer offsets.
-  ArrayMixedNoTombstones,
+
+  // JIT-only "pointer iteration", designed for good specialized code-gen.
+  // In pointer iteration, the iterator has a pointer directly into the base.
+  // We can only use it when the base is guaranteed unchanged during iteration.
+  //
+  // This condition is true for non-local iters, and for local iters with the
+  // BaseUnchanged enum value. Almost all iters fall into these two cases.
+  //
+  // We additionally restrict pointer iteration based on the base layout:
+  //   - For PackedArrays, we only do it for value iters. (For key-value iters,
+  //     the position is also the key, so we must materialize it anyway.)
+  //   - Fox MixedArrays, we only use it when the base is free of tombstones.
+  ArrayPackedPointer,
+  ArrayMixedPointer,
 };
 
 /*
@@ -267,13 +278,15 @@ struct ArrayIter {
   }
 
 private:
-  template<bool Local>
+  template<IterTypeOp Type>
   friend int64_t new_iter_array(Iter*, ArrayData*, TypedValue*);
-  template<bool Local>
+  template<IterTypeOp Type>
   friend int64_t new_iter_array_key(Iter*, ArrayData*, TypedValue*,
                                     TypedValue*);
+  template<bool Local>
+  friend int64_t iter_next_packed_pointer(Iter*, Cell*, ArrayData*);
   template<bool HasKey, bool Local>
-  friend int64_t iter_next_mixed_no_tombstones(Iter*, Cell*, Cell*, ArrayData*);
+  friend int64_t iter_next_mixed_pointer(Iter*, Cell*, Cell*, ArrayData*);
 
   template <bool incRef = true>
   void arrInit(const ArrayData* arr);
@@ -336,15 +349,16 @@ private:
     ObjectData* m_obj;
   };
   // Current position. Beware that when m_data is null, m_pos is uninitialized.
-  // Also, iterators with the ArrayMixedNoTombstones next helper use m_pos_diff
-  // and m_end_diff instead of m_pos and m_end.
+  // For the pointer iteration types, we use the appropriate pointers instead.
   union {
     size_t m_pos;
-    ptrdiff_t m_pos_diff;
+    TypedValue* m_packed_elm;
+    MixedArrayElm* m_mixed_elm;
   };
   union {
     size_t m_end;
-    ptrdiff_t m_end_diff;
+    TypedValue* m_packed_end;
+    MixedArrayElm* m_mixed_end;
   };
   // This field is a union so new_iter_array can set it in one instruction.
   union {
@@ -354,6 +368,14 @@ private:
     };
     uint32_t m_itypeAndNextHelperIdx;
   };
+
+  // These elements are always referenced elsewhere, either in the m_data field
+  // of this iterator or in a local. (If we weren't using pointer iteration, we
+  // would track elements by index, not by pointer, but GC would still work.)
+  TYPE_SCAN_IGNORE_FIELD(m_packed_end);
+  TYPE_SCAN_IGNORE_FIELD(m_mixed_end);
+  TYPE_SCAN_IGNORE_FIELD(m_packed_elm);
+  TYPE_SCAN_IGNORE_FIELD(m_mixed_elm);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -611,7 +633,7 @@ bool IterateKV(const TypedValue& it,
  *
  * NOTE: If you initialize an iterator using the faster init helpers, you MUST
  * use the faster next helpers for IterNext ops. That's because the helpers may
- * create ArrayMixedNoTombstones-type iterators that Iter::next doesn't handle.
+ * make iterators that use pointer iteration, which Iter::next doesn't handle.
  * doesn't handle. This invariant is checked in debug builds.
  *
  * In practice, this constraint shouldn't be a problem, because we always use
@@ -664,11 +686,17 @@ private:
 // from the first key-value pair of the base.
 //
 // For non-local iters, if these helpers return 0, they also dec-ref the base.
-template <bool Local> NEVER_INLINE
-int64_t new_iter_array(Iter* dest, ArrayData* arr, TypedValue* val);
-template <bool Local> NEVER_INLINE
-int64_t new_iter_array_key(Iter* dest, ArrayData* arr, TypedValue* val,
-                           TypedValue* key);
+//
+// For the array helpers, first provide an IterTypeOp to get an IterInit helper
+// to call, then call it. This indirection lets us burn the appropriate helper
+// into the JIT (where we know IterTypeOp statically). For objects, we don't
+// need it because the type is always NonLocal.
+using IterInitArr    = int64_t(*)(Iter*, ArrayData*, TypedValue*);
+using IterInitArrKey = int64_t(*)(Iter*, ArrayData*, TypedValue*, TypedValue*);
+
+IterInitArr    new_iter_array_helper(IterTypeOp type);
+IterInitArrKey new_iter_array_key_helper(IterTypeOp type);
+
 int64_t new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
                         TypedValue* val, TypedValue* key);
 

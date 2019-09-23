@@ -5421,9 +5421,9 @@ void iopFCallBuiltin(
 
 namespace {
 
-template <bool HasKey, bool Local>
-void initIterator(PC& pc, PC targetpc, Iter* it, TypedValue* base,
-                  TypedValue* val, TypedValue* key) {
+template <bool HasKey>
+void initIterator(PC& pc, PC targetpc, Iter* it, IterTypeOp op,
+                  TypedValue* base, TypedValue* val, TypedValue* key) {
   // WARNING: This code requires caution regarding cells vs. refs. It takes
   // some case analysis to show that it is correct:
   //
@@ -5435,12 +5435,13 @@ void initIterator(PC& pc, PC targetpc, Iter* it, TypedValue* base,
   //    not kick in if the base is a ref to an array - these are non-local
   //    iterators handled by the generic iterator init code below.
   //
+  auto const local = op != IterTypeOp::NonLocal;
   if (isArrayLikeType(type(base))) {
     auto const arr = base->m_data.parr;
-    auto const res = HasKey ? new_iter_array_key<Local>(it, arr, val, key)
-                            : new_iter_array<Local>(it, arr, val);
+    auto const res = HasKey ? new_iter_array_key_helper(op)(it, arr, val, key)
+                            : new_iter_array_helper(op)(it, arr, val);
     if (res == 0) pc = targetpc;
-    if (!Local) vmStack().discard();
+    if (!local) vmStack().discard();
     return;
   }
 
@@ -5461,7 +5462,7 @@ void initIterator(PC& pc, PC targetpc, Iter* it, TypedValue* base,
   // It's also about as fast as it can get, because at this point, we're almost
   // always going to create an object iter, which can't really be optimized.
   //
-  base = Local ? tvToCell(base) : tvAssertCell(base);
+  base = local ? tvToCell(base) : tvAssertCell(base);
   if (isClsMethType(type(base))) {
     raise_error("Invalid operand type was used: "
                 "expects iterable, clsmeth was given");
@@ -5473,34 +5474,36 @@ void initIterator(PC& pc, PC targetpc, Iter* it, TypedValue* base,
   } else {
     pc = targetpc;
   }
-  if (!Local) vmStack().popC();
+  if (!local) vmStack().popC();
 }
 
 }
 
 OPTBLD_INLINE void iopIterInit(PC& pc, Iter* it, PC targetpc, local_var val) {
   auto const base = vmStack().topC();
-  auto constexpr HasKey = false, Local = false;
-  initIterator<HasKey, Local>(pc, targetpc, it, base, val.ptr, nullptr);
+  auto constexpr HasKey = false;
+  auto constexpr op = IterTypeOp::NonLocal;
+  initIterator<HasKey>(pc, targetpc, it, op, base, val.ptr, nullptr);
 }
 
 OPTBLD_INLINE
 void iopIterInitK(PC& pc, Iter* it, PC targetpc, local_var val, local_var key) {
   auto const base = vmStack().topC();
-  auto constexpr HasKey = true, Local = false;
-  initIterator<HasKey, Local>(pc, targetpc, it, base, val.ptr, key.ptr);
+  auto constexpr HasKey = true;
+  auto constexpr op = IterTypeOp::NonLocal;
+  initIterator<HasKey>(pc, targetpc, it, op, base, val.ptr, key.ptr);
 }
 
 OPTBLD_INLINE void iopLIterInit(PC& pc, Iter* it, local_var local,
                                 PC targetpc, local_var val, IterTypeOp op) {
-  auto constexpr HasKey = false, Local = true;
-  initIterator<HasKey, Local>(pc, targetpc, it, local.ptr, val.ptr, nullptr);
+  auto constexpr HasKey = false;
+  initIterator<HasKey>(pc, targetpc, it, op, local.ptr, val.ptr, nullptr);
 }
 
 OPTBLD_INLINE void iopLIterInitK(PC& pc, Iter* it, local_var local, PC targetpc,
                                  local_var val, local_var key, IterTypeOp op) {
-  auto constexpr HasKey = true, Local = true;
-  initIterator<HasKey, Local>(pc, targetpc, it, local.ptr, val.ptr, key.ptr);
+  auto constexpr HasKey = true;
+  initIterator<HasKey>(pc, targetpc, it, op, local.ptr, val.ptr, key.ptr);
 }
 
 OPTBLD_INLINE void iopIterNext(PC& pc, Iter* it, PC targetpc, local_var val) {

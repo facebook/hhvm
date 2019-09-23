@@ -754,6 +754,7 @@ module Make (GetLocals : GetLocals) = struct
       ?(allow_typedef = true)
       ?(allow_wildcard = false)
       ?(allow_like = false)
+      ?(in_where_clause = false)
       ?(tp_depth = 0)
       env
       (hh : Aast.hint) =
@@ -766,6 +767,7 @@ module Make (GetLocals : GetLocals) = struct
         ~allow_typedef
         ~allow_wildcard
         ~allow_like
+        ~in_where_clause
         ~tp_depth
         env
         (p, h) )
@@ -816,6 +818,7 @@ module Make (GetLocals : GetLocals) = struct
       ~allow_typedef
       ~allow_wildcard
       ~allow_like
+      ~in_where_clause
       ?(tp_depth = 0)
       env
       (p, x) =
@@ -958,9 +961,9 @@ module Make (GetLocals : GetLocals) = struct
           begin
             match h with
             | N.Hthis
-            | N.Happly _
-            | N.Habstr _ ->
+            | N.Happly _ ->
               h
+            | N.Habstr _ when in_where_clause -> h
             | _ ->
               Errors.invalid_type_access_root root;
               N.Herr
@@ -1612,8 +1615,8 @@ module Make (GetLocals : GetLocals) = struct
   and type_where_constraints env locl_cstrl =
     List.map
       ~f:(fun (h1, ck, h2) ->
-        let ty1 = hint env h1 in
-        let ty2 = hint env h2 in
+        let ty1 = hint ~in_where_clause:true env h1 in
+        let ty2 = hint ~in_where_clause:true env h2 in
         (ty1, ck, ty2))
       locl_cstrl
 

@@ -50,7 +50,7 @@ enum SurpriseFlag : size_t {
   /* Set by the debugger hook handler to force function entry/exit events. */
   DebuggerHookFlag     = 1ull << 57,
 
-  CPUTimedOutFlag      = 1ull << 58,
+  UnusedSurpriseFlag58 = 1ull << 58,
   IntervalTimerFlag    = 1ull << 59,
 
   /* Set if a GC should be run at the next safe point. */
@@ -75,7 +75,6 @@ enum SurpriseFlag : size_t {
   ResourceFlags =
     MemExceededFlag |
     TimedOutFlag |
-    CPUTimedOutFlag |
     PendingGCFlag |
     PendingPerfEventFlag,
 

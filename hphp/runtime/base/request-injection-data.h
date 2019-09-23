@@ -89,6 +89,12 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
+enum TimeoutKindFlag : uint8_t {
+  TimeoutNone          = 0,
+  TimeoutTime          = 1ull << 1,
+  TimeoutCPUTime       = 1ull << 2
+};
+
 /*
  * General-purpose bag of data and options for a request.
  *
@@ -135,6 +141,9 @@ struct RequestInjectionData {
 
   int getTimeout() const;
   void setTimeout(int seconds);
+  void triggerTimeout(TimeoutKindFlag kind);
+  bool checkTimeoutKind(TimeoutKindFlag kind);
+  void clearTimeoutFlag(TimeoutKindFlag kind);
 
   int getCPUTimeout() const;
   void setCPUTimeout(int seconds);
@@ -142,8 +151,7 @@ struct RequestInjectionData {
   int getRemainingTime() const;
   int getRemainingCPUTime() const;
 
-  void resetTimer(int seconds = 0);
-  void resetCPUTimer(int seconds = 0);
+  void resetTimers(int time_sec = 0, int cputime_sec = 0);
 
   void onTimeout(RequestTimer*);
 
@@ -333,6 +341,8 @@ struct RequestInjectionData {
   bool logFunctionCalls() const;
 
 private:
+  void resetTimer(int seconds = 0);
+  void resetCPUTimer(int seconds = 0);
   RequestTimer m_timer;
   RequestTimer m_cpuTimer;
 
@@ -422,6 +432,13 @@ private:
   int64_t m_brotliLgWindowSize;
   int64_t m_brotliQuality;
   int64_t m_zstdLevel;
+
+  /*
+   * Instead of using several surprise flags, we can track the timeout info
+   * in its own array of flags. This allows us to define different kind of
+   * of timeouts.
+   */
+  std::atomic<uint8_t> m_timeoutFlags;
 
   /*
    * Keep track of the open_basedir_separator that may be used so we can

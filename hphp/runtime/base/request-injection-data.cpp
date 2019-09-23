@@ -571,12 +571,12 @@ void RequestInjectionData::onSessionInit() {
 
 void RequestInjectionData::onTimeout(RequestTimer* timer) {
   if (timer == &m_timer) {
-    setFlag(TimedOutFlag);
+    triggerTimeout(TimeoutTime);
 #if !defined(__APPLE__) && !defined(_MSC_VER)
     m_timer.m_timerActive.store(false, std::memory_order_relaxed);
 #endif
   } else if (timer == &m_cpuTimer) {
-    setFlag(CPUTimedOutFlag);
+    triggerTimeout(TimeoutCPUTime);
 #if !defined(__APPLE__) && !defined(_MSC_VER)
     m_cpuTimer.m_timerActive.store(false, std::memory_order_relaxed);
 #endif
@@ -593,12 +593,36 @@ void RequestInjectionData::setCPUTimeout(int seconds) {
   m_cpuTimer.setTimeout(seconds);
 }
 
+void RequestInjectionData::triggerTimeout(TimeoutKindFlag kind) {
+  // Add the flags. The surprise handling queries those in a certain order
+  m_timeoutFlags.fetch_or(kind);
+  setFlag(TimedOutFlag);
+}
+
+bool RequestInjectionData::checkTimeoutKind(TimeoutKindFlag kind) {
+  return m_timeoutFlags.load() & kind;
+}
+
+/*
+ * Clear the specific flag. If new timeout flags are 0, remove the surprise.
+ */
+void RequestInjectionData::clearTimeoutFlag(TimeoutKindFlag kind) {
+  if (m_timeoutFlags.fetch_and(~kind) == kind) {
+    clearFlag(TimedOutFlag);
+  }
+}
+
 int RequestInjectionData::getRemainingTime() const {
   return m_timer.getRemainingTime();
 }
 
 int RequestInjectionData::getRemainingCPUTime() const {
   return m_cpuTimer.getRemainingTime();
+}
+
+void RequestInjectionData::resetTimers(int time_sec, int cputime_sec) {
+  resetTimer(time_sec);
+  resetCPUTimer(time_sec);
 }
 
 /*
@@ -616,7 +640,7 @@ void RequestInjectionData::resetTimer(int seconds /* = 0 */) {
     if (seconds < getRemainingTime()) return;
   }
   setTimeout(seconds);
-  clearFlag(TimedOutFlag);
+  clearTimeoutFlag(TimeoutTime);
 }
 
 void RequestInjectionData::resetCPUTimer(int seconds /* = 0 */) {
@@ -628,11 +652,12 @@ void RequestInjectionData::resetCPUTimer(int seconds /* = 0 */) {
     if (seconds < getRemainingCPUTime()) return;
   }
   setCPUTimeout(seconds);
-  clearFlag(CPUTimedOutFlag);
+  clearTimeoutFlag(TimeoutCPUTime);
 }
 
 void RequestInjectionData::reset() {
   m_sflagsAndStkPtr->fetch_and(kSurpriseFlagStackMask);
+  m_timeoutFlags.fetch_and(TimeoutNone);
   m_hostOutOfMemory.store(false, std::memory_order_relaxed);
   m_OOMAbort = false;
   m_coverage = RuntimeOption::RecordCodeCoverage;

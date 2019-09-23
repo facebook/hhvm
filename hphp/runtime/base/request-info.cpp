@@ -261,22 +261,25 @@ size_t handle_request_surprise(c_WaitableWaitHandle* wh, size_t mask) {
   }
 
   if ((flags & TimedOutFlag) && !debugging) {
-    p.setCPUTimeout(0);  // Stop CPU timer so we won't time out twice.
-    if (pendingException) {
-      setSurpriseFlag(TimedOutFlag);
-    } else {
-      pendingException = generate_request_timeout_exception(wh);
-    }
-  } else if ((flags & CPUTimedOutFlag) && !debugging) {
-    // Don't bother with the CPU timeout if we're already handling a wall
-    // timeout.
-    p.setTimeout(0);  // Stop wall timer so we won't time out twice.
-    if (pendingException) {
-      setSurpriseFlag(CPUTimedOutFlag);
-    } else {
-      pendingException = generate_request_cpu_timeout_exception(wh);
+    if (p.checkTimeoutKind(TimeoutTime)) {
+      p.setCPUTimeout(0);  // Stop CPU timer so we won't time out twice.
+      if (pendingException) {
+        setSurpriseFlag(TimedOutFlag);
+      } else {
+        pendingException = generate_request_timeout_exception(wh);
+      }
+    } else if (p.checkTimeoutKind(TimeoutCPUTime)) {
+      // Don't bother with the CPU timeout if we're already handling a wall
+      // timeout.
+      p.setTimeout(0);  // Stop wall timer so we won't time out twice.
+      if (pendingException) {
+        setSurpriseFlag(TimedOutFlag);
+      } else {
+        pendingException = generate_request_cpu_timeout_exception(wh);
+      }
     }
   }
+
   if (flags & MemExceededFlag) {
     if (pendingException) {
       setSurpriseFlag(MemExceededFlag);

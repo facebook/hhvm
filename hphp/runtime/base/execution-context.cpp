@@ -657,8 +657,10 @@ void ExecutionContext::onRequestShutdown() {
 }
 
 void ExecutionContext::executeFunctions(ShutdownType type) {
-  RID().resetTimer(RuntimeOption::PspTimeoutSeconds);
-  RID().resetCPUTimer(RuntimeOption::PspCpuTimeoutSeconds);
+  RID().resetTimers(
+      RuntimeOption::PspTimeoutSeconds,
+      RuntimeOption::PspCpuTimeoutSeconds
+  );
 
   // We mustn't destroy any callbacks until we're done with all
   // of them. So hold them in tmp.
@@ -950,7 +952,7 @@ bool ExecutionContext::callUserErrorHandler(const Exception& e, int errnum,
 
 bool ExecutionContext::onFatalError(const Exception& e) {
   tl_heap->resetCouldOOM(isStandardRequest());
-  RID().resetTimer();
+  RID().resetTimers();
   // need to restore the error reporting level, because the fault
   // handler for silencers won't be run on fatals, and we might be
   // about to run a user error handler (and psp/shutdown code).

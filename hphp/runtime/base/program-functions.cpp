@@ -615,9 +615,9 @@ static void handle_resource_exceeded_exception() {
   try {
     throw;
   } catch (RequestTimeoutException&) {
-    setSurpriseFlag(TimedOutFlag);
+    RID().triggerTimeout(TimeoutTime);
   } catch (RequestCPUTimeoutException&) {
-    setSurpriseFlag(CPUTimedOutFlag);
+    RID().triggerTimeout(TimeoutCPUTime);
   } catch (RequestMemoryExceededException&) {
     setSurpriseFlag(MemExceededFlag);
   } catch (...) {}
@@ -2713,7 +2713,7 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
   }
 
   tl_heap->resetCouldOOM(isStandardRequest());
-  RID().resetTimer();
+  RID().resetTimers();
 
   bool ret = true;
   if (!warmupOnly) {

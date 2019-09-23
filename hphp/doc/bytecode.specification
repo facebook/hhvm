@@ -3059,9 +3059,10 @@ IterInitK <iterator id> <rel offset> <local id> <local id>     [C]  ->  []
     If the iterator specified by %1 is a non-mutable default class iterator,
     this instruction stores a copy of the name of the current property in %4.
 
-LIterInit <iterator id> <local id> <rel offset> <local id>     []   ->  []
+LIterInit  <iterator id> <local id> <rel offset>
+           <local id> <IterTypeOp>                             []   ->  []
 LIterInitK <iterator id> <local id> <rel offset>
-           <local id> <local id>                               []   ->  []
+           <local id> <local id> <IterTypeOp>                  []   ->  []
 
   Initialize iterator with local. If the local specified by %2 is not an
   array-like, behave as IterInit or IterInitK, except loading the base value
@@ -3073,6 +3074,9 @@ LIterInitK <iterator id> <local id> <rel offset>
   array-like in %2 was not stored within the iterator, all operations on this
   iterator must use the LIter variants and provide the same local (containing
   the same array-like).
+
+  The IterTypeOp enum distinguishes between cases where the base may be
+  updated during iteration and cases where it is guaranteed to be unchanged.
 
 IterNext  <iterator id> <rel offset> <local id>               []  ->  []
 IterNextK <iterator id> <rel offset> <local id> <local id>    []  ->  []
@@ -3106,9 +3110,10 @@ IterNextK <iterator id> <rel offset> <local id> <local id>    []  ->  []
   The semantics of how to determine what the key and value are depend on %1 in
   an analogous way to IterInit{K,}.
 
-LIterNext <iterator id> <local id> <rel offset> <local id>     []   ->  []
+LIterNext  <iterator id> <local id> <rel offset>
+           <local id> <IterTypeOp>                             []   ->  []
 LIterNextK <iterator id> <local id> <rel offset>
-           <local id> <local id>                               []   ->  []
+           <local id> <local id> <IterTypeOp>                  []   ->  []
 
   Iterator next with local. The iterator specified by %1 must have been
   initialized with LIterInit or LIterNext. These instructions behave similarily
@@ -3116,6 +3121,9 @@ LIterNextK <iterator id> <local id> <rel offset>
   base, instead of one stored in the iterator. If the value in local %2 is a
   non-array-like, the base stored in the iterator is used, otherwise the value
   in the local is used.
+
+  The IterTypeOp enum distinguishes between cases where the base may be
+  updated during iteration and cases where it is guaranteed to be unchanged.
 
 IterFree <iterator id>    []  ->  []
 

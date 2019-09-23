@@ -340,6 +340,17 @@ enum class BareThisOp : uint8_t {
 #undef BARETHIS_OP
 };
 
+#define ITERTYPE_OPS            \
+  ITERTYPE_OP(LocalBaseConst)   \
+  ITERTYPE_OP(LocalBaseMutable) \
+  ITERTYPE_OP(NonLocal)
+
+enum class IterTypeOp : uint8_t {
+#define ITERTYPE_OP(x) x,
+  ITERTYPE_OPS
+#undef ITERTYPE_OP
+};
+
 #define SILENCE_OPS \
   SILENCE_OP(Start) \
   SILENCE_OP(End)
@@ -665,13 +676,17 @@ constexpr uint32_t kMaxConcatN = 4;
                                        FCALL(0, 1),     FCALL,      CF) \
   O(FCallBuiltin,    FOUR(IVA,IVA,IVA,SA),CALLNATIVE,   CALLNATIVE, NF) \
   O(IterInit,        THREE(IA,BA,LA),  ONE(CV),         NOV,        CF) \
-  O(LIterInit,       FOUR(IA,LA,BA,LA),NOV,             NOV,        CF) \
+  O(LIterInit,       FIVE(IA,LA,BA,LA,OA(IterTypeOp)),                  \
+                                       NOV,             NOV,        CF) \
   O(IterInitK,       FOUR(IA,BA,LA,LA),ONE(CV),         NOV,        CF) \
-  O(LIterInitK,      FIVE(IA,LA,BA,LA,LA),NOV,          NOV,        CF) \
+  O(LIterInitK,      SIX(IA,LA,BA,LA,LA,OA(IterTypeOp)),                \
+                                       NOV,             NOV,        CF) \
   O(IterNext,        THREE(IA,BA,LA),  NOV,             NOV,        CF) \
-  O(LIterNext,       FOUR(IA,LA,BA,LA),NOV,             NOV,        CF) \
+  O(LIterNext,       FIVE(IA,LA,BA,LA,OA(IterTypeOp)),                  \
+                                       NOV,             NOV,        CF) \
   O(IterNextK,       FOUR(IA,BA,LA,LA),NOV,             NOV,        CF) \
-  O(LIterNextK,      FIVE(IA,LA,BA,LA,LA),NOV,          NOV,        CF) \
+  O(LIterNextK,      SIX(IA,LA,BA,LA,LA,OA(IterTypeOp)),                \
+                                       NOV,             NOV,        CF) \
   O(IterFree,        ONE(IA),          NOV,             NOV,        NF) \
   O(LIterFree,       TWO(IA,LA),       NOV,             NOV,        NF) \
   O(IterBreak,       TWO(BA,ILA),      NOV,             NOV,        CF_TF) \
@@ -918,6 +933,7 @@ const char* subopToName(CollectionType);
 const char* subopToName(SetOpOp);
 const char* subopToName(IncDecOp);
 const char* subopToName(BareThisOp);
+const char* subopToName(IterTypeOp);
 const char* subopToName(SilenceOp);
 const char* subopToName(OODeclExistsOp);
 const char* subopToName(ObjMethodOp);

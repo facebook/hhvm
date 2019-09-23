@@ -44,19 +44,38 @@ struct FuncAnalysis;
  * We track iterator liveness precisely, so if an iterator is DeadIter, its
  * definitely dead and vice-versa. We only track "normal" iterators (non-weak,
  * non-mutable), so iterators not of those type are considered "dead".
+ *
+ * We use this state to check if the "local iterator" optimization is valid.
+ * In this optimization, we leave the iterator base in a local slot instead of
+ * inc-ref-ing it and storing it in the iter.
+ *
+ * Local iteration is only possible if the positions of the keys of the base
+ * iterator are unchanged. We call an update that leaves these key positions
+ * unchanged a "safe" update; the only one that we can account for is updating
+ * the value of the current iteration key, as in:
+ *
+ *  foreach ($base as $key => $value) {
+ *    $base[$key] = $value + 1;
+ *  }
+ *
+ * Finally, we also track a flag that is set whenever we see *any* update to
+ * the base (including "safe" updates). If we know the base is unchanged during
+ * iteration, we can further optimize the iterator in HHIR.
  */
 struct DeadIter {};
 struct LiveIter {
   IterTypes types;
-  // The local that an iterator was initialized with (and which has not been
-  // changed since).
+  // If the base came from a local, and all updates to it have been "safe",
+  // this field will be the id of that local. Otherwise, it will be NoLocalId.
   LocalId baseLocal = NoLocalId;
-  // The local that is known to be equivalent to the current key in the
-  // iterator. Used to detect "safe" writes.
+  // The local that is known to be equivalent to the current key in the iter.
+  // Used to detect "safe" updates to the base.
   LocalId keyLocal  = NoLocalId;
   // The block id where this iterator was initialized. If there's more than one
-  // such block, NoBlockId.
+  // such block, it will be NoBlockId.
   BlockId initBlock = NoBlockId;
+  // Set whenever we see any mutation, even "safe" ones that don't affect keys.
+  bool baseUpdated = false;
 };
 using Iter = boost::variant<DeadIter, LiveIter>;
 

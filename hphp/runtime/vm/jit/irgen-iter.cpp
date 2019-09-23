@@ -134,7 +134,8 @@ void emitLIterInit(IRGS& env,
                    int32_t iterId,
                    int32_t baseLocalId,
                    Offset relOffset,
-                   int32_t valLocalId) {
+                   int32_t valLocalId,
+                   IterTypeOp subop) {
   if (curFunc(env)->isPseudoMain()) PUNT(LIterInit-pseudomain);
   auto const base = ldLoc(env, baseLocalId, nullptr, DataTypeSpecific);
   if (!base->type().subtypeOfAny(TArrLike, TObj)) PUNT(LIterInit);
@@ -152,7 +153,8 @@ void emitLIterInitK(IRGS& env,
                     int32_t baseLocalId,
                     Offset relOffset,
                     int32_t valLocalId,
-                    int32_t keyLocalId) {
+                    int32_t keyLocalId,
+                    IterTypeOp subop) {
   if (curFunc(env)->isPseudoMain()) PUNT(LIterInitK-pseudomain);
   auto const base = ldLoc(env, baseLocalId, nullptr, DataTypeSpecific);
   if (!base->type().subtypeOfAny(TArrLike, TObj)) PUNT(LIterInitK);
@@ -169,7 +171,8 @@ void emitLIterNext(IRGS& env,
                    int32_t iterId,
                    int32_t baseLocalId,
                    Offset relOffset,
-                   int32_t valLocalId) {
+                   int32_t valLocalId,
+                   IterTypeOp subop) {
   if (curFunc(env)->isPseudoMain()) PUNT(LIterNext-pseudomain);
   auto const base = ldLoc(env, baseLocalId, nullptr, DataTypeSpecific);
   auto const data = IterData(iterId, uint32_t(-1), valLocalId);
@@ -186,7 +189,8 @@ void emitLIterNextK(IRGS& env,
                     int32_t baseLocalId,
                     Offset relOffset,
                     int32_t valLocalId,
-                    int32_t keyLocalId) {
+                    int32_t keyLocalId,
+                    IterTypeOp subop) {
   if (curFunc(env)->isPseudoMain()) PUNT(LIterNextK-pseudomain);
   auto const base = ldLoc(env, baseLocalId, nullptr, DataTypeSpecific);
   auto const data = IterData(iterId, keyLocalId, valLocalId);

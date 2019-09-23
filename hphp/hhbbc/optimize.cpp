@@ -652,6 +652,9 @@ struct OptimizeIterState {
             if (eligible[ti.initBlock] && ti.baseLocal == NoLocalId) {
               FTRACE(2, "   - blk:{} ineligible\n", ti.initBlock);
               eligible[ti.initBlock] = false;
+            } else if (ti.baseUpdated) {
+              FTRACE(2, "   - blk:{} updated\n", ti.initBlock);
+              updated[ti.initBlock] = true;
             }
           }
         );
@@ -736,6 +739,9 @@ struct OptimizeIterState {
   // All of the associated iterator operations within an iterator loop can be
   // optimized to liter if the iterator's initialization block is eligible.
   boost::dynamic_bitset<> eligible;
+  // For eligible blocks, the "updated" flag tracks whether there was *any*
+  // change to the base initialized in that block (including "safe" changes).
+  boost::dynamic_bitset<> updated;
 };
 
 void optimize_iterators(const Index& index,
@@ -747,9 +753,10 @@ void optimize_iterators(const Index& index,
   if (!func->numIters || !ainfo.hasInvariantIterBase) return;
 
   OptimizeIterState state;
-  // Everything starts out as eligible. We'll remove initialization blocks as we
-  // go.
+  // All blocks starts out eligible. We'll remove initialization blocks as go.
+  // Similarly, the iterator bases for all blocks start out not being updated.
   state.eligible.resize(func->blocks.size(), true);
+  state.updated.resize(func->blocks.size(), false);
 
   // Visit all the blocks and build up the fixup state.
   visit_blocks("optimize_iterators", index, ainfo, collect, state);
@@ -766,6 +773,10 @@ void optimize_iterators(const Index& index,
       continue;
     }
 
+    auto const subop = state.updated[fixup.init]
+      ? IterTypeOp::LocalBaseMutable
+      : IterTypeOp::LocalBaseConst;
+
     BytecodeVec newOps;
     assertx(fixup.base != NoLocalId);
 
@@ -780,7 +791,8 @@ void optimize_iterators(const Index& index,
               op.IterInit.iter1,
               fixup.base,
               op.IterInit.target2,
-              op.IterInit.loc3
+              op.IterInit.loc3,
+              subop
             }
           )
         };
@@ -795,7 +807,8 @@ void optimize_iterators(const Index& index,
               fixup.base,
               op.IterInitK.target2,
               op.IterInitK.loc3,
-              op.IterInitK.loc4
+              op.IterInitK.loc4,
+              subop
             }
           )
         };
@@ -808,7 +821,8 @@ void optimize_iterators(const Index& index,
               op.IterNext.iter1,
               fixup.base,
               op.IterNext.target2,
-              op.IterNext.loc3
+              op.IterNext.loc3,
+              subop
             }
           )
         };
@@ -822,7 +836,8 @@ void optimize_iterators(const Index& index,
               fixup.base,
               op.IterNextK.target2,
               op.IterNextK.loc3,
-              op.IterNextK.loc4
+              op.IterNextK.loc4,
+              subop
             }
           )
         };

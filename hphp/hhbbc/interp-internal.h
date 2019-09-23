@@ -673,6 +673,7 @@ void killIterEquivs(ISS& env, LocalId l, LocalId key = NoLocalId) {
       [&] (LiveIter& iter) {
         if (iter.keyLocal == l) iter.keyLocal = NoLocalId;
         if (iter.baseLocal == l) {
+          iter.baseUpdated = true;
           if (key == NoLocalId || key != iter.keyLocal) {
             iter.baseLocal = NoLocalId;
           }
@@ -688,6 +689,7 @@ void killAllIterEquivs(ISS& env) {
       i,
       [] (DeadIter) {},
       [] (LiveIter& iter) {
+        iter.baseUpdated = true;
         iter.baseLocal = NoLocalId;
         iter.keyLocal = NoLocalId;
       }

@@ -183,6 +183,7 @@ inline const char* prettytype(IncDecOp) { return "IncDecOp"; }
 inline const char* prettytype(ObjMethodOp) { return "ObjMethodOp"; }
 inline const char* prettytype(BareThisOp) { return "BareThisOp"; }
 inline const char* prettytype(InitPropOp) { return "InitPropOp"; }
+inline const char* prettytype(IterTypeOp) { return "IterTypeOp"; }
 inline const char* prettytype(SilenceOp) { return "SilenceOp"; }
 inline const char* prettytype(SwitchKind) { return "SwitchKind"; }
 inline const char* prettytype(MOpMode) { return "MOpMode"; }
@@ -5491,13 +5492,13 @@ void iopIterInitK(PC& pc, Iter* it, PC targetpc, local_var val, local_var key) {
 }
 
 OPTBLD_INLINE void iopLIterInit(PC& pc, Iter* it, local_var local,
-                                PC targetpc, local_var val) {
+                                PC targetpc, local_var val, IterTypeOp op) {
   auto constexpr HasKey = false, Local = true;
   initIterator<HasKey, Local>(pc, targetpc, it, local.ptr, val.ptr, nullptr);
 }
 
-OPTBLD_INLINE void iopLIterInitK(PC& pc, Iter* it, local_var local,
-                                 PC targetpc, local_var val, local_var key) {
+OPTBLD_INLINE void iopLIterInitK(PC& pc, Iter* it, local_var local, PC targetpc,
+                                 local_var val, local_var key, IterTypeOp op) {
   auto constexpr HasKey = true, Local = true;
   initIterator<HasKey, Local>(pc, targetpc, it, local.ptr, val.ptr, key.ptr);
 }
@@ -5519,11 +5520,8 @@ void iopIterNextK(PC& pc, Iter* it, PC targetpc, local_var val, local_var key) {
   }
 }
 
-OPTBLD_INLINE void iopLIterNext(PC& pc,
-                                Iter* it,
-                                local_var base,
-                                PC targetpc,
-                                local_var val) {
+OPTBLD_INLINE void iopLIterNext(PC& pc, Iter* it, local_var base,
+                                PC targetpc, local_var val, IterTypeOp op) {
   auto valOut = tvToCell(val.ptr);
   auto const hasMore = isArrayLikeType(base.ptr->m_type)
     ? liter_next_ind(it, valOut, base.ptr->m_data.parr)
@@ -5535,12 +5533,8 @@ OPTBLD_INLINE void iopLIterNext(PC& pc,
   }
 }
 
-OPTBLD_INLINE void iopLIterNextK(PC& pc,
-                                 Iter* it,
-                                 local_var base,
-                                 PC targetpc,
-                                 local_var val,
-                                 local_var key) {
+OPTBLD_INLINE void iopLIterNextK(PC& pc, Iter* it, local_var base, PC targetpc,
+                                 local_var val, local_var key, IterTypeOp op) {
   auto valOut = tvToCell(val.ptr);
   auto keyOut = tvToCell(key.ptr);
   auto const hasMore = isArrayLikeType(base.ptr->m_type)

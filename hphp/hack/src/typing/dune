@@ -77,6 +77,7 @@
     typing_print
     typing_reactivity
     typing_solver
+    typing_special_fun
     typing_substring
     typing_subtype
     typing_subtype_tconst

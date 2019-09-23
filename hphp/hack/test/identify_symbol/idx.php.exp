@@ -15,8 +15,8 @@ definition:
 
      $index
        kind: param
-       position: line 33, characters 3-8
-       span: line 33, character 3 - line 33, character 8
+       position: line 33, characters 7-12
+       span: line 33, character 3 - line 33, character 12
        modifiers: 
 
      $default

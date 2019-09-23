@@ -1,7 +1,7 @@
 File "empty_map_update.php", line 11, characters 3-15:
 Invalid assignment (Typing[4110])
-File "empty_map_update.php", line 6, characters 11-20:
-Expected nothing because type parameter Tv of idx could not be determined. Please add explicit type parameters to the invocation of idx
+File "empty_map_update.php", line 6, characters 11-13:
+Expected nothing because type parameter Tv of HH\idx could not be determined. Please add explicit type parameters to the invocation of HH\idx
 File "idx.hhi", line 31, characters 10-12:
   via this generic Tv
 File "empty_map_update.php", line 4, characters 32-46:

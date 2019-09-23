@@ -18,7 +18,7 @@ namespace HH {
 // can have two signatures:
 //
 // idx<Tk, Tv>(?KeyedContainer<Tk, ?Tv> $collection, ?Tk $index): ?Tv
-// idx<Tk, Tv>(?KeyedContainer<Tk, Tv> $collection, Tk $index, Tv $default): Tv
+// idx<Tk, Tv>(?KeyedContainer<Tk, Tv> $collection, ?Tk $index, Tv $default): Tv
 /**
  * Index into the given KeyedContainer using the provided key.
  *
@@ -30,7 +30,7 @@ namespace HH {
 <<__Rx>>
 function idx<Tk as arraykey, Tv>(
   ?KeyedContainer<Tk, Tv> $collection,
-  $index,
+  ?Tk $index,
   $default = null,
 ) {}
 

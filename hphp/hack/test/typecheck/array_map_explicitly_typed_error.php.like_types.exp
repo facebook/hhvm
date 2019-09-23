@@ -1,0 +1,6 @@
+File "array_map_explicitly_typed_error.php", line 8, characters 5-13:
+Some elements in this Vector are incompatible (Typing[4110])
+File "array_map_explicitly_typed_error.php", line 5, characters 18-23:
+Expected string
+File "array_map_explicitly_typed_error.php", line 8, characters 9-9:
+But got int

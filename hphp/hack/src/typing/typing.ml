@@ -2235,7 +2235,7 @@ and expr_
         Errors.re_prefixed_non_string pe "Non-strings";
         expr_error env (Reason.Rregex pe) e)
   | Fun_id x ->
-    let (env, fty) = fun_type_of_id env x [] in
+    let (env, fty) = fun_type_of_id env x [] [] in
     begin
       match fty with
       | (_, Tfun fty) -> check_deprecated (fst x) fty
@@ -4650,7 +4650,7 @@ and dispatch_call
   in
   (* For special functions and pseudofunctions with a definition in hhi. *)
   let make_call_special_from_def env id tel ty_ =
-    let (env, fty) = fun_type_of_id env id tal in
+    let (env, fty) = fun_type_of_id env id tal el in
     let ty =
       match fty with
       | (_, Tfun ft) -> ft.ft_ret.et_type
@@ -4820,7 +4820,7 @@ and dispatch_call
     check_function_in_suspend SN.StdlibFunctions.array_filter;
 
     (* dispatch the call to typecheck the arguments *)
-    let (env, fty) = fun_type_of_id env id tal in
+    let (env, fty) = fun_type_of_id env id tal el in
     let (env, (tel, tuel, res)) = call ~expected p env fty el uel in
     (* but ignore the result and overwrite it with custom return type *)
     let x = List.hd_exn el in
@@ -4913,7 +4913,7 @@ and dispatch_call
   | Id ((_, array_map) as x)
     when array_map = SN.StdlibFunctions.array_map && el <> [] && uel = [] ->
     check_function_in_suspend SN.StdlibFunctions.array_map;
-    let (env, fty) = fun_type_of_id env x [] in
+    let (env, fty) = fun_type_of_id env x [] el in
     let (env, fty) = Env.expand_type env fty in
     let (env, fty) =
       match (fty, el) with
@@ -5092,78 +5092,6 @@ and dispatch_call
     in
     let (env, (tel, tuel, ty)) = call ~expected p env fty el [] in
     make_call env (Tast.make_typed_expr fpos fty (T.Id x)) tal tel tuel ty
-  (* Special function `idx` *)
-  | Id ((_, idx) as id) when idx = SN.FB.idx ->
-    check_function_in_suspend SN.FB.idx;
-
-    (* Directly call get_fun so that we can muck with the type before
-     * instantiation -- much easier to work in terms of Tgeneric Tk/Tv than
-     * trying to figure out which Tvar is which. *)
-    (match get_fun env (snd id) with
-    | Some fty ->
-      let (param1, param2, param3) =
-        match fty.ft_params with
-        | [param1; param2; param3] -> (param1, param2, param3)
-        | _ -> assert false
-      in
-      let { fp_type = { et_type = (r2, _); _ }; _ } = param2 in
-      let { fp_type = { et_type = (r3, _); _ }; _ } = param3 in
-      let (params, ret) =
-        match List.length el with
-        | 2 ->
-          let ty1 =
-            match param1.fp_type.et_type with
-            | (r11, Toption (r12, Tapply (coll, [tk; ((r13, _) as tv)]))) ->
-              (r11, Toption (r12, Tapply (coll, [tk; (r13, Toption tv)])))
-            | _ -> assert false
-          in
-          let param1 =
-            { param1 with fp_type = { param1.fp_type with et_type = ty1 } }
-          in
-          let ty2 = MakeType.nullable_decl r2 (r2, Tgeneric "Tk") in
-          let param2 =
-            { param2 with fp_type = { param2.fp_type with et_type = ty2 } }
-          in
-          let rret = fst fty.ft_ret.et_type in
-          let ret = MakeType.nullable_decl rret (rret, Tgeneric "Tv") in
-          ([param1; param2], ret)
-        | 3 ->
-          let param2 =
-            {
-              param2 with
-              fp_type =
-                MakeType.unenforced
-                  (MakeType.nullable_decl r2 (r2, Tgeneric "Tk"));
-            }
-          in
-          let param3 =
-            { param3 with fp_type = MakeType.unenforced (r3, Tgeneric "Tv") }
-          in
-          let ret = (fst fty.ft_ret.et_type, Tgeneric "Tv") in
-          ([param1; param2; param3], ret)
-        | _ -> (fty.ft_params, fty.ft_ret.et_type)
-      in
-      let fty =
-        {
-          fty with
-          ft_params = params;
-          ft_ret = { fty.ft_ret with et_type = ret };
-        }
-      in
-      let ety_env = Phase.env_with_self env in
-      let (env, fty) =
-        Phase.(
-          localize_ft
-            ~instantiation:
-              { use_pos = p; use_name = "idx"; explicit_targs = [] }
-            ~ety_env
-            env
-            fty)
-      in
-      let tfun = (Reason.Rwitness fty.ft_pos, Tfun fty) in
-      let (env, (tel, _tuel, ty)) = call ~expected p env tfun el [] in
-      make_call env (Tast.make_typed_expr fpos tfun (T.Id id)) [] tel [] ty
-    | None -> unbound_name env id e)
   (* Special function `Shapes::idx` *)
   | Class_const (((_, CI (_, shapes)) as class_id), ((_, idx) as method_id))
     when shapes = SN.Shapes.cShapes && idx = SN.Shapes.idx ->
@@ -5455,12 +5383,12 @@ and dispatch_call
       ty
   (* Function invocation *)
   | Fun_id x ->
-    let (env, fty) = fun_type_of_id env x tal in
+    let (env, fty) = fun_type_of_id env x tal el in
     let env = check_coroutine_call env fty in
     let (env, (tel, tuel, ty)) = call ~expected p env fty el uel in
     make_call env (Tast.make_typed_expr fpos fty (T.Fun_id x)) tal tel tuel ty
   | Id ((_, id) as x) ->
-    let (env, fty) = fun_type_of_id env x tal in
+    let (env, fty) = fun_type_of_id env x tal el in
     let env = check_coroutine_call env fty in
     let (env, (tel, tuel, ty)) = call ~expected p env fty el uel in
     let is_mutable = id = SN.Rx.mutable_ in
@@ -5503,12 +5431,18 @@ and dispatch_call
     let (env, (tel, tuel, ty)) = call ~expected p env fty el uel in
     make_call env te tal tel tuel ty
 
-and fun_type_of_id env x tal =
+and fun_type_of_id env x tal el =
   match get_fun env (snd x) with
   | None ->
     let (env, _, ty) = unbound_name env x (Pos.none, Aast.Null) in
     (env, ty)
   | Some decl_fty ->
+    let decl_fty =
+      Typing_special_fun.transform_special_fun_ty
+        decl_fty
+        (snd x)
+        (List.length el)
+    in
     let ety_env = Phase.env_with_self env in
     let tal = List.map ~f:(Decl_hint.hint env.decl_env) tal in
     let decl_fty =

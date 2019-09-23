@@ -1618,11 +1618,15 @@ String string_number_format(double d, int dec,
   d = php_math_round(d, dec);
 
   // departure from PHP: we got rid of dependencies on spprintf() here.
+  // This actually means 63 bytes for characters + 1 byte for '\0'
   String tmpstr(63, ReserveString);
   tmpbuf = tmpstr.mutableData();
   tmplen = snprintf(tmpbuf, 64, "%.*F", dec, d);
+  // From the man page of snprintf, the return value is:
+  // The number of characters that would have been written if n had been
+  // sufficiently large, not counting the terminating null character.
   if (tmplen < 0) return empty_string();
-  if (tmpbuf == nullptr || !isdigit((int)tmpbuf[0])) {
+  if (tmplen < 64 && (tmpbuf == nullptr || !isdigit((int)tmpbuf[0]))) {
     tmpstr.setSize(tmplen);
     return tmpstr;
   }

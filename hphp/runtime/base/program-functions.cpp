@@ -837,15 +837,14 @@ hugifyText(char* from, char* to) {
   }
   size_t sz = to - from;
 
+#ifdef FACEBOOK
   if (RuntimeOption::EvalNewTHPHotText) {
     auto const hasKernelSupport = [] () -> bool {
       KernelVersion version;
       if (version.m_major < 5) return false;
       if (version.m_major > 5) return true;
       if (version.m_minor > 2) return true;
-#ifdef FACEBOOK
-      if ((version.m_minor == 2) && (version.m_minor >= 9)) return true;
-#endif
+      if ((version.m_minor == 2) && (version.m_fbk >= 1)) return true;
       return false;
     };
     if (hasKernelSupport()) {
@@ -858,6 +857,7 @@ hugifyText(char* from, char* to) {
       return;
     }
   }
+#endif
 
   void* mem = malloc(sz);
   memcpy(mem, from, sz);

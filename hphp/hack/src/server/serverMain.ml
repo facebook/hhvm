@@ -1332,7 +1332,7 @@ let daemon_main
   ServerProgress.make_pipe_to_monitor default_out_fd;
 
   (* Restore the root directory and other global states from monitor *)
-  ServerGlobalState.restore state;
+  ServerGlobalState.restore state 0;
 
   (* Restore hhi files every time the server restarts
     in case the tmp folder changes *)

@@ -1,6 +1,8 @@
 open Core_kernel
 
-let entry = WorkerController.register_entry_point ~restore:(fun () -> ())
+let entry =
+  WorkerController.register_entry_point ~restore:(fun () ~(worker_id : int) ->
+      Hh_logger.set_id (Printf.sprintf "worker_test %d" worker_id))
 
 let num_workers = 2
 

@@ -20,7 +20,9 @@ module Ids =
       let description = ""
     end)
 
-let entry = WorkerController.register_entry_point ~restore:(fun () -> ())
+let entry =
+  WorkerController.register_entry_point ~restore:(fun () ~(worker_id : int) ->
+      Hh_logger.set_id (Printf.sprintf "test_workers %d" worker_id))
 
 let () =
   Daemon.check_entry_point ();

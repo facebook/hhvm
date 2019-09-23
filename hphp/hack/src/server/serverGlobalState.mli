@@ -11,6 +11,8 @@ type t
 
 val save : logging_init:(unit -> unit) -> t
 
-val restore : t -> unit
+val worker_id_str : worker_id:int -> string
+
+val restore : t -> worker_id:int -> unit
 
 val to_string : t -> string

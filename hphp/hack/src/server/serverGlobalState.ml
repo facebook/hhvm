@@ -36,7 +36,14 @@ let save ~logging_init =
     logging_init;
   }
 
-let restore state =
+let worker_id_str ~(worker_id : int) =
+  if worker_id = 0 then
+    "master"
+  else
+    Printf.sprintf "worker-%d" worker_id
+
+let restore state ~(worker_id : int) =
+  Hh_logger.set_id (worker_id_str ~worker_id);
   Relative_path.(set_path_prefix Root state.saved_root);
   Relative_path.(set_path_prefix Hhi state.saved_hhi);
   Relative_path.(set_path_prefix Tmp state.saved_tmp);

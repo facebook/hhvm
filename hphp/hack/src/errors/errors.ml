@@ -1527,11 +1527,13 @@ let invalid_mutability_in_return_type_hint pos =
     pos
     "OwnedMutable is the only mutability related hint allowed in return type annotation for reactive function types."
 
-let pu_duplication pos name kind =
+let pu_duplication pos kind name seen =
+  let name = Utils.strip_ns name in
+  let seen = Utils.strip_ns seen in
   add
     (Naming.err_code Naming.PocketUniversesDuplication)
     pos
-    (sprintf "[PocketUniverses] %s (%s) is declared multiple times." name kind)
+    (sprintf "Pocket Universe %s %s is already declared in %s" kind name seen)
 
 let illegal_use_of_dynamically_callable attr_pos meth_pos visibility =
   add_list

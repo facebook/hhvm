@@ -1,0 +1,10 @@
+File "dup_parent_type.bad.php--file1.php", line 10, characters 15-15:
+Pocket Universe case type C:@F:@T is already declared in A:@F (Naming[2101])
+File "dup_parent_type.bad.php--file1.php", line 10, characters 15-15:
+Pocket Universe case type C:@F:@T is already declared in B:@F (Naming[2101])
+File "dup_parent_type.bad.php--file1.php", line 11, characters 12-14:
+Pocket Universe case value C:@F::foo is already declared in B:@F (Naming[2101])
+File "dup_parent_type.bad.php--file2.php", line 5, characters 15-15:
+Pocket Universe case type B:@F:@T is already declared in A:@F (Naming[2101])
+File "dup_parent_type.bad.php--file2.php", line 7, characters 17-19:
+Pocket Universe case value B:@F::key is already declared in A:@F (Naming[2101])

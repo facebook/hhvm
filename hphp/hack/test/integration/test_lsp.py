@@ -369,11 +369,6 @@ class TestLsp(TestCase[LspTestDriver]):
         variables = self.setup_php_file("completion.php")
         self.load_and_run("completion_legacy", variables)
 
-    def test_definition(self) -> None:
-        self.prepare_server_environment()
-        variables = self.setup_php_file("definition.php")
-        self.load_and_run("definition", variables)
-
     def test_serverless_ide_definition(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("definition.php"))

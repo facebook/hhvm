@@ -262,12 +262,6 @@ impl<'a> Env<'a> {
         RefMut::map(self.state.borrow_mut(), |s| &mut s.lowpri_errors)
     }
 
-    fn clone_non_tls(&self) -> Self {
-        let mut cloned = self.clone();
-        cloned.top_level_statements = false;
-        cloned
-    }
-
     fn top_docblock(&self) -> Ref<Option<DocComment>> {
         Ref::map(self.state.borrow(), |s| {
             s.doc_comments.last().unwrap_or(&None)
@@ -290,6 +284,24 @@ impl<'a> Env<'a> {
 
     fn pos_none(&self) -> &Pos {
         &self.pos_none
+    }
+
+    fn clone_and_unset_toplevel_if_toplevel<'b, 'c>(
+        e: &'b mut Env<'c>,
+    ) -> impl AsMut<Env<'c>> + 'b {
+        if e.top_level_statements {
+            let mut cloned = e.clone();
+            cloned.top_level_statements = false;
+            Either::Left(cloned)
+        } else {
+            Either::Right(e)
+        }
+    }
+}
+
+impl<'a> AsMut<Env<'a>> for Env<'a> {
+    fn as_mut(&mut self) -> &mut Env<'a> {
+        self
     }
 }
 
@@ -1237,8 +1249,8 @@ where
                 let (body, yield_) = if !c.lambda_body.is_compound_statement() {
                     Self::mp_yielding(&Self::p_function_body, &c.lambda_body, env)?
                 } else {
-                    let env1 = &mut env.clone_non_tls();
-                    Self::mp_yielding(&Self::p_function_body, &c.lambda_body, env1)?
+                    let mut env1 = Env::clone_and_unset_toplevel_if_toplevel(env);
+                    Self::mp_yielding(&Self::p_function_body, &c.lambda_body, env1.as_mut())?
                 };
                 let external = c.lambda_body.is_external();
                 let fun = aast::Fun_ {
@@ -1855,10 +1867,10 @@ where
                     &c.anonymous_async_keyword,
                     &c.anonymous_coroutine_keyword,
                 );
-                let mut env1 = env.clone();
-                env1.top_level_statements = false;
-                let (body, yield_) =
-                    Self::mp_yielding(&Self::p_function_body, &c.anonymous_body, &mut env1)?;
+                let (body, yield_) = {
+                    let mut env1 = Env::clone_and_unset_toplevel_if_toplevel(env);
+                    Self::mp_yielding(&Self::p_function_body, &c.anonymous_body, env1.as_mut())?
+                };
                 let doc_comment =
                     Self::extract_docblock(node, env).or_else(|| env.top_docblock().clone());
                 let user_attributes = Self::p_user_attributes(&c.anonymous_attribute_spec, env)?;
@@ -4058,7 +4070,8 @@ where
                 let function_attribute_spec = &child.function_attribute_spec;
                 let function_declaration_header = &child.function_declaration_header;
                 let function_body = &child.function_body;
-                let env = &mut env.clone_non_tls();
+                let mut env = Env::clone_and_unset_toplevel_if_toplevel(env);
+                let env = env.as_mut();
                 let allowed_kinds =
                     modifier::KindSet::from_kinds(&[modifier::ASYNC, modifier::COROUTINE]);
                 let modifier_checker =
@@ -4105,7 +4118,8 @@ where
                 })])
             }
             ClassishDeclaration(c) if Self::contains_class_body(c) => {
-                let env = &mut env.clone_non_tls();
+                let mut env = Env::clone_and_unset_toplevel_if_toplevel(env);
+                let env = env.as_mut();
                 let mode = Self::mode_annotation(env.file_mode());
                 let user_attributes = Self::p_user_attributes(&c.classish_attribute, env)?;
                 let kinds = Self::p_kinds(&c.classish_modifiers, env)?;
@@ -4328,7 +4342,8 @@ where
                 let name = &c.namespace_name;
                 let defs = match &c.namespace_body.syntax {
                     NamespaceBody(c) => {
-                        let env1 = &mut env.clone_non_tls();
+                        let mut env1 = Env::clone_and_unset_toplevel_if_toplevel(env);
+                        let env1 = env1.as_mut();
                         itertools::concat(
                             Self::as_list(&c.namespace_declarations)
                                 .iter()

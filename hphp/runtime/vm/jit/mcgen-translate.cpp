@@ -219,7 +219,7 @@ void retranslateAll() {
           Logger::Error(errMsg);
         }
         if (mode == JitSerdesMode::SerializeAndExit) {
-          raise(SIGTERM);
+          HttpServer::Server->stop();
           return true;
         }
       }

@@ -527,7 +527,10 @@ module LowererTest_ = struct
       (Errors.get_hh_fixme_pos := (fun _ _ -> None));
       (Errors.is_hh_fixme_disallowed := (fun _ _ -> false));
       let ast = OcamlLowerer.from_text env source_text in
-      let aast = Ast_to_aast.convert_program i () () () ast.OcamlLowerer.ast in
+      let (_err, aast) =
+        Errors.do_ (fun () ->
+            Ast_to_aast.convert_program i () () () ast.OcamlLowerer.ast)
+      in
       Tree aast
     with e -> Crash (Caml.Printexc.to_string e)
 

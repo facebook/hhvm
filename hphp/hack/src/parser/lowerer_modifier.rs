@@ -85,4 +85,8 @@ impl KindSet {
     pub fn has_any(&self, set: KindSet) -> bool {
         self.0 & set.0 > 0
     }
+
+    pub fn is_empty(&self) -> bool {
+        self.0 == 0
+    }
 }

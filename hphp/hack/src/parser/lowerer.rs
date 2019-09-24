@@ -4068,12 +4068,12 @@ where
                             if !kinds.has_any(modifier::USE_AS_VISIBILITY) {
                                 Self::raise_parsing_error(n, e, &syntax_error::trait_alias_rule_allows_only_final_and_visibility_modifiers);
                             }
-                            let vis = if !kinds.has_any(modifier::VISIBILITIES) {
+                            let vis = if kinds.is_empty() || kinds.has_any(modifier::VISIBILITIES) {
+                                vis_raw
+                            } else {
                                 let mut v = vec![aast::UseAsVisibility::UseAsPublic];
                                 v.append(&mut vis_raw);
                                 v
-                            } else {
-                                vis_raw
                             };
                             let aliased_name = if !aliased_name.is_missing() {
                                 Some(Self::pos_name(aliased_name, e)?)

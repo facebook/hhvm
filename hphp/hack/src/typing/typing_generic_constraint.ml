@@ -54,14 +54,14 @@ let check_constraint env ck ty ~cstr_ty =
        * constraint type. *)
       TUtils.sub_type env ecstr_ty ty Errors.unify_error
 
-let add_check_constraint_todo (env : env) ~use_pos (pos, name) ck cstr_ty ty =
+let check_tparams_constraint (env : env) ~use_pos (pos, name) ck cstr_ty ty =
   Errors.try_
     (fun () -> check_constraint env ck ty ~cstr_ty)
     (fun l ->
       Errors.explain_constraint ~use_pos ~definition_pos:pos ~param_name:name l;
       env)
 
-let add_check_where_constraint_todo
+let check_where_constraint
     ~in_class (env : env) ~use_pos ~definition_pos ck cstr_ty ty =
   Errors.try_
     (fun () -> check_constraint env ck ty ~cstr_ty)
@@ -104,7 +104,7 @@ let handle_eq_tconst_constraint env ck ty cstr_ty =
     List.fold tys ~init:env ~f:(fun env ty_ ->
         check_constraint env ck ty_ ~cstr_ty:ty)
 
-let add_check_tconst_where_constraint_todo
+let check_tconst_where_constraint
     (env : env) ~use_pos ~definition_pos ck ty_from_env cstr_ty ty =
   Errors.try_
     (fun () ->

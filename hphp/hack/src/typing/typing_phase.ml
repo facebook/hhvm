@@ -503,12 +503,6 @@ and localize_ft ?instantiation ~ety_env env ft =
  * Then the constraints are satisfied, because
  *   C is a subtype of MyContravariant<C>
  *   I is a supertype of C
- *
- * In fact, the constraint checking isn't done immediately, but rather pushed
- * onto the env.todo list. Typically we haven't resolved types sufficiently
- * (e.g. we have completely unresolved type variables) and so the actual
- * constraint checking is deferred until we have finished checking a
- * function's body.
  *)
 and check_tparams_constraints ~use_pos ~ety_env env tparams =
   let check_tparam_constraints env t =
@@ -523,10 +517,10 @@ and check_tparams_constraints ~use_pos ~ety_env env tparams =
                   env
                   [
                     Log_head
-                      ( "check_tparams_constraints: add_check_constraint_todo",
+                      ( "check_tparams_constraints: check_tparams_constraint",
                         [Log_type ("ty", ty); Log_type ("x_ty", x_ty)] );
                   ]));
-          TGenConstraint.add_check_constraint_todo
+          TGenConstraint.check_tparams_constraint
             env
             ~use_pos
             t.tp_name
@@ -549,7 +543,7 @@ and check_where_constraints
       in
       if contains_type_access then
         let ty_from_env = localize ~ety_env in
-        TGenConstraint.add_check_tconst_where_constraint_todo
+        TGenConstraint.check_tconst_where_constraint
           env
           ~use_pos
           ~definition_pos
@@ -560,7 +554,7 @@ and check_where_constraints
       else
         let (env, ty1) = localize ~ety_env env ty1 in
         let (env, ty2) = localize ~ety_env env ty2 in
-        TGenConstraint.add_check_where_constraint_todo
+        TGenConstraint.check_where_constraint
           ~in_class
           env
           ~use_pos

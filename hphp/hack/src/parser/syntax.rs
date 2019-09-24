@@ -228,6 +228,14 @@ where
         self.kind() == SyntaxKind::CompoundStatement
     }
 
+    pub fn is_xhp_open(&self) -> bool {
+        self.kind() == SyntaxKind::XHPOpen
+    }
+
+    pub fn is_braced_expression(&self) -> bool {
+        self.kind() == SyntaxKind::BracedExpression
+    }
+
     pub fn syntax_node_to_list<'a>(&'a self) -> impl DoubleEndedIterator<Item = &'a Self> {
         use std::iter::{empty, once};
         match &self.syntax {
@@ -264,7 +272,7 @@ where
         std::mem::replace(&mut self.syntax, Syntax::from_children(kind, children));
     }
 
-    fn get_token(&self) -> Option<&T> {
+    pub fn get_token(&self) -> Option<&T> {
         match &self.syntax {
             SyntaxVariant::Token(t) => Some(&t),
             _ => None,

@@ -45,3 +45,9 @@ impl<Fb, En, Hi> Expr<Pos, Fb, En, Hi> {
         Self::new(p.clone(), Expr_::Lvar(Lid(p.clone(), (0, String::from(n)))))
     }
 }
+
+impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
+    pub fn make_string(s: Vec<u8>) -> Self {
+        Expr_::String(unsafe { String::from_utf8_unchecked(s) })
+    }
+}

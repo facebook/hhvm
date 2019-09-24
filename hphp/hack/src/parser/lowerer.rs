@@ -4,23 +4,20 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use escaper::*;
+use itertools::{Either, Either::Left, Either::Right};
+use naming_special_names_rust::{special_functions, special_idents};
+use ocamlvalue_macro::Ocamlvalue;
 use oxidized::{
     aast, aast_defs, ast_defs, doc_comment::DocComment, file_info, global_options::GlobalOptions,
     namespace_env::Env as NamespaceEnv, pos::Pos, prim_defs::Comment, s_map,
 };
-
-use naming_special_names_rust::{special_functions, special_idents};
-
 use parser_rust::{
     indexed_source_text::IndexedSourceText, lexable_token::LexablePositionedToken,
     positioned_syntax::PositionedSyntaxTrait, source_text::SourceText, syntax::*, syntax_error,
     syntax_kind, syntax_trait::SyntaxTrait, token_kind::TokenKind as TK,
 };
-
-use escaper::*;
-
-use ocamlvalue_macro::Ocamlvalue;
-
+use regex::bytes::Regex;
 use std::{
     cell::{Ref, RefCell, RefMut},
     collections::HashSet,
@@ -31,8 +28,6 @@ use std::{
 };
 
 use crate::lowerer_modifier as modifier;
-
-use itertools::Either;
 
 macro_rules! not_impl {
     () => {
@@ -585,6 +580,31 @@ where
             "''" | "\"\"" => Ok(String::from("")),
             _ => Ok(unesc_s),
         }
+    }
+
+    // TODO: return Cow<[u8]>
+    fn unesc_xhp(s: &[u8]) -> Vec<u8> {
+        lazy_static! {
+            static ref WHITESPACE: Regex = Regex::new("[\x20\t\n\r\x0c]+").unwrap();
+        }
+        WHITESPACE.replace_all(s, &b" "[..]).into_owned()
+    }
+
+    fn unesc_xhp_attr(s: &[u8]) -> Vec<u8> {
+        // TODO: change unesc_dbl to &[u8] -> Vec<u8>
+        let r = Self::get_quoted_content(s);
+        let r = unsafe { std::str::from_utf8_unchecked(r) };
+        Self::unesc_dbl(r).unwrap().into_bytes()
+    }
+
+    fn get_quoted_content(s: &[u8]) -> &[u8] {
+        lazy_static! {
+            static ref QUOTED: Regex = Regex::new(r#"^[\x20\t\n\r\x0c]*"((?:.|\n)*)""#).unwrap();
+        }
+        QUOTED
+            .captures(s)
+            .map_or(None, |c| c.get(1))
+            .map_or(s, |m| m.as_bytes())
     }
 
     fn as_list(node: &Syntax<T, V>) -> Vec<&Syntax<T, V>> {
@@ -2115,7 +2135,28 @@ where
                     vec![],
                 ))
             }
-            XHPExpression(c) => not_impl!(),
+            XHPExpression(c) if c.xhp_open.is_xhp_open() => {
+                if let XHPOpen(c1) = &c.xhp_open.syntax {
+                    let name = Self::pos_name(&c1.xhp_open_name, env)?;
+                    let attrs = Self::could_map(Self::p_xhp_attr, &c1.xhp_open_attributes, env)?;
+                    let exprs = Self::aggregate_xhp_tokens(&c.xhp_body)?
+                        .iter()
+                        .map(|n| match n {
+                            Either::Left(n) => Self::p_xhp_embedded(Self::unesc_xhp, &n, env),
+                            Either::Right(n) => Self::p_xhp_embedded(Self::unesc_xhp, n, env),
+                        })
+                        .collect::<std::result::Result<Vec<_>, _>>()?;
+
+                    Ok(E_::Xml(
+                        // TODO: update pos_name to support prefix
+                        ast_defs::Id(name.0, String::from(":") + &name.1),
+                        attrs,
+                        exprs,
+                    ))
+                } else {
+                    Self::failwith("expect xhp open")
+                }
+            }
             PocketAtomExpression(c) => Ok(E_::PUAtom(
                 Self::pos_name(&c.pocket_atom_expression, env)?.1,
             )),
@@ -2147,6 +2188,111 @@ where
             }
             _ => Self::missing_syntax(Some(E_::Null), "expression", node, env),
         }
+    }
+
+    fn p_xhp_embedded<F>(escaper: F, node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Expr<,>)
+    where
+        F: FnOnce(&[u8]) -> Vec<u8>,
+    {
+        if let Some(kind) = Self::token_kind(node) {
+            if env.codegen() && TK::XHPStringLiteral == kind {
+                let p = Self::p_pos(node, env);
+                /* for XHP string literals (attribute values) just extract
+                value from quotes and decode HTML entities  */
+                let text = html_entities::decode(&Self::get_quoted_content(
+                    node.full_text(env.source_text()),
+                ));
+                Ok(aast::Expr::new(p, aast::Expr_::make_string(text)))
+            } else if env.codegen() && TK::XHPBody == kind {
+                let p = Self::p_pos(node, env);
+                /* for XHP body - only decode HTML entities */
+                let text =
+                    html_entities::decode(&Self::unesc_xhp(node.full_text(env.source_text())));
+                Ok(aast::Expr::new(p, aast::Expr_::make_string(text)))
+            } else {
+                let p = Self::p_pos(node, env);
+                let s = escaper(node.full_text(env.source_text()));
+                Ok(aast::Expr::new(p, aast::Expr_::make_string(s)))
+            }
+        } else {
+            let expr = Self::p_expr(node, env)?;
+            match *expr.1 {
+                aast::Expr_::BracedExpr(e) => Ok(e),
+                _ => Ok(expr),
+            }
+        }
+    }
+
+    fn p_xhp_attr(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(XhpAttribute<,>) {
+        match &node.syntax {
+            XHPSimpleAttribute(c) => {
+                let attr_expr = &c.xhp_simple_attribute_expression;
+                let name = Self::p_pstring(&c.xhp_simple_attribute_name, env)?;
+                let expr = if attr_expr.is_braced_expression()
+                    && env.file_mode() == file_info::Mode::Mdecl
+                    && !env.codegen()
+                {
+                    aast::Expr::new(env.pos_none().clone(), aast::Expr_::Null)
+                } else {
+                    Self::p_xhp_embedded(Self::unesc_xhp_attr, attr_expr, env)?
+                };
+                Ok(aast::XhpAttribute::XhpSimple(name, expr))
+            }
+            XHPSpreadAttribute(c) => {
+                let expr =
+                    Self::p_xhp_embedded(Self::unesc_xhp, &c.xhp_spread_attribute_expression, env)?;
+                Ok(aast::XhpAttribute::XhpSpread(expr))
+            }
+            _ => Self::missing_syntax(None, "XHP attribute", node, env),
+        }
+    }
+
+    fn aggregate_xhp_tokens<'b>(
+        nodes: &'b Syntax<T, V>,
+    ) -> ret!(Vec<Either<Syntax<T, V>, &'b Syntax<T, V>>>) {
+        let nodes = Self::as_list(nodes);
+        let mut state = (None, None, vec![]); // (start, end, result)
+        let combine = |state: &mut (
+            Option<&'b Syntax<T, V>>,
+            Option<&'b Syntax<T, V>>,
+            Vec<Either<Syntax<T, V>, &'b Syntax<T, V>>>,
+        )| {
+            match (state.0, state.1) {
+                (Some(s), None) => state.2.push(Right(s)),
+                (Some(s), Some(e)) => {
+                    let token = T::concatenate(s.get_token().unwrap(), e.get_token().unwrap())
+                        .map_err(Error::Failwith)?;
+                    let node = <Syntax<T, V>>::make_token(token);
+                    state.2.push(Left(node))
+                }
+                _ => {}
+            }
+            state.0 = None;
+            state.1 = None;
+            Ok(())
+        };
+        for n in nodes {
+            match &n.syntax {
+                Token(t) if t.kind() == TK::XHPComment => {
+                    if state.0.is_some() {
+                        combine(&mut state)?;
+                    }
+                }
+                Token(t) => {
+                    if state.0.is_none() {
+                        state.0 = Some(n)
+                    } else {
+                        state.1 = Some(n)
+                    }
+                }
+                _ => {
+                    combine(&mut state)?;
+                    state.2.push(Right(n));
+                }
+            }
+        }
+        combine(&mut state)?;
+        Ok(state.2)
     }
 
     fn p_bop(

@@ -47,4 +47,5 @@ where
     fn clone_value(&self) -> Self;
     fn trim_left(&mut self, n: usize) -> Result<(), String>;
     fn trim_right(&mut self, n: usize) -> Result<(), String>;
+    fn concatenate(s: &Self, e: &Self) -> Result<Self, String>;
 }

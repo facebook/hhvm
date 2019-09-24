@@ -178,20 +178,32 @@ impl<'a> LexablePositionedToken<'a> for PositionedToken {
     // TODO: PositionedToken auto derives Clone trait, and it also
     // has clone_rc(..), two are the same.
     fn clone_value(&self) -> Self {
-        Self(Rc::new(self.0.as_ref().clone()))
+        let mut inner = self.0.as_ref().clone();
+        inner.ocamlpool_generation = 0;
+        inner.ocamlpool_forward_pointer = 0;
+        Self(Rc::new(inner))
     }
 
     fn trim_left(&mut self, n: usize) -> Result<(), String> {
-        let inner = Rc::get_mut(&mut self.0).ok_or("could not mutable")?;
+        let inner = Rc::get_mut(&mut self.0).ok_or("could not get mutable")?;
         inner.leading_width = inner.leading_width + n;
         inner.width = inner.width - n;
         Ok(())
     }
 
     fn trim_right(&mut self, n: usize) -> Result<(), String> {
-        let inner = Rc::get_mut(&mut self.0).ok_or("could not mutable")?;
+        let inner = Rc::get_mut(&mut self.0).ok_or("could not get mutable")?;
         inner.trailing_width = inner.trailing_width + n;
         inner.width = inner.width - n;
         Ok(())
+    }
+
+    fn concatenate(s: &Self, e: &Self) -> Result<Self, String> {
+        let mut t = s.clone_value();
+        let inner = Rc::get_mut(&mut t.0).ok_or("could not get mutable")?;
+        inner.width = e.end_offset() + 1 - s.start_offset();
+        inner.trailing_width = e.trailing_width();
+        inner.trailing = e.trailing().to_vec();
+        Ok(t)
     }
 }

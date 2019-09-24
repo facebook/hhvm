@@ -272,6 +272,7 @@ pub trait PositionedSyntaxTrait: SyntaxTrait {
      */
     fn position_exclusive(&self, source_text: &IndexedSourceText) -> Option<Pos>;
     fn text<'a>(&self, source_text: &'a SourceText) -> &'a str;
+    fn full_text<'a>(&self, source_text: &'a SourceText) -> &'a [u8];
     fn leading_text<'a>(&self, source_text: &'a SourceText) -> &'a str;
 }
 
@@ -294,6 +295,10 @@ impl PositionedSyntaxTrait for PositionedSyntax {
 
     fn text<'a>(&self, source_text: &'a SourceText) -> &'a str {
         source_text.sub_as_str(self.start_offset(), self.width())
+    }
+
+    fn full_text<'a>(&self, source_text: &'a SourceText) -> &'a [u8] {
+        source_text.sub(self.leading_start_offset(), self.full_width())
     }
 
     fn leading_text<'a>(&self, source_text: &'a SourceText) -> &'a str {

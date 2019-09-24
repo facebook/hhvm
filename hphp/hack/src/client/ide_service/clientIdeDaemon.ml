@@ -579,8 +579,14 @@ let serve
               let%lwt () = write_message ~out_fd ~message:response in
               Lwt.return state
           with e ->
-            let stack = Printexc.get_backtrace () in
-            Hh_logger.exc ~prefix:"[ide-daemon] exception: " ~stack e;
+            let e = Exception.wrap e in
+            let message = Exception.to_string e in
+            log "Exception: %s" message;
+
+            (* If we were responding to a message, but threw an exception, write
+            that exception as a response. *)
+            let response = ClientIdeMessage.Response (Error message) in
+            let%lwt () = write_message ~out_fd ~message:response in
             Lwt.return t.state
         in
         handle_messages { t with state })

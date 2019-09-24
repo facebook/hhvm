@@ -44,7 +44,7 @@ class UConverter implements IDisposable {
   public function fromUCallback(int $reason,
                                 array $source,
                                 int $codePoint,
-                                int &$error): mixed {
+                                inout int $error): mixed {
     switch ($reason) {
       case self::REASON_UNASSIGNED:
       case self::REASON_ILLEGAL:
@@ -249,7 +249,7 @@ class UConverter implements IDisposable {
   public function toUCallback(int $reason,
                               ?string $source,
                               ?string $codeUnits,
-                              int &$error): mixed {
+                              inout int $error): mixed {
     switch ($reason) {
       case self::REASON_UNASSIGNED:
       case self::REASON_ILLEGAL:

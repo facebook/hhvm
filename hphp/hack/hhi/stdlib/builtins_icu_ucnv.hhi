@@ -60,8 +60,8 @@ class UConverter {
   public function getDestinationType();
   public function getSubstChars();
   public function setSubstChars(string $chars);
-  public function fromUCallback(int $reason, $source, int $codepoint, int &$error);
-  public function toUCallback(int $reason, $source, $codeunits, int &$error);
+  public function fromUCallback(int $reason, $source, int $codepoint, inout int $error);
+  public function toUCallback(int $reason, $source, $codeunits, inout int $error);
   public function convert(string $str, bool $reverse = false);
   static public function transcode(string $str, string $toEncoding, string $fromEncoding, $options = null);
   public function getErrorCode();

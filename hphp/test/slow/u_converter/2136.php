@@ -1,7 +1,7 @@
 <?hh
 
 class MyConverter extends UConverter {
-  public function toUCallback($reason, $source, $codeUnits, &$error) {
+  public function toUCallback($reason, $source, $codeUnits, inout $error) {
     $error = U_ZERO_ERROR;
     switch ($codeUnits) {
       case "\x80": return NULL;
@@ -10,7 +10,7 @@ class MyConverter extends UConverter {
       case "\x83": return array('c');
     }
   }
-  public function fromUCallback($reason, $source, $codePoint, &$error) {
+  public function fromUCallback($reason, $source, $codePoint, inout $error) {
     $error = U_ZERO_ERROR;
     switch ($codePoint) {
       case 0x00F1: return "A";

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_UNIQUE_STUBS_H_
-#define incl_HPHP_JIT_UNIQUE_STUBS_H_
+#pragma once
 
 #include "hphp/runtime/vm/hhbc.h"
 
@@ -374,8 +373,9 @@ struct UniqueStubs {
    *
    * enterTCExit is the address returned to when we leave the TC.
    */
-  void (*enterTCHelper)(Cell* sp, ActRec* fp, TCA start,
-                        ActRec* firstAR, void* tl, ActRec* stashedAR);
+  void (*enterTCHelper)(TCA start, ActRec* fp, void* tl, Cell* sp,
+                        ActRec* firstAR);
+  void (*enterTCAtPrologueHelper)(TCA start, ActRec* fp, void* tl);
   TCA enterTCExit;
 
   /*
@@ -484,12 +484,11 @@ void emitInterpReq(Vout& v, SrcKey sk, FPInvOffset spOff);
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Wrapper around the enterTCHelper stub, called from enterTC().
+ * Wrappers around the enterTC*Helper stubs, called from enterTC*().
  */
-void enterTCImpl(TCA start, ActRec* stashedAR);
+void enterTCImpl(TCA start);
+void enterTCAtPrologueImpl(TCA start, ActRec* calleeAR);
 
 ///////////////////////////////////////////////////////////////////////////////
 
 }}
-
-#endif

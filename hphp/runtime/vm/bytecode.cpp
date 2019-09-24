@@ -1590,7 +1590,7 @@ void enterVMAtPseudoMain(ActRec* enterFnAr, VarEnv* varEnv) {
     assert_flog(jit::tc::isValidCodeAddress(start),
                 "start = {} ; func = {} ({})\n",
                 start, enterFnAr->m_func, enterFnAr->m_func->fullName());
-    jit::enterTCAfterPrologue(start);
+    jit::enterTC(start);
   } else {
     dispatch();
   }
@@ -1616,7 +1616,7 @@ void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk,
     int na = enterFnAr->numArgs();
     if (na > np) na = np + 1;
     jit::TCA start = enterFnAr->m_func->getPrologue(na);
-    jit::enterTCAtPrologue(enterFnAr, start);
+    jit::enterTCAtPrologue(start, enterFnAr);
     return;
   }
 
@@ -1634,7 +1634,7 @@ void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk,
     assert_flog(jit::tc::isValidCodeAddress(start),
                 "start = {} ; func = {} ({})\n",
                 start, enterFnAr->m_func, enterFnAr->m_func->fullName());
-    jit::enterTCAfterPrologue(start);
+    jit::enterTC(start);
   } else {
     dispatch();
   }
@@ -1646,7 +1646,7 @@ void enterVMAtCurPC() {
   assertx(vmfp()->func()->contains(vmpc()));
   Stats::inc(Stats::VMEnter);
   if (RID().getJit()) {
-    jit::enterTC();
+    jit::enterTC(jit::tc::ustubs().resumeHelper);
   } else {
     dispatch();
   }

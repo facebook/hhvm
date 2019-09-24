@@ -29,9 +29,11 @@
 
 TRACE_SET_MOD(mcg);
 
-namespace HPHP { namespace jit { namespace detail {
+namespace HPHP { namespace jit {
 
-void enterTC(TCA start, ActRec* stashedAR) {
+namespace {
+
+ALWAYS_INLINE void preEnter(TCA start) {
   if (debug) {
     fflush(stdout);
     fflush(stderr);
@@ -48,11 +50,28 @@ void enterTC(TCA start, ActRec* stashedAR) {
   }
 
   tl_regState = VMRegState::DIRTY;
-  enterTCImpl(start, stashedAR);
+}
+
+ALWAYS_INLINE void postExit() {
   tl_regState = VMRegState::CLEAN;
   assertx(isValidVMStackAddress(vmsp()));
 
   vmfp() = nullptr;
 }
 
-}}}
+}
+
+void enterTC(TCA start) {
+  preEnter(start);
+  enterTCImpl(start);
+  postExit();
+}
+
+void enterTCAtPrologue(TCA start, ActRec* calleeAR) {
+  assertx(vmFirstAR() == calleeAR);
+  preEnter(start);
+  enterTCAtPrologueImpl(start, calleeAR);
+  postExit();
+}
+
+}}

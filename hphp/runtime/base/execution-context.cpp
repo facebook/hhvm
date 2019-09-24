@@ -1894,7 +1894,7 @@ void ExecutionContext::resumeAsyncFunc(Resumable* resumable,
     const bool useJit = RID().getJit();
     if (LIKELY(useJit && resumable->resumeAddr())) {
       Stats::inc(Stats::VMEnter);
-      jit::enterTCAfterPrologue(resumable->resumeAddr());
+      jit::enterTC(resumable->resumeAddr());
     } else {
       enterVMAtCurPC();
     }

@@ -832,6 +832,21 @@ TCA emitDecRefGeneric(CodeBlock& cb, DataBlock& data) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+namespace {
+
+void alignNativeStack(Vout& v, bool exit) {
+  switch (arch()) {
+    case Arch::X64:
+    case Arch::PPC64:
+      v << lea{rsp()[exit ? 8 : -8], rsp()};
+      break;
+    case Arch::ARM:
+      break;
+  }
+}
+
+}
+
 TCA emitEnterTCExit(CodeBlock& cb, DataBlock& data, UniqueStubs& /*us*/) {
   alignCacheLine(cb);
 
@@ -840,14 +855,7 @@ TCA emitEnterTCExit(CodeBlock& cb, DataBlock& data, UniqueStubs& /*us*/) {
     storeVMRegs(v);
 
     // Realign the native stack.
-    switch (arch()) {
-      case Arch::X64:
-      case Arch::PPC64:
-        v << lea{rsp()[8], rsp()};
-        break;
-      case Arch::ARM:
-        break;
-    }
+    alignNativeStack(v, true);
 
     // Store the return value on the top of the eval stack.  Whenever we get to
     // enterTCExit, we're semantically executing some PHP construct that sends
@@ -872,16 +880,14 @@ TCA emitEnterTCExit(CodeBlock& cb, DataBlock& data, UniqueStubs& /*us*/) {
 TCA emitEnterTCHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
   alignCacheLine(cb);
 
-  auto const sp       = rarg(0);
+  auto const start    = rarg(0);
   auto const fp       = rarg(1);
-  auto const start    = rarg(2);
-  auto const firstAR  = rarg(3);
+  auto const tl       = rarg(2);
+  auto const sp       = rarg(3);
 #ifdef _MSC_VER
-  auto const tl       = reg::r10;
-  auto const calleeAR = reg::r11;
+  auto const firstAR  = reg::r10;
 #else
-  auto const tl       = rarg(4);
-  auto const calleeAR = rarg(5);
+  auto const firstAR  = rarg(4);
 #endif
 
   return vwrap2(cb, cb, data, [&] (Vout& v, Vout& vc) {
@@ -894,7 +900,6 @@ TCA emitEnterTCHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
 #ifdef _MSC_VER
     // Windows hates argument registers.
     v << load{rsp()[0x28], reg::r10};
-    v << load{rsp()[0x30], reg::r11};
 #endif
 
     // Set up linkage with the top VM frame in this nesting.
@@ -902,36 +907,43 @@ TCA emitEnterTCHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
 
     // Set up the VM registers.
     v << copy{fp, rvmfp()};
+    v << copy{tl, rvmtl()};
     v << copy{sp, rvmsp()};
+
+    // Unalign the native stack.
+    alignNativeStack(v, false);
+
+    v << resumetc{start, us.enterTCExit, vm_regs_with_sp()};
+  });
+}
+
+TCA
+emitEnterTCAtPrologueHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
+  alignCacheLine(cb);
+
+  auto const start    = rarg(0);
+  auto const fp       = rarg(1);
+  auto const tl       = rarg(2);
+
+  return vwrap2(cb, cb, data, [&] (Vout& v, Vout& vc) {
+    // Architecture-specific setup for entering the TC.
+    v << inittc{};
+
+    // Native func prologue.
+    v << stublogue{arch() != Arch::PPC64};
+
+    // Set up linkage with the top VM frame in this nesting.
+    v << store{rsp(), fp[AROFF(m_sfp)]};
+
+    // Set up the VM registers.
+    v << copy{fp, rvmfp()};
     v << copy{tl, rvmtl()};
 
     // Unalign the native stack.
-    switch (arch()) {
-      case Arch::X64:
-      case Arch::PPC64:
-        v << lea{rsp()[-8], rsp()};
-        break;
-      case Arch::ARM:
-        break;
-    }
+    alignNativeStack(v, false);
 
-    // Check if `calleeAR' was set.
-    auto const sf = v.makeReg();
-    v << testq{calleeAR, calleeAR, sf};
-
-    // We mark this block as unlikely in order to coax the emitter into
-    // ordering this block last.  This is an important optimization for x64;
-    // without it, both the jcc for the branch and the jmp for the resumetc{}
-    // will end up in the same 16-byte extent of code, which messes up the
-    // branch predictor.
-    unlikelyIfThen(v, vc, CC_Z, sf, [&] (Vout& v) {
-      // No callee means we're resuming in the middle of a TC function.
-      v << resumetc{start, us.enterTCExit, vm_regs_with_sp()};
-    });
-
-    // We have a callee; set rvmfp() and call it.
-    v << copy{calleeAR, rvmfp()};
-    v << calltc{start, rvmfp(), us.enterTCExit, vm_regs_with_sp()};
+    // Set rvmfp() to the callee and call the prologue.
+    v << calltc{start, rvmfp(), us.enterTCExit, php_call_regs()};
   });
 }
 
@@ -1088,14 +1100,12 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
 
 #define ADD(name, v, stub) name = EMIT(#name, v, [&] { return (stub); })
   ADD(enterTCExit,   hotView(), emitEnterTCExit(hot(), data, *this));
-  enterTCHelper =
-    decltype(enterTCHelper)(
-      EMIT(
-        "enterTCHelper",
-        view,
-        [&] { return emitEnterTCHelper(main, data, *this); }
-      )
-    );
+  enterTCHelper = decltype(enterTCHelper)(
+    EMIT("enterTCHelper", view,
+      [&] { return emitEnterTCHelper(main, data, *this); }));
+  enterTCAtPrologueHelper = decltype(enterTCAtPrologueHelper)(
+    EMIT("enterTCAtPrologueHelper", view,
+      [&] { return emitEnterTCAtPrologueHelper(main, data, *this); }));
 
   // These guys are required by a number of other stubs.
   ADD(handleSRHelper, hotView(), emitHandleSRHelper(hot(), data));
@@ -1256,17 +1266,31 @@ void emitInterpReq(Vout& v, SrcKey sk, FPInvOffset spOff) {
 #ifdef __clang__
 NEVER_INLINE
 #endif
-void enterTCImpl(TCA start, ActRec* stashedAR) {
+void enterTCImpl(TCA start) {
+  assert_flog(tc::isValidCodeAddress(start), "start = {} ; func = {} ({})\n",
+              start, vmfp()->func(), vmfp()->func()->fullName());
+
   // We have to force C++ to spill anything that might be in a callee-saved
   // register (aside from rvmfp()), since enterTCHelper does not save them.
   CALLEE_SAVED_BARRIER();
   auto& regs = vmRegsUnsafe();
+  tc::ustubs().enterTCHelper(start, regs.fp, rds::tl_base, regs.stack.top(),
+                             vmFirstAR());
+  CALLEE_SAVED_BARRIER();
+}
 
+// see T39604764: inlining-specific issue that might also affect GCC
+#ifdef __clang__
+NEVER_INLINE
+#endif
+void enterTCAtPrologueImpl(TCA start, ActRec* calleeAR) {
   assert_flog(tc::isValidCodeAddress(start), "start = {} ; func = {} ({})\n",
-              start, stashedAR->func(), stashedAR->func()->fullName());
+              start, calleeAR->func(), calleeAR->func()->fullName());
 
-  tc::ustubs().enterTCHelper(regs.stack.top(), regs.fp, start,
-                              vmFirstAR(), rds::tl_base, stashedAR);
+  // We have to force C++ to spill anything that might be in a callee-saved
+  // register (aside from rvmfp()), since enterTCHelper does not save them.
+  CALLEE_SAVED_BARRIER();
+  tc::ustubs().enterTCAtPrologueHelper(start, calleeAR, rds::tl_base);
   CALLEE_SAVED_BARRIER();
 }
 

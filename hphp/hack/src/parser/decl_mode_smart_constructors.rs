@@ -207,7 +207,7 @@ where
         SyntaxVariant::CompoundStatement(children) => {
             let stmts = if saw_yield {
                 let token = Token::make(TokenKind::Yield, &st.source, 0, 0, vec![], vec![]);
-                let yield_ = Syntax::<Token, Value>::make_token(st, token);
+                let yield_ = Syntax::<Token, Value>::make_token(token);
                 Syntax::make_list(st, vec![yield_], 0)
             } else {
                 Syntax::make_missing(st, 0)

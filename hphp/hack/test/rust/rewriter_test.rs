@@ -6,11 +6,8 @@
 use oxidized::relative_path::{Prefix, RelativePath};
 
 use parser_core_types::{
-    lexable_token::LexableToken,
-    positioned_syntax::PositionedSyntax,
-    positioned_token::PositionedToken,
-    syntax::{Syntax, SyntaxTypeBase},
-    token_kind::TokenKind,
+    lexable_token::LexableToken, positioned_syntax::PositionedSyntax,
+    positioned_token::PositionedToken, syntax::Syntax, token_kind::TokenKind,
 };
 use parser_rust::{
     parser::Parser, parser_env::ParserEnv, rewriter::Rewriter, smart_constructors::NoState,
@@ -49,17 +46,14 @@ fn test_bracket_braces_swap() {
                 TokenKind::RightBrace => TokenKind::RightBracket,
                 _ => return Some(node),
             };
-            return Some(Syntax::make_token(
-                &(),
-                PositionedToken::make(
-                    replacement,
-                    &source,
-                    t.offset(),
-                    t.width(),
-                    t.leading().iter().map(|x| x.clone()).collect(),
-                    t.trailing().iter().map(|x| x.clone()).collect(),
-                ),
-            ));
+            return Some(Syntax::make_token(PositionedToken::make(
+                replacement,
+                &source,
+                t.offset(),
+                t.width(),
+                t.leading().iter().map(|x| x.clone()).collect(),
+                t.trailing().iter().map(|x| x.clone()).collect(),
+            )));
         }
         Some(node)
     };

@@ -72,9 +72,7 @@ where
     }
 
     fn make_token(_: &C, arg: T) -> Self {
-        let value = V::from_token(&arg);
-        let syntax = SyntaxVariant::Token(Box::new(arg));
-        Self::make(syntax, value)
+        Self::make_token(arg)
     }
 
     fn make_list(ctx: &C, arg: Vec<Self>, offset: usize) -> Self {
@@ -103,6 +101,12 @@ where
 {
     pub fn make(syntax: SyntaxVariant<T, V>, value: V) -> Self {
         Self { syntax, value }
+    }
+
+    pub fn make_token(arg: T) -> Self {
+        let value = V::from_token(&arg);
+        let syntax = SyntaxVariant::Token(Box::new(arg));
+        Self::make(syntax, value)
     }
 
     fn is_specific_token(&self, kind: TokenKind) -> bool {

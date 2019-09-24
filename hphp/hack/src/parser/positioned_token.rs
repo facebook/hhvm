@@ -170,4 +170,28 @@ impl<'a> LexablePositionedToken<'a> for PositionedToken {
     fn text<'b>(&self, source_text: &'b SourceText) -> &'b str {
         source_text.sub_as_str(self.start_offset(), self.width())
     }
+
+    fn text_raw<'b>(&self, source_text: &'b SourceText) -> &'b [u8] {
+        source_text.sub(self.start_offset(), self.width())
+    }
+
+    // TODO: PositionedToken auto derives Clone trait, and it also
+    // has clone_rc(..), two are the same.
+    fn clone_value(&self) -> Self {
+        Self(Rc::new(self.0.as_ref().clone()))
+    }
+
+    fn trim_left(&mut self, n: usize) -> Result<(), String> {
+        let inner = Rc::get_mut(&mut self.0).ok_or("could not mutable")?;
+        inner.leading_width = inner.leading_width + n;
+        inner.width = inner.width - n;
+        Ok(())
+    }
+
+    fn trim_right(&mut self, n: usize) -> Result<(), String> {
+        let inner = Rc::get_mut(&mut self.0).ok_or("could not mutable")?;
+        inner.trailing_width = inner.trailing_width + n;
+        inner.width = inner.width - n;
+        Ok(())
+    }
 }

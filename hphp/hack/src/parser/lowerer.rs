@@ -95,6 +95,14 @@ pub enum SuspensionKind {
     SKCoroutine,
 }
 
+#[derive(Copy, Clone, Eq, PartialEq)]
+pub enum TokenOp {
+    Skip,
+    Noop,
+    LeftTrim(usize),
+    RightTrim(usize),
+}
+
 #[derive(Debug)]
 pub struct FunHdr {
     fh_suspension_kind: SuspensionKind,
@@ -990,6 +998,160 @@ where
         }
     }
 
+    fn rfind(s: &[u8], mut i: usize, c: u8) -> ret!(usize) {
+        if i >= s.len() {
+            return Self::failwith("index out of range");
+        }
+        while {
+            if s[i] == c {
+                return Ok(i);
+            }
+            i -= 1;
+            i > 0
+        } {}
+        Self::failwith("char not found")
+    }
+
+    fn prep_string2(nodes: &[Syntax<T, V>], env: &mut Env) -> ret!((TokenOp, TokenOp)) {
+        use TokenOp::*;
+        let is_qoute = |c| c == b'\"' || c == b'`';
+        let start_is_qoute = |s: &[u8]| {
+            (s.len() > 0 && is_qoute(s[0])) || (s.len() > 1 && (s[0] == b'b' && s[1] == b'\"'))
+        };
+        let last_is_qoute = |s: &[u8]| s.len() > 0 && is_qoute(s[s.len() - 1]);
+        let is_heredoc = |s: &[u8]| (s.len() > 3 && &s[0..3] == b"<<<");
+        let mut nodes = nodes.iter();
+        let first = nodes.next();
+        match first.map(|n| &n.syntax) {
+            Some(Token(t)) => {
+                let raise = |env| {
+                    Self::raise_parsing_error(first.unwrap(), env, "Malformed String2 SyntaxList");
+                };
+                let text = t.text_raw(env.source_text());
+                if start_is_qoute(text) {
+                    let first_token_op = match text[0] {
+                        b'b' if text.len() > 2 => LeftTrim(2),
+                        _ if is_qoute(text[0]) && text.len() > 1 => LeftTrim(1),
+                        _ => Skip,
+                    };
+                    if let Some(Token(t)) = nodes.last().map(|n| &n.syntax) {
+                        let last_text = t.text_raw(env.source_text());
+                        if last_is_qoute(last_text) {
+                            let last_taken_op = match last_text.len() {
+                                n if n > 1 => RightTrim(1),
+                                _ => Skip,
+                            };
+                            return Ok((first_token_op, last_taken_op));
+                        }
+                    }
+                    raise(env);
+                    Ok((first_token_op, Noop))
+                } else if is_heredoc(text) {
+                    let trim_size = text
+                        .iter()
+                        .position(|c| *c == b'\n')
+                        .ok_or_else(|| Error::Failwith(String::from("newline not found")))?
+                        + 1;
+                    let first_token_op = match trim_size {
+                        _ if trim_size == text.len() => Skip,
+                        _ => LeftTrim(trim_size),
+                    };
+                    if let Some(Token(t)) = nodes.last().map(|n| &n.syntax) {
+                        let text = t.text_raw(env.source_text());
+                        let len = text.len();
+                        if len != 0 {
+                            let n = Self::rfind(text, len - 2, b'\n')?;
+                            let last_token_op = match n {
+                                0 => Skip,
+                                _ => RightTrim(len - n),
+                            };
+                            return Ok((first_token_op, last_token_op));
+                        }
+                    }
+                    raise(env);
+                    Ok((first_token_op, Noop))
+                } else {
+                    Ok((Noop, Noop))
+                }
+            }
+            _ => Ok((Noop, Noop)),
+        }
+    }
+
+    fn process_token_op(op: TokenOp, node: &Syntax<T, V>) -> ret!(Option<Syntax<T, V>>) {
+        use TokenOp::*;
+        match op {
+            LeftTrim(n) => match &node.syntax {
+                Token(t) => {
+                    let mut token = t.clone_value();
+                    token.trim_left(n).map_err(Error::Failwith)?;
+                    let node = <Syntax<T, V>>::make_token(token);
+                    Ok(Some(node))
+                }
+                _ => Self::failwith("Token expected"),
+            },
+            RightTrim(n) => match &node.syntax {
+                Token(t) => {
+                    let mut token = t.clone_value();
+                    token.trim_right(n).map_err(Error::Failwith)?;
+                    let node = <Syntax<T, V>>::make_token(token);
+                    Ok(Some(node))
+                }
+                _ => Self::failwith("Token expected"),
+            },
+            _ => Ok(None),
+        }
+    }
+
+    fn p_string2(nodes: &[Syntax<T, V>], env: &mut Env) -> ret!(Vec<aast!(Expr<,>)>) {
+        use TokenOp::*;
+        let (head_op, tail_op) = Self::prep_string2(nodes, env)?;
+        let mut result = Vec::with_capacity(nodes.len());
+        let mut i = 0;
+        let last = nodes.len() - 1;
+        while i <= last {
+            let op = match i {
+                0 => head_op,
+                _ if i == last => tail_op,
+                _ => Noop,
+            };
+
+            if op == Skip {
+                i += 1;
+                continue;
+            }
+
+            let node = Self::process_token_op(op, &nodes[i])?;
+            let node = node.as_ref().unwrap_or(&nodes[i]);
+
+            if Self::token_kind(node) == Some(TK::Dollar) && i < last {
+                if let EmbeddedBracedExpression(c) = &nodes[i + 1].syntax {
+                    Self::raise_parsing_error(
+                        &nodes[i + 1],
+                        env,
+                        &syntax_error::outside_dollar_str_interp,
+                    );
+
+                    result.push(Self::p_expr_with_loc(
+                        ExprLocation::InDoubleQuotedString,
+                        &nodes[i + 1],
+                        env,
+                    )?);
+                    i += 2;
+                    continue;
+                }
+            }
+
+            result.push(Self::p_expr_with_loc(
+                ExprLocation::InDoubleQuotedString,
+                node,
+                env,
+            )?);
+            i += 1;
+        }
+        Ok(result)
+    }
+
     fn p_expr_l(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Expr<,>) {
         Self::p_expr_l_with_loc(ExprLocation::TopLevel, node, env)
     }
@@ -1123,7 +1285,7 @@ where
                     _ => Self::missing_syntax(None, "literal", expr, env),
                 }
             }
-            SyntaxList(ts) => not_impl!(),
+            SyntaxList(ts) => Ok(aast::Expr_::String2(Self::p_string2(ts.as_slice(), env)?)),
             _ => Self::missing_syntax(None, "literal expressoin", expr, env),
         }
     }
@@ -1278,9 +1440,12 @@ where
             BracedExpression(c) => {
                 Self::p_expr_with_loc_(location, &c.braced_expression_expression, env)
             }
-            EmbeddedBracedExpression(c) => {
-                Self::p_expr_with_loc_(location, &c.embedded_braced_expression_expression, env)
-            }
+            EmbeddedBracedExpression(c) => Self::p_expr_impl_(
+                location,
+                &c.embedded_braced_expression_expression,
+                env,
+                Some(pos),
+            ),
             ParenthesizedExpression(c) => {
                 Self::p_expr_with_loc_(location, &c.parenthesized_expression_expression, env)
             }

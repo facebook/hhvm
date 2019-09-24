@@ -501,6 +501,7 @@ module LowererTest_ = struct
   type r =
     | Tree of (Ast_defs.pos, unit, unit, unit) Aast.program
     | Crash of string
+    | Skip
 
   let print_err path s =
     let oc = Pervasives.open_out path in
@@ -544,23 +545,39 @@ module LowererTest_ = struct
     let path = Relative_path.to_absolute file in
     Printf.printf "Start %s\n" path;
     flush stdout;
-    let ocaml_tree = build_ocaml_tree ocaml_env file source_text in
-    let rust_tree = build_rust_tree rust_env file source_text in
+    let ocaml_tree =
+      match args.mode with
+      | RUST -> Skip
+      | _ -> build_ocaml_tree ocaml_env file source_text
+    in
+    let rust_tree =
+      match args.mode with
+      | OCAML -> Skip
+      | _ -> build_rust_tree rust_env file source_text
+    in
     (match (ocaml_tree, rust_tree) with
     | (Tree ot, Tree rt) when ot = rt -> Printf.printf ":EQUAL: "
     | (Tree _, Tree _) -> Printf.printf ":NOT_EQUAL: "
-    | (Tree _, Crash _) -> Printf.printf ":OCAML_PASS: :RUST_CRASH: "
-    | (Crash _, Tree _) -> Printf.printf ":OCAML_CRASH: :RUST_PASS: "
-    | (Crash _, Crash _) -> Printf.printf ":OCAML_CRASH: :RUST_CRASH: ");
+    | (_, _) -> ());
+    (match ocaml_tree with
+    | Tree _ -> Printf.printf ":OCAML_PASS: "
+    | Crash e -> Printf.printf ":OCAML_CRASH(%s): " e
+    | Skip -> Printf.printf ":OCAML_SKIP: ");
+    (match rust_tree with
+    | Tree _ -> Printf.printf ":RUST_PASS: "
+    | Crash e -> Printf.printf ":RUST_CRASH(%s): " e
+    | Skip -> Printf.printf ":RUST_SKIP: ");
     Printf.printf "%s\n" path;
     flush stdout;
     if args.check_printed_tree then (
       (match ocaml_tree with
       | Tree t -> print_aast "/tmp/ocaml.aast" t
-      | Crash e -> print_err "/tmp/ocaml.aast" e);
+      | Crash e -> print_err "/tmp/ocaml.aast" e
+      | _ -> ());
       match rust_tree with
       | Tree t -> print_aast "/tmp/rust.aast" t
       | Crash e -> print_err "/tmp/rust.aast" e
+      | _ -> ()
     )
 end
 

@@ -1,0 +1,19 @@
+[package]
+name = "hack_lowerer_ffi"
+version = "3.49.0"
+edition = "2018"
+
+[lib]
+name = "lowerer_ffi"
+path = "../../../lowerer_ffi.rs"
+crate-type = ["lib", "staticlib"]
+
+[dependencies]
+ocamlpool_rust = { path = "../../../../utils/ocamlpool_rust", package = "hack_utils_ocamlpool" }
+lowerer = { path = "../", package = "hack_lowerer" }
+oxidized = {path = "../../../../oxidized", package = "hack_oxidized" }
+parser_rust = { path = "../../..", package = "hack_parser" }
+positioned_parser = {path = "../../positioned_parser", package = "positioned_parser" }
+syntax_tree = {path = "../../syntax_tree", package = "syntax_tree" }
+ocaml = "^0.7"
+

@@ -6,6 +6,8 @@ members = [
     "src/parser/cargo/core_types",
     "src/parser/cargo/errors",
     "src/parser/cargo/errors/ffi",
+    "src/parser/cargo/lowerer",
+    "src/parser/cargo/lowerer/ffi",    
     "src/parser/ffi",
     "src/utils/escaper",
     "src/utils/ocamlpool_rust",

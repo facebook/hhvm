@@ -104,6 +104,8 @@
     nast
     parser_ppl
     partial_provider
+    rust_lowerer_ffi
+    rust_parser_ffi
     utils_lint
     utils_php_escape))
 

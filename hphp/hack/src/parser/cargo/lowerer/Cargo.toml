@@ -1,0 +1,22 @@
+[package]
+name = "hack_lowerer"
+version = "3.49.0"
+edition = "2018"
+
+[lib]
+name = "lowerer"
+path = "../../lowerer_lib.rs"
+
+[dependencies]
+ocamlpool_rust = { path = "../../../utils/ocamlpool_rust", package = "hack_utils_ocamlpool" }
+ocamlvalue_macro = {path = "../../../utils/ocamlpool_rust/macro", package = "hack_utils_ocamlvalue_macro" }
+oxidized = {path = "../../../oxidized", package = "hack_oxidized" }
+escaper = {path = "../../../utils/escaper", package = "hack_escaper" }
+html_entities = {path = "../../../utils/html_entities", package = "html_entities" }
+parser_core_types = { path = "../core_types", package = "hack_parser_core_types" }
+parser_rust = { path = "../..", package = "hack_parser" }
+itertools = "^0.7"
+lazy_static = "^1.3.0"
+ocaml = "^0.7"
+regex = "^1.2.1"
+naming_special_names_rust = {path = "../../../naming/", package = "naming_special_names"}

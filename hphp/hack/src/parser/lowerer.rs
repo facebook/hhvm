@@ -79,7 +79,7 @@ pub enum ExprLocation {
 
 impl ExprLocation {
     fn in_string(self) -> bool {
-        self == Self::InDoubleQuotedString || self == Self::InBacktickedString
+        self == ExprLocation::InDoubleQuotedString || self == ExprLocation::InBacktickedString
     }
 }
 

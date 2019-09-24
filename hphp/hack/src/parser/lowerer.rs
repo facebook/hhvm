@@ -27,6 +27,7 @@ use std::{
     mem,
     rc::Rc,
     result::Result::{Err, Ok},
+    slice::Iter,
 };
 
 use crate::lowerer_modifier as modifier;
@@ -1717,11 +1718,12 @@ where
                 Self::p_hint(&c.cast_type, env)?,
                 Self::p_expr(&c.cast_operand, env)?,
             )),
-            ConditionalExpression(c) => Ok(E_::Eif(
-                Self::p_expr(&c.conditional_test, env)?,
-                Self::mp_optional(Self::p_expr, &c.conditional_consequence, env)?,
-                Self::p_expr(&c.conditional_alternative, env)?,
-            )),
+            ConditionalExpression(c) => {
+                let alter = Self::p_expr(&c.conditional_alternative, env)?;
+                let consequence = Self::mp_optional(Self::p_expr, &c.conditional_consequence, env)?;
+                let condition = Self::p_expr(&c.conditional_test, env)?;
+                Ok(E_::Eif(condition, consequence, alter))
+            }
             SubscriptExpression(c) => Ok(E_::ArrayGet(
                 Self::p_expr(&c.subscript_receiver, env)?,
                 Self::mp_optional(Self::p_expr, &c.subscript_index, env)?,
@@ -2051,19 +2053,49 @@ where
         }
     }
 
+    fn p_stmt_list_(
+        pos: &Pos,
+        mut nodes: Iter<&Syntax<T, V>>,
+        env: &mut Env,
+    ) -> ret!(Vec<aast!(Stmt<,>)>) {
+        let mut r = vec![];
+        loop {
+            match nodes.next() {
+                Some(n) => match &n.syntax {
+                    UsingStatementFunctionScoped(c) => {
+                        let body = Self::p_stmt_list_(pos, nodes, env)?;
+                        let f = |e: &mut Env| {
+                            Ok(aast::Stmt::new(
+                                pos.clone(),
+                                aast::Stmt_::Using(aast::UsingStmt {
+                                    is_block_scoped: false,
+                                    has_await: !c.using_function_await_keyword.is_missing(),
+                                    expr: Self::p_expr_l_with_loc(
+                                        ExprLocation::UsingStatement,
+                                        &c.using_function_expression,
+                                        e,
+                                    )?,
+                                    block: body,
+                                }),
+                            ))
+                        };
+                        let using = Self::lift_awaits_in_statement_(f, Either::Right(pos), env)?;
+                        r.push(using);
+                        break Ok(r);
+                    }
+                    _ => {
+                        r.push(Self::p_stmt(n, env)?);
+                    }
+                },
+                _ => break Ok(r),
+            }
+        }
+    }
+
     // TODO: rename to p_stmt_list
     fn handle_loop_body(pos: Pos, node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Stmt<,>) {
         let list = Self::as_list(node);
-        let mut result = vec![];
-        for n in list.iter() {
-            match &n.syntax {
-                UsingStatementFunctionScoped(_) => not_impl!(),
-                _ => {
-                    result.push(Self::p_stmt(n, env)?);
-                }
-            }
-        }
-        let blk: Vec<_> = result
+        let blk: Vec<_> = Self::p_stmt_list_(&pos, list.iter(), env)?
             .into_iter()
             .filter(|stmt| !Self::is_noop(stmt))
             .collect();
@@ -2154,6 +2186,17 @@ where
     where
         F: FnOnce(&mut Env) -> ret_aast!(Stmt<,>),
     {
+        Self::lift_awaits_in_statement_(f, Either::Left(node), env)
+    }
+
+    fn lift_awaits_in_statement_<F>(
+        f: F,
+        pos: Either<&Syntax<T, V>, &Pos>,
+        env: &mut Env,
+    ) -> ret_aast!(Stmt<,>)
+    where
+        F: FnOnce(&mut Env) -> ret_aast!(Stmt<,>),
+    {
         use LiftedAwaitKind::*;
         let (lifted_awaits, result) = match env.lifted_awaits {
             Some(LiftedAwaits { lift_kind, .. }) if lift_kind == LiftedFromConcurrent => {
@@ -2173,8 +2216,12 @@ where
         if let Some(lifted_awaits) = lifted_awaits {
             if !lifted_awaits.awaits.is_empty() {
                 let awaits = Self::process_lifted_awaits(lifted_awaits, env)?;
+                let pos = match pos {
+                    Either::Left(n) => Self::p_pos(n, env),
+                    Either::Right(p) => p.clone(),
+                };
                 return Ok(aast::Stmt::new(
-                    Self::p_pos(node, env),
+                    pos,
                     aast::Stmt_::Awaitall((awaits, vec![result])),
                 ));
             }
@@ -2620,8 +2667,13 @@ where
         }
     }
 
-    fn is_hashbang(text: &Syntax<T, V>) -> bool {
-        not_impl!()
+    fn is_hashbang(node: &Syntax<T, V>, env: &Env) -> bool {
+        let text = Self::text_str(node, env);
+        lazy_static! {
+            static ref RE: regex::Regex = regex::Regex::new("^#!.*\n").unwrap();
+        }
+        text.lines().nth(1).is_none() && // only one line
+        RE.is_match(text)
     }
 
     fn p_markup(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Stmt<,>) {
@@ -2636,7 +2688,7 @@ where
                     Self::raise_parsing_error(node, env, &syntax_error::error1060);
                 } else if markup_prefix.value.is_missing()
                     && markup_text.width() > 0
-                    && !Self::is_hashbang(&markup_text)
+                    && !Self::is_hashbang(&markup_text, env)
                 {
                     Self::raise_parsing_error(node, env, &syntax_error::error1001);
                 }

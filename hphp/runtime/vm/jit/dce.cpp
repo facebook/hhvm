@@ -215,6 +215,7 @@ bool canDCE(IRInstruction* inst) {
   case NewLikeArray:
   case NewCol:
   case NewPair:
+  case DefCallFlags:
   case DefInlineFP:
   case LdRetVal:
   case Mov:

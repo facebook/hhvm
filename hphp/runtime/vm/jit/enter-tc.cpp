@@ -22,6 +22,7 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 
+#include "hphp/runtime/vm/call-flags.h"
 #include "hphp/runtime/vm/runtime.h"
 
 #include "hphp/util/ringbuffer.h"
@@ -67,10 +68,10 @@ void enterTC(TCA start) {
   postExit();
 }
 
-void enterTCAtPrologue(TCA start, ActRec* calleeAR) {
+void enterTCAtPrologue(CallFlags callFlags, TCA start, ActRec* calleeAR) {
   assertx(vmFirstAR() == calleeAR);
   preEnter(start);
-  enterTCAtPrologueImpl(start, calleeAR);
+  enterTCAtPrologueImpl(callFlags, start, calleeAR);
   postExit();
 }
 

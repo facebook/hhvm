@@ -2027,6 +2027,10 @@ To string conversions:
   This instruction is used at the beginning of tracelets to represent the state
   of the stack on entry and does not emit code.
 
+| DefCallFlags, D(Int), NA, NF
+
+  Creates a temporary D representing the flags passed to the prologue.
+
 | Count, D(Int), S(Cell), NF
 
   Computes the number of elements in S0. The count of an array is the number of

@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/call-flags.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/hhbc.h"
@@ -113,6 +114,9 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
       v.makeReg()
     };
   }
+
+  auto const callFlags = CallFlags();
+  v << copy{v.cns(callFlags.value()), r_php_call_flags()};
 
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     v << syncvmsp{v.cns(0x42)};

@@ -75,6 +75,11 @@ void cgDefSP(IRLS& env, const IRInstruction* inst) {
   v << lea{fp[-cellsToBytes(inst->extra<DefSP>()->offset.offset)], sp};
 }
 
+void cgDefCallFlags(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  v << copy{r_php_call_flags(), dstLoc(env, inst, 0).reg()};
+}
+
 void cgEagerSyncVMRegs(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<EagerSyncVMRegs>();
   auto const fp = srcLoc(env, inst, 0).reg();

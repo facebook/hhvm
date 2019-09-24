@@ -675,6 +675,7 @@ bool opcodeMayRaise(Opcode opc) {
   case DebugBacktraceFast:
   case DecRef:
   case DecRefNZ:
+  case DefCallFlags:
   case DefConst:
   case DefFP:
   case DefInlineFP:

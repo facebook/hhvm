@@ -108,6 +108,12 @@ PhysReg r_svcreq_stub();
 PhysReg r_svcreq_sf();
 PhysReg r_svcreq_arg(size_t i);
 
+/*
+ * PHP call registers (used by Call IR).
+ *
+ * - r_php_call_flags: see struct CallFlags
+ */
+inline PhysReg r_php_call_flags() { return rarg(0); }
 
 ///////////////////////////////////////////////////////////////////////////////
 // JIT and TC boundary ABI registers.
@@ -139,7 +145,9 @@ inline RegSet leave_trace_regs() { return vm_regs_with_sp(); }
  * Registers that are live between the caller and the callee when making a PHP
  * function call.
  */
-inline RegSet php_call_regs() { return cross_trace_regs(); }
+inline RegSet php_call_regs() {
+  return cross_trace_regs() | r_php_call_flags();
+}
 
 /*
  * Registers that are live after a PHP function return.

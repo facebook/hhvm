@@ -16,25 +16,29 @@
 
 #pragma once
 
-#include "hphp/runtime/vm/call-flags.h"
-#include "hphp/runtime/vm/jit/types.h"
+#include <cstdint>
 
 namespace HPHP {
 
-struct ActRec;
-
-namespace jit {
+///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Main entry point for the translator from the bytecode interpreter.  It
- * operates on behalf of a given nested invocation of the intepreter (calling
- * back into it as necessary for blocks that need to be interpreted).
+ * C++ representation of various flags passed from the caller to the callee's
+ * prologue used to complete a function call.
+ *
+ * Bits 0-63: currently unused
  */
-void enterTC(TCA start);
+struct CallFlags {
+  CallFlags() {
+    m_bits = 0;
+  }
 
-/*
- * The version of enterTC() that enters TC at a prologue.
- */
-void enterTCAtPrologue(CallFlags callFlags, TCA start, ActRec* calleeAR);
+  int64_t value() const { return static_cast<int64_t>(m_bits); }
 
-}}
+private:
+  uint64_t m_bits;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+}

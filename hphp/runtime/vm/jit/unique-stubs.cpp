@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-variant.h"
+#include "hphp/runtime/vm/call-flags.h"
 #include "hphp/runtime/vm/cti.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/debug/debug.h"
@@ -268,7 +269,7 @@ TCA emitFuncPrologueRedispatch(CodeBlock& cb, DataBlock& data) {
 
       emitLdLowPtr(v, func[nargs * ptrSize + (pTabOff + ptrSize)],
                    dest, sizeof(LowPtr<uint8_t>));
-      v << jmpr{dest};
+      v << jmpr{dest, php_call_regs()};
     });
 
     auto const nargs = v.makeReg();
@@ -277,7 +278,7 @@ TCA emitFuncPrologueRedispatch(CodeBlock& cb, DataBlock& data) {
     auto const dest = v.makeReg();
     emitLdLowPtr(v, func[nargs * ptrSize + pTabOff],
                  dest, sizeof(LowPtr<uint8_t>));
-    v << jmpr{dest};
+    v << jmpr{dest, php_call_regs()};
   });
 }
 
@@ -289,8 +290,10 @@ TCA emitFCallHelperThunk(CodeBlock& main, CodeBlock& cold, DataBlock& data) {
 
     // fcallHelper asserts native stack alignment for us.
     FCallHelperRet (*helper)(ActRec*) = &fcallHelper;
+    auto const callFlags = v.makeReg();
     auto const dest = v.makeReg();
     auto const saved_rip = v.makeReg();
+    v << copy{r_php_call_flags(), callFlags};
     v << simplecall(v, helper, rvmfp(), dest, saved_rip);
 
     // Clobber rvmsp in debug builds.
@@ -312,6 +315,7 @@ TCA emitFCallHelperThunk(CodeBlock& main, CodeBlock& cold, DataBlock& data) {
     });
 
     // Jump to the func prologue.
+    v << copy{callFlags, r_php_call_flags()};
     v << tailcallphp{dest, rvmfp(), php_call_regs()};
   });
 }
@@ -538,8 +542,10 @@ TCA emitBindCallStub(CodeBlock& cb, DataBlock& data) {
     auto args = VregList { v.makeReg(), v.makeReg() };
 
     // Reconstruct the address of the call from the saved RIP.
+    auto const callFlags = v.makeReg();
     auto const savedRIP = v.makeReg();
     auto const callLen = safe_cast<int>(smashableCallLen());
+    v << copy{r_php_call_flags(), callFlags};
     v << load{rvmfp()[AROFF(m_savedRip)], savedRIP};
     v << subqi{callLen, savedRIP, args[0], v.makeReg()};
 
@@ -555,6 +561,7 @@ TCA emitBindCallStub(CodeBlock& cb, DataBlock& data) {
       DestType::SSA
     };
 
+    v << copy{callFlags, r_php_call_flags()};
     v << tailcallphp{ret, rvmfp(), php_call_regs()};
   });
 }
@@ -921,9 +928,11 @@ TCA
 emitEnterTCAtPrologueHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
   alignCacheLine(cb);
 
-  auto const start    = rarg(0);
-  auto const fp       = rarg(1);
-  auto const tl       = rarg(2);
+  UNUSED auto const callFlags = rarg(0);
+  auto const start     = rarg(1);
+  auto const fp        = rarg(2);
+  auto const tl        = rarg(3);
+  assertx(callFlags == r_php_call_flags());
 
   return vwrap2(cb, cb, data, [&] (Vout& v, Vout& vc) {
     // Architecture-specific setup for entering the TC.
@@ -1283,14 +1292,15 @@ void enterTCImpl(TCA start) {
 #ifdef __clang__
 NEVER_INLINE
 #endif
-void enterTCAtPrologueImpl(TCA start, ActRec* calleeAR) {
+void enterTCAtPrologueImpl(CallFlags callFlags, TCA start, ActRec* calleeAR) {
   assert_flog(tc::isValidCodeAddress(start), "start = {} ; func = {} ({})\n",
               start, calleeAR->func(), calleeAR->func()->fullName());
 
   // We have to force C++ to spill anything that might be in a callee-saved
   // register (aside from rvmfp()), since enterTCHelper does not save them.
   CALLEE_SAVED_BARRIER();
-  tc::ustubs().enterTCAtPrologueHelper(start, calleeAR, rds::tl_base);
+  tc::ustubs().enterTCAtPrologueHelper(callFlags, start, calleeAR,
+                                       rds::tl_base);
   CALLEE_SAVED_BARRIER();
 }
 

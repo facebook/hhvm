@@ -1615,8 +1615,9 @@ void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk,
     const int np = enterFnAr->m_func->numNonVariadicParams();
     int na = enterFnAr->numArgs();
     if (na > np) na = np + 1;
+    auto const callFlags = CallFlags();
     jit::TCA start = enterFnAr->m_func->getPrologue(na);
-    jit::enterTCAtPrologue(start, enterFnAr);
+    jit::enterTCAtPrologue(callFlags, start, enterFnAr);
     return;
   }
 

@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "hphp/runtime/vm/call-flags.h"
 #include "hphp/runtime/vm/hhbc.h"
 
 #include "hphp/runtime/vm/jit/code-cache.h"
@@ -375,7 +376,8 @@ struct UniqueStubs {
    */
   void (*enterTCHelper)(TCA start, ActRec* fp, void* tl, Cell* sp,
                         ActRec* firstAR);
-  void (*enterTCAtPrologueHelper)(TCA start, ActRec* fp, void* tl);
+  void (*enterTCAtPrologueHelper)(CallFlags callFlags, TCA start, ActRec* fp,
+                                  void* tl);
   TCA enterTCExit;
 
   /*
@@ -487,7 +489,7 @@ void emitInterpReq(Vout& v, SrcKey sk, FPInvOffset spOff);
  * Wrappers around the enterTC*Helper stubs, called from enterTC*().
  */
 void enterTCImpl(TCA start);
-void enterTCAtPrologueImpl(TCA start, ActRec* calleeAR);
+void enterTCAtPrologueImpl(CallFlags callFlags, TCA start, ActRec* calleeAR);
 
 ///////////////////////////////////////////////////////////////////////////////
 

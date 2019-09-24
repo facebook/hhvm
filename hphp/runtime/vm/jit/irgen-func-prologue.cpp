@@ -414,6 +414,14 @@ void emitPrologueEntry(IRGS& env, uint32_t argc) {
 
 void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID) {
   auto const func = curFunc(env);
+  UNUSED auto const callFlags = gen(env, DefCallFlags);
+  if (debug) {
+    ifThen(
+      env,
+      [&] (Block* taken) { gen(env, JmpNZero, taken, callFlags); },
+      [&] { gen(env, Unreachable, ASSERT_REASON); }
+    );
+  }
 
   // Increment profiling counter.
   if (isProfiling(env.context.kind)) {

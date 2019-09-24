@@ -11,6 +11,8 @@ array(0) {
 }
 int(0)
 int(1)
+bool(true)
+bool(true)
 bool(false)
 bool(false)
 string(8) "50000000"

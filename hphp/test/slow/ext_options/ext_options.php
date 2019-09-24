@@ -18,9 +18,16 @@ var_dump(!($x ?? false));
 var_dump(get_included_files()[0] === __FILE__);
 var_dump(array());
 
-clock_getres(CLOCK_THREAD_CPUTIME_ID, &$sec, &$nsec);
+$sec = null;
+$nsec = null;
+clock_getres(CLOCK_THREAD_CPUTIME_ID, inout $sec, inout $nsec);
 var_dump($sec);
 var_dump($nsec);
+$sec = null;
+$nsec = null;
+clock_gettime(CLOCK_THREAD_CPUTIME_ID, inout $sec, inout $nsec);
+var_dump($sec is nonnull);
+var_dump($nsec is nonnull);
 
 var_dump(ini_get(""));
 var_dump(ini_get("setting_that_does_not_exist"));

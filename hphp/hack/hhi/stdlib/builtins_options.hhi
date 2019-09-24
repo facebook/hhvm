@@ -58,9 +58,9 @@ function getopt(string $options, $longopts = null);
 <<__PHPStdLib>>
 function getrusage(int $who = 0);
 <<__PHPStdLib>>
-function clock_getres(int $clk_id, &$sec, &$nsec);
+function clock_getres(int $clk_id, inout $sec, inout $nsec);
 <<__PHPStdLib>>
-function clock_gettime(int $clk_id, &$sec, &$nsec);
+function clock_gettime(int $clk_id, inout $sec, inout $nsec);
 <<__PHPStdLib>>
 function clock_gettime_ns(int $clk_id): int;
 <<__PHPStdLib>>

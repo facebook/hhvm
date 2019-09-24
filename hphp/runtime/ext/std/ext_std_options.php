@@ -139,15 +139,19 @@ function getrusage(int $who = 0): array;
  */
 <<__Native>>
 function clock_getres(int $clk_id,
-                      mixed &$sec,
-                      mixed &$nsec): bool;
+                      <<__OutOnly>>
+                      inout mixed $sec,
+                      <<__OutOnly>>
+                      inout mixed $nsec): bool;
 
 /* Gets time of a system clock. "man 3 clock_gettime" for more details.
  */
 <<__Native>>
 function clock_gettime(int $clk_id,
-                       mixed &$sec,
-                       mixed &$nsec): bool;
+                       <<__OutOnly>>
+                       inout mixed $sec,
+                       <<__OutOnly>>
+                       inout mixed $nsec): bool;
 
 /* Same as clock_gettime(), but returns a single integer in nanoseconds.
  * Returns -1 if invalid or non-supported clock is specified.

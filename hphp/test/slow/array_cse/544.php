@@ -11,4 +11,4 @@ function f($x, $y) {
   blocker();
   var_dump($y);
 }
-<<__EntryPoint>> function main(): void {}
+<<__EntryPoint>> function main(): void { echo "Done.\n"; }

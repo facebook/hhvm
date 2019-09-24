@@ -10,4 +10,4 @@ class Sub extends Base {
 	public function test(Foo $foo, array $bar, $option = NULL, $extra = 0xffffff ) {
 	}
 }
-<<__EntryPoint>> function main(): void {}
+<<__EntryPoint>> function main(): void { echo "Done.\n"; }

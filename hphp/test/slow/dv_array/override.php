@@ -22,4 +22,4 @@ class ChildD1 extends ParentD { function foo(varray $x) {} }
 class ChildD2 extends ParentD { function foo(darray $x) {} }
 class ChildD3 extends ParentD { function foo(varray_or_darray $x) {} }
 class ChildD4 extends ParentD { function foo(array $x) {} }
-<<__EntryPoint>> function main(): void {}
+<<__EntryPoint>> function main(): void { echo "Done.\n"; }

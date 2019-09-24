@@ -10,4 +10,4 @@ function g($a, $b, $c) {
   return f($a++, $b++ + $a++, $c);
 }
 
-<<__EntryPoint>> function main(): void {}
+<<__EntryPoint>> function main(): void { echo "Done.\n"; }

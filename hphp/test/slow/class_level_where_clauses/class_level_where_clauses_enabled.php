@@ -11,4 +11,4 @@
 
 class Base <T> where T = int {}
 
-<<__EntryPoint>> function main(): void {}
+<<__EntryPoint>> function main(): void { echo "Done.\n"; }

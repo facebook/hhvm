@@ -6,4 +6,4 @@ function main() {
   foo:
 }
 
-<<__EntryPoint>> function main_entry(): void {}
+<<__EntryPoint>> function main_entry(): void { echo "Done.\n"; }

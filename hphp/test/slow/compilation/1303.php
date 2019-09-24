@@ -10,4 +10,4 @@ function checker($x) {
   return $a - $b + $x;
 }
 
-<<__EntryPoint>> function main(): void {}
+<<__EntryPoint>> function main(): void { echo "Done.\n"; }

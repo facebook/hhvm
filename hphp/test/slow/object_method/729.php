@@ -10,4 +10,4 @@ class A {
     call_user_func(array('self', 'f'));
   }
 }
-<<__EntryPoint>> function main(): void {}
+<<__EntryPoint>> function main(): void { echo "Done.\n"; }

@@ -31,4 +31,4 @@ function test5($x) {
   f(error(), $x ?? 42);
 }
 
-<<__EntryPoint>> function main(): void {}
+<<__EntryPoint>> function main(): void { echo "Done.\n"; }

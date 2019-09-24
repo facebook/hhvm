@@ -12,4 +12,4 @@ abstract class CBase implements IBase {}
 
 abstract class C extends CBase implements I {}
 
-<<__EntryPoint>> function main(): void {}
+<<__EntryPoint>> function main(): void { echo "Done.\n"; }

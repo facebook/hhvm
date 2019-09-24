@@ -5,4 +5,4 @@ foreach ($b[$a++ + $a++] as $x) {
  echo $x;
  }
 }
-<<__EntryPoint>> function main(): void {}
+<<__EntryPoint>> function main(): void { echo "Done.\n"; }

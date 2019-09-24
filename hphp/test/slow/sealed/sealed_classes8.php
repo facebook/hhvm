@@ -9,4 +9,4 @@ class SomeOtherSealedClass extends SomeSealedClass {}
 class SomeNotSealedClass extends SomeOtherSealedClass {}
 
 class SomeIrreleventClass extends SomeNotSealedClass {}
-<<__EntryPoint>> function main(): void {}
+<<__EntryPoint>> function main(): void { echo "Done.\n"; }

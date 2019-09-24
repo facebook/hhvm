@@ -8,4 +8,4 @@ trait SomeTrait implements SomeInterface {}
 trait SomeTrait2 {
   use SomeTrait;
 }
-<<__EntryPoint>> function main(): void {}
+<<__EntryPoint>> function main(): void { echo "Done.\n"; }

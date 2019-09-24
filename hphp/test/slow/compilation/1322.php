@@ -11,4 +11,4 @@ class X {
     return $this->__array[$offset];
   }
 }
-<<__EntryPoint>> function main(): void {}
+<<__EntryPoint>> function main(): void { echo "Done.\n"; }

@@ -5,4 +5,4 @@ function foo($a) {
   return $x + $y;
 }
 
-<<__EntryPoint>> function main(): void {}
+<<__EntryPoint>> function main(): void { echo "Done.\n"; }

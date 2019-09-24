@@ -24,4 +24,4 @@ class IString implements I {
   public function foo(string $t): void {}
 }
 
-<<__EntryPoint>> function main(): void {}
+<<__EntryPoint>> function main(): void { echo "Done.\n"; }

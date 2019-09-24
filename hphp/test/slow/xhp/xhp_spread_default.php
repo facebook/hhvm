@@ -6,4 +6,4 @@ class :bar {
 
 function foo($x = <bar {...<bar name="foo" />} />) { }
 
-<<__EntryPoint>> function main(): void {}
+<<__EntryPoint>> function main(): void { echo "Done.\n"; }

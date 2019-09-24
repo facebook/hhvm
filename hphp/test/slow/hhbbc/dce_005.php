@@ -7,4 +7,4 @@ function foo($x = 0, $y, $z) {
   for (;;) { continue; }
 }
 
-<<__EntryPoint>> function main(): void {}
+<<__EntryPoint>> function main(): void { echo "Done.\n"; }

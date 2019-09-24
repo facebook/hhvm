@@ -9,4 +9,4 @@ function foo($x) {
   $a = bar(1);
   bar($a++);
 }
-<<__EntryPoint>> function main(): void {}
+<<__EntryPoint>> function main(): void { echo "Done.\n"; }

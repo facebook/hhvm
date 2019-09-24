@@ -35,4 +35,4 @@ function whereClauseOnFunction<T> (): T where T=int {
     return 5;
 }
 
-<<__EntryPoint>> function main(): void {}
+<<__EntryPoint>> function main(): void { echo "Done.\n"; }

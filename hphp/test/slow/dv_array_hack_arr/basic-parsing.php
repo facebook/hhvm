@@ -54,4 +54,4 @@ class A {
   public darray<int,array<int>> $prop12;
 }
 
-<<__EntryPoint>> function main(): void {}
+<<__EntryPoint>> function main(): void { echo "Done.\n"; }

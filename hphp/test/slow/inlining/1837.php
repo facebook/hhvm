@@ -11,4 +11,4 @@ function bar($a) {
   foo($a)->bar = 1;
 }
 
-<<__EntryPoint>> function main(): void {}
+<<__EntryPoint>> function main(): void { echo "Done.\n"; }

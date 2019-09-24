@@ -6,4 +6,4 @@ interface SomeSealedInterface {}
 interface SomeOtherInterface extends SomeSealedInterface {}
 
 interface SomeOtherOtherInterface extends SomeOtherInterface {}
-<<__EntryPoint>> function main(): void {}
+<<__EntryPoint>> function main(): void { echo "Done.\n"; }

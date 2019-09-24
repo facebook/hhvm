@@ -19,4 +19,4 @@ abstract class X {
   abstract protected static function heh(): array<string>;
 }
 
-<<__EntryPoint>> function main(): void {}
+<<__EntryPoint>> function main(): void { echo "Done.\n"; }

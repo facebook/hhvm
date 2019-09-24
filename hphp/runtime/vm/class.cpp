@@ -1349,7 +1349,7 @@ Cell Class::clsCnsGet(const StringData* clsCnsName, ClsCnsLookup what) const {
     if (!m_nonScalarConstantCache.isInit()) {
       clsCnsData.detach();
       clsCnsData = Array::attach(
-        MixedArray::MakeReserveMixed(m_constants.size())
+        MixedArray::MakeReserveDict(m_constants.size())
       );
       m_nonScalarConstantCache.markInit();
     }

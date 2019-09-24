@@ -633,6 +633,24 @@ req::ptr<CompactTrace> createCompactBacktrace() {
   return ret;
 }
 
+std::pair<const Func*, Offset> getCurrentFuncAndOffset() {
+  VMRegAnchor _;
+  folly::small_vector<c_WaitableWaitHandle*, 64> visitedWHs;
+  BTContext ctx;
+
+  auto offset = vmfp()->func()->unit()->offsetOf(vmpc());
+  auto fp = initBTContextAt(ctx, vmJitReturnAddr(), vmfp(), &offset);
+  if (!fp) fp = vmfp();
+
+  // Builtins don't have a file and line number, so find the first user frame
+  while (fp && fp->func()->isBuiltin()) {
+    fp = getPrevActRec(ctx, fp, &offset, visitedWHs);
+  }
+
+  if (!fp) return std::make_pair(nullptr, 0);
+  return std::make_pair(fp->func(), offset);
+}
+
 namespace {
 
 struct CTKHasher final {

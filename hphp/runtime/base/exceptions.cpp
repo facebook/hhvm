@@ -333,9 +333,13 @@ void throwable_init(ObjectData* throwable) {
   if (UNLIKELY(fp->func()->isBuiltin())) {
     throwable_init_file_and_line_from_builtin(throwable);
   } else {
-    auto const unit = fp->func()->unit();
+    // Get the current function and offset in an inline-aware way. It must
+    // always exist, as vmfp() is a non-builtin frame pointer.
+    auto const funcAndOffset = getCurrentFuncAndOffset();
+    assertx(funcAndOffset.first != nullptr);
+    auto const unit = funcAndOffset.first->unit();
     auto const file = const_cast<StringData*>(unit->filepath());
-    auto const line = unit->getLineNumber(unit->offsetOf(vmpc()));
+    auto const line = unit->getLineNumber(funcAndOffset.second);
     tvSetIgnoreRef(
       make_tv<KindOfString>(file),
       throwable->propLvalAtOffset(s_fileSlot)

@@ -136,7 +136,7 @@ struct RequestMemoryExceededException : ResourceExceededException {
 struct RequestOOMKilledException : ResourceExceededException {
   RequestOOMKilledException(size_t usedBytes)
     : ResourceExceededException(
-        folly::sformat("request aborted due to memeory presure, "
+        folly::sformat("request aborted due to memory presure, "
                        "used {} bytes", usedBytes),
         empty_array())
   {}

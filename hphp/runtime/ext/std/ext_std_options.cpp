@@ -710,24 +710,24 @@ static Array HHVM_FUNCTION(getrusage, int64_t who /* = 0 */) {
 }
 
 static bool HHVM_FUNCTION(clock_getres,
-                          int64_t clk_id, Variant& sec, Variant& nsec) {
+                          int64_t clk_id, int64_t& sec, int64_t& nsec) {
 #if defined(__APPLE__)
   throw_not_supported(__func__, "feature not supported on OSX");
 #else
   struct timespec ts;
   int ret = clock_getres(clk_id, &ts);
-  sec = (int64_t)ts.tv_sec;
-  nsec = (int64_t)ts.tv_nsec;
+  sec = ts.tv_sec;
+  nsec = ts.tv_nsec;
   return ret == 0;
 #endif
 }
 
 static bool HHVM_FUNCTION(clock_gettime,
-                          int64_t clk_id, Variant& sec, Variant& nsec) {
+                          int64_t clk_id, int64_t& sec, int64_t& nsec) {
   struct timespec ts;
   int ret = gettime(clockid_t(clk_id), &ts);
-  sec = (int64_t)ts.tv_sec;
-  nsec = (int64_t)ts.tv_nsec;
+  sec = ts.tv_sec;
+  nsec = ts.tv_nsec;
   return ret == 0;
 }
 

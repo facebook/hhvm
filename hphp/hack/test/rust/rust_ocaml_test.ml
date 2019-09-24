@@ -495,8 +495,7 @@ end)
 module PPLRewriterTest = Runner (PPLRewriterTest_)
 
 module LowererTest_ = struct
-  module OcamlLowerer = Full_fidelity_ast
-  module RustLowerer = Lowerer_ffi
+  module Lowerer = Full_fidelity_ast
 
   type r =
     | Tree of (Ast_defs.pos, unit, unit, unit) Aast.program
@@ -517,30 +516,39 @@ module LowererTest_ = struct
       "%s\n"
       (Aast.show_program pp_pos pp_unit pp_unit pp_unit aast)
 
-  let build_ocaml_tree _env file source_text =
+  let build_tree _env is_rust file source_text =
     let i x = x in
-    let env =
-      OcamlLowerer.make_env file ~keep_errors:false ~elaborate_namespaces:false
+    let lower_env =
+      Lowerer.make_env
+        file
+        ~keep_errors:false
+        ~elaborate_namespaces:false
+        ~lower_coroutines:false
+        ~parser_options:
+          { ParserOptions.default with GlobalOptions.po_rust_lowerer = true }
     in
-    try
+    let ocaml_lower lower_env source_text =
       (Errors.is_hh_fixme := (fun _ _ -> false));
       (Errors.get_hh_fixme_pos := (fun _ _ -> None));
       (Errors.is_hh_fixme_disallowed := (fun _ _ -> false));
-      let ast = OcamlLowerer.from_text env source_text in
+      let result = Lowerer.from_text lower_env source_text in
       let (_err, aast) =
         Errors.do_ (fun () ->
-            Ast_to_aast.convert_program i () () () ast.OcamlLowerer.ast)
+            Ast_to_aast.convert_program i () () () result.Lowerer.ast)
       in
-      Tree aast
-    with e -> Crash (Caml.Printexc.to_string e)
-
-  let build_rust_tree _env file source_text =
-    let env = OcamlLowerer.make_env file in
-    try
-      let result = RustLowerer.from_text_rust env source_text in
-      match result with
-      | RustLowerer.Ok aast -> Tree aast.RustLowerer.ast
-      | RustLowerer.Err s -> Crash s
+      aast
+    in
+    let rust_lower lower_env source_text =
+      let result = Lowerer.from_text_rust lower_env source_text in
+      result.Lowerer.ast
+    in
+    let lower =
+      if is_rust then
+        rust_lower
+      else
+        ocaml_lower
+    in
+    try Tree (lower lower_env source_text)
     with e -> Crash (Caml.Printexc.to_string e)
 
   let test args ~ocaml_env ~rust_env file contents =
@@ -551,12 +559,12 @@ module LowererTest_ = struct
     let ocaml_tree =
       match args.mode with
       | RUST -> Skip
-      | _ -> build_ocaml_tree ocaml_env file source_text
+      | _ -> build_tree ocaml_env false file source_text
     in
     let rust_tree =
       match args.mode with
       | OCAML -> Skip
-      | _ -> build_rust_tree rust_env file source_text
+      | _ -> build_tree rust_env true file source_text
     in
     (match (ocaml_tree, rust_tree) with
     | (Tree ot, Tree rt) when ot = rt -> Printf.printf ":EQUAL: "

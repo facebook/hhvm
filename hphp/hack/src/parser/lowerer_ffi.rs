@@ -9,25 +9,20 @@ use parser_rust as parser;
 use ocamlpool_rust::{
     caml_raise,
     ocamlvalue::*,
-    utils::{block_field, str_field},
+    utils::{block_field, bool_field, str_field},
 };
 use oxidized::{file_info, global_options::GlobalOptions, relative_path::RelativePath};
 use parser::{
     indexed_source_text::IndexedSourceText,
-    parser::Parser,
-    parser_env::ParserEnv,
-    positioned_syntax::PositionedValue,
+    positioned_syntax::{PositionedSyntax, PositionedValue},
     positioned_token::PositionedToken,
-    smart_constructors::{NoState, WithKind},
     source_text::SourceText,
 };
-use positioned_parser::positioned_smart_constructors::PositionedSmartConstructors;
-use syntax_tree::mode_parser::parse_mode;
+use syntax_tree::SyntaxTree;
 
 use lowerer::{Env as LowererEnv, Lowerer};
 use std::default::Default;
 
-type PositionedSyntaxParser<'a> = Parser<'a, WithKind<PositionedSmartConstructors>, NoState>;
 struct PositionedSyntaxLowerer {}
 impl<'a> Lowerer<'a, PositionedToken, PositionedValue> for PositionedSyntaxLowerer {}
 
@@ -36,7 +31,7 @@ extern "C" {
     fn ocamlpool_leave();
 }
 
-caml_raise!(parse_and_lower_from_text, |ocaml_source_text|, <res>, {
+caml_raise!(lower, |ocaml_env, ocaml_source_text, ocaml_tree|, <res>, {
     let ocaml_source_text_value = ocaml_source_text.0;
 
     let relative_path_raw = block_field(&ocaml_source_text, 0);
@@ -44,30 +39,26 @@ caml_raise!(parse_and_lower_from_text, |ocaml_source_text|, <res>, {
     let content = str_field(&ocaml_source_text, 2);
     let source_text = SourceText::make_with_raw(&relative_path, &content.data(), ocaml_source_text_value);
     let indexed_source_text = IndexedSourceText::new(&source_text);
-    let mode = parse_mode(&source_text).unwrap_or(file_info::Mode::Mpartial);
+    let tree = <SyntaxTree<PositionedSyntax, ()>>::from_ffi_pointer(ocaml_tree.usize_val(), &source_text);
 
-    let env = ParserEnv {
-        is_experimental_mode : mode == file_info::Mode::Mexperimental,
-        hhvm_compat_mode : false,
-        php5_compat_mode : false,
-        codegen : false,
-        allow_new_attribute_syntax : false,
-    };
-
-    let mut parser = PositionedSyntaxParser::make(&source_text, env);
-    let script = parser.parse_script(None);
     let parser_options = GlobalOptions::default();
+    let codegen = bool_field(&ocaml_env, 1);
+    let elaborate_namespaces = bool_field(&ocaml_env, 3);
+    let quick_mode = bool_field(&ocaml_env, 6);
+    let mode = file_info::Mode::from_ocamlvalue(block_field(&ocaml_env, 11));
+
     let mut env = LowererEnv::make(
-        false, /* codegen */
-        false, /* elaborate namespace */
-        false, /* quick mode */
+        codegen,
+        elaborate_namespaces,
+        quick_mode,
         mode,
         &indexed_source_text,
         &parser_options,
     );
 
     ocamlpool_enter();
-    let r = PositionedSyntaxLowerer::lower(&mut env, &script).ocamlvalue();
+    let r = PositionedSyntaxLowerer::lower(&mut env, tree.root()).ocamlvalue();
     ocamlpool_leave();
     res = ocaml::Value::new(r);
+    Box::leak(tree);
 } -> res );

@@ -10,7 +10,7 @@ use naming_special_names_rust::{special_functions, special_idents};
 use ocamlvalue_macro::Ocamlvalue;
 use oxidized::{
     aast, aast_defs, ast_defs, doc_comment::DocComment, file_info, global_options::GlobalOptions,
-    namespace_env::Env as NamespaceEnv, pos::Pos, prim_defs::Comment, s_map,
+    namespace_env::Env as NamespaceEnv, pos::Pos, s_map,
 };
 use parser_rust::{
     indexed_source_text::IndexedSourceText, lexable_token::LexablePositionedToken,
@@ -183,17 +183,12 @@ impl<'a> Env<'a> {
         indexed_source_text: &'a IndexedSourceText<'a>,
         parser_options: &'a GlobalOptions,
     ) -> Self {
-        use file_info::Mode::*;
         Env {
             codegen,
             elaborate_namespaces,
             include_line_comments: false,
             keep_errors: false,
-            quick_mode: !codegen
-                && (match mode {
-                    Mdecl | Mphp => true,
-                    _ => quick_mode,
-                }),
+            quick_mode,
             show_all_errors: false,
             lower_coroutines: true,
             fail_open: true,
@@ -323,8 +318,7 @@ pub enum Error {
 
 #[derive(Ocamlvalue)]
 pub struct Result {
-    ast: aast!(Program<,>),
-    comments: Vec<(Pos, Comment)>,
+    aast: aast!(Program<,>),
 }
 
 use parser_core_types::syntax::SyntaxVariant::*;
@@ -3446,7 +3440,7 @@ where
                         }
                         _ => {
                             if !e.top_level_statements
-                                && (e.file_mode() == file_info::Mode::Mdecl && !e.codegen()
+                                && ((e.file_mode() == file_info::Mode::Mdecl && !e.codegen())
                                     || e.quick_mode)
                             {
                                 mk_noop_result()
@@ -4847,7 +4841,7 @@ where
         }
     }
 
-    fn elabarate_halt_compiler(ast: aast!(Program<,>), env: &mut Env) -> aast!(Program<,>) {
+    fn elaborate_halt_compiler(ast: aast!(Program<,>), env: &mut Env) -> aast!(Program<,>) {
         match *env.saw_compiler_halt_offset() {
             Some(_) => not_impl!(),
             _ => ast,
@@ -4855,9 +4849,8 @@ where
     }
 
     fn lower(env: &mut Env<'a>, script: &Syntax<T, V>) -> std::result::Result<Result, String> {
-        let comments = vec![];
-        let ast_result = Self::p_script(script, env);
-        let ast = match ast_result {
+        let aast_result = Self::p_script(script, env);
+        let aast = match aast_result {
             Ok(ast) => ast,
             Err(err) => match err {
                 Error::APIMissingSyntax {
@@ -4879,7 +4872,7 @@ where
         if env.elaborate_namespaces {
             not_impl!()
         }
-        let ast = Self::elabarate_halt_compiler(ast, env);
-        Ok(Result { ast, comments })
+        let aast = Self::elaborate_halt_compiler(aast, env);
+        Ok(Result { aast })
     }
 }

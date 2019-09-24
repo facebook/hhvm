@@ -43,6 +43,8 @@ let disable_lval_as_an_expression =
 
 let rust_parser_errors = GlobalOptions.po_rust_parser_errors
 
+let rust_lowerer = GlobalOptions.po_rust_lowerer
+
 let enable_constant_visibility_modifiers =
   GlobalOptions.po_enable_constant_visibility_modifiers
 

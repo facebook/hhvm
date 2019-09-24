@@ -37,15 +37,20 @@ val make_env (* Optional parts *) :
   Relative_path.t ->
   env
 
-type result = {
+type 'a result_ = {
   fi_mode: FileInfo.mode;
   is_hh_file: bool;
-  ast: Ast.program;
+  ast: 'a;
   content: string;
   file: Relative_path.t;
   comments: (Pos.t * Prim_defs.comment) list;
 }
 [@@deriving show]
+
+type result = Ast.program result_
+
+type rust_result = (Pos.t, unit, unit, unit) Aast.program result_
+
 (**
  * A `result` contains some information from the original `env`; the information
  * that is typically required later. This is still quite ad-hoc and should be
@@ -74,6 +79,8 @@ val lower_tree :
   result
 
 val from_text : env -> Full_fidelity_source_text.t -> result
+
+val from_text_rust : env -> Full_fidelity_source_text.t -> rust_result
 
 val from_file : env -> result
 

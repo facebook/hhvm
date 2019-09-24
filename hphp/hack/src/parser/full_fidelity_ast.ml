@@ -145,15 +145,19 @@ let should_surface_errors env =
    * parse errors. *)
   ((not env.quick_mode) || env.show_all_errors) && env.keep_errors
 
-type result = {
+type 'a result_ = {
   fi_mode: FileInfo.mode;
   is_hh_file: bool;
-  ast: Ast.program;
+  ast: 'a;
   content: string;
   file: Relative_path.t;
   comments: (Pos.t * comment) list;
 }
 [@@deriving show]
+
+type result = Ast.program result_
+
+type rust_result = (pos, unit, unit, unit) Aast.program result_
 
 module WithPositionedSyntax (Syntax : Positioned_syntax_sig.PositionedSyntax_S) =
 struct
@@ -4264,9 +4268,11 @@ let parse_text (env : env) (source_text : SourceText.t) :
        currently leak memory when an exception is thrown between parsing and
        error checking
      *)
-    ParserOptions.rust_parser_errors env.parser_options
-    && (not @@ ParserOptions.parser_errors_only env.parser_options)
-    && (env.codegen || env.keep_errors)
+    if ParserOptions.rust_parser_errors env.parser_options then
+      (not @@ ParserOptions.parser_errors_only env.parser_options)
+      && (env.codegen || env.keep_errors)
+    else
+      ParserOptions.rust_lowerer env.parser_options
   in
   let tree =
     let env' =
@@ -4330,11 +4336,46 @@ let flush_parsing_errors env =
       raise @@ SyntaxError.ParserFatal (e, p)
     | _ -> ()
 
-let lower_tree
+type rust_lowerer_result = { aast: (Pos.t, unit, unit, unit) Aast.program }
+
+external rust_lower_ffi :
+  env ->
+  SourceText.t ->
+  Rust_pointer.t ->
+  (rust_lowerer_result, string) Result.t = "lower"
+
+let rust_lower env ~source_text ~tree comments =
+  let rust_tree =
+    match PositionedSyntaxTree.rust_tree tree with
+    | Some t -> t
+    | None -> raise (Failure "missing rust tree ")
+  in
+  let aast =
+    match rust_lower_ffi env source_text rust_tree with
+    | Ok r -> r.aast
+    | Error e -> raise (Failure e)
+  in
+  {
+    fi_mode = env.fi_mode;
+    is_hh_file = env.is_hh_file;
+    ast = aast;
+    content =
+      ( if env.codegen then
+        ""
+      else
+        SourceText.text source_text );
+    comments;
+    file = env.file;
+  }
+
+let lower_tree_
+    editable_lower
+    lower
+    check_syntax_error
     (env : env)
     (source_text : SourceText.t)
     (mode : FileInfo.mode option)
-    (tree : PositionedSyntaxTree.t) : result =
+    (tree : PositionedSyntaxTree.t) : 'a result_ =
   let env =
     {
       env with
@@ -4346,8 +4387,38 @@ let lower_tree
   in
   let script = PositionedSyntaxTree.root tree in
   let comments = scour_comments_and_add_fixmes env source_text script in
-  let relative_pos = pos_of_error env.file source_text in
-  let check_for_syntax_errors ast_opt =
+  let mode = Option.value mode ~default:FileInfo.Mpartial in
+  let env = { env with fi_mode = mode; is_hh_file = mode <> FileInfo.Mphp } in
+  let popt = env.parser_options in
+  (* If we are generating code, then we want to inject auto import types into
+   * HH namespace during namespace resolution.
+   *)
+  let popt = ParserOptions.with_codegen popt env.codegen in
+  let env = { env with parser_options = popt } in
+  let lower () =
+    if env.lower_coroutines then
+      let script =
+        Full_fidelity_editable_positioned_syntax.from_positioned_syntax script
+        |> Ppl_class_rewriter.rewrite_ppl_classes
+        |> Coroutine_lowerer.lower_coroutines
+      in
+      editable_lower env ~source_text ~script comments
+    else
+      lower env ~source_text ~tree comments
+  in
+  let ast_opt = ref None in
+  Utils.try_finally
+    ~f:(fun () ->
+      let ret = lower () in
+      ast_opt := Some ret.ast;
+      ret)
+    ~finally:(fun () ->
+      check_syntax_error env source_text tree !ast_opt;
+      flush_parsing_errors env)
+
+let lower_tree =
+  let check_syntax_error (env : env) source_text tree ast_opt =
+    let relative_pos = pos_of_error env.file source_text in
     let find_errors error_env =
       ParserErrors.parse_errors error_env
       @
@@ -4401,39 +4472,27 @@ let lower_tree
         Rust_pointer.free_leaked_pointer ~warn:false ();
         report_error error
   in
-  (* check_for_syntax_errors *)
-  let mode = Option.value mode ~default:FileInfo.Mpartial in
-  let env = { env with fi_mode = mode; is_hh_file = mode <> FileInfo.Mphp } in
-  let popt = env.parser_options in
-  (* If we are generating code, then we want to inject auto import types into
-   * HH namespace during namespace resolution.
-   *)
-  let popt = ParserOptions.with_codegen popt env.codegen in
-  let env = { env with parser_options = popt } in
-  let lower =
-    if env.lower_coroutines then
-      let script =
-        Full_fidelity_editable_positioned_syntax.from_positioned_syntax script
-        |> Ppl_class_rewriter.rewrite_ppl_classes
-        |> Coroutine_lowerer.lower_coroutines
-      in
-      FromEditablePositionedSyntax.lower ~script
-    else
-      FromPositionedSyntax.lower ~script
+  let lower env ~source_text:st ~tree comments =
+    FromPositionedSyntax.lower
+      env
+      ~source_text:st
+      ~script:(PositionedSyntaxTree.root tree)
+      comments
   in
-  let ast_opt = ref None in
-  Utils.try_finally
-    ~f:(fun () ->
-      let ret = lower env ~source_text comments in
-      ast_opt := Some ret.ast;
-      ret)
-    ~finally:(fun () ->
-      check_for_syntax_errors !ast_opt;
-      flush_parsing_errors env)
+  lower_tree_ FromEditablePositionedSyntax.lower lower check_syntax_error
+
+let lower_tree_rust =
+  let ni _ ~source_text:_ ~script:_ _ = raise (Failure "not implemented") in
+  let empty_checker _ _ _ _ = () in
+  lower_tree_ ni rust_lower empty_checker
 
 let from_text (env : env) (source_text : SourceText.t) : result =
   let (mode, tree) = parse_text env source_text in
   lower_tree env source_text mode tree
+
+let from_text_rust (env : env) (source_text : SourceText.t) : rust_result =
+  let (mode, tree) = parse_text env source_text in
+  lower_tree_rust env source_text mode tree
 
 let from_file (env : env) : result =
   let source_text = SourceText.from_file env.file in

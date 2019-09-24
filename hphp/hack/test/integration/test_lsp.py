@@ -1143,6 +1143,16 @@ class TestLsp(TestCase[LspTestDriver]):
         variables = self.setup_php_file("messy.php")
         self.load_and_run("formatting", variables)
 
+    def test_rangeformatting(self) -> None:
+
+        # This test will fail if hackfmt can't be found
+        if not self.test_driver.run_hackfmt_check():
+            raise unittest.SkipTest("Hackfmt can't be found. Skipping.")
+
+        variables = dict(self.prepare_serverless_ide_environment())
+        variables.update(self.setup_php_file("messy.php"))
+        self.load_and_run("range_formatting", variables)
+
     def test_ontypeformatting(self) -> None:
 
         # This test will fail if hackfmt can't be found

@@ -75,8 +75,6 @@ class ReflectionClass implements Reflector {
   final public function getAttribute(string $name): ?varray<mixed>;
   <<__Rx, __MaybeMutable>>
   final public function getAttributeClass<T as HH\ClassLikeAttribute>(classname<T> $c): ?T;
-  <<__Deprecated("This function is being removed as it has been broken for some time")>> final public function getAttributesRecursive(): darray<string, varray<mixed>>;
-  <<__Deprecated("This function is being removed as it has been broken for some time")>> final public function getAttributeRecursive(string $name): ?varray<mixed>;
   <<__Rx, __MaybeMutable>>
   public function getMethod(string $name): ReflectionMethod;
   <<__Rx, __MaybeMutable>>
@@ -290,8 +288,6 @@ class ReflectionMethod extends ReflectionFunctionAbstract implements Reflector {
   <<__Rx, __MaybeMutable>>
   public function getPrototype();
   public function setAccessible(bool $accessible);
-  <<__Deprecated("This function is being removed as it has been broken for some time")>> final public function getAttributesRecursive(): darray<string, varray<mixed>>;
-  <<__Deprecated("This function is being removed as it has been broken for some time")>> final public function getAttributeRecursive(string $name): ?varray<mixed>;
   <<__Rx, __MaybeMutable>>
   final public function getAttributeClass<T as HH\MethodAttribute>(classname<T> $c): ?T;
 }
@@ -355,8 +351,6 @@ class ReflectionParameter implements Reflector {
   final public function getAttributeClass<T as HH\ParameterAttribute>(classname<T> $c): ?T;
   <<__Rx, __MaybeMutable>>
   final public function getAttributes(): darray<string, varray<mixed>>;
-  <<__Deprecated("This function is being removed as it has been broken for some time")>> final public function getAttributeRecursive(string $name);
-  <<__Deprecated("This function is being removed as it has been broken for some time")>> final public function getAttributesRecursive();
 }
 
 class ReflectionProperty implements Reflector {

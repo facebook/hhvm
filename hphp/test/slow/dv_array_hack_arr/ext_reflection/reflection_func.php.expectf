@@ -8,18 +8,6 @@ dict(2) {
   vec(0) {
   }
 }
-
-Deprecated: ReflectionFunctionAbstract::getAttributesRecursive: This function is being removed as it has been broken for some time in %s on line 25
-dict(2) {
-  ["A"]=>
-  vec(2) {
-    int(1)
-    int(2)
-  }
-  ["B"]=>
-  vec(0) {
-  }
-}
 vec(3) {
   object(ReflectionParameter) (3) {
     ["info"]=>
@@ -157,18 +145,6 @@ vec(1) {
 }
 dict(1) {
   ["Bing"]=>
-  vec(0) {
-  }
-}
-
-Deprecated: ReflectionMethod::getAttributesRecursive: This function is being removed as it has been broken for some time in %s on line 31
-
-Deprecated: ReflectionMethod::getAttributesRecursive: This function is being removed as it has been broken for some time in %s on line 31
-dict(2) {
-  ["Bing"]=>
-  vec(0) {
-  }
-  ["Bar"]=>
   vec(0) {
   }
 }

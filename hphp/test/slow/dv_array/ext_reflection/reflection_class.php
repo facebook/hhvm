@@ -43,7 +43,6 @@ function main() {
   var_dump($a_cls->getInterfaceNames());
   var_dump($a_cls->getInterfaces());
   var_dump($a_cls->getAttributes());
-  var_dump($a_cls->getAttributesRecursive());
   var_dump($a_cls->getMethods());
   var_dump($a_cls->getProperties());
   var_dump($a_cls->getStaticProperties());

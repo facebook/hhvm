@@ -33,5 +33,4 @@ $rp = $rc->getProperties()[0];
 \var_dump($rp->getAttributes());
 \var_dump($rp->getAttribute("Baboon"));
 $rcc = new \ReflectionClass("Animal\\Zebra");
-\var_dump($rc->getAttributesRecursive());
 }

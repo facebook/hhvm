@@ -43,17 +43,6 @@ array(1) {
     int(4)
   }
 }
-
-Deprecated: ReflectionClass::getAttributesRecursive: This function is being removed as it has been broken for some time in %s on line %d
-array(1) {
-  ["__Attr1"]=>
-  array(2) {
-    [0]=>
-    int(3)
-    [1]=>
-    int(4)
-  }
-}
 array(2) {
   [0]=>
   object(ReflectionMethod) (2) {

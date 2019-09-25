@@ -18,7 +18,7 @@ function test1($v) { return HH\array_key_cast($v); }
 function test2(bool $v) { return HH\array_key_cast($v); }
 function test3(bool $v) { return HH\array_key_cast($v); }
 function test4(int $v) { return HH\array_key_cast($v); }
-function test5(double $v) { return HH\array_key_cast($v); }
+function test5(float $v) { return HH\array_key_cast($v); }
 function test6(string $v) { return HH\array_key_cast($v); }
 function test7(string $v) { return HH\array_key_cast($v); }
 function test8(resource $v) { return HH\array_key_cast($v); }

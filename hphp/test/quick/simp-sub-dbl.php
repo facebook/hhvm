@@ -36,7 +36,7 @@ function foo9() {
   return INF - NAN;
 }
 
-function foo10(double $a) {
+function foo10(float $a) {
   return $a - $a;
 }
 <<__EntryPoint>> function main(): void {

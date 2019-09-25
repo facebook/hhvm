@@ -2,7 +2,7 @@
 
 <<__ALWAYS_INLINE>>
 function foo(
-  inout double $a,
+  inout float $a,
   inout int $b,
   inout string $c,
   inout $x,

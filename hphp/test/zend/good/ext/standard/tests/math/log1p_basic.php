@@ -24,7 +24,7 @@ echo "\n LOG1p tests\n";
 
 foreach($values as $value) {
     echo "\n-- log1p $value --\n";
-    var_dump(log1p((double)$value));
+    var_dump(log1p((float)$value));
 };
 echo "===Done===";
 }

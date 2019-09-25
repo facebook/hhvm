@@ -1,8 +1,8 @@
 <?hh
 
 type Point = shape(
-  'x' => real,
-  'y' => real,
+  'x' => float,
+  'y' => float,
 );
 
 function woot(Point $x) : Point {

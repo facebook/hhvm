@@ -1,7 +1,7 @@
 <?hh
 
 <<__ALWAYS_INLINE>>
-function foo(inout double $a, inout int $b, inout string $c) {
+function foo(inout float $a, inout int $b, inout string $c) {
   $a += 1;
   $b += 2;
   $c += 3;

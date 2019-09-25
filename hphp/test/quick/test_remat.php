@@ -46,15 +46,15 @@ class KM {
         }
         $this->dKV = array();
         $this->dKV[$key] = array(
-          'sc' => (double)$sc,
+          'sc' => (float)$sc,
           'l_o' => (int)$l_o,
           'l_b_t' => (int)$l_b_t
           );
       }
 
-      $this->kSA[$key] = (double)$sc;
+      $this->kSA[$key] = (float)$sc;
       if ($this) {
-        var_dump((double)$sc, $this->kSA[$key]);
+        var_dump((float)$sc, $this->kSA[$key]);
       }
     }
   }

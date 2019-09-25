@@ -1,7 +1,7 @@
 <?hh
 
 function foo($v) {
-  return (double)$v;
+  return (float)$v;
 }
 function foo2(): void {
   var_dump(foo(null));
@@ -39,17 +39,17 @@ function real($i) {
     $v10 = array();
     $v11 = array(123);
   }
-  var_dump((double)$v1);
-  var_dump((double)$v2);
-  var_dump((double)$v3);
-  var_dump((double)$v4);
-  var_dump((double)$v5);
-  var_dump((double)$v6);
-  var_dump((double)$v7);
-  var_dump((double)$v8);
-  var_dump((double)$v9);
-  var_dump((double)$v10);
-  var_dump((double)$v11);
+  var_dump((float)$v1);
+  var_dump((float)$v2);
+  var_dump((float)$v3);
+  var_dump((float)$v4);
+  var_dump((float)$v5);
+  var_dump((float)$v6);
+  var_dump((float)$v7);
+  var_dump((float)$v8);
+  var_dump((float)$v9);
+  var_dump((float)$v10);
+  var_dump((float)$v11);
 }
 
 function baz($i) {
@@ -57,8 +57,8 @@ function baz($i) {
     $s1 = '5.3xxx';
     $s2 = '7yyy';
   }
-  var_dump((double)$s1);
-  var_dump((double)$s2);
+  var_dump((float)$s1);
+  var_dump((float)$s2);
 }
 
 <<__EntryPoint>> function main(): void {

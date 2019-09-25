@@ -24,9 +24,9 @@ require_once('fix_exceptions.inc');
 set_error_handler(fun('errHandler'), E_ALL);
 
 check("Boolean", function ($v) { return sha1("abc", $v); },
-      function (@boolean $v) { });
+      function (@bool $v) { });
 check("Int64", function ($v) { return str_pad("abc", $v); },
-      function (@integer $v) { });
+      function (@int $v) { });
 check("Double", function ($v) { return number_format($v); },
       function (@float $v) { });
 check("String", function ($v) { return rtrim($v); },

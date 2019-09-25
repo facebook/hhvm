@@ -2,7 +2,7 @@
 
 type MyInt    = int;
 type MyBool   = bool;
-type MyDouble = double;
+type MyDouble = float;
 type MyArray  = array;
 type MyString = string;
 

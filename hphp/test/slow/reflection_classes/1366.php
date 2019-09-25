@@ -53,11 +53,11 @@ function f203((int, Vector<string>) $tupple): array<ClassA> {
 }
 function f204((function (int): Vector<string>) $f): array<string, ClassA> {
 }
-function f300<X, Y>(Y $y, ?double $d): X {
+function f300<X, Y>(Y $y, ?float $d): X {
 }
 function f301<X, Y>((function (): Vector<Y>) $f): array<string, X> {
 }
-function f302<X, Y>((Y, X, double, string) $f): ?Y {
+function f302<X, Y>((Y, X, float, string) $f): ?Y {
 }
 class C {
   public @int $a;
@@ -68,7 +68,7 @@ class C {
 }
   static public function m1() {
 }
-  public function m2(@double $d) : void {
+  public function m2(@float $d) : void {
 }
   static public function m3(Vector<Map<int, Vector<?string>>> $v, :xhp:html $x) : @array<int, ?Vector<string>> {
 }
@@ -98,7 +98,7 @@ trait T {
 }
   static public function m3(Vector<Map<int, Vector<?C>>> $v, :xhp:html $x) : @array<C, ?Vector<string>> {
 }
-  public function m4((function(@int, (double, string)): void) $v) : array<Map<CT<int, string>, :xhp:html>> {
+  public function m4((function(@int, (float, string)): void) $v) : array<Map<CT<int, string>, :xhp:html>> {
 }
 }
 class TC {

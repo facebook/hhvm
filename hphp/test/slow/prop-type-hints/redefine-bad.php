@@ -53,7 +53,7 @@ class A {
   public int $p1;
   public string $p2;
   public bool $p3;
-  public double $p4;
+  public float $p4;
   public array $p5;
   public resource $p6;
   public nonnull $p7;
@@ -139,7 +139,7 @@ class A {
   private int $pp1;
   private string $pp2;
   private bool $pp3;
-  private double $pp4;
+  private float $pp4;
   private array $pp5;
   private resource $pp6;
   private nonnull $pp7;
@@ -225,7 +225,7 @@ class A {
   public static int $s1;
   public static string $s2;
   public static bool $s3;
-  public static double $s4;
+  public static float $s4;
   public static array $s5;
   public static resource $s6;
   public static nonnull $s7;
@@ -315,7 +315,7 @@ class B extends A {
 class C extends B {
   public string $p1;
   public int $p2;
-  public double $p3;
+  public float $p3;
   public num $p4;
   public arraylike $p5;
   public Cls1 $p6;
@@ -395,7 +395,7 @@ class C extends B {
 
   private string $pp1;
   private int $pp2;
-  private double $pp3;
+  private float $pp3;
   private num $pp4;
   private arraylike $pp5;
   private Cls1 $pp6;
@@ -475,7 +475,7 @@ class C extends B {
 
   public static string $s1;
   public static int $s2;
-  public static double $s3;
+  public static float $s3;
   public static num $s4;
   public static arraylike $s5;
   public static Cls1 $s6;

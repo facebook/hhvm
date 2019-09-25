@@ -230,7 +230,7 @@ function main(): void {
 
                'int 0' => 0, 'int 99' => 99, 'int -1' => -1,
 
-               'float 0' => 0.0,'double 99' => (double)99,
+               'float 0' => 0.0,'double 99' => (float)99,
                'float 99' => 99.0, 'float -1' => -1.0,
                'INF' => INF, '-INF' => -INF, 'NAN' => NAN,
 

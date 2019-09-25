@@ -11,8 +11,8 @@ class ArrayObject implements IteratorAggregate, ArrayAccess,
                              Serializable, Countable {
   use StrictKeyedIterable;
 
-  const integer STD_PROP_LIST = 1;
-  const integer ARRAY_AS_PROPS = 2;
+  const int STD_PROP_LIST = 1;
+  const int ARRAY_AS_PROPS = 2;
 
   /*
    * Note: don't add type annotations to these properties---this class

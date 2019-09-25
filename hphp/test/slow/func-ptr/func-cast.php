@@ -19,7 +19,7 @@ function boolCast($x) {
 }
 
 function doubleCast($x) {
-    return (double) $x;
+    return (float)$x;
 }
 
 function intCast($x) {

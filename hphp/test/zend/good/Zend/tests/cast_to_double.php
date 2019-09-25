@@ -27,7 +27,7 @@ $vars = array(
 );
 
 foreach ($vars as $var) {
-    $tmp = (double)$var;
+    $tmp = (float)$var;
     var_dump($tmp);
 }
 

@@ -45,7 +45,7 @@ class A {
   public int $p1 = 123;
   public string $p2 = 'abc';
   public bool $p3 = false;
-  public double $p4 = 3.14;
+  public float $p4 = 3.14;
   public array $p5a = [1, 2, 3];
   public array $p5b = varray[1, 2, 3];
   public array $p5c = darray[1 => 'a', 2 => 'b', 3 => 'c'];
@@ -159,7 +159,7 @@ class A {
   public ?int $opt1 = null;
   public ?string $opt2 = null;
   public ?bool $opt3 = null;
-  public ?double $opt4 = null;
+  public ?float $opt4 = null;
   public ?array $opt5 = null;
   public ?resource $opt6 = null;
   public ?nonnull $opt7 = null;
@@ -197,7 +197,7 @@ class A {
   public static int $s1 = 123;
   public static string $s2 = 'abc';
   public static bool $s3 = false;
-  public static double $s4 = 3.14;
+  public static float $s4 = 3.14;
   public static array $s5a = [1, 2, 3];
   public static array $s5b = varray[1, 2, 3];
   public static array $s5c = darray[1 => 'a', 2 => 'b', 3 => 'c'];
@@ -311,7 +311,7 @@ class A {
   public static ?int $sopt1 = null;
   public static ?string $sopt2 = null;
   public static ?bool $sopt3 = null;
-  public static ?double $sopt4 = null;
+  public static ?float $sopt4 = null;
   public static ?array $sopt5 = null;
   public static ?resource $sopt6 = null;
   public static ?nonnull $sopt7 = null;

@@ -46,7 +46,7 @@ class A {
   public int $p1 = 'abc';
   public string $p2 = 123;
   public bool $p3 = 123;
-  public double $p4 = false;
+  public float $p4 = false;
   public array $p5 = vec[1, 2, 3];
   public resource $p6 = null;
   public nonnull $p7 = null;
@@ -136,7 +136,7 @@ class A {
   public static int $s1 = 'abc';
   public static string $s2 = 123;
   public static bool $s3 = 123;
-  public static double $s4 = false;
+  public static float $s4 = false;
   public static array $s5 = vec[1, 2, 3];
   public static resource $s6 = null;
   public static nonnull $s7 = null;

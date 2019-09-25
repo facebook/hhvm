@@ -58,9 +58,9 @@ class HijriConverter {
 }
 
 function main() {
-  var_dump((new HijriBirthday)->convertSolarToLunar(1983, (double)31, 7));
-  var_dump((new HijriBirthday)->convertSolarToLunar(1983, (double)31, 7));
-  var_dump((new HijriBirthday)->convertSolarToLunar(1983, (double)31, 7));
+  var_dump((new HijriBirthday)->convertSolarToLunar(1983, (float)31, 7));
+  var_dump((new HijriBirthday)->convertSolarToLunar(1983, (float)31, 7));
+  var_dump((new HijriBirthday)->convertSolarToLunar(1983, (float)31, 7));
 }
 <<__EntryPoint>> function main_entry(): void {
 main();

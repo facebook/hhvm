@@ -19,7 +19,7 @@ class Cls1 implements IMemoizeParam {
 <<__Memoize>> function takes_int(int $x)          { echo "takes_int\n"; return $x; }
 <<__Memoize>> function takes_bool(bool $x)        { echo "takes_bool\n"; return $x; }
 <<__Memoize>> function takes_str(string $x)       { echo "takes_str\n"; return $x; }
-<<__Memoize>> function takes_double(double $x)    { echo "takes_double\n"; return $x; }
+<<__Memoize>> function takes_double(float $x)    { echo "takes_double\n"; return $x; }
 <<__Memoize>> function takes_arrkey(arraykey $x)  { echo "takes_arrkey\n"; return $x; }
 <<__Memoize>> function takes_vector(Vector $x)    { echo "takes_vector\n"; return $x; }
 <<__Memoize>> function takes_cls1(Cls1 $x)        { echo "takes_cls1\n"; return $x; }
@@ -29,7 +29,7 @@ class Cls1 implements IMemoizeParam {
 <<__Memoize>> function takes_opt_int(?int $x)     { echo "takes_opt_int\n"; return $x; }
 <<__Memoize>> function takes_opt_bool(?bool $x)   { echo "takes_opt_bool\n"; return $x; }
 <<__Memoize>> function takes_opt_str(?string $x)  { echo "takes_opt_str\n"; return $x; }
-<<__Memoize>> function takes_opt_dbl(?double $x)  { echo "takes_opt_dbl\n"; return $x; }
+<<__Memoize>> function takes_opt_dbl(?float $x)  { echo "takes_opt_dbl\n"; return $x; }
 <<__Memoize>> function takes_opt_vector(?Vector $x) { echo "takes_opt_vector\n"; return $x; }
 <<__Memoize>> function takes_opt_cls1(?Cls1 $x)   { echo "takes_opt_cls1\n"; return $x; }
 <<__Memoize>> function takes_opt_cls2(?Cls2 $x)   { echo "takes_opt_cls2\n"; return $x; }

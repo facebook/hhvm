@@ -12,7 +12,7 @@ function getClsMeth() {
 
 function stringCast($x) { return (string) $x; }
 function boolCast($x) { return (bool) $x; }
-function doubleCast($x) { return (double) $x; }
+function doubleCast($x) { return (float)$x; }
 function intCast($x) { return (int) $x; }
 function arrayCast($x) { return (array)$x; }
 function varrayCast($x) { return varray($x); }

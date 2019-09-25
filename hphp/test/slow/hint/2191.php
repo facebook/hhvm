@@ -22,8 +22,8 @@ $y = (bool) $x;
  var_dump($y);
  return $y;
  }
-function f6(double $x = null) {
-$y = (double) $x;
+function f6(float $x = null) {
+$y = (float)$x;
  var_dump($y);
  return $y;
  }

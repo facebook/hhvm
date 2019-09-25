@@ -398,7 +398,7 @@ class Redis {
 
     $args[0] = $this->_prefix($args[0]);
     for ($i = 1; $i < $count; $i += 2) {
-      $args[$i  ] = (double)$args[$i];
+      $args[$i  ] = (float)$args[$i];
       $args[$i+1] = $this->_serialize($args[$i+1]);
     }
     $this->processArrayCommand('ZADD', $args);

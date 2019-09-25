@@ -263,7 +263,7 @@ class RegexIterator extends FilterIterator
    * @throws InvalidArgumentException
    */
   public function setMode($mode) {
-    $mode = (integer) $mode;
+    $mode = (int)$mode;
 
     if ($mode < self::MATCH || $mode > self::REPLACE) {
       throw new InvalidArgumentException(sprintf('Illegal mode %ld', $mode));
@@ -297,7 +297,7 @@ class RegexIterator extends FilterIterator
    *                            of available flags.
    */
   public function setPregFlags($preg_flags) {
-    $preg_flags = (integer) $preg_flags;
+    $preg_flags = (int) $preg_flags;
 
     $this->pregFlags = $preg_flags;
   }

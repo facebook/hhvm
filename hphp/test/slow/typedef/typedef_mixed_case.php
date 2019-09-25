@@ -1,7 +1,7 @@
 <?hh
 
 newtype Foo = int;
-newtype Foo2 = integer;
+newtype Foo2 = int;
 
 function foo(Foo $x, Foo2 $y) {}
 
@@ -16,13 +16,13 @@ function baz2(Bazcls $k) {}
 
 type A = array;
 type B = int;
-type C = integer;
+type C = int;
 type D = bool;
-type E = boolean;
+type E = bool;
 type F = string;
-type G = real;
+type G = float;
 type H = float;
-type I = double;
+type I = float;
 function lots(A $x,
               B $xx,
               C $xxx,

@@ -22,7 +22,7 @@ function testInt($x) {
 }
 
 function testDbl($x) {
-  return foo((double)$x);
+  return foo((float)$x);
 }
 
 echo "test int\n";

@@ -47,11 +47,14 @@ function call_constructors(): void {
   $b = new Derived(0);
 }
 
+function only_variadic(int ...$args): void {}
+
 function variadic(inout int $arg, int ...$args): void{}
 
 function with_nontrivial_fun_decls(): void {
   $num = 17;
   variadic(inout $num, 18, 19);
+  only_variadic($num, 18, 19);
   $d = new Derived($num);
 }
 

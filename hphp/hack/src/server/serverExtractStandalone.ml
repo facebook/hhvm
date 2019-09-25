@@ -278,13 +278,15 @@ let print_fun_args tcopt fun_type =
   let variadic =
     match fun_type.ft_arity with
     (* variadic argument comes last *)
-    | Fvariadic (arity, arg) ->
-      Printf.sprintf ", %s" @@ print_arg ~is_variadic:true arity arg
+    | Fvariadic (arity, arg) -> print_arg ~is_variadic:true arity arg
     | Fstandard _
     | Fellipsis _ ->
       ""
   in
-  args ^ variadic
+  if String.is_empty args then
+    variadic
+  else
+    Printf.sprintf "%s, %s" args variadic
 
 let get_function_declaration tcopt fun_name fun_type =
   let tparams =

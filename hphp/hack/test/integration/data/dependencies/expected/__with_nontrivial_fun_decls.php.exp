@@ -5,9 +5,13 @@ class ImplementingBase extends AbstractBase {
 abstract class AbstractBase {
 
 }
+function only_variadic(int ...$args): void {
+  throw new \Exception();
+}
 function with_nontrivial_fun_decls(): void {
   $num = 17;
   variadic(inout $num, 18, 19);
+  only_variadic($num, 18, 19);
   $d = new Derived($num);
 }
 function variadic(inout int $arg, int ...$args): void {

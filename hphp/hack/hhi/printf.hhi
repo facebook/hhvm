@@ -20,7 +20,7 @@ namespace {
  * causes the corresponding method in T to be looked up. For example,
  * '%d' will "call" the method
  *
- *   function format_d(?int $s) : string;
+ *   function format_d(num $s) : string;
  *
  * and consume an 'int' from the argument list.
  *
@@ -40,10 +40,8 @@ namespace {
  */
 
 interface PlainSprintf {
-  // It's common to pass floats; would be nice to type this as
-  // 'number' once that type becomes available in userland.
  <<__Rx>>
-  public function format_d(mixed $s) : string;
+  public function format_d(num $s) : string;
  <<__Rx>>
   public function format_s(mixed $s) : string;
  <<__Rx>>

@@ -651,7 +651,7 @@ static int put_shm_data(sysvshm_chunk_head *ptr, long key, char *data,
   }
 
   if (ptr->free < total_size) {
-    return -1; /* not enough memeory */
+    return -1; /* not enough memory */
   }
 
   shm_var = (sysvshm_chunk *) ((char *) ptr + ptr->end);

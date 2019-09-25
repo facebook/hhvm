@@ -3810,7 +3810,7 @@ void process_phijmp_spills(State& state,
 // move between a spilled or non-spilled Vreg (or vice-versa). Indeed,
 // we need to ensure that a copy never causes a reload, as we need to
 // be able to copy spilled Vregs around without introducing additional
-// register presure. Return the number of instructions inserted.
+// register pressure. Return the number of instructions inserted.
 size_t process_copy_spills(State& state,
                            VregList& uses,
                            const VregList& defs,

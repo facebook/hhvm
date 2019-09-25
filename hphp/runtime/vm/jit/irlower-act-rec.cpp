@@ -302,7 +302,6 @@ static void actionMayReenter(ActRec* ar,
 void trimExtraArgs(ActRec* ar, CallFlags callFlags) {
   SHUFFLE_EXTRA_ARGS_PRELUDE()
   assertx(!f->hasVariadicCaptureParam());
-  assertx(!(f->attrs() & AttrMayUseVV));
 
   actionMayReenter(
     ar,
@@ -320,20 +319,10 @@ void trimExtraArgs(ActRec* ar, CallFlags callFlags) {
   if (generics) *genericsLocal = make_array_like_tv(generics);
 }
 
-void shuffleExtraArgsMayUseVV(ActRec* ar, CallFlags callFlags) {
-  SHUFFLE_EXTRA_ARGS_PRELUDE()
-  assertx(!f->hasVariadicCaptureParam());
-  assertx(f->attrs() & AttrMayUseVV);
-
-  ar->setExtraArgs(ExtraArgs::allocateCopy(tvArgs, numExtra));
-  if (f->hasReifiedGenerics()) tvWriteUninit(*genericsLocal);
-  if (generics) *genericsLocal = make_array_like_tv(generics);
-}
 
 void shuffleExtraArgsVariadic(ActRec* ar, CallFlags callFlags) {
   SHUFFLE_EXTRA_ARGS_PRELUDE()
   assertx(f->hasVariadicCaptureParam());
-  assertx(!(f->attrs() & AttrMayUseVV));
 
   VArrayInit ai{numExtra};
   actionMayReenter(
@@ -369,37 +358,6 @@ void shuffleExtraArgsVariadic(ActRec* ar, CallFlags callFlags) {
   if (generics) *genericsLocal = make_array_like_tv(generics);
 }
 
-void shuffleExtraArgsVariadicAndVV(ActRec* ar, CallFlags callFlags) {
-  SHUFFLE_EXTRA_ARGS_PRELUDE()
-  assertx(f->hasVariadicCaptureParam());
-  assertx(f->attrs() & AttrMayUseVV);
-
-  ar->setExtraArgs(ExtraArgs::allocateCopy(tvArgs, numExtra));
-  try {
-    VArrayInit ai{numExtra};
-    actionMayReenter(
-      ar,
-      std::reverse_iterator<TypedValue*>(tvArgs + numExtra),
-      std::reverse_iterator<TypedValue*>(tvArgs),
-      [](TypedValue v)  { return isRefType(v.m_type); },
-      [&](TypedValue v) { ai.appendWithRef(v); },
-      [&](TypedValue v) { ai.appendWithRef(v); }
-    );
-    // Write into the last (variadic) param.
-    auto tv = reinterpret_cast<TypedValue*>(ar) - numParams - 1;
-    *tv = make_array_like_tv(ai.create());
-    assertx(tv->m_data.parr->hasExactlyOneRef());
-    // Before, for each arg: refcount = n + 1 (stack).
-    // After, for each arg: refcount = n + 2 (ExtraArgs, varArgsArray).
-  } catch (...) {
-    ExtraArgs::deallocateRaw(ar->getExtraArgs());
-    ar->resetExtraArgs();
-    throw;
-  }
-  if (f->hasReifiedGenerics()) tvWriteUninit(*genericsLocal);
-  if (generics) *genericsLocal = make_array_like_tv(generics);
-}
-
 #undef SHUFFLE_EXTRA_ARGS_PRELUDE
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -408,33 +366,21 @@ void cgInitExtraArgs(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 0).reg();
   auto const extra = inst->extra<InitExtraArgs>();
   auto const func = extra->func;
-  auto const argc = extra->argc;
-
-  using Action = ExtraArgsAction;
-
   auto& v = vmain(env);
-  void (*handler)(ActRec*, CallFlags) = nullptr;
 
-  switch (extra_args_action(func, argc)) {
-    case Action::None:
-      if (func->attrs() & AttrMayUseVV) {
-        v << storeqi{0, fp[AROFF(m_invName)]};
-      }
-      return;
-
-    case Action::Discard:
-      handler = trimExtraArgs;
-      break;
-    case Action::Variadic:
-      handler = shuffleExtraArgsVariadic;
-      break;
-    case Action::MayUseVV:
-      handler = shuffleExtraArgsMayUseVV;
-      break;
-    case Action::VarAndVV:
-      handler = shuffleExtraArgsVariadicAndVV;
-      break;
+  // Zero out m_varEnv if it may be used.
+  if (func->attrs() & AttrMayUseVV) {
+    v << storeqi{0, fp[AROFF(m_varEnv)]};
   }
+
+  // No extra arguments.
+  if (extra->argc <= func->numNonVariadicParams()) {
+    return;
+  }
+
+  void (*handler)(ActRec*, CallFlags) = func->hasVariadicCaptureParam()
+    ? shuffleExtraArgsVariadic  // populate `...$args` parameter
+    : trimExtraArgs;            // discard extra arguments
 
   cgCallHelper(
     v,

@@ -112,12 +112,8 @@ void Generator::copyVars(const ActRec* srcFp) {
   if (LIKELY(!(srcFp->func()->attrs() & AttrMayUseVV))) return;
   if (LIKELY(srcFp->m_varEnv == nullptr)) return;
 
-  if (srcFp->hasExtraArgs()) {
-    dstFp->setExtraArgs(srcFp->getExtraArgs()->clone(dstFp));
-  } else {
-    assertx(srcFp->hasVarEnv());
-    dstFp->setVarEnv(srcFp->getVarEnv()->clone(dstFp));
-  }
+  assertx(srcFp->hasVarEnv());
+  dstFp->setVarEnv(srcFp->getVarEnv()->clone(dstFp));
 }
 
 void Generator::yield(Offset resumeOffset,

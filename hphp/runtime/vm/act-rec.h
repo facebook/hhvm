@@ -32,7 +32,6 @@ namespace HPHP {
 
 struct ActRec;
 struct Class;
-struct ExtraArgs;
 struct Func;
 struct ObjectData;
 struct StringData;
@@ -85,7 +84,6 @@ struct ActRec {
   };
   union {
     VarEnv* m_varEnv;       // Variable environment when live
-    ExtraArgs* m_extraArgs; // Lightweight extra args, when live
     StringData* m_invName;  // Invoked name, used for __call(), when pre-live
   };
 
@@ -137,7 +135,6 @@ struct ActRec {
    * accessors (below) to encapsulate this logic.
    */
   static auto constexpr      kHasClassBit  = 0x1;  // unset for m_this
-  static auto constexpr      kExtraArgsBit = 0x1;  // unset for m_varEnv
 
   static constexpr uintptr_t kTrashedVarEnvSlot = 0xfeeefeee000f000f;
   static constexpr uintptr_t kTrashedThisSlot = 0xfeeefeeef00fe00e;
@@ -316,39 +313,30 @@ struct ActRec {
   void trashThis();
 
   /////////////////////////////////////////////////////////////////////////////
-  // VarEnv / ExtraArgs.
+  // VarEnv.
 
   /*
-   * Write garbage to the m_varEnv/m_extraArgs union (in debug mode only).
+   * Write garbage to the m_varEnv (in debug mode only).
    */
   void trashVarEnv();
 
   /*
-   * Check that the m_varEnv/m_extraArgs union is not the special garbage
+   * Check that the m_varEnv is not the special garbage
    * value.
    */
   bool checkVarEnv() const;
 
   /*
-   * Whether the m_varEnv/m_extraArgs union is discriminated in the desired
-   * way.
+   * Whether the m_varEnv is non-null.
    */
   bool hasVarEnv() const;
-  bool hasExtraArgs() const;
 
   /*
-   * Get and decode the VarEnv.
+   * Get the VarEnv.
    *
    * @requires: hasVarEnv()
    */
   VarEnv* getVarEnv() const;
-
-  /*
-   * Get and decode the ExtraArgs.
-   *
-   * If !hasExtraArgs(), returns nullptr.
-   */
-  ExtraArgs* getExtraArgs() const;
 
   /*
    * Get and decode the magic invocation name.
@@ -358,19 +346,9 @@ struct ActRec {
   StringData* getInvName() const;
 
   /*
-   * Encode and set `val' to the m_varEnv/m_extraArgs union.
+   * Set `val' to the m_varEnv.
    */
   void setVarEnv(VarEnv* val);
-  void setExtraArgs(ExtraArgs* val);
-  void resetExtraArgs();
-
-  /*
-   * Get the extra argument with index `ind', from either the VarEnv or the
-   * ExtraArgs, whichever is set.
-   *
-   * Returns nullptr if there are no extra arguments.
-   */
-  TypedValue* getExtraArg(unsigned ind) const;
 
   /*
    * Get the minimum possible effective level of reactivity.

@@ -1,7 +1,7 @@
 <?hh /* destructor */
 
 class A {
-  public static function foo() {
+  public static function foo(...$args) {
    var_dump('failed');
    return 12;
   }

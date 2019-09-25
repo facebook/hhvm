@@ -2130,7 +2130,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvVecToDArr:
     return may_load_store(AElemAny, AEmpty);
 
-  case ReleaseVVAndSkip:  // can decref ExtraArgs or VarEnv and Locals
+  case ReleaseVVAndSkip:  // can decref VarEnv and Locals
     return may_reenter(inst,
                        may_load_store(AHeapAny|AFrameAny, AHeapAny|AFrameAny));
 

@@ -171,9 +171,7 @@ const Func* lookupClsMethodHelper(const Class* cls, const StringData* methName,
 // These shuffle* functions are the JIT's version of bytecode.cpp's
 // shuffleExtraStackArgs
 void trimExtraArgs(ActRec* ar);
-void shuffleExtraArgsMayUseVV(ActRec* ar);
 void shuffleExtraArgsVariadic(ActRec* ar);
-void shuffleExtraArgsVariadicAndVV(ActRec* ar);
 
 void raiseMissingArgument(const Func* func, int got);
 void raiseTooManyArguments(const Func* func, int got);

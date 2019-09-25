@@ -327,10 +327,6 @@ inline bool Func::hasVariadicCaptureParam() const {
   return m_attrs & AttrVariadicParam;
 }
 
-inline bool Func::discardExtraArgs() const {
-  return !(m_attrs & (AttrMayUseVV | AttrVariadicParam));
-}
-
 inline bool Func::takesInOutParams() const {
   return m_attrs & AttrTakesInOutParams;
 }

@@ -78,13 +78,4 @@ bool ActRec::isInlined() const {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypedValue* ActRec::getExtraArg(unsigned ind) const {
-  assertx(hasExtraArgs() || hasVarEnv());
-  return hasExtraArgs() ? getExtraArgs()->getExtraArg(ind) :
-         hasVarEnv()    ? getVarEnv()->getExtraArg(ind) :
-         static_cast<TypedValue*>(nullptr);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 }

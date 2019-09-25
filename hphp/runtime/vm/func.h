@@ -534,12 +534,6 @@ struct Func final {
   bool hasVariadicCaptureParam() const;
 
   /*
-   * Whether extra arguments passed at call time can be ignored because they
-   * are never used.
-   */
-  bool discardExtraArgs() const;
-
-  /*
    * Whether any of the parameters to this function are inout parameters.
    */
   bool takesInOutParams() const;

@@ -258,31 +258,15 @@ void cgReleaseVVAndSkip(IRLS& env, const IRInstruction* inst) {
       v << incwm{rvmtl()[profile.handle() + releasedOff], v.makeReg()};
     }
 
-    auto const sf = v.makeReg();
-    v << testqim{ActRec::kExtraArgsBit, fp[AROFF(m_varEnv)], sf};
-
-    unlikelyIfThenElse(v, vc, CC_NZ, sf,
-      [&] (Vout& v) {
-        cgCallHelper(
-          v, env,
-          CallSpec::direct(static_cast<void (*)(ActRec*)>(
-                           ExtraArgs::deallocate)),
-          kVoidDest,
-          SyncOptions::Sync,
-          argGroup(env, inst).reg(fp)
-        );
-      },
-      [&] (Vout& v) {
-        cgCallHelper(
-          v, env,
-          CallSpec::direct(static_cast<void (*)(ActRec*)>(
-                           VarEnv::deallocate)),
-          kVoidDest,
-          SyncOptions::Sync,
-          argGroup(env, inst).reg(fp)
-        );
-        v << jmp{label(env, inst->taken())};
-      });
+    cgCallHelper(
+      v, env,
+      CallSpec::direct(static_cast<void (*)(ActRec*)>(
+                       VarEnv::deallocate)),
+      kVoidDest,
+      SyncOptions::Sync,
+      argGroup(env, inst).reg(fp)
+    );
+    v << jmp{label(env, inst->taken())};
   }, releaseUnlikely);
 }
 

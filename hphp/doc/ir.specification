@@ -1874,9 +1874,8 @@ To string conversions:
 | ReleaseVVAndSkip, ND, S(FramePtr), B
 
   Loads the VarEnv slot off the ActRec pointed to by S0. If it is null, does
-  nothing. If it is an ExtraArgs, deallocates the ExtraArgs structure.
-  Otherwise it frees the VarEnv and jumps to block B. This instruction may not
-  occur in an inlined call.
+  nothing. Otherwise it frees the VarEnv and jumps to block B. This instruction
+  may not occur in an inlined call.
 
 | GenericRetDecRefs, ND, S(FramePtr), NF
 
@@ -3483,10 +3482,10 @@ fields of that struct for holding intermediate values.
 
 | InitExtraArgs<func,argc>, ND, S(FramePtr) S(Int), NF
 
-  Set up the ExtraArgs struct on the live ActRec.  If extra args are present
-  and need to be discarded, they will be decref'd and may re-enter to run
-  destructors. S1 contains call arguments.
-
+  Process extra arguments, if present. Either shuffle them to the `...$args`
+  local, or discard them. Also, in case of MayUseVV, set m_varEnv to nullptr.
+  S1 contains call arguments.
+  
 | InitCtx, ND, S(FramePtr) S(Ctx,Nullptr), CRc
 
   Store S1 to the m_this/m_cls field in the frame pointer S0.

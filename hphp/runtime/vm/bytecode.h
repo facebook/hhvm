@@ -83,56 +83,6 @@ void setopBody(tv_lval lhs, SetOpOp op, Cell* rhs) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct ExtraArgs {
-  ExtraArgs(const ExtraArgs&) = delete;
-  ExtraArgs& operator=(const ExtraArgs&) = delete;
-
-  /*
-   * Allocate an ExtraArgs structure, with arguments copied from the
-   * evaluation stack.  This takes ownership of the args without
-   * adjusting reference counts, so they must be discarded from the
-   * stack.
-   */
-  static ExtraArgs* allocateCopy(TypedValue* args, unsigned nargs);
-
-  /*
-   * Allocate an ExtraArgs, without initializing any of the arguments.
-   * All arguments must be initialized via getExtraArg before
-   * deallocate() is called for the returned pointer.
-   */
-  static ExtraArgs* allocateUninit(unsigned nargs);
-
-  /*
-   * Deallocate an extraArgs structure.  Either use the one that
-   * exists in a ActRec, or do it explicitly.
-   */
-  static void deallocate(ActRec*);
-  static void deallocate(ExtraArgs*, unsigned numArgs);
-
-  // Just free the memory, don't dec-ref anything.
-  static void deallocateRaw(ExtraArgs*);
-
-  /**
-   * Make a copy of ExtraArgs.
-   */
-  ExtraArgs* clone(ActRec* fp) const;
-
-  /*
-   * Get the slot for extra arg i, where i = argNum - func->numParams.
-   */
-  TypedValue* getExtraArg(unsigned argInd) const;
-
-private:
-  ExtraArgs();
-  ~ExtraArgs();
-
-  static void* allocMem(unsigned nargs);
-
-private:
-  TypedValue m_extraArgs[0];
-  TYPE_SCAN_FLEXIBLE_ARRAY_FIELD(m_extraArgs);
-};
-
 /*
  * Variable environment.
  *
@@ -154,13 +104,12 @@ private:
 struct VarEnv {
  private:
   NameValueTable m_nvTable;
-  ExtraArgs* m_extraArgs;
   uint16_t m_depth;
   const bool m_global;
 
  public:
   explicit VarEnv();
-  explicit VarEnv(ActRec* fp, ExtraArgs* eArgs);
+  explicit VarEnv(ActRec* fp);
   explicit VarEnv(const VarEnv* varEnv, ActRec* fp);
   ~VarEnv();
 
@@ -190,38 +139,7 @@ struct VarEnv {
   // Used for save/store m_cfp for debugger
   ActRec* getFP() const { return m_nvTable.getFP(); }
   bool isGlobalScope() const { return m_global; }
-
-  // Access to wrapped ExtraArgs, if we have one.
-  TypedValue* getExtraArg(unsigned argInd) const;
 };
-
-/*
- * Action taken to handle any extra arguments passed for a function call.
- */
-enum class ExtraArgsAction {
-  None,     // no extra arguments; zero out m_extraArgs
-  Discard,  // discard extra arguments
-  Variadic, // populate `...$args' parameter
-  MayUseVV, // create ExtraArgs
-  VarAndVV, // both of the above
-};
-
-inline ExtraArgsAction extra_args_action(const Func* func, uint32_t argc) {
-  using Action = ExtraArgsAction;
-
-  auto const nparams = func->numNonVariadicParams();
-  if (argc <= nparams) return Action::None;
-
-  if (LIKELY(func->discardExtraArgs())) {
-    return Action::Discard;
-  }
-  if (func->attrs() & AttrMayUseVV) {
-    return func->hasVariadicCaptureParam() ? Action::VarAndVV
-                                           : Action::MayUseVV;
-  }
-  assertx(func->hasVariadicCaptureParam());
-  return Action::Variadic;
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -839,7 +757,7 @@ enum class StackArgsState { // tells prepareFuncEntry how much work to do
   // the stack may contain more arguments than the function expects
   Untrimmed,
   // the stack has already been trimmed of any extra arguments, which
-  // have been teleported away into ExtraArgs and/or a variadic param
+  // have been teleported away into a variadic param
   Trimmed
 };
 void enterVMAtPseudoMain(ActRec* enterFnAr, VarEnv* varEnv);

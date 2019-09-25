@@ -107,18 +107,11 @@ frame_free_locals_helper_inl(ActRec* fp, int numLocals) {
   assertx(numLocals == fp->m_func->numLocals());
   // Check if the frame has a VarEnv or if it has extraArgs
   if (UNLIKELY(fp->func()->attrs() & AttrMayUseVV) &&
-      UNLIKELY(fp->m_varEnv != nullptr)) {
-    if (fp->hasVarEnv()) {
-      // If there is a VarEnv, free the locals and the VarEnv
-      // by calling the detach method.
-      fp->m_varEnv->exitFP(fp);
-      return;
-    }
-    // Free extra args
-    assertx(fp->hasExtraArgs());
-    ExtraArgs* ea = fp->getExtraArgs();
-    int numExtra = fp->numArgs() - fp->m_func->numNonVariadicParams();
-    ExtraArgs::deallocate(ea, numExtra);
+      UNLIKELY(fp->hasVarEnv())) {
+    // If there is a VarEnv, free the locals and the VarEnv
+    // by calling the detach method.
+    fp->m_varEnv->exitFP(fp);
+    return;
   }
   // Free locals
   for (int i = numLocals - 1; i >= 0; --i) {

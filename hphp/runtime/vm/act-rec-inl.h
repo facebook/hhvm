@@ -232,23 +232,12 @@ inline bool ActRec::checkVarEnv() const {
 inline bool ActRec::hasVarEnv() const {
   assertx(checkVarEnv());
   assertx(!magicDispatch());
-  return m_varEnv && !(reinterpret_cast<uintptr_t>(m_varEnv) & kExtraArgsBit);
-}
-
-inline bool ActRec::hasExtraArgs() const {
-  assertx(checkVarEnv());
-  return reinterpret_cast<uintptr_t>(m_extraArgs) & kExtraArgsBit;
+  return m_varEnv;
 }
 
 inline VarEnv* ActRec::getVarEnv() const {
   assertx(hasVarEnv());
   return m_varEnv;
-}
-
-inline ExtraArgs* ActRec::getExtraArgs() const {
-  if (!hasExtraArgs()) return nullptr;
-  return reinterpret_cast<ExtraArgs*>(
-    reinterpret_cast<uintptr_t>(m_extraArgs) - kExtraArgsBit);
 }
 
 inline StringData* ActRec::getInvName() const {
@@ -259,15 +248,6 @@ inline StringData* ActRec::getInvName() const {
 
 inline void ActRec::setVarEnv(VarEnv* val) {
   m_varEnv = val;
-}
-
-inline void ActRec::setExtraArgs(ExtraArgs* val) {
-  m_extraArgs = reinterpret_cast<ExtraArgs*>(
-    reinterpret_cast<uintptr_t>(val) | kExtraArgsBit);
-}
-
-inline void ActRec::resetExtraArgs() {
-  m_extraArgs = nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

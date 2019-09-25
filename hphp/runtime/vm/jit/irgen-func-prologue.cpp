@@ -80,8 +80,8 @@ void prologueDispatch(IRGS& env, const Func* func, Body body) {
 /*
  * Initialize parameters.
  *
- * Set un-passed parameters to Uninit (or the empty array, for the variadic
- * capture parameter) and set up the ExtraArgs on the ActRec as needed.
+ * Set un-passed parameters to Uninit and set up the variadic capture parameter
+ * as neeeded.
  */
 void init_params(IRGS& env, const Func* func, uint32_t argc,
                  SSATmp* callFlags) {
@@ -141,7 +141,8 @@ void init_params(IRGS& env, const Func* func, uint32_t argc,
 
   assertx(!isInlining(env) || argc <= nparams);
   if (!isInlining(env)) {
-    // Null out or initialize the frame's ExtraArgs. Also takes care of moving
+    // Shuffle extra args to variadic capture parameter or trim them.
+    // Also sets m_varEnv to nullptr if MayUseVV and takes care of moving
     // generics to the correct slot if there were too many args.
     env.irb->exceptionStackBoundary();
     gen(env, InitExtraArgs, FuncEntryData{func, argc}, fp(env), callFlags);
@@ -300,9 +301,8 @@ StackCheck stack_check_kind(const Func* func, uint32_t argc) {
    *
    * The only things we are going to do is write uninits to the non-passed
    * params and to the non-parameter locals, and possibly shuffle some of the
-   * locals into an ExtraArgs structure.  The stack overflow code knows how to
-   * handle the possibility of an ExtraArgs structure on the ActRec, and the
-   * uninits are harmless as long as we know we aren't going to segfault while
+   * locals into the variadic capture param.  The uninits are harmless to the
+   * stack overflow code as long as we know we aren't going to segfault while
    * we write them.
    *
    * There's always sSurprisePageSize extra space at the bottom (lowest

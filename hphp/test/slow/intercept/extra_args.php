@@ -1,6 +1,6 @@
 <?hh /* destructor */
 
-function foo() {
+function foo(...$args) {
  var_dump('failed');
  return 12;
 }

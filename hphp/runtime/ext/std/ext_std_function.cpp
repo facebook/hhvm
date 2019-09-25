@@ -109,8 +109,7 @@ Array hhvm_get_frame_args(const ActRec* ar, int offset) {
   }
   int numParams = ar->func()->numNonVariadicParams();
   int numArgs = ar->numArgs();
-  bool variadic = ar->func()->hasVariadicCaptureParam() &&
-    !(ar->func()->attrs() & AttrMayUseVV);
+  bool variadic = ar->func()->hasVariadicCaptureParam();
   auto local = reinterpret_cast<TypedValue*>(
     uintptr_t(ar) - sizeof(TypedValue)
   );
@@ -130,11 +129,9 @@ Array hhvm_get_frame_args(const ActRec* ar, int offset) {
       // on the stack.
       retInit.append(tvAsCVarRef(local));
       --local;
-    } else if (variadic) {
-      retInit.append(tvAsCVarRef(local).asCArrRef()[i - numParams]);
     } else {
-      // This is not a formal parameter, so it's in the ExtraArgs.
-      retInit.append(tvAsCVarRef(ar->getExtraArg(i - numParams)));
+      assertx(variadic);
+      retInit.append(tvAsCVarRef(local).asCArrRef()[i - numParams]);
     }
   }
 

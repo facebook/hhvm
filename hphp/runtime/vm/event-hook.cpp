@@ -230,13 +230,22 @@ void runUserProfilerOnFunctionExit(const ActRec* ar, const TypedValue* retval,
 static Array get_frame_args(const ActRec* ar, bool with_ref) {
   int numNonVariadic = ar->func()->numNonVariadicParams();
   int numArgs = ar->numArgs();
+  auto const variadic = ar->func()->hasVariadicCaptureParam();
+  auto local = reinterpret_cast<TypedValue*>(
+    uintptr_t(ar) - sizeof(TypedValue)
+  );
+  if (variadic && numArgs > numNonVariadic) {
+    auto arr = local - numNonVariadic;
+    if (isArrayType(arr->m_type) && arr->m_data.parr->hasPackedLayout()) {
+      numArgs = numNonVariadic + arr->m_data.parr->size();
+    } else {
+      numArgs = numNonVariadic;
+    }
+  }
 
   SuppressHACRefBindNotices _guard;
   VArrayInit retArray(numArgs);
 
-  auto local = reinterpret_cast<TypedValue*>(
-    uintptr_t(ar) - sizeof(TypedValue)
-  );
   int i = 0;
   // The function's formal parameters are on the stack
   for (; i < numArgs && i < numNonVariadic; ++i) {
@@ -246,22 +255,13 @@ static Array get_frame_args(const ActRec* ar, bool with_ref) {
   }
 
   if (i < numArgs) {
+    assertx(ar->func()->hasVariadicCaptureParam());
     // If there are still args that haven't been accounted for, they have
-    // either been ... :
-    if (ar->func()->hasVariadicCaptureParam()) {
-      // ... shuffled into a packed array stored in the variadic capture
-      // param on the stack
-      for (ArrayIter iter(tvAsCVarRef(local)); iter; ++iter) {
-        if (with_ref) retArray.appendWithRef(iter.secondVal());
-        else          retArray.append(iter.secondVal());
-      }
-    } else {
-      // ... or moved into the ExtraArgs datastructure.
-      for (; i < numArgs; ++i) {
-        auto const arg = ar->getExtraArg(i - numNonVariadic);
-        if (with_ref) retArray.appendWithRef(tvAsCVarRef(arg));
-        else          retArray.append(tvAsCVarRef(arg));
-      }
+    // been shuffled into a packed array stored in the variadic capture
+    // param on the stack.
+    for (ArrayIter iter(tvAsCVarRef(local)); iter; ++iter) {
+      if (with_ref) retArray.appendWithRef(iter.secondVal());
+      else          retArray.append(iter.secondVal());
     }
   }
   return retArray.toArray();

@@ -306,7 +306,6 @@ void VarEnv::createGlobal() {
 
 VarEnv::VarEnv()
   : m_nvTable()
-  , m_extraArgs(nullptr)
   , m_depth(0)
   , m_global(true)
 {
@@ -317,9 +316,8 @@ VarEnv::VarEnv()
   m_nvTable.set(s_GLOBALS.get(), globals_var.asTypedValue());
 }
 
-VarEnv::VarEnv(ActRec* fp, ExtraArgs* eArgs)
+VarEnv::VarEnv(ActRec* fp)
   : m_nvTable(fp)
-  , m_extraArgs(eArgs)
   , m_depth(1)
   , m_global(false)
 {
@@ -329,7 +327,6 @@ VarEnv::VarEnv(ActRec* fp, ExtraArgs* eArgs)
 
 VarEnv::VarEnv(const VarEnv* varEnv, ActRec* fp)
   : m_nvTable(varEnv->m_nvTable, fp)
-  , m_extraArgs(varEnv->m_extraArgs ? varEnv->m_extraArgs->clone(fp) : nullptr)
   , m_depth(1)
   , m_global(false)
 {
@@ -365,7 +362,7 @@ void VarEnv::deallocate(ActRec* fp) {
 }
 
 VarEnv* VarEnv::createLocal(ActRec* fp) {
-  return req::make_raw<VarEnv>(fp, fp->getExtraArgs());
+  return req::make_raw<VarEnv>(fp);
 }
 
 VarEnv* VarEnv::clone(ActRec* fp) const {
@@ -415,12 +412,6 @@ void VarEnv::exitFP(ActRec* fp) {
   m_nvTable.detach(fp);
 
   if (m_depth == 0) {
-    if (m_extraArgs) {
-      assertx(!isGlobalScope());
-      const auto numExtra = fp->numArgs() - fp->m_func->numNonVariadicParams();
-      ExtraArgs::deallocate(m_extraArgs, numExtra);
-    }
-
     // don't free global VarEnv
     if (!isGlobalScope()) {
       req::destroy_raw(this);
@@ -490,74 +481,6 @@ Array VarEnv::getDefinedVariables() const {
     sorted->ksort(0, true);
   }
   return ret;
-}
-
-TypedValue* VarEnv::getExtraArg(unsigned argInd) const {
-  return m_extraArgs->getExtraArg(argInd);
-}
-
-//=============================================================================
-
-ExtraArgs::ExtraArgs() {}
-ExtraArgs::~ExtraArgs() {}
-
-void* ExtraArgs::allocMem(unsigned nargs) {
-  assertx(nargs > 0);
-  return req::malloc(
-    sizeof(TypedValue) * nargs + sizeof(ExtraArgs),
-    type_scan::getIndexForMalloc<
-      ExtraArgs,
-      type_scan::Action::WithSuffix<TypedValue>
-    >()
-  );
-}
-
-ExtraArgs* ExtraArgs::allocateCopy(TypedValue* args, unsigned nargs) {
-  void* mem = allocMem(nargs);
-  ExtraArgs* ea = new (mem) ExtraArgs();
-
-  /*
-   * The stack grows downward, so the args in memory are "backward"; i.e. the
-   * leftmost (in PHP) extra arg is highest in memory.
-   */
-  std::reverse_copy(args, args + nargs, &ea->m_extraArgs[0]);
-  return ea;
-}
-
-ExtraArgs* ExtraArgs::allocateUninit(unsigned nargs) {
-  void* mem = ExtraArgs::allocMem(nargs);
-  return new (mem) ExtraArgs();
-}
-
-void ExtraArgs::deallocate(ExtraArgs* ea, unsigned nargs) {
-  assertx(nargs > 0);
-  for (unsigned i = 0; i < nargs; ++i) {
-    tvDecRefGen(ea->m_extraArgs + i);
-  }
-  deallocateRaw(ea);
-}
-
-void ExtraArgs::deallocate(ActRec* ar) {
-  const int numExtra = ar->numArgs() - ar->m_func->numNonVariadicParams();
-  deallocate(ar->getExtraArgs(), numExtra);
-}
-
-void ExtraArgs::deallocateRaw(ExtraArgs* ea) {
-  ea->~ExtraArgs();
-  req::free(ea);
-}
-
-ExtraArgs* ExtraArgs::clone(ActRec* ar) const {
-  const int numExtra = ar->numArgs() - ar->m_func->numParams();
-  auto ret = allocateUninit(numExtra);
-  for (int i = 0; i < numExtra; ++i) {
-    tvDupWithRef(m_extraArgs[i], ret->m_extraArgs[i]);
-  }
-  return ret;
-}
-
-TypedValue* ExtraArgs::getExtraArg(unsigned argInd) const {
-  return const_cast<TypedValue*>(&m_extraArgs[argInd]);
 }
 
 //=============================================================================
@@ -1033,6 +956,7 @@ NEVER_INLINE
 static void shuffleExtraStackArgs(ActRec* ar) {
   const Func* func = ar->m_func;
   assertx(func);
+  assertx(func->hasVariadicCaptureParam());
 
   // the last (variadic) param is included in numParams (since it has a
   // name), but the arg in that slot should be included as the first
@@ -1041,54 +965,21 @@ static void shuffleExtraStackArgs(ActRec* ar) {
   const auto numVarArgs = numArgs - func->numNonVariadicParams();
   assertx(numVarArgs > 0);
 
-  const auto takesVariadicParam = func->hasVariadicCaptureParam();
   auto& stack = vmStack();
-  if (func->attrs() & AttrMayUseVV) {
-    auto const tvArgs = reinterpret_cast<TypedValue*>(ar) - numArgs;
-    ar->setExtraArgs(ExtraArgs::allocateCopy(tvArgs, numVarArgs));
-    if (takesVariadicParam) {
-      try {
-        VArrayInit ai{numVarArgs};
-        for (uint32_t i = 0; i < numVarArgs; ++i) {
-          ai.appendWithRef(*(tvArgs + numVarArgs - 1 - i));
-        }
-        // Remove them from the stack
-        stack.ndiscard(numVarArgs);
-        if (RuntimeOption::EvalHackArrDVArrs) {
-          stack.pushVecNoRc(ai.create());
-        } else {
-          stack.pushArrayNoRc(ai.create());
-        }
-        // Before, for each arg: refcount = n + 1 (stack)
-        // After, for each arg: refcount = n + 2 (ExtraArgs, varArgsArray)
-      } catch (...) {
-        ExtraArgs::deallocateRaw(ar->getExtraArgs());
-        ar->resetExtraArgs();
-        throw;
-      }
-    } else {
-      // Discard the arguments from the stack; they were all moved
-      // into the extra args so we don't decref.
-      stack.ndiscard(numVarArgs);
-    }
-    // leave ar->numArgs reflecting the actual number of args passed
-  } else {
-    assertx(takesVariadicParam); // called only if extra args are used
-    auto tvArgs = reinterpret_cast<TypedValue*>(ar) - numArgs + numVarArgs - 1;
-    VArrayInit ai{numVarArgs};
-    for (uint32_t i = 0; i < numVarArgs; ++i) {
-      ai.appendWithRef(*(tvArgs--));
-    }
-    // Discard the arguments from the stack
-    for (uint32_t i = 0; i < numVarArgs; ++i) stack.popTV();
-    if (RuntimeOption::EvalHackArrDVArrs) {
-      stack.pushVecNoRc(ai.create());
-    } else {
-      stack.pushArrayNoRc(ai.create());
-    }
-    assertx(func->numParams() == (numArgs - numVarArgs + 1));
-    ar->setNumArgs(func->numParams());
+  auto tvArgs = reinterpret_cast<TypedValue*>(ar) - numArgs + numVarArgs - 1;
+  VArrayInit ai{numVarArgs};
+  for (uint32_t i = 0; i < numVarArgs; ++i) {
+    ai.appendWithRef(*(tvArgs--));
   }
+  // Discard the arguments from the stack
+  for (uint32_t i = 0; i < numVarArgs; ++i) stack.popTV();
+  if (RuntimeOption::EvalHackArrDVArrs) {
+    stack.pushVecNoRc(ai.create());
+  } else {
+    stack.pushArrayNoRc(ai.create());
+  }
+  assertx(func->numParams() == (numArgs - numVarArgs + 1));
+  ar->setNumArgs(func->numParams());
 }
 
 static void shuffleMagicArgs(ActRec* ar) {
@@ -1133,28 +1024,6 @@ static void shuffleMagicArgs(ActRec* ar) {
 
   ar->setNumArgs(2);
   ar->setVarEnv(nullptr);
-}
-
-// This helper is meant to be called if an exception or invalidation takes
-// place in the process of function entry; the ActRec ar is on the stack
-// but is not (yet) the current (executing) frame and is followed by a
-// number of params
-static NEVER_INLINE void cleanupParamsAndActRec(Stack& stack,
-                                                ActRec* ar,
-                                                ExtraArgs* extraArgs,
-                                                int* numParams) {
-  assertx(stack.top() + (numParams != nullptr ? (*numParams) :
-                        extraArgs != nullptr ? ar->m_func->numParams() :
-                        ar->numArgs())
-         == (void*)ar);
-  if (extraArgs) {
-    const int numExtra = ar->numArgs() - ar->m_func->numNonVariadicParams();
-    ExtraArgs::deallocate(extraArgs, numExtra);
-  }
-  while (stack.top() != (void*)ar) {
-    stack.popTV();
-  }
-  stack.popAR();
 }
 
 static NEVER_INLINE void shuffleMagicArrayArgs(ActRec* ar, const Cell args,
@@ -1267,6 +1136,11 @@ void prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
     return;
   }
 
+  ar->trashVarEnv();
+  if (!debug || (ar->func()->attrs() & AttrMayUseVV)) {
+    ar->setVarEnv(nullptr);
+  }
+
 #define WRAP(e)                                                        \
   try {                                                                \
     e;                                                                 \
@@ -1309,10 +1183,6 @@ void prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
       // "trimmed" over there, we need to null the extraArgs/varEnv field if
       // the function could read it.
       ar->setNumArgs(nargs);
-      ar->trashVarEnv();
-      if (!debug || (ar->func()->attrs() & AttrMayUseVV)) {
-        ar->setVarEnv(nullptr);
-      }
       return;
     }
   }
@@ -1323,7 +1193,7 @@ void prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
   // ... unpack operator and/or still remaining in argArray
   assertx(nargs > nparams);
   assertx(nextra_regular > 0 || !!iter);
-  if (LIKELY(f->discardExtraArgs())) {
+  if (LIKELY(!f->hasVariadicCaptureParam())) {
     if (UNLIKELY(nextra_regular > 0)) {
       // if unpacking, any regularly passed arguments on the stack
       // in excess of those expected by the function need to be discarded
@@ -1337,92 +1207,45 @@ void prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
     return;
   }
 
-  auto const hasVarParam = f->hasVariadicCaptureParam();
   auto const extra = nargs - nparams;
-  if (f->attrs() & AttrMayUseVV) {
-    ExtraArgs* extraArgs = ExtraArgs::allocateUninit(extra);
+  if (nparams == nregular &&
+      !RuntimeOption::EvalHackArrDVArrs &&
+      isArrayType(args.m_type) &&
+      args.m_data.parr->isVArray()) {
+    stack.pushArray(args.m_data.parr);
+  } else if (nparams == nregular &&
+             RuntimeOption::EvalHackArrDVArrs &&
+             isVecType(args.m_type)) {
+    stack.pushVec(args.m_data.parr);
+  } else {
     VArrayInit ai(extra);
     if (UNLIKELY(nextra_regular > 0)) {
       // The arguments are pushed in order, so we should refer them by
       // index instead of taking the top, that would lead to reverse order.
       for (int i = nextra_regular - 1; i >= 0; --i) {
-        TypedValue* to = extraArgs->getExtraArg(nextra_regular - i - 1);
-        const TypedValue* from = stack.indTV(i);
-        if (isRefType(from->m_type) && from->m_data.pref->isReferenced()) {
-          refCopy(*from, *to);
-        } else {
-          cellCopy(*tvToCell(from), *to);
-        }
-        if (hasVarParam) {
-          // appendWithRef bumps the refcount: this accounts for the fact
-          // that the extra args values went from being present on the stack
-          // to being in (both) ExtraArgs and the variadic args
-          ai.appendWithRef(tvAsCVarRef(from));
-        }
+        // appendWithRef bumps the refcount and splits if necessary,
+        // to compensate for the upcoming pop from the stack
+        ai.appendWithRef(tvAsVariant(stack.indTV(i)));
       }
-      stack.ndiscard(nextra_regular);
+      for (int i = 0; i < nextra_regular; ++i) {
+        stack.popTV();
+      }
     }
     for (int i = nextra_regular; i < extra; ++i, ++iter) {
-      TypedValue* to = extraArgs->getExtraArg(i);
-      auto const from = iter.secondValPlus();
-      tvDupWithRef(from, *to);
-      if (hasVarParam) {
-        ai.appendWithRef(from);
-      }
+      // appendWithRef bumps the refcount to compensate for the
+      // eventual decref of arrayArgs.
+      ai.appendWithRef(iter.secondValPlus());
     }
     assertx(!iter); // iter should now be exhausted
-    if (hasVarParam) {
-      auto const ad = ai.create();
-      assertx(ad->hasExactlyOneRef());
-      if (RuntimeOption::EvalHackArrDVArrs) {
-        stack.pushVecNoRc(ad);
-      } else {
-        stack.pushArrayNoRc(ad);
-      }
-    }
-    ar->setNumArgs(nargs);
-    ar->setExtraArgs(extraArgs);
-  } else {
-    assertx(hasVarParam);
-    if (nparams == nregular &&
-        !RuntimeOption::EvalHackArrDVArrs &&
-        isArrayType(args.m_type) &&
-        args.m_data.parr->isVArray()) {
-      stack.pushArray(args.m_data.parr);
-    } else if (nparams == nregular &&
-               RuntimeOption::EvalHackArrDVArrs &&
-               isVecType(args.m_type)) {
-      stack.pushVec(args.m_data.parr);
+    auto const ad = ai.create();
+    assertx(ad->hasExactlyOneRef());
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      stack.pushVecNoRc(ad);
     } else {
-      VArrayInit ai(extra);
-      if (UNLIKELY(nextra_regular > 0)) {
-        // The arguments are pushed in order, so we should refer them by
-        // index instead of taking the top, that would lead to reverse order.
-        for (int i = nextra_regular - 1; i >= 0; --i) {
-          // appendWithRef bumps the refcount and splits if necessary,
-          // to compensate for the upcoming pop from the stack
-          ai.appendWithRef(tvAsVariant(stack.indTV(i)));
-        }
-        for (int i = 0; i < nextra_regular; ++i) {
-          stack.popTV();
-        }
-      }
-      for (int i = nextra_regular; i < extra; ++i, ++iter) {
-        // appendWithRef bumps the refcount to compensate for the
-        // eventual decref of arrayArgs.
-        ai.appendWithRef(iter.secondValPlus());
-      }
-      assertx(!iter); // iter should now be exhausted
-      auto const ad = ai.create();
-      assertx(ad->hasExactlyOneRef());
-      if (RuntimeOption::EvalHackArrDVArrs) {
-        stack.pushVecNoRc(ad);
-      } else {
-        stack.pushArrayNoRc(ad);
-      }
+      stack.pushArrayNoRc(ad);
     }
-    ar->setNumArgs(f->numParams());
   }
+  ar->setNumArgs(f->numParams());
 }
 
 static void prepareFuncEntry(ActRec *ar, StackArgsState stk, Array&& generics) {
@@ -1434,18 +1257,20 @@ static void prepareFuncEntry(ActRec *ar, StackArgsState stk, Array&& generics) {
   const int nparams = func->numNonVariadicParams();
   auto& stack = vmStack();
 
-  if (stk == StackArgsState::Trimmed &&
-      (ar->func()->attrs() & AttrMayUseVV) &&
-      ar->hasExtraArgs()) {
-    assertx(nparams < ar->numArgs());
-  } else if (UNLIKELY(ar->magicDispatch())) {
+  if (UNLIKELY(ar->magicDispatch())) {
     // shuffleMagicArgs deals with everything. no need for further
     // argument munging
     shuffleMagicArgs(ar);
   } else {
+    ar->trashVarEnv();
+    if (!debug || (ar->func()->attrs() & AttrMayUseVV)) {
+      ar->setVarEnv(nullptr);
+    }
+
     int nargs = ar->numArgs();
     if (UNLIKELY(nargs > nparams)) {
-      if (LIKELY(stk != StackArgsState::Trimmed && func->discardExtraArgs())) {
+      if (LIKELY(stk != StackArgsState::Trimmed &&
+                 !func->hasVariadicCaptureParam())) {
         // In the common case, the function won't use the extra arguments,
         // so act as if they were never passed (NOTE: this has the effect
         // of slightly misleading backtraces that don't reflect the
@@ -1486,9 +1311,6 @@ static void prepareFuncEntry(ActRec *ar, StackArgsState stk, Array&& generics) {
         } else {
           stack.pushArrayNoRc(ArrayData::CreateVArray());
         }
-      }
-      if (func->attrs() & AttrMayUseVV) {
-        ar->setVarEnv(nullptr);
       }
     }
   }

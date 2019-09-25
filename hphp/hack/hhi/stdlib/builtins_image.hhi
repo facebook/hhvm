@@ -40,11 +40,11 @@ function image_type_to_mime_type(int $imagetype);
 <<__PHPStdLib>>
 function image2wbmp(resource $image, string $filename = "", int $threshold = -1);
 <<__PHPStdLib>>
-function imageaffine(resource $image, $affine = array(), $clip = array());
+function imageaffine(resource $image, $affine = varray[], $clip = darray[]);
 <<__PHPStdLib>>
 function imageaffinematrixconcat($m1, $m2);
 <<__PHPStdLib>>
-function imageaffinematrixget(int $type, $options = array());
+function imageaffinematrixget(int $type, $options = darray[]);
 <<__PHPStdLib>>
 function imagealphablending(resource $image, bool $blendmode);
 <<__PHPStdLib>>

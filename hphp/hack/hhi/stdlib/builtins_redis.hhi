@@ -153,8 +153,8 @@ class Redis {
   public function zRem($key, $member1, $member2 = null, $memberN = null) {}
   public function zDelete($key, $member1, $member2 = null, $memberN = null) {}
   public function zRevRange($key, $start, $end, $withscore = null) {}
-  public function zRangeByScore($key, $start, $end, array $options = array()) {}
-  public function zRevRangeByScore($key, $start, $end, array $options = array()) {}
+  public function zRangeByScore($key, $start, $end, array $options = darray[]) {}
+  public function zRevRangeByScore($key, $start, $end, array $options = darray[]) {}
   public function zCount($key, $start, $end) {}
   public function zRemRangeByScore($key, $start, $end) {}
   public function zDeleteRangeByScore($key, $start, $end) {}
@@ -166,8 +166,8 @@ class Redis {
   public function zRank($key, $member) {}
   public function zRevRank($key, $member) {}
   public function zIncrBy($key, $value, $member) {}
-  public function zUnion($Output, $ZSetKeys, array $Weights = array(), $aggregateFunction = 'SUM') {}
-  public function zInter($Output, $ZSetKeys, array $Weights = array(), $aggregateFunction = 'SUM') {}
+  public function zUnion($Output, $ZSetKeys, array $Weights = varray[], $aggregateFunction = 'SUM') {}
+  public function zInter($Output, $ZSetKeys, array $Weights = varray[], $aggregateFunction = 'SUM') {}
   public function hSet($key, $hashKey, $value) {}
   public function hSetNx($key, $hashKey, $value) {}
   public function hGet($key, $hashKey) {}
@@ -182,9 +182,9 @@ class Redis {
   public function hMset($key, $hashKeys) {}
   public function hMGet($key, $hashKeys) {}
   public function config($operation, $key, $value) {}
-  public function evaluate($script, $args = array(), $numKeys = 0) {}
-  public function evalSha($scriptSha, $args = array(), $numKeys = 0) {}
-  public function evaluateSha($scriptSha, $args = array(), $numKeys = 0) {}
+  public function evaluate($script, $args = varray[], $numKeys = 0) {}
+  public function evalSha($scriptSha, $args = varray[], $numKeys = 0) {}
+  public function evaluateSha($scriptSha, $args = varray[], $numKeys = 0) {}
   public function script($command, $script) {}
   public function getLastError() {}
   public function clearLastError() {}
@@ -203,7 +203,7 @@ class RedisException extends RuntimeException {
 <<__PHPStdLib>>
 class RedisArray {
   public function __call($function_name, $arguments) {}
-  public function __construct($name = '', array $hosts = array(), array $opts = array()) {}
+  public function __construct($name = '', array $hosts = varray[], array $opts = darray[]) {}
   public function _distributor() {}
   public function _function() {}
   public function _hosts() {}

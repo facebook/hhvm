@@ -350,6 +350,107 @@ void ifNonNull(IRGS& env, SSATmp* tmp, Then then) {
 }
 
 //////////////////////////////////////////////////////////////////////
+// Multi cond (Chonky cond)
+
+/* This is a helper for generating multi-branch diamonds, or 'chonky conds'
+ *
+ * Usage is something like this:
+ *
+ *
+ *   MultiCond mc{env};
+ *   mc.ifThen(
+ *     [&](Block* taken) { return gen(env, CheckType, TInt, tmp, taken); },
+ *     [&](SSATmp* refined) {
+ *       // this code is executed when we ***don't*** jump to `taken`
+ *       ...
+ *     });
+ *   mc.ifTypeThen( // equivalent to passing a lambda that does CheckType on src
+ *     src, TBool
+ *     [&](SSATmp* refined) {
+ *       ...
+ *     });
+ *   SSATmp* result = mc.elseDo([&]{ return cns(env, false); });
+ *   // mc is logically dead here
+ *
+ *
+ * This will produce the following control flow:
+ *
+ *
+ * B0:
+ *  x1 : Int := CheckType<Int>(x0 : Gen) -> B1
+ *  [ here refined === x1 ]
+ *  phijmp <something> -> B3
+ *
+ * B1:
+ *  x2 : Bool := CheckType<Bool>(x0 : Gen) -> B2
+ *  ...
+ *  phijmp <something> -> B3
+ *
+ * B2:
+ *   phijmp (false : Bool) -> B3
+ *
+ * B3:
+ *   x3 := DefLabel<Bool>
+ *
+ *
+ *
+ * While it won't _necessarily_ break anything to use the IRGS outside of
+ * `if(Type)Then` and `elseDo` while there's a live MultiCond, you are cautioned
+ * to do so at your own peril
+ */
+
+struct MultiCond {
+  explicit MultiCond(IRGS& env)
+    : env{env}
+    , done{defBlock(env)} {}
+
+  ~MultiCond() {
+    assertx(finished);
+  }
+
+  template <typename Branch, typename Then>
+  void ifThen(Branch&& branch, Then&& then) {
+    assertx(!finished);
+    auto const taken = defBlock(env);
+    auto const refined = branch(taken);
+    auto const result = then(refined);
+    resultTy |= result->type();
+    gen(env, Jmp, done, result);
+    env.irb->appendBlock(taken);
+  }
+
+  template <typename Then>
+  void ifTypeThen(SSATmp* src, Type type, Then&& then) {
+    ifThen([&](Block* taken) { return gen(env, CheckType, type, taken, src); },
+           std::forward<Then>(then));
+  }
+
+  template <typename Else>
+  SSATmp* elseDo(Else&& els) {
+    assertx(!finished);
+    auto const result = els();
+    assertx(result);
+    resultTy |= result->type();
+    gen(env, Jmp, done, result);
+    finished = true;
+
+    env.irb->appendBlock(done);
+    auto const label = env.unit.defLabel(1, env.irb->nextBCContext());
+    done->push_back(label);
+    auto const finalResult = label->dst(0);
+    finalResult->setType(resultTy);
+    return finalResult;
+  }
+
+private:
+  IRGS& env;
+  Block* done;
+  Type resultTy{TBottom};
+  bool finished{false};
+};
+
+
+//////////////////////////////////////////////////////////////////////
 // Eval stack manipulation
 
 inline SSATmp* assertType(SSATmp* tmp, Type type) {

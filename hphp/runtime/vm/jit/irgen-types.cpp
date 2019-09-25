@@ -537,145 +537,53 @@ SSATmp* isDVArrayImpl(IRGS& env, SSATmp* val, IsTypeOp op) {
   );
 }
 
-/*
- * A helper to generate and summarize the tangled birds'-nests of type checks
- * we've developed over the last interval. Build one by passing in a list of
- * cases.
- *
- * Cases are processed in the order they appear--you must be careful to ensure
- * this produces the correct behavior. If no case matches, the generated code
- * will produce `false`.
- *
- * Each case is a tuple of (enabled, type, result, instr) and either `enabled`
- * or `result` can be omitted and default to `true` and `false` respectively.
- *
- * If a case has an `instr` that is false-y according to operator bool,
- * and a `result` of false, no code will be generated for it, even if it is
- * enabled.
- */
-template <typename InstrumentationType>
-struct InstrumentedTypecheck {
-  struct Case {
-    Case(bool enabled, Type type, bool result, InstrumentationType instr)
-      : enabled(enabled),
-        type(type),
-        result(result),
-        instr(instr) {}
-
-    template <
-      typename I,
-      typename = std::enable_if<
-        std::is_convertible<I, InstrumentationType>::value
-      >
-    >
-    Case(bool enabled, Type type, bool result, I instr)
-      : Case(enabled,
-             type,
-             result,
-             static_cast<InstrumentationType>(instr)) {}
-
-    template <typename I>
-    Case(Type type, bool result, I instr)
-      : Case(true, type, result, instr) {}
-
-    bool enabled;
-    Type type;
-    bool result;
-    InstrumentationType instr;
-
-  };
-
-  /*
-   * Build an instrumented check from the given table of cases.
-   *
-   * This should be in static storage of some kind since the table is
-   * heap-allocated.
-   */
-  explicit InstrumentedTypecheck(std::initializer_list<Case>&& ilist)
-    : cases(std::move(ilist)) {}
-
-  /*
-   * Build the typecheck into the given irgen environment.
-   *
-   * src: the SSATmp* being type-tested.
-   * impl: a function called on each Case::instr to generate the appropriate
-   *       instrumentation code
-   */
-  template <typename Impl>
-  SSATmp* go(IRGS& env, SSATmp* src, Impl&& impl) const {
-    auto done = defBlock(env);
-
-    for (auto const& k : cases) {
-      if (!k.enabled) continue;
-      if (!k.instr && !k.result) continue;
-      auto taken = defBlock(env);
-      auto const checked_src = gen(env, CheckType, k.type, taken, src);
-      impl(k.instr, checked_src);
-      gen(env, Jmp, done, cns(env, k.result));
-      env.irb->appendBlock(taken);
-    }
-
-    gen(env, Jmp, done, cns(env, false));
-    env.irb->appendBlock(done);
-    auto const label = env.unit.defLabel(1, env.irb->nextBCContext());
-    done->push_back(label);
-    auto const result = label->dst(0);
-    result->setType(TBool);
-    return result;
-  }
-
-  std::vector<Case> cases;
-};
-
 StaticString s_isDict("is_dict");
 StaticString s_isVec("is_vec");
 
 
 SSATmp* isVecImpl(IRGS& env, SSATmp* src) {
-  enum IsVecLogging {
-    None = 0,
-    ClsMethLogging = 1 << 0,
-    ProvLogging = 1 << 1,
-    DVArrayLogging = 1<< 2,
-  };
-
   using RO = RuntimeOption;
-  static auto const mask =
-    (RO::EvalLogArrayProvenance ? ProvLogging : None) |
-    (RO::EvalHackArrCompatIsVecDictNotices ? DVArrayLogging : None) |
-    (RO::EvalIsVecNotices ? ClsMethLogging : None);
 
-  static auto const tycheck = InstrumentedTypecheck<IsVecLogging>{
-    {TVec,     true,    mask & ProvLogging},
-    {TArr,     false,   mask & DVArrayLogging},
-    {RO::EvalHackArrDVArrs,
-     TClsMeth, true,    mask & (ClsMethLogging | ProvLogging)},
+  MultiCond mc{env};
+
+  auto const provLogging = [&](SSATmp* src) {
+    if (!RO::EvalLogArrayProvenance) return;
+    gen(env, RaiseArraySerializeNotice,
+        cns(env, s_isVec.get()),
+        src);
   };
 
-  return tycheck.go(env, src, [&](IsVecLogging kind, SSATmp* src) {
-    if (kind & ClsMethLogging) {
-      gen(env, RaiseNotice,
-          cns(env, makeStaticString(Strings::CLSMETH_COMPAT_IS_VEC)));
-    }
-    if (kind & ProvLogging) {
-      gen(env, RaiseArraySerializeNotice,
-          cns(env, s_isVec.get()),
-          src);
-    }
-    if (kind & DVArrayLogging) {
+  mc.ifTypeThen(src, TVec, [&](SSATmp* src) {
+    provLogging(src);
+    return cns(env, true);
+  });
+
+  if (RO::EvalHackArrCompatIsVecDictNotices) {
+    mc.ifTypeThen(src, TArr, [&](SSATmp* src) {
       ifElse(
         env,
         [&](Block* taken) { return gen(env, CheckVArray, taken, src); },
         [&]{
-          gen(
-            env,
-            RaiseHackArrCompatNotice,
-            cns(env, makeStaticString(Strings::HACKARR_COMPAT_VARR_IS_VEC))
-          );
+          gen(env, RaiseHackArrCompatNotice,
+              cns(env, makeStaticString(Strings::HACKARR_COMPAT_VARR_IS_VEC)));
         }
       );
-    }
-  });
+      return cns(env, false);
+    });
+  }
+
+  if (RO::EvalHackArrDVArrs) {
+    mc.ifTypeThen(src, TClsMeth, [&](SSATmp* src) {
+      if (RO::EvalIsVecNotices) {
+        gen(env, RaiseNotice,
+            cns(env, makeStaticString(Strings::CLSMETH_COMPAT_IS_VEC)));
+      }
+      provLogging(src);
+      return cns(env, true);
+    });
+  }
+
+  return mc.elseDo([&]{ return cns(env, false); });
 }
 
 const StaticString s_FUNC_CONVERSION(Strings::FUNC_TO_STRING);
@@ -684,124 +592,110 @@ const StaticString s_CLASS_CONVERSION(Strings::CLASS_TO_STRING);
 const StaticString s_CLASS_IS_STRING("Class used in is_string");
 
 SSATmp* isStrImpl(IRGS& env, SSATmp* src) {
-  using RO = RuntimeOption;
-  static auto const tycheck = InstrumentedTypecheck<const StringData*>{
-    {TStr,  true, nullptr },
-    {TFunc, true, RO::EvalIsStringNotices ? s_FUNC_IS_STRING.get() : nullptr },
-    {TCls,  true, RO::EvalIsStringNotices ? s_CLASS_IS_STRING.get() : nullptr },
-  };
+  MultiCond mc{env};
 
-  return tycheck.go(env, src, [&](const StringData* msg, SSATmp* src) {
-    if (msg) {
-      gen(env, RaiseNotice, cns(env, msg));
+  mc.ifTypeThen(src, TStr, [&](SSATmp*) { return cns(env, true); });
+
+  mc.ifTypeThen(src, TFunc, [&](SSATmp*) {
+    if (RuntimeOption::EvalIsStringNotices) {
+      gen(env, RaiseNotice, cns(env, s_FUNC_IS_STRING.get()));
     }
+    return cns(env, true);
   });
+
+  mc.ifTypeThen(src, TCls, [&](SSATmp*) {
+    if (RuntimeOption::EvalIsStringNotices) {
+      gen(env, RaiseNotice, cns(env, s_CLASS_IS_STRING.get()));
+    }
+    return cns(env, true);
+  });
+
+  return mc.elseDo([&]{ return cns(env, false); });
 }
 
 SSATmp* isDictImpl(IRGS& env, SSATmp* src) {
-  enum IsDictLogging {
-    None = 0,
-    DVArrayLogging = 1 << 0,
-    ProvLogging = 1 << 1,
-  };
-
   using RO = RuntimeOption;
-  static auto const mask =
-    (RO::EvalLogArrayProvenance ? ProvLogging : None) |
-    (RO::EvalHackArrCompatIsVecDictNotices ? DVArrayLogging : None);
 
-  static auto const tycheck = InstrumentedTypecheck<IsDictLogging>{
-    {TDict,  true, mask & ProvLogging},
-    {TArr,   false, mask & DVArrayLogging},
-  };
+  MultiCond mc{env};
 
-  return tycheck.go(env, src, [&](IsDictLogging kind, SSATmp* src) {
-    if (kind & DVArrayLogging) {
-      ifElse(
-        env,
-        [&](Block* taken) { gen(env, CheckDArray, taken, src); },
-        [&]{
-          gen(
-            env,
-            RaiseHackArrCompatNotice,
-            cns(env, makeStaticString(Strings::HACKARR_COMPAT_DARR_IS_DICT))
-          );
-        }
-      );
-    }
-    if (kind & ProvLogging) {
+  mc.ifTypeThen(src, TDict, [&](SSATmp* src) {
+    if (RO::EvalLogArrayProvenance) {
       gen(env, RaiseArraySerializeNotice,
           cns(env, s_isDict.get()),
           src);
     }
+    return cns(env, true);
   });
+
+  if (RO::EvalHackArrCompatIsVecDictNotices) {
+    mc.ifTypeThen(src, TArr, [&](SSATmp* src) {
+      ifElse(
+        env,
+        [&](Block* taken) { gen(env, CheckDArray, taken, src); },
+        [&]{
+          gen(env, RaiseHackArrCompatNotice,
+              cns(env, makeStaticString(Strings::HACKARR_COMPAT_DARR_IS_DICT)));
+        }
+      );
+      return cns(env, false);
+    });
+  }
+
+  return mc.elseDo([&]{ return cns(env, false); });
 }
 
 const StaticString s_is_array("is_array");
 
 SSATmp* isArrayImpl(IRGS& env, SSATmp* src) {
-  enum IsArrayLogging {
-    None = 0,
-    ClsMethNotice = 1 << 0,
-    VecLogging = 1 << 1,
-    DictLogging = 1 << 2,
-    KeysetLogging = 1 << 3,
-    ProvLogging = 1 << 4,
-  };
-
   using RO = RuntimeOption;
 
-  static auto const mask =
-    (RO::EvalIsVecNotices ? ClsMethNotice : None) |
-    (RO::EvalHackArrCompatIsArrayNotices ?
-       VecLogging | DictLogging | KeysetLogging :
-       None) |
-    (RO::EvalLogArrayProvenance ? ProvLogging : None);
+  MultiCond mc{env};
 
-  static auto const tycheck = InstrumentedTypecheck<IsArrayLogging>{
-    {TArr,     true,  None},
-    /* cases for shapes and clsmeth */
-    {!RO::EvalHackArrDVArrs && RO::EvalIsCompatibleClsMethType,
-     TClsMeth, true,  mask & ClsMethNotice},
-    /* HAC logging */
-    {TVec,     false, mask & (ProvLogging | VecLogging)},
-    {TDict,    false, mask & (ProvLogging | DictLogging)},
-    {TKeyset,  false, mask & KeysetLogging}
+  mc.ifTypeThen(src, TArr, [&](SSATmp*) { return cns(env, true); });
+
+  if (!RO::EvalHackArrDVArrs && RO::EvalIsCompatibleClsMethType) {
+    mc.ifTypeThen(src, TClsMeth, [&](SSATmp*) {
+      if (RO::EvalIsVecNotices) {
+        gen(env, RaiseNotice,
+            cns(env, makeStaticString(Strings::CLSMETH_COMPAT_IS_ARR)));
+      }
+      return cns(env, true);
+    });
+  }
+
+  auto const provLogging = [&](SSATmp* src) {
+    if (!RO::EvalLogArrayProvenance) return;
+    gen(env, RaiseArraySerializeNotice,
+        cns(env, s_is_array.get()),
+        src);
   };
 
-  /* This table is used for isBuiltin() functions and excludes HAC logging */
-  static auto const builtin_tycheck = InstrumentedTypecheck<IsArrayLogging>{
-    {TArr,     true,  None},
-    {!RO::EvalHackArrDVArrs && RO::EvalIsCompatibleClsMethType,
-     TClsMeth, true,  mask & ClsMethNotice},
+  auto const hacLogging = [&](const char* msg) {
+    if (!RO::EvalHackArrCompatIsArrayNotices) return;
+    gen(env, RaiseHackArrCompatNotice,
+        cns(env, makeStaticString(msg)));
   };
 
-  auto const instrumentation = [&](IsArrayLogging type, SSATmp* src) {
-    if (type & ClsMethNotice) {
-      gen(env, RaiseNotice,
-          cns(env, makeStaticString(Strings::CLSMETH_COMPAT_IS_ARR)));
-    }
-    if (type & VecLogging) {
-      gen(env, RaiseHackArrCompatNotice,
-          cns(env, makeStaticString(Strings::HACKARR_COMPAT_VEC_IS_ARR)));
-    }
-    if (type & DictLogging) {
-      gen(env, RaiseHackArrCompatNotice,
-          cns(env, makeStaticString(Strings::HACKARR_COMPAT_DICT_IS_ARR)));
-    }
-    if (type & KeysetLogging) {
-      gen(env, RaiseHackArrCompatNotice,
-          cns(env, makeStaticString(Strings::HACKARR_COMPAT_KEYSET_IS_ARR)));
-    }
-    if (type & ProvLogging) {
-      gen(env, RaiseArraySerializeNotice,
-          cns(env, s_is_array.get()),
-          src);
-    }
-  };
+  if (!curFunc(env)->isBuiltin() &&
+      (RO::EvalLogArrayProvenance || RO::EvalHackArrCompatIsArrayNotices)) {
 
-  return (curFunc(env)->isBuiltin() ? builtin_tycheck : tycheck)
-    .go(env, src, instrumentation);
+    mc.ifTypeThen(src, TVec, [&](SSATmp* src) {
+      hacLogging(Strings::HACKARR_COMPAT_VEC_IS_ARR);
+      provLogging(src);
+      return cns(env, false);
+    });
+    mc.ifTypeThen(src, TDict, [&](SSATmp* src) {
+      hacLogging(Strings::HACKARR_COMPAT_DICT_IS_ARR);
+      provLogging(src);
+      return cns(env, false);
+    });
+    mc.ifTypeThen(src, TKeyset, [&](SSATmp* src) {
+      hacLogging(Strings::HACKARR_COMPAT_KEYSET_IS_ARR);
+      return cns(env, false);
+    });
+  }
+
+  return mc.elseDo([&]{ return cns(env, false); });
 }
 
 //////////////////////////////////////////////////////////////////////

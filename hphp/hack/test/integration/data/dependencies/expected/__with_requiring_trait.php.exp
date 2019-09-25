@@ -15,13 +15,13 @@ interface SimpleInterface {
 interface DerivedInterface extends BaseInterface {
 
 }
-interface BaseInterface {
-
-}
 trait RequiringTrait {
   require implements SimpleInterface;
   require implements BaseInterface;
 
+
+}
+interface BaseInterface {
 
 }
 class Implementing extends AbstractBase implements DerivedInterface {

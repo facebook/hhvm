@@ -1,15 +1,15 @@
 <?hh
-function with_typedefs(Complex $c, shape('x' => int, 'y' => C) $pair): Point {
-  return shape('x' => $pair['x'], 'y' => $c['first']);
-}
 class C extends A {
 
+}
+function with_typedefs(Complex $c, shape('x' => int, 'y' => C) $pair): Point {
+  return shape('x' => $pair['x'], 'y' => $c['first']);
 }
 class A0 {
 
 }
-type Complex = shape('first' => int, 'second' => \B);
 newtype Point = shape('x' => int, 'y' => int);
+type Complex = shape('first' => int, 'second' => \B);
 class A extends A0 implements I1 {
 
 }

@@ -49,14 +49,14 @@ class ExtractStandaloneDriver(CommonTestDriver):
             assert False
 
         extracted_file = os.path.join(self.repo_dir, "extracted.php.out")
+        # Check if the generated code is the same as expected
+        expected_fname = self.function_to_filename(function_to_extract)
+        self.assert_output_matches(generated_code, expected_fname)
         # Check if the generated code typechecks
         if typecheck:
             with open(extracted_file, "w") as f:
                 print(generated_code, file=f, flush=True)
             assert self.run_single_typecheck(extracted_file) == 0
-        # Check if the generated code is the same as expected
-        expected_fname = self.function_to_filename(function_to_extract)
-        self.assert_output_matches(generated_code, expected_fname)
 
     def check_failing(self, function_to_extract: str) -> None:
         self.check_extract_standalone(function_to_extract, typecheck=False)

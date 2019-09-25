@@ -3,11 +3,11 @@ function call_constructors(): void {
   $a = new ImplementingBase();
   $b = new Derived(0);
 }
-abstract class AbstractBase {
-
-}
 class ImplementingBase extends AbstractBase {
 
+
+}
+abstract class AbstractBase {
 
 }
 class Derived extends ImplementingBase {
@@ -17,5 +17,3 @@ class Derived extends ImplementingBase {
 function extract_standalone_make_default<T>(): T {
   throw new Exception();
 }
-
-

@@ -4,11 +4,11 @@ class TraitBase extends AbstractBase {
 
 
 }
-function with_traits(TraitBase $arg): void {
-  $arg->routine();
-}
 abstract class AbstractBase {
 
+}
+function with_traits(TraitBase $arg): void {
+  $arg->routine();
 }
 trait T {
   require extends AbstractBase;

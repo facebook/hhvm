@@ -1,8 +1,8 @@
 <?hh
-abstract class AbstractBase {
+class ImplementingBase extends AbstractBase {
 
 }
-class ImplementingBase extends AbstractBase {
+abstract class AbstractBase {
 
 }
 function with_nontrivial_fun_decls(): void {
@@ -10,12 +10,12 @@ function with_nontrivial_fun_decls(): void {
   variadic(inout $num, 18, 19);
   $d = new Derived($num);
 }
+function variadic(inout int $arg, int ...$args): void {
+  throw new \Exception();
+}
 class Derived extends ImplementingBase {
 
   public function __construct(int $num) {}
-}
-function variadic(inout int $arg, int ...$args): void {
-  throw new \Exception();
 }
 function extract_standalone_make_default<T>(): T {
   throw new Exception();

@@ -20,14 +20,14 @@ class B implements I1 {
 class D<Tfirst, Tsecond> extends B {
 
 }
+interface I1 {
+
+}
 function with_generics<Tfirst, Tsecond>(
   D<Tfirst, Tsecond> $d,
   E<Tfirst> $e,
 ): int {
   return generic<C>();
-}
-interface I1 {
-
 }
 function extract_standalone_make_default<T>(): T {
   throw new Exception();

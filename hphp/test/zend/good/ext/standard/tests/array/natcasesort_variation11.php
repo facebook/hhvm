@@ -101,7 +101,7 @@ $inputs = array(
 $iterator = 1;
 foreach($inputs as $input) {
     echo "\n-- Iteration $iterator --\n";
-    var_dump( natcasesort(&$input) );
+    var_dump( natcasesort(inout $input) );
     var_dump($input);
     $iterator++;
 };

@@ -37,7 +37,7 @@ function main() {
   ];
 
   $a = array_intersect(array_keys(HH\rqtrace\all_request_stats()), $valid);
-  sort(&$a);
+  sort(inout $a);
   var_dump($a);
 
   var_dump(HH\rqtrace\request_event_stats('EVENT0'));

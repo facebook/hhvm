@@ -12,13 +12,13 @@ echo "*** Testing get_html_translation_table() : basic functionality ***\n";
 echo "-- with table = HTML_ENTITIES --\n";
 $table = HTML_ENTITIES;
 $tt = get_html_translation_table($table, ENT_COMPAT, "UTF-8");
-asort(&$tt);
+asort(inout $tt);
 var_dump( $tt );
 
 echo "-- with table = HTML_SPECIALCHARS --\n";
 $table = HTML_SPECIALCHARS;
 $tt = get_html_translation_table($table, ENT_COMPAT, "UTF-8");
-asort(&$tt);
+asort(inout $tt);
 var_dump( $tt );
 
 echo "Done\n";

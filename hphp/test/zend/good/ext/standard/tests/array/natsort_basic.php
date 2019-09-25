@@ -5,10 +5,10 @@
 */
 <<__EntryPoint>> function main(): void {
 $array1 = $array2 = array("img12.png", "img10.png", "img2.png", "img1.png");
-sort(&$array1);
+sort(inout $array1);
 echo "Standard sorting\n";
 print_r($array1);
-natsort(&$array2);
+natsort(inout $array2);
 echo "\nNatural order sorting\n";
 print_r($array2);
 }

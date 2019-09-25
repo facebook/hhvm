@@ -11,6 +11,6 @@ const FOO = 'foo';
 <<__EntryPoint>>
 function main_691() {
 $vars = get_class_vars('X');
- asort(&$vars);
+ asort(inout $vars);
  var_dump($vars);
 }

@@ -8,7 +8,7 @@ foreach (glob(__DIR__ . "/resources/*") as $filename) {
 		$results["$filename"] = finfo_file($fp, $filename);
 	}
 }
-ksort(&$results);
+ksort(inout $results);
 
 var_dump($results);
 }

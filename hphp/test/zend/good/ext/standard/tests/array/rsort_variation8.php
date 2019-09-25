@@ -35,12 +35,12 @@ foreach ($various_arrays as $array) {
 
   echo "\n-- 'flag' value is default --\n";
   $temp_array = $array;
-  var_dump(rsort(&$temp_array) );
+  var_dump(rsort(inout $temp_array) );
   var_dump($temp_array);
 
   echo "\n-- 'flag' value is SORT_REGULAR --\n";
   $temp_array = $array;
-  var_dump(rsort(&$temp_array, SORT_REGULAR) );
+  var_dump(rsort(inout $temp_array, SORT_REGULAR) );
   var_dump($temp_array);
   $count++;
 }

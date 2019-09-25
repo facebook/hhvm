@@ -60,23 +60,23 @@ echo "\n-- Testing asort() by supplying various object arrays, 'flag' value is d
 
 // testing asort() function by supplying integer object array, flag value is defualt
 $temp_array = $unsorted_int_obj;
-var_dump(asort(&$temp_array) );
+var_dump(asort(inout $temp_array) );
 var_dump($temp_array);
 
 // testing asort() function by supplying string object array, flag value is defualt
 $temp_array = $unsorted_str_obj;
-var_dump(asort(&$temp_array) );
+var_dump(asort(inout $temp_array) );
 var_dump($temp_array);
 
 echo "\n-- Testing asort() by supplying various object arrays, 'flag' value is SORT_REGULAR --\n";
 // testing asort() function by supplying integer object array, flag value = SORT_REGULAR
 $temp_array = $unsorted_int_obj;
-var_dump(asort(&$temp_array, SORT_REGULAR) );
+var_dump(asort(inout $temp_array, SORT_REGULAR) );
 var_dump($temp_array);
 
 // testing asort() function by supplying string object array, flag value = SORT_REGULAR
 $temp_array = $unsorted_str_obj;
-var_dump(asort(&$temp_array, SORT_REGULAR) );
+var_dump(asort(inout $temp_array, SORT_REGULAR) );
 var_dump($temp_array);
 
 echo "Done\n";

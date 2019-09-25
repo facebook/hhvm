@@ -44,7 +44,7 @@ echo "\n-- Testing natcasesort() by supplying object arrays --\n";
 
 // testing natcasesort() function by supplying string object array
 $temp_array = $unsorted_str_obj;
-var_dump(natcasesort(&$temp_array) );
+var_dump(natcasesort(inout $temp_array) );
 var_dump($temp_array);
 
 echo "Done";

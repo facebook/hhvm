@@ -203,36 +203,36 @@ TypedValue HHVM_FUNCTION(array_intersect_ukey,
                          const Variant& key_compare_func,
                          const Array& args = null_array);
 bool HHVM_FUNCTION(sort,
-                   VRefParam array,
+                   Variant& array,
                    int sort_flags = 0);
 bool HHVM_FUNCTION(rsort,
-                   VRefParam array,
+                   Variant& array,
                    int sort_flags = 0);
 bool HHVM_FUNCTION(asort,
-                   VRefParam array,
+                   Variant& array,
                    int sort_flags = 0);
 bool HHVM_FUNCTION(arsort,
-                   VRefParam array,
+                   Variant& array,
                    int sort_flags = 0);
 bool HHVM_FUNCTION(ksort,
-                   VRefParam array,
+                   Variant& array,
                    int sort_flags = 0);
 bool HHVM_FUNCTION(krsort,
-                   VRefParam array,
+                   Variant& array,
                    int sort_flags = 0);
 bool HHVM_FUNCTION(usort,
-                   VRefParam array,
+                   Variant& array,
                    const Variant& cmp_function);
 bool HHVM_FUNCTION(uasort,
-                   VRefParam array,
+                   Variant& array,
                    const Variant& cmp_function);
 bool HHVM_FUNCTION(uksort,
-                   VRefParam array,
+                   Variant& array,
                    const Variant& cmp_function);
 bool HHVM_FUNCTION(natsort,
-                   VRefParam array);
+                   Variant& array);
 bool HHVM_FUNCTION(natcasesort,
-                   VRefParam array);
+                   Variant& array);
 String HHVM_FUNCTION(i18n_loc_get_default);
 bool HHVM_FUNCTION(i18n_loc_set_default,
                    const String& locale);

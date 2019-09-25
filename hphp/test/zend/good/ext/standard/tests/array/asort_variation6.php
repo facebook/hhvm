@@ -22,17 +22,17 @@ $unsorted_hex_array = array ( 0x1AB => 0x1AB, 0xFFF => 0xFFF, 0xF => 0xF, 0xFF =
 
 echo "\n-- Testing asort() by supplying hexadecimal value array, 'flag' value is defualt  --\n";
 $temp_array = $unsorted_hex_array;
-var_dump(asort(&$temp_array) ); // expecting : bool(true)
+var_dump(asort(inout $temp_array) ); // expecting : bool(true)
 var_dump($temp_array);
 
 echo "\n-- Testing asort() by supplying hexadecimal value array, 'flag' value is SORT_REGULAR  --\n";
 $temp_array = $unsorted_hex_array;
-var_dump(asort(&$temp_array, SORT_REGULAR) ); // expecting : bool(true)
+var_dump(asort(inout $temp_array, SORT_REGULAR) ); // expecting : bool(true)
 var_dump($temp_array);
 
 echo "\n-- Testing asort() by supplying hexadecimal value array, 'flag' value is SORT_NUMERIC  --\n";
 $temp_array = $unsorted_hex_array;
-var_dump(asort(&$temp_array, SORT_NUMERIC) ); // expecting : bool(true)
+var_dump(asort(inout $temp_array, SORT_NUMERIC) ); // expecting : bool(true)
 var_dump($temp_array);
 
 echo "Done\n";

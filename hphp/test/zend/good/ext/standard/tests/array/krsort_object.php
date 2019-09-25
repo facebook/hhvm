@@ -57,23 +57,23 @@ echo "\n-- Testing krsort() by supplying various object arrays, 'flag' value is 
 
 // testing krsort() function by supplying integer object array, flag value is defualt
 $temp_array = $unsorted_int_obj;
-var_dump(krsort(&$temp_array) );
+var_dump(krsort(inout $temp_array) );
 var_dump($temp_array);
 
 // testing krsort() function by supplying string object array, flag value is defualt
 $temp_array = $unsorted_str_obj;
-var_dump(krsort(&$temp_array) );
+var_dump(krsort(inout $temp_array) );
 var_dump($temp_array);
 
 echo "\n-- Testing krsort() by supplying various object arrays, 'flag' value is SORT_REGULAR --\n";
 // testing krsort() function by supplying integer object array, flag value = SORT_REGULAR
 $temp_array = $unsorted_int_obj;
-var_dump(krsort(&$temp_array, SORT_REGULAR) );
+var_dump(krsort(inout $temp_array, SORT_REGULAR) );
 var_dump($temp_array);
 
 // testing krsort() function by supplying string object array, flag value = SORT_REGULAR
 $temp_array = $unsorted_str_obj;
-var_dump(krsort(&$temp_array, SORT_REGULAR) );
+var_dump(krsort(inout $temp_array, SORT_REGULAR) );
 var_dump($temp_array);
 
 echo "Done\n";

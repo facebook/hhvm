@@ -64,32 +64,32 @@ function main($v) {
 
   echo "sort: ";
   $copy_v = $v;
-  var_dump(sort(&$copy_v));
+  var_dump(sort(inout $copy_v));
   var_dump($copy_v);
 
   echo "rsort: ";
   $copy_v = $v;
-  var_dump(rsort(&$copy_v));
+  var_dump(rsort(inout $copy_v));
   var_dump($copy_v);
 
   echo "asort: ";
   $copy_v = $v;
-  var_dump(asort(&$copy_v));
+  var_dump(asort(inout $copy_v));
   var_dump($copy_v);
 
   echo "arsort: ";
   $copy_v = $v;
-  var_dump(arsort(&$copy_v));
+  var_dump(arsort(inout $copy_v));
   var_dump($copy_v);
 
   echo "ksort: ";
   $copy_v = $v;
-  var_dump(ksort(&$copy_v));
+  var_dump(ksort(inout $copy_v));
   var_dump($copy_v);
 
   echo "krsort: ";
   $copy_v = $v;
-  var_dump(krsort(&$copy_v));
+  var_dump(krsort(inout $copy_v));
   var_dump($copy_v);
 
   echo "array_slice (0): ";

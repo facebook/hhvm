@@ -23,26 +23,26 @@ class AllTheInterfaces extends MostOfTheInterfaces implements IC {}
 <<__EntryPoint>> function main(): void {
 echo "interfaces of Base:\n";
 $x = class_implements('Base');
-ksort(&$x);
+ksort(inout $x);
 var_dump($x);
 echo "\ninterfaces of Derived:\n";
 $x = class_implements('Derived');
-ksort(&$x);
+ksort(inout $x);
 var_dump($x);
 echo "\ninterfaces of DerivedDerived:\n";
 $x = class_implements('DerivedDerived');
-ksort(&$x);
+ksort(inout $x);
 var_dump($x);
 echo "\ninterfaces of LotsOfInterfaces:\n";
 $x = class_implements('LotsOfInterfaces');
-ksort(&$x);
+ksort(inout $x);
 var_dump($x);
 echo "\ninterfaces of MostOfTheInterfaces:\n";
 $x = class_implements('MostOfTheInterfaces');
-ksort(&$x);
+ksort(inout $x);
 var_dump($x);
 echo "\ninterfaces of AllTheInterfaces:\n";
 $x = class_implements('AllTheInterfaces');
-ksort(&$x);
+ksort(inout $x);
 var_dump($x);
 }

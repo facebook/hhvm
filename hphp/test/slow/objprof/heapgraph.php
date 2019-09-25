@@ -53,7 +53,7 @@ function echo_buffer($str) {
 function echo_flush() {
 
   $echobuf_uniq = array_unique(ObjprofHeapgraphPhp::$echobuf);
-  sort(&$echobuf_uniq);
+  sort(inout $echobuf_uniq);
   foreach ($echobuf_uniq as $str) {
     echo $str;
   }

@@ -12,6 +12,6 @@ while($dir->valid()) {
   }
   $dir->next();
 }
-asort(&$files);
+asort(inout $files);
 var_dump(array_values($files));
 }

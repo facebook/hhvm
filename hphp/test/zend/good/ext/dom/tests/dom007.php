@@ -61,7 +61,7 @@ $xkeys = array();
 foreach ($ents as $key=>$node) {
     $xkeys[] = "Key: $key Name: ".$node->nodeName."\n";
 }
-sort(&$xkeys);  // fix inconsistent output ordering (bug #61810)
+sort(inout $xkeys);  // fix inconsistent output ordering (bug #61810)
 foreach ($xkeys as $key => $node) {
     echo $node;
 }
@@ -71,7 +71,7 @@ $xkeys = array();
 for($x=0; $x < $length; $x++) {
     $xkeys[] = "Index: ".$ents->item($x)->nodeName."\n";
 }
-sort(&$xkeys);  // fix inconsistent output ordering (bug #61810)
+sort(inout $xkeys);  // fix inconsistent output ordering (bug #61810)
 foreach ($xkeys as $key => $node) {
     echo $node;
 }

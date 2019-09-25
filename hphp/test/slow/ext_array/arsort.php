@@ -9,7 +9,7 @@ $fruits = array(
   "b" => "banana",
   "c" => "apple"
 );
-arsort(&$fruits);
+arsort(inout $fruits);
 var_dump($fruits);
 
 
@@ -19,7 +19,7 @@ $fruits = array(
   "b" => "banana",
   "c" => "apple"
 );
-ksort(&$fruits);
+ksort(inout $fruits);
 var_dump($fruits);
 
 
@@ -29,6 +29,6 @@ $fruits = array(
   "b" => "banana",
   "c" => "apple"
 );
-krsort(&$fruits);
+krsort(inout $fruits);
 var_dump($fruits);
 }

@@ -17,22 +17,22 @@ $bool_values = array (true => true, false => false, TRUE => TRUE, FALSE => FALSE
 
 echo "\n-- Testing ksort() by supplying boolean value array, 'flag' value is defualt --\n";
 $temp_array = $bool_values;
-var_dump(ksort(&$temp_array) );
+var_dump(ksort(inout $temp_array) );
 var_dump($temp_array);
 
 echo "\n-- Testing ksort() by supplying boolean value array, 'flag' value is SORT_REGULAR --\n";
 $temp_array = $bool_values;
-var_dump(ksort(&$temp_array, SORT_REGULAR) );
+var_dump(ksort(inout $temp_array, SORT_REGULAR) );
 var_dump($temp_array);
 
 echo "\n-- Testing ksort() by supplying boolean value array, 'flag' value is SORT_NUMERIC  --\n";
 $temp_array = $bool_values;
-var_dump(ksort(&$temp_array, SORT_NUMERIC) );
+var_dump(ksort(inout $temp_array, SORT_NUMERIC) );
 var_dump($temp_array);
 
 echo "\n-- Testing ksort() by supplying boolean value array, 'flag' value is SORT_STRING --\n";
 $temp_array = $bool_values;
-var_dump(ksort(&$temp_array, SORT_STRING) );
+var_dump(ksort(inout $temp_array, SORT_STRING) );
 var_dump($temp_array);
 
 echo "Done\n";

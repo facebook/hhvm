@@ -15,7 +15,7 @@ foreach (new RecursiveIteratorIterator($ite) as $filename=>$cur) {
   $nbfiles++;
   $files[] = "$filename => $filesize\n";
 }
-asort(&$files);
+asort(inout $files);
 var_dump(array_values($files));
 $bytestotal=number_format($bytestotal);
 echo "Total: $nbfiles files, $bytestotal bytes\n";

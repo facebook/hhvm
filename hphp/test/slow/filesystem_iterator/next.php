@@ -9,6 +9,6 @@ while($iterator->valid()) {
   $ret[] = $iterator->getFilename();
   $iterator->next();
 }
-asort(&$ret);
+asort(inout $ret);
 var_dump(array_values($ret));
 }

@@ -8,6 +8,6 @@ $ret = array();
 foreach ($it as $fileinfo) {
   $ret[] = $fileinfo->getFilename();
 }
-asort(&$ret);
+asort(inout $ret);
 var_dump(array_values($ret));
 }

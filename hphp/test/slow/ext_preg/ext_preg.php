@@ -180,8 +180,8 @@ function test_preg_replace() {
   VS(preg_replace($patterns, $replacements, $str),
      "The bear black slow jumped over the lazy dog.");
 
-  ksort(&$patterns);
-  ksort(&$replacements);
+  ksort(inout $patterns);
+  ksort(inout $replacements);
   VS(preg_replace($patterns, $replacements, $str),
      "The slow black bear jumped over the lazy dog.");
 

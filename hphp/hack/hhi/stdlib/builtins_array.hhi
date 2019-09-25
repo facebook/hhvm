@@ -291,9 +291,9 @@ function array_intersect_key($array1, $array2, ...$args);
 <<__PHPStdLib>>
 function array_intersect_ukey($array1, $array2, $key_compare_func, ...$args);
 <<__PHPStdLib>>
-function natsort(&$array);
+function natsort(inout $array);
 <<__PHPStdLib>>
-function natcasesort(&$array);
+function natcasesort(inout $array);
 <<__PHPStdLib>>
 function i18n_loc_get_default();
 <<__PHPStdLib>>

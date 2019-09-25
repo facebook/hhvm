@@ -68,7 +68,7 @@ while(FALSE !== ($file = readdir($dir_handle))){
 }
 
 // more important to check that all contents are present than order they are returned in
-sort(&$contents);
+sort(inout $contents);
 var_dump($contents);
 
 closedir($dir_handle);

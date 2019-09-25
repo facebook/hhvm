@@ -746,7 +746,7 @@ function find_tests($files, array $options = null) {
           "the right expect files for the tests you are trying to run.\n" .
           usage());
   }
-  asort(&$tests);
+  asort(inout $tests);
   $tests = array_filter($tests);
   if ($options['exclude'] ?? false) {
     $exclude = $options['exclude'];
@@ -2800,7 +2800,7 @@ function msg_loop($num_tests, $queue) {
     if (Status::$skipped > 0) {
       print Status::$skipped ." tests \033[1;33mskipped\033[0m\n";
       $reasons = Status::$skip_reasons;
-      arsort(&$reasons);
+      arsort(inout $reasons);
       Status::$skip_reasons = $reasons;
       foreach (Status::$skip_reasons as $reason => $count) {
         printf("%12s: %d\n", $reason, $count);
@@ -2911,21 +2911,21 @@ function aggregate_srcloc_info($tests) {
       $all_mismatched_srcloc[] = $instr;
     }
     $all_mismatched_srcloc = array_unique($all_mismatched_srcloc);
-    sort(&$all_mismatched_srcloc);
+    sort(inout $all_mismatched_srcloc);
 
     $missing_on_lhs_srcloc = $srcloc_info['missing_on_lhs_srcloc'];
     foreach ($missing_on_lhs_srcloc as $instr) {
       $all_missing_on_lhs[] = $instr;
     }
     $all_missing_on_lhs = array_unique($all_missing_on_lhs);
-    sort(&$all_missing_on_lhs);
+    sort(inout $all_missing_on_lhs);
 
     $missing_on_rhs_srcloc = $srcloc_info['missing_on_rhs_srcloc'];
     foreach ($missing_on_rhs_srcloc as $instr) {
       $all_missing_on_rhs[] = $instr;
     }
     $all_missing_on_rhs = array_unique($all_missing_on_rhs);
-    sort(&$all_missing_on_rhs);
+    sort(inout $all_missing_on_rhs);
   }
 
   print "\nInstructions with mismatched srcloc:\n";
@@ -2948,7 +2948,7 @@ function print_failure($argv, $results, $options) {
       $passed[] = $result['name'];
     }
   }
-  asort(&$failed);
+  asort(inout $failed);
   print "\n".count($failed)." tests failed\n";
   if (!($options['no-fun'] ?? false)) {
     // Unicode for table-flipping emoticon
@@ -3492,7 +3492,7 @@ function main($argv) {
       "There are %d new failing tests, and %d new passing tests.\n",
       count($failed_tests), $new_fails, $new_passes
     );
-    sort(&$failed_tests);
+    sort(inout $failed_tests);
     file_put_contents($fail_file, implode("\n", $failed_tests));
   } else if (isset($options['testpilot'])) {
     Status::say(array('op' => 'all_done', 'results' => $results));

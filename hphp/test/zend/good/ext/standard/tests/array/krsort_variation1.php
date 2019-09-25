@@ -71,10 +71,10 @@ $counter = 1;
 for($index = 0; $index < count($unexpected_values); $index ++) {
   echo "-- Iteration $counter --\n";
   $value = $unexpected_values [$index];
-  var_dump( krsort(&$value) ); // expecting : bool(false)
-  var_dump( krsort(&$value, SORT_REGULAR) ); // expecting : bool(false)
-  var_dump( krsort(&$value, SORT_NUMERIC) ); // expecting : bool(false)
-  var_dump( krsort(&$value, SORT_STRING) ); // expecting : bool(false)
+  var_dump( krsort(inout $value) ); // expecting : bool(false)
+  var_dump( krsort(inout $value, SORT_REGULAR) ); // expecting : bool(false)
+  var_dump( krsort(inout $value, SORT_NUMERIC) ); // expecting : bool(false)
+  var_dump( krsort(inout $value, SORT_STRING) ); // expecting : bool(false)
   $counter++;
 }
 

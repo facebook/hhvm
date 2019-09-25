@@ -12,7 +12,7 @@ class NodeClass {
 }
 
 function dump($data) {
-  ksort(&$data);
+  ksort(inout $data);
   var_dump($data);
 }
 

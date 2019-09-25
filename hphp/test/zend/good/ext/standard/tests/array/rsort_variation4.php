@@ -22,12 +22,12 @@ $unsorted_numerics =  array( $value1 , $value2, $value3);
 
 echo "\n-- 'flag' value is defualt --\n";
 $temp_array = $unsorted_numerics;
-var_dump( rsort(&$temp_array) );
+var_dump( rsort(inout $temp_array) );
 var_dump( $temp_array);
 
 echo "\n-- 'flag' = SORT_REGULAR --\n";
 $temp_array = $unsorted_numerics;
-var_dump( rsort(&$temp_array, SORT_REGULAR) );
+var_dump( rsort(inout $temp_array, SORT_REGULAR) );
 var_dump( $temp_array);
 
 echo "Done";

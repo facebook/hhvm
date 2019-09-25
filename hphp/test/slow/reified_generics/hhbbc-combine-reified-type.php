@@ -7,7 +7,7 @@ function f<reify T>($x) {
 
 function g<reify T>() {
   $ts = HH\ReifiedGenerics\get_type_structure<T>();
-  ksort(&$ts);
+  ksort(inout $ts);
   var_dump($ts);
 }
 

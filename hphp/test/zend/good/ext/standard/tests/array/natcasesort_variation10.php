@@ -16,7 +16,7 @@ echo "\n-- Initial Position of Internal Pointer: --\n";
 echo key($array_arg) . " => " . current($array_arg) . "\n";
 
 echo "\n-- Call natcasesort() --\n";
-var_dump(natcasesort(&$array_arg));
+var_dump(natcasesort(inout $array_arg));
 var_dump($array_arg);
 
 echo "\n-- Position of Internal Pointer in Passed Array: --\n";

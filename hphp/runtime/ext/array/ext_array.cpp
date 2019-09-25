@@ -2850,7 +2850,7 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(Collator, s_collator);
 
 namespace {
 struct ArraySortTmp {
-  ArraySortTmp(TypedValue* arr, SortFunction sf) : m_arr(arr) {
+  ArraySortTmp(Cell* arr, SortFunction sf) : m_arr(arr) {
     m_ad = arr->m_data.parr->escalateForSort(sf);
     assertx(m_ad == arr->m_data.parr ||
             m_ad->empty() ||
@@ -2865,18 +2865,16 @@ struct ArraySortTmp {
   }
   ArrayData* operator->() { return m_ad; }
  private:
-  TypedValue* m_arr;
+  Cell* m_arr;
   ArrayData* m_ad;
 };
 }
 
 static bool
-php_sort(VRefParam container, int sort_flags, bool ascending) {
+php_sort(Variant& container, int sort_flags, bool ascending) {
   if (container.isArray()) {
-    auto ref = container.getVariantOrNull();
-    if (!ref) return true;
     SortFunction sf = getSortFunction(SORTFUNC_SORT, ascending);
-    ArraySortTmp ast(ref->asTypedValue(), sf);
+    ArraySortTmp ast(container.toCell(), sf);
     ast->sort(sort_flags, ascending);
     return true;
   }
@@ -2898,12 +2896,10 @@ php_sort(VRefParam container, int sort_flags, bool ascending) {
 }
 
 static bool
-php_asort(VRefParam container, int sort_flags, bool ascending) {
+php_asort(Variant& container, int sort_flags, bool ascending) {
   if (container.isArray()) {
-    auto ref = container.getVariantOrNull();
-    if (!ref) return true;
     SortFunction sf = getSortFunction(SORTFUNC_ASORT, ascending);
-    ArraySortTmp ast(ref->asTypedValue(), sf);
+    ArraySortTmp ast(container.toCell(), sf);
     ast->asort(sort_flags, ascending);
     return true;
   }
@@ -2924,12 +2920,10 @@ php_asort(VRefParam container, int sort_flags, bool ascending) {
 }
 
 static bool
-php_ksort(VRefParam container, int sort_flags, bool ascending) {
+php_ksort(Variant& container, int sort_flags, bool ascending) {
   if (container.isArray()) {
-    auto ref = container.getVariantOrNull();
-    if (!ref) return true;
     SortFunction sf = getSortFunction(SORTFUNC_KSORT, ascending);
-    ArraySortTmp ast(ref->asTypedValue(), sf);
+    ArraySortTmp ast(container.toCell(), sf);
     ast->ksort(sort_flags, ascending);
     return true;
   }
@@ -2950,42 +2944,42 @@ php_ksort(VRefParam container, int sort_flags, bool ascending) {
 }
 
 bool HHVM_FUNCTION(sort,
-                  VRefParam array,
+                  Variant& array,
                   int sort_flags /* = 0 */) {
   if (checkIsClsMethAndRaise( __FUNCTION__+2, array)) return false;
   return php_sort(array, sort_flags, true);
 }
 
 bool HHVM_FUNCTION(rsort,
-                   VRefParam array,
+                   Variant& array,
                    int sort_flags /* = 0 */) {
   if (checkIsClsMethAndRaise( __FUNCTION__+2, array)) return false;
   return php_sort(array, sort_flags, false);
 }
 
 bool HHVM_FUNCTION(asort,
-                   VRefParam array,
+                   Variant& array,
                    int sort_flags /* = 0 */) {
   if (checkIsClsMethAndRaise( __FUNCTION__+2, array)) return false;
   return php_asort(array, sort_flags, true);
 }
 
 bool HHVM_FUNCTION(arsort,
-                   VRefParam array,
+                   Variant& array,
                    int sort_flags /* = 0 */) {
   if (checkIsClsMethAndRaise( __FUNCTION__+2, array)) return false;
   return php_asort(array, sort_flags, false);
 }
 
 bool HHVM_FUNCTION(ksort,
-                   VRefParam array,
+                   Variant& array,
                    int sort_flags /* = 0 */) {
   if (checkIsClsMethAndRaise( __FUNCTION__+2, array)) return false;
   return php_ksort(array, sort_flags, true);
 }
 
 bool HHVM_FUNCTION(krsort,
-                   VRefParam array,
+                   Variant& array,
                    int sort_flags /* = 0 */) {
   if (checkIsClsMethAndRaise( __FUNCTION__+2, array)) return false;
   return php_ksort(array, sort_flags, false);
@@ -2995,31 +2989,23 @@ bool HHVM_FUNCTION(krsort,
 // objects as well, which does not make much sense, and which is not supported
 // here.
 
-bool HHVM_FUNCTION(natsort, VRefParam array) {
+bool HHVM_FUNCTION(natsort, Variant& array) {
   if (checkIsClsMethAndRaise( __FUNCTION__+2, array)) return false;
   return php_asort(array, SORT_NATURAL, true);
 }
 
-bool HHVM_FUNCTION(natcasesort, VRefParam array) {
+bool HHVM_FUNCTION(natcasesort, Variant& array) {
   if (checkIsClsMethAndRaise( __FUNCTION__+2, array)) return false;
   return php_asort(array, SORT_NATURAL_CASE, true);
 }
 
 bool HHVM_FUNCTION(usort,
-                   VRefParam container,
+                   Variant& container,
                    const Variant& cmp_function) {
   if (checkIsClsMethAndRaise( __FUNCTION__+2, container)) return false;
   if (container.isArray()) {
-    auto sort = [](TypedValue* arr_array, const Variant& cmp_function) -> bool {
-      ArraySortTmp ast(arr_array, SORTFUNC_USORT);
-      return ast->usort(cmp_function);
-    };
-    auto ref = container.getVariantOrNull();
-    if (LIKELY(ref != nullptr)) {
-      return sort(ref->asTypedValue(), cmp_function);
-    }
-    auto tmp = container.wrapped();
-    return sort(tmp.asTypedValue(), cmp_function);
+    ArraySortTmp ast(container.toCell(), SORTFUNC_USORT);
+    return ast->usort(cmp_function);
   }
   if (container.isObject()) {
     ObjectData* obj = container.getObjectData();
@@ -3038,20 +3024,12 @@ bool HHVM_FUNCTION(usort,
 }
 
 bool HHVM_FUNCTION(uasort,
-                   VRefParam container,
+                   Variant& container,
                    const Variant& cmp_function) {
   if (checkIsClsMethAndRaise( __FUNCTION__+2, container)) return false;
   if (container.isArray()) {
-    auto sort = [](TypedValue* arr_array, const Variant& cmp_function) -> bool {
-      ArraySortTmp ast(arr_array, SORTFUNC_UASORT);
-      return ast->uasort(cmp_function);
-    };
-    auto ref = container.getVariantOrNull();
-    if (LIKELY(ref != nullptr)) {
-      return sort(ref->asTypedValue(), cmp_function);
-    }
-    auto tmp = container.wrapped();
-    return sort(tmp.asTypedValue(), cmp_function);
+    ArraySortTmp ast(container.toCell(), SORTFUNC_UASORT);
+    return ast->uasort(cmp_function);
   }
   if (container.isObject()) {
     ObjectData* obj = container.getObjectData();
@@ -3072,20 +3050,12 @@ bool HHVM_FUNCTION(uasort,
 }
 
 bool HHVM_FUNCTION(uksort,
-                   VRefParam container,
+                   Variant& container,
                    const Variant& cmp_function) {
   if (checkIsClsMethAndRaise( __FUNCTION__+2, container)) return false;
   if (container.isArray()) {
-    auto sort = [](TypedValue* arr_array, const Variant& cmp_function) -> bool {
-      ArraySortTmp ast(arr_array, SORTFUNC_UKSORT);
-      return ast->uksort(cmp_function);
-    };
-    auto ref = container.getVariantOrNull();
-    if (LIKELY(ref != nullptr)) {
-      return sort(ref->asTypedValue(), cmp_function);
-    }
-    auto tmp = container.wrapped();
-    return sort(tmp.asTypedValue(), cmp_function);
+    ArraySortTmp ast(container.toCell(), SORTFUNC_UKSORT);
+    return ast->uksort(cmp_function);
   }
   if (container.isObject()) {
     ObjectData* obj = container.getObjectData();

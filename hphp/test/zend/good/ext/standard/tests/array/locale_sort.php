@@ -15,6 +15,6 @@ function main_entry(): void {
   "NT" => "Territoires du Nord-Ouest",
   "NU" => "Nunavut",
   "YT" => "Territoire du Yukon");
-  asort(&$table, SORT_LOCALE_STRING);
+  asort(inout $table, SORT_LOCALE_STRING);
   var_dump($table);
 }

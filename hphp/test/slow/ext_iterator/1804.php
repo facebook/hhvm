@@ -16,7 +16,7 @@ function getFiles(&$rdi,$depth=0) {
       }
     }
   }
-  asort(&$files);
+  asort(inout $files);
   var_dump(array_values($files));
 }
 

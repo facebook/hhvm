@@ -15,14 +15,14 @@ function f() {
 function main_2198() {
 $rc = new ReflectionClass('C');
 $attrs = $rc->getAttributes();
-ksort(&$attrs);
+ksort(inout $attrs);
 var_dump($attrs);
 $rm = $rc->getMethod('f');
 $attrs = $rm->getAttributes();
-ksort(&$attrs);
+ksort(inout $attrs);
 var_dump($attrs);
 $rf = new ReflectionFunction('f');
 $attrs = $rf->getAttributes();
-ksort(&$attrs);
+ksort(inout $attrs);
 var_dump($attrs);
 }

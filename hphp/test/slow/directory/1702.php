@@ -10,7 +10,7 @@ $files = array();
 while (false !== ($entry = $d->read())) {
    $files[] = $entry."\n";
 }
-asort(&$files);
+asort(inout $files);
 var_dump(array_values($files));
 
 $d->rewind();
@@ -19,7 +19,7 @@ $files = array();
 while (false !== ($entry = $d->read())) {
    $files[] = $entry."\n";
 }
-asort(&$files);
+asort(inout $files);
 var_dump(array_values($files));
 $d->close();
 }

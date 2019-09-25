@@ -36,19 +36,19 @@ function test_warning($c, $f, $cmp) {
   var_dump(array_intersect_key(HH\class_meth($c, $f), [0]));
   var_dump(array_intersect_ukey(HH\class_meth($c, $f), [0], $cmp));
 
-  $x = HH\class_meth($c, $f); var_dump(sort(&$x));
-  $x = HH\class_meth($c, $f); var_dump(rsort(&$x));
-  $x = HH\class_meth($c, $f); var_dump(asort(&$x));
-  $x = HH\class_meth($c, $f); var_dump(arsort(&$x));
-  $x = HH\class_meth($c, $f); var_dump(ksort(&$x));
-  $x = HH\class_meth($c, $f); var_dump(krsort(&$x));
+  $x = HH\class_meth($c, $f); var_dump(sort(inout $x));
+  $x = HH\class_meth($c, $f); var_dump(rsort(inout $x));
+  $x = HH\class_meth($c, $f); var_dump(asort(inout $x));
+  $x = HH\class_meth($c, $f); var_dump(arsort(inout $x));
+  $x = HH\class_meth($c, $f); var_dump(ksort(inout $x));
+  $x = HH\class_meth($c, $f); var_dump(krsort(inout $x));
 
-  $x = HH\class_meth($c, $f); var_dump(natsort(&$x));
-  $x = HH\class_meth($c, $f); var_dump(natcasesort(&$x));
+  $x = HH\class_meth($c, $f); var_dump(natsort(inout $x));
+  $x = HH\class_meth($c, $f); var_dump(natcasesort(inout $x));
 
-  $x = HH\class_meth($c, $f); var_dump(usort(&$x, $cmp));
-  $x = HH\class_meth($c, $f); var_dump(uasort(&$x, $cmp));
-  $x = HH\class_meth($c, $f); var_dump(uksort(&$x, $cmp));
+  $x = HH\class_meth($c, $f); var_dump(usort(inout $x, $cmp));
+  $x = HH\class_meth($c, $f); var_dump(uasort(inout $x, $cmp));
+  $x = HH\class_meth($c, $f); var_dump(uksort(inout $x, $cmp));
   $x = HH\class_meth($c, $f); var_dump(array_multisort1(inout $x));
 }
 

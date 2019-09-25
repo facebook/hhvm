@@ -12,6 +12,6 @@ foreach($it as $file) {
   $files[$file->getFilename()] =
     $it->getFilename() == $file->getFilename();
 }
-ksort(&$files);
+ksort(inout $files);
 var_dump($files);
 }

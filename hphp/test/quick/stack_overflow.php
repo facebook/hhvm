@@ -5,7 +5,7 @@ abstract final class StackOverflow { public static $g; }
 StackOverflow::$g = array(1,2,3);
 function cmp($a, $b) {
   $g = StackOverflow::$g;
-  usort(&$g, fun('cmp'));
+  usort(inout $g, fun('cmp'));
   StackOverflow::$g = $g;
   fiz();
 }

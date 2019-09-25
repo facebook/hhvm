@@ -39,12 +39,12 @@ foreach ($various_arrays as $array) {
   echo "\n-- Iteration $count --\n"; 
   echo "- With defualt sort flag -\n";
   $temp_array = $array;
-  var_dump( ksort(&$temp_array) );
+  var_dump( ksort(inout $temp_array) );
   var_dump($temp_array);
 
   echo "- Sort flag = SORT_REGULAR -\n";
   $temp_array = $array;
-  var_dump( ksort(&$temp_array, SORT_REGULAR) );
+  var_dump( ksort(inout $temp_array, SORT_REGULAR) );
   var_dump($temp_array);
   $count++;
 }

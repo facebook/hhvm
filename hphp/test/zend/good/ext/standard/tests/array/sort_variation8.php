@@ -39,13 +39,13 @@ foreach ($various_arrays as $array) {
   // testing sort() function by supplying different arrays, flag value is defualt
   echo "- With Defualt sort flag -\n";
   $temp_array = $array;
-  var_dump(sort(&$temp_array) );
+  var_dump(sort(inout $temp_array) );
   var_dump($temp_array);
 
   // testing sort() function by supplying different arrays, flag value = SORT_REGULAR
   echo "- Sort flag = SORT_REGULAR -\n";
   $temp_array = $array;
-  var_dump(sort(&$temp_array, SORT_REGULAR) );
+  var_dump(sort(inout $temp_array, SORT_REGULAR) );
   var_dump($temp_array);
   $count++;
 }

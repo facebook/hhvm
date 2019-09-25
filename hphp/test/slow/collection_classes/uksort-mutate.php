@@ -13,7 +13,7 @@ function main() {
   $m[nonstatic_string('b')] = 2;
   $m[nonstatic_string('a')] = 3;
   $mut = new Ref(true);
-  uksort(&$m, ($a, $b) ==> {
+  uksort(inout $m, ($a, $b) ==> {
     var_dump($a, $b);
     if ($mut->v) {
       echo "mut\n";

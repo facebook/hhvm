@@ -2,7 +2,7 @@
 
   function wat(array<int> $arr, bool $sort): vec<int> {
     if ($sort) {
-      usort(&$arr, function($a, $b) {
+      usort(inout $arr, function($a, $b) {
           return $a < $b ? -1 : ($a > $b ? 1 : 0);
         });
     }

@@ -67,7 +67,7 @@ $array_arg = array(
 2 => new SimpleClass1(100),
 3 => new SimpleClass1(50)
 );
-var_dump( usort(&$array_arg, fun('simple_cmp')) );
+var_dump( usort(inout $array_arg, fun('simple_cmp')) );
 var_dump($array_arg);
 
 // array of SimpleClass objects having more than one properties
@@ -76,7 +76,7 @@ $array_arg = array(
 1 => new SimpleClass2(10, 1.2, "apple"),
 2 => new SimpleClass2(5, 2.5, "orange"),
 );
-var_dump( usort(&$array_arg, fun('multiple_cmp')) );
+var_dump( usort(inout $array_arg, fun('multiple_cmp')) );
 var_dump($array_arg);
 echo "===DONE===\n";
 }

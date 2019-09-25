@@ -17,12 +17,12 @@ $cmp_function_ref = (&$value1, &$value2) ==> { if($value1 == $value2) {return 0;
 
 $array_arg = array(0 => 100, 1 => 3, 2 => -70, 3 => 24, 4 => 90);
 echo "-- Anonymous 'cmp_function' with parameters passed by value --\n";
-var_dump( uasort(&$array_arg, $cmp_function ) );
+var_dump( uasort(inout $array_arg, $cmp_function ) );
 var_dump($array_arg);
 
 $array_arg = array("b" => "Banana", "m" => "Mango", "a" => "Apple", "p" => "Pineapple");
 echo "-- Anonymous 'cmp_function' with parameters passed by reference --\n";
-var_dump( uasort(&$array_arg, $cmp_function_ref) );
+var_dump( uasort(inout $array_arg, $cmp_function_ref) );
 var_dump($array_arg);
 
 echo "Done";

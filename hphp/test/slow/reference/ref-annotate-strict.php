@@ -24,7 +24,7 @@ function main($foo, $cuf, $cufa) {
   echo "Builtin calls:\n";
   expect_fail(() ==> { ksort($a); });
   var_dump($a);
-  sort(&$a);
+  sort(inout $a);
   var_dump($a);
 
   echo "Literal calls:\n";

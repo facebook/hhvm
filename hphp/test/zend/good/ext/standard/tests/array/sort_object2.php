@@ -67,23 +67,23 @@ echo "\n-- Testing sort() by supplying various object arrays, 'flag' value is de
 
 // testing sort() function by supplying integer object array, flag value is defualt
 $temp_array = $unsorted_int_obj;
-var_dump(sort(&$temp_array) );
+var_dump(sort(inout $temp_array) );
 var_dump($temp_array);
 
 // testing sort() function by supplying string object array, flag value is defualt
 $temp_array = $unsorted_str_obj;
-var_dump(sort(&$temp_array) );
+var_dump(sort(inout $temp_array) );
 var_dump($temp_array);
 
 echo "\n-- Testing sort() by supplying various object arrays, 'flag' value is SORT_REGULAR --\n";
 // testing sort() function by supplying integer object array, flag value = SORT_REGULAR
 $temp_array = $unsorted_int_obj;
-var_dump(sort(&$temp_array, SORT_REGULAR) );
+var_dump(sort(inout $temp_array, SORT_REGULAR) );
 var_dump($temp_array);
 
 // testing sort() function by supplying string object array, flag value = SORT_REGULAR
 $temp_array = $unsorted_str_obj;
-var_dump(sort(&$temp_array, SORT_REGULAR) );
+var_dump(sort(inout $temp_array, SORT_REGULAR) );
 var_dump($temp_array);
 
 echo "Done\n";

@@ -14,6 +14,6 @@ $a = new A;
  $b = new A;
  $b->a = 'b';
  $arr = array($a, $b);
- sort(&$arr, SORT_REGULAR);
+ sort(inout $arr, SORT_REGULAR);
  print ((string)$arr[0]);
 }

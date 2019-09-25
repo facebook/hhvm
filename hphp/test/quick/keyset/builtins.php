@@ -67,22 +67,22 @@ function main($k) {
 
   echo "asort: ";
   $copy_k = $k;
-  var_dump(asort(&$copy_k));
+  var_dump(asort(inout $copy_k));
   var_dump($copy_k);
 
   echo "arsort: ";
   $copy_k = $k;
-  var_dump(arsort(&$copy_k));
+  var_dump(arsort(inout $copy_k));
   var_dump($copy_k);
 
   echo "ksort: ";
   $copy_k = $k;
-  var_dump(ksort(&$copy_k));
+  var_dump(ksort(inout $copy_k));
   var_dump($copy_k);
 
   echo "krsort: ";
   $copy_k = $k;
-  var_dump(krsort(&$copy_k));
+  var_dump(krsort(inout $copy_k));
   var_dump($copy_k);
 
   echo "array_slice (0): ";

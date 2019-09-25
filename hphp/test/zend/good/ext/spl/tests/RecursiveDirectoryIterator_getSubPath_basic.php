@@ -26,7 +26,7 @@ function main_entry(): void {
     $list[] = $it->getSubPath();
     $it->next();
   }
-  asort(&$list);
+  asort(inout $list);
   foreach ($list as $item) {
   	echo $item . "\n";
   }

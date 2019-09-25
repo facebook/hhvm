@@ -18,22 +18,22 @@ $bool_values = array (true, false, TRUE, FALSE);
 
 echo "\n-- Testing sort() by supplying bool value array, 'flag' value is defualt --\n";
 $temp_array = $bool_values;
-var_dump(sort(&$temp_array) );
+var_dump(sort(inout $temp_array) );
 var_dump($temp_array);
 
 echo "\n-- Testing sort() by supplying bool value array, 'flag' value is SORT_REGULAR --\n";
 $temp_array = $bool_values;
-var_dump(sort(&$temp_array, SORT_REGULAR) );
+var_dump(sort(inout $temp_array, SORT_REGULAR) );
 var_dump($temp_array);
 
 echo "\n-- Testing sort() by supplying bool value array, 'flag' value is SORT_NUMERIC  --\n";
 $temp_array = $bool_values;
-var_dump(sort(&$temp_array, SORT_NUMERIC) );
+var_dump(sort(inout $temp_array, SORT_NUMERIC) );
 var_dump($temp_array);
 
 echo "\n-- Testing sort() by supplying bool value array, 'flag' value is SORT_STRING --\n";
 $temp_array = $bool_values;
-var_dump(sort(&$temp_array, SORT_STRING) );
+var_dump(sort(inout $temp_array, SORT_STRING) );
 var_dump($temp_array);
 
 echo "Done\n";

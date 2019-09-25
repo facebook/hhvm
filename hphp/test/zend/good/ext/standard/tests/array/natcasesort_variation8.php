@@ -12,7 +12,7 @@ echo "*** Testing natcasesort() : usage variation ***\n";
 
 $unsorted_oct_array = array(01235, 0321, 0345, 066, 0772, 077, -066, -0345, 0);
 
-var_dump( natcasesort(&$unsorted_oct_array) );
+var_dump( natcasesort(inout $unsorted_oct_array) );
 var_dump($unsorted_oct_array);
 
 echo "Done";

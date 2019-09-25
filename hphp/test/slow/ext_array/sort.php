@@ -4,10 +4,10 @@
 <<__EntryPoint>>
 function main_sort() {
 $fruits = array("lemon", "orange", "banana", "apple");
-sort(&$fruits);
+sort(inout $fruits);
 var_dump($fruits);
 
 $fruits = array("lemon", "orange", "banana", "apple");
-rsort(&$fruits);
+rsort(inout $fruits);
 var_dump($fruits);
 }

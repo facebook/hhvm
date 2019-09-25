@@ -21,17 +21,17 @@ $unsorted_oct_array = array (
 
 echo "\n-- Testing ksort() by supplying octal value array, 'flag' value is defualt  --\n";
 $temp_array = $unsorted_oct_array;
-var_dump( ksort(&$temp_array) ); // expecting : bool(true)
+var_dump( ksort(inout $temp_array) ); // expecting : bool(true)
 var_dump($temp_array);
 
 echo "\n-- Testing ksort() by supplying octal value array, 'flag' value is SORT_REGULAR  --\n";
 $temp_array = $unsorted_oct_array;
-var_dump( ksort(&$temp_array, SORT_REGULAR) ); // expecting : bool(true)
+var_dump( ksort(inout $temp_array, SORT_REGULAR) ); // expecting : bool(true)
 var_dump($temp_array);
 
 echo "\n-- Testing ksort() by supplying octal value array, 'flag' value is SORT_NUMERIC  --\n";
 $temp_array = $unsorted_oct_array;
-var_dump( ksort(&$temp_array, SORT_NUMERIC) ); // expecting : bool(true)
+var_dump( ksort(inout $temp_array, SORT_NUMERIC) ); // expecting : bool(true)
 var_dump($temp_array);
 
 echo "Done\n";

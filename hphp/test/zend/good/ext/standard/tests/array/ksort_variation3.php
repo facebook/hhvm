@@ -39,14 +39,14 @@ foreach ($various_arrays as $array) {
 
   echo "- With defualt sort flag -\n"; 
   $temp_array = $array; 
-  var_dump(ksort(&$temp_array) );
+  var_dump(ksort(inout $temp_array) );
   var_dump($temp_array);
 
   // loop through $flags array and call ksort() with all possible sort flag values
   foreach($flags as $key => $flag){
     echo "- Sort flag = $key -\n";
     $temp_array = $array; 
-    var_dump(ksort(&$temp_array, $flag) );
+    var_dump(ksort(inout $temp_array, $flag) );
     var_dump($temp_array);
   }  
   $count++;

@@ -1,7 +1,7 @@
 <?hh
 function f($x) {
   $arr = (array)$x;
-  uasort(&$arr, function($a,$b) {
+  uasort(inout $arr, function($a,$b) {
     if (is_int($a) != is_int($b)) {
       if (is_int($a)) return -1;
       return 1;

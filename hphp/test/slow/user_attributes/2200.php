@@ -33,6 +33,6 @@ var_dump($rm->getAttribute('Y'));
 var_dump($rm->getAttribute('Z'));
 
 $attrs = $rm->getAttributes();
-ksort(&$attrs);
+ksort(inout $attrs);
 var_dump($attrs);
 }

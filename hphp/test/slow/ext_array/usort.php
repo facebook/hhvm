@@ -9,8 +9,8 @@ function reverse_comp_func($n1,$n2) {
 <<__EntryPoint>>
 function main_usort() {
 $a = array(3, 2, 5, 6, 10);
-usort(&$a, "reverse_comp_func");
+usort(inout $a, "reverse_comp_func");
 var_dump($a);
 
-usort(&$a, "undefined_function_");
+usort(inout $a, "undefined_function_");
 }

@@ -315,7 +315,7 @@ print "\n";
 
 print "--- get_defined_functions() ---\n";
 $a = get_defined_functions()["user"];
-sort(&$a);
+sort(inout $a);
 var_dump($a);
 
 print "--- get_defined_constants() ---\n";

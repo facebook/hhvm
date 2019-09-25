@@ -10,7 +10,7 @@ while (($file = readdir($dir)) !== FALSE) {
     }
 }
 closedir($dir);
-sort(&$files);
+sort(inout $files);
 $info = null;
 foreach($files as $file) {
     $result[$file] = getimagesize(dirname(__FILE__)."/$file", inout $info);

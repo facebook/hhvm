@@ -13,14 +13,14 @@ function do_wonderful_things_with($r) {
   foreach ($r->getProperties() as $prop) {
     $props[] = $prop->getName();
   }
-  asort(&$props);
+  asort(inout $props);
   show_without_extra_vardump_nonsense($props);
   $meths = array();
   echo "yall know what time it is now too. time to show you some methods\n";
   foreach ($r->getMethods() as $meth) {
     $meths[] = $meth->getName();
   }
-  asort(&$meths);
+  asort(inout $meths);
   show_without_extra_vardump_nonsense($meths);
 }
 

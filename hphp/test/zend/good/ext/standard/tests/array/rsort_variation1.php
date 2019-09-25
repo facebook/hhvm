@@ -83,13 +83,13 @@ $iterator = 1;
 foreach ($inputs as $input) {
   echo "-- Iteration $iterator --\n";
   echo "Flag = default:\n";
-  var_dump( rsort(&$input) );
+  var_dump( rsort(inout $input) );
   echo "Flag = SORT_REGULAR:\n";
-  var_dump( rsort(&$input, SORT_REGULAR) );
+  var_dump( rsort(inout $input, SORT_REGULAR) );
   echo "Flag = SORT_NUMERIC:\n";
-  var_dump( rsort(&$input, SORT_NUMERIC) );
+  var_dump( rsort(inout $input, SORT_NUMERIC) );
   echo "Flag = SORT_STRING:\n";
-  var_dump( rsort(&$input, SORT_STRING) );
+  var_dump( rsort(inout $input, SORT_STRING) );
   $iterator++;
 }
 

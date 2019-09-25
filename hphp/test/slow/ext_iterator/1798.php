@@ -19,7 +19,7 @@ foreach ($dir as $fileinfo) {
     $files[] = $fileinfo->getFilename();
   }
 }
-asort(&$files);
+asort(inout $files);
 var_dump(array_values($files));
 
 $iterator = new DirectoryIterator($sample_dir);
@@ -50,7 +50,7 @@ foreach ($iterator as $fileinfo) {
     $files[$name] = $str;
   }
 }
-ksort(&$files);
+ksort(inout $files);
 foreach ($files as $str) {
   echo $str;
 }
@@ -63,7 +63,7 @@ foreach ($iterator as $fileinfo) {
     $files[$fileinfo->getFilename()] = $fileinfo;
   }
 }
-ksort(&$files);
+ksort(inout $files);
 foreach ($files as $name => $fileinfo) {
   echo $fileinfo->getFilename() . "\n";
    $fileinfo->getCTime() . "\n";

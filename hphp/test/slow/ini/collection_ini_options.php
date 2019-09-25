@@ -1,7 +1,7 @@
 <?hh
 
 function sort_opt($a) {
-  ksort(&$a);
+  ksort(inout $a);
   var_dump($a);
 }
 

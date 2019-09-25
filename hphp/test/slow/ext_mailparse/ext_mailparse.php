@@ -46,7 +46,7 @@ foreach ($files as $file) {
 
     $data = mailparse_msg_get_part_data($subpart);
     echo "\n"; echo $indent; echo "Part "; echo $partname; echo "\n";
-    ksort(&$data);
+    ksort(inout $data);
     foreach ($data as $key => $second) {
       if ($key != "headers" && $key != "ending-pos-body") {
         echo $indent; echo $key; echo " => ";

@@ -7,7 +7,7 @@ function main() {
   $m = Map{1 => 'c', 2 => 'b', 3 => 'a'};
   $calls = new Ref(0);
   try {
-    uasort(&$m, ($a, $b) ==> {
+    uasort(inout $m, ($a, $b) ==> {
       echo "in callback\n";
       if (++$calls->v == 2) throw new Exception("lol");
       return $a <=> $b;

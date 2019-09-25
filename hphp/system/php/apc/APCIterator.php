@@ -207,7 +207,7 @@ class APCIterator implements Iterator{
   private function init() {
     $info = apc_cache_info()['cache_list'];
     // Order defined by ksort
-    ksort(&$info);
+    ksort(inout $info);
     $this->info = $info;
     $this->initialized = true;
     $this->index = -1;

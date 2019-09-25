@@ -11,6 +11,6 @@ $ret = array();
 foreach ($iterator as $fileinfo) {
   $ret[] = $iterator->current();
 }
-asort(&$ret);
+asort(inout $ret);
 var_dump(array_values($ret));
 }

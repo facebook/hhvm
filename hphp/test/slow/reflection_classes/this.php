@@ -12,7 +12,7 @@ function printClass($rc) {
   foreach($rms as $rm) {
     $meths[$rm->getName()] = $rm;
   }
-  ksort(&$meths);
+  ksort(inout $meths);
   foreach($meths as $meth) {
     printFunc($meth);
   }
@@ -21,7 +21,7 @@ function printClass($rc) {
   foreach($rps as $rp) {
     $props[$rp->getName()] = $rp;
   }
-  ksort(&$props);
+  ksort(inout $props);
   foreach($props as $prop) {
     var_dump($prop->getTypeText());
   }

@@ -9,7 +9,7 @@ class C {
       unset($frame['file']);
       unset($frame['line']);
       unset($frame['args']);
-      ksort(&$frame);
+      ksort(inout $frame);
       $bt[$k] = $frame;
     }
     var_dump($bt);

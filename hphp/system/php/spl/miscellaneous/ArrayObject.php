@@ -84,7 +84,7 @@ class ArrayObject implements IteratorAggregate, ArrayAccess,
    */
   public function asort($sort_flags = 0) {
     $storage = $this->storage;
-    asort(&$storage, $sort_flags);
+    asort(inout $storage, $sort_flags);
     $this->storage = $storage;
   }
 
@@ -188,7 +188,7 @@ class ArrayObject implements IteratorAggregate, ArrayAccess,
    */
   public function ksort($sort_flags = 0) {
     $__storage = $this->storage;
-    $ret = ksort(&$__storage, $sort_flags);
+    $ret = ksort(inout $__storage, $sort_flags);
     $this->storage = $__storage;
     return $ret;
   }
@@ -207,7 +207,7 @@ class ArrayObject implements IteratorAggregate, ArrayAccess,
    */
   public function natcasesort() {
     $__storage = $this->storage;
-    $ret = natcasesort(&$__storage);
+    $ret = natcasesort(inout $__storage);
     $this->storage = $__storage;
     return $ret;
   }
@@ -227,7 +227,7 @@ class ArrayObject implements IteratorAggregate, ArrayAccess,
    */
   public function natsort() {
     $__storage = $this->storage;
-    $ret = natsort(&$__storage);
+    $ret = natsort(inout $__storage);
     $this->storage = $__storage;
     return $ret;
   }
@@ -407,7 +407,7 @@ class ArrayObject implements IteratorAggregate, ArrayAccess,
    */
   public function uasort($cmp_function) {
     $__storage = $this->storage;
-    $ret = uasort(&$__storage, $cmp_function);
+    $ret = uasort(inout $__storage, $cmp_function);
     $this->storage = $__storage;
     return $ret;
   }
@@ -433,7 +433,7 @@ class ArrayObject implements IteratorAggregate, ArrayAccess,
    */
   public function uksort($cmp_function) {
     $__storage = $this->storage;
-    $ret = uksort(&$__storage, $cmp_function);
+    $ret = uksort(inout $__storage, $cmp_function);
     $this->storage = $__storage;
     return $ret;
   }

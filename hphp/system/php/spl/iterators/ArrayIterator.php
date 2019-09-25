@@ -77,7 +77,7 @@ class ArrayIterator implements ArrayAccess, SeekableIterator, Countable {
    */
   public function asort() {
     $__storage = $this->storage;
-    $ret = asort(&$__storage);
+    $ret = asort(inout $__storage);
     $this->storage = $__storage;
     return $ret;
   }
@@ -161,7 +161,7 @@ class ArrayIterator implements ArrayAccess, SeekableIterator, Countable {
    */
   public function ksort() {
     $__storage = $this->storage;
-    $ret = ksort(&$__storage);
+    $ret = ksort(inout $__storage);
     $this->storage = $__storage;
     return $ret;
   }
@@ -178,7 +178,7 @@ class ArrayIterator implements ArrayAccess, SeekableIterator, Countable {
    */
   public function natcasesort() {
     $__storage = $this->storage;
-    $ret = natcasesort(&$__storage);
+    $ret = natcasesort(inout $__storage);
     $this->storage = $__storage;
     return $ret;
   }
@@ -195,7 +195,7 @@ class ArrayIterator implements ArrayAccess, SeekableIterator, Countable {
    */
   public function natsort() {
     $__storage = $this->storage;
-    $ret = natsort(&$__storage);
+    $ret = natsort(inout $__storage);
     $this->storage = $__storage;
     return $ret;
   }
@@ -351,7 +351,7 @@ class ArrayIterator implements ArrayAccess, SeekableIterator, Countable {
    */
   public function uasort($cmp_function) {
     $__storage = $this->storage;
-    $ret = uasort(&$__storage, $cmp_function);
+    $ret = uasort(inout $__storage, $cmp_function);
     $this->storage = $__storage;
     return $ret;
   }
@@ -371,7 +371,7 @@ class ArrayIterator implements ArrayAccess, SeekableIterator, Countable {
    */
   public function uksort($cmp_function) {
     $__storage = $this->storage;
-    $ret = uksort(&$__storage, $cmp_function);
+    $ret = uksort(inout $__storage, $cmp_function);
     $this->storage = $__storage;
     return $ret;
   }

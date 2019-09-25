@@ -4,7 +4,7 @@
 
 function show_iter($iter) {
   $vs = new Vector($iter);
-  sort(&$vs);
+  sort(inout $vs);
   echo "...\n";
   foreach ($vs as $v) var_dump($v);
   echo "...\n";

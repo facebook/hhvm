@@ -9,7 +9,7 @@ $vals = array();
 foreach($it as $key=>$value) {
   $vals[$key] = $value['key'];
 }
-ksort(&$vals);
+ksort(inout $vals);
 var_dump($vals);
 
 echo "===DONE===\n";

@@ -13,19 +13,19 @@ echo "-- with table = HTML_SPECIALCHARS & quote_style = ENT_COMPAT --\n";
 $table = HTML_SPECIALCHARS;
 $quote_style = ENT_COMPAT;
 $tt = get_html_translation_table($table, $quote_style, "UTF-8");
-asort( &$tt );
+asort(inout $tt );
 var_dump( $tt );
 
 echo "-- with table = HTML_SPECIALCHARS & quote_style = ENT_QUOTES --\n";
 $quote_style = ENT_QUOTES;
 $tt = get_html_translation_table($table, $quote_style, "UTF-8");
-asort( &$tt );
+asort(inout $tt );
 var_dump( $tt );
 
 echo "-- with table = HTML_SPECIALCHARS & quote_style = ENT_NOQUOTES --\n";
 $quote_style = ENT_NOQUOTES;
 $tt = get_html_translation_table($table, $quote_style, "UTF-8");
-asort( &$tt );
+asort(inout $tt );
 var_dump( $tt );
 
 echo "Done\n";

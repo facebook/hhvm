@@ -24,6 +24,6 @@ var_dump($x->getAttribute('Attr1'));
 $x = new ReflectionTypeAlias('MyNewType');
 echo $x->__toString();
 $attrs = $x->getAttributes();
-ksort(&$attrs);
+ksort(inout $attrs);
 var_dump($attrs);
 }

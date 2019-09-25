@@ -4,7 +4,7 @@
 */
 
 function sort_var_dump($results) {
-   sort(&$results);
+   sort(inout $results);
    var_dump($results);
 }
 <<__EntryPoint>> function main(): void {

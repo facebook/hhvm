@@ -26,7 +26,7 @@ function test_implicit_append() {
 
 function test_sort() {
   $x = varray[1, 2, 3];
-  asort(&$x);
+  asort(inout $x);
 }
 
 function test_unset() {

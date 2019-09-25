@@ -68,7 +68,7 @@ foreach($exp as $m)
 var_dump($miss);
 
 $props = array_keys(get_class_vars('ReflectionClassEx'));
-sort(&$props);
+sort(inout $props);
 var_dump($props);
 var_dump($r->name);
 echo "===DONE===\n";

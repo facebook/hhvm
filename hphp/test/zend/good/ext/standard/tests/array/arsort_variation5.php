@@ -39,14 +39,14 @@ foreach ($various_arrays as $array) {
 
   echo "- With default sort_flag -\n";
   $temp_array = $array;
-  var_dump(arsort(&$temp_array) ); // expecting : bool(true)
+  var_dump(arsort(inout $temp_array) ); // expecting : bool(true)
   var_dump($temp_array);
 
   // loop through $flags array and setting all possible flag values
   foreach($flags as $key => $flag){
     echo "- Sort_flag = $key -\n";
     $temp_array = $array;
-    var_dump(arsort(&$temp_array, $flag) ); // expecting : bool(true)
+    var_dump(arsort(inout $temp_array, $flag) ); // expecting : bool(true)
     var_dump($temp_array);
   }
   $count++;

@@ -18,7 +18,7 @@ class fooExtended extends fooUser {}
 
 
 function s_var_dump($arr) {
-   krsort(&$arr);
+   krsort(inout $arr);
    var_dump($arr);
 }
 <<__EntryPoint>>

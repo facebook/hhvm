@@ -34,7 +34,7 @@ __CLaSS__}
     foreach ($obj as $k => $v) {
       $arr[$k] = $v;
     }
-    ksort(&$arr);
+    ksort(inout $arr);
     var_dump($arr);
   }
 }

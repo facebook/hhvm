@@ -25,47 +25,47 @@ $unsorted_numerics =  array( 100 => 4, 33 => 3, 555 => 2, 22 => 1 );
 
 echo "\n-- Testing ksort() by supplying string array, 'flag' value is defualt --\n";
 $temp_array = $unsorted_strings;
-var_dump( ksort(&$temp_array) ); // expecting : bool(true)
+var_dump( ksort(inout $temp_array) ); // expecting : bool(true)
 var_dump( $temp_array);
 
 echo "\n-- Testing ksort() by supplying numeric array, 'flag' value is defualt --\n";
 $temp_array = $unsorted_numerics;
-var_dump( ksort(&$temp_array) ); // expecting : bool(true)
+var_dump( ksort(inout $temp_array) ); // expecting : bool(true)
 var_dump( $temp_array);
 
 echo "\n-- Testing ksort() by supplying string array, 'flag' = SORT_REGULAR --\n";
 $temp_array = $unsorted_strings;
-var_dump( ksort(&$temp_array, SORT_REGULAR) ); // expecting : bool(true)
+var_dump( ksort(inout $temp_array, SORT_REGULAR) ); // expecting : bool(true)
 var_dump( $temp_array);
 
 echo "\n-- Testing ksort() by supplying numeric array, 'flag' = SORT_REGULAR --\n";
 $temp_array = $unsorted_numerics;
-var_dump( ksort(&$temp_array, SORT_REGULAR) ); // expecting : bool(true)
+var_dump( ksort(inout $temp_array, SORT_REGULAR) ); // expecting : bool(true)
 var_dump( $temp_array);
 
 echo "\n-- Testing ksort() by supplying string array, 'flag' = SORT_STRING --\n";
 $temp_array = $unsorted_strings;
-var_dump( ksort(&$temp_array, SORT_STRING) ); // expecting : bool(true)
+var_dump( ksort(inout $temp_array, SORT_STRING) ); // expecting : bool(true)
 var_dump( $temp_array);
 
 echo "\n-- Testing ksort() by supplying string array (case insensitive), 'flag' = SORT_STRING|SORT_FLAG_CASE --\n";
 $temp_array = $unsorted_strings;
-var_dump( sort(&$temp_array, SORT_STRING|SORT_FLAG_CASE) ); // expecting : bool(true)
+var_dump( sort(inout $temp_array, SORT_STRING|SORT_FLAG_CASE) ); // expecting : bool(true)
 var_dump( $temp_array);
 
 echo "\n-- Testing ksort() by supplying string array (natural), 'flag' = SORT_NATURAL --\n";
 $temp_array = $unsorted_strings;
-var_dump( sort(&$temp_array, SORT_NATURAL) ); // expecting : bool(true)
+var_dump( sort(inout $temp_array, SORT_NATURAL) ); // expecting : bool(true)
 var_dump( $temp_array);
 
 echo "\n-- Testing ksort() by supplying string array (natural, case insensitive), 'flag' = SORT_NATURAL|SORT_FLAG_CASE --\n";
 $temp_array = $unsorted_strings;
-var_dump( sort(&$temp_array, SORT_NATURAL|SORT_FLAG_CASE) ); // expecting : bool(true)
+var_dump( sort(inout $temp_array, SORT_NATURAL|SORT_FLAG_CASE) ); // expecting : bool(true)
 var_dump( $temp_array);
 
 echo "\n-- Testing ksort() by supplying numeric array, 'flag' = SORT_NUMERIC --\n";
 $temp_array = $unsorted_numerics;
-var_dump( ksort(&$temp_array, SORT_NUMERIC) ); // expecting : bool(true)
+var_dump( ksort(inout $temp_array, SORT_NUMERIC) ); // expecting : bool(true)
 var_dump( $temp_array);
 
 echo "Done\n";

@@ -12,7 +12,7 @@ $ret = array();
 foreach ($iterator as $key => $fileinfo) {
   $ret[] = $key;
 }
-asort(&$ret);
+asort(inout $ret);
 var_dump(array_values($ret));
 
 $iterator->setFlags(FilesystemIterator::KEY_AS_FILENAME);
@@ -21,6 +21,6 @@ $ret = array();
 foreach ($iterator as $key => $fileinfo) {
   $ret[] = $key;
 }
-asort(&$ret);
+asort(inout $ret);
 var_dump(array_values($ret));
 }

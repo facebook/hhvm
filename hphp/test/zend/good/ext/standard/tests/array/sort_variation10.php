@@ -20,17 +20,17 @@ $unsorted_oct_array = array(01235, 0321, 0345, 066, 0772, 077, -066, -0345, 0);
 
 echo "\n-- Testing sort() by supplying octal value array, 'flag' value is defualt  --\n";
 $temp_array = $unsorted_oct_array;
-var_dump(sort(&$temp_array) ); // expecting : bool(true)
+var_dump(sort(inout $temp_array) ); // expecting : bool(true)
 var_dump($temp_array);
 
 echo "\n-- Testing sort() by supplying octal value array, 'flag' value is SORT_REGULAR  --\n";
 $temp_array = $unsorted_oct_array;
-var_dump(sort(&$temp_array, SORT_REGULAR) ); // expecting : bool(true)
+var_dump(sort(inout $temp_array, SORT_REGULAR) ); // expecting : bool(true)
 var_dump($temp_array);
 
 echo "\n-- Testing sort() by supplying octal value array, 'flag' value is SORT_NUMERIC  --\n";
 $temp_array = $unsorted_oct_array;
-var_dump(sort(&$temp_array, SORT_NUMERIC) ); // expecting : bool(true)
+var_dump(sort(inout $temp_array, SORT_NUMERIC) ); // expecting : bool(true)
 var_dump($temp_array);
 
 echo "Done\n";

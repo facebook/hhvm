@@ -36,17 +36,17 @@ $array = array (
 
 echo "\n-- Testing krsort() by supplying heredoc string array, 'flag' value is defualt --\n";
 $temp_array = $array;
-var_dump(krsort(&$temp_array) ); // expecting : bool(true)
+var_dump(krsort(inout $temp_array) ); // expecting : bool(true)
 var_dump($temp_array);
 
 echo "\n-- Testing krsort() by supplying heredoc string array, 'flag' = SORT_REGULAR --\n";
 $temp_array = $array;
-var_dump(krsort(&$temp_array, SORT_REGULAR) ); // expecting : bool(true)
+var_dump(krsort(inout $temp_array, SORT_REGULAR) ); // expecting : bool(true)
 var_dump($temp_array);
 
 echo "\n-- Testing krsort() by supplying heredoc string array, 'flag' = SORT_STRING --\n";
 $temp_array = $array;
-var_dump(krsort(&$temp_array, SORT_STRING) ); // expecting : bool(true)
+var_dump(krsort(inout $temp_array, SORT_STRING) ); // expecting : bool(true)
 var_dump($temp_array);
 
 echo "Done\n";

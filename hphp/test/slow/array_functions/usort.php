@@ -5,7 +5,7 @@ function less($a, $b) {
  }
 
 function main($a) {
-  usort(&$a, fun('less'));
+  usort(inout $a, fun('less'));
   var_dump($a);
 }
 

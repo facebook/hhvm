@@ -22,17 +22,17 @@ $unsorted_oct_array = array (
 
 echo "\n-- Testing arsort() by supplying octal value array, 'flag' value is defualt  --\n";
 $temp_array = $unsorted_oct_array;
-var_dump( arsort(&$temp_array) ); // expecting : bool(true)
+var_dump( arsort(inout $temp_array) ); // expecting : bool(true)
 var_dump($temp_array);
 
 echo "\n-- Testing arsort() by supplying octal value array, 'flag' value is SORT_REGULAR  --\n";
 $temp_array = $unsorted_oct_array;
-var_dump( arsort(&$temp_array, SORT_REGULAR) ); // expecting : bool(true)
+var_dump( arsort(inout $temp_array, SORT_REGULAR) ); // expecting : bool(true)
 var_dump($temp_array);
 
 echo "\n-- Testing arsort() by supplying octal value array, 'flag' value is SORT_NUMERIC  --\n";
 $temp_array = $unsorted_oct_array;
-var_dump( arsort(&$temp_array, SORT_NUMERIC) ); // expecting : bool(true)
+var_dump( arsort(inout $temp_array, SORT_NUMERIC) ); // expecting : bool(true)
 var_dump($temp_array);
 
 echo "Done\n";

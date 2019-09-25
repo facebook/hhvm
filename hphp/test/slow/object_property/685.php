@@ -29,21 +29,21 @@ class Z {
 <<__EntryPoint>>
 function test() {
   $vars = get_class_vars('A');
-  asort(&$vars);
+  asort(inout $vars);
   var_dump($vars);
   $vars = get_class_vars('B');
-  asort(&$vars);
+  asort(inout $vars);
   var_dump($vars);
   $vars = get_class_vars('C');
-  asort(&$vars);
+  asort(inout $vars);
   var_dump($vars);
   $vars = get_class_vars('X');
-  asort(&$vars);
+  asort(inout $vars);
   var_dump($vars);
   $vars = get_class_vars('Y');
-  asort(&$vars);
+  asort(inout $vars);
   var_dump($vars);
   $vars = get_class_vars('Z');
-  asort(&$vars);
+  asort(inout $vars);
   var_dump($vars);
 }

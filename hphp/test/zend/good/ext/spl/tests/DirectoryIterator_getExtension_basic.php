@@ -19,7 +19,7 @@ foreach (new DirectoryIterator($dir) as $file) {
     $nfo_exts[] = pathinfo($file->getFilename(), PATHINFO_EXTENSION);
 }
 var_dump($dit_exts === $nfo_exts);
-sort(&$dit_exts);
+sort(inout $dit_exts);
 var_dump($dit_exts);
 error_reporting(0);
 $dir   = __DIR__ . DIRECTORY_SEPARATOR . md5('DirectoryIterator::getExtension') . DIRECTORY_SEPARATOR;

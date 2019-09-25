@@ -15,7 +15,7 @@ foreach($it as $key=>$value) {
 foreach($it2 as $key=>$value) {
   $vals2[$key] = $value['key'];
 }
-ksort(&$vals2);
+ksort(inout $vals2);
 var_dump($vals);
 var_dump($vals2);
 

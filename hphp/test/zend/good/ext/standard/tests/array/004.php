@@ -9,9 +9,9 @@ $data = array(
 
 var_dump($data);
 
-natsort(&$data);
+natsort(inout $data);
 var_dump($data);
 
-natcasesort(&$data);
+natcasesort(inout $data);
 var_dump($data);
 }

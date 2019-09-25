@@ -2,7 +2,7 @@
 function stats($f, $a) {
     $times = 90000;
     print "$f\n";
-    ksort(&$a);
+    ksort(inout $a);
     foreach($a as $k => $v)
         print "$k: $v: " . sprintf('%0.3f', $v / $times) . "\n";
 }

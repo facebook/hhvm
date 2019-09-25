@@ -6,7 +6,7 @@ function cmp($a, $b) {
 function test() {
   $a = array(1,2,3);
   try {
-    usort(&$a, fun('cmp'));
+    usort(inout $a, fun('cmp'));
     var_dump('unreached');
   }
  catch (Exception $e) {

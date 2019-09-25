@@ -68,23 +68,23 @@ echo "\n-- Sort flag = default --\n";
 
 // testing rsort() function by supplying integer object array, flag value is defualt
 $temp_array = $unsorted_int_obj;
-var_dump(rsort(&$temp_array) );
+var_dump(rsort(inout $temp_array) );
 var_dump($temp_array);
 
 // testing rsort() function by supplying string object array, flag value is defualt
 $temp_array = $unsorted_str_obj;
-var_dump(rsort(&$temp_array) );
+var_dump(rsort(inout $temp_array) );
 var_dump($temp_array);
 
 echo "\n-- Sort flag = SORT_REGULAR --\n";
 // testing rsort() function by supplying integer object array, flag value = SORT_REGULAR
 $temp_array = $unsorted_int_obj;
-var_dump(rsort(&$temp_array, SORT_REGULAR) );
+var_dump(rsort(inout $temp_array, SORT_REGULAR) );
 var_dump($temp_array);
 
 // testing rsort() function by supplying string object array, flag value = SORT_REGULAR
 $temp_array = $unsorted_str_obj;
-var_dump(rsort(&$temp_array, SORT_REGULAR) );
+var_dump(rsort(inout $temp_array, SORT_REGULAR) );
 var_dump($temp_array);
 
 echo "Done";

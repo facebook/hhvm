@@ -41,13 +41,13 @@ foreach ($various_arrays as $array) {
   // testing arsort() function by supplying different arrays, flag value is default
   echo "- With default sort_flag -\n";
   $temp_array = $array;
-  var_dump(arsort(&$temp_array) );
+  var_dump(arsort(inout $temp_array) );
   var_dump($temp_array);
 
   // testing arsort() function by supplying different arrays, flag value = SORT_REGULAR
   echo "- Sort_flag = SORT_REGULAR -\n";
   $temp_array = $array;
-  var_dump(arsort(&$temp_array, SORT_REGULAR) );
+  var_dump(arsort(inout $temp_array, SORT_REGULAR) );
   var_dump($temp_array);
   $count++;
 }

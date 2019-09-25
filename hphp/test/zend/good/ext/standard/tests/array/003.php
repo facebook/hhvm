@@ -12,14 +12,14 @@ function cmp($a, $b) {
 require(dirname(__FILE__) . '/data.inc');
 
 echo " -- Testing uasort() -- \n";
-uasort(&$data, fun('cmp'));
+uasort(inout $data, fun('cmp'));
 var_dump($data);
 
 echo "\n -- Testing uksort() -- \n";
-uksort(&$data, fun('cmp'));
+uksort(inout $data, fun('cmp'));
 var_dump($data);
 
 echo "\n -- Testing usort() -- \n";
-usort(&$data, fun('cmp'));
+usort(inout $data, fun('cmp'));
 var_dump($data);
 }

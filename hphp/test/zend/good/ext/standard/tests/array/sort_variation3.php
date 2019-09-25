@@ -43,14 +43,14 @@ foreach ($various_arrays as $array) {
 
   echo "- With Defualt sort flag -\n"; 
   $temp_array = $array; 
-  var_dump(sort(&$temp_array) );
+  var_dump(sort(inout $temp_array) );
   var_dump($temp_array);
 
   // loop through $flag_value array and setting all possible flag values
   foreach($flag_value as $key => $flag){
     echo "- Sort flag = $key -\n";
     $temp_array = $array; 
-    var_dump(sort(&$temp_array, $flag) );
+    var_dump(sort(inout $temp_array, $flag) );
     var_dump($temp_array);
   }  
   $count++;

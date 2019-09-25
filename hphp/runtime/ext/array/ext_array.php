@@ -1166,7 +1166,7 @@ function array_intersect_ukey(
  */
 <<__Native, __Rx, __AtMostRxAsArgs>>
 function sort(
-  <<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> mixed &$array,
+  <<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> inout mixed $array,
   int $sort_flags = 0,
 ): bool;
 
@@ -1182,7 +1182,7 @@ function sort(
  */
 <<__Native, __Rx, __AtMostRxAsArgs>>
 function rsort(
-  <<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> mixed &$array,
+  <<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> inout mixed $array,
   int $sort_flags = 0,
 ): bool;
 
@@ -1201,7 +1201,7 @@ function rsort(
  */
 <<__Native, __Rx, __AtMostRxAsArgs>>
 function asort(
-  <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> mixed &$array,
+  <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> inout mixed $array,
   int $sort_flags = 0,
 ): bool;
 
@@ -1220,7 +1220,7 @@ function asort(
  */
 <<__Native, __Rx, __AtMostRxAsArgs>>
 function arsort(
-  <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> mixed &$array,
+  <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> inout mixed $array,
   int $sort_flags = 0,
 ): bool;
 
@@ -1237,7 +1237,7 @@ function arsort(
  */
 <<__Native, __Rx, __AtMostRxAsArgs>>
 function ksort(
-  <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> mixed &$array,
+  <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> inout mixed $array,
   int $sort_flags = 0,
 ): bool;
 
@@ -1254,7 +1254,7 @@ function ksort(
  */
 <<__Native, __Rx, __AtMostRxAsArgs>>
 function krsort(
-  <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> mixed &$array,
+  <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> inout mixed $array,
   int $sort_flags = 0,
 ): bool;
 
@@ -1278,7 +1278,7 @@ function krsort(
  */
 <<__Native, __Rx, __AtMostRxAsArgs>>
 function usort(
-  <<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> mixed &$array,
+  <<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> inout mixed $array,
   <<__AtMostRxAsFunc>> mixed $cmp_function,
 ): bool;
 
@@ -1297,7 +1297,7 @@ function usort(
  */
 <<__Native, __Rx, __AtMostRxAsArgs>>
 function uasort(
-  <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> mixed &$array,
+  <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> inout mixed $array,
   <<__AtMostRxAsFunc>> mixed $cmp_function,
 ): bool;
 
@@ -1318,7 +1318,7 @@ function uasort(
  */
 <<__Native, __Rx, __AtMostRxAsArgs>>
 function uksort(
-  <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> mixed &$array,
+  <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> inout mixed $array,
   <<__AtMostRxAsFunc>> mixed $cmp_function,
 ): bool;
 
@@ -1335,7 +1335,7 @@ function uksort(
  *
  */
 <<__Native>>
-function natsort(mixed &$array): bool;
+function natsort(inout mixed $array): bool;
 
 /**
  * natcasesort() is a case insensitive version of natsort(). This function
@@ -1349,7 +1349,7 @@ function natsort(mixed &$array): bool;
  *
  */
 <<__Native>>
-function natcasesort(mixed &$array): bool;
+function natcasesort(inout mixed $array): bool;
 
 <<__Native>>
 function i18n_loc_get_default(): string;

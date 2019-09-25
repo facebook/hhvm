@@ -1,5 +1,5 @@
 <?hh
 
 $headers = \HH\get_headers_secure();
-ksort(&$headers);
+ksort(inout $headers);
 var_dump($headers);

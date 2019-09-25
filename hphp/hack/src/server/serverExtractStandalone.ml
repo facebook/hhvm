@@ -896,10 +896,17 @@ let rec add_dep deps ?cls:(this_cls = None) ?(init_const = false) ty : unit =
         (* If a constant has a dependency on a non-built-in class, this class is an enum and
           the constant's value (or a part of it) is one of this enum's values. This means
           we need to add a dependency on an enum value to generate the constant's initializer. *)
-        if init_const && not (is_builtin_dep dep) then (
+        if
+          init_const
+          && (not (is_builtin_dep dep))
+          && Decl_provider.get_typedef name = None
+        then (
           let enum_value = get_enum_value name in
           do_add_dep deps (Typing_deps.Dep.Const (name, enum_value));
-          List.fold_left tyl ~f:this#on_type ~init:()
+
+          (* Exception to the comment above: type parameters. If we have a constant of type vec<A>,
+            we don't need values of A to generate an initializer for the constant. *)
+          List.iter tyl ~f:(add_dep deps ~cls:this_cls ~init_const:false)
         )
 
       method! on_taccess _ _ ((_, cls_type), tconsts) =
@@ -993,7 +1000,8 @@ let add_signature_dependencies deps obj =
               let c =
                 value_or_not_found description @@ Class.get_const cls name
               in
-              add_dep deps ~cls:(Some cls_name) ~init_const:true c.cc_type
+              let init_const = Class.kind cls <> Ast_defs.Cenum in
+              add_dep deps ~cls:(Some cls_name) ~init_const c.cc_type
           | Cstr _ ->
             (match Class.construct cls with
             | (Some constr, _) ->
@@ -1004,8 +1012,9 @@ let add_signature_dependencies deps obj =
                 add_dep deps ~cls:(Some cls_name) ty)
           | AllMembers _ ->
             (* AllMembers is used for dependencies on enums, so we should depend on all constants *)
-            Sequence.iter (Class.consts cls) (fun (_, c) ->
-                add_dep deps ~cls:(Some cls_name) c.cc_type)
+            Sequence.iter (Class.consts cls) (fun (name, c) ->
+                if name <> "class" then
+                  add_dep deps ~cls:(Some cls_name) c.cc_type)
           (* Ignore, we fetch class hierarchy when we call add_signature_dependencies on a class dep *)
           | Extends _ -> ()
           | _ -> raise UnexpectedDependency)

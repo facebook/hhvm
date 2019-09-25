@@ -1,6 +1,8 @@
 <?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
+type TypedefForString = string;
+
 enum SomeEnum: int {
   FIRST = 2;
   SECOND = 3;
@@ -39,6 +41,7 @@ const darray<string, int> AGE_RANGE = darray['min' => 21];
 const varray<string> MAP_INDEX = varray['MAP_1', 'MAP_2'];
 const classname<WithConst> CLASSNAME = WithConst::class;
 const keyset<string> KEYSET = keyset['a', 'b'];
+const TypedefForString TYPEDEF = "hello";
 
 function with_constants(): void {
   $a = WithConst::CFLOAT;
@@ -50,6 +53,7 @@ function with_constants(): void {
   $g = MAP_INDEX;
   $h = CLASSNAME;
   $i = KEYSET;
+  $j = TYPEDEF;
 }
 
 function with_type_constants(WithAbstractConst::NESTED::WITH_THIS $arg)
@@ -60,8 +64,10 @@ function with_type_constants(WithAbstractConst::NESTED::WITH_THIS $arg)
 class WithStaticProperty {
   public static Map<SomeEnum, string> $map =
     Map {SomeEnum::FIRST => 'first', SomeEnum::SECOND => 'second'};
+  public static Vector<A> $vector = Vector {};
 }
 
 function with_static_property(): void {
   $a = WithStaticProperty::$map;
+  $b = WithStaticProperty::$vector;
 }

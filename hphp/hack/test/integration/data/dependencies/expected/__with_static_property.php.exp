@@ -1,0 +1,16 @@
+<?hh
+class WithStaticProperty {
+
+  public static \Map<\SomeEnum, string> $map = Map {};
+}
+function with_static_property(): void {
+  $a = WithStaticProperty::$map;
+}
+enum SomeEnum: int {
+
+}
+function extract_standalone_make_default<T>(): T {
+  throw new Exception();
+}
+
+

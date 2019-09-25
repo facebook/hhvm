@@ -361,6 +361,19 @@ let get_init_from_type tcopt ty =
                || x = SN.Collections.cKeyset
                || x = SN.Collections.cDict ->
           Printf.sprintf "%s[]" (strip_ns name)
+        | x
+          when x = SN.Collections.cVector
+               || x = SN.Collections.cImmVector
+               || x = SN.Collections.cMap
+               || x = SN.Collections.cImmMap
+               || x = SN.Collections.cSet
+               || x = SN.Collections.cImmSet ->
+          Printf.sprintf "%s {}" (strip_ns name)
+        | x when x = SN.Collections.cPair ->
+          (match targs with
+          | [first; second] ->
+            Printf.sprintf "Pair {%s, %s}" (get_ first) (get_ second)
+          | _ -> raise UnexpectedDependency)
         | x when x = SN.Classes.cClassname ->
           (match targs with
           | [cls] ->
@@ -606,8 +619,15 @@ let get_property_declaration
     else
       ""
   in
-  let prop_type = Typing_print.full_decl tcopt @@ Lazy.force prop.ce_type in
-  Printf.sprintf "%s %s%s $%s;" visibility static prop_type name
+  let ty = Lazy.force prop.ce_type in
+  let prop_type = Typing_print.full_decl tcopt ty in
+  let init =
+    if is_static && not prop.ce_abstract then
+      Printf.sprintf " = %s" (get_init_from_type tcopt ty)
+    else
+      ""
+  in
+  Printf.sprintf "%s %s%s $%s%s;" visibility static prop_type name init
 
 let get_typeconst_declaration tcopt tconst name =
   let abstract =
@@ -765,8 +785,6 @@ let construct_class tcopt cls ?full_method:(meth = None) fields =
               match field with
               | Dep.Prop (_, p) ->
                 (value_or_not_found desc @@ Class.get_prop cls p, p) :: acc
-              | Dep.SProp (_, sp) ->
-                (value_or_not_found desc @@ Class.get_sprop cls sp, sp) :: acc
               | _ -> acc)
             fields
             []
@@ -936,7 +954,7 @@ let add_signature_dependencies deps obj =
             HashSet.add deps (Cstr cls_name)
           | SProp (_, name) ->
             let sp =
-              value_or_not_found description @@ Class.get_prop cls name
+              value_or_not_found description @@ Class.get_sprop cls name
             in
             add_dep deps ~cls:(Some cls_name) @@ Lazy.force sp.ce_type
           | Method (_, name) ->

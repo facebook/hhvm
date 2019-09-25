@@ -56,3 +56,12 @@ function with_type_constants(WithAbstractConst::NESTED::WITH_THIS $arg)
 : WithConst::TYPECONST {
   return 1;
 }
+
+class WithStaticProperty {
+  public static Map<SomeEnum, string> $map =
+    Map {SomeEnum::FIRST => 'first', SomeEnum::SECOND => 'second'};
+}
+
+function with_static_property(): void {
+  $a = WithStaticProperty::$map;
+}

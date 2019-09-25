@@ -62,10 +62,11 @@ class WithProperties {
 
   public int $first;
   public int $second = 0;
+  public static int $third = 7;
 }
 
 function use_properties(WithProperties $arg): int {
-  return $arg->first + $arg->second;
+  return $arg->first + $arg->second + WithProperties::$third;
 }
 
 class SimpleClass {

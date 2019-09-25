@@ -59,6 +59,17 @@ let set_state (t : t) (new_state : state) : unit =
   t.state <- new_state;
   Lwt_condition.broadcast t.state_changed_cv ()
 
+type serverless_ide_status =
+  | Starting
+  | Running
+  | Failed
+
+let is_running (t : t) : serverless_ide_status =
+  match t.state with
+  | Initialized -> Running
+  | Failed_to_initialize _ -> Failed
+  | Uninitialized _ -> Starting
+
 let log s = Hh_logger.log ("[ide-service] " ^^ s)
 
 let do_rpc

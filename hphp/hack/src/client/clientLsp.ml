@@ -2927,7 +2927,10 @@ let cancel_if_stale
   else
     Lwt.return_unit
 
-let tick_showStatus ~(state : state ref) : unit Lwt.t =
+let tick_showStatus
+    ~(state : state ref)
+    ~(use_serverless_ide : bool)
+    ~(ide_service : ClientIdeService.t) : unit Lwt.t =
   Main_env.(
     Lost_env.(
       ShowStatus.(
@@ -2935,8 +2938,38 @@ let tick_showStatus ~(state : state ref) : unit Lwt.t =
           let show_status () : unit Lwt.t =
             let%lwt () = Lwt_unix.sleep 1.0 in
             begin
-              match !state with
-              | Main_loop menv ->
+              let ide_service_running =
+                ClientIdeService.is_running ide_service
+              in
+              match (!state, use_serverless_ide, ide_service_running) with
+              | (_, true, ClientIdeService.Starting) ->
+                request_showStatus
+                  {
+                    request =
+                      {
+                        type_ = MessageType.WarningMessage;
+                        message = "Hack IDE Services are starting...";
+                        actions = [];
+                      };
+                    progress = None;
+                    total = None;
+                    shortMessage =
+                      Some ("Hack IDE Services starting " ^ status_tick ());
+                  }
+              | (_, true, ClientIdeService.Failed) ->
+                request_showStatus
+                  {
+                    request =
+                      {
+                        type_ = MessageType.ErrorMessage;
+                        message = "Hack IDE Services failed to start up.";
+                        actions = [];
+                      };
+                    progress = None;
+                    total = None;
+                    shortMessage = Some "Hack IDE Services failed";
+                  }
+              | (Main_loop menv, _, _) ->
                 request_showStatus
                   {
                     request =
@@ -2952,7 +2985,7 @@ let tick_showStatus ~(state : state ref) : unit Lwt.t =
                       | Some msg -> Some (msg ^ " " ^ status_tick ())
                       | None -> None);
                   }
-              | Lost_server { p; _ } ->
+              | (Lost_server { p; _ }, _, _) ->
                 let restart_command = "Restart Hack Server" in
                 let on_result ~result state =
                   let result = Jget.string_d result "title" ~default:"" in
@@ -3876,6 +3909,8 @@ let main (env : env) : Exit_status.t Lwt.t =
     let%lwt () = process_next_event () in
     main_loop ()
   in
-  let%lwt () = Lwt.pick [main_loop (); tick_showStatus state]
+  let%lwt () =
+    Lwt.pick
+      [main_loop (); tick_showStatus state env.use_serverless_ide ide_service]
   and () = run_ide_service env ide_service in
   Lwt.return Exit_status.No_error

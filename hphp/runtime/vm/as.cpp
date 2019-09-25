@@ -2760,7 +2760,7 @@ void parse_prop_or_field_impl(AsmState& as, AttrValidator validate, Adder add) {
   Attr attrs = parse_attribute_list(as, AttrContext::Prop, &userAttributes);
   validate(attrs);
 
-  auto const heredoc = makeStaticString(parse_maybe_long_string(as));
+  auto const heredoc = makeDocComment(parse_maybe_long_string(as));
 
   const StringData* userTy;
   TypeConstraint typeConstraint;

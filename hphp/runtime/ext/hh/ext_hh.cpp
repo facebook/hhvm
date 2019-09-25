@@ -207,7 +207,15 @@ void serialize_memoize_array(StringBuffer& sb, int depth, const ArrayData* ad) {
   IterateKV(ad, [&] (Cell k, TypedValue v) {
     serialize_memoize_arraykey(sb, k);
     serialize_memoize_tv(sb, depth, v);
-    return false;
+  });
+  serialize_memoize_code(sb, SER_MC_STOP);
+}
+
+void serialize_memoize_set(StringBuffer& sb, const ArrayData* ad) {
+  serialize_memoize_code(sb, SER_MC_CONTAINER);
+  IterateKVNoInc(ad, [&] (Cell k, TypedValue) {
+    serialize_memoize_arraykey(sb, k);
+    serialize_memoize_arraykey(sb, k);
   });
   serialize_memoize_code(sb, SER_MC_STOP);
 }
@@ -217,7 +225,11 @@ void serialize_memoize_col(StringBuffer& sb, int depth, ObjectData* obj) {
   assertx(obj->isCollection());
   auto const ad = collections::asArray(obj);
   if (LIKELY(ad != nullptr)) {
-    serialize_memoize_array(sb, depth, ad);
+    if (UNLIKELY(isSetCollection(obj->collectionType()))) {
+      serialize_memoize_set(sb, ad);
+    } else {
+      serialize_memoize_array(sb, depth, ad);
+    }
   } else {
     assertx(obj->collectionType() == CollectionType::Pair);
     auto const pair = reinterpret_cast<const c_Pair*>(obj);
@@ -288,12 +300,15 @@ void serialize_memoize_tv(StringBuffer& sb, int depth, TypedValue tv) {
       serialize_memoize_string_data(sb, tv.m_data.pstr);
       break;
 
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
+      serialize_memoize_set(sb, tv.m_data.parr);
+      break;
+
     case KindOfPersistentVec:
     case KindOfVec:
     case KindOfPersistentDict:
     case KindOfDict:
-    case KindOfPersistentKeyset:
-    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
       serialize_memoize_array(sb, depth, tv.m_data.parr);
@@ -343,6 +358,12 @@ ALWAYS_INLINE TypedValue serialize_memoize_string_top(StringData* str) {
 TypedValue serialize_memoize_param_arr(ArrayData* arr) {
   StringBuffer sb;
   serialize_memoize_array(sb, 0, arr);
+  return tvReturn(sb.detach());
+}
+
+TypedValue serialize_memoize_param_set(ArrayData* arr) {
+  StringBuffer sb;
+  serialize_memoize_set(sb, arr);
   return tvReturn(sb.detach());
 }
 

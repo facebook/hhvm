@@ -163,13 +163,15 @@ void getMemoKeyImpl(IRLS& env, const IRInstruction* inst, bool sync) {
   auto const s = inst->src(0);
 
   auto args = argGroup(env, inst);
-  if (s->isA(TArrLike) || s->isA(TObj) || s->isA(TStr) || s->isA(TDbl)) {
+  if (s->isA(TKeyset) || s->isA(TArrLike) || s->isA(TObj) || s->isA(TStr) ||
+      s->isA(TDbl)) {
     args.ssa(0, s->isA(TDbl));
   } else {
     args.typedValue(0);
   }
 
   auto const target = [&]{
+    if (s->isA(TKeyset))  return CallSpec::direct(serialize_memoize_param_set);
     if (s->isA(TArrLike)) return CallSpec::direct(serialize_memoize_param_arr);
     if (s->isA(TStr))     return CallSpec::direct(serialize_memoize_param_str);
     if (s->isA(TDbl))     return CallSpec::direct(serialize_memoize_param_dbl);

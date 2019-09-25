@@ -22,7 +22,7 @@ namespace {
  *
  *   function format_d(num $s) : string;
  *
- * and consume an 'int' from the argument list.
+ * and consume a 'num' from the argument list.
  *
  * Hex escapes are used for non-alphabetic characters. The '%%'
  * pseudo-specifier consumes nothing and appears as

@@ -884,8 +884,7 @@ let construct_type_declaration tcopt t ?(full_method = None) fields =
 
 let do_add_dep deps dep = if not (is_builtin_dep dep) then HashSet.add deps dep
 
-let rec add_dep deps ?cls:(this_cls = None) ?of_const:(dep_of_const = false) ty
-    : unit =
+let rec add_dep deps ?cls:(this_cls = None) ?(init_const = false) ty : unit =
   let visitor =
     object (this)
       inherit [unit] Type_visitor.decl_type_visitor
@@ -897,7 +896,7 @@ let rec add_dep deps ?cls:(this_cls = None) ?of_const:(dep_of_const = false) ty
         (* If a constant has a dependency on a non-built-in class, this class is an enum and
           the constant's value (or a part of it) is one of this enum's values. This means
           we need to add a dependency on an enum value to generate the constant's initializer. *)
-        if dep_of_const && not (is_builtin_dep dep) then (
+        if init_const && not (is_builtin_dep dep) then (
           let enum_value = get_enum_value name in
           do_add_dep deps (Typing_deps.Dep.Const (name, enum_value));
           List.fold_left tyl ~f:this#on_type ~init:()
@@ -917,27 +916,25 @@ let rec add_dep deps ?cls:(this_cls = None) ?of_const:(dep_of_const = false) ty
            continue adding dependencies of T::TConst2[::...] *)
         | (_, tconst) :: tconsts ->
           do_add_dep deps (Typing_deps.Dep.Const (class_name, tconst));
-          let not_found_msg =
-            Printf.sprintf "type constant %s in %s" tconst class_name
-          in
-          let typeconst =
-            value_or_not_found not_found_msg
-            @@ Decl_provider.Class.get_typeconst cls tconst
-          in
-          let (_ : unit) =
-            Option.fold ~f:this#on_type ~init:() typeconst.ttc_type
-          in
-          if not (List.is_empty tconsts) then
-            if Option.is_some typeconst.ttc_type then
-              let tc_type = Option.value_exn typeconst.ttc_type in
-              (* What 'this' refers to inside of T? *)
-              let tc_this =
-                match snd tc_type with
-                | Tapply ((_, name), _) -> Some name
-                | _ -> None
-              in
-              let taccess = Typing_defs.Taccess (tc_type, tconsts) in
-              add_dep ~cls:tc_this deps (Typing_reason.Rnone, taccess)
+          if Option.is_some (Decl_provider.Class.get_typeconst cls tconst) then
+            let typeconst =
+              value_or_not_found tconst
+              @@ Decl_provider.Class.get_typeconst cls tconst
+            in
+            let (_ : unit) =
+              Option.fold ~f:this#on_type ~init:() typeconst.ttc_type
+            in
+            if not (List.is_empty tconsts) then
+              if Option.is_some typeconst.ttc_type then
+                let tc_type = Option.value_exn typeconst.ttc_type in
+                (* What 'this' refers to inside of T? *)
+                let tc_this =
+                  match snd tc_type with
+                  | Tapply ((_, name), _) -> Some name
+                  | _ -> None
+                in
+                let taccess = Typing_defs.Taccess (tc_type, tconsts) in
+                add_dep ~cls:tc_this deps (Typing_reason.Rnone, taccess)
     end
   in
   visitor#on_type () ty
@@ -978,13 +975,29 @@ let add_signature_dependencies deps obj =
             in
             add_dep deps ~cls:(Some cls_name) @@ Lazy.force sm.ce_type
           | Const (_, name) ->
-            let c =
-              value_or_not_found description @@ Class.get_const cls name
-            in
-            add_dep deps ~cls:(Some cls_name) ~of_const:true c.cc_type
+            if Option.is_some (Class.get_typeconst cls name) then (
+              let tc =
+                value_or_not_found description @@ Class.get_typeconst cls name
+              in
+              if Option.is_some tc.ttc_type then
+                add_dep
+                  deps
+                  ~cls:(Some cls_name)
+                  (Option.value_exn tc.ttc_type);
+              if Option.is_some tc.ttc_constraint then
+                add_dep
+                  deps
+                  ~cls:(Some cls_name)
+                  (Option.value_exn tc.ttc_constraint)
+            ) else
+              let c =
+                value_or_not_found description @@ Class.get_const cls name
+              in
+              add_dep deps ~cls:(Some cls_name) ~init_const:true c.cc_type
           | Cstr _ ->
             (match Class.construct cls with
-            | (Some constr, _) -> add_dep deps @@ Lazy.force constr.ce_type
+            | (Some constr, _) ->
+              add_dep deps ~cls:(Some cls_name) @@ Lazy.force constr.ce_type
             | _ -> ())
           | Class _ ->
             Sequence.iter (Class.all_ancestors cls) (fun (_, ty) ->
@@ -1005,7 +1018,7 @@ let add_signature_dependencies deps obj =
         | GConst c
         | GConstName c ->
           let (ty, _) = value_or_not_found description @@ get_gconst c in
-          add_dep ~of_const:true deps ty
+          add_dep ~init_const:true deps ty
         | _ -> raise UnexpectedDependency))
 
 let get_dependency_origin cls (dep : Typing_deps.Dep.variant) =

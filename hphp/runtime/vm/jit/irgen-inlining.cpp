@@ -229,15 +229,12 @@ void beginInlining(IRGS& env,
 
   FTRACE(1, "[[[ begin inlining: {}\n", target->fullName()->data());
 
-  auto const generics = fca.hasGenerics() ? popC(env) : cns(env, TNullptr);
-
   // The VM stack-pointer is conceptually pointing to the last
-  // parameter, so we need to add numArgs to get to the ActRec
-  assertx(!fca.hasUnpack());
-  IRSPRelOffset calleeAROff = spOffBCFromIRSP(env) + fca.numArgs;
+  // parameter, so we need to add numInputs to get to the ActRec
+  IRSPRelOffset calleeAROff = spOffBCFromIRSP(env) + fca.numInputs();
 
   auto const arInfo = ActRecInfo { calleeAROff, fca.numArgs, dynamicCall };
-  gen(env, SpillFrame, arInfo, sp(env), cns(env, target), ctx, generics);
+  gen(env, SpillFrame, arInfo, sp(env), cns(env, target), ctx);
 
   ctx = [&] () -> SSATmp* {
     if (!target->implCls()) {
@@ -289,6 +286,14 @@ void beginInlining(IRGS& env,
   // will be a TCtx (= TObj | TCctx) read from the stack
   assertx(!ctx || (ctx->type() <= (TCtx | TCls) && target->implCls()));
 
+  auto const generics = [&]() -> SSATmp* {
+    if (!fca.hasGenerics()) return nullptr;
+    if (target->hasReifiedGenerics()) return popC(env);
+    popDecRef(env, DataTypeGeneric);
+    return nullptr;
+  }();
+  assertx(!fca.hasUnpack());
+
   jit::vector<SSATmp*> params{fca.numArgs};
   for (unsigned i = 0; i < fca.numArgs; ++i) {
     params[fca.numArgs - i - 1] = popF(env);
@@ -339,10 +344,15 @@ void beginInlining(IRGS& env,
   for (unsigned i = 0; i < fca.numArgs; ++i) {
     stLocRaw(env, i, calleeFP, params[i]);
   }
-  emitPrologueLocals(env, fca.numArgs, target, ctx);
+  if (generics != nullptr) stLocRaw(env, fca.numArgs, calleeFP, generics);
+
+  auto const callFlags = cns(env, CallFlags(generics != nullptr, 0).value());
+  emitPrologueLocals(env, fca.numArgs, callFlags, ctx);
 
   updateMarker(env);
   env.irb->exceptionStackBoundary();
+
+  emitGenericsMismatchCheck(env, callFlags);
   emitCalleeDynamicCallCheck(env);
 
   if (data.ctx && data.ctx->isA(TObj)) {

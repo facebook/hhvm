@@ -527,8 +527,7 @@ private:
                             bool dynamic, bool allowDynCallNoPointer,
                             FStackCheck doStackCheck,
                             FInitArgs doInitArgs,
-                            FEnterVM doEnterVM,
-                            Array&& reifiedGenerics);
+                            FEnterVM doEnterVM);
 
   struct ExcLoggerHook final : LoggerHook {
     explicit ExcLoggerHook(ExecutionContext& ec) : ec(ec) {}

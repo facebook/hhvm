@@ -18,6 +18,8 @@
 
 #include <cstdint>
 
+#include "hphp/util/assertions.h"
+
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -26,13 +28,24 @@ namespace HPHP {
  * C++ representation of various flags passed from the caller to the callee's
  * prologue used to complete a function call.
  *
- * Bits 0-63: currently unused
+ * Bit 0: flag indicating whether generics are on the stack
+ * Bits 1-31: currently unused
+ * Bits 32-47: generics bitmap
+ * Bits 48-63: currently unused
  */
 struct CallFlags {
-  CallFlags() {
-    m_bits = 0;
+  enum Flags {
+    HasGenerics,
+  };
+
+  CallFlags(bool hasGenerics, uint32_t genericsBitmap) {
+    assertx(hasGenerics || genericsBitmap == 0);
+    m_bits =
+      ((hasGenerics ? 1 : 0) << Flags::HasGenerics) |
+      ((uint64_t)genericsBitmap << 32);
   }
 
+  bool hasGenerics() const { return m_bits & (1 << Flags::HasGenerics); }
   int64_t value() const { return static_cast<int64_t>(m_bits); }
 
 private:

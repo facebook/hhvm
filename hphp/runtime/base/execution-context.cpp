@@ -1584,8 +1584,7 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
                                             bool allowDynCallNoPointer,
                                             FStackCheck doStackCheck,
                                             FInitArgs doInitArgs,
-                                            FEnterVM doEnterVM,
-                                            Array&& reifiedGenerics) {
+                                            FEnterVM doEnterVM) {
   assertx(f);
   // If `f' is a regular function, `thiz' and `cls' must be null.
   assertx(IMPLIES(!f->implCls(), (!thiz && !cls)));
@@ -1654,8 +1653,6 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
     vmStack().popAR();
     throw;
   }
-
-  if (reifiedGenerics.get()) ar->setReifiedGenerics(reifiedGenerics.detach());
 
   {
     pushVMState(reentrySP);
@@ -1761,7 +1758,7 @@ TypedValue ExecutionContext::invokePseudoMain(const Func* f,
   };
 
   return invokeFuncImpl(f, thiz, cls, 0, nullptr, false, false,
-                        doCheckStack, doInitArgs, doEnterVM, Array());
+                        doCheckStack, doInitArgs, doEnterVM);
 }
 
 TypedValue ExecutionContext::invokeFunc(const Func* f,
@@ -1806,13 +1803,14 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
 
   auto const doEnterVM = [&] (ActRec* ar) {
     enterVM(ar, [&] {
-      enterVMAtFunc(ar, StackArgsState::Trimmed, allowDynCallNoPointer);
+      enterVMAtFunc(ar, StackArgsState::Trimmed, std::move(reifiedGenerics),
+                    allowDynCallNoPointer);
     });
   };
 
   return invokeFuncImpl(f, thiz, cls, argc, invName, dynamic,
                         allowDynCallNoPointer, doCheckStack, doInitArgs,
-                        doEnterVM, std::move(reifiedGenerics));
+                        doEnterVM);
 }
 
 TypedValue ExecutionContext::invokeFuncFew(const Func* f,
@@ -1846,14 +1844,14 @@ TypedValue ExecutionContext::invokeFuncFew(const Func* f,
   };
 
   auto const doEnterVM = [&] (ActRec* ar) {
-    enterVM(ar, [&] { enterVMAtFunc(ar, StackArgsState::Untrimmed); });
+    enterVM(ar, [&] { enterVMAtFunc(ar, StackArgsState::Untrimmed, Array()); });
   };
 
   return invokeFuncImpl(f,
                         ActRec::decodeThis(thisOrCls),
                         ActRec::decodeClass(thisOrCls),
                         argc, invName, dynamic, allowDynCallNoPointer,
-                        doCheckStack, doInitArgs, doEnterVM, Array());
+                        doCheckStack, doInitArgs, doEnterVM);
 }
 
 static void prepareAsyncFuncEntry(ActRec* enterFnAr, Resumable* resumable) {

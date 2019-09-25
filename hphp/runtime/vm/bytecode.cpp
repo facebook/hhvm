@@ -1425,7 +1425,7 @@ void prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
   }
 }
 
-static void prepareFuncEntry(ActRec *ar, StackArgsState stk) {
+static void prepareFuncEntry(ActRec *ar, StackArgsState stk, Array&& generics) {
   assertx(!ar->resumed());
   const Func* func = ar->m_func;
   Offset firstDVInitializer = InvalidAbsoluteOffset;
@@ -1433,15 +1433,6 @@ static void prepareFuncEntry(ActRec *ar, StackArgsState stk) {
   folly::Optional<uint32_t> raiseTooManyArgumentsWarnings;
   const int nparams = func->numNonVariadicParams();
   auto& stack = vmStack();
-  ArrayData* reified_generics = nullptr;
-
-  if (ar->m_func->hasReifiedGenerics()) {
-    if (ar->hasReifiedGenerics()) {
-      // This means that the first local is $0ReifiedGenerics
-      reified_generics = ar->getReifiedGenerics();
-    }
-    ar->trashReifiedGenerics();
-  }
 
   if (stk == StackArgsState::Trimmed &&
       (ar->func()->attrs() & AttrMayUseVV) &&
@@ -1514,18 +1505,19 @@ static void prepareFuncEntry(ActRec *ar, StackArgsState stk) {
   if (ar->m_func->hasReifiedGenerics()) {
     // Currently does not work with closures
     assertx(!func->isClosureBody());
-    if (!ar->hasReifiedGenerics()) {
+    if (generics.isNull()) {
       stack.pushUninit();
     } else {
-      assertx(reified_generics != nullptr);
       // push for first local
       if (RuntimeOption::EvalHackArrDVArrs) {
-        stack.pushVec(reified_generics);
+        stack.pushVecNoRc(generics.detach());
       } else {
-        stack.pushArray(reified_generics);
+        stack.pushArrayNoRc(generics.detach());
       }
     }
     nlocals++;
+  } else {
+    generics.reset();
   }
 
   pushFrameSlots(func, nlocals);
@@ -1549,9 +1541,9 @@ static void prepareFuncEntry(ActRec *ar, StackArgsState stk) {
 namespace {
 // Check whether HasReifiedGenerics is set on the ActRec
 // Check whether the location of reified generics matches the one we expect
-void checkForReifiedGenericsErrors(const ActRec* ar) {
+void checkForReifiedGenericsErrors(const ActRec* ar, bool hasGenerics) {
   if (!ar->m_func->hasReifiedGenerics()) return;
-  if (!ar->hasReifiedGenerics()) {
+  if (!hasGenerics) {
     throw_call_reified_func_without_generics(ar->m_func);
   }
   auto const tv = frame_local(ar, ar->m_func->numParams());
@@ -1596,7 +1588,7 @@ void enterVMAtPseudoMain(ActRec* enterFnAr, VarEnv* varEnv) {
   }
 }
 
-void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk,
+void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk, Array&& generics,
                    bool allowDynCallNoPointer /* = false */) {
   assertx(enterFnAr);
   assertx(!enterFnAr->resumed());
@@ -1612,18 +1604,26 @@ void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk,
   // of invoke func).
 
   if (LIKELY(useJitPrologue)) {
+    if (!generics.isNull()) {
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        vmStack().pushVecNoRc(generics.detach());
+      } else {
+        vmStack().pushArrayNoRc(generics.detach());
+      }
+    }
     const int np = enterFnAr->m_func->numNonVariadicParams();
     int na = enterFnAr->numArgs();
     if (na > np) na = np + 1;
-    auto const callFlags = CallFlags();
+    auto const callFlags = CallFlags(!generics.isNull(), 0);
     jit::TCA start = enterFnAr->m_func->getPrologue(na);
     jit::enterTCAtPrologue(callFlags, start, enterFnAr);
     return;
   }
 
-  prepareFuncEntry(enterFnAr, stk);
+  auto const hasGenerics = !generics.isNull();
+  prepareFuncEntry(enterFnAr, stk, std::move(generics));
 
-  checkForReifiedGenericsErrors(enterFnAr);
+  checkForReifiedGenericsErrors(enterFnAr, hasGenerics);
   if (!EventHook::FunctionCall(enterFnAr, EventHook::NormalFunc)) return;
   checkStack(vmStack(), enterFnAr->m_func, 0);
   calleeDynamicCallChecks(enterFnAr, allowDynCallNoPointer);
@@ -4548,13 +4548,18 @@ OPTBLD_INLINE void iopUnsetG() {
   vmStack().popC();
 }
 
-bool doFCall(ActRec* ar, uint32_t numArgs, bool unpack) {
+bool doFCall(ActRec* ar, uint32_t numArgs, bool hasUnpack, bool hasGenerics) {
   TRACE(3, "FCall: pc %p func %p base %d\n", vmpc(),
         vmfp()->unit()->entry(),
         int(vmfp()->func()->base()));
 
   try {
-    if (unpack) {
+    assertx(!hasGenerics || tvIsVecOrVArray(vmStack().topC()));
+    auto generics = hasGenerics
+      ? Array::attach(vmStack().topC()->m_data.parr) : Array();
+    if (hasGenerics) vmStack().discard();
+
+    if (hasUnpack) {
       Cell* c1 = vmStack().topC();
       if (UNLIKELY(!isContainer(*c1))) {
         Cell tmp = *c1;
@@ -4575,7 +4580,9 @@ bool doFCall(ActRec* ar, uint32_t numArgs, bool unpack) {
 
     prepareFuncEntry(
       ar,
-      unpack ? StackArgsState::Trimmed : StackArgsState::Untrimmed);
+      hasUnpack ? StackArgsState::Trimmed : StackArgsState::Untrimmed,
+      std::move(generics)
+    );
   } catch (...) {
     // If the callee's frame is still pre-live, free it explicitly.
     if (ar->m_sfp == vmfp()) {
@@ -4588,7 +4595,7 @@ bool doFCall(ActRec* ar, uint32_t numArgs, bool unpack) {
     throw;
   }
 
-  checkForReifiedGenericsErrors(ar);
+  checkForReifiedGenericsErrors(ar, hasGenerics);
   if (UNLIKELY(!EventHook::FunctionCall(ar, EventHook::NormalFunc))) {
     return false;
   }
@@ -4618,19 +4625,10 @@ void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
   if (asyncEagerReturn) ar->setAsyncEagerReturn();
   ar->setReturn(vmfp(), origpc, jit::tc::ustubs().retHelper);
   ar->trashVarEnv();
-  if (fca.hasGenerics()) {
-    assertx(tvIsVecOrVArray(vmStack().topC()));
-    if (func->hasReifiedGenerics()) {
-      ar->setReifiedGenerics(vmStack().topC()->m_data.parr);
-      vmStack().discard();
-    } else {
-      vmStack().popC();
-    }
-  }
 
   initActRec(ar);
 
-  doFCall(ar, fca.numArgs, fca.hasUnpack());
+  doFCall(ar, fca.numArgs, fca.hasUnpack(), fca.hasGenerics());
   pc = vmpc();
 }
 
@@ -5363,15 +5361,17 @@ OPTBLD_INLINE void iopLockObj() {
   c1->m_data.pobj->lockObject();
 }
 
-bool doFCallUnpackTC(PC origpc, int32_t numArgsInclUnpack, void* retAddr) {
+bool doFCallUnpackTC(PC origpc, int32_t numInputs, bool hasGenerics,
+                     void* retAddr) {
   assert_native_stack_aligned();
   assertx(tl_regState == VMRegState::DIRTY);
   tl_regState = VMRegState::CLEAN;
-  auto const ar = vmStack().indA(numArgsInclUnpack);
-  assertx(ar->numArgs() == numArgsInclUnpack);
+  auto const ar = vmStack().indA(numInputs);
+  if (hasGenerics) --numInputs;
+  assertx(ar->numArgs() == numInputs);
   ar->setReturn(vmfp(), origpc, jit::tc::ustubs().retHelper);
   ar->setJitReturn(retAddr);
-  auto const ret = doFCall(ar, numArgsInclUnpack - 1, true);
+  auto const ret = doFCall(ar, numInputs - 1, true, hasGenerics);
   tl_regState = VMRegState::DIRTY;
   return ret;
 }

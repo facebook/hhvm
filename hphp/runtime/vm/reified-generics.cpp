@@ -172,5 +172,20 @@ void checkClassReifiedGenericMismatch(
   );
 }
 
+uint32_t getGenericsBitmap(const ArrayData* generics) {
+  assertx(generics);
+  if (generics->size() > 15) return 0;
+  auto bitmap = 1;
+  IterateV(
+    generics,
+    [&](TypedValue v) {
+      assertx(isArrayLikeType(v.m_type));
+      bitmap = (bitmap << 1) | !isWildCard(v.m_data.parr);
+    }
+  );
+  return bitmap;
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////
 }

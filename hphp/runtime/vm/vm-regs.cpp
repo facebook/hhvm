@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/vm-regs.h"
 
+#include "hphp/runtime/vm/call-flags.h"
 #include "hphp/runtime/vm/jit/fixup.h"
 
 namespace HPHP {
@@ -32,7 +33,7 @@ VMRegAnchor::VMRegAnchor(Mode mode)
   jit::syncVMRegs(mode == Soft);
 }
 
-VMRegAnchor::VMRegAnchor(ActRec* ar)
+VMRegAnchor::VMRegAnchor(CallFlags callFlags, ActRec* ar)
   : m_old(tl_regState)
 {
   assertx(tl_regState == VMRegState::DIRTY);
@@ -42,7 +43,8 @@ VMRegAnchor::VMRegAnchor(ActRec* ar)
   const Func* prevF = prevAr->m_func;
   assertx(!ar->resumed());
   auto& regs = vmRegs();
-  regs.stack.top() = (TypedValue*)ar - ar->numArgs();
+  auto const numInputs = ar->numArgs() + (callFlags.hasGenerics() ? 1 : 0);
+  regs.stack.top() = (TypedValue*)ar - numInputs;
   assertx(vmStack().isValidAddress((uintptr_t)vmsp()));
   regs.pc = prevF->unit()->at(prevF->base() + ar->m_callOff);
   regs.fp = prevAr;

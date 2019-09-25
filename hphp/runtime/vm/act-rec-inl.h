@@ -72,10 +72,6 @@ inline bool ActRec::isFCallM() const {
   return flags() & MultiReturn;
 }
 
-inline bool ActRec::hasReifiedGenerics() const {
-  return flags() & HasReifiedGenerics;
-}
-
 inline uint32_t ActRec::encodeNumArgsAndFlags(uint32_t numArgs, Flags flags) {
   assertx((numArgs & kFlagsMask) == 0);
   assertx((uint32_t{flags} & kNumArgsMask) == 0);
@@ -102,12 +98,8 @@ inline void ActRec::setFCallM() {
   m_numArgsAndFlags |= MultiReturn;
 }
 
-inline void ActRec::setHasReifiedGenerics() {
-  m_numArgsAndFlags |= HasReifiedGenerics;
-}
-
 inline void ActRec::setResumed() {
-  assertx((flags() & ~(AsyncEagerRet | DynamicCall | HasReifiedGenerics))
+  assertx((flags() & ~(AsyncEagerRet | DynamicCall))
          == Flags::None);
   m_numArgsAndFlags = encodeNumArgsAndFlags(
     numArgs(),
@@ -116,11 +108,11 @@ inline void ActRec::setResumed() {
 }
 
 inline void ActRec::setAsyncEagerReturn() {
-  assertx((flags() & ~(DynamicCall | HasReifiedGenerics)) == Flags::None);
+  assertx((flags() & ~DynamicCall) == Flags::None);
   m_numArgsAndFlags = encodeNumArgsAndFlags(
     numArgs(),
     static_cast<Flags>(AsyncEagerRet |
-                       (flags() & (DynamicCall | HasReifiedGenerics)))
+                       (flags() & DynamicCall))
   );
 }
 
@@ -226,21 +218,6 @@ inline void ActRec::trashThis() {
   if (debug) m_thisUnsafe = reinterpret_cast<ObjectData*>(kTrashedThisSlot);
 }
 
-/////////////////////////////////////////////////////////////////////////////
-
-inline void ActRec::setReifiedGenerics(ArrayData* rg) {
-  m_numArgsAndFlags |= HasReifiedGenerics;
-  m_reifiedGenerics.set(0, rg);
-}
-
-inline ArrayData* ActRec::getReifiedGenerics() const {
-  return m_reifiedGenerics.ptr();
-}
-
-inline void ActRec::trashReifiedGenerics() {
-  if (!debug) return;
-  m_reifiedGenerics = ReifiedGenericsPtr(kTrashedReifiedGenericsSlot);
-}
 /////////////////////////////////////////////////////////////////////////////
 
 inline void ActRec::trashVarEnv() {

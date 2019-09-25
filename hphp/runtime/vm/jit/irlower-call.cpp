@@ -67,34 +67,17 @@ TRACE_SET_MOD(irlower);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace {
-
-TCA getCallTarget(IRLS& env, const IRInstruction* inst, Vreg sp) {
-  auto const extra = inst->extra<Call>();
-  auto const callee = extra->callee;
-  if (callee != nullptr) return tc::ustubs().immutableBindCallStub;
-  return tc::ustubs().funcPrologueRedispatch;
-}
-
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 void cgCall(IRLS& env, const IRInstruction* inst) {
   auto const sp = srcLoc(env, inst, 0).reg();
   auto const fp = srcLoc(env, inst, 1).reg();
   auto const extra = inst->extra<Call>();
-  auto const callee = extra->callee;
-  auto const argc = extra->numParams;
   auto const callOff = safe_cast<int32_t>(extra->callOffset);
 
   auto& v = vmain(env);
   auto const catchBlock = label(env, inst->taken());
 
   auto const calleeSP = sp[cellsToBytes(extra->spOffset.offset)];
-  auto const calleeAR = calleeSP + cellsToBytes(argc);
-
-  auto const target = getCallTarget(env, inst, sp);
+  auto const calleeAR = calleeSP + cellsToBytes(extra->numInputs());
 
   v << store{fp, calleeAR + AROFF(m_sfp)};
   v << storeli{callOff, calleeAR + AROFF(m_callOff)};
@@ -115,7 +98,7 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
     };
   }
 
-  auto const callFlags = CallFlags();
+  auto const callFlags = CallFlags(extra->hasGenerics, extra->genericsBitmap);
   v << copy{v.cns(callFlags.value()), r_php_call_flags()};
 
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
@@ -136,8 +119,13 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
   // Emit a smashable call that initially calls a recyclable service request
   // stub.  The stub and the eventual targets take rvmfp() as an argument,
   // pointing to the callee ActRec.
+  auto const target = extra->callee != nullptr
+    ? tc::ustubs().immutableBindCallStub
+    : tc::ustubs().funcPrologueRedispatch;
+
   auto const done = v.makeBlock();
-  v << callphp{target, php_call_regs(), {{done, catchBlock}}, callee, argc};
+  v << callphp{target, php_call_regs(), {{done, catchBlock}},
+               extra->callee, extra->numArgs};
   v = done;
 
   auto const dst = dstLoc(env, inst, 0);
@@ -160,7 +148,7 @@ void cgCallUnpack(IRLS& env, const IRInstruction* inst) {
   v << syncvmsp{syncSP};
 
   if (extra->numOut) {
-    auto const calleeAR = syncSP + cellsToBytes(extra->numParams);
+    auto const calleeAR = syncSP + cellsToBytes(extra->numInputs());
     v << orlim{
       static_cast<int32_t>(ActRec::Flags::MultiReturn),
       calleeAR + AROFF(m_numArgsAndFlags),
@@ -170,7 +158,8 @@ void cgCallUnpack(IRLS& env, const IRInstruction* inst) {
 
   auto const target = tc::ustubs().fcallUnpackHelper;
   auto const callOff = v.cns(extra->callOffset);
-  auto const args = v.makeTuple({callOff, v.cns(extra->numParams)});
+  auto const args = v.makeTuple(
+    {callOff, v.cns(extra->numInputs()), v.cns(extra->hasGenerics ? 1 : 0)});
 
   auto const done = v.makeBlock();
   v << vcallunpack{target, fcall_unpack_regs(), args,

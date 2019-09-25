@@ -178,17 +178,16 @@ void emitCallerRxChecksUnknown(IRGS& env, SSATmp* callee) {
 
 //////////////////////////////////////////////////////////////////////
 
-IRSPRelOffset fsetActRec(
+void fsetActRec(
   IRGS& env,
   SSATmp* func,
   const FCallArgs& fca,
   SSATmp* objOrClass,
   bool dynamicCall
 ) {
-  auto const generics = fca.hasGenerics() ? popC(env) : cns(env, TNullptr);
-  auto const numArgs = fca.numArgs + (fca.hasUnpack() ? 1 : 0);
   auto const arOffset =
-    offsetFromIRSP(env, BCSPRelOffset{static_cast<int32_t>(numArgs)});
+    offsetFromIRSP(env, BCSPRelOffset{static_cast<int32_t>(fca.numInputs())});
+  auto const numArgs = fca.numArgs + (fca.hasUnpack() ? 1 : 0);
 
   gen(
     env,
@@ -196,23 +195,22 @@ IRSPRelOffset fsetActRec(
     ActRecInfo { arOffset, numArgs, dynamicCall },
     sp(env),
     func,
-    objOrClass ? objOrClass : cns(env, TNullptr),
-    generics
+    objOrClass ? objOrClass : cns(env, TNullptr)
   );
-
-  return arOffset;
 }
 
 //////////////////////////////////////////////////////////////////////
 
 void callUnpack(IRGS& env, const Func* callee, const FCallArgs& fca,
                 bool unlikely) {
+  assertx(fca.hasUnpack());
   auto const data = CallUnpackData {
     spOffBCFromIRSP(env),
-    fca.numArgs + 1,
+    fca.numArgs,
     fca.numRets - 1,
     bcOff(env),
     callee,
+    fca.hasGenerics(),
   };
   push(env, gen(env, CallUnpack, data, sp(env), fp(env)));
   if (unlikely) gen(env, Jmp, makeExit(env, nextBcOff(env)));
@@ -220,12 +218,29 @@ void callUnpack(IRGS& env, const Func* callee, const FCallArgs& fca,
 
 SSATmp* callImpl(IRGS& env, const Func* callee, const FCallArgs& fca,
                  bool asyncEagerReturn) {
+  // TODO: extend hhbc with bitmap of passed generics, or even better, use one
+  // stack value per generic argument and extend hhbc with their count
+  auto const genericsBitmap = [&] {
+    if (!fca.hasGenerics()) return uint32_t{0};
+    auto const type = RuntimeOption::EvalHackArrDVArrs ? TVec : TArr;
+    auto const generics = topC(env);
+    // Do not bother calculating the bitmap using a C++ helper if generics are
+    // not statically known, as the prologue already has the same logic.
+    if (!generics->hasConstVal(type)) return uint32_t{0};
+    auto const genericsArr = RuntimeOption::EvalHackArrDVArrs
+      ? generics->vecVal() : generics->arrVal();
+    return getGenericsBitmap(genericsArr);
+  }();
+
+  assertx(!fca.hasUnpack());
   auto const data = CallData {
     spOffBCFromIRSP(env),
     fca.numArgs,
     fca.numRets - 1,
     bcOff(env) - curFunc(env)->base(),
     callee,
+    genericsBitmap,
+    fca.hasGenerics(),
     asyncEagerReturn,
   };
   return gen(env, Call, data, sp(env), fp(env));

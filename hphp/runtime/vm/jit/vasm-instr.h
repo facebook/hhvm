@@ -790,9 +790,8 @@ struct syncvmrettype { Vreg type; };
  * was before the instruction that transferred control to us.
  *
  * The phplogue should dominate all code that is logically part of a PHP func
- * prologue or func body (but /not/ the func guard, which precedes it).  Note
- * that this includes unique stubs like fcallHelperThunk, which are reached by
- * PHP function call.
+ * prologue or func body.  Note that this includes unique stubs like
+ * fcallHelperThunk, which are reached by PHP function call.
  *
  * Ultimately, anytime we hit a phplogue, we came from enterTCHelper, which
  * means that after the phplogue (since we maintain the native stack pointer),

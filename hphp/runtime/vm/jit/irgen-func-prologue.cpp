@@ -18,9 +18,11 @@
 
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/type-structure-helpers-defs.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/reified-generics-info.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/srckey.h"
 
@@ -75,124 +77,48 @@ void prologueDispatch(IRGS& env, const Func* func, Body body) {
   );
 }
 
-// Check if HasReifiedGenerics flag is set
-SSATmp* emitARHasReifiedGenericsTest(IRGS& env) {
-  auto const flags = gen(env, LdARNumArgsAndFlags, fp(env));
-  auto const test = gen(
-    env, AndInt, flags,
-    cns(env, static_cast<int32_t>(ActRec::Flags::HasReifiedGenerics))
-  );
-  return test;
-}
-
-// Load the reified generics from ActRec if the bit is set otherwise set
-// it uninit. We will error at the end of the prologue
-SSATmp* emitLdARReifiedGenericsSafe(IRGS& env) {
-  return cond(
-    env,
-    [&] (Block* taken) {
-      auto const test = emitARHasReifiedGenericsTest(env);
-      gen(env, JmpZero, taken, test);
-    },
-    [&] { return gen(env, LdARReifiedGenerics, fp(env)); },
-    // taken
-    [&] { return cns(env, TUninit); }
-  );
-}
-
-// Check whether HasReifiedGenerics is set on the ActRec
-void emitARHasReifiedGenericsCheck(IRGS& env) {
-  auto const func = curFunc(env);
-  // It is possible to create a reified function and call it with reified
-  // parameters but then, on sandboxes, make this function unreified yet
-  // still call it with reified parameters. We need to catch this, hence
-  // the following check has to happen not only on reified functions but
-  // on all functions when we are not in repo mode.
-  if (!func->hasReifiedGenerics() &&
-      (func->cls() ? func->cls()->attrs() & AttrUnique : func->isUnique()) &&
-      RuntimeOption::RepoAuthoritative) {
-    return;
-  }
-  if (!func->hasReifiedGenerics()) return;
-  ifThen(
-    env,
-    [&] (Block* taken) {
-      auto const test = emitARHasReifiedGenericsTest(env);
-      gen(env, JmpZero, taken, test);
-    },
-    [&] {
-      if (!func->hasReifiedGenerics()) return;
-      hint(env, Block::Hint::Unlikely);
-      updateMarker(env);
-      env.irb->exceptionStackBoundary();
-      gen(env, ThrowCallReifiedFunctionWithoutGenerics, cns(env, curFunc(env)));
-    }
-  );
-  // Now that we know that first local is not Tuninit,
-  // lets tell that to the JIT
-  gen(
-    env,
-    AssertLoc,
-    RuntimeOption::EvalHackArrDVArrs ? TVec : TArr,
-    LocalId{func->numParams()},
-    fp(env)
-  );
-}
-
-// Checks whether the reified generics matches the one we expect
-void emitCorrectNumOfReifiedGenericsCheck(
-  IRGS& env, SSATmp* doesReifiedGenericsMatch
-) {
-  auto const func = curFunc(env);
-  if (!func->hasReifiedGenerics()) return;
-  auto const finish = [&] {
-    // First local contains the reified generics
-    auto const reified_generics =
-      gen(
-        env,
-        LdLoc,
-        RuntimeOption::EvalHackArrDVArrs ? TVec : TArr,
-        LocalId{func->numParams()},
-        fp(env)
-      );
-    updateMarker(env);
-    env.irb->exceptionStackBoundary();
-    gen(env, CheckFunReifiedGenericMismatch, FuncData{func}, reified_generics);
-  };
-  if (!doesReifiedGenericsMatch) return finish();
-  ifThen(
-    env,
-    [&] (Block* taken) { gen(env, JmpZero, taken, doesReifiedGenericsMatch); },
-    [&] { finish(); }
-  );
-}
-
 /*
  * Initialize parameters.
  *
  * Set un-passed parameters to Uninit (or the empty array, for the variadic
  * capture parameter) and set up the ExtraArgs on the ActRec as needed.
  */
-void init_params(IRGS& env, const Func* func, uint32_t argc) {
-  /*
-   * Maximum number of default-value parameter initializations to unroll.
-   */
-  constexpr auto kMaxParamsInitUnroll = 5;
+void init_params(IRGS& env, const Func* func, uint32_t argc,
+                 SSATmp* callFlags) {
+  // Reified generics are not supported on closures yet.
+  assertx(!func->hasReifiedGenerics() || !func->isClosureBody());
 
+  // Maximum number of default-value parameter initializations to unroll.
+  auto constexpr kMaxParamsInitUnroll = 5;
   auto const nparams = func->numNonVariadicParams();
-  SSATmp* doesReifiedGenericsMatch = nullptr;
 
-  if (func->hasReifiedGenerics()) {
-    // Currently does not work with closures
-    assertx(!func->isClosureBody());
-    auto const reified_generics = emitLdARReifiedGenericsSafe(env);
-    doesReifiedGenericsMatch =
-      gen(env, IsFunReifiedGenericsMatched, FuncData { func }, fp(env));
-    if (argc <= nparams) {
-      gen(env, KillARReifiedGenerics, fp(env));
-      // $0ReifiedGenerics is the first local
-      gen(env, StLoc, LocalId{func->numParams()}, fp(env), reified_generics);
-    }
+  // If generics were expected and given, but not enough args were provided,
+  // move generics to the correct slot ($0ReifiedGenerics is the first
+  // non-parameter local).
+  // FIXME: leaks memory if generics were given but not expected.
+  if (func->hasReifiedGenerics() && argc <= nparams) {
+    ifThenElse(
+      env,
+      [&] (Block* taken) {
+        auto constexpr flag = 1 << CallFlags::Flags::HasGenerics;
+        auto const hasGenerics = gen(env, AndInt, callFlags, cns(env, flag));
+        gen(env, JmpNZero, taken, hasGenerics);
+      },
+      [&] {
+        // Generics not given. We will fail later. Write uninit so that
+        // the local is properly initialized.
+        gen(env, StLoc, LocalId{func->numParams()}, fp(env), cns(env, TUninit));
+      },
+      [&] {
+        // Already at the correct slot.
+        if (argc == func->numParams()) return;
+
+        auto const type = RuntimeOption::EvalHackArrDVArrs ? TVec : TArr;
+        gen(env, AssertLoc, type, LocalId{argc}, fp(env));
+        auto const generics = gen(env, LdLoc, type, LocalId{argc}, fp(env));
+        gen(env, StLoc, LocalId{func->numParams()}, fp(env), generics);
+      }
+    );
   }
 
   if (argc < nparams) {
@@ -213,14 +139,13 @@ void init_params(IRGS& env, const Func* func, uint32_t argc) {
         cns(env, ArrayData::CreateVArray()));
   }
 
+  assertx(!isInlining(env) || argc <= nparams);
   if (!isInlining(env)) {
-    // Null out or initialize the frame's ExtraArgs.
+    // Null out or initialize the frame's ExtraArgs. Also takes care of moving
+    // generics to the correct slot if there were too many args.
     env.irb->exceptionStackBoundary();
-    gen(env, InitExtraArgs, FuncEntryData{func, argc}, fp(env));
+    gen(env, InitExtraArgs, FuncEntryData{func, argc}, fp(env), callFlags);
   }
-
-  emitARHasReifiedGenericsCheck(env);
-  emitCorrectNumOfReifiedGenericsCheck(env, doesReifiedGenericsMatch);
 }
 
 /*
@@ -414,14 +339,7 @@ void emitPrologueEntry(IRGS& env, uint32_t argc) {
 
 void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID) {
   auto const func = curFunc(env);
-  UNUSED auto const callFlags = gen(env, DefCallFlags);
-  if (debug) {
-    ifThen(
-      env,
-      [&] (Block* taken) { gen(env, JmpNZero, taken, callFlags); },
-      [&] { gen(env, Unreachable, ASSERT_REASON); }
-    );
-  }
+  auto const callFlags = gen(env, DefCallFlags);
 
   // Increment profiling counter.
   if (isProfiling(env.context.kind)) {
@@ -439,9 +357,11 @@ void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID) {
 
   // Initialize params, locals, and---if we have a closure---the closure's
   // bound class context and use vars.
-  emitPrologueLocals(env, argc, func, nullptr);
+  emitPrologueLocals(env, argc, callFlags, nullptr);
 
   warn_argument_arity(env, argc, numTooManyArgs);
+
+  emitGenericsMismatchCheck(env, callFlags);
 
   // Check surprise flags in the same place as the interpreter: after setting
   // up the callee's frame but before executing any of its code.
@@ -482,9 +402,10 @@ void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void emitPrologueLocals(IRGS& env, uint32_t argc,
-                        const Func* func, SSATmp* closureOpt) {
-  init_params(env, func, argc);
+void emitPrologueLocals(IRGS& env, uint32_t argc, SSATmp* callFlags,
+                        SSATmp* closureOpt) {
+  auto const func = curFunc(env);
+  init_params(env, func, argc, callFlags);
   if (func->isClosureBody()) {
     auto const closure = juggle_closure_ctx(env, func, closureOpt);
     init_use_vars(env, func, closure);
@@ -544,6 +465,70 @@ void emitFuncBodyDispatch(IRGS& env, const DVFuncletsVec& dvs) {
         sp(env),
         fp(env)
       );
+    }
+  );
+}
+
+void emitGenericsMismatchCheck(IRGS& env, SSATmp* callFlags) {
+  auto const func = curFunc(env);
+  if (!func->hasReifiedGenerics()) return;
+
+  // Fail if generics were not passed.
+  ifThen(
+    env,
+    [&] (Block* taken) {
+      auto constexpr flag = 1 << CallFlags::Flags::HasGenerics;
+      auto const hasGenerics = gen(env, AndInt, callFlags, cns(env, flag));
+      gen(env, JmpZero, taken, hasGenerics);
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      updateMarker(env);
+      env.irb->exceptionStackBoundary();
+      gen(env, ThrowCallReifiedFunctionWithoutGenerics, cns(env, curFunc(env)));
+    }
+  );
+
+  // Fail on generics count/wildcard mismatch.
+  auto const type = RuntimeOption::EvalHackArrDVArrs ? TVec : TArr;
+  auto const local = LocalId{func->numParams()};
+  gen(env, AssertLoc, type, local, fp(env));
+  auto const generics = gen(env, LdLoc, type, local, fp(env));
+
+  // Generics may be known if we are inlining.
+  if (generics->hasConstVal(type)) {
+    auto const genericsArr = RuntimeOption::EvalHackArrDVArrs
+      ? generics->vecVal() : generics->arrVal();
+    auto const& genericsDef = func->getReifiedGenericsInfo().m_typeParamInfo;
+    if (genericsArr->size() == genericsDef.size()) {
+      bool match = true;
+      IterateKV(genericsArr, [&](Cell k, TypedValue v) {
+        assertx(tvIsInt(k) && tvIsArrayLike(v));
+        auto const idx = k.m_data.num;
+        auto const ts = v.m_data.parr;
+        if (isWildCard(ts) && genericsDef[idx].m_isReified) {
+          match = false;
+          return true;
+        }
+        return false;
+      });
+      if (match) return;
+    }
+  }
+
+  ifThen(
+    env,
+    [&] (Block* taken) {
+      auto const fd = FuncData { func };
+      auto const match =
+        gen(env, IsFunReifiedGenericsMatched, fd, callFlags);
+      gen(env, JmpZero, taken, match);
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      updateMarker(env);
+      env.irb->exceptionStackBoundary();
+      gen(env, CheckFunReifiedGenericMismatch, FuncData{func}, generics);
     }
   );
 }

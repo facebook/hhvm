@@ -39,8 +39,6 @@ struct StringData;
 struct Unit;
 struct VarEnv;
 
-using ReifiedGenericsPtr = CompactTaggedPtr<ArrayData,uint16_t>;
-
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -89,9 +87,6 @@ struct ActRec {
     VarEnv* m_varEnv;       // Variable environment when live
     ExtraArgs* m_extraArgs; // Lightweight extra args, when live
     StringData* m_invName;  // Invoked name, used for __call(), when pre-live
-    // Used to store a pointer to reified generics and a bit map of
-    // which generics are reified
-    ReifiedGenericsPtr m_reifiedGenerics{};
   };
 
   TYPE_SCAN_CUSTOM_FIELD(m_thisUnsafe) {
@@ -115,9 +110,6 @@ struct ActRec {
 
     // Set if this corresponds to a dynamic call
     DynamicCall = (1u << 27),
-
-    // Set if m_reifiedGenerics contains valid data
-    HasReifiedGenerics = (1u << 28),
 
     // This bit can be independently set on ActRecs with any other flag state.
     // It's used by the unwinder to know that an ActRec has been partially torn
@@ -150,7 +142,6 @@ struct ActRec {
   static constexpr uintptr_t kTrashedVarEnvSlot = 0xfeeefeee000f000f;
   static constexpr uintptr_t kTrashedThisSlot = 0xfeeefeeef00fe00e;
   static constexpr uintptr_t kTrashedFuncSlot = 0xfeeefeeef00fe00d;
-  static constexpr uintptr_t kTrashedReifiedGenericsSlot = 0xfeeefeeef00fe00c;
 
   /////////////////////////////////////////////////////////////////////////////
 
@@ -207,7 +198,6 @@ struct ActRec {
   bool magicDispatch() const;
   bool isDynamicCall() const;
   bool isFCallM() const;
-  bool hasReifiedGenerics() const;
 
   /*
    * Pack `numArgs' and `flags' into the format expected by m_numArgsAndFlags.
@@ -231,7 +221,6 @@ struct ActRec {
   void setAsyncEagerReturn();
   void setDynamicCall();
   void setFCallM();
-  void setHasReifiedGenerics();
 
   /*
    * Set or clear both m_invName and the MagicDispatch flag.
@@ -325,25 +314,6 @@ struct ActRec {
    * Write garbage to the m_this/m_cls union (in debug mode only).
    */
   void trashThis();
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Reified Generics.
-
-  /*
-   * Sets to reified generics slot
-   * It also sets HasReifiedGenerics on the m_numArgsAndFlags
-   */
-   void setReifiedGenerics(ArrayData* rg);
-
-  /*
-   * Gets reified generics
-   */
-   ArrayData* getReifiedGenerics() const;
-
-  /*
-   * Trashes the reified generics
-   */
-   void trashReifiedGenerics();
 
   /////////////////////////////////////////////////////////////////////////////
   // VarEnv / ExtraArgs.

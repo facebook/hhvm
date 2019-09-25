@@ -150,21 +150,6 @@ Vinstr simplecall(Vout& v, F helper, Vreg arg, Vreg d) {
 }
 
 /*
- * Convenience wrapper around a simple vcall to `helper', with a single `arg'
- * and a pair of return values in `d1' and `d2'.
- */
-template<class F>
-Vinstr simplecall(Vout& v, F helper, Vreg arg, Vreg d1, Vreg d2) {
-  return vcall{
-    CallSpec::direct(helper, nullptr),
-    v.makeVcallArgs({{arg}}),
-    v.makeTuple({d1, d2}),
-    Fixup{},
-    DestType::SSA
-  };
-}
-
-/*
  * Emit a catch trace that unwinds a stub context back to the PHP context that
  * called it.
  */
@@ -196,7 +181,7 @@ struct FCallHelperRet {
   TCA retAddr;
 };
 
-FCallHelperRet fcallHelper(ActRec* ar) {
+FCallHelperRet fcallHelper(CallFlags callFlags, ActRec* ar) {
   assert_native_stack_aligned();
   assertx(!ar->resumed());
 
@@ -219,8 +204,8 @@ FCallHelperRet fcallHelper(ActRec* ar) {
   auto const retAddr = (TCA)ar->m_savedRip;
 
   try {
-    VMRegAnchor _(ar);
-    if (doFCall(ar, ar->numArgs(), false)) {
+    VMRegAnchor _(callFlags, ar);
+    if (doFCall(ar, ar->numArgs(), false, callFlags.hasGenerics())) {
       return { tc::ustubs().resumeHelperRet, nullptr };
     }
     // We've been asked to skip the function body (fb_intercept).  The vmregs
@@ -289,12 +274,18 @@ TCA emitFCallHelperThunk(CodeBlock& main, CodeBlock& cold, DataBlock& data) {
     v << phplogue{rvmfp()};
 
     // fcallHelper asserts native stack alignment for us.
-    FCallHelperRet (*helper)(ActRec*) = &fcallHelper;
+    FCallHelperRet (*helper)(CallFlags, ActRec*) = &fcallHelper;
     auto const callFlags = v.makeReg();
     auto const dest = v.makeReg();
     auto const saved_rip = v.makeReg();
     v << copy{r_php_call_flags(), callFlags};
-    v << simplecall(v, helper, rvmfp(), dest, saved_rip);
+    v << vcall{
+      CallSpec::direct(helper, nullptr),
+      v.makeVcallArgs({{callFlags, rvmfp()}}),
+      v.makeTuple({dest, saved_rip}),
+      Fixup{},
+      DestType::SSA
+    };
 
     // Clobber rvmsp in debug builds.
     if (debug) v << copy{v.cns(0x1), rvmsp()};
@@ -604,11 +595,11 @@ TCA emitFCallUnpackHelper(CodeBlock& main, CodeBlock& cold,
     auto const done = v.makeBlock();
     auto const ctch = vc.makeBlock();
     auto const should_continue = v.makeReg();
-    bool (*helper)(PC, int32_t, void*) = &doFCallUnpackTC;
+    bool (*helper)(PC, int32_t, bool, void*) = &doFCallUnpackTC;
 
     v << vinvoke{
       CallSpec::direct(helper),
-      v.makeVcallArgs({{pc, rarg(1), retAddr}}),
+      v.makeVcallArgs({{pc, rarg(1), rarg(2), retAddr}}),
       v.makeTuple({should_continue}),
       {done, ctch},
       Fixup{},

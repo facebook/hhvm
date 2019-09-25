@@ -64,6 +64,8 @@ void checkClassReifiedGenericMismatch(
   const ArrayData* reified_generics
 );
 
+uint32_t getGenericsBitmap(const ArrayData* generics);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }

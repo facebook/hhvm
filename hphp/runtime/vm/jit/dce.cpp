@@ -281,8 +281,6 @@ bool canDCE(IRInstruction* inst) {
   case Select:
   case LdARCtx:
   case LdARNumArgsAndFlags:
-  case LdARReifiedGenerics:
-  case KillARReifiedGenerics:
   case FuncHasAttr:
   case IsFunReifiedGenericsMatched:
   case IsClsDynConstructible:

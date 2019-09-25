@@ -765,36 +765,6 @@ struct SyncReturnBCData : IRExtraData {
   IRSPRelOffset spOffset;
 };
 
-struct CallUnpackData : IRExtraData {
-  explicit CallUnpackData(IRSPRelOffset spOffset,
-                          uint32_t numParams,
-                          uint32_t numOut,
-                          Offset callOffset,
-                          const Func* callee)
-    : spOffset(spOffset)
-    , numParams(numParams)
-    , numOut(numOut)
-    , callOffset(callOffset)
-    , callee(callee)
-  {
-    assertx(numParams > 0);
-  }
-
-  std::string show() const {
-    return folly::to<std::string>(
-      callOffset, ",",
-      callee
-        ? folly::sformat(",{}", callee->fullName())
-        : std::string{});
-  }
-
-  IRSPRelOffset spOffset; // offset from StkPtr to bottom of call's ActRec+args
-  uint32_t numParams;
-  uint32_t numOut;
-  Offset callOffset;  // offset from unit m_bc (unlike m_callOff in ActRec)
-  const Func* callee; // nullptr if not statically known
-};
-
 struct CallBuiltinData : IRExtraData {
   explicit CallBuiltinData(IRSPRelOffset spOffset,
                            IRSPRelOffset retSpOffset,
@@ -821,35 +791,85 @@ struct CallBuiltinData : IRExtraData {
 
 struct CallData : IRExtraData {
   explicit CallData(IRSPRelOffset spOffset,
-                    uint32_t numParams,
+                    uint32_t numArgs,
                     uint32_t numOut,
                     Offset callOffset,
                     const Func* callee,
+                    uint32_t genericsBitmap,
+                    bool hasGenerics,
                     bool asyncEagerReturn)
     : spOffset(spOffset)
-    , numParams(numParams)
+    , numArgs(numArgs)
     , numOut(numOut)
     , callOffset(callOffset)
     , callee(callee)
+    , genericsBitmap(genericsBitmap)
+    , hasGenerics(hasGenerics)
     , asyncEagerReturn(asyncEagerReturn)
   {}
 
   std::string show() const {
     return folly::to<std::string>(
-      spOffset.offset, ',', numParams, ',', callOffset,
+      spOffset.offset, ',', numArgs, ',', numOut, ',', callOffset,
       callee
-        ? folly::format(",{}", callee->fullName()).str()
+        ? folly::sformat(",{}", callee->fullName())
+        : std::string{},
+      hasGenerics
+        ? folly::sformat(",hasGenerics({})", genericsBitmap)
         : std::string{},
       asyncEagerReturn ? ",asyncEagerReturn" : ""
     );
   }
 
+  uint32_t numInputs() const {
+    return numArgs + (hasGenerics ? 1 : 0);
+  }
+
   IRSPRelOffset spOffset; // offset from StkPtr to bottom of call's ActRec+args
-  uint32_t numParams;
+  uint32_t numArgs;
   uint32_t numOut;     // number of values returned via stack from the callee
   Offset callOffset;   // m_callOff style: offset from func->base()
   const Func* callee;  // nullptr if not statically known
+  uint32_t genericsBitmap;
+  bool hasGenerics;
   bool asyncEagerReturn;
+};
+
+struct CallUnpackData : IRExtraData {
+  explicit CallUnpackData(IRSPRelOffset spOffset,
+                          uint32_t numArgs,
+                          uint32_t numOut,
+                          Offset callOffset,
+                          const Func* callee,
+                          bool hasGenerics)
+    : spOffset(spOffset)
+    , numArgs(numArgs)
+    , numOut(numOut)
+    , callOffset(callOffset)
+    , callee(callee)
+    , hasGenerics(hasGenerics)
+  {}
+
+  std::string show() const {
+    return folly::to<std::string>(
+      spOffset.offset, ',', numArgs, ',', numOut, ',', callOffset,
+      callee
+        ? folly::sformat(",{}", callee->fullName())
+        : std::string{},
+      hasGenerics ? ",hasGenerics" : ""
+    );
+  }
+
+  uint32_t numInputs() const {
+    return numArgs + 1 + (hasGenerics ? 1 : 0);
+  }
+
+  IRSPRelOffset spOffset; // offset from StkPtr to bottom of call's ActRec+args
+  uint32_t numArgs;
+  uint32_t numOut;
+  Offset callOffset;  // offset from unit m_bc (unlike m_callOff in ActRec)
+  const Func* callee; // nullptr if not statically known
+  bool hasGenerics;
 };
 
 struct RetCtrlData : IRExtraData {

@@ -1704,7 +1704,7 @@ To string conversions:
 
 | SpillFrame<offset,numArgs,dynamicCall>,
 |   ND,
-|   S(StkPtr) S(Func) S(Ctx,Cls,Nullptr) S(Arr|Vec,Nullptr),
+|   S(StkPtr) S(Func) S(Ctx,Cls,Nullptr),
 |   NF
 
   Operands:
@@ -1713,7 +1713,6 @@ To string conversions:
      S1 - callee Func or nullptr
      S2 - object (for FCallObjMethod*), class (for FCallClsMethod*), context
           (for FCallClsMethod*), or nullptr (for FCallFunc*).
-     S3 - reified generics type structure list
 
   Defines the fields for an activation record and writes them to the stack
   pointed to by S0, at `offset'.
@@ -2287,13 +2286,13 @@ To string conversions:
   Raises a runtime error unless whether each generic in S0 is reified or erased
   matches exactly to the expectations of the func.
 
-| IsFunReifiedGenericsMatched<func>, D(Bool), S(FramePtr), NF
+| IsFunReifiedGenericsMatched<func>, D(Bool), S(Int), NF
 
-  Load the value of m_reifiedGenerics on the ActRec pointed to by the frame
-  pointer S0 and does the fast path for checking whether the number of generics
-  and whether erased versus reified parity match.
-  If the function has soft generics or the number of generics is greater than
-  ReifiedGenericsPtr::kMaxTagSize, returns false.
+  Load the generics bitmap from call flags given by S0 and check whether the
+  bitmap proves that the number of given generics and positions of reified vs
+  erased generics matches the expectations of the callee `func' (which must use
+  reified generics). If this opcode returned false, further checks implemented
+  by CheckFunReifiedGenericMismatch are needed.
 
 | InitClsCns<className,constName>, DCns, NA, PRc
 
@@ -3482,11 +3481,11 @@ fields of that struct for holding intermediate values.
   Check if the stack depth has exceeded its limit.  If it has, jump to the
   stack overflow helper stub, which will throw.
 
-| InitExtraArgs<func,argc>, ND, S(FramePtr), NF
+| InitExtraArgs<func,argc>, ND, S(FramePtr) S(Int), NF
 
   Set up the ExtraArgs struct on the live ActRec.  If extra args are present
   and need to be discarded, they will be decref'd and may re-enter to run
-  destructors.
+  destructors. S1 contains call arguments.
 
 | InitCtx, ND, S(FramePtr) S(Ctx,Nullptr), CRc
 
@@ -3518,17 +3517,6 @@ fields of that struct for holding intermediate values.
   register for the m_type member, and thus ignore m_aux.  LdTVAux is only valid
   when we know that S0's m_type and m_aux were both materialized into the same
   64-bit register.
-
-| LdARReifiedGenerics, DVArr, S(FramePtr), NF
-
-  Load the value of m_reifiedGenerics on the ActRec pointed to by the frame
-  pointer S0.
-
-| KillARReifiedGenerics, ND, S(FramePtr), NF
-
-  Mark the ActRec's m_reifiedGenerics pointer in frame S0 as no longer
-  containing a meaningful value. This can used to aid in memory analysis.
-  In debugging builds, it may overwrite the pointer with a poison value.
 
 /* Local Variables: */
 /* fill-column: 79 */

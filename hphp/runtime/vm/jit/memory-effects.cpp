@@ -844,13 +844,13 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
         // Stack. The act-rec, incoming parameters, and everything below.
         stack_below(
           inst.src(0),
-          extra->spOffset + extra->numParams + kNumActRecCells +
+          extra->spOffset + extra->numInputs() + kNumActRecCells +
           extra->numOut - 1
         ),
         // Locals.
         backtrace_locals(inst),
         // Callee.
-        actrec_func(inst.src(0), extra->spOffset + extra->numParams)
+        actrec_func(inst.src(0), extra->spOffset + extra->numInputs())
       };
     }
 
@@ -878,13 +878,13 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
         // Stack. The act-rec, incoming parameters, and everything below.
         stack_below(
           inst.src(0),
-          extra->spOffset + extra->numParams + kNumActRecCells +
+          extra->spOffset + extra->numInputs() + kNumActRecCells +
           extra->numOut - 1
         ),
         // Locals.
         backtrace_locals(inst),
         // Callee.
-        actrec_func(inst.src(0), extra->spOffset + extra->numParams)
+        actrec_func(inst.src(0), extra->spOffset + extra->numInputs())
       };
     }
 
@@ -1744,8 +1744,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdIfaceMethod:
   case InstanceOfIfaceVtable:
   case LdARNumArgsAndFlags:
-  case LdARReifiedGenerics:
-  case KillARReifiedGenerics:
   case LdTVAux:
   case MethodExists:
   case GetTime:

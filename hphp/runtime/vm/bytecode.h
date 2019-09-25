@@ -829,8 +829,8 @@ void resetCoverageCounters();
 using InterpOneFunc = jit::TCA (*) (ActRec*, TypedValue*, Offset);
 extern InterpOneFunc interpOneEntryPoints[];
 
-bool doFCallUnpackTC(PC origpc, int32_t numArgs, void*);
-bool doFCall(ActRec* ar, uint32_t numArgs, bool unpack);
+bool doFCallUnpackTC(PC origpc, int32_t numInputs, bool hasGenerics, void*);
+bool doFCall(ActRec* ar, uint32_t numArgs, bool hasUnpack, bool hasGenerics);
 jit::TCA dispatchBB();
 void pushFrameSlots(const Func* func, int nparams = 0);
 Array getDefinedVariables(const ActRec*);
@@ -843,7 +843,7 @@ enum class StackArgsState { // tells prepareFuncEntry how much work to do
   Trimmed
 };
 void enterVMAtPseudoMain(ActRec* enterFnAr, VarEnv* varEnv);
-void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk,
+void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk, Array&& generics,
                    bool allowDynCallNoPointer = false);
 void enterVMAtCurPC();
 void prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,

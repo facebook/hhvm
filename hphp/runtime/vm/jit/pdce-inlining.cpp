@@ -679,7 +679,8 @@ void adjustFrame(IRUnit& unit,
    */
   if (it->is(SyncReturnBC)) {
     assertx(
-      it->extra<SyncReturnBC>()->spOffset == extra->spOffset + extra->numParams
+      it->extra<SyncReturnBC>()->spOffset ==
+        extra->spOffset + extra->numInputs()
     );
     return;
   }
@@ -687,7 +688,7 @@ void adjustFrame(IRUnit& unit,
   auto syncInst = unit.gen(
     SyncReturnBC,
     it->bcctx(),
-    SyncReturnBCData{callOffset, extra->spOffset + extra->numParams},
+    SyncReturnBCData{callOffset, extra->spOffset + extra->numInputs()},
     inst.src(0),
     def->dst()
   );

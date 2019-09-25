@@ -269,9 +269,10 @@ struct UniqueStubs {
 
   /*
    * Use interpreter functions to enter the pre-live ActRec that we place on
-   * the stack (along with the Array of parameters) in a CallUnpack instruction.
-   * The last arg specifies the total number of args, including the array
-   * parameter (which must be the last one).
+   * the stack (along with arguments, the array of arguments to unpack and
+   * optionally the array of generics) in a CallUnpack instruction. The last
+   * two args specify the total number of inputs, including unpack arguments and
+   * generics, and a boolean flag whether generics were passed.
    *
    * @reached:  callunpack from TC
    * @context:  func prologue

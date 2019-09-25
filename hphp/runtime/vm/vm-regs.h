@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/call-flags.h"
 
 /*
  * This file contains accessors for the three primary VM registers:
@@ -181,7 +182,7 @@ struct VMRegAnchor {
    * instruction.  Instantiating a VMRegAnchor with an ActRec argument syncs us
    * to right after the call instruction.
    */
-  explicit VMRegAnchor(ActRec* ar);
+  explicit VMRegAnchor(CallFlags callFlags, ActRec* ar);
 
   ~VMRegAnchor() {
     if (m_old < VMRegState::GUARDED_THRESHOLD) {

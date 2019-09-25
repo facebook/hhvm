@@ -343,7 +343,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     {
       auto const extra = inst->extra<Call>();
       // Remove tracked state for the slots for args and the actrec.
-      uint32_t numCells = kNumActRecCells + extra->numParams;
+      uint32_t numCells = kNumActRecCells + extra->numInputs();
       for (auto i = uint32_t{0}; i < numCells; ++i) {
         setValue(stk(extra->spOffset + i), nullptr);
       }
@@ -366,7 +366,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     {
       auto const extra = inst->extra<CallUnpack>();
       // Remove tracked state for the actrec and array arg.
-      uint32_t numCells = kNumActRecCells + extra->numParams;
+      uint32_t numCells = kNumActRecCells + extra->numInputs();
       for (auto i = uint32_t{0}; i < numCells; ++i) {
         setValue(stk(extra->spOffset + i), nullptr);
       }

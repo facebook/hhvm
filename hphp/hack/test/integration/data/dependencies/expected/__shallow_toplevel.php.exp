@@ -1,5 +1,5 @@
 <?hh
-class C extends A {
+class C extends \A {
 
 }
 function shallow_toplevel(C $c): void {
@@ -11,7 +11,7 @@ function g(): void {
 class A0 {
 
 }
-class A extends A0 implements I1 {
+class A extends \A0 implements \I1 {
 
 }
 interface I1 {

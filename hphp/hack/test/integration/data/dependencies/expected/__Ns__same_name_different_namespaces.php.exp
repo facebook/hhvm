@@ -17,7 +17,7 @@ namespace Test1 {
     function g(int $x): \Test1\NestedTest\A {
       throw new \Exception();
     }
-    class A extends UltraNested\B {
+    class A extends \Test1\NestedTest\UltraNested\B {
 
     }
     namespace UltraNested {

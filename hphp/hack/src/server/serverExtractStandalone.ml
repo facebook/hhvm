@@ -449,25 +449,6 @@ let get_global_object_declaration tcopt obj =
     (* No other global declarations *)
     | _ -> raise UnexpectedDependency)
 
-let rec name_from_hint hint =
-  Aast.(
-    match snd hint with
-    | Happly ((_, s), params) ->
-      if List.is_empty params then
-        s
-      else
-        Printf.sprintf "%s<%s>" s (list_items @@ List.map params name_from_hint)
-    | Haccess (cls, tconsts) ->
-      Printf.sprintf
-        "%s::%s"
-        (name_from_hint cls)
-        (String.concat ~sep:"::" (List.map tconsts snd))
-    | Htuple els ->
-      Printf.sprintf
-        "(%s)"
-        (String.concat ~sep:", " @@ List.map els name_from_hint)
-    | _ -> raise UnexpectedDependency)
-
 type ancestors = {
   extends: string list;
   implements: string list;
@@ -477,36 +458,50 @@ type ancestors = {
 }
 
 let get_direct_ancestors cls =
-  let cls_pos = Decl_provider.Class.pos cls in
-  let cls_name = Decl_provider.Class.name cls in
-  let filename = Pos.filename cls_pos in
-  let not_found_msg = Printf.sprintf "aast class %s" cls_name in
-  let aast_class =
-    value_or_not_found not_found_msg
-    @@ Ast_provider.find_class_in_file filename cls_name
-  in
-  let get_namespaced_class_name hint =
-    strip_ns_prefix cls_name @@ name_from_hint hint
-  in
-  let get_names hints = List.map hints get_namespaced_class_name in
-  Aast.(
-    let (req_extends_hints, req_implements_hints) =
-      List.fold
-        ~f:(fun (acc_ext, acc_impl) (hint, ext) ->
-          if ext then
-            (hint :: acc_ext, acc_impl)
-          else
-            (acc_ext, hint :: acc_impl))
-        ~init:([], [])
-        aast_class.c_reqs
+  Decl_provider.(
+    let set_of_sequence seq =
+      let set = HashSet.create 0 in
+      let () = Sequence.iter seq ~f:(fun x -> HashSet.add set x) in
+      set
     in
-    {
-      extends = get_names aast_class.c_extends;
-      implements = get_names aast_class.c_implements;
-      uses = get_names aast_class.c_uses;
-      req_extends = get_names req_extends_hints;
-      req_implements = get_names req_implements_hints;
-    })
+    let get_direct (get_ancestors : Class.t -> string Sequence.t) =
+      let ancestors = get_ancestors cls in
+      let ancestors_ancestors =
+        Sequence.concat_map ancestors ~f:(fun ancestor_name ->
+            Option.value_map
+              (get_class ancestor_name)
+              ~default:Sequence.empty
+              ~f:get_ancestors)
+        |> set_of_sequence
+      in
+      Sequence.filter ancestors ~f:(fun x ->
+          not (HashSet.mem ancestors_ancestors x))
+    in
+    let direct_ancestors = get_direct Class.all_ancestor_names in
+    let direct_reqs = get_direct Class.all_ancestor_req_names in
+    let cls_kind = Class.kind cls in
+    let filter_by_kind seq kind_condition =
+      Sequence.to_list
+      @@ Sequence.filter seq ~f:(fun n ->
+             kind_condition cls_kind (Class.kind (get_class_exn n)))
+    in
+    Ast_defs.
+      {
+        extends =
+          filter_by_kind direct_ancestors (fun kderived kbase ->
+              (kderived = Cinterface && kbase = Cinterface)
+              || kbase = Cabstract
+              || kbase = Cnormal);
+        implements =
+          filter_by_kind direct_ancestors (fun kderived kbase ->
+              kderived <> Cinterface && kbase = Cinterface);
+        uses = filter_by_kind direct_ancestors (fun _ kbase -> kbase = Ctrait);
+        req_extends =
+          filter_by_kind direct_reqs (fun _ kbase ->
+              kbase = Cabstract || kbase = Cnormal);
+        req_implements =
+          filter_by_kind direct_reqs (fun _ kbase -> kbase = Cinterface);
+      })
 
 let get_enum_declaration tcopt enum =
   let name = Decl_provider.Class.name enum in
@@ -521,7 +516,7 @@ let get_enum_declaration tcopt enum =
   let base = Typing_print.full_decl tcopt enum.te_base in
   Printf.sprintf "enum %s: %s%s" (strip_ns name) base cons
 
-let get_class_declaration (cls : Decl_provider.class_decl) =
+let get_class_declaration tcopt (cls : Decl_provider.class_decl) =
   Decl_provider.(
     let kind =
       match Class.kind cls with
@@ -543,15 +538,28 @@ let get_class_declaration (cls : Decl_provider.class_decl) =
     let { extends; implements; uses; req_extends; req_implements } =
       get_direct_ancestors cls
     in
+    let print_ancestor_ty ancestor_list =
+      List.map ancestor_list ~f:(fun a ->
+          let not_found_msg = Printf.sprintf "ancestor %s of %s" a name in
+          let ancestor_ty =
+            value_exn (DependencyNotFound not_found_msg)
+            @@ Class.get_ancestor cls a
+          in
+          Typing_print.full_decl tcopt ancestor_ty)
+    in
     let prefix_if_nonempty prefix s =
       if s = "" then
         ""
       else
         prefix ^ s
     in
-    let extends = prefix_if_nonempty "extends " @@ list_items extends in
+    let extends =
+      prefix_if_nonempty "extends " @@ list_items @@ print_ancestor_ty extends
+    in
     let implements =
-      prefix_if_nonempty "implements " @@ list_items implements
+      prefix_if_nonempty "implements "
+      @@ list_items
+      @@ print_ancestor_ty implements
     in
     let uses =
       if list_items uses = "" then
@@ -778,7 +786,7 @@ let construct_class tcopt cls ?full_method:(meth = None) fields =
     if Class.kind cls = Ast_defs.Cenum then
       construct_enum tcopt cls fields
     else
-      let decl = get_class_declaration cls in
+      let decl = get_class_declaration tcopt cls in
       Typing_deps.(
         let properties =
           HashSet.fold

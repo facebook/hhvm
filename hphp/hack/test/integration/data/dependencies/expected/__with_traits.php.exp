@@ -1,6 +1,6 @@
 <?hh
-class TraitBase extends AbstractBase {
-  use ImplementingAbstractBase, T;
+class TraitBase extends \AbstractBase {
+  use \ImplementingAbstractBase, \T;
 
 
 }
@@ -11,7 +11,7 @@ function with_traits(TraitBase $arg): void {
   $arg->routine();
 }
 trait T {
-  require extends AbstractBase;
+  require extends \AbstractBase;
 
 
   public function routine(): void {

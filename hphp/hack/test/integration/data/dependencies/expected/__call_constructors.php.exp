@@ -3,14 +3,14 @@ function call_constructors(): void {
   $a = new ImplementingBase();
   $b = new Derived(0);
 }
-class ImplementingBase extends AbstractBase {
+class ImplementingBase extends \AbstractBase {
 
 
 }
 abstract class AbstractBase {
 
 }
-class Derived extends ImplementingBase {
+class Derived extends \ImplementingBase {
 
   public function __construct(int $num) {}
 }

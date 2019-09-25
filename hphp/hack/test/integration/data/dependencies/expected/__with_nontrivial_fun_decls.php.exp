@@ -1,5 +1,5 @@
 <?hh
-class ImplementingBase extends AbstractBase {
+class ImplementingBase extends \AbstractBase {
 
 }
 abstract class AbstractBase {
@@ -17,7 +17,7 @@ function with_nontrivial_fun_decls(): void {
 function variadic(inout int $arg, int ...$args): void {
   throw new \Exception();
 }
-class Derived extends ImplementingBase {
+class Derived extends \ImplementingBase {
 
   public function __construct(int $num) {}
 }

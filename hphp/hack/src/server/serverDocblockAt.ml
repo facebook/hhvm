@@ -265,7 +265,7 @@ let go_docblock_for_symbol
     | None ->
       let msg =
         Printf.sprintf
-          "The symbol %s (%s) has been added recently. To use this symbol, please rebase."
+          "The symbol %s (%s) was not found.  If this symbol was added recently, you might consider rebasing."
           symbol
           (SearchUtils.show_si_kind kind)
       in

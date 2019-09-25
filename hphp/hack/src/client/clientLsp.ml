@@ -1668,7 +1668,14 @@ let do_resolve_local
           failwith (Printf.sprintf "Local resolve failed: %s" error_message))
       (* If that fails, next try using symbol *)
     with _ ->
-      let symbolname = params.Completion.label in
+      (* The "fullname" value includes the fully qualified namespace, so
+       * we want to use that.  However, if it's missing (it shouldn't be)
+       * let's default to using the label which doesn't include the
+       * namespace. *)
+      let symbolname =
+        try Jget.string_exn params.Completion.data "fullname"
+        with _ -> params.Completion.label
+      in
       let request =
         ClientIdeMessage.Completion_resolve
           { ClientIdeMessage.Completion_resolve.symbol = symbolname; kind }

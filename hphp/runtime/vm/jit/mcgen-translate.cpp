@@ -219,7 +219,12 @@ void retranslateAll() {
           Logger::Error(errMsg);
         }
         if (mode == JitSerdesMode::SerializeAndExit) {
-          HttpServer::Server->stop();
+          auto const pid = getpid();
+          if (pid > 0) {
+            kill(pid, SIGTERM);
+          } else {
+            abort();
+          }
           return true;
         }
       }

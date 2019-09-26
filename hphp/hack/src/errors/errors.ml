@@ -1543,6 +1543,32 @@ let pu_not_in_class pos name loc =
     pos
     (sprintf "Pocket Universe %s is defined outside a class (%s)" name loc)
 
+let pu_atom_missing pos name kind loc missing =
+  let name = Utils.strip_ns name in
+  let loc = Utils.strip_ns loc in
+  add
+    (Naming.err_code Naming.PocketUniversesAtomMissing)
+    pos
+    (sprintf
+       "In Pocket Universe %s, atom %s is missing %s %s"
+       loc
+       name
+       kind
+       missing)
+
+let pu_atom_unknown pos name kind loc unk =
+  let name = Utils.strip_ns name in
+  let loc = Utils.strip_ns loc in
+  add
+    (Naming.err_code Naming.PocketUniversesAtomUnknown)
+    pos
+    (sprintf
+       "In Pocket Universe %s, atom %s declares unknown %s %s"
+       loc
+       name
+       kind
+       unk)
+
 let illegal_use_of_dynamically_callable attr_pos meth_pos visibility =
   add_list
     (Naming.err_code Naming.IllegalUseOfDynamicallyCallable)

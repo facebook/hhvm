@@ -159,6 +159,8 @@ InvalidTraitUseAsVisibility = 2104
 InvalidFunPointer = 2105
 IllegalUseOfDynamicallyCallable = 2106
 PocketUniversesNotInClass = 2107
+PocketUniversesAtomMissing = 2108
+PocketUniversesAtomUnknown = 2109
 
 NastCheck Errors:
 AbstractBody = 3001

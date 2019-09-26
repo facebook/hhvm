@@ -929,6 +929,10 @@ val pu_expansion : Pos.t -> unit
 
 val pu_typing : Pos.t -> unit
 
+val pu_atom_missing : Pos.t -> string -> string -> string -> string -> unit
+
+val pu_atom_unknown : Pos.t -> string -> string -> string -> string -> unit
+
 val lvar_in_obj_get : Pos.t -> unit
 
 val invalid_freeze_target : Pos.t -> Pos.t -> string -> unit

@@ -364,6 +364,1252 @@ class TestLsp(TestCase[LspTestDriver]):
         variables = self.setup_php_file("completion.php")
         self.load_and_run("completion", variables)
 
+    def test_ide_completion(self) -> None:
+        # This port of the `test_completion` test above needs more work:
+        # - The expected responses (as ported directly) are slightly different
+        #   from the actual responses - why?
+        # - Can we restructure this test so it doesn't require a server
+        #   with a dependency on external dictionaries?
+        raise unittest.SkipTest(
+            "Test should be enabled when file update issues are resolved."
+        )
+
+        self.prepare_server_environment()
+        variables = self.setup_php_file("completion.php")
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("ide_completion"), use_serverless_ide=False
+            )
+            .wait_for_hh_server_ready()
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .notification(
+                comment="Add '$x = <'",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 3, "character": 0},
+                                "end": {"line": 3, "character": 0},
+                            },
+                            "text": "$x = <",
+                        }
+                    ],
+                },
+            )
+            .request(
+                comment="autocomplete after '$x = <'",
+                method="textDocument/completion",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 3, "character": 6},
+                },
+                result={
+                    "isIncomplete": False,
+                    "items": [
+                        {
+                            "label": "ab:cd:alpha",
+                            "kind": 7,
+                            "detail": "class",
+                            "inlineDetail": "class",
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 6},
+                                    "end": {"line": 3, "character": 6},
+                                },
+                                "newText": "ab:cd:alpha",
+                            },
+                            "data": {
+                                "fullname": "ab:cd:alpha",
+                                "filename": "${root_path}/completion_extras.php",
+                                "line": 9,
+                                "char": 13,
+                                "base_class": None,
+                            },
+                        },
+                        {
+                            "label": "ab:cd:text",
+                            "kind": 7,
+                            "detail": "class",
+                            "inlineDetail": "class",
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 6},
+                                    "end": {"line": 3, "character": 6},
+                                },
+                                "newText": "ab:cd:text",
+                            },
+                            "data": {
+                                "fullname": "ab:cd:text",
+                                "filename": "${root_path}/completion_extras.php",
+                                "line": 4,
+                                "char": 13,
+                                "base_class": None,
+                            },
+                        },
+                    ],
+                },
+            )
+            .notification(
+                comment="Add '$x = <a'",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 3, "character": 0},
+                                "end": {"line": 3, "character": 6},
+                            },
+                            "text": "$x = <a",
+                        }
+                    ],
+                },
+            )
+            .request(
+                comment="autocomplete after '$x = <a'",
+                method="textDocument/completion",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 3, "character": 7},
+                },
+                result={
+                    "isIncomplete": False,
+                    "items": [
+                        {
+                            "label": "ab:cd:alpha",
+                            "kind": 7,
+                            "detail": "class",
+                            "inlineDetail": "class",
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 6},
+                                    "end": {"line": 3, "character": 7},
+                                },
+                                "newText": "ab:cd:alpha",
+                            },
+                            "data": {
+                                "fullname": "ab:cd:alpha",
+                                "filename": "${root_path}/completion_extras.php",
+                                "line": 9,
+                                "char": 13,
+                                "base_class": None,
+                            },
+                        },
+                        {
+                            "label": "ab:cd:text",
+                            "kind": 7,
+                            "detail": "class",
+                            "inlineDetail": "class",
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 6},
+                                    "end": {"line": 3, "character": 7},
+                                },
+                                "newText": "ab:cd:text",
+                            },
+                            "data": {
+                                "fullname": "ab:cd:text",
+                                "filename": "${root_path}/completion_extras.php",
+                                "line": 4,
+                                "char": 13,
+                                "base_class": None,
+                            },
+                        },
+                    ],
+                },
+            )
+            .notification(
+                comment="Add '$x = <ab:'",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 3, "character": 0},
+                                "end": {"line": 3, "character": 7},
+                            },
+                            "text": "$x = <ab:",
+                        }
+                    ],
+                },
+            )
+            .request(
+                comment="autocomplete after '$x = <ab:'",
+                method="textDocument/completion",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 3, "character": 9},
+                },
+                result={
+                    "isIncomplete": False,
+                    "items": [
+                        {
+                            "label": "ab:cd:alpha",
+                            "kind": 7,
+                            "detail": "class",
+                            "inlineDetail": "class",
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 6},
+                                    "end": {"line": 3, "character": 9},
+                                },
+                                "newText": "ab:cd:alpha",
+                            },
+                            "data": {
+                                "fullname": "ab:cd:alpha",
+                                "filename": "${root_path}/completion_extras.php",
+                                "line": 9,
+                                "char": 13,
+                                "base_class": None,
+                            },
+                        },
+                        {
+                            "label": "ab:cd:text",
+                            "kind": 7,
+                            "detail": "class",
+                            "inlineDetail": "class",
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 6},
+                                    "end": {"line": 3, "character": 9},
+                                },
+                                "newText": "ab:cd:text",
+                            },
+                            "data": {
+                                "fullname": "ab:cd:text",
+                                "filename": "${root_path}/completion_extras.php",
+                                "line": 4,
+                                "char": 13,
+                                "base_class": None,
+                            },
+                        },
+                    ],
+                },
+            )
+            .notification(
+                comment="Add '$x = <ab:cd:text '",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 3, "character": 0},
+                                "end": {"line": 3, "character": 9},
+                            },
+                            "text": "$x = <ab:cd:text ",
+                        }
+                    ],
+                },
+            )
+            .request(
+                comment="autocomplete after '$x = <ab:cd:text '",
+                method="textDocument/completion",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 3, "character": 17},
+                },
+                result={
+                    "isIncomplete": False,
+                    "items": [
+                        {
+                            "label": "width",
+                            "kind": 10,
+                            "detail": "?int",
+                            "inlineDetail": "?int",
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 17},
+                                    "end": {"line": 3, "character": 17},
+                                },
+                                "newText": "width",
+                            },
+                            "data": {
+                                "fullname": "width",
+                                "filename": "${root_path}/completion_extras.php",
+                                "line": 5,
+                                "char": 27,
+                                "base_class": "\\:ab:cd:text",
+                            },
+                        },
+                        {
+                            "label": "color",
+                            "kind": 10,
+                            "detail": "?string",
+                            "inlineDetail": "?string",
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 17},
+                                    "end": {"line": 3, "character": 17},
+                                },
+                                "newText": "color",
+                            },
+                            "data": {
+                                "fullname": "color",
+                                "filename": "${root_path}/completion_extras.php",
+                                "line": 5,
+                                "char": 13,
+                                "base_class": "\\:ab:cd:text",
+                            },
+                        },
+                    ],
+                },
+            )
+            .notification(
+                comment="Add '$x = <ab:cd:text w'",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 3, "character": 0},
+                                "end": {"line": 3, "character": 17},
+                            },
+                            "text": "$x = <ab:cd:text w",
+                        }
+                    ],
+                },
+            )
+            .request(
+                comment="autocomplete after '$x = <ab:cd:text w'",
+                method="textDocument/completion",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 3, "character": 18},
+                },
+                result={
+                    "isIncomplete": False,
+                    "items": [
+                        {
+                            "label": "width",
+                            "kind": 10,
+                            "detail": "?int",
+                            "inlineDetail": "?int",
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 17},
+                                    "end": {"line": 3, "character": 18},
+                                },
+                                "newText": "width",
+                            },
+                            "data": {
+                                "fullname": "width",
+                                "filename": "${root_path}/completion_extras.php",
+                                "line": 5,
+                                "char": 27,
+                                "base_class": "\\:ab:cd:text",
+                            },
+                        },
+                        {
+                            "label": "color",
+                            "kind": 10,
+                            "detail": "?string",
+                            "inlineDetail": "?string",
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 17},
+                                    "end": {"line": 3, "character": 18},
+                                },
+                                "newText": "color",
+                            },
+                            "data": {
+                                "fullname": "color",
+                                "filename": "${root_path}/completion_extras.php",
+                                "line": 5,
+                                "char": 13,
+                                "base_class": "\\:ab:cd:text",
+                            },
+                        },
+                    ],
+                },
+            )
+            .notification(
+                comment="Add '$x = new :'",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 3, "character": 0},
+                                "end": {"line": 3, "character": 18},
+                            },
+                            "text": "$x = new :",
+                        }
+                    ],
+                },
+            )
+            .request(
+                comment="autocomplete after '$x = new :'",
+                method="textDocument/completion",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 3, "character": 10},
+                },
+                result={
+                    "isIncomplete": False,
+                    "items": [
+                        {
+                            "label": ":ab:cd:alpha",
+                            "kind": 4,
+                            "detail": "function(): :ab:cd:alpha",
+                            "inlineDetail": "()",
+                            "itemType": ":ab:cd:alpha",
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 9},
+                                    "end": {"line": 3, "character": 10},
+                                },
+                                "newText": ":ab:cd:alpha",
+                            },
+                            "data": {
+                                "fullname": ":ab:cd:alpha",
+                                "filename": "${root_path}/completion_extras.php",
+                                "line": 9,
+                                "char": 13,
+                                "base_class": "\\:ab:cd:alpha",
+                            },
+                        },
+                        {
+                            "label": ":ab:cd:text",
+                            "kind": 4,
+                            "detail": "function(): :ab:cd:text",
+                            "inlineDetail": "()",
+                            "itemType": ":ab:cd:text",
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 9},
+                                    "end": {"line": 3, "character": 10},
+                                },
+                                "newText": ":ab:cd:text",
+                            },
+                            "data": {
+                                "fullname": ":ab:cd:text",
+                                "filename": "${root_path}/completion_extras.php",
+                                "line": 4,
+                                "char": 13,
+                                "base_class": "\\:ab:cd:text",
+                            },
+                        },
+                    ],
+                },
+            )
+            .notification(
+                comment="Add '$x = new :a'",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 3, "character": 0},
+                                "end": {"line": 3, "character": 10},
+                            },
+                            "text": "$x = new :a",
+                        }
+                    ],
+                },
+            )
+            .request(
+                comment="autocomplete after '$x = new :a'",
+                method="textDocument/completion",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 3, "character": 11},
+                },
+                result={
+                    "isIncomplete": False,
+                    "items": [
+                        {
+                            "label": ":ab:cd:alpha",
+                            "kind": 4,
+                            "detail": "function(): :ab:cd:alpha",
+                            "inlineDetail": "()",
+                            "itemType": ":ab:cd:alpha",
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 9},
+                                    "end": {"line": 3, "character": 11},
+                                },
+                                "newText": ":ab:cd:alpha",
+                            },
+                            "data": {
+                                "fullname": ":ab:cd:alpha",
+                                "filename": "${root_path}/completion_extras.php",
+                                "line": 9,
+                                "char": 13,
+                                "base_class": "\\:ab:cd:alpha",
+                            },
+                        },
+                        {
+                            "label": ":ab:cd:text",
+                            "kind": 4,
+                            "detail": "function(): :ab:cd:text",
+                            "inlineDetail": "()",
+                            "itemType": ":ab:cd:text",
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 9},
+                                    "end": {"line": 3, "character": 11},
+                                },
+                                "newText": ":ab:cd:text",
+                            },
+                            "data": {
+                                "fullname": ":ab:cd:text",
+                                "filename": "${root_path}/completion_extras.php",
+                                "line": 4,
+                                "char": 13,
+                                "base_class": "\\:ab:cd:text",
+                            },
+                        },
+                    ],
+                },
+            )
+            .request(
+                comment="autocomplete resolving after '$x = new :a'",
+                method="completionItem/resolve",
+                params={
+                    "label": ":ab:cd:alpha",
+                    "kind": 4,
+                    "detail": "function(): :ab:cd:alpha",
+                    "inlineDetail": "()",
+                    "itemType": ":ab:cd:alpha",
+                    "insertText": ":ab:cd:alpha",
+                    "insertTextFormat": 1,
+                    "data": {
+                        "filename": "${root_path}/completion_extras.php",
+                        "line": 9,
+                        "char": 13,
+                    },
+                },
+                result={
+                    "label": ":ab:cd:alpha",
+                    "kind": 4,
+                    "detail": "function(): :ab:cd:alpha",
+                    "inlineDetail": "()",
+                    "itemType": ":ab:cd:alpha",
+                    "insertText": ":ab:cd:alpha",
+                    "insertTextFormat": 1,
+                    "data": {
+                        "filename": "${root_path}/completion_extras.php",
+                        "line": 9,
+                        "char": 13,
+                    },
+                },
+            )
+            .request(
+                comment="autocomplete after '$x = <ab:cd:text/>; $y = $x->'",
+                method="textDocument/completion",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 3, "character": 29},
+                },
+                result={
+                    "isIncomplete": False,
+                    "items": [
+                        {
+                            "label": ":width",
+                            "kind": 10,
+                            "detail": "?int",
+                            "inlineDetail": "?int",
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 29},
+                                    "end": {"line": 3, "character": 29},
+                                },
+                                "newText": ":width",
+                            },
+                            "data": {
+                                "fullname": ":width",
+                                "filename": "${root_path}/completion_extras.php",
+                                "line": 5,
+                                "char": 27,
+                                "base_class": "\\:ab:cd:text",
+                            },
+                        },
+                        {
+                            "label": ":color",
+                            "kind": 10,
+                            "detail": "?string",
+                            "inlineDetail": "?string",
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 29},
+                                    "end": {"line": 3, "character": 29},
+                                },
+                                "newText": ":color",
+                            },
+                            "data": {
+                                "fullname": ":color",
+                                "filename": "${root_path}/completion_extras.php",
+                                "line": 5,
+                                "char": 13,
+                                "base_class": "\\:ab:cd:text",
+                            },
+                        },
+                    ],
+                },
+            )
+            .notification(
+                comment="Add '$x = <ab:cd:text/>; $y = $x->:'",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 3, "character": 0},
+                                "end": {"line": 3, "character": 29},
+                            },
+                            "text": "$x = <ab:cd:text/>; $y = $x->:",
+                        }
+                    ],
+                },
+            )
+            .request(
+                comment="autocomplete after '$x = <ab:cd:text/>; $y = $x->:'",
+                method="textDocument/completion",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 3, "character": 30},
+                },
+                result={
+                    "isIncomplete": False,
+                    "items": [
+                        {
+                            "label": ":width",
+                            "kind": 10,
+                            "detail": "?int",
+                            "inlineDetail": "?int",
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 29},
+                                    "end": {"line": 3, "character": 30},
+                                },
+                                "newText": ":width",
+                            },
+                            "data": {
+                                "fullname": ":width",
+                                "filename": "${root_path}/completion_extras.php",
+                                "line": 5,
+                                "char": 27,
+                                "base_class": "\\:ab:cd:text",
+                            },
+                        },
+                        {
+                            "label": ":color",
+                            "kind": 10,
+                            "detail": "?string",
+                            "inlineDetail": "?string",
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 29},
+                                    "end": {"line": 3, "character": 30},
+                                },
+                                "newText": ":color",
+                            },
+                            "data": {
+                                "fullname": ":color",
+                                "filename": "${root_path}/completion_extras.php",
+                                "line": 5,
+                                "char": 13,
+                                "base_class": "\\:ab:cd:text",
+                            },
+                        },
+                    ],
+                },
+            )
+            .notification(
+                comment="Add 'test_fun'",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 3, "character": 0},
+                                "end": {"line": 3, "character": 30},
+                            },
+                            "text": "test_fun",
+                        }
+                    ],
+                },
+            )
+            .request(
+                comment="autocomplete after 'test_fun'",
+                method="textDocument/completion",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 3, "character": 8},
+                },
+                result={
+                    "isIncomplete": False,
+                    "items": [
+                        {
+                            "label": "test_function",
+                            "kind": 3,
+                            "detail": "function(): void",
+                            "inlineDetail": "()",
+                            "itemType": "void",
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 0},
+                                    "end": {"line": 3, "character": 8},
+                                },
+                                "newText": "test_function",
+                            },
+                            "data": {
+                                "fullname": "test_function",
+                                "filename": "${root_path}/completion.php",
+                                "line": 8,
+                                "char": 10,
+                                "base_class": None,
+                            },
+                        }
+                    ],
+                },
+            )
+            .request(
+                comment="autocomplete resolving after 'test_fun'",
+                method="completionItem/resolve",
+                params={
+                    "label": "test_function",
+                    "kind": 3,
+                    "detail": "function(): void",
+                    "inlineDetail": "()",
+                    "itemType": "void",
+                    "insertText": "test_function",
+                    "insertTextFormat": 1,
+                    "data": {
+                        "filename": "${root_path}/completion.php",
+                        "line": 8,
+                        "char": 10,
+                    },
+                },
+                result={
+                    "label": "test_function",
+                    "kind": 3,
+                    "detail": "function(): void",
+                    "inlineDetail": "()",
+                    "itemType": "void",
+                    "documentation": {
+                        "kind": "markdown",
+                        "value": "test_function docblock.",
+                    },
+                    "insertText": "test_function",
+                    "insertTextFormat": 1,
+                    "data": {
+                        "filename": "${root_path}/completion.php",
+                        "line": 8,
+                        "char": 10,
+                    },
+                },
+            )
+            .notification(
+                comment="Add 'switch (Elsa::Alonso) { case Elsa:'",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 3, "character": 0},
+                                "end": {"line": 3, "character": 8},
+                            },
+                            "text": "switch (Elsa::Alonso) { case Elsa:",
+                        }
+                    ],
+                },
+            )
+            .request(
+                comment="autocomplete after 'switch (Elsa::Alonso) { case Elsa:'",
+                method="textDocument/completion",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 3, "character": 34},
+                },
+                result={"isIncomplete": False, "items": []},
+            )
+            .notification(
+                comment="Add 'switch (Elsa::Alonso) { case Elsa::'",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 3, "character": 0},
+                                "end": {"line": 3, "character": 34},
+                            },
+                            "text": "switch (Elsa::Alonso) { case Elsa::",
+                        }
+                    ],
+                },
+            )
+            .request(
+                comment="autocomplete after 'switch (Elsa::Alonso) { case Elsa::'",
+                method="textDocument/completion",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 3, "character": 35},
+                },
+                result={
+                    "isIncomplete": False,
+                    "items": [
+                        {
+                            "label": "class",
+                            "kind": 21,
+                            "detail": "classname<this>",
+                            "inlineDetail": "classname<this>",
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "class",
+                            },
+                            "data": {
+                                "fullname": "class",
+                                "filename": "${root_path}/completion_extras.php",
+                                "line": 13,
+                                "char": 6,
+                                "base_class": "\\Elsa",
+                            },
+                        },
+                        {
+                            "label": "Bard",
+                            "kind": 21,
+                            "detail": "Elsa",
+                            "inlineDetail": "Elsa",
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "Bard",
+                            },
+                            "data": {
+                                "fullname": "Bard",
+                                "filename": "${root_path}/completion_extras.php",
+                                "line": 13,
+                                "char": 12,
+                                "base_class": "\\Elsa",
+                            },
+                        },
+                        {
+                            "label": "Alonso",
+                            "kind": 21,
+                            "detail": "Elsa",
+                            "inlineDetail": "Elsa",
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "Alonso",
+                            },
+                            "data": {
+                                "fullname": "Alonso",
+                                "filename": "${root_path}/completion_extras.php",
+                                "line": 13,
+                                "char": 12,
+                                "base_class": "\\Elsa",
+                            },
+                        },
+                        {
+                            "label": "isValid",
+                            "kind": 2,
+                            "detail": "function(mixed $value): bool",
+                            "inlineDetail": "(mixed $value)",
+                            "itemType": "bool",
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "isValid",
+                            },
+                            "data": {
+                                "fullname": "isValid",
+                                "filename": "${hhi_path}/BuiltinEnum.hhi",
+                                "line": 49,
+                                "char": 32,
+                                "base_class": "\\Elsa",
+                            },
+                        },
+                        {
+                            "label": "getValues",
+                            "kind": 2,
+                            "detail": "function(): darray<string, Elsa>",
+                            "inlineDetail": "()",
+                            "itemType": "darray<string, Elsa>",
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "getValues",
+                            },
+                            "data": {
+                                "fullname": "getValues",
+                                "filename": "${hhi_path}/BuiltinEnum.hhi",
+                                "line": 34,
+                                "char": 32,
+                                "base_class": "\\Elsa",
+                            },
+                        },
+                        {
+                            "label": "getNames",
+                            "kind": 2,
+                            "detail": "function(): darray<Elsa, string>",
+                            "inlineDetail": "()",
+                            "itemType": "darray<Elsa, string>",
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "getNames",
+                            },
+                            "data": {
+                                "fullname": "getNames",
+                                "filename": "${hhi_path}/BuiltinEnum.hhi",
+                                "line": 43,
+                                "char": 32,
+                                "base_class": "\\Elsa",
+                            },
+                        },
+                        {
+                            "label": "coerce",
+                            "kind": 2,
+                            "detail": "function(mixed $value): ?Elsa",
+                            "inlineDetail": "(mixed $value)",
+                            "itemType": "?Elsa",
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "coerce",
+                            },
+                            "data": {
+                                "fullname": "coerce",
+                                "filename": "${hhi_path}/BuiltinEnum.hhi",
+                                "line": 56,
+                                "char": 32,
+                                "base_class": "\\Elsa",
+                            },
+                        },
+                        {
+                            "label": "assertAll",
+                            "kind": 2,
+                            "detail": "function(Traversable<mixed> $values): Container<Elsa>",
+                            "inlineDetail": "(Traversable<mixed> $values)",
+                            "itemType": "Container<Elsa>",
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "assertAll",
+                            },
+                            "data": {
+                                "fullname": "assertAll",
+                                "filename": "${hhi_path}/BuiltinEnum.hhi",
+                                "line": 70,
+                                "char": 32,
+                                "base_class": "\\Elsa",
+                            },
+                        },
+                        {
+                            "label": "assert",
+                            "kind": 2,
+                            "detail": "function(mixed $value): Elsa",
+                            "inlineDetail": "(mixed $value)",
+                            "itemType": "Elsa",
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "assert",
+                            },
+                            "data": {
+                                "fullname": "assert",
+                                "filename": "${hhi_path}/BuiltinEnum.hhi",
+                                "line": 63,
+                                "char": 32,
+                                "base_class": "\\Elsa",
+                            },
+                        },
+                    ],
+                },
+            )
+            .notification(
+                comment="Add 'switch (Elsa::Alonso) { case Elsa::Alonso:'",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 3, "character": 0},
+                                "end": {"line": 3, "character": 35},
+                            },
+                            "text": "switch (Elsa::Alonso) { case Elsa::Alonso:",
+                        }
+                    ],
+                },
+            )
+            .request(
+                comment="autocomplete resolving after 'switch (Elsa::Alonso) { case Elsa::'",
+                method="completionItem/resolve",
+                params={
+                    "label": "isValid",
+                    "kind": 2,
+                    "detail": "function(mixed $value): bool",
+                    "inlineDetail": "(mixed $value)",
+                    "itemType": "bool",
+                    "insertTextFormat": 1,
+                    "textEdit": {
+                        "range": {
+                            "start": {"line": 3, "character": 35},
+                            "end": {"line": 3, "character": 35},
+                        },
+                        "newText": "isValid",
+                    },
+                    "data": {
+                        "filename": "${hhi_path}/BuiltinEnum.hhi",
+                        "line": 49,
+                        "char": 32,
+                    },
+                },
+                result={
+                    "label": "isValid",
+                    "kind": 2,
+                    "detail": "function(mixed $value): bool",
+                    "inlineDetail": "(mixed $value)",
+                    "itemType": "bool",
+                    "documentation": {
+                        "kind": "markdown",
+                        "value": "Returns whether or not the value is defined as a constant.",
+                    },
+                    "insertTextFormat": 1,
+                    "textEdit": {
+                        "range": {
+                            "start": {"line": 3, "character": 35},
+                            "end": {"line": 3, "character": 35},
+                        },
+                        "newText": "isValid",
+                    },
+                    "data": {
+                        "filename": "${hhi_path}/BuiltinEnum.hhi",
+                        "line": 49,
+                        "char": 32,
+                    },
+                },
+            )
+            .request(
+                comment="autocomplete after 'switch (Elsa::Alonso) { case Elsa::Alonso:'",
+                method="textDocument/completion",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 3, "character": 42},
+                },
+                result={"isIncomplete": False, "items": []},
+            )
+            .notification(
+                comment="Add 'TestNS\\'",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 3, "character": 0},
+                                "end": {"line": 3, "character": 42},
+                            },
+                            "text": "TestNS\\",
+                        }
+                    ],
+                },
+            )
+            .request(
+                comment="autocomplete after 'TestNS\\'",
+                method="textDocument/completion",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 3, "character": 7},
+                },
+                result={
+                    "isIncomplete": False,
+                    "items": [
+                        {
+                            "label": "TestNS\\test_func",
+                            "kind": 3,
+                            "detail": "function(): void",
+                            "inlineDetail": "()",
+                            "itemType": "void",
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 7},
+                                    "end": {"line": 3, "character": 7},
+                                },
+                                "newText": "TestNS\\test_func",
+                            },
+                            "data": {
+                                "fullname": "TestNS\\test_func",
+                                "filename": "${root_path}/completion_extras_namespace.php",
+                                "line": 5,
+                                "char": 10,
+                                "base_class": None,
+                            },
+                        }
+                    ],
+                },
+            )
+            .notification(
+                comment="Add '$cc = new CompletionClass(); $cc->interfa'",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 3, "character": 0},
+                                "end": {"line": 3, "character": 7},
+                            },
+                            "text": "$cc = new CompletionClass(); $cc->interfa",
+                        }
+                    ],
+                },
+            )
+            .request(
+                comment="autocomplete after '$cc = new CompletionClass(); $cc->interfa'",
+                method="textDocument/completion",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 3, "character": 41},
+                },
+                result={
+                    "isIncomplete": False,
+                    "items": [
+                        {
+                            "label": "interfaceDocBlockMethod",
+                            "kind": 2,
+                            "detail": "function(): void",
+                            "inlineDetail": "()",
+                            "itemType": "void",
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 34},
+                                    "end": {"line": 3, "character": 41},
+                                },
+                                "newText": "interfaceDocBlockMethod",
+                            },
+                            "data": {
+                                "fullname": "interfaceDocBlockMethod",
+                                "filename": "${root_path}/completion.php",
+                                "line": 18,
+                                "char": 19,
+                                "base_class": "\\CompletionClass",
+                            },
+                        }
+                    ],
+                },
+            )
+            .request(
+                comment="autocomplete resolving after '$cc = new CompletionClass(); $cc->interfa'",
+                method="completionItem/resolve",
+                params={
+                    "label": "interfaceDocBlockMethod",
+                    "kind": 2,
+                    "detail": "function(): void",
+                    "inlineDetail": "()",
+                    "itemType": "void",
+                    "insertTextFormat": 1,
+                    "textEdit": {
+                        "range": {
+                            "start": {"line": 3, "character": 34},
+                            "end": {"line": 3, "character": 41},
+                        },
+                        "newText": "interfaceDocBlockMethod",
+                    },
+                    "data": {
+                        "filename": "${root_path}/completion.php",
+                        "line": 18,
+                        "char": 19,
+                    },
+                },
+                result={
+                    "label": "interfaceDocBlockMethod",
+                    "kind": 2,
+                    "detail": "function(): void",
+                    "inlineDetail": "()",
+                    "itemType": "void",
+                    "insertTextFormat": 1,
+                    "textEdit": {
+                        "range": {
+                            "start": {"line": 3, "character": 34},
+                            "end": {"line": 3, "character": 41},
+                        },
+                        "newText": "interfaceDocBlockMethod",
+                    },
+                    "data": {
+                        "filename": "${root_path}/completion.php",
+                        "line": 18,
+                        "char": 19,
+                    },
+                },
+            )
+            .request(method="shutdown", params={}, result=None)
+        )
+        self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)
+
     def test_completion_legacy(self) -> None:
         self.prepare_server_environment()
         variables = self.setup_php_file("completion.php")

@@ -1,0 +1,45 @@
+/*
+   +----------------------------------------------------------------------+
+   | HipHop for PHP                                                       |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 3.01 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | http://www.php.net/license/3_01.txt                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+*/
+
+#include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/mixed-array-keys.h"
+#include "hphp/runtime/base/string-data.h"
+
+namespace HPHP {
+
+bool MixedArrayKeys::checkInvariants(const MixedArray* ad) const {
+  uint8_t true_bits = 0;
+  MixedArrayElm* elm = ad->data();
+  auto const static_str = kTrackStaticStrKeys ? kStaticStrKey : uint8_t(0x00);
+  for (auto const end = elm + ad->iterLimit(); elm < end; elm++) {
+    true_bits |= [&]{
+      if (elm->isTombstone())        return kTombstoneKey;
+      if (elm->hasIntKey())          return kIntKey;
+      if (elm->strKey()->isStatic()) return static_str;
+      else                           return kNonStaticStrKey;
+    }();
+  }
+  DEBUG_ONLY auto const all =
+    kTombstoneKey | kIntKey | kNonStaticStrKey | static_str;
+  assert_flog((true_bits & ~m_bits) == 0,
+              "Untracked key type: true = {}, pred = {}\n",
+              true_bits, m_bits);
+  assertx((m_bits & ~all) == 0);
+  return true;
+}
+
+} // namespace HPHP

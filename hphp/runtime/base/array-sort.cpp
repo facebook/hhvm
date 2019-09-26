@@ -113,7 +113,7 @@ void MixedArray::postSort(bool resetKeys) {   // nothrow guarantee
   auto const ht = initHash(m_scale);
   auto const mask = this->mask();
   if (resetKeys) {
-    mutableKeyTypes() = kIntKey;
+    mutableKeyTypes()->renumberKeys();
     for (uint32_t pos = 0; pos < m_used; ++pos) {
       auto& e = data()[pos];
       if (e.hasStrKey()) decRefStr(e.skey);
@@ -123,7 +123,7 @@ void MixedArray::postSort(bool resetKeys) {   // nothrow guarantee
     }
     m_nextKI = m_size;
   } else {
-    mutableKeyTypes() &= ~kTombstoneKey;
+    mutableKeyTypes()->makeCompact();
     auto data = this->data();
     for (uint32_t pos = 0; pos < m_used; ++pos) {
       auto& e = data[pos];

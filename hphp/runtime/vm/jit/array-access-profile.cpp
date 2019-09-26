@@ -49,7 +49,7 @@ bool isSmallStaticArray(const ArrayData* ad) {
   if (!ad->hasMixedLayout()) return false;
   auto const arr = MixedArray::asMixed(ad);
   return arr->iterLimit() <= MixedArray::SmallSize &&
-         (arr->keyTypes() & ~MixedArray::kStaticStrKey) == 0x00;
+         arr->keyTypes().mustBeStaticStrs();
 }
 
 }

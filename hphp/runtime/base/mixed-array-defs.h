@@ -129,7 +129,7 @@ inline ArrayData* MixedArray::addVal(int64_t ki, Cell data) {
   auto ei = findForNewInsert(h);
   auto e = allocElm(ei);
   e->setIntKey(ki, h);
-  recordIntKey();
+  mutableKeyTypes()->recordInt();
   if (ki >= m_nextKI && m_nextKI >= 0) m_nextKI = ki + 1;
   cellDup(data, e->data);
   // TODO(#3888164): should avoid needing these KindOfUninit checks.
@@ -150,7 +150,7 @@ inline ArrayData* MixedArray::addValNoAsserts(StringData* key, Cell data) {
   auto ei = findForNewInsert(h);
   auto e = allocElm(ei);
   e->setStrKey(key, h);
-  recordStrKey(key);
+  mutableKeyTypes()->recordStr(key);
   // TODO(#3888164): we should restructure things so we don't have to check
   // KindOfUninit here.
   initElem(e->data, data);

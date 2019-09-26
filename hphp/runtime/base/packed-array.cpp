@@ -144,7 +144,7 @@ MixedArray* PackedArray::ToMixedHeader(const ArrayData* old,
   assertx(checkInvariants(old));
 
   auto const aux =
-    static_cast<uint16_t>(MixedArray::kIntKey) << 8 |
+    MixedArrayKeys::packIntsForAux() |
     (old->isVArray() ? ArrayData::kDArray : ArrayData::kNotDVArray);
 
   auto const oldSize = old->m_size;

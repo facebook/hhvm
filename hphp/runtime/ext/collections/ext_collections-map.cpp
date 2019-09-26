@@ -278,7 +278,7 @@ retry:
   auto& e = allocElm(p);
   cellDup(tv, e.data);
   e.setIntKey(k, h);
-  arrayData()->recordIntKey();
+  arrayData()->mutableKeyTypes()->recordInt();
   updateNextKI(k);
 }
 
@@ -308,7 +308,7 @@ retry:
   auto& e = allocElm(p);
   cellDup(tv, e.data);
   e.setStrKey(key, h);
-  arrayData()->recordStrKey(key);
+  arrayData()->mutableKeyTypes()->recordStr(key);
 }
 
 void BaseMap::setRaw(int64_t k, TypedValue val) { setImpl<true>(k, val); }
@@ -522,7 +522,8 @@ BaseMap::php_take(const Variant& n) {
   map->reserve(sz);
   map->setSize(sz);
   map->setPosLimit(sz);
-  map->arrayData()->copyKeyTypes(*arrayData(), /*compact=*/true);
+  map->arrayData()->mutableKeyTypes()->copyFrom(
+    arrayData()->keyTypes(), /*compact=*/true);
   auto table = map->hashTab();
   auto mask = map->tableMask();
   for (uint32_t frPos = 0, toPos = 0; toPos < sz; ++toPos, ++frPos) {
@@ -565,7 +566,8 @@ BaseMap::php_skip(const Variant& n) {
   map->reserve(sz);
   map->setSize(sz);
   map->setPosLimit(sz);
-  map->arrayData()->copyKeyTypes(*arrayData(), /*compact=*/true);
+  map->arrayData()->mutableKeyTypes()->copyFrom(
+    arrayData()->keyTypes(), /*compact=*/true);
   uint32_t frPos = nthElmPos(len);
   auto table = map->hashTab();
   auto mask = map->tableMask();
@@ -638,7 +640,8 @@ BaseMap::php_slice(const Variant& start, const Variant& len) {
   map->reserve(sz);
   map->setSize(sz);
   map->setPosLimit(sz);
-  map->arrayData()->copyKeyTypes(*arrayData(), /*compact=*/true);
+  map->arrayData()->mutableKeyTypes()->copyFrom(
+    arrayData()->keyTypes(), /*compact=*/true);
   uint32_t frPos = nthElmPos(skipAmt);
   auto table = map->hashTab();
   auto mask = map->tableMask();

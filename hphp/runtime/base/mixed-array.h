@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/data-walker.h"
 #include "hphp/runtime/base/hash-table.h"
+#include "hphp/runtime/base/mixed-array-keys.h"
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"
@@ -241,46 +242,16 @@ private:
   static MixedArray* MakeMixedImpl(uint32_t size, const TypedValue* kvs);
 
 public:
-  using KeyTypes = uint8_t;
   static constexpr size_t kKeyTypesOffset = 7;
 
-  // To save on stores, we can avoid tracking static string keys.
-  static constexpr bool kTrackStaticStrKeys = false;
-
-  static constexpr KeyTypes kNonStaticStrKey = 0b0001;
-  static constexpr KeyTypes kStaticStrKey    = 0b0010;
-  static constexpr KeyTypes kIntKey          = 0b0100;
-  static constexpr KeyTypes kTombstoneKey    = 0b1000;
-
-  KeyTypes keyTypes() const {
+  MixedArrayKeys keyTypes() const {
     auto const pointer = uintptr_t(this) + kKeyTypesOffset;
-    return *reinterpret_cast<KeyTypes*>(pointer);
+    return *reinterpret_cast<MixedArrayKeys*>(pointer);
   }
 
-  void copyKeyTypes(const MixedArray& other, bool compact) {
-    mutableKeyTypes() |= other.keyTypes() & (compact ? ~kTombstoneKey : 0xff);
-  }
-  void recordIntKey() {
-    mutableKeyTypes() |= kIntKey;
-  }
-  void recordStrKey(const StringData* sd) {
-    if (kTrackStaticStrKeys) {
-      mutableKeyTypes() |= sd->isStatic() ? kStaticStrKey : kNonStaticStrKey;
-    } else {
-      if (!sd->isStatic()) mutableKeyTypes() |= kNonStaticStrKey;
-    }
-  }
-  void recordStaticStrKey() {
-    mutableKeyTypes() |= kStaticStrKey;
-  }
-  void recordTombstoneKey() {
-    mutableKeyTypes() |= kTombstoneKey;
-  }
-
-private:
-  KeyTypes& mutableKeyTypes() {
+  MixedArrayKeys* mutableKeyTypes() {
     auto const pointer = uintptr_t(this) + kKeyTypesOffset;
-    return *reinterpret_cast<KeyTypes*>(pointer);
+    return reinterpret_cast<MixedArrayKeys*>(pointer);
   }
 
 public:

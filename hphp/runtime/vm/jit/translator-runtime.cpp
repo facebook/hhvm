@@ -581,19 +581,9 @@ TypedValue arrayIdxSSlow(ArrayData* a, StringData* key, TypedValue def) {
 }
 
 ALWAYS_INLINE
-bool isMixedArrayWithStaticKeys(const ArrayData* arr) {
-  // In one comparison we check both the kind and the fact that the array only
-  // has static string keys (no tombstones, int keys, or counted str keys).
-  auto const test = static_cast<uint32_t>(HeaderKind::Mixed);
-  auto const mask = static_cast<uint32_t>(~MixedArray::kStaticStrKey) << 24 |
-                    static_cast<uint32_t>(0xff);
-  return (*(reinterpret_cast<const uint32_t*>(arr) + 1) & mask) == test;
-}
-
-ALWAYS_INLINE
 TypedValue doScan(const MixedArray* arr, StringData* key, TypedValue def) {
   assertx(key->isStatic());
-  assertx((arr->keyTypes() & ~MixedArray::kStaticStrKey) == 0x00);
+  assertx(arr->keyTypes().mustBeStaticStrs());
   auto used = arr->iterLimit();
   for (auto elm = arr->data(); used; used--, elm++) {
     assertx(elm->hasStrKey());
@@ -618,7 +608,7 @@ TypedValue arrayIdxS(ArrayData* a, StringData* key, TypedValue def) {
 
 TypedValue arrayIdxScan(ArrayData* a, StringData* key, TypedValue def) {
   assertx(a->isPHPArray());
-  return LIKELY(isMixedArrayWithStaticKeys(a))
+  return LIKELY(MixedArrayKeys::isMixedWithStaticStrKeys(a))
     ? doScan(MixedArray::asMixed(a), key, def)
     : arrayIdxSSlow(a, key, def);
 }
@@ -637,7 +627,7 @@ TypedValue dictIdxS(ArrayData* a, StringData* key, TypedValue def) {
 TypedValue dictIdxScan(ArrayData* a, StringData* key, TypedValue def) {
   assertx(a->isDict());
   auto ad = MixedArray::asMixed(a);
-  return LIKELY((ad->keyTypes() & ~MixedArray::kStaticStrKey) == 0)
+  return LIKELY(ad->keyTypes().mustBeStaticStrs())
     ? doScan(ad, key, def)
     : dictIdxS(a, key, def);
 }

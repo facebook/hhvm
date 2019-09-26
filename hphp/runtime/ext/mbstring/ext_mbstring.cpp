@@ -908,7 +908,7 @@ static bool php_mb_parse_encoding(const Variant& encoding,
   }
   if (!ret) {
     if (return_list && *return_list) {
-      free(*return_list);
+      req::free(*return_list);
       *return_list = nullptr;
     }
     return_size = 0;

@@ -1248,14 +1248,51 @@ class TestLsp(TestCase[LspTestDriver]):
         self.load_and_run("formatting", variables)
 
     def test_rangeformatting(self) -> None:
-
         # This test will fail if hackfmt can't be found
         if not self.test_driver.run_hackfmt_check():
             raise unittest.SkipTest("Hackfmt can't be found. Skipping.")
 
-        variables = dict(self.prepare_serverless_ide_environment())
-        variables.update(self.setup_php_file("messy.php"))
-        self.load_and_run("range_formatting", variables)
+        self.prepare_server_environment()
+        variables = self.setup_php_file("messy.php")
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("range_formatting"), use_serverless_ide=False
+            )
+            .wait_for_hh_server_ready()
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .request(
+                method="textDocument/rangeFormatting",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "range": {
+                        "start": {"line": 4, "character": 0},
+                        "end": {"line": 5, "character": 0},
+                    },
+                    "options": {"tabSize": 5, "insertSpaces": True},
+                },
+                result=[
+                    {
+                        "range": {
+                            "start": {"line": 4, "character": 0},
+                            "end": {"line": 5, "character": 0},
+                        },
+                        "newText": '     $a = "this";\n',
+                    }
+                ],
+            )
+            .request(method="shutdown", params={}, result=None)
+        )
+        self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)
 
     def test_ontypeformatting(self) -> None:
 

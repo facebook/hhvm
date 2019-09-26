@@ -1133,6 +1133,110 @@ class TestLsp(TestCase[LspTestDriver]):
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
+    def test_serverless_ide_file_hover_with_errors(self) -> None:
+        variables = dict(self.prepare_serverless_ide_environment())
+        variables.update(self.setup_php_file("hover_with_errors.php"))
+        self.test_driver.stop_hh_server()
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("serverless_ide_hover_with_errors"), use_serverless_ide=True
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .notification(
+                method="workspace/didChangeWatchedFiles",
+                params={"changes": [{"uri": "${php_file_uri}", "type": 2}]},
+            )
+            .wait_for_notification(
+                comment="wait for sIDE to process file change",
+                method="telemetry/event",
+                params={
+                    "type": 4,
+                    "message": "[client-ide] Done processing file changes",
+                },
+            )
+            .request(
+                comment="Totally normal hover",
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 14, "character": 37},
+                },
+                result={
+                    "contents": [
+                        {
+                            "language": "hack",
+                            "value": "public static function staticMethod(string $z): void",
+                        },
+                        'During testing, we\'ll remove the "public" tag from this '
+                        "method\n"
+                        "to ensure that we can still get IDE services",
+                        "Return type: `void`",
+                        "Full name: `HoverWithErrorsClass::staticMethod`",
+                    ],
+                    "range": {
+                        "end": {"character": 39, "line": 14},
+                        "start": {"character": 27, "line": 14},
+                    },
+                },
+                powered_by="serverless_ide",
+            )
+            .notification(
+                comment="Remove the 'public' visibility modifier which triggers AST->AAST errors",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 10, "character": 2},
+                                "end": {"line": 10, "character": 8},
+                            },
+                            "text": "",
+                        }
+                    ],
+                },
+            )
+            .request(
+                comment="Hover should still work even if visibility modifier has been removed",
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 14, "character": 37},
+                },
+                result={
+                    "contents": [
+                        {
+                            "language": "hack",
+                            "value": "public static function staticMethod(string $z): void",
+                        },
+                        'During testing, we\'ll remove the "public" tag from this '
+                        "method\n"
+                        "to ensure that we can still get IDE services",
+                        "Return type: `void`",
+                        "Full name: `HoverWithErrorsClass::staticMethod`",
+                    ],
+                    "range": {
+                        "end": {"character": 39, "line": 14},
+                        "start": {"character": 27, "line": 14},
+                    },
+                },
+                powered_by="serverless_ide",
+            )
+            .request(method="shutdown", params={}, result=None)
+        )
+        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+
     def test_formatting(self) -> None:
 
         # This test will fail if hackfmt can't be found

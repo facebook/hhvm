@@ -30,5 +30,6 @@ let () =
     global_config
     relative_path
     sys_utils)
+  (preprocessor_deps (source_tree %%{workspace_root}/hhi))
   (preprocess (pps ppx_gen_hhi -- -hhi-dir \"%s/hphp/hack/hhi\")))
 " find_root

@@ -214,6 +214,11 @@ inline bool ArrayData::isLegacyArray() const { return m_aux16 & kLegacyArray; }
 inline void ArrayData::setLegacyArray(bool legacy) {
   assertx(hasExactlyOneRef());
   assertx(!legacy || kind() == kDictKind || kind() == kVecKind);
+  assertx(!RuntimeOption::EvalArrayProvenance || hasProvenanceData());
+  if (legacy && !isLegacyArray() && hasProvenanceData()) {
+    arrprov::clearTag(this);
+    setHasProvenanceData(false);
+  }
   m_aux16 = (m_aux16 & ~kLegacyArray) | (legacy ? kLegacyArray : 0);
 }
 

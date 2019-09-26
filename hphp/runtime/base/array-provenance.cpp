@@ -78,8 +78,9 @@ constexpr bool wants_local_prov(const APCArray* a) { return false; }
 
 bool arrayWantsTag(const ArrayData* ad) {
   auto const kind = ad->kind();
-  return kind == ArrayData::ArrayKind::kVecKind ||
-         kind == ArrayData::ArrayKind::kDictKind;
+  return !ad->isLegacyArray() &&
+    (kind == ArrayData::ArrayKind::kVecKind ||
+     kind == ArrayData::ArrayKind::kDictKind);
 }
 
 bool arrayWantsTag(const APCArray* a) {

@@ -1,0 +1,67 @@
+
+
+----------------------------------------
+vec(0) {
+}
+*** without legacy bit ***
+a:0:{}
+*** with legacy bit ***
+v:0:{}
+*** after a CoW ***
+v:1:{s:10:"blarghghg!";}
+
+
+----------------------------------------
+dict(0) {
+}
+*** without legacy bit ***
+a:0:{}
+*** with legacy bit ***
+D:0:{}
+*** after a CoW ***
+D:1:{i:0;s:10:"blarghghg!";}
+
+
+----------------------------------------
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+*** without legacy bit ***
+a:3:{i:0;i:1;i:1;i:2;i:2;i:3;}
+*** with legacy bit ***
+v:3:{i:1;i:2;i:3;}
+*** after a CoW ***
+v:4:{i:1;i:2;i:3;s:10:"blarghghg!";}
+
+
+----------------------------------------
+dict(2) {
+  ["hello"]=>
+  int(42)
+  ["baz"]=>
+  int(100)
+}
+*** without legacy bit ***
+a:2:{s:5:"hello";i:42;s:3:"baz";i:100;}
+*** with legacy bit ***
+D:2:{s:5:"hello";i:42;s:3:"baz";i:100;}
+*** after a CoW ***
+D:3:{s:5:"hello";i:42;s:3:"baz";i:100;i:0;s:10:"blarghghg!";}
+
+
+----------------------------------------
+dict(2) {
+  [1000]=>
+  string(2) "no"
+  ["potato"]=>
+  vec(0) {
+  }
+}
+*** without legacy bit ***
+a:2:{i:1000;s:2:"no";s:6:"potato";a:0:{}}
+*** with legacy bit ***
+D:2:{i:1000;s:2:"no";s:6:"potato";a:0:{}}
+*** after a CoW ***
+D:3:{i:1000;s:2:"no";s:6:"potato";a:0:{}i:1001;s:10:"blarghghg!";}

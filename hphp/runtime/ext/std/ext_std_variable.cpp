@@ -502,7 +502,8 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
       ArrayData* arr = value.getArrayData();
       assertx(arr->isVecArray());
       if (arr->empty()) {
-        return UNLIKELY(arr->isLegacyArray())
+        return UNLIKELY(RuntimeOption::EvalHackArrDVArrs &&
+                        !arr->isLegacyArray())
           ? s_EmptyArray
           : empty_hack(arr, s_EmptyVecArray);
       }
@@ -514,7 +515,8 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
       ArrayData* arr = value.getArrayData();
       assertx(arr->isDict());
       if (arr->empty()) {
-        return UNLIKELY(arr->isLegacyArray())
+        return UNLIKELY(RuntimeOption::EvalHackArrDVArrs &&
+                        !arr->isLegacyArray())
           ? s_EmptyArray
           : empty_hack(arr, s_EmptyDictArray);
       }

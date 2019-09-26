@@ -92,8 +92,32 @@ VariableSerializer::VariableSerializer(Type type, int option /* = 0 */,
 VariableSerializer::ArrayKind
 VariableSerializer::getKind(const ArrayData* arr) const {
   assertx(!RuntimeOption::EvalHackArrDVArrs || arr->isNotDVArray());
-  if (UNLIKELY(m_forcePHPArrays ||
-        (arr->isLegacyArray() && getType() == Type::Serialize))) {
+  if (UNLIKELY(m_forcePHPArrays)) {
+    return VariableSerializer::ArrayKind::PHP;
+  }
+
+  auto const respectsLegacyBit = [&] {
+    switch (getType()) {
+    case Type::PrintR:
+    case Type::VarExport:
+    case Type::Serialize:
+    case Type::JSON:
+      return true;
+    case Type::Internal:
+    case Type::VarDump:
+    case Type::DebugDump:
+    case Type::DebuggerDump:
+    case Type::PHPOutput:
+    case Type::APCSerialize:
+    case Type::DebuggerSerialize:
+      return false;
+    }
+    always_assert(false);
+  }();
+
+  if (RuntimeOption::EvalHackArrDVArrs &&
+      respectsLegacyBit &&
+      !arr->isLegacyArray()) {
     return VariableSerializer::ArrayKind::PHP;
   }
   if (arr->isDict())     return VariableSerializer::ArrayKind::Dict;

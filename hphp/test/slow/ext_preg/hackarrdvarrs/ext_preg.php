@@ -46,7 +46,7 @@ function test_preg_match() {
   $str = "foobar: 2008";
   preg_match_with_matches("/(?<name>\\w+): (?<digit>\\d+)/", $str, inout $matches);
   VS(print_r($matches, true),
-     "Dict\n".
+     "Array\n".
      "(\n".
      "    [0] => foobar: 2008\n".
      "    [name] => foobar\n".
@@ -65,15 +65,15 @@ function test_preg_match_all() {
     inout $matches,
   );
   VS(print_r($matches, true),
-     "Dict\n".
+     "Array\n".
      "(\n".
-     "    [0] => Dict\n".
+     "    [0] => Array\n".
      "        (\n".
      "            [0] => 555-1212\n".
      "            [1] => 800-555-1212\n".
      "        )\n".
      "\n".
-     "    [1] => Dict\n".
+     "    [1] => Array\n".
      "        (\n".
      "            [0] => \n".
      "            [1] => 800\n".
@@ -93,9 +93,9 @@ function test_preg_match_all() {
     PREG_SET_ORDER,
   );
   VS(print_r($matches, true),
-     "Dict\n".
+     "Array\n".
      "(\n".
-     "    [0] => Dict\n".
+     "    [0] => Array\n".
      "        (\n".
      "            [0] => <b>bold text</b>\n".
      "            [1] => <b>\n".
@@ -104,7 +104,7 @@ function test_preg_match_all() {
      "            [4] => </b>\n".
      "        )\n".
      "\n".
-     "    [1] => Dict\n".
+     "    [1] => Array\n".
      "        (\n".
      "            [0] => <a href=howdy.html>click me</a>\n".
      "            [1] => <a href=howdy.html>\n".
@@ -122,37 +122,37 @@ function test_preg_match_all() {
     inout $matches,
   );
   VS(print_r($matches, true),
-     "Dict\n".
+     "Array\n".
      "(\n".
-     "    [0] => Dict\n".
+     "    [0] => Array\n".
      "        (\n".
      "            [0] => a: 1\n".
      "            [1] => b: 2\n".
      "            [2] => c: 3\n".
      "        )\n".
      "\n".
-     "    [name] => Dict\n".
+     "    [name] => Array\n".
      "        (\n".
      "            [0] => a\n".
      "            [1] => b\n".
      "            [2] => c\n".
      "        )\n".
      "\n".
-     "    [1] => Dict\n".
+     "    [1] => Array\n".
      "        (\n".
      "            [0] => a\n".
      "            [1] => b\n".
      "            [2] => c\n".
      "        )\n".
      "\n".
-     "    [digit] => Dict\n".
+     "    [digit] => Array\n".
      "        (\n".
      "            [0] => 1\n".
      "            [1] => 2\n".
      "            [2] => 3\n".
      "        )\n".
      "\n".
-     "    [2] => Dict\n".
+     "    [2] => Array\n".
      "        (\n".
      "            [0] => 1\n".
      "            [1] => 2\n".

@@ -1,0 +1,2 @@
+File "not_in_class.bad.php", line 3, characters 11-13:
+Pocket Universe E is defined outside a class (Foo) (Naming[2107])

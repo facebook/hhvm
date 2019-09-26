@@ -74,6 +74,22 @@ let handler =
 
     method! at_class_ _env c =
       let c_name = snd c.c_name in
+      (* We restrict PU definition to only happen in a proper class.
+       * This limits PU to single inheritance, which we use here by
+       * collpasing parent information into single set/maps *)
+      let () =
+        match c.c_kind with
+        | Ast_defs.Cabstract
+        | Ast_defs.Cnormal ->
+          ()
+        | Ast_defs.Cinterface
+        | Ast_defs.Ctrait
+        | Ast_defs.Cenum ->
+          (match c.c_pu_enums with
+          | [] -> ()
+          | { pu_name; _ } :: _ ->
+            Errors.pu_not_in_class (fst c.c_name) (snd pu_name) c_name)
+      in
       let dup_case_type p full_name spotted =
         Errors.pu_duplication p "case type" full_name spotted
       in

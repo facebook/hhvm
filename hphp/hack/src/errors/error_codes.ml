@@ -158,6 +158,7 @@ module Naming = struct
     | InvalidTraitUseAsVisibility
     | InvalidFunPointer
     | IllegalUseOfDynamicallyCallable
+    | PocketUniversesNotInClass
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@deriving enum, show { with_path = false }]
 

@@ -1535,6 +1535,14 @@ let pu_duplication pos kind name seen =
     pos
     (sprintf "Pocket Universe %s %s is already declared in %s" kind name seen)
 
+let pu_not_in_class pos name loc =
+  let name = Utils.strip_ns name in
+  let loc = Utils.strip_ns loc in
+  add
+    (Naming.err_code Naming.PocketUniversesNotInClass)
+    pos
+    (sprintf "Pocket Universe %s is defined outside a class (%s)" name loc)
+
 let illegal_use_of_dynamically_callable attr_pos meth_pos visibility =
   add_list
     (Naming.err_code Naming.IllegalUseOfDynamicallyCallable)

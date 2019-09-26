@@ -90,8 +90,6 @@ let alias_map =
       HH_ONLY_TYPE "null";
       HH_ONLY_TYPE "nothing";
       HH_ONLY_TYPE "dynamic";
-      HH_ALIAS ("classname", "string");
-      HH_ALIAS ("typename", "string");
         (*
   PHP7_TYPE("Throwable"; PHP7_EngineExceptions);
   PHP7_TYPE("Error"; PHP7_EngineExceptions);

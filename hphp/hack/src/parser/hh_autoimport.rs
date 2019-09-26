@@ -73,8 +73,6 @@ lazy_static! {
         HhOnlyType("null".to_string()),
         HhOnlyType("nothing".to_string()),
         HhOnlyType("dynamic".to_string()),
-        HhAlias("classname".to_string(), "string".to_string()),
-        HhAlias("typename".to_string(), "string".to_string()),
         /*
         PHP7_TYPE("Throwable"; PHP7_EngineExceptions);
         PHP7_TYPE("Error"; PHP7_EngineExceptions);

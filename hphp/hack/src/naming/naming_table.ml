@@ -1015,6 +1015,7 @@ let save naming_table db_name =
     save_result
   | Backed local_changes ->
     let t = Unix.gettimeofday () in
+    let old_path = Sqlite.get_db_path () in
     (* Don't overwrite. *)
     FileUtil.cp
       ~force:(FileUtil.Ask (fun _ -> false))
@@ -1029,6 +1030,9 @@ let save naming_table db_name =
            (Relative_path.Map.cardinal local_changes))
         t
     in
+    (match old_path with
+    | Some old_path -> Sqlite.set_db_path old_path
+    | None -> ());
     { empty_save_result with files_added = 1 }
 
 (*****************************************************************************)

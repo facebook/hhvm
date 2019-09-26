@@ -525,6 +525,7 @@ bool canDCE(IRInstruction* inst) {
   case IncRef:
   case DecRef:
   case DecRefNZ:
+  case ProfileDecRef:
   case DefFP:
   case DefSP:
   case Count:

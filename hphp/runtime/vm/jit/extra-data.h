@@ -1789,6 +1789,7 @@ X(LdContResumeAddr,             IsAsyncData);
 X(LdContActRec,                 IsAsyncData);
 X(DecRef,                       DecRefData);
 X(DecRefNZ,                     DecRefData);
+X(ProfileDecRef,                DecRefData);
 X(LdTVAux,                      LdTVAuxData);
 X(CheckRefs,                    CheckRefsData);
 X(RaiseHackArrParamNotice,      RaiseHackArrParamNoticeData);

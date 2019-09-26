@@ -1773,6 +1773,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // can.  All GeneralEffects instructions are assumed to possibly do so.
 
   case DecRefNZ:
+  case ProfileDecRef:
   case AFWHBlockOn:
   case IncRef:
   case LdClosureCtx:

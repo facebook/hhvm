@@ -833,6 +833,35 @@ void cgDecRefNZ(IRLS& env, const IRInstruction* inst) {
   );
 }
 
+void cgProfileDecRef(IRLS& env, const IRInstruction* inst) {
+  const auto profile = decRefProfile(env.unit, inst);
+  if (!profile.profiling()) return;
+
+  auto const type = inst->src(0)->type();
+  if (!type.maybe(TCounted)) return;
+
+  auto& v = vmain(env);
+  auto const amount = incrAmount(v, profile);
+  auto const base = srcLoc(env, inst, 0).reg(0);
+
+  auto const increment = [&](Vout& v, size_t offset) {
+    incrementProfile(v, profile, amount, offset);
+  };
+
+  increment(v, offsetof(DecRefProfile, total));
+  ifRefCountedType(v, v, type, srcLoc(env, inst, 0), [&] (Vout& v) {
+    increment(v, offsetof(DecRefProfile, refcounted));
+    auto const sf = emitCmpRefCount(v, OneReference, base);
+    ifThenElse(v, CC_E, sf,
+      [&](Vout& v){ increment(v, offsetof(DecRefProfile, released)); },
+      [&](Vout& v){ type.maybe(TPersistent)
+        ? ifThen(v, CC_NL, sf, [&](Vout& v){
+            increment(v, offsetof(DecRefProfile, decremented)); })
+        : increment(v, offsetof(DecRefProfile, decremented)); }
+    );
+  });
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void cgDbgAssertRefCount(IRLS& env, const IRInstruction* inst) {

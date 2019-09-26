@@ -2002,11 +2002,17 @@ To string conversions:
   The locId is just a hint to the runtime indicating which local variable is
   being DecRef'd, if any.
 
-| DecRefNZ, ND, S(Gen,Ctx), CRc
+| DecRefNZ<locId>, ND, S(Gen,Ctx), CRc
 
   Decrease the reference count of S0 by one, do not check if it goes to zero.
   This instruction can be used for more efficient code when it is provable that
   the reference count cannot go to zero.
+
+| ProfileDecRef<locId>, ND, S(Gen,Ctx), NF
+
+  Update the DecRefProfile for the given input as if it were dec-ref-ed, but do
+  not actually dec-ref it. We can use this op for e.g. iterator output locals,
+  because we don't specialize iterators in profiling translations.
 
 
 13. Misc

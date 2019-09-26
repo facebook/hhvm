@@ -937,6 +937,7 @@ bool opcodeMayRaise(Opcode opc) {
   case PairIsset:
   case ProfileArrayKind:
   case ProfileCall:
+  case ProfileDecRef:
   case ProfileDictAccess:
   case ProfileInstanceCheck:
   case ProfileKeysetAccess:

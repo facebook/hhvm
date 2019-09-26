@@ -84,7 +84,6 @@
     docblock_finder
     full_fidelity_ast
     hack_grammar_descriptor_helper
-    html_entities
     ide_parser_cache
     limited_width_pretty_printing_library
     namespaces
@@ -99,6 +98,7 @@
     fixme_provider
     full_fidelity
     heap_shared_mem
+    html_entities
     logging
     namespace_env
     nast

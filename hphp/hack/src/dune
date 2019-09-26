@@ -1,6 +1,15 @@
 (env
   (_ (flags (:standard -w @a-4-6-20-29-35-41-42-44-45-48-50 \ -strict-sequence))))
 
+(library
+  (name html_entities)
+  (modules html_entities)
+  (ocamlc_flags (:standard -custom))
+  (libraries
+    core_kernel
+    str)
+)
+
 (executable
   (name hh_single_type_check)
   (modules
@@ -143,7 +152,7 @@
   (link_flags (:standard (:include dune_config/ld-opts.sexp)))
   (libraries
     core_kernel
-    default_injector_config
-    parser
+    html_entities
     str
+    parser_schema
     collections))

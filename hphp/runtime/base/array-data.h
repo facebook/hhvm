@@ -679,11 +679,18 @@ public:
   // Static arrays.
 
   /*
-   * If arr points to a static array, do nothing. Otherwise, make a
-   * static copy, destroy the original and update arr.
+   * If `arr' points to a static array, do nothing.  Otherwise, make a static
+   * copy, destroy the original, and update `*arr`.
+   *
+   * If `tag` is set or `arr` has provenance data, we copy the tag to the new
+   * static array.  (A set `tag` overrides the provenance of `arr`.)
    */
-  static void GetScalarArray(ArrayData** arr);
-  /* Promote the array referenced by arr to a static array, and return it */
+  static void GetScalarArray(ArrayData** arr,
+                             folly::Optional<arrprov::Tag> tag = folly::none);
+
+  /*
+   * Promote the array referenced by `arr` to a static array and return it.
+   */
   static ArrayData* GetScalarArray(Array&& arr);
   static ArrayData* GetScalarArray(Variant&& arr);
 

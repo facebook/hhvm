@@ -391,7 +391,7 @@ ArrayData* PackedArray::CopyStatic(const ArrayData* adIn) {
   assertx(ad->kind() == adIn->kind());
   assertx(ad->dvArray() == adIn->dvArray());
   assertx(!arrprov::arrayWantsTag(ad) ||
-          ad->hasProvenanceData() == adIn->hasProvenanceData());
+          arrprov::getTag(ad) == arrprov::getTag(adIn));
   assertx(capacity(ad) >= adIn->m_size);
   assertx(ad->m_size == adIn->m_size);
   assertx(ad->m_pos == adIn->m_pos);
@@ -432,7 +432,7 @@ ArrayData* PackedArray::ConvertStatic(const ArrayData* arr) {
   assertx(capacity(ad) >= arr->m_size);
   assertx(ad->dvArray() == arr->dvArray());
   assertx(!arrprov::arrayWantsTag(ad) ||
-          ad->hasProvenanceData() == arr->hasProvenanceData());
+          !!arrprov::getTag(ad) == !!arrprov::getTag(arr));
   assertx(ad->m_size == arr->m_size);
   assertx(ad->m_pos == arr->m_pos);
   assertx(ad->isStatic());

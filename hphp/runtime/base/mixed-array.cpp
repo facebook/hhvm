@@ -532,7 +532,7 @@ NEVER_INLINE ArrayData* MixedArray::CopyStatic(const ArrayData* in) {
     }
   }
   assertx(!arrprov::arrayWantsTag(ret) ||
-          ret->hasProvenanceData() == in->hasProvenanceData());
+          !!arrprov::getTag(ret) == !!arrprov::getTag(in));
   return ret;
 }
 

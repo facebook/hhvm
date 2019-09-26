@@ -143,14 +143,11 @@ TypedValue tagTV(TypedValue tv);
 TypedValue tagTVKnown(TypedValue tv, Tag tag);
 
 /*
- * Produce a static empty array (with the same kind as `base`) with the given
- * provenance tag.  If no tag is provided, we attempt to make one from vmpc(),
- * and failing that we just return the input array.
+ * Produce a static empty array with the given provenance tag.
  *
- * Should only be called with staticEmptyVecArray() or staticEmptyDictArray().
+ * If no tag is provided, we attempt to make one from vmpc(), and failing that
+ * we just return the input array.
  */
-const ArrayData* makeEmptyArray(const ArrayData* base,
-                          folly::Optional<Tag> tag = folly::none);
 ArrayData* makeEmptyVec(folly::Optional<Tag> tag = folly::none);
 ArrayData* makeEmptyDict(folly::Optional<Tag> tag = folly::none);
 

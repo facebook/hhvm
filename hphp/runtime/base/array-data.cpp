@@ -70,7 +70,8 @@ struct ScalarHash {
     if (arr == s_cachedHash.first) return s_cachedHash.second;
     return raw_hash(arr);
   }
-  size_t raw_hash(const ArrayData* arr) const {
+  size_t raw_hash(const ArrayData* arr,
+                  folly::Optional<arrprov::Tag> tag = folly::none) const {
     auto ret = uint64_t{
       arr->isHackArray()
       ? arr->kind()
@@ -79,7 +80,8 @@ struct ScalarHash {
     ret |= (uint64_t{arr->dvArray()} << 32);
 
     if (RuntimeOption::EvalArrayProvenance) {
-      if (auto const tag = arrprov::getTag(arr)) {
+      if (!tag) tag = arrprov::getTag(arr);
+      if (tag) {
         ret = folly::hash::hash_combine(ret, tag->line());
         ret = folly::hash::hash_combine(ret, tag->filename());
       }
@@ -179,20 +181,20 @@ ArrayDataMap s_arrayDataMap;
 }
 ///////////////////////////////////////////////////////////////////////////////
 
-void ArrayData::GetScalarArray(ArrayData** parr) {
+void ArrayData::GetScalarArray(ArrayData** parr,
+                               folly::Optional<arrprov::Tag> tag) {
   auto const arr = *parr;
-  if (arr->isStatic()) return;
+  auto const arrprov_enabled = RuntimeOption::EvalArrayProvenance && tag;
+
+  if (arr->isStatic() && LIKELY(!arrprov_enabled)) return;
+
   auto replace = [&] (ArrayData* rep) {
     *parr = rep;
     decRefArr(arr);
     s_cachedHash.first = nullptr;
   };
 
-  auto const provenanceEnabled =
-    RuntimeOption::EvalArrayProvenance &&
-    arr->hasProvenanceData();
-
-  if (arr->empty() && LIKELY(!provenanceEnabled)) {
+  if (arr->empty() && LIKELY(!arrprov_enabled)) {
     if (arr->isKeyset())   return replace(staticEmptyKeysetArray());
     if (arr->isVArray())   return replace(staticEmptyVArray());
     if (arr->isDArray())   return replace(staticEmptyDArray());
@@ -205,8 +207,9 @@ void ArrayData::GetScalarArray(ArrayData** parr) {
   arr->onSetEvalScalar();
 
   s_cachedHash.first = arr;
-  s_cachedHash.second = ScalarHash{}.raw_hash(arr);
+  s_cachedHash.second = ScalarHash{}.raw_hash(arr, tag);
 
+  // See documentation for `tl_tag_override`.
   auto it = s_arrayDataMap.find(arr);
   if (it != s_arrayDataMap.end()) return replace(*it);
 
@@ -232,6 +235,8 @@ void ArrayData::GetScalarArray(ArrayData** parr) {
   assertx(ScalarHash{}.raw_hash(ad) == s_cachedHash.second);
   auto const DEBUG_ONLY inserted = s_arrayDataMap.insert(ad).second;
   assertx(inserted);
+
+  if (tag) arrprov::setTag<arrprov::Mode::Emplace>(ad, *tag);
   return replace(ad);
 }
 

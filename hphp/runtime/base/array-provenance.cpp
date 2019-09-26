@@ -88,6 +88,32 @@ bool arrayWantsTag(const APCArray* a) {
 
 namespace {
 
+/*
+ * Used to override the provenance tag reported for ArrayData*'s in a given
+ * thread.
+ *
+ * This is pretty hacky, but it's only used for one specific purpose: for
+ * obtaining a copy of the static empty vec or dict which has specific
+ * provenance.
+ *
+ * The static array cache is set up to distinguish arrays by provenance tag.
+ * However, it's a tbb::concurrent_hash_set, which we can't jam a tag into.
+ * Instead, its hash and equal functions look up the provenance tag of an array
+ * in order to allow for multiple identical static arrays with different source
+ * tags.
+ *
+ * As a result, there's no real way to thread a tag into the lookups and
+ * inserts of the hash set.  We could pass in tagged temporary empty arrays,
+ * but we don't want to keep allocating those.  We could keep one around for
+ * each thread... but that's pretty much the moral equivalent of doing things
+ * this way:
+ *
+ * So instead, we have a thread-local tag that is only "active" when we're
+ * trying to retrieve or create a specifically tagged copy of the empty vec or
+ * dict, which facilitates the desired behavior in the static array cache.
+ */
+thread_local folly::Optional<Tag> tl_tag_override = folly::none;
+
 template<typename A>
 folly::Optional<Tag> getTagImpl(const A* a) {
   using ProvenanceTable = decltype(s_static_array_provenance);
@@ -118,7 +144,7 @@ folly::Optional<Tag> getTagImpl(const A* a) {
 template<Mode mode, typename A>
 bool setTagImpl(A* a, Tag tag) {
   if (!arrayWantsTag(a)) return false;
-  assertx(mode == Mode::Emplace || !getTag(a));
+  assertx(mode == Mode::Emplace || !getTag(a) || tl_tag_override);
 
   if (wants_local_prov(a)) {
     rl_array_provenance->tags[a] = tag;
@@ -145,6 +171,7 @@ void clearTagImpl(const A* a) {
 } // namespace
 
 folly::Optional<Tag> getTag(const ArrayData* ad) {
+  if (tl_tag_override) return tl_tag_override;
   if (!ad->hasProvenanceData()) return folly::none;
   auto const tag = getTagImpl(ad);
   assertx(tag);
@@ -220,34 +247,25 @@ TypedValue tagTVKnown(TypedValue tv, Tag tag) {
 
 namespace {
 
-template<typename AD, typename Copy>
-typename maybe_const<AD, ArrayData, AD*>::type
-makeEmptyImpl(AD* base, folly::Optional<Tag> tag, Copy&& copy) {
+template<typename Copy>
+ArrayData* makeEmptyImpl(ArrayData* ad,
+                         folly::Optional<Tag> tag,
+                         Copy&& copy) {
   assertx(RuntimeOption::EvalArrayProvenance);
-  assertx(base->empty());
-  assertx(base->isStatic());
-  assertx(arrayWantsTag(base));
+  assertx(ad->empty());
+  assertx(ad->isStatic());
+  assertx(arrayWantsTag(ad));
 
   if (!tag) tag = tagFromPC();
-  if (!tag) return base;
+  if (!tag) return ad;
 
-  auto ad = copy(base);
-  assertx(ad);
-  assertx(ad->hasExactlyOneRef());
+  tl_tag_override = tag;
+  SCOPE_EXIT { tl_tag_override = folly::none; };
 
-  arrprov::setTag<Mode::Emplace>(ad, *tag);
-  ArrayData::GetScalarArray(&ad);
-
+  ArrayData::GetScalarArray(&ad, tag);
   return ad;
 }
 
-}
-
-const ArrayData* makeEmptyArray(const ArrayData* base,
-                                folly::Optional<Tag> tag) {
-  return makeEmptyImpl(base, tag, [] (const ArrayData* ad) {
-    return ad->copy();
-  });
 }
 
 ArrayData* makeEmptyVec(folly::Optional<Tag> tag /* = folly::none */) {

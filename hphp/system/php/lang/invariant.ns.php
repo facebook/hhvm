@@ -84,7 +84,7 @@ function invariant_violation(string $format_str, ...$args): void {
     $cb($format_str, ...$args);
   }
 
-  $args = \array_map('\__SystemLib\invariant_violation_helper', $args);
+  $args = \array_map(fun('\__SystemLib\invariant_violation_helper'), $args);
   $message = \vsprintf($format_str, $args);
 
   throw new InvariantException($message);

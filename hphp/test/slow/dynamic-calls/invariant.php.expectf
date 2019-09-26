@@ -1,0 +1,5 @@
+Fatal error: Uncaught exception 'HH\InvariantException' with message 'Message: message' in %s/invariant.php:9
+Stack trace:
+#0 %s/invariant.php(9): HH\invariant_violation()
+#1 (): invariant_main()
+#2 {main}

@@ -1,2 +1,2 @@
 File "double_argument.php", line 12, characters 14-19:
-Invalid Hack type. Using 'double' in Hack is considered an error. Use 'float' instead, to keep the codebase consistent. (Naming[2004])
+Invalid type hint 'double'. Use 'float' instead (Parsing[1002])

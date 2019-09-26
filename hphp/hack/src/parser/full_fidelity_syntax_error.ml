@@ -1055,3 +1055,6 @@ let const_mutation = "Cannot mutate a class constant"
 
 let no_attributes_on_variadic_parameter =
   "Attributes on variadic parameters are not allowed"
+
+let invalid_typehint_alias alias hint =
+  "Invalid type hint '" ^ alias ^ "'. Use '" ^ hint ^ "' instead"

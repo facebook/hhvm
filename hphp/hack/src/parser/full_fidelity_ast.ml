@@ -1002,7 +1002,23 @@ if there already is one, since that one will likely be better than this one. *)
       | Token _
       | SimpleTypeSpecifier _
       | QualifiedName _ ->
-        Happly (pos_name node env, [])
+        let (pos, name) = pos_name node env in
+        let hint = String.lowercase name in
+        let suggest canonical =
+          raise_parsing_error
+            env
+            (`Node node)
+            (SyntaxError.invalid_typehint_alias hint canonical)
+        in
+        if hint = SN.Typehints.integer then
+          suggest SN.Typehints.int
+        else if hint = SN.Typehints.boolean then
+          suggest SN.Typehints.bool
+        else if hint = SN.Typehints.double then
+          suggest SN.Typehints.float
+        else if hint = SN.Typehints.real then
+          suggest SN.Typehints.float;
+        Happly ((pos, name), [])
       | ShapeTypeSpecifier { shape_type_fields; shape_type_ellipsis; _ } ->
         let si_allows_unknown_fields = not (is_missing shape_type_ellipsis) in
         (* if last element lacks a separator and ellipsis is present, error *)
@@ -1950,7 +1966,7 @@ if there already is one, since that one will likely be better than this one. *)
             | (_, Some TK.HexadecimalLiteral)
             (* We allow underscores while lexing the integer literals. This gets rid of them before
              * the literal is created. *)
-            
+
             | (_, Some TK.BinaryLiteral) ->
               Int (Str.global_replace underscore "" s)
             | (_, Some TK.FloatingLiteral) -> Float s
@@ -3954,7 +3970,7 @@ if there already is one, since that one will likely be better than this one. *)
     let rec aux env acc = function
       | []
       (* EOF happens only as the last token in the list. *)
-      
+
       | [{ syntax = EndOfFile _; _ }] ->
         List.concat (List.rev acc)
       (* HaltCompiler stops processing the list in PHP but can be disabled in Hack *)

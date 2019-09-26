@@ -468,6 +468,8 @@ module Typehints = struct
 
   let double = "double"
 
+  let real = "real"
+
   let callable = "callable"
 
   let unset_cast = "unset"
@@ -494,6 +496,7 @@ module Typehints = struct
     || x = integer
     || x = boolean
     || x = double
+    || x = real
     || x = dynamic
     || x = wildcard
     || x = nonnull

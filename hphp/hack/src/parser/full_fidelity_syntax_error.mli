@@ -721,3 +721,5 @@ val const_mutation : string
 val no_attributes_on_variadic_parameter : string
 
 val globals_without_subscript : string
+
+val invalid_typehint_alias : string -> string -> string

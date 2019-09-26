@@ -410,7 +410,7 @@ let is_isexp_op lower_fq_id : Aast.hint option =
   | "is_float"
   | "is_real"
   | "is_double" ->
-    Some (h "double")
+    Some (h "float")
   | "is_string" -> Some (h "string")
   | "is_null" -> Some (h "void")
   | "hh\\is_keyset" -> Some (h "keyset")

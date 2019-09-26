@@ -1189,15 +1189,6 @@ module Make (GetLocals : GetLocals) = struct
           | _ ->
             Errors.too_many_type_arguments p;
             N.Hany)
-      | nm when nm = SN.Typehints.integer ->
-        Errors.primitive_invalid_alias p nm SN.Typehints.int;
-        Some (N.Hprim N.Tint)
-      | nm when nm = SN.Typehints.boolean ->
-        Errors.primitive_invalid_alias p nm SN.Typehints.bool;
-        Some (N.Hprim N.Tbool)
-      | nm when nm = SN.Typehints.double ->
-        Errors.primitive_invalid_alias p nm SN.Typehints.float;
-        Some (N.Hprim N.Tfloat)
       | _ -> None
     in
     let () =

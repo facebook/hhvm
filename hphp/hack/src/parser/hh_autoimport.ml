@@ -92,10 +92,6 @@ let alias_map =
       HH_ONLY_TYPE "dynamic";
       HH_ALIAS ("classname", "string");
       HH_ALIAS ("typename", "string");
-      HH_ALIAS ("boolean", "bool");
-      HH_ALIAS ("integer", "int");
-      HH_ALIAS ("double", "float");
-      HH_ALIAS ("real", "float");
         (*
   PHP7_TYPE("Throwable"; PHP7_EngineExceptions);
   PHP7_TYPE("Error"; PHP7_EngineExceptions);

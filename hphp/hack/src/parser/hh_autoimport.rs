@@ -75,10 +75,6 @@ lazy_static! {
         HhOnlyType("dynamic".to_string()),
         HhAlias("classname".to_string(), "string".to_string()),
         HhAlias("typename".to_string(), "string".to_string()),
-        HhAlias("boolean".to_string(), "bool".to_string()),
-        HhAlias("integer".to_string(), "int".to_string()),
-        HhAlias("double".to_string(), "float".to_string()),
-        HhAlias("real".to_string(), "float".to_string()),
         /*
         PHP7_TYPE("Throwable"; PHP7_EngineExceptions);
         PHP7_TYPE("Error"; PHP7_EngineExceptions);
@@ -144,7 +140,6 @@ mod tests {
     fn test_normalize() {
         assert_eq!(normalize("float"), "HH\\float");
         assert_eq!(normalize("KeyedIterable"), "HH\\KeyedIterable");
-        assert_eq!(normalize("double"), "HH\\float");
         assert_eq!(normalize("non-exisit"), "non-exisit");
     }
 
@@ -152,7 +147,6 @@ mod tests {
     fn test_opt_normalize() {
         assert_eq!(opt_normalize("float"), Some("HH\\float"));
         assert_eq!(opt_normalize("KeyedIterable"), Some("HH\\KeyedIterable"));
-        assert_eq!(opt_normalize("double"), Some("HH\\float"));
         assert_eq!(opt_normalize("callable"), Some("callable"));
         assert_eq!(opt_normalize("non-exisit"), None);
     }

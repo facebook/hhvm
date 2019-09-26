@@ -20,6 +20,8 @@ type env = {
   (* The source where the client was spawned from, i.e. nuclide, vim, emacs, etc. *)
   use_ffp_autocomplete: bool;
   (* Flag to turn on the (experimental) FFP based autocomplete *)
+  use_ranked_autocomplete: bool;
+  (* Flag to turn on ranked autocompletion results *)
   use_serverless_ide: bool; (* Flag to provide IDE services from `hh_client` *)
 }
 

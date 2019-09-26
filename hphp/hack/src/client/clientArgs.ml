@@ -819,6 +819,7 @@ let parse_lsp_args () =
   in
   let from = ref "" in
   let use_ffp_autocomplete = ref false in
+  let use_ranked_autocomplete = ref false in
   let use_serverless_ide = ref false in
   let options =
     [
@@ -828,6 +829,9 @@ let parse_lsp_args () =
         Arg.Set use_ffp_autocomplete,
         " [experimental] use the full-fidelity parser based autocomplete " );
       Common_argspecs.from from;
+      ( "--ranked-autocomplete",
+        Arg.Set use_ranked_autocomplete,
+        " [experimental] display ranked autocompletion results" );
       ( "--serverless-ide",
         Arg.Set use_serverless_ide,
         " [experimental] provide IDE services from hh_client instead of hh_server"
@@ -843,6 +847,7 @@ let parse_lsp_args () =
       {
         ClientLsp.from = !from;
         use_ffp_autocomplete = !use_ffp_autocomplete;
+        use_ranked_autocomplete = !use_ranked_autocomplete;
         use_serverless_ide = !use_serverless_ide;
       }
   | _ ->

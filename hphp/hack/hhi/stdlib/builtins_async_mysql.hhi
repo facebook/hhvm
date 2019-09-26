@@ -154,26 +154,26 @@ class AsyncMysqlConnection {
     dict<string, string> $query_attributes = dict[],
   ) { }
   public function escapeString(string $data): string { }
-  public function close(): void{ }
+  public function close(): void { }
   public function releaseConnection() { }
-  public function isValid() { }
-  public function serverInfo() { }
-  public function sslSessionReused() { }
-  public function isSSL() { }
-  public function warningCount() { }
+  public function isValid(): bool { }
+  public function serverInfo(): string { }
+  public function sslSessionReused(): bool { }
+  public function isSSL(): bool { }
+  public function warningCount(): int { }
   public function host(): string { }
   public function port(): int { }
   public function setReusable(bool $reusable): void { }
   public function isReusable(): bool { }
-  public function lastActivityTime() { }
-  public function connectResult() { }
+  public function lastActivityTime(): float { }
+  public function connectResult(): ?AsyncMysqlConnectResult { }
 }
 
 abstract class AsyncMysqlResult {
   public function __construct() { }
-  public function elapsedMicros() { }
-  public function startTime() { }
-  public function endTime() { }
+  public function elapsedMicros(): int { }
+  public function startTime(): float { }
+  public function endTime(): float { }
 
   public function clientStats() : AsyncMysqlClientStats { }
 }
@@ -184,10 +184,10 @@ class AsyncMysqlConnectResult extends AsyncMysqlResult {
 
 class AsyncMysqlErrorResult extends AsyncMysqlResult {
   public function __construct() { parent::__construct(); }
-  public function mysql_errno() { }
-  public function mysql_error() { }
-  public function mysql_normalize_error() { }
-  public function failureType() { }
+  public function mysql_errno(): int { }
+  public function mysql_error(): string { }
+  public function mysql_normalize_error(): string { }
+  public function failureType(): string { }
 }
 class AsyncMysqlQueryErrorResult extends AsyncMysqlErrorResult {
   public function numSuccessfulQueries(): int { }

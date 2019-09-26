@@ -51,9 +51,6 @@ bool HHVM_FUNCTION(method_exists, const Variant& class_or_object,
 Variant HHVM_FUNCTION(property_exists, const Variant& class_or_object,
                                        const String& property);
 Array HHVM_FUNCTION(get_object_vars, const Object& object);
-Variant HHVM_FUNCTION(call_user_method_array, const String& method_name,
-                                              VRefParam obj,
-                                              const Variant& paramarr);
 
 void getMethodNames(Class* cls, Class* ctx, Array& result);
 

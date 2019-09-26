@@ -357,14 +357,6 @@ Array HHVM_FUNCTION(get_object_vars, const Object& object) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant HHVM_FUNCTION(call_user_method_array, const String& method_name,
-                                              VRefParam obj,
-                                              const Variant& paramarr) {
-  return obj.toObject()->o_invoke(method_name, paramarr);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 String HHVM_FUNCTION(HH_class_meth_get_class, TypedValue v) {
   if (!tvIsClsMeth(v)) {
     SystemLib::throwInvalidArgumentExceptionObject(
@@ -455,7 +447,6 @@ void StandardExtension::initClassobj() {
   HHVM_FE(method_exists);
   HHVM_FE(property_exists);
   HHVM_FE(get_object_vars);
-  HHVM_FE(call_user_method_array);
   HHVM_FALIAS(HH\\class_meth_get_class, HH_class_meth_get_class);
   HHVM_FALIAS(HH\\class_meth_get_method, HH_class_meth_get_method);
   HHVM_FALIAS(HH\\meth_caller_get_class, HH_meth_caller_get_class);

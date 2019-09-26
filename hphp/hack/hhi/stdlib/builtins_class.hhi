@@ -41,10 +41,6 @@ function method_exists($class_or_object, string $method_name): bool;
 function property_exists($class_or_object, string $property): ?bool;
 <<__Rx>>
 function get_object_vars(<<__MaybeMutable>> $object): ?darray;
-<<__PHPStdLib>>
-function call_user_method_array(string $method_name, &$obj, array $paramarr);
-<<__PHPStdLib>>
-function call_user_method(string $method_name, &$obj, ...$args);
 }
 
 namespace HH {

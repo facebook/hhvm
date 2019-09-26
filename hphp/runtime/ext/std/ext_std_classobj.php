@@ -1,35 +1,6 @@
 <?hh // partial
 
 namespace {
-/**
- * Call a user method given with an array of parameters [deprecated]
- *
- * @param string $method_name - The method name being called.
- * @param object $obj - The object that method_name is being called on.
- * @param array $params - An array of parameters.
- *
- * @return mixed -
- */
-<<__Native>>
-function call_user_method_array(string $method_name,
-                                mixed &$obj,
-                                mixed $params): mixed;
-
-/**
- * Call a user method on an specific object [deprecated]
- *
- * @param string $method_name - The method name being called.
- * @param object $obj - The object that method_name is being called on.
- * @param mixed $parameter -
- * @param mixed $... -
- *
- * @return mixed -
- */
-function call_user_method(Stringish $method_name,
-                          mixed &$obj,
-                          ...$args): mixed {
-  return call_user_method_array((string)$method_name, &$obj, $args);
-}
 
 /**
  * Creates an alias for a class

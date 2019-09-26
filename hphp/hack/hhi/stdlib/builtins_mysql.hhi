@@ -22,15 +22,15 @@ const int MYSQL_CLIENT_SSL = 2048;
 // Since no further damage is possible, I added the $conn_attrs parameter
 // instead of creating new functions - jkedgar@fb.com
 <<__PHPStdLib>>
-function mysql_connect(string $server = "", string $username = "", string $password = "", bool $new_link = false, int $client_flags = 0, int $connect_timeout_ms = -1, int $query_timeout_ms = -1, darray<string, string> $conn_attrs = []);
+function mysql_connect(string $server = "", string $username = "", string $password = "", bool $new_link = false, int $client_flags = 0, int $connect_timeout_ms = -1, int $query_timeout_ms = -1, darray<string, string> $conn_attrs = darray[]);
 <<__PHPStdLib>>
-function mysql_pconnect(string $server = "", string $username = "", string $password = "", int $client_flags = 0, int $connect_timeout_ms = -1, int $query_timeout_ms = -1, darray<string, string> $conn_attrs = []);
+function mysql_pconnect(string $server = "", string $username = "", string $password = "", int $client_flags = 0, int $connect_timeout_ms = -1, int $query_timeout_ms = -1, darray<string, string> $conn_attrs = darray[]);
 <<__PHPStdLib>>
-function mysql_connect_with_db(string $server = "", string $username = "", string $password = "", string $database = "", bool $new_link = false, int $client_flags = 0, int $connect_timeout_ms = -1, int $query_timeout_ms = -1, darray<string, string> $conn_attrs = []);
+function mysql_connect_with_db(string $server = "", string $username = "", string $password = "", string $database = "", bool $new_link = false, int $client_flags = 0, int $connect_timeout_ms = -1, int $query_timeout_ms = -1, darray<string, string> $conn_attrs = darray[]);
 <<__PHPStdLib>>
-function mysql_connect_with_ssl(string $server = "", string $username = "", string $password = "", string $database = "", int $client_flags = 0, int $connect_timeout_ms = -1, int $query_timeout_ms = -1, ?MySSLContextProvider $ssl_context = null, darray<string, string> $conn_attrs = []);
+function mysql_connect_with_ssl(string $server = "", string $username = "", string $password = "", string $database = "", int $client_flags = 0, int $connect_timeout_ms = -1, int $query_timeout_ms = -1, ?MySSLContextProvider $ssl_context = null, darray<string, string> $conn_attrs = darray[]);
 <<__PHPStdLib>>
-function mysql_pconnect_with_db(string $server = "", string $username = "", string $password = "", string $database = "", int $client_flags = 0, int $connect_timeout_ms = -1, int $query_timeout_ms = -1, darray<string, string> $conn_attrs = []);
+function mysql_pconnect_with_db(string $server = "", string $username = "", string $password = "", string $database = "", int $client_flags = 0, int $connect_timeout_ms = -1, int $query_timeout_ms = -1, darray<string, string> $conn_attrs = darray[]);
 <<__PHPStdLib>>
 function mysql_set_charset(string $charset, $link_identifier = null);
 <<__PHPStdLib>>

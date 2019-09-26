@@ -508,18 +508,23 @@ let add_docblocks defs comments =
 
 let outline popt content =
   let { Parser_return.ast; comments; _ } =
-    if Ide_parser_cache.is_enabled () then
-      Ide_parser_cache.(
-        with_ide_cache @@ (fun () -> get_ast popt Relative_path.default content))
-    else
-      let env =
-        Parser.make_env
-          ~parser_options:popt
-          ~include_line_comments:true
-          ~keep_errors:false
-          Relative_path.default
-      in
-      Parser.from_text_with_legacy env content
+    let ast =
+      Errors.ignore_ (fun () ->
+          if Ide_parser_cache.is_enabled () then
+            Ide_parser_cache.(
+              with_ide_cache
+              @@ (fun () -> get_ast popt Relative_path.default content))
+          else
+            let env =
+              Parser.make_env
+                ~parser_options:popt
+                ~include_line_comments:true
+                ~keep_errors:false
+                Relative_path.default
+            in
+            Parser.from_text_with_legacy env content)
+    in
+    ast
   in
   let result = outline_ast ast in
   add_docblocks result comments

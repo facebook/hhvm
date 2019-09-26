@@ -54,7 +54,10 @@ let update_context
     ~(path : Relative_path.t)
     ~(file_input : ServerCommandTypes.file_input) :
     Provider_context.t * Provider_context.entry =
-  let ast = Ast_provider.parse_file_input ~full:true path file_input in
+  let ast =
+    Errors.ignore_ (fun () ->
+        Ast_provider.parse_file_input ~full:true path file_input)
+  in
   Ast_provider.provide_ast_hint path ast Ast_provider.Full;
   let entry = { Provider_context.path; file_input; ast } in
   let ctx =
@@ -68,13 +71,14 @@ let update_context
 
 let compute_tast ~(ctx : Provider_context.t) ~(entry : Provider_context.entry)
     : Tast.program =
-  let make_tast () =
-    let nast = Naming.program entry.Provider_context.ast in
-    Typing.nast_to_tast ctx.Provider_context.tcopt nast
-  in
-  match Provider_context.get_global_context () with
-  | None -> with_context ~ctx ~f:make_tast
-  | Some _ ->
-    (* No need for [with_context] -- assume that's already the context we're
+  Errors.ignore_ (fun () ->
+      let make_tast () =
+        let nast = Naming.program entry.Provider_context.ast in
+        Typing.nast_to_tast ctx.Provider_context.tcopt nast
+      in
+      match Provider_context.get_global_context () with
+      | None -> with_context ~ctx ~f:make_tast
+      | Some _ ->
+        (* No need for [with_context] -- assume that's already the context we're
     operating under. *)
-    make_tast ()
+        make_tast ())

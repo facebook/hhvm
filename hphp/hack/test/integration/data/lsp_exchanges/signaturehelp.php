@@ -19,4 +19,29 @@ function test_signature_help(): void
   MyClass::staticMethod("hi");
   global_function("hi", 1);
   Herp\aliased_global_func("hi");
+  test_signature_help_params1("hi", "there");
+  test_signature_help_params2("hi", "there");
+  test_signature_help_params3("hi", "there");
+}
+
+/* comment describing the method
+  @param $param1 info1
+  @param $param2 info2
+*/
+function test_signature_help_params1(string $param1, string $param2): void {}
+
+/* comment describing the method
+  @param $param1 info1
+*/
+function test_signature_help_params2(string $param1, string $param2): void {}
+
+/*
+ * @param $param1 info1
+ *                for param1
+ * @param $param2   info2
+ * @return the string
+ *         'hack'
+*/
+function test_signature_help_params3(string $param1, string $param2): string {
+  return 'hack';
 }

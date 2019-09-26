@@ -1625,6 +1625,75 @@ class TestLsp(TestCase[LspTestDriver]):
                     "activeParameter": 0,
                 },
             )
+            .request(
+                comment="signature help for 2-argument function with params (right of open paren)",
+                method="textDocument/signatureHelp",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 21, "character": 30},
+                },
+                result={
+                    "signatures": [
+                        {
+                            "label": "function test_signature_help_params1(\n  string $param1,\n  string $param2\n): void",
+                            "documentation": "comment describing the method\n@param $param1 info1\n@param $param2 info2",
+                            "parameters": [
+                                {"label": "$param1", "documentation": "info1"},
+                                {"label": "$param2", "documentation": "info2"},
+                            ],
+                        }
+                    ],
+                    "activeSignature": 0,
+                    "activeParameter": 0,
+                },
+            )
+            .request(
+                comment="signature help for 2-argument function with params (right of open paren)",
+                method="textDocument/signatureHelp",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 22, "character": 30},
+                },
+                result={
+                    "signatures": [
+                        {
+                            "label": "function test_signature_help_params2(\n  string $param1,\n  string $param2\n): void",
+                            "documentation": "comment describing the method\n@param $param1 info1",
+                            "parameters": [
+                                {"label": "$param1", "documentation": "info1"},
+                                {"label": "$param2"},
+                            ],
+                        }
+                    ],
+                    "activeSignature": 0,
+                    "activeParameter": 0,
+                },
+            )
+            .request(
+                comment="signature help for 2-argument function with params (right of open paren)",
+                method="textDocument/signatureHelp",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 23, "character": 30},
+                },
+                result={
+                    "signatures": [
+                        {
+                            "label": "function test_signature_help_params3(\n  string $param1,\n  string $param2\n): string",
+                            "documentation": "@param $param1 info1\n               for param1\n@param $param2   info2\n@return the string\n        'hack'",
+                            "parameters": [
+                                {
+                                    "label": "$param1",
+                                    "documentation": "info1 for param1",
+                                },
+                                {"label": "$param2", "documentation": "info2"},
+                            ],
+                        }
+                    ],
+                    "activeSignature": 0,
+                    "activeParameter": 0,
+                },
+            )
             .request(method="shutdown", params={}, result=None)
         )
         self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)

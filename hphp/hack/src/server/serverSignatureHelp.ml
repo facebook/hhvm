@@ -170,10 +170,13 @@ let get_param_docs (documentation_lines : string list) :
       let split = parse_param_docs line in
       match split with
       | Some param_info ->
-        Map.set
-          ~key:param_info.param_name
-          ~data:param_info.param_desc
-          param_docs
+        let param_name =
+          if String_utils.string_starts_with param_info.param_name "$" then
+            param_info.param_name
+          else
+            "$" ^ param_info.param_name
+        in
+        Map.set ~key:param_name ~data:param_info.param_desc param_docs
       | None -> param_docs)
     documentation_attributes
 

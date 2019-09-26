@@ -1636,7 +1636,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "signatures": [
                         {
                             "label": "function test_signature_help_params1(\n  string $param1,\n  string $param2\n): void",
-                            "documentation": "comment describing the method\n@param $param1 info1\n@param $param2 info2",
+                            "documentation": "comment describing the method\n@param $param1 info1\n@param param2 info2",
                             "parameters": [
                                 {"label": "$param1", "documentation": "info1"},
                                 {"label": "$param2", "documentation": "info2"},

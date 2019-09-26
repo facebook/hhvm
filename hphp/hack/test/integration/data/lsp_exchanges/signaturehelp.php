@@ -26,7 +26,7 @@ function test_signature_help(): void
 
 /* comment describing the method
   @param $param1 info1
-  @param $param2 info2
+  @param param2 info2
 */
 function test_signature_help_params1(string $param1, string $param2): void {}
 

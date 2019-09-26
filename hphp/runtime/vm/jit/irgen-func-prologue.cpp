@@ -362,6 +362,7 @@ void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID) {
   warn_argument_arity(env, argc, numTooManyArgs);
 
   emitGenericsMismatchCheck(env, callFlags);
+  emitCallInOutCheck(env, callFlags);
 
   // Check surprise flags in the same place as the interpreter: after setting
   // up the callee's frame but before executing any of its code.
@@ -373,7 +374,6 @@ void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID) {
   }
 
   emitCalleeDynamicCallCheck(env);
-  emitCallMCheck(env);
 
   prologueDispatch(
     env, func,
@@ -574,7 +574,7 @@ void emitCalleeDynamicCallCheck(IRGS& env) {
 const StaticString
   s_inoutError("In/out function called dynamically without inout annotations");
 
-void emitCallMCheck(IRGS& env) {
+void emitCallInOutCheck(IRGS& env, SSATmp* callFlags) {
   auto const func = curFunc(env);
 
   if (!func->takesInOutParams()) {
@@ -584,12 +584,9 @@ void emitCallMCheck(IRGS& env) {
   ifThen(
     env,
     [&] (Block* taken) {
-      auto flags = gen(env, LdARNumArgsAndFlags, fp(env));
-      auto test = gen(
-        env, AndInt, flags,
-        cns(env, static_cast<int32_t>(ActRec::Flags::MultiReturn))
-      );
-      gen(env, JmpZero, taken, test);
+      auto constexpr flag = 1 << CallFlags::Flags::HasInOut;
+      auto const hasInOut = gen(env, AndInt, callFlags, cns(env, flag));
+      gen(env, JmpZero, taken, hasInOut);
     },
     [&] {
       hint(env, Block::Hint::Unlikely);

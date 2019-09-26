@@ -29,6 +29,7 @@
 #include "hphp/runtime/base/tv-refcount.h"
 
 #include "hphp/runtime/vm/act-rec.h"
+#include "hphp/runtime/vm/call-flags.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/func.h"
@@ -747,8 +748,8 @@ void resetCoverageCounters();
 using InterpOneFunc = jit::TCA (*) (ActRec*, TypedValue*, Offset);
 extern InterpOneFunc interpOneEntryPoints[];
 
-bool doFCallUnpackTC(PC origpc, int32_t numInputs, bool hasGenerics, void*);
-bool doFCall(ActRec* ar, uint32_t numArgs, bool hasUnpack, bool hasGenerics);
+bool doFCallUnpackTC(PC origpc, int32_t numInputs, CallFlags callFlags, void*);
+bool doFCall(ActRec* ar, uint32_t numArgs, bool hasUnpack, CallFlags callFlags);
 jit::TCA dispatchBB();
 void pushFrameSlots(const Func* func, int nparams = 0);
 Array getDefinedVariables(const ActRec*);
@@ -762,7 +763,7 @@ enum class StackArgsState { // tells prepareFuncEntry how much work to do
 };
 void enterVMAtPseudoMain(ActRec* enterFnAr, VarEnv* varEnv);
 void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk, Array&& generics,
-                   bool allowDynCallNoPointer = false);
+                   bool hasInOut, bool allowDynCallNoPointer);
 void enterVMAtCurPC();
 void prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
                       int nregular, bool checkRefAnnot);

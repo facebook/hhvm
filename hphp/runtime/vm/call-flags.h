@@ -29,6 +29,7 @@ namespace HPHP {
  * prologue used to complete a function call.
  *
  * Bit 0: flag indicating whether generics are on the stack
+ * Bit 1: flag indicating whether any inout arguments were passed
  * Bits 1-31: currently unused
  * Bits 32-47: generics bitmap
  * Bits 48-63: currently unused
@@ -36,16 +37,19 @@ namespace HPHP {
 struct CallFlags {
   enum Flags {
     HasGenerics,
+    HasInOut,
   };
 
-  CallFlags(bool hasGenerics, uint32_t genericsBitmap) {
+  CallFlags(bool hasGenerics, bool hasInOut, uint32_t genericsBitmap) {
     assertx(hasGenerics || genericsBitmap == 0);
     m_bits =
       ((hasGenerics ? 1 : 0) << Flags::HasGenerics) |
+      ((hasInOut ? 1 : 0) << Flags::HasInOut) |
       ((uint64_t)genericsBitmap << 32);
   }
 
   bool hasGenerics() const { return m_bits & (1 << Flags::HasGenerics); }
+  bool hasInOut() const { return m_bits & (1 << Flags::HasInOut); }
   int64_t value() const { return static_cast<int64_t>(m_bits); }
 
 private:

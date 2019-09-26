@@ -1411,7 +1411,7 @@ void enterVMAtPseudoMain(ActRec* enterFnAr, VarEnv* varEnv) {
 }
 
 void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk, Array&& generics,
-                   bool allowDynCallNoPointer /* = false */) {
+                   bool hasInOut, bool allowDynCallNoPointer) {
   assertx(enterFnAr);
   assertx(!enterFnAr->resumed());
   Stats::inc(Stats::VMEnter);
@@ -1436,7 +1436,7 @@ void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk, Array&& generics,
     const int np = enterFnAr->m_func->numNonVariadicParams();
     int na = enterFnAr->numArgs();
     if (na > np) na = np + 1;
-    auto const callFlags = CallFlags(!generics.isNull(), 0);
+    auto const callFlags = CallFlags(!generics.isNull(), hasInOut, 0);
     jit::TCA start = enterFnAr->m_func->getPrologue(na);
     jit::enterTCAtPrologue(callFlags, start, enterFnAr);
     return;
@@ -1446,10 +1446,10 @@ void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk, Array&& generics,
   prepareFuncEntry(enterFnAr, stk, std::move(generics));
 
   checkForReifiedGenericsErrors(enterFnAr, hasGenerics);
+  checkForRequiredInOut(enterFnAr, hasInOut);
   if (!EventHook::FunctionCall(enterFnAr, EventHook::NormalFunc)) return;
   checkStack(vmStack(), enterFnAr->m_func, 0);
   calleeDynamicCallChecks(enterFnAr, allowDynCallNoPointer);
-  checkForRequiredCallM(enterFnAr);
   assertx(vmfp()->func()->contains(vmpc()));
 
   if (useJit) {
@@ -4370,16 +4370,17 @@ OPTBLD_INLINE void iopUnsetG() {
   vmStack().popC();
 }
 
-bool doFCall(ActRec* ar, uint32_t numArgs, bool hasUnpack, bool hasGenerics) {
+bool doFCall(ActRec* ar, uint32_t numArgs, bool hasUnpack,
+             CallFlags callFlags) {
   TRACE(3, "FCall: pc %p func %p base %d\n", vmpc(),
         vmfp()->unit()->entry(),
         int(vmfp()->func()->base()));
 
   try {
-    assertx(!hasGenerics || tvIsVecOrVArray(vmStack().topC()));
-    auto generics = hasGenerics
+    assertx(!callFlags.hasGenerics() || tvIsVecOrVArray(vmStack().topC()));
+    auto generics = callFlags.hasGenerics()
       ? Array::attach(vmStack().topC()->m_data.parr) : Array();
-    if (hasGenerics) vmStack().discard();
+    if (callFlags.hasGenerics()) vmStack().discard();
 
     if (hasUnpack) {
       Cell* c1 = vmStack().topC();
@@ -4417,12 +4418,12 @@ bool doFCall(ActRec* ar, uint32_t numArgs, bool hasUnpack, bool hasGenerics) {
     throw;
   }
 
-  checkForReifiedGenericsErrors(ar, hasGenerics);
+  checkForReifiedGenericsErrors(ar, callFlags.hasGenerics());
+  checkForRequiredInOut(ar, callFlags.hasInOut());
   if (UNLIKELY(!EventHook::FunctionCall(ar, EventHook::NormalFunc))) {
     return false;
   }
   calleeDynamicCallChecks(ar);
-  checkForRequiredCallM(ar);
   return true;
 }
 
@@ -4441,7 +4442,6 @@ void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
   ar->m_func = func;
   ar->initNumArgs(fca.numArgs + (fca.hasUnpack() ? 1 : 0));
   if (dynamic) ar->setDynamicCall();
-  if (fca.numRets != 1) ar->setFCallM();
   auto const asyncEagerReturn =
     fca.asyncEagerOffset != kInvalidOffset && func->supportsAsyncEagerReturn();
   if (asyncEagerReturn) ar->setAsyncEagerReturn();
@@ -4450,7 +4450,13 @@ void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
 
   initActRec(ar);
 
-  doFCall(ar, fca.numArgs, fca.hasUnpack(), fca.hasGenerics());
+  auto const callFlags = CallFlags(
+    fca.hasGenerics(),
+    fca.numRets != 1,
+    0  // generics bitmap not used by interpreter
+  );
+
+  doFCall(ar, fca.numArgs, fca.hasUnpack(), callFlags);
   pc = vmpc();
 }
 
@@ -5183,17 +5189,17 @@ OPTBLD_INLINE void iopLockObj() {
   c1->m_data.pobj->lockObject();
 }
 
-bool doFCallUnpackTC(PC origpc, int32_t numInputs, bool hasGenerics,
+bool doFCallUnpackTC(PC origpc, int32_t numInputs, CallFlags callFlags,
                      void* retAddr) {
   assert_native_stack_aligned();
   assertx(tl_regState == VMRegState::DIRTY);
   tl_regState = VMRegState::CLEAN;
   auto const ar = vmStack().indA(numInputs);
-  if (hasGenerics) --numInputs;
+  if (callFlags.hasGenerics()) --numInputs;
   assertx(ar->numArgs() == numInputs);
   ar->setReturn(vmfp(), origpc, jit::tc::ustubs().retHelper);
   ar->setJitReturn(retAddr);
-  auto const ret = doFCall(ar, numInputs - 1, true, hasGenerics);
+  auto const ret = doFCall(ar, numInputs - 1, true, callFlags);
   tl_regState = VMRegState::DIRTY;
   return ret;
 }

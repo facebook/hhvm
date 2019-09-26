@@ -43,7 +43,7 @@ void emitGenericsMismatchCheck(IRGS& env, SSATmp* callFlags);
 
 void emitCalleeDynamicCallCheck(IRGS& env);
 
-void emitCallMCheck(IRGS& env);
+void emitCallInOutCheck(IRGS& env, SSATmp* callFlags);
 
 ///////////////////////////////////////////////////////////////////////////////
 

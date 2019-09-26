@@ -272,7 +272,7 @@ struct UniqueStubs {
    * the stack (along with arguments, the array of arguments to unpack and
    * optionally the array of generics) in a CallUnpack instruction. The last
    * two args specify the total number of inputs, including unpack arguments and
-   * generics, and a boolean flag whether generics were passed.
+   * generics, and a call flags (see CallFlags).
    *
    * @reached:  callunpack from TC
    * @context:  func prologue

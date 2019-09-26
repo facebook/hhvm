@@ -431,8 +431,6 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
     }
   }
 
-  checkForRequiredCallM(ar);
-
   VMRegAnchor _;
 
   PC savePc = vmpc();

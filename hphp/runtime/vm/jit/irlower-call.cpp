@@ -90,15 +90,11 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
     };
   }
 
-  if (extra->numOut) {
-    v << orlim{
-      static_cast<int32_t>(ActRec::Flags::MultiReturn),
-      calleeAR + AROFF(m_numArgsAndFlags),
-      v.makeReg()
-    };
-  }
-
-  auto const callFlags = CallFlags(extra->hasGenerics, extra->genericsBitmap);
+  auto const callFlags = CallFlags(
+    extra->hasGenerics,
+    extra->numOut != 0,
+    extra->genericsBitmap
+  );
   v << copy{v.cns(callFlags.value()), r_php_call_flags()};
 
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
@@ -147,19 +143,16 @@ void cgCallUnpack(IRLS& env, const IRInstruction* inst) {
   v << lea{sp[cellsToBytes(extra->spOffset.offset)], syncSP};
   v << syncvmsp{syncSP};
 
-  if (extra->numOut) {
-    auto const calleeAR = syncSP + cellsToBytes(extra->numInputs());
-    v << orlim{
-      static_cast<int32_t>(ActRec::Flags::MultiReturn),
-      calleeAR + AROFF(m_numArgsAndFlags),
-      v.makeReg()
-    };
-  }
+  auto const callFlags = CallFlags(
+    extra->hasGenerics,
+    extra->numOut != 0,
+    0  // generics bitmap not used with unpack
+  );
 
   auto const target = tc::ustubs().fcallUnpackHelper;
   auto const callOff = v.cns(extra->callOffset);
   auto const args = v.makeTuple(
-    {callOff, v.cns(extra->numInputs()), v.cns(extra->hasGenerics ? 1 : 0)});
+    {callOff, v.cns(extra->numInputs()), v.cns(callFlags.value())});
 
   auto const done = v.makeBlock();
   v << vcallunpack{target, fcall_unpack_regs(), args,

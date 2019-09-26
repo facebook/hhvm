@@ -141,10 +141,10 @@ inline bool callerRxChecks(const ActRec* caller, const Func* callee) {
   return false;
 }
 
-inline void checkForRequiredCallM(const ActRec* ar) {
+inline void checkForRequiredInOut(const ActRec* ar, bool hasInOut) {
   if (!ar->func()->takesInOutParams()) return;
 
-  if (!ar->isFCallM()) {
+  if (!hasInOut) {
     raise_error("In/out function called dynamically without inout annotations");
   }
 }

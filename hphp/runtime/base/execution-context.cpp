@@ -1627,10 +1627,6 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
     ar->trashVarEnv();
   }
 
-  if (UNLIKELY(f->takesInOutParams())) {
-    ar->setFCallM();
-  }
-
 #ifdef HPHP_TRACE
   if (vmfp() == nullptr) {
     TRACE(1, "Reentry: enter %s(%p) from top-level\n",
@@ -1804,7 +1800,7 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
   auto const doEnterVM = [&] (ActRec* ar) {
     enterVM(ar, [&] {
       enterVMAtFunc(ar, StackArgsState::Trimmed, std::move(reifiedGenerics),
-                    allowDynCallNoPointer);
+                    f->takesInOutParams(), allowDynCallNoPointer);
     });
   };
 
@@ -1844,7 +1840,10 @@ TypedValue ExecutionContext::invokeFuncFew(const Func* f,
   };
 
   auto const doEnterVM = [&] (ActRec* ar) {
-    enterVM(ar, [&] { enterVMAtFunc(ar, StackArgsState::Untrimmed, Array()); });
+    enterVM(ar, [&] {
+      enterVMAtFunc(ar, StackArgsState::Untrimmed, Array(),
+                    f->takesInOutParams(), false);
+    });
   };
 
   return invokeFuncImpl(f,

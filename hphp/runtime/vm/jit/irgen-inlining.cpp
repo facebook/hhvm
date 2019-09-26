@@ -346,7 +346,11 @@ void beginInlining(IRGS& env,
   }
   if (generics != nullptr) stLocRaw(env, fca.numArgs, calleeFP, generics);
 
-  auto const callFlags = cns(env, CallFlags(generics != nullptr, 0).value());
+  auto const callFlags = cns(env, CallFlags(
+    generics != nullptr,
+    fca.numRets != 1,
+    0
+  ).value());
   emitPrologueLocals(env, fca.numArgs, callFlags, ctx);
 
   updateMarker(env);

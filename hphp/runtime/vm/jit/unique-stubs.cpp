@@ -205,7 +205,7 @@ FCallHelperRet fcallHelper(CallFlags callFlags, ActRec* ar) {
 
   try {
     VMRegAnchor _(callFlags, ar);
-    if (doFCall(ar, ar->numArgs(), false, callFlags.hasGenerics())) {
+    if (doFCall(ar, ar->numArgs(), false, callFlags)) {
       return { tc::ustubs().resumeHelperRet, nullptr };
     }
     // We've been asked to skip the function body (fb_intercept).  The vmregs
@@ -595,7 +595,7 @@ TCA emitFCallUnpackHelper(CodeBlock& main, CodeBlock& cold,
     auto const done = v.makeBlock();
     auto const ctch = vc.makeBlock();
     auto const should_continue = v.makeReg();
-    bool (*helper)(PC, int32_t, bool, void*) = &doFCallUnpackTC;
+    bool (*helper)(PC, int32_t, CallFlags, void*) = &doFCallUnpackTC;
 
     v << vinvoke{
       CallSpec::direct(helper),

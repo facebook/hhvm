@@ -77,7 +77,7 @@ struct ActRec {
 #endif
   const Func* m_func;  // Function.
   uint32_t m_callOff;  // bc offset of call opcode from caller func entry.
-  uint32_t m_numArgsAndFlags; // arg_count:26, flags:6
+  uint32_t m_numArgsAndFlags; // arg_count:27, flags:5
   union {
     ObjectData* m_thisUnsafe; // This.
     Class* m_clsUnsafe;       // Late bound class.
@@ -102,10 +102,6 @@ struct ActRec {
   enum Flags : uint32_t {
     None          = 0,
 
-    // Set if the function was called using FCall instruction with more
-    // than one return values and must return a value via RetM.
-    MultiReturn = (1u << 26),
-
     // Set if this corresponds to a dynamic call
     DynamicCall = (1u << 27),
 
@@ -120,11 +116,11 @@ struct ActRec {
     MagicDispatch = InResumed|AsyncEagerRet,
   };
 
-  static constexpr int kNumArgsBits = 26;
+  static constexpr int kNumArgsBits = 27;
   static constexpr int kNumArgsMask = (1 << kNumArgsBits) - 1;
   static constexpr int kFlagsMask = ~kNumArgsMask;
   static constexpr int kExecutionModeMask =
-    ~(LocalsDecRefd | DynamicCall | MultiReturn);
+    ~(LocalsDecRefd | DynamicCall);
 
   /*
    * To conserve space, we use unions for pairs of mutually exclusive fields
@@ -194,7 +190,6 @@ struct ActRec {
   bool isAsyncEagerReturn() const;
   bool magicDispatch() const;
   bool isDynamicCall() const;
-  bool isFCallM() const;
 
   /*
    * Pack `numArgs' and `flags' into the format expected by m_numArgsAndFlags.
@@ -217,7 +212,6 @@ struct ActRec {
   void setResumed();
   void setAsyncEagerReturn();
   void setDynamicCall();
-  void setFCallM();
 
   /*
    * Set or clear both m_invName and the MagicDispatch flag.

@@ -68,10 +68,6 @@ inline bool ActRec::isDynamicCall() const {
   return flags() & DynamicCall;
 }
 
-inline bool ActRec::isFCallM() const {
-  return flags() & MultiReturn;
-}
-
 inline uint32_t ActRec::encodeNumArgsAndFlags(uint32_t numArgs, Flags flags) {
   assertx((numArgs & kFlagsMask) == 0);
   assertx((uint32_t{flags} & kNumArgsMask) == 0);
@@ -92,10 +88,6 @@ inline void ActRec::setLocalsDecRefd() {
 
 inline void ActRec::setDynamicCall() {
   m_numArgsAndFlags |= DynamicCall;
-}
-
-inline void ActRec::setFCallM() {
-  m_numArgsAndFlags |= MultiReturn;
 }
 
 inline void ActRec::setResumed() {

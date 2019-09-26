@@ -1385,7 +1385,8 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
-                comment="signature help for 0-argument constructor (left of opening paren)",
+                comment="signature help for 0-argument constructor"
+                " (left of opening paren)",
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
@@ -1413,7 +1414,8 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
-                comment="signature help for 0-argument constructor (right of closing paren)",
+                comment="signature help for 0-argument constructor"
+                " (right of closing paren)",
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
@@ -1422,7 +1424,8 @@ class TestLsp(TestCase[LspTestDriver]):
                 result=None,
             )
             .request(
-                comment="signature help for 2-argument instance method (left of opening paren)",
+                comment="signature help for 2-argument instance method"
+                " (left of opening paren)",
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
@@ -1431,7 +1434,8 @@ class TestLsp(TestCase[LspTestDriver]):
                 result=None,
             )
             .request(
-                comment="signature help for 2-argument instance method (right of opening paren)",
+                comment="signature help for 2-argument instance method"
+                " (right of opening paren)",
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
@@ -1440,7 +1444,8 @@ class TestLsp(TestCase[LspTestDriver]):
                 result={
                     "signatures": [
                         {
-                            "label": "public function instanceMethod(int $x1, int $x2): void",
+                            "label": "public function instanceMethod"
+                            "(int $x1, int $x2): void",
                             "documentation": "Instance method with doc block",
                             "parameters": [{"label": "$x1"}, {"label": "$x2"}],
                         }
@@ -1450,7 +1455,8 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
-                comment="signature help for 2-argument instance method (left of first comma)",
+                comment="signature help for 2-argument instance method"
+                " (left of first comma)",
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
@@ -1459,7 +1465,8 @@ class TestLsp(TestCase[LspTestDriver]):
                 result={
                     "signatures": [
                         {
-                            "label": "public function instanceMethod(int $x1, int $x2): void",
+                            "label": "public function instanceMethod"
+                            "(int $x1, int $x2): void",
                             "documentation": "Instance method with doc block",
                             "parameters": [{"label": "$x1"}, {"label": "$x2"}],
                         }
@@ -1469,7 +1476,8 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
-                comment="signature help for 2-argument instance method (right of first comma)",
+                comment="signature help for 2-argument instance method"
+                " (right of first comma)",
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
@@ -1478,7 +1486,8 @@ class TestLsp(TestCase[LspTestDriver]):
                 result={
                     "signatures": [
                         {
-                            "label": "public function instanceMethod(int $x1, int $x2): void",
+                            "label": "public function instanceMethod"
+                            "(int $x1, int $x2): void",
                             "documentation": "Instance method with doc block",
                             "parameters": [{"label": "$x1"}, {"label": "$x2"}],
                         }
@@ -1488,7 +1497,8 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
-                comment="signature help for 2-argument instance method (left of closing paren)",
+                comment="signature help for 2-argument instance method"
+                " (left of closing paren)",
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
@@ -1497,7 +1507,8 @@ class TestLsp(TestCase[LspTestDriver]):
                 result={
                     "signatures": [
                         {
-                            "label": "public function instanceMethod(int $x1, int $x2): void",
+                            "label": "public function instanceMethod"
+                            "(int $x1, int $x2): void",
                             "documentation": "Instance method with doc block",
                             "parameters": [{"label": "$x1"}, {"label": "$x2"}],
                         }
@@ -1507,7 +1518,8 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
-                comment="signature help for 2-argument instance method (right of closing paren)",
+                comment="signature help for 2-argument instance method"
+                " (right of closing paren)",
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
@@ -1516,7 +1528,8 @@ class TestLsp(TestCase[LspTestDriver]):
                 result=None,
             )
             .request(
-                comment="signature help for 1-argument static method (left of open paren)",
+                comment="signature help for 1-argument static method"
+                " (left of open paren)",
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
@@ -1525,7 +1538,8 @@ class TestLsp(TestCase[LspTestDriver]):
                 result=None,
             )
             .request(
-                comment="signature help for 1-argument static method (right of open paren)",
+                comment="signature help for 1-argument static method"
+                " (right of open paren)",
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
@@ -1534,7 +1548,8 @@ class TestLsp(TestCase[LspTestDriver]):
                 result={
                     "signatures": [
                         {
-                            "label": "public static function staticMethod(string $z): void",
+                            "label": "public static function staticMethod"
+                            "(string $z): void",
                             "documentation": "Static method with doc block",
                             "parameters": [{"label": "$z"}],
                         }
@@ -1544,7 +1559,8 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
-                comment="signature help for 2-argument global function (left of open paren)",
+                comment="signature help for 2-argument global function"
+                " (left of open paren)",
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
@@ -1553,7 +1569,8 @@ class TestLsp(TestCase[LspTestDriver]):
                 result=None,
             )
             .request(
-                comment="signature help for 2-argument global function (right of open paren)",
+                comment="signature help for 2-argument global function"
+                " (right of open paren)",
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
@@ -1562,7 +1579,8 @@ class TestLsp(TestCase[LspTestDriver]):
                 result={
                     "signatures": [
                         {
-                            "label": "function global_function(string $s, int $x): void",
+                            "label": "function global_function"
+                            "(string $s, int $x): void",
                             "documentation": "Global function with doc block",
                             "parameters": [{"label": "$s"}, {"label": "$x"}],
                         }
@@ -1572,7 +1590,8 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
-                comment="signature help for 1-argument namespace-aliased global function (left of open paren)",
+                comment="signature help for 1-argument namespace-aliased global"
+                " function (right of open paren)",
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
@@ -1581,7 +1600,8 @@ class TestLsp(TestCase[LspTestDriver]):
                 result=None,
             )
             .request(
-                comment="signature help for 1-argument namespace-aliased global function (right of open paren)",
+                comment="signature help for 1-argument namespace-aliased global"
+                " function (right of open paren)",
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
@@ -1590,7 +1610,8 @@ class TestLsp(TestCase[LspTestDriver]):
                 result=None,
             )
             .request(
-                comment="signature help for 1-argument namespace-aliased global function (right of open paren)",
+                comment="signature help for 1-argument namespace-aliased global"
+                " function (right of open paren)",
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
@@ -1599,7 +1620,8 @@ class TestLsp(TestCase[LspTestDriver]):
                 result={
                     "signatures": [
                         {
-                            "label": "function Herp\\aliased_global_func(string $s): void",
+                            "label": "function Herp\\aliased_global_func"
+                            "(string $s): void",
                             "parameters": [{"label": "$s"}],
                         }
                     ],
@@ -1608,7 +1630,8 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
-                comment="signature help for 1-argument namespace-aliased global function (right of open paren)",
+                comment="signature help for 1-argument namespace-aliased global"
+                " function (right of open paren)",
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
@@ -1617,7 +1640,8 @@ class TestLsp(TestCase[LspTestDriver]):
                 result={
                     "signatures": [
                         {
-                            "label": "function Herp\\aliased_global_func(string $s): void",
+                            "label": "function Herp\\aliased_global_func"
+                            "(string $s): void",
                             "parameters": [{"label": "$s"}],
                         }
                     ],
@@ -1626,7 +1650,8 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
-                comment="signature help for 2-argument function with params (right of open paren)",
+                comment="signature help for 2-argument function with params"
+                " (right of open paren)",
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
@@ -1635,8 +1660,11 @@ class TestLsp(TestCase[LspTestDriver]):
                 result={
                     "signatures": [
                         {
-                            "label": "function test_signature_help_params1(\n  string $param1,\n  string $param2\n): void",
-                            "documentation": "comment describing the method\n@param $param1 info1\n@param param2 info2",
+                            "label": "function test_signature_help_params1("
+                            "\n  string $param1,\n  string $param2\n): void",
+                            "documentation": "comment describing the method"
+                            "\n@param $param1 info1"
+                            "\n@param param2 info2",
                             "parameters": [
                                 {"label": "$param1", "documentation": "info1"},
                                 {"label": "$param2", "documentation": "info2"},
@@ -1648,7 +1676,8 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
-                comment="signature help for 2-argument function with params (right of open paren)",
+                comment="signature help for 2-argument function with params"
+                " (right of open paren)",
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
@@ -1657,8 +1686,10 @@ class TestLsp(TestCase[LspTestDriver]):
                 result={
                     "signatures": [
                         {
-                            "label": "function test_signature_help_params2(\n  string $param1,\n  string $param2\n): void",
-                            "documentation": "comment describing the method\n@param $param1 info1",
+                            "label": "function test_signature_help_params2("
+                            "\n  string $param1,\n  string $param2\n): void",
+                            "documentation": "comment describing the method"
+                            "\n@param $param1 info1",
                             "parameters": [
                                 {"label": "$param1", "documentation": "info1"},
                                 {"label": "$param2"},
@@ -1670,7 +1701,8 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
-                comment="signature help for 2-argument function with params (right of open paren)",
+                comment="signature help for 2-argument function with params"
+                " (right of open paren)",
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
@@ -1679,8 +1711,13 @@ class TestLsp(TestCase[LspTestDriver]):
                 result={
                     "signatures": [
                         {
-                            "label": "function test_signature_help_params3(\n  string $param1,\n  string $param2\n): string",
-                            "documentation": "@param $param1 info1\n               for param1\n@param $param2   info2\n@return the string\n        'hack'",
+                            "label": "function test_signature_help_params3("
+                            "\n  string $param1,\n  string $param2\n): string",
+                            "documentation": "@param $param1 info1"
+                            "\n               for param1"
+                            "\n@param $param2   info2"
+                            "\n@return the string"
+                            "\n        'hack'",
                             "parameters": [
                                 {
                                     "label": "$param1",

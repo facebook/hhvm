@@ -422,7 +422,7 @@ function intltz_get_gmt();
 <<__PHPStdLib>>
 function intltz_get_id(IntlTimeZone $timeZone);
 <<__PHPStdLib>>
-function intltz_get_offset(IntlTimeZone $timeZone, float $date, bool $local, int &$rawOffset, int &$dstOffset);
+function intltz_get_offset(IntlTimeZone $timeZone, float $date, bool $local, inout int $rawOffset, inout int $dstOffset);
 <<__PHPStdLib>>
 function intltz_get_raw_offset(IntlTimeZone $timeZone);
 <<__PHPStdLib>>
@@ -718,7 +718,7 @@ class IntlTimeZone {
   public function getErrorMessage();
   public static function getGMT();
   public function getID();
-  public function getOffset(float $date, bool $local, int &$rawOffset, int &$dstOffset);
+  public function getOffset(float $date, bool $local, inout int $rawOffset, inout int $dstOffset);
   public function getRawOffset();
   public static function getRegion(string $zoneId);
   public static function getTZDataVersion();

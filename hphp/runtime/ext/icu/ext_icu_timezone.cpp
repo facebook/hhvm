@@ -259,7 +259,7 @@ static Variant HHVM_METHOD(IntlTimeZone, getID) {
 
 static bool HHVM_METHOD(IntlTimeZone, getOffset,
                         double date, bool local,
-                        VRefParam rawOffset, VRefParam dstOffset) {
+                        int64_t& rawOffset, int64_t& dstOffset) {
   TZ_GET(data, this_, false);
   UErrorCode error = U_ZERO_ERROR;
   int32_t rawOff, dstOff;
@@ -268,8 +268,8 @@ static bool HHVM_METHOD(IntlTimeZone, getOffset,
     data->setError(error, "intltz_get_offset: error obtaining offset");
     return false;
   }
-  rawOffset.assignIfRef(rawOff);
-  dstOffset.assignIfRef(dstOff);
+  rawOffset = rawOff;
+  dstOffset = dstOff;
   return true;
 }
 

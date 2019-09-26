@@ -171,10 +171,12 @@ class IntlTimeZone {
    * @return integer -
    */
   <<__Native>>
-  public function getOffset(float $date,
-                            bool $local,
-                            int &$rawOffset,
-                            int &$dstOffset): bool;
+  public function getOffset(
+    float $date,
+    bool $local,
+    <<__OutOnly('KindOfInt64')>> inout int $rawOffset,
+    <<__OutOnly('KindOfInt64')>> inout int $dstOffset,
+  ): bool;
 
   /**
    * Get the raw GMT offset (before taking daylight savings time into
@@ -399,9 +401,9 @@ function intltz_get_id(IntlTimeZone $obj): string {
 function intltz_get_offset(IntlTimeZone $obj,
                            float $date,
                            bool $local,
-                           int &$rawOffset,
-                           int &$dstOffset): bool {
-  return $obj->getOffset($date, $local, &$rawOffset, &$dstOffset);
+                           inout int $rawOffset,
+                           inout int $dstOffset): bool {
+  return $obj->getOffset($date, $local, inout $rawOffset, inout $dstOffset);
 }
 
 /**

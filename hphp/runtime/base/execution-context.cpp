@@ -1619,7 +1619,6 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
     ar->trashThis();
   }
   ar->initNumArgs(argc);
-  if (dynamic) ar->setDynamicCall();
 
   if (UNLIKELY(invName != nullptr)) {
     ar->setMagicDispatch(invName);
@@ -1800,7 +1799,7 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
   auto const doEnterVM = [&] (ActRec* ar) {
     enterVM(ar, [&] {
       enterVMAtFunc(ar, StackArgsState::Trimmed, std::move(reifiedGenerics),
-                    f->takesInOutParams(), allowDynCallNoPointer);
+                    f->takesInOutParams(), dynamic, allowDynCallNoPointer);
     });
   };
 
@@ -1842,7 +1841,7 @@ TypedValue ExecutionContext::invokeFuncFew(const Func* f,
   auto const doEnterVM = [&] (ActRec* ar) {
     enterVM(ar, [&] {
       enterVMAtFunc(ar, StackArgsState::Untrimmed, Array(),
-                    f->takesInOutParams(), false);
+                    f->takesInOutParams(), dynamic, false);
     });
   };
 

@@ -1411,7 +1411,8 @@ void enterVMAtPseudoMain(ActRec* enterFnAr, VarEnv* varEnv) {
 }
 
 void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk, Array&& generics,
-                   bool hasInOut, bool allowDynCallNoPointer) {
+                   bool hasInOut, bool dynamicCall,
+                   bool allowDynCallNoPointer) {
   assertx(enterFnAr);
   assertx(!enterFnAr->resumed());
   Stats::inc(Stats::VMEnter);
@@ -1436,7 +1437,8 @@ void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk, Array&& generics,
     const int np = enterFnAr->m_func->numNonVariadicParams();
     int na = enterFnAr->numArgs();
     if (na > np) na = np + 1;
-    auto const callFlags = CallFlags(!generics.isNull(), hasInOut, 0);
+    auto const callFlags = CallFlags(
+      !generics.isNull(), hasInOut, dynamicCall, 0);
     jit::TCA start = enterFnAr->m_func->getPrologue(na);
     jit::enterTCAtPrologue(callFlags, start, enterFnAr);
     return;
@@ -1447,9 +1449,10 @@ void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk, Array&& generics,
 
   checkForReifiedGenericsErrors(enterFnAr, hasGenerics);
   checkForRequiredInOut(enterFnAr, hasInOut);
+  calleeDynamicCallChecks(enterFnAr->func(), dynamicCall,
+                          allowDynCallNoPointer);
   if (!EventHook::FunctionCall(enterFnAr, EventHook::NormalFunc)) return;
   checkStack(vmStack(), enterFnAr->m_func, 0);
-  calleeDynamicCallChecks(enterFnAr, allowDynCallNoPointer);
   assertx(vmfp()->func()->contains(vmpc()));
 
   if (useJit) {
@@ -4420,11 +4423,8 @@ bool doFCall(ActRec* ar, uint32_t numArgs, bool hasUnpack,
 
   checkForReifiedGenericsErrors(ar, callFlags.hasGenerics());
   checkForRequiredInOut(ar, callFlags.hasInOut());
-  if (UNLIKELY(!EventHook::FunctionCall(ar, EventHook::NormalFunc))) {
-    return false;
-  }
-  calleeDynamicCallChecks(ar);
-  return true;
+  calleeDynamicCallChecks(ar->func(), callFlags.isDynamicCall());
+  return EventHook::FunctionCall(ar, EventHook::NormalFunc);
 }
 
 namespace {
@@ -4441,7 +4441,6 @@ void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
   ActRec* ar = vmStack().indA(fca.numInputs());
   ar->m_func = func;
   ar->initNumArgs(fca.numArgs + (fca.hasUnpack() ? 1 : 0));
-  if (dynamic) ar->setDynamicCall();
   auto const asyncEagerReturn =
     fca.asyncEagerOffset != kInvalidOffset && func->supportsAsyncEagerReturn();
   if (asyncEagerReturn) ar->setAsyncEagerReturn();
@@ -4453,6 +4452,7 @@ void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
   auto const callFlags = CallFlags(
     fca.hasGenerics(),
     fca.numRets != 1,
+    dynamic,
     0  // generics bitmap not used by interpreter
   );
 

@@ -64,10 +64,6 @@ inline bool ActRec::magicDispatch() const {
   return (flags() & kExecutionModeMask) == MagicDispatch;
 }
 
-inline bool ActRec::isDynamicCall() const {
-  return flags() & DynamicCall;
-}
-
 inline uint32_t ActRec::encodeNumArgsAndFlags(uint32_t numArgs, Flags flags) {
   assertx((numArgs & kFlagsMask) == 0);
   assertx((uint32_t{flags} & kNumArgsMask) == 0);
@@ -86,25 +82,19 @@ inline void ActRec::setLocalsDecRefd() {
   m_numArgsAndFlags |= LocalsDecRefd;
 }
 
-inline void ActRec::setDynamicCall() {
-  m_numArgsAndFlags |= DynamicCall;
-}
-
 inline void ActRec::setResumed() {
-  assertx((flags() & ~(AsyncEagerRet | DynamicCall))
-         == Flags::None);
+  assertx((flags() & ~AsyncEagerRet) == Flags::None);
   m_numArgsAndFlags = encodeNumArgsAndFlags(
     numArgs(),
-    static_cast<Flags>(InResumed | (flags() & DynamicCall))
+    static_cast<Flags>(InResumed)
   );
 }
 
 inline void ActRec::setAsyncEagerReturn() {
-  assertx((flags() & ~DynamicCall) == Flags::None);
+  assertx(flags() == Flags::None);
   m_numArgsAndFlags = encodeNumArgsAndFlags(
     numArgs(),
-    static_cast<Flags>(AsyncEagerRet |
-                       (flags() & DynamicCall))
+    static_cast<Flags>(AsyncEagerRet)
   );
 }
 

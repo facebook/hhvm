@@ -125,13 +125,8 @@ void cgSpillFrame(IRLS& env, const IRInstruction* inst) {
   v << store{func, ar + AROFF(m_func)};
 
   // Set m_numArgsAndFlags.
-  auto flags = ActRec::Flags::None;
-  if (extra->dynamicCall) {
-    flags = static_cast<ActRec::Flags>(flags | ActRec::Flags::DynamicCall);
-  }
-
   auto const naaf = static_cast<int32_t>(
-    ActRec::encodeNumArgsAndFlags(extra->numArgs, flags));
+    ActRec::encodeNumArgsAndFlags(extra->numArgs, ActRec::Flags::None));
   v << storeli{naaf, ar + AROFF(m_numArgsAndFlags)};
 }
 

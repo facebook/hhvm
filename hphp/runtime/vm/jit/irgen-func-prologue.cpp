@@ -363,6 +363,7 @@ void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID) {
 
   emitGenericsMismatchCheck(env, callFlags);
   emitCallInOutCheck(env, callFlags);
+  emitCalleeDynamicCallCheck(env, callFlags);
 
   // Check surprise flags in the same place as the interpreter: after setting
   // up the callee's frame but before executing any of its code.
@@ -372,8 +373,6 @@ void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID) {
   } else {
     gen(env, CheckSurpriseFlagsEnter, FuncEntryData { func, argc }, fp(env));
   }
-
-  emitCalleeDynamicCallCheck(env);
 
   prologueDispatch(
     env, func,
@@ -533,7 +532,7 @@ void emitGenericsMismatchCheck(IRGS& env, SSATmp* callFlags) {
   );
 }
 
-void emitCalleeDynamicCallCheck(IRGS& env) {
+void emitCalleeDynamicCallCheck(IRGS& env, SSATmp* callFlags) {
   auto const func = curFunc(env);
 
   if (!(RuntimeOption::EvalNoticeOnBuiltinDynamicCalls && func->isBuiltin())) {
@@ -543,12 +542,9 @@ void emitCalleeDynamicCallCheck(IRGS& env) {
   ifThen(
     env,
     [&] (Block* taken) {
-      auto flags = gen(env, LdARNumArgsAndFlags, fp(env));
-      auto test = gen(
-        env, AndInt, flags,
-        cns(env, static_cast<int32_t>(ActRec::Flags::DynamicCall))
-      );
-      gen(env, JmpNZero, taken, test);
+      auto constexpr flag = 1 << CallFlags::Flags::IsDynamicCall;
+      auto const isDynamicCall = gen(env, AndInt, callFlags, cns(env, flag));
+      gen(env, JmpNZero, taken, isDynamicCall);
     },
     [&] {
       hint(env, Block::Hint::Unlikely);

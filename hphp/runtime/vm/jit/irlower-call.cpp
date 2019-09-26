@@ -93,6 +93,7 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
   auto const callFlags = CallFlags(
     extra->hasGenerics,
     extra->numOut != 0,
+    extra->dynamicCall,
     extra->genericsBitmap
   );
   v << copy{v.cns(callFlags.value()), r_php_call_flags()};
@@ -146,6 +147,7 @@ void cgCallUnpack(IRLS& env, const IRInstruction* inst) {
   auto const callFlags = CallFlags(
     extra->hasGenerics,
     extra->numOut != 0,
+    extra->dynamicCall,
     0  // generics bitmap not used with unpack
   );
 

@@ -41,7 +41,7 @@ void emitFuncBodyDispatch(IRGS& env, const DVFuncletsVec& dvs);
 
 void emitGenericsMismatchCheck(IRGS& env, SSATmp* callFlags);
 
-void emitCalleeDynamicCallCheck(IRGS& env);
+void emitCalleeDynamicCallCheck(IRGS& env, SSATmp* callFlags);
 
 void emitCallInOutCheck(IRGS& env, SSATmp* callFlags);
 

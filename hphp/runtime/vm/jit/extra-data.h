@@ -708,24 +708,17 @@ struct ReqRetranslateData : IRExtraData {
  */
 struct ActRecInfo : IRExtraData {
   explicit ActRecInfo(IRSPRelOffset spOffset,
-                      uint32_t numArgs,
-                      bool dynamicCall)
+                      uint32_t numArgs)
     : spOffset(spOffset)
     , numArgs(numArgs)
-    , dynamicCall(dynamicCall)
   {}
 
   std::string show() const {
-    return folly::sformat(
-      "{}, {}{}",
-      spOffset.offset, numArgs,
-      dynamicCall ? ", dynamic call" : ""
-    );
+    return folly::sformat("{}, {}", spOffset.offset, numArgs);
   }
 
   IRSPRelOffset spOffset;
   uint32_t numArgs;
-  bool dynamicCall;
 };
 
 /*
@@ -797,6 +790,7 @@ struct CallData : IRExtraData {
                     const Func* callee,
                     uint32_t genericsBitmap,
                     bool hasGenerics,
+                    bool dynamicCall,
                     bool asyncEagerReturn)
     : spOffset(spOffset)
     , numArgs(numArgs)
@@ -805,6 +799,7 @@ struct CallData : IRExtraData {
     , callee(callee)
     , genericsBitmap(genericsBitmap)
     , hasGenerics(hasGenerics)
+    , dynamicCall(dynamicCall)
     , asyncEagerReturn(asyncEagerReturn)
   {}
 
@@ -817,6 +812,7 @@ struct CallData : IRExtraData {
       hasGenerics
         ? folly::sformat(",hasGenerics({})", genericsBitmap)
         : std::string{},
+      dynamicCall ? ",dynamicCall" : "",
       asyncEagerReturn ? ",asyncEagerReturn" : ""
     );
   }
@@ -832,6 +828,7 @@ struct CallData : IRExtraData {
   const Func* callee;  // nullptr if not statically known
   uint32_t genericsBitmap;
   bool hasGenerics;
+  bool dynamicCall;
   bool asyncEagerReturn;
 };
 
@@ -841,13 +838,15 @@ struct CallUnpackData : IRExtraData {
                           uint32_t numOut,
                           Offset callOffset,
                           const Func* callee,
-                          bool hasGenerics)
+                          bool hasGenerics,
+                          bool dynamicCall)
     : spOffset(spOffset)
     , numArgs(numArgs)
     , numOut(numOut)
     , callOffset(callOffset)
     , callee(callee)
     , hasGenerics(hasGenerics)
+    , dynamicCall(dynamicCall)
   {}
 
   std::string show() const {
@@ -856,7 +855,8 @@ struct CallUnpackData : IRExtraData {
       callee
         ? folly::sformat(",{}", callee->fullName())
         : std::string{},
-      hasGenerics ? ",hasGenerics" : ""
+      hasGenerics ? ",hasGenerics" : "",
+      dynamicCall ? ",dynamicCall" : ""
     );
   }
 
@@ -870,6 +870,7 @@ struct CallUnpackData : IRExtraData {
   Offset callOffset;  // offset from unit m_bc (unlike m_callOff in ActRec)
   const Func* callee; // nullptr if not statically known
   bool hasGenerics;
+  bool dynamicCall;
 };
 
 struct RetCtrlData : IRExtraData {

@@ -182,8 +182,7 @@ void fsetActRec(
   IRGS& env,
   SSATmp* func,
   const FCallArgs& fca,
-  SSATmp* objOrClass,
-  bool dynamicCall
+  SSATmp* objOrClass
 ) {
   auto const arOffset =
     offsetFromIRSP(env, BCSPRelOffset{static_cast<int32_t>(fca.numInputs())});
@@ -192,7 +191,7 @@ void fsetActRec(
   gen(
     env,
     SpillFrame,
-    ActRecInfo { arOffset, numArgs, dynamicCall },
+    ActRecInfo { arOffset, numArgs },
     sp(env),
     func,
     objOrClass ? objOrClass : cns(env, TNullptr)
@@ -202,7 +201,7 @@ void fsetActRec(
 //////////////////////////////////////////////////////////////////////
 
 void callUnpack(IRGS& env, const Func* callee, const FCallArgs& fca,
-                bool unlikely) {
+                bool dynamicCall, bool unlikely) {
   assertx(fca.hasUnpack());
   auto const data = CallUnpackData {
     spOffBCFromIRSP(env),
@@ -211,13 +210,14 @@ void callUnpack(IRGS& env, const Func* callee, const FCallArgs& fca,
     bcOff(env),
     callee,
     fca.hasGenerics(),
+    dynamicCall,
   };
   push(env, gen(env, CallUnpack, data, sp(env), fp(env)));
   if (unlikely) gen(env, Jmp, makeExit(env, nextBcOff(env)));
 }
 
 SSATmp* callImpl(IRGS& env, const Func* callee, const FCallArgs& fca,
-                 bool asyncEagerReturn) {
+                 bool dynamicCall, bool asyncEagerReturn) {
   // TODO: extend hhbc with bitmap of passed generics, or even better, use one
   // stack value per generic argument and extend hhbc with their count
   auto const genericsBitmap = [&] {
@@ -241,20 +241,22 @@ SSATmp* callImpl(IRGS& env, const Func* callee, const FCallArgs& fca,
     callee,
     genericsBitmap,
     fca.hasGenerics(),
+    dynamicCall,
     asyncEagerReturn,
   };
   return gen(env, Call, data, sp(env), fp(env));
 }
 
 void callRegular(IRGS& env, const Func* callee, const FCallArgs& fca,
-                 bool unlikely) {
-  push(env, callImpl(env, callee, fca, false));
+                 bool dynamicCall, bool unlikely) {
+  push(env, callImpl(env, callee, fca, dynamicCall, false));
   if (unlikely) gen(env, Jmp, makeExit(env, nextBcOff(env)));
 }
 
 void callWithAsyncEagerReturn(IRGS& env, const Func* callee,
-                              const FCallArgs& fca, bool unlikely) {
-  auto const retVal = callImpl(env, callee, fca, true);
+                              const FCallArgs& fca, bool dynamicCall,
+                              bool unlikely) {
+  auto const retVal = callImpl(env, callee, fca, dynamicCall, true);
 
   ifThenElse(
     env,
@@ -282,31 +284,35 @@ void callWithAsyncEagerReturn(IRGS& env, const Func* callee,
   );
 }
 
-void callKnown(IRGS& env, const Func* callee, const FCallArgs& fca) {
+void callKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
+               bool dynamicCall) {
   assertx(callee);
   if (fca.hasUnpack()) {
-    return callUnpack(env, callee, fca, false /* unlikely */);
+    return callUnpack(env, callee, fca, dynamicCall, false /* unlikely */);
   }
 
   if (fca.asyncEagerOffset != kInvalidOffset &&
       callee->supportsAsyncEagerReturn()) {
-    return callWithAsyncEagerReturn(env, callee, fca, false /* unlikely */);
+    return callWithAsyncEagerReturn(env, callee, fca, dynamicCall,
+                                    false /* unlikely */);
   }
 
-  callRegular(env, callee, fca, false /* unlikely */);
+  callRegular(env, callee, fca, dynamicCall, false /* unlikely */);
 }
 
 void callUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca,
-                 bool unlikely) {
+                 bool dynamicCall, bool unlikely) {
   assertx(!callee->hasConstVal() || env.formingRegion);
-  if (fca.hasUnpack()) return callUnpack(env, nullptr, fca, unlikely);
+  if (fca.hasUnpack()) {
+    return callUnpack(env, nullptr, fca, dynamicCall, unlikely);
+  }
 
   if (fca.asyncEagerOffset != kInvalidOffset) {
     // Okay to request async eager return even if it is not supported.
-    return callWithAsyncEagerReturn(env, nullptr, fca, unlikely);
+    return callWithAsyncEagerReturn(env, nullptr, fca, dynamicCall, unlikely);
   }
 
-  callRegular(env, nullptr, fca, unlikely);
+  callRegular(env, nullptr, fca, dynamicCall, unlikely);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -397,14 +403,14 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
     if (inlined) return;
   }
 
-  fsetActRec(env, cns(env, callee), fca, objOrClass, dynamicCall);
+  fsetActRec(env, cns(env, callee), fca, objOrClass);
 
   // We just wrote to the stack, make sure Call opcode can set up its Catch.
   updateMarker(env);
   env.irb->exceptionStackBoundary();
 
   if (!env.formingRegion) {
-    callKnown(env, callee, fca);
+    callKnown(env, callee, fca, dynamicCall);
   } else {
     // Do not use the inferred Func* if we are forming a region. We may have
     // inferred the target of the call based on specialized type information
@@ -412,7 +418,7 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
     // FCall to specialize using this information, we may infer narrower type
     // for the return value, erroneously preventing the region from breaking
     // on unknown type.
-    callUnknown(env, cns(env, callee), fca, false);
+    callUnknown(env, cns(env, callee), fca, dynamicCall, false);
   }
 }
 
@@ -432,13 +438,13 @@ void prepareAndCallUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca,
   }
   emitCallerRxChecksUnknown(env, callee);
 
-  fsetActRec(env, callee, fca, objOrClass, dynamicCall);
+  fsetActRec(env, callee, fca, objOrClass);
 
   // We just wrote to the stack, make sure Call opcode can set up its Catch.
   updateMarker(env);
   env.irb->exceptionStackBoundary();
 
-  callUnknown(env, callee, fca, unlikely);
+  callUnknown(env, callee, fca, dynamicCall, unlikely);
 }
 
 void prepareAndCallProfiled(IRGS& env, SSATmp* callee, const FCallArgs& fca,

@@ -1702,7 +1702,7 @@ To string conversions:
 
 9. Call & Return
 
-| SpillFrame<offset,numArgs,dynamicCall>,
+| SpillFrame<offset,numArgs>,
 |   ND,
 |   S(StkPtr) S(Func) S(Ctx,Cls,Nullptr),
 |   NF

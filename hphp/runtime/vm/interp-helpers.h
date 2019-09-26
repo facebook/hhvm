@@ -104,11 +104,9 @@ inline void callerDynamicConstructChecks(const Class* cls) {
   }
 }
 
-inline void calleeDynamicCallChecks(const ActRec* ar,
+inline void calleeDynamicCallChecks(const Func* func, bool dynamicCall,
                                     bool allowDynCallNoPointer = false) {
-  if (!ar->isDynamicCall()) return;
-  auto const func = ar->func();
-
+  if (!dynamicCall) return;
   if (func->isDynamicallyCallable() && allowDynCallNoPointer) return;
 
   auto error_msg = func->isDynamicallyCallable() ?

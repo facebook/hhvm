@@ -233,7 +233,7 @@ void beginInlining(IRGS& env,
   // parameter, so we need to add numInputs to get to the ActRec
   IRSPRelOffset calleeAROff = spOffBCFromIRSP(env) + fca.numInputs();
 
-  auto const arInfo = ActRecInfo { calleeAROff, fca.numArgs, dynamicCall };
+  auto const arInfo = ActRecInfo { calleeAROff, fca.numArgs };
   gen(env, SpillFrame, arInfo, sp(env), cns(env, target), ctx);
 
   ctx = [&] () -> SSATmp* {
@@ -349,6 +349,7 @@ void beginInlining(IRGS& env,
   auto const callFlags = cns(env, CallFlags(
     generics != nullptr,
     fca.numRets != 1,
+    dynamicCall,
     0
   ).value());
   emitPrologueLocals(env, fca.numArgs, callFlags, ctx);
@@ -357,7 +358,7 @@ void beginInlining(IRGS& env,
   env.irb->exceptionStackBoundary();
 
   emitGenericsMismatchCheck(env, callFlags);
-  emitCalleeDynamicCallCheck(env);
+  emitCalleeDynamicCallCheck(env, callFlags);
 
   if (data.ctx && data.ctx->isA(TObj)) {
     assertx(startSk.hasThis());

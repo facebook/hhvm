@@ -882,9 +882,15 @@ let construct_type_declaration tcopt t ?(full_method = None) fields =
   | Some cls -> construct_class tcopt cls ~full_method fields
   | None -> construct_typedef tcopt t
 
-let do_add_dep deps dep = if not (is_builtin_dep dep) then HashSet.add deps dep
+let rec do_add_dep deps dep =
+  if (not (HashSet.mem deps dep)) && not (is_builtin_dep dep) then (
+    HashSet.add deps dep;
+    add_signature_dependencies deps dep;
+    if is_class_dependency dep then
+      do_add_dep deps (Typing_deps.Dep.Class (get_class_name dep))
+  )
 
-let rec add_dep deps ?cls:(this_cls = None) ?(init_const = false) ty : unit =
+and add_dep deps ?cls:(this_cls = None) ?(init_const = false) ty : unit =
   let visitor =
     object (this)
       inherit [unit] Type_visitor.decl_type_visitor
@@ -946,7 +952,7 @@ let rec add_dep deps ?cls:(this_cls = None) ?(init_const = false) ty : unit =
   in
   visitor#on_type () ty
 
-let add_signature_dependencies deps obj =
+and add_signature_dependencies deps obj =
   Typing_deps.Dep.(
     Decl_provider.(
       let description = to_string obj in
@@ -1062,18 +1068,14 @@ let collect_dependencies tcopt to_extract =
     match to_extract with
     (* We depend on the class which the method belongs to *)
     | Member (cls, Method _) ->
-      HashSet.add dependencies (Typing_deps.Dep.Class cls)
+      do_add_dep dependencies (Typing_deps.Dep.Class cls)
     | Function _ -> ()
     | _ -> raise Unsupported
   in
   Typing_deps.Dep.(
     let add_dependency root obj =
-      if is_relevant_dependency to_extract root then (
-        (* We don't necessarily add this to dependencies as it might be a builtin,
-         but it might contain nested dependencies -- e.g. Vector<UserType> *)
-        add_signature_dependencies dependencies obj;
+      if is_relevant_dependency to_extract root then
         do_add_dep dependencies obj
-      )
     in
     Typing_deps.add_dependency_callback "add_dependency" add_dependency;
     let filename = get_filename to_extract in

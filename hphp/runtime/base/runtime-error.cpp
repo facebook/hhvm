@@ -244,6 +244,7 @@ void raise_dynamically_sampled_notice(folly::StringPiece fmt, Args&& ... args) {
 
 void raise_array_serialization_notice(const char* src, const ArrayData* arr) {
   assertx(RuntimeOption::EvalLogArrayProvenance);
+  if (arr->isLegacyArray()) return;
   if (UNLIKELY(g_context->getThrowAllErrors())) {
     throw Exception("Would have logged provenance");
   }

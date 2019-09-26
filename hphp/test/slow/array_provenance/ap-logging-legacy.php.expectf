@@ -1,0 +1,15 @@
+string(9) "["hello"]"
+string(18) "v:1:{s:5:"hello";}"
+string(25) "Vec
+(
+    [0] => hello
+)
+"
+string(18) "vec [
+  'hello',
+]"
+string(11) "hello"
+string(3) "vec"
+bool(false)
+string(22) "a:1:{i:0;s:5:"hello";}"
+string(9) "["hello"]"

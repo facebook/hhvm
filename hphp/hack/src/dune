@@ -142,7 +142,8 @@
   (ocamlc_flags (:standard -custom))
   (link_flags (:standard (:include dune_config/ld-opts.sexp)))
   (libraries
-    procs_procs_lwt
     core_kernel
+    default_injector_config
+    parser
     str
     collections))

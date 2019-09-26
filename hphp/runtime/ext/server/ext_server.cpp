@@ -117,15 +117,13 @@ int64_t HHVM_FUNCTION(pagelet_server_task_status,
 
 String HHVM_FUNCTION(pagelet_server_task_result,
                      const Resource& task,
-                     VRefParam headers,
-                     VRefParam code,
+                     Array& headers,
+                     int64_t& code,
                      int64_t timeout_ms /* = 0 */) {
-  Array rheaders;
   int rcode;
-  String response = PageletServer::TaskResult(task, rheaders, rcode,
+  String response = PageletServer::TaskResult(task, headers, rcode,
                                               timeout_ms);
-  headers.assignIfRef(rheaders);
-  code.assignIfRef(rcode);
+  code = rcode;
   return response;
 }
 
@@ -163,12 +161,10 @@ bool HHVM_FUNCTION(pagelet_server_is_done) {
 
 bool HHVM_FUNCTION(xbox_send_message,
                    const String& msg,
-                   VRefParam retRef,
+                   Array& ret,
                    int64_t timeout_ms,
                    const String& host /* = "localhost" */) {
-  Array ret;
   auto b = XboxServer::SendMessage(msg, ret, timeout_ms, host);
-  retRef.assignIfRef(ret);
   return b;
 }
 
@@ -191,8 +187,9 @@ bool HHVM_FUNCTION(xbox_task_status,
 int64_t HHVM_FUNCTION(xbox_task_result,
                       const Resource& task,
                       int64_t timeout_ms,
-                      VRefParam ret) {
-  return XboxServer::TaskResult(task, timeout_ms, ret.getVariantOrNull());
+                      Variant& ret) {
+  auto result = XboxServer::TaskResult(task, timeout_ms, &ret);
+  return result;
 }
 
 Variant HHVM_FUNCTION(xbox_process_call_message,

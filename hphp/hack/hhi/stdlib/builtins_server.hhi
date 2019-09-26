@@ -21,11 +21,11 @@ function pagelet_server_task_start(string $url, darray $headers = darray[], stri
 <<__PHPStdLib>>
 function pagelet_server_task_status(resource $task);
 <<__PHPStdLib>>
-function pagelet_server_task_result(resource $task, &$headers, &$code, int $timeout_ms = 0): string;
+function pagelet_server_task_result(resource $task, inout $headers, inout $code, int $timeout_ms = 0): string;
 <<__PHPStdLib>>
 function pagelet_server_flush();
 <<__PHPStdLib>>
-function xbox_send_message(string $msg, &$ret, int $timeout_ms, string $host = "localhost");
+function xbox_send_message(string $msg, inout $ret, int $timeout_ms, string $host = "localhost");
 <<__PHPStdLib>>
 function xbox_post_message(string $msg, string $host = "localhost");
 <<__PHPStdLib>>
@@ -33,7 +33,7 @@ function xbox_task_start(string $message);
 <<__PHPStdLib>>
 function xbox_task_status(resource $task);
 <<__PHPStdLib>>
-function xbox_task_result(resource $task, int $timeout_ms, &$ret);
+function xbox_task_result(resource $task, int $timeout_ms, inout $ret);
 <<__PHPStdLib>>
 function xbox_process_call_message(string $msg);
 <<__PHPStdLib>>

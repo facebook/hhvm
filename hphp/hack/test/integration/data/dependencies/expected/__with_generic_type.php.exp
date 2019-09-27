@@ -5,7 +5,7 @@ function with_generic_type<T>(GenericType<T> $arg): void {
 class GenericBase<Tfirst, Tsecond> {
 
 }
-function extract_standalone_make_default<T>(): T {
+function extract_standalone_make_default(): nothing {
   throw new Exception();
 }
 

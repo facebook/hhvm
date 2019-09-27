@@ -21,7 +21,7 @@ class Derived extends \ImplementingBase {
 
   public function __construct(int $num) {}
 }
-function extract_standalone_make_default<T>(): T {
+function extract_standalone_make_default(): nothing {
   throw new Exception();
 }
 

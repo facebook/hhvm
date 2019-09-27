@@ -28,7 +28,7 @@ class Implementing extends \AbstractBase implements \DerivedInterface {
 
 }
 function with_requiring_trait(DerivedImplementing $arg): void {}
-function extract_standalone_make_default<T>(): T {
+function extract_standalone_make_default(): nothing {
   throw new Exception();
 }
 

@@ -29,7 +29,7 @@ function with_generics<Tfirst, Tsecond>(
 ): int {
   return generic<C>();
 }
-function extract_standalone_make_default<T>(): T {
+function extract_standalone_make_default(): nothing {
   throw new Exception();
 }
 

@@ -10,7 +10,7 @@ abstract class WithAbstractConst {
     this::ABS_WO_CONSTRAINT $arg,
   ): this::ABS_WITH_CONSTRAINT;
 }
-function extract_standalone_make_default<T>(): T {
+function extract_standalone_make_default(): nothing {
   throw new Exception();
 }
 

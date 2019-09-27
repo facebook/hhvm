@@ -4,12 +4,12 @@ function call_defaulted(int $arg): void {
   with_defaults();
 }
 function with_defaults(
-  int $arg = extract_standalone_make_default<int>(),
-  float $argf = extract_standalone_make_default<float>(),
+  int $arg = extract_standalone_make_default(),
+  float $argf = extract_standalone_make_default(),
 ): void {
   throw new \Exception();
 }
-function extract_standalone_make_default<T>(): T {
+function extract_standalone_make_default(): nothing {
   throw new Exception();
 }
 

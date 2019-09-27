@@ -234,11 +234,7 @@ let tparam_name (tp : Typing_defs.decl_tparam) = snd tp.tp_name
 
 let function_make_default = "extract_standalone_make_default"
 
-let call_make_default tcopt typ =
-  Printf.sprintf
-    "%s<%s>()"
-    function_make_default
-    (Typing_print.full_decl tcopt typ)
+let call_make_default = Printf.sprintf "%s()" function_make_default
 
 let print_fun_args tcopt fun_type =
   let with_default arg_idx =
@@ -263,7 +259,7 @@ let print_fun_args tcopt fun_type =
     let typ = Typing_print.full_decl tcopt arg.fp_type.et_type in
     let default =
       if with_default idx then
-        Printf.sprintf " = %s" (call_make_default tcopt arg.fp_type.et_type)
+        Printf.sprintf " = %s" call_make_default
       else
         ""
     in
@@ -808,11 +804,8 @@ let construct_class tcopt cls ?full_method:(meth = None) fields =
           | Dep.Cstr _ ->
             let (cstr, _) = Class.construct cls in
             let properties =
-              List.map properties (fun (p, name) ->
-                  Printf.sprintf
-                    "$this->%s = %s;"
-                    name
-                    (call_make_default tcopt @@ Lazy.force p.ce_type))
+              List.map properties (fun (_, name) ->
+                  Printf.sprintf "$this->%s = %s;" name call_make_default)
             in
             (match cstr with
             | None ->
@@ -1231,7 +1224,7 @@ let get_code (decl_names : string HashSet.t) declarations =
   (* Toplevel code has to be in a separate file *)
   let helper =
     Printf.sprintf
-      "function %s<T>(): T {throw new Exception();}"
+      "function %s(): nothing {throw new Exception();}"
       function_make_default
   in
   let toplevel =

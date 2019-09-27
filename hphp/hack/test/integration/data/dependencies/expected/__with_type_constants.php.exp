@@ -17,7 +17,7 @@ abstract class WithAbstractConst {
 
   const type NESTED = \WithConst;
 }
-function extract_standalone_make_default<T>(): T {
+function extract_standalone_make_default(): nothing {
   throw new Exception();
 }
 

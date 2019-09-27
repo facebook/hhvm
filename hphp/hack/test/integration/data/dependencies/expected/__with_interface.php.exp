@@ -9,7 +9,7 @@ interface DerivedInterface extends \BaseInterface {
 interface BaseInterface {
 
 }
-function extract_standalone_make_default<T>(): T {
+function extract_standalone_make_default(): nothing {
   throw new Exception();
 }
 

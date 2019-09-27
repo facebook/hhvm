@@ -19,7 +19,7 @@ class B implements \I1 {
 interface I1 {
 
 }
-function extract_standalone_make_default<T>(): T {
+function extract_standalone_make_default(): nothing {
   throw new Exception();
 }
 

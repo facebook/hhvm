@@ -18,6 +18,6 @@ class Derived extends \ImplementingBase {
     throw new Exception();
   }
 }
-function extract_standalone_make_default<T>(): T {
+function extract_standalone_make_default(): nothing {
   throw new Exception();
 }

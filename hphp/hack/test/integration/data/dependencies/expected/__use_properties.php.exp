@@ -3,8 +3,8 @@ class WithProperties {
 
   public static int $third = 0;
   public function __construct(int $arg) {
-    $this->first = extract_standalone_make_default<int>();
-    $this->second = extract_standalone_make_default<int>();
+    $this->first = extract_standalone_make_default();
+    $this->second = extract_standalone_make_default();
   }
   public int $second;
   public int $first;
@@ -12,7 +12,7 @@ class WithProperties {
 function use_properties(WithProperties $arg): int {
   return $arg->first + $arg->second + WithProperties::$third;
 }
-function extract_standalone_make_default<T>(): T {
+function extract_standalone_make_default(): nothing {
   throw new Exception();
 }
 

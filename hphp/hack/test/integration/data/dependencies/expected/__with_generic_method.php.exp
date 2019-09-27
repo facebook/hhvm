@@ -10,7 +10,7 @@ function with_generic_method(int $arg): void {
   $r = new Regular();
   $r->generic_method($arg);
 }
-function extract_standalone_make_default<T>(): T {
+function extract_standalone_make_default(): nothing {
   throw new Exception();
 }
 

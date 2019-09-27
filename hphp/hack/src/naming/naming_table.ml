@@ -186,7 +186,7 @@ type type_of_type =
 module Sqlite : sig
   val get_db_path : unit -> string option
 
-  val set_db_path : string -> unit
+  val set_db_path : string option -> unit
 
   val is_connected : unit -> bool
 
@@ -675,7 +675,7 @@ end = struct
   module Database_handle : sig
     val get_db_path : unit -> string option
 
-    val set_db_path : string -> unit
+    val set_db_path : string option -> unit
 
     val is_connected : unit -> bool
 
@@ -706,7 +706,10 @@ end = struct
 
     let set_db_path path =
       Shared_db_settings.remove_batch (SSet.singleton "database_path");
-      Shared_db_settings.add "database_path" path;
+
+      (match path with
+      | Some path -> Shared_db_settings.add "database_path" path
+      | None -> ());
 
       (* Force this immediately so that we can get validation errors in master. *)
       db := Lazy.from_val (open_db ())
@@ -806,14 +809,14 @@ end = struct
       Sqlite3.exec db "END TRANSACTION;" |> check_rc db;
       if not @@ Sqlite3.db_close db then
         failwith @@ Printf.sprintf "Could not close database at %s" db_name;
-      Database_handle.set_db_path db_name;
+      Database_handle.set_db_path (Some db_name);
       save_result
     with e ->
       Sqlite3.exec db "END TRANSACTION;" |> check_rc db;
       raise e
 
   let update_file_infos db_name local_changes =
-    Database_handle.set_db_path db_name;
+    Database_handle.set_db_path (Some db_name);
     let db =
       match Database_handle.get_db () with
       | Some db -> db
@@ -1021,7 +1024,7 @@ let save naming_table db_name =
       ~force:(FileUtil.Ask (fun _ -> false))
       [Core_kernel.Option.value_exn (Sqlite.get_db_path ())]
       db_name;
-    Sqlite.set_db_path db_name;
+    Sqlite.set_db_path (Some db_name);
     Sqlite.update_file_infos db_name local_changes;
     let (_ : float) =
       Hh_logger.log_duration
@@ -1030,9 +1033,7 @@ let save naming_table db_name =
            (Relative_path.Map.cardinal local_changes))
         t
     in
-    (match old_path with
-    | Some old_path -> Sqlite.set_db_path old_path
-    | None -> ());
+    Sqlite.set_db_path old_path;
     { empty_save_result with files_added = 1 }
 
 (*****************************************************************************)
@@ -1452,7 +1453,7 @@ let create a = Unbacked a
 let load_from_sqlite ~update_reverse_entries db_path =
   Hh_logger.log "Loading naming table from SQLite...";
   let t = Unix.gettimeofday () in
-  Sqlite.set_db_path db_path;
+  Sqlite.set_db_path (Some db_path);
   let local_changes = Sqlite.get_local_changes () in
   let t = Hh_logger.log_duration "Loaded local naming table changes" t in
   if update_reverse_entries then (

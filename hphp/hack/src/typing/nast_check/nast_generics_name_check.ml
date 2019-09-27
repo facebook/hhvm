@@ -20,7 +20,24 @@ let check_constraint { Aast.tp_name = tp; _ } =
   error_if_does_not_start_with_T tp;
   ()
 
-let check_constraints tparams = List.iter tparams ~f:check_constraint
+let error_if_contains_duplicates tparams =
+  let _ =
+    List.fold_left
+      tparams
+      ~init:SMap.empty
+      ~f:(fun seen_tparams { Aast.tp_name = (pos, name); _ } ->
+        match SMap.get name seen_tparams with
+        | None -> SMap.add name pos seen_tparams
+        | Some seen_pos ->
+          Errors.shadowed_type_param pos seen_pos name;
+          seen_tparams)
+  in
+  ()
+
+let check_constraints tparams =
+  error_if_contains_duplicates tparams;
+  List.iter tparams ~f:check_constraint;
+  ()
 
 let handler =
   object

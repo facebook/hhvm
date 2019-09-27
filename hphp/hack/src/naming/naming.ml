@@ -1546,21 +1546,7 @@ module Make (GetLocals : GetLocals) = struct
     }
 
   and type_paraml ?(forbid_this = false) env tparams =
-    let (_, ret) =
-      List.fold_left
-        tparams
-        ~init:(SMap.empty, [])
-        ~f:(fun (seen, tparaml) tparam ->
-          let (p, name) = tparam.Aast.tp_name in
-          match SMap.get name seen with
-          | None ->
-            ( SMap.add name p seen,
-              type_param ~forbid_this env tparam :: tparaml )
-          | Some pos ->
-            Errors.shadowed_type_param p pos name;
-            (seen, tparaml))
-    in
-    List.rev ret
+    List.map tparams ~f:(type_param ~forbid_this env)
 
   and type_param ~forbid_this ((genv, _) as env) t =
     begin

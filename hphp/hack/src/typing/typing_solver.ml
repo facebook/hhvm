@@ -858,7 +858,7 @@ let rec push_option_out pos env ty =
       Typing_set.elements (Typing_env.get_tyvar_lower_bounds env var)
     in
     if List.exists lower_bounds (has_null env) then
-      let (env, ty) =
+      let (env, ty') =
         expand_type_and_solve
           env
           ~description_of_expected:"a value of known type"
@@ -866,7 +866,11 @@ let rec push_option_out pos env ty =
           ty
           Errors.unify_error
       in
-      push_option_out pos env ty
+      (* To avoid infinite loops *)
+      if ty <> ty' then
+        push_option_out pos env ty'
+      else
+        (env, ty)
     else
       (env, ty)
   | ( _,

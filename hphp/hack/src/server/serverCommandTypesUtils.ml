@@ -66,6 +66,7 @@ let debug_describe_t : type a. a t -> string = function
   | GO_TO_DEFINITION _ -> "GO_TO_DEFINITION"
   | BIGCODE _ -> "BIGCODE"
   | PAUSE _ -> "PAUSE"
+  | GLOBAL_INFERENCE _ -> "GLOBAL_INFERENCE"
 
 let debug_describe_cmd : type a. a command -> string = function
   | Rpc rpc -> debug_describe_t rpc

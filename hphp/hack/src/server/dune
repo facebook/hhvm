@@ -102,6 +102,7 @@
     serverCommandTypesUtils
     serverCoverageMetricTypes
     serverFormatTypes
+    serverGlobalInferenceTypes
     serverHighlightRefsTypes
     serverLintTypes
     serverNotifierTypes
@@ -161,7 +162,8 @@
     serverRxApiShared
     serverSymbolDefinition
     symbolFunCallService
-    symbolTypeService)
+    symbolTypeService
+    serverGlobalInference)
   (libraries
     ast
     decl

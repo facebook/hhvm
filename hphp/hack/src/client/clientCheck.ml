@@ -725,6 +725,13 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
         print_endline
           "Resumed the automatic triggering of full checks upon file changes.";
       Lwt.return Exit_status.No_error
+    | MODE_GLOBAL_INFERENCE (submode, files) ->
+      let%lwt conn = connect args in
+      let%lwt results =
+        ClientConnect.rpc conn @@ Rpc.GLOBAL_INFERENCE (submode, files)
+      in
+      ignore results;
+      Lwt.return Exit_status.No_error
   in
   HackEventLogger.client_check_finish exit_status;
   Lwt.return exit_status

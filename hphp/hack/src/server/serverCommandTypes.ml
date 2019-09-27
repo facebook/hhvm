@@ -327,6 +327,9 @@ type _ t =
   | GO_TO_DEFINITION : labelled_file * int * int -> Go_to_definition.result t
   | BIGCODE : string -> string t
   | PAUSE : bool -> unit t
+  | GLOBAL_INFERENCE :
+      ServerGlobalInferenceTypes.mode * string list
+      -> ServerGlobalInferenceTypes.result t
 
 let is_disconnect_rpc : type a. a t -> bool = function
   | DISCONNECT -> true

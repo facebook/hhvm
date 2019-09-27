@@ -95,6 +95,7 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | PAUSE true -> false
   (* when you unpause, then it will catch up *)
   | PAUSE false -> true
+  | GLOBAL_INFERENCE _ -> true
 
 let command_needs_full_check = function
   | Rpc x -> rpc_command_needs_full_check x
@@ -171,6 +172,7 @@ let get_description : type a. a command -> string = function
   | Rpc (GO_TO_DEFINITION _) -> "GO_TO_DEFINITION"
   | Rpc (BIGCODE _) -> "BIGCODE"
   | Rpc (PAUSE _) -> "PAUSE"
+  | Rpc (GLOBAL_INFERENCE _) -> "GLOBAL_INFERENCE"
 
 let rpc_command_needs_writes : type a. a t -> bool = function
   | OPEN_FILE _ -> true

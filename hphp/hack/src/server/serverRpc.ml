@@ -367,3 +367,5 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         (env, ServerGoToDefinition.go_ctx ~ctx ~entry ~line ~column))
   | BIGCODE filename -> (env, ServerBigCode.go env filename)
   | PAUSE pause -> ({ env with paused = pause }, ())
+  | GLOBAL_INFERENCE (submode, files) ->
+    (env, ServerGlobalInference.execute submode files)

@@ -321,7 +321,7 @@ function array_pad(
  *
  */
 <<__Native>>
-function array_pop(mixed &$array): mixed;
+function array_pop(inout mixed $array): mixed;
 
 /**
  * array_product() returns the product of values in an array.
@@ -354,7 +354,7 @@ function array_product(
  *
  */
 <<__Native>>
-function array_push(mixed &$array, mixed $var, ...$args): mixed;
+function array_push(inout mixed $array, mixed $var, ...$args): mixed;
 
 /**
  * Picks one ore more random entries out of an array, and returns the key (or
@@ -451,7 +451,7 @@ function array_search(
  *
  */
 <<__Native>>
-function array_shift(mixed &$array): mixed;
+function array_shift(inout mixed $array): mixed;
 
 /**
  * array_slice() returns the sequence of elements from the array array as
@@ -514,7 +514,7 @@ function array_slice(
  */
 <<__Native, __Rx, __AtMostRxAsArgs>>
 function array_splice(
-  <<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> mixed &$input,
+  <<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> inout mixed $input,
   int $offset,
   mixed $length = null,
   <<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> mixed $replacement = null,
@@ -575,7 +575,7 @@ function array_unique(
  *
  */
 <<__Native>>
-function array_unshift(mixed &$array, mixed $var, ...$argv): mixed;
+function array_unshift(inout mixed $array, mixed $var, ...$argv): mixed;
 
 /**
  * array_values() returns all the values from the input array and indexes
@@ -601,7 +601,7 @@ function array_values(
  *
  */
 <<__Native>>
-function shuffle(mixed &$array): bool;
+function shuffle(inout mixed $array): bool;
 
 /**
  * Counts all elements in an array, or properties in an object. For objects,

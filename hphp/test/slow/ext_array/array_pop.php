@@ -2,14 +2,14 @@
 
 function a() {
   $input = array("orange", "banana", "apple", "raspberryu");
-  $fruit = array_pop(&$input);
+  $fruit = array_pop(inout $input);
   var_dump($input);
 }
 
 function b() {
   $input = array("orange");
-  $fruit = array_pop(&$input);
-  array_push(&$input, "banana");
+  $fruit = array_pop(inout $input);
+  array_push(inout $input, "banana");
   var_dump($input);
   var_dump($fruit);
 }

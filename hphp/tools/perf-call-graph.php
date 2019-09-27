@@ -146,7 +146,7 @@ function main($argv) {
     usage($argv[0]);
     return 1;
   }
-  array_shift(&$argv);
+  array_shift(inout $argv);
 
   $reverse = false;
   $root_last = false;

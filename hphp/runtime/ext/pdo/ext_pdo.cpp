@@ -1390,12 +1390,13 @@ static Variant HHVM_METHOD(PDO, query, const String& sql,
     // when we add support for varargs here, we only need to set the stmt if
     // the argument count is > 1
     int argc = _argv.size() + 1;
+    Variant argv_variant = _argv;
     if (argc == 1 ||
         pdo_stmt_set_fetch_mode(
           stmt,
           0,
           tvCastToInt64(_argv.rvalAt(0).tv()),
-          Variant::attach(HHVM_FN(array_splice)(_argv, 1)).toArray()
+          Variant::attach(HHVM_FN(array_splice)(argv_variant, 1)).toArray()
         )) {
       /* now execute the statement */
       setPDOErrorNone(stmt->error_code);

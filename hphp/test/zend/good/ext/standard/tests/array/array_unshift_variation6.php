@@ -34,7 +34,7 @@ $two_dimensional_array = array(
 // returns element count in the resulting array after arguments are pushed to
 // beginning of the given array
 $temp_array = $two_dimensional_array;
-var_dump( array_unshift(&$temp_array, $var) );  // whole 2-d array
+var_dump( array_unshift(inout $temp_array, $var) );  // whole 2-d array
 
 // dumps the resulting array
 var_dump($temp_array);
@@ -43,7 +43,7 @@ var_dump($temp_array);
 // returns element count in the resulting array after arguments are pushed to
 // beginning of the given array
 $temp_array = $two_dimensional_array;
-var_dump( array_unshift(&$temp_array, $var, "hello", 'world') );  // whole 2-d array
+var_dump( array_unshift(inout $temp_array, $var, "hello", 'world') );  // whole 2-d array
 
 // dumps the resulting array
 var_dump($temp_array);
@@ -54,7 +54,7 @@ var_dump($temp_array);
 // returns element count in the resulting array after arguments are pushed to
 // beginning of the given array
 $temp_array = $two_dimensional_array[0];
-var_dump( array_unshift(&$temp_array, $var) );  // sub array
+var_dump( array_unshift(inout $temp_array, $var) );  // sub array
 
 // dumps the resulting array
 var_dump($temp_array);
@@ -63,7 +63,7 @@ var_dump($temp_array);
 // returns element count in the resulting array after arguments are pushed to
 // beginning of the given array
 $temp_array = $two_dimensional_array[0];
-var_dump( array_unshift(&$temp_array, $var, "hello", 'world') );  // sub array
+var_dump( array_unshift(inout $temp_array, $var, "hello", 'world') );  // sub array
 
 // dumps the resulting array
 var_dump($temp_array);

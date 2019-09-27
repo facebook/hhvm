@@ -5,7 +5,7 @@ function h6() {
   end(inout $x);
   next(inout $x);
   $y = $x;
-  array_pop(&$y);
+  array_pop(inout $y);
   var_dump(current($x));
   var_dump(current($y));
 }

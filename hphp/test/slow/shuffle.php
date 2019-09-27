@@ -2,7 +2,7 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function test($a) {
-  var_dump(shuffle(&$a));
+  var_dump(shuffle(inout $a));
   var_dump($a);
 }
 

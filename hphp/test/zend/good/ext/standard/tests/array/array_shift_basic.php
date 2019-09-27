@@ -16,7 +16,7 @@ var_dump($array);
 
 echo "\n-- After shift: --\n";
 echo "Returned value:\t";
-var_dump(array_shift(&$array));
+var_dump(array_shift(inout $array));
 echo "New array:\n";
 var_dump($array);
 

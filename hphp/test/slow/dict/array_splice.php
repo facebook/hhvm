@@ -1,7 +1,7 @@
 <?hh
 
 function test_splice($input) {
-  var_dump(array_splice(&$input, 1));
+  var_dump(array_splice(inout $input, 1));
   var_dump($input);
 }
 <<__EntryPoint>> function main(): void {

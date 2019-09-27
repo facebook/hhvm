@@ -33,16 +33,16 @@ echo "\n*** Testing Error Conditions ***\n";
 try { var_dump( array_shift() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 /* Scalar argument */
-var_dump( array_shift(&$number) );
+var_dump( array_shift(inout $number) );
 
 /* String argument */
-var_dump( array_shift(&$str) );
+var_dump( array_shift(inout $str) );
 
 /* Invalid Number of arguments */
-try { var_dump( array_shift(&$mixed_array1,$mixed_array[2]) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( array_shift(inout $mixed_array1,$mixed_array[2]) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 /* Empty Array as argument */
-var_dump( array_shift(&$empty_array) );
+var_dump( array_shift(inout $empty_array) );
 
 /* Loop to test normal functionality with different arrays inputs */
 echo "\n*** Testing with various array inputs ***\n";
@@ -52,7 +52,7 @@ foreach( $mixed_array as $sub_array ) {
   echo "\n-- Input Array for Iteration $counter is --\n";
   print_r( $sub_array );
   echo "\nOutput after shift is :\n";
-  var_dump( array_shift(&$sub_array) );
+  var_dump( array_shift(inout $sub_array) );
   $counter++;
 }
 
@@ -70,7 +70,7 @@ echo "\nNext Element is : ";
 var_dump( next(inout $mixed_array1) );
 
 echo "\nshifted Element is : ";
-var_dump( array_shift(&$mixed_array1) );
+var_dump( array_shift(inout $mixed_array1) );
 
 echo "\nCurrent Element after shift operation is: ";
 var_dump( current($mixed_array1) );

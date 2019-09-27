@@ -24,7 +24,7 @@ $array_arg = array(
 );
 
 // calling shuffle() function with multi-dimensional array
-var_dump( shuffle(&$array_arg) );
+var_dump( shuffle(inout $array_arg) );
 echo "\nThe output array is:\n";
 var_dump( $array_arg );
 

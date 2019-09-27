@@ -9,14 +9,14 @@ function push_stack(){
 
   $val = PushStackStatics::$index++;
   $stack = PushStackStatics::$stack;
-  array_push(&$stack, $val);
+  array_push(inout $stack, $val);
   PushStackStatics::$stack = $stack;
 }
 function pop_stack(){
 
   if (PushStackStatics::$stack) {
     $stack = PushStackStatics::$stack;
-    array_pop(&$stack);
+    array_pop(inout $stack);
     PushStackStatics::$stack = $stack;
   }
 }

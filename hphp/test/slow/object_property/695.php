@@ -10,5 +10,5 @@ function foo() {
 function main_695() {
 foo()->v[0] += 5;
 $v = foo()->v;
-var_dump(shuffle(&$v));
+var_dump(shuffle(inout $v));
 }

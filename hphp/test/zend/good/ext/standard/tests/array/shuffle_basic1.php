@@ -27,7 +27,7 @@ var_dump( $array_arg_int );
 
 // applying shuffle() function on the input array of integers
 echo "\n-- return value from shuffle() function --\n";
-var_dump( shuffle(&$array_arg_int) );  // prints the return value from shuffle() function
+var_dump( shuffle(inout $array_arg_int) );  // prints the return value from shuffle() function
 
 echo "\n-- resultant array after shuffle() function is applied --\n";
 var_dump( $array_arg_int );
@@ -40,7 +40,7 @@ var_dump( $array_arg_strings );
 
 // applying shuffle() function on the input array of strings
 echo "\n-- return value from shuffle() function --\n";
-var_dump( shuffle(&$array_arg_strings) );  // prints the return value from shuffle() function
+var_dump( shuffle(inout $array_arg_strings) );  // prints the return value from shuffle() function
 
 echo "\n-- resultant array after shuffle() function is applied --\n";
 var_dump( $array_arg_strings );

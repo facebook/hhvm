@@ -31,7 +31,7 @@ foreach( $mixed_array as $sub_array )
  echo "\n-- Input Array for Iteration $counter is --\n";
  print_r( $sub_array );
  echo "\nOutput after Pop is :\n";
- var_dump( array_pop(&$sub_array) );
+ var_dump( array_pop(inout $sub_array) );
  $counter++;
 }
 

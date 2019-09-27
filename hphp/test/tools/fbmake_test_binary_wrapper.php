@@ -24,7 +24,7 @@ function finish($status) {
             'test' => ToolsFbmakeTestBinaryWrapperPhp::$current,
             'details' => '',
             'status' => $status));
-  array_push(&ToolsFbmakeTestBinaryWrapperPhp::$results, array('name'   => ToolsFbmakeTestBinaryWrapperPhp::$current,
+  array_push(inout ToolsFbmakeTestBinaryWrapperPhp::$results, array('name'   => ToolsFbmakeTestBinaryWrapperPhp::$current,
                              'status' => $status));
   ToolsFbmakeTestBinaryWrapperPhp::$current = '';
 }

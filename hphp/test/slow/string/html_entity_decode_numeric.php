@@ -8,8 +8,8 @@ $characters = array(' ', '#', 'a', '$', '_');
 
 // Numbers (hex and dec) we know to be valid HTML entities.
 foreach (range(165, 170) as $n) {
-  array_push(&$characters, $n);
-  array_push(&$characters, 'x' . dechex($n));
+  array_push(inout $characters, $n);
+  array_push(inout $characters, 'x' . dechex($n));
 }
 
 foreach ($characters as $c) {

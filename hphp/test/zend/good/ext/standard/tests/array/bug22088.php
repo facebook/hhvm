@@ -1,12 +1,12 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 $a = array('a', 'b', 'c');
-$last = array_shift (&$a);
+$last = array_shift(inout $a);
 $a[] = 'a';
 var_dump($a);
 
 $a = array('a' => 1, 'b' => 2, 'c' => 3);
-$last = array_shift (&$a);
+$last = array_shift(inout $a);
 $a[] = 'a';
 var_dump($a);
 }

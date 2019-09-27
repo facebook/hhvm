@@ -5,7 +5,7 @@ class A {
     foreach ($args as $a) {
  var_dump($a);
  }
-    var_dump(array_pop(&$args));
+    var_dump(array_pop(inout $args));
     if (isset($args[1])) {
  var_dump($args[1]);
  }

@@ -30,16 +30,16 @@ echo "\n*** Testing Error Conditions ***\n";
 try { var_dump( array_pop() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 /* Scalar argument */
-var_dump( array_pop(&$number) );
+var_dump( array_pop(inout $number) );
 
 /* String argument */
-var_dump( array_pop(&$str) );
+var_dump( array_pop(inout $str) );
 
 /* Invalid Number of arguments */
-try { var_dump( array_pop(&$mixed_array1,$mixed_array[2]) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( array_pop(inout $mixed_array1,$mixed_array[2]) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 /* Empty Array as argument */
-var_dump( array_pop(&$empty_array) );
+var_dump( array_pop(inout $empty_array) );
 
 echo"\nDone";
 }

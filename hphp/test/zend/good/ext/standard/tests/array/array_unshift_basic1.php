@@ -17,7 +17,7 @@ $array = array(1, 2);
 $temp_array = $array;
 // returns element count in the resulting array after arguments are pushed to
 // beginning of the given array
-var_dump( array_unshift(&$temp_array, 10) );
+var_dump( array_unshift(inout $temp_array, 10) );
 
 // dump the resulting array
 var_dump($temp_array);
@@ -26,7 +26,7 @@ var_dump($temp_array);
 $temp_array = $array;
 // returns element count in the resulting array after arguments are pushed to
 // beginning of the given array
-var_dump( array_unshift(&$temp_array, 222, "hello", 12.33) );
+var_dump( array_unshift(inout $temp_array, 222, "hello", 12.33) );
 
 // dump the resulting array
 var_dump($temp_array);

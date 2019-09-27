@@ -4,7 +4,7 @@ function h3() {
   $x = array(1,2,3,4);
   next(inout $x);
   $y = $x;
-  array_pop(&$y);
+  array_pop(inout $y);
   var_dump(current($x));
   var_dump(current($y));
 }

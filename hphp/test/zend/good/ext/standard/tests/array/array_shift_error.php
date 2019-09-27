@@ -18,7 +18,7 @@ try { var_dump( array_shift() ); } catch (Exception $e) { echo "\n".'Warning: '.
 echo "\n-- Testing array_shift() function with more than expected no. of arguments --\n";
 $stack = array(1, 2);
 $extra_arg = 10;
-try { var_dump( array_shift(&$stack, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( array_shift(inout $stack, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
 }

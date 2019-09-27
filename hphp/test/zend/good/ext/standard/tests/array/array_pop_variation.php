@@ -31,7 +31,7 @@ echo "\nNext Element is : ";
 var_dump( next(inout $mixed_array1) );
 
 echo "\nPOPed Element is : ";
-var_dump( array_pop(&$mixed_array1) );
+var_dump( array_pop(inout $mixed_array1) );
 
 echo "\nCurrent Element after POP operation is: ";
 var_dump( current($mixed_array1) );

@@ -9,7 +9,7 @@ function replace_variables($text, $params) {
 
   $c = function($matches) use ($params, $text) {
     $__val = $params->val;
-    $text->val = preg_replace( '/(\?)/', array_shift(&$__val), $text->val, 1);
+    $text->val = preg_replace( '/(\?)/', array_shift(inout $__val), $text->val, 1);
     $params->val = $__val;
   };
 

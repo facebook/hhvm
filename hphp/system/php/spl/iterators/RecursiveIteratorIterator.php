@@ -160,7 +160,7 @@ class RecursiveIteratorIterator implements OuterIterator {
           if ($this->getDepth() > 0) {
             $this->endChildren();
             $__iterators = $this->iterators;
-            array_pop(&$__iterators);
+            array_pop(inout $__iterators);
             $this->iterators = $__iterators;
             return self::NEXT_REPEAT;
           }
@@ -237,7 +237,7 @@ class RecursiveIteratorIterator implements OuterIterator {
   public function rewind() {
     while ($this->iterators) {
       $__iterators = $this->iterators;
-      array_pop(&$__iterators);
+      array_pop(inout $__iterators);
       $this->iterators = $__iterators;
     }
 

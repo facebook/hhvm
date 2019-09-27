@@ -30,7 +30,7 @@ function cgetm_ge() {
 
   $idx = array(2, 6, 3);
   foreach (array('gArray', 'gObj', 'gStr') as $dyn) {
-    var_dump($GLOBALS[$dyn][array_shift(&$idx)]);
+    var_dump($GLOBALS[$dyn][array_shift(inout $idx)]);
   }
 
   try {

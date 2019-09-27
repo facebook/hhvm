@@ -14,7 +14,7 @@ $stack = array ('one' => 'un', 'two' => 'deux');
 $var0 = 'zero';
 
 echo "\n-- Call array_push() --\n";
-var_dump($result = array_push(&$stack, $var0));
+var_dump($result = array_push(inout $stack, $var0));
 
 echo "\n-- Position of Internal Pointer in Original Array: --\n";
 echo key($stack) . " => " . current($stack) . "\n";

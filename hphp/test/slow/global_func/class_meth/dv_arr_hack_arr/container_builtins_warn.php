@@ -10,7 +10,7 @@ class A {
  * These builtins are NOT compatible with arraylike and will raise Warning.
  */
 function test_warning($c, $f, $cmp) {
-  $x = HH\class_meth($c, $f); var_dump(shuffle(&$x));
+  $x = HH\class_meth($c, $f); var_dump(shuffle(inout $x));
   $x = HH\class_meth($c, $f); var_dump(key($x));
   $x = HH\class_meth($c, $f); var_dump(reset(inout $x));
   $x = HH\class_meth($c, $f); var_dump(each(inout $x));

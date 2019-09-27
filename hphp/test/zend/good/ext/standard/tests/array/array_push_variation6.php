@@ -96,7 +96,7 @@ foreach($inputs as $key => $input) {
   echo "Before : ";
   var_dump(count($input));
   echo "After  : ";
-  var_dump( array_push(&$input, $var) );
+  var_dump( array_push(inout $input, $var) );
   $iterator++;
 };
 

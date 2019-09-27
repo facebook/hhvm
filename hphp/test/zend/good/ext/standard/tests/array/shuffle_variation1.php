@@ -79,7 +79,7 @@ function main(): void {
   $count = 1;
   foreach ($values as $value) {
     echo "\n-- Iteration $count --\n";
-    var_dump(shuffle(&$value));
+    var_dump(shuffle(inout $value));
     $count++;
   }
 

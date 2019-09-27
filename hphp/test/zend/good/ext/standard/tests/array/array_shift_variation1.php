@@ -82,7 +82,7 @@ $inputs = array(
 $iterator = 1;
 foreach($inputs as $input) {
   echo "\n-- Iteration $iterator --\n";
-  var_dump( array_shift(&$input) );
+  var_dump( array_shift(inout $input) );
   $iterator++;
 };
 

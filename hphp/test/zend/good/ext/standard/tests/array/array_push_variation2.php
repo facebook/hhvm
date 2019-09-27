@@ -87,7 +87,7 @@ $iterator = 1;
 foreach($inputs as $input) {
   echo "\n-- Iteration $iterator --\n";
   $temp_array = $stack;
-  var_dump( array_push(&$temp_array, $input) );
+  var_dump( array_push(inout $temp_array, $input) );
   $iterator++;
 };
 

@@ -61,13 +61,13 @@ $heredoc_asso_array = array(
 
 // test shuffle() with array containing heredoc strings as values
 echo "\n-- with array of heredoc strings --\n";
-var_dump( shuffle(&$heredoc_array) );
+var_dump( shuffle(inout $heredoc_array) );
 echo "\nThe output array is:\n";
 var_dump( $heredoc_array );
 
 // test shuffle() with array containing heredoc strings as its keys
 echo "\n-- with array having heredoc strings as keys --\n";
-var_dump( shuffle(&$heredoc_asso_array) );
+var_dump( shuffle(inout $heredoc_asso_array) );
 echo "\nThe output array is:\n";
 var_dump( $heredoc_asso_array );
 

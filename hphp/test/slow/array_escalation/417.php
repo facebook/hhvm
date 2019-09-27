@@ -9,7 +9,7 @@ function test() {
   }
   unset($a[16]);
   $b = $a;
-  array_unshift(&$a, 'foo');
+  array_unshift(inout $a, 'foo');
   var_dump(count($a), count($b));
 }
 

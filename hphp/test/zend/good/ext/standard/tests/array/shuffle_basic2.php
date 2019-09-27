@@ -26,7 +26,7 @@ var_dump( $array_arg );
 
 // applying shuffle() function on the input array
 echo "\n-- return value from shuffle() function --\n";
-var_dump( shuffle(&$array_arg) );  // prints the return value from shuffle() function
+var_dump( shuffle(inout $array_arg) );  // prints the return value from shuffle() function
 
 echo "\n-- resultant array after shuffle() function is applied --\n";
 var_dump( $array_arg );

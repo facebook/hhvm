@@ -11,7 +11,7 @@ $a = array();
 $times = 90000;
 for ($i = 0; $i < $times; $i++) {
     $p = range(1,4);
-    shuffle(&$p);
+    shuffle(inout $p);
     $s = join('', $p);
     if (!($a[$s] ?? false)) $a[$s] = 0;
     $a[$s]++;

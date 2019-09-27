@@ -22,13 +22,13 @@ var_dump($stack_last);
 echo "\n-- After shift: --\n";
 echo "---- Pop array from array:\n";
 echo "Returned value:\t";
-var_dump(array_shift(&$stack_first));
+var_dump(array_shift(inout $stack_first));
 echo "New array:\n";
 var_dump($stack_first);
 
 echo "---- Pop element from array within array:\n";
 echo "Returned value:\t";
-var_dump(array_shift(&$last));
+var_dump(array_shift(inout $last));
 $stack_last[2] = $last;
 echo "New array:\n";
 var_dump($stack_last);

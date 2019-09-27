@@ -78,7 +78,7 @@ function with_keyset($k1) {
   var_dump(array_keys($k1));
   $k = $k1;
   echo "array_pop: ";
-  var_dump(array_pop(&$k));
+  var_dump(array_pop(inout $k));
   var_dump($k);
   echo "array_product: ";
   var_dump(array_product($k1));
@@ -92,7 +92,7 @@ function with_keyset($k1) {
   echo "array_search 2: ";
   var_dump(array_search('x', $k1));
   echo "array_shift: ";
-  var_dump(array_shift(&$k));
+  var_dump(array_shift(inout $k));
   var_dump($k);
   echo "array_sum: ";
   var_dump(array_sum($k1));
@@ -133,12 +133,12 @@ function with_keyset($k1) {
 
   // Those two must work with keysets and preserve the type.
   //
-  var_dump(array_push(&$k, 'i'));
-  var_dump(array_unshift(&$k, 'q'));
+  var_dump(array_push(inout $k, 'i'));
+  var_dump(array_unshift(inout $k, 'q'));
   var_dump($k);
 
   echo "array_splice: ";
-  var_dump(array_splice(&$k, 2));
+  var_dump(array_splice(inout $k, 2));
   var_dump($k);
 
 }

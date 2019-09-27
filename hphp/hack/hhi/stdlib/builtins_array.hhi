@@ -196,9 +196,9 @@ function array_multisort9(
 <<__PHPStdLib, __Rx>>
 function array_pad($input, int $pad_size, $pad_value);
 <<__PHPStdLib>>
-function array_pop(&$array);
+function array_pop(inout $array);
 <<__PHPStdLib>>
-function array_push(&$array, $var, ...$args);
+function array_push(inout $array, $var, ...$args);
 <<__PHPStdLib>>
 function array_rand($input, int $num_req = 1);
 <<__PHPStdLib>>
@@ -208,13 +208,12 @@ function array_reverse($array, bool $preserve_keys = false);
 <<__PHPStdLib, __Rx>>
 function array_search($needle, $haystack, bool $strict = false);
 <<__PHPStdLib>>
-function array_shift(&$array);
+function array_shift(inout $array);
 <<__PHPStdLib, __Rx>>
 function array_slice($array, int $offset, $length = null, bool $preserve_keys = false);
 <<__PHPStdLib, __Rx, __AtMostRxAsArgs>>
-/* HH_FIXME[2088] reference will be inout eventually */
 function array_splice(
-  <<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> mixed &$input,
+  <<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> inout mixed $input,
   int $offset,
   mixed $length = null,
   <<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> mixed $replacement = null,
@@ -222,11 +221,11 @@ function array_splice(
 <<__PHPStdLib, __Rx>>
 function array_unique($array, int $sort_flags = 2);
 <<__PHPStdLib>>
-function array_unshift(&$array, $var, ...$args);
+function array_unshift(inout $array, $var, ...$args);
 <<__PHPStdLib, __Rx>>
 function array_values<Tv>(Container<Tv> $input): array<Tv>;
 <<__PHPStdLib>>
-function shuffle(&$array);
+function shuffle(inout $array);
 <<__Deprecated('Use count(), it does the same thing as sizeof() in PHP and '.
   'doesn\'t suggest that it\'s counting bytes.'), __PHPStdLib, __Rx>>
 function sizeof($var);
@@ -236,8 +235,6 @@ function each(inout $array);
 function current($array);
 <<__PHPStdLib>>
 function current_ref(&$array);
-<<__PHPStdLib>>
-function hphp_current_ref(&$array);
 <<__PHPStdLib>>
 function next(inout $array);
 <<__PHPStdLib>>
@@ -252,8 +249,6 @@ function key($array);
 function key_ref(&$array);
 <<__PHPStdLib>>
 function hphp_get_iterator($iterable);
-<<__PHPStdLib>>
-function hphp_get_mutable_iterator(&$iterable);
 <<__PHPStdLib, __Rx>>
 function in_array($needle, $haystack, bool $strict = false);
 <<__PHPStdLib, __Rx>>

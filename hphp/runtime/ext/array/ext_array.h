@@ -69,7 +69,7 @@ TypedValue HHVM_FUNCTION(array_pad,
 TypedValue HHVM_FUNCTION(array_product,
                          const Variant& array);
 TypedValue HHVM_FUNCTION(array_push,
-                         VRefParam container,
+                         Variant& container,
                          const Variant& var,
                          const Array& args = null_array);
 TypedValue HHVM_FUNCTION(array_rand,
@@ -80,9 +80,9 @@ TypedValue HHVM_FUNCTION(array_search,
                          const Variant& haystack,
                          bool strict = false);
 TypedValue HHVM_FUNCTION(array_shift,
-                         VRefParam array);
+                         Variant& array);
 TypedValue HHVM_FUNCTION(array_splice,
-                         VRefParam input,
+                         Variant& input,
                          int offset,
                          const Variant& length = uninit_variant,
                          const Variant& replacement = uninit_variant);
@@ -92,13 +92,13 @@ TypedValue HHVM_FUNCTION(array_unique,
                          const Variant& array,
                          int sort_flags = 2);
 TypedValue HHVM_FUNCTION(array_unshift,
-                         VRefParam array,
+                         Variant& array,
                          const Variant& var,
                          const Array& args = null_array);
 TypedValue HHVM_FUNCTION(array_values,
                          const Variant& input);
 bool HHVM_FUNCTION(shuffle,
-                   VRefParam array);
+                   Variant& array);
 int64_t HHVM_FUNCTION(count,
                       const Variant& var,
                       int64_t mode = 0);

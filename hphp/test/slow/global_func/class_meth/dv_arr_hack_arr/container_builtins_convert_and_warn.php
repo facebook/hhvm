@@ -50,11 +50,11 @@ function test_compact_builtins($c, $f) {
   var_dump(array_replace(HH\class_meth($c, $f), vec[3,4]));
   var_dump(array_replace_recursive(HH\class_meth($c, $f), vec[3,4]));
 
-  $x = HH\class_meth($c, $f); var_dump(array_pop(&$x)); var_dump($x);
-  $x = HH\class_meth($c, $f); var_dump(array_push(&$x, "t1")); var_dump($x);
-  $x = HH\class_meth($c, $f); var_dump(array_shift(&$x)); var_dump($x);
-  $x = HH\class_meth($c, $f); var_dump(array_splice(&$x, 1)); var_dump($x);
-  $x = HH\class_meth($c, $f); var_dump(array_unshift(&$x, "foo")); var_dump($x);
+  $x = HH\class_meth($c, $f); var_dump(array_pop(inout $x)); var_dump($x);
+  $x = HH\class_meth($c, $f); var_dump(array_push(inout $x, "t1")); var_dump($x);
+  $x = HH\class_meth($c, $f); var_dump(array_shift(inout $x)); var_dump($x);
+  $x = HH\class_meth($c, $f); var_dump(array_splice(inout $x, 1)); var_dump($x);
+  $x = HH\class_meth($c, $f); var_dump(array_unshift(inout $x, "foo")); var_dump($x);
 }
 
 function test_string_builtins($c, $f) {

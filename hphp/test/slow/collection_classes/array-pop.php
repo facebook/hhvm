@@ -18,7 +18,7 @@ function main() {
     ImmSet {},
   };
   foreach ($containers as $x) {
-    var_dump(array_pop(&$x));
+    var_dump(array_pop(inout $x));
     var_dump($x);
   }
 }

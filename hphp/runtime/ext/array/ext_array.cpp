@@ -733,26 +733,18 @@ TypedValue HHVM_FUNCTION(array_pad,
 }
 
 TypedValue HHVM_FUNCTION(array_pop,
-                         VRefParam containerRef) {
-  auto* container = castClsmethToContainerInplace(containerRef);
+                         Variant& containerRef) {
+  auto* container = castClsmethToContainerInplace(containerRef.toCell());
   if (UNLIKELY(!isMutableContainer(*container))) {
     raise_warning("array_pop() expects parameter 1 to be an "
                   "array or mutable collection");
     return make_tv<KindOfNull>();
   }
-  if (!getContainerSize(containerRef)) {
+  if (!getContainerSize(*container)) {
     return make_tv<KindOfNull>();
   }
   if (isArrayLikeType(container->m_type)) {
-    if (auto ref = containerRef.getVariantOrNull()) {
-      return tvReturn(ref->asArrRef().pop());
-    }
-    auto ad = container->m_data.parr;
-    if (ad->size()) {
-      auto last = ad->iter_last();
-      return tvReturn(ad->getValue(last));
-    }
-    return make_tv<KindOfNull>();
+    return tvReturn(containerRef.toArrRef().pop());
   }
   assertx(container->m_type == KindOfObject);
   return tvReturn(collections::pop(container->m_data.pobj));
@@ -846,24 +838,17 @@ DOUBLE:
 }
 
 TypedValue HHVM_FUNCTION(array_push,
-                         VRefParam container,
+                         Variant& container,
                          const Variant& var,
                          const Array& args /* = null array */) {
-  if (LIKELY(container->isArray()) || container->isClsMeth()) {
-    auto ref = container.getVariantOrNull();
-    if (!ref) {
-      return make_tv<KindOfInt64>(
-        1 + args.size() + container->asCArrRef().size()
-      );
-    }
-    ref = &tvAsVariant(castClsmethToContainerInplace(ref->toCell()));
-
+  if (LIKELY(container.isArray()) || container.isClsMeth()) {
+    castClsmethToContainerInplace(container.toCell());
     /*
      * Important note: this *must* cast the parr in the inner cell to
      * the Array&---we can't copy it to the stack or anything because we
      * might escalate.
      */
-    Array& arr_array = ref->asArrRef();
+    Array& arr_array = container.toArrRef();
     arr_array.append(var);
     for (ArrayIter iter(args); iter; ++iter) {
       arr_array.append(iter.second());
@@ -925,26 +910,18 @@ TypedValue HHVM_FUNCTION(array_reverse,
 }
 
 TypedValue HHVM_FUNCTION(array_shift,
-                         VRefParam array) {
-  auto* cell_array = castClsmethToContainerInplace(array);
+                         Variant& array) {
+  auto* cell_array = castClsmethToContainerInplace(array.toCell());
   if (UNLIKELY(!isMutableContainer(*cell_array))) {
     raise_warning("array_shift() expects parameter 1 to be an "
                   "array or mutable collection");
     return make_tv<KindOfNull>();
   }
-  if (!getContainerSize(array)) {
+  if (!getContainerSize(*cell_array)) {
     return make_tv<KindOfNull>();
   }
   if (isArrayLikeType(cell_array->m_type)) {
-    if (auto ref = array.getVariantOrNull()) {
-      return tvReturn(ref->asArrRef().dequeue());
-    }
-    auto ad = cell_array->m_data.parr;
-    if (ad->size()) {
-      auto first = ad->iter_begin();
-      return tvReturn(ad->getValue(first));
-    }
-    return make_tv<KindOfNull>();
+    return tvReturn(array.toArrRef().dequeue());
   }
   assertx(cell_array->m_type == KindOfObject);
   return tvReturn(collections::shift(cell_array->m_data.pobj));
@@ -1033,17 +1010,17 @@ TypedValue HHVM_FUNCTION(array_slice,
   return tvReturn(std::move(ret));
 }
 
-Variant array_splice(VRefParam input, int offset,
+Variant array_splice(Variant& input, int offset,
                      const Variant& length, const Variant& replacement) {
   getCheckedArrayVariant(input);
   Array ret = Array::Create();
   int64_t len = length.isNull() ? 0x7FFFFFFF : length.toInt64();
-  input.assignIfRef(ArrayUtil::Splice(arr_input, offset, len, replacement, &ret));
+  input = ArrayUtil::Splice(arr_input, offset, len, replacement, &ret);
   return ret;
 }
 
 TypedValue HHVM_FUNCTION(array_splice,
-                         VRefParam input,
+                         Variant& input,
                          int offset,
                          const Variant& length,
                          const Variant& replacement) {
@@ -1138,31 +1115,26 @@ DOUBLE:
 }
 
 TypedValue HHVM_FUNCTION(array_unshift,
-                         VRefParam array,
+                         Variant& array,
                          const Variant& var,
                          const Array& args /* = null array */) {
-  auto* cell_array = castClsmethToContainerInplace(array);
+  auto* cell_array = castClsmethToContainerInplace(array.toCell());
   if (UNLIKELY(!isContainer(*cell_array))) {
     raise_warning("%s() expects parameter 1 to be an array, Vector, or Set",
                   __FUNCTION__+2 /* remove the "f_" prefix */);
     return make_tv<KindOfNull>();
   }
   if (isArrayLikeType(cell_array->m_type)) {
-    auto ref_array = array.getVariantOrNull();
-    if (!ref_array) {
-      return make_tv<KindOfInt64>(
-        cell_array->m_data.parr->size() + args.size() + 1
-      );
-    }
+    Array& arr_array = array.toArrRef();
     if (cell_array->m_data.parr->isVectorData()) {
       if (!args.empty()) {
         auto pos_limit = args->iter_end();
         for (ssize_t pos = args->iter_last(); pos != pos_limit;
              pos = args->iter_rewind(pos)) {
-          ref_array->asArrRef().prepend(args->atPos(pos));
+          arr_array.prepend(args->atPos(pos));
         }
       }
-      ref_array->asArrRef().prepend(var);
+      arr_array.prepend(var);
     } else {
       {
         Array newArray;
@@ -1196,12 +1168,12 @@ TypedValue HHVM_FUNCTION(array_unshift,
             }
           }
         }
-        *ref_array = std::move(newArray);
+        arr_array = std::move(newArray);
       }
       // Reset the array's internal pointer
-      ref_array->asArrRef()->reset();
+      arr_array->reset();
     }
-    return make_tv<KindOfInt64>(ref_array->asArrRef().size());
+    return make_tv<KindOfInt64>(arr_array.size());
   }
   // Handle collections
   assertx(cell_array->m_type == KindOfObject);
@@ -1305,7 +1277,7 @@ static int php_count_recursive(const Array& array) {
 }
 
 bool HHVM_FUNCTION(shuffle,
-                   VRefParam array) {
+                   Variant& array) {
   if (array.isClsMeth()) {
     raiseClsMethToVecWarningHelper(__FUNCTION__+2);
     return false;
@@ -1314,7 +1286,7 @@ bool HHVM_FUNCTION(shuffle,
     throw_expected_array_exception("shuffle");
     return false;
   }
-  array.assignIfRef(ArrayUtil::Shuffle(array));
+  array = ArrayUtil::Shuffle(array.toCArrRef());
   return true;
 }
 

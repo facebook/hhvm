@@ -267,7 +267,7 @@ class Redis {
 
   public function sort($key, array $arr = null) {
     $args = $this->sortClause($arr, &$using_store);
-    array_unshift(&$args, $key);
+    array_unshift(inout $args, $key);
     $this->processArrayCommand('SORT', $args);
     if ($using_store) {
       return $this->processVectorResponse(true);
@@ -702,8 +702,8 @@ class Redis {
       if ($keyCount-- <= 0) break;
       $args[$idx] = $this->_prefix($arg);
     }
-    array_unshift(&$args, $numKeys);
-    array_unshift(&$args, $script);
+    array_unshift(inout $args, $numKeys);
+    array_unshift(inout $args, $script);
     $this->processArrayCommand($cmd, $args);
     $response = $this->processVariantResponse();
     return ($response !== NULL) ? $response : false;
@@ -1164,7 +1164,7 @@ class Redis {
 
     // Then prefix, serialie, and cast as needed
     if ($flags & self::VAR_TIMEOUT) {
-      $timeout = array_pop(&$args);
+      $timeout = array_pop(inout $args);
     }
     if (($this->prefix && ($flags & self::VAR_KEY_MASK)) ||
         ($flags & self::VAR_SERIALIZE)) {
@@ -1217,7 +1217,7 @@ class Redis {
     $cmd = "*{$count}\r\n\${$clen}\r\n{$cmd}\r\n";
 
     while (count($args)) {
-      $arg = (string)array_shift(&$args);
+      $arg = (string)array_shift(inout $args);
       $alen = strlen($arg);
       $cmd .= "\${$alen}\r\n{$arg}\r\n";
     }
@@ -1472,7 +1472,7 @@ class Redis {
 
     $ret = [];
     while($count--) {
-      $key = array_shift(&$keys);
+      $key = array_shift(inout $keys);
       $val = $this->sockReadData(&$type);
       if ($unser_val) {
         $val = $this->_unserialize($val);

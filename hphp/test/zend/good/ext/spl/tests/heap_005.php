@@ -1,6 +1,6 @@
 <?hh <<__EntryPoint>> function main(): void {
 $input = range(1,100);
-shuffle(&$input);
+shuffle(inout $input);
 
 $h = new SplMinHeap();
 

@@ -431,6 +431,14 @@ pub mod pseudo_functions {
 
     pub const HH_LOOP_FOREVER: &str = "\\hh_loop_forever";
 
+    pub const ASSERT: &str = "\\assert";
+
+    pub const ECHO: &str = "\\echo";
+
+    pub const EXIT: &str = "\\exit";
+
+    pub const DIE: &str = "\\die";
+
     lazy_static! {
         pub static ref ALL_PSEUDO_FUNCTIONS: Vec<&'static str> = vec![
             ISSET,
@@ -440,6 +448,10 @@ pub mod pseudo_functions {
             HH_LOG_LEVEL,
             HH_FORCE_SOLVE,
             HH_LOOP_FOREVER,
+            ASSERT,
+            ECHO,
+            EXIT,
+            DIE,
         ];
     }
 }

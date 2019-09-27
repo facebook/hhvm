@@ -397,6 +397,14 @@ module PseudoFunctions = struct
 
   let hh_loop_forever = "\\hh_loop_forever"
 
+  let assert_ = "\\assert"
+
+  let echo = "\\echo"
+
+  let exit = "\\exit"
+
+  let die = "\\die"
+
   let all_pseudo_functions =
     [
       isset;
@@ -406,7 +414,16 @@ module PseudoFunctions = struct
       hh_log_level;
       hh_force_solve;
       hh_loop_forever;
+      assert_;
+      echo;
+      exit;
+      die;
     ]
+
+  let is_pseudo_function =
+    let h = HashSet.create (List.length all_pseudo_functions) in
+    List.iter all_pseudo_functions (HashSet.add h);
+    (fun x -> HashSet.mem h x)
 end
 
 module StdlibFunctions = struct

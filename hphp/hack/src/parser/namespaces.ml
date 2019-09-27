@@ -160,15 +160,6 @@ let get_autoimport_name_namespace id kind =
 
 let is_autoimport_name id kind = get_autoimport_name_namespace id kind <> None
 
-let is_always_global_function =
-  let funcs =
-    SN.PseudoFunctions.all_pseudo_functions
-    @ ["\\assert"; "\\echo"; "\\exit"; "\\die"]
-  in
-  let h = HashSet.create (List.length funcs) in
-  List.iter funcs (HashSet.add h);
-  (fun x -> HashSet.mem h x)
-
 let elaborate_into_ns ns_name id =
   match ns_name with
   | None -> "\\" ^ id
@@ -247,7 +238,9 @@ let elaborate_id_impl nsenv kind id =
     if kind = ElaborateConst && SN.PseudoConsts.is_pseudo_const global_id then
       (false, global_id)
     (* Pseudo-constants are always global. *)
-    else if kind = ElaborateFun && is_always_global_function global_id then
+    else if
+      kind = ElaborateFun && SN.PseudoFunctions.is_pseudo_function global_id
+    then
       (false, global_id)
     else
       let (bslash_loc, has_bslash) =

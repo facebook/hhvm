@@ -104,13 +104,16 @@ let init
   Parser_options_provider.set env.popt;
   GlobalNamingOptions.set env.tcopt;
   let root = ServerArgs.root genv.options in
-  if
-    GlobalOptions.(
-      InferMissing.global_inference @@ tco_infer_missing env.tcopt)
-  then
-    Typing_global_inference.init ()
-  else
-    ();
+  let (lazy_lev, init_approach) =
+    if
+      GlobalOptions.(
+        InferMissing.global_inference @@ tco_infer_missing env.tcopt)
+    then (
+      Typing_global_inference.init ();
+      (Off, Full_init)
+    ) else
+      (lazy_lev, init_approach)
+  in
   let ((env, t), init_result, skip_post_init) =
     match (lazy_lev, init_approach) with
     | (_, Remote_init { worker_key; check_id }) ->

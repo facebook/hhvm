@@ -13,3 +13,4 @@ type mode =
 type result =
   | RMerge of unit
   | RSolve of unit
+  | RError of string

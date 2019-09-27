@@ -730,7 +730,9 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
       let%lwt results =
         ClientConnect.rpc conn @@ Rpc.GLOBAL_INFERENCE (submode, files)
       in
-      ignore results;
+      (match results with
+      | ServerGlobalInferenceTypes.RError error -> print_endline error
+      | _ -> ());
       Lwt.return Exit_status.No_error
   in
   HackEventLogger.client_check_finish exit_status;

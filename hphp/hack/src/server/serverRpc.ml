@@ -368,4 +368,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
   | BIGCODE filename -> (env, ServerBigCode.go env filename)
   | PAUSE pause -> ({ env with paused = pause }, ())
   | GLOBAL_INFERENCE (submode, files) ->
+    (* We are getting files in the reverse order*)
+    let files = List.rev files in
     (env, ServerGlobalInference.execute submode files)

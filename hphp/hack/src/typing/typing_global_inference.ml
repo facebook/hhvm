@@ -6,6 +6,7 @@
  *
  *)
 open Core_kernel
+open Typing_env_types
 
 let folder_name = ".global_inference_artifacts/"
 
@@ -35,3 +36,48 @@ let save_subgraphs global_tvenvs =
     in
     Marshal.to_channel out_channel global_tvenvs [];
     Out_channel.close out_channel
+
+let merge_subgraph_in_env subgraph env =
+  IMap.fold
+    (fun var tyvar_info env ->
+      let current_tyvar_info : tyvar_info_ =
+        Typing_env.get_tyvar_info env var
+      in
+      let pos =
+        match (tyvar_info.tyvar_pos, current_tyvar_info.tyvar_pos) with
+        | (p, t) when t = Pos.none -> p
+        | (_, p) -> p
+      in
+      let current_tyvar_info =
+        {
+          current_tyvar_info with
+          appears_covariantly =
+            tyvar_info.appears_covariantly
+            || current_tyvar_info.appears_covariantly;
+          appears_contravariantly =
+            tyvar_info.appears_contravariantly
+            || current_tyvar_info.appears_contravariantly;
+          tyvar_pos = pos;
+        }
+      in
+      (* We store in the env the updated tyvar_info_ *)
+      Typing_env.update_tyvar_info env var current_tyvar_info
+      (* Add the missing upper and lower bounds - and do the transitive closure *)
+      |> TySet.fold
+           (fun bound env ->
+             Typing_subtype.add_tyvar_upper_bound_and_close
+               env
+               var
+               bound
+               Errors.unify_error)
+           tyvar_info.upper_bounds
+      |> TySet.fold
+           (fun bound env ->
+             Typing_subtype.add_tyvar_lower_bound_and_close
+               env
+               var
+               bound
+               Errors.unify_error)
+           tyvar_info.lower_bounds)
+    subgraph
+    env

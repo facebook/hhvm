@@ -268,6 +268,8 @@ val get_tyvar_upper_bounds : env -> Ident.t -> TPEnv.tparam_bounds
 
 val set_tyvar_lower_bounds : env -> Ident.t -> TPEnv.tparam_bounds -> env
 
+val update_tyvar_info : env -> Ident.t -> tyvar_info_ -> env
+
 val set_tyvar_upper_bounds : env -> Ident.t -> TPEnv.tparam_bounds -> env
 
 (* Optionally supply intersection or union operations to simplify the bounds *)

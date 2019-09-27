@@ -16,4 +16,3 @@ parser_rust = { path = "../../..", package = "hack_parser" }
 positioned_parser = {path = "../../positioned_parser", package = "positioned_parser" }
 syntax_tree = {path = "../../syntax_tree", package = "syntax_tree" }
 ocaml = "^0.7"
-

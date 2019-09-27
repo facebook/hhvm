@@ -103,6 +103,7 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
             "\\recursive_function",
             "\\WithRecursiveMethods::recursive_static",
             "\\WithRecursiveMethods::recursive_instance",
+            "\\does_not_use_class_methods",
         ]
 
         for path in paths:

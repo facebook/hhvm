@@ -32,3 +32,11 @@ class DerivedImplementing extends Implementing implements SimpleInterface {
 }
 
 function with_requiring_trait(DerivedImplementing $arg): void {}
+
+class ImplementsBuiltin implements Stringish {
+  public function __toString(): string {
+    return "";
+  }
+}
+
+function does_not_use_class_methods(ImplementsBuiltin $arg): void {}

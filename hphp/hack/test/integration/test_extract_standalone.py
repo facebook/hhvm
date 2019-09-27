@@ -99,6 +99,7 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
             "\\with_generic_method",
             "\\builtin_argument_types",
             "\\with_static_property",
+            "\\SimpleDerived::call_parent_method",
         ]
 
         for path in paths:

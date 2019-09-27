@@ -983,10 +983,17 @@ and add_signature_dependencies deps obj =
             in
             add_dep deps ~cls:(Some cls_name) @@ Lazy.force m.ce_type
           | SMethod (_, name) ->
-            let sm =
-              value_or_not_found description @@ Class.get_smethod cls name
-            in
-            add_dep deps ~cls:(Some cls_name) @@ Lazy.force sm.ce_type
+            if
+              Class.get_smethod cls name = None
+              && Option.is_some (Class.get_method cls name)
+            then (
+              HashSet.remove deps obj;
+              do_add_dep deps (Method (cls_name, name))
+            ) else
+              let sm =
+                value_or_not_found description @@ Class.get_smethod cls name
+              in
+              add_dep deps ~cls:(Some cls_name) @@ Lazy.force sm.ce_type
           | Const (_, name) ->
             if Option.is_some (Class.get_typeconst cls name) then (
               let tc =

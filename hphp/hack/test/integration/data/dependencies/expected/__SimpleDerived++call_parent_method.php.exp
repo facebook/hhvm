@@ -1,0 +1,20 @@
+<?hh
+class SimpleDerived extends \SimpleClass {
+
+  private static int $calls = 0;
+  public function call_parent_method(): void {
+    parent::simple_method();
+    ++SimpleDerived::$calls;
+  }
+}
+class SimpleClass {
+
+  public function simple_method(): void {
+    throw new Exception();
+  }
+
+}
+function extract_standalone_make_default<T>(): T {
+  throw new Exception();
+}
+

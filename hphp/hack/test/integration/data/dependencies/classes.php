@@ -79,3 +79,12 @@ class SimpleClass {
   }
   public function coarse_grained_dependency(): void {}
 }
+
+class SimpleDerived extends SimpleClass {
+  public function call_parent_method(): void {
+    parent::simple_method();
+    ++SimpleDerived::$calls;
+  }
+
+  private static int $calls = 0;
+}

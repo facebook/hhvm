@@ -2483,28 +2483,71 @@ class TestLsp(TestCase[LspTestDriver]):
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
-    def test_formatting(self) -> None:
-
+    def test_serverless_ide_formatting(self) -> None:
         # This test will fail if hackfmt can't be found
         if not self.test_driver.run_hackfmt_check():
             raise unittest.SkipTest("Hackfmt can't be found. Skipping.")
 
-        self.prepare_server_environment()
-        variables = self.setup_php_file("messy.php")
-        self.load_and_run("formatting", variables)
+        variables = dict(self.prepare_serverless_ide_environment())
+        variables.update(self.setup_php_file("messy.php"))
 
-    def test_rangeformatting(self) -> None:
+        self.test_driver.stop_hh_server()
+
+        spec = (
+            self.initialize_spec(LspTestSpec("formatting"), use_serverless_ide=True)
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .request(
+                method="textDocument/formatting",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "options": {"tabSize": 5, "insertSpaces": True},
+                },
+                result=[
+                    {
+                        "range": {
+                            "start": {"line": 0, "character": 0},
+                            "end": {"line": 15, "character": 0},
+                        },
+                        "newText": "<?hh //strict\n\nfunction x(): string {\n"
+                        + "     /* @lint-ignore TXT2 3 tabs on purpose */\n"
+                        + '     $a = "this";\n\n'
+                        + "     /* @lint-ignore TXT2 2 tabs on purpose */\n"
+                        + '     $b = "is";\n\n'
+                        + "     /* lint-ignore TXT2 1 tab on purpose */\n"
+                        + '     $c = "messy"; // 1 tab\n\n'
+                        + '     $d = "."; // 4 spaces\n'
+                        + '     return "$a"."$b"."$c"."d";\n}\n',
+                    }
+                ],
+            )
+            .request(method="shutdown", params={}, result=None)
+        )
+        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+
+    def test_serverless_ide_rangeformatting(self) -> None:
         # This test will fail if hackfmt can't be found
         if not self.test_driver.run_hackfmt_check():
             raise unittest.SkipTest("Hackfmt can't be found. Skipping.")
 
-        self.prepare_server_environment()
-        variables = self.setup_php_file("messy.php")
+        variables = dict(self.prepare_serverless_ide_environment())
+        variables.update(self.setup_php_file("messy.php"))
+
+        self.test_driver.stop_hh_server()
+
         spec = (
             self.initialize_spec(
-                LspTestSpec("range_formatting"), use_serverless_ide=False
+                LspTestSpec("range_formatting"), use_serverless_ide=True
             )
-            .wait_for_hh_server_ready()
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -2538,17 +2581,95 @@ class TestLsp(TestCase[LspTestDriver]):
             )
             .request(method="shutdown", params={}, result=None)
         )
-        self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)
+        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
-    def test_ontypeformatting(self) -> None:
-
+    def test_serverless_ide_ontypeformatting(self) -> None:
         # This test will fail if hackfmt can't be found
         if not self.test_driver.run_hackfmt_check():
             raise unittest.SkipTest("Hackfmt can't be found. Skipping.")
 
-        self.prepare_server_environment()
-        variables = self.setup_php_file("ontypeformatting.php")
-        self.load_and_run("ontypeformatting", variables)
+        variables = dict(self.prepare_serverless_ide_environment())
+        variables.update(self.setup_php_file("ontypeformatting.php"))
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("ontypeformatting"), use_serverless_ide=True
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .request(
+                method="textDocument/onTypeFormatting",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 9, "character": 58},
+                    "ch": ";",
+                    "options": {"tabSize": 2, "insertSpaces": True},
+                },
+                result=[
+                    {
+                        "range": {
+                            "start": {"line": 5, "character": 17},
+                            "end": {"line": 9, "character": 58},
+                        },
+                        "newText": "{\n  test_otf(\n"
+                        + "    '1234567890',\n"
+                        + "    '1234567890',\n"
+                        + "    '1234567890',\n"
+                        + "    '1234567890',\n"
+                        + "    '1234567890',\n"
+                        + "    '1234567890',\n  );",
+                    }
+                ],
+            )
+            .request(
+                method="textDocument/onTypeFormatting",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 13, "character": 1},
+                    "ch": "}",
+                    "options": {"tabSize": 2, "insertSpaces": True},
+                },
+                result=[
+                    {
+                        "range": {
+                            "start": {"line": 13, "character": 0},
+                            "end": {"line": 13, "character": 1},
+                        },
+                        "newText": "{",
+                    }
+                ],
+            )
+            .request(
+                method="textDocument/onTypeFormatting",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 15, "character": 16},
+                    "ch": "}",
+                    "options": {"tabSize": 2, "insertSpaces": True},
+                },
+                result=[
+                    {
+                        "range": {
+                            "start": {"line": 15, "character": 0},
+                            "end": {"line": 15, "character": 16},
+                        },
+                        "newText": "function otf() {}",
+                    }
+                ],
+            )
+            .request(method="shutdown", params={}, result=None)
+        )
+
+        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_did_change(self) -> None:
         self.prepare_server_environment()

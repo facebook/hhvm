@@ -3288,6 +3288,40 @@ let handle_event
           |> print_signatureHelp
           |> respond_jsonrpc ~powered_by:Serverless_ide c;
           Lwt.return_unit
+        (* textDocument/formatting *)
+        | ( ( In_init { In_init_env.editor_open_files; _ }
+            | Main_loop { Main_env.editor_open_files; _ }
+            | Lost_server { Lost_env.editor_open_files; _ } ),
+            Client_message c )
+          when c.method_ = "textDocument/formatting" ->
+          parse_documentFormatting c.params
+          |> do_documentFormatting editor_open_files
+          |> print_documentFormatting
+          |> respond_jsonrpc ~powered_by:Language_server c;
+          Lwt.return_unit
+        (* textDocument/formatting *)
+        | ( ( In_init { In_init_env.editor_open_files; _ }
+            | Main_loop { Main_env.editor_open_files; _ }
+            | Lost_server { Lost_env.editor_open_files; _ } ),
+            Client_message c )
+          when c.method_ = "textDocument/rangeFormatting" ->
+          parse_documentRangeFormatting c.params
+          |> do_documentRangeFormatting editor_open_files
+          |> print_documentRangeFormatting
+          |> respond_jsonrpc ~powered_by:Language_server c;
+          Lwt.return_unit
+        (* textDocument/onTypeFormatting *)
+        | ( ( In_init { In_init_env.editor_open_files; _ }
+            | Main_loop { Main_env.editor_open_files; _ }
+            | Lost_server { Lost_env.editor_open_files; _ } ),
+            Client_message c )
+          when c.method_ = "textDocument/onTypeFormatting" ->
+          let%lwt () = cancel_if_stale client c short_timeout in
+          parse_documentOnTypeFormatting c.params
+          |> do_documentOnTypeFormatting editor_open_files
+          |> print_documentOnTypeFormatting
+          |> respond_jsonrpc ~powered_by:Language_server c;
+          Lwt.return_unit
         (* any request/notification if we're not yet ready *)
         | (In_init ienv, Client_message c) ->
           In_init_env.(
@@ -3483,31 +3517,6 @@ let handle_event
           result
           |> print_typeCoverage
           |> respond_jsonrpc ~powered_by:Hh_server c;
-          Lwt.return_unit
-        (* textDocument/formatting *)
-        | (Main_loop menv, Client_message c)
-          when c.method_ = "textDocument/formatting" ->
-          parse_documentFormatting c.params
-          |> do_documentFormatting menv.editor_open_files
-          |> print_documentFormatting
-          |> respond_jsonrpc ~powered_by:Language_server c;
-          Lwt.return_unit
-        (* textDocument/formatting *)
-        | (Main_loop menv, Client_message c)
-          when c.method_ = "textDocument/rangeFormatting" ->
-          parse_documentRangeFormatting c.params
-          |> do_documentRangeFormatting menv.editor_open_files
-          |> print_documentRangeFormatting
-          |> respond_jsonrpc ~powered_by:Language_server c;
-          Lwt.return_unit
-        (* textDocument/onTypeFormatting *)
-        | (Main_loop menv, Client_message c)
-          when c.method_ = "textDocument/onTypeFormatting" ->
-          let%lwt () = cancel_if_stale client c short_timeout in
-          parse_documentOnTypeFormatting c.params
-          |> do_documentOnTypeFormatting menv.editor_open_files
-          |> print_documentOnTypeFormatting
-          |> respond_jsonrpc ~powered_by:Language_server c;
           Lwt.return_unit
         (* textDocument/didOpen notification *)
         | (Main_loop menv, Client_message c)

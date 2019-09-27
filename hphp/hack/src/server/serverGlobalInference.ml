@@ -103,8 +103,71 @@ module Mode_solve = struct
       Ok ()
 end
 
+module Mode_export_json = struct
+  let execute files =
+    expect_2_files
+      ~error_message:"was expecting two files: [env] [jsonenv]"
+      files
+    >>= fun (input, output) ->
+    if not @@ Disk.file_exists input then
+      Error (Printf.sprintf "Error: %s does not exists" input)
+    else
+      Ok ()
+      >>= fun () ->
+      let channel = In_channel.create input in
+      let env : env = Marshal.from_channel channel in
+      In_channel.close channel;
+
+      (* Now gonna convert it to json in order to do further
+      analysis in python *)
+      let out = Out_channel.create output in
+      Out_channel.output_string out "{";
+      let is_start = ref false in
+      let tyvar_to_json env = function
+        | LocalTyvar tyvar ->
+          let type_to_json ty = "\"" ^ Typing_print.full env ty ^ "\"" in
+          let bounds_to_json bounds =
+            if List.length bounds = 0 then
+              "[]"
+            else
+              "["
+              ^ List.fold
+                  ~init:(type_to_json @@ List.hd_exn bounds)
+                  ~f:(fun acc e -> acc ^ ", " ^ type_to_json e)
+                  (List.tl_exn bounds)
+              ^ "]"
+          in
+          Printf.sprintf
+            "{\"start_line\": \"%d\", \"start_column\": \"%d\", \"end_line\": \"%d\", \"end_column\": \"%d\", \"filename\": \"%s\", \"lower_bounds\": \"%s\", \"upper_bounds\": \"%s\"}"
+            (fst (Pos.line_column tyvar.tyvar_pos))
+            (snd (Pos.line_column tyvar.tyvar_pos))
+            (fst (Pos.end_line_column tyvar.tyvar_pos))
+            (snd (Pos.end_line_column tyvar.tyvar_pos))
+            (Pos.filename (Pos.to_absolute tyvar.tyvar_pos))
+            (bounds_to_json (TySet.elements tyvar.lower_bounds))
+            (bounds_to_json (TySet.elements tyvar.upper_bounds))
+        | GlobalTyvar -> "global"
+      in
+      IMap.iter
+        (fun var tyvar ->
+          let key =
+            ( if !is_start then
+              ","
+            else
+              "" )
+            ^ Printf.sprintf "\n\"#%d\": %s" var (tyvar_to_json env tyvar)
+          in
+          is_start := true;
+          Out_channel.output_string out key)
+        env.tvenv;
+      Out_channel.output_string out "}";
+      Out_channel.close out;
+      Ok ()
+end
+
 (* Entry Point *)
 let execute mode files =
   match mode with
   | MMerge -> Mode_merge.execute files >>| (fun x -> RMerge x)
   | MSolve -> Mode_solve.execute files >>| (fun x -> RSolve x)
+  | MExport -> Mode_export_json.execute files >>| (fun x -> RExport x)

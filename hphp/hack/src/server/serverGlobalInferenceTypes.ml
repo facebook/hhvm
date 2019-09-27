@@ -9,8 +9,10 @@
 type mode =
   | MMerge
   | MSolve
+  | MExport
 
 type result =
   | RMerge of unit
   | RSolve of unit
+  | RExport of unit
   | RError of string

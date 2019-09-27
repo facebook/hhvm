@@ -67,16 +67,21 @@ class LspCommandProcessor:
             stderr=subprocess.PIPE,
             env=env,
         )
+
+        # Use the unbuffered versions of these streams, as the buffered versions
+        # of these streams sometimes cause deadlocks when accessed from multiple
+        # threads.
+        stdin = proc.stdin.detach()  # pyre-ignore
+        stdout = proc.stdout.detach()
+        stderr = proc.stderr.detach()
         try:
-            stdout: BinaryIO = proc.stdout  # pyre-ignore
-            stdin: BinaryIO = proc.stdin  # pyre-ignore
             reader = JsonRpcStreamReader(stdout)
             writer = JsonRpcStreamWriter(stdin)
             yield cls(proc, reader, writer)
         finally:
-            proc.stdin.close()
-            proc.stdout.close()
-            proc.stderr.close()
+            stdin.close()
+            stdout.close()
+            stderr.close()
 
     # request_timeout is the number of seconds to wait for responses
     # that we expect the server to send back.  this timeout can

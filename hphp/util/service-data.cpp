@@ -24,19 +24,9 @@
 #include <folly/Conv.h>
 #include <folly/MapUtil.h>
 #include <folly/Random.h>
+#include <folly/stats/Histogram.h>
 
 #include "hphp/util/portability.h"
-
-//  TODO: use only the .h inclue and not the -defs.h include
-#ifdef __has_include
-#if __has_include(<folly/stats/Histogram-defs.h>)
-#include <folly/stats/Histogram-defs.h>
-#else
-#include <folly/stats/Histogram.h>
-#endif
-#else
-#include <folly/stats/Histogram.h>
-#endif
 
 namespace HPHP {
 

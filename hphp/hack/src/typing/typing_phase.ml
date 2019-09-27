@@ -203,18 +203,15 @@ let rec localize ~ety_env env (dty : decl_ty) =
       @@ TypecheckerOptions.infer_missing (Env.get_tcopt env)
     in
     let (env, tyl) =
-      if (not (tyl_contains_wildcard tyl)) && List.length tyl <> 0 then
-        List.map_env env tyl (localize ~ety_env)
-      else
-        match Env.get_class env cid with
-        | None -> List.map_env env tyl (localize ~ety_env)
-        | Some class_info ->
-          let tparams = Cls.tparams class_info in
-          if List.length tparams <> List.length tyl && can_infer_tparams then
-            (* In this case we will infer the missing type parameters *)
-            localize_missing_tparams_class env r cls class_info tyl
-          else
-            localize_tparams ~ety_env env (Reason.to_pos r) tyl tparams
+      match Env.get_class env cid with
+      | None -> List.map_env env tyl (localize ~ety_env)
+      | Some class_info ->
+        let tparams = Cls.tparams class_info in
+        if List.length tparams <> List.length tyl && can_infer_tparams then
+          (* In this case we will infer the missing type parameters *)
+          localize_missing_tparams_class env r cls class_info tyl
+        else
+          localize_tparams ~ety_env env (Reason.to_pos r) tyl tparams
     in
     (env, (r, Tclass (cls, Nonexact, tyl)))
   | (r, Ttuple tyl) ->
@@ -300,11 +297,6 @@ and localize_tparam pos (env, ety_env) ty tparam =
   | _ ->
     let (env, ty) = localize ~ety_env env ty in
     ((env, ety_env), ty)
-
-and tyl_contains_wildcard tyl =
-  List.exists tyl (function
-      | (_, Tapply ((_, x), _)) -> x = SN.Typehints.wildcard
-      | _ -> false)
 
 (* Recursive localizations of function types do not make judgements about enforceability *)
 and localize_possibly_enforced_ty ~ety_env env ety =

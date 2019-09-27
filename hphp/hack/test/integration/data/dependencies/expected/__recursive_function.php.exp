@@ -1,0 +1,11 @@
+<?hh
+function recursive_function(int $n): int {
+  if ($n <= 0) {
+    return 0;
+  }
+  return $n + recursive_function($n - 1);
+}
+function extract_standalone_make_default<T>(): T {
+  throw new Exception();
+}
+

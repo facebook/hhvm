@@ -1,0 +1,14 @@
+<?hh
+class WithRecursiveMethods {
+
+  public function recursive_instance(): void {
+    throw new Exception();
+  }
+  public static function recursive_static(): void {
+    WithRecursiveMethods::recursive_static();
+  }
+}
+function extract_standalone_make_default<T>(): T {
+  throw new Exception();
+}
+

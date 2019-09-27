@@ -51,3 +51,19 @@ function call_defaulted(int $arg): void {
 function nonexistent_dependency(BogusType $arg): void {}
 
 function builtin_argument_types(Exception $e, keyset<string> $k): void {}
+
+function recursive_function(int $n): int {
+  if ($n <= 0) {
+    return 0;
+  }
+  return $n + recursive_function($n - 1);
+}
+
+class WithRecursiveMethods {
+  public function recursive_instance(): void {
+    $this->recursive_instance();
+  }
+  public static function recursive_static(): void {
+    WithRecursiveMethods::recursive_static();
+  }
+}

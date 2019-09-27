@@ -100,6 +100,9 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
             "\\builtin_argument_types",
             "\\with_static_property",
             "\\SimpleDerived::call_parent_method",
+            "\\recursive_function",
+            "\\WithRecursiveMethods::recursive_static",
+            "\\WithRecursiveMethods::recursive_instance",
         ]
 
         for path in paths:

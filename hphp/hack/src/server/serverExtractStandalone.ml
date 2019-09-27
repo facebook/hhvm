@@ -846,11 +846,7 @@ let construct_class tcopt cls ?full_method:(meth = None) fields =
        of other class fields. *)
         let extracted_method =
           match meth with
-          | Some (Member (cls, Method m)) ->
-            (* We don't want to redeclare the method we're extracting *)
-            HashSet.remove fields (Dep.Method (cls, m));
-            HashSet.remove fields (Dep.SMethod (cls, m));
-            extract_body (Option.value_exn meth)
+          | Some (Member (_, Method _)) -> extract_body (Option.value_exn meth)
           | _ -> ""
         in
         Printf.sprintf "%s\n%s\n%s}" decl body extracted_method))
@@ -1086,18 +1082,22 @@ let collect_dependencies tcopt to_extract =
     in
     Typing_deps.add_dependency_callback "add_dependency" add_dependency;
     let filename = get_filename to_extract in
+    (* Collect dependencies through side effects of typechecking and remove the extracted
+       function/method from the set of dependencies to avoid declaring it twice. *)
     let () =
       match to_extract with
       | Function func ->
         let (_ : (Tast.def * Typing_env_types.global_tvenv) option) =
           Typing_check_service.type_fun tcopt filename func
         in
-        ()
-      | Member (cls, Method _) ->
+        HashSet.remove dependencies (Fun func);
+        HashSet.remove dependencies (FunName func)
+      | Member (cls, Method m) ->
         let (_ : (Tast.def * Typing_env_types.global_tvenv list) option) =
           Typing_check_service.type_class tcopt filename cls
         in
-        ()
+        HashSet.remove dependencies (Method (cls, m));
+        HashSet.remove dependencies (SMethod (cls, m))
       | _ -> raise Unsupported
     in
     let types = Caml.Hashtbl.create 0 in

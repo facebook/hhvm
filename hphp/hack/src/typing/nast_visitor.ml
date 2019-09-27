@@ -115,6 +115,8 @@ class type handler =
     method at_stmt : env -> Nast.stmt -> unit
 
     method at_hint : env -> hint -> unit
+
+    method at_typedef : env -> Nast.typedef -> unit
   end
 
 class virtual handler_base : handler =
@@ -130,6 +132,8 @@ class virtual handler_base : handler =
     method at_stmt _ _ = ()
 
     method at_hint _ _ = ()
+
+    method at_typedef _ _ = ()
   end
 
 let iter_with (handlers : handler list) : iter =
@@ -159,4 +163,8 @@ let iter_with (handlers : handler list) : iter =
     method! on_hint env h =
       List.iter handlers (fun v -> v#at_hint env h);
       super#on_hint env h
+
+    method! on_typedef env t =
+      List.iter handlers (fun v -> v#at_typedef env t);
+      super#on_typedef env t
   end

@@ -663,12 +663,6 @@ end
 (* Helpers *)
 (*****************************************************************************)
 
-let check_constraint { Aast.tp_name = (pos, name); _ } =
-  if String.lowercase name = "this" then
-    Errors.this_reserved pos
-  else if name.[0] <> 'T' then
-    Errors.start_with_T pos
-
 let check_repetition s param =
   let name = param.Aast.param_name in
   if SSet.mem name s then Errors.already_bound param.Aast.param_pos name;
@@ -1293,8 +1287,6 @@ module Make (GetLocals : GetLocals) = struct
     let where_constraints =
       type_where_constraints env c.Aast.c_where_constraints
     in
-    (* Checking for a code smell *)
-    List.iter c.Aast.c_tparams.Aast.c_tparam_list check_constraint;
     let name =
       Env.type_name
         env
@@ -1840,7 +1832,6 @@ module Make (GetLocals : GetLocals) = struct
     (* Cannot use 'this' if it is a public instance method *)
     let (variadicity, paraml) = fun_paraml env m.Aast.m_params in
     let tparam_l = type_paraml env m.Aast.m_tparams in
-    List.iter tparam_l check_constraint;
     let where_constraints =
       type_where_constraints env m.Aast.m_where_constraints
     in
@@ -2007,7 +1998,6 @@ module Make (GetLocals : GetLocals) = struct
     in
     let (variadicity, paraml) = fun_paraml env f.Aast.f_params in
     let x = Env.fun_id env f.Aast.f_name in
-    List.iter f.Aast.f_tparams check_constraint;
     let f_tparams = type_paraml env f.Aast.f_tparams in
     let f_kind = f.Aast.f_fun_kind in
     let body =
@@ -3252,7 +3242,6 @@ module Make (GetLocals : GetLocals) = struct
     let cstrs = make_constraints tdef.Aast.t_tparams in
     let env = Env.make_typedef_env cstrs tdef in
     let tconstraint = Option.map tdef.Aast.t_constraint (hint env) in
-    List.iter tdef.Aast.t_tparams check_constraint;
     let tparaml = type_paraml env tdef.Aast.t_tparams in
     let attrs = user_attributes env tdef.Aast.t_user_attributes in
     {

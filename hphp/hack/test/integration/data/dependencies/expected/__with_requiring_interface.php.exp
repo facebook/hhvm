@@ -1,0 +1,21 @@
+<?hh
+class A0 {
+
+}
+interface IWithRequirement {
+  require extends \A;
+  require extends \A0;
+
+
+}
+class A extends \A0 implements \I1 {
+
+}
+function with_requiring_interface(IWithRequirement $arg): void {}
+interface I1 {
+
+}
+function extract_standalone_make_default(): nothing {
+  throw new Exception();
+}
+

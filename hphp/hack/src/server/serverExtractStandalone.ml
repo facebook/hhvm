@@ -1012,6 +1012,8 @@ and add_signature_dependencies deps obj =
           | Class _ ->
             Sequence.iter (Class.all_ancestors cls) (fun (_, ty) ->
                 add_dep deps ~cls:(Some cls_name) ty);
+            Sequence.iter (Class.all_ancestor_reqs cls) (fun (_, ty) ->
+                add_dep deps ~cls:(Some cls_name) ty);
             let add_implementations interface_name =
               let interf = get_class_exn interface_name in
               if

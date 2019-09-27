@@ -88,3 +88,9 @@ class SimpleDerived extends SimpleClass {
 
   private static int $calls = 0;
 }
+
+interface IWithRequirement {
+  require extends A;
+}
+
+function with_requiring_interface(IWithRequirement $arg): void {}

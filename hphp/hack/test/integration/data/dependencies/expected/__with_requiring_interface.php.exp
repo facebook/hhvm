@@ -4,7 +4,6 @@ class A0 {
 }
 interface IWithRequirement {
   require extends \A;
-  require extends \A0;
 
 
 }
@@ -18,4 +17,5 @@ interface I1 {
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }
+
 

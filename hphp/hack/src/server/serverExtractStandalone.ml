@@ -201,6 +201,11 @@ let format text =
   try Libhackfmt.format_tree (tree_from_string text)
   with Hackfmt_error.InvalidSyntax -> text
 
+let name_from_type (_, ty) =
+  match ty with
+  | Tapply ((_, name), _) -> name
+  | _ -> raise Unsupported
+
 let get_ns obj_name =
   let (ns, _) = String.rsplit2_exn obj_name '\\' in
   ns
@@ -446,11 +451,11 @@ let get_global_object_declaration tcopt obj =
     | _ -> raise UnexpectedDependency)
 
 type ancestors = {
-  extends: string list;
-  implements: string list;
-  uses: string list;
-  req_extends: string list;
-  req_implements: string list;
+  extends: decl_ty list;
+  implements: decl_ty list;
+  uses: decl_ty list;
+  req_extends: decl_ty list;
+  req_implements: decl_ty list;
 }
 
 let get_direct_ancestors cls =
@@ -481,22 +486,39 @@ let get_direct_ancestors cls =
       @@ Sequence.filter seq ~f:(fun n ->
              kind_condition cls_kind (Class.kind (get_class_exn n)))
     in
+    let get_ancestor_types names =
+      List.map names ~f:(fun n ->
+          value_or_not_found n @@ Class.get_ancestor cls n)
+    in
+    let get_req_types names =
+      let names_set = SSet.of_list names in
+      Sequence.to_list
+      @@ Sequence.filter
+           (Sequence.map (Class.all_ancestor_reqs cls) ~f:snd)
+           ~f:(fun ty -> SSet.mem (name_from_type ty) names_set)
+    in
     Ast_defs.
       {
         extends =
-          filter_by_kind direct_ancestors (fun kderived kbase ->
-              (kderived = Cinterface && kbase = Cinterface)
-              || kbase = Cabstract
-              || kbase = Cnormal);
+          get_ancestor_types
+          @@ filter_by_kind direct_ancestors (fun kderived kbase ->
+                 (kderived = Cinterface && kbase = Cinterface)
+                 || kbase = Cabstract
+                 || kbase = Cnormal);
         implements =
-          filter_by_kind direct_ancestors (fun kderived kbase ->
-              kderived <> Cinterface && kbase = Cinterface);
-        uses = filter_by_kind direct_ancestors (fun _ kbase -> kbase = Ctrait);
+          get_ancestor_types
+          @@ filter_by_kind direct_ancestors (fun kderived kbase ->
+                 kderived <> Cinterface && kbase = Cinterface);
+        uses =
+          get_ancestor_types
+          @@ filter_by_kind direct_ancestors (fun _ kbase -> kbase = Ctrait);
         req_extends =
-          filter_by_kind direct_reqs (fun _ kbase ->
-              kbase = Cabstract || kbase = Cnormal);
+          get_req_types
+          @@ filter_by_kind direct_reqs (fun _ kbase ->
+                 kbase = Cabstract || kbase = Cnormal);
         req_implements =
-          filter_by_kind direct_reqs (fun _ kbase -> kbase = Cinterface);
+          get_req_types
+          @@ filter_by_kind direct_reqs (fun _ kbase -> kbase = Cinterface);
       })
 
 let get_enum_declaration tcopt enum =
@@ -534,15 +556,6 @@ let get_class_declaration tcopt (cls : Decl_provider.class_decl) =
     let { extends; implements; uses; req_extends; req_implements } =
       get_direct_ancestors cls
     in
-    let print_ancestor_ty ancestor_list =
-      List.map ancestor_list ~f:(fun a ->
-          let not_found_msg = Printf.sprintf "ancestor %s of %s" a name in
-          let ancestor_ty =
-            value_exn (DependencyNotFound not_found_msg)
-            @@ Class.get_ancestor cls a
-          in
-          Typing_print.full_decl tcopt ancestor_ty)
-    in
     let prefix_if_nonempty prefix s =
       if s = "" then
         ""
@@ -550,28 +563,36 @@ let get_class_declaration tcopt (cls : Decl_provider.class_decl) =
         prefix ^ s
     in
     let extends =
-      prefix_if_nonempty "extends " @@ list_items @@ print_ancestor_ty extends
+      prefix_if_nonempty "extends "
+      @@ list_items
+      @@ List.map ~f:(Typing_print.full_decl tcopt) extends
     in
     let implements =
       prefix_if_nonempty "implements "
       @@ list_items
-      @@ print_ancestor_ty implements
+      @@ List.map ~f:(Typing_print.full_decl tcopt) implements
     in
     let uses =
-      if list_items uses = "" then
+      if List.is_empty uses then
         ""
       else
-        Printf.sprintf "use %s;\n" (list_items uses)
+        Printf.sprintf
+          "use %s;\n"
+          (list_items @@ List.map ~f:(Typing_print.full_decl tcopt) uses)
     in
     let req_extends =
       String.concat
       @@ List.map req_extends (fun s ->
-             Printf.sprintf "require extends %s;\n" s)
+             Printf.sprintf
+               "require extends %s;\n"
+               (Typing_print.full_decl tcopt s))
     in
     let req_implements =
       String.concat
       @@ List.map req_implements (fun s ->
-             Printf.sprintf "require implements %s;\n" s)
+             Printf.sprintf
+               "require implements %s;\n"
+               (Typing_print.full_decl tcopt s))
     in
     (* TODO: traits, records *)
     Printf.sprintf

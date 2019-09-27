@@ -42,3 +42,11 @@ function with_properties<T>(GenericDerived<T> $arg) : Mode {
 
 function with_generic_type<T>(GenericType<T> $arg): void {
 }
+
+interface GenericInterface<Tfirst, Tsecond> {}
+
+interface IGenericDerived<T> extends GenericInterface<T, int> {
+  require extends GenericBase<float, T>;
+}
+
+function with_generic_interface<T>(IGenericDerived<T> $arg): void {}

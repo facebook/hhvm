@@ -857,7 +857,6 @@ struct RuntimeOption {
   F(uint32_t, HHIRInliningMaxInitObjProps, 12)                          \
   F(bool,     HHIRInliningIgnoreHints, !debug)                          \
   F(bool,     HHIRInliningUseStackedCost, true)                         \
-  F(bool,     HHIRInliningUseReachableCost, true)                       \
   F(bool,     HHIRInliningUseLayoutBlocks, false)                       \
   F(bool, HHIRInlineFrameOpts,         true)                            \
   F(bool, HHIRPartialInlineFrameOpts,  true)                            \

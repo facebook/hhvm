@@ -54,7 +54,9 @@ Vcost computeVunitCost(const Vunit& unit) {
   int cost = 0;
   bool incomplete = false;
 
-  auto const process = [&] (const Vblock& block) {
+  for (auto const b : sortBlocks(unit)) {
+    auto const& block = unit.blocks[b];
+
     auto const factor = [&] {
       switch (block.area_idx) {
         case AreaIndex::Main:
@@ -72,12 +74,6 @@ Vcost computeVunitCost(const Vunit& unit) {
       cost += info.cost * factor;
       incomplete |= info.incomplete;
     }
-  };
-
-  if (RuntimeOption::EvalHHIRInliningUseReachableCost) {
-    for (auto const b : sortBlocks(unit)) process(unit.blocks[b]);
-  } else {
-    for (auto const& b : unit.blocks) process(b);
   }
 
   return {cost, incomplete};

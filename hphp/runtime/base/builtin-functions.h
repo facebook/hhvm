@@ -274,10 +274,6 @@ bool is_constructor_name(const char* func);
                                              unsigned int arg_num,
                                              DataType type);
 
-void raise_soft_late_init_prop(const Class* cls,
-                               const StringData* propName,
-                               bool isSProp);
-
 void check_collection_cast_to_array();
 
 Object create_object_only(const String& s);

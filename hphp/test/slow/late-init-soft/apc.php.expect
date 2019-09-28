@@ -1,3 +1,0 @@
-Accessing <<__SoftLateInit>> property 'A::y' before initialization. Providing default.
-vec(0) {
-}

@@ -96,7 +96,6 @@ ExecutionContext::ExecutionContext()
   , m_lastErrorNum(0)
   , m_deferredErrors(staticEmptyVecArray())
   , m_throwAllErrors(false)
-  , m_softLateInitDefault{init_null_variant}
   , m_pageletTasksStarted(0)
   , m_vhost(nullptr)
   , m_globalVarEnv(nullptr)

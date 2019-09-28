@@ -107,28 +107,15 @@ APCHandle::Pair APCObject::Construct(ObjectData* objectData) {
     }
 
     if (UNLIKELY(type(objProp) == KindOfUninit) && (attrs & AttrLateInit)) {
-      if (attrs & AttrLateInitSoft) {
-        assertx(!(attrs & AttrBuiltin));
-        raise_soft_late_init_prop(
-          propInfo[slot].cls,
-          propInfo[slot].name,
-          false
-        );
-        tvDup(
-          *g_context->getSoftLateInitDefault().asTypedValue(),
-          *const_cast<TypedValue*>(objPropVec + index)
-        );
-      } else {
-        auto const origSlot = slot;
-        while (slot > 0) {
-          --slot;
-          auto idx = cls->propSlotToIndex(slot);
-          apcPropVec[idx]->unreferenceRoot();
-        }
-        apc_sized_free(apcObj, size);
-        throw_late_init_prop(propInfo[origSlot].cls, propInfo[origSlot].name,
-                             false);
+      auto const origSlot = slot;
+      while (slot > 0) {
+        --slot;
+        auto idx = cls->propSlotToIndex(slot);
+        apcPropVec[idx]->unreferenceRoot();
       }
+      apc_sized_free(apcObj, size);
+      throw_late_init_prop(propInfo[origSlot].cls, propInfo[origSlot].name,
+                           false);
     }
 
     // If the property value satisfies its type-hint in all contexts, we don't

@@ -121,10 +121,6 @@ Type knownTypeForProp(const Class::Prop& prop,
                       const Class* propCls,
                       const Class* ctx,
                       bool ignoreLateInit) {
-  // The default value means that a AttrLateInitSoft property can potentially be
-  // anything, so be pessimistic.
-  if (prop.attrs & AttrLateInitSoft) return TGen;
-
   auto knownType = TGen;
   if (RuntimeOption::EvalCheckPropTypeHints >= 3) {
     knownType = typeFromPropTC(prop.typeConstraint, propCls, ctx, false);
@@ -200,10 +196,6 @@ PropInfo getPropertyOffset(IRGS& env,
   if (env.context.kind == TransKind::Profile && isJitSerializing()) {
     gen(env, ProfileProp, cns(env, prop.baseCls->name()), cns(env, name));
   }
-
-  // If we want the AttrLateInitSoft default value behavior here, resort to the
-  // runtime helpers to handle it.
-  if ((prop.attrs & AttrLateInitSoft) && !ignoreLateInit) return PropInfo();
 
   return PropInfo(
     baseClass->declPropOffset(idx),

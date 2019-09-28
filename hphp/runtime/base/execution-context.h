@@ -321,9 +321,6 @@ public:
 
   bool hasRequestEventHandlers() const;
 
-  const Variant& getSoftLateInitDefault() const;
-  void setSoftLateInitDefault(Variant);
-
   const RepoOptions& getRepoOptionsForCurrentFrame() const;
 
   const RepoOptions* getRepoOptionsForRequest() const;
@@ -575,7 +572,6 @@ private:
   String m_timezone;
   bool m_throwAllErrors;
   req::ptr<StreamContext> m_streamContext;
-  Variant m_softLateInitDefault;
 
   // session backup/restore for RPCRequestHandler
   std::array<Array, 2> m_shutdownsBackup;

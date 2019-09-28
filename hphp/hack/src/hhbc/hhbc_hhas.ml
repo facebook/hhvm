@@ -1965,12 +1965,6 @@ let property_attributes p =
       attrs
   in
   let attrs =
-    if P.is_soft_late_init p then
-      "late_init_soft" :: attrs
-    else
-      attrs
-  in
-  let attrs =
     if P.is_no_bad_redeclare p then
       "no_bad_redeclare" :: attrs
     else

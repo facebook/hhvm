@@ -366,10 +366,6 @@ Array HHVM_FUNCTION(HH_deferred_errors) {
   return g_context->releaseDeferredErrors();
 }
 
-void HHVM_FUNCTION(HH_set_soft_late_init_default, const Variant& v) {
-  return g_context->setSoftLateInitDefault(v);
-}
-
 Array HHVM_FUNCTION(SL_extract_trace, const Resource& handle) {
   auto bt = dyn_cast<CompactTrace>(handle);
   if (!bt) {
@@ -401,7 +397,6 @@ void StandardExtension::initErrorFunc() {
   HHVM_FE(trigger_sampled_error);
   HHVM_FE(user_error);
   HHVM_FALIAS(HH\\deferred_errors, HH_deferred_errors);
-  HHVM_FALIAS(HH\\set_soft_late_init_default, HH_set_soft_late_init_default);
   HHVM_FALIAS(__SystemLib\\extract_trace, SL_extract_trace);
   HHVM_RC_INT(DEBUG_BACKTRACE_PROVIDE_OBJECT, k_DEBUG_BACKTRACE_PROVIDE_OBJECT);
   HHVM_RC_INT(DEBUG_BACKTRACE_IGNORE_ARGS, k_DEBUG_BACKTRACE_IGNORE_ARGS);

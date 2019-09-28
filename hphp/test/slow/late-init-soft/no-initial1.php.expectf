@@ -1,1 +1,0 @@
-Fatal error: <<__SoftLateInit>> property 'A::$x1' cannot have an initial value in %s/no-initial1.php on line 5

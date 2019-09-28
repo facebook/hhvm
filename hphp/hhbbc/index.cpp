@@ -3646,7 +3646,7 @@ Type lookup_public_prop_impl(
   if (!prop) return TGen;
   // Make sure its non-static and public. Otherwise its another function's
   // problem.
-  if (prop->attrs & (AttrStatic | AttrPrivate | AttrLateInitSoft)) return TGen;
+  if (prop->attrs & (AttrStatic | AttrPrivate)) return TGen;
 
   // Get a type corresponding to its declared type-hint (if any).
   auto ty = adjust_type_for_prop(
@@ -5593,13 +5593,8 @@ void Index::init_public_static_prop_types() {
        * include the Uninit (which isn't really a user-visible type for the
        * property) or by the time we union things in we'll have inferred nothing
        * much.
-       *
-       * If the property is AttrLateInitSoft, it can be anything because of the
-       * default value, so give the initial value as TInitGen and don't honor
-       * the type-constraint, which will keep us from inferring anything.
        */
       auto const initial = [&] {
-        if (prop.attrs & AttrLateInitSoft) return TInitGen;
         auto const tyRaw = from_cell(prop.val);
         if (tyRaw.subtypeOf(BUninit)) return TBottom;
         if (prop.attrs & AttrSystemInitialValue) return tyRaw;
@@ -5608,18 +5603,19 @@ void Index::init_public_static_prop_types() {
         );
       }();
 
-      auto const tc = (prop.attrs & AttrLateInitSoft)
-        ? nullptr
-        : &prop.typeConstraint;
-
       cinfo->publicStaticProps[prop.name] =
         PublicSPropEntry {
           union_of(
-            adjust_type_for_prop(*this, *cinfo->cls, tc, TInitGen),
+            adjust_type_for_prop(
+              *this,
+              *cinfo->cls,
+              &prop.typeConstraint,
+              TInitGen
+            ),
             initial
           ),
           initial,
-          tc,
+          &prop.typeConstraint,
           0,
           true
         };

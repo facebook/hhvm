@@ -203,7 +203,6 @@ void PreClass::Prop::prettyPrint(std::ostream& out,
   if (m_attrs & AttrInitialSatisfiesTC) { out << "(initial-satisfies-tc) "; }
   if (m_attrs & AttrLSB) { out << "(lsb) "; }
   if (m_attrs & AttrLateInit) { out << "(late-init) "; }
-  if (m_attrs & AttrLateInitSoft) { out << "(late-init-soft) "; }
   out << preClass->name()->data() << "::" << m_name->data() << " = ";
   if (m_val.m_type == KindOfUninit) {
     out << "<non-scalar>";

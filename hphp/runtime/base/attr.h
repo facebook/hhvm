@@ -122,10 +122,6 @@ enum Attr {
   // Traits have been flattened on this class.
   AttrNoExpandTrait        = (1u << 12), //    X  |          |         //
                                          //       |          |         //
-  // Like AttrLateInit, but instead of throwing, will provide a configurable
-  // default value (and have that value from that point on). This can only be
-  // set if AttrLateInit is set.
-  AttrLateInitSoft         = (1u << 12), //       |    X     |         //
   // Only valid in WholeProgram mode.  Indicates on a class that the class is
   // not extended, or on a method that no extending class defines the method.
   AttrNoOverride           = (1u << 13), //    X  |          |    X    //

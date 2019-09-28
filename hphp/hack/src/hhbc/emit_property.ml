@@ -109,7 +109,6 @@ let from_ast
   in
   let is_lsb = Hhas_attribute.has_lsb attributes in
   let is_late_init = Hhas_attribute.has_late_init attributes in
-  let is_soft_late_init = Hhas_attribute.has_soft_late_init attributes in
   let visibility = cv_visibility in
   let is_private = cv_visibility = Aast.Private in
   if
@@ -149,22 +148,18 @@ let from_ast
     match initial_value with
     | None ->
       let v =
-        if is_late_init || is_soft_late_init then
+        if is_late_init then
           Some Typed_value.Uninit
         else
           None
       in
       (v, false, true, None)
     | Some expr ->
-      if is_late_init || is_soft_late_init then
+      if is_late_init then
         Emit_fatal.raise_fatal_parse
           pos
           (Printf.sprintf
-             "<<__%sLateInit>> property '%s::$%s' cannot have an initial value"
-             ( if is_soft_late_init then
-               "Soft"
-             else
-               "" )
+             "<<__LateInit>> property '%s::$%s' cannot have an initial value"
              (Utils.strip_ns (snd class_.T.c_name))
              (Hhbc_id.Prop.to_raw_string pid));
       let is_collection_map =
@@ -222,7 +217,6 @@ let from_ast
     false (*no_implicit_null*)
     false (*initial_satisfies_tc*)
     is_late_init
-    is_soft_late_init
     pid
     initial_value
     initializer_instrs

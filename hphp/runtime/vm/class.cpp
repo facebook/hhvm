@@ -1206,9 +1206,7 @@ Class::PropValLookup Class::getSPropIgnoreLateInit(
       "Static property initialization failed to initialize a property."
     );
 
-    // Skip asserting on the property type for AttrLateInitSoft properties
-    // because the default value means they can be potentially anything.
-    if (sProp->m_type != KindOfUninit && !(decl.attrs & AttrLateInitSoft)) {
+    if (sProp->m_type != KindOfUninit) {
       if (RuntimeOption::RepoAuthoritative) {
         auto const repoTy = staticPropRepoAuthType(lookup.slot);
         always_assert(tvMatchesRepoAuthType(*sProp, repoTy));
@@ -1243,15 +1241,7 @@ Class::PropValLookup Class::getSProp(
   if (lookup.val && UNLIKELY(lookup.val->m_type == KindOfUninit)) {
     auto const& decl = m_staticProperties[lookup.slot];
     if (decl.attrs & AttrLateInit) {
-      if (decl.attrs & AttrLateInitSoft) {
-        raise_soft_late_init_prop(decl.cls, sPropName, true);
-        tvDup(
-          *g_context->getSoftLateInitDefault().asTypedValue(),
-          *lookup.val
-        );
-      } else {
-        throw_late_init_prop(decl.cls, sPropName, true);
-      }
+      throw_late_init_prop(decl.cls, sPropName, true);
     }
   }
   return lookup;
@@ -2495,20 +2485,15 @@ void Class::setProperties() {
       };
 
       auto const lateInitCheck = [&] (const Class::Prop& prop) {
-        auto const check = [&] (Attr attr, const char* str) {
-          if ((prop.attrs ^ preProp->attrs()) & attr) {
-            raise_error(
-              "Property %s::$%s must %sbe <<__%s>> (as in class %s)",
-              m_preClass->name()->data(),
-              preProp->name()->data(),
-              prop.attrs & attr ? "" : "not ",
-              str,
-              m_parent->name()->data()
-            );
-          }
-        };
-        check(AttrLateInitSoft, "SoftLateInit");
-        check(AttrLateInit, "LateInit");
+        if ((prop.attrs ^ preProp->attrs()) & AttrLateInit) {
+          raise_error(
+            "Property %s::$%s must %sbe <<__LateInit>> (as in class %s)",
+            m_preClass->name()->data(),
+            preProp->name()->data(),
+            prop.attrs & AttrLateInit ? "" : "not ",
+            m_parent->name()->data()
+          );
+        }
       };
 
       auto const redeclareProp = [&] (const Slot slot) {

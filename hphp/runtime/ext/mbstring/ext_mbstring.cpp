@@ -3610,8 +3610,9 @@ static Variant _php_mb_regex_ereg_replace_exec(const Variant& pattern,
       while (i < replacement.size()) {
         int fwd = (int)php_mb_mbchar_bytes_ex(p, enc);
         n = -1;
-        if ((replacement.size() - i) >= 2 && fwd == 1 &&
-          p[0] == '\\' && p[1] >= '0' && p[1] <= '9') {
+        auto const remaining = replacement.size() - i;
+        if (remaining >= 2 && fwd == 1 &&
+            p[0] == '\\' && p[1] >= '0' && p[1] <= '9') {
           n = p[1] - '0';
         }
         if (n >= 0 && n < regs->num_regs) {
@@ -3622,10 +3623,14 @@ static Variant _php_mb_regex_ereg_replace_exec(const Variant& pattern,
           }
           p += 2;
           i += 2;
-        } else {
+        } else if (remaining >= fwd) {
           out_buf.append(p, fwd);
           p += fwd;
           i += fwd;
+        } else {
+          raise_warning("Replacement ends with unterminated %s: 0x%hhx",
+                        enc->name, *p);
+          break;
         }
       }
       n = regs->end[0];

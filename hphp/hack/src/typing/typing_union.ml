@@ -109,6 +109,11 @@ let rec make_union env r tyl reason_nullable_opt dyn_opt =
   in
   (env, ty)
 
+let exact_least_upper_bound e1 e2 =
+  match (e1, e2) with
+  | (Exact, Exact) -> Exact
+  | (_, _) -> Nonexact
+
 let rec union env ((r1, _) as ty1) ((r2, _) as ty2) =
   let (env, result) =
     if ty_equal ty1 ty2 then
@@ -163,7 +168,7 @@ and simplify_union_ env ty1 ty2 r =
       (env, Some (MakeType.num r))
     | ((_, Tclass ((p, id1), e1, tyl1)), (_, Tclass ((_, id2), e2, tyl2)))
       when id1 = id2 ->
-      let e = Typing_ops.LeastUpperBound.exact_least_upper_bound e1 e2 in
+      let e = exact_least_upper_bound e1 e2 in
       let (env, tyl) = union_class env id1 tyl1 tyl2 in
       (env, Some (r, Tclass ((p, id1), e, tyl)))
     | ((_, Tarraykind ak1), (_, Tarraykind ak2)) ->

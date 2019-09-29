@@ -224,8 +224,6 @@ let rec array_get
         (* coerce if possible *)
         match
           Typing_coercion.try_coerce
-            p
-            reason
             env
             ty_have
             { et_type = ty_expect; et_enforced = true }
@@ -666,8 +664,6 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
         (* coerce if possible *)
         match
           Typing_coercion.try_coerce
-            p
-            reason
             env
             ty_have
             { et_type = ty_expect; et_enforced = true }

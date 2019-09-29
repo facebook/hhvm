@@ -32,7 +32,7 @@ let sub_type p ur env ty_sub ty_super on_error =
   Errors.try_add_err
     p
     (Reason.string_of_ureason ur)
-    (fun () -> Typing_utils.sub_type env ty_sub ty_super on_error)
+    (fun () -> Typing_subtype.sub_type env ty_sub ty_super on_error)
     (fun () -> env)
 
 let sub_type_decl p ur env ty_sub ty_super =
@@ -46,12 +46,3 @@ let unify_decl p ur env ty1 ty2 =
   let (env, ty2) = Typing_utils.localize_with_self env ty2 in
   ignore (sub_type p ur env ty2 ty1 Errors.unify_error);
   ignore (sub_type p ur env ty1 ty2 Errors.unify_error)
-
-module LeastUpperBound = struct
-  open Typing_defs
-
-  let exact_least_upper_bound e1 e2 =
-    match (e1, e2) with
-    | (Exact, Exact) -> Exact
-    | (_, _) -> Nonexact
-end

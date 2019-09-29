@@ -3533,22 +3533,6 @@ and class_const ?(incl_tc = false) env p ((cpos, cid), mid) =
       cid
   in
   make_result env p (T.Class_const (ce, mid)) const_ty
-
-and anon_sub_type pos ur env ty_sub ty_super on_error =
-  Errors.try_add_err
-    pos
-    (Reason.string_of_ureason ur)
-    (fun () -> SubType.sub_type env ty_sub ty_super on_error)
-    (fun () -> env)
-
-and anon_coerce_type pos ur env ty_have ty_expect =
-  Typing_coercion.coerce_type
-    ~sub_fn:anon_sub_type
-    pos
-    ur
-    env
-    ty_have
-    ty_expect
   (*****************************************************************************)
   (* XHP attribute/body helpers. *)
   (*****************************************************************************)
@@ -3627,7 +3611,7 @@ and anon_bind_param params (env, t_params) ty : env * Tast.fun_param list =
       let (env, h) = Phase.localize ~ety_env env h in
       let pos = Reason.to_pos (fst ty) in
       let env =
-        anon_coerce_type
+        Typing_coercion.coerce_type
           pos
           Reason.URparam
           env
@@ -3666,7 +3650,7 @@ and anon_bind_variadic env vparam variadic_ty =
       let (env, h) = Phase.localize ~ety_env env h in
       let pos = Reason.to_pos (fst variadic_ty) in
       let env =
-        anon_coerce_type
+        Typing_coercion.coerce_type
           pos
           Reason.URparam
           env

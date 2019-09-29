@@ -28,12 +28,7 @@ let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
   let type_index env ty_have ty_expect reason =
     let t_env = Env.tast_env_as_typing_env env in
     match
-      Typing_coercion.try_coerce
-        index_pos
-        Reason.URnone
-        t_env
-        ty_have
-        (MakeType.unenforced ty_expect)
+      Typing_coercion.try_coerce t_env ty_have (MakeType.unenforced ty_expect)
     with
     | Some _ -> ()
     | None ->

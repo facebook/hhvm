@@ -12,21 +12,32 @@ open Aast
 open Nast_check_env
 module SN = Naming_special_names
 
+let error_if_static_prop_is_const env cv =
+  if
+    cv.cv_is_static
+    && (not (TypecheckerOptions.const_static_props env.tcopt))
+    && Attributes.mem SN.UserAttributes.uaConst cv.cv_user_attributes
+  then
+    let pos = fst cv.cv_id in
+    Errors.experimental_feature pos "Const properties cannot be static."
+
+(* Non-static properties cannot have attribute __LSB *)
+let error_if_nonstatic_prop_with_lsb cv =
+  if not cv.cv_is_static then
+    let lsb_pos =
+      Attributes.mem_pos SN.UserAttributes.uaLSB cv.cv_user_attributes
+    in
+    Option.iter lsb_pos Errors.nonstatic_property_with_lsb
+
 let handler =
   object
     inherit Nast_visitor.handler_base
 
     method! at_class_ env cv =
       let check_vars cv =
-        let pos = fst cv.cv_id in
-        if
-          cv.cv_is_static
-          && (not (TypecheckerOptions.const_static_props env.tcopt))
-          && Attributes.mem SN.UserAttributes.uaConst cv.cv_user_attributes
-        then
-          Errors.experimental_feature pos "Const properties cannot be static."
-        else
-          ()
+        error_if_static_prop_is_const env cv;
+        error_if_nonstatic_prop_with_lsb cv;
+        ()
       in
       List.iter cv.c_vars check_vars
   end

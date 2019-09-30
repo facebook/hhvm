@@ -1594,13 +1594,6 @@ module Make (GetLocals : GetLocals) = struct
   and class_prop_non_static env ?(const = None) cv =
     let h = Option.map cv.Aast.cv_type (hint env) in
     let attrs = user_attributes env cv.Aast.cv_user_attributes in
-    let lsb_pos = Attributes.mem_pos SN.UserAttributes.uaLSB attrs in
-    (* Non-static properties cannot have attribute __LSB *)
-    let _ =
-      match lsb_pos with
-      | Some p -> Errors.nonstatic_property_with_lsb p
-      | None -> ()
-    in
     (* if class is __Const, make all member fields __Const *)
     let attrs =
       match const with

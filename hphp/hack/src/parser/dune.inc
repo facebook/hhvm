@@ -82,6 +82,7 @@
   (modules
     ast_check
     docblock_finder
+    docblock_parser
     full_fidelity_ast
     hack_grammar_descriptor_helper
     ide_parser_cache

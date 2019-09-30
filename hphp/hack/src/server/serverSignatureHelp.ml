@@ -108,78 +108,6 @@ let get_occurrence_info
   | None -> None
   | Some ft -> Some (occurrence, ft, def_opt)
 
-let param_doc_re_str = {|@param[ ]+\([^ ]+\)[ ]+\(.+\)|}
-
-let param_doc_re = Str.regexp param_doc_re_str
-
-type param_info = {
-  param_name: string;
-  param_desc: string;
-}
-
-let parse_param_docs (line : string) : param_info option =
-  if Str.string_match param_doc_re line 0 then
-    let param_name = Str.matched_group 1 line in
-    let param_desc = Str.matched_group 2 line in
-    Some { param_name; param_desc }
-  else
-    None
-
-(* convert all multiline @attribute descriptions to singleline ones *)
-let parse_documentation_attributes (documentation_lines : string list) :
-    string list =
-  let attributes_info =
-    List.fold
-      ~init:([], None)
-      ~f:(fun (documentation_attributes, current_attribute) line ->
-        let trimmed_line = Caml.String.trim line in
-        if Str.string_match (Str.regexp "@.*") trimmed_line 0 then
-          (* new attribute *)
-          match current_attribute with
-          | Some current_attribute ->
-            (* add previous attribute to the list and start building up this one *)
-            ( List.cons current_attribute documentation_attributes,
-              Some trimmed_line )
-          | None -> (documentation_attributes, Some trimmed_line)
-        else
-          (* either continuing attribute or not related to attributes *)
-          match current_attribute with
-          | Some current_attribute ->
-            let new_current_attribute =
-              current_attribute ^ " " ^ trimmed_line
-            in
-            (documentation_attributes, Some new_current_attribute)
-          | None -> (documentation_attributes, None))
-      documentation_lines
-  in
-  match snd @@ attributes_info with
-  | Some current_attribute ->
-    (* add final attribute *)
-    List.cons current_attribute (fst @@ attributes_info)
-  | None -> fst @@ attributes_info
-
-(* convert the documentation lines into a map of mentioned parameters -> their descriptions *)
-let get_param_docs (documentation_lines : string list) :
-    string Core_kernel.String.Map.t =
-  let documentation_attributes =
-    parse_documentation_attributes documentation_lines
-  in
-  List.fold
-    ~init:String.Map.empty
-    ~f:(fun param_docs line ->
-      let split = parse_param_docs line in
-      match split with
-      | Some param_info ->
-        let param_name =
-          if String_utils.string_starts_with param_info.param_name "$" then
-            param_info.param_name
-          else
-            "$" ^ param_info.param_name
-        in
-        Map.set ~key:param_name ~data:param_info.param_desc param_docs
-      | None -> param_docs)
-    documentation_attributes
-
 let go
     ~(env : ServerEnv.env)
     ~(file : ServerCommandTypes.file_input)
@@ -250,15 +178,10 @@ let go
                 ~base_class_name
                 ~file
             in
-            let documentation_split =
-              match siginfo_documentation with
-              | Some doc -> Some (Str.split (Str.regexp "\n") doc)
-              | None -> None
-            in
             let param_docs =
-              match documentation_split with
-              | Some documentation_split ->
-                Some (get_param_docs documentation_split)
+              match siginfo_documentation with
+              | Some siginfo_documentation ->
+                Some (Docblock_parser.get_param_docs siginfo_documentation)
               | None -> None
             in
             let params =

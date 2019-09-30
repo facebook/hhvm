@@ -86,7 +86,7 @@ PDOSqliteConnection::PDOSqliteConnection() : m_db(NULL) {
 
 PDOSqliteConnection::~PDOSqliteConnection() {
   if (m_db) {
-    sqlite3_close(m_db);
+    sqlite3_close_v2(m_db);
   }
   if (m_einfo.errmsg) {
     free(m_einfo.errmsg);
@@ -158,7 +158,7 @@ int PDOSqliteConnection::handleError(const char *file, int line,
 
 bool PDOSqliteConnection::closer() {
   if (m_db) {
-    sqlite3_close(m_db);
+    sqlite3_close_v2(m_db);
     m_db = NULL;
   }
   if (m_einfo.errmsg) {

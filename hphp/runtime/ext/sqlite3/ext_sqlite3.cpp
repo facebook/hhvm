@@ -177,7 +177,7 @@ SQLite3::SQLite3() : m_raw_db(nullptr) {
 
 SQLite3::~SQLite3() {
   if (m_raw_db) {
-    sqlite3_close(m_raw_db);
+    sqlite3_close_v2(m_raw_db);
   }
 }
 
@@ -247,7 +247,7 @@ bool HHVM_METHOD(SQLite3, busytimeout,
 bool HHVM_METHOD(SQLite3, close) {
   auto *data = Native::data<SQLite3>(this_);
   if (data->m_raw_db) {
-    int errcode = sqlite3_close(data->m_raw_db);
+    int errcode = sqlite3_close_v2(data->m_raw_db);
     if (errcode != SQLITE_OK) {
       raise_warning("Unable to close database: %d, %s", errcode,
                     sqlite3_errmsg(data->m_raw_db));

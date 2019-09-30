@@ -621,7 +621,7 @@ void Repo::connect() {
 
 void Repo::disconnect() noexcept {
   if (m_dbc != nullptr) {
-    sqlite3_close(m_dbc);
+    sqlite3_close_v2(m_dbc);
     m_dbc = nullptr;
     m_localReadable = false;
     m_localWritable = false;

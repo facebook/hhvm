@@ -205,7 +205,6 @@ final class Map<Tk as arraykey, Tv> implements MutableMap<Tk, Tv> {
    * @guide /hack/collections/examples
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  /* HH_FIXME[3007]: This is intentional; not a constructor */
   public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $callback): Map<Tk, Tu>;
 
   /**

@@ -1,6 +1,6 @@
 File "map_lambda_bad_pos.php", line 6, characters 23-46:
 Invalid argument (Typing[4110])
-File "collections/Map.hhi", line 229, characters 54-75:
+File "collections/Map.hhi", line 228, characters 54-75:
 Expected ~(function(string, bool): [unresolved]) because it is an unenforceable type
 File "map_lambda_bad_pos.php", line 6, characters 23-46:
 But got (function(int $k, bool $v): [unresolved])

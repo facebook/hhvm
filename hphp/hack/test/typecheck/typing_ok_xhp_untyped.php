@@ -9,10 +9,14 @@
  *
  */
 
-class A implements XHPChild {}
+namespace x {
+	class :dumb {}
+}
 
-class :x:dumb {}
+namespace {
+	class A implements XHPChild {}
 
-function foo($y): void {
-  $y = <x:dumb>{0}{'hello'}{$y}{new A()}</x:dumb>;
+	function foo($y): void {
+		$y = <x:dumb>{0}{'hello'}{$y}{new A()}</x:dumb>;
+	}
 }

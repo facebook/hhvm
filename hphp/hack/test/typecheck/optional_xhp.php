@@ -9,12 +9,15 @@
  *
  */
 
-class A {
-  public ?:x:base $xhp;
-
-  public function foo(?:x:base $x): ?:x:base {
-    return null;
-  }
+namespace x {
+	class :base {}
 }
+namespace {
+	class A {
+		public ?:x:base $xhp;
 
-class :x:base {}
+		public function foo(?:x:base $x): ?:x:base {
+			return null;
+		}
+	}
+}

@@ -9,8 +9,12 @@
  *
  */
 
-class :x:xx {}
+namespace x {
+	class :xx {}
+}
 
-function test(): void {
-  $x = <x:xx><x:xy></x:xy></x:xx>;
+namespace {
+	function test(): void {
+		$x = <x:xx><x:xy></x:xy></x:xx>;
+	}
 }

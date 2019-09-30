@@ -1,18 +1,18 @@
 <?hh
 
-class :xhp:foo-element {}
+namespace xhp {
+	class :foo-element {}
 
-class :xhp:bar {
-  attribute :xhp:foo-element;
-  public function genFoo(
-    :xhp:foo-element $e,
-  ): :xhp:foo-element {
-    return <xhp:foo-element />;
-  }
+	class :bar {
+		attribute :foo-element;
+		public function genFoo(:foo-element $e): :foo-element {
+			return <foo-element />;
+		}
+	}
 }
 
-function test(
-  :xhp:foo-element $e,
-): :xhp:foo-element {
-  return <xhp:foo-element />;
+namespace {
+	function test(:xhp:foo-element $e): :xhp:foo-element {
+		return <xhp:foo-element />;
+	}
 }

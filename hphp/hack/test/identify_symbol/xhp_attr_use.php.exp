@@ -1,10 +1,10 @@
-name: \:xhp:foo-element, kind: type_id, span: line 6, characters 13-28, is_declaration: false
+name: \xhp\:foo-element, kind: type_id, span: line 9, characters 13-28, is_declaration: false
 definition:
- :xhp:foo-element
+ xhp\:foo-element
    kind: class
-   id: type_id:::xhp:foo-element
-   position: line 3, characters 7-22
-   span: line 3, character 1 - line 3, character 25
+   id: type_id::xhp\:foo-element
+   position: line 4, characters 8-19
+   span: line 4, character 2 - line 4, character 22
    modifiers: 
 
 

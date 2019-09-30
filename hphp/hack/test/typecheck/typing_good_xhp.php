@@ -9,12 +9,16 @@
  *
  */
 
-class A implements XHPChild {}
+namespace x {
+	class :dumb {}
+}
 
-class :x:dumb {}
+namespace {
+	class A implements XHPChild {}
 
-function foo(mixed $x, string $s, ConstVector<string> $cs): void {
-  // This is allowed
-  if ($x !== null) $s = $cs;
-  $y = <x:dumb>{0}{'hello'}{$s}{new A()}</x:dumb>;
+	function foo(mixed $x, string $s, ConstVector<string> $cs): void {
+		// This is allowed
+		if ($x !== null) $s = $cs;
+		$y = <x:dumb>{0}{'hello'}{$s}{new A()}</x:dumb>;
+	}
 }

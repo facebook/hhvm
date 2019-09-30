@@ -213,6 +213,31 @@ let elaborate_defined_id nsenv kind (p, id) =
   in
   ((p, newid), nsenv, update_nsenv)
 
+let rec elaborate_xhp_namespace_impl parts =
+  match parts with
+  | [] -> ""
+  | h :: [] -> ":" ^ h
+  | h::t -> h ^ "\\" ^ elaborate_xhp_namespace_impl t
+
+(* If the given id is an xhp id, for example :foo:bar
+ * we will pull it apart into foo and bar, then reassemble
+ * into \foo\:bar. This gives us the fully qualified name
+ * in a way that the rest of elaborate_id_impl expects.
+ *)
+let elaborate_xhp_namespace id =
+  let is_xhp s = String.length s <> 0 && s.[0] = ':' in
+  let strip_colon s = String_utils.lstrip s ":" in
+
+  if is_xhp id = false then
+    id
+  else
+    (* all xhp ids here have a leading colon here that we don't want to split on *)
+    let parts = String.split (strip_colon id) ~on: ':' in
+    if List.length parts > 1 then
+      elaborate_xhp_namespace_impl parts
+    else
+      id
+
 (* Resolves an identifier in a given namespace environment. For example, if we
  * are in the namespace "N\O", the identifier "P\Q" is resolved to "\N\O\P\Q".
  *
@@ -230,6 +255,9 @@ let elaborate_defined_id nsenv kind (p, id) =
  * used to be other schemes here.)
  *)
 let elaborate_id_impl nsenv kind id =
+  (* in case we've found an xhp id let's do some preparation to get it into the \namespace\:xhp format *)
+  let id = elaborate_xhp_namespace id in
+
   if id <> "" && id.[0] = '\\' then
     (false, id)
   (* The name is already fully-qualified. *)

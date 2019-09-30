@@ -1,7 +1,11 @@
 <?hh
 
-class :foo:bar {}
+namespace foo {
+  class :bar {}
+}
 
-function main(): void {
-  $x = <foo:AUTO332
+namespace {
+  function main(): void {
+    $x = <foo:AUTO332
+  }
 }

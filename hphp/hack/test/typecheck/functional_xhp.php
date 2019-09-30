@@ -9,16 +9,20 @@
  *
  */
 
-class Blah {}
+namespace x {
+	class Blah {}
 
-class :x:xx extends Blah {
-  attribute Map<string, int> k;
+	class :xx extends Blah {
+		attribute Map<string, int> k;
+	}
+
+	class :xy {}
 }
 
-class :x:xy {}
+namespace {
+	class A {}
 
-class A {}
-
-function test(): void {
-  $x = <x:xx k={Map {}}></x:xx>;
+	function test(): void {
+		$x = <x:xx k={Map {}}></x:xx>;
+	}
 }

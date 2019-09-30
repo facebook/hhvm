@@ -1,7 +1,11 @@
 <?hh
 
-class :xhp:foo-element {}
+namespace xhp {
+	class :foo-element {}
+}
 
-class :xhp:bar-component {
-  attribute :xhp:foo-element;
+namespace {
+	class :xhp:bar-component {
+		attribute :xhp:foo-element;
+	}
 }

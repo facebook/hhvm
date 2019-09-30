@@ -9,10 +9,13 @@
  *
  */
 
-final class :ui:link {}
-
-class Bloo {
-  public function mybloo(): void {
-    $x = <ui:link>abcd `</ui:link>;
-  }
+namespace ui {
+	final class :link {}
+}
+namespace {
+	class Bloo {
+		public function mybloo(): void {
+			$x = <ui:link>abcd `</ui:link>;
+		}
+	}
 }

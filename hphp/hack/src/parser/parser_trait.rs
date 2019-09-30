@@ -400,7 +400,11 @@ where
     ) -> (Vec<S::R>, Option<S::R>, bool) {
         loop {
             let mut parser1 = self.clone();
-            let token = parser1.next_token_as_name();
+            let token = if parser1.is_next_xhp_class_name() {
+                parser1.next_xhp_class_name()
+            } else {
+                parser1.next_token_as_name()
+            };
             match (name_opt.is_some(), token.kind()) {
                 (true, TokenKind::Backslash) => {
                     // found backslash, create item and recurse
@@ -414,6 +418,13 @@ where
                 }
                 (false, TokenKind::Name) => {
                     // found a name, recurse to look for backslash
+                    self.continue_from(parser1);
+                    let token = S!(make_token, self, token);
+                    name_opt = Some(token);
+                    has_backslash = false;
+                }
+                (false, TokenKind::XHPClassName) => {
+                    // found a xhp class name, recurse to look for backslash
                     self.continue_from(parser1);
                     let token = S!(make_token, self, token);
                     name_opt = Some(token);
@@ -560,9 +571,14 @@ where
 
     fn require_qualified_name(&mut self) -> S::R {
         let mut parser1 = self.clone();
-        let name = parser1.next_token_non_reserved_as_name();
+        let name = if parser1.is_next_xhp_class_name() {
+            parser1.next_xhp_class_name()
+        }else{
+            parser1.next_token_non_reserved_as_name()
+        };
+
         match name.kind() {
-            TokenKind::Name => {
+            TokenKind::Name | TokenKind::XHPClassName => {
                 self.continue_from(parser1);
                 let token = S!(make_token, self, name);
                 self.scan_remaining_qualified_name(token)
@@ -582,6 +598,15 @@ where
 
     fn require_name(&mut self) -> S::R {
         self.require_token(TokenKind::Name, Errors::error1004)
+    }
+
+    fn require_xhp_class_name_or_name(&mut self) -> S::R {
+        if self.is_next_xhp_class_name() {
+            let token = self.next_xhp_class_name();
+            S!(make_token, self, token)
+        } else {
+            self.require_token(TokenKind::Name, Errors::error1004)
+        }
     }
 
     fn require_class_name(&mut self) -> S::R {

@@ -1,7 +1,11 @@
 <?hh
 
-class :xhp:foo-element {}
+namespace xhp {
+	class :foo-element {}
+}
 
-function test() {
-  <xhp:foo-element />;
+namespace {
+	function test() {
+		<xhp:foo-element />;
+	}
 }

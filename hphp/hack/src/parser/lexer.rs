@@ -1055,8 +1055,8 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
     }
 
     fn scan_xhp_label(&mut self) {
-        // An XHP label has the same grammar as a Hack name.
-        let _: TokenKind = self.scan_name();
+        self.advance(1);
+        self.skip_name_end();
     }
 
     fn scan_xhp_element_name(&mut self, attribute: bool) -> TokenKind {
@@ -1126,7 +1126,7 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
         let ch0 = self.peek_char(0);
         if ch0 == INVALID && self.at_end() {
             TokenKind::EndOfFile
-        } else if Self::is_name_nondigit(ch0) {
+        } else if self.is_xhp_class_name() || Self::is_name_nondigit(ch0) {
             self.scan_xhp_element_name(false)
         } else {
             match ch0 {

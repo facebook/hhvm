@@ -9,15 +9,21 @@
  *
  */
 
-trait A {}
-class Base {
-  use A;
+namespace {
+	trait A {}
+	class Base {
+		use A;
+	}
 }
 
-class :foo:core {
-  use A;
+namespace foo {
+	class :core {
+		use \A;
+	}
 }
 
-class :foo extends Base {
-  attribute :foo:core;
+namespace {
+	class :foo extends Base {
+		attribute :foo:core;
+	}
 }

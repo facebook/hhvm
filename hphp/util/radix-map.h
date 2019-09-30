@@ -265,7 +265,7 @@ struct RadixMap {
    */
   template<class Fn> void iterate(Fn fn) const {
     if (!m_root) return;
-    for (auto k = m_root_prefix, e = k + slot_size(m_root_scale + LgRadix);
+    for (size_t k = m_root_prefix, e = k + slot_size(m_root_scale + LgRadix);
          k < e;) {
       auto n = m_root;
       auto scale = m_root_scale;

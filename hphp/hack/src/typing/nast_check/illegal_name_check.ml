@@ -23,9 +23,19 @@ let is_magic =
   in
   (fun (_, s) -> Caml.Hashtbl.mem h s)
 
+(* Class consts and typeconsts cannot be named "class" *)
+let error_if_is_named_class (pos, name) =
+  if String.lowercase name = "class" then
+    Errors.illegal_member_variable_class pos
+
 let handler =
   object
     inherit Nast_visitor.handler_base
+
+    method! at_class_ _ c =
+      List.iter c.c_typeconsts ~f:(fun tc ->
+          error_if_is_named_class tc.c_tconst_name);
+      List.iter c.c_consts ~f:(fun cc -> error_if_is_named_class cc.cc_id)
 
     method! at_expr env (pos, e) =
       match e with

@@ -50,8 +50,6 @@ type genv = {
   type_params: type_constraint SMap.t;
   (* The current class, None if we are in a function *)
   current_cls: (Ast_defs.id * Ast_defs.class_kind) option;
-  class_consts: (string, Pos.t) Caml.Hashtbl.t;
-  class_props: (string, Pos.t) Caml.Hashtbl.t;
   (* Normally we don't need to add dependencies at this stage, but there
    * are edge cases when we do. *)
   droot: Typing_deps.Dep.variant;
@@ -130,8 +128,6 @@ module Env : sig
 
   val fun_id_special : genv * lenv -> Ast_defs.id -> Ast_defs.id
 
-  val bind_class_const : genv * lenv -> Ast_defs.id -> unit
-
   val goto_label : genv * lenv -> string -> Pos.t option
 
   val new_goto_label : genv * lenv -> Aast.pstring -> unit
@@ -209,8 +205,6 @@ end = struct
       in_ppl = is_ppl;
       type_params = tparams;
       current_cls = Some (cid, ckind);
-      class_consts = Caml.Hashtbl.create 0;
-      class_props = Caml.Hashtbl.create 0;
       droot = Typing_deps.Dep.Class (snd cid);
       namespace;
     }
@@ -259,8 +253,6 @@ end = struct
       in_ppl = false;
       type_params = cstrs;
       current_cls = None;
-      class_consts = Caml.Hashtbl.create 0;
-      class_props = Caml.Hashtbl.create 0;
       droot = Typing_deps.Dep.Class tdef_name;
       namespace = tdef_namespace;
     }
@@ -279,8 +271,6 @@ end = struct
       in_ppl = false;
       type_params = params;
       current_cls = None;
-      class_consts = Caml.Hashtbl.create 0;
-      class_props = Caml.Hashtbl.create 0;
       droot = Typing_deps.Dep.Fun f_name;
       namespace = f_namespace;
     }
@@ -295,8 +285,6 @@ end = struct
       in_ppl = false;
       type_params = SMap.empty;
       current_cls = None;
-      class_consts = Caml.Hashtbl.create 0;
-      class_props = Caml.Hashtbl.create 0;
       droot = Typing_deps.Dep.GConst (snd cst.Aast.cst_name);
       namespace = cst.Aast.cst_namespace;
     }
@@ -308,8 +296,6 @@ end = struct
       in_ppl = false;
       type_params = SMap.empty;
       current_cls = None;
-      class_consts = Caml.Hashtbl.create 0;
-      class_props = Caml.Hashtbl.create 0;
       droot = Typing_deps.Dep.Fun "";
       namespace = Namespace_env.empty_with_default;
     }
@@ -327,8 +313,6 @@ end = struct
       in_ppl = false;
       type_params = SMap.empty;
       current_cls = None;
-      class_consts = Caml.Hashtbl.create 0;
-      class_props = Caml.Hashtbl.create 0;
       droot = Typing_deps.Dep.Fun "";
       namespace;
     }
@@ -557,16 +541,6 @@ end = struct
     | None ->
       Errors.invalid_fun_pointer p name;
       x
-
-  let bind_class_member tbl (p, x) =
-    try
-      let p' = Caml.Hashtbl.find tbl x in
-      Errors.error_name_already_bound x x p p'
-    with Caml.Not_found -> Caml.Hashtbl.replace tbl x p
-
-  let bind_class_const (genv, _env) (p, x) =
-    if String.lowercase x = "class" then Errors.illegal_member_variable_class p;
-    bind_class_member genv.class_consts (p, x)
 
   (**
    * Returns the position of the goto label declaration, if it exists.
@@ -1710,7 +1684,6 @@ module Make (GetLocals : GetLocals) = struct
       (fst e, N.Any)
 
   and class_const env cc =
-    Env.bind_class_const env cc.Aast.cc_id;
     let h = Option.map cc.Aast.cc_type (hint env) in
     let e = Option.map cc.Aast.cc_expr (constant_expr env) in
     {
@@ -1722,10 +1695,6 @@ module Make (GetLocals : GetLocals) = struct
     }
 
   and typeconst env t =
-    (* We use the same namespace as constants within the class so we cannot have
-     * a const and type const with the same name
-     *)
-    Env.bind_class_const env t.Aast.c_tconst_name;
     let abstract =
       match t.Aast.c_tconst_abstract with
       | Aast.TCAbstract (Some default) ->

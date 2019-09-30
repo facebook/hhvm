@@ -51,4 +51,7 @@ let handler =
     method! at_method_ _ method_ = check_constraints method_.m_tparams
 
     method! at_typedef _ typedef = check_constraints typedef.t_tparams
+
+    method! at_method_redeclaration _ method_redeclaration =
+      check_constraints method_redeclaration.mt_tparams
   end

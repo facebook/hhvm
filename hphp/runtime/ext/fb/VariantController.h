@@ -274,7 +274,7 @@ struct VariantControllerImpl {
   static void traceSerialization(const_variant_ref thing) {
     if (LIKELY(!RuntimeOption::EvalLogArrayProvenance)) return;
 
-    if (thing.isVecArray() || thing.isDict()) {
+    if (thing.isVecArray()) {
       raise_array_serialization_notice("fb_serialize", thing.asCArrRef().get());
     }
   }

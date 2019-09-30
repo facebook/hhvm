@@ -14,4 +14,8 @@ function main() {
 
   var_dump(HH\serialize_with_options($a, dict["forcePHPArrays" => true]));
   var_dump(json_encode($a, JSON_FB_FORCE_PHP_ARRAYS));
+
+  $b = __hhvm_intrinsics\launder_value(dict[]);
+  $b['foo'] = 42;
+  var_dump(fb_serialize($b, FB_SERIALIZE_HACK_ARRAYS));
 }

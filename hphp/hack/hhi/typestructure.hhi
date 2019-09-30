@@ -46,6 +46,7 @@ enum TypeStructureKind : int {
   OF_NOTHING = 0;
   OF_DYNAMIC = 0;
   OF_UNRESOLVED = 0;
+  OF_XHP = 0;
 }
 
 // Note: Nullable fields in shapes of this type may not be present, and so

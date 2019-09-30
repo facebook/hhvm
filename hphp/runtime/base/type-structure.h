@@ -75,7 +75,11 @@ enum class Kind : uint8_t {
   // Make sure to update kMaxResolvedKind if you add a new kind here
 
   /* The following kinds needs class/alias resolution, and
-   * are not exposed to the users. */
+   * are generally not exposed to the users.
+   *
+   * Unfortunately this is a bit leaky, and a few of these are needed by
+   * tooling.
+   */
   T_unresolved = 101,
   T_typeaccess = 102,
   T_xhp = 103,

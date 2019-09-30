@@ -1312,6 +1312,7 @@ namespace HH {
     OF_NOTHING = 29;
     OF_DYNAMIC = 30;
     OF_UNRESOLVED = 101; // for type aliases only
+    OF_XHP = 103;
   }
 
   type TypeStructure<T> = shape(

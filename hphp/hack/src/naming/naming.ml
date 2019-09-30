@@ -1297,7 +1297,7 @@ module Make (GetLocals : GetLocals) = struct
         parent :: parents
       | _ -> parents
     in
-    let methods = List.map ~f:(class_method env) methods in
+    let methods = List.map ~f:(method_ (fst env)) methods in
     let uses = List.map ~f:(hint ~allow_typedef:false env) c.Aast.c_uses in
     let pu_enums = List.map ~f:(class_pu_enum env) c.Aast.c_pu_enums in
     let redeclarations =
@@ -1627,13 +1627,6 @@ module Make (GetLocals : GetLocals) = struct
       N.cv_is_static = cv.Aast.cv_is_static;
       N.cv_span = cv.Aast.cv_span;
     }
-
-  and class_method env c_meth =
-    match (c_meth.Aast.m_name, c_meth.Aast.m_params) with
-    | ((m_pos, m_name), _ :: _) when m_name = SN.Members.__clone ->
-      Errors.clone_too_many_arguments m_pos;
-      c_meth
-    | _ -> method_ (fst env) c_meth
 
   and check_constant_expr env (pos, e) =
     match e with

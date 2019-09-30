@@ -21,6 +21,12 @@ let error_if_duplicate_method_names methods =
   in
   ()
 
+let error_if_clone_has_arguments method_ =
+  match (method_.m_name, method_.m_params) with
+  | ((pos, name), _ :: _) when name = Naming_special_names.Members.__clone ->
+    Errors.clone_too_many_arguments pos
+  | _ -> ()
+
 let handler =
   object
     inherit Nast_visitor.handler_base
@@ -28,4 +34,6 @@ let handler =
     method! at_class_ _ class_ =
       error_if_duplicate_method_names class_.c_methods;
       ()
+
+    method! at_method_ _ method_ = error_if_clone_has_arguments method_
   end

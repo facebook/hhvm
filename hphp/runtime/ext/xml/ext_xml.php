@@ -327,10 +327,6 @@ function xml_set_notation_decl_handler(resource $parser, mixed $handler): bool;
 <<__Native>>
 function xml_set_object(resource $parser, mixed $object): bool;
 
-function xml_set_object_ref(resource $parser, inout mixed $object): bool {
-  return xml_set_object($parser, $object);
-}
-
 /**
  * Gets the current byte index of the given XML parser.
  *

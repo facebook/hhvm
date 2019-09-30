@@ -234,8 +234,6 @@ function each(inout $array);
 <<__PHPStdLib>>
 function current($array);
 <<__PHPStdLib>>
-function current_ref(&$array);
-<<__PHPStdLib>>
 function next(inout $array);
 <<__PHPStdLib>>
 function prev(inout $array);
@@ -245,8 +243,6 @@ function reset(inout $array);
 function end(inout $array);
 <<__PHPStdLib>>
 function key($array);
-<<__PHPStdLib>>
-function key_ref(&$array);
 <<__PHPStdLib>>
 function hphp_get_iterator($iterable);
 <<__PHPStdLib, __Rx>>

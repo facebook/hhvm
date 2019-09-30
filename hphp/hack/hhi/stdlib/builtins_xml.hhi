@@ -74,8 +74,6 @@ function xml_set_notation_decl_handler(resource $parser, $handler);
 <<__PHPStdLib>>
 function xml_set_object(resource $parser, $object);
 <<__PHPStdLib>>
-function xml_set_object_ref(resource $parser, inout $object);
-<<__PHPStdLib>>
 function xml_get_current_byte_index(resource $parser);
 <<__PHPStdLib>>
 function xml_get_current_column_number(resource $parser);

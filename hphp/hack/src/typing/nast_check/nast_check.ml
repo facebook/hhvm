@@ -23,6 +23,7 @@ let visitor =
       Dynamically_callable_attr_check.handler;
       Nast_switch_check.handler;
       Nast_generics_name_check.handler;
+      Nast_class_method_check.handler;
     ]
 
 let program = visitor#go

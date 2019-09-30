@@ -1246,17 +1246,6 @@ module Make (GetLocals : GetLocals) = struct
       (constructor, methods, smethods)
 
   (**************************************************************************)
-  (* Checking for collision on method names *)
-  (**************************************************************************)
-
-  let check_method acc { N.m_name = (p, x); _ } =
-    if SSet.mem x acc then Errors.method_name_already_bound p x;
-    SSet.add x acc
-
-  let check_name_collision methods =
-    ignore (List.fold_left methods ~init:SSet.empty ~f:check_method)
-
-  (**************************************************************************)
   (* Checking for shadowing of method type parameters *)
   (**************************************************************************)
 
@@ -1386,9 +1375,7 @@ module Make (GetLocals : GetLocals) = struct
       | Some c -> (c :: smethods) @ methods
     in
     check_tparams_constructor class_tparam_names constructor;
-    check_name_collision methods;
     check_tparams_shadow class_tparam_names methods;
-    check_name_collision smethods;
     check_tparams_shadow class_tparam_names smethods;
     {
       N.c_annotation = ();

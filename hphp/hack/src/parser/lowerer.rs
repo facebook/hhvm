@@ -100,23 +100,23 @@ pub enum TokenOp {
 
 #[derive(Debug)]
 pub struct FunHdr {
-    fh_suspension_kind: SuspensionKind,
-    fh_name: aast!(Sid),
-    fh_constrs: Vec<aast_defs::WhereConstraint>,
-    fh_type_parameters: Vec<aast!(Tparam<,>)>,
-    fh_parameters: Vec<aast!(FunParam<,>)>,
-    fh_return_type: Option<aast!(Hint)>,
+    suspension_kind: SuspensionKind,
+    name: aast!(Sid),
+    constrs: Vec<aast_defs::WhereConstraint>,
+    type_parameters: Vec<aast!(Tparam<,>)>,
+    parameters: Vec<aast!(FunParam<,>)>,
+    return_type: Option<aast!(Hint)>,
 }
 
 impl FunHdr {
     fn make_empty() -> Self {
         Self {
-            fh_suspension_kind: SuspensionKind::SKSync,
-            fh_name: ast_defs::Id(Pos::make_none(), String::from("<ANONYMOUS>")),
-            fh_constrs: vec![],
-            fh_type_parameters: vec![],
-            fh_parameters: vec![],
-            fh_return_type: None,
+            suspension_kind: SuspensionKind::SKSync,
+            name: ast_defs::Id(Pos::make_none(), String::from("<ANONYMOUS>")),
+            constrs: vec![],
+            type_parameters: vec![],
+            parameters: vec![],
+            return_type: None,
         }
     }
 }
@@ -515,9 +515,7 @@ where
     fn pos_name_(node: &Syntax<T, V>, env: &mut Env, drop_prefix: Option<char>) -> ret_aast!(Sid) {
         match &node.syntax {
             QualifiedName(_) => Self::pos_qualified_name(node, env),
-            SimpleTypeSpecifier(child) => {
-                Self::pos_name_(&child.simple_type_specifier, env, drop_prefix)
-            }
+            SimpleTypeSpecifier(c) => Self::pos_name_(&c.simple_type_specifier, env, drop_prefix),
             _ => {
                 let mut name = node.text(env.indexed_source_text.source_text);
                 if name == "__COMPILER_HALT_OFFSET__" {
@@ -917,7 +915,7 @@ where
 
     fn p_simple_initializer(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Expr<,>) {
         match &node.syntax {
-            SimpleInitializer(child) => Self::p_expr(&child.simple_initializer_value, env),
+            SimpleInitializer(c) => Self::p_expr(&c.simple_initializer_value, env),
             _ => Self::missing_syntax(None, "simple initializer", node, env),
         }
     }
@@ -1205,8 +1203,8 @@ where
         parent_pos: Option<Pos>,
     ) -> ret_aast!(Expr<,>) {
         match &node.syntax {
-            BracedExpression(child) => {
-                let expr = &child.braced_expression_expression;
+            BracedExpression(c) => {
+                let expr = &c.braced_expression_expression;
                 let inner = Self::p_expr_impl(location, expr, env, parent_pos)?;
                 let inner_pos = &inner.0;
                 let inner_expr_ = inner.1.as_ref();
@@ -1219,9 +1217,9 @@ where
                     )),
                 }
             }
-            ParenthesizedExpression(child) => Self::p_expr_impl(
+            ParenthesizedExpression(c) => Self::p_expr_impl(
                 location,
-                &child.parenthesized_expression_expression,
+                &c.parenthesized_expression_expression,
                 env,
                 parent_pos,
             ),
@@ -1991,9 +1989,7 @@ where
                     Self::could_map(Self::p_member, &c.record_creation_members, env)?,
                 ))
             }
-            LiteralExpression(child) => {
-                Self::p_expr_lit(location, node, &child.literal_expression, env)
-            }
+            LiteralExpression(c) => Self::p_expr_lit(location, node, &c.literal_expression, env),
             PrefixedStringExpression(c) => {
                 /* Temporarily allow only`re`- prefixed strings */
                 let name_text = Self::text(&c.prefixed_string_name, env);
@@ -2983,10 +2979,10 @@ where
 
     fn p_markup(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Stmt<,>) {
         match &node.syntax {
-            MarkupSection(child) => {
-                let markup_prefix = &child.markup_prefix;
-                let markup_text = &child.markup_text;
-                let markup_expression = &child.markup_expression;
+            MarkupSection(c) => {
+                let markup_prefix = &c.markup_prefix;
+                let markup_text = &c.markup_text;
+                let markup_expression = &c.markup_expression;
                 let pos = Self::p_pos(node, env);
                 let has_dot_hack_extension = pos.filename().ends_with(".hack");
                 if has_dot_hack_extension {
@@ -3159,24 +3155,23 @@ where
 
     fn p_fun_param(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(FunParam<,>) {
         match &node.syntax {
-            ParameterDeclaration(child) => {
-                let parameter_attribute = &child.parameter_attribute;
-                let parameter_visibility = &child.parameter_visibility;
-                let parameter_call_convention = &child.parameter_call_convention;
-                let parameter_type = &child.parameter_type;
-                let parameter_name = &child.parameter_name;
-                let parameter_default_value = &child.parameter_default_value;
+            ParameterDeclaration(c) => {
+                let parameter_attribute = &c.parameter_attribute;
+                let parameter_visibility = &c.parameter_visibility;
+                let parameter_call_convention = &c.parameter_call_convention;
+                let parameter_type = &c.parameter_type;
+                let parameter_name = &c.parameter_name;
+                let parameter_default_value = &c.parameter_default_value;
                 let (is_reference, is_variadic, name) = match &parameter_name.syntax {
-                    DecoratedExpression(child) => {
-                        let decorated_expression_decorator = &child.decorated_expression_decorator;
-                        let decorated_expression_expression =
-                            &child.decorated_expression_expression;
+                    DecoratedExpression(c) => {
+                        let decorated_expression_decorator = &c.decorated_expression_decorator;
+                        let decorated_expression_expression = &c.decorated_expression_expression;
                         let decorator = Self::text_str(decorated_expression_decorator, env);
                         match &decorated_expression_expression.syntax {
-                            DecoratedExpression(child) => {
-                                let nested_expression = &child.decorated_expression_expression;
+                            DecoratedExpression(c) => {
+                                let nested_expression = &c.decorated_expression_expression;
                                 let nested_decorator =
-                                    Self::text_str(&child.decorated_expression_decorator, env);
+                                    Self::text_str(&c.decorated_expression_decorator, env);
                                 (
                                     decorator == "&" || nested_decorator == "&",
                                     decorator == "..." || nested_decorator == "...",
@@ -3320,13 +3315,13 @@ where
         F: Fn((), modifier::Kind, &Syntax<T, V>, &mut Env),
     {
         match &node.syntax {
-            FunctionDeclarationHeader(child) => {
-                let function_modifiers = &child.function_modifiers;
-                let function_name = &child.function_name;
-                let function_where_clause = &child.function_where_clause;
-                let function_type_parameter_list = &child.function_type_parameter_list;
-                let function_parameter_list = &child.function_parameter_list;
-                let function_type = &child.function_type;
+            FunctionDeclarationHeader(c) => {
+                let function_modifiers = &c.function_modifiers;
+                let function_name = &c.function_name;
+                let function_where_clause = &c.function_where_clause;
+                let function_type_parameter_list = &c.function_type_parameter_list;
+                let function_parameter_list = &c.function_parameter_list;
+                let function_type = &c.function_type;
                 let is_autoload = Self::text_str(function_name, env)
                     .eq_ignore_ascii_case(special_functions::AUTOLOAD);
                 if function_name.value.is_missing() {
@@ -3343,29 +3338,26 @@ where
                 let (kinds, _) = Self::p_modifiers(modifier_checker, (), function_modifiers, env)?;
                 let has_async = kinds.has(modifier::ASYNC);
                 let has_coroutine = kinds.has(modifier::COROUTINE);
-                let fh_parameters =
-                    Self::could_map(Self::p_fun_param, function_parameter_list, env)?;
-                let fh_return_type = Self::mp_optional(Self::p_hint, function_type, env)?;
-                let fh_suspension_kind =
+                let parameters = Self::could_map(Self::p_fun_param, function_parameter_list, env)?;
+                let return_type = Self::mp_optional(Self::p_hint, function_type, env)?;
+                let suspension_kind =
                     Self::mk_suspension_kind_(node, env, has_async, has_coroutine);
-                let fh_name = Self::pos_name(function_name, env)?;
-                let fh_constrs = Self::p_where_constraint(false, node, function_where_clause, env)?;
-                let fh_type_parameters =
-                    Self::p_tparam_l(false, function_type_parameter_list, env)?;
+                let name = Self::pos_name(function_name, env)?;
+                let constrs = Self::p_where_constraint(false, node, function_where_clause, env)?;
+                let type_parameters = Self::p_tparam_l(false, function_type_parameter_list, env)?;
                 Ok(FunHdr {
-                    fh_suspension_kind,
-                    fh_name,
-                    fh_constrs,
-                    fh_type_parameters,
-                    fh_parameters,
-                    fh_return_type,
+                    suspension_kind,
+                    name,
+                    constrs,
+                    type_parameters,
+                    parameters,
+                    return_type,
                 })
             }
             LambdaSignature(c) => {
                 let mut header = FunHdr::make_empty();
-                header.fh_parameters =
-                    Self::could_map(Self::p_fun_param, &c.lambda_parameters, env)?;
-                header.fh_return_type = Self::mp_optional(Self::p_hint, &c.lambda_type, env)?;
+                header.parameters = Self::could_map(Self::p_fun_param, &c.lambda_parameters, env)?;
+                header.return_type = Self::mp_optional(Self::p_hint, &c.lambda_type, env)?;
                 Ok(header)
             }
             Token(_) => Ok(FunHdr::make_empty()),
@@ -3924,7 +3916,7 @@ where
                     _ => panic!(),
                 };
                 let hdr = Self::p_fun_hdr(|_, _, _, _| {}, header, env)?;
-                if hdr.fh_name.1 == "__construct" && !hdr.fh_type_parameters.is_empty() {
+                if hdr.name.1 == "__construct" && !hdr.type_parameters.is_empty() {
                     Self::raise_parsing_error(
                         header,
                         env,
@@ -3935,7 +3927,7 @@ where
                     Vec<aast!(Stmt<,>)>,
                     Vec<aast!(ClassVar<,>)>,
                 ) = hdr
-                    .fh_parameters
+                    .parameters
                     .iter()
                     .filter_map(|p| p.visibility.map(|_| classvar_init(p)))
                     .unzip();
@@ -3961,19 +3953,19 @@ where
                     final_: kinds.has(modifier::FINAL),
                     abstract_: is_abstract,
                     static_: is_static,
-                    name: hdr.fh_name,
+                    name: hdr.name,
                     visibility,
-                    tparams: hdr.fh_type_parameters,
-                    where_constraints: hdr.fh_constrs,
-                    variadic: Self::determine_variadicity(&hdr.fh_parameters),
-                    params: hdr.fh_parameters,
+                    tparams: hdr.type_parameters,
+                    where_constraints: hdr.constrs,
+                    variadic: Self::determine_variadicity(&hdr.parameters),
+                    params: hdr.parameters,
                     body: aast::FuncBody {
                         annotation: (),
                         ast: body,
                     },
-                    fun_kind: Self::mk_fun_kind(hdr.fh_suspension_kind, body_has_yield),
+                    fun_kind: Self::mk_fun_kind(hdr.suspension_kind, body_has_yield),
                     user_attributes,
-                    ret: aast::TypeHint((), hdr.fh_return_type),
+                    ret: aast::TypeHint((), hdr.return_type),
                     external: is_external,
                     doc_comment: doc_comment_opt,
                 };
@@ -4002,13 +3994,13 @@ where
                     abstract_: kind.has(modifier::ABSTRACT),
                     static_: kind.has(modifier::STATIC),
                     visibility,
-                    name: hdr.fh_name,
-                    tparams: hdr.fh_type_parameters,
-                    where_constraints: hdr.fh_constrs,
-                    variadic: Self::determine_variadicity(&hdr.fh_parameters),
-                    params: hdr.fh_parameters,
-                    fun_kind: Self::mk_fun_kind(hdr.fh_suspension_kind, false),
-                    ret: aast::TypeHint((), hdr.fh_return_type),
+                    name: hdr.name,
+                    tparams: hdr.type_parameters,
+                    where_constraints: hdr.constrs,
+                    variadic: Self::determine_variadicity(&hdr.parameters),
+                    params: hdr.parameters,
+                    fun_kind: Self::mk_fun_kind(hdr.suspension_kind, false),
+                    ret: aast::TypeHint((), hdr.return_type),
                     trait_: qualifier,
                     method: name,
                     user_attributes,
@@ -4411,10 +4403,10 @@ where
     fn p_def(node: &Syntax<T, V>, env: &mut Env) -> ret!(Vec<aast!(Def<,>)>) {
         let doc_comment_opt = Self::extract_docblock(node, env);
         match &node.syntax {
-            FunctionDeclaration(child) => {
-                let function_attribute_spec = &child.function_attribute_spec;
-                let function_declaration_header = &child.function_declaration_header;
-                let function_body = &child.function_body;
+            FunctionDeclaration(c) => {
+                let function_attribute_spec = &c.function_attribute_spec;
+                let function_declaration_header = &c.function_declaration_header;
+                let function_body = &c.function_body;
                 let mut env = Env::clone_and_unset_toplevel_if_toplevel(env);
                 let env = env.as_mut();
                 let allowed_kinds =
@@ -4437,22 +4429,22 @@ where
                     Self::mp_yielding(&Self::p_function_body, function_body, env)?
                 };
                 let user_attributes = Self::p_user_attributes(function_attribute_spec, env)?;
-                let variadic = Self::determine_variadicity(&hdr.fh_parameters);
-                let ret = aast::TypeHint((), hdr.fh_return_type);
+                let variadic = Self::determine_variadicity(&hdr.parameters);
+                let ret = aast::TypeHint((), hdr.return_type);
                 Ok(vec![aast::Def::Fun(aast::Fun_ {
                     span: Self::p_function(node, env),
                     annotation: (),
                     mode: Self::mode_annotation(env.file_mode()),
                     ret,
-                    name: hdr.fh_name,
-                    tparams: hdr.fh_type_parameters,
-                    where_constraints: hdr.fh_constrs,
-                    params: hdr.fh_parameters,
+                    name: hdr.name,
+                    tparams: hdr.type_parameters,
+                    where_constraints: hdr.constrs,
+                    params: hdr.parameters,
                     body: aast::FuncBody {
                         ast: block,
                         annotation: (),
                     },
-                    fun_kind: Self::mk_fun_kind(hdr.fh_suspension_kind, yield_),
+                    fun_kind: Self::mk_fun_kind(hdr.suspension_kind, yield_),
                     variadic,
                     user_attributes,
                     file_attributes: vec![],
@@ -4541,15 +4533,15 @@ where
                 }
                 Ok(vec![aast::Def::Class(class_)])
             }
-            ConstDeclaration(child) => {
-                let ty = &child.const_type_specifier;
-                let decls = Self::as_list(&child.const_declarators);
+            ConstDeclaration(c) => {
+                let ty = &c.const_type_specifier;
+                let decls = Self::as_list(&c.const_declarators);
                 let mut defs = vec![];
                 for decl in decls.iter() {
                     let def = match &decl.syntax {
-                        ConstantDeclarator(child) => {
-                            let name = &child.constant_declarator_name;
-                            let init = &child.constant_declarator_initializer;
+                        ConstantDeclarator(c) => {
+                            let name = &c.constant_declarator_name;
+                            let init = &c.constant_declarator_initializer;
                             let gconst = aast::Gconst {
                                 annotation: (),
                                 mode: Self::mode_annotation(env.file_mode()),
@@ -4672,12 +4664,12 @@ where
                     doc_comment: doc_comment_opt,
                 })])
             }
-            InclusionDirective(child)
+            InclusionDirective(c)
                 if env.file_mode() != file_info::Mode::Mdecl
                     && env.file_mode() != file_info::Mode::Mphp
                     || env.codegen() =>
             {
-                let expr = Self::p_expr(&child.inclusion_expression, env)?;
+                let expr = Self::p_expr(&c.inclusion_expression, env)?;
                 Ok(vec![aast::Def::Stmt(aast::Stmt::new(
                     Self::p_pos(node, env),
                     aast::Stmt_::Expr(expr),

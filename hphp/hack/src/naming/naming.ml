@@ -646,8 +646,8 @@ let check_repetition s param =
     s
 
 let convert_shape_name env = function
-  | Ast_defs.SFlit_int (pos, s) -> (pos, Ast_defs.SFlit_int (pos, s))
-  | Ast_defs.SFlit_str (pos, s) -> (pos, Ast_defs.SFlit_str (pos, s))
+  | Ast_defs.SFlit_int (pos, s) -> Ast_defs.SFlit_int (pos, s)
+  | Ast_defs.SFlit_str (pos, s) -> Ast_defs.SFlit_str (pos, s)
   | Ast_defs.SFclass_const (x, (pos, y)) ->
     let class_name =
       if snd x = SN.Classes.cSelf then (
@@ -659,7 +659,7 @@ let convert_shape_name env = function
       ) else
         Env.type_name env x ~allow_typedef:false ~allow_generics:false
     in
-    (pos, Ast_defs.SFclass_const (class_name, (pos, y)))
+    Ast_defs.SFclass_const (class_name, (pos, y))
 
 let arg_unpack_unexpected = function
   | [] -> ()
@@ -947,7 +947,7 @@ module Make (GetLocals : GetLocals) = struct
       let nsi_field_map =
         List.map
           ~f:(fun { Aast.sfi_optional; sfi_hint; sfi_name } ->
-            let (_pos, new_key) = convert_shape_name env sfi_name in
+            let new_key = convert_shape_name env sfi_name in
             let new_field =
               {
                 N.sfi_optional;
@@ -2736,17 +2736,11 @@ module Make (GetLocals : GetLocals) = struct
           attrl env al,
           exprl env el )
     | Aast.Shape fdl ->
-      let (shp, _) =
-        List.fold_left
-          fdl
-          ~init:([], Ast_defs.ShapeSet.empty)
-          ~f:(fun (fdm, set) (pname, value) ->
-            let (pos, name) = convert_shape_name env pname in
-            if Ast_defs.ShapeSet.mem name set then
-              Errors.fd_name_already_bound pos;
-            ((name, expr env value) :: fdm, Ast_defs.ShapeSet.add name set))
+      let shp =
+        List.map fdl ~f:(fun (pname, value) ->
+            (convert_shape_name env pname, expr env value))
       in
-      N.Shape (List.rev shp)
+      N.Shape shp
     | Aast.BracedExpr _ -> N.Any
     | Aast.Yield_from e -> N.Yield_from (expr env e)
     | Aast.Import _ -> N.Any

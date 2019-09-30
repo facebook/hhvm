@@ -26,6 +26,7 @@ let visitor =
       Nast_class_method_check.handler;
       Global_const_check.handler;
       Duplicate_class_member_check.handler;
+      Shape_name_check.handler;
     ]
 
 let program = visitor#go

@@ -175,7 +175,7 @@ module NastCheck = struct
     | CallBeforeInit
     | CaseFallthrough
     | ContinueInSwitch
-    | DangerousMethodName
+    | DangerousMethodNameDEPRECATED
     | DefaultFallthrough
     | InterfaceWithMemberVariable
     | InterfaceWithStaticMemberVariable

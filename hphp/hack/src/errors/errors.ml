@@ -1873,14 +1873,6 @@ let illegal_function_name pos mname =
     pos
     ("Illegal function name: " ^ strip_ns mname)
 
-let dangerous_method_name pos =
-  add
-    (NastCheck.err_code NastCheck.DangerousMethodName)
-    pos
-    ( "This is a dangerous method name, "
-    ^ "if you want to define a constructor, use "
-    ^ "__construct" )
-
 let inout_params_outside_of_sync pos =
   add
     (NastCheck.err_code NastCheck.InoutParamsOutsideOfSync)

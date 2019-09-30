@@ -82,12 +82,6 @@ let handler =
       let (pos, name) = m.m_name in
       if name = SN.Members.__destruct then Errors.illegal_destructor pos;
       match env.class_name with
-      | Some cname ->
-        let (p, mname) = m.m_name in
-        if
-          String.lowercase (strip_ns cname) = String.lowercase mname
-          && env.class_kind <> Some Ast_defs.Ctrait
-        then
-          Errors.dangerous_method_name p
+      | Some _ -> ()
       | None -> assert false
   end

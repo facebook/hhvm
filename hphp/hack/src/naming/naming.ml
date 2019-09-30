@@ -1735,19 +1735,6 @@ module Make (GetLocals : GetLocals) = struct
     let constr = Option.map t.Aast.c_tconst_constraint (hint env) in
     let type_ = Option.map t.Aast.c_tconst_type (hint env) in
     let attrs = user_attributes env t.Aast.c_tconst_user_attributes in
-    begin
-      match abstract with
-      | Aast.TCAbstract (Some _)
-        when not
-               (TypecheckerOptions.experimental_feature_enabled
-                  (fst env).tcopt
-                  TypecheckerOptions
-                  .experimental_abstract_type_const_with_default) ->
-        Errors.experimental_feature
-          (fst t.Aast.c_tconst_name)
-          "abstract type constant with default"
-      | _ -> ()
-    end;
     N.
       {
         c_tconst_abstract = abstract;

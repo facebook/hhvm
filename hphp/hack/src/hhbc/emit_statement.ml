@@ -442,13 +442,23 @@ and emit_awaitall_multi env el b =
 and emit_while env e b =
   let break_label = Label.next_regular () in
   let cont_label = Label.next_regular () in
+  let start_label = Label.next_regular () in
+  (* TODO: This is *bizarre* codegen for a while loop.
+  It would be better to generate this as
+  instr_label continue_label;
+  emit_expr e;
+  instr_jmpz break_label;
+  body;
+  instr_jmp continue_label;
+  instr_label break_label;
+  *)
   gather
     [
-      instr_label cont_label;
-      emit_expr env e;
-      instr_jmpz break_label;
+      get_instrs @@ emit_jmpz env e break_label;
+      instr_label start_label;
       Emit_env.do_in_loop_body break_label cont_label env b emit_stmt;
-      instr_jmp cont_label;
+      instr_label cont_label;
+      get_instrs @@ emit_jmpnz env (fst e) (snd e) start_label;
       instr_label break_label;
     ]
 
@@ -578,34 +588,54 @@ and emit_for (env : Emit_env.t) p (e1 : Tast.expr) e2 e3 b =
   let break_label = Label.next_regular () in
   let cont_label = Label.next_regular () in
   let start_label = Label.next_regular () in
-  let emit_cond () =
+  (* TODO: this is bizarre codegen for a "for" loop.
+     This should be codegen'd as
+     emit_ignored_expr initializer;
+     instr_label start_label;
+     from_expr condition;
+     instr_jmpz break_label;
+     body;
+     instr_label continue_label;
+     emit_ignored_expr increment;
+     instr_jmp start_label;
+     instr_label break_label;
+  *)
+  let emit_cond ~jmpz label =
+    let final cond =
+      get_instrs
+        ( if jmpz then
+          emit_jmpz env cond label
+        else
+          emit_jmpnz env (fst cond) (snd cond) label )
+    in
+    let rec expr_list h tl =
+      match tl with
+      | [] ->
+        [
+          final
+          @@ ( (Pos.none, (Typing_reason.none, Typing_defs.make_tany ())),
+               A.Expr_list [h] );
+        ]
+      | h1 :: t1 -> emit_ignored_expr env ~pop_pos:p h :: expr_list h1 t1
+    in
     match e2 with
-    | (_, A.Expr_list exprs) ->
-      begin
-        (* all of the expressions need to be evaluated, but only the last one is kept *)
-        match List.rev exprs with
-        | [] -> empty
-        | last :: extras ->
-          gather
-            [
-              gather
-              (* evaluate everything but the last expression in order and discard the results *)
-              @@ List.rev_map ~f:(emit_ignored_expr ~pop_pos:p env) extras;
-              emit_expr env last;
-              instr_jmpz break_label;
-            ]
-      end
-    | expr -> get_instrs @@ emit_jmpz env expr break_label
+    | (_, A.Expr_list []) ->
+      if jmpz then
+        empty
+      else
+        instr_jmp label
+    | (_, A.Expr_list (h :: t)) -> gather @@ expr_list h t
+    | cond -> final cond
   in
   gather
     [
       emit_ignored_expr env e1;
+      emit_cond ~jmpz:true break_label;
       instr_label start_label;
-      emit_cond ();
       Emit_env.do_in_loop_body break_label cont_label env b emit_stmt;
       instr_label cont_label;
       emit_ignored_expr env e3;
-      instr_jmp start_label;
+      emit_cond ~jmpz:false start_label;
       instr_label break_label;
     ]
 

@@ -172,6 +172,7 @@ let check_const
   | None -> None
   | Some cst ->
     let cst = Naming.global_const cst in
+    Nast_check.def (Aast.Constant cst);
     let def = Aast.Constant (Typing.gconst_def opts cst) in
     Tast_check.def opts def;
     Some def

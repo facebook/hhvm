@@ -3181,29 +3181,10 @@ module Make (GetLocals : GetLocals) = struct
   (* Global constants *)
   (**************************************************************************)
 
-  let check_constant_hint cst =
-    match cst.Aast.cst_type with
-    | None when Partial.should_check_error cst.Aast.cst_mode 2001 ->
-      Errors.const_without_typehint cst.Aast.cst_name
-    | None
-    | Some _ ->
-      ()
-
-  let check_constant_name genv cst =
-    if genv.namespace.Namespace_env.ns_name <> None then
-      let (pos, name) = cst.Aast.cst_name in
-      let name = Utils.strip_all_ns name in
-      if SN.PseudoConsts.is_pseudo_const (Utils.add_ns name) then
-        Errors.name_is_reserved name pos
-
   let global_const cst =
     let env = Env.make_const_env cst in
     let hint = Option.map cst.Aast.cst_type (hint env) in
-    let e =
-      let _ = check_constant_name (fst env) cst in
-      let _ = check_constant_hint cst in
-      constant_expr env cst.Aast.cst_value
-    in
+    let e = constant_expr env cst.Aast.cst_value in
     {
       N.cst_annotation = ();
       cst_mode = cst.Aast.cst_mode;

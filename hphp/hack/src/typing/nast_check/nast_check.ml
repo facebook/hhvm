@@ -24,6 +24,7 @@ let visitor =
       Nast_switch_check.handler;
       Nast_generics_name_check.handler;
       Nast_class_method_check.handler;
+      Global_const_check.handler;
     ]
 
 let program = visitor#go

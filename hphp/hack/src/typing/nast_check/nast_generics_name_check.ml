@@ -39,6 +39,14 @@ let check_constraints tparams =
   List.iter tparams ~f:check_constraint;
   ()
 
+let check_method_shadowing class_tparams class_methods =
+  let error_if_method_tparam_shadows_class_tparam method_ =
+    List.iter method_.m_tparams ~f:(fun { tp_name = (pos, name); _ } ->
+        List.iter class_tparams ~f:(fun { tp_name = (cpos, cname); _ } ->
+            if name = cname then Errors.shadowed_type_param pos cpos name))
+  in
+  List.iter class_methods ~f:error_if_method_tparam_shadows_class_tparam
+
 let handler =
   object
     inherit Nast_visitor.handler_base
@@ -46,7 +54,9 @@ let handler =
     method! at_fun_ _ fun_ = check_constraints fun_.f_tparams
 
     method! at_class_ _ class_ =
-      check_constraints class_.c_tparams.c_tparam_list
+      check_constraints class_.c_tparams.c_tparam_list;
+      check_method_shadowing class_.c_tparams.c_tparam_list class_.c_methods;
+      ()
 
     method! at_method_ _ method_ = check_constraints method_.m_tparams
 

@@ -1245,23 +1245,6 @@ module Make (GetLocals : GetLocals) = struct
       let smethods = add_abstractl smethods in
       (constructor, methods, smethods)
 
-  (**************************************************************************)
-  (* Checking for shadowing of method type parameters *)
-  (**************************************************************************)
-
-  let check_method_tparams class_tparam_names { N.m_tparams = tparams; _ } =
-    List.iter tparams (fun { N.tp_name = (p, x); _ } ->
-        List.iter class_tparam_names (fun (pc, xc) ->
-            if x = xc then Errors.shadowed_type_param p pc x))
-
-  let check_tparams_constructor class_tparam_names constructor =
-    match constructor with
-    | None -> ()
-    | Some constr -> check_method_tparams class_tparam_names constr
-
-  let check_tparams_shadow class_tparam_names methods =
-    List.iter methods (check_method_tparams class_tparam_names)
-
   let ensure_name_not_dynamic env e =
     match e with
     | (_, (Aast.Id _ | Aast.Lvar _)) -> ()
@@ -1357,11 +1340,6 @@ module Make (GetLocals : GetLocals) = struct
     let (constructor, methods, smethods) =
       interface c constructor methods smethods
     in
-    let class_tparam_names =
-      List.map
-        ~f:(fun tp -> tp.Aast.tp_name)
-        c.Aast.c_tparams.Aast.c_tparam_list
-    in
     let enum = Option.map c.Aast.c_enum (enum_ env) in
     let file_attributes =
       file_attributes c.Aast.c_mode c.Aast.c_file_attributes
@@ -1374,9 +1352,6 @@ module Make (GetLocals : GetLocals) = struct
       | None -> smethods @ methods
       | Some c -> (c :: smethods) @ methods
     in
-    check_tparams_constructor class_tparam_names constructor;
-    check_tparams_shadow class_tparam_names methods;
-    check_tparams_shadow class_tparam_names smethods;
     {
       N.c_annotation = ();
       N.c_span = c.Aast.c_span;

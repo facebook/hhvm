@@ -138,7 +138,7 @@ module Mode_export_json = struct
               ^ "]"
           in
           Printf.sprintf
-            "{\"start_line\": \"%d\", \"start_column\": \"%d\", \"end_line\": \"%d\", \"end_column\": \"%d\", \"filename\": \"%s\", \"lower_bounds\": \"%s\", \"upper_bounds\": \"%s\"}"
+            "{\"start_line\": \"%d\", \"start_column\": \"%d\", \"end_line\": \"%d\", \"end_column\": \"%d\", \"filename\": \"%s\", \"lower_bounds\": %s, \"upper_bounds\": %s}"
             (fst (Pos.line_column tyvar.tyvar_pos))
             (snd (Pos.line_column tyvar.tyvar_pos))
             (fst (Pos.end_line_column tyvar.tyvar_pos))

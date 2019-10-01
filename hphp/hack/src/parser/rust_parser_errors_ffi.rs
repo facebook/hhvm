@@ -92,7 +92,7 @@ caml_raise!(rust_parser_errors_positioned, |ocaml_source_text, ocaml_tree, ocaml
     let relative_path = RelativePath::from_ocamlvalue(&relative_path_raw);
     let content = str_field(&ocaml_source_text, 2);
     let source_text = SourceText::make_with_raw(&relative_path, &content.data(), ocaml_source_text_value);
-    let tree = <SyntaxTree<PositionedSyntax, ()>>::from_ffi_pointer(ocaml_tree.usize_val(), &source_text);
+    let tree = <SyntaxTree<PositionedSyntax, ()>>::ffi_pointer_into_boxed(ocaml_tree.usize_val(), &source_text);
 
     let errors = rust_parser_errors::ParserErrors::parse_errors(&tree, parser_options, hhvm_compat_mode, hhi_mode, codegen);
     drop_tree(tree);

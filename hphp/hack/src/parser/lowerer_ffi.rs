@@ -39,8 +39,10 @@ caml_raise!(lower, |ocaml_env, ocaml_source_text, ocaml_tree|, <res>, {
     let content = str_field(&ocaml_source_text, 2);
     let source_text = SourceText::make_with_raw(&relative_path, &content.data(), ocaml_source_text_value);
     let indexed_source_text = IndexedSourceText::new(&source_text);
-    let tree = <SyntaxTree<PositionedSyntax, ()>>::from_ffi_pointer(ocaml_tree.usize_val(), &source_text);
-
+    let tree = match <SyntaxTree<PositionedSyntax, ()>>::ffi_pointer_as_ref(ocaml_tree.usize_val(), &source_text) {
+        Ok(t) => t,
+        Err(msg) => panic!(msg),
+    };
     let parser_options = GlobalOptions::default();
     let codegen = bool_field(&ocaml_env, 1);
     let elaborate_namespaces = bool_field(&ocaml_env, 3);
@@ -60,5 +62,4 @@ caml_raise!(lower, |ocaml_env, ocaml_source_text, ocaml_tree|, <res>, {
     let r = PositionedSyntaxLowerer::lower(&mut env, tree.root()).ocamlvalue();
     ocamlpool_leave();
     res = ocaml::Value::new(r);
-    Box::leak(tree);
 } -> res );

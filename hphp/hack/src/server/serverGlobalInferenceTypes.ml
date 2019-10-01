@@ -10,9 +10,11 @@ type mode =
   | MMerge
   | MSolve
   | MExport
+  | MRewrite
 
 type result =
   | RMerge of unit
   | RSolve of unit
   | RExport of unit
+  | RRewrite of ServerRefactorTypes.patch list
   | RError of string

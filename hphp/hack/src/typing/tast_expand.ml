@@ -19,8 +19,13 @@ module T = Aast
  *   Transform completely unconstrained types to Tmixed
  *   Consider using a fresh datatype for TAST types.
  *)
-let expand_ty ?pos env ty =
+let expand_ty ?var_hook ?pos env ty =
   let rec exp_ty ty =
+    begin
+      match (ty, var_hook) with
+      | ((_, Tvar var), Some hook) -> hook var
+      | _ -> ()
+    end;
     let (_, ety) = Tast_env.expand_type env ty in
     let ety =
       match ety with

@@ -162,8 +162,7 @@
     serverRxApiShared
     serverSymbolDefinition
     symbolFunCallService
-    symbolTypeService
-    serverGlobalInference)
+    symbolTypeService)
   (libraries
     ast
     decl
@@ -236,7 +235,8 @@
     serverTypeCheck
     serverTypeDefinition
     serverWorker
-    symbolInfoService)
+    symbolInfoService
+    serverGlobalInference)
   (libraries
     buffered_line_reader
     coverage_level

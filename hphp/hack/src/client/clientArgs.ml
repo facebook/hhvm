@@ -340,6 +340,7 @@ let parse_check_args cmd =
                   | "merge" -> ServerGlobalInferenceTypes.MMerge
                   | "solve" -> ServerGlobalInferenceTypes.MSolve
                   | "export-json" -> ServerGlobalInferenceTypes.MExport
+                  | "rewrite" -> ServerGlobalInferenceTypes.MRewrite
                   | _ ->
                     raise
                       (Arg.Bad
@@ -353,7 +354,7 @@ let parse_check_args cmd =
               | _ -> raise (Arg.Bad "only a single mode should be specified")
           end,
         " (mode) global inference operations, Usage: --global-inference "
-        ^ "[\"merge\", \"solve\", \"export-json\"] files..." );
+        ^ "[\"merge\", \"solve\", \"export-json\", \"rewrite\"] files..." );
       ("--ide-outline", Arg.Unit (set_mode MODE_OUTLINE2), "");
       ( "--ide-refactor",
         Arg.String (fun x -> set_mode (MODE_IDE_REFACTOR x) ()),

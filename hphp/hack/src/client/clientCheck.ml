@@ -732,6 +732,11 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
       in
       (match results with
       | ServerGlobalInferenceTypes.RError error -> print_endline error
+      | ServerGlobalInferenceTypes.RRewrite patches ->
+        if args.output_json then
+          print_patches_json patches
+        else
+          apply_patches patches
       | _ -> ());
       Lwt.return Exit_status.No_error
   in

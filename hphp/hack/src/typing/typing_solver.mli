@@ -34,3 +34,9 @@ val expand_type_and_narrow :
 val close_tyvars_and_solve : env -> Errors.typing_error_callback -> env
 
 val expand_bounds_of_global_tyvars : env -> env
+
+val solve_all_unsolved_tyvars_gi :
+  env -> (Ident.t -> Errors.typing_error_callback) -> env
+
+val close_tyvars_and_solve_gi :
+  env -> (Ident.t -> Errors.typing_error_callback) -> env

@@ -620,6 +620,18 @@ let solve_all_unsolved_tyvars env on_error =
   Typing_subtype.log_prop env;
   env
 
+let solve_all_unsolved_tyvars_gi env make_on_error =
+  IMap.fold
+    (fun tyvar _ env ->
+      always_solve_tyvar
+        ~freshen:false
+        env
+        Reason.Rnone
+        tyvar
+        (make_on_error tyvar))
+    env.tvenv
+    env
+
 (* Expand an already-solved type variable, and solve an unsolved type variable
  * by binding it to the union of its lower bounds, with covariant and contravariant
  * components of the type suitably "freshened". For example,
@@ -768,6 +780,12 @@ let close_tyvars_and_solve env on_error =
   let env = Env.close_tyvars env in
   List.fold_left tyvars ~init:env ~f:(fun env tyvar ->
       solve_tyvar_wrt_variance env Reason.Rnone tyvar on_error)
+
+let close_tyvars_and_solve_gi env make_on_error =
+  let tyvars = Env.get_current_tyvars env in
+  let env = Env.close_tyvars env in
+  List.fold_left tyvars ~init:env ~f:(fun env tyvar ->
+      solve_tyvar_wrt_variance env Reason.Rnone tyvar (make_on_error tyvar))
 
 (* Currently, simplify_subtype doesn't look at bounds on type variables.
  * Let's at least notice when these bounds imply an equality.

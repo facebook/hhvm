@@ -8,6 +8,18 @@
 
 open Typing_env_types
 
+module StateErrors : sig
+  type t
+
+  val mk_empty : unit -> t
+
+  val add : t -> Ident.t -> unit
+
+  val has_error : t -> Ident.t -> bool
+
+  val show : t -> string -> unit
+end
+
 module StateSubConstraintGraphs : sig
   type t = global_tvenv list
 
@@ -17,7 +29,7 @@ module StateSubConstraintGraphs : sig
 end
 
 module StateConstraintGraph : sig
-  type t = env
+  type t = env * StateErrors.t
 
   val load : string -> t
 
@@ -27,7 +39,7 @@ module StateConstraintGraph : sig
 end
 
 module StateSolvedGraph : sig
-  type t = env * (Pos.t * int) list
+  type t = env * StateErrors.t * (Pos.t * int) list
 
   val load : string -> t
 

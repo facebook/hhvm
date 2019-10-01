@@ -211,6 +211,7 @@ void callUnpack(IRGS& env, const Func* callee, const FCallArgs& fca,
     callee,
     fca.hasGenerics(),
     dynamicCall,
+    env.formingRegion,
   };
   push(env, gen(env, CallUnpack, data, sp(env), fp(env)));
   if (unlikely) gen(env, Jmp, makeExit(env, nextBcOff(env)));
@@ -243,6 +244,7 @@ SSATmp* callImpl(IRGS& env, const Func* callee, const FCallArgs& fca,
     fca.hasGenerics(),
     dynamicCall,
     asyncEagerReturn,
+    env.formingRegion,
   };
   return gen(env, Call, data, sp(env), fp(env));
 }
@@ -253,6 +255,11 @@ void handleCallReturn(IRGS& env, const Func* callee, const FCallArgs& fca,
     push(env, retVal);
     if (unlikely) gen(env, Jmp, makeExit(env, nextBcOff(env)));
     return;
+  }
+
+  if (env.formingRegion) {
+    // See callReturn() in ir-instruction.cpp.
+    callee = nullptr;
   }
 
   ifThenElse(
@@ -404,17 +411,7 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
   updateMarker(env);
   env.irb->exceptionStackBoundary();
 
-  if (!env.formingRegion) {
-    callKnown(env, callee, fca, dynamicCall);
-  } else {
-    // Do not use the inferred Func* if we are forming a region. We may have
-    // inferred the target of the call based on specialized type information
-    // that won't be available when the region is translated. If we allow the
-    // FCall to specialize using this information, we may infer narrower type
-    // for the return value, erroneously preventing the region from breaking
-    // on unknown type.
-    callUnknown(env, cns(env, callee), fca, dynamicCall, false);
-  }
+  callKnown(env, callee, fca, dynamicCall);
 }
 
 void prepareAndCallUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca,

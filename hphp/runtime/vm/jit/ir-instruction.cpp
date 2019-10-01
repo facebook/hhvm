@@ -476,15 +476,24 @@ Type builtinReturn(const IRInstruction* inst) {
 Type callReturn(const IRInstruction* inst) {
   assertx(inst->is(Call, CallUnpack));
 
+  // Do not use the inferred Func* if we are forming a region. We may have
+  // inferred the target of the call based on specialized type information
+  // that won't be available when the region is translated. If we allow the
+  // FCall to specialize using this information, we may infer narrower type
+  // for the return value, erroneously preventing the region from breaking
+  // on unknown type.
+
   if (inst->is(Call)) {
     // Async eager return needs to load TVAux
     if (inst->extra<Call>()->asyncEagerReturn) return TInitCell;
     if (inst->extra<Call>()->numOut) return TInitCell;
+    if (inst->extra<Call>()->formingRegion) return TInitCell;
     auto callee = inst->extra<Call>()->callee;
     return callee ? irgen::callReturnType(callee) : TInitCell;
   }
   if (inst->is(CallUnpack)) {
     if (inst->extra<CallUnpack>()->numOut) return TInitCell;
+    if (inst->extra<CallUnpack>()->formingRegion) return TInitCell;
     auto callee = inst->extra<CallUnpack>()->callee;
     return callee ? irgen::callReturnType(callee) : TInitCell;
   }

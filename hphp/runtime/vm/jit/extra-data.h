@@ -791,7 +791,8 @@ struct CallData : IRExtraData {
                     uint32_t genericsBitmap,
                     bool hasGenerics,
                     bool dynamicCall,
-                    bool asyncEagerReturn)
+                    bool asyncEagerReturn,
+                    bool formingRegion)
     : spOffset(spOffset)
     , numArgs(numArgs)
     , numOut(numOut)
@@ -801,6 +802,7 @@ struct CallData : IRExtraData {
     , hasGenerics(hasGenerics)
     , dynamicCall(dynamicCall)
     , asyncEagerReturn(asyncEagerReturn)
+    , formingRegion(formingRegion)
   {}
 
   std::string show() const {
@@ -813,7 +815,8 @@ struct CallData : IRExtraData {
         ? folly::sformat(",hasGenerics({})", genericsBitmap)
         : std::string{},
       dynamicCall ? ",dynamicCall" : "",
-      asyncEagerReturn ? ",asyncEagerReturn" : ""
+      asyncEagerReturn ? ",asyncEagerReturn" : "",
+      formingRegion ? ",formingRegion" : ""
     );
   }
 
@@ -830,6 +833,7 @@ struct CallData : IRExtraData {
   bool hasGenerics;
   bool dynamicCall;
   bool asyncEagerReturn;
+  bool formingRegion;
 };
 
 struct CallUnpackData : IRExtraData {
@@ -839,7 +843,8 @@ struct CallUnpackData : IRExtraData {
                           Offset callOffset,
                           const Func* callee,
                           bool hasGenerics,
-                          bool dynamicCall)
+                          bool dynamicCall,
+                          bool formingRegion)
     : spOffset(spOffset)
     , numArgs(numArgs)
     , numOut(numOut)
@@ -847,6 +852,7 @@ struct CallUnpackData : IRExtraData {
     , callee(callee)
     , hasGenerics(hasGenerics)
     , dynamicCall(dynamicCall)
+    , formingRegion(formingRegion)
   {}
 
   std::string show() const {
@@ -856,7 +862,8 @@ struct CallUnpackData : IRExtraData {
         ? folly::sformat(",{}", callee->fullName())
         : std::string{},
       hasGenerics ? ",hasGenerics" : "",
-      dynamicCall ? ",dynamicCall" : ""
+      dynamicCall ? ",dynamicCall" : "",
+      formingRegion ? ",formingRegion" : ""
     );
   }
 
@@ -871,6 +878,7 @@ struct CallUnpackData : IRExtraData {
   const Func* callee; // nullptr if not statically known
   bool hasGenerics;
   bool dynamicCall;
+  bool formingRegion;
 };
 
 struct RetCtrlData : IRExtraData {

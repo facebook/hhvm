@@ -204,6 +204,12 @@ module Go_to_type_definition = struct
   type result = (Pos.absolute * string) list
 end
 
+module Extract_standalone = struct
+  type target =
+    | Function of string
+    | Method of string * string
+end
+
 type file_input =
   | FileName of string
   | FileContent of string
@@ -323,7 +329,7 @@ type _ t =
   | LIST_FILES_WITH_ERRORS : string list t
   | FILE_DEPENDENCIES : string list -> string list t
   | IDENTIFY_TYPES : file_input * int * int -> (Pos.absolute * string) list t
-  | EXTRACT_STANDALONE : Find_refs.action -> string t
+  | EXTRACT_STANDALONE : Extract_standalone.target -> string t
   | GO_TO_DEFINITION : labelled_file * int * int -> Go_to_definition.result t
   | BIGCODE : string -> string t
   | PAUSE : bool -> unit t

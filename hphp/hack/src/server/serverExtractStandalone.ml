@@ -8,7 +8,7 @@
 
 open Core_kernel
 open Typing_defs
-open ServerCommandTypes.Find_refs
+open ServerCommandTypes.Extract_standalone
 module SourceText = Full_fidelity_source_text
 module Syntax = Full_fidelity_positioned_syntax
 module SyntaxTree = Full_fidelity_syntax_tree.WithSyntax (Syntax)
@@ -128,43 +128,40 @@ let is_builtin_dep dep =
       (* Must be a class dependency *)
       | _ -> raise UnexpectedDependency)
 
-let is_relevant_dependency (e : action) (dep : Typing_deps.Dep.variant) =
-  match e with
+let is_relevant_dependency (target : target) (dep : Typing_deps.Dep.variant) =
+  match target with
   | Function f ->
     dep = Typing_deps.Dep.Fun f || dep = Typing_deps.Dep.FunName f
   (* We have to collect dependencies of the entire class because dependency collection is
      coarse-grained: if cls's member depends on D, we get a dependency edge cls --> D,
      not (cls, member) --> D *)
-  | Member (cls, Method _) ->
-    is_class_dependency dep && get_class_name dep = cls
-  | _ -> raise Unsupported
+  | Method (cls, _) -> is_class_dependency dep && get_class_name dep = cls
 
-let get_filename to_extract =
+let get_filename target =
   let pos =
-    match to_extract with
+    match target with
     | Function func ->
       let f = value_exn NotFound @@ Decl_provider.get_fun func in
       f.ft_pos
-    | Member (cls, Method _) ->
+    | Method (cls, _) ->
       let cls = value_exn NotFound @@ Decl_provider.get_class cls in
       Decl_provider.Class.pos cls
-    | _ -> raise Unsupported
   in
   Pos.filename pos
 
-let extract_body to_extract =
-  let filename = get_filename to_extract in
+let extract_body target =
+  let filename = get_filename target in
   let abs_filename = Relative_path.to_absolute filename in
   let file_content = In_channel.read_all abs_filename in
   Aast.(
     let pos =
-      match to_extract with
+      match target with
       | Function func ->
         let ast_function =
           value_exn NotFound @@ Ast_provider.find_fun_in_file filename func
         in
         ast_function.f_span
-      | Member (cls, Method name) ->
+      | Method (cls, name) ->
         let ast_class =
           value_exn NotFound @@ Ast_provider.find_class_in_file filename cls
         in
@@ -173,7 +170,6 @@ let extract_body to_extract =
           @@ List.find ast_class.c_methods (fun meth -> snd meth.m_name = name)
         in
         m.m_span
-      | _ -> raise Unsupported
     in
     Pos.get_text_from_pos file_content pos)
 
@@ -860,7 +856,7 @@ let construct_class tcopt cls ?full_method:(meth = None) fields =
        of other class fields. *)
         let extracted_method =
           match meth with
-          | Some (Member (_, Method _)) -> extract_body (Option.value_exn meth)
+          | Some (Method _) -> extract_body (Option.value_exn meth)
           | _ -> ""
         in
         Printf.sprintf "%s\n%s\n%s}" decl body extracted_method))
@@ -1110,40 +1106,36 @@ let get_dependency_origin cls (dep : Typing_deps.Dep.variant) =
       | Cstr cls -> cls
       | _ -> raise UnexpectedDependency))
 
-let collect_dependencies tcopt to_extract =
+let collect_dependencies tcopt target =
   let dependencies = HashSet.create 0 in
   let _ =
-    match to_extract with
+    match target with
     (* We depend on the class which the method belongs to *)
-    | Member (cls, Method _) ->
-      do_add_dep dependencies (Typing_deps.Dep.Class cls)
+    | Method (cls, _) -> do_add_dep dependencies (Typing_deps.Dep.Class cls)
     | Function _ -> ()
-    | _ -> raise Unsupported
   in
   Typing_deps.Dep.(
     let add_dependency root obj =
-      if is_relevant_dependency to_extract root then
-        do_add_dep dependencies obj
+      if is_relevant_dependency target root then do_add_dep dependencies obj
     in
     Typing_deps.add_dependency_callback "add_dependency" add_dependency;
-    let filename = get_filename to_extract in
+    let filename = get_filename target in
     (* Collect dependencies through side effects of typechecking and remove the extracted
        function/method from the set of dependencies to avoid declaring it twice. *)
     let () =
-      match to_extract with
+      match target with
       | Function func ->
         let (_ : (Tast.def * Typing_env_types.global_tvenv) option) =
           Typing_check_service.type_fun tcopt filename func
         in
         HashSet.remove dependencies (Fun func);
         HashSet.remove dependencies (FunName func)
-      | Member (cls, Method m) ->
+      | Method (cls, m) ->
         let (_ : (Tast.def * Typing_env_types.global_tvenv list) option) =
           Typing_check_service.type_class tcopt filename cls
         in
         HashSet.remove dependencies (Method (cls, m));
         HashSet.remove dependencies (SMethod (cls, m))
-      | _ -> raise Unsupported
     in
     let types = Caml.Hashtbl.create 0 in
     let globals = HashSet.create 0 in
@@ -1284,7 +1276,7 @@ let get_code declarations =
   else
     namespaced
 
-let get_declarations tcopt to_extract types globals =
+let get_declarations tcopt target types globals =
   let add_global_declaration dep declarations =
     SMap.add
       (global_dep_name dep)
@@ -1292,38 +1284,36 @@ let get_declarations tcopt to_extract types globals =
       declarations
   in
   let add_class_declaration cls fields declarations =
-    let declaration =
-      match to_extract with
-      | Function _ -> construct_type_declaration tcopt cls fields
-      | Member (c, Method _) ->
-        let full_method =
-          if c = cls then
-            Some to_extract
-          else
-            None
-        in
-        construct_type_declaration tcopt cls ~full_method fields
-      | _ -> raise Unsupported
+    let full_method =
+      match target with
+      | Function _ -> None
+      | Method (c, _) ->
+        if c = cls then
+          Some target
+        else
+          None
     in
-    SMap.add cls declaration declarations
+    SMap.add
+      cls
+      (construct_type_declaration tcopt cls ~full_method fields)
+      declarations
   in
-  let add_extracted_function_declaration declarations =
-    match to_extract with
+  let add_target_declaration declarations =
+    match target with
     | Function function_name ->
-      let function_text = extract_body to_extract in
+      let function_text = extract_body target in
       SMap.add function_name function_text declarations
-    | Member (_, Method _) -> declarations
-    | _ -> raise Unsupported
+    | Method _ -> declarations
   in
   SMap.empty
   |> HashSet.fold add_global_declaration globals
   |> Caml.Hashtbl.fold add_class_declaration types
-  |> add_extracted_function_declaration
+  |> add_target_declaration
 
-let go tcopt to_extract =
+let go tcopt target =
   try
-    let (types, globals) = collect_dependencies tcopt to_extract in
-    let declarations = get_declarations tcopt to_extract types globals in
+    let (types, globals) = collect_dependencies tcopt target in
+    let declarations = get_declarations tcopt target types globals in
     get_code declarations
   with
   | NotFound -> "Not found!"

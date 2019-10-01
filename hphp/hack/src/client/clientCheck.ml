@@ -279,16 +279,16 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
       in
       Lwt.return Exit_status.No_error
     | MODE_EXTRACT_STANDALONE name ->
-      ServerCommandTypes.Find_refs.(
-        let action =
+      ServerCommandTypes.Extract_standalone.(
+        let target =
           parse_function_or_method_id
             ~meth_action:(fun class_name method_name ->
-              Member (class_name, Method method_name))
+              Method (class_name, method_name))
             ~func_action:(fun fun_name -> Function fun_name)
             name
         in
         let%lwt pretty_printed_dependencies =
-          rpc args @@ Rpc.EXTRACT_STANDALONE action
+          rpc args @@ Rpc.EXTRACT_STANDALONE target
         in
         print_endline pretty_printed_dependencies;
         Lwt.return Exit_status.No_error)

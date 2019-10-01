@@ -16,8 +16,6 @@ module StateErrors : sig
   val add : t -> Ident.t -> unit
 
   val has_error : t -> Ident.t -> bool
-
-  val show : t -> string -> unit
 end
 
 module StateSubConstraintGraphs : sig

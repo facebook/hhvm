@@ -18,10 +18,6 @@ module StateErrors = struct
   let add t id = t := IdentMap.add id () !t
 
   let has_error t id = IdentMap.mem id !t
-
-  let show t m =
-    print_endline m;
-    IdentMap.iter (fun k _ -> print_endline (string_of_int k)) !t
 end
 
 let make_error_callback errors var _l1 _l2 = StateErrors.add errors var

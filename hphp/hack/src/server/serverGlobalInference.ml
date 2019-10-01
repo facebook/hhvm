@@ -13,6 +13,8 @@ module PositionedTree =
   Full_fidelity_syntax_tree.WithSyntax (Full_fidelity_positioned_syntax)
 open Syntax
 
+let scuba_table = Scuba.Table.of_name "hh_global_inference"
+
 let is_not_acceptable ty =
   let finder =
     object (this)
@@ -244,6 +246,40 @@ let log_ty log =
     | SNonacceptable -> "nonacceptable"
     | SCorrect -> "correct"
   in
+  EventLogger.log_if_initialized
+  @@ fun () ->
+  Scuba.new_sample (Some scuba_table)
+  |> Scuba.add_normal "file" log.file
+  |> Scuba.add_int "start_line" (fst @@ Pos.line_column log.pos)
+  |> Scuba.add_int "start_column" (snd @@ Pos.line_column log.pos)
+  |> Scuba.add_int "end_line" (fst @@ Pos.end_line_column log.pos)
+  |> Scuba.add_int "end_column" (snd @@ Pos.end_line_column log.pos)
+  |> Scuba.add_int
+       "is_error"
+       ( if log.status = SError then
+         1
+       else
+         0 )
+  |> Scuba.add_int
+       "is_nonacceptable"
+       ( if log.status = SNonacceptable then
+         1
+       else
+         0 )
+  |> Scuba.add_int
+       "is_ret"
+       ( if log.syntax_type = RetType then
+         1
+       else
+         0 )
+  |> Scuba.add_int
+       "is_param"
+       ( if log.syntax_type = ParamType then
+         1
+       else
+         0 )
+  |> Scuba.add_normal "ty" log.ty
+  |> EventLogger.log;
   Hh_logger.log
     "[%s] %s, type %s"
     status_str

@@ -130,7 +130,7 @@ let maybe_remote_type_check genv env fnl =
   if do_remote then (
     set_up_remote_logging env;
     let eden_threshold =
-      genv.local_config.remote_worker_eden_checkout_threshold
+      genv.local_config.remote_type_check.worker_eden_checkout_threshold
     in
     let remote_errors =
       Typing_remote_check_service.go

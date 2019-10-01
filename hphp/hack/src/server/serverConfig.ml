@@ -14,6 +14,7 @@
 open Core_kernel
 open Config_file.Getters
 open Reordered_argument_collections
+open ServerLocalConfig
 
 type t = {
   version: Config_file.version;
@@ -301,24 +302,20 @@ let load config_filename options =
       ?tco_disallow_array_typehint:(bool_opt "disallow_array_typehint" config)
       ?tco_disallow_array_literal:(bool_opt "disallow_array_literal" config)
       ?tco_defer_class_declaration_threshold:
-        local_config.ServerLocalConfig.defer_class_declaration_threshold
+        local_config.defer_class_declaration_threshold
       ?tco_max_times_to_defer_type_checking:
-        local_config.ServerLocalConfig.max_times_to_defer_type_checking
-      ?tco_prefetch_deferred_files:
-        (Some local_config.ServerLocalConfig.prefetch_deferred_files)
+        local_config.max_times_to_defer_type_checking
+      ?tco_prefetch_deferred_files:(Some local_config.prefetch_deferred_files)
       ?tco_remote_type_check_threshold:
-        local_config.ServerLocalConfig.remote_type_check_threshold
-      ?tco_remote_type_check:
-        (Some local_config.ServerLocalConfig.remote_type_check)
-      ?tco_remote_worker_key:local_config.ServerLocalConfig.remote_worker_key
-      ?tco_remote_check_id:local_config.ServerLocalConfig.remote_check_id
-      ?tco_num_remote_workers:
-        (Some local_config.ServerLocalConfig.num_remote_workers)
-      ?so_remote_version_specifier:
-        local_config.ServerLocalConfig.remote_version_specifier
+        local_config.remote_type_check.recheck_threshold
+      ?tco_remote_type_check:(Some local_config.remote_type_check.enabled)
+      ?tco_remote_worker_key:local_config.remote_worker_key
+      ?tco_remote_check_id:local_config.remote_check_id
+      ?tco_num_remote_workers:(Some local_config.remote_type_check.num_workers)
+      ?so_remote_version_specifier:local_config.remote_version_specifier
       ?so_remote_worker_eden_checkout_threshold:
-        (int_opt "remote_worker_eden_checkout_threshold" config)
-      ?so_naming_sqlite_path:local_config.ServerLocalConfig.naming_sqlite_path
+        (Some local_config.remote_type_check.worker_eden_checkout_threshold)
+      ?so_naming_sqlite_path:local_config.naming_sqlite_path
       ?tco_language_feature_logging:
         (bool_opt "language_feature_logging" config)
       ?tco_unsafe_rx:(bool_opt "unsafe_rx" config)

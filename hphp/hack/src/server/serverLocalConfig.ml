@@ -95,19 +95,12 @@ type t = {
   max_times_to_defer_type_checking: int option;
   (* The whether to use the hook that prefetches files on an Eden checkout *)
   prefetch_deferred_files: bool;
-  (* If set, distributes type checking to remote workers if the number of files to
-    type check exceeds the threshold. If not set, then always checks everything locally. *)
-  remote_type_check_threshold: int option;
-  (* Enables remote type check *)
-  remote_type_check: bool;
+  (* Remote type check settings that can be changed, e.g., by GK *)
+  remote_type_check: remote_type_check;
   (* If set, uses the key to fetch type checking jobs *)
   remote_worker_key: string option;
   (* If set, uses the check ID when logging events in the context of remove init/work *)
   remote_check_id: string option;
-  (* Indicates the size of the job below which Eden should be used by the remote worker *)
-  remote_worker_eden_checkout_threshold: int;
-  (* Dictates the number of remote type checking workers *)
-  num_remote_workers: int;
   (* The version of the package the remote worker is to install *)
   remote_version_specifier: string option;
   (* Enables the reverse naming table to fall back to SQLite for queries. *)
@@ -126,6 +119,18 @@ type t = {
   use_lru_workers: bool;
   (* Use Rust version of full_fidelity_parser_errors.ml  *)
   rust_parser_errors: bool;
+}
+
+and remote_type_check = {
+  (* Enables remote type check *)
+  enabled: bool;
+  (* If set, distributes type checking to remote workers if the number of files to
+    type check exceeds the threshold. If not set, then always checks everything locally. *)
+  recheck_threshold: int option;
+  (* Indicates the size of the job below which Eden should be used by the remote worker *)
+  worker_eden_checkout_threshold: int;
+  (* Dictates the number of remote type checking workers *)
+  num_workers: int;
 }
 
 let default =
@@ -181,13 +186,16 @@ let default =
     defer_class_declaration_threshold = None;
     max_times_to_defer_type_checking = None;
     prefetch_deferred_files = false;
-    remote_type_check_threshold = None;
-    remote_type_check = true;
+    remote_type_check =
+      {
+        enabled = true;
+        num_workers = 4;
+        recheck_threshold = None;
+        worker_eden_checkout_threshold = 10000;
+      };
     remote_worker_key = None;
     remote_check_id = None;
-    num_remote_workers = 4;
     remote_version_specifier = None;
-    remote_worker_eden_checkout_threshold = 10000;
     naming_sqlite_path = None;
     enable_naming_table_fallback = false;
     symbolindex_search_provider = "TrieIndex";
@@ -247,6 +255,28 @@ let state_loader_timeouts_ ~default config =
       current_hg_rev_timeout;
       current_base_rev_timeout;
     })
+
+let load_remote_type_check ~current_version config =
+  let prefix = Some "remote_type_check" in
+  let num_workers =
+    int_
+      "num_workers"
+      ~prefix
+      ~default:default.remote_type_check.num_workers
+      config
+  in
+  let recheck_threshold = int_opt "recheck_threshold" ~prefix config in
+  let enabled =
+    bool_if_min_version "enabled" ~prefix ~default:true ~current_version config
+  in
+  let worker_eden_checkout_threshold =
+    int_
+      "worker_eden_checkout_threshold"
+      ~prefix
+      ~default:default.remote_type_check.worker_eden_checkout_threshold
+      config
+  in
+  { enabled; num_workers; recheck_threshold; worker_eden_checkout_threshold }
 
 let load_ fn ~silent ~current_version overrides =
   let config =
@@ -480,29 +510,11 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
-  let remote_type_check_threshold =
-    int_opt "remote_type_check_threshold" config
-  in
-  let remote_type_check =
-    bool_if_min_version
-      "remote_type_check"
-      ~default:true
-      ~current_version
-      config
-  in
+  let remote_type_check = load_remote_type_check ~current_version config in
   let remote_worker_key = string_opt "remote_worker_key" config in
   let remote_check_id = string_opt "remote_check_id" config in
-  let num_remote_workers =
-    int_ "num_remote_workers" ~default:default.num_remote_workers config
-  in
   let remote_version_specifier =
     string_opt "remote_version_specifier" config
-  in
-  let remote_worker_eden_checkout_threshold =
-    int_
-      "remote_worker_eden_checkout_threshold"
-      ~default:default.remote_worker_eden_checkout_threshold
-      config
   in
   let naming_sqlite_path = string_opt "naming_sqlite_path" config in
   let enable_naming_table_fallback =
@@ -607,12 +619,9 @@ let load_ fn ~silent ~current_version overrides =
     defer_class_declaration_threshold;
     max_times_to_defer_type_checking;
     prefetch_deferred_files;
-    remote_worker_eden_checkout_threshold;
-    remote_type_check_threshold;
     remote_type_check;
     remote_worker_key;
     remote_check_id;
-    num_remote_workers;
     remote_version_specifier;
     naming_sqlite_path;
     enable_naming_table_fallback;

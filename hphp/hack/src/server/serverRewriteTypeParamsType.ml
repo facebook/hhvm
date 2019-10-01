@@ -48,7 +48,6 @@ let parameter_type_collector =
             { (Phase.env_with_self tenv) with from_class = Some Aast.CIstatic }
         in
         let ty = Decl_hint.hint tenv.Typing_env_types.decl_env hint in
-        let ty = Typing_enforceability.pessimize_type tenv ty in
         let ty = snd @@ Phase.localize ~ety_env tenv ty in
         if Pervasives.( = ) inferred_hint ty then
           self#zero

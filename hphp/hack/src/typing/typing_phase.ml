@@ -263,9 +263,6 @@ and localize_tparams ~ety_env env pos tyl tparams =
 and localize_tparam pos (env, ety_env) ty tparam =
   match ty with
   | (r, Tapply ((_, x), _argl)) when x = SN.Typehints.wildcard ->
-    let tparam =
-      Typing_enforceability.pessimize_tparam_constraints env tparam
-    in
     let {
       tp_name = (_, name);
       tp_constraints = cstrl;
@@ -701,49 +698,5 @@ let sub_type_decl env ty1 ty2 on_error =
   let (env, ty1) = localize_with_self env ty1 in
   let (env, ty2) = localize_with_self env ty2 in
   ignore (TUtils.sub_type env ty1 ty2 on_error)
-
-(*****************************************************************************
- * External API
- *****************************************************************************)
-
-let localize_with_self env ty =
-  let ty = Typing_enforceability.pessimize_type env ty in
-  localize_with_self env ty
-
-let localize ~ety_env env ty =
-  let ty = Typing_enforceability.pessimize_type env ty in
-  localize ~ety_env env ty
-
-let localize_ft ?instantiation ~ety_env env ft =
-  let ft = Typing_enforceability.pessimize_fun_type env ft in
-  let instantiation =
-    Option.map instantiation ~f:(fun i ->
-        let explicit_targs =
-          Typing_enforceability.pessimize_targs
-            env
-            i.explicit_targs
-            (fst ft.ft_tparams)
-        in
-        { i with explicit_targs })
-  in
-  localize_ft ?instantiation ~ety_env env ft
-
-let localize_generic_parameters_with_bounds ~ety_env env tparams =
-  let tparams : decl_tparam list =
-    List.map
-      tparams
-      ~f:(Typing_enforceability.pessimize_tparam_constraints env)
-  in
-  localize_generic_parameters_with_bounds ~ety_env env tparams
-
-let check_tparams_constraints ~use_pos ~ety_env env tparams =
-  let tparams =
-    List.map
-      ~f:(Typing_enforceability.pessimize_tparam_constraints env)
-      tparams
-  in
-  check_tparams_constraints ~use_pos ~ety_env env tparams
-
-(* TODO(T46211387) make the rest of the API pessimize *)
 
 let () = TUtils.localize_with_self_ref := localize_with_self

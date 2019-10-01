@@ -117,8 +117,6 @@ let like_type_hints = GlobalOptions.tco_like_type_hints
 
 let like_casts = GlobalOptions.tco_like_casts
 
-let pessimize_types = GlobalOptions.tco_pessimize_types
-
 let simple_pessimize = GlobalOptions.tco_simple_pessimize
 
 let coercion_from_dynamic = GlobalOptions.tco_coercion_from_dynamic

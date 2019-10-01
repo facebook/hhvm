@@ -196,7 +196,6 @@ let parse_options () =
   let out_extension = ref ".out" in
   let like_type_hints = ref false in
   let like_casts = ref false in
-  let pessimize_types = ref false in
   let simple_pessimize = ref 0.0 in
   let coercion_from_dynamic = ref false in
   let coercion_from_union = ref false in
@@ -423,10 +422,6 @@ let parse_options () =
       ( "--like-casts",
         Arg.Set like_casts,
         "Allows like types to be written in as expressions" );
-      ( "--pessimize-types",
-        Arg.Set pessimize_types,
-        "When unenforceable types are encountered, convert them to like types"
-      );
       ( "--simple-pessimize",
         Arg.Set_float simple_pessimize,
         "At coercion points, if a type is not enforceable, wrap it in like. Float argument 0.0 to 1.0 sets frequency"
@@ -549,7 +544,6 @@ let parse_options () =
       ~tco_shallow_class_decl:!shallow_class_decl
       ~tco_like_type_hints:!like_type_hints
       ~tco_like_casts:!like_casts
-      ~tco_pessimize_types:!pessimize_types
       ~tco_simple_pessimize:!simple_pessimize
       ~tco_coercion_from_dynamic:!coercion_from_dynamic
       ~tco_coercion_from_union:!coercion_from_union

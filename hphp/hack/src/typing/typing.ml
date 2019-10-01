@@ -7888,7 +7888,6 @@ and generate_fresh_tparams env class_info reason hint_tyl =
     List.map hint_tyl (fun x -> Some x) @ List.init pad_len (fun _ -> None)
   in
   let replace_wildcard env hint_ty tp =
-    let tp = Typing_enforceability.pessimize_tparam_constraints env tp in
     let {
       tp_name = (_, tparam_name);
       tp_reified = reified;
@@ -7940,11 +7939,7 @@ and safely_refine_class_type
   (* Type of variable in block will be class name
    * with fresh type parameters *)
   let obj_ty = (fst obj_ty, Tclass (class_name, Nonexact, tyl_fresh)) in
-  let tparams =
-    List.map
-      (Cls.tparams class_info)
-      ~f:(Typing_enforceability.pessimize_tparam_constraints env)
-  in
+  let tparams = Cls.tparams class_info in
   (* Add in constraints as assumptions on those type parameters *)
   let ety_env =
     {
@@ -7956,7 +7951,6 @@ and safely_refine_class_type
     }
   in
   let add_bounds env (t, ty_fresh) =
-    let t = Typing_enforceability.pessimize_tparam_constraints env t in
     List.fold_left t.tp_constraints ~init:env ~f:(fun env (ck, ty) ->
         (* Substitute fresh type parameters for
          * original formals in constraint *)
@@ -8114,15 +8108,6 @@ and string2 env idl =
  * to check that the arguments provided are consistent with the constraints on
  * the type parameters. *)
 and check_implements_tparaml (env : env) ht =
-  (* Pessimize `extends C<int> to extends C<~int>` for erased generics so that the lower bound of
-   * dynamic is respected *)
-  let ht =
-    match ht with
-    | (_, Tapply ((_, x), _)) when not (Env.is_typedef x || Env.is_enum env x)
-      ->
-      Typing_enforceability.pessimize_type env ht
-    | _ -> ht
-  in
   let (_r, (_, c), paraml) = TUtils.unwrap_class_type ht in
   let class_ = Env.get_class_dep env c in
   match class_ with
@@ -8134,7 +8119,6 @@ and check_implements_tparaml (env : env) ht =
     iter2_shortest
       begin
         fun t ty ->
-        let t = Typing_enforceability.pessimize_tparam_constraints env t in
         let ty_pos = Reason.to_pos (fst ty) in
         List.iter t.tp_constraints (fun (ck, cstr) ->
             (* Constraint might contain uses of generic type parameters *)
@@ -8357,11 +8341,6 @@ and class_def_ env c tc =
       (match Env.get_class env (snd cls) with
       | Some cls when Cls.where_constraints cls <> [] ->
         let tc_tparams = Cls.tparams cls in
-        let tc_tparams =
-          List.map
-            tc_tparams
-            ~f:(Typing_enforceability.pessimize_tparam_constraints env)
-        in
         let ety_env =
           {
             (Phase.env_with_self env) with

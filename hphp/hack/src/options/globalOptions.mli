@@ -214,9 +214,6 @@ type t = {
   tco_like_type_hints: bool;
   (* Enables like casts *)
   tco_like_casts: bool;
-  (* This tells the type checker to rewrite unenforceable as like types
-     i.e. vec<string> => vec<~string> *)
-  tco_pessimize_types: bool;
   (* A simpler form of pessimization, only wraps the outermost type in like
    * if the type is not enforceable *)
   tco_simple_pessimize: float;
@@ -337,7 +334,6 @@ val make :
   ?profile_type_check_duration_threshold:float ->
   ?tco_like_type_hints:bool ->
   ?tco_like_casts:bool ->
-  ?tco_pessimize_types:bool ->
   ?tco_simple_pessimize:float ->
   ?tco_coercion_from_dynamic:bool ->
   ?tco_coercion_from_union:bool ->
@@ -498,8 +494,6 @@ val profile_type_check_duration_threshold : t -> float
 val tco_like_type_hints : t -> bool
 
 val tco_like_casts : t -> bool
-
-val tco_pessimize_types : t -> bool
 
 val tco_simple_pessimize : t -> float
 

@@ -82,7 +82,7 @@ let get_occurrence_info
     (env : ServerEnv.env)
     (nast : Nast.program)
     (occurrence : Relative_path.t SymbolOccurrence.t) =
-  let ft_opt =
+  let (ft_opt, full_occurrence) =
     (* Handle static methods, instance methods, and constructors *)
     match occurrence.SymbolOccurrence.type_ with
     | SymbolOccurrence.Method (classname, methodname) ->
@@ -95,15 +95,21 @@ let get_occurrence_info
             (Decl_provider.get_class_method classname methodname)
             (Decl_provider.get_static_method classname methodname)
       in
-      ft
+      (ft, occurrence)
     | _ ->
       let fun_name =
         ServerEnv.expand_namespace env occurrence.SymbolOccurrence.name
       in
       let ft = Decl_provider.get_fun fun_name in
-      ft
+      let full_occurrence =
+        match occurrence.SymbolOccurrence.type_ with
+        | SymbolOccurrence.Function ->
+          { occurrence with SymbolOccurrence.name = fun_name }
+        | _ -> occurrence
+      in
+      (ft, full_occurrence)
   in
-  let def_opt = ServerSymbolDefinition.go (Some nast) occurrence in
+  let def_opt = ServerSymbolDefinition.go (Some nast) full_occurrence in
   match ft_opt with
   | None -> None
   | Some ft -> Some (occurrence, ft, def_opt)

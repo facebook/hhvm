@@ -2989,6 +2989,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         {
                             "label": "function Herp\\aliased_global_func"
                             "(string $s): void",
+                            "documentation": "Namespace-aliased function with doc block",
                             "parameters": [{"label": "$s"}],
                         }
                     ],
@@ -3009,6 +3010,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         {
                             "label": "function Herp\\aliased_global_func"
                             "(string $s): void",
+                            "documentation": "Namespace-aliased function with doc block",
                             "parameters": [{"label": "$s"}],
                         }
                     ],

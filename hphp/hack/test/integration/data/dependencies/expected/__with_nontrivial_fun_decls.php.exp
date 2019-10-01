@@ -24,5 +24,3 @@ class Derived extends \ImplementingBase {
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }
-
-

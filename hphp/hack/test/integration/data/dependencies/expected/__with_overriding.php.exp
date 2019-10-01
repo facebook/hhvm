@@ -1,12 +1,12 @@
 <?hh
-abstract class AbstractBase {
-
-}
 class ImplementingBase extends \AbstractBase {
 
   public function inherited(): void {
     throw new Exception();
   }
+}
+abstract class AbstractBase {
+
 }
 function with_overriding(Derived $arg): int {
   $arg->inherited();

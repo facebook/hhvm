@@ -4,7 +4,6 @@ class WithConst {
   const float CFLOAT = 0.0;
   const \SomeEnum CENUM = \SomeEnum::SECOND;
 }
-const \TypedefForString TYPEDEF = "";
 function with_constants(): void {
   $a = WithConst::CFLOAT;
   $b = WithConst::CENUM;
@@ -17,6 +16,7 @@ function with_constants(): void {
   $i = KEYSET;
   $j = TYPEDEF;
 }
+const \TypedefForString TYPEDEF = "";
 const array<string, int> ARR = [];
 type TypedefForString = string;
 const varray<string> MAP_INDEX = varray[];
@@ -24,16 +24,14 @@ const shape('x' => int, 'y' => \SecondEnum) SHAPE =
   shape('y' => \SecondEnum::SECOND, 'x' => 0);
 const (int, ?(string, float)) OPTION = tuple(0, null);
 const darray<string, int> AGE_RANGE = darray[];
-const \classname<\WithConst> CLASSNAME = \WithConst::class;
 enum SomeEnum: int {
   SECOND = 0;
 }
-const \keyset<string> KEYSET = keyset[];
+const \classname<\WithConst> CLASSNAME = \WithConst::class;
 enum SecondEnum: string {
   SECOND = "";
 }
+const \keyset<string> KEYSET = keyset[];
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }
-
-

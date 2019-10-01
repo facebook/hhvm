@@ -1,9 +1,9 @@
 <?hh
-class C extends \A {
-
-}
 function with_typedefs(Complex $c, shape('x' => int, 'y' => C) $pair): Point {
   return shape('x' => $pair['x'], 'y' => $c['first']);
+}
+class C extends \A {
+
 }
 class A0 {
 
@@ -22,5 +22,3 @@ interface I1 {
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }
-
-

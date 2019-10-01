@@ -1227,7 +1227,7 @@ let sort_by_namespace declarations =
   let namespaces =
     { namespaces = Caml.Hashtbl.create 0; decls = HashSet.create 0 }
   in
-  HashSet.iter (fun decl -> add_decl namespaces decl 0) declarations;
+  List.iter declarations ~f:(fun decl -> add_decl namespaces decl 0);
   namespaces
 
 (* Takes declarations of Hack classes, functions, constants (map name -> code)
@@ -1238,10 +1238,11 @@ let sort_by_namespace declarations =
    declarations, we "generate" a separate file for toplevel declarations, using
    hh_single_type_check multifile syntax.
 *)
-let get_code (decl_names : string HashSet.t) declarations =
+let get_code declarations =
+  let decl_names = SMap.keys declarations in
   let global_namespace = sort_by_namespace decl_names in
   let code_from_namespace_decls name acc =
-    List.append (Caml.Hashtbl.find_all declarations name) acc
+    Option.to_list (SMap.get name declarations) @ acc
   in
   let hh_prefix = "<?hh" in
   (* Toplevel code has to be in a separate file *)
@@ -1284,57 +1285,46 @@ let get_code (decl_names : string HashSet.t) declarations =
     namespaced
 
 let get_declarations tcopt to_extract types globals =
-  let declarations = Caml.Hashtbl.create 0 in
-  let add_global_declaration dep =
-    let name = global_dep_name dep in
-    Caml.Hashtbl.add
-      declarations
-      name
+  let add_global_declaration dep declarations =
+    SMap.add
+      (global_dep_name dep)
       (get_global_object_declaration tcopt dep)
+      declarations
   in
-  let add_class_declaration cls fields =
-    match to_extract with
-    | Function _ ->
-      Caml.Hashtbl.add
-        declarations
-        cls
-        (construct_type_declaration tcopt cls fields)
-    | Member (c, Method _) ->
-      if c = cls then
-        Caml.Hashtbl.add
-          declarations
-          cls
-          (construct_type_declaration
-             tcopt
-             cls
-             ~full_method:(Some to_extract)
-             fields)
-      else
-        Caml.Hashtbl.add
-          declarations
-          cls
-          (construct_type_declaration tcopt cls fields)
-    | _ -> raise Unsupported
+  let add_class_declaration cls fields declarations =
+    let declaration =
+      match to_extract with
+      | Function _ -> construct_type_declaration tcopt cls fields
+      | Member (c, Method _) ->
+        let full_method =
+          if c = cls then
+            Some to_extract
+          else
+            None
+        in
+        construct_type_declaration tcopt cls ~full_method fields
+      | _ -> raise Unsupported
+    in
+    SMap.add cls declaration declarations
   in
-  HashSet.iter add_global_declaration globals;
-  Caml.Hashtbl.iter add_class_declaration types;
-  let (_ : unit) =
+  let add_extracted_function_declaration declarations =
     match to_extract with
     | Function function_name ->
       let function_text = extract_body to_extract in
-      Caml.Hashtbl.add declarations function_name function_text
-    | Member (_, Method _) -> ()
+      SMap.add function_name function_text declarations
+    | Member (_, Method _) -> declarations
     | _ -> raise Unsupported
   in
-  declarations
+  SMap.empty
+  |> HashSet.fold add_global_declaration globals
+  |> Caml.Hashtbl.fold add_class_declaration types
+  |> add_extracted_function_declaration
 
 let go tcopt to_extract =
   try
     let (types, globals) = collect_dependencies tcopt to_extract in
     let declarations = get_declarations tcopt to_extract types globals in
-    let decl_names = HashSet.create 0 in
-    Caml.Hashtbl.iter (fun k _ -> HashSet.add decl_names k) declarations;
-    get_code decl_names declarations
+    get_code declarations
   with
   | NotFound -> "Not found!"
   | InvalidInput ->

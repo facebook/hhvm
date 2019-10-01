@@ -1,14 +1,14 @@
 <?hh
+function with_type_constants(
+  WithAbstractConst::NESTED::WITH_THIS $arg,
+): WithConst::TYPECONST {
+  return 1;
+}
 class WithConst {
 
   const type TYPECONST as num = int;
   const type WITH_CONSTRAINT = \A0;
   const type WITH_THIS = this::WITH_CONSTRAINT;
-}
-function with_type_constants(
-  WithAbstractConst::NESTED::WITH_THIS $arg,
-): WithConst::TYPECONST {
-  return 1;
 }
 class A0 {
 
@@ -20,5 +20,3 @@ abstract class WithAbstractConst {
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }
-
-

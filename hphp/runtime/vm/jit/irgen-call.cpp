@@ -247,16 +247,13 @@ SSATmp* callImpl(IRGS& env, const Func* callee, const FCallArgs& fca,
   return gen(env, Call, data, sp(env), fp(env));
 }
 
-void callRegular(IRGS& env, const Func* callee, const FCallArgs& fca,
-                 bool dynamicCall, bool unlikely) {
-  push(env, callImpl(env, callee, fca, dynamicCall, false));
-  if (unlikely) gen(env, Jmp, makeExit(env, nextBcOff(env)));
-}
-
-void callWithAsyncEagerReturn(IRGS& env, const Func* callee,
-                              const FCallArgs& fca, bool dynamicCall,
-                              bool unlikely) {
-  auto const retVal = callImpl(env, callee, fca, dynamicCall, true);
+void handleCallReturn(IRGS& env, const Func* callee, const FCallArgs& fca,
+                      SSATmp* retVal, bool asyncEagerReturn, bool unlikely) {
+  if (!asyncEagerReturn) {
+    push(env, retVal);
+    if (unlikely) gen(env, Jmp, makeExit(env, nextBcOff(env)));
+    return;
+  }
 
   ifThenElse(
     env,
@@ -291,13 +288,12 @@ void callKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
     return callUnpack(env, callee, fca, dynamicCall, false /* unlikely */);
   }
 
-  if (fca.asyncEagerOffset != kInvalidOffset &&
-      callee->supportsAsyncEagerReturn()) {
-    return callWithAsyncEagerReturn(env, callee, fca, dynamicCall,
-                                    false /* unlikely */);
-  }
-
-  callRegular(env, callee, fca, dynamicCall, false /* unlikely */);
+  auto const asyncEagerReturn =
+    fca.asyncEagerOffset != kInvalidOffset &&
+    callee->supportsAsyncEagerReturn();
+  auto const retVal = callImpl(env, callee, fca, dynamicCall, asyncEagerReturn);
+  handleCallReturn(env, callee, fca, retVal, asyncEagerReturn,
+                   false /* unlikely */);
 }
 
 void callUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca,
@@ -307,12 +303,11 @@ void callUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca,
     return callUnpack(env, nullptr, fca, dynamicCall, unlikely);
   }
 
-  if (fca.asyncEagerOffset != kInvalidOffset) {
-    // Okay to request async eager return even if it is not supported.
-    return callWithAsyncEagerReturn(env, nullptr, fca, dynamicCall, unlikely);
-  }
-
-  callRegular(env, nullptr, fca, dynamicCall, unlikely);
+  // Okay to request async eager return even if it is not supported.
+  auto const asyncEagerReturn = fca.asyncEagerOffset != kInvalidOffset;
+  auto const retVal = callImpl(env, nullptr, fca, dynamicCall,
+                               asyncEagerReturn);
+  handleCallReturn(env, nullptr, fca, retVal, asyncEagerReturn, unlikely);
 }
 
 //////////////////////////////////////////////////////////////////////

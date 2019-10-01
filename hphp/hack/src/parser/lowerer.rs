@@ -142,6 +142,8 @@ pub struct State {
      * which would be expensive). */
     pub lowpri_errors: Vec<(Pos, String)>,
     pub doc_comments: Vec<Option<DocComment>>,
+
+    pub local_id_counter: isize,
 }
 
 #[derive(Debug, Clone)]
@@ -193,7 +195,7 @@ impl<'a> Env<'a> {
             lower_coroutines: true,
             fail_open: true,
             file_mode: mode,
-            top_level_statements: false,
+            top_level_statements: true,
             saw_yield: false,
             lifted_awaits: None,
             tmp_var_counter: 1,
@@ -209,6 +211,7 @@ impl<'a> Env<'a> {
                 parent_maybe_reified: false,
                 lowpri_errors: vec![],
                 doc_comments: vec![],
+                local_id_counter: 1,
             })),
         }
     }
@@ -265,6 +268,12 @@ impl<'a> Env<'a> {
         Ref::map(self.state.borrow(), |s| {
             s.doc_comments.last().unwrap_or(&None)
         })
+    }
+
+    fn next_local_id(&self) -> isize {
+        let mut id = RefMut::map(self.state.borrow_mut(), |s| &mut s.local_id_counter);
+        *id = *id + 1;
+        *id
     }
 
     fn push_docblock(&mut self, doc_comment: Option<DocComment>) {
@@ -1776,7 +1785,7 @@ where
                 // tmp var count in lifted await statement.
                 let right = Self::p_expr_with_loc(rlocation, &c.binary_right_operand, env)?;
                 let left = Self::p_expr(&c.binary_left_operand, env)?;
-                let bop_ast_node = Self::p_bop(&c.binary_operator, left, right, env)?;
+                let bop_ast_node = Self::p_bop(pos, &c.binary_operator, left, right, env)?;
                 match &bop_ast_node {
                     // TODO: Ast_check.check_lvalue (fun pos error -> raise_parsing_error env (`Pos pos) error) lhs
                     E_::Binop(ast_defs::Bop::Eq(_), lhs, _) => {}
@@ -2286,6 +2295,7 @@ where
     }
 
     fn p_bop(
+        pos: Pos,
         node: &Syntax<T, V>,
         lhs: aast!(Expr<,>),
         rhs: aast!(Expr<,>),
@@ -2335,12 +2345,18 @@ where
             Some(TK::QuestionQuestion) => mk(QuestionQuestion, lhs, rhs),
             Some(TK::QuestionQuestionEqual) => mk_eq(QuestionQuestion, lhs, rhs),
             /* The ugly duckling; In the FFP, `|>` is parsed as a
-            * `BinaryOperator`, whereas the typed AST has separate constructors for
-            * Pipe and Binop. This is why we don't just project onto a
-            * `bop`, but a `expr -> expr -> expr_`.
-            */
-            //Some(TK::BarGreaterThan) => E_::Pipe(lhs, rhs),
-            Some(TK::BarGreaterThan) => not_impl!(),
+             * `BinaryOperator`, whereas the typed AST has separate constructors for
+             * Pipe and Binop. This is why we don't just project onto a
+             * `bop`, but a `expr -> expr -> expr_`.
+             */
+            Some(TK::BarGreaterThan) => {
+                let lid = aast::Lid::from_counter(
+                    pos,
+                    env.next_local_id(),
+                    special_idents::DOLLAR_DOLLAR,
+                );
+                Ok(E_::Pipe(lid, lhs, rhs))
+            }
             Some(TK::QuestionColon) => Ok(E_::Eif(lhs, None, rhs)),
             _ => Self::missing_syntax(None, "binary operator", node, env),
         }

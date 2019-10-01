@@ -506,7 +506,13 @@ module LowererTest_ = struct
     let oc = Pervasives.open_out path in
     Printf.fprintf oc "%s\n" s
 
+  let print_lid fmt lid =
+    Format.pp_print_string
+      fmt
+      (Format.asprintf "(%d, %s)" (Local_id.to_int lid) (Local_id.get_name lid))
+
   let print_aast path aast =
+    Local_id.pp_ref := print_lid;
     let print_pos pos = Format.asprintf "(%a)" Pos.pp pos in
     let pp_pos fmt pos = Format.pp_print_string fmt (print_pos pos) in
     let pp_unit fmt _ = Format.pp_print_string fmt "" in

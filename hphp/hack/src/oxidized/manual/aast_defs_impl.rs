@@ -11,6 +11,10 @@ impl Lid {
     pub fn new(p: Pos, s: String) -> Self {
         Self(p, (0, s))
     }
+
+    pub fn from_counter(p: Pos, counter: isize, s: &str) -> Self {
+        Self(p, (counter, String::from(s)))
+    }
 }
 
 impl Hint {

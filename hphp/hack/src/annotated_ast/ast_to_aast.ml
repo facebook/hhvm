@@ -325,8 +325,10 @@ let converter
       | Unop (op, e) -> Aast.Unop (op, on_expr e)
       | Binop (op, e1, e2) -> Aast.Binop (op, on_expr e1, on_expr e2)
       | Pipe (e1, e2) ->
+        let e2 = on_expr e2 in
+        let e1 = on_expr e1 in
         let id = Local_id.make (next ()) SN.SpecialIdents.dollardollar in
-        Aast.Pipe ((p, id), on_expr e1, on_expr e2)
+        Aast.Pipe ((p, id), e1, e2)
       | Eif (e1, opt_e, e2) ->
         Aast.Eif (on_expr e1, optional on_expr opt_e, on_expr e2)
       | Is (e, h) -> Aast.Is (on_expr e, on_hint h)
@@ -410,7 +412,9 @@ let converter
   and on_block stmt_list =
     match stmt_list with
     | [] -> []
-    | x :: rest -> on_stmt x :: on_block rest
+    | x :: rest ->
+      let x = on_stmt x in
+      x :: on_block rest
   and on_tparam_constraint (kind, hint) : constraint_kind * Aast.hint =
     (kind, on_hint hint)
   and on_tparam t =

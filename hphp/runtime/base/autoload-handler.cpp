@@ -131,15 +131,7 @@ void AutoloadHandler::requestInit() {
 
   auto* factory = AutoloadMapFactory::getInstance();
   if (factory) {
-    auto* map = getAutoloadMapFromFactory(*factory);
-    if (map) {
-      if (!map->ensureUpdated()) {
-        Logger::Warning(
-            "Failed to update native autoloader, proceeding with stale data.\n"
-        );
-      }
-      m_map = map;
-    }
+    setAutoloadMapFromFactory(*factory);
   }
 }
 
@@ -336,26 +328,38 @@ AutoloadHandler::loadFromMap(const String& clsName,
   }
 }
 
-AutoloadMap* AutoloadHandler::getAutoloadMapFromFactory(
-    AutoloadMapFactory& factory) const {
+void AutoloadHandler::setAutoloadMapFromFactory(
+    AutoloadMapFactory& factory) {
 
   if (g_context.isNull()) {
-    return nullptr;
+    return;
   }
 
   auto* repoOptions = g_context->getRepoOptionsForRequest();
   if (!repoOptions) {
-    return nullptr;
+    return;
   }
 
   auto repoRoot = folly::fs::canonical(repoOptions->path()).parent_path();
 
   auto queryExprStr = repoOptions->autoloadQuery();
   if (queryExprStr.empty()) {
-    return nullptr;
+    return;
   }
 
-  return factory.getForRoot(queryExprStr, std::move(repoRoot));
+  auto* map = factory.getForRoot(queryExprStr, repoRoot);
+  if (!map) {
+    return;
+  }
+
+  if (map->ensureUpdated()) {
+    m_map = map;
+  } else {
+    Logger::Warning(
+        "Failed to update native autoloader, not natively autoloading %s.\n",
+        repoRoot.generic().c_str()
+    );
+  }
 }
 
 bool AutoloadHandler::autoloadFunc(StringData* name) {

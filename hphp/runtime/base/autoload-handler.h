@@ -139,6 +139,10 @@ public:
    */
   bool setMap(const Array& map, String root);
 
+  const AutoloadMap* getAutoloadMap() const {
+    return m_map;
+  }
+
 private:
   /**
    * This method may return Success or Failure.
@@ -192,7 +196,7 @@ private:
   static String getSignature(const Variant& handler);
 
 private:
-  AutoloadMap* getAutoloadMapFromFactory(AutoloadMapFactory& factory) const;
+  void setAutoloadMapFromFactory(AutoloadMapFactory& factory);
 
   // m_map points to either the request-scoped userland AutoloadMap or
   // a statically-scoped native AutoloadMap

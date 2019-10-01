@@ -1010,11 +1010,9 @@ and add_signature_dependencies deps obj =
             let add_implementations interface_name =
               let interf = get_class_exn interface_name in
               if
-                (not (is_builtin_dep @@ Class interface_name))
-                || Class.kind interf <> Ast_defs.Cinterface
-              then
-                ()
-              else
+                (is_builtin_dep @@ Class interface_name)
+                && Class.kind interf = Ast_defs.Cinterface
+              then (
                 let add_impl ~is_static method_name =
                   let method_elt =
                     match is_static with
@@ -1034,6 +1032,7 @@ and add_signature_dependencies deps obj =
                     add_impl ~is_static:false m);
                 Sequence.iter (Class.smethods interf) ~f:(fun (m, _) ->
                     add_impl ~is_static:true m)
+              )
             in
             Sequence.iter (Class.all_ancestor_names cls) add_implementations
           | AllMembers _ ->

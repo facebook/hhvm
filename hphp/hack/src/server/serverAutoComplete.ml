@@ -163,15 +163,17 @@ let auto_complete_at_position_ctx
     let autocomplete_context =
       get_autocomplete_context content pos ~is_manually_invoked
     in
-    AutocompleteService.go
-      ~tcopt
-      ~content_funs:
-        (Core_kernel.List.map fileinfo.FileInfo.funs ~f:snd |> SSet.of_list)
-      ~content_classes:
-        (Core_kernel.List.map fileinfo.FileInfo.classes ~f:snd |> SSet.of_list)
-      ~content_record_defs:
-        ( Core_kernel.List.map fileinfo.FileInfo.record_defs ~f:snd
-        |> SSet.of_list )
-      ~autocomplete_context
-      ~sienv
-      (Provider_utils.compute_tast ~ctx ~entry))
+    Provider_utils.with_context ~ctx ~f:(fun () ->
+        AutocompleteService.go
+          ~tcopt
+          ~content_funs:
+            (Core_kernel.List.map fileinfo.FileInfo.funs ~f:snd |> SSet.of_list)
+          ~content_classes:
+            ( Core_kernel.List.map fileinfo.FileInfo.classes ~f:snd
+            |> SSet.of_list )
+          ~content_record_defs:
+            ( Core_kernel.List.map fileinfo.FileInfo.record_defs ~f:snd
+            |> SSet.of_list )
+          ~autocomplete_context
+          ~sienv
+          (Provider_utils.compute_tast ~ctx ~entry)))

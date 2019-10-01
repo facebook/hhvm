@@ -457,9 +457,7 @@ type ancestors = {
 let get_direct_ancestors cls =
   Decl_provider.(
     let set_of_sequence seq =
-      let set = HashSet.create 0 in
-      let () = Sequence.iter seq ~f:(fun x -> HashSet.add set x) in
-      set
+      Sequence.fold seq ~f:(fun set x -> SSet.add x set) ~init:SSet.empty
     in
     let get_direct (get_ancestors : Class.t -> string Sequence.t) =
       let ancestors = get_ancestors cls in
@@ -472,7 +470,7 @@ let get_direct_ancestors cls =
         |> set_of_sequence
       in
       Sequence.filter ancestors ~f:(fun x ->
-          not (HashSet.mem ancestors_ancestors x))
+          not (SSet.mem x ancestors_ancestors))
     in
     let direct_ancestors = get_direct Class.all_ancestor_names in
     let direct_reqs = get_direct Class.all_ancestor_req_names in

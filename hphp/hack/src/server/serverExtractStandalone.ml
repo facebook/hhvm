@@ -1089,17 +1089,19 @@ let get_dependency_origin cls (dep : Typing_deps.Dep.variant) =
       | Cstr cls -> cls
       | _ -> raise UnexpectedDependency))
 
-let collect_dependencies tcopt target =
+let get_dependencies tcopt target =
   let dependencies = HashSet.create 0 in
-  Typing_deps.Dep.(
-    let add_dependency root obj =
-      if is_relevant_dependency target root then do_add_dep dependencies obj
-    in
-    Typing_deps.add_dependency_callback "add_dependency" add_dependency;
-    let filename = get_filename target in
-    (* Collect dependencies through side effects of typechecking and remove the extracted
-       function/method from the set of dependencies to avoid declaring it twice. *)
-    let () =
+  let add_dependency root obj =
+    if is_relevant_dependency target root then do_add_dep dependencies obj
+  in
+  Typing_deps.add_dependency_callback "add_dependency" add_dependency;
+  let filename = get_filename target in
+  (* Collect dependencies through side effects of typechecking and remove
+   * the target function/method from the set of dependencies to avoid
+   * declaring it twice.
+   *)
+  let () =
+    Typing_deps.Dep.(
       match target with
       | Function func ->
         let (_ : (Tast.def * Typing_env_types.global_tvenv) option) =
@@ -1112,12 +1114,16 @@ let collect_dependencies tcopt target =
           Typing_check_service.type_class tcopt filename cls
         in
         HashSet.remove dependencies (Method (cls, m));
-        HashSet.remove dependencies (SMethod (cls, m))
-    in
-    let types = Caml.Hashtbl.create 0 in
-    let globals = HashSet.create 0 in
-    let group_by_type obj =
-      if is_class_dependency obj then (
+        HashSet.remove dependencies (SMethod (cls, m)))
+  in
+  dependencies
+
+let split_dependencies dependencies =
+  let types = Caml.Hashtbl.create 0 in
+  let globals = HashSet.create 0 in
+  let group_by_type obj =
+    if is_class_dependency obj then (
+      Typing_deps.Dep.(
         match obj with
         | Class cls ->
           (match Caml.Hashtbl.find_opt types cls with
@@ -1125,23 +1131,29 @@ let collect_dependencies tcopt target =
           | None ->
             let set = HashSet.create 0 in
             Caml.Hashtbl.add types cls set)
-        (* We already added the members when adding signature dependencies, omit it from generation *)
+        (* We already added the members when adding signature dependencies,
+         * omit it from generation
+         *)
         | AllMembers _ -> ()
         | Extends _ -> ()
         | _ ->
           let cls = get_class_name obj in
           let origin = get_dependency_origin cls obj in
           (* Consider the following example:
-        * class Base {
-        *   public static function do(): void {}
-        * }
-        * class Derived extends Base {}
-        * function f(): void {
-        *   Derived::do();
-        * }
-        * We will pull both SMethod(Base, do) and SMethod(Derived, do) as dependencies, but we should
-        * not generate method do() in Derived. Therefore we should ignore dependencies whose origin
-        * differ from their class. *)
+           *
+           * class Base {
+           *   public static function do(): void {}
+           * }
+           * class Derived extends Base {}
+           * function f(): void {
+           *   Derived::do();
+           * }
+           *
+           * We will pull both SMethod(Base, do) and SMethod(Derived, do) as
+           * dependencies, but we should not generate method do() in Derived.
+           * Therefore we should ignore dependencies whose origin differ from
+           * their class.
+           *)
           if origin = cls then (
             match Caml.Hashtbl.find_opt types cls with
             | Some set -> HashSet.add set obj
@@ -1149,12 +1161,12 @@ let collect_dependencies tcopt target =
               let set = HashSet.create 0 in
               HashSet.add set obj;
               Caml.Hashtbl.add types cls set
-          )
-      ) else
-        HashSet.add globals obj
-    in
-    HashSet.iter group_by_type dependencies;
-    (types, globals))
+          ))
+    ) else
+      HashSet.add globals obj
+  in
+  HashSet.iter group_by_type dependencies;
+  (types, globals)
 
 (* Every namespace can contain declarations of classes, functions, constants
    as well as nested namespaces *)
@@ -1289,7 +1301,9 @@ let get_declarations tcopt target types globals =
 
 let go tcopt target =
   try
-    let (types, globals) = collect_dependencies tcopt target in
+    let (types, globals) =
+      split_dependencies (get_dependencies tcopt target)
+    in
     let declarations = get_declarations tcopt target types globals in
     get_code declarations
   with

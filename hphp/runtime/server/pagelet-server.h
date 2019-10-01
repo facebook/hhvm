@@ -168,6 +168,11 @@ private:
 };
 
 struct PageletServerTaskEvent final : AsioExternalThreadEvent {
+
+  PageletServerTaskEvent() = default;
+  PageletServerTaskEvent(const PageletServerTaskEvent&) = delete;
+  PageletServerTaskEvent& operator=(const PageletServerTaskEvent&) = delete;
+
   ~PageletServerTaskEvent() override {
     if (m_job) m_job->decRefCount();
   }
@@ -187,7 +192,8 @@ protected:
   }
 
 private:
-  PageletTransport* m_job;
+
+  PageletTransport* m_job{nullptr};
   // string m_response;
   // Object m_next_wait_handle;
 };

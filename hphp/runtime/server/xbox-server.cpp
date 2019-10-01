@@ -359,6 +359,9 @@ struct XboxTask : SweepableResourceData {
     m_job->incRefCount();
   }
 
+  XboxTask(const XboxTask&) = delete;
+  XboxTask& operator=(const XboxTask&) = delete;
+
   ~XboxTask() override {
     m_job->decRefCount();
   }
@@ -370,7 +373,7 @@ struct XboxTask : SweepableResourceData {
   const String& o_getClassNameHook() const override { return classnameof(); }
 
 private:
-  XboxTransport *m_job;
+  XboxTransport *m_job{nullptr};
 };
 IMPLEMENT_RESOURCE_ALLOCATION(XboxTask)
 

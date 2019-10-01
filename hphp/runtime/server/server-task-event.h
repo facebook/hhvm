@@ -33,6 +33,8 @@ namespace HPHP {
 template<class TServer, class TTransport>
 struct ServerTaskEvent final : AsioExternalThreadEvent {
   ServerTaskEvent() {}
+  ServerTaskEvent(const ServerTaskEvent&) = delete;
+  ServerTaskEvent& operator=(const ServerTaskEvent&) = delete;
 
   ~ServerTaskEvent() override {
     if (m_job) m_job->decRefCount();
@@ -65,7 +67,8 @@ struct ServerTaskEvent final : AsioExternalThreadEvent {
   }
 
  private:
-  TTransport *m_job;
+
+  TTransport *m_job{nullptr};
 };
 
 ///////////////////////////////////////////////////////////////////////////////

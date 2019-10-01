@@ -2939,15 +2939,6 @@ OPERATOR_DECL_IMPLend
       ()
 end
 
-type gen_data = {
-  path: string;
-  content: string;
-}
-
-let gen_file data =
-  let file = OcamlPervasives.open_out data.path in
-  OcamlPrintf.fprintf file "%s" data.content
-
 let escape = Str.replace_first (Str.regexp "\"") "\\\""
 
 module GenerateHtmlEntityDecodTable = struct
@@ -3018,14 +3009,14 @@ TEST_CASES
       decode_table
       ""
 
-  let data =
-    {
-      path = "hphp/hack/src/utils/html_entities/decoder.rs";
-      content =
-        template
+  let template =
+    Full_fidelity_schema.make_template_file
+      ~filename:"hphp/hack/src/utils/html_entities/decoder.rs"
+      ~template:
+        ( template
         |> Str.replace_first (Str.regexp "TABLE") table
-        |> Str.replace_first (Str.regexp "TEST_CASES") test_cases;
-    }
+        |> Str.replace_first (Str.regexp "TEST_CASES") test_cases )
+      ()
 end
 
 module GenerateHtmlEntityUtf32Tests = struct
@@ -3061,57 +3052,49 @@ TEST_CASES
                   (start_char + i)
                   (escape e)))
 
-  let data =
-    {
-      path = "hphp/hack/src/utils/html_entities/test/utf32_to_utf8.rs";
-      content =
-        template |> Str.replace_first (Str.regexp "TEST_CASES") test_cases;
-    }
+  let template =
+    Full_fidelity_schema.make_template_file
+      ~filename:"hphp/hack/src/utils/html_entities/test/utf32_to_utf8.rs"
+      ~template:
+        (template |> Str.replace_first (Str.regexp "TEST_CASES") test_cases)
+      ()
 end
 
-let () =
-  generate_file GenerateFFOperatorRust.full_fidelity_operators;
-  generate_file GenerateFFOperator.full_fidelity_operator;
-  generate_file GenerateFFSyntaxType.full_fidelity_syntax_type;
-  generate_file GenerateFFSyntaxSig.full_fidelity_syntax_sig;
-  generate_file GenerateFFValidatedSyntax.full_fidelity_validated_syntax;
-  generate_file GenerateFFTriviaKind.full_fidelity_trivia_kind;
-  generate_file GenerateFFRustTriviaKind.full_fidelity_trivia_kind;
-  generate_file GenerateFFSyntax.full_fidelity_syntax;
-  generate_file GenerateFFRustSyntax.full_fidelity_syntax;
-  generate_file GenerateFFRustSyntaxType.full_fidelity_syntax;
-  generate_file GenerateFFSyntaxKind.full_fidelity_syntax_kind;
-  generate_file GenerateFFRustSyntaxKind.full_fidelity_syntax_kind;
-  generate_file GenerateFFTokenKind.full_fidelity_token_kind;
-  generate_file GenerateFFRustTokenKind.full_fidelity_token_kind;
-  generate_file GenerateFFJSONSchema.full_fidelity_json_schema;
-  generate_file GenerateFFSmartConstructors.full_fidelity_smart_constructors;
-  generate_file
+let templates =
+  [
+    GenerateFFOperatorRust.full_fidelity_operators;
+    GenerateFFOperator.full_fidelity_operator;
+    GenerateFFSyntaxType.full_fidelity_syntax_type;
+    GenerateFFSyntaxSig.full_fidelity_syntax_sig;
+    GenerateFFValidatedSyntax.full_fidelity_validated_syntax;
+    GenerateFFTriviaKind.full_fidelity_trivia_kind;
+    GenerateFFRustTriviaKind.full_fidelity_trivia_kind;
+    GenerateFFSyntax.full_fidelity_syntax;
+    GenerateFFRustSyntax.full_fidelity_syntax;
+    GenerateFFRustSyntaxType.full_fidelity_syntax;
+    GenerateFFSyntaxKind.full_fidelity_syntax_kind;
+    GenerateFFRustSyntaxKind.full_fidelity_syntax_kind;
+    GenerateFFTokenKind.full_fidelity_token_kind;
+    GenerateFFRustTokenKind.full_fidelity_token_kind;
+    GenerateFFJSONSchema.full_fidelity_json_schema;
+    GenerateFFSmartConstructors.full_fidelity_smart_constructors;
     GenerateFFRustSmartConstructors.full_fidelity_smart_constructors;
-  generate_file
     GenerateFFRustMinimalSmartConstructors.minimal_smart_constructors;
-  generate_file
     GenerateFFRustPositionedSmartConstructors.positioned_smart_constructors;
-  generate_file GenerateFFRustVerifySmartConstructors.verify_smart_constructors;
-  generate_file
+    GenerateFFRustVerifySmartConstructors.verify_smart_constructors;
     GenerateFFVerifySmartConstructors.full_fidelity_verify_smart_constructors;
-  generate_file
     GenerateFFSyntaxSmartConstructors.full_fidelity_syntax_smart_constructors;
-  generate_file
     GenerateFFRustSyntaxSmartConstructors
     .full_fidelity_syntax_smart_constructors;
-  generate_file
     GenerateFFRustCoroutineSmartConstructors.coroutine_smart_constructors;
-  generate_file
     GenerateFFRustDeclModeSmartConstructors.decl_mode_smart_constructors;
-  generate_file GenerateRustFlattenSmartConstructors.flatten_smart_constructors;
-  generate_file GenerateRustFactsSmartConstructors.facts_smart_constructors;
-  generate_file
+    GenerateRustFlattenSmartConstructors.flatten_smart_constructors;
+    GenerateRustFactsSmartConstructors.facts_smart_constructors;
     GenerateFFSmartConstructorsWrappers
     .full_fidelity_smart_constructors_wrappers;
-  generate_file
     GenerateFFRustSmartConstructorsWrappers
     .full_fidelity_smart_constructors_wrappers;
-  generate_file GenerateOcamlSyntax.ocaml_syntax;
-  gen_file GenerateHtmlEntityDecodTable.data;
-  gen_file GenerateHtmlEntityUtf32Tests.data
+    GenerateOcamlSyntax.ocaml_syntax;
+    GenerateHtmlEntityDecodTable.template;
+    GenerateHtmlEntityUtf32Tests.template;
+  ]

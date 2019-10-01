@@ -395,7 +395,6 @@ let load config_filename options =
       ?glean_reponame:(string_opt "glean_reponame" config)
       ?po_disallow_func_ptrs_in_constants:
         (bool_opt "disallow_func_ptrs_in_constants" config)
-      ~po_rust_parser_errors:local_config.ServerLocalConfig.rust_parser_errors
       ()
   in
   Errors.ignored_fixme_codes := GlobalOptions.ignored_fixme_codes global_opts;

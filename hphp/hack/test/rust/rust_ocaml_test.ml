@@ -617,12 +617,11 @@ let () =
       ~hhvm_compat_mode:args.hhvm_compat_mode
       ~php5_compat_mode:args.php5_compat_mode
       ~codegen:args.codegen
+      ~leak_rust_tree:(args.parser = COROUTINE_ERRORS)
       ?mode
   in
-  let ocaml_env = make_env ~rust:false ~leak_rust_tree:false () in
-  let rust_env =
-    make_env ~rust:true ~leak_rust_tree:(args.parser = COROUTINE_ERRORS) ()
-  in
+  let ocaml_env = make_env ~rust:false () in
+  let rust_env = make_env ~rust:true () in
   let f =
     match args.parser with
     | MINIMAL -> MinimalTest.test_batch args ~ocaml_env ~rust_env

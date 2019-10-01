@@ -58,7 +58,6 @@ type t = {
   option_abstract_static_props: bool;
   option_disable_unset_class_const: bool;
   option_disallow_func_ptrs_in_constants: bool;
-  option_use_rust_parser_errors: bool;
 }
 
 let default =
@@ -112,7 +111,6 @@ let default =
     option_abstract_static_props = false;
     option_disable_unset_class_const = false;
     option_disallow_func_ptrs_in_constants = false;
-    option_use_rust_parser_errors = true;
   }
 
 let constant_folding o = o.option_constant_folding
@@ -216,8 +214,6 @@ let disable_unset_class_const o = o.option_disable_unset_class_const
 let disallow_func_ptrs_in_constants o =
   o.option_disallow_func_ptrs_in_constants
 
-let use_rust_parser_errors o = o.option_use_rust_parser_errors
-
 let to_string o =
   let dynamic_invokes =
     String.concat ~sep:", " (SSet.elements (dynamic_invoke_functions o))
@@ -294,7 +290,6 @@ let to_string o =
       @@ disable_unset_class_const o;
       Printf.sprintf "disallow_func_ptrs_in_constants: %B"
       @@ disallow_func_ptrs_in_constants o;
-      Printf.sprintf "use_rust_parser_errors: %B" @@ use_rust_parser_errors o;
     ]
 
 let as_bool s =
@@ -611,10 +606,6 @@ let value_setters =
         get_value_from_config_int
     @@ fun opts v ->
     { opts with option_disallow_func_ptrs_in_constants = v = 1 } );
-    ( set_value
-        "hhvm.hack.lang.hack_compiler_use_rust_parser_errors"
-        get_value_from_config_int
-    @@ (fun opts v -> { opts with option_use_rust_parser_errors = v = 1 }) );
   ]
 
 let extract_config_options_from_json ~init config_json =

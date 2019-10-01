@@ -86,7 +86,6 @@ struct RepoOptions {
   H(bool,           AbstractStaticProps,            false)            \
   H(bool,           DisableUnsetClassConst,         false)            \
   H(bool,           DisallowFuncPtrsInConstants,    false)            \
-  H(bool,           HackCompilerUseRustParserErrors, true)            \
   E(bool,           CreateInOutWrapperFunctions,    true)             \
   E(bool,           EmitFuncPointers,               true)             \
   E(bool,           EmitInstMethPointers,           EmitFuncPointers) \

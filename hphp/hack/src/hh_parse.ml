@@ -62,7 +62,6 @@ module FullFidelityParseArgs = struct
     files: string list;
     dump_nast: bool;
     disable_lval_as_an_expression: bool;
-    rust_parser_errors: bool;
     enable_constant_visibility_modifiers: bool;
     enable_class_level_where_clauses: bool;
     disable_legacy_soft_typehints: bool;
@@ -100,7 +99,6 @@ module FullFidelityParseArgs = struct
       files
       dump_nast
       disable_lval_as_an_expression
-      rust_parser_errors
       enable_constant_visibility_modifiers
       enable_class_level_where_clauses
       disable_legacy_soft_typehints
@@ -136,7 +134,6 @@ module FullFidelityParseArgs = struct
       files;
       dump_nast;
       disable_lval_as_an_expression;
-      rust_parser_errors;
       enable_constant_visibility_modifiers;
       enable_class_level_where_clauses;
       disable_legacy_soft_typehints;
@@ -189,7 +186,6 @@ module FullFidelityParseArgs = struct
     let set_show_file_name () = show_file_name := true in
     let files = ref [] in
     let push_file file = files := file :: !files in
-    let rust_parser_errors = ref true in
     let enable_constant_visibility_modifiers = ref false in
     let enable_class_level_where_clauses = ref false in
     let disable_legacy_soft_typehints = ref false in
@@ -304,9 +300,6 @@ No errors are filtered out."
         ( "--disable-lval-as-an-expression",
           Arg.Set disable_lval_as_an_expression,
           "Disable lval as an expression." );
-        ( "--rust-parser-errors",
-          Arg.Bool (fun x -> rust_parser_errors := x),
-          "Use the parser errors written in Rust instead of OCaml one" );
         ( "--enable-constant-visibility-modifiers",
           Arg.Set enable_constant_visibility_modifiers,
           "Require constants to have visibility modifiers" );
@@ -386,7 +379,6 @@ No errors are filtered out."
       (List.rev !files)
       !dump_nast
       !disable_lval_as_an_expression
-      !rust_parser_errors
       !enable_constant_visibility_modifiers
       !enable_class_level_where_clauses
       !disable_legacy_soft_typehints
@@ -480,7 +472,7 @@ let handle_existing_file args filename =
         args.disable_legacy_attribute_syntax
         (* When print_errors is true, the leaked tree will be passed to ParserErrors,
          * which will consume it. *)
-      ~leak_rust_tree:(args.rust_parser_errors && print_errors)
+      ~leak_rust_tree:print_errors
       ?mode
       ()
   in

@@ -35,31 +35,49 @@ val apply_overrides :
   string SMap.t
 
 module Getters : sig
-  val string_opt : string -> string SMap.t -> string option
+  val string_opt :
+    string -> ?prefix:string option -> string SMap.t -> string option
 
-  val string_ : string -> default:string -> string SMap.t -> string
+  val string_ :
+    string ->
+    ?prefix:string option ->
+    default:string ->
+    string SMap.t ->
+    string
 
-  val int_opt : string -> string SMap.t -> int option
+  val int_opt : string -> ?prefix:string option -> string SMap.t -> int option
 
-  val int_ : string -> default:int -> string SMap.t -> int
+  val int_ :
+    string -> ?prefix:string option -> default:int -> string SMap.t -> int
 
-  val bool_opt : string -> string SMap.t -> bool option
+  val bool_opt :
+    string -> ?prefix:string option -> string SMap.t -> bool option
 
-  val bool_ : string -> default:bool -> string SMap.t -> bool
+  val bool_ :
+    string -> ?prefix:string option -> default:bool -> string SMap.t -> bool
 
-  val float_opt : string -> string SMap.t -> float option
+  val float_opt :
+    string -> ?prefix:string option -> string SMap.t -> float option
 
-  val float_ : string -> default:float -> string SMap.t -> float
+  val float_ :
+    string -> ?prefix:string option -> default:float -> string SMap.t -> float
 
   val string_list :
     delim:Str.regexp ->
     string ->
+    ?prefix:string option ->
     default:string list ->
     string SMap.t ->
     string list
 
-  val bool_if_version : string -> default:bool -> string SMap.t -> bool
+  val bool_if_version :
+    string -> ?prefix:string option -> default:bool -> string SMap.t -> bool
 
   val bool_if_min_version :
-    string -> default:bool -> current_version:version -> string SMap.t -> bool
+    string ->
+    ?prefix:string option ->
+    default:bool ->
+    current_version:version ->
+    string SMap.t ->
+    bool
 end

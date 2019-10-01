@@ -99,7 +99,7 @@ let alias_map =
   PHP7_TYPE("ParseError"; PHP7_EngineExceptions);
   PHP7_TYPE("TypeError"; PHP7_EngineExceptions);
   *)
-      
+
     ]
 
 let rec normalize s =
@@ -108,9 +108,6 @@ let rec normalize s =
   | Some a -> normalize a
 
 let opt_normalize s =
-  match String.lowercase s with
-  | "callable" -> Some "callable"
-  | "array" -> Some "array"
-  | s -> Option.map (SMap.get s alias_map) normalize
+  Option.map (SMap.get (String.lowercase s) alias_map) normalize
 
 let is_hh_autoimport s = SMap.mem (String.lowercase s) alias_map

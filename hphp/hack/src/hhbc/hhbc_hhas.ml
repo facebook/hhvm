@@ -987,13 +987,13 @@ and string_of_uop = function
   | Ast_defs.Updecr ->
     failwith "string_of_uop - should have been captures earlier"
 
-and string_of_hint ~ns h =
-  let h =
-    Emit_type_hint.fmt_hint
-      ~tparams:[]
-      ~namespace:Namespace_env.empty_with_default
-      h
+and string_of_hint ~env ~ns h =
+  let namespace =
+    match env.codegen_env with
+    | None -> Namespace_env.empty_with_default
+    | Some env -> Emit_env.get_namespace env
   in
+  let h = Emit_type_hint.fmt_hint ~tparams:[] ~namespace h in
   let h =
     if ns then
       h
@@ -1038,7 +1038,7 @@ and string_of_fun ~env f use_list =
         Option.value_map
           (A.hint_of_type_hint p.A.param_type_hint)
           ~default:""
-          ~f:(string_of_hint ~ns:true)
+          ~f:(string_of_hint ~env ~ns:true)
       in
       let default_val =
         Option.value_map p.A.param_expr ~default:"" ~f:(fun e ->
@@ -1446,13 +1446,13 @@ and string_of_param_default_value ~env expr =
   | A.BracedExpr e -> "{" ^ string_of_param_default_value ~env e ^ "}"
   | A.ParenthesizedExpr e -> "(" ^ string_of_param_default_value ~env e ^ ")"
   | A.Cast (h, e) ->
-    let h = string_of_hint ~ns:false h in
+    let h = string_of_hint ~env ~ns:false h in
     let e = string_of_param_default_value ~env e in
     "(" ^ h ^ ")" ^ e
   | A.Pipe (_, e1, e2) -> middle_aux e1 " |> " e2
   | A.Is (e, h) ->
     let e = string_of_param_default_value ~env e in
-    let h = string_of_hint ~ns:true h in
+    let h = string_of_hint ~env ~ns:true h in
     e ^ " is " ^ h
   | A.As (e, h, b) ->
     let e = string_of_param_default_value ~env e in
@@ -1462,7 +1462,7 @@ and string_of_param_default_value ~env expr =
       else
         " as "
     in
-    let h = string_of_hint ~ns:true h in
+    let h = string_of_hint ~env ~ns:true h in
     e ^ o ^ h
   | A.Varray (_, es) ->
     let es = List.map ~f:(string_of_param_default_value ~env) es in

@@ -148,9 +148,7 @@ let get_autoimport_name_namespace id kind =
   let lookup_name map = Option.map (SMap.get id map) (fun ns -> (ns, HH)) in
   match kind with
   | ElaborateClass ->
-    if SN.Typehints.is_reserved_global_name id then
-      Some (Global, Global)
-    else if SN.Typehints.is_reserved_hh_name id then
+    if SN.Typehints.is_reserved_hh_name id then
       Some (Global, HH)
     else
       lookup_name autoimport_types
@@ -236,12 +234,15 @@ let elaborate_id_impl nsenv kind id =
   else
     let global_id = Utils.add_ns id in
     if kind = ElaborateConst && SN.PseudoConsts.is_pseudo_const global_id then
-      (false, global_id)
-    (* Pseudo-constants are always global. *)
+      (* Pseudo-constants are always global. *)
+      (true, global_id)
     else if
       kind = ElaborateFun && SN.PseudoFunctions.is_pseudo_function global_id
     then
-      (false, global_id)
+      (true, global_id)
+    else if kind = ElaborateClass && SN.Typehints.is_reserved_global_name id
+    then
+      (true, global_id)
     else
       let (bslash_loc, has_bslash) =
         match String.index id '\\' with
@@ -270,29 +271,27 @@ let elaborate_id_impl nsenv kind id =
         match SMap.get prefix uses with
         | Some use -> (true, use ^ String_utils.lstrip id prefix)
         | None ->
-          let fq_id =
-            let unaliased_id =
-              aliased_to_fully_qualified_id nsenv.ns_auto_ns_map id
-            in
-            if unaliased_id <> id then
-              "\\" ^ unaliased_id
-            else
-              match get_autoimport_name_namespace id kind with
-              | None -> elaborate_into_current_ns nsenv id
-              | Some (typechecker_ns, compiler_ns) ->
-                let ns =
-                  if nsenv.ns_is_codegen then
-                    compiler_ns
-                  else
-                    typechecker_ns
-                in
-                begin
-                  match ns with
-                  | Global -> elaborate_into_ns None id
-                  | HH -> elaborate_into_ns (Some "HH") id
-                end
+          let unaliased_id =
+            aliased_to_fully_qualified_id nsenv.ns_auto_ns_map id
           in
-          (false, fq_id)
+          if unaliased_id <> id then
+            (true, Utils.add_ns unaliased_id)
+          else (
+            match get_autoimport_name_namespace id kind with
+            | None -> (false, elaborate_into_current_ns nsenv id)
+            | Some (typechecker_ns, compiler_ns) ->
+              let ns =
+                if nsenv.ns_is_codegen then
+                  compiler_ns
+                else
+                  typechecker_ns
+              in
+              begin
+                match ns with
+                | Global -> (true, elaborate_into_ns None id)
+                | HH -> (true, elaborate_into_ns (Some "HH") id)
+              end
+          )
 
 let elaborate_id nsenv kind (p, id) =
   let (_, newid) = elaborate_id_impl nsenv kind id in

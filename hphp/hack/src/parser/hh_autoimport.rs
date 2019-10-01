@@ -107,13 +107,9 @@ pub fn normalize(s: &str) -> &str {
 }
 
 pub fn opt_normalize(s: &str) -> Option<&str> {
-    match &s.to_lowercase()[..] {
-        "callable" => Some("callable"),
-        "array" => Some("array"),
-        lower => match ALIAS_MAP.get(lower) {
-            Some(v) => Some(normalize(v)),
-            _ => None,
-        },
+    match ALIAS_MAP.get(&s.to_lowercase()[..]) {
+        Some(v) => Some(normalize(v)),
+        None => None,
     }
 }
 
@@ -145,7 +141,6 @@ mod tests {
     fn test_opt_normalize() {
         assert_eq!(opt_normalize("float"), Some("HH\\float"));
         assert_eq!(opt_normalize("KeyedIterable"), Some("HH\\KeyedIterable"));
-        assert_eq!(opt_normalize("callable"), Some("callable"));
         assert_eq!(opt_normalize("non-exisit"), None);
     }
 

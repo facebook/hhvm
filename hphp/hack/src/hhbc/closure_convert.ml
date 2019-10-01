@@ -72,6 +72,7 @@ let empty_per_function_state =
   else empty_goto_state *)
 
 type state = {
+  popt: ParserOptions.t;
   (* Number of closures created in the current function *)
   closure_cnt_per_fun: int;
   (* Free variables computed so far *)
@@ -144,6 +145,7 @@ let set_has_goto (st : state) =
 
 let initial_state popt =
   {
+    popt;
     closure_cnt_per_fun = 0;
     captured_vars = ULS.empty;
     captured_this = false;
@@ -597,7 +599,7 @@ let make_closure
       c_attributes = [];
       c_xhp_children = [];
       c_xhp_attrs = [];
-      c_namespace = Namespace_env.empty_with_default;
+      c_namespace = Namespace_env.empty_from_popt st.popt;
       c_enum = None;
       c_doc_comment = None;
       c_pu_enums = [];
@@ -807,7 +809,7 @@ let convert_meth_caller_to_func_ptr env st ann pc cls pf func =
         f_user_attributes = [{ ua_name = (p, "__MethCaller"); ua_params = [] }];
         f_file_attributes = [];
         f_external = false;
-        f_namespace = Namespace_env.empty_with_default;
+        f_namespace = Namespace_env.empty_from_popt st.popt;
         f_doc_comment = None;
         f_static = false;
       }
@@ -1848,7 +1850,7 @@ let hoist_toplevel_functions all_defs =
 let convert_toplevel_prog ~popt defs =
   let defs =
     if constant_folding () then
-      Ast_constant_folder.fold_program defs
+      Ast_constant_folder.fold_program ~popt defs
     else
       defs
   in

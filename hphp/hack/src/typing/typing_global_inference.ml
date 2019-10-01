@@ -41,8 +41,6 @@ module StateFunctor (M : MarshalledData) = struct
     Out_channel.close out_channel
 end
 
-let folder_name = ".global_inference_artifacts/"
-
 let artifacts_path : string ref = ref ""
 
 module StateConstraintGraph = struct
@@ -111,8 +109,6 @@ module StateSubConstraintGraphs = struct
     let subcontraints =
       List.filter ~f:(fun e -> not @@ IMap.is_empty e) subcontraints
     in
-    if !artifacts_path = "" then
-      artifacts_path := Filename.concat "/tmp" folder_name;
     if subcontraints = [] then
       ()
     else
@@ -170,7 +166,16 @@ module StateSolvedGraph = struct
     (env, errors, positions)
 end
 
+let set_path () =
+  let tmp = Tmp.temp_dir GlobalConfig.tmp_dir "gi_artifacts" in
+  artifacts_path := tmp
+
+let get_path () = !artifacts_path
+
+let restore_path s = artifacts_path := s
+
 let init () =
-  let path = Filename.concat "/tmp" folder_name in
+  let path = !artifacts_path in
+  Hh_logger.log "Global artifacts path: %s" path;
   Disk.rm_dir_tree path;
   if not @@ Disk.file_exists path then Disk.mkdir path 0o777

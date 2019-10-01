@@ -46,4 +46,10 @@ module StateSolvedGraph : sig
   val from_constraint_graph : StateConstraintGraph.t -> t
 end
 
+val set_path : unit -> unit
+
+val get_path : unit -> string
+
+val restore_path : string -> unit
+
 val init : unit -> unit

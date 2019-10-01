@@ -103,7 +103,8 @@
     symbol
     typechecker_options
     typing_ast
-    typing_defs)
+    typing_defs
+    global_config)
   (preprocess (pps ppx_deriving.std)))
 
 (library

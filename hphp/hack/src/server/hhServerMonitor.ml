@@ -74,6 +74,7 @@ let monitor_daemon_main
   ignore @@ Sys_utils.setsid ();
   ignore (make_tmp_dir ());
   ignore (Hhi.get_hhi_root ());
+  Typing_global_inference.set_path ();
 
   if local_config.ServerLocalConfig.use_full_fidelity_parser then
     HackEventLogger.set_use_full_fidelity_parser true;

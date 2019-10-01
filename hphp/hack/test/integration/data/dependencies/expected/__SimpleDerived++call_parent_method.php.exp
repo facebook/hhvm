@@ -1,6 +1,5 @@
 <?hh
 class SimpleDerived extends \SimpleClass {
-
   private static int $calls = 0;
   public function call_parent_method(): void {
     parent::simple_method();
@@ -8,7 +7,6 @@ class SimpleDerived extends \SimpleClass {
   }
 }
 class SimpleClass {
-
   public function simple_method(): void {
     throw new Exception();
   }
@@ -17,5 +15,3 @@ class SimpleClass {
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }
-
-

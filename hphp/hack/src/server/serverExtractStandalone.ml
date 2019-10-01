@@ -787,9 +787,7 @@ let construct_enum tcopt enum fields =
   let enum_decl =
     Printf.sprintf "enum %s: %s%s" (strip_ns enum_name) base cons
   in
-  let constants =
-    HashSet.fold (fun f acc -> string_enum_const f :: acc) fields []
-  in
+  let constants = List.map fields ~f:string_enum_const in
   Printf.sprintf "%s {\n%s\n}" enum_decl (String.concat ~sep:"\n" constants)
 
 let construct_class tcopt cls ?full_method:(meth = None) fields =
@@ -802,15 +800,12 @@ let construct_class tcopt cls ?full_method:(meth = None) fields =
       let decl = get_class_declaration tcopt cls in
       Typing_deps.(
         let properties =
-          HashSet.fold
-            (fun field acc ->
+          List.filter_map fields ~f:(fun field ->
               let desc = Dep.to_string field in
               match field with
               | Dep.Prop (_, p) ->
-                (value_or_not_found desc @@ Class.get_prop cls p, p) :: acc
-              | _ -> acc)
-            fields
-            []
+                Some (value_or_not_found desc @@ Class.get_prop cls p, p)
+              | _ -> None)
         in
         let process_field f =
           match f with
@@ -847,10 +842,7 @@ let construct_class tcopt cls ?full_method:(meth = None) fields =
           | _ -> get_field_declaration tcopt cls f
         in
         let body =
-          HashSet.fold
-            (fun f accum -> accum ^ "\n" ^ process_field f)
-            fields
-            ""
+          String.concat ~sep:"\n" (List.map fields ~f:process_field)
         in
         (* If we are extracting a method of this class, we should declare it here, with stubs
        of other class fields. *)
@@ -1116,26 +1108,21 @@ let get_dependencies tcopt target =
         HashSet.remove dependencies (Method (cls, m));
         HashSet.remove dependencies (SMethod (cls, m)))
   in
-  dependencies
+  HashSet.fold List.cons dependencies []
 
-let split_dependencies dependencies =
-  let types = Caml.Hashtbl.create 0 in
-  let globals = HashSet.create 0 in
-  let group_by_type obj =
-    if is_class_dependency obj then (
+let group_class_dependencies_by_class dependencies =
+  List.fold_left
+    dependencies
+    ~f:(fun acc obj ->
       Typing_deps.Dep.(
         match obj with
         | Class cls ->
-          (match Caml.Hashtbl.find_opt types cls with
-          | Some _ -> ()
-          | None ->
-            let set = HashSet.create 0 in
-            Caml.Hashtbl.add types cls set)
-        (* We already added the members when adding signature dependencies,
-         * omit it from generation
-         *)
-        | AllMembers _ -> ()
-        | Extends _ -> ()
+          if SMap.has_key cls acc then
+            acc
+          else
+            SMap.add cls [] acc
+        | AllMembers _ -> acc
+        | Extends _ -> acc
         | _ ->
           let cls = get_class_name obj in
           let origin = get_dependency_origin cls obj in
@@ -1151,22 +1138,14 @@ let split_dependencies dependencies =
            *
            * We will pull both SMethod(Base, do) and SMethod(Derived, do) as
            * dependencies, but we should not generate method do() in Derived.
-           * Therefore we should ignore dependencies whose origin differ from
-           * their class.
+           * Therefore, we should ignore dependencies whose origin differs
+           * from their class.
            *)
-          if origin = cls then (
-            match Caml.Hashtbl.find_opt types cls with
-            | Some set -> HashSet.add set obj
-            | None ->
-              let set = HashSet.create 0 in
-              HashSet.add set obj;
-              Caml.Hashtbl.add types cls set
-          ))
-    ) else
-      HashSet.add globals obj
-  in
-  HashSet.iter group_by_type dependencies;
-  (types, globals)
+          if origin = cls then
+            SMap.add cls [obj] acc ~combine:(fun x y -> y @ x)
+          else
+            acc))
+    ~init:SMap.empty
 
 (* Every namespace can contain declarations of classes, functions, constants
    as well as nested namespaces *)
@@ -1265,8 +1244,8 @@ let get_code declarations =
   else
     namespaced
 
-let get_declarations tcopt target types globals =
-  let add_global_declaration dep declarations =
+let get_declarations tcopt target class_dependencies global_dependencies =
+  let add_global_declaration declarations dep =
     SMap.add
       (global_dep_name dep)
       (get_global_object_declaration tcopt dep)
@@ -1294,17 +1273,23 @@ let get_declarations tcopt target types globals =
       SMap.add function_name function_text declarations
     | Method _ -> declarations
   in
-  SMap.empty
-  |> HashSet.fold add_global_declaration globals
-  |> Caml.Hashtbl.fold add_class_declaration types
+  List.fold_left global_dependencies ~f:add_global_declaration ~init:SMap.empty
+  |> SMap.fold add_class_declaration class_dependencies
   |> add_target_declaration
 
 let go tcopt target =
   try
-    let (types, globals) =
-      split_dependencies (get_dependencies tcopt target)
+    let dependencies = get_dependencies tcopt target in
+    let (class_dependencies, global_dependencies) =
+      List.partition_tf dependencies ~f:is_class_dependency
     in
-    let declarations = get_declarations tcopt target types globals in
+    let declarations =
+      get_declarations
+        tcopt
+        target
+        (group_class_dependencies_by_class class_dependencies)
+        global_dependencies
+    in
     get_code declarations
   with
   | NotFound -> "Not found!"

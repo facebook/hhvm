@@ -1,6 +1,5 @@
 <?hh
 class WithConst {
-
   const type TYPECONST as num = int;
   const type WITH_CONSTRAINT = \A0;
   public function with_type_constants(
@@ -17,5 +16,3 @@ enum SomeEnum: int {
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }
-
-

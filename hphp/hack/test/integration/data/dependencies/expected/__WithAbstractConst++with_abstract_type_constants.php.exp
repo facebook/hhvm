@@ -3,9 +3,8 @@ class WithConst {
 
 }
 abstract class WithAbstractConst {
-
-  abstract const type ABS_WITH_CONSTRAINT as string;
   abstract const type ABS_WO_CONSTRAINT;
+  abstract const type ABS_WITH_CONSTRAINT as string;
   abstract public function with_abstract_type_constants(
     this::ABS_WO_CONSTRAINT $arg,
   ): this::ABS_WITH_CONSTRAINT;
@@ -13,5 +12,3 @@ abstract class WithAbstractConst {
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }
-
-

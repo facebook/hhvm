@@ -7,7 +7,6 @@ function with_static_property(): void {
   $b = WithStaticProperty::$vector;
 }
 class WithStaticProperty {
-
   public static \Vector<\A> $vector = Vector {};
   public static \Map<\SomeEnum, string> $map = Map {};
 }

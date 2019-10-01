@@ -13,7 +13,6 @@ abstract class AbstractBase {
 trait T {
   require extends \AbstractBase;
 
-
   public function routine(): void {
     throw new Exception();
   }

@@ -1,10 +1,9 @@
 <?hh
 class WithProperties {
-
   public static int $third = 0;
   public function __construct(int $arg) {
-    $this->first = extract_standalone_make_default();
     $this->second = extract_standalone_make_default();
+    $this->first = extract_standalone_make_default();
   }
   public int $second;
   public int $first;
@@ -15,5 +14,3 @@ function use_properties(WithProperties $arg): int {
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }
-
-

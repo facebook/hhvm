@@ -1,6 +1,5 @@
 <?hh
 class Regular {
-
   public function generic_method<T>(T $arg): void {
     throw new Exception();
   }
@@ -13,5 +12,3 @@ function with_generic_method(int $arg): void {
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }
-
-

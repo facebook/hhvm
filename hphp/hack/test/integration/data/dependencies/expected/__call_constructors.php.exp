@@ -5,13 +5,11 @@ function call_constructors(): void {
 }
 class ImplementingBase extends \AbstractBase {
 
-
 }
 abstract class AbstractBase {
 
 }
 class Derived extends \ImplementingBase {
-
   public function __construct(int $num) {}
 }
 function extract_standalone_make_default(): nothing {

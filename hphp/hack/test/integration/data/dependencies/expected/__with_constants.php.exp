@@ -1,6 +1,5 @@
 <?hh
 class WithConst {
-
   const float CFLOAT = 0.0;
   const \SomeEnum CENUM = \SomeEnum::SECOND;
 }

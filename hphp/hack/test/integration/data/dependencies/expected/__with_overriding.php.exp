@@ -1,6 +1,5 @@
 <?hh
 class ImplementingBase extends \AbstractBase {
-
   public function inherited(): void {
     throw new Exception();
   }
@@ -13,7 +12,6 @@ function with_overriding(Derived $arg): int {
   return $arg->overridden();
 }
 class Derived extends \ImplementingBase {
-
   public function overridden(): int {
     throw new Exception();
   }

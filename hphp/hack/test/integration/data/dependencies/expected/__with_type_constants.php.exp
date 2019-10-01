@@ -5,7 +5,6 @@ function with_type_constants(
   return 1;
 }
 class WithConst {
-
   const type TYPECONST as num = int;
   const type WITH_CONSTRAINT = \A0;
   const type WITH_THIS = this::WITH_CONSTRAINT;
@@ -14,7 +13,6 @@ class A0 {
 
 }
 abstract class WithAbstractConst {
-
   const type NESTED = \WithConst;
 }
 function extract_standalone_make_default(): nothing {

@@ -1,7 +1,6 @@
 <?hh
 function does_not_use_class_methods(ImplementsBuiltin $arg): void {}
 class ImplementsBuiltin implements \Stringish {
-
   public function __toString(): string {
     throw new Exception();
   }
@@ -9,5 +8,3 @@ class ImplementsBuiltin implements \Stringish {
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }
-
-

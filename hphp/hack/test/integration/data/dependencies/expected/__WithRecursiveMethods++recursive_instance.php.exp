@@ -1,6 +1,5 @@
 <?hh
 class WithRecursiveMethods {
-
   public static function recursive_static(): void {
     throw new Exception();
   }
@@ -11,5 +10,3 @@ class WithRecursiveMethods {
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }
-
-

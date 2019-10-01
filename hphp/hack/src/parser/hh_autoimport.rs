@@ -5,95 +5,71 @@
 
 use lazy_static::lazy_static;
 use std::collections::HashMap;
-use Alias::*;
-
-enum Alias {
-    HhOnlyType(String),
-    ScalarType(String),
-    HhAlias(String, String),
-}
 
 lazy_static! {
-    static ref ALIASES: Vec<Alias> = vec![
-        HhOnlyType("AsyncIterator".to_string()),
-        HhOnlyType("AsyncKeyedIterator".to_string()),
-        HhOnlyType("Traversable".to_string()),
-        HhOnlyType("Container".to_string()),
-        HhOnlyType("KeyedTraversable".to_string()),
-        HhOnlyType("KeyedContainer".to_string()),
-        HhOnlyType("Iterator".to_string()),
-        HhOnlyType("KeyedIterator".to_string()),
-        HhOnlyType("Iterable".to_string()),
-        HhOnlyType("KeyedIterable".to_string()),
-        HhOnlyType("Collection".to_string()),
-        HhOnlyType("Vector".to_string()),
-        HhOnlyType("Map".to_string()),
-        HhOnlyType("Set".to_string()),
-        HhOnlyType("Pair".to_string()),
-        HhOnlyType("ImmVector".to_string()),
-        HhOnlyType("ImmMap".to_string()),
-        HhOnlyType("ImmSet".to_string()),
-        HhOnlyType("InvariantException".to_string()),
-        HhOnlyType("IMemoizeParam".to_string()),
-        HhOnlyType("Shapes".to_string()),
-        HhOnlyType("TypeStructureKind".to_string()),
-        HhOnlyType("TypeStructure".to_string()),
-        HhOnlyType("dict".to_string()),
-        HhOnlyType("vec".to_string()),
-        HhOnlyType("keyset".to_string()),
-        HhOnlyType("varray".to_string()),
-        HhOnlyType("darray".to_string()),
-        HhOnlyType("Awaitable".to_string()),
-        HhOnlyType("AsyncGenerator".to_string()),
-        HhOnlyType("StaticWaitHandle".to_string()),
-        HhOnlyType("WaitableWaitHandle".to_string()),
-        HhOnlyType("ResumableWaitHandle".to_string()),
-        HhOnlyType("AsyncFunctionWaitHandle".to_string()),
-        HhOnlyType("AsyncGeneratorWaitHandle".to_string()),
-        HhOnlyType("AwaitAllWaitHandle".to_string()),
-        HhOnlyType("ConditionWaitHandle".to_string()),
-        HhOnlyType("RescheduleWaitHandle".to_string()),
-        HhOnlyType("SleepWaitHandle".to_string()),
-        HhOnlyType("ExternalThreadEventWaitHandle".to_string()),
-        ScalarType("bool".to_string()),
-        ScalarType("int".to_string()),
-        ScalarType("float".to_string()),
-        ScalarType("string".to_string()),
-        ScalarType("void".to_string()),
-        HhOnlyType("num".to_string()),
-        HhOnlyType("arraykey".to_string()),
-        HhOnlyType("resource".to_string()),
-        HhOnlyType("mixed".to_string()),
-        HhOnlyType("noreturn".to_string()),
-        HhOnlyType("this".to_string()),
-        HhOnlyType("varray_or_darray".to_string()),
-        HhOnlyType("vec_or_dict".to_string()),
-        HhOnlyType("arraylike".to_string()),
-        HhOnlyType("nonnull".to_string()),
-        HhOnlyType("null".to_string()),
-        HhOnlyType("nothing".to_string()),
-        HhOnlyType("dynamic".to_string()),
-        /*
-        PHP7_TYPE("Throwable"; PHP7_EngineExceptions);
-        PHP7_TYPE("Error"; PHP7_EngineExceptions);
-        PHP7_TYPE("ArithmeticError"; PHP7_EngineExceptions);
-        PHP7_TYPE("AssertionError"; PHP7_EngineExceptions);
-        PHP7_TYPE("DivisionByZeroError"; PHP7_EngineExceptions);
-        PHP7_TYPE("ParseError"; PHP7_EngineExceptions);
-        PHP7_TYPE("TypeError"; PHP7_EngineExceptions);
-        */
+    static ref ALIASES: Vec<String> = vec![
+        "AsyncIterator".to_string(),
+        "AsyncKeyedIterator".to_string(),
+        "Traversable".to_string(),
+        "Container".to_string(),
+        "KeyedTraversable".to_string(),
+        "KeyedContainer".to_string(),
+        "Iterator".to_string(),
+        "KeyedIterator".to_string(),
+        "Iterable".to_string(),
+        "KeyedIterable".to_string(),
+        "Collection".to_string(),
+        "Vector".to_string(),
+        "Map".to_string(),
+        "Set".to_string(),
+        "Pair".to_string(),
+        "ImmVector".to_string(),
+        "ImmMap".to_string(),
+        "ImmSet".to_string(),
+        "InvariantException".to_string(),
+        "IMemoizeParam".to_string(),
+        "Shapes".to_string(),
+        "TypeStructureKind".to_string(),
+        "TypeStructure".to_string(),
+        "dict".to_string(),
+        "vec".to_string(),
+        "keyset".to_string(),
+        "varray".to_string(),
+        "darray".to_string(),
+        "Awaitable".to_string(),
+        "AsyncGenerator".to_string(),
+        "StaticWaitHandle".to_string(),
+        "WaitableWaitHandle".to_string(),
+        "ResumableWaitHandle".to_string(),
+        "AsyncFunctionWaitHandle".to_string(),
+        "AsyncGeneratorWaitHandle".to_string(),
+        "AwaitAllWaitHandle".to_string(),
+        "ConditionWaitHandle".to_string(),
+        "RescheduleWaitHandle".to_string(),
+        "SleepWaitHandle".to_string(),
+        "ExternalThreadEventWaitHandle".to_string(),
+        "bool".to_string(),
+        "int".to_string(),
+        "float".to_string(),
+        "string".to_string(),
+        "void".to_string(),
+        "num".to_string(),
+        "arraykey".to_string(),
+        "resource".to_string(),
+        "mixed".to_string(),
+        "noreturn".to_string(),
+        "this".to_string(),
+        "varray_or_darray".to_string(),
+        "vec_or_dict".to_string(),
+        "arraylike".to_string(),
+        "nonnull".to_string(),
+        "null".to_string(),
+        "nothing".to_string(),
+        "dynamic".to_string(),
     ];
-
     static ref ALIAS_MAP: HashMap<String, String> = {
-        ALIASES.iter().fold(HashMap::new(), |mut map, hh_alias| {
-            match hh_alias {
-                ScalarType(s) | HhOnlyType(s) => {
-                    map.insert(s.to_lowercase(), "HH\\".to_string() + s);
-                }
-                HhAlias(s, alias) => {
-                    map.insert(s.to_lowercase(), alias.to_string());
-                }
-            }
+        ALIASES.iter().fold(HashMap::new(), |mut map, s| {
+            map.insert(s.to_lowercase(), "HH\\".to_string() + s);
             map
         })
     };

@@ -11,6 +11,12 @@ open Ast
 open Core_kernel
 module SN = Naming_special_names
 
+let ctr = ref 1
+
+let next () =
+  incr ctr;
+  !ctr
+
 type ('ex, 'fb, 'en, 'hi) class_body = {
   c_uses: Aast.hint list;
   c_use_as_aliases: Aast.use_as_alias list;
@@ -319,7 +325,7 @@ let converter
       | Unop (op, e) -> Aast.Unop (op, on_expr e)
       | Binop (op, e1, e2) -> Aast.Binop (op, on_expr e1, on_expr e2)
       | Pipe (e1, e2) ->
-        let id = Local_id.make_scoped SN.SpecialIdents.dollardollar in
+        let id = Local_id.make (next ()) SN.SpecialIdents.dollardollar in
         Aast.Pipe ((p, id), on_expr e1, on_expr e2)
       | Eif (e1, opt_e, e2) ->
         Aast.Eif (on_expr e1, optional on_expr opt_e, on_expr e2)
@@ -888,6 +894,7 @@ let convert_program
     (env_annotation : 'en)
     (hint_annotation : 'hi)
     (p : Ast.program) : ('ex, 'fb, 'en, 'hi) Aast.program =
+  ctr := 1;
   (converter expr_annotation func_body_ann env_annotation hint_annotation)
     #on_program
     p

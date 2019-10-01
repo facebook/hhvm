@@ -1091,12 +1091,6 @@ let get_dependency_origin cls (dep : Typing_deps.Dep.variant) =
 
 let collect_dependencies tcopt target =
   let dependencies = HashSet.create 0 in
-  let _ =
-    match target with
-    (* We depend on the class which the method belongs to *)
-    | Method (cls, _) -> do_add_dep dependencies (Typing_deps.Dep.Class cls)
-    | Function _ -> ()
-  in
   Typing_deps.Dep.(
     let add_dependency root obj =
       if is_relevant_dependency target root then do_add_dep dependencies obj

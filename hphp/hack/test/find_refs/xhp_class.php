@@ -12,7 +12,7 @@ namespace xhp {
 }
 
 namespace {
-	function test(:xhp:foo-element $e): :xhp:foo-element {
+	function test(\xhp\:foo-element $e): \xhp\:foo-element {
 		return <xhp:foo-element />;
 	}
 }

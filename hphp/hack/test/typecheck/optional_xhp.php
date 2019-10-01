@@ -16,7 +16,7 @@ namespace {
 	class A {
 		public ?:x:base $xhp;
 
-		public function foo(?:x:base $x): ?:x:base {
+		public function foo(?\x\:base $x): ?\x\:base {
 			return null;
 		}
 	}

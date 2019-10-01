@@ -3104,6 +3104,87 @@ class TestLsp(TestCase[LspTestDriver]):
         )
         self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)
 
+    def test_signature_help_lambda(self) -> None:
+        self.prepare_server_environment()
+        variables = self.setup_php_file("signaturehelp_lambda.php")
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("test_serverless_ide_signature_help_lambda"),
+                use_serverless_ide=False,
+            )
+            .wait_for_hh_server_ready()
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .request(
+                comment="signature help for a normal function call",
+                method="textDocument/signatureHelp",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 8, "character": 29},
+                },
+                result={
+                    "activeParameter": 0,
+                    "activeSignature": 0,
+                    "signatures": [
+                        {
+                            "label": "function test_lambda_sighelp(\n"
+                            "  string $str,\n"
+                            "  (function(string): int) $f\n"
+                            "): int",
+                            "parameters": [{"label": "$str"}, {"label": "$f"}],
+                        }
+                    ],
+                },
+            )
+            .request(
+                comment="signature help for normal function call within a lambda",
+                method="textDocument/signatureHelp",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 9, "character": 21},
+                },
+                result={
+                    "activeParameter": 0,
+                    "activeSignature": 0,
+                    "signatures": [
+                        {
+                            "label": "function normal_test_func(string $str): void",
+                            "parameters": [{"label": "$str"}],
+                        }
+                    ],
+                },
+            )
+            .request(
+                comment="signature help for text within a lambda, left side of an open paren",
+                method="textDocument/signatureHelp",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 10, "character": 15},
+                },
+                result=None,
+            )
+            .request(
+                comment="signature help for text within a lambda, right side of an open paren",
+                method="textDocument/signatureHelp",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 10, "character": 16},
+                },
+                result=None,
+            )
+            .request(method="shutdown", params={}, result=None)
+        )
+        self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)
+
     def test_rename(self) -> None:
         self.prepare_server_environment()
         variables = self.setup_php_file("rename.php")

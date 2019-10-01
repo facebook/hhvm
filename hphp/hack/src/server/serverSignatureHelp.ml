@@ -31,52 +31,70 @@ module Syntax = Full_fidelity_positioned_syntax
 let get_positional_info (cst : Syntax.t) (file_offset : int) :
     ((int * int) * int) option =
   Syntax.(
-    parentage cst file_offset
-    |> List.find_map ~f:(fun syntax ->
-           match syntax.syntax with
-           | FunctionCallExpression children ->
-             Some
-               ( children.function_call_receiver,
-                 children.function_call_argument_list )
-           | ConstructorCall children ->
-             Some
-               ( children.constructor_call_type,
-                 children.constructor_call_argument_list )
-           | _ -> None)
-    >>= fun (callee_node, argument_list) ->
-    trailing_token callee_node
-    >>= fun callee_trailing_token ->
-    let function_symbol_offset = Token.end_offset callee_trailing_token in
-    let pos =
-      SourceText.offset_to_position
-        callee_trailing_token.Token.source_text
-        function_symbol_offset
+    let parent_tree = parentage cst file_offset in
+    (* Search upwards through the parent tree.
+     * If we find a function call or constructor, signature help should appear.
+     * If we find a lambda first, don't offer help even if we are within a function call! *)
+    let within_lambda =
+      Option.value
+        ~default:false
+        (List.find_map parent_tree ~f:(fun syntax ->
+             match syntax.syntax with
+             | LambdaExpression _ -> Some true
+             | ConstructorCall _
+             | FunctionCallExpression _ ->
+               Some false
+             | _ -> None))
     in
-    let arguments = children argument_list in
-    (* Add 1 to counteract the -1 in trailing_end_offset. *)
-    let in_args_area =
-      leading_start_offset argument_list <= file_offset
-      && file_offset <= trailing_end_offset argument_list + 1
-    in
-    if not in_args_area then
+    if within_lambda then
       None
     else
-      match arguments with
-      | [] -> Some (pos, 0)
-      | arguments ->
-        arguments
-        |> List.mapi ~f:(fun idx elem -> (idx, elem))
-        |> List.find_map ~f:(fun (idx, child) ->
-               (* Don't bother range checking if we're in the final argument, since we
-         already checked that in in_args_area up above. *)
-               let matches_end =
-                 idx = List.length arguments - 1
-                 || file_offset < trailing_end_offset child
-               in
-               if matches_end then
-                 Some (pos, idx)
-               else
-                 None))
+      parent_tree
+      |> List.find_map ~f:(fun syntax ->
+             match syntax.syntax with
+             | FunctionCallExpression children ->
+               Some
+                 ( children.function_call_receiver,
+                   children.function_call_argument_list )
+             | ConstructorCall children ->
+               Some
+                 ( children.constructor_call_type,
+                   children.constructor_call_argument_list )
+             | _ -> None)
+      >>= fun (callee_node, argument_list) ->
+      trailing_token callee_node
+      >>= fun callee_trailing_token ->
+      let function_symbol_offset = Token.end_offset callee_trailing_token in
+      let pos =
+        SourceText.offset_to_position
+          callee_trailing_token.Token.source_text
+          function_symbol_offset
+      in
+      let arguments = children argument_list in
+      (* Add 1 to counteract the -1 in trailing_end_offset. *)
+      let in_args_area =
+        leading_start_offset argument_list <= file_offset
+        && file_offset <= trailing_end_offset argument_list + 1
+      in
+      if not in_args_area then
+        None
+      else
+        match arguments with
+        | [] -> Some (pos, 0)
+        | arguments ->
+          arguments
+          |> List.mapi ~f:(fun idx elem -> (idx, elem))
+          |> List.find_map ~f:(fun (idx, child) ->
+                 (* Don't bother range checking if we're in the final argument, since we
+          already checked that in in_args_area up above. *)
+                 let matches_end =
+                   idx = List.length arguments - 1
+                   || file_offset < trailing_end_offset child
+                 in
+                 if matches_end then
+                   Some (pos, idx)
+                 else
+                   None))
 
 let get_occurrence_info
     (env : ServerEnv.env)

@@ -72,16 +72,22 @@ def map_json_scalars(json: Json, f: Callable[[JsonScalar], JsonScalar]) -> Json:
 
 
 def interpolate_variables(payload: Json, variables: VariableMap) -> Json:
-    for variable, value in variables.items():
+    def interpolate(json: JsonScalar) -> JsonScalar:
+        if isinstance(json, str):
+            for variable, value in variables.items():
+                json = json.replace("${" + variable + "}", value)
+            if "${" in json:
+                raise ValueError(
+                    f"There was an undefined ${{}}-variable "
+                    + f"in this JSON value: {json!r}. "
+                    + f"Make sure that you have initialized everything correctly and "
+                    + f"passed the correct variable map "
+                    + f"to {interpolate_variables.__name__}. "
+                    + f"It is currently: {variables!r}"
+                )
+        return json
 
-        def interpolate(json: JsonScalar) -> JsonScalar:
-            if isinstance(json, str):
-                return json.replace("${" + variable + "}", value)
-            else:
-                return json
-
-        payload = map_json_scalars(json=payload, f=interpolate)
-    return payload
+    return map_json_scalars(json=payload, f=interpolate)
 
 
 def uninterpolate_variables(payload: Json, variables: VariableMap) -> Json:

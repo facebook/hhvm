@@ -82,16 +82,9 @@ module Mode_solve = struct
       ~error_message:"was expecting two files: [graph] [output]"
       files
     >>= fun (input, output) ->
-    let env = StateConstraintGraph.load input in
-    let env =
-      {
-        env with
-        tyvars_stack =
-          [(Pos.none, IMap.fold (fun tyvar _ l -> tyvar :: l) env.tvenv [])];
-      }
-    in
-    let env = Typing_solver.close_tyvars_and_solve env Errors.unify_error in
-    StateSolvedGraph.save output env;
+    StateConstraintGraph.load input
+    |> StateSolvedGraph.from_constraint_graph
+    |> StateSolvedGraph.save output;
     Ok ()
 end
 

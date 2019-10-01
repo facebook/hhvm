@@ -8,14 +8,6 @@
 
 open Typing_env_types
 
-module StateSolvedGraph : sig
-  type t = env
-
-  val load : string -> t
-
-  val save : string -> t -> unit
-end
-
 module StateSubConstraintGraphs : sig
   type t = global_tvenv list
 
@@ -32,6 +24,16 @@ module StateConstraintGraph : sig
   val save : string -> t -> unit
 
   val merge_subgraphs : t -> StateSubConstraintGraphs.t -> t
+end
+
+module StateSolvedGraph : sig
+  type t = env * (Pos.t * int) list
+
+  val load : string -> t
+
+  val save : string -> t -> unit
+
+  val from_constraint_graph : StateConstraintGraph.t -> t
 end
 
 val init : unit -> unit

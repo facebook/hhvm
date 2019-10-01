@@ -31,10 +31,6 @@ let folder_name = ".global_inference_artifacts/"
 
 let artifacts_path : string ref = ref ""
 
-module StateSolvedGraph = StateFunctor (struct
-  type t = env
-end)
-
 module StateConstraintGraph = struct
   include StateFunctor (struct
     type t = env
@@ -109,6 +105,27 @@ module StateSubConstraintGraphs = struct
           ("subgraph_" ^ string_of_int (Ident.tmp ()))
       in
       save path subcontraints
+end
+
+module StateSolvedGraph = struct
+  include StateFunctor (struct
+    type t = env * (Pos.t * int) list
+  end)
+
+  let from_constraint_graph constraintgraph =
+    let extract_pos = function
+      | LocalTyvar tyvar -> tyvar.tyvar_pos
+      | GlobalTyvar -> Pos.none
+    in
+    let positions =
+      IMap.fold
+        (fun var tyvar_info l -> (extract_pos tyvar_info, var) :: l)
+        constraintgraph.tvenv
+        []
+    in
+    let (_, tyvars) = List.unzip positions in
+    let env = { constraintgraph with tyvars_stack = [(Pos.none, tyvars)] } in
+    (Typing_solver.close_tyvars_and_solve env Errors.unify_error, positions)
 end
 
 let init () =

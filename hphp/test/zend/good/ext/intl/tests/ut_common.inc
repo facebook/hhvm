@@ -51,21 +51,21 @@ function ut_coll_compare( $coll, $str1, $str2 )
 {
     return $GLOBALS['oo-mode'] ? $coll->compare( $str1, $str2 ) : collator_compare( $coll, $str1, $str2 );
 }
-function ut_coll_sort( $coll, &$arr, $sort_flag = Collator::SORT_REGULAR )
+function ut_coll_sort( $coll, inout $arr, $sort_flag = Collator::SORT_REGULAR )
 {
-    return $GLOBALS['oo-mode'] ? $coll->sort( &$arr, $sort_flag ) : collator_sort( $coll, &$arr, $sort_flag );
+    return $GLOBALS['oo-mode'] ? $coll->sort( inout $arr, $sort_flag ) : collator_sort( $coll, inout $arr, $sort_flag );
 }
-function ut_coll_sort_with_sort_keys( $coll, &$arr )
+function ut_coll_sort_with_sort_keys( $coll, inout $arr )
 {
-    return $GLOBALS['oo-mode'] ? $coll->sortWithSortKeys( &$arr ) : collator_sort_with_sort_keys( $coll, &$arr );
+    return $GLOBALS['oo-mode'] ? $coll->sortWithSortKeys( inout $arr ) : collator_sort_with_sort_keys( $coll, inout $arr );
 }
 function ut_coll_get_sort_key( $coll, $str )
 {
     return $GLOBALS['oo-mode'] ? $coll->getSortKey( $str ) : collator_get_sort_key( $coll, $str );
 }
-function ut_coll_asort( $coll, &$arr, $sort_flag = Collator::SORT_REGULAR )
+function ut_coll_asort( $coll, inout $arr, $sort_flag = Collator::SORT_REGULAR )
 {
-    return $GLOBALS['oo-mode'] ? $coll->asort( &$arr, $sort_flag ) : collator_asort( $coll, &$arr, $sort_flag );
+    return $GLOBALS['oo-mode'] ? $coll->asort( inout $arr, $sort_flag ) : collator_asort( $coll, inout $arr, $sort_flag );
 }
 function ut_coll_get_locale( $coll, $type )
 {
@@ -375,7 +375,7 @@ function ut_datefmt_format( $fmt , $value )
 }
 function ut_datefmt_parse( $fmt , $value , inout $parse_pos )
 {
-    return $GLOBALS['oo-mode'] ? $fmt->parseWithPosition(  $value ,inout $parse_pos ) : datefmt_parse( $fmt ,  $value,&$parse_pos);
+    return $GLOBALS['oo-mode'] ? $fmt->parseWithPosition(  $value ,inout $parse_pos ) : datefmt_parse( $fmt ,  $value,inout $parse_pos);
 }
 function ut_datefmt_localtime( $fmt , $value , inout $parse_pos )
 {

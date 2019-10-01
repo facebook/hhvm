@@ -203,7 +203,7 @@ function intl_error_name(int $error_code);
 <<__PHPStdLib>>
 function intl_is_failure(int $error_code);
 <<__PHPStdLib>>
-function collator_asort($obj, &$arr, int $sort_flag = Collator::SORT_REGULAR);
+function collator_asort($obj, inout $arr, int $sort_flag = Collator::SORT_REGULAR);
 <<__PHPStdLib>>
 function collator_compare($obj, $str1, $str2);
 <<__PHPStdLib>>
@@ -225,9 +225,9 @@ function collator_set_attribute($obj, int $attr, int $val);
 <<__PHPStdLib>>
 function collator_set_strength($obj, int $strength);
 <<__PHPStdLib>>
-function collator_sort_with_sort_keys($obj, &$arr);
+function collator_sort_with_sort_keys($obj, inout $arr);
 <<__PHPStdLib>>
-function collator_sort($obj, &$arr, int $sort_flag = Collator::SORT_REGULAR);
+function collator_sort($obj, inout $arr, int $sort_flag = Collator::SORT_REGULAR);
 <<__PHPStdLib>>
 function idn_to_ascii(string $domain, int $options = 0, int $variant = 0);
 <<__PHPStdLib>>
@@ -570,7 +570,7 @@ class Collator {
   const UPPER_FIRST = 0;
 
   public function __construct(string $locale);
-  public function asort(&$arr, int $sort_flag = Collator::SORT_REGULAR);
+  public function asort(inout $arr, int $sort_flag = Collator::SORT_REGULAR);
   public function compare($str1, $str2);
   static public function create(string $locale);
   public function getAttribute(int $attr);
@@ -581,8 +581,8 @@ class Collator {
   public function getStrength();
   public function setAttribute(int $attr, int $val);
   public function setStrength(int $strength);
-  public function sortWithSortKeys(&$arr);
-  public function sort(&$arr, int $sort_flag = Collator::SORT_REGULAR);
+  public function sortWithSortKeys(inout $arr);
+  public function sort(inout $arr, int $sort_flag = Collator::SORT_REGULAR);
 }
 
 class Locale {
@@ -671,7 +671,7 @@ class IntlDateFormatter {
   public function getTimeZoneId();
   public function isLenient();
   public function localtime(string $string, inout $position);
-  public function parse(string $string, &$position = null);
+  public function parse(string $string);
   public function parseWithPosition(string $string, inout $position);
   public function setCalendar($which);
   public function setLenient(bool $lenient);

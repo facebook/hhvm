@@ -19,7 +19,7 @@ function sort_arrays( $locale, $arrays )
     foreach( $arrays as $array )
     {
         // Sort array values
-        $res_val = ut_coll_sort_with_sort_keys( $coll, &$array );
+        $res_val = ut_coll_sort_with_sort_keys( $coll, inout $array );
 
         // Concatenate the sorted array and function result
         // with output string.

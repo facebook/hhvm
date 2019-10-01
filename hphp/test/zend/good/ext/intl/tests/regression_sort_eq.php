@@ -8,7 +8,7 @@ function sort_using_locale( $locale, $test_array )
     $coll = ut_coll_create( $locale );
 
     // Sort array.
-    ut_coll_sort( $coll, &$test_array );
+    ut_coll_sort( $coll, inout $test_array );
 
     // And return the sorted array.
     return dump( $test_array ) . "\n";

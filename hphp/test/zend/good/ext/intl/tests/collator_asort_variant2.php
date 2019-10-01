@@ -19,7 +19,7 @@ function sort_arrays( $locale, $test_arrays, $sort_flag = Collator::SORT_REGULAR
     foreach( $test_arrays as $test_array )
     {
         // Try to sort test data.
-        $res_val = ut_coll_asort( $coll, &$test_array, $sort_flag );
+        $res_val = ut_coll_asort( $coll, inout $test_array, $sort_flag );
 
         // Return output data.
         $res_dump = "\n" . dump( $test_array ) .

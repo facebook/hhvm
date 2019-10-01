@@ -218,8 +218,8 @@ class IntlDateFormatter {
    * @return int - timestamp parsed value, or FALSE if value can't be
    *   parsed.
    */
-  public function parse(string $value,
-                        mixed &$position = null): mixed {
+  public function parse(string $value): mixed {
+    $position = null;
     $result = $this->parseWithPosition($value, inout $position);
     return $result;
   }

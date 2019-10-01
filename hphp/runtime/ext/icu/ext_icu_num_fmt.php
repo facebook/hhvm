@@ -185,8 +185,8 @@ class NumberFormatter {
    * @return mixed - The value of the parsed number or FALSE on error.
    */
   public function parse(string $value,
-                        int $type = NumberFormatter::TYPE_DOUBLE,
-                        mixed &$position = null): mixed {
+                        int $type = NumberFormatter::TYPE_DOUBLE): mixed {
+    $position = null;
     $result = $this->parseWithPosition($value, $type, inout $position);
     return $result;
   }

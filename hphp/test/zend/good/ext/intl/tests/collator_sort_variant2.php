@@ -19,7 +19,7 @@ function sort_arrays( $locale, $arrays, $sort_flag = Collator::SORT_REGULAR )
     foreach( $arrays as $array )
     {
         // Sort array values
-        $res_val = ut_coll_sort( $coll, &$array, $sort_flag );
+        $res_val = ut_coll_sort( $coll, inout $array, $sort_flag );
 
         // Concatenate the sorted array and function result
         // with output string.

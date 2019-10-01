@@ -144,6 +144,20 @@ module StateSolvedGraph = struct
     in
     let (_, tyvars) = List.unzip positions in
     let env = { constraintgraph with tyvars_stack = [(Pos.none, tyvars)] } in
+    Typing_solver.use_bind_to_equal_bound := false;
+
+    (* For any errors seen during the last step (that is graph merging), we bind
+    the corresponding tyvar to Terr *)
+    let env =
+      IMap.fold
+        (fun var _ env ->
+          if StateErrors.has_error errors var then
+            Typing_solver.bind env var (Typing_reason.Rnone, Typing_defs.Terr)
+          else
+            env)
+        env.tvenv
+        env
+    in
     let env =
       Typing_solver.close_tyvars_and_solve_gi env (make_error_callback errors)
     in
@@ -152,6 +166,7 @@ module StateSolvedGraph = struct
         env
         (make_error_callback errors)
     in
+    Typing_solver.use_bind_to_equal_bound := true;
     (env, errors, positions)
 end
 

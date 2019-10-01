@@ -20,6 +20,8 @@ module Cls = Decl_provider.Class
 module TySet = Typing_set
 module MakeType = Typing_make_type
 
+let use_bind_to_equal_bound = ref true
+
 (* Given a type ty, replace any covariant or contravariant components of the type
  * with fresh type variables. Components replaced include
  *   covariant key and element types for tuples, arrays, and shapes
@@ -453,7 +455,7 @@ let union_any_if_any_in_lower_bounds env ty lower_bounds =
   (env, ty)
 
 let try_bind_to_equal_bound ~freshen env r var on_error =
-  if tyvar_is_solved env var then
+  if (not !use_bind_to_equal_bound) || tyvar_is_solved env var then
     env
   else
     Env.log_env_change "bind_to_equal_bound" env

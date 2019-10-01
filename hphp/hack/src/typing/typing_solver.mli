@@ -2,11 +2,15 @@ module Env = Typing_env
 open Typing_defs
 open Typing_env_types
 
-val is_sub_type : env -> locl_ty -> locl_ty -> bool
-(** Non-side-effecting test for subtypes.
+(* Non-side-effecting test for subtypes.
     result = true implies ty1 <: ty2
     result = false implies NOT ty1 <: ty2 OR we don't know
 *)
+val is_sub_type : env -> locl_ty -> locl_ty -> bool
+
+val use_bind_to_equal_bound : bool ref
+
+val push_option_out : Pos.t -> env -> locl_ty -> env * locl_ty
 
 val non_null : env -> Pos.t -> locl_ty -> env * locl_ty
 
@@ -40,3 +44,5 @@ val solve_all_unsolved_tyvars_gi :
 
 val close_tyvars_and_solve_gi :
   env -> (Ident.t -> Errors.typing_error_callback) -> env
+
+val bind : env -> Ident.t -> locl_ty -> env

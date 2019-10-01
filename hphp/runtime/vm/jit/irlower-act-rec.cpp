@@ -67,7 +67,7 @@ TRACE_SET_MOD(irlower);
 void cgSpillFrame(IRLS& env, const IRInstruction* inst) {
   auto const sp = srcLoc(env, inst, 0).reg();
   auto const extra = inst->extra<SpillFrame>();
-  auto const ctxTmp = inst->src(2);
+  auto const ctxTmp = inst->src(1);
   auto& v = vmain(env);
 
   auto const ar = sp[cellsToBytes(extra->spOffset.offset)];
@@ -80,7 +80,7 @@ void cgSpillFrame(IRLS& env, const IRInstruction* inst) {
                     uintptr_t(ctxTmp->clsVal()) | ActRec::kHasClassBit,
                     ar + AROFF(m_thisUnsafe));
     } else {
-      auto const cls = srcLoc(env, inst, 2).reg();
+      auto const cls = srcLoc(env, inst, 1).reg();
       auto const cctx = v.makeReg();
       v << orqi{ActRec::kHasClassBit, cls, cctx, v.makeReg()};
       v << store{cctx, ar + AROFF(m_thisUnsafe)};
@@ -97,7 +97,7 @@ void cgSpillFrame(IRLS& env, const IRInstruction* inst) {
     assertx(ctxTmp->isA(TCtx | TNullptr));
 
     // We don't have to incref here
-    auto const ctx = srcLoc(env, inst, 2).reg();
+    auto const ctx = srcLoc(env, inst, 1).reg();
     v << store{ctx, ar + AROFF(m_thisUnsafe)};
     if (RuntimeOption::EvalHHIRGenerateAsserts &&
         ctxTmp->type().maybe(TNullptr)) {
@@ -118,11 +118,6 @@ void cgSpillFrame(IRLS& env, const IRInstruction* inst) {
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     emitImmStoreq(v, ActRec::kTrashedVarEnvSlot, ar + AROFF(m_varEnv));
   }
-
-  // Set m_func.
-  assertx(inst->src(1)->isA(TFunc));
-  auto const func = srcLoc(env, inst, 1).reg();
-  v << store{func, ar + AROFF(m_func)};
 
   // Set m_numArgsAndFlags.
   auto const naaf = static_cast<int32_t>(

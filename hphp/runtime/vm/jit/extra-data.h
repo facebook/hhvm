@@ -787,7 +787,6 @@ struct CallData : IRExtraData {
                     uint32_t numArgs,
                     uint32_t numOut,
                     Offset callOffset,
-                    const Func* callee,
                     uint32_t genericsBitmap,
                     bool hasGenerics,
                     bool dynamicCall,
@@ -797,7 +796,6 @@ struct CallData : IRExtraData {
     , numArgs(numArgs)
     , numOut(numOut)
     , callOffset(callOffset)
-    , callee(callee)
     , genericsBitmap(genericsBitmap)
     , hasGenerics(hasGenerics)
     , dynamicCall(dynamicCall)
@@ -808,9 +806,6 @@ struct CallData : IRExtraData {
   std::string show() const {
     return folly::to<std::string>(
       spOffset.offset, ',', numArgs, ',', numOut, ',', callOffset,
-      callee
-        ? folly::sformat(",{}", callee->fullName())
-        : std::string{},
       hasGenerics
         ? folly::sformat(",hasGenerics({})", genericsBitmap)
         : std::string{},
@@ -828,7 +823,6 @@ struct CallData : IRExtraData {
   uint32_t numArgs;
   uint32_t numOut;     // number of values returned via stack from the callee
   Offset callOffset;   // m_callOff style: offset from func->base()
-  const Func* callee;  // nullptr if not statically known
   uint32_t genericsBitmap;
   bool hasGenerics;
   bool dynamicCall;
@@ -841,7 +835,6 @@ struct CallUnpackData : IRExtraData {
                           uint32_t numArgs,
                           uint32_t numOut,
                           Offset callOffset,
-                          const Func* callee,
                           bool hasGenerics,
                           bool dynamicCall,
                           bool formingRegion)
@@ -849,7 +842,6 @@ struct CallUnpackData : IRExtraData {
     , numArgs(numArgs)
     , numOut(numOut)
     , callOffset(callOffset)
-    , callee(callee)
     , hasGenerics(hasGenerics)
     , dynamicCall(dynamicCall)
     , formingRegion(formingRegion)
@@ -858,9 +850,6 @@ struct CallUnpackData : IRExtraData {
   std::string show() const {
     return folly::to<std::string>(
       spOffset.offset, ',', numArgs, ',', numOut, ',', callOffset,
-      callee
-        ? folly::sformat(",{}", callee->fullName())
-        : std::string{},
       hasGenerics ? ",hasGenerics" : "",
       dynamicCall ? ",dynamicCall" : "",
       formingRegion ? ",formingRegion" : ""
@@ -875,7 +864,6 @@ struct CallUnpackData : IRExtraData {
   uint32_t numArgs;
   uint32_t numOut;
   Offset callOffset;  // offset from unit m_bc (unlike m_callOff in ActRec)
-  const Func* callee; // nullptr if not statically known
   bool hasGenerics;
   bool dynamicCall;
   bool formingRegion;
@@ -1776,7 +1764,6 @@ X(IncDecElem,                   IncDecData);
 X(StArResumeAddr,               ResumeOffset);
 X(StContArState,                GeneratorState);
 X(ContEnter,                    ContEnterData);
-X(DbgAssertARFunc,              IRSPRelOffsetData);
 X(EagerSyncVMRegs,              IRSPRelOffsetData);
 X(JmpSSwitchDest,               IRSPRelOffsetData);
 X(DbgTrashStk,                  IRSPRelOffsetData);

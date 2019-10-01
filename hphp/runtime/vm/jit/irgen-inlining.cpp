@@ -270,7 +270,7 @@ void beginInlining(IRGS& env,
   IRSPRelOffset calleeAROff = spOffBCFromIRSP(env) + fca.numInputs();
 
   auto const arInfo = ActRecInfo { calleeAROff, fca.numArgs };
-  gen(env, SpillFrame, arInfo, sp(env), cns(env, target), ctx);
+  gen(env, SpillFrame, arInfo, sp(env), ctx);
 
   auto const generics = [&]() -> SSATmp* {
     if (!fca.hasGenerics()) return nullptr;
@@ -290,11 +290,6 @@ void beginInlining(IRGS& env,
   // inlining. If we bail out from now on, the caller's frame state
   // will be as if the arguments don't exist on the stack (even though
   // they do).
-
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    gen(env, DbgAssertARFunc, IRSPRelOffsetData{calleeAROff},
-        sp(env), cns(env, target));
-  }
 
   gen(
     env,

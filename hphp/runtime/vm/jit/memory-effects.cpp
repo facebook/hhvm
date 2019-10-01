@@ -276,12 +276,6 @@ AliasClass actrec_ctx(SSATmp* base, IRSPRelOffset offset) {
   return AStack { base, offset + int32_t{kActRecCtxCellOff}, 1 };
 }
 
-// Return AliasClass representing just the func field of an ActRec at base +
-// offset.
-AliasClass actrec_func(SSATmp* base, IRSPRelOffset offset) {
-  return AStack { base, offset + int32_t{kActRecFuncCellOff}, 1 };
-}
-
 InlineExitEffects inline_exit_effects(SSATmp* fp) {
   fp = canonical(fp);
   auto fpInst = fp->inst();
@@ -848,9 +842,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
           extra->numOut - 1
         ),
         // Locals.
-        backtrace_locals(inst),
-        // Callee.
-        actrec_func(inst.src(0), extra->spOffset + extra->numInputs())
+        backtrace_locals(inst)
       };
     }
 
@@ -863,9 +855,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
         // Stack. The value being sent, and everything below.
         stack_below(inst.src(0), extra->spOffset),
         // Locals.
-        backtrace_locals(inst),
-        // Callee. Stored inside the generator object, not used by ContEnter.
-        AEmpty
+        backtrace_locals(inst)
       };
     }
 
@@ -882,9 +872,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
           extra->numOut - 1
         ),
         // Locals.
-        backtrace_locals(inst),
-        // Callee.
-        actrec_func(inst.src(0), extra->spOffset + extra->numInputs())
+        backtrace_locals(inst)
       };
     }
 
@@ -1584,21 +1572,13 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       auto const spOffset = inst.extra<SpillFrame>()->spOffset;
       return PureSpillFrame {
         actrec(inst.src(0), spOffset),
-        actrec_ctx(inst.src(0), spOffset),
-        actrec_func(inst.src(0), spOffset),
-        inst.src(1)
+        actrec_ctx(inst.src(0), spOffset)
       };
     }
 
   case CheckStk:
     return may_load_store(
       AStack { inst.src(0), inst.extra<CheckStk>()->offset, 1 },
-      AEmpty
-    );
-
-  case DbgAssertARFunc:
-    return may_load_store(
-      actrec_func(inst.src(0), inst.extra<DbgAssertARFunc>()->offset),
       AEmpty
     );
 
@@ -2231,17 +2211,14 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
     },
     [&] (PureLoad x)         { check(x.src); },
     [&] (PureStore x)        { check(x.dst); },
-    [&] (PureSpillFrame x)   { check(x.stk); check(x.ctx); check(x.callee);
-                               always_assert(x.ctx <= x.stk);
-                               always_assert(x.callee <= x.stk); },
+    [&] (PureSpillFrame x)   { check(x.stk); check(x.ctx);
+                               always_assert(x.ctx <= x.stk); },
     [&] (ExitEffects x)      { check(x.live); check(x.kills); },
     [&] (IrrelevantEffects)  {},
     [&] (UnknownEffects)     {},
     [&] (CallEffects x)      { check(x.kills);
                                check(x.stack);
-                               check(x.locals);
-                               check(x.callee);
-                               always_assert(x.callee <= x.stack); },
+                               check(x.locals); },
     [&] (InlineEnterEffects x){ check(x.inlStack);
                                 check(x.inlFrame);
                                 check(x.actrec); },
@@ -2334,8 +2311,7 @@ MemEffects canonicalize(MemEffects me) {
     [&] (PureSpillFrame x) -> R {
       return PureSpillFrame {
         canonicalize(x.stk),
-        canonicalize(x.ctx),
-        canonicalize(x.callee)
+        canonicalize(x.ctx)
       };
     },
     [&] (ExitEffects x) -> R {
@@ -2359,8 +2335,7 @@ MemEffects canonicalize(MemEffects me) {
       return CallEffects {
         canonicalize(x.kills),
         canonicalize(x.stack),
-        canonicalize(x.locals),
-        canonicalize(x.callee)
+        canonicalize(x.locals)
       };
     },
     [&] (ReturnEffects x) -> R {
@@ -2403,18 +2378,16 @@ std::string show(MemEffects effects) {
       );
     },
     [&] (CallEffects x) {
-      return sformat("call({} ; {} ; {} ; {})",
+      return sformat("call({} ; {} ; {})",
         show(x.kills),
         show(x.stack),
-        show(x.locals),
-        show(x.callee)
+        show(x.locals)
       );
     },
     [&] (PureSpillFrame x) {
-      return sformat("stFrame({} ; {} ; {})",
+      return sformat("stFrame({} ; {})",
         show(x.stk),
-        show(x.ctx),
-        show(x.callee)
+        show(x.ctx)
       );
     },
     [&] (PureLoad x)        { return sformat("ld({})", show(x.src)); },

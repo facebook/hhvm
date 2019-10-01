@@ -70,6 +70,7 @@ TRACE_SET_MOD(irlower);
 void cgCall(IRLS& env, const IRInstruction* inst) {
   auto const sp = srcLoc(env, inst, 0).reg();
   auto const fp = srcLoc(env, inst, 1).reg();
+  auto const callee = srcLoc(env, inst, 2).reg();
   auto const extra = inst->extra<Call>();
   auto const callOff = safe_cast<int32_t>(extra->callOffset);
 
@@ -80,6 +81,7 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
   auto const calleeAR = calleeSP + cellsToBytes(extra->numInputs());
 
   v << store{fp, calleeAR + AROFF(m_sfp)};
+  v << store{callee, calleeAR + AROFF(m_func)};
   v << storeli{callOff, calleeAR + AROFF(m_callOff)};
 
   if (extra->asyncEagerReturn) {
@@ -116,13 +118,14 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
   // Emit a smashable call that initially calls a recyclable service request
   // stub.  The stub and the eventual targets take rvmfp() as an argument,
   // pointing to the callee ActRec.
-  auto const target = extra->callee != nullptr
-    ? tc::ustubs().immutableBindCallStub
-    : tc::ustubs().funcPrologueRedispatch;
-
   auto const done = v.makeBlock();
-  v << callphp{target, php_call_regs(), {{done, catchBlock}},
-               extra->callee, extra->numArgs};
+  if (inst->src(2)->hasConstVal(TFunc)) {
+    v << callphp{tc::ustubs().immutableBindCallStub, php_call_regs(),
+                 {{done, catchBlock}}, inst->src(2)->funcVal(), extra->numArgs};
+  } else {
+    v << callphp{tc::ustubs().funcPrologueRedispatch, php_call_regs(),
+                 {{done, catchBlock}}, nullptr, extra->numArgs};
+  }
   v = done;
 
   auto const dst = dstLoc(env, inst, 0);
@@ -138,7 +141,12 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
 void cgCallUnpack(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<CallUnpack>();
   auto const sp = srcLoc(env, inst, 0).reg();
+  auto const callee = srcLoc(env, inst, 2).reg();
   auto& v = vmain(env);
+
+  auto const calleeSP = sp[cellsToBytes(extra->spOffset.offset)];
+  auto const calleeAR = calleeSP + cellsToBytes(extra->numInputs());
+  v << store{callee, calleeAR + AROFF(m_func)};
 
   auto const syncSP = v.makeReg();
   v << lea{sp[cellsToBytes(extra->spOffset.offset)], syncSP};

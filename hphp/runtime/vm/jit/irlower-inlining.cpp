@@ -62,6 +62,7 @@ void cgDefInlineFP(IRLS& env, const IRInstruction* inst) {
   v << store{callerFP, ar + AROFF(m_sfp)};
   emitImmStoreq(v, uintptr_t(tc::ustubs().retInlHelper),
                 ar + AROFF(m_savedRip));
+  emitImmStoreq(v, uintptr_t(extra->target), ar + AROFF(m_func));
   v << storeli{extra->callBCOff, ar + AROFF(m_callOff)};
   if (extra->target->attrs() & AttrMayUseVV) {
     v << storeqi{0, ar + AROFF(m_invName)};

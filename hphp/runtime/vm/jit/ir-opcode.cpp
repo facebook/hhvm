@@ -663,7 +663,6 @@ bool opcodeMayRaise(Opcode opc) {
   case CreateGen:
   case CreateSSWH:
   case DbgAssertFunc:
-  case DbgAssertARFunc:
   case DbgAssertRefCount:
   case DbgTraceCall:
   case DbgTrashFrame:

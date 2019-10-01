@@ -184,7 +184,6 @@ struct Global {
   size_t loadsRemoved  = 0;
   size_t loadsRefined  = 0;
   size_t jumpsRemoved  = 0;
-  size_t callsResolved = 0;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -265,11 +264,6 @@ struct FReducible { ValueInfo knownValue; Type knownType; uint32_t aloc; };
 struct FRefinableLoad { Type refinedType; };
 
 /*
- * The instruction is a call to a callee who's identity has been determined.
- */
-struct FResolvable { const Func* callee; };
-
-/*
  * The instruction can be replaced with a nop.
  */
 struct FRemovable {};
@@ -282,7 +276,7 @@ struct FJmpNext {};
 struct FJmpTaken {};
 
 using Flags = boost::variant<FNone,FRedundant,FReducible,FRefinableLoad,
-                             FResolvable,FRemovable,FJmpNext,FJmpTaken>;
+                             FRemovable,FJmpNext,FJmpTaken>;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -486,32 +480,9 @@ Flags handle_general_effects(Local& env,
   return FNone{};
 }
 
-Flags handle_call_effects(Local& env,
-                          const IRInstruction& inst,
-                          CallEffects effects) {
-  // If the callee isn't already known, see if we can determine it. We can
-  // determine it if we know the precise type of the Func stored in the spilled
-  // frame.
-  auto const knownCallee = [&]() -> const Func* {
-    if (inst.is(Call)) return inst.extra<Call>()->callee;
-    if (inst.is(CallUnpack)) return inst.extra<CallUnpack>()->callee;
-    return nullptr;
-  }();
-
-  Flags flags = FNone{};
-  if (!knownCallee) {
-    if (auto const meta = env.global.ainfo.find(canonicalize(effects.callee))) {
-      assertx(meta->index < kMaxTrackedALocs);
-      if (env.state.avail[meta->index]) {
-        auto const& tracked = env.state.tracked[meta->index];
-        if (tracked.knownType.hasConstVal(TFunc)) {
-          auto const callee = tracked.knownType.funcVal();
-          flags = FResolvable { callee };
-        }
-      }
-    }
-  }
-
+void handle_call_effects(Local& env,
+                         const IRInstruction& inst,
+                         CallEffects effects) {
   /*
    * Keep types for stack, locals, and iterators, and throw away the
    * values.  We are just doing this to avoid extending lifetimes
@@ -529,8 +500,6 @@ Flags handle_call_effects(Local& env,
 
   // Any stack locations modified by the callee are no longer valid
   store(env, effects.stack, nullptr);
-
-  return flags;
 }
 
 Flags handle_assert(Local& env, const IRInstruction& inst) {
@@ -602,8 +571,7 @@ Flags analyze_inst(Local& env, const IRInstruction& inst) {
     [&] (ReturnEffects)     {},
 
     [&] (PureStore m)       { store(env, m.dst, m.value); },
-    [&] (PureSpillFrame m)  { store(env, m.stk, nullptr);
-                              store(env, m.callee, m.calleeValue); },
+    [&] (PureSpillFrame m)  { store(env, m.stk, nullptr); },
 
     [&] (PureLoad m)        { flags = load(env, inst, m.src); },
 
@@ -612,7 +580,7 @@ Flags analyze_inst(Local& env, const IRInstruction& inst) {
     [&] (InlineExitEffects m) { store(env, m.inlFrame, nullptr);
                                 store(env, m.inlMeta, nullptr); },
     [&] (GeneralEffects m)  { flags = handle_general_effects(env, inst, m); },
-    [&] (CallEffects x)     { flags = handle_call_effects(env, inst, x); }
+    [&] (CallEffects x)     { handle_call_effects(env, inst, x); }
   );
 
   switch (inst.op()) {
@@ -843,32 +811,6 @@ void refine_load(Global& env,
   ++env.loadsRefined;
 }
 
-void resolve_call(Global& env,
-                  IRInstruction& inst,
-                  const FResolvable& flags) {
-  FTRACE(2, "      resolvable: {} -> {}\n",
-         inst.toString(),
-         flags.callee->fullName());
-
-  if (inst.is(Call)) {
-    auto& extra = *inst.extra<Call>();
-    assertx(extra.callee == nullptr);
-    extra.callee = flags.callee;
-    retypeDests(&inst, &env.unit);
-    ++env.callsResolved;
-    return;
-  }
-
-  if (inst.is(CallUnpack)) {
-    auto& extra = *inst.extra<CallUnpack>();
-    assertx(extra.callee == nullptr);
-    extra.callee = flags.callee;
-    retypeDests(&inst, &env.unit);
-    ++env.callsResolved;
-    return;
-  }
-}
-
 //////////////////////////////////////////////////////////////////////
 
 void optimize_inst(Global& env, IRInstruction& inst, Flags flags) {
@@ -897,8 +839,6 @@ void optimize_inst(Global& env, IRInstruction& inst, Flags flags) {
     [&] (FReducible reducibleFlags) { reduce_inst(env, inst, reducibleFlags); },
 
     [&] (FRefinableLoad f) { refine_load(env, inst, f); },
-
-    [&] (FResolvable f) { resolve_call(env, inst, f); },
 
     [&] (FRemovable) {
       FTRACE(2, "      removable\n");
@@ -1212,7 +1152,6 @@ void optimizeLoads(IRUnit& unit) {
   size_t loadsRemoved = 0;
   size_t loadsRefined = 0;
   size_t jumpsRemoved = 0;
-  size_t callsResolved = 0;
   do {
     auto genv = Global { unit };
     if (genv.ainfo.locations.size() == 0) {
@@ -1243,8 +1182,7 @@ void optimizeLoads(IRUnit& unit) {
     if (!genv.instrsReduced &&
         !genv.loadsRemoved &&
         !genv.loadsRefined &&
-        !genv.jumpsRemoved &&
-        !genv.callsResolved) {
+        !genv.jumpsRemoved) {
       // Nothing changed so we're done
       break;
     }
@@ -1252,7 +1190,6 @@ void optimizeLoads(IRUnit& unit) {
     loadsRemoved += genv.loadsRemoved;
     loadsRefined += genv.loadsRefined;
     jumpsRemoved += genv.jumpsRemoved;
-    callsResolved += genv.callsResolved;
 
     FTRACE(2, "reflowing types\n");
     reflowTypes(genv.unit);
@@ -1283,7 +1220,6 @@ void optimizeLoads(IRUnit& unit) {
     entry->setInt("optimize_loads_loads_removed", loadsRemoved);
     entry->setInt("optimize_loads_loads_refined", loadsRefined);
     entry->setInt("optimize_loads_jumps_removed", jumpsRemoved);
-    entry->setInt("optimize_loads_calls_resolved", callsResolved);
   }
 }
 

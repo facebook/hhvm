@@ -180,7 +180,6 @@ void emitCallerRxChecksUnknown(IRGS& env, SSATmp* callee) {
 
 void fsetActRec(
   IRGS& env,
-  SSATmp* func,
   const FCallArgs& fca,
   SSATmp* objOrClass
 ) {
@@ -193,14 +192,13 @@ void fsetActRec(
     SpillFrame,
     ActRecInfo { arOffset, numArgs },
     sp(env),
-    func,
     objOrClass ? objOrClass : cns(env, TNullptr)
   );
 }
 
 //////////////////////////////////////////////////////////////////////
 
-void callUnpack(IRGS& env, const Func* callee, const FCallArgs& fca,
+void callUnpack(IRGS& env, SSATmp* callee, const FCallArgs& fca,
                 bool dynamicCall, bool unlikely) {
   assertx(fca.hasUnpack());
   auto const data = CallUnpackData {
@@ -208,16 +206,15 @@ void callUnpack(IRGS& env, const Func* callee, const FCallArgs& fca,
     fca.numArgs,
     fca.numRets - 1,
     bcOff(env),
-    callee,
     fca.hasGenerics(),
     dynamicCall,
     env.formingRegion,
   };
-  push(env, gen(env, CallUnpack, data, sp(env), fp(env)));
+  push(env, gen(env, CallUnpack, data, sp(env), fp(env), callee));
   if (unlikely) gen(env, Jmp, makeExit(env, nextBcOff(env)));
 }
 
-SSATmp* callImpl(IRGS& env, const Func* callee, const FCallArgs& fca,
+SSATmp* callImpl(IRGS& env, SSATmp* callee, const FCallArgs& fca,
                  bool dynamicCall, bool asyncEagerReturn) {
   // TODO: extend hhbc with bitmap of passed generics, or even better, use one
   // stack value per generic argument and extend hhbc with their count
@@ -239,14 +236,13 @@ SSATmp* callImpl(IRGS& env, const Func* callee, const FCallArgs& fca,
     fca.numArgs,
     fca.numRets - 1,
     bcOff(env) - curFunc(env)->base(),
-    callee,
     genericsBitmap,
     fca.hasGenerics(),
     dynamicCall,
     asyncEagerReturn,
     env.formingRegion,
   };
-  return gen(env, Call, data, sp(env), fp(env));
+  return gen(env, Call, data, sp(env), fp(env), callee);
 }
 
 void handleCallReturn(IRGS& env, const Func* callee, const FCallArgs& fca,
@@ -292,13 +288,15 @@ void callKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
                bool dynamicCall) {
   assertx(callee);
   if (fca.hasUnpack()) {
-    return callUnpack(env, callee, fca, dynamicCall, false /* unlikely */);
+    return callUnpack(env, cns(env, callee), fca, dynamicCall,
+                      false /* unlikely */);
   }
 
   auto const asyncEagerReturn =
     fca.asyncEagerOffset != kInvalidOffset &&
     callee->supportsAsyncEagerReturn();
-  auto const retVal = callImpl(env, callee, fca, dynamicCall, asyncEagerReturn);
+  auto const retVal = callImpl(env, cns(env, callee), fca, dynamicCall,
+                               asyncEagerReturn);
   handleCallReturn(env, callee, fca, retVal, asyncEagerReturn,
                    false /* unlikely */);
 }
@@ -307,13 +305,12 @@ void callUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca,
                  bool dynamicCall, bool unlikely) {
   assertx(!callee->hasConstVal() || env.formingRegion);
   if (fca.hasUnpack()) {
-    return callUnpack(env, nullptr, fca, dynamicCall, unlikely);
+    return callUnpack(env, callee, fca, dynamicCall, unlikely);
   }
 
   // Okay to request async eager return even if it is not supported.
   auto const asyncEagerReturn = fca.asyncEagerOffset != kInvalidOffset;
-  auto const retVal = callImpl(env, nullptr, fca, dynamicCall,
-                               asyncEagerReturn);
+  auto const retVal = callImpl(env, callee, fca, dynamicCall, asyncEagerReturn);
   handleCallReturn(env, nullptr, fca, retVal, asyncEagerReturn, unlikely);
 }
 
@@ -405,7 +402,7 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
     if (inlined) return;
   }
 
-  fsetActRec(env, cns(env, callee), fca, objOrClass);
+  fsetActRec(env, fca, objOrClass);
 
   // We just wrote to the stack, make sure Call opcode can set up its Catch.
   updateMarker(env);
@@ -430,7 +427,7 @@ void prepareAndCallUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca,
   }
   emitCallerRxChecksUnknown(env, callee);
 
-  fsetActRec(env, callee, fca, objOrClass);
+  fsetActRec(env, fca, objOrClass);
 
   // We just wrote to the stack, make sure Call opcode can set up its Catch.
   updateMarker(env);

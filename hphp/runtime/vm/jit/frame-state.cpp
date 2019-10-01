@@ -348,10 +348,12 @@ void FrameStateMgr::update(const IRInstruction* inst) {
         setValue(stk(extra->spOffset + i), nullptr);
       }
       // Mark out parameter locations as being at least InitCell
+      auto const callee = inst->src(2)->hasConstVal(TFunc)
+        ? inst->src(2)->funcVal() : nullptr;
       auto const base = extra->spOffset + numCells;
       for (auto i = uint32_t{0}; i < extra->numOut; ++i) {
-        auto const ty = extra->callee && extra->callee->takesInOutParams()
-          ? irgen::callOutType(extra->callee, i)
+        auto const ty = callee && callee->takesInOutParams()
+          ? irgen::callOutType(callee, i)
           : TInitCell;
         setType(stk(base + i), ty);
       }

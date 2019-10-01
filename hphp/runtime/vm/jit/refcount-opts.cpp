@@ -2140,7 +2140,7 @@ void analyze_mem_effects(Env& env,
     [&] (PureLoad x)    { pure_load(env, state, x.src, inst.dst(), add_node); },
 
     [&] (PureSpillFrame x) {
-      pure_spill_frame(env, state, x, inst.src(2), add_node);
+      pure_spill_frame(env, state, x, inst.src(1), add_node);
     }
   );
 }

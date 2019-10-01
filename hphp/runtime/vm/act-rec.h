@@ -379,8 +379,6 @@ bool isDebuggerReturnHelper(void* address);
 static_assert(offsetof(ActRec, m_func) % sizeof(Cell) == 0, "");
 static_assert(offsetof(ActRec, m_thisUnsafe) % sizeof(Cell) == 0, "");
 
-constexpr auto kActRecFuncCellOff = offsetof(ActRec, m_func) /
-                                    sizeof(Cell);
 constexpr auto kActRecCtxCellOff  = offsetof(ActRec, m_thisUnsafe) /
                                     sizeof(Cell);
 

@@ -52,8 +52,7 @@ void visit_locations(const BlockList& blocks, Visit visit) {
         [&] (ReturnEffects x)     { visit(x.kills); },
         [&] (CallEffects x)       { visit(x.kills);
                                     visit(x.stack);
-                                    visit(x.locals);
-                                    visit(x.callee); },
+                                    visit(x.locals); },
         [&] (GeneralEffects x)    { visit(x.loads);
                                     visit(x.stores);
                                     visit(x.moves);
@@ -61,8 +60,7 @@ void visit_locations(const BlockList& blocks, Visit visit) {
         [&] (PureLoad x)          { visit(x.src); },
         [&] (PureStore x)         { visit(x.dst); },
         [&] (PureSpillFrame x)    { visit(x.stk);
-                                    visit(x.ctx);
-                                    visit(x.callee); },
+                                    visit(x.ctx); },
         [&] (ExitEffects x)       { visit(x.live); visit(x.kills); },
         [&] (InlineEnterEffects x) { visit(x.inlFrame);
                                      visit(x.inlStack);

@@ -113,14 +113,9 @@ struct PureStore    { AliasClass dst; SSATmp* value; SSATmp* dep; };
  * The `stk' range should be interpreted as an exact AliasClass, not an upper
  * bound: it is guaranteed to be kNumActRecCells in size---no bigger than the
  * actual range of stack slots a SpillFrame instruction affects.
- *
- * The `callee' class is the memory location where the callee's Func* is written
- * to. The `callee' class should be a subset of the `stk' class.
  */
 struct PureSpillFrame { AliasClass stk;
-                        AliasClass ctx;
-                        AliasClass callee;
-                        SSATmp* calleeValue; };
+                        AliasClass ctx; };
 
 /*
  * Calls are somewhat special enough that they get a top-level effect.
@@ -136,16 +131,12 @@ struct PureSpillFrame { AliasClass stk;
  * The `locals` set contains frame locations that the call might read. (If the
  * call might write *any* local, then writes_local will be true).
  *
- * The `callee' set contains the frame location that the call will read to
- * obtain the callee. It must be a subset of the `stack' set.
- *
  * Note that calls that have been weakened to CallBuiltin use GeneralEffects,
  * not CallEffects.
  */
 struct CallEffects    { AliasClass kills;
                         AliasClass stack;
-                        AliasClass locals;
-                        AliasClass callee; };
+                        AliasClass locals; };
 
 /*
  * ReturnEffects is a return, either from the php function or an inlined

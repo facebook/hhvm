@@ -488,14 +488,14 @@ Type callReturn(const IRInstruction* inst) {
     if (inst->extra<Call>()->asyncEagerReturn) return TInitCell;
     if (inst->extra<Call>()->numOut) return TInitCell;
     if (inst->extra<Call>()->formingRegion) return TInitCell;
-    auto callee = inst->extra<Call>()->callee;
-    return callee ? irgen::callReturnType(callee) : TInitCell;
+    return inst->src(2)->hasConstVal(TFunc)
+      ? irgen::callReturnType(inst->src(2)->funcVal()) : TInitCell;
   }
   if (inst->is(CallUnpack)) {
     if (inst->extra<CallUnpack>()->numOut) return TInitCell;
     if (inst->extra<CallUnpack>()->formingRegion) return TInitCell;
-    auto callee = inst->extra<CallUnpack>()->callee;
-    return callee ? irgen::callReturnType(callee) : TInitCell;
+    return inst->src(2)->hasConstVal(TFunc)
+      ? irgen::callReturnType(inst->src(2)->funcVal()) : TInitCell;
   }
   not_reached();
 }

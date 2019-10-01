@@ -325,20 +325,10 @@ let get_enum_value enum_name =
   if Decl_provider.Class.kind enum <> Ast_defs.Cenum then
     raise Unsupported
   else
-    let values = Decl_provider.Class.consts enum in
-    (* Pick one of the constants, defined in the enum *)
-    match
-      Sequence.fold
-        values
-        ~f:(fun acc (name, _) ->
-          if name = "class" then
-            acc
-          else
-            name :: acc)
-        ~init:[]
-    with
-    | [] -> raise UnexpectedDependency
-    | some_const :: _ -> some_const
+    Decl_provider.Class.consts enum
+    |> Sequence.map ~f:fst
+    |> Sequence.find ~f:(fun name -> name <> "class")
+    |> value_exn UnexpectedDependency
 
 let get_init_from_type tcopt ty =
   Typing_defs.(

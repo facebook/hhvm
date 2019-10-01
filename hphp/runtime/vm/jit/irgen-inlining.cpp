@@ -214,7 +214,6 @@ void beginInlining(IRGS& env,
                    const Func* target,
                    const FCallArgs& fca,
                    SSATmp* ctx,
-                   Type ctxType,
                    bool dynamicCall,
                    Op writeArOpc,
                    SrcKey startSk,
@@ -229,62 +228,49 @@ void beginInlining(IRGS& env,
 
   FTRACE(1, "[[[ begin inlining: {}\n", target->fullName()->data());
 
+  ctx = [&] () -> SSATmp* {
+    if (target->isClosureBody()) {
+      return ctx;
+    }
+
+    if (!target->cls()) {
+      assertx(ctx->isA(TNullptr));
+      return ctx;
+    }
+    assertx(!ctx->type().maybe(TNullptr));
+
+    if (target->isStaticInPrologue() ||
+        (!hasThis(env) && isFCallClsMethod(writeArOpc))) {
+      assertx(ctx->isA(TCls) || ctx->isA(TCctx));
+      if (ctx->hasConstVal(TCctx)) {
+        return cns(env, ctx->cctxVal().cls());
+      } else if (ctx->hasConstVal(TCls)) {
+        return ctx;
+      }
+
+      auto const clsCtx = ctx->isA(TCctx) ? gen(env, LdClsCctx, ctx) : ctx;
+      auto const ty = clsCtx->type() & Type::SubCls(target->cls());
+      if (clsCtx->type() <= ty) return clsCtx;
+      return gen(env, AssertType, ty, clsCtx);
+    }
+
+    if (target->attrs() & AttrRequiresThis ||
+        isFCallObjMethod(writeArOpc) ||
+        ctx->isA(TObj)) {
+      auto const ty = ctx->type() & thisTypeFromFunc(target);
+      if (ctx->type() <= ty) return ctx;
+      return gen(env, AssertType, ty, ctx);
+    }
+
+    return ctx;
+  }();
+
   // The VM stack-pointer is conceptually pointing to the last
   // parameter, so we need to add numInputs to get to the ActRec
   IRSPRelOffset calleeAROff = spOffBCFromIRSP(env) + fca.numInputs();
 
   auto const arInfo = ActRecInfo { calleeAROff, fca.numArgs };
   gen(env, SpillFrame, arInfo, sp(env), cns(env, target), ctx);
-
-  ctx = [&] () -> SSATmp* {
-    if (!target->implCls()) {
-      return nullptr;
-    }
-    auto ty = ctxType;
-    if (!target->isClosureBody()) {
-      if (target->isStaticInPrologue() ||
-          (!hasThis(env) &&
-           isFCallClsMethod(writeArOpc))) {
-        assertx(!ty.maybe(TObj));
-        if (ty.hasConstVal(TCctx)) {
-          ty = Type::ExactCls(ty.cctxVal().cls());
-        } else if (!ty.hasConstVal(TCls)) {
-          if (!ty.maybe(TCls)) ty = TCls;
-          ty &= Type::SubCls(target->cls());
-        }
-      } else {
-        if (target->attrs() & AttrRequiresThis ||
-            isFCallObjMethod(writeArOpc) ||
-            ty <= TObj) {
-          ty &= thisTypeFromFunc(target);
-        }
-      }
-    }
-    if (ctx && !ctx->isA(TNullptr)) {
-      if (ctx->type() <= ty) {
-        return ctx;
-      }
-      if (ctx->type().maybe(ty)) {
-        return gen(env, AssertType, ty, ctx);
-      }
-      if (ctx->type() <= TCctx && ty <= TCls) {
-        return gen(env, AssertType, ty, gen(env, LdClsCctx, ctx));
-      }
-    }
-    if (ty <= TObj) {
-      return gen(env, LdARCtx, ty, IRSPRelOffsetData{calleeAROff}, sp(env));
-    }
-    if (ty <= TCls) {
-      auto const cctx =
-        gen(env, LdARCtx, TCctx, IRSPRelOffsetData{calleeAROff}, sp(env));
-      return gen(env, AssertType, ty, gen(env, LdClsCctx, cctx));
-    }
-    return nullptr;
-  }();
-
-  // If the ctx was extracted from SpillFrame it may be a TCls, otherwise it
-  // will be a TCtx (= TObj | TCctx) read from the stack
-  assertx(!ctx || (ctx->type() <= (TCtx | TCls) && target->implCls()));
 
   auto const generics = [&]() -> SSATmp* {
     if (!fca.hasGenerics()) return nullptr;
@@ -320,7 +306,8 @@ void beginInlining(IRGS& env,
   DefInlineFPData data;
   data.target        = target;
   data.callBCOff     = callBcOffset;
-  data.ctx           = target->isClosureBody() ? nullptr : ctx;
+  data.ctx           = (target->isClosureBody() || !target->cls())
+                         ? nullptr : ctx;
   data.retSPOff      = offsetFromFP(env, calleeAROff) - kNumActRecCells;
   data.spOffset      = calleeAROff;
   data.numNonDefault = fca.numArgs;
@@ -360,6 +347,7 @@ void beginInlining(IRGS& env,
   emitGenericsMismatchCheck(env, callFlags);
   emitCalleeDynamicCallCheck(env, callFlags);
 
+  if (data.ctx && data.ctx->isA(TBottom)) return;
   if (data.ctx && data.ctx->isA(TObj)) {
     assertx(startSk.hasThis());
   } else if (data.ctx && !data.ctx->type().maybe(TObj)) {
@@ -433,7 +421,12 @@ void conjureBeginInlining(IRGS& env,
   for (auto const argType : args) {
     push(env, conjure(argType));
   }
-  auto const ctx = conjure(thisType);
+
+  // thisType is the context type inside the closure, but beginInlining()'s ctx
+  // is a context given to the prologue.
+  auto const ctx = func->isClosureBody()
+    ? conjure(Type::ExactObj(func->implCls()))
+    : conjure(thisType);
 
   // FIXME: conjure generics; otherwise this translation will have tiny cost
   // as it will fail early due to generics mismatch, causing us to inline
@@ -444,7 +437,6 @@ void conjureBeginInlining(IRGS& env,
     FCallArgs(FCallArgs::Flags::None, numParams, 1, nullptr, kInvalidOffset,
               false),
     ctx,
-    ctx->type(),
     false,
     env.context.initSrcKey.op(),
     startSk,

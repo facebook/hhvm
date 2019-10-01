@@ -1596,11 +1596,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       AEmpty
     );
 
-  case LdARCtx:
-    return PureLoad {
-      actrec_ctx(inst.src(0), inst.extra<LdARCtx>()->offset)
-    };
-
   case DbgAssertARFunc:
     return may_load_store(
       actrec_func(inst.src(0), inst.extra<DbgAssertARFunc>()->offset),

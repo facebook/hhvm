@@ -1769,7 +1769,6 @@ X(StArResumeAddr,               ResumeOffset);
 X(StContArState,                GeneratorState);
 X(ContEnter,                    ContEnterData);
 X(DbgAssertARFunc,              IRSPRelOffsetData);
-X(LdARCtx,                      IRSPRelOffsetData);
 X(EagerSyncVMRegs,              IRSPRelOffsetData);
 X(JmpSSwitchDest,               IRSPRelOffsetData);
 X(DbgTrashStk,                  IRSPRelOffsetData);

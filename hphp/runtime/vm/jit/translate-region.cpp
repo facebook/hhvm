@@ -696,7 +696,7 @@ bool irGenTryInlineFCall(irgen::IRGS& irgs, const Func* callee,
   };
   auto callFuncOff = bcOff(irgs) - curFunc(irgs)->base();
 
-  irgen::beginInlining(irgs, callee, fca, ctx, ctx->type(), dynamicCall,
+  irgen::beginInlining(irgs, callee, fca, ctx, dynamicCall,
                        psk.srcKey.op(),
                        calleeRegion->start(),
                        callFuncOff,

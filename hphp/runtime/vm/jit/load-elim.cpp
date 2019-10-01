@@ -293,7 +293,6 @@ bool refinable_load_eligible(const IRInstruction& inst) {
     case LdStk:
     case LdMBase:
     case LdMem:
-    case LdARCtx:
       assertx(inst.hasTypeParam());
       return true;
     default:

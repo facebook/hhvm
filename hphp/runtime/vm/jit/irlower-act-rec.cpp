@@ -132,13 +132,6 @@ void cgSpillFrame(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void cgLdARCtx(IRLS& env, const IRInstruction* inst) {
-  auto const dst = dstLoc(env, inst, 0).reg();
-  auto const sp = srcLoc(env, inst, 0).reg();
-  auto const off = cellsToBytes(inst->extra<LdARCtx>()->offset.offset);
-  vmain(env) << load{sp[off + AROFF(m_thisUnsafe)], dst};
-}
-
 void cgIsFunReifiedGenericsMatched(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const callFlags = srcLoc(env, inst, 0).reg();

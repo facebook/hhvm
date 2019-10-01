@@ -787,7 +787,6 @@ bool opcodeMayRaise(Opcode opc) {
   case KeysetIsset:
   case KeysetLast:
   case LdAFWHActRec:
-  case LdARCtx:
   case LdARNumArgsAndFlags:
   case LdARNumParams:
   case LdBindAddr:

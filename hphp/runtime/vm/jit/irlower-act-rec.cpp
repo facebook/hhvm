@@ -67,52 +67,9 @@ TRACE_SET_MOD(irlower);
 void cgSpillFrame(IRLS& env, const IRInstruction* inst) {
   auto const sp = srcLoc(env, inst, 0).reg();
   auto const extra = inst->extra<SpillFrame>();
-  auto const ctxTmp = inst->src(1);
   auto& v = vmain(env);
 
   auto const ar = sp[cellsToBytes(extra->spOffset.offset)];
-
-  // Set m_this/m_cls.
-  if (ctxTmp->isA(TCls)) {
-    // Store the Class* as a Cctx.
-    if (ctxTmp->hasConstVal()) {
-      emitImmStoreq(v,
-                    uintptr_t(ctxTmp->clsVal()) | ActRec::kHasClassBit,
-                    ar + AROFF(m_thisUnsafe));
-    } else {
-      auto const cls = srcLoc(env, inst, 1).reg();
-      auto const cctx = v.makeReg();
-      v << orqi{ActRec::kHasClassBit, cls, cctx, v.makeReg()};
-      v << store{cctx, ar + AROFF(m_thisUnsafe)};
-    }
-  } else if (ctxTmp->isA(TNullptr)) {
-    // No $this or class; this happens in FCallFunc*.
-    if (RuntimeOption::EvalHHIRGenerateAsserts) {
-      emitImmStoreq(v, ActRec::kTrashedThisSlot, ar + AROFF(m_thisUnsafe));
-    }
-  } else {
-    // It could be TCls | TCtx | TNullptr, but we can't distinguish TCls and
-    // TCtx so assert it doesn't happen. We don't generate SpillFrames with such
-    // input types.
-    assertx(ctxTmp->isA(TCtx | TNullptr));
-
-    // We don't have to incref here
-    auto const ctx = srcLoc(env, inst, 1).reg();
-    v << store{ctx, ar + AROFF(m_thisUnsafe)};
-    if (RuntimeOption::EvalHHIRGenerateAsserts &&
-        ctxTmp->type().maybe(TNullptr)) {
-      auto const sf = v.makeReg();
-      v << testq{ctx, ctx, sf};
-      ifThen(
-        v,
-        CC_Z,
-        sf,
-        [&] (Vout& v) {
-          emitImmStoreq(v, ActRec::kTrashedThisSlot, ar + AROFF(m_thisUnsafe));
-        }
-      );
-    }
-  }
 
   // Trash m_varEnv.
   if (RuntimeOption::EvalHHIRGenerateAsserts) {

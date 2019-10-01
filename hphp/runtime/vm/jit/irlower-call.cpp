@@ -71,6 +71,7 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
   auto const sp = srcLoc(env, inst, 0).reg();
   auto const fp = srcLoc(env, inst, 1).reg();
   auto const callee = srcLoc(env, inst, 2).reg();
+  auto const ctx = srcLoc(env, inst, 3).reg();
   auto const extra = inst->extra<Call>();
   auto const callOff = safe_cast<int32_t>(extra->callOffset);
 
@@ -90,6 +91,13 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
       calleeAR + AROFF(m_numArgsAndFlags),
       v.makeReg()
     };
+  }
+
+  assertx(inst->src(3)->isA(TCtx) || inst->src(3)->isA(TNullptr));
+  if (inst->src(3)->isA(TCtx)) {
+    v << store{ctx, calleeAR + AROFF(m_thisUnsafe)};
+  } else if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    emitImmStoreq(v, ActRec::kTrashedThisSlot, calleeAR + AROFF(m_thisUnsafe));
   }
 
   auto const callFlags = CallFlags(
@@ -142,11 +150,19 @@ void cgCallUnpack(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<CallUnpack>();
   auto const sp = srcLoc(env, inst, 0).reg();
   auto const callee = srcLoc(env, inst, 2).reg();
+  auto const ctx = srcLoc(env, inst, 3).reg();
   auto& v = vmain(env);
 
   auto const calleeSP = sp[cellsToBytes(extra->spOffset.offset)];
   auto const calleeAR = calleeSP + cellsToBytes(extra->numInputs());
   v << store{callee, calleeAR + AROFF(m_func)};
+
+  assertx(inst->src(3)->isA(TCtx) || inst->src(3)->isA(TNullptr));
+  if (inst->src(3)->isA(TCtx)) {
+    v << store{ctx, calleeAR + AROFF(m_thisUnsafe)};
+  } else if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    emitImmStoreq(v, ActRec::kTrashedThisSlot, calleeAR + AROFF(m_thisUnsafe));
+  }
 
   auto const syncSP = v.makeReg();
   v << lea{sp[cellsToBytes(extra->spOffset.offset)], syncSP};

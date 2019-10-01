@@ -394,18 +394,6 @@ SSATmp* simplifyLdClsMethod(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* simplifySpillFrame(State& env, const IRInstruction* inst) {
-  auto const ctx = inst->src(1);
-  if (ctx->isA(TCls)) {
-    auto const src = ctx->inst();
-    if (src->op() == LdClsCctx) {
-      return gen(env, SpillFrame, *inst->extra<SpillFrame>(),
-                 inst->src(0), src->src(0));
-    }
-  }
-  return nullptr;
-}
-
 SSATmp* simplifyLdObjClass(State& env, const IRInstruction* inst) {
   auto const ty = inst->src(0)->type();
 
@@ -4064,7 +4052,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(ChrInt)
   X(JmpSwitchDest)
   X(CheckRange)
-  X(SpillFrame)
   X(GetMemoKey)
   X(GetMemoKeyScalar)
   X(StrictlyIntegerConv)

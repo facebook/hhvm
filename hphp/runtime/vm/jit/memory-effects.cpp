@@ -270,12 +270,6 @@ AliasClass actrec(SSATmp* base, IRSPRelOffset offset) {
   };
 }
 
-// Return an AliasClass representing just the context field of an ActRec at base
-// + offset.
-AliasClass actrec_ctx(SSATmp* base, IRSPRelOffset offset) {
-  return AStack { base, offset + int32_t{kActRecCtxCellOff}, 1 };
-}
-
 InlineExitEffects inline_exit_effects(SSATmp* fp) {
   fp = canonical(fp);
   auto fpInst = fp->inst();
@@ -709,6 +703,11 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
    * removing that set.
    */
   case DefInlineFP: {
+    /*
+     * Notice that the stack positions and frame locals described here are
+     * exactly the set of alias locations that are about to be overlapping
+     * inside the inlined frame.
+     */
     auto const func = inst.extra<DefInlineFP>()->target;
     AliasClass stack = func->numLocals()
       ? AStack{inst.dst(), FPRelOffset{-1}, func->numLocals()}
@@ -716,12 +715,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     AliasClass frame = func->numLocals()
       ? AFrame{inst.dst(), AliasIdSet::IdRange(0, func->numLocals())}
       : AEmpty;
-    /*
-     * Notice that the stack positions and frame locals described here are
-     * exactly the set of alias locations that are about to be overlapping
-     * inside the inlined frame.
-     */
-    return InlineEnterEffects{ stack, frame, inline_fp_frame(&inst) };
+    AliasClass actrec = AStack {
+      inst.src(0),
+      inst.extra<DefInlineFP>()->spOffset + int32_t{kNumActRecCells} - 1,
+      int32_t{kNumActRecCells}
+    };
+    return InlineEnterEffects{ stack, frame, actrec };
   }
 
   /*
@@ -1570,10 +1569,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case SpillFrame:
     {
       auto const spOffset = inst.extra<SpillFrame>()->spOffset;
-      return PureSpillFrame {
-        actrec(inst.src(0), spOffset),
-        actrec_ctx(inst.src(0), spOffset)
-      };
+      return PureSpillFrame { actrec(inst.src(0), spOffset) };
     }
 
   case CheckStk:
@@ -2211,8 +2207,7 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
     },
     [&] (PureLoad x)         { check(x.src); },
     [&] (PureStore x)        { check(x.dst); },
-    [&] (PureSpillFrame x)   { check(x.stk); check(x.ctx);
-                               always_assert(x.ctx <= x.stk); },
+    [&] (PureSpillFrame x)   { check(x.stk); },
     [&] (ExitEffects x)      { check(x.live); check(x.kills); },
     [&] (IrrelevantEffects)  {},
     [&] (UnknownEffects)     {},
@@ -2310,8 +2305,7 @@ MemEffects canonicalize(MemEffects me) {
     },
     [&] (PureSpillFrame x) -> R {
       return PureSpillFrame {
-        canonicalize(x.stk),
-        canonicalize(x.ctx)
+        canonicalize(x.stk)
       };
     },
     [&] (ExitEffects x) -> R {
@@ -2385,9 +2379,8 @@ std::string show(MemEffects effects) {
       );
     },
     [&] (PureSpillFrame x) {
-      return sformat("stFrame({} ; {})",
-        show(x.stk),
-        show(x.ctx)
+      return sformat("stFrame({})",
+        show(x.stk)
       );
     },
     [&] (PureLoad x)        { return sformat("ld({})", show(x.src)); },
@@ -2396,16 +2389,6 @@ std::string show(MemEffects effects) {
     [&] (IrrelevantEffects) { return "IrrelevantEffects"; },
     [&] (UnknownEffects)    { return "UnknownEffects"; }
   );
-}
-
-//////////////////////////////////////////////////////////////////////
-
-AliasClass inline_fp_frame(const IRInstruction* inst) {
-  return AStack {
-    inst->src(0),
-    inst->extra<DefInlineFP>()->spOffset + int32_t{kNumActRecCells} - 1,
-    int32_t{kNumActRecCells}
-  };
 }
 
 //////////////////////////////////////////////////////////////////////

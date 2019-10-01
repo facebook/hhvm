@@ -737,7 +737,6 @@ struct DefInlineFPData : IRExtraData {
   }
 
   const Func* target;
-  SSATmp* ctx;  // Ctx, Cls or Nullptr.
   Offset callBCOff;
   FPInvOffset retSPOff;
   IRSPRelOffset spOffset; // offset from caller SP to bottom of callee's ActRec

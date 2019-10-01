@@ -54,6 +54,7 @@ void cgDefInlineFP(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<DefInlineFP>();
   auto const callerSP = srcLoc(env, inst, 0).reg();
   auto const callerFP = srcLoc(env, inst, 1).reg();
+  auto const ctx = srcLoc(env, inst, 2).reg();
   auto& v = vmain(env);
 
   auto const ar = callerSP[cellsToBytes(extra->spOffset.offset)];
@@ -64,15 +65,35 @@ void cgDefInlineFP(IRLS& env, const IRInstruction* inst) {
                 ar + AROFF(m_savedRip));
   emitImmStoreq(v, uintptr_t(extra->target), ar + AROFF(m_func));
   v << storeli{extra->callBCOff, ar + AROFF(m_callOff)};
-  if (extra->target->attrs() & AttrMayUseVV) {
-    v << storeqi{0, ar + AROFF(m_invName)};
-  }
+
   if (extra->asyncEagerReturn) {
     v << orlim{
       static_cast<int32_t>(ActRec::Flags::AsyncEagerRet),
       ar + AROFF(m_numArgsAndFlags),
       v.makeReg()
     };
+  }
+
+  // Set m_this/m_cls.
+  auto const ctxTmp = inst->src(2);
+  assertx(ctxTmp->isA(TCls) || ctxTmp->isA(TCtx) || ctxTmp->isA(TNullptr));
+  if (ctxTmp->hasConstVal(TCls)) {
+    auto const ctxVal = uintptr_t(ctxTmp->clsVal()) | ActRec::kHasClassBit;
+    emitImmStoreq(v, ctxVal, ar + AROFF(m_thisUnsafe));
+  } else if (ctxTmp->isA(TCls)) {
+    // Store the Class* as a Cctx.
+    auto const cctx = v.makeReg();
+    v << orqi{ActRec::kHasClassBit, ctx, cctx, v.makeReg()};
+    v << store{cctx, ar + AROFF(m_thisUnsafe)};
+  } else if (ctxTmp->isA(TCtx)) {
+    v << store{ctx, ar + AROFF(m_thisUnsafe)};
+  } else if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    // No $this or class; this happens in FCallFunc*.
+    emitImmStoreq(v, ActRec::kTrashedThisSlot, ar + AROFF(m_thisUnsafe));
+  }
+
+  if (extra->target->attrs() & AttrMayUseVV) {
+    v << storeqi{0, ar + AROFF(m_varEnv)};
   }
 
   v << pushframe{};

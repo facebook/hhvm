@@ -106,16 +106,13 @@ struct PureStore    { AliasClass dst; SSATmp* value; SSATmp* dep; };
  * pure stores.  They store to a range of stack slots, and don't store a PHP
  * value, so they get their own branch of the union.
  *
- * The `stk' class is the entire stack range the instruction stores to, and the
- * `ctx' class is a subclass of `stk' that is the stack slot where it'll store
- * the context for the pre-live ActRec.
+ * The `stk' class is the entire stack range the instruction stores to.
  *
  * The `stk' range should be interpreted as an exact AliasClass, not an upper
  * bound: it is guaranteed to be kNumActRecCells in size---no bigger than the
  * actual range of stack slots a SpillFrame instruction affects.
  */
-struct PureSpillFrame { AliasClass stk;
-                        AliasClass ctx; };
+struct PureSpillFrame { AliasClass stk; };
 
 /*
  * Calls are somewhat special enough that they get a top-level effect.
@@ -241,19 +238,6 @@ AliasClass pointee(const SSATmp*);
  * Produces a string about some MemEffects for debug-printing.
  */
 std::string show(MemEffects);
-
-//////////////////////////////////////////////////////////////////////
-
-/*
- * Get the frame from a DefInlineFP.
- *
- * Returns: an (uncanonicalized, precise) AliasClass containing the stack slots
- * corresponding to the ActRec that is being converted from a pre-live to a
- * live ActRec by this instruction.
- *
- * Pre: inst->is(DefInlineFP)
- */
-AliasClass inline_fp_frame(const IRInstruction* inst);
 
 //////////////////////////////////////////////////////////////////////
 

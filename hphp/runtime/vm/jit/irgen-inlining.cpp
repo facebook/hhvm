@@ -270,7 +270,7 @@ void beginInlining(IRGS& env,
   IRSPRelOffset calleeAROff = spOffBCFromIRSP(env) + fca.numInputs();
 
   auto const arInfo = ActRecInfo { calleeAROff, fca.numArgs };
-  gen(env, SpillFrame, arInfo, sp(env), ctx);
+  gen(env, SpillFrame, arInfo, sp(env));
 
   auto const generics = [&]() -> SSATmp* {
     if (!fca.hasGenerics()) return nullptr;
@@ -301,8 +301,6 @@ void beginInlining(IRGS& env,
   DefInlineFPData data;
   data.target        = target;
   data.callBCOff     = callBcOffset;
-  data.ctx           = (target->isClosureBody() || !target->cls())
-                         ? nullptr : ctx;
   data.retSPOff      = offsetFromFP(env, calleeAROff) - kNumActRecCells;
   data.spOffset      = calleeAROff;
   data.numNonDefault = fca.numArgs;
@@ -321,7 +319,7 @@ void beginInlining(IRGS& env,
   env.bcState = startSk;
   updateMarker(env);
 
-  auto const calleeFP = gen(env, DefInlineFP, data, sp(env), fp(env));
+  auto const calleeFP = gen(env, DefInlineFP, data, sp(env), fp(env), ctx);
 
   for (unsigned i = 0; i < fca.numArgs; ++i) {
     stLocRaw(env, i, calleeFP, params[i]);
@@ -342,12 +340,17 @@ void beginInlining(IRGS& env,
   emitGenericsMismatchCheck(env, callFlags);
   emitCalleeDynamicCallCheck(env, callFlags);
 
-  if (data.ctx && data.ctx->isA(TBottom)) return;
-  if (data.ctx && data.ctx->isA(TObj)) {
-    assertx(startSk.hasThis());
-  } else if (data.ctx && !data.ctx->type().maybe(TObj)) {
-    assertx(!startSk.hasThis());
-  } else if (target->cls()) {
+  auto const needsStaticnessGuard = [&] {
+    if (!target->cls()) return false;
+    if (target->isClosureBody()) return true;
+    if (ctx->isA(TBottom)) return false;
+
+    assertx(IMPLIES(ctx->isA(TObj), startSk.hasThis()));
+    assertx(IMPLIES(!ctx->type().maybe(TObj), !startSk.hasThis()));
+    return ctx->type().maybe(TObj) && !ctx->isA(TObj);
+  }();
+
+  if (needsStaticnessGuard) {
     env.bcState =
       SrcKey{startSk.func(), startSk.offset(), SrcKey::PrologueTag{}};
     updateMarker(env);

@@ -2050,33 +2050,31 @@ void pure_store(Env& env,
 
 void pure_spill_frame(Env& env,
                       RCState& state,
-                      PureSpillFrame psf,
-                      SSATmp* ctx,
-                      PreAdder add_node) {
+                      PureSpillFrame psf) {
   /*
    * First, the effects of PureStores on memory support.  A SpillFrame will
    * store over kNumActRecCells stack slots, and just like normal PureStores we
    * can drop any support bits for them without reducing their lower bounds.
    */
   drop_support_bits(env, state, env.ainfo.expand(psf.stk));
+}
 
-  /*
-   * Now the effects on the set being stored.  Pre-live frames are slightly
-   * different from other pure stores, because eventually they may become live
-   * frames even within our region (via DefInlineFP).  However, in the
-   * meantime, we need to treat the store of the context like a normal
-   * pure_store, because there are various IR instructions that can decref the
-   * context on a pre-live ActRec through memory (FIXME: this may no longer
-   * be the case).
-   *
-   * If the frame becomes live via DefInlineFP, we don't need to treat it as
-   * memory support for this set anymore, for the same reason that LdCtx
-   * doesn't need that.  The only way that reference can be DecRef'd in a
-   * semantically correct program is in a return sequence, and if it's done
-   * inside this region, we will see the relevant DecRef instructions and
-   * handle that.
-   */
-  create_store_support(env, state, psf.ctx, ctx, add_node);
+void inline_enter_effects(Env& env,
+                          RCState& state,
+                          InlineEnterEffects& ief,
+                          PreAdder add_node) {
+  // We're converting a pre-live actrec to a live actrec, which effectively
+  // changes some stack AliasClasses to not exist anymore.
+  observe_unbalanced_decrefs(env, state, add_node);
+
+  // Kill locations that are going to be overwritten by the ActRec.
+  drop_support_bits(env, state, env.ainfo.expand(ief.actrec));
+
+  // DefInlineFP may store a $this to the ActRec. We don't need to treat it
+  // as a memory support, as LdCtx doesn't need that. The only way that
+  // reference can be DecRef'd in a semantically correct program is in a return
+  // sequence, and if it's done inside this region, we will see the relevant
+  // DecRef instructions and handle that.
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -2090,7 +2088,11 @@ void analyze_mem_effects(Env& env,
   match<void>(
     effects,
     [&] (IrrelevantEffects) {},
-    [&] (InlineEnterEffects) {},
+
+    [&] (InlineEnterEffects x) {
+      inline_enter_effects(env, state, x, add_node);
+    },
+
     [&] (InlineExitEffects) {},
 
     [&] (GeneralEffects x)  {
@@ -2140,7 +2142,7 @@ void analyze_mem_effects(Env& env,
     [&] (PureLoad x)    { pure_load(env, state, x.src, inst.dst(), add_node); },
 
     [&] (PureSpillFrame x) {
-      pure_spill_frame(env, state, x, inst.src(1), add_node);
+      pure_spill_frame(env, state, x);
     }
   );
 }
@@ -2258,15 +2260,6 @@ void rc_analyze_inst(Env& env,
       if (old_lb <= 1) analyze_mem_effects(env, inst, state, add_node);
     }
     return;
-  case DefInlineFP:
-    // We're converting a pre-live actrec to a live actrec, which effectively
-    // changes some stack AliasClasses to not exist anymore.  See comments in
-    // pure_spill_frame for an explanation of why we don't need any support
-    // bits on this now.
-    observe_unbalanced_decrefs(env, state, add_node);
-    drop_support_bits(env, state,
-      env.ainfo.expand(canonicalize(inline_fp_frame(&inst))));
-    break;
   default:
     if (!irrelevant_inst(inst)) {
       observe_unbalanced_decrefs(env, state, add_node);

@@ -1699,15 +1699,8 @@ To string conversions:
 
 | SpillFrame<offset,numArgs>,
 |   ND,
-|   S(StkPtr) S(Ctx,Cls,Nullptr),
+|   S(StkPtr),
 |   NF
-
-  Operands:
-
-     S0 - caller stack pointer
-     S1 - callee Func or nullptr
-     S2 - object (for FCallObjMethod*), class (for FCallClsMethod*), context
-          (for FCallClsMethod*), or nullptr (for FCallFunc*).
 
   Defines the fields for an activation record and writes them to the stack
   pointed to by S0, at `offset'.
@@ -1718,9 +1711,10 @@ To string conversions:
   the SP. It has no effect other than to hint to optimization passes that at the
   start of the inlined function its stack is dead.
 
-| DefInlineFP<func,callBCOff,retSPOff>, D(FramePtr),
-|                                       S(StkPtr) S(FramePtr),
-|                                       NF
+| DefInlineFP<func,callBCOff,retSPOff>,
+|   D(FramePtr),
+|   S(StkPtr) S(FramePtr) S(Ctx,Cls,Nullptr),
+|   NF
 
   Defines a frame pointer for an inlined function.
 
@@ -1736,6 +1730,8 @@ To string conversions:
 
   The caller frame pointer is passed as S1. This is used to keep track of the
   call chain of inlined functions for simplification and dead code elimination.
+
+  S2 is the context (nullptr, $this or static::class).
 
 | InlineReturn<callerFPOff>, ND, S(FramePtr), NF
 
@@ -1763,15 +1759,15 @@ To string conversions:
 
 | CallUnpack<spOffset,numParams,callOff,destroyLocals>,
 |   DCall,
-|   S(StkPtr) S(FramePtr) S(Func),
-|   NF
+|   S(StkPtr) S(FramePtr) S(Func) S(Ctx,Nullptr),
+|   CRc
 
   Invoke function S2 corresponding to the current FPI with numParams arguments,
   the last of which is an array of the remaining args. Used for FCall with
   unpack. S0+spOffset points to the stack resulting after the ActRec for the
-  function and numParams arguments have been pushed. CallUnpack pops the array
-  off the stack, pushes the elements of the array as arguments, and invokes the
-  function in the ActRec.
+  function and numParams arguments have been pushed. S3 is the context (nullptr,
+  $this or static::class). CallUnpack pops the array off the stack, pushes the
+  elements of the array as arguments, and invokes the function in the ActRec.
 
 | SyncReturnBC<spOffset,callBCOffset>, ND, S(StkPtr) S(FramePtr), NF
 
@@ -1780,12 +1776,12 @@ To string conversions:
 
 | Call<offset,numParams,callOff,destroyLocals>,
 |   DCall,
-|   S(StkPtr) S(FramePtr) S(Func),
-|   NF
+|   S(StkPtr) S(FramePtr) S(Func) S(Ctx,Nullptr),
+|   CRc
 
   Transfer control to a callee S2, based on the pre-live activation record and
   set of args on the stack pointed to by S0 at `offset'. S1 is the current
-  caller frame pointer.
+  caller frame pointer. S3 is the context (nullptr, $this or static::class).
 
 | NativeImpl<func>, ND, S(FramePtr) S(StkPtr), NF
 

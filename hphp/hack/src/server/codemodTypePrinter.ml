@@ -18,6 +18,16 @@ let print_tprim =
     | Tnoreturn -> "noreturn"
     | Tatom s -> ":@" ^ s)
 
+let strip_ns str =
+  let str' = Utils.strip_ns str in
+  (* If we had more than one '\\' patternm then we must keep the first '\\'
+  otherwise it will cause an error (we are detecting types from the root
+  namespace)*)
+  if String.contains str' '\\' then
+    str
+  else
+    str'
+
 let rec print_ty_exn ty =
   match snd ty with
   | Tprim p -> print_tprim p
@@ -63,7 +73,7 @@ let rec print_ty_exn ty =
   | Tabstract (AKnewtype (name, []), _) -> Utils.strip_ns name
   | Tabstract (AKnewtype (name, tyl), _) ->
     Utils.strip_ns name ^ "<" ^ print_tyl_exn tyl ^ ">"
-  | Tclass ((_, name), _, []) -> Utils.strip_ns name
+  | Tclass ((_, name), _, []) -> strip_ns name
   | Tclass ((_, name), _, tyl) ->
     Utils.strip_ns name ^ "<" ^ print_tyl_exn tyl ^ ">"
   | Tarraykind (AKvarray ty) -> Printf.sprintf "varray<%s>" (print_ty_exn ty)

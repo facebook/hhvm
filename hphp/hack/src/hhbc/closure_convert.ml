@@ -502,14 +502,13 @@ let make_closure_name env st name =
     name
 
 (* Get the user-provided closure name from the set of user attributes. This is
- * only allowed in systemlib and in transpiled javascript, otherwise we ignore the
- * attribute
+ * only allowed in systemlib otherwise we ignore the attribute.
  *
  * Returns the filtered list of attributes and the closure name
  *)
 let get_closure_name attrs =
   let is_closure_name attr = snd attr.ua_name = "__ClosureName" in
-  if Emit_env.is_systemlib () || Emit_env.is_js () then
+  if Emit_env.is_systemlib () then
     match List.find attrs is_closure_name with
     | Some { ua_params = [(_, String s)]; _ } ->
       (List.filter attrs (Fn.compose not is_closure_name), Some s)

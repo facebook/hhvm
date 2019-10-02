@@ -400,9 +400,6 @@ let convert_to_tast ast =
 let do_compile filename compiler_options popt fail_or_ast debug_time =
   let t = Unix.gettimeofday () in
   let t = add_to_time_ref debug_time.parsing_t t in
-  let is_js_file =
-    Filename.check_suffix (Relative_path.to_absolute filename) "js"
-  in
   let hhas_prog =
     match fail_or_ast with
     | `ParseFailure (e, pos) ->
@@ -421,7 +418,6 @@ let do_compile filename compiler_options popt fail_or_ast debug_time =
         | Ok tast ->
           Emit_program.from_ast
             ~is_hh_file
-            ~is_js_file
             ~is_evaled:(is_file_path_for_evaled_code filename)
             ~for_debugger_eval:compiler_options.for_debugger_eval
             ~popt

@@ -40,19 +40,13 @@ let empty_global_state =
     global_lambda_rx_of_scope = SMap.empty;
   }
 
-let is_js_file_ = ref false
-
 let is_systemlib_ = ref false
 
 let global_state_ = ref empty_global_state
 
-let set_is_js_file v = is_js_file_ := v
-
 let set_is_systemlib v = is_systemlib_ := v
 
 let is_systemlib () = !is_systemlib_
-
-let is_js () = !is_js_file_
 
 let get_explicit_use_set () = !global_state_.global_explicit_use_set
 

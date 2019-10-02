@@ -17,7 +17,7 @@
 #include "hphp/util/address-range.h"
 
 #include "hphp/util/assertions.h"
-#include <atomic>
+#include <cinttypes>
 #include <folly/portability/SysMman.h>
 
 #if USE_JEMALLOC_EXTENT_HOOKS
@@ -33,15 +33,15 @@ void RangeState::reserve() {
     char msg[128];
     if (ret == MAP_FAILED) {
       std::snprintf(msg, sizeof(msg),
-                    "failed to reserve address range 0x%p to 0x%" PRIuPTR
-                    ", errno = %d",
-                    base, high(), errno);
+                    "failed to reserve address range [0x%" PRIxPTR
+                    ", 0x%" PRIxPTR "), errno = %d",
+                    low(), high(), errno);
     } else {
       munmap(ret, capacity());
       std::snprintf(msg, sizeof(msg),
-                    "failed to reserve address range 0x%p to 0x%" PRIuPTR
-                    ", got 0x%p instead",
-                    base, high(), ret);
+                    "failed to reserve address range [0x%" PRIxPTR
+                    ", 0x%" PRIxPTR "), got 0x%" PRIxPTR " instead",
+                    low(), high(), reinterpret_cast<uintptr_t>(ret));
     }
     throw std::runtime_error{msg};
   }

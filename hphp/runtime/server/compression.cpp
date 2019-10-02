@@ -116,6 +116,23 @@ struct StaticInitTrigger {
 const StaticInitTrigger trigger;
 } // anonymous namespace
 
+std::vector<CompressionEncodingParam> parseParams(
+    const std::string& allParams) {
+  std::vector<CompressionEncodingParam> ret;
+  std::vector<folly::StringPiece> allParamsSplit;
+  folly::split(';', allParams, allParamsSplit);
+
+  for (auto& paramValue : allParamsSplit) {
+    CompressionEncodingParam p;
+    auto paramName = paramValue.split_step('=');
+    p.param = std::string(folly::trimWhitespace(paramName));
+    p.value = std::string(folly::trimWhitespace(paramValue));
+    ret.emplace_back(std::move(p));
+  }
+
+  return ret;
+}
+
 std::vector<CompressionEncodingPair> parseEncoding(folly::StringPiece header) {
   // Handle leading and trailing quotes
   std::vector<CompressionEncodingPair> encodingHeader;

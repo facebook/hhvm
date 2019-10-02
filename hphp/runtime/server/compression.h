@@ -43,6 +43,20 @@ struct CompressionEncodingPair {
 std::vector<CompressionEncodingPair> parseEncoding(folly::StringPiece header);
 
 /*
+ * Struct holding a param and it's value w/ string (e.g. param="q", value="1.0")
+ */
+ struct CompressionEncodingParam {
+   std::string param;
+   std::string value;
+ };
+
+/*
+ * Function to parse params into a vector of CompressionEncodingParam.
+ * Consumer should do determine type based on their encoding param specs.
+ */
+std::vector<CompressionEncodingParam> parseParams(const std::string& allParams);
+
+/*
  * Test whether a request indicates it accepts a certain encoding.
  */
 bool acceptsEncoding(ITransportHeaders *headers, const char *encoding);

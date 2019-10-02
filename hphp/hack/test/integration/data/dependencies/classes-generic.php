@@ -26,6 +26,11 @@ class GenericDerived<Tfirst> extends GenericBase<Tfirst, Mode> {
   protected int $property;
 }
 
+class First {}
+class Second {}
+
+class NonGenericDerived extends GenericBase<First, Second> {}
+
 class Regular {
   public function generic_method<T>(T $arg): void {}
 }
@@ -42,6 +47,8 @@ function with_properties<T>(GenericDerived<T> $arg) : Mode {
 
 function with_generic_type<T>(GenericType<T> $arg): void {
 }
+
+function with_non_generic_type(NonGenericDerived $_): void {}
 
 interface GenericInterface<Tfirst, Tsecond> {}
 

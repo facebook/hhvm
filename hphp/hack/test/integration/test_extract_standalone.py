@@ -106,6 +106,7 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
             "\\does_not_use_class_methods",
             "\\with_requiring_interface",
             "\\with_generic_interface",
+            "\\with_non_generic_type",
         ]
 
         for path in paths:

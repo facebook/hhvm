@@ -885,21 +885,23 @@ and add_dep deps ?cls:(this_cls = None) ?(init_const = false) ty : unit =
         let dep = Typing_deps.Dep.Class name in
         do_add_dep deps dep;
 
-        (* If a constant has a dependency on a non-built-in class, this class is an enum and
-          the constant's value (or a part of it) is one of this enum's values. This means
-          we need to add a dependency on an enum value to generate the constant's initializer. *)
+        (* If we have a constant of a generic type, it can only be an
+           array type, e.g., vec<A>, for which don't need values of A
+           to generate an initializer. *)
+        List.iter tyl ~f:(add_dep deps ~cls:this_cls ~init_const:false);
+
+        (* If a constant has a dependency on a non-builtin class, this
+           class is an enum and the constant's value (or a part of it)
+           is one of this enum's values. This means we need to add a
+           dependency on an enum value to generate the constant's
+           initializer. *)
         if
           init_const
           && (not (is_builtin_dep dep))
           && Decl_provider.get_typedef name = None
-        then (
+        then
           let enum_value = get_enum_value name in
-          do_add_dep deps (Typing_deps.Dep.Const (name, enum_value));
-
-          (* Exception to the comment above: type parameters. If we have a constant of type vec<A>,
-            we don't need values of A to generate an initializer for the constant. *)
-          List.iter tyl ~f:(add_dep deps ~cls:this_cls ~init_const:false)
-        )
+          do_add_dep deps (Typing_deps.Dep.Const (name, enum_value))
 
       method! on_taccess _ _ ((_, cls_type), tconsts) =
         let class_name =

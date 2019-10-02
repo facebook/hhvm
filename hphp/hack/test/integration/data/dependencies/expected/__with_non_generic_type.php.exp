@@ -1,0 +1,17 @@
+<?hh
+class First {
+
+}
+class NonGenericDerived extends \GenericBase<\First, \Second> {
+
+}
+class Second {
+
+}
+function with_non_generic_type(NonGenericDerived $_): void {}
+class GenericBase<Tfirst, Tsecond> {
+
+}
+function extract_standalone_make_default(): nothing {
+  throw new Exception();
+}

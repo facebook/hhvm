@@ -440,11 +440,11 @@ let redo_type_decl
   in
   let (changed, to_recheck) =
     if shallow_decl_enabled () then (
-      let (changed', mro_invalidated, to_recheck') =
+      let AffectedDeps.{ changed = changed'; mro_invalidated; needs_recheck } =
         Shallow_decl_compare.compute_class_fanout get_classes fnl
       in
       let changed = DepSet.union changed changed' in
-      let to_recheck = DepSet.union to_recheck to_recheck' in
+      let to_recheck = DepSet.union to_recheck needs_recheck in
       let mro_invalidated =
         mro_invalidated
         |> Typing_deps.get_files

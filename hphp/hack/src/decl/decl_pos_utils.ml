@@ -9,6 +9,7 @@
 
 open Core_kernel
 open Decl_defs
+open Shallow_decl_defs
 open Typing_defs
 module ShapeMap = Nast.ShapeMap
 
@@ -329,6 +330,99 @@ struct
       td_constraint = ty_opt tdef.td_constraint;
       td_type = ty tdef.td_type;
       td_decl_errors = None;
+    }
+
+  and shallow_class sc =
+    {
+      sc_mode = sc.sc_mode;
+      sc_final = sc.sc_final;
+      sc_is_xhp = sc.sc_is_xhp;
+      sc_kind = sc.sc_kind;
+      sc_name = string_id sc.sc_name;
+      sc_tparams = List.map sc.sc_tparams type_param;
+      sc_where_constraints = List.map sc.sc_where_constraints where_constraint;
+      sc_extends = List.map sc.sc_extends ty;
+      sc_uses = List.map sc.sc_uses ty;
+      sc_method_redeclarations = sc.sc_method_redeclarations;
+      sc_xhp_attr_uses = List.map sc.sc_xhp_attr_uses ty;
+      sc_req_extends = List.map sc.sc_req_extends ty;
+      sc_req_implements = List.map sc.sc_req_implements ty;
+      sc_implements = List.map sc.sc_implements ty;
+      sc_consts = List.map sc.sc_consts shallow_class_const;
+      sc_typeconsts = List.map sc.sc_typeconsts shallow_typeconst;
+      sc_pu_enums = List.map sc.sc_pu_enums shallow_pu_enum;
+      sc_props = List.map sc.sc_props shallow_prop;
+      sc_sprops = List.map sc.sc_sprops shallow_prop;
+      sc_constructor = Option.map sc.sc_constructor shallow_method;
+      sc_static_methods = List.map sc.sc_static_methods shallow_method;
+      sc_methods = List.map sc.sc_methods shallow_method;
+      sc_user_attributes = List.map sc.sc_user_attributes user_attribute;
+      sc_enum_type = Option.map sc.sc_enum_type enum_type;
+      sc_decl_errors = Errors.empty;
+    }
+
+  and shallow_class_const scc =
+    {
+      scc_abstract = scc.scc_abstract;
+      scc_expr = Option.map scc.scc_expr (pos_mapper#on_expr ());
+      scc_name = string_id scc.scc_name;
+      scc_type = ty scc.scc_type;
+      scc_visibility = scc.scc_visibility;
+    }
+
+  and shallow_typeconst stc =
+    {
+      stc_abstract = typeconst_abstract_kind stc.stc_abstract;
+      stc_constraint = Option.map stc.stc_constraint ty;
+      stc_name = string_id stc.stc_name;
+      stc_type = Option.map stc.stc_type ty;
+      stc_enforceable = (pos (fst stc.stc_enforceable), snd stc.stc_enforceable);
+      stc_visibility = stc.stc_visibility;
+      stc_reifiable = Option.map stc.stc_reifiable pos;
+    }
+
+  and shallow_pu_member spum =
+    {
+      spum_atom = string_id spum.spum_atom;
+      spum_types = List.map spum.spum_types (fun (s, t) -> (string_id s, ty t));
+      spum_exprs = List.map spum.spum_exprs string_id;
+    }
+
+  and shallow_pu_enum spu =
+    {
+      spu_name = string_id spu.spu_name;
+      spu_is_final = spu.spu_is_final;
+      spu_case_types = List.map spu.spu_case_types string_id;
+      spu_case_values =
+        List.map spu.spu_case_values (fun (s, t) -> (string_id s, ty t));
+      spu_members = List.map spu.spu_members shallow_pu_member;
+    }
+
+  and shallow_prop sp =
+    {
+      sp_const = sp.sp_const;
+      sp_xhp_attr = sp.sp_xhp_attr;
+      sp_lateinit = sp.sp_lateinit;
+      sp_lsb = sp.sp_lsb;
+      sp_name = string_id sp.sp_name;
+      sp_needs_init = sp.sp_needs_init;
+      sp_type = Option.map sp.sp_type ty;
+      sp_abstract = sp.sp_abstract;
+      sp_visibility = sp.sp_visibility;
+      sp_fixme_codes = ISet.empty;
+    }
+
+  and shallow_method sm =
+    {
+      sm_abstract = sm.sm_abstract;
+      sm_final = sm.sm_final;
+      sm_memoizelsb = sm.sm_memoizelsb;
+      sm_name = string_id sm.sm_name;
+      sm_override = sm.sm_override;
+      sm_reactivity = sm.sm_reactivity;
+      sm_type = fun_type sm.sm_type;
+      sm_visibility = sm.sm_visibility;
+      sm_fixme_codes = ISet.empty;
     }
 end
 

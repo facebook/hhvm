@@ -7,7 +7,4 @@
  *
  *)
 
-val compute_class_fanout :
-  get_classes_in_file:(Relative_path.t -> SSet.t) ->
-  Relative_path.t list ->
-  AffectedDeps.t
+val log_class_diff : string -> ClassDiff.t -> unit

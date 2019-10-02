@@ -8,26 +8,27 @@
  *)
 
 open Core_kernel
+open ClassDiff
 open Reordered_argument_collections
 open Shallow_decl_defs
-open Typing_deps
 
-let is_changed
+let diff_class_in_changed_file
     (old_classes : shallow_class option SMap.t)
     (new_classes : shallow_class option SMap.t)
-    (class_name : string) : bool =
+    (class_name : string) : ClassDiff.t =
   let old_class_opt = SMap.find_unsafe old_classes class_name in
   let new_class_opt = SMap.find_unsafe new_classes class_name in
   match (old_class_opt, new_class_opt) with
-  | (Some old_class, Some new_class) -> old_class <> new_class
+  | (Some old_class, Some new_class) ->
+    Shallow_class_diff.diff_class old_class new_class
   | (Some _, None)
   | (None, Some _)
   | (None, None) ->
-    true
+    Major_change
 
-let find_changed_classes
+let compute_class_diffs
     ~(get_classes_in_file : Relative_path.t -> SSet.t)
-    (changed_files : Relative_path.t list) : string list =
+    (changed_files : Relative_path.t list) : (string * ClassDiff.t) list =
   let possibly_changed_classes =
     List.fold changed_files ~init:SSet.empty ~f:(fun classes filename ->
         SSet.union classes (get_classes_in_file filename))
@@ -37,29 +38,24 @@ let find_changed_classes
   in
   let new_classes = Shallow_classes_heap.get_batch possibly_changed_classes in
   SSet.fold possibly_changed_classes ~init:[] ~f:(fun cid acc ->
-      let changed = is_changed old_classes new_classes cid in
-      if not changed then
+      let diff = diff_class_in_changed_file old_classes new_classes cid in
+      Decl_compare_utils.log_class_diff cid diff;
+      if diff = Unchanged then
         acc
       else
-        cid :: acc)
+        (cid, diff) :: acc)
 
 let compute_class_fanout
     ~(get_classes_in_file : Relative_path.t -> SSet.t)
-    (changed_files : Relative_path.t list) : DepSet.t * DepSet.t * DepSet.t =
+    (changed_files : Relative_path.t list) : AffectedDeps.t =
   let file_count = List.length changed_files in
   Hh_logger.log "Detecting changes to classes in %d files:" file_count;
 
-  let changes = find_changed_classes ~get_classes_in_file changed_files in
+  let changes = compute_class_diffs ~get_classes_in_file changed_files in
   let change_count = List.length changes in
   if List.is_empty changes then
     Hh_logger.log "No class changes detected"
   else
     Hh_logger.log "Computing fanout from %d changed classes" change_count;
 
-  let changed_class_deps =
-    List.fold changes ~init:DepSet.empty ~f:(fun acc cid ->
-        DepSet.add acc (Dep.make (Dep.Class cid)))
-  in
-  let mro_invalidated = Typing_deps.add_extend_deps changed_class_deps in
-  let to_recheck = Typing_deps.add_typing_deps mro_invalidated in
-  (changed_class_deps, mro_invalidated, to_recheck)
+  Shallow_class_fanout.fanout_of_changes ~get_classes_in_file changes

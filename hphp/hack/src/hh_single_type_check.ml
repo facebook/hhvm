@@ -49,6 +49,7 @@ type mode =
   | Find_refs of int * int
   | Highlight_refs of int * int
   | Decl_compare
+  | Shallow_class_diff
   | Linearization
 
 type options = {
@@ -149,6 +150,15 @@ let print_error_list format errors max_errors =
 
 let print_errors format (errors : Errors.t) max_errors : unit =
   print_error_list format (Errors.get_error_list errors) max_errors
+
+let print_errors_if_present (errors : Errors.error list) =
+  if not (List.is_empty errors) then (
+    Printf.printf "Errors:\n";
+    List.iter errors (fun err ->
+        List.iter (Errors.to_list err) (fun (pos, msg) ->
+            Format.printf "  %a %s" Pos.pp pos msg;
+            Format.print_newline ()))
+  )
 
 let parse_options () =
   let fn_ref = ref [] in
@@ -325,6 +335,10 @@ let parse_options () =
         Arg.Unit (set_mode Decl_compare),
         " Test comparison functions used in incremental mode on declarations"
         ^ " in provided file" );
+      ( "--shallow-class-diff",
+        Arg.Unit (set_mode Shallow_class_diff),
+        "Test shallow class comparison used in incremental mode on shallow class declarations"
+      );
       ( "--safe_array",
         Arg.Unit (set_bool safe_array),
         " Enforce array subtyping relationships so that array<T> and array<Tk, Tv> are each subtypes of array but not vice-versa."
@@ -651,68 +665,97 @@ let create_nasts files_info =
   in
   Relative_path.Map.mapi ~f:build_nast files_info
 
+let parse_and_name popt files_contents =
+  let parsed_files =
+    Relative_path.Map.mapi files_contents ~f:(fun fn contents ->
+        Errors.run_in_context fn Errors.Parsing (fun () ->
+            let parsed_file =
+              Full_fidelity_ast.defensive_program popt fn contents
+            in
+            let ast =
+              let { Parser_return.ast; _ } = parsed_file in
+              if ParserOptions.deregister_php_stdlib popt then
+                Nast.deregister_ignored_attributes ast
+              else
+                ast
+            in
+            Ast_provider.provide_ast_hint fn ast Ast_provider.Full;
+            { parsed_file with Parser_return.ast }))
+  in
+  let files_info =
+    Relative_path.Map.mapi
+      ~f:
+        begin
+          fun _fn parsed_file ->
+          let { Parser_return.file_mode; comments; ast; _ } = parsed_file in
+          (* If the feature is turned on, deregister functions with attribute
+             __PHPStdLib. This does it for all functions, not just hhi files *)
+          let (funs, classes, record_defs, typedefs, consts) =
+            Nast.get_defs ast
+          in
+          {
+            FileInfo.file_mode;
+            funs;
+            classes;
+            record_defs;
+            typedefs;
+            consts;
+            comments = Some comments;
+            hash = None;
+          }
+        end
+      parsed_files
+  in
+  Relative_path.Map.iter files_info (fun fn fileinfo ->
+      Errors.run_in_context fn Errors.Naming (fun () ->
+          let { FileInfo.funs; classes; record_defs; typedefs; consts; _ } =
+            fileinfo
+          in
+          NamingGlobal.make_env ~funs ~classes ~record_defs ~typedefs ~consts));
+  (parsed_files, files_info)
+
 let parse_name_and_decl popt files_contents =
   Errors.do_ (fun () ->
-      let parsed_files =
-        Relative_path.Map.mapi files_contents ~f:(fun fn contents ->
-            Errors.run_in_context fn Errors.Parsing (fun () ->
-                let parsed_file =
-                  Full_fidelity_ast.defensive_program popt fn contents
-                in
-                let ast =
-                  let { Parser_return.ast; _ } = parsed_file in
-                  if ParserOptions.deregister_php_stdlib popt then
-                    Nast.deregister_ignored_attributes ast
-                  else
-                    ast
-                in
-                Ast_provider.provide_ast_hint fn ast Ast_provider.Full;
-                { parsed_file with Parser_return.ast }))
-      in
-      let files_info =
-        Relative_path.Map.mapi
-          ~f:
-            begin
-              fun _fn parsed_file ->
-              let { Parser_return.file_mode; comments; ast; _ } =
-                parsed_file
-              in
-              (* If the feature is turned on, deregister functions with attribute
-        __PHPStdLib. This does it for all functions, not just hhi files *)
-              let (funs, classes, record_defs, typedefs, consts) =
-                Nast.get_defs ast
-              in
-              {
-                FileInfo.file_mode;
-                funs;
-                classes;
-                record_defs;
-                typedefs;
-                consts;
-                comments = Some comments;
-                hash = None;
-              }
-            end
-          parsed_files
-      in
-      Relative_path.Map.iter files_info (fun fn fileinfo ->
-          Errors.run_in_context fn Errors.Naming (fun () ->
-              let { FileInfo.funs; classes; record_defs; typedefs; consts; _ }
-                  =
-                fileinfo
-              in
-              NamingGlobal.make_env
-                ~funs
-                ~classes
-                ~record_defs
-                ~typedefs
-                ~consts));
-
+      let (parsed_files, files_info) = parse_and_name popt files_contents in
       Relative_path.Map.iter parsed_files (fun fn parsed_file ->
           Errors.run_in_context fn Errors.Decl (fun () ->
               Decl.name_and_declare_types_program parsed_file.Parser_return.ast));
 
       files_info)
+
+let parse_name_and_shallow_decl popt filename file_contents :
+    Shallow_decl_defs.shallow_class SMap.t =
+  Errors.ignore_ (fun () ->
+      let files_contents =
+        Relative_path.Map.singleton filename file_contents
+      in
+      let (parsed_files, _) = parse_and_name popt files_contents in
+      let parsed_file = Relative_path.Map.values parsed_files |> List.hd_exn in
+      parsed_file.Parser_return.ast
+      |> List.filter_map ~f:(function
+             | Aast.Class c -> Some (Shallow_decl.class_ c)
+             | _ -> None)
+      |> List.fold ~init:SMap.empty ~f:(fun acc c ->
+             SMap.add (snd c.Shallow_decl_defs.sc_name) c acc))
+
+let test_shallow_class_diff popt filename =
+  let filename_after = Relative_path.to_absolute filename ^ ".after" in
+  let contents1 = Sys_utils.cat (Relative_path.to_absolute filename) in
+  let contents2 = Sys_utils.cat filename_after in
+  let decls1 = parse_name_and_shallow_decl popt filename contents1 in
+  let decls2 = parse_name_and_shallow_decl popt filename contents2 in
+  let decls =
+    SMap.merge (fun _ a b -> Some (a, b)) decls1 decls2 |> SMap.bindings
+  in
+  let diffs =
+    List.map decls (fun (cid, old_and_new) ->
+        ( Utils.strip_ns cid,
+          match old_and_new with
+          | (Some c1, Some c2) -> Shallow_class_diff.diff_class c1 c2
+          | _ -> ClassDiff.Major_change ))
+  in
+  List.iter diffs (fun (cid, diff) ->
+      Format.printf "%s: %a@." cid ClassDiff.pp diff)
 
 let add_newline contents =
   (* this is used for incremental mode to change all the positions, so we
@@ -1214,14 +1257,7 @@ let handle_mode
     let (errors, tasts) =
       compute_tasts_expand_types tcopt files_info files_contents
     in
-    (match parse_errors @ Errors.get_error_list errors with
-    | [] -> ()
-    | errors ->
-      Printf.printf "Errors:\n";
-      List.iter errors (fun err ->
-          List.iter (Errors.to_list err) (fun (pos, msg) ->
-              Format.printf "  %a %s" Pos.pp pos msg;
-              Format.print_newline ())));
+    print_errors_if_present (parse_errors @ Errors.get_error_list errors);
     print_tasts tasts tcopt
   | Check_tast ->
     iter_over_files (fun filename ->
@@ -1353,6 +1389,10 @@ let handle_mode
   | Decl_compare ->
     let filename = expect_single_file () in
     test_decl_compare filename popt builtins files_contents files_info
+  | Shallow_class_diff ->
+    print_errors_if_present parse_errors;
+    let filename = expect_single_file () in
+    test_shallow_class_diff popt filename
   | Linearization ->
     if parse_errors <> [] then (
       print_error error_format (List.hd_exn parse_errors);

@@ -7,7 +7,7 @@
  *
  *)
 
-val compute_class_fanout :
+val fanout_of_changes :
   get_classes_in_file:(Relative_path.t -> SSet.t) ->
-  Relative_path.t list ->
+  (string * ClassDiff.t) list ->
   AffectedDeps.t

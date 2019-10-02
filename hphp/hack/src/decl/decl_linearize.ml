@@ -14,6 +14,10 @@ open Typing_defs
 
 (* Module calculating the Member Resolution Order of a class *)
 
+(* NB: For incremental typechecking to be correct, every bit of information from
+   shallow classes used in this module must be accounted for in the function
+   Shallow_class_diff.mro_unchanged! *)
+
 type linearization_kind =
   | Member_resolution
   | Ancestor_types

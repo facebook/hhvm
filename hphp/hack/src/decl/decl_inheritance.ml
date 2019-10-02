@@ -389,20 +389,7 @@ let make_pu_enum_cache lin =
            end
 
 let constructor_elt child_class_name (mro, cls, subst) =
-  let consistent =
-    if cls.sc_final then
-      FinalClass
-    else
-      let consistent_attr_present =
-        Attributes.mem
-          SN.UserAttributes.uaConsistentConstruct
-          cls.sc_user_attributes
-      in
-      if consistent_attr_present then
-        ConsistentConstruct
-      else
-        Inconsistent
-  in
+  let consistent = Decl_utils.consistent_construct_kind cls in
   let elt =
     Option.map
       cls.sc_constructor

@@ -7,7 +7,6 @@
  *
  *)
 
-val compute_class_fanout :
-  get_classes_in_file:(Relative_path.t -> SSet.t) ->
-  Relative_path.t list ->
-  AffectedDeps.t
+open Shallow_decl_defs
+
+val diff_class : shallow_class -> shallow_class -> ClassDiff.t

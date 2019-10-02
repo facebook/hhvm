@@ -14,5 +14,5 @@ File "closure.php", line 25, characters 17-18:
 Invalid argument (Typing[4110])
 File "closure.php", line 18, characters 24-29:
 Expected string
-File "closure.php", line 23, characters 8-13:
-But got dynamic, the result of calling a dynamic type as a function
+File "closure.php", line 20, characters 15-17:
+But got int

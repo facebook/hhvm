@@ -1,6 +1,0 @@
-File "list_read.php", line 17, characters 5-48:
-Invalid assignment (Typing[4110])
-File "list_read.php", line 15, characters 11-13:
-Expected int
-File "list_read.php", line 13, characters 17-36:
-But got dynamic because it is an unenforceable type

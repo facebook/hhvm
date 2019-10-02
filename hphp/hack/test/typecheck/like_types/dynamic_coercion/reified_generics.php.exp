@@ -1,0 +1,16 @@
+File "reified_generics.php", line 6, characters 10-22:
+Invalid return type (Typing[4110])
+File "reified_generics.php", line 5, characters 21-23:
+Expected int
+File "reified_generics.php", line 5, characters 21-23:
+Considering that this type argument is invariant with respect to C
+File "reified_generics.php", line 6, characters 16-19:
+But got dynamic
+File "reified_generics.php", line 10, characters 10-27:
+Invalid return type (Typing[4110])
+File "reified_generics.php", line 9, characters 35-37:
+Expected int
+File "reified_generics.php", line 9, characters 35-37:
+Considering that this type argument is invariant with respect to C
+File "reified_generics.php", line 10, characters 19-22:
+But got dynamic

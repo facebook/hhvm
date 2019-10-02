@@ -45,7 +45,7 @@ let force_null_union env r t =
 *)
 
 (* does coercion, including subtyping *)
-let rec coerce_type_impl env ty_have ty_expect on_error =
+let coerce_type_impl env ty_have ty_expect on_error =
   let coercion_from_dynamic =
     TypecheckerOptions.coercion_from_dynamic (Typing_env.get_tcopt env)
   in
@@ -58,36 +58,22 @@ let rec coerce_type_impl env ty_have ty_expect on_error =
   | (_, (_, Tdynamic)) -> env
   | ((_, Tdynamic), _) when ty_expect.et_enforced && coercion_from_dynamic ->
     env
-  | ((_, Tunion tyl), _) when coercion_from_union ->
-    (* If coercion and subtyping fail for any of the elements of the union,
-     * errors will be emitted *)
-    List.fold tyl ~init:env ~f:(fun env ty ->
-        coerce_type_impl env ty ty_expect on_error)
-  | ((r, Toption t), _) when coercion_from_union ->
-    let union : locl_ty = force_null_union env r t in
-    coerce_type_impl env union ty_expect on_error
+  | _ when ty_expect.et_enforced && coercion_from_union ->
+    Typing_subtype.sub_type_with_dynamic_as_bottom
+      env
+      ty_have
+      ty_expect.et_type
+      on_error
   | _ -> Typing_subtype.sub_type env ty_have ty_expect.et_type on_error
 
 (* The Errors.try_ allows us to report a union ty_have in an error
  * instead of just elements in the union *)
 let coerce_type p ur env ty_have ty_expect on_error =
-  Errors.try_
-    (fun () ->
-      Typing_log.(
-        log_with_level env "sub" 1 (fun () ->
-            log_types
-              p
-              env
-              [
-                Log_head
-                  ( "can_coerce",
-                    [
-                      Log_type ("ty_have", ty_have);
-                      Log_type ("ty_expect", ty_expect.et_type);
-                    ] );
-              ]));
-      coerce_type_impl env ty_have ty_expect on_error)
-    (fun _ -> Typing_ops.sub_type p ur env ty_have ty_expect.et_type on_error)
+  Errors.try_add_err
+    p
+    (Reason.string_of_ureason ur)
+    (fun () -> coerce_type_impl env ty_have ty_expect on_error)
+    (fun () -> env)
 
 (* does coercion if possible, returning Some env with resultant coercion constraints
  * otherwise suppresses errors from attempted coercion and returns None *)

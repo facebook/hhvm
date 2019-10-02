@@ -1,6 +1,0 @@
-File "idx3_3.php", line 10, characters 10-11:
-Invalid return type (Typing[4110])
-File "idx3_3.php", line 7, characters 15-17:
-Expected int
-File "idx.hhi", line 31, characters 10-12:
-But got dynamic because it is an unenforceable type

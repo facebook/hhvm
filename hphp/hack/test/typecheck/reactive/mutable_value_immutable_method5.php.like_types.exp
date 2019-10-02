@@ -1,6 +1,0 @@
-File "mutable_value_immutable_method5.php", line 18, characters 22-23:
-Invalid argument (Typing[4110])
-File "mutable_value_immutable_method5.php", line 10, characters 42-42:
-Expected A
-File "rx/functions.hhi", line 26, characters 28-28:
-But got dynamic because it is an unenforceable type

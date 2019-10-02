@@ -10,5 +10,5 @@ File "shape_idx3.php", line 21, characters 10-34:
 Invalid return type (Typing[4110])
 File "shape_idx3.php", line 13, characters 4-6:
 Expected int
-File "shape_idx3.php", line 21, characters 10-34:
-But got dynamic because it is an unenforceable type
+File "shape_idx3.php", line 11, characters 3-10:
+But got arraykey

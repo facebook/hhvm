@@ -45,6 +45,9 @@ val sub_type : env -> locl_ty -> locl_ty -> Errors.typing_error_callback -> env
     sub_type env int string => error
  *)
 
+val sub_type_with_dynamic_as_bottom :
+  env -> locl_ty -> locl_ty -> Errors.typing_error_callback -> env
+
 val subtype_method :
   check_return:bool ->
   extra_info:reactivity_extra_info ->

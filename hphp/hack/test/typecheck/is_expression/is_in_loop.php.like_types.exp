@@ -4,9 +4,3 @@ File "is_in_loop.php", line 8, characters 50-50:
 Expected ~T because it is an unenforceable type
 File "is_in_loop.php", line 12, characters 14-14:
 But got B
-File "is_in_loop.php", line 20, characters 12-13:
-Invalid argument (Typing[4110])
-File "is_in_loop.php", line 15, characters 19-19:
-Expected A
-File "is_in_loop.php", line 8, characters 50-50:
-But got dynamic because it is an unenforceable type

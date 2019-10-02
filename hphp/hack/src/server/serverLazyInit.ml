@@ -437,6 +437,7 @@ let get_files_to_recheck
       ~conservative_redecl:false
       ~bucket_size
       genv.workers
+      get_classes
       dirty_names
       fast
   in

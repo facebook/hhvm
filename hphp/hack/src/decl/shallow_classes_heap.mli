@@ -35,6 +35,12 @@ val push_local_changes : unit -> unit
 
 val pop_local_changes : unit -> unit
 
+val get_batch : SSet.t -> shallow_class option SMap.t
+
+val get_old_batch : SSet.t -> shallow_class option SMap.t
+
 val oldify_batch : SSet.t -> unit
 
 val remove_old_batch : SSet.t -> unit
+
+val remove_batch : SSet.t -> unit

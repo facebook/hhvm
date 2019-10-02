@@ -17,6 +17,9 @@ open Core_kernel
 open Reordered_argument_collections
 open Typing_deps
 
+let shallow_decl_enabled () =
+  TypecheckerOptions.shallow_class_decl (GlobalNamingOptions.get ())
+
 (*****************************************************************************)
 (* The neutral element of declaration (cf procs/multiWorker.mli) *)
 (*****************************************************************************)
@@ -178,12 +181,20 @@ let compute_deps ~conservative_redecl fast filel =
   let acc =
     compute_gconsts_deps ~conservative_redecl old_consts acc n_consts
   in
-  let old_classes = Decl_heap.Classes.get_old_batch n_classes in
-  let new_classes = Decl_heap.Classes.get_batch n_classes in
-  let compare_classes =
-    compute_classes_deps ~conservative_redecl old_classes new_classes
+  let acc =
+    if shallow_decl_enabled () then
+      acc
+    else
+      let old_classes = Decl_heap.Classes.get_old_batch n_classes in
+      let new_classes = Decl_heap.Classes.get_batch n_classes in
+      compute_classes_deps
+        ~conservative_redecl
+        old_classes
+        new_classes
+        acc
+        n_classes
   in
-  let (changed, to_redecl, to_recheck) = compare_classes acc n_classes in
+  let (changed, to_redecl, to_recheck) = acc in
   (changed, to_redecl, to_recheck)
 
 (*****************************************************************************)
@@ -259,7 +270,6 @@ let oldify_defs
   Decl_class_elements.oldify_all elems;
   Decl_heap.Classes.oldify_batch n_classes;
   Shallow_classes_heap.oldify_batch n_classes;
-  Decl_linearize.remove_batch n_classes;
   Decl_heap.RecordDefs.oldify_batch n_record_defs;
   Decl_heap.Typedefs.oldify_batch n_types;
   Decl_heap.GConsts.oldify_batch n_consts;
@@ -285,6 +295,7 @@ let remove_defs
   Decl_heap.Funs.remove_batch n_funs;
   Decl_class_elements.remove_all elems;
   Decl_heap.Classes.remove_batch n_classes;
+  Shallow_classes_heap.remove_batch n_classes;
   Decl_linearize.remove_batch n_classes;
   Decl_heap.RecordDefs.remove_batch n_record_defs;
   Decl_heap.Typedefs.remove_batch n_types;
@@ -296,6 +307,8 @@ let intersection_nonempty s1 mem_f s2 = SSet.exists s1 ~f:(mem_f s2)
 
 let is_dependent_class_of_any classes c =
   if SSet.mem classes c then
+    true
+  else if shallow_decl_enabled () then
     true
   else
     match Decl_heap.Classes.get c with
@@ -366,28 +379,36 @@ let get_dependent_classes workers ~bucket_size get_classes classes =
   |> SSet.of_list
 
 let get_elems workers ~bucket_size ~old defs =
-  let classes = SSet.elements defs.FileInfo.n_classes in
-  (* Getting the members of a class requires fetching the class from the heap.
-   * Doing this for too many classes will cause a large amount of allocations
-   * to be performed on the master process triggering the GC and slowing down
-   * redeclaration. Using the workers prevents this from occurring
-   *)
-  if List.length classes < 10 then
-    Decl_class_elements.get_for_classes ~old classes
+  if shallow_decl_enabled () then
+    SMap.empty
   else
-    MultiWorker.call
-      workers
-      ~job:(fun _ c -> Decl_class_elements.get_for_classes ~old c)
-      ~merge:SMap.union
-      ~neutral:SMap.empty
-      ~next:(MultiWorker.next ~max_size:bucket_size workers classes)
+    let classes = SSet.elements defs.FileInfo.n_classes in
+    (* Getting the members of a class requires fetching the class from the heap.
+     * Doing this for too many classes will cause a large amount of allocations
+     * to be performed on the master process triggering the GC and slowing down
+     * redeclaration. Using the workers prevents this from occurring
+     *)
+    if List.length classes < 10 then
+      Decl_class_elements.get_for_classes ~old classes
+    else
+      MultiWorker.call
+        workers
+        ~job:(fun _ c -> Decl_class_elements.get_for_classes ~old c)
+        ~merge:SMap.union
+        ~neutral:SMap.empty
+        ~next:(MultiWorker.next ~max_size:bucket_size workers classes)
 
 (*****************************************************************************)
 (* The main entry point *)
 (*****************************************************************************)
 
 let redo_type_decl
-    workers ~bucket_size ~conservative_redecl all_oldified_defs fast =
+    workers
+    ~bucket_size
+    ~conservative_redecl
+    get_classes
+    all_oldified_defs
+    fast =
   let defs =
     Relative_path.Map.fold fast ~init:FileInfo.empty_names ~f:(fun _ ->
         FileInfo.merge_names)
@@ -407,7 +428,7 @@ let redo_type_decl
   let all_elems = SMap.union current_elems oldified_elems in
   let fnl = Relative_path.Map.keys fast in
   (* If there aren't enough files, let's do this ourselves ... it's faster! *)
-  let result =
+  let (errors, changed, to_redecl, to_recheck) =
     if List.length fnl < 10 then
       let errors = otf_decl_files fnl in
       let (changed, to_redecl, to_recheck) =
@@ -417,8 +438,32 @@ let redo_type_decl
     else
       parallel_otf_decl ~conservative_redecl workers bucket_size fast fnl
   in
+  let (changed, to_recheck) =
+    if shallow_decl_enabled () then (
+      let (changed', mro_invalidated, to_recheck') =
+        Shallow_decl_compare.compute_class_fanout get_classes fnl
+      in
+      let changed = DepSet.union changed changed' in
+      let to_recheck = DepSet.union to_recheck to_recheck' in
+      let mro_invalidated =
+        mro_invalidated
+        |> Typing_deps.get_files
+        |> Relative_path.Set.fold ~init:SSet.empty ~f:(fun path acc ->
+               SSet.union acc (get_classes path))
+      in
+      Decl_linearize.remove_batch mro_invalidated;
+      (changed, to_recheck)
+    ) else
+      (changed, to_recheck)
+  in
   remove_old_defs defs all_elems;
-  result
+
+  Hh_logger.log "Finished recomputing type declarations:";
+  Hh_logger.log "  changed: %d" (DepSet.cardinal changed);
+  Hh_logger.log "  to_redecl: %d" (DepSet.cardinal to_redecl);
+  Hh_logger.log "  to_recheck: %d" (DepSet.cardinal to_recheck);
+
+  (errors, changed, to_redecl, to_recheck)
 
 let oldify_type_decl
     ?(collect_garbage = true)

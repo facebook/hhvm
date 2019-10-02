@@ -69,5 +69,11 @@ val update_file : Relative_path.t -> FileInfo.t -> unit
 val get_extend_deps :
   visited:DepSet.t ref -> source_class:Dep.t -> acc:DepSet.t -> DepSet.t
 
+(* Grow input set by adding all its extend dependencies (including recursive) *)
+val add_extend_deps : DepSet.t -> DepSet.t
+
+(* Grow input set by adding all its typing dependencies (direct only) *)
+val add_typing_deps : DepSet.t -> DepSet.t
+
 (* add_extend_deps and add_typing_deps chained together *)
 val add_all_deps : DepSet.t -> DepSet.t

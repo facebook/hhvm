@@ -76,6 +76,12 @@ let get cid =
     | None -> None
     | Some filename -> Some (declare_class_in_file filename cid))
 
+let get_batch = Classes.get_batch
+
+let get_old_batch = Classes.get_old_batch
+
 let oldify_batch = Classes.oldify_batch
 
 let remove_old_batch = Classes.remove_old_batch
+
+let remove_batch = Classes.remove_batch

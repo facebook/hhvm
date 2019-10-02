@@ -48,6 +48,9 @@ type check_results = {
   total_rechecked_count: int;
 }
 
+let shallow_decl_enabled () =
+  TypecheckerOptions.shallow_class_decl (GlobalNamingOptions.get ())
+
 (*****************************************************************************)
 (* Debugging *)
 (*****************************************************************************)
@@ -688,6 +691,15 @@ functor
           end
         ~init:FileInfo.empty_names
 
+    let get_classes naming_table path =
+      match Naming_table.get_file_info naming_table path with
+      | None -> SSet.empty
+      | Some info ->
+        List.fold
+          info.FileInfo.classes
+          ~init:SSet.empty
+          ~f:(fun acc (_, cid) -> SSet.add acc cid)
+
     let clear_failed_parsing errors failed_parsing =
       (* In most cases, set of files processed in a phase is a superset
        * of files from previous phase - i.e if we run decl on file A, we'll also
@@ -768,6 +780,7 @@ functor
     let do_redecl_phase1
         (genv : genv)
         ~(fast : FileInfo.names Relative_path.Map.t)
+        ~(naming_table : Naming_table.t)
         ~(oldified_defs : FileInfo.names) : redecl_phase1_result =
       let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
       let defs_to_redecl = get_defs fast in
@@ -778,6 +791,7 @@ functor
                genv.local_config.ServerLocalConfig.disable_conservative_redecl)
           ~bucket_size
           genv.workers
+          (get_classes naming_table)
           oldified_defs
           fast
       in
@@ -806,16 +820,11 @@ functor
         ~(to_redecl_phase2_deps : Typing_deps.DepSet.t) : redecl_phase2_result
         =
       let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
-      let get_classes path =
-        match Naming_table.get_file_info naming_table path with
-        | None -> SSet.empty
-        | Some info -> SSet.of_list @@ List.map info.FileInfo.classes snd
-      in
       let defs_to_oldify = get_defs lazy_decl_later in
       Decl_redecl_service.oldify_type_decl
         ~bucket_size
         genv.workers
-        get_classes
+        (get_classes naming_table)
         oldified_defs
         defs_to_oldify;
       let oldified_defs = FileInfo.merge_names oldified_defs defs_to_oldify in
@@ -826,6 +835,7 @@ functor
                genv.local_config.ServerLocalConfig.disable_conservative_redecl)
           ~bucket_size
           genv.workers
+          (get_classes naming_table)
           oldified_defs
           fast_redecl_phase2_now
       in
@@ -1097,10 +1107,14 @@ functor
        the declarations defined in all changed files, and collect the set of
        files which need to be re-typechecked as a consequence of those changes,
        as well as the set of files whose folded class declarations must be
-       recomputed as a consequence of those changes (in phase 2). When
-       shallow_class_decl is enabled, we should no longer need to do phase 2. *)
+       recomputed as a consequence of those changes (in phase 2).
+
+       When shallow_class_decl is enabled, there is no need to do phase 2--the
+       only source of class information needing recomputing is linearizations.
+       These are invalidated by Decl_redecl_service.redo_type_decl in phase 1,
+       and are lazily recomputed as needed. *)
       let { changes; oldified_defs; to_recheck1; to_redecl_phase2_deps } =
-        do_redecl_phase1 genv ~fast ~oldified_defs
+        do_redecl_phase1 genv ~fast ~naming_table ~oldified_defs
       in
       let to_redecl_phase2 = Typing_deps.get_files to_redecl_phase2_deps in
       let hs = SharedMem.heap_size () in
@@ -1119,14 +1133,19 @@ functor
        it was invalidated by a previous lazy check). For a lazy check, we only
        want to redeclare files open in the IDE, leaving everything else to be
        lazily redeclared later. In either case, there's no need to attempt to
-       redeclare definitions in files with parse errors. *)
+       redeclare definitions in files with parse errors.
+
+       When shallow_class_decl is enabled, there is no need to do phase 2. *)
       let (fast_redecl_phase2_now, lazy_decl_later) =
-        CheckKind.get_defs_to_redecl_phase2
-          genv
-          fast
-          naming_table
-          to_redecl_phase2
-          env
+        if shallow_decl_enabled () then
+          (Relative_path.Map.empty, Relative_path.Map.empty)
+        else
+          CheckKind.get_defs_to_redecl_phase2
+            genv
+            fast
+            naming_table
+            to_redecl_phase2
+            env
       in
       let fast_redecl_phase2_now =
         remove_failed_parsing
@@ -1144,11 +1163,14 @@ functor
         Printf.sprintf "Type declaration (phase 2) for %d files" count
       in
       Hh_logger.log "Begin %s" logstring;
-      Hh_logger.log
-        "(Recomputing type declarations for descendants of changed classes and determining full typechecking fanout)";
-      Hh_logger.log
-        "Invalidating (but not recomputing) declarations in %d files"
-        (Relative_path.Map.cardinal lazy_decl_later);
+
+      if not (shallow_decl_enabled ()) then (
+        Hh_logger.log
+          "(Recomputing type declarations for descendants of changed classes and determining full typechecking fanout)";
+        Hh_logger.log
+          "Invalidating (but not recomputing) declarations in %d files"
+          (Relative_path.Map.cardinal lazy_decl_later)
+      );
 
       debug_print_fast_keys genv "to_redecl_phase2" fast_redecl_phase2_now;
       debug_print_fast_keys genv "lazy_decl_later" lazy_decl_later;
@@ -1158,17 +1180,25 @@ functor
        be re-typechecked because of changes between the old and new
        declarations. We need not collect a set of files to redeclare (again)
        because our to_redecl set from phase 1 included the transitive children
-       of changed classes. *)
-      let { errors_after_phase2 = errors; needs_phase2_redecl; to_recheck2 } =
-        do_redecl_phase2
-          genv
-          env
-          ~errors
-          ~fast_redecl_phase2_now
-          ~naming_table
-          ~lazy_decl_later
-          ~oldified_defs
-          ~to_redecl_phase2_deps
+       of changed classes.
+
+       When shallow_class_decl is enabled, there is no need to do phase 2. *)
+      let (errors, needs_phase2_redecl, to_recheck2) =
+        if shallow_decl_enabled () then
+          (errors, Relative_path.Set.empty, Relative_path.Set.empty)
+        else
+          let { errors_after_phase2; needs_phase2_redecl; to_recheck2 } =
+            do_redecl_phase2
+              genv
+              env
+              ~errors
+              ~fast_redecl_phase2_now
+              ~naming_table
+              ~lazy_decl_later
+              ~oldified_defs
+              ~to_redecl_phase2_deps
+          in
+          (errors_after_phase2, needs_phase2_redecl, to_recheck2)
       in
       (* We have changed declarations, which means that typed ASTs could have
        * changed too. *)
@@ -1281,6 +1311,9 @@ functor
         Printf.sprintf "Typechecked %d files" total_rechecked_count
       in
       let t = Hh_logger.log_duration logstring t in
+      let hs = SharedMem.heap_size () in
+      Hh_logger.log "Heap size: %d" hs;
+
       Hh_logger.log "Total: %f\n%!" (t -. start_t);
 
       (* INVALIDATE FILES (EXPERIMENTAL TYPES IN CODEGEN) **********************)

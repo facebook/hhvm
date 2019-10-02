@@ -38,10 +38,10 @@ hhvm_build_dbgo_cov = "buck build @mode/dbgo-cov -c " \
 
 hhvm_build_dbgo = "buck build @mode/dbgo //hphp/hhvm:hhvm"
 
-profdata = fbcode + "third-party-buck/platform007/tools/llvm-fb/bin/" \
+profdata = fbcode + "third-party-buck/platform007/build/llvm-fb/bin/" \
     "llvm-profdata merge -sparse"
 
-cov = fbcode + "third-party-buck/platform007/tools/llvm-fb/bin/" \
+cov = fbcode + "third-party-buck/platform007/build/llvm-fb/bin/" \
     "llvm-cov"
 
 verbose = False

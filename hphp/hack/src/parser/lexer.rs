@@ -1944,7 +1944,7 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
 
     fn as_case_insensitive_keyword(&self, text: &str) -> Option<String> {
         let lower = text.to_ascii_lowercase();
-        let res = match lower.as_ref() {
+        match lower.as_ref() {
             "__halt_compiler" | "abstract" | "and" | "array" | "as" | "bool" | "boolean"
             | "break" | "callable" | "case" | "catch" | "class" | "clone" | "const"
             | "continue" | "default" | "die" | "do" | "echo" | "else" | "elseif" | "empty"
@@ -1957,8 +1957,7 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
             | "static" | "string" | "switch" | "throw" | "trait" | "try" | "true" | "unset"
             | "use" | "using" | "var" | "void" | "while" | "xor" | "yield" => Some(lower),
             _ => None,
-        };
-        res.map(|x| x.to_owned())
+        }
     }
 
     fn lowercase_error(&self, original_text: &str, lowered_text: &str) -> bool {

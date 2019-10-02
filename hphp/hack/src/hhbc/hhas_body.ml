@@ -15,6 +15,7 @@ type t = {
   body_num_iters: int;
   body_is_memoize_wrapper: bool;
   body_is_memoize_wrapper_lsb: bool;
+  body_upper_bounds: (string * Hhas_type_info.t list) list;
   body_params: Hhas_param.t list;
   body_return_type: Hhas_type_info.t option;
   body_doc_comment: string option;
@@ -27,6 +28,7 @@ let make
     num_iters
     is_memoize_wrapper
     is_memoize_wrapper_lsb
+    upper_bounds
     params
     return_type
     doc_comment
@@ -37,6 +39,7 @@ let make
     body_num_iters = num_iters;
     body_is_memoize_wrapper = is_memoize_wrapper;
     body_is_memoize_wrapper_lsb = is_memoize_wrapper_lsb;
+    body_upper_bounds = upper_bounds;
     body_params = params;
     body_return_type = return_type;
     body_doc_comment = doc_comment;
@@ -62,3 +65,5 @@ let with_instrs body instrs = { body with body_instrs = instrs }
 let doc_comment body = body.body_doc_comment
 
 let env body = body.body_env
+
+let upper_bounds body = body.body_upper_bounds

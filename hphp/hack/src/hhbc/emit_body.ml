@@ -20,6 +20,28 @@ let has_type_constraint env ti ast_param =
     (RGH.has_reified_type_constraint env h, Some h)
   | _ -> (RGH.NoConstraint, None)
 
+let emit_generics_upper_bounds tparams ~skipawaitable ~namespace =
+  List.filter_map tparams ~f:(fun t ->
+      let ubs =
+        List.filter_map t.A.tp_constraints ~f:(fun c ->
+            match c with
+            | (Ast_defs.Constraint_as, h) ->
+              let tparams = List.map tparams (fun t -> snd t.A.tp_name) in
+              Some
+                (Emit_type_hint.hint_to_type_info
+                   ~kind:Emit_type_hint.Param
+                   ~tparams
+                   ~nullable:false
+                   ~skipawaitable
+                   ~namespace
+                   h)
+            | _ -> None)
+      in
+      if ubs = [] then
+        None
+      else
+        Some (snd t.A.tp_name, ubs))
+
 let emit_method_prolog ~env ~pos ~params ~ast_params ~should_emit_init_this =
   let init_this =
     if not should_emit_init_this then
@@ -160,6 +182,7 @@ let make_body
     decl_vars
     is_memoize_wrapper
     is_memoize_wrapper_lsb
+    upper_bounds
     params
     return_type_info
     doc_comment
@@ -184,6 +207,7 @@ let make_body
     num_iters
     is_memoize_wrapper
     is_memoize_wrapper_lsb
+    upper_bounds
     params
     return_type_info
     doc_comment
@@ -609,11 +633,18 @@ let emit_body
     else
       body_instrs
   in
+  let upper_bounds =
+    if Hhbc_options.enforce_generics_ub !Hhbc_options.compiler_options then
+      emit_generics_upper_bounds immediate_tparams ~skipawaitable ~namespace
+    else
+      []
+  in
   ( make_body
       body_instrs
       decl_vars
       false (*is_memoize_wrapper*)
       false (*is_memoize_wrapper_lsb*)
+      upper_bounds
       params
       (Some return_type_info)
       doc_comment

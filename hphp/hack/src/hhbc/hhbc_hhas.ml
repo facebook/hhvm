@@ -1535,6 +1535,18 @@ let string_of_param env p =
 let string_of_params env ps =
   "(" ^ String.concat ~sep:", " (List.map ~f:(string_of_param env) ps) ^ ")"
 
+let string_of_upper_bound ub =
+  "("
+  ^ fst ub
+  ^ " as "
+  ^ String.concat ~sep:", " (List.map ~f:string_of_type_info (snd ub))
+  ^ ")"
+
+let string_of_upper_bounds ubs =
+  "[["
+  ^ String.concat ~sep:", " (List.map ~f:string_of_upper_bound ubs)
+  ^ "]] "
+
 let add_indent buf indent = Acc.add buf (String.make indent ' ')
 
 let add_indented_line buf indent str =
@@ -1676,6 +1688,7 @@ let add_fun_def buf fun_def =
   let function_span = Hhas_function.span fun_def in
   let function_return_type = Hhas_body.return_type function_body in
   let env = Hhas_body.env function_body in
+  let function_upper_bounds = Hhas_body.upper_bounds function_body in
   let function_params = Hhas_body.params function_body in
   let function_is_async = Hhas_function.is_async fun_def in
   let function_is_generator = Hhas_function.is_generator fun_def in
@@ -1685,6 +1698,8 @@ let add_fun_def buf fun_def =
   Acc.add buf (function_attributes fun_def);
   if Hhbc_options.source_mapping !Hhbc_options.compiler_options then
     Acc.add buf (string_of_span function_span ^ " ");
+  if Hhbc_options.enforce_generics_ub !Hhbc_options.compiler_options then
+    Acc.add buf (string_of_upper_bounds function_upper_bounds);
   Acc.add buf (string_of_type_info_option function_return_type);
   Acc.add buf (Hhbc_id.Function.to_raw_string function_name);
   Acc.add buf (string_of_params env function_params);
@@ -2181,6 +2196,8 @@ let add_class_def buf class_def =
   let class_name = Hhas_class.name class_def in
   (* TODO: user attributes *)
   Acc.add buf "\n.class ";
+  if Hhbc_options.enforce_generics_ub !Hhbc_options.compiler_options then
+    Acc.add buf (string_of_upper_bounds (Hhas_class.upper_bounds class_def));
   Acc.add buf (class_special_attributes class_def);
   Acc.add buf (Hhbc_id.Class.to_raw_string class_name);
   if Hhbc_options.source_mapping !Hhbc_options.compiler_options then

@@ -55,6 +55,7 @@ let emit_fatal_program ~ignore_message op pos message =
       [] (* decl_vars *)
       false (*is_memoize_wrapper*)
       false (*is_memoize_wrapper_lsb*)
+      [] (* upper bounds *)
       [] (* params *)
       None (* return_type_info *)
       None (* doc *)

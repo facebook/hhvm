@@ -13,6 +13,7 @@ val make_body :
   (* Actually local_id list *)
   bool ->
   bool ->
+  (string * Hhas_type_info.t list) list ->
   Hhas_param.t list ->
   Hhas_type_info.t option ->
   string option ->
@@ -66,3 +67,9 @@ val emit_deprecation_warning :
   Typed_value.t list option ->
   (* deprecation_info *)
   Instruction_sequence.t
+
+val emit_generics_upper_bounds :
+  Tast.tparam list ->
+  skipawaitable:bool ->
+  namespace:Namespace_env.env ->
+  (string * Hhas_type_info.t list) list

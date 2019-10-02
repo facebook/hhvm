@@ -50,6 +50,7 @@ type t = {
   class_constants: Hhas_constant.t list;
   class_type_constants: Hhas_type_constant.t list;
   class_requirements: (trait_req_kind * string) list;
+  class_upper_bounds: (string * Hhas_type_info.t list) list;
   class_doc_comment: string option;
 }
 
@@ -79,6 +80,7 @@ let make
     class_constants
     class_type_constants
     class_requirements
+    class_upper_bounds
     class_doc_comment =
   {
     class_attributes;
@@ -106,6 +108,7 @@ let make
     class_constants;
     class_type_constants;
     class_requirements;
+    class_upper_bounds;
     class_doc_comment;
   }
 
@@ -164,6 +167,8 @@ let constants hhas_class = hhas_class.class_constants
 let type_constants hhas_class = hhas_class.class_type_constants
 
 let requirements hhas_class = hhas_class.class_requirements
+
+let upper_bounds hhas_class = hhas_class.class_upper_bounds
 
 let is_closure_class hhas_class =
   List.exists Hhas_method.is_closure_body (methods hhas_class)

@@ -59,6 +59,7 @@ let make_86method
       method_decl_vars
       method_is_memoize_wrapper
       method_is_memoize_wrapper_lsb
+      []
       params
       method_return_type
       method_doc_comment
@@ -627,6 +628,15 @@ let emit_class (ast_class, hoisted) =
     (not (List.is_empty reified_init_method))
     && List.is_empty ast_class.A.c_extends
   in
+  let class_upper_bounds =
+    if Hhbc_options.enforce_generics_ub !Hhbc_options.compiler_options then
+      Emit_body.emit_generics_upper_bounds
+        ast_class.A.c_tparams.A.c_tparam_list
+        ~skipawaitable:false
+        ~namespace
+    else
+      []
+  in
   let additional_methods =
     additional_methods
     @ reified_init_method
@@ -681,6 +691,7 @@ let emit_class (ast_class, hoisted) =
     class_constants
     class_type_constants
     class_requirements
+    class_upper_bounds
     ast_class.A.c_doc_comment
 
 let emit_classes_from_program

@@ -89,6 +89,7 @@ struct RepoOptions {
   E(bool,           CreateInOutWrapperFunctions,    true)             \
   E(bool,           EmitFuncPointers,               true)             \
   E(bool,           EmitInstMethPointers,           EmitFuncPointers) \
+  E(bool,           EnforceGenericsUB,              false)             \
   /**/
 
   /**/

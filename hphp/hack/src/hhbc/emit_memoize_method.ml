@@ -449,6 +449,7 @@ let make_wrapper env return_type params instrs with_lsb is_reified =
     (* decl_vars *) )
     true (* is_memoize_wrapper *)
     with_lsb (* is_memoize_wrapper_lsb *)
+    []
     params
     (Some return_type)
     None (* doc *)

@@ -81,6 +81,7 @@ let emit_body scope namespace class_attrs name params ret =
     0
     false
     false
+    []
     params
     (Some return_type_info)
     None

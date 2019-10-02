@@ -623,6 +623,7 @@ let mutate_metadata (input : HP.t)  =
       (body |> Hhas_body.num_iters)
       (body |> Hhas_body.is_memoize_wrapper     |> mutate_bool)
       (body |> Hhas_body.is_memoize_wrapper_lsb |> mutate_bool)
+      (body |> Hhas_body.upper_bounds)
       (body |> Hhas_body.params                 |> delete_map mutate_param)
       (body |> Hhas_body.return_type            |> option_lift mutate_type_info)
       (body |> Hhas_body.doc_comment)
@@ -713,6 +714,7 @@ let mutate_metadata (input : HP.t)  =
       (cls |> HC.constants          |> delete_map mutate_constant)
       (cls |> HC.type_constants     |> delete_map mutate_typed_constant)
       (cls |> HC.requirements       |> delete_map mutate_req)
+      (cls |> HC.upper_bounds)
       (cls |> HC.doc_comment) in
   let mutate_fun_data (f : Hhas_function.t) : Hhas_function.t =
     Hhas_function.make

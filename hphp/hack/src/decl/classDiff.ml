@@ -13,7 +13,7 @@ type member_change =
   | Changed_inheritance (* Modified in a way that affects inheritance *)
   | Modified (* Modified in a way that does not affect inheritance *)
   | Private_change (* Added/removed a private member *)
-[@@deriving show { with_path = false }]
+[@@deriving eq, show { with_path = false }]
 
 (* Returns true if the member changed in a way that affects what a descendant
    might inherit. This is trivially true for Added/Removed. The
@@ -69,6 +69,7 @@ type member_diff = {
   smethods: member_change SMap.t;
   constructor: member_change option;
 }
+[@@deriving eq]
 
 let empty_member_diff =
   {
@@ -136,10 +137,10 @@ type minor_change = {
   mro_positions_changed: bool;
   member_diff: member_diff;
 }
-[@@deriving show { with_path = false }]
+[@@deriving eq, show { with_path = false }]
 
 type t =
   | Unchanged
   | Major_change
   | Minor_change of minor_change
-[@@deriving show { with_path = false }]
+[@@deriving eq, show { with_path = false }]

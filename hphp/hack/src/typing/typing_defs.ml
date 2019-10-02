@@ -104,6 +104,19 @@ type xhp_attr = {
 }
 [@@deriving eq]
 
+(* Denotes the categories of requirements we apply to constructor overrides.
+ *
+ * In the default case, we use Inconsistent. If a class has <<__ConsistentConstruct>>,
+ * or if it inherits a class that has <<__ConsistentConstruct>>, we use inherited.
+ * If we have a new final class that doesn't extend from <<__ConsistentConstruct>>,
+ * then we use Final. Only classes that are Inconsistent or Final can have reified
+ * generics. *)
+type consistent_kind =
+  | Inconsistent
+  | ConsistentConstruct
+  | FinalClass
+[@@deriving eq]
+
 type 'phase ty = Reason.t * 'phase ty_
 
 and decl_ty = decl_phase ty
@@ -502,16 +515,6 @@ and class_const = {
  * }
  *)
 and requirement = Pos.t * decl_ty
-
-(* In the default case, we use Inconsistent. If a class has <<__ConsistentConstruct>>,
- * or if it inherits a class that has <<__ConsistentConstruct>>, we use inherited.
- * If we have a new final class that doesn't extend from <<__ConsistentConstruct>>,
- * then we use Final. Only classes that are Inconsistent or Final can have reified
- * generics. *)
-and consistent_kind =
-  | Inconsistent
-  | ConsistentConstruct
-  | FinalClass
 
 and class_type = {
   tc_need_init: bool;

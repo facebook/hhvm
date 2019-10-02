@@ -13,7 +13,7 @@ type member_change =
   | Changed_inheritance (* Modified in a way that affects inheritance *)
   | Modified (* Modified in a way that does not affect inheritance *)
   | Private_change (* Added/removed a private member *)
-[@@deriving show]
+[@@deriving eq, show]
 
 type member_diff = {
   consts: member_change SMap.t;
@@ -24,19 +24,19 @@ type member_diff = {
   smethods: member_change SMap.t;
   constructor: member_change option;
 }
-[@@deriving show]
+[@@deriving eq, show]
 
 type minor_change = {
   mro_positions_changed: bool;
   member_diff: member_diff;
 }
-[@@deriving show]
+[@@deriving eq, show]
 
 type t =
   | Unchanged
   | Major_change
   | Minor_change of minor_change
-[@@deriving show]
+[@@deriving eq, show]
 
 val empty_member_diff : member_diff
 

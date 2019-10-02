@@ -43,7 +43,8 @@ let diff_members
       | (None, None) -> failwith "merge_member_lists added (None, None)"
       | (Some member, None)
       | (None, Some member)
-        when class_kind <> Ast_defs.Ctrait && is_private member ->
+        when (not Ast_defs.(equal_class_kind class_kind Ctrait))
+             && is_private member ->
         SMap.add diff name Private_change
       | (Some _, None) -> SMap.add diff name Removed
       | (None, Some _) -> SMap.add diff name Added
@@ -54,9 +55,9 @@ let diff_members
 let diff_const c1 c2 : member_change option =
   let c1 = Decl_pos_utils.NormalizeSig.shallow_class_const c1 in
   let c2 = Decl_pos_utils.NormalizeSig.shallow_class_const c2 in
-  if c1 = c2 then
+  if equal_shallow_class_const c1 c2 then
     None
-  else if c1.scc_abstract <> c2.scc_abstract then
+  else if not (Bool.equal c1.scc_abstract c2.scc_abstract) then
     Some Changed_inheritance
   else
     Some Modified
@@ -64,9 +65,14 @@ let diff_const c1 c2 : member_change option =
 let diff_typeconst tc1 tc2 : member_change option =
   let tc1 = Decl_pos_utils.NormalizeSig.shallow_typeconst tc1 in
   let tc2 = Decl_pos_utils.NormalizeSig.shallow_typeconst tc2 in
-  if tc1 = tc2 then
+  if equal_shallow_typeconst tc1 tc2 then
     None
-  else if tc1.stc_abstract <> tc2.stc_abstract then
+  else if
+    not
+      (Typing_defs.equal_typeconst_abstract_kind
+         tc1.stc_abstract
+         tc2.stc_abstract)
+  then
     Some Changed_inheritance
   else
     Some Modified
@@ -74,10 +80,11 @@ let diff_typeconst tc1 tc2 : member_change option =
 let diff_prop p1 p2 : member_change option =
   let p1 = Decl_pos_utils.NormalizeSig.shallow_prop p1 in
   let p2 = Decl_pos_utils.NormalizeSig.shallow_prop p2 in
-  if p1 = p2 then
+  if equal_shallow_prop p1 p2 then
     None
   else if
-    p1.sp_visibility <> p2.sp_visibility || p1.sp_abstract <> p2.sp_abstract
+    (not (Aast.equal_visibility p1.sp_visibility p2.sp_visibility))
+    || not (Bool.equal p1.sp_abstract p2.sp_abstract)
   then
     Some Changed_inheritance
   else
@@ -86,18 +93,21 @@ let diff_prop p1 p2 : member_change option =
 let diff_method m1 m2 : member_change option =
   let m1 = Decl_pos_utils.NormalizeSig.shallow_method m1 in
   let m2 = Decl_pos_utils.NormalizeSig.shallow_method m2 in
-  if m1 = m2 then
+  if equal_shallow_method m1 m2 then
     None
   else if
-    m1.sm_visibility <> m2.sm_visibility || m1.sm_abstract <> m2.sm_abstract
+    (not (Aast.equal_visibility m1.sm_visibility m2.sm_visibility))
+    || not (Bool.equal m1.sm_abstract m2.sm_abstract)
   then
     Some Changed_inheritance
   else
     Some Modified
 
-let is_prop_private p : bool = p.sp_visibility = Aast_defs.Private
+let is_prop_private p : bool =
+  Aast_defs.equal_visibility p.sp_visibility Aast_defs.Private
 
-let is_method_private m : bool = m.sm_visibility = Aast_defs.Private
+let is_method_private m : bool =
+  Aast_defs.equal_visibility m.sm_visibility Aast_defs.Private
 
 let diff_constructor old_cls new_cls old_cstr new_cstr : member_change option =
   match (old_cstr, new_cstr) with
@@ -107,7 +117,7 @@ let diff_constructor old_cls new_cls old_cstr new_cstr : member_change option =
   | (Some old_method, Some new_method) ->
     let consistent1 = Decl_utils.consistent_construct_kind old_cls in
     let consistent2 = Decl_utils.consistent_construct_kind new_cls in
-    if consistent1 <> consistent2 then
+    if not (Typing_defs.equal_consistent_kind consistent1 consistent2) then
       Some Changed_inheritance
     else
       diff_method old_method new_method
@@ -172,19 +182,26 @@ let diff_class_members (c1 : shallow_class) (c2 : shallow_class) :
     NB: It is critical for the correctness of incremental typechecking that
     every bit of information used by Decl_linearize is checked here! *)
 let mro_inputs_equal (c1 : shallow_class) (c2 : shallow_class) : bool =
-  let is_to_string m = snd m.sm_name = SN.Members.__toString in
-  fst c1.sc_name = fst c2.sc_name
-  && snd c1.sc_name = snd c2.sc_name
-  && c1.sc_kind = c2.sc_kind
-  && List.find c1.sc_methods is_to_string
-     = List.find c2.sc_methods is_to_string
-  && c1.sc_tparams = c2.sc_tparams
-  && c1.sc_extends = c2.sc_extends
-  && c1.sc_implements = c2.sc_implements
-  && c1.sc_uses = c2.sc_uses
-  && c1.sc_req_extends = c2.sc_req_extends
-  && c1.sc_req_implements = c2.sc_req_implements
-  && c1.sc_xhp_attr_uses = c2.sc_xhp_attr_uses
+  let is_to_string m = String.equal (snd m.sm_name) SN.Members.__toString in
+  Aast.equal_sid c1.sc_name c2.sc_name
+  && Ast_defs.equal_class_kind c1.sc_kind c2.sc_kind
+  && Option.equal
+       equal_shallow_method
+       (List.find c1.sc_methods is_to_string)
+       (List.find c2.sc_methods is_to_string)
+  && List.equal c1.sc_tparams c2.sc_tparams Typing_defs.equal_decl_tparam
+  && List.equal c1.sc_extends c2.sc_extends Typing_defs.equal_decl_ty
+  && List.equal c1.sc_implements c2.sc_implements Typing_defs.equal_decl_ty
+  && List.equal c1.sc_uses c2.sc_uses Typing_defs.equal_decl_ty
+  && List.equal c1.sc_req_extends c2.sc_req_extends Typing_defs.equal_decl_ty
+  && List.equal
+       c1.sc_req_implements
+       c2.sc_req_implements
+       Typing_defs.equal_decl_ty
+  && List.equal
+       c1.sc_xhp_attr_uses
+       c2.sc_xhp_attr_uses
+       Typing_defs.equal_decl_ty
 
 (* The ConsistentConstruct attribute is propagated down the inheritance
    hierarchy, so we can model it with Changed_inheritance on the constructor. To
@@ -195,7 +212,10 @@ let remove_consistent_construct_attribute sc =
     sc with
     sc_user_attributes =
       List.filter sc.sc_user_attributes ~f:(fun ua ->
-          snd ua.Aast.ua_name <> SN.UserAttributes.uaConsistentConstruct);
+          not
+            (String.equal
+               (snd ua.Aast.ua_name)
+               SN.UserAttributes.uaConsistentConstruct));
   }
 
 let remove_members_except_to_string sc =
@@ -209,7 +229,7 @@ let remove_members_except_to_string sc =
     sc_static_methods = [];
     sc_methods =
       List.filter sc.sc_methods (fun m ->
-          snd m.sm_name = SN.Members.__toString);
+          String.equal (snd m.sm_name) SN.Members.__toString);
   }
 
 (* To normalize classes for comparison, we:
@@ -236,7 +256,7 @@ let normalize sc =
   |> Decl_pos_utils.NormalizeSig.shallow_class
 
 let diff_class (c1 : shallow_class) (c2 : shallow_class) : ClassDiff.t =
-  if normalize c1 <> normalize c2 then
+  if not (equal_shallow_class (normalize c1) (normalize c2)) then
     Major_change
   else
     let mro_inputs_equal = mro_inputs_equal c1 c2 in

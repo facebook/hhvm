@@ -13,17 +13,17 @@ let test_myMap_union () =
   let () =
     let union = IntMap.union map1 map2 in
     let expected = map_of_elements [(1, 2); (3, 4); (5, 6)] in
-    if not (IntMap.equal union expected) then failwith "Maps not equal"
+    if not (IntMap.equal ( = ) union expected) then failwith "Maps not equal"
   in
   let () =
     let union = IntMap.union ~combine:(fun _ _ snd -> Some snd) map1 map2 in
     let expected = map_of_elements [(1, 10); (3, 4); (5, 6)] in
-    if not (IntMap.equal union expected) then failwith "Maps not equal"
+    if not (IntMap.equal ( = ) union expected) then failwith "Maps not equal"
   in
   let () =
     let union = IntMap.union ~combine:(fun _ _ _ -> None) map1 map2 in
     let expected = map_of_elements [(3, 4); (5, 6)] in
-    if not (IntMap.equal union expected) then failwith "Maps not equal"
+    if not (IntMap.equal ( = ) union expected) then failwith "Maps not equal"
   in
   true
 

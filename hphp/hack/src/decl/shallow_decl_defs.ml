@@ -16,7 +16,7 @@ type shallow_class_const = {
   scc_name: Aast.sid;
   scc_type: decl_ty;
 }
-[@@deriving show]
+[@@deriving eq, show]
 
 type shallow_typeconst = {
   stc_abstract: typeconst_abstract_kind;
@@ -26,14 +26,14 @@ type shallow_typeconst = {
   stc_enforceable: Pos.t * bool;
   stc_reifiable: Pos.t option;
 }
-[@@deriving show]
+[@@deriving eq, show]
 
 type shallow_pu_member = {
   spum_atom: Aast.sid;
   spum_types: (Aast.sid * decl_ty) list;
   spum_exprs: Aast.sid list;
 }
-[@@deriving show]
+[@@deriving eq, show]
 
 type shallow_pu_enum = {
   spu_name: Aast.sid;
@@ -42,7 +42,7 @@ type shallow_pu_enum = {
   spu_case_values: (Aast.sid * decl_ty) list;
   spu_members: shallow_pu_member list;
 }
-[@@deriving show]
+[@@deriving eq, show]
 
 type shallow_prop = {
   sp_const: bool;
@@ -56,7 +56,7 @@ type shallow_prop = {
   sp_visibility: Aast.visibility;
   sp_fixme_codes: ISet.t;
 }
-[@@deriving show]
+[@@deriving eq, show]
 
 type shallow_method = {
   sm_abstract: bool;
@@ -69,7 +69,7 @@ type shallow_method = {
   sm_visibility: Aast.visibility;
   sm_fixme_codes: ISet.t;
 }
-[@@deriving show]
+[@@deriving eq, show]
 
 type shallow_method_redeclaration = {
   smr_abstract: bool;
@@ -82,7 +82,7 @@ type shallow_method_redeclaration = {
   smr_method: Aast.pstring;
   smr_fixme_codes: ISet.t;
 }
-[@@deriving show]
+[@@deriving eq, show]
 
 type shallow_class = {
   sc_mode: FileInfo.mode;
@@ -111,4 +111,4 @@ type shallow_class = {
   sc_enum_type: enum_type option;
   sc_decl_errors: Errors.t; [@opaque]
 }
-[@@deriving show]
+[@@deriving eq, show]

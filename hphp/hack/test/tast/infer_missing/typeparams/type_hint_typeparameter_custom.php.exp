@@ -2,7 +2,7 @@ Errors:
   [10:14-15] The type C expects 1 type parameter(s)
   [3:7-8] Definition is here
 [(Class
-    { c_span = [3:1-8:2]; c_annotation = (); c_mode = <opaque>;
+    { c_span = [3:1-8:2]; c_annotation = (); c_mode = Mpartial;
       c_final = false; c_is_xhp = false; c_kind = Cnormal;
       c_name = ([3:7-8], "\\C");
       c_tparams =
@@ -11,7 +11,7 @@ Errors:
            tp_constraints = []; tp_reified = Erased; tp_user_attributes = []
            }
           ];
-        c_tparam_constraints = <opaque> };
+        c_tparam_constraints = { "T" -> (Erased, []) } };
       c_extends = []; c_uses = []; c_use_as_alias = [];
       c_insteadof_alias = []; c_method_redeclarations = [];
       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
@@ -55,10 +55,14 @@ Errors:
          m_external = false; m_doc_comment = None }
         ];
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
-      c_namespace = <opaque>; c_user_attributes = []; c_file_attributes = [];
-      c_enum = None; c_pu_enums = []; c_doc_comment = None });
+      c_namespace =
+      { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
+        ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
+        ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false };
+      c_user_attributes = []; c_file_attributes = []; c_enum = None;
+      c_pu_enums = []; c_doc_comment = None });
   (Fun
-     { f_span = [10:1-12:2]; f_annotation = (); f_mode = <opaque>;
+     { f_span = [10:1-12:2]; f_annotation = (); f_mode = Mpartial;
        f_ret = ((_), None); f_name = ([10:10-13], "\\foo"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic;
        f_params =
@@ -84,6 +88,10 @@ Errors:
            ];
          fb_annotation = No unsafe blocks };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
-       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
-       f_static = false })
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
+         ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false };
+       f_doc_comment = None; f_static = false })
   ]

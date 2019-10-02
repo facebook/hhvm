@@ -1,8 +1,8 @@
 [(Class
-    { c_span = [4:3-6:4]; c_annotation = (); c_mode = <opaque>;
+    { c_span = [4:3-6:4]; c_annotation = (); c_mode = Mstrict;
       c_final = false; c_is_xhp = false; c_kind = Cnormal;
       c_name = ([4:9-30], "\\A\\MyStringFileAttribute");
-      c_tparams = { c_tparam_list = []; c_tparam_constraints = <opaque> };
+      c_tparams = { c_tparam_list = []; c_tparam_constraints = {} };
       c_extends = []; c_uses = []; c_use_as_alias = [];
       c_insteadof_alias = []; c_method_redeclarations = [];
       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
@@ -48,7 +48,11 @@
          m_external = false; m_doc_comment = None }
         ];
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
-      c_namespace = <opaque>; c_user_attributes = [];
+      c_namespace =
+      { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
+        ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
+        ns_name = (Some "A"); ns_auto_ns_map = []; ns_is_codegen = false };
+      c_user_attributes = [];
       c_file_attributes =
       [{ fa_user_attributes =
          [{ ua_name = ([12:11-32], "\\A\\MyStringFileAttribute");
@@ -59,14 +63,18 @@
               ]
             }
            ];
-         fa_namespace = <opaque> }
+         fa_namespace =
+         { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
+           ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
+           ns_name = (Some "A"); ns_auto_ns_map = []; ns_is_codegen = false }
+         }
         ];
       c_enum = None; c_pu_enums = []; c_doc_comment = None });
   (Class
-     { c_span = [8:3-10:4]; c_annotation = (); c_mode = <opaque>;
+     { c_span = [8:3-10:4]; c_annotation = (); c_mode = Mstrict;
        c_final = false; c_is_xhp = false; c_kind = Cnormal;
        c_name = ([8:9-16], "\\A\\MyClass");
-       c_tparams = { c_tparam_list = []; c_tparam_constraints = <opaque> };
+       c_tparams = { c_tparam_list = []; c_tparam_constraints = {} };
        c_extends = []; c_uses = []; c_use_as_alias = [];
        c_insteadof_alias = []; c_method_redeclarations = [];
        c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
@@ -78,7 +86,11 @@
           cc_doc_comment = None }
          ];
        c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = [];
-       c_xhp_children = []; c_xhp_attrs = []; c_namespace = <opaque>;
+       c_xhp_children = []; c_xhp_attrs = [];
+       c_namespace =
+       { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
+         ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
+         ns_name = (Some "A"); ns_auto_ns_map = []; ns_is_codegen = false };
        c_user_attributes = [];
        c_file_attributes =
        [{ fa_user_attributes =
@@ -90,20 +102,29 @@
                ]
              }
             ];
-          fa_namespace = <opaque> }
+          fa_namespace =
+          { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
+            ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
+            ns_name = (Some "A"); ns_auto_ns_map = []; ns_is_codegen = false
+            }
+          }
          ];
        c_enum = None; c_pu_enums = []; c_doc_comment = None });
   (Class
-     { c_span = [16:3-25]; c_annotation = (); c_mode = <opaque>;
+     { c_span = [16:3-25]; c_annotation = (); c_mode = Mstrict;
        c_final = false; c_is_xhp = false; c_kind = Cnormal;
        c_name = ([16:9-21], "\\B\\MyOtherClass");
-       c_tparams = { c_tparam_list = []; c_tparam_constraints = <opaque> };
+       c_tparams = { c_tparam_list = []; c_tparam_constraints = {} };
        c_extends = []; c_uses = []; c_use_as_alias = [];
        c_insteadof_alias = []; c_method_redeclarations = [];
        c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
        c_implements = []; c_where_constraints = []; c_consts = [];
        c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = [];
-       c_xhp_children = []; c_xhp_attrs = []; c_namespace = <opaque>;
+       c_xhp_children = []; c_xhp_attrs = [];
+       c_namespace =
+       { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
+         ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
+         ns_name = (Some "B"); ns_auto_ns_map = []; ns_is_codegen = false };
        c_user_attributes = [];
        c_file_attributes =
        [{ fa_user_attributes =
@@ -115,7 +136,12 @@
                ]
              }
             ];
-          fa_namespace = <opaque> }
+          fa_namespace =
+          { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
+            ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
+            ns_name = (Some "A"); ns_auto_ns_map = []; ns_is_codegen = false
+            }
+          }
          ];
        c_enum = None; c_pu_enums = []; c_doc_comment = None })
   ]

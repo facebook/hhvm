@@ -10,7 +10,7 @@ Errors:
   [57:14-25] Bad regex pattern; Missing delimiter(s).
   [58:14-22] Bad regex pattern; Missing delimiter(s).
 [(Fun
-    { f_span = [3:1-16:2]; f_annotation = (); f_mode = <opaque>;
+    { f_span = [3:1-16:2]; f_annotation = (); f_mode = Mstrict;
       f_ret = ((void), (Some ([3:15-19], (Hprim Tvoid))));
       f_name = ([3:10-11], "\\f"); f_tparams = []; f_where_constraints = [];
       f_variadic = FVnonVariadic; f_params = [];
@@ -65,10 +65,14 @@ Errors:
           ];
         fb_annotation = No unsafe blocks };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
-      f_external = false; f_namespace = <opaque>; f_doc_comment = None;
-      f_static = false });
+      f_external = false;
+      f_namespace =
+      { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
+        ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
+        ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false };
+      f_doc_comment = None; f_static = false });
   (Fun
-     { f_span = [19:1-20:2]; f_annotation = (); f_mode = <opaque>;
+     { f_span = [19:1-20:2]; f_annotation = (); f_mode = Mstrict;
        f_ret = ((T), (Some ([19:78-79], (Habstr "T"))));
        f_name = ([19:10-17], "\\goodbye");
        f_tparams =
@@ -96,10 +100,14 @@ Errors:
        f_body =
        { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
-       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
-       f_static = false });
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
+         ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false };
+       f_doc_comment = None; f_static = false });
   (Fun
-     { f_span = [24:1-42:2]; f_annotation = (); f_mode = <opaque>;
+     { f_span = [24:1-42:2]; f_annotation = (); f_mode = Mstrict;
        f_ret = ((void), (Some ([24:25-29], (Hprim Tvoid))));
        f_name = ([24:10-21], "\\bad_pattern"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
@@ -289,10 +297,14 @@ Errors:
            ];
          fb_annotation = No unsafe blocks };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
-       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
-       f_static = false });
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
+         ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false };
+       f_doc_comment = None; f_static = false });
   (Fun
-     { f_span = [46:1-59:2]; f_annotation = (); f_mode = <opaque>;
+     { f_span = [46:1-59:2]; f_annotation = (); f_mode = Mstrict;
        f_ret = ((void), (Some ([46:31-35], (Hprim Tvoid))));
        f_name = ([46:10-27], "\\missing_delimiter"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
@@ -388,10 +400,14 @@ Errors:
            ];
          fb_annotation = No unsafe blocks };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
-       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
-       f_static = false });
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
+         ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false };
+       f_doc_comment = None; f_static = false });
   (Fun
-     { f_span = [61:1-65:2]; f_annotation = (); f_mode = <opaque>;
+     { f_span = [61:1-65:2]; f_annotation = (); f_mode = Mstrict;
        f_ret = ((void), (Some ([61:35-39], (Hprim Tvoid))));
        f_name = ([61:10-31], "\\parentheses_are_weird"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
@@ -413,6 +429,10 @@ Errors:
            ];
          fb_annotation = No unsafe blocks };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
-       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
-       f_static = false })
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
+         ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false };
+       f_doc_comment = None; f_static = false })
   ]

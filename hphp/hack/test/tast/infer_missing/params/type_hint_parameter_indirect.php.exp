@@ -6,7 +6,7 @@ Errors:
   [12:3-5] Was expecting an object but type is unknown
   [11:19-21] It is unknown
 [(Fun
-    { f_span = [3:1-5:2]; f_annotation = (); f_mode = <opaque>;
+    { f_span = [3:1-5:2]; f_annotation = (); f_mode = Mpartial;
       f_ret = ((int), (Some ([3:30-33], (Hprim Tint))));
       f_name = ([3:10-23], "\\accessorentry"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic;
@@ -30,10 +30,14 @@ Errors:
           ];
         fb_annotation = No unsafe blocks };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
-      f_external = false; f_namespace = <opaque>; f_doc_comment = None;
-      f_static = false });
+      f_external = false;
+      f_namespace =
+      { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
+        ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
+        ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false };
+      f_doc_comment = None; f_static = false });
   (Fun
-     { f_span = [7:1-9:2]; f_annotation = (); f_mode = <opaque>;
+     { f_span = [7:1-9:2]; f_annotation = (); f_mode = Mpartial;
        f_ret = ((int), (Some ([7:34-37], (Hprim Tint))));
        f_name = ([7:10-23], "\\accessorarray"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic;
@@ -61,10 +65,14 @@ Errors:
            ];
          fb_annotation = No unsafe blocks };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
-       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
-       f_static = false });
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
+         ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false };
+       f_doc_comment = None; f_static = false });
   (Fun
-     { f_span = [11:1-13:2]; f_annotation = (); f_mode = <opaque>;
+     { f_span = [11:1-13:2]; f_annotation = (); f_mode = Mpartial;
        f_ret = ((void), (Some ([11:29-33], (Hprim Tvoid))));
        f_name = ([11:10-18], "\\mutentry"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic;
@@ -96,10 +104,14 @@ Errors:
            ];
          fb_annotation = No unsafe blocks };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
-       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
-       f_static = false });
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
+         ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false };
+       f_doc_comment = None; f_static = false });
   (Fun
-     { f_span = [15:1-17:2]; f_annotation = (); f_mode = <opaque>;
+     { f_span = [15:1-17:2]; f_annotation = (); f_mode = Mpartial;
        f_ret = ((void), (Some ([15:42-46], (Hprim Tvoid))));
        f_name = ([15:10-18], "\\mutarray"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic;
@@ -139,6 +151,10 @@ Errors:
            ];
          fb_annotation = No unsafe blocks };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
-       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
-       f_static = false })
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
+         ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false };
+       f_doc_comment = None; f_static = false })
   ]

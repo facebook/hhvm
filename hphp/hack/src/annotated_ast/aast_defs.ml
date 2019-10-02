@@ -10,9 +10,9 @@
 include Aast_defs_visitors_ancestors
 module ShapeMap = Ast_defs.ShapeMap
 
-type 'a shape_map = 'a ShapeMap.t [@@deriving show]
+type 'a shape_map = 'a ShapeMap.t [@@deriving eq, show]
 
-type pos = Ast_defs.pos [@@deriving show]
+type pos = Ast_defs.pos [@@deriving eq, show]
 
 type local_id = (Local_id.t[@visitors.opaque])
 
@@ -191,6 +191,7 @@ and enum_ = {
 and where_constraint = hint * Ast_defs.constraint_kind * hint
 [@@deriving
   show { with_path = false },
+    eq,
     visitors
       {
         name = "iter_defs";
@@ -237,13 +238,14 @@ let string_of_use_as_visibility vis =
   | UseAsProtected -> "protected"
   | UseAsFinal -> "final"
 
-type id = lid [@@deriving show]
+type id = lid [@@deriving eq, show]
 
-type pstring = Ast_defs.pstring [@@deriving show]
+type pstring = Ast_defs.pstring [@@deriving eq, show]
 
 type og_null_flavor = Ast_defs.og_null_flavor =
   | OG_nullthrows
   | OG_nullsafe
+[@@deriving eq]
 
 let pp_og_null_flavor fmt flavor =
   Format.pp_print_string fmt

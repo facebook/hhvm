@@ -1,8 +1,8 @@
 [(Class
-    { c_span = [3:1-89]; c_annotation = (); c_mode = <opaque>;
+    { c_span = [3:1-89]; c_annotation = (); c_mode = Mstrict;
       c_final = false; c_is_xhp = false; c_kind = Cnormal;
       c_name = ([3:7-10], "\\Foo");
-      c_tparams = { c_tparam_list = []; c_tparam_constraints = <opaque> };
+      c_tparams = { c_tparam_list = []; c_tparam_constraints = {} };
       c_extends = []; c_uses = []; c_use_as_alias = [];
       c_insteadof_alias = []; c_method_redeclarations = [];
       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
@@ -32,13 +32,17 @@
          m_external = false; m_doc_comment = None }
         ];
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
-      c_namespace = <opaque>; c_user_attributes = []; c_file_attributes = [];
-      c_enum = None; c_pu_enums = []; c_doc_comment = None });
+      c_namespace =
+      { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
+        ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
+        ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false };
+      c_user_attributes = []; c_file_attributes = []; c_enum = None;
+      c_pu_enums = []; c_doc_comment = None });
   (Class
-     { c_span = [4:1-46]; c_annotation = (); c_mode = <opaque>;
+     { c_span = [4:1-46]; c_annotation = (); c_mode = Mstrict;
        c_final = false; c_is_xhp = false; c_kind = Cnormal;
        c_name = ([4:7-10], "\\Bar");
-       c_tparams = { c_tparam_list = []; c_tparam_constraints = <opaque> };
+       c_tparams = { c_tparam_list = []; c_tparam_constraints = {} };
        c_extends = []; c_uses = []; c_use_as_alias = [];
        c_insteadof_alias = []; c_method_redeclarations = [];
        c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
@@ -46,14 +50,18 @@
        [([4:22-43], (Happly (([4:22-43], "\\HH\\TypeAliasAttribute"), [])))];
        c_where_constraints = []; c_consts = []; c_typeconsts = [];
        c_vars = []; c_methods = []; c_attributes = []; c_xhp_children = [];
-       c_xhp_attrs = []; c_namespace = <opaque>; c_user_attributes = [];
-       c_file_attributes = []; c_enum = None; c_pu_enums = [];
-       c_doc_comment = None });
+       c_xhp_attrs = [];
+       c_namespace =
+       { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
+         ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false };
+       c_user_attributes = []; c_file_attributes = []; c_enum = None;
+       c_pu_enums = []; c_doc_comment = None });
   (Class
-     { c_span = [5:1-58]; c_annotation = (); c_mode = <opaque>;
+     { c_span = [5:1-58]; c_annotation = (); c_mode = Mstrict;
        c_final = false; c_is_xhp = false; c_kind = Cnormal;
        c_name = ([5:7-22], "\\SingleAttribute");
-       c_tparams = { c_tparam_list = []; c_tparam_constraints = <opaque> };
+       c_tparams = { c_tparam_list = []; c_tparam_constraints = {} };
        c_extends = []; c_uses = []; c_use_as_alias = [];
        c_insteadof_alias = []; c_method_redeclarations = [];
        c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
@@ -61,9 +69,13 @@
        [([5:34-55], (Happly (([5:34-55], "\\HH\\TypeAliasAttribute"), [])))];
        c_where_constraints = []; c_consts = []; c_typeconsts = [];
        c_vars = []; c_methods = []; c_attributes = []; c_xhp_children = [];
-       c_xhp_attrs = []; c_namespace = <opaque>; c_user_attributes = [];
-       c_file_attributes = []; c_enum = None; c_pu_enums = [];
-       c_doc_comment = None });
+       c_xhp_attrs = [];
+       c_namespace =
+       { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
+         ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false };
+       c_user_attributes = []; c_file_attributes = []; c_enum = None;
+       c_pu_enums = []; c_doc_comment = None });
   (Typedef
      { t_annotation = (); t_name = ([8:6-8], "\\T1"); t_tparams = [];
        t_constraint = None; t_kind = ([8:11-14], (Hprim Tint));
@@ -75,14 +87,24 @@
              (([7:11-12], int), (Int "3"))]
            }
          ];
-       t_mode = <opaque>; t_vis = Transparent; t_namespace = <opaque> });
+       t_mode = Mstrict; t_vis = Transparent;
+       t_namespace =
+       { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
+         ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false }
+       });
   (Typedef
      { t_annotation = (); t_name = ([11:6-8], "\\T2"); t_tparams = [];
        t_constraint = None;
        t_kind = ([11:11-18], (Hoption ([11:12-18], (Hprim Tstring))));
        t_user_attributes =
        [{ ua_name = ([10:3-18], "\\SingleAttribute"); ua_params = [] }];
-       t_mode = <opaque>; t_vis = Transparent; t_namespace = <opaque> });
+       t_mode = Mstrict; t_vis = Transparent;
+       t_namespace =
+       { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
+         ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false }
+       });
   (Typedef
      { t_annotation = (); t_name = ([13:6-23], "\\Serialized_contra");
        t_tparams =
@@ -90,8 +112,12 @@
           tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }
          ];
        t_constraint = None; t_kind = ([13:30-36], (Hprim Tstring));
-       t_user_attributes = []; t_mode = <opaque>; t_vis = Transparent;
-       t_namespace = <opaque> });
+       t_user_attributes = []; t_mode = Mstrict; t_vis = Transparent;
+       t_namespace =
+       { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
+         ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false }
+       });
   (Typedef
      { t_annotation = (); t_name = ([14:6-19], "\\Serialized_co");
        t_tparams =
@@ -99,6 +125,10 @@
           tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }
          ];
        t_constraint = None; t_kind = ([14:26-32], (Hprim Tstring));
-       t_user_attributes = []; t_mode = <opaque>; t_vis = Transparent;
-       t_namespace = <opaque> })
+       t_user_attributes = []; t_mode = Mstrict; t_vis = Transparent;
+       t_namespace =
+       { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
+         ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false }
+       })
   ]

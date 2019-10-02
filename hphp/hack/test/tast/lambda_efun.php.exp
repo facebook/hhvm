@@ -1,7 +1,7 @@
 Errors:
   [20:4-21:1] A semicolon (';') is expected here.
 [(Fun
-    { f_span = [12:1-25:2]; f_annotation = (); f_mode = <opaque>;
+    { f_span = [12:1-25:2]; f_annotation = (); f_mode = Mstrict;
       f_ret = ((void), (Some ([12:17-21], (Hprim Tvoid))));
       f_name = ([12:10-13], "\\foo"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
@@ -20,7 +20,7 @@ Errors:
                   (([15:8-22], (function(int $z): int)),
                    (Lfun (
                       { f_span = [15:8-22]; f_annotation = ();
-                        f_mode = <opaque>; f_ret = ((int), None);
+                        f_mode = Mstrict; f_ret = ((int), None);
                         f_name = ([15:8-22], ";anonymous"); f_tparams = [];
                         f_where_constraints = []; f_variadic = FVnonVariadic;
                         f_params =
@@ -47,8 +47,12 @@ Errors:
                           fb_annotation = No unsafe blocks };
                         f_fun_kind = FSync; f_user_attributes = [];
                         f_file_attributes = []; f_external = false;
-                        f_namespace = <opaque>; f_doc_comment = None;
-                        f_static = false },
+                        f_namespace =
+                        { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
+                          ns_record_def_uses = {}; ns_fun_uses = {};
+                          ns_const_uses = {}; ns_name = None;
+                          ns_auto_ns_map = []; ns_is_codegen = false };
+                        f_doc_comment = None; f_static = false },
                       [([15:15-17], $y)])))
                   )))));
           ([16:3-14],
@@ -69,7 +73,7 @@ Errors:
                   (([18:8-20:4], (function(int $z): int)),
                    (Efun (
                       { f_span = [18:8-20:4]; f_annotation = ();
-                        f_mode = <opaque>; f_ret = ((int), None);
+                        f_mode = Mstrict; f_ret = ((int), None);
                         f_name = ([18:8-20:4], ";anonymous"); f_tparams = [];
                         f_where_constraints = []; f_variadic = FVnonVariadic;
                         f_params =
@@ -96,8 +100,12 @@ Errors:
                           fb_annotation = No unsafe blocks };
                         f_fun_kind = FSync; f_user_attributes = [];
                         f_file_attributes = []; f_external = false;
-                        f_namespace = <opaque>; f_doc_comment = None;
-                        f_static = false },
+                        f_namespace =
+                        { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
+                          ns_record_def_uses = {}; ns_fun_uses = {};
+                          ns_const_uses = {}; ns_name = None;
+                          ns_auto_ns_map = []; ns_is_codegen = false };
+                        f_doc_comment = None; f_static = false },
                       [([18:26-28], $y)])))
                   )))));
           ([21:3-14],
@@ -119,7 +127,7 @@ Errors:
                   (([23:8-28], (function(int $a, int $b): int)),
                    (Lfun (
                       { f_span = [23:8-28]; f_annotation = ();
-                        f_mode = <opaque>; f_ret = ((int), None);
+                        f_mode = Mstrict; f_ret = ((int), None);
                         f_name = ([23:8-28], ";anonymous"); f_tparams = [];
                         f_where_constraints = []; f_variadic = FVnonVariadic;
                         f_params =
@@ -154,8 +162,12 @@ Errors:
                           fb_annotation = No unsafe blocks };
                         f_fun_kind = FSync; f_user_attributes = [];
                         f_file_attributes = []; f_external = false;
-                        f_namespace = <opaque>; f_doc_comment = None;
-                        f_static = false },
+                        f_namespace =
+                        { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
+                          ns_record_def_uses = {}; ns_fun_uses = {};
+                          ns_const_uses = {}; ns_name = None;
+                          ns_auto_ns_map = []; ns_is_codegen = false };
+                        f_doc_comment = None; f_static = false },
                       [])))
                   )))));
           ([24:3-17],
@@ -174,7 +186,11 @@ Errors:
           ];
         fb_annotation = No unsafe blocks };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
-      f_external = false; f_namespace = <opaque>;
+      f_external = false;
+      f_namespace =
+      { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
+        ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
+        ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false };
       f_doc_comment =
       (Some "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */");
       f_static = false })

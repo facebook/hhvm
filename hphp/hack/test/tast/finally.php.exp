@@ -2,7 +2,7 @@ Errors:
   [14:5-27] You are calling Shapes::idx() on a field known to not exist
   [4:45-52] The field 'foo' is not defined in this shape
 [(Fun
-    { f_span = [4:1-6:2]; f_annotation = (); f_mode = <opaque>;
+    { f_span = [4:1-6:2]; f_annotation = (); f_mode = Mstrict;
       f_ret =
       ((Awaitable<shape()>),
        (Some ([4:35-53],
@@ -20,10 +20,14 @@ Errors:
         [([5:3-18], (Return (Some (([5:10-17], shape()), (Shape [])))))];
         fb_annotation = No unsafe blocks };
       f_fun_kind = FAsync; f_user_attributes = []; f_file_attributes = [];
-      f_external = false; f_namespace = <opaque>; f_doc_comment = None;
-      f_static = false });
+      f_external = false;
+      f_namespace =
+      { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
+        ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
+        ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false };
+      f_doc_comment = None; f_static = false });
   (Fun
-     { f_span = [8:1-16:2]; f_annotation = (); f_mode = <opaque>;
+     { f_span = [8:1-16:2]; f_annotation = (); f_mode = Mstrict;
        f_ret =
        ((Awaitable<void>),
         (Some ([8:24-39],
@@ -77,6 +81,10 @@ Errors:
            ];
          fb_annotation = No unsafe blocks };
        f_fun_kind = FAsync; f_user_attributes = []; f_file_attributes = [];
-       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
-       f_static = false })
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
+         ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false };
+       f_doc_comment = None; f_static = false })
   ]

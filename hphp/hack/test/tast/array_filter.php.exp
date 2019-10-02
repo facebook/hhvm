@@ -1,5 +1,5 @@
 [(Fun
-    { f_span = [3:1-28:2]; f_annotation = (); f_mode = <opaque>;
+    { f_span = [3:1-28:2]; f_annotation = (); f_mode = Mpartial;
       f_ret = ((void), (Some ([10:4-8], (Hprim Tvoid))));
       f_name = ([3:10-27], "\\test_array_filter"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic;
@@ -138,7 +138,7 @@
                   (([20:8-35], (function(?string $x): bool)),
                    (Lfun (
                       { f_span = [20:8-35]; f_annotation = ();
-                        f_mode = <opaque>;
+                        f_mode = Mpartial;
                         f_ret = ((bool), (Some ([20:22-26], (Hprim Tbool))));
                         f_name = ([20:8-35], ";anonymous"); f_tparams = [];
                         f_where_constraints = []; f_variadic = FVnonVariadic;
@@ -161,8 +161,12 @@
                           fb_annotation = No unsafe blocks };
                         f_fun_kind = FSync; f_user_attributes = [];
                         f_file_attributes = []; f_external = false;
-                        f_namespace = <opaque>; f_doc_comment = None;
-                        f_static = false },
+                        f_namespace =
+                        { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
+                          ns_record_def_uses = {}; ns_fun_uses = {};
+                          ns_const_uses = {}; ns_name = None;
+                          ns_auto_ns_map = []; ns_is_codegen = false };
+                        f_doc_comment = None; f_static = false },
                       [])))
                   )))));
           ([22:3-36],
@@ -244,6 +248,10 @@
           ];
         fb_annotation = No unsafe blocks };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
-      f_external = false; f_namespace = <opaque>; f_doc_comment = None;
-      f_static = false })
+      f_external = false;
+      f_namespace =
+      { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
+        ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
+        ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false };
+      f_doc_comment = None; f_static = false })
   ]

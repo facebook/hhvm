@@ -19,6 +19,7 @@ include Aast_defs
 type ('ex, 'fb, 'en, 'hi) program = ('ex, 'fb, 'en, 'hi) def list
 [@@deriving
   show { with_path = false },
+    eq,
     visitors
       {
         variety = "iter";
@@ -280,7 +281,7 @@ and ('ex, 'fb, 'en, 'hi) fun_variadicity =
 and ('ex, 'fb, 'en, 'hi) fun_ = {
   f_span: pos;
   f_annotation: 'en;
-  f_mode: FileInfo.mode; [@opaque]
+  f_mode: FileInfo.mode; [@visitors.opaque]
   f_ret: 'hi type_hint;
   f_name: sid;
   f_tparams: ('ex, 'fb, 'en, 'hi) tparam list;
@@ -345,7 +346,7 @@ and ('ex, 'fb, 'en, 'hi) class_tparams = {
    * for the purposes of Naming.class_meth_bodies *)
   c_tparam_constraints:
     (reify_kind * (Ast_defs.constraint_kind * hint) list) SMap.t;
-      [@opaque]
+      [@visitors.opaque]
 }
 
 and use_as_alias = sid option * pstring * sid option * use_as_visibility list
@@ -357,7 +358,7 @@ and is_extends = bool
 and ('ex, 'fb, 'en, 'hi) class_ = {
   c_span: pos;
   c_annotation: 'en;
-  c_mode: FileInfo.mode; [@opaque]
+  c_mode: FileInfo.mode; [@visitors.opaque]
   c_final: bool;
   c_is_xhp: bool;
   c_kind: Ast_defs.class_kind;
@@ -498,7 +499,7 @@ and ('ex, 'fb, 'en, 'hi) method_redeclaration = {
   mt_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;
 }
 
-and nsenv = (Namespace_env.env[@opaque])
+and nsenv = (Namespace_env.env[@visitors.opaque])
 
 and ('ex, 'fb, 'en, 'hi) typedef = {
   t_annotation: 'en;
@@ -507,14 +508,14 @@ and ('ex, 'fb, 'en, 'hi) typedef = {
   t_constraint: hint option;
   t_kind: hint;
   t_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;
-  t_mode: FileInfo.mode; [@opaque]
+  t_mode: FileInfo.mode; [@visitors.opaque]
   t_vis: typedef_visibility;
   t_namespace: nsenv;
 }
 
 and ('ex, 'fb, 'en, 'hi) gconst = {
   cst_annotation: 'en;
-  cst_mode: FileInfo.mode; [@opaque]
+  cst_mode: FileInfo.mode; [@visitors.opaque]
   cst_name: sid;
   cst_type: hint option;
   cst_value: ('ex, 'fb, 'en, 'hi) expr;

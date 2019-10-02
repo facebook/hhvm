@@ -17,7 +17,7 @@ File "switch_fallthrough.php", line 33, characters 7-17:
 File "switch_fallthrough.php", line 37, characters 3-13:
   (bool | num)
 [(Fun
-    { f_span = [3:1-38:2]; f_annotation = (); f_mode = <opaque>;
+    { f_span = [3:1-38:2]; f_annotation = (); f_mode = Mstrict;
       f_ret = ((void), (Some ([3:18-22], (Hprim Tvoid))));
       f_name = ([3:10-14], "\\test"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
@@ -137,6 +137,10 @@ File "switch_fallthrough.php", line 37, characters 3-13:
           ];
         fb_annotation = No unsafe blocks };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
-      f_external = false; f_namespace = <opaque>; f_doc_comment = None;
-      f_static = false })
+      f_external = false;
+      f_namespace =
+      { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
+        ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
+        ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false };
+      f_doc_comment = None; f_static = false })
   ]

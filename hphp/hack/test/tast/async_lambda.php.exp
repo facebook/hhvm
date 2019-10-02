@@ -1,5 +1,5 @@
 [(Fun
-    { f_span = [3:1-70]; f_annotation = (); f_mode = <opaque>;
+    { f_span = [3:1-70]; f_annotation = (); f_mode = Mstrict;
       f_ret =
       ((Awaitable<string>),
        (Some ([3:38-55],
@@ -21,10 +21,14 @@
           (Return (Some (([3:65-67], string), (Lvar ([3:65-67], $s))))))];
         fb_annotation = No unsafe blocks };
       f_fun_kind = FAsync; f_user_attributes = []; f_file_attributes = [];
-      f_external = false; f_namespace = <opaque>; f_doc_comment = None;
-      f_static = false });
+      f_external = false;
+      f_namespace =
+      { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
+        ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
+        ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false };
+      f_doc_comment = None; f_static = false });
   (Fun
-     { f_span = [5:1-12:2]; f_annotation = (); f_mode = <opaque>;
+     { f_span = [5:1-12:2]; f_annotation = (); f_mode = Mstrict;
        f_ret = ((void), (Some ([5:18-22], (Hprim Tvoid))));
        f_name = ([5:10-14], "\\test"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
@@ -39,7 +43,7 @@
                   (([6:9-8:4], (function(): Awaitable<_>)),
                    (Lfun (
                       { f_span = [6:9-8:4]; f_annotation = ();
-                        f_mode = <opaque>; f_ret = ((Awaitable<void>), None);
+                        f_mode = Mstrict; f_ret = ((Awaitable<void>), None);
                         f_name = ([6:9-8:4], ";anonymous"); f_tparams = [];
                         f_where_constraints = []; f_variadic = FVnonVariadic;
                         f_params = [];
@@ -65,8 +69,12 @@
                           fb_annotation = No unsafe blocks };
                         f_fun_kind = FAsync; f_user_attributes = [];
                         f_file_attributes = []; f_external = false;
-                        f_namespace = <opaque>; f_doc_comment = None;
-                        f_static = false },
+                        f_namespace =
+                        { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
+                          ns_record_def_uses = {}; ns_fun_uses = {};
+                          ns_const_uses = {}; ns_name = None;
+                          ns_auto_ns_map = []; ns_is_codegen = false };
+                        f_doc_comment = None; f_static = false },
                       [])))
                   )))));
            ([9:3-11:5],
@@ -78,8 +86,7 @@
                    (([9:9-11:4], (function(string $x): Awaitable<void>)),
                     (Lfun (
                        { f_span = [9:9-11:4]; f_annotation = ();
-                         f_mode = <opaque>;
-                         f_ret = ((Awaitable<void>), None);
+                         f_mode = Mstrict; f_ret = ((Awaitable<void>), None);
                          f_name = ([9:9-11:4], ";anonymous"); f_tparams = [];
                          f_where_constraints = [];
                          f_variadic = FVnonVariadic;
@@ -116,13 +123,21 @@
                            fb_annotation = No unsafe blocks };
                          f_fun_kind = FAsync; f_user_attributes = [];
                          f_file_attributes = []; f_external = false;
-                         f_namespace = <opaque>; f_doc_comment = None;
-                         f_static = false },
+                         f_namespace =
+                         { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
+                           ns_record_def_uses = {}; ns_fun_uses = {};
+                           ns_const_uses = {}; ns_name = None;
+                           ns_auto_ns_map = []; ns_is_codegen = false };
+                         f_doc_comment = None; f_static = false },
                        [])))
                    )))))
            ];
          fb_annotation = No unsafe blocks };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
-       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
-       f_static = false })
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
+         ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false };
+       f_doc_comment = None; f_static = false })
   ]

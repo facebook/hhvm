@@ -15,11 +15,12 @@ type visibility =
   | Vpublic
   | Vprivate of string
   | Vprotected of string
-[@@deriving show]
+[@@deriving eq, show]
 
 type exact =
   | Exact
   | Nonexact
+[@@deriving eq]
 
 (* All the possible types, reason is a trace of why a type
    was inferred in a certain way.
@@ -29,18 +30,18 @@ type exact =
    inferred via local inference.
 *)
 (* create private types to represent the different type phases *)
-type decl_phase = private DeclPhase
+type decl_phase = private DeclPhase [@@deriving eq]
 
-type locl_phase = private LoclPhase
+type locl_phase = private LoclPhase [@@deriving eq]
 
 (* This abstract type allows us to guard the construction of Tany to the
  * make_tany function in this module. *)
 module TanySentinel : sig
-  type t
+  type t [@@deriving eq]
 
   val value : t
 end = struct
-  type t = ()
+  type t = () [@@deriving eq]
 
   let value : t = ()
 end
@@ -49,11 +50,59 @@ let show_phase_ty _ = "<phase_ty>"
 
 let pp_phase_ty _ _ = Printf.printf "%s\n" "<phase_ty>"
 
+type val_kind =
+  | Lval
+  | LvalSubexpr
+  | Other
+[@@deriving eq]
+
+type param_mutability =
+  | Param_owned_mutable
+  | Param_borrowed_mutable
+  | Param_maybe_mutable
+[@@deriving eq]
+
+type fun_tparams_kind =
+  | FTKtparams
+      (** If ft_tparams is empty, the containing fun_type is a concrete function type.
+      Otherwise, it is a generic function and ft_tparams specifies its type parameters. *)
+  | FTKinstantiated_targs
+      (** The containing fun_type is a concrete function type which is an
+      instantiation of a generic function with at least one reified type
+      parameter. This means that the function requires explicit type arguments
+      at every invocation, and ft_tparams specifies the type arguments with
+      which the generic function was instantiated, as well as whether each
+      explicit type argument must be reified. *)
+[@@deriving eq]
+
+type shape_kind =
+  | Closed_shape
+  | Open_shape
+[@@deriving eq]
+
+type param_mode =
+  | FPnormal
+  | FPref
+  | FPinout
+[@@deriving eq]
+
 type pu_kind =
   (* all atoms of an enumeration *)
   | Pu_plain
   (* single atom of an enumeration *)
   | Pu_atom of string
+[@@deriving eq]
+
+type xhp_attr_tag =
+  | Required
+  | Lateinit
+[@@deriving eq]
+
+type xhp_attr = {
+  xa_tag: xhp_attr_tag option;
+  xa_has_default: bool;
+}
+[@@deriving eq]
 
 type 'phase ty = Reason.t * 'phase ty_
 
@@ -305,10 +354,6 @@ and dependent_type =
 
 and taccess_type = decl_ty * Nast.sid list
 
-and shape_kind =
-  | Closed_shape
-  | Open_shape
-
 (* represents reactivity of function
    - None corresponds to non-reactive function
    - Some reactivity - to reactive function with specified reactivity flavor
@@ -328,28 +373,6 @@ and reactivity =
   | Reactive of decl_ty option
   | MaybeReactive of reactivity
   | RxVar of reactivity option
-
-and val_kind =
-  | Lval
-  | LvalSubexpr
-  | Other
-
-and param_mutability =
-  | Param_owned_mutable
-  | Param_borrowed_mutable
-  | Param_maybe_mutable
-
-and fun_tparams_kind =
-  | FTKtparams
-      (** If ft_tparams is empty, the containing fun_type is a concrete function type.
-      Otherwise, it is a generic function and ft_tparams specifies its type parameters. *)
-  | FTKinstantiated_targs
-      (** The containing fun_type is a concrete function type which is an
-      instantiation of a generic function with at least one reified type
-      parameter. This means that the function requires explicit type arguments
-      at every invocation, and ft_tparams specifies the type arguments with
-      which the generic function was instantiated, as well as whether each
-      explicit type argument must be reified. *)
 
 (* The type of a function AND a method.
  * A function has a min and max arity because of optional arguments *)
@@ -394,11 +417,6 @@ and decl_fun_arity = decl_ty fun_arity
 
 and locl_fun_arity = locl_ty fun_arity
 
-and param_mode =
-  | FPnormal
-  | FPref
-  | FPinout
-
 and param_rx_annotation =
   | Param_rx_var
   | Param_rx_if_impl of decl_ty
@@ -432,15 +450,6 @@ and 'ty fun_params = 'ty fun_param list
 and decl_fun_params = decl_ty fun_params
 
 and locl_fun_params = locl_ty fun_params
-
-and xhp_attr_tag =
-  | Required
-  | Lateinit
-
-and xhp_attr = {
-  xa_tag: xhp_attr_tag option;
-  xa_has_default: bool;
-}
 
 and class_elt = {
   ce_abstract: bool;
@@ -759,6 +768,33 @@ let ty_con_ordinal ty =
   | Tpu _ -> 18
   | Tpu_access _ -> 19
 
+(* Ordinal value for type constructor, for decl types *)
+let decl_ty_con_ordinal ty =
+  match snd ty with
+  | Tany _
+  | Terr ->
+    0
+  | Tthis -> 1
+  | Tapply _ -> 2
+  | Tgeneric _ -> 3
+  | Taccess _ -> 4
+  | Tarray _ -> 5
+  | Tdarray _ -> 6
+  | Tvarray _ -> 7
+  | Tvarray_or_darray _ -> 8
+  | Tmixed -> 9
+  | Tnothing -> 10
+  | Tlike _ -> 11
+  | Tnonnull -> 12
+  | Tdynamic -> 13
+  | Toption _ -> 14
+  | Tprim _ -> 15
+  | Tfun _ -> 16
+  | Ttuple _ -> 17
+  | Tshape _ -> 18
+  | Tpu_access _ -> 19
+  | Tvar _ -> 20
+
 let array_kind_con_ordinal ak =
   match ak with
   | AKany -> 0
@@ -948,3 +984,169 @@ let make_function_type_rxvar param_ty =
   | (r, Toption (r1, Tfun tfun)) ->
     (r, Toption (r1, Tfun { tfun with ft_reactive = RxVar None }))
   | _ -> param_ty
+
+let rec equal_decl_ty ty1 ty2 =
+  let rec equal_ty ty1 ty2 =
+    let (ty_1, ty_2) = (snd ty1, snd ty2) in
+    match (ty_1, ty_2) with
+    | (Tany _, Tany _) -> true
+    | (Terr, Terr) -> true
+    | (Tthis, Tthis) -> true
+    | (Tmixed, Tmixed) -> true
+    | (Tnothing, Tnothing) -> true
+    | (Tnonnull, Tnonnull) -> true
+    | (Tdynamic, Tdynamic) -> true
+    | (Tapply (id1, tyl1), Tapply (id2, tyl2)) ->
+      Aast.equal_sid id1 id2 && equal_decl_tyl tyl1 tyl2
+    | (Tgeneric s1, Tgeneric s2) -> String.equal s1 s2
+    | (Taccess (ty1, idl1), Taccess (ty2, idl2)) ->
+      equal_ty ty1 ty2 && List.equal ~equal:Aast.equal_sid idl1 idl2
+    | (Tarray (tk1, tv1), Tarray (tk2, tv2)) ->
+      Option.equal equal_ty tk1 tk2 && Option.equal equal_ty tv1 tv2
+    | (Tdarray (tk1, tv1), Tdarray (tk2, tv2)) ->
+      equal_ty tk1 tk2 && equal_ty tv1 tv2
+    | (Tvarray ty1, Tvarray ty2) -> equal_ty ty1 ty2
+    | (Tvarray_or_darray ty1, Tvarray_or_darray ty2) -> equal_ty ty1 ty2
+    | (Tlike ty1, Tlike ty2) -> equal_ty ty1 ty2
+    | (Tprim ty1, Tprim ty2) -> Aast.equal_tprim ty1 ty2
+    | (Toption ty, Toption ty2) -> equal_ty ty ty2
+    | (Tfun fty1, Tfun fty2) -> equal_decl_fun_type fty1 fty2
+    | (Ttuple tyl1, Ttuple tyl2) -> equal_decl_tyl tyl1 tyl2
+    | (Tshape (shape_kind1, fields1), Tshape (shape_kind2, fields2)) ->
+      equal_shape_kind shape_kind1 shape_kind2
+      && List.equal
+           ~equal:(fun (k1, v1) (k2, v2) ->
+             Ast_defs.ShapeField.equal k1 k2 && equal_shape_field_type v1 v2)
+           (Nast.ShapeMap.elements fields1)
+           (Nast.ShapeMap.elements fields2)
+    | (Tpu_access (ty1, id1), Tpu_access (ty2, id2)) ->
+      equal_ty ty1 ty2 && Aast.equal_sid id1 id2
+    | (Tvar v1, Tvar v2) -> Ident.equal v1 v2
+    | (Tany _, _)
+    | (Terr, _)
+    | (Tthis, _)
+    | (Tapply _, _)
+    | (Tgeneric _, _)
+    | (Taccess _, _)
+    | (Tarray _, _)
+    | (Tdarray _, _)
+    | (Tvarray _, _)
+    | (Tvarray_or_darray _, _)
+    | (Tmixed, _)
+    | (Tnothing, _)
+    | (Tlike _, _)
+    | (Tnonnull, _)
+    | (Tdynamic, _)
+    | (Toption _, _)
+    | (Tprim _, _)
+    | (Tfun _, _)
+    | (Ttuple _, _)
+    | (Tshape _, _)
+    | (Tpu_access _, _)
+    | (Tvar _, _) ->
+      false
+  and equal_shape_kind sk1 sk2 =
+    match (sk1, sk2) with
+    | (Closed_shape, Closed_shape)
+    | (Open_shape, Open_shape) ->
+      true
+    | (Closed_shape, Open_shape) -> false
+    | (Open_shape, Closed_shape) -> false
+  and equal_shape_field_type sft1 sft2 =
+    equal_ty sft1.sft_ty sft2.sft_ty
+    && Bool.equal sft1.sft_optional sft2.sft_optional
+  in
+  equal_ty ty1 ty2
+
+and equal_decl_fun_type fty1 fty2 =
+  let equal_arity a1 a2 =
+    match (a1, a2) with
+    | (Fstandard (min1, max1), Fstandard (min2, max2)) ->
+      Int.equal min1 min2 && Int.equal max1 max2
+    | (Fvariadic (min1, param1), Fvariadic (min2, param2)) ->
+      Int.equal min1 min2 && equal_decl_ft_params [param1] [param2]
+    | (Fellipsis (min1, pos1), Fellipsis (min2, pos2)) ->
+      Int.equal min1 min2 && Pos.equal pos1 pos2
+    | (Fstandard _, _)
+    | (Fvariadic _, _)
+    | (Fellipsis _, _) ->
+      false
+  in
+  let rec equal_reactivity r1 r2 =
+    match (r1, r2) with
+    | (Nonreactive, Nonreactive) -> true
+    | (Local ty1, Local ty2)
+    | (Shallow ty1, Shallow ty2)
+    | (Reactive ty1, Reactive ty2) ->
+      Option.equal equal_decl_ty ty1 ty2
+    | (MaybeReactive r1, MaybeReactive r2) -> equal_reactivity r1 r2
+    | (RxVar r1, RxVar r2) -> Option.equal equal_reactivity r1 r2
+    | (Nonreactive, _)
+    | (Local _, _)
+    | (Shallow _, _)
+    | (Reactive _, _)
+    | (MaybeReactive _, _)
+    | (RxVar _, _) ->
+      false
+  in
+  equal_decl_possibly_enforced_ty fty1.ft_ret fty2.ft_ret
+  && equal_decl_ft_params fty1.ft_params fty2.ft_params
+  && Bool.equal fty1.ft_is_coroutine fty2.ft_is_coroutine
+  && equal_arity fty1.ft_arity fty2.ft_arity
+  && equal_reactivity fty1.ft_reactive fty2.ft_reactive
+  && Bool.equal fty1.ft_return_disposable fty2.ft_return_disposable
+  && Option.equal equal_param_mutability fty1.ft_mutability fty2.ft_mutability
+  && Bool.equal fty1.ft_returns_mutable fty2.ft_returns_mutable
+
+and equal_decl_tyl tyl1 tyl2 = List.equal ~equal:equal_decl_ty tyl1 tyl2
+
+and equal_decl_possibly_enforced_ty ety1 ety2 =
+  equal_decl_ty ety1.et_type ety2.et_type
+  && Bool.equal ety1.et_enforced ety2.et_enforced
+
+and equal_decl_fun_param param1 param2 =
+  equal_decl_possibly_enforced_ty param1.fp_type param2.fp_type
+  && equal_param_mode param1.fp_kind param2.fp_kind
+  && Bool.equal param1.fp_accept_disposable param2.fp_accept_disposable
+  && Option.equal
+       equal_param_mutability
+       param1.fp_mutability
+       param2.fp_mutability
+
+and equal_decl_ft_params params1 params2 =
+  List.equal ~equal:equal_decl_fun_param params1 params2
+
+let equal_typeconst_abstract_kind ak1 ak2 =
+  match (ak1, ak2) with
+  | (TCAbstract ty1, TCAbstract ty2) -> Option.equal equal_decl_ty ty1 ty2
+  | (TCPartiallyAbstract, TCPartiallyAbstract) -> true
+  | (TCConcrete, TCConcrete) -> true
+  | (TCAbstract _, _)
+  | (TCPartiallyAbstract, _)
+  | (TCConcrete, _) ->
+    false
+
+let equal_enum_type et1 et2 =
+  equal_decl_ty et1.te_base et2.te_base
+  && Option.equal equal_decl_ty et1.te_constraint et2.te_constraint
+
+let equal_decl_where_constraint c1 c2 =
+  let (tya1, ck1, tyb1) = c1 in
+  let (tya2, ck2, tyb2) = c2 in
+  equal_decl_ty tya1 tya2
+  && Ast_defs.equal_constraint_kind ck1 ck2
+  && equal_decl_ty tyb1 tyb2
+
+let equal_decl_tparam tp1 tp2 =
+  Ast_defs.equal_variance tp1.tp_variance tp2.tp_variance
+  && Ast_defs.equal_id tp1.tp_name tp2.tp_name
+  && List.equal
+       ~equal:
+         (Tuple.T2.equal ~eq1:Ast_defs.equal_constraint_kind ~eq2:equal_decl_ty)
+       tp1.tp_constraints
+       tp2.tp_constraints
+  && Aast.equal_reify_kind tp1.tp_reified tp2.tp_reified
+  && List.equal
+       ~equal:Nast.equal_user_attribute
+       tp1.tp_user_attributes
+       tp2.tp_user_attributes

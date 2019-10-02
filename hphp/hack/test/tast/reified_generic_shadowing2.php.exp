@@ -1,7 +1,7 @@
 Errors:
   [6:21-23] Tc is a type parameter. Type parameters cannot themselves take type parameters (e.g. Tc<int> doesn't make sense)
 [(Class
-    { c_span = [4:1-7:2]; c_annotation = (); c_mode = <opaque>;
+    { c_span = [4:1-7:2]; c_annotation = (); c_mode = Mstrict;
       c_final = false; c_is_xhp = false; c_kind = Cnormal;
       c_name = ([4:7-9], "\\Tc");
       c_tparams =
@@ -10,7 +10,7 @@ Errors:
            tp_constraints = []; tp_reified = Erased; tp_user_attributes = []
            }
           ];
-        c_tparam_constraints = <opaque> };
+        c_tparam_constraints = { "Tc" -> (Erased, []) } };
       c_extends = []; c_uses = []; c_use_as_alias = [];
       c_insteadof_alias = []; c_method_redeclarations = [];
       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
@@ -36,13 +36,17 @@ Errors:
          m_external = false; m_doc_comment = None }
         ];
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
-      c_namespace = <opaque>; c_user_attributes = []; c_file_attributes = [];
-      c_enum = None; c_pu_enums = []; c_doc_comment = None });
+      c_namespace =
+      { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
+        ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
+        ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false };
+      c_user_attributes = []; c_file_attributes = []; c_enum = None;
+      c_pu_enums = []; c_doc_comment = None });
   (Class
-     { c_span = [9:1-12:2]; c_annotation = (); c_mode = <opaque>;
+     { c_span = [9:1-12:2]; c_annotation = (); c_mode = Mstrict;
        c_final = false; c_is_xhp = false; c_kind = Cnormal;
        c_name = ([9:7-15], "\\Tc_other");
-       c_tparams = { c_tparam_list = []; c_tparam_constraints = <opaque> };
+       c_tparams = { c_tparam_list = []; c_tparam_constraints = {} };
        c_extends = []; c_uses = []; c_use_as_alias = [];
        c_insteadof_alias = []; c_method_redeclarations = [];
        c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
@@ -72,7 +76,10 @@ Errors:
           m_external = false; m_doc_comment = None }
          ];
        c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
-       c_namespace = <opaque>; c_user_attributes = [];
-       c_file_attributes = []; c_enum = None; c_pu_enums = [];
-       c_doc_comment = None })
+       c_namespace =
+       { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
+         ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false };
+       c_user_attributes = []; c_file_attributes = []; c_enum = None;
+       c_pu_enums = []; c_doc_comment = None })
   ]

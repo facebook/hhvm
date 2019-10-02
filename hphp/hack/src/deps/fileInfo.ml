@@ -30,7 +30,7 @@ type mode =
   | Mstrict (* check everything! *)
   | Mpartial (* Don't fail if you see a function/class you don't know *)
   | Mexperimental (* Strict mode + experimental features *)
-[@@deriving show]
+[@@deriving eq, show]
 
 let parse_mode = function
   | "strict"
@@ -79,14 +79,14 @@ type name_type =
   | RecordDef
   | Typedef
   | Const
-[@@deriving show]
+[@@deriving eq, show]
 
 type pos =
   | Full of Pos.t
   | File of name_type * Relative_path.t
-[@@deriving show]
+[@@deriving eq, show]
 
-type id = pos * string [@@deriving show]
+type id = pos * string [@@deriving eq, show]
 
 (* The hash value of a decl AST.
   We use this to see if two versions of a file are "similar", i.e. their
@@ -96,7 +96,7 @@ type id = pos * string [@@deriving show]
 (* The record produced by the parsing phase. *)
 (*****************************************************************************)
 
-type hash_type = OpaqueDigest.t option
+type hash_type = OpaqueDigest.t option [@@deriving eq]
 
 let pp_hash_type fmt hash =
   match hash with
@@ -113,7 +113,7 @@ type t = {
   consts: id list;
   comments: (Pos.t * comment) list option; (* None if loaded from saved state *)
 }
-[@@deriving show]
+[@@deriving eq, show]
 
 let empty_t =
   {

@@ -97,6 +97,7 @@ and uop =
   | Usilence
 [@@deriving
   show { with_path = false },
+    eq,
     visitors
       {
         name = "iter_defs";
@@ -152,7 +153,7 @@ let string_of_param_kind = function
   | Pinout -> "inout"
 
 module ShapeField = struct
-  type t = shape_field_name
+  type t = shape_field_name [@@deriving eq]
 
   (* We include span information in shape_field_name to improve error
    * messages, but we don't want it being used in the comparison, so

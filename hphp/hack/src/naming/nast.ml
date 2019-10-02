@@ -15,7 +15,8 @@ type func_body_ann =
   | Named
   | NamedWithUnsafeBlocks
   (* Namespace info *)
-  | Unnamed of Namespace_env.env [@opaque]
+  | Unnamed of Namespace_env.env
+[@@deriving eq]
 
 let show_func_body_ann = function
   | Named -> "Named"
@@ -30,7 +31,7 @@ type program = (Pos.t, func_body_ann, unit, unit) Aast.program
 
 type def = (Pos.t, func_body_ann, unit, unit) Aast.def
 
-type expr = (Pos.t, func_body_ann, unit, unit) Aast.expr [@@deriving show]
+type expr = (Pos.t, func_body_ann, unit, unit) Aast.expr [@@deriving eq, show]
 
 type expr_ = (Pos.t, func_body_ann, unit, unit) Aast.expr_
 
@@ -39,7 +40,7 @@ type stmt = (Pos.t, func_body_ann, unit, unit) Aast.stmt
 type block = (Pos.t, func_body_ann, unit, unit) Aast.block
 
 type user_attribute = (Pos.t, func_body_ann, unit, unit) Aast.user_attribute
-[@@deriving show]
+[@@deriving eq, show]
 
 type class_id_ = (Pos.t, func_body_ann, unit, unit) Aast.class_id_
 

@@ -794,7 +794,7 @@ val try_unless_error_in_different_file :
   Relative_path.t -> (unit -> 'a) -> (error -> unit) -> 'a
 
 (* The type of collections of errors *)
-type t
+type t [@@deriving eq]
 
 val do_ : (unit -> 'a) -> t * 'a
 

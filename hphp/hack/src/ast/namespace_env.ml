@@ -19,7 +19,7 @@ type env = {
   ns_auto_ns_map: (string * string) list;
   ns_is_codegen: bool;
 }
-[@@deriving show]
+[@@deriving eq, show]
 
 let empty auto_ns_map is_code_gen =
   {

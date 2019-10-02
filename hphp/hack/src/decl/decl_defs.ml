@@ -56,7 +56,7 @@ type source_type =
   | Interface
   | ReqImpl
   | ReqExtends
-[@@deriving show]
+[@@deriving eq, show]
 
 type mro_element = {
   (* The class's name *)
@@ -125,9 +125,19 @@ type mro_element = {
      type constant instead. *)
   mro_passthrough_abstract_typeconst: bool;
 }
-[@@deriving show]
+[@@deriving eq, show]
 
 type linearization = mro_element Sequence.t
+
+(* name of condition type for conditional reactivity of methods.
+   If None - method is unconditionally reactive *)
+type condition_type_name = string option [@@deriving eq, show]
+
+type method_reactivity =
+  | Method_reactive of condition_type_name
+  | Method_shallow of condition_type_name
+  | Method_local of condition_type_name
+[@@deriving eq, show]
 
 type decl_class_type = {
   dc_need_init: bool;
@@ -167,15 +177,6 @@ type decl_class_type = {
   dc_condition_types: SSet.t;
 }
 [@@deriving show]
-
-(* name of condition type for conditional reactivity of methods.
-   If None - method is unconditionally reactive *)
-and condition_type_name = string option
-
-and method_reactivity =
-  | Method_reactive of condition_type_name
-  | Method_shallow of condition_type_name
-  | Method_local of condition_type_name
 
 and element = {
   elt_final: bool;

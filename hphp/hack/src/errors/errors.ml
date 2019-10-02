@@ -12,11 +12,11 @@ open Utils
 open Reordered_argument_collections
 open String_utils
 
-type error_code = int
+type error_code = int [@@deriving eq]
 
 (* We use `Pos.t message` on the server and convert to `Pos.absolute message`
  * before sending it to the client *)
-type 'a message = 'a * string
+type 'a message = 'a * string [@@deriving eq]
 
 type phase =
   | Init
@@ -56,10 +56,10 @@ module PhaseMap = Reordered_argument_map (MyMap.Make (struct
 end))
 
 (* Results of single file analysis. *)
-type 'a file_t = 'a list PhaseMap.t
+type 'a file_t = 'a list PhaseMap.t [@@deriving eq]
 
 (* Results of multi-file analysis. *)
-type 'a files_t = 'a file_t Relative_path.Map.t
+type 'a files_t = 'a file_t Relative_path.Map.t [@@deriving eq]
 
 let files_t_fold v ~f ~init =
   Relative_path.Map.fold v ~init ~f:(fun path v acc ->
@@ -116,11 +116,11 @@ let get_last error_map =
     | [] -> None
     | e :: _ -> Some e)
 
-type 'a error_ = error_code * 'a message list
+type 'a error_ = error_code * 'a message list [@@deriving eq]
 
-type error = Pos.t error_
+type error = Pos.t error_ [@@deriving eq]
 
-type applied_fixme = Pos.t * int
+type applied_fixme = Pos.t * int [@@deriving eq]
 
 let applied_fixmes : applied_fixme files_t ref = ref Relative_path.Map.empty
 
@@ -622,7 +622,7 @@ module Typing = Error_codes.Typing
 (* Types *)
 (*****************************************************************************)
 
-type t = error files_t * applied_fixme files_t
+type t = error files_t * applied_fixme files_t [@@deriving eq]
 
 module type Error_category = sig
   type t

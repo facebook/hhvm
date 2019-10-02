@@ -1,5 +1,5 @@
 [(Fun
-    { f_span = [3:1-5:2]; f_annotation = (); f_mode = <opaque>;
+    { f_span = [3:1-5:2]; f_annotation = (); f_mode = Mstrict;
       f_ret =
       ((Awaitable<int>),
        (Some ([3:26-40],
@@ -11,10 +11,14 @@
       { fb_ast = [([4:3-12], (Return (Some (([4:10-11], int), (Int "1")))))];
         fb_annotation = No unsafe blocks };
       f_fun_kind = FAsync; f_user_attributes = []; f_file_attributes = [];
-      f_external = false; f_namespace = <opaque>; f_doc_comment = None;
-      f_static = false });
+      f_external = false;
+      f_namespace =
+      { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
+        ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
+        ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false };
+      f_doc_comment = None; f_static = false });
   (Fun
-     { f_span = [7:1-9:2]; f_annotation = (); f_mode = <opaque>;
+     { f_span = [7:1-9:2]; f_annotation = (); f_mode = Mstrict;
        f_ret =
        ((Awaitable<string>),
         (Some ([7:29-46],
@@ -27,10 +31,14 @@
          [([8:3-16], (Return (Some (([8:10-15], string), (String "foo")))))];
          fb_annotation = No unsafe blocks };
        f_fun_kind = FAsync; f_user_attributes = []; f_file_attributes = [];
-       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
-       f_static = false });
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
+         ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false };
+       f_doc_comment = None; f_static = false });
   (Fun
-     { f_span = [11:1-17:2]; f_annotation = (); f_mode = <opaque>;
+     { f_span = [11:1-17:2]; f_annotation = (); f_mode = Mstrict;
        f_ret =
        ((Awaitable<void>),
         (Some ([11:21-36],
@@ -79,6 +87,10 @@
            ];
          fb_annotation = No unsafe blocks };
        f_fun_kind = FAsync; f_user_attributes = []; f_file_attributes = [];
-       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
-       f_static = false })
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
+         ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false };
+       f_doc_comment = None; f_static = false })
   ]

@@ -12,10 +12,14 @@
                 sfi_name = (SFlit_str ([3:33-36], "y")) }
               ]
             }));
-      t_user_attributes = []; t_mode = <opaque>; t_vis = Transparent;
-      t_namespace = <opaque> });
+      t_user_attributes = []; t_mode = Mstrict; t_vis = Transparent;
+      t_namespace =
+      { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
+        ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
+        ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false }
+      });
   (Fun
-     { f_span = [5:1-11:2]; f_annotation = (); f_mode = <opaque>;
+     { f_span = [5:1-11:2]; f_annotation = (); f_mode = Mstrict;
        f_ret = ((void), (Some ([5:26-30], (Hprim Tvoid))));
        f_name = ([5:10-14], "\\test"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic;
@@ -102,6 +106,10 @@
            ];
          fb_annotation = No unsafe blocks };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
-       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
-       f_static = false })
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
+         ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false };
+       f_doc_comment = None; f_static = false })
   ]

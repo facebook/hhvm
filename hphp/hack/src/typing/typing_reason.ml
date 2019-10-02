@@ -113,6 +113,7 @@ and expr_dep_type_reason =
   | ERclass of string
   | ERparent of string
   | ERself of string
+[@@deriving eq]
 
 let arg_pos_str ap =
   match ap with

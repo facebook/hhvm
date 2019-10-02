@@ -1874,7 +1874,7 @@ void nativeImplInlined(IRGS& env) {
     return castCtxThis(env, ctx);
   }();
 
-  auto numNonDefault = fp(env)->inst()->extra<DefInlineFP>()->numNonDefault;
+  auto numNonDefault = fp(env)->inst()->extra<DefInlineFP>()->numArgs;
   auto params = prepare_params(
     env,
     callee,

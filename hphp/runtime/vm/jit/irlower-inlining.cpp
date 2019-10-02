@@ -66,13 +66,12 @@ void cgDefInlineFP(IRLS& env, const IRInstruction* inst) {
   emitImmStoreq(v, uintptr_t(extra->target), ar + AROFF(m_func));
   v << storeli{extra->callBCOff, ar + AROFF(m_callOff)};
 
-  if (extra->asyncEagerReturn) {
-    v << orlim{
-      static_cast<int32_t>(ActRec::Flags::AsyncEagerRet),
-      ar + AROFF(m_numArgsAndFlags),
-      v.makeReg()
-    };
-  }
+  // Set m_numArgsAndFlags.
+  auto const flags = extra->asyncEagerReturn
+    ? ActRec::Flags::AsyncEagerRet : ActRec::Flags::None;
+  auto const naaf = static_cast<int32_t>(
+    ActRec::encodeNumArgsAndFlags(extra->numArgs, flags));
+  v << storeli{naaf, ar + AROFF(m_numArgsAndFlags)};
 
   // Set m_this/m_cls.
   auto const ctxTmp = inst->src(2);
@@ -94,6 +93,8 @@ void cgDefInlineFP(IRLS& env, const IRInstruction* inst) {
 
   if (extra->target->attrs() & AttrMayUseVV) {
     v << storeqi{0, ar + AROFF(m_varEnv)};
+  } else if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    emitImmStoreq(v, ActRec::kTrashedVarEnvSlot, ar + AROFF(m_varEnv));
   }
 
   v << pushframe{};

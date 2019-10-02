@@ -64,23 +64,7 @@ TRACE_SET_MOD(irlower);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void cgSpillFrame(IRLS& env, const IRInstruction* inst) {
-  auto const sp = srcLoc(env, inst, 0).reg();
-  auto const extra = inst->extra<SpillFrame>();
-  auto& v = vmain(env);
-
-  auto const ar = sp[cellsToBytes(extra->spOffset.offset)];
-
-  // Trash m_varEnv.
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    emitImmStoreq(v, ActRec::kTrashedVarEnvSlot, ar + AROFF(m_varEnv));
-  }
-
-  // Set m_numArgsAndFlags.
-  auto const naaf = static_cast<int32_t>(
-    ActRec::encodeNumArgsAndFlags(extra->numArgs, ActRec::Flags::None));
-  v << storeli{naaf, ar + AROFF(m_numArgsAndFlags)};
-}
+void cgSpillFrame(IRLS& env, const IRInstruction* inst) {}
 
 ///////////////////////////////////////////////////////////////////////////////
 

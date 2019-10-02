@@ -184,12 +184,11 @@ void fsetActRec(
 ) {
   auto const arOffset =
     offsetFromIRSP(env, BCSPRelOffset{static_cast<int32_t>(fca.numInputs())});
-  auto const numArgs = fca.numArgs + (fca.hasUnpack() ? 1 : 0);
 
   gen(
     env,
     SpillFrame,
-    ActRecInfo { arOffset, numArgs },
+    ActRecInfo { arOffset },
     sp(env)
   );
 }

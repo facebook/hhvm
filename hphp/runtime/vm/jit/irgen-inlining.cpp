@@ -269,7 +269,7 @@ void beginInlining(IRGS& env,
   // parameter, so we need to add numInputs to get to the ActRec
   IRSPRelOffset calleeAROff = spOffBCFromIRSP(env) + fca.numInputs();
 
-  auto const arInfo = ActRecInfo { calleeAROff, fca.numArgs };
+  auto const arInfo = ActRecInfo { calleeAROff };
   gen(env, SpillFrame, arInfo, sp(env));
 
   auto const generics = [&]() -> SSATmp* {
@@ -303,7 +303,7 @@ void beginInlining(IRGS& env,
   data.callBCOff     = callBcOffset;
   data.retSPOff      = offsetFromFP(env, calleeAROff) - kNumActRecCells;
   data.spOffset      = calleeAROff;
-  data.numNonDefault = fca.numArgs;
+  data.numArgs       = fca.numArgs;
   data.asyncEagerReturn = returnTarget.asyncEagerOffset != kInvalidOffset;
 
   assertx(startSk.func() == target &&

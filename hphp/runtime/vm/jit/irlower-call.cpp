@@ -85,19 +85,21 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
   v << store{callee, calleeAR + AROFF(m_func)};
   v << storeli{callOff, calleeAR + AROFF(m_callOff)};
 
-  if (extra->asyncEagerReturn) {
-    v << orlim{
-      static_cast<int32_t>(ActRec::Flags::AsyncEagerRet),
-      calleeAR + AROFF(m_numArgsAndFlags),
-      v.makeReg()
-    };
-  }
+  auto const flags = extra->asyncEagerReturn
+    ? ActRec::Flags::AsyncEagerRet : ActRec::Flags::None;
+  auto const naaf = static_cast<int32_t>(
+    ActRec::encodeNumArgsAndFlags(extra->numArgs, flags));
+  v << storeli{naaf, calleeAR + AROFF(m_numArgsAndFlags)};
 
   assertx(inst->src(3)->isA(TCtx) || inst->src(3)->isA(TNullptr));
   if (inst->src(3)->isA(TCtx)) {
     v << store{ctx, calleeAR + AROFF(m_thisUnsafe)};
   } else if (RuntimeOption::EvalHHIRGenerateAsserts) {
     emitImmStoreq(v, ActRec::kTrashedThisSlot, calleeAR + AROFF(m_thisUnsafe));
+  }
+
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    emitImmStoreq(v, ActRec::kTrashedVarEnvSlot, calleeAR + AROFF(m_varEnv));
   }
 
   auto const callFlags = CallFlags(
@@ -157,11 +159,19 @@ void cgCallUnpack(IRLS& env, const IRInstruction* inst) {
   auto const calleeAR = calleeSP + cellsToBytes(extra->numInputs());
   v << store{callee, calleeAR + AROFF(m_func)};
 
+  auto const naaf = static_cast<int32_t>(
+    ActRec::encodeNumArgsAndFlags(extra->numArgs + 1, ActRec::Flags::None));
+  v << storeli{naaf, calleeAR + AROFF(m_numArgsAndFlags)};
+
   assertx(inst->src(3)->isA(TCtx) || inst->src(3)->isA(TNullptr));
   if (inst->src(3)->isA(TCtx)) {
     v << store{ctx, calleeAR + AROFF(m_thisUnsafe)};
   } else if (RuntimeOption::EvalHHIRGenerateAsserts) {
     emitImmStoreq(v, ActRec::kTrashedThisSlot, calleeAR + AROFF(m_thisUnsafe));
+  }
+
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    emitImmStoreq(v, ActRec::kTrashedVarEnvSlot, calleeAR + AROFF(m_varEnv));
   }
 
   auto const syncSP = v.makeReg();

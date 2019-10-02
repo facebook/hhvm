@@ -707,18 +707,15 @@ struct ReqRetranslateData : IRExtraData {
  * Compile-time metadata about an ActRec allocation.
  */
 struct ActRecInfo : IRExtraData {
-  explicit ActRecInfo(IRSPRelOffset spOffset,
-                      uint32_t numArgs)
+  explicit ActRecInfo(IRSPRelOffset spOffset)
     : spOffset(spOffset)
-    , numArgs(numArgs)
   {}
 
   std::string show() const {
-    return folly::sformat("{}, {}", spOffset.offset, numArgs);
+    return folly::sformat("{}", spOffset.offset);
   }
 
   IRSPRelOffset spOffset;
-  uint32_t numArgs;
 };
 
 /*
@@ -740,7 +737,7 @@ struct DefInlineFPData : IRExtraData {
   Offset callBCOff;
   FPInvOffset retSPOff;
   IRSPRelOffset spOffset; // offset from caller SP to bottom of callee's ActRec
-  uint32_t numNonDefault;
+  uint32_t numArgs;
   bool asyncEagerReturn;
 };
 

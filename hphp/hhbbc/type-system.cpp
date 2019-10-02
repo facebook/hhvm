@@ -2323,6 +2323,30 @@ bool Type::checkInvariants() const {
   return true;
 }
 
+/* Retrieve the provenance tag from a type, if it has one */
+ProvTag Type::getProvTag() const {
+  if (!RuntimeOption::EvalArrayProvenance) return folly::none;
+  switch (m_dataTag) {
+  case DataTag::None:
+  case DataTag::Str:
+  case DataTag::Int:
+  case DataTag::Dbl:
+  case DataTag::Obj:
+  case DataTag::Cls:
+  case DataTag::RefInner:
+  case DataTag::ArrLikePackedN:
+  case DataTag::ArrLikeMapN:
+    return folly::none;
+  case DataTag::ArrLikeVal:
+    return arrprov::getTag(m_data.aval);
+  case DataTag::ArrLikePacked:
+    return m_data.packed->provenance;
+  case DataTag::ArrLikeMap:
+    return m_data.map->provenance;
+  }
+  always_assert(false);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 Type wait_handle(const Index& index, Type inner) {
@@ -2418,16 +2442,20 @@ Type vec_val(SArray val) {
   return r;
 }
 
-Type vec_empty() {
+Type vec_empty(ProvTag pt /* = folly::none */) {
   auto r = Type { BSVecE };
-  r.m_data.aval = staticEmptyVecArray();
+  r.m_data.aval = RuntimeOption::EvalArrayProvenance && pt
+    ? arrprov::makeEmptyVec(pt)
+    : staticEmptyVecArray();
   r.m_dataTag   = DataTag::ArrLikeVal;
   return r;
 }
 
-Type some_vec_empty() {
+Type some_vec_empty(ProvTag pt /* = folly::none */) {
   auto r = Type { BVecE };
-  r.m_data.aval = staticEmptyVecArray();
+  r.m_data.aval = RuntimeOption::EvalArrayProvenance && pt
+    ? arrprov::makeEmptyVec(pt)
+    : staticEmptyVecArray();
   r.m_dataTag   = DataTag::ArrLikeVal;
   return r;
 }
@@ -2474,16 +2502,20 @@ Type dict_val(SArray val) {
   return r;
 }
 
-Type dict_empty() {
+Type dict_empty(ProvTag pt /* = folly::none */) {
   auto r = Type { BSDictE };
-  r.m_data.aval = staticEmptyDictArray();
+  r.m_data.aval = RuntimeOption::EvalArrayProvenance && pt
+    ? arrprov::makeEmptyDict(pt)
+    : staticEmptyDictArray();
   r.m_dataTag   = DataTag::ArrLikeVal;
   return r;
 }
 
-Type some_dict_empty() {
+Type some_dict_empty(ProvTag pt /* = folly::none */) {
   auto r = Type { BDictE };
-  r.m_data.aval = staticEmptyDictArray();
+  r.m_data.aval = RuntimeOption::EvalArrayProvenance && pt
+    ? arrprov::makeEmptyDict(pt)
+    : staticEmptyDictArray();
   r.m_dataTag   = DataTag::ArrLikeVal;
   return r;
 }
@@ -4948,7 +4980,7 @@ array_elem(const Type& arr, const Type& undisectedKey, const Type& defaultTy) {
 std::pair<Type,ThrowMode> array_like_set(Type arr,
                                          const ArrKey& key,
                                          const Type& valIn,
-                                         ProvTag src) {
+                                         ProvTag loc) {
   const bool maybeEmpty = arr.couldBe(BArrLikeE);
   const bool isVector   = arr.couldBe(BVec);
   const bool isPhpArray = arr.couldBe(BArr);
@@ -4957,6 +4989,14 @@ std::pair<Type,ThrowMode> array_like_set(Type arr,
 
   trep bits = combine_dv_arr_like_bits(arr.m_bits, BArrLikeN);
   if (validKey) bits &= ~BArrLikeE;
+
+  auto const src = [&] () -> ProvTag {
+    if (auto const tag = arr.getProvTag()) {
+      return tag;
+    } else {
+      return loc;
+    }
+  }();
 
   auto const fixRef  = !isPhpArray && valIn.couldBe(BRef);
   auto const throwMode = !fixRef && validKey && !key.mayThrow ?

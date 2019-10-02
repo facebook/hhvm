@@ -726,11 +726,11 @@ private:
 
   friend Type spec_array_like_union(Type&, Type&, trep, trep);
   friend Type vec_val(SArray);
-  friend Type vec_empty();
-  friend Type some_vec_empty();
+  friend Type vec_empty(ProvTag);
+  friend Type some_vec_empty(ProvTag);
   friend Type dict_val(SArray);
-  friend Type dict_empty();
-  friend Type some_dict_empty();
+  friend Type dict_empty(ProvTag);
+  friend Type some_dict_empty(ProvTag);
   friend Type keyset_val(SArray);
   friend bool could_contain_objects(const Type&);
   friend bool could_copy_on_write(const Type&);
@@ -775,6 +775,7 @@ private:
   bool subtypeData(const Type&) const;
   bool couldBeData(const Type&) const;
   bool checkInvariants() const;
+  ProvTag getProvTag() const;
 
 private:
   trep m_bits;
@@ -1060,8 +1061,8 @@ Type sempty();
 Type aempty();
 Type aempty_varray();
 Type aempty_darray();
-Type vec_empty();
-Type dict_empty();
+Type vec_empty(ProvTag pt = folly::none);
+Type dict_empty(ProvTag pt = folly::none);
 Type keyset_empty();
 
 /*
@@ -1069,8 +1070,8 @@ Type keyset_empty();
  */
 Type some_aempty();
 Type some_aempty_darray();
-Type some_vec_empty();
-Type some_dict_empty();
+Type some_vec_empty(ProvTag pt = folly::none);
+Type some_dict_empty(ProvTag pt = folly::none);
 Type some_keyset_empty();
 
 /*

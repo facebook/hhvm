@@ -1154,7 +1154,7 @@ folly::Optional<arrprov::Tag> provTagHere(ISS& env) {
     : env.ctx.unit;
   return arrprov::Tag{
     unit->filename,
-    static_cast<int>(unit->srcLocs[idx].start.line)
+    static_cast<int>(unit->srcLocs[idx].past.line)
   };
 }
 

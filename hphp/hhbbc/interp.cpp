@@ -908,7 +908,8 @@ void in(ISS& env, const bc::NewArray& op) {
 
 void in(ISS& env, const bc::NewDictArray& op) {
   effect_free(env);
-  push(env, op.arg1 == 0 ? dict_empty() : some_dict_empty());
+  push(env, op.arg1 == 0 ? dict_empty(provTagHere(env))
+                         : some_dict_empty(provTagHere(env)));
 }
 
 void in(ISS& env, const bc::NewMixedArray& op) {

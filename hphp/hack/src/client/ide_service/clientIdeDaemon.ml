@@ -343,25 +343,57 @@ let handle_message :
         | None -> file_path |> Path.to_string |> Sys_utils.cat_no_fail
       in
       let sienv = !(server_env.ServerEnv.local_symbol_table) in
-      let matches =
-        ServerAutoComplete.auto_complete_at_position_ctx
-          ~line
-          ~column
-          ~file_content
-          ~path
-          ~tcopt:server_env.ServerEnv.tcopt
-          ~sienv
-          ~is_manually_invoked
-      in
-      let result =
-        {
-          AutocompleteTypes.completions =
-            matches.Utils.With_complete_flag.value;
-          char_at_pos = ' ';
-          is_complete = matches.Utils.With_complete_flag.is_complete;
-        }
-      in
-      Lwt.return (state, Handle_message_result.Response result)
+      File_content.(
+        (* TODO: We don't actually want to do this AUTO332 nonsense.
+        Ripe for a refactor and move to FFP autocomplete *)
+        let tcopt = server_env.ServerEnv.tcopt in
+        let pos = { line; column } in
+        let edits =
+          [{ range = Some { st = pos; ed = pos }; text = "AUTO332" }]
+        in
+        let content = File_content.edit_file_unsafe file_content edits in
+        (* Assemble the server IDE context *)
+        let (ctx, entry) =
+          Provider_utils.update_context
+            ~ctx:(Provider_context.empty ~tcopt)
+            ~path
+            ~file_input:(ServerCommandTypes.FileContent content)
+        in
+        (* Use the server env and the param to contact autocomplete service *)
+        let fileinfo = Provider_context.get_fileinfo entry in
+        let autocomplete_context =
+          ServerAutoComplete.get_autocomplete_context
+            content
+            pos
+            ~is_manually_invoked
+        in
+        let matches =
+          Provider_utils.with_context ~ctx ~f:(fun () ->
+              let tast = Provider_utils.compute_tast ~ctx ~entry in
+              AutocompleteService.go
+                ~tcopt
+                ~content_funs:
+                  ( Core_kernel.List.map fileinfo.FileInfo.funs ~f:snd
+                  |> SSet.of_list )
+                ~content_classes:
+                  ( Core_kernel.List.map fileinfo.FileInfo.classes ~f:snd
+                  |> SSet.of_list )
+                ~content_record_defs:
+                  ( Core_kernel.List.map fileinfo.FileInfo.record_defs ~f:snd
+                  |> SSet.of_list )
+                ~autocomplete_context
+                ~sienv
+                tast)
+        in
+        let result =
+          {
+            AutocompleteTypes.completions =
+              matches.Utils.With_complete_flag.value;
+            char_at_pos = ' ';
+            is_complete = matches.Utils.With_complete_flag.is_complete;
+          }
+        in
+        Lwt.return (state, Handle_message_result.Response result))
     (* Autocomplete docblock resolve *)
     | (Initialized { server_env; _ }, Completion_resolve param) ->
       ClientIdeMessage.Completion_resolve.(

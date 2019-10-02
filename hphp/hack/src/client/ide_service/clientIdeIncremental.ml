@@ -261,6 +261,21 @@ let invalidate_decls ~(old_file_info : FileInfo.t option) : unit =
     consts |> strip_positions |> SSet.iter ~f:Decl_provider.invalidate_gconst;
     ()
 
+let update_symbol_index
+    ~(env : ServerEnv.env)
+    ~(path : Relative_path.t)
+    ~(new_file_info : FileInfo.t option) : unit =
+  match new_file_info with
+  | None ->
+    let paths = Relative_path.Set.singleton path in
+    SymbolIndex.remove_files ~sienv:env.ServerEnv.local_symbol_table ~paths
+  | Some fileinfo ->
+    let paths = [(path, SearchUtils.Full fileinfo, SearchUtils.TypeChecker)] in
+    SymbolIndex.update_files
+      ~sienv:env.ServerEnv.local_symbol_table
+      ~workers:None
+      ~paths
+
 let process_changed_file (env : ServerEnv.env) (path : Path.t) :
     ServerEnv.env Lwt.t =
   let path = Path.to_string path in
@@ -278,4 +293,5 @@ let process_changed_file (env : ServerEnv.env) (path : Path.t) :
       in
       invalidate_decls ~old_file_info;
       let env = update_naming_table ~env ~path ~old_file_info ~new_file_info in
+      update_symbol_index ~env ~path ~new_file_info;
       Lwt.return env

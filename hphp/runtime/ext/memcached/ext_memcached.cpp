@@ -586,10 +586,8 @@ Variant getMultiByKeyImpl(ObjectData* const this_, const String& server_key,
 
 Variant HHVM_METHOD(Memcached, getbykey, const String& server_key,
                                          const String& key,
-                                         const Variant& cache_cb /*= null*/,
-                                         VRefParam cas_token /*= null*/) {
-  return getByKeyImpl(this_, server_key, key, cache_cb,
-                      cas_token.getVariantOrNull());
+                                         const Variant& cache_cb /*= null*/) {
+  return getByKeyImpl(this_, server_key, key, cache_cb, nullptr);
 }
 
 Variant HHVM_METHOD(Memcached, getbykeywithcastoken,
@@ -602,11 +600,8 @@ Variant HHVM_METHOD(Memcached, getbykeywithcastoken,
 
 Variant HHVM_METHOD(Memcached, getmultibykey, const String& server_key,
                                const Array& keys,
-                               VRefParam cas_tokens /*= uninit_variant*/,
                                int flags /*= 0*/) {
-  return getMultiByKeyImpl(this_, server_key, keys,
-                           cas_tokens.getVariantOrNull(),
-                           flags);
+  return getMultiByKeyImpl(this_, server_key, keys, nullptr, flags);
 }
 
 Variant HHVM_METHOD(Memcached, getmultibykeywithcastokens,

@@ -337,9 +337,8 @@ class Memcached {
    *   Memcached::RES_NOTFOUND if the key does not exist.
    */
   public function get(mixed $key,
-                      ?mixed $cache_cb = null,
-                      ?mixed &$cas_token = null): mixed {
-    return $this->getByKey('', $key, $cache_cb, &$cas_token);
+                      ?mixed $cache_cb = null): mixed {
+    return $this->getByKey('', $key, $cache_cb);
   }
 
   public function getWithCasToken(mixed $key,
@@ -376,8 +375,7 @@ class Memcached {
   <<__Native>>
   public function getByKey(string $server_key,
                            string $key,
-                           mixed $cache_cb = null,
-                           mixed &$cas_token = null): mixed;
+                           mixed $cache_cb = null): mixed;
 
   <<__Native>>
   public function getByKeyWithCasToken(string $server_key,
@@ -428,9 +426,8 @@ class Memcached {
    * @return mixed - Returns the array of found items.
    */
   public function getMulti(mixed $keys,
-                           mixed &$cas_tokens = null,
                            int $flags = 0): mixed {
-    return $this->getMultiByKey('', $keys, &$cas_tokens, $flags);
+    return $this->getMultiByKey('', $keys, $flags);
   }
 
   public function getMultiWithCasTokens(
@@ -461,7 +458,6 @@ class Memcached {
   <<__Native>>
   public function getMultiByKey(string $server_key,
                                 array $keys,
-                                mixed &$cas_tokens = null,
                                 int $flags = 0): mixed;
 
   <<__Native>>

@@ -37,13 +37,13 @@ function newInstanceOfA($line) {
   ;
 
 // Box
-function box(&$_);
-$x = newInstanceOfA(__LINE__); box(&$x);
+function box(inout $_);
+$x = newInstanceOfA(__LINE__); box(inout $x);
 
-$x = newInstanceOfA(__LINE__); box(&$x);
+$x = newInstanceOfA(__LINE__); box(inout $x);
 
 
-$x = newInstanceOfA(__LINE__); box(&$x);
+$x = newInstanceOfA(__LINE__); box(inout $x);
 
 // handled exception
 try {

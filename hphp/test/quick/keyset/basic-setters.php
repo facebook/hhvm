@@ -1,14 +1,14 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function append_via_ref(&$ks, $val) {
+function append_via_ref(inout $ks, $val) {
   $ks[] = $val;
 }
 
 function do_append($ks, $val, $s, $via_ref) {
   try {
     if ($via_ref) {
-      append_via_ref(&$ks, $val);
+      append_via_ref(inout $ks, $val);
     } else {
       $ks[] = $val;
     }

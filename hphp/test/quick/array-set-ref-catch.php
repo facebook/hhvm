@@ -7,7 +7,7 @@ function make_key($i) {
   return $s;
 }
 
-function test(&$a, $b) {
+function test(inout $a, $b) {
   for ($i = 0; $i < 40000; $i++) {
     $a[make_key($i)] = $b;
   }
@@ -15,5 +15,5 @@ function test(&$a, $b) {
 }
 <<__EntryPoint>> function main(): void {
 $y = array();
-test(&$y, 5);
+test(inout $y, 5);
 }

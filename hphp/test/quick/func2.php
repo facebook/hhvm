@@ -1,6 +1,6 @@
 <?hh
 
-function foo(&$a) {
+function foo(inout $a) {
   var_dump($a);
 }
 <<__EntryPoint>> function main(): void {

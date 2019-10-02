@@ -24,7 +24,7 @@ class C {
 }
 
 
-function swizzle($name, $obj, $args, $data, &$done) {
+function swizzle($name, $obj, inout $args, $data, inout $done) {
   var_dump($name, $obj, $args, $data, $done);
   $done = false;
 }

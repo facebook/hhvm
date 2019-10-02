@@ -18,7 +18,7 @@ function set(dict $d, mixed $k, mixed $v): dict {
   return $d;
 }
 
-function run(&$ref, &$badref) {
+function run(inout $ref, inout $badref) {
   set(dict[], "1", "hello")
     |> set($$, 1, "goodbye")
     |> set($$, null, "null")
@@ -44,5 +44,5 @@ function run(&$ref, &$badref) {
 function main() {
   $foo = 12;
   $bar = array();
-  run(&$foo, &$bar);
+  run(inout $foo, inout $bar);
 }

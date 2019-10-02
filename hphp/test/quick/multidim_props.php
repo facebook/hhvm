@@ -1,6 +1,6 @@
 <?hh
 
-function baz(&$x) {
+function baz(inout $x) {
   var_dump($x);
 }
 
@@ -12,9 +12,9 @@ class A {
   }
   function bar() {
     $y = $this->x->x->x->x->x;
-    baz(&$y);
+    baz(inout $y);
     $y = $this->x->x->x->x->x;
-    baz(&$y);
+    baz(inout $y);
 
   }
 

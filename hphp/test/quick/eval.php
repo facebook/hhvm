@@ -12,12 +12,12 @@
     print "$i: $r\n";
   }
 
-  $testEval = function (&$i) {
+  $testEval = function (inout $i) {
     eval('$i *= 33;');
   };
   $i = 1;
   while ($i < 100000) {
-    $testEval(&$i);
+    $testEval(inout $i);
     var_dump($i);
   }
 

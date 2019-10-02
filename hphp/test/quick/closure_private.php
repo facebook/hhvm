@@ -38,7 +38,7 @@ class A {
     $a = "foo";
     $b = "bar";
     $c = function($foo) use ($b) {
-      $this->double(&$foo, &$b);
+      $this->double(inout $foo, inout $b);
     };
     $c($a);
     return $a.$b;
@@ -48,7 +48,7 @@ class A {
     return $args;
   }
 
-  private function double(&$a, &$b) {
+  private function double(inout $a, inout $b) {
     $a = $a.$a;
     $b = $b.$b;
   }

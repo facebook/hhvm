@@ -1,6 +1,6 @@
 <?hh
 
-function run(&$a, &$b) {
+function run(inout $a, inout $b) {
   $a = 1;
   $a = true;
 
@@ -8,5 +8,5 @@ function run(&$a, &$b) {
 }
 <<__EntryPoint>> function main(): void {
 $a = 5;
-var_dump(run(&$a, &$a));
+var_dump(run(inout $a, inout $a));
 }

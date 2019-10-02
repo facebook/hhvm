@@ -4,7 +4,7 @@ function foo($a) {
   print "foo $a\n";
 }
 
-function bar(&$a) {
+function bar(inout $a) {
   $a = 2;
   return $a;
 }

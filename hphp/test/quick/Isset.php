@@ -35,7 +35,7 @@ function get_index() {
   return 0;
 }
 
-function g($dontTake, &$toFillIn, $id, $key, $value) {
+function g($dontTake, inout $toFillIn, $id, $key, $value) {
   $toFillIn = array();
   if (isset($toFillIn[$id])) {
     $cur = $toFillIn[$id];
@@ -58,6 +58,6 @@ var_dump(isset($a, $b, $arr[get_index()]));
  */
 
 $a = null;
-g(null, &$a, "127.0.0.1", null, null );
+g(null, inout $a, "127.0.0.1", null, null );
 var_dump($a);
 }

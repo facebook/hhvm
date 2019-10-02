@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a7034a7eafea75c6b4e8d8eb573ff336>>
+// @generated SignedSource<<726e1a07b58650d631d19773ddd559c3>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -73,6 +73,8 @@ pub type Case = aast::Case<pos::Pos, FuncBodyAnn, (), ()>;
 pub type Field = aast::Field<pos::Pos, FuncBodyAnn, (), ()>;
 
 pub type Afield = aast::Afield<pos::Pos, FuncBodyAnn, (), ()>;
+
+pub type MethodRedeclaration = aast::MethodRedeclaration<pos::Pos, FuncBodyAnn, (), ()>;
 
 #[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 pub struct IgnoreAttributeEnv {

@@ -53,6 +53,7 @@
     typing_deferred_members
     typing_dependent_type
     typing_enforceability
+    typing_enum
     typing_env
     typing_env_from_def
     typing_env_return_info
@@ -70,6 +71,7 @@
     typing_logic
     typing_make_type
     typing_mutability
+    typing_object_get
     typing_ops
     typing_per_cont_env
     typing_per_cont_ops
@@ -146,7 +148,6 @@
     typing_attributes
     typing_debug
     typing_disposable
-    typing_enum
     typing_extends
     typing_exts
     typing_gather_defined

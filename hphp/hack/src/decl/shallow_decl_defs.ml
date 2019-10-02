@@ -15,7 +15,6 @@ type shallow_class_const = {
   scc_expr: Nast.expr option;
   scc_name: Aast.sid;
   scc_type: decl_ty;
-  scc_visibility: Aast.visibility;
 }
 [@@deriving show]
 
@@ -25,7 +24,6 @@ type shallow_typeconst = {
   stc_name: Aast.sid;
   stc_type: decl_ty option;
   stc_enforceable: Pos.t * bool;
-  stc_visibility: Aast.visibility;
   stc_reifiable: Pos.t option;
 }
 [@@deriving show]

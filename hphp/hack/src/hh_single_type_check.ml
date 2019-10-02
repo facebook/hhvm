@@ -206,7 +206,6 @@ let parse_options () =
   let check_xhp_attribute = ref false in
   let disallow_invalid_arraykey_constraint = ref None in
   let enable_class_level_where_clauses = ref false in
-  let enable_constant_visibility_modifiers = ref false in
   let disable_legacy_soft_typehints = ref false in
   let allow_new_attribute_syntax = ref false in
   let allow_toplevel_requires = ref false in
@@ -448,9 +447,6 @@ let parse_options () =
       ( "--enable-class-level-where-clauses",
         Arg.Set enable_class_level_where_clauses,
         "Enables support for class-level where clauses" );
-      ( "--enable-constant-visibility-modifiers",
-        Arg.Set enable_constant_visibility_modifiers,
-        "Enable constant visibility modifiers" );
       ( "--disable-legacy-soft-typehints",
         Arg.Set disable_legacy_soft_typehints,
         "Disables the legacy @ syntax for soft typehints (use __Soft instead)"
@@ -553,8 +549,6 @@ let parse_options () =
       ~log_levels:!log_levels
       ~po_rust_parser_errors:!rust_parser_errors
       ~po_enable_class_level_where_clauses:!enable_class_level_where_clauses
-      ~po_enable_constant_visibility_modifiers:
-        !enable_constant_visibility_modifiers
       ~po_disable_legacy_soft_typehints:!disable_legacy_soft_typehints
       ~po_allow_new_attribute_syntax:!allow_new_attribute_syntax
       ~po_disallow_toplevel_requires:(not !allow_toplevel_requires)

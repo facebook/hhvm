@@ -211,7 +211,6 @@ struct
   and class_const cc =
     {
       cc_synthesized = cc.cc_synthesized;
-      cc_visibility = cc.cc_visibility;
       cc_abstract = cc.cc_abstract;
       cc_pos = pos cc.cc_pos;
       cc_type = ty cc.cc_type;
@@ -232,7 +231,6 @@ struct
       ttc_type = ty_opt tc.ttc_type;
       ttc_origin = tc.ttc_origin;
       ttc_enforceable = Tuple.T2.map_fst ~f:pos tc.ttc_enforceable;
-      ttc_visibility = tc.ttc_visibility;
       ttc_reifiable = Option.map tc.ttc_reifiable pos;
     }
 

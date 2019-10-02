@@ -136,9 +136,6 @@ let disallow_unresolved_type_variables =
 let disallow_invalid_arraykey_constraint =
   GlobalOptions.tco_disallow_invalid_arraykey_constraint
 
-let enable_constant_visibility_modifiers =
-  GlobalOptions.po_enable_constant_visibility_modifiers
-
 let const_static_props = GlobalOptions.tco_const_static_props
 
 let use_lru_workers = GlobalOptions.tco_use_lru_workers

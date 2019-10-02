@@ -43,14 +43,8 @@ let disable_lval_as_an_expression =
 
 let rust_lowerer = GlobalOptions.po_rust_lowerer
 
-let enable_constant_visibility_modifiers =
-  GlobalOptions.po_enable_constant_visibility_modifiers
-
 let enable_class_level_where_clauses =
   GlobalOptions.po_enable_class_level_where_clauses
-
-let with_enable_constant_visibility_modifiers po b =
-  { po with GlobalOptions.po_enable_constant_visibility_modifiers = b }
 
 let disable_legacy_soft_typehints =
   GlobalOptions.po_disable_legacy_soft_typehints
@@ -105,7 +99,6 @@ let make
     ~disable_nontoplevel_declarations
     ~disable_static_closures
     ~disable_lval_as_an_expression
-    ~enable_constant_visibility_modifiers
     ~enable_class_level_where_clauses
     ~disable_legacy_soft_typehints
     ~allow_new_attribute_syntax
@@ -126,8 +119,6 @@ let make
       po_disable_nontoplevel_declarations = disable_nontoplevel_declarations;
       po_disable_static_closures = disable_static_closures;
       po_disable_lval_as_an_expression = disable_lval_as_an_expression;
-      po_enable_constant_visibility_modifiers =
-        enable_constant_visibility_modifiers;
       po_enable_class_level_where_clauses = enable_class_level_where_clauses;
       po_disable_legacy_soft_typehints = disable_legacy_soft_typehints;
       po_allow_new_attribute_syntax = allow_new_attribute_syntax;
@@ -143,14 +134,13 @@ let make
 
 (* Changes here need to be synchronized with rust_parser_errors_ffi.rs *)
 type ffi_t =
-  bool * bool * bool * bool * bool * bool * bool * bool * bool * bool * bool
+  bool * bool * bool * bool * bool * bool * bool * bool * bool * bool
 
 let to_rust_ffi_t po ~hhvm_compat_mode ~hhi_mode ~codegen =
   ( hhvm_compat_mode,
     hhi_mode,
     codegen,
     disable_lval_as_an_expression po,
-    enable_constant_visibility_modifiers po,
     disable_legacy_soft_typehints po,
     const_static_props po,
     disable_legacy_attribute_syntax po,

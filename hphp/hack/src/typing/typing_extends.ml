@@ -70,15 +70,6 @@ let check_class_elt_visibility parent_class_elt class_elt =
   let pos = Reason.to_pos elt_pos in
   check_visibility parent_vis c_vis parent_pos pos
 
-let check_constant_visibility parent_class_const class_const =
-  let (parent_pos, _) = parent_class_const.cc_type in
-  let (elt_pos, _) = class_const.cc_type in
-  let parent_pos = Reason.to_pos parent_pos in
-  let pos = Reason.to_pos elt_pos in
-  let parent_vis = parent_class_const.cc_visibility in
-  let vis = class_const.cc_visibility in
-  check_visibility parent_vis vis parent_pos pos
-
 (* Check that all the required members are implemented *)
 let check_members_implemented
     check_private parent_reason reason (_, parent_members, get_member, _) =
@@ -387,7 +378,6 @@ let check_const_override
       && not parent_class_const.cc_abstract
     | _ -> false
   in
-  check_constant_visibility parent_class_const class_const;
   ( if check_params then
     if member_not_unique then
       Errors.multiple_concrete_defs
@@ -729,11 +719,6 @@ let check_typeconsts env parent_class class_ =
   Sequence.iter ptypeconsts (fun (tconst_name, parent_tconst) ->
       match Cls.get_typeconst class_ tconst_name with
       | Some tconst ->
-        check_visibility
-          parent_tconst.ttc_visibility
-          tconst.ttc_visibility
-          (fst parent_tconst.ttc_name)
-          (fst tconst.ttc_name);
         check_ambiguous_inheritance
           tconst_check
           parent_tconst

@@ -516,7 +516,6 @@ let converter
     | CA_hint h -> Aast.CA_hint (on_hint h)
     | CA_enum sl -> Aast.CA_enum sl
   and on_class_typeconst (tc : Ast.typeconst) =
-    let vis = get_visibility_from_kinds tc.tconst_kinds in
     let has_abstract = mem tc.tconst_kinds Abstract in
     let (tconst_type, abstract_kind) =
       match (has_abstract, tc.tconst_constraint, tc.tconst_type) with
@@ -545,7 +544,6 @@ let converter
       {
         c_tconst_abstract = abstract_kind;
         c_tconst_name = tc.tconst_name;
-        c_tconst_visibility = vis;
         c_tconst_constraint = optional on_hint tc.tconst_constraint;
         c_tconst_type = optional on_hint tconst_type;
         c_tconst_user_attributes =
@@ -604,16 +602,9 @@ let converter
       let acc = cv :: acc in
       on_list_append_acc acc (with_dc_name None) rest
     | [] -> acc
-  and on_class_const hint kind doc_com (id, eopt) =
-    let vis =
-      match kind with
-      | Private -> Aast.Private
-      | Protected -> Aast.Protected
-      | _ -> Aast.Public
-    in
+  and on_class_const hint doc_com (id, eopt) =
     Aast.
       {
-        cc_visibility = vis;
         cc_type = hint;
         cc_id = id;
         cc_expr = optional on_expr eopt;
@@ -621,10 +612,7 @@ let converter
       }
   and on_class_consts_with_acc acc ccs =
     let with_name =
-      on_class_const
-        (optional on_hint ccs.cc_hint)
-        ccs.cc_visibility
-        ccs.cc_doc_comment
+      on_class_const (optional on_hint ccs.cc_hint) ccs.cc_doc_comment
     in
     on_list_append_acc acc with_name ccs.cc_names
   and on_xhp_attr (p, b, el) = (p, b, on_list on_expr el)

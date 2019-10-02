@@ -362,8 +362,6 @@ let load config_filename options =
         (bool_opt "disallow_invalid_arraykey_constraint" config)
       ?po_enable_class_level_where_clauses:
         (bool_opt "class_level_where_clauses" config)
-      ?po_enable_constant_visibility_modifiers:
-        (bool_opt "enable_constant_visibility_modifiers" config)
       ?po_disable_legacy_soft_typehints:
         (bool_opt "disable_legacy_soft_typehints" config)
       ?tco_use_lru_workers:

@@ -1,4 +1,0 @@
-File "parent_illegal_access.php", line 9, characters 20-27:
-You cannot access a private member with parent:: (Typing[4112])
-File "parent_illegal_access.php", line 4, characters 17-19:
-This member is private

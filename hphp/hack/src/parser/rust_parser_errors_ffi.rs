@@ -32,17 +32,14 @@ unsafe fn parser_options_from_ocaml_only_for_parser_errors(
     let mut parser_options = ParserOptions::default();
 
     let po_disable_lval_as_an_expression = bool_field(ocaml_parser_options, 3);
-    let po_enable_constant_visibility_modifiers = bool_field(ocaml_parser_options, 4);
-    let po_disable_legacy_soft_typehints = bool_field(ocaml_parser_options, 5);
-    let tco_const_static_props = bool_field(ocaml_parser_options, 6);
-    let po_disable_legacy_attribute_syntax = bool_field(ocaml_parser_options, 7);
-    let po_const_default_func_args = bool_field(ocaml_parser_options, 8);
-    let po_abstract_static_props = bool_field(ocaml_parser_options, 9);
-    let po_disallow_func_ptrs_in_constants = bool_field(ocaml_parser_options, 10);
+    let po_disable_legacy_soft_typehints = bool_field(ocaml_parser_options, 4);
+    let tco_const_static_props = bool_field(ocaml_parser_options, 5);
+    let po_disable_legacy_attribute_syntax = bool_field(ocaml_parser_options, 6);
+    let po_const_default_func_args = bool_field(ocaml_parser_options, 7);
+    let po_abstract_static_props = bool_field(ocaml_parser_options, 8);
+    let po_disallow_func_ptrs_in_constants = bool_field(ocaml_parser_options, 9);
 
     parser_options.po_disable_lval_as_an_expression = po_disable_lval_as_an_expression;
-    parser_options.po_enable_constant_visibility_modifiers =
-        po_enable_constant_visibility_modifiers;
     parser_options.po_disable_legacy_soft_typehints = po_disable_legacy_soft_typehints;
     parser_options.tco_const_static_props = tco_const_static_props;
     parser_options.po_disable_legacy_attribute_syntax = po_disable_legacy_attribute_syntax;

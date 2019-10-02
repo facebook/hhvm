@@ -97,7 +97,7 @@ let from_extends ~namespace ~is_enum _tparams extends =
 let from_implements ~namespace implements =
   List.map implements (Emit_type_hint.hint_to_class ~namespace)
 
-let from_constant env visibility (_, name) expr =
+let from_constant env (_, name) expr =
   let (value, init_instrs) =
     match expr with
     | None -> (None, None)
@@ -111,7 +111,7 @@ let from_constant env visibility (_, name) expr =
       | None ->
         (Some Typed_value.Uninit, Some (Emit_expression.emit_expr env init)))
   in
-  Hhas_constant.make name value visibility init_instrs
+  Hhas_constant.make name value init_instrs
 
 let from_type_constant namespace tc =
   let type_constant_name = snd tc.A.c_tconst_name in
@@ -162,7 +162,7 @@ let from_class_elt_classvars ast_class class_is_const tparams =
 
 let from_class_elt_constants env class_ =
   let map_aux (c : Tast.class_const) =
-    from_constant env c.A.cc_visibility c.A.cc_id c.A.cc_expr
+    from_constant env c.A.cc_id c.A.cc_expr
   in
   List.map ~f:map_aux class_.A.c_consts
 

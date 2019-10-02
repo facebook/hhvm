@@ -759,7 +759,6 @@ and class_const_fold c acc scc =
   let cc =
     {
       cc_synthesized = false;
-      cc_visibility = visibility (snd c.sc_name) scc.scc_visibility;
       cc_abstract = scc.scc_abstract;
       cc_pos = fst scc.scc_name;
       cc_type = scc.scc_type;
@@ -780,7 +779,6 @@ and class_class_decl class_id =
   in
   {
     cc_abstract = false;
-    cc_visibility = Vpublic;
     cc_pos = pos;
     cc_synthesized = true;
     cc_type = classname_ty;
@@ -867,7 +865,6 @@ and typeconst_structure c stc =
   in
   {
     cc_abstract = abstract;
-    cc_visibility = Vpublic;
     cc_pos = pos;
     cc_synthesized = true;
     cc_type = ts_ty;
@@ -887,7 +884,6 @@ and typeconst_fold c ((typeconsts, consts) as acc) stc =
     let c_name = snd c.sc_name in
     let ts = typeconst_structure c stc in
     let consts = SMap.add name ts consts in
-    let vis = visibility (snd c.sc_name) stc.stc_visibility in
     let ptc_opt = SMap.get name typeconsts in
     let enforceable =
       (* Without the positions, this is a simple OR, but this way allows us to
@@ -913,7 +909,6 @@ and typeconst_fold c ((typeconsts, consts) as acc) stc =
         ttc_type = stc.stc_type;
         ttc_origin = c_name;
         ttc_enforceable = enforceable;
-        ttc_visibility = vis;
         ttc_reifiable = reifiable;
       }
     in

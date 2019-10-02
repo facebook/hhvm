@@ -589,16 +589,12 @@ pub const reified_attribute: Error =
 pub const lval_as_expression: Error = Cow::Borrowed(
     "Assignments can no longer be used as expressions. Pull the assignment out into a separate statement.",
 );
-pub const non_public_const_in_interface: Error =
-    Cow::Borrowed("Constants inside of interfaces must have 'public' visibility.");
 pub fn elt_abstract_private(elt: &str) -> Error {
     Cow::Owned(format!(
         "Cannot declare abstract {} private.",
         elt.to_string(),
     ))
 }
-pub const const_has_multiple_visibilities: Error =
-    Cow::Borrowed("A constant cannot have multiple visibility modifiers.");
 pub const const_has_duplicate_modifiers: Error =
     Cow::Borrowed("A constant cannot have duplicate modifiers.");
 pub const only_soft_allowed: Error = Cow::Borrowed("Only the __Soft attribute is allowed here.");

@@ -77,8 +77,7 @@ Errors:
        c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
        c_implements = []; c_where_constraints = [];
        c_consts =
-       [{ cc_visibility = Public;
-          cc_type = (Some ([9:11-17], (Hprim Tstring)));
+       [{ cc_type = (Some ([9:11-17], (Hprim Tstring)));
           cc_id = ([9:18-32], "MY_CLASS_CONST");
           cc_expr =
           (Some (([9:35-57], string), (String "my class const value")));

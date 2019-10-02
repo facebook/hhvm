@@ -504,8 +504,6 @@ let make_popt () =
       ~disable_static_closures:(phpism_disable_static_closures co)
       ~disable_halt_compiler:(phpism_disable_halt_compiler co)
       ~disable_lval_as_an_expression:(disable_lval_as_an_expression co)
-      ~enable_constant_visibility_modifiers:
-        (enable_constant_visibility_modifiers co)
       ~enable_class_level_where_clauses:(enable_class_level_where_clauses co)
       ~disable_legacy_soft_typehints:(disable_legacy_soft_typehints co)
       ~allow_new_attribute_syntax:(allow_new_attribute_syntax co)

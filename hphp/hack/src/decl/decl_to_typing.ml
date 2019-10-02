@@ -166,13 +166,7 @@ let shallow_prop_to_telt child_class mro subst prop : tagged_elt =
   }
 
 let shallow_const_to_class_const child_class mro subst const =
-  let {
-    scc_abstract = cc_abstract;
-    scc_expr = cc_expr;
-    scc_name;
-    scc_type;
-    scc_visibility;
-  } =
+  let { scc_abstract = cc_abstract; scc_expr = cc_expr; scc_name; scc_type } =
     const
   in
   let ty =
@@ -182,11 +176,9 @@ let shallow_const_to_class_const child_class mro subst const =
     else
       Decl_instantiate.instantiate subst ty
   in
-  let visibility = base_visibility mro.mro_name scc_visibility in
   ( snd scc_name,
     {
       cc_synthesized = mro.mro_via_req_extends;
-      cc_visibility = visibility;
       cc_abstract;
       cc_pos = fst scc_name;
       cc_type = ty;
@@ -210,7 +202,6 @@ let classname_const class_id =
       cc_type = classname_ty;
       cc_expr = None;
       cc_origin = name;
-      cc_visibility = Vpublic;
     } )
 
 (** Each concrete type constant [const type <sometype> T] implicitly defines a
@@ -235,7 +226,6 @@ let typeconst_structure mro class_name stc =
   in
   ( snd stc.stc_name,
     {
-      cc_visibility = Vpublic;
       cc_abstract = abstract;
       cc_pos = pos;
       cc_synthesized = true;
@@ -251,7 +241,6 @@ let shallow_typeconst_to_typeconst_type child_class mro subst stc =
     stc_name = ttc_name;
     stc_type;
     stc_enforceable = ttc_enforceable;
-    stc_visibility;
     stc_reifiable = ttc_reifiable;
   } =
     stc
@@ -262,7 +251,6 @@ let shallow_typeconst_to_typeconst_type child_class mro subst stc =
     else
       Option.map stc_constraint (Decl_instantiate.instantiate subst)
   in
-  let ttc_visibility = base_visibility mro.mro_name stc_visibility in
   let ty =
     if child_class = mro.mro_name then
       stc_type
@@ -286,7 +274,6 @@ let shallow_typeconst_to_typeconst_type child_class mro subst stc =
         ttc_type = Some default;
         ttc_origin = mro.mro_name;
         ttc_enforceable;
-        ttc_visibility;
         ttc_reifiable;
       }
     | _ ->
@@ -297,7 +284,6 @@ let shallow_typeconst_to_typeconst_type child_class mro subst stc =
         ttc_type = ty;
         ttc_origin = mro.mro_name;
         ttc_enforceable;
-        ttc_visibility;
         ttc_reifiable;
       }
   in

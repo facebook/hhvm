@@ -1564,7 +1564,6 @@ module PrintClass = struct
         ttc_type = tc_type;
         ttc_origin = origin;
         ttc_enforceable = (_, enforceable);
-        ttc_visibility = _;
         ttc_reifiable = reifiable;
       } =
     let name = snd tc_name in

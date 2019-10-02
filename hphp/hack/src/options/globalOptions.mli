@@ -236,8 +236,6 @@ type t = {
   tco_disallow_unresolved_type_variables: bool;
   (* Disallow using non-string, non-int types as array key type constraints. *)
   tco_disallow_invalid_arraykey_constraint: bool;
-  (* Enable constants to have visibility modifiers *)
-  po_enable_constant_visibility_modifiers: bool;
   (* Enable class-level where clauses, i.e.
      class base<T> where T = int {} *)
   po_enable_class_level_where_clauses: bool;
@@ -343,7 +341,6 @@ val make :
   ?tco_check_xhp_attribute:bool ->
   ?tco_disallow_unresolved_type_variables:bool ->
   ?tco_disallow_invalid_arraykey_constraint:bool ->
-  ?po_enable_constant_visibility_modifiers:bool ->
   ?po_enable_class_level_where_clauses:bool ->
   ?po_disable_legacy_soft_typehints:bool ->
   ?tco_use_lru_workers:bool ->
@@ -512,8 +509,6 @@ val tco_check_xhp_attribute : t -> bool
 val tco_disallow_unresolved_type_variables : t -> bool
 
 val tco_disallow_invalid_arraykey_constraint : t -> bool
-
-val po_enable_constant_visibility_modifiers : t -> bool
 
 val po_enable_class_level_where_clauses : t -> bool
 

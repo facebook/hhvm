@@ -475,7 +475,6 @@ and class_const = {
   cc_abstract: bool;
   cc_pos: Pos.t;
   cc_type: decl_ty;
-  cc_visibility: visibility;
   cc_expr: Nast.expr option;
   (* identifies the class from which this const originates *)
   cc_origin: string;
@@ -553,7 +552,6 @@ and typeconst_abstract_kind =
 
 and typeconst_type = {
   ttc_abstract: typeconst_abstract_kind;
-  ttc_visibility: visibility;
   ttc_name: Nast.sid;
   ttc_constraint: decl_ty option;
   ttc_type: decl_ty option;

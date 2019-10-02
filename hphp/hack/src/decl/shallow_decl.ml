@@ -18,15 +18,7 @@ module Attrs = Attributes
 module Partial = Partial_provider
 
 let class_const env c cc =
-  let {
-    cc_id = name;
-    cc_type = h;
-    cc_expr = e;
-    cc_visibility = v;
-    cc_doc_comment = _;
-  } =
-    cc
-  in
+  let { cc_id = name; cc_type = h; cc_expr = e; cc_doc_comment = _ } = cc in
   let pos = fst name in
   match c.c_kind with
   | Ast_defs.Ctrait ->
@@ -68,13 +60,7 @@ let class_const env c cc =
         ((r, Typing_defs.make_tany ()), true)
     in
     Some
-      {
-        scc_abstract = abstract;
-        scc_expr = e;
-        scc_name = name;
-        scc_type = ty;
-        scc_visibility = v;
-      }
+      { scc_abstract = abstract; scc_expr = e; scc_name = name; scc_type = ty }
 
 let typeconst_abstract_kind env = function
   | Aast.TCAbstract default ->
@@ -117,7 +103,6 @@ let typeconst env c tc =
         stc_constraint = constr;
         stc_type = ty;
         stc_enforceable = enforceable;
-        stc_visibility = tc.c_tconst_visibility;
         stc_reifiable = reifiable;
       }
 

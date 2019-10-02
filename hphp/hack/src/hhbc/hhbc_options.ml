@@ -48,7 +48,6 @@ type t = {
   option_enable_pocket_universes: bool;
   option_notice_on_by_ref_argument_typehint_violation: bool;
   option_array_provenance: bool;
-  option_enable_constant_visibility_modifiers: bool;
   option_enable_class_level_where_clauses: bool;
   option_disable_legacy_soft_typehints: bool;
   option_allow_new_attribute_syntax: bool;
@@ -102,7 +101,6 @@ let default =
     option_enable_pocket_universes = false;
     option_notice_on_by_ref_argument_typehint_violation = false;
     option_array_provenance = false;
-    option_enable_constant_visibility_modifiers = false;
     option_enable_class_level_where_clauses = false;
     option_disable_legacy_soft_typehints = false;
     option_allow_new_attribute_syntax = false;
@@ -192,9 +190,6 @@ let notice_on_by_ref_argument_typehint_violation o =
 
 let array_provenance o = o.option_array_provenance
 
-let enable_constant_visibility_modifiers o =
-  o.option_enable_constant_visibility_modifiers
-
 let enable_class_level_where_clauses o =
   o.option_enable_class_level_where_clauses
 
@@ -277,8 +272,6 @@ let to_string o =
       Printf.sprintf "notice_on_by_ref_argument_typehint_violation: %B"
       @@ notice_on_by_ref_argument_typehint_violation o;
       Printf.sprintf "array_provenance: %B" @@ array_provenance o;
-      Printf.sprintf "enable_constant_visibility_modifiers: %B"
-      @@ enable_constant_visibility_modifiers o;
       Printf.sprintf "enable_class_level_where_clauses: %B"
       @@ enable_class_level_where_clauses o;
       Printf.sprintf "disable_legacy_soft_typehints: %B"
@@ -381,11 +374,6 @@ let set_option options name value =
     }
   | "hhvm.array_provenance" ->
     { options with option_array_provenance = as_bool value }
-  | "hhvm.lang.enable_constant_visibility_modifiers" ->
-    {
-      options with
-      option_enable_constant_visibility_modifiers = as_bool value;
-    }
   | "hhvm.lang.enable_class_level_where_clauses" ->
     { options with option_enable_class_level_where_clauses = as_bool value }
   | "hhvm.lang.disable_legacy_soft_typehints" ->
@@ -570,11 +558,6 @@ let value_setters =
     @@ (fun opts v -> { opts with option_rx_is_enabled = v > 0 }) );
     ( set_value "hhvm.array_provenance" get_value_from_config_int
     @@ (fun opts v -> { opts with option_array_provenance = v > 0 }) );
-    ( set_value
-        "hhvm.hack.lang.enable_constant_visibility_modifiers"
-        get_value_from_config_int
-    @@ fun opts v ->
-    { opts with option_enable_constant_visibility_modifiers = v = 1 } );
     ( set_value
         "hhvm.hack.lang.enable_class_level_where_clauses"
         get_value_from_config_int

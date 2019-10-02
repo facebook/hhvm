@@ -5566,14 +5566,7 @@ and class_get_
         | None ->
           TOG.smember_not_found p ~is_const ~is_method class_ mid;
           (env, (Reason.Rnone, Typing_utils.terr env))
-        | Some { cc_type; cc_abstract; cc_pos; cc_visibility; _ } ->
-          let p_vis = Reason.to_pos (fst cc_type) in
-          TVis.check_class_access
-            p
-            env
-            (p_vis, cc_visibility, false)
-            cid
-            class_;
+        | Some { cc_type; cc_abstract; cc_pos; _ } ->
           let (env, cc_locl_type) = Phase.localize ~ety_env env cc_type in
           ( if cc_abstract then
             match cid with
@@ -7886,7 +7879,6 @@ and typeconst_def
     env
     {
       c_tconst_abstract;
-      c_tconst_visibility;
       c_tconst_name = (pos, _) as id;
       c_tconst_constraint;
       c_tconst_type = hint;
@@ -7922,7 +7914,6 @@ and typeconst_def
   ( env,
     {
       T.c_tconst_abstract;
-      T.c_tconst_visibility;
       T.c_tconst_name = id;
       T.c_tconst_constraint;
       T.c_tconst_type = hint;
@@ -7966,7 +7957,6 @@ and class_const_def env cc =
   in
   ( env,
     ( {
-        T.cc_visibility = cc.cc_visibility;
         T.cc_type = cc.cc_type;
         T.cc_id = cc.cc_id;
         T.cc_expr = eopt;

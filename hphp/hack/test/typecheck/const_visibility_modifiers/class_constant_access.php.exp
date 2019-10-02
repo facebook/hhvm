@@ -1,4 +1,0 @@
-File "class_constant_access.php", line 13, characters 15-22:
-Cannot access this protected member, you don't extend A (Typing[4112])
-File "class_constant_access.php", line 4, characters 19-21:
-This member is protected

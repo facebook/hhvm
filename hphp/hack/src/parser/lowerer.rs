@@ -3744,7 +3744,6 @@ where
         match &node.syntax {
             ConstDeclaration(c) => {
                 // TODO: make wrap `type_` `doc_comment` by `Rc` in ClassConst to avoid clone
-                let vis = Self::p_visibility_or(&c.const_modifiers, env, aast::Visibility::Public)?;
                 let type_ = Self::mp_optional(Self::p_hint, &c.const_type_specifier, env)?;
                 // using map_fold can save one Vec allocation, but ocaml's behavior is that
                 // if anything throw, it will discard all lowered elements. So adding to class
@@ -3764,7 +3763,6 @@ where
                                     )?
                                 };
                                 Ok(aast::ClassConst {
-                                    visibility: vis,
                                     type_: type_.clone(),
                                     id,
                                     expr,
@@ -3791,8 +3789,6 @@ where
                 let constraint =
                     Self::mp_optional(Self::p_tconstraint_ty, &c.type_const_type_constraint, env)?;
                 let span = Self::p_pos(node, env);
-                let visibility = Self::p_visibility(&c.type_const_modifiers, env)?
-                    .unwrap_or(aast::Visibility::Public);
                 let has_abstract = kinds.has(modifier::ABSTRACT);
                 let (type_, abstract_kind) = match (has_abstract, &constraint, &type__) {
                     (false, _, None) => {
@@ -3811,7 +3807,6 @@ where
                 };
                 Ok(class.typeconsts.push(aast::ClassTypeconst {
                     abstract_: abstract_kind,
-                    visibility,
                     name,
                     constraint,
                     type_,
@@ -4609,7 +4604,6 @@ where
                     match &n.syntax {
                         Enumerator(c) => Ok(aast::ClassConst {
                             type_: None,
-                            visibility: aast::Visibility::Public,
                             id: Self::pos_name(&c.enumerator_name, e)?,
                             expr: Some(Self::p_expr(&c.enumerator_value, e)?),
                             doc_comment: None,

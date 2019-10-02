@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8fe6c1bc15133577e3a819041fd79f41>>
+// @generated SignedSource<<dd1702c5723afd855fbe87d5a2013a53>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -228,7 +228,6 @@ pub struct ClassConst {
     pub abstract_: bool,
     pub pos: pos::Pos,
     pub type_: DeclTy,
-    pub visibility: Visibility,
     pub expr: Option<nast::Expr>,
     pub origin: String,
 }
@@ -286,7 +285,6 @@ pub enum TypeconstAbstractKind {
 #[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 pub struct TypeconstType {
     pub abstract_: TypeconstAbstractKind,
-    pub visibility: Visibility,
     pub name: nast::Sid,
     pub constraint: Option<DeclTy>,
     pub type_: Option<DeclTy>,

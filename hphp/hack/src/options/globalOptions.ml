@@ -99,7 +99,6 @@ type t = {
   tco_check_xhp_attribute: bool;
   tco_disallow_unresolved_type_variables: bool;
   tco_disallow_invalid_arraykey_constraint: bool;
-  po_enable_constant_visibility_modifiers: bool;
   po_enable_class_level_where_clauses: bool;
   po_disable_legacy_soft_typehints: bool;
   tco_use_lru_workers: bool;
@@ -259,7 +258,6 @@ let default =
     tco_check_xhp_attribute = false;
     tco_disallow_unresolved_type_variables = false;
     tco_disallow_invalid_arraykey_constraint = false;
-    po_enable_constant_visibility_modifiers = false;
     po_enable_class_level_where_clauses = false;
     po_disable_legacy_soft_typehints = false;
     tco_use_lru_workers = true;
@@ -352,8 +350,6 @@ let make
       default.tco_disallow_unresolved_type_variables)
     ?(tco_disallow_invalid_arraykey_constraint =
       default.tco_disallow_invalid_arraykey_constraint)
-    ?(po_enable_constant_visibility_modifiers =
-      default.po_enable_constant_visibility_modifiers)
     ?(po_enable_class_level_where_clauses =
       default.po_enable_class_level_where_clauses)
     ?(po_disable_legacy_soft_typehints =
@@ -440,7 +436,6 @@ let make
     tco_check_xhp_attribute;
     tco_disallow_unresolved_type_variables;
     tco_disallow_invalid_arraykey_constraint;
-    po_enable_constant_visibility_modifiers;
     po_enable_class_level_where_clauses;
     po_disable_legacy_soft_typehints;
     tco_use_lru_workers;
@@ -593,9 +588,6 @@ let tco_check_xhp_attribute t = t.tco_check_xhp_attribute
 
 let tco_disallow_unresolved_type_variables t =
   t.tco_disallow_unresolved_type_variables
-
-let po_enable_constant_visibility_modifiers t =
-  t.po_enable_constant_visibility_modifiers
 
 let po_enable_class_level_where_clauses t =
   t.po_enable_class_level_where_clauses

@@ -416,7 +416,6 @@ and ca_type =
 
 (* expr = None indicates an abstract const *)
 and ('ex, 'fb, 'en, 'hi) class_const = {
-  cc_visibility: visibility;
   cc_type: hint option;
   cc_id: sid;
   cc_expr: ('ex, 'fb, 'en, 'hi) expr option;
@@ -436,7 +435,6 @@ and typeconst_abstract_kind =
  *)
 and ('ex, 'fb, 'en, 'hi) class_typeconst = {
   c_tconst_abstract: typeconst_abstract_kind;
-  c_tconst_visibility: visibility;
   c_tconst_name: sid;
   c_tconst_constraint: hint option;
   c_tconst_type: hint option;

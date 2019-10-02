@@ -123,13 +123,6 @@ let summarize_typeconst class_name t =
     | TCAbstract _ -> [Abstract]
     | _ -> []
   in
-  let visibility_modifier =
-    match t.c_tconst_visibility with
-    | Public -> SymbolDefinition.Public
-    | Private -> SymbolDefinition.Private
-    | Protected -> SymbolDefinition.Protected
-  in
-  let modifiers = visibility_modifier :: modifiers in
   let full_name = get_full_name (Some class_name) name in
   {
     kind;

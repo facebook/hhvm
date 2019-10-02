@@ -676,7 +676,6 @@ let mutate_metadata (input : HP.t)  =
       Hhas_constant.make
         (const |> Hhas_constant.name)
         (const |> Hhas_constant.value |> option_lift mutate_typed_value)
-        (const |> Hhas_constant.visibility         |> mutate_visibility)
         (const |> Hhas_constant.initializer_instrs |> mutate_option) in
     let mutate_typed_constant (const : Hhas_type_constant.t) =
       Hhas_type_constant.make

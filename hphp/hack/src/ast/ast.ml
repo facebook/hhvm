@@ -284,7 +284,6 @@ and class_vars_ = {
 and class_const = id * expr option
 
 and class_consts_ = {
-  cc_visibility: kind;
   cc_hint: hint option;
   cc_names: class_const list;
   cc_doc_comment: string option;

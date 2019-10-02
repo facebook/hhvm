@@ -631,10 +631,6 @@ where
         Self::methodish_modifier_contains_helper(|x| x.is_private(), node)
     }
 
-    fn methodish_contains_protected(node: &'a Syntax<Token, Value>) -> bool {
-        Self::methodish_modifier_contains_helper(|x| x.is_protected(), node)
-    }
-
     fn is_visibility(x: &'a Syntax<Token, Value>) -> bool {
         x.is_public() || x.is_private() || x.is_protected()
     }
@@ -1218,11 +1214,6 @@ where
     // Tests if the immediate classish parent is a trait.
     fn is_inside_trait(&self) -> bool {
         self.first_parent_classish_node(TokenKind::Trait).is_some()
-    }
-
-    fn non_public_const_inside_interface(&self, node: &'a Syntax<Token, Value>) -> bool {
-        self.is_inside_interface()
-            && (Self::methodish_contains_private(node) || Self::methodish_contains_protected(node))
     }
 
     // Returns the 'async'-annotation syntax node from the methodish_declaration
@@ -4240,8 +4231,6 @@ where
     fn class_constant_modifier_errors(&mut self, node: &'a Syntax<Token, Value>) {
         if let ConstDeclaration(x) = &node.syntax {
             let const_modifiers = &x.const_modifiers;
-            let has_abstract = Self::methodish_contains_abstract(node);
-            let has_private = Self::methodish_contains_private(node);
             if self.is_inside_trait() {
                 self.errors
                     .push(Self::make_error_from_node(node, errors::const_in_trait))
@@ -4251,49 +4240,16 @@ where
                 self.errors
                     .push(Self::make_error_from_node(node, errors::static_const))
             }
-
-            if !Self::methodish_contains_visibility(node) {
-
-            } else if !self
-                .env
-                .parser_options
-                .po_enable_constant_visibility_modifiers
-            {
-                if self.env.is_typechecker() {
-                    self.errors
-                        .push(Self::make_error_from_node(node, errors::const_visibility))
-                }
-            } else {
-                if self.non_public_const_inside_interface(node) {
-                    self.errors.push(Self::make_error_from_node(
-                        node,
-                        errors::non_public_const_in_interface,
-                    ))
-                }
-
-                if has_abstract && has_private {
-                    self.errors.push(Self::make_error_from_node(
-                        node,
-                        errors::elt_abstract_private("constants"),
-                    ))
-                }
-                self.multiple_visibility_errors(
-                    const_modifiers,
-                    errors::const_has_multiple_visibilities,
-                )
+            if Self::methodish_contains_visibility(node) {
+                self.errors
+                    .push(Self::make_error_from_node(node, errors::const_visibility))
             }
         }
     }
 
     fn type_const_modifier_errors(&mut self, node: &'a Syntax<Token, Value>) {
         if let TypeConstDeclaration(_) = &node.syntax {
-            if Self::methodish_contains_visibility(node)
-                && !self
-                    .env
-                    .parser_options
-                    .po_enable_constant_visibility_modifiers
-                && self.env.is_typechecker()
-            {
+            if Self::methodish_contains_visibility(node) {
                 self.errors.push(Self::make_error_from_node(
                     node,
                     errors::type_const_visibility,

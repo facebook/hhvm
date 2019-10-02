@@ -3020,24 +3020,10 @@ if there already is one, since that one will likely be better than this one. *)
      * properties, right now we don't handle this *)
     let doc_comment_opt = extract_docblock node in
     let pClassElt_ = function
-      | ConstDeclaration
-          { const_type_specifier; const_declarators; const_modifiers; _ } ->
-        let modifiers = pKinds (fun _ -> ()) const_modifiers env in
-        let vis =
-          let rec find_vis_from_kind_list lst =
-            match lst with
-            | [] -> Public
-            | x :: _ when List.mem [Private; Public; Protected] x ~equal:( = )
-              ->
-              x
-            | _ :: xs -> find_vis_from_kind_list xs
-          in
-          find_vis_from_kind_list modifiers
-        in
+      | ConstDeclaration { const_type_specifier; const_declarators; _ } ->
         [
           Const
             {
-              cc_visibility = vis;
               cc_hint = mpOptional pHint const_type_specifier env;
               cc_doc_comment = doc_comment_opt;
               cc_names =
@@ -3794,7 +3780,6 @@ if there already is one, since that one will likely be better than this one. *)
             Const
               {
                 cc_hint = None;
-                cc_visibility = Public;
                 cc_names = [(pos_name name env, Some (pExpr value env))];
                 cc_doc_comment = None;
               }

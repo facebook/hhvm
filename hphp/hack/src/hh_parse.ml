@@ -62,7 +62,6 @@ module FullFidelityParseArgs = struct
     files: string list;
     dump_nast: bool;
     disable_lval_as_an_expression: bool;
-    enable_constant_visibility_modifiers: bool;
     enable_class_level_where_clauses: bool;
     disable_legacy_soft_typehints: bool;
     allow_new_attribute_syntax: bool;
@@ -99,7 +98,6 @@ module FullFidelityParseArgs = struct
       files
       dump_nast
       disable_lval_as_an_expression
-      enable_constant_visibility_modifiers
       enable_class_level_where_clauses
       disable_legacy_soft_typehints
       allow_new_attribute_syntax
@@ -134,7 +132,6 @@ module FullFidelityParseArgs = struct
       files;
       dump_nast;
       disable_lval_as_an_expression;
-      enable_constant_visibility_modifiers;
       enable_class_level_where_clauses;
       disable_legacy_soft_typehints;
       allow_new_attribute_syntax;
@@ -186,7 +183,6 @@ module FullFidelityParseArgs = struct
     let set_show_file_name () = show_file_name := true in
     let files = ref [] in
     let push_file file = files := file :: !files in
-    let enable_constant_visibility_modifiers = ref false in
     let enable_class_level_where_clauses = ref false in
     let disable_legacy_soft_typehints = ref false in
     let allow_new_attribute_syntax = ref false in
@@ -300,9 +296,6 @@ No errors are filtered out."
         ( "--disable-lval-as-an-expression",
           Arg.Set disable_lval_as_an_expression,
           "Disable lval as an expression." );
-        ( "--enable-constant-visibility-modifiers",
-          Arg.Set enable_constant_visibility_modifiers,
-          "Require constants to have visibility modifiers" );
         ( "--enable-class-level-where-clauses",
           Arg.Set enable_class_level_where_clauses,
           "Enables support for class-level where clauses" );
@@ -379,7 +372,6 @@ No errors are filtered out."
       (List.rev !files)
       !dump_nast
       !disable_lval_as_an_expression
-      !enable_constant_visibility_modifiers
       !enable_class_level_where_clauses
       !disable_legacy_soft_typehints
       !allow_new_attribute_syntax
@@ -409,11 +401,6 @@ let handle_existing_file args filename =
     ParserOptions.with_disable_lval_as_an_expression
       popt
       args.disable_lval_as_an_expression
-  in
-  let popt =
-    ParserOptions.with_enable_constant_visibility_modifiers
-      popt
-      args.enable_constant_visibility_modifiers
   in
   let popt =
     {

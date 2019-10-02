@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4d1d105e7d935ede08ec287483e5143c>>
+// @generated SignedSource<<48b793f442e2d7cb3f9a69019ac56242>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -28,7 +28,6 @@ pub struct ShallowClassConst {
     pub expr: Option<nast::Expr>,
     pub name: aast::Sid,
     pub type_: DeclTy,
-    pub visibility: aast::Visibility,
 }
 
 #[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
@@ -38,7 +37,6 @@ pub struct ShallowTypeconst {
     pub name: aast::Sid,
     pub type_: Option<DeclTy>,
     pub enforceable: (pos::Pos, bool),
-    pub visibility: aast::Visibility,
     pub reifiable: Option<pos::Pos>,
 }
 

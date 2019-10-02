@@ -25,17 +25,30 @@
 #endif
 
 namespace HPHP {
-// numa_num_nodes is always defined. It is initialized to 1 (which is the value
-// when libnuma isn't used).
+// numa_num_nodes and numa_node_set are always defined. They are initialized to
+// 1 (which is the value when libnuma isn't used).
 extern uint32_t numa_num_nodes;
+extern uint32_t numa_node_set;
 
 #ifdef HAVE_NUMA
-extern uint32_t numa_node_set;
+
 extern uint32_t numa_node_mask;
 extern std::vector<bitmask*> node_to_cpu_mask;
 extern bool use_numa;
 
-void initNuma();
+/*
+ * init_numa() is called very early during process initialization, before
+ * parsing runtime options. It initializes `numa_num_nodes`, `numa_node_set`,
+ * and `numa_node_mask`, when NUMA APIs are usable.
+ */
+void init_numa();
+
+/*
+ * enable_numa() is called after parsing runtime options. It initializes
+ * `use_numa`, which is used to decide whether we actually call NUMA APIs. Note
+ * that on single-node systems, we don't set use_numa.
+ */
+void enable_numa();
 
 /*
  * Determine the next NUMA node according to state maintained in `curr_node`.
@@ -65,7 +78,8 @@ inline bool numa_node_allowed(uint32_t node) {
 
 #else // HAVE_NUMA undefined
 
-inline void initNuma() {}
+inline void init_numa() {}
+inline void enable_numa() {}
 inline constexpr uint32_t next_numa_node(std::atomic<uint32_t>& curr_node) {
   return 0;
 }

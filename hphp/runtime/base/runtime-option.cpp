@@ -1823,7 +1823,7 @@ void RuntimeOption::Load(
 #undef F
 
     if (EvalJitSerdesModeForceOff) EvalJitSerdesMode = JitSerdesMode::Off;
-    if (getenv("HHVM_DISABLE_NUMA") || (numa_num_nodes <= 1)) {
+    if (numa_num_nodes <= 1) {
       EvalEnableNuma = false;
     }
 

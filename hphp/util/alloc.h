@@ -233,10 +233,6 @@ extern __thread MemBlock s_tlSpace;
 extern __thread MemBlock s_hugeRange;
 
 /*
- * Enable the numa support in hhvm.
- */
-void enable_numa();
-/*
  * Set the thread affinity, and the jemalloc arena for the current
  * thread.
  * Also initializes s_numaNode

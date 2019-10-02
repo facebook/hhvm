@@ -136,7 +136,6 @@ void flush_thread_stack() {
 }
 
 #if !defined USE_JEMALLOC || !defined HAVE_NUMA
-void enable_numa() {}
 void set_numa_binding(int node) {}
 void* mallocx_on_node(size_t size, int node, size_t align) {
   void* ret = nullptr;
@@ -192,38 +191,6 @@ __thread int local_arena_tcache = -1;
 static unsigned base_arena;
 
 #ifdef HAVE_NUMA
-
-void enable_numa() {
-  if (numa_available() < 0) return;
-  /*
-   * libnuma is only partially aware of taskset. If on entry,
-   * you have completely disabled a node via taskset, the node
-   * will not be available, and calling numa_run_on_node will
-   * not work for that node. But if only some of the cpu's on a
-   * node were disabled, then calling numa_run_on_node will enable
-   * them all. To prevent this, compute the actual masks up front
-   */
-  bitmask* enabled = numa_allocate_cpumask();
-  if (numa_sched_getaffinity(0, enabled) < 0) {
-    return;
-  }
-  int num_cpus = numa_num_configured_cpus();
-  int max_node = numa_max_node();
-  for (int i = 0; i <= max_node; i++) {
-    bitmask* cpus_for_node = numa_allocate_cpumask();
-    numa_node_to_cpus(i, cpus_for_node);
-    for (int j = 0; j < num_cpus; j++) {
-      if (!numa_bitmask_isbitset(enabled, j)) {
-        numa_bitmask_clearbit(cpus_for_node, j);
-      }
-    }
-    assert(node_to_cpu_mask.size() == i);
-    node_to_cpu_mask.push_back(cpus_for_node);
-  }
-  numa_bitmask_free(enabled);
-
-  use_numa = true;
-}
 
 void set_numa_binding(int node) {
   if (node < 0) return;                 // thread not created from JobQueue
@@ -287,8 +254,8 @@ void setup_low_arena(unsigned n1GPages) {
   auto veryLowMapper =
     getMapperChain(veryLowRange,
                    (n1GPages != 0) ? 1 : 0,
-                   true, 0,                 // 2M
-                   true,                    // 4K
+                   true, 0,             // 2M
+                   true,                // 4K
                    numa_node_set, 0);
   auto lowMapper =
     getMapperChain(lowRange,
@@ -671,7 +638,7 @@ struct JEMallocInitializer {
     // Enable backtracing through PHP frames (t9814472).
     setenv("UNW_RBP_ALWAYS_VALID", "1", false);
 
-    initNuma();
+    init_numa();
 #ifdef USE_JEMALLOC
 #if !USE_JEMALLOC_EXTENT_HOOKS
     // Create the legacy low arena that uses brk() instead of mmap().  When

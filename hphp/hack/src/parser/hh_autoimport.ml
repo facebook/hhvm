@@ -10,7 +10,7 @@
 open Core_kernel
 
 (* Create map from name to alias *)
-let add_alias m s = SMap.add (String.lowercase s) ("HH\\" ^ s) m
+let add_alias m s = SMap.add s ("HH\\" ^ s) m
 
 let alias_map =
   List.fold_left
@@ -77,8 +77,8 @@ let alias_map =
       "dynamic";
     ]
 
-let opt_normalize s = SMap.get (String.lowercase s) alias_map
+let opt_normalize s = SMap.get s alias_map
 
 let normalize s = Option.value (opt_normalize s) ~default:s
 
-let is_hh_autoimport s = SMap.mem (String.lowercase s) alias_map
+let is_hh_autoimport s = SMap.mem s alias_map

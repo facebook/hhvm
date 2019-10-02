@@ -2,7 +2,9 @@ from __future__ import absolute_import, unicode_literals
 
 import json
 import os
+import tempfile
 import time
+from os import path
 from typing import List, Optional, Tuple
 
 from common_tests import CommonTestDriver
@@ -15,10 +17,8 @@ class GlobalInferenceDriver(CommonTestDriver):
         self, submode: str, files: Optional[List[str]] = None
     ) -> Tuple[str, str, int]:
         files = [] if files is None else files
-        root = self.repo_dir + os.path.sep
         return self.proc_call(
-            [hh_client, self.repo_dir, "--global-inference", submode]
-            + list(map(lambda x: x.format(root=root), files)),
+            [hh_client, self.repo_dir, "--global-inference", submode] + files,
             stdin=None,
         )
 
@@ -58,6 +58,8 @@ class TestThreeFilesGlobalInference(TestCase[GlobalInferenceDriver]):
         return GlobalInferenceDriver()
 
     def execute_once(self):
+        temp_dir = tempfile.mkdtemp()
+
         self.test_driver.start_hh_server(args=["--config", "infer_missing=global"])
         logpath, _, _ = self.test_driver.proc_call(
             [hh_client, self.test_driver.repo_dir, "--logname"]
@@ -71,11 +73,15 @@ class TestThreeFilesGlobalInference(TestCase[GlobalInferenceDriver]):
         if artifacts_path is None:
             self.fail("Couldn't retrieve the artifacts")
 
-        self.test_driver.run_hh_global_inference("merge", [artifacts_path, "env"])
-        self.test_driver.run_hh_global_inference("export-json", ["env", "env.json"])
+        self.test_driver.run_hh_global_inference(
+            "merge", [artifacts_path, path.join(temp_dir, "env")]
+        )
+        self.test_driver.run_hh_global_inference(
+            "export-json", [path.join(temp_dir, "env"), path.join(temp_dir, "env.json")]
+        )
         time.sleep(1)
 
-        with open(self.test_driver.get_file_path("env.json")) as json_file:
+        with open(path.join(temp_dir, "env.json")) as json_file:
             content = json_file.read().replace("\\", "\\\\")
             graph_json = json.loads(content)
             graph_json = {

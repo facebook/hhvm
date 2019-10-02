@@ -34,7 +34,7 @@ struct ZstdCompressor {
 
   StringHolder compress(const void* data, size_t& len, bool last);
 
- private:
+ protected:
   static void zstd_cctx_deleter(ZSTD_CCtx* ctx);
 
   using ContextPool = CompressionContextPool<
@@ -52,7 +52,7 @@ struct ZstdCompressor {
 
  public:
   static bool s_useLocalArena;
- private:
+ protected:
   int compression_level_;
   ContextPool::Ref ctx_;
 };

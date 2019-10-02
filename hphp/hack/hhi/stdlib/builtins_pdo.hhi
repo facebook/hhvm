@@ -125,7 +125,9 @@ class PDOStatement {
   public function fetchColumn(int $column_numner = 0);
   public function fetchAll(int $how = 0, $class_name = null, $ctor_args = null);
   public function bindValue($paramno, $param, int $type = PDO::PARAM_STR);
+  <<__Deprecated('use bindValue')>>
   public function bindParam($paramno, &$param, int $type = PDO::PARAM_STR, int $max_value_len = 0, $driver_params = null);
+  <<__Deprecated('subject to removal in a future revision')>>
   public function bindColumn($paramno, &$param, int $type = PDO::PARAM_STR, int $max_value_len = 0, $driver_params = null);
   public function rowCount();
   public function errorCode();

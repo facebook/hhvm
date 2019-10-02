@@ -1,0 +1,6 @@
+File "tconst_unsoundness.php", line 16, characters 10-11:
+Invalid return type (Typing[4110])
+File "tconst_unsoundness.php", line 14, characters 49-52:
+Expected Tout
+File "tconst_unsoundness.php", line 14, characters 40-42:
+But got Tin

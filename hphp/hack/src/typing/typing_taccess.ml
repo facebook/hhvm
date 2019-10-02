@@ -125,7 +125,6 @@ and referenced_typeconsts env ety_env (root, ids) =
  * we do not recurse infinitely.
  *)
 and expand env ~as_tyvar_with_cnstr root id =
-  let expand env ty = expand env ~as_tyvar_with_cnstr ty id in
   let (tenv, ((root_reason, root_ty) as root)) =
     Env.expand_type env.tenv root
   in
@@ -182,7 +181,7 @@ and expand env ~as_tyvar_with_cnstr root id =
     (env, root)
   | Tabstract (AKdependent (DTcls _), Some ty)
   | Tabstract (AKnewtype (_, _), Some ty) ->
-    expand env ty
+    expand env ~as_tyvar_with_cnstr ty id
   | Tclass ((class_pos, class_name), _, _) ->
     create_root_from_type_constant
       env
@@ -216,7 +215,7 @@ and expand env ~as_tyvar_with_cnstr root id =
         (TySet.elements upper_bounds)
         ~f:(fun (prev_env, tys, errors) ty ->
           try
-            let (env, ty) = expand env ty in
+            let (env, ty) = expand env ~as_tyvar_with_cnstr:false ty id in
             (* If ty here involves a type access, we have to use
             the current environment's dependent types. Otherwise,
             we throw away type access information.
@@ -250,13 +249,19 @@ and expand env ~as_tyvar_with_cnstr root id =
     end
   | Tabstract (AKdependent dep_ty, Some ty) ->
     let env = { env with choose_assigned_type = false } in
-    let (env, ty) = expand env ty in
+    let (env, ty) = expand env ~as_tyvar_with_cnstr:false ty id in
     make_ty env (AbstractKind.to_string (AKdependent dep_ty)) ty
   | Tunion tyl ->
-    let (env, tyl) = List.map_env env tyl ~f:expand in
+    let (env, tyl) =
+      List.map_env env tyl ~f:(fun env ty ->
+          expand env ~as_tyvar_with_cnstr ty id)
+    in
     (env, (make_reason tenv Reason.Rnone, Tunion tyl))
   | Tintersection tyl ->
-    let (env, tyl) = Typing_utils.run_on_intersection env tyl ~f:expand in
+    let (env, tyl) =
+      Typing_utils.run_on_intersection env tyl ~f:(fun env ty ->
+          expand env ~as_tyvar_with_cnstr ty id)
+    in
     let (tenv, ty) =
       Inter.intersect_list env.tenv (make_reason tenv Reason.Rnone) tyl
     in

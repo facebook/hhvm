@@ -10,11 +10,3 @@ File "generic_self_type_access_failure.php", line 18, characters 30-33:
 No type constant 'T' in Intf (Typing[4090])
 File "generic_self_type_access_failure.php", line 5, characters 11-14:
 Declaration of Intf is here
-File "generic_self_type_access_failure.php", line 20, characters 11-11:
-A 'where' type constraint is violated here (Typing[4323])
-File "generic_self_type_access_failure.php", line 12, characters 28-28:
-This method's where constraints contain a generic type access
-File "generic_self_type_access_failure.php", line 18, characters 30-33:
-No type constant 'T' in Intf
-File "generic_self_type_access_failure.php", line 5, characters 11-14:
-Declaration of Intf is here

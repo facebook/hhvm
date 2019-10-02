@@ -523,34 +523,16 @@ and check_tparams_constraints ~use_pos ~ety_env env tparams =
 and check_where_constraints
     ~in_class ~use_pos ~ety_env ~definition_pos env cstrl =
   List.fold_left cstrl ~init:env ~f:(fun env (ty1, ck, ty2) ->
-      let contains_type_access =
-        match (ty1, ty2) with
-        | ((_, Taccess ((_, Tgeneric _), _)), _)
-        | (_, (_, Taccess ((_, Tgeneric _), _))) ->
-          true
-        | _ -> false
-      in
-      if contains_type_access then
-        let ty_from_env = localize ~ety_env in
-        TGenConstraint.check_tconst_where_constraint
-          env
-          ~use_pos
-          ~definition_pos
-          ck
-          ty_from_env
-          ty2
-          ty1
-      else
-        let (env, ty1) = localize ~ety_env env ty1 in
-        let (env, ty2) = localize ~ety_env env ty2 in
-        TGenConstraint.check_where_constraint
-          ~in_class
-          env
-          ~use_pos
-          ~definition_pos
-          ck
-          ty2
-          ty1)
+      let (env, ty1) = localize ~ety_env env ty1 in
+      let (env, ty2) = localize ~ety_env env ty2 in
+      TGenConstraint.check_where_constraint
+        ~in_class
+        env
+        ~use_pos
+        ~definition_pos
+        ck
+        ty2
+        ty1)
 
 (* Performs no substitutions of generics and initializes Tthis to
  * Env.get_self env

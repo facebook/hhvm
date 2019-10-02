@@ -260,6 +260,7 @@ bool VariableUnserializer::RefInfo::isColValue() const {
 }
 
 const StaticString s_force_darrays{"force_darrays"};
+const StaticString s_legacy_hack_arrays{"legacy_hack_arrays"};
 
 VariableUnserializer::VariableUnserializer(
   const char* str,
@@ -275,6 +276,7 @@ VariableUnserializer::VariableUnserializer(
     , m_options(options)
     , m_begin(str)
     , m_forceDArrays{m_options[s_force_darrays].toBoolean()}
+    , m_legacyHackArrays{m_options[s_legacy_hack_arrays].toBoolean()}
 {}
 
 VariableUnserializer::Type VariableUnserializer::type() const {
@@ -909,6 +911,12 @@ void VariableUnserializer::unserializeVariant(
       // It seems silly to check this here, but GCC actually generates much
       // better code this way.
       auto a = (type == 'a') ? unserializeArray() : unserializeDict();
+      if (UNLIKELY(m_legacyHackArrays && type == 'D')) {
+        if (a->cowCheck()) {
+          a = a.copy();
+        }
+        a->setLegacyArray(true);
+      }
       tvMove(make_array_like_tv(a.detach()), self);
     }
     return; // array has '}' terminating
@@ -933,6 +941,12 @@ void VariableUnserializer::unserializeVariant(
       // Check stack depth to avoid overflow.
       check_recursion_throw();
       auto a = unserializeVec();
+      if (UNLIKELY(m_legacyHackArrays)) {
+        if (a->cowCheck()) {
+          a = a.copy();
+        }
+        a->setLegacyArray(true);
+      }
       tvMove(make_tv<KindOfVec>(a.detach()), self);
     }
     return; // array has '}' terminating

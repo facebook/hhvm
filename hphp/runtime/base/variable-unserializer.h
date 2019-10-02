@@ -203,6 +203,7 @@ private:
   req::vector<Object> m_sleepingObjects;
   const char* const m_begin;
   bool m_forceDArrays;
+  bool m_legacyHackArrays;
   VariableSerializer::DVOverrides* m_dvOverrides = nullptr;
 
   void unserializeVariant(tv_lval self,

@@ -1,0 +1,60 @@
+vec(0) {
+}
+vec(0) {
+}
+dict(0) {
+}
+dict(0) {
+}
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+dict(1) {
+  ["foobar"]=>
+  NULL
+}
+dict(1) {
+  ["foobar"]=>
+  NULL
+}
+vec(1) {
+  dict(0) {
+  }
+}
+dict(0) {
+}
+vec(1) {
+  dict(0) {
+  }
+}
+dict(0) {
+}
+dict(1) {
+  ["crosby"]=>
+  dict(1) {
+    ["bing"]=>
+    NULL
+  }
+}
+dict(1) {
+  ["bing"]=>
+  NULL
+}
+dict(1) {
+  ["crosby"]=>
+  dict(1) {
+    ["bing"]=>
+    NULL
+  }
+}
+dict(1) {
+  ["bing"]=>
+  NULL
+}

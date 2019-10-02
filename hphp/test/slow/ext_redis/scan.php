@@ -18,7 +18,7 @@ $ret = $r->mset(array('key:one' => 'one', 'key:two' => 'two',
 function performScan($fn){
 	$cursor = null;
 	$returns = array();
-	while (($retval = $fn($cursor))){
+	while (($retval = $fn(inout $cursor))){
 		foreach ($retval as $key){
 
 			if (strstr($key, ExtRedisScan::$prefix) !== false){
@@ -32,23 +32,23 @@ function performScan($fn){
 }
 
 try {
-	$ret = performScan(function(&$cursor) use($r){
+	$ret = performScan(function(inout $cursor) use($r){
 		// Scan without patterns.
-		return $r->scan($cursor);
+		return $r->scan(inout $cursor);
 	});
 	var_dump($ret);
 
-	$ret = performScan(function(&$cursor) use($r){
+	$ret = performScan(function(inout $cursor) use($r){
 		// catch key:two and key:three
 
-		return $r->scan($cursor, ExtRedisScan::$prefix . 'key:t*');
+		return $r->scan(inout $cursor, ExtRedisScan::$prefix . 'key:t*');
 	});
 	var_dump($ret);
 
-	$ret = performScan(function(&$cursor) use($r){
+	$ret = performScan(function(inout $cursor) use($r){
 		// nothing.
 
-		return $r->scan($cursor, ExtRedisScan::$prefix . 'nokey:t*');
+		return $r->scan(inout $cursor, ExtRedisScan::$prefix . 'nokey:t*');
 	});
 	var_dump($ret);
 } finally {

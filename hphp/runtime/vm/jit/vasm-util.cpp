@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/vasm-util.h"
 
 #include "hphp/runtime/vm/jit/vasm-instr.h"
+#include "hphp/runtime/vm/jit/vasm-print.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-visit.h"
 
@@ -434,7 +435,12 @@ struct SSAConverter {
   // find a definition of 'pre' to a new Vreg.
   Vreg chaseDefinition(Vlabel label, Vreg pre) {
     auto const post = [&]{
-      assertx(label != unit.entry);
+      always_assert_flog(
+        label != unit.entry,
+        "Unable to find def for {}",
+        show(pre)
+      );
+
       auto const& preds = predecessors[label];
       assertx(!preds.empty());
 

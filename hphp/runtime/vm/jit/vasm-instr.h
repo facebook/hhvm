@@ -92,6 +92,9 @@ struct Vunit;
   O(popframe, Inone, Un, Dn)\
   O(recordstack, Inone, Un, Dn)\
   O(spill, Inone, U(s), D(d))\
+  O(spillbi, I(s), Un, D(d))\
+  O(spillli, I(s), Un, D(d))\
+  O(spillqi, I(s), Un, D(d))\
   O(reload, Inone, U(s), D(d))\
   O(ssaalias, Inone, U(s), D(d))\
   /* native function abi */\
@@ -560,9 +563,14 @@ struct conjureuse { Vreg c; };
  * a Vreg in memory, and the other represents a Vreg in a
  * register. This lets spilled Vregs be manipulated like any
  * other. These will not exist outside of register allocation as they
- * are lowered into actual load/stores to/from memory.
+ * are lowered into actual load/stores to/from memory. The immediate
+ * forms represent spilling an immediate directly without using a
+ * Vreg.
  */
 struct spill { Vreg s, d; };
+struct spillbi { Immed s; Vreg d; };
+struct spillli { Immed s; Vreg d; };
+struct spillqi { Immed s; Vreg d; };
 struct reload { Vreg s, d; };
 
 /*

@@ -255,6 +255,9 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::shrli:
     case Vinstr::shrqi:
     case Vinstr::spill:
+    case Vinstr::spillbi:
+    case Vinstr::spillli:
+    case Vinstr::spillqi:
     case Vinstr::sqrtsd:
     case Vinstr::srem:
     case Vinstr::ssaalias:

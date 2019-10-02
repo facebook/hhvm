@@ -2479,7 +2479,8 @@ function run_and_lock_test($options, $test) {
   $failmsg = "";
   $status = false;
   $lock = fopen($test, 'r');
-  if (!$lock || !flock($lock, LOCK_EX)) {
+  $wouldblock = false;
+  if (!$lock || !flock($lock, LOCK_EX, inout $wouldblock)) {
     $failmsg = "Failed to lock test";
     if ($lock) fclose($lock);
     $lock = null;
@@ -2500,7 +2501,7 @@ function run_and_lock_test($options, $test) {
       $failmsg = @file_get_contents("$test.diff");
       if (!$failmsg) $failmsg = "Test failed with empty diff";
     }
-    if (!flock($lock, LOCK_UN)) {
+    if (!flock($lock, LOCK_UN, inout $wouldblock)) {
       if ($failmsg !== '') $failmsg .= "\n";
       $failmsg .= "Failed to release test lock";
     }

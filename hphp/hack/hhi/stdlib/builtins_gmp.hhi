@@ -30,7 +30,7 @@ function gmp_and(mixed $a,
                  mixed $b): mixed;
 
 <<__PHPStdLib>>
-function gmp_clrbit(mixed &$a,
+function gmp_clrbit(inout mixed $a,
                     int $index): void;
 
 <<__PHPStdLib>>
@@ -156,7 +156,7 @@ function gmp_scan1(mixed $a,
                    int $start): mixed;
 
 <<__PHPStdLib>>
-function gmp_setbit(mixed &$a,
+function gmp_setbit(inout mixed $a,
                     int $index,
                     bool $bit_on = true): void;
 

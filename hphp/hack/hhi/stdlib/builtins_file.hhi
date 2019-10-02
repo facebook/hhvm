@@ -99,7 +99,7 @@ function fflush(resource $handle);
 <<__PHPStdLib>>
 function ftruncate(resource $handle, int $size);
 <<__PHPStdLib>>
-function flock(resource $handle, int $operation, &$wouldblock = null);
+function flock(resource $handle, int $operation, inout $wouldblock);
 <<__PHPStdLib>>
 function fputcsv(resource $handle, $fields, string $delimiter = ",", string $enclosure = "\"", string $escape_char = "\\");
 <<__PHPStdLib>>

@@ -141,7 +141,7 @@ class SplFileObject extends SplFileInfo
   ): varray;
   public function fgets();
   public function fgetss(?string $allowable_tags = null): string;
-  public function flock(int $operation, mixed &$wouldblock = false): bool;
+  public function flock(int $operation, inout mixed $wouldblock): bool;
   public function fpassthru(): int;
   public function fputcsv(
     /* HH_IGNORE_ERROR[2071] */

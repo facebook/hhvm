@@ -46,11 +46,12 @@ $wouldblocks = array(
 $i = 0;
 foreach($operations as $operation) {
   echo "--- Outer iteration $i ---\n";
-  var_dump(flock($fp, (int)$operation));
+  $wouldblock = false;
+  var_dump(flock($fp, (int)$operation, inout $wouldblock));
   $j = 0;
   foreach($wouldblocks as $wouldblock) {
     echo "-- Inner iteration $j in $i --\n";
-    var_dump(flock($fp, (int)$operation, &$wouldblock));
+    var_dump(flock($fp, (int)$operation, inout $wouldblock));
     $j++;
   }
   $i++;

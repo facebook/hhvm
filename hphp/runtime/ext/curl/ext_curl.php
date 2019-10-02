@@ -531,7 +531,7 @@ async function curl_exec(mixed $urlOrHandle,
   do {
     $active = 1;
     do {
-      $status = \curl_multi_exec($mh, &$active);
+      $status = \curl_multi_exec($mh, inout $active);
     } while ($status == \CURLM_CALL_MULTI_PERFORM);
     if (!$active) break;
     $select = await \curl_multi_await($mh);

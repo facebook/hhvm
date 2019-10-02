@@ -520,10 +520,10 @@ static int flock_values[] = { LOCK_SH, LOCK_EX, LOCK_UN };
 bool HHVM_FUNCTION(flock,
                    const Resource& handle,
                    int operation,
-                   VRefParam wouldblock /* = null */) {
+                   bool& wouldblock) {
   CHECK_HANDLE(handle, f);
-  bool block = false;
   int act;
+  wouldblock = false;
 
   act = operation & 3;
   if (act < 1 || act > 3) {
@@ -531,8 +531,7 @@ bool HHVM_FUNCTION(flock,
     return false;
   }
   act = flock_values[act - 1] | (operation & 4 ? LOCK_NB : 0);
-  bool ret = f->lock(act, block);
-  wouldblock.assignIfRef(block);
+  bool ret = f->lock(act, wouldblock);
   return ret;
 }
 

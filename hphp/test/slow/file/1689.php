@@ -1,6 +1,7 @@
 <?hh
 function flock_or_die($filename, $resource, $flock_op) {
-  $r = flock($resource, $flock_op);
+  $wouldblock = false;
+  $r = flock($resource, $flock_op, inout $wouldblock);
   var_dump($r);
  }
 

@@ -415,7 +415,7 @@ namespace __SystemLib {
       } else {
         $children = [];
         foreach ($data as $k => $v) {
-          \array_push(&$children, $this->tr($k, \print_r($v, true)));
+          \array_push(inout $children, $this->tr($k, \print_r($v, true)));
         }
         return [
           $this->element('hr'),

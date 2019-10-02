@@ -14,7 +14,7 @@ function gmp_and(mixed $a,
 
 
 <<__Native>>
-function gmp_clrbit(mixed &$a,
+function gmp_clrbit(inout mixed $a,
                     int $index): void;
 
 
@@ -170,7 +170,7 @@ function gmp_scan1(mixed $a,
 
 
 <<__Native>>
-function gmp_setbit(mixed& $a,
+function gmp_setbit(inout mixed $a,
                     int $index,
                     bool $bit_on = true): void;
 

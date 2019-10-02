@@ -20,7 +20,7 @@ echo gmp_strval($and2) . "\n";
 
 // gmp_clrbit
 $clrbit = gmp_init("0xff");
-gmp_clrbit(&$clrbit, 0);
+gmp_clrbit(inout $clrbit, 0);
 echo gmp_strval($clrbit) . "\n";
 
 // gmp_cmp
@@ -204,15 +204,15 @@ echo gmp_scan1($s2, 5) . "\n";
 // gmp_setbit
 $a = gmp_init("2"); //
 echo gmp_strval($a), ' -> 0b', gmp_strval($a, 2), "\n";
-gmp_setbit(&$a, 0); // 0b10 now becomes 0b11
+gmp_setbit(inout $a, 0); // 0b10 now becomes 0b11
 echo gmp_strval($a), ' -> 0b', gmp_strval($a, 2), "\n";
 $a = gmp_init("0xfd");
 echo gmp_strval($a), ' -> 0b', gmp_strval($a, 2), "\n";
-gmp_setbit(&$a, 1); // index starts at 0
+gmp_setbit(inout $a, 1); // index starts at 0
 echo gmp_strval($a), ' -> 0b', gmp_strval($a, 2), "\n";
 $a = gmp_init("0xff");
 echo gmp_strval($a), ' -> 0b', gmp_strval($a, 2), "\n";
-gmp_setbit(&$a, 0, false); // clear bit at index 0
+gmp_setbit(inout $a, 0, false); // clear bit at index 0
 echo gmp_strval($a), ' -> 0b', gmp_strval($a, 2), "\n";
 
 // gmp_sign
@@ -249,7 +249,7 @@ echo gmp_strval($sub) . "\n";
 // gmp_testbit
 $n = gmp_init("1000000");
 var_dump(gmp_testbit($n, 1));
-gmp_setbit(&$n, 1);
+gmp_setbit(inout $n, 1);
 var_dump(gmp_testbit($n, 1));
 
 // gmp_xor

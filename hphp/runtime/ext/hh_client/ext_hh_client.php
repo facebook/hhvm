@@ -34,7 +34,7 @@ function locate_hh(string $client_name): ?string {
   $cmd = \sprintf('which %s > /dev/null 2>&1', \escapeshellarg($client_name));
   $ret = null;
   $output_arr = null;
-  \exec($cmd, &$output_arr, &$ret);
+  \exec($cmd, inout $output_arr, inout $ret);
 
   if ($ret === 0) {
     return $client_name;
@@ -70,7 +70,7 @@ function typecheck_impl(string $input_client_name): TypecheckResult {
 
   $ret = null;
   $output_arr = null;
-  $output = \exec($cmd, &$output_arr, &$ret);
+  $output = \exec($cmd, inout $output_arr, inout $ret);
 
   // 7 -> timeout, or ran out of retries
   if ($ret == 7) {
@@ -101,8 +101,8 @@ function typecheck_impl(string $input_client_name): TypecheckResult {
   } else {
     $errors = \hphp_array_idx($json, 'errors', null);
     if ($errors) {
-      $first_msg = \reset(&$errors)['message'];
-      $first_msg = \reset(&$first_msg);
+      $first_msg = \reset(inout $errors)['message'];
+      $first_msg = \reset(inout $first_msg);
       $error_text = \sprintf(
         'Hack type error: %s at %s line %d',
         $first_msg['descr'],

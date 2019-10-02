@@ -136,7 +136,7 @@ bool HHVM_FUNCTION(ftruncate,
 bool HHVM_FUNCTION(flock,
                    const Resource& handle,
                    int operation,
-                   VRefParam wouldblock = uninit_null());
+                   bool& wouldblock);
 Variant HHVM_FUNCTION(fputcsv,
                       const Resource& handle,
                       const Array& fields,

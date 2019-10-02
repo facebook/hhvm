@@ -164,6 +164,17 @@ struct MockHeaders : ITransportHeaders {
     headers = respHeaders;
   }
 
+  void addToCommaSeparatedHeader(const char* name, const char* value) override {
+    assertx(name && *name);
+    assertx(value);
+    const auto it = respHeaders.find(name);
+    if (it != respHeaders.end() && !it->second.empty()) {
+      it->second[0] = it->second[0] + std::string(", ") + value;
+    } else {
+      addHeader(name, value);
+    }
+  }
+
  private:
   bool splitHeader(const String& header, String &name, const char *&value) {
     int pos = header.find(':');
@@ -696,6 +707,16 @@ TEST_F(ResponseCompressorTest, testZstdChunkedCompression) {
   EXPECT_TRUE(compressor->isAccepted());
   auto compressed = compressChunked(compressor.get(), kResponse);
   decompressZstd(compressed, kResponse);
+}
+
+TEST_F(ResponseCompressorTest, testHeaderSettings) {
+  mh.addToCommaSeparatedHeader("Vary", "Accept-Encoding");
+  HeaderMap responseHeaders;
+  mh.getResponseHeaders(responseHeaders);
+  EXPECT_EQ(responseHeaders["Vary"][0], "Accept-Encoding");
+  mh.addToCommaSeparatedHeader("Vary", "Other Stuff");
+  mh.getResponseHeaders(responseHeaders);
+  EXPECT_EQ(responseHeaders["Vary"][0], "Accept-Encoding, Other Stuff");
 }
 
 /********************

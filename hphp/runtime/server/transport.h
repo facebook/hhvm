@@ -65,6 +65,8 @@ struct ITransportHeaders {
   virtual void removeHeader(const char *name) = 0;
   virtual void removeAllHeaders() = 0;
   virtual void getResponseHeaders(HeaderMap& headers) = 0;
+  virtual void addToCommaSeparatedHeader(
+      const char* name, const char* value) = 0;
 };
 
 /**
@@ -222,6 +224,9 @@ public:
   void getResponseHeaders(HeaderMap &headers) override;
   std::string getFirstHeaderFile() const { return m_firstHeaderFile;}
   int getFirstHeaderLine() const { return m_firstHeaderLine;}
+  // Appends value to the response header field, separated with a ", "
+  // If the value doesn't exist in m_responseHeaders[name] then, we add it
+  void addToCommaSeparatedHeader(const char* name, const char* value) override;
 
   /**
    * Content/MIME type related functions.

@@ -428,6 +428,17 @@ void Transport::getResponseHeaders(HeaderMap &headers) {
      cookies_existing.end());
 }
 
+void Transport::addToCommaSeparatedHeader(const char* name, const char* value) {
+  assertx(name && *name);
+  assertx(value);
+  const auto it = m_responseHeaders.find(name);
+  if (it != m_responseHeaders.end() && !it->second.empty()) {
+    it->second[0] = it->second[0] + std::string(", ") + value;
+  } else {
+    addHeader(name, value);
+  }
+}
+
 bool Transport::cookieExists(const char *name) {
   assertx(name && *name);
   std::string header = getHeader("Cookie");

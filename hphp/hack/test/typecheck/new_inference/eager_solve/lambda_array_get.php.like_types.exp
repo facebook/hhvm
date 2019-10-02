@@ -4,12 +4,6 @@ File "lambda_array_get.php", line 11, characters 49-50:
 Expected T1
 File "lambda_array_get.php", line 11, characters 32-33:
 But got dynamic because it is an unenforceable type
-File "lambda_array_get.php", line 13, characters 10-33:
-Invalid return type (Typing[4110])
-File "lambda_array_get.php", line 11, characters 61-75:
-Expected ~(T2, Contra<T1>) because it is an unenforceable type
-File "lambda_array_get.php", line 13, characters 10-33:
-But got (~T2, Contra<mixed>)
 File "lambda_array_get.php", line 147, characters 39-44:
 Invalid argument (Typing[4110])
 File "lambda_array_get.php", line 16, characters 20-20:

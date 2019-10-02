@@ -1,6 +1,0 @@
-File "vector.php", line 21, characters 10-61:
-Invalid return type (Typing[4110])
-File "vector.php", line 20, characters 16-37:
-Expected ~Vector<Vector<string>> because it is an unenforceable type
-File "vector.php", line 21, characters 10-61:
-But got Vector<[unresolved]>

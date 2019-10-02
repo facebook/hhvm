@@ -24,9 +24,3 @@ File "contravariance_inout_2.php", line 7, characters 19-19:
 Expected T (inout parameter)
 File "contravariance_inout_2.php", line 5, characters 39-39:
 But got dynamic because it is an unenforceable type
-File "contravariance_inout_2.php", line 7, characters 12-49:
-Invalid return type (Typing[4110])
-File "contravariance_inout_2.php", line 6, characters 25-48:
-Expected ~(function(inout T): void) because it is an unenforceable type
-File "contravariance_inout_2.php", line 7, characters 12-49:
-But got (function(inout ~T $x): void)

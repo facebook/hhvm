@@ -10,9 +10,4 @@ File "list_assign_vec.php", line 13, characters 3-14:
   ~int
 File "list_assign_vec.php", line 14, characters 3-14:
   ~int
-File "list_assign_vec.php", line 16, characters 10-24:
-Invalid return type (Typing[4110])
-File "list_assign_vec.php", line 3, characters 55-64:
-Expected ~(int, int) because it is an unenforceable type
-File "list_assign_vec.php", line 16, characters 10-24:
-But got (~int, ~int)
+No errors

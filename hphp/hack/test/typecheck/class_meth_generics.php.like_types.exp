@@ -1,6 +1,0 @@
-File "class_meth_generics.php", line 14, characters 10-53:
-Invalid return type (Typing[4110])
-File "class_meth_generics.php", line 13, characters 50-70:
-Expected ~(string, (int, bool)) because it is an unenforceable type
-File "class_meth_generics.php", line 14, characters 10-53:
-But got (~string, ~(int, bool))

@@ -1,6 +1,0 @@
-File "instanceof_gadt.php", line 167, characters 12-30:
-Invalid return type (Typing[4110])
-File "instanceof_gadt.php", line 134, characters 31-31:
-Expected ~T because it is an unenforceable type
-File "instanceof_gadt.php", line 167, characters 12-30:
-But got (~Tu#5, ~Tv#5)

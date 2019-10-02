@@ -1,6 +1,1 @@
-File "yield.php", line 6, characters 3-10:
-Invalid yield (Typing[4110])
-File "yield.php", line 5, characters 25-49:
-Expected ~Generator<int, int, void> because it is an unenforceable type
-File "yield.php", line 6, characters 3-10:
-But got Generator<int, dynamic, [unresolved]> (result of function with 'yield' in the body)
+No errors

@@ -1,6 +1,6 @@
-File "array_sub2.php", line 17, characters 10-16:
-Invalid return type (Typing[4110])
-File "array_sub2.php", line 12, characters 44-54:
-Expected ~array<bool> because it is an unenforceable type
-File "array_sub2.php", line 15, characters 5-13:
-But got array<dynamic> because a value is appended to it
+File "array_sub2.php", line 21, characters 12-13:
+Invalid argument (Typing[4110])
+File "array_sub2.php", line 12, characters 23-37:
+Expected ~array<bool, [unresolved]> because it is an unenforceable type
+File "array_sub2.php", line 20, characters 15-24:
+But got array<int>

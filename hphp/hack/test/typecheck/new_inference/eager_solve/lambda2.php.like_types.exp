@@ -1,6 +1,0 @@
-File "lambda2.php", line 23, characters 10-26:
-Invalid return type (Typing[4110])
-File "lambda2.php", line 22, characters 30-43:
-Expected ~Map<string, Tv> because it is an unenforceable type
-File "lambda2.php", line 23, characters 10-26:
-But got Map<[unresolved], [unresolved]>

@@ -1,15 +1,3 @@
-File "constraints_stack_overflow.php", line 17, characters 5-30:
-Invalid assignment (Typing[4110])
-File "constraints_stack_overflow.php", line 7, characters 11-22:
-Expected ~dict<Tk, Tv> because it is an unenforceable type
-File "constraints_stack_overflow.php", line 7, characters 11-22:
-But got dict<~Tk, ~Tv>
-File "constraints_stack_overflow.php", line 18, characters 5-35:
-Invalid assignment (Typing[4110])
-File "constraints_stack_overflow.php", line 7, characters 11-22:
-Expected ~dict<Tk, Tv> because it is an unenforceable type
-File "constraints_stack_overflow.php", line 7, characters 11-22:
-But got dict<~Tk, ~dict<~Tk2, ~Tv_>>
 File "constraints_stack_overflow.php", line 18, characters 5-19:
 Invalid index type for this dict (Typing[4324])
 File "constraints_stack_overflow.php", line 4, characters 15-16:

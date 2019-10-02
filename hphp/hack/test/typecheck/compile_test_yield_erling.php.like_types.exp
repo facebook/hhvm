@@ -1,6 +1,0 @@
-File "compile_test_yield_erling.php", line 40, characters 5-21:
-Invalid yield (Typing[4110])
-File "compile_test_yield_erling.php", line 32, characters 33-57:
-Expected ~Generator<int, int, void> because it is an unenforceable type
-File "compile_test_yield_erling.php", line 40, characters 5-21:
-But got Generator<int, ~int, [unresolved]> (result of function with 'yield' in the body)

@@ -52,6 +52,9 @@ let coerce_type_impl env ty_have ty_expect on_error =
   let coercion_from_union =
     TypecheckerOptions.coercion_from_union (Typing_env.get_tcopt env)
   in
+  let complex_coercion =
+    TypecheckerOptions.complex_coercion (Typing_env.get_tcopt env)
+  in
   let (env, ety_expect) = Typing_env.expand_type env ty_expect.et_type in
   let (env, ety_have) = Typing_env.expand_type env ty_have in
   match (ety_have, ety_expect) with
@@ -59,6 +62,12 @@ let coerce_type_impl env ty_have ty_expect on_error =
   | ((_, Tdynamic), _) when ty_expect.et_enforced && coercion_from_dynamic ->
     env
   | _ when ty_expect.et_enforced && coercion_from_union ->
+    Typing_subtype.sub_type_with_dynamic_as_bottom
+      env
+      ty_have
+      ty_expect.et_type
+      on_error
+  | _ when complex_coercion && Typing_utils.is_dynamic env ety_expect ->
     Typing_subtype.sub_type_with_dynamic_as_bottom
       env
       ty_have

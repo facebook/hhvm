@@ -1,6 +1,0 @@
-File "rx_unresolved_byval_collection1.php", line 12, characters 10-16:
-Invalid return type (Typing[4110])
-File "rx_unresolved_byval_collection1.php", line 4, characters 54-63:
-Expected ~keyset<Tv> because it is an unenforceable type
-File "rx_unresolved_byval_collection1.php", line 5, characters 13-20:
-But got keyset<~Tv>

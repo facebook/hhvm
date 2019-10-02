@@ -1,6 +1,0 @@
-File "inter_sub_tvar.php", line 27, characters 10-16:
-Invalid return type (Typing[4110])
-File "inter_sub_tvar.php", line 20, characters 4-13:
-Expected ~keyset<Tv> because it is an unenforceable type
-File "inter_sub_tvar.php", line 21, characters 13-20:
-But got keyset<dynamic>

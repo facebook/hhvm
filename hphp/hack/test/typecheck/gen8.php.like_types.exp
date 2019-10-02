@@ -1,6 +1,0 @@
-File "gen8.php", line 25, characters 10-11:
-Invalid return type (Typing[4110])
-File "gen8.php", line 23, characters 29-46:
-Expected ~(function(T3): T3) because it is an unenforceable type
-File "gen8.php", line 17, characters 10-13:
-But got (function<T2>(~[unresolved] $x): ~[unresolved])

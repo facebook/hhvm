@@ -1,6 +1,0 @@
-File "superas.php", line 19, characters 22-30:
-Invalid argument (Typing[4110])
-File "superas.php", line 10, characters 39-47:
-Expected ~Vector<[unresolved]> because it is an unenforceable type
-File "superas.php", line 12, characters 17-25:
-But got Vector<[unresolved]>

@@ -4,9 +4,3 @@ File "lambda_prop.php", line 18, characters 49-50:
 Expected T1
 File "lambda_prop.php", line 18, characters 32-33:
 But got dynamic because it is an unenforceable type
-File "lambda_prop.php", line 20, characters 10-33:
-Invalid return type (Typing[4110])
-File "lambda_prop.php", line 18, characters 61-75:
-Expected ~(T2, Contra<T1>) because it is an unenforceable type
-File "lambda_prop.php", line 20, characters 10-33:
-But got (~T2, Contra<mixed>)

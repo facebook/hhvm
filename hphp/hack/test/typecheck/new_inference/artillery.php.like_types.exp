@@ -1,6 +1,0 @@
-File "artillery.php", line 9, characters 10-23:
-Invalid return type (Typing[4110])
-File "artillery.php", line 8, characters 56-67:
-Expected ~dict<Tk, Tv> because it is an unenforceable type
-File "artillery.php", line 9, characters 10-23:
-But got dict<~Tk, ~Tv>

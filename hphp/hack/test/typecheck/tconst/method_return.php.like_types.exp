@@ -1,6 +1,0 @@
-File "method_return.php", line 58, characters 10-36:
-Invalid return type (Typing[4110])
-File "method_return.php", line 57, characters 28-42:
-Expected ~(int, arraykey) because it is an unenforceable type
-File "method_return.php", line 58, characters 10-36:
-But got (~int, ~<expr#2>::T)

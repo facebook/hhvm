@@ -1,6 +1,0 @@
-File "circular_bug.php", line 28, characters 13-14:
-Invalid argument (Typing[4110])
-File "circular_bug.php", line 8, characters 19-31:
-Expected ~vec<Pred<[unresolved]>> because it is an unenforceable type
-File "circular_bug.php", line 27, characters 8-20:
-But got vec<~?(EqualsPred<[unresolved]> | Pred<mixed>)>

@@ -1,6 +1,0 @@
-File "list_destructuring.php", line 5, characters 10-22:
-Invalid return type (Typing[4110])
-File "list_destructuring.php", line 4, characters 24-29:
-Expected ~(T, T) because it is an unenforceable type
-File "list_destructuring.php", line 5, characters 10-22:
-But got (~T, ~T)

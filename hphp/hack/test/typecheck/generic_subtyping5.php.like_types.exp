@@ -1,6 +1,1 @@
-File "generic_subtyping5.php", line 32, characters 5-25:
-Invalid assignment (Typing[4110])
-File "generic_subtyping5.php", line 25, characters 10-18:
-Expected ~Vector<T> because it is an unenforceable type
-File "generic_subtyping5.php", line 28, characters 16-24:
-But got Vector<[unresolved]>
+No errors

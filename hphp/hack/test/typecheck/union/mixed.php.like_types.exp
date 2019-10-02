@@ -54,12 +54,6 @@ File "mixed.php", line 96, characters 25-55:
 Expected ~(function(string, string): int) because it is an unenforceable type
 File "mixed.php", line 48, characters 10-70:
 But got (function(string $s1, string $s2): (int | string))
-File "mixed.php", line 64, characters 23-24:
-Invalid argument (Typing[4110])
-File "mixed.php", line 95, characters 30-65:
-Expected ~(function(string, string): arraykey) because it is an unenforceable type
-File "mixed.php", line 59, characters 10-31:
-But got (function($s1, $s2): ~string)
 File "mixed.php", line 65, characters 28-29:
 Invalid argument (Typing[4110])
 File "mixed.php", line 94, characters 35-60:

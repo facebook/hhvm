@@ -448,5 +448,3 @@ end
 
 let elaborate_toplevel_defs popt ast =
   ElaborateDefs.program (Namespace_env.empty_from_popt popt) ast
-
-let elaborate_def nsenv def = ElaborateDefs.def nsenv def

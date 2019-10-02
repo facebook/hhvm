@@ -25,6 +25,3 @@ val elaborate_id_impl :
   namespaces are propagated to inline declarations
   during closure conversion process *)
 val elaborate_toplevel_defs : ParserOptions.t -> Ast.program -> Ast.program
-
-val elaborate_def :
-  Namespace_env.env -> Ast.def -> Namespace_env.env * Ast.def list

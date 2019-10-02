@@ -234,7 +234,7 @@ module Api = struct
         let add_class_name names param =
           match param with
           | (_, Class_const ((_, CI (_, cls)), (_, name)))
-            when name = SN.Members.mClass ->
+            when String.equal name SN.Members.mClass ->
             SSet.add cls names
           | _ -> names
         in
@@ -372,8 +372,8 @@ module Api = struct
     not (Sequence.is_empty (lower_bounds_on_this_from_constraints t))
 
   let is_disposable_class_name class_name =
-    class_name = SN.Classes.cIDisposable
-    || class_name = SN.Classes.cIAsyncDisposable
+    String.equal class_name SN.Classes.cIDisposable
+    || String.equal class_name SN.Classes.cIAsyncDisposable
 
   let is_disposable t =
     match t with

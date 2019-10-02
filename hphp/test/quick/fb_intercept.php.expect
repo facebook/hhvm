@@ -43,23 +43,6 @@ bool(true)
 ---------------
 frap callfunc
 Closure! wooooo
-magic call! string(12) "i_dont_exist"
-array(5) {
-  [0]=>
-  string(4) "frap"
-  [1]=>
-  NULL
-  [2]=>
-  array(1) {
-    [0]=>
-    string(8) "claptrap"
-  }
-  [3]=>
-  NULL
-  [4]=>
-  &bool(true)
-}
-
 frap claptrap
 ---------- test_variadic_function ----------
 var_frap claptrap array(1) {
@@ -117,25 +100,6 @@ bool(true)
 var_frap callfunc array(0) {
 }
 Closure! wooooo
-magic call! string(12) "i_dont_exist"
-array(5) {
-  [0]=>
-  string(8) "var_frap"
-  [1]=>
-  NULL
-  [2]=>
-  array(2) {
-    [0]=>
-    string(8) "claptrap"
-    [1]=>
-    string(4) "blah"
-  }
-  [3]=>
-  NULL
-  [4]=>
-  &bool(true)
-}
-
 var_frap claptrap array(1) {
   [0]=>
   string(4) "blah"
@@ -213,36 +177,6 @@ NULL
 bool(true)
 ---------------
 static frap Blark
-magic call! string(19) "i_dont_exist_either"
-array(5) {
-  [0]=>
-  string(12) "Blark::sfrap"
-  [1]=>
-  string(5) "Blark"
-  [2]=>
-  array(0) {
-  }
-  [3]=>
-  NULL
-  [4]=>
-  &bool(true)
-}
-
-magic call! string(19) "i_dont_exist_either"
-array(5) {
-  [0]=>
-  string(12) "Blark::sfrap"
-  [1]=>
-  string(5) "Blark"
-  [2]=>
-  array(0) {
-  }
-  [3]=>
-  NULL
-  [4]=>
-  &bool(true)
-}
-
 ----HANDLER----
 string(11) "Blark::frap"
 object(Blark) (0) {
@@ -281,38 +215,6 @@ NULL
 bool(true)
 ---------------
 non-static frap
-magic call! string(19) "i_dont_exist_either"
-array(5) {
-  [0]=>
-  string(11) "Blark::frap"
-  [1]=>
-  object(Blark) (0) {
-  }
-  [2]=>
-  array(0) {
-  }
-  [3]=>
-  NULL
-  [4]=>
-  &bool(true)
-}
-
-magic call! string(19) "i_dont_exist_either"
-array(5) {
-  [0]=>
-  string(11) "Blark::frap"
-  [1]=>
-  object(Blark) (0) {
-  }
-  [2]=>
-  array(0) {
-  }
-  [3]=>
-  NULL
-  [4]=>
-  &bool(true)
-}
-
 ----HANDLER----
 string(7) "handler"
 NULL
@@ -329,7 +231,7 @@ array(5) {
   [3]=>
   NULL
   [4]=>
-  &bool(true)
+  bool(true)
 }
 NULL
 bool(true)
@@ -384,4 +286,3 @@ array(1) {
   [0]=>
   string(2) "ho"
 }
-

@@ -3,7 +3,6 @@
 
 const TESTS = vec[
   'class Cls1 { static public $a = 123; const BADARRAY = [$a]; };',
-  'class Cls1 { static public $a = 123; const BADARRAY = [&$a]; };',
   'class Cls1 { static public $a = 123; const BADARRAY = [100 + $a + 200]; };',
   'class Cls1 { const BADARRAY = [new stdclass]; };',
   'class Cls1 { const BADARRAY = [foobaz()]; };',
@@ -11,7 +10,6 @@ const TESTS = vec[
   'class Cls1 { const BADARRAY = [1, [2, foobaz()], 3]; };',
   'class Cls1 { const BADARRAY = [$GLOBALS]; };',
   'class Cls1 { static public $a = 123; const BADARRAY = [1, [2, $a], 3]; };',
-  'class Cls1 { static public $a = 123; const BADARRAY = [1, [2, &$a], 3]; };',
   'class Cls1 { static public $a = 123; const BADARRAY = [1, [2, 100 + $a + 200], 3]; };',
 
   'class Cls1 { static public $a = 123; const BADVEC = vec[$a]; };',

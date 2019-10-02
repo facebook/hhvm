@@ -1,7 +1,7 @@
 <?hh
 
 class X {
-  function foo(&$a) {
+  function foo(inout $a) {
     return $this;
   }
 }

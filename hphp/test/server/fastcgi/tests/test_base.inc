@@ -12,7 +12,7 @@ function runTest($testController, $customArgs = '') {
   try {
     $serverProc = $serverPort = $adminPort = null;
     $debugPort = false;
-    $serverProc = startServer(&$serverPort, &$adminPort, &$debugPort,
+    $serverProc = startServer(inout $serverPort, inout $adminPort, inout $debugPort,
                               dirname(__DIR__), ServerUtilServerTests::$DOC_ROOT, $customArgs);
     $testController($serverPort);
     stopServer($adminPort, $serverProc);

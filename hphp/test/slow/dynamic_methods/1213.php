@@ -1,7 +1,7 @@
 <?hh
 
 class A {
-  function foo(&$test) {
+  function foo(inout $test) {
     $test[3] = 10;
   }
 }
@@ -11,6 +11,6 @@ function main_1213() {
 $obj = new A();
 $method = 'foo';
 $aa = array();
-$obj->$method(&$aa);
+$obj->$method(inout $aa);
 var_dump($aa);
 }

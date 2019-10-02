@@ -1,7 +1,7 @@
 <?hh
 function foo() {
 }
-function goo(&$p) {
+function goo(inout $p) {
 }
 function bar() {
 }
@@ -9,7 +9,7 @@ function bar() {
 <<__EntryPoint>>
 function main_1187() {
 $goo = 'goo';
-$foo = foo(); goo(&$foo);
-$foo = foo(); $goo(&$foo);
+$foo = foo(); goo(inout $foo);
+$foo = foo(); $goo(inout $foo);
 bar(foo());
 }

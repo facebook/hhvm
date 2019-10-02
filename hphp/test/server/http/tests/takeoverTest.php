@@ -14,7 +14,7 @@ function runTakeoverTest() {
   $customArgs = " -vServer.TakeoverFilename={$takeoverFile}";
 
   try {
-    $serverProc = startServer(&$serverPort, &$adminPort, &$debugPort,
+    $serverProc = startServer(inout $serverPort, inout $adminPort, inout $debugPort,
                               $serverHome, $serverRoot,
                               $customArgs);
     if ($serverProc === null) {

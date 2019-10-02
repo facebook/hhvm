@@ -235,9 +235,9 @@ class Client
     {
         if (!$this->_sock) {
             if ($this->_persistentSocket) {
-                $this->_sock = \pfsockopen($this->_host, $this->_port, &$errno, &$errstr, $this->_connectTimeout/1000.0);
+                $this->_sock = \pfsockopen($this->_host, $this->_port, inout $errno, inout $errstr, $this->_connectTimeout/1000.0);
             } else {
-                $this->_sock = \fsockopen($this->_host, $this->_port, &$errno, &$errstr, $this->_connectTimeout/1000.0);
+                $this->_sock = \fsockopen($this->_host, $this->_port, inout $errno, inout $errstr, $this->_connectTimeout/1000.0);
             }
 
             if (!$this->_sock) {

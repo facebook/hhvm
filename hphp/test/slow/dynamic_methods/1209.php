@@ -23,7 +23,7 @@ class z {
     $args = array_merge($args, $more_args);
     var_dump($args);
   }
-  function refTestHelper(&$x) {
+  function refTestHelper(inout $x) {
     $x *= 2;
   }
 }
@@ -32,7 +32,7 @@ function refTest($q) {
  $q = 1;
  }
   $x = 1;
-  $q->refTestHelper(&$x);
+  $q->refTestHelper(inout $x);
   var_dump($x);
 }
 

@@ -1,5 +1,5 @@
 <?hh
-function foo(&$a) { var_dump($a++); }
+function foo(inout $a) { var_dump($a++); }
 function test($cuf, $f) {
   $a = array(1);
   try {

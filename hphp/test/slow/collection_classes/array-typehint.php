@@ -21,7 +21,7 @@ function helper($x) {
     var_dump($x);
   }
 }
-function helper_ref(&$x) {
+function helper_ref(inout $x) {
   var_dump($x);
   if ($x is Map) {
     $x['z'] = 4;
@@ -36,10 +36,10 @@ function f1(array $x) { helper($x); }
 function f2(?array $x) { helper($x); }
 function f3(@array $x) { helper($x); }
 function f4(@?array $x) { helper($x); }
-function f5(array &$x) { helper_ref(&$x); }
-function f6(?array &$x) { helper_ref(&$x); }
-function f7(@array &$x) { helper_ref(&$x); }
-function f8(@?array &$x) { helper_ref(&$x); }
+function f5(inout array $x) { helper_ref(inout $x); }
+function f6(inout ?array $x) { helper_ref(inout $x); }
+function f7(inout @array $x) { helper_ref(inout $x); }
+function f8(inout @?array $x) { helper_ref(inout $x); }
 
 function main() {
   $containers = Map {
@@ -57,7 +57,7 @@ function main() {
       echo "$fn:\n";
       $x = ($c is Collection) ? clone $c : $c;
       try {
-        $i <= 4 ? $fn($x) : $fn(&$x);
+        $i <= 4 ? $fn($x) : $fn(inout $x);
       } catch (Exception $e) {
         echo $fn . "() threw an exception\n";
       }

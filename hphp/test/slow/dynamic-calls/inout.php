@@ -20,34 +20,24 @@ function positive_tests() {
   echo "====================== positive tests ========================\n";
   $v = 123;
 
-  try { $x = 'func1'; $x(&$v); } catch (Exception $e) { wrap($e); }
   try { $x = 'func1'; $x(inout $v); } catch (Exception $e) { wrap($e); }
-  try { $x = 'A::func2'; $x(&$v); } catch (Exception $e) { wrap($e); }
   try { $x = 'A::func2'; $x(inout $v); } catch (Exception $e) { wrap($e); }
-  try { $x = 'A::func3'; $x(&$v); } catch (Exception $e) { wrap($e); }
   try { $x = 'A::func3'; $x(inout $v); } catch (Exception $e) { wrap($e); }
 
-  try { $x = ['A', 'func2']; $x(&$v); } catch (Exception $e) { wrap($e); }
   try { $x = ['A', 'func2']; $x(inout $v); } catch (Exception $e) { wrap($e); }
-  try { $x = ['A', 'func3']; $x(&$v); } catch (Exception $e) { wrap($e); }
   try { $x = ['A', 'func3']; $x(inout $v); } catch (Exception $e) { wrap($e); }
 
-  try { $x = [new A, 'func2']; $x(&$v); } catch (Exception $e) { wrap($e); }
   try { $x = [new A, 'func2']; $x(inout $v); } catch (Exception $e) { wrap($e); }
-  try { $x = [new A, 'func3']; $x(&$v); } catch (Exception $e) { wrap($e); }
   try { $x = [new A, 'func3']; $x(inout $v); } catch (Exception $e) { wrap($e); }
 
 
 
-  try { $x = 'A'; $x::func3(&$v); } catch (Exception $e) { wrap($e); }
   try { $x = 'A'; $x::func3(inout $v); } catch (Exception $e) { wrap($e); }
 
 
 
-  try { $x = 'func3'; A::$x(&$v); } catch (Exception $e) { wrap($e); }
   try { $x = 'func3'; A::$x(inout $v); } catch (Exception $e) { wrap($e); }
 
-  try { $obj = new A; $x = 'func2'; $obj->$x(&$v); } catch (Exception $e) { wrap($e); }
   try { $obj = new A; $x = 'func2'; $obj->$x(inout $v); } catch (Exception $e) { wrap($e); }
 
 
@@ -57,26 +47,18 @@ function negative_tests() {
   echo "====================== negative tests ========================\n";
   $v = 123;
 
-  $x = 'func4'; $x(&$v);
   $x = 'func4'; $x(inout $v);
-  $x = 'B::func6'; $x(&$v);
   $x = 'B::func6'; $x(inout $v);
 
-  $x = ['B', 'func6']; $x(&$v);
   $x = ['B', 'func6']; $x(inout $v);
 
-  $x = [new B, 'func5']; $x(&$v);
   $x = [new B, 'func5']; $x(inout $v);
-  $x = [new B, 'func6']; $x(&$v);
   $x = [new B, 'func6']; $x(inout $v);
 
-  $x = 'B'; $x::func6(&$v);
   $x = 'B'; $x::func6(inout $v);
 
-  $x = 'func6'; B::$x(&$v);
   $x = 'func6'; B::$x(inout $v);
 
-  $obj = new B; $x = 'func5'; $obj->$x(&$v);
   $obj = new B; $x = 'func5'; $obj->$x(inout $v);
 
 

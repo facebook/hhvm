@@ -3,7 +3,7 @@
 DynamicMethods1203::$i = 'gi';
  $s = 'gs';
  class A {
- public function dyn_test(&$a) {
+ public function dyn_test(inout $a) {
 
  $a = DynamicMethods1203::$i;
  return DynamicMethods1203::$i;
@@ -11,7 +11,8 @@ DynamicMethods1203::$i = 'gi';
 }
  $obj = new A();
  $f = 'dyn_test';
- $c = $obj->$f(&$b);
+ $b = null;
+ $c = $obj->$f(inout $b);
  var_dump($b);
  var_dump($c);
 

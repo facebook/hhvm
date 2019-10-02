@@ -3,7 +3,6 @@
 
 const TESTS = vec[
   '$a = 123; const BADARRAY = [$a];',
-  '$a = 123; const BADARRAY = [&$a];',
   '$a = 123; const BADARRAY = [100 + $a + 200];',
   'const BADARRAY = [new stdclass];',
   'const BADARRAY = [foobaz()];',
@@ -11,7 +10,6 @@ const TESTS = vec[
   'const BADARRAY = [1, [2, foobaz()], 3];',
   'const BADARRAY = [$GLOBALS];',
   '$a = 123; const BADARRAY = [1, [2, $a], 3];',
-  '$a = 123; const BADARRAY = [1, [2, &$a], 3];',
   '$a = 123; const BADARRAY = [1, [2, 100 + $a + 200], 3];',
 
   '$a = 123; const BADVEC = vec[$a];',

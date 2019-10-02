@@ -3,14 +3,15 @@
 $i = 'gi';
  DynamicMethods1204::$s = 'gs';
  class A {
- public static function dyn_test(&$a) {
+ public static function dyn_test(inout $a) {
 
  $a = DynamicMethods1204::$s;
  return DynamicMethods1204::$s;
 }
 }
  $f = 'dyn_test';
- $e = A::$f(&$d);
+ $d = null;
+ $e = A::$f(inout $d);
  var_dump($d);
  var_dump($e);
 

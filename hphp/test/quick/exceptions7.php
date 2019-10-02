@@ -1,13 +1,13 @@
 <?hh
 
-function handler($name, $obj, $args, $data, &$done) {
+function handler($name, $obj, inout $args, $data, inout $done) {
   echo "----HANDLER----\n";
   var_dump($name, $obj, $args, $data, $done);
   echo "---------------\n";
   throw new Exception;
 }
 
-function passthrough_handler($name, $obj, $args, $data, &$done) {
+function passthrough_handler($name, $obj, inout $args, $data, inout $done) {
   echo "----HANDLER----\n";
   var_dump($name, $obj, $args, $data, $done);
   $done = false;
@@ -65,14 +65,6 @@ function main_entry(): void {
     echo "caught closure 1\n";
   }
 
-  // Replace with __call-having object
-  $mc = new MagicCall();
-  fb_intercept('frap', array($mc, 'i_dont_exist'));
-  try {
-    call_user_func(fun("frap"), 'claptrap');
-  } catch (Exception $e) {
-    echo "caught magic call 1\n";
-  }
   $mc = new MagicCall();
 
   // Intercept static method
@@ -90,13 +82,6 @@ function main_entry(): void {
     echo "caught static call 2\n";
   }
 
-  fb_intercept('Blark::sfrap', array($mc, 'i_dont_exist_either'));
-  try {
-    call_user_func(array('Blark', 'sfrap'));
-  } catch (Exception $e) {
-    echo "caught magic call 2\n";
-  }
-
   // Intercept non-static method
   $b = new Blark();
   fb_intercept('Blark::frap', 'handler');
@@ -111,13 +96,6 @@ function main_entry(): void {
     call_user_func(array($b, 'frap'));
   } catch (Exception $e) {
     echo "caught non-static call 2\n";
-  }
-
-  fb_intercept('Blark::frap', array($mc, 'i_dont_exist_either'));
-  try {
-    call_user_func(array($b, 'frap'));
-  } catch (Exception $e) {
-    echo "caught magic call 3\n";
   }
 
   // MULTI-INTERCEPT!

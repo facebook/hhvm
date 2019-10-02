@@ -1,6 +1,6 @@
 <?hh
 function handler() { throw new Exception; }
-function foo(&$r) {}
+function foo(inout $r) {}
 function test() {
   try {
     foo();

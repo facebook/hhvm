@@ -145,7 +145,7 @@ function getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
   return $cmd;
 }
 
-function startServer(&$serverPort, &$adminPort, &$debugPort, $home, $root,
+function startServer(inout $serverPort, inout $adminPort, inout $debugPort, $home, $root,
                      $customArgs = '', $serverId = null, $repoArgs = '') {
 
 
@@ -169,7 +169,7 @@ function startServer(&$serverPort, &$adminPort, &$debugPort, $home, $root,
                         $customArgs, $serverId, $repoArgs);
     tlog('Starting server with command: '.$cmd);
     $pipes = array();
-    $serverProc = proc_open($cmd, array(), &$pipes);
+    $serverProc = proc_open($cmd, array(), inout $pipes);
     if (!is_resource($serverProc)) {
       tlog('Failed to start a shell process for the server');
     } else if (waitForServerToGetGoing($serverPort, $serverProc, $serverId)) {
@@ -261,7 +261,7 @@ function takeoverOldServer($serverPort, $adminPort, $home, $root,
   $cmd = getServerCmd($serverPort, $adminPort, false, $home, $root,
                       $customArgs, $serverId);
   $pipes = array();
-  $serverProc = proc_open($cmd, array(), &$pipes);
+  $serverProc = proc_open($cmd, array(), inout $pipes);
   if (!is_resource($serverProc)) {
     tlog('Failed to start a shell process for the server');
     return;

@@ -3,13 +3,13 @@
 
 
 class c {
- function f(&$a, $b, $c) { $a[$b] = $c; }
+ function f(inout $a, $b, $c) { $a[$b] = $c; }
 }
 function setNullVariantHelper($f, $value) {
   $a = array();
   $obj = new c;
   $a[$obj] = 1;
-  $obj->$f(&$a, $obj, $value);
+  $obj->$f(inout $a, $obj, $value);
   var_dump($a[$obj] = 1);
 }
 function setNullVariant($value) {

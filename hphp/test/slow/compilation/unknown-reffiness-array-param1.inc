@@ -1,3 +1,3 @@
 <?hh
 
-function foo(&$a) { return $a; }
+function foo(inout $a) { return $a; }

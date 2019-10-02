@@ -7,7 +7,7 @@ function get_coord($ox, $oy, $rx, $ry, $arg) {
   );
 }
 
-function draw_pie(&$canvas, $ox, $oy, $r, $sd, $ed, $color) {
+function draw_pie($canvas, $ox, $oy, $r, $sd, $ed, $color) {
   $draw = new ImagickDraw;
 
   $draw->setFillColor($color);
@@ -24,7 +24,7 @@ function draw_pie(&$canvas, $ox, $oy, $r, $sd, $ed, $color) {
   $canvas->drawImage($draw);
 }
 
-function test_annotation(&$canvas) {
+function test_annotation($canvas) {
   $draw = new ImagickDraw;
   $font = __DIR__.'/php_imagick_tests/anonymous_pro_minus.ttf';
 
@@ -35,7 +35,7 @@ function test_annotation(&$canvas) {
   $canvas->drawImage($draw);
 }
 
-function test_composite(&$canvas) {
+function test_composite($canvas) {
   $draw = new ImagickDraw;
   $fblogo = new Imagick(__DIR__.'/facebook.png');
 
@@ -44,7 +44,7 @@ function test_composite(&$canvas) {
   $canvas->drawImage($draw);
 }
 
-function test_path(&$canvas) {
+function test_path($canvas) {
   $draw = new ImagickDraw;
 
   $draw->setFillColor('transparent');
@@ -70,7 +70,7 @@ function test_path(&$canvas) {
   $canvas->drawImage($draw);
 }
 
-function test_shape(&$canvas) {
+function test_shape($canvas) {
   $draw = new ImagickDraw;
 
   $draw->setFillColor('transparent');

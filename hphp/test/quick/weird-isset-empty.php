@@ -1,5 +1,5 @@
 <?hh
-function tst1(&$abc) {
+function tst1(inout $abc) {
   var_dump(isset($abc['foo']));
   var_dump(!($abc['foo'] ?? false));
   var_dump(isset($abc->foo));
@@ -13,7 +13,7 @@ function tst1(&$abc) {
   var_dump(isset($abc->foo->bar));
   var_dump(!($abc->foo->bar ?? false));
 }
-function tst2(&$abc) {
+function tst2(inout $abc) {
   $abc->foo = array('bar' => 'baz');
   var_dump(isset($abc->foo));
   var_dump(!($abc->foo ?? false));
@@ -22,7 +22,7 @@ function tst2(&$abc) {
   var_dump(isset($abc->foo->bar));
   var_dump(!($abc->foo->bar ?? false));
 }
-function tst3(&$abc) {
+function tst3(inout $abc) {
   $abc['foo']->bar = 'baz';
   var_dump(isset($abc['foo']));
   var_dump(!($abc['foo'] ?? false));
@@ -93,7 +93,7 @@ function main_entry(): void {
   echo "**************************\n";
 
   $abc = array('foo' => array('bar' => 'baz'));
-  tst1(&$abc);  // make $abc a Var
+  tst1(inout $abc);  // make $abc a Var
 
   echo "**************************\n";
 
@@ -110,7 +110,7 @@ function main_entry(): void {
   echo "**************************\n";
 
   $abc = new stdclass;
-  tst2(&$abc);  // make $abc a Var
+  tst2(inout $abc);  // make $abc a Var
   unset($abc);
 
   echo "**************************\n";
@@ -133,7 +133,7 @@ function main_entry(): void {
 
   $abc = array('foo' => new stdclass);
 
-  tst3(&$abc);  // make $abc a Var
+  tst3(inout $abc);  // make $abc a Var
   unset($abc);
 
   echo "**************************\n";

@@ -1,3 +1,3 @@
 <?hh
 
-function foo(&$x) {}
+function foo(inout $x) {}

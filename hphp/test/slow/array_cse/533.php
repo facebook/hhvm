@@ -6,7 +6,7 @@ function f($x, $y) {
     if ($x[$y]) print "HI\n";
   } catch (Exception $e) { echo $e->getMessage()."\n"; }
 }
-function g(&$x, $y) {
+function g(inout $x, $y) {
   try {
     var_dump($x[$y]);
     if ($x[$y]) print "HI\n";
@@ -20,9 +20,9 @@ function main_533() {
   f(array(0), 'noidx');
   f('abc', 0);
   f('abc', 'noidx');
-  $x = null; g(&$x, 0);
-  $x = array(0); g(&$x, 0);
-  $x = array(0); g(&$x, 'noidx');
-  $x = 'abc'; g(&$x, 0);
-  $x = 'abc'; g(&$x, 'noidx');
+  $x = null; g(inout $x, 0);
+  $x = array(0); g(inout $x, 0);
+  $x = array(0); g(inout $x, 'noidx');
+  $x = 'abc'; g(inout $x, 0);
+  $x = 'abc'; g(inout $x, 'noidx');
 }

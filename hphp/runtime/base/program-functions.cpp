@@ -1012,7 +1012,8 @@ static bool set_execution_mode(folly::StringPiece mode) {
     Logger::Escape = true;
     return true;
   } else if (mode == "run" || mode == "debug" || mode == "translate" ||
-             mode == "dumphhas" || mode == "verify" || mode == "vsdebug") {
+             mode == "dumphhas" || mode == "verify" || mode == "vsdebug" ||
+             mode == "getoption") {
     // We don't run PHP in "translate" mode, so just treat it like cli mode.
     RuntimeOption::ServerMode = false;
     Logger::Escape = false;
@@ -1484,7 +1485,7 @@ static int execute_program_impl(int argc, char** argv) {
     ("repo-schema", "display the repository schema id")
     ("mode,m", value<std::string>(&po.mode)->default_value("run"),
      "run | debug (d) | vsdebug | server (s) | daemon | replay | "
-     "translate (t) | verify")
+     "translate (t) | verify | getoption")
     ("interactive,a", "Shortcut for --mode debug") // -a is from PHP5
     ("config,c", value<std::vector<std::string>>(&po.config)->composing(),
      "load specified config file")
@@ -1784,6 +1785,25 @@ static int execute_program_impl(int argc, char** argv) {
       const auto msg = "Possible bad config node: " + badnode;
       fprintf(stderr, "%s\n", msg.c_str());
       messages.push_back(msg);
+    }
+
+    if (po.mode == "getoption") {
+      if (po.args.size() < 1) {
+        fprintf(stderr, "Must specify an option to load\n");
+        return 1;
+      }
+      Variant value;
+      bool ret = IniSetting::Get(po.args[0], value);
+      if (!ret) {
+        fprintf(stderr, "No such option: %s\n", po.args[0].data());
+        return 1;
+      }
+      if (!value.isString()) {
+        VariableSerializer vs{VariableSerializer::Type::JSON};
+        value = vs.serializeValue(value, false);
+      }
+      printf("%s\n", value.toString().data());
+      return 0;
     }
   }
 

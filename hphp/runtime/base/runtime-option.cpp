@@ -1216,6 +1216,44 @@ static bool matchHdfPattern(const std::string &value,
   return true;
 }
 
+static bool matchShard(
+  const std::string& hostname,
+  const IniSetting::Map& ini, Hdf hdfPattern,
+  std::vector<std::string>& messages
+) {
+  if (!hdfPattern.exists("Shard")) return true;
+  auto const shard = Config::GetInt64(ini, hdfPattern, "Shard", -1, false);
+
+  auto const nshards =
+    Config::GetInt64(ini, hdfPattern, "ShardCount", 100, false);
+
+  if (shard < 0 || shard >= nshards) {
+    messages.push_back(folly::sformat("Invalid value for Shard: {}", shard));
+    return true;
+  }
+
+  auto input = hostname;
+  if (hdfPattern.exists("ShardSalt")) {
+    input += Config::GetString(ini, hdfPattern, "ShardSalt", "", false);
+  }
+
+  auto const md5 = Md5Digest(input.data(), input.size());
+  uint32_t seed{0};
+  memcpy(&seed, &md5.digest[0], 4);
+
+  // This shift is to match the behavior of sharding in chef which appears to
+  // have an off-by-one bug:
+  //   seed = Digest::MD5.hexdigest(seed_input)[0...7].to_i(16)
+  seed = ntohl(seed) >> 4;
+
+  messages.push_back(folly::sformat(
+    "Checking Shard = {}; Input = {}; Seed = {}; ShardCount = {}; Value = {}",
+    shard, input, seed, nshards, seed % nshards
+  ));
+
+  return seed % nshards <= shard;
+}
+
 // A machine can belong to a tier, which can overwrite
 // various settings, even if they are set in the same
 // hdf file. However, CLI overrides still win the day over
@@ -1255,6 +1293,16 @@ static std::vector<std::string> getTierOverwrites(IniSetting::Map& ini,
     }
   }
 
+  auto const checkPatterns = [&] (Hdf hdf) {
+    return
+      matchHdfPattern(hostname, ini, hdf, "machine") &
+      matchHdfPattern(tier, ini, hdf, "tier") &
+      matchHdfPattern(task, ini, hdf, "task") &
+      matchHdfPattern(tiers, ini, hdf, "tiers", "m") &
+      matchHdfPattern(tags, ini, hdf, "tags", "m") &
+      matchHdfPattern(cpu, ini, hdf, "cpu");
+  };
+
   std::vector<std::string> messages;
   // Tier overwrites
   {
@@ -1270,12 +1318,9 @@ static std::vector<std::string> getTierOverwrites(IniSetting::Map& ini,
       // Check the patterns using "&" rather than "&&" so they all get
       // evaluated; otherwise with multiple patterns, if an earlier
       // one fails to match, the later one is reported as unused.
-      if (matchHdfPattern(hostname, ini, hdf, "machine") &
-          matchHdfPattern(tier, ini, hdf, "tier") &
-          matchHdfPattern(task, ini, hdf, "task") &
-          matchHdfPattern(tiers, ini, hdf, "tiers", "m") &
-          matchHdfPattern(tags, ini, hdf, "tags", "m") &
-          matchHdfPattern(cpu, ini, hdf, "cpu")) {
+      if (checkPatterns(hdf) &
+          (!hdf.exists("exclude") || !checkPatterns(hdf["exclude"])) &
+          matchShard(hostname, ini, hdf, messages)) {
         messages.emplace_back(folly::sformat(
                                 "Matched tier: {}", hdf.getName()));
         if (hdf.exists("clear")) {

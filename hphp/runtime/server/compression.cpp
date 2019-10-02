@@ -16,8 +16,7 @@
 
 #include "hphp/runtime/server/compression.h"
 
-#include <boost/algorithm/string.hpp>
-#include <folly/String.h>
+#include <strings.h>
 
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/ini-setting.h"
@@ -61,6 +60,20 @@ std::vector<std::unique_ptr<ResponseCompressor>> makeImpls(ITransportHeaders* he
   return impls;
 }
 
+// Returns whether or not a vector of CompressionEncodingPair accepts encoding
+bool acceptsCompressionHeaderEncoding(
+    const std::vector<CompressionEncodingPair>& encodingHeader,
+    const char* encoding) {
+  assertx(encoding && *encoding);
+  for (const auto& elem : encodingHeader) {
+    if (strcasecmp(elem.encoding.data(), encoding) == 0) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 bool acceptsEncoding(folly::StringPiece header, const char *encoding) {
   // Examples of valid encodings that we want to accept
   // gzip;q=1.0, identity; q=0.5, *;q=0
@@ -72,43 +85,8 @@ bool acceptsEncoding(folly::StringPiece header, const char *encoding) {
   // TODO: handle q=0 disabling
 
   assertx(encoding && *encoding);
-
-  // Handle leading and trailing quotes
-  size_t len = header.size();
-  if (len >= 2
-      && ((header[0] == '"' && header[len-1] == '"')
-      || (header[0] == '\'' && header[len-1] == '\''))) {
-    header = folly::StringPiece(header.data() + 1, len - 2);
-  }
-
-  // Split the header by ','
-  std::vector<folly::StringPiece> cTokens;
-  folly::split(',', header, cTokens);
-  for (size_t i = 0; i < cTokens.size(); ++i) {
-    // Then split by ';'
-    auto& cToken = cTokens[i];
-    std::vector<folly::StringPiece> scTokens;
-    folly::split(';', cToken, scTokens);
-    assertx(scTokens.size() > 0);
-    auto& scToken = scTokens[0];
-    auto begin = scToken.begin();
-    auto end = scToken.end();
-    while (begin < end && std::isspace(*begin)) {
-      ++begin;
-    }
-    while (begin < end && std::isspace(*(end-1))) {
-      --end;
-    }
-    scToken = folly::StringPiece(begin, end);
-
-    // lhs contains the encoding
-    // rhs, if it exists, contains the qvalue
-    if (scToken.size() == strlen(encoding) &&
-        strncasecmp(scToken.data(), encoding, scToken.size()) == 0) {
-      return true;
-    }
-  }
-  return false;
+  std::vector<CompressionEncodingPair> parsedHeader = parseEncoding(header);
+  return acceptsCompressionHeaderEncoding(parsedHeader, encoding);
 }
 
 std::unique_ptr<ResponseCompressor> makeGzipResponseCompressor(
@@ -137,6 +115,35 @@ struct StaticInitTrigger {
 
 const StaticInitTrigger trigger;
 } // anonymous namespace
+
+std::vector<CompressionEncodingPair> parseEncoding(folly::StringPiece header) {
+  // Handle leading and trailing quotes
+  std::vector<CompressionEncodingPair> encodingHeader;
+  size_t len = header.size();
+  if (len >= 2
+      && ((header[0] == '"' && header[len-1] == '"')
+      || (header[0] == '\'' && header[len-1] == '\''))) {
+    header = folly::StringPiece(header.data() + 1, len - 2);
+  }
+
+  // Split the header by ','
+  std::vector<folly::StringPiece> cTokens;
+  folly::split(',', header, cTokens, true);
+
+  for (size_t i = 0; i < cTokens.size(); ++i) {
+    // Then split by first ';'
+    auto encoding = cTokens[i].split_step(';');
+    auto trimmedEncoding = folly::trimWhitespace(std::move(encoding));
+    CompressionEncodingPair pair;
+    pair.encoding = std::string(trimmedEncoding);
+    if (!cTokens[i].empty()) {
+      pair.params = std::string(cTokens[i]);
+    }
+    encodingHeader.push_back(pair);
+
+  }
+  return encodingHeader;
+}
 
 bool acceptsEncoding(ITransportHeaders* headers, const char *encoding) {
   const auto& map = headers->getHeaders();

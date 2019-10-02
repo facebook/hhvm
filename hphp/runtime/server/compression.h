@@ -24,11 +24,25 @@
 #include "hphp/util/brotli.h"
 #include "hphp/util/gzip.h"
 #include "hphp/util/zstd.h"
+#include <folly/String.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/**
+/*
+ * Struct to hold encoding : param pairs
+ */
+struct CompressionEncodingPair {
+  std::string encoding;
+  std::string params;
+};
+
+/*
+ * Parse a request into a compressionEncodingHeader struct
+ */
+std::vector<CompressionEncodingPair> parseEncoding(folly::StringPiece header);
+
+/*
  * Test whether a request indicates it accepts a certain encoding.
  */
 bool acceptsEncoding(ITransportHeaders *headers, const char *encoding);

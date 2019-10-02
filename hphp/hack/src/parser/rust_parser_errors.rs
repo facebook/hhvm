@@ -596,12 +596,13 @@ where
             PropertyDeclaration(x) => Some(&x.property_modifiers),
             ConstDeclaration(x) => Some(&x.const_modifiers),
             TypeConstDeclaration(x) => Some(&x.type_const_modifiers),
+            ClassishDeclaration(x) => Some(&x.classish_modifiers),
             _ => None,
         }
     }
 
-    // tests whether the methodish contains a modifier that satisfies [p]
-    fn methodish_modifier_contains_helper<P>(p: P, node: &'a Syntax<Token, Value>) -> bool
+    // tests whether the node's modifiers contain one that satisfies [p]
+    fn has_modifier_helper<P>(p: P, node: &'a Syntax<Token, Value>) -> bool
     where
         P: Fn(&'a Syntax<Token, Value>) -> bool,
     {
@@ -611,32 +612,33 @@ where
         }
     }
 
-    // test the methodish node contains the Final keyword *)
-    fn methodish_contains_final(node: &'a Syntax<Token, Value>) -> bool {
-        Self::methodish_modifier_contains_helper(|x| x.is_final(), node)
+    // does the node contain the Final keyword in its modifiers
+    fn has_modifier_final(node: &'a Syntax<Token, Value>) -> bool {
+        Self::has_modifier_helper(|x| x.is_final(), node)
     }
 
-    // test the methodish node contains the Abstract keyword
-    fn methodish_contains_abstract(node: &'a Syntax<Token, Value>) -> bool {
-        Self::methodish_modifier_contains_helper(|x| x.is_abstract(), node)
+    // does the node contain the Abstract keyword in its modifiers
+    fn has_modifier_abstract(node: &'a Syntax<Token, Value>) -> bool {
+        Self::has_modifier_helper(|x| x.is_abstract(), node)
     }
 
-    // test the methodish node contains the Static keyword
-    fn methodish_contains_static(node: &'a Syntax<Token, Value>) -> bool {
-        Self::methodish_modifier_contains_helper(|x| x.is_static(), node)
+    // does the node contain the Static keyword in its modifiers
+    fn has_modifier_static(node: &'a Syntax<Token, Value>) -> bool {
+        Self::has_modifier_helper(|x| x.is_static(), node)
     }
 
-    // test the methodish node contains the Private keyword
-    fn methodish_contains_private(node: &'a Syntax<Token, Value>) -> bool {
-        Self::methodish_modifier_contains_helper(|x| x.is_private(), node)
+    // does the node contain the Private keyword in its modifiers
+    fn has_modifier_private(node: &'a Syntax<Token, Value>) -> bool {
+        Self::has_modifier_helper(|x| x.is_private(), node)
     }
 
     fn is_visibility(x: &'a Syntax<Token, Value>) -> bool {
         x.is_public() || x.is_private() || x.is_protected()
     }
 
-    fn methodish_contains_visibility(node: &'a Syntax<Token, Value>) -> bool {
-        Self::methodish_modifier_contains_helper(&Self::is_visibility, node)
+    // does the node contain any visibility keywords in its modifiers
+    fn has_modifier_visibility(node: &'a Syntax<Token, Value>) -> bool {
+        Self::has_modifier_helper(&Self::is_visibility, node)
     }
 
     fn contains_async_not_last(mods: &'a Syntax<Token, Value>) -> bool {
@@ -660,7 +662,7 @@ where
                         .context
                         .active_methodish
                         .iter()
-                        .any(|&x| Self::methodish_contains_static(x))
+                        .any(|&x| Self::has_modifier_static(x))
             }
             _ => false,
         }
@@ -882,7 +884,7 @@ where
         node: &'a Syntax<Token, Value>,
     ) -> bool {
         let non_abstract =
-            !(Self::methodish_contains_abstract(node) || self.methodish_inside_interface());
+            !(Self::has_modifier_abstract(node) || self.methodish_inside_interface());
         let not_has_body = !Self::methodish_has_body(node);
         let not_native = !self.methodish_is_native(node);
         let not_hhi = !self.env.is_hhi_mode();
@@ -892,20 +894,20 @@ where
 
     // Test whether node is a method that is both abstract and private
     fn methodish_abstract_conflict_with_private(node: &'a Syntax<Token, Value>) -> bool {
-        let is_abstract = Self::methodish_contains_abstract(node);
-        let has_private = Self::methodish_contains_private(node);
+        let is_abstract = Self::has_modifier_abstract(node);
+        let has_private = Self::has_modifier_private(node);
         is_abstract && has_private
     }
 
     // Test whether node is a method that is both abstract and final
     fn methodish_abstract_conflict_with_final(node: &'a Syntax<Token, Value>) -> bool {
-        let is_abstract = Self::methodish_contains_abstract(node);
-        let has_final = Self::methodish_contains_final(node);
+        let is_abstract = Self::has_modifier_abstract(node);
+        let has_final = Self::has_modifier_final(node);
         is_abstract && has_final
     }
 
     fn methodish_abstract_inside_interface(&self, node: &'a Syntax<Token, Value>) -> bool {
-        let is_abstract = Self::methodish_contains_abstract(node);
+        let is_abstract = Self::has_modifier_abstract(node);
         let is_in_interface = self.methodish_inside_interface();
         is_abstract && is_in_interface
     }
@@ -1180,8 +1182,8 @@ where
             });
     }
 
-    // Given a classish_ or methodish_ declaration node, returns the modifier node
-    // from its list of modifiers, or None if there isn't one.
+    // Given a declaration node, returns the modifier node matching the given
+    // predicate from its list of modifiers, or None if there isn't one.
     fn extract_keyword<F>(
         modifier: F,
         declaration_node: &'a Syntax<Token, Value>,
@@ -1189,11 +1191,7 @@ where
     where
         F: Fn(&'a Syntax<Token, Value>) -> bool,
     {
-        (match &declaration_node.syntax {
-            ClassishDeclaration(x) => Some(&x.classish_modifiers),
-            _ => Self::get_modifiers_of_declaration(declaration_node),
-        })
-        .and_then(|modifiers_list| {
+        Self::get_modifiers_of_declaration(declaration_node).and_then(|modifiers_list| {
             Self::syntax_to_list_no_separators(modifiers_list)
                 .find(|x: &&'a Syntax<Token, Value>| modifier(*x))
         })
@@ -1216,26 +1214,13 @@ where
         self.first_parent_classish_node(TokenKind::Trait).is_some()
     }
 
-    // Returns the 'async'-annotation syntax node from the methodish_declaration
-    // node. The returned node may have syntax kind 'Missing', but it will only be
-    // None if something other than a methodish_declaration node was provided as
-    // input.
-    fn extract_async_node(md_node: &'a Syntax<Token, Value>) -> Option<&'a Syntax<Token, Value>> {
-        Self::get_modifiers_of_declaration(md_node).map_or(None, |x| {
-            Self::syntax_to_list_no_separators(x).find(|x| x.is_async())
-        })
-    }
-
     fn is_abstract_and_async_method(md_node: &'a Syntax<Token, Value>) -> bool {
-        Self::extract_async_node(md_node).map_or(false, |async_node| {
-            Self::is_abstract_declaration(md_node) && !async_node.is_missing()
-        })
+        Self::is_abstract_declaration(md_node)
+            && Self::extract_keyword(|x| x.is_async(), md_node).is_some()
     }
 
     fn is_interface_and_async_method(&self, md_node: &'a Syntax<Token, Value>) -> bool {
-        Self::extract_async_node(md_node).map_or(false, |async_node| {
-            self.is_inside_interface() && !async_node.is_missing()
-        })
+        self.is_inside_interface() && Self::extract_keyword(|x| x.is_async(), md_node).is_some()
     }
 
     fn get_params_for_enclosing_callable(&self) -> Option<&'a Syntax<Token, Value>> {
@@ -1369,7 +1354,7 @@ where
     // Given a node, checks if it is a abstract ConstDeclaration
     fn is_abstract_const(declaration: &'a Syntax<Token, Value>) -> bool {
         match &declaration.syntax {
-            ConstDeclaration(_) => Self::methodish_contains_abstract(declaration),
+            ConstDeclaration(_) => Self::has_modifier_abstract(declaration),
             _ => false,
         }
     }
@@ -1388,7 +1373,7 @@ where
     // Given a node, checks if it is a concrete ConstDeclaration *)
     fn is_concrete_const(declaration: &'a Syntax<Token, Value>) -> bool {
         match &declaration.syntax {
-            ConstDeclaration(_) => !Self::methodish_contains_abstract(declaration),
+            ConstDeclaration(_) => !Self::has_modifier_abstract(declaration),
             _ => false,
         }
     }
@@ -1424,7 +1409,7 @@ where
 
     fn methodish_memoize_lsb_on_non_static(&mut self, node: &'a Syntax<Token, Value>) {
         if self.methodish_contains_attribute(node, sn::user_attributes::MEMOIZE_LSB)
-            && !Self::methodish_contains_static(node)
+            && !Self::has_modifier_static(node)
         {
             self.errors.push(Self::make_error_from_node(
                 node,
@@ -1880,7 +1865,7 @@ where
                 self.multiple_visibility_errors(modifiers, errors::error2017);
                 self.multiple_modifiers_errors(modifiers, errors::error2013);
 
-                if Self::methodish_contains_static(node)
+                if Self::has_modifier_static(node)
                     && (self.attribute_specification_contains(
                         method_attrs,
                         sn::user_attributes::MUTABLE,
@@ -1941,7 +1926,8 @@ where
                     modifiers,
                 );
                 self.methodish_memoize_lsb_on_non_static(node);
-                let async_annotation = Self::extract_async_node(node).unwrap_or(node);
+                let async_annotation =
+                    Self::extract_keyword(|x| x.is_async(), node).unwrap_or(node);
 
                 self.produce_error(
                     |self_, x| self_.is_interface_and_async_method(x),
@@ -3976,7 +3962,7 @@ where
                 }
             }
             PropertyDeclaration(_) => {
-                if Self::methodish_contains_static(node) && self.is_in_reified_class() {
+                if Self::has_modifier_static(node) && self.is_in_reified_class() {
                     self.errors.push(Self::make_error_from_node(
                         node,
                         errors::static_property_in_reified_class,
@@ -4190,9 +4176,8 @@ where
                         &mut c_names,
                     );
                 }
-                let has_abstract_fn = class_body_methods().any(&Self::methodish_contains_abstract);
-                let has_private_method = class_body_methods()
-                    .any(|x| Self::methodish_modifier_contains_helper(|x| x.is_private(), x));
+                let has_abstract_fn = class_body_methods().any(&Self::has_modifier_abstract);
+                let has_private_method = class_body_methods().any(&Self::has_modifier_private);
                 if has_abstract_fn
                     && Self::is_token_kind(&cd.classish_keyword, TokenKind::Class)
                     && !Self::list_contains_predicate(|x| x.is_abstract(), &cd.classish_modifiers)
@@ -4236,11 +4221,11 @@ where
                     .push(Self::make_error_from_node(node, errors::const_in_trait))
             };
             self.multiple_modifiers_errors(const_modifiers, errors::const_has_duplicate_modifiers);
-            if Self::methodish_contains_static(node) {
+            if Self::has_modifier_static(node) {
                 self.errors
                     .push(Self::make_error_from_node(node, errors::static_const))
             }
-            if Self::methodish_contains_visibility(node) {
+            if Self::has_modifier_visibility(node) {
                 self.errors
                     .push(Self::make_error_from_node(node, errors::const_visibility))
             }
@@ -4249,7 +4234,7 @@ where
 
     fn type_const_modifier_errors(&mut self, node: &'a Syntax<Token, Value>) {
         if let TypeConstDeclaration(_) = &node.syntax {
-            if Self::methodish_contains_visibility(node) {
+            if Self::has_modifier_visibility(node) {
                 self.errors.push(Self::make_error_from_node(
                     node,
                     errors::type_const_visibility,
@@ -4854,23 +4839,20 @@ where
 
             if !self.env.parser_options.po_abstract_static_props {
                 self.produce_error(
-                    |_, n| Self::methodish_contains_abstract(n),
+                    |_, n| Self::has_modifier_abstract(n),
                     node,
                     || errors::error2058,
                     node,
                 )
             } else {
                 self.produce_error(
-                    |_, n| {
-                        Self::methodish_contains_abstract(n) && !Self::methodish_contains_static(n)
-                    },
+                    |_, n| Self::has_modifier_abstract(n) && !Self::has_modifier_static(n),
                     node,
                     || errors::abstract_instance_property,
                     node,
                 );
 
-                if Self::methodish_contains_abstract(node) && Self::methodish_contains_private(node)
-                {
+                if Self::has_modifier_abstract(node) && Self::has_modifier_private(node) {
                     self.errors.push(Self::make_error_from_node(
                         node,
                         errors::elt_abstract_private("properties"),
@@ -4913,11 +4895,9 @@ where
             })
         };
         if let PropertyDeclaration(x) = &node.syntax {
-            if self.env.parser_options.tco_const_static_props
-                && Self::methodish_contains_static(node)
-            {
+            if self.env.parser_options.tco_const_static_props && Self::has_modifier_static(node) {
                 if self.env.parser_options.po_abstract_static_props
-                    && Self::methodish_contains_abstract(node)
+                    && Self::has_modifier_abstract(node)
                 {
                     check_decls(
                         self,

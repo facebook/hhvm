@@ -6,7 +6,7 @@ array(1) {
   [0]=>
   string(8) "fetchAll"
 }
-array(26) {
+array(24) {
   [0]=>
   string(21) "PDOStatement::execute"
   [1]=>
@@ -20,47 +20,43 @@ array(26) {
   [5]=>
   string(23) "PDOStatement::bindValue"
   [6]=>
-  string(23) "PDOStatement::bindParam"
-  [7]=>
-  string(24) "PDOStatement::bindColumn"
-  [8]=>
   string(22) "PDOStatement::rowCount"
-  [9]=>
+  [7]=>
   string(23) "PDOStatement::errorCode"
-  [10]=>
+  [8]=>
   string(23) "PDOStatement::errorInfo"
-  [11]=>
+  [9]=>
   string(26) "PDOStatement::setAttribute"
-  [12]=>
+  [10]=>
   string(26) "PDOStatement::getAttribute"
-  [13]=>
+  [11]=>
   string(25) "PDOStatement::columnCount"
-  [14]=>
+  [12]=>
   string(27) "PDOStatement::getColumnMeta"
-  [15]=>
+  [13]=>
   string(26) "PDOStatement::setFetchMode"
-  [16]=>
+  [14]=>
   string(24) "PDOStatement::nextRowset"
-  [17]=>
+  [15]=>
   string(25) "PDOStatement::closeCursor"
-  [18]=>
+  [16]=>
   string(29) "PDOStatement::debugDumpParams"
-  [19]=>
+  [17]=>
   string(21) "PDOStatement::current"
-  [20]=>
+  [18]=>
   string(17) "PDOStatement::key"
-  [21]=>
+  [19]=>
   string(18) "PDOStatement::next"
-  [22]=>
+  [20]=>
   string(20) "PDOStatement::rewind"
-  [23]=>
+  [21]=>
   string(19) "PDOStatement::valid"
-  [24]=>
+  [22]=>
   string(22) "PDOStatement::__wakeup"
-  [25]=>
+  [23]=>
   string(21) "PDOStatement::__sleep"
 }
-array(26) {
+array(24) {
   [0]=>
   string(7) "execute"
   [1]=>
@@ -74,43 +70,39 @@ array(26) {
   [5]=>
   string(9) "bindValue"
   [6]=>
-  string(9) "bindParam"
-  [7]=>
-  string(10) "bindColumn"
-  [8]=>
   string(8) "rowCount"
-  [9]=>
+  [7]=>
   string(9) "errorCode"
-  [10]=>
+  [8]=>
   string(9) "errorInfo"
-  [11]=>
+  [9]=>
   string(12) "setAttribute"
-  [12]=>
+  [10]=>
   string(12) "getAttribute"
-  [13]=>
+  [11]=>
   string(11) "columnCount"
-  [14]=>
+  [12]=>
   string(13) "getColumnMeta"
-  [15]=>
+  [13]=>
   string(12) "setFetchMode"
-  [16]=>
+  [14]=>
   string(10) "nextRowset"
-  [17]=>
+  [15]=>
   string(11) "closeCursor"
-  [18]=>
+  [16]=>
   string(15) "debugDumpParams"
-  [19]=>
+  [17]=>
   string(7) "current"
-  [20]=>
+  [18]=>
   string(3) "key"
-  [21]=>
+  [19]=>
   string(4) "next"
-  [22]=>
+  [20]=>
   string(6) "rewind"
-  [23]=>
+  [21]=>
   string(5) "valid"
-  [24]=>
+  [22]=>
   string(8) "__wakeup"
-  [25]=>
+  [23]=>
   string(7) "__sleep"
 }

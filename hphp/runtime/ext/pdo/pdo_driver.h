@@ -497,7 +497,7 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 
 /* describes a bound parameter */
-struct PDOBoundParam : SweepableResourceData {
+struct PDOBoundParam final : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(PDOBoundParam);
   PDOBoundParam();
   ~PDOBoundParam();
@@ -511,15 +511,10 @@ public:
                               know the index *yet* */
   String name;
 
-  int64_t max_value_len;     /* as a hint for pre-allocation */
-
   Variant parameter;       /* the variable itself */
   PDOParamType param_type; /* desired or suggested type */
 
-  Variant driver_params;   /* optional parameter(s) for the driver */
-
   PDOStatement *stmt;      /* for convenience in dtor */
-  bool is_param;           /* parameter or column ? */
 
   void *driver_ext_data;   /* must not be request-heap ptr */
   TYPE_SCAN_IGNORE_FIELD(driver_ext_data);

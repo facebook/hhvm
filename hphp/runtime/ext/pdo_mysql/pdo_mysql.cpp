@@ -1120,7 +1120,7 @@ bool PDOMySqlStatement::getColumn(int colno, Variant &value) {
 bool PDOMySqlStatement::paramHook(PDOBoundParam* param,
                                   PDOParamEvent event_type) {
   MYSQL_BIND *b;
-  if (m_stmt && param->is_param) {
+  if (m_stmt) {
     switch (event_type) {
     case PDO_PARAM_EVT_ALLOC:
       /* sanity check parameter number range */

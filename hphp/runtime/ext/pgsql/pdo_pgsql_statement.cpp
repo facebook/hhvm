@@ -401,7 +401,7 @@ const StaticString
 bool PDOPgSqlStatement::paramHook(
   PDOBoundParam* param, PDOParamEvent event_type
 ){
-  if(m_stmtName.size() > 0 && param->is_param){
+  if (m_stmtName.size() > 0) {
     switch(event_type){
       case PDO_PARAM_EVT_FREE:
         param_values.clear();
@@ -496,17 +496,15 @@ bool PDOPgSqlStatement::paramHook(
         break;
     }
   } else {
-    if(param->is_param){
-      // Convert into a native pgsql boolean literal
-      if(
-        PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_BOOL &&
-        ((param->param_type & PDO_PARAM_INPUT_OUTPUT) !=
-         PDO_PARAM_INPUT_OUTPUT)
-      ){
-        param->param_type = PDO_PARAM_STR;
-        param->parameter =
-          param->parameter.asBooleanVal() ? String(s_t) : String(s_f);
-      }
+    // Convert into a native pgsql boolean literal
+    if(
+      PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_BOOL &&
+      ((param->param_type & PDO_PARAM_INPUT_OUTPUT) !=
+       PDO_PARAM_INPUT_OUTPUT)
+    ){
+      param->param_type = PDO_PARAM_STR;
+      param->parameter =
+        param->parameter.asBooleanVal() ? String(s_t) : String(s_f);
     }
   }
 

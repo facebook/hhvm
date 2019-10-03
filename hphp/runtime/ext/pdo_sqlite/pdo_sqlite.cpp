@@ -496,7 +496,6 @@ bool PDOSqliteStatement::paramHook(PDOBoundParam* param,
       m_done = 1;
     }
 
-    if (param->is_param) {
       if (param->paramno == -1) {
         param->paramno = sqlite3_bind_parameter_index(m_stmt,
                                                       param->name.c_str()) - 1;
@@ -575,7 +574,6 @@ bool PDOSqliteStatement::paramHook(PDOBoundParam* param,
         handleError(__FILE__, __LINE__);
         return false;
       }
-    }
     break;
 
   default:;

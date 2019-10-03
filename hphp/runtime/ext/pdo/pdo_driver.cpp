@@ -261,9 +261,10 @@ PDOColumn::~PDOColumn() {
 // PDOBoundParam
 
 PDOBoundParam::PDOBoundParam()
-    : paramno(0), max_value_len(0), param_type(PDO_PARAM_NULL),
-      is_param(false), driver_ext_data(nullptr) {
-}
+  : paramno(0)
+  , param_type(PDO_PARAM_NULL)
+  , driver_ext_data(nullptr)
+{}
 
 PDOBoundParam::~PDOBoundParam() {
   sweep();

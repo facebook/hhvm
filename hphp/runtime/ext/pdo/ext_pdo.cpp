@@ -1564,12 +1564,11 @@ static void get_lazy_object(sp_PDOStatement stmt, Variant &ret) {
 }
 
 static bool really_register_bound_param(sp_PDOBoundParam param,
-                                        sp_PDOStatement stmt,
-                                        bool is_param) {
-  Array &hash = is_param ? stmt->bound_params : stmt->bound_columns;
+                                        sp_PDOStatement stmt) {
+  Array &hash = stmt->bound_params;
 
   if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_STR &&
-      param->max_value_len <= 0 && !param->parameter.isNull()) {
+      !param->parameter.isNull()) {
     param->parameter = param->parameter.toString();
   } else if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_INT &&
              param->parameter.isBoolean()) {
@@ -1579,30 +1578,12 @@ static bool really_register_bound_param(sp_PDOBoundParam param,
     param->parameter = param->parameter.toBoolean();
   }
   param->stmt = stmt.get();
-  param->is_param = is_param;
 
-  if (!is_param && !param->name.empty() && !stmt->columns.empty()) {
-    /* try to map the name to the column */
-    for (int i = 0; i < stmt->column_count; i++) {
-      if (cast<PDOColumn>(stmt->columns[i])->name == param->name) {
-        param->paramno = i;
-        break;
-      }
-    }
-
-    /* if you prepare and then execute passing an array of params keyed by
-       names, then this will trigger, and we don't want that */
-    if (param->paramno == -1) {
-      raise_warning("Did not found column name '%s' in the defined columns;"
-                    " it will not be bound", param->name.data());
-    }
-  }
-
-  if (is_param && !param->name.empty() && param->name[0] != ':') {
+  if (!param->name.empty() && param->name[0] != ':') {
     param->name = String(":") + param->name;
   }
 
-  if (is_param && !rewrite_name_to_position(stmt, param)) {
+  if (!rewrite_name_to_position(stmt, param)) {
     param->name.reset();
     return false;
   }
@@ -1677,7 +1658,7 @@ static inline void fetch_value(sp_PDOStatement stmt, Variant &dest, int colno,
 }
 
 static bool do_fetch_common(sp_PDOStatement stmt, PDOFetchOrientation ori,
-                            long offset, bool do_bind) {
+                            long offset) {
   if (!stmt->executed) {
     return false;
   }
@@ -1695,7 +1676,7 @@ static bool do_fetch_common(sp_PDOStatement stmt, PDOFetchOrientation ori,
     return false;
   }
 
-  if (do_bind && !stmt->bound_columns.empty()) {
+  if (!stmt->bound_columns.empty()) {
     /* update those bound column variables now */
     for (ArrayIter iter(stmt->bound_columns); iter; ++iter) {
       auto param = cast<PDOBoundParam>(iter.second());
@@ -1727,7 +1708,6 @@ static bool do_fetch_func_prepare(sp_PDOStatement stmt) {
 /* perform a fetch.  If do_bind is true, update any bound columns.
  * If return_value is not null, store values into it according to HOW. */
 static bool do_fetch(sp_PDOStatement stmt,
-                     bool do_bind,
                      Variant& ret,
                      PDOFetchType how,
                      PDOFetchOrientation ori,
@@ -1739,7 +1719,7 @@ static bool do_fetch(sp_PDOStatement stmt,
   int flags = how & PDO_FETCH_FLAGS;
   how = (PDOFetchType)(how & ~PDO_FETCH_FLAGS);
 
-  if (!do_fetch_common(stmt, ori, offset, do_bind)) {
+  if (!do_fetch_common(stmt, ori, offset)) {
     return false;
   }
 
@@ -2018,10 +1998,16 @@ static bool do_fetch(sp_PDOStatement stmt,
   return true;
 }
 
-static int register_bound_param(const Variant& paramno, VRefParam param,
-                                int64_t type, int64_t max_value_len,
-                                const Variant& driver_params,
-                                sp_PDOStatement stmt, bool is_param) {
+
+static bool HHVM_METHOD(PDOStatement, bindvalue, const Variant& paramno,
+                        const Variant& param,
+                        int64_t type /* = PDO_PARAM_STR */) {
+  auto data = Native::data<PDOStatementData>(this_);
+  if (data->m_stmt == nullptr) {
+    return false;
+  }
+  auto& stmt = data->m_stmt;
+
   auto p = req::make<PDOBoundParam>();
   // need to make sure this is NULL, in case a fatal errors occurs before it's
   // set inside really_register_bound_param
@@ -2034,10 +2020,8 @@ static int register_bound_param(const Variant& paramno, VRefParam param,
     p->name = paramno.toString();
   }
 
-  p->parameter.setWithRef(param);
+  p->parameter = param;
   p->param_type = (PDOParamType)type;
-  p->max_value_len = max_value_len;
-  p->driver_params = driver_params;
 
   if (p->paramno > 0) {
     --p->paramno; /* make it zero-based internally */
@@ -2047,7 +2031,7 @@ static int register_bound_param(const Variant& paramno, VRefParam param,
     return false;
   }
 
-  if (!really_register_bound_param(p, stmt, is_param)) {
+  if (!really_register_bound_param(p, stmt)) {
     p->parameter.unset();
     return false;
   }
@@ -2696,7 +2680,7 @@ static Variant HHVM_METHOD(PDOStatement, execute,
         param->paramno = num_index;
       }
 
-      if (!really_register_bound_param(param, data->m_stmt, true)) {
+      if (!really_register_bound_param(param, data->m_stmt)) {
         return false;
       }
     }
@@ -2763,7 +2747,7 @@ static Variant HHVM_METHOD(PDOStatement, fetch, int64_t how  = 0,
   }
 
   Variant ret;
-  if (!do_fetch(data->m_stmt, true, ret, (PDOFetchType)how,
+  if (!do_fetch(data->m_stmt, ret, (PDOFetchType)how,
                 (PDOFetchOrientation)orientation, offset, NULL)) {
     PDO_HANDLE_STMT_ERR(data->m_stmt);
     return false;
@@ -2805,7 +2789,7 @@ static Variant HHVM_METHOD(PDOStatement, fetchobject,
   data->m_stmt->fetch.ctor_args = ctor_args;
 
   Variant ret;
-  if (!error && !do_fetch(data->m_stmt, true, ret, PDO_FETCH_CLASS,
+  if (!error && !do_fetch(data->m_stmt, ret, PDO_FETCH_CLASS,
                           PDO_FETCH_ORI_NEXT, 0, NULL)) {
     error = true;
   }
@@ -2829,7 +2813,7 @@ static Variant HHVM_METHOD(PDOStatement, fetchcolumn,
   }
 
   setPDOErrorNone(data->m_stmt->error_code);
-  if (!do_fetch_common(data->m_stmt, PDO_FETCH_ORI_NEXT, 0, true)) {
+  if (!do_fetch_common(data->m_stmt, PDO_FETCH_ORI_NEXT, 0)) {
     PDO_HANDLE_STMT_ERR(data->m_stmt);
     return false;
   }
@@ -2923,7 +2907,7 @@ static Variant HHVM_METHOD(PDOStatement, fetchall, int64_t how /* = 0 */,
       return_value = Array::CreateDArray();
       return_all = &return_value;
     }
-    if (!do_fetch(self->m_stmt, true, data, (PDOFetchType)(how | flags),
+    if (!do_fetch(self->m_stmt, data, (PDOFetchType)(how | flags),
                   PDO_FETCH_ORI_NEXT, 0, return_all)) {
       error = 2;
     }
@@ -2932,12 +2916,12 @@ static Variant HHVM_METHOD(PDOStatement, fetchall, int64_t how /* = 0 */,
     if ((how & PDO_FETCH_GROUP)) {
       do {
         data.unset();
-      } while (do_fetch(self->m_stmt, true, data, (PDOFetchType)(how | flags),
+      } while (do_fetch(self->m_stmt, data, (PDOFetchType)(how | flags),
                         PDO_FETCH_ORI_NEXT, 0, return_all));
     } else if (how == PDO_FETCH_KEY_PAIR ||
                (how == PDO_FETCH_USE_DEFAULT &&
                 self->m_stmt->default_fetch_type == PDO_FETCH_KEY_PAIR)) {
-      while (do_fetch(self->m_stmt, true, data, (PDOFetchType)(how | flags),
+      while (do_fetch(self->m_stmt, data, (PDOFetchType)(how | flags),
                       PDO_FETCH_ORI_NEXT, 0, return_all)) {
         continue;
       }
@@ -2946,7 +2930,7 @@ static Variant HHVM_METHOD(PDOStatement, fetchall, int64_t how /* = 0 */,
       do {
         return_value.toArrRef().append(data);
         data.unset();
-      } while (do_fetch(self->m_stmt, true, data, (PDOFetchType)(how | flags),
+      } while (do_fetch(self->m_stmt,  data, (PDOFetchType)(how | flags),
                         PDO_FETCH_ORI_NEXT, 0, NULL));
     }
   }
@@ -2966,44 +2950,6 @@ static Variant HHVM_METHOD(PDOStatement, fetchall, int64_t how /* = 0 */,
     }
   }
   return return_value;
-}
-
-static bool HHVM_METHOD(PDOStatement, bindvalue, const Variant& paramno,
-                        const Variant& param,
-                        int64_t type /* = PDO_PARAM_STR */) {
-  auto data = Native::data<PDOStatementData>(this_);
-  if (data->m_stmt == nullptr) {
-    return false;
-  }
-
-  return register_bound_param(paramno, param, type, 0,
-                              uninit_null(), data->m_stmt, true);
-}
-
-static bool HHVM_METHOD(PDOStatement, bindparam, const Variant& paramno,
-                        VRefParam param, int64_t type /* = PDO_PARAM_STR */,
-                        int64_t max_value_len /* = 0 */,
-                        const Variant& driver_params /*= null */) {
-  auto data = Native::data<PDOStatementData>(this_);
-  if (data->m_stmt == nullptr) {
-    return false;
-  }
-
-  return register_bound_param(paramno, ref(param), type, max_value_len,
-                              driver_params, data->m_stmt, true);
-}
-
-static bool HHVM_METHOD(PDOStatement, bindcolumn, const Variant& paramno,
-                        VRefParam param, int64_t type /* = PDO_PARAM_STR */,
-                        int64_t max_value_len /* = 0 */,
-                        const Variant& driver_params /* = null */) {
-  auto data = Native::data<PDOStatementData>(this_);
-  if (data->m_stmt == nullptr) {
-    return false;
-  }
-
-  return register_bound_param(paramno, ref(param), type, max_value_len,
-                              driver_params, data->m_stmt, false);
 }
 
 static int64_t HHVM_METHOD(PDOStatement, rowcount) {
@@ -3262,13 +3208,12 @@ static Variant HHVM_METHOD(PDOStatement, debugdumpparams) {
 
     auto param = cast<PDOBoundParam>(iter.second());
     f->printf(
-      "paramno=%d\nname=[%d] \"%.*s\"\nis_param=%d\nparam_type=%d\n",
+      "paramno=%d\nname=[%d] \"%.*s\"\nparam_type=%d\n",
       make_vec_array(
         param->paramno,
         param->name.size(),
         param->name.size(),
         param->name.data(),
-        param->is_param,
         param->param_type
       )
     );
@@ -3371,8 +3316,6 @@ static struct PDOExtension final : Extension {
     HHVM_ME(PDOStatement, fetchcolumn);
     HHVM_ME(PDOStatement, fetchall);
     HHVM_ME(PDOStatement, bindvalue);
-    HHVM_ME(PDOStatement, bindparam);
-    HHVM_ME(PDOStatement, bindcolumn);
     HHVM_ME(PDOStatement, rowcount);
     HHVM_ME(PDOStatement, errorcode);
     HHVM_ME(PDOStatement, errorinfo);

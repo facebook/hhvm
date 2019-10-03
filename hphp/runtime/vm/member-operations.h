@@ -1262,7 +1262,11 @@ tv_lval ElemU(TypedValue& tvRef, tv_lval base, key_type<keyType> key) {
 inline tv_lval NewElemEmptyish(tv_lval base, const MInstrPropState* pState) {
   detail::checkPromotion(base, pState);
   tvMove(make_tv<KindOfArray>(ArrayData::Create()), base);
-  return asArrRef(base).lval();
+
+  if (checkHACFalseyPromote()) {
+    raise_hac_falsey_promote_notice("Lval on missing array element");
+  }
+  return asArrRef(base).lvalForce();
 }
 
 /**
@@ -1304,7 +1308,10 @@ inline tv_lval NewElemString(TypedValue& tvRef,
 inline tv_lval NewElemArray(tv_lval base) {
   assertx(tvIsArray(base));
   assertx(tvIsPlausible(*base));
-  return asArrRef(base).lval();
+  if (checkHACFalseyPromote()) {
+    raise_hac_falsey_promote_notice("Lval on missing array element");
+  }
+  return asArrRef(base).lvalForce();
 }
 
 /**
@@ -2162,7 +2169,10 @@ inline tv_lval SetOpNewElemEmptyish(SetOpOp op, tv_lval base, Cell* rhs,
                                     const MInstrPropState* pState) {
   detail::checkPromotion(base, pState);
   cellMove(make_tv<KindOfArray>(ArrayData::Create()), base);
-  auto result = asArrRef(base).lval();
+  if (checkHACFalseyPromote()) {
+    raise_hac_falsey_promote_notice("Lval on missing array element");
+  }
+  auto result = asArrRef(base).lvalForce();
   setopBody(tvToCell(result), op, rhs);
   return result;
 }
@@ -2217,7 +2227,10 @@ inline tv_lval SetOpNewElem(TypedValue& tvRef,
       if (UNLIKELY(checkHACFalseyPromote())) {
         raiseHackArrCompatMissingSetOp();
       }
-      auto result = asArrRef(base).lval();
+      if (checkHACFalseyPromote()) {
+        raise_hac_falsey_promote_notice("Lval on missing array element");
+      }
+      auto result = asArrRef(base).lvalForce();
       setopBody(result, op, rhs);
       return result;
     }
@@ -2414,7 +2427,10 @@ inline Cell IncDecNewElemEmptyish(
 ) {
   detail::checkPromotion(base, pState);
   cellMove(make_tv<KindOfArray>(ArrayData::Create()), base);
-  auto result = asArrRef(base).lval();
+  if (checkHACFalseyPromote()) {
+    raise_hac_falsey_promote_notice("Lval on missing array element");
+  }
+  auto result = asArrRef(base).lvalForce();
   assertx(type(result) == KindOfNull);
   return IncDecBody(op, result);
 }
@@ -2473,7 +2489,10 @@ inline Cell IncDecNewElem(
       if (UNLIKELY(checkHACFalseyPromote())) {
         raiseHackArrCompatMissingIncDec();
       }
-      auto result = asArrRef(base).lval();
+      if (checkHACFalseyPromote()) {
+        raise_hac_falsey_promote_notice("Lval on missing array element");
+      }
+      auto result = asArrRef(base).lvalForce();
       assertx(type(result) == KindOfNull);
       return IncDecBody(op, result);
     }

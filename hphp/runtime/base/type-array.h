@@ -457,7 +457,7 @@ public:
   /*
    * Get an lval to a newly created element.
    */
-  arr_lval lval();
+  arr_lval lvalForce();
 
   /////////////////////////////////////////////////////////////////////////////
   // Element access and mutation.

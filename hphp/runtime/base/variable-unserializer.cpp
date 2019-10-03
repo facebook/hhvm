@@ -1437,10 +1437,7 @@ Array VariableUnserializer::unserializeVec() {
   reserveForAdd(size);
 
   for (int64_t i = 0; i < size; i++) {
-    auto const lval = [&] {
-      SuppressHACFalseyPromoteNotices shacn;
-      return PackedArray::LvalNewVec(arr.get(), false);
-    }();
+    auto const lval = PackedArray::LvalForceNewVec(arr.get(), false);
     assertx(lval.arr == arr.get());
     unserializeVariant(lval, UnserializeMode::VecValue);
     assertx(!tvIsRef(lval));
@@ -1518,12 +1515,8 @@ Array VariableUnserializer::unserializeVArray() {
        : UnserializeMode::DictValue);
 
   for (int64_t i = 0; i < size; i++) {
-    auto lval = [&]() -> decltype(auto) {
-      SuppressHACFalseyPromoteNotices shacn;
-      return arr.lval();
-    }();
+    auto const lval = arr.lvalForce();
     assertx(lval.arr == arr.get());
-
     unserializeVariant(lval, mode);
     assertx(!arr.isHackArray() || !tvIsRef(lval));
 

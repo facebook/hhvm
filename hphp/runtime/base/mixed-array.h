@@ -329,7 +329,7 @@ private:
   using ArrayData::at;
   using ArrayData::rval;
   using ArrayData::lval;
-  using ArrayData::lvalNew;
+  using ArrayData::lvalForce;
   using ArrayData::set;
   using ArrayData::remove;
   using ArrayData::release;
@@ -359,7 +359,7 @@ public:
   static bool ExistsStr(const ArrayData*, const StringData* k);
   static arr_lval LvalInt(ArrayData* ad, int64_t k, bool copy);
   static arr_lval LvalStr(ArrayData* ad, StringData* k, bool copy);
-  static arr_lval LvalNew(ArrayData*, bool copy);
+  static arr_lval LvalForceNew(ArrayData*, bool copy);
   static ArrayData* SetInt(ArrayData*, int64_t k, Cell v);
   static ArrayData* SetIntInPlace(ArrayData*, int64_t k, Cell v);
   static ArrayData* SetStr(ArrayData*, StringData* k, Cell v);
@@ -451,7 +451,7 @@ public:
   static constexpr auto ExistsStrDict = &ExistsStr;
   static constexpr auto LvalIntDict = &LvalInt;
   static constexpr auto LvalStrDict = &LvalStr;
-  static constexpr auto LvalNewDict = &LvalNew;
+  static constexpr auto LvalForceNewDict = &LvalForceNew;
   static constexpr auto RemoveIntDict = &RemoveInt;
   static constexpr auto RemoveIntInPlaceDict = &RemoveIntInPlace;
   static constexpr auto RemoveStrDict = &RemoveStr;

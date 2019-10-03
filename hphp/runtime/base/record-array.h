@@ -22,6 +22,9 @@
 #include "hphp/runtime/base/string-hash-map.h"
 
 namespace HPHP {
+
+///////////////////////////////////////////////////////////////////////////////
+
 struct RecordArray : ArrayData,
                      RecordBase,
                      type_scan::MarkCollectable<RecordArray>  {
@@ -71,7 +74,7 @@ struct RecordArray : ArrayData,
   static arr_lval LvalStr(ArrayData*, StringData* key, bool copy);
   static arr_lval LvalSilentInt(ArrayData*, int64_t k, bool copy);
   static arr_lval LvalSilentStr(ArrayData*, StringData* key, bool copy);
-  static arr_lval LvalNew(ArrayData*, bool copy);
+  static arr_lval LvalForceNew(ArrayData*, bool copy);
   static ArrayData* RemoveInt(ArrayData*, int64_t key);
   static ArrayData* RemoveIntInPlace(ArrayData*, int64_t key);
   static ArrayData* RemoveStr(ArrayData*, const StringData*);
@@ -130,5 +133,9 @@ private:
    */
   void updateField(StringData* key, Cell val, Slot idx);
 };
-} // namespace HPHP
+
+///////////////////////////////////////////////////////////////////////////////
+
+}
+
 #endif // incl_HPHP_RECORD_ARRAY_H_

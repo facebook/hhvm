@@ -362,8 +362,7 @@ void register_variable(Array& variables, char *name, const Variant& value,
       }
 
       if (!index) {
-        SuppressHACFalseyPromoteNotices shacn;
-        auto lval = symtable->lval();
+        auto lval = symtable->lvalForce();
         type(lval) = KindOfPersistentArray;
         val(lval).parr = ArrayData::Create();
         gpc_elements.push_back(uninit_null());

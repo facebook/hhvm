@@ -115,7 +115,7 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static arr_lval LvalStr(ArrayData*, StringData* k, bool copy);
   static arr_lval LvalSilentInt(ArrayData*, int64_t, bool copy);
   static arr_lval LvalSilentStr(ArrayData*, StringData*, bool copy);
-  static arr_lval LvalNew(ArrayData*, bool copy);
+  static arr_lval LvalForceNew(ArrayData*, bool copy);
   static ArrayData* RemoveInt(ArrayData*, int64_t k);
   static ArrayData* RemoveIntInPlace(ArrayData*, int64_t k);
   static ArrayData* RemoveStr(ArrayData*, const StringData* k);
@@ -192,7 +192,7 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static constexpr auto IsVectorDataVec = &IsVectorData;
   static constexpr auto ExistsIntVec = &ExistsInt;
   static constexpr auto ExistsStrVec = &ExistsStr;
-  static constexpr auto LvalNewVec = &LvalNew;
+  static constexpr auto LvalForceNewVec = &LvalForceNew;
   static constexpr auto RemoveStrVec = &RemoveStr;
   static constexpr auto RemoveStrInPlaceVec = &RemoveStr;
   static constexpr auto IterBeginVec = &IterBegin;

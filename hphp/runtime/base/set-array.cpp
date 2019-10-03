@@ -649,7 +649,7 @@ arr_lval SetArray::LvalStr(ArrayData*, StringData*, bool) {
   );
 }
 
-arr_lval SetArray::LvalNew(ArrayData*, bool) {
+arr_lval SetArray::LvalForceNew(ArrayData*, bool) {
   SystemLib::throwInvalidOperationExceptionObject(
     "Invalid keyset operation (lval new)"
   );

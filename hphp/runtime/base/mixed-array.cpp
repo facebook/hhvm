@@ -1187,18 +1187,13 @@ arr_lval MixedArray::LvalSilentStr(ArrayData* ad, StringData* k, bool copy) {
   return arr_lval { a, &a->data()[pos].data };
 }
 
-arr_lval MixedArray::LvalNew(ArrayData* ad, bool copy) {
+arr_lval MixedArray::LvalForceNew(ArrayData* ad, bool copy) {
   auto a = asMixed(ad);
   if (UNLIKELY(a->m_nextKI < 0)) {
     raise_warning("Cannot add element to the array as the next element is "
                   "already occupied");
     return arr_lval { a, lvalBlackHole().asTypedValue() };
   }
-
-  if (checkHACFalseyPromote()) {
-    raise_hac_falsey_promote_notice("Lval on missing array element");
-  }
-
   a = a->prepareForInsert(copy);
   a->nextInsert(make_tv<KindOfNull>());
   return arr_lval { a, &a->data()[a->m_used - 1].data };

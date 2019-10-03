@@ -397,7 +397,7 @@ public:
    * fail, in which case we return the lval blackhole (see lvalBlackHole() for
    * details).
    */
-  arr_lval lvalNew(bool copy);
+  arr_lval lvalForce(bool copy);
 
   /*
    * Get an rval for the element at key `k'.
@@ -926,7 +926,7 @@ struct ArrayFunctions {
   arr_lval (*lvalStr[NK])(ArrayData*, StringData* k, bool copy);
   arr_lval (*lvalSilentInt[NK])(ArrayData*, int64_t k, bool copy);
   arr_lval (*lvalSilentStr[NK])(ArrayData*, StringData* k, bool copy);
-  arr_lval (*lvalNew[NK])(ArrayData*, bool copy);
+  arr_lval (*lvalForce[NK])(ArrayData*, bool copy);
   ArrayData* (*removeInt[NK])(ArrayData*, int64_t k);
   ArrayData* (*removeIntInPlace[NK])(ArrayData*, int64_t k);
   ArrayData* (*removeStr[NK])(ArrayData*, const StringData* k);

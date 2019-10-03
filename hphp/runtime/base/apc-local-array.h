@@ -52,7 +52,7 @@ struct APCLocalArray final : ArrayData,
   static arr_lval LvalStr(ArrayData*, StringData* k, bool copy);
   static arr_lval LvalSilentInt(ArrayData*, int64_t k, bool copy);
   static arr_lval LvalSilentStr(ArrayData*, StringData* k, bool copy);
-  static arr_lval LvalNew(ArrayData*, bool copy);
+  static arr_lval LvalForceNew(ArrayData*, bool copy);
   static ArrayData* SetInt(ArrayData*, int64_t k, Cell v);
   static constexpr auto SetIntInPlace = &SetInt;
   static ArrayData* SetStr(ArrayData*, StringData* k, Cell v);

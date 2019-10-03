@@ -20,9 +20,13 @@
 #include "hphp/runtime/base/tv-refcount.h"
 
 namespace HPHP {
+
+///////////////////////////////////////////////////////////////////////////////
+
 RecordArray::RecordArray(const RecordDesc* record)
   : ArrayData(ArrayData::kRecordKind)
-  , RecordBase(record) {
+  , RecordBase(record)
+{
   new (const_cast<ExtraFieldMap*>(extraFieldMap())) ExtraFieldMap();
   auto const sizeIdx = MemoryManager::size2Index(sizeWithFields(record));
   m_aux16 = static_cast<uint16_t>(sizeIdx) << 8;
@@ -238,7 +242,7 @@ arr_lval RecordArray::LvalSilentStr(ArrayData*, StringData*, bool) {
   throw_not_implemented("This method on RecordArray");
 }
 
-arr_lval RecordArray::LvalNew(ArrayData*, bool) {
+arr_lval RecordArray::LvalForceNew(ArrayData*, bool) {
   throw_not_implemented("This method on RecordArray");
 }
 
@@ -389,4 +393,7 @@ ArrayData* RecordArray::ToVArray(ArrayData*, bool) {
 ArrayData* RecordArray::ToDArray(ArrayData*, bool) {
   throw_not_implemented("This method on RecordArray");
 }
-} // namespace HPHP
+
+///////////////////////////////////////////////////////////////////////////////
+
+}

@@ -449,7 +449,7 @@ TEST(ARRAY, Membership) {
   }
   {
     Array arr;
-    auto const lval = arr.lval();
+    auto const lval = arr.lvalForce();
     type(lval) = KindOfString;
     val(lval).pstr = StringData::Make("test", CopyString);
     EXPECT_TRUE(equal(arr, make_varray("test")));

@@ -812,7 +812,12 @@ auto MutableOpIntVec(ArrayData* adIn, int64_t k, bool copy, FoundFn found) {
 arr_lval PackedArray::LvalInt(ArrayData* adIn, int64_t k, bool copy) {
   return MutableOpInt(adIn, k, copy,
     [&] (ArrayData* ad) { return arr_lval { ad, LvalUncheckedInt(ad, k) }; },
-    [&] { return LvalNew(adIn, copy); },
+    [&] {
+      if (checkHACFalseyPromote()) {
+        raise_hac_falsey_promote_notice("Lval on missing array element");
+      }
+      return LvalForceNew(adIn, copy);
+    },
     // TODO(#2606310): Make use of our knowledge that the key is missing.
     [&] (MixedArray* mixed) { return mixed->addLvalImpl<true>(k); }
   );
@@ -856,11 +861,8 @@ arr_lval PackedArray::LvalSilentStr(ArrayData* ad, StringData* k, bool) {
   return arr_lval { ad, nullptr };
 }
 
-arr_lval PackedArray::LvalNew(ArrayData* adIn, bool copy) {
+arr_lval PackedArray::LvalForceNew(ArrayData* adIn, bool copy) {
   assertx(checkInvariants(adIn));
-  if (checkHACFalseyPromote()) {
-    raise_hac_falsey_promote_notice("Lval on missing array element");
-  }
   auto const ad = PrepareForInsert(adIn, copy);
   auto lval = LvalUncheckedInt(ad, ad->m_size++);
   type(lval) = KindOfNull;

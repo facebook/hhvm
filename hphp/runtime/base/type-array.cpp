@@ -832,9 +832,9 @@ FOR_EACH_KEY_TYPE(setWithRef)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-arr_lval Array::lval() {
+arr_lval Array::lvalForce() {
   if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
-  auto const lval = m_arr->lvalNew(m_arr->cowCheck());
+  auto const lval = m_arr->lvalForce(m_arr->cowCheck());
   if (lval.arr != m_arr) m_arr = Ptr::attach(lval.arr);
   assertx(lval);
   return lval;

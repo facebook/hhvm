@@ -51,9 +51,13 @@ folly::StringPiece buildId();
 folly::StringPiece hhjsBabelTransform();
 
 /*
- * Replace %{schema} with the repo schema in path.
+ * Replace supported %{xxx} placeholders.  These include:
+ *
+ *  - %{schema} -> repo schema
+ *  - %{uid} -> user id
+ *  - %{euid} -> effective user id
  */
-std::string insertSchema(const char* path);
+void replacePlaceholders(std::string&);
 
 }
 

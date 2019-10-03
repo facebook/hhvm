@@ -843,7 +843,8 @@ void setCentralRepoFileMode(const std::string& path) {
 }
 
 RepoStatus Repo::openCentral(const char* rawPath, std::string& errorMsg) {
-  std::string repoPath = insertSchema(rawPath);
+  std::string repoPath = rawPath;
+  replacePlaceholders(repoPath);
   // SQLITE_OPEN_NOMUTEX specifies that the connection be opened such
   // that no mutexes are used to protect the database connection from other
   // threads.  However, multiple connections can still be used concurrently,
@@ -930,7 +931,8 @@ void Repo::initLocal() {
 }
 
 void Repo::attachLocal(const char* path, bool isWritable) {
-  std::string repoPath = insertSchema(path);
+  std::string repoPath = path;
+  replacePlaceholders(repoPath);
   if (!isWritable) {
     // Make sure the repo exists before attaching it, in order to avoid
     // creating a read-only repo.

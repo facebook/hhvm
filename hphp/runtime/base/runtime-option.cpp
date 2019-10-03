@@ -1730,6 +1730,9 @@ void RuntimeOption::Load(
     Config::Bind(RepoAllowFallbackPath, ini, config, "Repo.AllowFallbackPath",
                  RepoAllowFallbackPath);
 
+    replacePlaceholders(RepoLocalPath);
+    replacePlaceholders(RepoCentralPath);
+
     // Repo - Eval
     Config::Bind(RepoEvalMode, ini, config, "Repo.Eval.Mode");
     if (RepoEvalMode.empty()) {
@@ -1837,21 +1840,10 @@ void RuntimeOption::Load(
       high_2m_pages(EvalMaxHighArenaHugePages);
     }
 
-    EvalHackCompilerExtractPath = insertSchema(
-      EvalHackCompilerExtractPath.data()
-    );
-
-    EvalHackCompilerFallbackPath = insertSchema(
-      EvalHackCompilerFallbackPath.data()
-    );
-
-    EvalEmbeddedDataExtractPath = insertSchema(
-      EvalEmbeddedDataExtractPath.data()
-    );
-
-    EvalEmbeddedDataFallbackPath = insertSchema(
-      EvalEmbeddedDataFallbackPath.data()
-    );
+    replacePlaceholders(EvalHackCompilerExtractPath);
+    replacePlaceholders(EvalHackCompilerFallbackPath);
+    replacePlaceholders(EvalEmbeddedDataExtractPath);
+    replacePlaceholders(EvalEmbeddedDataFallbackPath);
 
     if (EvalPerfRelocate > 0) {
       setRelocateRequests(EvalPerfRelocate);

@@ -49,6 +49,7 @@
           ]
         },
         "renameProvider": true,
+        "implementationProvider": false,
         "typeCoverageProvider": true,
         "rageProvider": true
       }

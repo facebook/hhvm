@@ -2410,7 +2410,11 @@ let rec connect_client (root : Path.t) ~(autostart : bool) : server_conn Lwt.t
       can_autostart_after_mismatch := false;
       connect_client root ~autostart:true)
 
-let do_initialize () : Initialize.result =
+let do_initialize (root : Path.t) : Initialize.result =
+  let server_args = ServerArgs.default_options ~root:(Path.to_string root) in
+  let server_local_config =
+    snd @@ ServerConfig.load ServerConfig.filename server_args
+  in
   Initialize.
     {
       server_capabilities =
@@ -2448,6 +2452,8 @@ let do_initialize () : Initialize.result =
           renameProvider = true;
           documentLinkProvider = None;
           executeCommandProvider = None;
+          implementationProvider =
+            server_local_config.ServerLocalConfig.find_all_implementations;
           typeCoverageProvider = true;
           rageProvider = true;
         };
@@ -3128,15 +3134,13 @@ let handle_event
           hhconfig_version := version;
           let%lwt new_state = connect !state in
           state := new_state;
-          do_initialize ()
+          let root = Path.make (Lsp_helpers.get_root initialize_params) in
+          Relative_path.set_path_prefix Relative_path.Root root;
+          do_initialize root
           |> print_initialize
           |> respond_jsonrpc ~powered_by:Language_server c;
 
           if env.use_serverless_ide then (
-            Relative_path.set_path_prefix
-              Relative_path.Root
-              (Path.make (Lsp_helpers.get_root initialize_params));
-
             let id = NumberId (Jsonrpc.get_next_request_id ()) in
             let message = do_didChangeWatchedFiles_registerCapability () in
             to_stdout (print_lsp_request id message);
@@ -3475,6 +3479,18 @@ let handle_event
         (* textDocument/references request *)
         | (Main_loop menv, Client_message c)
           when c.method_ = "textDocument/references" ->
+          let%lwt () = cancel_if_stale client c long_timeout in
+          let%lwt result =
+            parse_findReferences c.params
+            |> do_findReferences menv.conn ref_unblocked_time
+          in
+          result
+          |> print_findReferences
+          |> respond_jsonrpc ~powered_by:Hh_server c;
+          Lwt.return_unit
+        (* textDocument/implementation request: for now just acts like textDocument/references *)
+        | (Main_loop menv, Client_message c)
+          when c.method_ = "textDocument/implementation" ->
           let%lwt () = cancel_if_stale client c long_timeout in
           let%lwt result =
             parse_findReferences c.params

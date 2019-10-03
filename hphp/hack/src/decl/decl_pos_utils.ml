@@ -367,7 +367,6 @@ struct
       scc_expr = Option.map scc.scc_expr (pos_mapper#on_expr ());
       scc_name = string_id scc.scc_name;
       scc_type = ty scc.scc_type;
-      scc_visibility = scc.scc_visibility;
     }
 
   and shallow_typeconst stc =
@@ -377,7 +376,6 @@ struct
       stc_name = string_id stc.stc_name;
       stc_type = Option.map stc.stc_type ty;
       stc_enforceable = (pos (fst stc.stc_enforceable), snd stc.stc_enforceable);
-      stc_visibility = stc.stc_visibility;
       stc_reifiable = Option.map stc.stc_reifiable pos;
     }
 

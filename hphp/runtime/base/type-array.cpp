@@ -197,7 +197,7 @@ Array Array::diffImpl(const Array& array, bool by_key, bool by_value, bool match
         if (by_value) {
           found = value_cmp_as_string_function(
             VarNR(value),
-            VarNR(array.rvalAt(key, AccessFlags::Key).tv()),
+            VarNR(array.rval(key, AccessFlags::Key).tv()),
             value_data
           ) == 0;
         } else {
@@ -599,13 +599,13 @@ int Array::compare(const Array& v2, bool flip /* = false */) const {
 ///////////////////////////////////////////////////////////////////////////////
 
 template<typename T> ALWAYS_INLINE
-tv_rval Array::rvalAtImpl(const T& key, AccessFlags flags) const {
+tv_rval Array::rvalImpl(const T& key, AccessFlags flags) const {
   return m_arr ? m_arr->get(key, any(flags & AccessFlags::Error))
                : tv_rval::dummy();
 }
 
 template<typename T> ALWAYS_INLINE
-arr_lval Array::lvalAtImpl(const T& key, AccessFlags) {
+arr_lval Array::lvalImpl(const T& key, AccessFlags) {
   if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
   auto const lval = m_arr->lval(key, m_arr->cowCheck());
   if (lval.arr != m_arr) m_arr = Ptr::attach(lval.arr);
@@ -751,8 +751,8 @@ decltype(auto) elem(const Array& arr, Fn fn, bool is_key,
     return name##Impl(int64_t(k), fl);              \
   }
 
-FOR_EACH_KEY_TYPE(rvalAt, tv_rval, const)
-FOR_EACH_KEY_TYPE(lvalAt, arr_lval, )
+FOR_EACH_KEY_TYPE(rval, tv_rval, const)
+FOR_EACH_KEY_TYPE(lval, arr_lval, )
 
 #undef I
 #undef V
@@ -815,7 +815,7 @@ FOR_EACH_KEY_TYPE(setWithRef)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-arr_lval Array::lvalAt() {
+arr_lval Array::lval() {
   if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
   auto const lval = m_arr->lvalNew(m_arr->cowCheck());
   if (lval.arr != m_arr) m_arr = Ptr::attach(lval.arr);

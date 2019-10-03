@@ -888,7 +888,7 @@ void StreamContext::mergeOptions(const Array& options) {
       m_options.set(wrapper, Array::CreateDArray());
     }
     assertx(m_options[wrapper].isArray());
-    Array& opts = asArrRef(m_options.lvalAt(wrapper));
+    Array& opts = asArrRef(m_options.lval(wrapper));
     const Array& new_opts = it.second().toArray();
     for (ArrayIter it2(new_opts); it2; ++it2) {
       opts.set(it2.first(), it2.second());
@@ -906,7 +906,7 @@ void StreamContext::setOption(const String& wrapper,
     m_options.set(wrapper, Array::CreateDArray());
   }
   assertx(m_options[wrapper].isArray());
-  Array& opts = asArrRef(m_options.lvalAt(wrapper));
+  Array& opts = asArrRef(m_options.lval(wrapper));
   opts.set(option, value);
 }
 

@@ -253,7 +253,7 @@ inline tv_rval ElemArrayPre(ArrayData* base, TypedValue key) {
 
   // TODO(#3888164): Array elements can never be KindOfUninit.  This API should
   // be changed.
-  auto const rval = ArrNR{base}.asArray().rvalAt(cellAsCVarRef(key));
+  auto const rval = ArrNR{base}.asArray().rval(cellAsCVarRef(key));
   return rval.type() != KindOfUninit ? rval : tv_rval { nullptr };
 }
 
@@ -669,7 +669,7 @@ inline tv_lval ElemDArrayPre(tv_lval base, TypedValue key,
   }
   auto& arr = asArrRef(base);
   defined = (mode != MOpMode::Warn) || arr.exists(tvAsCVarRef(&key));
-  return arr.lvalAt(key);
+  return arr.lval(key);
 }
 
 /**
@@ -851,7 +851,7 @@ inline tv_lval ElemDEmptyish(tv_lval base,
 
   tvMove(make_tv<KindOfArray>(ArrayData::Create()), base);
 
-  auto const result = asArrRef(base).lvalAt(cellAsCVarRef(scratchKey));
+  auto const result = asArrRef(base).lval(cellAsCVarRef(scratchKey));
   if (mode == MOpMode::Warn) {
     throwArrayKeyException(tvAsCVarRef(&scratchKey).toString().get(), false);
   }
@@ -1045,7 +1045,7 @@ inline tv_lval ElemUArrayImpl(tv_lval base, TypedValue key) {
   if (!arr.exists(keyAsValue(key))) {
     return ElemUEmptyish();
   }
-  return arr.lvalAt(tvAsCVarRef(&key));
+  return arr.lval(tvAsCVarRef(&key));
 }
 
 /**
@@ -1262,7 +1262,7 @@ tv_lval ElemU(TypedValue& tvRef, tv_lval base, key_type<keyType> key) {
 inline tv_lval NewElemEmptyish(tv_lval base, const MInstrPropState* pState) {
   detail::checkPromotion(base, pState);
   tvMove(make_tv<KindOfArray>(ArrayData::Create()), base);
-  return asArrRef(base).lvalAt();
+  return asArrRef(base).lval();
 }
 
 /**
@@ -1304,7 +1304,7 @@ inline tv_lval NewElemString(TypedValue& tvRef,
 inline tv_lval NewElemArray(tv_lval base) {
   assertx(tvIsArray(base));
   assertx(tvIsPlausible(*base));
-  return asArrRef(base).lvalAt();
+  return asArrRef(base).lval();
 }
 
 /**
@@ -2031,7 +2031,7 @@ inline tv_lval SetOpElemEmptyish(SetOpOp op, tv_lval base,
   detail::checkPromotion(base, pState);
 
   cellMove(make_tv<KindOfArray>(ArrayData::Create()), base);
-  auto const lval = asArrRef(base).lvalAt(tvAsCVarRef(&key));
+  auto const lval = asArrRef(base).lval(tvAsCVarRef(&key));
   setopBody(lval, op, rhs);
   return lval;
 }
@@ -2162,7 +2162,7 @@ inline tv_lval SetOpNewElemEmptyish(SetOpOp op, tv_lval base, Cell* rhs,
                                     const MInstrPropState* pState) {
   detail::checkPromotion(base, pState);
   cellMove(make_tv<KindOfArray>(ArrayData::Create()), base);
-  auto result = asArrRef(base).lvalAt();
+  auto result = asArrRef(base).lval();
   setopBody(tvToCell(result), op, rhs);
   return result;
 }
@@ -2217,7 +2217,7 @@ inline tv_lval SetOpNewElem(TypedValue& tvRef,
       if (UNLIKELY(checkHACFalseyPromote())) {
         raiseHackArrCompatMissingSetOp();
       }
-      auto result = asArrRef(base).lvalAt();
+      auto result = asArrRef(base).lval();
       setopBody(result, op, rhs);
       return result;
     }
@@ -2290,7 +2290,7 @@ inline Cell IncDecElemEmptyish(
   detail::checkPromotion(base, pState);
 
   cellMove(make_tv<KindOfArray>(ArrayData::Create()), base);
-  auto const lval = asArrRef(base).lvalAt(tvAsCVarRef(&key));
+  auto const lval = asArrRef(base).lval(tvAsCVarRef(&key));
   assertx(type(lval) == KindOfNull);
   return IncDecBody(op, lval);
 }
@@ -2414,7 +2414,7 @@ inline Cell IncDecNewElemEmptyish(
 ) {
   detail::checkPromotion(base, pState);
   cellMove(make_tv<KindOfArray>(ArrayData::Create()), base);
-  auto result = asArrRef(base).lvalAt();
+  auto result = asArrRef(base).lval();
   assertx(type(result) == KindOfNull);
   return IncDecBody(op, result);
 }
@@ -2473,7 +2473,7 @@ inline Cell IncDecNewElem(
       if (UNLIKELY(checkHACFalseyPromote())) {
         raiseHackArrCompatMissingIncDec();
       }
-      auto result = asArrRef(base).lvalAt();
+      auto result = asArrRef(base).lval();
       assertx(type(result) == KindOfNull);
       return IncDecBody(op, result);
     }

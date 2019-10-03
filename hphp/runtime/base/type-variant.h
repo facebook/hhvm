@@ -1758,19 +1758,19 @@ void clearBlackHole();
 // breaking circular dependencies
 
 inline Variant Array::operator[](Cell key) const {
-  return Variant::wrap(rvalAt(key).tv());
+  return Variant::wrap(rval(key).tv());
 }
 inline Variant Array::operator[](int key) const {
-  return Variant::wrap(rvalAt(key).tv());
+  return Variant::wrap(rval(key).tv());
 }
 inline Variant Array::operator[](int64_t key) const {
-  return Variant::wrap(rvalAt(key).tv());
+  return Variant::wrap(rval(key).tv());
 }
 inline Variant Array::operator[](const String& key) const {
-  return Variant::wrap(rvalAt(key).tv());
+  return Variant::wrap(rval(key).tv());
 }
 inline Variant Array::operator[](const Variant& key) const {
-  return Variant::wrap(rvalAt(key).tv());
+  return Variant::wrap(rval(key).tv());
 }
 
 inline void Array::append(const Variant& v) {

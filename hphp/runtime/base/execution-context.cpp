@@ -865,7 +865,7 @@ void ExecutionContext::handleError(const std::string& msg,
           )
         );
       } else if (!deferred.empty()) {
-        auto const last = deferred.lvalAt(int64_t{deferred.size() - 1});
+        auto const last = deferred.lval(int64_t{deferred.size() - 1});
         if (isDictType(type(last))) {
           asArrRef(last).set(s_overflow, true);
         }
@@ -2037,7 +2037,7 @@ Variant ExecutionContext::getEvaledArg(const StringData* val,
     g_context->invokePseudoMain(unit->getMain(nullptr))
   );
   SuppressHACFalseyPromoteNotices shacn;
-  auto const lv = m_evaledArgs.lvalAt(key, AccessFlags::Key);
+  auto const lv = m_evaledArgs.lval(key, AccessFlags::Key);
   tvSet(*v.asTypedValue(), lv);
   return Variant::wrap(lv.tv());
 }

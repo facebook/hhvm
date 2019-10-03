@@ -1200,7 +1200,7 @@ static Variant preg_match_impl(const StringData* pattern,
             /* For each subpattern, insert it into the appropriate array. */
             for (i = 0; i < count; i++) {
               if (offset_capture) {
-                auto const lval = match_sets.lvalAt(i);
+                auto const lval = match_sets.lval(i);
                 add_offset_pair_match(forceToOutput(lval, hackArrOutput),
                                       String(stringlist[i],
                                              offsets[(i<<1)+1] - offsets[i<<1],
@@ -1209,7 +1209,7 @@ static Variant preg_match_impl(const StringData* pattern,
                                       nullptr,
                                       hackArrOutput);
               } else {
-                auto const lval = match_sets.lvalAt(i);
+                auto const lval = match_sets.lval(i);
                 forceToOutput(lval, hackArrOutput).append(
                   String(stringlist[i], offsets[(i<<1)+1] - offsets[i<<1],
                     CopyString)
@@ -1223,7 +1223,7 @@ static Variant preg_match_impl(const StringData* pattern,
              */
             if (count < num_subpats) {
               for (; i < num_subpats; i++) {
-                auto const lval = match_sets.lvalAt(i);
+                auto const lval = match_sets.lval(i);
                 forceToOutput(lval, hackArrOutput).append("");
               }
             }

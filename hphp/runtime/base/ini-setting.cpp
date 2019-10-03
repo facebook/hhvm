@@ -559,7 +559,7 @@ void mergeSettings(tv_lval curval, TypedValue v) {
       if (!cur_inner_ref.exists(i.first())) {
         cur_inner_ref.set(i.first(), empty_array());
       }
-      mergeSettings(cur_inner_ref.lvalAt(i.first()), i.secondVal());
+      mergeSettings(cur_inner_ref.lval(i.first()), i.secondVal());
     }
   } else {
     tvSet(tvToInitCell(v), curval);
@@ -573,7 +573,7 @@ void IniSettingMap::set(const String& key, const Variant& v) {
   if (!mapref.exists(key)) {
     mapref.set(key, empty_array());
   }
-  auto const curval = mapref.lvalAt(key);
+  auto const curval = mapref.lval(key);
   mergeSettings(curval, *v.asTypedValue());
 }
 
@@ -611,7 +611,7 @@ void IniSetting::ParserCallback::onPopEntry(
   if (!arr_ref.exists(skey)) {
     arr_ref.set(skey, empty_array());
   }
-  auto const hash = arr_ref.lvalAt(skey);
+  auto const hash = arr_ref.lval(skey);
   forceToArray(hash);
   if (!offset.empty()) {                 // a[b]
     makeArray(hash, offset, value);
@@ -647,7 +647,7 @@ void IniSetting::ParserCallback::makeArray(tv_lval val,
     if (!arr.exists(key)) {
       arr.set(key, make_tv<KindOfArray>(ArrayData::Create()));
     }
-    val = arr.lvalAt(key);
+    val = arr.lval(key);
     p += index.size() + 1;
   }
 }

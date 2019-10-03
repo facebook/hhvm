@@ -363,7 +363,7 @@ void register_variable(Array& variables, char *name, const Variant& value,
 
       if (!index) {
         SuppressHACFalseyPromoteNotices shacn;
-        auto lval = symtable->lvalAt();
+        auto lval = symtable->lval();
         type(lval) = KindOfPersistentArray;
         val(lval).parr = ArrayData::Create();
         gpc_elements.push_back(uninit_null());
@@ -372,12 +372,12 @@ void register_variable(Array& variables, char *name, const Variant& value,
         String key_str(index, index_len, CopyString);
         auto const key =
           symtable->convertKey<IntishCast::Cast>(key_str.toCell());
-        auto const v = symtable->rvalAt(key).unboxed();
+        auto const v = symtable->rval(key).unboxed();
         if (isNullType(v.type()) || !isArrayLikeType(v.type())) {
           symtable->set(key, make_tv<KindOfPersistentArray>(ArrayData::Create()));
         }
         gpc_elements.push_back(uninit_null());
-        gpc_elements.back().assignRef(symtable->lvalAt(key));
+        gpc_elements.back().assignRef(symtable->lval(key));
       }
       symtable = &gpc_elements.back().toArrRef();
       /* ip pointed to the '[' character, now obtain the key */

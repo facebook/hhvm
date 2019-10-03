@@ -228,7 +228,7 @@ Array TimeZone::GetAbbreviations() {
     if (!ret.exists(key)) {
       ret.set(key, Array::CreateVArray());
     }
-    auto const lval = ret.lvalAt(key);
+    auto const lval = ret.lval(key);
     forceToArray(lval).append(element.toArray());
   }
   return ret;

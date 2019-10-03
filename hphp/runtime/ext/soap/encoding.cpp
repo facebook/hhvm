@@ -1215,7 +1215,7 @@ tv_rval get_rval_property(const Variant &object, const char* name) {
     return obj->getPropIgnoreAccessibility(sname.get());
   } else if (object.isArray()) {
     auto const& arr = object.toCArrRef();
-    if (arr.exists(sname)) return arr.rvalAt(sname);
+    if (arr.exists(sname)) return arr.rval(sname);
   }
   return tv_rval {};
 }
@@ -1272,7 +1272,7 @@ static void model_to_zval_any(Variant &ret, xmlNodePtr node) {
         if (name) {
           String name_str(name);
           if (any.toArrRef().exists(name_str)) {
-            auto const el = any.toArrRef().lvalAt(name_str).unboxed();
+            auto const el = any.toArrRef().lval(name_str).unboxed();
             if (!isArrayLikeType(el.type())) {
               /* Convert into array */
               Array arr = Array::Create();
@@ -2522,7 +2522,7 @@ static Variant to_zval_array(encodeType* type, xmlNodePtr data) {
         if (!arr.exists(pos[i])) {
           arr.set(pos[i], Array::Create());
         }
-        ar = arr.lvalAt(pos[i]);
+        ar = arr.lval(pos[i]);
         i++;
       }
       toArrRef(ar).set(pos[i], tmpVal);

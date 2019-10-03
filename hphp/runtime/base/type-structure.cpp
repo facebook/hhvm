@@ -963,7 +963,7 @@ bool TypeStructure::isValidResolvedTypeStructureList(const Array& arr,
       }
       auto const parr = [&] {
         if (isShape) {
-          auto const value = arr.rvalAt(s_value);
+          auto const value = arr.rval(s_value);
           if (value.is_set()) {
             if (!isDictOrArrayType(value.type())) {
               valid = false;
@@ -987,7 +987,7 @@ bool TypeStructure::isValidResolvedTypeStructure(const Array& arr) {
           ? arr.isDict() : (arr.isPHPArray() && !arr.isNull()))) {
     return false;
   }
-  auto const kindfield = arr.rvalAt(s_kind);
+  auto const kindfield = arr.rval(s_kind);
   if (!kindfield.is_set() || !isIntType(kindfield.type()) ||
       kindfield.val().num > TypeStructure::kMaxResolvedKind) {
     return false;
@@ -1019,33 +1019,33 @@ bool TypeStructure::isValidResolvedTypeStructure(const Array& arr) {
     case TypeStructure::Kind::T_nonnull:
       return true;
     case TypeStructure::Kind::T_fun: {
-      auto const rtype = arr.rvalAt(s_return_type);
+      auto const rtype = arr.rval(s_return_type);
       if (!rtype.is_set() || !isDictOrArrayType(rtype.type())) return false;
       if (!TypeStructure::isValidResolvedTypeStructure(
             ArrNR(rtype.val().parr))) {
         return false;
       }
-      auto const vtype = arr.rvalAt(s_variadic_type);
+      auto const vtype = arr.rval(s_variadic_type);
       if (vtype.is_set()) {
         if (!isDictOrArrayType(vtype.type())) return false;
         auto const varr = ArrNR(rtype.val().parr);
         if (!TypeStructure::isValidResolvedTypeStructure(varr)) return false;
       }
-      auto const ptypes = arr.rvalAt(s_param_types);
+      auto const ptypes = arr.rval(s_param_types);
       if (!ptypes.is_set() || !isVecOrArrayType(ptypes.type())) return false;
       return isValidResolvedTypeStructureList(ArrNR(ptypes.val().parr));
     }
     case TypeStructure::Kind::T_typevar: {
-      auto const name = arr.rvalAt(s_name);
+      auto const name = arr.rval(s_name);
       return name.is_set() && isStringType(name.type());
     }
     case TypeStructure::Kind::T_shape: {
-      auto const fields = arr.rvalAt(s_fields);
+      auto const fields = arr.rval(s_fields);
       if (!fields.is_set() || !isVecOrArrayType(fields.type())) return false;
       return isValidResolvedTypeStructureList(ArrNR(fields.val().parr), true);
     }
     case TypeStructure::Kind::T_tuple: {
-      auto const elems = arr.rvalAt(s_elem_types);
+      auto const elems = arr.rval(s_elem_types);
       if (!elems.is_set() || !isVecOrArrayType(elems.type())) return false;
       return isValidResolvedTypeStructureList(ArrNR(elems.val().parr));
     }
@@ -1053,9 +1053,9 @@ bool TypeStructure::isValidResolvedTypeStructure(const Array& arr) {
     case TypeStructure::Kind::T_interface:
     case TypeStructure::Kind::T_trait:
     case TypeStructure::Kind::T_enum: {
-      auto const clsname = arr.rvalAt(s_classname);
+      auto const clsname = arr.rval(s_classname);
       if (!clsname.is_set() || !isStringType(clsname.type())) return false;
-      auto const generics = arr.rvalAt(s_generic_types);
+      auto const generics = arr.rval(s_generic_types);
       if (generics.is_set()) {
         if (!isVecOrArrayType(generics.type())) return false;
         return isValidResolvedTypeStructureList(ArrNR(generics.val().parr));

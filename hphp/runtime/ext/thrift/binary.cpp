@@ -208,13 +208,13 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
       uint32_t size = transport.readU32();
 
       auto keyspec = tvCastToArrayLike(
-        fieldspec.rvalAt(s_key, AccessFlags::ErrorKey).tv()
+        fieldspec.rval(s_key, AccessFlags::ErrorKey).tv()
       );
       auto valspec = tvCastToArrayLike(
-        fieldspec.rvalAt(s_val, AccessFlags::ErrorKey).tv()
+        fieldspec.rval(s_val, AccessFlags::ErrorKey).tv()
       );
       auto format = tvCastToString(
-        fieldspec.rvalAt(s_format, AccessFlags::None).tv()
+        fieldspec.rval(s_format, AccessFlags::None).tv()
       );
       if (format.equal(s_harray)) {
         DictInit arr(size);
@@ -266,10 +266,10 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
       int8_t type = transport.readI8();
       uint32_t size = transport.readU32();
       auto elemspec = tvCastToArrayLike(
-        fieldspec.rvalAt(s_elem, AccessFlags::ErrorKey).tv()
+        fieldspec.rval(s_elem, AccessFlags::ErrorKey).tv()
       );
       auto format = tvCastToString(
-        fieldspec.rvalAt(s_format, AccessFlags::None).tv()
+        fieldspec.rval(s_format, AccessFlags::None).tv()
       );
 
       if (format.equal(s_harray)) {
@@ -304,10 +304,10 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
       transport.readBytes(&size, 4);
       size = ntohl(size);
       auto elemspec = tvCastToArrayLike(
-        fieldspec.rvalAt(s_elem, AccessFlags::ErrorKey).tv()
+        fieldspec.rval(s_elem, AccessFlags::ErrorKey).tv()
       );
       auto format = tvCastToString(
-        fieldspec.rvalAt(s_format, AccessFlags::None).tv()
+        fieldspec.rval(s_format, AccessFlags::None).tv()
       );
       if (format.equal(s_harray)) {
         KeysetInit arr(size);
@@ -439,15 +439,15 @@ void binary_deserialize_slow(const Object& zthis, const Array& spec,
     if (!(val = spec[fieldno]).isNull()) {
       Array fieldspec = val.toArray();
       // pull the field name
-      auto varname = tvCastToString(fieldspec.rvalAt(s_var).tv());
+      auto varname = tvCastToString(fieldspec.rval(s_var).tv());
 
       // and the type
-      int8_t expected_ttype = tvCastToInt64(fieldspec.rvalAt(s_type).tv());
+      int8_t expected_ttype = tvCastToInt64(fieldspec.rval(s_type).tv());
 
       if (ttypes_are_compatible(ttype, expected_ttype)) {
         Variant rv = binary_deserialize(ttype, transport, fieldspec);
         zthis->o_set(varname, rv, zthis->getClassName());
-        bool isUnion = tvCastToBoolean(fieldspec.rvalAt(s_union).tv());
+        bool isUnion = tvCastToBoolean(fieldspec.rval(s_union).tv());
         if (isUnion) {
           zthis->o_set(s__type, Variant(fieldno), zthis->getClassName());
         }
@@ -572,16 +572,16 @@ void binary_serialize(int8_t thrift_typeID, PHPOutputTransport& transport,
     case T_MAP: {
       Array ht = value.toArray<IntishCast::Cast>();
       uint8_t keytype = (char)tvCastToInt64(
-        fieldspec.rvalAt(s_ktype, AccessFlags::ErrorKey).tv()
+        fieldspec.rval(s_ktype, AccessFlags::ErrorKey).tv()
       );
       transport.writeI8(keytype);
       uint8_t valtype = (char)tvCastToInt64(
-        fieldspec.rvalAt(s_vtype, AccessFlags::ErrorKey).tv()
+        fieldspec.rval(s_vtype, AccessFlags::ErrorKey).tv()
       );
       transport.writeI8(valtype);
 
       auto valspec = tvCastToArrayLike(
-        fieldspec.rvalAt(s_val, AccessFlags::ErrorKey).tv()
+        fieldspec.rval(s_val, AccessFlags::ErrorKey).tv()
       );
 
       transport.writeI32(ht.size());
@@ -595,11 +595,11 @@ void binary_serialize(int8_t thrift_typeID, PHPOutputTransport& transport,
       Variant val;
 
       uint8_t valtype = tvCastToInt64(
-        fieldspec.rvalAt(s_etype, AccessFlags::ErrorKey).tv()
+        fieldspec.rval(s_etype, AccessFlags::ErrorKey).tv()
       );
       transport.writeI8(valtype);
       auto valspec = tvCastToArrayLike(
-        fieldspec.rvalAt(s_elem, AccessFlags::ErrorKey).tv()
+        fieldspec.rval(s_elem, AccessFlags::ErrorKey).tv()
       );
       transport.writeI32(ht.size());
       for (ArrayIter key_ptr = ht.begin(); !key_ptr.end(); ++key_ptr) {
@@ -610,7 +610,7 @@ void binary_serialize(int8_t thrift_typeID, PHPOutputTransport& transport,
       Array ht = value.toArray<IntishCast::Cast>();
 
       uint8_t keytype = (char)tvCastToInt64(
-        fieldspec.rvalAt(s_etype, AccessFlags::ErrorKey).tv()
+        fieldspec.rval(s_etype, AccessFlags::ErrorKey).tv()
       );
       transport.writeI8(keytype);
 

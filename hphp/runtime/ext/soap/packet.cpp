@@ -367,7 +367,7 @@ bool parse_packet_soap(SoapClient* obj, const char* buffer, int buffer_size,
             if (val->name) {
               String key((char*)val->name, CopyString);
               if (return_value.toCArrRef().exists(key)) {
-                auto const lval = return_value.toArrRef().lvalAt(key).unboxed();
+                auto const lval = return_value.toArrRef().lval(key).unboxed();
                 if (!isArrayLikeType(lval.type())) {
                   auto const tv = make_tv<KindOfArray>(
                     tvCastToArrayLikeData(lval.tv())

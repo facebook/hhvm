@@ -1151,7 +1151,7 @@ void VariableUnserializer::unserializeVariant(
                   auto t = [&]() {
                     SuppressHACFalseyPromoteNotices shacn;
                     auto& arr = obj->dynPropArray();
-                    return arr.lvalAt(key, AccessFlags::Key);
+                    return arr.lval(key, AccessFlags::Key);
                   }();
                   if (UNLIKELY(isRefcountedType(t.type()))) {
                     putInOverwrittenList(t);
@@ -1301,7 +1301,7 @@ Array VariableUnserializer::unserializeArray() {
 
     auto value = [&]() {
       SuppressHACFalseyPromoteNotices shacn;
-      return arr.lvalAt(key, AccessFlags::Key);
+      return arr.lval(key, AccessFlags::Key);
     }();
     if (UNLIKELY(isRefcountedType(value.type()))) {
       putInOverwrittenList(value);
@@ -1520,7 +1520,7 @@ Array VariableUnserializer::unserializeVArray() {
   for (int64_t i = 0; i < size; i++) {
     auto lval = [&]() -> decltype(auto) {
       SuppressHACFalseyPromoteNotices shacn;
-      return arr.lvalAt();
+      return arr.lval();
     }();
     assertx(lval.arr == arr.get());
 
@@ -1589,7 +1589,7 @@ Array VariableUnserializer::unserializeDArray() {
 
     auto value = [&]() {
       SuppressHACFalseyPromoteNotices shacn;
-      return arr.lvalAt(key, AccessFlags::Key);
+      return arr.lval(key, AccessFlags::Key);
     }();
     if (UNLIKELY(isRefcountedType(value.type()))) {
       putInOverwrittenList(value);

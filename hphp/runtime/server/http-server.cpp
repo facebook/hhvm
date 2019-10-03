@@ -291,13 +291,13 @@ void HttpServer::runOrExitProcess() {
             std::vector<std::string> frameStrings;
             std::vector<folly::StringPiece> frames;
             for (int i = 0; i < bt.size(); i++) {
-              auto f = tvCastToArrayLike(bt.rvalAt(i).tv());
+              auto f = tvCastToArrayLike(bt.rval(i).tv());
               if (f.exists(s_file)) {
-                auto s = tvCastToString(f.rvalAt(s_file).tv()).toCppString();
+                auto s = tvCastToString(f.rval(s_file).tv()).toCppString();
                 if (f.exists(s_line)) {
                   s += folly::sformat(
                     ":{}",
-                    tvCastToInt64(f.rvalAt(s_line).tv())
+                    tvCastToInt64(f.rval(s_line).tv())
                   );
                 }
                 frameStrings.emplace_back(std::move(s));

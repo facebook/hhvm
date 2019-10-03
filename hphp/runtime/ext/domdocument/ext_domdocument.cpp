@@ -423,7 +423,7 @@ static Variant dom_canonicalization(xmlNodePtr nodep, const String& file,
       raise_warning("'query' missing from xpath array");
       return false;
     }
-    auto const tmp = arr.rvalAt(s_query).unboxed();
+    auto const tmp = arr.rval(s_query).unboxed();
     if (!isStringType(tmp.type())) {
       raise_warning("'query' is not a string");
       return false;
@@ -432,7 +432,7 @@ static Variant dom_canonicalization(xmlNodePtr nodep, const String& file,
     ctxp = xmlXPathNewContext(docp);
     ctxp->node = nodep;
     if (arr.exists(s_namespaces)) {
-      auto const temp = arr.rvalAt(s_namespaces).unboxed();
+      auto const temp = arr.rval(s_namespaces).unboxed();
       if (isArrayLikeType(temp.type())) {
         auto ad = temp.val().parr;
         for (ArrayIter it = ArrayIter(ad); it; ++it) {

@@ -435,14 +435,14 @@ public:
   /*
    * Get an rval to the element at `key'.
    */
-  FOR_EACH_KEY_TYPE(rvalAt, tv_rval, const)
+  FOR_EACH_KEY_TYPE(rval, tv_rval, const)
 
   /*
    * Get an lval to the element at `key'.
    *
    * This is ArrayData::lval() with CoW and escalation.
    */
-  FOR_EACH_KEY_TYPE(lvalAt, arr_lval, )
+  FOR_EACH_KEY_TYPE(lval, arr_lval, )
 
 #undef D
 #undef I
@@ -452,7 +452,7 @@ public:
   /*
    * Get an lval to a newly created element.
    */
-  arr_lval lvalAt();
+  arr_lval lval();
 
   /////////////////////////////////////////////////////////////////////////////
   // Element access and mutation.
@@ -549,8 +549,8 @@ private:
                  PFUNC_CMP key_cmp_function, const void* key_data,
                  PFUNC_CMP value_cmp_function, const void* value_data) const;
 
-  template<typename T> tv_rval rvalAtImpl(const T& key, Flags) const;
-  template<typename T> arr_lval lvalAtImpl(const T& key, Flags);
+  template<typename T> tv_rval rvalImpl(const T& key, Flags) const;
+  template<typename T> arr_lval lvalImpl(const T& key, Flags);
 
   template<typename T> bool existsImpl(const T& key) const;
   template<typename T> void removeImpl(const T& key);

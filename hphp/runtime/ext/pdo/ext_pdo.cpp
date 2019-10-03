@@ -1395,7 +1395,7 @@ static Variant HHVM_METHOD(PDO, query, const String& sql,
         pdo_stmt_set_fetch_mode(
           stmt,
           0,
-          tvCastToInt64(_argv.rvalAt(0).tv()),
+          tvCastToInt64(_argv.rval(0).tv()),
           Variant::attach(HHVM_FN(array_splice)(argv_variant, 1)).toArray()
         )) {
       /* now execute the statement */
@@ -1930,7 +1930,7 @@ static bool do_fetch(sp_PDOStatement stmt,
       /* already have an item with this name? */
       forceToDArray(ret);
       if (ret.toArrRef().exists(name_key)) {
-        auto const curr_val = ret.toArrRef().lvalAt(name_key).unboxed();
+        auto const curr_val = ret.toArrRef().lval(name_key).unboxed();
         if (!isArrayLikeType(curr_val.type())) {
           Array arr = Array::CreateVArray();
           arr.append(curr_val.tv());
@@ -2010,7 +2010,7 @@ static bool do_fetch(sp_PDOStatement stmt,
     if ((flags & PDO_FETCH_UNIQUE) == PDO_FETCH_UNIQUE) {
       return_all->toArrRef().set(grp_key, *ret.asTypedValue());
     } else {
-      auto const lval = return_all->toArrRef().lvalAt(grp_key);
+      auto const lval = return_all->toArrRef().lval(grp_key);
       forceToArray(lval).append(ret);
     }
   }

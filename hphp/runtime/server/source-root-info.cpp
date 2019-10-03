@@ -62,19 +62,19 @@ SourceRootInfo::SourceRootInfo(Transport* transport)
     return;
   }
   if (RuntimeOption::SandboxFromCommonRoot) {
-    auto sandboxName = tvCastToString(matches.toArray().rvalAt(1).tv());
+    auto sandboxName = tvCastToString(matches.toArray().rval(1).tv());
     createFromCommonRoot(sandboxName);
   } else {
     Array pair = StringUtil::Explode(
-      tvCastToString(matches.toArray().rvalAt(1).tv()),
+      tvCastToString(matches.toArray().rval(1).tv()),
       "-", 2
     ).toArray();
-    m_user = tvCastToString(pair.rvalAt(0).tv());
+    m_user = tvCastToString(pair.rval(0).tv());
     bool defaultSb = pair.size() == 1;
     if (defaultSb) {
       m_sandbox = s_default;
     } else {
-      m_sandbox = tvCastToString(pair.rvalAt(1).tv());
+      m_sandbox = tvCastToString(pair.rval(1).tv());
     }
 
     createFromUserConfig();

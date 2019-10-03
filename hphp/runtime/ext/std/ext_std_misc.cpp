@@ -125,7 +125,7 @@ String HHVM_FUNCTION(execution_context) {
 TypedValue HHVM_FUNCTION(sequence, const Array& args) {
   if (args.empty()) return make_tv<KindOfNull>();
   int64_t idx = args.size() - 1;
-  auto ret = args.rvalAt(idx).tv();
+  auto ret = args.rval(idx).tv();
   tvIncRefGen(ret);
   return ret;
 }

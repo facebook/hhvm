@@ -413,7 +413,7 @@ static void _xml_add_to_info(const req::ptr<XmlParser>& parser,
   if (!parser->info.toCArrRef().exists(nameStr)) {
     parser->info.toArrRef().set(nameStr, Array::Create());
   }
-  auto const inner = parser->info.toArrRef().lvalAt(nameStr);
+  auto const inner = parser->info.toArrRef().lval(nameStr);
   forceToArray(inner).append(parser->curtag);
   parser->curtag++;
 }
@@ -508,7 +508,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
           String myval;
           // check if value exists, if yes append to that
           if (parser->ctag.toArrRef().exists(s_value)) {
-            myval = tvCastToString(parser->ctag.toArray().rvalAt(s_value).tv());
+            myval = tvCastToString(parser->ctag.toArray().rval(s_value).tv());
             myval += decoded_value;
             parser->ctag.toArrRef().set(s_value, myval);
           } else {
@@ -530,10 +530,10 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
           };
 
           if (curtag.toArrRef().exists(s_type)) {
-            mytype = tvCastToString(curtag.toArrRef().rvalAt(s_type).tv());
+            mytype = tvCastToString(curtag.toArrRef().rval(s_type).tv());
             if (!strcmp(mytype.data(), "cdata") &&
                 curtag.toArrRef().exists(s_value)) {
-              myval = tvCastToString(curtag.toArrRef().rvalAt(s_value).tv());
+              myval = tvCastToString(curtag.toArrRef().rval(s_value).tv());
               myval += decoded_value;
               curtag.toArrRef().set(s_value, myval);
               return;
@@ -591,7 +591,7 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
         String val = xml_utf8_decode(attributes[1],
                                     strlen((const char*)attributes[1]),
                                     parser->target_encoding);
-        auto const arr = args.lvalAt(2);
+        auto const arr = args.lval(2);
         asArrRef(arr).set(att, val);
         attributes += 2;
       }
@@ -631,7 +631,7 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
           tag.set(s_attributes,atr);
         }
         SuppressHACFalseyPromoteNotices shacn;
-        auto lval = parser->data.toArrRef().lvalAt();
+        auto lval = parser->data.toArrRef().lval();
         type(lval) = KindOfArray;
         val(lval).parr = tag.detach();
         parser->ctag.assignRef(lval);

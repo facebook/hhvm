@@ -362,7 +362,7 @@ tv_lval ObjectData::makeDynProp(const StringData* key) {
     raiseCreateDynamicProp(key);
   }
   SuppressHACFalseyPromoteNotices shacn;
-  return reserveProperties().lvalAt(StrNR(key), AccessFlags::Key);
+  return reserveProperties().lval(StrNR(key), AccessFlags::Key);
 }
 
 void ObjectData::setDynProp(const StringData* key, Cell val) {
@@ -1214,7 +1214,7 @@ ObjectData::PropLookup ObjectData::getPropImpl(
       // not const since all dynamic properties are. If we may write to
       // the property we need to allow the array to escalate.
       if (forWrite) {
-        auto const lval = arr.lvalAt(StrNR(key), AccessFlags::Key);
+        auto const lval = arr.lval(StrNR(key), AccessFlags::Key);
         return { lval, nullptr, kInvalidSlot, true, false };
       }
       return { rval.as_lval(), nullptr, kInvalidSlot, true, true };

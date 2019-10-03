@@ -453,7 +453,7 @@ static void php_array_merge_recursive(PointerSet &seen, bool check,
       // in the array.
       auto const arrkey =
         arr1.convertKey<IntishCast::Cast>(*key.asTypedValue());
-      auto const lval = arr1.lvalAt(arrkey, AccessFlags::Key);
+      auto const lval = arr1.lval(arrkey, AccessFlags::Key);
       auto subarr1 = tvCastToArrayLike<IntishCast::Cast>(lval.tv())
         .toPHPArray();
       php_array_merge_recursive(
@@ -647,7 +647,7 @@ static void php_array_replace_recursive(PointerSet &seen, bool check,
       Variant::wrap(arr1.convertKey<IntishCast::Cast>(iter.first()));
     auto const rval = iter.secondRval().unboxed();
     if (arr1.exists(key, true) && isArrayLikeType(rval.type())) {
-      auto const lval = arr1.lvalAt(key, AccessFlags::Key);
+      auto const lval = arr1.lval(key, AccessFlags::Key);
       if (isArrayLikeType(lval.unboxed().type())) {
         Array subarr1 = tvCastToArrayLike<IntishCast::Cast>(
           lval.tv()

@@ -1,7 +1,7 @@
 <?hh
 
 class a {
-  function r(&$x) {
+  function r(inout $x) {
     $x = 20;
   }
 }
@@ -12,6 +12,7 @@ function id($x) {
 <<__EntryPoint>>
 function main_1508() {
 $a = new a();
-id($a)->r(&$x);
+$x = null;
+id($a)->r(inout $x);
 var_dump($x);
 }

@@ -1,6 +1,6 @@
 <?hh
 
-function xsort(&$a) {
+function xsort(inout $a) {
   $b = array();
   $b[0] = $a;
   uksort(inout $a, function ($i, $j) use($b) {
@@ -11,7 +11,7 @@ function xsort(&$a) {
 }
 function test($x) {
   $a = array(220,250,240,$x);
-  xsort(&$a);
+  xsort(inout $a);
   var_dump($a);
 }
 

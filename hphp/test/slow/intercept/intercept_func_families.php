@@ -10,7 +10,7 @@ class D2 extends Base { function thing() { return 2; } }
 function go(Base $x) {
   var_dump($x->thing());
 }
-function handler($name, $obj, $args, $data, &$done) {
+function handler($name, $obj, inout $args, $data, inout $done) {
   $done = true;
   return "string!";
 }

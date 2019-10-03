@@ -1,0 +1,1 @@
+Fatal error: Parameter 1 on function x was declared inout but is not declared inout on abstract function IDunno::x in %s/public_static_props_012.php on line 10

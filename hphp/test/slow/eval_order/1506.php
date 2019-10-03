@@ -15,7 +15,7 @@ class c {
   static function g($a, $b, $c, $d) {
 }
 }
-function rt(&$a, $v) {
+function rt(inout $a, $v) {
   $a = $v;
 }
 function id($x) {
@@ -49,7 +49,8 @@ echo "omc
 $q->f(p(1), p(2), p(3), 4);
 echo "rsfc
 ";
-rt(&$a, id(10));
+$a = null;
+rt(inout $a, id(10));
 var_dump($a);
 dump($v++, $v++);
 $v = 10;

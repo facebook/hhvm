@@ -3,7 +3,7 @@
 /* Compile only: verify no c++ compilation errors */function foo($a) {
   return $a[1];
 }
-function baz(&$x) {
+function baz(inout $x) {
  if ($x) $x++;
  }
 function bar($a) {

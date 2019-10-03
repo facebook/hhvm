@@ -1,17 +1,17 @@
 <?hh
 
-function f(&$a, $v = 5) {
+function f(inout $a, $v = 5) {
   $a = $v;
   return 0;
 }
 
 
 
-function g(&$a) {
+function g(inout $a) {
   $a[0] = 5;
   return 0;
 }
-function h(&$a) {
+function h(inout $a) {
   $a = 5;
   return 0;
 }
@@ -29,27 +29,27 @@ function dump($a, $b) {
 <<__EntryPoint>>
 function main_1523() {
 $a = 2;
-var_dump($a . f(&$a));
+var_dump($a . f(inout $a));
 $a = 2;
-var_dump(($a.'') . f(&$a));
+var_dump(($a.'') . f(inout $a));
 $a = 2;
-var_dump(($a.$a) . f(&$a));
-f(&$a,2);
-var_dump($a . f(&$a));
-f(&$a,2);
-var_dump(($a.'') . f(&$a));
-f(&$a,2);
-var_dump(($a.$a) . f(&$a));
+var_dump(($a.$a) . f(inout $a));
+f(inout $a,2);
+var_dump($a . f(inout $a));
+f(inout $a,2);
+var_dump(($a.'') . f(inout $a));
+f(inout $a,2);
+var_dump(($a.$a) . f(inout $a));
 
 
 $a = array(2);
-var_dump($a[0] . g(&$a));
+var_dump($a[0] . g(inout $a));
 
 
 
 
 $a = array(2);
-var_dump(($a[0] . '') . g(&$a));
+var_dump(($a[0] . '') . g(inout $a));
 $a = new stdclass;
 $a->prop = 2;
 var_dump($a->prop . k($a));
@@ -60,7 +60,7 @@ $i = 0;
 var_dump($i . ++$i);
 $i = 0;
 var_dump(($i . '') . ++$i);
-f(&$a, 'test');
+f(inout $a, 'test');
 var_dump(($a . 'x') . foo($a = ''));
 $a = new stdclass;
 $a->foo = 42;
@@ -71,15 +71,15 @@ var_dump($a);
 $b = new stdclass;
 $a = null;
 $a->{
-f(&$a,$b)}
+f(inout $a,$b)}
  = 5;
 var_dump($a, $b);
-f(&$a, 'foo');
+f(inout $a, 'foo');
 dump($a, $a = 'bar');
 $a = 'foo';
 dump($a, $a = 'bar');
-f(&$a, 'foo');
+f(inout $a, 'foo');
 dump($a.'', $a = 'bar');
-f(&$a, 'foo');
+f(inout $a, 'foo');
 dump($a.$a, $a = 'bar');
 }

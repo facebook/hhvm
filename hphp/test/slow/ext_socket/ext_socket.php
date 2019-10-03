@@ -22,7 +22,7 @@ function bind_random_port($socket, $address) {
   return 0;
 }
 
-function create_listen_random_port(&$sock) {
+function create_listen_random_port(inout $sock) {
   for ($i = 0; $i < 100; $i++) {
     $port = get_random_port();
     if ($sock = @socket_create_listen($port)) return $port;
@@ -30,7 +30,7 @@ function create_listen_random_port(&$sock) {
   return 0;
 }
 
-function pfsockopen_random_port(&$fsock, $address) {
+function pfsockopen_random_port(inout $fsock, $address) {
   $fsock = false;
   for ($i = 0; $i < 100; $i++) {
     $port = get_random_port();
@@ -64,7 +64,7 @@ $s = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 var_dump($s);
 
 $s2 = false;
-var_dump(create_listen_random_port(&$s2) != 0);
+var_dump(create_listen_random_port(inout $s2) != 0);
 var_dump($s2);
 
 $fds = null;
@@ -130,7 +130,7 @@ if (socket_last_error($s) == 13) {
 var_dump(socket_last_error($s));
 
 $fsock = false;
-$port = pfsockopen_random_port(&$fsock, "udp://[0:0:0:0:0:0:0:1]");
+$port = pfsockopen_random_port(inout $fsock, "udp://[0:0:0:0:0:0:0:1]");
 var_dump($fsock);
 var_dump($port != 0);
 var_dump(fwrite($fsock, "foo") > 0);

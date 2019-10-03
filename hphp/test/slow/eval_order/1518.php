@@ -1,6 +1,6 @@
 <?hh
 
-function f(&$a, &$b) {
+function f(inout $a, inout $b) {
   $a[0] = 1;
   $b[1] = 2;
   return 3;
@@ -13,10 +13,10 @@ function f(&$a, &$b) {
 <<__EntryPoint>>
 function test() {
   $a = array();
-  f(&$a, &$a);
+  f(inout $a, inout $a);
   var_dump($a);
   $a = array();
-  $a[100] = f(&$a, &$a);
+  $a[100] = f(inout $a, inout $a);
   var_dump($a);
 
 

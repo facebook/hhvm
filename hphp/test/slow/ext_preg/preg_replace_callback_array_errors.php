@@ -25,7 +25,7 @@ $a = "";
 try { var_dump(preg_replace_callback_array(array("" => ""), "", "", inout $a)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 $a = array();
 $b = "";
-try { var_dump(preg_replace_callback_array($a, $a, $a, &$a, $b)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(preg_replace_callback_array($a, $a, $a, inout $a, $b)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump($b);
 $b = -1;
 // PHP 7 used preg_replace_callback here, but we are testing

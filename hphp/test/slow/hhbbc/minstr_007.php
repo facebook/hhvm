@@ -1,7 +1,7 @@
 <?hh
 
 class A { public function go($x) {} }
-class B { public function go(&$x) {} }
+class B { public function go(inout $x) {} }
 
 class Foo {
   private $foo = "asd";

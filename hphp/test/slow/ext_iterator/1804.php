@@ -1,6 +1,6 @@
 <?hh
 
-function getFiles(&$rdi,$depth=0) {
+function getFiles($rdi,$depth=0) {
   if (!is_object($rdi)) return;
   $files = array();
   // order changes per machine
@@ -12,7 +12,7 @@ function getFiles(&$rdi,$depth=0) {
       $files[] = $indent.$rdi->current()."\n";
       if ($rdi->hasChildren()) {
         $children = $rdi->getChildren();
-        getFiles(&$children, 1+$depth);
+        getFiles($children, 1+$depth);
       }
     }
   }
@@ -23,5 +23,5 @@ function getFiles(&$rdi,$depth=0) {
 <<__EntryPoint>>
 function main_1804() {
   $rdi = new RecursiveDirectoryIterator(__DIR__.'/../../sample_dir');
-  getFiles(&$rdi);
+  getFiles($rdi);
 }

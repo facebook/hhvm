@@ -3,17 +3,17 @@
 function test($name, $sf) {
   echo "==== $name 0 ====\n";
   $a = varray[];
-  $sf(&$a);
+  $sf(inout $a);
   var_dump(is_varray($a), is_darray($a));
 
   echo "==== $name 1 ====\n";
   $a = varray[1];
-  $sf(&$a);
+  $sf(inout $a);
   var_dump(is_varray($a), is_darray($a));
 
   echo "==== $name 2 ====\n";
   $a = varray[2, 1];
-  $sf(&$a);
+  $sf(inout $a);
   var_dump(is_varray($a), is_darray($a));
 }
 
@@ -22,17 +22,17 @@ function utest($name, $sf) {
 
   echo "==== $name 0 ====\n";
   $a = varray[];
-  $sf(&$a, $cb);
+  $sf(inout $a, $cb);
   var_dump(is_varray($a), is_darray($a));
 
   echo "==== $name 1 ====\n";
   $a = varray[1];
-  $sf(&$a, $cb);
+  $sf(inout $a, $cb);
   var_dump(is_varray($a), is_darray($a));
 
   echo "==== $name 2 ====\n";
   $a = varray[2, 1];
-  $sf(&$a, $cb);
+  $sf(inout $a, $cb);
   var_dump(is_varray($a), is_darray($a));
 }
 

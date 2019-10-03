@@ -1,6 +1,6 @@
 <?hh
 
-class X { private function go(&$x) {} }
+class X { private function go(inout $x) {} }
 class N extends X {
   function go($x) { echo "ok\n"; }
 }

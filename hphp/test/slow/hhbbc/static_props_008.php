@@ -1,7 +1,7 @@
 <?hh
 
 class A { public function bummer($x) {var_dump($x);} }
-class B { public function bummer(&$x) {$x = "asd"; var_dump($x);} }
+class B { public function bummer(inout $x) {$x = "asd"; var_dump($x);} }
 
 class Foob {
   private static $maybe_boxed = 0;
@@ -12,7 +12,7 @@ class Foob {
   }
   public static function b($y) {
     $maybe_boxed = self::$maybe_boxed;
-    $y->bummer(&$maybe_boxed);
+    $y->bummer(inout $maybe_boxed);
     self::$maybe_boxed = $maybe_boxed;
   }
   public static function get() { return self::$maybe_boxed; }

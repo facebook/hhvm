@@ -68,7 +68,7 @@ function fb_cs_test_impl($v) {
     );
   }
   $ret = null;
-  $unserialize_result = fb_unserialize($s_, &$ret);
+  $unserialize_result = fb_unserialize($s_, inout $ret);
   printf(
     "fb_unserialize(fb_compact_serialize(x)) === x: %s\n"
     ."gettype(fb_unserialize(fb_serialize(%s))) === %s\n"

@@ -6,7 +6,7 @@ class X {
   }
 }
 class Z {
-  function x(&$y) {}
+  function x(inout $y) {}
 }
 
 function main() {

@@ -3,12 +3,12 @@
 function err() { throw new exception; }
 
 class somecls {
- public function x(&$k) {}
+ public function x(inout $k) {}
 }
 
 function foo(somecls $z) {
  try {
- $z->x(&$y?->z);
+ $z->x(inout $y?->z);
  } catch (exception $e) {
  set_error_handler(null);
  var_dump($y);

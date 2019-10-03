@@ -7,7 +7,7 @@ class A {
 function main(A $a) {
   var_dump($a->foo());
 }
-function handler($name, $obj, $args, $data, &$done) {
+function handler($name, $obj, inout $args, $data, inout $done) {
   $done = true;
   return "string!";
 }

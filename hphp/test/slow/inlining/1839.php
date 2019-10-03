@@ -1,10 +1,11 @@
 <?hh
 
-function inline_me($x, $y, &$z) {
+function inline_me($x, $y, inout $z) {
  return ($z = ($x + $y));
  }
 function gen($x, $y) {
-  yield inline_me($x, $y, &$arg);
+  $arg = null;
+  yield inline_me($x, $y, inout $arg);
   yield $arg;
 }
 

@@ -2,7 +2,7 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function main($a, $b, $c) {
-  $ks = keyset[$a, &$b, &$c];
+  $ks = keyset[$a, inout $b, inout $c];
   return $ks;
 }
 

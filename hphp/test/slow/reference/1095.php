@@ -1,6 +1,6 @@
 <?hh
 
-function foo(&$perms, &$t) {
+function foo(inout $perms, inout $t) {
   $perms = array('x' => 1);
   $t = $t['x'];
   unset($t);
@@ -9,5 +9,6 @@ function foo(&$perms, &$t) {
 
 <<__EntryPoint>>
 function main_1095() {
-  var_dump(foo(&$a, &$a));
+  $a = null;
+  var_dump(foo(inout $a, inout $a));
 }

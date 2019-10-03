@@ -1,6 +1,6 @@
 <?hh
 
-function run(&$a, &$b) {
+function run(inout $a, inout $b) {
   $c = 2;
   $b = $c;
   $c = 5;
@@ -12,5 +12,5 @@ function run(&$a, &$b) {
 <<__EntryPoint>>
 function main() {
   $a = 1;
-  run(&$a, &$a);
+  run(inout $a, inout $a);
 }

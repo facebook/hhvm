@@ -1,6 +1,6 @@
 <?hh
 
-function test(&$x, &$y) {
+function test(inout $x, inout $y) {
   $x = false;
   $y .= 'hello';
   echo $x;
@@ -8,5 +8,6 @@ function test(&$x, &$y) {
 
 <<__EntryPoint>>
 function main_1105() {
-  test(&$x, &$x);
+  $x = null;
+  test(inout $x, inout $x);
 }

@@ -1,12 +1,12 @@
 <?hh
 
-function f(&$a) {
+function f(inout $a) {
  $a = 'ok';
 }
 
  <<__EntryPoint>>
 function main_1075() {
 $a = 10;
- f(&$a);
+ f(inout $a);
  var_dump($a);
 }

@@ -1,6 +1,6 @@
 <?hh
 // Similar case, but for a builtin (array_multisort).
-function blarg2(&$a1, &$a2) {}
+function blarg2(inout $a1, inout $a2) {}
 
 // array_multisort is weird.  Some arguments are literals.
 function main4() {

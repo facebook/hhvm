@@ -20,7 +20,7 @@ function test() {
   $a = new B();
   $a->t($arr['hello'], $arr);
 }
-function test2(&$a, $b) {
+function test2(inout $a, $b) {
   $a = $b;
 }
 
@@ -28,6 +28,6 @@ function test2(&$a, $b) {
 function main_1090() {
   test();
   $v = 10;
-  test2(&$v, $v);
+  test2(inout $v, $v);
   var_dump($v);
 }

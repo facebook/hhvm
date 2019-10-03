@@ -16,7 +16,7 @@ class thinger {
     $this->fn = 'id';
   }
 
-  private function process($history, &$updated) {
+  private function process($history, inout $updated) {
     $updated = rand(0, 1) == 2;
     $fn = $this->fn;
     return $fn([$history]);
@@ -26,7 +26,7 @@ class thinger {
     if ($this->things) {
       foreach ($this->things as $id => $history) {
         $updated = $init;
-        $this->otherThings[$id] = $this->process($history, &$updated);
+        $this->otherThings[$id] = $this->process($history, inout $updated);
         if ($updated) {
           $this->updatedIDs[$id] = 1;
         }

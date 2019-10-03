@@ -1,16 +1,16 @@
 <?hh
 
-function by_ref(&$ref) {}
+function by_ref(inout $ref) {}
 
 function test1() : array {
   $array = [];
-  by_ref(&$array);
+  by_ref(inout $array);
   return $array;
 }
 
 function test2() : string {
   $int = 42;
-  by_ref(&$int);
+  by_ref(inout $int);
   return $int;
 }
 <<__EntryPoint>> function main(): void {

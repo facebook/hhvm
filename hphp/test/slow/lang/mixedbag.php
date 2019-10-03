@@ -117,7 +117,7 @@ function hash2($n = 500) {
   print "$hash1[$first] $hash1[$last] $hash2[$first] $hash2[$last]\n";
 }
 
-function heapsort_r($n, &$ra) {
+function heapsort_r($n, inout $ra) {
   $l = ($n >> 1) + 1;
   $ir = $n;
 
@@ -154,7 +154,7 @@ function heapsort($N = 20000) {
   for ($i=1; $i<=$N; $i++) {
     $ary[$i] = ($N - $i);
   }
-  heapsort_r($N, &$ary);
+  heapsort_r($N, inout $ary);
   var_dump($ary[$N]);
 }
 

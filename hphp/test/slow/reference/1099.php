@@ -3,7 +3,7 @@
 function f($arg0, $arg1) {
  var_dump($arg0, $arg1);
  }
-function g(&$arg0, $arg1) {
+function g(inout $arg0, $arg1) {
  var_dump($arg0, $arg1);
  }
 class Af {
@@ -14,7 +14,7 @@ class Af {
 class Ag {
   function g($f, $var) {
     $thiz = $this;
-    $f(&$thiz, $var++);
+    $f(inout $thiz, $var++);
   }
 }
 

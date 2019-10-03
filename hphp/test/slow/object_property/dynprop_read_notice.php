@@ -86,7 +86,7 @@ function test($thing) {
   unset($thing->dynprop);
 }
 
-function by_ref(&$ref) {}
+function by_ref(inout $ref) {}
 
 class C {}
 class D { public $x = 1; }

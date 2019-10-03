@@ -1,6 +1,6 @@
 <?hh
 
-function run(&$a, &$b, &$c, &$d) {
+function run(inout $a, inout $b, inout $c, inout $d) {
   $b = $d;
   var_dump($a);
   var_dump($b);
@@ -12,5 +12,5 @@ function run(&$a, &$b, &$c, &$d) {
 function main() {
   $a = 1;
   $c = 2;
-  run(&$a, &$a, &$c, &$c);
+  run(inout $a, inout $a, inout $c, inout $c);
 }

@@ -65,7 +65,7 @@ array(4) {
   [1]=>
   object(ReflectionParameter) (3) {
     ["info"]=>
-    array(11) {
+    array(12) {
       ["index"]=>
       int(1)
       ["name"]=>
@@ -83,6 +83,8 @@ array(4) {
       ["type_hint_nullable"]=>
       bool(true)
       ["ref"]=>
+      bool(true)
+      ["inout"]=>
       bool(true)
       ["attributes"]=>
       array(0) {
@@ -210,7 +212,7 @@ Function [ <user> function f ] {
 
   - Parameters [4] {
     Parameter #0 [ <required> $a ]
-    Parameter #1 [ <required> &$b ]
+    Parameter #1 [ <required> inout $b ]
     Parameter #2 [ <optional> $c = NULL ]
     Parameter #3 [ <optional> $d = array (
     0 => 1,

@@ -1,0 +1,5 @@
+Notice: Undefined variable: t in %s/reference/1095.php on line 7
+array(1) {
+  ["x"]=>
+  int(1)
+}

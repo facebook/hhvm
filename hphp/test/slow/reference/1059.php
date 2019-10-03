@@ -1,11 +1,12 @@
 <?hh
 
-function run(&$a, &$b) {
+function run(inout $a, inout $b) {
   $a = 10;
   var_dump($b);
 }
 
 <<__EntryPoint>>
 function main() {
-  run(&$a, &$a);
+  $a = null;
+  run(inout $a, inout $a);
 }

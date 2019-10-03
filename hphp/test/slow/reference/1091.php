@@ -1,18 +1,18 @@
 <?hh
 
-function test(&$some_ref) {
+function test(inout $some_ref) {
   $some_ref = 42;
 }
 function test2($some_ref) {
   $some_ref = 42;
 }
 
-function run(&$var, &$some_ref) {
+function run(inout $var, inout $some_ref) {
   $var = null;
-  test(&$var);
+  test(inout $var);
   var_dump($var);
   $var = null;
-  test(&$var);
+  test(inout $var);
   var_dump($some_ref, $var);
   test2($some_ref = 1);
   var_dump($some_ref);
@@ -26,6 +26,6 @@ function run(&$var, &$some_ref) {
 
 <<__EntryPoint>>
 function main() {
-  run(&$a, &$a);
+  $a = null;
+  run(inout $a, inout $a);
 }
-

@@ -1,6 +1,6 @@
 <?hh
 
-function run(&$a) {
+function run(inout $a) {
   foreach($a as $v) {
     echo "$v\n";
     unset($a[1]);
@@ -10,5 +10,5 @@ function run(&$a) {
 <<__EntryPoint>>
 function main() {
   $a = [1, 2, 3];
-  run(&$a);
+  run(inout $a);
 }

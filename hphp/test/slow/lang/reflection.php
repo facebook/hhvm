@@ -12,7 +12,7 @@ class State { static $staticX = 4; }
 /**
  * This is f's doc comment.
  */
-function f($a, &$b, $c=null, $d=array(1, 2, SOME_CONSTANT)) {
+function f($a, inout $b, $c=null, $d=array(1, 2, SOME_CONSTANT)) {
   print "In f()\n";
   State::$staticX++;
   $x = State::$staticX;

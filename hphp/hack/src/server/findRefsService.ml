@@ -299,7 +299,7 @@ let get_definitions = function
   | IFunction fun_name ->
     begin
       match Decl_provider.get_fun fun_name with
-      | Some { fe_type = (_, Tfun fun_); _ } -> [(fun_name, fun_.ft_pos)]
+      | Some { fe_pos; _ } -> [(fun_name, fe_pos)]
       | _ -> []
     end
   | IGConst _

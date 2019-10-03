@@ -67,14 +67,14 @@ let base_visibility origin_class_name = function
   | Private -> Vprivate origin_class_name
   | Protected -> Vprotected origin_class_name
 
-let ft_to_ty ft = (Reason.Rwitness ft.ft_pos, Tfun ft)
+let ft_to_ty pos ft = (Reason.Rwitness pos, Tfun ft)
 
 let shallow_method_to_class_elt child_class mro subst meth : class_elt =
   let {
     sm_abstract = ce_abstract;
     sm_final = ce_final;
     sm_memoizelsb = ce_memoizelsb;
-    sm_name = _;
+    sm_name = (pos, _);
     sm_override = ce_override;
     sm_reactivity = _;
     sm_type;
@@ -88,7 +88,7 @@ let shallow_method_to_class_elt child_class mro subst meth : class_elt =
   let ty =
     lazy
       begin
-        let ty = ft_to_ty sm_type in
+        let ty = ft_to_ty pos sm_type in
         if child_class = mro.mro_name then
           ty
         else
@@ -109,6 +109,7 @@ let shallow_method_to_class_elt child_class mro subst meth : class_elt =
     ce_origin = mro.mro_name;
     ce_type = ty;
     ce_deprecated = sm_deprecated;
+    ce_pos = pos;
   }
 
 let shallow_method_to_telt child_class mro subst meth : tagged_elt =
@@ -166,6 +167,7 @@ let shallow_prop_to_telt child_class mro subst prop : tagged_elt =
         ce_origin = mro.mro_name;
         ce_type = ty;
         ce_deprecated = None;
+        ce_pos = fst sp_name;
       };
   }
 

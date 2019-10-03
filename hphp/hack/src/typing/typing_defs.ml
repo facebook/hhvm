@@ -390,7 +390,6 @@ and reactivity =
 (* The type of a function AND a method.
  * A function has a min and max arity because of optional arguments *)
 and 'ty fun_type = {
-  ft_pos: Pos.t;
   ft_is_coroutine: bool;
   ft_arity: 'ty fun_arity;
   ft_tparams: 'ty tparam list * fun_tparams_kind;
@@ -489,12 +488,14 @@ and class_elt = {
   (* identifies the class from which this elt originates *)
   ce_origin: string;
   ce_deprecated: string option;
+  ce_pos: Pos.t;
 }
 
 and fun_elt = {
   fe_deprecated: string option;
   fe_type: decl_ty;
   fe_decl_errors: Errors.t option;
+  fe_pos: Pos.t;
 }
 
 and class_const = {

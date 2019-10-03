@@ -291,7 +291,6 @@ and fun_decl_in_env env f =
     ( Reason.Rwitness (fst f.f_name),
       Tfun
         {
-          ft_pos = fst f.f_name;
           ft_is_coroutine = f.f_fun_kind = Ast_defs.FCoroutine;
           ft_arity = arity;
           ft_tparams = (tparams, FTKtparams);
@@ -307,7 +306,7 @@ and fun_decl_in_env env f =
           ft_returns_void_to_rx = returns_void_to_rx;
         } )
   in
-  { fe_type; fe_deprecated; fe_decl_errors = None }
+  { fe_pos = fst f.f_name; fe_type; fe_deprecated; fe_decl_errors = None }
 
 (*****************************************************************************)
 (* Section declaring the type of a class *)
@@ -722,8 +721,8 @@ and constructor_decl (pcstr, pconsist) class_ =
     match (class_.sc_constructor, pcstr) with
     | (None, _) -> pcstr
     | (Some method_, Some { elt_final = true; elt_origin; _ }) ->
-      let ft = Decl_heap.Constructors.find_unsafe elt_origin in
-      Errors.override_final ~parent:ft.ft_pos ~child:(fst method_.sm_name);
+      let fe = Decl_heap.Constructors.find_unsafe elt_origin in
+      Errors.override_final ~parent:fe.fe_pos ~child:(fst method_.sm_name);
       let cstr = build_constructor class_ method_ in
       cstr
     | (Some method_, _) ->
@@ -736,6 +735,7 @@ and build_constructor class_ method_ =
   let ft = method_.sm_type in
   let (_, class_name) = class_.sc_name in
   let vis = visibility class_name method_.sm_visibility in
+  let pos = fst method_.sm_name in
   let cstr =
     {
       elt_final = method_.sm_final;
@@ -754,7 +754,15 @@ and build_constructor class_ method_ =
       elt_deprecated = method_.sm_deprecated;
     }
   in
-  Decl_heap.Constructors.add class_name ft;
+  let fe =
+    {
+      fe_pos = pos;
+      fe_deprecated = method_.sm_deprecated;
+      fe_type = (Reason.Rwitness pos, Tfun ft);
+      fe_decl_errors = None;
+    }
+  in
+  Decl_heap.Constructors.add class_name fe;
   Some cstr
 
 and class_const_fold c acc scc =
@@ -934,7 +942,7 @@ and method_check_override c m acc =
 
 and method_redecl_acc c acc m =
   let ft = m.smr_type in
-  let (_, id) = m.smr_name in
+  let (pos, id) = m.smr_name in
   let vis =
     match (SMap.get id acc, m.smr_visibility) with
     | (Some { elt_visibility = Vprotected _ as parent_vis; _ }, Protected) ->
@@ -959,20 +967,28 @@ and method_redecl_acc c acc m =
       elt_deprecated = None;
     }
   in
+  let fe =
+    {
+      fe_pos = pos;
+      fe_deprecated = None;
+      fe_type = (Reason.Rwitness pos, Tfun ft);
+      fe_decl_errors = None;
+    }
+  in
   let add_meth =
     if m.smr_static then
       Decl_heap.StaticMethods.add
     else
       Decl_heap.Methods.add
   in
-  add_meth (elt.elt_origin, id) ft;
+  add_meth (elt.elt_origin, id) fe;
   SMap.add id elt acc
 
 and method_decl_acc ~is_static c (acc, condition_types) m =
   let check_override = method_check_override c m acc in
   let has_memoizelsb = m.sm_memoizelsb in
   let ft = m.sm_type in
-  let (_, id) = m.sm_name in
+  let (pos, id) = m.sm_name in
   let condition_types =
     match ft.ft_reactive with
     | Reactive (Some (_, Tapply ((_, cls), []))) ->
@@ -1008,13 +1024,21 @@ and method_decl_acc ~is_static c (acc, condition_types) m =
       elt_deprecated = m.sm_deprecated;
     }
   in
+  let fe =
+    {
+      fe_pos = pos;
+      fe_deprecated = None;
+      fe_type = (Reason.Rwitness pos, Tfun ft);
+      fe_decl_errors = None;
+    }
+  in
   let add_meth =
     if is_static then
       Decl_heap.StaticMethods.add
     else
       Decl_heap.Methods.add
   in
-  add_meth (elt.elt_origin, id) ft;
+  add_meth (elt.elt_origin, id) fe;
   let acc = SMap.add id elt acc in
   (acc, condition_types)
 

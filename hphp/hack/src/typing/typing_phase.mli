@@ -26,6 +26,7 @@ val localize : ety_env:expand_env -> env -> decl_ty -> env * locl_ty
 val localize_ft :
   ?instantiation:method_instantiation ->
   ety_env:expand_env ->
+  def_pos:Pos.t ->
   env ->
   decl_fun_type ->
   env * locl_fun_type

@@ -519,7 +519,6 @@ let default_constructor_ce class_ =
   (* reason doesn't get used in, e.g. arity checks *)
   let ft =
     {
-      ft_pos = pos;
       ft_is_coroutine = false;
       ft_arity = Fstandard (0, 0);
       ft_tparams = ([], FTKtparams);
@@ -548,6 +547,7 @@ let default_constructor_ce class_ =
     ce_type = lazy (r, Tfun ft);
     ce_origin = name;
     ce_deprecated = None;
+    ce_pos = pos;
   }
 
 (* When an interface defines a constructor, we check that they are compatible *)

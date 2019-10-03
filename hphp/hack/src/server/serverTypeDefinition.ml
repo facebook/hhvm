@@ -33,7 +33,7 @@ let go_common (tast : Tast.program) ~(line : int) ~(column : int) :
           match ret_type with
           | Tprim _ ->
             (* default to function definition *)
-            (fn_type.ft_pos, Tast_env.print_ty env (reason, ty)) :: acc
+            (Reason.to_pos reason, Tast_env.print_ty env (reason, ty)) :: acc
           | _ -> handle_type acc ret_type
         end
       | _ -> acc

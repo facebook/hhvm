@@ -64,7 +64,6 @@ let expand_ty ?var_hook ?pos env ty =
   and exp_tys tyl = List.map ~f:exp_ty tyl
   and exp_fun_type
       {
-        ft_pos;
         ft_arity;
         ft_tparams;
         ft_where_constraints;
@@ -79,7 +78,6 @@ let expand_ty ?var_hook ?pos env ty =
         ft_returns_void_to_rx;
       } =
     {
-      ft_pos;
       ft_arity;
       ft_fun_kind;
       ft_reactive;

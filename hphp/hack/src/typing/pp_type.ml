@@ -390,14 +390,35 @@ and pp_possibly_enforced_ty :
   Format.fprintf fmt "@]";
   Format.fprintf fmt "@ }@]"
 
-and pp_fun_type : type a. Format.formatter -> a ty fun_type -> unit =
+and pp_fun_elt : Format.formatter -> fun_elt -> unit =
  fun fmt x ->
   Format.fprintf fmt "@[<2>{ ";
 
-  Format.fprintf fmt "@[%s =@ " "ft_pos";
-  Pos.pp fmt x.ft_pos;
+  Format.fprintf fmt "@[%s =@ " "fe_pos";
+  Pos.pp fmt x.fe_pos;
   Format.fprintf fmt "@]";
   Format.fprintf fmt ";@ ";
+
+  Format.fprintf fmt "@[%s =@ " "fe_type";
+  pp_ty fmt x.fe_type;
+  Format.fprintf fmt "@]";
+  Format.fprintf fmt ";@ ";
+
+  Format.fprintf fmt "@[%s =@ " "fe_deprecated";
+  (match x.fe_deprecated with
+  | None -> Format.pp_print_string fmt "None"
+  | Some x ->
+    Format.pp_print_string fmt "(Some ";
+    Format.fprintf fmt "%S" x;
+    Format.pp_print_string fmt ")");
+  Format.fprintf fmt "@]";
+  Format.fprintf fmt ";@ ";
+
+  Format.fprintf fmt "@ }@]"
+
+and pp_fun_type : type a. Format.formatter -> a ty fun_type -> unit =
+ fun fmt x ->
+  Format.fprintf fmt "@[<2>{ ";
 
   Format.fprintf fmt "@[%s =@ " "ft_is_coroutine";
   Format.fprintf fmt "%B" x.ft_is_coroutine;

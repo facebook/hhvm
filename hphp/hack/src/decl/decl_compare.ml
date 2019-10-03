@@ -198,7 +198,7 @@ module ClassEltDiff = struct
         ~cid
         ~elts1
         ~elts2
-        ~normalize:Decl_pos_utils.NormalizeSig.fun_type
+        ~normalize:Decl_pos_utils.NormalizeSig.fun_elt
     in
     add_inverted_deps acc (fun x -> Dep.Method (cid, x)) diff
 
@@ -211,7 +211,7 @@ module ClassEltDiff = struct
         ~cid
         ~elts1
         ~elts2
-        ~normalize:Decl_pos_utils.NormalizeSig.fun_type
+        ~normalize:Decl_pos_utils.NormalizeSig.fun_elt
     in
     add_inverted_deps acc (fun x -> Dep.SMethod (cid, x)) diff
 
@@ -232,10 +232,10 @@ module ClassEltDiff = struct
       | (None, _)
       | (_, None) ->
         (Typing_deps.get_ideps (Dep.Cstr cid), `Changed)
-      | (Some ft1, Some ft2) ->
-        let ft1 = Decl_pos_utils.NormalizeSig.fun_type ft1 in
-        let ft2 = Decl_pos_utils.NormalizeSig.fun_type ft2 in
-        if ft1 = ft2 then
+      | (Some fe1, Some fe2) ->
+        let fe1 = Decl_pos_utils.NormalizeSig.fun_elt fe1 in
+        let fe2 = Decl_pos_utils.NormalizeSig.fun_elt fe2 in
+        if fe1 = fe2 then
           (DepSet.empty, `Unchanged)
         else
           (Typing_deps.get_ideps (Dep.Cstr cid), `Changed)
@@ -358,13 +358,9 @@ let get_fun_deps
     in
     (add_changed changed dep, to_redecl, DepSet.union fun_name to_recheck)
   | (Some fe1, Some fe2) ->
-    let ty1 = Decl_pos_utils.NormalizeSig.ty fe1.Typing_defs.fe_type in
-    let ty2 = Decl_pos_utils.NormalizeSig.ty fe2.Typing_defs.fe_type in
-    let is_same_signature =
-      ty1 = ty2
-      && fe1.Typing_defs.fe_deprecated = fe2.Typing_defs.fe_deprecated
-    in
-    if is_same_signature then
+    let fe1 = Decl_pos_utils.NormalizeSig.fun_elt fe1 in
+    let fe2 = Decl_pos_utils.NormalizeSig.fun_elt fe2 in
+    if fe1 = fe2 then
       (changed, to_redecl, to_recheck)
     else
       (* No need to add Dep.FunName stuff here -- we found a function with the

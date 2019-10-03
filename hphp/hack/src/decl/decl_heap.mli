@@ -67,7 +67,7 @@ module StaticProperty : sig
 end
 
 module Method : sig
-  type t = decl_fun_type
+  type t = fun_elt
 
   val prefix : Prefix.t
 
@@ -75,7 +75,7 @@ module Method : sig
 end
 
 module StaticMethod : sig
-  type t = decl_fun_type
+  type t = fun_elt
 
   val prefix : Prefix.t
 
@@ -83,7 +83,7 @@ module StaticMethod : sig
 end
 
 module Constructor : sig
-  type t = decl_fun_type
+  type t = fun_elt
 
   val prefix : Prefix.t
 

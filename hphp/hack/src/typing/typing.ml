@@ -2344,7 +2344,6 @@ and expr_
         in
         let caller =
           {
-            ft_pos = pos;
             (* propagate 'is_coroutine' from the method being called*)
             ft_is_coroutine = fty.ft_is_coroutine;
             ft_arity = fun_arity;
@@ -2396,7 +2395,8 @@ and expr_
           class_
           (snd meth);
         expr_error env Reason.Rnone outer
-      | Some { ce_type = (lazy ty); ce_visibility; ce_deprecated; _ } ->
+      | Some { ce_type = (lazy ty); ce_visibility; ce_deprecated; ce_pos; _ }
+        ->
         let cid = CI c in
         let (env, _te, cid_ty) =
           static_class_id ~check_constraints:true (fst c) env [] cid
@@ -2422,6 +2422,7 @@ and expr_
               env
               ft
           in
+          let def_pos = ce_pos in
           let (env, ft) =
             Phase.(
               localize_ft
@@ -2433,11 +2434,11 @@ and expr_
                       explicit_targs = [];
                     }
                 ~ety_env
+                ~def_pos:ce_pos
                 env
                 ft)
           in
           let ty = (r, Tfun ft) in
-          let def_pos = Reason.to_pos r in
           let use_pos = fst meth in
           TVis.check_deprecated ~use_pos ~def_pos ce_deprecated;
           (match ce_visibility with
@@ -3091,9 +3092,9 @@ and expr_
     (* This is the function type as declared on the lambda itself.
      * If type hints are absent then use Tany instead. *)
     let declared_fe = Decl.fun_decl_in_env env.decl_env f in
-    let declared_ft =
+    let (declared_pos, declared_ft) =
       match declared_fe with
-      | { fe_type = (_, Tfun ft); _ } -> ft
+      | { fe_type = (_, Tfun ft); fe_pos; _ } -> (fe_pos, ft)
       | _ -> failwith "Not a function"
     in
     let declared_ft =
@@ -3113,6 +3114,7 @@ and expr_
           ~instantiation:
             { use_name = "lambda"; use_pos = p; explicit_targs = [] }
           ~ety_env
+          ~def_pos:declared_pos
           env
           declared_ft)
     in
@@ -3331,7 +3333,7 @@ and expr_
                 let (env, ft_params) =
                   List.map_env env ft.ft_params freshen_untyped_param
                 in
-                let (env, ft_ret) = freshen_ty env ft.ft_pos ft.ft_ret in
+                let (env, ft_ret) = freshen_ty env declared_pos ft.ft_ret in
                 (env, { ft with ft_params; ft_ret })
               in
               let (env, declared_ft) = freshen_ftype env declared_ft in
@@ -3510,7 +3512,7 @@ and expr_
       (Reason.Rwitness p, Tshape (Closed_shape, fdm))
   | PU_atom _
   (* TODO(T36532263): Pocket Universes *)
-  
+
   | PU_identifier _ ->
     Errors.pu_typing p;
     expr_error env (Reason.Rwitness p) outer
@@ -5328,7 +5330,7 @@ and fun_type_of_id env x tal el =
   | None ->
     let (env, _, ty) = unbound_name env x (Pos.none, Aast.Null) in
     (env, ty)
-  | Some { fe_type; fe_deprecated; _ } ->
+  | Some { fe_type; fe_pos; fe_deprecated; _ } ->
     (match fe_type with
     | (r, Tfun ft) ->
       let ft =
@@ -5347,6 +5349,7 @@ and fun_type_of_id env x tal el =
           localize_ft
             ~instantiation:
               { use_name = strip_ns (snd x); use_pos; explicit_targs = tal }
+            ~def_pos:fe_pos
             ~ety_env
             env
             ft)
@@ -5612,6 +5615,7 @@ and class_get_
                     ~instantiation:
                       { use_name = strip_ns mid; use_pos = p; explicit_targs }
                     ~ety_env
+                    ~def_pos
                     env
                     ft)
               in
@@ -6461,7 +6465,6 @@ and call
                 ( Reason.Rlambda_use pos,
                   Tfun
                     {
-                      ft_pos = fpos;
                       ft_is_coroutine = is_coroutine;
                       ft_arity = arity;
                       ft_tparams = ([], FTKtparams);
@@ -7589,7 +7592,7 @@ and class_def_ env c tc =
           Decl_heap.Methods.get
       in
       match get_meth (class_id, meth_id) with
-      | Some { ft_pos; _ } -> ft_pos
+      | Some { fe_pos; _ } -> fe_pos
       | None -> Pos.none
     in
     let check_override ~is_static (id, ce) =

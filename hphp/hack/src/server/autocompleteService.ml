@@ -272,7 +272,6 @@ let get_constructor_ty c =
     ( reason,
       Typing_defs.Tfun
         {
-          ft_pos = pos;
           ft_is_coroutine = false;
           ft_arity = Fstandard (0, 0);
           ft_tparams = ([], FTKtparams);

@@ -1385,7 +1385,6 @@ module Json = struct
                  ft_params;
                  ft_ret = { et_type = ft_ret; et_enforced = false };
                  (* Dummy values: these aren't currently serialized. *)
-                 ft_pos = Pos.none;
                  ft_arity = Fstandard (0, 0);
                  ft_tparams = ([], FTKtparams);
                  ft_where_constraints = [];

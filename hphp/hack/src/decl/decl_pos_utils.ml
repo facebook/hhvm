@@ -178,12 +178,17 @@ struct
       ft_where_constraints = List.map ft.ft_where_constraints where_constraint;
       ft_params = List.map ft.ft_params fun_param;
       ft_ret = possibly_enforced_ty ft.ft_ret;
-      ft_pos = pos ft.ft_pos;
       ft_arity = fun_arity ft.ft_arity;
       ft_reactive = fun_reactive ft.ft_reactive;
     }
 
-  and fun_elt fe = { fe with fe_type = ty fe.fe_type; fe_decl_errors = None }
+  and fun_elt fe =
+    {
+      fe with
+      fe_type = ty fe.fe_type;
+      fe_pos = pos fe.fe_pos;
+      fe_decl_errors = None;
+    }
 
   and fun_reactive = function
     | Local (Some ty1) -> Local (Some (ty ty1))

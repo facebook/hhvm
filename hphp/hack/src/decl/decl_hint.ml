@@ -114,7 +114,6 @@ and hint_ p env = function
     in
     Tfun
       {
-        ft_pos = p;
         ft_is_coroutine = is_coroutine;
         ft_arity = arity;
         ft_tparams = ([], FTKtparams);

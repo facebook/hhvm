@@ -2658,8 +2658,12 @@ let subtype_method
     (ft_super : decl_fun_type)
     (on_error : Errors.typing_error_callback) : env =
   let ety_env = Phase.env_with_self env in
-  let (env, ft_super_no_tvars) = Phase.localize_ft ~ety_env env ft_super in
-  let (env, ft_sub_no_tvars) = Phase.localize_ft ~ety_env env ft_sub in
+  let (env, ft_super_no_tvars) =
+    Phase.localize_ft ~ety_env ~def_pos:(Reason.to_pos r_super) env ft_super
+  in
+  let (env, ft_sub_no_tvars) =
+    Phase.localize_ft ~ety_env ~def_pos:(Reason.to_pos r_sub) env ft_sub
+  in
   let old_tpenv = Env.get_tpenv env in
   (* We check constraint entailment and contravariant parameter/covariant result
    * subtyping in the context of the ft_super constraints. But we'd better

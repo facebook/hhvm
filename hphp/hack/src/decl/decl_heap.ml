@@ -88,7 +88,7 @@ module StaticProperty = struct
 end
 
 module Method = struct
-  type t = decl_fun_type
+  type t = fun_elt
 
   let prefix = Prefix.make ()
 
@@ -96,7 +96,7 @@ module Method = struct
 end
 
 module StaticMethod = struct
-  type t = decl_fun_type
+  type t = fun_elt
 
   let prefix = Prefix.make ()
 
@@ -104,7 +104,7 @@ module StaticMethod = struct
 end
 
 module Constructor = struct
-  type t = decl_fun_type
+  type t = fun_elt
 
   let prefix = Prefix.make ()
 

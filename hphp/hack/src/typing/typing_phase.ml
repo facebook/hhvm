@@ -167,7 +167,8 @@ let rec localize ~ety_env env (dty : decl_ty) =
   | (r, Tfun ft) ->
     let (env, ft) =
       localize_ft
-        ~ety_env
+        ~ety_env (* def_pos just used for targs errors, which won't occur *)
+        ~def_pos:Pos.none
         ~instantiation:
           {
             use_pos = Reason.to_pos r;
@@ -318,7 +319,7 @@ and localize_cstr_ty ~ety_env env ty tp_name =
  * 2) When the type arguments are explicitly specified, in which case we instantiate
  * the type parameters to the provided types.
  *)
-and localize_ft ?instantiation ~ety_env env ft =
+and localize_ft ?instantiation ~ety_env ~def_pos env ft =
   (* set reactivity to Nonreactive to prevent occasional setting
      of condition types when expanding type constants *)
   let saved_r = env_reactivity env in
@@ -347,7 +348,7 @@ and localize_ft ?instantiation ~ety_env env ft =
           default ()
         else if List.length explicit_targs <> List.length tparams then (
           Errors.expected_tparam
-            ~definition_pos:ft.ft_pos
+            ~definition_pos:def_pos
             ~use_pos
             (List.length tparams);
           default ()
@@ -449,7 +450,7 @@ and localize_ft ?instantiation ~ety_env env ft =
         check_where_constraints
           ~in_class:false
           ~use_pos
-          ~definition_pos:ft.ft_pos
+          ~definition_pos:def_pos
           ~ety_env
           env
           ft.ft_where_constraints

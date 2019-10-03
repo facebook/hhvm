@@ -38,8 +38,8 @@ let get_docblock_for_member class_info member_name =
     Cls.get_method class_info member_name
     >>= fun member ->
     match Lazy.force member.Typing_defs.ce_type with
-    | (_, Typing_defs.Tfun ft) ->
-      let pos = ft.Typing_defs.ft_pos in
+    | (_, Typing_defs.Tfun _) ->
+      let pos = member.Typing_defs.ce_pos in
       let filename = Pos.filename pos in
       File_provider.get_contents filename
       >>= fun contents ->

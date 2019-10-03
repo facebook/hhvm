@@ -58,7 +58,7 @@ let lookup_magic_type (env : env) (class_ : locl_ty) (fname : string) :
     let ce_type =
       Env.get_class env className
       >>= (fun c -> Env.get_member true env c fname)
-      >>= fun { ce_type = (lazy ty); _ } ->
+      >>= fun { ce_type = (lazy ty); ce_pos; _ } ->
       match ty with
       | (r, Tfun fty) ->
         let ety_env = Typing_phase.env_with_self env in
@@ -70,7 +70,13 @@ let lookup_magic_type (env : env) (class_ : locl_ty) (fname : string) :
               explicit_targs = [];
             }
         in
-        Some (Typing_phase.localize_ft ~instantiation ~ety_env env fty)
+        Some
+          (Typing_phase.localize_ft
+             ~instantiation
+             ~def_pos:ce_pos
+             ~ety_env
+             env
+             fty)
       | _ -> None
     in
     begin

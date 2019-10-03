@@ -229,7 +229,6 @@ let method_type env m =
     List.map m.m_where_constraints (where_constraint env)
   in
   {
-    ft_pos = fst m.m_name;
     ft_is_coroutine = m.m_fun_kind = Ast_defs.FCoroutine;
     ft_arity = arity;
     ft_tparams = (tparams, FTKtparams);
@@ -271,7 +270,6 @@ let method_redeclaration_type env m =
     List.map m.mt_where_constraints (where_constraint env)
   in
   {
-    ft_pos = fst m.mt_name;
     ft_is_coroutine = m.mt_fun_kind = Ast_defs.FCoroutine;
     ft_arity = arity;
     ft_tparams = (tparams, FTKtparams);
@@ -288,9 +286,9 @@ let method_redeclaration_type env m =
 
 let method_ env c m =
   let override = Attrs.mem SN.UserAttributes.uaOverride m.m_user_attributes in
-  ( if m.m_visibility = Private && override then
-    let (pos, id) = m.m_name in
-    Errors.private_override pos (snd c.c_name) id );
+  let (pos, id) = m.m_name in
+  if m.m_visibility = Private && override then
+    Errors.private_override pos (snd c.c_name) id;
   let has_memoizelsb =
     Attrs.mem SN.UserAttributes.uaMemoizeLSB m.m_user_attributes
   in
@@ -319,7 +317,7 @@ let method_ env c m =
     sm_reactivity = reactivity;
     sm_type = ft;
     sm_visibility = m.m_visibility;
-    sm_fixme_codes = Fixme_provider.get_fixme_codes_for_pos ft.ft_pos;
+    sm_fixme_codes = Fixme_provider.get_fixme_codes_for_pos pos;
     sm_deprecated;
   }
 
@@ -334,7 +332,7 @@ let method_redeclaration env m =
     smr_visibility = m.mt_visibility;
     smr_trait = m.mt_trait;
     smr_method = m.mt_method;
-    smr_fixme_codes = Fixme_provider.get_fixme_codes_for_pos ft.ft_pos;
+    smr_fixme_codes = Fixme_provider.get_fixme_codes_for_pos (fst m.mt_name);
   }
 
 let enum_type hint e =

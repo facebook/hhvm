@@ -317,7 +317,7 @@ and linearize (env : env) (c : shallow_class) : linearization =
       in
       match List.find c.sc_methods is_to_string with
       | None -> []
-      | Some { sm_type = { ft_pos = pos; _ }; _ } ->
+      | Some { sm_name = (pos, _); _ } ->
         let ty =
           (Typing_reason.Rhint pos, Tapply ((pos, SN.Classes.cStringish), []))
         in

@@ -123,7 +123,6 @@ let transform_special_fun_ty fty id nargs =
           ( r1,
             Tfun
               {
-                ft_pos = fst id;
                 ft_is_coroutine = false;
                 ft_arity = Fstandard (arity, arity);
                 ft_tparams = ([], FTKtparams);

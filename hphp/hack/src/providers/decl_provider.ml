@@ -76,15 +76,17 @@ let get_class (class_name : class_key) : class_decl option =
     result
 
 let convert_class_elt_to_fun_decl class_elt_opt : fun_decl option =
-  match class_elt_opt with
-  | Some { Typing_defs.ce_type = (lazy ty); Typing_defs.ce_deprecated; _ } ->
-    Some
-      {
-        Typing_defs.fe_type = ty;
-        Typing_defs.fe_deprecated = ce_deprecated;
-        Typing_defs.fe_decl_errors = None;
-      }
-  | _ -> None
+  Typing_defs.(
+    match class_elt_opt with
+    | Some { ce_type = (lazy ty); ce_deprecated; ce_pos; _ } ->
+      Some
+        {
+          fe_pos = ce_pos;
+          fe_type = ty;
+          fe_deprecated = ce_deprecated;
+          fe_decl_errors = None;
+        }
+    | _ -> None)
 
 let get_class_constructor (class_name : class_key) : fun_decl option =
   match get_class class_name with

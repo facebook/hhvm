@@ -272,6 +272,7 @@ and obj_get_concrete_ty
                           explicit_targs = [];
                         }
                       ~ety_env
+                      ~def_pos:mem_pos
                       env
                       ft)
                 in
@@ -371,6 +372,7 @@ and obj_get_concrete_ty
                           explicit_targs;
                         }
                       ~ety_env
+                      ~def_pos:mem_pos
                       env
                       ft)
                 in

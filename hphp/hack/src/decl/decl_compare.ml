@@ -357,10 +357,13 @@ let get_fun_deps
         to_redecl
     in
     (add_changed changed dep, to_redecl, DepSet.union fun_name to_recheck)
-  | (Some fty1, Some fty2) ->
-    let fty1 = Decl_pos_utils.NormalizeSig.fun_type fty1 in
-    let fty2 = Decl_pos_utils.NormalizeSig.fun_type fty2 in
-    let is_same_signature = fty1 = fty2 in
+  | (Some fe1, Some fe2) ->
+    let ty1 = Decl_pos_utils.NormalizeSig.ty fe1.Typing_defs.fe_type in
+    let ty2 = Decl_pos_utils.NormalizeSig.ty fe2.Typing_defs.fe_type in
+    let is_same_signature =
+      ty1 = ty2
+      && fe1.Typing_defs.fe_deprecated = fe2.Typing_defs.fe_deprecated
+    in
     if is_same_signature then
       (changed, to_redecl, to_recheck)
     else

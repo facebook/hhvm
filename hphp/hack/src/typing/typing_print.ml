@@ -1386,7 +1386,6 @@ module Json = struct
                  ft_ret = { et_type = ft_ret; et_enforced = false };
                  (* Dummy values: these aren't currently serialized. *)
                  ft_pos = Pos.none;
-                 ft_deprecated = None;
                  ft_arity = Fstandard (0, 0);
                  ft_tparams = ([], FTKtparams);
                  ft_where_constraints = [];
@@ -1395,7 +1394,6 @@ module Json = struct
                  ft_return_disposable = false;
                  ft_mutability = None;
                  ft_returns_mutable = false;
-                 ft_decl_errors = None;
                  ft_returns_void_to_rx = false;
                })
         | "anon" ->
@@ -1725,56 +1723,6 @@ module PrintClass = struct
     ^ ""
 end
 
-module PrintFun = struct
-  let fparam tcopt { fp_name = sopt; fp_type = { et_type = ty; _ }; _ } =
-    let s =
-      match sopt with
-      | None -> "[None]"
-      | Some s -> s
-    in
-    s ^ " " ^ Full.to_string_decl tcopt ty ^ ", "
-
-  let farity = function
-    | Fstandard (min, max) -> Printf.sprintf "non-variadic: %d to %d" min max
-    | Fvariadic (min, _) ->
-      Printf.sprintf "variadic: ...$arg-style (PHP 5.6); min: %d" min
-    | Fellipsis (min, _) ->
-      Printf.sprintf "variadic: ...-style (Hack); min: %d" min
-
-  let fparams tcopt l =
-    List.fold_right l ~f:(fun x acc -> fparam tcopt x ^ acc) ~init:""
-
-  let fun_type tcopt f =
-    let ft_pos = PrintClass.pos f.ft_pos in
-    let ft_arity = farity f.ft_arity in
-    let tparams = PrintClass.tparam_list tcopt (fst f.ft_tparams) in
-    let instantiate_tparams =
-      match snd f.ft_tparams with
-      | FTKtparams -> "FTKtparams"
-      | FTKinstantiated_targs -> "FTKinstantiated_targs"
-    in
-    let ft_params = fparams tcopt f.ft_params in
-    let ft_ret = Full.to_string_decl tcopt f.ft_ret.et_type in
-    "ft_pos: "
-    ^ ft_pos
-    ^ "\n"
-    ^ "ft_arity: "
-    ^ ft_arity
-    ^ "\n"
-    ^ "ft_tparams: ("
-    ^ tparams
-    ^ ", "
-    ^ instantiate_tparams
-    ^ ")\n"
-    ^ "ft_params: "
-    ^ ft_params
-    ^ "\n"
-    ^ "ft_ret: "
-    ^ ft_ret
-    ^ "\n"
-    ^ ""
-end
-
 module PrintTypedef = struct
   let typedef tcopt = function
     | {
@@ -1843,7 +1791,7 @@ let class_ tcopt c = PrintClass.class_type tcopt c
 
 let gconst tcopt gc = Full.to_string_decl tcopt (fst gc)
 
-let fun_ tcopt f = PrintFun.fun_type tcopt f
+let fun_ tcopt { fe_type; _ } = Full.to_string_decl tcopt fe_type
 
 let fun_type tcopt f = Full.fun_to_string tcopt f
 

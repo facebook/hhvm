@@ -169,7 +169,11 @@ let rec localize ~ety_env env (dty : decl_ty) =
       localize_ft
         ~ety_env
         ~instantiation:
-          { use_pos = ft.ft_pos; use_name = "function"; explicit_targs = [] }
+          {
+            use_pos = Reason.to_pos r;
+            use_name = "function";
+            explicit_targs = [];
+          }
         env
         ft
     in

@@ -391,7 +391,6 @@ and reactivity =
  * A function has a min and max arity because of optional arguments *)
 and 'ty fun_type = {
   ft_pos: Pos.t;
-  ft_deprecated: string option;
   ft_is_coroutine: bool;
   ft_arity: 'ty fun_arity;
   ft_tparams: 'ty tparam list * fun_tparams_kind;
@@ -405,7 +404,6 @@ and 'ty fun_type = {
   (* mutability of the receiver *)
   ft_mutability: param_mutability option;
   ft_returns_mutable: bool;
-  ft_decl_errors: Errors.t option;
   ft_returns_void_to_rx: bool;
 }
 
@@ -490,6 +488,13 @@ and class_elt = {
   ce_type: decl_ty Lazy.t;
   (* identifies the class from which this elt originates *)
   ce_origin: string;
+  ce_deprecated: string option;
+}
+
+and fun_elt = {
+  fe_deprecated: string option;
+  fe_type: decl_ty;
+  fe_decl_errors: Errors.t option;
 }
 
 and class_const = {

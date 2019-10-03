@@ -121,7 +121,7 @@ let is_builtin_dep dep =
       | Fun f
       | FunName f ->
         let func = value_or_not_found description @@ Decl_provider.get_fun f in
-        is_in_hhi func.ft_pos
+        is_in_hhi (Reason.to_pos (fst func.fe_type))
       | GConst c
       | GConstName c ->
         Naming_special_names.PseudoConsts.is_pseudo_const c
@@ -142,7 +142,7 @@ let get_filename target =
     match target with
     | Function func ->
       let f = value_exn NotFound @@ Decl_provider.get_fun func in
-      f.ft_pos
+      Reason.to_pos (fst f.fe_type)
     | Method (cls, _) ->
       let cls = value_exn NotFound @@ Decl_provider.get_class cls in
       Decl_provider.Class.pos cls
@@ -425,8 +425,13 @@ let get_global_object_declaration tcopt obj =
       let fun_type =
         value_or_not_found description @@ Decl_provider.get_fun f
       in
-      let declaration = get_function_declaration tcopt f fun_type in
-      declaration ^ "{throw new \\Exception();}"
+      begin
+        match fun_type with
+        | { fe_type = (_, Tfun fun_type); _ } ->
+          let declaration = get_function_declaration tcopt f fun_type in
+          declaration ^ "{throw new \\Exception();}"
+        | _ -> failwith "Expected function type"
+      end
     | GConst c
     | GConstName c ->
       let (const_type, _) =
@@ -1015,7 +1020,7 @@ and add_signature_dependencies deps obj =
         | Fun f
         | FunName f ->
           let func = value_or_not_found description @@ get_fun f in
-          add_dep deps @@ (Typing_reason.Rnone, Tfun func)
+          add_dep deps @@ func.fe_type
         | GConst c
         | GConstName c ->
           let (ty, _) = value_or_not_found description @@ get_gconst c in

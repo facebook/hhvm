@@ -632,7 +632,7 @@ and fun_def tcopt f : (Tast.fun_def * Typing_env_types.global_tvenv) option =
       add_decl_errors
         (Option.map
            (get_fun env (snd f.f_name))
-           ~f:(fun x -> Option.value_exn x.ft_decl_errors));
+           ~f:(fun x -> Option.value_exn x.fe_decl_errors));
       let env = Env.open_tyvars env (fst f.f_name) in
       let env = Env.set_env_function_pos env pos in
       let env = Env.set_env_pessimize env in
@@ -2237,11 +2237,6 @@ and expr_
         expr_error env (Reason.Rregex pe) e)
   | Fun_id x ->
     let (env, fty) = fun_type_of_id env x [] [] in
-    begin
-      match fty with
-      | (_, Tfun fty) -> check_deprecated (fst x) fty
-      | _ -> ()
-    end;
     make_result env p (T.Fun_id x) fty
   | Id ((cst_pos, cst_name) as id) ->
     (match Env.get_gconst env cst_name with
@@ -2283,9 +2278,6 @@ and expr_
     let (env, result) =
       Env.FakeMembers.check_instance_invalid env instance (snd meth) result
     in
-    (match result with
-    | (_, Tfun fty) -> check_deprecated p fty
-    | _ -> ());
     make_result env p (T.Method_id (te, meth)) result
   | Method_caller (((pos, class_name) as pos_cname), meth_name) ->
     (* meth_caller('X', 'foo') desugars to:
@@ -2326,9 +2318,7 @@ and expr_
           meth_name
       in
       (match fty with
-      | (reason, Tfun fty) ->
-        check_deprecated p fty;
-
+      | (reason, Tfun ftype) ->
         (* We are creating a fake closure:
          * function(Class $x, arg_types_of(Class::meth_name))
                  : return_type_of(Class::meth_name)
@@ -2345,7 +2335,7 @@ and expr_
         in
         let (env, local_obj_ty) = Phase.localize ~ety_env env obj_type in
         let local_obj_fp = TUtils.default_fun_param local_obj_ty in
-        let fty = { fty with ft_params = local_obj_fp :: fty.ft_params } in
+        let fty = { ftype with ft_params = local_obj_fp :: ftype.ft_params } in
         let fun_arity =
           match fty.ft_arity with
           | Fstandard (min, max) -> Fstandard (min + 1, max + 1)
@@ -2355,7 +2345,6 @@ and expr_
         let caller =
           {
             ft_pos = pos;
-            ft_deprecated = None;
             (* propagate 'is_coroutine' from the method being called*)
             ft_is_coroutine = fty.ft_is_coroutine;
             ft_arity = fun_arity;
@@ -2368,7 +2357,6 @@ and expr_
             ft_mutability = fty.ft_mutability;
             ft_returns_mutable = fty.ft_returns_mutable;
             ft_return_disposable = fty.ft_return_disposable;
-            ft_decl_errors = None;
             ft_returns_void_to_rx = fty.ft_returns_void_to_rx;
           }
         in
@@ -2408,7 +2396,7 @@ and expr_
           class_
           (snd meth);
         expr_error env Reason.Rnone outer
-      | Some { ce_type = (lazy ty); ce_visibility; _ } ->
+      | Some { ce_type = (lazy ty); ce_visibility; ce_deprecated; _ } ->
         let cid = CI c in
         let (env, _te, cid_ty) =
           static_class_id ~check_constraints:true (fst c) env [] cid
@@ -2451,7 +2439,7 @@ and expr_
           let ty = (r, Tfun ft) in
           let def_pos = Reason.to_pos r in
           let use_pos = fst meth in
-          check_deprecated p ft;
+          TVis.check_deprecated ~use_pos ~def_pos ce_deprecated;
           (match ce_visibility with
           | Vpublic -> make_result env p (T.Smethod_id (c, meth)) ty
           | Vprivate _ ->
@@ -3102,7 +3090,12 @@ and expr_
     in
     (* This is the function type as declared on the lambda itself.
      * If type hints are absent then use Tany instead. *)
-    let declared_ft = Decl.fun_decl_in_env env.decl_env f in
+    let declared_fe = Decl.fun_decl_in_env env.decl_env f in
+    let declared_ft =
+      match declared_fe with
+      | { fe_type = (_, Tfun ft); _ } -> ft
+      | _ -> failwith "Not a function"
+    in
     let declared_ft =
       Typing_enforceability.compute_enforced_and_pessimize_fun_type_simple
         env
@@ -3178,11 +3171,11 @@ and expr_
     in
     begin
       match eexpected with
-      | Some (_pos, _ur, (_, Tfun expected_ft)) ->
+      | Some (_pos, _ur, (r, Tfun expected_ft)) ->
         (* First check that arities match up *)
         check_lambda_arity
           p
-          expected_ft.ft_pos
+          (Reason.to_pos r)
           declared_ft.ft_arity
           expected_ft.ft_arity;
 
@@ -5335,34 +5328,34 @@ and fun_type_of_id env x tal el =
   | None ->
     let (env, _, ty) = unbound_name env x (Pos.none, Aast.Null) in
     (env, ty)
-  | Some decl_fty ->
-    let decl_fty =
-      Typing_special_fun.transform_special_fun_ty
-        decl_fty
-        (snd x)
-        (List.length el)
-    in
-    let ety_env = Phase.env_with_self env in
-    let tal = List.map ~f:(Decl_hint.hint env.decl_env) tal in
-    let decl_fty =
-      Typing_enforceability.compute_enforced_and_pessimize_fun_type_simple
-        env
-        decl_fty
-    in
-    let (env, fty) =
-      Phase.(
-        localize_ft
-          ~instantiation:
-            {
-              use_name = strip_ns (snd x);
-              use_pos = fst x;
-              explicit_targs = tal;
-            }
-          ~ety_env
+  | Some { fe_type; fe_deprecated; _ } ->
+    (match fe_type with
+    | (r, Tfun ft) ->
+      let ft =
+        Typing_special_fun.transform_special_fun_ty ft x (List.length el)
+      in
+      let ety_env = Phase.env_with_self env in
+      let tal = List.map ~f:(Decl_hint.hint env.decl_env) tal in
+      let ft =
+        Typing_enforceability.compute_enforced_and_pessimize_fun_type_simple
           env
-          decl_fty)
-    in
-    (env, (Reason.Rwitness fty.ft_pos, Tfun fty))
+          ft
+      in
+      let use_pos = fst x in
+      let (env, ft) =
+        Phase.(
+          localize_ft
+            ~instantiation:
+              { use_name = strip_ns (snd x); use_pos; explicit_targs = tal }
+            ~ety_env
+            env
+            ft)
+      in
+      let fty = (fst fe_type, Tfun ft) in
+      let def_pos = Reason.to_pos r in
+      TVis.check_deprecated ~use_pos ~def_pos fe_deprecated;
+      (env, fty)
+    | _ -> failwith "Expected function type")
 
 (**
  * Checks if a class (given by cty) contains a given static method.
@@ -5593,11 +5586,13 @@ and class_get_
                 ce_visibility = vis;
                 ce_lsb = lsb;
                 ce_type = (lazy member_decl_ty);
+                ce_deprecated;
                 _;
               } as ce ) ->
-          let p_vis = Reason.to_pos (fst member_decl_ty) in
-          TVis.check_class_access p env (p_vis, vis, lsb) cid class_;
-          check_class_get env p p_vis c mid ce cid;
+          let def_pos = Reason.to_pos (fst member_decl_ty) in
+          TVis.check_class_access ~use_pos:p ~def_pos env (vis, lsb) cid class_;
+          TVis.check_deprecated ~use_pos:p ~def_pos ce_deprecated;
+          check_class_get env p def_pos c mid ce cid;
           let (env, member_ty, et_enforced) =
             match member_decl_ty with
             (* We special case Tfun here to allow passing in explicit tparams to localize_ft. *)
@@ -5620,7 +5615,8 @@ and class_get_
                     env
                     ft)
               in
-              (env, (r, Tfun ft), false)
+              let fty = (r, Tfun ft) in
+              (env, fty, false)
             (* unused *)
             | _ ->
               let { et_type; et_enforced } =
@@ -5954,8 +5950,10 @@ and call_construct p env class_ params el uel cid =
         Errors.constructor_no_args p;
       let (env, tel, _tyl) = exprs env el in
       (env, tcid, tel, [], (Reason.Rnone, TUtils.terr env))
-    | Some { ce_visibility = vis; ce_type = (lazy m); _ } ->
-      TVis.check_obj_access p env (Reason.to_pos (fst m), vis);
+    | Some { ce_visibility = vis; ce_type = (lazy m); ce_deprecated; _ } ->
+      let def_pos = Reason.to_pos (fst m) in
+      TVis.check_obj_access ~use_pos:p ~def_pos env vis;
+      TVis.check_deprecated ~use_pos:p ~def_pos ce_deprecated;
       let m =
         match m with
         | (r, Tfun ft) ->
@@ -5997,11 +5995,6 @@ and check_lambda_arity lambda_pos def_pos lambda_arity expected_arity =
     if lambda_min > expected_min then
       Errors.typing_too_many_args expected_min lambda_min lambda_pos def_pos
   | (_, _) -> ()
-
-and check_deprecated p { ft_pos; ft_deprecated; _ } =
-  match ft_deprecated with
-  | Some s -> Errors.deprecated_use p ft_pos s
-  | None -> ()
 
 (* The variadic capture argument is an array listing the passed
  * variable arguments for the purposes of the function body; callsites
@@ -6196,7 +6189,6 @@ and call
              *)
             let pos_def = Reason.to_pos r2 in
             let (env, ft) = Typing_exts.retype_magic_func env ft el in
-            check_deprecated pos ft;
             let (env, var_param) = variadic_param env ft in
             (* Force subtype with expected result *)
             let env =
@@ -6470,7 +6462,6 @@ and call
                   Tfun
                     {
                       ft_pos = fpos;
-                      ft_deprecated = None;
                       ft_is_coroutine = is_coroutine;
                       ft_arity = arity;
                       ft_tparams = ([], FTKtparams);
@@ -6483,7 +6474,6 @@ and call
                       ft_return_disposable = false;
                       ft_mutability = None;
                       ft_returns_mutable = false;
-                      ft_decl_errors = None;
                       ft_returns_void_to_rx = false;
                     } )
               in
@@ -7573,7 +7563,9 @@ and get_decl_function_header tcopt function_id =
     IM.global_inference @@ TCO.infer_missing tcopt
   in
   if is_global_inference_on then
-    Decl_provider.get_fun function_id
+    match Decl_provider.get_fun function_id with
+    | Some { fe_type = (_, Tfun fun_type); _ } -> Some fun_type
+    | _ -> None
   else
     None
 

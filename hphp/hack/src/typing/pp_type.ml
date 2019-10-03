@@ -399,16 +399,6 @@ and pp_fun_type : type a. Format.formatter -> a ty fun_type -> unit =
   Format.fprintf fmt "@]";
   Format.fprintf fmt ";@ ";
 
-  Format.fprintf fmt "@[%s =@ " "ft_deprecated";
-  (match x.ft_deprecated with
-  | None -> Format.pp_print_string fmt "None"
-  | Some x ->
-    Format.pp_print_string fmt "(Some ";
-    Format.fprintf fmt "%S" x;
-    Format.pp_print_string fmt ")");
-  Format.fprintf fmt "@]";
-  Format.fprintf fmt ";@ ";
-
   Format.fprintf fmt "@[%s =@ " "ft_is_coroutine";
   Format.fprintf fmt "%B" x.ft_is_coroutine;
   Format.fprintf fmt "@]";

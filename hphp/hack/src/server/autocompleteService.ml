@@ -273,7 +273,6 @@ let get_constructor_ty c =
       Typing_defs.Tfun
         {
           ft_pos = pos;
-          ft_deprecated = None;
           ft_is_coroutine = false;
           ft_arity = Fstandard (0, 0);
           ft_tparams = ([], FTKtparams);
@@ -285,7 +284,6 @@ let get_constructor_ty c =
           ft_return_disposable = false;
           ft_returns_mutable = false;
           ft_mutability = None;
-          ft_decl_errors = None;
           ft_returns_void_to_rx = false;
         } )
 
@@ -441,15 +439,11 @@ let compute_complete_global
       else if not (does_fully_qualified_name_match_prefix name) then
         None
       else
-        Option.map (Decl_provider.get_fun name) ~f:(fun fun_ ->
+        Option.map (Decl_provider.get_fun name) ~f:(fun { fe_type; _ } ->
             incr result_count;
-            let ty =
-              ( Typing_reason.Rwitness fun_.Typing_defs.ft_pos,
-                Typing_defs.Tfun fun_ )
-            in
             get_partial_result
               (string_to_replace_prefix name)
-              (Phase.decl ty)
+              (Phase.decl fe_type)
               SearchUtils.SI_Function
               None)
     in
@@ -930,8 +924,8 @@ let find_global_results
             let fixed_name = ns ^ r.si_name in
             match Tast_env.get_fun tast_env fixed_name with
             | None -> (None, kind_to_string r.si_kind)
-            | Some ft ->
-              let ty = (Typing_reason.Rnone, Tfun ft) in
+            | Some fe ->
+              let ty = fe.fe_type in
               let details = get_func_details_for tast_env (DeclTy ty) in
               let res_ty = Tast_env.print_decl_ty tast_env ty in
               (details, res_ty)
@@ -944,7 +938,7 @@ let find_global_results
             let fixed_name = ns ^ r.si_name in
             match Tast_env.get_fun tast_env fixed_name with
             | None -> absolute_none
-            | Some ft -> ft.ft_pos |> Pos.to_absolute
+            | Some fe -> Reason.to_pos (fst fe.fe_type) |> Pos.to_absolute
           else
             absolute_none
         in

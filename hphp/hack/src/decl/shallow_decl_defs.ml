@@ -68,6 +68,7 @@ type shallow_method = {
   sm_type: decl_fun_type;
   sm_visibility: Aast.visibility;
   sm_fixme_codes: ISet.t;
+  sm_deprecated: string option;
 }
 [@@deriving eq, show]
 

@@ -77,7 +77,7 @@ let test () =
   (* Verify that typechecking of uses_foo.php computed (as a side effect)
    * declaration of foo and stored it in shared memory. *)
   (match Decl_heap.Funs.get "\\foo" with
-  | Some f ->
+  | Some { Typing_defs.fe_type = (_, Typing_defs.Tfun f); _ } ->
     let f_ret =
       Typing_print.full_decl
         TypecheckerOptions.default
@@ -88,7 +88,7 @@ let test () =
      * things changed in that file.
      * This should still be "int" at this point! *)
     assert (f_ret = "string")
-  | None -> assert false);
+  | _ -> assert false);
 
   (* Only now server will notice the change to foo.php. During this operation,
    * it will compare new return type of foo ("string"), with what it thinks

@@ -33,8 +33,8 @@ module Shared (Env : Env_S) = struct
     in
     let fun_returns_mutable id =
       match Env.get_fun env (snd id) with
-      | None -> false
-      | Some fty -> fty_returns_mutable fty
+      | Some { fe_type = (_, Tfun fty); _ } -> fty_returns_mutable fty
+      | _ -> false
     in
     match snd e with
     (* Function call *)

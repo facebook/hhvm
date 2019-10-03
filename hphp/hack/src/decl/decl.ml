@@ -240,7 +240,7 @@ let rec ifun_decl (f : Nast.fun_) =
   fun_decl f
 
 and fun_decl f =
-  let (errors, ft) =
+  let (errors, fe) =
     Errors.do_ (fun () ->
         let dep = Dep.Fun (snd f.f_name) in
         let env =
@@ -252,10 +252,10 @@ and fun_decl f =
         in
         fun_decl_in_env env f)
   in
-  let ft = { ft with ft_decl_errors = Some errors } in
+  let fe = { fe with fe_decl_errors = Some errors } in
   record_fun (snd f.f_name);
-  Decl_heap.Funs.add (snd f.f_name) ft;
-  ft
+  Decl_heap.Funs.add (snd f.f_name) fe;
+  fe
 
 and fun_decl_in_env env f =
   check_params env f.f_params;
@@ -284,28 +284,30 @@ and fun_decl_in_env env f =
   let where_constraints =
     List.map f.f_where_constraints (where_constraint env)
   in
-  let ft =
-    {
-      ft_pos = fst f.f_name;
-      ft_deprecated =
-        Attributes.deprecated ~kind:"function" f.f_name f.f_user_attributes;
-      ft_is_coroutine = f.f_fun_kind = Ast_defs.FCoroutine;
-      ft_arity = arity;
-      ft_tparams = (tparams, FTKtparams);
-      ft_where_constraints = where_constraints;
-      ft_params = params;
-      ft_ret = { et_type = ret_ty; et_enforced = false };
-      ft_fun_kind = f.f_fun_kind;
-      ft_reactive = reactivity;
-      ft_mutability = None;
-      (* Functions can't be mutable because they don't have "this" *)
-      ft_returns_mutable = returns_mutable;
-      ft_return_disposable = return_disposable;
-      ft_decl_errors = None;
-      ft_returns_void_to_rx = returns_void_to_rx;
-    }
+  let fe_deprecated =
+    Attributes.deprecated ~kind:"function" f.f_name f.f_user_attributes
   in
-  ft
+  let fe_type =
+    ( Reason.Rwitness (fst f.f_name),
+      Tfun
+        {
+          ft_pos = fst f.f_name;
+          ft_is_coroutine = f.f_fun_kind = Ast_defs.FCoroutine;
+          ft_arity = arity;
+          ft_tparams = (tparams, FTKtparams);
+          ft_where_constraints = where_constraints;
+          ft_params = params;
+          ft_ret = { et_type = ret_ty; et_enforced = false };
+          ft_fun_kind = f.f_fun_kind;
+          ft_reactive = reactivity;
+          ft_mutability = None;
+          (* Functions can't be mutable because they don't have "this" *)
+          ft_returns_mutable = returns_mutable;
+          ft_return_disposable = return_disposable;
+          ft_returns_void_to_rx = returns_void_to_rx;
+        } )
+  in
+  { fe_type; fe_deprecated; fe_decl_errors = None }
 
 (*****************************************************************************)
 (* Section declaring the type of a class *)
@@ -749,6 +751,7 @@ and build_constructor class_ method_ =
       elt_origin = class_name;
       elt_reactivity = None;
       elt_fixme_codes = method_.sm_fixme_codes;
+      elt_deprecated = method_.sm_deprecated;
     }
   in
   Decl_heap.Constructors.add class_name ft;
@@ -809,6 +812,7 @@ and prop_decl c acc sp =
       elt_origin = snd c.sc_name;
       elt_reactivity = None;
       elt_fixme_codes = sp.sp_fixme_codes;
+      elt_deprecated = None;
     }
   in
   Decl_heap.Props.add (elt.elt_origin, sp_name) ty;
@@ -838,6 +842,7 @@ and static_prop_decl c acc sp =
       elt_origin = snd c.sc_name;
       elt_reactivity = None;
       elt_fixme_codes = sp.sp_fixme_codes;
+      elt_deprecated = None;
     }
   in
   Decl_heap.StaticProps.add (elt.elt_origin, sp_name) ty;
@@ -951,6 +956,7 @@ and method_redecl_acc c acc m =
       elt_origin = snd c.sc_name;
       elt_reactivity = None;
       elt_fixme_codes = m.smr_fixme_codes;
+      elt_deprecated = None;
     }
   in
   let add_meth =
@@ -999,6 +1005,7 @@ and method_decl_acc ~is_static c (acc, condition_types) m =
       elt_origin = snd c.sc_name;
       elt_reactivity = m.sm_reactivity;
       elt_fixme_codes = m.sm_fixme_codes;
+      elt_deprecated = m.sm_deprecated;
     }
   in
   let add_meth =
@@ -1117,7 +1124,7 @@ let rec name_and_declare_types_program prog =
       | SetNamespaceEnv _ -> ()
       | FileAttributes _ -> ()
       | Fun f ->
-        let (_ : decl_fun_type) = ifun_decl f in
+        let (_ : fun_elt) = ifun_decl f in
         ()
       | Class c ->
         let class_env = { stack = SSet.empty } in

@@ -33,7 +33,7 @@ let transform_special_fun_ty fty id nargs =
    *
    * so this needs to be munged into the above.
    *)
-  if String.equal id SN.FB.idx then
+  if String.equal (snd id) SN.FB.idx then
     let (param1, param2, param3) =
       match fty.ft_params with
       | [param1; param2; param3] -> (param1, param2, param3)
@@ -81,7 +81,7 @@ let transform_special_fun_ty fty id nargs =
 
       function array_map($callback, $arr1, ...$args);
     *)
-    id = SN.StdlibFunctions.array_map && nargs > 0
+    String.equal (snd id) SN.StdlibFunctions.array_map && nargs > 0
   then
     let arity = nargs - 1 in
     if arity = 0 then
@@ -107,7 +107,7 @@ let transform_special_fun_ty fty id nargs =
       let make_tparam name =
         {
           tp_variance = Ast_defs.Invariant;
-          tp_name = (fty.ft_pos, name);
+          tp_name = (fst id, name);
           tp_constraints = [];
           tp_reified = Aast.Erased;
           tp_user_attributes = [];
@@ -123,8 +123,7 @@ let transform_special_fun_ty fty id nargs =
           ( r1,
             Tfun
               {
-                ft_pos = fty.ft_pos;
-                ft_deprecated = None;
+                ft_pos = fst id;
                 ft_is_coroutine = false;
                 ft_arity = Fstandard (arity, arity);
                 ft_tparams = ([], FTKtparams);
@@ -136,13 +135,12 @@ let transform_special_fun_ty fty id nargs =
                 ft_mutability = fty.ft_mutability;
                 ft_returns_mutable = fty.ft_returns_mutable;
                 ft_return_disposable = fty.ft_return_disposable;
-                ft_decl_errors = None;
                 ft_returns_void_to_rx = fty.ft_returns_void_to_rx;
               } )
       in
       let param_rest =
         List.map vars (fun var ->
-            let tc = Tapply ((fty.ft_pos, SN.Collections.cContainer), [var]) in
+            let tc = Tapply ((fst id, SN.Collections.cContainer), [var]) in
             TUtils.default_fun_param (r2, tc))
       in
       {

@@ -160,11 +160,10 @@ let handler =
       match x with
       | ((pos, _), Class_get ((_, CI (_, t)), _)) ->
         if Env.get_reified env t = Reified then Errors.class_get_reified pos
-      | ( (pos, _),
-          Call (_, ((_, (_, Tfun { ft_pos; ft_tparams; _ })), _), targs, _, _)
-        ) ->
+      | ((pos, _), Call (_, ((_, (r, Tfun { ft_tparams; _ })), _), targs, _, _))
+        ->
         let tparams = fst ft_tparams in
-        verify_call_targs env pos ft_pos tparams targs
+        verify_call_targs env pos (Reason.to_pos r) tparams targs
       | ((pos, _), New (((_, ty), CI (_, class_id)), targs, _, _, _)) ->
         begin
           match ty with

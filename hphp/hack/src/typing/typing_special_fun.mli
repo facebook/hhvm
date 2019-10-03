@@ -7,7 +7,4 @@
  *
  *)
 val transform_special_fun_ty :
-  Decl_provider.fun_decl ->
-  Decl_provider.fun_key ->
-  int ->
-  Decl_provider.fun_decl
+  Typing_defs.decl_fun_type -> Nast.sid -> int -> Typing_defs.decl_fun_type

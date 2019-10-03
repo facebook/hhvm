@@ -65,7 +65,6 @@ let expand_ty ?var_hook ?pos env ty =
   and exp_fun_type
       {
         ft_pos;
-        ft_deprecated;
         ft_arity;
         ft_tparams;
         ft_where_constraints;
@@ -77,12 +76,10 @@ let expand_ty ?var_hook ?pos env ty =
         ft_mutability;
         ft_returns_mutable;
         ft_is_coroutine;
-        ft_decl_errors;
         ft_returns_void_to_rx;
       } =
     {
       ft_pos;
-      ft_deprecated;
       ft_arity;
       ft_fun_kind;
       ft_reactive;
@@ -95,7 +92,6 @@ let expand_ty ?var_hook ?pos env ty =
         List.map ~f:exp_where_constraint ft_where_constraints;
       ft_ret = exp_possibly_enforced_ty ft_ret;
       ft_params = List.map ~f:exp_fun_param ft_params;
-      ft_decl_errors;
       ft_returns_void_to_rx;
     }
   and exp_fun_param

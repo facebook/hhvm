@@ -12,7 +12,7 @@ type typedef_key = string
 
 type gconst_key = string
 
-type fun_decl = Typing_defs.decl_fun_type
+type fun_decl = Typing_defs.fun_elt
 
 type typedef_decl = Typing_defs.typedef_type
 

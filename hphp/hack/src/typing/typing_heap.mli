@@ -21,7 +21,7 @@ module type ReadOnly = sig
   val find_unsafe : key -> t
 end
 
-module Funs : ReadOnly with type key = StringKey.t and type t = decl_fun_type
+module Funs : ReadOnly with type key = StringKey.t and type t = fun_elt
 
 module Classes :
   ReadOnly with type key = StringKey.t and type t = Typing_classes_heap.Api.t

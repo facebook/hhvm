@@ -245,10 +245,19 @@ and obj_get_concrete_ty
               | None ->
                 member_not_found id_pos ~is_method class_info id_str r;
                 default ()
-              | Some { ce_visibility = vis; ce_type = (lazy (r, Tfun ft)); _ }
-                ->
+              | Some
+                  {
+                    ce_visibility = vis;
+                    ce_type = (lazy (r, Tfun ft));
+                    ce_deprecated;
+                    _;
+                  } ->
                 let mem_pos = Reason.to_pos r in
-                TVis.check_obj_access id_pos env (mem_pos, vis);
+                TVis.check_deprecated
+                  ~use_pos:id_pos
+                  ~def_pos:mem_pos
+                  ce_deprecated;
+                TVis.check_obj_access ~use_pos:id_pos ~def_pos:mem_pos env vis;
 
                 (* the return type of __call can depend on the class params or be this *)
                 let ety_env = mk_ety_env r class_info x exact paraml in
@@ -287,7 +296,14 @@ and obj_get_concrete_ty
                 in
                 let member_ty = (r, Tfun ft) in
                 if inst_meth then
-                  TVis.check_inst_meth_access id_pos (mem_pos, vis);
+                  TVis.check_inst_meth_access
+                    ~use_pos:id_pos
+                    ~def_pos:mem_pos
+                    vis;
+                TVis.check_deprecated
+                  ~use_pos:id_pos
+                  ~def_pos:mem_pos
+                  ce_deprecated;
                 (env, member_ty)
               | _ -> assert false
             end
@@ -298,6 +314,7 @@ and obj_get_concrete_ty
                   ce_type = (lazy member_);
                   ce_abstract;
                   ce_xhp_attr;
+                  ce_deprecated;
                   _;
                 } as member_ce ) ->
             let mem_pos = Reason.to_pos (fst member_) in
@@ -321,7 +338,11 @@ and obj_get_concrete_ty
                       (snd x)
                 end
               | _ -> () );
-            TVis.check_obj_access id_pos env (mem_pos, vis);
+            TVis.check_obj_access ~use_pos:id_pos ~def_pos:mem_pos env vis;
+            TVis.check_deprecated
+              ~use_pos:id_pos
+              ~def_pos:mem_pos
+              ce_deprecated;
             if class_id = CIparent && ce_abstract then
               Errors.parent_abstract_call id_str id_pos mem_pos;
             let member_decl_ty = Typing_enum.member_type env member_ce in
@@ -367,7 +388,8 @@ and obj_get_concrete_ty
                 (* TODO(T52753871): same as for class_get *)
                 (env, member_ty, et_enforced)
             in
-            if inst_meth then TVis.check_inst_meth_access id_pos (mem_pos, vis);
+            if inst_meth then
+              TVis.check_inst_meth_access ~use_pos:id_pos ~def_pos:mem_pos vis;
             let (env, member_ty) =
               if Cls.has_upper_bounds_on_this_from_constraints class_info then
                 let ((env, ty), succeed) =

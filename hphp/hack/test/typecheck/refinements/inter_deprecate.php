@@ -1,7 +1,7 @@
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-class B {
+class B implements I {
   <<__Deprecated('blah', 25)>>
   public function foo(): string {
     return "a";

@@ -176,14 +176,14 @@ let go
     | Some head_result ->
       (match get_occurrence_info env nast head_result with
       | None -> None
-      | Some (occurrence, ft, def_opt) ->
+      | Some (occurrence, fe, def_opt) ->
         Typing_defs.(
           Lsp.SignatureHelp.(
             let tast_env = Tast_env.empty tcopt in
             let siginfo_label =
               Tast_env.print_ty_with_identity
                 tast_env
-                (DeclTy (Reason.Rnone, Tfun ft))
+                (DeclTy fe.fe_type)
                 occurrence
                 def_opt
             in
@@ -208,12 +208,17 @@ let go
                 Some (Docblock_parser.get_param_docs siginfo_documentation)
               | None -> None
             in
+            let ft_params =
+              match fe.fe_type with
+              | (_, Tfun ft) -> ft.ft_params
+              | _ -> []
+            in
             let params =
-              List.map ft.ft_params ~f:(fun param ->
+              List.map ft_params ~f:(fun param ->
                   let parinfo_label =
                     match param.fp_name with
                     | Some s -> s
-                    | None -> Tast_env.print_decl_ty tast_env ft.ft_ret.et_type
+                    | None -> Tast_env.print_decl_ty tast_env fe.fe_type
                   in
                   let parinfo_documentation =
                     match param_docs with

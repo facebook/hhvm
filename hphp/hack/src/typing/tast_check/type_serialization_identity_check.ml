@@ -78,7 +78,6 @@ let rec strip_ty ty =
           ft_ret;
           (* Dummy values: these aren't currently serialized. *)
           ft_pos = Pos.none;
-          ft_deprecated = None;
           ft_arity = Fstandard (0, 0);
           ft_tparams = ([], FTKtparams);
           ft_where_constraints = [];
@@ -87,7 +86,6 @@ let rec strip_ty ty =
           ft_return_disposable = false;
           ft_mutability = None;
           ft_returns_mutable = false;
-          ft_decl_errors = None;
           ft_returns_void_to_rx = false;
         }
     | Tshape (shape_kind, shape_fields) ->

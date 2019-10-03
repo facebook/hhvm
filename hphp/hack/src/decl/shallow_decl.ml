@@ -230,8 +230,6 @@ let method_type env m =
   in
   {
     ft_pos = fst m.m_name;
-    ft_deprecated =
-      Attrs.deprecated ~kind:"method" m.m_name m.m_user_attributes;
     ft_is_coroutine = m.m_fun_kind = Ast_defs.FCoroutine;
     ft_arity = arity;
     ft_tparams = (tparams, FTKtparams);
@@ -243,7 +241,6 @@ let method_type env m =
     ft_returns_mutable = returns_mutable;
     ft_return_disposable = return_disposable;
     ft_fun_kind = m.m_fun_kind;
-    ft_decl_errors = None;
     ft_returns_void_to_rx = returns_void_to_rx;
   }
 
@@ -275,7 +272,6 @@ let method_redeclaration_type env m =
   in
   {
     ft_pos = fst m.mt_name;
-    ft_deprecated = None;
     ft_is_coroutine = m.mt_fun_kind = Ast_defs.FCoroutine;
     ft_arity = arity;
     ft_tparams = (tparams, FTKtparams);
@@ -287,7 +283,6 @@ let method_redeclaration_type env m =
     ft_returns_mutable = false;
     ft_fun_kind = m.mt_fun_kind;
     ft_return_disposable = false;
-    ft_decl_errors = None;
     ft_returns_void_to_rx = false;
   }
 
@@ -312,6 +307,9 @@ let method_ env c m =
     | Local None -> Some (Method_local None)
     | _ -> None
   in
+  let sm_deprecated =
+    Attrs.deprecated ~kind:"method" m.m_name m.m_user_attributes
+  in
   {
     sm_abstract = m.m_abstract;
     sm_final = m.m_final;
@@ -322,6 +320,7 @@ let method_ env c m =
     sm_type = ft;
     sm_visibility = m.m_visibility;
     sm_fixme_codes = Fixme_provider.get_fixme_codes_for_pos ft.ft_pos;
+    sm_deprecated;
   }
 
 let method_redeclaration env m =

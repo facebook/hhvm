@@ -45,6 +45,7 @@ let element_to_class_elt
       elt_visibility = ce_visibility;
       elt_reactivity = _;
       elt_fixme_codes = _;
+      elt_deprecated = ce_deprecated;
     } =
   {
     ce_final;
@@ -59,6 +60,7 @@ let element_to_class_elt
     ce_visibility;
     ce_origin;
     ce_type;
+    ce_deprecated;
   }
 
 let to_class_type

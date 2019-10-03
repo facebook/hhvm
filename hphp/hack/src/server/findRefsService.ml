@@ -299,8 +299,8 @@ let get_definitions = function
   | IFunction fun_name ->
     begin
       match Decl_provider.get_fun fun_name with
-      | Some fun_ -> [(fun_name, fun_.ft_pos)]
-      | None -> []
+      | Some { fe_type = (_, Tfun fun_); _ } -> [(fun_name, fun_.ft_pos)]
+      | _ -> []
     end
   | IGConst _
   | IMember (Subclasses_of _, _)

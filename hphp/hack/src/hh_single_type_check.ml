@@ -812,8 +812,8 @@ let compare_typedefs t1 t2 =
   if t1 <> t2 then fail_comparison "typedefs"
 
 let compare_funs f1 f2 =
-  let f1 = Decl_pos_utils.NormalizeSig.fun_type f1 in
-  let f2 = Decl_pos_utils.NormalizeSig.fun_type f2 in
+  let f1 = Decl_pos_utils.NormalizeSig.fun_elt f1 in
+  let f2 = Decl_pos_utils.NormalizeSig.fun_elt f2 in
   if f1 <> f2 then fail_comparison "funs"
 
 let compare_classes c1 c2 =

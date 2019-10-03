@@ -322,9 +322,9 @@ let enforce_mutable_call (env : Env.env) (te : expr) =
     when s <> SN.Rx.move && s <> SN.Rx.freeze ->
     begin
       match Env.get_fun env (snd id) with
-      | Some fty ->
+      | Some { fe_type = (_, Tfun fty); _ } ->
         check_mutability_fun_params env Borrowable_args.empty fty el
-      | None -> ()
+      | _ -> ()
     end
   (* static methods/lambdas *)
   | Call (_, ((_, (_, Tfun fty)), Class_const _), _, el, _)
@@ -655,11 +655,11 @@ let check =
               enforce_mutable_call env expr;
               ( if not is_expr_statement then
                 match get_type f with
-                | (_, Tfun fty) when fty.ft_returns_void_to_rx ->
+                | (r, Tfun fty) when fty.ft_returns_void_to_rx ->
                   Errors
                   .returns_void_to_rx_function_as_non_expression_statement
                     (get_position expr)
-                    fty.ft_pos
+                    (Reason.to_pos r)
                 | _ -> () );
               super#on_expr (env, ctx) expr
             | (_, New (_, _, el, _, (_, ctor_fty))) ->

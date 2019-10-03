@@ -15,7 +15,10 @@ module Cls = Decl_provider.Class
 
 (* Not adding a Typing_dep here because it will be added when the
  * Nast is fully processed (by the caller of this code) *)
-let get_fun = Decl_provider.get_fun
+let get_fun name =
+  match Decl_provider.get_fun name with
+  | Some { fe_type = (_, Tfun ft); _ } -> Some ft
+  | _ -> None
 
 let get_static_meth (cls_name : string) (meth_name : string) =
   match Decl_provider.get_class cls_name with
@@ -30,13 +33,7 @@ let get_static_meth (cls_name : string) (meth_name : string) =
     end
 
 let funopt_is_noreturn = function
-  | Some
-      {
-        Typing_defs.ft_ret =
-          { Typing_defs.et_type = (_r, Typing_defs.Tprim Tnoreturn); _ };
-        _;
-      } ->
-    true
+  | Some { ft_ret = { et_type = (_r, Tprim Tnoreturn); _ }; _ } -> true
   | _ -> false
 
 let raise_exit_if_terminal f = if funopt_is_noreturn f then raise Exit

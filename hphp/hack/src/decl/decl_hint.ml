@@ -115,7 +115,6 @@ and hint_ p env = function
     Tfun
       {
         ft_pos = p;
-        ft_deprecated = None;
         ft_is_coroutine = is_coroutine;
         ft_arity = arity;
         ft_tparams = ([], FTKtparams);
@@ -127,7 +126,6 @@ and hint_ p env = function
         ft_return_disposable = false;
         ft_mutability = None;
         ft_returns_mutable = mut_ret;
-        ft_decl_errors = None;
         ft_returns_void_to_rx = false;
       }
   | Happly ((p, "\\Tuple"), _)

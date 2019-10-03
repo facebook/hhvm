@@ -54,6 +54,7 @@ let method_redeclaration_to_shallow_method smr =
     sm_type;
     sm_visibility;
     sm_fixme_codes;
+    sm_deprecated = None;
   }
 
 let redecl_list_to_method_seq redecls =
@@ -79,6 +80,7 @@ let shallow_method_to_class_elt child_class mro subst meth : class_elt =
     sm_type;
     sm_visibility;
     sm_fixme_codes = _;
+    sm_deprecated;
   } =
     meth
   in
@@ -106,6 +108,7 @@ let shallow_method_to_class_elt child_class mro subst meth : class_elt =
     ce_visibility = visibility;
     ce_origin = mro.mro_name;
     ce_type = ty;
+    ce_deprecated = sm_deprecated;
   }
 
 let shallow_method_to_telt child_class mro subst meth : tagged_elt =
@@ -162,6 +165,7 @@ let shallow_prop_to_telt child_class mro subst prop : tagged_elt =
         ce_visibility = visibility;
         ce_origin = mro.mro_name;
         ce_type = ty;
+        ce_deprecated = None;
       };
   }
 

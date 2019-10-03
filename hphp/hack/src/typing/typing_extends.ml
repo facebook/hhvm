@@ -520,7 +520,6 @@ let default_constructor_ce class_ =
   let ft =
     {
       ft_pos = pos;
-      ft_deprecated = None;
       ft_is_coroutine = false;
       ft_arity = Fstandard (0, 0);
       ft_tparams = ([], FTKtparams);
@@ -532,7 +531,6 @@ let default_constructor_ce class_ =
       ft_mutability = None;
       ft_returns_mutable = false;
       ft_return_disposable = false;
-      ft_decl_errors = None;
       ft_returns_void_to_rx = false;
     }
   in
@@ -549,6 +547,7 @@ let default_constructor_ce class_ =
     ce_visibility = Vpublic;
     ce_type = lazy (r, Tfun ft);
     ce_origin = name;
+    ce_deprecated = None;
   }
 
 (* When an interface defines a constructor, we check that they are compatible *)

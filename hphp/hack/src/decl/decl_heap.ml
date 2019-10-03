@@ -29,7 +29,7 @@ end
 
 (* a function type *)
 module Fun = struct
-  type t = decl_fun_type
+  type t = fun_elt
 
   let prefix = Prefix.make ()
 

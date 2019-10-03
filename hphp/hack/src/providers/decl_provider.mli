@@ -20,7 +20,7 @@ module Class : sig
   include module type of Typing_classes_heap.Api
 end
 
-type fun_decl = Typing_defs.decl_fun_type
+type fun_decl = Typing_defs.fun_elt
 
 type class_decl = Class.t
 

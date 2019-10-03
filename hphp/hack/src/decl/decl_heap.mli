@@ -19,7 +19,7 @@ module Class : sig
 end
 
 module Fun : sig
-  type t = decl_fun_type
+  type t = fun_elt
 
   val prefix : Prefix.t
 

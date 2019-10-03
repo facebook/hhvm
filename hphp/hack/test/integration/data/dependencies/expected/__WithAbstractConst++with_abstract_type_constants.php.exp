@@ -1,7 +1,5 @@
 <?hh
-class WithConst {
-
-}
+class WithConst {}
 abstract class WithAbstractConst {
   abstract const type ABS_WO_CONSTRAINT;
   abstract const type ABS_WITH_CONSTRAINT as string;

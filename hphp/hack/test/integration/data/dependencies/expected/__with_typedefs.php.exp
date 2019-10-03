@@ -2,23 +2,13 @@
 function with_typedefs(Complex $c, shape('x' => int, 'y' => C) $pair): Point {
   return shape('x' => $pair['x'], 'y' => $c['first']);
 }
-class C extends \A {
-
-}
-class A0 {
-
-}
+class C extends \A {}
+class A0 {}
 newtype Point = shape('x' => int, 'y' => int);
 type Complex = shape('first' => int, 'second' => \B);
-class A extends \A0 implements \I1 {
-
-}
-class B implements \I1 {
-
-}
-interface I1 {
-
-}
+class A extends \A0 implements \I1 {}
+class B implements \I1 {}
+interface I1 {}
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }

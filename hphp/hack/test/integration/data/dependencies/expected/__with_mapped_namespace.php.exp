@@ -16,7 +16,5 @@ namespace HH {
         throw new \Exception();
       }
     }
-
   }
-
 }

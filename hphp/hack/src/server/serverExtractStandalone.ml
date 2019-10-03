@@ -537,9 +537,7 @@ let get_class_declaration tcopt (cls : Decl_provider.class_decl) =
           "<%s>"
           (list_items @@ List.map (Class.tparams cls) tparam_name)
     in
-    let { extends; implements; uses; req_extends; req_implements } =
-      get_direct_ancestors cls
-    in
+    let { extends; implements; _ } = get_direct_ancestors cls in
     let prefix_if_nonempty prefix s =
       if s = "" then
         ""
@@ -547,48 +545,17 @@ let get_class_declaration tcopt (cls : Decl_provider.class_decl) =
         prefix ^ s
     in
     let extends =
-      prefix_if_nonempty "extends "
+      prefix_if_nonempty " extends "
       @@ list_items
       @@ List.map ~f:(Typing_print.full_decl tcopt) extends
     in
     let implements =
-      prefix_if_nonempty "implements "
+      prefix_if_nonempty " implements "
       @@ list_items
       @@ List.map ~f:(Typing_print.full_decl tcopt) implements
     in
-    let uses =
-      if List.is_empty uses then
-        ""
-      else
-        Printf.sprintf
-          "use %s;\n"
-          (list_items @@ List.map ~f:(Typing_print.full_decl tcopt) uses)
-    in
-    let req_extends =
-      String.concat
-      @@ List.map req_extends (fun s ->
-             Printf.sprintf
-               "require extends %s;\n"
-               (Typing_print.full_decl tcopt s))
-    in
-    let req_implements =
-      String.concat
-      @@ List.map req_implements (fun s ->
-             Printf.sprintf
-               "require implements %s;\n"
-               (Typing_print.full_decl tcopt s))
-    in
     (* TODO: traits, records *)
-    Printf.sprintf
-      "%s %s%s %s %s {%s%s%s"
-      kind
-      name
-      tparams
-      extends
-      implements
-      req_extends
-      req_implements
-      uses)
+    Printf.sprintf "%s %s%s%s%s" kind name tparams extends implements)
 
 let get_method_declaration
     tcopt
@@ -660,13 +627,15 @@ let get_typeconst_declaration tcopt tconst name =
   in
   Printf.sprintf "%s const type %s%s%s;" abstract name constr typ
 
-let get_field_declaration
-    tcopt (cls : Decl_provider.class_decl) (field : Typing_deps.Dep.variant) =
+let get_class_elt_declaration
+    tcopt
+    (cls : Decl_provider.class_decl)
+    (class_elt : Typing_deps.Dep.variant) =
   Typing_deps.Dep.(
     Decl_provider.(
       let from_interface = Class.kind cls = Ast_defs.Cinterface in
-      let description = to_string field in
-      match field with
+      let description = to_string class_elt in
+      match class_elt with
       | Const (_, const_name) ->
         if Class.has_typeconst cls const_name then
           let tconst =
@@ -735,7 +704,7 @@ let get_field_declaration
           sp
           ~is_static:true
           (String.lstrip ~drop:(fun c -> c = '$') sprop_name)
-      (* Constructor should've been tackled earlier, and all other dependencies aren't fields *)
+      (* Constructor should've been tackled earlier, and all other dependencies aren't class elements *)
       | Cstr _
       | Extends _
       | AllMembers _
@@ -776,70 +745,79 @@ let construct_enum tcopt enum fields =
     Printf.sprintf "enum %s: %s%s" (strip_ns enum_name) base cons
   in
   let constants = List.map fields ~f:string_enum_const in
-  Printf.sprintf "%s {\n%s\n}" enum_decl (String.concat ~sep:"\n" constants)
+  Printf.sprintf "%s {%s}" enum_decl (String.concat ~sep:"\n" constants)
 
-let construct_class tcopt cls ?full_method:(meth = None) fields =
-  Decl_provider.(
-    (* Enum declaration have a very different format: for example, no 'const' keyword
-     for values, which are actually just class constants *)
-    if Class.kind cls = Ast_defs.Cenum then
-      construct_enum tcopt cls fields
+let get_constructor_declaration tcopt cls prop_names =
+  let (cstr, _) = Decl_provider.Class.construct cls in
+  let body =
+    String.concat ~sep:"\n"
+    @@ List.map prop_names (fun prop_name ->
+           Printf.sprintf "$this->%s = %s;" prop_name call_make_default)
+  in
+  match cstr with
+  | None ->
+    if List.is_empty prop_names then
+      None
     else
-      let decl = get_class_declaration tcopt cls in
-      Typing_deps.(
-        let properties =
-          List.filter_map fields ~f:(fun field ->
-              let desc = Dep.to_string field in
-              match field with
-              | Dep.Prop (_, p) ->
-                Some (value_or_not_found desc @@ Class.get_prop cls p, p)
-              | _ -> None)
-        in
-        let process_field f =
-          match f with
-          | Dep.AllMembers _
-          | Dep.Extends _ ->
-            raise UnexpectedDependency
-          (* Constructor needs special treatment because we need information about properties *)
-          | Dep.Cstr _ ->
-            let (cstr, _) = Class.construct cls in
-            let properties =
-              List.map properties (fun (_, name) ->
-                  Printf.sprintf "$this->%s = %s;" name call_make_default)
-            in
-            (match cstr with
-            | None ->
-              if List.is_empty properties then
-                ""
-              else
-                Printf.sprintf
-                  "public function __construct() {%s}"
-                  (String.concat ~sep:"\n" properties)
-            | Some cstr ->
-              let decl =
-                get_method_declaration
-                  tcopt
-                  cstr
-                  ~is_static:false
-                  "__construct"
-              in
-              let body =
-                Printf.sprintf "{%s}" @@ String.concat ~sep:"\n" properties
-              in
-              decl ^ body)
-          | _ -> get_field_declaration tcopt cls f
-        in
-        let body =
-          String.concat ~sep:"\n" (List.map fields ~f:process_field)
-        in
-        (* If we are extracting a method of this class, we should declare it here, with stubs
-       of other class fields. *)
-        let extracted_method =
-          match meth with
-          | Some (Method _) -> extract_body (Option.value_exn meth)
-          | _ -> ""
-        in
-        Printf.sprintf "%s\n%s\n%s}" decl body extracted_method))
+      Some (Printf.sprintf "public function __construct() {%s}" body)
+  | Some cstr ->
+    let decl =
+      get_method_declaration tcopt cstr ~is_static:false "__construct"
+    in
+    Some (Printf.sprintf "%s {%s}" decl body)
+
+let get_class_body tcopt cls meth class_elts =
+  let { uses; req_extends; req_implements; _ } = get_direct_ancestors cls in
+  let uses =
+    List.map uses ~f:(fun s ->
+        Printf.sprintf "use %s;" (Typing_print.full_decl tcopt s))
+  in
+  let req_extends =
+    List.map req_extends (fun s ->
+        Printf.sprintf "require extends %s;" (Typing_print.full_decl tcopt s))
+  in
+  let req_implements =
+    List.map req_implements (fun s ->
+        Printf.sprintf
+          "require implements %s;"
+          (Typing_print.full_decl tcopt s))
+  in
+  let open Typing_deps in
+  let prop_names =
+    List.filter_map class_elts ~f:(function
+        | Dep.Prop (_, p) -> Some p
+        | _ -> None)
+  in
+  let body =
+    List.filter_map class_elts ~f:(function
+        | Dep.AllMembers _
+        | Dep.Extends _ ->
+          raise UnexpectedDependency
+        (* Constructor needs special treatment because we need
+           information about properties. *)
+        | Dep.Cstr _ -> get_constructor_declaration tcopt cls prop_names
+        | class_elt -> Some (get_class_elt_declaration tcopt cls class_elt))
+  in
+  (* If we are extracting a method of this class, we should declare it
+     here, with stubs of other class elements. *)
+  let extracted_method =
+    match meth with
+    | Some (Method _ as m) -> [extract_body m]
+    | _ -> []
+  in
+  String.concat
+    ~sep:"\n"
+    (req_extends @ req_implements @ uses @ body @ extracted_method)
+
+let construct_class tcopt cls ?(full_method = None) fields =
+  (* Enum declaration have a very different format: for example, no 'const' keyword
+     for values, which are actually just class constants *)
+  if Decl_provider.Class.kind cls = Ast_defs.Cenum then
+    construct_enum tcopt cls fields
+  else
+    let decl = get_class_declaration tcopt cls in
+    let body = get_class_body tcopt cls full_method fields in
+    Printf.sprintf "%s {%s}" decl body
 
 let construct_typedef tcopt t =
   let not_found_msg = Printf.sprintf "typedef %s" t in
@@ -1201,7 +1179,7 @@ let get_code declarations =
     format @@ String.concat ~sep:"\n" @@ (hh_prefix :: toplevel)
   in
   let rec code_from_namespace nspace_name nspace_content code =
-    let code = "}\n" :: code in
+    let code = "}" :: code in
     let code =
       Caml.Hashtbl.fold code_from_namespace nspace_content.namespaces code
     in

@@ -1,32 +1,18 @@
 <?hh
 class DerivedImplementing extends \Implementing implements \SimpleInterface {
   use \RequiringTrait;
-
-
 }
-abstract class AbstractBase {
-
-}
+abstract class AbstractBase {}
 interface SimpleInterface {
   require extends \AbstractBase;
-
-
 }
-interface DerivedInterface extends \BaseInterface {
-
-}
+interface DerivedInterface extends \BaseInterface {}
 trait RequiringTrait {
   require implements \BaseInterface;
   require implements \SimpleInterface;
-
-
 }
-interface BaseInterface {
-
-}
-class Implementing extends \AbstractBase implements \DerivedInterface {
-
-}
+interface BaseInterface {}
+class Implementing extends \AbstractBase implements \DerivedInterface {}
 function with_requiring_trait(DerivedImplementing $arg): void {}
 function extract_standalone_make_default(): nothing {
   throw new Exception();

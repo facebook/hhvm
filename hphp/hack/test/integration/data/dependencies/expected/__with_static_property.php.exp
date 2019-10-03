@@ -1,7 +1,5 @@
 <?hh
-class A0 {
-
-}
+class A0 {}
 function with_static_property(): void {
   $a = WithStaticProperty::$map;
   $b = WithStaticProperty::$vector;
@@ -10,15 +8,9 @@ class WithStaticProperty {
   public static \Vector<\A> $vector = Vector {};
   public static \Map<\SomeEnum, string> $map = Map {};
 }
-class A extends \A0 implements \I1 {
-
-}
-enum SomeEnum: int {
-
-}
-interface I1 {
-
-}
+class A extends \A0 implements \I1 {}
+enum SomeEnum: int {}
+interface I1 {}
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }

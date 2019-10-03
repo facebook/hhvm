@@ -4,9 +4,7 @@ class ImplementingBase extends \AbstractBase {
     throw new Exception();
   }
 }
-abstract class AbstractBase {
-
-}
+abstract class AbstractBase {}
 function with_overriding(Derived $arg): int {
   $arg->inherited();
   return $arg->overridden();

@@ -7,9 +7,7 @@ class WithConst {
     this::WITH_CONSTRAINT $arg2,
   ): void {}
 }
-class A0 {
-
-}
+class A0 {}
 enum SomeEnum: int {
   SECOND = 0;
 }

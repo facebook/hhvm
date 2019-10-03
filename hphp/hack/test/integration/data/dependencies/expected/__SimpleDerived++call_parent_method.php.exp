@@ -10,7 +10,6 @@ class SimpleClass {
   public function simple_method(): void {
     throw new Exception();
   }
-
 }
 function extract_standalone_make_default(): nothing {
   throw new Exception();

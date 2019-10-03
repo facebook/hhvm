@@ -2,33 +2,19 @@
 function generic<T>(): int {
   throw new \Exception();
 }
-class C extends \A {
-
-}
-class A0 {
-
-}
-class E<T> extends \D<T, int> {
-
-}
-class A extends \A0 implements \I1 {
-
-}
-class B implements \I1 {
-
-}
-class D<Tfirst, Tsecond> extends \B {
-
-}
+class C extends \A {}
+class A0 {}
+class E<T> extends \D<T, int> {}
+class A extends \A0 implements \I1 {}
+class B implements \I1 {}
+class D<Tfirst, Tsecond> extends \B {}
 function with_generics<Tfirst, Tsecond>(
   D<Tfirst, Tsecond> $d,
   E<Tfirst> $e,
 ): int {
   return generic<C>();
 }
-interface I1 {
-
-}
+interface I1 {}
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }

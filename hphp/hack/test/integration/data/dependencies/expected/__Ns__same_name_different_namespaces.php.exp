@@ -10,35 +10,25 @@ namespace Test1 {
   function f(int $x): \Test1\A {
     throw new \Exception();
   }
-  class A {
-
-  }
+  class A {}
   namespace NestedTest {
     function g(int $x): \Test1\NestedTest\A {
       throw new \Exception();
     }
-    class A extends \Test1\NestedTest\UltraNested\B {
-
-    }
+    class A extends \Test1\NestedTest\UltraNested\B {}
     namespace UltraNested {
       function noop(): void {
         throw new \Exception();
       }
-      class B {
-
-      }
+      class B {}
     }
-
   }
-
 }
-
 namespace Test2 {
   function f(int $x): \Test1\A {
     throw new \Exception();
   }
 }
-
 namespace Ns {
   function same_name_different_namespaces(int $x): int {
     \Test1\NestedTest\g($x);
@@ -52,5 +42,3 @@ namespace Ns {
     }
   }
 }
-
-

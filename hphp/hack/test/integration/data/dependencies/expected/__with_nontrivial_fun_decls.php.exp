@@ -1,10 +1,6 @@
 <?hh
-class ImplementingBase extends \AbstractBase {
-
-}
-abstract class AbstractBase {
-
-}
+class ImplementingBase extends \AbstractBase {}
+abstract class AbstractBase {}
 function only_variadic(int ...$args): void {
   throw new \Exception();
 }

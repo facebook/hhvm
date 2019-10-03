@@ -94,3 +94,9 @@ interface IWithRequirement {
 }
 
 function with_requiring_interface(IWithRequirement $arg): void {}
+
+function WithNameMatchingClassName(): WithNameMatchingClassName {
+  return new WithNameMatchingClassName();
+}
+
+class WithNameMatchingClassName {}

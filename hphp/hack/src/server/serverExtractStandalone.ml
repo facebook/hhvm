@@ -1168,7 +1168,7 @@ let get_code declarations =
   let decl_names = SMap.keys declarations in
   let global_namespace = sort_by_namespace decl_names in
   let code_from_namespace_decls name acc =
-    Option.to_list (SMap.get name declarations) @ acc
+    Option.value (SMap.get name declarations) ~default:[] @ acc
   in
   let hh_prefix = "<?hh" in
   (* Toplevel code has to be in a separate file *)
@@ -1211,11 +1211,14 @@ let get_code declarations =
     namespaced
 
 let get_declarations tcopt target class_dependencies global_dependencies =
+  let add_declaration declarations name declaration =
+    SMap.add name [declaration] declarations ~combine:(fun x y -> y @ x)
+  in
   let add_global_declaration declarations dep =
-    SMap.add
+    add_declaration
+      declarations
       (global_dep_name dep)
       (get_global_object_declaration tcopt dep)
-      declarations
   in
   let add_class_declaration cls fields declarations =
     let full_method =
@@ -1227,16 +1230,16 @@ let get_declarations tcopt target class_dependencies global_dependencies =
         else
           None
     in
-    SMap.add
+    add_declaration
+      declarations
       cls
       (construct_type_declaration tcopt cls ~full_method fields)
-      declarations
   in
   let add_target_declaration declarations =
     match target with
     | Function function_name ->
       let function_text = extract_body target in
-      SMap.add function_name function_text declarations
+      add_declaration declarations function_name function_text
     | Method _ -> declarations
   in
   List.fold_left global_dependencies ~f:add_global_declaration ~init:SMap.empty

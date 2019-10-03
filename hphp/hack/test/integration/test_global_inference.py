@@ -141,3 +141,61 @@ class TestThreeFilesGlobalInference(TestCase[GlobalInferenceDriver]):
                 self.fail(
                     "Data race detected, we should only have three variables here"
                 )
+
+
+class TestGlobalInferenceCorrectness(TestCase[GlobalInferenceDriver]):
+    @classmethod
+    def get_template_repo(cls) -> str:
+        return "hphp/hack/test/integration/data/global_inference/www"
+
+    @classmethod
+    def get_test_driver(cls) -> GlobalInferenceDriver:
+        return GlobalInferenceDriver()
+
+    def execute_once(self):
+        temp_dir = tempfile.mkdtemp()
+
+        self.test_driver.start_hh_server(args=["--config", "infer_missing=global"])
+        logpath, _, _ = self.test_driver.proc_call(
+            [hh_client, self.test_driver.repo_dir, "--logname"]
+        )
+        artifacts_path = None
+        with open(logpath.strip()) as log:
+            for line in log.readlines():
+                if "Global artifacts path" in line:
+                    artifacts_path = line.split()[-1]
+
+        if artifacts_path is None:
+            self.fail("Couldn't retrieve the artifacts")
+
+        self.test_driver.run_hh_global_inference(
+            "merge", [artifacts_path, path.join(temp_dir, "globalenv")]
+        )
+        self.test_driver.run_hh_global_inference(
+            "solve", [path.join(temp_dir, "globalenv"), path.join(temp_dir, "env")]
+        )
+        self.test_driver.run_hh_global_inference(
+            "rewrite", [path.join(temp_dir, "env")]
+        )
+
+    def test_correctness(self) -> None:
+        self.execute_once()
+
+        for root, _, files in os.walk(self.test_driver.repo_dir):
+            for filename in files:
+                filename_no_ext, ext = os.path.splitext(filename)
+                print(ext)
+                if ext == ".php":
+                    outname = filename_no_ext + ".out"
+                    file_content = ""
+                    with open(path.join(root, filename)) as f:
+                        file_content = f.read()
+                    out_content = ""
+                    with open(path.join(root, outname)) as f:
+                        out_content = f.read()
+                    print(file_content, out_content)
+                    self.assertMultiLineEqual(
+                        file_content,
+                        out_content,
+                        "Rewritten {} does not match with {}".format(filename, outname),
+                    )

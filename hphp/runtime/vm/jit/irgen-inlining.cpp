@@ -224,9 +224,16 @@ void beginInlining(IRGS& env,
 
   FTRACE(1, "[[[ begin inlining: {}\n", target->fullName()->data());
 
+  auto const closure = target->isClosureBody()
+    ? gen(env, AssertType, Type::ExactObj(target->implCls()), ctx)
+    : nullptr;
+
   ctx = [&] () -> SSATmp* {
     if (target->isClosureBody()) {
-      return ctx;
+      if (!target->cls()) return cns(env, nullptr);
+      auto const closureCtx = gen(env, LdClosureCtx, FuncData{target}, closure);
+      gen(env, IncRef, closureCtx);
+      return closureCtx;
     }
 
     if (!target->cls()) {
@@ -324,7 +331,7 @@ void beginInlining(IRGS& env,
     dynamicCall,
     0
   ).value());
-  emitPrologueLocals(env, fca.numArgs, callFlags, ctx);
+  emitPrologueLocals(env, fca.numArgs, callFlags, closure);
 
   updateMarker(env);
   env.irb->exceptionStackBoundary();

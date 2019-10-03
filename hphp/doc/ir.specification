@@ -2473,10 +2473,10 @@ To string conversions:
 
 15. Generators & Closures
 
-| LdClosureCtx, DCtx, S(Obj), NF
+| LdClosureCtx<func>, DCtx, S(Obj), NF
 
-  Load the context from the closure object S0 into D.
-  May only be used in S0's closure Func.
+  Load the context from the closure object S0 into D, assuming `func' is
+  S0's closure Func.
 
 | StClosureCtx, ND, S(Obj) S(Ctx,Nullptr), CRc
 

@@ -155,28 +155,21 @@ void init_params(IRGS& env, const Func* func, uint32_t argc,
  * We swap out the Closure object stored in m_this, and replace it with the
  * closure's bound Ctx, which may be either an object or a class context.  We
  * then teleport the object onto the stack as the first local after the params.
+ *
+ * If closure is non-nullptr, we skip the juggling and just store the closure
+ * to the proper local.
  */
-SSATmp* juggle_closure_ctx(IRGS& env, const Func* func, SSATmp* closureOpt) {
+SSATmp* juggle_closure_ctx(IRGS& env, const Func* func, SSATmp* closure) {
   assertx(func->isClosureBody());
 
-  auto const closure_type = Type::ExactObj(func->implCls());
-  auto const closure = [&] {
-    if (!closureOpt) {
-      return gen(env, LdClosure, closure_type, fp(env));
+  if (closure == nullptr) {
+    closure = gen(env, LdClosure, Type::ExactObj(func->implCls()), fp(env));
+    if (func->cls()) {
+      auto const ctx = gen(env, LdClosureCtx, FuncData{func}, closure);
+      // We can skip the incref for static closures, which have a Cctx.
+      if (!func->isStatic()) gen(env, IncRef, ctx);
+      gen(env, InitCtx, fp(env), ctx);
     }
-    if (closureOpt->hasConstVal() || closureOpt->isA(closure_type)) {
-      return closureOpt;
-    }
-    return gen(env, AssertType, closure_type, closureOpt);
-  }();
-
-  auto const ctx = func->cls() ?
-    gen(env, LdClosureCtx, closure) : cns(env, nullptr);
-
-  gen(env, InitCtx, fp(env), ctx);
-  // We can skip the incref for static closures, which have a Cctx.
-  if (func->cls() && !func->isStatic()) {
-    gen(env, IncRef, ctx);
   }
 
   // Teleport the closure to the next local.  There's no need to incref since

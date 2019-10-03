@@ -1675,6 +1675,7 @@ X(IsFunReifiedGenericsMatched,  FuncData);
 X(InterpOne,                    InterpOneData);
 X(InterpOneCF,                  InterpOneData);
 X(StClosureArg,                 ByteOffsetData);
+X(LdClosureCtx,                 FuncData);
 X(RBTraceEntry,                 RBEntryData);
 X(RBTraceMsg,                   RBMsgData);
 X(OODeclExists,                 ClassKindData);

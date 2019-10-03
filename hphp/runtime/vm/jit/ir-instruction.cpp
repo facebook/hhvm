@@ -411,7 +411,8 @@ Type keysetElemReturn(const IRInstruction* inst) {
 }
 
 Type ctxReturn(const IRInstruction* inst) {
-  auto const func = inst->func();
+  auto const func = inst->is(LdClosureCtx)
+    ? inst->extra<LdClosureCtx>()->func : inst->func();
   if (!func) return TCtx;
 
   if (func->requiresThisInBody()) {
@@ -420,10 +421,9 @@ Type ctxReturn(const IRInstruction* inst) {
   if (func->hasForeignThis()) {
     return func->isStatic() ? TCctx : TCtx;
   }
-  auto const cls = inst->ctx();
   if (inst->is(LdCctx) || func->isStatic()) {
-    if (cls->attrs() & AttrNoOverride) {
-      return Type::cns(ConstCctx::cctx(cls));
+    if (func->cls()->attrs() & AttrNoOverride) {
+      return Type::cns(ConstCctx::cctx(func->cls()));
     }
     return TCctx;
   }

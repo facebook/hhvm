@@ -1125,10 +1125,10 @@ void FrameStateMgr::trackDefInlineFP(const IRInstruction* inst) {
   m_stack.emplace_back(std::move(stateCopy));
 
   /*
-   * Set up the callee state. We will set ctx for closures in InitCtx.
+   * Set up the callee state.
    */
   cur().fpValue          = calleeFP;
-  cur().ctx              = target->isClosureBody() ? nullptr : inst->src(2);
+  cur().ctx              = inst->src(2);
   cur().curFunc          = target;
   cur().frameMaySpanCall = false;
   cur().bcSPOff          = FPInvOffset{target->numSlotsInFrame()};

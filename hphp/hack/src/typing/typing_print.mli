@@ -13,7 +13,7 @@ open Typing_env_types
 (* Pretty printing of types *)
 (*****************************************************************************)
 
-val error : env -> Typing_defs.locl_ty -> string
+val error : ?ignore_dynamic:bool -> env -> Typing_defs.locl_ty -> string
 
 val full : env -> Typing_defs.locl_ty -> string
 

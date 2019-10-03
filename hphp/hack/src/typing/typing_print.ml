@@ -680,74 +680,79 @@ module ErrorString = struct
 
   let varray_or_darray = "a varray_or_darray"
 
-  let rec type_ : _ -> locl_phase ty_ -> _ = function
-    | env ->
-      (function
-      | Tany _ -> "an untyped value"
-      | Terr -> "a type error"
-      | Tdynamic -> "a dynamic value"
-      | Tunion l -> union env l
-      | Tintersection [] -> "a mixed value"
-      | Tintersection l -> intersection env l
-      | Tarraykind (AKvarray_or_darray _) -> varray_or_darray
-      | Tarraykind AKempty -> "an empty array"
-      | Tarraykind AKany -> array (None, None)
-      | Tarraykind (AKvarray _) -> varray
-      | Tarraykind (AKvec x) -> array (Some x, None)
-      | Tarraykind (AKdarray (_, _)) -> darray
-      | Tarraykind (AKmap (x, y)) -> array (Some x, Some y)
-      | Ttuple l -> "a tuple of size " ^ string_of_int (List.length l)
-      | Tnonnull -> "a nonnull value"
-      | Toption (_, Tnonnull) -> "a mixed value"
-      | Toption _ -> "a nullable type"
-      | Tprim tp -> tprim tp
-      | Tvar _ -> "some value"
-      | Tanon _ -> "a function"
-      | Tfun _ -> "a function"
-      | Tabstract (AKnewtype (x, _), _) when x = SN.Classes.cClassname ->
-        "a classname string"
-      | Tabstract (AKnewtype (x, _), _) when x = SN.Classes.cTypename ->
-        "a typename string"
-      | Tabstract (ak, cstr) -> abstract env ak cstr
-      | Tclass ((_, x), Exact, tyl) ->
-        "an object of exactly the class " ^ strip_ns x ^ inst env tyl
-      | Tclass ((_, x), Nonexact, tyl) ->
-        "an object of type " ^ strip_ns x ^ inst env tyl
-      | Tobject -> "an object"
-      | Tshape _ -> "a shape"
-      | Tdestructure l ->
-        "a list destructuring assignment of length "
-        ^ string_of_int (List.length l)
-      | Tpu ((_, ty), (_, enum), kind) ->
-        let ty =
-          match ty with
-          | Tclass ((_, x), _, tyl) -> strip_ns x ^ inst env tyl
-          | _ -> "..."
-        in
-        let prefix =
-          match kind with
-          | Pu_atom atom -> "member " ^ atom
-          | Pu_plain -> "a member"
-        in
-        prefix ^ " of pocket universe " ^ ty ^ ":@" ^ enum
-      | Tpu_access ((_, ty), (_, access)) ->
-        let ty =
-          match ty with
-          | Tpu ((_, ty), (_, enum), kind) ->
-            let ty =
-              match ty with
-              | Tclass ((_, x), _, tyl) -> strip_ns x ^ inst env tyl
-              | _ -> "..."
-            in
-            let kind =
-              match kind with
-              | Pu_plain -> ""
-              | Pu_atom atom -> atom
-            in
-            ty ^ ":@" ^ enum ^ kind
-          | _ -> "..."
-        in
-        "pocket universe dependent type " ^ ty ^ ":@" ^ access)
+  let rec type_ ?(ignore_dynamic = false) env ty =
+    match ty with
+    | Tany _ -> "an untyped value"
+    | Terr -> "a type error"
+    | Tdynamic -> "a dynamic value"
+    | Tunion l when ignore_dynamic ->
+      union
+        env
+        (List.filter l ~f:(function
+            | (_, Tdynamic) -> false
+            | _ -> true))
+    | Tunion l -> union env l
+    | Tintersection [] -> "a mixed value"
+    | Tintersection l -> intersection env l
+    | Tarraykind (AKvarray_or_darray _) -> varray_or_darray
+    | Tarraykind AKempty -> "an empty array"
+    | Tarraykind AKany -> array (None, None)
+    | Tarraykind (AKvarray _) -> varray
+    | Tarraykind (AKvec x) -> array (Some x, None)
+    | Tarraykind (AKdarray (_, _)) -> darray
+    | Tarraykind (AKmap (x, y)) -> array (Some x, Some y)
+    | Ttuple l -> "a tuple of size " ^ string_of_int (List.length l)
+    | Tnonnull -> "a nonnull value"
+    | Toption (_, Tnonnull) -> "a mixed value"
+    | Toption _ -> "a nullable type"
+    | Tprim tp -> tprim tp
+    | Tvar _ -> "some value"
+    | Tanon _ -> "a function"
+    | Tfun _ -> "a function"
+    | Tabstract (AKnewtype (x, _), _) when x = SN.Classes.cClassname ->
+      "a classname string"
+    | Tabstract (AKnewtype (x, _), _) when x = SN.Classes.cTypename ->
+      "a typename string"
+    | Tabstract (ak, cstr) -> abstract env ak cstr
+    | Tclass ((_, x), Exact, tyl) ->
+      "an object of exactly the class " ^ strip_ns x ^ inst env tyl
+    | Tclass ((_, x), Nonexact, tyl) ->
+      "an object of type " ^ strip_ns x ^ inst env tyl
+    | Tobject -> "an object"
+    | Tshape _ -> "a shape"
+    | Tdestructure l ->
+      "a list destructuring assignment of length "
+      ^ string_of_int (List.length l)
+    | Tpu ((_, ty), (_, enum), kind) ->
+      let ty =
+        match ty with
+        | Tclass ((_, x), _, tyl) -> strip_ns x ^ inst env tyl
+        | _ -> "..."
+      in
+      let prefix =
+        match kind with
+        | Pu_atom atom -> "member " ^ atom
+        | Pu_plain -> "a member"
+      in
+      prefix ^ " of pocket universe " ^ ty ^ ":@" ^ enum
+    | Tpu_access ((_, ty), (_, access)) ->
+      let ty =
+        match ty with
+        | Tpu ((_, ty), (_, enum), kind) ->
+          let ty =
+            match ty with
+            | Tclass ((_, x), _, tyl) -> strip_ns x ^ inst env tyl
+            | _ -> "..."
+          in
+          let kind =
+            match kind with
+            | Pu_plain -> ""
+            | Pu_atom atom -> atom
+          in
+          ty ^ ":@" ^ enum ^ kind
+        | _ -> "..."
+      in
+      "pocket universe dependent type " ^ ty ^ ":@" ^ access
 
   and array = function
     | (None, None) -> "an untyped array"
@@ -822,10 +827,9 @@ module ErrorString = struct
     | Ast_defs.Ctrait -> "a trait"
     | Ast_defs.Cenum -> "an enum"
 
-  and to_string : _ -> locl_ty -> _ =
-   fun env ty ->
+  and to_string ?(ignore_dynamic = false) env ty =
     let (_, ety) = Env.expand_type env ty in
-    type_ env (snd ety)
+    type_ ~ignore_dynamic env (snd ety)
 end
 
 module Json = struct
@@ -1808,7 +1812,8 @@ end
 (* User API *)
 (*****************************************************************************)
 
-let error env ty = ErrorString.to_string env ty
+let error ?(ignore_dynamic = false) env ty =
+  ErrorString.to_string ~ignore_dynamic env ty
 
 let full env ty = Full.to_string ~ty:Full.locl_ty Doc.text env ty
 

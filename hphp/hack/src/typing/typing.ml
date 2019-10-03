@@ -4777,6 +4777,7 @@ and dispatch_call
           ( Reason.Rnone,
             Tunion
               [
+                MakeType.dynamic r;
                 MakeType.dict r tmixed tmixed;
                 MakeType.keyset r tmixed;
                 ( if disallow_varray then
@@ -4791,7 +4792,7 @@ and dispatch_call
             checked_unset_error
               p
               (Reason.to_string
-                 ("This is " ^ Typing_print.error env ty)
+                 ("This is " ^ Typing_print.error ~ignore_dynamic:true env ty)
                  (fst ty));
             env)
       | _ ->

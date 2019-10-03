@@ -217,6 +217,11 @@ folly::Synchronized<
 
 template <typename... Args>
 void raise_dynamically_sampled_notice(folly::StringPiece fmt, Args&& ... args) {
+  static auto samplingTableSize = ServiceData::createTimeSeries(
+    "vm.dynsampling.table-size",
+    {ServiceData::StatsType::SUM}
+  );
+
   /*
    * We want to dedupe notices, but not so much that we exclude
    * notices at a new location, so we need to grab the first
@@ -237,6 +242,7 @@ void raise_dynamically_sampled_notice(folly::StringPiece fmt, Args&& ... args) {
     auto const inserted = notices->emplace(pc, str);
     if (!inserted.second) return;
   }
+  samplingTableSize->addValue(1);
   raise_notice(str);
 }
 

@@ -205,9 +205,9 @@ struct assert_sizeof_class {
   // If this static_assert fails, the compiler error will have the real value
   // of sizeof_Class in it since it's in this struct's type.
 #ifndef NDEBUG
-  static_assert(sz == (use_lowptr ? 292 : 336), "Change this only on purpose");
+  static_assert(sz == (use_lowptr ? 288 : 328), "Change this only on purpose");
 #else
-  static_assert(sz == (use_lowptr ? 284 : 328), "Change this only on purpose");
+  static_assert(sz == (use_lowptr ? 280 : 320), "Change this only on purpose");
 #endif
 };
 template struct assert_sizeof_class<sizeof_Class>;
@@ -1843,13 +1843,12 @@ Class::Class(PreClass* preClass, Class* parent,
   , m_needsPropInitialCheck{false}
   , m_hasReifiedGenerics{false}
   , m_hasReifiedParent{false}
+  , m_serialized(false)
   , m_preClass(PreClassPtr(preClass))
   , m_classVecLen(always_safe_cast<decltype(m_classVecLen)>(classVecLen))
   , m_funcVecLen(always_safe_cast<decltype(m_funcVecLen)>(funcVecLen))
-  , m_serialized(false)
-  , m_releaseFunc{nullptr} // These fields are set in setReleaseFunc,
-  , m_memoSize{0}          // except that m_releaseFunc is set specially
-  , m_sizeIdx{0}           // for native classes.
+  // Will be overwritten if the class has a native dtor
+  , m_releaseFunc{ObjectData::release}
 {
   if (usedTraits.size()) {
     allocExtraData();
@@ -1876,9 +1875,9 @@ Class::Class(PreClass* preClass, Class* parent,
   // of those fatals could be thrown.
   setInterfaceVtables();
 
-  // Sets object release function if not already set, also calculates the base
-  // pointer offset and the MemoryManager index of the class size.
-  setReleaseFunc();
+  // Calculates the base pointer offset and
+  // the MemoryManager index of the class size.
+  setReleaseData();
 }
 
 void Class::methodOverrideCheck(const Func* parentMethod, const Func* method) {
@@ -3788,33 +3787,14 @@ void Class::setFuncVec(MethodMapBuilder& builder) {
   }
 }
 
-extern template NEVER_INLINE void ObjectData::release<true>(
-  ObjectData* obj,
-  const Class* cls
-) noexcept;
-extern template NEVER_INLINE void ObjectData::release<false>(
-  ObjectData* obj,
-  const Class* cls
-) noexcept;
-
-void Class::setReleaseFunc() {
-  auto const numSlots = numMemoSlots();
-  if (numSlots > 0) {
-    m_memoSize = numSlots * sizeof(MemoSlot) + sizeof(MemoNode);
+void Class::setReleaseData() {
+  if (getNativeDataInfo()) return;
+  if (hasMemoSlots()) {
+    m_memoSize = ObjectData::objOffFromMemoNode(this);
   }
   auto const nProps = numDeclProperties();
   auto const size = m_memoSize + ObjectData::sizeForNProps(nProps);
   m_sizeIdx = MemoryManager::size2Index(size);
-  /*
-   * m_releaseFunc is initialized to nullptr and might be updated to
-   * a specialized version, e.g. Native::nativeDataInstanceDtor.
-   * If the pointer is not set, it should be initialized to the default
-   * ObjectData release function.
-   */
-  if (m_releaseFunc) return;
-  m_releaseFunc = m_sizeIdx < kNumSmallSizes ?
-                    ObjectData::release<true> :
-                    ObjectData::release<false>;
 }
 
 void Class::getMethodNames(const Class* cls,

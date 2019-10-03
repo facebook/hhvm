@@ -1463,7 +1463,7 @@ private:
   void setNativeDataInfo();
   void setInstanceMemoCacheInfo();
   void setLSBMemoCacheInfo();
-  void setReleaseFunc();
+  void setReleaseData();
 
   template<bool setParents> void setInstanceBitsImpl();
   void addInterfacesFromUsedTraits(InterfaceMap::Builder& builder) const;
@@ -1535,7 +1535,21 @@ private:
   bool m_hasReifiedGenerics      : 1;
   /* This class has a refied parent */
   bool m_hasReifiedParent        : 1;
-  // NB: 19 bits available here (in USE_LOWPTR builds).
+  /*
+   * Whether the Class requires initialization, because it has either
+   * {p,s}init() methods or static members, or possibly has prop type invariance
+   * violations.
+   */
+  bool m_needInitialization : 1;
+
+  bool m_needsInitThrowable : 1;
+  bool m_hasDeepInitProps : 1;
+  /*
+   * Whether this class has been serialized yet.
+   */
+  mutable bool m_serialized : 1;
+
+  // NB: 15 bits available here (in USE_LOWPTR builds).
 
   /*
    * Vector of 86pinit() methods that need to be called to complete instance
@@ -1629,19 +1643,8 @@ private:
    */
   uint8_t m_RTAttrs;
 
-  /*
-   * Whether the Class requires initialization, because it has either
-   * {p,s}init() methods or static members, or possibly has prop type invariance
-   * violations.
-   */
-  bool m_needInitialization : 1;
-
-  bool m_needsInitThrowable : 1;
-  bool m_hasDeepInitProps : 1;
-  /*
-   * Whether this class has been serialized yet.
-   */
-  mutable bool m_serialized : 1;
+  // An index that represent the size bin in the MemoryManager
+  uint8_t m_sizeIdx{0};
 
   mutable rds::Link<PropInitVec*, rds::Mode::Normal> m_propDataCache;
 
@@ -1657,9 +1660,7 @@ private:
   // Pointer to a function that releases object instances of this class type.
   ObjReleaseFunc m_releaseFunc;
   // Determines the offset to the base pointer to be released
-  uint32_t m_memoSize;
-  // An index that represent the size bin in the MemoryManager
-  uint8_t m_sizeIdx;
+  uint32_t m_memoSize{0};
 
   /*
    * An exclusive upper limit on the post-sort indices of properties of this

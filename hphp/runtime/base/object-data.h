@@ -155,7 +155,15 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
                                // finished. Set during construction to
                                // temporarily allow writing to const props.
     UsedMemoCache      = 0x10, // Object has had data set in its memo slots
-    HasUninitProps     = 0x20  // The object's properties are being initialized
+    HasUninitProps     = 0x20, // The object's properties are being initialized
+    BigAllocSize       = 0x40, // The object was allocated using Big Size
+#ifndef NDEBUG
+    SmallAllocSize     = 0x80, // For Debug, the object was allocated with
+                               // small buffers. If needed can be removed to
+                               // free up Attribute bits.
+#else
+    SmallAllocSize     = NoAttrs,
+#endif
   };
 
   static constexpr size_t offsetofAttrs() {
@@ -208,6 +216,25 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
 
   void setReifiedGenerics(Class*, ArrayData*);
 
+
+  /*
+   * Allocate space for an object data of type `cls`.  If it should have a
+   * Memo header create space for that and initialize it.
+   *
+   * Return the pointer to address where the object-data should start (`mem`),
+   * along with flags indicating if the allocation was a small or big size
+   * class alloc (`flags`).  These flags ultimately must be incorporated into
+   * the object-data's attributes in order for the deallocation to follow the
+   * correct path.
+   */
+  struct Alloc {
+    void* mem;
+    uint8_t flags;
+  };
+  static Alloc allocMemoInit(Class* cls);
+
+  template <bool Unlocked>
+  static ObjectData* newInstanceSlow(Class*);
  public:
   /*
    * Call newInstance() to instantiate a PHP object. The initial ref-count will
@@ -254,11 +281,8 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   static ObjectData* newInstanceRawMemoBig(Class*, size_t size, size_t objoff);
 
   /*
-   * Templated release() method, which makes different calls to free memory
-   * MemoryManager::freeBigSize() - for big object, or
-   * MemoryManager::freeSmallIndex() - for small objects
+   * Default release function, used for non-closure, non-native objects.
    */
-  template<bool isSmallObject>
   static void release(ObjectData* obj, const Class* cls) noexcept;
 
   Class* getVMClass() const;

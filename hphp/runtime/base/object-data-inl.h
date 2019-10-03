@@ -29,6 +29,11 @@ inline ObjectData::ObjectData(Class* cls, uint8_t flags, HeaderKind kind)
   : m_cls(cls)
 {
   initHeader_16(kind, OneReference, flags);
+  if (debug && cls->releaseFunc() == ObjectData::release) {
+    DEBUG_ONLY auto const is_small = cls->sizeIdx() < kNumSmallSizes;
+    assertx(is_small == bool(m_aux16 & Attribute::SmallAllocSize));
+    assertx(is_small != bool(m_aux16 & Attribute::BigAllocSize));
+  }
   assertx(isObjectKind(m_kind));
   assertx(!cls->needInitialization() || cls->initialized());
   assertx(!isCollection()); // collections use NoInit{}
@@ -40,6 +45,11 @@ inline ObjectData::ObjectData(Class* cls, InitRaw, uint8_t flags,
   : m_cls(cls)
 {
   initHeader_16(kind, OneReference, flags);
+  if (debug && cls->releaseFunc() == ObjectData::release) {
+    DEBUG_ONLY auto const is_small = cls->sizeIdx() < kNumSmallSizes;
+    assertx(is_small == bool(m_aux16 & Attribute::SmallAllocSize));
+    assertx(is_small != bool(m_aux16 & Attribute::BigAllocSize));
+  }
   assertx(isObjectKind(m_kind));
   assertx(!cls->needInitialization() || cls->initialized());
 }
@@ -56,6 +66,32 @@ inline size_t ObjectData::heapSize() const {
   return sizeForNProps(m_cls->numDeclProperties());
 }
 
+ALWAYS_INLINE ObjectData::Alloc ObjectData::allocMemoInit(Class* cls) {
+  auto result = Alloc{};
+  auto const index = cls->sizeIdx();
+  if (LIKELY(index < kNumSmallSizes)) {
+    result.mem = tl_heap->mallocSmallIndex(index);
+    result.flags = Attribute::SmallAllocSize;
+  } else {
+    // This cannot ever occur with our current setting for kNumSmallSizes.
+    auto size = MemoryManager::sizeIndex2Size(index);
+    result.mem = tl_heap->mallocBigSize(size);
+    result.flags = Attribute::BigAllocSize;
+  }
+
+  if (cls->hasMemoSlots()) {
+    auto const objOff = objOffFromMemoNode(cls);
+    new (NotNull{}, result.mem) MemoNode(objOff);
+    std::memset(
+      reinterpret_cast<char*>(result.mem) + sizeof(MemoNode),
+      0,
+      objOff - sizeof(MemoNode)
+    );
+    result.mem = reinterpret_cast<char*>(result.mem) + objOff;
+  }
+  return result;
+}
+
 template <bool Unlocked, typename Init>
 ALWAYS_INLINE
 ObjectData* ObjectData::newInstanceImpl(Class* cls, Init objConstruct) {
@@ -68,29 +104,16 @@ ObjectData* ObjectData::newInstanceImpl(Class* cls, Init objConstruct) {
     return obj;
   }
 
-  auto mem = [&](){
-    auto const size = sizeForNProps(cls->numDeclProperties());
-    if (!cls->hasMemoSlots()) return tl_heap->objMalloc(size);
+  auto const alloc = allocMemoInit(cls);
 
-    auto const objOff = objOffFromMemoNode(cls);
-    auto mem = tl_heap->objMalloc(size + objOff);
-    new (NotNull{}, mem) MemoNode(objOff);
-    std::memset(
-      reinterpret_cast<char*>(mem) + sizeof(MemoNode),
-      0,
-      objOff - sizeof(MemoNode)
-    );
-    return reinterpret_cast<void*>(reinterpret_cast<char*>(mem) + objOff);
-  }();
-
-  auto obj = objConstruct(mem);
+  auto obj = objConstruct(alloc.mem, alloc.flags);
   assertx(obj->hasExactlyOneRef());
   assertx(!obj->hasInstanceDtor());
   return obj;
 }
 
 template <bool Unlocked>
-inline ObjectData* ObjectData::newInstance(Class* cls) {
+NEVER_INLINE ObjectData* ObjectData::newInstanceSlow(Class* cls) {
   assertx(cls);
   if (UNLIKELY(cls->attrs() &
                (AttrAbstract | AttrInterface | AttrTrait | AttrEnum))) {
@@ -100,10 +123,13 @@ inline ObjectData* ObjectData::newInstance(Class* cls) {
     raise_error("Cannot create a new instance of a reified class without "
                 "the reified generics");
   }
-  auto obj = ObjectData::newInstanceImpl<Unlocked>(cls, [&](void* mem) {
-    return new (NotNull{}, mem)
-      ObjectData(cls, Unlocked ? IsBeingConstructed : NoAttrs);
-  });
+  auto obj = ObjectData::newInstanceImpl<Unlocked>(
+    cls,
+    [&](void* mem, uint8_t sizeFlag) {
+      auto const flags = sizeFlag | (Unlocked ? IsBeingConstructed : NoAttrs);
+      return new (NotNull{}, mem) ObjectData(cls, flags);
+    }
+  );
   if (UNLIKELY(cls->needsInitThrowable())) {
     // may incref obj
     throwable_init(obj);
@@ -112,6 +138,28 @@ inline ObjectData* ObjectData::newInstance(Class* cls) {
   if (cls->hasReifiedParent()) {
     obj->setReifiedGenerics(cls, ArrayData::CreateVArray());
   }
+  return obj;
+}
+
+template <bool Unlocked>
+inline ObjectData* ObjectData::newInstance(Class* cls) {
+  assertx(cls);
+  if (UNLIKELY(cls->hasReifiedGenerics() ||
+               cls->needsInitThrowable() ||
+               cls->hasReifiedParent())) {
+    return newInstanceSlow<Unlocked>(cls);
+  }
+  if (UNLIKELY(cls->attrs() &
+               (AttrAbstract | AttrInterface | AttrTrait | AttrEnum))) {
+    raiseAbstractClassError(cls);
+  }
+  auto obj = ObjectData::newInstanceImpl<Unlocked>(
+    cls,
+    [&](void* mem, uint8_t sizeFlag) {
+      auto const flags = sizeFlag | (Unlocked ? IsBeingConstructed : NoAttrs);
+      return new (NotNull{}, mem) ObjectData(cls, flags);
+    }
+  );
   return obj;
 }
 
@@ -127,10 +175,13 @@ inline ObjectData* ObjectData::newInstanceReified(Class* cls,
     assertx(reifiedTypes);
     checkClassReifiedGenericMismatch(cls, reifiedTypes);
   }
-  auto obj = ObjectData::newInstanceImpl<Unlocked>(cls, [&](void* mem) {
-    return new (NotNull{}, mem)
-      ObjectData(cls, Unlocked ? IsBeingConstructed : NoAttrs);
-  });
+  auto obj = ObjectData::newInstanceImpl<Unlocked>(
+    cls,
+    [&](void* mem, uint8_t sizeFlag) {
+      auto const flags = sizeFlag | (Unlocked ? IsBeingConstructed : NoAttrs);
+      return new (NotNull{}, mem) ObjectData(cls, flags);
+    }
+  );
   if (UNLIKELY(cls->needsInitThrowable())) {
     // may incref obj
     throwable_init(obj);
@@ -149,9 +200,12 @@ inline ObjectData* ObjectData::newInstanceReified(Class* cls,
 inline ObjectData* ObjectData::newInstanceNoPropInit(Class* cls) {
   assertx(!(cls->attrs() &
             (AttrAbstract | AttrInterface | AttrTrait | AttrEnum)));
-  return ObjectData::newInstanceImpl<false>(cls, [&](void* mem) {
-    return new (NotNull{}, mem) ObjectData(cls, InitRaw{}, ObjectData::NoAttrs);
-  });
+  return ObjectData::newInstanceImpl<false>(
+    cls,
+    [&](void* mem, uint8_t sizeFlag) {
+      return new (NotNull{}, mem) ObjectData(cls, InitRaw{}, sizeFlag);
+    }
+  );
 }
 
 inline void ObjectData::instanceInit(Class* cls) {

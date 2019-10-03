@@ -156,20 +156,23 @@ void ObjectData::slowDestroyCases() {
   if (UNLIKELY(getAttribute(IsWeakRefed))) {
     WeakRefData::invalidateWeakRef((uintptr_t)this);
   }
+
+  auto const memoSize = m_cls->memoSize();
+  auto const ptr = reinterpret_cast<char*>(this) - memoSize;
+  tl_heap->objFreeIndex(ptr, m_cls->sizeIdx());
 }
 
 // Single check for a couple different unlikely actions during destruction.
 inline bool ObjectData::slowDestroyCheck() const {
-  return m_aux16 & (HasDynPropArr | IsWeakRefed | UsedMemoCache);
+  return m_aux16 & (HasDynPropArr | IsWeakRefed | UsedMemoCache | BigAllocSize);
 }
 
-template<bool isSmallObject>
 void ObjectData::release(ObjectData* obj, const Class* cls) noexcept {
   assertx(obj->kindIsValid());
   assertx(!obj->hasInstanceDtor());
   assertx(!obj->hasNativeData());
   assertx(obj->getVMClass() == cls);
-  assertx(isSmallObject == (cls->sizeIdx() < kNumSmallSizes));
+  assertx(cls->releaseFunc() == &ObjectData::release);
 
   // Note: cleanups done in this function are only run for classes without an
   // instanceDtor. Some of these cleanups are duplicated in ~ObjectData, and
@@ -193,25 +196,20 @@ void ObjectData::release(ObjectData* obj, const Class* cls) noexcept {
     tvDecRefGen(prop);
   }
 
-  if (UNLIKELY(obj->slowDestroyCheck())) obj->slowDestroyCases();
-
-  auto const memoSize = cls->memoSize();
-  auto const ptr = reinterpret_cast<char*>(obj) - memoSize;
-  assertx(memoSize == 0 ||
-          reinterpret_cast<const MemoNode*>(ptr)->objOff() == memoSize);
-  if (isSmallObject) {
-    tl_heap->freeSmallIndex(ptr, cls->sizeIdx());
+  if (UNLIKELY(obj->slowDestroyCheck())) {
+    obj->slowDestroyCases();
   } else {
-    tl_heap->freeBigSize(ptr);
+    assertx((obj->m_aux16 & BigAllocSize) == 0);
+    auto const memoSize = cls->memoSize();
+    auto const ptr = reinterpret_cast<char*>(obj) - memoSize;
+    assertx(memoSize == 0 ||
+            reinterpret_cast<const MemoNode*>(ptr)->objOff() == memoSize);
+
+    tl_heap->freeSmallIndex(ptr, cls->sizeIdx());
   }
 
   AARCH64_WALKABLE_FRAME();
 }
-
-template NEVER_INLINE void ObjectData::release<true>(ObjectData*,
-                                                     const Class*) noexcept;
-template NEVER_INLINE void ObjectData::release<false>(ObjectData*,
-                                                      const Class*) noexcept;
 
 ///////////////////////////////////////////////////////////////////////////////
 // class info
@@ -846,25 +844,11 @@ ObjectData* ObjectData::clone() {
     );
     assertx(clone->hasExactlyOneRef());
     assertx(clone->hasInstanceDtor());
-  } else if (m_cls->hasMemoSlots()) {
-    auto const size = sizeForNProps(nProps);
-    auto const objOff = objOffFromMemoNode(m_cls);
-    auto mem = tl_heap->objMalloc(size + objOff);
-    new (NotNull{}, mem) MemoNode(objOff);
-    std::memset(
-      reinterpret_cast<char*>(mem) + sizeof(MemoNode),
-      0,
-      objOff - sizeof(MemoNode)
-    );
-    auto const obj = new (NotNull{}, reinterpret_cast<char*>(mem) + objOff)
-      ObjectData(m_cls, InitRaw{}, ObjectData::NoAttrs);
-    clone = Object::attach(obj);
-    assertx(clone->hasExactlyOneRef());
-    assertx(!clone->hasInstanceDtor());
   } else {
-    auto const size = sizeForNProps(nProps);
-    auto const obj = new (NotNull{}, tl_heap->objMalloc(size))
-      ObjectData(m_cls, InitRaw{}, ObjectData::NoAttrs);
+    auto const alloc = allocMemoInit(m_cls);
+
+    auto const obj = new (NotNull{}, alloc.mem)
+                     ObjectData(m_cls, InitRaw{}, alloc.flags);
     clone = Object::attach(obj);
     assertx(clone->hasExactlyOneRef());
     assertx(!clone->hasInstanceDtor());
@@ -1095,14 +1079,17 @@ ObjectData* ObjectData::newInstanceRawSmall(Class* cls, size_t size,
                                             size_t index) {
   assertx(size <= kMaxSmallSize);
   assertx(!cls->hasMemoSlots());
+  assertx(cls->sizeIdx() == index);
   auto mem = tl_heap->mallocSmallIndexSize(index, size);
-  return new (NotNull{}, mem) ObjectData(cls, InitRaw{}, IsBeingConstructed);
+  auto const flags = IsBeingConstructed | SmallAllocSize;
+  return new (NotNull{}, mem) ObjectData(cls, InitRaw{}, flags);
 }
 
 ObjectData* ObjectData::newInstanceRawBig(Class* cls, size_t size) {
   assertx(!cls->hasMemoSlots());
   auto mem = tl_heap->mallocBigSize(size);
-  return new (NotNull{}, mem) ObjectData(cls, InitRaw{}, IsBeingConstructed);
+  auto const flags = IsBeingConstructed | BigAllocSize;
+  return new (NotNull{}, mem) ObjectData(cls, InitRaw{}, flags);
 }
 
 // called from jit code
@@ -1114,10 +1101,12 @@ ObjectData* ObjectData::newInstanceRawMemoSmall(Class* cls,
   assertx(cls->hasMemoSlots());
   assertx(!cls->getNativeDataInfo());
   assertx(objoff == ObjectData::objOffFromMemoNode(cls));
+  assertx(cls->sizeIdx() == index);
   auto mem = tl_heap->mallocSmallIndexSize(index, size);
   new (NotNull{}, mem) MemoNode(objoff);
-  return new (NotNull{}, reinterpret_cast<char*>(mem) + objoff)
-    ObjectData(cls, InitRaw{}, IsBeingConstructed);
+  mem = reinterpret_cast<char*>(mem) + objoff;
+  auto const flags = IsBeingConstructed | SmallAllocSize;
+  return new (NotNull{}, mem) ObjectData(cls, InitRaw{}, flags);
 }
 
 ObjectData* ObjectData::newInstanceRawMemoBig(Class* cls,
@@ -1128,8 +1117,9 @@ ObjectData* ObjectData::newInstanceRawMemoBig(Class* cls,
   assertx(objoff == ObjectData::objOffFromMemoNode(cls));
   auto mem = tl_heap->mallocBigSize(size);
   new (NotNull{}, mem) MemoNode(objoff);
-  return new (NotNull{}, reinterpret_cast<char*>(mem) + objoff)
-    ObjectData(cls, InitRaw{}, IsBeingConstructed);
+  mem = reinterpret_cast<char*>(mem) + objoff;
+  auto const flags = IsBeingConstructed | BigAllocSize;
+  return new (NotNull{}, mem) ObjectData(cls, InitRaw{}, flags);
 }
 
 // Note: the normal object destruction path does not actually call this

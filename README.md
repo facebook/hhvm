@@ -11,7 +11,7 @@ HHVM is an open-source virtual machine designed for executing programs written i
 
 HHVM is intended for [Hack](http://hacklang.org) projects, and also supports a large subset of PHP 7 that is required by common tools and libraries. We no longer recommend using HHVM for purely PHP projects.
 
-HHVM should be used together with a webserver like the built in, easy to deploy [Proxygen](https://docs.hhvm.com/hhvm/basic-usage/proxygen), or a [FastCGI](https://docs.hhvm.com/hhvm/advanced-usage/fastCGI)-based webserver on top of nginx or Apache.
+HHVM should be used together with a webserver like the built-in, easy to deploy [Proxygen](https://docs.hhvm.com/hhvm/basic-usage/proxygen), or a [FastCGI](https://docs.hhvm.com/hhvm/advanced-usage/fastCGI)-based web server on top of Nginx or Apache.
 
 ## Installing
 
@@ -21,10 +21,10 @@ You can install a [prebuilt package](https://docs.hhvm.com/hhvm/installation/int
 
 ## Running
 
-You can run standalone programs just by passing them to hhvm: `hhvm example.hack`.
+You can run standalone programs just bypassing them to hhvm: `hhvm example.hack`.
 
 If you want to host a website:
-* Install your favorite webserver. [Proxygen](https://docs.hhvm.com/hhvm/basic-usage/proxygen) is built in to HHVM, fast and easy to deploy.
+* Install your favorite webserver. [Proxygen](https://docs.hhvm.com/hhvm/basic-usage/proxygen) is built into HHVM, fast and easy to deploy.
 * Install our [package](https://docs.hhvm.com/hhvm/installation/introduction#prebuilt-packages)
 * Start your webserver
 * Run `sudo /etc/init.d/hhvm start`

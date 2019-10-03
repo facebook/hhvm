@@ -1,0 +1,22 @@
+////toplevel.php
+<?hh
+function with_mapped_namespace(): void {
+  PHP\ini_set('foo', 'bar');
+}
+function extract_standalone_make_default(): nothing {
+  throw new Exception();
+}
+
+////namespaces.php
+<?hh
+namespace HH {
+  namespace Lib {
+    namespace PHP {
+      function ini_set(string $varname, mixed $newvalue): void {
+        throw new \Exception();
+      }
+    }
+
+  }
+
+}

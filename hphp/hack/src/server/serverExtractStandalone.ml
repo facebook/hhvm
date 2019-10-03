@@ -1152,26 +1152,20 @@ let subnamespace index name =
     let nspaces = String.split ~on:'\\' nspaces in
     List.nth nspaces index
 
-let is_builtin name = String.is_prefix ~prefix:"\\HH" name
-
 (* Build the recursive hack_namespace data structure for given declarations *)
 let sort_by_namespace declarations =
   let rec add_decl nspace decl index =
-    (* Ignore builtins because we shouldn't generate their declarations *)
-    if is_builtin decl then
-      ()
-    else
-      match subnamespace index decl with
-      | Some name ->
-        ( if Caml.Hashtbl.find_opt nspace.namespaces name = None then
-          let nested = Caml.Hashtbl.create 0 in
-          let declarations = HashSet.create 0 in
-          Caml.Hashtbl.add
-            nspace.namespaces
-            name
-            { namespaces = nested; decls = declarations } );
-        add_decl (Caml.Hashtbl.find nspace.namespaces name) decl (index + 1)
-      | None -> HashSet.add nspace.decls decl
+    match subnamespace index decl with
+    | Some name ->
+      ( if Caml.Hashtbl.find_opt nspace.namespaces name = None then
+        let nested = Caml.Hashtbl.create 0 in
+        let declarations = HashSet.create 0 in
+        Caml.Hashtbl.add
+          nspace.namespaces
+          name
+          { namespaces = nested; decls = declarations } );
+      add_decl (Caml.Hashtbl.find nspace.namespaces name) decl (index + 1)
+    | None -> HashSet.add nspace.decls decl
   in
   let namespaces =
     { namespaces = Caml.Hashtbl.create 0; decls = HashSet.create 0 }

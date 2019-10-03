@@ -67,3 +67,7 @@ class WithRecursiveMethods {
     WithRecursiveMethods::recursive_static();
   }
 }
+
+function with_mapped_namespace(): void {
+  PHP\ini_set('foo', 'bar');
+}

@@ -9,9 +9,29 @@ from common_tests import CommonTestDriver
 from test_case import TestCase
 
 
+auto_namespace_map = '{"PHP": "HH\\\\Lib\\\\PHP"}'
+
+
 class ExtractStandaloneDriver(CommonTestDriver):
+    def write_load_config(self, use_saved_state: bool = False) -> None:
+        with open(os.path.join(self.repo_dir, ".hhconfig"), "w") as f:
+            f.write(
+                """
+auto_namespace_map = {}
+""".format(
+                    auto_namespace_map
+                )
+            )
+
     def run_single_typecheck(self, filename: str) -> int:
-        _, _, retcode = self.proc_call([hh_paths.hh_single_type_check, filename])
+        _, _, retcode = self.proc_call(
+            [
+                hh_paths.hh_single_type_check,
+                "--auto-namespace-map",
+                auto_namespace_map,
+                filename,
+            ]
+        )
         if retcode != 0:
             print(
                 "hh_single_type_check returned non-zero code: {}".format(retcode),
@@ -76,6 +96,8 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
         return ExtractStandaloneDriver()
 
     def test_extract(self) -> None:
+        self.test_driver.write_load_config()
+
         paths = [
             "\\shallow_toplevel",
             "\\with_typedefs",
@@ -107,6 +129,7 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
             "\\with_requiring_interface",
             "\\with_generic_interface",
             "\\with_non_generic_type",
+            "\\with_mapped_namespace",
         ]
 
         for path in paths:
@@ -114,5 +137,6 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
                 self.test_driver.check_extract_standalone(path)
 
     def test_failing(self) -> None:
+        self.test_driver.write_load_config()
         self.test_driver.check_failing("\\nonexistent_function")
         self.test_driver.check_failing("\\nonexistent_dependency")

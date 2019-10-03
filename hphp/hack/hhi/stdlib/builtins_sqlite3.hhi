@@ -47,8 +47,6 @@ class SQLite3Stmt {
   public function close();
   public function reset();
   public function clear();
-  <<__Deprecated('use bindvalue')>>
-  public function bindparam($name, &$parameter, int $type = SQLITE3_TEXT);
   public function bindvalue($name, $parameter, int $type = SQLITE3_TEXT);
   public function execute();
 }

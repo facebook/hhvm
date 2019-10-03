@@ -304,30 +304,6 @@ class SQLite3Stmt {
   public function clear(): bool;
 
   /**
-   * Binds a parameter to a statement variable.
-   *
-   * @param mixed $name - An string identifying the statement variable to
-   *   which the parameter should be bound.
-   * @param mixed $parameter - The parameter to bind to a statement variable.
-   * @param int $type - The data type of the parameter to bind.
-   *   SQLITE3_INTEGER: The value is a signed integer, stored in 1, 2, 3, 4, 6,
-   *   or 8 bytes depending on the magnitude of the value.  SQLITE3_FLOAT: The
-   *   value is a floating point value, stored as an 8-byte IEEE floating point
-   *   number.  SQLITE3_TEXT: The value is a text string, stored using the
-   *   database encoding (UTF-8, UTF-16BE or UTF-16-LE).  SQLITE3_BLOB: The
-   *   value is a blob of data, stored exactly as it was input.  SQLITE3_NULL:
-   *   The value is a NULL value.
-   *
-   * @return bool - Returns TRUE if the parameter is bound to the statement
-   *   variable, FALSE on failure.
-   *
-   */
-  <<__Native>>
-  public function bindparam(mixed $name,
-                     mixed &$parameter,
-                     int $type = SQLITE3_TEXT): bool;
-
-  /**
    * Binds the value of a parameter to a statement variable.
    *
    * @param mixed $name - An string identifying the statement variable to

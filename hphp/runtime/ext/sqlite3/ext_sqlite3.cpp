@@ -568,14 +568,14 @@ bool HHVM_METHOD(SQLite3Stmt, clear) {
   return true;
 }
 
-bool HHVM_METHOD(SQLite3Stmt, bindparam,
+bool HHVM_METHOD(SQLite3Stmt, bindvalue,
                  const Variant& name,
-                 VRefParam parameter,
+                 const Variant& parameter,
                  int64_t type /* = SQLITE3_TEXT */) {
   auto *data = Native::data<SQLite3Stmt>(this_);
   auto param = req::make_shared<SQLite3Stmt::BoundParam>();
   param->type = type;
-  param->value.setWithRef(parameter);
+  param->value = parameter;
 
   if (name.isString()) {
     String sname = name.toString();
@@ -593,14 +593,6 @@ bool HHVM_METHOD(SQLite3Stmt, bindparam,
 
   data->m_bound_params.push_back(param);
   return true;
-}
-
-bool HHVM_METHOD(SQLite3Stmt, bindvalue,
-                 const Variant& name,
-                 const Variant& parameter,
-                 int64_t type /* = SQLITE3_TEXT */) {
-  Variant v = parameter;
-  return HHVM_MN(SQLite3Stmt, bindparam)(this_, name, v, type);
 }
 
 Variant HHVM_METHOD(SQLite3Stmt, execute) {
@@ -805,7 +797,6 @@ static struct SQLite3Extension final : Extension {
     HHVM_ME(SQLite3Stmt, close);
     HHVM_ME(SQLite3Stmt, reset);
     HHVM_ME(SQLite3Stmt, clear);
-    HHVM_ME(SQLite3Stmt, bindparam);
     HHVM_ME(SQLite3Stmt, bindvalue);
     HHVM_ME(SQLite3Stmt, execute);
     Native::registerNativeDataInfo<SQLite3Stmt>(SQLite3Stmt::s_className.get(),

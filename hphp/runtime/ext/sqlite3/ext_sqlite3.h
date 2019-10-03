@@ -120,10 +120,6 @@ int64_t HHVM_METHOD(SQLite3Stmt, paramcount);
 bool HHVM_METHOD(SQLite3Stmt, close);
 bool HHVM_METHOD(SQLite3Stmt, reset);
 bool HHVM_METHOD(SQLite3Stmt, clear);
-bool HHVM_METHOD(SQLite3Stmt, bindparam,
-                 const Variant& name,
-                 VRefParam parameter,
-                 int64_t type /* = SQLITE3_TEXT */);
 bool HHVM_METHOD(SQLite3Stmt, bindvalue,
                  const Variant& name,
                  const Variant& parameter,

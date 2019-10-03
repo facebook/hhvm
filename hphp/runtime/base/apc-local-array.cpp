@@ -172,6 +172,18 @@ APCLocalArray::LvalStr(ArrayData* ad, StringData* k, bool /*copy*/) {
   return arr_lval { helper.release(lval.arr), lval };
 }
 
+arr_lval APCLocalArray::LvalSilentInt(ArrayData* ad, int64_t k, bool copy) {
+  EscalateHelper helper{ad};
+  auto const lval = helper.escalated->lvalSilent(k, copy);
+  return arr_lval { helper.release(lval.arr), lval };
+}
+
+arr_lval APCLocalArray::LvalSilentStr(ArrayData* ad, StringData* k, bool copy) {
+  EscalateHelper helper{ad};
+  auto const lval = helper.escalated->lvalSilent(k, copy);
+  return arr_lval { helper.release(lval.arr), lval };
+}
+
 arr_lval APCLocalArray::LvalNew(ArrayData* ad, bool /*copy*/) {
   EscalateHelper helper{ad};
   auto const lval = helper.escalated->lvalNew(false);

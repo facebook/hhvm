@@ -69,6 +69,8 @@ struct RecordArray : ArrayData,
   static bool ExistsStr(const ArrayData*, const StringData*);
   static arr_lval LvalInt(ArrayData*, int64_t k, bool copy);
   static arr_lval LvalStr(ArrayData*, StringData* key, bool copy);
+  static arr_lval LvalSilentInt(ArrayData*, int64_t k, bool copy);
+  static arr_lval LvalSilentStr(ArrayData*, StringData* key, bool copy);
   static arr_lval LvalNew(ArrayData*, bool copy);
   static ArrayData* RemoveInt(ArrayData*, int64_t key);
   static ArrayData* RemoveIntInPlace(ArrayData*, int64_t key);

@@ -500,7 +500,7 @@ public:
   // Like Lval[Int,Str], but silently does nothing if the element does not
   // exist. Not part of the ArrayData interface, but used for member operations.
   static arr_lval LvalSilentInt(ArrayData*, int64_t, bool);
-  static arr_lval LvalSilentStr(ArrayData*, const StringData*, bool);
+  static arr_lval LvalSilentStr(ArrayData*, StringData*, bool);
 
   static constexpr auto LvalSilentIntDict = &LvalSilentInt;
   static constexpr auto LvalSilentStrDict = &LvalSilentStr;

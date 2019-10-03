@@ -852,6 +852,10 @@ PackedArray::LvalStrVec(ArrayData* adIn, StringData* key, bool) {
   throwInvalidArrayKeyException(key, adIn);
 }
 
+arr_lval PackedArray::LvalSilentStr(ArrayData* ad, StringData* k, bool) {
+  return arr_lval { ad, nullptr };
+}
+
 arr_lval PackedArray::LvalNew(ArrayData* adIn, bool copy) {
   assertx(checkInvariants(adIn));
   if (checkHACFalseyPromote()) {

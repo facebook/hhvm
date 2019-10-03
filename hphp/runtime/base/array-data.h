@@ -381,6 +381,16 @@ public:
   arr_lval lval(const Variant& k, bool copy);
 
   /*
+   * Get an lval for the element at key `k', failing quietly (by returning an
+   * empty arr_lval) instead of throwing.
+   */
+  arr_lval lvalSilent(int64_t k, bool copy);
+  arr_lval lvalSilent(StringData* k, bool copy);
+  arr_lval lvalSilent(Cell k, bool copy);
+  arr_lval lvalSilent(const String& k, bool copy);
+  arr_lval lvalSilent(const Variant& k, bool copy);
+
+  /*
    * Get an lval for a new element at the next available integer key.
    *
    * Note that adding a new element with the next available integer key may
@@ -914,6 +924,8 @@ struct ArrayFunctions {
   bool (*existsStr[NK])(const ArrayData*, const StringData* k);
   arr_lval (*lvalInt[NK])(ArrayData*, int64_t k, bool copy);
   arr_lval (*lvalStr[NK])(ArrayData*, StringData* k, bool copy);
+  arr_lval (*lvalSilentInt[NK])(ArrayData*, int64_t k, bool copy);
+  arr_lval (*lvalSilentStr[NK])(ArrayData*, StringData* k, bool copy);
   arr_lval (*lvalNew[NK])(ArrayData*, bool copy);
   ArrayData* (*removeInt[NK])(ArrayData*, int64_t k);
   ArrayData* (*removeIntInPlace[NK])(ArrayData*, int64_t k);

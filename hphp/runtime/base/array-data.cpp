@@ -455,22 +455,24 @@ const ArrayFunctions g_array_funcs = {
 
   /*
    * arr_lval LvalInt(ArrayData*, int64_t k, bool copy)
-   *
-   *   Look up a value in the array by the supplied integer key, creating it as
-   *   a KindOfNull if it doesn't exist, and return a reference to it.  This
-   *   function has copy/grow semantics.
-   */
-  DISPATCH(LvalInt)
-
-  /*
    * arr_lval LvalStr(ArrayData*, StringData* key, bool copy)
    *
-   *   Look up a value in the array by the supplied string key, creating it as
-   *   a KindOfNull if it doesn't exist, and return a reference to it.  The
-   *   string `key' may not be an integer-like string.  This function has
-   *   copy/grow semantics.
+   *   Look up a value in the array by the supplied key, throwing if it doesn't
+   *   exist, and return a reference to it.  This function has copy/grow
+   *   semantics.
    */
+  DISPATCH(LvalInt)
   DISPATCH(LvalStr)
+
+  /*
+   * arr_lval LvalSilentInt(ArrayData*, int64_t k, bool copy)
+   * arr_lval LvalSilentStr(ArrayData*, StringData* key, bool copy)
+   *
+   *   Look up a value in the array by the supplied key and return a reference
+   *   to it, or an empty reference if it doesn't exist.
+   */
+  DISPATCH(LvalSilentInt)
+  DISPATCH(LvalSilentStr)
 
   /*
    * arr_lval LvalNew(ArrayData*, bool copy)

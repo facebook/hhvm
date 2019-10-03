@@ -113,6 +113,8 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static bool ExistsStr(const ArrayData*, const StringData*);
   static arr_lval LvalInt(ArrayData*, int64_t k, bool copy);
   static arr_lval LvalStr(ArrayData*, StringData* k, bool copy);
+  static arr_lval LvalSilentInt(ArrayData*, int64_t, bool copy);
+  static arr_lval LvalSilentStr(ArrayData*, StringData*, bool copy);
   static arr_lval LvalNew(ArrayData*, bool copy);
   static ArrayData* RemoveInt(ArrayData*, int64_t k);
   static ArrayData* RemoveIntInPlace(ArrayData*, int64_t k);
@@ -169,6 +171,8 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static ArrayData* RemoveIntInPlaceVec(ArrayData*, int64_t);
   static arr_lval LvalIntVec(ArrayData*, int64_t, bool);
   static arr_lval LvalStrVec(ArrayData*, StringData*, bool);
+  static constexpr auto LvalSilentIntVec = &LvalSilentInt;
+  static constexpr auto LvalSilentStrVec = &LvalSilentStr;
   static ArrayData* AppendWithRefVec(ArrayData*, TypedValue);
   static ArrayData* AppendWithRefInPlaceVec(ArrayData*, TypedValue);
   static ArrayData* PlusEqVec(ArrayData*, const ArrayData*);
@@ -226,11 +230,6 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   }
 
   //////////////////////////////////////////////////////////////////////
-
-  // Like LvalInt, but silently does nothing if the element doesn't exist. Not
-  // part of the ArrayData interface, but used in member operations.
-  static arr_lval LvalSilentInt(ArrayData*, int64_t, bool);
-  static constexpr auto LvalSilentIntVec = &LvalSilentInt;
 
   // Like LvalInt, but without any bounds checking. Used to implement the
   // Vector / ImmVector collection types in ext/collections. This function

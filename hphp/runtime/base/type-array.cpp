@@ -614,6 +614,21 @@ arr_lval Array::lvalImpl(const T& key, AccessFlags) {
 }
 
 template<typename T> ALWAYS_INLINE
+arr_lval Array::lvalSilentImpl(const T& key, AccessFlags) {
+  if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
+  auto const lval = m_arr->lvalSilent(key, m_arr->cowCheck());
+  assertx(lval.arr == m_arr);
+  return lval;
+}
+
+template<typename T> ALWAYS_INLINE
+arr_lval Array::lvalForceImpl(const T& key, AccessFlags flags) {
+  if (auto const lval = lvalSilentImpl(key, flags)) return lval;
+  setImpl(key, make_tv<KindOfNull>());
+  return lvalImpl(key, flags);
+}
+
+template<typename T> ALWAYS_INLINE
 bool Array::existsImpl(const T& key) const {
   if (m_arr) return m_arr->exists(key);
   return false;
@@ -753,6 +768,8 @@ decltype(auto) elem(const Array& arr, Fn fn, bool is_key,
 
 FOR_EACH_KEY_TYPE(rval, tv_rval, const)
 FOR_EACH_KEY_TYPE(lval, arr_lval, )
+FOR_EACH_KEY_TYPE(lvalSilent, arr_lval, )
+FOR_EACH_KEY_TYPE(lvalForce, arr_lval, )
 
 #undef I
 #undef V

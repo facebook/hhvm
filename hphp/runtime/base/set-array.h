@@ -421,6 +421,8 @@ public:
   static bool ExistsStr(const ArrayData*, const StringData*);
   static arr_lval LvalInt(ArrayData*, int64_t, bool);
   static arr_lval LvalStr(ArrayData*, StringData*, bool);
+  static constexpr auto LvalSilentInt = &LvalInt;
+  static constexpr auto LvalSilentStr = &LvalStr;
   static arr_lval LvalNew(ArrayData*, bool);
   static ArrayData* SetInt(ArrayData*, int64_t, Cell);
   static constexpr auto SetIntInPlace = &SetInt;

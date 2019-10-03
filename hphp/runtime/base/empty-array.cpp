@@ -273,6 +273,14 @@ arr_lval EmptyArray::LvalStr(ArrayData* ad, StringData* k, bool copy) {
   return LvalStrImpl<true>(ad, k, copy);
 }
 
+arr_lval EmptyArray::LvalSilentInt(ArrayData* ad, int64_t k, bool copy) {
+  return arr_lval { ad, nullptr };
+}
+
+arr_lval EmptyArray::LvalSilentStr(ArrayData* ad, StringData* k, bool copy) {
+  return arr_lval { ad, nullptr };
+}
+
 arr_lval EmptyArray::LvalNew(ArrayData*, bool) {
   if (checkHACFalseyPromote()) {
     raise_hac_falsey_promote_notice("Lval on missing array element");

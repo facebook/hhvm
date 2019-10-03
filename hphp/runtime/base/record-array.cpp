@@ -230,6 +230,14 @@ arr_lval RecordArray::LvalStr(ArrayData*, StringData*, bool) {
   throw_not_implemented("This method on RecordArray");
 }
 
+arr_lval RecordArray::LvalSilentInt(ArrayData*, int64_t, bool) {
+  throw_not_implemented("This method on RecordArray");
+}
+
+arr_lval RecordArray::LvalSilentStr(ArrayData*, StringData*, bool) {
+  throw_not_implemented("This method on RecordArray");
+}
+
 arr_lval RecordArray::LvalNew(ArrayData*, bool) {
   throw_not_implemented("This method on RecordArray");
 }

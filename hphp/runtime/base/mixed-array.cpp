@@ -1179,8 +1179,7 @@ arr_lval MixedArray::LvalSilentInt(ArrayData* ad, int64_t k, bool copy) {
   return arr_lval { a, &a->data()[pos].data };
 }
 
-arr_lval MixedArray::LvalSilentStr(ArrayData* ad, const StringData* k,
-                                  bool copy) {
+arr_lval MixedArray::LvalSilentStr(ArrayData* ad, StringData* k, bool copy) {
   auto a = asMixed(ad);
   auto const pos = a->find(k, k->hash());
   if (UNLIKELY(!validPos(pos))) return arr_lval { a, nullptr };

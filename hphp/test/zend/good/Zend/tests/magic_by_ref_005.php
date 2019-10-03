@@ -1,7 +1,7 @@
 <?hh
 
 class test {
-    function __isset(&$name) { }
+    function __isset(inout $name) { }
 }
 <<__EntryPoint>> function main(): void {
 $t = new test;

@@ -1721,17 +1721,25 @@ where
                     errors::invalid_number_of_args(&full_name, n),
                 ))
             }
-            if (s == sn::members::__CALL
+            if s == sn::members::__CALL
                 || s == sn::members::__GET
                 || s == sn::members::__SET
                 || s == sn::members::__ISSET
-                || s == sn::members::__UNSET)
-                && params().any(&Self::is_param_by_ref)
+                || s == sn::members::__UNSET
             {
-                self.errors.push(Self::make_error_from_node(
-                    node,
-                    errors::invalid_args_by_ref(&full_name),
-                ))
+                if params().any(&Self::is_param_by_ref) {
+                    self.errors.push(Self::make_error_from_node(
+                        node,
+                        errors::invalid_args_by_ref(&full_name),
+                    ))
+                }
+                // disallow inout parameters on magic methods
+                if params().any(&Self::is_parameter_with_callconv) {
+                    self.errors.push(Self::make_error_from_node(
+                        node,
+                        errors::invalid_inout_args(&full_name),
+                    ))
+                }
             }
         }
     }

@@ -1,7 +1,7 @@
 <?hh
 
 class test {
-    function __get(&$name) { }
+    function __get(inout $name) { }
 }
 <<__EntryPoint>> function main(): void {
 $t = new test;

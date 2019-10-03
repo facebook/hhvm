@@ -754,6 +754,12 @@ pub fn invalid_args_by_ref(name: &str) -> Error {
         name.to_string(),
     ))
 }
+pub fn invalid_inout_args(name: &str) -> Error {
+    Cow::Owned(format!(
+        "Method {} cannot take inout arguments",
+        name.to_string(),
+    ))
+}
 pub fn redeclaration_error(name: &str) -> Error {
     Cow::Owned(format!("Cannot redeclare {}", name.to_string(),))
 }

@@ -1,7 +1,7 @@
 <?hh
 
 class test {
-    function __unset(&$name) { }
+    function __unset(inout $name) { }
 }
 <<__EntryPoint>> function main(): void {
 $t = new test;

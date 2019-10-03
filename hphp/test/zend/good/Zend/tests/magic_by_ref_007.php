@@ -1,7 +1,7 @@
 <?hh
 
 class test {
-    function __call($name, &$args) { }
+    function __call($name, inout $args) { }
 }
 <<__EntryPoint>> function main(): void {
 $t = new test;

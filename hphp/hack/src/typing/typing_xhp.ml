@@ -149,4 +149,6 @@ let is_xhp_child env pos ty =
   Typing_solver.is_sub_type
     env
     ty
-    (MakeType.nullable_locl r (r, Tunion [ty_child; ty_traversable]))
+    (MakeType.nullable_locl
+       r
+       (r, Tunion [MakeType.dynamic r; ty_child; ty_traversable]))

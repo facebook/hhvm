@@ -13,8 +13,8 @@ class A implements XHPChild {}
 
 class :x:dumb {}
 
-function foo(mixed $x, string $s, ConstVector<string> $cs): void {
+function foo(mixed $x, string $s, ConstVector<string> $cs, dynamic $d): void {
   // This is allowed
   if ($x !== null) $s = $cs;
-  $y = <x:dumb>{0}{'hello'}{$s}{new A()}</x:dumb>;
+  $y = <x:dumb>{0}{'hello'}{$s}{new A()}{$d}</x:dumb>;
 }

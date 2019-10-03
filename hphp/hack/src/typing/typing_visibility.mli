@@ -28,8 +28,3 @@ val is_visible :
   Nast.class_id_ option ->
   Decl_provider.class_decl ->
   bool
-
-val min_vis_opt :
-  (Pos.t * visibility) option ->
-  (Pos.t * visibility) option ->
-  (Pos.t * visibility) option

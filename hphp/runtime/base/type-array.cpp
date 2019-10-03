@@ -625,7 +625,12 @@ template<typename T> ALWAYS_INLINE
 arr_lval Array::lvalForceImpl(const T& key, AccessFlags flags) {
   if (auto const lval = lvalSilentImpl(key, flags)) return lval;
   setImpl(key, make_tv<KindOfNull>());
-  return lvalImpl(key, flags);
+
+  // NB: In order to preserve the old lval behavior
+  auto const lval = lvalSilentImpl(key, flags);
+  assertx(lval.arr == m_arr);
+  assertx(lval);
+  return lval;
 }
 
 template<typename T> ALWAYS_INLINE

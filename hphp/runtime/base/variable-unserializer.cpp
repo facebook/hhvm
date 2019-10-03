@@ -600,7 +600,6 @@ void VariableUnserializer::unserializeProp(ObjectData* obj,
     // Unserialize as a dynamic property. If this is the first, we need to
     // pre-allocate space in the array to ensure the elements don't move during
     // unserialization.
-    SuppressHACFalseyPromoteNotices shacn;
     t = obj->makeDynProp(realKey.get());
   } else {
     // We'll check if this doesn't violate the type-hint once we're done
@@ -1149,9 +1148,8 @@ void VariableUnserializer::unserializeVariant(
                     obj->raiseCreateDynamicProp(key.get());
                   }
                   auto t = [&]() {
-                    SuppressHACFalseyPromoteNotices shacn;
                     auto& arr = obj->dynPropArray();
-                    return arr.lval(key, AccessFlags::Key);
+                    return arr.lvalForce(key, AccessFlags::Key);
                   }();
                   if (UNLIKELY(isRefcountedType(t.type()))) {
                     putInOverwrittenList(t);
@@ -1299,10 +1297,7 @@ Array VariableUnserializer::unserializeArray() {
     assertx(type() != VariableUnserializer::Type::APCSerialize ||
            !arr.exists(key, true));
 
-    auto value = [&]() {
-      SuppressHACFalseyPromoteNotices shacn;
-      return arr.lval(key, AccessFlags::Key);
-    }();
+    auto value = arr.lvalForce(key, AccessFlags::Key);
     if (UNLIKELY(isRefcountedType(value.type()))) {
       putInOverwrittenList(value);
     }
@@ -1580,10 +1575,7 @@ Array VariableUnserializer::unserializeDArray() {
     assertx(type() != VariableUnserializer::Type::APCSerialize ||
            !arr.exists(key, true));
 
-    auto value = [&]() {
-      SuppressHACFalseyPromoteNotices shacn;
-      return arr.lval(key, AccessFlags::Key);
-    }();
+    auto value = arr.lvalForce(key, AccessFlags::Key);
     if (UNLIKELY(isRefcountedType(value.type()))) {
       putInOverwrittenList(value);
     }

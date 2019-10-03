@@ -361,8 +361,7 @@ tv_lval ObjectData::makeDynProp(const StringData* key) {
   if (RuntimeOption::EvalNoticeOnCreateDynamicProp) {
     raiseCreateDynamicProp(key);
   }
-  SuppressHACFalseyPromoteNotices shacn;
-  return reserveProperties().lval(StrNR(key), AccessFlags::Key);
+  return reserveProperties().lvalForce(StrNR(key), AccessFlags::Key);
 }
 
 void ObjectData::setDynProp(const StringData* key, Cell val) {

@@ -2036,8 +2036,7 @@ Variant ExecutionContext::getEvaledArg(const StringData* val,
   auto v = Variant::attach(
     g_context->invokePseudoMain(unit->getMain(nullptr))
   );
-  SuppressHACFalseyPromoteNotices shacn;
-  auto const lv = m_evaledArgs.lval(key, AccessFlags::Key);
+  auto const lv = m_evaledArgs.lvalForce(key, AccessFlags::Key);
   tvSet(*v.asTypedValue(), lv);
   return Variant::wrap(lv.tv());
 }

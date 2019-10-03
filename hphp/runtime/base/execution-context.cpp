@@ -1659,16 +1659,7 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
       popVMState();
     };
 
-    {
-      SCOPE_FAIL {
-        // Pop off any placeholder in-out stack slots if we throw from doEnterVM
-        // to ensure the stack pointer matches.
-        if (UNLIKELY(f->takesInOutParams())) {
-          for (auto i = f->numInOutParams(); i > 0; --i) vmStack().popTV();
-        }
-      };
-      doEnterVM(ar);
-    }
+    doEnterVM(ar);
 
     // `retptr' might point somewhere that is affected by {push,pop}VMState(),
     // so don't write to it until after we pop the nested VM state.

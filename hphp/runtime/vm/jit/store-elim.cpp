@@ -659,9 +659,21 @@ void visit(Local& env, IRInstruction& inst) {
     [&] (CallEffects l) {
       env.containsCall = true;
 
+      mayStore(env, l.outputs);
+      if (auto bit = pure_store_bit(env, l.outputs)) {
+        mustStore(env, *bit);
+      } else {
+        auto const it =
+          env.global.ainfo.stack_ranges.find(canonicalize(l.outputs));
+        if (it != end(env.global.ainfo.stack_ranges)) {
+          mustStoreSet(env, it->second);
+        }
+      }
+
       load(env, AHeapAny);
       load(env, l.locals);
-      load(env, l.stack);
+      load(env, l.inputs);
+      load(env, l.actrec);
       kill(env, l.kills);
     },
 

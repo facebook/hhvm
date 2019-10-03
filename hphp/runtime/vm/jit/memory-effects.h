@@ -119,20 +119,26 @@ struct PureSpillFrame { AliasClass stk; };
  *
  * The `kills' set are locations that cannot be read by this instruction unless
  * it writes to them first, and which it generally may write to.  (This is used
- * for killing stack slots below the call depth.)
+ * for killing stack slots below the call depth and MInstrState locations)
  *
- * The `stack' set contains stack locations the call will read as arguments, as
- * well as stack locations it may read or write via other means. Locations in
- * any intersection between `stack' and `kills' may be assumed to be killed.
+ * The `inputs' set contains stack locations the call will read as arguments.
  *
- * The `locals` set contains frame locations that the call might read. (If the
- * call might write *any* local, then writes_local will be true).
+ * The `actrec' set contains stack locations the call will write ActRec to.
+ * As of now, they are considered to be reads, because dummy SpillFrame opcode
+ * pretends to write them.
+ *
+ * The `outputs' set contains stack locations the call will write inout
+ * variables to.
+ *
+ * The `locals` set contains frame locations that the call might read.
  *
  * Note that calls that have been weakened to CallBuiltin use GeneralEffects,
  * not CallEffects.
  */
 struct CallEffects    { AliasClass kills;
-                        AliasClass stack;
+                        AliasClass inputs;
+                        AliasClass actrec;
+                        AliasClass outputs;
                         AliasClass locals; };
 
 /*

@@ -158,6 +158,10 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
       // Free ActRec.
       stack.ndiscard(func->numSlotsInFrame());
       stack.discardAR();
+
+      // JIT may have optimized away NullUninit writes over the space reserved
+      // for inout outputs.
+      stack.ndiscard(func->numInOutParams());
     }
   } else if (func->isAsyncFunction()) {
     auto const waitHandle = frame_afwh(fp);

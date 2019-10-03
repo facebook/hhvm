@@ -861,7 +861,10 @@ void FrameStateMgr::updateMBase(const IRInstruction* inst) {
               [&](PureStore m) { handle_stores(m.dst); },
               [&](PureSpillFrame m) { handle_stores(m.stk); },
               [&](CallEffects x) {
-                handle_stores(x.stack);
+                handle_stores(x.kills);
+                handle_stores(x.inputs);
+                handle_stores(x.actrec);
+                handle_stores(x.outputs);
               },
               [&](PureLoad /*m*/) {}, [&](ReturnEffects) {},
               [&](ExitEffects) {}, [&](IrrelevantEffects) {},

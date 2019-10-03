@@ -499,7 +499,10 @@ void handle_call_effects(Local& env,
   }
 
   // Any stack locations modified by the callee are no longer valid
-  store(env, effects.stack, nullptr);
+  store(env, effects.kills, nullptr);
+  store(env, effects.inputs, nullptr);
+  store(env, effects.actrec, nullptr);
+  store(env, effects.outputs, nullptr);
 }
 
 Flags handle_assert(Local& env, const IRInstruction& inst) {

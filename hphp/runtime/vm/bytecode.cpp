@@ -4416,7 +4416,9 @@ bool doFCall(ActRec* ar, uint32_t numArgs, bool hasUnpack,
       while (vmStack().top() != (void*)ar) {
         vmStack().popTV();
       }
+      auto const numInOutParams = ar->func()->numInOutParams();
       vmStack().popAR();
+      vmStack().ndiscard(numInOutParams);
     }
     throw;
   }

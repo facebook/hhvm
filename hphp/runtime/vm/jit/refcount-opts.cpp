@@ -1991,9 +1991,10 @@ void handle_call(Env& env, RCState& state, const IRInstruction& /*inst*/,
   // Figure out locations the call may cause stores to, then remove any memory
   // support on those locations.
   auto bset = ALocBits{};
-  bset |= env.ainfo.may_alias(e.stack);
+  bset |= env.ainfo.may_alias(e.inputs);
+  bset |= env.ainfo.may_alias(e.actrec);
+  bset |= env.ainfo.may_alias(e.outputs);
   bset |= env.ainfo.may_alias(AHeapAny);
-  bset &= ~env.ainfo.expand(e.kills);
   reduce_support_bits(env, state, bset, true, add_node);
 }
 

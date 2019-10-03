@@ -834,12 +834,21 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       return CallEffects {
         // Kills. Everything on the stack below the incoming parameters.
         stack_below(inst.src(0), extra->spOffset - 1) | AMIStateAny,
-        // Stack. The act-rec, incoming parameters, and everything below.
-        stack_below(
+        // Input arguments.
+        extra->numInputs() == 0 ? AEmpty : AStack {
+          inst.src(0),
+          extra->spOffset + extra->numInputs() - 1,
+          static_cast<int32_t>(extra->numInputs())
+        },
+        // ActRec.
+        actrec(inst.src(0), extra->spOffset + extra->numInputs()),
+        // Inout outputs.
+        extra->numOut == 0 ? AEmpty : AStack {
           inst.src(0),
           extra->spOffset + extra->numInputs() + kNumActRecCells +
-          extra->numOut - 1
-        ),
+            extra->numOut - 1,
+          static_cast<int32_t>(extra->numOut)
+        },
         // Locals.
         backtrace_locals(inst)
       };
@@ -851,8 +860,13 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       return CallEffects {
         // Kills. Everything on the stack below the sent value.
         stack_below(inst.src(0), extra->spOffset - 1) | AMIStateAny,
-        // Stack. The value being sent, and everything below.
-        stack_below(inst.src(0), extra->spOffset),
+        // Inputs. The value being sent.
+        AStack { inst.src(0), extra->spOffset, 1 },
+        // ActRec. It is on the heap and we already implicitly assume that
+        // CallEffects can perform arbitrary heap operations.
+        AEmpty,
+        // No outputs.
+        AEmpty,
         // Locals.
         backtrace_locals(inst)
       };
@@ -864,12 +878,21 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       return CallEffects {
         // Kills. Everything on the stack below the incoming parameters.
         stack_below(inst.src(0), extra->spOffset - 1) | AMIStateAny,
-        // Stack. The act-rec, incoming parameters, and everything below.
-        stack_below(
+        // Input arguments.
+        extra->numInputs() == 0 ? AEmpty : AStack {
+          inst.src(0),
+          extra->spOffset + extra->numInputs() - 1,
+          static_cast<int32_t>(extra->numInputs())
+        },
+        // ActRec.
+        actrec(inst.src(0), extra->spOffset + extra->numInputs()),
+        // Inout outputs.
+        extra->numOut == 0 ? AEmpty : AStack {
           inst.src(0),
           extra->spOffset + extra->numInputs() + kNumActRecCells +
-          extra->numOut - 1
-        ),
+            extra->numOut - 1,
+          static_cast<int32_t>(extra->numOut)
+        },
         // Locals.
         backtrace_locals(inst)
       };
@@ -2212,7 +2235,9 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
     [&] (IrrelevantEffects)  {},
     [&] (UnknownEffects)     {},
     [&] (CallEffects x)      { check(x.kills);
-                               check(x.stack);
+                               check(x.inputs);
+                               check(x.actrec);
+                               check(x.outputs);
                                check(x.locals); },
     [&] (InlineEnterEffects x){ check(x.inlStack);
                                 check(x.inlFrame);
@@ -2328,7 +2353,9 @@ MemEffects canonicalize(MemEffects me) {
     [&] (CallEffects x) -> R {
       return CallEffects {
         canonicalize(x.kills),
-        canonicalize(x.stack),
+        canonicalize(x.inputs),
+        canonicalize(x.actrec),
+        canonicalize(x.outputs),
         canonicalize(x.locals)
       };
     },
@@ -2372,9 +2399,11 @@ std::string show(MemEffects effects) {
       );
     },
     [&] (CallEffects x) {
-      return sformat("call({} ; {} ; {})",
+      return sformat("call({} ; {} ; {} ; {} ; {})",
         show(x.kills),
-        show(x.stack),
+        show(x.inputs),
+        show(x.actrec),
+        show(x.outputs),
         show(x.locals)
       );
     },

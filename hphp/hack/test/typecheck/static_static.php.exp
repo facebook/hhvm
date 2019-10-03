@@ -1,2 +1,2 @@
 File "static_static.php", line 13, characters 26-30:
-A method declaration cannot have duplicate modifiers. (Parsing[1002])
+Methods cannot have duplicate modifiers (Parsing[1002])

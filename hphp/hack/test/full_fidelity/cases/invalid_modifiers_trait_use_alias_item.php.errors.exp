@@ -1,0 +1,8 @@
+(5,13)-(5,20) Trait use aliases cannot be declared abstract
+(5,28)-(5,33) Trait use aliases cannot be declared static
+(5,53)-(5,58) Trait use aliases cannot have multiple visibility modifiers
+(5,60)-(5,64) Trait use aliases cannot be declared async
+(5,66)-(5,74) Trait use aliases cannot be declared coroutine
+(7,13)-(7,20) Trait use aliases cannot be declared abstract
+(7,22)-(7,29) Trait use aliases cannot have duplicate modifiers
+(7,22)-(7,29) Trait use aliases cannot be declared abstract

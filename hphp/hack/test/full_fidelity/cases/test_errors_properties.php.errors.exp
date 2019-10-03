@@ -1,2 +1,2 @@
-(4,10)-(4,16) Multiple access type modifiers are not allowed: properties of C
-(5,17)-(5,22) Multiple modifiers are not allowed: properties of C
+(4,10)-(4,16) Properties cannot have multiple visibility modifiers
+(5,17)-(5,22) Properties cannot have duplicate modifiers

@@ -62,8 +62,6 @@ val invalid_variable_name : string
 
 val invalid_variable_variable : string
 
-val function_modifier : string -> string
-
 val invalid_yield : string
 
 val invalid_yield_from : string
@@ -118,14 +116,10 @@ val outside_dollar_str_interp : string
 
 val no_silence : string
 
-val declared_final : string -> string
-
 val const_mutation : string
 
 val no_attributes_on_variadic_parameter : string
 
 val statement_without_await_in_concurrent_block : string
-
-val trait_alias_rule_allows_only_final_and_visibility_modifiers : string
 
 val invalid_typehint_alias : string -> string -> string

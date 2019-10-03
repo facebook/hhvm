@@ -1,0 +1,4 @@
+(6,1)-(6,8) Interfaces may not be declared 'abstract'.
+(6,1)-(6,29) Interfaces cannot be declared final.
+(8,1)-(8,8) Interfaces may not be declared 'abstract'.
+(8,10)-(8,17) Classes, interfaces, and traits cannot have duplicate modifiers

@@ -593,10 +593,14 @@ where
             MethodishDeclaration(x) => Some(Self::modifiers_of_function_decl_header_exn(
                 &x.methodish_function_decl_header,
             )),
+            FunctionDeclaration(x) => Some(Self::modifiers_of_function_decl_header_exn(
+                &x.function_declaration_header,
+            )),
             PropertyDeclaration(x) => Some(&x.property_modifiers),
             ConstDeclaration(x) => Some(&x.const_modifiers),
             TypeConstDeclaration(x) => Some(&x.type_const_modifiers),
             ClassishDeclaration(x) => Some(&x.classish_modifiers),
+            TraitUseAliasItem(x) => Some(&x.trait_use_alias_item_modifiers),
             _ => None,
         }
     }
@@ -634,11 +638,6 @@ where
 
     fn is_visibility(x: &'a Syntax<Token, Value>) -> bool {
         x.is_public() || x.is_private() || x.is_protected()
-    }
-
-    // does the node contain any visibility keywords in its modifiers
-    fn has_modifier_visibility(node: &'a Syntax<Token, Value>) -> bool {
-        Self::has_modifier_helper(&Self::is_visibility, node)
     }
 
     fn contains_async_not_last(mods: &'a Syntax<Token, Value>) -> bool {
@@ -1017,24 +1016,42 @@ where
         }
     }
 
-    // error on 'public private function foo()'
-    fn multiple_visibility_errors(&mut self, modifiers: &'a Syntax<Token, Value>, msg: Error) {
-        if let SyntaxList(modifiers) = &modifiers.syntax {
-            let modifiers: Vec<&'a Syntax<Token, Value>> = modifiers
-                .iter()
-                .filter(|x: &&'a Syntax<Token, Value>| Self::is_visibility(*x))
-                .collect();
-            if modifiers.len() > 1 {
-                self.errors
-                    .push(Self::make_error_from_node(modifiers.last().unwrap(), msg))
+    fn invalid_modifier_errors<F>(&mut self, decl_name: &str, node: &'a Syntax<Token, Value>, ok: F)
+    where
+        F: Fn(TokenKind) -> bool,
+    {
+        if let Some(modifiers) = Self::get_modifiers_of_declaration(node) {
+            for modifier in Self::syntax_to_list_no_separators(modifiers) {
+                if let Some(kind) = Self::token_kind(modifier) {
+                    if !ok(kind) {
+                        self.errors.push(Self::make_error_from_node(
+                            modifier,
+                            errors::invalid_modifier_for_declaration(
+                                decl_name,
+                                self.text(modifier),
+                            ),
+                        ));
+                    }
+                }
             }
-        }
-    }
-
-    // error on 'final final function foo()'
-    fn multiple_modifiers_errors(&mut self, modifiers: &'a Syntax<Token, Value>, msg: Error) {
-        if let Some(duplicate) = Self::list_first_duplicate_token(modifiers) {
-            self.errors.push(Self::make_error_from_node(duplicate, msg))
+            if let Some(duplicate) = Self::list_first_duplicate_token(modifiers) {
+                self.errors.push(Self::make_error_from_node(
+                    duplicate,
+                    errors::duplicate_modifiers_for_declaration(decl_name),
+                ))
+            }
+            if let SyntaxList(modifiers) = &modifiers.syntax {
+                let modifiers: Vec<&'a Syntax<Token, Value>> = modifiers
+                    .iter()
+                    .filter(|x: &&'a Syntax<Token, Value>| Self::is_visibility(*x))
+                    .collect();
+                if modifiers.len() > 1 {
+                    self.errors.push(Self::make_error_from_node(
+                        modifiers.last().unwrap(),
+                        errors::multiple_visibility_modifiers_for_declaration(decl_name),
+                    ));
+                }
+            }
         }
     }
 
@@ -1816,6 +1833,10 @@ where
                     || errors::misplaced_owned_mutable,
                     function_attrs,
                 );
+
+                self.invalid_modifier_errors("Top-level functions", node, |kind| {
+                    kind == TokenKind::Async || kind == TokenKind::Coroutine
+                });
             }
             MethodishDeclaration(md) => {
                 let header_node = &md.methodish_function_decl_header;
@@ -1862,8 +1883,16 @@ where
                     || errors::clone_cannot_be_static(class_name, method_name),
                     modifiers,
                 );
-                self.multiple_visibility_errors(modifiers, errors::error2017);
-                self.multiple_modifiers_errors(modifiers, errors::error2013);
+                self.invalid_modifier_errors("Methods", node, |kind| {
+                    kind == TokenKind::Abstract
+                        || kind == TokenKind::Final
+                        || kind == TokenKind::Static
+                        || kind == TokenKind::Private
+                        || kind == TokenKind::Protected
+                        || kind == TokenKind::Public
+                        || kind == TokenKind::Async
+                        || kind == TokenKind::Coroutine
+                });
 
                 if Self::has_modifier_static(node)
                     && (self.attribute_specification_contains(
@@ -4084,7 +4113,9 @@ where
                 ))
             };
 
-            self.multiple_modifiers_errors(&cd.classish_modifiers, errors::error2031);
+            self.invalid_modifier_errors("Classes, interfaces, and traits", node, |kind| {
+                kind == TokenKind::Abstract || kind == TokenKind::Final
+            });
 
             self.produce_error(
                 |self_, _| classish_sealed_arg_not_classname(self_),
@@ -4214,33 +4245,15 @@ where
 
     // Checks for modifiers on class constants
     fn class_constant_modifier_errors(&mut self, node: &'a Syntax<Token, Value>) {
-        if let ConstDeclaration(x) = &node.syntax {
-            let const_modifiers = &x.const_modifiers;
-            if self.is_inside_trait() {
-                self.errors
-                    .push(Self::make_error_from_node(node, errors::const_in_trait))
-            };
-            self.multiple_modifiers_errors(const_modifiers, errors::const_has_duplicate_modifiers);
-            if Self::has_modifier_static(node) {
-                self.errors
-                    .push(Self::make_error_from_node(node, errors::static_const))
-            }
-            if Self::has_modifier_visibility(node) {
-                self.errors
-                    .push(Self::make_error_from_node(node, errors::const_visibility))
-            }
+        if self.is_inside_trait() {
+            self.errors
+                .push(Self::make_error_from_node(node, errors::const_in_trait))
         }
+        self.invalid_modifier_errors("Constants", node, |kind| kind == TokenKind::Abstract);
     }
 
     fn type_const_modifier_errors(&mut self, node: &'a Syntax<Token, Value>) {
-        if let TypeConstDeclaration(_) = &node.syntax {
-            if Self::has_modifier_visibility(node) {
-                self.errors.push(Self::make_error_from_node(
-                    node,
-                    errors::type_const_visibility,
-                ))
-            }
-        }
+        self.invalid_modifier_errors("Type constants", node, |kind| kind == TokenKind::Abstract);
     }
 
     fn alias_errors(&mut self, node: &'a Syntax<Token, Value>) {
@@ -4819,16 +4832,17 @@ where
     fn class_property_modifiers_errors(&mut self, node: &'a Syntax<Token, Value>) {
         if let PropertyDeclaration(x) = &node.syntax {
             let property_modifiers = &x.property_modifiers;
-            let first_parent_name = self.first_parent_class_name().unwrap_or("");
-            self.multiple_modifiers_errors(
-                property_modifiers,
-                errors::property_has_multiple_modifiers(first_parent_name),
-            );
 
-            self.multiple_visibility_errors(
-                property_modifiers,
-                errors::property_has_multiple_visibilities(first_parent_name),
-            );
+            let abstract_static_props = self.env.parser_options.po_abstract_static_props;
+            self.invalid_modifier_errors("Properties", node, |kind| {
+                if kind == TokenKind::Abstract {
+                    return abstract_static_props;
+                }
+                kind == TokenKind::Static
+                    || kind == TokenKind::Private
+                    || kind == TokenKind::Protected
+                    || kind == TokenKind::Public
+            });
 
             self.produce_error(
                 |_, x| Self::is_empty_list_or_missing(x),
@@ -4837,27 +4851,20 @@ where
                 node,
             );
 
-            if !self.env.parser_options.po_abstract_static_props {
-                self.produce_error(
-                    |_, n| Self::has_modifier_abstract(n),
-                    node,
-                    || errors::error2058,
-                    node,
-                )
-            } else {
+            if self.env.parser_options.po_abstract_static_props {
                 self.produce_error(
                     |_, n| Self::has_modifier_abstract(n) && !Self::has_modifier_static(n),
                     node,
                     || errors::abstract_instance_property,
                     node,
                 );
+            }
 
-                if Self::has_modifier_abstract(node) && Self::has_modifier_private(node) {
-                    self.errors.push(Self::make_error_from_node(
-                        node,
-                        errors::elt_abstract_private("properties"),
-                    ))
-                }
+            if Self::has_modifier_abstract(node) && Self::has_modifier_private(node) {
+                self.errors.push(Self::make_error_from_node(
+                    node,
+                    errors::elt_abstract_private("properties"),
+                ));
             }
         }
     }
@@ -4915,6 +4922,15 @@ where
                 }
             }
         }
+    }
+
+    fn trait_use_alias_item_modifier_errors(&mut self, node: &'a Syntax<Token, Value>) {
+        self.invalid_modifier_errors("Trait use aliases", node, |kind| {
+            kind == TokenKind::Final
+                || kind == TokenKind::Private
+                || kind == TokenKind::Protected
+                || kind == TokenKind::Public
+        });
     }
 
     fn mixed_namespace_errors(&mut self, node: &'a Syntax<Token, Value>) {
@@ -5482,6 +5498,7 @@ where
                 self.class_property_const_errors(node);
                 self.class_property_declarator_errors(node);
             }
+            TraitUseAliasItem(_) => self.trait_use_alias_item_modifier_errors(node),
             EnumDeclaration(_) => self.enum_decl_errors(node),
             Enumerator(_) => self.enumerator_errors(node),
             PostfixUnaryExpression(_) | BinaryExpression(_) | ForeachStatement(_) => {

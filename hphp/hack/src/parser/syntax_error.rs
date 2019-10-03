@@ -226,7 +226,6 @@ pub const error2010: Error = Cow::Borrowed(concat!(
     "Parameters cannot have visibility modifiers (except in ",
     "parameter lists of constructors)."
 ));
-pub const error2013: Error = Cow::Borrowed("A method declaration cannot have duplicate modifiers.");
 pub const error2014: Error = Cow::Borrowed("An abstract method cannot have a method body.");
 pub fn error2015(class_name: &str, method_name: &str) -> Error {
     Cow::Owned(format!(
@@ -242,8 +241,6 @@ pub fn error2016(class_name: &str, method_name: &str) -> Error {
         method_name.to_string(),
     ))
 }
-pub const error2017: Error =
-    Cow::Borrowed("A method declaration cannot have multiple visibility modifiers.");
 pub const error2018: Error = Cow::Borrowed("A constructor cannot have a non-void type annotation.");
 pub fn error2019(class_name: &str, method_name: &str) -> Error {
     Cow::Owned(format!(
@@ -275,8 +272,6 @@ pub fn error2025(class_name: &str, prop_name: &str) -> Error {
 }
 pub const error2029: Error = Cow::Borrowed("Only traits and interfaces may use 'require extends'.");
 pub const error2030: Error = Cow::Borrowed("Only traits may use 'require implements'.");
-pub const error2031: Error =
-    Cow::Borrowed("A class, interface, or trait declaration cannot have duplicate modifiers.");
 pub const error2032: Error = Cow::Borrowed("The array type is not allowed in strict mode.");
 pub const error2033: Error = Cow::Borrowed(concat!(
     "The splat operator ('...') for unpacking variadic arguments ",
@@ -342,7 +337,6 @@ pub const error2054: Error = Cow::Borrowed(concat!(
 pub const error2055: Error = Cow::Borrowed("At least one enumerated item is expected.");
 pub const error2056: Error = Cow::Borrowed("First unbracketed namespace occurrence here");
 pub const error2057: Error = Cow::Borrowed("First bracketed namespace occurrence here");
-pub const error2058: Error = Cow::Borrowed("Property may not be abstract.");
 pub const invalid_shape_field_name: Error =
     Cow::Borrowed("Shape field name must be a nonempty single-quoted string or a class constant");
 pub const shape_field_int_like_string: Error =
@@ -595,14 +589,11 @@ pub fn elt_abstract_private(elt: &str) -> Error {
         elt.to_string(),
     ))
 }
-pub const const_has_duplicate_modifiers: Error =
-    Cow::Borrowed("A constant cannot have duplicate modifiers.");
 pub const only_soft_allowed: Error = Cow::Borrowed("Only the __Soft attribute is allowed here.");
 pub const soft_no_arguments: Error = Cow::Borrowed("The __Soft attribute does not take arguments.");
 pub const no_legacy_soft_typehints: Error = Cow::Borrowed(
     "The @ syntax for soft typehints is not allowed. Use the __Soft attribute instead.",
 );
-pub const static_const: Error = Cow::Borrowed("Cannot declare constants static.");
 pub const outside_dollar_str_interp: Error =
     Cow::Borrowed("The ${x} syntax is disallowed in Hack. Use {$x} instead.");
 pub const no_const_interfaces_traits_enums: Error =
@@ -666,18 +657,6 @@ pub const references_not_allowed: Error =
     Cow::Borrowed("References are only allowed as function call arguments");
 pub const enum_elem_name_is_class: Error = Cow::Borrowed("Enum element cannot be named 'class'");
 pub const sealed_enum: Error = Cow::Borrowed("Enums cannot be sealed.");
-pub fn property_has_multiple_modifiers(name: &str) -> Error {
-    Cow::Owned(format!(
-        "Multiple modifiers are not allowed: properties of {}",
-        name.to_string(),
-    ))
-}
-pub fn property_has_multiple_visibilities(name: &str) -> Error {
-    Cow::Owned(format!(
-        "Multiple access type modifiers are not allowed: properties of {}",
-        name.to_string(),
-    ))
-}
 pub const property_requires_visibility: Error = Cow::Borrowed(concat!(
     "Property declarations require a visibility modifier ",
     "such as public, private or protected.",
@@ -803,11 +782,7 @@ pub fn declared_name_is_already_in_use(line_num: usize, name: &str, _short_name:
         line_num.to_string(),
     ))
 }
-pub const type_const_visibility: Error =
-    Cow::Borrowed("Type constants cannot have visibility modifiers");
 pub const const_in_trait: Error = Cow::Borrowed("Traits cannot have constants");
-pub const const_visibility: Error =
-    Cow::Borrowed("Class constants cannot have visibility modifiers in Hack files");
 pub const sealed_val_not_classname: Error =
     Cow::Borrowed("Values in sealed whitelist must be classname constants.");
 pub const list_must_be_lvar: Error =
@@ -968,3 +943,22 @@ pub const xhp_class_attribute_type_constant: Error =
 pub const globals_without_subscript: Error = Cow::Borrowed("$GLOBALS access requires a subscript.");
 pub const invalid_await_position_pipe: Error =
     Cow::Borrowed("Await cannot be used as an expression right of a pipe operator.");
+pub fn invalid_modifier_for_declaration(decl: &str, modifier: &str) -> Error {
+    Cow::Owned(format!(
+        "{} cannot be declared {}",
+        decl.to_string(),
+        modifier.to_string(),
+    ))
+}
+pub fn duplicate_modifiers_for_declaration(decl: &str) -> Error {
+    Cow::Owned(format!(
+        "{} cannot have duplicate modifiers",
+        decl.to_string(),
+    ))
+}
+pub fn multiple_visibility_modifiers_for_declaration(decl: &str) -> Error {
+    Cow::Owned(format!(
+        "{} cannot have multiple visibility modifiers",
+        decl.to_string(),
+    ))
+}

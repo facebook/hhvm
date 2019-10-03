@@ -85,9 +85,6 @@ let shape_type_ellipsis_without_trailing_comma =
 
 let this_in_static = "Don't use $this in a static method, use static:: instead"
 
-let trait_alias_rule_allows_only_final_and_visibility_modifiers =
-  "Only 'final' and visibility modifiers are allowed in trait alias rule"
-
 let autoload_takes_one_argument = "__autoload() must take exactly 1 argument"
 
 let constants_as_attribute_arguments =
@@ -102,9 +99,6 @@ let invalid_variable_name =
   "A valid variable name starts with a letter or underscore, followed by any number of letters, numbers, or underscores"
 
 let invalid_variable_variable = "Variable Variables are not legal"
-
-let function_modifier s =
-  Printf.sprintf "Top-level function cannot have modifier '%s'" s
 
 let invalid_yield =
   "Yield can only appear as a statement or on the right of an assignment"
@@ -174,8 +168,6 @@ let outside_dollar_str_interp =
   "The ${x} syntax is disallowed in Hack. Use {$x} instead."
 
 let no_silence = "The error suppression operator @ is not allowed"
-
-let declared_final elt = elt ^ " cannot be declared final."
 
 let const_mutation = "Cannot mutate a class constant"
 

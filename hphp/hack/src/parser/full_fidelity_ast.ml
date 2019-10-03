@@ -634,12 +634,9 @@ if there already is one, since that one will likely be better than this one. *)
     kinds: kind list;
   }
 
-  let pModifiers check_modifier node env =
+  let pModifiers node env =
     let f (has_async, has_coroutine, kinds) node =
-      let add_kind k =
-        check_modifier node;
-        k :: kinds
-      in
+      let add_kind k = k :: kinds in
       match token_kind node with
       | Some TK.Final -> (has_async, has_coroutine, add_kind Final)
       | Some TK.Static -> (has_async, has_coroutine, add_kind Static)
@@ -657,8 +654,7 @@ if there already is one, since that one will likely be better than this one. *)
     in
     { has_async; has_coroutine; kinds = List.rev kinds }
 
-  let pKinds check_modifier node env =
-    (pModifiers check_modifier node env).kinds
+  let pKinds node env = (pModifiers node env).kinds
 
   let pParamKind : param_kind parser =
    fun node env ->
@@ -1248,7 +1244,7 @@ if there already is one, since that one will likely be better than this one. *)
                Some x
              | _ :: xs -> go xs
            in
-           go (pKinds (fun _ -> ()) parameter_visibility env));
+           go (pKinds parameter_visibility env));
       }
     | VariadicParameter _
     | Token _
@@ -2840,7 +2836,7 @@ if there already is one, since that one will likely be better than this one. *)
       couldMap ~f:pTParam type_parameters_parameters env
     | _ -> missing_syntax "type parameter list" node env
 
-  and pFunHdr check_modifier : fun_hdr parser =
+  and pFunHdr : fun_hdr parser =
    fun node env ->
     match syntax node with
     | FunctionDeclarationHeader
@@ -2870,7 +2866,7 @@ if there already is one, since that one will likely be better than this one. *)
           env
           (`Node node)
           SyntaxError.autoload_takes_one_argument;
-      let modifiers = pModifiers check_modifier function_modifiers env in
+      let modifiers = pModifiers function_modifiers env in
       let fh_parameters = couldMap ~f:pFunParam function_parameter_list env in
       let fh_return_type = mpOptional pHint function_type env in
       let fh_suspension_kind =
@@ -3069,7 +3065,7 @@ if there already is one, since that one will likely be better than this one. *)
           mpOptional pHint type_const_type_specifier env
           |> Option.map ~f:(soften_hint tconst_user_attributes)
         in
-        let tconst_kinds = pKinds (fun _ -> ()) type_const_modifiers env in
+        let tconst_kinds = pKinds type_const_modifiers env in
         [
           TypeConst
             {
@@ -3091,13 +3087,6 @@ if there already is one, since that one will likely be better than this one. *)
             property_declarators;
             _;
           } ->
-        let check_modifier node =
-          if is_final node then
-            raise_parsing_error
-              env
-              (`Node node)
-              (SyntaxError.declared_final "Properties")
-        in
         let cv_user_attributes = pUserAttributes env property_attribute_spec in
         let cv_hint =
           mpOptional pHint property_type env
@@ -3108,7 +3097,7 @@ if there already is one, since that one will likely be better than this one. *)
             {
               cv_user_attributes;
               cv_hint;
-              cv_kinds = pKinds check_modifier property_modifiers env;
+              cv_kinds = pKinds property_modifiers env;
               cv_is_promoted_variadic = false;
               cv_names =
                 couldMap property_declarators env ~f:(fun node env ->
@@ -3169,7 +3158,7 @@ if there already is one, since that one will likely be better than this one. *)
                 cv_user_attributes = param.param_user_attributes;
               } )
         in
-        let hdr = pFunHdr (fun _ -> ()) header env in
+        let hdr = pFunHdr header env in
         if
           snd hdr.fh_name = "__construct"
           && not (List.is_empty hdr.fh_type_parameters)
@@ -3193,7 +3182,7 @@ if there already is one, since that one will likely be better than this one. *)
           in
           member_init @ body
         in
-        let kind = pKinds (fun _ -> ()) h.function_modifiers env in
+        let kind = pKinds h.function_modifiers env in
         env.in_static_method :=
           List.exists kind ~f:(function
               | Static -> true
@@ -3237,8 +3226,8 @@ if there already is one, since that one will likely be better than this one. *)
             methodish_trait_name;
             _;
           } ->
-        let hdr = pFunHdr (fun _ -> ()) header env in
-        let kind = pKinds (fun _ -> ()) h.function_modifiers env in
+        let hdr = pFunHdr header env in
+        let kind = pKinds h.function_modifiers env in
         let (qualifier, name) =
           match syntax methodish_trait_name with
           | ScopeResolutionExpression
@@ -3304,20 +3293,7 @@ if there already is one, since that one will likely be better than this one. *)
                   pos_name scope_resolution_name env )
               | _ -> (None, pos_name aliasing_name env)
             in
-            let modifiers = pKinds (fun _ -> ()) modifiers env in
-            List.iter modifiers ~f:(fun modifier ->
-                match modifier with
-                | Public
-                | Private
-                | Protected
-                | Final ->
-                  ()
-                | _ ->
-                  raise_parsing_error
-                    env
-                    (`Node node)
-                    SyntaxError
-                    .trait_alias_rule_allows_only_final_and_visibility_modifiers);
+            let modifiers = pKinds modifiers env in
             let is_visibility = function
               | Public
               | Private
@@ -3431,7 +3407,7 @@ if there already is one, since that one will likely be better than this one. *)
             pocket_enum_fields = fields;
             _;
           } ->
-        let kinds = pKinds (fun _ -> ()) mods env in
+        let kinds = pKinds mods env in
         let final = List.mem kinds Final ~equal:( = ) in
         let id = pos_name name env in
         let flds = List.map ~f:(fun x -> pPUField x env) (as_list fields) in
@@ -3598,13 +3574,7 @@ if there already is one, since that one will likely be better than this one. *)
         { function_attribute_spec; function_declaration_header; function_body }
       ->
       let env = non_tls env in
-      let check_modifier node =
-        raise_parsing_error
-          env
-          (`Node node)
-          (SyntaxError.function_modifier (text node))
-      in
-      let hdr = pFunHdr check_modifier function_declaration_header env in
+      let hdr = pFunHdr function_declaration_header env in
       let is_external = is_external function_body in
       let (block, yield) =
         if is_external then
@@ -3646,7 +3616,7 @@ if there already is one, since that one will likely be better than this one. *)
       let c_mode = mode_annotation env.fi_mode in
       let c_user_attributes = pUserAttributes env attr in
       let c_file_attributes = [] in
-      let kinds = pKinds (fun _ -> ()) mods env in
+      let kinds = pKinds mods env in
       let c_final = List.mem kinds Final ~equal:( = ) in
       let c_is_xhp =
         match token_kind name with

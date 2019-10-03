@@ -1,0 +1,9 @@
+(4,12)-(4,16) Constants cannot be declared final
+(4,18)-(4,23) Constants cannot be declared static
+(4,25)-(4,31) Constants cannot be declared private
+(4,33)-(4,41) Constants cannot be declared protected
+(4,43)-(4,48) Constants cannot have multiple visibility modifiers
+(4,43)-(4,48) Constants cannot be declared public
+(4,50)-(4,54) Constants cannot be declared async
+(4,56)-(4,64) Constants cannot be declared coroutine
+(6,12)-(6,19) Constants cannot have duplicate modifiers

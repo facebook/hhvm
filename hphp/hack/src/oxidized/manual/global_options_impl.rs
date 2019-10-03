@@ -59,7 +59,6 @@ impl Default for GlobalOptions {
             profile_type_check_duration_threshold: 0.0,
             tco_like_type_hints: false,
             tco_like_casts: false,
-            tco_pessimize_types: false,
             tco_simple_pessimize: 0.0,
             tco_coercion_from_dynamic: false,
             tco_coercion_from_union: false,

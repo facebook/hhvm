@@ -2539,7 +2539,7 @@ where
                 };
                 return Ok(aast::Stmt::new(
                     pos,
-                    aast::Stmt_::Awaitall((awaits, vec![result])),
+                    aast::Stmt_::Awaitall(awaits, vec![result]),
                 ));
             }
         }
@@ -2962,7 +2962,7 @@ where
                     }
                     _ => Self::failwith("Unexpected concurrent stmt structure")?,
                 };
-                Ok(S::new(pos, S_::Awaitall((lifted_awaits, vec![stmt]))))
+                Ok(S::new(pos, S_::Awaitall(lifted_awaits, vec![stmt])))
             }
             MarkupSection(_) => Self::p_markup(node, env),
             _ => Self::missing_syntax(

@@ -388,7 +388,9 @@ let converter
     | Return e -> Aast.Return (optional on_expr e)
     | GotoLabel label -> Aast.GotoLabel label
     | Goto label -> Aast.Goto label
-    | Awaitall (el, s) -> Aast.Awaitall (on_awaitall el s)
+    | Awaitall (el, s) ->
+      let (el, b) = on_awaitall el s in
+      Aast.Awaitall (el, b)
     | If (e, b1, b2) -> Aast.If (on_expr e, on_block b1, on_block b2)
     | Do (b, e) -> Aast.Do (on_block b, on_expr e)
     | While (e, b) -> Aast.While (on_expr e, on_block b)

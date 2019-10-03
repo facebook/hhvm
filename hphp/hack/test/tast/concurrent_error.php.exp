@@ -38,32 +38,33 @@ Errors:
        f_body =
        { fb_ast =
          [([8:3-11:4],
-           (Awaitall
-              ([((Some ([9:17-26], __tmp$1)),
-                 (([9:17-26], Awaitable<int>),
-                  (Call (Cnormal,
-                     (([9:17-24], (function(): Awaitable<int>)),
-                      (Id ([9:17-24], "\\gen_int"))),
-                     [], [], []))))
-                 ],
-               [([10:5-21],
+           (Awaitall (
+              [((Some ([9:17-26], __tmp$1)),
+                (([9:17-26], Awaitable<int>),
+                 (Call (Cnormal,
+                    (([9:17-24], (function(): Awaitable<int>)),
+                     (Id ([9:17-24], "\\gen_int"))),
+                    [], [], []))))
+                ],
+              [([10:5-21],
+                (Expr
+                   (([10:5-20], Awaitable<int>),
+                    (Binop ((Eq None),
+                       (([10:5-8], Awaitable<int>), (Lvar ([10:5-8], $v2))),
+                       (([10:11-20], Awaitable<int>),
+                        (Call (Cnormal,
+                           (([10:11-18], (function(): Awaitable<int>)),
+                            (Id ([10:11-18], "\\gen_int"))),
+                           [], [], [])))
+                       )))));
+                ([9:5-27],
                  (Expr
-                    (([10:5-20], Awaitable<int>),
+                    (([9:5-26], int),
                      (Binop ((Eq None),
-                        (([10:5-8], Awaitable<int>), (Lvar ([10:5-8], $v2))),
-                        (([10:11-20], Awaitable<int>),
-                         (Call (Cnormal,
-                            (([10:11-18], (function(): Awaitable<int>)),
-                             (Id ([10:11-18], "\\gen_int"))),
-                            [], [], [])))
-                        )))));
-                 ([9:5-27],
-                  (Expr
-                     (([9:5-26], int),
-                      (Binop ((Eq None),
-                         (([9:5-8], int), (Lvar ([9:5-8], $v1))),
-                         (([9:11-26], int), (Lvar ([9:11-26], __tmp$1))))))))
-                 ])));
+                        (([9:5-8], int), (Lvar ([9:5-8], $v1))),
+                        (([9:11-26], int), (Lvar ([9:11-26], __tmp$1))))))))
+                ]
+              )));
            ([12:3-20],
             (Return
                (Some (([12:10-19], num),

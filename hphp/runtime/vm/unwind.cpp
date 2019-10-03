@@ -457,35 +457,6 @@ void unwindCpp(Exception* exception) {
   exception->throwException();
 }
 
-void unwindBuiltinFrame() {
-  auto& stack = vmStack();
-  auto& fp = vmfp();
-
-  assertx(fp->m_func->name()->isame(s_hphpd_break.get()));
-
-  // Free any values that may be on the eval stack. We know it can't be
-  // a resumable body because it's a builtin frame.
-  const int numSlots = fp->m_func->numSlotsInFrame();
-  auto const evalTop = reinterpret_cast<TypedValue*>(vmfp()) - numSlots;
-  while (stack.topTV() < evalTop) {
-    stack.popTV();
-  }
-
-  // Free the locals and VarEnv if there is one
-  auto rv = make_tv<KindOfNull>();
-  frame_free_locals_inl(fp, fp->m_func->numLocals(), &rv);
-
-  // Tear down the frame
-  Offset pc = -1;
-  ActRec* sfp = g_context->getPrevVMState(fp, &pc);
-  assertx(pc != -1);
-  fp = sfp;
-  vmpc() = skipCall(fp->m_func->unit()->at(pc));
-  stack.ndiscard(numSlots);
-  stack.discardAR();
-  stack.pushNull(); // return value
-}
-
 //////////////////////////////////////////////////////////////////////
 
 }

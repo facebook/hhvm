@@ -58,14 +58,6 @@ inline void exception_handler(Action action) {
     return;
   }
 
-  catch (VMSwitchModeBuiltin&) {
-    checkVMRegState();
-    ITRACE_MOD(Trace::unwind, 1, "unwind: VMSwitchModeBuiltin from {}\n",
-               vmfp()->m_func->fullName()->data());
-    unwindBuiltinFrame();
-    return;
-  }
-
   catch (Exception& e) {
     checkVMRegState();
     ITRACE_MOD(Trace::unwind, 1, "unwind: Exception: {}\n", e.what());

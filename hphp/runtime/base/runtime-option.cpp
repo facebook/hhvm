@@ -1123,7 +1123,6 @@ std::string RuntimeOption::DebuggerStartupDocument;
 int RuntimeOption::DebuggerSignalTimeout = 1;
 std::string RuntimeOption::DebuggerAuthTokenScriptBin;
 std::string RuntimeOption::DebuggerSessionAuthScriptBin;
-bool RuntimeOption::ForceDebuggerBpToInterp = false;
 
 std::string RuntimeOption::SendmailPath = "sendmail -t -i";
 std::string RuntimeOption::MailForceExtraParameters;
@@ -1935,8 +1934,6 @@ void RuntimeOption::Load(
                    "Eval.Debugger.Auth.TokenScriptBin");
       Config::Bind(DebuggerSessionAuthScriptBin, ini, config,
                    "Eval.Debugger.Auth.SessionAuthScriptBin");
-      Config::Bind(ForceDebuggerBpToInterp, ini, config,
-                   "Eval.Debugger.ForceDebuggerBpToInterp");
     }
   }
   {

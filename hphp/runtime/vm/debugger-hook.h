@@ -119,9 +119,8 @@ struct DebuggerHook {
 
       s_numAttached++;
       ti->m_reqInjectionData.setDebuggerAttached(true);
-      if (RuntimeOption::ForceDebuggerBpToInterp &&
-          (requestHasBreakpoints(ti->m_reqInjectionData) ||
-           (!RuntimeOption::ServerExecutionMode() || is_cli_mode()))) {
+      if (requestHasBreakpoints(ti->m_reqInjectionData) ||
+          !RuntimeOption::ServerExecutionMode() || is_cli_mode()) {
         ti->m_reqInjectionData.setJittingDisabled(true);
         rl_typeProfileLocals->forceInterpret = true;
         ti->m_reqInjectionData.updateJit();

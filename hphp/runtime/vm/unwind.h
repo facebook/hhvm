@@ -46,12 +46,6 @@ void unwindPhp(ObjectData* phpException);
 void unwindCpp(Exception* cppException);
 
 /*
- * Unwind the frame for a builtin.  Currently only used when switching modes
- * for hphpd_break, and fb_enable_code_coverage.
- */
-void unwindBuiltinFrame();
-
-/*
  * The main entry point to the unwinder.
  *
  * Wraps action in try/catch and executes appropriate unwinding logic based
@@ -83,14 +77,6 @@ void chainFaultObjects(ObjectData* top, ObjectData* prev);
  */
 struct VMSwitchMode : BaseException {
   const char* what() const noexcept override { return "VMSwitchMode"; }
-};
-
-/*
- * Same as VMSwitchMode, except for use from a builtin---the frame for
- * the builtin function should be unwound before resuming the VM.
- */
-struct VMSwitchModeBuiltin : BaseException {
-  const char* what() const noexcept override { return "VMSwitchModeBuiltin"; }
 };
 
 //////////////////////////////////////////////////////////////////////

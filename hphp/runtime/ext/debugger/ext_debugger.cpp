@@ -97,11 +97,6 @@ bool HHVM_FUNCTION(hphp_debug_break, bool condition /* = true */) {
   if (RuntimeOption::EnableHphpdDebugger) {
     VMRegAnchor _;
     Debugger::InterruptVMHook(HardBreakPoint);
-    if (RuntimeOption::EvalJit && DEBUGGER_FORCE_INTR &&
-        !RuntimeOption::ForceDebuggerBpToInterp) {
-      TRACE(5, "switch mode\n");
-      throw VMSwitchModeBuiltin();
-    }
     return true;
   }
 

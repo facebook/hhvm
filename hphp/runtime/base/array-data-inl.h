@@ -118,7 +118,7 @@ inline size_t ArrayData::vsize() const {
 // Introspection.
 
 inline size_t ArrayData::size() const {
-  if (UNLIKELY((int)m_size) < 0) return vsize();
+  if (UNLIKELY((int)m_size < 0)) return vsize();
   return m_size;
 }
 

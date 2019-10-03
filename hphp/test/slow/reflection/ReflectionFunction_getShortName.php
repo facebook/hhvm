@@ -10,7 +10,7 @@ abstract final class FStatics {
 #===============================================================================
 # ReflectionFunction.
 
-function f($a, &$b, $c=null) {
+function f($a, inout $b, $c=null) {
   print "In f()\n";
   FStatics::$staticX++;
   $x = FStatics::$staticX;

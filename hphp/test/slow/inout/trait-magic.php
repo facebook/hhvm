@@ -8,8 +8,8 @@ trait Herp {
     return "Herp::foo($r)";
   }
 
-  function bar(&$a) {
-    $a = 'Herp&';
+  function bar(inout $a) {
+    $a = 'Herp inout';
     return 'Herp::bar';
   }
 
@@ -30,12 +30,12 @@ trait Derp {
     return "Derp::foo($r)";
   }
 
-  function bar(&$a) {
-    $a = 'Derp&';
+  function bar(inout $a) {
+    $a = 'Derp inout';
     return 'Derp::bar';
   }
 
-  function derp(&$a) {
+  function derp(inout $a) {
     $a = 'Derp Derp';
     return 'Derp::derp';
   }
@@ -69,7 +69,7 @@ function main() {
   var_dump($r, $x);
 
   var_dump(HerpDerp::s1(inout $x), $x);
-  var_dump(HerpDerp::s2(&$x), $x);
+  var_dump(HerpDerp::s2(inout $x), $x);
   var_dump(HerpDerp::s2(inout $x));
   var_dump(HerpDerp::orange($x));
 }

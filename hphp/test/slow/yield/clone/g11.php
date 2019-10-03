@@ -1,15 +1,19 @@
 <?hh
-function f(&$a) {
-  ++$a;
-  yield $a;
-  ++$a;
-  yield $a;
+
+class Ref {
+  function __construct(public $value) {}
+}
+function f($a) {
+  ++$a->value;
+  yield $a->value;
+  ++$a->value;
+  yield $a->value;
 }
 
 <<__EntryPoint>>
 function main_g11() {
-$a = 3;
-$x = f(&$a);
+$a = new Ref(3);
+$x = f($a);
 unset($a);
 $y1 = clone $x;
 $y2 = clone $x;

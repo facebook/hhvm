@@ -10,19 +10,19 @@ getType: object(ReflectionType) (1) {
     ["name"]=>
     string(9) "HH\string"
     ["nullable"]=>
-    bool(false)
-    ["builtin"]=>
     bool(true)
+    ["builtin"]=>
+    bool(false)
   }
 }
-type isBuiltin: bool(true)
-type allowsNull: bool(false)
+type isBuiltin: bool(false)
+type allowsNull: bool(true)
 type hint: string(9) "HH\string"
 isArray: bool(false)
 isCallable: bool(false)
 isOptional: bool(false)
 isVariadic: bool(false)
-allowsNull: bool(false)
+allowsNull: bool(true)
 isDefaultValueAvailable: bool(false)
 isDefaultValueConstant: bool(false)
 getDefaultValue: string(16) "no default value"
@@ -41,19 +41,19 @@ getType: object(ReflectionType) (1) {
     ["name"]=>
     string(6) "HH\int"
     ["nullable"]=>
-    bool(false)
-    ["builtin"]=>
     bool(true)
+    ["builtin"]=>
+    bool(false)
   }
 }
-type isBuiltin: bool(true)
-type allowsNull: bool(false)
+type isBuiltin: bool(false)
+type allowsNull: bool(true)
 type hint: string(6) "HH\int"
 isArray: bool(false)
 isCallable: bool(false)
 isOptional: bool(false)
 isVariadic: bool(false)
-allowsNull: bool(false)
+allowsNull: bool(true)
 isDefaultValueAvailable: bool(false)
 isDefaultValueConstant: bool(false)
 getDefaultValue: string(16) "no default value"
@@ -72,19 +72,19 @@ getType: object(ReflectionType) (1) {
     ["name"]=>
     string(8) "HH\float"
     ["nullable"]=>
-    bool(false)
-    ["builtin"]=>
     bool(true)
+    ["builtin"]=>
+    bool(false)
   }
 }
-type isBuiltin: bool(true)
-type allowsNull: bool(false)
+type isBuiltin: bool(false)
+type allowsNull: bool(true)
 type hint: string(8) "HH\float"
 isArray: bool(false)
 isCallable: bool(false)
 isOptional: bool(false)
 isVariadic: bool(false)
-allowsNull: bool(false)
+allowsNull: bool(true)
 isDefaultValueAvailable: bool(false)
 isDefaultValueConstant: bool(false)
 getDefaultValue: string(16) "no default value"
@@ -103,19 +103,19 @@ getType: object(ReflectionType) (1) {
     ["name"]=>
     string(7) "HH\bool"
     ["nullable"]=>
-    bool(false)
-    ["builtin"]=>
     bool(true)
+    ["builtin"]=>
+    bool(false)
   }
 }
-type isBuiltin: bool(true)
-type allowsNull: bool(false)
+type isBuiltin: bool(false)
+type allowsNull: bool(true)
 type hint: string(7) "HH\bool"
 isArray: bool(false)
 isCallable: bool(false)
 isOptional: bool(false)
 isVariadic: bool(false)
-allowsNull: bool(false)
+allowsNull: bool(true)
 isDefaultValueAvailable: bool(false)
 isDefaultValueConstant: bool(false)
 getDefaultValue: string(16) "no default value"
@@ -126,7 +126,7 @@ name: string(1) "e"
 position: int(4)
 canBePassedByValue: bool(false)
 isPassedByReference: bool(true)
-isInOut: bool(false)
+isInOut: bool(true)
 hasType: bool(true)
 getType: object(ReflectionType) (1) {
   ["type_hint_info":"ReflectionType":private]=>
@@ -134,19 +134,19 @@ getType: object(ReflectionType) (1) {
     ["name"]=>
     string(9) "Exception"
     ["nullable"]=>
-    bool(false)
+    bool(true)
     ["builtin"]=>
     bool(false)
   }
 }
 type isBuiltin: bool(false)
-type allowsNull: bool(false)
+type allowsNull: bool(true)
 type hint: string(9) "Exception"
 isArray: bool(false)
 isCallable: bool(false)
 isOptional: bool(false)
 isVariadic: bool(false)
-allowsNull: bool(false)
+allowsNull: bool(true)
 isDefaultValueAvailable: bool(false)
 isDefaultValueConstant: bool(false)
 getDefaultValue: string(16) "no default value"
@@ -167,10 +167,10 @@ getType: object(ReflectionType) (1) {
     ["nullable"]=>
     bool(true)
     ["builtin"]=>
-    bool(true)
+    bool(false)
   }
 }
-type isBuiltin: bool(true)
+type isBuiltin: bool(false)
 type allowsNull: bool(true)
 type hint: string(8) "callable"
 isArray: bool(false)
@@ -198,10 +198,10 @@ getType: object(ReflectionType) (1) {
     ["nullable"]=>
     bool(true)
     ["builtin"]=>
-    bool(true)
+    bool(false)
   }
 }
-type isBuiltin: bool(true)
+type isBuiltin: bool(false)
 type allowsNull: bool(true)
 type hint: string(11) "HH\resource"
 isArray: bool(false)

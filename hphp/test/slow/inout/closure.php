@@ -5,13 +5,13 @@ function main($cl1) {
     $x = 5;
     return 6;
   };
-  $cl3 = function (&$x) {
+  $cl3 = function (inout $x) {
     $x = 6;
     return 7;
   };
 
   $x = null;
-  var_dump($cl1(inout $x), $x, $cl2(&$x), $x, $cl3(inout $x), $x);
+  var_dump($cl1(inout $x), $x, $cl2(inout $x), $x, $cl3(inout $x), $x);
 }
 
 

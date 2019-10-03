@@ -1,5 +1,5 @@
 <?hh
-function foo(string $a, int $b, float $c, bool $d, Exception &$e,
+function foo(string $a, int $b, float $c, bool $d, inout Exception $e,
              callable $f = null, resource $g = null, $noType = 'whatever') {}
 
 

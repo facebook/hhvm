@@ -1,19 +1,19 @@
 <?hh
 
 interface I {
-  public function foo(int &$x): Awaitable<void>;
+  public function foo(inout int $x): void;
 }
 
 class C implements I {
-  public async function foo(int &$x): Awaitable<void> {}
+  public function foo(inout int $x): void {}
 }
 
 abstract class B {
-  public abstract function foo(int &$x): Awaitable<void>;
+  public abstract function foo(inout int $x): void;
 }
 
 class D extends B {
-  public async function foo(int &$x): Awaitable<void> {}
+  public function foo(inout int $x): void {}
 }
 
 

@@ -1,6 +1,6 @@
 <?hh
 
-function g(&$x) {
+function g(inout $x) {
  var_dump($x);
 }
 function f($x) {
@@ -13,7 +13,7 @@ function f($x) {
     } catch (Exception $e) { echo $e->getMessage()."\n"; }
   }
   if (is_array($x) && $x) {
-    g(&$x);
+    g(inout $x);
   }
 }
 

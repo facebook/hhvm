@@ -1,1 +1,0 @@
-Fatal error: An 'inout' parameter cannot be passed by reference ('&'). in %s/test/slow/inout/bad-decl-1.php on line 3

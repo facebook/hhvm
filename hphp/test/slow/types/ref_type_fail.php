@@ -5,12 +5,12 @@ function handler() {
  return true;
  }
 
-function foo(@array &$a) {
+function foo(inout @array $a) {
  var_dump($a);
  }
 
 function test($a) {
-  foo(&$a);
+  foo(inout $a);
 }
 
 

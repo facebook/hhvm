@@ -9,7 +9,7 @@ class Foo {
   }
 }
 
-function meep(&$f, $g, &$r) {
+function meep(inout $f, $g, inout $r) {
   var_dump('inside meep');
   $f = 'apple';
   $r = 'orange';
@@ -26,7 +26,7 @@ function main() {
   fb_intercept('meep', 'io_intercept', true);
   fb_intercept('Foo::bar', 'io_intercept', true);
   $a = 1; $b = true; $c = 'c';
-  Foo::bar($a, &$b, &$c);
+  Foo::bar($a, inout $b, inout $c);
 
   $a = 1; $b = true; $c = 'c';
   meep(inout $a, $b, inout $c);

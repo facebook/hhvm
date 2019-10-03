@@ -2,22 +2,26 @@ array(1) {
   [0]=>
   object(ReflectionParameter) (3) {
     ["info"]=>
-    array(10) {
+    array(12) {
       ["index"]=>
       int(0)
       ["name"]=>
       string(1) "a"
       ["type"]=>
-      string(7) "HH\bool"
+      string(0) ""
       ["type_hint"]=>
       string(7) "HH\bool"
       ["type_hint_builtin"]=>
-      bool(true)
+      bool(false)
       ["function"]=>
       string(1) "f"
+      ["nullable"]=>
+      bool(true)
       ["type_hint_nullable"]=>
-      bool(false)
+      bool(true)
       ["ref"]=>
+      bool(true)
+      ["inout"]=>
       bool(true)
       ["attributes"]=>
       array(0) {
@@ -32,9 +36,9 @@ array(1) {
       ["name"]=>
       string(7) "HH\bool"
       ["nullable"]=>
-      bool(false)
-      ["builtin"]=>
       bool(true)
+      ["builtin"]=>
+      bool(false)
     }
   }
 }
@@ -160,7 +164,7 @@ array(1) {
 }
 array(1) {
   [0]=>
-  bool(false)
+  bool(true)
 }
 array(2) {
   [0]=>
@@ -176,7 +180,7 @@ string(%d) "Function [ <user> function f ] {
   @@ %s/ReflectionFunction_getParamInfo_ref.php %d - %d
 
   - Parameters [1] {
-    Parameter #0 [ <required> HH\bool &$a ]
+    Parameter #0 [ <required> inout HH\bool $a ]
   }
 }
 "

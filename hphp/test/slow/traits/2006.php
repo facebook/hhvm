@@ -1,7 +1,7 @@
 <?hh
 
 trait T {
-  function F(&$a, $b="default") {
+  function F(inout $a, $b="default") {
     $a .= " = " . $b;
   }
 }
@@ -11,10 +11,10 @@ class C {
 <<__EntryPoint>> function main(): void {
 $o = new C;
 $x = "value";
-$o->F(&$x);
+$o->F(inout $x);
 echo $x;
 echo "\n";
 $y = "zero";
-$o->F(&$y, "0");
+$o->F(inout $y, "0");
 echo $y;
 }

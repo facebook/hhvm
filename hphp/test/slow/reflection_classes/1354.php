@@ -12,7 +12,7 @@ class cls1 implements i1, i2 {
  print $param1;
 }
  }
- function func1(cls1 $p1, &$p2, $p3='def') {
+ function func1(cls1 $p1, inout $p2, $p3='def') {
  var_dump($p1);
 }
  function func2($a) {

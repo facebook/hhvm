@@ -19,7 +19,7 @@ function main() {
   $v = null;
   hit1(inout $v);
   var_dump($v);
-  hit2(&$v);
+  hit2(inout $v);
   var_dump($v);
   hit3(inout $v);
   var_dump($v);

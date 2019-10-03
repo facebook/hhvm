@@ -1,6 +1,6 @@
 <?hh
 
-function ref(&$a) {}
+function ref(inout $a) {}
 
 
 <<__EntryPoint>>

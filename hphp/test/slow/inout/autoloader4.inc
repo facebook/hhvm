@@ -1,5 +1,5 @@
 <?hh
 
-function hit3(&$x) {
+function hit3(inout $x) {
   $x = 'hit3';
 }

@@ -1,6 +1,6 @@
 <?hh
 
-function ref(&$x) {
+function ref(inout $x) {
 }
 
 function foo($r, inout $a, inout $b, $q, inout $c, ...$_) {
@@ -95,8 +95,8 @@ function main() {
     inout $b[0],
     $b,
     inout $c[0],
-    ref(&$a),
-    ref(&$c),
+    ref(inout $a),
+    ref(inout $c),
   );
   var_dump($a[0], $b[0], $c[0]);
 

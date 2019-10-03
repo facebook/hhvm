@@ -10,7 +10,7 @@ class :x {
 <<__EntryPoint>>
 function main_xhp() {
 $x = 42;
-:x::foo(&$x);
+:x::foo(inout $x);
 
 var_dump($x);
 }

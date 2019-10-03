@@ -1,5 +1,6 @@
 string(7) "handler"
 string(5) "hello"
+string(7) "handler"
 array(3) {
   [0]=>
   int(1)
@@ -12,3 +13,4 @@ array(0) {
 }
 string(7) "handler"
 string(5) "hello"
+string(7) "handler"

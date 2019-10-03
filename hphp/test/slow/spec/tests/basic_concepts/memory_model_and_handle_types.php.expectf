@@ -5,12 +5,6 @@ After '$d = clone $b', $d is (1,3)
 After '$b->move(4, 6)', $d is (1,3), $b is (4,6), and $a is (4,6)
 After '$a = new Point(2, 1)', $d is (1,3), $b is (4,6), and $a is (2,1)
 Done
------------------ byRef assignment of handle types ----------------------
-After '$a = new Point(1, 3)', $a is (1,3)
-After '$a->move(4, 6)', $c is (4,6), and $a is (4,6)
-After '$a = new Point(2, 1)', $c is (2,1), and $a is (2,1)
-After 'unset($a)', $c is (2,1)
-Done
 ----------------- value argument passing of handle types ----------------------
 After '$a = new Point(1, 3)', $a is (1,3)
 	Inside function f1, $b is (1,3)
@@ -18,18 +12,7 @@ After '$b->move(4, 6)', $b is (4,6)
 After 'new Point(5, 7)', $b is (5,7)
 After 'f1($a)', $a is (4,6)
 Done
------------------ byRef argument passing of handle types ----------------------
-After '$a = new Point(1, 3)', $a is (1,3)
-	Inside function g1, $b is (1,3)
-After '$b->move(4, 6)', $b is (4,6)
-After 'new Point(5, 7)', $b is (5,7)
-After 'g1($a)', $a is (5,7)
-Done
 ----------------- value returning of handle types ----------------------
-After 'new Point(5, 7)', $b is (5,7)
-After '$a = f2()', $a is (5,7)
-Done
------------------ byRef returning of handle types ----------------------
 After 'new Point(5, 7)', $b is (5,7)
 After '$a = f2()', $a is (5,7)
 Done

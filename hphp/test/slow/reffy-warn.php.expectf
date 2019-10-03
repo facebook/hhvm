@@ -1,4 +1,2 @@
 
-Warning: Parameter 1 on function alpha was declared '&' but is not declared '&' on parent function Foo::alpha in %s/reffy-warn.php on line 7
-
-Warning: Parameter 2 on function alpha was not declared '&' but is declared '&' on parent function Foo::alpha in %s/reffy-warn.php on line 7
+Fatal error: Parameter 1 on function alpha was declared inout but is not declared inout on parent function Foo::alpha in %s/reffy-warn.php on line 7

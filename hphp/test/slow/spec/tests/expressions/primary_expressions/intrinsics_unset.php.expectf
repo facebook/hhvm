@@ -36,10 +36,12 @@ bool(false)
 ---------- unsetting inside a function (pass-by-ref) ------------
 bool(true)
 bool(false)
+
+Notice: Undefined variable: p2 in %s/intrinsics_unset.php on line %d
 bool(true)
 int(10)
-bool(true)
-int(20)
+bool(false)
+NULL
 ---------- unsetting inside a function (static) ------------
 count = 1
 bool(true)

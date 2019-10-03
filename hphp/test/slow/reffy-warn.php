@@ -1,10 +1,9 @@
 <?hh
 
 class Foo {
-  function alpha($one, &$two, $three, &$four) {}
+  function alpha($one, inout $two, $three, inout $four) {}
 }
 
 class Bar extends Foo {
-  function alpha(&$one, $two, $three, &$four) {}
+  function alpha(inout $one, $two, $three, inout $four) {}
 }
-

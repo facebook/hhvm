@@ -2,7 +2,7 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function func1($a) { return $a; }
-function func2(&$a) { return $a; }
+function func2(inout $a) { return $a; }
 
 function vec_foo($f, $k) {
   $d = vec['abc', 'def'];

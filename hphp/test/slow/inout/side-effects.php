@@ -106,7 +106,7 @@ function main() {
   $a->y = 'two';
   $saved = $a;
   foo(
-    &$a,
+    inout $a,
     inout $a->x,
     inout $a,
     $a,
@@ -117,7 +117,7 @@ function main() {
   Herp::$derp = 'foo';
   $a = 'Herp';
   foo(
-    &$a,
+    inout $a,
     inout $a::$derp,
     inout $a,
     $a,
@@ -130,7 +130,7 @@ function main() {
   $a->y = 'two';
   $saved = $a;
   foo(
-    &$a,
+    inout $a,
     inout $a,
     inout $a->x,
     $a,
@@ -143,7 +143,7 @@ function main() {
   $a->y = 'two';
   $saved = $a;
   foo(
-    &$a,
+    inout $a,
     inout $a->x,
     inout $a->y,
     $a = 'oops',

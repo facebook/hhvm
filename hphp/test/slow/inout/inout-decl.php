@@ -48,13 +48,13 @@ class PrivGParent extends PrivGGParent {
 }
 
 class PrivParent extends PrivGParent {
-  private function foo(&$x) {}
+  private function foo(inout $x) {}
   private function bar($y) {}
 }
 
 class PrivChild extends PrivParent {
   private function foo() {}
-  private function bar(&$y) {}
+  private function bar(inout $y) {}
 }
 
 function foo($x, $y, inout $z, $q) {}

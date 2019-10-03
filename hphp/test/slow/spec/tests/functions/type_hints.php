@@ -49,7 +49,7 @@ function f5(callable $p1)
     $p1();
 }
 
-function f6(C1 &$p1)
+function f6(inout C1 $p1)
 {
     echo "Inside " . __METHOD__ . "\n";
 
@@ -93,5 +93,5 @@ function main_entry(): void {
 
   echo "--------------- test type hint + by ref ---------------------\n";
   $x = new C1;
-  f6(&$x);
+  f6(inout $x);
 }

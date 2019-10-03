@@ -44,14 +44,14 @@ function test_soft_type_array_as_io_param(inout @array $x) { var_dump($x); }
 function test_soft_type_varry_as_io_param(inout @varray $x) { var_dump($x); }
 
 function test_inout_param_type_cast($c, $f) {
-  $x = HH\class_meth($c, $f); test_clsmeth_as_io_param(&$x);
-  $x = HH\class_meth($c, $f); test_varry_as_io_param(&$x);
-  $x = HH\class_meth($c, $f); test_vdarray_as_io_param(&$x);
-  $x = HH\class_meth($c, $f); test_vec_as_io_param(&$x);
-  $x = HH\class_meth($c, $f); test_vec_dict_as_io_param(&$x);
-  $x = HH\class_meth($c, $f); test_container_as_io_param(&$x);
-  $x = HH\class_meth($c, $f); test_soft_type_array_as_io_param(&$x);
-  $x = HH\class_meth($c, $f); test_soft_type_varry_as_io_param(&$x);
+  $x = HH\class_meth($c, $f); test_clsmeth_as_io_param(inout $x);
+  $x = HH\class_meth($c, $f); test_varry_as_io_param(inout $x);
+  $x = HH\class_meth($c, $f); test_vdarray_as_io_param(inout $x);
+  $x = HH\class_meth($c, $f); test_vec_as_io_param(inout $x);
+  $x = HH\class_meth($c, $f); test_vec_dict_as_io_param(inout $x);
+  $x = HH\class_meth($c, $f); test_container_as_io_param(inout $x);
+  $x = HH\class_meth($c, $f); test_soft_type_array_as_io_param(inout $x);
+  $x = HH\class_meth($c, $f); test_soft_type_varry_as_io_param(inout $x);
 }
 
 function test_return_as_clsmeth() {

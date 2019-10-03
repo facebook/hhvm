@@ -15,7 +15,6 @@ class Widget
     }
 ///*
     public function __call($name, $arguments)
-//    public function __call(&$name, &$arguments)
     {
         echo "Calling instance method >$name<\n";
         var_dump($arguments);

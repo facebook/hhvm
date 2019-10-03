@@ -7,7 +7,7 @@ function main() {
   );
   apc_store('hello', $a);
   $success = false;
-  $b = apc_fetch('hello', &$success);
+  $b = apc_fetch('hello', inout $success);
 
   var_dump(HH\get_provenance($a));
   var_dump(HH\get_provenance($b));

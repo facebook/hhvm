@@ -23,11 +23,3 @@ f Out: $p: 200
 int(200)
 int(200)
 string(40) "f() expects exactly 1 parameter, 0 given"
-$p is set
-g In:  $p: red
-g Out: $p: 200
-int(10)
-$p is set
-g In:  $p: 10
-g Out: $p: 200
-int(200)

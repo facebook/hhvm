@@ -31,7 +31,7 @@ class C {
     return $x;
   }
 
-  public function ref(&$x = null) {
+  public function ref(inout $x) {
     return 0;
   }
 
@@ -72,7 +72,6 @@ function main_entry(): void {
 
   $caller = meth_caller(C::class, 'ref');
   $x = 1;
-  var_dump($caller(new C()));
   try {
     var_dump($caller(new C(), $x));
   } catch (Exception $e) {

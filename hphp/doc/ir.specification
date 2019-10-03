@@ -1697,14 +1697,6 @@ To string conversions:
 
 9. Call & Return
 
-| SpillFrame<offset,numArgs>,
-|   ND,
-|   S(StkPtr),
-|   NF
-
-  Defines the fields for an activation record and writes them to the stack
-  pointed to by S0, at `offset'.
-
 | BeginInlining<offset>, ND, S(StkPtr), NF
 
   Marks the start of an inlined function whose stack resides offset cells below
@@ -1753,9 +1745,9 @@ To string conversions:
 | InlineReturnNoFrame<InlineFrameStart>, ND, NA, NF
 
   Mark the end of an inlined function for which no DefInlineFP was required. The
-  primary purpose of this instruction is to mark the result of a SpillFrame as
-  dead. InlineFrameStart is the caller FP-relative offset of the start of the
-  callee frame. Everything below InlineFrameStart is dead.
+  primary purpose of this instruction is to hint the optimization passes that
+  after return everything below InlineFrameStart is dead. InlineFrameStart is
+  the caller FP-relative offset of the start of the callee frame.
 
 | CallUnpack<spOffset,numParams,callOff,destroyLocals>,
 |   DCall,

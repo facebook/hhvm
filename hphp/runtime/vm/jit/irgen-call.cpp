@@ -178,23 +178,6 @@ void emitCallerRxChecksUnknown(IRGS& env, SSATmp* callee) {
 
 //////////////////////////////////////////////////////////////////////
 
-void fsetActRec(
-  IRGS& env,
-  const FCallArgs& fca
-) {
-  auto const arOffset =
-    offsetFromIRSP(env, BCSPRelOffset{static_cast<int32_t>(fca.numInputs())});
-
-  gen(
-    env,
-    SpillFrame,
-    ActRecInfo { arOffset },
-    sp(env)
-  );
-}
-
-//////////////////////////////////////////////////////////////////////
-
 void callUnpack(IRGS& env, SSATmp* callee, const FCallArgs& fca,
                 SSATmp* objOrClass, bool dynamicCall, bool unlikely) {
   assertx(fca.hasUnpack());
@@ -291,37 +274,6 @@ void handleCallReturn(IRGS& env, const Func* callee, const FCallArgs& fca,
   );
 }
 
-void callKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
-               SSATmp* objOrClass, bool dynamicCall) {
-  assertx(callee);
-  if (fca.hasUnpack()) {
-    return callUnpack(env, cns(env, callee), fca, objOrClass, dynamicCall,
-                      false /* unlikely */);
-  }
-
-  auto const asyncEagerReturn =
-    fca.asyncEagerOffset != kInvalidOffset &&
-    callee->supportsAsyncEagerReturn();
-  auto const retVal = callImpl(env, cns(env, callee), fca, objOrClass,
-                               dynamicCall, asyncEagerReturn);
-  handleCallReturn(env, callee, fca, retVal, asyncEagerReturn,
-                   false /* unlikely */);
-}
-
-void callUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca,
-                 SSATmp* objOrClass, bool dynamicCall, bool unlikely) {
-  assertx(!callee->hasConstVal() || env.formingRegion);
-  if (fca.hasUnpack()) {
-    return callUnpack(env, callee, fca, objOrClass, dynamicCall, unlikely);
-  }
-
-  // Okay to request async eager return even if it is not supported.
-  auto const asyncEagerReturn = fca.asyncEagerOffset != kInvalidOffset;
-  auto const retVal = callImpl(env, callee, fca, objOrClass, dynamicCall,
-                               asyncEagerReturn);
-  handleCallReturn(env, nullptr, fca, retVal, asyncEagerReturn, unlikely);
-}
-
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -410,13 +362,22 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
     if (inlined) return;
   }
 
-  fsetActRec(env, fca);
-
-  // We just wrote to the stack, make sure Call opcode can set up its Catch.
+  // We may have updated the stack, make sure Call opcode can set up its Catch.
   updateMarker(env);
   env.irb->exceptionStackBoundary();
 
-  callKnown(env, callee, fca, objOrClass, dynamicCall);
+  if (fca.hasUnpack()) {
+    return callUnpack(env, cns(env, callee), fca, objOrClass, dynamicCall,
+                      false /* unlikely */);
+  }
+
+  auto const asyncEagerReturn =
+    fca.asyncEagerOffset != kInvalidOffset &&
+    callee->supportsAsyncEagerReturn();
+  auto const retVal = callImpl(env, cns(env, callee), fca, objOrClass,
+                               dynamicCall, asyncEagerReturn);
+  handleCallReturn(env, callee, fca, retVal, asyncEagerReturn,
+                   false /* unlikely */);
 }
 
 void prepareAndCallUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca,
@@ -435,13 +396,19 @@ void prepareAndCallUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca,
   }
   emitCallerRxChecksUnknown(env, callee);
 
-  fsetActRec(env, fca);
-
-  // We just wrote to the stack, make sure Call opcode can set up its Catch.
+  // We may have updated the stack, make sure Call opcode can set up its Catch.
   updateMarker(env);
   env.irb->exceptionStackBoundary();
 
-  callUnknown(env, callee, fca, objOrClass, dynamicCall, unlikely);
+  if (fca.hasUnpack()) {
+    return callUnpack(env, callee, fca, objOrClass, dynamicCall, unlikely);
+  }
+
+  // Okay to request async eager return even if it is not supported.
+  auto const asyncEagerReturn = fca.asyncEagerOffset != kInvalidOffset;
+  auto const retVal = callImpl(env, callee, fca, objOrClass, dynamicCall,
+                               asyncEagerReturn);
+  handleCallReturn(env, nullptr, fca, retVal, asyncEagerReturn, unlikely);
 }
 
 void prepareAndCallProfiled(IRGS& env, SSATmp* callee, const FCallArgs& fca,

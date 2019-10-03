@@ -960,7 +960,6 @@ bool opcodeMayRaise(Opcode opc) {
   case Select:
   case Shl:
   case Shr:
-  case SpillFrame:
   case Sqrt:
   case StArResumeAddr:
   case StClosureArg:

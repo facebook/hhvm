@@ -547,16 +547,6 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     );
     break;
 
-  case SpillFrame: {
-    assertx(inst->is(SpillFrame));
-    auto const extra = inst->extra<SpillFrame>();
-
-    for (auto i = uint32_t{0}; i < kNumActRecCells; ++i) {
-      setValue(stk(extra->spOffset + i), nullptr);
-    }
-    break;
-  }
-
   case InterpOne:
   case InterpOneCF: {
     auto const& extra = *inst->extra<InterpOneData>();
@@ -859,7 +849,6 @@ void FrameStateMgr::updateMBase(const IRInstruction* inst) {
   auto const effects = memory_effects(*inst);
   match<void>(effects, [&](GeneralEffects m) { handle_stores(m.stores); },
               [&](PureStore m) { handle_stores(m.dst); },
-              [&](PureSpillFrame m) { handle_stores(m.stk); },
               [&](CallEffects x) {
                 handle_stores(x.kills);
                 handle_stores(x.inputs);
@@ -868,7 +857,8 @@ void FrameStateMgr::updateMBase(const IRInstruction* inst) {
               },
               [&](PureLoad /*m*/) {}, [&](ReturnEffects) {},
               [&](ExitEffects) {}, [&](IrrelevantEffects) {},
-              [&](InlineEnterEffects) {}, [&](InlineExitEffects) {},
+              [&](InlineEnterEffects x) { handle_stores(x.actrec); },
+              [&](InlineExitEffects) {},
               [&](UnknownEffects) { pessimize_mbase(); });
 }
 
@@ -1127,6 +1117,9 @@ void FrameStateMgr::trackDefInlineFP(const IRInstruction* inst) {
    * Push a new state for the inlined callee; saving the state we'll need to
    * pop on return.
    */
+  for (auto i = uint32_t{0}; i < kNumActRecCells; ++i) {
+    setValue(stk(extra->spOffset + i), nullptr);
+  }
   cur().bcSPOff = savedSPOff;
   auto stateCopy = m_stack.back();
   m_stack.emplace_back(std::move(stateCopy));

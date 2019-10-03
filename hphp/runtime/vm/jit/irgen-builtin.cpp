@@ -1853,7 +1853,7 @@ SSATmp* builtinCall(IRGS& env,
 /*
  * When we're inlining a NativeImpl opcode, we know this is the only opcode in
  * the callee method body aside from AssertRATs (bytecode invariant).  So in
- * order to make sure we can eliminate the SpillFrame, we do the CallBuiltin
+ * order to make sure we can eliminate the DefInlineFP, we do the CallBuiltin
  * instruction after we've left the inlined frame.
  *
  * We may need to pass some arguments to the builtin through the stack (e.g. if

@@ -102,19 +102,6 @@ struct PureLoad       { AliasClass src; };
 struct PureStore    { AliasClass dst; SSATmp* value; SSATmp* dep; };
 
 /*
- * Spilling pre-live ActRecs are somewhat unusual, but effectively still just
- * pure stores.  They store to a range of stack slots, and don't store a PHP
- * value, so they get their own branch of the union.
- *
- * The `stk' class is the entire stack range the instruction stores to.
- *
- * The `stk' range should be interpreted as an exact AliasClass, not an upper
- * bound: it is guaranteed to be kNumActRecCells in size---no bigger than the
- * actual range of stack slots a SpillFrame instruction affects.
- */
-struct PureSpillFrame { AliasClass stk; };
-
-/*
  * Calls are somewhat special enough that they get a top-level effect.
  *
  * The `kills' set are locations that cannot be read by this instruction unless
@@ -124,8 +111,6 @@ struct PureSpillFrame { AliasClass stk; };
  * The `inputs' set contains stack locations the call will read as arguments.
  *
  * The `actrec' set contains stack locations the call will write ActRec to.
- * As of now, they are considered to be reads, because dummy SpillFrame opcode
- * pretends to write them.
  *
  * The `outputs' set contains stack locations the call will write inout
  * variables to.
@@ -209,7 +194,6 @@ struct UnknownEffects {};
 using MemEffects = boost::variant< GeneralEffects
                                  , PureLoad
                                  , PureStore
-                                 , PureSpillFrame
                                  , CallEffects
                                  , ReturnEffects
                                  , ExitEffects

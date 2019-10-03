@@ -20,13 +20,9 @@ IR function inliner
 Inlining functions at the IR level can be complex, particularly when dealing
 with async callees. All inlined regions are setup the same way, though later
 optimization passes may attempt to elide elements of this inititalization,
-particularly the SpillFrame and DefinlineFP. Below is an annotated version of
-this setup.
+particularly the DefinlineFP. Below is an annotated version of this setup.
 
   StStk ...  # Stores initiated for parameters as if this was an ordinary call.
-
-  SpillFrame # Standard spill of an ActRec prior to making a call. The StoreElim
-             # pass will attempt to elide these spills.
 
   #
   # This is where this module starts to emit instructions, the stores and spills
@@ -42,9 +38,10 @@ this setup.
                 # frame. Most importantly it marks any values on the callee
                 # stack from before the call as dead.
 
-  DefInlineFP   # This instruction sets up the inlined frame, redefining the
-                # fp SSATmp to refer to the callee frame. In most cases the DCE
-                # or partial-DCE passes are able to elide this instruction.
+  DefInlineFP   # This instruction spills ActRec and sets up the inlined frame,
+                # redefining the fp SSATmp to refer to the callee frame. In most
+                # cases the DCE or partial-DCE passes are able to elide this
+                # instruction.
 
   StLoc ...     # At this point the arguments are stored back to the frame
                 # locations for their corresponding locals in the callee. N.B.
@@ -148,7 +145,6 @@ Outer:                                 | Inner:
            |
            v
 +-------------------+
-| SpillFrame        |
 | ...               |
 | BeginInlining     |
 | DefInlineFP       |
@@ -265,13 +261,6 @@ void beginInlining(IRGS& env,
     return ctx;
   }();
 
-  // The VM stack-pointer is conceptually pointing to the last
-  // parameter, so we need to add numInputs to get to the ActRec
-  IRSPRelOffset calleeAROff = spOffBCFromIRSP(env) + fca.numInputs();
-
-  auto const arInfo = ActRecInfo { calleeAROff };
-  gen(env, SpillFrame, arInfo, sp(env));
-
   auto const generics = [&]() -> SSATmp* {
     if (!fca.hasGenerics()) return nullptr;
     if (target->hasReifiedGenerics()) return popC(env);
@@ -290,6 +279,9 @@ void beginInlining(IRGS& env,
   // inlining. If we bail out from now on, the caller's frame state
   // will be as if the arguments don't exist on the stack (even though
   // they do).
+
+  // The top of the stack now points to the space for ActRec.
+  IRSPRelOffset calleeAROff = spOffBCFromIRSP(env);
 
   gen(
     env,

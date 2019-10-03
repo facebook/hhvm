@@ -369,7 +369,6 @@ bool canDCE(IRInstruction* inst) {
   case AKExistsObj:
   case StStk:
   case StOutValue:
-  case SpillFrame:
   case CheckType:
   case CheckNullptr:
   case CheckTypeMem:
@@ -1122,8 +1121,8 @@ void performActRecFixups(const BlockList& blocks,
 
 /*
  * Look for InlineReturn instructions that are the only "non-weak" use
- * of a DefInlineFP.  In this case we can kill both, which may allow
- * removing a SpillFrame as well.
+ * of a DefInlineFP.  In this case we can kill both, avoiding the ActRec
+ * spill.
  *
  * Prior to calling this routine, `uses' should contain the direct
  * (non-transitive) use counts of each DefInlineFP instruction.  If
@@ -1281,9 +1280,12 @@ void processCatchBlock(IRUnit& unit, DceState& state, Block* block,
       },
       [&] (PureLoad x)           { return process_stack(x.src); },
       [&] (PureStore x)          { return do_store(x.dst, &*inst); },
-      [&] (PureSpillFrame x)     { return process_stack(x.stk); },
       [&] (ExitEffects x)        { return process_stack(x.live); },
-      [&] (InlineEnterEffects x) { return process_stack(x.inlStack); },
+      [&] (InlineEnterEffects x) {
+        return
+          process_stack(x.inlStack) ||
+          process_stack(x.actrec);
+      },
       [&] (InlineExitEffects x)  { return process_stack(x.inlStack); }
     );
   }

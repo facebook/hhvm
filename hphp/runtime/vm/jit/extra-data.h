@@ -704,21 +704,6 @@ struct ReqRetranslateData : IRExtraData {
 };
 
 /*
- * Compile-time metadata about an ActRec allocation.
- */
-struct ActRecInfo : IRExtraData {
-  explicit ActRecInfo(IRSPRelOffset spOffset)
-    : spOffset(spOffset)
-  {}
-
-  std::string show() const {
-    return folly::sformat("{}", spOffset.offset);
-  }
-
-  IRSPRelOffset spOffset;
-};
-
-/*
  * DefInlineFP is present when we need to create a frame for inlining.  This
  * instruction also carries some metadata used by IRBuilder to track state
  * during an inlined call.
@@ -1633,7 +1618,6 @@ X(InitObjMemoSlots,             ClassData);
 X(InstanceOfIfaceVtable,        InstanceOfIfaceVtableData);
 X(ResolveTypeStruct,            ResolveTypeStructData);
 X(ExtendsClass,                 ExtendsClassData);
-X(SpillFrame,                   ActRecInfo);
 X(CheckStk,                     IRSPRelOffsetData);
 X(HintStkInner,                 IRSPRelOffsetData);
 X(StStk,                        IRSPRelOffsetData);

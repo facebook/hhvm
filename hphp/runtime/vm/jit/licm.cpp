@@ -326,9 +326,9 @@ void analyze_block(LoopEnv& env, Block* blk) {
       [&] (UnknownEffects)   { kill(AUnknown); },
 
       [&] (CallEffects x)    { env.contains_call = true;
-                               kill(AHeapAny); },
+                               kill(AHeapAny);
+                               kill(x.actrec); },
       [&] (PureStore x)      { kill(x.dst); },
-      [&] (PureSpillFrame x) { kill(x.stk); },
 
       [&] (GeneralEffects x) {
         kill(x.stores);
@@ -353,7 +353,8 @@ void analyze_block(LoopEnv& env, Block* blk) {
       [&] (IrrelevantEffects) {},
 
       [&] (InlineEnterEffects x) { kill(x.inlFrame);
-                                   kill(x.inlStack); },
+                                   kill(x.inlStack);
+                                   kill(x.actrec); },
 
       [&] (InlineExitEffects x) { kill(x.inlFrame);
                                   kill(x.inlMeta); },
@@ -455,7 +456,6 @@ bool try_invariant_memory(LoopEnv& env,
     [&] (UnknownEffects)    { return false; },
     [&] (CallEffects)       { return false; },
     [&] (PureStore)         { return false; },
-    [&] (PureSpillFrame)    { return false; },
     [&] (IrrelevantEffects) { return false; },
     [&] (ReturnEffects)     { return false; },
     [&] (ExitEffects)       { return false; },

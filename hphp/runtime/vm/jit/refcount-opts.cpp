@@ -300,13 +300,12 @@ everything alone.
 -- Effects of Pure Stores on Memory Support --
 
 There are two main kinds of stores from the perspective of this module.  There
-are lowered stores (PureStore and PureSpillFrame) that happen within our IR
-compilation unit, and don't imply reference count manipulation, and there are
-stores that happen with "hhbc semantics" outside of the visibility of this
-compilation unit, which imply decreffing the value that used to live in a
-memory location as it's replaced with a new one.  This module needs some
-understanding of both types, and both of these types of stores affect memory
-support, but in different ways.
+are lowered stores (PureStore) that happen within our IR compilation unit, and
+don't imply reference count manipulation, and there are stores that happen with
+"hhbc semantics" outside of the visibility of this compilation unit, which
+imply decreffing the value that used to live in a memory location as it's
+replaced with a new one.  This module needs some understanding of both types,
+and both of these types of stores affect memory support, but in different ways.
 
 For any instruction that may do non-lowered stores outside of our unit ("stores
 with hhbc semantics"), if the location(s) it may be storing to could be
@@ -992,13 +991,6 @@ void mrinfo_step_impl(Env& env,
      */
     [&](PureLoad) {},
 
-    /*
-     * Since there's no semantically correct way to do PureLoads from the
-     * locations in a PureSpillFrame unless something must have stored over
-     * them again first, we don't need to kill anything here.
-     */
-    [&](PureSpillFrame /*x*/) {},
-
     [&](CallEffects /*x*/) {
       /*
        * Because PHP callees can side-exit (or for that matter throw from their
@@ -1319,7 +1311,6 @@ bool irrelevant_inst(const IRInstruction& inst) {
     // object reference counts.
     [&] (PureLoad) { return true; },
     [&] (PureStore) { return true; },
-    [&] (PureSpillFrame) { return true; },
     [&] (IrrelevantEffects) { return true; },
     [&] (InlineEnterEffects) { return true; },
     [&] (InlineExitEffects) { return true; },
@@ -2049,17 +2040,6 @@ void pure_store(Env& env,
   if (tmp) create_store_support(env, state, dst, tmp, add_node);
 }
 
-void pure_spill_frame(Env& env,
-                      RCState& state,
-                      PureSpillFrame psf) {
-  /*
-   * First, the effects of PureStores on memory support.  A SpillFrame will
-   * store over kNumActRecCells stack slots, and just like normal PureStores we
-   * can drop any support bits for them without reducing their lower bounds.
-   */
-  drop_support_bits(env, state, env.ainfo.expand(psf.stk));
-}
-
 void inline_enter_effects(Env& env,
                           RCState& state,
                           InlineEnterEffects& ief,
@@ -2140,11 +2120,7 @@ void analyze_mem_effects(Env& env,
       handle_call(env, state, inst, e, add_node);
     },
     [&] (PureStore x)   { pure_store(env, state, x.dst, x.value, add_node); },
-    [&] (PureLoad x)    { pure_load(env, state, x.src, inst.dst(), add_node); },
-
-    [&] (PureSpillFrame x) {
-      pure_spill_frame(env, state, x);
-    }
+    [&] (PureLoad x)    { pure_load(env, state, x.src, inst.dst(), add_node); }
   );
 }
 

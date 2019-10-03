@@ -210,9 +210,8 @@ uint16_t inlineDepth(const IRGS& env);
  *   // ... normal stuff happens ...
  *   // ... probably some StStks due to argument expressions
  *   // FCall*:
- *     SpillFrame sp, ...
  *             BeginInlining<offset> sp
- *     fp2   = DefInlineFP<func,retBC,retSP,off> sp
+ *     fp2   = DefInlineFP<func,retBC,retSP,off> sp fp ctx
  *
  *         // ... callee body ...
  *

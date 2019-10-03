@@ -728,9 +728,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
    * first instruction in the inlined call and has no effect serving only as
    * a marker to memory effects that the stack cells within the inlined call
    * are now dead.
-   *
-   * Unlike DefInlineFP it does not load the SpillFrame, which we hope to push
-   * off the main trace or elide entirely.
    */
   case BeginInlining: {
     /*
@@ -766,7 +763,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case SyncReturnBC: {
     auto const spOffset = inst.extra<SyncReturnBC>()->spOffset;
     auto const arStack = actrec(inst.src(0), spOffset);
-    // This instruction doesn't actually load but SpillFrame cannot be pushed
+    // This instruction doesn't actually load but DefInlineFP cannot be pushed
     // past it
     return may_load_store(arStack, arStack);
   }
@@ -1589,12 +1586,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdOutAddr:
     return IrrelevantEffects{};
 
-  case SpillFrame:
-    {
-      auto const spOffset = inst.extra<SpillFrame>()->spOffset;
-      return PureSpillFrame { actrec(inst.src(0), spOffset) };
-    }
-
   case CheckStk:
     return may_load_store(
       AStack { inst.src(0), inst.extra<CheckStk>()->offset, 1 },
@@ -2230,7 +2221,6 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
     },
     [&] (PureLoad x)         { check(x.src); },
     [&] (PureStore x)        { check(x.dst); },
-    [&] (PureSpillFrame x)   { check(x.stk); },
     [&] (ExitEffects x)      { check(x.live); check(x.kills); },
     [&] (IrrelevantEffects)  {},
     [&] (UnknownEffects)     {},
@@ -2292,7 +2282,6 @@ MemEffects memory_effects(const IRInstruction& inst) {
       [&] (UnknownEffects x)   { return x; },
       [&] (PureLoad)           { return fail(); },
       [&] (PureStore)          { return fail(); },
-      [&] (PureSpillFrame)     { return fail(); },
       [&] (ExitEffects)        { return fail(); },
       [&] (InlineExitEffects)  { return fail(); },
       [&] (InlineEnterEffects) { return fail(); },
@@ -2327,11 +2316,6 @@ MemEffects canonicalize(MemEffects me) {
     },
     [&] (PureStore x) -> R {
       return PureStore { canonicalize(x.dst), x.value, x.dep };
-    },
-    [&] (PureSpillFrame x) -> R {
-      return PureSpillFrame {
-        canonicalize(x.stk)
-      };
     },
     [&] (ExitEffects x) -> R {
       return ExitEffects { canonicalize(x.live), canonicalize(x.kills) };
@@ -2405,11 +2389,6 @@ std::string show(MemEffects effects) {
         show(x.actrec),
         show(x.outputs),
         show(x.locals)
-      );
-    },
-    [&] (PureSpillFrame x) {
-      return sformat("stFrame({})",
-        show(x.stk)
       );
     },
     [&] (PureLoad x)        { return sformat("ld({})", show(x.src)); },

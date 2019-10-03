@@ -64,10 +64,6 @@ TRACE_SET_MOD(irlower);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void cgSpillFrame(IRLS& env, const IRInstruction* inst) {}
-
-///////////////////////////////////////////////////////////////////////////////
-
 void cgIsFunReifiedGenericsMatched(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const callFlags = srcLoc(env, inst, 0).reg();

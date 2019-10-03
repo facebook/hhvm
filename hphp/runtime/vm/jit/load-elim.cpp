@@ -574,12 +574,11 @@ Flags analyze_inst(Local& env, const IRInstruction& inst) {
     [&] (ReturnEffects)     {},
 
     [&] (PureStore m)       { store(env, m.dst, m.value); },
-    [&] (PureSpillFrame m)  { store(env, m.stk, nullptr); },
-
     [&] (PureLoad m)        { flags = load(env, inst, m.src); },
 
     [&] (InlineEnterEffects m) { store(env, m.inlFrame, nullptr);
-                                 store(env, m.inlStack, nullptr); },
+                                 store(env, m.inlStack, nullptr);
+                                 store(env, m.actrec, nullptr); },
     [&] (InlineExitEffects m) { store(env, m.inlFrame, nullptr);
                                 store(env, m.inlMeta, nullptr); },
     [&] (GeneralEffects m)  { flags = handle_general_effects(env, inst, m); },

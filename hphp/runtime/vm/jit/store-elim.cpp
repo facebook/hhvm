@@ -158,15 +158,14 @@ using PostOrderId = uint32_t;
     - Phi..Phi+kMaxTrackedAlocs, in which case it holds a pointer to the
       Block where the phi would have to be inserted, or
     - Bad which means that although stores are available on all
-      paths to this point they're not compatible in some way
-      (usually SpillFrame vs StStk).
+      paths to this point they're not compatible in some way.
 
     - Pending and Processed are used while building phis to handle
       cycles of phis.
 
   For the Phi case, we just need to ensure that we can differentiate
   Phis in the same block for different ALocations; this is just used
-  for the hash() and same() methods for the spillFrameMap.
+  for the same() method for the combine_ts().
 */
 struct TrackedStore {
   enum Kind : int16_t {
@@ -238,9 +237,6 @@ struct TrackedStore {
                                     const TrackedStore& b) {
     return a.kind() >= b.kind();
   }
-  size_t hash() const {
-    return m_ptr.tag() + intptr_t(m_ptr.ptr());
-  }
   std::string toString() const {
     if (isUnseen()) return "Unseen";
     if (isBad()) return "Bad";
@@ -289,18 +285,6 @@ struct StoreKeyHashCmp {
 using MovableStoreMap = hphp_hash_map<StoreKey, TrackedStore,
                                       StoreKeyHashCmp, StoreKeyHashCmp>;
 
-struct TrackedStoreHashCmp {
-  size_t operator()(const TrackedStore& ts) const {
-    return ts.hash();
-  }
-  bool operator()(const TrackedStore& ts1, const TrackedStore& ts2) const {
-    return ts1.same(ts2);
-  }
-};
-
-using SpillFrameMap = hphp_hash_map<TrackedStore, ALocBits,
-                                    TrackedStoreHashCmp, TrackedStoreHashCmp>;
-
 struct BlockState {
   PostOrderId id;
   ALocBits antIn;
@@ -341,9 +325,6 @@ struct Global {
    */
   hphp_fast_map<SSATmp*,ALocBits> ssa2Aloc;
 
-  // We keep an entry for each tracked SpillFrame in this map, so we
-  // can check its ALocBits
-  SpillFrameMap spillFrameMap;
   MovableStoreMap trackedStoreMap;
   // Block states are indexed by block->id().  These are only meaningful after
   // we do dataflow.
@@ -406,28 +387,9 @@ bool srcsCanSpanCall(const IRInstruction& inst) {
   return true;
 }
 
-const ALocBits* findSpillFrame(Global& genv, const TrackedStore& ts) {
-  auto it = genv.spillFrameMap.find(ts);
-  if (it == genv.spillFrameMap.end()) return nullptr;
-  return &it->second;
-}
-
 void set_movable_store(Local& env, uint32_t bit, IRInstruction& inst) {
   env.global.trackedStoreMap[
     StoreKey { inst.block(), StoreKey::Out, bit }].set(&inst);
-}
-
-void set_movable_spill_frame(Local& env, const ALocBits& bits,
-                             IRInstruction& inst) {
-  TrackedStore ts { &inst };
-  bitset_for_each_set(
-    bits,
-    [&](uint32_t i) {
-      env.global.trackedStoreMap[
-        StoreKey { inst.block(), StoreKey::Out, i }] = ts;
-    }
-  );
-  env.global.spillFrameMap[ts] = bits;
 }
 
 bool isDead(Local& env, int bit) {
@@ -452,14 +414,6 @@ bool removeDead(Local& env, IRInstruction& inst, bool trash) {
         DbgTrashStk,
         inst.bcctx(),
         IRSPRelOffsetData { inst.extra<StStk>()->offset },
-        inst.src(0)
-      );
-      break;
-    case SpillFrame:
-      dbgInst = env.global.unit.gen(
-        DbgTrashFrame,
-        inst.bcctx(),
-        IRSPRelOffsetData { inst.extra<SpillFrame>()->spOffset },
         inst.src(0)
       );
       break;
@@ -659,21 +613,23 @@ void visit(Local& env, IRInstruction& inst) {
     [&] (CallEffects l) {
       env.containsCall = true;
 
-      mayStore(env, l.outputs);
-      if (auto bit = pure_store_bit(env, l.outputs)) {
-        mustStore(env, *bit);
-      } else {
-        auto const it =
-          env.global.ainfo.stack_ranges.find(canonicalize(l.outputs));
-        if (it != end(env.global.ainfo.stack_ranges)) {
-          mustStoreSet(env, it->second);
+      auto const store = [&](AliasClass cls) {
+        mayStore(env, cls);
+        if (auto bit = pure_store_bit(env, cls)) {
+          mustStore(env, *bit);
+        } else {
+          auto const it = env.global.ainfo.stack_ranges.find(canonicalize(cls));
+          if (it != end(env.global.ainfo.stack_ranges)) {
+            mustStoreSet(env, it->second);
+          }
         }
-      }
+      };
 
+      store(l.outputs);
       load(env, AHeapAny);
       load(env, l.locals);
       load(env, l.inputs);
-      load(env, l.actrec);
+      store(l.actrec);
       kill(env, l.kills);
     },
 
@@ -716,31 +672,6 @@ void visit(Local& env, IRInstruction& inst) {
         return;
       }
       mayStore(env, l.dst);
-    },
-
-    [&] (PureSpillFrame l) {
-      auto const it = env.global.ainfo.stack_ranges.find(canonicalize(l.stk));
-      if (it != end(env.global.ainfo.stack_ranges)) {
-        // If all the bits corresponding to the stack range are dead, we can
-        // eliminate this instruction.  We can also count all of them as
-        // redefined.
-        if (isDeadSet(env, it->second)) {
-          if (removeDead(env, inst, true)) return;
-        } else {
-          auto avlLoc = it->second & ~(env.antLoc | env.mayLoad |
-                                       env.mayStore);
-          if (avlLoc == it->second &&
-              (!env.containsCall ||
-               srcsCanSpanCall(inst))) {
-            set_movable_spill_frame(env, avlLoc, inst);
-            env.avlLoc |= avlLoc;
-          }
-        }
-        mayStore(env, l.stk);
-        mustStoreSet(env, it->second);
-        return;
-      }
-      mayStore(env, l.stk);
     }
   );
 }
@@ -840,8 +771,7 @@ void find_all_stores(Global& genv, Block* blk, uint32_t id,
 }
 
 IRInstruction* resolve_ts(Global& genv, Block* blk,
-                          StoreKey::Where w, uint32_t id,
-                          const ALocBits** sfp = nullptr);
+                          StoreKey::Where w, uint32_t id);
 
 void resolve_cycle(Global& genv, TrackedStore& ts, Block* blk, uint32_t id) {
   genv.needsReflow = true;
@@ -997,11 +927,8 @@ IRInstruction* resolve_flat(Global& genv, Block* blk, uint32_t id,
 }
 
 IRInstruction* resolve_ts(Global& genv, Block* blk,
-                          StoreKey::Where w, uint32_t id,
-                          const ALocBits** sfp) {
+                          StoreKey::Where w, uint32_t id) {
   auto& ts = genv.trackedStoreMap[StoreKey { blk, w, id }];
-  auto sf = findSpillFrame(genv, ts);
-  if (sfp) *sfp = sf;
 
   ITRACE(7, "resolve_ts: B{}:{} store:{} ts:{}\n",
          blk->id(), show(w), id, show(ts));
@@ -1032,7 +959,6 @@ IRInstruction* resolve_ts(Global& genv, Block* blk,
   }
   auto const rep = ts.instruction();
 
-  if (sf) genv.spillFrameMap[ts] = *sf;
   ITRACE(7, "-> {} (resolve_ts B{}, store {})\n",
          rep->toString(), blk->id(), id);
   return rep;
@@ -1073,12 +999,7 @@ void optimize_block_pre(Global& genv, Block* block,
       insertBits,
       [&](size_t i){
         if (!store_insert.go()) return;
-        const ALocBits* sf = nullptr;
-        auto const cinst = resolve_ts(genv, block, StoreKey::In, i, &sf);
-        if (sf) {
-          always_assert((state.ppIn & *sf) == *sf);
-          insertBits &= ~*sf;
-        }
+        auto const cinst = resolve_ts(genv, block, StoreKey::In, i);
         FTRACE(1, " Inserting store {}: {}\n", i, cinst->toString());
         auto const inst = genv.unit.clone(cinst);
         block->prepend(inst);
@@ -1265,27 +1186,8 @@ TrackedStore combine_ts(Global& genv, uint32_t id,
     return Compat::Same;
   };
 
-  auto sf1 = findSpillFrame(genv, s1);
-  auto sf2 = findSpillFrame(genv, s2);
-
-  // t7621182 Don't merge different spillframes for now,
-  // because code-gen doesn't handle phi'ing an Obj and a
-  // Cls.
-  if (sf1 || sf2) {
-    // we already know they aren't the same
-    return TrackedStore::BadVal();
-  }
-
-  if (!sf1 != !sf2 || (sf1 && *sf1 != *sf2)) {
-    // They need to both be spill frames affecting
-    // the same addresses, or both not be spill frames.
-    return TrackedStore::BadVal();
-  }
-
   auto trackedBlock = [&]() {
-    auto ret = TrackedStore(succ, id);
-    if (sf1) genv.spillFrameMap[ret] = *sf1;
-    return ret;
+    return TrackedStore(succ, id);
   };
 
   if (s1.block() || s2.block()) {
@@ -1359,10 +1261,6 @@ void compute_available_stores(
 
           if (tsOut.isBad()) {
             state.ppOut[i] = false;
-          } else if (auto sf = findSpillFrame(genv, tsIn)) {
-            if ((propagate & *sf) != *sf) {
-              state.ppOut &= ~*sf;
-            }
           }
         }
       );
@@ -1408,26 +1306,13 @@ void compute_available_stores(
             genv.trackedStoreMap[StoreKey { blk, StoreKey::Out, i }];
           auto& tsSucc =
             genv.trackedStoreMap[StoreKey { succ, StoreKey::In, i }];
-          auto sf = findSpillFrame(genv, ts);
-          if (sf) {
-            if ((succState.ppIn & *sf) != *sf) {
-              changed = true;
-              tsSucc.setBad();
-              succState.ppIn &= ~*sf;
-              return;
-            }
-          }
           auto tsNew = succ->numPreds() == 1 ? ts : recompute_ts(genv, i, succ);
           if (!tsNew.same(tsSucc)) {
             changed = true;
             assertx(tsNew >= tsSucc);
             tsSucc = tsNew;
             if (tsSucc.isBad()) {
-              if (sf) {
-                succState.ppIn &= ~*sf;
-              } else {
-                succState.ppIn[i] = false;
-              }
+              succState.ppIn[i] = false;
             }
           }
         }
@@ -1485,22 +1370,7 @@ void compute_placement_possible(
           restrictBits &= succState.ppIn | succState.antIn;
         });
 
-      auto bitsToClear = state.ppOut & ~restrictBits;
-      // ensure that if we clear any spill frame bits, we clear
-      // them all.
-      if (bitsToClear.any()) {
-        bitset_for_each_set(
-          bitsToClear,
-          [&](uint32_t i) {
-            auto const ts =
-              genv.trackedStoreMap[StoreKey { blk, StoreKey::Out, i }];
-            if (auto sf = findSpillFrame(genv, ts)) {
-              restrictBits &= ~*sf;
-            }
-          }
-        );
-        state.ppOut &= restrictBits;
-      }
+      state.ppOut &= restrictBits;
       trace();
       return true;
     },

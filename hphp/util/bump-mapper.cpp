@@ -46,29 +46,29 @@ bool Bump1GMapper::addMappingImpl() {
     return false;
   }
 #ifdef HAVE_NUMA
-  assertx((m_interleaveMask & ~numa_node_set) == 0);
-  if (const int numAllowedNodes = __builtin_popcount(m_interleaveMask)) {
-    int failCount = 0;
-    // Try to map huge pages in round-robin fashion starting from m_nextNode. We
-    // try on each allowed NUMA node at most once.
-    do {
-      auto const currNode = m_nextNode;
-      m_nextNode = (currNode + 1) & numa_node_mask;
-      if (!((1u << currNode) & m_interleaveMask)) {
-        // Node not allowed, try next one.
-        continue;
-      }
-      if (mmap_1g((void*)currFrontier, currNode, /* MAP_FIXED */ true)) {
-        ++m_currHugePages;
-        m_state.low_map.store(newFrontier, std::memory_order_release);
-        return true;
-      }
-      if (++failCount >= numAllowedNodes) return false;
-    } while (true);
+  if (numa_num_nodes > 1) {
+    if (const int numAllowedNodes = __builtin_popcount(m_interleaveMask)) {
+      assertx((m_interleaveMask & ~numa_node_set) == 0);
+      int failCount = 0;
+      // Try to map huge pages in round-robin fashion starting from m_nextNode.
+      // We try on each allowed NUMA node at most once.
+      do {
+        auto const currNode = m_nextNode;
+        m_nextNode = (currNode + 1) & numa_node_mask;
+        if (!((1u << currNode) & m_interleaveMask)) {
+          // Node not allowed, try next one.
+          continue;
+        }
+        if (mmap_1g((void*)currFrontier, currNode, /* MAP_FIXED */ true)) {
+          ++m_currHugePages;
+          m_state.low_map.store(newFrontier, std::memory_order_release);
+          return true;
+        }
+        if (++failCount >= numAllowedNodes) return false;
+      } while (true);
+    }
   }
 #endif
-  // This covers cases when HAVE_NUMA is defined, and when `m_interleaveMask` is
-  // set to 0 (on single-socket machines).
   if (mmap_1g((void*)currFrontier, -1, /* MAP_FIXED */ true)) {
     ++m_currHugePages;
     m_state.low_map.store(newFrontier, std::memory_order_release);
@@ -102,7 +102,7 @@ bool Bump2MMapper::addMappingImpl() {
   if (newPages == MAP_FAILED) return false;
   assertx(newPages == (void*)currFrontier);    // MAP_FIXED should work
 #ifdef HAVE_NUMA
-  if (num_numa_nodes() > 1 && m_interleaveMask) {
+  if (numa_num_nodes > 1 && m_interleaveMask) {
     unsigned long mask = m_interleaveMask;
     mbind(newPages, hugeSize, MPOL_INTERLEAVE,
           &mask, 32 /* max node */, 0 /* flag */);
@@ -147,7 +147,7 @@ bool BumpNormalMapper<D>::addMappingImpl() {
   }
 
 #ifdef HAVE_NUMA
-  if (num_numa_nodes() > 1 && m_interleaveMask) {
+  if (numa_num_nodes > 1 && m_interleaveMask) {
     unsigned long mask = m_interleaveMask;
     mbind(newPages, size, MPOL_INTERLEAVE,
           &mask, 32 /* max node */, 0 /* flag */);

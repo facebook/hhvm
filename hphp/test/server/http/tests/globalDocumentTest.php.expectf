@@ -1,0 +1,20 @@
+No global doc
+Requesting 'global_document_should_not_be_hit.php'
+string(20) "Should not hit this!"
+Global doc, existing file
+Requesting 'global_document_should_not_be_hit.php'
+string(19) "Hit global document"
+Global doc, nonexistent file
+Requesting 'this_file_does_not_exist.php'
+string(19) "Hit global document"
+Requesting 'foo/this_file_does_not_exist.php'
+string(19) "Hit global document"
+Requesting 'foo/bar/this_file_does_not_exist.php'
+string(19) "Hit global document"
+Nonexistent global doc
+Requesting 'some_file.php'
+string(18) "404 File Not Found"
+Requesting 'this_file_does_not_exist.php'
+string(18) "404 File Not Found"
+Requesting 'index.php'
+string(18) "404 File Not Found"

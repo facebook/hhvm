@@ -416,6 +416,7 @@ struct RuntimeOption {
 
   static std::string FileCache;
   static std::string DefaultDocument;
+  static std::string GlobalDocument;
   static std::string ErrorDocument404;
   static bool ForbiddenAs404;
   static std::string ErrorDocument500;

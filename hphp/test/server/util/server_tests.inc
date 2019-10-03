@@ -146,7 +146,8 @@ function getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
 }
 
 function startServer(inout $serverPort, inout $adminPort, inout $debugPort, $home, $root,
-                     $customArgs = '', $serverId = null, $repoArgs = '') {
+                     $customArgs = '', $serverId = null, $repoArgs = '',
+                     $expect404 = false) {
 
 
   $chooseServer = $serverPort === null;
@@ -172,7 +173,7 @@ function startServer(inout $serverPort, inout $adminPort, inout $debugPort, $hom
     $serverProc = proc_open($cmd, array(), inout $pipes);
     if (!is_resource($serverProc)) {
       tlog('Failed to start a shell process for the server');
-    } else if (waitForServerToGetGoing($serverPort, $serverProc, $serverId)) {
+    } else if (waitForServerToGetGoing($serverPort, $serverProc, $serverId, $expect404)) {
       return $serverProc;
     }
     killChildren($pid, $safe_children);
@@ -197,7 +198,7 @@ function checkServerId($serverPort, $expectedIds) {
   return false;
 }
 
-function waitForServerToGetGoing($serverPort, $serverProc, $serverId = null) {
+function waitForServerToGetGoing($serverPort, $serverProc, $serverId = null, $expect404 = false) {
 
   $serverId ??= ServerUtilServerTests::$test_run_id;
   for ($i = 1; $i <= 20; $i++) {
@@ -206,8 +207,15 @@ function waitForServerToGetGoing($serverPort, $serverProc, $serverId = null) {
       break;
     }
     sleep(1);
-    if (checkServerId($serverPort, $serverId)) {
-      return true;
+    if ($expect404) {
+      $r = request('localhost', $serverPort, "hello.php");
+      if ($r === "404 File Not Found") {
+        return true;
+      }
+    } else {
+      if (checkServerId($serverPort, $serverId)) {
+        return true;
+      }
     }
   }
 

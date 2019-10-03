@@ -694,6 +694,7 @@ bool RuntimeOption::AutoloadEnabled;
 std::string RuntimeOption::AutoloadDBPath;
 std::string RuntimeOption::FileCache;
 std::string RuntimeOption::DefaultDocument;
+std::string RuntimeOption::GlobalDocument;
 std::string RuntimeOption::ErrorDocument404;
 bool RuntimeOption::ForbiddenAs404 = false;
 std::string RuntimeOption::ErrorDocument500;
@@ -2245,6 +2246,7 @@ void RuntimeOption::Load(
     Config::Bind(FileCache, ini, config, "Server.FileCache");
     Config::Bind(DefaultDocument, ini, config, "Server.DefaultDocument",
                  "index.php");
+    Config::Bind(GlobalDocument, ini, config, "Server.GlobalDocument");
     Config::Bind(ErrorDocument404, ini, config, "Server.ErrorDocument404");
     normalizePath(ErrorDocument404);
     Config::Bind(ForbiddenAs404, ini, config, "Server.ForbiddenAs404");

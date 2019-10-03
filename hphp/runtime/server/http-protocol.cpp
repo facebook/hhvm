@@ -666,6 +666,9 @@ static void CopyPathInfo(Array& server,
         name = name.substr(0, pos);
       }
     }
+    if (r.globalDoc()) {
+      name = String(RuntimeOption::GlobalDocument);
+    }
     if (r.defaultDoc()) {
       if (!name.empty() && name[name.length() - 1] != '/') {
         name += "/";

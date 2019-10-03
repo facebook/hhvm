@@ -31,14 +31,14 @@ function withRefValue($elements, $transform) {
 
 <<__EntryPoint>> function main(): void {
 echo "\nPopping elements off end of an unreferenced array";
-$transform = 'array_pop(&$a);';
+$transform = 'array_pop(inout $a);';
 withRefValue(1, $transform);
 withRefValue(2, $transform);
 withRefValue(3, $transform);
 withRefValue(4, $transform);
 
 echo "\n\n\nShift elements off start of an unreferenced array";
-$transform = 'array_shift(&$a);';
+$transform = 'array_shift(inout $a);';
 withRefValue(1, $transform);
 withRefValue(2, $transform);
 withRefValue(3, $transform);
@@ -52,14 +52,14 @@ withRefValue(3, $transform);
 withRefValue(4, $transform);
 
 echo "\n\n\nAdding elements to the end of an unreferenced array";
-$transform = 'array_push(&$a, "new.$counter");';
+$transform = 'array_push(inout $a, "new.$counter");';
 withRefValue(1, $transform);
 withRefValue(2, $transform);
 withRefValue(3, $transform);
 withRefValue(4, $transform);
 
 echo "\n\n\nAdding elements to the start of an unreferenced array";
-$transform = 'array_unshift(&$a, "new.$counter");';
+$transform = 'array_unshift(inout $a, "new.$counter");';
 withRefValue(1, $transform);
 withRefValue(2, $transform);
 withRefValue(3, $transform);

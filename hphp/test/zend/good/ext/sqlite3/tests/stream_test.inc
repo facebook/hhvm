@@ -6,7 +6,7 @@ class SQLite3_Test_Stream
 	public static $string_length = 10;
 	public static $string = "abcdefg\0hi";
 
-	public function stream_open($path, $mode, $options, &$opened_path)
+	public function stream_open($path, $mode, $options, inout $opened_path)
 	{
 		$this->position = 0;
 		return true;
@@ -41,4 +41,3 @@ class SQLite3_Test_Stream
 }
 
 stream_wrapper_register('sqliteBlobTest', "SQLite3_Test_Stream") or die("Unable to register sqliteBlobTest stream");
-

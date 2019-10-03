@@ -4,7 +4,7 @@ function passbyVal($val) {
     var_dump($val);
 }
 
-function passbyRef(&$ref) {
+function passbyRef(inout $ref) {
     echo "\nInside passbyRef call:\n";
     var_dump($ref);
 }
@@ -15,7 +15,7 @@ echo "\nAfter call\n";
 var_dump($undef1);
 
 echo "\nPassing undefined by reference\n";
-passbyRef(&$undef2);
+passbyRef(inout $undef2);
 echo "\nAfter call\n";
 var_dump($undef2);
 }

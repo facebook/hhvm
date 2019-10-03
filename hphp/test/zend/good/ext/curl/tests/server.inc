@@ -28,7 +28,8 @@ function curl_cli_server_start() {
 		$cmd .= " {$router}";
 		$cmd .= " 2>/dev/null";
 
-		$handle = proc_open($cmd, $descriptorspec, &$pipes, $doc_root);
+                $pipes = null;
+		$handle = proc_open($cmd, $descriptorspec, inout $pipes, $doc_root);
 	}
 
 	// note: even when server prints 'Listening on localhost:8964...Press Ctrl-C to quit.'

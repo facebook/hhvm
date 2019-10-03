@@ -1,5 +1,5 @@
 <?hh
-function f($arg1, &$arg2)
+function f($arg1, inout $arg2)
 {
     var_dump($arg1++);
     var_dump($arg2++);
@@ -8,7 +8,7 @@ function f($arg1, &$arg2)
 $a = 7;
 $b = 15;
 
-f($a, &$b);
+f($a, inout $b);
 
 var_dump($a);
 var_dump($b);

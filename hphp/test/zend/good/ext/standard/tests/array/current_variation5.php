@@ -5,7 +5,7 @@
  * Alias to functions: pos
  */
 
-function current_variation5_ref(&$a)
+function current_variation5_ref(inout $a)
 {
     var_dump(current($a));
     var_dump(next(inout $a));

@@ -22,7 +22,7 @@ class Foo
         print $this->prop;
     }
 
-    function retrieve(&$other)
+    function retrieve(inout $other)
     {
         echo __METHOD__ . "\n";
         $other = $this;

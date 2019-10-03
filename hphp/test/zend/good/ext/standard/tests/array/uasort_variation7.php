@@ -13,7 +13,7 @@
 echo "*** Testing uasort() : anonymous function as 'cmp_function' ***\n";
 
 $cmp_function = ($value1, $value2) ==> { if($value1 == $value2) {return 0;} else if($value1 > $value2) {return 1;} else{return -1;} };
-$cmp_function_ref = (&$value1, &$value2) ==> { if($value1 == $value2) {return 0;} else if($value1 > $value2) {return 1;} else{return -1;} };
+$cmp_function_ref = (inout $value1, inout $value2) ==> { if($value1 == $value2) {return 0;} else if($value1 > $value2) {return 1;} else{return -1;} };
 
 $array_arg = array(0 => 100, 1 => 3, 2 => -70, 3 => 24, 4 => 90);
 echo "-- Anonymous 'cmp_function' with parameters passed by value --\n";

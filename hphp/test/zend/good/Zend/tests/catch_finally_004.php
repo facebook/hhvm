@@ -4,7 +4,7 @@ function throw_exception($msg) {
     throw new Exception($msg);
 }
 
-function foo (&$ex) {
+function foo (inout $ex) {
    try {
       echo "1";
       try {
@@ -26,7 +26,8 @@ function foo (&$ex) {
    return 1;
 }
 <<__EntryPoint>> function main(): void {
-var_dump(foo(&$ex));
+$ex = null;
+var_dump(foo(inout $ex));
 
 do {
   var_dump($ex->getMessage());

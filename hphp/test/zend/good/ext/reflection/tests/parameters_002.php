@@ -1,6 +1,6 @@
 <?hh
 
-function test($nix, array $ar, &$ref, stdClass $std, NonExistingClass $na, stdClass &$opt = NULL, $def = "FooBar")
+function test($nix, array $ar, inout $ref, stdClass $std, NonExistingClass $na, inout stdClass $opt, $def = "FooBar")
 {
 }
 

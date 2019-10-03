@@ -1,5 +1,5 @@
 <?hh
-function compareByRef(&$first, $id, &$second) {
+function compareByRef(inout $first, $id, inout $second) {
     return $first[$id] === $second;
 }
 
@@ -34,5 +34,5 @@ $root = new MyTree();
 $child = new MyTree();
 $root[$id] = $child;
 
-var_dump(compareByRef(&$root,$id, &$child));
+var_dump(compareByRef(inout $root,$id, inout $child));
 }

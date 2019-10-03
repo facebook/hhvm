@@ -15,7 +15,7 @@
  *               -1 - if value1 is less than value2
  * Description : compares value1 and value2
  */
-function cmp(&$value1, &$value2)
+function cmp(inout $value1, inout $value2)
 {
   if($value1 == $value2) {
     return 0;

@@ -10,9 +10,9 @@ class  foo {
 	public function b() {
 		return array(1.2, array(new self));
 	}
-	public function c(&$a, &$b) {
+	public function c(inout $a, inout $b) {
 		$a = array();
-		$b[] = true;
+		$a[] = true;
 		return $a;
 	}
 	public function d() {
@@ -30,6 +30,7 @@ function main_entry(): void {
   var_dump($foo->a()[0]->x);
   var_dump($foo->a()[0]);
   var_dump($foo->b()[1][0]->a()[0]->x);
-  var_dump($foo->c(&$a, &$a)[0]);
+  $a = null;
+  var_dump($foo->c(inout $a, inout $a)[0]);
   var_dump($foo->d()[0]);
 }

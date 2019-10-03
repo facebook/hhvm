@@ -32,12 +32,12 @@ class W {
   }
 }
 
-function foo(&$x) { echo "foo: $x\n"; }
-function bar(&$x) { echo "bar: $x\n"; }
-function fiz(&$x) { echo "fiz: $x\n"; }
-function buz(&$x) { echo "buz: $x\n"; }
-function biz(&$x) { echo "biz: $x\n"; }
-function far(&$x) { echo "far: $x\n"; }
+function foo(inout $x) { echo "foo: $x\n"; }
+function bar(inout $x) { echo "bar: $x\n"; }
+function fiz(inout $x) { echo "fiz: $x\n"; }
+function buz(inout $x) { echo "buz: $x\n"; }
+function biz(inout $x) { echo "biz: $x\n"; }
+function far(inout $x) { echo "far: $x\n"; }
 
 <<__EntryPoint>>
 function main() {
@@ -52,10 +52,10 @@ function main() {
   fb_intercept('biz', W::make_static_closure());
   fb_intercept('far', $handler6);
 
-  $x = 'fail'; foo(&$x);
-  $x = 'fail'; bar(&$x);
-  $x = 'fail'; fiz(&$x);
-  $x = 'fail'; buz(&$x);
-  $x = 'fail'; biz(&$x);
-  $x = 'fail'; far(&$x);
+  $x = 'fail'; foo(inout $x);
+  $x = 'fail'; bar(inout $x);
+  $x = 'fail'; fiz(inout $x);
+  $x = 'fail'; buz(inout $x);
+  $x = 'fail'; biz(inout $x);
+  $x = 'fail'; far(inout $x);
 }

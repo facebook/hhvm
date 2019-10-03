@@ -5,6 +5,6 @@
  * we should trick EG(argument_stack) into growing  */
 <<__EntryPoint>> function main(): void {
 $args = array_fill(0, 64 * 1024 - 64, 0);
-call_user_func_array(function(&$a) {}, $args);
+call_user_func_array(function(inout $a) {}, $args);
 echo strval("okey");
 }

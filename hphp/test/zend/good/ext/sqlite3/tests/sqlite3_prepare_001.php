@@ -1,11 +1,12 @@
 <?hh
 
-function test(&$x) {
+function test(inout $x) {
     $class = new SQLite3(':memory:');
     $x = $class->prepare('SELECT 1');
 }
 <<__EntryPoint>> function main(): void {
-test(&$foo);
+$foo = null;
+test(inout $foo);
 
 echo "done\n";
 }

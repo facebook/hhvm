@@ -55,10 +55,11 @@
   RetC
 }
 
-.function byref(&$foo) {
+.function byref(inout $foo) {
+  Null
   Int 42
   SetL $foo
-  RetC
+  RetM 2
 }
 
 .function main() {
@@ -76,10 +77,12 @@
   NullUninit
   NullUninit
   NullUninit
-  VGetL $funk
-  FCallFuncD <> 1 1 "" - "byref"
-  PopC
+  NullUninit
   CGetL $funk
+  Null
+  PopL $funk
+  FCallFuncD <> 1 2 "0" - "byref"
+  PopC
   Print
   PopC
   String "\n"

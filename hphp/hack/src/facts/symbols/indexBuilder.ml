@@ -73,10 +73,10 @@ let parse_one_file ~(path : Relative_path.t) : si_capture =
                 get_details_from_info info_opt
               in
               {
-                (* We store all classes without the preceding
-                 * namespace indicator, because that is closest
-                 * to how they are returned by autocomplete. *)
-                sif_name = Utils.strip_both_ns key;
+                (* We need to strip away the preceding backslash for hack classes
+                 * but leave intact the : for xhp classes. The preceding : symbol
+                 * is needed to distinguish which type of a class you want. *)
+                sif_name = Utils.strip_ns key;
                 sif_kind = kind;
                 sif_filepath = relative_path_str;
                 sif_is_abstract = is_abstract;
@@ -117,10 +117,9 @@ let parse_one_file ~(path : Relative_path.t) : si_capture =
               })
         in
         (* Return unified results *)
-        let r = List.append classes_mapped functions_mapped in
-        let r = List.append r types_mapped in
-        let r = List.append r constants_mapped in
-        r
+        List.append classes_mapped functions_mapped
+        |> List.append types_mapped
+        |> List.append constants_mapped
       | None -> []
     in
     files_scanned := !files_scanned + 1;

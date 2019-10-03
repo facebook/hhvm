@@ -275,9 +275,11 @@ let test_builder_names (harness : Test_harness.t) : bool =
     ~sienv;
 
   (* XHP is considered a class at the moment - this may change.
-   * Note that XHP classes are saved WITHOUT a leading colon. *)
+   * Note that XHP classes are saved WITH a leading colon.
+   * Storing them without the leading colon results in incorrect
+   * text for XHP class autocomplete. *)
   assert_autocomplete
-    ~query_text:"xhp:helloworld"
+    ~query_text:":xhp:helloworld"
     ~kind:SI_Class
     ~expected:1
     ~sienv;

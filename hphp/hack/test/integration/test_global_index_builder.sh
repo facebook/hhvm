@@ -53,6 +53,7 @@ spot_check "Aaaaaaaaaaa_class 1 acid  acnew  actype"
 spot_check "Derp\\\\Lib\\\\Herp\\\\f"
 spot_check "HH\\\\vec"
 spot_check "__CLASS__ 9 acid"
+spot_check ":xhp:helloworld 1 acid"
 
 # Clean up
 rm -rf "${TEMP_REPO}"

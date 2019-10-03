@@ -22,13 +22,10 @@ namespace Strings {
 
 constexpr char FATAL_NULL_THIS[] = "$this is null";
 constexpr char WARN_NULL_THIS[] = "Undefined variable: this";
-constexpr char ASSIGN_THIS_ERROR[] = "Cannot re-assign $this";
 constexpr char FUNCTION_ALREADY_DEFINED[] = "Function already defined: %s";
 constexpr char CONSTANT_ALREADY_DEFINED[] = "Constant %s already defined";
 constexpr char CONSTANTS_MUST_BE_SCALAR[] =
   "Constants may only evaluate to scalar values or arrays";
-constexpr char CONSTANTS_CASE_SENSITIVE[] =
-  "Case insensitive constant names are not supported in HipHop";
 constexpr char MODULO_BY_ZERO[] = "Modulo by zero";
 constexpr char DIVISION_BY_ZERO[] =
   "Division by zero";
@@ -54,15 +51,12 @@ constexpr char SET_PROP_NON_OBJECT[] =
   "Setting a property on a non-object";
 constexpr char NULLSAFE_PROP_WRITE_ERROR[] =
   "?-> is not allowed in write context";
-constexpr char NULLSAFE_THIS_BASE_ERROR[] = "?-> is not allowed with $this";
 constexpr char FUNCTION_NAME_MUST_BE_STRING[] =
   "Function name must be a string";
 constexpr char METHOD_NAME_MUST_BE_STRING[] =
   "Method name must be a string";
 constexpr char CANT_UNSET_STRING[] =
   "Cannot unset string offsets";
-constexpr char CANT_UNSET_RECORD[] =
-  "Cannot unset record fields";
 constexpr char OP_NOT_SUPPORTED_STRING[] =
   "Operator not supported for strings";
 constexpr char OP_NOT_SUPPORTED_FUNC[] =
@@ -71,11 +65,6 @@ constexpr char OP_NOT_SUPPORTED_RECORD[] =
   "Operator not supported for records";
 constexpr char OP_NOT_SUPPORTED_CLASS[] =
   "Operator not supported for classes";
-constexpr char ASYNC_WITHOUT_BODY[] =
-  "Cannot declare %s method %s::%s() async; async is only meaningful"
-  " when it modifies a method body";
-constexpr char PICK_ACCESS_MODIFIER[] =
-  "Multiple access type modifiers are not allowed";
 constexpr char TRAITS_UNKNOWN_TRAIT[] =
   "Unknown trait '%s'";
 constexpr char TRAITS_UNKNOWN_TRAIT_METHOD[] =
@@ -105,13 +94,10 @@ constexpr char MULTIPLY_EXCLUDED[] =
   "Failed to evaluate a trait precedence (%s). Method of trait %s was defined "
   "to be excluded multiple times";
 constexpr char REDECLARE_BUILTIN[] = "Cannot redeclare %s()";
-constexpr char DISALLOWED_DYNCALL[] = "%s should not be called dynamically";
 constexpr char HACKARR_COMPAT_ARR_HACK_ARR_CMP[] =
   "Comparing PHP array with Hack array";
 constexpr char HACKARR_COMPAT_ARR_NON_ARR_CMP[] =
   "Comparing PHP array with non any-array";
-constexpr char HACKARR_COMPAT_VARR_IS_ARR[] = "is_array() called on varray";
-constexpr char HACKARR_COMPAT_DARR_IS_ARR[] = "is_array() called on darray";
 constexpr char HACKARR_COMPAT_VEC_IS_ARR[] = "is_array() called on vec";
 constexpr char HACKARR_COMPAT_DICT_IS_ARR[] = "is_array() called on dict";
 constexpr char HACKARR_COMPAT_KEYSET_IS_ARR[] = "is_array() called on keyset";

@@ -1,6 +1,0 @@
-File "datetime_compare.php", line 9, characters 10-18:
-This comparison has invalid types.  Only comparisons in which both arguments are strings, nums, DateTime, or DateTimeImmutable are allowed (Typing[4240])
-File "datetime_compare.php", line 8, characters 47-47:
-This is a dynamic value or a value of generic type T because it is an unenforceable type
-File "datetime_compare.php", line 8, characters 54-61:
-This is an object of type DateTime

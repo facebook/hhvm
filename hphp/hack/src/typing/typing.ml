@@ -6911,9 +6911,9 @@ and binop p env bop p1 te1 ty1 p2 te2 ty2 =
     let ty_datetime = MakeType.datetime (Reason.Rcomp p) in
     let ty_datetimeimmutable = MakeType.datetime_immutable (Reason.Rcomp p) in
     let ty_dynamic = MakeType.dynamic (Reason.Rcomp p) in
-    let both_sub tyl =
-      List.exists tyl ~f:(SubType.is_sub_type_LEGACY_DEPRECATED env ty1)
-      && List.exists tyl ~f:(SubType.is_sub_type_LEGACY_DEPRECATED env ty2)
+    let both_sub ty =
+      SubType.is_sub_type_LEGACY_DEPRECATED env ty1 ty
+      && SubType.is_sub_type_LEGACY_DEPRECATED env ty2 ty
     in
     (*
      * Comparison here is allowed when both args are num, both string, or both
@@ -6930,9 +6930,16 @@ and binop p env bop p1 te1 ty1 p2 te2 ty2 =
     ( if
       (not contains_any)
       && not
-           ( both_sub [ty_num; ty_dynamic]
-           || both_sub [ty_string; ty_dynamic]
-           || both_sub [ty_datetime; ty_datetimeimmutable; ty_dynamic] )
+           ( both_sub
+               (Typing_make_type.union (Reason.Rcomp p) [ty_num; ty_dynamic])
+           || both_sub
+                (Typing_make_type.union
+                   (Reason.Rcomp p)
+                   [ty_string; ty_dynamic])
+           || both_sub
+                (Typing_make_type.union
+                   (Reason.Rcomp p)
+                   [ty_datetime; ty_datetimeimmutable; ty_dynamic]) )
     then
       let ty1 = Typing_expand.fully_expand env ty1 in
       let ty2 = Typing_expand.fully_expand env ty2 in

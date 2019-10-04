@@ -16,5 +16,5 @@ function apply_curried_generic<T1, T2, T3>(
 }
 function test_curried(): void {
   $b = apply_curried($i ==> $s ==> $i < 3 + len($s));
-  $r = apply_curried_generic($i ==> $s ==> $i < 3 + len($s), 3, "a");
+  $r = apply_curried_generic((int $i) ==> $s ==> $i < 3 + len($s), 3, "a");
 }

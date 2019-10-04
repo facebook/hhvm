@@ -57,6 +57,12 @@ and instantiate_ subst x =
   | Ttuple tyl ->
     let tyl = List.map tyl (instantiate subst) in
     Ttuple tyl
+  | Tunion tyl ->
+    let tyl = List.map tyl (instantiate subst) in
+    Tunion tyl
+  | Tintersection tyl ->
+    let tyl = List.map tyl (instantiate subst) in
+    Tintersection tyl
   | Toption ty ->
     let ty = instantiate subst ty in
     (* we want to avoid double option: ??T *)

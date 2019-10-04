@@ -141,6 +141,12 @@ and hint_ p env = function
   | Htuple hl ->
     let tyl = List.map hl (hint env) in
     Ttuple tyl
+  | Hunion hl ->
+    let tyl = List.map hl (hint env) in
+    Tunion tyl
+  | Hintersection hl ->
+    let tyl = List.map hl (hint env) in
+    Tintersection tyl
   | Hshape { nsi_allows_unknown_fields; nsi_field_map } ->
     let shape_kind =
       if nsi_allows_unknown_fields then

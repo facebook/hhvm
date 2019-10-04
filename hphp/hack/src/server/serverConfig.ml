@@ -346,6 +346,8 @@ let load config_filename options =
       ~profile_type_check_duration_threshold:
         local_config.ServerLocalConfig.profile_type_check_duration_threshold
       ?tco_like_type_hints:(bool_opt "like_type_hints" config)
+      ?tco_union_intersection_type_hints:
+        (bool_opt "union_intersection_type_hints" config)
       ?tco_like_casts:(bool_opt "like_casts" config)
       ?tco_simple_pessimize:(float_opt "simple_pessimize" config)
       ?tco_coercion_from_dynamic:(bool_opt "coercion_from_dynamic" config)

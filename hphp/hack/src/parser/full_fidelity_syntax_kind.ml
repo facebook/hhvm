@@ -185,6 +185,8 @@ type t =
   | TypeArguments
   | TypeParameters
   | TupleTypeSpecifier
+  | UnionTypeSpecifier
+  | IntersectionTypeSpecifier
   | ErrorSyntax
   | ListItem
   | PocketAtomExpression
@@ -367,6 +369,8 @@ let to_string kind =
   | TypeArguments                     -> "type_arguments"
   | TypeParameters                    -> "type_parameters"
   | TupleTypeSpecifier                -> "tuple_type_specifier"
+  | UnionTypeSpecifier                -> "union_type_specifier"
+  | IntersectionTypeSpecifier         -> "intersection_type_specifier"
   | ErrorSyntax                       -> "error"
   | ListItem                          -> "list_item"
   | PocketAtomExpression              -> "pocket_atom"

@@ -29,6 +29,8 @@ let validate_classname (pos, hint) =
   | Aast.Hnothing ->
     ()
   | Aast.Htuple _
+  | Aast.Hunion _
+  | Aast.Hintersection _
   | Aast.Harray _
   | Aast.Hdarray _
   | Aast.Hvarray _
@@ -100,7 +102,10 @@ let rec check_hint env (pos, hint) =
       } ->
     List.iter hl (check_hint env);
     check_hint env h
-  | Aast.Htuple hl -> List.iter hl (check_hint env)
+  | Aast.Htuple hl
+  | Aast.Hunion hl
+  | Aast.Hintersection hl ->
+    List.iter hl (check_hint env)
   | Aast.Hpu_access (h, _) -> check_hint env h
 
 and check_shape env Aast.{ nsi_allows_unknown_fields = _; nsi_field_map } =

@@ -71,6 +71,8 @@ let rec has_reified_type_constraint env h =
   | Aast.Hnothing
   | Aast.Hdynamic
   | Aast.Htuple _
+  | Aast.Hunion _
+  | Aast.Hintersection _
   | Aast.Hshape _
   | Aast.Hfun _
   | Aast.Haccess _
@@ -92,6 +94,8 @@ let rec remove_awaitable ((pos, h_) as h) =
   (* For ?Awaitable<T>, the optional is dropped *)
   | Aast.Hoption h -> remove_awaitable h
   | Aast.Htuple _
+  | Aast.Hunion _
+  | Aast.Hintersection _
   | Aast.Hshape _
   | Aast.Hfun _
   | Aast.Haccess _
@@ -154,6 +158,8 @@ let remove_erased_generics env h =
       | Aast.Hlike h -> Aast.Hlike (aux h)
       | Aast.Hoption h -> Aast.Hoption (aux h)
       | Aast.Htuple hl -> Aast.Htuple (List.map ~f:aux hl)
+      | Aast.Hunion hl -> Aast.Hunion (List.map ~f:aux hl)
+      | Aast.Hintersection hl -> Aast.Hintersection (List.map ~f:aux hl)
       | Aast.Hshape si ->
         let modify_sfi sfi =
           { sfi with Aast.sfi_hint = aux sfi.Aast.sfi_hint }

@@ -43,7 +43,10 @@ end = struct
         (match fty.ft_arity with
         | Fvariadic (_min, { fp_type = var_ty; _ }) -> ty var_ty.et_type
         | _ -> ())
-      | Ttuple tyl -> List.iter tyl ty
+      | Ttuple tyl
+      | Tunion tyl
+      | Tintersection tyl ->
+        List.iter tyl ty
       | Tapply (_, tyl) -> List.iter tyl ty
       | Taccess (t, _) -> ty t
       | Tarray (t1, t2) ->

@@ -141,6 +141,8 @@ let converter
             is_mutable_return = true;
           } )
     | Htuple hl -> (p, Aast.Htuple (on_list on_hint hl))
+    | Hunion hl -> (p, Aast.Hunion (on_list on_hint hl))
+    | Hintersection hl -> (p, Aast.Hintersection (on_list on_hint hl))
     | Happly (x, hl) -> (p, Aast.Happly (x, on_list on_hint hl))
     | Hshape s -> (p, Aast.Hshape (on_shape_info s))
     | Haccess (root, id, ids) -> (p, on_haccess root id ids)

@@ -271,8 +271,8 @@ and _ ty_ =
    *   Tunion [int;float] is the same as num
    *   Tunion [null;t] is the same as Toption t
    *)
-  | Tunion : locl_ty list -> locl_phase ty_
-  | Tintersection : locl_ty list -> locl_phase ty_
+  | Tunion : 'phase ty list -> 'phase ty_
+  | Tintersection : 'phase ty list -> 'phase ty_
   (* Tobject is an object type compatible with all objects. This type is also
    * compatible with some string operations (since a class might implement
    * __toString), but not with string type hints. In a similar way, Tobject
@@ -803,6 +803,8 @@ let decl_ty_con_ordinal ty =
   | Tshape _ -> 18
   | Tpu_access _ -> 19
   | Tvar _ -> 20
+  | Tunion _ -> 21
+  | Tintersection _ -> 22
 
 let array_kind_con_ordinal ak =
   match ak with
@@ -841,8 +843,7 @@ let rec ty_compare ?(normalize_lists = false) ty1 ty2 =
     | (Tdestructure tyl1, Tdestructure tyl2) ->
       tyl_compare ~sort:false tyl1 tyl2
     | (Tunion tyl1, Tunion tyl2)
-    | (Tintersection tyl1, Tintersection tyl2) ->
-      tyl_compare ~sort:normalize_lists ~normalize_lists tyl1 tyl2
+    | (Tintersection tyl1, Tintersection tyl2)
     | (Ttuple tyl1, Ttuple tyl2) ->
       tyl_compare ~sort:normalize_lists ~normalize_lists tyl1 tyl2
     | (Tabstract (ak1, opt_cstr1), Tabstract (ak2, opt_cstr2)) ->
@@ -1020,7 +1021,10 @@ let rec equal_decl_ty ty1 ty2 =
     | (Tprim ty1, Tprim ty2) -> Aast.equal_tprim ty1 ty2
     | (Toption ty, Toption ty2) -> equal_ty ty ty2
     | (Tfun fty1, Tfun fty2) -> equal_decl_fun_type fty1 fty2
-    | (Ttuple tyl1, Ttuple tyl2) -> equal_decl_tyl tyl1 tyl2
+    | (Tunion tyl1, Tunion tyl2)
+    | (Tintersection tyl1, Tintersection tyl2)
+    | (Ttuple tyl1, Ttuple tyl2) ->
+      equal_decl_tyl tyl1 tyl2
     | (Tshape (shape_kind1, fields1), Tshape (shape_kind2, fields2)) ->
       equal_shape_kind shape_kind1 shape_kind2
       && List.equal
@@ -1052,7 +1056,9 @@ let rec equal_decl_ty ty1 ty2 =
     | (Ttuple _, _)
     | (Tshape _, _)
     | (Tpu_access _, _)
-    | (Tvar _, _) ->
+    | (Tvar _, _)
+    | (Tunion _, _)
+    | (Tintersection _, _) ->
       false
   and equal_shape_kind sk1 sk2 =
     match (sk1, sk2) with

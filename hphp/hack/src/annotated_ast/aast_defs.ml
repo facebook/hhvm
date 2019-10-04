@@ -124,6 +124,8 @@ and hint_ =
   | Hdynamic
   | Hnothing
   | Hpu_access of hint * sid
+  | Hunion of hint list
+  | Hintersection of hint list
 
 (* AST types such as Happly("int", []) are resolved to Hprim values *)
 and tprim =

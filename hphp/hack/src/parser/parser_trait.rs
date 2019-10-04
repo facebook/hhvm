@@ -549,13 +549,14 @@ where
     where
         F: Fn(&mut Self) -> S::R,
     {
-        self.parse_separated_list_predicate(
-            separator_kind,
+        let (x, y, _) = self.parse_separated_list_predicate(
+            |x| x == separator_kind,
             allow_trailing,
             |x| x == close_kind,
             error,
             parse_item,
-        )
+        );
+        (x, y)
     }
 
     fn require_qualified_name(&mut self) -> S::R {
@@ -770,19 +771,22 @@ where
         )
     }
 
-    fn parse_separated_list_predicate<P, F>(
+    fn parse_separated_list_predicate<P, SP, F>(
         &mut self,
-        separator_kind: TokenKind,
+        separator_predicate: SP,
         list_kind: SeparatedListKind,
         close_predicate: P,
         error: Error,
         parse_item: F,
-    ) -> (S::R, bool)
+    ) -> (S::R, bool, TokenKind)
     where
         P: Fn(TokenKind) -> bool,
+        SP: Fn(TokenKind) -> bool,
         F: Fn(&mut Self) -> S::R,
     {
         let mut items = vec![];
+        // Set this when we first see a separator
+        let mut separator_kind = TokenKind::Empty;
 
         loop {
             // At this point we are expecting an item followed by a separator,
@@ -805,7 +809,13 @@ where
                 // TODO(T25649779)
                 items.push(list_item);
                 break;
-            } else if kind == separator_kind {
+            } else if separator_predicate(kind) {
+                if separator_kind == TokenKind::Empty {
+                    separator_kind = kind;
+                } else if separator_kind != kind {
+                    self.with_error(Errors::error1063);
+                }
+
                 // ERROR RECOVERY: We expected an item but we got a separator.
                 // Assume the item was missing, eat the separator, and move on.
                 //
@@ -841,7 +851,14 @@ where
                     // TODO(T25649779)
                     items.push(list_item);
                     break;
-                } else if kind == separator_kind {
+                } else if separator_predicate(kind) {
+                    if separator_kind == TokenKind::Empty {
+                        separator_kind = kind;
+                    } else {
+                        if separator_kind != kind {
+                            self.with_error(Errors::error1063);
+                        }
+                    }
                     let token = self.next_token();
 
                     let separator = S!(make_token, self, token);
@@ -867,7 +884,7 @@ where
         }
         let no_arg_is_missing = items.iter().all(|x| !x.is_missing());
         let item_list = S!(make_list, self, items, self.pos());
-        (item_list, no_arg_is_missing)
+        (item_list, no_arg_is_missing, separator_kind)
     }
 
     fn parse_list_until_none<F>(&mut self, parse_item: F) -> S::R
@@ -910,8 +927,8 @@ where
         if close_predicate(kind) {
             S!(make_missing, self, self.pos())
         } else {
-            let (items, _) = self.parse_separated_list_predicate(
-                separator_kind,
+            let (items, _, _) = self.parse_separated_list_predicate(
+                |x| x == separator_kind,
                 allow_trailing,
                 close_predicate,
                 error,

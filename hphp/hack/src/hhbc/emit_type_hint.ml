@@ -128,6 +128,8 @@ and fmt_hint ~tparams ~namespace ?(strip_tparams = false) (pos, h) =
   | Aast.Hnothing -> fmt_name_or_prim (pos, SN.Typehints.nothing)
   | Aast.Hpu_access (h, sid) ->
     "(" ^ fmt_hint ~tparams ~namespace h ^ ":@" ^ snd sid ^ ")"
+  | Aast.Hunion _ -> fmt_name_or_prim (pos, SN.Typehints.mixed)
+  | Aast.Hintersection _ -> fmt_name_or_prim (pos, SN.Typehints.mixed)
 
 and fmt_hints ~tparams ~namespace hints =
   String.concat ~sep:", " (List.map hints (fmt_hint ~tparams ~namespace))
@@ -196,6 +198,8 @@ let rec hint_to_type_constraint ~kind ~tparams ~skipawaitable ~namespace (p, h)
   | Aast.Hdynamic
   | Aast.Hlike _
   | Aast.Hfun _
+  | Aast.Hunion _
+  | Aast.Hintersection _
   | Aast.Hmixed ->
     TC.make None []
   | Aast.Hprim Aast.Tvoid when kind <> TypeDef -> TC.make None []

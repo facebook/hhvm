@@ -719,6 +719,14 @@ impl<'src, State: StateType<'src, PositionedSyntax>> SmartConstructors<'src, Sta
         <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_tuple_type_specifier(self, arg0, arg1, arg2)
     }
 
+    fn make_union_type_specifier(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
+        <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_union_type_specifier(self, arg0, arg1, arg2)
+    }
+
+    fn make_intersection_type_specifier(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
+        <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_intersection_type_specifier(self, arg0, arg1, arg2)
+    }
+
     fn make_error(&mut self, arg0: Self::R) -> Self::R {
         <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_error(self, arg0)
     }

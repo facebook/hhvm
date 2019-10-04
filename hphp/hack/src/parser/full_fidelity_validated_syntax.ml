@@ -310,6 +310,8 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.LikeTypeSpecifier _ -> tag validate_like_type_specifier (fun x -> SpecLike x) x
     | Syntax.SoftTypeSpecifier _ -> tag validate_soft_type_specifier (fun x -> SpecSoft x) x
     | Syntax.TupleTypeSpecifier _ -> tag validate_tuple_type_specifier (fun x -> SpecTuple x) x
+    | Syntax.UnionTypeSpecifier _ -> tag validate_union_type_specifier (fun x -> SpecUnion x) x
+    | Syntax.IntersectionTypeSpecifier _ -> tag validate_intersection_type_specifier (fun x -> SpecIntersection x) x
     | s -> aggregation_fail Def.Specifier s
   and invalidate_specifier : specifier invalidator = fun (value, thing) ->
     match thing with
@@ -335,6 +337,8 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | SpecLike              thing -> invalidate_like_type_specifier            (value, thing)
     | SpecSoft              thing -> invalidate_soft_type_specifier            (value, thing)
     | SpecTuple             thing -> invalidate_tuple_type_specifier           (value, thing)
+    | SpecUnion             thing -> invalidate_union_type_specifier           (value, thing)
+    | SpecIntersection      thing -> invalidate_intersection_type_specifier    (value, thing)
   and validate_parameter : parameter validator = fun x ->
     match Syntax.syntax x with
     | Syntax.ParameterDeclaration _ -> tag validate_parameter_declaration (fun x -> ParamParameterDeclaration x) x
@@ -3612,6 +3616,38 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       { tuple_left_paren = invalidate_token x.tuple_left_paren
       ; tuple_types = invalidate_list_with (invalidate_option_with (invalidate_specifier)) x.tuple_types
       ; tuple_right_paren = invalidate_token x.tuple_right_paren
+      }
+    ; Syntax.value = v
+    }
+  and validate_union_type_specifier : union_type_specifier validator = function
+  | { Syntax.syntax = Syntax.UnionTypeSpecifier x; value = v } -> v,
+    { union_right_paren = validate_token x.union_right_paren
+    ; union_types = validate_list_with (validate_option_with (validate_specifier)) x.union_types
+    ; union_left_paren = validate_token x.union_left_paren
+    }
+  | s -> validation_fail (Some SyntaxKind.UnionTypeSpecifier) s
+  and invalidate_union_type_specifier : union_type_specifier invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.UnionTypeSpecifier
+      { union_left_paren = invalidate_token x.union_left_paren
+      ; union_types = invalidate_list_with (invalidate_option_with (invalidate_specifier)) x.union_types
+      ; union_right_paren = invalidate_token x.union_right_paren
+      }
+    ; Syntax.value = v
+    }
+  and validate_intersection_type_specifier : intersection_type_specifier validator = function
+  | { Syntax.syntax = Syntax.IntersectionTypeSpecifier x; value = v } -> v,
+    { intersection_right_paren = validate_token x.intersection_right_paren
+    ; intersection_types = validate_list_with (validate_option_with (validate_specifier)) x.intersection_types
+    ; intersection_left_paren = validate_token x.intersection_left_paren
+    }
+  | s -> validation_fail (Some SyntaxKind.IntersectionTypeSpecifier) s
+  and invalidate_intersection_type_specifier : intersection_type_specifier invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.IntersectionTypeSpecifier
+      { intersection_left_paren = invalidate_token x.intersection_left_paren
+      ; intersection_types = invalidate_list_with (invalidate_option_with (invalidate_specifier)) x.intersection_types
+      ; intersection_right_paren = invalidate_token x.intersection_right_paren
       }
     ; Syntax.value = v
     }

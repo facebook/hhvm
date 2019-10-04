@@ -49,6 +49,10 @@ class type ['a] decl_type_visitor_type =
 
     method on_ttuple : 'a -> Reason.t -> decl_ty list -> 'a
 
+    method on_tunion : 'a -> Reason.t -> decl_ty list -> 'a
+
+    method on_tintersection : 'a -> Reason.t -> decl_ty list -> 'a
+
     method on_tshape :
       'a ->
       Reason.t ->
@@ -116,6 +120,11 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
 
     method on_ttuple acc _ tyl = List.fold_left tyl ~f:this#on_type ~init:acc
 
+    method on_tunion acc _ tyl = List.fold_left tyl ~f:this#on_type ~init:acc
+
+    method on_tintersection acc _ tyl =
+      List.fold_left tyl ~f:this#on_type ~init:acc
+
     method on_tshape acc _ _ fdm =
       let f _ { sft_ty; _ } acc = this#on_type acc sft_ty in
       Nast.ShapeMap.fold f fdm acc
@@ -142,6 +151,8 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
       | Tapply (s, tyl) -> this#on_tapply acc r s tyl
       | Taccess aty -> this#on_taccess acc r aty
       | Ttuple tyl -> this#on_ttuple acc r tyl
+      | Tunion tyl -> this#on_tunion acc r tyl
+      | Tintersection tyl -> this#on_tintersection acc r tyl
       | Tshape (shape_kind, fdm) -> this#on_tshape acc r shape_kind fdm
       | Tpu_access (base, _) -> this#on_type acc base
   end
@@ -170,6 +181,10 @@ class type ['a] locl_type_visitor_type =
       'a -> Reason.t -> abstract_kind -> locl_ty option -> 'a
 
     method on_ttuple : 'a -> Reason.t -> locl_ty list -> 'a
+
+    method on_tunion : 'a -> Reason.t -> locl_ty list -> 'a
+
+    method on_tintersection : 'a -> Reason.t -> locl_ty list -> 'a
 
     method on_tanon : 'a -> Reason.t -> locl_fun_arity -> Ident.t -> 'a
 

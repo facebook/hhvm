@@ -91,7 +91,10 @@ and hint_ env p = function
   | Hvarray_or_darray ty
   | Hvarray ty ->
     hint env ty
-  | Htuple hl -> List.iter hl (hint env)
+  | Htuple hl
+  | Hunion hl
+  | Hintersection hl ->
+    List.iter hl (hint env)
   | Hoption h
   | Hsoft h
   | Hlike h ->

@@ -561,7 +561,10 @@ and type_ tcopt root variance env (reason, ty) =
       end
       variancel
       tyl
-  | Ttuple tyl -> type_list tcopt root variance env tyl
+  | Ttuple tyl
+  | Tunion tyl
+  | Tintersection tyl ->
+    type_list tcopt root variance env tyl
   | Taccess (ty, _) -> type_ tcopt root variance env ty
   | Tshape (_, ty_map) ->
     Nast.ShapeMap.iter
@@ -683,7 +686,10 @@ and get_typarams root env (ty : decl_ty) =
   | Tlike ty
   | Taccess (ty, _) ->
     get_typarams root env ty
-  | Ttuple tyl -> List.fold_left tyl ~init:empty ~f:get_typarams_union
+  | Tunion tyl
+  | Tintersection tyl
+  | Ttuple tyl ->
+    List.fold_left tyl ~init:empty ~f:get_typarams_union
   | Tshape (_, m) ->
     Nast.ShapeMap.fold
       (fun _ { sft_ty; _ } res -> get_typarams_union res sft_ty)

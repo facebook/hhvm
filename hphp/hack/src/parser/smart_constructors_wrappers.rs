@@ -554,6 +554,12 @@ where S: SmartConstructors<'src, State> {
     fn make_tuple_type_specifier(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
         compose(SyntaxKind::TupleTypeSpecifier, self.s.make_tuple_type_specifier(arg0.1, arg1.1, arg2.1))
     }
+    fn make_union_type_specifier(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
+        compose(SyntaxKind::UnionTypeSpecifier, self.s.make_union_type_specifier(arg0.1, arg1.1, arg2.1))
+    }
+    fn make_intersection_type_specifier(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
+        compose(SyntaxKind::IntersectionTypeSpecifier, self.s.make_intersection_type_specifier(arg0.1, arg1.1, arg2.1))
+    }
     fn make_error(&mut self, arg0 : Self::R) -> Self::R {
         compose(SyntaxKind::ErrorSyntax, self.s.make_error(arg0.1))
     }

@@ -222,6 +222,12 @@ let rec localize ~ety_env env (dty : decl_ty) =
   | (r, Ttuple tyl) ->
     let (env, tyl) = List.map_env env tyl (localize ~ety_env) in
     (env, (r, Ttuple tyl))
+  | (r, Tunion tyl) ->
+    let (env, tyl) = List.map_env env tyl (localize ~ety_env) in
+    (env, (r, Tunion tyl))
+  | (r, Tintersection tyl) ->
+    let (env, tyl) = List.map_env env tyl (localize ~ety_env) in
+    (env, (r, Tintersection tyl))
   | (r, Taccess (root_ty, ids)) ->
     let (env, root_ty) = localize ~ety_env env root_ty in
     let (env, (expansion_reason, ty)) =

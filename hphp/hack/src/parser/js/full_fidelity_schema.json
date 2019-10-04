@@ -1,6 +1,6 @@
 { "description" :
   "@generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2019-08-22-0001",
+  "version" : "2019-10-03-0001",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -2056,6 +2056,24 @@
       "type_name" : "tuple_type_specifier",
       "description" : "tuple_type_specifier",
       "prefix" : "tuple",
+      "fields" : [
+        { "field_name" : "left_paren" },
+        { "field_name" : "types" },
+        { "field_name" : "right_paren" }
+      ] },
+    { "kind_name" : "UnionTypeSpecifier",
+      "type_name" : "union_type_specifier",
+      "description" : "union_type_specifier",
+      "prefix" : "union",
+      "fields" : [
+        { "field_name" : "left_paren" },
+        { "field_name" : "types" },
+        { "field_name" : "right_paren" }
+      ] },
+    { "kind_name" : "IntersectionTypeSpecifier",
+      "type_name" : "intersection_type_specifier",
+      "description" : "intersection_type_specifier",
+      "prefix" : "intersection",
       "fields" : [
         { "field_name" : "left_paren" },
         { "field_name" : "types" },

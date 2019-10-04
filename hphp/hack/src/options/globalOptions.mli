@@ -212,6 +212,8 @@ type t = {
   profile_type_check_duration_threshold: float;
   (* Enables like type hints *)
   tco_like_type_hints: bool;
+  (* Enables union and intersection type hints *)
+  tco_union_intersection_type_hints: bool;
   (* Enables like casts *)
   tco_like_casts: bool;
   (* A simpler form of pessimization, only wraps the outermost type in like
@@ -331,6 +333,7 @@ val make :
   ?po_rust_lowerer:bool ->
   ?profile_type_check_duration_threshold:float ->
   ?tco_like_type_hints:bool ->
+  ?tco_union_intersection_type_hints:bool ->
   ?tco_like_casts:bool ->
   ?tco_simple_pessimize:float ->
   ?tco_coercion_from_dynamic:bool ->
@@ -489,6 +492,8 @@ val po_rust_lowerer : t -> bool
 val profile_type_check_duration_threshold : t -> float
 
 val tco_like_type_hints : t -> bool
+
+val tco_union_intersection_type_hints : t -> bool
 
 val tco_like_casts : t -> bool
 

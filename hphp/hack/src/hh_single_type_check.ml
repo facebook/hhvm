@@ -205,6 +205,7 @@ let parse_options () =
   let shallow_class_decl = ref false in
   let out_extension = ref ".out" in
   let like_type_hints = ref false in
+  let union_intersection_type_hints = ref false in
   let like_casts = ref false in
   let simple_pessimize = ref 0.0 in
   let coercion_from_dynamic = ref false in
@@ -429,6 +430,10 @@ let parse_options () =
       ( "--shallow-class-decl",
         Arg.Set shallow_class_decl,
         "Look up class members lazily from shallow declarations" );
+      ( "--union-intersection-type-hints",
+        Arg.Set union_intersection_type_hints,
+        "Allows union and intersection types to be written in type hint positions"
+      );
       ( "--like-type-hints",
         Arg.Set like_type_hints,
         "Allows like types to be written in type hint positions" );
@@ -553,6 +558,7 @@ let parse_options () =
       ~tco_check_xhp_attribute:!check_xhp_attribute
       ~tco_shallow_class_decl:!shallow_class_decl
       ~tco_like_type_hints:!like_type_hints
+      ~tco_union_intersection_type_hints:!union_intersection_type_hints
       ~tco_like_casts:!like_casts
       ~tco_simple_pessimize:!simple_pessimize
       ~tco_coercion_from_dynamic:!coercion_from_dynamic

@@ -303,6 +303,8 @@ and hint_to_type_constant_list ~tparams ~namespace ~targ_map (h : Aast.hint) =
   | Aast.Hprim _
   | Aast.Hthis
   | Aast.Hnothing
+  | Aast.Hunion _
+  | Aast.Hintersection _
   | Aast.Hdynamic ->
     failwith "Hints not available on the original AST"
 

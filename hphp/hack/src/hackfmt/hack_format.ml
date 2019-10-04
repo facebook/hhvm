@@ -2444,6 +2444,20 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           tuple_right_paren = right_p;
         } ->
       transform_argish env left_p types right_p
+    | Syntax.UnionTypeSpecifier
+        {
+          union_left_paren = left_p;
+          union_types = types;
+          union_right_paren = right_p;
+        } ->
+      transform_argish env left_p types right_p
+    | Syntax.IntersectionTypeSpecifier
+        {
+          intersection_left_paren = left_p;
+          intersection_types = types;
+          intersection_right_paren = right_p;
+        } ->
+      transform_argish env left_p types right_p
     | Syntax.TupleTypeExplicitSpecifier
         {
           tuple_type_keyword = kw;

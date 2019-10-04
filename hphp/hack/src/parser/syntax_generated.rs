@@ -1806,6 +1806,26 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_union_type_specifier(_: &C, union_left_paren: Self, union_types: Self, union_right_paren: Self) -> Self {
+        let syntax = SyntaxVariant::UnionTypeSpecifier(Box::new(UnionTypeSpecifierChildren {
+            union_left_paren,
+            union_types,
+            union_right_paren,
+        }));
+        let value = V::from_syntax(&syntax);
+        Self::make(syntax, value)
+    }
+
+    fn make_intersection_type_specifier(_: &C, intersection_left_paren: Self, intersection_types: Self, intersection_right_paren: Self) -> Self {
+        let syntax = SyntaxVariant::IntersectionTypeSpecifier(Box::new(IntersectionTypeSpecifierChildren {
+            intersection_left_paren,
+            intersection_types,
+            intersection_right_paren,
+        }));
+        let value = V::from_syntax(&syntax);
+        Self::make(syntax, value)
+    }
+
     fn make_error(_: &C, error_error: Self) -> Self {
         let syntax = SyntaxVariant::ErrorSyntax(Box::new(ErrorSyntaxChildren {
             error_error,
@@ -3222,6 +3242,20 @@ where
                 let acc = f(tuple_right_paren, acc);
                 acc
             },
+            SyntaxVariant::UnionTypeSpecifier(x) => {
+                let UnionTypeSpecifierChildren { union_left_paren, union_types, union_right_paren } = *x;
+                let acc = f(union_left_paren, acc);
+                let acc = f(union_types, acc);
+                let acc = f(union_right_paren, acc);
+                acc
+            },
+            SyntaxVariant::IntersectionTypeSpecifier(x) => {
+                let IntersectionTypeSpecifierChildren { intersection_left_paren, intersection_types, intersection_right_paren } = *x;
+                let acc = f(intersection_left_paren, acc);
+                let acc = f(intersection_types, acc);
+                let acc = f(intersection_right_paren, acc);
+                acc
+            },
             SyntaxVariant::ErrorSyntax(x) => {
                 let ErrorSyntaxChildren { error_error } = *x;
                 let acc = f(error_error, acc);
@@ -3471,6 +3505,8 @@ where
             SyntaxVariant::TypeArguments {..} => SyntaxKind::TypeArguments,
             SyntaxVariant::TypeParameters {..} => SyntaxKind::TypeParameters,
             SyntaxVariant::TupleTypeSpecifier {..} => SyntaxKind::TupleTypeSpecifier,
+            SyntaxVariant::UnionTypeSpecifier {..} => SyntaxKind::UnionTypeSpecifier,
+            SyntaxVariant::IntersectionTypeSpecifier {..} => SyntaxKind::IntersectionTypeSpecifier,
             SyntaxVariant::ErrorSyntax {..} => SyntaxKind::ErrorSyntax,
             SyntaxVariant::ListItem {..} => SyntaxKind::ListItem,
             SyntaxVariant::PocketAtomExpression {..} => SyntaxKind::PocketAtomExpression,
@@ -4611,6 +4647,18 @@ where
                  tuple_right_paren: ts.pop().unwrap(),
                  tuple_types: ts.pop().unwrap(),
                  tuple_left_paren: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::UnionTypeSpecifier, 3) => SyntaxVariant::UnionTypeSpecifier(Box::new(UnionTypeSpecifierChildren {
+                 union_right_paren: ts.pop().unwrap(),
+                 union_types: ts.pop().unwrap(),
+                 union_left_paren: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::IntersectionTypeSpecifier, 3) => SyntaxVariant::IntersectionTypeSpecifier(Box::new(IntersectionTypeSpecifierChildren {
+                 intersection_right_paren: ts.pop().unwrap(),
+                 intersection_types: ts.pop().unwrap(),
+                 intersection_left_paren: ts.pop().unwrap(),
                  
              })),
              (SyntaxKind::ErrorSyntax, 1) => SyntaxVariant::ErrorSyntax(Box::new(ErrorSyntaxChildren {
@@ -5974,6 +6022,20 @@ pub struct TupleTypeSpecifierChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+pub struct UnionTypeSpecifierChildren<T, V> {
+    pub union_left_paren: Syntax<T, V>,
+    pub union_types: Syntax<T, V>,
+    pub union_right_paren: Syntax<T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct IntersectionTypeSpecifierChildren<T, V> {
+    pub intersection_left_paren: Syntax<T, V>,
+    pub intersection_types: Syntax<T, V>,
+    pub intersection_right_paren: Syntax<T, V>,
+}
+
+#[derive(Debug, Clone)]
 pub struct ErrorSyntaxChildren<T, V> {
     pub error_error: Syntax<T, V>,
 }
@@ -6219,6 +6281,8 @@ pub enum SyntaxVariant<T, V> {
     TypeArguments(Box<TypeArgumentsChildren<T, V>>),
     TypeParameters(Box<TypeParametersChildren<T, V>>),
     TupleTypeSpecifier(Box<TupleTypeSpecifierChildren<T, V>>),
+    UnionTypeSpecifier(Box<UnionTypeSpecifierChildren<T, V>>),
+    IntersectionTypeSpecifier(Box<IntersectionTypeSpecifierChildren<T, V>>),
     ErrorSyntax(Box<ErrorSyntaxChildren<T, V>>),
     ListItem(Box<ListItemChildren<T, V>>),
     PocketAtomExpression(Box<PocketAtomExpressionChildren<T, V>>),
@@ -7864,6 +7928,24 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                         0 => Some(&x.tuple_left_paren),
                     1 => Some(&x.tuple_types),
                     2 => Some(&x.tuple_right_paren),
+                        _ => None,
+                    }
+                })
+            },
+            UnionTypeSpecifier(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.union_left_paren),
+                    1 => Some(&x.union_types),
+                    2 => Some(&x.union_right_paren),
+                        _ => None,
+                    }
+                })
+            },
+            IntersectionTypeSpecifier(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.intersection_left_paren),
+                    1 => Some(&x.intersection_types),
+                    2 => Some(&x.intersection_right_paren),
                         _ => None,
                     }
                 })

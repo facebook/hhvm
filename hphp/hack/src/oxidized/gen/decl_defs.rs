@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b4f887430087b83a0772248520cc5d2d>>
+// @generated SignedSource<<9547160e99e4597bfae24e5dabdb2ff0>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -59,6 +59,15 @@ pub struct MroElement {
 
 pub type Linearization = sequence::Sequence<MroElement>;
 
+pub type ConditionTypeName = Option<String>;
+
+#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+pub enum MethodReactivity {
+    MethodReactive(ConditionTypeName),
+    MethodShallow(ConditionTypeName),
+    MethodLocal(ConditionTypeName),
+}
+
 #[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 pub struct DeclClassType {
     pub need_init: bool,
@@ -93,15 +102,6 @@ pub struct DeclClassType {
     pub enum_type: Option<EnumType>,
     pub decl_errors: Option<errors::Errors>,
     pub condition_types: s_set::SSet,
-}
-
-pub type ConditionTypeName = Option<String>;
-
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
-pub enum MethodReactivity {
-    MethodReactive(ConditionTypeName),
-    MethodShallow(ConditionTypeName),
-    MethodLocal(ConditionTypeName),
 }
 
 #[derive(Clone, Debug, OcamlRep, Ocamlvalue)]

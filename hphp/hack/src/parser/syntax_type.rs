@@ -184,6 +184,8 @@ pub trait SyntaxType<'a, C>: SyntaxTypeBase<'a, C>
     fn make_type_arguments(ctx: &C, type_arguments_left_angle: Self, type_arguments_types: Self, type_arguments_right_angle: Self) -> Self;
     fn make_type_parameters(ctx: &C, type_parameters_left_angle: Self, type_parameters_parameters: Self, type_parameters_right_angle: Self) -> Self;
     fn make_tuple_type_specifier(ctx: &C, tuple_left_paren: Self, tuple_types: Self, tuple_right_paren: Self) -> Self;
+    fn make_union_type_specifier(ctx: &C, union_left_paren: Self, union_types: Self, union_right_paren: Self) -> Self;
+    fn make_intersection_type_specifier(ctx: &C, intersection_left_paren: Self, intersection_types: Self, intersection_right_paren: Self) -> Self;
     fn make_error(ctx: &C, error_error: Self) -> Self;
     fn make_list_item(ctx: &C, list_item: Self, list_separator: Self) -> Self;
     fn make_pocket_atom_expression(ctx: &C, pocket_atom_glyph: Self, pocket_atom_expression: Self) -> Self;

@@ -992,6 +992,16 @@ module type Syntax_S = sig
     ; tuple_types                                        : t
     ; tuple_right_paren                                  : t
     }
+  | UnionTypeSpecifier                of
+    { union_left_paren                                   : t
+    ; union_types                                        : t
+    ; union_right_paren                                  : t
+    }
+  | IntersectionTypeSpecifier         of
+    { intersection_left_paren                            : t
+    ; intersection_types                                 : t
+    ; intersection_right_paren                           : t
+    }
   | ErrorSyntax                       of
     { error_error                                        : t
     }
@@ -1256,6 +1266,8 @@ module type Syntax_S = sig
   val make_type_arguments : t -> t -> t -> t
   val make_type_parameters : t -> t -> t -> t
   val make_tuple_type_specifier : t -> t -> t -> t
+  val make_union_type_specifier : t -> t -> t -> t
+  val make_intersection_type_specifier : t -> t -> t -> t
   val make_error : t -> t
   val make_list_item : t -> t -> t
   val make_pocket_atom_expression : t -> t -> t
@@ -1436,6 +1448,8 @@ module type Syntax_S = sig
   val is_type_arguments : t -> bool
   val is_type_parameters : t -> bool
   val is_tuple_type_specifier : t -> bool
+  val is_union_type_specifier : t -> bool
+  val is_intersection_type_specifier : t -> bool
   val is_error : t -> bool
   val is_list_item : t -> bool
   val is_pocket_atom_expression : t -> bool

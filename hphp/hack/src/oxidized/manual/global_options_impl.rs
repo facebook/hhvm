@@ -58,6 +58,7 @@ impl Default for GlobalOptions {
             po_rust_lowerer: false,
             profile_type_check_duration_threshold: 0.0,
             tco_like_type_hints: false,
+            tco_union_intersection_type_hints: false,
             tco_like_casts: false,
             tco_simple_pessimize: 0.0,
             tco_coercion_from_dynamic: false,

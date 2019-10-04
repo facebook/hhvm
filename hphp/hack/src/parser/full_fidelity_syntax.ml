@@ -224,6 +224,8 @@ module WithToken(Token: TokenType) = struct
       | TypeArguments                     _ -> SyntaxKind.TypeArguments
       | TypeParameters                    _ -> SyntaxKind.TypeParameters
       | TupleTypeSpecifier                _ -> SyntaxKind.TupleTypeSpecifier
+      | UnionTypeSpecifier                _ -> SyntaxKind.UnionTypeSpecifier
+      | IntersectionTypeSpecifier         _ -> SyntaxKind.IntersectionTypeSpecifier
       | ErrorSyntax                       _ -> SyntaxKind.ErrorSyntax
       | ListItem                          _ -> SyntaxKind.ListItem
       | PocketAtomExpression              _ -> SyntaxKind.PocketAtomExpression
@@ -412,6 +414,8 @@ module WithToken(Token: TokenType) = struct
     let is_type_arguments                       = has_kind SyntaxKind.TypeArguments
     let is_type_parameters                      = has_kind SyntaxKind.TypeParameters
     let is_tuple_type_specifier                 = has_kind SyntaxKind.TupleTypeSpecifier
+    let is_union_type_specifier                 = has_kind SyntaxKind.UnionTypeSpecifier
+    let is_intersection_type_specifier          = has_kind SyntaxKind.IntersectionTypeSpecifier
     let is_error                                = has_kind SyntaxKind.ErrorSyntax
     let is_list_item                            = has_kind SyntaxKind.ListItem
     let is_pocket_atom_expression               = has_kind SyntaxKind.PocketAtomExpression
@@ -2257,6 +2261,24 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc tuple_left_paren in
          let acc = f acc tuple_types in
          let acc = f acc tuple_right_paren in
+         acc
+      | UnionTypeSpecifier {
+        union_left_paren;
+        union_types;
+        union_right_paren;
+      } ->
+         let acc = f acc union_left_paren in
+         let acc = f acc union_types in
+         let acc = f acc union_right_paren in
+         acc
+      | IntersectionTypeSpecifier {
+        intersection_left_paren;
+        intersection_types;
+        intersection_right_paren;
+      } ->
+         let acc = f acc intersection_left_paren in
+         let acc = f acc intersection_types in
+         let acc = f acc intersection_right_paren in
          acc
       | ErrorSyntax {
         error_error;
@@ -4127,6 +4149,24 @@ module WithToken(Token: TokenType) = struct
         tuple_types;
         tuple_right_paren;
       ]
+      | UnionTypeSpecifier {
+        union_left_paren;
+        union_types;
+        union_right_paren;
+      } -> [
+        union_left_paren;
+        union_types;
+        union_right_paren;
+      ]
+      | IntersectionTypeSpecifier {
+        intersection_left_paren;
+        intersection_types;
+        intersection_right_paren;
+      } -> [
+        intersection_left_paren;
+        intersection_types;
+        intersection_right_paren;
+      ]
       | ErrorSyntax {
         error_error;
       } -> [
@@ -5996,6 +6036,24 @@ module WithToken(Token: TokenType) = struct
         "tuple_left_paren";
         "tuple_types";
         "tuple_right_paren";
+      ]
+      | UnionTypeSpecifier {
+        union_left_paren;
+        union_types;
+        union_right_paren;
+      } -> [
+        "union_left_paren";
+        "union_types";
+        "union_right_paren";
+      ]
+      | IntersectionTypeSpecifier {
+        intersection_left_paren;
+        intersection_types;
+        intersection_right_paren;
+      } -> [
+        "intersection_left_paren";
+        "intersection_types";
+        "intersection_right_paren";
       ]
       | ErrorSyntax {
         error_error;
@@ -8085,6 +8143,26 @@ module WithToken(Token: TokenType) = struct
           tuple_left_paren;
           tuple_types;
           tuple_right_paren;
+        }
+      | (SyntaxKind.UnionTypeSpecifier, [
+          union_left_paren;
+          union_types;
+          union_right_paren;
+        ]) ->
+        UnionTypeSpecifier {
+          union_left_paren;
+          union_types;
+          union_right_paren;
+        }
+      | (SyntaxKind.IntersectionTypeSpecifier, [
+          intersection_left_paren;
+          intersection_types;
+          intersection_right_paren;
+        ]) ->
+        IntersectionTypeSpecifier {
+          intersection_left_paren;
+          intersection_types;
+          intersection_right_paren;
         }
       | (SyntaxKind.ErrorSyntax, [
           error_error;
@@ -10657,6 +10735,32 @@ module WithToken(Token: TokenType) = struct
           tuple_left_paren;
           tuple_types;
           tuple_right_paren;
+        } in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_union_type_specifier
+        union_left_paren
+        union_types
+        union_right_paren
+      =
+        let syntax = UnionTypeSpecifier {
+          union_left_paren;
+          union_types;
+          union_right_paren;
+        } in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_intersection_type_specifier
+        intersection_left_paren
+        intersection_types
+        intersection_right_paren
+      =
+        let syntax = IntersectionTypeSpecifier {
+          intersection_left_paren;
+          intersection_types;
+          intersection_right_paren;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

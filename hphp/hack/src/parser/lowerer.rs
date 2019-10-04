@@ -775,6 +775,14 @@ where
             TupleTypeSpecifier(c) => {
                 Ok(Htuple(Self::could_map(Self::p_hint, &c.tuple_types, env)?))
             }
+            UnionTypeSpecifier(c) => {
+                Ok(Hunion(Self::could_map(&Self::p_hint, &c.union_types, env)?))
+            }
+            IntersectionTypeSpecifier(c) => Ok(Hintersection(Self::could_map(
+                &Self::p_hint,
+                &c.intersection_types,
+                env,
+            )?)),
             KeysetTypeSpecifier(c) => Ok(Happly(
                 Self::pos_name(&c.keyset_type_keyword, env)?,
                 Self::could_map(Self::p_hint, &c.keyset_type_type, env)?,

@@ -1,0 +1,6 @@
+File "intershape.php", line 29, characters 18-44:
+Invalid argument (Typing[4110])
+File "intershape.php", line 8, characters 20-22:
+Expected ~(shape('a' => int) & shape('b' => string)) because it is an unenforceable type
+File "intershape.php", line 29, characters 18-44:
+But got shape('a' => int, 'b' => string)

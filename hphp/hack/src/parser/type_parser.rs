@@ -10,6 +10,7 @@ use crate::lexer::Lexer;
 use crate::parser_env::ParserEnv;
 use crate::parser_trait::Context;
 use crate::parser_trait::ParserTrait;
+use crate::parser_trait::SeparatedListKind;
 use crate::smart_constructors::{NodeType, SmartConstructors};
 use parser_core_types::lexable_token::LexableToken;
 use parser_core_types::syntax_error::{self as Errors, SyntaxError};
@@ -831,7 +832,7 @@ where
         let token = parser1.peek_token();
         match token.kind() {
             TokenKind::Function | TokenKind::Coroutine => self.parse_closure_type_specifier(),
-            _ => self.parse_tuple_type_specifier(),
+            _ => self.parse_tuple_or_union_or_intersection_type_specifier(),
         }
     }
 
@@ -883,26 +884,52 @@ where
         )
     }
 
-    fn parse_tuple_type_specifier(&mut self) -> S::R {
+    fn parse_tuple_or_union_or_intersection_type_specifier(&mut self) -> S::R {
         // SPEC
-        // tuple-type-specifier:
+        // tuple-union-intersection-type-specifier:
         //   ( type-specifier  ,  type-specifier-list  )
+        //   ( type-specifier  &  intersection-type-specifier-list )
+        //   ( type-specifier  |  union-type-specifier-list )
         // type-specifier-list:
         //   type-specifiers  ,opt
         //   type-specifiers
         //   type-specifier
         //   type-specifiers , type-specifier
+        // intersection-type-specifier-list:
+        //   type-specifier
+        //   intersection-type-specifier-list & type-specifier
+        // union-type-specifier-list:
+        //   type-specifier
+        //   union-type-specifier-list | type-specifier
 
         // TODO: Here we parse a type list with one or more items, but the grammar
         // actually requires a type list with two or more items. Give an error in
         // a later pass if there is only one item here.
 
         let left_paren = self.assert_token(TokenKind::LeftParen);
-        let args = self.parse_type_list(TokenKind::RightParen);
+
+        let (args, _, separator_kind) = self.parse_separated_list_predicate(
+            |x| x == TokenKind::Bar || x == TokenKind::Ampersand || x == TokenKind::Comma,
+            SeparatedListKind::TrailingAllowed,
+            |x| x == TokenKind::RightParen,
+            Errors::error1007,
+            |x: &mut Self| x.parse_type_specifier(false, true),
+        );
+
         if self.peek_token_kind() == TokenKind::RightParen {
             let right_paren = self.next_token();
             let token = S!(make_token, self, right_paren);
-            S!(make_tuple_type_specifier, self, left_paren, args, token)
+            match separator_kind {
+                TokenKind::Bar => S!(make_union_type_specifier, self, left_paren, args, token),
+                TokenKind::Ampersand => S!(
+                    make_intersection_type_specifier,
+                    self,
+                    left_paren,
+                    args,
+                    token
+                ),
+                _ => S!(make_tuple_type_specifier, self, left_paren, args, token),
+            }
         } else {
             // ERROR RECOVERY: Don't eat the token that is in the place of the
             // missing ) or ,.  Assume that it is the ) that is missing and

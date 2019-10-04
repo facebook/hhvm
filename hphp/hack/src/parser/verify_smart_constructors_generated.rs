@@ -1382,6 +1382,22 @@ impl<'src> SmartConstructors<'src, State> for VerifySmartConstructors
         r
     }
 
+    fn make_union_type_specifier(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
+        let args = arg_kinds!(arg0, arg1, arg2);
+        let r = <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_union_type_specifier(self, arg0, arg1, arg2);
+        self.state_mut().verify(&args);
+        self.state_mut().push(r.kind());
+        r
+    }
+
+    fn make_intersection_type_specifier(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
+        let args = arg_kinds!(arg0, arg1, arg2);
+        let r = <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_intersection_type_specifier(self, arg0, arg1, arg2);
+        self.state_mut().verify(&args);
+        self.state_mut().push(r.kind());
+        r
+    }
+
     fn make_error(&mut self, arg0: Self::R) -> Self::R {
         let args = arg_kinds!(arg0);
         let r = <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_error(self, arg0);

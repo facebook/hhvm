@@ -2349,6 +2349,34 @@ let schema : schema_node list =
         ];
     };
     {
+      kind_name = "UnionTypeSpecifier";
+      type_name = "union_type_specifier";
+      func_name = "union_type_specifier";
+      description = "union_type_specifier";
+      prefix = "union";
+      aggregates = [Specifier];
+      fields =
+        [
+          ("left_paren", Token);
+          ("types", ZeroOrMore (ZeroOrOne (Aggregate Specifier)));
+          ("right_paren", Token);
+        ];
+    };
+    {
+      kind_name = "IntersectionTypeSpecifier";
+      type_name = "intersection_type_specifier";
+      func_name = "intersection_type_specifier";
+      description = "intersection_type_specifier";
+      prefix = "intersection";
+      aggregates = [Specifier];
+      fields =
+        [
+          ("left_paren", Token);
+          ("types", ZeroOrMore (ZeroOrOne (Aggregate Specifier)));
+          ("right_paren", Token);
+        ];
+    };
+    {
       kind_name = "ErrorSyntax";
       type_name = "error";
       func_name = "error";

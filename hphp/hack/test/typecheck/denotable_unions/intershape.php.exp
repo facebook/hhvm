@@ -1,0 +1,6 @@
+File "intershape.php", line 29, characters 18-44:
+Invalid argument (Typing[4110])
+File "intershape.php", line 6, characters 13-14:
+Expected nothing because the field 'b' is not defined in this shape type, and this shape type does not allow unknown fields
+File "intershape.php", line 29, characters 41-43:
+But got string

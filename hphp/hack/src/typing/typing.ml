@@ -4577,7 +4577,8 @@ and call_parent_construct pos env el uel =
       | Tarray (_, _)
       | Tdarray (_, _)
       | Tvarray _ | Tvarray_or_darray _ | Tgeneric _ | Toption _ | Tlike _
-      | Tprim _ | Terr | Tfun _ | Ttuple _ | Tshape _
+      | Tprim _ | Terr | Tfun _ | Ttuple _ | Tshape _ | Tunion _
+      | Tintersection _
       | Taccess (_, _)
       | Tthis | Tpu_access _
       (* TODO(T36532263) not sure this is the right thing *) ) ) ->

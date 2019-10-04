@@ -92,6 +92,8 @@ let rec is_enforceable (env : env) (ty : decl_ty) =
   | Tdynamic -> true
   | Tfun _ -> false
   | Ttuple _ -> false
+  | Tunion _ -> false
+  | Tintersection _ -> false
   | Tshape _ -> false
   | Tmixed -> true
   | Tnothing -> true

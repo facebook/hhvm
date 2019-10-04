@@ -315,6 +315,8 @@ module Full = struct
       *)
     | Tapply ((_, s), tyl) -> to_doc s ^^ list "<" k tyl ">"
     | Ttuple tyl -> ttuple k tyl
+    | Tunion tyl -> Concat [text "|"; ttuple k tyl]
+    | Tintersection tyl -> Concat [text "&"; ttuple k tyl]
     | Tshape (shape_kind, fdm) -> tshape k to_doc shape_kind fdm
     | Tpu_access (ty', (_, access)) -> tpu_access k ty' access
 

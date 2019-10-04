@@ -1276,8 +1276,8 @@ where
     where
         P: Fn(TokenKind) -> bool,
     {
-        let (items, _) = self.parse_separated_list_predicate(
-            TokenKind::Comma,
+        let (items, _, _) = self.parse_separated_list_predicate(
+            |x| x == TokenKind::Comma,
             SeparatedListKind::NoTrailing,
             predicate,
             Errors::error1004,

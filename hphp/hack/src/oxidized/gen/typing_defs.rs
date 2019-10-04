@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<dd1702c5723afd855fbe87d5a2013a53>>
+// @generated SignedSource<<635208b0d313063bfb1379574193d787>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -37,10 +37,62 @@ pub enum Exact {
     Nonexact,
 }
 
+#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
+pub enum ValKind {
+    Lval,
+    LvalSubexpr,
+    Other,
+}
+
+#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
+pub enum ParamMutability {
+    ParamOwnedMutable,
+    ParamBorrowedMutable,
+    ParamMaybeMutable,
+}
+
+#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
+pub enum FunTparamsKind {
+    FTKtparams,
+    FTKinstantiatedTargs,
+}
+
+#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
+pub enum ShapeKind {
+    ClosedShape,
+    OpenShape,
+}
+
+#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
+pub enum ParamMode {
+    FPnormal,
+    FPref,
+    FPinout,
+}
+
 #[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 pub enum PuKind {
     PuPlain,
     PuAtom(String),
+}
+
+#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
+pub enum XhpAttrTag {
+    Required,
+    Lateinit,
+}
+
+#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+pub struct XhpAttr {
+    pub tag: Option<XhpAttrTag>,
+    pub has_default: bool,
+}
+
+#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
+pub enum ConsistentKind {
+    Inconsistent,
+    ConsistentConstruct,
+    FinalClass,
 }
 
 #[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
@@ -78,6 +130,8 @@ pub enum Ty_ {
     Tshape(ShapeKind, nast::shape_map::ShapeMap<ShapeFieldType>),
     TpuAccess(Ty, nast::Sid),
     Tvar(ident::Ident),
+    Tunion(Vec<Ty>),
+    Tintersection(Vec<Ty>),
 }
 
 #[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
@@ -90,12 +144,6 @@ pub enum DependentType {
 #[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 pub struct TaccessType(pub DeclTy, pub Vec<nast::Sid>);
 
-#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
-pub enum ShapeKind {
-    ClosedShape,
-    OpenShape,
-}
-
 #[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 pub enum Reactivity {
     Nonreactive,
@@ -104,26 +152,6 @@ pub enum Reactivity {
     Reactive(Option<DeclTy>),
     MaybeReactive(Box<Reactivity>),
     RxVar(Option<Box<Reactivity>>),
-}
-
-#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
-pub enum ValKind {
-    Lval,
-    LvalSubexpr,
-    Other,
-}
-
-#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
-pub enum ParamMutability {
-    ParamOwnedMutable,
-    ParamBorrowedMutable,
-    ParamMaybeMutable,
-}
-
-#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
-pub enum FunTparamsKind {
-    FTKtparams,
-    FTKinstantiatedTargs,
 }
 
 #[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
@@ -156,13 +184,6 @@ pub enum FunArity<Ty> {
 
 pub type DeclFunArity = FunArity<DeclTy>;
 
-#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
-pub enum ParamMode {
-    FPnormal,
-    FPref,
-    FPinout,
-}
-
 #[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 pub enum ParamRxAnnotation {
     ParamRxVar,
@@ -194,18 +215,6 @@ pub type FunParams<Ty> = Vec<FunParam<Ty>>;
 
 pub type DeclFunParams = FunParams<DeclTy>;
 
-#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
-pub enum XhpAttrTag {
-    Required,
-    Lateinit,
-}
-
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
-pub struct XhpAttr {
-    pub tag: Option<XhpAttrTag>,
-    pub has_default: bool,
-}
-
 #[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 pub struct ClassElt {
     pub abstract_: bool,
@@ -234,13 +243,6 @@ pub struct ClassConst {
 
 #[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 pub struct Requirement(pub pos::Pos, pub DeclTy);
-
-#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
-pub enum ConsistentKind {
-    Inconsistent,
-    ConsistentConstruct,
-    FinalClass,
-}
 
 #[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 pub struct ClassType {

@@ -376,6 +376,8 @@ and hint_ =
   | Hfun of
       is_coroutine * hint list * param_kind option list * variadic_hint * hint
   | Htuple of hint list
+  | Hunion of hint list
+  | Hintersection of hint list
   | Happly of id * hint list
   | Hshape of shape_info
   (* This represents the use of a type const. Type consts are accessed like

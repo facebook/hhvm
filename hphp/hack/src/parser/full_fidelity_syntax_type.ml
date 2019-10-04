@@ -1105,6 +1105,16 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; tuple_types                                        : t
     ; tuple_right_paren                                  : t
     }
+  | UnionTypeSpecifier                of
+    { union_left_paren                                   : t
+    ; union_types                                        : t
+    ; union_right_paren                                  : t
+    }
+  | IntersectionTypeSpecifier         of
+    { intersection_left_paren                            : t
+    ; intersection_types                                 : t
+    ; intersection_right_paren                           : t
+    }
   | ErrorSyntax                       of
     { error_error                                        : t
     }
@@ -1283,6 +1293,8 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | SpecLike              of like_type_specifier
   | SpecSoft              of soft_type_specifier
   | SpecTuple             of tuple_type_specifier
+  | SpecUnion             of union_type_specifier
+  | SpecIntersection      of intersection_type_specifier
   and parameter =
   | ParamParameterDeclaration of parameter_declaration
   | ParamVariadicParameter    of variadic_parameter
@@ -2410,6 +2422,16 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { tuple_left_paren: Token.t value
     ; tuple_types: (specifier option) listesque value
     ; tuple_right_paren: Token.t value
+    }
+  and union_type_specifier =
+    { union_left_paren: Token.t value
+    ; union_types: (specifier option) listesque value
+    ; union_right_paren: Token.t value
+    }
+  and intersection_type_specifier =
+    { intersection_left_paren: Token.t value
+    ; intersection_types: (specifier option) listesque value
+    ; intersection_right_paren: Token.t value
     }
   and pocket_atom_expression =
     { pocket_atom_glyph: Token.t value

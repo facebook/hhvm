@@ -89,6 +89,7 @@ type t = {
   po_rust_lowerer: bool;
   profile_type_check_duration_threshold: float;
   tco_like_type_hints: bool;
+  tco_union_intersection_type_hints: bool;
   tco_like_casts: bool;
   tco_simple_pessimize: float;
   tco_coercion_from_dynamic: bool;
@@ -248,6 +249,7 @@ let default =
     po_rust_lowerer = false;
     profile_type_check_duration_threshold = 0.05;
     tco_like_type_hints = false;
+    tco_union_intersection_type_hints = false;
     tco_like_casts = false;
     tco_simple_pessimize = 0.0;
     tco_coercion_from_dynamic = false;
@@ -337,6 +339,8 @@ let make
     ?(profile_type_check_duration_threshold =
       default.profile_type_check_duration_threshold)
     ?(tco_like_type_hints = default.tco_like_type_hints)
+    ?(tco_union_intersection_type_hints =
+      default.tco_union_intersection_type_hints)
     ?(tco_like_casts = default.tco_like_casts)
     ?(tco_simple_pessimize = default.tco_simple_pessimize)
     ?(tco_coercion_from_dynamic = default.tco_coercion_from_dynamic)
@@ -426,6 +430,7 @@ let make
     po_rust_lowerer;
     profile_type_check_duration_threshold;
     tco_like_type_hints;
+    tco_union_intersection_type_hints;
     tco_like_casts;
     tco_simple_pessimize;
     tco_coercion_from_dynamic;
@@ -565,6 +570,8 @@ let profile_type_check_duration_threshold t =
   t.profile_type_check_duration_threshold
 
 let tco_like_type_hints t = t.tco_like_type_hints
+
+let tco_union_intersection_type_hints t = t.tco_union_intersection_type_hints
 
 let tco_like_casts t = t.tco_like_casts
 

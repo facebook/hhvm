@@ -196,6 +196,8 @@ pub trait SmartConstructors<'src, State>: Clone {
     fn make_type_arguments(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R;
     fn make_type_parameters(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R;
     fn make_tuple_type_specifier(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R;
+    fn make_union_type_specifier(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R;
+    fn make_intersection_type_specifier(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R;
     fn make_error(&mut self, arg0 : Self::R) -> Self::R;
     fn make_list_item(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R;
     fn make_pocket_atom_expression(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R;

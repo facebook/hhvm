@@ -1032,6 +1032,10 @@ if there already is one, since that one will likely be better than this one. *)
         Hshape { si_allows_unknown_fields; si_shape_field_list }
       | TupleTypeSpecifier { tuple_types; _ } ->
         Htuple (couldMap ~f:pHint tuple_types env)
+      | UnionTypeSpecifier { union_types; _ } ->
+        Hunion (couldMap ~f:pHint union_types env)
+      | IntersectionTypeSpecifier { intersection_types; _ } ->
+        Hintersection (couldMap ~f:pHint intersection_types env)
       | KeysetTypeSpecifier
           { keyset_type_keyword = kw; keyset_type_type = ty; _ }
       | VectorTypeSpecifier

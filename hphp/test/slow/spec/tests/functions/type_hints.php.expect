@@ -25,7 +25,7 @@ object(D2) (0) {
 Inside f5
 string(5) "hello"
 Hello!
---------------- test type hint + by ref ---------------------
+--------------- test type hint + by inout ---------------------
 Inside f6
 object(C1) (0) {
 }

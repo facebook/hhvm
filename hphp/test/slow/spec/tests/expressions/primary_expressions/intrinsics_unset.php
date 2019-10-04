@@ -97,7 +97,7 @@ function g2()
 g2();
 var_dump(isset($gl));       // no longer set
 
-echo "---------- unsetting inside a function (pass-by-ref) ------------\n";
+echo "---------- unsetting inside a function (pass-by-inout) ------------\n";
 
 function g3($p1, inout $p2)
 {
@@ -111,7 +111,7 @@ $v2 = 20;
 g3($v1, inout $v2);
 var_dump(isset($v1));       // still set
 var_dump($v1);
-var_dump(isset($v2));       // still set, even though passed in by reference and unset
+var_dump(isset($v2));       // no longer set
 var_dump($v2);
 
 echo "---------- unsetting inside a function (static) ------------\n";

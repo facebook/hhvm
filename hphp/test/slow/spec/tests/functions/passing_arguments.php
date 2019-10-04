@@ -8,7 +8,7 @@
 
 error_reporting(-1);
 
-// a simple example of passing by value and by reference
+// a simple example of passing by value and by inout
 
 function f($p1, inout $p2)
 {
@@ -23,7 +23,7 @@ $a1 = 10;
 $a2 = 20;
 var_dump($a1);
 var_dump($a2);
-f($a1, inout $a2);        // variable $a2 is passed by reference
+f($a1, inout $a2);        // variable $a2 is passed by inout
 var_dump($a1);
 var_dump($a2);
 $twenty = 20;
@@ -44,7 +44,7 @@ var_dump($a2);
 
 //*/
 
-// passing by reference explored further
+// passing by inout explored further
 
 function g(inout $p1)
 {
@@ -58,7 +58,7 @@ $a2 = 0;
 // g(TRUE);             // PHP5 32/64, Error: Only variables can be passed by reference
                            // HHVM,       Error: Cannot pass parameter 1 by reference
    $a2 = TRUE;
-   g(inout $a2);              // OK; passing a modifiable lvalue by reference
+   g(inout $a2);              // OK; passing a modifiable lvalue by inout
    var_dump($a2);
 
 // following tests have different values for $a2, and give results like the case above

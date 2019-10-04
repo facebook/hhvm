@@ -33,7 +33,7 @@ bool(true)
 bool(true)
 bool(false)
 bool(false)
----------- unsetting inside a function (pass-by-ref) ------------
+---------- unsetting inside a function (pass-by-inout) ------------
 bool(true)
 bool(false)
 

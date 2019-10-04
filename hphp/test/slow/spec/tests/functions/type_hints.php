@@ -91,7 +91,7 @@ function main_entry(): void {
   //f5(123); // must be callable, integer given
   f5('hello');
 
-  echo "--------------- test type hint + by ref ---------------------\n";
+  echo "--------------- test type hint + by inout ---------------------\n";
   $x = new C1;
   f6(inout $x);
 }

@@ -387,6 +387,13 @@ bool srcsCanSpanCall(const IRInstruction& inst) {
   return true;
 }
 
+folly::Optional<uint32_t> pure_store_bit(Local& env, AliasClass acls) {
+  if (auto const meta = env.global.ainfo.find(canonicalize(acls))) {
+    return meta->index;
+  }
+  return folly::none;
+}
+
 void set_movable_store(Local& env, uint32_t bit, IRInstruction& inst) {
   env.global.trackedStoreMap[
     StoreKey { inst.block(), StoreKey::Out, bit }].set(&inst);
@@ -486,19 +493,24 @@ void mayStore(Local& env, AliasClass acls) {
   env.reStores &= ~mayStore;
 }
 
+void store(Local& env, AliasClass acls) {
+  mayStore(env, acls);
+  if (auto bit = pure_store_bit(env, acls)) {
+    mustStore(env, *bit);
+  } else {
+    auto const it = env.global.ainfo.stack_ranges.find(canonicalize(acls));
+    if (it != end(env.global.ainfo.stack_ranges)) {
+      mustStoreSet(env, it->second);
+    }
+  }
+};
+
 void kill(Local& env, AliasClass acls) {
   auto const canon = canonicalize(acls);
   killSet(env, env.global.ainfo.expand(canon));
 }
 
 //////////////////////////////////////////////////////////////////////
-
-folly::Optional<uint32_t> pure_store_bit(Local& env, AliasClass acls) {
-  if (auto const meta = env.global.ainfo.find(canonicalize(acls))) {
-    return meta->index;
-  }
-  return folly::none;
-}
 
 void visit(Local& env, IRInstruction& inst) {
   auto const effects = memory_effects(inst);
@@ -567,7 +579,7 @@ void visit(Local& env, IRInstruction& inst) {
 
     [&] (InlineEnterEffects l) {
       load(env, l.inlStack);
-      load(env, l.actrec);
+      store(env, l.actrec);
 
       // This effect is a lie, but we can't push any stores that use a caller
       // frame pointer into the callee, as the frame pointer will be updated.
@@ -613,23 +625,11 @@ void visit(Local& env, IRInstruction& inst) {
     [&] (CallEffects l) {
       env.containsCall = true;
 
-      auto const store = [&](AliasClass cls) {
-        mayStore(env, cls);
-        if (auto bit = pure_store_bit(env, cls)) {
-          mustStore(env, *bit);
-        } else {
-          auto const it = env.global.ainfo.stack_ranges.find(canonicalize(cls));
-          if (it != end(env.global.ainfo.stack_ranges)) {
-            mustStoreSet(env, it->second);
-          }
-        }
-      };
-
-      store(l.outputs);
+      store(env, l.outputs);
       load(env, AHeapAny);
       load(env, l.locals);
       load(env, l.inputs);
-      store(l.actrec);
+      store(env, l.actrec);
       kill(env, l.kills);
     },
 

@@ -1,0 +1,19 @@
+functions
+
+Warning: Generic at index 0 to Function f must be reified, erased given in %s on line 7
+
+Warning: Generic at index 0 to Function f must be reified, erased given in %s on line 7
+
+classes
+
+Warning: Generic at index 0 to Class C must be reified, erased given in %s on line 18
+
+Warning: Generic at index 0 to Class C must be reified, erased given in %s on line 19
+
+Warning: Generic at index 0 to Class C must be reified, erased given in %s on line 27
+
+extends classes
+
+Warning: Generic at index 0 to Class C must be reified, erased given in %s on line 27
+
+done

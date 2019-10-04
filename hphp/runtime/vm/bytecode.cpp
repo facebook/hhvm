@@ -1361,11 +1361,14 @@ static void prepareFuncEntry(ActRec *ar, StackArgsState stk, Array&& generics) {
 }
 
 namespace {
-// Check whether HasReifiedGenerics is set on the ActRec
 // Check whether the location of reified generics matches the one we expect
 void checkForReifiedGenericsErrors(const ActRec* ar, bool hasGenerics) {
   if (!ar->m_func->hasReifiedGenerics()) return;
   if (!hasGenerics) {
+    if (areAllGenericsSoft(ar->m_func->getReifiedGenericsInfo())) {
+      raise_warning_for_soft_reified(0, true, ar->m_func->fullName());
+      return;
+    }
     throw_call_reified_func_without_generics(ar->m_func);
   }
   auto const tv = frame_local(ar, ar->m_func->numParams());

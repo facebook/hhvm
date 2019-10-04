@@ -117,6 +117,12 @@ void checkReifiedGenericMismatchHelper(
   auto const generics = info.m_typeParamInfo;
   auto const len = generics.size();
   if (len != reified_generics->size()) {
+    if (reified_generics->size() == 0) {
+      if (areAllGenericsSoft(info)) {
+        raise_warning_for_soft_reified(0, fun, name);
+        return;
+      }
+    }
     SystemLib::throwBadMethodCallExceptionObject(
       folly::sformat("{} {} requires {} generics but {} given",
                      fun ? "Function" : "Class",
@@ -139,11 +145,7 @@ void checkReifiedGenericMismatchHelper(
                            name->data(),
                            i));
         }
-        raise_warning("Generic at index %zu to %s %s must be reified,"
-                      " erased given",
-                      i,
-                      fun ? "Function" : "Class",
-                      name->data());
+        raise_warning_for_soft_reified(i, fun, name);
       }
       ++it;
     }
@@ -185,6 +187,23 @@ uint32_t getGenericsBitmap(const ArrayData* generics) {
   );
   return bitmap;
 }
+
+bool areAllGenericsSoft(const ReifiedGenericsInfo& info) {
+  for (auto const& tp : info.m_typeParamInfo) {
+    if (!tp.m_isSoft) return false;
+  }
+  return true;
+}
+
+void raise_warning_for_soft_reified(size_t i, bool fun,
+                                    const StringData *name) {
+  raise_warning("Generic at index %zu to %s %s must be reified,"
+                " erased given",
+                i,
+                fun ? "Function" : "Class",
+                name->data());
+}
+
 
 
 ///////////////////////////////////////////////////////////////////////////////

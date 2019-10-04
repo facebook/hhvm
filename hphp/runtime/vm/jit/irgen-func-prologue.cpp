@@ -105,9 +105,17 @@ void init_params(IRGS& env, const Func* func, uint32_t argc,
         gen(env, JmpNZero, taken, hasGenerics);
       },
       [&] {
-        // Generics not given. We will fail later. Write uninit so that
-        // the local is properly initialized.
-        gen(env, StLoc, LocalId{func->numParams()}, fp(env), cns(env, TUninit));
+        // Generics not given. We will either fail later or raise a warning.
+        // Write empty array so that the local is properly initialized.
+        auto const emptyArr =
+          RuntimeOption::EvalHackArrDVArrs ? ArrayData::CreateVec()
+                                           : ArrayData::CreateVArray();
+        gen(
+          env,
+          StLoc,
+          LocalId{func->numParams()},
+          fp(env),
+          cns(env, emptyArr));
       },
       [&] {
         // Already at the correct slot.
@@ -466,7 +474,7 @@ void emitGenericsMismatchCheck(IRGS& env, SSATmp* callFlags) {
   if (!func->hasReifiedGenerics()) return;
 
   // Fail if generics were not passed.
-  ifThen(
+  ifThenElse(
     env,
     [&] (Block* taken) {
       auto constexpr flag = 1 << CallFlags::Flags::HasGenerics;
@@ -474,53 +482,64 @@ void emitGenericsMismatchCheck(IRGS& env, SSATmp* callFlags) {
       gen(env, JmpZero, taken, hasGenerics);
     },
     [&] {
-      hint(env, Block::Hint::Unlikely);
-      updateMarker(env);
-      env.irb->exceptionStackBoundary();
-      gen(env, ThrowCallReifiedFunctionWithoutGenerics, cns(env, curFunc(env)));
-    }
-  );
+      // Fail on generics count/wildcard mismatch.
+      auto const type = RuntimeOption::EvalHackArrDVArrs ? TVec : TArr;
+      auto const local = LocalId{func->numParams()};
+      gen(env, AssertLoc, type, local, fp(env));
+      auto const generics = gen(env, LdLoc, type, local, fp(env));
 
-  // Fail on generics count/wildcard mismatch.
-  auto const type = RuntimeOption::EvalHackArrDVArrs ? TVec : TArr;
-  auto const local = LocalId{func->numParams()};
-  gen(env, AssertLoc, type, local, fp(env));
-  auto const generics = gen(env, LdLoc, type, local, fp(env));
-
-  // Generics may be known if we are inlining.
-  if (generics->hasConstVal(type)) {
-    auto const genericsArr = RuntimeOption::EvalHackArrDVArrs
-      ? generics->vecVal() : generics->arrVal();
-    auto const& genericsDef = func->getReifiedGenericsInfo().m_typeParamInfo;
-    if (genericsArr->size() == genericsDef.size()) {
-      bool match = true;
-      IterateKV(genericsArr, [&](Cell k, TypedValue v) {
-        assertx(tvIsInt(k) && tvIsArrayLike(v));
-        auto const idx = k.m_data.num;
-        auto const ts = v.m_data.parr;
-        if (isWildCard(ts) && genericsDef[idx].m_isReified) {
-          match = false;
-          return true;
+      // Generics may be known if we are inlining.
+      if (generics->hasConstVal(type)) {
+        auto const genericsArr = RuntimeOption::EvalHackArrDVArrs
+          ? generics->vecVal() : generics->arrVal();
+        auto const& genericsDef =
+          func->getReifiedGenericsInfo().m_typeParamInfo;
+        if (genericsArr->size() == genericsDef.size()) {
+          bool match = true;
+          IterateKV(genericsArr, [&](Cell k, TypedValue v) {
+            assertx(tvIsInt(k) && tvIsArrayLike(v));
+            auto const idx = k.m_data.num;
+            auto const ts = v.m_data.parr;
+            if (isWildCard(ts) && genericsDef[idx].m_isReified) {
+              match = false;
+              return true;
+            }
+            return false;
+          });
+          if (match) return;
         }
-        return false;
-      });
-      if (match) return;
-    }
-  }
+      }
 
-  ifThen(
-    env,
-    [&] (Block* taken) {
-      auto const fd = FuncData { func };
-      auto const match =
-        gen(env, IsFunReifiedGenericsMatched, fd, callFlags);
-      gen(env, JmpZero, taken, match);
+      ifThen(
+        env,
+        [&] (Block* taken) {
+          auto const fd = FuncData { func };
+          auto const match =
+            gen(env, IsFunReifiedGenericsMatched, fd, callFlags);
+          gen(env, JmpZero, taken, match);
+        },
+        [&] {
+          hint(env, Block::Hint::Unlikely);
+          updateMarker(env);
+          env.irb->exceptionStackBoundary();
+          gen(env, CheckFunReifiedGenericMismatch, FuncData{func}, generics);
+        }
+      );
     },
     [&] {
       hint(env, Block::Hint::Unlikely);
       updateMarker(env);
       env.irb->exceptionStackBoundary();
-      gen(env, CheckFunReifiedGenericMismatch, FuncData{func}, generics);
+      if (areAllGenericsSoft(func->getReifiedGenericsInfo())) {
+        gen(
+          env,
+          RaiseWarning,
+          cns(env, makeStaticString(folly::sformat(
+            "Generic at index 0 to Function {} must be reified, erased given",
+            func->fullName()->data()))));
+        return;
+      }
+      gen(env, ThrowCallReifiedFunctionWithoutGenerics, cns(env, func));
     }
   );
 }

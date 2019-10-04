@@ -33,6 +33,7 @@ type subtype_env = {
   seen_generic_params: SSet.t option;
   no_top_bottom: bool;
   treat_dynamic_as_bottom: bool;
+  on_error: Errors.typing_error_callback;
 }
 
 let empty_seen = Some SSet.empty
@@ -41,8 +42,8 @@ let make_subtype_env
     ?(seen_generic_params = empty_seen)
     ?(no_top_bottom = false)
     ?(treat_dynamic_as_bottom = false)
-    () =
-  { seen_generic_params; no_top_bottom; treat_dynamic_as_bottom }
+    on_error =
+  { seen_generic_params; no_top_bottom; treat_dynamic_as_bottom; on_error }
 
 let add_seen_generic subtype_env name =
   match subtype_env.seen_generic_params with
@@ -304,7 +305,6 @@ and simplify_subtype
     ?(this_ty : locl_ty option = None)
     (ty_sub : locl_ty)
     (ty_super : locl_ty)
-    ~(on_error : Errors.typing_error_callback)
     env : env * TL.subtype_prop =
   log_subtype
     ~level:2
@@ -338,7 +338,7 @@ and simplify_subtype
     | (Reason.Rcstr_on_generics (p, tparam), _)
     | (_, Reason.Rcstr_on_generics (p, tparam)) ->
       Errors.violated_constraint p tparam left right
-    | _ -> on_error left right
+    | _ -> subtype_env.on_error left right
   in
   let ( ||| ) (env, p1) (f : env -> env * TL.subtype_prop) =
     if TL.is_valid p1 then
@@ -356,8 +356,6 @@ and simplify_subtype
   let valid () = (env, TL.valid) in
   (* We don't know whether the assertion is valid or not *)
   let default () = (env, TL.IsSubtype (ety_sub, ety_super)) in
-  let simplify_subtype = simplify_subtype ~on_error in
-  let simplify_subtype_variance = simplify_subtype_variance ~on_error in
   let simplify_subtype_generic_sub name_sub opt_sub_cstr ty_super env =
     match subtype_env.seen_generic_params with
     | None -> default ()
@@ -583,7 +581,6 @@ and simplify_subtype
       ft_sub
       r_super
       ft_super
-      on_error
       env
   | (Tanon (anon_arity, id), Tfun ft) ->
     let (r_sub, r_super) = (fst ety_sub, fst ety_super) in
@@ -1457,8 +1454,7 @@ and simplify_subtype_variance
     (cid : string)
     (variance_reifiedl : (Ast_defs.variance * Aast.reify_kind) list)
     (children_tyl : locl_ty list)
-    (super_tyl : locl_ty list)
-    ~(on_error : Errors.typing_error_callback) : env -> env * TL.subtype_prop =
+    (super_tyl : locl_ty list) : env -> env * TL.subtype_prop =
  fun env ->
   let simplify_subtype reify_kind =
     (* When doing coercions we treat dynamic as a bottom type. This is generally
@@ -1486,11 +1482,9 @@ and simplify_subtype_variance
       else
         subtype_env
     in
-    simplify_subtype ~subtype_env ~on_error ~this_ty:None
+    simplify_subtype ~subtype_env ~this_ty:None
   in
-  let simplify_subtype_variance =
-    simplify_subtype_variance ~subtype_env ~on_error
-  in
+  let simplify_subtype_variance = simplify_subtype_variance ~subtype_env in
   match (variance_reifiedl, children_tyl, super_tyl) with
   | ([], _, _)
   | (_, [], _)
@@ -1526,14 +1520,11 @@ and simplify_subtype_params
     (superl : locl_fun_param list)
     (variadic_sub_ty : locl_possibly_enforced_ty option)
     (variadic_super_ty : locl_possibly_enforced_ty option)
-    ~(on_error : Errors.typing_error_callback)
     env =
   let simplify_subtype_possibly_enforced =
-    simplify_subtype_possibly_enforced ~subtype_env ~on_error
+    simplify_subtype_possibly_enforced ~subtype_env
   in
-  let simplify_subtype_params =
-    simplify_subtype_params ~subtype_env ~on_error
-  in
+  let simplify_subtype_params = simplify_subtype_params ~subtype_env in
   let simplify_subtype_params_with_variadic =
     simplify_subtype_params_with_variadic ~subtype_env
   in
@@ -1569,11 +1560,11 @@ and simplify_subtype_params
   | ([], _) ->
     (match variadic_super_ty with
     | None -> valid env
-    | Some ty -> simplify_supertype_params_with_variadic superl ty on_error env)
+    | Some ty -> simplify_supertype_params_with_variadic superl ty env)
   | (_, []) ->
     (match variadic_sub_ty with
     | None -> valid env
-    | Some ty -> simplify_subtype_params_with_variadic subl ty on_error env)
+    | Some ty -> simplify_subtype_params_with_variadic subl ty env)
   | (sub :: subl, super :: superl) ->
     env
     |> begin
@@ -1619,10 +1610,9 @@ and simplify_subtype_params_with_variadic
     ~(subtype_env : subtype_env)
     (subl : locl_fun_param list)
     (variadic_ty : locl_possibly_enforced_ty)
-    (on_error : Errors.typing_error_callback)
     env =
   let simplify_subtype_possibly_enforced =
-    simplify_subtype_possibly_enforced ~subtype_env ~on_error
+    simplify_subtype_possibly_enforced ~subtype_env
   in
   let simplify_subtype_params_with_variadic =
     simplify_subtype_params_with_variadic ~subtype_env
@@ -1632,16 +1622,15 @@ and simplify_subtype_params_with_variadic
   | { fp_type = sub; _ } :: subl ->
     env
     |> simplify_subtype_possibly_enforced sub variadic_ty
-    &&& simplify_subtype_params_with_variadic subl variadic_ty on_error
+    &&& simplify_subtype_params_with_variadic subl variadic_ty
 
 and simplify_supertype_params_with_variadic
     ~(subtype_env : subtype_env)
     (superl : locl_fun_param list)
     (variadic_ty : locl_possibly_enforced_ty)
-    (on_error : Errors.typing_error_callback)
     env =
   let simplify_subtype_possibly_enforced =
-    simplify_subtype_possibly_enforced ~subtype_env ~on_error
+    simplify_subtype_possibly_enforced ~subtype_env
   in
   let simplify_supertype_params_with_variadic =
     simplify_supertype_params_with_variadic ~subtype_env
@@ -1651,7 +1640,7 @@ and simplify_supertype_params_with_variadic
   | { fp_type = super; _ } :: superl ->
     env
     |> simplify_subtype_possibly_enforced variadic_ty super
-    &&& simplify_supertype_params_with_variadic superl variadic_ty on_error
+    &&& simplify_supertype_params_with_variadic superl variadic_ty
 
 and subtype_reactivity
     ?(extra_info : reactivity_extra_info option)
@@ -2105,8 +2094,8 @@ and check_subtype_funs_attributes
     | (_, _) -> res
 
 and simplify_subtype_possibly_enforced
-    ~(subtype_env : subtype_env) et_sub et_super on_error =
-  simplify_subtype ~subtype_env et_sub.et_type et_super.et_type on_error
+    ~(subtype_env : subtype_env) et_sub et_super =
+  simplify_subtype ~subtype_env et_sub.et_type et_super.et_type
 
 (* This implements basic subtyping on non-generic function types:
  *   (1) return type behaves covariantly
@@ -2121,7 +2110,6 @@ and simplify_subtype_funs
     (ft_sub : locl_fun_type)
     (r_super : Reason.t)
     (ft_super : locl_fun_type)
-    (on_error : Errors.typing_error_callback)
     env : env * TL.subtype_prop =
   let variadic_subtype =
     match ft_sub.ft_arity with
@@ -2134,11 +2122,9 @@ and simplify_subtype_funs
     | _ -> None
   in
   let simplify_subtype_possibly_enforced =
-    simplify_subtype_possibly_enforced ~subtype_env ~on_error
+    simplify_subtype_possibly_enforced ~subtype_env
   in
-  let simplify_subtype_params =
-    simplify_subtype_params ~subtype_env ~on_error
-  in
+  let simplify_subtype_params = simplify_subtype_params ~subtype_env in
   (* First apply checks on attributes, coroutine-ness and variadic arity *)
   env
   |> check_subtype_funs_attributes ?extra_info r_sub ft_sub r_super ft_super
@@ -2184,12 +2170,11 @@ and sub_type
     (on_error : Errors.typing_error_callback) : env =
   Env.log_env_change "sub_type" env
   @@ sub_type_inner
-       ~subtype_env:(make_subtype_env ~treat_dynamic_as_bottom ())
+       ~subtype_env:(make_subtype_env ~treat_dynamic_as_bottom on_error)
        env
        ~this_ty:None
        ty_sub
        ty_super
-       on_error
 
 (* Add a new upper bound ty on var.  Apply transitivity of sutyping,
  * so if we already have tyl <: var, then check that for each ty_sub
@@ -2411,8 +2396,7 @@ and sub_type_inner
     ~(subtype_env : subtype_env)
     ~(this_ty : locl_ty option)
     (ty_sub : locl_ty)
-    (ty_super : locl_ty)
-    (on_error : Errors.typing_error_callback) : env =
+    (ty_super : locl_ty) : env =
   log_subtype
     ~level:1
     ~this_ty
@@ -2421,14 +2405,14 @@ and sub_type_inner
     ty_sub
     ty_super;
   let (env, prop) =
-    simplify_subtype ~subtype_env ~this_ty ty_sub ty_super ~on_error env
+    simplify_subtype ~subtype_env ~this_ty ty_sub ty_super env
   in
   let (env, prop) =
     prop_to_env
       ~treat_dynamic_as_bottom:subtype_env.treat_dynamic_as_bottom
       env
       prop
-      on_error
+      subtype_env.on_error
   in
   let env = Env.add_subtype_prop env prop in
   process_simplify_subtype_result prop;
@@ -2472,13 +2456,13 @@ and is_sub_type_alt
               empty_seen );
           no_top_bottom;
           treat_dynamic_as_bottom;
+          on_error = Errors.unify_error;
         }
       ~this_ty:(Some ty1)
       (* It is weird that this can cause errors, but I am wary to discard them.
        * Using the generic unify_error to maintain current behavior. *)
       ty1
       ty2
-      ~on_error:Errors.unify_error
       env
   in
   if TL.is_valid prop then
@@ -2687,14 +2671,13 @@ let subtype_method
   let env = add_where_constraints env ft_super_no_tvars.ft_where_constraints in
   let (env, res) =
     simplify_subtype_funs
-      ~subtype_env:(make_subtype_env ())
+      ~subtype_env:(make_subtype_env on_error)
       ~check_return
       ~extra_info
       r_sub
       ft_sub_no_tvars
       r_super
       ft_super_no_tvars
-      on_error
       env
   in
   let (env, res) =
@@ -2816,11 +2799,10 @@ let rec decompose_subtype
     ty_super;
   let (env, prop) =
     simplify_subtype
-      ~subtype_env:(make_subtype_env ~seen_generic_params:None ())
+      ~subtype_env:(make_subtype_env ~seen_generic_params:None on_error)
       ~this_ty:None
       ty_sub
       ty_super
-      ~on_error
       env
   in
   decompose_subtype_add_prop p env prop

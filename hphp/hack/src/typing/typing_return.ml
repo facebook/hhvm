@@ -102,6 +102,11 @@ let make_return_type localize env (ty : decl_ty) =
     when class_name = Naming_special_names.Classes.cAwaitable ->
     let (env, ty) = localize env inner_ty in
     (env, wrap_awaitable env (Reason.to_pos r) ty)
+  | (Ast_defs.FAsync, (r_like, Tlike (r, Tapply ((_, class_name), [inner_ty]))))
+    when class_name = Naming_special_names.Classes.cAwaitable ->
+    let ty = (r_like, Tlike inner_ty) in
+    let (env, ty) = localize env ty in
+    (env, wrap_awaitable env (Reason.to_pos r) ty)
   | _ -> localize env ty
 
 let force_awaitable env p ty =
@@ -149,6 +154,7 @@ let async_suggest_return fkind hint pos =
   if is_async then
     let e_func = Errors.expecting_awaitable_return_type_hint in
     match snd hint with
+    | Aast.Hlike (_, Aast.Happly (s, _))
     | Aast.Happly (s, _) ->
       if snd s <> Naming_special_names.Classes.cAwaitable then e_func pos
     | _ -> e_func pos

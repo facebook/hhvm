@@ -315,7 +315,7 @@ let method_ env c m =
     sm_name = m.m_name;
     sm_override = override;
     sm_reactivity = reactivity;
-    sm_type = ft;
+    sm_type = (Reason.Rwitness pos, Tfun ft);
     sm_visibility = m.m_visibility;
     sm_fixme_codes = Fixme_provider.get_fixme_codes_for_pos pos;
     sm_deprecated;
@@ -328,7 +328,7 @@ let method_redeclaration env m =
     smr_final = m.mt_final;
     smr_static = m.mt_static;
     smr_name = m.mt_name;
-    smr_type = ft;
+    smr_type = (Reason.Rwitness (fst m.mt_name), Tfun ft);
     smr_visibility = m.mt_visibility;
     smr_trait = m.mt_trait;
     smr_method = m.mt_method;

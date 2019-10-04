@@ -426,7 +426,7 @@ struct
       sm_name = string_id sm.sm_name;
       sm_override = sm.sm_override;
       sm_reactivity = sm.sm_reactivity;
-      sm_type = fun_type sm.sm_type;
+      sm_type = ty sm.sm_type;
       sm_visibility = sm.sm_visibility;
       sm_fixme_codes = ISet.empty;
       sm_deprecated = sm.sm_deprecated;

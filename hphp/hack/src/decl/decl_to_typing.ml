@@ -67,8 +67,6 @@ let base_visibility origin_class_name = function
   | Private -> Vprivate origin_class_name
   | Protected -> Vprotected origin_class_name
 
-let ft_to_ty pos ft = (Reason.Rwitness pos, Tfun ft)
-
 let shallow_method_to_class_elt child_class mro subst meth : class_elt =
   let {
     sm_abstract = ce_abstract;
@@ -77,7 +75,7 @@ let shallow_method_to_class_elt child_class mro subst meth : class_elt =
     sm_name = (pos, _);
     sm_override = ce_override;
     sm_reactivity = _;
-    sm_type;
+    sm_type = ty;
     sm_visibility;
     sm_fixme_codes = _;
     sm_deprecated;
@@ -88,11 +86,9 @@ let shallow_method_to_class_elt child_class mro subst meth : class_elt =
   let ty =
     lazy
       begin
-        let ty = ft_to_ty pos sm_type in
         if child_class = mro.mro_name then
           ty
-        else
-          Decl_instantiate.instantiate subst ty
+        else Decl_instantiate.instantiate subst ty
       end
   in
   {

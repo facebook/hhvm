@@ -65,7 +65,7 @@ type shallow_method = {
   sm_name: Aast.sid;
   sm_override: bool;
   sm_reactivity: Decl_defs.method_reactivity option;
-  sm_type: decl_fun_type;
+  sm_type: decl_ty;
   sm_visibility: Aast.visibility;
   sm_fixme_codes: ISet.t;
   sm_deprecated: string option;
@@ -77,7 +77,7 @@ type shallow_method_redeclaration = {
   smr_final: bool;
   smr_static: bool;
   smr_name: Aast.sid;
-  smr_type: decl_fun_type;
+  smr_type: decl_ty;
   smr_visibility: Aast.visibility;
   smr_trait: Aast.hint;
   smr_method: Aast.pstring;

@@ -732,7 +732,6 @@ and constructor_decl (pcstr, pconsist) class_ =
   (cstr, Decl_utils.coalesce_consistent pconsist cconsist)
 
 and build_constructor class_ method_ =
-  let ft = method_.sm_type in
   let (_, class_name) = class_.sc_name in
   let vis = visibility class_name method_.sm_visibility in
   let pos = fst method_.sm_name in
@@ -758,7 +757,7 @@ and build_constructor class_ method_ =
     {
       fe_pos = pos;
       fe_deprecated = method_.sm_deprecated;
-      fe_type = (Reason.Rwitness pos, Tfun ft);
+      fe_type = method_.sm_type;
       fe_decl_errors = None;
     }
   in
@@ -941,7 +940,6 @@ and method_check_override c m acc =
   | None -> false
 
 and method_redecl_acc c acc m =
-  let ft = m.smr_type in
   let (pos, id) = m.smr_name in
   let vis =
     match (SMap.get id acc, m.smr_visibility) with
@@ -971,7 +969,7 @@ and method_redecl_acc c acc m =
     {
       fe_pos = pos;
       fe_deprecated = None;
-      fe_type = (Reason.Rwitness pos, Tfun ft);
+      fe_type = m.smr_type;
       fe_decl_errors = None;
     }
   in
@@ -987,10 +985,14 @@ and method_redecl_acc c acc m =
 and method_decl_acc ~is_static c (acc, condition_types) m =
   let check_override = method_check_override c m acc in
   let has_memoizelsb = m.sm_memoizelsb in
-  let ft = m.sm_type in
   let (pos, id) = m.sm_name in
+  let get_reactivity t =
+    match t with
+    | (_, Tfun { ft_reactive; _ }) -> ft_reactive
+    | _ -> Local None
+  in
   let condition_types =
-    match ft.ft_reactive with
+    match get_reactivity m.sm_type with
     | Reactive (Some (_, Tapply ((_, cls), []))) ->
       SSet.add cls condition_types
     | Reactive None -> condition_types
@@ -1028,7 +1030,7 @@ and method_decl_acc ~is_static c (acc, condition_types) m =
     {
       fe_pos = pos;
       fe_deprecated = None;
-      fe_type = (Reason.Rwitness pos, Tfun ft);
+      fe_type = m.sm_type;
       fe_decl_errors = None;
     }
   in

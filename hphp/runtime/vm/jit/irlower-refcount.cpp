@@ -712,7 +712,7 @@ void cgDecRef(IRLS& env, const IRInstruction *inst) {
 
   if (profile.profiling()) {
     ifRefCountedType(v, v, ty, srcLoc(env, inst, 0), [&] (Vout& v) {
-        implProf(v, ty);
+        implProf(v, negativeCheckType(ty, TUncounted));
       });
   } else {
     if (useAddrForCountedCheck() &&
@@ -730,13 +730,13 @@ void cgDecRef(IRLS& env, const IRInstruction *inst) {
         v << shrqi{(int)kUncountedMaxShift, addr, v.makeReg(), sf};
         unlikelyIfThen(v, vcold(env), CC_NZ, sf,
                        [&] (Vout& v) {
-                         impl(v, ty & TCounted);
+                         impl(v, negativeCheckType(ty, TUncounted));
                        });
         return;
       }
     }
     ifRefCountedType(v, v, ty, srcLoc(env, inst, 0), [&] (Vout& v) {
-        impl(v, ty);
+        impl(v, negativeCheckType(ty, TUncounted));
       });
   }
 }

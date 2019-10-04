@@ -177,6 +177,7 @@ let go ast result =
           result.SymbolOccurrence.name
           result.SymbolOccurrence.pos
     end
+  | SymbolOccurrence.Attribute -> None
 
 let get_definition_cst_node_from_pos kind source_text pos =
   try

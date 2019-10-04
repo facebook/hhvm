@@ -25,6 +25,10 @@ let is_target target_line target_char { pos; _ } =
 let process_class_id ?(is_declaration = false) (pos, cid) =
   Result_set.singleton { name = cid; type_ = Class; is_declaration; pos }
 
+let process_attribute (pos, cid) =
+  Result_set.singleton
+    { name = cid; type_ = Attribute; is_declaration = false; pos }
+
 let clean_member_name name = String_utils.lstrip name "$"
 
 let process_member ?(is_declaration = false) c_name id ~is_method ~is_const =
@@ -320,6 +324,10 @@ let visitor =
       process_class_id cid
       + process_member (snd cid) mid ~is_method:false ~is_const:true
       + super#on_SFclass_const env cid mid
+
+    method! on_user_attribute env ua =
+      let acc = process_attribute ua.Aast.ua_name in
+      self#plus acc (super#on_user_attribute env ua)
   end
 
 let all_symbols tast = visitor#go tast |> Result_set.elements

@@ -547,7 +547,7 @@ let default_constructor_ce class_ =
     ce_type = lazy (r, Tfun ft);
     ce_origin = name;
     ce_deprecated = None;
-    ce_pos = pos;
+    ce_pos = lazy pos;
   }
 
 (* When an interface defines a constructor, we check that they are compatible *)

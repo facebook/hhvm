@@ -104,13 +104,23 @@ let to_class_type
       begin
         fun name elt ->
         let (pos, ty) =
-          let elem_name () = Printf.sprintf "%s::%s" elt.elt_origin name in
-          let elem =
-            wrap_not_found dc_name elem_name find (elt.elt_origin, name)
+          let pos_and_ty =
+            lazy
+              begin
+                let elem_name () =
+                  Printf.sprintf "%s::%s" elt.elt_origin name
+                in
+                let elem =
+                  wrap_not_found dc_name elem_name find (elt.elt_origin, name)
+                in
+                apply_substs dc_substs elt.elt_origin @@ elem
+              end
           in
-          apply_substs dc_substs elt.elt_origin @@ elem
+          let pos = lazy (fst (Lazy.force pos_and_ty)) in
+          let ty = lazy (snd (Lazy.force pos_and_ty)) in
+          (pos, ty)
         in
-        element_to_class_elt (pos, lazy ty) elt
+        element_to_class_elt (pos, ty) elt
       end
       elts
   in
@@ -123,14 +133,25 @@ let to_class_type
     | (None, consistent) -> (None, consistent)
     | (Some elt, consistent) ->
       let (pos, ty) =
-        let name = Naming_special_names.Members.__construct in
-        let elem_name () = Printf.sprintf "%s::%s" elt.elt_origin name in
-        elt.elt_origin
-        |> wrap_not_found dc_name elem_name Decl_heap.Constructors.find_unsafe
-        |> fun_elt_to_ty
-        |> apply_substs dc_substs elt.elt_origin
+        let pos_and_ty =
+          lazy
+            begin
+              let name = Naming_special_names.Members.__construct in
+              let elem_name () = Printf.sprintf "%s::%s" elt.elt_origin name in
+              elt.elt_origin
+              |> wrap_not_found
+                   dc_name
+                   elem_name
+                   Decl_heap.Constructors.find_unsafe
+              |> fun_elt_to_ty
+              |> apply_substs dc_substs elt.elt_origin
+            end
+        in
+        let pos = lazy (fst (Lazy.force pos_and_ty)) in
+        let ty = lazy (snd (Lazy.force pos_and_ty)) in
+        (pos, ty)
       in
-      let class_elt = element_to_class_elt (pos, lazy ty) elt in
+      let class_elt = element_to_class_elt (pos, ty) elt in
       (Some class_elt, consistent)
   in
   {

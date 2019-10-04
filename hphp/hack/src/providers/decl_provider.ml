@@ -78,10 +78,10 @@ let get_class (class_name : class_key) : class_decl option =
 let convert_class_elt_to_fun_decl class_elt_opt : fun_decl option =
   Typing_defs.(
     match class_elt_opt with
-    | Some { ce_type = (lazy ty); ce_deprecated; ce_pos; _ } ->
+    | Some { ce_type = (lazy ty); ce_deprecated; ce_pos = (lazy pos); _ } ->
       Some
         {
-          fe_pos = ce_pos;
+          fe_pos = pos;
           fe_type = ty;
           fe_deprecated = ce_deprecated;
           fe_decl_errors = None;

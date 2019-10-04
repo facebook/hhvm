@@ -2395,8 +2395,14 @@ and expr_
           class_
           (snd meth);
         expr_error env Reason.Rnone outer
-      | Some { ce_type = (lazy ty); ce_visibility; ce_deprecated; ce_pos; _ }
-        ->
+      | Some
+          {
+            ce_type = (lazy ty);
+            ce_visibility;
+            ce_deprecated;
+            ce_pos = (lazy ce_pos);
+            _;
+          } ->
         let cid = CI c in
         let (env, _te, cid_ty) =
           static_class_id ~check_constraints:true (fst c) env [] cid
@@ -3512,7 +3518,7 @@ and expr_
       (Reason.Rwitness p, Tshape (Closed_shape, fdm))
   | PU_atom _
   (* TODO(T36532263): Pocket Universes *)
-
+  
   | PU_identifier _ ->
     Errors.pu_typing p;
     expr_error env (Reason.Rwitness p) outer

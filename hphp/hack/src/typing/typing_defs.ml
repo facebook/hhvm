@@ -488,7 +488,7 @@ and class_elt = {
   (* identifies the class from which this elt originates *)
   ce_origin: string;
   ce_deprecated: string option;
-  ce_pos: Pos.t;
+  ce_pos: Pos.t Lazy.t;
 }
 
 and fun_elt = {

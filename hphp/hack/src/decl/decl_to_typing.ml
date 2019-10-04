@@ -109,7 +109,7 @@ let shallow_method_to_class_elt child_class mro subst meth : class_elt =
     ce_origin = mro.mro_name;
     ce_type = ty;
     ce_deprecated = sm_deprecated;
-    ce_pos = pos;
+    ce_pos = lazy pos;
   }
 
 let shallow_method_to_telt child_class mro subst meth : tagged_elt =
@@ -167,7 +167,7 @@ let shallow_prop_to_telt child_class mro subst prop : tagged_elt =
         ce_origin = mro.mro_name;
         ce_type = ty;
         ce_deprecated = None;
-        ce_pos = fst sp_name;
+        ce_pos = lazy (fst sp_name);
       };
   }
 

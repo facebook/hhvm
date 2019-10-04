@@ -28,9 +28,10 @@ let strip_ns str =
   else
     str'
 
-let rec print_ty_exn ty =
+let rec print_ty_exn ?(allow_nothing = false) ty =
   match snd ty with
   | Tprim p -> print_tprim p
+  | Tunion [] when allow_nothing -> "nothing"
   | Tany _
   | Terr
   | Tvar _
@@ -113,4 +114,5 @@ and print_shape_field_name name =
   | Ast_defs.SFlit_str _ -> "'" ^ s ^ "'"
   | _ -> s
 
-let print ty = (try Some (print_ty_exn ty) with Non_denotable -> None)
+let print ?(allow_nothing = false) ty =
+  (try Some (print_ty_exn ~allow_nothing ty) with Non_denotable -> None)

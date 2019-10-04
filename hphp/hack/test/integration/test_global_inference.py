@@ -180,11 +180,11 @@ class TestGlobalInferenceCorrectness(TestCase[GlobalInferenceDriver]):
 
     def test_correctness(self) -> None:
         self.execute_once()
+        self.maxDiff = None
 
         for root, _, files in os.walk(self.test_driver.repo_dir):
             for filename in files:
                 filename_no_ext, ext = os.path.splitext(filename)
-                print(ext)
                 if ext == ".php":
                     outname = filename_no_ext + ".out"
                     file_content = ""
@@ -193,7 +193,6 @@ class TestGlobalInferenceCorrectness(TestCase[GlobalInferenceDriver]):
                     out_content = ""
                     with open(path.join(root, outname)) as f:
                         out_content = f.read()
-                    print(file_content, out_content)
                     self.assertMultiLineEqual(
                         file_content,
                         out_content,

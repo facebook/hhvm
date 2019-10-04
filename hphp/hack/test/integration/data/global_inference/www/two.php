@@ -15,3 +15,11 @@ class Two extends One {
     $x->noparameter(1);
   }
 }
+
+function throwException() {
+  throw new \Exception("");
+}
+
+function throwExceptionIndirect() {
+  throwException();
+}

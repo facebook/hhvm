@@ -9,9 +9,17 @@ class Two extends One {
     return 1;
   }
 
-  public function usenum() {
+  public function usenum() : <<__Soft>> void {
     $x = new One();
 
     $x->noparameter(1);
   }
+}
+
+function throwException() : <<__Soft>> nothing {
+  throw new \Exception("");
+}
+
+function throwExceptionIndirect() : <<__Soft>> void {
+  throwException();
 }

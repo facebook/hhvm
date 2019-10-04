@@ -15,14 +15,14 @@ open Syntax
 
 let scuba_table = Scuba.Table.of_name "hh_global_inference"
 
-let is_not_acceptable ty =
+let is_not_acceptable ~is_return ty =
   let finder =
     object (this)
       inherit [_] Type_visitor.locl_type_visitor
 
       method! on_tprim acc _ =
         function
-        | Aast.Tvoid
+        | Aast.Tvoid when not is_return -> true
         | Aast.Tresource
         | Aast.Tnull
         | Aast.Tnoreturn ->
@@ -34,6 +34,13 @@ let is_not_acceptable ty =
       method! on_tdynamic _ _ = true
 
       method! on_tnonnull _ _ = true
+
+      (* nothing is acceptable only if is_return is true *)
+      method! on_tunion _ _ l =
+        if is_return then
+          l <> []
+        else
+          true
 
       (* mixed, even though we could infer it and add it, might lead to further
       problems and doesn't gives us a lot of information. More conceptually
@@ -47,12 +54,12 @@ let is_not_acceptable ty =
   in
   finder#on_type false ty
 
-let print_ty ty =
+let print_ty ?(is_return = false) ty =
   Option.Monad_infix.(
-    if is_not_acceptable ty then
+    if is_not_acceptable ~is_return ty then
       None
     else
-      CodemodTypePrinter.print ty
+      CodemodTypePrinter.print ~allow_nothing:is_return ty
       >>= (fun str -> Option.some_if (not @@ String.contains str '#') str))
 
 open Typing_env_types
@@ -217,7 +224,7 @@ type loggable = {
   syntax_type: syntax_type;
 }
 
-let classify_ty ~syntax_type ~pos ~file errors env ty =
+let classify_ty ?(is_return = false) ~syntax_type ~pos ~file errors env ty =
   let has_error = ref false in
   let var_hook var =
     has_error := !has_error || StateErrors.has_error errors var
@@ -235,7 +242,7 @@ let classify_ty ~syntax_type ~pos ~file errors env ty =
   if !has_error then
     ({ log with status = SError }, None)
   else
-    match print_ty ty with
+    match print_ty ~is_return ty with
     | Some type_str -> (log, Some type_str)
     | None -> ({ log with status = SNonacceptable }, None)
 
@@ -296,7 +303,14 @@ let get_first_suggested_type_as_string ~syntax_type errors file type_map node =
         match phase_ty with
         | Typing_defs.LoclTy ty ->
           let (log, type_str_opt) =
-            classify_ty ~syntax_type ~pos ~file errors env ty
+            classify_ty
+              ~is_return:(syntax_type = RetType)
+              ~syntax_type
+              ~pos
+              ~file
+              errors
+              env
+              ty
           in
           log_ty log;
           type_str_opt

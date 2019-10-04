@@ -13,7 +13,9 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-*/
+ */
+
+namespace {
 
 /**
  * An asynchronous MySQL client.
@@ -403,8 +405,15 @@ final class AsyncMysqlConnection {
    *           object.
    */
   <<__HipHopSpecific, __Native>>
-  public function queryf(string $pattern,
-                  ...$args): Awaitable<AsyncMysqlQueryResult>;
+  public function queryf(
+    string $pattern,
+    ...$args
+  ): Awaitable<AsyncMysqlQueryResult>;
+ 
+  <<__HipHopSpecific, __Native>>
+  public function queryAsync(
+    \HH\Lib\SQL\Query $query,
+  ): Awaitable<AsyncMysqlQueryResult>;
 
   /**
    * Begin running a query with multiple statements.
@@ -1642,4 +1651,25 @@ final class AsyncMysqlRowIterator implements HH\KeyedIterator {
    */
   <<__HipHopSpecific, __Native>>
   public function rewind(): void;
+}
+
+}
+
+namespace HH\Lib\SQL {
+  type QueryFormatString = string;
+
+  final class Query {
+    private QueryFormatString $format;
+    private Container<mixed> $args;
+    public function __construct(QueryFormatString $format, mixed ...$args) {
+      $this->format = $format;
+      $this->args = $args;
+    }
+
+    <<__Native,NoDoc>>
+    public function toString__FOR_DEBUGGING_ONLY(\AsyncMysqlConnection $conn): string;
+
+    <<__Native,NoDoc>>
+    public function toUnescapedString__FOR_DEBUGGING_ONLY__UNSAFE(): string;
+  }
 }

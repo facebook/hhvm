@@ -51,6 +51,12 @@ typedef am::ClientPool<am::AsyncMysqlClient, am::AsyncMysqlClientFactory>
 namespace {
 int HdfAsyncMysqlClientPoolSize = -1;
 
+static Class* s_queryClass = nullptr;
+const StaticString s_queryClassName("HH\\Lib\\SQL\\Query");
+const Slot s_query_format_idx { 0 };
+const Slot s_query_args_idx { 1 };
+
+
 folly::Singleton<AsyncMysqlClientPool> clientPool([]() {
   if (HdfAsyncMysqlClientPoolSize == -1) {
     Logger::Error("AsyncMysql Config should have been initialized");
@@ -60,6 +66,74 @@ folly::Singleton<AsyncMysqlClientPool> clientPool([]() {
       std::make_unique<am::AsyncMysqlClientFactory>(),
       HdfAsyncMysqlClientPoolSize);
 });
+
+am::Query amquery_from_queryf(const StringData* pattern, const ArrayData* args);
+
+am::QueryArgument queryarg_from_variant(const Variant& arg) {
+  if (arg.isInteger()) {
+    return arg.toInt64();
+  }
+  if (arg.isDouble()) {
+    return arg.toDouble();
+  }
+  if (arg.isString()) {
+    return static_cast<std::string>(arg.toString());
+  }
+  if (arg.isNull()) {
+    return nullptr;
+  }
+
+  if (arg.isVecArray()) {
+    const Array& vec = arg.asCArrRef();
+    std::vector<am::QueryArgument> elems;
+    elems.reserve(vec.size());
+    for (ArrayIter listIter(vec); listIter; ++listIter) {
+      const Variant& item = listIter.second();
+      elems.push_back(queryarg_from_variant(item));
+    }
+    return elems;
+  }
+
+  if (arg.isObject()) {
+    const Object& obj = arg.asCObjRef();
+
+    if (obj->getVMClass() == s_queryClass) {
+      const auto format = val(obj->propRvalAtOffset(s_query_format_idx).tv()).pstr;
+      const auto args = val(obj->propRvalAtOffset(s_query_args_idx).tv()).parr;
+      return amquery_from_queryf(format, args);
+    }
+
+    if (obj->isCollection() && isVectorCollection(obj->collectionType())) {
+      std::vector<am::QueryArgument> elems;
+      elems.reserve(collections::getSize(obj.get()));
+      for (ArrayIter listIter(arg); listIter; ++listIter) {
+        const Variant& item = listIter.second();
+        elems.push_back(queryarg_from_variant(item));
+      }
+      return elems;
+    }
+  }
+
+  SystemLib::throwInvalidArgumentExceptionObject(
+    "Unable to serialize type '%s' for SQL",
+     getDataTypeString(arg.getType()).c_str()
+  );
+}
+
+am::Query amquery_from_queryf(const StringData* pattern, const ArrayData* args) {
+  // Not directly calling argsv.toFollyDynamic() as that creates a folly
+  // dynamic object, not list
+  std::vector<am::QueryArgument> query_args;
+  query_args.reserve(args->getSize());
+
+  for (ArrayIter iter(args); iter; ++iter) {
+    const Variant& arg = iter.second();
+    query_args.push_back(queryarg_from_variant(arg));
+  }
+
+  return am::Query(pattern->toCppString(), query_args);
+}
+
 }
 
 static std::shared_ptr<am::AsyncMysqlClient> getClient() {
@@ -121,6 +195,30 @@ static double HHVM_METHOD(AsyncMysqlClientStats, ioThreadIdleMicrosAvg) {
 static int64_t HHVM_METHOD(AsyncMysqlClientStats, notificationQueueSize) {
   auto* data = Native::data<AsyncMysqlClientStats>(this_);
   return data->m_values.notificationQueueSize;
+}
+
+static String HHLibSQLQuery__toString__FOR_DEBUGGING_ONLY(
+  ObjectData* this_,
+  const Object& conn) {
+
+  const auto format = val(this_->propRvalAtOffset(s_query_format_idx).tv()).pstr;
+  const auto args = val(this_->propRvalAtOffset(s_query_args_idx).tv()).parr;
+  const auto query = amquery_from_queryf(format, args);
+  auto mysql = Native::data<AsyncMysqlConnection>(conn)
+    ->m_conn
+    ->mysql_for_testing_only()
+    ->mysql();
+  const auto str = query.render(mysql);
+  return String(str.data(), str.length(), CopyString);
+}
+
+static String HHLibSQLQuery__toUnescapedString__FOR_DEBUGGING_ONLY__UNSAFE(
+  ObjectData* this_) {
+  const auto format = val(this_->propRvalAtOffset(s_query_format_idx).tv()).pstr;
+  const auto args = val(this_->propRvalAtOffset(s_query_args_idx).tv()).parr;
+  const auto query = amquery_from_queryf(format, args);
+  const auto str = query.renderInsecure();
+  return String(str.data(), str.length(), CopyString);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -724,69 +822,20 @@ static Object HHVM_METHOD(
     queryf,
     const String& pattern,
     const Array& args) {
+
+  const auto query = amquery_from_queryf(pattern.get(), args.get());
   auto* data = Native::data<AsyncMysqlConnection>(this_);
+  return data->query(this_,  query);
+}
 
-  // Not directly calling argsv.toFollyDynamic() as that creates a folly
-  // dynamic object, not list
-  std::vector<am::QueryArgument> query_args;
-  query_args.reserve(args.length());
-
-  auto scalarPush = [](
-    std::vector<am::QueryArgument>& list, const Variant& arg
-  ) {
-    if (arg.isInteger()) {
-      list.push_back(arg.toInt64());
-    } else if (arg.isDouble()) {
-      list.push_back(arg.toDouble());
-    } else if (arg.isString()) {
-      list.push_back(static_cast<std::string>(arg.toString()));
-    } else if (arg.isNull()) {
-      list.push_back(nullptr);
-    } else {
-      return false;
-    }
-    return true;
-  };
-
-  for (ArrayIter iter(args); iter; ++iter) {
-    const Variant& arg = iter.second();
-    if (scalarPush(query_args, arg)) {
-      continue;
-    }
-
-    if (arg.isObject()) {
-      const Object& obj = arg.asCObjRef();
-      if (obj->isCollection() && isVectorCollection(obj->collectionType())) {
-        std::vector<am::QueryArgument> out;
-        out.reserve(collections::getSize(obj.get()));
-        for (ArrayIter listIter(arg); listIter; ++listIter) {
-          const Variant& item = listIter.second();
-          if (scalarPush(out, item)) {
-            continue;
-          }
-          throw_invalid_argument(
-            "queryf arguments must be scalars, or Vectors of scalars. "
-            "Parameter %ld is a Vector containing a %s at index %ld",
-            query_args.size(),
-            getDataTypeString(item.getType()).c_str(),
-            out.size()
-          );
-        }
-        query_args.push_back(out);
-        continue;
-      }
-    }
-
-    throw_invalid_argument(
-      "queryf parameters must be scalars, or Vectors of scalars. "
-      "Parameter %ld is a %s",
-      query_args.size(),
-      getDataTypeString(arg.getType()).c_str()
-    );
-  }
-
-  return data->query(
-      this_, am::Query(static_cast<std::string>(pattern), query_args));
+static Object HHVM_METHOD(
+    AsyncMysqlConnection,
+    queryAsync,
+    const Object& query) {
+  const auto format = val(query->propRvalAtOffset(s_query_format_idx).tv()).pstr;
+  const auto args = val(query->propRvalAtOffset(s_query_args_idx).tv()).parr;
+  return Native::data<AsyncMysqlConnection>(this_)->query(
+    this_, amquery_from_queryf(format, args));
 }
 
 static Object HHVM_METHOD(
@@ -1810,6 +1859,7 @@ static struct AsyncMysqlExtension final : Extension {
 
     HHVM_ME(AsyncMysqlConnection, query);
     HHVM_ME(AsyncMysqlConnection, queryf);
+    HHVM_ME(AsyncMysqlConnection, queryAsync);
     HHVM_ME(AsyncMysqlConnection, multiQuery);
     HHVM_ME(AsyncMysqlConnection, escapeString);
     HHVM_ME(AsyncMysqlConnection, close);
@@ -1923,9 +1973,19 @@ static struct AsyncMysqlExtension final : Extension {
     Native::registerNativeDataInfo<AsyncMysqlConnectionOptions>(
         AsyncMysqlConnectionOptions::s_className.get());
 
+    HHVM_NAMED_ME(HH\\Lib\\SQL\\Query,
+        toString__FOR_DEBUGGING_ONLY,
+        HHLibSQLQuery__toString__FOR_DEBUGGING_ONLY);
+    HHVM_NAMED_ME(HH\\Lib\\SQL\\Query,
+        toUnescapedString__FOR_DEBUGGING_ONLY__UNSAFE,
+        HHLibSQLQuery__toUnescapedString__FOR_DEBUGGING_ONLY__UNSAFE);
+
+
     loadSystemlib("mysqlrow");
     loadSystemlib("async_mysql_exceptions");
     loadSystemlib();
+
+    s_queryClass = Unit::lookupClass(s_queryClassName.get());
   }
   void moduleLoad(const IniSetting::Map& ini, Hdf config) override {
     Config::Bind(

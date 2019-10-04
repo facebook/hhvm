@@ -155,7 +155,7 @@ bool consumesRefImpl(const IRInstruction* inst, int srcNo) {
 
     case Call:
     case CallUnpack:
-      return srcNo == 3;
+      return move != MustMove && srcNo == 3;
 
     case InitCtx:
       return srcNo == 1;

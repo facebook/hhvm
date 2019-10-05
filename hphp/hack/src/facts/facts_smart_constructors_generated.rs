@@ -41,6 +41,10 @@ impl<'src> SmartConstructors<'src, HasScriptContent<'src>> for FactsSmartConstru
         &mut self.state
     }
 
+    fn into_state(self) -> HasScriptContent<'src> {
+      self.state
+    }
+
     fn make_missing(&mut self, offset: usize) -> Self::R {
         <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_missing(self, offset)
     }

@@ -1014,6 +1014,7 @@ pub trait SmartConstructors<'src, State>: Clone {
 
     fn new(env: &ParserEnv, src: &SourceText<'src>) -> Self;
     fn state_mut(&mut self) -> &mut State;
+    fn into_state(self) -> State;
 
     fn make_missing(&mut self, offset : usize) -> Self::R;
     fn make_token(&mut self, arg0: Self::Token) -> Self::R;
@@ -1081,6 +1082,10 @@ impl<'src> SmartConstructors<'src, NoState> for MinimalSmartConstructors {
 
     fn state_mut(&mut self) -> &mut NoState {
         &mut self.dummy_state
+    }
+
+    fn into_state(self) -> NoState {
+      self.dummy_state
     }
 
     fn make_missing(&mut self, offset: usize) -> Self::R {
@@ -1162,6 +1167,10 @@ impl<'src, State: StateType<'src, PositionedSyntax>> SmartConstructors<'src, Sta
        &mut self.state
     }
 
+    fn into_state(self) -> State {
+      self.state
+    }
+
     fn make_missing(&mut self, offset: usize) -> Self::R {
         <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_missing(self, offset)
     }
@@ -1239,6 +1248,10 @@ impl<'src> SmartConstructors<'src, State> for VerifySmartConstructors
 
     fn state_mut(&mut self) -> &mut State {
        &mut self.state
+    }
+
+    fn into_state(self) -> State {
+      self.state
     }
 
     fn make_missing(&mut self, offset: usize) -> Self::R {
@@ -1325,6 +1338,10 @@ where
 
     fn state_mut(&mut self) -> &mut T {
         &mut self.state
+    }
+
+    fn into_state(self) -> T {
+      self.state
     }
 
     fn make_missing(&mut self, offset: usize) -> Self::R {
@@ -1681,6 +1698,10 @@ where
         &mut self.state
     }
 
+    fn into_state(self) -> State<'src, Syntax<Token, Value>> {
+      self.state
+    }
+
     fn make_missing(&mut self, o: usize) -> Self::R {
         <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::make_missing(self, o)
     }
@@ -1816,6 +1837,10 @@ impl<'src> SmartConstructors<'src, HasScriptContent<'src>> for FactsSmartConstru
         &mut self.state
     }
 
+    fn into_state(self) -> HasScriptContent<'src> {
+      self.state
+    }
+
     fn make_missing(&mut self, offset: usize) -> Self::R {
         <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_missing(self, offset)
     }
@@ -1886,6 +1911,10 @@ impl<'src> SmartConstructors<'src, State<'src>> for DirectDeclSmartConstructors<
 
     fn state_mut(&mut self) -> &mut State<'src> {
         &mut self.state
+    }
+
+    fn into_state(self) -> State<'src> {
+      self.state
     }
 
     fn make_missing(&mut self, offset: usize) -> Self::R {
@@ -2022,6 +2051,10 @@ where S: SmartConstructors<'src, State> {
 
     fn state_mut(&mut self) -> &mut State {
         self.s.state_mut()
+    }
+
+    fn into_state(self) -> State {
+      self.s.into_state()
     }
 
     fn make_token(&mut self, token: Self::Token) -> Self::R {

@@ -45,6 +45,10 @@ where
         &mut self.state
     }
 
+    fn into_state(self) -> T {
+      self.state
+    }
+
     fn make_missing(&mut self, offset: usize) -> Self::R {
        <Self as SyntaxSmartConstructors<'src, Self::R, T>>::make_missing(self, offset)
     }

@@ -45,6 +45,10 @@ where S: SmartConstructors<'src, State> {
         self.s.state_mut()
     }
 
+    fn into_state(self) -> State {
+      self.s.into_state()
+    }
+
     fn make_token(&mut self, token: Self::Token) -> Self::R {
         compose(SyntaxKind::Token(token.kind()), self.s.make_token(token))
     }

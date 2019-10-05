@@ -28,6 +28,7 @@ pub trait SmartConstructors<'src, State>: Clone {
 
     fn new(env: &ParserEnv, src: &SourceText<'src>) -> Self;
     fn state_mut(&mut self) -> &mut State;
+    fn into_state(self) -> State;
 
     fn make_missing(&mut self, offset : usize) -> Self::R;
     fn make_token(&mut self, arg0: Self::Token) -> Self::R;

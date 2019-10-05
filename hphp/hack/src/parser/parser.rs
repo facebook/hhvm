@@ -83,4 +83,8 @@ where
     pub fn sc_state(&mut self) -> &T {
         self.sc.state_mut()
     }
+
+    pub fn into_sc_state(self) -> T {
+        self.sc.into_state()
+    }
 }

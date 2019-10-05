@@ -49,6 +49,10 @@ impl<'src> SmartConstructors<'src, NoState> for MinimalSmartConstructors {
         &mut self.dummy_state
     }
 
+    fn into_state(self) -> NoState {
+      self.dummy_state
+    }
+
     fn make_missing(&mut self, offset: usize) -> Self::R {
         <Self as SyntaxSmartConstructors<'src, MinimalSyntax, NoState>>::make_missing(self, offset)
     }

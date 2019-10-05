@@ -51,6 +51,10 @@ impl<'src, State: StateType<'src, PositionedSyntax>> SmartConstructors<'src, Sta
        &mut self.state
     }
 
+    fn into_state(self) -> State {
+      self.state
+    }
+
     fn make_missing(&mut self, offset: usize) -> Self::R {
         <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_missing(self, offset)
     }

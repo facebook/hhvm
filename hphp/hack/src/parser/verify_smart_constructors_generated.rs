@@ -46,6 +46,10 @@ impl<'src> SmartConstructors<'src, State> for VerifySmartConstructors
        &mut self.state
     }
 
+    fn into_state(self) -> State {
+      self.state
+    }
+
     fn make_missing(&mut self, offset: usize) -> Self::R {
         let r = <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_missing(self, offset);
         self.state_mut().push(r.kind());

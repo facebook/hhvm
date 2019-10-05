@@ -47,6 +47,10 @@ where
         &mut self.state
     }
 
+    fn into_state(self) -> State<'src, Syntax<Token, Value>> {
+      self.state
+    }
+
     fn make_missing(&mut self, o: usize) -> Self::R {
         <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::make_missing(self, o)
     }

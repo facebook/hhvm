@@ -42,6 +42,10 @@ impl<'src> SmartConstructors<'src, State<'src>> for DirectDeclSmartConstructors<
         &mut self.state
     }
 
+    fn into_state(self) -> State<'src> {
+      self.state
+    }
+
     fn make_missing(&mut self, offset: usize) -> Self::R {
         <Self as FlattenSmartConstructors<'src, State<'src>>>::make_missing(self, offset)
     }

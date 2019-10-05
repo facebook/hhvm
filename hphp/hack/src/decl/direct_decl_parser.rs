@@ -7,9 +7,7 @@
 use parser_rust as parser;
 
 use crate::direct_decl_smart_constructors::*;
-use oxidized::{
-    direct_decl_parser::Decls, file_info::Mode, relative_path::RelativePath, s_map::SMap,
-};
+use oxidized::{direct_decl_parser::Decls, file_info::Mode, relative_path::RelativePath};
 use parser::{
     parser::Parser, parser_env::ParserEnv, smart_constructors_wrappers::WithKind,
     source_text::SourceText,
@@ -30,20 +28,11 @@ pub fn parse_decls(filename: &RelativePath, text: &str, trace: bool) -> Result<D
     };
     let mut parser = DirectDeclParser::make(&text, env);
     let root = parser.parse_script(None);
-    match &root {
-        Node::List(_) => {
-            if trace {
-                println!("Parsed:");
-                println!("{:?}", &root);
-            }
-            let decls = Decls {
-                classes: SMap::new(),
-                funs: SMap::new(),
-                typedefs: SMap::new(),
-                consts: SMap::new(),
-            };
-            Ok(decls)
+    root.map(|root| {
+        if trace {
+            println!("Parsed:");
+            println!("{:?}", &root);
         }
-        _ => Err(format!("Expected a List, but got {:?}", root)),
-    }
+        parser.into_sc_state().decls
+    })
 }

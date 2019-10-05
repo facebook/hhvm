@@ -184,6 +184,32 @@ impl<T: OcamlRep> OcamlRep for Option<T> {
     }
 }
 
+impl<T: OcamlRep, E: OcamlRep> OcamlRep for Result<T, E> {
+    fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
+        match self {
+            Ok(val) => {
+                let mut block = arena.block_with_size(1);
+                block[0] = arena.add(val);
+                block.build()
+            }
+            Err(val) => {
+                let mut block = arena.block_with_size_and_tag(1, 1);
+                block[0] = arena.add(val);
+                block.build()
+            }
+        }
+    }
+
+    fn from_ocamlrep(value: Value<'_>) -> Result<Self, FromError> {
+        let block = from::expect_block(value)?;
+        match block.tag() {
+            0 => Ok(Ok(from::field(block, 0)?)),
+            1 => Ok(Err(from::field(block, 0)?)),
+            t => Err(FromError::BlockTagOutOfRange { max: 1, actual: t }),
+        }
+    }
+}
+
 impl<T: OcamlRep> OcamlRep for Vec<T> {
     fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
         let mut hd = arena.add(());

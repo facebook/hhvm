@@ -149,6 +149,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "hack_decl"
 version = "3.49.0"
 dependencies = [
+ "hack_hhbc 3.49.0",
  "pretty_assertions 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -175,6 +176,7 @@ version = "3.49.0"
 dependencies = [
  "flatten_smart_constructors 3.49.0",
  "hack_escaper 3.49.0",
+ "hack_hhbc 3.49.0",
  "hack_oxidized 3.49.0",
  "hack_parser 3.49.0",
  "pretty_assertions 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -190,8 +192,16 @@ name = "hack_facts_ffi"
 version = "3.49.0"
 dependencies = [
  "hack_facts 3.49.0",
+ "hack_hhbc 3.49.0",
  "hack_oxidized 3.49.0",
  "ocaml 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "hack_hhbc"
+version = "3.49.0"
+dependencies = [
+ "pretty_assertions 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

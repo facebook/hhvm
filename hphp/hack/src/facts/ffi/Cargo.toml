@@ -6,6 +6,7 @@ edition = "2018"
 [dependencies]
 facts_rust = { path = "..", package = "hack_facts" }
 ocaml = "^0.7"
+hhbc_rust = {path = "../../hhbc", package = "hack_hhbc" }
 oxidized = {path = "../../oxidized", package = "hack_oxidized" }
 
 [lib]

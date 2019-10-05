@@ -1,14 +1,11 @@
 [package]
-name = "hack_decl"
+name = "hack_hhbc"
 version = "3.49.0"
 edition = "2018"
 
 [lib]
-name = "decl_rust"
+name = "hhbc_rust"
 path = "lib.rs"
-
-[dependencies]
-hhbc_rust = {path = "../hhbc", package = "hack_hhbc" }
 
 [dev-dependencies]
 pretty_assertions = "^0.6.1"

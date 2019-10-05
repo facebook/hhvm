@@ -4,6 +4,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use hhbc_rust::string_utils::mangle_xhp_id;
 use oxidized::{file_info::Mode, relative_path::RelativePath};
 use parser_rust::{
     parser::Parser, parser_env::ParserEnv, smart_constructors_wrappers::WithKind,
@@ -51,42 +52,10 @@ pub fn from_text(text: &str, opts: ExtractAsJsonOpts) -> Option<Facts> {
     }
 }
 
-pub fn without_xhp_mangling<T>(f: impl FnOnce() -> T) -> T {
-    MANGLE_XHP_MODE.with(|cur| {
-        let old = cur.replace(false);
-        let ret = f();
-        cur.set(old); // use old instead of true to support nested calls in the same thread
-        ret
-    })
-}
-
 // implementation details
 
-use std::cell::Cell;
 use std::string::String;
 use Node::*; // Ensure String doesn't refer to Node::String
-
-thread_local!(static MANGLE_XHP_MODE: Cell<bool> = Cell::new(true));
-
-// TODO(leoo) move to hhbc_utils::Xhp::mangle_id​ once HHBC is ported
-fn mangle_xhp_id(mut name: String) -> String {
-    fn ignore_id(name: &str) -> bool {
-        name.starts_with("class@anonymous") || name.starts_with("Closure$")
-    }
-
-    fn is_xhp(name: &str) -> bool {
-        name.chars().next().map_or(false, |c| c == ':')
-    }
-
-    if !ignore_id(&name) && MANGLE_XHP_MODE.with(|x| x.get()) {
-        if is_xhp(&name) {
-            name.replace_range(..1, "xhp_")
-        }
-        name.replace(":", "__").replace("-", "_")
-    } else {
-        name
-    }
-}
 
 fn qualified_name(namespace: &str, name: Node) -> Option<String> {
     fn qualified_name_from_parts(namespace: &str, parts: Vec<Node>) -> Option<String> {

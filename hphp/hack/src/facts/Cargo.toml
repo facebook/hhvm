@@ -15,6 +15,7 @@ rust-crypto = "^0.2"
 serde = "^1.0.98"
 serde_derive = "^1.0.98"
 serde_json = "^1.0.40"
+hhbc_rust = { path = "../hhbc", package = "hack_hhbc" }
 oxidized = {path = "../oxidized", package = "hack_oxidized" }
 escaper = {path = "../utils/escaper", package = "hack_escaper"}
 

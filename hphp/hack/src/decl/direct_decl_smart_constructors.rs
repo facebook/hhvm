@@ -10,6 +10,7 @@ use parser_rust as parser;
 
 use escaper::{extract_unquoted_string, unescape_double, unescape_single};
 use flatten_smart_constructors::{FlattenOp, FlattenSmartConstructors};
+use hhbc_rust::string_utils::GetName;
 use oxidized::pos::Pos;
 use parser::{
     indexed_source_text::IndexedSourceText, lexable_token::LexableToken, token_kind::TokenKind,
@@ -20,34 +21,6 @@ pub use crate::direct_decl_smart_constructors_generated::*;
 #[derive(Clone, Debug)]
 pub struct State<'a> {
     pub source_text: IndexedSourceText<'a>,
-}
-
-// TODO(leoo) consider avoiding always materializing substrings using something like (hard):
-// type GetName<'a> = Rc<Fn() -> &'a [u8]>;  // would require lifetime 'a param everywhere
-#[derive(Clone)]
-pub struct GetName {
-    string: Vec<u8>,
-
-    unescape: fn(String) -> String,
-}
-
-impl GetName {
-    pub fn get(&self) -> &Vec<u8> {
-        &self.string
-    }
-    pub fn to_string(&self) -> String {
-        String::from_utf8_lossy(&self.string).to_string()
-    }
-    pub fn to_unescaped_string(&self) -> String {
-        let unescape = self.unescape;
-        unescape(self.to_string())
-    }
-}
-
-impl std::fmt::Debug for GetName {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "GetName {{ string: {}, unescape:? }}", self.to_string())
-    }
 }
 
 #[derive(Clone, Debug)]
@@ -198,32 +171,21 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         };
         let kind = token.kind();
         match kind {
-            TokenKind::Name => Node::Name(GetName {
-                string: token_text(),
-                unescape: |string| string,
-            }),
-            TokenKind::DecimalLiteral => Node::String(GetName {
-                string: token_text(),
-                unescape: |string| string,
-            }),
-            TokenKind::SingleQuotedStringLiteral => Node::String(GetName {
-                string: token_text(),
-                unescape: |string| {
+            TokenKind::Name => Node::Name(GetName::new(token_text(), |string| string)),
+            TokenKind::DecimalLiteral => Node::String(GetName::new(token_text(), |string| string)),
+            TokenKind::SingleQuotedStringLiteral => {
+                Node::String(GetName::new(token_text(), |string| {
                     let tmp = unescape_single(string.as_str()).ok().unwrap();
                     extract_unquoted_string(&tmp, 0, tmp.len()).ok().unwrap()
-                },
-            }),
-            TokenKind::DoubleQuotedStringLiteral => Node::String(GetName {
-                string: token_text(),
-                unescape: |string| {
+                }))
+            }
+            TokenKind::DoubleQuotedStringLiteral => {
+                Node::String(GetName::new(token_text(), |string| {
                     let tmp = unescape_double(string.as_str()).ok().unwrap();
                     extract_unquoted_string(&tmp, 0, tmp.len()).ok().unwrap()
-                },
-            }),
-            TokenKind::XHPClassName => Node::XhpName(GetName {
-                string: token_text(),
-                unescape: |string| string,
-            }),
+                }))
+            }
+            TokenKind::XHPClassName => Node::XhpName(GetName::new(token_text(), |string| string)),
             TokenKind::String => Node::Hint(HintValue::String, token_pos()),
             TokenKind::Int => Node::Hint(HintValue::Int, token_pos()),
             TokenKind::Float | TokenKind::Double => Node::Hint(HintValue::Float, token_pos()),

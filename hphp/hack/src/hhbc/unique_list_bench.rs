@@ -15,7 +15,7 @@ fn main() {
 mod tests {
     use super::*;
     use test::Bencher;
-    use unique_list_rust::unique_list::UniqueList;
+    use unique_list_rust::UniqueList;
 
     fn make_sample_unique_list() -> UniqueList<String> {
         let mut ul = UniqueList::new();

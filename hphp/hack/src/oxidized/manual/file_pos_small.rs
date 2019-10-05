@@ -5,7 +5,7 @@
 
 use std::fmt;
 
-use ocamlrep_derive::OcamlRep;
+use ocamlrep::OcamlRep;
 use ocamlvalue_macro::Ocamlvalue;
 
 // Three values packed into one 64-bit integer:
@@ -33,7 +33,7 @@ use ocamlvalue_macro::Ocamlvalue;
 // behave incorrectly on a 32-bit machine. We use `usize` here to match its
 // behavior, but once parity is no longer necessary, we may want to switch to
 // `u64`.
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, OcamlRep, Ocamlvalue)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Ocamlvalue)]
 pub struct FilePosSmall(usize);
 
 const COLUMN_BITS: usize = 9;
@@ -173,5 +173,15 @@ impl fmt::Debug for FilePosSmall {
             .field("line", &self.line())
             .field("column", &self.column())
             .finish()
+    }
+}
+
+impl OcamlRep for FilePosSmall {
+    fn into_ocamlrep<'a>(self, _arena: &ocamlrep::Arena<'a>) -> ocamlrep::Value<'a> {
+        ocamlrep::Value::int(self.0 as isize)
+    }
+
+    fn from_ocamlrep(value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
+        Ok(Self(ocamlrep::from::expect_int(value)? as usize))
     }
 }

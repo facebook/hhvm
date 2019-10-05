@@ -707,7 +707,12 @@ let to_constructor_string r =
   | Rdestructure _ -> "Rdestructure"
   | Rkey_value_collection_key _ -> "Rkey_value_collection_key"
 
-let pp fmt r = Format.pp_print_string fmt @@ to_constructor_string r
+let pp fmt r =
+  Format.pp_print_string fmt
+  @@ Printf.sprintf
+       "%s (%s)"
+       (to_constructor_string r)
+       (to_pos r |> Pos.to_absolute |> Pos.string)
 
 type ureason =
   | URnone

@@ -6,8 +6,7 @@
     src/hh_single_type_check.exe
     src/hackfmt.exe
     src/hh_parse.exe
-    src/hh_single_compile.exe
-    src/hh_single_parse.exe))
+    src/hh_single_compile.exe))
 
 (alias
   (name hh)
@@ -23,8 +22,7 @@
     src/hh_single_type_check.bc
     src/hackfmt.bc
     src/hh_parse.bc
-    src/hh_single_compile.bc
-    src/hh_single_parse.bc))
+    src/hh_single_compile.bc))
 
 (alias
   (name all-hack)

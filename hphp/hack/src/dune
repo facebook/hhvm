@@ -131,20 +131,6 @@
     utils_ocaml_overrides))
 
 (executable
-  (name hh_single_parse)
-  (modules
-    hh_single_parse)
-  (ocamlc_flags (:standard -custom))
-  (link_flags (:standard (:include dune_config/ld-opts.sexp)))
-  (libraries
-    debug
-    default_injector_config
-    global_config
-    hackfmt
-    nast
-    parser))
-
-(executable
   (name generate_full_fidelity)
   (modules
     generate_full_fidelity)

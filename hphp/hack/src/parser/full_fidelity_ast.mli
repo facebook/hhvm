@@ -57,15 +57,6 @@ type rust_result = (Pos.t, unit, unit, unit) Aast.program result_
  * redesigned properly at some point.
  *)
 
-module WithPositionedSyntax (Syntax : Positioned_syntax_sig.PositionedSyntax_S) : sig
-  val lower :
-    env ->
-    source_text:Full_fidelity_source_text.t ->
-    script:Syntax.t ->
-    (Pos.t * Prim_defs.comment) list ->
-    result
-end
-
 val parse_text :
   env ->
   Full_fidelity_source_text.t ->

@@ -7,32 +7,37 @@
 use crate::source_text::SourceText;
 use line_break_map::LineBreakMap;
 use oxidized::pos::Pos;
+use std::rc::Rc;
 
 #[derive(Debug)]
-pub struct IndexedSourceText<'a> {
-    pub source_text: &'a SourceText<'a>,
+pub struct IndexedSourceTextImpl<'a> {
+    pub source_text: SourceText<'a>,
     offset_map: LineBreakMap,
 }
 
+#[derive(Clone, Debug)]
+pub struct IndexedSourceText<'a>(Rc<IndexedSourceTextImpl<'a>>);
+
 impl<'a> IndexedSourceText<'a> {
-    pub fn new(source_text: &'a SourceText<'a>) -> Self {
-        IndexedSourceText {
+    pub fn new(source_text: SourceText<'a>) -> Self {
+        let text = source_text.text();
+        Self(Rc::new(IndexedSourceTextImpl {
             source_text,
-            offset_map: LineBreakMap::new(source_text.text()),
-        }
+            offset_map: LineBreakMap::new(text),
+        }))
     }
 
     pub fn source_text(&self) -> &SourceText {
-        self.source_text
+        &self.0.source_text
     }
 
     pub fn offset_to_position(&self, offset: isize) -> (isize, isize) {
-        self.offset_map.offset_to_position(offset)
+        self.0.offset_map.offset_to_position(offset)
     }
 
     pub fn relative_pos(&self, start_offset: usize, end_offset: usize) -> Pos {
-        let pos_start = self.offset_map.offset_to_file_pos_triple(start_offset);
-        let pos_end = self.offset_map.offset_to_file_pos_triple(end_offset);
-        Pos::from_lnum_bol_cnum(self.source_text.file_path().clone(), pos_start, pos_end)
+        let pos_start = self.0.offset_map.offset_to_file_pos_triple(start_offset);
+        let pos_end = self.0.offset_map.offset_to_file_pos_triple(end_offset);
+        Pos::from_lnum_bol_cnum(self.0.source_text.file_path().clone(), pos_start, pos_end)
     }
 }

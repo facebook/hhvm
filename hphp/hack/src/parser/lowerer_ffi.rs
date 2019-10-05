@@ -38,7 +38,7 @@ caml_raise!(lower, |ocaml_env, ocaml_source_text, ocaml_tree|, <res>, {
     let relative_path = RelativePath::from_ocamlvalue(&relative_path_raw);
     let content = str_field(&ocaml_source_text, 2);
     let source_text = SourceText::make_with_raw(&relative_path, &content.data(), ocaml_source_text_value);
-    let indexed_source_text = IndexedSourceText::new(&source_text);
+    let indexed_source_text = IndexedSourceText::new(source_text.clone());
     let tree = match <SyntaxTree<PositionedSyntax, ()>>::ffi_pointer_as_ref(ocaml_tree.usize_val(), &source_text) {
         Ok(t) => t,
         Err(msg) => panic!(msg),

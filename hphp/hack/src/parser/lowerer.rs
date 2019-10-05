@@ -233,7 +233,7 @@ impl<'a> Env<'a> {
     }
 
     fn source_text(&self) -> &SourceText<'a> {
-        self.indexed_source_text.source_text
+        self.indexed_source_text.source_text()
     }
 
     fn lower_coroutines(&self) -> bool {
@@ -526,7 +526,7 @@ where
             QualifiedName(_) => Self::pos_qualified_name(node, env),
             SimpleTypeSpecifier(c) => Self::pos_name_(&c.simple_type_specifier, env, drop_prefix),
             _ => {
-                let mut name = node.text(env.indexed_source_text.source_text);
+                let mut name = node.text(env.indexed_source_text.source_text());
                 if name == "__COMPILER_HALT_OFFSET__" {
                     *env.saw_compiler_halt_offset() = Some(0);
                 }
@@ -1256,7 +1256,7 @@ where
     ) -> ret_aast!(Expr_<,>) {
         match &expr.syntax {
             Token(_) => {
-                let s = expr.text(env.indexed_source_text.source_text);
+                let s = expr.text(env.indexed_source_text.source_text());
                 match (location, Self::token_kind(expr)) {
                     (ExprLocation::InDoubleQuotedString, _) if env.codegen() => Ok(
                         aast::Expr_::String(Self::mk_str(expr, env, Self::unesc_dbl, s)),
@@ -3692,7 +3692,7 @@ where
                 }
             }
         }
-        let str = node.leading_text(env.indexed_source_text.source_text);
+        let str = node.leading_text(env.indexed_source_text.source_text());
         parse(str, 0, Free, 0).map(Rc::new)
     }
 

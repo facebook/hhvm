@@ -5656,7 +5656,7 @@ where
             parser_options,
             syntax_tree: tree,
             // TODO(kasper): do not repeat work if we have the indexed text already available somwhere)
-            text: IndexedSourceText::new(tree.text()),
+            text: IndexedSourceText::new(tree.text().clone()),
             context: Context {
                 active_classish: None,
                 active_methodish: None,

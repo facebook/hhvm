@@ -1,0 +1,11 @@
+[package]
+name = "hack_decl"
+version = "3.49.0"
+edition = "2018"
+
+[lib]
+name = "decl_rust"
+path = "lib.rs"
+
+[dev-dependencies]
+pretty_assertions = "^0.6.1"

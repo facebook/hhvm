@@ -1,5 +1,7 @@
 [workspace]
 members = [
+    "src/decl",
+    "src/decl/ffi",
     "src/facts",
     "src/facts/ffi",
     "src/parser",

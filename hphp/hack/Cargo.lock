@@ -146,6 +146,22 @@ version = "0.3.55"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
+name = "hack_decl"
+version = "3.49.0"
+dependencies = [
+ "pretty_assertions 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "hack_decl_ffi"
+version = "3.49.0"
+dependencies = [
+ "hack_decl 3.49.0",
+ "hack_oxidized 3.49.0",
+ "ocaml 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "hack_escaper"
 version = "3.49.0"
 dependencies = [

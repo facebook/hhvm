@@ -5,6 +5,7 @@ edition = "2018"
 
 [dependencies]
 decl_rust = { path = "..", package = "hack_decl" }
+lazy_static = "^1.3.0"
 ocaml = "^0.7"
 oxidized = {path = "../../oxidized", package = "hack_oxidized" }
 

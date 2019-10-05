@@ -10,9 +10,5 @@
     partial_provider
     procs_procs
     typing_defs
-    rust_decl_ffi
-    (select rust_decl_ffi.ml from
-      (-> ffi/rust_decl_ffi.ml)
-    )
   )
   (preprocess (pps ppx_deriving.std)))

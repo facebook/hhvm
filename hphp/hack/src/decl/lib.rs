@@ -4,6 +4,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-pub fn hello_world() -> String {
-    String::from("hello, world!")
-}
+pub mod direct_decl_parser;
+mod direct_decl_smart_constructors;
+mod direct_decl_smart_constructors_generated;

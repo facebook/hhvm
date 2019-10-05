@@ -158,6 +158,7 @@ version = "3.49.0"
 dependencies = [
  "hack_decl 3.49.0",
  "hack_oxidized 3.49.0",
+ "lazy_static 1.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "ocaml 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 

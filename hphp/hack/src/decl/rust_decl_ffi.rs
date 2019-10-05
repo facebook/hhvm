@@ -7,9 +7,34 @@
 #[macro_use]
 extern crate ocaml;
 
-use decl_rust as decl;
+#[macro_use]
+extern crate lazy_static;
 
-caml!(hello_world() {
-    use ocaml::ToValue;
-    return decl::hello_world().to_value();
+use decl_rust::direct_decl_parser::parse_decls;
+use ocamlrep::Arena;
+use oxidized::relative_path::RelativePath;
+use std::collections::HashMap;
+use std::sync::Mutex;
+
+lazy_static! {
+    static ref PARSE_RESULTS: Mutex<HashMap<String, Arena<'static>>> = Mutex::default();
+}
+
+caml!(parse_decls_ffi(
+    filename,
+    text,
+    trace
+) {
+    let relative_path = RelativePath::from_ocamlvalue(&filename);
+    let trace = ocaml::value::Value::isize_val(&trace) != 0;
+    let decls = parse_decls(
+        &relative_path,
+        ocaml::Str::from(text).as_str(),
+        trace);
+    if trace { println!("Returning {:?}", decls);
+}
+    let arena = Arena::new();
+    let value = arena.add(decls);
+    PARSE_RESULTS.lock().unwrap().insert(relative_path.path_str().to_string(), arena);
+    ocaml::Value::new(value.to_bits())
 });

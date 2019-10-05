@@ -22,6 +22,7 @@ buck run hphp/hack/src/hh_oxidize --                                          \
   hphp/hack/src/ast/ast_defs.ml                                               \
   hphp/hack/src/ast/namespace_env.ml                                          \
   hphp/hack/src/decl/decl_defs.ml                                             \
+  hphp/hack/src/decl/direct_decl_parser.ml                                    \
   hphp/hack/src/decl/shallow_decl_defs.ml                                     \
   hphp/hack/src/deps/fileInfo.ml                                              \
   hphp/hack/src/heap/ident.ml                                                 \

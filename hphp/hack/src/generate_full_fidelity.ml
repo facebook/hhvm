@@ -1844,6 +1844,78 @@ end
 
 (* GenerateRustFactsSmartConstructors *)
 
+module GenerateRustDirectDeclSmartConstructors = struct
+  let to_constructor_methods x =
+    let args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d: Self::R" i) in
+    let args = String.concat ~sep:", " args in
+    let fwd_args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d" i) in
+    let fwd_args = String.concat ~sep:", " fwd_args in
+    sprintf
+      "    fn make_%s(&mut self, %s) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_%s(self, %s)
+    }\n\n"
+      x.type_name
+      args
+      x.type_name
+      fwd_args
+
+  let direct_decl_smart_constructors_template : string =
+    make_header CStyle ""
+    ^ "
+use flatten_smart_constructors::*;
+use parser_rust as parser;
+use parser::source_text::SourceText;
+use parser::indexed_source_text::IndexedSourceText;
+use parser::smart_constructors::SmartConstructors;
+use parser::parser_env::ParserEnv;
+use parser::positioned_token::PositionedToken;
+
+use crate::direct_decl_smart_constructors::*;
+
+#[derive(Clone)]
+pub struct DirectDeclSmartConstructors<'src> {
+    pub state: State<'src>,
+}
+impl<'src> SmartConstructors<'src, State<'src>> for DirectDeclSmartConstructors<'src> {
+    type Token = PositionedToken;
+    type R = Node;
+
+    fn new(_: &ParserEnv, src: &SourceText<'src>) -> Self {
+        Self { state: State { source_text: IndexedSourceText::new(src.clone()) } }
+    }
+
+    fn state_mut(&mut self) -> &mut State<'src> {
+        &mut self.state
+    }
+
+    fn make_missing(&mut self, offset: usize) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_missing(self, offset)
+    }
+
+    fn make_token(&mut self, token: Self::Token) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_token(self, token)
+    }
+
+    fn make_list(&mut self, items: Vec<Self::R>, offset: usize) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_list(self, items, offset)
+    }
+
+CONSTRUCTOR_METHODS}
+"
+
+  let direct_decl_smart_constructors =
+    Full_fidelity_schema.make_template_file
+      ~transformations:
+        [{ pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods }]
+      ~filename:
+        ( full_fidelity_path_prefix
+        ^ "../decl/direct_decl_smart_constructors_generated.rs" )
+      ~template:direct_decl_smart_constructors_template
+      ()
+end
+
+(* GenerateRustDirectDeclSmartConstructors *)
+
 module GenerateFFSmartConstructorsWrappers = struct
   let full_fidelity_smart_constructors_wrappers_template : string =
     make_header
@@ -3090,6 +3162,7 @@ let templates =
     GenerateFFRustDeclModeSmartConstructors.decl_mode_smart_constructors;
     GenerateRustFlattenSmartConstructors.flatten_smart_constructors;
     GenerateRustFactsSmartConstructors.facts_smart_constructors;
+    GenerateRustDirectDeclSmartConstructors.direct_decl_smart_constructors;
     GenerateFFSmartConstructorsWrappers
     .full_fidelity_smart_constructors_wrappers;
     GenerateFFRustSmartConstructorsWrappers

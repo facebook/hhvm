@@ -37,6 +37,7 @@ pub use gen::aast;
 pub use gen::aast_defs;
 pub use gen::ast_defs;
 pub use gen::decl_defs;
+pub use gen::direct_decl_parser;
 pub use gen::file_info;
 pub use gen::global_options;
 pub use gen::ident;

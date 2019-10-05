@@ -1,2 +1,0 @@
-bar (function(dict<string, string> $in): string)
-foo (function(): string)

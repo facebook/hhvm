@@ -328,231 +328,205 @@ let compute_complete_global
     else
       gname
   in
-  (* is_after_single_colon : XHP vs switch statements                       *)
-  (* is_after_open_square_bracket : shape field names vs container keys     *)
-  (* is_after_quote: shape field names vs arbitrary strings                 *)
-  (*                                                                        *)
-  (* We can recognize these cases by whether the prefix is empty.           *)
-  (* We do this by checking the identifier length, as the string will       *)
-  (* include the current namespace.                                         *)
-  let have_user_prefix =
-    match !autocomplete_identifier with
-    | None -> failwith "No autocomplete position was set"
-    | Some (pos, _) -> Pos.length pos > suffix_len
+  let does_fully_qualified_name_match_prefix name =
+    let stripped_name = strip_ns name in
+    (* name must match gname, and have no additional namespace slashes, e.g. *)
+    (* name="Str\\co" gname="S" -> false *)
+    (* name="Str\\co" gname="Str\\co" -> true *)
+    string_starts_with stripped_name gname
+    && not (String.contains stripped_name ~pos:(String.length gname) '\\')
   in
-  let ctx = autocomplete_context in
-  if
-    (not ctx.is_manually_invoked)
-    && (not have_user_prefix)
-    && ( ctx.is_after_single_colon
-       || ctx.is_after_open_square_bracket
-       || ctx.is_after_quote )
-  then
-    ()
-  else if ctx.is_after_double_right_angle_bracket then
-    (* <<__Override>>AUTO332 *)
-    ()
-  else
-    let does_fully_qualified_name_match_prefix name =
-      let stripped_name = strip_ns name in
-      (* name must match gname, and have no additional namespace slashes, e.g. *)
-      (* name="Str\\co" gname="S" -> false *)
-      (* name="Str\\co" gname="Str\\co" -> true *)
-      string_starts_with stripped_name gname
-      && not (String.contains stripped_name ~pos:(String.length gname) '\\')
-    in
-    let string_to_replace_prefix name = Utils.strip_ns name in
-    let result_count = ref 0 in
-    let on_class name ~seen =
-      if SSet.mem seen name then
-        None
-      else if not (does_fully_qualified_name_match_prefix name) then
+  let string_to_replace_prefix name = Utils.strip_ns name in
+  let result_count = ref 0 in
+  let on_class name ~seen =
+    if SSet.mem seen name then
+      None
+    else if not (does_fully_qualified_name_match_prefix name) then
+      None
+    else
+      let target = Decl_provider.get_class name in
+      let target_kind = Option.map target ~f:(fun c -> Cls.kind c) in
+      if not (should_complete_class completion_type target_kind) then
         None
       else
-        let target = Decl_provider.get_class name in
-        let target_kind = Option.map target ~f:(fun c -> Cls.kind c) in
-        if not (should_complete_class completion_type target_kind) then
-          None
-        else
-          Option.map target ~f:(fun c ->
-              incr result_count;
-              if completion_type = Some Acnew then
-                get_partial_result
-                  (string_to_replace_prefix name)
-                  (Phase.decl (get_constructor_ty c))
-                  SearchUtils.SI_Constructor
-                  (* Only do doc block fallback on constructors if they're consistent. *)
-                  ( if snd (Cls.construct c) <> Inconsistent then
-                    Some c
-                  else
-                    None )
-              else
-                let kind =
-                  match Cls.kind c with
-                  | Ast_defs.Cabstract
-                  | Ast_defs.Cnormal ->
-                    SearchUtils.SI_Class
-                  | Ast_defs.Cinterface -> SearchUtils.SI_Interface
-                  | Ast_defs.Ctrait -> SearchUtils.SI_Trait
-                  | Ast_defs.Cenum -> SearchUtils.SI_Enum
-                in
-                let ty =
-                  ( Typing_reason.Rwitness (Cls.pos c),
-                    Typing_defs.Tapply ((Cls.pos c, name), []) )
-                in
-                get_partial_result
-                  (string_to_replace_prefix name)
-                  (Phase.decl ty)
-                  kind
-                  None)
-    in
-    let on_record name ~seen =
-      if SSet.mem seen name then
-        None
-      else if not (should_complete_fun completion_type) then
-        None
-      else if not (does_fully_qualified_name_match_prefix name) then
-        None
-      else
-        Option.map (Decl_provider.get_record_def name) ~f:(fun rd ->
+        Option.map target ~f:(fun c ->
             incr result_count;
+            if completion_type = Some Acnew then
+              get_partial_result
+                (string_to_replace_prefix name)
+                (Phase.decl (get_constructor_ty c))
+                SearchUtils.SI_Constructor
+                (* Only do doc block fallback on constructors if they're consistent. *)
+                ( if snd (Cls.construct c) <> Inconsistent then
+                  Some c
+                else
+                  None )
+            else
+              let kind =
+                match Cls.kind c with
+                | Ast_defs.Cabstract
+                | Ast_defs.Cnormal ->
+                  SearchUtils.SI_Class
+                | Ast_defs.Cinterface -> SearchUtils.SI_Interface
+                | Ast_defs.Ctrait -> SearchUtils.SI_Trait
+                | Ast_defs.Cenum -> SearchUtils.SI_Enum
+              in
+              let ty =
+                ( Typing_reason.Rwitness (Cls.pos c),
+                  Typing_defs.Tapply ((Cls.pos c, name), []) )
+              in
+              get_partial_result
+                (string_to_replace_prefix name)
+                (Phase.decl ty)
+                kind
+                None)
+  in
+  let on_record name ~seen =
+    if SSet.mem seen name then
+      None
+    else if not (should_complete_fun completion_type) then
+      None
+    else if not (does_fully_qualified_name_match_prefix name) then
+      None
+    else
+      Option.map (Decl_provider.get_record_def name) ~f:(fun rd ->
+          incr result_count;
 
-            (* TODO: don't assume records are mixed, T44306013 *)
-            let ty =
-              ( Typing_reason.Rwitness rd.Typing_defs.rdt_pos,
-                Typing_defs.Tmixed )
-            in
-            get_partial_result
-              (string_to_replace_prefix name)
-              (Phase.decl ty)
-              SearchUtils.SI_RecordDef
-              None)
-    in
-    let on_function name ~seen =
-      if autocomplete_context.is_xhp_classname then
-        None
-      else if SSet.mem seen name then
-        None
-      else if not (should_complete_fun completion_type) then
-        None
-      else if not (does_fully_qualified_name_match_prefix name) then
-        None
-      else
-        Option.map (Decl_provider.get_fun name) ~f:(fun { fe_type; _ } ->
-            incr result_count;
-            get_partial_result
-              (string_to_replace_prefix name)
-              (Phase.decl fe_type)
-              SearchUtils.SI_Function
-              None)
-    in
-    let on_namespace name : autocomplete_result option =
-      (* name will have the form "Str" or "HH\\Lib\\Str" *)
-      (* Our autocomplete will show up in the list as "Str". *)
-      if autocomplete_context.is_xhp_classname then
-        None
-      else if not (does_fully_qualified_name_match_prefix name) then
-        None
-      else
-        Some
-          (Complete
-             {
-               res_pos = Pos.none |> Pos.to_absolute;
-               res_replace_pos = get_replace_pos_exn ();
-               res_base_class = None;
-               res_ty = "namespace";
-               res_name = string_to_replace_prefix name;
-               res_fullname = string_to_replace_prefix name;
-               res_kind = SearchUtils.SI_Namespace;
-               func_details = None;
-             })
-    in
-    (* Try using the names in local content buffer first *)
-    List.iter
-      (List.filter_map
-         (SSet.elements content_classes)
-         (on_class ~seen:SSet.empty))
-      add_res;
-    List.iter
-      (List.filter_map
-         (SSet.elements content_record_defs)
-         (on_record ~seen:SSet.empty))
-      add_res;
-    List.iter
-      (List.filter_map
-         (SSet.elements content_funs)
-         (on_function ~seen:SSet.empty))
-      add_res;
+          (* TODO: don't assume records are mixed, T44306013 *)
+          let ty =
+            (Typing_reason.Rwitness rd.Typing_defs.rdt_pos, Typing_defs.Tmixed)
+          in
+          get_partial_result
+            (string_to_replace_prefix name)
+            (Phase.decl ty)
+            SearchUtils.SI_RecordDef
+            None)
+  in
+  let on_function name ~seen =
+    if autocomplete_context.is_xhp_classname then
+      None
+    else if SSet.mem seen name then
+      None
+    else if not (should_complete_fun completion_type) then
+      None
+    else if not (does_fully_qualified_name_match_prefix name) then
+      None
+    else
+      Option.map (Decl_provider.get_fun name) ~f:(fun { fe_type; _ } ->
+          incr result_count;
+          get_partial_result
+            (string_to_replace_prefix name)
+            (Phase.decl fe_type)
+            SearchUtils.SI_Function
+            None)
+  in
+  let on_namespace name : autocomplete_result option =
+    (* name will have the form "Str" or "HH\\Lib\\Str" *)
+    (* Our autocomplete will show up in the list as "Str". *)
+    if autocomplete_context.is_xhp_classname then
+      None
+    else if not (does_fully_qualified_name_match_prefix name) then
+      None
+    else
+      Some
+        (Complete
+           {
+             res_pos = Pos.none |> Pos.to_absolute;
+             res_replace_pos = get_replace_pos_exn ();
+             res_base_class = None;
+             res_ty = "namespace";
+             res_name = string_to_replace_prefix name;
+             res_fullname = string_to_replace_prefix name;
+             res_kind = SearchUtils.SI_Namespace;
+             func_details = None;
+           })
+  in
+  (* Try using the names in local content buffer first *)
+  List.iter
+    (List.filter_map
+       (SSet.elements content_classes)
+       (on_class ~seen:SSet.empty))
+    add_res;
+  List.iter
+    (List.filter_map
+       (SSet.elements content_record_defs)
+       (on_record ~seen:SSet.empty))
+    add_res;
+  List.iter
+    (List.filter_map
+       (SSet.elements content_funs)
+       (on_function ~seen:SSet.empty))
+    add_res;
 
-    (* Add namespaces. The hack server doesn't index namespaces themselves; it  *)
-    (* only stores names of functions and classes in fully qualified form, e.g. *)
-    (*   \\HH\\Lib\\Str\\length                                                 *)
-    (* If the project's .hhconfig has auto_namesspace_map "Str": "HH\Lib\\Str"  *)
-    (* then the hack server will index the function just as                     *)
-    (*   \\Str\\length                                                          *)
-    (* The main index, having only a global list if functions/classes, doesn't  *)
-    (* actually offer any way for us to iterate over namespaces. And changing   *)
-    (* its trie-indexer to do so is kind of ugly. So as a temporary workaround, *)
-    (* to give an okay user-experience at least for the Hack standard library,  *)
-    (* we're just going to list all the possible standard namespaces right here *)
-    (* and see if any of them really exist in the current codebase/hhconfig!    *)
-    (* This will give a good experience only for codebases where users rarely   *)
-    (* define their own namespaces...                                           *)
-    let standard_namespaces =
-      [
-        "C";
-        "Vec";
-        "Dict";
-        "Str";
-        "Keyset";
-        "Math";
-        "PseudoRandom";
-        "SecureRandom";
-        "PHP";
-        "JS";
-      ]
-    in
-    let auto_namespace_map = GlobalOptions.po_auto_namespace_map tcopt in
-    let all_standard_namespaces =
-      List.concat_map standard_namespaces ~f:(fun ns ->
-          [
-            Printf.sprintf "%s" ns;
-            Printf.sprintf "%s\\fb" ns;
-            Printf.sprintf "HH\\Lib\\%s" ns;
-            Printf.sprintf "HH\\Lib\\%s\\fb" ns;
-          ])
-    in
-    let all_aliased_namespaces =
-      List.concat_map auto_namespace_map ~f:(fun (alias, fully_qualified) ->
-          [alias; fully_qualified])
-    in
-    let all_possible_namespaces =
-      all_standard_namespaces @ all_aliased_namespaces
-      |> SSet.of_list
-      |> SSet.elements
-    in
-    List.iter all_possible_namespaces ~f:(fun ns ->
-        let ns_results =
-          search_funs_and_classes
-            (ns ^ "\\")
-            ~limit:(Some 1)
-            ~on_class:(fun _className -> on_namespace ns)
-            ~on_function:(fun _functionName -> on_namespace ns)
-        in
-        List.iter ns_results.With_complete_flag.value add_res);
+  (* Add namespaces. The hack server doesn't index namespaces themselves; it  *)
+  (* only stores names of functions and classes in fully qualified form, e.g. *)
+  (*   \\HH\\Lib\\Str\\length                                                 *)
+  (* If the project's .hhconfig has auto_namesspace_map "Str": "HH\Lib\\Str"  *)
+  (* then the hack server will index the function just as                     *)
+  (*   \\Str\\length                                                          *)
+  (* The main index, having only a global list if functions/classes, doesn't  *)
+  (* actually offer any way for us to iterate over namespaces. And changing   *)
+  (* its trie-indexer to do so is kind of ugly. So as a temporary workaround, *)
+  (* to give an okay user-experience at least for the Hack standard library,  *)
+  (* we're just going to list all the possible standard namespaces right here *)
+  (* and see if any of them really exist in the current codebase/hhconfig!    *)
+  (* This will give a good experience only for codebases where users rarely   *)
+  (* define their own namespaces...                                           *)
+  let standard_namespaces =
+    [
+      "C";
+      "Vec";
+      "Dict";
+      "Str";
+      "Keyset";
+      "Math";
+      "PseudoRandom";
+      "SecureRandom";
+      "PHP";
+      "JS";
+    ]
+  in
+  let auto_namespace_map = GlobalOptions.po_auto_namespace_map tcopt in
+  let all_standard_namespaces =
+    List.concat_map standard_namespaces ~f:(fun ns ->
+        [
+          Printf.sprintf "%s" ns;
+          Printf.sprintf "%s\\fb" ns;
+          Printf.sprintf "HH\\Lib\\%s" ns;
+          Printf.sprintf "HH\\Lib\\%s\\fb" ns;
+        ])
+  in
+  let all_aliased_namespaces =
+    List.concat_map auto_namespace_map ~f:(fun (alias, fully_qualified) ->
+        [alias; fully_qualified])
+  in
+  let all_possible_namespaces =
+    all_standard_namespaces @ all_aliased_namespaces
+    |> SSet.of_list
+    |> SSet.elements
+  in
+  List.iter all_possible_namespaces ~f:(fun ns ->
+      let ns_results =
+        search_funs_and_classes
+          (ns ^ "\\")
+          ~limit:(Some 1)
+          ~on_class:(fun _className -> on_namespace ns)
+          ~on_function:(fun _functionName -> on_namespace ns)
+      in
+      List.iter ns_results.With_complete_flag.value add_res);
 
-    (* Use search results to look for matches, while excluding names we have
-     * already seen in local content buffer *)
-    let gname_results =
-      search_funs_and_classes
-        gname
-        ~limit:(Some 100)
-        ~on_class:(on_class ~seen:content_classes)
-        ~on_function:(on_function ~seen:content_funs)
-    in
-    autocomplete_is_complete :=
-      !autocomplete_is_complete && gname_results.With_complete_flag.is_complete;
-    List.iter gname_results.With_complete_flag.value add_res
+  (* Use search results to look for matches, while excluding names we have
+   * already seen in local content buffer *)
+  let gname_results =
+    search_funs_and_classes
+      gname
+      ~limit:(Some 100)
+      ~on_class:(on_class ~seen:content_classes)
+      ~on_function:(on_function ~seen:content_funs)
+  in
+  autocomplete_is_complete :=
+    !autocomplete_is_complete && gname_results.With_complete_flag.is_complete;
+  List.iter gname_results.With_complete_flag.value add_res
 
 (* Print a descriptive "detail" element *)
 let get_desc_string_for env ty kind =
@@ -868,94 +842,139 @@ let find_global_results
     ~(autocomplete_context : AutocompleteTypes.legacy_autocomplete_context)
     ~(sienv : SearchUtils.si_env)
     ~(tast_env : Tast_env.t) : unit =
-  (* Select the provider to use for symbol autocomplete *)
-  match sienv.sie_provider with
-  (* Legacy provider should match previous behavior *)
-  | TrieIndex ->
-    compute_complete_global
-      ~tcopt
-      ~autocomplete_context
-      ~content_funs
-      ~content_classes
-      ~content_record_defs;
-
-    (* If only traits are valid, filter to that *)
-    if completion_type = Some Actrait_only then
-      autocomplete_results :=
-        List.filter !autocomplete_results ~f:(fun r ->
-            match r with
-            | Complete c -> c.res_kind = SI_Trait
-            | Partial p -> p.kind_ = SI_Trait)
-  (* The new simpler providers *)
-  | _ ->
-    (kind_filter :=
-       match completion_type with
-       | Some Acnew -> Some SI_Class
-       | Some Actrait_only -> Some SI_Trait
-       | _ -> None);
-    let query_text = strip_suffix !auto_complete_for_global in
-    let replace_pos = get_replace_pos_exn () in
-    let (ns, _) = Utils.split_ns_from_name query_text in
-    (* This ensures that we do not have a leading backslash *)
-    let query_text = Utils.strip_ns query_text in
-    let absolute_none = Pos.none |> Pos.to_absolute in
-    let results =
-      SymbolIndex.find_matching_symbols
-        ~sienv
-        ~query_text
-        ~max_results
-        ~kind_filter:!kind_filter
-        ~context:completion_type
-    in
-    (* Looking up a function signature using Tast_env.get_fun consumes ~67KB
-     * and can cause complex typechecking which can take from 2-100 milliseconds
-     * per result.  When tested in summer 2019 it was possible to load 1.4GB of data
-     * if get_fun was called on every function in the WWW codebase.
-     *
-     * Therefore, this feature is only available via the option sie_resolve_signatures
-     * - and please be careful not to turn it on unless you really want to consume
-     * memory and performance.
+  (* First step: Check obvious cases where autocomplete is not warranted.   *)
+  (*                                                                        *)
+  (* is_after_single_colon : XHP vs switch statements                       *)
+  (* is_after_open_square_bracket : shape field names vs container keys     *)
+  (* is_after_quote: shape field names vs arbitrary strings                 *)
+  (*                                                                        *)
+  (* We can recognize these cases by whether the prefix is empty.           *)
+  (* We do this by checking the identifier length, as the string will       *)
+  (* include the current namespace.                                         *)
+  let have_user_prefix =
+    match !autocomplete_identifier with
+    | None -> failwith "No autocomplete position was set"
+    | Some (pos, _) -> Pos.length pos > suffix_len
+  in
+  let ctx = autocomplete_context in
+  if
+    (not ctx.is_manually_invoked)
+    && (not have_user_prefix)
+    && ( ctx.is_after_single_colon
+       || ctx.is_after_open_square_bracket
+       || ctx.is_after_quote )
+  then
+    ()
+  else if ctx.is_after_double_right_angle_bracket then
+    (* <<__Override>>AUTO332 *)
+    ()
+  else
+    (* Okay!  We've decided we need to do autocomplete.
+     * Select the provider to use for symbol autocomplete
      *)
-    List.iter results ~f:(fun r ->
-        (* Only load func details if the flag sie_resolve_signatures is true *)
-        let (func_details, res_ty) =
-          if sienv.sie_resolve_signatures && r.si_kind = SI_Function then
-            let fixed_name = ns ^ r.si_name in
-            match Tast_env.get_fun tast_env fixed_name with
-            | None -> (None, kind_to_string r.si_kind)
-            | Some fe ->
-              let ty = fe.fe_type in
-              let details = get_func_details_for tast_env (DeclTy ty) in
-              let res_ty = Tast_env.print_decl_ty tast_env ty in
-              (details, res_ty)
-          else
-            (None, kind_to_string r.si_kind)
-        in
-        (* Only load exact positions if specially requested *)
-        let res_pos =
-          if sienv.sie_resolve_positions then
-            let fixed_name = ns ^ r.si_name in
-            match Tast_env.get_fun tast_env fixed_name with
-            | None -> absolute_none
-            | Some fe -> Reason.to_pos (fst fe.fe_type) |> Pos.to_absolute
-          else
-            absolute_none
-        in
-        (* Figure out how to display them *)
-        let complete =
-          {
-            res_pos;
-            res_replace_pos = replace_pos;
-            res_base_class = None;
-            res_ty;
-            res_name = r.si_name;
-            res_fullname = r.si_fullname;
-            res_kind = r.si_kind;
-            func_details;
-          }
-        in
-        add_res (Complete complete));
-    autocomplete_is_complete := List.length results < max_results
+    match sienv.sie_provider with
+    (* Legacy provider should match previous behavior *)
+    | TrieIndex ->
+      compute_complete_global
+        ~tcopt
+        ~autocomplete_context
+        ~content_funs
+        ~content_classes
+        ~content_record_defs;
+
+      (* If only traits are valid, filter to that *)
+      if completion_type = Some Actrait_only then
+        autocomplete_results :=
+          List.filter !autocomplete_results ~f:(fun r ->
+              match r with
+              | Complete c -> c.res_kind = SI_Trait
+              | Partial p -> p.kind_ = SI_Trait)
+    (* The new simpler providers *)
+    | _ ->
+      (kind_filter :=
+         match completion_type with
+         | Some Acnew -> Some SI_Class
+         | Some Actrait_only -> Some SI_Trait
+         | _ -> None);
+      let replace_pos = get_replace_pos_exn () in
+      (* Ensure that we do not have a leading backslash for Hack classes,
+       * while ensuring that we have colons for XHP classes.  That's how we
+       * differentiate between them. *)
+      let query_text = strip_suffix !auto_complete_for_global in
+      let query_text =
+        if autocomplete_context.is_xhp_classname then
+          Utils.add_xhp_ns query_text
+        else
+          Utils.strip_ns query_text
+      in
+      auto_complete_for_global := query_text;
+      let (ns, _) = Utils.split_ns_from_name query_text in
+      let absolute_none = Pos.none |> Pos.to_absolute in
+      let results =
+        SymbolIndex.find_matching_symbols
+          ~sienv
+          ~query_text
+          ~max_results
+          ~kind_filter:!kind_filter
+          ~context:completion_type
+      in
+      (* Looking up a function signature using Tast_env.get_fun consumes ~67KB
+       * and can cause complex typechecking which can take from 2-100 milliseconds
+       * per result.  When tested in summer 2019 it was possible to load 1.4GB of data
+       * if get_fun was called on every function in the WWW codebase.
+       *
+       * Therefore, this feature is only available via the option sie_resolve_signatures
+       * - and please be careful not to turn it on unless you really want to consume
+       * memory and performance.
+       *)
+      List.iter results ~f:(fun r ->
+          (* If we are autocompleting XHP using "$x = <" then the suggestions we
+           * return should omit the leading colon *)
+          let (res_name, res_fullname) =
+            if autocomplete_context.is_xhp_classname then
+              (Utils.strip_xhp_ns r.si_name, Utils.strip_xhp_ns r.si_fullname)
+            else
+              (r.si_name, r.si_fullname)
+          in
+          (* Only load func details if the flag sie_resolve_signatures is true *)
+          let (func_details, res_ty) =
+            if sienv.sie_resolve_signatures && r.si_kind = SI_Function then
+              let fixed_name = ns ^ r.si_name in
+              match Tast_env.get_fun tast_env fixed_name with
+              | None -> (None, kind_to_string r.si_kind)
+              | Some fe ->
+                let ty = fe.fe_type in
+                let details = get_func_details_for tast_env (DeclTy ty) in
+                let res_ty = Tast_env.print_decl_ty tast_env ty in
+                (details, res_ty)
+            else
+              (None, kind_to_string r.si_kind)
+          in
+          (* Only load exact positions if specially requested *)
+          let res_pos =
+            if sienv.sie_resolve_positions then
+              let fixed_name = ns ^ r.si_name in
+              match Tast_env.get_fun tast_env fixed_name with
+              | None -> absolute_none
+              | Some fe -> Reason.to_pos (fst fe.fe_type) |> Pos.to_absolute
+            else
+              absolute_none
+          in
+          (* Figure out how to display them *)
+          let complete =
+            {
+              res_pos;
+              res_replace_pos = replace_pos;
+              res_base_class = None;
+              res_ty;
+              res_name;
+              res_fullname;
+              res_kind = r.si_kind;
+              func_details;
+            }
+          in
+          add_res (Complete complete));
+      autocomplete_is_complete := List.length results < max_results
 
 (* Main entry point for autocomplete *)
 let go

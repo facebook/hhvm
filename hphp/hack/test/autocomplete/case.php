@@ -8,6 +8,6 @@ namespace Foo;
 
 function main(): void {
   switch(\random_int(123, 456)) {
-    case 123:AUTO332
+    case 123:AUTO332 // this should not invoke autocomplete
   }
 }

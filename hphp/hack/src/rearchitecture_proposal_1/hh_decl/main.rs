@@ -10,24 +10,18 @@
 //!     and requests for status,
 //!  2) The decl service, which serves decls to typecheck clients.
 //!
-//! hh_decl exposes these two services using the `Service` abstraction in the
-//! `server` module, which turns any type that implements the high-level
-//! `Service` trait into a service that speaks JSON over Unix domain sockets.
 
-// use failure_ext::Result;
-// use nix::unistd::{fork, ForkResult};
+use control_service::ControlService;
+use decl_service::DeclService;
+use server::UnixDomainServer;
 use std::path::PathBuf;
-// use std::process;
 use std::thread;
 use structopt::StructOpt;
 
 mod control_service;
 mod decl_service;
+mod hh_tmpdir;
 mod server;
-
-use control_service::ControlService;
-use decl_service::DeclService;
-use server::UnixDomainServer;
 
 /// The well-known socket that the control service listens on.
 const CONTROL_SERVICE_SOCKET: &'static str = "/tmp/hh_server/control_service";
@@ -55,21 +49,21 @@ struct CommandLineArgs {
     cachelib_size: u64,
 }
 
-// let tmp_path_of_root (root : string) (ext : string) : string =
-//   (* TODO: move this into GlobalConfig out of ServerFiles *)
-//   Sys_utils.mkdir_no_fail GlobalConfig.tmp_dir;
-//   let root_part = Path.slash_escaped_string_of_path (Path.make root) in
-//   Filename.concat GlobalConfig.tmp_dir (Printf.sprintf "%s%s" root_part ext)
-
-// fn tmp_path_of_root(root: &PathBuf) -> PathBuf {
-//     return root;
-// }
-
 fn main() {
-    // Read the command-line args into the struct that `structopt` derived
-    // for us.
     let args = CommandLineArgs::from_args();
-    let a = args.root;
+
+    // TODO: validate root (canonicalize, make sure .hhconfig exists)
+
+    // Check lock-file sentinel to ensure only one instance is running per root
+    let lock_file = hh_tmpdir::tmp_path_of_root(&args.root, ".decl.lock");
+    let lock = match hh_tmpdir::open_exclusive_lock_file(&lock_file).unwrap() {
+        None => {
+            println!("local decl service is already running");
+            std::process::exit(1);
+        }
+        Some(fd) => fd,
+    };
+    println!("hh_decl starting...");
 
     // Spawn our two services: the decl service and control service. The control
     // service runs on the main thread (arbitrarily).
@@ -84,4 +78,6 @@ fn main() {
         UnixDomainServer::new(&PathBuf::from(CONTROL_SERVICE_SOCKET))
             .expect("failed to start control service");
     svr.start();
+
+    std::mem::drop(lock);
 }

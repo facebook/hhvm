@@ -62,13 +62,6 @@ val parse_text :
   Full_fidelity_source_text.t ->
   FileInfo.mode option * PositionedSyntaxTree.t
 
-val lower_tree :
-  env ->
-  Full_fidelity_source_text.t ->
-  FileInfo.mode option ->
-  PositionedSyntaxTree.t ->
-  result
-
 val from_text : env -> Full_fidelity_source_text.t -> result
 
 val from_text_rust : env -> Full_fidelity_source_text.t -> rust_result
@@ -81,6 +74,13 @@ val from_text_with_legacy : env -> string -> Parser_return.t
  *)
 
 val from_file_with_legacy : env -> Parser_return.t
+
+val lower_tree_with_legacy :
+  env ->
+  Full_fidelity_source_text.t ->
+  FileInfo.mode option ->
+  PositionedSyntaxTree.t ->
+  Parser_return.t
 
 val defensive_program :
   ?hacksperimental:bool ->

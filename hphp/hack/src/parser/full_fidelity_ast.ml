@@ -4495,6 +4495,13 @@ let from_text_with_legacy (env : env) (content : string) : Parser_return.t =
 
 let from_file_with_legacy env = legacy (from_file env)
 
+let lower_tree_with_legacy
+    (env : env)
+    (source_text : SourceText.t)
+    (mode : FileInfo.mode option)
+    (tree : PositionedSyntaxTree.t) =
+  legacy @@ lower_tree env source_text mode tree
+
 (******************************************************************************(
  * For cut-over purposes only; this should be removed as soon as Parser_hack
  * is removed.

@@ -149,10 +149,9 @@ let go
   let parser_env = Full_fidelity_ast.make_env relative_path in
   let (mode, tree) = Full_fidelity_ast.parse_text parser_env source_text in
   let results =
-    Full_fidelity_ast.lower_tree parser_env source_text mode tree
+    Full_fidelity_ast.lower_tree_with_legacy parser_env source_text mode tree
   in
-  let ast = results.Full_fidelity_ast.ast in
-  let nast = Ast_to_nast.convert ast in
+  let nast = results.Parser_return.ast in
   let tast = ServerIdeUtils.check_ast tcopt nast in
   let offset = SourceText.position_to_offset source_text (line, column) in
   match

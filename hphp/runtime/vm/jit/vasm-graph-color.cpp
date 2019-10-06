@@ -5532,6 +5532,7 @@ void hoist_spills_in_loop(State& state,
           switch (inst.op) {
             case Vinstr::copy:
             case Vinstr::copyargs:
+            case Vinstr::ssaalias:
             case Vinstr::phidef:
             case Vinstr::phijmp:
               // These handle spilled Vregs fine, they need to be kept

@@ -403,7 +403,7 @@ TCA handleBindCall(TCA toSmash, ActRec* calleeFrame) {
   TCA start = mcgen::getFuncPrologue(func, nArgs);
   TRACE(2, "bindCall immutably %s -> %p\n", func->fullName()->data(), start);
 
-  if (start && !RuntimeOption::EvalFailJitPrologs) {
+  if (start) {
     // Using start is racy but bindCall will recheck the start address after
     // acquiring a lock on the ProfTransRec
     tc::bindCall(toSmash, start, func, nArgs);

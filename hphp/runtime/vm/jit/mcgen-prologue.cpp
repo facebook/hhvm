@@ -228,6 +228,9 @@ TCA getFuncPrologue(Func* func, int nPassed) {
   // Do a quick test before grabbing the write lease
   if (auto const p = checkCachedPrologue(func, paramIndex)) return p;
 
+  // Fail if we were asked to fail.
+  if (UNLIKELY(RuntimeOption::EvalFailJitPrologs)) return nullptr;
+
   auto const computeKind = [&] {
     return tc::profileFunc(func) ? TransKind::ProfPrologue
                                  : TransKind::LivePrologue;

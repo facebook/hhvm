@@ -43,6 +43,7 @@ namespace detail {
 template <class T, class S>
 struct LowPtrImpl {
   using storage_type = typename S::storage_type;
+  enum class Unchecked {};
 
   /*
    * Constructors.
@@ -50,6 +51,7 @@ struct LowPtrImpl {
   LowPtrImpl() {}
 
   /* implicit */ LowPtrImpl(T* px) : m_s{to_low(px)} {}
+  /* implicit */ LowPtrImpl(Unchecked, T* px) : m_s{to_low_unchecked(px)} {}
 
   /* implicit */ LowPtrImpl(std::nullptr_t /*px*/) : m_s{ 0 } {}
 
@@ -156,6 +158,11 @@ private:
 
   static typename S::raw_type to_low(T* px) {
     always_assert(is_low(px));
+    return (typename S::raw_type)(reinterpret_cast<uintptr_t>(px));
+  }
+
+  static typename S::raw_type to_low_unchecked(T* px) {
+    assertx(is_low(px));
     return (typename S::raw_type)(reinterpret_cast<uintptr_t>(px));
   }
 

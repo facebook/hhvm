@@ -286,7 +286,6 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   static void release(ObjectData* obj, const Class* cls) noexcept;
 
   Class* getVMClass() const;
-  void setVMClass(Class* cls);
   StrNR getClassName() const;
 
   // instanceof() can be used for both classes and interfaces.
@@ -601,7 +600,7 @@ private:
 // lowptr:  header  cls     [subclass][props...]
 
 private:
-  LowPtr<Class> m_cls;
+  const LowPtr<Class> m_cls;
 };
 #ifdef _MSC_VER
 #pragma pack(pop)

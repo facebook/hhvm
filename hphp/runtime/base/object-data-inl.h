@@ -26,7 +26,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline ObjectData::ObjectData(Class* cls, uint8_t flags, HeaderKind kind)
-  : m_cls(cls)
+  : m_cls(LowPtr<Class>::Unchecked{}, cls)
 {
   initHeader_16(kind, OneReference, flags);
   if (debug && cls->releaseFunc() == ObjectData::release) {
@@ -42,7 +42,7 @@ inline ObjectData::ObjectData(Class* cls, uint8_t flags, HeaderKind kind)
 
 inline ObjectData::ObjectData(Class* cls, InitRaw, uint8_t flags,
                               HeaderKind kind) noexcept
-  : m_cls(cls)
+  : m_cls(LowPtr<Class>::Unchecked{}, cls)
 {
   initHeader_16(kind, OneReference, flags);
   if (debug && cls->releaseFunc() == ObjectData::release) {
@@ -309,10 +309,6 @@ inline bool ObjectData::assertPropTypeHints() const {
 inline Class* ObjectData::getVMClass() const {
   assertx(kindIsValid());
   return m_cls;
-}
-
-inline void ObjectData::setVMClass(Class* cls) {
-  m_cls = cls;
 }
 
 inline bool ObjectData::instanceof(const Class* c) const {

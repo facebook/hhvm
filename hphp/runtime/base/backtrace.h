@@ -53,12 +53,12 @@ struct CompactTrace : SweepableResourceData {
   struct Frame final {
     Frame() = default;
     Frame(const Func* f, int32_t ppc, bool ht)
-      : func(f)
+      : func(LowPtr<const Func>::Unchecked{}, f)
       , prevPc(ppc)
       , hasThis(ht)
     {}
 
-    LowPtr<const Func> func;
+    const LowPtr<const Func> func;
     union {
       struct {
         int32_t prevPc : 31;

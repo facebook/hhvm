@@ -214,24 +214,19 @@ let check_mutability
   | _ -> valid env
 
 let log_subtype_i ~level ~this_ty ~function_name env ty_sub ty_super =
-  match (ty_sub, ty_super) with
-  | (LoclType ty_sub, LoclType ty_super) ->
-    Typing_log.(
-      log_with_level env "sub" level (fun () ->
-          let types =
-            [Log_type ("ty_sub", ty_sub); Log_type ("ty_super", ty_super)]
-          in
-          let types =
-            Option.value_map this_ty ~default:types ~f:(fun ty ->
-                Log_type ("this_ty", ty) :: types)
-          in
-          log_types
-            (Reason.to_pos (fst ty_sub))
-            env
-            [Log_head (function_name, types)]))
-  | _ -> ()
-
-(* TODO *)
+  Typing_log.(
+    log_with_level env "sub" level (fun () ->
+        let types =
+          [Log_type_i ("ty_sub", ty_sub); Log_type_i ("ty_super", ty_super)]
+        in
+        let types =
+          Option.value_map this_ty ~default:types ~f:(fun ty ->
+              Log_type ("this_ty", ty) :: types)
+        in
+        log_types
+          (Reason.to_pos (reason ty_sub))
+          env
+          [Log_head (function_name, types)]))
 
 let log_subtype ~this_ty ~function_name env ty_sub ty_super =
   log_subtype_i

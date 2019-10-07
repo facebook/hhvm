@@ -276,6 +276,13 @@ module Full = struct
 
   let tpu_access k ty' access = k ty' ^^ text (":@" ^ access)
 
+  let thas_member k hm =
+    let { hm_name = (_, name); hm_type; hm_nullsafe = _; hm_class_id = _ } =
+      hm
+    in
+    Concat
+      [text "has_member"; text "("; text name; comma_sep; k hm_type; text ")"]
+
   let rec decl_ty to_doc st env (_, x) = decl_ty_ to_doc st env x
 
   and decl_ty_ : _ -> _ -> _ -> decl_phase ty_ -> Doc.t =
@@ -529,6 +536,22 @@ module Full = struct
       in
       k ty' ^^ text (":@" ^ enum ^ suffix)
     | Tpu_access (ty', (_, access)) -> tpu_access k ty' access
+
+  let constraint_type_ to_doc st env x =
+    let k x = locl_ty to_doc st env x in
+    match x with
+    | Thas_member hm -> thas_member k hm
+
+  let constraint_type to_doc st env (r, x) =
+    let d = constraint_type_ to_doc st env x in
+    match r with
+    | Typing_reason.Rsolve_fail _ -> Concat [text "{suggest:"; d; text "}"]
+    | _ -> d
+
+  let internal_type to_doc st env ty =
+    match ty with
+    | LoclType ty -> locl_ty to_doc st env ty
+    | ConstraintType ty -> constraint_type to_doc st env ty
 
   (* For a given type parameter, construct a list of its constraints *)
   let get_constraints_on_tparam env tparam =
@@ -1766,19 +1789,14 @@ let error ?(ignore_dynamic = false) env ty =
 
 let full env ty = Full.to_string ~ty:Full.locl_ty Doc.text env ty
 
-let full_i env ty =
-  match ty with
-  | LoclType ty -> full env ty
-  | ConstraintType _ -> (* TODO *) ""
+let full_i env ty = Full.to_string ~ty:Full.internal_type Doc.text env ty
 
 let full_rec env n ty = Full.to_string_rec env n ty
 
 let full_strip_ns env ty = Full.to_string_strip_ns ~ty:Full.locl_ty env ty
 
 let full_strip_ns_i env ty =
-  match ty with
-  | LoclType ty -> full_strip_ns env ty
-  | ConstraintType _ -> (* TODO *) ""
+  Full.to_string_strip_ns ~ty:Full.internal_type env ty
 
 let full_strip_ns_decl env ty = Full.to_string_strip_ns ~ty:Full.decl_ty env ty
 
@@ -1799,9 +1817,10 @@ let debug_decl env ty =
   f_str
 
 let debug_i env ty =
-  match ty with
-  | LoclType ty -> debug env ty
-  | ConstraintType _ -> (* TODO *) ""
+  Full.debug_mode := true;
+  let f_str = full_strip_ns_i env ty in
+  Full.debug_mode := false;
+  f_str
 
 let class_ tcopt c = PrintClass.class_type tcopt c
 

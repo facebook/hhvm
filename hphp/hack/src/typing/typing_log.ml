@@ -73,12 +73,6 @@ let lastenv =
 
 let iterations : int Pos.Map.t ref = ref Pos.Map.empty
 
-let filter_missing l =
-  List.filter_map l (fun (k, v) ->
-      match v with
-      | None -> None
-      | Some v -> Some (k, v))
-
 (* Universal representation of a delta between values
  *)
 type delta =
@@ -674,6 +668,7 @@ let hh_show p env ty =
 type log_structure =
   | Log_head of string * log_structure list
   | Log_type of string * Typing_defs.locl_ty
+  | Log_type_i of string * Typing_defs.internal_type
 
 let log_with_level env key level log_f =
   if Env.get_log_level env key >= level then
@@ -690,6 +685,11 @@ let log_types p env items =
               indentEnv ~color:(Normal Yellow) message (fun () -> go items)
             | Log_type (message, ty) ->
               let s = Typing_print.debug env ty in
+              lprintf (Bold Green) "%s: " message;
+              lprintf (Normal Green) "%s" s;
+              lnewline ()
+            | Log_type_i (message, ty) ->
+              let s = Typing_print.debug_i env ty in
               lprintf (Bold Green) "%s: " message;
               lprintf (Normal Green) "%s" s;
               lnewline ())

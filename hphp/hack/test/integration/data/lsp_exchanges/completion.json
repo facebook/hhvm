@@ -641,7 +641,7 @@
               "character": 42
             }
           },
-          "text": "TestNS\\"
+          "text": "\\TestNS\\"
         }
       ]
     }
@@ -657,7 +657,7 @@
       },
       "position": {
         "line": 3,
-        "character": 7
+        "character": 8
       }
     }
   },
@@ -678,7 +678,7 @@
             },
             "end": {
               "line": 3,
-              "character": 7
+              "character": 8
             }
           },
           "text": "$cc = new CompletionClass(); $cc->interfa"

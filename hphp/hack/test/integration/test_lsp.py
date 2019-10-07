@@ -38,6 +38,7 @@ require_mini_state = {use_saved_state}
 lazy_decl = {use_saved_state}
 lazy_parse = {use_saved_state}
 lazy_init2 = {use_saved_state}
+symbolindex_search_provider = SqliteIndex
 """.format(
                     use_saved_state=use_saved_state_str
                 )
@@ -364,23 +365,12 @@ class TestLsp(TestCase[LspTestDriver]):
         variables = self.setup_php_file("completion.php")
         self.load_and_run("completion", variables)
 
-    def test_ide_completion(self) -> None:
-        # This port of the `test_completion` test above needs more work:
-        # - The expected responses (as ported directly) are slightly different
-        #   from the actual responses - why?
-        # - Can we restructure this test so it doesn't require a server
-        #   with a dependency on external dictionaries?
-        raise unittest.SkipTest(
-            "Test should be enabled when file update issues are resolved."
-        )
-
-        self.prepare_server_environment()
-        variables = self.setup_php_file("completion.php")
+    def test_serverless_ide_completion(self) -> None:
+        variables = dict(self.prepare_serverless_ide_environment())
+        variables.update(self.setup_php_file("completion.php"))
+        self.test_driver.stop_hh_server()
         spec = (
-            self.initialize_spec(
-                LspTestSpec("ide_completion"), use_serverless_ide=False
-            )
-            .wait_for_hh_server_ready()
+            self.initialize_spec(LspTestSpec("ide_completion"), use_serverless_ide=True)
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -423,45 +413,22 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 7,
                             "detail": "class",
                             "inlineDetail": "class",
+                            "insertText": "ab:cd:alpha",
                             "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 6},
-                                    "end": {"line": 3, "character": 6},
-                                },
-                                "newText": "ab:cd:alpha",
-                            },
-                            "data": {
-                                "fullname": "ab:cd:alpha",
-                                "filename": "${root_path}/completion_extras.php",
-                                "line": 9,
-                                "char": 13,
-                                "base_class": None,
-                            },
+                            "data": {"fullname": "ab:cd:alpha", "base_class": None},
                         },
                         {
                             "label": "ab:cd:text",
                             "kind": 7,
                             "detail": "class",
                             "inlineDetail": "class",
+                            "insertText": "ab:cd:text",
                             "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 6},
-                                    "end": {"line": 3, "character": 6},
-                                },
-                                "newText": "ab:cd:text",
-                            },
-                            "data": {
-                                "fullname": "ab:cd:text",
-                                "filename": "${root_path}/completion_extras.php",
-                                "line": 4,
-                                "char": 13,
-                                "base_class": None,
-                            },
+                            "data": {"fullname": "ab:cd:text", "base_class": None},
                         },
                     ],
                 },
+                powered_by="serverless_ide",
             )
             .notification(
                 comment="Add '$x = <a'",
@@ -494,45 +461,22 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 7,
                             "detail": "class",
                             "inlineDetail": "class",
+                            "insertText": "ab:cd:alpha",
                             "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 6},
-                                    "end": {"line": 3, "character": 7},
-                                },
-                                "newText": "ab:cd:alpha",
-                            },
-                            "data": {
-                                "fullname": "ab:cd:alpha",
-                                "filename": "${root_path}/completion_extras.php",
-                                "line": 9,
-                                "char": 13,
-                                "base_class": None,
-                            },
+                            "data": {"fullname": "ab:cd:alpha", "base_class": None},
                         },
                         {
                             "label": "ab:cd:text",
                             "kind": 7,
                             "detail": "class",
                             "inlineDetail": "class",
+                            "insertText": "ab:cd:text",
                             "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 6},
-                                    "end": {"line": 3, "character": 7},
-                                },
-                                "newText": "ab:cd:text",
-                            },
-                            "data": {
-                                "fullname": "ab:cd:text",
-                                "filename": "${root_path}/completion_extras.php",
-                                "line": 4,
-                                "char": 13,
-                                "base_class": None,
-                            },
+                            "data": {"fullname": "ab:cd:text", "base_class": None},
                         },
                     ],
                 },
+                powered_by="serverless_ide",
             )
             .notification(
                 comment="Add '$x = <ab:'",
@@ -565,45 +509,22 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 7,
                             "detail": "class",
                             "inlineDetail": "class",
+                            "insertText": "ab:cd:alpha",
                             "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 6},
-                                    "end": {"line": 3, "character": 9},
-                                },
-                                "newText": "ab:cd:alpha",
-                            },
-                            "data": {
-                                "fullname": "ab:cd:alpha",
-                                "filename": "${root_path}/completion_extras.php",
-                                "line": 9,
-                                "char": 13,
-                                "base_class": None,
-                            },
+                            "data": {"fullname": "ab:cd:alpha", "base_class": None},
                         },
                         {
                             "label": "ab:cd:text",
                             "kind": 7,
                             "detail": "class",
                             "inlineDetail": "class",
+                            "insertText": "ab:cd:text",
                             "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 6},
-                                    "end": {"line": 3, "character": 9},
-                                },
-                                "newText": "ab:cd:text",
-                            },
-                            "data": {
-                                "fullname": "ab:cd:text",
-                                "filename": "${root_path}/completion_extras.php",
-                                "line": 4,
-                                "char": 13,
-                                "base_class": None,
-                            },
+                            "data": {"fullname": "ab:cd:text", "base_class": None},
                         },
                     ],
                 },
+                powered_by="serverless_ide",
             )
             .notification(
                 comment="Add '$x = <ab:cd:text '",
@@ -636,14 +557,8 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 10,
                             "detail": "?int",
                             "inlineDetail": "?int",
+                            "insertText": "width",
                             "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 17},
-                                    "end": {"line": 3, "character": 17},
-                                },
-                                "newText": "width",
-                            },
                             "data": {
                                 "fullname": "width",
                                 "filename": "${root_path}/completion_extras.php",
@@ -657,14 +572,8 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 10,
                             "detail": "?string",
                             "inlineDetail": "?string",
+                            "insertText": "color",
                             "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 17},
-                                    "end": {"line": 3, "character": 17},
-                                },
-                                "newText": "color",
-                            },
                             "data": {
                                 "fullname": "color",
                                 "filename": "${root_path}/completion_extras.php",
@@ -675,6 +584,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         },
                     ],
                 },
+                powered_by="serverless_ide",
             )
             .notification(
                 comment="Add '$x = <ab:cd:text w'",
@@ -707,14 +617,8 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 10,
                             "detail": "?int",
                             "inlineDetail": "?int",
+                            "insertText": "width",
                             "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 17},
-                                    "end": {"line": 3, "character": 18},
-                                },
-                                "newText": "width",
-                            },
                             "data": {
                                 "fullname": "width",
                                 "filename": "${root_path}/completion_extras.php",
@@ -728,14 +632,8 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 10,
                             "detail": "?string",
                             "inlineDetail": "?string",
+                            "insertText": "color",
                             "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 17},
-                                    "end": {"line": 3, "character": 18},
-                                },
-                                "newText": "color",
-                            },
                             "data": {
                                 "fullname": "color",
                                 "filename": "${root_path}/completion_extras.php",
@@ -746,6 +644,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         },
                     ],
                 },
+                powered_by="serverless_ide",
             )
             .notification(
                 comment="Add '$x = new :'",
@@ -775,50 +674,25 @@ class TestLsp(TestCase[LspTestDriver]):
                     "items": [
                         {
                             "label": ":ab:cd:alpha",
-                            "kind": 4,
-                            "detail": "function(): :ab:cd:alpha",
-                            "inlineDetail": "()",
-                            "itemType": ":ab:cd:alpha",
+                            "kind": 7,
+                            "detail": "class",
+                            "inlineDetail": "class",
+                            "insertText": ":ab:cd:alpha",
                             "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 9},
-                                    "end": {"line": 3, "character": 10},
-                                },
-                                "newText": ":ab:cd:alpha",
-                            },
-                            "data": {
-                                "fullname": ":ab:cd:alpha",
-                                "filename": "${root_path}/completion_extras.php",
-                                "line": 9,
-                                "char": 13,
-                                "base_class": "\\:ab:cd:alpha",
-                            },
+                            "data": {"fullname": ":ab:cd:alpha", "base_class": None},
                         },
                         {
                             "label": ":ab:cd:text",
-                            "kind": 4,
-                            "detail": "function(): :ab:cd:text",
-                            "inlineDetail": "()",
-                            "itemType": ":ab:cd:text",
+                            "kind": 7,
+                            "detail": "class",
+                            "inlineDetail": "class",
+                            "insertText": ":ab:cd:text",
                             "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 9},
-                                    "end": {"line": 3, "character": 10},
-                                },
-                                "newText": ":ab:cd:text",
-                            },
-                            "data": {
-                                "fullname": ":ab:cd:text",
-                                "filename": "${root_path}/completion_extras.php",
-                                "line": 4,
-                                "char": 13,
-                                "base_class": "\\:ab:cd:text",
-                            },
+                            "data": {"fullname": ":ab:cd:text", "base_class": None},
                         },
                     ],
                 },
+                powered_by="serverless_ide",
             )
             .notification(
                 comment="Add '$x = new :a'",
@@ -848,50 +722,25 @@ class TestLsp(TestCase[LspTestDriver]):
                     "items": [
                         {
                             "label": ":ab:cd:alpha",
-                            "kind": 4,
-                            "detail": "function(): :ab:cd:alpha",
-                            "inlineDetail": "()",
-                            "itemType": ":ab:cd:alpha",
+                            "kind": 7,
+                            "detail": "class",
+                            "inlineDetail": "class",
+                            "insertText": ":ab:cd:alpha",
                             "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 9},
-                                    "end": {"line": 3, "character": 11},
-                                },
-                                "newText": ":ab:cd:alpha",
-                            },
-                            "data": {
-                                "fullname": ":ab:cd:alpha",
-                                "filename": "${root_path}/completion_extras.php",
-                                "line": 9,
-                                "char": 13,
-                                "base_class": "\\:ab:cd:alpha",
-                            },
+                            "data": {"fullname": ":ab:cd:alpha", "base_class": None},
                         },
                         {
                             "label": ":ab:cd:text",
-                            "kind": 4,
-                            "detail": "function(): :ab:cd:text",
-                            "inlineDetail": "()",
-                            "itemType": ":ab:cd:text",
+                            "kind": 7,
+                            "detail": "class",
+                            "inlineDetail": "class",
+                            "insertText": ":ab:cd:text",
                             "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 9},
-                                    "end": {"line": 3, "character": 11},
-                                },
-                                "newText": ":ab:cd:text",
-                            },
-                            "data": {
-                                "fullname": ":ab:cd:text",
-                                "filename": "${root_path}/completion_extras.php",
-                                "line": 4,
-                                "char": 13,
-                                "base_class": "\\:ab:cd:text",
-                            },
+                            "data": {"fullname": ":ab:cd:text", "base_class": None},
                         },
                     ],
                 },
+                powered_by="serverless_ide",
             )
             .request(
                 comment="autocomplete resolving after '$x = new :a'",
@@ -924,6 +773,23 @@ class TestLsp(TestCase[LspTestDriver]):
                         "char": 13,
                     },
                 },
+                powered_by="serverless_ide",
+            )
+            .notification(
+                comment="Add '$x = <ab:cd:text/>; $y = $x->'",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 3, "character": 0},
+                                "end": {"line": 3, "character": 11},
+                            },
+                            "text": "$x = <ab:cd:text/>; $y = $x->",
+                        }
+                    ],
+                },
             )
             .request(
                 comment="autocomplete after '$x = <ab:cd:text/>; $y = $x->'",
@@ -940,14 +806,8 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 10,
                             "detail": "?int",
                             "inlineDetail": "?int",
+                            "insertText": ":width",
                             "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 29},
-                                    "end": {"line": 3, "character": 29},
-                                },
-                                "newText": ":width",
-                            },
                             "data": {
                                 "fullname": ":width",
                                 "filename": "${root_path}/completion_extras.php",
@@ -961,14 +821,8 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 10,
                             "detail": "?string",
                             "inlineDetail": "?string",
+                            "insertText": ":color",
                             "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 29},
-                                    "end": {"line": 3, "character": 29},
-                                },
-                                "newText": ":color",
-                            },
                             "data": {
                                 "fullname": ":color",
                                 "filename": "${root_path}/completion_extras.php",
@@ -979,6 +833,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         },
                     ],
                 },
+                powered_by="serverless_ide",
             )
             .notification(
                 comment="Add '$x = <ab:cd:text/>; $y = $x->:'",
@@ -1011,14 +866,8 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 10,
                             "detail": "?int",
                             "inlineDetail": "?int",
+                            "insertText": ":width",
                             "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 29},
-                                    "end": {"line": 3, "character": 30},
-                                },
-                                "newText": ":width",
-                            },
                             "data": {
                                 "fullname": ":width",
                                 "filename": "${root_path}/completion_extras.php",
@@ -1032,14 +881,8 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 10,
                             "detail": "?string",
                             "inlineDetail": "?string",
+                            "insertText": ":color",
                             "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 29},
-                                    "end": {"line": 3, "character": 30},
-                                },
-                                "newText": ":color",
-                            },
                             "data": {
                                 "fullname": ":color",
                                 "filename": "${root_path}/completion_extras.php",
@@ -1050,6 +893,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         },
                     ],
                 },
+                powered_by="serverless_ide",
             )
             .notification(
                 comment="Add 'test_fun'",
@@ -1080,27 +924,15 @@ class TestLsp(TestCase[LspTestDriver]):
                         {
                             "label": "test_function",
                             "kind": 3,
-                            "detail": "function(): void",
-                            "inlineDetail": "()",
-                            "itemType": "void",
+                            "detail": "function",
+                            "inlineDetail": "function",
+                            "insertText": "test_function",
                             "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 0},
-                                    "end": {"line": 3, "character": 8},
-                                },
-                                "newText": "test_function",
-                            },
-                            "data": {
-                                "fullname": "test_function",
-                                "filename": "${root_path}/completion.php",
-                                "line": 8,
-                                "char": 10,
-                                "base_class": None,
-                            },
+                            "data": {"fullname": "test_function", "base_class": None},
                         }
                     ],
                 },
+                powered_by="serverless_ide",
             )
             .request(
                 comment="autocomplete resolving after 'test_fun'",
@@ -1137,6 +969,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         "char": 10,
                     },
                 },
+                powered_by="serverless_ide",
             )
             .notification(
                 comment="Add 'switch (Elsa::Alonso) { case Elsa:'",
@@ -1162,6 +995,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "position": {"line": 3, "character": 34},
                 },
                 result={"isIncomplete": False, "items": []},
+                powered_by="serverless_ide",
             )
             .notification(
                 comment="Add 'switch (Elsa::Alonso) { case Elsa::'",
@@ -1194,14 +1028,8 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 21,
                             "detail": "classname<this>",
                             "inlineDetail": "classname<this>",
+                            "insertText": "class",
                             "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 35},
-                                    "end": {"line": 3, "character": 35},
-                                },
-                                "newText": "class",
-                            },
                             "data": {
                                 "fullname": "class",
                                 "filename": "${root_path}/completion_extras.php",
@@ -1215,14 +1043,8 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 21,
                             "detail": "Elsa",
                             "inlineDetail": "Elsa",
+                            "insertText": "Bard",
                             "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 35},
-                                    "end": {"line": 3, "character": 35},
-                                },
-                                "newText": "Bard",
-                            },
                             "data": {
                                 "fullname": "Bard",
                                 "filename": "${root_path}/completion_extras.php",
@@ -1236,14 +1058,8 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 21,
                             "detail": "Elsa",
                             "inlineDetail": "Elsa",
+                            "insertText": "Alonso",
                             "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 35},
-                                    "end": {"line": 3, "character": 35},
-                                },
-                                "newText": "Alonso",
-                            },
                             "data": {
                                 "fullname": "Alonso",
                                 "filename": "${root_path}/completion_extras.php",
@@ -1258,14 +1074,8 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "function(mixed $value): bool",
                             "inlineDetail": "(mixed $value)",
                             "itemType": "bool",
+                            "insertText": "isValid",
                             "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 35},
-                                    "end": {"line": 3, "character": 35},
-                                },
-                                "newText": "isValid",
-                            },
                             "data": {
                                 "fullname": "isValid",
                                 "filename": "/tmp/cleansed_hhi_path/BuiltinEnum.hhi",
@@ -1280,14 +1090,8 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "function(): darray<string, Elsa>",
                             "inlineDetail": "()",
                             "itemType": "darray<string, Elsa>",
+                            "insertText": "getValues",
                             "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 35},
-                                    "end": {"line": 3, "character": 35},
-                                },
-                                "newText": "getValues",
-                            },
                             "data": {
                                 "fullname": "getValues",
                                 "filename": "/tmp/cleansed_hhi_path/BuiltinEnum.hhi",
@@ -1302,14 +1106,8 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "function(): darray<Elsa, string>",
                             "inlineDetail": "()",
                             "itemType": "darray<Elsa, string>",
+                            "insertText": "getNames",
                             "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 35},
-                                    "end": {"line": 3, "character": 35},
-                                },
-                                "newText": "getNames",
-                            },
                             "data": {
                                 "fullname": "getNames",
                                 "filename": "/tmp/cleansed_hhi_path/BuiltinEnum.hhi",
@@ -1324,14 +1122,8 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "function(mixed $value): ?Elsa",
                             "inlineDetail": "(mixed $value)",
                             "itemType": "?Elsa",
+                            "insertText": "coerce",
                             "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 35},
-                                    "end": {"line": 3, "character": 35},
-                                },
-                                "newText": "coerce",
-                            },
                             "data": {
                                 "fullname": "coerce",
                                 "filename": "/tmp/cleansed_hhi_path/BuiltinEnum.hhi",
@@ -1346,14 +1138,8 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "function(Traversable<mixed> $values): Container<Elsa>",
                             "inlineDetail": "(Traversable<mixed> $values)",
                             "itemType": "Container<Elsa>",
+                            "insertText": "assertAll",
                             "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 35},
-                                    "end": {"line": 3, "character": 35},
-                                },
-                                "newText": "assertAll",
-                            },
                             "data": {
                                 "fullname": "assertAll",
                                 "filename": "/tmp/cleansed_hhi_path/BuiltinEnum.hhi",
@@ -1368,14 +1154,8 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "function(mixed $value): Elsa",
                             "inlineDetail": "(mixed $value)",
                             "itemType": "Elsa",
+                            "insertText": "assert",
                             "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 35},
-                                    "end": {"line": 3, "character": 35},
-                                },
-                                "newText": "assert",
-                            },
                             "data": {
                                 "fullname": "assert",
                                 "filename": "/tmp/cleansed_hhi_path/BuiltinEnum.hhi",
@@ -1386,6 +1166,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         },
                     ],
                 },
+                powered_by="serverless_ide",
             )
             .notification(
                 comment="Add 'switch (Elsa::Alonso) { case Elsa::Alonso:'",
@@ -1452,6 +1233,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         "char": 32,
                     },
                 },
+                powered_by="serverless_ide",
             )
             .request(
                 comment="autocomplete after 'switch (Elsa::Alonso) { case Elsa::Alonso:'",
@@ -1461,6 +1243,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "position": {"line": 3, "character": 42},
                 },
                 result={"isIncomplete": False, "items": []},
+                powered_by="serverless_ide",
             )
             .notification(
                 comment="Add 'TestNS\\'",
@@ -1489,29 +1272,20 @@ class TestLsp(TestCase[LspTestDriver]):
                     "isIncomplete": False,
                     "items": [
                         {
-                            "label": "TestNS\\test_func",
+                            "label": "test_func",
                             "kind": 3,
-                            "detail": "function(): void",
-                            "inlineDetail": "()",
-                            "itemType": "void",
+                            "detail": "function",
+                            "inlineDetail": "function",
+                            "insertText": "test_func",
                             "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 7},
-                                    "end": {"line": 3, "character": 7},
-                                },
-                                "newText": "TestNS\\test_func",
-                            },
                             "data": {
                                 "fullname": "TestNS\\test_func",
-                                "filename": "${root_path}/completion_extras_namespace.php",
-                                "line": 5,
-                                "char": 10,
                                 "base_class": None,
                             },
                         }
                     ],
                 },
+                powered_by="serverless_ide",
             )
             .notification(
                 comment="Add '$cc = new CompletionClass(); $cc->interfa'",
@@ -1545,14 +1319,8 @@ class TestLsp(TestCase[LspTestDriver]):
                             "detail": "function(): void",
                             "inlineDetail": "()",
                             "itemType": "void",
+                            "insertText": "interfaceDocBlockMethod",
                             "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 34},
-                                    "end": {"line": 3, "character": 41},
-                                },
-                                "newText": "interfaceDocBlockMethod",
-                            },
                             "data": {
                                 "fullname": "interfaceDocBlockMethod",
                                 "filename": "${root_path}/completion.php",
@@ -1563,6 +1331,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         }
                     ],
                 },
+                powered_by="serverless_ide",
             )
             .request(
                 comment="autocomplete resolving after '$cc = new CompletionClass(); $cc->interfa'",
@@ -1607,10 +1376,11 @@ class TestLsp(TestCase[LspTestDriver]):
                         "char": 19,
                     },
                 },
+                powered_by="serverless_ide",
             )
             .request(method="shutdown", params={}, result=None)
         )
-        self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)
+        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_completion_legacy(self) -> None:
         self.prepare_server_environment()

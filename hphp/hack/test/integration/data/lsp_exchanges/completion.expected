@@ -82,9 +82,6 @@
           },
           "data": {
             "fullname": "ab:cd:alpha",
-            "filename": "${root_path}/completion_extras.php",
-            "line": 9,
-            "char": 13,
             "base_class": null
           }
         },
@@ -109,9 +106,6 @@
           },
           "data": {
             "fullname": "ab:cd:text",
-            "filename": "${root_path}/completion_extras.php",
-            "line": 4,
-            "char": 13,
             "base_class": null
           }
         }
@@ -145,9 +139,6 @@
           },
           "data": {
             "fullname": "ab:cd:alpha",
-            "filename": "${root_path}/completion_extras.php",
-            "line": 9,
-            "char": 13,
             "base_class": null
           }
         },
@@ -172,9 +163,6 @@
           },
           "data": {
             "fullname": "ab:cd:text",
-            "filename": "${root_path}/completion_extras.php",
-            "line": 4,
-            "char": 13,
             "base_class": null
           }
         }
@@ -208,9 +196,6 @@
           },
           "data": {
             "fullname": "ab:cd:alpha",
-            "filename": "${root_path}/completion_extras.php",
-            "line": 9,
-            "char": 13,
             "base_class": null
           }
         },
@@ -235,9 +220,6 @@
           },
           "data": {
             "fullname": "ab:cd:text",
-            "filename": "${root_path}/completion_extras.php",
-            "line": 4,
-            "char": 13,
             "base_class": null
           }
         }
@@ -378,10 +360,9 @@
       "items": [
         {
           "label": ":ab:cd:alpha",
-          "kind": 4,
-          "detail": "function(): :ab:cd:alpha",
-          "inlineDetail": "()",
-          "itemType": ":ab:cd:alpha",
+          "kind": 7,
+          "detail": "class",
+          "inlineDetail": "class",
           "insertTextFormat": 1,
           "textEdit": {
             "range": {
@@ -398,18 +379,14 @@
           },
           "data": {
             "fullname": ":ab:cd:alpha",
-            "filename": "${root_path}/completion_extras.php",
-            "line": 9,
-            "char": 13,
-            "base_class": "\\:ab:cd:alpha"
+            "base_class": null
           }
         },
         {
           "label": ":ab:cd:text",
-          "kind": 4,
-          "detail": "function(): :ab:cd:text",
-          "inlineDetail": "()",
-          "itemType": ":ab:cd:text",
+          "kind": 7,
+          "detail": "class",
+          "inlineDetail": "class",
           "insertTextFormat": 1,
           "textEdit": {
             "range": {
@@ -426,10 +403,7 @@
           },
           "data": {
             "fullname": ":ab:cd:text",
-            "filename": "${root_path}/completion_extras.php",
-            "line": 4,
-            "char": 13,
-            "base_class": "\\:ab:cd:text"
+            "base_class": null
           }
         }
       ]
@@ -443,10 +417,9 @@
       "items": [
         {
           "label": ":ab:cd:alpha",
-          "kind": 4,
-          "detail": "function(): :ab:cd:alpha",
-          "inlineDetail": "()",
-          "itemType": ":ab:cd:alpha",
+          "kind": 7,
+          "detail": "class",
+          "inlineDetail": "class",
           "insertTextFormat": 1,
           "textEdit": {
             "range": {
@@ -463,18 +436,14 @@
           },
           "data": {
             "fullname": ":ab:cd:alpha",
-            "filename": "${root_path}/completion_extras.php",
-            "line": 9,
-            "char": 13,
-            "base_class": "\\:ab:cd:alpha"
+            "base_class": null
           }
         },
         {
           "label": ":ab:cd:text",
-          "kind": 4,
-          "detail": "function(): :ab:cd:text",
-          "inlineDetail": "()",
-          "itemType": ":ab:cd:text",
+          "kind": 7,
+          "detail": "class",
+          "inlineDetail": "class",
           "insertTextFormat": 1,
           "textEdit": {
             "range": {
@@ -491,10 +460,7 @@
           },
           "data": {
             "fullname": ":ab:cd:text",
-            "filename": "${root_path}/completion_extras.php",
-            "line": 4,
-            "char": 13,
-            "base_class": "\\:ab:cd:text"
+            "base_class": null
           }
         }
       ]
@@ -653,9 +619,8 @@
         {
           "label": "test_function",
           "kind": 3,
-          "detail": "function(): void",
-          "inlineDetail": "()",
-          "itemType": "void",
+          "detail": "function",
+          "inlineDetail": "function",
           "insertTextFormat": 1,
           "textEdit": {
             "range": {
@@ -672,9 +637,6 @@
           },
           "data": {
             "fullname": "test_function",
-            "filename": "${root_path}/completion.php",
-            "line": 8,
-            "char": 10,
             "base_class": null
           }
         }
@@ -1018,30 +980,26 @@
       "isIncomplete": false,
       "items": [
         {
-          "label": "TestNS\\test_func",
+          "label": "test_func",
           "kind": 3,
-          "detail": "function(): void",
-          "inlineDetail": "()",
-          "itemType": "void",
+          "detail": "function",
+          "inlineDetail": "function",
           "insertTextFormat": 1,
           "textEdit": {
             "range": {
               "start": {
                 "line": 3,
-                "character": 7
+                "character": 8
               },
               "end": {
                 "line": 3,
-                "character": 7
+                "character": 8
               }
             },
-            "newText": "TestNS\\test_func"
+            "newText": "test_func"
           },
           "data": {
             "fullname": "TestNS\\test_func",
-            "filename": "${root_path}/completion_extras_namespace.php",
-            "line": 5,
-            "char": 10,
             "base_class": null
           }
         }

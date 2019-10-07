@@ -1404,7 +1404,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(
-                comment="autocomplete resolving after 'switch (Elsa::Alonso) { case Elsa::'",
+                comment="docblock resolve after 'switch (Elsa::Alonso) { case Elsa::'",
                 method="completionItem/resolve",
                 params={
                     "label": "isValid",
@@ -1421,7 +1421,9 @@ class TestLsp(TestCase[LspTestDriver]):
                         "newText": "isValid",
                     },
                     "data": {
-                        "filename": "/tmp/cleansed_hhi_path/BuiltinEnum.hhi",
+                        # Note that this ${hhi_path} is a request, not a response
+                        # which is why it is still a replacement rather than a "cleansed" variable
+                        "filename": "${hhi_path}/BuiltinEnum.hhi",
                         "line": 49,
                         "char": 32,
                     },

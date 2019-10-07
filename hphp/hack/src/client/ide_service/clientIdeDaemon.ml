@@ -420,16 +420,21 @@ let handle_message :
     | (Initialized { server_env; _ }, Completion_resolve_location param) ->
       ClientIdeMessage.Completion_resolve_location.(
         let start_time = Unix.gettimeofday () in
-        let contents =
-          Option.value_exn param.document_location.file_contents
-        in
         let result =
-          ServerDocblockAt.go_docblock_at_contents
-            ~filename:(Path.to_string param.document_location.file_path)
-            ~contents
-            ~line:param.document_location.line
-            ~column:param.document_location.column
-            ~kind:param.kind
+          match param.document_location.file_contents with
+          | Some contents ->
+            ServerDocblockAt.go_docblock_at_contents
+              ~filename:(Path.to_string param.document_location.file_path)
+              ~contents
+              ~line:param.document_location.line
+              ~column:param.document_location.column
+              ~kind:param.kind
+          | None ->
+            ServerDocblockAt.go_docblock_at
+              ~filename:(Path.to_string param.document_location.file_path)
+              ~line:param.document_location.line
+              ~column:param.document_location.column
+              ~kind:param.kind
         in
         let sienv = !(server_env.ServerEnv.local_symbol_table) in
         ( if sienv.SearchUtils.sie_log_timings then

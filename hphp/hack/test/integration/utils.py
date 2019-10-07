@@ -3,6 +3,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os
+import re
 import signal
 from types import FrameType
 from typing import BinaryIO, Callable, Iterable, Mapping, Union, _ForwardRef
@@ -69,6 +70,19 @@ def map_json_scalars(json: Json, f: Callable[[JsonScalar], JsonScalar]) -> Json:
         return f(json)
     else:
         assert False, f"Unhandled JSON case: {json.__class__.__name__}"
+
+
+# Because HHI folders are different for each process,
+# let's just standardize them
+def fixup_hhi_json(payload: Json) -> Json:
+    def interpolate(json: JsonScalar) -> JsonScalar:
+        if isinstance(json, str):
+            json = re.sub(
+                "/tmp/tmp[\\d\\w_]*/hhi_[\\dabcdef]*/", "/tmp/cleansed_hhi_path/", json
+            )
+        return json
+
+    return map_json_scalars(json=payload, f=interpolate)
 
 
 def interpolate_variables(payload: Json, variables: VariableMap) -> Json:

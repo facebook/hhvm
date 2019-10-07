@@ -23,7 +23,13 @@ import libcst
 from libcst.metadata.position_provider import SyntacticPositionProvider
 from libcst.metadata.wrapper import MetadataWrapper
 from lspcommand import LspCommandProcessor, Transcript, TranscriptEntry
-from utils import Json, VariableMap, interpolate_variables, uninterpolate_variables
+from utils import (
+    Json,
+    VariableMap,
+    fixup_hhi_json,
+    interpolate_variables,
+    uninterpolate_variables,
+)
 
 
 _MessageSpec = Union[
@@ -409,6 +415,10 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
             )
         else:
             request_description = f"Request with ID {lsp_id!r}"
+
+        # Because of the way hack allocates a different HHI folder for each running
+        # process, let's replace the standard HHI foldername
+        actual_result = fixup_hhi_json(actual_result)
 
         expected_result = interpolate_variables(
             payload=request.result, variables=variables

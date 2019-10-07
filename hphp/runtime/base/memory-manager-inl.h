@@ -215,7 +215,6 @@ inline void* MemoryManager::mallocSmallIndex(size_t index) {
 }
 
 inline void* MemoryManager::mallocSmallIndexSize(size_t index, size_t bytes) {
-  assertx(index < kNumSmallSizes);
   if (debug) requestEagerGC();
 
   m_stats.mm_udebt -= bytes;
@@ -228,37 +227,36 @@ inline void* MemoryManager::mallocSmallIndexSize(size_t index, size_t bytes) {
 
 ALWAYS_INLINE
 void* MemoryManager::mallocSmallIndexTail(size_t bytes, size_t index) {
-  auto p = m_freelists[index].likelyPop();
-  if (!p) {
-    p = mallocSmallSizeSlow(bytes, index);
+  auto clamped = std::min(index, kNumSmallSizes);
+  if (auto p = m_freelists[clamped].likelyPop()) {
+    assertx((reinterpret_cast<uintptr_t>(p) & kSmallSizeAlignMask) == 0);
+    FTRACE(3, "mallocSmallIndex: {} -> {}\n", bytes, p);
+    return p;
   }
-  assertx((reinterpret_cast<uintptr_t>(p) & kSmallSizeAlignMask) == 0);
-  FTRACE(3, "mallocSmallIndex: {} -> {}\n", bytes, p);
-  return p;
+  return mallocSmallSizeSlow(bytes, index);
 }
 
 inline void* MemoryManager::mallocSmallSize(size_t bytes) {
   assertx(bytes > 0);
-  assertx(bytes <= kMaxSmallSize);
   // mallocSmallIndex() converts the size index back to a size to track the
   // size class's actual size, rather than the requested size.
   return mallocSmallIndex(size2Index(bytes));
 }
 
 inline void MemoryManager::freeSmallIndex(void* ptr, size_t index) {
-  assertx(index < kNumSmallSizes);
   assertx((reinterpret_cast<uintptr_t>(ptr) & kSmallSizeAlignMask) == 0);
-
-  if (UNLIKELY(m_bypassSlabAlloc)) {
-    return freeBigSize(ptr);
-  }
 
   size_t bytes = sizeIndex2Size(index);
   FTRACE(3, "freeSmallIndex({}, {}), freelist {}\n", ptr, bytes, index);
 
   assertx(memset(ptr, kSmallFreeFill, bytes));
-  m_freelists[index].push(ptr);
-  m_stats.mm_freed += bytes;
+  auto clamped = std::min(index, kNumSmallSizes);
+  if (LIKELY(m_freelists[clamped].head != nullptr)) {
+    m_freelists[clamped].push(ptr);
+    m_stats.mm_freed += bytes;
+  } else {
+    freeSmallIndexSlow(ptr, index, bytes);
+  }
 }
 
 inline void MemoryManager::freeSmallSize(void* ptr, size_t bytes) {
@@ -269,26 +267,22 @@ inline void MemoryManager::freeSmallSize(void* ptr, size_t bytes) {
 
 ALWAYS_INLINE
 void* MemoryManager::objMalloc(size_t size) {
-  if (LIKELY(size <= kMaxSmallSize)) return mallocSmallSize(size);
-  return mallocBigSize(size);
+  return mallocSmallSize(size);
 }
 
 ALWAYS_INLINE
 void MemoryManager::objFree(void* vp, size_t size) {
-  if (LIKELY(size <= kMaxSmallSize)) return freeSmallSize(vp, size);
-  freeBigSize(vp);
+  freeSmallSize(vp, size);
 }
 
 ALWAYS_INLINE
 void* MemoryManager::objMallocIndex(size_t index) {
-  if (LIKELY(index < kNumSmallSizes)) return mallocSmallIndex(index);
-  return mallocBigSize(sizeIndex2Size(index));
+  return mallocSmallIndex(index);
 }
 
 ALWAYS_INLINE
 void MemoryManager::objFreeIndex(void* ptr, size_t index) {
-  if (LIKELY(index < kNumSmallSizes)) return freeSmallIndex(ptr, index);
-  return freeBigSize(ptr);
+  freeSmallIndex(ptr, index);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

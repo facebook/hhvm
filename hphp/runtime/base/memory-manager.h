@@ -945,7 +945,7 @@ struct MemoryManager {
     void push(void*);
     FreeNode* head{nullptr};
   };
-  using FreelistArray = std::array<FreeList,kNumSmallSizes>;
+  using FreelistArray = std::array<FreeList, kNumSmallSizes + 1>;
 
   /*
    * beginQuarantine() swaps out the normal freelists. endQuarantine()
@@ -990,6 +990,7 @@ private:
   void* mallocSmallIndexSlow(size_t bytes, size_t index);
   void* mallocSmallSizeSlow(size_t bytes, size_t index);
   void  updateBigStats();
+  void  freeSmallIndexSlow(void* ptr, size_t index, size_t bytes);
 
   static void threadStatsInit();
   static void threadStats(uint64_t*&, uint64_t*&);

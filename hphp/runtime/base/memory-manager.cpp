@@ -465,7 +465,7 @@ void MemoryManager::initFree() {
 }
 
 void MemoryManager::reinitFree() {
-  for (auto i = 0; i < kNumSmallSizes; i++) {
+  for (size_t i = 0, e = m_freelists.size(); i < e; i++) {
     auto size = sizeIndex2Size(i);
     auto n = m_freelists[i].head;
     for (; n && n->kind() != HeaderKind::Free; n = n->next) {
@@ -482,7 +482,7 @@ void MemoryManager::reinitFree() {
 
 MemoryManager::FreelistArray MemoryManager::beginQuarantine() {
   FreelistArray list;
-  for (auto i = 0; i < kNumSmallSizes; ++i) {
+  for (size_t i = 0, n = list.size(); i < n; ++i) {
     list[i].head = m_freelists[i].head;
     m_freelists[i].head = nullptr;
   }
@@ -491,7 +491,7 @@ MemoryManager::FreelistArray MemoryManager::beginQuarantine() {
 
 // turn free blocks into holes, restore original freelists
 void MemoryManager::endQuarantine(FreelistArray&& list) {
-  for (auto i = 0; i < kNumSmallSizes; i++) {
+  for (size_t i = 0, n = list.size(); i < n; i++) {
     auto size = sizeIndex2Size(i);
     while (auto n = m_freelists[i].likelyPop()) {
       memset(n, 0x8a, size);
@@ -572,8 +572,8 @@ void MemoryManager::checkHeap(const char* phase) {
   // check the free lists
   free_blocks.prepare();
   size_t num_free_blocks = 0;
-  for (auto i = 0; i < kNumSmallSizes; i++) {
-    for (auto n = m_freelists[i].head; n; n = n->next) {
+  for (auto& list : m_freelists) {
+    for (auto n = list.head; n; n = n->next) {
       assertx(free_blocks.isStart(n));
       ++num_free_blocks;
     }
@@ -754,6 +754,7 @@ NEVER_INLINE void* MemoryManager::newSlab(size_t nbytes) {
   // we can't use any space after slab->end() even if the allocator allows
   // (indiciated by mem.size), because of the fixed-sized crossing map.
   m_limit = slab->end();
+  assertx(m_front <= m_limit);
   FTRACE(3, "newSlab: adding slab at {} to limit {}\n", slab_start, m_limit);
   slab->setStart(slab_start);
   return slab_start;
@@ -766,16 +767,7 @@ inline void* MemoryManager::slabAlloc(size_t nbytes, size_t index) {
   FTRACE(3, "slabAlloc({}, {}): m_front={}, m_limit={}\n", nbytes, index,
             m_front, m_limit);
   assertx(nbytes == sizeIndex2Size(index));
-  assertx(nbytes <= kSlabSize);
   assertx((uintptr_t(m_front) & kSmallSizeAlignMask) == 0);
-
-  if (UNLIKELY(m_bypassSlabAlloc)) {
-    // Stats correction; mallocBigSize() updates m_stats. Add to mm_udebt rather
-    // than adding to mm_freed because we're adjusting for double-counting, not
-    // actually freeing anything.
-    m_stats.mm_udebt += nbytes;
-    return mallocBigSize(nbytes);
-  }
 
   auto ptr = m_front;
   auto next = (void*)(uintptr_t(ptr) + nbytes);
@@ -785,6 +777,13 @@ inline void* MemoryManager::slabAlloc(size_t nbytes, size_t index) {
     slab = Slab::fromPtr(ptr);
     slab->setStart(ptr);
   } else {
+    if (UNLIKELY(index >= kNumSmallSizes) || UNLIKELY(m_bypassSlabAlloc)) {
+      // Stats correction; mallocBigSize() updates m_stats. Add to mm_udebt
+      // rather than mm_freed because we're adjusting for double-counting, not
+      // actually freeing anything.
+      m_stats.mm_udebt += nbytes;
+      return mallocBigSize(nbytes);
+    }
     ptr = newSlab(nbytes); // sets start bit at ptr
     slab = Slab::fromPtr(ptr);
   }
@@ -813,7 +812,7 @@ void* MemoryManager::mallocSmallIndexSlow(size_t bytes, size_t index) {
 
 void* MemoryManager::mallocSmallSizeSlow(size_t nbytes, size_t index) {
   assertx(nbytes == sizeIndex2Size(index));
-  assertx(!m_freelists[index].head); // freelist[index] is empty
+  assertx(!m_freelists[std::min(index, kNumSmallSizes)].head);
   size_t contigInd = kContigIndexTab[index];
   for (auto i = contigInd; i < kNumSmallSizes; ++i) {
     FTRACE(4, "MemoryManager::mallocSmallSizeSlow({}, {}): contigMin={}, "
@@ -844,6 +843,16 @@ inline void MemoryManager::updateBigStats() {
   // this check won't do anything so avoid the extra overhead.
   if (debug) requestEagerGC();
   refreshStats();
+}
+
+NEVER_INLINE
+void MemoryManager::freeSmallIndexSlow(void* ptr, size_t index, size_t bytes) {
+  if (UNLIKELY(index >= kNumSmallSizes) || UNLIKELY(m_bypassSlabAlloc)) {
+    return freeBigSize(ptr);
+  }
+  // copy of FreeList::push() fast path when head == nullptr
+  m_freelists[index].head = FreeNode::UninitFrom(ptr, nullptr);
+  m_stats.mm_freed += bytes;
 }
 
 NEVER_INLINE

@@ -1,6 +1,7 @@
 <?hh
 
 class Baz {
+  <<__NEVER_INLINE>>
   private function bar($options) {
     var_dump(debug_backtrace($options));
   }

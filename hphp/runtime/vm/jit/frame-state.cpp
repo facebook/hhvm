@@ -155,10 +155,6 @@ bool merge_into(FrameState& dst, const FrameState& src) {
 
   changed |= merge_into(dst.mbase, src.mbase);
 
-  // The frame may span a call if it could have done so in either state.
-  changed |= merge_util(dst.frameMaySpanCall,
-                        dst.frameMaySpanCall || src.frameMaySpanCall);
-
   for (auto i = uint32_t{0}; i < src.locals.size(); ++i) {
     changed |= merge_into(dst.locals[i], src.locals[i]);
   }
@@ -1095,7 +1091,6 @@ void FrameStateMgr::clearForUnprocessedPred() {
   }
 
   // These values must go toward their conservative state.
-  cur().frameMaySpanCall = true;
   cur().mbr = MBRState{};
   cur().mbase = MBaseState{};
 
@@ -1130,7 +1125,6 @@ void FrameStateMgr::trackDefInlineFP(const IRInstruction* inst) {
   cur().fpValue          = calleeFP;
   cur().ctx              = inst->src(2);
   cur().curFunc          = target;
-  cur().frameMaySpanCall = false;
   cur().bcSPOff          = FPInvOffset{target->numSlotsInFrame()};
 
   /*
@@ -1180,7 +1174,6 @@ void FrameStateMgr::trackCall() {
     for (auto& stk : state.stack) {
       stk.value = nullptr;
     }
-    state.frameMaySpanCall = true;
   }
 }
 
@@ -1586,10 +1579,9 @@ std::string show(const FrameStateMgr& state) {
   auto funcName = func ? func->fullName() : makeStaticString("null");
 
   return folly::sformat(
-    "func: {}, spOff: {}{}",
+    "func: {}, spOff: {}",
     funcName,
-    state.irSPOff().offset,
-    state.frameMaySpanCall() ? ", frameMaySpanCall" : ""
+    state.irSPOff().offset
   );
 }
 

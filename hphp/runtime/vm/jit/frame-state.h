@@ -160,12 +160,6 @@ struct FrameState {
   SSATmp* ctx{nullptr};
 
   /*
-   * frameMaySpan is true iff a Call instruction has been seen on any path
-   * since the definition of the current frame pointer.
-   */
-  bool frameMaySpanCall{false};
-
-  /*
    * stackModified is reset to false by exceptionStackBoundary() and set to
    * true by anything that modifies the eval stack. It's used to verify that
    * the stack is not modified between the beginning of a bytecode's
@@ -311,7 +305,6 @@ struct FrameStateMgr final {
   FPInvOffset irSPOff()           const { return cur().irSPOff; }
   FPInvOffset bcSPOff()           const { return cur().bcSPOff; }
   bool        needRatchet()       const { return cur().needRatchet; }
-  bool        frameMaySpanCall()  const { return cur().frameMaySpanCall; }
   bool        stackModified()     const { return cur().stackModified; }
 
   /*

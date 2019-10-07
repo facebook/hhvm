@@ -341,8 +341,7 @@ SSATmp* IRBuilder::preOptimizeLdCtxHelper(IRInstruction* inst) {
         ret->type().subtypeOfAny(TInitNull, TUninit, TNullptr)) {
       return m_unit.cns(ret->type());
     }
-    if (!m_state.frameMaySpanCall()) return ret;
-    return nullptr;
+    return ret;
   }();
 
   if (ctx) {

@@ -27,6 +27,7 @@ function doit($a, $b, $how)
 }
 
 class foo {
+  <<__NEVER_INLINE>>
 	protected function doCall($dowhat, $how)
 	{
 	   $dowhat('a','b', $how);

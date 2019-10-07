@@ -1348,37 +1348,11 @@ bool irrelevant_inst(const IRInstruction& inst) {
 void find_alias_sets(Env& env) {
   FTRACE(2, "find_alias_sets --------------------------------------\n");
 
-  auto frame_to_ctx = sparse_idptr_map<SSATmp,ASetID>(env.unit.numTmps());
-
   auto add = [&] (SSATmp* tmp) {
     if (!tmp->type().maybe(TCounted)) return;
 
     auto& id = env.asetMap[tmp];
     if (id != -1) return;
-
-    /*
-     * There's one MustAliasSet for each frame's context, no matter how many
-     * times we see loads of it.  We take advantage of this in pure_load to
-     * bump the lower bound to at least one (if they weren't all in one set,
-     * we'd not be able to do that without violating exclusivity of lower
-     * bounds).
-     */
-    if (tmp->inst()->is(LdCtx)) {
-      assertx(tmp == canonical(tmp));
-
-      auto const fp = tmp->inst()->src(0);
-      if (frame_to_ctx.contains(fp)) {
-        id = frame_to_ctx[fp];
-      } else {
-        id = env.asets.size();
-        frame_to_ctx[fp] = id;
-        assertx(canonical(tmp) == tmp);
-        env.asets.push_back(MustAliasSet { tmp->type(), tmp });
-      }
-
-      FTRACE(2,  "  t{} -> {} ({})\n", tmp->id(), id, tmp->toString());
-      return;
-    }
 
     auto canon = canonical(tmp);
     if (env.asetMap[canon] != -1) {
@@ -2315,40 +2289,6 @@ void rc_analyze_inst(Env& env,
       auto& aset = state.asets[asetID];
       ++aset.lower_bound;
       FTRACE(3, "    {} produced: lb {}\n", asetID, aset.lower_bound);
-    });
-  }
-
-  /*
-   * We assume that LdCtx on the main frame requires that the $this pointer has
-   * a non-zero reference count, without any need for memory support.  The
-   * reason for this is that nothing is allowed to DecRef the context of a
-   * frame, except code that tears down that frame (either via a return or
-   * unwinding).
-   *
-   * If this IR program contains a return sequence, it might DecRef the frame
-   * context below one (possibly freeing it).  It is legal IR to have a LdCtx
-   * after this sort of decref, but it would be a semantically incorrect
-   * program if it does anything with the context after loading it that cares
-   * about whether it's freed.  So we're safe assuming any load of the context
-   * has a lower bound of one, because if it is loaded in a program position
-   * where that doesn't hold, the program can't do anything that cares about
-   * that without being broken already.
-   *
-   * One final note: because of the exclusivity rule on lower bounds, we cannot
-   * assume a lower bound of one for a LdCtx unless it comes from the main
-   * frame.  We are guaranteed (from find_alias_sets) that all the main frame
-   * contexts are in the same must alias set, but the value stored to an
-   * inlined frame may be in a different must alias set than the inlined LdCtx
-   * set, and its lower bound could still be non-zero.  In practice, we expect
-   * to rarely see LdCtx instructions inside of an inlined function---normally
-   * the actual context object should be copy propagated.
-   */
-  if (inst.is(LdCtx) && inst.src(0) == env.unit.mainFP()) {
-    if_aset(env, inst.dst(), [&] (ASetID asetID) {
-      auto& aset = state.asets[asetID];
-      aset.lower_bound = std::max(aset.lower_bound, 1);
-      FTRACE(3, "    {} lb: {}({})\n",
-             asetID, aset.lower_bound, aset.unsupported_refs);
     });
   }
 }

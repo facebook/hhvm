@@ -4,3 +4,15 @@ File "dup_check.bad.php", line 12, characters 12-12:
 Pocket Universe case value A:@F::x is already declared in A:@F (Naming[2101])
 File "dup_check.bad.php", line 25, characters 8-8:
 Pocket Universe enumeration A:@F is already declared in A (Naming[2101])
+File "dup_check.bad.php", line 20, characters 7-7:
+Wrong type hint (Typing[4350])
+File "dup_check.bad.php", line 11, characters 10-10:
+Expected X
+File "dup_check.bad.php", line 20, characters 11-12:
+But got int
+File "dup_check.bad.php", line 21, characters 7-7:
+Wrong type hint (Typing[4350])
+File "dup_check.bad.php", line 11, characters 10-10:
+Expected X
+File "dup_check.bad.php", line 21, characters 11-12:
+But got int

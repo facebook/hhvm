@@ -52,6 +52,8 @@ module Cls = Decl_provider.Class
 module Partial = Partial_provider
 module Fake = Typing_fake_members
 
+exception InvalidPocketUniverse
+
 module ExpectedTy : sig
   [@@@warning "-32"]
 
@@ -3516,11 +3518,14 @@ and expr_
       p
       (T.Shape (List.map ~f:(fun (k, (te, _)) -> (k, te)) tfdm))
       (Reason.Rwitness p, Tshape (Closed_shape, fdm))
-  | PU_atom _
-  (* TODO(T36532263): Pocket Universes *)
-  
-  | PU_identifier _ ->
-    Errors.pu_typing p;
+  | PU_atom s ->
+    (* TODO(T36532263): Pocket Universes *)
+    Errors.pu_typing p "atom" s;
+    expr_error env (Reason.Rwitness p) outer
+  | PU_identifier (_, (_, enum), (_, atom)) ->
+    (* TODO(T36532263): Pocket Universes *)
+    let s = enum ^ ":@" ^ atom in
+    Errors.pu_typing p "identifier" s;
     expr_error env (Reason.Rwitness p) outer
 
 (* let ty = (Reason.Rwitness cst_pos, Typing_utils.terr env) in *)
@@ -7773,6 +7778,10 @@ and class_def_ env c tc =
     | Some (m, global_tvenv) ->
       ((m :: typed_static_methods) @ typed_methods, [global_tvenv])
   in
+  let pu_enums =
+    try List.map c.c_pu_enums ~f:(pu_enum_def env (snd c.c_name))
+    with InvalidPocketUniverse -> []
+  in
   let (env, tparams) = class_type_param env c.c_tparams in
   let (env, user_attributes) =
     List.map_env env c.c_user_attributes user_attribute
@@ -7815,7 +7824,7 @@ and class_def_ env c tc =
       T.c_attributes = [];
       T.c_xhp_children = c.c_xhp_children;
       T.c_xhp_attrs = [];
-      T.c_pu_enums = [] (* TODO PU (typing) *);
+      T.c_pu_enums = pu_enums;
     },
     typed_methods_global_tvenv
     @ typed_static_methods_global_tvenv
@@ -7931,6 +7940,114 @@ and typeconst_def
       T.c_tconst_span;
       T.c_tconst_doc_comment;
     } )
+
+and pu_enum_def
+    env
+    c_name
+    { pu_name; pu_is_final; pu_case_types; pu_case_values; pu_members } =
+  (* What is a well-formed pocket universe?
+    - pu_name is unique
+    - pu_case_types are well-formed if all names are unique
+    - pu_case_values are well-formed if all types are well-formed in an
+       environment where all names in pu_case_types are bound to abstract types
+    - pu_members are well-formed if:
+      - each name is unique
+      - all types are defined one and only one times in pum_types, and
+        are well-formed in an environment
+      - all values are defined one and only one times in pum_types, and
+        are correctly typed according to pum_types instances.
+
+    Note: Structural correctness (mostly uniqueness and exhaustivity)
+    is checked during Nast check.
+    If the Nast check fails, this function might raise InvalidPocketUniverse,
+    that we silently ignore not to spam with duplicated errors.
+
+    Here we check that all definitions are well-typed.
+ *)
+  let cls = Decl_provider.get_class c_name in
+  let pu_enum =
+    Option.bind cls ~f:(fun cls -> Cls.get_pu_enum cls (snd pu_name))
+  in
+  let make_ty_tparam sid =
+    {
+      tp_variance = Ast_defs.Invariant;
+      tp_name = sid;
+      tp_constraints = [];
+      tp_reified = Aast.Erased;
+      tp_user_attributes = [];
+    }
+  in
+  let make_aast_tparam (sid, hint) =
+    let hint_ty = Decl_hint.hint env.decl_env hint in
+    {
+      tp_variance = Ast_defs.Invariant;
+      tp_name = sid;
+      tp_constraints = [(Ast_defs.Constraint_eq, hint_ty)];
+      tp_reified = Aast.Erased;
+      tp_user_attributes = [];
+    }
+  in
+  let case_types =
+    let env =
+      Env.add_generic_parameters env (List.map ~f:make_ty_tparam pu_case_types)
+    in
+    List.iter pu_case_values ~f:(fun (_sid, hint) ->
+        ignore (Phase.localize_hint_with_self env hint : _ * _));
+    pu_case_types
+  in
+  let members =
+    let process_member pum =
+      let (env, cstrs) =
+        let pum_types = List.map ~f:make_aast_tparam pum.pum_types in
+        Phase.localize_generic_parameters_with_bounds
+          env
+          ~ety_env:(Phase.env_with_self env)
+          pum_types
+      in
+      let env = add_constraints (fst pum.pum_atom) env cstrs in
+      let process_mapping (sid, map_expr) =
+        let (env, ty, expected) =
+          let equal ((_, s1) : sid) ((_, s2) : sid) = String.equal s1 s2 in
+          let (env, ty) =
+            match List.Assoc.find ~equal pu_case_values sid with
+            | None ->
+              ((* Check in parent hierarchy *)
+              match pu_enum with
+              | None -> raise InvalidPocketUniverse
+              | Some pu_enum ->
+                (match SMap.find_opt (snd sid) pu_enum.tpu_case_values with
+                | None -> raise InvalidPocketUniverse
+                | Some (_, decl_ty) -> Phase.localize_with_self env decl_ty))
+            | Some hint -> Phase.localize_hint_with_self env hint
+          in
+          (env, ty, Some (ExpectedTy.make (fst sid) Reason.URhint ty))
+        in
+        let (_env, expr, ty') = expr ?expected env map_expr in
+        ignore
+          (Typing_ops.sub_type
+             (fst sid)
+             Reason.URhint
+             env
+             ty'
+             ty
+             Errors.pocket_universes_typing);
+        (sid, expr)
+      in
+      {
+        T.pum_atom = pum.pum_atom;
+        T.pum_types = pum.pum_types;
+        T.pum_exprs = List.map ~f:process_mapping pum.pum_exprs;
+      }
+    in
+    List.map ~f:process_member pu_members
+  in
+  {
+    T.pu_name;
+    T.pu_is_final;
+    T.pu_case_types = case_types;
+    T.pu_case_values;
+    T.pu_members = members;
+  }
 
 and class_const_def env cc =
   let { cc_type = h; cc_id = id; cc_expr = e; _ } = cc in

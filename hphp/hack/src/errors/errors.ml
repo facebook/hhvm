@@ -3539,6 +3539,8 @@ let class_property_initializer_type_does_not_match_hint =
 let xhp_attribute_does_not_match_hint =
   maybe_unify_error Typing.XhpAttributeValueDoesNotMatchHint
 
+let pocket_universes_typing = maybe_unify_error Typing.PocketUniversesTyping
+
 let record_init_value_does_not_match_hint =
   maybe_unify_error Typing.RecordInitValueDoesNotMatchHint
 
@@ -3972,11 +3974,14 @@ let pu_expansion pos =
     pos
     "[PocketUniverses] Type expansion is not supported."
 
-let pu_typing pos =
+let pu_typing pos kind msg =
   add
     (Typing.err_code Typing.PocketUniversesTyping)
     pos
-    "[PocketUniverses] Typing is not supported."
+    (sprintf
+       "Unexpected Pocket Universes %s %s while typing expressions."
+       kind
+       msg)
 
 (*****************************************************************************)
 (* Typing decl errors *)

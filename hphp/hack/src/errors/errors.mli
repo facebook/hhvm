@@ -465,6 +465,8 @@ val class_property_initializer_type_does_not_match_hint : typing_error_callback
 
 val xhp_attribute_does_not_match_hint : typing_error_callback
 
+val pocket_universes_typing : typing_error_callback
+
 val record_init_value_does_not_match_hint : typing_error_callback
 
 val static_redeclared_as_dynamic :
@@ -925,7 +927,7 @@ val mutable_return_annotated_decls_must_be_reactive :
 
 val pu_expansion : Pos.t -> unit
 
-val pu_typing : Pos.t -> unit
+val pu_typing : Pos.t -> string -> string -> unit
 
 val pu_atom_missing : Pos.t -> string -> string -> string -> string -> unit
 

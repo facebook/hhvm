@@ -41,6 +41,12 @@ function server_warmup_status_monotonic(): string;
 function execution_context(): string;
 
 <<__Rx, __Native>>
+function mark_legacy_hack_array(vec_or_dict $v): vec_or_dict;
+
+<<__Rx, __Native>>
+function is_marked_legacy_hack_array(vec_or_dict $v): bool;
+
+<<__Rx, __Native>>
 function enable_legacy_behavior(vec_or_dict $v): vec_or_dict;
 
 <<__Rx, __Native>>

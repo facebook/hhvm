@@ -2,7 +2,7 @@ vec(0) {
 }
 bool(true)
 
-Warning: is_legacy_behavior_enabled expects a dict or vec in %s/test/slow/hack_arr_compat/legacy_serialize/json_decode_legacy_hack_array.php on line 25
+Warning: is_marked_legacy_hack_array expects a dict or vec in %s/test/slow/hack_arr_compat/legacy_serialize/json_decode_legacy_hack_array.php on line 25
 array(0) {
 }
 bool(true)
@@ -13,7 +13,7 @@ vec(3) {
 }
 bool(true)
 
-Warning: is_legacy_behavior_enabled expects a dict or vec in %s/test/slow/hack_arr_compat/legacy_serialize/json_decode_legacy_hack_array.php on line 25
+Warning: is_marked_legacy_hack_array expects a dict or vec in %s/test/slow/hack_arr_compat/legacy_serialize/json_decode_legacy_hack_array.php on line 25
 array(3) {
   [0]=>
   int(1)
@@ -32,7 +32,7 @@ vec(0) {
 }
 bool(true)
 
-Warning: is_legacy_behavior_enabled expects a dict or vec in %s/test/slow/hack_arr_compat/legacy_serialize/json_decode_legacy_hack_array.php on line 25
+Warning: is_marked_legacy_hack_array expects a dict or vec in %s/test/slow/hack_arr_compat/legacy_serialize/json_decode_legacy_hack_array.php on line 25
 array(1) {
   [0]=>
   array(0) {
@@ -40,7 +40,7 @@ array(1) {
 }
 bool(true)
 
-Warning: is_legacy_behavior_enabled expects a dict or vec in %s/test/slow/hack_arr_compat/legacy_serialize/json_decode_legacy_hack_array.php on line 25
+Warning: is_marked_legacy_hack_array expects a dict or vec in %s/test/slow/hack_arr_compat/legacy_serialize/json_decode_legacy_hack_array.php on line 25
 array(0) {
 }
 bool(true)

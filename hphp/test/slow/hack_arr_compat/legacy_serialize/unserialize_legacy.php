@@ -24,7 +24,7 @@ function check_impl(mixed $val, bool $should_be_legacy): void {
   if (HH\is_any_array($val)) {
     var_dump($val);
     invariant(
-      $should_be_legacy === HH\is_legacy_behavior_enabled($val),
+      $should_be_legacy === HH\is_marked_legacy_hack_array($val),
       'Legacy expectation mismatch!',
     );
     foreach ($val as $v) {

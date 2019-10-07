@@ -221,8 +221,11 @@ void StandardExtension::initMisc() {
     HHVM_FE(unpack);
     HHVM_FE(sys_getloadavg);
     HHVM_FE(hphp_to_string);
-    HHVM_FALIAS(HH\\enable_legacy_behavior, enable_legacy_behavior);
-    HHVM_FALIAS(HH\\is_legacy_behavior_enabled, is_legacy_behavior_enabled);
+    HHVM_FALIAS(HH\\mark_legacy_hack_array, mark_legacy_hack_array);
+    HHVM_FALIAS(HH\\is_marked_legacy_hack_array, is_marked_legacy_hack_array);
+    // TODO T54978012 remove next 2 after removing refs in WWW
+    HHVM_FALIAS(HH\\enable_legacy_behavior, mark_legacy_hack_array);
+    HHVM_FALIAS(HH\\is_legacy_behavior_enabled, is_marked_legacy_hack_array);
     HHVM_FALIAS(__SystemLib\\max2, SystemLib_max2);
     HHVM_FALIAS(__SystemLib\\min2, SystemLib_min2);
 
@@ -575,20 +578,20 @@ Array HHVM_FUNCTION(sys_getloadavg) {
   return make_varray(load[0], load[1], load[2]);
 }
 
-Variant HHVM_FUNCTION(enable_legacy_behavior, const Variant& v) {
+Variant HHVM_FUNCTION(mark_legacy_hack_array, const Variant& v) {
   if (v.isVecArray() || v.isDict()) {
     auto arr = v.toCArrRef().copy();
     arr->setLegacyArray(true);
     return arr;
   } else {
-    raise_warning("enable_legacy_behavior expects a dict or vec");
+    raise_warning("mark_legacy_hack_array expects a dict or vec");
     return v;
   }
 }
 
-bool HHVM_FUNCTION(is_legacy_behavior_enabled, const Variant& v) {
+bool HHVM_FUNCTION(is_marked_legacy_hack_array, const Variant& v) {
   if (!v.isVecArray() && !v.isDict()) {
-    raise_warning("is_legacy_behavior_enabled expects a dict or vec");
+    raise_warning("is_marked_legacy_hack_array expects a dict or vec");
     return false;
   }
   return v.asCArrRef()->isLegacyArray();

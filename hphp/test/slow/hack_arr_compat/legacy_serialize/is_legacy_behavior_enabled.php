@@ -8,7 +8,7 @@ function good_cases(): vec<Container<mixed>> {
     dict['foo' =>  null, 'bar' => null],
   ];
   foreach ($init as $e) {
-    $init[] = HH\enable_legacy_behavior($e);
+    $init[] = HH\mark_legacy_hack_array($e);
   }
   return $init;
 }
@@ -23,7 +23,7 @@ function bad_cases(): vec<mixed> {
 
 function test(Container<mixed> $cases): void {
   foreach ($cases as $case) {
-    var_dump(HH\is_legacy_behavior_enabled($case));
+    var_dump(HH\is_marked_legacy_hack_array($case));
   }
 }
 

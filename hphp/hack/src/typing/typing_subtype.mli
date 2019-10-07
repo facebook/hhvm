@@ -48,6 +48,9 @@ val sub_type : env -> locl_ty -> locl_ty -> Errors.typing_error_callback -> env
 val sub_type_with_dynamic_as_bottom :
   env -> locl_ty -> locl_ty -> Errors.typing_error_callback -> env
 
+val sub_type_i :
+  env -> internal_type -> internal_type -> Errors.typing_error_callback -> env
+
 val subtype_method :
   check_return:bool ->
   extra_info:reactivity_extra_info ->
@@ -75,7 +78,7 @@ val add_constraint :
 val log_prop : env -> unit
 
 val add_tyvar_upper_bound_and_close :
-  env -> int -> locl_ty -> Errors.typing_error_callback -> env
+  env -> int -> internal_type -> Errors.typing_error_callback -> env
 
 val add_tyvar_lower_bound_and_close :
-  env -> int -> locl_ty -> Errors.typing_error_callback -> env
+  env -> int -> internal_type -> Errors.typing_error_callback -> env

@@ -1,23 +1,28 @@
+open Typing_defs
 module Env = Typing_env
 module Phase = Typing_phase
-module TySet = Typing_set
+module ITySet = Internal_type_set
 module Utils = Typing_utils
 
 (** Make tconstty (usually a type variable representing the type constant of
 another type variable v) equal to ty::tconstid (where ty is usually a bound
 of v) *)
-let make_type_const_equal env tconstty ty tconstid ~as_tyvar_with_cnstr =
+let make_type_const_equal
+    env tconstty (ty : internal_type) tconstid ~as_tyvar_with_cnstr =
   let ety_env = Phase.env_with_self env in
-  let (env, tytconst) =
-    Utils.expand_typeconst ety_env env ~as_tyvar_with_cnstr ty tconstid
-  in
-  let env =
-    Utils.sub_type env tytconst tconstty Errors.type_constant_mismatch
-  in
-  let env =
-    Utils.sub_type env tconstty tytconst Errors.type_constant_mismatch
-  in
-  env
+  match ty with
+  | LoclType ty ->
+    let (env, tytconst) =
+      Utils.expand_typeconst ety_env env ~as_tyvar_with_cnstr ty tconstid
+    in
+    let env =
+      Utils.sub_type env tytconst tconstty Errors.type_constant_mismatch
+    in
+    let env =
+      Utils.sub_type env tconstty tytconst Errors.type_constant_mismatch
+    in
+    env
+  | ConstraintType (_, Thas_member _) -> env
 
 (** Add a type constant with id `tyconstid` and type `ty` to a type variable,
 and propagate constraints to all type constants `tyconstid` of upper bounds and
@@ -26,21 +31,22 @@ let add_tyvar_type_const env var tconstid ty =
   let env = Env.set_tyvar_type_const env var tconstid ty in
   let upper_bounds = Env.get_tyvar_upper_bounds env var in
   let env =
-    TySet.fold
+    ITySet.fold
       (fun bound env ->
         make_type_const_equal env ty bound tconstid ~as_tyvar_with_cnstr:true)
       upper_bounds
       env
   in
   let lower_bounds = Env.get_tyvar_lower_bounds env var in
-  TySet.fold
+  ITySet.fold
     (fun bound env ->
       make_type_const_equal env ty bound tconstid ~as_tyvar_with_cnstr:false)
     lower_bounds
     env
 
 (** For all type constants T of var, make its type equal to ty::T *)
-let make_all_type_consts_equal env var ty ~as_tyvar_with_cnstr =
+let make_all_type_consts_equal
+    env var (ty : internal_type) ~as_tyvar_with_cnstr =
   SMap.fold
     (fun _ (tconstid, tconstty) env ->
       make_type_const_equal env tconstty ty tconstid ~as_tyvar_with_cnstr)

@@ -321,6 +321,13 @@ let tyset_as_value env tys =
        tys
        SSet.empty)
 
+let ityset_as_value env tys =
+  Set
+    (ITySet.fold
+       (fun t s -> SSet.add (Typing_print.debug_i env t) s)
+       tys
+       SSet.empty)
+
 let tparam_info_as_value env tpinfo =
   let Type_parameter_env.
         { lower_bounds; upper_bounds; reified; enforceable; newable } =
@@ -442,8 +449,8 @@ let local_tyvar_info_as_value env tvinfo =
       ("eager_solve_fail", bool_as_value eager_solve_fail);
       ("appears_covariantly", bool_as_value appears_covariantly);
       ("appears_contravariantly", bool_as_value appears_contravariantly);
-      ("lower_bounds", tyset_as_value env lower_bounds);
-      ("upper_bounds", tyset_as_value env upper_bounds);
+      ("lower_bounds", ityset_as_value env lower_bounds);
+      ("upper_bounds", ityset_as_value env upper_bounds);
       ( "type_constants",
         smap_as_value (fun (_, ty) -> type_as_value env ty) type_constants );
     ]

@@ -8,7 +8,7 @@
  *)
 
 open Typing_defs
-module TySet = Typing_set
+module ITySet = Internal_type_set
 
 (* Local environment includes types of locals and bounds on type parameters. *)
 type local_env = {
@@ -24,8 +24,8 @@ type tyvar_info_ = {
   eager_solve_fail: bool;
   appears_covariantly: bool;
   appears_contravariantly: bool;
-  lower_bounds: TySet.t;
-  upper_bounds: TySet.t;
+  lower_bounds: ITySet.t;
+  upper_bounds: ITySet.t;
   type_constants: (Aast.sid * locl_ty) SMap.t;
 }
 

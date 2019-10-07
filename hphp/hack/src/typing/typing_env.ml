@@ -22,13 +22,13 @@ module C = Typing_continuations
 module TL = Typing_logic
 module Cls = Decl_provider.Class
 module Fake = Typing_fake_members
+module ITySet = Internal_type_set
 module TPEnv = Type_parameter_env
+module TySet = Typing_set
 
 let show_env _ = "<env>"
 
 let pp_env _ _ = Printf.printf "%s\n" "<env>"
-
-let ( ++ ) x y = Typing_set.add x y
 
 let get_tcopt env = env.genv.tcopt
 
@@ -95,8 +95,8 @@ let empty_tyvar_info =
   {
     tyvar_pos = Pos.none;
     eager_solve_fail = false;
-    lower_bounds = empty_bounds;
-    upper_bounds = empty_bounds;
+    lower_bounds = ITySet.empty;
+    upper_bounds = ITySet.empty;
     appears_covariantly = false;
     appears_contravariantly = false;
     type_constants = SMap.empty;
@@ -202,6 +202,13 @@ let expand_type env x =
   match x with
   | (r, Tvar x) -> expand_var env r x
   | x -> (env, x)
+
+let expand_internal_type env ty =
+  match ty with
+  | ConstraintType _ -> (env, ty)
+  | LoclType ty ->
+    let (env, ty) = expand_type env ty in
+    (env, LoclType ty)
 
 let get_shape_field_name = function
   | Ast_defs.SFlit_int (_, s)
@@ -343,14 +350,14 @@ let mark_inconsistent env =
  * should consider sharing in future.
  *****************************************************************************)
 
-let get_tyvar_lower_bounds env var =
+let get_tyvar_lower_bounds env var : ITySet.t =
   match get_tyvar_info_opt env var with
-  | None -> empty_bounds
+  | None -> ITySet.empty
   | Some { lower_bounds; _ } -> lower_bounds
 
-let get_tyvar_upper_bounds env var =
+let get_tyvar_upper_bounds env var : ITySet.t =
   match get_tyvar_info_opt env var with
-  | None -> empty_bounds
+  | None -> ITySet.empty
   | Some { upper_bounds; _ } -> upper_bounds
 
 let set_tyvar_lower_bounds env var lower_bounds =
@@ -367,8 +374,9 @@ let set_tyvar_upper_bounds env var upper_bounds =
 
 let rec is_tvar ~elide_nullable ty var =
   match ty with
-  | (_, Tvar var') -> var = var'
-  | (_, Toption ty) when elide_nullable -> is_tvar ~elide_nullable ty var
+  | LoclType (_, Tvar var') -> var = var'
+  | LoclType (_, Toption ty) when elide_nullable ->
+    is_tvar ~elide_nullable (LoclType ty) var
   | _ -> false
 
 let remove_tyvar env var =
@@ -1217,7 +1225,9 @@ let save local_tpenv env =
  * Return a pair of sets of positive and negative type variables
  * (as well as an updated environment).
  *)
-let rec get_tyvars env ty =
+let rec get_tyvars env (ty : locl_ty) = get_tyvars_i env (LoclType ty)
+
+and get_tyvars_i env (ty : internal_type) =
   let get_tyvars_union (env, acc_positive, acc_negative) ty =
     let (env, positive, negative) = get_tyvars env ty in
     (env, ISet.union acc_positive positive, ISet.union acc_negative negative)
@@ -1235,83 +1245,95 @@ let rec get_tyvars env ty =
       let tyvars = ISet.union negative positive in
       (env, ISet.union tyvars acc_positive, ISet.union tyvars acc_negative)
   in
-  let (env, ety) = expand_type env ty in
-  match snd ety with
-  | Tvar v -> (env, ISet.singleton v, ISet.empty)
-  | Tany _
-  | Tnonnull
-  | Terr
-  | Tdynamic
-  | Tobject
-  | Tprim _
-  | Tanon _ ->
-    (env, ISet.empty, ISet.empty)
-  | Toption ty -> get_tyvars env ty
-  | Ttuple tyl
-  | Tunion tyl
-  | Tintersection tyl
-  | Tdestructure tyl ->
-    List.fold_left tyl ~init:(env, ISet.empty, ISet.empty) ~f:get_tyvars_union
-  | Tshape (_, m) ->
-    Nast.ShapeMap.fold
-      (fun _ { sft_ty; _ } res -> get_tyvars_union res sft_ty)
-      m
+  let (env, ety) = expand_internal_type env ty in
+  match ety with
+  | LoclType ety ->
+    (match snd ety with
+    | Tvar v -> (env, ISet.singleton v, ISet.empty)
+    | Tany _
+    | Tnonnull
+    | Terr
+    | Tdynamic
+    | Tobject
+    | Tprim _
+    | Tanon _ ->
       (env, ISet.empty, ISet.empty)
-  | Tfun ft ->
-    let (env, params_positive, params_negative) =
-      match ft.ft_arity with
-      | Fstandard _
-      | Fellipsis _ ->
-        (env, ISet.empty, ISet.empty)
-      | Fvariadic (_, fp) -> get_tyvars_param (env, ISet.empty, ISet.empty) fp
-    in
-    let (env, params_positive, params_negative) =
+    | Toption ty -> get_tyvars env ty
+    | Ttuple tyl
+    | Tunion tyl
+    | Tintersection tyl
+    | Tdestructure tyl ->
       List.fold_left
-        ft.ft_params
-        ~init:(env, params_positive, params_negative)
-        ~f:get_tyvars_param
-    in
-    let (env, ret_positive, ret_negative) = get_tyvars env ft.ft_ret.et_type in
-    ( env,
-      ISet.union ret_positive params_positive,
-      ISet.union ret_negative params_negative )
-  | Tabstract (AKnewtype (name, tyl), _) ->
-    begin
-      match get_typedef env name with
-      | Some { td_tparams; _ } ->
-        let variancel = List.map td_tparams (fun t -> t.tp_variance) in
-        get_tyvars_variance_list (env, ISet.empty, ISet.empty) variancel tyl
-      | None -> (env, ISet.empty, ISet.empty)
-    end
-  | Tabstract (_, Some ty) -> get_tyvars env ty
-  | Tabstract (_, None) -> (env, ISet.empty, ISet.empty)
-  | Tclass ((_, cid), _, tyl) ->
-    begin
-      match get_class env cid with
-      | Some cls ->
-        let variancel = List.map (Cls.tparams cls) (fun t -> t.tp_variance) in
-        get_tyvars_variance_list (env, ISet.empty, ISet.empty) variancel tyl
-      | None -> (env, ISet.empty, ISet.empty)
-    end
-  | Tarraykind ak ->
-    begin
-      match ak with
-      | AKany
-      | AKempty ->
+        tyl
+        ~init:(env, ISet.empty, ISet.empty)
+        ~f:get_tyvars_union
+    | Tshape (_, m) ->
+      Nast.ShapeMap.fold
+        (fun _ { sft_ty; _ } res -> get_tyvars_union res sft_ty)
+        m
         (env, ISet.empty, ISet.empty)
-      | AKvarray ty
-      | AKvec ty
-      | AKvarray_or_darray ty ->
-        get_tyvars env ty
-      | AKdarray (ty1, ty2)
-      | AKmap (ty1, ty2) ->
-        let (env, positive1, negative1) = get_tyvars env ty1 in
-        let (env, positive2, negative2) = get_tyvars env ty2 in
-        (env, ISet.union positive1 positive2, ISet.union negative1 negative2)
-    end
-  | Tpu (base, _, _) -> get_tyvars env base
-  | Tpu_access (base, _) -> get_tyvars env base
+    | Tfun ft ->
+      let (env, params_positive, params_negative) =
+        match ft.ft_arity with
+        | Fstandard _
+        | Fellipsis _ ->
+          (env, ISet.empty, ISet.empty)
+        | Fvariadic (_, fp) ->
+          get_tyvars_param (env, ISet.empty, ISet.empty) fp
+      in
+      let (env, params_positive, params_negative) =
+        List.fold_left
+          ft.ft_params
+          ~init:(env, params_positive, params_negative)
+          ~f:get_tyvars_param
+      in
+      let (env, ret_positive, ret_negative) =
+        get_tyvars env ft.ft_ret.et_type
+      in
+      ( env,
+        ISet.union ret_positive params_positive,
+        ISet.union ret_negative params_negative )
+    | Tabstract (AKnewtype (name, tyl), _) ->
+      begin
+        match get_typedef env name with
+        | Some { td_tparams; _ } ->
+          let variancel = List.map td_tparams (fun t -> t.tp_variance) in
+          get_tyvars_variance_list (env, ISet.empty, ISet.empty) variancel tyl
+        | None -> (env, ISet.empty, ISet.empty)
+      end
+    | Tabstract (_, Some ty) -> get_tyvars env ty
+    | Tabstract (_, None) -> (env, ISet.empty, ISet.empty)
+    | Tclass ((_, cid), _, tyl) ->
+      begin
+        match get_class env cid with
+        | Some cls ->
+          let variancel =
+            List.map (Cls.tparams cls) (fun t -> t.tp_variance)
+          in
+          get_tyvars_variance_list (env, ISet.empty, ISet.empty) variancel tyl
+        | None -> (env, ISet.empty, ISet.empty)
+      end
+    | Tarraykind ak ->
+      begin
+        match ak with
+        | AKany
+        | AKempty ->
+          (env, ISet.empty, ISet.empty)
+        | AKvarray ty
+        | AKvec ty
+        | AKvarray_or_darray ty ->
+          get_tyvars env ty
+        | AKdarray (ty1, ty2)
+        | AKmap (ty1, ty2) ->
+          let (env, positive1, negative1) = get_tyvars env ty1 in
+          let (env, positive2, negative2) = get_tyvars env ty2 in
+          (env, ISet.union positive1 positive2, ISet.union negative1 negative2)
+      end
+    | Tpu (base, _, _) -> get_tyvars env base
+    | Tpu_access (base, _) -> get_tyvars env base)
+  | ConstraintType _ -> (env, ISet.empty, ISet.empty)
 
+(* TODO *)
 and get_tyvars_variance_list (env, acc_positive, acc_negative) variancel tyl =
   match (variancel, tyl) with
   | (variance :: variancel, ty :: tyl) ->
@@ -1351,23 +1373,23 @@ and set_tyvar_appears_contravariantly env var =
     update_variance_of_tyvars_occurring_in_upper_bounds env tvinfo.upper_bounds
 
 and update_variance_of_tyvars_occurring_in_lower_bounds env tys =
-  TySet.fold
+  ITySet.fold
     (fun ty env -> update_variance_of_tyvars_occurring_in_lower_bound env ty)
     tys
     env
 
 and update_variance_of_tyvars_occurring_in_upper_bounds env tys =
-  TySet.fold
+  ITySet.fold
     (fun ty env -> update_variance_of_tyvars_occurring_in_upper_bound env ty)
     tys
     env
 
 and update_variance_of_tyvars_occurring_in_lower_bound env ty =
-  let (env, ety) = expand_type env ty in
-  match snd ety with
-  | Tvar _ -> env
+  let (env, ety) = expand_internal_type env ty in
+  match ety with
+  | LoclType (_, Tvar _) -> env
   | _ ->
-    let (env, positive, negative) = get_tyvars env ty in
+    let (env, positive, negative) = get_tyvars_i env ty in
     let env =
       ISet.fold
         (fun var env -> set_tyvar_appears_covariantly env var)
@@ -1383,11 +1405,11 @@ and update_variance_of_tyvars_occurring_in_lower_bound env ty =
     env
 
 and update_variance_of_tyvars_occurring_in_upper_bound env ty =
-  let (env, ety) = expand_type env ty in
-  match snd ety with
-  | Tvar _ -> env
+  let (env, ety) = expand_internal_type env ty in
+  match ety with
+  | LoclType (_, Tvar _) -> env
   | _ ->
-    let (env, positive, negative) = get_tyvars env ty in
+    let (env, positive, negative) = get_tyvars_i env ty in
     let env =
       ISet.fold
         (fun var env -> set_tyvar_appears_contravariantly env var)
@@ -1495,7 +1517,7 @@ let fresh_invariant_type_var env p =
  * is equivalent to a single upper bound
  *   v <: (t1 & ... & tn)
  *)
-let add_tyvar_upper_bound ?intersect env var ty =
+let add_tyvar_upper_bound ?intersect env var (ty : internal_type) =
   log_env_change "add_tyvar_upper_bound" env
   @@
   (* Don't add superfluous v <: v or v <: ?v to environment *)
@@ -1505,9 +1527,9 @@ let add_tyvar_upper_bound ?intersect env var ty =
     let tvinfo = get_tyvar_info env var in
     let upper_bounds =
       match intersect with
-      | None -> ty ++ tvinfo.upper_bounds
+      | None -> ITySet.add ty tvinfo.upper_bounds
       | Some intersect ->
-        TySet.of_list (intersect ty (TySet.elements tvinfo.upper_bounds))
+        ITySet.of_list (intersect ty (ITySet.elements tvinfo.upper_bounds))
     in
     let env = update_tyvar_info env var { tvinfo with upper_bounds } in
     if get_tyvar_appears_contravariantly env var then
@@ -1522,10 +1544,10 @@ let remove_tyvar_upper_bound env var upper_var =
   @@
   let tvinfo = get_tyvar_info env var in
   let upper_bounds =
-    TySet.filter
+    ITySet.filter
       (fun ty ->
-        match expand_type env ty with
-        | (_, (_, Tvar v)) -> v <> upper_var
+        match expand_internal_type env ty with
+        | (_, LoclType (_, Tvar v)) -> v <> upper_var
         | _ -> true)
       tvinfo.upper_bounds
   in
@@ -1538,10 +1560,10 @@ let remove_tyvar_lower_bound env var lower_var =
   @@
   let tvinfo = get_tyvar_info env var in
   let lower_bounds =
-    TySet.filter
+    ITySet.filter
       (fun ty ->
-        match expand_type env ty with
-        | (_, (_, Tvar v)) -> v <> lower_var
+        match expand_internal_type env ty with
+        | (_, LoclType (_, Tvar v)) -> v <> lower_var
         | _ -> true)
       tvinfo.lower_bounds
   in
@@ -1565,9 +1587,9 @@ let add_tyvar_lower_bound ?union env var ty =
     let tvinfo = get_tyvar_info env var in
     let lower_bounds =
       match union with
-      | None -> ty ++ tvinfo.lower_bounds
+      | None -> ITySet.add ty tvinfo.lower_bounds
       | Some union ->
-        TySet.of_list (union ty (TySet.elements tvinfo.lower_bounds))
+        ITySet.of_list (union ty (ITySet.elements tvinfo.lower_bounds))
     in
     let env = update_tyvar_info env var { tvinfo with lower_bounds } in
     if get_tyvar_appears_covariantly env var then

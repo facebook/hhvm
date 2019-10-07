@@ -301,6 +301,23 @@ and _ ty_ =
    *)
   | Tpu : locl_ty * Nast.sid * pu_kind -> locl_phase ty_
 
+and constraint_type_ = Thas_member of has_member
+
+and has_member = {
+  hm_name: Nast.sid;
+  hm_type: locl_ty;
+  hm_nullsafe: nullsafe;
+  hm_class_id: Nast.class_id_;
+}
+
+and nullsafe = Pos.t option
+
+and constraint_type = Reason.t * constraint_type_
+
+and internal_type =
+  | LoclType of locl_ty
+  | ConstraintType of constraint_type
+
 and array_kind =
   (* Those three types directly correspond to their decl_phase level counterparts:
    * array, array<_> and array<_, _> *)
@@ -666,6 +683,15 @@ let has_expanded { type_expansions; _ } x =
   List.exists type_expansions (function
       | (_, x') when x = x' -> true
       | _ -> false)
+
+let reason = function
+  | LoclType (r, _)
+  | ConstraintType (r, _) ->
+    r
+
+let is_constraint_type = function
+  | ConstraintType _ -> true
+  | LoclType _ -> false
 
 (* The identifier for this *)
 let this = Local_id.make_scoped "$this"

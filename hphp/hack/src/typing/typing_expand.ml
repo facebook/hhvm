@@ -30,3 +30,9 @@ let visitor =
 (*****************************************************************************)
 
 let fully_expand env ty = snd (visitor#on_type (Type_mapper.fresh_env env) ty)
+
+let fully_expand_i env ty =
+  Typing_defs.(
+    match ty with
+    | ConstraintType _ -> ty
+    | LoclType ty -> LoclType (fully_expand env ty))

@@ -75,7 +75,7 @@ module StateConstraintGraph = struct
           (* We store in the env the updated tyvar_info_ *)
           Typing_env.update_tyvar_info env var current_tyvar_info
           (* Add the missing upper and lower bounds - and do the transitive closure *)
-          |> TySet.fold
+          |> ITySet.fold
                (fun bound env ->
                  Typing_subtype.add_tyvar_upper_bound_and_close
                    env
@@ -83,7 +83,7 @@ module StateConstraintGraph = struct
                    bound
                    (make_error_callback errors var))
                tyvar_info.upper_bounds
-          |> TySet.fold
+          |> ITySet.fold
                (fun bound env ->
                  Typing_subtype.add_tyvar_lower_bound_and_close
                    env

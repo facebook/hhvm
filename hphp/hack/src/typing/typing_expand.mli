@@ -18,3 +18,8 @@
 
 val fully_expand :
   Typing_env_types.env -> Typing_defs.locl_ty -> Typing_defs.locl_ty
+
+val fully_expand_i :
+  Typing_env_types.env ->
+  Typing_defs.internal_type ->
+  Typing_defs.internal_type

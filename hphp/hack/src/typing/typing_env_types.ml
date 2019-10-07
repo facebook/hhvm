@@ -11,7 +11,7 @@
 open Core_kernel
 open Typing_defs
 module TPEnv = Type_parameter_env
-module TySet = Typing_set
+module ITySet = Internal_type_set
 
 type locl_ty = Typing_defs.locl_ty
 
@@ -71,8 +71,8 @@ type tyvar_info_ = {
    * appear at all then both will be false
    *)
   appears_contravariantly: bool;
-  lower_bounds: TySet.t;
-  upper_bounds: TySet.t;
+  lower_bounds: ITySet.t;
+  upper_bounds: ITySet.t;
   (* Map associating a type to each type constant id of this variable.
   Whenever we localize "T1::T" in a constraint, we add a fresh type variable
   indexed by "T" in the type_constants of the type variable representing T1.

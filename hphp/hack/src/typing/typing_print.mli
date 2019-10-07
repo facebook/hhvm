@@ -17,9 +17,13 @@ val error : ?ignore_dynamic:bool -> env -> Typing_defs.locl_ty -> string
 
 val full : env -> Typing_defs.locl_ty -> string
 
+val full_i : env -> Typing_defs.internal_type -> string
+
 val full_rec : env -> int -> Typing_defs.locl_ty -> string
 
 val full_strip_ns : env -> Typing_defs.locl_ty -> string
+
+val full_strip_ns_i : env -> Typing_defs.internal_type -> string
 
 val full_strip_ns_decl : env -> Typing_defs.decl_ty -> string
 
@@ -38,6 +42,8 @@ val full_with_identity :
 val debug : env -> Typing_defs.locl_ty -> string
 
 val debug_decl : env -> Typing_defs.decl_ty -> string
+
+val debug_i : env -> Typing_defs.internal_type -> string
 
 val with_blank_tyvars : (unit -> 'a) -> 'a
 

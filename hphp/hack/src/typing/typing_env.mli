@@ -45,6 +45,8 @@ val expand_var : env -> Reason.t -> Ident.t -> env * locl_ty
 
 val expand_type : env -> locl_ty -> env * locl_ty
 
+val expand_internal_type : env -> internal_type -> env * internal_type
+
 val get_shape_field_name : Ast_defs.shape_field_name -> string
 
 val get_shape_field_name_pos : Ast_defs.shape_field_name -> Pos.t
@@ -262,29 +264,29 @@ val get_generic_parameters : env -> string list
 val is_generic_parameter : env -> string -> bool
 
 (* Get or add to bounds on type variables *)
-val get_tyvar_lower_bounds : env -> Ident.t -> TPEnv.tparam_bounds
+val get_tyvar_lower_bounds : env -> Ident.t -> Internal_type_set.t
 
-val get_tyvar_upper_bounds : env -> Ident.t -> TPEnv.tparam_bounds
+val get_tyvar_upper_bounds : env -> Ident.t -> Internal_type_set.t
 
-val set_tyvar_lower_bounds : env -> Ident.t -> TPEnv.tparam_bounds -> env
+val set_tyvar_lower_bounds : env -> Ident.t -> Internal_type_set.t -> env
 
 val update_tyvar_info : env -> Ident.t -> tyvar_info_ -> env
 
-val set_tyvar_upper_bounds : env -> Ident.t -> TPEnv.tparam_bounds -> env
+val set_tyvar_upper_bounds : env -> Ident.t -> Internal_type_set.t -> env
 
 (* Optionally supply intersection or union operations to simplify the bounds *)
 val add_tyvar_upper_bound :
-  ?intersect:(locl_ty -> locl_ty list -> locl_ty list) ->
+  ?intersect:(internal_type -> internal_type list -> internal_type list) ->
   env ->
   Ident.t ->
-  locl_ty ->
+  internal_type ->
   env
 
 val add_tyvar_lower_bound :
-  ?union:(locl_ty -> locl_ty list -> locl_ty list) ->
+  ?union:(internal_type -> internal_type list -> internal_type list) ->
   env ->
   Ident.t ->
-  locl_ty ->
+  internal_type ->
   env
 
 val remove_tyvar_upper_bound : env -> Ident.t -> Ident.t -> env

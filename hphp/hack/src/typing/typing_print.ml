@@ -1766,9 +1766,19 @@ let error ?(ignore_dynamic = false) env ty =
 
 let full env ty = Full.to_string ~ty:Full.locl_ty Doc.text env ty
 
+let full_i env ty =
+  match ty with
+  | LoclType ty -> full env ty
+  | ConstraintType _ -> (* TODO *) ""
+
 let full_rec env n ty = Full.to_string_rec env n ty
 
 let full_strip_ns env ty = Full.to_string_strip_ns ~ty:Full.locl_ty env ty
+
+let full_strip_ns_i env ty =
+  match ty with
+  | LoclType ty -> full_strip_ns env ty
+  | ConstraintType _ -> (* TODO *) ""
 
 let full_strip_ns_decl env ty = Full.to_string_strip_ns ~ty:Full.decl_ty env ty
 
@@ -1787,6 +1797,11 @@ let debug_decl env ty =
   let f_str = full_strip_ns_decl env ty in
   Full.debug_mode := false;
   f_str
+
+let debug_i env ty =
+  match ty with
+  | LoclType ty -> debug env ty
+  | ConstraintType _ -> (* TODO *) ""
 
 let class_ tcopt c = PrintClass.class_type tcopt c
 
@@ -1813,7 +1828,7 @@ let subtype_prop env prop =
     | Disj (_, []) -> "FALSE"
     | Disj (_, ps) ->
       "(" ^ String.concat ~sep:" || " (List.map ~f:subtype_prop ps) ^ ")"
-    | IsSubtype (ty1, ty2) -> debug env ty1 ^ " <: " ^ debug env ty2
+    | IsSubtype (ty1, ty2) -> debug_i env ty1 ^ " <: " ^ debug_i env ty2
   in
   let p_str = subtype_prop prop in
   p_str

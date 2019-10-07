@@ -36,6 +36,7 @@
   (wrapped false)
   (modules
     ide_tast_cache
+    internal_type_set
     tast_env
     tast_expand
     tast_utils

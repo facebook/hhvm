@@ -1,7 +1,8 @@
 open Typing_env_types
+open Typing_defs
 module Env = Typing_env
 module Log = Typing_log
-module TySet = Typing_set
+module ITySet = Internal_type_set
 
 let local_env_size env =
   match Env.next_cont_opt env with
@@ -12,8 +13,15 @@ let local_env_size env =
       local_types
       0
 
+let ty_size env ty =
+  match ty with
+  | LoclType ty -> Typing_utils.ty_size env ty
+  | ConstraintType _ -> 1
+
+(* TODO *)
+
 let ty_set_size env tyset =
-  TySet.fold (fun ty size -> size + Typing_utils.ty_size env ty) tyset 0
+  ITySet.fold (fun ty size -> size + ty_size env ty) tyset 0
 
 let tvenv_size env =
   IMap.fold

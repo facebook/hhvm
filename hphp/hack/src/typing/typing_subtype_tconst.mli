@@ -3,7 +3,7 @@ open Typing_env_types
 module Env = Typing_env
 
 val make_all_type_consts_equal :
-  env -> Ident.t -> locl_ty -> as_tyvar_with_cnstr:bool -> env
+  env -> Ident.t -> internal_type -> as_tyvar_with_cnstr:bool -> env
 (** For all type constant T of type variable, make its type equal to `ty`::T *)
 
 val get_tyvar_type_const : env -> Ident.t -> Aast.sid -> env * locl_ty

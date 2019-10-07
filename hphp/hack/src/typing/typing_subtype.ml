@@ -22,7 +22,7 @@ module SN = Naming_special_names
 module Phase = Typing_phase
 module TL = Typing_logic
 module Cls = Decl_provider.Class
-module TySet = Typing_set
+module ITySet = Internal_type_set
 module MakeType = Typing_make_type
 module Partial = Partial_provider
 module ShapeMap = Nast.ShapeMap
@@ -213,20 +213,33 @@ let check_mutability
             (str mut_super)) )
   | _ -> valid env
 
-let log_subtype ~level ~this_ty ~function_name env ty_sub ty_super =
-  Typing_log.(
-    log_with_level env "sub" level (fun () ->
-        let types =
-          [Log_type ("ty_sub", ty_sub); Log_type ("ty_super", ty_super)]
-        in
-        let types =
-          Option.value_map this_ty ~default:types ~f:(fun ty ->
-              Log_type ("this_ty", ty) :: types)
-        in
-        log_types
-          (Reason.to_pos (fst ty_sub))
-          env
-          [Log_head (function_name, types)]))
+let log_subtype_i ~level ~this_ty ~function_name env ty_sub ty_super =
+  match (ty_sub, ty_super) with
+  | (LoclType ty_sub, LoclType ty_super) ->
+    Typing_log.(
+      log_with_level env "sub" level (fun () ->
+          let types =
+            [Log_type ("ty_sub", ty_sub); Log_type ("ty_super", ty_super)]
+          in
+          let types =
+            Option.value_map this_ty ~default:types ~f:(fun ty ->
+                Log_type ("this_ty", ty) :: types)
+          in
+          log_types
+            (Reason.to_pos (fst ty_sub))
+            env
+            [Log_head (function_name, types)]))
+  | _ -> ()
+
+(* TODO *)
+
+let log_subtype ~this_ty ~function_name env ty_sub ty_super =
+  log_subtype_i
+    ~this_ty
+    ~function_name
+    env
+    (LoclType ty_sub)
+    (LoclType ty_super)
 
 let is_final_and_not_contravariant env id =
   let class_def = Env.get_class env id in
@@ -288,6 +301,17 @@ let rec process_simplify_subtype_result prop =
     in
     try_disj props
 
+and simplify_subtype
+    ~(subtype_env : subtype_env)
+    ?(this_ty : locl_ty option = None)
+    ty_sub
+    ty_super =
+  simplify_subtype_i
+    ~subtype_env
+    ~this_ty
+    (LoclType ty_sub)
+    (LoclType ty_super)
+
 (* Attempt to "solve" a subtype assertion ty_sub <: ty_super.
  * Return a proposition that is equivalent, but simpler, than
  * the original assertion. Fail with Unsat error_function if
@@ -301,41 +325,42 @@ let rec process_simplify_subtype_result prop =
  *   vec<T> <: vec<I>    ==>  True
  * This last one would be left as T <: I if seen_generic_params is None
  *)
-and simplify_subtype
+and simplify_subtype_i
     ~(subtype_env : subtype_env)
     ?(this_ty : locl_ty option = None)
-    (ty_sub : locl_ty)
-    (ty_super : locl_ty)
+    (ty_sub : internal_type)
+    (ty_super : internal_type)
     env : env * TL.subtype_prop =
-  log_subtype
+  log_subtype_i
     ~level:2
     ~this_ty
     ~function_name:"simplify_subtype"
     env
     ty_sub
     ty_super;
-  let (env, ety_super) = Env.expand_type env ty_super in
-  let (env, ety_sub) = Env.expand_type env ty_sub in
+  let (env, ety_super) = Env.expand_internal_type env ty_super in
+  let (env, ety_sub) = Env.expand_internal_type env ty_sub in
   let fail () =
-    let (r1, ty1) = ety_super in
-    let (r2, ty2) = ety_sub in
-    let ty1 =
+    let r_super = reason ety_super in
+    let r_sub = reason ety_sub in
+    let ty_super_descr =
       Typing_print.with_blank_tyvars (fun () ->
-          Typing_print.full_strip_ns env (r1, ty1))
+          Typing_print.full_strip_ns_i env ety_super)
     in
-    let ty2 =
+    let ty_sub_descr =
       Typing_print.with_blank_tyvars (fun () ->
-          Typing_print.full_strip_ns env (r2, ty2))
+          Typing_print.full_strip_ns_i env ety_sub)
     in
-    let (ty1, ty2) =
-      if String.equal ty1 ty2 then
-        ("exactly the type " ^ ty1, "the nonexact type " ^ ty2)
+    let (ty_super_descr, ty_sub_descr) =
+      if String.equal ty_super_descr ty_sub_descr then
+        ( "exactly the type " ^ ty_super_descr,
+          "the nonexact type " ^ ty_sub_descr )
       else
-        (ty1, ty2)
+        (ty_super_descr, ty_sub_descr)
     in
-    let left = Reason.to_string ("Expected " ^ ty1) r1 in
-    let right = Reason.to_string ("But got " ^ ty2) r2 in
-    match (r1, r2) with
+    let left = Reason.to_string ("Expected " ^ ty_super_descr) r_super in
+    let right = Reason.to_string ("But got " ^ ty_sub_descr) r_sub in
+    match (r_super, r_sub) with
     | (Reason.Rcstr_on_generics (p, tparam), _)
     | (_, Reason.Rcstr_on_generics (p, tparam)) ->
       Errors.violated_constraint p tparam left right
@@ -357,7 +382,7 @@ and simplify_subtype
   let valid () = (env, TL.valid) in
   (* We don't know whether the assertion is valid or not *)
   let default () = (env, TL.IsSubtype (ety_sub, ety_super)) in
-  let simplify_subtype_generic_sub name_sub opt_sub_cstr ty_super env =
+  let simplify_subtype_generic_sub name_sub opt_sub_cstr ty_sub ty_super env =
     match subtype_env.seen_generic_params with
     | None -> default ()
     | Some seen ->
@@ -373,7 +398,7 @@ and simplify_subtype
         let this_ty =
           if AbstractKind.is_generic_dep_ty name_sub && Option.is_none this_ty
           then
-            Some ety_sub
+            Some ty_sub
           else
             this_ty
         in
@@ -393,7 +418,7 @@ and simplify_subtype
          *)
             let r =
               Reason.Rimplicit_upper_bound
-                (Reason.to_pos (fst ety_sub), "?nonnull")
+                (Reason.to_pos (fst ty_sub), "?nonnull")
             in
             let tmixed = MakeType.mixed r in
             env |> simplify_subtype ~subtype_env ~this_ty tmixed ty_super
@@ -445,921 +470,943 @@ and simplify_subtype
       not (Sequence.is_empty (Cls.lower_bounds_on_this class_ty))
     | None -> false
   in
-  match (snd ety_sub, snd ety_super) with
-  | (Tvar var_sub, Tvar var_super) when var_sub = var_super -> valid ()
-  (* Internally, newtypes and dependent types are always equipped with an upper bound.
-   * In the case when no upper bound is specified in source code,
-   * an implicit upper bound mixed = ?nonnull is added.
-   *)
-  | (Tabstract ((AKnewtype _ | AKdependent _), None), _)
-  | (_, Tabstract ((AKnewtype _ | AKdependent _), None)) ->
-    assert false
-  | (Tdynamic, _) when subtype_env.treat_dynamic_as_bottom -> valid ()
-  | ( ( Tprim
-          Nast.(
-            ( Tint | Tbool | Tfloat | Tstring | Tresource | Tnum | Tarraykey
-            | Tnoreturn | Tatom _ ))
-      | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tobject | Tclass _
-      | Tarraykind _ | Tpu _ ),
-      Tnonnull ) ->
-    valid ()
-  | ((Tdynamic | Toption _ | Tprim Nast.(Tnull | Tvoid)), Tnonnull) ->
-    invalid ()
-  | (Tabstract ((AKnewtype _ | AKdependent _), Some ty), Tnonnull) ->
-    simplify_subtype ~subtype_env ~this_ty ty ty_super env
-  | (Tdynamic, Tdynamic) -> valid ()
-  | ( ( Tnonnull | Toption _ | Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tanon _
-      | Tobject | Tclass _ | Tarraykind _ ),
-      Tdynamic ) ->
-    invalid ()
-  | (Tabstract ((AKnewtype _ | AKdependent _), Some ty), Tdynamic) ->
-    simplify_subtype ~subtype_env ~this_ty ty ty_super env
-  (* everything subtypes mixed *)
-  | (_, Toption (_, Tnonnull)) -> valid ()
-  (* null is the type of null and is a subtype of any option type. *)
-  | (Tprim Nast.Tnull, Toption _) -> valid ()
-  (* void behaves with respect to subtyping as an abstract type with
-   * an implicit upper bound ?nonnull
-   *)
-  | (Tprim Nast.Tvoid, Toption ty_super') ->
-    let r =
-      Reason.Rimplicit_upper_bound (Reason.to_pos (fst ety_sub), "?nonnull")
-    in
-    let tmixed = MakeType.mixed r in
-    env
-    |> simplify_subtype ~subtype_env ~this_ty ty_sub ty_super'
-    ||| simplify_subtype ~subtype_env ~this_ty tmixed ty_super
-  | (Tdynamic, Toption ty_super) ->
-    simplify_subtype ~subtype_env ~this_ty ty_sub ty_super env
-  (* ?ty_sub' <: ?ty_super' iff ty_sub' <: ?ty_super'. Reasoning:
-   * If ?ty_sub' <: ?ty_super', then from ty_sub' <: ?ty_sub' (widening) and transitivity
-   * of <: it follows that ty_sub' <: ?ty_super'.  Conversely, if ty_sub' <: ?ty_super', then
-   * by covariance and idempotence of ?, we have ?ty_sub' <: ??ty_sub' <: ?ty_super'.
-   * Therefore, this step preserves the set of solutions.
-   *)
-  | (Toption ty_sub', Toption _) ->
-    simplify_subtype ~subtype_env ~this_ty ty_sub' ty_super env
-  (* If ty_sub <: ?ty_super' and ty_sub does not contain null then we
-   * must also have ty_sub <: ty_super'.  The converse follows by
-   * widening and transitivity.  Therefore, this step preserves the set
-   * of solutions.
-   *)
-  | ( ( Tprim
-          Nast.(
-            ( Tint | Tbool | Tfloat | Tstring | Tresource | Tnum | Tarraykey
-            | Tnoreturn | Tatom _ ))
-      | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tobject | Tclass _
-      | Tarraykind _ | Tany _ | Tpu _ ),
-      Toption ty_super' ) ->
-    simplify_subtype ~subtype_env ~this_ty ty_sub ty_super' env
-  | ( Tabstract (AKnewtype (name_sub, _), _),
-      Toption ((_, Tabstract (AKnewtype (name_super, _), _)) as ty_super') )
-    when name_super = name_sub ->
-    simplify_subtype ~subtype_env ~this_ty ty_sub ty_super' env
-  | ( Tabstract (AKdependent d_sub, Some bound_sub),
-      Tabstract (AKdependent d_super, Some bound_super) ) ->
-    let this_ty = Option.first_some this_ty (Some ety_sub) in
-    (* Dependent types are identical but bound might be different *)
-    if d_sub = d_super then
-      simplify_subtype ~subtype_env ~this_ty bound_sub bound_super env
-    else
-      simplify_subtype ~subtype_env ~this_ty bound_sub ty_super env
-  | (Tabstract (AKdependent (DTexpr _), Some ty), Toption arg_ty_super) ->
-    let this_ty = Option.first_some this_ty (Some ety_sub) in
-    env
-    |> simplify_subtype ~subtype_env ~this_ty ty ty_super
-    ||| simplify_subtype ~subtype_env ~this_ty ty_sub arg_ty_super
-  (* If t1 <: ?t2 and t1 is an abstract type constrained as t1',
-   * then t1 <: t2 or t1' <: ?t2.  The converse is obviously
-   * true as well.  We can fold the case where t1 is unconstrained
-   * into the case analysis below.
-   *)
-  | (Tabstract ((AKnewtype _ | AKdependent _), Some ty), Toption arg_ty_super)
-    ->
-    env
-    |> simplify_subtype ~subtype_env ~this_ty ty_sub arg_ty_super
-    ||| simplify_subtype ~subtype_env ~this_ty ty ty_super
-  (* If t1 <: ?t2, where t1 is guaranteed not to contain null, then
-   * t1 <: t2, and the converse is obviously true as well.
-   *)
-  | (Tabstract (AKgeneric name_sub, opt_sub_cstr), Toption arg_ty_super)
-    when Option.is_some subtype_env.seen_generic_params ->
-    env
-    |> simplify_subtype ~subtype_env ~this_ty ty_sub arg_ty_super
-    ||| (* Look up *)
-        simplify_subtype_generic_sub name_sub opt_sub_cstr ty_super
-  | (Tprim (Nast.Tint | Nast.Tfloat), Tprim Nast.Tnum) -> valid ()
-  | (Tprim (Nast.Tint | Nast.Tstring), Tprim Nast.Tarraykey) -> valid ()
-  | (Tprim p1, Tprim p2) ->
-    if p1 = p2 then
-      valid ()
-    else
-      invalid ()
-  | ( ( Tnonnull | Tdynamic | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tobject
-      | Tclass _ | Tarraykind _ ),
-      Tprim _ ) ->
-    invalid ()
-  | ( Toption _,
-      Tprim
-        Nast.(
-          ( Tvoid | Tint | Tbool | Tfloat | Tstring | Tresource | Tnum
-          | Tarraykey | Tnoreturn | Tatom _ )) ) ->
-    invalid ()
-  | (Toption ty_sub', Tprim Nast.Tnull) ->
-    simplify_subtype ~subtype_env ~this_ty ty_sub' ty_super env
-  | (Tabstract ((AKnewtype _ | AKdependent _), Some ty), Tprim _) ->
-    simplify_subtype ~subtype_env ~this_ty ty ty_super env
-  | ( ( Tnonnull | Tdynamic | Toption _ | Tprim _ | Ttuple _ | Tshape _
-      | Tobject | Tclass _ | Tarraykind _ ),
-      Tfun _ ) ->
-    invalid ()
-  | (Tfun ft_sub, Tfun ft_super) ->
-    let (r_sub, r_super) = (fst ety_sub, fst ety_super) in
-    simplify_subtype_funs
-      ~subtype_env
-      ~check_return:true
-      r_sub
-      ft_sub
-      r_super
-      ft_super
-      env
-  | (Tanon (anon_arity, id), Tfun ft) ->
-    let (r_sub, r_super) = (fst ety_sub, fst ety_super) in
-    begin
-      match Env.get_anonymous env id with
-      | None ->
-        invalid_with (fun () ->
-            Errors.anonymous_recursive_call (Reason.to_pos r_sub))
-      | Some
-          {
-            rx = reactivity;
-            is_coroutine;
-            counter = ftys;
-            typecheck = anon;
-            _;
-          } ->
-        let p_super = Reason.to_pos r_super in
-        let p_sub = Reason.to_pos r_sub in
-        (* Add function type to set of types seen so far *)
-        ftys := TUtils.add_function_type env ety_super !ftys;
-        (env, TL.valid)
-        |> check_with
-             ( subtype_reactivity env reactivity ft.ft_reactive
-             || TypecheckerOptions.unsafe_rx (Env.get_tcopt env) )
-             (fun () ->
-               Errors.fun_reactivity_mismatch
-                 p_super
-                 (TUtils.reactivity_to_string env reactivity)
-                 p_sub
-                 (TUtils.reactivity_to_string env ft.ft_reactive))
-        |> check_with (is_coroutine = ft.ft_is_coroutine) (fun () ->
-               Errors.coroutinness_mismatch ft.ft_is_coroutine p_super p_sub)
-        |> check_with
-             (Unify.unify_arities
-                ~ellipsis_is_variadic:true
-                anon_arity
-                ft.ft_arity)
-             (fun () -> Errors.fun_arity_mismatch p_super p_sub)
-        |> fun (env, prop) ->
-        let (env, _, ret) = anon env ft.ft_params ft.ft_arity in
-        (env, prop)
-        &&& simplify_subtype ~subtype_env ~this_ty ret ft.ft_ret.et_type
-    end
-  | (Tabstract ((AKnewtype _ | AKdependent _), Some ty), Tfun _) ->
-    let this_ty = Option.first_some this_ty (Some ety_sub) in
-    simplify_subtype ~subtype_env ~this_ty ty ty_super env
-  | ( ( Tnonnull | Tdynamic | Toption _ | Tprim _ | Tfun _ | Tshape _ | Tanon _
-      | Tobject | Tclass _ | Tarraykind _ ),
-      Ttuple _ ) ->
-    invalid ()
-  (* (t1,...,tn) <: (u1,...,un) iff t1<:u1, ... , tn <: un *)
-  | (Ttuple tyl_sub, Ttuple tyl_super) ->
-    if List.length tyl_super = List.length tyl_sub then
-      wfold_left2
-        (fun res ty_sub ty_super ->
-          res &&& simplify_subtype ~subtype_env ty_sub ty_super)
-        (env, TL.valid)
-        tyl_sub
-        tyl_super
-    else
-      invalid ()
-  | (Tabstract ((AKnewtype _ | AKdependent _), Some ty), Ttuple _) ->
-    let this_ty = Option.first_some this_ty (Some ety_sub) in
-    simplify_subtype ~subtype_env ~this_ty ty ty_super env
-  | ( ( Tnonnull | Tdynamic | Toption _ | Tprim _ | Tfun _ | Ttuple _ | Tanon _
-      | Tobject | Tclass _ | Tarraykind _ ),
-      Tshape _ ) ->
-    invalid ()
-  | (Tshape (shape_kind_sub, fdm_sub), Tshape (shape_kind_super, fdm_super)) ->
-    let (r_sub, r_super) = (fst ety_sub, fst ety_super) in
-    (*
-     * shape_field_type A <: shape_field_type B iff:
-     *   1. A is no more optional than B
-     *   2. A's type <: B.type
+  match (ety_sub, ety_super) with
+  | (LoclType ety_sub, LoclType ety_super) ->
+    (match (snd ety_sub, snd ety_super) with
+    | (Tvar var_sub, Tvar var_super) when var_sub = var_super -> valid ()
+    (* Internally, newtypes and dependent types are always equipped with an upper bound.
+     * In the case when no upper bound is specified in source code,
+     * an implicit upper bound mixed = ?nonnull is added.
      *)
-    let simplify_subtype_shape_field name res sft_sub sft_super =
-      match (sft_sub.sft_optional, sft_super.sft_optional) with
-      | (_, true)
-      | (false, false) ->
-        res
-        &&& simplify_subtype
-              ~subtype_env
-              ~this_ty
-              sft_sub.sft_ty
-              sft_super.sft_ty
-      | (true, false) ->
-        res
-        |> with_error (fun () ->
-               let printable_name =
-                 TUtils.get_printable_shape_field_name name
-               in
-               match fst sft_sub.sft_ty with
-               | Reason.Rmissing_required_field _ ->
-                 Errors.missing_field
-                   (Reason.to_pos r_sub)
-                   (Reason.to_pos r_super)
-                   printable_name
-               | _ ->
-                 Errors.required_field_is_optional
-                   (Reason.to_pos r_sub)
-                   (Reason.to_pos r_super)
-                   printable_name)
-    in
-    let lookup_shape_field_type name r shape_kind fdm =
-      match ShapeMap.get name fdm with
-      | Some sft -> sft
-      | None ->
-        let printable_name = TUtils.get_printable_shape_field_name name in
-        let sft_ty =
-          match shape_kind with
-          | Closed_shape ->
-            MakeType.nothing
-              (Reason.Rmissing_required_field (Reason.to_pos r, printable_name))
-          | Open_shape ->
-            MakeType.mixed
-              (Reason.Rmissing_optional_field (Reason.to_pos r, printable_name))
-        in
-        { sft_ty; sft_optional = true }
-    in
-    begin
-      match (shape_kind_sub, shape_kind_super) with
-      | (Open_shape, Closed_shape) ->
-        invalid_with (fun () ->
-            Errors.shape_fields_unknown
-              (Reason.to_pos r_sub)
-              (Reason.to_pos r_super))
-      | (_, _) ->
-        ShapeSet.fold
-          (fun name res ->
-            simplify_subtype_shape_field
-              name
-              res
-              (lookup_shape_field_type name r_sub shape_kind_sub fdm_sub)
-              (lookup_shape_field_type name r_super shape_kind_super fdm_super))
-          (ShapeSet.of_list (ShapeMap.keys fdm_sub @ ShapeMap.keys fdm_super))
+    | (Tabstract ((AKnewtype _ | AKdependent _), None), _)
+    | (_, Tabstract ((AKnewtype _ | AKdependent _), None)) ->
+      assert false
+    | (Tdynamic, _) when subtype_env.treat_dynamic_as_bottom -> valid ()
+    | ( ( Tprim
+            Nast.(
+              ( Tint | Tbool | Tfloat | Tstring | Tresource | Tnum | Tarraykey
+              | Tnoreturn | Tatom _ ))
+        | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tobject
+        | Tclass _ | Tarraykind _ | Tpu _ ),
+        Tnonnull ) ->
+      valid ()
+    | ((Tdynamic | Toption _ | Tprim Nast.(Tnull | Tvoid)), Tnonnull) ->
+      invalid ()
+    | (Tabstract ((AKnewtype _ | AKdependent _), Some ty), Tnonnull) ->
+      simplify_subtype ~subtype_env ~this_ty ty ety_super env
+    | (Tdynamic, Tdynamic) -> valid ()
+    | ( ( Tnonnull | Toption _ | Tprim _ | Tfun _ | Ttuple _ | Tshape _
+        | Tanon _ | Tobject | Tclass _ | Tarraykind _ ),
+        Tdynamic ) ->
+      invalid ()
+    | (Tabstract ((AKnewtype _ | AKdependent _), Some ty), Tdynamic) ->
+      simplify_subtype ~subtype_env ~this_ty ty ety_super env
+    (* everything subtypes mixed *)
+    | (_, Toption (_, Tnonnull)) -> valid ()
+    (* null is the type of null and is a subtype of any option type. *)
+    | (Tprim Nast.Tnull, Toption _) -> valid ()
+    (* void behaves with respect to subtyping as an abstract type with
+     * an implicit upper bound ?nonnull
+     *)
+    | (Tprim Nast.Tvoid, Toption ty_super') ->
+      let r =
+        Reason.Rimplicit_upper_bound (Reason.to_pos (fst ety_sub), "?nonnull")
+      in
+      let tmixed = MakeType.mixed r in
+      env
+      |> simplify_subtype ~subtype_env ~this_ty ety_sub ty_super'
+      ||| simplify_subtype ~subtype_env ~this_ty tmixed ety_super
+    | (Tdynamic, Toption ty_super) ->
+      simplify_subtype ~subtype_env ~this_ty ety_sub ty_super env
+    (* ?ty_sub' <: ?ty_super' iff ty_sub' <: ?ty_super'. Reasoning:
+     * If ?ty_sub' <: ?ty_super', then from ty_sub' <: ?ty_sub' (widening) and transitivity
+     * of <: it follows that ty_sub' <: ?ty_super'.  Conversely, if ty_sub' <: ?ty_super', then
+     * by covariance and idempotence of ?, we have ?ty_sub' <: ??ty_sub' <: ?ty_super'.
+     * Therefore, this step preserves the set of solutions.
+     *)
+    | (Toption ty_sub', Toption _) ->
+      simplify_subtype ~subtype_env ~this_ty ty_sub' ety_super env
+    (* If ty_sub <: ?ty_super' and ty_sub does not contain null then we
+     * must also have ty_sub <: ty_super'.  The converse follows by
+     * widening and transitivity.  Therefore, this step preserves the set
+     * of solutions.
+     *)
+    | ( ( Tprim
+            Nast.(
+              ( Tint | Tbool | Tfloat | Tstring | Tresource | Tnum | Tarraykey
+              | Tnoreturn | Tatom _ ))
+        | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tobject
+        | Tclass _ | Tarraykind _ | Tany _ | Tpu _ ),
+        Toption ty_super' ) ->
+      simplify_subtype ~subtype_env ~this_ty ety_sub ty_super' env
+    | ( Tabstract (AKnewtype (name_sub, _), _),
+        Toption ((_, Tabstract (AKnewtype (name_super, _), _)) as ty_super') )
+      when name_super = name_sub ->
+      simplify_subtype ~subtype_env ~this_ty ety_sub ty_super' env
+    | ( Tabstract (AKdependent d_sub, Some bound_sub),
+        Tabstract (AKdependent d_super, Some bound_super) ) ->
+      let this_ty = Option.first_some this_ty (Some ety_sub) in
+      (* Dependent types are identical but bound might be different *)
+      if d_sub = d_super then
+        simplify_subtype ~subtype_env ~this_ty bound_sub bound_super env
+      else
+        simplify_subtype ~subtype_env ~this_ty bound_sub ety_super env
+    | (Tabstract (AKdependent (DTexpr _), Some ty), Toption arg_ty_super) ->
+      let this_ty = Option.first_some this_ty (Some ety_sub) in
+      env
+      |> simplify_subtype ~subtype_env ~this_ty ty ety_super
+      ||| simplify_subtype ~subtype_env ~this_ty ety_sub arg_ty_super
+    (* If t1 <: ?t2 and t1 is an abstract type constrained as t1',
+     * then t1 <: t2 or t1' <: ?t2.  The converse is obviously
+     * true as well.  We can fold the case where t1 is unconstrained
+     * into the case analysis below.
+     *)
+    | (Tabstract ((AKnewtype _ | AKdependent _), Some ty), Toption arg_ty_super)
+      ->
+      env
+      |> simplify_subtype ~subtype_env ~this_ty ety_sub arg_ty_super
+      ||| simplify_subtype ~subtype_env ~this_ty ty ety_super
+    (* If t1 <: ?t2, where t1 is guaranteed not to contain null, then
+     * t1 <: t2, and the converse is obviously true as well.
+     *)
+    | (Tabstract (AKgeneric name_sub, opt_sub_cstr), Toption arg_ty_super)
+      when Option.is_some subtype_env.seen_generic_params ->
+      env
+      |> simplify_subtype ~subtype_env ~this_ty ety_sub arg_ty_super
+      ||| (* Look up *)
+          simplify_subtype_generic_sub name_sub opt_sub_cstr ety_sub ety_super
+    | (Tprim (Nast.Tint | Nast.Tfloat), Tprim Nast.Tnum) -> valid ()
+    | (Tprim (Nast.Tint | Nast.Tstring), Tprim Nast.Tarraykey) -> valid ()
+    | (Tprim p1, Tprim p2) ->
+      if p1 = p2 then
+        valid ()
+      else
+        invalid ()
+    | ( ( Tnonnull | Tdynamic | Tfun _ | Ttuple _ | Tshape _ | Tanon _
+        | Tobject | Tclass _ | Tarraykind _ ),
+        Tprim _ ) ->
+      invalid ()
+    | ( Toption _,
+        Tprim
+          Nast.(
+            ( Tvoid | Tint | Tbool | Tfloat | Tstring | Tresource | Tnum
+            | Tarraykey | Tnoreturn | Tatom _ )) ) ->
+      invalid ()
+    | (Toption ty_sub', Tprim Nast.Tnull) ->
+      simplify_subtype ~subtype_env ~this_ty ty_sub' ety_super env
+    | (Tabstract ((AKnewtype _ | AKdependent _), Some ty), Tprim _) ->
+      simplify_subtype ~subtype_env ~this_ty ty ety_super env
+    | ( ( Tnonnull | Tdynamic | Toption _ | Tprim _ | Ttuple _ | Tshape _
+        | Tobject | Tclass _ | Tarraykind _ ),
+        Tfun _ ) ->
+      invalid ()
+    | (Tfun ft_sub, Tfun ft_super) ->
+      let (r_sub, r_super) = (fst ety_sub, fst ety_super) in
+      simplify_subtype_funs
+        ~subtype_env
+        ~check_return:true
+        r_sub
+        ft_sub
+        r_super
+        ft_super
+        env
+    | (Tanon (anon_arity, id), Tfun ft) ->
+      let (r_sub, r_super) = (fst ety_sub, fst ety_super) in
+      begin
+        match Env.get_anonymous env id with
+        | None ->
+          invalid_with (fun () ->
+              Errors.anonymous_recursive_call (Reason.to_pos r_sub))
+        | Some
+            {
+              rx = reactivity;
+              is_coroutine;
+              counter = ftys;
+              typecheck = anon;
+              _;
+            } ->
+          let p_super = Reason.to_pos r_super in
+          let p_sub = Reason.to_pos r_sub in
+          (* Add function type to set of types seen so far *)
+          ftys := TUtils.add_function_type env ety_super !ftys;
           (env, TL.valid)
-    end
-  | (Tabstract ((AKnewtype _ | AKdependent _), Some ty), Tshape _) ->
-    let this_ty = Option.first_some this_ty (Some ety_sub) in
-    simplify_subtype ~subtype_env ~this_ty ty ty_super env
-  | (Tclass ((_, class_name), _, _), Tabstract (AKnewtype (enum_name, _), _))
-    when Env.is_enum env enum_name && enum_name = class_name ->
-    valid ()
-  | ( ( Tnonnull | Tdynamic | Toption _ | Tprim _ | Tfun _ | Ttuple _
-      | Tshape _ | Tanon _ | Tobject | Tclass _ | Tarraykind _ ),
-      Tabstract (AKnewtype _, _) ) ->
-    invalid ()
-  | (Tabstract (AKnewtype (e_sub, _), _), Tabstract (AKnewtype (e_super, _), _))
-    when Env.is_enum env e_sub && Env.is_enum env e_super && e_sub = e_super ->
-    valid ()
-  | ( Tabstract (AKnewtype (name_sub, tyl_sub), _),
-      Tabstract (AKnewtype (name_super, tyl_super), _) )
-    when name_super = name_sub ->
-    let td = Env.get_typedef env name_super in
-    begin
-      match td with
-      | Some { td_tparams; _ } ->
-        let variance_reifiedl =
-          List.map td_tparams (fun t -> (t.tp_variance, t.tp_reified))
-        in
-        simplify_subtype_variance
-          ~subtype_env
-          name_sub
-          variance_reifiedl
+          |> check_with
+               ( subtype_reactivity env reactivity ft.ft_reactive
+               || TypecheckerOptions.unsafe_rx (Env.get_tcopt env) )
+               (fun () ->
+                 Errors.fun_reactivity_mismatch
+                   p_super
+                   (TUtils.reactivity_to_string env reactivity)
+                   p_sub
+                   (TUtils.reactivity_to_string env ft.ft_reactive))
+          |> check_with (is_coroutine = ft.ft_is_coroutine) (fun () ->
+                 Errors.coroutinness_mismatch ft.ft_is_coroutine p_super p_sub)
+          |> check_with
+               (Unify.unify_arities
+                  ~ellipsis_is_variadic:true
+                  anon_arity
+                  ft.ft_arity)
+               (fun () -> Errors.fun_arity_mismatch p_super p_sub)
+          |> fun (env, prop) ->
+          let (env, _, ret) = anon env ft.ft_params ft.ft_arity in
+          (env, prop)
+          &&& simplify_subtype ~subtype_env ~this_ty ret ft.ft_ret.et_type
+      end
+    | (Tabstract ((AKnewtype _ | AKdependent _), Some ty), Tfun _) ->
+      let this_ty = Option.first_some this_ty (Some ety_sub) in
+      simplify_subtype ~subtype_env ~this_ty ty ety_super env
+    | ( ( Tnonnull | Tdynamic | Toption _ | Tprim _ | Tfun _ | Tshape _
+        | Tanon _ | Tobject | Tclass _ | Tarraykind _ ),
+        Ttuple _ ) ->
+      invalid ()
+    (* (t1,...,tn) <: (u1,...,un) iff t1<:u1, ... , tn <: un *)
+    | (Ttuple tyl_sub, Ttuple tyl_super) ->
+      if List.length tyl_super = List.length tyl_sub then
+        wfold_left2
+          (fun res ty_sub ty_super ->
+            res &&& simplify_subtype ~subtype_env ty_sub ty_super)
+          (env, TL.valid)
           tyl_sub
           tyl_super
-          env
-      | None -> invalid ()
-    end
-  | ( Tabstract ((AKnewtype _ | AKdependent _), Some ty),
-      Tabstract (AKnewtype _, _) ) ->
-    simplify_subtype ~subtype_env ~this_ty ty ty_super env
-  | (_, Tabstract (AKdependent _, Some ((_, Tclass ((_, x), _, _)) as ty)))
-    when is_final_and_not_contravariant env x ->
-    (* For final class C, there is no difference between `this as X` and `X`,
-     * and `expr<#n> as X` and `X`.
-     * But we need to take care with contravariant classes, since we can't
-     * statically guarantee their runtime type.
-     *)
-    simplify_subtype ~subtype_env ~this_ty ty_sub ty env
-  | ( Tclass _,
-      Tabstract (AKdependent DTthis, Some (_, Tclass ((_, x), _, tyl_super)))
-    )
-    when has_lower_bounds x ->
-    let class_def = Env.get_class env x in
-    begin
-      match class_def with
-      | Some class_ty ->
-        let p_super = fst ety_super in
-        let tyl_super =
-          if
-            List.is_empty tyl_super
-            && not (Partial.should_check_error (Env.get_mode env) 4029)
-          then
-            List.map (Cls.tparams class_ty) (fun _ ->
-                (p_super, Typing_defs.make_tany ()))
-          else
-            tyl_super
-        in
-        if List.length (Cls.tparams class_ty) <> List.length tyl_super then
-          invalid_with (fun () ->
-              Errors.expected_tparam
-                ~definition_pos:(Cls.pos class_ty)
-                ~use_pos:(Reason.to_pos p_super)
-                (List.length (Cls.tparams class_ty)))
-        else
-          let ety_env =
-            {
-              type_expansions = [];
-              substs = Subst.make_locl (Cls.tparams class_ty) tyl_super;
-              this_ty = Option.value this_ty ~default:ty_super;
-              from_class = None;
-            }
-          in
-          let lower_bounds_super = Cls.lower_bounds_on_this class_ty in
-          let rec try_constraints lower_bounds_super env =
-            match Sequence.next lower_bounds_super with
-            | None -> invalid_env env
-            | Some (ty_super, lower_bounds_super) ->
-              let (env, ty_super) = Phase.localize ~ety_env env ty_super in
-              env
-              |> simplify_subtype ~subtype_env ~this_ty ty_sub ty_super
-              ||| try_constraints lower_bounds_super
-          in
-          try_constraints lower_bounds_super env
-      | None -> invalid ()
-    end
-  (* Primitives and other concrete types cannot be subtypes of dependent types *)
-  | ( ( Tnonnull | Tdynamic | Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tanon _
-      | Tclass _ | Tobject | Tarraykind _ ),
-      Tabstract (AKdependent expr_dep, tyopt) ) ->
-    (* If the bound is the same class try and show more explanation of the error *)
-    begin
-      match (snd ty_sub, tyopt) with
-      | (Tclass ((_, y), _, _), Some (_, Tclass (((_, x) as id), _, _)))
-        when y = x ->
-        invalid_with (fun () ->
-            Errors.try_ fail (fun error ->
-                let p = Reason.to_pos (fst ety_sub) in
-                if expr_dep = DTcls x then
-                  Errors.exact_class_final id p error
-                else
-                  Errors.this_final id p error))
-      | _ -> invalid ()
-    end
-  | (Tabstract (AKnewtype _, Some ty), Tabstract (AKdependent _, _)) ->
-    simplify_subtype ~subtype_env ~this_ty ty ty_super env
-  | (Toption _, Tabstract (AKdependent _, Some _)) -> invalid ()
-  | ( ( Tnonnull | Tdynamic | Toption _ | Tprim _ | Ttuple _ | Tshape _
-      | Tobject | Tclass _ | Tarraykind _ ),
-      Tanon _ ) ->
-    invalid ()
-  | (Tanon (_, id1), Tanon (_, id2)) ->
-    if id1 = id2 then
-      valid ()
-    else
-      invalid ()
-  | (Tabstract ((AKnewtype _ | AKdependent _), Some ty), Tanon _) ->
-    simplify_subtype ~subtype_env ~this_ty ty ty_super env
-  | (Tfun _, Tanon _) -> invalid ()
-  | (Tobject, Tobject) -> valid ()
-  (* Any class type is a subtype of object *)
-  | (Tclass _, Tobject) -> valid ()
-  | ( ( Tnonnull | Tdynamic | Toption _ | Tprim _ | Tfun _ | Ttuple _
-      | Tshape _ | Tanon _ | Tarraykind _ ),
-      Tobject ) ->
-    invalid ()
-  | (Tabstract ((AKnewtype _ | AKdependent _), Some ty), Tobject) ->
-    simplify_subtype ~subtype_env ~this_ty ty ty_super env
-  | ( Tabstract (AKnewtype (cid, _), _),
-      Tclass ((_, class_name), _, [ty_super']) )
-    when Env.is_enum env cid && class_name = SN.Classes.cHH_BuiltinEnum ->
-    env
-    |> simplify_subtype ~subtype_env ~this_ty ty_sub ty_super'
-    &&& simplify_subtype ~subtype_env ~this_ty ty_super' ty_sub
-  | ( Tabstract (AKnewtype (enum_name, _), _),
-      Tclass ((_, class_name), Nonexact, _) )
-    when (Env.is_enum env enum_name && enum_name = class_name)
-         || class_name = SN.Classes.cXHPChild ->
-    valid ()
-  | ( Tabstract (AKnewtype (enum_name, _), Some ty),
-      Tclass ((_, class_name), exact, _) )
-    when Env.is_enum env enum_name ->
-    if enum_name = class_name && exact = Nonexact then
-      valid ()
-    else
-      simplify_subtype ~subtype_env ~this_ty ty ty_super env
-  | (Tprim Nast.Tstring, Tclass ((_, class_name), exact, _)) ->
-    if
-      (class_name = SN.Classes.cStringish || class_name = SN.Classes.cXHPChild)
-      && exact = Nonexact
-    then
-      valid ()
-    else
-      invalid ()
-  | ( Tprim Nast.(Tarraykey | Tint | Tfloat | Tnum),
-      Tclass ((_, class_name), exact, _) ) ->
-    if class_name = SN.Classes.cXHPChild && exact = Nonexact then
-      valid ()
-    else
-      invalid ()
-  | ( ( Tnonnull | Tdynamic
-      | Tprim Nast.(Tnull | Tvoid | Tbool | Tresource | Tnoreturn | Tatom _)
-      | Toption _ | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tpu _ ),
-      Tclass _ ) ->
-    invalid ()
-  (* Match what's done in unify for non-strict code *)
-  | (Tobject, Tclass _) ->
-    if Partial.should_check_error (Env.get_mode env) 4110 then
-      invalid ()
-    else
-      valid ()
-  | ( Tclass (x_sub, exact_sub, tyl_sub),
-      Tclass (x_super, exact_super, tyl_super) ) ->
-    let exact_match =
-      match (exact_sub, exact_super) with
-      | (Nonexact, Exact) -> false
-      | (_, _) -> true
-    in
-    let (p_sub, p_super) = (fst ety_sub, fst ety_super) in
-    let (cid_super, cid_sub) = (snd x_super, snd x_sub) in
-    (* This is side-effecting as it registers a dependency *)
-    let class_def_sub = Env.get_class env cid_sub in
-    if cid_super = cid_sub then
-      (* If class is final then exactness is superfluous *)
-      let is_final =
-        match class_def_sub with
-        | Some tc -> Cls.final tc
-        | None -> false
-      in
-      if not (exact_match || is_final) then
-        invalid ()
       else
-        (* We handle the case where a generic A<T> is used as A *)
-        let tyl_super =
-          if
-            List.is_empty tyl_super
-            && not (Partial.should_check_error (Env.get_mode env) 4101)
-          then
-            List.map tyl_sub (fun _ -> (p_super, Typing_defs.make_tany ()))
-          else
-            tyl_super
-        in
-        let tyl_sub =
-          if
-            List.is_empty tyl_sub
-            && not (Partial.should_check_error (Env.get_mode env) 4101)
-          then
-            List.map tyl_super (fun _ -> (p_super, Typing_defs.make_tany ()))
-          else
-            tyl_sub
-        in
-        if List.length tyl_sub <> List.length tyl_super then
-          let n_sub = String_utils.soi (List.length tyl_sub) in
-          let n_super = String_utils.soi (List.length tyl_super) in
-          invalid_with (fun () ->
-              Errors.type_arity_mismatch
-                (fst x_super)
-                n_super
-                (fst x_sub)
-                n_sub)
-        else if List.is_empty tyl_sub && List.is_empty tyl_super then
-          valid ()
-        else
-          let variance_reifiedl =
-            match class_def_sub with
-            | None ->
-              List.map tyl_sub (fun _ -> (Ast_defs.Invariant, Aast.Erased))
-            | Some class_sub ->
-              List.map (Cls.tparams class_sub) (fun t ->
-                  (t.tp_variance, t.tp_reified))
+        invalid ()
+    | (Tabstract ((AKnewtype _ | AKdependent _), Some ty), Ttuple _) ->
+      let this_ty = Option.first_some this_ty (Some ety_sub) in
+      simplify_subtype ~subtype_env ~this_ty ty ety_super env
+    | ( ( Tnonnull | Tdynamic | Toption _ | Tprim _ | Tfun _ | Ttuple _
+        | Tanon _ | Tobject | Tclass _ | Tarraykind _ ),
+        Tshape _ ) ->
+      invalid ()
+    | (Tshape (shape_kind_sub, fdm_sub), Tshape (shape_kind_super, fdm_super))
+      ->
+      let (r_sub, r_super) = (fst ety_sub, fst ety_super) in
+      (*
+       * shape_field_type A <: shape_field_type B iff:
+       *   1. A is no more optional than B
+       *   2. A's type <: B.type
+       *)
+      let simplify_subtype_shape_field name res sft_sub sft_super =
+        match (sft_sub.sft_optional, sft_super.sft_optional) with
+        | (_, true)
+        | (false, false) ->
+          res
+          &&& simplify_subtype
+                ~subtype_env
+                ~this_ty
+                sft_sub.sft_ty
+                sft_super.sft_ty
+        | (true, false) ->
+          res
+          |> with_error (fun () ->
+                 let printable_name =
+                   TUtils.get_printable_shape_field_name name
+                 in
+                 match fst sft_sub.sft_ty with
+                 | Reason.Rmissing_required_field _ ->
+                   Errors.missing_field
+                     (Reason.to_pos r_sub)
+                     (Reason.to_pos r_super)
+                     printable_name
+                 | _ ->
+                   Errors.required_field_is_optional
+                     (Reason.to_pos r_sub)
+                     (Reason.to_pos r_super)
+                     printable_name)
+      in
+      let lookup_shape_field_type name r shape_kind fdm =
+        match ShapeMap.get name fdm with
+        | Some sft -> sft
+        | None ->
+          let printable_name = TUtils.get_printable_shape_field_name name in
+          let sft_ty =
+            match shape_kind with
+            | Closed_shape ->
+              MakeType.nothing
+                (Reason.Rmissing_required_field
+                   (Reason.to_pos r, printable_name))
+            | Open_shape ->
+              MakeType.mixed
+                (Reason.Rmissing_optional_field
+                   (Reason.to_pos r, printable_name))
           in
-          (* C<t1, .., tn> <: C<u1, .., un> iff
-           *   t1 <:v1> u1 /\ ... /\ tn <:vn> un
-           * where vi is the variance of the i'th generic parameter of C,
-           * and <:v denotes the appropriate direction of subtyping for variance v
-           *)
+          { sft_ty; sft_optional = true }
+      in
+      begin
+        match (shape_kind_sub, shape_kind_super) with
+        | (Open_shape, Closed_shape) ->
+          invalid_with (fun () ->
+              Errors.shape_fields_unknown
+                (Reason.to_pos r_sub)
+                (Reason.to_pos r_super))
+        | (_, _) ->
+          ShapeSet.fold
+            (fun name res ->
+              simplify_subtype_shape_field
+                name
+                res
+                (lookup_shape_field_type name r_sub shape_kind_sub fdm_sub)
+                (lookup_shape_field_type
+                   name
+                   r_super
+                   shape_kind_super
+                   fdm_super))
+            (ShapeSet.of_list (ShapeMap.keys fdm_sub @ ShapeMap.keys fdm_super))
+            (env, TL.valid)
+      end
+    | (Tabstract ((AKnewtype _ | AKdependent _), Some ty), Tshape _) ->
+      let this_ty = Option.first_some this_ty (Some ety_sub) in
+      simplify_subtype ~subtype_env ~this_ty ty ety_super env
+    | (Tclass ((_, class_name), _, _), Tabstract (AKnewtype (enum_name, _), _))
+      when Env.is_enum env enum_name && enum_name = class_name ->
+      valid ()
+    | ( ( Tnonnull | Tdynamic | Toption _ | Tprim _ | Tfun _ | Ttuple _
+        | Tshape _ | Tanon _ | Tobject | Tclass _ | Tarraykind _ ),
+        Tabstract (AKnewtype _, _) ) ->
+      invalid ()
+    | ( Tabstract (AKnewtype (e_sub, _), _),
+        Tabstract (AKnewtype (e_super, _), _) )
+      when Env.is_enum env e_sub && Env.is_enum env e_super && e_sub = e_super
+      ->
+      valid ()
+    | ( Tabstract (AKnewtype (name_sub, tyl_sub), _),
+        Tabstract (AKnewtype (name_super, tyl_super), _) )
+      when name_super = name_sub ->
+      let td = Env.get_typedef env name_super in
+      begin
+        match td with
+        | Some { td_tparams; _ } ->
+          let variance_reifiedl =
+            List.map td_tparams (fun t -> (t.tp_variance, t.tp_reified))
+          in
           simplify_subtype_variance
             ~subtype_env
-            cid_sub
+            name_sub
             variance_reifiedl
             tyl_sub
             tyl_super
             env
-    else if not exact_match then
-      invalid ()
-    else (
-      match class_def_sub with
-      | None ->
-        (* This should have been caught already in the naming phase *)
-        valid ()
-      | Some class_sub ->
-        (* We handle the case where a generic A<T> is used as A *)
-        let tyl_sub =
-          if
-            List.is_empty tyl_sub
-            && not (Partial.should_check_error (Env.get_mode env) 4029)
-          then
-            List.map (Cls.tparams class_sub) (fun _ ->
-                (p_sub, Typing_defs.make_tany ()))
-          else
-            tyl_sub
-        in
-        if List.length (Cls.tparams class_sub) <> List.length tyl_sub then
-          invalid_with (fun () ->
-              Errors.expected_tparam
-                ~definition_pos:(Cls.pos class_sub)
-                ~use_pos:(Reason.to_pos p_sub)
-                (List.length (Cls.tparams class_sub)))
-        else
-          let ety_env =
-            {
-              type_expansions = [];
-              substs = Subst.make_locl (Cls.tparams class_sub) tyl_sub;
-              (* TODO: do we need this? *)
-              this_ty = Option.value this_ty ~default:ty_sub;
-              from_class = None;
-            }
-          in
-          let up_obj = Cls.get_ancestor class_sub cid_super in
-          (match up_obj with
-          | Some up_obj ->
-            let (env, up_obj) = Phase.localize ~ety_env env up_obj in
-            simplify_subtype ~subtype_env ~this_ty up_obj ty_super env
-          | None ->
+        | None -> invalid ()
+      end
+    | ( Tabstract ((AKnewtype _ | AKdependent _), Some ty),
+        Tabstract (AKnewtype _, _) ) ->
+      simplify_subtype ~subtype_env ~this_ty ty ety_super env
+    | (_, Tabstract (AKdependent _, Some ((_, Tclass ((_, x), _, _)) as ty)))
+      when is_final_and_not_contravariant env x ->
+      (* For final class C, there is no difference between `this as X` and `X`,
+       * and `expr<#n> as X` and `X`.
+       * But we need to take care with contravariant classes, since we can't
+       * statically guarantee their runtime type.
+       *)
+      simplify_subtype ~subtype_env ~this_ty ety_sub ty env
+    | ( Tclass _,
+        Tabstract (AKdependent DTthis, Some (_, Tclass ((_, x), _, tyl_super)))
+      )
+      when has_lower_bounds x ->
+      let class_def = Env.get_class env x in
+      begin
+        match class_def with
+        | Some class_ty ->
+          let p_super = fst ety_super in
+          let tyl_super =
             if
-              Cls.kind class_sub = Ast_defs.Ctrait
-              || Cls.kind class_sub = Ast_defs.Cinterface
+              List.is_empty tyl_super
+              && not (Partial.should_check_error (Env.get_mode env) 4029)
             then
-              let rec try_upper_bounds_on_this up_objs env =
-                match Sequence.next up_objs with
-                | None ->
-                  (* It's crucial that we don't lose updates to global_tpenv in env that were
-                   * introduced by PHase.localize. TODO: avoid this requirement *)
-                  invalid_env env
-                | Some (ub_obj_typ, up_objs) ->
-                  (* a trait is never the runtime type, but it can be used
-                   * as a constraint if it has requirements or where constraints
-                   * for its using classes *)
-                  let (env, ub_obj_typ) =
-                    Phase.localize ~ety_env env ub_obj_typ
-                  in
-                  env
-                  |> simplify_subtype
-                       ~subtype_env
-                       ~this_ty
-                       (p_sub, snd ub_obj_typ)
-                       ty_super
-                  ||| try_upper_bounds_on_this up_objs
-              in
-              try_upper_bounds_on_this (Cls.upper_bounds_on_this class_sub) env
+              List.map (Cls.tparams class_ty) (fun _ ->
+                  (p_super, Typing_defs.make_tany ()))
             else
-              invalid ())
-    )
-  | (Tabstract (AKnewtype _, Some ty), Tclass _) ->
-    simplify_subtype ~subtype_env ~this_ty ty ty_super env
-  | (Tarraykind _, Tclass ((_, class_name), Nonexact, _))
-    when class_name = SN.Classes.cXHPChild ->
-    valid ()
-  | (Tarraykind akind, Tclass ((_, coll), Nonexact, [tv_super]))
-    when coll = SN.Collections.cTraversable
-         || coll = SN.Rx.cTraversable
-         || coll = SN.Collections.cContainer ->
-    (match akind with
-    (* array <: Traversable<_> and emptyarray <: Traversable<t> for any t *)
-    | AKany ->
-      simplify_subtype
-        ~subtype_env
-        ~this_ty
-        (fst ety_sub, Typing_defs.make_tany ())
-        tv_super
-        env
-    | AKempty -> valid ()
-    (* vec<tv> <: Traversable<tv_super>
-     * iff tv <: tv_super
-     * Likewise for vec<tv> <: Container<tv_super>
-     *          and map<_,tv> <: Traversable<tv_super>
-     *          and map<_,tv> <: Container<tv_super>
-     *)
-    | AKvarray tv
-    | AKvec tv
-    | AKdarray (_, tv)
-    | AKvarray_or_darray tv
-    | AKmap (_, tv) ->
-      simplify_subtype ~subtype_env ~this_ty tv tv_super env)
-  | (Tarraykind akind, Tclass ((_, coll), Nonexact, [tk_super; tv_super]))
-    when coll = SN.Collections.cKeyedTraversable
-         || coll = SN.Rx.cKeyedTraversable
-         || coll = SN.Collections.cKeyedContainer ->
-    let r = fst ety_sub in
-    (match akind with
-    | AKany ->
-      env
-      |> simplify_subtype
-           ~subtype_env
-           ~this_ty
-           (fst ety_sub, Typing_defs.make_tany ())
-           tk_super
-      &&& simplify_subtype
-            ~subtype_env
-            ~this_ty
-            (fst ety_sub, Typing_defs.make_tany ())
-            tv_super
-    | AKempty -> valid ()
-    | AKvarray tv
-    | AKvec tv ->
-      env
-      |> simplify_subtype ~subtype_env ~this_ty (MakeType.int r) tk_super
-      &&& simplify_subtype ~subtype_env ~this_ty tv tv_super
-    | AKvarray_or_darray tv ->
-      let tk_sub =
-        MakeType.arraykey (Reason.Rvarray_or_darray_key (Reason.to_pos r))
-      in
-      env
-      |> simplify_subtype ~subtype_env ~this_ty tk_sub tk_super
-      &&& simplify_subtype ~subtype_env ~this_ty tv tv_super
-    | AKdarray (tk, tv)
-    | AKmap (tk, tv) ->
-      env
-      |> simplify_subtype ~subtype_env ~this_ty tk tk_super
-      &&& simplify_subtype ~subtype_env ~this_ty tv tv_super)
-  | (Tarraykind _, Tclass ((_, coll), Nonexact, []))
-    when coll = SN.Collections.cKeyedTraversable
-         || coll = SN.Rx.cKeyedTraversable
-         || coll = SN.Collections.cKeyedContainer ->
-    (* All arrays are subtypes of the untyped KeyedContainer / Traversables *)
-    valid ()
-  | (Tarraykind _, Tclass _) -> invalid ()
-  | (Tabstract (AKdependent _, Some ty), Tclass _) ->
-    let this_ty = Option.first_some this_ty (Some ety_sub) in
-    simplify_subtype ~subtype_env ~this_ty ty ty_super env
-  (* Arrays *)
-  | (Ttuple _, Tarraykind AKany) ->
-    if TypecheckerOptions.disallow_array_as_tuple (Env.get_tcopt env) then
+              tyl_super
+          in
+          if List.length (Cls.tparams class_ty) <> List.length tyl_super then
+            invalid_with (fun () ->
+                Errors.expected_tparam
+                  ~definition_pos:(Cls.pos class_ty)
+                  ~use_pos:(Reason.to_pos p_super)
+                  (List.length (Cls.tparams class_ty)))
+          else
+            let ety_env =
+              {
+                type_expansions = [];
+                substs = Subst.make_locl (Cls.tparams class_ty) tyl_super;
+                this_ty = Option.value this_ty ~default:ety_super;
+                from_class = None;
+              }
+            in
+            let lower_bounds_super = Cls.lower_bounds_on_this class_ty in
+            let rec try_constraints lower_bounds_super env =
+              match Sequence.next lower_bounds_super with
+              | None -> invalid_env env
+              | Some (ty_super, lower_bounds_super) ->
+                let (env, ty_super) = Phase.localize ~ety_env env ty_super in
+                env
+                |> simplify_subtype ~subtype_env ~this_ty ety_sub ty_super
+                ||| try_constraints lower_bounds_super
+            in
+            try_constraints lower_bounds_super env
+        | None -> invalid ()
+      end
+    (* Primitives and other concrete types cannot be subtypes of dependent types *)
+    | ( ( Tnonnull | Tdynamic | Tprim _ | Tfun _ | Ttuple _ | Tshape _
+        | Tanon _ | Tclass _ | Tobject | Tarraykind _ ),
+        Tabstract (AKdependent expr_dep, tyopt) ) ->
+      (* If the bound is the same class try and show more explanation of the error *)
+      begin
+        match (snd ety_sub, tyopt) with
+        | (Tclass ((_, y), _, _), Some (_, Tclass (((_, x) as id), _, _)))
+          when y = x ->
+          invalid_with (fun () ->
+              Errors.try_ fail (fun error ->
+                  let p = Reason.to_pos (fst ety_sub) in
+                  if expr_dep = DTcls x then
+                    Errors.exact_class_final id p error
+                  else
+                    Errors.this_final id p error))
+        | _ -> invalid ()
+      end
+    | (Tabstract (AKnewtype _, Some ty), Tabstract (AKdependent _, _)) ->
+      simplify_subtype ~subtype_env ~this_ty ty ety_super env
+    | (Toption _, Tabstract (AKdependent _, Some _)) -> invalid ()
+    | ( ( Tnonnull | Tdynamic | Toption _ | Tprim _ | Ttuple _ | Tshape _
+        | Tobject | Tclass _ | Tarraykind _ ),
+        Tanon _ ) ->
       invalid ()
-    else
+    | (Tanon (_, id1), Tanon (_, id2)) ->
+      if id1 = id2 then
+        valid ()
+      else
+        invalid ()
+    | (Tabstract ((AKnewtype _ | AKdependent _), Some ty), Tanon _) ->
+      simplify_subtype ~subtype_env ~this_ty ty ety_super env
+    | (Tfun _, Tanon _) -> invalid ()
+    | (Tobject, Tobject) -> valid ()
+    (* Any class type is a subtype of object *)
+    | (Tclass _, Tobject) -> valid ()
+    | ( ( Tnonnull | Tdynamic | Toption _ | Tprim _ | Tfun _ | Ttuple _
+        | Tshape _ | Tanon _ | Tarraykind _ ),
+        Tobject ) ->
+      invalid ()
+    | (Tabstract ((AKnewtype _ | AKdependent _), Some ty), Tobject) ->
+      simplify_subtype ~subtype_env ~this_ty ty ety_super env
+    | ( Tabstract (AKnewtype (cid, _), _),
+        Tclass ((_, class_name), _, [ty_super']) )
+      when Env.is_enum env cid && class_name = SN.Classes.cHH_BuiltinEnum ->
+      env
+      |> simplify_subtype ~subtype_env ~this_ty ety_sub ty_super'
+      &&& simplify_subtype ~subtype_env ~this_ty ty_super' ety_sub
+    | ( Tabstract (AKnewtype (enum_name, _), _),
+        Tclass ((_, class_name), Nonexact, _) )
+      when (Env.is_enum env enum_name && enum_name = class_name)
+           || class_name = SN.Classes.cXHPChild ->
       valid ()
-  | ( ( Tnonnull | Tdynamic | Toption _ | Tprim _ | Tfun _ | Ttuple _
-      | Tshape _ | Tanon _ | Tobject | Tclass _ ),
-      Tarraykind _ ) ->
-    invalid ()
-  | (Tabstract ((AKnewtype _ | AKdependent _), Some ty), Tarraykind _) ->
-    simplify_subtype ~subtype_env ~this_ty ty ty_super env
-  | (Tarraykind ak_sub, Tarraykind ak_super) ->
-    let r = fst ety_sub in
-    begin
-      match (ak_sub, ak_super) with
-      (* An array of any kind is a subtype of an array of AKany *)
-      | (_, AKany) -> valid ()
-      (* An empty array is a subtype of any array type *)
-      | (AKempty, _) -> valid ()
-      (* array is a subtype of varray_or_darray<_> *)
-      | (AKany, AKvarray_or_darray (_, Tany _)) -> valid ()
-      | (AKany, _) ->
-        let safe_array = TypecheckerOptions.safe_array (Env.get_tcopt env) in
-        if safe_array then
+    | ( Tabstract (AKnewtype (enum_name, _), Some ty),
+        Tclass ((_, class_name), exact, _) )
+      when Env.is_enum env enum_name ->
+      if enum_name = class_name && exact = Nonexact then
+        valid ()
+      else
+        simplify_subtype ~subtype_env ~this_ty ty ety_super env
+    | (Tprim Nast.Tstring, Tclass ((_, class_name), exact, _)) ->
+      if
+        ( class_name = SN.Classes.cStringish
+        || class_name = SN.Classes.cXHPChild )
+        && exact = Nonexact
+      then
+        valid ()
+      else
+        invalid ()
+    | ( Tprim Nast.(Tarraykey | Tint | Tfloat | Tnum),
+        Tclass ((_, class_name), exact, _) ) ->
+      if class_name = SN.Classes.cXHPChild && exact = Nonexact then
+        valid ()
+      else
+        invalid ()
+    | ( ( Tnonnull | Tdynamic
+        | Tprim Nast.(Tnull | Tvoid | Tbool | Tresource | Tnoreturn | Tatom _)
+        | Toption _ | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tpu _ ),
+        Tclass _ ) ->
+      invalid ()
+    (* Match what's done in unify for non-strict code *)
+    | (Tobject, Tclass _) ->
+      if Partial.should_check_error (Env.get_mode env) 4110 then
+        invalid ()
+      else
+        valid ()
+    | ( Tclass (x_sub, exact_sub, tyl_sub),
+        Tclass (x_super, exact_super, tyl_super) ) ->
+      let exact_match =
+        match (exact_sub, exact_super) with
+        | (Nonexact, Exact) -> false
+        | (_, _) -> true
+      in
+      let (p_sub, p_super) = (fst ety_sub, fst ety_super) in
+      let (cid_super, cid_sub) = (snd x_super, snd x_sub) in
+      (* This is side-effecting as it registers a dependency *)
+      let class_def_sub = Env.get_class env cid_sub in
+      if cid_super = cid_sub then
+        (* If class is final then exactness is superfluous *)
+        let is_final =
+          match class_def_sub with
+          | Some tc -> Cls.final tc
+          | None -> false
+        in
+        if not (exact_match || is_final) then
           invalid ()
         else
+          (* We handle the case where a generic A<T> is used as A *)
+          let tyl_super =
+            if
+              List.is_empty tyl_super
+              && not (Partial.should_check_error (Env.get_mode env) 4101)
+            then
+              List.map tyl_sub (fun _ -> (p_super, Typing_defs.make_tany ()))
+            else
+              tyl_super
+          in
+          let tyl_sub =
+            if
+              List.is_empty tyl_sub
+              && not (Partial.should_check_error (Env.get_mode env) 4101)
+            then
+              List.map tyl_super (fun _ -> (p_super, Typing_defs.make_tany ()))
+            else
+              tyl_sub
+          in
+          if List.length tyl_sub <> List.length tyl_super then
+            let n_sub = String_utils.soi (List.length tyl_sub) in
+            let n_super = String_utils.soi (List.length tyl_super) in
+            invalid_with (fun () ->
+                Errors.type_arity_mismatch
+                  (fst x_super)
+                  n_super
+                  (fst x_sub)
+                  n_sub)
+          else if List.is_empty tyl_sub && List.is_empty tyl_super then
+            valid ()
+          else
+            let variance_reifiedl =
+              match class_def_sub with
+              | None ->
+                List.map tyl_sub (fun _ -> (Ast_defs.Invariant, Aast.Erased))
+              | Some class_sub ->
+                List.map (Cls.tparams class_sub) (fun t ->
+                    (t.tp_variance, t.tp_reified))
+            in
+            (* C<t1, .., tn> <: C<u1, .., un> iff
+             *   t1 <:v1> u1 /\ ... /\ tn <:vn> un
+             * where vi is the variance of the i'th generic parameter of C,
+             * and <:v denotes the appropriate direction of subtyping for variance v
+             *)
+            simplify_subtype_variance
+              ~subtype_env
+              cid_sub
+              variance_reifiedl
+              tyl_sub
+              tyl_super
+              env
+      else if not exact_match then
+        invalid ()
+      else (
+        match class_def_sub with
+        | None ->
+          (* This should have been caught already in the naming phase *)
           valid ()
-      (* varray_or_darray<ty1> <: varray_or_darray<ty2> iff t1 <: ty2
-       But, varray_or_darray<ty1> is never a subtype of a vect-like array *)
-      | (AKvarray_or_darray ty_sub, AKvarray_or_darray ty_super) ->
-        simplify_subtype ~subtype_env ~this_ty ty_sub ty_super env
-      | ( (AKvarray ty_sub | AKvec ty_sub),
-          (AKvarray ty_super | AKvec ty_super | AKvarray_or_darray ty_super) )
-        ->
-        simplify_subtype ~subtype_env ~this_ty ty_sub ty_super env
-      | ( (AKdarray (tk_sub, tv_sub) | AKmap (tk_sub, tv_sub)),
-          (AKdarray (tk_super, tv_super) | AKmap (tk_super, tv_super)) ) ->
-        env
-        |> simplify_subtype ~subtype_env ~this_ty tk_sub tk_super
-        &&& simplify_subtype ~subtype_env ~this_ty tv_sub tv_super
-      | ( (AKdarray (tk_sub, tv_sub) | AKmap (tk_sub, tv_sub)),
-          AKvarray_or_darray tv_super ) ->
-        let tk_super =
-          MakeType.arraykey
-            (Reason.Rvarray_or_darray_key (Reason.to_pos (fst ety_super)))
-        in
-        env
-        |> simplify_subtype ~subtype_env ~this_ty tk_sub tk_super
-        &&& simplify_subtype ~subtype_env ~this_ty tv_sub tv_super
-      | ((AKvarray elt_ty | AKvec elt_ty), (AKdarray _ | AKmap _))
-        when not (TypecheckerOptions.safe_vector_array (Env.get_tcopt env)) ->
-        let int_reason = Reason.Ridx (Reason.to_pos r, Reason.Rnone) in
-        let int_type = MakeType.int int_reason in
+        | Some class_sub ->
+          (* We handle the case where a generic A<T> is used as A *)
+          let tyl_sub =
+            if
+              List.is_empty tyl_sub
+              && not (Partial.should_check_error (Env.get_mode env) 4029)
+            then
+              List.map (Cls.tparams class_sub) (fun _ ->
+                  (p_sub, Typing_defs.make_tany ()))
+            else
+              tyl_sub
+          in
+          if List.length (Cls.tparams class_sub) <> List.length tyl_sub then
+            invalid_with (fun () ->
+                Errors.expected_tparam
+                  ~definition_pos:(Cls.pos class_sub)
+                  ~use_pos:(Reason.to_pos p_sub)
+                  (List.length (Cls.tparams class_sub)))
+          else
+            let ety_env =
+              {
+                type_expansions = [];
+                substs = Subst.make_locl (Cls.tparams class_sub) tyl_sub;
+                (* TODO: do we need this? *)
+                this_ty = Option.value this_ty ~default:ety_sub;
+                from_class = None;
+              }
+            in
+            let up_obj = Cls.get_ancestor class_sub cid_super in
+            (match up_obj with
+            | Some up_obj ->
+              let (env, up_obj) = Phase.localize ~ety_env env up_obj in
+              simplify_subtype ~subtype_env ~this_ty up_obj ety_super env
+            | None ->
+              if
+                Cls.kind class_sub = Ast_defs.Ctrait
+                || Cls.kind class_sub = Ast_defs.Cinterface
+              then
+                let rec try_upper_bounds_on_this up_objs env =
+                  match Sequence.next up_objs with
+                  | None ->
+                    (* It's crucial that we don't lose updates to global_tpenv in env that were
+                     * introduced by PHase.localize. TODO: avoid this requirement *)
+                    invalid_env env
+                  | Some (ub_obj_typ, up_objs) ->
+                    (* a trait is never the runtime type, but it can be used
+                     * as a constraint if it has requirements or where constraints
+                     * for its using classes *)
+                    let (env, ub_obj_typ) =
+                      Phase.localize ~ety_env env ub_obj_typ
+                    in
+                    env
+                    |> simplify_subtype
+                         ~subtype_env
+                         ~this_ty
+                         (p_sub, snd ub_obj_typ)
+                         ety_super
+                    ||| try_upper_bounds_on_this up_objs
+                in
+                try_upper_bounds_on_this
+                  (Cls.upper_bounds_on_this class_sub)
+                  env
+              else
+                invalid ())
+      )
+    | (Tabstract (AKnewtype _, Some ty), Tclass _) ->
+      simplify_subtype ~subtype_env ~this_ty ty ety_super env
+    | (Tarraykind _, Tclass ((_, class_name), Nonexact, _))
+      when class_name = SN.Classes.cXHPChild ->
+      valid ()
+    | (Tarraykind akind, Tclass ((_, coll), Nonexact, [tv_super]))
+      when coll = SN.Collections.cTraversable
+           || coll = SN.Rx.cTraversable
+           || coll = SN.Collections.cContainer ->
+      (match akind with
+      (* array <: Traversable<_> and emptyarray <: Traversable<t> for any t *)
+      | AKany ->
         simplify_subtype
           ~subtype_env
           ~this_ty
-          (r, Tarraykind (AKmap (int_type, elt_ty)))
-          ty_super
+          (fst ety_sub, Typing_defs.make_tany ())
+          tv_super
           env
-      (* any other array subtyping is unsatisfiable *)
-      | _ -> invalid ()
-    end
-  (* List destructuring *)
-  | (Ttuple tyl, Tdestructure tyl_dest) ->
-    if List.length tyl <> List.length tyl_dest then
-      invalid ()
-    else
-      List.fold2_exn
-        tyl
-        tyl_dest
-        ~init:(env, TL.valid)
-        ~f:(fun res ty ty_dest ->
-          res &&& simplify_subtype ~subtype_env ~this_ty ty ty_dest)
-  | (Tclass ((_, x), _, [elt_type]), Tdestructure tyl_dest)
-    when x = SN.Collections.cVector
-         || x = SN.Collections.cImmVector
-         || x = SN.Collections.cVec
-         || x = SN.Collections.cConstVector ->
-    List.fold tyl_dest ~init:(env, TL.valid) ~f:(fun res ty_dest ->
-        res &&& simplify_subtype ~subtype_env ~this_ty elt_type ty_dest)
-  | (Tclass ((_, x), _, tyl), Tdestructure tyl_dest)
-    when x = SN.Collections.cPair ->
-    if List.length tyl <> List.length tyl_dest then
-      invalid ()
-    else
-      List.fold2_exn
-        tyl
-        tyl_dest
-        ~init:(env, TL.valid)
-        ~f:(fun res ty ty_dest ->
-          res &&& simplify_subtype ~subtype_env ~this_ty ty ty_dest)
-  | (Tarraykind (AKvec elt_type), Tdestructure tyl_dest)
-  | (Tarraykind (AKvarray elt_type), Tdestructure tyl_dest) ->
-    List.fold tyl_dest ~init:(env, TL.valid) ~f:(fun res ty_dest ->
-        res &&& simplify_subtype ~subtype_env ~this_ty elt_type ty_dest)
-  | (Tdynamic, Tdestructure tyl_dest) ->
-    List.fold tyl_dest ~init:(env, TL.valid) ~f:(fun res ty_dest ->
-        res &&& simplify_subtype ~subtype_env ~this_ty ty_sub ty_dest)
-  (* TODO: should remove these any cases *)
-  | (Tarraykind (AKany | AKempty), Tdestructure tyl_dest)
-  | (Tany _, Tdestructure tyl_dest) ->
-    let any = (fst ty_super, Typing_defs.make_tany ()) in
-    List.fold tyl_dest ~init:(env, TL.valid) ~f:(fun res ty_dest ->
-        res &&& simplify_subtype ~subtype_env ~this_ty any ty_dest)
-  (* ty_sub <: union{ty_super'} iff ty_sub <: ty_super' *)
-  | (_, Tunion [ty_super']) ->
-    simplify_subtype ~subtype_env ~this_ty ty_sub ty_super' env
-  (* t1 | ... | tn <: t
-   *   if and only if
-   * t1 <: t /\ ... /\ tn <: t
-   * We want this even if t is a type variable e.g. consider
-   *   int | v <: v
-   *)
-  | (Tunion tyl, _) ->
-    List.fold_left tyl ~init:(env, TL.valid) ~f:(fun res ty_sub ->
-        res &&& simplify_subtype ~subtype_env ty_sub ty_super)
-  (* t <: (t1 & ... & tn)
-   *   if and only if
-   * t <: t1 /\  ... /\ t <: tn
-   *)
-  | (_, Tintersection tyl) ->
-    List.fold_left tyl ~init:(env, TL.valid) ~f:(fun res ty_super ->
-        res &&& simplify_subtype ~subtype_env ~this_ty ty_sub ty_super)
-  (* We want to treat nullable as a union with the same rule as above.
-   * This is only needed for Tvar on right; other cases are dealt with specially as
-   * derived rules.
-   *)
-  | (Toption t, Tvar _) ->
-    env
-    |> simplify_subtype ~subtype_env ~this_ty t ty_super
-    &&& simplify_subtype
-          ~subtype_env
-          ~this_ty
-          (MakeType.null (fst ety_sub))
-          ty_super
-  | (Terr, Terr) -> valid ()
-  | (Terr, _)
-  | (_, Terr) ->
-    if subtype_env.no_top_bottom then
-      default ()
-    else
+      | AKempty -> valid ()
+      (* vec<tv> <: Traversable<tv_super>
+       * iff tv <: tv_super
+       * Likewise for vec<tv> <: Container<tv_super>
+       *          and map<_,tv> <: Traversable<tv_super>
+       *          and map<_,tv> <: Container<tv_super>
+       *)
+      | AKvarray tv
+      | AKvec tv
+      | AKdarray (_, tv)
+      | AKvarray_or_darray tv
+      | AKmap (_, tv) ->
+        simplify_subtype ~subtype_env ~this_ty tv tv_super env)
+    | (Tarraykind akind, Tclass ((_, coll), Nonexact, [tk_super; tv_super]))
+      when coll = SN.Collections.cKeyedTraversable
+           || coll = SN.Rx.cKeyedTraversable
+           || coll = SN.Collections.cKeyedContainer ->
+      let r = fst ety_sub in
+      (match akind with
+      | AKany ->
+        env
+        |> simplify_subtype
+             ~subtype_env
+             ~this_ty
+             (fst ety_sub, Typing_defs.make_tany ())
+             tk_super
+        &&& simplify_subtype
+              ~subtype_env
+              ~this_ty
+              (fst ety_sub, Typing_defs.make_tany ())
+              tv_super
+      | AKempty -> valid ()
+      | AKvarray tv
+      | AKvec tv ->
+        env
+        |> simplify_subtype ~subtype_env ~this_ty (MakeType.int r) tk_super
+        &&& simplify_subtype ~subtype_env ~this_ty tv tv_super
+      | AKvarray_or_darray tv ->
+        let tk_sub =
+          MakeType.arraykey (Reason.Rvarray_or_darray_key (Reason.to_pos r))
+        in
+        env
+        |> simplify_subtype ~subtype_env ~this_ty tk_sub tk_super
+        &&& simplify_subtype ~subtype_env ~this_ty tv tv_super
+      | AKdarray (tk, tv)
+      | AKmap (tk, tv) ->
+        env
+        |> simplify_subtype ~subtype_env ~this_ty tk tk_super
+        &&& simplify_subtype ~subtype_env ~this_ty tv tv_super)
+    | (Tarraykind _, Tclass ((_, coll), Nonexact, []))
+      when coll = SN.Collections.cKeyedTraversable
+           || coll = SN.Rx.cKeyedTraversable
+           || coll = SN.Collections.cKeyedContainer ->
+      (* All arrays are subtypes of the untyped KeyedContainer / Traversables *)
       valid ()
-  | (Tvar _, _)
-  | (_, Tvar _) ->
-    default ()
-  (* A & B <: C iif A <: C | !B *)
-  | (Tintersection tyl, _)
-    when let (_, non_ty_opt, _) = find_type_with_exact_negation env tyl in
-         Option.is_some non_ty_opt ->
-    let (env, non_ty_opt, tyl') = find_type_with_exact_negation env tyl in
-    let non_ty = Option.value_exn non_ty_opt in
-    let (env, ty_super') = TUtils.union env ty_super non_ty in
-    let ty_sub' = MakeType.intersection (fst ety_sub) tyl' in
-    simplify_subtype ~subtype_env ty_sub' ty_super' env
-  (* A <: ?B iif A & nonnull <: B
+    | (Tarraykind _, Tclass _) -> invalid ()
+    | (Tabstract (AKdependent _, Some ty), Tclass _) ->
+      let this_ty = Option.first_some this_ty (Some ety_sub) in
+      simplify_subtype ~subtype_env ~this_ty ty ety_super env
+    (* Arrays *)
+    | (Ttuple _, Tarraykind AKany) ->
+      if TypecheckerOptions.disallow_array_as_tuple (Env.get_tcopt env) then
+        invalid ()
+      else
+        valid ()
+    | ( ( Tnonnull | Tdynamic | Toption _ | Tprim _ | Tfun _ | Ttuple _
+        | Tshape _ | Tanon _ | Tobject | Tclass _ ),
+        Tarraykind _ ) ->
+      invalid ()
+    | (Tabstract ((AKnewtype _ | AKdependent _), Some ty), Tarraykind _) ->
+      simplify_subtype ~subtype_env ~this_ty ty ety_super env
+    | (Tarraykind ak_sub, Tarraykind ak_super) ->
+      let r = fst ety_sub in
+      begin
+        match (ak_sub, ak_super) with
+        (* An array of any kind is a subtype of an array of AKany *)
+        | (_, AKany) -> valid ()
+        (* An empty array is a subtype of any array type *)
+        | (AKempty, _) -> valid ()
+        (* array is a subtype of varray_or_darray<_> *)
+        | (AKany, AKvarray_or_darray (_, Tany _)) -> valid ()
+        | (AKany, _) ->
+          let safe_array = TypecheckerOptions.safe_array (Env.get_tcopt env) in
+          if safe_array then
+            invalid ()
+          else
+            valid ()
+        (* varray_or_darray<ty1> <: varray_or_darray<ty2> iff t1 <: ty2
+       But, varray_or_darray<ty1> is never a subtype of a vect-like array *)
+        | (AKvarray_or_darray ty_sub, AKvarray_or_darray ty_super) ->
+          simplify_subtype ~subtype_env ~this_ty ty_sub ty_super env
+        | ( (AKvarray ty_sub | AKvec ty_sub),
+            (AKvarray ty_super | AKvec ty_super | AKvarray_or_darray ty_super)
+          ) ->
+          simplify_subtype ~subtype_env ~this_ty ty_sub ty_super env
+        | ( (AKdarray (tk_sub, tv_sub) | AKmap (tk_sub, tv_sub)),
+            (AKdarray (tk_super, tv_super) | AKmap (tk_super, tv_super)) ) ->
+          env
+          |> simplify_subtype ~subtype_env ~this_ty tk_sub tk_super
+          &&& simplify_subtype ~subtype_env ~this_ty tv_sub tv_super
+        | ( (AKdarray (tk_sub, tv_sub) | AKmap (tk_sub, tv_sub)),
+            AKvarray_or_darray tv_super ) ->
+          let tk_super =
+            MakeType.arraykey
+              (Reason.Rvarray_or_darray_key (Reason.to_pos (fst ety_super)))
+          in
+          env
+          |> simplify_subtype ~subtype_env ~this_ty tk_sub tk_super
+          &&& simplify_subtype ~subtype_env ~this_ty tv_sub tv_super
+        | ((AKvarray elt_ty | AKvec elt_ty), (AKdarray _ | AKmap _))
+          when not (TypecheckerOptions.safe_vector_array (Env.get_tcopt env))
+          ->
+          let int_reason = Reason.Ridx (Reason.to_pos r, Reason.Rnone) in
+          let int_type = MakeType.int int_reason in
+          simplify_subtype
+            ~subtype_env
+            ~this_ty
+            (r, Tarraykind (AKmap (int_type, elt_ty)))
+            ety_super
+            env
+        (* any other array subtyping is unsatisfiable *)
+        | _ -> invalid ()
+      end
+    (* List destructuring *)
+    | (Ttuple tyl, Tdestructure tyl_dest) ->
+      if List.length tyl <> List.length tyl_dest then
+        invalid ()
+      else
+        List.fold2_exn
+          tyl
+          tyl_dest
+          ~init:(env, TL.valid)
+          ~f:(fun res ty ty_dest ->
+            res &&& simplify_subtype ~subtype_env ~this_ty ty ty_dest)
+    | (Tclass ((_, x), _, [elt_type]), Tdestructure tyl_dest)
+      when x = SN.Collections.cVector
+           || x = SN.Collections.cImmVector
+           || x = SN.Collections.cVec
+           || x = SN.Collections.cConstVector ->
+      List.fold tyl_dest ~init:(env, TL.valid) ~f:(fun res ty_dest ->
+          res &&& simplify_subtype ~subtype_env ~this_ty elt_type ty_dest)
+    | (Tclass ((_, x), _, tyl), Tdestructure tyl_dest)
+      when x = SN.Collections.cPair ->
+      if List.length tyl <> List.length tyl_dest then
+        invalid ()
+      else
+        List.fold2_exn
+          tyl
+          tyl_dest
+          ~init:(env, TL.valid)
+          ~f:(fun res ty ty_dest ->
+            res &&& simplify_subtype ~subtype_env ~this_ty ty ty_dest)
+    | (Tarraykind (AKvec elt_type), Tdestructure tyl_dest)
+    | (Tarraykind (AKvarray elt_type), Tdestructure tyl_dest) ->
+      List.fold tyl_dest ~init:(env, TL.valid) ~f:(fun res ty_dest ->
+          res &&& simplify_subtype ~subtype_env ~this_ty elt_type ty_dest)
+    | (Tdynamic, Tdestructure tyl_dest) ->
+      List.fold tyl_dest ~init:(env, TL.valid) ~f:(fun res ty_dest ->
+          res &&& simplify_subtype ~subtype_env ~this_ty ety_sub ty_dest)
+    (* TODO: should remove these any cases *)
+    | (Tarraykind (AKany | AKempty), Tdestructure tyl_dest)
+    | (Tany _, Tdestructure tyl_dest) ->
+      let any = (fst ety_super, Typing_defs.make_tany ()) in
+      List.fold tyl_dest ~init:(env, TL.valid) ~f:(fun res ty_dest ->
+          res &&& simplify_subtype ~subtype_env ~this_ty any ty_dest)
+    (* ty_sub <: union{ty_super'} iff ty_sub <: ty_super' *)
+    | (_, Tunion [ty_super']) ->
+      simplify_subtype ~subtype_env ~this_ty ety_sub ty_super' env
+    (* t1 | ... | tn <: t
+     *   if and only if
+     * t1 <: t /\ ... /\ tn <: t
+     * We want this even if t is a type variable e.g. consider
+     *   int | v <: v
+     *)
+    | (Tunion tyl, _) ->
+      List.fold_left tyl ~init:(env, TL.valid) ~f:(fun res ty_sub ->
+          res &&& simplify_subtype ~subtype_env ty_sub ety_super)
+    (* t <: (t1 & ... & tn)
+     *   if and only if
+     * t <: t1 /\  ... /\ t <: tn
+     *)
+    | (_, Tintersection tyl) ->
+      List.fold_left tyl ~init:(env, TL.valid) ~f:(fun res ty_super ->
+          res &&& simplify_subtype ~subtype_env ~this_ty ety_sub ty_super)
+    (* We want to treat nullable as a union with the same rule as above.
+     * This is only needed for Tvar on right; other cases are dealt with specially as
+     * derived rules.
+     *)
+    | (Toption t, Tvar _) ->
+      env
+      |> simplify_subtype ~subtype_env ~this_ty t ety_super
+      &&& simplify_subtype
+            ~subtype_env
+            ~this_ty
+            (MakeType.null (fst ety_sub))
+            ety_super
+    | (Terr, Terr) -> valid ()
+    | (Terr, _)
+    | (_, Terr) ->
+      if subtype_env.no_top_bottom then
+        default ()
+      else
+        valid ()
+    | (Tvar _, _)
+    | (_, Tvar _) ->
+      default ()
+    (* A & B <: C iif A <: C | !B *)
+    | (Tintersection tyl, _)
+      when let (_, non_ty_opt, _) = find_type_with_exact_negation env tyl in
+           Option.is_some non_ty_opt ->
+      let (env, non_ty_opt, tyl') = find_type_with_exact_negation env tyl in
+      let non_ty = Option.value_exn non_ty_opt in
+      let (env, ty_super') = TUtils.union env ety_super non_ty in
+      let ty_sub' = MakeType.intersection (fst ety_sub) tyl' in
+      simplify_subtype ~subtype_env ty_sub' ty_super' env
+    (* A <: ?B iif A & nonnull <: B
   Only apply if B is a type variable or an intersection, to avoid oscillating
   forever between this case and the previous one.*)
-  | (_, Toption ty_super')
-    when let (_, (_, ety_super')) = Env.expand_type env ty_super' in
-         match ety_super' with
-         | Tintersection _
-         | Tvar _ ->
-           true
-         | _ -> false ->
-    let (env, ty_sub') =
-      let r = fst ety_super in
-      Inter.intersect env r ety_sub (MakeType.nonnull r)
-    in
-    simplify_subtype ~subtype_env ty_sub' ty_super' env
-  (* If subtype and supertype are the same generic parameter, we're done *)
-  | (Tabstract (AKgeneric name_sub, _), Tabstract (AKgeneric name_super, _))
-    when name_sub = name_super ->
-    valid ()
-  (* When decomposing subtypes for the purpose of adding bounds on generic
-   * parameters to the context, (so seen_generic_params = None), leave
-   * subtype so that the bounds get added *)
-  | (Tabstract (AKgeneric _, _), _)
-  | (_, Tabstract (AKgeneric _, _))
-    when Option.is_none subtype_env.seen_generic_params ->
-    default ()
-  (* Num is not atomic: it is equivalent to int|float. The rule below relies
-   * on ty_sub not being a union e.g. consider num <: arraykey | float, so
-   * we break out num first.
-   *)
-  | (Tprim Nast.Tnum, Tunion _) ->
-    let r = fst ty_sub in
-    env
-    |> simplify_subtype ~subtype_env ~this_ty (MakeType.float r) ty_super
-    &&& simplify_subtype ~subtype_env ~this_ty (MakeType.int r) ty_super
-  (* Likewise, reduce nullable on left to a union *)
-  | (Toption ty, Tunion _) ->
-    let r = fst ty_sub in
-    let (env, p1) =
-      simplify_subtype ~subtype_env ~this_ty (MakeType.null r) ty_super env
-    in
-    if TL.is_unsat p1 then
-      invalid ()
-    else
-      let (env, p2) = simplify_subtype ~subtype_env ~this_ty ty ty_super env in
-      (env, TL.conj p1 p2)
-  | (Tabstract ((AKnewtype _ | AKdependent _), Some ty), Tunion []) ->
-    simplify_subtype ~subtype_env ~this_ty ty ty_super env
-  | (Tabstract (AKgeneric name_sub, opt_sub_cstr), Tunion []) ->
-    simplify_subtype_generic_sub name_sub opt_sub_cstr ty_super env
-  | ( ( Tnonnull | Tdynamic | Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tanon _
-      | Tobject | Tclass _ | Tarraykind _ ),
-      Tunion [] ) ->
-    invalid ()
-  | (_, Tunion (_ :: _ as tyl)) ->
-    (* It's sound to reduce t <: t1 | t2 to (t <: t1) || (t <: t2). But
-     * not complete e.g. consider (t1 | t3) <: (t1 | t2) | (t2 | t3).
-     * But we deal with unions on the left first (see case above), so this
-     * particular situation won't arise.
-     * TODO: identify under what circumstances this reduction is complete.
+    | (_, Toption ty_super')
+      when let (_, (_, ety_super')) = Env.expand_type env ty_super' in
+           match ety_super' with
+           | Tintersection _
+           | Tvar _ ->
+             true
+           | _ -> false ->
+      let (env, ty_sub') =
+        let r = fst ety_super in
+        Inter.intersect env r ety_sub (MakeType.nonnull r)
+      in
+      simplify_subtype ~subtype_env ty_sub' ty_super' env
+    (* If subtype and supertype are the same generic parameter, we're done *)
+    | (Tabstract (AKgeneric name_sub, _), Tabstract (AKgeneric name_super, _))
+      when name_sub = name_super ->
+      valid ()
+    (* When decomposing subtypes for the purpose of adding bounds on generic
+     * parameters to the context, (so seen_generic_params = None), leave
+     * subtype so that the bounds get added *)
+    | (Tabstract (AKgeneric _, _), _)
+    | (_, Tabstract (AKgeneric _, _))
+      when Option.is_none subtype_env.seen_generic_params ->
+      default ()
+    (* Num is not atomic: it is equivalent to int|float. The rule below relies
+     * on ty_sub not being a union e.g. consider num <: arraykey | float, so
+     * we break out num first.
      *)
-    let rec try_each tys env =
-      match tys with
-      | [] ->
-        (* If type on left might have an explicit upper bound (e.g. generic parameters, new type)
-         * then we'd better check this too. e.g. consider foo<T as ~int> and T <: ~num
-         *)
-        begin
-          match snd ty_sub with
-          | Tabstract ((AKnewtype _ | AKdependent _), Some ty) ->
-            simplify_subtype ~subtype_env ~this_ty ty ty_super env
-          | Tabstract (AKgeneric name_sub, opt_sub_cstr) ->
-            simplify_subtype_generic_sub name_sub opt_sub_cstr ty_super env
-          | _ -> invalid ()
-        end
-      | ty :: tys ->
-        env
-        |> simplify_subtype ~subtype_env ~this_ty ty_sub ty
-        ||| try_each tys
-    in
-    try_each tyl env
-  (* It's sound to reduce t1 & t2 <: t to (t1 <: t) || (t2 <: t), but
-   * not complete.
-   *)
-  | (Tintersection tyl, _) ->
-    List.fold_left
-      tyl
-      ~init:(env, TL.invalid ~fail)
-      ~f:(fun res ty_sub ->
-        res ||| simplify_subtype ~subtype_env ~this_ty ty_sub ty_super)
-  | (Tany _, Tany _) -> valid ()
-  (* If ty_sub contains other types, e.g. C<T>, make this a subtype assertion on
+    | (Tprim Nast.Tnum, Tunion _) ->
+      let r = fst ety_sub in
+      env
+      |> simplify_subtype ~subtype_env ~this_ty (MakeType.float r) ety_super
+      &&& simplify_subtype ~subtype_env ~this_ty (MakeType.int r) ety_super
+    (* Likewise, reduce nullable on left to a union *)
+    | (Toption ty, Tunion _) ->
+      let r = fst ety_sub in
+      let (env, p1) =
+        simplify_subtype ~subtype_env ~this_ty (MakeType.null r) ety_super env
+      in
+      if TL.is_unsat p1 then
+        invalid ()
+      else
+        let (env, p2) =
+          simplify_subtype ~subtype_env ~this_ty ty ety_super env
+        in
+        (env, TL.conj p1 p2)
+    | (Tabstract ((AKnewtype _ | AKdependent _), Some ty), Tunion []) ->
+      simplify_subtype ~subtype_env ~this_ty ty ety_super env
+    | (Tabstract (AKgeneric name_sub, opt_sub_cstr), Tunion []) ->
+      simplify_subtype_generic_sub name_sub opt_sub_cstr ety_sub ety_super env
+    | ( ( Tnonnull | Tdynamic | Tprim _ | Tfun _ | Ttuple _ | Tshape _
+        | Tanon _ | Tobject | Tclass _ | Tarraykind _ ),
+        Tunion [] ) ->
+      invalid ()
+    | (_, Tunion (_ :: _ as tyl)) ->
+      (* It's sound to reduce t <: t1 | t2 to (t <: t1) || (t <: t2). But
+       * not complete e.g. consider (t1 | t3) <: (t1 | t2) | (t2 | t3).
+       * But we deal with unions on the left first (see case above), so this
+       * particular situation won't arise.
+       * TODO: identify under what circumstances this reduction is complete.
+       *)
+      let rec try_each tys env =
+        match tys with
+        | [] ->
+          (* If type on left might have an explicit upper bound (e.g. generic parameters, new type)
+           * then we'd better check this too. e.g. consider foo<T as ~int> and T <: ~num
+           *)
+          begin
+            match snd ety_sub with
+            | Tabstract ((AKnewtype _ | AKdependent _), Some ty) ->
+              simplify_subtype ~subtype_env ~this_ty ty ety_super env
+            | Tabstract (AKgeneric name_sub, opt_sub_cstr) ->
+              simplify_subtype_generic_sub
+                name_sub
+                opt_sub_cstr
+                ety_sub
+                ety_super
+                env
+            | _ -> invalid ()
+          end
+        | ty :: tys ->
+          env
+          |> simplify_subtype ~subtype_env ~this_ty ety_sub ty
+          ||| try_each tys
+      in
+      try_each tyl env
+    (* It's sound to reduce t1 & t2 <: t to (t1 <: t) || (t2 <: t), but
+     * not complete.
+     *)
+    | (Tintersection tyl, _) ->
+      List.fold_left
+        tyl
+        ~init:(env, TL.invalid ~fail)
+        ~f:(fun res ty_sub ->
+          res ||| simplify_subtype ~subtype_env ~this_ty ty_sub ety_super)
+    | (Tany _, Tany _) -> valid ()
+    (* If ty_sub contains other types, e.g. C<T>, make this a subtype assertion on
   those inner types and `any`. For example transform the assertion
     C<D> <: Tany
   into
@@ -1368,88 +1415,91 @@ and simplify_subtype
     D <: Tany
   if say C is covariant.
   *)
-  | (_, Tany _) ->
-    if subtype_env.no_top_bottom then
-      default ()
-    else
-      let ety_super = anyfy env (fst ety_super) ety_sub in
-      simplify_subtype ~subtype_env ~this_ty ety_sub ety_super env
-  | (Tany _, _) ->
-    if subtype_env.no_top_bottom then
-      default ()
-    else
-      let ety_sub = anyfy env (fst ety_sub) ety_super in
-      simplify_subtype ~subtype_env ~this_ty ety_sub ety_super env
-  (* Supertype is generic parameter *and* subtype is a newtype with bound.
-   * We need to make this a special case because there is a *choice*
-   * of subtyping rule to apply. See details in the case of dependent type
-   * against generic parameter which is similar
-   *)
-  | (Tabstract (AKnewtype (_, _), Some ty), Tabstract (AKgeneric name_super, _))
-    when Option.is_some subtype_env.seen_generic_params ->
-    env
-    |> simplify_subtype ~subtype_env ~this_ty ty ty_super
-    ||| simplify_subtype_generic_super ty_sub name_super
-  (* void behaves with respect to subtyping as an abstract type with
-   * an implicit upper bound ?nonnull
-   *)
-  | (Tprim Nast.Tvoid, Tabstract (AKgeneric name_super, _))
-    when Option.is_some subtype_env.seen_generic_params ->
-    let r =
-      Reason.Rimplicit_upper_bound (Reason.to_pos (fst ety_sub), "?nonnull")
-    in
-    let tmixed = (r, Toption (r, Tnonnull)) in
-    env
-    |> simplify_subtype ~subtype_env ~this_ty tmixed ty_super
-    ||| simplify_subtype_generic_super ty_sub name_super
-  (* Supertype is generic parameter *and* subtype is dependent.
-   * We need to make this a special case because there is a *choice*
-   * of subtyping rule to apply.
-   *
-   * Example. First suppose that we have the definition
-   *
-   *     abstract const type TC as C
-   *
-   * (1) Now suppose we have to check
-   *       this::TC <: Tu
-   *     where we have the constraint
-   *       <Tu super C>.
-   *     Then it's necessary to apply the rule for AKdependent first, so we
-   *     reduce this problem to
-   *       C <: Tu
-   *     and then call sub_generic_params to deal with the type parameter.
-   * (2) Alternatively, suppose we again have to check
-   *       this::TC <: Tu
-   *     but this time we have the constraint
-   *       <Tu super this::TC>.
-   *    Then if we first reduce the problem to C <: Tu we fail;
-   *    but if we also try sub_generic_params then we succeed, because
-   *    we end up checking this::TC <: this::TC.
-   *)
-  | (Tabstract (AKdependent _, Some ty), Tabstract (AKgeneric name_super, _))
-    when Option.is_some subtype_env.seen_generic_params ->
-    env
-    |> simplify_subtype_generic_super ty_sub name_super
-    |||
-    let this_ty = Option.first_some this_ty (Some ety_sub) in
-    simplify_subtype ~subtype_env ~this_ty ty ty_super
-  (* Subtype or supertype is generic parameter
-   * We delegate these cases to a separate function in order to catch cycles
-   * in constraints e.g. <T1 as T2, T2 as T3, T3 as T1>
-   *)
-  | (Tabstract (AKgeneric name_sub, opt_sub_cstr), _) ->
-    simplify_subtype_generic_sub name_sub opt_sub_cstr ty_super env
-  | (_, Tabstract (AKgeneric name_super, _)) ->
-    simplify_subtype_generic_super ty_sub name_super env
-  | (Tdestructure _, _) -> invalid ()
-  | (_, Tdestructure _) -> invalid ()
-  | (Tpu _, _)
-  | (_, Tpu _)
-  | (Tpu_access _, _)
-  | (_, Tpu_access _) ->
-    (* TODO(T36532263) implement subtyping *)
-    invalid ()
+    | (_, Tany _) ->
+      if subtype_env.no_top_bottom then
+        default ()
+      else
+        let ety_super = anyfy env (fst ety_super) ety_sub in
+        simplify_subtype ~subtype_env ~this_ty ety_sub ety_super env
+    | (Tany _, _) ->
+      if subtype_env.no_top_bottom then
+        default ()
+      else
+        let ety_sub = anyfy env (fst ety_sub) ety_super in
+        simplify_subtype ~subtype_env ~this_ty ety_sub ety_super env
+    (* Supertype is generic parameter *and* subtype is a newtype with bound.
+     * We need to make this a special case because there is a *choice*
+     * of subtyping rule to apply. See details in the case of dependent type
+     * against generic parameter which is similar
+     *)
+    | ( Tabstract (AKnewtype (_, _), Some ty),
+        Tabstract (AKgeneric name_super, _) )
+      when Option.is_some subtype_env.seen_generic_params ->
+      env
+      |> simplify_subtype ~subtype_env ~this_ty ty ety_super
+      ||| simplify_subtype_generic_super ety_sub name_super
+    (* void behaves with respect to subtyping as an abstract type with
+     * an implicit upper bound ?nonnull
+     *)
+    | (Tprim Nast.Tvoid, Tabstract (AKgeneric name_super, _))
+      when Option.is_some subtype_env.seen_generic_params ->
+      let r =
+        Reason.Rimplicit_upper_bound (Reason.to_pos (fst ety_sub), "?nonnull")
+      in
+      let tmixed = (r, Toption (r, Tnonnull)) in
+      env
+      |> simplify_subtype ~subtype_env ~this_ty tmixed ety_super
+      ||| simplify_subtype_generic_super ety_sub name_super
+    (* Supertype is generic parameter *and* subtype is dependent.
+     * We need to make this a special case because there is a *choice*
+     * of subtyping rule to apply.
+     *
+     * Example. First suppose that we have the definition
+     *
+     *     abstract const type TC as C
+     *
+     * (1) Now suppose we have to check
+     *       this::TC <: Tu
+     *     where we have the constraint
+     *       <Tu super C>.
+     *     Then it's necessary to apply the rule for AKdependent first, so we
+     *     reduce this problem to
+     *       C <: Tu
+     *     and then call sub_generic_params to deal with the type parameter.
+     * (2) Alternatively, suppose we again have to check
+     *       this::TC <: Tu
+     *     but this time we have the constraint
+     *       <Tu super this::TC>.
+     *    Then if we first reduce the problem to C <: Tu we fail;
+     *    but if we also try sub_generic_params then we succeed, because
+     *    we end up checking this::TC <: this::TC.
+     *)
+    | (Tabstract (AKdependent _, Some ty), Tabstract (AKgeneric name_super, _))
+      when Option.is_some subtype_env.seen_generic_params ->
+      env
+      |> simplify_subtype_generic_super ety_sub name_super
+      |||
+      let this_ty = Option.first_some this_ty (Some ety_sub) in
+      simplify_subtype ~subtype_env ~this_ty ty ety_super
+    (* Subtype or supertype is generic parameter
+     * We delegate these cases to a separate function in order to catch cycles
+     * in constraints e.g. <T1 as T2, T2 as T3, T3 as T1>
+     *)
+    | (Tabstract (AKgeneric name_sub, opt_sub_cstr), _) ->
+      simplify_subtype_generic_sub name_sub opt_sub_cstr ety_sub ety_super env
+    | (_, Tabstract (AKgeneric name_super, _)) ->
+      simplify_subtype_generic_super ety_sub name_super env
+    | (Tdestructure _, _) -> invalid ()
+    | (_, Tdestructure _) -> invalid ()
+    | (Tpu _, _)
+    | (_, Tpu _)
+    | (Tpu_access _, _)
+    | (_, Tpu_access _) ->
+      (* TODO(T36532263) implement subtyping *)
+      invalid ())
+  | _ -> invalid ()
 
+(* TODO *)
 and simplify_subtype_variance
     ~(subtype_env : subtype_env)
     (cid : string)
@@ -2163,11 +2213,11 @@ and simplify_subtype_funs
     valid
 
 (* One of the main entry points to this module *)
-and sub_type
+and sub_type_i
     ~(treat_dynamic_as_bottom : bool)
     (env : env)
-    (ty_sub : locl_ty)
-    (ty_super : locl_ty)
+    (ty_sub : internal_type)
+    (ty_super : internal_type)
     (on_error : Errors.typing_error_callback) : env =
   Env.log_env_change "sub_type" env
   @@ sub_type_inner
@@ -2176,6 +2226,9 @@ and sub_type
        ~this_ty:None
        ty_sub
        ty_super
+
+and sub_type env (ty_sub : locl_ty) (ty_super : locl_ty) =
+  sub_type_i env (LoclType ty_sub) (LoclType ty_super)
 
 (* Add a new upper bound ty on var.  Apply transitivity of sutyping,
  * so if we already have tyl <: var, then check that for each ty_sub
@@ -2188,18 +2241,18 @@ and add_tyvar_upper_bound_and_close
   let upper_bounds_before = Env.get_tyvar_upper_bounds env var in
   let env =
     Env.add_tyvar_upper_bound
-      ~intersect:(try_intersect ~treat_dynamic_as_bottom env)
+      ~intersect:(try_intersect_i ~treat_dynamic_as_bottom env)
       env
       var
       ty
   in
   let upper_bounds_after = Env.get_tyvar_upper_bounds env var in
   let added_upper_bounds =
-    Typing_set.diff upper_bounds_after upper_bounds_before
+    ITySet.diff upper_bounds_after upper_bounds_before
   in
   let lower_bounds = Env.get_tyvar_lower_bounds env var in
   let env =
-    Typing_set.fold
+    ITySet.fold
       (fun upper_bound env ->
         let env =
           Typing_subtype_tconst.make_all_type_consts_equal
@@ -2208,9 +2261,9 @@ and add_tyvar_upper_bound_and_close
             upper_bound
             ~as_tyvar_with_cnstr:true
         in
-        Typing_set.fold
+        ITySet.fold
           (fun lower_bound env ->
-            sub_type
+            sub_type_i
               ~treat_dynamic_as_bottom
               env
               lower_bound
@@ -2234,18 +2287,18 @@ and add_tyvar_lower_bound_and_close
   let lower_bounds_before = Env.get_tyvar_lower_bounds env var in
   let env =
     Env.add_tyvar_lower_bound
-      ~union:(try_union ~treat_dynamic_as_bottom env)
+      ~union:(try_union_i ~treat_dynamic_as_bottom env)
       env
       var
       ty
   in
   let lower_bounds_after = Env.get_tyvar_lower_bounds env var in
   let added_lower_bounds =
-    Typing_set.diff lower_bounds_after lower_bounds_before
+    ITySet.diff lower_bounds_after lower_bounds_before
   in
   let upper_bounds = Env.get_tyvar_upper_bounds env var in
   let env =
-    Typing_set.fold
+    ITySet.fold
       (fun lower_bound env ->
         let env =
           Typing_subtype_tconst.make_all_type_consts_equal
@@ -2254,9 +2307,9 @@ and add_tyvar_lower_bound_and_close
             lower_bound
             ~as_tyvar_with_cnstr:false
         in
-        Typing_set.fold
+        ITySet.fold
           (fun upper_bound env ->
-            sub_type
+            sub_type_i
               ~treat_dynamic_as_bottom
               env
               lower_bound
@@ -2273,7 +2326,8 @@ and props_to_env ~treat_dynamic_as_bottom env remain props on_error =
   match props with
   | [] -> (env, List.rev remain)
   | TL.IsSubtype
-      (((_, Tvar var_sub) as ty_sub), ((_, Tvar var_super) as ty_super))
+      ( (LoclType (_, Tvar var_sub) as ty_sub),
+        (LoclType (_, Tvar var_super) as ty_super) )
     :: props ->
     let env =
       add_tyvar_upper_bound_and_close
@@ -2292,7 +2346,7 @@ and props_to_env ~treat_dynamic_as_bottom env remain props on_error =
         on_error
     in
     props_to_env ~treat_dynamic_as_bottom env remain props on_error
-  | TL.IsSubtype ((_, Tvar var), ty) :: props ->
+  | TL.IsSubtype (LoclType (_, Tvar var), ty) :: props ->
     let env =
       add_tyvar_upper_bound_and_close
         ~treat_dynamic_as_bottom
@@ -2302,7 +2356,7 @@ and props_to_env ~treat_dynamic_as_bottom env remain props on_error =
         on_error
     in
     props_to_env ~treat_dynamic_as_bottom env remain props on_error
-  | TL.IsSubtype (ty, (_, Tvar var)) :: props ->
+  | TL.IsSubtype (ty, LoclType (_, Tvar var)) :: props ->
     let env =
       add_tyvar_lower_bound_and_close
         ~treat_dynamic_as_bottom
@@ -2362,16 +2416,18 @@ and tvenv_to_prop tvenv =
         match tyvar_info with
         | LocalTyvar { lower_bounds; upper_bounds; _ } ->
           let tyvar = (Reason.Rnone, Tvar id) in
-          let lower_bounds = TySet.elements lower_bounds in
-          let upper_bounds = TySet.elements upper_bounds in
+          let lower_bounds = ITySet.elements lower_bounds in
+          let upper_bounds = ITySet.elements upper_bounds in
           let lower_bounds_props =
-            List.map ~f:(fun ty -> TL.IsSubtype (ty, tyvar)) lower_bounds
+            List.map
+              ~f:(fun ty -> TL.IsSubtype (ty, LoclType tyvar))
+              lower_bounds
           in
           (* If an upper bound of variable n1 is a `Tvar n2`,
         then we have already added "Tvar n1 <: Tvar n2" when traversing
         lower bounds of n2, so we can filter out upper bounds that are Tvars. *)
           let can_be_removed = function
-            | (_, Tvar n) ->
+            | LoclType (_, Tvar n) ->
               begin
                 match IMap.find_opt n tvenv with
                 | Some _ -> true
@@ -2383,7 +2439,9 @@ and tvenv_to_prop tvenv =
             List.filter ~f:(fun ty -> not (can_be_removed ty)) upper_bounds
           in
           let upper_bounds_props =
-            List.map ~f:(fun ty -> TL.IsSubtype (tyvar, ty)) upper_bounds
+            List.map
+              ~f:(fun ty -> TL.IsSubtype (LoclType tyvar, ty))
+              upper_bounds
           in
           TL.conj_list (lower_bounds_props @ upper_bounds_props)
         | GlobalTyvar -> TL.conj_list [])
@@ -2396,9 +2454,9 @@ and sub_type_inner
     (env : env)
     ~(subtype_env : subtype_env)
     ~(this_ty : locl_ty option)
-    (ty_sub : locl_ty)
-    (ty_super : locl_ty) : env =
-  log_subtype
+    (ty_sub : internal_type)
+    (ty_super : internal_type) : env =
+  log_subtype_i
     ~level:1
     ~this_ty
     ~function_name:"sub_type_inner"
@@ -2406,7 +2464,7 @@ and sub_type_inner
     ty_sub
     ty_super;
   let (env, prop) =
-    simplify_subtype ~subtype_env ~this_ty ty_sub ty_super env
+    simplify_subtype_i ~subtype_env ~this_ty ty_sub ty_super env
   in
   let (env, prop) =
     prop_to_env
@@ -2443,11 +2501,16 @@ and is_sub_type_LEGACY_DEPRECATED
              true))
        (fun _ -> false)
 
-and is_sub_type_alt
+and is_sub_type_alt_i
     ~ignore_generic_params ~no_top_bottom ~treat_dynamic_as_bottom env ty1 ty2
     =
+  let this_ty =
+    match ty1 with
+    | LoclType ty1 -> Some ty1
+    | ConstraintType _ -> None
+  in
   let (_env, prop) =
-    simplify_subtype
+    simplify_subtype_i
       ~subtype_env:
         {
           seen_generic_params =
@@ -2459,7 +2522,7 @@ and is_sub_type_alt
           treat_dynamic_as_bottom;
           on_error = Errors.unify_error;
         }
-      ~this_ty:(Some ty1)
+      ~this_ty
       (* It is weird that this can cause errors, but I am wary to discard them.
        * Using the generic unify_error to maintain current behavior. *)
       ty1
@@ -2473,6 +2536,14 @@ and is_sub_type_alt
   else
     None
 
+and is_sub_type_alt ~ignore_generic_params ~no_top_bottom env ty1 ty2 =
+  is_sub_type_alt_i
+    ~ignore_generic_params
+    ~no_top_bottom
+    env
+    (LoclType ty1)
+    (LoclType ty2)
+
 and is_sub_type env ty1 ty2 =
   is_sub_type_alt
     ~ignore_generic_params:false
@@ -2485,6 +2556,16 @@ and is_sub_type env ty1 ty2 =
 
 and is_sub_type_for_union ~treat_dynamic_as_bottom env ty1 ty2 =
   is_sub_type_alt
+    ~ignore_generic_params:false
+    ~no_top_bottom:true
+    ~treat_dynamic_as_bottom
+    env
+    ty1
+    ty2
+  = Some true
+
+and is_sub_type_for_union_i ~treat_dynamic_as_bottom env ty1 ty2 =
+  is_sub_type_alt_i
     ~ignore_generic_params:false
     ~no_top_bottom:true
     ~treat_dynamic_as_bottom
@@ -2513,6 +2594,16 @@ and is_sub_type_ignore_generic_params ~treat_dynamic_as_bottom env ty1 ty2 =
     ty2
   = Some true
 
+and is_sub_type_ignore_generic_params_i ~treat_dynamic_as_bottom env ty1 ty2 =
+  is_sub_type_alt_i
+    ~ignore_generic_params:true
+    ~no_top_bottom:true
+    ~treat_dynamic_as_bottom
+    env
+    ty1
+    ty2
+  = Some true
+
 (* Attempt to compute the intersection of a type with an existing list intersection.
  * If try_intersect env t [t1;...;tn] = [u1; ...; um]
  * then u1&...&um must be the greatest lower bound of t and t1&...&tn wrt subtyping.
@@ -2523,35 +2614,48 @@ and is_sub_type_ignore_generic_params ~treat_dynamic_as_bottom env ty1 ty2 =
  * we simplify (as above) wherever practical.
  * It can be assumed that the original list contains no redundancy.
  *)
-and try_intersect ~treat_dynamic_as_bottom env ty tyl =
+and try_intersect_i ~treat_dynamic_as_bottom env ty tyl =
   match tyl with
   | [] -> [ty]
   | ty' :: tyl' ->
-    if is_sub_type_ignore_generic_params ~treat_dynamic_as_bottom env ty ty'
+    if is_sub_type_ignore_generic_params_i ~treat_dynamic_as_bottom env ty ty'
     then
-      try_intersect ~treat_dynamic_as_bottom env ty tyl'
+      try_intersect_i ~treat_dynamic_as_bottom env ty tyl'
     else if
-      is_sub_type_ignore_generic_params ~treat_dynamic_as_bottom env ty' ty
+      is_sub_type_ignore_generic_params_i ~treat_dynamic_as_bottom env ty' ty
     then
       tyl
     else
-      let nonnull_ty = (fst ty, Tnonnull) in
+      let nonnull_ty = LoclType (reason ty, Tnonnull) in
       (match (ty, ty') with
-      | ((_, Toption t), _)
-        when is_sub_type_ignore_generic_params
+      | (LoclType (_, Toption t), _)
+        when is_sub_type_ignore_generic_params_i
                ~treat_dynamic_as_bottom
                env
                ty'
                nonnull_ty ->
-        try_intersect ~treat_dynamic_as_bottom env t (ty' :: tyl')
-      | (_, (_, Toption t))
-        when is_sub_type_ignore_generic_params
+        try_intersect_i ~treat_dynamic_as_bottom env (LoclType t) (ty' :: tyl')
+      | (_, LoclType (_, Toption t))
+        when is_sub_type_ignore_generic_params_i
                ~treat_dynamic_as_bottom
                env
                ty
                nonnull_ty ->
-        try_intersect ~treat_dynamic_as_bottom env t (ty :: tyl')
-      | (_, _) -> ty' :: try_intersect ~treat_dynamic_as_bottom env ty tyl')
+        try_intersect_i ~treat_dynamic_as_bottom env (LoclType t) (ty :: tyl')
+      | (_, _) -> ty' :: try_intersect_i ~treat_dynamic_as_bottom env ty tyl')
+
+and try_intersect ~treat_dynamic_as_bottom env ty tyl =
+  let try_intersect_i = try_intersect_i ~treat_dynamic_as_bottom in
+  List.map
+    (try_intersect_i
+       env
+       (LoclType ty)
+       (List.map tyl ~f:(fun ty -> LoclType ty)))
+    ~f:(function
+      | LoclType ty -> ty
+      | _ ->
+        failwith
+          "The intersection of two locl type should always be a locl type.")
 
 (* Attempt to compute the union of a type with an existing list union.
  * If try_union env t [t1;...;tn] = [u1;...;um]
@@ -2567,22 +2671,31 @@ and try_intersect ~treat_dynamic_as_bottom env ty tyl =
  * 3. It can be assumed that the original list contains no redundancy.
  * TODO: there are many more unions to implement yet.
  *)
-and try_union ~treat_dynamic_as_bottom env ty tyl =
+and try_union_i ~treat_dynamic_as_bottom env ty tyl =
   match tyl with
   | [] -> [ty]
   | ty' :: tyl' ->
-    if is_sub_type_for_union ~treat_dynamic_as_bottom env ty ty' then
+    if is_sub_type_for_union_i ~treat_dynamic_as_bottom env ty ty' then
       tyl
-    else if is_sub_type_for_union ~treat_dynamic_as_bottom env ty' ty then
-      try_union ~treat_dynamic_as_bottom env ty tyl'
+    else if is_sub_type_for_union_i ~treat_dynamic_as_bottom env ty' ty then
+      try_union_i ~treat_dynamic_as_bottom env ty tyl'
     else (
-      match (snd ty, snd ty') with
-      | (Tprim Nast.Tfloat, Tprim Nast.Tint)
-      | (Tprim Nast.Tint, Tprim Nast.Tfloat) ->
-        let t = MakeType.num (fst ty) in
-        try_union ~treat_dynamic_as_bottom env t tyl'
-      | (_, _) -> ty' :: try_union ~treat_dynamic_as_bottom env ty tyl'
+      match (ty, ty') with
+      | (LoclType (_, Tprim Nast.Tfloat), LoclType (_, Tprim Nast.Tint))
+      | (LoclType (_, Tprim Nast.Tint), LoclType (_, Tprim Nast.Tfloat)) ->
+        let num = LoclType (MakeType.num (reason ty)) in
+        try_union_i env ~treat_dynamic_as_bottom num tyl'
+      | (_, _) -> ty' :: try_union_i ~treat_dynamic_as_bottom env ty tyl'
     )
+
+and try_union ~treat_dynamic_as_bottom env ty tyl =
+  let try_union_i = try_union_i ~treat_dynamic_as_bottom in
+  List.map
+    (try_union_i env (LoclType ty) (List.map tyl ~f:(fun ty -> LoclType ty)))
+    ~f:(function
+      | LoclType ty -> ty
+      | _ ->
+        failwith "The union of two locl type should always be a locl type.")
 
 (** Check that the method with signature ft_sub can be used to override
  * (is a subtype of) method with signature ft_super.
@@ -2822,7 +2935,11 @@ and decompose_subtype_add_prop p env prop =
       env
       prop;
     env
-  | TL.IsSubtype (ty1, ty2) -> decompose_subtype_add_bound env ty1 ty2
+  | TL.IsSubtype (LoclType ty1, LoclType ty2) ->
+    decompose_subtype_add_bound env ty1 ty2
+  | TL.IsSubtype _ ->
+    failwith
+      "Subtyping locl types should yield propositions involving locl types only."
 
 (* Decompose a general constraint *)
 and decompose_constraint
@@ -2949,6 +3066,8 @@ let add_tyvar_lower_bound_and_close =
   add_tyvar_lower_bound_and_close ~treat_dynamic_as_bottom:false
 
 let sub_type = sub_type ~treat_dynamic_as_bottom:false
+
+let sub_type_i = sub_type_i ~treat_dynamic_as_bottom:false
 
 (*****************************************************************************)
 (* Exporting *)

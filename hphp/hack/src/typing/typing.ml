@@ -6627,8 +6627,8 @@ and is_num env t =
     let (env, ty) = Env.expand_type env ty in
     match ty with
     | (_, Tvar v) ->
-      Typing_set.mem
-        (MakeType.num Reason.Rnone)
+      ITySet.mem
+        (LoclType (MakeType.num Reason.Rnone))
         (Env.get_tyvar_upper_bounds env v)
     | _ -> false
   in

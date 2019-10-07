@@ -167,7 +167,7 @@ module Mode_export_json = struct
     let is_start = ref false in
     let tyvar_to_json env = function
       | LocalTyvar tyvar ->
-        let type_to_json ty = "\"" ^ Typing_print.full env ty ^ "\"" in
+        let type_to_json ty = "\"" ^ Typing_print.full_i env ty ^ "\"" in
         let bounds_to_json bounds =
           if List.length bounds = 0 then
             "[]"
@@ -186,8 +186,8 @@ module Mode_export_json = struct
           (fst (Pos.end_line_column tyvar.tyvar_pos))
           (snd (Pos.end_line_column tyvar.tyvar_pos))
           (Pos.filename (Pos.to_absolute tyvar.tyvar_pos))
-          (bounds_to_json (TySet.elements tyvar.lower_bounds))
-          (bounds_to_json (TySet.elements tyvar.upper_bounds))
+          (bounds_to_json (ITySet.elements tyvar.lower_bounds))
+          (bounds_to_json (ITySet.elements tyvar.upper_bounds))
       | GlobalTyvar -> "global"
     in
     IMap.iter

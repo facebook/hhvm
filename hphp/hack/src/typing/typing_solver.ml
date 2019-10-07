@@ -14,6 +14,7 @@ open Typing_env_types
 module Reason = Typing_reason
 module Env = Typing_env
 module Inter = Typing_intersection
+module ITySet = Internal_type_set
 module Union = Typing_union
 module TUtils = Typing_utils
 module Cls = Decl_provider.Class
@@ -234,18 +235,24 @@ let remove_tyvar_from_lower_bound env var r lower_bound =
       in
       (env, ty)
     | _ -> (env, ty)
+  and remove_i env ty =
+    match ty with
+    | LoclType ty ->
+      let (env, ty) = remove env ty in
+      (env, LoclType ty)
+    | _ -> (env, ty)
   in
-  remove env lower_bound
+  remove_i env lower_bound
 
 let remove_tyvar_from_lower_bounds env var r lower_bounds =
-  TySet.fold
+  ITySet.fold
     (fun lower_bound (env, acc) ->
       let (env, lower_bound) =
         remove_tyvar_from_lower_bound env var r lower_bound
       in
-      (env, TySet.add lower_bound acc))
+      (env, ITySet.add lower_bound acc))
     lower_bounds
-    (env, TySet.empty)
+    (env, ITySet.empty)
 
 (** If a type variable appear in one of its own upper bounds under a combination
 of unions and intersections, it can be simplified away from this upper bound by
@@ -281,18 +288,24 @@ let remove_tyvar_from_upper_bound env var r upper_bound =
       let tyl = List.filter tyl ~f:(fun ty -> not (is_mixed ty)) in
       (env, MakeType.intersection r tyl)
     | _ -> (env, ty)
+  and remove_i env ty =
+    match ty with
+    | LoclType ty ->
+      let (env, ty) = remove env ty in
+      (env, LoclType ty)
+    | _ -> (env, ty)
   in
-  remove env upper_bound
+  remove_i env upper_bound
 
 let remove_tyvar_from_upper_bounds env var r upper_bounds =
-  TySet.fold
+  ITySet.fold
     (fun upper_bound (env, acc) ->
       let (env, upper_bound) =
         remove_tyvar_from_upper_bound env var r upper_bound
       in
-      (env, TySet.add upper_bound acc))
+      (env, ITySet.add upper_bound acc))
     upper_bounds
-    (env, TySet.empty)
+    (env, ITySet.empty)
 
 (** Remove a type variable from its upper and lower bounds. More precisely,
 if a type variable appears in one of its bounds under any combination of unions
@@ -317,6 +330,15 @@ let remove_tyvar_from_bounds env r var =
   let env = Env.set_tyvar_upper_bounds env var upper_bounds in
   env
 
+let filter_locl_types types =
+  ITySet.fold
+    (fun ty types ->
+      match ty with
+      | LoclType ty -> TySet.add ty types
+      | _ -> types)
+    types
+    TySet.empty
+
 (* Solve type variable var by assigning it to the union of its lower bounds.
  * If freshen=true, first freshen the covariant and contravariant components of
  * the bounds.
@@ -324,22 +346,26 @@ let remove_tyvar_from_bounds env r var =
 let bind_to_lower_bound ~freshen env r var lower_bounds on_error =
   Env.log_env_change "bind_to_lower_bound" env
   @@
-  let (env, ty) = TUtils.union_list env r (TySet.elements lower_bounds) in
-  (* Freshen components of the types in the union wrt their variance.
-   * For example, if we have
-   *   Cov<C>, Contra<D> <: v
-   * then we actually construct the union
-   *   Cov<#1> | Contra<#2> with C <: #1 and #2 <: D
-   *)
-  let (env, ty) =
-    if freshen then
-      let (env, newty) = freshen_inside_ty env ty in
-      let env = Typing_subtype.sub_type env ty newty on_error in
-      (env, newty)
-    else
-      (env, ty)
-  in
-  (* If any of the components of the union are type variables, then remove
+  if ITySet.exists is_constraint_type lower_bounds then
+    env
+  else
+    let lower_bounds = filter_locl_types lower_bounds in
+    let (env, ty) = TUtils.union_list env r (TySet.elements lower_bounds) in
+    (* Freshen components of the types in the union wrt their variance.
+     * For example, if we have
+     *   Cov<C>, Contra<D> <: v
+     * then we actually construct the union
+     *   Cov<#1> | Contra<#2> with C <: #1 and #2 <: D
+     *)
+    let (env, ty) =
+      if freshen then
+        let (env, newty) = freshen_inside_ty env ty in
+        let env = Typing_subtype.sub_type env ty newty on_error in
+        (env, newty)
+      else
+        (env, ty)
+    in
+    (* If any of the components of the union are type variables, then remove
   * var from their upper bounds. Why? Because if we construct
   *   v1 , ... , vn , t <: var
   * for type variables v1, ..., vn and non-type variable t
@@ -347,24 +373,28 @@ let bind_to_lower_bound ~freshen env r var lower_bounds on_error =
   * so after binding var we end up with redundant bounds
   *   vi <: v1 | ... | vn | t
   *)
-  let env =
-    TySet.fold
-      (fun ty env ->
-        match Env.expand_type env ty with
-        | (env, (_, Tvar v)) when not (Env.is_global_tyvar env v) ->
-          Env.remove_tyvar_upper_bound env v var
-        | (env, _) -> env)
-      lower_bounds
-      env
-  in
-  (* Now actually make the assignment var := ty, and remove var from tvenv *)
-  bind env var ty
+    let env =
+      TySet.fold
+        (fun ty env ->
+          match Env.expand_type env ty with
+          | (env, (_, Tvar v)) when not (Env.is_global_tyvar env v) ->
+            Env.remove_tyvar_upper_bound env v var
+          | (env, _) -> env)
+        lower_bounds
+        env
+    in
+    (* Now actually make the assignment var := ty, and remove var from tvenv *)
+    bind env var ty
 
 let bind_to_upper_bound env r var upper_bounds =
   Env.log_env_change "bind_to_upper_bound" env
   @@
-  let (env, ty) = Inter.intersect_list env r (TySet.elements upper_bounds) in
-  (* If ty is a variable (in future, if any of the types in the list are variables),
+  if ITySet.exists is_constraint_type upper_bounds then
+    env
+  else
+    let upper_bounds = filter_locl_types upper_bounds in
+    let (env, ty) = Inter.intersect_list env r (TySet.elements upper_bounds) in
+    (* If ty is a variable (in future, if any of the types in the list are variables),
     * then remove var from their lower bounds. Why? Because if we construct
     *   var <: v1 , ... , vn , t
     * for type variables v1 , ... , vn and non-type variable t
@@ -372,13 +402,13 @@ let bind_to_upper_bound env r var upper_bounds =
     * so after binding var we end up with redundant bounds
     *   v1 & ... & vn & t <: vi
     *)
-  let env =
-    match Env.expand_type env ty with
-    | (env, (_, Tvar v)) when not (Env.is_global_tyvar env v) ->
-      Env.remove_tyvar_lower_bound env v var
-    | (env, _) -> env
-  in
-  bind env var ty
+    let env =
+      match Env.expand_type env ty with
+      | (env, (_, Tvar v)) when not (Env.is_global_tyvar env v) ->
+        Env.remove_tyvar_lower_bound env v var
+      | (env, _) -> env
+    in
+    bind env var ty
 
 let tyvar_is_solved env var =
   Env.is_global_tyvar env var
@@ -441,16 +471,17 @@ let ty_equal_shallow ty1 ty2 =
 
 let union_any_if_any_in_lower_bounds env ty lower_bounds =
   let r = Reason.none in
-  let any = (r, Typing_defs.make_tany ()) and err = (r, Terr) in
+  let any = LoclType (r, Typing_defs.make_tany ())
+  and err = LoclType (r, Terr) in
   let (env, ty) =
-    match TySet.find_opt any lower_bounds with
-    | Some any -> Union.union env ty any
-    | None -> (env, ty)
+    match ITySet.find_opt any lower_bounds with
+    | Some (LoclType any) -> Union.union env ty any
+    | _ -> (env, ty)
   in
   let (env, ty) =
-    match TySet.find_opt err lower_bounds with
-    | Some err -> Union.union env ty err
-    | None -> (env, ty)
+    match ITySet.find_opt err lower_bounds with
+    | Some (LoclType err) -> Union.union env ty err
+    | _ -> (env, ty)
   in
   (env, ty)
 
@@ -462,54 +493,61 @@ let try_bind_to_equal_bound ~freshen env r var on_error =
     @@
     let env = remove_tyvar_from_bounds env r var in
     let expand_all tyset =
-      Typing_set.map
+      ITySet.map
         (fun ty ->
-          let (_, ty) = Env.expand_type env ty in
+          let (_, ty) = Env.expand_internal_type env ty in
           ty)
         tyset
     in
     let tyvar_info = Env.get_tyvar_info env var in
     let lower_bounds = expand_all tyvar_info.lower_bounds in
     let upper_bounds = expand_all tyvar_info.upper_bounds in
-    let equal_bounds = Typing_set.inter lower_bounds upper_bounds in
+    let equal_bounds = ITySet.inter lower_bounds upper_bounds in
     let r = Reason.none in
-    let any = (r, Typing_defs.make_tany ()) and err = (r, Terr) in
-    let equal_bounds = equal_bounds |> TySet.remove any |> TySet.remove err in
-    match Typing_set.choose_opt equal_bounds with
-    | Some ty ->
+    let any = LoclType (r, Typing_defs.make_tany ())
+    and err = LoclType (r, Terr) in
+    let equal_bounds =
+      equal_bounds |> ITySet.remove any |> ITySet.remove err
+    in
+    match ITySet.choose_opt equal_bounds with
+    | Some (LoclType ty) ->
       let (env, ty) = union_any_if_any_in_lower_bounds env ty lower_bounds in
       bind env var ty
+    | Some (ConstraintType _)
     | None ->
       if not freshen then
         env
       else
-        Typing_set.fold
+        ITySet.fold
           (fun upper_bound env ->
-            Typing_set.fold
+            ITySet.fold
               (fun lower_bound env ->
                 if tyvar_is_solved env var then
-                  let (env, ty) = Env.expand_type env (var_as_ty var) in
+                  let (env, ty) = Env.expand_var env r var in
+                  let ty = LoclType ty in
                   let env =
-                    Typing_subtype.sub_type env lower_bound ty on_error
+                    Typing_subtype.sub_type_i env lower_bound ty on_error
                   in
                   let env =
-                    Typing_subtype.sub_type env ty upper_bound on_error
+                    Typing_subtype.sub_type_i env ty upper_bound on_error
                   in
                   env
-                else if ty_equal_shallow lower_bound upper_bound then
-                  let (env, ty) = freshen_inside_ty env lower_bound in
-                  let env =
-                    Typing_subtype.sub_type env lower_bound ty on_error
-                  in
-                  let env =
-                    Typing_subtype.sub_type env ty upper_bound on_error
-                  in
-                  let (env, ty) =
-                    union_any_if_any_in_lower_bounds env ty lower_bounds
-                  in
-                  bind env var ty
                 else
-                  env)
+                  match (lower_bound, upper_bound) with
+                  | (LoclType lower_bound, LoclType upper_bound)
+                    when ty_equal_shallow lower_bound upper_bound ->
+                    let (env, ty) = freshen_inside_ty env lower_bound in
+                    let env =
+                      Typing_subtype.sub_type env lower_bound ty on_error
+                    in
+                    let env =
+                      Typing_subtype.sub_type env ty upper_bound on_error
+                    in
+                    let (env, ty) =
+                      union_any_if_any_in_lower_bounds env ty lower_bounds
+                    in
+                    bind env var ty
+                  | _ -> env)
               lower_bounds
               env)
           upper_bounds
@@ -747,7 +785,9 @@ let expand_type_and_narrow
         else
           let () = seen_tyvars := ISet.add v !seen_tyvars in
           let lower_bounds =
-            TySet.elements (Env.get_tyvar_lower_bounds env v)
+            TySet.elements
+            @@ filter_locl_types
+            @@ Env.get_tyvar_lower_bounds env v
           in
           Typing_union.union_list env r lower_bounds)
   in
@@ -873,14 +913,17 @@ let rec push_option_out pos env ty =
   (* Solve type variable to lower bound if it's manifestly nullable *)
   | (_, Tvar var) ->
     let rec has_null env ty =
-      match snd (Env.expand_type env ty) with
-      | (_, Tprim Aast.Tnull) -> true
-      | (_, Toption _) -> true
-      | (_, Tabstract (_, Some ty)) -> has_null env ty
-      | _ -> false
+      match snd (Env.expand_internal_type env ty) with
+      | ConstraintType _ -> false
+      | LoclType ty ->
+        (match ty with
+        | (_, Tprim Aast.Tnull) -> true
+        | (_, Toption _) -> true
+        | (_, Tabstract (_, Some ty)) -> has_null env (LoclType ty)
+        | _ -> false)
     in
     let lower_bounds =
-      Typing_set.elements (Typing_env.get_tyvar_lower_bounds env var)
+      ITySet.elements (Typing_env.get_tyvar_lower_bounds env var)
     in
     if List.exists lower_bounds (has_null env) then
       let (env, ty') =
@@ -929,13 +972,13 @@ let expand_bounds_of_global_tyvars env =
          IMap.map
            (fun tyvar_info ->
              let upper_bounds =
-               TySet.map
-                 (Typing_expand.fully_expand env)
+               ITySet.map
+                 (Typing_expand.fully_expand_i env)
                  tyvar_info.upper_bounds
              in
              let lower_bounds =
-               TySet.map
-                 (Typing_expand.fully_expand env)
+               ITySet.map
+                 (Typing_expand.fully_expand_i env)
                  tyvar_info.lower_bounds
              in
              { tyvar_info with upper_bounds; lower_bounds })

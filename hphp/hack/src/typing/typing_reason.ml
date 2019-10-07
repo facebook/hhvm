@@ -232,13 +232,9 @@ let rec to_string prefix r =
     [(p, prefix ^ " because this is the result of a bitwise operation")]
   | Rstmt _ -> [(p, prefix ^ " because this is a statement")]
   | Rno_return _ ->
-    [(p, prefix ^ " because this function implicitly returns void")]
+    [(p, prefix ^ " because this function does not always return a value")]
   | Rno_return_async _ ->
-    [
-      ( p,
-        prefix
-        ^ " because this async function implicitly returns Awaitable<void>" );
-    ]
+    [(p, prefix ^ " because this function does not always return a value")]
   | Rret_fun_kind (_, kind) ->
     [
       ( p,

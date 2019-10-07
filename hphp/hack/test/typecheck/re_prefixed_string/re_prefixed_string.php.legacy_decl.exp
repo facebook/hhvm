@@ -7,7 +7,7 @@ But got string because this is the result of a concatenation
 File "re_prefixed_string.php", line 21, characters 10-16:
 Invalid return type (Typing[4336])
 File "re_prefixed_string.php", line 21, characters 10-16:
-Expected void because this function implicitly returns void
+Expected void because this function does not always return a value
 File "re_prefixed_string.php", line 21, characters 78-78:
 But got T
 File "re_prefixed_string.php", line 21, characters 10-16:
@@ -15,7 +15,7 @@ Invalid return type (Typing[4336])
 File "re_prefixed_string.php", line 21, characters 78-78:
 Expected T
 File "re_prefixed_string.php", line 21, characters 10-16:
-But got void because this function implicitly returns void
+But got void because this function does not always return a value
 File "re_prefixed_string.php", line 27, characters 13-35:
 Bad regex pattern; two named subpatterns have the same name [14]. (Typing[4275])
 File "re_prefixed_string.php", line 28, characters 13-29:

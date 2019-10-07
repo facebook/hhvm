@@ -7,4 +7,4 @@ Invalid return type (Typing[4336])
 File "list_destructuring_tvar.php", line 27, characters 3-6:
 Expected nothing
 File "list_destructuring_tvar.php", line 35, characters 5-128:
-But got void because this function implicitly returns void
+But got void because this function does not always return a value

@@ -1433,22 +1433,31 @@ let make_ide_completion_response
             | Some base_class -> Hh_json.JSON_String base_class
             | None -> Hh_json.JSON_Null
           in
-          Some
-            (Hh_json.JSON_Object
-               [
-                 (* Fullname is needed for namespaces.  We often trim namespaces to make
-                  * the results more readable, such as showing "ad__breaks" instead of
-                  * "Thrift\Packages\cf\ad__breaks".
-                  *)
+          (* If we do not have a correct file position, skip sending that data *)
+          if Int.equal line 0 && Int.equal start 0 then
+            Some
+              (Hh_json.JSON_Object
+                 [
                    ("fullname", Hh_json.JSON_String completion.res_fullname);
-                 (* Filename/line/char/base_class are used to handle class methods.
-                  * We could unify this with fullname in the future.
-                  *)
-                   ("filename", Hh_json.JSON_String filename);
-                 ("line", Hh_json.int_ line);
-                 ("char", Hh_json.int_ start);
-                 ("base_class", base_class);
-               ])
+                   ("base_class", base_class);
+                 ])
+          else
+            Some
+              (Hh_json.JSON_Object
+                 [
+                   (* Fullname is needed for namespaces.  We often trim namespaces to make
+                    * the results more readable, such as showing "ad__breaks" instead of
+                    * "Thrift\Packages\cf\ad__breaks".
+                    *)
+                     ("fullname", Hh_json.JSON_String completion.res_fullname);
+                   (* Filename/line/char/base_class are used to handle class methods.
+                    * We could unify this with fullname in the future.
+                    *)
+                     ("filename", Hh_json.JSON_String filename);
+                   ("line", Hh_json.int_ line);
+                   ("char", Hh_json.int_ start);
+                   ("base_class", base_class);
+                 ])
         in
         {
           label =

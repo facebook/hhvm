@@ -37,7 +37,7 @@ let sqlite_escape_str (str : string) : string =
       match char with
       | '%' -> acc ^ "\\%"
       | '_' -> acc ^ "\\_"
-      | '\\' -> acc ^ "\\"
+      | '\\' -> acc ^ "\\\\"
       | _ -> acc ^ String.make 1 char)
 
 (* Select a filename for a temporary symbol index *)

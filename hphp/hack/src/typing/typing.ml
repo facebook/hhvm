@@ -401,7 +401,7 @@ let make_param_local_ty env decl_hint param =
         (env, (r, TUtils.tany env))
     | Some ty ->
       let { et_type = ty; _ } =
-        Typing_enforceability.compute_enforced_and_pessimize_ty_simple env ty
+        Typing_enforceability.compute_enforced_and_pessimize_ty env ty
       in
       let condition_type =
         Decl_fun_utils.condition_type_from_attributes
@@ -686,9 +686,7 @@ and fun_def tcopt f : (Tast.fun_def * Typing_env_types.global_tvenv) option =
         | Some ty ->
           let localize env ty =
             let { et_type = ty; _ } =
-              Typing_enforceability.compute_enforced_and_pessimize_ty_simple
-                env
-                ty
+              Typing_enforceability.compute_enforced_and_pessimize_ty env ty
             in
             Phase.localize_with_self env ty
           in
@@ -2425,8 +2423,7 @@ and expr_
         (match ty with
         | (r, Tfun ft) ->
           let ft =
-            Typing_enforceability
-            .compute_enforced_and_pessimize_fun_type_simple
+            Typing_enforceability.compute_enforced_and_pessimize_fun_type
               env
               ft
           in
@@ -3106,7 +3103,7 @@ and expr_
       | _ -> failwith "Not a function"
     in
     let declared_ft =
-      Typing_enforceability.compute_enforced_and_pessimize_fun_type_simple
+      Typing_enforceability.compute_enforced_and_pessimize_fun_type
         env
         declared_ft
     in
@@ -5351,9 +5348,7 @@ and fun_type_of_id env x tal el =
       let ety_env = Phase.env_with_self env in
       let tal = List.map ~f:(Decl_hint.hint env.decl_env) tal in
       let ft =
-        Typing_enforceability.compute_enforced_and_pessimize_fun_type_simple
-          env
-          ft
+        Typing_enforceability.compute_enforced_and_pessimize_fun_type env ft
       in
       let use_pos = fst x in
       let (env, ft) =
@@ -5616,8 +5611,7 @@ and class_get_
                 List.map explicit_tparams ~f:(Decl_hint.hint env.decl_env)
               in
               let ft =
-                Typing_enforceability
-                .compute_enforced_and_pessimize_fun_type_simple
+                Typing_enforceability.compute_enforced_and_pessimize_fun_type
                   env
                   ft
               in
@@ -5636,7 +5630,7 @@ and class_get_
             (* unused *)
             | _ ->
               let { et_type; et_enforced } =
-                Typing_enforceability.compute_enforced_and_pessimize_ty_simple
+                Typing_enforceability.compute_enforced_and_pessimize_ty
                   env
                   member_decl_ty
               in
@@ -5975,8 +5969,7 @@ and call_construct p env class_ params el uel cid =
         | (r, Tfun ft) ->
           ( r,
             Tfun
-              (Typing_enforceability
-               .compute_enforced_and_pessimize_fun_type_simple
+              (Typing_enforceability.compute_enforced_and_pessimize_fun_type
                  env
                  ft) )
         | _ -> m
@@ -8059,7 +8052,7 @@ and class_const_def env cc =
     | Some h ->
       let ty = Decl_hint.hint env.decl_env h in
       let ty =
-        Typing_enforceability.compute_enforced_and_pessimize_ty_simple env ty
+        Typing_enforceability.compute_enforced_and_pessimize_ty env ty
       in
       let (env, ty) = Phase.localize_possibly_enforced_with_self env ty in
       ( env,
@@ -8113,9 +8106,7 @@ and class_var_def ~is_static env cv =
     | Some ((p, _) as cty) ->
       let decl_cty = Decl_hint.hint env.decl_env cty in
       let decl_cty =
-        Typing_enforceability.compute_enforced_and_pessimize_ty_simple
-          env
-          decl_cty
+        Typing_enforceability.compute_enforced_and_pessimize_ty env decl_cty
       in
       let (env, cty) =
         Phase.localize_possibly_enforced_with_self env decl_cty
@@ -8447,9 +8438,7 @@ and method_def env cls m =
           in
           let localize env ty =
             let { et_type = ty; _ } =
-              Typing_enforceability.compute_enforced_and_pessimize_ty_simple
-                env
-                ty
+              Typing_enforceability.compute_enforced_and_pessimize_ty env ty
             in
             Phase.localize ~ety_env env ty
           in
@@ -8674,7 +8663,7 @@ and gconst_def tcopt cst =
     | Some hint ->
       let ty = Decl_hint.hint env.decl_env hint in
       let ty =
-        Typing_enforceability.compute_enforced_and_pessimize_ty_simple env ty
+        Typing_enforceability.compute_enforced_and_pessimize_ty env ty
       in
       let (env, dty) = Phase.localize_possibly_enforced_with_self env ty in
       let (env, te, value_type) =

@@ -357,8 +357,7 @@ and obj_get_concrete_ty
                   List.map ~f:(Decl_hint.hint env.decl_env) explicit_tparams
                 in
                 let ft =
-                  Typing_enforceability
-                  .compute_enforced_and_pessimize_fun_type_simple
+                  Typing_enforceability.compute_enforced_and_pessimize_fun_type
                     env
                     ft
                 in
@@ -380,8 +379,7 @@ and obj_get_concrete_ty
               | _ ->
                 let is_xhp_attr = Option.is_some ce_xhp_attr in
                 let { et_type; et_enforced } =
-                  Typing_enforceability
-                  .compute_enforced_and_pessimize_ty_simple
+                  Typing_enforceability.compute_enforced_and_pessimize_ty
                     env
                     member_decl_ty
                     ~is_xhp_attr

@@ -515,10 +515,15 @@ let try_bind_to_equal_bound ~freshen env r var on_error =
           upper_bounds
           env
 
-(* Always solve a type variable. We force to the lower bounds, because it
- * produces a "more specific" type, and we don't have support for intersections
- * of upper bounds
- *)
+(* Always solve a type variable. 
+We are here because we eagerly solve a type variable to see 
+whether certain operations are allowed on the type (e.g. a  method call), 
+or because we are at the end of a function body and we solve
+the remaining invariant type variables. 
+Therefore, we always force to the lower bounds (even contravariant variables), 
+because it produces a "more specific" type, which is more likely to support
+the operation which we eagerly solved for in the first place.
+*)
 let rec always_solve_tyvar ~freshen env r var on_error =
   (* If there is a type that is both a lower and upper bound, force to that type *)
   let env = try_bind_to_equal_bound ~freshen env r var on_error in

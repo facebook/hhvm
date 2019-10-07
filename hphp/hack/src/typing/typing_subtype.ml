@@ -266,7 +266,8 @@ let find_type_with_exact_negation env tyl =
   in
   find env tyl []
 
-(* Process the constraint proposition *)
+(* Process the constraint proposition. There should only be errors left now,
+i.e. empty disjunction with error functions we call here. *)
 let rec process_simplify_subtype_result prop =
   match prop with
   | TL.IsSubtype (_ty1, _ty2) ->

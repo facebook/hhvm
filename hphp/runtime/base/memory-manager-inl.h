@@ -218,20 +218,13 @@ inline void* MemoryManager::mallocSmallIndexSize(size_t index, size_t bytes) {
   if (debug) requestEagerGC();
 
   m_stats.mm_udebt -= bytes;
-  if (UNLIKELY(m_stats.mm_udebt > std::numeric_limits<int64_t>::max())) {
-    return mallocSmallIndexSlow(bytes, index);
-  }
-
-  return mallocSmallIndexTail(bytes, index);
-}
-
-ALWAYS_INLINE
-void* MemoryManager::mallocSmallIndexTail(size_t bytes, size_t index) {
-  auto clamped = std::min(index, kNumSmallSizes);
-  if (auto p = m_freelists[clamped].likelyPop()) {
-    assertx((reinterpret_cast<uintptr_t>(p) & kSmallSizeAlignMask) == 0);
-    FTRACE(3, "mallocSmallIndex: {} -> {}\n", bytes, p);
-    return p;
+  if (LIKELY(m_stats.mm_udebt <= std::numeric_limits<int64_t>::max())) {
+    auto clamped = std::min(index, kNumSmallSizes);
+    if (auto p = m_freelists[clamped].likelyPop()) {
+      assertx((reinterpret_cast<uintptr_t>(p) & kSmallSizeAlignMask) == 0);
+      FTRACE(3, "mallocSmallIndex: {} -> {}\n", bytes, p);
+      return p;
+    }
   }
   return mallocSmallSizeSlow(bytes, index);
 }

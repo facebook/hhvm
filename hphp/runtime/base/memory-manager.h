@@ -986,8 +986,6 @@ private:
 private:
   void* slabAlloc(size_t bytes, size_t index);
   void* newSlab(size_t nbytes);
-  void* mallocSmallIndexTail(size_t bytes, size_t index);
-  void* mallocSmallIndexSlow(size_t bytes, size_t index);
   void* mallocSmallSizeSlow(size_t bytes, size_t index);
   void  updateBigStats();
   void  freeSmallIndexSlow(void* ptr, size_t index, size_t bytes);

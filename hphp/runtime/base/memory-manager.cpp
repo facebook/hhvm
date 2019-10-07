@@ -804,15 +804,20 @@ inline void* MemoryManager::slabAlloc(size_t nbytes, size_t index) {
 }
 
 NEVER_INLINE
-void* MemoryManager::mallocSmallIndexSlow(size_t bytes, size_t index) {
-  checkGC();
-  updateMMDebt();
-  return mallocSmallIndexTail(bytes, index);
-}
-
 void* MemoryManager::mallocSmallSizeSlow(size_t nbytes, size_t index) {
   assertx(nbytes == sizeIndex2Size(index));
-  assertx(!m_freelists[std::min(index, kNumSmallSizes)].head);
+
+  if (UNLIKELY(m_stats.mm_udebt > std::numeric_limits<int64_t>::max())) {
+    // Must be here to check gc; might still have free objects.
+    checkGC();
+    updateMMDebt();
+    auto clamped = std::min(index, kNumSmallSizes);
+    if (auto p = m_freelists[clamped].unlikelyPop()) {
+      FTRACE(3, "mallocSmallSizeSlow: check gc {} -> {}\n", nbytes, p);
+      return p;
+    }
+  }
+
   size_t contigInd = kContigIndexTab[index];
   for (auto i = contigInd; i < kNumSmallSizes; ++i) {
     FTRACE(4, "MemoryManager::mallocSmallSizeSlow({}, {}): contigMin={}, "

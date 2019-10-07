@@ -2837,8 +2837,8 @@ and decompose_constraint
   | Ast_defs.Constraint_super ->
     decompose_subtype p env ty_super ty_sub Errors.unify_error
   | Ast_defs.Constraint_eq ->
-    let env' = decompose_subtype p env ty_sub ty_super Errors.unify_error in
-    decompose_subtype p env' ty_super ty_sub Errors.unify_error
+    let env = decompose_subtype p env ty_sub ty_super Errors.unify_error in
+    decompose_subtype p env ty_super ty_sub Errors.unify_error
 
 (* Given a constraint ty1 ck ty2 where ck is AS, SUPER or =,
  * add bounds to type parameters in the environment that necessarily
@@ -2876,16 +2876,16 @@ let add_constraint
     ty_sub
     ty_super;
   let oldsize = Env.get_tpenv_size env in
-  let env' = decompose_constraint p env ck ty_sub ty_super in
-  if Env.get_tpenv_size env' = oldsize then
-    env'
+  let env = decompose_constraint p env ck ty_sub ty_super in
+  if Env.get_tpenv_size env = oldsize then
+    env
   else
     let rec iter n env =
       if n > constraint_iteration_limit then
         env
       else
         let oldsize = Env.get_tpenv_size env in
-        let env' =
+        let env =
           List.fold_left
             (Env.get_generic_parameters env)
             ~init:env
@@ -2905,12 +2905,12 @@ let add_constraint
                         ty_super'
                         Errors.unify_error)))
         in
-        if Env.get_tpenv_size env' = oldsize then
-          env'
+        if Env.get_tpenv_size env = oldsize then
+          env
         else
-          iter (n + 1) env'
+          iter (n + 1) env
     in
-    iter 0 env'
+    iter 0 env
 
 let log_prop env =
   let filename = Pos.filename (Pos.to_absolute env.function_pos) in

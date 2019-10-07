@@ -86,7 +86,6 @@ struct PreClassEmitter {
 
     template<class SerDe> void serde(SerDe& sd) {
       sd(m_name)
-        (m_mangledName)
         (m_attrs)
         (m_userType)
         (m_docComment)
@@ -99,8 +98,9 @@ struct PreClassEmitter {
 
   private:
     friend PreClassEmitter;
-    void resolveArray(const PreClassEmitter* pce) {
+    void updateAfterDeserialize(const PreClassEmitter* pce) {
       m_repoAuthType.resolveArray(pce->ue());
+      m_mangledName = PreClass::manglePropName(pce->name(), m_name, m_attrs);
     }
 
   private:

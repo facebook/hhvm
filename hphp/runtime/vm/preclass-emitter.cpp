@@ -376,7 +376,7 @@ template<class SerDe> void PreClassEmitter::serdeMetaData(SerDe& sd) {
 
     if (SerDe::deserializing) {
       for (unsigned i = 0; i < m_propMap.size(); ++i) {
-        m_propMap[i].resolveArray(this);
+        m_propMap[i].updateAfterDeserialize(this);
       }
     }
 }

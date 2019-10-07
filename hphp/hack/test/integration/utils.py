@@ -6,11 +6,16 @@ import os
 import re
 import signal
 from types import FrameType
-from typing import BinaryIO, Callable, Iterable, Mapping, Union, _ForwardRef
+from typing import BinaryIO, Callable, Iterable, Mapping, Union
 
 
-JsonObject = Mapping[str, _ForwardRef("Json")]
-JsonArray = Iterable[_ForwardRef("Json")]
+try:
+    from typing import ForwardRef
+except ImportError:
+    from typing import _ForwardRef as ForwardRef
+
+JsonObject = Mapping[str, ForwardRef("Json")]
+JsonArray = Iterable[ForwardRef("Json")]
 JsonScalar = Union[str, int, float, bool, None]
 Json = Union[JsonObject, JsonArray, JsonScalar]
 

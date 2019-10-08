@@ -974,7 +974,8 @@ let find_global_results
             }
           in
           add_res (Complete complete));
-      autocomplete_is_complete := List.length results < max_results
+      autocomplete_is_complete :=
+        List.length !autocomplete_results < max_results
 
 (* Main entry point for autocomplete *)
 let go

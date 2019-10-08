@@ -208,7 +208,7 @@ let find_matching_symbols
     (* Merge and deduplicate results *)
     let all_results = List.append local_results global_results in
     let dedup_results =
-      List.dedup_and_sort
+      List.sort
         ~compare:(fun a b -> String.compare b.si_name a.si_name)
         all_results
     in

@@ -274,6 +274,9 @@ type _ t =
   | IDE_FIND_REFS :
       labelled_file * int * int * bool
       -> Find_refs.ide_result_or_retry t
+  | IDE_GO_TO_IMPL :
+      labelled_file * int * int
+      -> Find_refs.ide_result_or_retry t
   | IDE_HIGHLIGHT_REFS :
       file_input * int * int
       -> ServerHighlightRefsTypes.result t

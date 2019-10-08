@@ -208,6 +208,7 @@
     serverFindRefs
     serverFormat
     serverGoToDefinition
+    serverGoToImpl
     serverHighlightRefs
     serverHotClasses
     serverHotClassesDescription

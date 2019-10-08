@@ -2587,6 +2587,80 @@ class TestLsp(TestCase[LspTestDriver]):
         )
         self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)
 
+    def test_go_to_implementation(self) -> None:
+        self.prepare_server_environment()
+        variables = self.setup_php_file("go_to_implementation.php")
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("test_go_to_implementation"), use_serverless_ide=False
+            )
+            .wait_for_hh_server_ready()
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .request(
+                comment="go to implemenetation: abstract class",
+                method="textDocument/implementation",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 1, "character": 17},
+                },
+                result=[
+                    {
+                        "uri": "${php_file_uri}",
+                        "range": {
+                            "start": {"line": 7, "character": 6},
+                            "end": {"line": 7, "character": 9},
+                        },
+                    }
+                ],
+            )
+            .request(
+                comment="go to implemenetation: interface",
+                method="textDocument/implementation",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 13, "character": 13},
+                },
+                result=[
+                    {
+                        "uri": "${php_file_uri}",
+                        "range": {
+                            "start": {"line": 17, "character": 6},
+                            "end": {"line": 17, "character": 9},
+                        },
+                    }
+                ],
+            )
+            .request(
+                comment="go to implemenetation: trait",
+                method="textDocument/implementation",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 23, "character": 10},
+                },
+                result=[
+                    {
+                        "uri": "${php_file_uri}",
+                        "range": {
+                            "start": {"line": 30, "character": 6},
+                            "end": {"line": 30, "character": 16},
+                        },
+                    }
+                ],
+            )
+            .request(method="shutdown", params={}, result=None)
+        )
+        self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)
+
     def test_signature_help(self) -> None:
         self.prepare_server_environment()
         variables = self.setup_php_file("signaturehelp.php")

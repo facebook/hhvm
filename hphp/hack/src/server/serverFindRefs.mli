@@ -7,9 +7,19 @@
  *
  *)
 
+open Core_kernel
 open ServerCommandTypes.Find_refs
 
 val to_json : result -> Hh_json.json
+
+val add_ns : String.t -> String.t
+
+val handle_prechecked_files :
+  ServerEnv.genv ->
+  ServerEnv.env ->
+  Typing_deps.DepSet.elt ->
+  (unit -> 'a) ->
+  ServerEnv.env * 'a ServerCommandTypes.Done_or_retry.t
 
 val go :
   action ->

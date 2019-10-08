@@ -1875,6 +1875,33 @@ let do_findReferences
              positions
              ~f:(hack_pos_to_lsp_location ~default_path:filename))))
 
+let do_findImplementations
+    (conn : server_conn)
+    (ref_unblocked_time : float ref)
+    (params : GoToImplementation.params) : GoToImplementation.result Lwt.t =
+  GoToImplementation.(
+    TextDocumentPositionParams.(
+      let { Ide_api_types.line; column } =
+        lsp_position_to_ide params.loc.position
+      in
+      let filename =
+        Lsp_helpers.lsp_textDocumentIdentifier_to_filename
+          params.loc.textDocument
+      in
+      let labelled_file = ServerCommandTypes.LabelledFileName filename in
+      let command =
+        ServerCommandTypes.IDE_GO_TO_IMPL (labelled_file, line, column)
+      in
+      let%lwt results = rpc_with_retry conn ref_unblocked_time command in
+      (* TODO: respect params.context.include_declaration *)
+      match results with
+      | None -> Lwt.return []
+      | Some (_name, positions) ->
+        Lwt.return
+          (List.map
+             positions
+             ~f:(hack_pos_to_lsp_location ~default_path:filename))))
+
 (* Shared function for hack range conversion *)
 let hack_range_to_lsp_highlight range =
   { DocumentHighlight.range = ide_range_to_lsp range; kind = None }
@@ -3493,21 +3520,17 @@ let handle_event
             parse_findReferences c.params
             |> do_findReferences menv.conn ref_unblocked_time
           in
-          result
-          |> print_findReferences
-          |> respond_jsonrpc ~powered_by:Hh_server c;
+          result |> print_Locations |> respond_jsonrpc ~powered_by:Hh_server c;
           Lwt.return_unit
-        (* textDocument/implementation request: for now just acts like textDocument/references *)
+        (* textDocument/implementation request *)
         | (Main_loop menv, Client_message c)
           when c.method_ = "textDocument/implementation" ->
           let%lwt () = cancel_if_stale client c long_timeout in
           let%lwt result =
-            parse_findReferences c.params
-            |> do_findReferences menv.conn ref_unblocked_time
+            parse_findImplementations c.params
+            |> do_findImplementations menv.conn ref_unblocked_time
           in
-          result
-          |> print_findReferences
-          |> respond_jsonrpc ~powered_by:Hh_server c;
+          result |> print_Locations |> respond_jsonrpc ~powered_by:Hh_server c;
           Lwt.return_unit
         (* textDocument/rename *)
         | (Main_loop menv, Client_message c)

@@ -33,6 +33,7 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   (* Finding references uses global dependency table *)
   | FIND_REFS _ -> true
   | IDE_FIND_REFS _ -> true
+  | IDE_GO_TO_IMPL _ -> true
   | METHOD_JUMP (_, _, find_children) -> find_children (* uses find refs *)
   | SAVE_NAMING _ -> false
   | SAVE_STATE _ -> true
@@ -117,6 +118,7 @@ let get_description : type a. a command -> string = function
   | Rpc (AI_QUERY _) -> "AI_QUERY"
   | Rpc (FIND_REFS _) -> "FIND_REFS"
   | Rpc (IDE_FIND_REFS _) -> "IDE_FIND_REFS"
+  | Rpc (IDE_GO_TO_IMPL _) -> "IDE_GO_TO_IMPL"
   | Rpc (METHOD_JUMP _) -> "METHOD_JUMP"
   | Rpc (SAVE_NAMING _) -> "SAVE_NAMING"
   | Rpc (SAVE_STATE _) -> "SAVE_STATE"

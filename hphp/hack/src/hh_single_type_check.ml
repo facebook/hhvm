@@ -51,6 +51,7 @@ type mode =
   | Decl_compare
   | Shallow_class_diff
   | Linearization
+  | Go_to_impl of int * int
 
 type options = {
   files: string list;
@@ -324,6 +325,14 @@ let parse_options () =
             Arg.Int (fun column -> set_mode (Find_refs (!line, column)) ());
           ],
         "<pos> Find all usages of a symbol at given line and column" );
+      ( "--go-to-impl",
+        Arg.Tuple
+          [
+            Arg.Int (fun x -> line := x);
+            Arg.Int (fun column -> set_mode (Go_to_impl (!line, column)) ());
+          ],
+        "<pos> Find all implementations of a symbol at given line and column"
+      );
       ( "--highlight-refs",
         Arg.Tuple
           [
@@ -1325,6 +1334,39 @@ let handle_mode
               failwith
               @@ "should only happen with prechecked files "
               ^ "which are not a thing in hh_single_type_check")
+        in
+        ClientFindRefs.print_ide_readable results))
+  | Go_to_impl (line, column) ->
+    let filename = expect_single_file () in
+    let naming_table = Naming_table.create files_info in
+    Naming_table.iter naming_table Typing_deps.update_file;
+    let genv = ServerEnvBuild.default_genv in
+    let env =
+      {
+        (ServerEnvBuild.make_env genv.ServerEnv.config) with
+        ServerEnv.naming_table;
+        ServerEnv.tcopt;
+      }
+    in
+    let filename = Relative_path.to_absolute filename in
+    let content = cat filename in
+    let labelled_file =
+      ServerCommandTypes.LabelledFileContent { filename; content }
+    in
+    Option.Monad_infix.(
+      ServerCommandTypes.Done_or_retry.(
+        let results =
+          ServerFindRefs.go_from_file (labelled_file, line, column) env
+          >>= fun (name, action) ->
+          ServerGoToImpl.go action genv env
+          |> map_env ~f:(ServerFindRefs.to_ide name)
+          |> snd
+          |> function
+          | Done r -> r
+          | Retry ->
+            failwith
+            @@ "should only happen with prechecked files "
+            ^ "which are not a thing in hh_single_type_check"
         in
         ClientFindRefs.print_ide_readable results))
   | Highlight_refs (line, column) ->

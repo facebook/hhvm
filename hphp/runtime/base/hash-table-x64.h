@@ -19,10 +19,10 @@
 
 #define MixedArray_SCALE        16
 #define MixedArray_DATA         32
-#define MixedArrayElm_HASH      20
-#define MixedArrayElm_KEY       0
-#define MixedArrayElm_DATA      8
-#define MixedArrayElm_TYPE      16
+#define MixedArrayElm_HASH      12
+#define MixedArrayElm_KEY       16
+#define MixedArrayElm_DATA      0
+#define MixedArrayElm_TYPE      8
 #define MixedArrayElm_QUADWORDS 3
 
 #define SetArray_SCALE        16

@@ -40,10 +40,6 @@ struct MemoryProfile;
 struct MixedArrayElm {
   using hash_t = strhash_t;
 
-  union {
-    int64_t ikey;
-    StringData* skey;
-  };
   // We store values here, but also some information local to this array:
   // data.m_aux.u_hash contains either a negative number (for an int key) or
   // a string hashcode (31-bit and thus non-negative); the high bit is the
@@ -52,6 +48,13 @@ struct MixedArrayElm {
   // critical that when we return &data to clients, that they not read or
   // write the m_aux field!
   TypedValueAux data;
+
+  // Putting the key second lets us cast MixedArrayElm* to TypedValue*, which
+  // we can use to simplify the Lval sublattice in the JIT type system.
+  union {
+    int64_t ikey;
+    StringData* skey;
+  };
 
   void setStaticKey(StringData* k, strhash_t h) {
     assertx(k->isStatic());

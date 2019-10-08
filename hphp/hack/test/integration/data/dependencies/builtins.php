@@ -3,4 +3,4 @@
 
 namespace HH\Lib\PHP;
 
-function ini_set(string $varname, mixed $newvalue = null) {}
+function ini_set(string $varname, $newvalue = null) {}

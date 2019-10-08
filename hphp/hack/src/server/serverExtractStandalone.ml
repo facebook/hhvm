@@ -322,7 +322,13 @@ let print_fun_args tcopt fun_type =
       else
         ""
     in
-    let typ = Typing_print.full_decl tcopt arg.fp_type.et_type in
+    let typ =
+      match snd arg.fp_type.et_type with
+      | Typing_defs.Tany _ -> ""
+      | _ ->
+        Printf.sprintf "%s "
+        @@ Typing_print.full_decl tcopt arg.fp_type.et_type
+    in
     let default =
       if with_default idx then
         Printf.sprintf " = %s" call_make_default
@@ -330,9 +336,9 @@ let print_fun_args tcopt fun_type =
         ""
     in
     if var then
-      Printf.sprintf "%s ...%s" typ name
+      Printf.sprintf "%s...%s" typ name
     else
-      Printf.sprintf "%s%s %s%s" inout typ name default
+      Printf.sprintf "%s%s%s%s" inout typ name default
   in
   let args =
     String.concat ~sep:", " @@ List.mapi fun_type.ft_params print_arg

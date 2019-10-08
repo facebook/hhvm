@@ -47,9 +47,6 @@ val localize_where_constraints :
 val sub_type_decl :
   env -> decl_ty -> decl_ty -> Errors.typing_error_callback -> unit
 
-val unify_decl :
-  env -> decl_ty -> decl_ty -> Errors.typing_error_callback -> unit
-
 val check_tparams_constraints :
   use_pos:Pos.t -> ety_env:expand_env -> env -> decl_tparam list -> env
 

@@ -680,13 +680,6 @@ let localize_where_constraints ~ety_env (env : env) where_constraints =
 
 (* Helper functions *)
 
-(* Ensure that types are equivalent i.e. subtypes of each other *)
-let unify_decl env ty1 ty2 on_error =
-  let (env, ty1) = localize_with_self env ty1 in
-  let (env, ty2) = localize_with_self env ty2 in
-  ignore (TUtils.sub_type env ty2 ty1 on_error);
-  ignore (TUtils.sub_type env ty1 ty2 on_error)
-
 let sub_type_decl env ty1 ty2 on_error =
   let (env, ty1) = localize_with_self env ty1 in
   let (env, ty2) = localize_with_self env ty2 in

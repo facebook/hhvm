@@ -2462,7 +2462,7 @@ let do_initialize (root : Path.t) : Initialize.result =
           documentLinkProvider = None;
           executeCommandProvider = None;
           implementationProvider =
-            server_local_config.ServerLocalConfig.find_all_implementations;
+            server_local_config.ServerLocalConfig.go_to_implementation;
           typeCoverageProvider = true;
           rageProvider = true;
         };

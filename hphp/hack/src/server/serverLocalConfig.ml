@@ -118,7 +118,7 @@ type t = {
   (* Use shared_lru workers *)
   use_lru_workers: bool;
   (* Allows the IDE to show the 'find all implementations' button *)
-  find_all_implementations: bool;
+  go_to_implementation: bool;
 }
 
 and remote_type_check = {
@@ -206,7 +206,7 @@ let default =
     profile_type_check_duration_threshold = 0.05;
     (* seconds *)
     use_lru_workers = false;
-    find_all_implementations = false;
+    go_to_implementation = false;
   }
 
 let path =
@@ -561,10 +561,10 @@ let load_ fn ~silent ~current_version overrides =
   let use_lru_workers =
     bool_if_version "use_lru_workers" ~default:default.use_lru_workers config
   in
-  let find_all_implementations =
+  let go_to_implementation =
     bool_if_version
-      "find_all_implementations"
-      ~default:default.find_all_implementations
+      "go_to_implementation"
+      ~default:default.go_to_implementation
       config
   in
   {
@@ -631,7 +631,7 @@ let load_ fn ~silent ~current_version overrides =
     tico_invalidate_smart;
     profile_type_check_duration_threshold;
     use_lru_workers;
-    find_all_implementations;
+    go_to_implementation;
   }
 
 let load ~silent ~current_version config_overrides =

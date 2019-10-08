@@ -4,13 +4,11 @@ function call_defaulted(int $arg): void {
   with_defaults();
 }
 function with_defaults(
-  int $arg = extract_standalone_make_default(),
-  float $argf = extract_standalone_make_default(),
+  int $arg = \extract_standalone_make_default(),
+  float $argf = \extract_standalone_make_default(),
 ): void {
   throw new \Exception();
 }
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }
-
-

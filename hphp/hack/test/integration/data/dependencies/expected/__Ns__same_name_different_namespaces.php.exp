@@ -1,10 +1,10 @@
-////toplevel.php
+//// strict_toplevel.php
 <?hh
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }
 
-////namespaces.php
+//// strict_namespaces.php
 <?hh
 namespace Test1 {
   function f(int $x): \Test1\A {

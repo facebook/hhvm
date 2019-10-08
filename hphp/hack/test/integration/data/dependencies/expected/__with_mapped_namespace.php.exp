@@ -1,4 +1,4 @@
-////toplevel.php
+//// strict_toplevel.php
 <?hh
 function with_mapped_namespace(): void {
   PHP\ini_set('foo', 'bar');
@@ -7,12 +7,15 @@ function extract_standalone_make_default(): nothing {
   throw new Exception();
 }
 
-////namespaces.php
-<?hh
+//// partial_namespaces.php
+<?hh // partial
 namespace HH {
   namespace Lib {
     namespace PHP {
-      function ini_set(string $varname, mixed $newvalue): void {
+      function ini_set(
+        string $varname,
+        mixed $newvalue = \extract_standalone_make_default(),
+      ) {
         throw new \Exception();
       }
     }

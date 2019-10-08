@@ -98,6 +98,71 @@ let global_dep_name dep =
     | Extends _ ->
       raise UnexpectedDependency)
 
+let get_fun_mode name =
+  let open Option in
+  Decl_provider.get_fun name
+  >>= fun decl ->
+  let file_name = Pos.filename decl.fe_pos in
+  Ast_provider.find_fun_in_file file_name name
+  >>= (fun fun_ -> Some fun_.Aast.f_mode)
+
+let get_class_mode name =
+  let open Option in
+  Decl_provider.get_class name
+  >>= fun decl ->
+  let file_name = Pos.filename (Decl_provider.Class.pos decl) in
+  Ast_provider.find_class_in_file file_name name
+  >>| (fun class_ -> class_.Aast.c_mode)
+
+let get_typedef_mode name =
+  let open Option in
+  Decl_provider.get_typedef name
+  >>= fun decl ->
+  let file_name = Pos.filename decl.td_pos in
+  Ast_provider.find_typedef_in_file file_name name
+  >>| (fun typedef -> typedef.Aast.t_mode)
+
+let get_class_or_typedef_mode name =
+  match get_class_mode name with
+  | Some mode -> Some mode
+  | None -> get_typedef_mode name
+
+let get_gconst_mode name =
+  let open Option in
+  Decl_provider.get_gconst name
+  >>= fun ((r, _), _) ->
+  let file_name = Pos.filename (Typing_reason.to_pos r) in
+  Ast_provider.find_gconst_in_file file_name name
+  >>= (fun gconst -> Some gconst.Aast.cst_mode)
+
+let get_dep_mode dep =
+  let open Typing_deps.Dep in
+  match dep with
+  | Fun name
+  | FunName name ->
+    get_fun_mode name
+  | Class name
+  | Const (name, _)
+  | Method (name, _)
+  | SMethod (name, _)
+  | Prop (name, _)
+  | SProp (name, _)
+  | Cstr name ->
+    get_class_or_typedef_mode name
+  | GConst name
+  | GConstName name ->
+    get_gconst_mode name
+  | RecordDef _
+  | AllMembers _
+  | Extends _ ->
+    None
+
+let is_strict_dep dep = get_dep_mode dep = Some FileInfo.Mstrict
+
+let is_strict_fun name = is_strict_dep (Typing_deps.Dep.Fun name)
+
+let is_strict_class name = is_strict_dep (Typing_deps.Dep.Class name)
+
 let is_builtin_dep dep =
   let is_in_hhi pos =
     String_utils.string_ends_with
@@ -235,7 +300,7 @@ let tparam_name (tp : Typing_defs.decl_tparam) = snd tp.tp_name
 
 let function_make_default = "extract_standalone_make_default"
 
-let call_make_default = Printf.sprintf "%s()" function_make_default
+let call_make_default = Printf.sprintf "\\%s()" function_make_default
 
 let print_fun_args tcopt fun_type =
   let with_default arg_idx =
@@ -1164,53 +1229,69 @@ let sort_by_namespace declarations =
    declarations, we "generate" a separate file for toplevel declarations, using
    hh_single_type_check multifile syntax.
 *)
-let get_code declarations =
-  let decl_names = SMap.keys declarations in
-  let global_namespace = sort_by_namespace decl_names in
-  let code_from_namespace_decls name acc =
-    Option.value (SMap.get name declarations) ~default:[] @ acc
+let get_code strict_declarations partial_declarations =
+  let get_code declarations =
+    let decl_names = SMap.keys declarations in
+    let global_namespace = sort_by_namespace decl_names in
+    let code_from_namespace_decls name acc =
+      Option.value (SMap.get name declarations) ~default:[] @ acc
+    in
+    let toplevel =
+      HashSet.fold code_from_namespace_decls global_namespace.decls []
+    in
+    let rec code_from_namespace nspace_name nspace_content code =
+      let code = "}" :: code in
+      let code =
+        Caml.Hashtbl.fold code_from_namespace nspace_content.namespaces code
+      in
+      let code =
+        HashSet.fold code_from_namespace_decls nspace_content.decls code
+      in
+      Printf.sprintf "namespace %s {" nspace_name :: code
+    in
+    let namespaces =
+      Caml.Hashtbl.fold code_from_namespace global_namespace.namespaces []
+    in
+    (toplevel, namespaces)
   in
-  let hh_prefix = "<?hh" in
-  (* Toplevel code has to be in a separate file *)
+  let (strict_toplevel, strict_namespaces) = get_code strict_declarations in
+  let (partial_toplevel, partial_namespaces) = get_code partial_declarations in
   let helper =
     Printf.sprintf
       "function %s(): nothing {throw new Exception();}"
       function_make_default
   in
-  let toplevel =
-    HashSet.fold code_from_namespace_decls global_namespace.decls [helper]
+  let strict_hh_prefix = "<?hh" in
+  let partial_hh_prefix = "<?hh // partial" in
+  let sections =
+    [
+      ( "//// strict_toplevel.php",
+        (strict_hh_prefix, strict_toplevel @ [helper]) );
+      ("//// partial_toplevel.php", (partial_hh_prefix, partial_toplevel));
+      ("//// strict_namespaces.php", (strict_hh_prefix, strict_namespaces));
+      ("//// partial_namespaces.php", (partial_hh_prefix, partial_namespaces));
+    ]
   in
-  let toplevel =
-    format @@ String.concat ~sep:"\n" @@ (hh_prefix :: toplevel)
+  let non_empty_sections =
+    List.filter sections ~f:(fun (_, (_, decls)) -> not (List.is_empty decls))
   in
-  let rec code_from_namespace nspace_name nspace_content code =
-    let code = "}" :: code in
-    let code =
-      Caml.Hashtbl.fold code_from_namespace nspace_content.namespaces code
-    in
-    let code =
-      HashSet.fold code_from_namespace_decls nspace_content.decls code
-    in
-    Printf.sprintf "namespace %s {" nspace_name :: code
+  let format_section (prefix, decls) =
+    prefix ^ "\n" ^ format (String.concat ~sep:"\n" decls)
   in
-  let namespaced =
-    Caml.Hashtbl.fold code_from_namespace global_namespace.namespaces []
-  in
-  let namespaced =
-    format @@ String.concat ~sep:"\n" @@ (hh_prefix :: namespaced)
-  in
-  let has_code text = String.strip text <> hh_prefix in
-  if has_code toplevel && has_code namespaced then
-    Printf.sprintf
-      "////toplevel.php\n%s\n////namespaces.php\n%s"
-      toplevel
-      namespaced
-  else if has_code toplevel then
-    toplevel
-  else
-    namespaced
+  match non_empty_sections with
+  | [(_, section)] -> format_section section
+  | _ ->
+    String.concat ~sep:"\n"
+    @@ List.map non_empty_sections ~f:(fun (comment, section) ->
+           comment ^ "\n" ^ format_section section)
 
 let get_declarations tcopt target class_dependencies global_dependencies =
+  let (strict_class_dependencies, partial_class_dependencies) =
+    SMap.partition (fun cls _ -> is_strict_class cls) class_dependencies
+  in
+  let (strict_global_dependencies, partial_global_dependencies) =
+    List.partition_tf global_dependencies ~f:is_strict_dep
+  in
   let add_declaration declarations name declaration =
     SMap.add name [declaration] declarations ~combine:(fun x y -> y @ x)
   in
@@ -1235,16 +1316,28 @@ let get_declarations tcopt target class_dependencies global_dependencies =
       cls
       (construct_type_declaration tcopt cls ~full_method fields)
   in
-  let add_target_declaration declarations =
-    match target with
-    | Function function_name ->
-      let function_text = extract_body target in
-      add_declaration declarations function_name function_text
-    | Method _ -> declarations
+  let strict_declarations =
+    List.fold_left
+      strict_global_dependencies
+      ~f:add_global_declaration
+      ~init:SMap.empty
+    |> SMap.fold add_class_declaration strict_class_dependencies
   in
-  List.fold_left global_dependencies ~f:add_global_declaration ~init:SMap.empty
-  |> SMap.fold add_class_declaration class_dependencies
-  |> add_target_declaration
+  let partial_declarations =
+    List.fold_left
+      partial_global_dependencies
+      ~f:add_global_declaration
+      ~init:SMap.empty
+    |> SMap.fold add_class_declaration partial_class_dependencies
+  in
+  match target with
+  | Function name ->
+    let decl = extract_body target in
+    if is_strict_fun name then
+      (add_declaration strict_declarations name decl, partial_declarations)
+    else
+      (strict_declarations, add_declaration partial_declarations name decl)
+  | Method _ -> (strict_declarations, partial_declarations)
 
 let go tcopt target =
   try
@@ -1252,14 +1345,14 @@ let go tcopt target =
     let (class_dependencies, global_dependencies) =
       List.partition_tf dependencies ~f:is_class_dependency
     in
-    let declarations =
+    let (strict_declarations, partial_declarations) =
       get_declarations
         tcopt
         target
         (group_class_dependencies_by_class class_dependencies)
         global_dependencies
     in
-    get_code declarations
+    get_code strict_declarations partial_declarations
   with
   | NotFound -> "Not found!"
   | InvalidInput ->

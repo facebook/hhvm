@@ -21,7 +21,7 @@ fn ocaml_int_to_isize(value: usize) -> isize {
 }
 
 #[repr(transparent)]
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Hash, PartialEq, Eq)]
 pub struct Value<'arena>(pub(crate) usize, PhantomData<&'arena ()>);
 
 impl<'a> Value<'a> {

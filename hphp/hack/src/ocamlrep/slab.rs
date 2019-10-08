@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::cell::RefCell;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::fmt::{self, Debug};
 use std::mem;
 
@@ -291,6 +291,7 @@ fn debug_slab(name: &'static str, slab: &Slab<'_>, f: &mut fmt::Formatter) -> fm
 
 struct SlabBuilder<'slab: 'builder, 'builder> {
     slab: &'builder mut Slab<'slab>,
+    seen: HashMap<usize, OpaqueValue<'slab>>,
     next_block_index: RefCell<usize>,
 }
 
@@ -299,6 +300,7 @@ impl<'s, 'b> SlabBuilder<'s, 'b> {
         slab.set_base(slab.current_address());
         SlabBuilder {
             slab,
+            seen: HashMap::new(),
             next_block_index: RefCell::new(SLAB_METADATA_WORDS),
         }
     }
@@ -326,13 +328,16 @@ impl<'s, 'b> SlabBuilder<'s, 'b> {
         if value.is_immediate() {
             return OpaqueValue::from_bits(value.to_bits());
         }
+        if let Some(copied_value) = self.seen.get(&value.to_bits()) {
+            return *copied_value;
+        }
         let block = value.as_block().unwrap();
         let header = block.header();
         let size = header.size();
         let dest = self.alloc(size + 1);
         // A tag >= NO_SCAN_TAG indicates that the block contains binary data
         // rather than pointers or immediate integers.
-        if header.tag() >= NO_SCAN_TAG {
+        let copied_value = if header.tag() >= NO_SCAN_TAG {
             // Copy header and binary data
             let src: *const OpaqueValue = mem::transmute(block.header_ptr());
             std::ptr::copy_nonoverlapping(src, dest, size + 1);
@@ -345,20 +350,26 @@ impl<'s, 'b> SlabBuilder<'s, 'b> {
                 *dest.add(i + 1) = self.copy_value(block[i]);
             }
             OpaqueValue::from_bits(dest.add(1) as usize)
-        }
+        };
+        self.seen.insert(value.to_bits(), copied_value);
+        copied_value
     }
 }
 
-fn words_reachable(value: Value<'_>) -> usize {
+fn words_reachable<'a>(seen: &mut HashSet<Value<'a>>, value: Value<'a>) -> usize {
     let block = match value.as_block() {
         None => return 0,
         Some(b) => b,
     };
+    if seen.contains(&value) {
+        return 0;
+    }
+    seen.insert(value);
     let size = block.size();
     let mut words = size + 1;
     if block.tag() < NO_SCAN_TAG {
         for i in 0..size {
-            words += words_reachable(block[i]);
+            words += words_reachable(seen, block[i]);
         }
     }
     words
@@ -371,7 +382,7 @@ impl OwnedSlab {
         if value.is_immediate() {
             return None;
         }
-        let mut slab = Slab::new(words_reachable(value));
+        let mut slab = Slab::new(words_reachable(&mut HashSet::new(), value));
         unsafe { SlabBuilder::build_from_value(&mut slab, value) };
         slab.check_integrity().unwrap();
         Some(OwnedSlab(slab))

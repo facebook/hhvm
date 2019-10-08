@@ -440,6 +440,12 @@ let test_convert_sset () =
   | ["a"; "b"; "c"] -> ()
   | _ -> assert false
 
+let test_convert_shared_value () =
+  let str = "foo" in
+  let tup = (str, str) in
+  let (str1, str2) = convert_to_ocamlrep tup in
+  assert (phys_equal str1 str2)
+
 let test_cases =
   [
     test_char;
@@ -506,6 +512,7 @@ let test_cases =
     test_convert_empty_sset;
     test_convert_sset_singleton;
     test_convert_sset;
+    test_convert_shared_value;
   ]
 
 let main () = List.iter test_cases (fun test -> test ())

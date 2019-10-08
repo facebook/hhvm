@@ -2290,8 +2290,12 @@ let get_client_ide_status (ide_service : ClientIdeService.t) :
     {
       ShowStatus.request =
         {
-          ShowMessageRequest.type_ = MessageType.InfoMessage;
-          message = "IDE services: processing changes.";
+          ShowMessageRequest.type_ = MessageType.WarningMessage;
+          message =
+            Printf.sprintf
+              "IDE services: processing %d/%d changes."
+              processed
+              total;
           actions = [];
         };
       progress = Some processed;

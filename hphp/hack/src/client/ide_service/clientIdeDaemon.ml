@@ -21,6 +21,7 @@ type state =
       hhi_root: Path.t;
       server_env: ServerEnv.env;
       changed_files_to_process: Path.Set.t;
+      peak_changed_files_queue_size: int;
     }
 
 type t = {
@@ -108,6 +109,7 @@ let load_saved_state
                  hhi_root;
                  server_env;
                  changed_files_to_process = Path.Set.of_list changed_files;
+                 peak_changed_files_queue_size = List.length changed_files;
                })
         | Error load_error ->
           let message = Saved_state_loader.load_error_to_string load_error in
@@ -271,12 +273,22 @@ let handle_message :
             ^ "it failed to initialize or was still initializing. The caller "
             ^ "should have waited for the IDE services to become ready before "
             ^ "sending file-change notifications." ) )
-    | ( Initialized ({ changed_files_to_process; _ } as state),
+    | ( Initialized
+          ( { changed_files_to_process; peak_changed_files_queue_size; _ } as
+          state ),
         File_changed path ) ->
       let changed_files_to_process =
         Path.Set.add changed_files_to_process path
       in
-      let state = Initialized { state with changed_files_to_process } in
+      let peak_changed_files_queue_size = peak_changed_files_queue_size + 1 in
+      let state =
+        Initialized
+          {
+            state with
+            changed_files_to_process;
+            peak_changed_files_queue_size;
+          }
+      in
       Lwt.return (state, Handle_message_result.Notification)
     | (Initializing, Initialize_from_saved_state param) ->
       let%lwt new_state = initialize param in
@@ -541,6 +553,34 @@ let write_message
   let%lwt (_ : int) = Marshal_tools_lwt.to_fd_with_preamble out_fd message in
   Lwt.return_unit
 
+let write_status ~(out_fd : Lwt_unix.file_descr) (state : state) : unit Lwt.t =
+  match state with
+  | Initializing
+  | Failed_to_initialize _ ->
+    Lwt.return_unit
+  | Initialized { changed_files_to_process; peak_changed_files_queue_size; _ }
+    ->
+    if Path.Set.is_empty changed_files_to_process then
+      let%lwt () =
+        write_message
+          ~out_fd
+          ~message:
+            (ClientIdeMessage.Notification ClientIdeMessage.Done_processing)
+      in
+      Lwt.return_unit
+    else
+      let total = peak_changed_files_queue_size in
+      let processed = total - Path.Set.cardinal changed_files_to_process in
+      let%lwt () =
+        write_message
+          ~out_fd
+          ~message:
+            (ClientIdeMessage.Notification
+               (ClientIdeMessage.Processing_files
+                  { ClientIdeMessage.Processing_files.processed; total }))
+      in
+      Lwt.return_unit
+
 let serve
     (type a) ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
     unit Lwt.t =
@@ -583,17 +623,21 @@ let serve
       let%lwt server_env =
         ClientIdeIncremental.process_changed_file server_env next_file
       in
-      let%lwt () =
+      let%lwt state =
         if Path.Set.is_empty changed_files_to_process then
-          let message = ClientIdeMessage.(Notification Done_processing) in
-          let%lwt () = write_message ~out_fd ~message in
-          Lwt.return_unit
+          Lwt.return
+            (Initialized
+               {
+                 state with
+                 server_env;
+                 changed_files_to_process;
+                 peak_changed_files_queue_size = 0;
+               })
         else
-          Lwt.return_unit
+          Lwt.return
+            (Initialized { state with server_env; changed_files_to_process })
       in
-      let state =
-        Initialized { state with server_env; changed_files_to_process }
-      in
+      let%lwt () = write_status ~out_fd state in
       handle_messages { t with state }
     | t ->
       let%lwt message = Lwt_message_queue.pop t.message_queue in

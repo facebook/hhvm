@@ -1535,7 +1535,6 @@ struct EndCatchData : IRSPRelOffsetData {
   enum CatchMode {
     UnwindOnly,
     SwitchMode,
-    BuiltinSwitchMode,
     SideExit
   };
 
@@ -1546,9 +1545,7 @@ struct EndCatchData : IRSPRelOffsetData {
     return folly::to<std::string>(
       IRSPRelOffsetData::show(), ",",
       mode == UnwindOnly ? "UnwindOnly" :
-      mode == SwitchMode ? "SwitchMode" :
-      mode == BuiltinSwitchMode ?
-      "BuiltinSwitchMode" : "SideExit");
+      mode == SwitchMode ? "SwitchMode" : "SideExit");
   }
 
   CatchMode mode;

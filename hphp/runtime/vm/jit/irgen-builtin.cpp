@@ -87,7 +87,6 @@ const StaticString
   s_class_meth_get_class("HH\\class_meth_get_class"),
   s_class_meth_get_method("HH\\class_meth_get_method"),
   s_shapes_idx("HH\\Shapes::idx"),
-  s_vm_switch_mode("__VMSwitchMode"),
   s_is_meth_caller("HH\\is_meth_caller"),
   s_meth_caller_get_class("HH\\meth_caller_get_class"),
   s_meth_caller_get_method("HH\\meth_caller_get_method");
@@ -95,12 +94,7 @@ const StaticString
 //////////////////////////////////////////////////////////////////////
 
 struct ParamPrep {
-  explicit ParamPrep(size_t count, const Func* callee) :
-      info{count},
-      vmSwitchMode{
-        callee->userAttributes().count(s_vm_switch_mode.get()) != 0
-      }
-  {}
+  explicit ParamPrep(size_t count, const Func* callee) : info{count} {}
 
   void decRefParams(IRGS& env) const {
     if (forNativeImpl) return;
@@ -129,7 +123,6 @@ struct ParamPrep {
   jit::vector<Info> info;
   uint32_t numByAddr{0};
 
-  bool vmSwitchMode{false};
   bool forNativeImpl{false};
 };
 
@@ -1324,8 +1317,7 @@ struct CatchMaker {
         EndCatch,
         EndCatchData {
           spOffBCFromIRSP(env),
-          m_params.vmSwitchMode ?
-            EndCatchData::BuiltinSwitchMode : EndCatchData::UnwindOnly
+          EndCatchData::UnwindOnly
         },
         fp(env), sp(env));
     return exit;

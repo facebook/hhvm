@@ -184,7 +184,7 @@ function fb_get_code_coverage(bool $flush): mixed;
 
 /** Enables code coverage. The coverage information is cleared.
  */
-<<__HipHopSpecific, __Native("NoFCallBuiltin"), __VMSwitchMode>>
+<<__HipHopSpecific, __Native("NoFCallBuiltin")>>
 function fb_enable_code_coverage(): void;
 
 /** Disables and returns code coverage. The coverage information is cleared.

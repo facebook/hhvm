@@ -17,11 +17,6 @@ we need to look up declarations to service an IDE query, we parse and typecheck
 the files containing those declarations on-demand, then answer your IDE query.
 *)
 
-type serverless_ide_status =
-  | Starting
-  | Running
-  | Failed
-
 val make : unit -> t
 (** Create an uninitialized IDE service. All queries made to this service will
 fail immediately, unless otherwise requested in the initialization procedure. *)
@@ -36,9 +31,6 @@ val initialize_from_saved_state :
 to the service will fail until it is done initializing, unless
 [wait_for_initialization] is [true], in which case queries made to the service
 will block until the initializing is complete. *)
-
-val is_running : t -> serverless_ide_status
-(** Returns info about how this client IDE service is functioning *)
 
 val serve : t -> unit Lwt.t
 (** Pump the message loop for the IDE service. Exits once the IDE service has

@@ -22,7 +22,6 @@
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/server/source-root-info.h"
-#include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/file-util.h"
 

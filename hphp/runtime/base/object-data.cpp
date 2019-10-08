@@ -22,7 +22,6 @@
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/object-iterator.h"
 #include "hphp/runtime/base/runtime-error.h"
@@ -30,6 +29,7 @@
 #include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/tv-type.h"
+#include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/variable-serializer.h"
 
 #include "hphp/runtime/ext/generator/ext_generator.h"

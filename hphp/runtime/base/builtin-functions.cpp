@@ -656,9 +656,8 @@ static Variant invoke_failed(const char *func,
 }
 
 static Variant
-invoke(const String& function, const Variant& params, strhash_t /*hash*/,
-       bool /*tryInterp*/, bool fatal /* = true */,
-       bool allowDynCallNoPointer /* = false */) {
+invoke(const String& function, const Variant& params,
+       bool fatal /* = true */, bool allowDynCallNoPointer /* = false */) {
   Func* func = Unit::loadFunc(function.get());
   if (func && (isContainer(params) || params.isNull())) {
     auto ret = Variant::attach(
@@ -676,12 +675,11 @@ invoke(const String& function, const Variant& params, strhash_t /*hash*/,
 
 // Declared in externals.h.  If you're considering calling this
 // function for some new code, please reconsider.
-Variant invoke(const char *function, const Variant& params, strhash_t hash /* = -1 */,
-               bool tryInterp /* = true */, bool fatal /* = true */,
+Variant invoke(const char *function, const Variant& params,
+               bool fatal /* = true */,
                bool allowDynCallNoPointer /* = false */) {
   String funcName(function, CopyString);
-  return invoke(funcName, params, hash, tryInterp, fatal,
-                allowDynCallNoPointer);
+  return invoke(funcName, params, fatal, allowDynCallNoPointer);
 }
 
 Variant invoke_static_method(const String& s, const String& method,

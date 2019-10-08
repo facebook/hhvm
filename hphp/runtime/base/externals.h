@@ -39,8 +39,8 @@ extern "C++" {
 /**
  * Invoking an arbitrary user-defined function.
  */
-Variant invoke(const char *function, const Variant& params, strhash_t hash = -1,
-               bool tryInterp = true, bool fatal = true,
+Variant invoke(const char *function, const Variant& params,
+               bool fatal = true,
                bool allowDynCallNoPointer = false);
 
 } // extern C++

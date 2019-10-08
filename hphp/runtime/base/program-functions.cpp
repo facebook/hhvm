@@ -2742,8 +2742,8 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
                 context->getCwd().data(), true);
       }
       if (func) {
-        funcRet.assignIfRef(invoke(cmd.c_str(), funcParams, -1,
-                                   true, true, allowDynCallNoPointer));
+        funcRet.assignIfRef(invoke(cmd.c_str(), funcParams,
+                                   true /* fatal */, allowDynCallNoPointer));
       } else {
         if (isServer) hphp_chdir_file(cmd);
         include_impl_invoke(cmd.c_str(), once, "", true);

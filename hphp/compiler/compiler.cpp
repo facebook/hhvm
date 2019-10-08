@@ -24,7 +24,6 @@
 
 #include "hphp/hhbbc/hhbbc.h"
 #include "hphp/runtime/base/config.h"
-#include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/program-functions.h"

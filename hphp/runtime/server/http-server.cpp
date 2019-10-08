@@ -17,7 +17,6 @@
 #include "hphp/runtime/server/http-server.h"
 
 #include "hphp/runtime/base/backtrace.h"
-#include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/base/init-fini-node.h"

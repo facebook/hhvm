@@ -17,9 +17,9 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/collections.h"
-#include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/tv-refcount.h"
+#include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-global-data.h"

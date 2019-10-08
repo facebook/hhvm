@@ -47,7 +47,6 @@
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/enum-util.h"
 #include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/hhprof.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/mixed-array.h"
@@ -69,6 +68,7 @@
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/tv-type.h"
+#include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/unit-cache.h"
 
 #include "hphp/runtime/ext/array/ext_array.h"

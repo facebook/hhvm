@@ -2966,82 +2966,79 @@ let cancel_if_stale
     Lwt.return_unit
 
 let tick_showStatus ~(state : state ref) : unit Lwt.t =
-  Main_env.(
-    Lost_env.(
-      ShowStatus.(
-        ShowMessageRequest.(
-          let show_status () : unit Lwt.t =
-            let%lwt () = Lwt_unix.sleep 1.0 in
-            begin
-              match !state with
-              | Main_loop menv ->
-                request_showStatus
-                  {
-                    request =
-                      {
-                        type_ = menv.status.type_;
-                        message = menv.status.message;
-                        actions = [];
-                      };
-                    progress = None;
-                    total = None;
-                    shortMessage =
-                      (match menv.status.shortMessage with
-                      | Some msg -> Some (msg ^ " " ^ status_tick ())
-                      | None -> None);
-                  }
-              | Lost_server { p; _ } ->
-                let restart_command = "Restart Hack Server" in
-                let on_result ~result state =
-                  let result = Jget.string_d result "title" ~default:"" in
-                  match (result, state) with
-                  | (command, Lost_server _) ->
-                    if command = restart_command then (
-                      let root =
-                        match get_root_opt () with
-                        | None -> failwith "we should have root by now"
-                        | Some root -> root
-                      in
-                      (* Belt-and-braces kill the server. This is in case the server was *)
-                      (* stuck in some weird state. It's also what 'hh restart' does. *)
-                      if MonitorConnection.server_exists (Path.to_string root)
-                      then
-                        ClientStop.kill_server root !ref_from;
+  let show_status () : unit Lwt.t =
+    let%lwt () = Lwt_unix.sleep 1.0 in
+    begin
+      match !state with
+      | Main_loop menv ->
+        request_showStatus
+          Main_env.
+            {
+              ShowStatus.request =
+                {
+                  ShowMessageRequest.type_ = menv.status.type_;
+                  message = menv.status.message;
+                  actions = [];
+                };
+              progress = None;
+              total = None;
+              shortMessage =
+                (match menv.status.shortMessage with
+                | Some msg -> Some (msg ^ " " ^ status_tick ())
+                | None -> None);
+            }
+      | Lost_server { Lost_env.p; _ } ->
+        let restart_command = "Restart Hack Server" in
+        let on_result ~result state =
+          let result = Jget.string_d result "title" ~default:"" in
+          match (result, state) with
+          | (command, Lost_server _) ->
+            if command = restart_command then (
+              let root =
+                match get_root_opt () with
+                | None -> failwith "we should have root by now"
+                | Some root -> root
+              in
+              (* Belt-and-braces kill the server. This is in case the server was *)
+              (* stuck in some weird state. It's also what 'hh restart' does. *)
+              if MonitorConnection.server_exists (Path.to_string root) then
+                ClientStop.kill_server root !ref_from;
 
-                      (* After that it's safe to try to reconnect! *)
-                      start_server root;
-                      let%lwt state =
-                        reconnect_from_lost_if_necessary state `Force_regain
-                      in
-                      Lwt.return state
-                    ) else
-                      Lwt.return state
-                  | _ -> Lwt.return state
-                in
-                request_showStatus
-                  ~on_result
-                  {
-                    request =
-                      {
-                        type_ = MessageType.ErrorMessage;
-                        message =
-                          p.explanation
-                          ^ " Language features such as errors and go-to-def are currently unavailable.";
-                        actions = [{ title = "Restart Hack Server" }];
-                      };
-                    progress = None;
-                    total = None;
-                    shortMessage = None;
-                  }
-              | _ -> ()
-            end;
-            Lwt.return_unit
-          in
-          let rec loop () : unit Lwt.t =
-            let%lwt () = show_status () in
-            loop ()
-          in
-          loop ()))))
+              (* After that it's safe to try to reconnect! *)
+              start_server root;
+              let%lwt state =
+                reconnect_from_lost_if_necessary state `Force_regain
+              in
+              Lwt.return state
+            ) else
+              Lwt.return state
+          | _ -> Lwt.return state
+        in
+        request_showStatus
+          ~on_result
+          {
+            ShowStatus.request =
+              ShowMessageRequest.
+                {
+                  type_ = MessageType.ErrorMessage;
+                  message =
+                    p.Lost_env.explanation
+                    ^ " Language features such as errors and go-to-def are currently unavailable.";
+                  actions = [{ title = "Restart Hack Server" }];
+                };
+            progress = None;
+            total = None;
+            shortMessage = None;
+          }
+      | _ -> ()
+    end;
+    Lwt.return_unit
+  in
+  let rec loop () : unit Lwt.t =
+    let%lwt () = show_status () in
+    loop ()
+  in
+  loop ()
 
 (************************************************************************)
 (* Message handling                                                     *)

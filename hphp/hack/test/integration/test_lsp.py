@@ -1595,6 +1595,88 @@ class TestLsp(TestCase[LspTestDriver]):
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
+    def test_serverless_ide_overridden_definition(self) -> None:
+        variables = dict(self.prepare_serverless_ide_environment())
+        variables.update(self.setup_php_file("override.php"))
+        self.test_driver.stop_hh_server()
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("serverless_ide_overridden_definition"),
+                use_serverless_ide=True,
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .request(
+                comment="find overridden method from trait",
+                method="textDocument/definition",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 13, "character": 5},
+                },
+                result=[
+                    {
+                        "uri": "file://${root_path}/override.php",
+                        "range": {
+                            "start": {"line": 7, "character": 18},
+                            "end": {"line": 7, "character": 21},
+                        },
+                        "title": "MyTrait::foo",
+                    }
+                ],
+                powered_by="serverless_ide",
+            )
+            .request(
+                comment="find overridden static method",
+                method="textDocument/definition",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 26, "character": 5},
+                },
+                result=[
+                    {
+                        "uri": "file://${root_path}/override.php",
+                        "range": {
+                            "start": {"line": 23, "character": 25},
+                            "end": {"line": 23, "character": 28},
+                        },
+                        "title": "C2::bar",
+                    }
+                ],
+                powered_by="serverless_ide",
+            )
+            .request(
+                comment="find overridden interface method",
+                method="textDocument/definition",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 35, "character": 5},
+                },
+                result=[
+                    {
+                        "uri": "file://${root_path}/override.php",
+                        "range": {
+                            "start": {"line": 32, "character": 18},
+                            "end": {"line": 32, "character": 22},
+                        },
+                        "title": "I1::quux",
+                    }
+                ],
+                powered_by="serverless_ide",
+            )
+            .request(method="shutdown", params={}, result=None)
+        )
+        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+
     def test_serverless_ide_document_symbol(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("definition.php"))

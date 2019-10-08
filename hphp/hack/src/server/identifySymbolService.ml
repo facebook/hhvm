@@ -25,9 +25,15 @@ let is_target target_line target_char { pos; _ } =
 let process_class_id ?(is_declaration = false) (pos, cid) =
   Result_set.singleton { name = cid; type_ = Class; is_declaration; pos }
 
-let process_attribute (pos, cid) =
-  Result_set.singleton
-    { name = cid; type_ = Attribute; is_declaration = false; pos }
+let process_attribute (pos, name) class_name method_ =
+  let type_ =
+    match (name, class_name, method_) with
+    | (name, Some (_, class_name), Some ((_, method_name), is_static))
+      when name = Naming_special_names.UserAttributes.uaOverride ->
+      Attribute (Some { class_name; method_name; is_static })
+    | _ -> Attribute None
+  in
+  Result_set.singleton { name; type_; is_declaration = false; pos }
 
 let clean_member_name name = String_utils.lstrip name "$"
 
@@ -167,6 +173,8 @@ let remove_apostrophes_from_function_eval (mid : Ast_defs.pstring) :
   (new_pos, member_name)
 
 let visitor =
+  let class_name = ref None in
+  let method_name = ref None in
   object (self)
     inherit [_] Tast_visitor.reduce as super
 
@@ -273,6 +281,7 @@ let visitor =
 
     method! on_class_ env class_ =
       Aast.(
+        class_name := Some class_.c_name;
         let acc = process_class class_ in
         (*
       Enums implicitly extend BuiltinEnum. However, BuiltinEnums also extend
@@ -292,7 +301,9 @@ let visitor =
             { class_ with c_extends = [] }
           | _ -> class_
         in
-        self#plus acc (super#on_class_ env class_))
+        let acc = self#plus acc (super#on_class_ env class_) in
+        class_name := None;
+        acc)
 
     method! on_fun_ env fun_ =
       let acc = process_fun_id ~is_declaration:true fun_.Tast.f_name in
@@ -325,8 +336,14 @@ let visitor =
       + process_member (snd cid) mid ~is_method:false ~is_const:true
       + super#on_SFclass_const env cid mid
 
+    method! on_method_ env m =
+      method_name := Some (m.Aast.m_name, m.Aast.m_static);
+      let acc = super#on_method_ env m in
+      method_name := None;
+      acc
+
     method! on_user_attribute env ua =
-      let acc = process_attribute ua.Aast.ua_name in
+      let acc = process_attribute ua.Aast.ua_name !class_name !method_name in
       self#plus acc (super#on_user_attribute env ua)
   end
 

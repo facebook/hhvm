@@ -116,6 +116,28 @@ let summarize_class_typedef x =
 
 let go ast result =
   match result.SymbolOccurrence.type_ with
+  | SymbolOccurrence.Attribute
+      (Some { SymbolOccurrence.class_name; method_name; is_static }) ->
+    Decl_provider.get_class class_name
+    >>= fun cls ->
+    let matching_method =
+      Cls.all_ancestor_names cls
+      |> Sequence.filter_map ~f:Decl_provider.get_class
+      (* Find all inherited methods with the same name. *)
+      |> Sequence.filter_map ~f:(fun cls ->
+             ( if is_static then
+               Cls.get_smethod
+             else
+               Cls.get_method )
+               cls
+               method_name)
+      (* Take the earliest method in the linearization, if any. *)
+      |> Sequence.to_list_rev
+      |> List.hd
+    in
+    (match matching_method with
+    | Some meth -> get_member_def (Method, meth.ce_origin, method_name)
+    | None -> None)
   | SymbolOccurrence.Method (c_name, method_name) ->
     (* Classes on typing heap have all the methods from inheritance hierarchy
      * folded together, so we will correctly identify them even if method_name
@@ -177,7 +199,7 @@ let go ast result =
           result.SymbolOccurrence.name
           result.SymbolOccurrence.pos
     end
-  | SymbolOccurrence.Attribute -> None
+  | SymbolOccurrence.Attribute _ -> None
 
 let get_definition_cst_node_from_pos kind source_text pos =
   try

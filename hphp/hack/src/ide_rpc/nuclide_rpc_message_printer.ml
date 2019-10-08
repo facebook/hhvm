@@ -54,7 +54,7 @@ let identify_symbol_response_to_json results =
       | ClassConst _ -> "class_const"
       | Typeconst _ -> "typeconst"
       | GConst -> "global_const"
-      | Attribute -> "attribute")
+      | Attribute _ -> "attribute")
   in
   let symbol_to_json (occurrence, definition) =
     let (definition_pos, definition_span, definition_id) =

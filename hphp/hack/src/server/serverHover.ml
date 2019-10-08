@@ -351,7 +351,7 @@ let make_hover_info env_and_ty file (occurrence, def_opt) =
       in
       let addendum =
         match occurrence with
-        | { name; type_ = Attribute; _ } -> make_hover_attr_docs name
+        | { name; type_ = Attribute _; _ } -> make_hover_attr_docs name
         | _ ->
           List.concat
             [

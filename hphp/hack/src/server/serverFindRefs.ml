@@ -173,7 +173,7 @@ let get_action symbol (filename, file_content, line, char) =
   | SymbolOccurrence.GConst -> Some (GConst name)
   | SymbolOccurrence.LocalVar ->
     Some (LocalVar { filename; file_content; line; char })
-  | SymbolOccurrence.Attribute -> None
+  | SymbolOccurrence.Attribute _ -> None
 
 let go_from_file (labelled_file, line, char) env =
   let (filename, content) =

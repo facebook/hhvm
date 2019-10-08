@@ -152,11 +152,12 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         go find_refs_action include_defs genv env |> map_env ~f:to_absolute))
   | IDE_FIND_REFS (labelled_file, line, char, include_defs) ->
     Done_or_retry.(
-      ServerFindRefs.(
-        (match go_from_file (labelled_file, line, char) env with
-        | None -> (env, Done None)
-        | Some (name, action) ->
-          map_env ~f:(to_ide name) (go action include_defs genv env))))
+      (match ServerFindRefs.go_from_file (labelled_file, line, char) env with
+      | None -> (env, Done None)
+      | Some (name, action) ->
+        map_env
+          ~f:(ServerFindRefs.to_ide name)
+          (ServerFindRefs.go action include_defs genv env)))
   | IDE_GO_TO_IMPL (labelled_file, line, char) ->
     Done_or_retry.(
       (match ServerFindRefs.go_from_file (labelled_file, line, char) env with

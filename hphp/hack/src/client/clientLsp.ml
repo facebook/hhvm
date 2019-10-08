@@ -1850,57 +1850,51 @@ let do_findReferences
     (conn : server_conn)
     (ref_unblocked_time : float ref)
     (params : FindReferences.params) : FindReferences.result Lwt.t =
-  FindReferences.(
-    TextDocumentPositionParams.(
-      let { Ide_api_types.line; column } =
-        lsp_position_to_ide params.loc.position
-      in
-      let filename =
-        Lsp_helpers.lsp_textDocumentIdentifier_to_filename
-          params.loc.textDocument
-      in
-      let include_defs = params.context.includeDeclaration in
-      let labelled_file = ServerCommandTypes.LabelledFileName filename in
-      let command =
-        ServerCommandTypes.IDE_FIND_REFS
-          (labelled_file, line, column, include_defs)
-      in
-      let%lwt results = rpc_with_retry conn ref_unblocked_time command in
-      (* TODO: respect params.context.include_declaration *)
-      match results with
-      | None -> Lwt.return []
-      | Some (_name, positions) ->
-        Lwt.return
-          (List.map
-             positions
-             ~f:(hack_pos_to_lsp_location ~default_path:filename))))
+  let { Ide_api_types.line; column } =
+    lsp_position_to_ide
+      params.FindReferences.loc.TextDocumentPositionParams.position
+  in
+  let filename =
+    Lsp_helpers.lsp_textDocumentIdentifier_to_filename
+      params.FindReferences.loc.TextDocumentPositionParams.textDocument
+  in
+  let include_defs =
+    params.FindReferences.context.FindReferences.includeDeclaration
+  in
+  let labelled_file = ServerCommandTypes.LabelledFileName filename in
+  let command =
+    ServerCommandTypes.IDE_FIND_REFS (labelled_file, line, column, include_defs)
+  in
+  let%lwt results = rpc_with_retry conn ref_unblocked_time command in
+  (* TODO: respect params.context.include_declaration *)
+  match results with
+  | None -> Lwt.return []
+  | Some (_name, positions) ->
+    Lwt.return
+      (List.map positions ~f:(hack_pos_to_lsp_location ~default_path:filename))
 
-let do_findImplementations
+let do_goToImplementation
     (conn : server_conn)
     (ref_unblocked_time : float ref)
     (params : GoToImplementation.params) : GoToImplementation.result Lwt.t =
-  GoToImplementation.(
-    TextDocumentPositionParams.(
-      let { Ide_api_types.line; column } =
-        lsp_position_to_ide params.loc.position
-      in
-      let filename =
-        Lsp_helpers.lsp_textDocumentIdentifier_to_filename
-          params.loc.textDocument
-      in
-      let labelled_file = ServerCommandTypes.LabelledFileName filename in
-      let command =
-        ServerCommandTypes.IDE_GO_TO_IMPL (labelled_file, line, column)
-      in
-      let%lwt results = rpc_with_retry conn ref_unblocked_time command in
-      (* TODO: respect params.context.include_declaration *)
-      match results with
-      | None -> Lwt.return []
-      | Some (_name, positions) ->
-        Lwt.return
-          (List.map
-             positions
-             ~f:(hack_pos_to_lsp_location ~default_path:filename))))
+  let { Ide_api_types.line; column } =
+    lsp_position_to_ide
+      params.GoToImplementation.loc.TextDocumentPositionParams.position
+  in
+  let filename =
+    Lsp_helpers.lsp_textDocumentIdentifier_to_filename
+      params.GoToImplementation.loc.TextDocumentPositionParams.textDocument
+  in
+  let labelled_file = ServerCommandTypes.LabelledFileName filename in
+  let command =
+    ServerCommandTypes.IDE_GO_TO_IMPL (labelled_file, line, column)
+  in
+  let%lwt results = rpc_with_retry conn ref_unblocked_time command in
+  match results with
+  | None -> Lwt.return []
+  | Some (_name, positions) ->
+    Lwt.return
+      (List.map positions ~f:(hack_pos_to_lsp_location ~default_path:filename))
 
 (* Shared function for hack range conversion *)
 let hack_range_to_lsp_highlight range =
@@ -3527,8 +3521,8 @@ let handle_event
           when c.method_ = "textDocument/implementation" ->
           let%lwt () = cancel_if_stale client c long_timeout in
           let%lwt result =
-            parse_findImplementations c.params
-            |> do_findImplementations menv.conn ref_unblocked_time
+            parse_goToImplementation c.params
+            |> do_goToImplementation menv.conn ref_unblocked_time
           in
           result |> print_Locations |> respond_jsonrpc ~powered_by:Hh_server c;
           Lwt.return_unit

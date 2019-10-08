@@ -98,3 +98,21 @@ impl Error for FromError {
         }
     }
 }
+
+#[derive(Debug, PartialEq)]
+pub enum SlabIntegrityError {
+    InvalidBasePointer(usize),
+    InvalidBlockSize(usize),
+    InvalidPointer(usize),
+    InvalidRootValueOffset(usize),
+    NotInitialized,
+    TooSmall(usize),
+}
+
+impl fmt::Display for SlabIntegrityError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+impl Error for SlabIntegrityError {}

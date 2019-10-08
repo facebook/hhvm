@@ -14,7 +14,7 @@ pub mod from;
 
 pub use arena::Arena;
 pub use block::{Block, BlockBuilder};
-pub use error::FromError;
+pub use error::{FromError, SlabIntegrityError};
 pub use slab::OwnedSlab;
 pub use value::{OpaqueValue, Value};
 

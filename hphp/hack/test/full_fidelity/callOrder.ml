@@ -30,7 +30,7 @@ let verify ?(env = Env.default) text =
     failwith
     @@ Printf.sprintf
          "%s\n
-Argument lists are **PHISICALLY** different in \"%s\" smart constructor call.
+Argument lists are **PHYSICALLY** different in \"%s\" smart constructor call.
 This means that there are two structurally equal (n1 = n2) but still
 different (n1 != n2) nodes and you are passing one instead of the other.\n
 STACK:\n%s\n

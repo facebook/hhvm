@@ -62,13 +62,25 @@ val parse_text :
   Full_fidelity_source_text.t ->
   FileInfo.mode option * PositionedSyntaxTree.t
 
-val from_text : env -> Full_fidelity_source_text.t -> result
-
 val from_text_rust : env -> Full_fidelity_source_text.t -> rust_result
 
 val from_file : env -> result
 
 val from_text_with_legacy : env -> string -> Parser_return.t
+
+val from_text_to_custom_aast :
+  env ->
+  Full_fidelity_source_text.t ->
+  (Ast_defs.pos -> 'ex) ->
+  'fb ->
+  'en ->
+  'hi ->
+  ('ex, 'fb, 'en, 'hi) Aast.program * bool
+
+(* Only for hh_single_compile at the moment. *)
+val from_text_to_empty_tast :
+  env -> Full_fidelity_source_text.t -> Tast.program * bool
+
 (**
  * Here only for backward compatibility. Consider these deprecated.
  *)

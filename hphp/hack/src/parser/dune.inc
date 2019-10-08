@@ -107,6 +107,7 @@
     partial_provider
     rust_lowerer_ffi
     rust_parser_ffi
+    typing_ast
     utils_lint
     utils_php_escape))
 

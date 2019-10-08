@@ -296,8 +296,8 @@ let parse_text compiler_options popt fn text =
       fn
   in
   let source_text = SourceText.make fn text in
-  let { Full_fidelity_ast.ast; Full_fidelity_ast.is_hh_file; _ } =
-    Full_fidelity_ast.from_text env source_text
+  let (ast, is_hh_file) =
+    Full_fidelity_ast.from_text_to_empty_tast env source_text
   in
   let () = write_stats_if_enabled ~compiler_options in
   (ast, is_hh_file)
@@ -344,58 +344,19 @@ let log_fail compiler_options filename exc ~stack =
     ~mode:(mode_to_string compiler_options.mode)
     ~exc:(Caml.Printexc.to_string exc ^ "\n" ^ stack)
 
-(* Maps an Ast to a Tast where every type is Tany
- * Used to produce a Tast for unsafe code without inferring types for it. *)
-let ast_to_tast_tany =
-  let tany = (Typing_reason.Rnone, Typing_defs.make_tany ()) in
-  let get_expr_annotation (p : Ast_defs.pos) = (p, tany) in
-  Ast_to_aast.convert_program
-    get_expr_annotation
-    Tast.HasUnsafeBlocks
-    Tast.dummy_saved_env
-    tany
+let handle_conversion_errors errors =
+  List.filter errors ~f:(fun error ->
+      match Errors.get_code error with
+      (* Ignore these errors to match legacy AST behavior *)
+      | 2086
+      (* Naming.MethodNeedsVisibility *)
 
-(**
- * Converts a legacy ast (ast.ml) into a typed ast (tast.ml / aast.ml)
- * so that codegen and typing both operate on the same ast structure.
- * There are some errors that are not valid hack but are still expected
- * to produce valid bytecode. These errors are caught during the conversion
- * so as to match legacy behavior.
- *)
-let convert_to_tast ast =
-  let (errors, tast) =
-    let convert () =
-      let ast = ast_to_tast_tany ast in
-      if Hhbc_options.enable_pocket_universes !Hhbc_options.compiler_options
-      then
-        Pocket_universes.translate ast
-      else
-        ast
-    in
-    Errors.do_ convert
-  in
-  let handle_error _path error acc =
-    match Errors.get_code error with
-    (* Ignore these errors to match legacy AST behavior *)
-    | 2086
-    (* Naming.MethodNeedsVisibility *)
-    
-    | 2102
-    (* Naming.UnsupportedTraitUseAs *)
-    
-    | 2103 (* Naming.UnsupportedInsteadOf *) ->
-      acc
-    | _ (* Emit fatal parse otherwise *) ->
-      if acc = None then
-        let msg = snd (List.hd_exn (Errors.to_list error)) in
-        Some (Errors.get_pos error, msg)
-      else
-        acc
-  in
-  let result = Errors.fold_errors ~init:None ~f:handle_error errors in
-  match result with
-  | Some error -> Error error
-  | None -> Ok tast
+      | 2102
+      (* Naming.UnsupportedTraitUseAs *)
+
+      | 2103 (* Naming.UnsupportedInsteadOf *) ->
+        false
+      | _ (* Emit fatal parse otherwise *) -> true)
 
 let do_compile filename compiler_options popt fail_or_ast debug_time =
   let t = Unix.gettimeofday () in
@@ -410,24 +371,26 @@ let do_compile filename compiler_options popt fail_or_ast debug_time =
       in
       let s = SyntaxError.message e in
       Emit_program.emit_fatal_program ~ignore_message:false error_t pos s
-    | `ParseResult (errors, (ast, is_hh_file)) ->
-      List.iter (Errors.get_error_list errors) (fun e ->
+    | `ParseResult (errors, (tast, is_hh_file)) ->
+      let error_list = Errors.get_error_list errors in
+      let error_list = handle_conversion_errors error_list in
+      List.iter error_list (fun e ->
           P.eprintf "%s\n%!" (Errors.to_string (Errors.to_absolute e)));
-      if Errors.is_empty errors then
-        match convert_to_tast ast with
-        | Ok tast ->
-          Emit_program.from_ast
-            ~is_hh_file
-            ~is_evaled:(is_file_path_for_evaled_code filename)
-            ~for_debugger_eval:compiler_options.for_debugger_eval
-            ~popt
+      if List.is_empty error_list then
+        let tast =
+          if
+            Hhbc_options.enable_pocket_universes !Hhbc_options.compiler_options
+          then
+            Pocket_universes.translate tast
+          else
             tast
-        | Error (pos, msg) ->
-          Emit_program.emit_fatal_program
-            ~ignore_message:false
-            Hhbc_ast.FatalOp.Parse
-            pos
-            msg
+        in
+        Emit_program.from_ast
+          ~is_hh_file
+          ~is_evaled:(is_file_path_for_evaled_code filename)
+          ~for_debugger_eval:compiler_options.for_debugger_eval
+          ~popt
+          tast
       else
         Emit_program.emit_fatal_program
           ~ignore_message:true

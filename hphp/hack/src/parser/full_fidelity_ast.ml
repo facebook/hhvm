@@ -1966,7 +1966,7 @@ if there already is one, since that one will likely be better than this one. *)
             | (_, Some TK.HexadecimalLiteral)
             (* We allow underscores while lexing the integer literals. This gets rid of them before
              * the literal is created. *)
-            
+
             | (_, Some TK.BinaryLiteral) ->
               Int (Str.global_replace underscore "" s)
             | (_, Some TK.FloatingLiteral) -> Float s
@@ -3929,7 +3929,7 @@ if there already is one, since that one will likely be better than this one. *)
     let rec aux env acc = function
       | []
       (* EOF happens only as the last token in the list. *)
-      
+
       | [{ syntax = EndOfFile _; _ }] ->
         List.concat (List.rev acc)
       (* HaltCompiler stops processing the list in PHP but can be disabled in Hack *)
@@ -4474,6 +4474,33 @@ let from_text_rust (env : env) (source_text : SourceText.t) : rust_result =
 let from_file (env : env) : result =
   let source_text = SourceText.from_file env.file in
   from_text env source_text
+
+(**
+ * Converts a legacy ast (ast.ml) into a typed ast (tast.ml / aast.ml)
+ * so that codegen and typing both operate on the same ast structure.
+ *
+ * There are some errors that are not valid hack but are still expected
+ * to produce valid bytecode. hh_single_compile is expected to catch
+ * these errors.
+ *)
+let from_text_to_custom_aast env source_text to_ex fb en hi =
+  let legacy_ast_result = from_text env source_text in
+  let tast =
+    Ast_to_aast.convert_program to_ex fb en hi legacy_ast_result.ast
+  in
+  let is_hh_file = legacy_ast_result.is_hh_file in
+  (tast, is_hh_file)
+
+let from_text_to_empty_tast env source_text =
+  let tany = (Typing_reason.Rnone, Typing_defs.make_tany ()) in
+  let get_expr_annotation (p : Ast_defs.pos) = (p, tany) in
+  from_text_to_custom_aast
+    env
+    source_text
+    get_expr_annotation
+    Tast.HasUnsafeBlocks
+    Tast.dummy_saved_env
+    tany
 
 (*****************************************************************************(
  * Backward compatibility matter (should be short-lived)

@@ -188,7 +188,6 @@
     errors
     naming_attributes
     nast
-    parser
     typing_defs
     typechecker_options)
   (preprocess (pps ppx_deriving.std)))

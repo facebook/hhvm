@@ -57,9 +57,11 @@ let parse_file_input
     let source =
       ServerCommandTypesUtils.source_tree_of_file_input file_input
     in
-    Full_fidelity_ast.from_text parser_env source
+    Full_fidelity_ast.from_text_with_legacy
+      parser_env
+      source.Full_fidelity_source_text.text
   in
-  let ast = Ast_to_nast.convert result.Full_fidelity_ast.ast in
+  let ast = result.Parser_return.ast in
   let ast =
     if
       Relative_path.prefix file_name = Relative_path.Hhi

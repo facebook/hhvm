@@ -132,7 +132,7 @@ function bzread(resource $bz, int $length = 1024): mixed;
  *                       (uncompressed) bytes have been written or the end of
  *                       data is reached, whichever comes first.
  *
- * @return mized - Returns the number of bytes written, or FALSE on error.
+ * @return mixed - Returns the number of bytes written, or FALSE on error.
  */
 <<__Native>>
 function bzwrite(resource $bz, string $data, int $length = 0): mixed;

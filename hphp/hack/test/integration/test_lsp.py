@@ -1879,7 +1879,7 @@ class TestLsp(TestCase[LspTestDriver]):
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def initialize_spec(
-        self, spec: LspTestSpec, use_serverless_ide: bool
+        self, spec: LspTestSpec, use_serverless_ide: bool, supports_status: bool = False
     ) -> LspTestSpec:
         if use_serverless_ide:
             initialization_options = {
@@ -1888,13 +1888,17 @@ class TestLsp(TestCase[LspTestDriver]):
         else:
             initialization_options = {}
 
+        window_capabilities = {}
+        if supports_status:
+            window_capabilities["status"] = {"dynamicRegistration": False}
+
         spec = spec.ignore_notifications(method="telemetry/event").request(
             method="initialize",
             params={
                 "initializationOptions": initialization_options,
                 "processId": None,
                 "rootPath": "${root_path}",
-                "capabilities": {},
+                "capabilities": {"window": window_capabilities},
             },
             result={
                 "capabilities": {
@@ -3657,3 +3661,55 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
             .request(comment="Shutdown", method="shutdown", params={}, result=None)
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+
+    def test_status_stopped(self) -> None:
+        variables = dict(self.prepare_serverless_ide_environment())
+        variables.update(self.setup_php_file("hover.php"))
+        self.test_driver.stop_hh_server()
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("status_stopped"),
+                use_serverless_ide=False,
+                supports_status=True,
+            )
+            .wait_for_server_request(
+                method="window/showStatus",
+                params={
+                    "message": "hh_server isn't running. Not sure why. "
+                    "Here at FB we leave it running "
+                    "persistently. Try the 'Restart' button "
+                    "below. If that doesn't work, try `arc "
+                    "fix`. Language features such as errors "
+                    "and go-to-def are currently unavailable.",
+                    "actions": [{"title": "Restart Hack Server"}],
+                    "type": 1,
+                },
+                result=None,
+            )
+            .request(method="shutdown", params={}, result=None)
+        )
+        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=False)
+
+    def test_status_running(self) -> None:
+        variables = dict(self.prepare_serverless_ide_environment())
+        variables.update(self.setup_php_file("hover.php"))
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("status_running"),
+                use_serverless_ide=False,
+                supports_status=True,
+            )
+            .wait_for_server_request(
+                method="window/showStatus",
+                params={
+                    "actions": [],
+                    "message": "hh_server is initialized and running correctly.",
+                    "type": 3,
+                },
+                result=None,
+            )
+            .request(method="shutdown", params={}, result=None)
+        )
+        self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)

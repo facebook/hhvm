@@ -86,13 +86,7 @@ module Main_env = struct
     uris_with_diagnostics: SSet.t;
     uris_with_unsaved_changes: SSet.t;
     (* see comment in get_uris_with_unsaved_changes *)
-    status: status_params;
-  }
-
-  and status_params = {
-    message: string;
-    shortMessage: string option;
-    type_: MessageType.t;
+    status: ShowStatus.params;
   }
 end
 
@@ -958,9 +952,9 @@ let state_to_rage (state : state) : string =
           "uris_with_unsaved_changes";
           menv.uris_with_unsaved_changes |> SSet.cardinal |> string_of_int;
           "status.message";
-          menv.status.message;
+          menv.status.ShowStatus.request.ShowMessageRequest.message;
           "status.shortMessage";
-          Option.value menv.status.shortMessage ~default:"";
+          Option.value menv.status.ShowStatus.shortMessage ~default:"";
         ]
     | In_init ienv ->
       In_init_env.
@@ -2199,8 +2193,20 @@ let do_server_busy (state : state) (status : ServerCommandTypes.busy_status) :
             "hh_server is initialized and running correctly." )
       in
       match state with
-      | Main_loop menv ->
-        Main_loop { menv with status = { type_; shortMessage; message } }
+      | Main_loop ({ status; _ } as menv) ->
+        let status =
+          {
+            status with
+            ShowStatus.request =
+              {
+                status.ShowStatus.request with
+                ShowMessageRequest.type_;
+                message;
+              };
+            shortMessage;
+          }
+        in
+        Main_loop { menv with status }
       | _ -> state))
 
 (* do_diagnostics: sends notifications for all reported diagnostics; also     *)
@@ -2295,25 +2301,29 @@ let report_connect_progress (ienv : In_init_env.t) : unit =
 let report_connect_end (ienv : In_init_env.t) : state =
   Hh_logger.log "report_connect_end";
   In_init_env.(
-    Main_env.(
-      let _state = dismiss_ui (In_init ienv) in
-      let menv =
-        {
-          Main_env.conn = ienv.In_init_env.conn;
-          needs_idle = true;
-          editor_open_files = ienv.editor_open_files;
-          uris_with_diagnostics = SSet.empty;
-          uris_with_unsaved_changes =
-            ienv.In_init_env.uris_with_unsaved_changes;
-          status =
-            {
-              type_ = MessageType.InfoMessage;
-              message = "hh_server is initialized and running correctly.";
-              shortMessage = None;
-            };
-        }
-      in
-      Main_loop menv))
+    let _state = dismiss_ui (In_init ienv) in
+    let menv =
+      {
+        Main_env.conn = ienv.In_init_env.conn;
+        needs_idle = true;
+        editor_open_files = ienv.editor_open_files;
+        uris_with_diagnostics = SSet.empty;
+        uris_with_unsaved_changes = ienv.In_init_env.uris_with_unsaved_changes;
+        status =
+          {
+            ShowStatus.request =
+              {
+                ShowMessageRequest.type_ = MessageType.InfoMessage;
+                message = "hh_server is initialized and running correctly.";
+                actions = [];
+              };
+            progress = None;
+            total = None;
+            shortMessage = None;
+          };
+      }
+    in
+    Main_loop menv)
 
 (* After the server has sent 'hello', it means the persistent connection is   *)
 (* ready, so we can send our backlog of file-edits to the server.             *)
@@ -2970,23 +2980,13 @@ let tick_showStatus ~(state : state ref) : unit Lwt.t =
     let%lwt () = Lwt_unix.sleep 1.0 in
     begin
       match !state with
-      | Main_loop menv ->
-        request_showStatus
-          Main_env.
-            {
-              ShowStatus.request =
-                {
-                  ShowMessageRequest.type_ = menv.status.type_;
-                  message = menv.status.message;
-                  actions = [];
-                };
-              progress = None;
-              total = None;
-              shortMessage =
-                (match menv.status.shortMessage with
-                | Some msg -> Some (msg ^ " " ^ status_tick ())
-                | None -> None);
-            }
+      | Main_loop { Main_env.status; _ } ->
+        let shortMessage =
+          match status.ShowStatus.shortMessage with
+          | Some msg -> Some (msg ^ " " ^ status_tick ())
+          | None -> None
+        in
+        request_showStatus { status with ShowStatus.shortMessage }
       | Lost_server { Lost_env.p; _ } ->
         let restart_command = "Restart Hack Server" in
         let on_result ~result state =

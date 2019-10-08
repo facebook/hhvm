@@ -826,6 +826,7 @@ std::vector<std::string> RuntimeOption::Extensions;
 std::vector<std::string> RuntimeOption::DynamicExtensions;
 std::string RuntimeOption::DynamicExtensionPath = ".";
 
+int RuntimeOption::CheckIntOverflow = 0;
 HackStrictOption
   RuntimeOption::StrictArrayFillKeys = HackStrictOption::OFF;
 
@@ -1959,6 +1960,8 @@ void RuntimeOption::Load(
   }
   {
     // Hack Language
+    Config::Bind(CheckIntOverflow, ini, config,
+                 "Hack.Lang.CheckIntOverflow", 0);
     Config::Bind(StrictArrayFillKeys, ini, config,
                  "Hack.Lang.StrictArrayFillKeys", HackStrictOption::ON);
 

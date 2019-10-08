@@ -848,6 +848,7 @@ std::string mangleUnitSha1(const std::string& fileSha1,
     + RuntimeOption::EvalHackCompilerCommand + '\0'
     + RuntimeOption::EvalHackCompilerArgs + '\0'
     + (RuntimeOption::RepoDebugInfo ? '1' : '0')
+    + std::to_string(RuntimeOption::CheckIntOverflow)
     + (RuntimeOption::DisallowExecutionOperator ? '1' : '0')
     + (RuntimeOption::DisableNontoplevelDeclarations ? '1' : '0')
     + (RuntimeOption::DisableStaticClosures ? '1' : '0')

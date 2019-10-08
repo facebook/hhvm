@@ -650,22 +650,37 @@ TypedNum cellMul(Cell c1, Cell c2) {
 }
 
 Cell cellAddO(Cell c1, Cell c2) {
-  auto over = [](int64_t a, int64_t b) {
-    return make_dbl(double(a) + double(b));
+  auto over = [=](int64_t a, int64_t b) {
+    if (RuntimeOption::CheckIntOverflow > 1) {
+      SystemLib::throwArithmeticErrorObject(Strings::INTEGER_OVERFLOW);
+    } else if (RuntimeOption::CheckIntOverflow == 1) {
+      raise_warning(Strings::INTEGER_OVERFLOW);
+    }
+    return cellAdd(c1, c2);
   };
   return cellArithO(Add(), add_overflow<int64_t>, over, c1, c2);
 }
 
 TypedNum cellSubO(Cell c1, Cell c2) {
-  auto over = [](int64_t a, int64_t b) {
-    return make_dbl(double(a) - double(b));
+  auto over = [=](int64_t a, int64_t b) {
+    if (RuntimeOption::CheckIntOverflow > 1) {
+      SystemLib::throwArithmeticErrorObject(Strings::INTEGER_OVERFLOW);
+    } else if (RuntimeOption::CheckIntOverflow == 1) {
+      raise_warning(Strings::INTEGER_OVERFLOW);
+    }
+    return cellSub(c1, c2);
   };
   return cellArithO(Sub(), sub_overflow<int64_t>, over, c1, c2);
 }
 
 TypedNum cellMulO(Cell c1, Cell c2) {
-  auto over = [](int64_t a, int64_t b) {
-    return make_dbl(double(a) * double(b));
+  auto over = [=](int64_t a, int64_t b) {
+    if (RuntimeOption::CheckIntOverflow > 1) {
+      SystemLib::throwArithmeticErrorObject(Strings::INTEGER_OVERFLOW);
+    } else if (RuntimeOption::CheckIntOverflow == 1) {
+      raise_warning(Strings::INTEGER_OVERFLOW);
+    }
+    return cellMul(c1, c2);
   };
   return cellArithO(Mul(), mul_overflow<int64_t>, over, c1, c2);
 }

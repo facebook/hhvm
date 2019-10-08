@@ -1,0 +1,25 @@
+Warning: Integer overflow in %s/minus_equal_1.php on line 7
+9223372036854775807 -= -1 = -9223372036854775808
+9223372036854775807 -= 1 = 9223372036854775806
+
+Warning: Integer overflow in %s/minus_equal_1.php on line 7
+'9223372036854775807' -= -1 = -9223372036854775808
+
+Warning: Integer overflow in %s/minus_equal_1.php on line 7
+9223372036854775807 -= '-1' = -9223372036854775808
+
+Warning: Integer overflow in %s/minus_equal_1.php on line 7
+'9223372036854775807' -= '-1' = -9223372036854775808
+
+Warning: Integer overflow in %s/minus_equal_1.php on line 7
+-9223372036854775808 -= 1 = 9223372036854775807
+-9223372036854775808 -= -1 = -9223372036854775807
+
+Warning: Integer overflow in %s/minus_equal_1.php on line 7
+'-9223372036854775808' -= 1 = 9223372036854775807
+
+Warning: Integer overflow in %s/minus_equal_1.php on line 7
+-9223372036854775808 -= '1' = 9223372036854775807
+
+Warning: Integer overflow in %s/minus_equal_1.php on line 7
+'-9223372036854775808' -= '1' = 9223372036854775807

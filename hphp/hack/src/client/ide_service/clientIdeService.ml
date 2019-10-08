@@ -17,8 +17,8 @@ type state =
 type message_wrapper =
   | Message_wrapper : 'a ClientIdeMessage.t -> message_wrapper
       (** Existential type wrapper for `ClientIdeMessage.t`s, so that we can put
-    them in a queue without the typechecker trying to infer a concrete type for
-    `'a` based on its first use. *)
+      them in a queue without the typechecker trying to infer a concrete type for
+      `'a` based on its first use. *)
 
 type message_queue = message_wrapper Lwt_message_queue.t
 
@@ -34,25 +34,25 @@ type t = {
   mutable state: state;
   state_changed_cv: unit Lwt_condition.t;
       (** Used to notify tasks when the state changes, so that they can wait for the
-  IDE service to be initialized. *)
+    IDE service to be initialized. *)
   daemon_handle: (unit, unit) Daemon.handle;
       (** The handle to the daemon process backing the IDE service.
 
-  Note that `(unit, unit)` here refers to the input and output types of the
-  IDE service. However, we don't use the Daemon API's method of
-  producing/consuming these messages and instead do it with Lwt, so these
-  type parameters are not used. *)
+      Note that `(unit, unit)` here refers to the input and output types of the
+      IDE service. However, we don't use the Daemon API's method of
+      producing/consuming these messages and instead do it with Lwt, so these
+      type parameters are not used. *)
   in_fd: Lwt_unix.file_descr;
   out_fd: Lwt_unix.file_descr;
   messages_to_send: message_queue;
       (** The queue of messages that we have yet to send to the daemon. *)
   response_emitter: response_emitter;
       (** The queue of responses that we received from RPC calls to the daemon. We
-  assume that we receive the responses in the same order that we sent their
-  requests. *)
+      assume that we receive the responses in the same order that we sent their
+      requests. *)
   notification_emitter: notification_emitter;
       (** The queue of notifications that the daemon emitted. Notifications can be
-  emitted at any time, not just in response to an RPC call. *)
+      emitted at any time, not just in response to an RPC call. *)
 }
 
 let set_state (t : t) (new_state : state) : unit =

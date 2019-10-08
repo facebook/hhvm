@@ -86,7 +86,7 @@ module Main_env = struct
     uris_with_diagnostics: SSet.t;
     uris_with_unsaved_changes: SSet.t;
     (* see comment in get_uris_with_unsaved_changes *)
-    status: ShowStatus.params;
+    hh_server_status: ShowStatus.params;
   }
 end
 
@@ -951,10 +951,12 @@ let state_to_rage (state : state) : string =
           menv.uris_with_diagnostics |> SSet.cardinal |> string_of_int;
           "uris_with_unsaved_changes";
           menv.uris_with_unsaved_changes |> SSet.cardinal |> string_of_int;
-          "status.message";
-          menv.status.ShowStatus.request.ShowMessageRequest.message;
-          "status.shortMessage";
-          Option.value menv.status.ShowStatus.shortMessage ~default:"";
+          "hh_server_status.message";
+          menv.hh_server_status.ShowStatus.request.ShowMessageRequest.message;
+          "hh_server_status.shortMessage";
+          Option.value
+            menv.hh_server_status.ShowStatus.shortMessage
+            ~default:"";
         ]
     | In_init ienv ->
       In_init_env.
@@ -2193,20 +2195,20 @@ let do_server_busy (state : state) (status : ServerCommandTypes.busy_status) :
             "hh_server is initialized and running correctly." )
       in
       match state with
-      | Main_loop ({ status; _ } as menv) ->
-        let status =
+      | Main_loop ({ hh_server_status; _ } as menv) ->
+        let hh_server_status =
           {
-            status with
+            hh_server_status with
             ShowStatus.request =
               {
-                status.ShowStatus.request with
+                hh_server_status.ShowStatus.request with
                 ShowMessageRequest.type_;
                 message;
               };
             shortMessage;
           }
         in
-        Main_loop { menv with status }
+        Main_loop { menv with hh_server_status }
       | _ -> state))
 
 (* do_diagnostics: sends notifications for all reported diagnostics; also     *)
@@ -2256,7 +2258,124 @@ let do_diagnostics
   (* this is "(uris_with_diagnostics \ uris_without) U uris_with" *)
   SSet.union (SSet.diff uris_with_diagnostics uris_without) uris_with
 
-let report_connect_progress (ienv : In_init_env.t) : unit =
+let get_client_ide_status (ide_service : ClientIdeService.t) :
+    ShowStatus.params =
+  match ClientIdeService.get_status ide_service with
+  | ClientIdeService.Status.Not_started ->
+    {
+      ShowStatus.request =
+        {
+          ShowMessageRequest.type_ = MessageType.ErrorMessage;
+          message = "IDE services: not started.";
+          actions = [];
+        };
+      progress = None;
+      total = None;
+      shortMessage = None;
+    }
+  | ClientIdeService.Status.Initializing ->
+    {
+      ShowStatus.request =
+        {
+          ShowMessageRequest.type_ = MessageType.WarningMessage;
+          message = "IDE services: initializing.";
+          actions = [];
+        };
+      progress = None;
+      total = None;
+      shortMessage = Some "Hack IDE: initializing";
+    }
+  | ClientIdeService.Status.Processing_files
+      { ClientIdeMessage.Processing_files.processed; total } ->
+    {
+      ShowStatus.request =
+        {
+          ShowMessageRequest.type_ = MessageType.InfoMessage;
+          message = "IDE services: processing changes.";
+          actions = [];
+        };
+      progress = Some processed;
+      total = Some total;
+      shortMessage = Some "Hack IDE: processing";
+    }
+  | ClientIdeService.Status.Ready ->
+    {
+      ShowStatus.request =
+        {
+          ShowMessageRequest.type_ = MessageType.InfoMessage;
+          message = "IDE services: ready.";
+          actions = [];
+        };
+      progress = None;
+      total = None;
+      shortMessage = None;
+    }
+  | ClientIdeService.Status.Crashed message ->
+    {
+      ShowStatus.request =
+        {
+          ShowMessageRequest.type_ = MessageType.ErrorMessage;
+          message = "IDE services crashed: " ^ message;
+          actions = [];
+        };
+      progress = None;
+      total = None;
+      shortMessage = Some "Hack IDE: crashed";
+    }
+
+let merge_statuses
+    ~(hh_server_status : ShowStatus.params)
+    ~(client_ide_status : ShowStatus.params) : ShowStatus.params =
+  let add lhs rhs = Option.merge ~f:( + ) lhs rhs in
+  let combine_types _hh_server_type client_ide_type =
+    (* Use the IDE services type as the canonical type. We want to indicate
+    whether the language server is ready to produce IDE services. This might
+    change e.g. if we want to be sure to display some bulk typechecking progress
+    as yellow instead of blue. *)
+    client_ide_type
+  in
+  let combine_short_messages lhs rhs =
+    Option.merge ~f:(fun x y -> x ^ ", " ^ y) lhs rhs
+  in
+  let combine_messages lhs rhs = "* " ^ lhs ^ "\n" ^ "* " ^ rhs in
+  ShowStatus.
+    {
+      request =
+        ShowMessageRequest.
+          {
+            type_ =
+              combine_types
+                hh_server_status.request.type_
+                client_ide_status.request.type_;
+            (* Put IDE status first, since it's generally more important. *)
+            message =
+              combine_messages
+                client_ide_status.request.message
+                hh_server_status.request.message;
+            actions =
+              hh_server_status.request.actions
+              @ client_ide_status.request.actions;
+          };
+      progress = add hh_server_status.progress client_ide_status.progress;
+      total = add hh_server_status.total client_ide_status.total;
+      shortMessage =
+        combine_short_messages
+          hh_server_status.shortMessage
+          client_ide_status.shortMessage;
+    }
+
+let merge_with_client_ide_status
+    (env : env) (ide_service : ClientIdeService.t) (status : ShowStatus.params)
+    : ShowStatus.params =
+  if env.use_serverless_ide then
+    let client_ide_status = get_client_ide_status ide_service in
+    merge_statuses ~hh_server_status:status ~client_ide_status
+  else
+    status
+
+let report_connect_progress
+    (env : env) (ienv : In_init_env.t) (ide_service : ClientIdeService.t) :
+    unit =
   In_init_env.(
     ShowStatus.(
       ShowMessageRequest.(
@@ -2288,7 +2407,7 @@ let report_connect_progress (ienv : In_init_env.t) : unit =
               progress
               delay_in_secs
         in
-        request_showStatus
+        let hh_server_status =
           {
             request =
               { type_ = MessageType.WarningMessage; message; actions = [] };
@@ -2296,7 +2415,10 @@ let report_connect_progress (ienv : In_init_env.t) : unit =
             total = None;
             shortMessage =
               Some (Printf.sprintf "[%s] %s" progress (status_tick ()));
-          })))
+          }
+        in
+        request_showStatus
+          (merge_with_client_ide_status env ide_service hh_server_status))))
 
 let report_connect_end (ienv : In_init_env.t) : state =
   Hh_logger.log "report_connect_end";
@@ -2309,7 +2431,7 @@ let report_connect_end (ienv : In_init_env.t) : state =
         editor_open_files = ienv.editor_open_files;
         uris_with_diagnostics = SSet.empty;
         uris_with_unsaved_changes = ienv.In_init_env.uris_with_unsaved_changes;
-        status =
+        hh_server_status =
           {
             ShowStatus.request =
               {
@@ -2975,18 +3097,24 @@ let cancel_if_stale
   else
     Lwt.return_unit
 
-let tick_showStatus ~(state : state ref) : unit Lwt.t =
+let tick_showStatus
+    (env : env) ~(state : state ref) ~(ide_service : ClientIdeService.t) :
+    unit Lwt.t =
   let show_status () : unit Lwt.t =
     let%lwt () = Lwt_unix.sleep 1.0 in
     begin
       match !state with
-      | Main_loop { Main_env.status; _ } ->
+      | Main_loop { Main_env.hh_server_status; _ } ->
         let shortMessage =
-          match status.ShowStatus.shortMessage with
+          match hh_server_status.ShowStatus.shortMessage with
           | Some msg -> Some (msg ^ " " ^ status_tick ())
           | None -> None
         in
-        request_showStatus { status with ShowStatus.shortMessage }
+        let hh_server_status =
+          { hh_server_status with ShowStatus.shortMessage }
+        in
+        request_showStatus
+          (merge_with_client_ide_status env ide_service hh_server_status)
       | Lost_server { Lost_env.p; _ } ->
         let restart_command = "Restart Hack Server" in
         let on_result ~result state =
@@ -3014,8 +3142,7 @@ let tick_showStatus ~(state : state ref) : unit Lwt.t =
               Lwt.return state
           | _ -> Lwt.return state
         in
-        request_showStatus
-          ~on_result
+        let hh_server_status =
           {
             ShowStatus.request =
               ShowMessageRequest.
@@ -3030,6 +3157,10 @@ let tick_showStatus ~(state : state ref) : unit Lwt.t =
             total = None;
             shortMessage = None;
           }
+        in
+        request_showStatus
+          ~on_result
+          (merge_with_client_ide_status env ide_service hh_server_status)
       | _ -> ()
     end;
     Lwt.return_unit
@@ -3353,7 +3484,7 @@ let handle_event
             in
             let%lwt () =
               if delay_in_secs <= 10 then (
-                report_connect_progress ienv;
+                report_connect_progress env ienv ide_service;
                 Lwt.return_unit
               ) else
                 (* terminate + retry the connection *)
@@ -3932,6 +4063,6 @@ let main (env : env) : Exit_status.t Lwt.t =
     let%lwt () = process_next_event () in
     main_loop ()
   in
-  let%lwt () = Lwt.pick [main_loop (); tick_showStatus state]
+  let%lwt () = Lwt.pick [main_loop (); tick_showStatus env state ide_service]
   and () = run_ide_service env ide_service in
   Lwt.return Exit_status.No_error

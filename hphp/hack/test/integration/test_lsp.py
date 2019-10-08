@@ -274,19 +274,6 @@ class TestLsp(TestCase[LspTestDriver]):
         use_serverless_ide: bool,
     ) -> None:
         if wait_for_server:
-            assert not use_serverless_ide, (
-                "Warning: both `wait_for_server` and `use_serverless_ide` "
-                + "were set to `True` for testing in "
-                + self.run_lsp_test.__name__
-                + ". "
-                + "While this is a possible test case, it hasn't been written yet, "
-                + "so it's more likely that this is a mistake "
-                + "and you're accidentally relying on hh_server to fulfill "
-                + "serverless IDE requests."
-                + "(If you're writing that test, "
-                + "then it's time to remove this assertion.)"
-            )
-
             # wait until hh_server is ready before starting lsp
             self.test_driver.run_check()
         elif use_serverless_ide:
@@ -3713,3 +3700,57 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
             .request(method="shutdown", params={}, result=None)
         )
         self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)
+
+    def test_serverless_ide_status_stopped(self) -> None:
+        variables = dict(self.prepare_serverless_ide_environment())
+        variables.update(self.setup_php_file("hover.php"))
+        self.test_driver.stop_hh_server()
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("serverless_ide_status_stopped"),
+                use_serverless_ide=True,
+                supports_status=True,
+            )
+            .wait_for_server_request(
+                method="window/showStatus",
+                params={
+                    "message": "* IDE services: ready.\n"
+                    "* hh_server isn't running. Not sure why. "
+                    "Here at FB we leave it running "
+                    "persistently. Try the 'Restart' button "
+                    "below. If that doesn't work, try `arc "
+                    "fix`. Language features such as errors "
+                    "and go-to-def are currently unavailable.",
+                    "actions": [{"title": "Restart Hack Server"}],
+                    "type": 3,
+                },
+                result=None,
+            )
+            .request(method="shutdown", params={}, result=None)
+        )
+        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+
+    def test_serverless_ide_status_running(self) -> None:
+        variables = dict(self.prepare_serverless_ide_environment())
+        variables.update(self.setup_php_file("hover.php"))
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("serverless_ide_status_running"),
+                use_serverless_ide=True,
+                supports_status=True,
+            )
+            .wait_for_server_request(
+                method="window/showStatus",
+                params={
+                    "actions": [],
+                    "message": "* IDE services: ready.\n"
+                    "* hh_server is initialized and running correctly.",
+                    "type": 3,
+                },
+                result=None,
+            )
+            .request(method="shutdown", params={}, result=None)
+        )
+        self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=True)

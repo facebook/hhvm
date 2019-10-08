@@ -17,6 +17,20 @@ we need to look up declarations to service an IDE query, we parse and typecheck
 the files containing those declarations on-demand, then answer your IDE query.
 *)
 
+module Status : sig
+  type t =
+    | Not_started
+        (** The IDE services haven't been requested to initialize yet. *)
+    | Initializing
+        (** The IDE services are still initializing (e.g. loading saved-state or
+        building indexes.) *)
+    | Processing_files of ClientIdeMessage.Processing_files.t
+        (** The IDE services are available, but are also in the middle of
+        processing files. *)
+    | Ready  (** The IDE services are available. *)
+    | Crashed of string  (** The IDE services are not available. *)
+end
+
 val make : unit -> t
 (** Create an uninitialized IDE service. All queries made to this service will
 fail immediately, unless otherwise requested in the initialization procedure. *)
@@ -52,3 +66,7 @@ val get_notifications : t -> ClientIdeMessage.notification Lwt_message_queue.t
 (** Get a handle to the stream of notifications sent by the IDE service. These
 notifications may be sent even during RPC requests, and so should be processed
 asynchronously. *)
+
+val get_status : t -> Status.t
+(** Get the status of the IDE services, based on the internal state and any
+notifications that the IDE service process has sent to us. *)

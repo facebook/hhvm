@@ -134,7 +134,17 @@ type _ t =
   | Type_coverage : Type_coverage.request -> Type_coverage.result t
   | Signature_help : Signature_help.request -> Signature_help.result t
 
-type notification = Done_processing
+module Processing_files = struct
+  type t = {
+    processed: int;
+    total: int;
+  }
+end
+
+type notification =
+  | Initializing
+  | Processing_files of Processing_files.t
+  | Done_processing
 
 type message_from_daemon =
   | Notification of notification

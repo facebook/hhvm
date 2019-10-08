@@ -3590,6 +3590,12 @@ let handle_event
         (* any server diagnostics that come after we've shut down *)
         | (_, Server_message { push = ServerCommandTypes.DIAGNOSTIC _; _ }) ->
           Lwt.return_unit
+        | ( _,
+            Client_ide_notification
+              ( ClientIdeMessage.Initializing
+              | ClientIdeMessage.Processing_files _ ) ) ->
+          (* Do nothing; these are handled by `ClientIdeService`. *)
+          Lwt.return_unit
         | (_, Client_ide_notification ClientIdeMessage.Done_processing) ->
           Lsp_helpers.telemetry_log
             to_stdout

@@ -9,10 +9,19 @@
 
 open Core_kernel
 
+module Status = struct
+  type t =
+    | Not_started
+    | Initializing
+    | Processing_files of ClientIdeMessage.Processing_files.t
+    | Ready
+    | Crashed of string
+end
+
 type state =
   | Uninitialized of { wait_for_initialization: bool }
   | Failed_to_initialize of string
-  | Initialized
+  | Initialized of { status: Status.t }
 
 type message_wrapper =
   | Message_wrapper : 'a ClientIdeMessage.t -> message_wrapper
@@ -126,7 +135,7 @@ let rec wait_for_initialization (t : t) : unit Lwt.t =
   | Failed_to_initialize _ ->
     let%lwt () = Lwt_condition.wait t.state_changed_cv in
     wait_for_initialization t
-  | Initialized -> Lwt.return_unit
+  | Initialized _ -> Lwt.return_unit
 
 let initialize_from_saved_state
     (t : t)
@@ -158,7 +167,7 @@ let initialize_from_saved_state
     log
       "Initialized IDE service process (log file at %s)"
       (ServerFiles.client_ide_log root);
-    set_state t Initialized;
+    set_state t (Initialized { status = Status.Ready });
     Lwt.return_ok ()
   | ClientIdeMessage.Notification _ ->
     let error_message =
@@ -172,6 +181,23 @@ let initialize_from_saved_state
     log "Failed to initialize IDE service process: %s" error_message;
     set_state t (Failed_to_initialize error_message);
     Lwt.return_error error_message
+
+let process_status_notification
+    (t : t) (notification : ClientIdeMessage.notification) : unit =
+  match t.state with
+  | Uninitialized _
+  | Failed_to_initialize _ ->
+    ()
+  | Initialized _state ->
+    (match notification with
+    | ClientIdeMessage.Initializing ->
+      set_state t (Initialized { status = Status.Initializing })
+    | ClientIdeMessage.Processing_files processed_files ->
+      set_state
+        t
+        (Initialized { status = Status.Processing_files processed_files })
+    | ClientIdeMessage.Done_processing ->
+      set_state t (Initialized { status = Status.Ready }))
 
 let rec serve (t : t) : unit Lwt.t =
   let send_queued_up_messages ~out_fd messages_to_send : bool Lwt.t =
@@ -191,6 +217,7 @@ let rec serve (t : t) : unit Lwt.t =
     in
     match message with
     | ClientIdeMessage.Notification notification ->
+      process_status_notification t notification;
       Lwt.return (Lwt_message_queue.push notification_emitter notification)
     | ClientIdeMessage.Response response ->
       Lwt.return
@@ -198,7 +225,8 @@ let rec serve (t : t) : unit Lwt.t =
   in
   let%lwt should_continue =
     try%lwt
-      (* We mutate the queues in `t`, which is why we don't return a new `t` here. *)
+      (* We mutate the data in `t`, which is why we don't return a new `t` here.
+      *)
       let%lwt should_continue =
         Lwt.pick
           [
@@ -239,7 +267,7 @@ let destroy (t : t) : unit Lwt.t =
     | Uninitialized _
     | Failed_to_initialize _ ->
       Lwt.return_unit
-    | Initialized ->
+    | Initialized _ ->
       let%lwt () =
         Lwt.pick
           [
@@ -266,7 +294,7 @@ let destroy (t : t) : unit Lwt.t =
 let push_message (t : t) (message : message_wrapper) : unit =
   match t.state with
   | Uninitialized _
-  | Initialized ->
+  | Initialized _ ->
     let _success : bool = Lwt_message_queue.push t.messages_to_send message in
     ()
   | Failed_to_initialize _ ->
@@ -293,10 +321,16 @@ let rpc (t : t) (rpc_message : 'a ClientIdeMessage.t) :
       do_rpc ~message:rpc_message ~messages_to_send ~response_emitter
     in
     Lwt.return result
-  | Initialized ->
+  | Initialized _ ->
     let%lwt result =
       do_rpc ~message:rpc_message ~messages_to_send ~response_emitter
     in
     Lwt.return result
 
 let get_notifications (t : t) : notification_emitter = t.notification_emitter
+
+let get_status (t : t) : Status.t =
+  match t.state with
+  | Uninitialized _ -> Status.Initializing
+  | Failed_to_initialize message -> Status.Crashed message
+  | Initialized { status } -> status

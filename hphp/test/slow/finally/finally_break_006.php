@@ -29,11 +29,13 @@ function blah() {
       echo "middle outer loop\n";
       try {
         try {
+          $continue_after_loop = false;
           foreach ($xs as $x) {
             echo "begin inner loop $x\n";
             if ($x == 22 && $y == 'b') {
               echo "continue 2\n";
-              continue 2;
+              $continue_after_loop = true;
+              break;
             }
             if ($x == 33) {
               echo "break\n";
@@ -41,6 +43,7 @@ function blah() {
             }
             echo "end inner loop $x\n";
           }
+          if ($continue_after_loop) continue;
         } finally {
           echo "inner finally 2\n";
         }

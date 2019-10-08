@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<635208b0d313063bfb1379574193d787>>
+// @generated SignedSource<<69875ba3b3c2b6dde614801e578fc3b8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -156,8 +156,6 @@ pub enum Reactivity {
 
 #[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 pub struct FunType<Ty> {
-    pub pos: pos::Pos,
-    pub deprecated: Option<String>,
     pub is_coroutine: bool,
     pub arity: FunArity<Ty>,
     pub tparams: (Vec<Tparam<Ty>>, FunTparamsKind),
@@ -169,7 +167,6 @@ pub struct FunType<Ty> {
     pub return_disposable: bool,
     pub mutability: Option<ParamMutability>,
     pub returns_mutable: bool,
-    pub decl_errors: Option<errors::Errors>,
     pub returns_void_to_rx: bool,
 }
 
@@ -229,6 +226,16 @@ pub struct ClassElt {
     pub lateinit: bool,
     pub type_: lazy::Lazy<DeclTy>,
     pub origin: String,
+    pub deprecated: Option<String>,
+    pub pos: lazy::Lazy<pos::Pos>,
+}
+
+#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+pub struct FunElt {
+    pub deprecated: Option<String>,
+    pub type_: DeclTy,
+    pub decl_errors: Option<errors::Errors>,
+    pub pos: pos::Pos,
 }
 
 #[derive(Clone, Debug, OcamlRep, Ocamlvalue)]

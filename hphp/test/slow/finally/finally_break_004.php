@@ -25,11 +25,13 @@ function blah() {
     echo "middle outer loop\n";
     try {
       try {
+        $break_outer_loop = false;
         foreach ($xs as $x) {
           echo "begin inner loop $x\n";
           if ($x == 33 && $y == 'e') {
             echo "break 2\n";
-            break 2;
+            $break_outer_loop = true;
+            break;
           }
           if ($x == 33) {
             echo "break\n";
@@ -37,6 +39,7 @@ function blah() {
           }
           echo "end inner loop $x\n";
         }
+        if ($break_outer_loop) break;
       } finally {
         echo "inner finally 2\n";
       }

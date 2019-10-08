@@ -382,10 +382,14 @@ let converter
     | Fallthrough -> Aast.Fallthrough
     | Noop -> Aast.Noop
     | Markup (s, e) -> Aast.Markup (s, optional on_expr e)
-    | Break (Some e) -> Aast.TempBreak (on_expr e)
     | Break None -> Aast.Break
-    | Continue (Some e) -> Aast.TempContinue (on_expr e)
     | Continue None -> Aast.Continue
+    | Break (Some _) ->
+      Errors.break_continue_n_not_supported p;
+      Aast.Break
+    | Continue (Some _) ->
+      Errors.break_continue_n_not_supported p;
+      Aast.Continue
     | Throw e -> Aast.Throw (on_expr e)
     | Return e -> Aast.Return (optional on_expr e)
     | GotoLabel label -> Aast.GotoLabel label

@@ -6,13 +6,15 @@ function blah() {
 
   foreach ($ys as $y) {
     echo "begin outer loop $y\n";
+    $break_outer_loop = false;
     try {
       try {
         foreach ($xs as $x) {
           echo "begin inner loop $x\n";
           if ($x == 22 && $y == 'c') {
             echo "break 2\n";
-            break 2;
+            $break_outer_loop = true;
+            break;
           }
           if ($x == 22) {
             echo "break\n";
@@ -20,6 +22,7 @@ function blah() {
           }
           echo "end inner loop $x\n";
         }
+        if ($break_outer_loop) break;
       } finally {
         echo "inner finally\n";
       }

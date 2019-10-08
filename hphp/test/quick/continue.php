@@ -17,24 +17,4 @@ function bare_break_continue() {
     echo $x;
   }
   echo "\n";
-
-  foreach ($three as $x) {
-    foreach ($four as $y) {
-      if ($y == 3) {
-        continue 2;
-      }
-      echo $y;
-    }
-  }
-  echo "\n";
-
-  foreach ($three as $x) {
-    foreach ($four as $y) {
-      if ($y == 3) {
-        continue 2;
-      }
-      echo $y;
-    }
-  }
-  echo "\n";
 }

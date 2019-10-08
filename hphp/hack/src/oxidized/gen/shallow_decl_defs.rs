@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<48b793f442e2d7cb3f9a69019ac56242>>
+// @generated SignedSource<<59a36667ae33e67691ef17be9e8fb7db>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -78,9 +78,10 @@ pub struct ShallowMethod {
     pub name: aast::Sid,
     pub override_: bool,
     pub reactivity: Option<decl_defs::MethodReactivity>,
-    pub type_: DeclFunType,
+    pub type_: DeclTy,
     pub visibility: aast::Visibility,
     pub fixme_codes: i_set::ISet,
+    pub deprecated: Option<String>,
 }
 
 #[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
@@ -89,7 +90,7 @@ pub struct ShallowMethodRedeclaration {
     pub final_: bool,
     pub static_: bool,
     pub name: aast::Sid,
-    pub type_: DeclFunType,
+    pub type_: DeclTy,
     pub visibility: aast::Visibility,
     pub trait_: aast::Hint,
     pub method: aast::Pstring,

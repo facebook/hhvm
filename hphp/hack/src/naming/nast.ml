@@ -383,15 +383,11 @@ module Visitor_DEPRECATED = struct
 
       method on_break : 'a -> 'a
 
-      method on_temp_break : 'a -> expr -> 'a
-
       method on_case : 'a -> case -> 'a
 
       method on_catch : 'a -> catch -> 'a
 
       method on_continue : 'a -> 'a
-
-      method on_temp_continue : 'a -> expr -> 'a
 
       method on_darray : 'a -> (targ * targ) option -> field list -> 'a
 
@@ -622,11 +618,7 @@ module Visitor_DEPRECATED = struct
     object (this)
       method on_break acc = acc
 
-      method on_temp_break acc e = this#on_expr acc e
-
       method on_continue acc = acc
-
-      method on_temp_continue acc e = this#on_expr acc e
 
       method on_noop acc = acc
 
@@ -756,9 +748,7 @@ module Visitor_DEPRECATED = struct
         function
         | Expr e -> this#on_expr acc e
         | Break -> this#on_break acc
-        | TempBreak e -> this#on_temp_break acc e
         | Continue -> this#on_continue acc
-        | TempContinue e -> this#on_temp_continue acc e
         | Throw e -> this#on_throw acc e
         | Return eopt -> this#on_return acc eopt
         | GotoLabel label -> this#on_goto_label acc label

@@ -48,7 +48,6 @@ and terminal_ nsenv ~in_try st =
   | Aast.Throw _ when not in_try -> raise Exit
   | Aast.Throw _ -> ()
   | Aast.Continue
-  | Aast.TempContinue _
   | Aast.Expr
       ( _,
         ( Aast.Call (_, (_, Aast.Id (_, "assert")), _, [(_, Aast.False)], [])
@@ -85,9 +84,6 @@ and terminal_ nsenv ~in_try st =
     terminal nsenv ~in_try:true b;
     List.iter catch_l (terminal_catch nsenv ~in_try)
   | Aast.Break
-  (* TODO this is terminal sometimes too, except switch, see above. *)
-  
-  | Aast.TempBreak _
   | Aast.Expr _
   | Aast.Markup _
   | Aast.Let _
@@ -268,9 +264,7 @@ let rec stmt (acc : Namespace_env.env * Pos.t SMap.t) st =
   | Aast.Fallthrough
   | Aast.Markup _
   | Aast.Break
-  | Aast.TempBreak _
   | Aast.Continue
-  | Aast.TempContinue _
   | Aast.Throw _ ->
     acc
   | Aast.Do (b, e) ->

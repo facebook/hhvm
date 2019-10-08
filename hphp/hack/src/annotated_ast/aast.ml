@@ -55,11 +55,7 @@ and ('ex, 'fb, 'en, 'hi) stmt_ =
   | Fallthrough
   | Expr of ('ex, 'fb, 'en, 'hi) expr
   | Break
-  (* Temporarily need to support `break int` for codegen but not typecheck *)
-  | TempBreak of ('ex, 'fb, 'en, 'hi) expr
   | Continue
-  (* Temporarily need to support `continue int` for codegen but not typecheck *)
-  | TempContinue of ('ex, 'fb, 'en, 'hi) expr
   | Throw of ('ex, 'fb, 'en, 'hi) expr
   | Return of ('ex, 'fb, 'en, 'hi) expr option
   | GotoLabel of pstring

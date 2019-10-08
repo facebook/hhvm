@@ -23,7 +23,7 @@ for ($i = 1; $i <= 5; ++$i)
         if ((($j * $i) % 2) == 0)
         {
             $j -= 3;
-            continue 1;
+            continue;
         }
         echo ($j * $i)." is odd\n";
         $j -= 5;
@@ -37,9 +37,24 @@ for ($i = 10; $i <= 40; $i +=10)
     switch($i)
     {
         case 10: echo "ten"; break;
-        case 20: echo "twenty"; break 1;
+        case 20: echo "twenty"; break;
         case 30: echo "thirty"; break;
     }
+    echo "\nJust beyond the switch";
+}
+echo "\n----------\n";
+
+for ($i = 10; $i <= 40; $i +=10)
+{
+    echo "\n\$i = $i: ";
+    $break_after_switch = false;
+    switch($i)
+    {
+        case 10: echo "ten"; break;
+        case 20: echo "twenty"; $break_after_switch = true; break;
+        case 30: echo "thirty"; break;
+    }
+    if ($break_after_switch) break;
     echo "\nJust beyond the switch";
 }
 echo "\n----------\n";
@@ -50,7 +65,7 @@ for ($i = 10; $i <= 40; $i +=10)
     switch($i)
     {
         case 10: echo "ten"; break;
-        case 20: echo "twenty"; break 2;
+        case 20: echo "twenty"; continue;
         case 30: echo "thirty"; break;
     }
     echo "\nJust beyond the switch";
@@ -60,25 +75,14 @@ echo "\n----------\n";
 for ($i = 10; $i <= 40; $i +=10)
 {
     echo "\n\$i = $i: ";
+    $continue_after_switch = false;
     switch($i)
     {
         case 10: echo "ten"; break;
-        case 20: echo "twenty"; continue 1;
+        case 20: echo "twenty"; $continue_after_switch = true; continue;
         case 30: echo "thirty"; break;
     }
-    echo "\nJust beyond the switch";
-}
-echo "\n----------\n";
-
-for ($i = 10; $i <= 40; $i +=10)
-{
-    echo "\n\$i = $i: ";
-    switch($i)
-    {
-        case 10: echo "ten"; break;
-        case 20: echo "twenty"; continue 2;
-        case 30: echo "thirty"; break;
-    }
+    if ($continue_after_switch) continue;
     echo "\nJust beyond the switch";
 }
 echo "\n----------\n";

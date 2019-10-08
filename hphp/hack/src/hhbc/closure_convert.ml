@@ -1477,9 +1477,7 @@ and convert_stmt (env : env) (st : state) (p, stmt_) : _ * stmt =
     | Fallthrough
     | Noop
     | Break
-    | TempBreak _
     | Continue
-    | TempContinue _
     | Markup _ ->
       (st, stmt_)
   in

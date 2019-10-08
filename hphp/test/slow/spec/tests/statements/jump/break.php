@@ -2,14 +2,16 @@
 
 function findValue($table, $v)  // where $table is 2x3 array
 {
-        for ($row = 0; $row <= 1; ++$row)
+        $valid = true;
+        for ($row = 0; $valid && $row <= 1; ++$row)
         {
                 for ($colm = 0; $colm <= 2; ++$colm)
                 {
                         if ($table[$row][$colm] == $v)
                         {
                                 echo "$v was found at row $row, column $colm\n";
-                                break 2; // yes, I know it goes to the wrong place
+                                $valid = false;
+                                break; // yes, I know it goes to the wrong place
                         }
                 }
         }
@@ -51,12 +53,14 @@ function main_entry(): void {
   for ($i = 10; $i <= 40; $i +=10)
   {
           echo "\n\$i = $i: ";
+          $break_after_switch = false;
           switch($i)
           {
           case 10: echo "ten"; break;
-          case 20: echo "twenty"; break 2;
+          case 20: echo "twenty"; $break_after_switch = true; break;
           case 30: echo "thirty"; break;
           }
+          if ($break_after_switch) break;
           echo "\nJust beyond the switch";
   }
   echo "\n----------\n";

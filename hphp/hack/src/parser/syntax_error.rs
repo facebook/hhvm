@@ -969,3 +969,5 @@ pub fn multiple_visibility_modifiers_for_declaration(decl: &str) -> Error {
         decl.to_string(),
     ))
 }
+pub const break_continue_n_not_supported: Error =
+    Cow::Borrowed("Break/continue N operators are not supported.");

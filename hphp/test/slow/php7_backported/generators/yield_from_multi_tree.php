@@ -25,7 +25,8 @@ function main_yield_from_multi_tree() {
       }
     }
     $first = true;
-    while (1) {
+    $valid = true;
+    while ($valid) {
       foreach ($all as $gen) {
         if ($first) {
           $gen->next();
@@ -33,7 +34,8 @@ function main_yield_from_multi_tree() {
         var_dump($gen->current());
         $gen->next();
         if (!$gen->valid()) {
-          break 2;
+          $valid = false;
+          break;
         }
       }
       $first = false;

@@ -38,9 +38,7 @@ let rec collect_valid_target_labels_aux acc s =
   | T.Fallthrough
   | T.Expr _
   | T.Break
-  | T.TempBreak _
   | T.Continue
-  | T.TempContinue _
   | T.Throw _
   | T.Return _
   | T.Goto _

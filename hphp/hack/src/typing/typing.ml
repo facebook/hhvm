@@ -1272,15 +1272,7 @@ and stmt_ env pos st =
   | Continue ->
     let env = LEnv.move_and_merge_next_in_cont env C.Continue in
     (env, T.Continue)
-  (* TempContinue is a naming error caught in naming.ml *)
-  | TempContinue _ ->
-    let env = LEnv.move_and_merge_next_in_cont env C.Continue in
-    (env, T.Continue)
   | Break ->
-    let env = LEnv.move_and_merge_next_in_cont env C.Break in
-    (env, T.Break)
-  (* TempBreak is a naming error caught in naming.ml *)
-  | TempBreak _ ->
     let env = LEnv.move_and_merge_next_in_cont env C.Break in
     (env, T.Break)
   | Let (((p, x) as id), h, rhs) ->

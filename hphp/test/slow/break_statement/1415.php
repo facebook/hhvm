@@ -11,14 +11,16 @@ while (list(, $val) = each(inout $arr)) {
   echo "$val\n";
 }
 $i = 0;
-while (++$i) {
+$valid = true;
+while ($valid && ++$i) {
     switch ($i) {
     case 5:
       echo "At 5\n";
-      break 1;
+      break;
     case 10:
       echo "At 10; quitting\n";
-      break 2;
+      $valid = false;
+      break;
     default:
       break;
     }

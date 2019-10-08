@@ -254,11 +254,7 @@ and emit_stmt env (pos, stmt) =
         } ->
     emit_using env pos is_block_scoped has_await e (block_pos b, A.Block b)
   | A.Break -> emit_break env pos
-  | A.TempBreak level_opt ->
-    emit_temp_break env pos (get_level pos "break" level_opt)
   | A.Continue -> emit_continue env pos
-  | A.TempContinue level_opt ->
-    emit_temp_continue env pos (get_level pos "continue" level_opt)
   | A.Do (b, e) -> emit_do env (pos, A.Block b) e
   | A.For (e1, e2, e3, b) -> emit_for env pos e1 e2 e3 (pos, A.Block b)
   | A.Throw ((_, _) as expr) ->

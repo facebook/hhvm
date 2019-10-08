@@ -2900,14 +2900,26 @@ where
                 Self::lift_awaits_in_statement(f, node, env)
             }
             BreakStatement(c) => {
-                let brk = Self::mp_optional(Self::p_expr, &c.break_level, env)?
-                    .map_or(S_::Break, S_::TempBreak);
-                Ok(S::new(pos, brk))
+                /* Numbered breaks are not allowed in Hack. TODO: T55175441 */
+                if !c.break_level.is_missing() {
+                    Self::raise_parsing_error_pos(
+                        &pos,
+                        env,
+                        &syntax_error::break_continue_n_not_supported,
+                    );
+                }
+                Ok(S::new(pos, S_::Break))
             }
             ContinueStatement(c) => {
-                let ctn = Self::mp_optional(Self::p_expr, &c.continue_level, env)?
-                    .map_or(S_::Continue, S_::TempContinue);
-                Ok(S::new(pos, ctn))
+                /* Numbered continues are not allowed in Hack. TODO: T55175441 */
+                if !c.continue_level.is_missing() {
+                    Self::raise_parsing_error_pos(
+                        &pos,
+                        env,
+                        &syntax_error::break_continue_n_not_supported,
+                    );
+                }
+                Ok(S::new(pos, S_::Continue))
             }
             ConcurrentStatement(c) => {
                 let (lifted_awaits, S(stmt_pos, stmt)) = Self::with_new_concurrent_scrope(

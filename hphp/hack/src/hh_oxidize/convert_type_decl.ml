@@ -34,6 +34,10 @@ let blacklisted_types =
     ("typing_defs", "ExpandEnv");
     ("typing_defs", "LoclPhase");
     ("typing_defs", "PhaseTy");
+    ("typing_defs", "ConstraintType_");
+    ("typing_defs", "HasMember");
+    ("typing_defs", "ConstraintType");
+    ("typing_defs", "InternalType");
   ]
 
 (* HACK: ignore anything beginning with the "locl" prefix, since we are only

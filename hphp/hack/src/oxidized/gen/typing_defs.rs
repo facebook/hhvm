@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<69875ba3b3c2b6dde614801e578fc3b8>>
+// @generated SignedSource<<47bb06ce4ea7be9e4db57c1ac85b5916>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -133,6 +133,8 @@ pub enum Ty_ {
     Tunion(Vec<Ty>),
     Tintersection(Vec<Ty>),
 }
+
+pub type Nullsafe = Option<pos::Pos>;
 
 #[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 pub enum DependentType {

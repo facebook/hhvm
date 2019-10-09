@@ -276,32 +276,10 @@ let name_from_type (_, ty) =
   | Tapply ((_, name), _) -> name
   | _ -> raise Unsupported
 
-let get_ns obj_name =
-  let (ns, _) = String.rsplit2_exn obj_name '\\' in
-  ns
-
 let strip_ns obj_name =
   match String.rsplit2 obj_name '\\' with
   | Some (_, name) -> name
   | None -> obj_name
-
-(* Get "relative" namespace compared to the namespace of reference. For example,
-   for reference=/a/b/C and name=/a/b/c/d/f, return c/d/f *)
-let strip_ns_prefix reference name =
-  let split_ns name = String.lsplit2 name '\\' in
-  let reference = String.lstrip ~drop:(fun c -> c = '\\') reference in
-  let name = String.lstrip ~drop:(fun c -> c = '\\') name in
-  let rec strip_ reference name =
-    match (split_ns reference, split_ns name) with
-    | (None, None) -> name
-    | (Some (ref_ns, refn), Some (ns, n)) ->
-      if ref_ns = ns then
-        strip_ refn n
-      else
-        name
-    | (_, _) -> name
-  in
-  strip_ reference name
 
 let list_items items = String.concat items ~sep:", "
 
@@ -589,19 +567,6 @@ let get_direct_ancestors cls =
           get_req_types
           @@ filter_by_kind direct_reqs (fun _ kbase -> kbase = Cinterface);
       })
-
-let get_enum_declaration tcopt enum =
-  let name = Decl_provider.Class.name enum in
-  let enum =
-    value_exn UnexpectedDependency @@ Decl_provider.Class.enum_type enum
-  in
-  let cons =
-    match enum.te_constraint with
-    | Some c -> " as " ^ Typing_print.full_decl tcopt c
-    | None -> ""
-  in
-  let base = Typing_print.full_decl tcopt enum.te_base in
-  Printf.sprintf "enum %s: %s%s" (strip_ns name) base cons
 
 let get_class_declaration tcopt (cls : Decl_provider.class_decl) =
   Decl_provider.(

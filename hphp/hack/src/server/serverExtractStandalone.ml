@@ -932,7 +932,11 @@ let construct_type_declaration tcopt t ?(full_method = None) fields =
   | None -> construct_typedef tcopt t
 
 let rec do_add_dep deps dep =
-  if (not (HashSet.mem deps dep)) && not (is_builtin_dep dep) then (
+  if
+    dep <> Typing_deps.Dep.Class SN.Typehints.wildcard
+    && (not (HashSet.mem deps dep))
+    && not (is_builtin_dep dep)
+  then (
     HashSet.add deps dep;
     add_signature_dependencies deps dep;
     Option.iter (get_class_name dep) ~f:(fun name ->

@@ -24,6 +24,8 @@ class GenericDerived<Tfirst> extends GenericBase<Tfirst, Mode> {
   }
 
   protected int $property;
+
+  public function foo(): void {}
 }
 
 class First {}
@@ -38,6 +40,11 @@ class Regular {
 function with_generic_method(int $arg): void {
   $r = new Regular();
   $r->generic_method($arg);
+}
+
+function with_generic_method_with_wildcard_tparam(int $arg): void {
+  $r = new Regular();
+  $r->generic_method<_>($arg);
 }
 
 function with_properties<T>(GenericDerived<T> $arg) : Mode {
@@ -57,3 +64,11 @@ interface IGenericDerived<T> extends GenericInterface<T, int> {
 }
 
 function with_generic_interface<T>(IGenericDerived<T> $arg): void {}
+
+function with_is_refinement<Tfirst, Tsecond>(
+  GenericBase<Tfirst, Tsecond> $x,
+): void {
+  if ($x is GenericDerived<_>) {
+    $x->foo();
+  }
+}

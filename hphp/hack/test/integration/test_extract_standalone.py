@@ -131,6 +131,8 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
             "\\with_non_generic_type",
             "\\with_mapped_namespace",
             "\\WithNameMatchingClassName",
+            "\\with_generic_method_with_wildcard_tparam",
+            "\\with_is_refinement",
         ]
 
         for path in paths:

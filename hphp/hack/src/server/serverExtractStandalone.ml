@@ -40,26 +40,6 @@ let get_class_exn name =
   let not_found_msg = Printf.sprintf "Class %s" name in
   value_or_not_found not_found_msg @@ Decl_provider.get_class name
 
-let is_class_dependency dep =
-  Typing_deps.Dep.(
-    match dep with
-    | Fun _
-    | FunName _
-    | GConst _
-    | GConstName _ ->
-      false
-    | Const (_, _)
-    | Method (_, _)
-    | SMethod (_, _)
-    | Prop (_, _)
-    | SProp (_, _)
-    | Cstr _
-    | Class _
-    | AllMembers _
-    | Extends _ ->
-      true
-    | RecordDef _ -> records_not_supported ())
-
 let get_class_name (dep : Typing_deps.Dep.variant) =
   Typing_deps.Dep.(
     match dep with
@@ -72,12 +52,12 @@ let get_class_name (dep : Typing_deps.Dep.variant) =
     | Class cls
     | AllMembers cls
     | Extends cls ->
-      cls
+      Some cls
     | Fun _
     | FunName _
     | GConst _
     | GConstName _ ->
-      raise UnexpectedDependency
+      None
     | RecordDef _ -> records_not_supported ())
 
 let global_dep_name dep =
@@ -229,7 +209,7 @@ let is_relevant_dependency (target : target) (dep : Typing_deps.Dep.variant) =
   (* We have to collect dependencies of the entire class because dependency collection is
      coarse-grained: if cls's member depends on D, we get a dependency edge cls --> D,
      not (cls, member) --> D *)
-  | Method (cls, _) -> is_class_dependency dep && get_class_name dep = cls
+  | Method (cls, _) -> get_class_name dep = Some cls
 
 let get_filename target =
   let pos =
@@ -955,8 +935,8 @@ let rec do_add_dep deps dep =
   if (not (HashSet.mem deps dep)) && not (is_builtin_dep dep) then (
     HashSet.add deps dep;
     add_signature_dependencies deps dep;
-    if is_class_dependency dep then
-      do_add_dep deps (Typing_deps.Dep.Class (get_class_name dep))
+    Option.iter (get_class_name dep) ~f:(fun name ->
+        do_add_dep deps (Typing_deps.Dep.Class name))
   )
 
 and add_dep deps ?cls:(this_cls = None) ?(init_const = false) ty : unit =
@@ -1022,110 +1002,101 @@ and add_dep deps ?cls:(this_cls = None) ?(init_const = false) ty : unit =
   visitor#on_type () ty
 
 and add_signature_dependencies deps obj =
-  Typing_deps.Dep.(
-    Decl_provider.(
-      let description = to_string obj in
-      if is_class_dependency obj then
-        let cls_name = get_class_name obj in
-        match get_class cls_name with
-        | None ->
-          let td = value_or_not_found description @@ get_typedef cls_name in
-          add_dep deps td.td_type
-        | Some cls ->
-          let add_dep = add_dep deps ~cls:(Some cls_name) in
-          (match obj with
-          | Prop (_, name) ->
-            let p =
-              value_or_not_found description @@ Class.get_prop cls name
-            in
-            add_dep @@ Lazy.force p.ce_type;
+  let open Typing_deps.Dep in
+  let open Decl_provider in
+  let description = to_string obj in
+  match get_class_name obj with
+  | Some cls_name ->
+    (match get_class cls_name with
+    | None ->
+      let td = value_or_not_found description @@ get_typedef cls_name in
+      add_dep deps td.td_type
+    | Some cls ->
+      let add_dep = add_dep deps ~cls:(Some cls_name) in
+      (match obj with
+      | Prop (_, name) ->
+        let p = value_or_not_found description @@ Class.get_prop cls name in
+        add_dep @@ Lazy.force p.ce_type;
 
-            (* We need to initialize properties in the constructor, add a dependency on it *)
-            HashSet.add deps (Cstr cls_name)
-          | SProp (_, name) ->
-            let sp =
-              value_or_not_found description @@ Class.get_sprop cls name
-            in
-            add_dep @@ Lazy.force sp.ce_type
-          | Method (_, name) ->
-            let m =
-              value_or_not_found description @@ Class.get_method cls name
-            in
-            add_dep @@ Lazy.force m.ce_type
-          | SMethod (_, name) ->
-            (match Class.get_smethod cls name with
-            | Some sm -> add_dep @@ Lazy.force sm.ce_type
-            | None ->
-              (match Class.get_method cls name with
-              | Some _ ->
-                HashSet.remove deps obj;
-                do_add_dep deps (Method (cls_name, name))
-              | None -> raise (DependencyNotFound description)))
-          | Const (_, name) ->
-            (match Class.get_typeconst cls name with
-            | Some tc ->
-              Option.iter tc.ttc_type ~f:add_dep;
-              Option.iter tc.ttc_constraint ~f:add_dep
-            | None ->
-              let c =
-                value_or_not_found description @@ Class.get_const cls name
+        (* We need to initialize properties in the constructor, add a dependency on it *)
+        HashSet.add deps (Cstr cls_name)
+      | SProp (_, name) ->
+        let sp = value_or_not_found description @@ Class.get_sprop cls name in
+        add_dep @@ Lazy.force sp.ce_type
+      | Method (_, name) ->
+        let m = value_or_not_found description @@ Class.get_method cls name in
+        add_dep @@ Lazy.force m.ce_type
+      | SMethod (_, name) ->
+        (match Class.get_smethod cls name with
+        | Some sm -> add_dep @@ Lazy.force sm.ce_type
+        | None ->
+          (match Class.get_method cls name with
+          | Some _ ->
+            HashSet.remove deps obj;
+            do_add_dep deps (Method (cls_name, name))
+          | None -> raise (DependencyNotFound description)))
+      | Const (_, name) ->
+        (match Class.get_typeconst cls name with
+        | Some tc ->
+          Option.iter tc.ttc_type ~f:add_dep;
+          Option.iter tc.ttc_constraint ~f:add_dep
+        | None ->
+          let c = value_or_not_found description @@ Class.get_const cls name in
+          let init_const = Class.kind cls <> Ast_defs.Cenum in
+          add_dep ~init_const c.cc_type)
+      | Cstr _ ->
+        (match Class.construct cls with
+        | (Some constr, _) -> add_dep @@ Lazy.force constr.ce_type
+        | _ -> ())
+      | Class _ ->
+        Sequence.iter (Class.all_ancestors cls) (fun (_, ty) -> add_dep ty);
+        Sequence.iter (Class.all_ancestor_reqs cls) (fun (_, ty) -> add_dep ty);
+        let add_implementations interface_name =
+          let interf = get_class_exn interface_name in
+          if
+            (is_builtin_dep @@ Class interface_name)
+            && Class.kind interf = Ast_defs.Cinterface
+          then (
+            let add_impl ~is_static method_name =
+              let method_elt =
+                match is_static with
+                | true -> Class.get_smethod cls method_name
+                | false -> Class.get_method cls method_name
               in
-              let init_const = Class.kind cls <> Ast_defs.Cenum in
-              add_dep ~init_const c.cc_type)
-          | Cstr _ ->
-            (match Class.construct cls with
-            | (Some constr, _) -> add_dep @@ Lazy.force constr.ce_type
-            | _ -> ())
-          | Class _ ->
-            Sequence.iter (Class.all_ancestors cls) (fun (_, ty) -> add_dep ty);
-            Sequence.iter (Class.all_ancestor_reqs cls) (fun (_, ty) ->
-                add_dep ty);
-            let add_implementations interface_name =
-              let interf = get_class_exn interface_name in
-              if
-                (is_builtin_dep @@ Class interface_name)
-                && Class.kind interf = Ast_defs.Cinterface
-              then (
-                let add_impl ~is_static method_name =
-                  let method_elt =
-                    match is_static with
-                    | true -> Class.get_smethod cls method_name
-                    | false -> Class.get_method cls method_name
-                  in
-                  match method_elt with
-                  | Some elt ->
-                    if elt.ce_origin = cls_name then
-                      if is_static then
-                        do_add_dep deps (SMethod (cls_name, method_name))
-                      else
-                        do_add_dep deps (Method (cls_name, method_name))
-                  | None -> ()
-                in
-                Sequence.iter (Class.methods interf) ~f:(fun (m, _) ->
-                    add_impl ~is_static:false m);
-                Sequence.iter (Class.smethods interf) ~f:(fun (m, _) ->
-                    add_impl ~is_static:true m)
-              )
+              match method_elt with
+              | Some elt ->
+                if elt.ce_origin = cls_name then
+                  if is_static then
+                    do_add_dep deps (SMethod (cls_name, method_name))
+                  else
+                    do_add_dep deps (Method (cls_name, method_name))
+              | None -> ()
             in
-            Sequence.iter (Class.all_ancestor_names cls) add_implementations
-          | AllMembers _ ->
-            (* AllMembers is used for dependencies on enums, so we should depend on all constants *)
-            Sequence.iter (Class.consts cls) (fun (name, c) ->
-                if name <> "class" then add_dep c.cc_type)
-          (* Ignore, we fetch class hierarchy when we call add_signature_dependencies on a class dep *)
-          | Extends _ -> ()
-          | _ -> raise UnexpectedDependency)
-      else
-        match obj with
-        | Fun f
-        | FunName f ->
-          let func = value_or_not_found description @@ get_fun f in
-          add_dep deps @@ func.fe_type
-        | GConst c
-        | GConstName c ->
-          let (ty, _) = value_or_not_found description @@ get_gconst c in
-          add_dep ~init_const:true deps ty
-        | _ -> raise UnexpectedDependency))
+            Sequence.iter (Class.methods interf) ~f:(fun (m, _) ->
+                add_impl ~is_static:false m);
+            Sequence.iter (Class.smethods interf) ~f:(fun (m, _) ->
+                add_impl ~is_static:true m)
+          )
+        in
+        Sequence.iter (Class.all_ancestor_names cls) add_implementations
+      | AllMembers _ ->
+        (* AllMembers is used for dependencies on enums, so we should depend on all constants *)
+        Sequence.iter (Class.consts cls) (fun (name, c) ->
+            if name <> "class" then add_dep c.cc_type)
+      (* Ignore, we fetch class hierarchy when we call add_signature_dependencies on a class dep *)
+      | Extends _ -> ()
+      | _ -> raise UnexpectedDependency))
+  | None ->
+    (match obj with
+    | Fun f
+    | FunName f ->
+      let func = value_or_not_found description @@ get_fun f in
+      add_dep deps @@ func.fe_type
+    | GConst c
+    | GConstName c ->
+      let (ty, _) = value_or_not_found description @@ get_gconst c in
+      add_dep ~init_const:true deps ty
+    | _ -> raise UnexpectedDependency)
 
 let get_dependency_origin cls (dep : Typing_deps.Dep.variant) =
   Decl_provider.(
@@ -1196,7 +1167,7 @@ let group_class_dependencies_by_class dependencies =
         | AllMembers _ -> acc
         | Extends _ -> acc
         | _ ->
-          let cls = get_class_name obj in
+          let cls = value_exn UnexpectedDependency (get_class_name obj) in
           let origin = get_dependency_origin cls obj in
           (* Consider the following example:
            *
@@ -1378,7 +1349,8 @@ let go tcopt target =
   try
     let dependencies = get_dependencies tcopt target in
     let (class_dependencies, global_dependencies) =
-      List.partition_tf dependencies ~f:is_class_dependency
+      List.partition_tf dependencies ~f:(fun dep ->
+          Option.is_some (get_class_name dep))
     in
     let (strict_declarations, partial_declarations) =
       get_declarations

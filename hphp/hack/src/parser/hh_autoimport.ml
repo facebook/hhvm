@@ -139,6 +139,11 @@ let lookup_type id =
   else
     SMap.get id types
 
+let reverse_type id =
+  match String.chop_prefix ~prefix:"HH\\" id with
+  | Some stripped_id when is_hh_autoimport stripped_id -> stripped_id
+  | _ -> id
+
 let lookup_func id = SMap.get id funcs
 
 let lookup_const id = SMap.get id consts

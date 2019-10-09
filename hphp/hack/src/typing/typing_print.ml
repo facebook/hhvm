@@ -15,12 +15,13 @@ open Core_kernel
 open Typing_defs
 open Typing_env_types
 open Typing_logic
-open Utils
 module SN = Naming_special_names
 module Reason = Typing_reason
 module TySet = Typing_set
 module Cls = Decl_provider.Class
 module Nast = Aast
+
+let strip_ns id = id |> Utils.strip_ns |> Hh_autoimport.reverse_type
 
 let shallow_decl_enabled () =
   TypecheckerOptions.shallow_class_decl (GlobalNamingOptions.get ())
@@ -37,7 +38,7 @@ module Full = struct
 
   let format_env = Format_env.{ default with line_width = 60 }
 
-  let text_strip_ns s = Doc.text (Utils.strip_ns s)
+  let text_strip_ns s = Doc.text (strip_ns s)
 
   let ( ^^ ) a b = Concat [a; b]
 

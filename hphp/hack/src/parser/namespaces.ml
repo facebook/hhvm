@@ -12,13 +12,6 @@ open Ast
 open Namespace_env
 module SN = Naming_special_names
 
-(* The typechecker has a different view of HH autoimporting than the compiler.
- * This type exists to track the unification of HH autoimporting between the
- * typechecker and the compiler, after which it will be deleted. *)
-type autoimport_ns =
-  | Global
-  | HH
-
 type elaborate_kind =
   | ElaborateFun
   | ElaborateClass
@@ -26,134 +19,15 @@ type elaborate_kind =
   | ElaborateConst
 
 (**
- * Convenience function for maps that have been completely unified to autoimport
- * into the HH namespace.
- *)
-let autoimport_map_of_list ids =
-  List.fold_left ids ~init:SMap.empty ~f:(fun map id -> SMap.add id HH map)
-
-(* When dealing with an <?hh file, HHVM automatically imports a few
- * "core" classes into every namespace, mostly collections. Their
- * unqualified names always refer to this global version.
- *
- * Note that these are technically in the \HH namespace as far as the
- * runtime is concerned, but we treat them as in the global
- * namespace. This is a tiny bit weird, but since Facebook www all runs
- * in the global namespace relying on this autoimport, this makes the
- * most sense there.
- *)
-let autoimport_types =
-  SMap.of_list
-    [
-      ("AsyncFunctionWaitHandle", Global);
-      ("AsyncGenerator", Global);
-      ("AsyncGeneratorWaitHandle", Global);
-      ("AsyncIterator", Global);
-      ("AsyncKeyedIterator", Global);
-      ("Awaitable", Global);
-      ("AwaitAllWaitHandle", Global);
-      ("classname", Global);
-      ("Collection", Global);
-      ("ConditionWaitHandle", Global);
-      ("Container", Global);
-      ("dict", Global);
-      ("ExternalThreadEventWaitHandle", Global);
-      ("IMemoizeParam", Global);
-      ("ImmMap", Global);
-      ("ImmSet", Global);
-      ("ImmVector", Global);
-      ("InvariantException", Global);
-      ("Iterable", Global);
-      ("Iterator", Global);
-      ("KeyedContainer", Global);
-      ("KeyedIterable", Global);
-      ("KeyedIterator", Global);
-      ("KeyedTraversable", Global);
-      ("keyset", Global);
-      ("Map", Global);
-      ("ObjprofObjectStats", HH);
-      ("ObjprofPathsStats", HH);
-      ("ObjprofStringStats", HH);
-      ("Pair", Global);
-      ("RescheduleWaitHandle", Global);
-      ("ResumableWaitHandle", Global);
-      ("Set", Global);
-      ("Shapes", Global);
-      ("SleepWaitHandle", Global);
-      ("StableMap", Global);
-      ("StaticWaitHandle", Global);
-      ("Traversable", Global);
-      ("typename", Global);
-      ("TypeStructure", HH);
-      ("TypeStructureKind", HH);
-      ("vec", Global);
-      ("Vector", Global);
-      ("WaitableWaitHandle", Global);
-      ("XenonSample", HH);
-    ]
-
-let autoimport_funcs =
-  autoimport_map_of_list
-    [
-      "asio_get_current_context_idx";
-      "asio_get_running_in_context";
-      "asio_get_running";
-      "class_meth";
-      "darray";
-      "dict";
-      "fun";
-      "heapgraph_create";
-      "heapgraph_dfs_edges";
-      "heapgraph_dfs_nodes";
-      "heapgraph_edge";
-      "heapgraph_foreach_edge";
-      "heapgraph_foreach_node";
-      "heapgraph_foreach_root";
-      "heapgraph_node_in_edges";
-      "heapgraph_node_out_edges";
-      "heapgraph_node";
-      "heapgraph_stats";
-      "idx";
-      "inst_meth";
-      "invariant_callback_register";
-      "invariant_violation";
-      "invariant";
-      "is_darray";
-      "is_dict";
-      "is_keyset";
-      "is_varray";
-      "is_vec";
-      "keyset";
-      "meth_caller";
-      "objprof_get_data";
-      "objprof_get_paths";
-      "objprof_get_strings";
-      "server_warmup_status";
-      "thread_mark_stack";
-      "thread_memory_stats";
-      "type_structure";
-      "varray";
-      "vec";
-      "xenon_get_data";
-    ]
-
-let autoimport_consts = autoimport_map_of_list ["Rx\\IS_ENABLED"]
-
-(**
  * Return the namespace into which id is auto imported for the typechecker and
  * compiler, respectively. Return None if it is not auto imported.
  *)
 let get_autoimport_name_namespace id kind =
-  let lookup_name map = Option.map (SMap.get id map) (fun ns -> (ns, HH)) in
   match kind with
-  | ElaborateClass ->
-    if SN.Typehints.is_reserved_hh_name id then
-      Some (Global, HH)
-    else
-      lookup_name autoimport_types
-  | ElaborateRecord -> lookup_name autoimport_types
-  | ElaborateFun -> lookup_name autoimport_funcs
-  | ElaborateConst -> lookup_name autoimport_consts
+  | ElaborateClass -> Hh_autoimport.lookup_type id
+  | ElaborateRecord -> Hh_autoimport.lookup_type id
+  | ElaborateFun -> Hh_autoimport.lookup_func id
+  | ElaborateConst -> Hh_autoimport.lookup_const id
 
 let is_autoimport_name id kind = get_autoimport_name_namespace id kind <> None
 
@@ -285,11 +159,7 @@ let elaborate_id_impl nsenv kind id =
                 else
                   typechecker_ns
               in
-              begin
-                match ns with
-                | Global -> (true, elaborate_into_ns None id)
-                | HH -> (true, elaborate_into_ns (Some "HH") id)
-              end
+              (true, elaborate_into_ns (Hh_autoimport.string_of_ns ns) id)
           )
 
 let elaborate_id nsenv kind (p, id) =

@@ -10,9 +10,8 @@
 open Core_kernel
 module SU = Hhbc_string_utils
 
-let elaborate_id ns kind (_, id) =
-  let (was_renamed, fq_id) = Namespaces.elaborate_id_impl ns kind id in
-  (was_renamed, SU.strip_global_ns fq_id)
+let elaborate_id ns kind id =
+  Namespaces.elaborate_id ns kind id |> snd |> SU.strip_global_ns
 
 (* Class identifier, with namespace qualification if not global, but without
  * initial backslash.
@@ -20,32 +19,24 @@ let elaborate_id ns kind (_, id) =
 module Class = struct
   type t = string
 
-  let from_ast_name s = Hh_autoimport.normalize (SU.strip_global_ns s)
+  let from_ast_name s =
+    if Hh_autoimport.lookup_type (SU.strip_global_ns s) = None then
+      s
+    else
+      "HH\\" ^ s
 
   let from_raw_string s = s
 
   let to_raw_string s = s
 
-  let elaborate_id ns ((_, n) as id) =
+  let elaborate_id ns (p, id_) =
     let ns =
-      if SU.Xhp.is_xhp n then
-        Namespace_env.empty
-          ns.Namespace_env.ns_auto_ns_map
-          ns.Namespace_env.ns_is_codegen
+      if SU.Xhp.is_xhp id_ then
+        Namespace_env.empty_from_env ns
       else
         ns
     in
-    let mangled_name = SU.Xhp.mangle n in
-    let stripped_mangled_name = SU.strip_global_ns mangled_name in
-    let (was_renamed, id) =
-      elaborate_id ns Namespaces.ElaborateClass (fst id, mangled_name)
-    in
-    if was_renamed || mangled_name.[0] = '\\' then
-      id
-    else
-      match Hh_autoimport.opt_normalize stripped_mangled_name with
-      | None -> id
-      | Some s -> s
+    elaborate_id ns Namespaces.ElaborateClass (p, SU.Xhp.mangle id_)
 
   let to_unmangled_string s = SU.Xhp.unmangle s
 end
@@ -83,9 +74,7 @@ module Function = struct
 
   let add_suffix s suffix = s ^ suffix
 
-  let elaborate_id ns id =
-    let (_, fq_id) = elaborate_id ns Namespaces.ElaborateFun id in
-    fq_id
+  let elaborate_id ns id = elaborate_id ns Namespaces.ElaborateFun id
 end
 
 module Const = struct
@@ -97,9 +86,7 @@ module Const = struct
 
   let to_raw_string s = s
 
-  let elaborate_id ns id =
-    let (_, fq_id) = elaborate_id ns Namespaces.ElaborateConst id in
-    fq_id
+  let elaborate_id ns id = elaborate_id ns Namespaces.ElaborateConst id
 end
 
 module Record = struct
@@ -111,7 +98,5 @@ module Record = struct
 
   let to_raw_string s = s
 
-  let elaborate_id ns id =
-    let (_, fq_id) = elaborate_id ns Namespaces.ElaborateRecord id in
-    fq_id
+  let elaborate_id ns id = elaborate_id ns Namespaces.ElaborateRecord id
 end

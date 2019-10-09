@@ -516,6 +516,7 @@ module Typehints = struct
     || x = real
     || x = dynamic
     || x = wildcard
+    || x = null
     || x = nonnull
     || x = nothing
 

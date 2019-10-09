@@ -16,9 +16,6 @@ type elaborate_kind =
 val elaborate_id :
   Namespace_env.env -> elaborate_kind -> Ast_defs.id -> Ast_defs.id
 
-val elaborate_id_impl :
-  Namespace_env.env -> elaborate_kind -> string -> bool * string
-
 (* This function processes only top-level declarations and does not dive
   into inline classes/functions - those are disallowed in Hack and doing it will
   incur a perf hit that everybody will have to pay. For codegen purposed

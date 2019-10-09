@@ -9,76 +9,141 @@
 
 open Core_kernel
 
-(* Create map from name to alias *)
-let add_alias m s = SMap.add s ("HH\\" ^ s) m
+(* The typechecker has a different view of HH autoimporting than the compiler.
+ * This type exists to track the unification of HH autoimporting between the
+ * typechecker and the compiler, after which it will be deleted. *)
+type autoimport_ns =
+  | Global
+  | HH
 
-let alias_map =
-  List.fold_left
-    ~f:add_alias
-    ~init:SMap.empty
+(**
+ * Convenience function for maps that have been completely unified to autoimport
+ * into the HH namespace.
+ *)
+let autoimport_map_of_list ids =
+  List.fold_left ids ~init:SMap.empty ~f:(fun map id ->
+      SMap.add id (HH, HH) map)
+
+let autoimport_map_of_tuples ids =
+  List.fold_left ids ~init:SMap.empty ~f:(fun map (id, typechecker_ns) ->
+      SMap.add id (typechecker_ns, HH) map)
+
+let types =
+  autoimport_map_of_tuples
     [
-      "AsyncIterator";
-      "AsyncKeyedIterator";
-      "Traversable";
-      "Container";
-      "KeyedTraversable";
-      "KeyedContainer";
-      "Iterator";
-      "KeyedIterator";
-      "Iterable";
-      "KeyedIterable";
-      "Collection";
-      "Vector";
-      "Map";
-      "Set";
-      "Pair";
-      "ImmVector";
-      "ImmMap";
-      "ImmSet";
-      "InvariantException";
-      "IMemoizeParam";
-      "Shapes";
-      "TypeStructureKind";
-      "TypeStructure";
-      "dict";
-      "vec";
-      "keyset";
-      "varray";
-      "darray";
-      "Awaitable";
-      "AsyncGenerator";
-      "StaticWaitHandle";
-      "WaitableWaitHandle";
-      "ResumableWaitHandle";
-      "AsyncFunctionWaitHandle";
-      "AsyncGeneratorWaitHandle";
-      "AwaitAllWaitHandle";
-      "ConditionWaitHandle";
-      "RescheduleWaitHandle";
-      "SleepWaitHandle";
-      "ExternalThreadEventWaitHandle";
-      "bool";
-      "int";
-      "float";
-      "string";
-      "void";
-      "num";
-      "arraykey";
-      "resource";
-      "mixed";
-      "noreturn";
-      "this";
-      "varray_or_darray";
-      "vec_or_dict";
-      "arraylike";
-      "nonnull";
-      "null";
-      "nothing";
-      "dynamic";
+      ("arraylike", HH);
+      ("AsyncFunctionWaitHandle", Global);
+      ("AsyncGenerator", Global);
+      ("AsyncGeneratorWaitHandle", Global);
+      ("AsyncIterator", Global);
+      ("AsyncKeyedIterator", Global);
+      ("Awaitable", Global);
+      ("AwaitAllWaitHandle", Global);
+      ("classname", Global);
+      ("Collection", Global);
+      ("ConditionWaitHandle", Global);
+      ("Container", Global);
+      ("darray", HH);
+      ("dict", Global);
+      ("ExternalThreadEventWaitHandle", Global);
+      ("IMemoizeParam", Global);
+      ("ImmMap", Global);
+      ("ImmSet", Global);
+      ("ImmVector", Global);
+      ("InvariantException", Global);
+      ("Iterable", Global);
+      ("Iterator", Global);
+      ("KeyedContainer", Global);
+      ("KeyedIterable", Global);
+      ("KeyedIterator", Global);
+      ("KeyedTraversable", Global);
+      ("keyset", Global);
+      ("Map", Global);
+      ("ObjprofObjectStats", HH);
+      ("ObjprofPathsStats", HH);
+      ("ObjprofStringStats", HH);
+      ("Pair", Global);
+      ("RescheduleWaitHandle", Global);
+      ("ResumableWaitHandle", Global);
+      ("Set", Global);
+      ("Shapes", Global);
+      ("SleepWaitHandle", Global);
+      ("StableMap", Global);
+      ("StaticWaitHandle", Global);
+      ("this", Global);
+      ("Traversable", Global);
+      ("typename", Global);
+      ("TypeStructure", HH);
+      ("TypeStructureKind", HH);
+      ("varray_or_darray", HH);
+      ("varray", HH);
+      ("vec_or_dict", HH);
+      ("vec", Global);
+      ("Vector", Global);
+      ("WaitableWaitHandle", Global);
+      ("XenonSample", HH);
     ]
 
-let opt_normalize s = SMap.get s alias_map
+let funcs =
+  autoimport_map_of_list
+    [
+      "asio_get_current_context_idx";
+      "asio_get_running_in_context";
+      "asio_get_running";
+      "class_meth";
+      "darray";
+      "dict";
+      "fun";
+      "heapgraph_create";
+      "heapgraph_dfs_edges";
+      "heapgraph_dfs_nodes";
+      "heapgraph_edge";
+      "heapgraph_foreach_edge";
+      "heapgraph_foreach_node";
+      "heapgraph_foreach_root";
+      "heapgraph_node_in_edges";
+      "heapgraph_node_out_edges";
+      "heapgraph_node";
+      "heapgraph_stats";
+      "idx";
+      "inst_meth";
+      "invariant_callback_register";
+      "invariant_violation";
+      "invariant";
+      "is_darray";
+      "is_dict";
+      "is_keyset";
+      "is_varray";
+      "is_vec";
+      "keyset";
+      "meth_caller";
+      "objprof_get_data";
+      "objprof_get_paths";
+      "objprof_get_strings";
+      "server_warmup_status";
+      "thread_mark_stack";
+      "thread_memory_stats";
+      "type_structure";
+      "varray";
+      "vec";
+      "xenon_get_data";
+    ]
 
-let normalize s = Option.value (opt_normalize s) ~default:s
+let consts = autoimport_map_of_list ["Rx\\IS_ENABLED"]
 
-let is_hh_autoimport s = SMap.mem s alias_map
+let is_hh_autoimport s = SMap.mem s types
+
+let lookup_type id =
+  if Naming_special_names.Typehints.is_reserved_hh_name id then
+    Some (Global, HH)
+  else
+    SMap.get id types
+
+let lookup_func id = SMap.get id funcs
+
+let lookup_const id = SMap.get id consts
+
+let string_of_ns ns =
+  match ns with
+  | Global -> None
+  | HH -> Some "HH"

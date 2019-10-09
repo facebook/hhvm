@@ -99,6 +99,7 @@
     fixme_provider
     full_fidelity
     heap_shared_mem
+    hh_autoimport
     html_entities
     logging
     namespace_env
@@ -118,7 +119,8 @@
   (preprocess (pps visitors.ppx ppx_deriving.std)) ; See T41851208
   (libraries
     collections
-    core_kernel))
+    core_kernel
+    naming_special_names))
 
 (library
   (name parsing_service)

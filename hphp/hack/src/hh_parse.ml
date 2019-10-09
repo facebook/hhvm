@@ -60,7 +60,6 @@ module FullFidelityParseArgs = struct
     fail_open: bool;
     (* Defining the input *)
     files: string list;
-    dump_nast: bool;
     disable_lval_as_an_expression: bool;
     enable_class_level_where_clauses: bool;
     disable_legacy_soft_typehints: bool;
@@ -96,7 +95,6 @@ module FullFidelityParseArgs = struct
       fail_open
       show_file_name
       files
-      dump_nast
       disable_lval_as_an_expression
       enable_class_level_where_clauses
       disable_legacy_soft_typehints
@@ -130,7 +128,6 @@ module FullFidelityParseArgs = struct
       fail_open;
       show_file_name;
       files;
-      dump_nast;
       disable_lval_as_an_expression;
       enable_class_level_where_clauses;
       disable_legacy_soft_typehints;
@@ -178,7 +175,6 @@ module FullFidelityParseArgs = struct
     let enable_hh_syntax = ref false in
     let fail_open = ref true in
     let show_file_name = ref false in
-    let dump_nast = ref false in
     let disable_lval_as_an_expression = ref false in
     let set_show_file_name () = show_file_name := true in
     let files = ref [] in
@@ -290,9 +286,6 @@ No errors are filtered out."
         ( "--show-file-name",
           Arg.Unit set_show_file_name,
           "Displays the file name." );
-        ( "--dump-nast",
-          Arg.Set dump_nast,
-          "Converts the legacy AST to a NAST and prints it." );
         ( "--disable-lval-as-an-expression",
           Arg.Set disable_lval_as_an_expression,
           "Disable lval as an expression." );
@@ -370,7 +363,6 @@ No errors are filtered out."
       !fail_open
       !show_file_name
       (List.rev !files)
-      !dump_nast
       !disable_lval_as_an_expression
       !enable_class_level_where_clauses
       !disable_legacy_soft_typehints
@@ -393,6 +385,18 @@ let print_full_fidelity_error source_text error =
       (SourceText.offset_to_position source_text)
   in
   Printf.printf "%s\n" text
+
+let print_ast_check_errors errors =
+  let error_list = Errors.get_error_list errors in
+  List.iter
+    (fun e ->
+      let text = Errors.to_string (Errors.to_absolute e) in
+      if
+        Core_kernel.String.is_substring text SyntaxError.this_in_static
+        || Core_kernel.String.is_substring text SyntaxError.toplevel_await_use
+      then
+        Printf.eprintf "%s\n%!" (Errors.to_string (Errors.to_absolute e)))
+    error_list
 
 let handle_existing_file args filename =
   let popt = ParserOptions.default in
@@ -477,28 +481,6 @@ let handle_existing_file args filename =
     let str = DebugPos.dump_syntax root in
     Printf.printf "%s\n" str );
 
-  let dump_needed = args.full_fidelity_ast_s_expr || args.dump_nast in
-  let lowered =
-    if dump_needed || print_errors then
-      let env =
-        Full_fidelity_ast.make_env
-          ~codegen:args.codegen
-          ~php5_compat_mode:args.php5_compat_mode
-          ~elaborate_namespaces:args.elaborate_namespaces
-          ~include_line_comments:args.include_line_comments
-          ~keep_errors:(args.keep_errors && not print_errors)
-          ~quick_mode:args.quick_mode
-          ~lower_coroutines:args.lower_coroutines
-          ~parser_options:popt
-          ~fail_open:args.fail_open
-          ~is_hh_file:args.is_hh_file
-          file
-      in
-      try Some (Full_fidelity_ast.from_file env)
-      with _ when print_errors -> None
-    else
-      None
-  in
   ( if print_errors then
     let level =
       if args.full_fidelity_errors_all then
@@ -523,19 +505,38 @@ let handle_existing_file args filename =
     let errors = ParserErrors.parse_errors error_env in
     List.iter (print_full_fidelity_error source_text) errors );
   begin
+    let dump_needed = args.full_fidelity_ast_s_expr in
+    let lowered =
+      if dump_needed || print_errors then
+        let env =
+          Full_fidelity_ast.make_env
+            ~codegen:args.codegen
+            ~php5_compat_mode:args.php5_compat_mode
+            ~elaborate_namespaces:args.elaborate_namespaces
+            ~include_line_comments:args.include_line_comments
+            ~keep_errors:(args.keep_errors || print_errors)
+            ~quick_mode:args.quick_mode
+            ~lower_coroutines:args.lower_coroutines
+            ~parser_options:popt
+            ~fail_open:args.fail_open
+            ~is_hh_file:args.is_hh_file
+            file
+        in
+        try
+          let (errors, res) =
+            Errors.do_ (fun () -> Full_fidelity_ast.from_file_with_legacy env)
+          in
+          if print_errors then print_ast_check_errors errors;
+          Some res
+        with _ when print_errors -> None
+      else
+        None
+    in
     match lowered with
     | Some res ->
-      let ast = res.Full_fidelity_ast.ast in
-      if print_errors then
-        Ast_check.check_program ast
-        |> List.iter (print_full_fidelity_error source_text);
       if dump_needed then
-        let str =
-          if args.dump_nast then
-            Nast.show_program (Ast_to_nast.convert ast)
-          else
-            Debug.dump_ast (Ast.AProgram ast)
-        in
+        let ast = res.Parser_return.ast in
+        let str = Nast.show_program ast in
         Printf.printf "%s\n" str
     | None -> ()
   end;

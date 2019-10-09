@@ -47,8 +47,6 @@ type 'a result_ = {
 }
 [@@deriving show]
 
-type result = Ast.program result_
-
 type rust_result = (Pos.t, unit, unit, unit) Aast.program result_
 
 (**
@@ -63,8 +61,6 @@ val parse_text :
   FileInfo.mode option * PositionedSyntaxTree.t
 
 val from_text_rust : env -> Full_fidelity_source_text.t -> rust_result
-
-val from_file : env -> result
 
 val from_text_with_legacy : env -> string -> Parser_return.t
 

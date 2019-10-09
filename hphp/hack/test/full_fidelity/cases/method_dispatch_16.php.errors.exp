@@ -1,1 +1,3 @@
-(26,5)-(26,10) Don't use $this in a static method, use static:: instead
+File "method_dispatch_16.php", line 26, characters 5-9:
+Don't use $this in a static method, use static:: instead (Parsing[1002])
+

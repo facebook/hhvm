@@ -228,7 +228,7 @@ let elaborate_defined_id nsenv kind (p, id) =
  *)
 let elaborate_id_impl nsenv kind id =
   if id <> "" && id.[0] = '\\' then
-    (false, id)
+    (true, id)
   (* The name is already fully-qualified. *)
   else
     let global_id = Utils.add_ns id in
@@ -249,8 +249,8 @@ let elaborate_id_impl nsenv kind id =
         | None -> (String.length id, false)
       in
       let prefix = String.sub id 0 bslash_loc in
-      if prefix = "namespace" then
-        ( false,
+      if has_bslash && prefix = "namespace" then
+        ( true,
           elaborate_into_current_ns
             nsenv
             (String_utils.lstrip id "namespace\\") )

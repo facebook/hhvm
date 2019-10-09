@@ -616,7 +616,8 @@ let parse_check_args cmd =
         " (mode) fuzzy search typedef definitions" );
       ( "--single",
         Arg.String (fun x -> set_mode (MODE_STATUS_SINGLE x) ()),
-        "Return errors in file with provided name (give '-' for stdin)" );
+        "<path> Return errors in file with provided name (give '-' for stdin)"
+      );
       ("--sort-results", Arg.Set sort_results, " sort output for CST search.");
       ( "--stats",
         Arg.Unit (set_mode MODE_STATS),

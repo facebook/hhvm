@@ -27,6 +27,8 @@ exception Unsupported
 
 exception InvalidInput
 
+let records_not_supported () = failwith "Records are not supported"
+
 let value_exn ex opt =
   match opt with
   | Some s -> s
@@ -44,8 +46,7 @@ let is_class_dependency dep =
     | Fun _
     | FunName _
     | GConst _
-    | GConstName _
-    | RecordDef _ ->
+    | GConstName _ ->
       false
     | Const (_, _)
     | Method (_, _)
@@ -56,7 +57,8 @@ let is_class_dependency dep =
     | Class _
     | AllMembers _
     | Extends _ ->
-      true)
+      true
+    | RecordDef _ -> records_not_supported ())
 
 let get_class_name (dep : Typing_deps.Dep.variant) =
   Typing_deps.Dep.(
@@ -71,12 +73,12 @@ let get_class_name (dep : Typing_deps.Dep.variant) =
     | AllMembers cls
     | Extends cls ->
       cls
-    | RecordDef _
     | Fun _
     | FunName _
     | GConst _
     | GConstName _ ->
-      raise UnexpectedDependency)
+      raise UnexpectedDependency
+    | RecordDef _ -> records_not_supported ())
 
 let global_dep_name dep =
   Typing_deps.Dep.(
@@ -85,8 +87,7 @@ let global_dep_name dep =
     | FunName s
     | Class s
     | GConst s
-    | GConstName s
-    | RecordDef s ->
+    | GConstName s ->
       s
     | Const (_, _)
     | Method (_, _)
@@ -96,44 +97,78 @@ let global_dep_name dep =
     | Cstr _
     | AllMembers _
     | Extends _ ->
-      raise UnexpectedDependency)
+      raise UnexpectedDependency
+    | RecordDef _ -> records_not_supported ())
 
-let get_fun_mode name =
-  let open Option in
-  Decl_provider.get_fun name
-  >>= fun decl ->
-  let file_name = Pos.filename decl.fe_pos in
-  Ast_provider.find_fun_in_file file_name name
-  >>= (fun fun_ -> Some fun_.Aast.f_mode)
+let get_fun_pos name =
+  Decl_provider.get_fun name |> Option.map ~f:(fun decl -> decl.fe_pos)
 
-let get_class_mode name =
-  let open Option in
+let get_class_pos name =
   Decl_provider.get_class name
-  >>= fun decl ->
-  let file_name = Pos.filename (Decl_provider.Class.pos decl) in
-  Ast_provider.find_class_in_file file_name name
-  >>| (fun class_ -> class_.Aast.c_mode)
+  |> Option.map ~f:(fun decl -> Decl_provider.Class.pos decl)
 
-let get_typedef_mode name =
+let get_typedef_pos name =
+  Decl_provider.get_typedef name |> Option.map ~f:(fun decl -> decl.td_pos)
+
+let get_gconst_pos name =
+  Decl_provider.get_gconst name
+  |> Option.map ~f:(fun ((r, _), _) -> Typing_reason.to_pos r)
+
+let get_class_or_typedef_pos name =
+  Option.first_some (get_class_pos name) (get_typedef_pos name)
+
+let get_dep_pos dep =
+  let open Typing_deps.Dep in
+  match dep with
+  | Fun name
+  | FunName name ->
+    get_fun_pos name
+  | Class name
+  | Const (name, _)
+  | Method (name, _)
+  | SMethod (name, _)
+  | Prop (name, _)
+  | SProp (name, _)
+  | Cstr name
+  | AllMembers name
+  | Extends name ->
+    get_class_or_typedef_pos name
+  | GConst name
+  | GConstName name ->
+    get_gconst_pos name
+  | RecordDef _ -> records_not_supported ()
+
+let make_mode_getter ~get_pos ~find_in_file ~get_mode name =
   let open Option in
-  Decl_provider.get_typedef name
-  >>= fun decl ->
-  let file_name = Pos.filename decl.td_pos in
-  Ast_provider.find_typedef_in_file file_name name
-  >>| (fun typedef -> typedef.Aast.t_mode)
+  get_pos name
+  >>= (fun pos -> find_in_file (Pos.filename pos) name >>| get_mode)
+
+let get_fun_mode =
+  make_mode_getter
+    ~get_pos:get_fun_pos
+    ~find_in_file:Ast_provider.find_fun_in_file
+    ~get_mode:(fun fun_ -> fun_.Aast.f_mode)
+
+let get_class_mode =
+  make_mode_getter
+    ~get_pos:get_class_pos
+    ~find_in_file:Ast_provider.find_class_in_file
+    ~get_mode:(fun class_ -> class_.Aast.c_mode)
+
+let get_typedef_mode =
+  make_mode_getter
+    ~get_pos:get_typedef_pos
+    ~find_in_file:Ast_provider.find_typedef_in_file
+    ~get_mode:(fun typedef -> typedef.Aast.t_mode)
+
+let get_gconst_mode =
+  make_mode_getter
+    ~get_pos:get_gconst_pos
+    ~find_in_file:Ast_provider.find_gconst_in_file
+    ~get_mode:(fun gconst -> gconst.Aast.cst_mode)
 
 let get_class_or_typedef_mode name =
-  match get_class_mode name with
-  | Some mode -> Some mode
-  | None -> get_typedef_mode name
-
-let get_gconst_mode name =
-  let open Option in
-  Decl_provider.get_gconst name
-  >>= fun ((r, _), _) ->
-  let file_name = Pos.filename (Typing_reason.to_pos r) in
-  Ast_provider.find_gconst_in_file file_name name
-  >>= (fun gconst -> Some gconst.Aast.cst_mode)
+  Option.first_some (get_class_mode name) (get_typedef_mode name)
 
 let get_dep_mode dep =
   let open Typing_deps.Dep in
@@ -147,15 +182,14 @@ let get_dep_mode dep =
   | SMethod (name, _)
   | Prop (name, _)
   | SProp (name, _)
-  | Cstr name ->
+  | Cstr name
+  | AllMembers name
+  | Extends name ->
     get_class_or_typedef_mode name
   | GConst name
   | GConstName name ->
     get_gconst_mode name
-  | RecordDef _
-  | AllMembers _
-  | Extends _ ->
-    None
+  | RecordDef _ -> records_not_supported ()
 
 let is_strict_dep dep = get_dep_mode dep = Some FileInfo.Mstrict
 
@@ -163,35 +197,30 @@ let is_strict_fun name = is_strict_dep (Typing_deps.Dep.Fun name)
 
 let is_strict_class name = is_strict_dep (Typing_deps.Dep.Class name)
 
+let is_hhi file_name =
+  String_utils.string_ends_with (Relative_path.suffix file_name) ".hhi"
+
 let is_builtin_dep dep =
-  let is_in_hhi pos =
-    String_utils.string_ends_with
-      (Relative_path.suffix (Pos.filename pos))
-      ".hhi"
-  in
-  if is_class_dependency dep then
-    let cls_name = get_class_name dep in
-    match Decl_provider.get_class cls_name with
-    | Some cls -> is_in_hhi (Decl_provider.Class.pos cls)
-    | None ->
-      let not_found_msg = Printf.sprintf "class or typedef %s" cls_name in
-      let td =
-        value_or_not_found not_found_msg @@ Decl_provider.get_typedef cls_name
-      in
-      is_in_hhi td.td_pos
-  else
-    Typing_deps.Dep.(
-      let description = to_string dep in
-      match dep with
-      | Fun f
-      | FunName f ->
-        let func = value_or_not_found description @@ Decl_provider.get_fun f in
-        is_in_hhi (Reason.to_pos (fst func.fe_type))
-      | GConst c
-      | GConstName c ->
-        Naming_special_names.PseudoConsts.is_pseudo_const c
-      (* Must be a class dependency *)
-      | _ -> raise UnexpectedDependency)
+  let open Typing_deps.Dep in
+  match dep with
+  | GConst c
+  | GConstName c ->
+    Naming_special_names.PseudoConsts.is_pseudo_const c
+  | Fun _
+  | FunName _
+  | Class _
+  | Const _
+  | Method _
+  | SMethod _
+  | Prop _
+  | SProp _
+  | Cstr _
+  | AllMembers _
+  | Extends _ ->
+    let msg = Typing_deps.Dep.to_string dep in
+    let pos = value_or_not_found msg (get_dep_pos dep) in
+    is_hhi (Pos.filename pos)
+  | RecordDef _ -> records_not_supported ()
 
 let is_relevant_dependency (target : target) (dep : Typing_deps.Dep.variant) =
   match target with
@@ -788,9 +817,9 @@ let get_class_elt_declaration
       | Fun _
       | FunName _
       | GConst _
-      | GConstName _
-      | RecordDef _ ->
-        raise UnexpectedDependency))
+      | GConstName _ ->
+        raise UnexpectedDependency
+      | RecordDef _ -> records_not_supported ()))
 
 let construct_enum tcopt enum fields =
   let enum_name = Decl_provider.Class.name enum in

@@ -133,6 +133,7 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
             "\\WithNameMatchingClassName",
             "\\with_generic_method_with_wildcard_tparam",
             "\\with_is_refinement",
+            "\\with_switch",
         ]
 
         for path in paths:

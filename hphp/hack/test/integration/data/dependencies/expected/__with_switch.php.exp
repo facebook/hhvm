@@ -1,0 +1,16 @@
+<?hh
+function with_switch(SomeEnum $x): void {
+  switch ($x) {
+    case SomeEnum::FIRST:
+      return;
+    default:
+      return;
+  }
+}
+enum SomeEnum: int {
+  SECOND = 0;
+  FIRST = 0;
+}
+function extract_standalone_make_default(): nothing {
+  throw new Exception();
+}

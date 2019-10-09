@@ -6,6 +6,7 @@ class GenericBase<Tfirst, Tsecond> {
   const int GENERIC_CONSTANT = 0;
 }
 enum Mode: int as int {
+  Two = 0;
   One = 0;
 }
 function extract_standalone_make_default(): nothing {

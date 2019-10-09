@@ -9,7 +9,10 @@ class WithStaticProperty {
   public static \Map<\SomeEnum, string> $map = Map {};
 }
 class A extends \A0 implements \I1 {}
-enum SomeEnum: int {}
+enum SomeEnum: int {
+  SECOND = 0;
+  FIRST = 0;
+}
 interface I1 {}
 function extract_standalone_make_default(): nothing {
   throw new Exception();

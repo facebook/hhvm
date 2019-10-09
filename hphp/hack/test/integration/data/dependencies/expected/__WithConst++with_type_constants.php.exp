@@ -10,6 +10,7 @@ class WithConst {
 class A0 {}
 enum SomeEnum: int {
   SECOND = 0;
+  FIRST = 0;
 }
 function extract_standalone_make_default(): nothing {
   throw new Exception();

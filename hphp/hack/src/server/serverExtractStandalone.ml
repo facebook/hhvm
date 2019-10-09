@@ -943,7 +943,7 @@ let rec do_add_dep deps dep =
         do_add_dep deps (Typing_deps.Dep.Class name))
   )
 
-and add_dep deps ?cls:(this_cls = None) ?(init_const = false) ty : unit =
+and add_dep deps ?cls:(this_cls = None) ty : unit =
   let visitor =
     object (this)
       inherit [unit] Type_visitor.decl_type_visitor
@@ -955,20 +955,19 @@ and add_dep deps ?cls:(this_cls = None) ?(init_const = false) ty : unit =
         (* If we have a constant of a generic type, it can only be an
            array type, e.g., vec<A>, for which don't need values of A
            to generate an initializer. *)
-        List.iter tyl ~f:(add_dep deps ~cls:this_cls ~init_const:false);
+        List.iter tyl ~f:(add_dep deps ~cls:this_cls);
 
-        (* If a constant has a dependency on a non-builtin class, this
-           class is an enum and the constant's value (or a part of it)
-           is one of this enum's values. This means we need to add a
-           dependency on an enum value to generate the constant's
-           initializer. *)
-        if
-          init_const
-          && (not (is_builtin_dep dep))
-          && Decl_provider.get_typedef name = None
-        then
-          let enum_value = get_enum_value name in
-          do_add_dep deps (Typing_deps.Dep.Const (name, enum_value))
+        (* When adding a dependency on an enum, also add dependencies
+           on all its values.  We need all the values and not only the
+           ones used by the extracted code.  See the \with_switch test
+           case. *)
+        match Decl_provider.get_class name with
+        | Some enum when Decl_provider.Class.kind enum = Ast_defs.Cenum ->
+          Decl_provider.Class.consts enum
+          |> Sequence.iter ~f:(fun (const_name, _) ->
+                 if const_name <> "class" then
+                   do_add_dep deps (Typing_deps.Dep.Const (name, const_name)))
+        | _ -> ()
 
       method! on_taccess _ _ ((_, cls_type), tconsts) =
         let class_name =
@@ -1046,8 +1045,7 @@ and add_signature_dependencies deps obj =
           Option.iter tc.ttc_constraint ~f:add_dep
         | None ->
           let c = value_or_not_found description @@ Class.get_const cls name in
-          let init_const = Class.kind cls <> Ast_defs.Cenum in
-          add_dep ~init_const c.cc_type)
+          add_dep c.cc_type)
       | Cstr _ ->
         (match Class.construct cls with
         | (Some constr, _) -> add_dep @@ Lazy.force constr.ce_type
@@ -1099,7 +1097,7 @@ and add_signature_dependencies deps obj =
     | GConst c
     | GConstName c ->
       let (ty, _) = value_or_not_found description @@ get_gconst c in
-      add_dep ~init_const:true deps ty
+      add_dep deps ty
     | _ -> raise UnexpectedDependency)
 
 let get_dependency_origin cls (dep : Typing_deps.Dep.variant) =

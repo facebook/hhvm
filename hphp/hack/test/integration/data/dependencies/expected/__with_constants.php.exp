@@ -24,10 +24,12 @@ const shape('x' => int, 'y' => \SecondEnum) SHAPE =
 const (int, ?(string, float)) OPTION = tuple(0, null);
 const darray<string, int> AGE_RANGE = darray[];
 enum SomeEnum: int {
+  SECOND = 0;
   FIRST = 0;
 }
 const \classname<\WithConst> CLASSNAME = \WithConst::class;
 enum SecondEnum: string {
+  SECOND = "";
   FIRST = "";
 }
 const \keyset<string> KEYSET = keyset[];

@@ -12,7 +12,10 @@ function with_is_refinement<Tfirst, Tsecond>(
   }
 }
 class GenericBase<Tfirst, Tsecond> {}
-enum Mode: int as int {}
+enum Mode: int as int {
+  Two = 0;
+  One = 0;
+}
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }

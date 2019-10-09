@@ -71,3 +71,12 @@ function with_static_property(): void {
   $a = WithStaticProperty::$map;
   $b = WithStaticProperty::$vector;
 }
+
+function with_switch(SomeEnum $x): void {
+  switch ($x) {
+    case SomeEnum::FIRST:
+      return;
+    default:
+      return;
+  }
+}

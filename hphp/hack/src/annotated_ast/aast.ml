@@ -296,10 +296,6 @@ and ('ex, 'fb, 'en, 'hi) fun_ = {
   f_static: bool;
 }
 
-and ('ex, 'fb, 'en, 'hi) func_body = {
-  fb_ast: ('ex, 'fb, 'en, 'hi) block;
-  fb_annotation: 'fb;
-}
 (**
  * Naming has two phases and the annotation helps to indicate the phase.
  * In the first pass, it will perform naming on everything except for function
@@ -308,6 +304,10 @@ and ('ex, 'fb, 'en, 'hi) func_body = {
  * have named and unnamed variants of the annotation.
  * See BodyNamingAnnotation in nast.ml and the comment in naming.ml
  *)
+and ('ex, 'fb, 'en, 'hi) func_body = {
+  fb_ast: ('ex, 'fb, 'en, 'hi) block;
+  fb_annotation: 'fb;
+}
 
 (* A type annotation is two things:
   - the localized hint, or if the hint is missing, the inferred type

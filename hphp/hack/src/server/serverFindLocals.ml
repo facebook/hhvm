@@ -15,7 +15,6 @@ type result = Pos.absolute list
 module PosSet = Caml.Set.Make (Pos)
 
 module LocalPositions = struct
-  type t = PosSet.t IMap.t
   (**
    * Local positions is a map from an identifier -- a unique integer that
    * identifies a local "symbol" -- to a set of all known positions where
@@ -24,6 +23,7 @@ module LocalPositions = struct
    * Identifiers that identify no known local produce an empty set of
    * positions.
    *)
+  type t = PosSet.t IMap.t
 
   let empty = IMap.empty
 
@@ -39,7 +39,6 @@ end
 (* End of module LocalPositions *)
 
 module ScopeChain = struct
-  type scope = Ident.t SMap.t
   (**
    * A scope maps from a string (the text of the use of a local) to an
    * ident (a unique integer associated with this local symbol).
@@ -48,6 +47,7 @@ module ScopeChain = struct
    * of the stack, that match shadows any matches in the tail. Otherwise,
    * the tail is checked.
    *)
+  type scope = Ident.t SMap.t
 
   type t = scope list
 
@@ -126,13 +126,6 @@ end
 (* End of module ScopeChains *)
 
 module LocalMap = struct
-  type t = {
-    scopechains: ScopeChains.t;
-    locals: LocalPositions.t;
-    target_line: int;
-    target_char: int;
-    target_ident: Ident.t option;
-  }
   (**
    * A "local map" is a scope chain stack and a local positions map.
    * When a usage of a local is encountered, there are several possibilities
@@ -158,6 +151,13 @@ module LocalMap = struct
    * When we encounter a local at that position, we'll make a note of the
    * ident so that we can look up the associated positions later.
    *)
+  type t = {
+    scopechains: ScopeChains.t;
+    locals: LocalPositions.t;
+    target_line: int;
+    target_char: int;
+    target_ident: Ident.t option;
+  }
 
   let make target_line target_char =
     {

@@ -6,18 +6,17 @@
  *
  *)
 
-val only : string -> string -> unit
 (** e.g. Args.parse options (only "foo"), to show that the only anonymous
      argument allowed is "foo" (an anonymous argument is one without -), and that
      "foo" may only be provided at most once.
      Specifically: only, given a string, returns a function which may only be invoked once, and only with that string *)
+val only : string -> string -> unit
 
-val root : string ref -> string * Arg.spec * string
 (** e.g. Args.parse [root my_ref] anon, to show that "--root" argument can be used.
     If present, and if it fails to specify a directory containing .hhconfig,
     then Args.parse will throw an exception. *)
+val root : string ref -> string * Arg.spec * string
 
-val prototype_lock_file : string -> string
 (** Minor helper function for the '--root' argument, to get the filename of the
     corresponding /tmp/hh_server/[root].prototype.lock file.
     e.g. "Lock.grab (prototype_lock_file root)"
@@ -28,8 +27,8 @@ val prototype_lock_file : string -> string
     except that the OS automatically releases the lock when the process
     terminates. If the attempt to grab fails, then prototype knows that another
     instance is still alive, and so gives up. *)
+val prototype_lock_file : string -> string
 
-val prototype_sock_file : string -> string
 (** Minor helper function for the '--root' argument, to get the filename of the
     corresponding /tmp/hh_server/[root].prototype.sock file.
     e.g. "Unix.ADDR_UNIX (Args.prototype_sock_file root)"
@@ -43,3 +42,4 @@ val prototype_sock_file : string -> string
     saying what kind of worker it wants (in JSON). In response the prototype
     will fork a worker, and the orchestrator can communicate with the worker
     over the socket fd. *)
+val prototype_sock_file : string -> string

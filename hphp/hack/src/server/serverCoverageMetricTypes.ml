@@ -7,8 +7,6 @@
  *
  *)
 
-type result =
-  Coverage_level_defs.level_stats SMap.t Coverage_level_defs.trie option
 (**
  * The type result is an optional trie.
  * The trie leaves are maps from strings of filenames to level_stats for those
@@ -17,3 +15,5 @@ type result =
  * to another trie.
  *
  *)
+type result =
+  Coverage_level_defs.level_stats SMap.t Coverage_level_defs.trie option

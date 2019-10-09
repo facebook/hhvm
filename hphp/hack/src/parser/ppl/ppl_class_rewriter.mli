@@ -8,7 +8,7 @@
 
 module Syntax = Full_fidelity_editable_positioned_syntax
 
-val rewrite_ppl_classes : Syntax.t -> Syntax.t
 (**
  * Takes a script and rewrites all classes with the user attribute <<__PPL>>
  *)
+val rewrite_ppl_classes : Syntax.t -> Syntax.t

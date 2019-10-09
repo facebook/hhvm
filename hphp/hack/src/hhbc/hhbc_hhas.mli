@@ -13,12 +13,12 @@ val to_segments :
   Hhas_program.t ->
   string list
 
-val to_string :
-  ?path:Relative_path.t -> ?dump_symbol_refs:bool -> Hhas_program.t -> string
 (**
  * Materializing the hhbc as a single string may introduce additional runtime
  * memory usage. Prefer to_hhbc_accumulator.
  *)
+val to_string :
+  ?path:Relative_path.t -> ?dump_symbol_refs:bool -> Hhas_program.t -> string
 
 val string_of_instruction : Hhbc_ast.instruct -> string
 

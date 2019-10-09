@@ -350,10 +350,10 @@ let handle_conversion_errors errors =
       (* Ignore these errors to match legacy AST behavior *)
       | 2086
       (* Naming.MethodNeedsVisibility *)
-
+      
       | 2102
       (* Naming.UnsupportedTraitUseAs *)
-
+      
       | 2103 (* Naming.UnsupportedInsteadOf *) ->
         false
       | _ (* Emit fatal parse otherwise *) -> true)

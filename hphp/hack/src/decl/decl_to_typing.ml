@@ -19,16 +19,16 @@ open Shallow_decl_defs
 open Typing_defs
 module Reason = Typing_reason
 
-type tagged_elt = {
-  id: string;
-  inherit_when_private: bool;
-  elt: class_elt;
-}
 (** [tagged_elt] is a representation internal to Decl_inheritance which is used
     for both methods and properties (members represented using
     {!Typing_defs.class_elt}). Tagging these members with [inherit_when_private]
     allows us to assign private trait members to the class which used the trait
     and to filter out other private members. *)
+type tagged_elt = {
+  id: string;
+  inherit_when_private: bool;
+  elt: class_elt;
+}
 
 let method_redeclaration_to_shallow_method smr =
   let {

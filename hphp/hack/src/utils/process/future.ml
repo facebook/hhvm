@@ -41,8 +41,8 @@ type 'a promise =
   | Bound : ('a t * (('a, error) result -> 'b t)) -> 'b promise
   | Incomplete of Process_types.t * (string -> 'a)
 
-and 'a t = 'a promise ref * float
 (** float is the time the Future was constructed. *)
+and 'a t = 'a promise ref * float
 
 let make process transformer =
   (ref (Incomplete (process, transformer)), Unix.gettimeofday ())

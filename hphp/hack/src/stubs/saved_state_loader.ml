@@ -44,10 +44,10 @@ type _ saved_state_type =
   | Naming_table : Naming_table_saved_state_info.t saved_state_type
   | Symbol_index : Symbol_index_saved_state_info.t saved_state_type
 
-type changed_files = Path.t list
 (** List of files changed since the saved-state's commit. This list of files may
 include files other than Hack files, so the caller should filter the given list
 as necessary. *)
+type changed_files = Path.t list
 
 type load_error
 

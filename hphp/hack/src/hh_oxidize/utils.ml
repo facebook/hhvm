@@ -9,10 +9,10 @@
 open Core_kernel
 open Reordered_argument_collections
 
-exception Skip_type_decl of string
 (** HACK: Raised when we encounter a construct in a type declaration which we
     have chosen not to handle (because it occurs in a type declaration which we
     do not need to convert at this time). *)
+exception Skip_type_decl of string
 
 let log_indent = ref 0
 

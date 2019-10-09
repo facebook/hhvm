@@ -19,8 +19,8 @@ module Env = Typing_env
 module Phase = Typing_phase
 module Partial = Partial_provider
 
-exception Cant_check
 (** This happens, for example, when there are gotos *)
+exception Cant_check
 
 exception Not_implemented
 

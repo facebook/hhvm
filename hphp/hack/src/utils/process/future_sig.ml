@@ -7,8 +7,8 @@
  *
  *)
 
-type 'a deserializer = string -> 'a
 (** Deserializes the byte sequence. *)
+type 'a deserializer = string -> 'a
 
 module Types = struct
   type error_mode =

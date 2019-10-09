@@ -39,9 +39,9 @@ module type S = sig
     (* bool indicates if there are working copy changes. *)
     (hg_rev * bool) Future.t
 
-  val current_working_copy_base_rev : string -> global_rev Future.t
   (** Get the global base revision of the current working copy in the given
    * repo dir. *)
+  val current_working_copy_base_rev : string -> global_rev Future.t
 
   val get_closest_global_ancestor : hg_rev -> string -> global_rev Future.t
 
@@ -56,8 +56,8 @@ module type S = sig
     string ->
     string list Future.t
 
-  val update_to_rev : rev -> string -> unit Future.t
   (** hg update to the base global revision. *)
+  val update_to_rev : rev -> string -> unit Future.t
 
   module Mocking : sig
     val current_working_copy_hg_rev_returns : (hg_rev * bool) Future.t -> unit

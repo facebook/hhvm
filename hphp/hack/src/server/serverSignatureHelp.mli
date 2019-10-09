@@ -7,10 +7,10 @@
  *
  *)
 
+(** Returns signature help for the given location. *)
 val go :
   env:ServerEnv.env ->
   file:ServerCommandTypes.file_input ->
   line:int ->
   column:int ->
   Lsp.SignatureHelp.result
-(** Returns signature help for the given location. *)

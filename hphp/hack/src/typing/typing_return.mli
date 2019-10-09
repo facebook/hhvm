@@ -30,9 +30,9 @@ val implicit_return :
   actual:Typing_defs.locl_ty ->
   env
 
+(** For async functions, wrap Awaitable<_> around the return type *)
 val wrap_awaitable :
   env -> Ast_defs.pos -> Typing_defs.locl_ty -> Typing_defs.locl_ty
-(** For async functions, wrap Awaitable<_> around the return type *)
 
 val make_return_type :
   (env -> Typing_defs.decl_ty -> env * Typing_defs.locl_ty) ->
@@ -40,22 +40,22 @@ val make_return_type :
   Typing_defs.decl_ty ->
   env * Typing_defs.locl_ty
 
+(** For async functions, strip Awaitable<_> from the return type *)
 val strip_awaitable :
   Ast_defs.fun_kind ->
   env ->
   Typing_defs.locl_possibly_enforced_ty ->
   Typing_defs.locl_possibly_enforced_ty
-(** For async functions, strip Awaitable<_> from the return type *)
 
 val force_awaitable :
   env -> Ast_defs.pos -> Typing_defs.locl_ty -> env * Typing_defs.locl_ty
 
+(** If there is no return type annotation on method, assume `void` for the
+special functions `__construct`, otherwise we can either
+introduce a new fresh variable when infer missing is on or assume type Tany *)
 val make_default_return :
   is_method:bool ->
   is_infer_missing_on:bool ->
   env ->
   Ast_defs.pos * string ->
   env * (Typing_reason.t * Typing_defs.locl_phase Typing_defs.ty_)
-(** If there is no return type annotation on method, assume `void` for the
-special functions `__construct`, otherwise we can either
-introduce a new fresh variable when infer missing is on or assume type Tany *)

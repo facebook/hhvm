@@ -13,13 +13,14 @@ type pattern
 
 type result
 
-val compile_pattern : Hh_json.json -> (pattern, string) Result.t
 (** Compile JSON input into a pattern that can be searched for. *)
+val compile_pattern : Hh_json.json -> (pattern, string) Result.t
 
-val result_to_json : sort_results:bool -> result option -> Hh_json.json
 (** Convert the result of a search into JSON output that can be sent back to the
     user. *)
+val result_to_json : sort_results:bool -> result option -> Hh_json.json
 
+(** Search for the given pattern across the given set of files. *)
 val go :
   ServerEnv.genv ->
   ServerEnv.env ->
@@ -27,13 +28,12 @@ val go :
   files_to_search:string list option ->
   Hh_json.json ->
   (Hh_json.json, string) Result.t
-(** Search for the given pattern across the given set of files. *)
 
+(** Execute a search on a single syntax tree. This is most useful in debugging
+    utilities like `hh_single_type_check`. *)
 val search :
   TypecheckerOptions.t ->
   Relative_path.t ->
   FileInfo.t ->
   pattern ->
   result option
-(** Execute a search on a single syntax tree. This is most useful in debugging
-    utilities like `hh_single_type_check`. *)

@@ -1,8 +1,4 @@
 (*
-open Integration_test_base_types
-*)
-module Test = Integration_test_base
-(**
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
@@ -11,6 +7,8 @@ module Test = Integration_test_base
  *
  *
  *)
+
+module Test = Integration_test_base
 
 let foo_name = "foo.php"
 

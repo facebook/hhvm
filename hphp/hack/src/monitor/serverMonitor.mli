@@ -12,6 +12,7 @@ module Make_monitor
     (Informant : Informant_sig.S) : sig
   type t
 
+  (** Start a monitor without running the check loop. Useful for testing. *)
   val start_monitor :
     current_version:Config_file.version ->
     waiting_client:Unix.file_descr option ->
@@ -20,11 +21,12 @@ module Make_monitor
     Informant.init_env ->
     ServerMonitorUtils.monitor_config ->
     t
-  (** Start a monitor without running the check loop. Useful for testing. *)
 
-  val check_and_run_loop_once : t -> t
   (** Run the check loop once. Useful for testing. *)
+  val check_and_run_loop_once : t -> t
 
+  (** Start the monitor and repeatedly run the check and run loop.
+       * Does not return. *)
   val start_monitoring :
     current_version:Config_file.version ->
     waiting_client:Unix.file_descr option ->
@@ -33,6 +35,4 @@ module Make_monitor
     Informant.init_env ->
     ServerMonitorUtils.monitor_config ->
     'a
-  (** Start the monitor and repeatedly run the check and run loop.
-       * Does not return. *)
 end

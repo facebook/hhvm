@@ -14,8 +14,8 @@ type decl_cache_key =
   | Typedef_decl of string
   | Gconst_decl of string
 
-type decl_cache = (decl_cache_key, Obj.t) Memory_bounded_lru_cache.t
 (** Maps decl names to types. *)
+type decl_cache = (decl_cache_key, Obj.t) Memory_bounded_lru_cache.t
 
 type backend = private
   | Lru_shared_memory

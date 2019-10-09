@@ -27,8 +27,8 @@ module Target_saved_state_opt_comparator =
   Asserter.Make_option_comparator (Target_saved_state_comparator)
 
 module Start_server_args_comparator = struct
-  type t = ServerMonitorUtils.target_saved_state option
   (** We only care about this arg and drop the rest. *)
+  type t = ServerMonitorUtils.target_saved_state option
 
   let to_string state =
     let state_string = Target_saved_state_opt_comparator.to_string state in

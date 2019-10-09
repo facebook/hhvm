@@ -24,7 +24,6 @@ end
 module type S = sig
   include module type of Abstract_types
 
-  val init : Path.t -> t
   (**
    * Initiates a client.
    *
@@ -32,14 +31,15 @@ module type S = sig
    *
    * If a connection cannot be made to a Watcher, returns None.
    *)
+  val init : Path.t -> t
 
-  val get_status : t -> WatchmanEventWatcherConfig.Responses.t option
   (**
    * Non-blocking poll on the connection - returns true if the Watcher reports
    * settled state, or we have previously already read the settled message.
    *
    * If Watchman Event Watcher connection fails, None is returned.
    *)
+  val get_status : t -> WatchmanEventWatcherConfig.Responses.t option
 
   module Mocking : sig
     val get_status_returns :

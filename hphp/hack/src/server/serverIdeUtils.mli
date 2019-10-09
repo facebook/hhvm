@@ -15,6 +15,7 @@ val revert_local_changes : unit -> unit
 * this is the path that will be assigned to it *)
 val path : Relative_path.t
 
+(** Runs the declaration, naming, and typecheck phases on a single file. *)
 val check_file_input :
   TypecheckerOptions.t ->
   (* What are the definitions in each file. *)
@@ -25,14 +26,13 @@ val check_file_input :
    * that. The declarations will be removed from shared memory afterwards. *)
   ServerCommandTypes.file_input ->
   Relative_path.t * Tast.program
-(** Runs the declaration, naming, and typecheck phases on a single file. *)
 
 val check_fileinfo :
   TypecheckerOptions.t -> Relative_path.t -> FileInfo.t -> Tast.program
 
-val check_ast : TypecheckerOptions.t -> Nast.program -> Tast.program
 (** Runs the declaration, naming, and typecheck phases on an already-parsed
     AST. *)
+val check_ast : TypecheckerOptions.t -> Nast.program -> Tast.program
 
 (* Parses, names, declares and typechecks the content buffer, then run f
  * while the declared definitions are still available in shared memory.

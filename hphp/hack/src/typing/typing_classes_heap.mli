@@ -37,9 +37,9 @@ module Api : sig
 
   val ppl : t -> bool
 
-  val deferred_init_members : t -> SSet.t
   (** To be used only when {!ServerLocalConfig.shallow_class_decl} is not enabled.
       Raises [Failure] if used when shallow_class_decl is enabled. *)
+  val deferred_init_members : t -> SSet.t
 
   val kind : t -> Ast_defs.class_kind
 
@@ -135,7 +135,6 @@ module Api : sig
 
   val smethods : t -> (string * class_elt) Sequence.t
 
-  val all_inherited_methods : t -> string -> class_elt list
   (** The following functions return _all_ class member declarations defined in or
       inherited by this class with the given member name, including ones which
       were overridden, for purposes such as override checking. The list is ordered
@@ -144,15 +143,16 @@ module Api : sig
 
       To be used only when {!ServerLocalConfig.shallow_class_decl} is enabled.
       Raises [Failure] if used when shallow_class_decl is not enabled. *)
+  val all_inherited_methods : t -> string -> class_elt list
 
   val all_inherited_smethods : t -> string -> class_elt list
 
-  val shallow_decl : t -> Shallow_decl_defs.shallow_class
   (** Return the shallow declaration for the given class.
 
       To be used only when {!ServerLocalConfig.shallow_class_decl} is enabled.
       Raises [Failure] if used when shallow_class_decl is not enabled. *)
+  val shallow_decl : t -> Shallow_decl_defs.shallow_class
 end
 
-val compute_class_decl_no_cache : string -> Classes.t option
 (** Implementation detail, do not use. For use in [Decl_provider] only. *)
+val compute_class_decl_no_cache : string -> Classes.t option

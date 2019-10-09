@@ -7,7 +7,6 @@
  *
  *)
 
-open Core_kernel
 (** Module "naming" a program.
  *
  * The naming phase consists in several things
@@ -15,6 +14,7 @@ open Core_kernel
  * 2- transform all the local names into a unique identifier
  *)
 
+open Core_kernel
 open Utils
 module SN = Naming_special_names
 

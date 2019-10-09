@@ -7,7 +7,6 @@
  *
  *)
 
-type t
 (** Provides IDE services in the client, without an instance of hh_server
 running.
 
@@ -16,6 +15,7 @@ information to provide IDE services for just the files you're looking at. When
 we need to look up declarations to service an IDE query, we parse and typecheck
 the files containing those declarations on-demand, then answer your IDE query.
 *)
+type t
 
 module Status : sig
   type t =
@@ -31,42 +31,42 @@ module Status : sig
     | Crashed of string  (** The IDE services are not available. *)
 end
 
-val make : unit -> t
 (** Create an uninitialized IDE service. All queries made to this service will
 fail immediately, unless otherwise requested in the initialization procedure. *)
+val make : unit -> t
 
+(** Request that the IDE service initialize from the saved state. Queries made
+to the service will fail until it is done initializing, unless
+[wait_for_initialization] is [true], in which case queries made to the service
+will block until the initializing is complete. *)
 val initialize_from_saved_state :
   t ->
   root:Path.t ->
   naming_table_saved_state_path:Path.t option ->
   wait_for_initialization:bool ->
   (unit, string) Lwt_result.t
-(** Request that the IDE service initialize from the saved state. Queries made
-to the service will fail until it is done initializing, unless
-[wait_for_initialization] is [true], in which case queries made to the service
-will block until the initializing is complete. *)
 
-val serve : t -> unit Lwt.t
 (** Pump the message loop for the IDE service. Exits once the IDE service has
 been [destroy]ed. *)
+val serve : t -> unit Lwt.t
 
-val destroy : t -> unit Lwt.t
 (** Clean up any resources held by the IDE service (such as the message loop and
 background processes). *)
+val destroy : t -> unit Lwt.t
 
-val notify_file_changed : t -> Path.t -> unit
 (** The caller is expected to call this function to notify the IDE service
 whenever a Hack file changes on disk, so that it can update its indexes
 appropriately. *)
+val notify_file_changed : t -> Path.t -> unit
 
-val rpc : t -> 'response ClientIdeMessage.t -> ('response, string) Lwt_result.t
 (** Make an RPC call to the IDE service. *)
+val rpc : t -> 'response ClientIdeMessage.t -> ('response, string) Lwt_result.t
 
-val get_notifications : t -> ClientIdeMessage.notification Lwt_message_queue.t
 (** Get a handle to the stream of notifications sent by the IDE service. These
 notifications may be sent even during RPC requests, and so should be processed
 asynchronously. *)
+val get_notifications : t -> ClientIdeMessage.notification Lwt_message_queue.t
 
-val get_status : t -> Status.t
 (** Get the status of the IDE services, based on the internal state and any
 notifications that the IDE service process has sent to us. *)
+val get_status : t -> Status.t

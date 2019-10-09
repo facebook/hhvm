@@ -9,6 +9,10 @@
 
 open Typing_deps
 
+(** AffectedDeps.t represents the "fanout" of a change, representing the cached
+    information we must invalidate and the files we must re-typecheck if we want
+    to produce a correct list of all errors in the repository which reflects
+    those changes. *)
 type t = {
   changed: DepSet.t;
       (** The subset of classes in changed files whose decls changed (excluding
@@ -29,10 +33,6 @@ type t = {
           rechecking. Instead, Typing_deps maintains a mapping from symbol hash
           to filename (exposed via Typing_deps.get_files). *)
 }
-(** AffectedDeps.t represents the "fanout" of a change, representing the cached
-    information we must invalidate and the files we must re-typecheck if we want
-    to produce a correct list of all errors in the repository which reflects
-    those changes. *)
 
 val empty : t
 

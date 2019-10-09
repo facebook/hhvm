@@ -7,7 +7,6 @@
  *
  *)
 
-val system_config_path : string
 (**
  * Where we look for system-wide configuration files.
  *
@@ -15,8 +14,8 @@ val system_config_path : string
  * - "/etc": most linux systems
  * - "/usr/local/etc": MacOS homebrew
  *)
+val system_config_path : string
 
-val default_hackfmt_path : string
 (**
  * Where to look for hackfmt.
  *
@@ -25,3 +24,4 @@ val default_hackfmt_path : string
  * - "/usr/bin/hackfmt": most linux binary builds
  * - "/usr/local/Cellar/hhvm/VERSION/bin/hackfmt": MacOS homebrew
  *)
+val default_hackfmt_path : string

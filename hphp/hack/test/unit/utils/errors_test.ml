@@ -1,4 +1,3 @@
-open Hh_core
 (**
  * Tests documenting various invariants about the order of things coming out
  * of Errors module. Some of them are __probably__ not necessary for
@@ -6,6 +5,8 @@ open Hh_core
  * outputs and will have to spend time wondering whether the changes are
  * significant or not.
  **)
+
+open Hh_core
 
 let error_list_to_string_buffer buf x =
   List.iter x ~f:(fun error ->

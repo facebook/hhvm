@@ -51,8 +51,8 @@ val empty_entry : per_cont_entry
 (* Get a continuation wrapped in Some, or None if not found *)
 val get_cont_option : C.t -> t -> per_cont_entry option
 
-val all_continuations : t -> C.t list
 (** Get all continuations present in an environment *)
+val all_continuations : t -> C.t list
 
 (* Add the key, value pair to the continuation named 'name'
  * If the continuation doesn't exist, create it *)

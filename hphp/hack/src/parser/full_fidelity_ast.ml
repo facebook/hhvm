@@ -1966,7 +1966,7 @@ if there already is one, since that one will likely be better than this one. *)
             | (_, Some TK.HexadecimalLiteral)
             (* We allow underscores while lexing the integer literals. This gets rid of them before
              * the literal is created. *)
-
+            
             | (_, Some TK.BinaryLiteral) ->
               Int (Str.global_replace underscore "" s)
             | (_, Some TK.FloatingLiteral) -> Float s
@@ -3929,7 +3929,7 @@ if there already is one, since that one will likely be better than this one. *)
     let rec aux env acc = function
       | []
       (* EOF happens only as the last token in the list. *)
-
+      
       | [{ syntax = EndOfFile _; _ }] ->
         List.concat (List.rev acc)
       (* HaltCompiler stops processing the list in PHP but can be disabled in Hack *)

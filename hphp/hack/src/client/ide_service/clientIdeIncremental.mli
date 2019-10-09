@@ -7,10 +7,10 @@
  *
  *)
 
-val process_changed_file : ServerEnv.env -> Path.t -> ServerEnv.env Lwt.t
 (** Update the forward and reverse naming tables by parsing the file at the
 given path and installing their declarations. If the file could not be read,
 it's assumed to be deleted.
 
 Returns an updated [ServerEnv.env], but also
 modifies the global naming table state in [NamingGlobal]. *)
+val process_changed_file : ServerEnv.env -> Path.t -> ServerEnv.env Lwt.t

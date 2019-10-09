@@ -6,7 +6,6 @@
  * LICENSE file in the "hack" directory of this source tree.
  *)
 
-open Core_kernel
 (** Note: the tracking in this module is best effort only;
  * it's not guaranteed to always reflect accurate merge base transitions:
  * - in some init types, initial merge base is not known so we will only notice
@@ -16,6 +15,7 @@ open Core_kernel
  * - we only record "new" mergebases as we see them, not detecting transitions
  *   between already visited revisions
  **)
+open Core_kernel
 
 (* This will be None after init in case of canaries and Precomputed loads *)
 let current_mergebase : Hg.global_rev option ref = ref None

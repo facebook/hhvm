@@ -16,6 +16,9 @@ module Syntax = Full_fidelity_positioned_syntax
 module Token = Full_fidelity_positioned_token
 module Trivia = Full_fidelity_positioned_trivia
 
+(**
+ * Data about the token with respect to the original source text.
+ *)
 type t = {
   source_text: SourceText.t;
   offset: int;
@@ -28,9 +31,6 @@ type t = {
   trailing: Trivia.t list;
 }
 [@@deriving show]
-(**
- * Data about the token with respect to the original source text.
- *)
 
 let empty =
   {

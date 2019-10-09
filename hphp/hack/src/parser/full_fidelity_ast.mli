@@ -13,11 +13,11 @@ end
 
 type lifted_awaits [@@deriving show]
 
-type env [@@deriving show]
 (**
  * The `env` of the lowerer is "full request." It provides all the settings the
  * lowerer needs to produce an AST.
  *)
+type env [@@deriving show]
 
 val make_env (* Optional parts *) :
   ?codegen:bool ->

@@ -400,8 +400,8 @@ type 'a message_type =
    * sending RPC response. *)
   | Ping
 
-exception Read_command_timeout
 (** Timeout on reading the command from the client - client probably frozen. *)
+exception Read_command_timeout
 
 (* This data is marshalled by the server to a <pid>.fin file in certain cases *)
 (* of a controlled exit, so the client can know about it. *)

@@ -31,13 +31,13 @@ val full_decl : TypecheckerOptions.t -> Typing_defs.decl_ty -> string
 
 val fun_type : TypecheckerOptions.t -> Typing_defs.decl_fun_type -> string
 
+(** Pretty print a type and all of its associated declaration information. *)
 val full_with_identity :
   env ->
   Typing_defs.locl_ty ->
   'b SymbolOccurrence.t ->
   'b SymbolDefinition.t option ->
   string
-(** Pretty print a type and all of its associated declaration information. *)
 
 val debug : env -> Typing_defs.locl_ty -> string
 

@@ -6,13 +6,13 @@
  *
  *)
 
-val get : unit -> ParserOptions.t
 (** Get the global [ParserOptions.t].
 
     Raises [Failure] if [set] has not yet been invoked. *)
+val get : unit -> ParserOptions.t
 
-val set : ParserOptions.t -> unit
 (** Set the global [ParserOptions.t] to be used in parsing for the entire
     lifetime of the server.
 
     Has no effect if [set] has already been invoked. *)
+val set : ParserOptions.t -> unit

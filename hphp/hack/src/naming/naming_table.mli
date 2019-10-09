@@ -30,13 +30,13 @@ val combine : t -> t -> t
 
 val empty : t
 
-val filter : t -> f:(Relative_path.t -> FileInfo.t -> bool) -> t
 (** [filter] is implemented using tombstones on SQLite-backed naming tables, so
   * if your naming table is backed by SQLite you should try to avoid removing
   * more than half the table by filtering (otherwise it would be best to just
   * make a new empty one and add elements to it). On non-SQLite backed tables
   * we remove entries, so it's no more or less efficient depending on how many
   * are removed. *)
+val filter : t -> f:(Relative_path.t -> FileInfo.t -> bool) -> t
 
 val fold : t -> init:'b -> f:(Relative_path.t -> FileInfo.t -> 'b -> 'b) -> 'b
 

@@ -14,22 +14,22 @@
 
 open Shallow_decl_defs
 
-val get : string -> shallow_class option
 (** Return the shallow declaration of the class with the given name if it is
     present in the cache. Otherwise, compute it, store it in the cache, and
     return it.
 
     Raises [Failure] if [shallow_class_decl] is not enabled. *)
+val get : string -> shallow_class option
 
-val class_naming_and_decl : Nast.class_ -> shallow_class
 (** Convert the given class AST to a shallow class declaration and return it. *)
+val class_naming_and_decl : Nast.class_ -> shallow_class
 
-val class_decl_if_missing : Nast.class_ -> shallow_class
 (** If a shallow declaration for the class with the given name is present in the
     cache, return it. Otherwise, convert the given class AST to a shallow class
     declaration, store it in the cache, and return it.
 
     Raises [Failure] if [shallow_class_decl] is not enabled. *)
+val class_decl_if_missing : Nast.class_ -> shallow_class
 
 val push_local_changes : unit -> unit
 

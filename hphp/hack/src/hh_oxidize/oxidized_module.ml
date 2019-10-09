@@ -8,6 +8,9 @@
 
 open Reordered_argument_collections
 
+(** This type is mostly strings for the sake of making conversion easy, but we
+    retain some structure for the postprocessing and formatting we do in
+    {!Stringify}. *)
 type t = {
   extern_uses: SSet.t;
   (* names of types (or derive macros) to import from other Rust crates *)
@@ -24,9 +27,6 @@ type t = {
   decls: (string * string) list;
       (* (name, rust_syntax_for_entire_declaration) *)
 }
-(** This type is mostly strings for the sake of making conversion easy, but we
-    retain some structure for the postprocessing and formatting we do in
-    {!Stringify}. *)
 
 let empty =
   {

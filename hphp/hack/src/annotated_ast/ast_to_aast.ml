@@ -1,5 +1,4 @@
-open Ast
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -8,6 +7,7 @@ open Ast
  *
  *)
 
+open Ast
 open Core_kernel
 module SN = Naming_special_names
 

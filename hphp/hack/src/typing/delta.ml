@@ -15,7 +15,6 @@ module Env = Typing_env
 module LEnv = Typing_lenv
 module Reason = Typing_reason
 
-type gamma = Typing_per_cont_env.per_cont_entry
 (**
  * This type represents the structure refered to using the greek alphabet
  * letter 'gamma' in the type system specification.
@@ -23,14 +22,15 @@ type gamma = Typing_per_cont_env.per_cont_entry
  * It is essentially a map from local ids to types.
  * For now, we reuse Typing_env.local_id_map but this may change.
  *)
+type gamma = Typing_per_cont_env.per_cont_entry
 
-type delta = gamma Typing_continuations.Map.t
 (**
  * This type represents the structure refered to using the greek alphabet
  * letter 'delta' in the type system specification.
  *
  * It is a map from continuations to gammas
  *)
+type delta = gamma Typing_continuations.Map.t
 
 let empty_gamma : gamma = Typing_per_cont_env.empty_entry
 

@@ -29,8 +29,8 @@ val make_docblock_finder : (Pos.t * Prim_defs.comment) list -> finder
 
 val find_docblock : finder -> int -> int -> string option
 
-val find_inline_comment : finder -> int -> string option
 (** Find the last comment on `line` if it exists. *)
+val find_inline_comment : finder -> int -> string option
 
-val get_docblock : Full_fidelity_positioned_syntax.t -> string option
 (** Returns the docblock for the passed in syntax node. *)
+val get_docblock : Full_fidelity_positioned_syntax.t -> string option

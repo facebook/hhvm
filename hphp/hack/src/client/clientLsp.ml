@@ -58,10 +58,6 @@ type hh_server_state =
   | Hh_server_stolen
   | Hh_server_forgot
 
-type server_message = {
-  push: ServerCommandTypes.push;
-  has_updated_server_state: bool;
-}
 (** A push message from the server might come while we're waiting for a server-rpc
    response, or while we're free. The current architecture allows us to have
    arbitrary responses to push messages while we're free, but only a limited set
@@ -69,6 +65,10 @@ type server_message = {
    notion of the server_state, or send a message to the client, but we can't
    update our own state monad. The has_* fields are ad-hoc push-specific indicators
    of whether we've done some part of the response during the rpc. *)
+type server_message = {
+  push: ServerCommandTypes.push;
+  has_updated_server_state: bool;
+}
 
 type server_conn = {
   ic: Timeout.in_channel;

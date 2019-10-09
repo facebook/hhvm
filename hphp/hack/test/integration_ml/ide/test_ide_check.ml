@@ -1,4 +1,3 @@
-open Integration_test_base_types
 (**
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
@@ -8,6 +7,7 @@ open Integration_test_base_types
  *
  *
  *)
+open Integration_test_base_types
 
 module Test = Integration_test_base
 

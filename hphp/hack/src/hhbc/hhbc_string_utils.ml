@@ -92,7 +92,7 @@ module Integer = struct
       | 'b'
       | 'B'
       (* Hex *)
-
+      
       | 'x'
       | 'X' ->
         s

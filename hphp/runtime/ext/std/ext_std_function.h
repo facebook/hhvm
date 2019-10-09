@@ -37,9 +37,9 @@ Array hhvm_get_frame_args(const ActRec* ar, int offset);
 ///////////////////////////////////////////////////////////////////////////////
 
 void HHVM_FUNCTION(register_postsend_function,
-  const Variant& function, const Array& params = null_array);
+  const Variant& function);
 void HHVM_FUNCTION(register_shutdown_function,
-  const Variant& function, const Array& params = null_array);
+  const Variant& function);
 
 ///////////////////////////////////////////////////////////////////////////////
 

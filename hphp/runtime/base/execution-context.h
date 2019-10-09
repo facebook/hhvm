@@ -248,9 +248,7 @@ public:
   std::size_t registerRequestEventHandler(RequestEventHandler* handler);
   void unregisterRequestEventHandler(RequestEventHandler* handler,
                                      std::size_t index);
-  void registerShutdownFunction(const Variant& function, Array arguments,
-                                ShutdownType type);
-  bool removeShutdownFunction(const Variant& function, ShutdownType type);
+  void registerShutdownFunction(const Variant& function, ShutdownType type);
   void onRequestShutdown();
   void onShutdownPreSend();
   void onShutdownPostSend();

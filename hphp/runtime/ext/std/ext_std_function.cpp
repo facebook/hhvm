@@ -140,16 +140,12 @@ Array hhvm_get_frame_args(const ActRec* ar, int offset) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void HHVM_FUNCTION(register_postsend_function, const Variant& function,
-                   const Array& params /* = null_array */) {
-  g_context->registerShutdownFunction(function, params,
-                                      ExecutionContext::PostSend);
+void HHVM_FUNCTION(register_postsend_function, const Variant& function) {
+  g_context->registerShutdownFunction(function, ExecutionContext::PostSend);
 }
 
-void HHVM_FUNCTION(register_shutdown_function, const Variant& function,
-                   const Array& params /* = null_array */) {
-  g_context->registerShutdownFunction(function, params,
-                                      ExecutionContext::ShutDown);
+void HHVM_FUNCTION(register_shutdown_function, const Variant& function) {
+  g_context->registerShutdownFunction(function, ExecutionContext::ShutDown);
 }
 
 void StandardExtension::initFunction() {

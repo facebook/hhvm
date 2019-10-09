@@ -7,13 +7,8 @@ function print_it($mode) {
   fflush(STDOUT);
 }
 
-function main() {
-  print_it('nonpsp');
-  register_postsend_function('print_it', 'psp');
-}
-
-
 <<__EntryPoint>>
 function main_printf_psp_cli() {
-main();
+  print_it('nonpsp');
+  register_postsend_function(() ==> { print_it('psp'); });
 }

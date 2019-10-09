@@ -53,11 +53,10 @@ function curl_cli_server_start() {
     }
 
 	register_shutdown_function(
-		function($handle) use($router) {
+		function() use ($handle) {
 			proc_terminate($handle);
-		},
-			$handle
-		);
+		}
+	);
 	// don't bother sleeping, server is already up
 	// server can take a variable amount of time to be up, so just sleeping a guessed amount of time
 	// does not work. this is why tests sometimes pass and sometimes fail. to get a reliable pass

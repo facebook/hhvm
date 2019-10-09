@@ -534,38 +534,10 @@ void ExecutionContext::resetCurrentBuffer() {
 // program executions
 
 void ExecutionContext::registerShutdownFunction(const Variant& function,
-                                                Array arguments,
                                                 ShutdownType type) {
   auto& funcs = m_shutdowns[type];
   assertx(funcs.isVecArray());
-  funcs.append(make_dict_array(
-    s_name, function,
-    s_args, arguments
-  ));
-}
-
-
-bool ExecutionContext::removeShutdownFunction(const Variant& function,
-                                              ShutdownType type) {
-  bool ret = false;
-  auto const& funcs = m_shutdowns[type];
-  assertx(funcs.isVecArray());
-  VecArrayInit newFuncs(funcs.size());
-
-  IterateV(
-    funcs.get(),
-    [&] (TypedValue v) {
-      auto const& arr = asCArrRef(&v);
-      assertx(arr->isDict());
-      if (!same(arr[s_name], function)) {
-        newFuncs.append(v);
-      } else {
-        ret = true;
-      }
-    }
-  );
-  m_shutdowns[type] = newFuncs.toArray();
-  return ret;
+  funcs.append(function);
 }
 
 Variant ExecutionContext::pushUserErrorHandler(const Variant& function,
@@ -672,9 +644,7 @@ void ExecutionContext::executeFunctions(ShutdownType type) {
     IterateV(
       funcs.get(),
       [](TypedValue v) {
-        auto const& cb = asCArrRef(&v);
-        assertx(cb->isDict());
-        vm_call_user_func(cb[s_name], cb[s_args].toArray());
+        vm_call_user_func(VarNR{v}, init_null_variant);
       }
     );
     tmp.append(funcs);

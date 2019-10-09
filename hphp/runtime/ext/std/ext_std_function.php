@@ -83,24 +83,19 @@ function get_defined_functions(): array;
  * @param callable $callback - The shutdown callback to register.   The
  *   shutdown callbacks are executed as the part of the request, so it's
  *   possible to send output from them and access output buffers.
- * @param mixed $parameters... - It is possible to pass parameters to the
- *   shutdown function by passing additional parameters.
  *
  * @return void
  */
 <<__Native>>
-function register_shutdown_function(mixed $callback,
-                                    ...$parameters): void;
+function register_shutdown_function(mixed $callback): void;
 
 /**
  * @param callable $callback
- * @param mixed $parameters...
  *
  * @return void
  */
 <<__Native, __HipHopSpecific>>
-function register_postsend_function(mixed $callback,
-                                    ...$parameters): void;
+function register_postsend_function(mixed $callback): void;
 
 }
 

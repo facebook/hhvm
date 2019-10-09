@@ -1,7 +1,7 @@
 <?hh // strict
 trait BaseTrait {
 
-  final public static function test(): string {
+  public static function test(): string {
     return "a";
   }
 }
@@ -11,6 +11,15 @@ trait ChildTrait {
   use BaseTrait;
 
   final public static function test(): string {
-    return "a";
+    return "b";
+  }
+}
+
+class Foo {
+
+  use ChildTrait;
+
+  final public static function test2(): string {
+    return test();
   }
 }

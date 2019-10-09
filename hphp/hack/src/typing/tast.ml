@@ -90,6 +90,10 @@ type class_ = (Pos.t * ty, func_body_ann, saved_env, ty) Aast.class_
 
 type class_id = (Pos.t * ty, func_body_ann, saved_env, ty) Aast.class_id
 
+type type_hint = ty Aast.type_hint
+
+type targ = ty Aast.targ
+
 type class_get_expr =
   (Pos.t * ty, func_body_ann, saved_env, ty) Aast.class_get_expr
 

@@ -262,7 +262,6 @@ let converter
     match a with
     | Xhp_simple (id, e) -> Aast.Xhp_simple (id, on_expr e)
     | Xhp_spread e -> Aast.Xhp_spread (on_expr e)
-  and on_targ h : Aast.targ = on_hint h
   and on_collection_targ targ =
     match targ with
     | Some (CollectionTKV (tk, tv)) ->
@@ -476,6 +475,7 @@ let converter
         fa_namespace = attribute.fa_namespace;
       }
   and on_type_hint ta = (hint_annotation, optional on_hint ta)
+  and on_targ ta = (hint_annotation, on_hint ta)
   and on_fun f =
     let body = on_block f.f_body in
     let body = { Aast.fb_ast = body; Aast.fb_annotation = func_body_ann } in

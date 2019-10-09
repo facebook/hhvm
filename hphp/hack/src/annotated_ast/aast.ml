@@ -119,18 +119,22 @@ and ('ex, 'fb, 'en, 'hi) class_id_ =
 
 and ('ex, 'fb, 'en, 'hi) expr = 'ex * ('ex, 'fb, 'en, 'hi) expr_
 
+and 'hi collection_targ =
+  | CollectionTV of 'hi targ
+  | CollectionTKV of 'hi targ * 'hi targ
+
 and ('ex, 'fb, 'en, 'hi) expr_ =
   | Array of ('ex, 'fb, 'en, 'hi) afield list
   | Darray of
-      (targ * targ) option
+      ('hi targ * 'hi targ) option
       * (('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) expr) list
-  | Varray of targ option * ('ex, 'fb, 'en, 'hi) expr list
+  | Varray of 'hi targ option * ('ex, 'fb, 'en, 'hi) expr list
   | Shape of (Ast_defs.shape_field_name * ('ex, 'fb, 'en, 'hi) expr) list
   (* TODO: T38184446 Consolidate collections in AAST *)
-  | ValCollection of vc_kind * targ option * ('ex, 'fb, 'en, 'hi) expr list
+  | ValCollection of vc_kind * 'hi targ option * ('ex, 'fb, 'en, 'hi) expr list
   (* TODO: T38184446 Consolidate collections in AAST *)
   | KeyValCollection of
-      kvc_kind * (targ * targ) option * ('ex, 'fb, 'en, 'hi) field list
+      kvc_kind * ('hi targ * 'hi targ) option * ('ex, 'fb, 'en, 'hi) field list
   | Null
   | This
   | True
@@ -151,7 +155,7 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
       call_type
       * ('ex, 'fb, 'en, 'hi) expr
       (* function *)
-      * targ list
+      * 'hi targ list
       (* explicit type annotations *)
       * ('ex, 'fb, 'en, 'hi) expr list
       (* positional args *)
@@ -182,7 +186,7 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
   | As of ('ex, 'fb, 'en, 'hi) expr * hint * (* is nullable *) bool
   | New of
       ('ex, 'fb, 'en, 'hi) class_id
-      * targ list
+      * 'hi targ list
       * ('ex, 'fb, 'en, 'hi) expr list
       * ('ex, 'fb, 'en, 'hi) expr list
       * 'ex (* constructor *)
@@ -200,7 +204,7 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
   | Import of import_flavor * ('ex, 'fb, 'en, 'hi) expr
   (* TODO: T38184446 Consolidate collections in AAST *)
   | Collection of
-      sid * collection_targ option * ('ex, 'fb, 'en, 'hi) afield list
+      sid * 'hi collection_targ option * ('ex, 'fb, 'en, 'hi) afield list
   | BracedExpr of ('ex, 'fb, 'en, 'hi) expr
   | ParenthesizedExpr of ('ex, 'fb, 'en, 'hi) expr
   (* None of these constructors exist in the AST *)
@@ -313,6 +317,13 @@ and ('ex, 'fb, 'en, 'hi) func_body = {
   - the localized hint, or if the hint is missing, the inferred type
   - The typehint associated to this expression if it exists *)
 and 'hi type_hint = 'hi * type_hint_
+
+(* Explicit type argument to function, constructor, or collection literal.
+ * 'hi = unit in NAST
+ * 'hi = Typing_defs.(locl ty) in TAST,
+ * and is used to record inferred type arguments, with wildcard hint.
+ *)
+and 'hi targ = 'hi * hint
 
 and type_hint_ = hint option
 

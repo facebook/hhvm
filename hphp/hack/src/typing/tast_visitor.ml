@@ -246,7 +246,7 @@ class type handler =
       Env.t ->
       Aast.call_type ->
       Tast.expr ->
-      Aast.targ list ->
+      Tast.targ list ->
       Tast.expr list ->
       Tast.expr list ->
       unit

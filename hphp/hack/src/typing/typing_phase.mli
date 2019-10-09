@@ -11,7 +11,7 @@ open Typing_env_types
 type method_instantiation = {
   use_pos: Pos.t;
   use_name: string;
-  explicit_targs: decl_ty list;
+  explicit_targs: Tast.targ list;
 }
 
 val env_with_self : env -> expand_env
@@ -32,6 +32,26 @@ val localize_ft :
   env * locl_fun_type
 
 val localize_hint_with_self : env -> Aast.hint -> env * locl_ty
+
+(* Declare and localize the type arguments to a constructor or function, given
+ * information about the declared type parameters in `decl_tparam list`. If no
+ * explicit type arguments are given, generate fresh type variables in their
+ * place; do the same for any wildcard explicit type arguments.
+ * Report arity errors using `def_pos` (for the declared parameters), `use_pos`
+ * (for the use-site) and `use_name` (the name of the constructor or function).
+ *)
+val localize_targs :
+  is_method:bool ->
+  def_pos:Pos.t ->
+  use_pos:Pos.t ->
+  use_name:string ->
+  env ->
+  decl_tparam list ->
+  Aast.hint list ->
+  env * Tast.targ list
+
+(* Declare and localize a single explicit type argument *)
+val localize_targ : env -> Aast.hint -> env * Tast.targ
 
 val localize_hint : ety_env:expand_env -> env -> Aast.hint -> env * locl_ty
 
@@ -63,15 +83,14 @@ val decl : decl_ty -> phase_ty
 
 val locl : locl_ty -> phase_ty
 
-val resolve_type_argument_hint : env -> Aast.hint -> env * locl_ty
-
 val resolve_type_arguments_and_check_constraints :
   exact:exact ->
   check_constraints:bool ->
+  def_pos:Pos.t ->
+  use_pos:Pos.t ->
   env ->
-  Pos.t ->
   Ast_defs.id ->
   Nast.class_id_ ->
   decl_tparam sexp_list ->
-  decl_ty sexp_list ->
-  env * (Reason.t * locl_phase ty_) * locl_ty sexp_list
+  Aast.hint sexp_list ->
+  env * locl_ty * Tast.targ sexp_list

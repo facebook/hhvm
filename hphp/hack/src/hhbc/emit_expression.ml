@@ -803,6 +803,14 @@ and has_non_tparam_generics env (targs : Aast.hint list) =
         false
       | _ -> true)
 
+and has_non_tparam_generics_targs env (targs : Tast.targ list) =
+  let erased_tparams = get_erased_tparams env in
+  List.exists targs ~f:(function
+      | (_, (_, Aast.Happly ((_, id), _)))
+        when List.mem ~equal:String.equal erased_tparams id ->
+        false
+      | _ -> true)
+
 and emit_reified_targs env pos targs =
   let len = List.length targs in
   let scope = Emit_env.get_scope env in
@@ -853,7 +861,7 @@ and emit_new
     env
     pos
     (cid : Tast.class_id)
-    (targs : Aast.targ list)
+    (targs : Tast.targ list)
     (args : Tast.expr list)
     (uargs : Tast.expr list) =
   if has_inout_args args then
@@ -887,7 +895,7 @@ and emit_new
               pos
               "Cannot have higher kinded reified generics";
           (Class_reified instrs, H.MaybeGenerics)
-        | None when not (has_non_tparam_generics env targs) ->
+        | None when not (has_non_tparam_generics_targs env targs) ->
           (cexpr, H.NoGenerics)
         | None -> (cexpr, H.HasGenerics)
       end
@@ -906,7 +914,7 @@ and emit_new
           gather
             [
               emit_pos pos;
-              emit_reified_targs env pos targs;
+              emit_reified_targs env pos (List.map ~f:snd targs);
               instr_newobjrd fq_id;
             ]
         | H.MaybeGenerics ->
@@ -3196,7 +3204,7 @@ and emit_ignored_expr env ?(pop_pos : Pos.t = Pos.none) (e : Tast.expr) =
  * Replaces erased generics with underscores or
  * raises a parse error if used with is/as expressions
  *)
-and fixup_type_arg (env : Emit_env.t) ~isas (hint : Aast.hint) : Aast.hint =
+and fixup_type_arg (env : Emit_env.t) ~isas (hint : Aast.hint) =
   let erased_tparams = get_erased_tparams env in
   let rec aux ((p, hint) as _x : Aast.hint) =
     match hint with
@@ -3459,18 +3467,18 @@ and emit_call_lhs_and_fcall
     env
     (expr : Tast.expr)
     fcall_args
-    (targs : Aast.targ list)
+    (targs : Tast.targ list)
     inout_arg_positions =
   let ((pos, _), expr_) = expr in
   let has_inout_args = List.length inout_arg_positions <> 0 in
   let does_not_have_non_tparam_generics =
-    not (has_non_tparam_generics env targs)
+    not (has_non_tparam_generics_targs env targs)
   in
   let emit_generics (flags, a, b, c, d) =
     if does_not_have_non_tparam_generics then
       (empty, (flags, a, b, c, d))
     else
-      ( emit_reified_targs env pos targs,
+      ( emit_reified_targs env pos (List.map ~f:snd targs),
         ({ flags with has_generics = true }, a, b, c, d) )
   in
   match expr_ with
@@ -4025,7 +4033,7 @@ and emit_call
     env
     pos
     expr
-    (targs : Aast.targ list)
+    (targs : Tast.targ list)
     (args : Tast.expr list)
     (uargs : Tast.expr list)
     async_eager_label =

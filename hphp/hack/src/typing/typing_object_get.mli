@@ -13,14 +13,13 @@ val obj_get :
   nullsafe:Ast_defs.pos option ->
   coerce_from_ty:
     (Ast_defs.pos * Typing_reason.ureason * Typing_defs.locl_ty) option ->
-  ?explicit_tparams:Aast.targ list ->
+  ?explicit_targs:Nast.targ list ->
   ?pos_params:'a ->
   Typing_env_types.env ->
   Typing_defs.locl_ty ->
   Nast.class_id_ ->
   Ast_defs.pos * string ->
-  Typing_env_types.env
-  * (Typing_reason.t * Typing_defs.locl_phase Typing_defs.ty_)
+  Typing_env_types.env * (Typing_defs.locl_ty * Tast.targ list)
 
 val obj_get_ :
   inst_meth:bool ->
@@ -30,14 +29,13 @@ val obj_get_ :
   pos_params:'a option ->
   coerce_from_ty:
     (Ast_defs.pos * Typing_reason.ureason * Typing_defs.locl_ty) option ->
-  ?explicit_tparams:Aast.targ list ->
+  ?explicit_targs:Nast.targ list ->
   Typing_env_types.env ->
   Typing_defs.locl_ty ->
   Nast.class_id_ ->
   Ast_defs.pos * string ->
   (Typing_defs.locl_ty -> Typing_defs.locl_ty) ->
-  Typing_env_types.env
-  * (Typing_reason.t * Typing_defs.locl_phase Typing_defs.ty_)
+  Typing_env_types.env * (Typing_defs.locl_ty * Tast.targ list)
 
 val smember_not_found :
   Ast_defs.pos ->

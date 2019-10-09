@@ -12,7 +12,6 @@ open Common
 open Aast
 open Tast
 open Typing_defs
-open Typing_env_types
 open Utils
 module TUtils = Typing_utils
 module Reason = Typing_reason
@@ -121,7 +120,7 @@ let rec obj_get
     ~is_method
     ~nullsafe
     ~coerce_from_ty
-    ?(explicit_tparams = [])
+    ?(explicit_targs = [])
     ?pos_params
     env
     ty1
@@ -133,7 +132,7 @@ let rec obj_get
     ~nullsafe
     ~obj_pos
     ~pos_params
-    ~explicit_tparams
+    ~explicit_targs
     ~coerce_from_ty
     env
     ty1
@@ -147,13 +146,15 @@ and obj_get_concrete_ty
     ~inst_meth
     ~is_method
     ~coerce_from_ty
-    ?(explicit_tparams = [])
+    ?(explicit_targs = [])
     env
     concrete_ty
     class_id
     (id_pos, id_str)
     k_lhs =
-  let default () = (env, (Reason.Rwitness id_pos, Typing_utils.tany env)) in
+  let default () =
+    (env, ((Reason.Rwitness id_pos, Typing_utils.tany env), []))
+  in
   let mk_ety_env r class_info x e paraml =
     let this_ty = k_lhs (r, Tclass (x, e, paraml)) in
     {
@@ -183,7 +184,7 @@ and obj_get_concrete_ty
         ~nullsafe:None
         ~obj_pos:(Reason.to_pos r)
         ~pos_params:None
-        ~explicit_tparams
+        ~explicit_targs
         ~coerce_from_ty
         env
         inter_ty
@@ -305,7 +306,7 @@ and obj_get_concrete_ty
                   ~use_pos:id_pos
                   ~def_pos:mem_pos
                   ce_deprecated;
-                (env, member_ty)
+                (env, (member_ty, []))
               | _ -> assert false
             end
           (* match Env.get_member is_method env class_info SN.Members.__call *)
@@ -348,13 +349,20 @@ and obj_get_concrete_ty
               Errors.parent_abstract_call id_str id_pos mem_pos;
             let member_decl_ty = Typing_enum.member_type env member_ce in
             let ety_env = mk_ety_env r class_info x exact paraml in
-            let (env, member_ty, et_enforced) =
+            let (env, member_ty, tal, et_enforced) =
               match member_decl_ty with
               | (r, Tfun ft) when is_method ->
                 (* We special case function types here to be able to pass explicit type
                  * parameters. *)
-                let explicit_targs =
-                  List.map ~f:(Decl_hint.hint env.decl_env) explicit_tparams
+                let (env, explicit_targs) =
+                  Phase.localize_targs
+                    ~is_method
+                    ~use_pos:id_pos
+                    ~def_pos:mem_pos
+                    ~use_name:(strip_ns id_str)
+                    env
+                    (fst ft.ft_tparams)
+                    (List.map ~f:snd explicit_targs)
                 in
                 let ft =
                   Typing_enforceability.compute_enforced_and_pessimize_fun_type
@@ -375,7 +383,7 @@ and obj_get_concrete_ty
                       env
                       ft)
                 in
-                (env, (r, Tfun ft), false)
+                (env, (r, Tfun ft), explicit_targs, false)
               | _ ->
                 let is_xhp_attr = Option.is_some ce_xhp_attr in
                 let { et_type; et_enforced } =
@@ -386,50 +394,53 @@ and obj_get_concrete_ty
                 in
                 let (env, member_ty) = Phase.localize ~ety_env env et_type in
                 (* TODO(T52753871): same as for class_get *)
-                (env, member_ty, et_enforced)
+                (env, member_ty, [], et_enforced)
             in
             if inst_meth then
               TVis.check_inst_meth_access ~use_pos:id_pos ~def_pos:mem_pos vis;
-            let (env, member_ty) =
+            let (env, (member_ty, tal)) =
               if Cls.has_upper_bounds_on_this_from_constraints class_info then
-                let ((env, ty), succeed) =
+                let ((env, (ty, tal)), succeed) =
                   Errors.try_with_result
                     (fun () ->
                       (get_member_from_constraints env class_info, true))
                     (fun _ _ ->
                       (* No eligible functions found in constraints *)
-                      ((env, MakeType.mixed Reason.Rnone), false))
+                      ((env, (MakeType.mixed Reason.Rnone, [])), false))
                 in
                 if succeed then
                   let (env, member_ty) =
                     Inter.intersect env (Reason.Rwitness id_pos) member_ty ty
                   in
-                  (env, member_ty)
+                  (env, (member_ty, tal))
                 else
-                  (env, member_ty)
+                  (env, (member_ty, tal))
               else
-                (env, member_ty)
+                (env, (member_ty, tal))
             in
             let env =
               match coerce_from_ty with
               | None -> env
               | Some (p, ur, ty) ->
-                Typing_coercion.coerce_type
-                  p
-                  ur
-                  env
-                  ty
-                  { et_type = member_ty; et_enforced }
-                  Errors.unify_error
+                let env =
+                  Typing_coercion.coerce_type
+                    p
+                    ur
+                    env
+                    ty
+                    { et_type = member_ty; et_enforced }
+                    Errors.unify_error
+                in
+                env
             in
-            (env, member_ty)
+            (env, (member_ty, tal))
         end
         (* match member_info *)
     end
   (* match Env.get_class env (snd x) *)
   | (_, Tdynamic) ->
     let ty = MakeType.dynamic (Reason.Rdynamic_prop id_pos) in
-    (env, ty)
+    (env, (ty, []))
   | (_, Tobject)
   | (_, Tany _)
   | (_, Terr) ->
@@ -544,7 +555,7 @@ and obj_get_
     ~obj_pos
     ~pos_params
     ~coerce_from_ty
-    ?(explicit_tparams = [])
+    ?(explicit_targs = [])
     env
     ty1
     cid
@@ -570,14 +581,14 @@ and obj_get_
   let nullable_obj_get ty =
     match nullsafe with
     | Some p1 ->
-      let (env, method_) =
+      let (env, (method_, tal)) =
         obj_get_
           ~inst_meth
           ~obj_pos
           ~is_method
           ~nullsafe
           ~pos_params
-          ~explicit_tparams
+          ~explicit_targs
           ~coerce_from_ty
           env
           ty
@@ -585,7 +596,10 @@ and obj_get_
           id
           k_lhs
       in
-      make_nullable_member_type ~is_method env id_pos p1 method_
+      let (env, ty) =
+        make_nullable_member_type ~is_method env id_pos p1 method_
+      in
+      (env, (ty, tal))
     | None ->
       (match ety1 with
       | (_, Toption (_, Tnonnull)) as ty ->
@@ -602,11 +616,11 @@ and obj_get_
           id_str
           id_pos
           (Reason.to_string "This can be null" (fst ety1)));
-      (env, (fst ety1, Typing_utils.terr env))
+      (env, ((fst ety1, Typing_utils.terr env), []))
   in
   match ety1 with
   | (_, Tunion tyl) ->
-    let (env, tyl) =
+    let (env, resultl) =
       List.map_env env tyl (fun env ty ->
           obj_get_
             ~inst_meth
@@ -614,7 +628,7 @@ and obj_get_
             ~is_method
             ~nullsafe
             ~pos_params
-            ~explicit_tparams
+            ~explicit_targs
             ~coerce_from_ty
             env
             ty
@@ -622,9 +636,18 @@ and obj_get_
             id
             k_lhs)
     in
-    Union.union_list env (fst ety1) tyl
+    (* TODO: decide what to do about methods with differing generic arity.
+     * See T55414751 *)
+    let tal =
+      match resultl with
+      | [] -> []
+      | (_, tal) :: _ -> tal
+    in
+    let tyl = List.map ~f:fst resultl in
+    let (env, ty) = Union.union_list env (fst ety1) tyl in
+    (env, (ty, tal))
   | (_, Tintersection tyl) ->
-    let (env, tyl) =
+    let (env, resultl) =
       TUtils.run_on_intersection env tyl ~f:(fun env ty ->
           obj_get_
             ~inst_meth
@@ -632,7 +655,7 @@ and obj_get_
             ~is_method
             ~nullsafe
             ~pos_params
-            ~explicit_tparams
+            ~explicit_targs
             ~coerce_from_ty
             env
             ty
@@ -640,7 +663,16 @@ and obj_get_
             id
             k_lhs)
     in
-    Inter.intersect_list env (fst ety1) tyl
+    (* TODO: decide what to do about methods with differing generic arity.
+     * See T55414751 *)
+    let tal =
+      match resultl with
+      | [] -> []
+      | (_, tal) :: _ -> tal
+    in
+    let tyl = List.map ~f:fst resultl in
+    let (env, ty) = Inter.intersect_list env (fst ety1) tyl in
+    (env, (ty, tal))
   | (p', Tabstract (ak, Some ty)) ->
     let k_lhs' ty =
       match ak with
@@ -653,7 +685,7 @@ and obj_get_
       ~is_method
       ~nullsafe
       ~pos_params
-      ~explicit_tparams
+      ~explicit_targs
       ~coerce_from_ty
       env
       ty
@@ -674,7 +706,7 @@ and obj_get_
           obj_get_concrete_ty
             ~inst_meth
             ~is_method
-            ~explicit_tparams
+            ~explicit_targs
             ~coerce_from_ty
             env
             ty
@@ -691,16 +723,16 @@ and obj_get_
           id_pos
           (Typing_print.error env ety1)
           (Reason.to_pos (fst ety1));
-        (env, err_witness env id_pos)
-      | ((_env, ty) as res) :: rest ->
-        if List.exists rest (fun (_, ty') -> not @@ ty_equal ty' ty) then (
+        (env, (err_witness env id_pos, []))
+      | ((_env, (ty, _)) as res) :: rest ->
+        if List.exists rest (fun (_, (ty', _)) -> not @@ ty_equal ty' ty) then (
           Errors.ambiguous_member
             ~is_method
             id_str
             id_pos
             (Typing_print.error env ety1)
             (Reason.to_pos (fst ety1));
-          (env, err_witness env id_pos)
+          (env, (err_witness env id_pos, []))
         ) else
           res
     end
@@ -715,12 +747,12 @@ and obj_get_
       id_str
       id_pos
       (Reason.to_string "It is unknown" r);
-    (env, (r, Typing_utils.terr env))
+    (env, ((r, Typing_utils.terr env), []))
   | (_, _) ->
     obj_get_concrete_ty
       ~inst_meth
       ~is_method
-      ~explicit_tparams
+      ~explicit_targs
       ~coerce_from_ty
       env
       ety1

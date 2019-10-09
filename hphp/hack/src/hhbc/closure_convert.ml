@@ -837,7 +837,7 @@ let rec convert_expr env st ((p, expr_) as expr) =
         match targ with
         | None -> (st, None)
         | Some targ ->
-          let (st, targ) = convert_hint env st targ in
+          let (st, targ) = convert_tyarg env st targ in
           (st, Some targ)
       in
       (st, (p, Varray (targ, es)))
@@ -848,8 +848,8 @@ let rec convert_expr env st ((p, expr_) as expr) =
         (st, (e1, e2))
       in
       let convert_tarp st (t1, t2) =
-        let (st, t1) = convert_hint env st t1 in
-        let (st, t2) = convert_hint env st t2 in
+        let (st, t1) = convert_tyarg env st t1 in
+        let (st, t2) = convert_tyarg env st t2 in
         (st, (t1, t2))
       in
       let (st, es) = List.map_env st es convert_pair in
@@ -875,11 +875,11 @@ let rec convert_expr env st ((p, expr_) as expr) =
       let (st, ta) =
         match targs with
         | Some (CollectionTV tv) ->
-          let (st, ta) = convert_hint env st tv in
+          let (st, ta) = convert_tyarg env st tv in
           (st, Some (CollectionTV ta))
         | Some (CollectionTKV (tk, tv)) ->
-          let (st, tk) = convert_hint env st tk in
-          let (st, tv) = convert_hint env st tv in
+          let (st, tk) = convert_tyarg env st tk in
+          let (st, tv) = convert_tyarg env st tv in
           (st, Some (CollectionTKV (tk, tv)))
         | None -> (st, None)
       in
@@ -890,7 +890,7 @@ let rec convert_expr env st ((p, expr_) as expr) =
         match targ with
         | None -> (st, None)
         | Some targ ->
-          let (st, targ) = convert_hint env st targ in
+          let (st, targ) = convert_tyarg env st targ in
           (st, Some targ)
       in
       (st, (p, ValCollection (k, targ, es)))
@@ -914,8 +914,8 @@ let rec convert_expr env st ((p, expr_) as expr) =
         match targ with
         | None -> (st, None)
         | Some (t1, t2) ->
-          let (st, t1) = convert_hint env st t1 in
-          let (st, t2) = convert_hint env st t2 in
+          let (st, t1) = convert_tyarg env st t1 in
+          let (st, t2) = convert_tyarg env st t2 in
           (st, Some (t1, t2))
       in
       (st, (p, KeyValCollection (k, targ, es)))
@@ -980,7 +980,7 @@ let rec convert_expr env st ((p, expr_) as expr) =
       when SU.is_parent cid ->
       let st = add_var env st "$this" in
       let (st, e) = convert_expr env st e in
-      let (st, targs) = convert_hints env st targs in
+      let (st, targs) = convert_tyargs env st targs in
       let (st, el2) = convert_exprs env st el2 in
       let (st, el3) = convert_exprs env st el3 in
       (st, (p, Call (ct, e, targs, el2, el3)))
@@ -988,7 +988,7 @@ let rec convert_expr env st ((p, expr_) as expr) =
       convert_expr env st (p, Varray (None, es))
     | Call (ct, e, targs, el2, el3) ->
       let (st, e) = convert_expr env st e in
-      let (st, targs) = convert_hints env st targs in
+      let (st, targs) = convert_tyargs env st targs in
       let (st, el2) = convert_exprs env st el2 in
       let (st, el3) = convert_exprs env st el3 in
       (st, (p, Call (ct, e, targs, el2, el3)))
@@ -1044,7 +1044,7 @@ let rec convert_expr env st ((p, expr_) as expr) =
       (st, (p, As (e, h, b)))
     | New (cid, targs, el1, el2, annot) ->
       let (st, cid) = convert_class_id env st cid in
-      let (st, targs) = convert_hints env st targs in
+      let (st, targs) = convert_tyargs env st targs in
       let (st, el1) = convert_exprs env st el1 in
       let (st, el2) = convert_exprs env st el2 in
       (st, (p, New (cid, targs, el1, el2, annot)))
@@ -1160,6 +1160,12 @@ and convert_prop_expr env st ((_, expr_) as expr) =
 and convert_snd_expr env st (a, b_exp) =
   let (s, b_exp) = convert_expr env st b_exp in
   (s, (a, b_exp))
+
+and convert_tyarg env st (i, hint) =
+  let (st, hint) = convert_hint env st hint in
+  (st, (i, hint))
+
+and convert_tyargs env st targs = List.map_env st targs (convert_tyarg env)
 
 and convert_hint env st ((p, h) as hint) =
   match h with

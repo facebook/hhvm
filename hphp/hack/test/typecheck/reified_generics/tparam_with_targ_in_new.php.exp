@@ -6,5 +6,9 @@ File "tparam_with_targ_in_new.php", line 9, characters 3-3:
 T is a type parameter. Type parameters cannot themselves take type parameters (e.g. T<int> doesn't make sense) (Naming[2047])
 File "tparam_with_targ_in_new.php", line 11, characters 5-5:
 T is a type parameter. Type parameters cannot themselves take type parameters (e.g. T<int> doesn't make sense) (Naming[2047])
+File "tparam_with_targ_in_new.php", line 13, characters 7-7:
+Expected no type parameter (Typing[4029])
+File "tparam_with_targ_in_new.php", line 13, characters 7-7:
+Definition is here
 File "tparam_with_targ_in_new.php", line 13, characters 3-12:
 T is a type parameter. Type parameters cannot themselves take type parameters (e.g. T<int> doesn't make sense) (Naming[2047])

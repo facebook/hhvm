@@ -35,7 +35,8 @@ Errors:
                    (Call (Cnormal,
                       (([7:8-15], (function<T as shape(...)>(HH\Lib\Regex\Pattern<shape(0 => string)> $pattern): shape(0 => string))),
                        (Id ([7:8-15], "\\goodbye"))),
-                      [],
+                      [((shape(0 => string)),
+                        ([7:8-15], (Happly (([Pos.none], "_"), []))))],
                       [(([7:16-18], HH\Lib\Regex\Pattern<shape(0 => string)>),
                         (Lvar ([7:16-18], $x)))],
                       [])))

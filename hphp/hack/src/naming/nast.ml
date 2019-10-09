@@ -79,6 +79,8 @@ type afield = (Pos.t, func_body_ann, unit, unit) Aast.afield
 type method_redeclaration =
   (Pos.t, func_body_ann, unit, unit) Aast.method_redeclaration
 
+type targ = unit Aast.targ
+
 type sid = Aast.sid
 
 module ShapeMap = Ast_defs.ShapeMap
@@ -449,7 +451,8 @@ module Visitor_DEPRECATED = struct
       method on_keyValCollection :
         'a -> kvc_kind -> (targ * targ) option -> field list -> 'a
 
-      method on_collection : 'a -> collection_targ option -> afield list -> 'a
+      method on_collection :
+        'a -> unit collection_targ option -> afield list -> 'a
 
       method on_this : 'a -> 'a
 
@@ -596,6 +599,8 @@ module Visitor_DEPRECATED = struct
       method on_typedef : 'a -> typedef -> 'a
 
       method on_hint : 'a -> hint -> 'a
+
+      method on_type_hint : 'a -> unit type_hint -> 'a
 
       method on_targ : 'a -> targ -> 'a
 
@@ -1086,6 +1091,8 @@ module Visitor_DEPRECATED = struct
           acc
 
       method on_hint acc _ = acc
+
+      method on_type_hint acc _ = acc
 
       method on_targ acc _ = acc
 

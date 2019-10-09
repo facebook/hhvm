@@ -63,11 +63,6 @@ let validator =
 let tparams_has_reified tparams =
   List.exists tparams ~f:(fun tparam -> tparam.tp_reified <> Nast.Erased)
 
-let check_explicit expr_pos tparams =
-  List.iter tparams ~f:(fun tparam ->
-      if Attributes.mem UA.uaExplicit tparam.tp_user_attributes then
-        Errors.require_generic_explicit tparam.tp_name expr_pos)
-
 let valid_newable_hint env tp (pos, hint) =
   match hint with
   | Aast.Happly ((p, h), _) ->
@@ -101,6 +96,13 @@ let verify_has_consistent_bound env (tparam : Tast.tparam) =
     let cbs = List.map ~f:Cls.name valid_classes in
     Errors.invalid_newable_type_param_constraints tparam.tp_name cbs
 
+let is_wildcard (_, hint) =
+  match hint with
+  | (_, Aast.Happly ((_, class_id), _)) when class_id = SN.Typehints.wildcard
+    ->
+    true
+  | _ -> false
+
 (* When passing targs to a reified position, they must either be concrete types
  * or reified type parameters. This prevents the case of
  *
@@ -109,15 +111,10 @@ let verify_has_consistent_bound env (tparam : Tast.tparam) =
  *
  * where Tf does not exist at runtime.
  *)
-let verify_targ_valid env tparam targ =
-  if Attributes.mem UA.uaExplicit tparam.tp_user_attributes then
-    match targ with
-    | (pos, Aast.Happly ((_, class_id), _targs))
-      when class_id = SN.Typehints.wildcard ->
-      Errors.require_generic_explicit tparam.tp_name pos
-    | _ -> ()
-  else
-    ();
+let verify_targ_valid env tparam ((_, hint) as targ) =
+  if Attributes.mem UA.uaExplicit tparam.tp_user_attributes && is_wildcard targ
+  then
+    Errors.require_generic_explicit tparam.tp_name (fst hint);
 
   (* There is some subtlety here. If a type *parameter* is declared reified,
    * even if it is soft, we require that the argument be concrete or reified, not soft
@@ -129,27 +126,25 @@ let verify_targ_valid env tparam targ =
     | Nast.Reified
     | Nast.SoftReified ->
       let emit_error = Errors.invalid_reified_argument tparam.tp_name in
-      validator#validate_hint env targ emit_error
+      validator#validate_hint env (snd targ) emit_error
     | Nast.Erased -> () );
 
   if Attributes.mem UA.uaEnforceable tparam.tp_user_attributes then
     Enforceable_hint_check.validator#validate_hint
       env
-      targ
+      (snd targ)
       (Errors.invalid_enforceable_type "parameter" tparam.tp_name);
 
   if Attributes.mem UA.uaNewable tparam.tp_user_attributes then
-    valid_newable_hint env tparam.tp_name targ
+    valid_newable_hint env tparam.tp_name (snd targ)
 
 let verify_call_targs env expr_pos decl_pos tparams targs =
-  if tparams_has_reified tparams && List.is_empty targs then
-    Errors.require_args_reify decl_pos expr_pos;
-  if List.is_empty targs then check_explicit expr_pos tparams;
-
-  (* Unequal_lengths case handled elsewhere *)
-  List.iter2 tparams targs ~f:(fun tparam targ ->
-      verify_targ_valid env tparam targ)
-  |> ignore
+  let all_wildcards = List.for_all ~f:is_wildcard targs in
+  if all_wildcards && tparams_has_reified tparams then
+    Errors.require_args_reify decl_pos expr_pos
+  else
+    (* Unequal_lengths case handled elsewhere *)
+    List.iter2 tparams targs ~f:(verify_targ_valid env) |> ignore
 
 let handler =
   object
@@ -193,17 +188,19 @@ let handler =
 
     method! at_hint env =
       function
-      | (pos, Aast.Happly ((_, class_id), targs)) ->
+      | (pos, Aast.Happly ((_, class_id), hints)) ->
         let tc = Env.get_class env class_id in
         Option.iter tc ~f:(fun tc ->
             let tparams = Cls.tparams tc in
-            ignore (List.iter2 tparams targs ~f:(verify_targ_valid env));
+            ignore
+              (List.iter2 tparams hints ~f:(fun tp hint ->
+                   verify_targ_valid env tp ((), hint)));
 
             (* TODO: This check could be unified with the existence check above,
              * but would require some consolidation T38941033. List.iter2 gives
              * a nice Or_unequal_lengths.t result that replaces this if statement *)
             let tparams_length = List.length tparams in
-            let targs_length = List.length targs in
+            let targs_length = List.length hints in
             if tparams_length <> targs_length then
               let c_pos = Cls.pos tc in
               if targs_length <> 0 then

@@ -80,7 +80,7 @@ let locl ty = LoclTy ty
 type method_instantiation = {
   use_pos: Pos.t;
   use_name: string;
-  explicit_targs: decl_ty list;
+  explicit_targs: Tast.targ list;
 }
 
 let env_with_self env =
@@ -212,9 +212,13 @@ let rec localize ~ety_env env (dty : decl_ty) =
       | None -> List.map_env env tyl (localize ~ety_env)
       | Some class_info ->
         let tparams = Cls.tparams class_info in
-        if List.length tparams <> List.length tyl && can_infer_tparams then
+        if
+          (not (List.is_empty tparams))
+          && List.is_empty tyl
+          && can_infer_tparams
+        then
           (* In this case we will infer the missing type parameters *)
-          localize_missing_tparams_class env r cls class_info tyl
+          localize_missing_tparams_class env r cls class_info
         else
           localize_tparams ~ety_env env (Reason.to_pos r) tyl tparams
     in
@@ -316,6 +320,51 @@ and localize_cstr_ty ~ety_env env ty tp_name =
   let ty = (Reason.Rcstr_on_generics (Reason.to_pos r, tp_name), ty_) in
   (env, ty)
 
+(* Localize an explicit type argument to a constructor or function. We
+ * support the use of wildcards at the top level only *)
+and localize_targ env hint =
+  let ty = Decl_hint.hint env.decl_env hint in
+  (* For explicit type arguments we support a wildcard syntax `_` for which
+  * Hack will generate a fresh type variable *)
+  match ty with
+  | (r, Tapply ((_, id), [])) when id = SN.Typehints.wildcard ->
+    let (env, ty) = Env.fresh_type env (Reason.to_pos r) in
+    (env, (ty, hint))
+  | _ ->
+    let (env, ty) = localize_with_self env ty in
+    (env, (ty, hint))
+
+(* See signature in .mli file for details *)
+and localize_targs ~is_method ~def_pos ~use_pos ~use_name env tparaml targl =
+  let tparam_count = List.length tparaml in
+  let targ_count = List.length targl in
+  (* If there are explicit type arguments but too few or too many then
+   * report an error *)
+  if targ_count <> 0 && tparam_count <> targ_count then
+    if is_method then
+      Errors.expected_tparam ~definition_pos:def_pos ~use_pos tparam_count
+    else
+      Errors.type_arity use_pos use_name (string_of_int tparam_count) def_pos;
+
+  (* Declare and localize the explicit type arguments *)
+  (* TODO? Drop surplus explicit type arguments *)
+  let (env, explicit_targs) = List.map_env env targl localize_targ in
+  (* Generate fresh type variables for the remainder *)
+  let (env, implicit_targs) =
+    List.map_env env (List.drop tparaml targ_count) (fun env tparam ->
+        let (env, tvar) =
+          Env.fresh_type_reason
+            env
+            (Reason.Rtype_variable_generics
+               (use_pos, snd tparam.tp_name, use_name))
+        in
+        Typing_log.log_tparam_instantiation env use_pos tparam tvar;
+        ( env,
+          (tvar, (use_pos, Aast.Happly ((Pos.none, SN.Typehints.wildcard), [])))
+        ))
+  in
+  (env, explicit_targs @ implicit_targs)
+
 (* For the majority of cases when we localize a function type we instantiate
  * the function's type parameters to be a Tunion wrapped in a Tvar so the
  * type can grow. There are two cases where we do not do this.
@@ -338,35 +387,16 @@ and localize_ft ?instantiation ~ety_env ~def_pos env ft =
   let (env, substs) =
     let (tparams, _) = ft.ft_tparams in
     match instantiation with
-    | Some { explicit_targs; use_name; use_pos } ->
-      let default () =
-        List.map_env env tparams (fun env tparam ->
-            let reason =
-              Reason.Rtype_variable_generics
-                (use_pos, snd tparam.tp_name, use_name)
-            in
-            let (env, tvar) = Env.fresh_type_reason env reason in
-            Typing_log.log_tparam_instantiation env use_pos tparam tvar;
-            (env, tvar))
-      in
-      let (env, tvarl) =
-        if List.is_empty explicit_targs then
-          default ()
-        else if List.length explicit_targs <> List.length tparams then (
-          Errors.expected_tparam
-            ~definition_pos:def_pos
-            ~use_pos
-            (List.length tparams);
-          default ()
-        ) else
-          let type_argument env decl_ty =
-            match decl_ty with
-            | (r, Tapply ((_, id), [])) when id = SN.Typehints.wildcard ->
-              Env.fresh_type env (Reason.to_pos r)
-            | _ -> localize_with_self env decl_ty
-          in
-          List.map_env env explicit_targs type_argument
-      in
+    | Some { explicit_targs; use_name = _; use_pos } ->
+      if
+        (not (List.is_empty explicit_targs))
+        && List.length explicit_targs <> List.length tparams
+      then
+        Errors.expected_tparam
+          ~definition_pos:def_pos
+          ~use_pos
+          (List.length tparams);
+      let tvarl = List.map ~f:fst explicit_targs in
       let ft_subst = Subst.make_locl tparams tvarl in
       (env, SMap.union ft_subst ety_env.substs)
     | None ->
@@ -562,18 +592,15 @@ and localize_hint ~ety_env env hint =
   let hint_ty = Decl_hint.hint env.decl_env hint in
   localize ~ety_env env hint_ty
 
-and localize_missing_tparams_class env r sid class_ tyl =
-  let p = Reason.to_pos r in
-  let (env, _, tyl) =
-    resolve_type_arguments_and_check_constraints
-      ~exact:Nonexact
-      ~check_constraints:false
-      env
-      p
-      sid
-      (Aast.CI sid)
-      (Cls.tparams class_)
-      tyl
+and localize_missing_tparams_class env r sid class_ =
+  let use_pos = Reason.to_pos r in
+  let use_name = Utils.strip_ns (snd sid) in
+  let (env, tyl) =
+    List.map_env env (Cls.tparams class_) (fun env tparam ->
+        Env.fresh_type_reason
+          env
+          (Reason.Rtype_variable_generics
+             (use_pos, snd tparam.tp_name, use_name)))
   in
   let c_ty = (r, Tclass (sid, Nonexact, tyl)) in
   let env = Env.set_tyvar_variance env c_ty in
@@ -586,12 +613,12 @@ and localize_missing_tparams_class env r sid class_ tyl =
     }
   in
   let env =
-    check_tparams_constraints ~use_pos:p ~ety_env env (Cls.tparams class_)
+    check_tparams_constraints ~use_pos ~ety_env env (Cls.tparams class_)
   in
   let env =
     check_where_constraints
       ~in_class:true
-      ~use_pos:p
+      ~use_pos
       ~definition_pos:(Cls.pos class_)
       ~ety_env
       env
@@ -599,42 +626,31 @@ and localize_missing_tparams_class env r sid class_ tyl =
   in
   (env, tyl)
 
-(* If there are no explicit type arguments then generate fresh type variables
-* for all of them. Otherwise, check the arity, and use the explicit types. *)
-and resolve_type_argument env hint =
-  (* For explicit type arguments we support a wildcard syntax `_` for which
-   * Hack will generate a fresh type variable *)
-  match hint with
-  | (r, Tapply ((_, id), [])) when id = SN.Typehints.wildcard ->
-    Env.fresh_type env (Reason.to_pos r)
-  | _ -> localize_with_self env hint
-
-and resolve_type_argument_hint env hint =
-  Decl_hint.hint env.decl_env hint |> resolve_type_argument env
-
-and resolve_type_arguments env p class_id tparaml hintl =
-  let length_hintl = List.length hintl in
-  let length_tparaml = List.length tparaml in
-  if length_hintl <> length_tparaml then
-    List.map_env env tparaml (fun env tparam ->
-        let (env, tvar) =
-          Env.fresh_type_reason
-            env
-            (Reason.Rtype_variable_generics
-               (p, snd tparam.tp_name, Utils.strip_ns (snd class_id)))
-        in
-        Typing_log.log_tparam_instantiation env p tparam tvar;
-        (env, tvar))
-  else
-    List.map_env env hintl resolve_type_argument
-
 (* Do all of the above, and also check any constraints associated with the type parameters.
  *)
 and resolve_type_arguments_and_check_constraints
-    ~exact ~check_constraints env p class_id from_class tparaml hintl =
-  let (env, type_argl) = resolve_type_arguments env p class_id tparaml hintl in
+    ~exact
+    ~check_constraints
+    ~def_pos
+    ~use_pos
+    env
+    class_id
+    from_class
+    tparaml
+    hintl =
+  let (env, type_argl) =
+    localize_targs
+      ~is_method:false
+      ~def_pos
+      ~use_pos
+      ~use_name:(Utils.strip_ns (snd class_id))
+      env
+      tparaml
+      hintl
+  in
   let this_ty =
-    (Reason.Rwitness (fst class_id), Tclass (class_id, exact, type_argl))
+    ( Reason.Rwitness (fst class_id),
+      Tclass (class_id, exact, List.map ~f:fst type_argl) )
   in
   let env =
     if check_constraints then
@@ -642,11 +658,11 @@ and resolve_type_arguments_and_check_constraints
         {
           type_expansions = [];
           this_ty;
-          substs = Subst.make_locl tparaml type_argl;
+          substs = Subst.make_locl tparaml (List.map ~f:fst type_argl);
           from_class = Some from_class;
         }
       in
-      check_tparams_constraints ~use_pos:p ~ety_env env tparaml
+      check_tparams_constraints ~use_pos ~ety_env env tparaml
     else
       env
   in

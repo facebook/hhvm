@@ -1199,15 +1199,16 @@ module Make (GetLocals : GetLocals) = struct
   let constraint_ ?(forbid_this = false) env (ck, h) =
     (ck, hint ~forbid_this env h)
 
-  let targ env t =
-    hint
-      ~allow_wildcard:true
-      ~forbid_this:false
-      ~allow_typedef:true
-      ~allow_retonly:true
-      ~tp_depth:1
-      env
-      t
+  let targ env (p, t) =
+    ( p,
+      hint
+        ~allow_wildcard:true
+        ~forbid_this:false
+        ~allow_typedef:true
+        ~allow_retonly:true
+        ~tp_depth:1
+        env
+        t )
 
   let targl env _ tal = List.map tal ~f:(targ env)
 

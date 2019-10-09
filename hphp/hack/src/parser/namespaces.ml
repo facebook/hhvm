@@ -100,22 +100,22 @@ let elaborate_defined_id nsenv kind (p, id) =
  * works out. (Fully qualifying identifiers is of course idempotent, but there
  * used to be other schemes here.)
  *)
-let elaborate_id_impl nsenv kind id =
+let elaborate_raw_id nsenv kind id =
   if id <> "" && id.[0] = '\\' then
-    (true, id)
-  (* The name is already fully-qualified. *)
+    (* The name is already fully-qualified. *)
+    id
   else
     let global_id = Utils.add_ns id in
     if kind = ElaborateConst && SN.PseudoConsts.is_pseudo_const global_id then
       (* Pseudo-constants are always global. *)
-      (true, global_id)
+      global_id
     else if
       kind = ElaborateFun && SN.PseudoFunctions.is_pseudo_function global_id
     then
-      (true, global_id)
+      global_id
     else if kind = ElaborateClass && SN.Typehints.is_reserved_global_name id
     then
-      (true, global_id)
+      global_id
     else
       let (bslash_loc, has_bslash) =
         match String.index id '\\' with
@@ -124,10 +124,7 @@ let elaborate_id_impl nsenv kind id =
       in
       let prefix = String.sub id 0 bslash_loc in
       if has_bslash && prefix = "namespace" then
-        ( true,
-          elaborate_into_current_ns
-            nsenv
-            (String_utils.lstrip id "namespace\\") )
+        elaborate_into_current_ns nsenv (String_utils.lstrip id "namespace\\")
       else
         (* Expand "use" imports. "use function" and "use const" only apply if the id
          * is completely unqualified, otherwise the normal "use" imports apply. *)
@@ -142,16 +139,16 @@ let elaborate_id_impl nsenv kind id =
             | ElaborateRecord -> nsenv.ns_record_def_uses
         in
         match SMap.get prefix uses with
-        | Some use -> (true, use ^ String_utils.lstrip id prefix)
+        | Some use -> use ^ String_utils.lstrip id prefix
         | None ->
           let unaliased_id =
             aliased_to_fully_qualified_id nsenv.ns_auto_ns_map id
           in
           if unaliased_id <> id then
-            (true, Utils.add_ns unaliased_id)
+            Utils.add_ns unaliased_id
           else (
             match get_autoimport_name_namespace id kind with
-            | None -> (false, elaborate_into_current_ns nsenv id)
+            | None -> elaborate_into_current_ns nsenv id
             | Some (typechecker_ns, compiler_ns) ->
               let ns =
                 if nsenv.ns_is_codegen then
@@ -159,12 +156,10 @@ let elaborate_id_impl nsenv kind id =
                 else
                   typechecker_ns
               in
-              (true, elaborate_into_ns (Hh_autoimport.string_of_ns ns) id)
+              elaborate_into_ns (Hh_autoimport.string_of_ns ns) id
           )
 
-let elaborate_id nsenv kind (p, id) =
-  let (_, newid) = elaborate_id_impl nsenv kind id in
-  (p, newid)
+let elaborate_id nsenv kind (p, id) = (p, elaborate_raw_id nsenv kind id)
 
 (* First pass of flattening namespaces, run super early in the pipeline, right
  * after parsing.

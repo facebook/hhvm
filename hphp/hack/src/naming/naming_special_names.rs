@@ -320,6 +320,24 @@ pub mod user_attributes {
         .cloned()
         .collect();
     }
+
+    pub fn is_memoized(name: &str) -> bool {
+        name == MEMOIZE || name == MEMOIZE_LSB
+    }
+
+    // TODO(hrust) these should probably be added to the above map/fields, too
+
+    pub fn is_native(name: &str) -> bool {
+        name == "__Native"
+    }
+
+    pub fn is_foldable(name: &str) -> bool {
+        name == "__IsFoldable"
+    }
+
+    pub fn is_meth_caller(name: &str) -> bool {
+        name == "__MethCaller"
+    }
 }
 
 pub mod attribute_kinds {

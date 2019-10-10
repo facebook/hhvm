@@ -72,7 +72,7 @@ let check_class_elt_visibility parent_class_elt class_elt =
 
 (* Check that all the required members are implemented *)
 let check_members_implemented
-    check_private parent_reason reason (_, parent_members, get_member, _) =
+    check_private parent_reason reason (_, parent_members, get_member) =
   Sequence.iter parent_members (fun (member_name, class_elt) ->
       match class_elt.ce_visibility with
       | Vprivate _ when not check_private -> ()
@@ -409,7 +409,7 @@ let check_members
     removals
     (parent_class, psubst, parent_ty)
     (class_, subst, class_ty)
-    (mem_source, parent_members, get_member, dep) =
+    (mem_source, parent_members, get_member) =
   let parent_members =
     if check_private then
       parent_members
@@ -461,10 +461,18 @@ let check_members
           let check_member_unique =
             should_check_member_unique class_elt parent_class_elt
           in
-          if parent_class_elt.ce_origin <> class_elt.ce_origin then
-            Typing_deps.add_idep
-              (Dep.Class (Cls.name class_))
-              (dep parent_class_elt.ce_origin member_name);
+          ( if parent_class_elt.ce_origin <> class_elt.ce_origin then
+            let dep =
+              match mem_source with
+              | `FromMethod ->
+                Dep.Method (parent_class_elt.ce_origin, member_name)
+              | `FromSMethod ->
+                Dep.SMethod (parent_class_elt.ce_origin, member_name)
+              | `FromSProp ->
+                Dep.SProp (parent_class_elt.ce_origin, member_name)
+              | `FromProp -> Dep.Prop (parent_class_elt.ce_origin, member_name)
+            in
+            Typing_deps.add_idep (Dep.Class (Cls.name class_)) dep );
           check_override
             ~check_member_unique
             env
@@ -490,22 +498,10 @@ let instantiate_consts subst consts =
 
 let make_all_members ~child_class ~parent_class =
   [
-    ( `FromProp,
-      Cls.props parent_class,
-      Cls.get_prop child_class,
-      (fun x y -> Dep.Prop (x, y)) );
-    ( `FromSProp,
-      Cls.sprops parent_class,
-      Cls.get_sprop child_class,
-      (fun x y -> Dep.SProp (x, y)) );
-    ( `FromMethod,
-      Cls.methods parent_class,
-      Cls.get_method child_class,
-      (fun x y -> Dep.Method (x, y)) );
-    ( `FromSMethod,
-      Cls.smethods parent_class,
-      Cls.get_smethod child_class,
-      (fun x y -> Dep.SMethod (x, y)) );
+    (`FromProp, Cls.props parent_class, Cls.get_prop child_class);
+    (`FromSProp, Cls.sprops parent_class, Cls.get_sprop child_class);
+    (`FromMethod, Cls.methods parent_class, Cls.get_method child_class);
+    (`FromSMethod, Cls.smethods parent_class, Cls.get_smethod child_class);
   ]
 
 (* The phantom class element that represents the default constructor:

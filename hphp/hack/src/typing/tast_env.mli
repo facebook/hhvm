@@ -57,15 +57,6 @@ val get_self_exn : env -> Tast.ty
     When not in a class definition, return {!None}. *)
 val get_self : env -> Tast.ty option
 
-(** Return a type consisting of a fresh type variable *)
-val fresh_type : env -> Pos.t -> env * Tast.ty
-
-val open_tyvars : env -> Pos.t -> env
-
-val close_tyvars_and_solve : env -> Errors.typing_error_callback -> env
-
-val set_tyvar_variance : env -> Tast.ty -> env
-
 (** Return the info of the given class from the typing heap. *)
 val get_class :
   env -> Decl_provider.class_key -> Decl_provider.class_decl option

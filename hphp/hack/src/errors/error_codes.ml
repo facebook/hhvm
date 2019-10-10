@@ -208,7 +208,7 @@ module NastCheck = struct
     | YieldInCoroutine
     | SuspendOutsideOfCoroutine
     | SuspendInFinally
-    | BreakContinueNNotSupported
+    | BreakContinueNNotSupportedDEPRECATED
     | StaticMemoizedFunction
     | InoutParamsOutsideOfSync
     | InoutParamsSpecial

@@ -6,6 +6,10 @@ class Foo {
 }
 
 class Bar extends Foo {
+
+}
+
+class Baz extends Bar {
   function test(): string {
     return "b";
   }

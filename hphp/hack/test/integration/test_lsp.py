@@ -2646,6 +2646,23 @@ class TestLsp(TestCase[LspTestDriver]):
                     }
                 ],
             )
+            .request(
+                comment="go to implemenetation: method",
+                method="textDocument/implementation",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 19, "character": 18},
+                },
+                result=[
+                    {
+                        "uri": "${php_file_uri}",
+                        "range": {
+                            "start": {"line": 8, "character": 18},
+                            "end": {"line": 8, "character": 22},
+                        },
+                    }
+                ],
+            )
             .request(method="shutdown", params={}, result=None)
         )
         self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)

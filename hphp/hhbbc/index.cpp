@@ -23,7 +23,6 @@
 #include <memory>
 #include <mutex>
 #include <unordered_map>
-#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -65,6 +64,7 @@
 
 #include "hphp/util/algorithm.h"
 #include "hphp/util/assertions.h"
+#include "hphp/util/hash-set.h"
 #include "hphp/util/match.h"
 
 namespace HPHP { namespace HHBBC {
@@ -2882,15 +2882,11 @@ void define_func_families(IndexData& index) {
 struct ConflictGraph {
   void add(const php::Class* i, const php::Class* j) {
     if (i == j) return;
-    auto& conflicts = map[i];
-    if (std::find(conflicts.begin(), conflicts.end(), j) != conflicts.end()) {
-      return;
-    }
-    conflicts.push_back(j);
+    map[i].insert(j);
   }
 
   hphp_hash_map<const php::Class*,
-                     std::vector<const php::Class*>> map;
+                hphp_fast_set<const php::Class*>> map;
 };
 
 /*
@@ -2991,8 +2987,8 @@ void trace_interfaces(const IndexData& index, const ConflictGraph& cg) {
 Slot find_min_slot(const php::Class* iface,
                    const IfaceSlotMap& slots,
                    const ConflictGraph& cg) {
-  auto const& conflicts = cg.map.at(iface);
-  if (conflicts.empty()) {
+  auto const& cit = cg.map.find(iface);
+  if (cit == cg.map.end() || cit->second.empty()) {
     // No conflicts. This is the only interface implemented by the classes that
     // implement it.
     return 0;
@@ -3000,7 +2996,7 @@ Slot find_min_slot(const php::Class* iface,
 
   boost::dynamic_bitset<> used;
 
-  for (auto& c : conflicts) {
+  for (auto const& c : cit->second) {
     auto const it = slots.find(c);
     if (it == slots.end()) continue;
     auto const slot = it->second;

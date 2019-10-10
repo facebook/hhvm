@@ -21,18 +21,7 @@ trait StrictIterable<+Tv> implements Iterable<Tv> {
 
   public function toValuesArray(): varray<Tv>;
 
-  /* HH_FIXME[4120]: While this violates our variance annotations, we are
-   * returning a copy of the underlying collection, so it is actually safe
-   * See #6853603. */
-  public function toVector(): Vector<Tv>;
-
   public function toImmVector(): ImmVector<Tv>;
-
-  /* HH_FIXME[4120]: While this violates our variance annotations, we are
-   * returning a copy of the underlying collection, so it is actually safe
-   * See #6853603. */
-
-  public function toSet(): Set<Tv> where Tv as arraykey;
 
   public function toImmSet(): ImmSet<Tv> where Tv as arraykey;
 
@@ -73,24 +62,9 @@ trait StrictKeyedIterable<Tk,+Tv> implements KeyedIterable<Tk,Tv> {
 
   public function toKeysArray(): varray<Tk>;
 
-  /* HH_FIXME[4120]: While this violates our variance annotations, we are
-   * returning a copy of the underlying collection, so it is actually safe
-   * See #6853603. */
-  public function toVector(): Vector<Tv>;
-
   public function toImmVector(): ImmVector<Tv>;
 
-  /* HH_FIXME[4120]: While this violates our variance annotations, we are
-   * returning a copy of the underlying collection, so it is actually safe
-   * See #6853603. */
-  public function toMap(): Map<Tk, Tv> where Tk as arraykey;
-
   public function toImmMap(): ImmMap<Tk, Tv> where Tk as arraykey;
-
-  /* HH_FIXME[4120]: While this violates our variance annotations, we are
-   * returning a copy of the underlying collection, so it is actually safe
-   * See #6853603. */
-  public function toSet(): Set<Tv> where Tv as arraykey;
 
   public function toImmSet(): ImmSet<Tv> where Tv as arraykey;
 
@@ -145,17 +119,7 @@ trait LazyIterable<+Tv> implements Iterable<Tv> {
 
   public function toValuesArray(): varray<Tv>;
 
-  /* HH_FIXME[4120]: While this violates our variance annotations, we are
-   * returning a copy of the underlying collection, so it is actually safe
-   * See #6853603. */
-  public function toVector(): Vector<Tv>;
-
   public function toImmVector(): ImmVector<Tv>;
-
-  /* HH_FIXME[4120]: While this violates our variance annotations, we are
-   * returning a copy of the underlying collection, so it is actually safe
-   * See #6853603. */
-  public function toSet(): Set<Tv> where Tv as arraykey;
 
   public function toImmSet(): ImmSet<Tv> where Tv as arraykey;
 
@@ -196,26 +160,9 @@ trait LazyKeyedIterable<Tk,+Tv> implements KeyedIterable<Tk,Tv> {
 
   public function toKeysArray(): varray<Tk>;
 
-  /* HH_FIXME[4120]: While this violates our variance annotations, we are
-   * returning a copy of the underlying collection, so it is actually safe
-   * See #6853603. */
-  public function toVector(): Vector<Tv>;
-
   public function toImmVector(): ImmVector<Tv>;
 
-  /* HH_FIXME[4120]: While this violates our variance annotations, we are
-   * returning a copy of the underlying collection, so it is actually safe
-   * See #6853603. */
-
-  public function toMap(): Map<Tk, Tv> where Tk as arraykey;
-
   public function toImmMap(): ImmMap<Tk, Tv> where Tk as arraykey;
-
-  /* HH_FIXME[4120]: While this violates our variance annotations, we are
-   * returning a copy of the underlying collection, so it is actually safe
-   * See #6853603. */
-
-  public function toSet(): Set<Tv> where Tv as arraykey;
 
   public function toImmSet(): ImmSet<Tv> where Tv as arraykey;
 

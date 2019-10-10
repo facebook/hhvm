@@ -3723,7 +3723,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 params={
                     "message": "IDE services: ready. hh_server: stopped.",
                     "actions": [{"title": "Restart Hack Server"}],
-                    "type": 3,
+                    "type": 1,
                 },
                 result=None,
             )

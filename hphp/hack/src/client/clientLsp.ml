@@ -2331,12 +2331,14 @@ let merge_statuses
     ~(hh_server_status : ShowStatus.params)
     ~(client_ide_status : ShowStatus.params) : ShowStatus.params =
   let add lhs rhs = Option.merge ~f:( + ) lhs rhs in
-  let combine_types _hh_server_type client_ide_type =
-    (* Use the IDE services type as the canonical type. We want to indicate
-    whether the language server is ready to produce IDE services. This might
-    change e.g. if we want to be sure to display some bulk typechecking progress
-    as yellow instead of blue. *)
-    client_ide_type
+  let combine_types hh_server_type client_ide_type =
+    (* Use the worse of the two status to indicate that something's not
+    working in the maximum number of applicable cases. *)
+    if MessageType.to_enum hh_server_type < MessageType.to_enum client_ide_type
+    then
+      hh_server_type
+    else
+      client_ide_type
   in
   let combine_short_messages lhs rhs =
     Option.merge ~f:(fun x y -> x ^ ", " ^ y) lhs rhs

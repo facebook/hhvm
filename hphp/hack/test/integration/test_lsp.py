@@ -3678,12 +3678,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
             .wait_for_server_request(
                 method="window/showStatus",
                 params={
-                    "message": "hh_server isn't running. Not sure why. "
-                    "Here at FB we leave it running "
-                    "persistently. Try the 'Restart' button "
-                    "below. If that doesn't work, try `arc "
-                    "fix`. Language features such as errors "
-                    "and go-to-def are currently unavailable.",
+                    "message": "hh_server: stopped.",
                     "actions": [{"title": "Restart Hack Server"}],
                     "type": 1,
                 },
@@ -3705,11 +3700,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
             )
             .wait_for_server_request(
                 method="window/showStatus",
-                params={
-                    "actions": [],
-                    "message": "hh_server is initialized and running correctly.",
-                    "type": 3,
-                },
+                params={"actions": [], "message": "hh_server: ready.", "type": 3},
                 result=None,
             )
             .request(method="shutdown", params={}, result=None)
@@ -3730,13 +3721,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
             .wait_for_server_request(
                 method="window/showStatus",
                 params={
-                    "message": "* IDE services: ready.\n"
-                    "* hh_server isn't running. Not sure why. "
-                    "Here at FB we leave it running "
-                    "persistently. Try the 'Restart' button "
-                    "below. If that doesn't work, try `arc "
-                    "fix`. Language features such as errors "
-                    "and go-to-def are currently unavailable.",
+                    "message": "IDE services: ready. hh_server: stopped.",
                     "actions": [{"title": "Restart Hack Server"}],
                     "type": 3,
                 },
@@ -3760,8 +3745,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 method="window/showStatus",
                 params={
                     "actions": [],
-                    "message": "* IDE services: ready.\n"
-                    "* hh_server is initialized and running correctly.",
+                    "message": "IDE services: ready. hh_server: ready.",
                     "type": 3,
                 },
                 result=None,

@@ -12,6 +12,3 @@ let ignore_ide_from _ = false
 let waiting_for_server_to_be_started_doc = ""
 
 let angery_reaccs_only () = false
-
-let lsp_explanation_for_no_server_running =
-  "hh_server isn't running. It's common to leave hh_server running persistently. Click 'Restart' button below when ready."

@@ -2341,7 +2341,7 @@ let merge_statuses
   let combine_short_messages lhs rhs =
     Option.merge ~f:(fun x y -> x ^ ", " ^ y) lhs rhs
   in
-  let combine_messages lhs rhs = "* " ^ lhs ^ "\n" ^ "* " ^ rhs in
+  let combine_messages lhs rhs = lhs ^ " " ^ rhs in
   ShowStatus.
     {
       request =
@@ -2440,7 +2440,7 @@ let report_connect_end (ienv : In_init_env.t) : state =
             ShowStatus.request =
               {
                 ShowMessageRequest.type_ = MessageType.InfoMessage;
-                message = "hh_server is initialized and running correctly.";
+                message = "hh_server: ready.";
                 actions = [];
               };
             progress = None;
@@ -2793,8 +2793,7 @@ let rec connect (state : state) : state Lwt.t =
         | Exit_with Out_of_retries
         | Exit_with Out_of_time ->
           "hh_server is waiting for things to settle"
-        | Exit_with No_server_running_should_retry ->
-          ClientMessages.lsp_explanation_for_no_server_running
+        | Exit_with No_server_running_should_retry -> "hh_server: stopped."
         | _ -> "hh_server: " ^ message
       in
       let%lwt state =
@@ -3152,9 +3151,7 @@ let tick_showStatus
               ShowMessageRequest.
                 {
                   type_ = MessageType.ErrorMessage;
-                  message =
-                    p.Lost_env.explanation
-                    ^ " Language features such as errors and go-to-def are currently unavailable.";
+                  message = p.Lost_env.explanation;
                   actions = [{ title = "Restart Hack Server" }];
                 };
             progress = None;
@@ -3957,7 +3954,7 @@ let main (env : env) : Exit_status.t Lwt.t =
         let explanation =
           match server_finale_data with
           | Some { ServerCommandTypes.msg; _ } -> msg
-          | _ -> "hh_server has stopped."
+          | _ -> "hh_server: stopped."
         in
         (* When would be a good time to auto-dismiss the dialog and attempt     *)
         (* a proper re-connection? it's not our job to ascertain with certainty *)

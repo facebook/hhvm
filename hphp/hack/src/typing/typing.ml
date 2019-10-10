@@ -4190,7 +4190,9 @@ and new_object
  * concrete_classname<T>, where T cannot be an interface.
  * *)
 and instantiable_cid ?(exact = Nonexact) p env cid explicit_targs =
-  let (env, tal, te, classes) = class_id_for_new ~exact p env cid explicit_targs in
+  let (env, tal, te, classes) =
+    class_id_for_new ~exact p env cid explicit_targs
+  in
   List.iter classes (fun ((pos, name), class_info, c_ty) ->
       if
         Cls.kind class_info = Ast_defs.Ctrait

@@ -92,12 +92,7 @@ let () =
     ; "--fallback-expect-extension .exp"
     ; "--flags"
     ; "--new-inference-lambda"
-    ; "--like-type-hints"
-    ; "--like-casts"
-    ; "--coercion-from-dynamic"
-    ; "--coercion-from-union"
-    ; "--complex-coercion"
-    ; "--simple-pessimize 1.0"
+    ; "--like-types-all"
     ; "--error-format raw"
     ; "--out-extension .like_types.out" ] in
   let cmd = String.concat " " cmds in

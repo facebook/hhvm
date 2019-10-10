@@ -203,6 +203,8 @@ let parse_options () =
   let disallow_byref_dynamic_calls = ref (Some false) in
   let disallow_byref_calls = ref (Some false) in
   let set_bool x () = x := Some true in
+  let set_bool_ x () = x := true in
+  let set_float_ x f = x := f in
   let shallow_class_decl = ref false in
   let out_extension = ref ".out" in
   let like_type_hints = ref false in
@@ -463,6 +465,16 @@ let parse_options () =
       ( "--complex-coercion",
         Arg.Set complex_coercion,
         "Allows complex coercions that involve like types" );
+      ( "--like-types-all",
+        Arg.Unit
+          (fun () ->
+            set_bool_ like_type_hints ();
+            set_bool_ like_casts ();
+            set_float_ simple_pessimize 1.0;
+            set_bool_ coercion_from_dynamic ();
+            set_bool_ coercion_from_union ();
+            set_bool_ complex_coercion ()),
+        "Enables all like types features" );
       ( "--disable-partially-abstract-typeconsts",
         Arg.Set disable_partially_abstract_typeconsts,
         "Treat partially abstract type constants as concrete type constants" );

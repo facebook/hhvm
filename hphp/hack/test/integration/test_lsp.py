@@ -1065,7 +1065,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "insertTextFormat": 1,
                             "data": {
                                 "fullname": "isValid",
-                                "filename": "/tmp/cleansed_hhi_path/BuiltinEnum.hhi",
+                                "filename": "${hhi_path}/BuiltinEnum.hhi",
                                 "line": 49,
                                 "char": 32,
                                 "base_class": "\\Elsa",
@@ -1081,7 +1081,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "insertTextFormat": 1,
                             "data": {
                                 "fullname": "getValues",
-                                "filename": "/tmp/cleansed_hhi_path/BuiltinEnum.hhi",
+                                "filename": "${hhi_path}/BuiltinEnum.hhi",
                                 "line": 34,
                                 "char": 32,
                                 "base_class": "\\Elsa",
@@ -1097,7 +1097,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "insertTextFormat": 1,
                             "data": {
                                 "fullname": "getNames",
-                                "filename": "/tmp/cleansed_hhi_path/BuiltinEnum.hhi",
+                                "filename": "${hhi_path}/BuiltinEnum.hhi",
                                 "line": 43,
                                 "char": 32,
                                 "base_class": "\\Elsa",
@@ -1113,7 +1113,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "insertTextFormat": 1,
                             "data": {
                                 "fullname": "coerce",
-                                "filename": "/tmp/cleansed_hhi_path/BuiltinEnum.hhi",
+                                "filename": "${hhi_path}/BuiltinEnum.hhi",
                                 "line": 56,
                                 "char": 32,
                                 "base_class": "\\Elsa",
@@ -1129,7 +1129,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "insertTextFormat": 1,
                             "data": {
                                 "fullname": "assertAll",
-                                "filename": "/tmp/cleansed_hhi_path/BuiltinEnum.hhi",
+                                "filename": "${hhi_path}/BuiltinEnum.hhi",
                                 "line": 70,
                                 "char": 32,
                                 "base_class": "\\Elsa",
@@ -1145,7 +1145,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "insertTextFormat": 1,
                             "data": {
                                 "fullname": "assert",
-                                "filename": "/tmp/cleansed_hhi_path/BuiltinEnum.hhi",
+                                "filename": "${hhi_path}/BuiltinEnum.hhi",
                                 "line": 63,
                                 "char": 32,
                                 "base_class": "\\Elsa",
@@ -1189,8 +1189,6 @@ class TestLsp(TestCase[LspTestDriver]):
                         "newText": "isValid",
                     },
                     "data": {
-                        # Note that this ${hhi_path} is a request, not a response
-                        # which is why it is still a replacement rather than a "cleansed" variable
                         "filename": "${hhi_path}/BuiltinEnum.hhi",
                         "line": 49,
                         "char": 32,
@@ -1215,7 +1213,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         "newText": "isValid",
                     },
                     "data": {
-                        "filename": "/tmp/cleansed_hhi_path/BuiltinEnum.hhi",
+                        "filename": "${hhi_path}/BuiltinEnum.hhi",
                         "line": 49,
                         "char": 32,
                     },

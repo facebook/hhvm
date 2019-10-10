@@ -419,10 +419,10 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
         # Because of the way hack allocates a different HHI folder for each running
         # process, let's replace the standard HHI foldername
         actual_result = fixup_hhi_json(actual_result)
-
         expected_result = interpolate_variables(
             payload=request.result, variables=variables
         )
+        expected_result = fixup_hhi_json(expected_result)
 
         if actual_result != expected_result:
             error_description = self._pretty_print_diff(

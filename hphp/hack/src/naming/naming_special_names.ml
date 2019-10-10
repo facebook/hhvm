@@ -294,6 +294,8 @@ module UserAttributes = struct
 
   let uaNeverInline = "__NEVER_INLINE"
 
+  let uaDisableTypecheckerInternal = "__DisableTypecheckerInternal"
+
   let as_map =
     AttributeKinds.(
       SMap.of_list
@@ -336,6 +338,7 @@ module UserAttributes = struct
           (uaDynamicallyConstructible, [cls]);
           (uaReifiable, [typeconst]);
           (uaNeverInline, [fn; mthd]);
+          (uaDisableTypecheckerInternal, [fn; mthd]);
         ])
 end
 

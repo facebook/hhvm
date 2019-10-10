@@ -724,7 +724,12 @@ and fun_def tcopt f : (Tast.fun_def * Typing_env_types.global_tvenv) option =
       in
       let env = set_tyvars_variance_in_callable env locl_ty param_tys in
       let local_tpenv = Env.get_tpenv env in
-      let (env, tb) = fun_ env return pos nb f.f_fun_kind in
+      let disable =
+        Attributes.mem
+          SN.UserAttributes.uaDisableTypecheckerInternal
+          f.f_user_attributes
+      in
+      let (env, tb) = fun_ ~disable env return pos nb f.f_fun_kind in
       (* restore original reactivity *)
       let env = Env.set_env_reactive env reactive in
       begin
@@ -775,11 +780,24 @@ and fun_def tcopt f : (Tast.fun_def * Typing_env_types.global_tvenv) option =
 (*****************************************************************************)
 (* function used to type closures, functions and methods *)
 (*****************************************************************************)
-and fun_ ?(abstract = false) env return pos named_body f_kind =
+and fun_
+    ?(abstract = false) ?(disable = false) env return pos named_body f_kind =
   Env.with_env env (fun env ->
       debug_last_pos := pos;
       let env = Env.set_return env return in
-      let (env, tb) = block env named_body.fb_ast in
+      let (env, tb) =
+        if disable then
+          let () =
+            Errors.internal_error
+              pos
+              ( "Type inference for this function has been disabled by the "
+              ^ SN.UserAttributes.uaDisableTypecheckerInternal
+              ^ " attribute" )
+          in
+          block env []
+        else
+          block env named_body.fb_ast
+      in
       Typing_sequencing.sequence_check_block named_body.fb_ast;
       let { Typing_env_return_info.return_type = ret; _ } =
         Env.get_return env
@@ -8526,8 +8544,13 @@ and method_def env cls m =
       let env = set_tyvars_variance_in_callable env locl_ty param_tys in
       let nb = Nast.assert_named_body m.m_body in
       let local_tpenv = Env.get_tpenv env in
+      let disable =
+        Attributes.mem
+          SN.UserAttributes.uaDisableTypecheckerInternal
+          m.m_user_attributes
+      in
       let (env, tb) =
-        fun_ ~abstract:m.m_abstract env return pos nb m.m_fun_kind
+        fun_ ~abstract:m.m_abstract ~disable env return pos nb m.m_fun_kind
       in
       (* restore original method reactivity  *)
       let env = Env.set_env_reactive env reactive in

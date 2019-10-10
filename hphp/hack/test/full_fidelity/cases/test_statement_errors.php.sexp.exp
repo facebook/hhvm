@@ -49,13 +49,12 @@
                   ((default_label 8
                     ((() default 7 ()) (() : 1 ((whitespace 1)))))))
                  (list 6
-                  ((break_statement 6
-                    ((() break 5 ()) (missing 0 ()) (() ";" 1 ())))))
+                  ((break_statement 6 ((() break 5 ()) (() ";" 1 ())))))
                  (missing 0 ())))))
              (() } 1
               ((whitespace 1) (single_line_comment 11) (end_of_line 1)))))
            (break_statement 6
-            ((((whitespace 2)) break 5 ()) (missing 0 ())
+            ((((whitespace 2)) break 5 ())
              (() ";" 1
               ((whitespace 1) (single_line_comment 8) (end_of_line 1)))))
            (while_statement 123
@@ -69,7 +68,7 @@
                    (variable 2 ((() variable 2 ())))
                    (() ")" 1 ((whitespace 1)))
                    (break_statement 6
-                    ((() break 5 ()) (missing 0 ())
+                    ((() break 5 ())
                      (() ";" 1
                       ((whitespace 1) (single_line_comment 11)
                        (end_of_line 1)))))
@@ -79,7 +78,7 @@
                    (variable 2 ((() variable 2 ())))
                    (() ")" 1 ((whitespace 1)))
                    (continue_statement 9
-                    ((() continue 8 ()) (missing 0 ())
+                    ((() continue 8 ())
                      (() ";" 1
                       ((whitespace 1) (single_line_comment 11)
                        (end_of_line 1)))))
@@ -105,8 +104,7 @@
                         ((() { 1 ((whitespace 1)))
                          (list 6
                           ((break_statement 6
-                            ((() break 5 ()) (missing 0 ())
-                             (() ";" 1 ((whitespace 1)))))))
+                            ((() break 5 ()) (() ";" 1 ((whitespace 1)))))))
                          (() } 1 ())))))))
                    (() ";" 1
                     ((whitespace 1) (single_line_comment 8) (end_of_line 1)))))))

@@ -2032,7 +2032,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and validate_break_statement : break_statement validator = function
   | { Syntax.syntax = Syntax.BreakStatement x; value = v } -> v,
     { break_semicolon = validate_token x.break_semicolon
-    ; break_level = validate_option_with (validate_literal_expression) x.break_level
     ; break_keyword = validate_token x.break_keyword
     }
   | s -> validation_fail (Some SyntaxKind.BreakStatement) s
@@ -2040,7 +2039,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { Syntax.syntax =
       Syntax.BreakStatement
       { break_keyword = invalidate_token x.break_keyword
-      ; break_level = invalidate_option_with (invalidate_literal_expression) x.break_level
       ; break_semicolon = invalidate_token x.break_semicolon
       }
     ; Syntax.value = v
@@ -2048,7 +2046,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and validate_continue_statement : continue_statement validator = function
   | { Syntax.syntax = Syntax.ContinueStatement x; value = v } -> v,
     { continue_semicolon = validate_token x.continue_semicolon
-    ; continue_level = validate_option_with (validate_literal_expression) x.continue_level
     ; continue_keyword = validate_token x.continue_keyword
     }
   | s -> validation_fail (Some SyntaxKind.ContinueStatement) s
@@ -2056,7 +2053,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { Syntax.syntax =
       Syntax.ContinueStatement
       { continue_keyword = invalidate_token x.continue_keyword
-      ; continue_level = invalidate_option_with (invalidate_literal_expression) x.continue_level
       ; continue_semicolon = invalidate_token x.continue_semicolon
       }
     ; Syntax.value = v

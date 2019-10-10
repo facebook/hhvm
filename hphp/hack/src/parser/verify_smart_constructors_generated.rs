@@ -658,17 +658,17 @@ impl<'src> SmartConstructors<'src, State> for VerifySmartConstructors
         r
     }
 
-    fn make_break_statement(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
-        let args = arg_kinds!(arg0, arg1, arg2);
-        let r = <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_break_statement(self, arg0, arg1, arg2);
+    fn make_break_statement(&mut self, arg0: Self::R, arg1: Self::R) -> Self::R {
+        let args = arg_kinds!(arg0, arg1);
+        let r = <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_break_statement(self, arg0, arg1);
         self.state_mut().verify(&args);
         self.state_mut().push(r.kind());
         r
     }
 
-    fn make_continue_statement(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
-        let args = arg_kinds!(arg0, arg1, arg2);
-        let r = <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_continue_statement(self, arg0, arg1, arg2);
+    fn make_continue_statement(&mut self, arg0: Self::R, arg1: Self::R) -> Self::R {
+        let args = arg_kinds!(arg0, arg1);
+        let r = <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_continue_statement(self, arg0, arg1);
         self.state_mut().verify(&args);
         self.state_mut().push(r.kind());
         r

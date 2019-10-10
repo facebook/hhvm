@@ -1340,16 +1340,10 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         { throw_keyword = kw; throw_expression = expr; throw_semicolon = semi }
       ->
       transform_keyword_expression_statement env kw expr semi
-    | Syntax.BreakStatement
-        { break_keyword = kw; break_level = expr; break_semicolon = semi } ->
-      transform_keyword_expression_statement env kw expr semi
+    | Syntax.BreakStatement { break_keyword = kw; break_semicolon = semi }
     | Syntax.ContinueStatement
-        {
-          continue_keyword = kw;
-          continue_level = level;
-          continue_semicolon = semi;
-        } ->
-      transform_keyword_expression_statement env kw level semi
+        { continue_keyword = kw; continue_semicolon = semi } ->
+      Concat [t env kw; t env semi; Newline]
     | Syntax.EchoStatement
         {
           echo_keyword = kw;

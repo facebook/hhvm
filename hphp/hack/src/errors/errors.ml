@@ -1789,12 +1789,6 @@ let suspend_in_finally p =
     p
     "suspend is not allowed inside finally blocks."
 
-let break_continue_n_not_supported p =
-  add
-    (NastCheck.err_code NastCheck.BreakContinueNNotSupported)
-    p
-    "Break/continue N operators are not supported."
-
 let static_memoized_function p =
   add
     (NastCheck.err_code NastCheck.StaticMemoizedFunction)

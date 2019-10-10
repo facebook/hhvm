@@ -285,11 +285,11 @@ where S: SmartConstructors<'src, State> {
     fn make_throw_statement(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
         compose(SyntaxKind::ThrowStatement, self.s.make_throw_statement(arg0.1, arg1.1, arg2.1))
     }
-    fn make_break_statement(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
-        compose(SyntaxKind::BreakStatement, self.s.make_break_statement(arg0.1, arg1.1, arg2.1))
+    fn make_break_statement(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R {
+        compose(SyntaxKind::BreakStatement, self.s.make_break_statement(arg0.1, arg1.1))
     }
-    fn make_continue_statement(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
-        compose(SyntaxKind::ContinueStatement, self.s.make_continue_statement(arg0.1, arg1.1, arg2.1))
+    fn make_continue_statement(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R {
+        compose(SyntaxKind::ContinueStatement, self.s.make_continue_statement(arg0.1, arg1.1))
     }
     fn make_echo_statement(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
         compose(SyntaxKind::EchoStatement, self.s.make_echo_statement(arg0.1, arg1.1, arg2.1))

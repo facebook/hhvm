@@ -571,9 +571,9 @@
          (parenthesized_expression 2
           ((() "(" 1 ()) (() ")" 1 ()) (missing 0 ())))))
        (() ";" 1 ((end_of_line 1)))))
-     (break_statement 8
-      ((() break 5 ())
-       (parenthesized_expression 2
+     (break_statement 5 ((() break 5 ()) (missing 0 ())))
+     (expression_statement 3
+      ((parenthesized_expression 2
         ((() "(" 1 ()) (() ")" 1 ()) (missing 0 ())))
        (() ";" 1 ((end_of_line 1)))))
      (case_label 7
@@ -603,9 +603,9 @@
       ((parenthesized_expression 2
         ((() "(" 1 ()) (() ")" 1 ()) (missing 0 ())))
        (() ";" 1 ((end_of_line 1)))))
-     (continue_statement 11
-      ((() continue 8 ())
-       (parenthesized_expression 2
+     (continue_statement 8 ((() continue 8 ()) (missing 0 ())))
+     (expression_statement 3
+      ((parenthesized_expression 2
         ((() "(" 1 ()) (() ")" 1 ()) (missing 0 ())))
        (() ";" 1 ((end_of_line 1)))))
      (expression_statement 10

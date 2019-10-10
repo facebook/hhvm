@@ -1075,12 +1075,7 @@ let schema : schema_node list =
       description = "break_statement";
       prefix = "break";
       aggregates = [TopLevelDeclaration; Statement];
-      fields =
-        [
-          ("keyword", Token);
-          ("level", ZeroOrOne (Just "LiteralExpression"));
-          ("semicolon", Token);
-        ];
+      fields = [("keyword", Token); ("semicolon", Token)];
     };
     {
       kind_name = "ContinueStatement";
@@ -1089,12 +1084,7 @@ let schema : schema_node list =
       description = "continue_statement";
       prefix = "continue";
       aggregates = [TopLevelDeclaration; Statement];
-      fields =
-        [
-          ("keyword", Token);
-          ("level", ZeroOrOne (Just "LiteralExpression"));
-          ("semicolon", Token);
-        ];
+      fields = [("keyword", Token); ("semicolon", Token)];
     };
     {
       kind_name = "EchoStatement";

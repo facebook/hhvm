@@ -349,12 +349,12 @@ impl<'src> SmartConstructors<'src, HasScriptContent<'src>> for FactsSmartConstru
         <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_throw_statement(self, arg0, arg1, arg2)
     }
 
-    fn make_break_statement(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_break_statement(self, arg0, arg1, arg2)
+    fn make_break_statement(&mut self, arg0: Self::R, arg1: Self::R) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_break_statement(self, arg0, arg1)
     }
 
-    fn make_continue_statement(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_continue_statement(self, arg0, arg1, arg2)
+    fn make_continue_statement(&mut self, arg0: Self::R, arg1: Self::R) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_continue_statement(self, arg0, arg1)
     }
 
     fn make_echo_statement(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {

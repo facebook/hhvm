@@ -44,8 +44,7 @@
                          (() : 1 ((whitespace 1)))))))
                      (list 6
                       ((break_statement 6
-                        ((() break 5 ()) (missing 0 ())
-                         (() ";" 1 ((end_of_line 1)))))))
+                        ((() break 5 ()) (() ";" 1 ((end_of_line 1)))))))
                      (missing 0 ())))))
                  (((whitespace 6)) } 1 ((end_of_line 1)))))
                (missing 0 ())
@@ -74,7 +73,7 @@
                            (variable 2 ((() variable 2 ())))
                            (() ";" 1 ((end_of_line 1)))))))
                        (continue_statement 9
-                        ((((whitespace 6)) continue 8 ()) (missing 0 ())
+                        ((((whitespace 6)) continue 8 ())
                          (() ";" 1 ((end_of_line 1)))))))
                      (((whitespace 4)) } 1 ((whitespace 1)))))
                    (() while 5 ((whitespace 1))) (() "(" 1 ())

@@ -1311,20 +1311,16 @@ module WithToken(Token: TokenType) = struct
          acc
       | BreakStatement {
         break_keyword;
-        break_level;
         break_semicolon;
       } ->
          let acc = f acc break_keyword in
-         let acc = f acc break_level in
          let acc = f acc break_semicolon in
          acc
       | ContinueStatement {
         continue_keyword;
-        continue_level;
         continue_semicolon;
       } ->
          let acc = f acc continue_keyword in
-         let acc = f acc continue_level in
          let acc = f acc continue_semicolon in
          acc
       | EchoStatement {
@@ -3198,20 +3194,16 @@ module WithToken(Token: TokenType) = struct
       ]
       | BreakStatement {
         break_keyword;
-        break_level;
         break_semicolon;
       } -> [
         break_keyword;
-        break_level;
         break_semicolon;
       ]
       | ContinueStatement {
         continue_keyword;
-        continue_level;
         continue_semicolon;
       } -> [
         continue_keyword;
-        continue_level;
         continue_semicolon;
       ]
       | EchoStatement {
@@ -5086,20 +5078,16 @@ module WithToken(Token: TokenType) = struct
       ]
       | BreakStatement {
         break_keyword;
-        break_level;
         break_semicolon;
       } -> [
         "break_keyword";
-        "break_level";
         "break_semicolon";
       ]
       | ContinueStatement {
         continue_keyword;
-        continue_level;
         continue_semicolon;
       } -> [
         "continue_keyword";
-        "continue_level";
         "continue_semicolon";
       ]
       | EchoStatement {
@@ -7102,22 +7090,18 @@ module WithToken(Token: TokenType) = struct
         }
       | (SyntaxKind.BreakStatement, [
           break_keyword;
-          break_level;
           break_semicolon;
         ]) ->
         BreakStatement {
           break_keyword;
-          break_level;
           break_semicolon;
         }
       | (SyntaxKind.ContinueStatement, [
           continue_keyword;
-          continue_level;
           continue_semicolon;
         ]) ->
         ContinueStatement {
           continue_keyword;
-          continue_level;
           continue_semicolon;
         }
       | (SyntaxKind.EchoStatement, [
@@ -9424,12 +9408,10 @@ module WithToken(Token: TokenType) = struct
 
       let make_break_statement
         break_keyword
-        break_level
         break_semicolon
       =
         let syntax = BreakStatement {
           break_keyword;
-          break_level;
           break_semicolon;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
@@ -9437,12 +9419,10 @@ module WithToken(Token: TokenType) = struct
 
       let make_continue_statement
         continue_keyword
-        continue_level
         continue_semicolon
       =
         let syntax = ContinueStatement {
           continue_keyword;
-          continue_level;
           continue_semicolon;
         } in
         let value = ValueBuilder.value_from_syntax syntax in

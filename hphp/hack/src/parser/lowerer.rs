@@ -2899,28 +2899,8 @@ where
                 };
                 Self::lift_awaits_in_statement(f, node, env)
             }
-            BreakStatement(c) => {
-                /* Numbered breaks are not allowed in Hack. TODO: T55175441 */
-                if !c.break_level.is_missing() {
-                    Self::raise_parsing_error_pos(
-                        &pos,
-                        env,
-                        &syntax_error::break_continue_n_not_supported,
-                    );
-                }
-                Ok(S::new(pos, S_::Break))
-            }
-            ContinueStatement(c) => {
-                /* Numbered continues are not allowed in Hack. TODO: T55175441 */
-                if !c.continue_level.is_missing() {
-                    Self::raise_parsing_error_pos(
-                        &pos,
-                        env,
-                        &syntax_error::break_continue_n_not_supported,
-                    );
-                }
-                Ok(S::new(pos, S_::Continue))
-            }
+            BreakStatement(_) => Ok(S::new(pos, S_::Break)),
+            ContinueStatement(_) => Ok(S::new(pos, S_::Continue)),
             ConcurrentStatement(c) => {
                 let (lifted_awaits, S(stmt_pos, stmt)) = Self::with_new_concurrent_scrope(
                     |e: &mut Env| Self::p_stmt(&c.concurrent_statement, e),

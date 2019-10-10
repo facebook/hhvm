@@ -585,12 +585,10 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     }
   | BreakStatement                    of
     { break_keyword                                      : t
-    ; break_level                                        : t
     ; break_semicolon                                    : t
     }
   | ContinueStatement                 of
     { continue_keyword                                   : t
-    ; continue_level                                     : t
     ; continue_semicolon                                 : t
     }
   | EchoStatement                     of
@@ -1903,12 +1901,10 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     }
   and break_statement =
     { break_keyword: Token.t value
-    ; break_level: literal_expression option value
     ; break_semicolon: Token.t value
     }
   and continue_statement =
     { continue_keyword: Token.t value
-    ; continue_level: literal_expression option value
     ; continue_semicolon: Token.t value
     }
   and echo_statement =

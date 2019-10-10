@@ -421,8 +421,8 @@ and stmt_ =
   | Fallthrough
   | Expr of expr
   | Block of block
-  | Break of expr option
-  | Continue of expr option
+  | Break
+  | Continue
   | Throw of expr
   | Return of expr option
   | GotoLabel of pstring

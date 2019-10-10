@@ -184,10 +184,7 @@ let return_keyword_syntax = make_token_syntax TokenKind.Return
 let throw_keyword_syntax = make_token_syntax TokenKind.Throw
 
 let break_statement_syntax =
-  make_break_statement
-    (make_token_syntax TokenKind.Break)
-    (* break_level *) (make_missing ())
-    semicolon_syntax
+  make_break_statement (make_token_syntax TokenKind.Break) semicolon_syntax
 
 let new_keyword_syntax = make_token_syntax TokenKind.New
 

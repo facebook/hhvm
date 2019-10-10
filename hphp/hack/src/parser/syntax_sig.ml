@@ -472,12 +472,10 @@ module type Syntax_S = sig
     }
   | BreakStatement                    of
     { break_keyword                                      : t
-    ; break_level                                        : t
     ; break_semicolon                                    : t
     }
   | ContinueStatement                 of
     { continue_keyword                                   : t
-    ; continue_level                                     : t
     ; continue_semicolon                                 : t
     }
   | EchoStatement                     of
@@ -1175,8 +1173,8 @@ module type Syntax_S = sig
   val make_goto_label : t -> t -> t
   val make_goto_statement : t -> t -> t -> t
   val make_throw_statement : t -> t -> t -> t
-  val make_break_statement : t -> t -> t -> t
-  val make_continue_statement : t -> t -> t -> t
+  val make_break_statement : t -> t -> t
+  val make_continue_statement : t -> t -> t
   val make_echo_statement : t -> t -> t -> t
   val make_concurrent_statement : t -> t -> t
   val make_simple_initializer : t -> t -> t

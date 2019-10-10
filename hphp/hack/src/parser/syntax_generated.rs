@@ -829,20 +829,18 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_break_statement(_: &C, break_keyword: Self, break_level: Self, break_semicolon: Self) -> Self {
+    fn make_break_statement(_: &C, break_keyword: Self, break_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::BreakStatement(Box::new(BreakStatementChildren {
             break_keyword,
-            break_level,
             break_semicolon,
         }));
         let value = V::from_syntax(&syntax);
         Self::make(syntax, value)
     }
 
-    fn make_continue_statement(_: &C, continue_keyword: Self, continue_level: Self, continue_semicolon: Self) -> Self {
+    fn make_continue_statement(_: &C, continue_keyword: Self, continue_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::ContinueStatement(Box::new(ContinueStatementChildren {
             continue_keyword,
-            continue_level,
             continue_semicolon,
         }));
         let value = V::from_syntax(&syntax);
@@ -2539,16 +2537,14 @@ where
                 acc
             },
             SyntaxVariant::BreakStatement(x) => {
-                let BreakStatementChildren { break_keyword, break_level, break_semicolon } = *x;
+                let BreakStatementChildren { break_keyword, break_semicolon } = *x;
                 let acc = f(break_keyword, acc);
-                let acc = f(break_level, acc);
                 let acc = f(break_semicolon, acc);
                 acc
             },
             SyntaxVariant::ContinueStatement(x) => {
-                let ContinueStatementChildren { continue_keyword, continue_level, continue_semicolon } = *x;
+                let ContinueStatementChildren { continue_keyword, continue_semicolon } = *x;
                 let acc = f(continue_keyword, acc);
-                let acc = f(continue_level, acc);
                 let acc = f(continue_semicolon, acc);
                 acc
             },
@@ -4036,15 +4032,13 @@ where
                  throw_keyword: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::BreakStatement, 3) => SyntaxVariant::BreakStatement(Box::new(BreakStatementChildren {
+             (SyntaxKind::BreakStatement, 2) => SyntaxVariant::BreakStatement(Box::new(BreakStatementChildren {
                  break_semicolon: ts.pop().unwrap(),
-                 break_level: ts.pop().unwrap(),
                  break_keyword: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::ContinueStatement, 3) => SyntaxVariant::ContinueStatement(Box::new(ContinueStatementChildren {
+             (SyntaxKind::ContinueStatement, 2) => SyntaxVariant::ContinueStatement(Box::new(ContinueStatementChildren {
                  continue_semicolon: ts.pop().unwrap(),
-                 continue_level: ts.pop().unwrap(),
                  continue_keyword: ts.pop().unwrap(),
                  
              })),
@@ -5320,14 +5314,12 @@ pub struct ThrowStatementChildren<T, V> {
 #[derive(Debug, Clone)]
 pub struct BreakStatementChildren<T, V> {
     pub break_keyword: Syntax<T, V>,
-    pub break_level: Syntax<T, V>,
     pub break_semicolon: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
 pub struct ContinueStatementChildren<T, V> {
     pub continue_keyword: Syntax<T, V>,
-    pub continue_level: Syntax<T, V>,
     pub continue_semicolon: Syntax<T, V>,
 }
 
@@ -7047,19 +7039,17 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             BreakStatement(x) => {
-                get_index(3).and_then(|index| { match index {
+                get_index(2).and_then(|index| { match index {
                         0 => Some(&x.break_keyword),
-                    1 => Some(&x.break_level),
-                    2 => Some(&x.break_semicolon),
+                    1 => Some(&x.break_semicolon),
                         _ => None,
                     }
                 })
             },
             ContinueStatement(x) => {
-                get_index(3).and_then(|index| { match index {
+                get_index(2).and_then(|index| { match index {
                         0 => Some(&x.continue_keyword),
-                    1 => Some(&x.continue_level),
-                    2 => Some(&x.continue_semicolon),
+                    1 => Some(&x.continue_semicolon),
                         _ => None,
                     }
                 })

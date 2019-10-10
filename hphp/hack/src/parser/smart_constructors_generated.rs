@@ -106,8 +106,8 @@ pub trait SmartConstructors<'src, State>: Clone {
     fn make_goto_label(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R;
     fn make_goto_statement(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R;
     fn make_throw_statement(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R;
-    fn make_break_statement(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R;
-    fn make_continue_statement(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R;
+    fn make_break_statement(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R;
+    fn make_continue_statement(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R;
     fn make_echo_statement(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R;
     fn make_concurrent_statement(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R;
     fn make_simple_initializer(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R;

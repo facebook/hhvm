@@ -60,6 +60,7 @@
 (67,3)-(67,3) An expression is expected here.
 (68,8)-(68,8) A lambda arrow ('==>') is expected here.
 (69,8)-(69,8) An expression is expected here.
+(70,6)-(70,6) A semicolon (';') is expected here.
 (70,8)-(70,8) An expression is expected here.
 (71,7)-(71,7) An expression is expected here.
 (71,7)-(71,7) A colon (':') is expected here.
@@ -69,6 +70,7 @@
 (75,6)-(75,6) A name is expected here.
 (75,6)-(75,6) A concrete constant declaration must have an initializer.
 (75,8)-(75,8) An expression is expected here.
+(76,9)-(76,9) A semicolon (';') is expected here.
 (76,11)-(76,11) An expression is expected here.
 (78,8)-(78,8) A colon (':') is expected here.
 (78,10)-(78,10) An expression is expected here.

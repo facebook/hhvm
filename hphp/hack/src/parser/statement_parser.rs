@@ -967,46 +967,22 @@ where
         // SPEC
         // break-statement:
         //   break  ;
-        //
-        // However, PHP allows an optional expression; though Hack does not have
-        // this feature, we allow it at parse time and produce an error later.
-        // TODO: Implement that error.
 
         // We detect if we are not inside a switch or loop in a later pass.
         let break_token = self.assert_token(TokenKind::Break);
-        let level = if self.peek_token_kind() == TokenKind::Semicolon {
-            S!(make_missing, self, self.pos())
-        } else {
-            self.parse_expression()
-        };
         let semi_token = self.require_semicolon();
-        S!(make_break_statement, self, break_token, level, semi_token)
+        S!(make_break_statement, self, break_token, semi_token)
     }
 
     fn parse_continue_statement(&mut self) -> S::R {
         // SPEC
         // continue-statement:
         //   continue  ;
-        //
-        // However, PHP allows an optional expression; though Hack does not have
-        // this feature, we allow it at parse time and produce an error later.
-        // TODO: Implement that error.
 
         // We detect if we are not inside a loop in a later pass.
         let continue_token = self.assert_token(TokenKind::Continue);
-        let level = if self.peek_token_kind() == TokenKind::Semicolon {
-            S!(make_missing, self, self.pos())
-        } else {
-            self.parse_expression()
-        };
         let semi_token = self.require_semicolon();
-        S!(
-            make_continue_statement,
-            self,
-            continue_token,
-            level,
-            semi_token
-        )
+        S!(make_continue_statement, self, continue_token, semi_token)
     }
 
     fn parse_return_statement(&mut self) -> S::R {

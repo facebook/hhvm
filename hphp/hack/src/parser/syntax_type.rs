@@ -93,8 +93,8 @@ pub trait SyntaxType<'a, C>: SyntaxTypeBase<'a, C>
     fn make_goto_label(ctx: &C, goto_label_name: Self, goto_label_colon: Self) -> Self;
     fn make_goto_statement(ctx: &C, goto_statement_keyword: Self, goto_statement_label_name: Self, goto_statement_semicolon: Self) -> Self;
     fn make_throw_statement(ctx: &C, throw_keyword: Self, throw_expression: Self, throw_semicolon: Self) -> Self;
-    fn make_break_statement(ctx: &C, break_keyword: Self, break_level: Self, break_semicolon: Self) -> Self;
-    fn make_continue_statement(ctx: &C, continue_keyword: Self, continue_level: Self, continue_semicolon: Self) -> Self;
+    fn make_break_statement(ctx: &C, break_keyword: Self, break_semicolon: Self) -> Self;
+    fn make_continue_statement(ctx: &C, continue_keyword: Self, continue_semicolon: Self) -> Self;
     fn make_echo_statement(ctx: &C, echo_keyword: Self, echo_expressions: Self, echo_semicolon: Self) -> Self;
     fn make_concurrent_statement(ctx: &C, concurrent_keyword: Self, concurrent_statement: Self) -> Self;
     fn make_simple_initializer(ctx: &C, simple_initializer_equal: Self, simple_initializer_value: Self) -> Self;

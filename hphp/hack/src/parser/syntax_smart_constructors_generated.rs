@@ -418,14 +418,14 @@ where
         Self::R::make_throw_statement(self.state_mut(), arg0, arg1, arg2)
     }
 
-    fn make_break_statement(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
-        self.state_mut().next(&[&arg0, &arg1, &arg2]);
-        Self::R::make_break_statement(self.state_mut(), arg0, arg1, arg2)
+    fn make_break_statement(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R {
+        self.state_mut().next(&[&arg0, &arg1]);
+        Self::R::make_break_statement(self.state_mut(), arg0, arg1)
     }
 
-    fn make_continue_statement(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
-        self.state_mut().next(&[&arg0, &arg1, &arg2]);
-        Self::R::make_continue_statement(self.state_mut(), arg0, arg1, arg2)
+    fn make_continue_statement(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R {
+        self.state_mut().next(&[&arg0, &arg1]);
+        Self::R::make_continue_statement(self.state_mut(), arg0, arg1)
     }
 
     fn make_echo_statement(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {

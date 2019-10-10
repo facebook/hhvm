@@ -2625,10 +2625,8 @@ if there already is one, since that one will likely be better than this one. *)
                       [],
                       exprl,
                       [] ) ) )
-          | BreakStatement { break_level = level; _ } ->
-            (pos, Break (pBreak_or_continue_level env level))
-          | ContinueStatement { continue_level = level; _ } ->
-            (pos, Continue (pBreak_or_continue_level env level))
+          | BreakStatement _ -> (pos, Break)
+          | ContinueStatement _ -> (pos, Continue)
           | ConcurrentStatement { concurrent_statement = concurrent_stmt; _ }
             ->
             let (lifted_awaits, stmt) =
@@ -2775,8 +2773,6 @@ if there already is one, since that one will likely be better than this one. *)
       in
       (pos, Markup ((pos, text markup_text), expr))
     | _ -> failwith "invalid node"
-
-  and pBreak_or_continue_level env level = mpOptional pExpr level env
 
   and pTConstraintTy : hint parser =
    fun node ->

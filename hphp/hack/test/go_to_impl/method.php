@@ -1,22 +1,30 @@
 <?hh // strict
-class Foo {
+class A {
   public function test(): string {
     return "a";
   }
 }
 
-class Bar extends Foo {
-
-}
-
-class Baz extends Bar {
+class B extends A {
   function test(): string {
     return "b";
   }
 }
 
-class Baz {
-  function test(Foo $f): string {
-    return $f->test();
+class C extends B {
+  function test(): string {
+    return "c";
+  }
+}
+
+class D extends A {
+  function test(): string {
+    return "c";
+  }
+}
+
+class Test {
+  function test(B $b): string {
+    return $b->test();
   }
 }

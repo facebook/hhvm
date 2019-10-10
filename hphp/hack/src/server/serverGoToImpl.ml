@@ -132,6 +132,8 @@ let search_member
     (* Find all the classes that extend this one *)
     let child_classes = find_child_classes class_name genv env in
     find_positions_of_methods [] child_classes method_name
+    |> List.dedup_and_sort ~compare:(fun (_, pos1) (_, pos2) ->
+           Pos.compare pos1 pos2)
   | Property _
   | Class_const _
   | Typeconst _ ->

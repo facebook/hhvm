@@ -13,6 +13,8 @@ open ServerCommandTypes.Find_refs
 open ServerCommandTypes.Done_or_retry
 open Typing_defs
 
+let parallel_limit = 10
+
 let find_positions_of_classes
     (acc : (string * Pos.t) list) (child_classes : string list) :
     (string * Pos.t) list =
@@ -67,9 +69,9 @@ let add_if_valid_origin class_elt child_class method_name result =
     | None -> failwith "TODO"
 
 let find_positions_of_methods
+    (method_name : string)
     (acc : (string * Pos.t) list)
-    (child_classes : string list)
-    (method_name : string) : (string * Pos.t) list =
+    (child_classes : string list) : (string * Pos.t) list =
   List.fold child_classes ~init:acc ~f:(fun result child_class ->
       let class_decl = Decl_provider.get_class child_class in
       match class_decl with
@@ -88,6 +90,17 @@ let find_positions_of_methods
           | None -> result))
       | None ->
         failwith ("Could not find definition of child class: " ^ child_class))
+
+let parallel_find_positions_of_methods
+    (child_classes : string list)
+    (method_name : string)
+    (workers : MultiWorker.worker list option) : (string * Pos.t) list =
+  MultiWorker.call
+    workers
+    ~job:(find_positions_of_methods method_name)
+    ~neutral:[]
+    ~merge:List.append
+    ~next:(MultiWorker.next workers child_classes)
 
 let find_child_classes
     (class_name : string) (genv : ServerEnv.genv) (env : ServerEnv.env) :
@@ -110,7 +123,7 @@ let search_class
     Typing_deps.Dep.(make (Class class_name))
   @@ fun () ->
   let child_classes = find_child_classes class_name genv env in
-  if List.length child_classes < 10 then
+  if List.length child_classes < parallel_limit then
     find_positions_of_classes [] child_classes
   else
     parallel_find_positions_of_classes child_classes genv.workers
@@ -131,9 +144,17 @@ let search_member
     @@ fun () ->
     (* Find all the classes that extend this one *)
     let child_classes = find_child_classes class_name genv env in
-    find_positions_of_methods [] child_classes method_name
-    |> List.dedup_and_sort ~compare:(fun (_, pos1) (_, pos2) ->
-           Pos.compare pos1 pos2)
+    let results =
+      if List.length child_classes < parallel_limit then
+        find_positions_of_methods method_name [] child_classes
+      else
+        parallel_find_positions_of_methods
+          child_classes
+          method_name
+          genv.workers
+    in
+    List.dedup_and_sort results ~compare:(fun (_, pos1) (_, pos2) ->
+        Pos.compare pos1 pos2)
   | Property _
   | Class_const _
   | Typeconst _ ->

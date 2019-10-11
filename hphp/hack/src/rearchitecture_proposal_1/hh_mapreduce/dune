@@ -13,11 +13,13 @@
   (link_flags (:standard (:include ../../dune_config/ld-opts.sexp)))
   (libraries
     default_injector_config
+    errors
     global_config
     global_options
     hhi
     naming
     parser_options_provider
+    pos
     provider_context
     provider_utils
     relative_path
@@ -27,4 +29,5 @@
     server_env
     sys_utils
     typechecker_options
+    typing
     typing_ast))

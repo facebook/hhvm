@@ -42,6 +42,22 @@ let global_init_and_get_tcopt ~(root : Path.t) ~(hhi_root : Path.t) :
   GlobalNamingOptions.set server_env.ServerEnv.tcopt;
   server_env.ServerEnv.tcopt
 
+let errors_to_string (errors : Errors.t) : string =
+  let one_error_to_string (e : Pos.absolute Errors.error_) : string =
+    let code = Errors.get_code e in
+    let msg_list = Errors.to_list e in
+    let (pos, msg) = List.hd_exn msg_list in
+    let (line, start, end_) = Pos.info_pos pos in
+    let fn = Pos.filename pos in
+    Printf.sprintf "%s(%d:%d-%d) - [%d] - %s\n" fn line start end_ code msg
+  in
+  let error_list =
+    Errors.get_sorted_error_list errors
+    |> List.map ~f:Errors.to_absolute
+    |> List.map ~f:one_error_to_string
+  in
+  String.concat error_list
+
 let run_worker (fd : Unix.file_descr) : unit =
   (* Message1: receive root *)
   let (root, hhi_root) : Path.t * Path.t =
@@ -62,8 +78,13 @@ let run_worker (fd : Unix.file_descr) : unit =
   let (ctx, entry) =
     Provider_utils.update_context ctx relative_path file_input
   in
-  let tast = Provider_utils.compute_tast ~ctx ~entry in
-  let result = Tast.show_program tast in
+  let (errors, tast) = Provider_utils.compute_tast_and_errors ~ctx ~entry in
+  let result =
+    Printf.sprintf
+      "ERRORS\n%s\nTAST\n%s"
+      (errors_to_string errors)
+      (Tast.show_program tast)
+  in
   match Prototype.rpc_write fd result with
   | Ok () -> ()
   | Error e -> failwith (Prototype.rpc_error_to_verbose_string e)

@@ -82,3 +82,11 @@ let compute_tast ~(ctx : Provider_context.t) ~(entry : Provider_context.entry)
         (* No need for [with_context] -- assume that's already the context we're
     operating under. *)
         make_tast ())
+
+let compute_tast_and_errors
+    ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
+    Errors.t * Tast.program =
+  Errors.do_ (fun () ->
+      let nast = Naming.program entry.Provider_context.ast in
+      let tast = Typing.nast_to_tast ctx.Provider_context.tcopt nast in
+      tast)

@@ -21,7 +21,6 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/root-map.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/zend-functions.h"
@@ -390,7 +389,7 @@ static Variant xml_call_handler(const req::ptr<XmlParser>& parser,
     Variant retval;
     if (handler.isString() && !name_contains_class(handler.toString())) {
       if (!parser->object.isObject()) {
-        retval = invoke(handler.toString().c_str(), args);
+        retval = invoke(handler.toString(), args);
       } else {
         retval = parser->object.toObject()->
           o_invoke(handler.toString(), args);

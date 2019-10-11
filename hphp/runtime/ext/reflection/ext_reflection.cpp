@@ -18,7 +18,7 @@
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
 
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -383,7 +383,7 @@ static const Class* get_prototype_class_from_interfaces(const Class *cls,
 }
 
 Variant HHVM_FUNCTION(hphp_invoke, const String& name, const Variant& params) {
-  return invoke(name.data(), params);
+  return invoke(name, params);
 }
 
 static const StaticString s_invoke_not_instanceof_error(

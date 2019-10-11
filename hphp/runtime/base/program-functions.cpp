@@ -24,7 +24,6 @@
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/extended-logger.h"
-#include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/file-util-defs.h"
 #include "hphp/runtime/base/hhprof.h"
@@ -2639,7 +2638,7 @@ static bool hphp_warmup(ExecutionContext *context,
       include_impl_invoke(reqInitDoc, true, "", runEntryPoint);
     }
     if (!reqInitFunc.empty()) {
-      invoke(reqInitFunc.c_str(), Array());
+      invoke(reqInitFunc, Array());
     }
     context->backupSession();
   } catch (...) {
@@ -2742,8 +2741,7 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
                 context->getCwd().data(), true);
       }
       if (func) {
-        funcRet.assignIfRef(invoke(cmd.c_str(), funcParams,
-                                   true /* fatal */, allowDynCallNoPointer));
+        funcRet.assignIfRef(invoke(cmd, funcParams, allowDynCallNoPointer));
       } else {
         if (isServer) hphp_chdir_file(cmd);
         include_impl_invoke(cmd.c_str(), once, "", true);

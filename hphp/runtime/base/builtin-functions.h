@@ -234,6 +234,11 @@ Variant vm_call_user_func(T&& t, const Variant& params, bool checkRef = false,
   );
 }
 
+// Invoke an arbitrary user-defined function.
+// If you're considering calling this function for some new code, don't.
+Variant invoke(const String& function, const Variant& params,
+               bool allowDynCallNoPointer = false);
+
 Variant invoke_static_method(const String& s, const String& method,
                              const Variant& params, bool fatal = true);
 

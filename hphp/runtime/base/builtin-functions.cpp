@@ -20,7 +20,6 @@
 #include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/request-injection-data.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -642,22 +641,9 @@ Variant vm_call_user_func(const_variant_ref function, const Variant& params,
   return ret;
 }
 
-static Variant invoke_failed(const char *func,
-                             bool fatal /* = true */) {
-  if (fatal) {
-    throw ExtendedException("(1) call the function without enough arguments OR "
-                            "(2) Unable to find function \"%s\" OR "
-                            "(3) function was not in invoke table OR "
-                            "(4) function was renamed to something else.",
-                            func);
-  }
-  raise_warning("call_user_func to non-existent function %s", func);
-  return false;
-}
-
-static Variant
+Variant
 invoke(const String& function, const Variant& params,
-       bool fatal /* = true */, bool allowDynCallNoPointer /* = false */) {
+       bool allowDynCallNoPointer /* = false */) {
   Func* func = Unit::loadFunc(function.get());
   if (func && (isContainer(params) || params.isNull())) {
     auto ret = Variant::attach(
@@ -670,16 +656,11 @@ invoke(const String& function, const Variant& params,
     }
     return ret;
   }
-  return invoke_failed(function.c_str(), fatal);
-}
-
-// Declared in externals.h.  If you're considering calling this
-// function for some new code, please reconsider.
-Variant invoke(const char *function, const Variant& params,
-               bool fatal /* = true */,
-               bool allowDynCallNoPointer /* = false */) {
-  String funcName(function, CopyString);
-  return invoke(funcName, params, fatal, allowDynCallNoPointer);
+  throw ExtendedException("(1) call the function without enough arguments OR "
+                          "(2) Unable to find function \"%s\" OR "
+                          "(3) function was not in invoke table OR "
+                          "(4) function was renamed to something else.",
+                          function.c_str());
 }
 
 Variant invoke_static_method(const String& s, const String& method,

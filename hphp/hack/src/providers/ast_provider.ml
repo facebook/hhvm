@@ -302,7 +302,13 @@ let local_changes_revert_batch paths =
 let provide_ast_hint
     (path : Relative_path.t) (program : Nast.program) (parse_type : parse_type)
     : unit =
-  ParserHeap.write_around path (program, parse_type)
+  match Provider_config.get_backend () with
+  | Provider_config.Lru_shared_memory
+  | Provider_config.Shared_memory ->
+    ParserHeap.write_around path (program, parse_type)
+  | Provider_config.Local_memory _
+  | Provider_config.Decl_service _ ->
+    ()
 
 let remove_batch paths = ParserHeap.remove_batch paths
 

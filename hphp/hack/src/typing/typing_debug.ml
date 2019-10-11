@@ -13,12 +13,18 @@ let local_env_size env =
       local_types
       0
 
+let constraint_ty_size env ty =
+  match ty with
+  | (_, Thas_member hm) ->
+    1
+    +
+    let { hm_type = ty; hm_name = _; hm_nullsafe = _; hm_class_id = _ } = hm in
+    Typing_utils.ty_size env ty
+
 let ty_size env ty =
   match ty with
   | LoclType ty -> Typing_utils.ty_size env ty
-  | ConstraintType _ -> 1
-
-(* TODO *)
+  | ConstraintType ty -> constraint_ty_size env ty
 
 let ty_set_size env tyset =
   ITySet.fold (fun ty size -> size + ty_size env ty) tyset 0

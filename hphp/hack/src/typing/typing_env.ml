@@ -1331,9 +1331,12 @@ and get_tyvars_i env (ty : internal_type) =
       end
     | Tpu (base, _, _) -> get_tyvars env base
     | Tpu_access (base, _) -> get_tyvars env base)
-  | ConstraintType _ -> (env, ISet.empty, ISet.empty)
+  | ConstraintType ty ->
+    (match ty with
+    | (_, Thas_member hm) ->
+      let { hm_type; hm_name = _; hm_nullsafe = _; hm_class_id = _ } = hm in
+      get_tyvars env hm_type)
 
-(* TODO *)
 and get_tyvars_variance_list (env, acc_positive, acc_negative) variancel tyl =
   match (variancel, tyl) with
   | (variance :: variancel, ty :: tyl) ->

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6dcb53d167faf209075c0f9d93c0967c>>
+// @generated SignedSource<<1120172bbefe4ba2f1f28a1278dda352>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -55,52 +55,62 @@ pub use aast_defs::XhpChildOp;
 pub type Program<Ex, Fb, En, Hi> = Vec<Def<Ex, Fb, En, Hi>>;
 
 #[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
-pub struct Stmt<Ex, Fb, En, Hi>(pub Pos, pub Box<Stmt_<Ex, Fb, En, Hi>>);
+pub struct Stmt<Ex, Fb, En, Hi>(pub Pos, pub Stmt_<Ex, Fb, En, Hi>);
 
 #[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 pub enum Stmt_<Ex, Fb, En, Hi> {
     Fallthrough,
-    Expr(Expr<Ex, Fb, En, Hi>),
+    Expr(Box<Expr<Ex, Fb, En, Hi>>),
     Break,
     Continue,
-    Throw(Expr<Ex, Fb, En, Hi>),
-    Return(Option<Expr<Ex, Fb, En, Hi>>),
-    GotoLabel(Pstring),
-    Goto(Pstring),
+    Throw(Box<Expr<Ex, Fb, En, Hi>>),
+    Return(Box<Option<Expr<Ex, Fb, En, Hi>>>),
+    GotoLabel(Box<Pstring>),
+    Goto(Box<Pstring>),
     Awaitall(
-        Vec<(Option<Lid>, Expr<Ex, Fb, En, Hi>)>,
-        Block<Ex, Fb, En, Hi>,
+        Box<(
+            Vec<(Option<Lid>, Expr<Ex, Fb, En, Hi>)>,
+            Block<Ex, Fb, En, Hi>,
+        )>,
     ),
     If(
-        Expr<Ex, Fb, En, Hi>,
-        Block<Ex, Fb, En, Hi>,
-        Block<Ex, Fb, En, Hi>,
+        Box<(
+            Expr<Ex, Fb, En, Hi>,
+            Block<Ex, Fb, En, Hi>,
+            Block<Ex, Fb, En, Hi>,
+        )>,
     ),
-    Do(Block<Ex, Fb, En, Hi>, Expr<Ex, Fb, En, Hi>),
-    While(Expr<Ex, Fb, En, Hi>, Block<Ex, Fb, En, Hi>),
-    Using(UsingStmt<Ex, Fb, En, Hi>),
+    Do(Box<(Block<Ex, Fb, En, Hi>, Expr<Ex, Fb, En, Hi>)>),
+    While(Box<(Expr<Ex, Fb, En, Hi>, Block<Ex, Fb, En, Hi>)>),
+    Using(Box<UsingStmt<Ex, Fb, En, Hi>>),
     For(
-        Expr<Ex, Fb, En, Hi>,
-        Expr<Ex, Fb, En, Hi>,
-        Expr<Ex, Fb, En, Hi>,
-        Block<Ex, Fb, En, Hi>,
+        Box<(
+            Expr<Ex, Fb, En, Hi>,
+            Expr<Ex, Fb, En, Hi>,
+            Expr<Ex, Fb, En, Hi>,
+            Block<Ex, Fb, En, Hi>,
+        )>,
     ),
-    Switch(Expr<Ex, Fb, En, Hi>, Vec<Case<Ex, Fb, En, Hi>>),
+    Switch(Box<(Expr<Ex, Fb, En, Hi>, Vec<Case<Ex, Fb, En, Hi>>)>),
     Foreach(
-        Expr<Ex, Fb, En, Hi>,
-        AsExpr<Ex, Fb, En, Hi>,
-        Block<Ex, Fb, En, Hi>,
+        Box<(
+            Expr<Ex, Fb, En, Hi>,
+            AsExpr<Ex, Fb, En, Hi>,
+            Block<Ex, Fb, En, Hi>,
+        )>,
     ),
     Try(
-        Block<Ex, Fb, En, Hi>,
-        Vec<Catch<Ex, Fb, En, Hi>>,
-        Block<Ex, Fb, En, Hi>,
+        Box<(
+            Block<Ex, Fb, En, Hi>,
+            Vec<Catch<Ex, Fb, En, Hi>>,
+            Block<Ex, Fb, En, Hi>,
+        )>,
     ),
-    DefInline(Def<Ex, Fb, En, Hi>),
-    Let(Lid, Option<Hint>, Expr<Ex, Fb, En, Hi>),
+    DefInline(Box<Def<Ex, Fb, En, Hi>>),
+    Let(Box<(Lid, Option<Hint>, Expr<Ex, Fb, En, Hi>)>),
     Noop,
     Block(Block<Ex, Fb, En, Hi>),
-    Markup(Pstring, Option<Expr<Ex, Fb, En, Hi>>),
+    Markup(Box<(Pstring, Option<Expr<Ex, Fb, En, Hi>>)>),
 }
 
 #[derive(Clone, Debug, OcamlRep, Ocamlvalue)]

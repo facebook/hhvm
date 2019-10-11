@@ -2380,7 +2380,7 @@ where
     }
 
     fn is_noop(stmt: &aast!(Stmt<,>)) -> bool {
-        if let aast::Stmt_::Noop = *stmt.1 {
+        if let aast::Stmt_::Noop = stmt.1 {
             true
         } else {
             false
@@ -2401,7 +2401,7 @@ where
                         let f = |e: &mut Env| {
                             Ok(aast::Stmt::new(
                                 pos.clone(),
-                                aast::Stmt_::Using(aast::UsingStmt {
+                                aast::Stmt_::mk_using(aast::UsingStmt {
                                     is_block_scoped: false,
                                     has_await: !c.using_function_await_keyword.is_missing(),
                                     expr: Self::p_expr_l_with_loc(
@@ -2438,7 +2438,7 @@ where
         } else {
             blk
         };
-        Ok(aast::Stmt::new(pos, aast::Stmt_::Block(body)))
+        Ok(aast::Stmt::new(pos, aast::Stmt_::mk_block(body)))
     }
 
     fn is_simple_assignment_await_expression(node: &Syntax<T, V>) -> bool {
@@ -2556,7 +2556,7 @@ where
                 };
                 return Ok(aast::Stmt::new(
                     pos,
-                    aast::Stmt_::Awaitall(awaits, vec![result]),
+                    aast::Stmt_::mk_awaitall(awaits, vec![result]),
                 ));
             }
         }
@@ -2642,7 +2642,7 @@ where
                 let f = |env: &mut Env| -> ret_aast!(Stmt<,>) {
                     Ok(S::new(
                         pos,
-                        S_::Switch(
+                        S_::mk_switch(
                             Self::p_expr(&c.switch_expression, env)?,
                             itertools::concat(Self::could_map(p_section, &c.switch_sections, env)?),
                         ),
@@ -2675,9 +2675,9 @@ where
                         .into_iter()
                         .rev()
                         .fold(else_, |child, (cond, stmts)| {
-                            vec![S::new(pos.clone(), S_::If(cond, stmts, child))]
+                            vec![S::new(pos.clone(), S_::mk_if(cond, stmts, child))]
                         });
-                    Ok(S::new(pos, S_::If(condition, statement, else_if)))
+                    Ok(S::new(pos, S_::mk_if(condition, statement, else_if)))
                 };
                 Self::lift_awaits_in_statement(f, node, env)
             }
@@ -2689,7 +2689,7 @@ where
                     } else {
                         Ok(S::new(
                             pos,
-                            S_::Expr(Self::p_expr_with_loc(ExprLocation::AsStatement, expr, e)?),
+                            S_::mk_expr(Self::p_expr_with_loc(ExprLocation::AsStatement, expr, e)?),
                         ))
                     }
                 };
@@ -2707,7 +2707,7 @@ where
                 |e: &mut Env| -> ret_aast!(Stmt<,>) {
                     Ok(S::new(
                         pos,
-                        S_::Throw(Self::p_expr(&c.throw_expression, e)?),
+                        S_::mk_throw(Self::p_expr(&c.throw_expression, e)?),
                     ))
                 },
                 node,
@@ -2715,14 +2715,14 @@ where
             ),
             DoStatement(c) => Ok(S::new(
                 pos,
-                S_::Do(
+                S_::mk_do(
                     Self::p_block(false /* remove noop */, &c.do_body, env)?,
                     Self::p_expr(&c.do_condition, env)?,
                 ),
             )),
             WhileStatement(c) => Ok(S::new(
                 pos,
-                S_::While(
+                S_::mk_while(
                     Self::p_expr(&c.while_condition, env)?,
                     Self::p_block(true, &c.while_body, env)?,
                 ),
@@ -2731,7 +2731,7 @@ where
                 let f = |e: &mut Env| -> ret_aast!(Stmt<,>) {
                     Ok(S::new(
                         pos,
-                        S_::Using(aast::UsingStmt {
+                        S_::mk_using(aast::UsingStmt {
                             is_block_scoped: true,
                             has_await: !&c.using_block_await_keyword.is_missing(),
                             expr: Self::p_expr_l_with_loc(
@@ -2749,7 +2749,7 @@ where
                 let f = |e: &mut Env| -> ret_aast!(Stmt<,>) {
                     Ok(S::new(
                         pos,
-                        S_::Using(aast::UsingStmt {
+                        S_::mk_using(aast::UsingStmt {
                             is_block_scoped: false,
                             has_await: !&c.using_function_await_keyword.is_missing(),
                             expr: Self::p_expr_l_with_loc(
@@ -2768,7 +2768,7 @@ where
                     let id = Self::lid_from_pos_name(pos.clone(), &c.let_statement_name, e)?;
                     let ty = Self::mp_optional(Self::p_hint, &c.let_statement_type, e)?;
                     let expr = Self::p_simple_initializer(&c.let_statement_initializer, e)?;
-                    Ok(S::new(pos, S_::Let(id, ty, expr)))
+                    Ok(S::new(pos, S_::mk_let(id, ty, expr)))
                 };
                 Self::lift_awaits_in_statement(f, node, env)
             }
@@ -2778,7 +2778,7 @@ where
                     let ctr = Self::p_expr_l(&c.for_control, e)?;
                     let eol = Self::p_expr_l(&c.for_end_of_loop, e)?;
                     let blk = Self::p_block(true, &c.for_body, e)?;
-                    Ok(S::new(pos, S_::For(ini, ctr, eol, blk)))
+                    Ok(S::new(pos, S_::mk_for(ini, ctr, eol, blk)))
                 };
                 Self::lift_awaits_in_statement(f, node, env)
             }
@@ -2799,13 +2799,13 @@ where
                         (None, _) => aast::AsExpr::AsKv(Self::p_expr(&c.foreach_key, e)?, value),
                     };
                     let blk = Self::p_block(true, &c.foreach_body, e)?;
-                    Ok(S::new(pos, S_::Foreach(col, akv, blk)))
+                    Ok(S::new(pos, S_::mk_foreach(col, akv, blk)))
                 };
                 Self::lift_awaits_in_statement(f, node, env)
             }
             TryStatement(c) => Ok(S::new(
                 pos,
-                S_::Try(
+                S_::mk_try(
                     Self::p_block(false, &c.try_compound_statement, env)?,
                     Self::could_map(
                         |n: &Syntax<T, V>, e| match &n.syntax {
@@ -2835,7 +2835,7 @@ where
                             e,
                         )?),
                     };
-                    Ok(aast::Stmt::new(pos, aast::Stmt_::Return(expr)))
+                    Ok(aast::Stmt::new(pos, aast::Stmt_::mk_return(expr)))
                 };
                 if Self::is_simple_await_expression(&c.return_expression) {
                     f(env)
@@ -2849,7 +2849,7 @@ where
                 }
                 Ok(S::new(
                     pos,
-                    S_::GotoLabel((
+                    S_::mk_goto_label((
                         Self::p_pos(&c.goto_label_name, env),
                         Self::text(&c.goto_label_name, env),
                     )),
@@ -2861,7 +2861,7 @@ where
                 }
                 Ok(S::new(
                     pos,
-                    S_::Goto(Self::p_pstring(&c.goto_statement_label_name, env)?),
+                    S_::mk_goto(Self::p_pstring(&c.goto_statement_label_name, env)?),
                 ))
             }
             EchoStatement(c) => {
@@ -2876,7 +2876,7 @@ where
                     let args = Self::could_map(Self::p_expr, &c.echo_expressions, e)?;
                     Ok(S::new(
                         pos.clone(),
-                        S_::Expr(aast::Expr::new(
+                        S_::mk_expr(aast::Expr::new(
                             pos,
                             E_::mk_call(aast::CallType::Cnormal, echo, vec![], args, vec![]),
                         )),
@@ -2900,7 +2900,7 @@ where
                     };
                     Ok(S::new(
                         pos.clone(),
-                        S_::Expr(aast::Expr::new(
+                        S_::mk_expr(aast::Expr::new(
                             pos,
                             E_::mk_call(aast::CallType::Cnormal, unset, vec![], args, vec![]),
                         )),
@@ -2915,7 +2915,7 @@ where
                     |e: &mut Env| Self::p_stmt(&c.concurrent_statement, e),
                     env,
                 )?;
-                let stmt = match *stmt {
+                let stmt = match stmt {
                     S_::Block(stmts) => {
                         use aast::Expr as E;
                         use ast_defs::Bop::Eq;
@@ -2933,30 +2933,34 @@ where
                             }
 
                             if let Some(tv) = tmp_vars.next() {
-                                let S(p1, s_) = n;
-                                if let S_::Expr(E(p2, E_::Binop(bop))) = *s_ {
-                                    if let (Eq(op), e1, e2) = *bop {
-                                        let tmp_n = E::mk_lvar(&e2.0, &(tv.1));
-                                        if tmp_n.lvar_name() != e2.lvar_name() {
-                                            let new_n = S::new(
-                                                p1.clone(),
-                                                S_::Expr(E::new(
-                                                    p2.clone(),
-                                                    E_::mk_binop(
-                                                        Eq(None),
-                                                        tmp_n.clone(),
-                                                        e2.clone(),
-                                                    ),
+                                if let S(p1, S_::Expr(expr)) = n {
+                                    if let E(p2, E_::Binop(bop)) = *expr {
+                                        if let (Eq(op), e1, e2) = *bop {
+                                            let tmp_n = E::mk_lvar(&e2.0, &(tv.1));
+                                            if tmp_n.lvar_name() != e2.lvar_name() {
+                                                let new_n = S::new(
+                                                    p1.clone(),
+                                                    S_::mk_expr(E::new(
+                                                        p2.clone(),
+                                                        E_::mk_binop(
+                                                            Eq(None),
+                                                            tmp_n.clone(),
+                                                            e2.clone(),
+                                                        ),
+                                                    )),
+                                                );
+                                                body_stmts.push(new_n);
+                                            }
+                                            let assign_stmt = S::new(
+                                                p1,
+                                                S_::mk_expr(E::new(
+                                                    p2,
+                                                    E_::mk_binop(Eq(op), e1, tmp_n),
                                                 )),
                                             );
-                                            body_stmts.push(new_n);
+                                            assign_stmts.push(assign_stmt);
+                                            continue;
                                         }
-                                        let assign_stmt = S::new(
-                                            p1,
-                                            S_::Expr(E::new(p2, E_::mk_binop(Eq(op), e1, tmp_n))),
-                                        );
-                                        assign_stmts.push(assign_stmt);
-                                        continue;
                                     }
                                 }
 
@@ -2971,11 +2975,11 @@ where
                             }
                         }
                         body_stmts.append(&mut assign_stmts);
-                        S::new(stmt_pos, S_::Block(body_stmts))
+                        S::new(stmt_pos, S_::mk_block(body_stmts))
                     }
                     _ => Self::failwith("Unexpected concurrent stmt structure")?,
                 };
-                Ok(S::new(pos, S_::Awaitall(lifted_awaits, vec![stmt])))
+                Ok(S::new(pos, S_::mk_awaitall(lifted_awaits, vec![stmt])))
             }
             MarkupSection(_) => Self::p_markup(node, env),
             _ => Self::missing_syntax(
@@ -3029,7 +3033,8 @@ where
                     }
                     _ => Self::failwith("expression expected")?,
                 };
-                let stmt_ = aast::Stmt_::Markup((pos.clone(), Self::text(&markup_text, env)), expr);
+                let stmt_ =
+                    aast::Stmt_::mk_markup((pos.clone(), Self::text(&markup_text, env)), expr);
                 Ok(aast::Stmt::new(pos, stmt_))
             }
             _ => Self::failwith("invalid node"),
@@ -3429,9 +3434,9 @@ where
 
     fn p_block(remove_noop: bool, node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Block<,>) {
         let aast::Stmt(p, stmt_) = Self::p_stmt(node, env)?;
-        if let aast::Stmt_::Block(blk) = *stmt_ {
+        if let aast::Stmt_::Block(blk) = stmt_ {
             if remove_noop && blk.len() == 1 {
-                if let aast::Stmt_::Noop = *(blk[0].1) {
+                if let aast::Stmt_::Noop = blk[0].1 {
                     return Ok(vec![]);
                 }
             }
@@ -3476,7 +3481,7 @@ where
                         let expr = Self::p_expr(node, e)?;
                         Ok(aast::Stmt::new(
                             expr.0.clone(),
-                            aast::Stmt_::Return(Some(expr)),
+                            aast::Stmt_::mk_return(Some(expr)),
                         ))
                     };
                     Ok(vec![Self::lift_awaits_in_statement(f, node, e)?])
@@ -3907,7 +3912,7 @@ where
                         (
                             aast::Stmt::new(
                                 p.clone(),
-                                aast::Stmt_::Expr(e(E_::mk_binop(
+                                aast::Stmt_::mk_expr(e(E_::mk_binop(
                                     ast_defs::Bop::Eq(None),
                                     e(E_::mk_obj_get(
                                         e(E_::mk_lvar(lid("$this"))),
@@ -4694,7 +4699,7 @@ where
                 let expr = Self::p_expr(&c.inclusion_expression, env)?;
                 Ok(vec![aast::Def::Stmt(aast::Stmt::new(
                     Self::p_pos(node, env),
-                    aast::Stmt_::Expr(expr),
+                    aast::Stmt_::mk_expr(expr),
                 ))])
             }
             NamespaceDeclaration(c) => {
@@ -4764,7 +4769,7 @@ where
     }
 
     fn post_process(env: &mut Env, program: aast!(Program<,>), acc: &mut aast!(Program<,>)) {
-        use aast::{Def::*, Expr_::*, Stmt_::*};
+        use aast::{Def::*, Stmt_::*};
         let mut saw_ns: Option<(aast!(Sid), aast!(Program<,>))> = None;
         for def in program.into_iter() {
             if let Namespace(_, _) = &def {
@@ -4790,10 +4795,10 @@ where
                 if Self::is_noop(&s) {
                     continue;
                 }
-                let raise_error = if let Markup(_, _) = *s.1 {
+                let raise_error = if let Markup(_) = &s.1 {
                     false
-                } else if let Expr(aast::Expr(_, e)) = &*s.1 {
-                    if let Import(_) = e {
+                } else if let Expr(expr) = &s.1 {
+                    if let aast::Expr(_, aast::Expr_::Import(_)) = expr.as_ref() {
                         env.parser_options.po_disallow_toplevel_requires
                     } else {
                         true

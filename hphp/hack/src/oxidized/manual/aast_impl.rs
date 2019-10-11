@@ -10,7 +10,7 @@ use std::boxed::Box;
 
 impl<Ex, Fb, En, Hi> Stmt<Ex, Fb, En, Hi> {
     pub fn new(pos: Pos, s: Stmt_<Ex, Fb, En, Hi>) -> Self {
-        Self(pos, Box::new(s))
+        Self(pos, s)
     }
 
     pub fn noop(pos: Pos) -> Self {
@@ -18,8 +18,8 @@ impl<Ex, Fb, En, Hi> Stmt<Ex, Fb, En, Hi> {
     }
 
     pub fn is_assign_expr(&self) -> bool {
-        if let Stmt_::Expr(expr) = &*self.1 {
-            if let Expr_::Binop(bop) = &expr.1 {
+        if let Stmt_::Expr(expr) = &self.1 {
+            if let Expr(_, Expr_::Binop(bop)) = expr.as_ref() {
                 if let (ast_defs::Bop::Eq(_), _, _) = bop.as_ref() {
                     return true;
                 }

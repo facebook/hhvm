@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c90b0fb6f94d6ddd2d363d70c3743371>>
+// @generated SignedSource<<90d61cf892aaae01e4c4e8ac0a72e8db>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -15,7 +15,7 @@ impl<Ex, Fb, En, Hi> Stmt_<Ex, Fb, En, Hi> {
         Stmt_::Fallthrough
     }
     pub fn mk_expr(p0: Expr<Ex, Fb, En, Hi>) -> Self {
-        Stmt_::Expr(p0)
+        Stmt_::Expr(Box::new(p0))
     }
     pub fn mk_break() -> Self {
         Stmt_::Break
@@ -24,38 +24,38 @@ impl<Ex, Fb, En, Hi> Stmt_<Ex, Fb, En, Hi> {
         Stmt_::Continue
     }
     pub fn mk_throw(p0: Expr<Ex, Fb, En, Hi>) -> Self {
-        Stmt_::Throw(p0)
+        Stmt_::Throw(Box::new(p0))
     }
     pub fn mk_return(p0: Option<Expr<Ex, Fb, En, Hi>>) -> Self {
-        Stmt_::Return(p0)
+        Stmt_::Return(Box::new(p0))
     }
     pub fn mk_goto_label(p0: Pstring) -> Self {
-        Stmt_::GotoLabel(p0)
+        Stmt_::GotoLabel(Box::new(p0))
     }
     pub fn mk_goto(p0: Pstring) -> Self {
-        Stmt_::Goto(p0)
+        Stmt_::Goto(Box::new(p0))
     }
     pub fn mk_awaitall(
         p0: Vec<(Option<Lid>, Expr<Ex, Fb, En, Hi>)>,
         p1: Block<Ex, Fb, En, Hi>,
     ) -> Self {
-        Stmt_::Awaitall(p0, p1)
+        Stmt_::Awaitall(Box::new((p0, p1)))
     }
     pub fn mk_if(
         p0: Expr<Ex, Fb, En, Hi>,
         p1: Block<Ex, Fb, En, Hi>,
         p2: Block<Ex, Fb, En, Hi>,
     ) -> Self {
-        Stmt_::If(p0, p1, p2)
+        Stmt_::If(Box::new((p0, p1, p2)))
     }
     pub fn mk_do(p0: Block<Ex, Fb, En, Hi>, p1: Expr<Ex, Fb, En, Hi>) -> Self {
-        Stmt_::Do(p0, p1)
+        Stmt_::Do(Box::new((p0, p1)))
     }
     pub fn mk_while(p0: Expr<Ex, Fb, En, Hi>, p1: Block<Ex, Fb, En, Hi>) -> Self {
-        Stmt_::While(p0, p1)
+        Stmt_::While(Box::new((p0, p1)))
     }
     pub fn mk_using(p0: UsingStmt<Ex, Fb, En, Hi>) -> Self {
-        Stmt_::Using(p0)
+        Stmt_::Using(Box::new(p0))
     }
     pub fn mk_for(
         p0: Expr<Ex, Fb, En, Hi>,
@@ -63,30 +63,30 @@ impl<Ex, Fb, En, Hi> Stmt_<Ex, Fb, En, Hi> {
         p2: Expr<Ex, Fb, En, Hi>,
         p3: Block<Ex, Fb, En, Hi>,
     ) -> Self {
-        Stmt_::For(p0, p1, p2, p3)
+        Stmt_::For(Box::new((p0, p1, p2, p3)))
     }
     pub fn mk_switch(p0: Expr<Ex, Fb, En, Hi>, p1: Vec<Case<Ex, Fb, En, Hi>>) -> Self {
-        Stmt_::Switch(p0, p1)
+        Stmt_::Switch(Box::new((p0, p1)))
     }
     pub fn mk_foreach(
         p0: Expr<Ex, Fb, En, Hi>,
         p1: AsExpr<Ex, Fb, En, Hi>,
         p2: Block<Ex, Fb, En, Hi>,
     ) -> Self {
-        Stmt_::Foreach(p0, p1, p2)
+        Stmt_::Foreach(Box::new((p0, p1, p2)))
     }
     pub fn mk_try(
         p0: Block<Ex, Fb, En, Hi>,
         p1: Vec<Catch<Ex, Fb, En, Hi>>,
         p2: Block<Ex, Fb, En, Hi>,
     ) -> Self {
-        Stmt_::Try(p0, p1, p2)
+        Stmt_::Try(Box::new((p0, p1, p2)))
     }
     pub fn mk_def_inline(p0: Def<Ex, Fb, En, Hi>) -> Self {
-        Stmt_::DefInline(p0)
+        Stmt_::DefInline(Box::new(p0))
     }
     pub fn mk_let(p0: Lid, p1: Option<Hint>, p2: Expr<Ex, Fb, En, Hi>) -> Self {
-        Stmt_::Let(p0, p1, p2)
+        Stmt_::Let(Box::new((p0, p1, p2)))
     }
     pub fn mk_noop() -> Self {
         Stmt_::Noop
@@ -95,7 +95,7 @@ impl<Ex, Fb, En, Hi> Stmt_<Ex, Fb, En, Hi> {
         Stmt_::Block(p0)
     }
     pub fn mk_markup(p0: Pstring, p1: Option<Expr<Ex, Fb, En, Hi>>) -> Self {
-        Stmt_::Markup(p0, p1)
+        Stmt_::Markup(Box::new((p0, p1)))
     }
 }
 impl<Ex, Fb, En, Hi> AsExpr<Ex, Fb, En, Hi> {

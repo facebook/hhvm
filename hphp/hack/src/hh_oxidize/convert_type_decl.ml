@@ -60,7 +60,7 @@ let tuple_aliases = [("ast_defs", "Pstring")]
 A list of (<module>, <ty1>) where ty1 is enum and all non-empty variant fields should
 be wrapped by Box to keep ty1 size down.
 *)
-let box_variant = [("aast", "Expr_")]
+let box_variant = [("aast", "Expr_"); ("aast", "Stmt_")]
 
 let should_box_variant ty =
   List.mem box_variant (curr_module_name (), ty) ~equal:( = )
@@ -146,7 +146,11 @@ let constructor_arguments ?(box_fields = false) = function
       | [] -> ""
       | [ty] ->
         let ty = core_type ty in
-        if ty = "String" || String.is_prefix ty ~prefix:"Vec<" then
+        if
+          ty = "String"
+          || String.is_prefix ty ~prefix:"Vec<"
+          || String.is_prefix ty ~prefix:"Block<"
+        then
           sprintf "(%s)" ty
         else
           sprintf "(Box<%s>)" ty

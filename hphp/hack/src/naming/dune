@@ -58,6 +58,7 @@
     naming_attributes
     nast
     partial_provider
+    provider_config
     sqlite3
     sqlite_utils
     typing_deps

@@ -25,8 +25,18 @@ module Store =
       let description = "GlobalNamingOptions"
     end)
 
-let get () =
-  match Store.get () with
+let local_memory_tcopt : TypecheckerOptions.t option ref = ref None
+
+let get () : TypecheckerOptions.t =
+  let tcopt_opt =
+    match Provider_config.get_backend () with
+    | Provider_config.Lru_shared_memory
+    | Provider_config.Shared_memory
+    | Provider_config.Local_memory _ ->
+      Store.get ()
+    | Provider_config.Decl_service _ -> !local_memory_tcopt
+  in
+  match tcopt_opt with
   | Some tcopt -> tcopt
   | None ->
     Hh_logger.fatal "%s"
@@ -34,10 +44,21 @@ let get () =
     ^ "before they were set";
     failwith "GlobalNamingOptions: global naming options not set"
 
-let set tcopt =
-  match Store.get () with
-  | None -> Store.add () tcopt
-  | Some _ ->
+let set (tcopt : TypecheckerOptions.t) : unit =
+  let was_already_set =
+    match Provider_config.get_backend () with
+    | Provider_config.Lru_shared_memory
+    | Provider_config.Shared_memory
+    | Provider_config.Local_memory _ ->
+      let was_already_set = Store.get () <> None in
+      Store.add () tcopt;
+      was_already_set
+    | Provider_config.Decl_service _ ->
+      let was_already_set = !local_memory_tcopt <> None in
+      local_memory_tcopt := Some tcopt;
+      was_already_set
+  in
+  if was_already_set then (
     (* We end up invoking ServerInit.init after setting the global naming
        options in the Unit_build tests, so we only log here instead of throwing
        an exception. *)
@@ -49,3 +70,4 @@ let set tcopt =
     Hh_logger.log
       "%s"
       (Printexc.raw_backtrace_to_string (Printexc.get_callstack 100))
+  )

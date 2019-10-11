@@ -675,6 +675,12 @@ type expand_env = {
    * dependent types for type constants.
    *)
   from_class: Nast.class_id_ option;
+  quiet: bool;
+      (** If what we are localizing or expanding comes from the decl heap for 
+  example, then some errors must be silenced since they must have already been
+  raised when first typechecking whatever we have fetched from the heap. 
+  Setting {!quiet} to true will silence those errors.
+  T54121530 aims at offering a better mechanism. *)
 }
 
 let is_type_no_return ty = ty = Tprim Aast.Tnoreturn

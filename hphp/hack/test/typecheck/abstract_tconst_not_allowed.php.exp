@@ -1,0 +1,4 @@
+File "abstract_tconst_not_allowed.php", line 11, characters 8-8:
+An abstract type constant is not allowed in this position. (Typing[4352])
+File "abstract_tconst_not_allowed.php", line 5, characters 23-23:
+T is abstract here.

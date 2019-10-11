@@ -1023,6 +1023,7 @@ and simplify_subtype_i
                 substs = Subst.make_locl (Cls.tparams class_ty) tyl_super;
                 this_ty = Option.value this_ty ~default:ety_super;
                 from_class = None;
+                quiet = true;
               }
             in
             let lower_bounds_super = Cls.lower_bounds_on_this class_ty in
@@ -1229,6 +1230,7 @@ and simplify_subtype_i
                 (* TODO: do we need this? *)
                 this_ty = Option.value this_ty ~default:ety_sub;
                 from_class = None;
+                quiet = true;
               }
             in
             let up_obj = Cls.get_ancestor class_sub cid_super in
@@ -2827,7 +2829,7 @@ let subtype_method
     (r_super : Reason.t)
     (ft_super : decl_fun_type)
     (on_error : Errors.typing_error_callback) : env =
-  let ety_env = Phase.env_with_self env in
+  let ety_env = Phase.env_with_self env ~quiet:true in
   let (env, ft_super_no_tvars) =
     Phase.localize_ft ~ety_env ~def_pos:(Reason.to_pos r_super) env ft_super
   in

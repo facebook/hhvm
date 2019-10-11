@@ -79,6 +79,7 @@ type expand_typeconst =
   ?as_tyvar_with_cnstr:bool ->
   locl_ty ->
   Aast.sid ->
+  allow_abstract_tconst:bool ->
   env * locl_ty
 
 let (expand_typeconst_ref : expand_typeconst ref) =
@@ -136,7 +137,7 @@ let (simplify_intersections_ref : simplify_intersections ref) =
 
 let simplify_intersections x = !simplify_intersections_ref x
 
-type localize_with_self = env -> decl_ty -> env * locl_ty
+type localize_with_self = env -> ?quiet:bool -> decl_ty -> env * locl_ty
 
 let (localize_with_self_ref : localize_with_self ref) =
   ref (not_implemented "localize_with_self")

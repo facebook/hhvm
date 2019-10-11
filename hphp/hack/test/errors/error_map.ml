@@ -598,4 +598,5 @@ ClassConstantTypeMismatch = 4348
 PocketUniversesExpansion = 4349
 PocketUniversesTyping = 4350
 RecordInitValueDoesNotMatchHint = 4351
+AbstractTconstNotAllowed = 4352
   |}]

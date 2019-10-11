@@ -42,16 +42,24 @@ let make_reason env r id ty =
 If as_tyvar_with_cnstr is set, then return a fresh type variable which has
 the same constraints as type constant T in A. Otherwise, return an
 AKGeneric("A::T"). *)
-let rec expand_with_env ety_env env ?(as_tyvar_with_cnstr = false) root id =
+let rec expand_with_env
+    ety_env env ?(as_tyvar_with_cnstr = false) root id ~allow_abstract_tconst =
   let (tenv, _, ty) =
-    expand_with_env_ ety_env env ~as_tyvar_with_cnstr root id
+    expand_with_env_
+      ety_env
+      env
+      ~as_tyvar_with_cnstr
+      root
+      id
+      ~allow_abstract_tconst
   in
   (tenv, ty)
 
-and expand_with_env_ ety_env env ~as_tyvar_with_cnstr root id =
+and expand_with_env_
+    ety_env env ~as_tyvar_with_cnstr root id ~allow_abstract_tconst =
   let env = empty_env env ety_env in
   let (env, ty) =
-    try expand env ~as_tyvar_with_cnstr root id
+    try expand env ~as_tyvar_with_cnstr root id ~allow_abstract_tconst
     with NoTypeConst error ->
       error ();
       ( env,
@@ -112,19 +120,20 @@ and referenced_typeconsts env ety_env (root, ids) =
             env
             ~as_tyvar_with_cnstr:false
             root
-            (pos, tconst),
+            (pos, tconst)
+            ~allow_abstract_tconst:true,
           acc )
       end
   |> snd
 
-(* The root of a type access is a type. When expanding a type access this type
+(* The root of a type access is a type. When expanding a type access, this type
  * needs to resolve to the name of a class so we can look up if a given type
  * constant is defined in the class.
  *
  * We also need to track what expansions have already taken place to make sure
  * we do not recurse infinitely.
  *)
-and expand env ~as_tyvar_with_cnstr root id =
+and expand env ~as_tyvar_with_cnstr root id ~allow_abstract_tconst =
   let (tenv, ((root_reason, root_ty) as root)) =
     Env.expand_type env.tenv root
   in
@@ -175,6 +184,21 @@ and expand env ~as_tyvar_with_cnstr root id =
       ({ env with tenv }, new_ty)
   in
   let env = { env with tenv } in
+  let allow_abstract_tconst =
+    match root_ty with
+    | Tabstract _ -> true
+    (* Hack: `self` in a trait is mistakenly replaced by the trait instead of
+    the class using the trait, so if a trait is the root, it is likely because
+    originally there was `self::T` written.
+    TODO: T54081153 fix `self` in traits and clean this up *)
+    | Tclass ((_, class_name), _, _)
+      when match Env.get_class env.tenv class_name with
+           | Some ci -> Decl_provider.Class.kind ci = Ast_defs.Ctrait
+           | None -> false ->
+      true
+    | _ -> allow_abstract_tconst
+  in
+  let expand = expand ~allow_abstract_tconst in
   match root_ty with
   | Tany _
   | Terr ->
@@ -190,6 +214,7 @@ and expand env ~as_tyvar_with_cnstr root id =
       class_name
       id
       ~as_tyvar_with_cnstr
+      ~allow_abstract_tconst
   | Tabstract (AKgeneric s, _) ->
     let env =
       {
@@ -317,7 +342,8 @@ and create_root_from_type_constant
     class_pos
     class_name
     (tconst_pos, tconst)
-    ~as_tyvar_with_cnstr =
+    ~as_tyvar_with_cnstr
+    ~allow_abstract_tconst =
   let (env, typeconst) =
     get_typeconst
       env
@@ -342,12 +368,22 @@ and create_root_from_type_constant
   let make_reason ?(root = ety_env.this_ty) env r =
     make_reason env r (tconst_pos, tconst) root
   in
+  (match typeconst with
+  | { ttc_type = None; ttc_name; _ } ->
+    if (not env.ety_env.quiet) && not allow_abstract_tconst then
+      Errors.try_unless_error_in_different_file
+        (Env.get_file env.tenv)
+        (fun () -> Errors.abstract_tconst_not_allowed tconst_pos ttc_name)
+        (fun _ -> ())
+  | _ -> ());
   match typeconst with
+  (* Concrete type constants *)
   | { ttc_type = Some ty; _ }
     when typeconst.ttc_constraint = None || env.choose_assigned_type ->
     let (tenv, (r, ty)) = Phase.localize ~ety_env env.tenv ty in
     ( { env with choose_assigned_type = true; tenv },
       (make_reason tenv r ~root, ty) )
+  (* Abstract type constants with constraint *)
   | { ttc_constraint = Some cstr; _ } ->
     let (tenv, cstr) = Phase.localize ~ety_env env.tenv cstr in
     let reason = make_reason tenv (Reason.Rwitness (fst typeconst.ttc_name)) in
@@ -368,6 +404,7 @@ and create_root_from_type_constant
         (tenv, ty)
     in
     ({ env with tenv }, ty)
+  (* Abstract type constant without constraint. *)
   | _ ->
     let (tenv, (r, ty)) =
       if as_tyvar_with_cnstr then (

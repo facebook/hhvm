@@ -2429,6 +2429,7 @@ and expr_
             substs = Subst.make_locl (Cls.tparams class_) tyargs;
             this_ty = cid_ty;
             from_class = Some cid;
+            quiet = true;
           }
         in
         (match ty with
@@ -4171,6 +4172,7 @@ and new_object
                 substs = Subst.make_locl (Cls.tparams class_info) params;
                 this_ty = obj_ty;
                 from_class = None;
+                quiet = false;
               }
             in
             if ce_abstract then
@@ -5567,6 +5569,7 @@ and class_get_
           this_ty;
           substs = Subst.make_locl (Cls.tparams class_) paraml;
           from_class = Some cid;
+          quiet = true;
         }
       in
       let get_smember_from_constraints env class_info =
@@ -5995,6 +5998,7 @@ and call_construct p env class_ params el uel cid =
       this_ty = cid_ty;
       substs = Subst.make_locl (Cls.tparams class_) params;
       from_class = Some cid;
+      quiet = true;
     }
   in
   let env =
@@ -7344,6 +7348,7 @@ and safely_refine_class_type
       this_ty = obj_ty;
       (* In case `this` appears in constraints *)
       from_class = None;
+      quiet = true;
     }
   in
   let add_bounds env (t, ty_fresh) =
@@ -8836,7 +8841,9 @@ and class_get_pu ?from_class env ty name =
   match class_get_pu_ env ty name with
   | (env, None) -> (env, None)
   | (env, Some (this_ty, substs, et)) ->
-    let ety_env = { type_expansions = []; this_ty; substs; from_class } in
+    let ety_env =
+      { type_expansions = []; this_ty; substs; from_class; quiet = false }
+    in
     (env, Some (ety_env, et))
 
 and class_get_pu_ env cty name =

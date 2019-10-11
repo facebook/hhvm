@@ -610,6 +610,7 @@ module Typing = struct
     | PocketUniversesExpansion
     | PocketUniversesTyping
     | RecordInitValueDoesNotMatchHint
+    | AbstractTconstNotAllowed
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@deriving enum, show { with_path = false }]
 

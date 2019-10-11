@@ -2123,6 +2123,14 @@ let missing_constructor pos =
 
 let typedef_trail_entry pos = (pos, "Typedef definition comes from here")
 
+let abstract_tconst_not_allowed pos (p, tconst_name) =
+  add_list
+    (Typing.err_code Typing.AbstractTconstNotAllowed)
+    [
+      (pos, "An abstract type constant is not allowed in this position.");
+      (p, Printf.sprintf "%s is abstract here." tconst_name);
+    ]
+
 let add_with_trail code errs trail =
   add_list code (errs @ List.map trail typedef_trail_entry)
 

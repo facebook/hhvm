@@ -117,6 +117,8 @@ val explain_where_constraint :
 val explain_tconst_where_constraint :
   use_pos:Pos.t -> definition_pos:Pos.t -> error -> unit
 
+val abstract_tconst_not_allowed : Pos.t -> Pos.t * string -> unit
+
 val unexpected_arrow : Pos.t -> string -> unit
 
 val missing_arrow : Pos.t -> string -> unit
@@ -804,6 +806,7 @@ val run_in_context : Relative_path.t -> phase -> (unit -> 'a) -> 'a
 
 val run_in_decl_mode : Relative_path.t -> (unit -> 'a) -> 'a
 
+(** ignore errors produced by function passed in argument. *)
 val ignore_ : (unit -> 'a) -> 'a
 
 val try_when :

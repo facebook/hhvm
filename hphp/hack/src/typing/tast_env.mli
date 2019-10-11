@@ -138,8 +138,13 @@ val localize :
 
     This is mostly provided as legacy support for {!AutocompleteService}, and
     should not be considered a general mechanism for transforming a {decl_ty} to
-    a {!Tast.ty}. *)
-val localize_with_self : env -> Typing_defs.decl_ty -> env * Tast.ty
+    a {!Tast.ty}.
+        
+    {!quiet} silences certain errors because those errors have already fired
+    and/or are not appropriate at the time we call localize.
+    *)
+val localize_with_self :
+  env -> ?quiet:bool -> Typing_defs.decl_ty -> env * Tast.ty
 
 (** Get the upper bounds of the type parameter with the given name. *)
 val get_upper_bounds : env -> string -> Type_parameter_env.tparam_bounds

@@ -162,6 +162,7 @@ and obj_get_concrete_ty
       this_ty;
       substs = Subst.make_locl (Cls.tparams class_info) paraml;
       from_class = Some class_id;
+      quiet = true;
     }
   in
   match concrete_ty with
@@ -495,6 +496,7 @@ and widen_class_for_obj_get ~is_method ~nullsafe member_name env ty =
                   substs = Subst.make_locl (Cls.tparams class_info) tyl;
                   this_ty = ty;
                   from_class = None;
+                  quiet = true;
                 }
               in
               let (env, basety) = Phase.localize ~ety_env env basety in

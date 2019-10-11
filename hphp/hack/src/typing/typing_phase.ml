@@ -83,9 +83,15 @@ type method_instantiation = {
   explicit_targs: Tast.targ list;
 }
 
-let env_with_self env =
+let env_with_self ?(quiet = false) env =
   let this_ty = (Reason.none, TUtils.this_of (Env.get_self env)) in
-  { type_expansions = []; substs = SMap.empty; this_ty; from_class = None }
+  {
+    type_expansions = [];
+    substs = SMap.empty;
+    this_ty;
+    from_class = None;
+    quiet;
+  }
 
 (*****************************************************************************)
 (* Transforms a declaration phase type into a localized type. This performs
@@ -233,10 +239,19 @@ let rec localize ~ety_env env (dty : decl_ty) =
     let (env, tyl) = List.map_env env tyl (localize ~ety_env) in
     (env, (r, Tintersection tyl))
   | (r, Taccess (root_ty, ids)) ->
+    (* Sometimes, Tthis and Tgeneric are not expanded to Tabstract, so we need
+    to allow accessing abstract type constants here. *)
+    let allow_abstract_tconst =
+      match snd root_ty with
+      | Tthis
+      | Tgeneric _ ->
+        true
+      | _ -> false
+    in
     let (env, root_ty) = localize ~ety_env env root_ty in
     let (env, (expansion_reason, ty)) =
       List.fold ids ~init:(env, root_ty) ~f:(fun (env, root_ty) id ->
-          TUtils.expand_typeconst ety_env env root_ty id)
+          TUtils.expand_typeconst ety_env env root_ty id ~allow_abstract_tconst)
     in
     (* Elaborate reason with information about expression dependent types and
      * the original location of the Taccess type
@@ -578,7 +593,9 @@ and check_where_constraints
 (* Performs no substitutions of generics and initializes Tthis to
  * Env.get_self env
  *)
-and localize_with_self env ty = localize env ty ~ety_env:(env_with_self env)
+and localize_with_self env ?(quiet = false) ty =
+  let ety_env = env_with_self env ~quiet in
+  localize env ty ~ety_env
 
 and localize_possibly_enforced_with_self env ety =
   let (env, et_type) = localize_with_self env ety.et_type in
@@ -610,6 +627,7 @@ and localize_missing_tparams_class env r sid class_ =
       this_ty = c_ty;
       substs = Subst.make_locl (Cls.tparams class_) tyl;
       from_class = Some (Aast.CI sid);
+      quiet = false;
     }
   in
   let env =
@@ -660,6 +678,7 @@ and resolve_type_arguments_and_check_constraints
           this_ty;
           substs = Subst.make_locl tparaml (List.map ~f:fst type_argl);
           from_class = Some from_class;
+          quiet = false;
         }
       in
       check_tparams_constraints ~use_pos ~ety_env env tparaml

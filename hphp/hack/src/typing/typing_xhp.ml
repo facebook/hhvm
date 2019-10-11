@@ -121,6 +121,7 @@ and get_spread_attributes env pos onto_xhp cty =
         this_ty = xhp_ty;
         substs = Subst.make_locl (Cls.tparams xhp_info) tparams;
         from_class = None;
+        quiet = false;
       }
     in
     List.map_env

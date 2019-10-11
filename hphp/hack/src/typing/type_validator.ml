@@ -141,6 +141,7 @@ class virtual type_validator =
                       (Env.get_self env)
                       ~default:(MakeType.nothing Reason.none);
                   from_class = Some Aast.CIstatic;
+                  quiet = true;
                 };
               expanded_typedefs = SSet.empty;
               validity = Valid;

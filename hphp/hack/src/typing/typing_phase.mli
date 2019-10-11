@@ -14,9 +14,22 @@ type method_instantiation = {
   explicit_targs: Tast.targ list;
 }
 
-val env_with_self : env -> expand_env
+val env_with_self : ?quiet:bool -> env -> expand_env
 
-val localize_with_self : env -> decl_ty -> env * locl_ty
+(** Transforms a declaration phase type ({!Typing_defs.decl_ty})
+    into a localized type ({!Typing_defs.locl_ty} = {!Tast.ty}).
+    Performs no substitutions of generics and initializes the late static bound
+    type ({!Typing_defs.Tthis}) to the current class type (the type returned by
+    {!get_self}).
+
+    This is mostly provided as legacy support for {!AutocompleteService}, and
+    should not be considered a general mechanism for transforming a {decl_ty} to
+    a {!Tast.ty}.
+    
+    {!quiet} silences certain errors because those errors have already fired
+    and/or are not appropriate at the time we call localize.
+    *)
+val localize_with_self : env -> ?quiet:bool -> decl_ty -> env * locl_ty
 
 val localize_possibly_enforced_with_self :
   env -> decl_possibly_enforced_ty -> env * locl_possibly_enforced_ty

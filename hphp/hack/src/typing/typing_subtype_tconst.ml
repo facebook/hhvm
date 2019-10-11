@@ -13,7 +13,13 @@ let make_type_const_equal
   match ty with
   | LoclType ty ->
     let (env, tytconst) =
-      Utils.expand_typeconst ety_env env ~as_tyvar_with_cnstr ty tconstid
+      Utils.expand_typeconst
+        ety_env
+        env
+        ~as_tyvar_with_cnstr
+        ty
+        tconstid
+        ~allow_abstract_tconst:true
     in
     let env =
       Utils.sub_type env tytconst tconstty Errors.type_constant_mismatch

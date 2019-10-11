@@ -206,7 +206,7 @@ let default =
     profile_type_check_duration_threshold = 0.05;
     (* seconds *)
     use_lru_workers = false;
-    go_to_implementation = false;
+    go_to_implementation = true;
   }
 
 let path =

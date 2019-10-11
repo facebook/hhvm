@@ -1914,7 +1914,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         "moreTriggerCharacter": ["}"],
                     },
                     "renameProvider": True,
-                    "implementationProvider": False,
+                    "implementationProvider": True,
                     "typeCoverageProvider": True,
                     "rageProvider": True,
                 }

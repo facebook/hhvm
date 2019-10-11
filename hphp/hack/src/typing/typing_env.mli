@@ -19,6 +19,7 @@ val get_tcopt : env -> TypecheckerOptions.t
 
 val fresh_type : env -> Pos.t -> env * locl_ty
 
+(** Same as fresh_type but takes a specific reason as parameter. *)
 val fresh_type_reason :
   ?variance:Ast_defs.variance -> env -> Reason.t -> env * locl_ty
 

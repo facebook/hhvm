@@ -16,38 +16,47 @@ let run_worker (fd : Unix.file_descr) : unit =
 let run () : unit =
   (* Parse command-line arguments *)
   let root = ref "" in
-  let usage = Printf.sprintf "Usage: %s typecheck --root ..." Sys.argv.(0) in
+  let files = ref [] in
+  let usage =
+    Printf.sprintf "Usage: %s typecheck --root [root] [files...]" Sys.argv.(0)
+  in
   let options = [Args.root root] in
-  Arg.parse options (Args.only "typecheck") usage;
+  Arg.parse options (fun s -> files := s :: !files) usage;
+  let files = List.rev !files in
+  (* TODO: handle exceptions in argument parsing, including in root *)
 
-  (* TODO: handle exceptions in argument parsing *)
+  (* Validate command-line arguments *)
+  let files =
+    match files with
+    | [] ->
+      Printf.eprintf "%s" usage;
+      exit 1
+    | "typecheck" :: files -> files
+    | _ -> failwith "expected 'typecheck' as first anon argument"
+  in
 
-  (* fetch two typechecker workers *)
-  let resA = Prototype.rpc_request_new_worker !root Dispatch.Typecheck in
-  let resB = Prototype.rpc_request_new_worker !root Dispatch.Typecheck in
-  let (fdA, fdB) =
-    match (resA, resB) with
-    | (Ok fdA, Ok fdB) -> (fdA, fdB)
-    | _ ->
-      Printf.eprintf "Can't connect to prototype\n";
+  (* Simplistically we'll typecheck one file at a time, one per worker *)
+  let per_file (fn : string) : unit =
+    let open Result.Monad_infix in
+    let res =
+      Prototype.rpc_request_new_worker !root Dispatch.Typecheck
+      >>= fun fd ->
+      Prototype.rpc_write fd fn
+      >>= fun () ->
+      Prototype.rpc_read fd
+      >>= fun results ->
+      Prototype.rpc_close_no_err fd;
+      Ok results
+    in
+    match res with
+    | Ok results -> Printf.printf "FILE %s\n%s\n" fn results
+    | Error e ->
+      Printf.eprintf
+        "Can't connect to prototype\n%s\n"
+        (Prototype.rpc_error_to_verbose_string e);
       exit 1
   in
-  (* orchestrate the typechecker work *)
-  Printf.printf "T->Wa sending 'A'\n%!";
-  Printf.printf "T->Wb sending 'B'\n%!";
-  let _res1A = Prototype.rpc_write fdA "A" in
-  let _res1B = Prototype.rpc_write fdB "B" in
-  let res2A = Prototype.rpc_read fdA in
-  let res2B = Prototype.rpc_read fdB in
-  begin
-    match (res2A, res2B) with
-    | (Ok respA, Ok respB) ->
-      Printf.printf "T<-Wa response '%s'\n%!" respA;
-      Printf.printf "T<-Wb response '%s'\n%!" respB
-    | _ -> Printf.printf "T<-Wa/Wb failed.\n%!"
-  end;
-  Prototype.rpc_close_no_err fdA;
-  Prototype.rpc_close_no_err fdB;
+  List.iter files ~f:per_file;
 
-  Printf.printf "T. Done\n%!";
+  Printf.printf "Typechecking done\n";
   ()

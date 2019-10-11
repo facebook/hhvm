@@ -207,7 +207,8 @@ let get_gconst (gconst_name : string) : gconst_decl option =
     let result : gconst_decl option = Obj.obj result in
     result
   | Provider_config.Decl_service _ ->
-    failwith "Decl_provider.get_gconst not yet impl. for decl memory provider"
+    (* TODO: provide a real decl here from the decl service! *)
+    None
 
 let invalidate_fun (fun_name : fun_key) : unit =
   match Provider_config.get_backend () with

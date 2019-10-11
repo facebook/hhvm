@@ -78,7 +78,8 @@
     collections
     errors
     heap_shared_mem
-    pos)
+    pos
+    provider_config)
   (preprocess (pps ppx_deriving.std)))
 
 (library

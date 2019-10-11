@@ -165,24 +165,36 @@ let get_unused_fixmes ~codes ~applied_fixmes ~fold ~files_info =
  *)
 (*****************************************************************************)
 let get_fixmes_for_pos pos =
-  let filename = Pos.filename pos in
-  let (line, _, _) = Pos.info_pos pos in
-  get_fixmes filename
-  |> Option.value ~default:IMap.empty
-  |> IMap.get line
-  |> Option.value ~default:IMap.empty
+  match Provider_config.get_backend () with
+  | Provider_config.Lru_shared_memory
+  | Provider_config.Shared_memory
+  | Provider_config.Local_memory _ ->
+    let filename = Pos.filename pos in
+    let (line, _, _) = Pos.info_pos pos in
+    get_fixmes filename
+    |> Option.value ~default:IMap.empty
+    |> IMap.get line
+    |> Option.value ~default:IMap.empty
+  | Provider_config.Decl_service _ ->
+    (* TODO: implement this! *)
+    IMap.empty
 
 let get_fixme_codes_for_pos pos =
   get_fixmes_for_pos pos |> IMap.keys |> ISet.of_list
 
 let is_disallowed pos code =
-  let filename = Pos.filename pos in
-  let (line, _, _) = Pos.info_pos pos in
-  DISALLOWED_FIXMES.get filename
-  |> Option.value ~default:IMap.empty
-  |> IMap.get line
-  |> Option.value ~default:IMap.empty
-  |> IMap.get code
+  match Provider_config.get_backend () with
+  | Provider_config.Lru_shared_memory
+  | Provider_config.Shared_memory
+  | Provider_config.Local_memory _ ->
+    let filename = Pos.filename pos in
+    let (line, _, _) = Pos.info_pos pos in
+    DISALLOWED_FIXMES.get filename
+    |> Option.value ~default:IMap.empty
+    |> IMap.get line
+    |> Option.value ~default:IMap.empty
+    |> IMap.get code
+  | Provider_config.Decl_service _ -> None
 
 let () =
   (Errors.get_hh_fixme_pos :=

@@ -552,7 +552,7 @@ pub const invalid_await_position: Error = Cow::Borrowed(concat!(
 ));
 pub const invalid_await_position_dependent: Error = Cow::Borrowed(concat!(
     "Await cannot be used as an expression inside another await expression. ",
-    "Pull the inner await out into it's own statement.",
+    "Pull the inner await out into its own statement.",
 ));
 pub const misplaced_reactivity_annotation: Error =
     Cow::Borrowed("Reactive annotations are not allowed on classes, interfaces or traits.");

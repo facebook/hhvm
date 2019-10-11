@@ -31,6 +31,9 @@ pub use stubs::lazy;
 pub use stubs::opaque_digest;
 pub use stubs::sequence;
 
+mod impl_gen;
+pub use impl_gen::*;
+
 mod gen;
 
 pub use gen::aast;

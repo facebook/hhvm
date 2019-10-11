@@ -19,8 +19,10 @@ impl<Ex, Fb, En, Hi> Stmt<Ex, Fb, En, Hi> {
 
     pub fn is_assign_expr(&self) -> bool {
         if let Stmt_::Expr(expr) = &*self.1 {
-            if let Expr_::Binop(ast_defs::Bop::Eq(_), _, _) = &*expr.1 {
-                return true;
+            if let Expr_::Binop(bop) = &expr.1 {
+                if let (ast_defs::Bop::Eq(_), _, _) = bop.as_ref() {
+                    return true;
+                }
             }
         }
         false
@@ -29,11 +31,11 @@ impl<Ex, Fb, En, Hi> Stmt<Ex, Fb, En, Hi> {
 
 impl<Ex, Fb, En, Hi> Expr<Ex, Fb, En, Hi> {
     pub fn new(ex: Ex, e: Expr_<Ex, Fb, En, Hi>) -> Self {
-        Self(ex, Box::new(e))
+        Self(ex, e)
     }
 
     pub fn lvar_name(&self) -> Option<&str> {
-        match &*self.1 {
+        match &self.1 {
             Expr_::Lvar(lid) => Some(&(lid.1).1),
             _ => None,
         }
@@ -42,7 +44,10 @@ impl<Ex, Fb, En, Hi> Expr<Ex, Fb, En, Hi> {
 
 impl<Fb, En, Hi> Expr<Pos, Fb, En, Hi> {
     pub fn mk_lvar(p: &Pos, n: &str) -> Self {
-        Self::new(p.clone(), Expr_::Lvar(Lid(p.clone(), (0, String::from(n)))))
+        Self::new(
+            p.clone(),
+            Expr_::Lvar(Box::new(Lid(p.clone(), (0, String::from(n))))),
+        )
     }
 }
 

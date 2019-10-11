@@ -56,6 +56,15 @@ let renamed_types = [(("typing_reason", "TypingReason"), "Reason")]
    alias in Rust. *)
 let tuple_aliases = [("ast_defs", "Pstring")]
 
+(*
+A list of (<module>, <ty1>) where ty1 is enum and all non-empty variant fields should
+be wrapped by Box to keep ty1 size down.
+*)
+let box_variant = [("aast", "Expr_")]
+
+let should_box_variant ty =
+  List.mem box_variant (curr_module_name (), ty) ~equal:( = )
+
 let override_field_type =
   SMap.of_list
     [
@@ -128,13 +137,26 @@ let record_declaration ?(pub = false) overrides labels =
   |> map_and_concat ~f:(record_label_declaration ~pub ~prefix overrides)
   |> sprintf "{\n%s}"
 
-let constructor_arguments = function
-  | Pcstr_tuple types -> tuple types
+let constructor_arguments ?(box_fields = false) = function
+  | Pcstr_tuple types ->
+    if not box_fields then
+      tuple types
+    else (
+      match types with
+      | [] -> ""
+      | [ty] ->
+        let ty = core_type ty in
+        if ty = "String" || String.is_prefix ty ~prefix:"Vec<" then
+          sprintf "(%s)" ty
+        else
+          sprintf "(Box<%s>)" ty
+      | _ -> sprintf "(Box<%s>)" (tuple types)
+    )
   | Pcstr_record labels -> record_declaration SMap.empty labels
 
-let variant_constructor_declaration cd =
+let variant_constructor_declaration ?(box_fields = false) cd =
   let name = convert_type_name cd.pcd_name.txt in
-  let args = constructor_arguments cd.pcd_args in
+  let args = constructor_arguments ~box_fields cd.pcd_args in
   sprintf "%s%s,\n" name args
 
 let ctor_arg_len (ctor_args : constructor_arguments) : int =
@@ -254,7 +276,12 @@ let type_declaration name td =
       else
         []
     in
-    let ctors = map_and_concat ctors variant_constructor_declaration in
+    let should_box_variant = should_box_variant name in
+    let ctors =
+      map_and_concat
+        ctors
+        (variant_constructor_declaration ~box_fields:should_box_variant)
+    in
     sprintf "%s enum %s%s {\n%s}" (attrs_and_vis derives) name tparams ctors
   (* Record types. *)
   | (Ptype_record labels, None) ->

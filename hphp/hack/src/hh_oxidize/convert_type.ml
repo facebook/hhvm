@@ -23,7 +23,6 @@ let add_box_between =
   [
     ("typing_defs", "Ty", "Ty_");
     ("aast_defs", "Hint", "Hint_");
-    ("aast", "Expr", "Expr_");
     ("aast", "Stmt", "Stmt_");
   ]
 

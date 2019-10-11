@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<79a2ce21837119c018f044e3dc56af44>>
+// @generated SignedSource<<c90b0fb6f94d6ddd2d363d70c3743371>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -137,23 +137,23 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
         p0: Option<(Targ, Targ)>,
         p1: Vec<(Expr<Ex, Fb, En, Hi>, Expr<Ex, Fb, En, Hi>)>,
     ) -> Self {
-        Expr_::Darray(p0, p1)
+        Expr_::Darray(Box::new((p0, p1)))
     }
     pub fn mk_varray(p0: Option<Targ>, p1: Vec<Expr<Ex, Fb, En, Hi>>) -> Self {
-        Expr_::Varray(p0, p1)
+        Expr_::Varray(Box::new((p0, p1)))
     }
     pub fn mk_shape(p0: Vec<(ast_defs::ShapeFieldName, Expr<Ex, Fb, En, Hi>)>) -> Self {
         Expr_::Shape(p0)
     }
     pub fn mk_val_collection(p0: VcKind, p1: Option<Targ>, p2: Vec<Expr<Ex, Fb, En, Hi>>) -> Self {
-        Expr_::ValCollection(p0, p1, p2)
+        Expr_::ValCollection(Box::new((p0, p1, p2)))
     }
     pub fn mk_key_val_collection(
         p0: KvcKind,
         p1: Option<(Targ, Targ)>,
         p2: Vec<Field<Ex, Fb, En, Hi>>,
     ) -> Self {
-        Expr_::KeyValCollection(p0, p1, p2)
+        Expr_::KeyValCollection(Box::new((p0, p1, p2)))
     }
     pub fn mk_null() -> Self {
         Expr_::Null
@@ -171,35 +171,35 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
         Expr_::Omitted
     }
     pub fn mk_id(p0: Sid) -> Self {
-        Expr_::Id(p0)
+        Expr_::Id(Box::new(p0))
     }
     pub fn mk_lvar(p0: Lid) -> Self {
-        Expr_::Lvar(p0)
+        Expr_::Lvar(Box::new(p0))
     }
     pub fn mk_immutable_var(p0: Lid) -> Self {
-        Expr_::ImmutableVar(p0)
+        Expr_::ImmutableVar(Box::new(p0))
     }
     pub fn mk_dollardollar(p0: Lid) -> Self {
-        Expr_::Dollardollar(p0)
+        Expr_::Dollardollar(Box::new(p0))
     }
     pub fn mk_clone(p0: Expr<Ex, Fb, En, Hi>) -> Self {
-        Expr_::Clone(p0)
+        Expr_::Clone(Box::new(p0))
     }
     pub fn mk_obj_get(
         p0: Expr<Ex, Fb, En, Hi>,
         p1: Expr<Ex, Fb, En, Hi>,
         p2: OgNullFlavor,
     ) -> Self {
-        Expr_::ObjGet(p0, p1, p2)
+        Expr_::ObjGet(Box::new((p0, p1, p2)))
     }
     pub fn mk_array_get(p0: Expr<Ex, Fb, En, Hi>, p1: Option<Expr<Ex, Fb, En, Hi>>) -> Self {
-        Expr_::ArrayGet(p0, p1)
+        Expr_::ArrayGet(Box::new((p0, p1)))
     }
     pub fn mk_class_get(p0: ClassId<Ex, Fb, En, Hi>, p1: ClassGetExpr<Ex, Fb, En, Hi>) -> Self {
-        Expr_::ClassGet(p0, p1)
+        Expr_::ClassGet(Box::new((p0, p1)))
     }
     pub fn mk_class_const(p0: ClassId<Ex, Fb, En, Hi>, p1: Pstring) -> Self {
-        Expr_::ClassConst(p0, p1)
+        Expr_::ClassConst(Box::new((p0, p1)))
     }
     pub fn mk_call(
         p0: CallType,
@@ -208,7 +208,7 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
         p3: Vec<Expr<Ex, Fb, En, Hi>>,
         p4: Vec<Expr<Ex, Fb, En, Hi>>,
     ) -> Self {
-        Expr_::Call(p0, p1, p2, p3, p4)
+        Expr_::Call(Box::new((p0, p1, p2, p3, p4)))
     }
     pub fn mk_int(p0: String) -> Self {
         Expr_::Int(p0)
@@ -223,22 +223,22 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
         Expr_::String2(p0)
     }
     pub fn mk_prefixed_string(p0: String, p1: Expr<Ex, Fb, En, Hi>) -> Self {
-        Expr_::PrefixedString(p0, p1)
+        Expr_::PrefixedString(Box::new((p0, p1)))
     }
     pub fn mk_yield(p0: Afield<Ex, Fb, En, Hi>) -> Self {
-        Expr_::Yield(p0)
+        Expr_::Yield(Box::new(p0))
     }
     pub fn mk_yield_break() -> Self {
         Expr_::YieldBreak
     }
     pub fn mk_yield_from(p0: Expr<Ex, Fb, En, Hi>) -> Self {
-        Expr_::YieldFrom(p0)
+        Expr_::YieldFrom(Box::new(p0))
     }
     pub fn mk_await(p0: Expr<Ex, Fb, En, Hi>) -> Self {
-        Expr_::Await(p0)
+        Expr_::Await(Box::new(p0))
     }
     pub fn mk_suspend(p0: Expr<Ex, Fb, En, Hi>) -> Self {
-        Expr_::Suspend(p0)
+        Expr_::Suspend(Box::new(p0))
     }
     pub fn mk_list(p0: Vec<Expr<Ex, Fb, En, Hi>>) -> Self {
         Expr_::List(p0)
@@ -247,29 +247,29 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
         Expr_::ExprList(p0)
     }
     pub fn mk_cast(p0: Hint, p1: Expr<Ex, Fb, En, Hi>) -> Self {
-        Expr_::Cast(p0, p1)
+        Expr_::Cast(Box::new((p0, p1)))
     }
     pub fn mk_unop(p0: ast_defs::Uop, p1: Expr<Ex, Fb, En, Hi>) -> Self {
-        Expr_::Unop(p0, p1)
+        Expr_::Unop(Box::new((p0, p1)))
     }
     pub fn mk_binop(p0: ast_defs::Bop, p1: Expr<Ex, Fb, En, Hi>, p2: Expr<Ex, Fb, En, Hi>) -> Self {
-        Expr_::Binop(p0, p1, p2)
+        Expr_::Binop(Box::new((p0, p1, p2)))
     }
     pub fn mk_pipe(p0: Lid, p1: Expr<Ex, Fb, En, Hi>, p2: Expr<Ex, Fb, En, Hi>) -> Self {
-        Expr_::Pipe(p0, p1, p2)
+        Expr_::Pipe(Box::new((p0, p1, p2)))
     }
     pub fn mk_eif(
         p0: Expr<Ex, Fb, En, Hi>,
         p1: Option<Expr<Ex, Fb, En, Hi>>,
         p2: Expr<Ex, Fb, En, Hi>,
     ) -> Self {
-        Expr_::Eif(p0, p1, p2)
+        Expr_::Eif(Box::new((p0, p1, p2)))
     }
     pub fn mk_is(p0: Expr<Ex, Fb, En, Hi>, p1: Hint) -> Self {
-        Expr_::Is(p0, p1)
+        Expr_::Is(Box::new((p0, p1)))
     }
     pub fn mk_as(p0: Expr<Ex, Fb, En, Hi>, p1: Hint, p2: bool) -> Self {
-        Expr_::As(p0, p1, p2)
+        Expr_::As(Box::new((p0, p1, p2)))
     }
     pub fn mk_new(
         p0: ClassId<Ex, Fb, En, Hi>,
@@ -278,79 +278,79 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
         p3: Vec<Expr<Ex, Fb, En, Hi>>,
         p4: Ex,
     ) -> Self {
-        Expr_::New(p0, p1, p2, p3, p4)
+        Expr_::New(Box::new((p0, p1, p2, p3, p4)))
     }
     pub fn mk_record(
         p0: ClassId<Ex, Fb, En, Hi>,
         p1: bool,
         p2: Vec<(Expr<Ex, Fb, En, Hi>, Expr<Ex, Fb, En, Hi>)>,
     ) -> Self {
-        Expr_::Record(p0, p1, p2)
+        Expr_::Record(Box::new((p0, p1, p2)))
     }
     pub fn mk_efun(p0: Fun_<Ex, Fb, En, Hi>, p1: Vec<Lid>) -> Self {
-        Expr_::Efun(p0, p1)
+        Expr_::Efun(Box::new((p0, p1)))
     }
     pub fn mk_lfun(p0: Fun_<Ex, Fb, En, Hi>, p1: Vec<Lid>) -> Self {
-        Expr_::Lfun(p0, p1)
+        Expr_::Lfun(Box::new((p0, p1)))
     }
     pub fn mk_xml(
         p0: Sid,
         p1: Vec<XhpAttribute<Ex, Fb, En, Hi>>,
         p2: Vec<Expr<Ex, Fb, En, Hi>>,
     ) -> Self {
-        Expr_::Xml(p0, p1, p2)
+        Expr_::Xml(Box::new((p0, p1, p2)))
     }
     pub fn mk_callconv(p0: ast_defs::ParamKind, p1: Expr<Ex, Fb, En, Hi>) -> Self {
-        Expr_::Callconv(p0, p1)
+        Expr_::Callconv(Box::new((p0, p1)))
     }
     pub fn mk_import(p0: ImportFlavor, p1: Expr<Ex, Fb, En, Hi>) -> Self {
-        Expr_::Import(p0, p1)
+        Expr_::Import(Box::new((p0, p1)))
     }
     pub fn mk_collection(
         p0: Sid,
         p1: Option<CollectionTarg>,
         p2: Vec<Afield<Ex, Fb, En, Hi>>,
     ) -> Self {
-        Expr_::Collection(p0, p1, p2)
+        Expr_::Collection(Box::new((p0, p1, p2)))
     }
     pub fn mk_braced_expr(p0: Expr<Ex, Fb, En, Hi>) -> Self {
-        Expr_::BracedExpr(p0)
+        Expr_::BracedExpr(Box::new(p0))
     }
     pub fn mk_parenthesized_expr(p0: Expr<Ex, Fb, En, Hi>) -> Self {
-        Expr_::ParenthesizedExpr(p0)
+        Expr_::ParenthesizedExpr(Box::new(p0))
     }
     pub fn mk_lplaceholder(p0: Pos) -> Self {
-        Expr_::Lplaceholder(p0)
+        Expr_::Lplaceholder(Box::new(p0))
     }
     pub fn mk_fun_id(p0: Sid) -> Self {
-        Expr_::FunId(p0)
+        Expr_::FunId(Box::new(p0))
     }
     pub fn mk_method_id(p0: Expr<Ex, Fb, En, Hi>, p1: Pstring) -> Self {
-        Expr_::MethodId(p0, p1)
+        Expr_::MethodId(Box::new((p0, p1)))
     }
     pub fn mk_method_caller(p0: Sid, p1: Pstring) -> Self {
-        Expr_::MethodCaller(p0, p1)
+        Expr_::MethodCaller(Box::new((p0, p1)))
     }
     pub fn mk_smethod_id(p0: Sid, p1: Pstring) -> Self {
-        Expr_::SmethodId(p0, p1)
+        Expr_::SmethodId(Box::new((p0, p1)))
     }
     pub fn mk_special_func(p0: SpecialFunc<Ex, Fb, En, Hi>) -> Self {
-        Expr_::SpecialFunc(p0)
+        Expr_::SpecialFunc(Box::new(p0))
     }
     pub fn mk_pair(p0: Expr<Ex, Fb, En, Hi>, p1: Expr<Ex, Fb, En, Hi>) -> Self {
-        Expr_::Pair(p0, p1)
+        Expr_::Pair(Box::new((p0, p1)))
     }
     pub fn mk_assert(p0: AssertExpr<Ex, Fb, En, Hi>) -> Self {
-        Expr_::Assert(p0)
+        Expr_::Assert(Box::new(p0))
     }
     pub fn mk_typename(p0: Sid) -> Self {
-        Expr_::Typename(p0)
+        Expr_::Typename(Box::new(p0))
     }
     pub fn mk_puatom(p0: String) -> Self {
         Expr_::PUAtom(p0)
     }
     pub fn mk_puidentifier(p0: ClassId<Ex, Fb, En, Hi>, p1: Pstring, p2: Pstring) -> Self {
-        Expr_::PUIdentifier(p0, p1, p2)
+        Expr_::PUIdentifier(Box::new((p0, p1, p2)))
     }
     pub fn mk_any() -> Self {
         Expr_::Any

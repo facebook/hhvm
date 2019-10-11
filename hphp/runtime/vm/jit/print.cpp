@@ -36,6 +36,7 @@
 
 #include "hphp/runtime/vm/jit/array-access-profile.h"
 #include "hphp/runtime/vm/jit/array-kind-profile.h"
+#include "hphp/runtime/vm/jit/array-iter-profile.h"
 #include "hphp/runtime/vm/jit/asm-info.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/call-target-profile.h"

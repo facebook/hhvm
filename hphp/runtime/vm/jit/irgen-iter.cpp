@@ -16,15 +16,71 @@
 
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 
+#include "hphp/runtime/vm/jit/array-iter-profile.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-control.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
+#include "hphp/runtime/vm/jit/target-profile.h"
+
+#include "hphp/util/struct-log.h"
 
 namespace HPHP { namespace jit { namespace irgen {
 
 //////////////////////////////////////////////////////////////////////
 
 namespace {
+
+//////////////////////////////////////////////////////////////////////
+// Basic logging.
+
+auto const s_ArrayIterProfile = makeStaticString("ArrayIterProfile");
+
+void logArrayIterProfile(IRGS& env) {
+  // We generate code for thousands of loops each time we call retranslateAll.
+  // We don't want production webservers to log when they do so.
+  if (!StructuredLog::coinflip(RuntimeOption::EvalArrayIterLogRate)) return;
+
+  auto const marker  = makeMarker(env, bcOff(env));
+  auto const profile = TargetProfile<ArrayIterProfile>(
+    env.unit,
+    makeMarker(env, bcOff(env)),
+    s_ArrayIterProfile
+  );
+  if (!profile.optimizing()) return;
+  if (env.inlineState.conjure) return;
+
+  auto func_str = "(unknown)";
+  auto file_str = "(unknown)";
+  auto line_int = 0;
+  if (marker.hasFunc()) {
+    auto const func = marker.func();
+    func_str = func->fullDisplayName()->data();
+    file_str = func->filename()->data();
+    line_int = func->unit()->getLineNumber(marker.bcOff());
+  }
+
+  std::vector<std::string> inline_state_string;
+  std::vector<folly::StringPiece> inline_state;
+  for (auto const& state : env.inlineState.bcStateStack) {
+    inline_state_string.push_back(show(state));
+    inline_state.push_back(inline_state_string.back());
+  }
+
+  StructuredLogEntry entry;
+  entry.setStr("marker", marker.show());
+  entry.setStr("profile", profile.data().toString());
+  entry.setStr("source_func", func_str);
+  entry.setStr("source_file", file_str);
+  entry.setInt("source_line", line_int);
+  entry.setInt("prof_count", curProfCount(env));
+  entry.setInt("inline_depth", env.inlineState.depth);
+  entry.setVec("inline_state", inline_state);
+
+  StructuredLog::log("hhvm_array_iterators", entry);
+}
+
+//////////////////////////////////////////////////////////////////////
+// Generic implementations.
 
 // We only JIT IterNext bytecodes if FrameState knows that their output locals
 // are cells. HHBBC almost always makes these assertions in repo mode.
@@ -90,6 +146,7 @@ void emitIterInit(IRGS& env, int32_t iterId, Offset relOffset,
   auto const base = popC(env);
   if (!base->type().subtypeOfAny(TArrLike, TObj)) PUNT(IterInit);
   if (iterInitEmptyBase(env, relOffset, base)) return;
+  if (base->isA(TArrLike)) logArrayIterProfile(env);
 
   auto const type = IterTypeOp::NonLocal;
   auto const data = IterInitData(iterId, uint32_t(-1), valLocalId, type);
@@ -102,6 +159,7 @@ void emitIterInitK(IRGS& env, int32_t iterId, Offset relOffset,
   auto const base = popC(env);
   if (!base->type().subtypeOfAny(TArrLike, TObj)) PUNT(IterInitK);
   if (iterInitEmptyBase(env, relOffset, base)) return;
+  if (base->isA(TArrLike)) logArrayIterProfile(env);
 
   auto const type = IterTypeOp::NonLocal;
   auto const data = IterInitData(iterId, keyLocalId, valLocalId, type);
@@ -142,6 +200,7 @@ void emitLIterInit(IRGS& env,
   auto const base = ldLoc(env, baseLocalId, nullptr, DataTypeSpecific);
   if (!base->type().subtypeOfAny(TArrLike, TObj)) PUNT(LIterInit);
   if (iterInitEmptyBase(env, relOffset, base)) return;
+  if (base->isA(TArrLike)) logArrayIterProfile(env);
 
   if (base->isA(TObj)) gen(env, IncRef, base);
   auto const data = IterInitData(iterId, uint32_t(-1), valLocalId, subop);
@@ -161,6 +220,7 @@ void emitLIterInitK(IRGS& env,
   auto const base = ldLoc(env, baseLocalId, nullptr, DataTypeSpecific);
   if (!base->type().subtypeOfAny(TArrLike, TObj)) PUNT(LIterInitK);
   if (iterInitEmptyBase(env, relOffset, base)) return;
+  if (base->isA(TArrLike)) logArrayIterProfile(env);
 
   if (base->isA(TObj)) gen(env, IncRef, base);
   auto const data = IterInitData(iterId, keyLocalId, valLocalId, subop);

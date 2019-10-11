@@ -53,6 +53,41 @@ const StaticString
 
 //////////////////////////////////////////////////////////////////////
 
+std::string show(IterSpecialization type) {
+  auto const base_const = type.base_const ? "BaseConst" : "BaseMutable";
+  auto const base_type  = show((IterSpecialization::BaseType)type.base_type);
+  if (type.output_key) {
+    auto const key_types  = show((IterSpecialization::KeyTypes)type.key_types);
+    return folly::format("{}::{}::{}", base_type, base_const, key_types).str();
+  } else {
+    return folly::format("{}::{}", base_type, base_const).str();
+  }
+}
+
+std::string show(IterSpecialization::BaseType type) {
+  switch (type) {
+    case IterSpecialization::Packed:        return "Packed";
+    case IterSpecialization::Mixed:         return "Mixed";
+    case IterSpecialization::Vec:           return "Vec";
+    case IterSpecialization::Dict:          return "Dict";
+    case IterSpecialization::kNumBaseTypes: always_assert(false);
+  }
+  always_assert(false);
+}
+
+std::string show(IterSpecialization::KeyTypes type) {
+  switch (type) {
+    case IterSpecialization::ArrayKey:     return "ArrayKey";
+    case IterSpecialization::Int:          return "Int";
+    case IterSpecialization::Str:          return "Str";
+    case IterSpecialization::StaticStr:    return "StaticStr";
+    case IterSpecialization::kNumKeyTypes: always_assert(false);
+  }
+  always_assert(false);
+}
+
+//////////////////////////////////////////////////////////////////////
+
 ArrayIter::ArrayIter(const ArrayData* data) {
   arrInit(data);
 }
@@ -83,9 +118,9 @@ ArrayIter::ArrayIter(const Variant& v) {
 
 ArrayIter::ArrayIter(const ArrayIter& iter) {
   m_data = iter.m_data;
+  m_typeFields = iter.m_typeFields;
   m_pos = iter.m_pos;
   m_end = iter.m_end;
-  m_itypeAndNextHelperIdx = iter.m_itypeAndNextHelperIdx;
   if (hasArrayData()) {
     const ArrayData* ad = getArrayData();
     if (ad) const_cast<ArrayData*>(ad)->incRefCount();
@@ -98,8 +133,7 @@ ArrayIter::ArrayIter(const ArrayIter& iter) {
 
 bool ArrayIter::checkInvariants(const ArrayData* ad /* = nullptr */) const {
   TRACE(3, "ArrayIter::checkInvariants: %lx %lx %lx %lx (ad = %lx)\n",
-        uintptr_t(m_data), size_t(m_itypeAndNextHelperIdx),
-        m_pos, m_end, uintptr_t(ad));
+        uintptr_t(m_data), size_t(m_typeFields), m_pos, m_end, uintptr_t(ad));
 
   // We can't make many assertions for iterators over objects.
   if (m_itype == ArrayIter::TypeIterator) {
@@ -218,10 +252,9 @@ void ArrayIter::kill() {
   if (!debug) return;
   // ArrayIter is not POD, so we memset each POD field separately.
   memset(&m_data, kIterTrashFill, sizeof(m_data));
+  memset(&m_typeFields, kIterTrashFill, sizeof(m_typeFields));
   memset(&m_pos, kIterTrashFill, sizeof(m_pos));
   memset(&m_end, kIterTrashFill, sizeof(m_end));
-  memset(&m_itypeAndNextHelperIdx, kIterTrashFill,
-         sizeof(m_itypeAndNextHelperIdx));
 }
 
 void ArrayIter::destruct() {
@@ -239,9 +272,9 @@ void ArrayIter::destruct() {
 ArrayIter& ArrayIter::operator=(const ArrayIter& iter) {
   reset();
   m_data = iter.m_data;
+  m_typeFields = iter.m_typeFields;
   m_pos = iter.m_pos;
   m_end = iter.m_end;
-  m_itypeAndNextHelperIdx = iter.m_itypeAndNextHelperIdx;
   if (hasArrayData()) {
     const ArrayData* ad = getArrayData();
     if (ad) const_cast<ArrayData*>(ad)->incRefCount();
@@ -256,9 +289,9 @@ ArrayIter& ArrayIter::operator=(const ArrayIter& iter) {
 ArrayIter& ArrayIter::operator=(ArrayIter&& iter) {
   reset();
   m_data = iter.m_data;
+  m_typeFields = iter.m_typeFields;
   m_pos = iter.m_pos;
   m_end = iter.m_end;
-  m_itypeAndNextHelperIdx = iter.m_itypeAndNextHelperIdx;
   iter.m_data = nullptr;
   return *this;
 }
@@ -365,8 +398,9 @@ bool Iter::next() {
 }
 
 void Iter::free() {
-  assertx(m_iter.getIterType() == ArrayIter::TypeArray ||
-          m_iter.getIterType() == ArrayIter::TypeIterator);
+  // We can't make any assertions about other iterator fields here, because we
+  // want memory effects to know that IterFree only reads the base (so we can
+  // eliminate storing the rest of the fields in most cases).
   m_iter.~ArrayIter();
 }
 

@@ -49,6 +49,7 @@ struct Class;
 
 namespace jit {
 struct ArrayAccessProfile;
+struct ArrayIterProfile;
 struct ArrayKindProfile;
 struct CallTargetProfile;
 struct ClsCnsProfile;
@@ -235,6 +236,7 @@ using Symbol = boost::variant< ClsConstant
                              , StaticMethod
                              , StaticMethodF
                              , Profile<jit::ArrayAccessProfile>
+                             , Profile<jit::ArrayIterProfile>
                              , Profile<jit::ArrayKindProfile>
                              , Profile<jit::CallTargetProfile>
                              , Profile<jit::ClsCnsProfile>

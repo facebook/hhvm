@@ -25,16 +25,19 @@
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/act-rec.h"
 
-#include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
+#include "hphp/runtime/vm/jit/array-iter-profile.h"
 #include "hphp/runtime/vm/jit/bc-marker.h"
 #include "hphp/runtime/vm/jit/call-spec.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
+#include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/type.h"
+#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
@@ -51,6 +54,25 @@ namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+static auto const s_ArrayIterProfile = makeStaticString("ArrayIterProfile");
+
+void profileIterInit(IRLS& env, const IRInstruction* inst, bool isInitK) {
+  if (!inst->src(0)->isA(TArrLike)) return;
+  auto const profile = TargetProfile<ArrayIterProfile>(
+    env.unit,
+    inst->marker(),
+    s_ArrayIterProfile
+  );
+  if (!profile.profiling()) return;
+
+  auto const args = argGroup(env, inst)
+    .addr(rvmtl(), safe_cast<int32_t>(profile.handle()))
+    .ssa(0)
+    .imm(isInitK);
+  cgCallHelper(vmain(env), env, CallSpec::method(&ArrayIterProfile::update),
+               kVoidDest, SyncOptions::Sync, args);
+}
+
 int iterOffset(const BCMarker& marker, uint32_t id) {
   auto const func = marker.func();
   return -cellsToBytes(((id + 1) * kNumIterCells + func->numLocals()));
@@ -66,6 +88,7 @@ void implIterInit(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 1).reg();
   auto const iterOff = iterOffset(inst->marker(), extra->iterId);
   auto const valOff = localOffset(extra->valId);
+  profileIterInit(env, inst, isInitK);
 
   auto& v = vmain(env);
 

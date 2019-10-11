@@ -18,8 +18,19 @@
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/mixed-array-keys.h"
 #include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/vm/jit/type.h"
 
 namespace HPHP {
+
+folly::Optional<uint8_t> MixedArrayKeys::getMask(const jit::Type& type) {
+  using namespace jit;
+  auto const str = kNonStaticStrKey | kStaticStrKey;
+  if (type == TInt && kTrackStaticStrKeys) return ~kIntKey;
+  if (type == (TInt | TStr))               return ~(kIntKey | str);
+  if (type == TStaticStr)                  return ~kStaticStrKey;
+  if (type == TStr)                        return ~str;
+  return folly::none;
+}
 
 bool MixedArrayKeys::checkInvariants(const MixedArray* ad) const {
   uint8_t true_bits = 0;
@@ -34,7 +45,7 @@ bool MixedArrayKeys::checkInvariants(const MixedArray* ad) const {
     }();
   }
   DEBUG_ONLY auto const all =
-    kTombstoneKey | kIntKey | kNonStaticStrKey | static_str;
+    kTombstoneKey | kIntKey | static_str | kNonStaticStrKey;
   assert_flog((true_bits & ~m_bits) == 0,
               "Untracked key type: true = {}, pred = {}\n",
               true_bits, m_bits);

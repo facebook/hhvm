@@ -22,7 +22,8 @@
 
 namespace HPHP {
 
-// Forward declaration needed for checkInvariants.
+// Forward declarations needed for getMask and checkInvariants.
+namespace jit { struct Type; }
 struct MixedArray;
 
 /*
@@ -59,9 +60,25 @@ struct MixedArrayKeys {
   bool mayIncludeTombstone() const {
     return (m_bits & kTombstoneKey) != 0;
   }
+  bool mustBeInts() const {
+    return kTrackStaticStrKeys ? (m_bits & ~kIntKey) == 0 : false;
+  }
+  bool mustBeStrs() const {
+    return (m_bits & ~(kStaticStrKey | kNonStaticStrKey)) == 0;
+  }
   bool mustBeStaticStrs() const {
     return (m_bits & ~kStaticStrKey) == 0;
   }
+
+  /*
+   * Call this helper to get a 1-byte mask to test against when JITing code
+   * to optimistically check the keys of a MixedArray. If you and this mask
+   * with the key bitset and the result is zero, then all keys match `type`.
+   *
+   * Some types can't be tested against this bitset; for these types, this
+   * method will return folly::none.
+   */
+  static folly::Optional<uint8_t> getMask(const jit::Type& type);
 
   /*
    * In one comparison we check both the kind and the fact that arr only
@@ -136,11 +153,11 @@ struct MixedArrayKeys {
   bool checkInvariants(const MixedArray* ad) const;
 
 private:
-  // To save on stores, we can avoid tracking static string keys.
+  // To save on stores, we can avoid tracking static string keys; we'll leave
+  // the bit unset and always assume that every MixedArray contains one.
   //
-  // We'll probably get rid of this option as soon as we have a use for
-  // checking that all keys are, say, ints - not tracking static keys would
-  // prevent us from doing that check soundly.
+  // If this flag is unset, we'll never be able to successfully prove that a
+  // MixedArray only contains int keys using this bitset.
   static constexpr bool kTrackStaticStrKeys = false;
 
   static constexpr uint8_t kNonStaticStrKey = 0b0001;

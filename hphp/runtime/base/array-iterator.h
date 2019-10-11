@@ -60,6 +60,45 @@ enum class IterNextIndex : uint8_t {
   ArrayMixedPointer,
 };
 
+// For iterator specialization, we pack all the information we need to generate
+// specialized code in a single byte so that we can check it in one comparison.
+//
+// This byte should be 0 for unspecialized iterators, as created by calling the
+// normal ArrayIter constructor instead of using a specialized initializer.
+struct IterSpecialization {
+  enum BaseType : uint8_t { Packed = 0, Mixed, Vec, Dict, kNumBaseTypes };
+  enum KeyTypes : uint8_t { ArrayKey = 0, Int, Str, StaticStr, kNumKeyTypes };
+
+  // Returns a generic (unspecialized) IterSpecialization value.
+  static IterSpecialization generic() {
+    IterSpecialization result;
+    result.as_byte = 0;
+    assertx(!result.specialized);
+    return result;
+  }
+
+  union {
+    uint8_t as_byte;
+    struct {
+      // `base_type` and `key_types` are 2-bit encodings of the enums above.
+      uint8_t base_type: 2;
+      uint8_t key_types: 2;
+
+      // When we JIT a specialized iterator, we set `specialized` to true,
+      // We set `output_key` for key-value iters but not for value-only iters.
+      // We set `base_const` if we know the base is const during iteration.
+      bool specialized: 1;
+      bool output_key: 1;
+      bool base_const: 1;
+    };
+  };
+};
+
+// Debugging output.
+std::string show(IterSpecialization type);
+std::string show(IterSpecialization::BaseType type);
+std::string show(IterSpecialization::KeyTypes type);
+
 /*
  * Iterator over an array, a collection, or an object implementing the Hack
  * Iterator interface. This iterator is used by both C++ code and by the JIT,
@@ -124,9 +163,9 @@ struct ArrayIter {
   // Move ctor
   ArrayIter(ArrayIter&& iter) noexcept {
     m_data = iter.m_data;
+    m_typeFields = iter.m_typeFields;
     m_pos = iter.m_pos;
     m_end = iter.m_end;
-    m_itypeAndNextHelperIdx = iter.m_itypeAndNextHelperIdx;
     iter.m_data = nullptr;
   }
 
@@ -277,6 +316,15 @@ struct ArrayIter {
     return (ObjectData*)((intptr_t)m_obj & ~1);
   }
 
+  // Used by native code and by the JIT to pack the m_typeFields components.
+  static uint32_t packTypeFields(
+      Type type, IterNextIndex index,
+      IterSpecialization spec = IterSpecialization::generic()) {
+    return static_cast<uint32_t>(spec.as_byte) << 16 |
+           static_cast<uint32_t>(index) << 8 |
+           static_cast<uint32_t>(type);
+  }
+
 private:
   template<IterTypeOp Type>
   friend int64_t new_iter_array(Iter*, ArrayData*, TypedValue*);
@@ -325,21 +373,19 @@ private:
   void setObject(ObjectData* obj) {
     assertx((intptr_t(obj) & 1) == 0);
     m_obj = (ObjectData*)((intptr_t)obj | 1);
-    m_itypeAndNextHelperIdx =
-      static_cast<uint16_t>(IterNextIndex::Object) << 8 |
-      static_cast<uint16_t>(ArrayIter::TypeIterator);
-    assertx(m_itype == ArrayIter::TypeIterator);
+    m_typeFields = packTypeFields(TypeIterator, IterNextIndex::Object);
+    assertx(m_itype == TypeIterator);
     assertx(m_nextHelperIdx == IterNextIndex::Object);
+    assertx(!m_specialization.specialized);
   }
 
   // Set the type fields of an array. These fields are packed so that we
   // can set them with a single mov-immediate to the union.
   void setArrayNext(IterNextIndex index) {
-    m_itypeAndNextHelperIdx =
-      static_cast<uint16_t>(index) << 8 |
-      static_cast<uint16_t>(ArrayIter::TypeArray);
-    assertx(m_itype == ArrayIter::TypeArray);
+    m_typeFields = packTypeFields(TypeArray, index);
+    assertx(m_itype == TypeArray);
     assertx(m_nextHelperIdx == index);
+    assertx(!m_specialization.specialized);
   }
 
   // The iterator base. Will be null for local iterators. We set the lowest
@@ -347,6 +393,15 @@ private:
   union {
     const ArrayData* m_data;
     ObjectData* m_obj;
+  };
+  // This field is a union so new_iter_array can set it in one instruction.
+  union {
+    struct {
+      Type m_itype;
+      IterNextIndex m_nextHelperIdx;
+      IterSpecialization m_specialization;
+    };
+    uint32_t m_typeFields;
   };
   // Current position. Beware that when m_data is null, m_pos is uninitialized.
   // For the pointer iteration types, we use the appropriate pointers instead.
@@ -359,14 +414,6 @@ private:
     size_t m_end;
     TypedValue* m_packed_end;
     MixedArrayElm* m_mixed_end;
-  };
-  // This field is a union so new_iter_array can set it in one instruction.
-  union {
-    struct {
-      Type m_itype;
-      IterNextIndex m_nextHelperIdx;
-    };
-    uint32_t m_itypeAndNextHelperIdx;
   };
 
   // These elements are always referenced elsewhere, either in the m_data field

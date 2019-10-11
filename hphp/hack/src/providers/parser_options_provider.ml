@@ -31,7 +31,9 @@ let get_opt () : ParserOptions.t option =
   | Provider_config.Lru_shared_memory
   | Provider_config.Shared_memory ->
     Store.get ()
-  | Provider_config.Local_memory _ -> !local_memory_popt
+  | Provider_config.Local_memory _
+  | Provider_config.Decl_service _ ->
+    !local_memory_popt
 
 let get () : ParserOptions.t =
   match get_opt () with
@@ -50,7 +52,9 @@ let set (popt : ParserOptions.t) : unit =
       | Provider_config.Lru_shared_memory
       | Provider_config.Shared_memory ->
         Store.add () popt
-      | Provider_config.Local_memory _ -> local_memory_popt := Some popt
+      | Provider_config.Local_memory _
+      | Provider_config.Decl_service _ ->
+        local_memory_popt := Some popt
     end
   | Some _ ->
     (* We end up invoking ServerInit.init after setting the global parser

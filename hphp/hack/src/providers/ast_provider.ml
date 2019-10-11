@@ -267,6 +267,8 @@ let get_ast ?(full = false) file_name =
         ~full
         file_name
         (ServerCommandTypes.FileName (Relative_path.to_absolute file_name)))
+  | Provider_config.Decl_service _ ->
+    failwith "Ast_provider.get_ast not supported with decl memory provider"
 
 let find_class_in_file
     ?(full = false) ?(case_insensitive = false) file_name class_name =

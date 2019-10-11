@@ -55,6 +55,8 @@ let get_fun (fun_name : fun_key) : fun_decl option =
     in
     let result : fun_decl option = Obj.obj result in
     result
+  | Provider_config.Decl_service _ ->
+    failwith "Decl_provider.get_fun not yet impl. for decl memory provider"
 
 let get_class (class_name : class_key) : class_decl option =
   match Provider_config.get_backend () with
@@ -74,6 +76,8 @@ let get_class (class_name : class_key) : class_decl option =
     in
     let result : class_decl option = Obj.obj result in
     result
+  | Provider_config.Decl_service _ ->
+    failwith "Decl_provider.get_class not yet impl. for decl memory provider"
 
 let convert_class_elt_to_fun_decl class_elt_opt : fun_decl option =
   Typing_defs.(
@@ -143,6 +147,8 @@ let get_typedef (typedef_name : string) : typedef_decl option =
     in
     let result : typedef_decl option = Obj.obj result in
     result
+  | Provider_config.Decl_service _ ->
+    failwith "Decl_provider.get_typedef not yet impl. for decl memory provider"
 
 let get_record_def (record_name : string) : record_def_decl option =
   match Provider_config.get_backend () with
@@ -171,6 +177,9 @@ let get_record_def (record_name : string) : record_def_decl option =
     in
     let result : record_def_decl option = Obj.obj result in
     result
+  | Provider_config.Decl_service _ ->
+    failwith
+      "Decl_provider.get_record_def not yet impl. for decl memory provider"
 
 let get_gconst (gconst_name : string) : gconst_decl option =
   match Provider_config.get_backend () with
@@ -197,6 +206,8 @@ let get_gconst (gconst_name : string) : gconst_decl option =
     in
     let result : gconst_decl option = Obj.obj result in
     result
+  | Provider_config.Decl_service _ ->
+    failwith "Decl_provider.get_gconst not yet impl. for decl memory provider"
 
 let invalidate_fun (fun_name : fun_key) : unit =
   match Provider_config.get_backend () with
@@ -209,6 +220,9 @@ let invalidate_fun (fun_name : fun_key) : unit =
     Memory_bounded_lru_cache.remove
       decl_cache
       (Provider_config.Fun_decl fun_name)
+  | Provider_config.Decl_service _ ->
+    failwith
+      "Decl_provider.invalidate_fun not yet impl. for decl memory provider"
 
 let invalidate_class (class_name : class_key) : unit =
   match Provider_config.get_backend () with
@@ -220,6 +234,9 @@ let invalidate_class (class_name : class_key) : unit =
     Memory_bounded_lru_cache.remove
       decl_cache
       (Provider_config.Class_decl class_name)
+  | Provider_config.Decl_service _ ->
+    failwith
+      "Decl_provider.invalidate_class not yet impl. for decl memory provider"
 
 let invalidate_record_def (record_name : record_def_key) : unit =
   match Provider_config.get_backend () with
@@ -232,6 +249,9 @@ let invalidate_record_def (record_name : record_def_key) : unit =
     Memory_bounded_lru_cache.remove
       decl_cache
       (Provider_config.Record_decl record_name)
+  | Provider_config.Decl_service _ ->
+    failwith
+      "Decl_provider.invalidate_record_def not yet impl. for decl memory provider"
 
 let invalidate_typedef (typedef_name : typedef_key) : unit =
   match Provider_config.get_backend () with
@@ -244,6 +264,9 @@ let invalidate_typedef (typedef_name : typedef_key) : unit =
     Memory_bounded_lru_cache.remove
       decl_cache
       (Provider_config.Typedef_decl typedef_name)
+  | Provider_config.Decl_service _ ->
+    failwith
+      "Decl_provider.invalidate_typedef not yet impl. for decl memory provider"
 
 let invalidate_gconst (gconst_name : gconst_key) : unit =
   match Provider_config.get_backend () with
@@ -256,6 +279,9 @@ let invalidate_gconst (gconst_name : gconst_key) : unit =
     Memory_bounded_lru_cache.remove
       decl_cache
       (Provider_config.Gconst_decl gconst_name)
+  | Provider_config.Decl_service _ ->
+    failwith
+      "Decl_provider.invalidate_gconst not yet impl. for decl memory provider"
 
 let invalidate_context_decls ~(ctx : Provider_context.t) =
   match Provider_config.get_backend () with
@@ -278,6 +304,9 @@ let invalidate_context_decls ~(ctx : Provider_context.t) =
     (* Don't attempt to invalidate decls with shared memory, as we may not be
     running in the master process where that's allowed. *)
     ()
+  | Provider_config.Decl_service _ ->
+    failwith
+      "Decl_provider.invalidate_context_decls not yet impl. for decl memory provider"
 
 let local_changes_push_stack () =
   (* For now, decl production still writes into shared memory, even when we're

@@ -28,6 +28,7 @@ type backend =
   | Lru_shared_memory
   | Shared_memory
   | Local_memory of { decl_cache: decl_cache }
+  | Decl_service of unit
 
 let backend_ref = ref Shared_memory
 
@@ -39,5 +40,7 @@ let set_local_memory_backend ~(max_size_in_words : int) : unit =
   backend_ref :=
     Local_memory
       { decl_cache = Memory_bounded_lru_cache.make ~max_size_in_words }
+
+let set_decl_service_backend () : unit = backend_ref := Decl_service ()
 
 let get_backend () : backend = !backend_ref

@@ -44,6 +44,7 @@ let global_init_and_get_tcopt ~(root : Path.t) ~(hhi_root : Path.t) :
         };
     }
   in
+  Provider_config.set_decl_service_backend ();
   Parser_options_provider.set server_env.ServerEnv.popt;
   GlobalNamingOptions.set server_env.ServerEnv.tcopt;
   server_env.ServerEnv.tcopt

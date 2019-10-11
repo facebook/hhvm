@@ -42,8 +42,9 @@ let get fn =
   | Provider_config.Lru_shared_memory
   | Provider_config.Shared_memory ->
     FileHeap.get fn
-  | Provider_config.Local_memory _ ->
-    failwith "File_provider.get not supported with local memory provider"
+  | Provider_config.Local_memory _
+  | Provider_config.Decl_service _ ->
+    failwith "File_provider.get not supported with local/decl memory provider"
 
 let get_unsafe fn =
   match Provider_config.get_backend () with
@@ -54,9 +55,10 @@ let get_unsafe fn =
       | Some contents -> contents
       | None -> failwith ("File not found: " ^ Relative_path.to_absolute fn)
     end
-  | Provider_config.Local_memory _ ->
+  | Provider_config.Local_memory _
+  | Provider_config.Decl_service _ ->
     failwith
-      "File_provider.get_unsafe not supported with local memory provider"
+      "File_provider.get_unsafe not supported with local/decl memory provider"
 
 let get_contents fn =
   match Provider_config.get_backend () with
@@ -73,7 +75,9 @@ let get_contents fn =
         FileHeap.add fn (Disk contents);
         Some contents
     end
-  | Provider_config.Local_memory _ -> read_file_contents_from_disk fn
+  | Provider_config.Local_memory _
+  | Provider_config.Decl_service _ ->
+    read_file_contents_from_disk fn
 
 let get_ide_contents_unsafe fn =
   match Provider_config.get_backend () with
@@ -84,68 +88,78 @@ let get_ide_contents_unsafe fn =
       | Some (Ide f) -> f
       | _ -> failwith ("IDE file not found: " ^ Relative_path.to_absolute fn)
     end
-  | Provider_config.Local_memory _ ->
+  | Provider_config.Local_memory _
+  | Provider_config.Decl_service _ ->
     failwith
       ( "File_provider.get_ide_contents_unsafe not supported "
-      ^ "with local memory provider" )
+      ^ "with local/decl memory provider" )
 
 let provide_file fn contents =
   match Provider_config.get_backend () with
   | Provider_config.Lru_shared_memory
   | Provider_config.Shared_memory ->
     FileHeap.add fn contents
-  | Provider_config.Local_memory _ ->
+  | Provider_config.Local_memory _
+  | Provider_config.Decl_service _ ->
     failwith
-      "File_provider.provide_file not supported with local memory provider"
+      "File_provider.provide_file not supported with local/decl memory provider"
 
 let provide_file_hint fn contents =
   match Provider_config.get_backend () with
   | Provider_config.Lru_shared_memory
   | Provider_config.Shared_memory ->
     FileHeap.write_around fn contents
-  | Provider_config.Local_memory _ ->
+  | Provider_config.Local_memory _
+  | Provider_config.Decl_service _ ->
     failwith
-      "File_provider.provide_file_hint not supported with local memory provider"
+      "File_provider.provide_file_hint not supported with local/decl memory provider"
 
 let remove_batch paths =
   match Provider_config.get_backend () with
   | Provider_config.Lru_shared_memory
   | Provider_config.Shared_memory ->
     FileHeap.remove_batch paths
-  | Provider_config.Local_memory _ ->
+  | Provider_config.Local_memory _
+  | Provider_config.Decl_service _ ->
     failwith
-      "File_provider.remove_batch not supported with local memory provider"
+      "File_provider.remove_batch not supported with local/decl memory provider"
 
 let local_changes_push_stack () =
   match Provider_config.get_backend () with
   | Provider_config.Lru_shared_memory
   | Provider_config.Shared_memory ->
     FileHeap.LocalChanges.push_stack ()
-  | Provider_config.Local_memory _ -> ()
+  | Provider_config.Local_memory _
+  | Provider_config.Decl_service _ ->
+    ()
 
 let local_changes_pop_stack () =
   match Provider_config.get_backend () with
   | Provider_config.Lru_shared_memory
   | Provider_config.Shared_memory ->
     FileHeap.LocalChanges.pop_stack ()
-  | Provider_config.Local_memory _ -> ()
+  | Provider_config.Local_memory _
+  | Provider_config.Decl_service _ ->
+    ()
 
 let local_changes_commit_batch paths =
   match Provider_config.get_backend () with
   | Provider_config.Lru_shared_memory
   | Provider_config.Shared_memory ->
     FileHeap.LocalChanges.commit_batch paths
-  | Provider_config.Local_memory _ ->
+  | Provider_config.Local_memory _
+  | Provider_config.Decl_service _ ->
     failwith
       ( "File_provider.local_changes_commit_batch not supported "
-      ^ "with local memory provider" )
+      ^ "with local/decl memory provider" )
 
 let local_changes_revert_batch paths =
   match Provider_config.get_backend () with
   | Provider_config.Lru_shared_memory
   | Provider_config.Shared_memory ->
     FileHeap.LocalChanges.revert_batch paths
-  | Provider_config.Local_memory _ ->
+  | Provider_config.Local_memory _
+  | Provider_config.Decl_service _ ->
     failwith
       ( "File_provider.local_changes_revert_batch not supported "
-      ^ "with local memory provider" )
+      ^ "with local/decl memory provider" )

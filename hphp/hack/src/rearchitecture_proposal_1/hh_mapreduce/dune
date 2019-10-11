@@ -14,5 +14,17 @@
   (libraries
     default_injector_config
     global_config
+    global_options
+    hhi
+    naming
+    parser_options_provider
+    provider_context
+    provider_utils
+    relative_path
     socket
-    sys_utils))
+    server
+    server_command_types
+    server_env
+    sys_utils
+    typechecker_options
+    typing_ast))

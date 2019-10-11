@@ -8,10 +8,65 @@
 
 open Core_kernel
 
+let global_init_and_get_tcopt ~(root : Path.t) ~(hhi_root : Path.t) :
+    GlobalOptions.t =
+  Relative_path.set_path_prefix Relative_path.Root root;
+  Relative_path.set_path_prefix Relative_path.Hhi hhi_root;
+  Relative_path.set_path_prefix Relative_path.Tmp (Path.make "/tmp");
+
+  let server_args = ServerArgs.default_options ~root:(Path.to_string root) in
+  let (server_config, server_local_config) =
+    ServerConfig.load ServerConfig.filename server_args
+  in
+  let genv =
+    ServerEnvBuild.make_genv
+      server_args
+      server_config
+      server_local_config
+      [] (* no workers *)
+      None
+    (* no lru_workers *)
+  in
+  let server_env = ServerEnvBuild.make_env genv.ServerEnv.config in
+  let server_env =
+    {
+      server_env with
+      ServerEnv.tcopt =
+        {
+          server_env.ServerEnv.tcopt with
+          GlobalOptions.tco_shallow_class_decl = true;
+        };
+    }
+  in
+  Parser_options_provider.set server_env.ServerEnv.popt;
+  GlobalNamingOptions.set server_env.ServerEnv.tcopt;
+  server_env.ServerEnv.tcopt
+
 let run_worker (fd : Unix.file_descr) : unit =
-  let req = (Marshal_tools.from_fd_with_preamble fd : string) in
-  let _ = Marshal_tools.to_fd_with_preamble fd req in
-  ()
+  (* Message1: receive root *)
+  let (root, hhi_root) : Path.t * Path.t =
+    match Prototype.rpc_read fd with
+    | Ok v -> v
+    | Error e -> failwith (Prototype.rpc_error_to_verbose_string e)
+  in
+  let tcopt = global_init_and_get_tcopt ~root ~hhi_root in
+  let ctx = Provider_context.empty ~tcopt in
+  (* Message2: receive filename to check *)
+  let fn : string =
+    match Prototype.rpc_read fd with
+    | Ok v -> v
+    | Error e -> failwith (Prototype.rpc_error_to_verbose_string e)
+  in
+  let relative_path = Relative_path.create_detect_prefix fn in
+  let file_input = ServerCommandTypes.FileName fn in
+  let (ctx, entry) =
+    Provider_utils.update_context ctx relative_path file_input
+  in
+  let tast = Provider_utils.compute_tast ~ctx ~entry in
+  let result = Tast.show_program tast in
+  match Prototype.rpc_write fd result with
+  | Ok () -> ()
+  | Error e -> failwith (Prototype.rpc_error_to_verbose_string e)
 
 let run () : unit =
   (* Parse command-line arguments *)
@@ -34,13 +89,17 @@ let run () : unit =
     | "typecheck" :: files -> files
     | _ -> failwith "expected 'typecheck' as first anon argument"
   in
-
+  (* Write out hhi files to disk *)
+  (* TODO: it should be the decl-service who writes these to disk *)
+  let hhi_root = Hhi.get_hhi_root () in
   (* Simplistically we'll typecheck one file at a time, one per worker *)
   let per_file (fn : string) : unit =
     let open Result.Monad_infix in
     let res =
       Prototype.rpc_request_new_worker !root Dispatch.Typecheck
       >>= fun fd ->
+      Prototype.rpc_write fd (Path.make !root, hhi_root)
+      >>= fun () ->
       Prototype.rpc_write fd fn
       >>= fun () ->
       Prototype.rpc_read fd

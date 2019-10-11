@@ -59,9 +59,10 @@ let errors_to_string (errors : Errors.t) : string =
   String.concat error_list
 
 let run_worker (fd : Unix.file_descr) : unit =
+  let pfd = Prototype.file_descr fd in
   (* Message1: receive root *)
   let (root, hhi_root) : Path.t * Path.t =
-    match Prototype.rpc_read fd with
+    match Prototype.rpc_read pfd with
     | Ok v -> v
     | Error e -> failwith (Prototype.rpc_error_to_verbose_string e)
   in
@@ -69,7 +70,7 @@ let run_worker (fd : Unix.file_descr) : unit =
   let ctx = Provider_context.empty ~tcopt in
   (* Message2: receive filename to check *)
   let fn : string =
-    match Prototype.rpc_read fd with
+    match Prototype.rpc_read pfd with
     | Ok v -> v
     | Error e -> failwith (Prototype.rpc_error_to_verbose_string e)
   in
@@ -85,7 +86,7 @@ let run_worker (fd : Unix.file_descr) : unit =
       (errors_to_string errors)
       (Tast.show_program tast)
   in
-  match Prototype.rpc_write fd result with
+  match Prototype.rpc_write pfd result with
   | Ok () -> ()
   | Error e -> failwith (Prototype.rpc_error_to_verbose_string e)
 
@@ -132,7 +133,7 @@ let run () : unit =
     | Ok results -> Printf.printf "FILE %s\n%s\n" fn results
     | Error e ->
       Printf.eprintf
-        "Can't connect to prototype\n%s\n"
+        "Prototype error: %s"
         (Prototype.rpc_error_to_verbose_string e);
       exit 1
   in

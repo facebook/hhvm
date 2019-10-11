@@ -439,7 +439,6 @@ void compile_repo() {
   );
   wp_thread.start();
   write_units(ueq);
-  LitstrTable::get().setReading();
   write_global_data(arrTable, input.second);
   wp_thread.waitForEnd();
 }

@@ -253,7 +253,6 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
         if (ues.size()) commitSome(ues);
       };
 
-      LitstrTable::get().setReading();
       ar->finish();
       ar.reset();
 
@@ -284,7 +283,6 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
 
       commitLoop();
 
-      LitstrTable::get().setReading();
       commitGlobalData(std::move(arrTable));
     }
     wp_thread.join();

@@ -307,6 +307,7 @@ void Repo::saveGlobalData(GlobalData newData) {
 
   // TODO(#3521039): we could just put the litstr table in the same
   // blob as the above and delete LitstrRepoProxy.
+  LitstrTable::get().setReading();
   LitstrTable::get().forEachLitstr(
     [this, &txn, repoId](int i, const StringData* name) {
       lsrp().insertLitstr(repoId).insert(txn, i, name);

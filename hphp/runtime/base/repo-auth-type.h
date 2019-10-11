@@ -26,6 +26,7 @@
 
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/types.h"
 
 namespace HPHP {
 
@@ -266,9 +267,17 @@ struct RepoAuthType {
     }
 
     if (hasClassName()) {
-      auto c = clsName();
-      sd(c);
-      m_data.set(static_cast<uint16_t>(t), reinterpret_cast<const void*>(c));
+      // Use a LowStringPtr for the blob encoder/decoder so we take advantage
+      // of the litstr table.
+      LowStringPtr lc;
+      if (!SerDe::deserializing) {
+        lc = clsName();
+      }
+      sd(lc);
+      if (SerDe::deserializing) {
+        m_data.set(static_cast<uint16_t>(t),
+                   reinterpret_cast<const void*>(lc.get()));
+      }
     }
   }
 

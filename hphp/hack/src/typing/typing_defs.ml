@@ -1017,6 +1017,61 @@ and abstract_kind_compare ?(normalize_lists = false) t1 t2 =
   | (AKdependent d1, AKdependent d2) -> compare d1 d2
   | _ -> abstract_kind_con_ordinal t1 - abstract_kind_con_ordinal t2
 
+let nullsafe_compare nullsafe1 nullsafe2 =
+  match (nullsafe1, nullsafe2) with
+  | (Some _, Some _)
+  | (None, None) ->
+    0
+  | (None, Some _) -> 1
+  | (Some _, None) -> -1
+
+let class_id_con_ordinal cid =
+  match cid with
+  | Aast.CIparent -> 0
+  | Aast.CIself -> 1
+  | Aast.CIstatic -> 2
+  | Aast.CIexpr _ -> 3
+  | Aast.CI _ -> 4
+
+let class_id_compare cid1 cid2 =
+  match (cid1, cid2) with
+  | (Aast.CIexpr _e1, Aast.CIexpr _e2) -> 0
+  | (Aast.CI (_, id1), Aast.CI (_, id2)) -> compare id1 id2
+  | _ -> class_id_con_ordinal cid2 - class_id_con_ordinal cid1
+
+let has_member_compare ~normalize_lists hm1 hm2 =
+  let ty_compare = ty_compare ~normalize_lists in
+  let {
+    hm_name = (_, m1);
+    hm_type = ty1;
+    hm_nullsafe = nullsafe1;
+    hm_class_id = cid1;
+  } =
+    hm1
+  in
+  let {
+    hm_name = (_, m2);
+    hm_type = ty2;
+    hm_nullsafe = nullsafe2;
+    hm_class_id = cid2;
+  } =
+    hm2
+  in
+  match compare m1 m2 with
+  | 0 ->
+    (match ty_compare ty1 ty2 with
+    | 0 ->
+      (match nullsafe_compare nullsafe1 nullsafe2 with
+      | 0 -> class_id_compare cid1 cid2
+      | comp -> comp)
+    | comp -> comp)
+  | comp -> comp
+
+let constraint_ty_compare ?(normalize_lists = false) (_, ty1) (_, ty2) =
+  match (ty1, ty2) with
+  | (Thas_member hm1, Thas_member hm2) ->
+    has_member_compare ~normalize_lists hm1 hm2
+
 let ty_equal ?(normalize_lists = false) ty1 ty2 =
   ty_compare ~normalize_lists ty1 ty2 = 0
 

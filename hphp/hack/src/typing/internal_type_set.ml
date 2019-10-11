@@ -20,9 +20,9 @@ module Ty_ = struct
   let compare ty1 ty2 =
     match (ty1, ty2) with
     | (LoclType ty1, LoclType ty2) -> ty_compare ty1 ty2
-    | _ -> 0
-
-  (* TODO *)
+    | (ConstraintType ty1, ConstraintType ty2) -> constraint_ty_compare ty1 ty2
+    | (LoclType _, ConstraintType _) -> 1
+    | (ConstraintType _, LoclType _) -> -1
 end
 
 include Caml.Set.Make (Ty_)

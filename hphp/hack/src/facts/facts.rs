@@ -50,6 +50,7 @@ pub struct Facts {
     pub functions: Vec<String>,
     pub constants: Vec<String>,
     pub type_aliases: Vec<String>,
+    pub file_attributes: Attributes,
 }
 impl Facts {
     pub fn to_json(&self, text: &str) -> String {
@@ -65,8 +66,14 @@ impl Facts {
                 json!(hex_number_to_i64(&md5sum[16..32])),
             );
             m.insert(String::from("sha1sum"), json!(sha1sum));
+            if self.skip_file_attributes() {
+                m.remove("fileAttributes");
+            }
         });
         serde_json::to_string_pretty(&json).expect("Could not serialize facts to JSON")
+    }
+    fn skip_file_attributes(&self) -> bool {
+        self.file_attributes.is_empty()
     }
 }
 

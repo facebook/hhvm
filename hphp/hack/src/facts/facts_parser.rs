@@ -378,6 +378,9 @@ fn collect(mut acc: CollectAcc, node: Node) -> CollectAcc {
                 }
             }
         }
+        FileAttributeSpecification(attributes) => {
+            acc.1.file_attributes = attributes_into_facts(&acc.0, *attributes);
+        }
         _ => (),
     };
     acc

@@ -60,6 +60,7 @@ pub enum Node {
     Static,
     QualifiedName(Vec<Node>),
     ScopeResolutionExpression(Box<(Node, Node)>),
+    FileAttributeSpecification(Box<Node>),
     // declarations
     ClassDecl(Box<ClassDeclChildren>),
     FunctionDecl(Box<Node>),
@@ -497,5 +498,16 @@ impl<'a> FlattenSmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstr
         name: Self::R,
     ) -> Self::R {
         Node::ScopeResolutionExpression(Box::new((qualifier, name)))
+    }
+
+    fn make_file_attribute_specification(
+        &mut self,
+        _left_double_angle: Self::R,
+        _keyword: Self::R,
+        _colon: Self::R,
+        attributes: Self::R,
+        _right_double_angle: Self::R,
+    ) -> Self::R {
+        Node::FileAttributeSpecification(Box::new(attributes))
     }
 }

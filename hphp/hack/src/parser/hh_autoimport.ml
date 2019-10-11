@@ -68,7 +68,6 @@ let types =
       ("Set", Global);
       ("Shapes", Global);
       ("SleepWaitHandle", Global);
-      ("StableMap", Global);
       ("StaticWaitHandle", Global);
       ("this", Global);
       ("Traversable", Global);

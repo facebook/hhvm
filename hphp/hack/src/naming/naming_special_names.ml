@@ -75,8 +75,6 @@ module Collections = struct
 
   let cMap = "\\Map"
 
-  let cStableMap = "\\StableMap"
-
   let cImmMap = "\\ImmMap"
 
   let cPair = "\\Pair"

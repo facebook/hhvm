@@ -79,8 +79,6 @@ pub mod collections {
 
     pub const MAP: &str = "\\Map";
 
-    pub const STABLE_MAP: &str = "\\StableMap";
-
     pub const IMM_MAP: &str = "\\ImmMap";
 
     pub const PAIR: &str = "\\Pair";

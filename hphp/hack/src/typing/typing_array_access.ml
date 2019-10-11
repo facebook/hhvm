@@ -62,7 +62,6 @@ let widen_for_array_get ~lhs_of_null_coalesce ~expr_pos index_expr env ty =
     when cn = SN.Collections.cVector
          || cn = SN.Collections.cVec
          || cn = SN.Collections.cMap
-         || cn = SN.Collections.cStableMap
          || cn = SN.Collections.cDict
          || cn = SN.Collections.cKeyset
          || cn = SN.Collections.cConstMap
@@ -271,7 +270,6 @@ let rec array_get
         (env, ty)
       | Tclass (((_, cn) as id), _, argl)
         when cn = SN.Collections.cMap
-             || cn = SN.Collections.cStableMap
              || cn = SN.Collections.cDict
              || cn = SN.Collections.cKeyset ->
         if cn = SN.Collections.cKeyset && is_lvalue then (
@@ -601,8 +599,7 @@ let widen_for_assign_array_get ~expr_pos index_expr env ty =
          || cn = SN.Collections.cKeyset
          || cn = SN.Collections.cVector
          || cn = SN.Collections.cDict
-         || cn = SN.Collections.cMap
-         || cn = SN.Collections.cStableMap ->
+         || cn = SN.Collections.cMap ->
     let (env, params) =
       List.map_env env tyl (fun env _ty ->
           Env.fresh_invariant_type_var env expr_pos)
@@ -733,8 +730,7 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
         let env = type_index env expr_pos tkey tk (Reason.index_class cn) in
         let (env, tv') = Typing_union.union env tv ty2 in
         (env, (r, Tclass (id, e, [tv'])))
-      | Tclass (((_, cn) as id), _, argl)
-        when cn = SN.Collections.cMap || cn = SN.Collections.cStableMap ->
+      | Tclass (((_, cn) as id), _, argl) when cn = SN.Collections.cMap ->
         let env = check_arraykey_index env expr_pos ety1 tkey in
         let (tk, tv) =
           match argl with

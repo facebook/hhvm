@@ -69,7 +69,6 @@ let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
     type_index env index_ty key_ty Reason.index_array
   | Tclass ((_, cn), _, key_ty :: _)
     when cn = SN.Collections.cMap
-         || cn = SN.Collections.cStableMap
          || cn = SN.Collections.cConstMap
          || cn = SN.Collections.cImmMap
          || cn = SN.Collections.cKeyedContainer

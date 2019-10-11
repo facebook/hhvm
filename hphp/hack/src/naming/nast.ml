@@ -119,7 +119,6 @@ let class_id_to_str = function
 let is_kvc_kind name =
   name = SN.Collections.cMap
   || name = SN.Collections.cImmMap
-  || name = SN.Collections.cStableMap
   || name = SN.Collections.cDict
 
 let get_kvc_kind name =

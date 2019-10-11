@@ -465,8 +465,18 @@ end = struct
     | None -> None
 
   let get_name genv get_pos x =
-    lookup genv get_pos x;
-    x
+    match Provider_config.get_backend () with
+    | Provider_config.Lru_shared_memory
+    | Provider_config.Shared_memory
+    | Provider_config.Local_memory _ ->
+      lookup genv get_pos x;
+      x
+    | Provider_config.Decl_service _ ->
+      (* TODO: we need to refactor this so naming phase doesn't report *)
+      (* unbound name errors; that should come later, during typchecking, *)
+      (* which is when we look up the decl service. The decl service *)
+      (* is the only one who'll tell us whether a name is unbound. *)
+      x
 
   (* For dealing with namespace resolution on functions *)
   let elaborate_and_get_name_with_canonicalized_fallback

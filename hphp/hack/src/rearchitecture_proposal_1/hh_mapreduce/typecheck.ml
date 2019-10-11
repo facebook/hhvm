@@ -15,6 +15,12 @@ let global_init_and_get_tcopt ~(root : Path.t) ~(hhi_root : Path.t) :
   Relative_path.set_path_prefix Relative_path.Tmp (Path.make "/tmp");
 
   let server_args = ServerArgs.default_options ~root:(Path.to_string root) in
+  (* server_args.check_mode is used (1) by make_genv in case it wants to
+     initializate watchman/dfind, (2) in serverMain and other server logic
+     to affect the actual behavior. For sake of a typecheck worker here,
+     we want make_genv to bypass the initialization, and we're not going to
+     call into the server proper anyway. *)
+  let server_args = ServerArgs.set_check_mode server_args true in
   let (server_config, server_local_config) =
     ServerConfig.load ServerConfig.filename server_args
   in

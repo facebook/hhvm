@@ -436,6 +436,8 @@ let write_symbol_info options = options.write_symbol_info
 (* Setters *)
 (*****************************************************************************)
 
+let set_check_mode options check_mode = { options with check_mode }
+
 let set_gen_saved_ignore_type_errors options ignore_type_errors =
   { options with gen_saved_ignore_type_errors = ignore_type_errors }
 

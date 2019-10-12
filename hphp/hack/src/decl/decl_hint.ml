@@ -70,14 +70,14 @@ and hint_ p env = function
   | Hlike h -> Tlike (hint env h)
   | Hfun
       {
-        reactive_kind = reactivity;
-        is_coroutine;
-        param_tys = hl;
-        param_kinds = kl;
-        param_mutability = muts;
-        variadic_ty = vh;
-        return_ty = h;
-        is_mutable_return = mut_ret;
+        hf_reactive_kind = reactivity;
+        hf_is_coroutine = is_coroutine;
+        hf_param_tys = hl;
+        hf_param_kinds = kl;
+        hf_param_mutability = muts;
+        hf_variadic_ty = vh;
+        hf_return_ty = h;
+        hf_is_mutable_return = mut_ret;
       } ->
     let make_param ((p, _) as x) k mut =
       let fp_mutability =

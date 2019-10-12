@@ -89,17 +89,18 @@ let rec check_hint env (pos, hint) =
   | Aast.Hnothing ->
     ()
   | Aast.Hfun
-      {
-        reactive_kind = _;
-        is_coroutine = _;
-        param_tys = hl;
-        param_kinds = _;
-        param_mutability = _;
-        (* TODO: shouldn't we be checking this hint as well? *)
-        variadic_ty = _;
-        return_ty = h;
-        is_mutable_return = _;
-      } ->
+      Aast.
+        {
+          hf_reactive_kind = _;
+          hf_is_coroutine = _;
+          hf_param_tys = hl;
+          hf_param_kinds = _;
+          hf_param_mutability = _;
+          (* TODO: shouldn't we be checking this hint as well? *)
+          hf_variadic_ty = _;
+          hf_return_ty = h;
+          hf_is_mutable_return = _;
+        } ->
     List.iter hl (check_hint env);
     check_hint env h
   | Aast.Htuple hl

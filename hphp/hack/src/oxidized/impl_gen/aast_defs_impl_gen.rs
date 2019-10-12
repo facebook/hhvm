@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<85d956922b75f625c0693f4fddf03875>>
+// @generated SignedSource<<7bc85009e10351fb8c41a6d35f4a3c01>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -37,6 +37,9 @@ impl Hint_ {
     }
     pub fn mk_hlike(p0: Hint) -> Self {
         Hint_::Hlike(p0)
+    }
+    pub fn mk_hfun(p0: HintFun) -> Self {
+        Hint_::Hfun(p0)
     }
     pub fn mk_htuple(p0: Vec<Hint>) -> Self {
         Hint_::Htuple(p0)

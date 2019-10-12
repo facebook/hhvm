@@ -56,19 +56,20 @@ and fmt_hint ~tparams ~namespace ?(strip_tparams = false) (pos, h) =
       name
     else
       name ^ "<" ^ fmt_hints ~tparams ~namespace args ^ ">"
-  | Aast.Hfun { is_coroutine = true; _ } ->
+  | Aast.Hfun Aast.{ hf_is_coroutine = true; _ } ->
     failwith "Codegen for coroutine functions is not supported"
   | Aast.Hfun
-      {
-        reactive_kind = _;
-        is_coroutine = false;
-        param_tys = args;
-        param_kinds = _;
-        param_mutability = _;
-        variadic_ty = _;
-        return_ty = ret;
-        is_mutable_return = _;
-      } ->
+      Aast.
+        {
+          hf_reactive_kind = _;
+          hf_is_coroutine = false;
+          hf_param_tys = args;
+          hf_param_kinds = _;
+          hf_param_mutability = _;
+          hf_variadic_ty = _;
+          hf_return_ty = ret;
+          hf_is_mutable_return = _;
+        } ->
     (* TODO(mqian): Implement for inout parameters *)
     "(function ("
     ^ fmt_hints ~tparams ~namespace args

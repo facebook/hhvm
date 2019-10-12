@@ -3211,29 +3211,31 @@ and fixup_type_arg (env : Emit_env.t) ~isas (hint : Aast.hint) =
     | Aast.Hoption h -> (p, Aast.Hoption (aux h))
     | Aast.Hlike h -> (p, Aast.Hlike (aux h))
     | Aast.Hfun
-        {
-          reactive_kind;
-          is_coroutine;
-          param_tys;
-          param_kinds;
-          param_mutability;
-          variadic_ty;
-          return_ty;
-          is_mutable_return;
-        } ->
+        Aast.
+          {
+            hf_reactive_kind;
+            hf_is_coroutine;
+            hf_param_tys;
+            hf_param_kinds;
+            hf_param_mutability;
+            hf_variadic_ty;
+            hf_return_ty;
+            hf_is_mutable_return;
+          } ->
       ( p,
         Aast.Hfun
-          {
-            reactive_kind;
-            is_coroutine;
-            param_tys = List.map ~f:aux param_tys;
-            param_kinds;
-            param_mutability;
-            (* TODO: shouldn't we also replace the hint in here? *)
-            variadic_ty;
-            return_ty = aux return_ty;
-            is_mutable_return;
-          } )
+          Aast.
+            {
+              hf_reactive_kind;
+              hf_is_coroutine;
+              hf_param_tys = List.map ~f:aux hf_param_tys;
+              hf_param_kinds;
+              hf_param_mutability;
+              (* TODO: shouldn't we also replace the hint in here? *)
+              hf_variadic_ty;
+              hf_return_ty = aux hf_return_ty;
+              hf_is_mutable_return;
+            } )
     | Aast.Htuple hl -> (p, Aast.Htuple (List.map ~f:aux hl))
     | Aast.Happly ((_, id), _)
       when List.mem ~equal:String.equal erased_tparams id ->

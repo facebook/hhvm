@@ -862,7 +862,7 @@ where
                     );
                     Self::invariant_failure_error(node, env, &msg)?;
                 }
-                Ok(Hfun {
+                Ok(Hfun(aast::HintFun {
                     reactive_kind: aast::FuncReactive::FNonreactive,
                     is_coroutine: !c.closure_coroutine.is_missing(),
                     param_tys: type_hints,
@@ -871,7 +871,7 @@ where
                     variadic_ty: variadic_hints.into_iter().next().unwrap_or(None),
                     return_ty: Self::p_hint(&c.closure_return_type, env)?,
                     is_mutable_return: true,
-                })
+                }))
             }
             AttributizedSpecifier(c) => {
                 let attrs = Self::p_user_attribute(&c.attributized_specifier_attribute_spec, env)?;

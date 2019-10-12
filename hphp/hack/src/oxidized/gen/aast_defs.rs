@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1160c97b58c3e20751fbb5d304e46e26>>
+// @generated SignedSource<<b348ff72dd99e6b9de291a1bc51450e6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -93,19 +93,22 @@ pub type MutableReturn = bool;
 pub type VariadicHint = Option<Hint>;
 
 #[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+pub struct HintFun {
+    pub reactive_kind: FuncReactive,
+    pub is_coroutine: IsCoroutine,
+    pub param_tys: Vec<Hint>,
+    pub param_kinds: Vec<Option<ast_defs::ParamKind>>,
+    pub param_mutability: Vec<Option<ParamMutability>>,
+    pub variadic_ty: VariadicHint,
+    pub return_ty: Hint,
+    pub is_mutable_return: MutableReturn,
+}
+
+#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 pub enum Hint_ {
     Hoption(Hint),
     Hlike(Hint),
-    Hfun {
-        reactive_kind: FuncReactive,
-        is_coroutine: IsCoroutine,
-        param_tys: Vec<Hint>,
-        param_kinds: Vec<Option<ast_defs::ParamKind>>,
-        param_mutability: Vec<Option<ParamMutability>>,
-        variadic_ty: VariadicHint,
-        return_ty: Hint,
-        is_mutable_return: MutableReturn,
-    },
+    Hfun(HintFun),
     Htuple(Vec<Hint>),
     Happly(Sid, Vec<Hint>),
     Hshape(NastShapeInfo),

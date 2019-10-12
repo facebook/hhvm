@@ -66,19 +66,21 @@ and mutable_return = bool
 
 and variadic_hint = hint option
 
+and hint_fun = {
+  hf_reactive_kind: func_reactive;
+  hf_is_coroutine: is_coroutine;
+  hf_param_tys: hint list;
+  hf_param_kinds: Ast_defs.param_kind option list;
+  hf_param_mutability: param_mutability option list;
+  hf_variadic_ty: variadic_hint;
+  hf_return_ty: hint;
+  hf_is_mutable_return: mutable_return;
+}
+
 and hint_ =
   | Hoption of hint
   | Hlike of hint
-  | Hfun of {
-      reactive_kind: func_reactive;
-      is_coroutine: is_coroutine;
-      param_tys: hint list;
-      param_kinds: Ast_defs.param_kind option list;
-      param_mutability: param_mutability option list;
-      variadic_ty: variadic_hint;
-      return_ty: hint;
-      is_mutable_return: mutable_return;
-    }
+  | Hfun of hint_fun
   | Htuple of hint list
   | Happly of sid * hint list
   | Hshape of nast_shape_info

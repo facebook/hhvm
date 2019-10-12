@@ -130,16 +130,17 @@ let converter
     | Hfun (is_coroutine, hl, param_kinds, variadic, h) ->
       ( p,
         Aast.Hfun
-          {
-            reactive_kind = Aast.FNonreactive;
-            is_coroutine;
-            param_tys = on_list on_hint hl;
-            param_kinds;
-            param_mutability = [];
-            variadic_ty = on_variadic_hint variadic;
-            return_ty = on_hint h;
-            is_mutable_return = true;
-          } )
+          Aast.
+            {
+              hf_reactive_kind = Aast.FNonreactive;
+              hf_is_coroutine = is_coroutine;
+              hf_param_tys = on_list on_hint hl;
+              hf_param_kinds = param_kinds;
+              hf_param_mutability = [];
+              hf_variadic_ty = on_variadic_hint variadic;
+              hf_return_ty = on_hint h;
+              hf_is_mutable_return = true;
+            } )
     | Htuple hl -> (p, Aast.Htuple (on_list on_hint hl))
     | Hunion hl -> (p, Aast.Hunion (on_list on_hint hl))
     | Hintersection hl -> (p, Aast.Hintersection (on_list on_hint hl))

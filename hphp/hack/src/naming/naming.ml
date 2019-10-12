@@ -779,16 +779,17 @@ module Make (GetLocals : GetLocals) = struct
         true
     in
     N.Hfun
-      {
-        reactive_kind = reactivity;
-        is_coroutine;
-        param_tys = hl;
-        param_kinds = kl;
-        param_mutability = muts;
-        variadic_ty = variadic_hint;
-        return_ty = hint ~allow_retonly:true env rh;
-        is_mutable_return = ret_mut;
-      }
+      N.
+        {
+          hf_reactive_kind = reactivity;
+          hf_is_coroutine = is_coroutine;
+          hf_param_tys = hl;
+          hf_param_kinds = kl;
+          hf_param_mutability = muts;
+          hf_variadic_ty = variadic_hint;
+          hf_return_ty = hint ~allow_retonly:true env rh;
+          hf_is_mutable_return = ret_mut;
+        }
 
   and hint_
       ~forbid_this
@@ -834,16 +835,17 @@ module Make (GetLocals : GetLocals) = struct
       else
         snd h
     | Aast.Hfun
-        {
-          reactive_kind = reactivity;
-          is_coroutine = coroutine;
-          param_tys = hl;
-          param_kinds = kl;
-          param_mutability = _;
-          variadic_ty = variadic_hint;
-          return_ty = h;
-          is_mutable_return = _;
-        } ->
+        Aast.
+          {
+            hf_reactive_kind = reactivity;
+            hf_is_coroutine = coroutine;
+            hf_param_tys = hl;
+            hf_param_kinds = kl;
+            hf_param_mutability = _;
+            hf_variadic_ty = variadic_hint;
+            hf_return_ty = h;
+            hf_is_mutable_return = _;
+          } ->
       hfun env reactivity coroutine hl kl variadic_hint h
     (* Special case for Rx<function> *)
     | Aast.Happly
@@ -851,54 +853,57 @@ module Make (GetLocals : GetLocals) = struct
           [
             ( _,
               Aast.Hfun
-                {
-                  reactive_kind = _;
-                  is_coroutine;
-                  param_tys = hl;
-                  param_kinds = kl;
-                  param_mutability = _;
-                  variadic_ty = variadic_hint;
-                  return_ty = h;
-                  is_mutable_return = _;
-                } );
+                Aast.
+                  {
+                    hf_reactive_kind = _;
+                    hf_is_coroutine;
+                    hf_param_tys = hl;
+                    hf_param_kinds = kl;
+                    hf_param_mutability = _;
+                    hf_variadic_ty = variadic_hint;
+                    hf_return_ty = h;
+                    hf_is_mutable_return = _;
+                  } );
           ] ) ->
-      hfun env N.FReactive is_coroutine hl kl variadic_hint h
+      hfun env N.FReactive hf_is_coroutine hl kl variadic_hint h
     (* Special case for RxShallow<function> *)
     | Aast.Happly
         ( (_, "RxShallow"),
           [
             ( _,
               Aast.Hfun
-                {
-                  reactive_kind = _;
-                  is_coroutine;
-                  param_tys = hl;
-                  param_kinds = kl;
-                  param_mutability = _;
-                  variadic_ty = variadic_hint;
-                  return_ty = h;
-                  is_mutable_return = _;
-                } );
+                Aast.
+                  {
+                    hf_reactive_kind = _;
+                    hf_is_coroutine;
+                    hf_param_tys = hl;
+                    hf_param_kinds = kl;
+                    hf_param_mutability = _;
+                    hf_variadic_ty = variadic_hint;
+                    hf_return_ty = h;
+                    hf_is_mutable_return = _;
+                  } );
           ] ) ->
-      hfun env N.FShallow is_coroutine hl kl variadic_hint h
+      hfun env N.FShallow hf_is_coroutine hl kl variadic_hint h
     (* Special case for RxLocal<function> *)
     | Aast.Happly
         ( (_, "RxLocal"),
           [
             ( _,
               Aast.Hfun
-                {
-                  reactive_kind = _;
-                  is_coroutine;
-                  param_tys = hl;
-                  param_kinds = kl;
-                  param_mutability = _;
-                  variadic_ty = variadic_hint;
-                  return_ty = h;
-                  is_mutable_return = _;
-                } );
+                Aast.
+                  {
+                    hf_reactive_kind = _;
+                    hf_is_coroutine;
+                    hf_param_tys = hl;
+                    hf_param_kinds = kl;
+                    hf_param_mutability = _;
+                    hf_variadic_ty = variadic_hint;
+                    hf_return_ty = h;
+                    hf_is_mutable_return = _;
+                  } );
           ] ) ->
-      hfun env N.FLocal is_coroutine hl kl variadic_hint h
+      hfun env N.FLocal hf_is_coroutine hl kl variadic_hint h
     | Aast.Happly (((p, _x) as id), hl) ->
       let hint_id =
         hint_id

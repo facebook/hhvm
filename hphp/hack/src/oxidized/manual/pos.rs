@@ -45,6 +45,15 @@ impl Pos {
         })
     }
 
+    pub fn is_none(&self) -> bool {
+        match self {
+            Pos(PosImpl::Small { file, start, end }) => {
+                start.is_dummy() && end.is_dummy() && file.is_empty()
+            }
+            _ => false,
+        }
+    }
+
     pub fn filename(&self) -> &RelativePath {
         match &self.0 {
             Small { file, .. } => &file,
@@ -183,5 +192,34 @@ impl PartialEq for Pos {
         self.filename() == other.filename()
             && self.start_cnum() == other.start_cnum()
             && self.end_cnum() == other.end_cnum()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use pretty_assertions::assert_eq;
+
+    #[test]
+    fn test() {
+        assert_eq!(Pos::make_none().is_none(), true);
+        assert_eq!(
+            Pos::from_lnum_bol_cnum(
+                RelativePath::make(Prefix::Dummy, PathBuf::from("a")),
+                (0, 0, 0),
+                (0, 0, 0)
+            )
+            .is_none(),
+            false
+        );
+        assert_eq!(
+            Pos::from_lnum_bol_cnum(
+                RelativePath::make(Prefix::Dummy, PathBuf::from("")),
+                (1, 0, 0),
+                (0, 0, 0)
+            )
+            .is_none(),
+            false
+        );
     }
 }

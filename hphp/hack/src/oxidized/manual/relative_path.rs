@@ -52,6 +52,10 @@ impl RelativePath {
         RelativePath(Rc::new((prefix, pathbuf)))
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.prefix() == Prefix::Dummy && self.path_str().is_empty()
+    }
+
     pub fn ends_with(&self, s: &str) -> bool {
         (self.0).1.to_str().unwrap().ends_with(s)
     }

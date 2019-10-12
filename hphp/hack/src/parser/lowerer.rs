@@ -109,10 +109,10 @@ pub struct FunHdr {
 }
 
 impl FunHdr {
-    fn make_empty() -> Self {
+    fn make_empty(env: &Env) -> Self {
         Self {
             suspension_kind: SuspensionKind::SKSync,
-            name: ast_defs::Id(Pos::make_none(), String::from("<ANONYMOUS>")),
+            name: ast_defs::Id(env.mk_none_pos(), String::from("<ANONYMOUS>")),
             constrs: vec![],
             type_parameters: vec![],
             parameters: vec![],
@@ -290,8 +290,8 @@ impl<'a> Env<'a> {
         name
     }
 
-    fn pos_none(&self) -> &Pos {
-        &self.pos_none
+    fn mk_none_pos(&self) -> Pos {
+        self.pos_none.clone()
     }
 
     fn clone_and_unset_toplevel_if_toplevel<'b, 'c>(
@@ -376,7 +376,7 @@ where
 
     fn p_pos(node: &Syntax<T, V>, env: &Env) -> Pos {
         node.position_exclusive(env.indexed_source_text)
-            .unwrap_or(Pos::make_none())
+            .unwrap_or_else(|| env.mk_none_pos())
     }
 
     fn raise_parsing_error(node: &Syntax<T, V>, env: &mut Env, msg: &str) {
@@ -1564,7 +1564,7 @@ where
                 /* TODO: Or tie in with other intrinsics and post-process to List */
                 let p_binder_or_ignore = |n: &Syntax<T, V>, e: &mut Env| -> ret_aast!(Expr<,>) {
                     match &n.syntax {
-                        Missing => Ok(E::new(Pos::make_none(), E_::Omitted)),
+                        Missing => Ok(E::new(e.mk_none_pos(), E_::Omitted)),
                         _ => Self::p_expr(n, e),
                     }
                 };
@@ -2249,7 +2249,7 @@ where
                     && env.file_mode() == file_info::Mode::Mdecl
                     && !env.codegen()
                 {
-                    aast::Expr::new(env.pos_none().clone(), E_::Null)
+                    aast::Expr::new(env.mk_none_pos(), E_::Null)
                 } else {
                     Self::p_xhp_embedded(Self::unesc_xhp_attr, attr_expr, env)?
                 };
@@ -2434,7 +2434,7 @@ where
             .filter(|stmt| !Self::is_noop(stmt))
             .collect();
         let body = if blk.len() == 0 {
-            vec![Self::mk_noop()]
+            vec![Self::mk_noop(env)]
         } else {
             blk
         };
@@ -2490,7 +2490,7 @@ where
 
     fn process_lifted_awaits(mut awaits: LiftedAwaits, env: &Env) -> ret!(LiftedAwaitExprs) {
         for await_ in awaits.awaits.iter() {
-            if &(await_.1).0 == env.pos_none() {
+            if (await_.1).0.is_none() {
                 return Self::failwith("none pos in lifted awaits");
             }
         }
@@ -2626,7 +2626,7 @@ where
                             let mut blk =
                                 Self::could_map(Self::p_stmt, &c.switch_section_statements, e)?;
                             if !c.switch_section_fallthrough.is_missing() {
-                                blk.push(S::new(Pos::make_none(), S_::Fallthrough));
+                                blk.push(S::new(e.mk_none_pos(), S_::Fallthrough));
                             }
                             let mut labels = Self::could_map(p_label, &c.switch_section_labels, e)?;
                             match labels.last_mut() {
@@ -2667,7 +2667,7 @@ where
                         Self::p_block(true /* remove noop */, &c.if_statement, env)?;
                     let else_ = match &c.if_else_clause.syntax {
                         ElseClause(c) => Self::p_block(true, &c.else_statement, env)?,
-                        Missing => vec![Self::mk_noop()],
+                        Missing => vec![Self::mk_noop(env)],
                         _ => Self::missing_syntax(None, "else clause", &c.if_else_clause, env)?,
                     };
                     let else_ifs = Self::could_map(p_else_if, &c.if_elseif_clauses, env)?;
@@ -2757,7 +2757,7 @@ where
                                 &c.using_function_expression,
                                 e,
                             )?,
-                            block: vec![Self::mk_noop()],
+                            block: vec![Self::mk_noop(e)],
                         }),
                     ))
                 };
@@ -2983,7 +2983,7 @@ where
             }
             MarkupSection(_) => Self::p_markup(node, env),
             _ => Self::missing_syntax(
-                Some(S::new(Pos::make_none(), S_::Noop)),
+                Some(S::new(env.mk_none_pos(), S_::Noop)),
                 "statement",
                 node,
                 env,
@@ -3389,12 +3389,12 @@ where
                 })
             }
             LambdaSignature(c) => {
-                let mut header = FunHdr::make_empty();
+                let mut header = FunHdr::make_empty(env);
                 header.parameters = Self::could_map(Self::p_fun_param, &c.lambda_parameters, env)?;
                 header.return_type = Self::mp_optional(Self::p_hint, &c.lambda_type, env)?;
                 Ok(header)
             }
-            Token(_) => Ok(FunHdr::make_empty()),
+            Token(_) => Ok(FunHdr::make_empty(env)),
             _ => Self::missing_syntax(None, "function header", node, env),
         }
     }
@@ -3446,12 +3446,12 @@ where
         }
     }
 
-    fn mk_noop() -> aast!(Stmt<,>) {
-        aast::Stmt::noop(Pos::make_none())
+    fn mk_noop(env: &Env) -> aast!(Stmt<,>) {
+        aast::Stmt::noop(env.mk_none_pos())
     }
 
     fn p_function_body(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Block<,>) {
-        let mk_noop_result = || Ok(vec![Self::mk_noop()]);
+        let mk_noop_result = |e: &Env| Ok(vec![Self::mk_noop(e)]);
         let f = |e: &mut Env| -> ret_aast!(Block<,>) {
             match &node.syntax {
                 Missing => Ok(vec![]),
@@ -3459,17 +3459,17 @@ where
                     let compound_statements = &c.compound_statements.syntax;
                     let compound_right_brace = &c.compound_right_brace.syntax;
                     match (compound_statements, compound_right_brace) {
-                        (Missing, Token(_)) => mk_noop_result(),
+                        (Missing, Token(_)) => mk_noop_result(e),
                         (SyntaxList(t), _) if t.len() == 1 && t[0].is_yield() => {
                             e.saw_yield = true;
-                            mk_noop_result()
+                            mk_noop_result(e)
                         }
                         _ => {
                             if !e.top_level_statements
                                 && ((e.file_mode() == file_info::Mode::Mdecl && !e.codegen())
                                     || e.quick_mode)
                             {
-                                mk_noop_result()
+                                mk_noop_result(e)
                             } else {
                                 Self::p_block(false /*remove noop*/, node, e)
                             }

@@ -731,6 +731,10 @@ where
         }
     }
 
+    fn p_targ(node: &Syntax<T, V>, env: &mut Env) -> ret!(aast::Targ<()>) {
+        Ok(aast::Targ((), Self::p_hint(node, env)?))
+    }
+
     fn p_hint_(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Hint_) {
         use aast_defs::Hint_::*;
         let unary = |kw, ty, env: &mut Env| {
@@ -968,15 +972,18 @@ where
         node: &Syntax<T, V>,
         env: &mut Env,
         tys: Vec<aast!(Hint)>,
-    ) -> Option<aast!(CollectionTarg)> {
+    ) -> Option<aast::CollectionTarg<()>> {
         let count = tys.len();
         let mut tys = tys.into_iter();
         match count {
             2 => Some(aast::CollectionTarg::CollectionTKV(
-                tys.next().unwrap(),
-                tys.next().unwrap(),
+                aast::Targ((), tys.next().unwrap()),
+                aast::Targ((), tys.next().unwrap()),
             )),
-            1 => Some(aast::CollectionTarg::CollectionTV(tys.next().unwrap())),
+            1 => Some(aast::CollectionTarg::CollectionTV(aast::Targ(
+                (),
+                tys.next().unwrap(),
+            ))),
             _ => {
                 Self::raise_parsing_error(
                     node,
@@ -1513,7 +1520,7 @@ where
                 let hints = Self::expand_type_args(&c.varray_intrinsic_explicit_type, env)?;
                 let hints = Self::check_intrinsic_type_arg_varity(node, env, hints);
                 let targ = match hints {
-                    Some(aast_defs::CollectionTarg::CollectionTV(ty)) => Some(ty),
+                    Some(aast::CollectionTarg::CollectionTV(ty)) => Some(ty),
                     None => None,
                     _ => Self::missing_syntax(
                         None,
@@ -1531,7 +1538,7 @@ where
                 let hints = Self::expand_type_args(&c.darray_intrinsic_explicit_type, env)?;
                 let hints = Self::check_intrinsic_type_arg_varity(node, env, hints);
                 match hints {
-                    Some(aast_defs::CollectionTarg::CollectionTKV(tk, tv)) => Ok(E_::mk_darray(
+                    Some(aast::CollectionTarg::CollectionTKV(tk, tv)) => Ok(E_::mk_darray(
                         Some((tk, tv)),
                         Self::could_map(Self::p_member, &c.darray_intrinsic_members, env)?,
                     )),
@@ -1613,14 +1620,14 @@ where
                         ))
                     }
                     None => {
-                        let hints = match (&recv.syntax, &c.function_call_type_args.syntax) {
+                        let targs = match (&recv.syntax, &c.function_call_type_args.syntax) {
                             (_, TypeArguments(c)) => {
-                                Self::could_map(Self::p_hint, &c.type_arguments_types, env)?
+                                Self::could_map(Self::p_targ, &c.type_arguments_types, env)?
                             }
                             /* TODO might not be needed */
                             (GenericTypeSpecifier(c), _) => match &c.generic_argument_list.syntax {
                                 TypeArguments(c) => {
-                                    Self::could_map(Self::p_hint, &c.type_arguments_types, env)?
+                                    Self::could_map(Self::p_targ, &c.type_arguments_types, env)?
                                 }
                                 _ => vec![],
                             },
@@ -1647,7 +1654,7 @@ where
                         Ok(E_::mk_call(
                             aast::CallType::Cnormal,
                             recv,
-                            hints,
+                            targs,
                             args,
                             varargs,
                         ))
@@ -1951,7 +1958,7 @@ where
                         let name = Self::pos_name(&c.generic_class_type, env)?;
                         let hints = match &c.generic_argument_list.syntax {
                             TypeArguments(c) => {
-                                Self::could_map(Self::p_hint, &c.type_arguments_types, env)?
+                                Self::could_map(Self::p_targ, &c.type_arguments_types, env)?
                             }
                             _ => Self::missing_syntax(
                                 None,

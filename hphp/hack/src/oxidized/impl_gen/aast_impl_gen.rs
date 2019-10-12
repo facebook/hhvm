@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<bf28eaf4012d31089c35a73832df02fe>>
+// @generated SignedSource<<8c9301ca73460f3d91119a552097257e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -129,28 +129,40 @@ impl<Ex, Fb, En, Hi> ClassId_<Ex, Fb, En, Hi> {
         ClassId_::CI(p0)
     }
 }
+impl<Hi> CollectionTarg<Hi> {
+    pub fn mk_collectiontv(p0: Targ<Hi>) -> Self {
+        CollectionTarg::CollectionTV(p0)
+    }
+    pub fn mk_collectiontkv(p0: Targ<Hi>, p1: Targ<Hi>) -> Self {
+        CollectionTarg::CollectionTKV(p0, p1)
+    }
+}
 impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn mk_array(p0: Vec<Afield<Ex, Fb, En, Hi>>) -> Self {
         Expr_::Array(p0)
     }
     pub fn mk_darray(
-        p0: Option<(Targ, Targ)>,
+        p0: Option<(Targ<Hi>, Targ<Hi>)>,
         p1: Vec<(Expr<Ex, Fb, En, Hi>, Expr<Ex, Fb, En, Hi>)>,
     ) -> Self {
         Expr_::Darray(Box::new((p0, p1)))
     }
-    pub fn mk_varray(p0: Option<Targ>, p1: Vec<Expr<Ex, Fb, En, Hi>>) -> Self {
+    pub fn mk_varray(p0: Option<Targ<Hi>>, p1: Vec<Expr<Ex, Fb, En, Hi>>) -> Self {
         Expr_::Varray(Box::new((p0, p1)))
     }
     pub fn mk_shape(p0: Vec<(ast_defs::ShapeFieldName, Expr<Ex, Fb, En, Hi>)>) -> Self {
         Expr_::Shape(p0)
     }
-    pub fn mk_val_collection(p0: VcKind, p1: Option<Targ>, p2: Vec<Expr<Ex, Fb, En, Hi>>) -> Self {
+    pub fn mk_val_collection(
+        p0: VcKind,
+        p1: Option<Targ<Hi>>,
+        p2: Vec<Expr<Ex, Fb, En, Hi>>,
+    ) -> Self {
         Expr_::ValCollection(Box::new((p0, p1, p2)))
     }
     pub fn mk_key_val_collection(
         p0: KvcKind,
-        p1: Option<(Targ, Targ)>,
+        p1: Option<(Targ<Hi>, Targ<Hi>)>,
         p2: Vec<Field<Ex, Fb, En, Hi>>,
     ) -> Self {
         Expr_::KeyValCollection(Box::new((p0, p1, p2)))
@@ -204,7 +216,7 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn mk_call(
         p0: CallType,
         p1: Expr<Ex, Fb, En, Hi>,
-        p2: Vec<Targ>,
+        p2: Vec<Targ<Hi>>,
         p3: Vec<Expr<Ex, Fb, En, Hi>>,
         p4: Vec<Expr<Ex, Fb, En, Hi>>,
     ) -> Self {
@@ -273,7 +285,7 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     }
     pub fn mk_new(
         p0: ClassId<Ex, Fb, En, Hi>,
-        p1: Vec<Targ>,
+        p1: Vec<Targ<Hi>>,
         p2: Vec<Expr<Ex, Fb, En, Hi>>,
         p3: Vec<Expr<Ex, Fb, En, Hi>>,
         p4: Ex,
@@ -308,7 +320,7 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     }
     pub fn mk_collection(
         p0: Sid,
-        p1: Option<CollectionTarg>,
+        p1: Option<CollectionTarg<Hi>>,
         p2: Vec<Afield<Ex, Fb, En, Hi>>,
     ) -> Self {
         Expr_::Collection(Box::new((p0, p1, p2)))

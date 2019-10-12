@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b348ff72dd99e6b9de291a1bc51450e6>>
+// @generated SignedSource<<dcedd238639e0902b5d963bd9c327110>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -45,14 +45,6 @@ pub enum FuncReactive {
     FLocal,
     FShallow,
     FNonreactive,
-}
-
-pub type Targ = Hint;
-
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
-pub enum CollectionTarg {
-    CollectionTV(Targ),
-    CollectionTKV(Targ, Targ),
 }
 
 #[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]

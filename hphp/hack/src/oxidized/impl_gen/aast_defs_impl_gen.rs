@@ -3,20 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7bc85009e10351fb8c41a6d35f4a3c01>>
+// @generated SignedSource<<06eee794a185593cd6cfaf20a8079c13>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
 
 use crate::aast_defs::*;
-impl CollectionTarg {
-    pub fn mk_collectiontv(p0: Targ) -> Self {
-        CollectionTarg::CollectionTV(p0)
-    }
-    pub fn mk_collectiontkv(p0: Targ, p1: Targ) -> Self {
-        CollectionTarg::CollectionTKV(p0, p1)
-    }
-}
 impl XhpChild {
     pub fn mk_child_name(p0: Sid) -> Self {
         XhpChild::ChildName(p0)

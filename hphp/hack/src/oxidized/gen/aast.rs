@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<23bb38ad024ab0602f11e09f750343db>>
+// @generated SignedSource<<00f8b2ed566bab5c601fe7de82c6db89>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -19,7 +19,6 @@ use crate::namespace_env;
 use crate::s_map;
 
 pub use aast_defs::CallType;
-pub use aast_defs::CollectionTarg;
 pub use aast_defs::Enum_;
 pub use aast_defs::FuncReactive;
 pub use aast_defs::Hint;
@@ -42,7 +41,6 @@ pub use aast_defs::Pstring;
 pub use aast_defs::ShapeFieldInfo;
 pub use aast_defs::ShapeMap;
 pub use aast_defs::Sid;
-pub use aast_defs::Targ;
 pub use aast_defs::Tprim;
 pub use aast_defs::TypedefVisibility;
 pub use aast_defs::UseAsVisibility;
@@ -148,18 +146,30 @@ pub enum ClassId_<Ex, Fb, En, Hi> {
 pub struct Expr<Ex, Fb, En, Hi>(pub Ex, pub Expr_<Ex, Fb, En, Hi>);
 
 #[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+pub enum CollectionTarg<Hi> {
+    CollectionTV(Targ<Hi>),
+    CollectionTKV(Targ<Hi>, Targ<Hi>),
+}
+
+#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 pub enum Expr_<Ex, Fb, En, Hi> {
     Array(Vec<Afield<Ex, Fb, En, Hi>>),
     Darray(
         Box<(
-            Option<(Targ, Targ)>,
+            Option<(Targ<Hi>, Targ<Hi>)>,
             Vec<(Expr<Ex, Fb, En, Hi>, Expr<Ex, Fb, En, Hi>)>,
         )>,
     ),
-    Varray(Box<(Option<Targ>, Vec<Expr<Ex, Fb, En, Hi>>)>),
+    Varray(Box<(Option<Targ<Hi>>, Vec<Expr<Ex, Fb, En, Hi>>)>),
     Shape(Vec<(ast_defs::ShapeFieldName, Expr<Ex, Fb, En, Hi>)>),
-    ValCollection(Box<(VcKind, Option<Targ>, Vec<Expr<Ex, Fb, En, Hi>>)>),
-    KeyValCollection(Box<(KvcKind, Option<(Targ, Targ)>, Vec<Field<Ex, Fb, En, Hi>>)>),
+    ValCollection(Box<(VcKind, Option<Targ<Hi>>, Vec<Expr<Ex, Fb, En, Hi>>)>),
+    KeyValCollection(
+        Box<(
+            KvcKind,
+            Option<(Targ<Hi>, Targ<Hi>)>,
+            Vec<Field<Ex, Fb, En, Hi>>,
+        )>,
+    ),
     Null,
     This,
     True,
@@ -178,7 +188,7 @@ pub enum Expr_<Ex, Fb, En, Hi> {
         Box<(
             CallType,
             Expr<Ex, Fb, En, Hi>,
-            Vec<Targ>,
+            Vec<Targ<Hi>>,
             Vec<Expr<Ex, Fb, En, Hi>>,
             Vec<Expr<Ex, Fb, En, Hi>>,
         )>,
@@ -211,7 +221,7 @@ pub enum Expr_<Ex, Fb, En, Hi> {
     New(
         Box<(
             ClassId<Ex, Fb, En, Hi>,
-            Vec<Targ>,
+            Vec<Targ<Hi>>,
             Vec<Expr<Ex, Fb, En, Hi>>,
             Vec<Expr<Ex, Fb, En, Hi>>,
             Ex,
@@ -235,7 +245,7 @@ pub enum Expr_<Ex, Fb, En, Hi> {
     ),
     Callconv(Box<(ast_defs::ParamKind, Expr<Ex, Fb, En, Hi>)>),
     Import(Box<(ImportFlavor, Expr<Ex, Fb, En, Hi>)>),
-    Collection(Box<(Sid, Option<CollectionTarg>, Vec<Afield<Ex, Fb, En, Hi>>)>),
+    Collection(Box<(Sid, Option<CollectionTarg<Hi>>, Vec<Afield<Ex, Fb, En, Hi>>)>),
     BracedExpr(Box<Expr<Ex, Fb, En, Hi>>),
     ParenthesizedExpr(Box<Expr<Ex, Fb, En, Hi>>),
     Lplaceholder(Box<Pos>),
@@ -346,6 +356,9 @@ pub struct FuncBody<Ex, Fb, En, Hi> {
 
 #[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 pub struct TypeHint<Hi>(pub Hi, pub TypeHint_);
+
+#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+pub struct Targ<Hi>(pub Hi, pub Hint);
 
 pub type TypeHint_ = Option<Hint>;
 

@@ -4459,7 +4459,7 @@ where
                 let user_attributes = Self::p_user_attributes(function_attribute_spec, env)?;
                 let variadic = Self::determine_variadicity(&hdr.parameters);
                 let ret = aast::TypeHint((), hdr.return_type);
-                Ok(vec![aast::Def::Fun(aast::Fun_ {
+                Ok(vec![aast::Def::mk_fun(aast::Fun_ {
                     span: Self::p_function(node, env),
                     annotation: (),
                     mode: Self::mode_annotation(env.file_mode()),
@@ -4559,7 +4559,7 @@ where
                     }
                     _ => Self::missing_syntax(None, "classish body", &c.classish_body, env)?,
                 }
-                Ok(vec![aast::Def::Class(class_)])
+                Ok(vec![aast::Def::mk_class(class_)])
             }
             ConstDeclaration(c) => {
                 let ty = &c.const_type_specifier;
@@ -4579,7 +4579,7 @@ where
                                 namespace: Self::make_empty_ns_env(env),
                                 span: Self::p_pos(node, env),
                             };
-                            aast::Def::Constant(gconst)
+                            aast::Def::mk_constant(gconst)
                         }
                         _ => Self::missing_syntax(None, "constant declaration", decl, env)?,
                     };
@@ -4594,7 +4594,7 @@ where
                         Self::raise_parsing_error(node, env, &syntax_error::invalid_reified)
                     }
                 }
-                Ok(vec![aast::Def::Typedef(aast::Typedef {
+                Ok(vec![aast::Def::mk_typedef(aast::Typedef {
                     annotation: (),
                     name: Self::pos_name(&c.alias_name, env)?,
                     tparams,
@@ -4628,7 +4628,7 @@ where
                         _ => Self::missing_syntax(None, "enumerator", n, e),
                     }
                 };
-                Ok(vec![aast::Def::Class(aast::Class_ {
+                Ok(vec![aast::Def::mk_class(aast::Class_ {
                     annotation: (),
                     mode: Self::mode_annotation(env.file_mode()),
                     user_attributes: Self::p_user_attributes(&c.enum_attribute_spec, env)?,
@@ -4678,7 +4678,7 @@ where
                     )),
                     _ => Self::missing_syntax(None, "record_field", n, e),
                 };
-                Ok(vec![aast::Def::RecordDef(aast::RecordDef {
+                Ok(vec![aast::Def::mk_record_def(aast::RecordDef {
                     name: Self::pos_name(&c.record_name, env)?,
                     extends: Self::could_map(Self::p_hint, &c.record_extends_list, env)?
                         .into_iter()
@@ -4697,7 +4697,7 @@ where
                     || env.codegen() =>
             {
                 let expr = Self::p_expr(&c.inclusion_expression, env)?;
-                Ok(vec![aast::Def::Stmt(aast::Stmt::new(
+                Ok(vec![aast::Def::mk_stmt(aast::Stmt::new(
                     Self::p_pos(node, env),
                     aast::Stmt_::mk_expr(expr),
                 ))])
@@ -4717,7 +4717,10 @@ where
                     }
                     _ => vec![],
                 };
-                Ok(vec![aast::Def::Namespace(Self::pos_name(name, env)?, defs)])
+                Ok(vec![aast::Def::mk_namespace(
+                    Self::pos_name(name, env)?,
+                    defs,
+                )])
             }
             NamespaceGroupUseDeclaration(c) => {
                 let uses: std::result::Result<Vec<_>, _> =
@@ -4732,7 +4735,7 @@ where
                             )
                         })
                         .collect();
-                Ok(vec![aast::Def::NamespaceUse(uses?)])
+                Ok(vec![aast::Def::mk_namespace_use(uses?)])
             }
             NamespaceUseDeclaration(c) => {
                 let uses: std::result::Result<Vec<_>, _> = Self::as_list(&c.namespace_use_clauses)
@@ -4746,10 +4749,10 @@ where
                         )
                     })
                     .collect();
-                Ok(vec![aast::Def::NamespaceUse(uses?)])
+                Ok(vec![aast::Def::mk_namespace_use(uses?)])
             }
             FileAttributeSpecification(_) => {
-                Ok(vec![aast::Def::FileAttributes(aast::FileAttribute {
+                Ok(vec![aast::Def::mk_file_attributes(aast::FileAttribute {
                     user_attributes: Self::p_user_attribute(node, env)?,
                     namespace: Self::mk_empty_ns_env(env),
                 })])
@@ -4759,7 +4762,7 @@ where
             {
                 Ok(vec![])
             }
-            _ => Ok(vec![aast::Def::Stmt(Self::p_stmt(node, env)?)]),
+            _ => Ok(vec![aast::Def::mk_stmt(Self::p_stmt(node, env)?)]),
         }
     }
 
@@ -4769,23 +4772,24 @@ where
     }
 
     fn post_process(env: &mut Env, program: aast!(Program<,>), acc: &mut aast!(Program<,>)) {
-        use aast::{Def::*, Stmt_::*};
+        use aast::{Def, Def::*, Stmt_::*};
         let mut saw_ns: Option<(aast!(Sid), aast!(Program<,>))> = None;
         for def in program.into_iter() {
-            if let Namespace(_, _) = &def {
+            if let Namespace(_) = &def {
                 if let Some((n, ns_acc)) = saw_ns {
-                    acc.push(Namespace(n, ns_acc));
+                    acc.push(Def::mk_namespace(n, ns_acc));
                     saw_ns = None;
                 }
             }
 
-            if let Namespace(n, defs) = def {
+            if let Namespace(ns) = def {
+                let (n, defs) = *ns;
                 if defs.is_empty() {
                     saw_ns = Some((n, vec![]));
                 } else {
                     let mut acc_ = vec![];
                     Self::post_process(env, defs, &mut acc_);
-                    acc.push(Namespace(n, acc_));
+                    acc.push(Def::mk_namespace(n, acc_));
                 }
 
                 continue;
@@ -4818,7 +4822,7 @@ where
             };
         }
         if let Some((n, defs)) = saw_ns {
-            acc.push(Namespace(n, defs));
+            acc.push(Def::mk_namespace(n, defs));
         }
     }
 

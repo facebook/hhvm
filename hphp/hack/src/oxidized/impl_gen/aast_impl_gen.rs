@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<90d61cf892aaae01e4c4e8ac0a72e8db>>
+// @generated SignedSource<<bf28eaf4012d31089c35a73832df02fe>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -438,34 +438,34 @@ impl TypeconstAbstractKind {
 }
 impl<Ex, Fb, En, Hi> Def<Ex, Fb, En, Hi> {
     pub fn mk_fun(p0: FunDef<Ex, Fb, En, Hi>) -> Self {
-        Def::Fun(p0)
+        Def::Fun(Box::new(p0))
     }
     pub fn mk_class(p0: Class_<Ex, Fb, En, Hi>) -> Self {
-        Def::Class(p0)
+        Def::Class(Box::new(p0))
     }
     pub fn mk_record_def(p0: RecordDef<Ex, Fb, En, Hi>) -> Self {
-        Def::RecordDef(p0)
+        Def::RecordDef(Box::new(p0))
     }
     pub fn mk_stmt(p0: Stmt<Ex, Fb, En, Hi>) -> Self {
-        Def::Stmt(p0)
+        Def::Stmt(Box::new(p0))
     }
     pub fn mk_typedef(p0: Typedef<Ex, Fb, En, Hi>) -> Self {
-        Def::Typedef(p0)
+        Def::Typedef(Box::new(p0))
     }
     pub fn mk_constant(p0: Gconst<Ex, Fb, En, Hi>) -> Self {
-        Def::Constant(p0)
+        Def::Constant(Box::new(p0))
     }
     pub fn mk_namespace(p0: Sid, p1: Program<Ex, Fb, En, Hi>) -> Self {
-        Def::Namespace(p0, p1)
+        Def::Namespace(Box::new((p0, p1)))
     }
     pub fn mk_namespace_use(p0: Vec<(NsKind, Sid, Sid)>) -> Self {
         Def::NamespaceUse(p0)
     }
     pub fn mk_set_namespace_env(p0: Nsenv) -> Self {
-        Def::SetNamespaceEnv(p0)
+        Def::SetNamespaceEnv(Box::new(p0))
     }
     pub fn mk_file_attributes(p0: FileAttribute<Ex, Fb, En, Hi>) -> Self {
-        Def::FileAttributes(p0)
+        Def::FileAttributes(Box::new(p0))
     }
 }
 impl BreakContinueLevel {

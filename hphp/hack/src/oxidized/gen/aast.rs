@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1120172bbefe4ba2f1f28a1278dda352>>
+// @generated SignedSource<<c1c8331f12527140b374aea7c737a4e3>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -601,16 +601,16 @@ pub type FunDef<Ex, Fb, En, Hi> = Fun_<Ex, Fb, En, Hi>;
 
 #[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 pub enum Def<Ex, Fb, En, Hi> {
-    Fun(FunDef<Ex, Fb, En, Hi>),
-    Class(Class_<Ex, Fb, En, Hi>),
-    RecordDef(RecordDef<Ex, Fb, En, Hi>),
-    Stmt(Stmt<Ex, Fb, En, Hi>),
-    Typedef(Typedef<Ex, Fb, En, Hi>),
-    Constant(Gconst<Ex, Fb, En, Hi>),
-    Namespace(Sid, Program<Ex, Fb, En, Hi>),
+    Fun(Box<FunDef<Ex, Fb, En, Hi>>),
+    Class(Box<Class_<Ex, Fb, En, Hi>>),
+    RecordDef(Box<RecordDef<Ex, Fb, En, Hi>>),
+    Stmt(Box<Stmt<Ex, Fb, En, Hi>>),
+    Typedef(Box<Typedef<Ex, Fb, En, Hi>>),
+    Constant(Box<Gconst<Ex, Fb, En, Hi>>),
+    Namespace(Box<(Sid, Program<Ex, Fb, En, Hi>)>),
     NamespaceUse(Vec<(NsKind, Sid, Sid)>),
-    SetNamespaceEnv(Nsenv),
-    FileAttributes(FileAttribute<Ex, Fb, En, Hi>),
+    SetNamespaceEnv(Box<Nsenv>),
+    FileAttributes(Box<FileAttribute<Ex, Fb, En, Hi>>),
 }
 
 #[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]

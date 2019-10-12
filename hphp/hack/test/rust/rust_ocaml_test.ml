@@ -537,8 +537,9 @@ module LowererTest_ = struct
       (Errors.is_hh_fixme := (fun _ _ -> false));
       (Errors.get_hh_fixme_pos := (fun _ _ -> None));
       (Errors.is_hh_fixme_disallowed := (fun _ _ -> false));
-      let (aast, _) =
-        Lowerer.from_text_to_custom_aast lower_env source_text i () () ()
+      let (_err, (aast, _)) =
+        Errors.do_ (fun () ->
+            Lowerer.from_text_to_custom_aast lower_env source_text i () () ())
       in
       aast
     in

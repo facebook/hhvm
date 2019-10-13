@@ -29,6 +29,7 @@
 #include <folly/portability/SysTime.h>
 
 #include "hphp/util/logger.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/rds-header.h"
@@ -36,6 +37,7 @@
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/vm/debugger-hook.h"
+#include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 
 namespace HPHP {
@@ -580,6 +582,11 @@ void RequestInjectionData::onTimeout(RequestTimer* timer) {
 #if !defined(__APPLE__) && !defined(_MSC_VER)
     m_cpuTimer.m_timerActive.store(false, std::memory_order_relaxed);
 #endif
+  } else if (timer == &m_preTimeoutTimer) {
+    triggerTimeout(TimeoutSoft);
+#if !defined(__APPLE__) && !defined(_MSC_VER)
+    m_preTimeoutTimer.m_timerActive.store(false, std::memory_order_relaxed);
+#endif
   } else {
     always_assert(false && "Unknown timer fired");
   }
@@ -591,6 +598,36 @@ void RequestInjectionData::setTimeout(int seconds) {
 
 void RequestInjectionData::setCPUTimeout(int seconds) {
   m_cpuTimer.setTimeout(seconds);
+}
+
+void RequestInjectionData::setPreTimeout(int seconds) {
+  auto remaining = RuntimeOption::TimeoutsUseWallTime
+    ? getRemainingTime()
+    : getRemainingCPUTime();
+
+  if (seconds == 0 || remaining - seconds < 0) {
+    #if !defined(__APPLE__) && !defined(_MSC_VER)
+      m_preTimeoutTimer.m_timerActive.store(false, std::memory_order_relaxed);
+    #endif
+  } else {
+    m_preTimeoutTimer.setTimeout(remaining - seconds);
+  }
+}
+
+void RequestInjectionData::invokePreTimeoutCallback() {
+  clearTimeoutFlag(TimeoutSoft);
+  if (!g_context->m_timeThresholdCallback.isNull()) {
+    VMRegAnchor _;
+    try {
+      vm_call_user_func(
+        g_context->m_timeThresholdCallback,
+        empty_vec_array()
+      );
+    } catch (Object& ex) {
+      raise_error("Uncaught exception escaping pre timeout callback: %s",
+                  ex.toString().data());
+    }
+  }
 }
 
 void RequestInjectionData::triggerTimeout(TimeoutKindFlag kind) {
@@ -620,9 +657,14 @@ int RequestInjectionData::getRemainingCPUTime() const {
   return m_cpuTimer.getRemainingTime();
 }
 
+int RequestInjectionData::getPreTimeoutRemainingTime() const {
+  return m_preTimeoutTimer.getRemainingTime();
+}
+
 void RequestInjectionData::resetTimers(int time_sec, int cputime_sec) {
   resetTimer(time_sec);
   resetCPUTimer(time_sec);
+  resetPreTimeoutTimer(time_sec);
 }
 
 /*
@@ -653,6 +695,18 @@ void RequestInjectionData::resetCPUTimer(int seconds /* = 0 */) {
   }
   setCPUTimeout(seconds);
   clearTimeoutFlag(TimeoutCPUTime);
+}
+
+void RequestInjectionData::resetPreTimeoutTimer(int seconds /* = 0 */) {
+  if (seconds == 0) {
+    seconds = getPreTimeout();
+  } else if (seconds < 0) {
+    if (!getPreTimeout()) return;
+    seconds = -seconds;
+    if (seconds < getPreTimeoutRemainingTime()) return;
+  }
+  setPreTimeout(seconds);
+  clearTimeoutFlag(TimeoutSoft);
 }
 
 void RequestInjectionData::reset() {

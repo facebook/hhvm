@@ -95,6 +95,9 @@ static void handleSurpriseCheck() {
   if (flags & MemThresholdFlag) {
     EventHook::DoMemoryThresholdCallback();
   }
+  if (flags & TimedOutFlag) {
+    RID().invokePreTimeoutCallback();
+  }
 }
 
 void cgHandleRequestSurprise(IRLS& env, const IRInstruction* inst) {

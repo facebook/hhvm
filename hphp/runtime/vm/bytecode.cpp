@@ -2539,6 +2539,9 @@ OPTBLD_INLINE void jmpSurpriseCheck(Offset offset) {
     if (flags & MemThresholdFlag) {
       EventHook::DoMemoryThresholdCallback();
     }
+    if (flags & TimedOutFlag) {
+      RID().invokePreTimeoutCallback();
+    }
   }
 }
 

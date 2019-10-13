@@ -108,6 +108,8 @@ function putenv(string $setting);
 <<__PHPStdLib>>
 function set_time_limit(int $seconds);
 <<__PHPStdLib>>
+function set_pre_timeout_handler(int $seconds, mixed $callback): void;
+<<__PHPStdLib>>
 function sys_get_temp_dir();
 <<__PHPStdLib, __Rx>>
 function version_compare(string $version1, string $version2, string $sop = "");

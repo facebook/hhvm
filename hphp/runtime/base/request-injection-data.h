@@ -92,7 +92,8 @@ private:
 enum TimeoutKindFlag : uint8_t {
   TimeoutNone          = 0,
   TimeoutTime          = 1ull << 1,
-  TimeoutCPUTime       = 1ull << 2
+  TimeoutCPUTime       = 1ull << 2,
+  TimeoutSoft          = 1ull << 3
 };
 
 /*
@@ -121,9 +122,11 @@ struct RequestInjectionData {
 #if defined(__APPLE__) || defined(_MSC_VER)
     : m_timer(this)
     , m_cpuTimer(this)
+    , m_preTimeoutTimer(this)
 #else
     : m_timer(this, CLOCK_REALTIME)
     , m_cpuTimer(this, CLOCK_THREAD_CPUTIME_ID)
+    , m_preTimeoutTimer(this, CLOCK_REALTIME)
 #endif
     {}
 
@@ -145,11 +148,16 @@ struct RequestInjectionData {
   bool checkTimeoutKind(TimeoutKindFlag kind);
   void clearTimeoutFlag(TimeoutKindFlag kind);
 
+  int getPreTimeout() const;
+  void setPreTimeout(int seconds);
+  void invokePreTimeoutCallback();
+
   int getCPUTimeout() const;
   void setCPUTimeout(int seconds);
 
   int getRemainingTime() const;
   int getRemainingCPUTime() const;
+  int getPreTimeoutRemainingTime() const;
 
   void resetTimers(int time_sec = 0, int cputime_sec = 0);
 
@@ -343,8 +351,10 @@ struct RequestInjectionData {
 private:
   void resetTimer(int seconds = 0);
   void resetCPUTimer(int seconds = 0);
+  void resetPreTimeoutTimer(int seconds = 0);
   RequestTimer m_timer;
   RequestTimer m_cpuTimer;
+  RequestTimer m_preTimeoutTimer;
 
   bool m_debuggerAttached{false};
   bool m_coverage{false};

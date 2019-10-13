@@ -332,6 +332,13 @@ function putenv(string $setting): bool;
 <<__Native>>
 function set_time_limit(int $seconds): void;
 
+/* Set the number of seconds prior to a timeout a script will invoke a callback.
+ * The callback is invoked only once unless another call to this function is
+ * made. This can help debugging scripts that take a long time to run.
+ */
+<<__Native>>
+function set_pre_timeout_handler(int $seconds, mixed $callback): void;
+
 /* Returns the path of the directory PHP stores temporary files in by default.
  */
 <<__Native>>

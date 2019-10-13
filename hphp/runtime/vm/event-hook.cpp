@@ -653,6 +653,10 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
     if (flags & MemThresholdFlag) {
       DoMemoryThresholdCallback();
     }
+    // Time Thresholds
+    if (flags & TimedOutFlag) {
+      RID().invokePreTimeoutCallback();
+    }
 
     // Interval timer
     if (flags & IntervalTimerFlag) {
@@ -715,6 +719,10 @@ bool EventHook::onFunctionCall(const ActRec* ar, int funcType) {
   if (flags & MemThresholdFlag) {
     DoMemoryThresholdCallback();
   }
+  // Time Thresholds
+  if (flags & TimedOutFlag) {
+    RID().invokePreTimeoutCallback();
+  }
 
   if (flags & IntervalTimerFlag) {
     IntervalTimer::RunCallbacks(IntervalTimer::EnterSample);
@@ -736,6 +744,10 @@ void EventHook::onFunctionResumeAwait(const ActRec* ar) {
   if (flags & MemThresholdFlag) {
     DoMemoryThresholdCallback();
   }
+  // Time Thresholds
+  if (flags & TimedOutFlag) {
+    RID().invokePreTimeoutCallback();
+  }
 
   if (flags & IntervalTimerFlag) {
     IntervalTimer::RunCallbacks(IntervalTimer::ResumeAwaitSample);
@@ -755,6 +767,10 @@ void EventHook::onFunctionResumeYield(const ActRec* ar) {
   // Memory Threhsold
   if (flags & MemThresholdFlag) {
     DoMemoryThresholdCallback();
+  }
+  // Time Thresholds
+  if (flags & TimedOutFlag) {
+    RID().invokePreTimeoutCallback();
   }
 
   if (flags & IntervalTimerFlag) {

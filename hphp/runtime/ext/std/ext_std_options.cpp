@@ -974,6 +974,20 @@ static void HHVM_FUNCTION(set_time_limit, int64_t seconds) {
   }
 }
 
+static void HHVM_FUNCTION(set_pre_timeout_handler,
+  int64_t seconds,
+  const Variant& callback
+) {
+  auto& req_data = RID();
+  if (callback.isNull() || !callback.isObject()) {
+    // We use 0 to signify no callback
+    req_data.setPreTimeout(0);
+  } else {
+    req_data.setPreTimeout(seconds);
+  }
+  g_context->m_timeThresholdCallback = callback;
+}
+
 String HHVM_FUNCTION(sys_get_temp_dir) {
 #ifdef WIN32
   char buf[PATH_MAX];
@@ -1235,6 +1249,7 @@ void StandardExtension::initOptions() {
   HHVM_FE(phpversion);
   HHVM_FE(putenv);
   HHVM_FE(set_time_limit);
+  HHVM_FE(set_pre_timeout_handler);
   HHVM_FE(sys_get_temp_dir);
   HHVM_FE(version_compare);
 

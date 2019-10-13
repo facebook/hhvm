@@ -79,6 +79,9 @@ namespace {
       if (flags & IntervalTimerFlag) {
         IntervalTimer::RunCallbacks(IntervalTimer::IOWaitSample, wait_handle);
       }
+      if (flags & TimedOutFlag) {
+        RID().invokePreTimeoutCallback();
+      }
     }
 
     if (UNLIKELY(session->hasOnIOWaitExit())) {

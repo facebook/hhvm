@@ -614,6 +614,7 @@ private:
 public:
   Variant m_setprofileCallback;
   Variant m_memThresholdCallback;
+  Variant m_timeThresholdCallback;
   uint64_t m_setprofileFlags;
   bool m_executingSetprofileCallback;
   hphp_fast_set<std::string> m_setprofileFunctions;

@@ -29,6 +29,10 @@ inline int RequestInjectionData::getCPUTimeout() const {
   return m_cpuTimer.m_timeoutSeconds;
 }
 
+inline int RequestInjectionData::getPreTimeout() const {
+  return m_preTimeoutTimer.m_timeoutSeconds;
+}
+
 inline bool RequestInjectionData::getJit() const {
   return m_jit;
 }

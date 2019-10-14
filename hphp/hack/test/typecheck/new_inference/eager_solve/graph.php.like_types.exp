@@ -1,0 +1,8 @@
+File "graph.php", line 31, characters 7-19:
+Invalid index type for this Map (Typing[4324])
+File "graph.php", line 17, characters 61-64:
+This is a value of generic type Tkey
+File "graph.php", line 13, characters 11-14:
+  via this generic Tkey
+File "graph.php", line 26, characters 14-19:
+It is incompatible with a dynamic value or a value of generic type Tkey

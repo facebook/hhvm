@@ -2,8 +2,8 @@ File "lambda_bad_pos.php", line 21, characters 33-38:
 Invalid argument (Typing[4110])
 File "lambda_bad_pos.php", line 17, characters 13-15:
 Expected Tv1
-File "lambda_bad_pos.php", line 20, characters 12-23:
-But got dynamic because a type could not be determined here
+File "lambda_bad_pos.php", line 16, characters 3-27:
+But got dynamic because it is an unenforceable type
 File "lambda_bad_pos.php", line 26, characters 34-35:
 Invalid return type (Typing[4323])
 File "lambda_bad_pos.php", line 6, characters 27-34:

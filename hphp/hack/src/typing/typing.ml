@@ -1249,7 +1249,7 @@ and stmt_ env pos st =
                    let env =
                      LEnv.update_next_from_conts env [C.Continue; C.Next]
                    in
-                   let (env, te2) = bind_as_expr env ty1 (fst e1) tk tv e2 in
+                   let (env, te2) = bind_as_expr env (fst e1) tk tv e2 in
                    let (env, tb) = block env b in
                    (env, (te2, tb))))
           in
@@ -1493,14 +1493,18 @@ and catch catchctx env (sid, exn, b) =
 
 and as_expr env ty1 pe e =
   let env = Env.open_tyvars env pe in
-  (fun (env, ty, tk, tv) ->
-    let env =
-      if TUtils.is_dynamic env ty1 then
-        env
-      else
-        Type.sub_type pe Reason.URforeach env ty1 ty Errors.unify_error
+  (fun (env, expected_ty, tk, tv) ->
+    let rec distribute_union env ty =
+      match ty with
+      | (_, Tdynamic) ->
+        let env = SubType.sub_type env ty tk Errors.unify_error in
+        SubType.sub_type env ty tv Errors.unify_error
+      | (_, Tunion tyl) -> List.fold tyl ~init:env ~f:distribute_union
+      | _ ->
+        Type.sub_type pe Reason.URforeach env ty expected_ty Errors.unify_error
     in
-    let env = Env.set_tyvar_variance env ty in
+    let env = distribute_union env ty1 in
+    let env = Env.set_tyvar_variance env expected_ty in
     (Typing_solver.close_tyvars_and_solve env Errors.unify_error, tk, tv))
   @@
   let (env, tv) = Env.fresh_type env pe in
@@ -1518,15 +1522,7 @@ and as_expr env ty1 pe e =
     let (env, tk) = Env.fresh_type env pe in
     (env, MakeType.async_keyed_iterator (Reason.Rasyncforeach pe) tk tv, tk, tv)
 
-and bind_as_expr env loop_ty p ty1 ty2 aexpr =
-  (* Set id as dynamic if the foreach loop was dynamic *)
-  let (env, eloop_ty) = Env.expand_type env loop_ty in
-  let (ty1, ty2) =
-    if TUtils.is_dynamic env eloop_ty then
-      (MakeType.dynamic (fst ty1), MakeType.dynamic (fst ty2))
-    else
-      (ty1, ty2)
-  in
+and bind_as_expr env p ty1 ty2 aexpr =
   let check_reassigned_mutable env te =
     if Env.env_local_reactive env then
       Typing_mutability.handle_assignment_mutability env te None

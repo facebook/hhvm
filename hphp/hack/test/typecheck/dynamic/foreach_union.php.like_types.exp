@@ -1,0 +1,6 @@
+File "foreach_union.php", line 20, characters 12-13:
+Invalid foreach (Typing[4110])
+File "foreach_union.php", line 20, characters 12-13:
+Expected Traversable<[unresolved]> because this is used in a foreach statement
+File "foreach_union.php", line 16, characters 33-33:
+But got C

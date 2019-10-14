@@ -384,6 +384,7 @@ and pp_possibly_enforced_ty :
   Format.fprintf fmt "@[%s =@ " "et_enforced";
   Format.fprintf fmt "%B" x.et_enforced;
   Format.fprintf fmt "@]";
+  Format.fprintf fmt ";@ ";
 
   Format.fprintf fmt "@[%s =@ " "et_type";
   pp_ty fmt x.et_type;

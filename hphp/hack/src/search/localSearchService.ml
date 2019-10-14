@@ -31,17 +31,19 @@ let get_tombstone (path : Relative_path.t) : int64 =
 
 (* This function is used if fast-facts-parser fails to scan the file *)
 let convert_fileinfo_to_contents
-    ~(info : SearchUtils.info) ~(filepath : string) : SearchUtils.si_capture =
+    ~(sienv : SearchUtils.si_env)
+    ~(info : SearchUtils.info)
+    ~(filepath : string) : SearchUtils.si_capture =
   let append_item
       (kind : SearchUtils.si_kind)
       (acc : SearchUtils.si_capture)
       (name : string) =
-    let (fixed_kind, is_abstract, is_final) =
+    let (sif_kind, sif_is_abstract, sif_is_final) =
       (* FFP produces more detailed information about classes
        * than we can get from FileInfo.t objects.  Since this function is only
        * called when a file has been modified locally, it's safe to call
        * decl_provider - this information has already been cached. *)
-      if kind = SI_Class then
+      if kind = SI_Class && sienv.sie_resolve_local_decl then
         match Decl_provider.get_class name with
         | Some cls ->
           let is_final = Decl_provider.Class.final cls in
@@ -65,10 +67,10 @@ let convert_fileinfo_to_contents
       {
         (* Only strip Hack namespaces. XHP must have a preceding colon *)
         sif_name = Utils.strip_ns name;
-        sif_kind = fixed_kind;
+        sif_kind;
         sif_filepath = filepath;
-        sif_is_abstract = is_abstract;
-        sif_is_final = is_final;
+        sif_is_abstract;
+        sif_is_final;
       }
     in
     item :: acc
@@ -115,12 +117,12 @@ let update_file
       if Sys.file_exists full_filename then
         let contents = IndexBuilder.parse_one_file ~path in
         if List.length contents = 0 then
-          convert_fileinfo_to_contents ~info ~filepath
+          convert_fileinfo_to_contents ~sienv ~info ~filepath
         else
           contents
       else
-        convert_fileinfo_to_contents ~info ~filepath
-    with _ -> convert_fileinfo_to_contents ~info ~filepath
+        convert_fileinfo_to_contents ~sienv ~info ~filepath
+    with _ -> convert_fileinfo_to_contents ~sienv ~info ~filepath
   in
   {
     sienv with

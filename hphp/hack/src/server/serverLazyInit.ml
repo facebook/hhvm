@@ -314,11 +314,8 @@ let update_search
   let provider_name =
     genv.local_config.ServerLocalConfig.symbolindex_search_provider
   in
-  let index_needs_updates =
-    SymbolIndex.init_needs_search_updates ~provider_name
-  in
   let check_mode = ServerArgs.check_mode genv.options in
-  if (not check_mode) && index_needs_updates then (
+  if not check_mode then (
     Hh_logger.log "Load search indices...";
 
     (* Filter out non php files *)

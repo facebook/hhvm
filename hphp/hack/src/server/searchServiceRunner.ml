@@ -66,14 +66,8 @@ module SearchServiceRunner = struct
   (* Return true if it's best to run all queue items in one go,
    * false if we should run small chunks every few seconds *)
   let should_run_completely
-      (genv : ServerEnv.genv) (provider : SearchUtils.search_provider) : bool =
-    match provider with
-    (* Use this logic to determine if we should run in one go *)
-    | SearchUtils.TrieIndex
-    | SearchUtils.LocalIndex ->
-      chunk_size genv = 0 && ServerArgs.ai_mode genv.options = None
-    (* All other providers should run in one go *)
-    | _ -> true
+      (genv : ServerEnv.genv) (_ : SearchUtils.search_provider) : bool =
+    chunk_size genv = 0 && ServerArgs.ai_mode genv.options = None
 
   let update_fileinfo_map
       (fast : Naming_table.t) ~(source : SearchUtils.file_source) : unit =

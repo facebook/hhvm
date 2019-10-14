@@ -11,9 +11,6 @@ val fuzzy_search_enabled : unit -> bool
 
 val set_fuzzy_search_enabled : bool -> unit
 
-(* Trie-based search indices need to be built on server initialization *)
-val init_needs_search_updates : provider_name:string -> bool
-
 (* Get or set the currently selected search provider *)
 val initialize :
   globalrev:int option ->

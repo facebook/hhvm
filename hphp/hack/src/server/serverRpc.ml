@@ -121,6 +121,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         !old_sienv with
         SearchUtils.sie_resolve_signatures = true;
         SearchUtils.sie_resolve_positions = true;
+        SearchUtils.sie_resolve_local_decl = true;
       }
     in
     (* feature not implemented here; it only works for LSP *)

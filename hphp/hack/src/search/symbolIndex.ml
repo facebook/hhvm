@@ -15,13 +15,6 @@ let fuzzy_search_enabled () = !HackSearchService.fuzzy
 
 let set_fuzzy_search_enabled x = HackSearchService.fuzzy := x
 
-let init_needs_search_updates ~(provider_name : string) : bool =
-  match SearchUtils.provider_of_string provider_name with
-  | LocalIndex
-  | TrieIndex ->
-    true
-  | _ -> false
-
 (* Set the currently selected search provider *)
 let initialize
     ~(globalrev : int option)

@@ -300,9 +300,26 @@ type si_env = {
   sie_quiet_mode: bool;
   sie_fuzzy_search_mode: bool ref;
   sie_log_timings: bool;
-  (* Setting the "resolve" parameters to true slows down autocomplete a lot *)
+  (*
+   * Setting the "resolve" parameters to true slows down autocomplete
+   * but increases precision for answers.
+   *
+   * sie_resolve_signatures: When a result appears in autocomplete,
+   * look up the full declaration and include parameters.  Uses extra
+   * memory.
+   *
+   * sie_resolve_positions: When a result appears in autocomplete,
+   * look up the exact position of the symbol from the naming table.
+   * Slows down autocomplete.
+   *
+   * sie_resolve_local_decl: When a file changes on disk, the local
+   * search index digs through its decls and saves exact class
+   * information.  Uses more memory and slows down processing of
+   * changed files.
+   *)
   sie_resolve_signatures: bool;
   sie_resolve_positions: bool;
+  sie_resolve_local_decl: bool;
   (* LocalSearchService *)
   lss_fullitems: si_capture Relative_path.Map.t;
   lss_tombstones: Tombstone_set.t;
@@ -325,9 +342,9 @@ let default_si_env =
     sie_quiet_mode = false;
     sie_fuzzy_search_mode = ref false;
     sie_log_timings = false;
-    (* Setting the "resolve" parameters to true slows down autocomplete a lot *)
     sie_resolve_signatures = false;
     sie_resolve_positions = false;
+    sie_resolve_local_decl = false;
     (* LocalSearchService *)
     lss_fullitems = Relative_path.Map.empty;
     lss_tombstones = Tombstone_set.empty;

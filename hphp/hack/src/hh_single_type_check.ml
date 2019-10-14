@@ -638,7 +638,14 @@ let parse_options () =
       ~savedstate_file_opt:!symbolindex_file
       ~workers:None
   in
-  let sienv = { sienv with SearchUtils.sie_resolve_signatures = true } in
+  let sienv =
+    {
+      sienv with
+      SearchUtils.sie_resolve_signatures = true;
+      SearchUtils.sie_resolve_positions = true;
+      SearchUtils.sie_resolve_local_decl = true;
+    }
+  in
   ( {
       files = fns;
       mode = !mode;

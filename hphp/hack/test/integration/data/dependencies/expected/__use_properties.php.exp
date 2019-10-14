@@ -2,8 +2,7 @@
 class WithProperties {
   public static int $third = 0;
   public function __construct(int $arg) {
-    $this->second = \extract_standalone_make_default();
-    $this->first = \extract_standalone_make_default();
+    throw new \Exception();
   }
   public int $second;
   public int $first;

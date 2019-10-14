@@ -1,18 +1,17 @@
 <?hh
 class SimpleDerived extends \SimpleClass {
-  private static int $calls = 0;
-  public function call_parent_method(): void {
-    parent::simple_method();
-    ++SimpleDerived::$calls;
+  public function __construct(float $f, bool $b, mixed ...$args) {
+    throw new \Exception();
   }
 }
 class SimpleClass {
-  public function simple_method(): void {
-    throw new Exception();
-  }
   public function __construct(string $s, int $i) {
     throw new \Exception();
   }
+}
+function with_parent_constructor_call(): void {
+  $_ = new SimpleClass('frob', 1337);
+  $_ = new SimpleDerived(3.14, true, null);
 }
 function extract_standalone_make_default(): nothing {
   throw new Exception();

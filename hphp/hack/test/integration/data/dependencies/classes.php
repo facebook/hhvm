@@ -73,6 +73,7 @@ function use_properties(WithProperties $arg): int {
 }
 
 class SimpleClass {
+  public function __construct(string $s, int $i) {}
   public function simple_method(): void {}
   public function another_method(): void {
     $this->coarse_grained_dependency();
@@ -81,6 +82,9 @@ class SimpleClass {
 }
 
 class SimpleDerived extends SimpleClass {
+  public function __construct(float $f, bool $b, mixed ...$args) {
+    parent::__construct('mumble', 42);
+  }
   public function call_parent_method(): void {
     parent::simple_method();
     ++SimpleDerived::$calls;
@@ -103,4 +107,9 @@ class WithNameMatchingClassName {}
 
 function with_classname(): string {
   return SimpleClass::class;
+}
+
+function with_parent_constructor_call(): void {
+  $_ = new SimpleClass('frob', 1337);
+  $_ = new SimpleDerived(3.14, true, null);
 }

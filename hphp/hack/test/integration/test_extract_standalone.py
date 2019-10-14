@@ -135,6 +135,7 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
             "\\with_is_refinement",
             "\\with_switch",
             "\\with_classname",
+            "\\with_parent_constructor_call",
         ]
 
         for path in paths:

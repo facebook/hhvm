@@ -799,22 +799,17 @@ let construct_enum tcopt enum fields =
 
 let get_constructor_declaration tcopt cls prop_names =
   let (cstr, _) = Decl_provider.Class.construct cls in
-  let body =
-    String.concat ~sep:"\n"
-    @@ List.map prop_names (fun prop_name ->
-           Printf.sprintf "$this->%s = %s;" prop_name call_make_default)
-  in
   match cstr with
   | None ->
     if List.is_empty prop_names then
       None
     else
-      Some (Printf.sprintf "public function __construct() {%s}" body)
+      Some "public function __construct() {throw new \\Exception();}"
   | Some cstr ->
     let decl =
       get_method_declaration tcopt cstr ~is_static:false "__construct"
     in
-    Some (Printf.sprintf "%s {%s}" decl body)
+    Some (decl ^ " {throw new \\Exception();}")
 
 let get_class_body tcopt cls meth class_elts =
   let { uses; req_extends; req_implements; _ } = get_direct_ancestors cls in

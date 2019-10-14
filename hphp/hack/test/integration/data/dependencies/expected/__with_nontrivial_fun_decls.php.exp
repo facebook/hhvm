@@ -14,7 +14,9 @@ function variadic(inout int $arg, int ...$args): void {
   throw new \Exception();
 }
 class Derived extends \ImplementingBase {
-  public function __construct(int $num) {}
+  public function __construct(int $num) {
+    throw new \Exception();
+  }
 }
 function extract_standalone_make_default(): nothing {
   throw new Exception();

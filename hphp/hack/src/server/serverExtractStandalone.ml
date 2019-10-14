@@ -846,6 +846,7 @@ let get_class_body tcopt cls meth class_elts =
         (* Constructor needs special treatment because we need
            information about properties. *)
         | Dep.Cstr _ -> get_constructor_declaration tcopt cls prop_names
+        | Dep.Const (_, "class") -> None
         | class_elt -> Some (get_class_elt_declaration tcopt cls class_elt))
   in
   (* If we are extracting a method of this class, we should declare it

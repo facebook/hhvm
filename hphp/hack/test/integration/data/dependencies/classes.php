@@ -100,3 +100,7 @@ function WithNameMatchingClassName(): WithNameMatchingClassName {
 }
 
 class WithNameMatchingClassName {}
+
+function with_classname(): string {
+  return SimpleClass::class;
+}

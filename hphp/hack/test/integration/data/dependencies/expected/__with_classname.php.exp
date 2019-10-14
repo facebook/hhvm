@@ -1,0 +1,8 @@
+<?hh
+class SimpleClass {}
+function with_classname(): string {
+  return SimpleClass::class;
+}
+function extract_standalone_make_default(): nothing {
+  throw new Exception();
+}

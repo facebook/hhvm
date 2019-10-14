@@ -944,7 +944,11 @@ let unset_local env local =
   let { per_cont_env; local_using_vars; local_mutability; local_reactive } =
     env.lenv
   in
-  let per_cont_env = LEnvC.remove_from_cont C.Next local per_cont_env in
+  let per_cont_env =
+    LEnvC.remove_from_cont C.Next local
+    @@ LEnvC.remove_from_cont C.Catch local
+    @@ per_cont_env
+  in
   let local_using_vars = LID.Set.remove local local_using_vars in
   let local_mutability = LID.Map.remove local local_mutability in
   let env =

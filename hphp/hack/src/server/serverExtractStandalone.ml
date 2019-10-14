@@ -1017,28 +1017,23 @@ and add_signature_dependencies deps obj =
         let add_implementations interface_name =
           let interf = get_class_exn interface_name in
           if
-            (is_builtin_dep @@ Class interface_name)
+            is_builtin_dep (Class interface_name)
             && Class.kind interf = Ast_defs.Cinterface
           then (
-            let add_impl ~is_static method_name =
-              let method_elt =
-                match is_static with
-                | true -> Class.get_smethod cls method_name
-                | false -> Class.get_method cls method_name
-              in
-              match method_elt with
-              | Some elt ->
-                if elt.ce_origin = cls_name then
-                  if is_static then
-                    do_add_dep deps (SMethod (cls_name, method_name))
-                  else
-                    do_add_dep deps (Method (cls_name, method_name))
-              | None -> ()
+            let add_smethod_impl (method_name, _) =
+              Class.get_smethod cls method_name
+              |> Option.iter ~f:(fun elt ->
+                     if elt.ce_origin = cls_name then
+                       do_add_dep deps (SMethod (cls_name, method_name)))
             in
-            Sequence.iter (Class.methods interf) ~f:(fun (m, _) ->
-                add_impl ~is_static:false m);
-            Sequence.iter (Class.smethods interf) ~f:(fun (m, _) ->
-                add_impl ~is_static:true m)
+            let add_method_impl (method_name, _) =
+              Class.get_method cls method_name
+              |> Option.iter ~f:(fun elt ->
+                     if elt.ce_origin = cls_name then
+                       do_add_dep deps (Method (cls_name, method_name)))
+            in
+            Sequence.iter (Class.methods interf) ~f:add_method_impl;
+            Sequence.iter (Class.smethods interf) ~f:add_smethod_impl
           )
         in
         Sequence.iter (Class.all_ancestor_names cls) add_implementations

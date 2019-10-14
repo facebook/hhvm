@@ -65,19 +65,19 @@ end
 
 module Collections = struct
   (* concrete classes *)
-  let cVector = "\\Vector"
+  let cVector = "\\HH\\Vector"
 
-  let cImmVector = "\\ImmVector"
+  let cImmVector = "\\HH\\ImmVector"
 
-  let cSet = "\\Set"
+  let cSet = "\\HH\\Set"
 
-  let cImmSet = "\\ImmSet"
+  let cImmSet = "\\HH\\ImmSet"
 
-  let cMap = "\\Map"
+  let cMap = "\\HH\\Map"
 
-  let cImmMap = "\\ImmMap"
+  let cImmMap = "\\HH\\ImmMap"
 
-  let cPair = "\\Pair"
+  let cPair = "\\HH\\Pair"
 
   (* interfaces *)
   let cContainer = "\\Container"

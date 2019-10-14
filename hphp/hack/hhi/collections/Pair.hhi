@@ -14,6 +14,8 @@
  * YOU SHOULD NEVER INCLUDE THIS FILE ANYWHERE!!!
  */
 
+namespace HH {
+
 /**
  * `Pair` is an immutable, fixed-size collection with exactly two elements
  * (possibly of different types). HHVM provides a native implementation for
@@ -45,7 +47,7 @@
  * @guide /hack/collections/classes
  */
 
-final class Pair<+Tv1, +Tv2> implements ConstVector<mixed> {
+final class Pair<+Tv1, +Tv2> implements \ConstVector<mixed> {
   /**
    * @internal
    *
@@ -162,7 +164,7 @@ final class Pair<+Tv1, +Tv2> implements ConstVector<mixed> {
    * @guide /hack/collections/examples
    */
   <<__Rx, __MutableReturn, __MaybeMutable>>
-  public function lazy(): HH\Rx\KeyedIterable<int, mixed>;
+  public function lazy(): \HH\Rx\KeyedIterable<int, mixed>;
 
   /**
    * Returns an `ImmVector` containing the values of the current `Pair`.
@@ -276,7 +278,7 @@ final class Pair<+Tv1, +Tv2> implements ConstVector<mixed> {
    *           with the provided `Traversable`.
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function zip<Tu>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable):
+  public function zip<Tu>(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> Traversable<Tu> $traversable):
     ImmVector<Pair<mixed, Tu>>;
 
   /**
@@ -373,7 +375,7 @@ final class Pair<+Tv1, +Tv2> implements ConstVector<mixed> {
    * @guide /hack/generics/constraints
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function concat(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<mixed> $traversable):
+  public function concat(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> Traversable<mixed> $traversable):
     ImmVector<mixed>;
 
   /**
@@ -452,7 +454,7 @@ final class Pair<+Tv1, +Tv2> implements ConstVector<mixed> {
    * @return - The `Iterable` view of the current `Pair`.
    */
   <<__Rx, __MutableReturn, __MaybeMutable>>
-  public function items(): HH\Rx\Iterable<mixed>;
+  public function items(): \HH\Rx\Iterable<mixed>;
 
   /**
    * Returns the value at the specified key in the current `Pair`.
@@ -506,7 +508,7 @@ final class Pair<+Tv1, +Tv2> implements ConstVector<mixed> {
    * @return - A `KeyedIterator` that allows you to traverse the current `Pair`.
    */
   <<__Rx, __MutableReturn, __MaybeMutable>>
-  public function getIterator(): HH\Rx\KeyedIterator<int, mixed>;
+  public function getIterator(): \HH\Rx\KeyedIterator<int, mixed>;
 
   /**
    * Returns the `string` version of the current `Pair`, which is `"Pair"`.
@@ -521,6 +523,10 @@ final class Pair<+Tv1, +Tv2> implements ConstVector<mixed> {
   <<__Rx, __MaybeMutable>> /* HH_FIXME[0001] */
   public function toDArray(): darray<int, mixed>;
 }
+
+} // namespace HH
+
+namespace {
 
 /**
  * @internal
@@ -541,3 +547,5 @@ class PairIterator implements HH\Rx\KeyedIterator<int, mixed> {
   <<__Rx, __Mutable>>
   public function rewind(): void;
 }
+
+} // namespace

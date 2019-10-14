@@ -14,6 +14,8 @@
  * YOU SHOULD NEVER INCLUDE THIS FILE ANYWHERE!!!
  */
 
+namespace HH {
+
 /**
  * `Set` is an ordered set-style collection. HHVM provides a native
  * implementation for this class. The PHP class definition below is not
@@ -46,7 +48,7 @@
  * @guide /hack/collections/classes
  */
 
-final class Set<Tv as arraykey> implements MutableSet<Tv> {
+final class Set<Tv as arraykey> implements \MutableSet<Tv> {
   /**
    * Creates a `Set` from the given `Traversable`, or an empty `Set` if `null`
    * is passed.
@@ -55,7 +57,7 @@ final class Set<Tv as arraykey> implements MutableSet<Tv> {
    *              (e.g., `array`). If `null`, then an empty `Set` is created.
    */
   <<__Rx, __AtMostRxAsArgs>>
-  public function __construct(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> ?Traversable<Tv> $it);
+  public function __construct(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> ?Traversable<Tv> $it);
 
   /**
    * Returns an `array` containing the values from the current `Set`.
@@ -176,7 +178,7 @@ final class Set<Tv as arraykey> implements MutableSet<Tv> {
    * @guide /hack/collections/examples
    */
   <<__Rx, __MutableReturn, __MaybeMutable>>
-  public function lazy(): HH\Rx\KeyedIterable<arraykey, Tv>;
+  public function lazy(): \HH\Rx\KeyedIterable<arraykey, Tv>;
 
   /**
    * Returns a `Vector` containing the values of the current `Set`.
@@ -336,7 +338,7 @@ final class Set<Tv as arraykey> implements MutableSet<Tv> {
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function zip<Tu>(
-    <<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable
+    <<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> Traversable<Tu> $traversable
   /* HH_FIXME[4110] need bottom type as generic */
   /* HH_FIXME[4323] need bottom type as generic */
   /* HH_FIXME[4322] */
@@ -439,7 +441,7 @@ final class Set<Tv as arraykey> implements MutableSet<Tv> {
    * @guide /hack/generics/constraints
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function concat<Tu super Tv>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable): Vector<Tu>;
+  public function concat<Tu super Tv>(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> Traversable<Tu> $traversable): Vector<Tu>;
 
   /**
    * Returns the first value in the current `Set`.
@@ -551,7 +553,7 @@ final class Set<Tv as arraykey> implements MutableSet<Tv> {
    * @return - Returns itself.
    */
   <<__Rx, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
-  public function addAll(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> ?Traversable<Tv> $it): Set<Tv>;
+  public function addAll(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> ?Traversable<Tv> $it): Set<Tv>;
 
   /**
    * Adds the keys of the specified container to the current `Set` as new
@@ -608,7 +610,7 @@ final class Set<Tv as arraykey> implements MutableSet<Tv> {
    * @return - Returns itself.
    */
   <<__Rx, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
-  public function removeAll(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tv> $other): Set<Tv>;
+  public function removeAll(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> Traversable<Tv> $other): Set<Tv>;
 
   /**
    * Returns an iterator that points to beginning of the current `Set`.
@@ -616,7 +618,7 @@ final class Set<Tv as arraykey> implements MutableSet<Tv> {
    * @return - A `KeyedIterator` that allows you to traverse the current `Set`.
    */
   <<__Rx, __MutableReturn, __MaybeMutable>>
-  public function getIterator(): HH\Rx\KeyedIterator<arraykey, Tv>;
+  public function getIterator(): \HH\Rx\KeyedIterator<arraykey, Tv>;
 
   /**
    * Returns a `Set` containing the values from the specified `array`.
@@ -653,7 +655,7 @@ final class Set<Tv as arraykey> implements MutableSet<Tv> {
    *           if the `Traversable` is `null`.
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn>>
-  public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> ?Traversable<Tv> $items): Set<Tv>;
+  public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> ?Traversable<Tv> $items): Set<Tv>;
 
   /**
    * Creates a `Set` from the keys of the specified container.
@@ -686,13 +688,17 @@ final class Set<Tv as arraykey> implements MutableSet<Tv> {
    * @return - The `Iterable` view of the current `Set`.
    */
   <<__Rx, __MutableReturn, __MaybeMutable>>
-  public function items(): HH\Rx\Iterable<Tv>;
+  public function items(): \HH\Rx\Iterable<Tv>;
 
   <<__Rx, __MaybeMutable>> /* HH_FIXME[0002] */
   public function toVArray(): varray<Tv>;
   <<__Rx, __MaybeMutable>> /* HH_FIXME[0001] */
   public function toDArray(): darray<Tv, Tv>;
 }
+
+} // namespace HH
+
+namespace {
 
 /**
  * @internal
@@ -713,3 +719,5 @@ class SetIterator<+Tv> implements HH\Rx\KeyedIterator<arraykey, Tv> {
   <<__Rx, __Mutable>>
   public function rewind(): void;
 }
+
+} // namespace

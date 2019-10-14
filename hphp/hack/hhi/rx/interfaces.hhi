@@ -442,7 +442,7 @@ interface KeyedIterable<Tk, +Tv>
   /* HH_FIXME[4120]: While this violates our variance annotations, we are
    * returning a copy of the underlying collection, so it is actually safe
    * See #6853603. */
-  public function toMap(): \Map<Tk, Tv> where Tk as arraykey;
+  public function toMap(): Map<Tk, Tv> where Tk as arraykey;
   /**
    * Returns an immutable map (`ImmMap`) based on the keys and values of the
    * current `KeyedIterable`.
@@ -451,7 +451,7 @@ interface KeyedIterable<Tk, +Tv>
    *           current `KeyedIterable`.
    */
   <<__Rx, __MaybeMutable>>
-  public function toImmMap(): \ImmMap<Tk, Tv> where Tk as arraykey;
+  public function toImmMap(): ImmMap<Tk, Tv> where Tk as arraykey;
   /**
    * Returns a lazy, access elements only when needed view of the current
    * `KeyedIterable`.

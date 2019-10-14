@@ -4,11 +4,11 @@ File "foreach_vector.php", line 21, characters 10-13:
 Expected num because this is used in an arithmetic operation
 File "foreach_vector.php", line 18, characters 19-21:
 But got Foo
-File "collections/Vector.hhi", line 48, characters 49-50:
+File "collections/Vector.hhi", line 50, characters 50-51:
   via this generic Tv
-File "collections/interfaces.hhi", line 575, characters 49-50:
+File "collections/interfaces.hhi", line 585, characters 49-50:
   via this generic Tv
-File "collections/interfaces.hhi", line 300, characters 61-62:
+File "collections/interfaces.hhi", line 310, characters 61-62:
   via this generic Tv
 File "rx/interfaces.hhi", line 414, characters 36-37:
   via this generic Tv

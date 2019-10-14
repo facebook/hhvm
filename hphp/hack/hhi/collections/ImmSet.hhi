@@ -14,6 +14,8 @@
  * YOU SHOULD NEVER INCLUDE THIS FILE ANYWHERE!!!
  */
 
+namespace HH {
+
 /**
  * `ImmSet` is an immutable, ordered set-style collection. HHVM provides a
  * native implementation for this class. The PHP class definition below is not
@@ -41,7 +43,7 @@
  * @guide /hack/collections/classes
  */
 
-final class ImmSet<+Tv as arraykey> implements ConstSet<Tv> {
+final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
   /**
    * Creates an `ImmSet` from the given `Traversable`, or an empty `ImmSet` if
    * `null` is passed.
@@ -50,7 +52,7 @@ final class ImmSet<+Tv as arraykey> implements ConstSet<Tv> {
    *              (e.g., `array`). If `null`, then an empty `ImmSet` is created.
    */
   <<__Rx, __AtMostRxAsArgs>>
-  public function __construct(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> ?Traversable<Tv> $it);
+  public function __construct(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> ?Traversable<Tv> $it);
 
   /**
    * Checks if the current `ImmSet` is empty.
@@ -123,7 +125,7 @@ final class ImmSet<+Tv as arraykey> implements ConstSet<Tv> {
    *           `ImmSet`.
    */
   <<__Rx, __MutableReturn, __MaybeMutable>>
-  public function getIterator(): HH\Rx\KeyedIterator<arraykey, Tv>;
+  public function getIterator(): \HH\Rx\KeyedIterator<arraykey, Tv>;
 
   /**
    * Creates an `ImmSet` from the given `Traversable`, or an empty `ImmSet` if
@@ -140,7 +142,7 @@ final class ImmSet<+Tv as arraykey> implements ConstSet<Tv> {
    *           `ImmSet` if the `Traversable` is `null`.
    */
   <<__Rx, __AtMostRxAsArgs>>
-  public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> ?Traversable<Tv> $items): ImmSet<Tv>;
+  public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> ?Traversable<Tv> $items): ImmSet<Tv>;
 
   /**
    * Returns an `ImmSet` containing all the values from the specified
@@ -264,7 +266,7 @@ final class ImmSet<+Tv as arraykey> implements ConstSet<Tv> {
    * @return - The `Iterable` view of the current `ImmSet`.
    */
   <<__Rx, __MutableReturn, __MaybeMutable>>
-  public function items(): HH\Rx\Iterable<Tv>;
+  public function items(): \HH\Rx\Iterable<Tv>;
 
   /**
    * Returns an `ImmVector` containing the values of the current `ImmSet`.
@@ -302,7 +304,7 @@ final class ImmSet<+Tv as arraykey> implements ConstSet<Tv> {
    * @guide /hack/collections/examples
    */
   <<__Rx, __MutableReturn, __MaybeMutable>>
-  public function lazy(): HH\Rx\KeyedIterable<arraykey, Tv>;
+  public function lazy(): \HH\Rx\KeyedIterable<arraykey, Tv>;
 
   /**
    * Returns an `ImmSet` containing the values after an operation has been
@@ -401,7 +403,7 @@ final class ImmSet<+Tv as arraykey> implements ConstSet<Tv> {
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function zip<Tu>(
-    <<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable
+    <<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> Traversable<Tu> $traversable
   /* HH_FIXME[4110] need bottom type as generic */
   /* HH_FIXME[4323] need bottom type as generic */
   ): ImmSet<Pair<Tv, Tu>>;
@@ -512,7 +514,7 @@ final class ImmSet<+Tv as arraykey> implements ConstSet<Tv> {
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function concat<Tu super Tv>(
-    <<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable
+    <<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> Traversable<Tu> $traversable
   ): ImmVector<Tu>;
 
   /**
@@ -568,3 +570,5 @@ final class ImmSet<+Tv as arraykey> implements ConstSet<Tv> {
   <<__Rx, __MaybeMutable>> /* HH_FIXME[0001] */
   public function toDArray(): darray<Tv, Tv>;
 }
+
+} // namespace HH

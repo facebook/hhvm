@@ -14,6 +14,8 @@
  * YOU SHOULD NEVER INCLUDE THIS FILE ANYWHERE!!!
  */
 
+namespace HH {
+
 /**
  * `Vector` is a stack-like collection. HHVM provides a native implementation
  * for this class. The PHP class definition below is not actually used at run
@@ -45,7 +47,7 @@
  * @guide /hack/collections/classes
  */
 
-final class Vector<Tv> implements MutableVector<Tv> {
+final class Vector<Tv> implements \MutableVector<Tv> {
   /**
    * Creates a `Vector` from the given `Traversable`, or an empty `Vector`
    * if `null` is passed.
@@ -55,7 +57,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *              `Vector` is created.
    */
   <<__Rx, __AtMostRxAsArgs>>
-  public function __construct(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> ?Traversable<Tv> $it);
+  public function __construct(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> ?Traversable<Tv> $it);
 
   /**
    * Returns an `array` containing the values from the current `Vector`.
@@ -161,7 +163,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * @guide /hack/collections/examples
    */
   <<__Rx, __MutableReturn, __MaybeMutable>>
-  public function lazy(): HH\Rx\KeyedIterable<int, Tv>;
+  public function lazy(): \HH\Rx\KeyedIterable<int, Tv>;
 
   /**
    * Returns a `Vector` containing the values of the current `Vector`.
@@ -277,7 +279,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *           with the provided `Traversable`.
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function zip<Tu>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable): Vector<Pair<Tv, Tu>>;
+  public function zip<Tu>(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> Traversable<Tu> $traversable): Vector<Pair<Tv, Tu>>;
 
   /**
    * Returns a `Vector` containing the first `$n` values of the current
@@ -402,7 +404,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * @guide /hack/generics/constraints
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function concat<Tu super Tv>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable): Vector<Tu>;
+  public function concat<Tu super Tv>(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> Traversable<Tu> $traversable): Vector<Tu>;
 
   /**
    * Returns the first value in the current `Vector`.
@@ -525,7 +527,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * @return - Returns itself.
    */
   <<__Rx, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
-  public function setAll(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\KeyedTraversable::class)>> ?KeyedTraversable<int, Tv> $it): Vector<Tv>;
+  public function setAll(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> ?KeyedTraversable<int, Tv> $it): Vector<Tv>;
 
   /**
    * Removes all the elements from the current `Vector`.
@@ -586,7 +588,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * @return - Returns itself.
    */
   <<__Rx, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
-  public function addAll(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> ?Traversable<Tv> $it): Vector<Tv>;
+  public function addAll(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> ?Traversable<Tv> $it): Vector<Tv>;
 
   /**
    * Adds the keys of the specified container to the current `Vector`.
@@ -683,7 +685,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *           `Vector`.
    */
   <<__Rx, __MutableReturn, __MaybeMutable>>
-  public function getIterator(): HH\Rx\KeyedIterator<int, Tv>;
+  public function getIterator(): \HH\Rx\KeyedIterator<int, Tv>;
 
   /**
    * Reverse the elements of the current `Vector` in place.
@@ -763,7 +765,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *           `Vector` if the `Traversable` is `null`.
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn>>
-  public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> ?Traversable<Tv> $items): Vector<Tv>;
+  public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> ?Traversable<Tv> $items): Vector<Tv>;
 
   /**
    * Creates a `Vector` from the keys of the specified container.
@@ -798,13 +800,17 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * @return - The `Iterable` view of the current `Vector`.
    */
   <<__Rx, __MutableReturn, __MaybeMutable>>
-  public function items(): HH\Rx\Iterable<Tv>;
+  public function items(): \HH\Rx\Iterable<Tv>;
 
   <<__Rx, __MaybeMutable>> /* HH_FIXME[0002] */
   public function toVArray(): varray<Tv>;
   <<__Rx, __MaybeMutable>> /* HH_FIXME[0001] */
   public function toDArray(): darray<int, Tv>;
 }
+
+} // namespace HH
+
+namespace {
 
 /**
  * @internal
@@ -825,3 +831,5 @@ class VectorIterator<+Tv> implements HH\Rx\KeyedIterator<int, Tv> {
   <<__Rx, __Mutable>>
   public function rewind(): void;
 }
+
+} // namespace

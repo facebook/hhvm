@@ -31,7 +31,7 @@ File "static_property_generic_bad.php", line 11, characters 26-29:
 File "static_property_generic_bad.php", line 12, characters 34-37:
 But got dynamic because it is an unenforceable type
 File "static_property_generic_bad.php", line 16, characters 12-31:
-Invalid index type for this Map (Typing[4324])
+Invalid index type for this HH\Map (Typing[4324])
 File "static_property_generic_bad.php", line 10, characters 22-23:
 This is a value of generic type Tk
 File "static_property_generic_bad.php", line 11, characters 22-23:

@@ -4,11 +4,11 @@ File "test_foreach2.php", line 12, characters 37-39:
 Expected int
 File "test_foreach2.php", line 12, characters 24-29:
 But got string
-File "collections/Map.hhi", line 57, characters 63-64:
+File "collections/Map.hhi", line 59, characters 64-65:
   via this generic Tv
-File "collections/interfaces.hhi", line 1126, characters 63-64:
+File "collections/interfaces.hhi", line 1136, characters 63-64:
   via this generic Tv
-File "collections/interfaces.hhi", line 855, characters 61-62:
+File "collections/interfaces.hhi", line 865, characters 61-62:
   via this generic Tv
 File "rx/interfaces.hhi", line 414, characters 36-37:
   via this generic Tv

@@ -40,16 +40,16 @@ let types =
       ("Awaitable", Global);
       ("AwaitAllWaitHandle", Global);
       ("classname", Global);
-      ("Collection", Global);
+      ("Collection", HH);
       ("ConditionWaitHandle", Global);
       ("Container", Global);
       ("darray", HH);
       ("dict", Global);
       ("ExternalThreadEventWaitHandle", Global);
       ("IMemoizeParam", Global);
-      ("ImmMap", Global);
-      ("ImmSet", Global);
-      ("ImmVector", Global);
+      ("ImmMap", HH);
+      ("ImmSet", HH);
+      ("ImmVector", HH);
       ("InvariantException", Global);
       ("Iterable", Global);
       ("Iterator", Global);
@@ -58,14 +58,14 @@ let types =
       ("KeyedIterator", Global);
       ("KeyedTraversable", Global);
       ("keyset", Global);
-      ("Map", Global);
+      ("Map", HH);
       ("ObjprofObjectStats", HH);
       ("ObjprofPathsStats", HH);
       ("ObjprofStringStats", HH);
-      ("Pair", Global);
+      ("Pair", HH);
       ("RescheduleWaitHandle", Global);
       ("ResumableWaitHandle", Global);
-      ("Set", Global);
+      ("Set", HH);
       ("Shapes", Global);
       ("SleepWaitHandle", Global);
       ("StaticWaitHandle", Global);
@@ -78,7 +78,7 @@ let types =
       ("varray", HH);
       ("vec_or_dict", HH);
       ("vec", Global);
-      ("Vector", Global);
+      ("Vector", HH);
       ("WaitableWaitHandle", Global);
       ("XenonSample", HH);
     ]

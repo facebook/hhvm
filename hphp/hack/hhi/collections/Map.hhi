@@ -14,6 +14,8 @@
  * YOU SHOULD NEVER INCLUDE THIS FILE ANYWHERE!!!
  */
 
+namespace HH {
+
 /**
  * `Map` is an ordered dictionary-style collection. HHVM provides a native
  * implementation for this class. The PHP class definition below is not
@@ -54,7 +56,7 @@
  * @guide /hack/collections/classes
  */
 
-final class Map<Tk as arraykey, Tv> implements MutableMap<Tk, Tv> {
+final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
   /**
    * Creates a `Map` from the given `KeyedTraversable`, or an empty `Map` if
    * `null` is passed.
@@ -63,7 +65,7 @@ final class Map<Tk as arraykey, Tv> implements MutableMap<Tk, Tv> {
    *              (e.g., `array`). If `null`, then an empty `Map` is created.
    */
   <<__Rx, __AtMostRxAsArgs>>
-  public function __construct(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\KeyedTraversable::class)>> ?KeyedTraversable<Tk, Tv> $it);
+  public function __construct(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> ?KeyedTraversable<Tk, Tv> $it);
 
   /**
    * Returns an `array` containing the key/value pairs from the current `Map`.
@@ -166,7 +168,7 @@ final class Map<Tk as arraykey, Tv> implements MutableMap<Tk, Tv> {
    * @guide /hack/collections/examples
    */
   <<__Rx, __MutableReturn, __MaybeMutable>>
-  public function lazy(): HH\Rx\KeyedIterable<Tk, Tv>;
+  public function lazy(): \HH\Rx\KeyedIterable<Tk, Tv>;
 
   /**
    * Returns a `Vector` containing the values of the current `Map`.
@@ -289,7 +291,7 @@ final class Map<Tk as arraykey, Tv> implements MutableMap<Tk, Tv> {
    *           the provided `Traversable`.
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function zip<Tu>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable): Map<Tk, Pair<Tv, Tu>>;
+  public function zip<Tu>(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> Traversable<Tu> $traversable): Map<Tk, Pair<Tv, Tu>>;
 
   /**
    * Returns a `Map` containing the first `n` key/values of the current `Map`.
@@ -388,7 +390,7 @@ final class Map<Tk as arraykey, Tv> implements MutableMap<Tk, Tv> {
    * @guide /hack/generics/constraints
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function concat<Tu super Tv>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable): Vector<Tu>;
+  public function concat<Tu super Tv>(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> Traversable<Tu> $traversable): Vector<Tu>;
 
   /**
    * Returns the first value in the current `Map`.
@@ -513,7 +515,7 @@ final class Map<Tk as arraykey, Tv> implements MutableMap<Tk, Tv> {
    * @return - Returns itself.
    */
   <<__Rx, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
-  public function setAll(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\KeyedTraversable::class)>> ?KeyedTraversable<Tk, Tv> $it): Map<Tk, Tv>;
+  public function setAll(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> ?KeyedTraversable<Tk, Tv> $it): Map<Tk, Tv>;
 
   /**
    * Remove all the elements from the current `Map`.
@@ -592,7 +594,7 @@ final class Map<Tk as arraykey, Tv> implements MutableMap<Tk, Tv> {
    * @return - Returns itself.
    */
   <<__Rx, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
-  public function addAll(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> ?Traversable<Pair<Tk, Tv>> $it): Map<Tk, Tv>;
+  public function addAll(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> ?Traversable<Pair<Tk, Tv>> $it): Map<Tk, Tv>;
 
   /**
    * Reserves enough memory to accommodate a given number of elements.
@@ -645,7 +647,7 @@ final class Map<Tk as arraykey, Tv> implements MutableMap<Tk, Tv> {
    *           current `Map` that are not in the `KeyedTraversable`.
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function differenceByKey(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\KeyedTraversable::class)>> KeyedTraversable<Tk, Tv> $traversable):
+  public function differenceByKey(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> KeyedTraversable<Tk, Tv> $traversable):
     Map<Tk, Tv>;
 
   /**
@@ -654,7 +656,7 @@ final class Map<Tk as arraykey, Tv> implements MutableMap<Tk, Tv> {
    * @return - A `KeyedIterator` that allows you to traverse the current `Map`.
    */
   <<__Rx, __MutableReturn, __MaybeMutable>>
-  public function getIterator(): HH\Rx\KeyedIterator<Tk, Tv>;
+  public function getIterator(): \HH\Rx\KeyedIterator<Tk, Tv>;
 
   /**
    * Returns a `Map` containing the key/value pairs from the specified `array`.
@@ -681,7 +683,7 @@ final class Map<Tk as arraykey, Tv> implements MutableMap<Tk, Tv> {
    *           empty `Map` if the `Traversable` is `null`.
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn>>
-  public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> ?Traversable<Pair<Tk, Tv>> $items)
+  public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> ?Traversable<Pair<Tk, Tv>> $items)
     : Map<Tk, Tv>;
 
   /**
@@ -701,12 +703,16 @@ final class Map<Tk as arraykey, Tv> implements MutableMap<Tk, Tv> {
    * @return - The `Iterable` view of the current `Map`.
    */
   <<__Rx, __MutableReturn, __MaybeMutable>>
-  public function items(): HH\Rx\Iterable<Pair<Tk, Tv>>;
+  public function items(): \HH\Rx\Iterable<Pair<Tk, Tv>>;
   <<__Rx, __MaybeMutable>> /* HH_FIXME[0002] */
   public function toVArray(): varray<Tv>;
   <<__Rx, __MaybeMutable>> /* HH_FIXME[0001] */
   public function toDArray(): darray<Tk, Tv>;
 }
+
+} // namespace HH
+
+namespace {
 
 /**
  * @internal
@@ -727,3 +733,5 @@ class MapIterator<Tk, +Tv> implements HH\Rx\KeyedIterator<Tk, Tv> {
   <<__Rx, __Mutable>>
   public function rewind(): void;
 }
+
+} // namespace

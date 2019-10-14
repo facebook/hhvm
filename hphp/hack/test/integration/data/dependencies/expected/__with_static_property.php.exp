@@ -5,8 +5,8 @@ function with_static_property(): void {
   $b = WithStaticProperty::$vector;
 }
 class WithStaticProperty {
-  public static \Vector<\A> $vector = Vector {};
-  public static \Map<\SomeEnum, string> $map = Map {};
+  public static \HH\Vector<\A> $vector = Vector {};
+  public static \HH\Map<\SomeEnum, string> $map = Map {};
 }
 class A extends \A0 implements \I1 {}
 enum SomeEnum: int {

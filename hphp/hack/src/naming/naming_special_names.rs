@@ -69,19 +69,19 @@ pub mod classes {
 
 pub mod collections {
     /* concrete classes */
-    pub const VECTOR: &str = "\\Vector";
+    pub const VECTOR: &str = "\\HH\\Vector";
 
-    pub const IMM_VECTOR: &str = "\\ImmVector";
+    pub const IMM_VECTOR: &str = "\\HH\\ImmVector";
 
-    pub const SET: &str = "\\Set";
+    pub const SET: &str = "\\HH\\Set";
 
-    pub const IMM_SET: &str = "\\ImmSet";
+    pub const IMM_SET: &str = "\\HH\\ImmSet";
 
-    pub const MAP: &str = "\\Map";
+    pub const MAP: &str = "\\HH\\Map";
 
-    pub const IMM_MAP: &str = "\\ImmMap";
+    pub const IMM_MAP: &str = "\\HH\\ImmMap";
 
-    pub const PAIR: &str = "\\Pair";
+    pub const PAIR: &str = "\\HH\\Pair";
 
     /* interfaces */
     pub const CONTAINER: &str = "\\Container";

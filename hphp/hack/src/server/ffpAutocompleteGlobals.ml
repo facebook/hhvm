@@ -142,45 +142,46 @@ let get_same_file_definitions (positioned_tree : PositionedSyntax.t) :
         fold ([], [], []) positioned_tree)))
 
 let get_globals
+    (sienv : SearchUtils.si_env)
     (context : context)
-    (input : string)
+    (query_text : string)
     (positioned_tree : PositionedSyntax.t)
     (replace_pos : Ide_api_types.range) : complete_autocomplete_result list =
   if should_get_globals context then
-    Utils.With_complete_flag.(
-      let (classes, interfaces, traits) =
-        get_same_file_definitions positioned_tree
-      in
-      let completions =
-        List.concat_no_order
-          [
-            List.filter_map
-              ~f:(make_class_completion context replace_pos)
-              classes;
-            List.filter_map
-              ~f:(make_trait_completion context replace_pos)
-              traits;
-            List.filter_map
-              ~f:(make_interface_completion context replace_pos)
-              interfaces;
-          ]
-      in
-      let { value; _ } =
-        SymbolIndex.query_for_autocomplete
-          input
-          ~limit:(Some 100)
-          ~filter_map:(fun _ _ res ->
-            let name = Utils.strip_ns res.SearchUtils.name in
-            match res.SearchUtils.result_type with
-            | SearchUtils.SI_Trait ->
-              make_trait_completion context replace_pos name
-            | SearchUtils.SI_Interface ->
-              make_interface_completion context replace_pos name
-            | SearchUtils.SI_Enum
-            | SearchUtils.SI_Class ->
-              make_class_completion context replace_pos name
-            | _ -> None)
-      in
-      completions @ value)
+    let (classes, interfaces, traits) =
+      get_same_file_definitions positioned_tree
+    in
+    let completions =
+      List.concat_no_order
+        [
+          List.filter_map ~f:(make_class_completion context replace_pos) classes;
+          List.filter_map ~f:(make_trait_completion context replace_pos) traits;
+          List.filter_map
+            ~f:(make_interface_completion context replace_pos)
+            interfaces;
+        ]
+    in
+    let results =
+      SymbolIndex.find_matching_symbols
+        ~sienv
+        ~query_text
+        ~max_results:100
+        ~context:None
+        ~kind_filter:None
+    in
+    let value =
+      List.filter_map results ~f:(fun res ->
+          let name = Utils.strip_ns res.SearchUtils.si_fullname in
+          match res.SearchUtils.si_kind with
+          | SearchUtils.SI_Trait ->
+            make_trait_completion context replace_pos name
+          | SearchUtils.SI_Interface ->
+            make_interface_completion context replace_pos name
+          | SearchUtils.SI_Enum
+          | SearchUtils.SI_Class ->
+            make_class_completion context replace_pos name
+          | _ -> None)
+    in
+    completions @ value
   else
     []

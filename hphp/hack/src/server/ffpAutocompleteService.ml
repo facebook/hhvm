@@ -127,6 +127,7 @@ let auto_complete
     in
     let global_completions =
       FfpAutocompleteGlobals.get_globals
+        sienv
         context
         stub
         positioned_tree

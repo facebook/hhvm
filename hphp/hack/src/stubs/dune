@@ -102,3 +102,9 @@
   (wrapped false)
   (modules
     shared_lru))
+
+(library
+  (name experiments_config_file_stubs)
+  (wrapped false)
+  (modules
+    experiments_config_file))

@@ -30,48 +30,27 @@ let result_to_json res =
 
 let re_colon_colon = Str.regexp "::"
 
-let go workers query type_ (sienv : SearchUtils.si_env) : SearchUtils.result =
+let go query_text type_ (sienv : SearchUtils.si_env) : SearchUtils.result =
   let max_results = 100 in
   let start_time = Unix.gettimeofday () in
   let kind_filter = SearchUtils.string_to_kind type_ in
-  let fuzzy = SymbolIndex.fuzzy_search_enabled () in
   let context = Some SearchUtils.Ac_no_namespace in
   let results =
     (* If query contains "::", search class methods instead of top level definitions *)
-    match Str.split_delim re_colon_colon query with
+    match Str.split_delim re_colon_colon query_text with
     | [class_name_query; method_query] ->
       (* Fixup the kind filter *)
       let kind_filter = Some SearchUtils.SI_Class in
       (* Get the class with the most similar name to `class_name_query` *)
       let class_ =
-        (* Switch between old behavior and new *)
-        match sienv.SearchUtils.sie_provider with
-        | SearchUtils.TrieIndex ->
-          SymbolIndex.query_for_symbol_search
-            ~fuzzy
-            workers
-            class_name_query
-            type_
-          |> List.find ~f:(fun result ->
-                 match result with
-                 | SearchUtils.{ result_type = SearchUtils.SI_Trait; _ } ->
-                   true
-                 | SearchUtils.{ result_type = SearchUtils.SI_Enum; _ } -> true
-                 | SearchUtils.{ result_type = SearchUtils.SI_Interface; _ } ->
-                   true
-                 | SearchUtils.{ result_type = SearchUtils.SI_Class; _ } ->
-                   true
-                 | _ -> false)
-          |> Option.map ~f:(fun s -> s.SearchUtils.name)
-        | _ ->
-          SymbolIndex.find_matching_symbols
-            ~query_text:class_name_query
-            ~max_results:1
-            ~kind_filter
-            ~context
-            ~sienv
-          |> List.hd
-          |> Option.map ~f:(fun r -> r.SearchUtils.si_name)
+        SymbolIndex.find_matching_symbols
+          ~query_text:class_name_query
+          ~max_results:1
+          ~kind_filter
+          ~context
+          ~sienv
+        |> List.hd
+        |> Option.map ~f:(fun r -> r.SearchUtils.si_name)
       in
       begin
         match class_ with
@@ -85,28 +64,20 @@ let go workers query type_ (sienv : SearchUtils.si_env) : SearchUtils.result =
           []
       end
     | _ ->
-      (* Switch between old behavior and new *)
-      (match sienv.SearchUtils.sie_provider with
-      | SearchUtils.TrieIndex ->
-        let temp_results =
-          SymbolIndex.query_for_symbol_search ~fuzzy workers query type_
-        in
-        List.map temp_results SearchUtils.to_absolute
-      | _ ->
-        let temp_results =
-          SymbolIndex.find_matching_symbols
-            ~query_text:query
-            ~max_results
-            ~kind_filter
-            ~context
-            ~sienv
-        in
-        AutocompleteService.add_position_to_results temp_results)
+      let temp_results =
+        SymbolIndex.find_matching_symbols
+          ~sienv
+          ~query_text
+          ~max_results
+          ~context
+          ~kind_filter
+      in
+      AutocompleteService.add_position_to_results temp_results
   in
   SymbolIndex.log_symbol_index_search
     ~sienv
     ~start_time
-    ~query_text:query
+    ~query_text
     ~max_results
     ~kind_filter
     ~results:(List.length results)

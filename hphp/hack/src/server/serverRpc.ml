@@ -219,7 +219,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       (env, Error "There are typecheck errors; cannot generate saved state.")
   | SEARCH (query, type_) ->
     let lst = env.ServerEnv.local_symbol_table in
-    (env, ServerSearch.go genv.workers query type_ !lst)
+    (env, ServerSearch.go query type_ !lst)
   | COVERAGE_COUNTS path -> (env, ServerCoverageMetric.go path genv env)
   | LINT fnl -> (env, ServerLint.go genv env fnl)
   | LINT_STDIN { filename; contents } ->

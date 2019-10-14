@@ -26,13 +26,22 @@ namespace HPHP {
 
 template<class SerDe>
 void EHEnt::serde(SerDe& sd) {
+  folly::Optional<Offset> end;
+  if (!SerDe::deserializing) {
+    end = (m_end == kInvalidOffset) ? folly::none : folly::make_optional(m_end);
+  }
+
   sd(m_base)
     (m_past)
     (m_iterId)
     (m_handler)
-    (m_end)
+    (end)
     (m_parentIndex)
     ;
+
+  if (SerDe::deserializing) {
+    m_end = end.value_or(kInvalidOffset);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

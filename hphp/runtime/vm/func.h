@@ -96,6 +96,15 @@ struct EHEnt {
   Offset m_handler;
   Offset m_end;
 
+  EHEnt()
+    : m_base()
+    , m_past()
+    , m_iterId()
+    , m_parentIndex()
+    , m_handler()
+    , m_end()
+  {}
+
   template<class SerDe> void serde(SerDe& sd);
 };
 

@@ -509,7 +509,20 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
 
     (params)
     (localNames)
-    (ehtab)
+    (ehtab,
+      [&](const EHEnt& prev, EHEnt cur) -> EHEnt {
+        cur.m_handler -= cur.m_past;
+        cur.m_past -= cur.m_base;
+        cur.m_base -= prev.m_base;
+        return cur;
+      },
+      [&](const EHEnt& prev, EHEnt delta) -> EHEnt {
+        delta.m_base += prev.m_base;
+        delta.m_past += delta.m_base;
+        delta.m_handler += delta.m_past;
+        return delta;
+      }
+    )
     (userAttributes)
     (retTypeConstraint)
     (retUserType)

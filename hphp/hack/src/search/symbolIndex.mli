@@ -43,25 +43,6 @@ val find_matching_symbols :
   kind_filter:SearchUtils.si_kind option ->
   SearchUtils.si_results
 
-(* Legacy query interface for "Symbol Search", depends on multiworker *)
-val query_for_symbol_search :
-  MultiWorker.worker list option ->
-  string ->
-  string ->
-  fuzzy:bool ->
-  (Pos.t, SearchUtils.si_kind) SearchUtils.term list
-
-(* Legacy query interface for LSP autocomplete, depends on filter-map *)
-val query_for_autocomplete :
-  string ->
-  limit:int option ->
-  filter_map:
-    (string ->
-    string ->
-    (FileInfo.pos, SearchUtils.si_kind) SearchUtils.term ->
-    'a option) ->
-  'a list Utils.With_complete_flag.t
-
 (* Notify the search service that certain files have been updated locally *)
 val update_files :
   sienv:SearchUtils.si_env ref ->

@@ -219,31 +219,6 @@ let find_matching_symbols
     List.take results max_results
 
 (*
- * Legacy API
- * Will be replaced in a future diff in this stack
- *)
-let query_for_symbol_search
-    (worker_list_opt : MultiWorker.worker list option)
-    (s1 : string)
-    (s2 : string)
-    ~(fuzzy : bool) : (Pos.t, si_kind) term list =
-  (* Just route to the trie-based search service for now *)
-  HackSearchService.MasterApi.query worker_list_opt s1 s2 fuzzy
-
-(*
- * Legacy API
- * Exact replacement TBD
- *)
-let query_for_autocomplete
-    (s1 : string)
-    ~(limit : int option)
-    ~(filter_map :
-       string -> string -> (FileInfo.pos, si_kind) term -> 'a option) :
-    'a list Utils.With_complete_flag.t =
-  (* Just route to the trie-based search service for now *)
-  HackSearchService.MasterApi.query_autocomplete s1 limit filter_map
-
-(*
  * This method is called when the typechecker has finished re-checking a file,
  * or when the saved-state is fully loaded.  Any system that needs to cache
  * this information should capture it here.

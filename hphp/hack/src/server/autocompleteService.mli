@@ -14,9 +14,6 @@ val autocomplete_result_to_json :
 
 val go :
   tcopt:TypecheckerOptions.t ->
-  content_funs:Reordered_argument_collections.SSet.t ->
-  content_classes:Reordered_argument_collections.SSet.t ->
-  content_record_defs:Reordered_argument_collections.SSet.t ->
   autocomplete_context:AutocompleteTypes.legacy_autocomplete_context ->
   sienv:SearchUtils.si_env ->
   Tast.program ->

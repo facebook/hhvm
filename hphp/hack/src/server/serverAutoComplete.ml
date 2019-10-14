@@ -16,26 +16,11 @@ let get_results
     ~(autocomplete_context : AutocompleteTypes.legacy_autocomplete_context)
     ~(sienv : SearchUtils.si_env)
     (_ : Relative_path.t)
-    (file_info : FileInfo.t)
+    (_ : FileInfo.t)
     (tast : Tast.program) :
     AutocompleteTypes.complete_autocomplete_result list
     Utils.With_complete_flag.t =
-  let {
-    FileInfo.n_funs = content_funs;
-    n_classes = content_classes;
-    n_record_defs = content_record_defs;
-    _;
-  } =
-    FileInfo.simplify file_info
-  in
-  AutocompleteService.go
-    tast
-    ~tcopt
-    ~content_funs
-    ~content_classes
-    ~content_record_defs
-    ~autocomplete_context
-    ~sienv
+  AutocompleteService.go tast ~tcopt ~autocomplete_context ~sienv
 
 let auto_complete
     ~(tcopt : TypecheckerOptions.t)

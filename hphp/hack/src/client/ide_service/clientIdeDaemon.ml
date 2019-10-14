@@ -372,7 +372,6 @@ let handle_message :
             ~file_input:(ServerCommandTypes.FileContent content)
         in
         (* Use the server env and the param to contact autocomplete service *)
-        let fileinfo = Provider_context.get_fileinfo entry in
         let autocomplete_context =
           ServerAutoComplete.get_autocomplete_context
             content
@@ -382,20 +381,7 @@ let handle_message :
         let matches =
           Provider_utils.with_context ~ctx ~f:(fun () ->
               let tast = Provider_utils.compute_tast ~ctx ~entry in
-              AutocompleteService.go
-                ~tcopt
-                ~content_funs:
-                  ( Core_kernel.List.map fileinfo.FileInfo.funs ~f:snd
-                  |> SSet.of_list )
-                ~content_classes:
-                  ( Core_kernel.List.map fileinfo.FileInfo.classes ~f:snd
-                  |> SSet.of_list )
-                ~content_record_defs:
-                  ( Core_kernel.List.map fileinfo.FileInfo.record_defs ~f:snd
-                  |> SSet.of_list )
-                ~autocomplete_context
-                ~sienv
-                tast)
+              AutocompleteService.go ~tcopt ~autocomplete_context ~sienv tast)
         in
         let result =
           {

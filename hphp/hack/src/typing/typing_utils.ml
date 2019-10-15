@@ -479,8 +479,7 @@ end = struct
         | AKany -> Some r
         | AKempty -> acc
         | AKvarray_or_darray ty
-        | AKvarray ty
-        | AKvec ty ->
+        | AKvarray ty ->
           this#on_type acc ty
         | AKdarray (tk, tv)
         | AKmap (tk, tv) ->

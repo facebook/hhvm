@@ -126,7 +126,7 @@ let rec transform_shapemap ?(nullable = false) env pos ty shape =
              *)
             | (SFlit_str (_, "generic_types"), _, _) when is_generic ->
               (env, acc_field_with_type sft_ty)
-            | (SFlit_str (_, "generic_types"), _, (r, Tarraykind (AKvec ty)))
+            | (SFlit_str (_, "generic_types"), _, (r, Tarraykind (AKvarray ty)))
               when not is_generic ->
               let (env, ty) = make_ts env ty in
               (env, acc_field_with_type (r, Ttuple [ty]))

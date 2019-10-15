@@ -85,7 +85,7 @@ let update_array_type p ~is_map env ty =
           (env, (Reason.Rused_as_map p, Tarraykind (AKmap (tk, tv))))
         else
           let (env, tv) = Env.fresh_type env p in
-          (env, (Reason.Rappend p, Tarraykind (AKvec tv)))
+          (env, (Reason.Rappend p, Tarraykind (AKvarray tv)))
     end
   in
   let (env, ty) = mapper#on_type (fresh_env env) ty in

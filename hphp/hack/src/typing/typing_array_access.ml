@@ -248,7 +248,7 @@ let rec array_get
               Errors.index_type_mismatch
       in
       match ety1_ with
-      | Tarraykind (AKvarray ty | AKvec ty) ->
+      | Tarraykind (AKvarray ty) ->
         let ty1 = MakeType.int (Reason.Ridx (fst e2, r)) in
         let env = type_index env expr_pos ty2 ty1 Reason.index_array in
         (env, ty)
@@ -511,9 +511,6 @@ let widen_for_assign_array_append ~expr_pos env ty =
     in
     let ty = (r, Tclass (id, Nonexact, params)) in
     (env, Some ty)
-  | (r, Tarraykind (AKvec _)) ->
-    let (env, element_ty) = Env.fresh_invariant_type_var env expr_pos in
-    (env, Some (r, Tarraykind (AKvec element_ty)))
   | (r, Tarraykind (AKvarray _)) ->
     let (env, element_ty) = Env.fresh_invariant_type_var env expr_pos in
     (env, Some (r, Tarraykind (AKvarray element_ty)))
@@ -567,9 +564,6 @@ let assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
         when n = SN.Collections.cVec || n = SN.Collections.cKeyset ->
         let (env, tv') = Typing_union.union env tv ty2 in
         (env, (r, Tclass (id, e, [tv'])))
-      | (r, Tarraykind (AKvec tv)) ->
-        let (env, tv') = Typing_union.union env tv ty2 in
-        (env, (r, Tarraykind (AKvec tv')))
       | (r, Tarraykind (AKvarray tv)) ->
         let (env, tv') = Typing_union.union env tv ty2 in
         (env, (r, Tarraykind (AKvarray tv')))
@@ -609,9 +603,6 @@ let widen_for_assign_array_get ~expr_pos index_expr env ty =
   | (r, Tarraykind (AKvarray _)) ->
     let (env, tv) = Env.fresh_invariant_type_var env expr_pos in
     (env, Some (r, Tarraykind (AKvarray tv)))
-  | (r, Tarraykind (AKvec _)) ->
-    let (env, tv) = Env.fresh_invariant_type_var env expr_pos in
-    (env, Some (r, Tarraykind (AKvec tv)))
   | (r, Tarraykind (AKvarray_or_darray _)) ->
     let (env, tv) = Env.fresh_invariant_type_var env expr_pos in
     (env, Some (r, Tarraykind (AKvarray_or_darray tv)))
@@ -692,11 +683,6 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
         let env = type_index env expr_pos tkey tk Reason.index_array in
         let (env, tv') = Typing_union.union env tv ty2 in
         (env, (r, Tarraykind (AKvarray tv')))
-      | Tarraykind (AKvec tv) ->
-        let tk = MakeType.int (Reason.Ridx (fst key, r)) in
-        let env = type_index env expr_pos tkey tk Reason.index_array in
-        let (env, tv') = Typing_union.union env tv ty2 in
-        (env, (r, Tarraykind (AKvec tv')))
       | Tarraykind (AKvarray_or_darray tv) ->
         let tk =
           MakeType.arraykey (Reason.Rvarray_or_darray_key (Reason.to_pos r))

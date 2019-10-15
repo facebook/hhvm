@@ -3,4 +3,4 @@ Invalid argument (Typing[4110])
 File "array_sub2.php", line 12, characters 23-37:
 Expected ~array<bool, [unresolved]> because it is an unenforceable type
 File "array_sub2.php", line 20, characters 15-24:
-But got array<int>
+But got varray<int>

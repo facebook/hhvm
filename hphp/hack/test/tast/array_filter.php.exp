@@ -10,9 +10,9 @@
          param_pos = [4:9-23]; param_name = "$untyped_array";
          param_expr = None; param_callconv = None;
          param_user_attributes = []; param_visibility = None };
-        { param_annotation = ([5:18-31], array<?string>);
+        { param_annotation = ([5:18-31], varray<?string>);
           param_type_hint =
-          ((array<?string>),
+          ((varray<?string>),
            (Some ([5:3-17],
                   (Harray (
                      (Some ([5:9-16], (Hoption ([5:10-16], (Hprim Tstring))))),
@@ -83,13 +83,13 @@
                   [])))));
           ([14:3-31],
            (Expr
-              (([14:3-30], array<string>),
+              (([14:3-30], varray<string>),
                (Call (Cnormal,
-                  (([14:3-15], (function<Tv>(Container<?string> $input, ?(function(?string): bool) $callback): array<string>)),
+                  (([14:3-15], (function<Tv>(Container<?string> $input, ?(function(?string): bool) $callback): varray<string>)),
                    (Id ([14:3-15], "\\array_filter"))),
                   [((?string), ([14:3-15], (Happly (([Pos.none], "_"), []))))
                     ],
-                  [(([14:16-29], array<?string>),
+                  [(([14:16-29], varray<?string>),
                     (Lvar ([14:16-29], $vector_array)))],
                   [])))));
           ([15:3-28],
@@ -188,13 +188,13 @@
                   [])))));
           ([23:3-35],
            (Expr
-              (([23:3-34], array<?string>),
+              (([23:3-34], varray<?string>),
                (Call (Cnormal,
-                  (([23:3-15], (function<Tv>(Container<?string> $input, ?(function(?string): bool) $callback): array<?string>)),
+                  (([23:3-15], (function<Tv>(Container<?string> $input, ?(function(?string): bool) $callback): varray<?string>)),
                    (Id ([23:3-15], "\\array_filter"))),
                   [((?string), ([23:3-15], (Happly (([Pos.none], "_"), []))))
                     ],
-                  [(([23:16-29], array<?string>),
+                  [(([23:16-29], varray<?string>),
                     (Lvar ([23:16-29], $vector_array)));
                     (([23:31-33], (function(?string $x): bool)),
                      (Lvar ([23:31-33], $f)))

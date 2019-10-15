@@ -3,4 +3,4 @@ Invalid argument (Typing[4110])
 File "akempty_promotion_7.php", line 15, characters 12-14:
 Expected int
 File "akempty_promotion_7.php", line 9, characters 7-10:
-But got array<(string | nothing)> because a value is appended to it
+But got varray<(string | nothing)> because a value is appended to it

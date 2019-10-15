@@ -1,7 +1,7 @@
 <?hh //strict
 
 /**
- * Test AKempty to AKvec upgrade when inside typevar and unresolved type
+ * Test AKempty to AKvarray upgrade when inside typevar and unresolved type
  */
 function test(bool $b): void {
   $a = array();

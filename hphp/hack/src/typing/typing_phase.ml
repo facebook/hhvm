@@ -136,7 +136,7 @@ let rec localize ~ety_env env (dty : decl_ty) =
       | (None, None) -> (env, Tarraykind AKany)
       | (Some tv, None) ->
         let (env, tv) = localize ~ety_env env tv in
-        (env, Tarraykind (AKvec tv))
+        (env, Tarraykind (AKvarray tv))
       | (Some tk, Some tv) ->
         let (env, tk) = localize ~ety_env env tk in
         let (env, tv) = localize ~ety_env env tv in

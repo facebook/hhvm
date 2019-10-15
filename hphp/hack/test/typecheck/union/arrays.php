@@ -37,7 +37,7 @@ function test1(
   if ($b) {
     $x = []; // AKempty
   } else {
-    $x = [1]; // AKvec
+    $x = [1]; // AKvarray
   }
   hh_show($x);
   hh_show($x[0]);
@@ -53,17 +53,17 @@ function test1(
   expect_array($x);
 
   if ($b) {
-    $x = [1]; // AKvec
+    $x = [1]; // AKvarray
   } else {
     $x = $array; // AKany
   }
   hh_show($x);
   hh_show($x[0]);
-  // no safe array mode, so this unions as AKvec
+  // no safe array mode, so this unions as AKvarray
   expect_int_array($x);
 
   if ($b) {
-    $x = $arrayint; // AKvec
+    $x = $arrayint; // AKvarray
   } else {
     $x = $array; // AKany
   }
@@ -100,9 +100,9 @@ function test1(
   hh_show($x[0]);
 
   if ($b) {
-    $x = $arrayint; // AKvec
+    $x = $arrayint; // AKvarray
   } else {
-    $x = [1]; // AKvec
+    $x = [1]; // AKvarray
   }
   hh_show($x);
   hh_show($x[0]);
@@ -111,7 +111,7 @@ function test1(
   if ($b) {
     $x = varray[0]; // AKvarray
   } else {
-    $x = [""]; // AKvec
+    $x = [""]; // AKvarray
   }
   hh_show($x);
   hh_show($x[0]);

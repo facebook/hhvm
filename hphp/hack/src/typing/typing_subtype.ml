@@ -194,13 +194,13 @@ let check_mutability
   (* immutable is not compatible with mutable *)
   | (None, Some (Param_borrowed_mutable | Param_owned_mutable))
   (* mutable is not compatible with immutable  *)
-  
+
   | (Some (Param_borrowed_mutable | Param_owned_mutable), None)
   (* borrowed mutable is not compatible with owned mutable *)
-  
+
   | (Some Param_borrowed_mutable, Some Param_owned_mutable)
   (* maybe-mutable is not compatible with immutable/mutable *)
-  
+
   | ( Some Param_maybe_mutable,
       (None | Some (Param_borrowed_mutable | Param_owned_mutable)) ) ->
     ( env,
@@ -637,8 +637,8 @@ and simplify_subtype_i
     let (env, non_ty_opt, tyl') = find_type_with_exact_negation env tyl in
     let non_ty = Option.value_exn non_ty_opt in
     let treat_dynamic_as_bottom = subtype_env.treat_dynamic_as_bottom in
-    (* We want to union ty_super with non_ty, but ty_super might be a 
-    constraint type, and we can't union with constraint types, 
+    (* We want to union ty_super with non_ty, but ty_super might be a
+    constraint type, and we can't union with constraint types,
     so if ty_super is a constraint type, we turn it into a type variable
     which has this constraint (i.e. which has it as upper bound). *)
     let (env, ty_super) =
@@ -658,8 +658,8 @@ and simplify_subtype_i
            true
          | _ -> false ->
     let treat_dynamic_as_bottom = subtype_env.treat_dynamic_as_bottom in
-    (* We want to intersect ty_sub with nonnull, but ty_super might be a 
-    constraint type, and we can't intersect with constraint types, 
+    (* We want to intersect ty_sub with nonnull, but ty_super might be a
+    constraint type, and we can't intersect with constraint types,
     so if ty_sub is a constraint type, we turn it into a type variable
     with that constraint type as lower bound. *)
     let (env, ty_sub) =
@@ -1296,7 +1296,6 @@ and simplify_subtype_i
        *          and map<_,tv> <: Container<tv_super>
        *)
       | AKvarray tv
-      | AKvec tv
       | AKdarray (_, tv)
       | AKvarray_or_darray tv
       | AKmap (_, tv) ->
@@ -1320,8 +1319,7 @@ and simplify_subtype_i
               (fst ety_sub, Typing_defs.make_tany ())
               tv_super
       | AKempty -> valid ()
-      | AKvarray tv
-      | AKvec tv ->
+      | AKvarray tv ->
         env
         |> simplify_subtype ~subtype_env ~this_ty (MakeType.int r) tk_super
         &&& simplify_subtype ~subtype_env ~this_ty tv tv_super
@@ -1379,9 +1377,8 @@ and simplify_subtype_i
        But, varray_or_darray<ty1> is never a subtype of a vect-like array *)
         | (AKvarray_or_darray ty_sub, AKvarray_or_darray ty_super) ->
           simplify_subtype ~subtype_env ~this_ty ty_sub ty_super env
-        | ( (AKvarray ty_sub | AKvec ty_sub),
-            (AKvarray ty_super | AKvec ty_super | AKvarray_or_darray ty_super)
-          ) ->
+        | (AKvarray ty_sub, (AKvarray ty_super | AKvarray_or_darray ty_super))
+          ->
           simplify_subtype ~subtype_env ~this_ty ty_sub ty_super env
         | ( (AKdarray (tk_sub, tv_sub) | AKmap (tk_sub, tv_sub)),
             (AKdarray (tk_super, tv_super) | AKmap (tk_super, tv_super)) ) ->
@@ -1397,7 +1394,7 @@ and simplify_subtype_i
           env
           |> simplify_subtype ~subtype_env ~this_ty tk_sub tk_super
           &&& simplify_subtype ~subtype_env ~this_ty tv_sub tv_super
-        | ((AKvarray elt_ty | AKvec elt_ty), (AKdarray _ | AKmap _))
+        | (AKvarray elt_ty, (AKdarray _ | AKmap _))
           when not (TypecheckerOptions.safe_vector_array (Env.get_tcopt env))
           ->
           let int_reason = Reason.Ridx (Reason.to_pos r, Reason.Rnone) in
@@ -1440,7 +1437,6 @@ and simplify_subtype_i
           ~init:(env, TL.valid)
           ~f:(fun res ty ty_dest ->
             res &&& simplify_subtype ~subtype_env ~this_ty ty ty_dest)
-    | (Tarraykind (AKvec elt_type), Tdestructure tyl_dest)
     | (Tarraykind (AKvarray elt_type), Tdestructure tyl_dest) ->
       List.fold tyl_dest ~init:(env, TL.valid) ~f:(fun res ty_dest ->
           res &&& simplify_subtype ~subtype_env ~this_ty elt_type ty_dest)
@@ -1851,7 +1847,7 @@ and subtype_reactivity
   (* ok:
      <<__Rx>>
      function f(<<__AtMostRxAsFunc>> (function(): int) $f) { return $f() }  *)
-  
+
   | (RxVar None, RxVar _, _) ->
     true
   | (RxVar (Some sub), RxVar (Some super), _)

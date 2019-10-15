@@ -115,9 +115,6 @@ let rec freshen_inside_ty env ((r, ty_) as ty) =
       | AKvarray ty ->
         let (env, ty) = freshen_ty env ty in
         (env, (r, Tarraykind (AKvarray ty)))
-      | AKvec ty ->
-        let (env, ty) = freshen_ty env ty in
-        (env, (r, Tarraykind (AKvec ty)))
       | AKvarray_or_darray ty ->
         let (env, ty) = freshen_ty env ty in
         (env, (r, Tarraykind (AKvarray_or_darray ty)))
@@ -440,7 +437,6 @@ let ty_equal_shallow ty1 ty2 =
   | (Tobject, Tobject)
   | (Ttuple _, Ttuple _)
   | (Tarraykind (AKvarray _), Tarraykind (AKvarray _))
-  | (Tarraykind (AKvec _), Tarraykind (AKvec _))
   | (Tarraykind (AKvarray_or_darray _), Tarraykind (AKvarray_or_darray _))
   | (Tarraykind (AKdarray _), Tarraykind (AKdarray _))
   | (Tarraykind (AKmap _), Tarraykind (AKmap _)) ->
@@ -553,12 +549,12 @@ let try_bind_to_equal_bound ~freshen env r var on_error =
           upper_bounds
           env
 
-(* Always solve a type variable. 
-We are here because we eagerly solve a type variable to see 
-whether certain operations are allowed on the type (e.g. a  method call), 
+(* Always solve a type variable.
+We are here because we eagerly solve a type variable to see
+whether certain operations are allowed on the type (e.g. a  method call),
 or because we are at the end of a function body and we solve
-the remaining invariant type variables. 
-Therefore, we always force to the lower bounds (even contravariant variables), 
+the remaining invariant type variables.
+Therefore, we always force to the lower bounds (even contravariant variables),
 because it produces a "more specific" type, which is more likely to support
 the operation which we eagerly solved for in the first place.
 *)

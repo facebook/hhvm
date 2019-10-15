@@ -276,8 +276,7 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
       | AKany -> acc
       | AKempty -> acc
       | AKvarray_or_darray ty
-      | AKvarray ty
-      | AKvec ty ->
+      | AKvarray ty ->
         this#on_type acc ty
       | AKdarray (tk, tv)
       | AKmap (tk, tv) ->

@@ -37,7 +37,6 @@ let rec strip_ty ty =
     | Tarraykind (AKmap (ty1, ty2)) ->
       Tarraykind (AKmap (strip_ty ty1, strip_ty ty2))
     | Tarraykind (AKvarray ty) -> Tarraykind (AKvarray (strip_ty ty))
-    | Tarraykind (AKvec ty) -> Tarraykind (AKvec (strip_ty ty))
     | Tarraykind (AKvarray_or_darray ty) ->
       Tarraykind (AKvarray_or_darray (strip_ty ty))
     | Ttuple tyl -> Ttuple (strip_tyl tyl)

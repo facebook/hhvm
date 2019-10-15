@@ -61,7 +61,6 @@ let check_param : env -> Nast.fun_param -> unit =
     | ( _,
         Tarraykind
           ( AKvarray ty
-          | AKvec ty
           | AKdarray (_, ty)
           | AKvarray_or_darray ty
           | AKmap (_, ty) ) ) ->

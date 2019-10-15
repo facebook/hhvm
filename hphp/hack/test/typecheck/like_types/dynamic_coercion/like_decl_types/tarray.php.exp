@@ -1,7 +1,7 @@
 File "tarray.php", line 9, characters 10-11:
 Invalid return type (Typing[4110])
 File "tarray.php", line 8, characters 33-42:
-Expected array<int>
+Expected varray<int>
 File "tarray.php", line 8, characters 16-26:
 But got dynamic
 File "tarray.php", line 13, characters 10-11:

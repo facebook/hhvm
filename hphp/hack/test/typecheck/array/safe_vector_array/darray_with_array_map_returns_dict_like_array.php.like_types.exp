@@ -3,4 +3,4 @@ Invalid return type (Typing[4110])
 File "darray_with_array_map_returns_dict_like_array.php", line 3, characters 35-53:
 Expected ~array<string, bool> because it is an unenforceable type
 File "stdlib/builtins_array.hhi", line 115, characters 10-18:
-But got array<[unresolved]>
+But got varray<[unresolved]>

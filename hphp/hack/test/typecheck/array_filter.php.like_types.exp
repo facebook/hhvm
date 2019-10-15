@@ -9,7 +9,7 @@ File "array_filter.php", line 22, characters 3-33:
 File "array_filter.php", line 25, characters 3-43:
   array
 File "array_filter.php", line 26, characters 3-42:
-  ~?(_ | array<?string>)
+  ~?(_ | varray<?string>)
 File "array_filter.php", line 31, characters 3-33:
   ~_
 File "array_filter.php", line 32, characters 3-37:

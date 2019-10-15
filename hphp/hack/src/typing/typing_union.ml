@@ -319,9 +319,6 @@ and union_arraykind env ak1 ak2 =
   | (AKvarray ty1, AKvarray ty2) ->
     let (env, ty) = union env ty1 ty2 in
     (env, AKvarray ty)
-  | ((AKvarray ty1 | AKvec ty1), (AKvarray ty2 | AKvec ty2)) ->
-    let (env, ty) = union env ty1 ty2 in
-    (env, AKvec ty)
   | (AKdarray (tk1, tv1), AKdarray (tk2, tv2)) ->
     let (env, tk) = union env tk1 tk2 in
     let (env, tv) = union env tv1 tv2 in

@@ -1,5 +1,5 @@
 File "array_map7.php", line 24, characters 3-32:
-  ~array<bool>
+  ~varray<bool>
 File "array_map7.php", line 27, characters 3-34:
-  ~array<bool>
+  ~varray<bool>
 No errors

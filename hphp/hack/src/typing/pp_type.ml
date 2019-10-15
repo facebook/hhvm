@@ -244,10 +244,6 @@ and pp_array_kind : Format.formatter -> array_kind -> unit =
     Format.fprintf fmt "(@[<2>AKvarray@ ";
     pp_ty fmt a0;
     Format.fprintf fmt "@])"
-  | AKvec a0 ->
-    Format.fprintf fmt "(@[<2>AKvec@ ";
-    pp_ty fmt a0;
-    Format.fprintf fmt "@])"
   | AKdarray (a0, a1) ->
     Format.fprintf fmt "(@[<2>AKdarray (@,";
     pp_ty fmt a0;

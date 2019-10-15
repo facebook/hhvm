@@ -1,6 +1,6 @@
 File "akempty_tuple_bad.php", line 6, characters 10-11:
 Invalid return type (Typing[4110])
 File "akempty_tuple_bad.php", line 4, characters 17-37:
-Expected ~(?string, array<int>) because it is an unenforceable type
+Expected ~(?string, varray<int>) because it is an unenforceable type
 File "akempty_tuple_bad.php", line 5, characters 8-14:
 But got array (empty)

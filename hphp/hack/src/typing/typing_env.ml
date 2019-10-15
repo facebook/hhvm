@@ -1324,7 +1324,6 @@ and get_tyvars_i env (ty : internal_type) =
         | AKempty ->
           (env, ISet.empty, ISet.empty)
         | AKvarray ty
-        | AKvec ty
         | AKvarray_or_darray ty ->
           get_tyvars env ty
         | AKdarray (ty1, ty2)

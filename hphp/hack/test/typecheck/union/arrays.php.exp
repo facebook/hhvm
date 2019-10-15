@@ -3,7 +3,7 @@ File "arrays.php", line 33, characters 3-13:
 File "arrays.php", line 34, characters 3-16:
   _
 File "arrays.php", line 42, characters 3-13:
-  array<int>
+  varray<int>
 File "arrays.php", line 43, characters 3-16:
   int
 File "arrays.php", line 51, characters 3-13:
@@ -35,15 +35,15 @@ File "arrays.php", line 91, characters 3-13:
 File "arrays.php", line 92, characters 3-16:
   (int | string)
 File "arrays.php", line 99, characters 3-13:
-  array<int>
+  varray<int>
 File "arrays.php", line 100, characters 3-16:
   int
 File "arrays.php", line 107, characters 3-13:
-  array<int>
+  varray<int>
 File "arrays.php", line 108, characters 3-16:
   int
 File "arrays.php", line 116, characters 3-13:
-  array<(int | string)>
+  varray<(int | string)>
 File "arrays.php", line 117, characters 3-16:
   (int | string)
 File "arrays.php", line 128, characters 3-13:

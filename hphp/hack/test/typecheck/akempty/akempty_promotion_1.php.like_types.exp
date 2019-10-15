@@ -1,6 +1,6 @@
 File "akempty_promotion_1.php", line 10, characters 5-6:
 Invalid argument (Typing[4110])
 File "akempty_promotion_1.php", line 13, characters 12-21:
-Expected ~array<int> because it is an unenforceable type
+Expected ~varray<int> because it is an unenforceable type
 File "akempty_promotion_1.php", line 8, characters 3-6:
-But got array<(string | nothing)> because a value is appended to it
+But got varray<(string | nothing)> because a value is appended to it

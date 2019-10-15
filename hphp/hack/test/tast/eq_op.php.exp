@@ -33,10 +33,10 @@
                   (([6:9-10], int), (Int "4")))))));
           ([8:3-23],
            (Expr
-              (([8:3-22], array<int>),
+              (([8:3-22], varray<int>),
                (Binop ((Eq None),
-                  (([8:3-7], array<int>), (Lvar ([8:3-7], $arr))),
-                  (([8:10-22], array<int>),
+                  (([8:3-7], varray<int>), (Lvar ([8:3-7], $arr))),
+                  (([8:10-22], varray<int>),
                    (Array
                       [(AFvalue (([8:11-12], int), (Int "1")));
                         (AFvalue (([8:14-15], int), (Int "2")));
@@ -54,7 +54,7 @@
                (Binop ((Eq (Some Plus)),
                   (([9:3-15], int),
                    (Array_get (
-                      (([9:3-7], array<int>), (Lvar ([9:3-7], $arr))),
+                      (([9:3-7], varray<int>), (Lvar ([9:3-7], $arr))),
                       (Some (([9:8-14], int),
                              (Binop (Minus,
                                 (([9:8-10], int), (Lvar ([9:8-10], $i))),

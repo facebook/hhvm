@@ -328,10 +328,6 @@ and array_kind =
   | AKdarray of locl_ty * locl_ty
   (* An array annotated as a varray_or_darray. *)
   | AKvarray_or_darray of locl_ty
-  (* An array "used like a vec".
-   * /!\ An actual `vec` is represented as a `Tclass ("\\vec", [...])`
-   *)
-  | AKvec of locl_ty
   (* An array "used like a map or dict".
    * /!\ An actual `dict` is represented as a `Tclass ("\\dict", [...])`
    *)
@@ -676,9 +672,9 @@ type expand_env = {
    *)
   from_class: Nast.class_id_ option;
   quiet: bool;
-      (** If what we are localizing or expanding comes from the decl heap for 
+      (** If what we are localizing or expanding comes from the decl heap for
   example, then some errors must be silenced since they must have already been
-  raised when first typechecking whatever we have fetched from the heap. 
+  raised when first typechecking whatever we have fetched from the heap.
   Setting {!quiet} to true will silence those errors.
   T54121530 aims at offering a better mechanism. *)
 }
@@ -842,7 +838,6 @@ let array_kind_con_ordinal ak =
   match ak with
   | AKany -> 0
   | AKvarray _ -> 1
-  | AKvec _ -> 2
   | AKdarray _ -> 3
   | AKvarray_or_darray _ -> 4
   | AKmap _ -> 5
@@ -965,8 +960,7 @@ let rec ty_compare ?(normalize_lists = false) ty1 ty2 =
     | (AKdarray (ty1, ty2), AKdarray (ty3, ty4)) ->
       tyl_compare ~sort:false [ty1; ty2] [ty3; ty4]
     | (AKvarray ty1, AKvarray ty2)
-    | (AKvarray_or_darray ty1, AKvarray_or_darray ty2)
-    | (AKvec ty1, AKvec ty2) ->
+    | (AKvarray_or_darray ty1, AKvarray_or_darray ty2) ->
       ty_compare ty1 ty2
     | _ -> array_kind_con_ordinal ak1 - array_kind_con_ordinal ak2
   in

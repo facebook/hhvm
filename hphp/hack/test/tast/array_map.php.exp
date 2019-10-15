@@ -147,9 +147,9 @@
                   [])))));
           ([16:3-27],
            (Expr
-              (([16:3-26], array<bool>),
+              (([16:3-26], varray<bool>),
                (Call (Cnormal,
-                  (([16:3-12], (function<T1, T2, Tr>((function(int, string): bool) $callback, Container<int>, Container<string>): array<bool>)),
+                  (([16:3-12], (function<T1, T2, Tr>((function(int, string): bool) $callback, Container<int>, Container<string>): varray<bool>)),
                    (Id ([16:3-12], "\\array_map"))),
                   [((int), ([16:3-12], (Happly (([Pos.none], "_"), []))));
                     ((string), ([16:3-12], (Happly (([Pos.none], "_"), []))));
@@ -163,9 +163,9 @@
                   [])))));
           ([17:3-32],
            (Expr
-              (([17:3-31], array<Container<int>>),
+              (([17:3-31], varray<Container<int>>),
                (Call (Cnormal,
-                  (([17:3-12], (function<T1, T2, T3, Tr>((function(int, string, num): Container<int>) $callback, Container<int>, Container<string>, Container<num>): array<Container<int>>)),
+                  (([17:3-12], (function<T1, T2, T3, Tr>((function(int, string, num): Container<int>) $callback, Container<int>, Container<string>, Container<num>): varray<Container<int>>)),
                    (Id ([17:3-12], "\\array_map"))),
                   [((int), ([17:3-12], (Happly (([Pos.none], "_"), []))));
                     ((string), ([17:3-12], (Happly (([Pos.none], "_"), []))));

@@ -222,9 +222,9 @@ let get_vc_inst vc_kind ty =
   | _ -> get_value_collection_inst ty
 
 (* Is this type array<vty> or a supertype for some vty? *)
-let get_akvec_inst ty =
+let get_akvarray_inst ty =
   match ty with
-  | (_, Tarraykind (AKvec vty)) -> Some vty
+  | (_, Tarraykind (AKvarray vty)) -> Some vty
   | _ -> get_value_collection_inst ty
 
 (* Is this type array<kty,vty> or a supertype for some kty and vty? *)
@@ -1899,7 +1899,7 @@ and expr_
         match expand_expected env expected with
         | (env, Some (pos, ur, ety)) ->
           begin
-            match get_akvec_inst ety with
+            match get_akvarray_inst ety with
             | Some vty -> (env, Some (ExpectedTy.make pos ur vty))
             | None -> (env, None)
           end
@@ -1914,7 +1914,7 @@ and expr_
             l
             array_field_value
         in
-        (env, tel, AKvec value_ty)
+        (env, tel, AKvarray value_ty)
       in
       make_result
         env
@@ -1928,7 +1928,7 @@ and expr_
         match expand_expected env expected with
         | (env, Some (pos, ur, ety)) ->
           begin
-            match get_akvec_inst ety with
+            match get_akvarray_inst ety with
             | Some vty -> (env, Some (ExpectedTy.make pos ur vty))
             | None -> (env, None)
           end
@@ -1942,7 +1942,7 @@ and expr_
           l
           array_field_value
       in
-      make_result env p T.Any (Reason.Rwitness p, Tarraykind (AKvec value_ty))
+      make_result env p T.Any (Reason.Rwitness p, Tarraykind (AKvarray value_ty))
     else
       (* Use expected type to determine expected element type *)
       let (env, kexpected, vexpected) =
@@ -4859,9 +4859,9 @@ and dispatch_call
       let (env, ety) = Env.expand_type env ty in
       match ety with
       | (_, Tarraykind (AKany | AKempty)) as array_type -> (env, array_type)
-      | (r, Tarraykind (AKvec tv | AKvarray tv)) ->
+      | (r, Tarraykind (AKvarray tv)) ->
         let (env, tv) = get_value_type env tv in
-        (env, (r, Tarraykind (AKvec tv)))
+        (env, (r, Tarraykind (AKvarray tv)))
       | (r, Tunion x) ->
         let (acc, x) = List.map_env env x get_array_filter_return_type in
         (acc, (r, Tunion x))
@@ -4957,8 +4957,8 @@ and dispatch_call
       match x with
       | (_, Tarraykind (AKany | AKempty)) as array_type ->
         (env, (fun _ -> array_type))
-      | (r, Tarraykind (AKvec _ | AKvarray _)) ->
-        (env, (fun tr -> (r, Tarraykind (AKvec tr))))
+      | (r, Tarraykind (AKvarray _)) ->
+        (env, (fun tr -> (r, Tarraykind (AKvarray tr))))
       | (r, Tany _) -> (env, (fun _ -> (r, Typing_utils.tany env)))
       | (r, Terr) -> (env, (fun _ -> (r, Typing_utils.terr env)))
       | (r, Tunion x) ->
@@ -4974,7 +4974,7 @@ and dispatch_call
         let try_vector env =
           let vector_type = MakeType.const_vector r_fty tv in
           let env = SubType.sub_type env x vector_type Errors.unify_error in
-          (env, (fun tr -> (r, Tarraykind (AKvec tr))))
+          (env, (fun tr -> (r, Tarraykind (AKvarray tr))))
         in
         let try_keyed_container env =
           let keyed_container_type = MakeType.keyed_container r_fty tk tv in
@@ -5010,7 +5010,7 @@ and dispatch_call
         let (env, _tx, x) = expr env x in
         let (env, output_container) = build_output_container env x in
         begin
-          match get_akvec_inst funty.ft_ret.et_type with
+          match get_akvarray_inst funty.ft_ret.et_type with
           | None -> (env, fty)
           | Some elem_ty ->
             let ft_ret = MakeType.unenforced (output_container elem_ty) in

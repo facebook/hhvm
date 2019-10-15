@@ -348,7 +348,6 @@ module Full = struct
     | Tarraykind AKany -> tarray k None None
     | Tarraykind AKempty -> text "array (empty)"
     | Tarraykind (AKvarray x) -> tvarray k x
-    | Tarraykind (AKvec x) -> tarray k (Some x) None
     | Tarraykind (AKdarray (x, y)) -> tdarray k x y
     | Tarraykind (AKmap (x, y)) -> tarray k (Some x) (Some y)
     | Tclass ((_, s), Exact, []) when !debug_mode ->
@@ -724,7 +723,6 @@ module ErrorString = struct
     | Tarraykind AKempty -> "an empty array"
     | Tarraykind AKany -> array (None, None)
     | Tarraykind (AKvarray _) -> varray
-    | Tarraykind (AKvec x) -> array (Some x, None)
     | Tarraykind (AKdarray (_, _)) -> darray
     | Tarraykind (AKmap (x, y)) -> array (Some x, Some y)
     | Ttuple l -> "a tuple of size " ^ string_of_int (List.length l)
@@ -992,8 +990,6 @@ module Json = struct
         | Tarraykind (AKdarray (ty1, ty2)) ->
           obj @@ kind "darray" @ args [ty1; ty2]
         | Tarraykind (AKvarray ty) -> obj @@ kind "varray" @ args [ty]
-        | Tarraykind (AKvec ty) ->
-          obj @@ kind "array" @ empty false @ args [ty]
         | Tarraykind (AKmap (ty1, ty2)) ->
           obj @@ kind "array" @ empty false @ args [ty1; ty2]
         | Tarraykind AKempty -> obj @@ kind "array" @ empty true @ args []
@@ -1207,7 +1203,7 @@ module Json = struct
                 ty (Tarraykind AKany)
             | [ty1] ->
               aux ty1 ~keytrace:("0" :: keytrace)
-              >>= (fun ty1 -> ty (Tarraykind (AKvec ty1)))
+              >>= (fun ty1 -> ty (Tarraykind (AKvarray ty1)))
             | [ty1; ty2] ->
               aux ty1 ~keytrace:("0" :: keytrace)
               >>= fun ty1 ->

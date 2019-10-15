@@ -1344,11 +1344,6 @@ and simplify_subtype_i
       let this_ty = Option.first_some this_ty (Some ety_sub) in
       simplify_subtype ~subtype_env ~this_ty ty ety_super env
     (* Arrays *)
-    | (Ttuple _, Tarraykind AKany) ->
-      if TypecheckerOptions.disallow_array_as_tuple (Env.get_tcopt env) then
-        invalid ()
-      else
-        valid ()
     | ( ( Tnonnull | Tdynamic | Toption _ | Tprim _ | Tfun _ | Ttuple _
         | Tshape _ | Tanon _ | Tobject | Tclass _ ),
         Tarraykind _ ) ->

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c1e6846099db3794418c2a62bab5a656>>
+// @generated SignedSource<<386a015c2d9fba1700644aecef1b5cd2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -35,7 +35,6 @@ pub struct GlobalOptions {
     pub so_remote_version_specifier: Option<String>,
     pub so_remote_worker_eden_checkout_threshold: isize,
     pub so_naming_sqlite_path: Option<String>,
-    pub tco_disallow_array_as_tuple: bool,
     pub po_auto_namespace_map: Vec<(String, String)>,
     pub po_codegen: bool,
     pub po_deregister_php_stdlib: bool,

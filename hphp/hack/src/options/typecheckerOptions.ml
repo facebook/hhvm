@@ -86,8 +86,6 @@ let migration_flags_all = GlobalOptions.tco_migration_flags_all
 
 let dynamic_view = GlobalOptions.tco_dynamic_view
 
-let disallow_array_as_tuple = GlobalOptions.tco_disallow_array_as_tuple
-
 let disallow_unset_on_varray = GlobalOptions.tco_disallow_unset_on_varray
 
 let disallow_scrutinee_case_value_type_mismatch =

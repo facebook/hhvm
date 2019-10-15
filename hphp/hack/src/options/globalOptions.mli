@@ -103,8 +103,6 @@ type t = {
   so_remote_worker_eden_checkout_threshold: int;
   (* Enables the reverse naming table to fall back to SQLite for queries. *)
   so_naming_sqlite_path: string option;
-  (* Flag to disallow subtyping of untyped arrays and tuples (both ways) *)
-  tco_disallow_array_as_tuple: bool;
   (* Namespace aliasing map *)
   po_auto_namespace_map: (string * string) list;
   (* Are we emitting bytecode? *)
@@ -308,7 +306,6 @@ val make :
   ?so_remote_version_specifier:string ->
   ?so_remote_worker_eden_checkout_threshold:int ->
   ?so_naming_sqlite_path:string ->
-  ?tco_disallow_array_as_tuple:bool ->
   ?po_auto_namespace_map:(string * string) list ->
   ?tco_disallow_ambiguous_lambda:bool ->
   ?tco_disallow_array_typehint:bool ->
@@ -398,8 +395,6 @@ val so_remote_version_specifier : t -> string option
 val so_remote_worker_eden_checkout_threshold : t -> int
 
 val so_naming_sqlite_path : t -> string option
-
-val tco_disallow_array_as_tuple : t -> bool
 
 val po_auto_namespace_map : t -> (string * string) list
 

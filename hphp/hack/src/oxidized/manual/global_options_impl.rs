@@ -24,7 +24,6 @@ impl Default for GlobalOptions {
             so_remote_version_specifier: None,
             so_remote_worker_eden_checkout_threshold: 0,
             so_naming_sqlite_path: None,
-            tco_disallow_array_as_tuple: false,
             po_auto_namespace_map: vec![],
             po_codegen: false,
             po_deregister_php_stdlib: false,

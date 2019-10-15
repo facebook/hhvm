@@ -55,7 +55,6 @@ type t = {
   so_remote_version_specifier: string option;
   so_remote_worker_eden_checkout_threshold: int;
   so_naming_sqlite_path: string option;
-  tco_disallow_array_as_tuple: bool;
   po_auto_namespace_map: (string * string) list;
   po_codegen: bool;
   po_deregister_php_stdlib: bool;
@@ -215,7 +214,6 @@ let default =
     so_remote_version_specifier = None;
     so_remote_worker_eden_checkout_threshold = 10000;
     so_naming_sqlite_path = None;
-    tco_disallow_array_as_tuple = false;
     po_auto_namespace_map = [];
     po_codegen = false;
     po_disallow_execution_operator = false;
@@ -309,7 +307,6 @@ let make
     ?(so_remote_worker_eden_checkout_threshold =
       default.so_remote_worker_eden_checkout_threshold)
     ?so_naming_sqlite_path
-    ?(tco_disallow_array_as_tuple = default.tco_disallow_array_as_tuple)
     ?(po_auto_namespace_map = default.po_auto_namespace_map)
     ?(tco_disallow_ambiguous_lambda = default.tco_disallow_ambiguous_lambda)
     ?(tco_disallow_array_typehint = default.tco_disallow_array_typehint)
@@ -396,7 +393,6 @@ let make
     so_remote_version_specifier;
     so_remote_worker_eden_checkout_threshold;
     so_naming_sqlite_path;
-    tco_disallow_array_as_tuple;
     po_auto_namespace_map;
     po_codegen = false;
     ignored_fixme_codes;
@@ -498,8 +494,6 @@ let so_remote_worker_eden_checkout_threshold t =
   t.so_remote_worker_eden_checkout_threshold
 
 let so_naming_sqlite_path t = t.so_naming_sqlite_path
-
-let tco_disallow_array_as_tuple t = t.tco_disallow_array_as_tuple
 
 let po_auto_namespace_map t = t.po_auto_namespace_map
 

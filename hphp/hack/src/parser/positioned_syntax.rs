@@ -271,6 +271,7 @@ pub trait PositionedSyntaxTrait: SyntaxTrait {
      * the last character. (the end offset is one larger than given by position)
      */
     fn position_exclusive(&self, source_text: &IndexedSourceText) -> Option<Pos>;
+    fn position(&self, source_text: &IndexedSourceText) -> Option<Pos>;
     fn text<'a>(&self, source_text: &'a SourceText) -> &'a str;
     fn full_text<'a>(&self, source_text: &'a SourceText) -> &'a [u8];
     fn leading_text<'a>(&self, source_text: &'a SourceText) -> &'a str;
@@ -290,6 +291,12 @@ impl PositionedSyntaxTrait for PositionedSyntax {
     fn position_exclusive(&self, source_text: &IndexedSourceText) -> Option<Pos> {
         let start_offset = self.start_offset();
         let end_offset = self.end_offset() + 1;
+        Some(source_text.relative_pos(start_offset, end_offset))
+    }
+
+    fn position(&self, source_text: &IndexedSourceText) -> Option<Pos> {
+        let start_offset = self.start_offset();
+        let end_offset = self.end_offset();
         Some(source_text.relative_pos(start_offset, end_offset))
     }
 

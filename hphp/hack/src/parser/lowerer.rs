@@ -380,13 +380,26 @@ where
     }
 
     fn raise_parsing_error(node: &Syntax<T, V>, env: &mut Env, msg: &str) {
-        //TODO:
+        Self::raise_parsing_error_(Either::Left(node), env, msg)
     }
 
     fn raise_parsing_error_pos(pos: &Pos, env: &mut Env, msg: &str) {
-        // TODO: enable should_surface_errors
-        if env.codegen() && !env.lower_coroutines() {
-            env.lowpri_errors().push((pos.clone(), String::from(msg)))
+        Self::raise_parsing_error_(Either::Right(pos), env, msg)
+    }
+
+    fn raise_parsing_error_(node_or_pos: Either<&Syntax<T, V>, &Pos>, env: &mut Env, msg: &str) {
+        if env.should_surface_error() {
+            let pos = node_or_pos.either(|node| Self::p_pos(node, env), |pos| pos.clone());
+            env.lowpri_errors().push((pos, String::from(msg)))
+        } else if env.codegen() {
+            let pos = node_or_pos.either(
+                |node| {
+                    node.position_exclusive(env.indexed_source_text)
+                        .unwrap_or_else(|| env.mk_none_pos())
+                },
+                |pos| pos.clone(),
+            );
+            env.lowpri_errors().push((pos, String::from(msg)))
         }
     }
 

@@ -8,7 +8,6 @@ use crate::{gen::global_options::GlobalOptions, i_set, infer_missing, s_map, s_s
 impl Default for GlobalOptions {
     fn default() -> Self {
         Self {
-            tco_safe_array: false,
             tco_safe_vector_array: false,
             tco_experimental_features: s_set::SSet::new(),
             tco_migration_flags: s_set::SSet::new(),

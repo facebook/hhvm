@@ -290,7 +290,6 @@ let load config_filename options =
   in
   let global_opts =
     GlobalOptions.make
-      ?tco_safe_array:(bool_opt "safe_array" config)
       ?tco_safe_vector_array:(bool_opt "safe_vector_array" config)
       ?po_deregister_php_stdlib:(bool_opt "deregister_php_stdlib" config)
       ?po_allow_goto:(Option.map ~f:not (bool_opt "disallow_goto" config))

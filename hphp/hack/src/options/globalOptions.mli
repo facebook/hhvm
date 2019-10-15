@@ -36,30 +36,6 @@ end
 
 type t = {
   (*
-   * Enforces array subtyping relationships.
-   *
-   * There are a few kinds of arrays in Hack:
-   *   1. array: This is a type parameter-less array, that behaves like a PHP
-   *      array, but may be used in place of the arrays listed below.
-   *   2. array<T>: This is a vector-like array. It may be implemented with a
-   *      compact representation. Keys are integer indices. Values are of type T.
-   *   3. array<Tk, Tv>: This is a dictionary-like array. It is generally
-   *      implemented as a hash table. Keys are of type Tk. Values are of type
-   *      Tv.
-   *
-   * Unfortunately, there is no consistent subtyping relationship between these
-   * types:
-   *   1. An array<T> may be provided where an array is required.
-   *   2. An array may be provided where an array<T> is required.
-   *   3. An array<Tk, Tv> may be provided where an array is required.
-   *   4. An array may be provided where an array<Tk, Tv> is required.
-   *
-   * This option enforces a stricter subtyping relationship within these types.
-   * In particular, when enabled, points 2. and 4. from the above list become
-   * typing errors.
-   *)
-  tco_safe_array: bool;
-  (*
    * Enforces that a vector-like array may not be used where a hashtable-like
    * array is required.
    *
@@ -282,7 +258,6 @@ type t = {
 [@@deriving show]
 
 val make :
-  ?tco_safe_array:bool ->
   ?tco_safe_vector_array:bool ->
   ?po_deregister_php_stdlib:bool ->
   ?po_disallow_execution_operator:bool ->
@@ -363,8 +338,6 @@ val make :
   ?po_disallow_func_ptrs_in_constants:bool ->
   unit ->
   t
-
-val tco_safe_array : t -> bool
 
 val tco_safe_vector_array : t -> bool
 

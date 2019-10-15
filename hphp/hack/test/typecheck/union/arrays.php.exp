@@ -94,6 +94,24 @@ File "arrays.php", line 14, characters 3-7:
 You cannot have an array without generics in strict mode (Typing[4045])
 File "arrays.php", line 15, characters 3-7:
 You cannot have an array without generics in strict mode (Typing[4045])
+File "arrays.php", line 53, characters 16-17:
+Invalid argument (Typing[4110])
+File "arrays.php", line 184, characters 26-33:
+Expected varray<[unresolved]>
+File "arrays.php", line 14, characters 3-7:
+But got array
+File "arrays.php", line 63, characters 20-21:
+Invalid argument (Typing[4110])
+File "arrays.php", line 185, characters 27-36:
+Expected varray<int>
+File "arrays.php", line 14, characters 3-7:
+But got array
+File "arrays.php", line 72, characters 20-21:
+Invalid argument (Typing[4110])
+File "arrays.php", line 185, characters 27-36:
+Expected varray<int>
+File "arrays.php", line 14, characters 3-7:
+But got array
 File "arrays.php", line 95, characters 20-21:
 Invalid argument (Typing[4110])
 File "arrays.php", line 185, characters 33-35:

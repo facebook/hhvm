@@ -1360,12 +1360,7 @@ and simplify_subtype_i
         | (AKempty, _) -> valid ()
         (* array is a subtype of varray_or_darray<_> *)
         | (AKany, AKvarray_or_darray (_, Tany _)) -> valid ()
-        | (AKany, _) ->
-          let safe_array = TypecheckerOptions.safe_array (Env.get_tcopt env) in
-          if safe_array then
-            invalid ()
-          else
-            valid ()
+        | (AKany, _) -> invalid ()
         (* varray_or_darray<ty1> <: varray_or_darray<ty2> iff t1 <: ty2
        But, varray_or_darray<ty1> is never a subtype of a vect-like array *)
         | (AKvarray_or_darray ty_sub, AKvarray_or_darray ty_super) ->

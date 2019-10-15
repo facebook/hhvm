@@ -310,12 +310,9 @@ and union_arraykind env ak1 ak2 =
   | (ak, AKempty) ->
     (env, ak)
   | (AKany, AKany) -> (env, AKany)
-  | (AKany, ak)
-  | (ak, AKany) ->
-    if TypecheckerOptions.safe_array (Env.get_tcopt env) then
-      raise Dont_simplify
-    else
-      (env, ak)
+  | (AKany, _)
+  | (_, AKany) ->
+    raise Dont_simplify
   | (AKvarray ty1, AKvarray ty2) ->
     let (env, ty) = union env ty1 ty2 in
     (env, AKvarray ty)

@@ -15,13 +15,29 @@ module Status = struct
     | Initializing
     | Processing_files of ClientIdeMessage.Processing_files.t
     | Ready
-    | Crashed of string
+    | Stopped of string
+end
+
+module Stop_reason = struct
+  type t =
+    | Crashed
+    | Editor_exited
+    | Restarting
+    | Testing
+
+  let to_string (t : t) =
+    match t with
+    | Crashed -> "crashed"
+    | Editor_exited -> "editor exited"
+    | Restarting -> "restarting"
+    | Testing -> "testing-only, you should not see this"
 end
 
 type state =
   | Uninitialized of { wait_for_initialization: bool }
   | Failed_to_initialize of string
   | Initialized of { status: Status.t }
+  | Stopped of Stop_reason.t
 
 type message_wrapper =
   | Message_wrapper : 'a ClientIdeMessage.t -> message_wrapper
@@ -136,6 +152,10 @@ let rec wait_for_initialization (t : t) : unit Lwt.t =
     let%lwt () = Lwt_condition.wait t.state_changed_cv in
     wait_for_initialization t
   | Initialized _ -> Lwt.return_unit
+  | Stopped _ ->
+    failwith
+      ( "Should not be waiting for the initialization of a stopped IDE service, "
+      ^ "as this is a terminal state" )
 
 let initialize_from_saved_state
     (t : t)
@@ -186,7 +206,8 @@ let process_status_notification
     (t : t) (notification : ClientIdeMessage.notification) : unit =
   match t.state with
   | Uninitialized _
-  | Failed_to_initialize _ ->
+  | Failed_to_initialize _
+  | Stopped _ ->
     ()
   | Initialized _state ->
     (match notification with
@@ -198,6 +219,53 @@ let process_status_notification
         (Initialized { status = Status.Processing_files processed_files })
     | ClientIdeMessage.Done_processing ->
       set_state t (Initialized { status = Status.Ready }))
+
+let destroy (t : t) : unit Lwt.t =
+  let {
+    daemon_handle;
+    messages_to_send;
+    response_emitter;
+    notification_emitter;
+    _;
+  } =
+    t
+  in
+  let%lwt () =
+    match t.state with
+    | Uninitialized _
+    | Failed_to_initialize _
+    | Stopped _ ->
+      Lwt.return_unit
+    | Initialized _ ->
+      (try%lwt
+         let%lwt () =
+           Lwt.pick
+             [
+               (let%lwt (_result : (unit, string) result) =
+                  do_rpc
+                    ~message:(ClientIdeMessage.Shutdown ())
+                    ~messages_to_send
+                    ~response_emitter
+                in
+                Daemon.kill daemon_handle;
+                Lwt.return_unit);
+               (let%lwt () = Lwt_unix.sleep 5.0 in
+                Daemon.kill daemon_handle;
+                Lwt.return_unit);
+             ]
+         in
+         Lwt.return_unit
+       with _ -> Lwt.return_unit)
+  in
+  Lwt_message_queue.close messages_to_send;
+  Lwt_message_queue.close notification_emitter;
+  Lwt_message_queue.close response_emitter;
+  Lwt.return_unit
+
+let stop (t : t) ~(reason : Stop_reason.t) : unit Lwt.t =
+  let%lwt () = destroy t in
+  set_state t (Stopped reason);
+  Lwt.return_unit
 
 let rec serve (t : t) : unit Lwt.t =
   let send_queued_up_messages ~out_fd messages_to_send : bool Lwt.t =
@@ -249,47 +317,14 @@ let rec serve (t : t) : unit Lwt.t =
     serve t
   else (
     log "Shutting down";
-    Lwt.return_unit
-  )
-
-let destroy (t : t) : unit Lwt.t =
-  let {
-    daemon_handle;
-    messages_to_send;
-    response_emitter;
-    notification_emitter;
-    _;
-  } =
-    t
-  in
-  let%lwt () =
     match t.state with
-    | Uninitialized _
-    | Failed_to_initialize _ ->
+    | Stopped _ ->
+      (* Already stopped, don't do anything. *)
       Lwt.return_unit
-    | Initialized _ ->
-      let%lwt () =
-        Lwt.pick
-          [
-            (let%lwt (_result : (unit, string) result) =
-               do_rpc
-                 ~message:(ClientIdeMessage.Shutdown ())
-                 ~messages_to_send
-                 ~response_emitter
-             in
-             Daemon.kill daemon_handle;
-             Lwt.return_unit);
-            (let%lwt () = Lwt_unix.sleep 5.0 in
-             Daemon.kill daemon_handle;
-             Lwt.return_unit);
-          ]
-      in
+    | _ ->
+      let%lwt () = stop t ~reason:Stop_reason.Crashed in
       Lwt.return_unit
-  in
-  Lwt_message_queue.close messages_to_send;
-  Lwt_message_queue.close notification_emitter;
-  Lwt_message_queue.close response_emitter;
-  Lwt.return_unit
+  )
 
 let push_message (t : t) (message : message_wrapper) : unit =
   match t.state with
@@ -297,7 +332,8 @@ let push_message (t : t) (message : message_wrapper) : unit =
   | Initialized _ ->
     let _success : bool = Lwt_message_queue.push t.messages_to_send message in
     ()
-  | Failed_to_initialize _ ->
+  | Failed_to_initialize _
+  | Stopped _ ->
     (* This is a terminal state. Don't waste memory queueing up messages that
     can never be sent. *)
     ()
@@ -315,6 +351,11 @@ let rpc (t : t) (rpc_message : 'a ClientIdeMessage.t) :
   | Failed_to_initialize error_message ->
     Lwt.return_error
       (Printf.sprintf "IDE service failed to initialize: %s" error_message)
+  | Stopped reason ->
+    Lwt.return_error
+      (Printf.sprintf
+         "IDE service is stopped: %s"
+         (Stop_reason.to_string reason))
   | Uninitialized { wait_for_initialization = true } ->
     let%lwt () = wait_for_initialization t in
     let%lwt result =
@@ -332,5 +373,6 @@ let get_notifications (t : t) : notification_emitter = t.notification_emitter
 let get_status (t : t) : Status.t =
   match t.state with
   | Uninitialized _ -> Status.Initializing
-  | Failed_to_initialize message -> Status.Crashed message
+  | Failed_to_initialize message -> Status.Stopped message
+  | Stopped reason -> Status.Stopped (Stop_reason.to_string reason)
   | Initialized { status } -> status

@@ -60,6 +60,8 @@ type hh_server_state =
 
 let hh_server_restart_button_text = "Restart Hack Server"
 
+let client_ide_restart_button_text = "Restart Hack IDE Services"
+
 (** A push message from the server might come while we're waiting for a server-rpc
    response, or while we're free. The current architecture allows us to have
    arbitrary responses to push messages while we're free, but only a limited set
@@ -904,6 +906,15 @@ let get_document_location
   let file_contents = get_document_contents editor_open_files uri in
   { ClientIdeMessage.file_path; file_contents; line; column }
 
+let stop_ide_service
+    (ide_service : ClientIdeService.t)
+    ~(reason : ClientIdeService.Stop_reason.t) : unit Lwt.t =
+  log
+    "Stopping IDE service process: %s"
+    (ClientIdeService.Stop_reason.to_string reason);
+  let%lwt () = ClientIdeService.stop ide_service ~reason in
+  Lwt.return_unit
+
 let do_shutdown
     (state : state)
     (ide_service : ClientIdeService.t)
@@ -934,7 +945,11 @@ let do_shutdown
     | _ ->
       (* No other states have a 'conn' to send any disconnect messages over.    *)
       Lwt.return_unit
-  and () = ClientIdeService.destroy ide_service in
+  and () =
+    stop_ide_service
+      ide_service
+      ~reason:ClientIdeService.Stop_reason.Editor_exited
+  in
   Lwt.return Post_shutdown
 
 let state_to_rage (state : state) : string =
@@ -2266,11 +2281,12 @@ let get_client_ide_status (ide_service : ClientIdeService.t) :
   | ClientIdeService.Status.Not_started ->
     {
       ShowStatus.request =
-        {
-          ShowMessageRequest.type_ = MessageType.ErrorMessage;
-          message = "IDE services: not started.";
-          actions = [];
-        };
+        ShowMessageRequest.
+          {
+            type_ = MessageType.ErrorMessage;
+            message = "IDE services: not started.";
+            actions = [{ title = client_ide_restart_button_text }];
+          };
       progress = None;
       total = None;
       shortMessage = None;
@@ -2316,17 +2332,18 @@ let get_client_ide_status (ide_service : ClientIdeService.t) :
       total = None;
       shortMessage = None;
     }
-  | ClientIdeService.Status.Crashed message ->
+  | ClientIdeService.Status.Stopped message ->
     {
       ShowStatus.request =
-        {
-          ShowMessageRequest.type_ = MessageType.ErrorMessage;
-          message = "IDE services crashed: " ^ message;
-          actions = [];
-        };
+        ShowMessageRequest.
+          {
+            type_ = MessageType.ErrorMessage;
+            message = "IDE services stopped: " ^ message ^ ".";
+            actions = [{ title = client_ide_restart_button_text }];
+          };
       progress = None;
       total = None;
-      shortMessage = Some "Hack IDE: crashed";
+      shortMessage = Some "Hack IDE: stopped";
     }
 
 let merge_statuses
@@ -3104,11 +3121,90 @@ let cancel_if_stale
   else
     Lwt.return_unit
 
+let run_ide_service (env : env) (ide_service : ClientIdeService.t) : unit Lwt.t
+    =
+  if env.use_serverless_ide then (
+    let%lwt root = get_root_wait () in
+    let initialize_params = initialize_params_exc () in
+    if
+      Lsp.Initialize.(
+        initialize_params.client_capabilities.workspace.didChangeWatchedFiles
+          .dynamicRegistration)
+    then
+      log "Language client reports that it supports file-watching"
+    else
+      log
+        ( "Warning: the language client does not report "
+        ^^ "that it supports file-watching; "
+        ^^ "file change notifications may not be processed, "
+        ^^ "and consequently, IDE queries may return stale results." );
+
+    let naming_table_saved_state_path =
+      Lsp.Initialize.(
+        initialize_params.initializationOptions.namingTableSavedStatePath)
+      |> Option.map ~f:Path.make
+    in
+    let%lwt result =
+      ClientIdeService.initialize_from_saved_state
+        ide_service
+        ~root
+        ~naming_table_saved_state_path
+        ~wait_for_initialization:(Option.is_some naming_table_saved_state_path)
+    in
+    match result with
+    | Ok () ->
+      let%lwt () = ClientIdeService.serve ide_service in
+      Lwt.return_unit
+    | Error message ->
+      log "IDE services could not be initialized: %s" message;
+      Lwt.return_unit
+  ) else
+    Lwt.return_unit
+
 let tick_showStatus
-    (env : env) ~(state : state ref) ~(ide_service : ClientIdeService.t) :
+    (env : env) ~(state : state ref) ~(ide_service : ClientIdeService.t ref) :
     unit Lwt.t =
   let show_status () : unit Lwt.t =
     begin
+      let on_result ~result state =
+        let result = Jget.string_d result "title" ~default:"" in
+        match (result, state) with
+        | (command, Lost_server _) when command = hh_server_restart_button_text
+          ->
+          let root =
+            match get_root_opt () with
+            | None -> failwith "we should have root by now"
+            | Some root -> root
+          in
+          (* Belt-and-braces kill the server. This is in case the server was *)
+          (* stuck in some weird state. It's also what 'hh restart' does. *)
+          if MonitorConnection.server_exists (Path.to_string root) then
+            ClientStop.kill_server root !ref_from;
+
+          (* After that it's safe to try to reconnect! *)
+          start_server root;
+          let%lwt state =
+            reconnect_from_lost_if_necessary state `Force_regain
+          in
+          Lwt.return state
+        | (command, _) when command = client_ide_restart_button_text ->
+          Hh_logger.log "Restarting IDE service";
+
+          (* It's possible that [destroy] takes a while to finish, so make
+          sure to assign the new IDE service to the [ref] before attempting
+          to do an asynchronous operation with the old one. *)
+          let old_ide_service = !ide_service in
+          let new_ide_service = ClientIdeService.make () in
+          ide_service := new_ide_service;
+          Lwt.async (fun () -> run_ide_service env new_ide_service);
+          let%lwt () =
+            stop_ide_service
+              old_ide_service
+              ~reason:ClientIdeService.Stop_reason.Restarting
+          in
+          Lwt.return state
+        | _ -> Lwt.return state
+      in
       match !state with
       | Main_loop { Main_env.hh_server_status; _ } ->
         let shortMessage =
@@ -3120,33 +3216,9 @@ let tick_showStatus
           { hh_server_status with ShowStatus.shortMessage }
         in
         request_showStatus
-          (merge_with_client_ide_status env ide_service hh_server_status)
+          ~on_result
+          (merge_with_client_ide_status env !ide_service hh_server_status)
       | Lost_server { Lost_env.p; _ } ->
-        let on_result ~result state =
-          let result = Jget.string_d result "title" ~default:"" in
-          match (result, state) with
-          | (command, Lost_server _) ->
-            if command = hh_server_restart_button_text then (
-              let root =
-                match get_root_opt () with
-                | None -> failwith "we should have root by now"
-                | Some root -> root
-              in
-              (* Belt-and-braces kill the server. This is in case the server was *)
-              (* stuck in some weird state. It's also what 'hh restart' does. *)
-              if MonitorConnection.server_exists (Path.to_string root) then
-                ClientStop.kill_server root !ref_from;
-
-              (* After that it's safe to try to reconnect! *)
-              start_server root;
-              let%lwt state =
-                reconnect_from_lost_if_necessary state `Force_regain
-              in
-              Lwt.return state
-            ) else
-              Lwt.return state
-          | _ -> Lwt.return state
-        in
         let hh_server_status =
           {
             ShowStatus.request =
@@ -3163,7 +3235,7 @@ let tick_showStatus
         in
         request_showStatus
           ~on_result
-          (merge_with_client_ide_status env ide_service hh_server_status)
+          (merge_with_client_ide_status env !ide_service hh_server_status)
       | _ -> ()
     end;
     Lwt.return_unit
@@ -3736,6 +3808,15 @@ let handle_event
             to_stdout
             "[client-ide] Done processing file changes";
           Lwt.return_unit
+        | (_, Client_message c) when c.method_ = "$test/shutdownServerlessIde"
+          ->
+          let%lwt () =
+            stop_ide_service
+              ide_service
+              ~reason:ClientIdeService.Stop_reason.Testing
+          in
+          respond_jsonrpc ~powered_by:Serverless_ide c Hh_json.JSON_Null;
+          Lwt.return_unit
         (* catch-all for client reqs/notifications we haven't yet implemented *)
         | (Main_loop _menv, Client_message c) ->
           let message = Printf.sprintf "not implemented: %s" c.method_ in
@@ -3795,51 +3876,6 @@ let handle_event
                  (lenv.p.new_hh_server_state |> hh_server_state_to_string)))
       in
       Lwt.return_unit))
-
-let run_ide_service (env : env) (ide_service : ClientIdeService.t) : unit Lwt.t
-    =
-  if env.use_serverless_ide then (
-    let%lwt root = get_root_wait () in
-    let initialize_params = initialize_params_exc () in
-    if
-      Lsp.Initialize.(
-        initialize_params.client_capabilities.workspace.didChangeWatchedFiles
-          .dynamicRegistration)
-    then
-      log "Language client reports that it supports file-watching"
-    else
-      log
-        ( "Warning: the language client does not report "
-        ^^ "that it supports file-watching; "
-        ^^ "file change notifications may not be processed, "
-        ^^ "and consequently, IDE queries may return stale results." );
-
-    let naming_table_saved_state_path =
-      Lsp.Initialize.(
-        initialize_params.initializationOptions.namingTableSavedStatePath)
-      |> Option.map ~f:Path.make
-    in
-    let%lwt result =
-      ClientIdeService.initialize_from_saved_state
-        ide_service
-        ~root
-        ~naming_table_saved_state_path
-        ~wait_for_initialization:(Option.is_some naming_table_saved_state_path)
-    in
-    match result with
-    | Ok () ->
-      let%lwt () = ClientIdeService.serve ide_service in
-      Lwt.return_unit
-    | Error message ->
-      log "IDE services could not be initialized: %s" message;
-      Lwt.return_unit
-  ) else
-    Lwt.return_unit
-
-let shutdown_ide_service (ide_service : ClientIdeService.t) : unit Lwt.t =
-  log "Shutting down IDE service process...";
-  let%lwt () = ClientIdeService.destroy ide_service in
-  Lwt.return_unit
 
 (* main: this is the main loop for processing incoming Lsp client requests,
    and incoming server notifications. Never returns. *)
@@ -4067,6 +4103,8 @@ let main (env : env) : Exit_status.t Lwt.t =
     let%lwt () = process_next_event () in
     main_loop ()
   in
-  let%lwt () = Lwt.pick [main_loop (); tick_showStatus env state !ide_service]
-  and () = run_ide_service env !ide_service in
+  Lwt.async (fun () -> run_ide_service env !ide_service);
+  let%lwt () =
+    Lwt.pick [main_loop (); tick_showStatus env state ide_service]
+  in
   Lwt.return Exit_status.No_error

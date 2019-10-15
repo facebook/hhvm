@@ -28,7 +28,17 @@ module Status : sig
         (** The IDE services are available, but are also in the middle of
         processing files. *)
     | Ready  (** The IDE services are available. *)
-    | Crashed of string  (** The IDE services are not available. *)
+    | Stopped of string  (** The IDE services are not available. *)
+end
+
+module Stop_reason : sig
+  type t =
+    | Crashed
+    | Editor_exited
+    | Restarting
+    | Testing
+
+  val to_string : t -> string
 end
 
 (** Create an uninitialized IDE service. All queries made to this service will
@@ -50,9 +60,10 @@ val initialize_from_saved_state :
 been [destroy]ed. *)
 val serve : t -> unit Lwt.t
 
-(** Clean up any resources held by the IDE service (such as the message loop and
-background processes). *)
-val destroy : t -> unit Lwt.t
+(** Clean up any resources held by the IDE service (such as the message loop
+and background processes). Mark the service's status as "shut down" for the
+given [reason]. *)
+val stop : t -> reason:Stop_reason.t -> unit Lwt.t
 
 (** The caller is expected to call this function to notify the IDE service
 whenever a Hack file changes on disk, so that it can update its indexes

@@ -3741,15 +3741,52 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
-    def test_serverless_ide_status_running(self) -> None:
+    def test_serverless_ide_status_restart(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("hover.php"))
 
         spec = (
             self.initialize_spec(
-                LspTestSpec("serverless_ide_status_running"),
+                LspTestSpec("serverless_ide_status_restart"),
                 use_serverless_ide=True,
                 supports_status=True,
+            )
+            .wait_for_server_request(
+                method="window/showStatus",
+                params={
+                    "type": 2,
+                    "actions": [],
+                    "message": "IDE services: initializing. hh_server: ready.",
+                    "shortMessage": "Hack IDE: initializing",
+                },
+                result=NoResponse(),
+            )
+            .wait_for_server_request(
+                method="window/showStatus",
+                params={
+                    "actions": [],
+                    "message": "IDE services: ready. hh_server: ready.",
+                    "type": 3,
+                },
+                result=NoResponse(),
+            )
+            .request(
+                "$test/shutdownServerlessIde",
+                params={},
+                result=None,
+                powered_by="serverless_ide",
+            )
+            .wait_for_server_request(
+                method="window/showStatus",
+                params={
+                    "actions": [{"title": "Restart Hack IDE Services"}],
+                    "message": "IDE services stopped: testing-only, "
+                    + "you should not see this. "
+                    + "hh_server: ready.",
+                    "shortMessage": "Hack IDE: stopped",
+                    "type": 1,
+                },
+                result={"title": "Restart Hack IDE Services"},
             )
             .wait_for_server_request(
                 method="window/showStatus",

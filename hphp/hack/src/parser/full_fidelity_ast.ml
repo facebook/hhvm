@@ -99,7 +99,6 @@ let make_env
     ?(lower_coroutines = true)
     ?(fail_open = true)
     ?(parser_options = ParserOptions.default)
-    ?(fi_mode = FileInfo.Mpartial)
     ?(is_hh_file = false)
     ?(hacksperimental = false)
     (file : Relative_path.t) : env =
@@ -111,18 +110,11 @@ let make_env
     elaborate_namespaces;
     include_line_comments;
     keep_errors;
-    quick_mode =
-      ( (not codegen)
-      &&
-      match fi_mode with
-      | FileInfo.Mdecl
-      | FileInfo.Mphp ->
-        true
-      | _ -> quick_mode );
+    quick_mode = (not codegen) && quick_mode;
     show_all_errors;
     lower_coroutines;
     parser_options;
-    fi_mode;
+    fi_mode = FileInfo.Mpartial;
     fail_open;
     file;
     hacksperimental;

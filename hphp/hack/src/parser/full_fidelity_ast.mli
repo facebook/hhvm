@@ -31,7 +31,6 @@ val make_env (* Optional parts *) :
   ?lower_coroutines:bool ->
   ?fail_open:bool ->
   ?parser_options:ParserOptions.t ->
-  ?fi_mode:FileInfo.mode ->
   ?is_hh_file:bool ->
   ?hacksperimental:bool (* Required parts *) ->
   Relative_path.t ->

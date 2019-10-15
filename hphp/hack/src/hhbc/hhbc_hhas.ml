@@ -395,8 +395,8 @@ let string_of_iterator_id i = Iterator.to_string i
 
 let string_of_null_flavor nf =
   match nf with
-  | Ast_defs.OG_nullthrows -> "NullThrows"
-  | Ast_defs.OG_nullsafe -> "NullSafe"
+  | Hhbc_ast.Obj_null_throws -> "NullThrows"
+  | Hhbc_ast.Obj_null_safe -> "NullSafe"
 
 let string_of_class_kind ck =
   match ck with

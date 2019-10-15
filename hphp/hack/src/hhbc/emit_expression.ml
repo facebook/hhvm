@@ -491,6 +491,10 @@ let text_of_prop (prop : Tast.class_get_expr) =
   | A.CGstring (_, s) -> s
   | A.CGexpr e -> text_of_expr e
 
+let from_ast_null_flavor = function
+  | A.OG_nullsafe -> Hhbc_ast.Obj_null_safe
+  | A.OG_nullthrows -> Hhbc_ast.Obj_null_throws
+
 let parse_include (e : Tast.expr) =
   let strip_backslash p =
     let len = String.length p in
@@ -3497,11 +3501,13 @@ and emit_call_lhs_and_fcall
     in
     let obj = emit_object_expr env obj in
     let (generics, fcall_args) = emit_generics fcall_args in
+    let null_flavor = from_ast_null_flavor null_flavor in
     ( gather [obj; instr_nulluninit; instr_nulluninit],
       gather [generics; instr_fcallobjmethodd fcall_args name null_flavor] )
   | A.Obj_get (obj, method_expr, null_flavor) ->
     let obj = emit_object_expr env obj in
     let tmp = Local.get_unnamed_local () in
+    let null_flavor = from_ast_null_flavor null_flavor in
     ( gather
         [
           obj;

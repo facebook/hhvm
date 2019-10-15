@@ -342,7 +342,7 @@ let instr_fcallobjmethodd fcall_args method_ flavor =
   instr (ICall (FCallObjMethodD (fcall_args, flavor, method_)))
 
 let instr_fcallobjmethodd_nullthrows fcall_args method_ =
-  instr_fcallobjmethodd fcall_args method_ Ast_defs.OG_nullthrows
+  instr_fcallobjmethodd fcall_args method_ Obj_null_throws
 
 let instr_querym num_params op key =
   instr (IFinal (QueryM (num_params, op, key)))

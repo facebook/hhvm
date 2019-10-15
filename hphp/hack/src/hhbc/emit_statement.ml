@@ -13,7 +13,6 @@ open Instruction_sequence
 open Emit_expression
 open Emit_pos
 module A = Aast
-module H = Hhbc_ast
 module TC = Hhas_type_constraint
 module SN = Naming_special_names
 module TFR = Try_finally_rewriter
@@ -524,7 +523,7 @@ and emit_using
           instr_fcallobjmethodd
             (make_fcall_args ?async_eager_label 0)
             fn_name
-            A.OG_nullthrows;
+            Obj_null_throws;
           epilogue;
           ( if is_block_scoped then
             instr_unsetl local
@@ -1112,7 +1111,7 @@ and emit_foreach_await env pos collection iterator block =
         instr_fcallobjmethodd
           (make_fcall_args ~async_eager_label 0)
           next_meth
-          A.OG_nullthrows;
+          Obj_null_throws;
         instr_await;
         instr_label async_eager_label;
         instr_dup;

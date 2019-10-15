@@ -329,25 +329,25 @@ let mut_imms (is : IS.t) : IS.t =
   let mutate_call s =
     match s with (*It's not worth mutating arg numbers for Push* or Call*,
                    because we already know it will fail the verifier/assembler*)
-    | FCallObjMethod   (i, Ast_defs.OG_nullthrows, pl)    ->
+    | FCallObjMethod   (i, Hhbc_ast.Obj_null_throws, pl)    ->
          FCallObjMethod(i,    (if should_mutate()
-                              then Ast_defs.OG_nullsafe
-                              else Ast_defs.OG_nullthrows),
+                              then Hhbc_ast.Obj_null_safe
+                              else Hhbc_ast.Obj_null_throws),
                         pl)
-    | FCallObjMethod   (i, Ast_defs.OG_nullsafe, pl)      ->
+    | FCallObjMethod   (i, Hhbc_ast.Obj_null_safe, pl)      ->
          FCallObjMethod(i,    (if should_mutate()
-                              then Ast_defs.OG_nullthrows
-                              else Ast_defs.OG_nullsafe),
+                              then Hhbc_ast.Obj_null_throws
+                              else Hhbc_ast.Obj_null_safe),
                         pl)
-    | FCallObjMethodD  (i, Ast_defs.OG_nullthrows, m) ->
+    | FCallObjMethodD  (i, Hhbc_ast.Obj_null_throws, m) ->
         FCallObjMethodD(i, (if should_mutate()
-                              then Ast_defs.OG_nullsafe
-                              else Ast_defs.OG_nullthrows),
+                              then Hhbc_ast.Obj_null_safe
+                              else Hhbc_ast.Obj_null_throws),
                         m)
-    | FCallObjMethodD  (i, Ast_defs.OG_nullsafe, m)   ->
+    | FCallObjMethodD  (i, Hhbc_ast.Obj_null_safe, m)   ->
         FCallObjMethodD(i, (if should_mutate()
-                              then Ast_defs.OG_nullthrows
-                              else Ast_defs.OG_nullsafe),
+                              then Hhbc_ast.Obj_null_throws
+                              else Hhbc_ast.Obj_null_safe),
                         m)
     | _ -> s in
   let mutate_base s =

@@ -410,6 +410,10 @@ type instruct_mutator =
   | CheckProp of prop_id
   | InitProp of prop_id * initprop_op
 
+type obj_null_flavor =
+  | Obj_null_throws
+  | Obj_null_safe
+
 type instruct_call =
   | NewObj
   | NewObjR
@@ -425,8 +429,8 @@ type instruct_call =
   | FCallCtor of fcall_args
   | FCallFunc of fcall_args * param_locations
   | FCallFuncD of fcall_args * function_id
-  | FCallObjMethod of fcall_args * Ast_defs.og_null_flavor * param_locations
-  | FCallObjMethodD of fcall_args * Ast_defs.og_null_flavor * method_id
+  | FCallObjMethod of fcall_args * obj_null_flavor * param_locations
+  | FCallObjMethodD of fcall_args * obj_null_flavor * method_id
 
 type instruct_base =
   | BaseGC of stack_index * MemberOpMode.t

@@ -104,7 +104,7 @@ module Naming = struct
     | Undefined
     | UnexpectedArrow
     | UnexpectedTypedef
-    | UsingInternalClass
+    | UsingInternalClassDEPRECATED
     | VoidCast
     | ObjectCast
     | UnsetCast

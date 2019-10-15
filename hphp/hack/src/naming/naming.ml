@@ -16,8 +16,6 @@
 
 open Core_kernel
 open Common
-open Utils
-open String_utils
 module N = Aast
 module SN = Naming_special_names
 module NS = Namespaces
@@ -515,18 +513,7 @@ end = struct
         NS.elaborate_id genv.namespace elaborate_kind x
       in
       (match Naming_table.Types.get_pos name with
-      | Some (_def_pos, Naming_table.TClass) ->
-        (* Don't let people use strictly internal classes
-         * (except when they are being declared in .hhi files) *)
-        if
-          name = SN.Classes.cHH_BuiltinEnum
-          && not
-               (string_ends_with
-                  (Relative_path.suffix (Pos.filename pos))
-                  ".hhi")
-        then
-          Errors.using_internal_class pos (strip_ns name);
-        (pos, name)
+      | Some (_def_pos, Naming_table.TClass) -> (pos, name)
       | Some (def_pos, Naming_table.TTypedef) when not allow_typedef ->
         let (full_pos, _) = GEnv.get_full_pos (def_pos, name) in
         Errors.unexpected_typedef pos full_pos;

@@ -3127,7 +3127,7 @@ module Make (GetLocals : GetLocals) = struct
     let attrs = user_attributes env rd.Aast.rd_user_attributes in
     {
       N.rd_name = rd.Aast.rd_name;
-      rd_final = rd.Aast.rd_final;
+      rd_abstract = rd.Aast.rd_abstract;
       (* TODO: look at hint_ and see if the checks make sense for records. *)
       rd_extends = rd.Aast.rd_extends;
       rd_fields = rd.Aast.rd_fields;

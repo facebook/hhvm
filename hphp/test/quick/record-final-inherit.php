@@ -1,9 +1,9 @@
 <?hh
 
-final record A {
+record A {
 }
 
-final record B extends A {
+record B extends A {
   x: int,
 }
 <<__EntryPoint>> function main(): void {

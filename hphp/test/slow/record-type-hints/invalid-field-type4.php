@@ -1,5 +1,5 @@
 <?hh
-final record A {
+record A {
   x: noreturn,
 }
 

@@ -4,7 +4,7 @@ abstract record A {
   x: int,
 }
 
-final record B extends A {
+record B extends A {
   y: int,
 }
 

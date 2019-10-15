@@ -1,6 +1,6 @@
 <?hh
 
-final record Foo {
+record Foo {
   x:int,
 }
 <<__EntryPoint>> function main(): void {

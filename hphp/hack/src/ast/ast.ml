@@ -127,7 +127,7 @@ and typedef_kind =
 and record_def = {
   rd_name: id;
   rd_extends: hint list;
-  rd_final: bool;
+  rd_abstract: bool;
   rd_fields: (id * hint * expr option) list;
   rd_user_attributes: user_attribute list;
   rd_namespace: nsenv;

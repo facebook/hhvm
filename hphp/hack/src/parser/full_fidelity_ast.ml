@@ -3811,7 +3811,7 @@ if there already is one, since that one will likely be better than this one. *)
           {
             rd_name = pos_name name env;
             rd_extends = couldMap ~f:pHint exts env;
-            rd_final = token_kind modifier = Some TK.Final;
+            rd_abstract = token_kind modifier = Some TK.Abstract;
             rd_fields = couldMap fields env ~f:pFields;
             rd_user_attributes = pUserAttributes env attrs;
             rd_namespace = Namespace_env.empty_from_popt env.parser_options;

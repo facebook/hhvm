@@ -165,7 +165,7 @@ void RecordDesc::setParent() {
   if (m_parent.get() != nullptr) {
     auto parentAttrs = m_parent->attrs();
     if (UNLIKELY(parentAttrs & AttrFinal)) {
-      raise_error("Record %s may not inherit from final record %s",
+      raise_error("Record %s may not inherit from non-abstract record %s",
                   name()->data(), m_parent->name()->data());
     }
   }

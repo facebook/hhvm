@@ -826,7 +826,7 @@ let converter
     Aast.
       {
         rd_name = rd.Ast.rd_name;
-        rd_final = rd.Ast.rd_final;
+        rd_abstract = rd.Ast.rd_abstract;
         rd_extends = optional on_hint (List.hd rd.Ast.rd_extends);
         rd_fields = on_list on_field rd.Ast.rd_fields;
         rd_user_attributes = on_list on_user_attribute rd.rd_user_attributes;

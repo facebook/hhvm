@@ -284,10 +284,9 @@ where
 
     fn parse_record_declaration(&mut self, attrs: S::R) -> S::R {
         // record-declaration:
-        //   (abstract|final) record name { record-list }
-        let modifier =
-            self.require_token_one_of(&[TokenKind::Abstract, TokenKind::Final], Errors::error1037);
-        let record = self.assert_token(TokenKind::RecordDec);
+        //   abstract? record name { record-list }
+        let abstract_ = self.optional_token(TokenKind::Abstract);
+        let record = self.require_token(TokenKind::RecordDec, Errors::error1037);
         let name = self.require_name();
         let (record_extends, record_extends_list) = self.parse_extends_opt();
         let (left_brace, record_fields, right_brace) =
@@ -296,7 +295,7 @@ where
             make_record_declaration,
             self,
             attrs,
-            modifier,
+            abstract_,
             record,
             name,
             record_extends,

@@ -7,7 +7,7 @@ HH\autoload_set_paths(
   __DIR__.'/'
 );
 
-final record Foo {
+record Foo {
   x: int,
 }
 

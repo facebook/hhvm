@@ -1,6 +1,6 @@
 <?hh
 
-final record Foo {
+record Foo {
 }
 
 type Foo = int;

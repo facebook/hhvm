@@ -1,10 +1,10 @@
 <?hh
 
-final record A {
+record A {
   x: int,
 }
 
-final record B {
+record B {
   y: ?A,
 }
 <<__EntryPoint>> function main(): void {

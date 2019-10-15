@@ -9,17 +9,17 @@
 
 type t = {
   record_name: Hhbc_id.Record.t;
-  record_is_final: bool;
+  record_is_abstract: bool;
   record_base: Hhbc_id.Record.t option;
   record_fields: (string * Hhas_type_info.t * Typed_value.t option) list;
 }
 
-let make record_name record_is_final record_base record_fields =
-  { record_name; record_is_final; record_base; record_fields }
+let make record_name record_is_abstract record_base record_fields =
+  { record_name; record_is_abstract; record_base; record_fields }
 
 let name hhas_record_decl = hhas_record_decl.record_name
 
-let is_final hhas_record_decl = hhas_record_decl.record_is_final
+let is_abstract hhas_record_decl = hhas_record_decl.record_is_abstract
 
 let base hhas_record_decl = hhas_record_decl.record_base
 

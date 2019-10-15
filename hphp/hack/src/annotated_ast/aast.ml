@@ -533,7 +533,7 @@ and ('ex, 'fb, 'en, 'hi) gconst = {
 and ('ex, 'fb, 'en, 'hi) record_def = {
   rd_name: sid;
   rd_extends: hint option;
-  rd_final: bool;
+  rd_abstract: bool;
   rd_fields: (sid * hint * ('ex, 'fb, 'en, 'hi) expr option) list;
   rd_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;
   rd_namespace: nsenv;

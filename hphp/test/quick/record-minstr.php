@@ -1,6 +1,6 @@
 <?hh
 
-final record Foo {
+record Foo {
   x: vec,
 }
 
@@ -8,11 +8,11 @@ class A {
   public Foo $f;
 }
 
-final record Bar {
+record Bar {
   y: A,
 }
 
-final record Baz {
+record Baz {
   z: int,
 }
 <<__EntryPoint>> function main(): void {

@@ -2489,7 +2489,7 @@ void resolve_combinations(RecordNamingEnv& env,
     if (parent->rec->attrs & AttrFinal) {
       ITRACE(2,
              "Resolve combinations failed for `{}' because "
-             "its parent `{}' is a final record\n",
+             "its parent record `{}' is not abstract\n",
              rec->name, parent->rec->name);
       return;
     }

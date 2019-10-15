@@ -49,7 +49,7 @@ let emit_record_def rd =
   let parent_name = Option.map ~f:elaborate parent_name in
   Hhas_record_def.make
     name
-    rd.rd_final
+    rd.rd_abstract
     parent_name
     (List.map rd.rd_fields ~f:(emit_field rd.rd_namespace))
 

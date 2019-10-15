@@ -4,11 +4,11 @@ class Foo {
   public A $x;
 }
 
-final record A {
+record A {
   x: int,
 }
 
-final record B {
+record B {
   x: int,
 }
 <<__EntryPoint>> function main(): void {

@@ -143,8 +143,7 @@ pub const error1033: Error = Cow::Borrowed(concat!(
 pub const error1034: Error = Cow::Borrowed("A left brace ('{') is expected here.");
 pub const error1035: Error = Cow::Borrowed("The 'class' keyword is expected here.");
 pub const error1036: Error = Cow::Borrowed("An equals sign ('=') is expected here.");
-pub const error1037: Error =
-    Cow::Borrowed("Either ('abstract') or ('final') keyword is expected here.");
+pub const error1037: Error = Cow::Borrowed("The 'record' keyword is expected here.");
 pub const error1038: Error =
     Cow::Borrowed("A semicolon (';') or a namespace body is expected here.");
 pub const error1039: Error = Cow::Borrowed("A closing XHP tag is expected here.");

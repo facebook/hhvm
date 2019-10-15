@@ -8641,7 +8641,7 @@ and record_def_def tcopt rd =
   {
     T.rd_name = rd.rd_name;
     T.rd_extends = rd.rd_extends;
-    T.rd_final = rd.rd_final;
+    T.rd_abstract = rd.rd_abstract;
     T.rd_fields = List.map rd.rd_fields (record_field env);
     T.rd_user_attributes = attributes;
     T.rd_namespace = rd.rd_namespace;

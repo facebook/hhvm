@@ -8,7 +8,7 @@ enum Enum : string {
 
 type Alias = Enum;
 
-final record A {
+record A {
   x: Alias,
 }
 <<__EntryPoint>> function main(): void {

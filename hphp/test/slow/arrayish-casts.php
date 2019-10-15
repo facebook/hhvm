@@ -5,7 +5,7 @@ class A {
   public static function meth() {}
 }
 
-final record B {
+record B {
   x: int,
 }
 

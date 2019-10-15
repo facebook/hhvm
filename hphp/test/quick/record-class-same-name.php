@@ -3,6 +3,6 @@
 class Foo {
 }
 
-final record Foo {
+record Foo {
 }
 

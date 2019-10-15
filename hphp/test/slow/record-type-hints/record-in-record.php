@@ -1,9 +1,9 @@
 <?hh
-final record Foo {
+record Foo {
   y: int,
 }
 
-final record Bar {
+record Bar {
   x:Foo,
 }
 <<__EntryPoint>> function main(): void {

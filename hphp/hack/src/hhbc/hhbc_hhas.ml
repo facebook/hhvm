@@ -2244,7 +2244,7 @@ let add_record_field buf field =
 let add_record_def buf rd =
   let name = Hhas_record_def.name rd in
   Acc.add buf "\n.record ";
-  if Hhas_record_def.is_final rd then Acc.add buf "[final] ";
+  if not (Hhas_record_def.is_abstract rd) then Acc.add buf "[final] ";
   Acc.add buf (Hhbc_id.Record.to_raw_string name);
   add_extends
     buf

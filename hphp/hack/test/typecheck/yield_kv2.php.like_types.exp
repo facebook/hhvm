@@ -1,6 +1,0 @@
-File "yield_kv2.php", line 4, characters 3-18:
-Invalid yield (Typing[4110])
-File "yield_kv2.php", line 3, characters 15-39:
-Expected ~Generator<int, int, void> because it is an unenforceable type
-File "yield_kv2.php", line 4, characters 3-18:
-But got Generator<string, int, [unresolved]> (result of function with 'yield' in the body)

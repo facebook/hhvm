@@ -1,6 +1,0 @@
-File "meth_caller4.php", line 23, characters 10-16:
-Invalid return type (Typing[4110])
-File "meth_caller4.php", line 20, characters 18-48:
-Expected ~(function(X<bool>, bool): bool) because it is an unenforceable type
-File "meth_caller4.php", line 13, characters 19-21:
-But got (function(X<[unresolved]>, ~[unresolved] $x): ~[unresolved])

@@ -1,0 +1,6 @@
+File "yield_from.php", line 10, characters 11-25:
+Invalid foreach (Typing[4110])
+File "yield_from.php", line 10, characters 11-25:
+Expected Traversable<[unresolved]> because this is used in a foreach statement
+File "yield_from.php", line 5, characters 26-31:
+But got string

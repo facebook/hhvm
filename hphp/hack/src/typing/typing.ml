@@ -684,12 +684,7 @@ and fun_def tcopt f : (Tast.fun_def * Typing_env_types.global_tvenv) option =
             env
             f.f_name
         | Some ty ->
-          let localize env ty =
-            let { et_type = ty; _ } =
-              Typing_enforceability.compute_enforced_and_pessimize_ty env ty
-            in
-            Phase.localize_with_self env ty
-          in
+          let localize env ty = Phase.localize_with_self env ty in
           Typing_return.make_return_type localize env ty
       in
       let return =
@@ -1942,7 +1937,11 @@ and expr_
           l
           array_field_value
       in
-      make_result env p T.Any (Reason.Rwitness p, Tarraykind (AKvarray value_ty))
+      make_result
+        env
+        p
+        T.Any
+        (Reason.Rwitness p, Tarraykind (AKvarray value_ty))
     else
       (* Use expected type to determine expected element type *)
       let (env, kexpected, vexpected) =
@@ -4986,7 +4985,8 @@ and dispatch_call
         let try_container env =
           let container_type = MakeType.container r_fty tv in
           let env = SubType.sub_type env x container_type Errors.unify_error in
-          (env, (fun tr -> (r, Tarraykind (AKdarray (MakeType.arraykey r, tr)))))
+          ( env,
+            (fun tr -> (r, Tarraykind (AKdarray (MakeType.arraykey r, tr)))) )
         in
         let (env, tr) =
           Errors.try_
@@ -8505,13 +8505,7 @@ and method_def env cls m =
           let ety_env =
             { (Phase.env_with_self env) with from_class = Some CIstatic }
           in
-          let localize env ty =
-            let { et_type = ty; _ } =
-              Typing_enforceability.compute_enforced_and_pessimize_ty env ty
-            in
-            Phase.localize ~ety_env env ty
-          in
-          Typing_return.make_return_type localize env ret
+          Typing_return.make_return_type (Phase.localize ~ety_env) env ret
       in
       let return =
         Typing_return.make_info

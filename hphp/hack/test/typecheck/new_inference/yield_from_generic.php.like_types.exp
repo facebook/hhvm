@@ -1,12 +1,10 @@
-File "yield_from_generic.php", line 7, characters 3-18:
-Invalid yield from (Typing[4110])
-File "yield_from_generic.php", line 7, characters 3-18:
-Expected KeyedTraversable<[unresolved], [unresolved]> (result of function with 'yield' in the body)
-File "yield_from_generic.php", line 3, characters 22-47:
-But got dynamic because it is an unenforceable type
 File "yield_from_generic.php", line 8, characters 3-19:
 Invalid yield from (Typing[4110])
-File "yield_from_generic.php", line 8, characters 3-19:
-Expected KeyedTraversable<[unresolved], [unresolved]> (result of function with 'yield' in the body)
-File "yield_from_generic.php", line 3, characters 22-47:
-But got dynamic because it is an unenforceable type
+File "yield_from_generic.php", line 6, characters 33-35:
+Expected int
+File "yield_from_generic.php", line 8, characters 16-18:
+But got string
+File "classes.hhi", line 97, characters 67-68:
+  via this generic Tv
+File "interfaces.hhi", line 239, characters 63-64:
+  via this generic Tv

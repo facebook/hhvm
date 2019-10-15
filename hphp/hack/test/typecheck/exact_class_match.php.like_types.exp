@@ -1,6 +1,0 @@
-File "exact_class_match.php", line 9, characters 14-21:
-Invalid argument (Typing[4110])
-File "exact_class_match.php", line 9, characters 14-21:
-Expected C<Super>
-File "exact_class_match.php", line 9, characters 14-21:
-But got dynamic because it is an unenforceable type

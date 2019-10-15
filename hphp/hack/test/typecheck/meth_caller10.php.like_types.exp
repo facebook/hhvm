@@ -1,6 +1,0 @@
-File "meth_caller10.php", line 13, characters 10-11:
-Invalid return type (Typing[4110])
-File "meth_caller10.php", line 9, characters 18-23:
-Expected ~X<int> because it is an unenforceable type
-File "meth_caller10.php", line 11, characters 12-12:
-But got X<[unresolved]>

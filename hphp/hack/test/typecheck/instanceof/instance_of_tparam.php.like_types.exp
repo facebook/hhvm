@@ -1,6 +1,0 @@
-File "instance_of_tparam.php", line 14, characters 12-13:
-Invalid return type (Typing[4110])
-File "instance_of_tparam.php", line 12, characters 23-54:
-Expected ~KeyedTraversable<string, string> because it is an unenforceable type
-File "instance_of_tparam.php", line 13, characters 13-34:
-But got KeyedTraversable<mixed, mixed>

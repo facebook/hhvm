@@ -1,6 +1,0 @@
-File "lambda23.php", line 4, characters 10-26:
-Invalid return type (Typing[4110])
-File "lambda23.php", line 3, characters 17-36:
-Expected ~(function(int): int) because it is an unenforceable type
-File "lambda23.php", line 4, characters 10-26:
-But got (function(string $x): int)

@@ -1,6 +1,0 @@
-File "pair-literal-2.php", line 12, characters 10-26:
-Invalid return type (Typing[4110])
-File "pair-literal-2.php", line 11, characters 15-31:
-Expected ~Pair<string, int> because it is an unenforceable type
-File "pair-literal-2.php", line 12, characters 10-26:
-But got Pair<int, string>

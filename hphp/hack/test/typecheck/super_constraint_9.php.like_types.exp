@@ -1,6 +1,0 @@
-File "super_constraint_9.php", line 7, characters 10-10:
-Invalid return type (Typing[4336])
-File "super_constraint_9.php", line 7, characters 10-10:
-Expected void because this function does not always return a value
-File "super_constraint_9.php", line 7, characters 59-66:
-But got dynamic because it is an unenforceable type

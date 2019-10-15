@@ -1,0 +1,6 @@
+File "concurrent_lambda.php", line 17, characters 10-30:
+Invalid return type (Typing[4110])
+File "concurrent_lambda.php", line 10, characters 33-35:
+Expected int
+File "concurrent_lambda.php", line 17, characters 10-30:
+But got num because this is the result of an arithmetic operation

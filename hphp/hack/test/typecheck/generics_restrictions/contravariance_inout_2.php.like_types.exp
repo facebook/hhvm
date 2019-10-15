@@ -1,23 +1,9 @@
-File "contravariance_inout_2.php", line 13, characters 16-23:
-Invalid argument (Typing[4110])
-File "contravariance_inout_2.php", line 11, characters 26-31:
-Expected string
-File "contravariance_inout_2.php", line 6, characters 41-41:
-  via this generic T
-File "contravariance_inout_2.php", line 13, characters 4-13:
-But got dynamic, the result of calling a dynamic type as a function
 File "contravariance_inout_2.php", line 6, characters 41-41:
 Illegal usage of a contravariant type parameter (Typing[4121])
 File "contravariance_inout_2.php", line 4, characters 10-10:
 This is where the parameter was declared as contravariant (-)
 File "contravariance_inout_2.php", line 6, characters 41-41:
 Inout/ref function parameters are both covariant and contravariant
-File "contravariance_inout_2.php", line 7, characters 19-19:
-Invalid argument (Typing[4110])
-File "contravariance_inout_2.php", line 7, characters 19-19:
-Expected T
-File "contravariance_inout_2.php", line 7, characters 19-19:
-But got dynamic because it is an unenforceable type
 File "contravariance_inout_2.php", line 5, characters 39-39:
 Invalid assignment to an inout parameter (Typing[4337])
 File "contravariance_inout_2.php", line 7, characters 19-19:

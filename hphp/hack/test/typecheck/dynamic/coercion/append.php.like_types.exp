@@ -1,6 +1,0 @@
-File "append.php", line 6, characters 10-11:
-Invalid return type (Typing[4110])
-File "append.php", line 3, characters 34-47:
-Expected ~varray<dynamic> because it is an unenforceable type
-File "append.php", line 3, characters 14-27:
-But got varray<~?(int | string)>

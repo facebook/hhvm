@@ -1,6 +1,0 @@
-File "invariant_err_msg.php", line 7, characters 10-11:
-Invalid return type (Typing[4110])
-File "invariant_err_msg.php", line 6, characters 29-37:
-Expected ~Vector<A> because it is an unenforceable type
-File "invariant_err_msg.php", line 6, characters 14-22:
-But got Vector<B>

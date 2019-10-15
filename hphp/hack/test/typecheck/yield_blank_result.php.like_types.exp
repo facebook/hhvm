@@ -1,6 +1,0 @@
-File "yield_blank_result.php", line 37, characters 10-23:
-Invalid return type (Typing[4110])
-File "yield_blank_result.php", line 36, characters 38-41:
-Expected void
-File "yield_blank_result.php", line 37, characters 10-23:
-But got dynamic

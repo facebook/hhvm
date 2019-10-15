@@ -1,6 +1,0 @@
-File "disallow_darray_with_wrong_value_type_where_varray_or_darray_is_required.php", line 4, characters 10-30:
-Invalid return type (Typing[4110])
-File "disallow_darray_with_wrong_value_type_where_varray_or_darray_is_required.php", line 3, characters 18-38:
-Expected ~varray_or_darray<int> because it is an unenforceable type
-File "disallow_darray_with_wrong_value_type_where_varray_or_darray_is_required.php", line 4, characters 10-30:
-But got darray<string, bool>

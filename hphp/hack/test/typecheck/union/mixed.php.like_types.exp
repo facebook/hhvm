@@ -9,7 +9,7 @@ File "mixed.php", line 43, characters 3-13:
 File "mixed.php", line 54, characters 3-13:
   (function(string $s1, string $s2): (int | string))
 File "mixed.php", line 63, characters 3-13:
-  (function($s1, $s2): ~string)
+  (function($s1, $s2): string)
 File "mixed.php", line 72, characters 3-13:
   A
 File "mixed.php", line 76, characters 3-13:
@@ -59,4 +59,4 @@ Invalid argument (Typing[4110])
 File "mixed.php", line 94, characters 35-60:
 Expected ~(function(string): string) because it is an unenforceable type
 File "mixed.php", line 59, characters 10-31:
-But got (function($s1, $s2): ~string)
+But got (function($s1, $s2): string)

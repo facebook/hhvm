@@ -1,6 +1,0 @@
-File "continuation_null.php", line 13, characters 3-12:
-Invalid yield (Typing[4110])
-File "continuation_null.php", line 12, characters 17-42:
-Expected ~Generator<int, void, void> because it is an unenforceable type
-File "continuation_null.php", line 13, characters 3-12:
-But got Generator<int, null, [unresolved]> (result of function with 'yield' in the body)

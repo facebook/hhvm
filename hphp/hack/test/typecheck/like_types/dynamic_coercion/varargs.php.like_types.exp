@@ -1,0 +1,6 @@
+File "varargs.php", line 13, characters 5-9:
+Invalid argument (Typing[4110])
+File "varargs.php", line 5, characters 19-20:
+Expected int (variadic argument)
+File "varargs.php", line 13, characters 5-9:
+But got string

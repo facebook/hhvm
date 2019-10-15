@@ -1,6 +1,0 @@
-File "lambda16.php", line 14, characters 12-23:
-Invalid return type (Typing[4110])
-File "lambda16.php", line 13, characters 30-33:
-Expected ~this because it is an unenforceable type
-File "lambda16.php", line 14, characters 12-23:
-But got (function(): this)

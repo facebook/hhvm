@@ -1,0 +1,6 @@
+File "disallow_darray_with_non_arraykey_keys.php", line 4, characters 10-31:
+Incompatible field values (Typing[4110])
+File "disallow_darray_with_non_arraykey_keys.php", line 3, characters 52-53:
+Expected Tv
+File "disallow_darray_with_non_arraykey_keys.php", line 3, characters 29-30:
+But got dynamic because it is an unenforceable type

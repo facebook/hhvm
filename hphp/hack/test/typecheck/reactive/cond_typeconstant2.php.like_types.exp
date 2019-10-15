@@ -1,6 +1,0 @@
-File "cond_typeconstant2.php", line 32, characters 14-31:
-Invalid return type (Typing[4110])
-File "cond_typeconstant2.php", line 25, characters 39-51:
-Expected ~this::TLoader#\IRxFactory::TLoader because it is an unenforceable type
-File "cond_typeconstant2.php", line 36, characters 41-53:
-But got this::TLoader

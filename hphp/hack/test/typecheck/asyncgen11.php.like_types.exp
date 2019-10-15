@@ -1,6 +1,0 @@
-File "asyncgen11.php", line 4, characters 3-12:
-Invalid yield (Typing[4110])
-File "asyncgen11.php", line 3, characters 21-53:
-Expected ~AsyncGenerator<int, string, void> because it is an unenforceable type
-File "asyncgen11.php", line 4, characters 3-12:
-But got AsyncGenerator<?[unresolved], string, [unresolved]> (result of 'async function' with 'yield' in the body)

@@ -1,12 +1,12 @@
 File "shape_idx_refine_opt.php", line 10, characters 10-11:
-Invalid return type (Typing[4110])
-File "shape_idx_refine_opt.php", line 6, characters 22-22:
-Expected ~shape('a' => int, ...) because it is an unenforceable type
+Invalid return type (Typing[4163])
 File "shape_idx_refine_opt.php", line 6, characters 12-15:
-But got shape(?'a' => ?int)
+The field 'a' is optional
+File "shape_idx_refine_opt.php", line 6, characters 22-22:
+The field 'a' is defined as required
 File "shape_idx_refine_opt.php", line 15, characters 12-13:
-Invalid return type (Typing[4110])
-File "shape_idx_refine_opt.php", line 13, characters 23-23:
-Expected ~shape('a' => int, ...) because it is an unenforceable type
+Invalid return type (Typing[4163])
 File "shape_idx_refine_opt.php", line 13, characters 13-16:
-But got shape(?'a' => ?int)
+The field 'a' is optional
+File "shape_idx_refine_opt.php", line 13, characters 23-23:
+The field 'a' is defined as required

@@ -1,6 +1,0 @@
-File "this_anon_bad.php", line 15, characters 21-24:
-Invalid argument (Typing[4110])
-File "this_anon_bad.php", line 15, characters 21-24:
-Expected this
-File "this_anon_bad.php", line 15, characters 21-24:
-But got dynamic because it is an unenforceable type

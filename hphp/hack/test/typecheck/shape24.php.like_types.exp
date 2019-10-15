@@ -1,6 +1,0 @@
-File "shape24.php", line 21, characters 10-11:
-Invalid return type (Typing[4110])
-File "shape24.php", line 20, characters 22-22:
-Expected ~shape('x' => int, ?'z' => ?bool, ...) because it is an unenforceable type
-File "shape24.php", line 20, characters 15-15:
-But got shape('x' => int, ...)

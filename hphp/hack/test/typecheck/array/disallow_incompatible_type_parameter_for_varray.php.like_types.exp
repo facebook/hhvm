@@ -1,6 +1,0 @@
-File "disallow_incompatible_type_parameter_for_varray.php", line 4, characters 10-21:
-Invalid return type (Typing[4110])
-File "disallow_incompatible_type_parameter_for_varray.php", line 3, characters 18-28:
-Expected ~varray<int> because it is an unenforceable type
-File "disallow_incompatible_type_parameter_for_varray.php", line 4, characters 10-21:
-But got varray<bool>

@@ -1,6 +1,0 @@
-File "make_inv_then_invoke.php", line 25, characters 10-11:
-Invalid return type (Typing[4110])
-File "make_inv_then_invoke.php", line 19, characters 21-26:
-Expected ~Inv<B> because it is an unenforceable type
-File "make_inv_then_invoke.php", line 12, characters 29-34:
-But got Inv<<expr#1>>

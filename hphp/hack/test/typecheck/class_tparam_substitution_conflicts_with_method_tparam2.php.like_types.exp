@@ -1,6 +1,0 @@
-File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 22, characters 10-42:
-Invalid return type (Typing[4110])
-File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 21, characters 44-58:
-Expected ~BaseIterable<C> because it is an unenforceable type
-File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 6, characters 6-23:
-But got BaseIterable<[unresolved]>

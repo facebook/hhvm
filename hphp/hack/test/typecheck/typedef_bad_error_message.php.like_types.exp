@@ -1,6 +1,0 @@
-File "typedef_bad_error_message.php", line 6, characters 10-24:
-Invalid return type (Typing[4110])
-File "typedef_bad_error_message.php", line 5, characters 15-23:
-Expected ~Vector<int> because it is an unenforceable type
-File "typedef_bad_error_message.php", line 6, characters 10-24:
-But got Vector<[unresolved]>

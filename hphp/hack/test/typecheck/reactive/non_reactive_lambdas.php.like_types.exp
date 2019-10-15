@@ -1,6 +1,0 @@
-File "non_reactive_lambdas.php", line 5, characters 14-24:
-Invalid argument (Typing[4110])
-File "non_reactive_lambdas.php", line 5, characters 14-24:
-Expected Vector<int>
-File "non_reactive_lambdas.php", line 5, characters 14-24:
-But got dynamic because it is an unenforceable type

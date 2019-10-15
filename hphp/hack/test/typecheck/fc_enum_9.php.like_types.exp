@@ -1,6 +1,0 @@
-File "fc_enum_9.php", line 13, characters 10-25:
-Invalid return type (Typing[4110])
-File "fc_enum_9.php", line 12, characters 27-44:
-Expected ~darray<string, int> because it is an unenforceable type
-File "BuiltinEnum.hhi", line 34, characters 45-61:
-But got darray<string, Foo>

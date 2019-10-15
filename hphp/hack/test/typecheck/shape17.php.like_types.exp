@@ -1,6 +1,0 @@
-File "shape17.php", line 24, characters 10-11:
-Invalid return type (Typing[4110])
-File "shape17.php", line 18, characters 18-24:
-Expected ~shape('field' => C) because it is an unenforceable type
-File "shape17.php", line 20, characters 10-34:
-But got shape('field' => A)

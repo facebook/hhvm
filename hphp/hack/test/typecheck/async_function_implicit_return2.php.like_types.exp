@@ -1,6 +1,0 @@
-File "async_function_implicit_return2.php", line 15, characters 29-36:
-Invalid return type (Typing[4110])
-File "async_function_implicit_return2.php", line 14, characters 74-77:
-Expected void
-File "async_function_implicit_return2.php", line 15, characters 29-36:
-But got dynamic

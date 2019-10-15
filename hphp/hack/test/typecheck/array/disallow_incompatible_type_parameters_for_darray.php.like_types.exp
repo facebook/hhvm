@@ -1,6 +1,0 @@
-File "disallow_incompatible_type_parameters_for_darray.php", line 4, characters 10-30:
-Invalid index type for this darray (Typing[4110])
-File "disallow_incompatible_type_parameters_for_darray.php", line 4, characters 17-20:
-Expected arraykey because only array keys can be used to index into a Map, dict, darray, Set, or keyset
-File "disallow_incompatible_type_parameters_for_darray.php", line 4, characters 17-20:
-But got bool

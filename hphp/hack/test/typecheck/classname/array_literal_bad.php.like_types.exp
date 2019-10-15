@@ -1,8 +1,0 @@
-File "array_literal_bad.php", line 10, characters 3-15:
-  darray<string, classname<(exact C1 | exact C2 | exact D)>>
-File "array_literal_bad.php", line 11, characters 10-13:
-Invalid return type (Typing[4110])
-File "array_literal_bad.php", line 8, characters 28-54:
-Expected ~darray<string, classname<I>> because it is an unenforceable type
-File "array_literal_bad.php", line 9, characters 10-76:
-But got darray<string, classname<(C1 | C2 | D)>>

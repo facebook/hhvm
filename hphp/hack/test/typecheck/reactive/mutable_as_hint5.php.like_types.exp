@@ -1,6 +1,2 @@
-File "mutable_as_hint5.php", line 13, characters 6-20:
-Invalid argument (Typing[4110])
-File "mutable_as_hint5.php", line 10, characters 38-38:
-Expected A
-File "rx/functions.hhi", line 30, characters 25-25:
-But got dynamic because it is an unenforceable type
+File "mutable_as_hint5.php", line 13, characters 18-19:
+Variable $z is undefined, not always defined, or unset afterwards (did you mean $a instead?) (Naming[2050])

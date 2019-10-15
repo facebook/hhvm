@@ -1,6 +1,0 @@
-File "mutable_as_hint2.php", line 12, characters 6-28:
-Invalid argument (Typing[4110])
-File "mutable_as_hint2.php", line 10, characters 33-33:
-Expected A
-File "rx/functions.hhi", line 26, characters 28-28:
-But got dynamic because it is an unenforceable type

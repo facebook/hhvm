@@ -1,6 +1,0 @@
-File "anonymous_shape2.php", line 16, characters 10-12:
-Invalid return type (Typing[4110])
-File "anonymous_shape2.php", line 12, characters 4-31:
-Expected ~shape('y' => int, ...) because it is an unenforceable type
-File "anonymous_shape2.php", line 7, characters 15-31:
-But got shape('x' => int)

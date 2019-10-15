@@ -1,6 +1,0 @@
-File "continuation_is_not_awaitable1.php", line 13, characters 10-12:
-Invalid return type (Typing[4110])
-File "continuation_is_not_awaitable1.php", line 12, characters 23-47:
-Expected ~Generator<int, int, void> because it is an unenforceable type
-File "continuation_is_not_awaitable1.php", line 13, characters 10-12:
-But got int

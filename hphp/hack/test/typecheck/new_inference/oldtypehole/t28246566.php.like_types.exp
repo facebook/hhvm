@@ -1,6 +1,0 @@
-File "t28246566.php", line 12, characters 12-13:
-Invalid return type (Typing[4110])
-File "t28246566.php", line 9, characters 34-44:
-Expected ~Vector<int> because it is an unenforceable type
-File "t28246566.php", line 10, characters 10-20:
-But got Vector<[unresolved]>

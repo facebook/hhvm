@@ -1,6 +1,0 @@
-File "union_subtype_bad.php", line 5, characters 10-20:
-Invalid return type (Typing[4110])
-File "union_subtype_bad.php", line 4, characters 35-42:
-Expected ~vec<num> because it is an unenforceable type
-File "union_subtype_bad.php", line 5, characters 10-20:
-But got vec<(int | string)>

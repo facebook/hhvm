@@ -7,7 +7,10 @@ function foo(
   darray<int,bool> $da,
   dict<mixed,bool> $dm,
   KeyedContainer<int,string> $kc,
-  ConstMap<int,bool> $cm):void {
+  ConstMap<int,bool> $cm,
+  ImmMap<int, mixed> $im,
+  mixed $k,
+):void {
   $x = $a["a"];
   $y = $d["a"];
   $z = $da["a"];
@@ -15,6 +18,10 @@ function foo(
   $zz = $dm[false];
   $xx = $kc["a"];
   $yy = $cm["a"];
+
+  $_ = $kc[$k];
+  $_ = $cm[$k];
+  $_ = $im[$k];
 
   // These are legal because they're lvalues
   if ($a["a"]) {

@@ -320,6 +320,7 @@ let rec array_get
               let any = err_witness env expr_pos in
               (any, any)
           in
+          let env = check_arraykey_index env expr_pos ety1 ty2 in
           (env, v)
       | Tclass (((_, cn) as id), _, argl)
         when (not is_lvalue)

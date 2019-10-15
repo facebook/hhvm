@@ -48,6 +48,13 @@ _LspIdMap = Mapping[_MessageSpec, Json]
 _Traceback = Sequence[inspect.FrameInfo]
 
 
+class NoResponse:
+    """Indicates that no response should be sent (different from `None` since
+    `None` is a valid JSON value)."""
+
+    pass
+
+
 class LspTestSpec:
     """Represents an LSP test to be run, in a declarative fashion.
 
@@ -124,7 +131,12 @@ class LspTestSpec:
         return self._update(messages=messages)
 
     def wait_for_server_request(
-        self, method: str, params: Json, *, result: Json, comment: Optional[str] = None
+        self,
+        method: str,
+        params: Json,
+        *,
+        result: Union[Json, NoResponse],
+        comment: Optional[str] = None,
     ) -> "LspTestSpec":
         messages = list(self._messages)
         messages.append(
@@ -284,18 +296,20 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                     }
                 )
             elif isinstance(message, _WaitForRequestSpec):
+                params = {
+                    "method": message.method,
+                    "params": interpolate_variables(
+                        message.params, variables=variables
+                    ),
+                }
+                if not isinstance(message.result, NoResponse):
+                    params["result"] = message.result
                 json_commands.append(
                     {
                         "jsonrpc": "2.0",
                         "comment": message.comment,
                         "method": "$test/waitForRequest",
-                        "params": {
-                            "method": message.method,
-                            "params": interpolate_variables(
-                                message.params, variables=variables
-                            ),
-                            "result": message.result,
-                        },
+                        "params": params,
                     }
                 )
             elif isinstance(message, _WaitForNotificationSpec):
@@ -837,7 +851,12 @@ class _WaitForRequestSpec:
     __slots__ = ["method", "params", "result", "comment"]
 
     def __init__(
-        self, *, method: str, params: Json, result: Json, comment: Optional[str]
+        self,
+        *,
+        method: str,
+        params: Json,
+        result: Union[Json, NoResponse],
+        comment: Optional[str],
     ) -> None:
         self.method = method
         self.params = params

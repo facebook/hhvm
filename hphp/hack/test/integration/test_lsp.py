@@ -13,7 +13,7 @@ from typing import Iterable, List, Mapping, Tuple
 import common_tests
 from hh_paths import hh_server
 from lspcommand import LspCommandProcessor, Transcript
-from lsptestspec import LspTestSpec
+from lsptestspec import LspTestSpec, NoResponse
 from test_case import TestCase
 from utils import Json, JsonObject, interpolate_variables
 
@@ -3682,7 +3682,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                     "actions": [{"title": "Restart Hack Server"}],
                     "type": 1,
                 },
-                result=None,
+                result=NoResponse(),
             )
             .request(method="shutdown", params={}, result=None)
         )
@@ -3701,7 +3701,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
             .wait_for_server_request(
                 method="window/showStatus",
                 params={"actions": [], "message": "hh_server: ready.", "type": 3},
-                result=None,
+                result=NoResponse(),
             )
             .request(method="shutdown", params={}, result=None)
         )
@@ -3721,11 +3721,21 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
             .wait_for_server_request(
                 method="window/showStatus",
                 params={
+                    "message": "IDE services: initializing. hh_server: stopped.",
+                    "actions": [{"title": "Restart Hack Server"}],
+                    "type": 1,
+                    "shortMessage": "Hack IDE: initializing",
+                },
+                result=NoResponse(),
+            )
+            .wait_for_server_request(
+                method="window/showStatus",
+                params={
                     "message": "IDE services: ready. hh_server: stopped.",
                     "actions": [{"title": "Restart Hack Server"}],
                     "type": 1,
                 },
-                result=None,
+                result=NoResponse(),
             )
             .request(method="shutdown", params={}, result=None)
         )
@@ -3740,6 +3750,16 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 LspTestSpec("serverless_ide_status_running"),
                 use_serverless_ide=True,
                 supports_status=True,
+            )
+            .wait_for_server_request(
+                method="window/showStatus",
+                params={
+                    "type": 2,
+                    "actions": [],
+                    "message": "IDE services: initializing. hh_server: ready.",
+                    "shortMessage": "Hack IDE: initializing",
+                },
+                result=NoResponse(),
             )
             .wait_for_server_request(
                 method="window/showStatus",

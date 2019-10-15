@@ -250,7 +250,6 @@ Transcript of all the messages we saw:
     ) -> Tuple[Transcript, Set[int]]:
         method = command["params"]["method"]
         params = command["params"]["params"]
-        result = command["params"]["result"]
         (transcript, message) = self._wait_for_message_from_server(
             transcript,
             method=method,
@@ -258,15 +257,30 @@ Transcript of all the messages we saw:
             received_request_ids=received_request_ids,
         )
         message_id = message["id"]
-        response = {"jsonrpc": 2.0, "id": message_id, "result": result}
 
         # Ensure that we don't double-count one received request as having
         # responded to multiple wait-for-request instructions.
         received_request_ids = set(received_request_ids)
         received_request_ids.add(message_id)
 
-        self.writer.write(response)
+        if "result" in command["params"]:
+            response = {
+                "jsonrpc": 2.0,
+                "id": message_id,
+                "result": command["params"]["result"],
+            }
+            self.writer.write(response)
+        else:
+            response = {
+                "jsonrpc": 2.0,
+                "id": message_id,
+                "result": "<acknowledged this message, but did not send a response>",
+            }
+
+        # Record that we responded to this message so that we don't flag it
+        # later as a message we didn't handle.
         transcript = self._scribe(transcript, sent=response, received=None)
+
         return (transcript, received_request_ids)
 
     def _wait_for_notification(

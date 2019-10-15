@@ -3108,7 +3108,6 @@ let tick_showStatus
     (env : env) ~(state : state ref) ~(ide_service : ClientIdeService.t) :
     unit Lwt.t =
   let show_status () : unit Lwt.t =
-    let%lwt () = Lwt_unix.sleep 1.0 in
     begin
       match !state with
       | Main_loop { Main_env.hh_server_status; _ } ->
@@ -3171,6 +3170,7 @@ let tick_showStatus
   in
   let rec loop () : unit Lwt.t =
     let%lwt () = show_status () in
+    let%lwt () = Lwt_unix.sleep 1.0 in
     loop ()
   in
   loop ()

@@ -3848,7 +3848,7 @@ let main (env : env) : Exit_status.t Lwt.t =
 
   HackEventLogger.set_from env.from;
   let client = Jsonrpc.make_queue () in
-  let ide_service = ClientIdeService.make () in
+  let ide_service = ref (ClientIdeService.make ()) in
   let deferred_action : (unit -> unit Lwt.t) option ref = ref None in
   let state = ref Pre_init in
   let ref_event = ref None in
@@ -3866,7 +3866,7 @@ let main (env : env) : Exit_status.t Lwt.t =
         | None -> Lwt.return_unit
       in
       deferred_action := None;
-      let%lwt event = get_next_event !state client ide_service in
+      let%lwt event = get_next_event !state client !ide_service in
       ref_event := Some event;
       ref_unblocked_time := Unix.gettimeofday ();
 
@@ -3891,7 +3891,7 @@ let main (env : env) : Exit_status.t Lwt.t =
       let%lwt () =
         (* update the IDE service with the new file contents, if any *)
         if env.use_serverless_ide then
-          let%lwt () = track_ide_service_open_files ide_service event in
+          let%lwt () = track_ide_service_open_files !ide_service event in
           Lwt.return_unit
         else
           Lwt.return_unit
@@ -3903,7 +3903,7 @@ let main (env : env) : Exit_status.t Lwt.t =
           ~env
           ~state
           ~client
-          ~ide_service
+          ~ide_service:!ide_service
           ~event
           ~ref_unblocked_time
       in
@@ -4066,6 +4066,6 @@ let main (env : env) : Exit_status.t Lwt.t =
     let%lwt () = process_next_event () in
     main_loop ()
   in
-  let%lwt () = Lwt.pick [main_loop (); tick_showStatus env state ide_service]
-  and () = run_ide_service env ide_service in
+  let%lwt () = Lwt.pick [main_loop (); tick_showStatus env state !ide_service]
+  and () = run_ide_service env !ide_service in
   Lwt.return Exit_status.No_error

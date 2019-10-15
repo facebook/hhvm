@@ -278,8 +278,7 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
       | AKvarray_or_darray ty
       | AKvarray ty ->
         this#on_type acc ty
-      | AKdarray (tk, tv)
-      | AKmap (tk, tv) ->
+      | AKdarray (tk, tv) ->
         let acc = this#on_type acc tk in
         this#on_type acc tv
 

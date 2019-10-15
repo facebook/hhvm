@@ -65,7 +65,7 @@ let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
   | Tunion tyl ->
     List.iter tyl (fun ty ->
         array_get ~array_pos ~expr_pos ~index_pos env ty index_ty)
-  | Tarraykind (AKdarray (key_ty, _) | AKmap (key_ty, _)) ->
+  | Tarraykind (AKdarray (key_ty, _)) ->
     type_index env index_ty key_ty Reason.index_array
   | Tclass ((_, cn), _, key_ty :: _)
     when cn = SN.Collections.cMap

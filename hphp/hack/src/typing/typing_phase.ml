@@ -140,7 +140,7 @@ let rec localize ~ety_env env (dty : decl_ty) =
       | (Some tk, Some tv) ->
         let (env, tk) = localize ~ety_env env tk in
         let (env, tv) = localize ~ety_env env tv in
-        (env, Tarraykind (AKmap (tk, tv)))
+        (env, Tarraykind (AKdarray (tk, tv)))
       | (None, Some _) -> failwith "Invalid array declaration type"
     in
     (env, (r, ty))

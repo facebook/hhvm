@@ -1297,8 +1297,7 @@ and simplify_subtype_i
        *)
       | AKvarray tv
       | AKdarray (_, tv)
-      | AKvarray_or_darray tv
-      | AKmap (_, tv) ->
+      | AKvarray_or_darray tv ->
         simplify_subtype ~subtype_env ~this_ty tv tv_super env)
     | (Tarraykind akind, Tclass ((_, coll), Nonexact, [tk_super; tv_super]))
       when coll = SN.Collections.cKeyedTraversable
@@ -1330,8 +1329,7 @@ and simplify_subtype_i
         env
         |> simplify_subtype ~subtype_env ~this_ty tk_sub tk_super
         &&& simplify_subtype ~subtype_env ~this_ty tv tv_super
-      | AKdarray (tk, tv)
-      | AKmap (tk, tv) ->
+      | AKdarray (tk, tv) ->
         env
         |> simplify_subtype ~subtype_env ~this_ty tk tk_super
         &&& simplify_subtype ~subtype_env ~this_ty tv tv_super)
@@ -1380,13 +1378,11 @@ and simplify_subtype_i
         | (AKvarray ty_sub, (AKvarray ty_super | AKvarray_or_darray ty_super))
           ->
           simplify_subtype ~subtype_env ~this_ty ty_sub ty_super env
-        | ( (AKdarray (tk_sub, tv_sub) | AKmap (tk_sub, tv_sub)),
-            (AKdarray (tk_super, tv_super) | AKmap (tk_super, tv_super)) ) ->
+        | (AKdarray (tk_sub, tv_sub), AKdarray (tk_super, tv_super)) ->
           env
           |> simplify_subtype ~subtype_env ~this_ty tk_sub tk_super
           &&& simplify_subtype ~subtype_env ~this_ty tv_sub tv_super
-        | ( (AKdarray (tk_sub, tv_sub) | AKmap (tk_sub, tv_sub)),
-            AKvarray_or_darray tv_super ) ->
+        | (AKdarray (tk_sub, tv_sub), AKvarray_or_darray tv_super) ->
           let tk_super =
             MakeType.arraykey
               (Reason.Rvarray_or_darray_key (Reason.to_pos (fst ety_super)))
@@ -1394,7 +1390,7 @@ and simplify_subtype_i
           env
           |> simplify_subtype ~subtype_env ~this_ty tk_sub tk_super
           &&& simplify_subtype ~subtype_env ~this_ty tv_sub tv_super
-        | (AKvarray elt_ty, (AKdarray _ | AKmap _))
+        | (AKvarray elt_ty, AKdarray _)
           when not (TypecheckerOptions.safe_vector_array (Env.get_tcopt env))
           ->
           let int_reason = Reason.Ridx (Reason.to_pos r, Reason.Rnone) in
@@ -1402,7 +1398,7 @@ and simplify_subtype_i
           simplify_subtype
             ~subtype_env
             ~this_ty
-            (r, Tarraykind (AKmap (int_type, elt_ty)))
+            (r, Tarraykind (AKdarray (int_type, elt_ty)))
             ety_super
             env
         (* any other array subtyping is unsatisfiable *)

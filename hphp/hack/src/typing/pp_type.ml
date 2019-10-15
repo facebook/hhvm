@@ -254,12 +254,6 @@ and pp_array_kind : Format.formatter -> array_kind -> unit =
     Format.fprintf fmt "(@[<2>AKvarray_or_darray@ ";
     pp_ty fmt a0;
     Format.fprintf fmt "@])"
-  | AKmap (a0, a1) ->
-    Format.fprintf fmt "(@[<2>AKmap (@,";
-    pp_ty fmt a0;
-    Format.fprintf fmt ",@ ";
-    pp_ty fmt a1;
-    Format.fprintf fmt "@,))@]"
   | AKempty -> Format.pp_print_string fmt "AKempty"
 
 and show_array_kind : array_kind -> string =

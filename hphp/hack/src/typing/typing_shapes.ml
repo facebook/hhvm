@@ -348,7 +348,7 @@ let to_array env pos shape_ty res =
   to_collection env shape_ty res (fun env r key value ->
       Typing_enforceability.make_locl_like_type
         env
-        (r, Tarraykind (AKmap (key, value))))
+        (r, Tarraykind (AKdarray (key, value))))
 
 let to_dict env pos shape_ty res =
   let (env, shape_ty) =

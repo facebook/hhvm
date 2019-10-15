@@ -3,7 +3,7 @@ File "array.php", line 5, characters 5-15:
 File "array.php", line 7, characters 5-15:
   varray<_>
 File "array.php", line 9, characters 5-15:
-  array<_, _>
+  darray<_, _>
 File "array.php", line 11, characters 5-15:
   varray<_>
 File "array.php", line 13, characters 5-15:

@@ -70,7 +70,7 @@ let union_values env values =
   | None -> union env values
 
 (* Apply this function to a type after lvalue array access that should update
- * array type (e.g from AKempty to AKmap after using it as a map). *)
+ * array type (e.g from AKempty to AKdarray after using it as a dict). *)
 let update_array_type p ~is_map env ty =
   let mapper =
     object
@@ -82,7 +82,7 @@ let update_array_type p ~is_map env ty =
         if is_map then
           let (env, tk) = Env.fresh_type env p in
           let (env, tv) = Env.fresh_type env p in
-          (env, (Reason.Rused_as_map p, Tarraykind (AKmap (tk, tv))))
+          (env, (Reason.Rused_as_map p, Tarraykind (AKdarray (tk, tv))))
         else
           let (env, tv) = Env.fresh_type env p in
           (env, (Reason.Rappend p, Tarraykind (AKvarray tv)))

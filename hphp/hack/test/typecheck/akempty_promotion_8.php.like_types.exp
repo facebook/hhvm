@@ -3,4 +3,4 @@ Invalid argument (Typing[4110])
 File "akempty_promotion_8.php", line 18, characters 12-24:
 Expected ~varray<string> because it is an unenforceable type
 File "akempty_promotion_8.php", line 12, characters 5-9:
-But got array<(int | nothing), (string | nothing)> because it is used as map here
+But got darray<(int | nothing), (string | nothing)> because it is used as map here

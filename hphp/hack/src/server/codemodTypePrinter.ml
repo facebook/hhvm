@@ -82,8 +82,6 @@ let rec print_ty_exn ?(allow_nothing = false) ty =
     Printf.sprintf "varray_or_darray<%s>" (print_ty_exn ty)
   | Tarraykind (AKdarray (ty1, ty2)) ->
     Printf.sprintf "darray<%s, %s>" (print_ty_exn ty1) (print_ty_exn ty2)
-  | Tarraykind (AKmap (ty1, ty2)) ->
-    Printf.sprintf "array<%s, %s>" (print_ty_exn ty1) (print_ty_exn ty2)
   | Tpu (ty, id, Pu_plain)
   | Tpu_access (ty, id) ->
     Printf.sprintf "%s:@%s)" (print_ty_exn ty) (snd id)

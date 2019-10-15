@@ -481,8 +481,7 @@ end = struct
         | AKvarray_or_darray ty
         | AKvarray ty ->
           this#on_type acc ty
-        | AKdarray (tk, tv)
-        | AKmap (tk, tv) ->
+        | AKdarray (tk, tv) ->
           merge (this#on_type acc tk) (this#on_type acc tv)
     end
 

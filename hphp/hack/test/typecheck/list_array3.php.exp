@@ -3,4 +3,4 @@ Invalid assignment (Typing[4110])
 File "list_array3.php", line 13, characters 3-14:
 Expected list([unresolved], [unresolved]) resulting from a list destructuring assignment of length 2
 File "list_array3.php", line 12, characters 16-30:
-But got array<int, int>
+But got darray<int, int>

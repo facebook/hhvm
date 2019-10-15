@@ -340,7 +340,7 @@ let rec array_get
              && ( cn = SN.Collections.cConstVector
                 || cn = SN.Collections.cImmVector ) ->
         error_const_mutation env expr_pos ety1
-      | Tarraykind (AKdarray (_k, v) | AKmap (_k, v)) ->
+      | Tarraykind (AKdarray (_k, v)) ->
         let env = check_arraykey_index env expr_pos ety1 ty2 in
         (env, v)
       | Terr -> (env, err_witness env expr_pos)
@@ -610,10 +610,6 @@ let widen_for_assign_array_get ~expr_pos index_expr env ty =
     let (env, tk) = Env.fresh_invariant_type_var env expr_pos in
     let (env, tv) = Env.fresh_invariant_type_var env expr_pos in
     (env, Some (r, Tarraykind (AKdarray (tk, tv))))
-  | (r, Tarraykind (AKmap _)) ->
-    let (env, tk) = Env.fresh_invariant_type_var env expr_pos in
-    let (env, tv) = Env.fresh_invariant_type_var env expr_pos in
-    (env, Some (r, Tarraykind (AKmap (tk, tv))))
   | (r, Ttuple tyl) ->
     (* requires integer literal *)
     begin
@@ -764,11 +760,6 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
         let (env, tk') = Typing_union.union env tk tkey in
         let (env, tv') = Typing_union.union env tv ty2 in
         (env, (r, Tarraykind (AKdarray (tk', tv'))))
-      | Tarraykind (AKmap (tk, tv)) ->
-        let env = check_arraykey_index env expr_pos ety1 tkey in
-        let (env, tk') = Typing_union.union env tk tkey in
-        let (env, tv') = Typing_union.union env tv ty2 in
-        (env, (r, Tarraykind (AKmap (tk', tv'))))
       | Terr -> error
       | Tdynamic -> (env, ety1)
       | Tany _

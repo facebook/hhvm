@@ -1,3 +1,3 @@
 File "array_literal.php", line 18, characters 3-30:
-  array<string, (typename<I> | array<string, typename<I>>)>
+  darray<string, (typename<I> | darray<string, typename<I>>)>
 No errors

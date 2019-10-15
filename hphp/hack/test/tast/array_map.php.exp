@@ -135,9 +135,9 @@
                  )))));
           ([15:3-22],
            (Expr
-              (([15:3-21], array<arraykey, bool>),
+              (([15:3-21], darray<arraykey, bool>),
                (Call (Cnormal,
-                  (([15:3-12], (function<T1, Tr>((function(int): bool) $callback, Container<int>): array<arraykey, bool>)),
+                  (([15:3-12], (function<T1, Tr>((function(int): bool) $callback, Container<int>): darray<arraykey, bool>)),
                    (Id ([15:3-12], "\\array_map"))),
                   [((int), ([15:3-12], (Happly (([Pos.none], "_"), []))));
                     ((bool), ([15:3-12], (Happly (([Pos.none], "_"), []))))],
@@ -184,9 +184,9 @@
                   [])))));
           ([18:3-30],
            (Expr
-              (([18:3-29], array<arraykey, bool>),
+              (([18:3-29], darray<arraykey, bool>),
                (Call (Cnormal,
-                  (([18:3-12], (function<T1, Tr>((function(num): bool) $callback, Container<num>): array<arraykey, bool>)),
+                  (([18:3-12], (function<T1, Tr>((function(num): bool) $callback, Container<num>): darray<arraykey, bool>)),
                    (Id ([18:3-12], "\\array_map"))),
                   [((num), ([18:3-12], (Happly (([Pos.none], "_"), []))));
                     ((bool), ([18:3-12], (Happly (([Pos.none], "_"), []))))],

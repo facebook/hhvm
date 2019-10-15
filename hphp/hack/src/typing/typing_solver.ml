@@ -122,10 +122,6 @@ let rec freshen_inside_ty env ((r, ty_) as ty) =
         let (env, ty1) = freshen_ty env ty1 in
         let (env, ty2) = freshen_ty env ty2 in
         (env, (r, Tarraykind (AKdarray (ty1, ty2))))
-      | AKmap (ty1, ty2) ->
-        let (env, ty1) = freshen_ty env ty1 in
-        let (env, ty2) = freshen_ty env ty2 in
-        (env, (r, Tarraykind (AKmap (ty1, ty2))))
     end
   | Tvar _ -> default ()
   | Tpu _
@@ -438,8 +434,7 @@ let ty_equal_shallow ty1 ty2 =
   | (Ttuple _, Ttuple _)
   | (Tarraykind (AKvarray _), Tarraykind (AKvarray _))
   | (Tarraykind (AKvarray_or_darray _), Tarraykind (AKvarray_or_darray _))
-  | (Tarraykind (AKdarray _), Tarraykind (AKdarray _))
-  | (Tarraykind (AKmap _), Tarraykind (AKmap _)) ->
+  | (Tarraykind (AKdarray _), Tarraykind (AKdarray _)) ->
     true
   | (Tprim p1, Tprim p2) -> p1 = p2
   | (Tclass (x_sub, exact_sub, _), Tclass (x_super, exact_super, _)) ->

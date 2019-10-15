@@ -1,15 +1,15 @@
 File "invalid_arraykey.php", line 6, characters 3-14:
 This value is not a valid key type for this container (Typing[4298])
 File "invalid_arraykey.php", line 5, characters 3-11:
-This container is an array (used like a hashtable)
+This container is a darray
 File "invalid_arraykey.php", line 6, characters 6-9:
-Null cannot be used as a key for an array (used like a hashtable)
+Null cannot be used as a key for a darray
 File "invalid_arraykey.php", line 7, characters 3-13:
 This value is not a valid key type for this container (Typing[4298])
 File "invalid_arraykey.php", line 5, characters 3-11:
-This container is an array (used like a hashtable)
+This container is a darray
 File "invalid_arraykey.php", line 7, characters 6-8:
-A float cannot be used as a key for an array (used like a hashtable)
+A float cannot be used as a key for a darray
 File "invalid_arraykey.php", line 11, characters 3-14:
 This value is not a valid key type for this container (Typing[4298])
 File "invalid_arraykey.php", line 9, characters 8-13:

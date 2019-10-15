@@ -349,7 +349,6 @@ module Full = struct
     | Tarraykind AKempty -> text "array (empty)"
     | Tarraykind (AKvarray x) -> tvarray k x
     | Tarraykind (AKdarray (x, y)) -> tdarray k x y
-    | Tarraykind (AKmap (x, y)) -> tarray k (Some x) (Some y)
     | Tclass ((_, s), Exact, []) when !debug_mode ->
       Concat [text "exact"; Space; to_doc s]
     | Tclass ((_, s), _, []) -> to_doc s
@@ -724,7 +723,6 @@ module ErrorString = struct
     | Tarraykind AKany -> array (None, None)
     | Tarraykind (AKvarray _) -> varray
     | Tarraykind (AKdarray (_, _)) -> darray
-    | Tarraykind (AKmap (x, y)) -> array (Some x, Some y)
     | Ttuple l -> "a tuple of size " ^ string_of_int (List.length l)
     | Tnonnull -> "a nonnull value"
     | Toption (_, Tnonnull) -> "a mixed value"
@@ -990,8 +988,6 @@ module Json = struct
         | Tarraykind (AKdarray (ty1, ty2)) ->
           obj @@ kind "darray" @ args [ty1; ty2]
         | Tarraykind (AKvarray ty) -> obj @@ kind "varray" @ args [ty]
-        | Tarraykind (AKmap (ty1, ty2)) ->
-          obj @@ kind "array" @ empty false @ args [ty1; ty2]
         | Tarraykind AKempty -> obj @@ kind "array" @ empty true @ args []
         | Tdestructure tyl -> obj @@ kind "union" @ args tyl
         | Tpu (base, enum, pukind) ->
@@ -1208,7 +1204,7 @@ module Json = struct
               aux ty1 ~keytrace:("0" :: keytrace)
               >>= fun ty1 ->
               aux ty2 ~keytrace:("1" :: keytrace)
-              >>= (fun ty2 -> ty (Tarraykind (AKmap (ty1, ty2))))
+              >>= (fun ty2 -> ty (Tarraykind (AKdarray (ty1, ty2))))
             | _ ->
               deserialization_error
                 ~message:

@@ -67,11 +67,11 @@ File "arrays.php", line 160, characters 3-13:
 File "arrays.php", line 161, characters 3-16:
   ~?(int | string)
 File "arrays.php", line 164, characters 3-13:
-  array<int, (bool | string)>
+  darray<int, (bool | string)>
 File "arrays.php", line 165, characters 3-16:
   (bool | string)
 File "arrays.php", line 168, characters 3-13:
-  ~array<int, bool>
+  ~darray<int, bool>
 File "arrays.php", line 169, characters 3-16:
   ~bool
 File "arrays.php", line 172, characters 3-13:
@@ -79,11 +79,11 @@ File "arrays.php", line 172, characters 3-13:
 File "arrays.php", line 173, characters 3-16:
   bool
 File "arrays.php", line 176, characters 3-13:
-  ~array<int, bool>
+  ~darray<int, bool>
 File "arrays.php", line 177, characters 3-16:
   ~bool
 File "arrays.php", line 180, characters 3-13:
-  ~array<int, bool>
+  ~darray<int, bool>
 File "arrays.php", line 181, characters 3-16:
   ~bool
 File "arrays.php", line 14, characters 3-7:

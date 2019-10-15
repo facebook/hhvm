@@ -48,9 +48,6 @@ class type type_mapper_type =
 
     method on_tarraykind_akvarray : env -> Reason.t -> locl_ty -> result
 
-    method on_tarraykind_akmap :
-      env -> Reason.t -> locl_ty -> locl_ty -> result
-
     method on_tarraykind_akdarray :
       env -> Reason.t -> locl_ty -> locl_ty -> result
 
@@ -113,9 +110,6 @@ class shallow_type_mapper : type_mapper_type =
     method on_tarraykind_akvarray env r tv =
       (env, (r, Tarraykind (AKvarray tv)))
 
-    method on_tarraykind_akmap env r tk tv =
-      (env, (r, Tarraykind (AKmap (tk, tv))))
-
     method on_tarraykind_akdarray env r tk tv =
       (env, (r, Tarraykind (AKdarray (tk, tv))))
 
@@ -153,7 +147,6 @@ class shallow_type_mapper : type_mapper_type =
       | Tarraykind AKany -> this#on_tarraykind_akany env r
       | Tarraykind AKempty -> this#on_tarraykind_akempty env r
       | Tarraykind (AKvarray tv) -> this#on_tarraykind_akvarray env r tv
-      | Tarraykind (AKmap (tk, tv)) -> this#on_tarraykind_akmap env r tk tv
       | Tarraykind (AKdarray (tk, tv)) ->
         this#on_tarraykind_akdarray env r tk tv
       | Tarraykind (AKvarray_or_darray tv) ->
@@ -212,11 +205,6 @@ class deep_type_mapper =
     method! on_tarraykind_akvarray env r tv =
       let (env, tv) = this#on_type env tv in
       (env, (r, Tarraykind (AKvarray tv)))
-
-    method! on_tarraykind_akmap env r tk tv =
-      let (env, tk) = this#on_type env tk in
-      let (env, tv) = this#on_type env tv in
-      (env, (r, Tarraykind (AKmap (tk, tv))))
 
     method! on_tarraykind_akdarray env r tk tv =
       let (env, tk) = this#on_type env tk in

@@ -3,4 +3,4 @@ Invalid return type (Typing[4110])
 File "darray_with_array_filter_does_not_return_vect_like_array.php", line 3, characters 35-45:
 Expected varray<bool>
 File "darray_with_array_filter_does_not_return_vect_like_array.php", line 4, characters 23-59:
-But got array<string, bool>
+But got darray<string, bool>

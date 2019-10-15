@@ -7,10 +7,10 @@
       { fb_ast =
         [([13:3-51],
           (Expr
-             (([13:3-50], array<string, _>),
+             (([13:3-50], darray<string, _>),
               (Binop ((Eq None),
-                 (([13:3-5], array<string, _>), (Lvar ([13:3-5], $x))),
-                 (([13:8-50], array<string, _>),
+                 (([13:3-5], darray<string, _>), (Lvar ([13:3-5], $x))),
+                 (([13:8-50], darray<string, _>),
                   (Array
                      [(AFkvalue ((([13:14-17], string), (String "k")),
                          (([13:21-22], int), (Int "0"))));

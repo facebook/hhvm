@@ -3,5 +3,5 @@ File "tarray.php", line 5, characters 3-13:
 File "tarray.php", line 9, characters 3-13:
   ~varray<int>
 File "tarray.php", line 13, characters 3-13:
-  ~array<int, string>
+  ~darray<int, string>
 No errors

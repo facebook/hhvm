@@ -1326,8 +1326,7 @@ and get_tyvars_i env (ty : internal_type) =
         | AKvarray ty
         | AKvarray_or_darray ty ->
           get_tyvars env ty
-        | AKdarray (ty1, ty2)
-        | AKmap (ty1, ty2) ->
+        | AKdarray (ty1, ty2) ->
           let (env, positive1, negative1) = get_tyvars env ty1 in
           let (env, positive2, negative2) = get_tyvars env ty2 in
           (env, ISet.union positive1 positive2, ISet.union negative1 negative2)

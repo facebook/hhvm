@@ -228,9 +228,9 @@ let get_akvarray_inst ty =
   | _ -> get_value_collection_inst ty
 
 (* Is this type array<kty,vty> or a supertype for some kty and vty? *)
-let get_akmap_inst p ty =
+let get_akdarray_inst p ty =
   match ty with
-  | (_, Tarraykind (AKmap (kty, vty))) -> Some (kty, vty)
+  | (_, Tarraykind (AKdarray (kty, vty))) -> Some (kty, vty)
   | _ -> get_key_value_collection_inst p ty
 
 (* Is this type one of the three key-value collection types
@@ -1949,7 +1949,7 @@ and expr_
         match expand_expected env expected with
         | (env, Some (pos, reason, ety)) ->
           begin
-            match get_akmap_inst p ety with
+            match get_akdarray_inst p ety with
             | Some (kty, vty) ->
               let k_expected = ExpectedTy.make pos reason kty in
               let v_expected = ExpectedTy.make pos reason vty in
@@ -1980,7 +1980,7 @@ and expr_
         (T.Array
            (List.map (List.zip_exn key_exprs value_exprs) (fun (tek, tev) ->
                 T.AFkvalue (tek, tev))))
-        (Reason.Rwitness p, Tarraykind (AKmap (key_ty, value_ty)))
+        (Reason.Rwitness p, Tarraykind (AKdarray (key_ty, value_ty)))
   | Darray (th, l) ->
     (* Use expected type to determine expected key and value types *)
     let (env, kexpected, vexpected, th) =
@@ -4810,7 +4810,7 @@ and dispatch_call
                 MakeType.dict r tmixed tmixed;
                 MakeType.keyset r tmixed;
                 ( if disallow_varray then
-                  (r, Tarraykind (AKmap (tmixed, tmixed)))
+                  (r, Tarraykind (AKdarray (tmixed, tmixed)))
                 else
                   (r, Tarraykind AKany) );
               ] )
@@ -4882,7 +4882,7 @@ and dispatch_call
               SubType.sub_type env ety keyed_container_type Errors.unify_error
             in
             let (env, tv) = get_value_type env tv in
-            (env, (r, Tarraykind (AKmap (explain_array_filter tk, tv)))))
+            (env, (r, Tarraykind (AKdarray (explain_array_filter tk, tv)))))
           (fun _ ->
             Errors.try_
               (fun () ->
@@ -4894,7 +4894,7 @@ and dispatch_call
                 ( env,
                   ( r,
                     Tarraykind
-                      (AKmap (explain_array_filter (MakeType.arraykey r), tv))
+                      (AKdarray (explain_array_filter (MakeType.arraykey r), tv))
                   ) ))
               (fun _ -> (env, res)))
     in
@@ -4981,12 +4981,12 @@ and dispatch_call
           let env =
             SubType.sub_type env x keyed_container_type Errors.unify_error
           in
-          (env, (fun tr -> (r, Tarraykind (AKmap (tk, tr)))))
+          (env, (fun tr -> (r, Tarraykind (AKdarray (tk, tr)))))
         in
         let try_container env =
           let container_type = MakeType.container r_fty tv in
           let env = SubType.sub_type env x container_type Errors.unify_error in
-          (env, (fun tr -> (r, Tarraykind (AKmap (MakeType.arraykey r, tr)))))
+          (env, (fun tr -> (r, Tarraykind (AKdarray (MakeType.arraykey r, tr)))))
         in
         let (env, tr) =
           Errors.try_

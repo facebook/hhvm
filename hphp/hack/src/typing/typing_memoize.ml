@@ -58,12 +58,8 @@ let check_param : env -> Nast.fun_param -> unit =
     | (_, Tarraykind AKany)
     | (_, Tarraykind AKempty) ->
       ()
-    | ( _,
-        Tarraykind
-          ( AKvarray ty
-          | AKdarray (_, ty)
-          | AKvarray_or_darray ty
-          | AKmap (_, ty) ) ) ->
+    | (_, Tarraykind (AKvarray ty | AKdarray (_, ty) | AKvarray_or_darray ty))
+      ->
       check_memoizable env ty
     | (_, Tshape (_, fdm)) ->
       ShapeMap.iter

@@ -58,6 +58,8 @@ type hh_server_state =
   | Hh_server_stolen
   | Hh_server_forgot
 
+let hh_server_restart_button_text = "Restart Hack Server"
+
 (** A push message from the server might come while we're waiting for a server-rpc
    response, or while we're free. The current architecture allows us to have
    arbitrary responses to push messages while we're free, but only a limited set
@@ -3121,12 +3123,11 @@ let tick_showStatus
         request_showStatus
           (merge_with_client_ide_status env ide_service hh_server_status)
       | Lost_server { Lost_env.p; _ } ->
-        let restart_command = "Restart Hack Server" in
         let on_result ~result state =
           let result = Jget.string_d result "title" ~default:"" in
           match (result, state) with
           | (command, Lost_server _) ->
-            if command = restart_command then (
+            if command = hh_server_restart_button_text then (
               let root =
                 match get_root_opt () with
                 | None -> failwith "we should have root by now"
@@ -3154,7 +3155,7 @@ let tick_showStatus
                 {
                   type_ = MessageType.ErrorMessage;
                   message = p.Lost_env.explanation;
-                  actions = [{ title = "Restart Hack Server" }];
+                  actions = [{ title = hh_server_restart_button_text }];
                 };
             progress = None;
             total = None;

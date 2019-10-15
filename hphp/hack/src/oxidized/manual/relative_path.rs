@@ -6,6 +6,7 @@
 use ocamlpool_rust::utils::*;
 use ocamlrep_derive::OcamlRep;
 use ocamlvalue_macro::Ocamlvalue;
+use std::convert::TryFrom;
 use std::fmt::{Display, Formatter, Result};
 use std::path::PathBuf;
 use std::rc::Rc;
@@ -16,6 +17,20 @@ pub enum Prefix {
     Hhi,
     Dummy,
     Tmp,
+}
+
+impl TryFrom<usize> for Prefix {
+    type Error = String;
+
+    fn try_from(prefix_raw: usize) -> std::result::Result<Self, String> {
+        match prefix_raw {
+            0 => Ok(Prefix::Root),
+            1 => Ok(Prefix::Hhi),
+            2 => Ok(Prefix::Dummy),
+            3 => Ok(Prefix::Tmp),
+            _ => Err(format!("prefix {} is not defined", prefix_raw)),
+        }
+    }
 }
 
 impl Display for Prefix {
@@ -36,14 +51,7 @@ pub struct RelativePath(Rc<(Prefix, PathBuf)>);
 impl RelativePath {
     // TODO(shiqicao): consider adding a FromOcamlvalue derive
     pub unsafe fn from_ocamlvalue(block: &ocaml::Value) -> RelativePath {
-        let prefix_raw = usize_field(block, 0);
-        let prefix = match prefix_raw {
-            0 => Prefix::Root,
-            1 => Prefix::Hhi,
-            2 => Prefix::Dummy,
-            3 => Prefix::Tmp,
-            _ => panic!("prefix {} is not defined", prefix_raw.to_string()),
-        };
+        let prefix = Prefix::try_from(usize_field(block, 0)).unwrap();
         let path = str_field(block, 1);
         RelativePath::make(prefix, PathBuf::from(path.as_str()))
     }
@@ -72,5 +80,27 @@ impl RelativePath {
 impl Display for RelativePath {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         write!(f, "{} {}", (self.0).0, (self.0).1.display())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use pretty_assertions::assert_eq;
+
+    #[test]
+    fn test_valid_usize_prefix() {
+        let valid_prefix: usize = 2;
+        assert_eq!(Ok(Prefix::Dummy), Prefix::try_from(valid_prefix));
+    }
+
+    #[test]
+    fn test_invalid_usize_prefix() {
+        let invalid_prefix: usize = 22;
+
+        assert_eq!(
+            Err("prefix 22 is not defined".to_string()),
+            Prefix::try_from(invalid_prefix)
+        )
     }
 }

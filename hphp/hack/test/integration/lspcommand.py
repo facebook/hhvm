@@ -15,6 +15,7 @@ from typing import (
     NamedTuple,
     Optional,
     Sequence,
+    Set,
     Tuple,
     Type,
     TypeVar,
@@ -109,9 +110,12 @@ class LspCommandProcessor:
     def _send_commands(
         self, transcript: Transcript, commands: Sequence[Json]
     ) -> Transcript:
+        received_request_ids = set()
         for command in commands:
             if command["method"] == "$test/waitForRequest":
-                transcript = self._wait_for_request(transcript, command)
+                (transcript, received_request_ids) = self._wait_for_request(
+                    transcript, command, received_request_ids=received_request_ids
+                )
             elif command["method"] == "$test/waitForResponse":
                 transcript = self._wait_for_response(
                     transcript, command["params"]["id"]
@@ -200,14 +204,24 @@ class LspCommandProcessor:
         return transcript
 
     def _wait_for_message_from_server(
-        self, transcript: Transcript, method: str, params: Json
+        self,
+        transcript: Transcript,
+        method: str,
+        params: Json,
+        received_request_ids: Set[int],
     ) -> Tuple[Transcript, Json]:
         def is_target_message(entry: TranscriptEntry) -> bool:
-            return (
+            if (
                 entry.received is not None
                 and entry.received.get("method") == method
                 and entry.received.get("params") == params
-            )
+            ):
+                entry_id = entry.received.get("id")
+                if entry_id is None:
+                    return True
+                else:
+                    return entry_id not in received_request_ids
+            return False
 
         while not any(is_target_message(entry) for entry in transcript.values()):
             message = self._try_read_logged(timeout_seconds=5)
@@ -215,7 +229,8 @@ class LspCommandProcessor:
             assert (
                 message is not None
             ), f"""\
-Timed out while waiting for a {method!r} message to be sent from the server.
+Timed out while waiting for a {method!r} message to be sent from the server,
+which must not have an ID in {received_request_ids!r}.
 The message was expected to have params:
 
 {params_pretty}
@@ -230,18 +245,29 @@ Transcript of all the messages we saw:
         ]
         return (transcript, message)
 
-    def _wait_for_request(self, transcript: Transcript, command: Json) -> Transcript:
+    def _wait_for_request(
+        self, transcript: Transcript, command: Json, received_request_ids: Set[int]
+    ) -> Tuple[Transcript, Set[int]]:
         method = command["params"]["method"]
         params = command["params"]["params"]
         result = command["params"]["result"]
         (transcript, message) = self._wait_for_message_from_server(
-            transcript, method=method, params=params
+            transcript,
+            method=method,
+            params=params,
+            received_request_ids=received_request_ids,
         )
+        message_id = message["id"]
+        response = {"jsonrpc": 2.0, "id": message_id, "result": result}
 
-        response = {"jsonrpc": 2.0, "id": message["id"], "result": result}
+        # Ensure that we don't double-count one received request as having
+        # responded to multiple wait-for-request instructions.
+        received_request_ids = set(received_request_ids)
+        received_request_ids.add(message_id)
+
         self.writer.write(response)
         transcript = self._scribe(transcript, sent=response, received=None)
-        return transcript
+        return (transcript, received_request_ids)
 
     def _wait_for_notification(
         self, transcript: Transcript, command: Json
@@ -249,7 +275,7 @@ Transcript of all the messages we saw:
         method = command["params"]["method"]
         params = command["params"]["params"]
         (transcript, _message) = self._wait_for_message_from_server(
-            transcript, method=method, params=params
+            transcript, method=method, params=params, received_request_ids={}
         )
         return transcript
 

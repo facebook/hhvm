@@ -315,15 +315,22 @@ let class_big_diff class1 class2 =
 and get_all_dependencies
     ~conservative_redecl trace cid (changed, to_redecl, to_recheck) =
   let dep = Dep.Class cid in
-  let where_class_was_used = Typing_deps.get_ideps dep in
+  let cid_hash = Typing_deps.Dep.make dep in
+  (* Why can't we just use `Typing_deps.get_ideps dep` here? See test case
+     hphp/hack/test/integration_ml/saved_state/test_changed_type_in_base_class.ml
+     for an example. *)
+  let where_class_and_subclasses_were_used =
+    Typing_deps.add_all_deps (DepSet.singleton cid_hash)
+  in
   let to_redecl =
     if conservative_redecl then
-      DepSet.union where_class_was_used to_redecl
+      DepSet.union where_class_and_subclasses_were_used to_redecl
     else
       to_redecl
   in
-  let to_recheck = DepSet.union where_class_was_used to_recheck in
-  let cid_hash = Typing_deps.Dep.make dep in
+  let to_recheck =
+    DepSet.union where_class_and_subclasses_were_used to_recheck
+  in
   let to_redecl = Typing_deps.get_extend_deps trace cid_hash to_redecl in
   (add_changed changed dep, to_redecl, to_recheck)
 

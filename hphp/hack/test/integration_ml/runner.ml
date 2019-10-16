@@ -43,6 +43,8 @@ let tests =
     ("ide/remove_parent", run Test_remove_parent.test);
     ("ide/status_single", run Test_status_single.test);
     ("ide/unsaved_changes", run Test_unsaved_changes.test);
+    ( "saved_state/changed_type_in_base_class",
+      run Test_changed_type_in_base_class.test );
     ("saved_state/deps_all_members", run Test_deps_all_members.test);
     ( "saved_state/disable_conservative_redecl_class",
       run Test_disable_conservative_redecl_class.test );

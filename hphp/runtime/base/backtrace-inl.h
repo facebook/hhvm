@@ -38,6 +38,16 @@ struct c_WaitableWaitHandle;
 
 namespace backtrace_detail {
 
+/*
+ * Everything we need to represent a frame in the backtrace.
+ */
+struct BTFrame {
+  ActRec* fp{nullptr};
+  Offset pc{kInvalidOffset};
+
+  operator bool() const { return fp != nullptr; }
+};
+
 struct BTContext {
   BTContext();
 
@@ -57,21 +67,24 @@ struct BTContext {
   ActRec fakeAR[2];
   IStack inlineStack;
 
-  // stashedAR stores a pointer to the frame that should be returned after the
-  // inlined stack has been traversed and stashedPC stores the corresponding PC.
-  ActRec* stashedAR{nullptr};
-  Offset stashedPC{kInvalidOffset};
+  // The frame we should resume at after unwinding the inlined stack.
+  BTFrame stashedFrm{};
 };
 
-ActRec* getPrevActRec(
-  BTContext& ctx,
-  const ActRec* fp,
-  Offset* prevPc,
+BTFrame getPrevActRec(
+  BTContext& ctx, BTFrame frm,
   folly::small_vector<c_WaitableWaitHandle*, 64>& visitedWHs
 );
 
-ActRec* initBTContextAt(BTContext& ctx, jit::CTCA ip,
-                        ActRec* fp, Offset* prevPc);
+/*
+ * Take a `frm` cursor and perform miscellaneous preprocessing on it.
+ *
+ * Preprocessing includes:
+ *  - Setting up virtual inline stack frames.
+ *  - Setting up virtual FCallBuiltin inline frames.
+ *  - Coalescing kInvalidOffset `pc` values to `pcOff()`.
+ */
+BTFrame initBTContextAt(BTContext& ctx, jit::CTCA ip, BTFrame frm);
 
 }
 
@@ -80,25 +93,20 @@ void walkStack(L func, bool skipTop) {
   using namespace backtrace_detail;
 
   VMRegAnchor _;
-  folly::small_vector<c_WaitableWaitHandle*, 64> visitedWHs;
-  auto fp = vmfp();
+  auto frm = BTFrame { vmfp() };
 
   // If there are no VM frames, we're done.
-  if (!fp || !rds::header()) return;
+  if (!frm || !rds::header()) return;
 
   BTContext ctx;
 
-  // Handle the subsequent VM frames.
-  auto prevPc = pcOff();
-  auto const addr = vmJitReturnAddr();
-  if (auto const inl = initBTContextAt(ctx, addr, fp, &prevPc)) {
-    fp = inl;
-  }
+  frm = initBTContextAt(ctx, vmJitReturnAddr(), frm);
 
-  if (skipTop) fp = getPrevActRec(ctx, fp, &prevPc, visitedWHs);
+  folly::small_vector<c_WaitableWaitHandle*, 64> visitedWHs;
+  if (skipTop) frm = getPrevActRec(ctx, frm, visitedWHs);
 
-  for (; fp != nullptr; fp = getPrevActRec(ctx, fp, &prevPc, visitedWHs)) {
-    if (ArrayData::call_helper(func, fp, prevPc)) return;
+  for (; frm; frm = getPrevActRec(ctx, frm, visitedWHs)) {
+    if (ArrayData::call_helper(func, frm.fp, frm.pc)) return;
   }
 }
 

@@ -45,6 +45,7 @@ U = TypeVar("U", bound="LspCommandProcessor")
 class LspCommandProcessor:
     def __init__(
         self,
+        # pyre-fixme[24]: Generic type `subprocess.Popen` expects 1 type parameter.
         proc: subprocess.Popen,
         reader: JsonRpcStreamReader,
         writer: JsonRpcStreamWriter,

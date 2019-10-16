@@ -24,6 +24,7 @@ class DebugSubscription(object):
     Wraps `hh_client debug`.
     """
 
+    # pyre-fixme[24]: Generic type `subprocess.Popen` expects 1 type parameter.
     def __init__(self, proc: subprocess.Popen) -> None:
         self.proc = proc
         hello = self.read_msg()
@@ -161,6 +162,7 @@ class CommonTestDriver(TestDriver):
         self.tearDownWithRetries()
 
     @classmethod
+    # pyre-fixme[24]: Generic type `subprocess.Popen` expects 1 type parameter.
     def proc_create(cls, args: List[str], env: Mapping[str, str]) -> subprocess.Popen:
         return subprocess.Popen(
             args,

@@ -45,6 +45,8 @@ max_workers = 2
             cls.write_repo = os.path.join(test_driver.repo_dir, "symbol_info_test_dir")
 
         # hardcoded map of valid keys
+        # pyre-fixme[8]: Attribute has type `Dict[str, List[str]]`; used as
+        #  `Dict[str, List[Type[Union[int, str]]]]`.
         cls.valid_keys = {
             "hackfull.symbolOccurrence.1": [
                 "name_lowercase",
@@ -129,6 +131,8 @@ max_workers = 2
                 # if didn't pass the above if, must be an object with any valid key
                 next_valid_keys = self.valid_keys.keys()
 
+            # pyre-fixme[6]: Expected `List[str]` for 2nd param but got
+            #  `Union[List[str], KeysView[str]]`.
             if not self.verify_json(element, next_valid_keys):
                 return False
 

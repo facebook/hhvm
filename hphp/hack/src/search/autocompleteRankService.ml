@@ -12,10 +12,12 @@ let rank_autocomplete_result
     ~(results : AutocompleteTypes.complete_autocomplete_result list)
     ~(max_results : int)
     ~(context : SearchUtils.autocomplete_type option)
-    ~(kind_filter : SearchUtils.si_kind option) :
+    ~(kind_filter : SearchUtils.si_kind option)
+    ~(ranking_context : AutocompleteTypes.autocomplete_ranking_context) :
     AutocompleteTypes.complete_autocomplete_result list =
   let _ = query_text in
   let _ = max_results in
   let _ = context in
   let _ = kind_filter in
+  let _ = ranking_context in
   results

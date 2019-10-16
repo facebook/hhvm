@@ -71,3 +71,6 @@ type legacy_autocomplete_context = {
   is_after_open_square_bracket: bool;
   is_after_quote: bool;
 }
+
+(* Ranked autocomplete context: prev tokens, prev token types *)
+type autocomplete_ranking_context = string * string

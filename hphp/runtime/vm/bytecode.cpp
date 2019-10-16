@@ -1046,57 +1046,47 @@ static void shuffleExtraStackArgs(ActRec* ar) {
   ar->setNumArgs(func->numParams());
 }
 
-// offset is the number of params already on the stack to which the
-// contents of args are to be added; for call_user_func_array, this is
-// always 0; for unpacked arguments, it may be greater if normally passed
-// params precede the unpack.
-void prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
-                      int nregular, bool checkRefAnnot) {
-  assertx(!cellIsNull(&args));
-  assertx(nregular >= 0);
-  assertx((stack.top() + nregular) == (void*) ar);
-  const Func* const f = ar->m_func;
-  assertx(f);
+// Unpack or repack arguments as needed to match the function signature.
+// The stack contains numArgs arguments plus an extra cell containing
+// arguments to unpack.
+uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
+                           bool checkRefAnnot) {
+  auto& stack = vmStack();
+  auto unpackArgs = popUnpackArgs();
+  SCOPE_EXIT { tvDecRefGen(unpackArgs); };
+  assertx(isContainer(unpackArgs));
 
-  assertx(isContainer(args));
-  int const nargs = nregular + getContainerSize(args);
-
-  ar->trashVarEnv();
-  if (!debug || (ar->func()->attrs() & AttrMayUseVV)) {
-    ar->setVarEnv(nullptr);
+  auto const numUnpackArgs = getContainerSize(unpackArgs);
+  auto const numParams = func->numNonVariadicParams();
+  if (LIKELY(numArgs == numParams)) {
+    // Nothing to unpack.
+    if (numUnpackArgs == 0) return numParams;
+    // Nowhere to unpack. FIXME: emit too many args warning
+    if (!func->hasVariadicCaptureParam()) return numParams;
+    // Convert unpack args to the proper type.
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      tvCastToVecInPlace(&unpackArgs);
+      stack.pushVec(unpackArgs.m_data.parr);
+    } else {
+      tvCastToVArrayInPlace(&unpackArgs);
+      stack.pushArray(unpackArgs.m_data.parr);
+    }
+    return numParams + 1;
   }
 
-#define WRAP(e)                                                        \
-  try {                                                                \
-    e;                                                                 \
-  } catch (...) {                                                      \
-    /* If the user error handler throws an exception, discard the
-     * uninitialized value(s) at the top of the eval stack so that the
-     * unwinder doesn't choke */                                       \
-    stack.discard();                                                   \
-    throw;                                                             \
-  }
-
-  int const nparams = f->numNonVariadicParams();
-  int nextra_regular = std::max(nregular - nparams, 0);
-  ArrayIter iter(args);
-  if (LIKELY(nextra_regular == 0)) {
-    for (int i = nregular; iter && (i < nparams); ++i, ++iter) {
+  ArrayIter iter(unpackArgs);
+  if (LIKELY(numArgs < numParams)) {
+    for (auto i = numArgs; iter && (i < numParams); ++i, ++iter) {
       auto const from = iter.secondValPlus();
-      TypedValue* to = stack.allocTV();
-      if (LIKELY(!f->byRef(i))) {
-        cellDup(tvToCell(from), *to);
+      if (LIKELY(!func->byRef(i))) {
+        cellDup(tvToCell(from), *stack.allocTV());
       } else if (LIKELY(isRefType(from.m_type) &&
                         from.m_data.pref->hasMultipleRefs())) {
-        if (checkRefAnnot) {
-          WRAP(throwParamRefMismatch(f, i));
-        }
-        refDup(from, *to);
+        if (checkRefAnnot) throwParamRefMismatch(func, i);
+        refDup(from, *stack.allocTV());
       } else {
-        if (checkRefAnnot) {
-          WRAP(throwParamRefMismatch(f, i));
-        }
-        cellDup(tvToCell(from), *to);
+        if (checkRefAnnot) throwParamRefMismatch(func, i);
+        cellDup(tvToCell(from), *stack.allocTV());
       }
     }
 
@@ -1104,73 +1094,59 @@ void prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
       // argArray was exhausted, so there are no "extra" arguments but there
       // may be a deficit of non-variadic arguments, and the need to push an
       // empty array for the variadic argument ... that work is left to
-      // prepareFuncEntry.  Since the stack state is going to be considered
-      // "trimmed" over there, we need to null the extraArgs/varEnv field if
-      // the function could read it.
-      ar->setNumArgs(nargs);
-      return;
+      // prepareFuncEntry.
+      return numArgs + numUnpackArgs;
     }
   }
 
-#undef WRAP
-
   // there are "extra" arguments; passed as standard arguments prior to the
   // ... unpack operator and/or still remaining in argArray
-  assertx(nargs > nparams);
-  assertx(nextra_regular > 0 || !!iter);
-  if (LIKELY(!f->hasVariadicCaptureParam())) {
-    if (UNLIKELY(nextra_regular > 0)) {
+  assertx(numArgs + numUnpackArgs > numParams);
+  assertx(numArgs > numParams || !!iter);
+  if (LIKELY(!func->hasVariadicCaptureParam())) {
+    // FIXME: emit too many args warning
+    if (UNLIKELY(numArgs > numParams)) {
       // if unpacking, any regularly passed arguments on the stack
       // in excess of those expected by the function need to be discarded
       // in addition to the ones held in the arry
-      do { stack.popTV(); } while (--nextra_regular);
+      for (auto i = numParams; i < numArgs; ++i) {
+        stack.popTV();
+      }
     }
 
     // the extra args are not used in the function; no reason to add them
     // to the stack
-    ar->setNumArgs(f->numParams());
-    return;
+    return numParams;
   }
 
-  auto const extra = nargs - nparams;
-  if (nparams == nregular &&
-      !RuntimeOption::EvalHackArrDVArrs &&
-      isArrayType(args.m_type) &&
-      args.m_data.parr->isVArray()) {
-    stack.pushArray(args.m_data.parr);
-  } else if (nparams == nregular &&
-             RuntimeOption::EvalHackArrDVArrs &&
-             isVecType(args.m_type)) {
-    stack.pushVec(args.m_data.parr);
-  } else {
-    VArrayInit ai(extra);
-    if (UNLIKELY(nextra_regular > 0)) {
-      // The arguments are pushed in order, so we should refer them by
-      // index instead of taking the top, that would lead to reverse order.
-      for (int i = nextra_regular - 1; i >= 0; --i) {
-        // appendWithRef bumps the refcount and splits if necessary,
-        // to compensate for the upcoming pop from the stack
-        ai.appendWithRef(tvAsVariant(stack.indTV(i)));
-      }
-      for (int i = 0; i < nextra_regular; ++i) {
-        stack.popTV();
-      }
+  auto const numNewUnpackArgs = numArgs + numUnpackArgs - numParams;
+  VArrayInit ai(numNewUnpackArgs);
+  if (UNLIKELY(numArgs > numParams)) {
+    // The arguments are pushed in order, so we should start from the bottom.
+    auto ptr = stack.indTV(numArgs - numParams);
+    for (auto i = numParams; i < numArgs; ++i) {
+      // appendWithRef bumps the refcount and splits if necessary,
+      // to compensate for the upcoming pop from the stack
+      ai.appendWithRef(*--ptr);
     }
-    for (int i = nextra_regular; i < extra; ++i, ++iter) {
-      // appendWithRef bumps the refcount to compensate for the
-      // eventual decref of arrayArgs.
-      ai.appendWithRef(iter.secondValPlus());
-    }
-    assertx(!iter); // iter should now be exhausted
-    auto const ad = ai.create();
-    assertx(ad->hasExactlyOneRef());
-    if (RuntimeOption::EvalHackArrDVArrs) {
-      stack.pushVecNoRc(ad);
-    } else {
-      stack.pushArrayNoRc(ad);
+    for (auto i = numParams; i < numArgs; ++i) {
+      stack.popTV();
     }
   }
-  ar->setNumArgs(f->numParams());
+  for (; iter; ++iter) {
+    // appendWithRef bumps the refcount to compensate for the
+    // eventual decref of arrayArgs.
+    ai.appendWithRef(iter.secondValPlus());
+  }
+  auto const ad = ai.create();
+  assertx(ad->hasExactlyOneRef());
+  assertx(ad->size() == numNewUnpackArgs);
+  if (RuntimeOption::EvalHackArrDVArrs) {
+    stack.pushVecNoRc(ad);
+  } else {
+    stack.pushArrayNoRc(ad);
+  }
+  return numParams + 1;
 }
 
 static void prepareFuncEntry(ActRec *ar, StackArgsState stk, Array&& generics) {
@@ -4310,13 +4286,9 @@ bool doFCall(ActRec* ar, uint32_t numArgs, bool hasUnpack,
     if (callFlags.hasGenerics()) vmStack().discard();
 
     if (hasUnpack) {
-      // prepareArrayArgs will push args onto the stack
-      auto const args = popUnpackArgs();
-      SCOPE_EXIT { tvDecRefGen(args); };
       checkStack(vmStack(), ar->func(), 0);
-
-      assertx(!ar->resumed());
-      prepareArrayArgs(ar, args, vmStack(), numArgs, /* checkRefAnnot */ true);
+      numArgs = prepareUnpackArgs(ar->func(), numArgs, true /*checkRefAnnot*/);
+      ar->setNumArgs(numArgs);
     }
 
     prepareFuncEntry(

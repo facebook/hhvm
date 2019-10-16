@@ -1750,10 +1750,11 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
       return;
     }
     assertx(isContainer(args));
+    cellDup(args, *vmStack().allocC());
     if (LIKELY(invName == nullptr)) {
-      prepareArrayArgs(ar, args, vmStack(), 0, checkRefAnnot);
+      auto const numArgs = prepareUnpackArgs(f, 0, checkRefAnnot);
+      ar->setNumArgs(numArgs);
     } else {
-      cellDup(args, *vmStack().allocC());
       shuffleMagicArgs(String::attach(invName), 0, true);
       ar->setNumArgs(2);
     }

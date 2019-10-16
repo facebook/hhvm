@@ -764,8 +764,8 @@ void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk, Array&& generics,
                    bool hasInOut, bool dynamicCall, bool allowDynCallNoPointer);
 void enterVMAtCurPC();
 void shuffleMagicArgs(String&& invName, uint32_t numArgs, bool hasUnpack);
-void prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
-                      int nregular, bool checkRefAnnot);
+uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
+                           bool checkRefAnnot);
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -71,7 +71,7 @@ let server_is_ready () = ()
 
 let load_deptable_end _ = ()
 
-let init_start _ = ()
+let init_start ~experiments_config_meta = ignore experiments_config_meta
 
 let nfs_root _ = ()
 

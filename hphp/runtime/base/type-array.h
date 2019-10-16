@@ -393,6 +393,11 @@ public:
   String toString() const;
 
   /*
+   * Enable the legacy behavior bit on this array
+   */
+  void setLegacyArray(bool);
+
+  /*
    * Comparisons.
    */
   bool same(const Array& v2) const;

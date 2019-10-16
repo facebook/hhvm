@@ -909,13 +909,21 @@ void VariableUnserializer::unserializeVariant(
       check_recursion_throw();
       // It seems silly to check this here, but GCC actually generates much
       // better code this way.
-      auto a = (type == 'a') ? unserializeArray() : unserializeDict();
-      if (UNLIKELY(m_legacyHackArrays && type == 'D')) {
-        if (a->cowCheck()) {
-          a = a.copy();
-        }
-        a->setLegacyArray(true);
+      auto a = (type == 'a') ?
+        unserializeArray() :
+        unserializeDict();
+      if (UNLIKELY(m_legacyHackArrays && type == 'D') || (type == 'x')) {
+        a.setLegacyArray(true);
       }
+      tvMove(make_array_like_tv(a.detach()), self);
+    }
+    return; // array has '}' terminating
+  case 'x': // legacy dict
+    {
+      // Check stack depth to avoid overflow.
+      check_recursion_throw();
+      auto a = unserializeDict();
+      a.setLegacyArray(true);
       tvMove(make_array_like_tv(a.detach()), self);
     }
     return; // array has '}' terminating
@@ -941,14 +949,20 @@ void VariableUnserializer::unserializeVariant(
       check_recursion_throw();
       auto a = unserializeVec();
       if (UNLIKELY(m_legacyHackArrays)) {
-        if (a->cowCheck()) {
-          a = a.copy();
-        }
-        a->setLegacyArray(true);
+        a.setLegacyArray(true);
       }
       tvMove(make_tv<KindOfVec>(a.detach()), self);
     }
     return; // array has '}' terminating
+  case 'X': // legacy vec
+  {
+    // Check stack depth to avoid overflow.
+    check_recursion_throw();
+    auto a = unserializeVec();
+    a.setLegacyArray(true);
+    tvMove(make_tv<KindOfVec>(a.detach()), self);
+  }
+  return; // array has '}' terminating
   case 'k':
     {
       // Check stack depth to avoid overflow.

@@ -114,7 +114,8 @@ struct VariableSerializer {
   // ignore uninitialized late init props and do not attempt to serialize them
   void setIgnoreLateInit() { m_ignoreLateInit = true; }
 
-  enum class ArrayKind { PHP, Dict, Vec, Keyset, VArray, DArray };
+  enum class ArrayKind { PHP, Dict, Vec, Keyset, VArray, DArray,
+                         LegacyDict, LegacyVec };
 
   // One entry for each vec or dict in the value being serialized (in a
   // pre-order walk). If the bool is true, and mode is PHPOutput, the vec or

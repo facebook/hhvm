@@ -120,8 +120,16 @@ VariableSerializer::getKind(const ArrayData* arr) const {
       !arr->isLegacyArray()) {
     return VariableSerializer::ArrayKind::PHP;
   }
-  if (arr->isDict())     return VariableSerializer::ArrayKind::Dict;
-  if (arr->isVecArray()) return VariableSerializer::ArrayKind::Vec;
+  if (arr->isDict()) {
+    return getType() == Type::Internal && arr->isLegacyArray()
+      ? VariableSerializer::ArrayKind::LegacyDict
+      : VariableSerializer::ArrayKind::Dict;
+  }
+  if (arr->isVecArray()) {
+    return getType() == Type::Internal && arr->isLegacyArray()
+      ? VariableSerializer::ArrayKind::LegacyVec
+      : VariableSerializer::ArrayKind::Vec;
+  }
   if (arr->isKeyset())   return VariableSerializer::ArrayKind::Keyset;
   assertx(arr->isPHPArray());
   if (m_keepDVArrays) {
@@ -823,9 +831,11 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
     } else {
       switch (kind) {
       case ArrayKind::Dict:
+      case ArrayKind::LegacyDict:
         m_buf->append("Dict\n");
         break;
       case ArrayKind::Vec:
+      case ArrayKind::LegacyVec:
         m_buf->append("Vec\n");
         break;
       case ArrayKind::Keyset:
@@ -864,6 +874,7 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
     } else {
       switch (kind) {
       case ArrayKind::Dict:
+      case ArrayKind::LegacyDict:
         if (m_type == Type::PHPOutput && m_dvOverrides) {
           m_buf->append(
             (*m_dvOverrides)[m_dvOverridesIndex] ? "darray [\n" : "dict [\n"
@@ -874,6 +885,7 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
         }
         break;
       case ArrayKind::Vec:
+      case ArrayKind::LegacyVec:
         if (m_type == Type::PHPOutput && m_dvOverrides) {
           m_buf->append(
             (*m_dvOverrides)[m_dvOverridesIndex] ? "varray [\n" : "vec [\n"
@@ -916,9 +928,11 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
     } else {
       switch (kind) {
       case ArrayKind::Dict:
+      case ArrayKind::LegacyDict:
         m_buf->append("dict");
         break;
       case ArrayKind::Vec:
+      case ArrayKind::LegacyVec:
         m_buf->append("vec");
         break;
       case ArrayKind::Keyset:
@@ -973,6 +987,12 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
         break;
       case ArrayKind::Vec:
         m_buf->append("v:");
+        break;
+      case ArrayKind::LegacyDict:
+        m_buf->append("x:");
+        break;
+      case ArrayKind::LegacyVec:
+        m_buf->append("X:");
         break;
       case ArrayKind::Keyset:
         m_buf->append("k:");
@@ -1136,7 +1156,8 @@ void VariableSerializer::writeArrayKey(
   case Type::Serialize:
   case Type::Internal:
   case Type::DebuggerSerialize:
-    if (kind == AK::Vec || kind == AK::Keyset || kind == AK::VArray) return;
+    if (kind == AK::Vec || kind == AK::LegacyVec ||
+        kind == AK::Keyset || kind == AK::VArray) return;
     write(key);
     break;
 
@@ -1290,7 +1311,9 @@ void VariableSerializer::writeArrayFooter(
     } else if (m_rsrcName.empty()) { // for rsrc, only write NULL in arrayHeader
       switch (kind) {
       case ArrayKind::Dict:
+      case ArrayKind::LegacyDict:
       case ArrayKind::Vec:
+      case ArrayKind::LegacyVec:
       case ArrayKind::Keyset:
         m_buf->append(']');
         break;

@@ -596,6 +596,18 @@ int Array::compare(const Array& v2, bool flip /* = false */) const {
   not_reached();
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
+void Array::setLegacyArray(bool isLegacy) {
+  auto const ad = get();
+  if (isLegacy == ad->isLegacyArray()) return;
+
+  if (ad->cowCheck()) {
+    m_arr = Ptr::attach(ad->copy());
+  }
+  m_arr->setLegacyArray(isLegacy);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 template<typename T> ALWAYS_INLINE

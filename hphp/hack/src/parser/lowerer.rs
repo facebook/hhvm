@@ -327,7 +327,7 @@ pub enum Error {
 
 #[derive(Ocamlvalue)]
 pub struct Result {
-    aast: aast!(Program<,>),
+    pub aast: aast!(Program<,>),
 }
 
 use parser_core_types::syntax::SyntaxVariant::*;

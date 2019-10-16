@@ -61,6 +61,13 @@ impl Pos {
         }
     }
 
+    pub fn line(&self) -> usize {
+        match &self.0 {
+            Small { start, .. } => start.line(),
+            Large { start, .. } => start.line(),
+        }
+    }
+
     pub fn from_lnum_bol_cnum(
         file: RelativePath,
         start: (usize, usize, usize),

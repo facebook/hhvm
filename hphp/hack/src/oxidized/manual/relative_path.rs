@@ -8,7 +8,7 @@ use ocamlrep_derive::OcamlRep;
 use ocamlvalue_macro::Ocamlvalue;
 use std::convert::TryFrom;
 use std::fmt::{Display, Formatter, Result};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::rc::Rc;
 
 #[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
@@ -66,6 +66,10 @@ impl RelativePath {
 
     pub fn ends_with(&self, s: &str) -> bool {
         (self.0).1.to_str().unwrap().ends_with(s)
+    }
+
+    pub fn path(&self) -> &Path {
+        &(self.0).1
     }
 
     pub fn path_str(&self) -> &str {

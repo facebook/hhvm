@@ -23,7 +23,7 @@ type env = {
 
 let empty auto_ns_map is_code_gen =
   {
-    ns_ns_uses = SMap.empty;
+    ns_ns_uses = SMap.of_list auto_ns_map;
     ns_class_uses = SMap.empty;
     ns_record_def_uses = SMap.empty;
     ns_fun_uses = SMap.empty;

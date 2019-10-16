@@ -38,37 +38,6 @@ let elaborate_into_ns ns_name id =
 
 let elaborate_into_current_ns nsenv id = elaborate_into_ns nsenv.ns_name id
 
-(* Walks over the namespace map and checks if any source
- * matches the given id.
- * If a match is found, then removes the match and
- * replaces it with the target
- * If no match is found, returns the id
- *
- * Regularly, translates from the long name to the short name.
- * If the reverse flag is give, then translation is done
- * otherway around.*)
-let rec translate_id ~reverse ns_map id =
-  match ns_map with
-  | [] -> id
-  | (short_name, long_name) :: rest ->
-    let (target, source) =
-      if reverse then
-        (long_name, short_name)
-      else
-        (short_name, long_name)
-    in
-    (* Append backslash at the end so that it doesn't match partially *)
-    if
-      String_utils.string_starts_with id (source ^ "\\")
-      (* Strip out the prefix and connect it to the next beginning *)
-    then
-      target ^ String_utils.lstrip id source
-    else
-      translate_id ~reverse rest id
-
-let aliased_to_fully_qualified_id alias_map id =
-  translate_id ~reverse:true alias_map id
-
 (* Elaborate a defined identifier in a given namespace environment. For example,
  * a class might be defined inside a namespace. Return new environment if
  * ID is auto imported (e.g. Map) and so must be mapped when used.
@@ -117,36 +86,28 @@ let elaborate_raw_id nsenv kind id =
     then
       global_id
     else
-      let (bslash_loc, has_bslash) =
+      let (prefix, has_bslash) =
         match String.index id '\\' with
-        | Some i -> (i, true)
-        | None -> (String.length id, false)
+        | Some i -> (String.sub id 0 i, true)
+        | None -> (id, false)
       in
-      let prefix = String.sub id 0 bslash_loc in
       if has_bslash && prefix = "namespace" then
         elaborate_into_current_ns nsenv (String_utils.lstrip id "namespace\\")
       else
         (* Expand "use" imports. "use function" and "use const" only apply if the id
          * is completely unqualified, otherwise the normal "use" imports apply. *)
         let uses =
-          if has_bslash then
-            nsenv.ns_ns_uses
-          else
-            match kind with
-            | ElaborateClass -> nsenv.ns_class_uses
-            | ElaborateFun -> nsenv.ns_fun_uses
-            | ElaborateConst -> nsenv.ns_const_uses
-            | ElaborateRecord -> nsenv.ns_record_def_uses
+          match kind with
+          | _ when has_bslash -> nsenv.ns_ns_uses
+          | ElaborateClass -> nsenv.ns_class_uses
+          | ElaborateFun -> nsenv.ns_fun_uses
+          | ElaborateConst -> nsenv.ns_const_uses
+          | ElaborateRecord -> nsenv.ns_record_def_uses
         in
         match SMap.get prefix uses with
-        | Some use -> use ^ String_utils.lstrip id prefix
+        | Some use -> Utils.add_ns (use ^ String_utils.lstrip id prefix)
         | None ->
-          let unaliased_id =
-            aliased_to_fully_qualified_id nsenv.ns_auto_ns_map id
-          in
-          if unaliased_id <> id then
-            Utils.add_ns unaliased_id
-          else (
+          begin
             match get_autoimport_name_namespace id kind with
             | None -> elaborate_into_current_ns nsenv id
             | Some (typechecker_ns, compiler_ns) ->
@@ -157,7 +118,7 @@ let elaborate_raw_id nsenv kind id =
                   typechecker_ns
               in
               elaborate_into_ns (Hh_autoimport.string_of_ns ns) id
-          )
+          end
 
 let elaborate_id nsenv kind (p, id) = (p, elaborate_raw_id nsenv kind id)
 

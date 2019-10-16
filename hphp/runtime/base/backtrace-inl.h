@@ -66,6 +66,7 @@ struct BTContext {
   // thus we introduce an m_sfp cycle between these frames.
   ActRec fakeAR[2];
   IStack inlineStack;
+  IFrameID prevIFID{kInvalidIFrameID};
 
   // The frame we should resume at after unwinding the inlined stack.
   BTFrame stashedFrm{};

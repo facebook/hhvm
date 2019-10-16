@@ -75,6 +75,7 @@ const ActRec* BTContext::clone(const BTContext& src, const ActRec* fp) {
 
   stashedFrm = src.stashedFrm;
   inlineStack = src.inlineStack;
+  prevIFID = src.prevIFID;
   hasInlFrames = src.hasInlFrames;
   assertx(!!stashedFrm == (fp == &src.fakeAR[0] || fp == &src.fakeAR[1]));
 
@@ -165,14 +166,12 @@ BTFrame initBTContextAt(BTContext& ctx, jit::CTCA ip, BTFrame frm) {
     prevFP->m_func = ifr.func;
     prevFP->m_callOff = ifr.callOff;
 
+    ctx.prevIFID = stk->frame;
     ctx.inlineStack = *stk;
     ctx.inlineStack.frame = ifr.parent;
     ctx.hasInlFrames = --ctx.inlineStack.nframes > 0;
 
     ctx.stashedFrm = frm;
-    if (frm.pc == kInvalidOffset) {
-      ctx.stashedFrm.pc = pcOff();
-    }
 
     return BTFrame { prevFP, safe_cast<int>(stk->callOff) + ifr.func->base() };
   }
@@ -221,7 +220,7 @@ BTFrame getPrevActRec(
     assertx(fp != fp->m_sfp);
     assertx(ctx.inlineStack.nframes > 0);
 
-    auto ifr = jit::getInlineFrame(ctx.inlineStack.frame);
+    auto const ifr = jit::getInlineFrame(ctx.inlineStack.frame);
 
     auto prev = BTFrame{};
     prev.fp = fp->m_sfp;
@@ -229,14 +228,21 @@ BTFrame getPrevActRec(
     prev.fp->m_callOff = ifr.callOff;
     prev.pc = fp->m_callOff + ifr.func->base();
 
+    ctx.prevIFID = ctx.inlineStack.frame;
     ctx.inlineStack.frame = ifr.parent;
     ctx.hasInlFrames = --ctx.inlineStack.nframes > 0;
 
     return prev;
   }
 
-  if (auto const prev = ctx.stashedFrm) {
+  if (auto prev = ctx.stashedFrm) {
+    if (prev.pc == kInvalidOffset) {
+      assertx(ctx.prevIFID != kInvalidIFrameID);
+      auto const ifr = jit::getInlineFrame(ctx.prevIFID);
+      prev.pc = prev.fp->func()->base() + ifr.callOff;
+    }
     ctx.stashedFrm = BTFrame{};
+    ctx.prevIFID = kInvalidIFrameID;
     return prev;
   }
 

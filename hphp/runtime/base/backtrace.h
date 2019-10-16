@@ -26,6 +26,7 @@
 #include <folly/small_vector.h>
 
 #include <cstdint>
+#include <limits>
 #include <type_traits>
 
 namespace HPHP {
@@ -226,8 +227,62 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+/*
+ * Inline stacktrace fragments.
+ *
+ * For your enjoyment, please peruse the following ASCII art diagram:
+ *
+ *    ActRec:  ________________
+ *            |                |
+ *            |  func: top     |
+ *            |  m_callOff     |
+ *            |________________|
+ *                     |
+ *                     | <---------+
+ *    ActRec:  ________v_______    |
+ *            |                |   | (relative to top->base())
+ * vmfp() --> |  func: caller  |   |
+ *            |  m_callOff ----+---+
+ *            |________________|
+ *                     |
+ *                     | <---------+
+ *    IFrame:  ________v_______    |
+ *            |                |   | (relative to caller->base())
+ *            |  func: inl1    |   |
+ *            |  callOff ------+---+
+ *            |________________|
+ *                     |
+ *                     | <---------+
+ *    IFrame:  ________v_______    |
+ *            |                |   | (relative to inl1->base())
+ *            |  func: inl2    |   |
+ *            |  callOff ------+---+
+ *            |________________|
+ *                     |
+ *                     | <---------------------------------+
+ *                     v                                   |
+ *            some native function                         |
+ *                                                         |
+ *    IStack corresponding to the TCA of the native call:  | (relative to
+ *             ________________                            |  inl2->base())
+ *            |                |                           |
+ *            |  frame: inl2   |                           |
+ *            |  nframes: 2    |                           |
+ *            |  callOff ------+---------------------------+
+ *            |________________|
+ *
+ *
+ * In the presence of inline frame elision, there are no ActRecs corresponding
+ * to the inlined callee frames.  Instead, we maintain IFrame structs which we
+ * use to construct the backtrace.
+ *
+ * The value of vmpc() is undocumented, because sometimes it appears to point
+ * to the call from `caller` to `inl1`, and sometimes it seems to point to the
+ * call from `inl2` to the native function.
+ */
 
 using IFrameID = int32_t;
+constexpr IFrameID kInvalidIFrameID = std::numeric_limits<IFrameID>::max();
 
 struct IFrame {
   const Func* func; // callee (m_func)

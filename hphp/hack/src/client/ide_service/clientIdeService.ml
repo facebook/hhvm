@@ -199,7 +199,7 @@ let initialize_from_saved_state
     Lwt.return_error error_message
   | ClientIdeMessage.Response (Error error_message) ->
     log "Failed to initialize IDE service process: %s" error_message;
-    set_state t (Failed_to_initialize error_message);
+    set_state t (Failed_to_initialize "could not load saved-state");
     Lwt.return_error error_message
 
 let process_status_notification

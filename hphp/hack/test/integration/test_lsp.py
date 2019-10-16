@@ -3810,3 +3810,40 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
             .request(method="shutdown", params={}, result=None)
         )
         self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=True)
+
+    def test_serverless_ide_failed_to_load_saved_state(self) -> None:
+        variables = dict(self.prepare_serverless_ide_environment())
+        variables.update(self.setup_php_file("hover.php"))
+        assert "naming_table_saved_state_path" in variables
+        variables["naming_table_saved_state_path"] = "/tmp/nonexistent"
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("serverless_ide_status_failed_to_load_saved_state"),
+                use_serverless_ide=True,
+                supports_status=True,
+            )
+            .wait_for_server_request(
+                method="window/showStatus",
+                params={
+                    "type": 2,
+                    "actions": [],
+                    "message": "IDE services: initializing. hh_server: ready.",
+                    "shortMessage": "Hack IDE: initializing",
+                },
+                result=NoResponse(),
+            )
+            .wait_for_server_request(
+                method="window/showStatus",
+                params={
+                    "actions": [{"title": "Restart Hack IDE Services"}],
+                    "message": "IDE services stopped: could not load "
+                    + "saved-state. hh_server: ready.",
+                    "shortMessage": "Hack IDE: stopped",
+                    "type": 1,
+                },
+                result=None,
+            )
+            .request(method="shutdown", params={}, result=None)
+        )
+        self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=True)

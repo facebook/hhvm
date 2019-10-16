@@ -64,7 +64,8 @@ let load_saved_state
     (env : ServerEnv.env)
     ~(root : Path.t)
     ~(hhi_root : Path.t)
-    ~(naming_table_saved_state_path : Path.t option) : state Lwt.t =
+    ~(naming_table_saved_state_path : Path.t option) :
+    (state, string) Lwt_result.t =
   log "[saved-state] Starting load in root %s" (Path.to_string root);
   let%lwt result =
     try%lwt
@@ -89,45 +90,39 @@ let load_saved_state
           in
           Lwt.return result
       in
-      let%lwt new_state =
-        match result with
-        | Ok (saved_state_info, changed_files) ->
-          log
-            "[saved-state] Naming table path: %s"
-            Saved_state_loader.Naming_table_saved_state_info.(
-              Path.to_string saved_state_info.naming_table_path);
+      match result with
+      | Ok (saved_state_info, changed_files) ->
+        log
+          "[saved-state] Naming table path: %s"
+          Saved_state_loader.Naming_table_saved_state_info.(
+            Path.to_string saved_state_info.naming_table_path);
 
-          let%lwt server_env =
-            load_naming_table_from_saved_state_info env saved_state_info
-          in
-          log "[saved-state] Load succeeded";
+        let%lwt server_env =
+          load_naming_table_from_saved_state_info env saved_state_info
+        in
+        log "[saved-state] Load succeeded";
 
-          Lwt.return
-            (Initialized
-               {
-                 saved_state_info;
-                 hhi_root;
-                 server_env;
-                 changed_files_to_process = Path.Set.of_list changed_files;
-                 peak_changed_files_queue_size = List.length changed_files;
-               })
-        | Error load_error ->
-          let message = Saved_state_loader.load_error_to_string load_error in
-          log "[saved-state] %s" message;
-          Lwt.return (Failed_to_initialize message)
-      in
-      Lwt.return new_state
+        Lwt.return_ok
+          (Initialized
+             {
+               saved_state_info;
+               hhi_root;
+               server_env;
+               changed_files_to_process = Path.Set.of_list changed_files;
+               peak_changed_files_queue_size = List.length changed_files;
+             })
+      | Error load_error ->
+        let message = Saved_state_loader.load_error_to_string load_error in
+        log "[saved-state] %s" message;
+        Lwt.return_error message
     with e ->
       let stack = Printexc.get_backtrace () in
       Hh_logger.exc
         e
         ~prefix:"Uncaught exception in client IDE services"
         ~stack;
-      Lwt.return
-        (Failed_to_initialize
-           (Printf.sprintf
-              "Uncaught exception in client IDE services: %s"
-              stack))
+      Lwt.return_error
+        (Printf.sprintf "Uncaught exception in client IDE services: %s" stack)
   in
   Lwt.return result
 
@@ -136,7 +131,8 @@ let initialize
        ClientIdeMessage.Initialize_from_saved_state.root;
        naming_table_saved_state_path;
      } :
-      ClientIdeMessage.Initialize_from_saved_state.t) =
+      ClientIdeMessage.Initialize_from_saved_state.t) :
+    (state, string) Lwt_result.t =
   set_up_hh_logger_for_client_ide_service ~root;
 
   Relative_path.set_path_prefix Relative_path.Root root;
@@ -206,11 +202,16 @@ let initialize
   let server_env =
     { server_env with ServerEnv.local_symbol_table = ref sienv }
   in
-  let%lwt new_state =
+  let%lwt load_state_result =
     load_saved_state server_env ~root ~hhi_root ~naming_table_saved_state_path
   in
-  log "Serverless IDE has completed initialization";
-  Lwt.return new_state
+  match load_state_result with
+  | Ok state ->
+    log "Serverless IDE has completed initialization";
+    Lwt.return_ok state
+  | Error message ->
+    log "Serverless IDE failed to initialize: %s" message;
+    Lwt.return_error message
 
 let shutdown (state : state) : unit Lwt.t =
   match state with
@@ -291,8 +292,14 @@ let handle_message :
       in
       Lwt.return (state, Handle_message_result.Notification)
     | (Initializing, Initialize_from_saved_state param) ->
-      let%lwt new_state = initialize param in
-      Lwt.return (new_state, Handle_message_result.Response ())
+      let%lwt result = initialize param in
+      begin
+        match result with
+        | Ok state -> Lwt.return (state, Handle_message_result.Response ())
+        | Error message ->
+          Lwt.return
+            (Failed_to_initialize message, Handle_message_result.Error message)
+      end
     | (Initialized _, Initialize_from_saved_state _) ->
       Lwt.return
         ( state,

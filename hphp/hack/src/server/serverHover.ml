@@ -34,6 +34,17 @@ let make_hover_doc_block file occurrence def_opt =
     |> Option.to_list
   | None -> []
 
+let make_hover_const_definition file def_opt =
+  match def_opt with
+  | Some def ->
+    let source_text = ServerCommandTypesUtils.source_tree_of_file_input file in
+    [
+      Pos.get_text_from_pos
+        (Full_fidelity_source_text.text source_text)
+        def.SymbolDefinition.span;
+    ]
+  | _ -> []
+
 let make_hover_return_type env_and_ty occurrence =
   SymbolOccurrence.(
     Typing_defs.(
@@ -352,6 +363,12 @@ let make_hover_info env_and_ty file (occurrence, def_opt) =
       let addendum =
         match occurrence with
         | { name; type_ = Attribute _; _ } -> make_hover_attr_docs name
+        | { type_ = GConst; _ } ->
+          List.concat
+            [
+              make_hover_doc_block file occurrence def_opt;
+              make_hover_const_definition file def_opt;
+            ]
         | _ ->
           List.concat
             [

@@ -530,7 +530,7 @@ module Full = struct
     | Tpu (ty', (_, enum), kind) ->
       let suffix =
         match kind with
-        | Pu_atom atom -> atom
+        | Pu_atom atom -> ":@" ^ atom
         | Pu_plain -> ""
       in
       k ty' ^^ text (":@" ^ enum ^ suffix)

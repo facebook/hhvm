@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/tv-refcount.h"
+#include "hphp/runtime/base/type-string.h"
 
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/call-flags.h"
@@ -328,9 +329,6 @@ public:
     assertx(m_top != m_base);
     ActRec* ar = (ActRec*)m_top;
     if (ar->func()->cls() && ar->hasThis()) decRefObj(ar->getThis());
-    if (ar->magicDispatch()) {
-      decRefStr(ar->getInvName());
-    }
     discardAR();
   }
 
@@ -765,6 +763,7 @@ void enterVMAtPseudoMain(ActRec* enterFnAr, VarEnv* varEnv);
 void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk, Array&& generics,
                    bool hasInOut, bool dynamicCall, bool allowDynCallNoPointer);
 void enterVMAtCurPC();
+void shuffleMagicArgs(String&& invName, uint32_t numArgs, bool hasUnpack);
 void prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
                       int nregular, bool checkRefAnnot);
 

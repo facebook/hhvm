@@ -952,6 +952,70 @@ Array getDefinedVariables(const ActRec* fp) {
   return ret.toArray();
 }
 
+namespace {
+
+Cell popUnpackArgs() {
+  auto& stack = vmStack();
+  Cell unpackArgs = *stack.topC();
+  if (LIKELY(isContainer(unpackArgs))) {
+    stack.discard();
+    return unpackArgs;
+  }
+
+  // argument_unpacking RFC dictates "containers and Traversables"
+  stack.popC();
+  raise_warning_unsampled("Only containers may be unpacked");
+  return make_persistent_array_like_tv(ArrayData::CreateVArray());
+}
+
+}
+
+void shuffleMagicArgs(String&& invName, uint32_t numArgs, bool hasUnpack) {
+  assertx(!invName.isNull());
+  auto& stack = vmStack();
+
+  // We need to make an array containing all the arguments passed by
+  // the caller and put it where the second argument is.
+  auto argArray = Array::attach([&] {
+    if (numArgs == 0) {
+      return RuntimeOption::EvalHackArrDVArrs
+        ? ArrayData::CreateVec()
+        : ArrayData::CreateVArray();
+    }
+    auto const args = stack.indC(hasUnpack ? 1 : 0);
+    return RuntimeOption::EvalHackArrDVArrs
+      ? PackedArray::MakeVec(numArgs, args)
+      : PackedArray::MakeVArray(numArgs, args);
+  }());
+
+  // Unpack arguments to the end of the argument array.
+  if (UNLIKELY(hasUnpack)) {
+    auto const args = popUnpackArgs();
+    SCOPE_EXIT { tvDecRefGen(args); };
+    assertx(isContainer(args));
+    IterateV(
+      args,
+      [](ArrayData*) { return false; },
+      [&](Cell v) { argArray.append(v); },
+      [](ObjectData*) { return false; }
+    );
+  }
+
+  // Remove the arguments from the stack; they were moved into the
+  // array so we don't need to decref.
+  stack.ndiscard(numArgs);
+
+  // Move invName to where the first argument belongs.
+  stack.pushStringNoRc(invName.detach());
+
+  // Move argArray to where the second argument belongs.
+  if (RuntimeOption::EvalHackArrDVArrs) {
+    stack.pushVecNoRc(argArray.detach());
+  } else {
+    stack.pushArrayNoRc(argArray.detach());
+  }
+}
+
 NEVER_INLINE
 static void shuffleExtraStackArgs(ActRec* ar) {
   const Func* func = ar->m_func;
@@ -982,141 +1046,6 @@ static void shuffleExtraStackArgs(ActRec* ar) {
   ar->setNumArgs(func->numParams());
 }
 
-static void shuffleMagicArgs(ActRec* ar) {
-  assertx(ar->magicDispatch());
-
-  // We need to put this where the first argument is
-  auto const invName = ar->clearMagicDispatch();
-  int const nargs = ar->numArgs();
-
-  // We need to make an array containing all the arguments passed by
-  // the caller and put it where the second argument is.
-  auto argArray = Array::attach(
-    [&]{
-      auto const args = reinterpret_cast<TypedValue*>(ar) - nargs;
-      if (RuntimeOption::EvalHackArrDVArrs) {
-        return nargs
-          ? PackedArray::MakeVec(nargs, args)
-          : ArrayData::CreateVec();
-      }
-      return nargs
-        ? PackedArray::MakeVArray(nargs, args)
-        : ArrayData::CreateVArray();
-    }()
-  );
-
-  auto& stack = vmStack();
-  // Remove the arguments from the stack; they were moved into the
-  // array so we don't need to decref.
-  stack.ndiscard(nargs);
-
-  // Move invName to where the first argument belongs, no need
-  // to incRef/decRef since we are transferring ownership
-  stack.pushStringNoRc(invName);
-
-  // Move argArray to where the second argument belongs. We've already
-  // incReffed the array above so we don't need to do it here.
-  if (RuntimeOption::EvalHackArrDVArrs) {
-    stack.pushVecNoRc(argArray.detach());
-  } else {
-    stack.pushArrayNoRc(argArray.detach());
-  }
-
-  ar->setNumArgs(2);
-  ar->setVarEnv(nullptr);
-}
-
-static NEVER_INLINE void shuffleMagicArrayArgs(ActRec* ar, const Cell args,
-                                               Stack& stack, int nregular) {
-  assertx(ar != nullptr && ar->magicDispatch());
-  assertx(!cellIsNull(&args));
-  assertx(nregular >= 0);
-  assertx((stack.top() + nregular) == (void*) ar);
-  assertx(isContainer(args));
-  DEBUG_ONLY const Func* f = ar->m_func;
-  assertx(f && f->name()->isame(s___call.get()));
-
-  // We'll need to make this the first argument
-  auto const invName = ar->clearMagicDispatch();
-
-  auto nargs = getContainerSize(args);
-
-  if (UNLIKELY(0 == nargs)) {
-    // We need to make an array containing all the arguments passed by
-    // the caller and put it where the second argument is.
-    auto argArray = Array::attach(
-      [&]{
-        auto const args = reinterpret_cast<TypedValue*>(ar) - nregular;
-        if (RuntimeOption::EvalHackArrDVArrs) {
-          return nregular
-            ? PackedArray::MakeVec(nregular, args)
-            : ArrayData::CreateVec();
-        }
-        return nregular
-          ? PackedArray::MakeVArray(nregular, args)
-          : ArrayData::CreateVArray();
-      }()
-    );
-
-    // Remove the arguments from the stack; they were moved into the
-    // array so we don't need to decref.
-    stack.ndiscard(nregular);
-
-    // Move invName to where the first argument belongs, no need
-    // to incRef/decRef since we are transferring ownership
-    assertx(stack.top() == (void*) ar);
-    stack.pushStringNoRc(invName);
-
-    // Move argArray to where the second argument belongs. We've already
-    // incReffed the array above so we don't need to do it here.
-    if (RuntimeOption::EvalHackArrDVArrs) {
-      stack.pushVecNoRc(argArray.detach());
-    } else {
-      stack.pushArrayNoRc(argArray.detach());
-    }
-  } else {
-    if (nregular == 0 &&
-        !RuntimeOption::EvalHackArrDVArrs &&
-        isArrayType(args.m_type) &&
-        args.m_data.parr->isVArray()) {
-      assertx(stack.top() == (void*) ar);
-      stack.pushStringNoRc(invName);
-      stack.pushArray(args.m_data.parr);
-    } else if (nregular == 0 &&
-               RuntimeOption::EvalHackArrDVArrs &&
-               isVecType(args.m_type)) {
-      assertx(stack.top() == (void*) ar);
-      stack.pushStringNoRc(invName);
-      stack.pushVec(args.m_data.parr);
-    } else {
-      VArrayInit ai(nargs + nregular);
-      // The arguments are pushed in order, so we should refer them by
-      // index instead of taking the top, that would lead to reverse order.
-      for (int i = nregular - 1; i >= 0; --i) {
-        // appendWithRef bumps the refcount and splits if necessary,
-        // to compensate for the upcoming pop from the stack
-        ai.appendWithRef(tvAsVariant(stack.indTV(i)));
-      }
-      for (int i = 0; i < nregular; ++i) {
-        stack.popTV();
-      }
-      assertx(stack.top() == (void*) ar);
-      stack.pushStringNoRc(invName);
-      for (ArrayIter iter(args); iter; ++iter) {
-        ai.appendWithRef(iter.secondValPlus());
-      }
-      if (RuntimeOption::EvalHackArrDVArrs) {
-        stack.pushVecNoRc(ai.create());
-      } else {
-        stack.pushArrayNoRc(ai.create());
-      }
-    }
-  }
-
-  ar->setNumArgs(2);
-  ar->setVarEnv(nullptr);
-}
-
 // offset is the number of params already on the stack to which the
 // contents of args are to be added; for call_user_func_array, this is
 // always 0; for unpacked arguments, it may be greater if normally passed
@@ -1131,10 +1060,6 @@ void prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
 
   assertx(isContainer(args));
   int const nargs = nregular + getContainerSize(args);
-  if (UNLIKELY(ar->magicDispatch())) {
-    shuffleMagicArrayArgs(ar, args, stack, nregular);
-    return;
-  }
 
   ar->trashVarEnv();
   if (!debug || (ar->func()->attrs() & AttrMayUseVV)) {
@@ -1257,60 +1182,54 @@ static void prepareFuncEntry(ActRec *ar, StackArgsState stk, Array&& generics) {
   const int nparams = func->numNonVariadicParams();
   auto& stack = vmStack();
 
-  if (UNLIKELY(ar->magicDispatch())) {
-    // shuffleMagicArgs deals with everything. no need for further
-    // argument munging
-    shuffleMagicArgs(ar);
-  } else {
-    ar->trashVarEnv();
-    if (!debug || (ar->func()->attrs() & AttrMayUseVV)) {
-      ar->setVarEnv(nullptr);
-    }
+  ar->trashVarEnv();
+  if (!debug || (ar->func()->attrs() & AttrMayUseVV)) {
+    ar->setVarEnv(nullptr);
+  }
 
-    int nargs = ar->numArgs();
-    if (UNLIKELY(nargs > nparams)) {
-      if (LIKELY(stk != StackArgsState::Trimmed &&
-                 !func->hasVariadicCaptureParam())) {
-        // In the common case, the function won't use the extra arguments,
-        // so act as if they were never passed (NOTE: this has the effect
-        // of slightly misleading backtraces that don't reflect the
-        // discarded args)
-        for (int i = nparams; i < nargs; ++i) { stack.popTV(); }
-        ar->setNumArgs(nparams);
-      } else if (stk == StackArgsState::Trimmed) {
-        assertx(nargs == func->numParams());
-        assertx(((TypedValue*)ar - stack.top()) == func->numParams());
-      } else {
-        shuffleExtraStackArgs(ar);
-      }
-      raiseTooManyArgumentsWarnings = nargs;
+  int nargs = ar->numArgs();
+  if (UNLIKELY(nargs > nparams)) {
+    if (LIKELY(stk != StackArgsState::Trimmed &&
+               !func->hasVariadicCaptureParam())) {
+      // In the common case, the function won't use the extra arguments,
+      // so act as if they were never passed (NOTE: this has the effect
+      // of slightly misleading backtraces that don't reflect the
+      // discarded args)
+      for (int i = nparams; i < nargs; ++i) { stack.popTV(); }
+      ar->setNumArgs(nparams);
+    } else if (stk == StackArgsState::Trimmed) {
+      assertx(nargs == func->numParams());
+      assertx(((TypedValue*)ar - stack.top()) == func->numParams());
     } else {
-      if (nargs < nparams) {
-        // Push uninitialized nulls for missing arguments. Some of them may
-        // end up getting default-initialized, but regardless, we need to
-        // make space for them on the stack.
-        const Func::ParamInfoVec& paramInfo = func->params();
-        for (int i = nargs; i < nparams; ++i) {
-          stack.pushUninit();
-          Offset dvInitializer = paramInfo[i].funcletOff;
-          if (dvInitializer == InvalidAbsoluteOffset) {
-            // We wait to raise warnings until after all the locals have been
-            // initialized. This is important because things need to be in a
-            // consistent state in case the user error handler throws.
-            raiseMissingArgumentWarnings = true;
-          } else if (firstDVInitializer == InvalidAbsoluteOffset) {
-            // This is the first unpassed arg with a default value, so
-            // this is where we'll need to jump to.
-            firstDVInitializer = dvInitializer;
-          }
+      shuffleExtraStackArgs(ar);
+    }
+    raiseTooManyArgumentsWarnings = nargs;
+  } else {
+    if (nargs < nparams) {
+      // Push uninitialized nulls for missing arguments. Some of them may
+      // end up getting default-initialized, but regardless, we need to
+      // make space for them on the stack.
+      const Func::ParamInfoVec& paramInfo = func->params();
+      for (int i = nargs; i < nparams; ++i) {
+        stack.pushUninit();
+        Offset dvInitializer = paramInfo[i].funcletOff;
+        if (dvInitializer == InvalidAbsoluteOffset) {
+          // We wait to raise warnings until after all the locals have been
+          // initialized. This is important because things need to be in a
+          // consistent state in case the user error handler throws.
+          raiseMissingArgumentWarnings = true;
+        } else if (firstDVInitializer == InvalidAbsoluteOffset) {
+          // This is the first unpassed arg with a default value, so
+          // this is where we'll need to jump to.
+          firstDVInitializer = dvInitializer;
         }
       }
-      if (UNLIKELY(func->hasVariadicCaptureParam())) {
-        if (RuntimeOption::EvalHackArrDVArrs) {
-          stack.pushVecNoRc(ArrayData::CreateVec());
-        } else {
-          stack.pushArrayNoRc(ArrayData::CreateVArray());
-        }
+    }
+    if (UNLIKELY(func->hasVariadicCaptureParam())) {
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        stack.pushVecNoRc(ArrayData::CreateVec());
+      } else {
+        stack.pushArrayNoRc(ArrayData::CreateVArray());
       }
     }
   }
@@ -1422,7 +1341,6 @@ void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk, Array&& generics,
 
   const bool useJit = RID().getJit() && !RID().getJitFolding();
   const bool useJitPrologue = useJit && vmfp()
-    && !enterFnAr->magicDispatch()
     && (stk != StackArgsState::Trimmed);
   // The jit prologues only know how to do limited amounts of work; cannot
   // be used for magic call/extra-args already determined or ... or if the
@@ -4392,18 +4310,9 @@ bool doFCall(ActRec* ar, uint32_t numArgs, bool hasUnpack,
     if (callFlags.hasGenerics()) vmStack().discard();
 
     if (hasUnpack) {
-      Cell* c1 = vmStack().topC();
-      if (UNLIKELY(!isContainer(*c1))) {
-        Cell tmp = *c1;
-        // argument_unpacking RFC dictates "containers and Traversables"
-        raise_warning_unsampled("Only containers may be unpacked");
-        *c1 = make_persistent_array_like_tv(ArrayData::CreateVArray());
-        tvDecRefGen(&tmp);
-      }
-
-      Cell args = *c1;
-      vmStack().discard(); // prepareArrayArgs will push args onto the stack
-      SCOPE_EXIT { tvDecRefGen(&args); };
+      // prepareArrayArgs will push args onto the stack
+      auto const args = popUnpackArgs();
+      SCOPE_EXIT { tvDecRefGen(args); };
       checkStack(vmStack(), ar->func(), 0);
 
       assertx(!ar->resumed());
@@ -4466,6 +4375,33 @@ void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
 
   doFCall(ar, fca.numArgs, fca.hasUnpack(), callFlags);
   pc = vmpc();
+}
+
+template<bool dynamic, class InitActRec>
+void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
+               String&& invName, InitActRec initActRec,
+               bool logAsDynamicCall = true) {
+  if (LIKELY(invName.isNull())) {
+    fcallImpl<dynamic>(origpc, pc, fca, func, initActRec, logAsDynamicCall);
+    return;
+  }
+
+  // Enforce reffiness before reshuffling.
+  if (fca.enforceReffiness()) callerReffinessChecks(func, fca);
+
+  // Magic methods don't support reified generics.
+  assertx(!func->hasReifiedGenerics());
+  if (fca.hasGenerics()) vmStack().popC();
+
+  shuffleMagicArgs(std::move(invName), fca.numArgs, fca.hasUnpack());
+
+  auto const flags = static_cast<FCallArgs::Flags>(
+    fca.flags & ~(FCallArgs::Flags::HasUnpack | FCallArgs::Flags::HasGenerics));
+  // FIXME: Assert that fca.numRets is 1 once reffiness checks are used for
+  // inout. Currently we allow $obj->magicCall(inout $foo)...
+  auto const fca2 = FCallArgs(flags, 2, fca.numRets, nullptr, kInvalidOffset,
+                              false);
+  fcallImpl<dynamic>(origpc, pc, fca2, func, initActRec, logAsDynamicCall);
 }
 
 ALWAYS_INLINE std::string concat_arg_list(imm_array<uint32_t> args) {
@@ -4560,7 +4496,8 @@ OPTBLD_INLINE void fcallFuncArr(PC origpc, PC& pc, const FCallArgs& fca,
     raise_error("Invalid callable (array)");
   }
 
-  fcallImpl<true>(origpc, pc, fca, func, [&] (ActRec* ar) {
+  fcallImpl<true>(origpc, pc, fca, func, String::attach(invName),
+                  [&] (ActRec* ar) {
     if (thiz) {
       thiz->incRefCount();
       ar->setThis(thiz);
@@ -4568,11 +4505,6 @@ OPTBLD_INLINE void fcallFuncArr(PC origpc, PC& pc, const FCallArgs& fca,
       ar->setClass(cls);
     } else {
       ar->trashThis();
-    }
-
-    if (UNLIKELY(invName != nullptr)) {
-      assertx(!func->hasReifiedGenerics());
-      ar->setMagicDispatch(invName);
     }
 
     arr.reset();
@@ -4609,7 +4541,8 @@ OPTBLD_INLINE void fcallFuncStr(PC origpc, PC& pc, const FCallArgs& fca,
       args.size ? stripInOutSuffix(str.get()) : str.get());
   }
 
-  fcallImpl<true>(origpc, pc, fca, func, [&] (ActRec* ar) {
+  fcallImpl<true>(origpc, pc, fca, func, String::attach(invName),
+                  [&] (ActRec* ar) {
     if (thiz) {
       thiz->incRefCount();
       ar->setThis(thiz);
@@ -4617,11 +4550,6 @@ OPTBLD_INLINE void fcallFuncStr(PC origpc, PC& pc, const FCallArgs& fca,
       ar->setClass(cls);
     } else {
       ar->trashThis();
-    }
-
-    if (UNLIKELY(invName != nullptr)) {
-      assertx(!func->hasReifiedGenerics());
-      ar->setMagicDispatch(invName);
     }
 
     str.reset();
@@ -4740,20 +4668,18 @@ void fcallObjMethodImpl(PC origpc, PC& pc, const FCallArgs& fca,
   assertx(res == LookupResult::MethodFoundWithThis ||
           res == LookupResult::MagicCallFound);
 
+  auto invName = res == LookupResult::MagicCallFound
+    ? String::attach(methName) : String();
+  if (res != LookupResult::MagicCallFound) decRefStr(methName);
+
   if (func->hasReifiedGenerics() && !fca.hasGenerics()) {
     throw_call_reified_func_without_generics(func);
   }
 
-  fcallImpl<dynamic>(origpc, pc, fca, func, [&] (ActRec* ar) {
+  fcallImpl<dynamic>(origpc, pc, fca, func, std::move(invName),
+                     [&] (ActRec* ar) {
     /* Transfer ownership of obj to the ActRec*/
     ar->setThis(obj);
-
-    if (res == LookupResult::MagicCallFound) {
-      assertx(!func->hasReifiedGenerics());
-      ar->setMagicDispatch(methName);
-    } else {
-      decRefStr(methName);
-    }
   });
 }
 
@@ -4957,11 +4883,16 @@ void fcallClsMethodImpl(PC origpc, PC& pc, const FCallArgs& fca, Class* cls,
             res == LookupResult::MagicCallFound);
   }
 
+  auto invName = res == LookupResult::MagicCallFound
+    ? String::attach(methName) : String();
+  if (res != LookupResult::MagicCallFound) decRefStr(methName);
+
   if (func->hasReifiedGenerics() && !fca.hasGenerics()) {
     throw_call_reified_func_without_generics(func);
   }
 
-  fcallImpl<dynamic>(origpc, pc, fca, func, [&] (ActRec* ar) {
+  fcallImpl<dynamic>(origpc, pc, fca, func, std::move(invName),
+                     [&] (ActRec* ar) {
     if (obj) {
       obj->incRefCount();
       ar->setThis(obj);
@@ -4976,13 +4907,6 @@ void fcallClsMethodImpl(PC origpc, PC& pc, const FCallArgs& fca, Class* cls,
         }
       }
       ar->setClass(cls);
-    }
-
-    if (res == LookupResult::MagicCallFound) {
-      assertx(!func->hasReifiedGenerics());
-      ar->setMagicDispatch(methName);
-    } else {
-      decRefStr(const_cast<StringData*>(methName));
     }
   },
   logAsDynamicCall);

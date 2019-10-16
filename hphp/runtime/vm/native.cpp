@@ -412,13 +412,6 @@ static inline int32_t minNumArgs(ActRec* ar) {
   return num;
 }
 
-const StringData* getInvokeName(ActRec* ar) {
-  if (ar->magicDispatch()) {
-    return ar->getInvName();
-  }
-  return ar->func()->fullDisplayName();
-}
-
 TypedValue* functionWrapper(ActRec* ar) {
   assertx(ar);
   auto func = ar->m_func;
@@ -454,12 +447,12 @@ TypedValue* methodWrapper(ActRec* ar) {
   void* ctx;  // ObjectData* or Class*
   if (ar->hasThis()) {
     if (isStatic) {
-      throw_instance_method_fatal(getInvokeName(ar)->data());
+      throw_instance_method_fatal(func->fullDisplayName()->data());
     }
     ctx = ar->getThis();
   } else {
     if (!isStatic) {
-      throw_instance_method_fatal(getInvokeName(ar)->data());
+      throw_instance_method_fatal(func->fullDisplayName()->data());
     }
     ctx = ar->getClass();
   }

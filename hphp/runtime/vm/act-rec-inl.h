@@ -60,10 +60,6 @@ inline bool ActRec::isAsyncEagerReturn() const {
   return (flags() & kExecutionModeMask) == AsyncEagerRet;
 }
 
-inline bool ActRec::magicDispatch() const {
-  return (flags() & kExecutionModeMask) == MagicDispatch;
-}
-
 inline uint32_t ActRec::encodeNumArgsAndFlags(uint32_t numArgs, Flags flags) {
   assertx((numArgs & kFlagsMask) == 0);
   assertx((uint32_t{flags} & kNumArgsMask) == 0);
@@ -96,23 +92,6 @@ inline void ActRec::setAsyncEagerReturn() {
     numArgs(),
     static_cast<Flags>(AsyncEagerRet)
   );
-}
-
-inline void ActRec::setMagicDispatch(StringData* invName) {
-  assertx(!resumed());
-  m_numArgsAndFlags |= MagicDispatch;
-  m_invName = invName;
-}
-
-inline StringData* ActRec::clearMagicDispatch() {
-  assertx(magicDispatch());
-  auto const invName = getInvName();
-  m_numArgsAndFlags = encodeNumArgsAndFlags(
-    numArgs(),
-    static_cast<Flags>(flags() & ~MagicDispatch)
-  );
-  trashVarEnv();
-  return invName;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -213,19 +192,12 @@ inline bool ActRec::checkVarEnv() const {
 
 inline bool ActRec::hasVarEnv() const {
   assertx(checkVarEnv());
-  assertx(!magicDispatch());
   return m_varEnv;
 }
 
 inline VarEnv* ActRec::getVarEnv() const {
   assertx(hasVarEnv());
   return m_varEnv;
-}
-
-inline StringData* ActRec::getInvName() const {
-  assertx(magicDispatch());
-  assertx(checkVarEnv());
-  return m_invName;
 }
 
 inline void ActRec::setVarEnv(VarEnv* val) {

@@ -1190,7 +1190,6 @@ ActRec* ExecutionContext::getFrameAtDepthForDebuggerUnsafe(int frameDepth) {
     frameDepth--;
     return false;
   });
-  assertx(!ret || !ret->magicDispatch());
   return ret;
 }
 
@@ -1548,7 +1547,7 @@ template<class FStackCheck, class FInitArgs, class FEnterVM>
 ALWAYS_INLINE
 TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
                                             ObjectData* thiz, Class* cls,
-                                            uint32_t argc, StringData* invName,
+                                            uint32_t argc,
                                             bool dynamic,
                                             bool allowDynCallNoPointer,
                                             FStackCheck doStackCheck,
@@ -1561,8 +1560,6 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
   assertx(IMPLIES(f->preClass(), thiz || cls));
   // If `f' is a static method, thiz must be null.
   assertx(IMPLIES(f->isStaticInPrologue(), !thiz));
-  // invName should only be non-null if we are calling __call.
-  assertx(IMPLIES(invName, f->name()->isame(s___call.get())));
 
   VMRegAnchor _;
   auto const reentrySP = vmStack().top();
@@ -1588,12 +1585,7 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
     ar->trashThis();
   }
   ar->initNumArgs(argc);
-
-  if (UNLIKELY(invName != nullptr)) {
-    ar->setMagicDispatch(invName);
-  } else {
-    ar->trashVarEnv();
-  }
+  ar->trashVarEnv();
 
 #ifdef HPHP_TRACE
   if (vmfp() == nullptr) {
@@ -1712,7 +1704,7 @@ TypedValue ExecutionContext::invokePseudoMain(const Func* f,
     enterVM(ar, [&] { enterVMAtPseudoMain(ar, varEnv); });
   };
 
-  return invokeFuncImpl(f, thiz, cls, 0, nullptr, false, false,
+  return invokeFuncImpl(f, thiz, cls, 0, false, false,
                         doCheckStack, doInitArgs, doEnterVM);
 }
 
@@ -1750,10 +1742,21 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
   };
 
   auto const doInitArgs = [&] (ActRec* ar) {
-    auto const& prepArgs = cellIsNull(&args)
-      ? make_array_like_tv(ArrayData::CreateVArray())
-      : args;
-    prepareArrayArgs(ar, prepArgs, vmStack(), 0, checkRefAnnot);
+    if (argc == 0) {
+      if (UNLIKELY(invName != nullptr)) {
+        shuffleMagicArgs(String::attach(invName), 0, false);
+        ar->setNumArgs(2);
+      }
+      return;
+    }
+    assertx(isContainer(args));
+    if (LIKELY(invName == nullptr)) {
+      prepareArrayArgs(ar, args, vmStack(), 0, checkRefAnnot);
+    } else {
+      cellDup(args, *vmStack().allocC());
+      shuffleMagicArgs(String::attach(invName), 0, true);
+      ar->setNumArgs(2);
+    }
   };
 
   auto const doEnterVM = [&] (ActRec* ar) {
@@ -1763,9 +1766,8 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
     });
   };
 
-  return invokeFuncImpl(f, thiz, cls, argc, invName, dynamic,
-                        allowDynCallNoPointer, doCheckStack, doInitArgs,
-                        doEnterVM);
+  return invokeFuncImpl(f, thiz, cls, argc, dynamic, allowDynCallNoPointer,
+                        doCheckStack, doInitArgs, doEnterVM);
 }
 
 TypedValue ExecutionContext::invokeFuncFew(const Func* f,
@@ -1786,7 +1788,7 @@ TypedValue ExecutionContext::invokeFuncFew(const Func* f,
     }
   };
 
-  auto const doInitArgs = [&](ActRec* /*ar*/) {
+  auto const doInitArgs = [&](ActRec* ar) {
     for (ssize_t i = 0; i < argc; ++i) {
       const TypedValue *from = &argv[i];
       TypedValue *to = vmStack().allocTV();
@@ -1795,6 +1797,10 @@ TypedValue ExecutionContext::invokeFuncFew(const Func* f,
       } else {
         refDup(*from, *to);
       }
+    }
+    if (UNLIKELY(invName != nullptr)) {
+      shuffleMagicArgs(String::attach(invName), argc, false);
+      ar->setNumArgs(2);
     }
   };
 
@@ -1808,7 +1814,7 @@ TypedValue ExecutionContext::invokeFuncFew(const Func* f,
   return invokeFuncImpl(f,
                         ActRec::decodeThis(thisOrCls),
                         ActRec::decodeClass(thisOrCls),
-                        argc, invName, dynamic, allowDynCallNoPointer,
+                        argc, dynamic, allowDynCallNoPointer,
                         doCheckStack, doInitArgs, doEnterVM);
 }
 

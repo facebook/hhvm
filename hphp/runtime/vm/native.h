@@ -244,12 +244,6 @@ void callFunc(const Func* func, const void* ctx,
               const TypedValue* args, int32_t numNonDefault,
               TypedValue& ret, bool isFCallBuiltin);
 
-/**
- * Extract the name used to invoke the function from the ActRec where name
- * maybe be stored in invName, or may include the classname (e.g. Class::func)
- */
-const StringData* getInvokeName(ActRec* ar);
-
 #define NATIVE_TYPES                                  \
   /* kind       arg type              return type */  \
   X(Int32,      int32_t,              int32_t)        \

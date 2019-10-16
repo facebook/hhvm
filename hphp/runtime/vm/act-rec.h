@@ -82,10 +82,7 @@ struct ActRec {
     ObjectData* m_thisUnsafe; // This.
     Class* m_clsUnsafe;       // Late bound class.
   };
-  union {
-    VarEnv* m_varEnv;       // Variable environment when live
-    StringData* m_invName;  // Invoked name, used for __call(), when pre-live
-  };
+  VarEnv* m_varEnv;       // Variable environment when live
 
   TYPE_SCAN_CUSTOM_FIELD(m_thisUnsafe) {
     // skip if "this" is a class
@@ -107,10 +104,9 @@ struct ActRec {
     // down (locals freed).
     LocalsDecRefd = (1u << 29),
 
-    // Four mutually exclusive execution mode states in these 2 bits.
+    // Three mutually exclusive execution mode states in these 2 bits.
     InResumed     = (1u << 30),
     AsyncEagerRet = (1u << 31),
-    MagicDispatch = InResumed|AsyncEagerRet,
   };
 
   static constexpr int kNumArgsBits = 29;
@@ -184,7 +180,6 @@ struct ActRec {
   bool localsDecRefd() const;
   bool resumed() const;
   bool isAsyncEagerReturn() const;
-  bool magicDispatch() const;
 
   /*
    * Pack `numArgs' and `flags' into the format expected by m_numArgsAndFlags.
@@ -206,12 +201,6 @@ struct ActRec {
   void setLocalsDecRefd();
   void setResumed();
   void setAsyncEagerReturn();
-
-  /*
-   * Set or clear both m_invName and the MagicDispatch flag.
-   */
-  void setMagicDispatch(StringData* invName);
-  StringData* clearMagicDispatch();
 
   /////////////////////////////////////////////////////////////////////////////
   // This / Class.
@@ -325,13 +314,6 @@ struct ActRec {
    * @requires: hasVarEnv()
    */
   VarEnv* getVarEnv() const;
-
-  /*
-   * Get and decode the magic invocation name.
-   *
-   * @requires: magicDispatch()
-   */
-  StringData* getInvName() const;
 
   /*
    * Set `val' to the m_varEnv.

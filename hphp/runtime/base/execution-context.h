@@ -518,7 +518,6 @@ private:
   template<class FStackCheck, class FInitArgs, class FEnterVM>
   TypedValue invokeFuncImpl(const Func* f,
                             ObjectData* thiz, Class* cls, uint32_t argc,
-                            StringData* invName,
                             bool dynamic, bool allowDynCallNoPointer,
                             FStackCheck doStackCheck,
                             FInitArgs doInitArgs,

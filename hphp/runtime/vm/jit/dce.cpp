@@ -288,6 +288,8 @@ bool canDCE(IRInstruction* inst) {
   case IsClsDynConstructible:
   case LdFuncRxLevel:
   case StrictlyIntegerConv:
+  case SetLegacyDict:
+  case SetLegacyVec:
   case GetMemoKeyScalar:
   case LookupSPropSlot:
   case ConstructClosure:

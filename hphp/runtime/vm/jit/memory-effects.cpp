@@ -2136,6 +2136,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ThrowParameterWrongType:
   case ThrowParamRefMismatch:
   case ThrowParamRefMismatchRange:
+  case SetLegacyDict:
+  case SetLegacyVec:
   case SetOpCell:
   case SetOpCellVerify:
   case ThrowAsTypeStructException:

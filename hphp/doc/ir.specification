@@ -3505,6 +3505,13 @@ fields of that struct for holding intermediate values.
   Returns the first value(key) from the keyset in S0.
   If the array is empty, it will return NULL.
 
+| SetLegacyVec, D(Vec), S(Vec), CRc|PRc
+
+| SetLegacyDict, D(Dict), S(Dict), CRc|PRc
+
+  Enable the legacy bit on the vec/dict in S0, copying it if necessary and
+  returning the tagged array.
+
 
 19. Exception/unwinding support
 

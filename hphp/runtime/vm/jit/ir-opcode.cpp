@@ -973,6 +973,8 @@ bool opcodeMayRaise(Opcode opc) {
   case SameObj:
   case SameStr:
   case Select:
+  case SetLegacyDict:
+  case SetLegacyVec:
   case Shl:
   case Shr:
   case Sqrt:

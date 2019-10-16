@@ -104,6 +104,43 @@ void cgCheckPackedArrayDataBounds(IRLS& env, const IRInstruction* inst) {
 
 IMPL_OPCODE_CALL(ArrayAdd);
 
+////////////////////////////////////////////////////////////////////////////////
+
+namespace {
+
+ArrayData* setLegacyHelper(ArrayData* arr) {
+  if (arr->cowCheck()) {
+    auto ad = arr->copy();
+    arr->decRefCount();
+    ad->setLegacyArray(true);
+    return ad;
+  } else {
+    arr->setLegacyArray(true);
+    return arr;
+  }
+}
+
+void setLegacyImpl(IRLS& env, const IRInstruction* inst) {
+  auto const args = argGroup(env, inst).ssa(0);
+
+  cgCallHelper(vmain(env),
+               env,
+               CallSpec::direct(setLegacyHelper),
+               callDest(env, inst),
+               SyncOptions::None,
+               args);
+}
+
+}
+
+void cgSetLegacyVec(IRLS& env, const IRInstruction* inst) {
+  setLegacyImpl(env, inst);
+}
+
+void cgSetLegacyDict(IRLS& env, const IRInstruction* inst) {
+  setLegacyImpl(env, inst);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {

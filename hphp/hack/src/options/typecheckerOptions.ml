@@ -118,10 +118,6 @@ let like_casts = GlobalOptions.tco_like_casts
 
 let simple_pessimize = GlobalOptions.tco_simple_pessimize
 
-let coercion_from_dynamic = GlobalOptions.tco_coercion_from_dynamic
-
-let coercion_from_union = GlobalOptions.tco_coercion_from_union
-
 let complex_coercion = GlobalOptions.tco_complex_coercion
 
 let disable_partially_abstract_typeconsts =

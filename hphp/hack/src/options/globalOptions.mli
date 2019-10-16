@@ -193,11 +193,6 @@ type t = {
   (* A simpler form of pessimization, only wraps the outermost type in like
    * if the type is not enforceable *)
   tco_simple_pessimize: float;
-  (* Enables coercion from dynamic to enforceable types
-     i.e. dynamic ~> int *)
-  tco_coercion_from_dynamic: bool;
-  (* Enables coercion from union types *)
-  tco_coercion_from_union: bool;
   (* Enables complex coercion interactions that involve like types *)
   tco_complex_coercion: bool;
   (* Treat partially abstract typeconsts like concrete typeconsts, disable overriding type *)
@@ -308,8 +303,6 @@ val make :
   ?tco_union_intersection_type_hints:bool ->
   ?tco_like_casts:bool ->
   ?tco_simple_pessimize:float ->
-  ?tco_coercion_from_dynamic:bool ->
-  ?tco_coercion_from_union:bool ->
   ?tco_complex_coercion:bool ->
   ?tco_disable_partially_abstract_typeconsts:bool ->
   ?error_codes_treated_strictly:ISet.t ->
@@ -466,10 +459,6 @@ val tco_union_intersection_type_hints : t -> bool
 val tco_like_casts : t -> bool
 
 val tco_simple_pessimize : t -> float
-
-val tco_coercion_from_dynamic : t -> bool
-
-val tco_coercion_from_union : t -> bool
 
 val tco_complex_coercion : t -> bool
 

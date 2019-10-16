@@ -2,14 +2,14 @@
 
 class C {}
 
-function expect_int(int $x): void {}
+function expect_vec_int(vec<int> $x): void {}
 
-function good_case(dynamic $dyn, vec<int> $vec): void {
+function good_case(dynamic $dyn, vec<vec<int>> $vec): void {
   if ($dyn) {
     $vec = $dyn;
   }
   foreach ($vec as $x) {
-    expect_int($x); // error, result is dynamic | int
+    expect_vec_int($x); // error, result is dynamic | vec<int>
   }
 }
 

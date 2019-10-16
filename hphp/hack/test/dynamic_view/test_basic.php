@@ -5,7 +5,7 @@ function foo()  {
 }
 
 
-function test() : int {
+function test() : (int, int) {
   // partial class
   $x = foo();
   /* HH_IGNORE_ERROR[2049] */ hh_show($x);

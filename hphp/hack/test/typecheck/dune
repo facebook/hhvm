@@ -57,7 +57,6 @@ let () =
   let typecheck_deps = deps files_tc in
   let cmds = [ "--flags"
              ; "--new-inference-lambda"
-             ; "--coercion-from-dynamic"
              ; "--shallow-class-decl"
              ; "--error-format raw"
              ] in
@@ -75,7 +74,6 @@ let () =
              ; "--flags"
              ; "--out-extension .legacy_decl.out"
              ; "--new-inference-lambda"
-             ; "--coercion-from-dynamic"
              ; "--error-format raw" ] in
   let cmd = String.concat " " cmds in
   let typecheck_legacy_decl =

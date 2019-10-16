@@ -10,16 +10,6 @@
 open Core_kernel
 open Typing_defs
 
-(* Typing_union.union normalizes a union out of two types, but it creates Toption for unions with
- * null. This function unwraps the null. TODO: remove in accordance with T45650596 *)
-let force_null_union env r t =
-  let null = Typing_make_type.null r in
-  let (_, union) = Typing_union.union env null t in
-  match union with
-  | (r, Toption (_, Tunion tyl)) -> (r, Tunion (null :: tyl))
-  | (r, Toption ty) -> (r, Tunion [null; ty])
-  | _ -> union
-
 (*
 * These are the main coercion functions.
 *
@@ -46,12 +36,6 @@ let force_null_union env r t =
 
 (* does coercion, including subtyping *)
 let coerce_type_impl env ty_have ty_expect on_error =
-  let coercion_from_dynamic =
-    TypecheckerOptions.coercion_from_dynamic (Typing_env.get_tcopt env)
-  in
-  let coercion_from_union =
-    TypecheckerOptions.coercion_from_union (Typing_env.get_tcopt env)
-  in
   let complex_coercion =
     TypecheckerOptions.complex_coercion (Typing_env.get_tcopt env)
   in
@@ -59,9 +43,8 @@ let coerce_type_impl env ty_have ty_expect on_error =
   let (env, ety_have) = Typing_env.expand_type env ty_have in
   match (ety_have, ety_expect) with
   | (_, (_, Tdynamic)) -> env
-  | ((_, Tdynamic), _) when ty_expect.et_enforced && coercion_from_dynamic ->
-    env
-  | _ when ty_expect.et_enforced && coercion_from_union ->
+  | ((_, Tdynamic), _) when ty_expect.et_enforced -> env
+  | _ when ty_expect.et_enforced ->
     Typing_subtype.sub_type_with_dynamic_as_bottom
       env
       ty_have

@@ -209,8 +209,6 @@ let parse_options () =
   let union_intersection_type_hints = ref false in
   let like_casts = ref false in
   let simple_pessimize = ref 0.0 in
-  let coercion_from_dynamic = ref false in
-  let coercion_from_union = ref false in
   let complex_coercion = ref false in
   let disable_partially_abstract_typeconsts = ref false in
   let rust_parser_errors = ref false in
@@ -446,13 +444,6 @@ let parse_options () =
         Arg.Set_float simple_pessimize,
         "At coercion points, if a type is not enforceable, wrap it in like. Float argument 0.0 to 1.0 sets frequency"
       );
-      ( "--coercion-from-dynamic",
-        Arg.Set coercion_from_dynamic,
-        "Allows coercion from dynamic to enforceable types at positions that HHVM enforces"
-      );
-      ( "--coercion-from-union",
-        Arg.Set coercion_from_union,
-        "Allows coercion from union types" );
       ( "--complex-coercion",
         Arg.Set complex_coercion,
         "Allows complex coercions that involve like types" );
@@ -462,8 +453,6 @@ let parse_options () =
             set_bool_ like_type_hints ();
             set_bool_ like_casts ();
             set_float_ simple_pessimize 1.0;
-            set_bool_ coercion_from_dynamic ();
-            set_bool_ coercion_from_union ();
             set_bool_ complex_coercion ()),
         "Enables all like types features" );
       ( "--disable-partially-abstract-typeconsts",
@@ -570,8 +559,6 @@ let parse_options () =
       ~tco_union_intersection_type_hints:!union_intersection_type_hints
       ~tco_like_casts:!like_casts
       ~tco_simple_pessimize:!simple_pessimize
-      ~tco_coercion_from_dynamic:!coercion_from_dynamic
-      ~tco_coercion_from_union:!coercion_from_union
       ~tco_complex_coercion:!complex_coercion
       ~tco_disable_partially_abstract_typeconsts:
         !disable_partially_abstract_typeconsts

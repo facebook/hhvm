@@ -90,8 +90,6 @@ type t = {
   tco_union_intersection_type_hints: bool;
   tco_like_casts: bool;
   tco_simple_pessimize: float;
-  tco_coercion_from_dynamic: bool;
-  tco_coercion_from_union: bool;
   tco_complex_coercion: bool;
   tco_disable_partially_abstract_typeconsts: bool;
   error_codes_treated_strictly: ISet.t;
@@ -248,8 +246,6 @@ let default =
     tco_union_intersection_type_hints = false;
     tco_like_casts = false;
     tco_simple_pessimize = 0.0;
-    tco_coercion_from_dynamic = false;
-    tco_coercion_from_union = false;
     tco_complex_coercion = false;
     tco_disable_partially_abstract_typeconsts = false;
     error_codes_treated_strictly = ISet.of_list [];
@@ -337,8 +333,6 @@ let make
       default.tco_union_intersection_type_hints)
     ?(tco_like_casts = default.tco_like_casts)
     ?(tco_simple_pessimize = default.tco_simple_pessimize)
-    ?(tco_coercion_from_dynamic = default.tco_coercion_from_dynamic)
-    ?(tco_coercion_from_union = default.tco_coercion_from_union)
     ?(tco_complex_coercion = default.tco_complex_coercion)
     ?(tco_disable_partially_abstract_typeconsts =
       default.tco_disable_partially_abstract_typeconsts)
@@ -425,8 +419,6 @@ let make
     tco_union_intersection_type_hints;
     tco_like_casts;
     tco_simple_pessimize;
-    tco_coercion_from_dynamic;
-    tco_coercion_from_union;
     tco_complex_coercion;
     tco_disable_partially_abstract_typeconsts;
     error_codes_treated_strictly;
@@ -564,10 +556,6 @@ let tco_union_intersection_type_hints t = t.tco_union_intersection_type_hints
 let tco_like_casts t = t.tco_like_casts
 
 let tco_simple_pessimize t = t.tco_simple_pessimize
-
-let tco_coercion_from_dynamic t = t.tco_coercion_from_dynamic
-
-let tco_coercion_from_union t = t.tco_coercion_from_union
 
 let tco_complex_coercion t = t.tco_complex_coercion
 

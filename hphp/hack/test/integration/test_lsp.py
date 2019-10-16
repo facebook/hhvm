@@ -2115,6 +2115,25 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .request(
+                comment="hover over constant reference",
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 15, "character": 19},
+                },
+                result={
+                    "contents": [
+                        {"language": "hack", "value": "THE_ANSWER"},
+                        "A comment describing THE_ANSWER",
+                    ],
+                    "range": {
+                        "start": {"line": 15, "character": 9},
+                        "end": {"line": 15, "character": 19},
+                    },
+                },
+                powered_by="serverless_ide",
+            )
+            .request(
                 comment="hover over whitespace",
                 method="textDocument/hover",
                 params={

@@ -478,7 +478,7 @@ public:
   TypedValue invokeFuncFew(const Func* f,
                            void* thisOrCls,
                            StringData* invName,
-                           int argc,
+                           uint32_t numArgs,
                            const TypedValue* argv,
                            bool dynamic = true,
                            bool allowDynCallNoPointer = false);
@@ -488,7 +488,7 @@ public:
                            StringData* invName = nullptr);
 
   TypedValue invokeFuncFew(const CallCtx& ctx,
-                           int argc,
+                           uint32_t numArgs,
                            const TypedValue* argv);
 
   TypedValue invokeMethod(
@@ -515,12 +515,10 @@ public:
   template<class Fn> void sweepDynPropTable(Fn);
 
 private:
-  template<class FStackCheck, class FInitArgs, class FEnterVM>
+  template<class FEnterVM>
   TypedValue invokeFuncImpl(const Func* f,
-                            ObjectData* thiz, Class* cls, uint32_t argc,
-                            bool dynamic, bool allowDynCallNoPointer,
-                            FStackCheck doStackCheck,
-                            FInitArgs doInitArgs,
+                            ObjectData* thiz, Class* cls,
+                            uint32_t numArgsInclUnpack,
                             FEnterVM doEnterVM);
 
   struct ExcLoggerHook final : LoggerHook {

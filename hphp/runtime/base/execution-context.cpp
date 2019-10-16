@@ -1534,24 +1534,22 @@ void ExecutionContext::requestExit() {
   if (m_requestTrace) record_trace(std::move(*m_requestTrace));
 }
 
+template<class Action>
+static inline void enterVM(ActRec* ar, Action action) {
+  enterVMCustomHandler(ar, [&] { exception_handler(action); });
+}
+
 /*
  * Shared implementation for invokeFunc{,Few}().
  *
- * The `doCheckStack' callback should return truthy in order to short-circuit
- * the rest of invokeFuncImpl() and return early, else it should return falsey.
- *
- * The `doInitArgs' and `doEnterVM' callbacks take an ActRec* argument
- * corresponding to the reentry frame.
+ * The `doEnterVM' callback take an ActRec* argument corresponding to
+ * the reentry frame.
  */
-template<class FStackCheck, class FInitArgs, class FEnterVM>
+template<class FEnterVM>
 ALWAYS_INLINE
 TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
                                             ObjectData* thiz, Class* cls,
-                                            uint32_t argc,
-                                            bool dynamic,
-                                            bool allowDynCallNoPointer,
-                                            FStackCheck doStackCheck,
-                                            FInitArgs doInitArgs,
+                                            uint32_t numArgsInclUnpack,
                                             FEnterVM doEnterVM) {
   assertx(f);
   // If `f' is a regular function, `thiz' and `cls' must be null.
@@ -1561,20 +1559,9 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
   // If `f' is a static method, thiz must be null.
   assertx(IMPLIES(f->isStaticInPrologue(), !thiz));
 
-  VMRegAnchor _;
-  auto const reentrySP = vmStack().top();
-
-  if (dynamic) callerDynamicCallChecks(f, allowDynCallNoPointer);
-
   if (thiz != nullptr) thiz->incRefCount();
 
-  doStackCheck();
-
-  if (UNLIKELY(f->takesInOutParams())) {
-    for (auto i = f->numInOutParams(); i > 0; --i) vmStack().pushNull();
-  }
-
-  ActRec* ar = vmStack().allocA();
+  ActRec* ar = vmStack().indA(numArgsInclUnpack);
   ar->setReturnVMExit();
   ar->m_func = f;
   if (thiz) {
@@ -1584,7 +1571,7 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
   } else {
     ar->trashThis();
   }
-  ar->initNumArgs(argc);
+  ar->initNumArgs(numArgsInclUnpack);
   ar->trashVarEnv();
 
 #ifdef HPHP_TRACE
@@ -1600,44 +1587,32 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
   }
 #endif
 
-  try {
-    doInitArgs(ar);
-  } catch (...) {
-    while (vmStack().top() != (void*)ar) {
-      vmStack().popTV();
+  auto const reentrySP =
+    vmStack().top() + numArgsInclUnpack + kNumActRecCells + f->numInOutParams();
+  pushVMState(reentrySP);
+  SCOPE_EXIT {
+    assert_flog(
+      vmStack().top() == reentrySP,
+      "vmsp() mismatch around reentry: before @ {}, after @ {}",
+      reentrySP, vmStack().top()
+    );
+    popVMState();
+  };
+
+  enterVM(ar, [&] { doEnterVM(ar); });
+
+  if (UNLIKELY(f->takesInOutParams())) {
+    VArrayInit varr(f->numInOutParams() + 1);
+    for (uint32_t i = 0; i < f->numInOutParams() + 1; ++i) {
+      varr.append(*vmStack().topTV());
+      vmStack().popC();
     }
-    vmStack().popAR();
-    throw;
-  }
-
-  {
-    pushVMState(reentrySP);
-    SCOPE_EXIT {
-      assert_flog(
-        vmStack().top() == reentrySP,
-        "vmsp() mismatch around reentry: before @ {}, after @ {}",
-        reentrySP, vmStack().top()
-      );
-      popVMState();
-    };
-
-    doEnterVM(ar);
-
-    // `retptr' might point somewhere that is affected by {push,pop}VMState(),
-    // so don't write to it until after we pop the nested VM state.
-    if (UNLIKELY(f->takesInOutParams())) {
-      VArrayInit varr(f->numInOutParams() + 1);
-      for (uint32_t i = 0; i < f->numInOutParams() + 1; ++i) {
-        varr.append(*vmStack().topTV());
-        vmStack().popC();
-      }
-      auto arr = varr.toArray();
-      return make_array_like_tv(arr.detach());
-    } else {
-      auto const retval = *vmStack().topTV();
-      vmStack().discard();
-      return retval;
-    }
+    auto arr = varr.toArray();
+    return make_array_like_tv(arr.detach());
+  } else {
+    auto const retval = *vmStack().topTV();
+    vmStack().discard();
+    return retval;
   }
 }
 
@@ -1664,11 +1639,6 @@ static inline void enterVMCustomHandler(ActRec* ar, Action action) {
   }
 }
 
-template<class Action>
-static inline void enterVM(ActRec* ar, Action action) {
-  enterVMCustomHandler(ar, [&] { exception_handler(action); });
-}
-
 TypedValue ExecutionContext::invokePseudoMain(const Func* f,
                                               VarEnv* varEnv /* = NULL */,
                                               ObjectData* thiz /* = NULL */,
@@ -1682,30 +1652,29 @@ TypedValue ExecutionContext::invokePseudoMain(const Func* f,
   }
 
   Stats::inc(Stats::PseudoMain_Executed);
+  VMRegAnchor _;
 
-  auto const doCheckStack = [&]() {
-    // We must do a stack overflow check for leaf functions on re-entry,
-    // because we won't have checked that the stack is deep enough for a
-    // leaf function /after/ re-entry, and the prologue for the leaf
-    // function will not make a check.
-    if (f->isPhpLeafFn()) {
-      // Check both the native stack and VM stack for overflow.
-      checkStack(vmStack(), f, kNumActRecCells);
-    } else {
-      // invokePseudoMain() must always check the native stack for overflow no
-      // matter what.
-      checkNativeStack();
-    }
-  };
+  // We must do a stack overflow check for leaf functions on re-entry,
+  // because we won't have checked that the stack is deep enough for a
+  // leaf function /after/ re-entry, and the prologue for the leaf
+  // function will not make a check.
+  if (f->isPhpLeafFn()) {
+    // Check both the native stack and VM stack for overflow.
+    checkStack(vmStack(), f, kNumActRecCells);
+  } else {
+    // invokePseudoMain() must always check the native stack for overflow no
+    // matter what.
+    checkNativeStack();
+  }
 
-  auto const doInitArgs = [&] (ActRec* ar) {};
+  // Reserve space for ActRec.
+  for (auto i = kNumActRecCells; i > 0; --i) vmStack().pushUninit();
 
   auto const doEnterVM = [&] (ActRec* ar) {
-    enterVM(ar, [&] { enterVMAtPseudoMain(ar, varEnv); });
+    enterVMAtPseudoMain(ar, varEnv);
   };
 
-  return invokeFuncImpl(f, thiz, cls, 0, false, false,
-                        doCheckStack, doInitArgs, doEnterVM);
+  return invokeFuncImpl(f, thiz, cls, 0, doEnterVM);
 }
 
 TypedValue ExecutionContext::invokeFunc(const Func* f,
@@ -1719,104 +1688,107 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
                                                               /* = false */,
                                         Array&& reifiedGenerics
                                                               /* = Array() */) {
-  const auto& args = *args_.toCell();
+  VMRegAnchor _;
+
+  // We must do a stack overflow check for leaf functions on re-entry,
+  // because we won't have checked that the stack is deep enough for a
+  // leaf function /after/ re-entry, and the prologue for the leaf
+  // function will not make a check.
+  if (f->isPhpLeafFn() ||
+      !(f->numParams() <= kStackCheckReenterPadding - kNumActRecCells)) {
+    // Check both the native stack and VM stack for overflow, numParams
+    // is already included in f->maxStackCells().
+    checkStack(vmStack(), f, kNumActRecCells);
+  } else {
+    // invokeFunc() must always check the native stack for overflow no
+    // matter what.
+    checkNativeStack();
+  }
+
+  // Reserve space for inout outputs and ActRec.
+  for (auto i = f->numInOutParams(); i > 0; --i) vmStack().pushUninit();
+  for (auto i = kNumActRecCells; i > 0; --i) vmStack().pushUninit();
+
+  // Push arguments.
+  auto const& args = *args_.toCell();
   assertx(isContainerOrNull(args));
-
-  auto const argc = cellIsNull(&args) ? 0 : getContainerSize(args);
-
-  auto const doCheckStack = [&]() {
-    // We must do a stack overflow check for leaf functions on re-entry,
-    // because we won't have checked that the stack is deep enough for a
-    // leaf function /after/ re-entry, and the prologue for the leaf
-    // function will not make a check.
-    if (f->isPhpLeafFn() ||
-        !(f->numParams() <= kStackCheckReenterPadding - kNumActRecCells)) {
-      // Check both the native stack and VM stack for overflow.
-      checkStack(vmStack(), f,
-        kNumActRecCells /* numParams is included in f->maxStackCells */);
-    } else {
-      // invokeFunc() must always check the native stack for overflow no
-      // matter what.
-      checkNativeStack();
+  auto numArgs = cellIsNull(args) ? 0 : getContainerSize(args);
+  if (numArgs == 0) {
+    if (UNLIKELY(invName != nullptr)) {
+      shuffleMagicArgs(String::attach(invName), 0, false);
+      numArgs = 2;
     }
-  };
-
-  auto const doInitArgs = [&] (ActRec* ar) {
-    if (argc == 0) {
-      if (UNLIKELY(invName != nullptr)) {
-        shuffleMagicArgs(String::attach(invName), 0, false);
-        ar->setNumArgs(2);
-      }
-      return;
-    }
+  } else {
     assertx(isContainer(args));
     cellDup(args, *vmStack().allocC());
     if (LIKELY(invName == nullptr)) {
-      auto const numArgs = prepareUnpackArgs(f, 0, checkRefAnnot);
-      ar->setNumArgs(numArgs);
+      numArgs = prepareUnpackArgs(f, 0, checkRefAnnot);
     } else {
       shuffleMagicArgs(String::attach(invName), 0, true);
-      ar->setNumArgs(2);
+      numArgs = 2;
     }
-  };
+  }
+
+  // Caller checks.
+  if (dynamic) callerDynamicCallChecks(f, allowDynCallNoPointer);
 
   auto const doEnterVM = [&] (ActRec* ar) {
-    enterVM(ar, [&] {
-      enterVMAtFunc(ar, StackArgsState::Trimmed, std::move(reifiedGenerics),
-                    f->takesInOutParams(), dynamic, allowDynCallNoPointer);
-    });
+    enterVMAtFunc(ar, StackArgsState::Trimmed, std::move(reifiedGenerics),
+                  f->takesInOutParams(), dynamic, allowDynCallNoPointer);
   };
 
-  return invokeFuncImpl(f, thiz, cls, argc, dynamic, allowDynCallNoPointer,
-                        doCheckStack, doInitArgs, doEnterVM);
+  return invokeFuncImpl(f, thiz, cls, numArgs, doEnterVM);
 }
 
 TypedValue ExecutionContext::invokeFuncFew(const Func* f,
                                            void* thisOrCls,
                                            StringData* invName,
-                                           int argc,
+                                           uint32_t numArgs,
                                            const TypedValue* argv,
                                            bool dynamic /* = true */,
                                            bool allowDynCallNoPointer
                                                                 /* = false */) {
-  auto const doCheckStack = [&]() {
-    // See comments in invokeFunc().
-    if (f->isPhpLeafFn() ||
-        !(argc <= kStackCheckReenterPadding - kNumActRecCells)) {
-      checkStack(vmStack(), f, argc + kNumActRecCells);
-    } else {
-      checkNativeStack();
-    }
-  };
+  VMRegAnchor _;
 
-  auto const doInitArgs = [&](ActRec* ar) {
-    for (ssize_t i = 0; i < argc; ++i) {
-      const TypedValue *from = &argv[i];
-      TypedValue *to = vmStack().allocTV();
-      if (LIKELY(!isRefType(from->m_type) || !f->byRef(i))) {
-        cellDup(*tvToCell(from), *to);
-      } else {
-        refDup(*from, *to);
-      }
+  // See comments in invokeFunc().
+  if (f->isPhpLeafFn() ||
+      !(numArgs <= kStackCheckReenterPadding - kNumActRecCells)) {
+    checkStack(vmStack(), f, numArgs + kNumActRecCells);
+  } else {
+    checkNativeStack();
+  }
+
+  // Reserve space for inout outputs and ActRec.
+  for (auto i = f->numInOutParams(); i > 0; --i) vmStack().pushUninit();
+  for (auto i = kNumActRecCells; i > 0; --i) vmStack().pushUninit();
+
+  // Push arguments.
+  for (auto i = 0; i < numArgs; ++i) {
+    const TypedValue *from = &argv[i];
+    TypedValue* to = vmStack().allocTV();
+    if (LIKELY(!isRefType(from->m_type) || !f->byRef(i))) {
+      cellDup(*tvToCell(from), *to);
+    } else {
+      refDup(*from, *to);
     }
-    if (UNLIKELY(invName != nullptr)) {
-      shuffleMagicArgs(String::attach(invName), argc, false);
-      ar->setNumArgs(2);
-    }
-  };
+  }
+  if (UNLIKELY(invName != nullptr)) {
+    shuffleMagicArgs(String::attach(invName), numArgs, false);
+    numArgs = 2;
+  }
+
+  // Caller checks.
+  if (dynamic) callerDynamicCallChecks(f, allowDynCallNoPointer);
 
   auto const doEnterVM = [&] (ActRec* ar) {
-    enterVM(ar, [&] {
-      enterVMAtFunc(ar, StackArgsState::Untrimmed, Array(),
-                    f->takesInOutParams(), dynamic, false);
-    });
+    enterVMAtFunc(ar, StackArgsState::Untrimmed, Array(),
+                  f->takesInOutParams(), dynamic, false);
   };
 
   return invokeFuncImpl(f,
                         ActRec::decodeThis(thisOrCls),
                         ActRec::decodeClass(thisOrCls),
-                        argc, dynamic, allowDynCallNoPointer,
-                        doCheckStack, doInitArgs, doEnterVM);
+                        numArgs, doEnterVM);
 }
 
 static void prepareAsyncFuncEntry(ActRec* enterFnAr, Resumable* resumable) {

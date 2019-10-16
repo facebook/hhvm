@@ -698,7 +698,7 @@ public:
   ALWAYS_INLINE
   ActRec* indA(size_t ind) {
     assertx(m_top != m_base);
-    assertx(count() > ind + kNumActRecCells);
+    assertx(count() >= ind + kNumActRecCells);
     return (ActRec*)&m_top[ind];
   }
 

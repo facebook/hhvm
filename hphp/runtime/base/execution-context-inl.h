@@ -225,7 +225,7 @@ inline TypedValue ExecutionContext::invokeFuncFew(
 
 inline TypedValue ExecutionContext::invokeFuncFew(
   const CallCtx& ctx,
-  int argc,
+  uint32_t numArgs,
   const TypedValue* argv
 ) {
   auto const thisOrCls = [&] () -> void* {
@@ -238,7 +238,7 @@ inline TypedValue ExecutionContext::invokeFuncFew(
     ctx.func,
     thisOrCls,
     ctx.invName,
-    argc,
+    numArgs,
     argv,
     ctx.dynamic
   );

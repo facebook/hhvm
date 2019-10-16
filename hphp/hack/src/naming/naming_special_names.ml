@@ -439,6 +439,8 @@ module StdlibFunctions = struct
   let array_map = "\\array_map"
 
   let type_structure = "\\HH\\type_structure"
+
+  let mark_legacy_hack_array = "\\HH\\mark_legacy_hack_array"
 end
 
 module Typehints = struct

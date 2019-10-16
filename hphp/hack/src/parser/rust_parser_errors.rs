@@ -4554,11 +4554,13 @@ where
                 .eq_ignore_ascii_case("__FUNCTION_CREDENTIAL__")
         };
 
-        let is_whitelisted_function = |receiver_token| {
-            let text = self.text(receiver_token);
-            !self.env.parser_options.po_disallow_func_ptrs_in_constants
+        let is_whitelisted_function = |self_: &Self, receiver_token| {
+            let text = self_.text(receiver_token);
+
+            (!self_.env.parser_options.po_disallow_func_ptrs_in_constants
                 && (text == sn::special_functions::FUN_
-                    || text == sn::special_functions::CLASS_METH)
+                    || text == sn::special_functions::CLASS_METH))
+                || (text == sn::std_lib_functions::MARK_LEGACY_HACK_ARRAY)
         };
 
         let is_namey = |self_: &Self, token: &Token| -> bool {
@@ -4743,19 +4745,27 @@ where
                 }
                 _ => default(self),
             },
-            FunctionCallExpression(x) => match &x.function_call_receiver.syntax {
-                Token(receiver_token) => match receiver_token.kind() {
-                    TokenKind::Name if is_whitelisted_function(&x.function_call_receiver) => {
+            FunctionCallExpression(x) => {
+                let mut check_receiver_and_arguments = |receiver| {
+                    if is_whitelisted_function(self, receiver) {
                         for node in
                             Self::syntax_to_list_no_separators(&x.function_call_argument_list)
                         {
                             self.check_constant_expression(node)
                         }
+                    } else {
+                        default(self)
                     }
+                };
+
+                match &x.function_call_receiver.syntax {
+                    Token(tok) if tok.kind() == TokenKind::Name => {
+                        check_receiver_and_arguments(&x.function_call_receiver)
+                    }
+                    QualifiedName(_) => check_receiver_and_arguments(&x.function_call_receiver),
                     _ => default(self),
-                },
-                _ => default(self),
-            },
+                }
+            }
 
             _ => default(self),
         }

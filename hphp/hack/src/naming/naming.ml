@@ -1587,6 +1587,7 @@ module Make (GetLocals : GetLocals) = struct
     | Aast.Call (_, (_, Aast.Id (_, cn)), _, el, uel)
       when cn = SN.SpecialFunctions.fun_
            || cn = SN.SpecialFunctions.class_meth
+           || cn = SN.StdlibFunctions.mark_legacy_hack_array
            (* Tuples are not really function calls, they are just parsed that way*)
            || cn = SN.SpecialFunctions.tuple ->
       arg_unpack_unexpected uel;

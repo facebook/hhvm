@@ -13,7 +13,9 @@
     cli_args
     config_state_loader
     diagnostic_subscription
+    disk
     errors
+    experiments_config_file_stubs
     file_info
     glean_options
     parser_options

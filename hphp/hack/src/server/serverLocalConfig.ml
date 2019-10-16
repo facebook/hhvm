@@ -11,6 +11,7 @@ open Config_file.Getters
 open Hh_core
 
 type t = {
+  experiments_config_meta: string;
   use_watchman: bool;
   watchman_init_timeout: int;
   (* in seconds *)
@@ -135,6 +136,7 @@ and remote_type_check = {
 
 let default =
   {
+    experiments_config_meta = "";
     use_watchman = false;
     (* Buck and hgwatchman use a 10 second timeout too *)
     watchman_init_timeout = 10;
@@ -278,12 +280,64 @@ let load_remote_type_check ~current_version config =
   in
   { enabled; num_workers; recheck_threshold; worker_eden_checkout_threshold }
 
+let apply_overrides ~silent ~current_version ~config ~overrides =
+  (* First of all, apply the CLI overrides so the settings below could be specified
+    altered via the CLI, even though the CLI overrides take precedence
+    over the experiments overrides *)
+  let config = Config_file.apply_overrides ~silent ~config ~overrides in
+  let prefix = Some "experiments_config" in
+  let enabled =
+    bool_if_min_version "enabled" ~prefix ~default:true ~current_version config
+  in
+  if enabled then
+    match Experiments_config_file.get_primary_owner () with
+    | None -> ("No primary owner", config)
+    | Some owner ->
+      let dir =
+        string_ "path" ~prefix ~default:BuildOptions.system_config_path config
+      in
+      let file =
+        Filename.concat dir (Printf.sprintf "hh.%s.experiments" owner)
+      in
+      let update =
+        bool_if_min_version
+          "update"
+          ~prefix
+          ~default:true
+          ~current_version
+          config
+      in
+      let meta =
+        if update then
+          match Experiments_config_file.update ~file with
+          | Ok meta -> meta
+          | Error message -> message
+        else
+          "Updating experimental config not enabled"
+      in
+      if Disk.file_exists file then
+        (* Apply the experiments overrides *)
+        let experiment_overrides =
+          Config_file.parse_local_config ~silent file
+        in
+        let config =
+          Config_file.apply_overrides
+            ~silent
+            ~config
+            ~overrides:experiment_overrides
+        in
+        (* Finally, reapply the CLI overrides, since they should take
+          precedence over the experiments overrides *)
+        (meta, Config_file.apply_overrides ~silent ~config ~overrides)
+      else
+        ("Experimental config not found on disk", config)
+  else
+    ("Experimental config not enabled", config)
+
 let load_ fn ~silent ~current_version overrides =
-  let config =
-    Config_file.apply_overrides
-      ~silent
-      ~config:(Config_file.parse_local_config ~silent fn)
-      ~overrides
+  let config = Config_file.parse_local_config ~silent fn in
+  let (experiments_config_meta, config) =
+    apply_overrides ~silent ~current_version ~config ~overrides
   in
   let use_watchman =
     bool_if_version "use_watchman" ~default:default.use_watchman config
@@ -568,6 +622,7 @@ let load_ fn ~silent ~current_version overrides =
       config
   in
   {
+    experiments_config_meta;
     use_watchman;
     watchman_init_timeout;
     watchman_subscribe;

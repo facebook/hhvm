@@ -209,6 +209,7 @@ let initialize
   let server_env =
     { server_env with ServerEnv.local_symbol_table = ref sienv }
   in
+  if use_ranked_autocomplete then AutocompleteRankService.initialize ();
   let%lwt load_state_result =
     load_saved_state server_env ~root ~hhi_root ~naming_table_saved_state_path
   in

@@ -1481,13 +1481,19 @@ let make_ide_completion_response
             else
               "" );
           kind =
-            si_kind_to_completion_kind completion.AutocompleteTypes.res_kind;
+            (match completion.ranking_details with
+            | Some _ -> Some Completion.Event
+            | None ->
+              si_kind_to_completion_kind completion.AutocompleteTypes.res_kind);
           detail = Some (hack_to_detail completion);
           inlineDetail = Some (hack_to_inline_detail completion);
           itemType = hack_to_itemType completion;
           documentation = None;
           (* This will be filled in by completionItem/resolve. *)
-          sortText = None;
+          sortText =
+            (match completion.ranking_details with
+            | Some detail -> Some detail.sort_text
+            | None -> None);
           filterText = None;
           insertText;
           insertTextFormat = Some insertTextFormat;

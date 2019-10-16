@@ -28,6 +28,7 @@ let make_keyword_completion
     res_fullname = keyword_name;
     res_kind = SearchUtils.SI_Keyword;
     func_details = None;
+    ranking_details = None;
   }
 
 let handle_empty_autocomplete (pos : File_content.position) file_content =

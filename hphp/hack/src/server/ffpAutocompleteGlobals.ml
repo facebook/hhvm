@@ -66,6 +66,7 @@ let make_class_completion
         res_fullname = name;
         res_kind = SearchUtils.SI_Class;
         func_details = None;
+        ranking_details = None;
       }
   else
     None
@@ -83,6 +84,7 @@ let make_interface_completion
         res_fullname = name;
         res_kind = SearchUtils.SI_Interface;
         func_details = None;
+        ranking_details = None;
       }
   else
     None
@@ -100,6 +102,7 @@ let make_trait_completion
         res_fullname = name;
         res_kind = SearchUtils.SI_Trait;
         func_details = None;
+        ranking_details = None;
       }
   else
     None

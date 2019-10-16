@@ -6,7 +6,7 @@
 
 use oxidized::aast::Visibility;
 use oxidized::aast_defs::UseAsVisibility;
-use parser_rust::token_kind::TokenKind as TK;
+use parser_core_types::token_kind::TokenKind as TK;
 
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub struct Kind(u32);

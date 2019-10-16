@@ -12,7 +12,7 @@ use oxidized::{
     aast, aast::Expr_ as E_, aast_defs, ast_defs, doc_comment::DocComment, file_info,
     global_options::GlobalOptions, namespace_env::Env as NamespaceEnv, pos::Pos, s_map,
 };
-use parser_rust::{
+use parser_core_types::{
     indexed_source_text::IndexedSourceText, lexable_token::LexablePositionedToken,
     positioned_syntax::PositionedSyntaxTrait, source_text::SourceText, syntax::*, syntax_error,
     syntax_kind, syntax_trait::SyntaxTrait, token_kind::TokenKind as TK,

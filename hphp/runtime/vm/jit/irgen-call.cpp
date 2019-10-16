@@ -305,7 +305,7 @@ void callProfiledFunc(IRGS& env, SSATmp* callee,
   // Dump annotations if requested.
   if (RuntimeOption::EvalDumpCallTargets) {
     auto const fnName = curFunc(env)->fullName()->data();
-    env.annotations.emplace_back(
+    env.unit.annotationData->add(
       "CallTargets",
       folly::sformat("BC={} FN={}: {}\n", bcOff(env), fnName, data.toString())
     );

@@ -401,7 +401,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
 
   if (RuntimeOption::EvalDumpRegion &&
       mcgen::dumpTCAnnotation(irgs.context.kind)) {
-    irgs.annotations.emplace_back("RegionDesc", show(region));
+    irgs.unit.annotationData->add("RegionDesc", show(region));
   }
 
   std::string errorMsg;

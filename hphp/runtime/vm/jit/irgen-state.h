@@ -108,11 +108,6 @@ struct IRGS {
    * Context for translation retries.
    */
   TranslateRetryContext* retryContext;
-
-  /*
-   * Annotations.
-   */
-  Annotations annotations;
 };
 
 //////////////////////////////////////////////////////////////////////

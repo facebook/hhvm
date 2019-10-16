@@ -85,11 +85,11 @@ struct AnnotationData {
   };
 
   Annotations getAllAnnotations() const {
-    auto inliningAnnotations = getInliningAnnotations();
-    inliningAnnotations.insert(inliningAnnotations.end(),
-                               otherAnnotations.begin(),
-                               otherAnnotations.end());
-    return inliningAnnotations;
+    auto allAnnotations = getInliningAnnotations();
+    allAnnotations.insert(allAnnotations.begin(),
+                          annotations.begin(),
+                          annotations.end());
+    return allAnnotations;
   }
 
   folly::dynamic getInliningDynamic() const {
@@ -100,9 +100,13 @@ struct AnnotationData {
     return annotations;
   }
 
+  void add(std::string label, std::string value) {
+    annotations.emplace_back(label, value);
+  }
+
   std::vector<rds::Symbol> profileKeys;
   std::vector<InliningDecision> inliningDecisions;
-  Annotations otherAnnotations;
+  Annotations annotations;
 };
 
 }} // namespace HPHP::jit

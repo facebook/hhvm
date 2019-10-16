@@ -289,6 +289,7 @@ mod tests {
         assert_eq!(
             (Facts {
                 constants: vec!["c1".into(), "c2".into()],
+                file_attributes: BTreeMap::new(),
                 functions: vec![],
                 type_aliases: vec!["my_type_alias".into()],
                 types,

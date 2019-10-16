@@ -13,3 +13,6 @@ ocamlvalue_macro = {path = "../utils/ocamlpool_rust/macro", package = "hack_util
 ocamlpool_rust = {path = "../utils/ocamlpool_rust", package = "hack_utils_ocamlpool" }
 ocamlrep = {path = "../ocamlrep", package = "hack_ocamlrep"}
 ocamlrep_derive = {path = "../ocamlrep_derive", package = "hack_ocamlrep_derive"}
+
+[dev-dependencies]
+pretty_assertions = "^0.6.1"

@@ -1,6 +1,7 @@
 [package]
 name = "hack_integration_tests"
 version = "3.49.0"
+edition = "2018"
 
 [[bin]]
 name = "test_facts_parse"

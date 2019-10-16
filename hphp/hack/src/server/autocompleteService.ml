@@ -701,10 +701,22 @@ let go
           resolve_ty tast_env autocomplete_context res replace_pos
         | Complete res -> res
       in
+      let complete_autocomplete_results =
+        !autocomplete_results |> List.map ~f:resolve
+      in
       let results =
         {
           With_complete_flag.is_complete = !autocomplete_is_complete;
-          value = !autocomplete_results |> List.map ~f:resolve;
+          value =
+            ( if sienv.use_ranked_autocomplete then
+              AutocompleteRankService.rank_autocomplete_result
+                ~query_text:""
+                ~results:complete_autocomplete_results
+                ~max_results:3
+                ~context:completion_type
+                ~kind_filter:!kind_filter
+            else
+              complete_autocomplete_results );
         }
       in
       SymbolIndex.log_symbol_index_search

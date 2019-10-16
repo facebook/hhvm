@@ -3150,6 +3150,7 @@ let run_ide_service (env : env) (ide_service : ClientIdeService.t) : unit Lwt.t
         ~root
         ~naming_table_saved_state_path
         ~wait_for_initialization:(Option.is_some naming_table_saved_state_path)
+        ~use_ranked_autocomplete:env.use_ranked_autocomplete
     in
     match result with
     | Ok () ->

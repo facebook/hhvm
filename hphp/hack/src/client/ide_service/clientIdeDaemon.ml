@@ -130,6 +130,7 @@ let initialize
     ({
        ClientIdeMessage.Initialize_from_saved_state.root;
        naming_table_saved_state_path;
+       use_ranked_autocomplete;
      } :
       ClientIdeMessage.Initialize_from_saved_state.t) :
     (state, string) Lwt_result.t =
@@ -198,7 +199,13 @@ let initialize
         server_local_config.ServerLocalConfig.symbolindex_file
       ~workers:None
   in
-  let sienv = { sienv with SearchUtils.sie_log_timings = true } in
+  let sienv =
+    {
+      sienv with
+      SearchUtils.sie_log_timings = true;
+      SearchUtils.use_ranked_autocomplete;
+    }
+  in
   let server_env =
     { server_env with ServerEnv.local_symbol_table = ref sienv }
   in

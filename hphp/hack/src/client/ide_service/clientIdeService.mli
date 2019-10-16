@@ -54,6 +54,7 @@ val initialize_from_saved_state :
   root:Path.t ->
   naming_table_saved_state_path:Path.t option ->
   wait_for_initialization:bool ->
+  use_ranked_autocomplete:bool ->
   (unit, string) Lwt_result.t
 
 (** Pump the message loop for the IDE service. Exits once the IDE service has

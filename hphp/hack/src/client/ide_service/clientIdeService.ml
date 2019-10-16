@@ -161,13 +161,15 @@ let initialize_from_saved_state
     (t : t)
     ~(root : Path.t)
     ~(naming_table_saved_state_path : Path.t option)
-    ~(wait_for_initialization : bool) : (unit, string) Lwt_result.t =
+    ~(wait_for_initialization : bool)
+    ~(use_ranked_autocomplete : bool) : (unit, string) Lwt_result.t =
   set_state t (Uninitialized { wait_for_initialization });
 
   let param =
     {
       ClientIdeMessage.Initialize_from_saved_state.root;
       naming_table_saved_state_path;
+      use_ranked_autocomplete;
     }
   in
   (* Do not use `do_rpc` here, as that depends on a running event loop in

@@ -78,6 +78,7 @@ struct ScalarHash {
       : ArrayData::ArrayKind::kMixedKind
     };
     ret |= (uint64_t{arr->dvArray()} << 32);
+    ret |= (uint64_t{arr->isLegacyArray()} << 33);
 
     if (RuntimeOption::EvalArrayProvenance) {
       if (!tag) tag = arrprov::getTag(arr);
@@ -139,8 +140,12 @@ struct ScalarHash {
       return false;
     }
 
+    if (ad1->isLegacyArray() != ad2->isLegacyArray()) return false;
+
     if (UNLIKELY(RuntimeOption::EvalArrayProvenance) &&
-        arrprov::getTag(ad1) != arrprov::getTag(ad2)) return false;
+        arrprov::getTag(ad1) != arrprov::getTag(ad2)) {
+      return false;
+    }
 
     auto check = [] (const TypedValue& tv1, const TypedValue& tv2) {
       if (tv1.m_type != tv2.m_type) {

@@ -6639,48 +6639,54 @@ and call_untyped_unpack env uel =
 and bad_call env p ty = Errors.bad_call p (Typing_print.error env ty)
 
 (* Checking of numeric operands for arithmetic operators:
- *    (1) Check if it's dynamic
- *    (2) If not, enforce that it's a subtype of num
- *    (3) Solve to float if it's a type variable with float as lower bound
+ *    (1) Enforce that it coerces to num
+ *    (2) Solve to float if it's a type variable with float as lower bound
+ *    (3) Check if it's dynamic
  *)
 and check_dynamic_or_enforce_num env p t r =
-  if TUtils.is_dynamic env t then
-    (env, true)
-  else
-    let env =
-      Type.sub_type p Reason.URnone env t (MakeType.num r) Errors.unify_error
-    in
-    let widen_for_arithmetic env ty =
-      match ty with
-      | (_, Tprim Tfloat) -> (env, Some ty)
-      | _ -> (env, None)
-    in
-    let default = MakeType.num (Reason.Rarith p) in
-    let (env, _) =
-      Typing_solver.expand_type_and_narrow
-        env
-        ~default
-        ~description_of_expected:"a number"
-        widen_for_arithmetic
-        p
-        t
-        Errors.unify_error
-    in
-    (env, false)
+  let env =
+    Typing_coercion.coerce_type
+      p
+      Reason.URnone
+      env
+      t
+      { et_type = MakeType.num r; et_enforced = true }
+      Errors.unify_error
+  in
+  let widen_for_arithmetic env ty =
+    match ty with
+    | (_, Tprim Tfloat) -> (env, Some ty)
+    | _ -> (env, None)
+  in
+  let default = MakeType.num (Reason.Rarith p) in
+  let (env, _) =
+    Typing_solver.expand_type_and_narrow
+      env
+      ~default
+      ~description_of_expected:"a number"
+      widen_for_arithmetic
+      p
+      t
+      Errors.unify_error
+  in
+  (env, TUtils.is_dynamic env t)
 
 (* Checking of numeric operands for arithmetic operators that work only
  * on integers:
- *   (1) Check if it's dynamic
- *   (2) If not, enforce that it's a subtype of int
+ *   (1) Enforce that it coerce to int
+ *   (2) Check if it's dynamic
  *)
 and check_dynamic_or_enforce_int env p t r =
-  (* First check if it's dynamic *)
-  if TUtils.is_dynamic env t then
-    (env, true)
-  (* Next make sure that it's a subtype of int *)
-  else
-    ( Type.sub_type p Reason.URnone env t (MakeType.int r) Errors.unify_error,
-      false )
+  let env =
+    Typing_coercion.coerce_type
+      p
+      Reason.URnone
+      env
+      t
+      { et_type = MakeType.int r; et_enforced = true }
+      Errors.unify_error
+  in
+  (env, TUtils.is_dynamic env t)
 
 (* Secondary check of numeric operand for arithmetic operators. We've
  * already enforced num and tried to infer a float. Now let's

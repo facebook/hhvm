@@ -2716,23 +2716,32 @@ and expr_
     let (env, te3, ty) = binop p env bop (fst e1) te1 ty1 (fst e2) te2 ty2 in
     (env, te3, ty)
   | Pipe (e0, e1, e2) ->
-    let (env, te1, ty) = expr env e1 in
-    (* id is the ID of the $$ that is implicitly declared by the pipe.
-     * Set the local type for the $$ in the RHS. *)
-    let env = set_local env e0 ty in
-    let (env, te2, ty2) = expr env e2 in
-    (*
-     * Return ty2 since the type of the pipe expression is the type of the
-     * RHS.
+    (* If it weren't for local variable assignment or refinement the pipe
+     * expression e1 |> e2 could be typed using this rule (E is environment with
+     * types for locals):
      *
-     * Note: env does have the type of this Pipe's $$, but it doesn't
-     * override the outer one since they have different ID's.
+     *    E |- e1 : ty1    E[$$:ty1] |- e2 : ty2
+     *    --------------------------------------
+     *                E |- e1|>e2 : ty2
      *
-     * For example:
-     *   a() |> ( inner1($$) |> inner2($$) ) + $$
-     *
-     *   The rightmost $$ refers to the result of a()
+     * The possibility of e2 changing the types of locals in E means that E
+     * can evolve, and so we need to restore $$ to its original state.
      *)
+    let (env, te1, ty1) = expr env e1 in
+    let dd_var = Local_id.make_unscoped SN.SpecialIdents.dollardollar in
+    let dd_old_ty =
+      if Env.is_local_defined env dd_var then
+        Some (Env.get_local env dd_var)
+      else
+        None
+    in
+    let env = Env.set_local env dd_var ty1 in
+    let (env, te2, ty2) = expr env e2 in
+    let env =
+      match dd_old_ty with
+      | None -> Env.unset_local env dd_var
+      | Some ty -> Env.set_local env dd_var ty
+    in
     make_result env p (T.Pipe (e0, te1, te2)) ty2
   | Unop (uop, e) ->
     let (env, te, ty) = raw_expr env e in
@@ -3916,6 +3925,14 @@ and anon_make tenv p f ft idl is_anon outer =
                        decl_ty)
                 in
                 let local_tpenv = Env.get_tpenv env in
+                (* Outer pipe variables aren't available in closures. Note that
+                 * locals are restored by Env.anon after processing the closure
+                 *)
+                let env =
+                  Env.unset_local
+                    env
+                    (Local_id.make_unscoped SN.SpecialIdents.dollardollar)
+                in
                 let (env, tb) = block env nb.fb_ast in
                 let implicit_return = LEnv.has_next env in
                 let env =
@@ -4320,8 +4337,17 @@ and set_valid_rvalue p env x ty =
    *)
   Env.set_local_expr_id env x (Ident.tmp ())
 
+(* Produce an error if assignment is used in the scope of the |> operator, i.e.
+ * if $$ is in scope *)
+and error_if_assign_in_pipe p env =
+  let dd_var = Local_id.make_unscoped SN.SpecialIdents.dollardollar in
+  let dd_defined = Env.is_local_defined env dd_var in
+  if dd_defined then
+    Errors.unimplemented_feature p "Assignment within pipe expressions"
+
 (* Deal with assignment of a value of type ty2 to lvalue e1 *)
 and assign p env e1 ty2 : _ * Tast.expr * Tast.ty =
+  error_if_assign_in_pipe p env;
   assign_ p Reason.URassign env e1 ty2
 
 and is_hack_collection env ty =

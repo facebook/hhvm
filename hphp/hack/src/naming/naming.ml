@@ -104,10 +104,6 @@ module Env : sig
 
   val new_let_local : genv * lenv -> Ast_defs.id -> positioned_ident
 
-  val found_dollardollar : genv * lenv -> Pos.t -> Local_id.t
-
-  val inside_pipe : genv * lenv -> bool
-
   val lvar : genv * lenv -> Ast_defs.id -> positioned_ident
 
   val let_local : genv * lenv -> Ast_defs.id -> positioned_ident option
@@ -141,19 +137,8 @@ module Env : sig
   val scope_lexical : genv * lenv -> (genv * lenv -> 'a) -> 'a
 
   val remove_locals : genv * lenv -> Ast_defs.id list -> unit
-
-  val pipe_scope :
-    genv * lenv -> (genv * lenv -> Nast.expr) -> Local_id.t * Nast.expr
 end = struct
   type map = positioned_ident SMap.t
-
-  type pipe_scope = {
-    (* The identifier for the special pipe variable $$ for this pipe scope. *)
-    dollardollar: Local_id.t;
-    (* Whether the current pipe scope's $$ has been used. Used to raise error
-     * if not. *)
-    used_dollardollar: bool;
-  }
 
   (* The local environment *)
   type lenv = {
@@ -163,10 +148,6 @@ end = struct
     (* TODO: Currently these locals live in a separate namespace, it is
      * worthwhile considering unified namespace for all local variables T28712009 *)
     let_locals: map ref;
-    (* stack of pipe scopes.
-     * We use a stack (represented by a list) because pipe operators
-     * can be nested. *)
-    pipe_locals: pipe_scope list ref;
     (* Handler called when we see an unbound name.
      * This is used to compute an approximation of the list of captured
      * variables for closures: when we see an undefined variable, we add it
@@ -190,7 +171,6 @@ end = struct
     {
       locals = ref SMap.empty;
       let_locals = ref SMap.empty;
-      pipe_locals = ref [];
       unbound_handler;
       goto_labels = ref SMap.empty;
       goto_targets = ref SMap.empty;
@@ -417,24 +397,6 @@ end = struct
     lenv.let_locals := SMap.add x (p, ident) !(lenv.let_locals);
     (p, ident)
 
-  (* Check $$ is defined (i.e. we are indeed in a pipe) and if yes, mark it
-   * as used and get the identifier for it. *)
-  let found_dollardollar (_, lenv) p =
-    match !(lenv.pipe_locals) with
-    | [] ->
-      (* TODO better error *)
-      Errors.undefined ~in_rx_scope:false p SN.SpecialIdents.dollardollar None;
-      Local_id.make_scoped SN.SpecialIdents.dollardollar
-    | pipe_scope :: scopes ->
-      let pipe_scope = { pipe_scope with used_dollardollar = true } in
-      lenv.pipe_locals := pipe_scope :: scopes;
-      pipe_scope.dollardollar
-
-  let inside_pipe (_, lenv) =
-    match !(lenv.pipe_locals) with
-    | [] -> false
-    | _ -> true
-
   let handle_undefined_variable (_genv, env) (p, x) =
     match env.unbound_handler with
     | None -> (p, Local_id.make_unscoped x)
@@ -600,34 +562,6 @@ end = struct
   let copy_let_locals (_genv1, lenv1) (_genv2, lenv2) =
     let let_locals_1 = !(lenv1.let_locals) in
     lenv2.let_locals := let_locals_1
-
-  (** Push a new pipe scope on the stack of pipe scopes in the environment
-   * and create an identifier for the $$ variable associated to this pipe,
-   * then perform the naming function [name_e2],
-   * then finally pops the added pipe scope.
-   * Append an error if $$ was not used in the RHS.
-   *
-   * Return the identifier for the $$ of this pipe and the names RHS.
-   * *)
-  let pipe_scope env name_e2 =
-    let (_, lenv) = env in
-    let pipe_var_ident = Local_id.make_scoped SN.SpecialIdents.dollardollar in
-    let pipe_scope =
-      { dollardollar = pipe_var_ident; used_dollardollar = false }
-    in
-    lenv.pipe_locals := pipe_scope :: !(lenv.pipe_locals);
-
-    (* Name the RHS of the pipe expression. *)
-    let e2 = name_e2 env in
-    let (pipe_scope, pipe_scopes) =
-      match !(lenv.pipe_locals) with
-      | [] -> assert false
-      | pipe_scope :: pipe_scopes -> (pipe_scope, pipe_scopes)
-    in
-    if not pipe_scope.used_dollardollar then
-      Errors.dollardollar_unused (fst e2);
-    lenv.pipe_locals := pipe_scopes;
-    (pipe_var_ident, e2)
 end
 
 (*****************************************************************************)
@@ -2301,7 +2235,7 @@ module Make (GetLocals : GetLocals) = struct
       N.This
     | Aast.Lvar (p, x)
       when Local_id.to_string x = SN.SpecialIdents.dollardollar ->
-      N.Dollardollar (p, Env.found_dollardollar env p)
+      N.Dollardollar (p, Local_id.make_unscoped SN.SpecialIdents.dollardollar)
     | Aast.Lvar (p, x) when Local_id.to_string x = SN.SpecialIdents.placeholder
       ->
       N.Lplaceholder p
@@ -2639,22 +2573,20 @@ module Make (GetLocals : GetLocals) = struct
       N.Cast (ty, expr env e2)
     | Aast.Unop (uop, e) -> N.Unop (uop, expr env e)
     | Aast.Binop ((Ast_defs.Eq None as op), lv, e2) ->
-      if Env.inside_pipe env then
-        Errors.unimplemented_feature p "Assignment within pipe expressions";
       let e2 = expr env e2 in
       let nsenv = (fst env).namespace in
       let (_, vars) = GetLocals.lvalue (nsenv, SMap.empty) lv in
       SMap.iter (fun x p -> ignore (Env.new_lvar env (p, x))) vars;
       N.Binop (op, expr env lv, e2)
     | Aast.Binop ((Ast_defs.Eq _ as bop), e1, e2) ->
-      if Env.inside_pipe env then
-        Errors.unimplemented_feature p "Assignment within pipe expressions";
       N.Binop (bop, expr env e1, expr env e2)
     | Aast.Binop (bop, e1, e2) -> N.Binop (bop, expr env e1, expr env e2)
-    | Aast.Pipe (_dollardollar, e1, e2) ->
-      let e1 = expr env e1 in
-      let (ident, e2) = Env.pipe_scope env (fun env -> expr env e2) in
-      N.Pipe ((p, ident), e1, e2)
+    | Aast.Pipe (dollardollar, e1, e2) ->
+      N.Pipe
+        ( ( fst dollardollar,
+            Local_id.make_unscoped SN.SpecialIdents.dollardollar ),
+          expr env e1,
+          expr env e2 )
     | Aast.Eif (e1, e2opt, e3) ->
       (* The order matters here, of course -- e1 can define vars that need to
        * be available in e2 and e3. *)
@@ -2840,7 +2772,8 @@ module Make (GetLocals : GetLocals) = struct
          * "$$" except in positions where a classname is expected, like in
          * static member access. So, we only reach here for things
          * like "$$::someMethod()". *)
-        N.CIexpr (p, N.Lvar (p, Env.found_dollardollar env p))
+        N.CIexpr
+          (p, N.Lvar (p, Local_id.make_unscoped SN.SpecialIdents.dollardollar))
       | x when x.[0] = '$' -> N.CIexpr (p, N.Lvar (Env.lvar env cid))
       | _ ->
         N.CI (Env.type_name env cid ~allow_typedef:false ~allow_generics:true)

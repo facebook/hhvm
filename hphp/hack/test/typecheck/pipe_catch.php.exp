@@ -1,0 +1,2 @@
+File "pipe_catch.php", line 11, characters 10-11:
+Variable $$ is undefined, or not always defined (did you mean $_ instead?) (Naming[2050])

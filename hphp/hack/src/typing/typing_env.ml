@@ -1046,7 +1046,9 @@ let get_locals env plids =
 let set_locals env locals =
   LID.Map.fold (fun lid ty env -> set_local_ env lid ty) locals env
 
-let is_local_defined env x = fst (get_local_ env x)
+let is_local_defined env x =
+  let next_cont = next_cont_opt env in
+  Option.is_some next_cont && fst (get_local_ env x)
 
 let get_local_check_defined env (p, x) =
   snd (get_local_ ~error_if_undef_at_pos:p env x)

@@ -1,0 +1,2 @@
+File "pipe_lambda.php", line 8, characters 32-33:
+Variable $$ is undefined, or not always defined (did you mean $z instead?) (Naming[2050])

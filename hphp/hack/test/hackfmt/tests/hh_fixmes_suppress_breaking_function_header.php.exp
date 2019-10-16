@@ -1,0 +1,35 @@
+<?hh
+
+class C {
+  // If we don't suppress formatting, we'll reflow this function header to fit
+  // in the line length limit.
+  private function getFooBarLink(
+    <<__Soft>> int $a,
+    $b,
+    bool $is_fantastic,
+  ): ?:bootstrap:link {
+    $a;
+    $b;
+    $c;
+    $d;
+    $e;
+    $f;
+    $g;
+  }
+
+  // If an HH_FIXME is applied (to suppress an error on one of the parameters),
+  // we don't want to reflow--it would move the parameter away from the FIXME,
+  // so that the error would no longer be silenced. We need to suppress
+  // formatting on the function header, but...
+  /* HH_FIXME[4032] */
+  private function getBetterFooBarLink( <<__Soft>> int $a, $b, bool $is_fantastic ): ?:bootstrap:link {
+    // ...the contents of the function should still be formatted.
+    $a;
+    $b;
+    $c;
+    $d;
+    $e;
+    $f;
+    $g;
+  }
+}

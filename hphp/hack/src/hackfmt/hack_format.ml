@@ -527,34 +527,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         [
           t env attr;
           when_present attr newline;
-          (let (fn_name, args_and_where) =
-             match Syntax.syntax func_decl with
-             | Syntax.FunctionDeclarationHeader
-                 {
-                   function_modifiers = modifiers;
-                   function_keyword = kw;
-                   function_name = name;
-                   function_type_parameter_list = type_params;
-                   function_left_paren = leftp;
-                   function_parameter_list = params;
-                   function_right_paren = rightp;
-                   function_colon = colon;
-                   function_type = ret_type;
-                   function_where_clause = where;
-                 } ->
-               ( Concat
-                   (transform_fn_decl_name
-                      env
-                      modifiers
-                      kw
-                      name
-                      type_params
-                      leftp),
-                 transform_fn_decl_args env params rightp colon ret_type where
-               )
-             | _ -> failwith "Expected FunctionDeclarationHeader"
-           in
-           Concat [Span [fn_name]; args_and_where]);
+          t env func_decl;
           when_present body (fun () ->
               handle_possible_compound_statement env ~allow_collapse:true body);
           t env semi;
@@ -572,34 +545,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         [
           t env attr;
           when_present attr newline;
-          (let (fn_name, args_and_where) =
-             match Syntax.syntax func_decl with
-             | Syntax.FunctionDeclarationHeader
-                 {
-                   function_modifiers = modifiers;
-                   function_keyword = kw;
-                   function_name = name;
-                   function_type_parameter_list = type_params;
-                   function_left_paren = leftp;
-                   function_parameter_list = params;
-                   function_right_paren = rightp;
-                   function_colon = colon;
-                   function_type = ret_type;
-                   function_where_clause = where;
-                 } ->
-               ( Concat
-                   (transform_fn_decl_name
-                      env
-                      modifiers
-                      kw
-                      name
-                      type_params
-                      leftp),
-                 transform_fn_decl_args env params rightp colon ret_type where
-               )
-             | _ -> failwith "Expected FunctionDeclarationHeader"
-           in
-           Concat [Span [fn_name]; args_and_where]);
+          t env func_decl;
           t env equal;
           t env name;
           t env semi;

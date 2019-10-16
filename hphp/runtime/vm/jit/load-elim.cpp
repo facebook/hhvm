@@ -287,6 +287,8 @@ bool refinable_load_eligible(const IRInstruction& inst) {
     case LdStk:
     case LdMBase:
     case LdMem:
+    case LdIterPos:
+    case LdIterEnd:
       assertx(inst.hasTypeParam());
       return true;
     default:
@@ -441,6 +443,15 @@ Flags handle_general_effects(Local& env,
     if (auto flags = handleCheck(TInitGen)) return *flags;
     break;
 
+  case CheckIter: {
+    auto const meta = env.global.ainfo.find(canonicalize(m.loads));
+    if (!meta || !env.state.avail[meta->index]) break;
+    auto const& type = env.state.tracked[meta->index].knownType;
+    if (!type.hasConstVal(TInt)) break;
+    auto const match = type.intVal() == inst.extra<CheckIter>()->type.as_byte;
+    return match ? Flags{FJmpNext{}} : Flags{FJmpTaken{}};
+  }
+
   case InitSProps: {
     auto const handle = inst.extra<ClassData>()->cls->sPropInitHandle();
     if (env.state.initRDS.count(handle) > 0) return FJmpNext{};
@@ -488,8 +499,12 @@ void handle_call_effects(Local& env,
    * values.  We are just doing this to avoid extending lifetimes
    * across php calls, which currently always leads to spilling.
    */
-  auto const keep = env.global.ainfo.all_stack          |
-                    env.global.ainfo.all_frame;
+  auto const keep = env.global.ainfo.all_stack    |
+                    env.global.ainfo.all_frame    |
+                    env.global.ainfo.all_iterBase |
+                    env.global.ainfo.all_iterType |
+                    env.global.ainfo.all_iterPos  |
+                    env.global.ainfo.all_iterEnd;
   env.state.avail &= keep;
   for (auto aloc = uint32_t{0};
       aloc < env.global.ainfo.locations.size();
@@ -586,6 +601,7 @@ Flags analyze_inst(Local& env, const IRInstruction& inst) {
   );
 
   switch (inst.op()) {
+  case AssertType:
   case CheckType:
   case CheckNonNull:
   case CheckVArray:
@@ -596,6 +612,32 @@ Flags analyze_inst(Local& env, const IRInstruction& inst) {
   case AssertStk:
     flags = handle_assert(env, inst);
     break;
+  case LdIterPos: {
+    // For pointer iters, the type of the pointee of the pos is a lower bound
+    // on the union of the types of the base's values. The same is true for the
+    // pointee type of the end.
+    //
+    // Since the end is loop-invariant, we can use its type to refine the pos
+    // and so avoid value type-checks. Here, "dropConstVal" drops the precise
+    // value of the end (for static bases) but preserves the pointee type.
+    auto const iter = inst.extra<LdIterPos>()->iterId;
+    auto const end_cls = canonicalize(AIterEnd{inst.src(0), iter});
+    auto const end = find_tracked(env, env.global.ainfo.find(end_cls));
+    if (end != nullptr) {
+      auto const end_type = end->knownType.dropConstVal();
+      if (end_type < inst.typeParam()) return FRefinableLoad { end_type };
+    }
+    break;
+  }
+  case StIterType: {
+    // StIterType stores an immediate to the iter's type fields. We construct a
+    // tmp to represent the immediate. (memory-effects can't do so w/o a unit.)
+    auto const iter = inst.extra<StIterType>()->iterId;
+    auto const type = inst.extra<StIterType>()->type;
+    auto const acls = canonicalize(AIterType{inst.src(0), iter});
+    store(env, acls, env.global.unit.cns(type.as_byte));
+    break;
+  }
   default:
     break;
   }

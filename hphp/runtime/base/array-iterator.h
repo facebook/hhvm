@@ -325,6 +325,38 @@ struct ArrayIter {
            static_cast<uint32_t>(type);
   }
 
+  // JIT helpers used for specializing iterators.
+  static constexpr size_t baseOffset() {
+    return offsetof(ArrayIter, m_data);
+  }
+  static constexpr size_t baseSize() {
+    return sizeof(m_data);
+  }
+  static constexpr size_t typeOffset() {
+    return offsetof(ArrayIter, m_typeFields);
+  }
+  static constexpr size_t typeSize() {
+    return sizeof(m_typeFields);
+  }
+  static constexpr size_t posOffset() {
+    return offsetof(ArrayIter, m_pos);
+  }
+  static constexpr size_t posSize() {
+    return sizeof(m_pos);
+  }
+  static constexpr size_t endOffset() {
+    return offsetof(ArrayIter, m_end);
+  }
+  static constexpr size_t endSize() {
+    return sizeof(m_end);
+  }
+
+  // When we specialize an iterator, we must *set* all m_type components (so as
+  // to be compatible with native helpers) but we only need to check this byte.
+  static constexpr size_t specializationOffset() {
+    return offsetof(ArrayIter, m_specialization);
+  }
+
 private:
   template<IterTypeOp Type>
   friend int64_t new_iter_array(Iter*, ArrayData*, TypedValue*);

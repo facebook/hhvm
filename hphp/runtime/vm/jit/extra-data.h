@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_VM_EXTRADATA_H_
 #define incl_HPHP_VM_EXTRADATA_H_
 
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/bytecode.h"
@@ -456,6 +457,30 @@ struct IterInitData : public IterData {
   // the type of the op. For example, we sometimes generate non-local IterInit
   // ops for an LIterInit bytecode, in which case sourceOp will still be local.
   IterTypeOp sourceOp;
+};
+
+struct IterTypeData : IRExtraData {
+  IterTypeData(uint32_t iterId, IterSpecialization type)
+    : iterId{iterId}
+    , type{type}
+  {
+    always_assert(type.specialized);
+  }
+
+  std::string show() const {
+    return folly::format("{}::{}", iterId, HPHP::show(type)).str();
+  }
+
+  uint32_t iterId;
+  IterSpecialization type;
+};
+
+struct IterOffsetData : IRExtraData {
+  IterOffsetData(int16_t offset) : offset(offset) {}
+
+  std::string show() const { return folly::to<std::string>(offset); }
+
+  int16_t offset;
 };
 
 /*
@@ -1596,6 +1621,17 @@ X(LdLocPseudoMain,              LocalId);
 X(StLoc,                        LocalId);
 X(StLocPseudoMain,              LocalId);
 X(StLocRange,                   LocalIdRange);
+X(AdvanceMixedPtrIter,          IterOffsetData);
+X(AdvancePackedPtrIter,         IterOffsetData);
+X(CheckIter,                    IterTypeData);
+X(StIterBase,                   IterId);
+X(StIterType,                   IterTypeData);
+X(StIterPos,                    IterId);
+X(StIterEnd,                    IterId);
+X(LdIterBase,                   IterId);
+X(LdIterPos,                    IterId);
+X(LdIterEnd,                    IterId);
+X(KillIter,                     IterId);
 X(IterFree,                     IterId);
 X(IterInit,                     IterInitData);
 X(IterInitK,                    IterInitData);

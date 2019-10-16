@@ -221,6 +221,11 @@ loaded, using a separate CheckRefInner instruction.
   register is T.  The type must be guarded on before it is known to be true
   (via CheckRefInner).
 
+| CheckIter<iterId,iterType>, ND, S(FramePtr), B
+
+  Check that specialization type of the given iterator `iterId` on the frame S0
+  is `iterType`; if it is not, branch to block B.
+
 | CheckLoc<T,localId>, ND, S(FramePtr), B
 
   Check that type of the given localId on the frame S0 is T; if not, branch to
@@ -1126,6 +1131,20 @@ To string conversions:
   Check that the inner type of the boxed cell in S0 is T, and if not take the
   branch to B.
 
+| LdIterBase<T,iterId>, DParam(ArrLike), S(FramePtr), NF
+
+| LdIterPos<T,iterId>, DParam(Int|PtrToElemGen), S(FramePtr), NF
+
+| LdIterEnd<T,iterId>, DParam(Int|PtrToElemGen), S(FramePtr), NF
+
+  Load the specified field of the iterator at `iterId`. These ops should only
+  be generated for iterators known to be some specialized type (see CheckIter).
+
+  The type parameters `T` must be compatible with the specialized iter type.
+  For example, the base must match the specialized base type (e.g. vec, dict),
+  and the type of pos and end is different based on whether we specialized the
+  iterator to use either index or pointer iteration.
+
 | LdRef<T>, DParam(Cell), S(BoxedCell), NF
 
   TODO(#2939547): this should take BoxedInitCell
@@ -1892,6 +1911,23 @@ To string conversions:
 
   Store S1 to the local variables corresponding to localIds, on the frame
   pointed to by S0.
+
+| StIterBase<iterId>, ND, S(FramePtr) S(ArrLike|Nullptr), NF
+
+  Sets the base of the iterator at `iterId` to the pointer S1. The array must
+  match the specialized type of the iterator, or be null (for local iterators).
+
+| StIterType<iterId,iterType>, ND, S(FramePtr), NF
+
+  Sets the type of the iterator at `iterId` to `iterType`. This type must be a
+  specialized type. Also sets auxiliary fields (like next helper index).
+
+| StIterPos<iterId>, ND, S(FramePtr) S(Int|PtrToElemGen), NF
+
+| StIterEnd<iterId>, ND, S(FramePtr) S(Int|PtrToElemGen), NF
+
+  Store S1 to the given field of the iterator at `iterId`. S1 must be an int if
+  we're doing index iteration and a pointer if we're doing pointer iteration.
 
 | StRef, ND, S(BoxedCell) S(Cell), NF
 
@@ -2764,10 +2800,48 @@ To string conversions:
   The IterInit and IterInitK instructions always copy the array element by
   value.
 
-| IterFree,  ND, S(FramePtr), NF
+| IterFree<iterId>, ND, S(FramePtr), NF
 
-  Free the iterator variable whose index is given by S1 in the stack frame
-  pointed to by S0.
+  Free the iterator variable with id `iterId` in the stack frame of S0.
+  For non-local iterators, this instruction will dec-ref the stored base.
+
+| KillIter<iterId>, ND, S(FramePtr), NF
+
+  Mark the iterator at `iterId` as no longer containing a meaningful value.
+  We can use this operation to elide stores for iterator fields that do not
+  get loaded again. In debug builds, it will write poison values to the fields.
+
+| GetMixedPtrIter,  DPtrIter, S(AK(Mixed),Dict) S(Int), NF
+
+| GetPackedPtrIter, DPtrIter, S(AK(Packed),Vec) S(Int), NF
+
+  Returns a pointer to the elm S1 of a {mixed,packed}-layout array S0. S1 does
+  not need to be a valid array position; for example, it may equal the size of
+  the array (so that the "elm" returned is the pointer-iteration end for S0).
+
+| AdvanceMixedPtrIter<offset>,  DPtrIter, S(PtrToElemGen), NF
+
+| AdvancePackedPtrIter<offset>, DPtrIter, S(PtrToElemGen), NF
+
+  Increments the pointer S0 to the array element with the given layout `offset`
+  positions forward. `offset` is allowed to be negative.
+
+| LdPtrIterKey<T>, DParam(Int|Str), S(PtrToElemGen), NF
+
+| LdPtrIterVal<T>, DPtrIterVal, S(PtrToElemGen), NF
+
+  Loads the key or val from the array element pointed to by S0. S0 must be a
+  valid elm; that is, it can't point to the end of the array data. LdPtrIterKey
+  can only be used for mixed elms, but LdPtrIterVal supports mixed and packed.
+
+  T must be a valid type for the array's keys - i.e., a subtype of TInt|TStr.
+  For LdPtrIterKey, T is used to type the result; if it's specific enough, we
+  skip doing a check on the type of the elm. For LdPtrIterVal, it's only used
+  to constrain the memory effects of the op.
+
+| EqPtrIter, D(Bool), S(PtrToElemGen) S(PtrToElemGen), NF
+
+  Compares two pointer iterators for equality.
 
 
 18. Member instruction support
@@ -2903,6 +2977,13 @@ fields of that struct for holding intermediate values.
 | ProfileMixedArrayAccess, ND, S(Arr) S(Int,Str), NF
 
   Profile access of the element keyed by S1 in S0, tracking sizes and offsets.
+
+| CheckMixedArrayKeys<T>, ND, S(AK(Mixed),Dict), B
+
+  Check that the given mixed array is free of tombstones and that all of its
+  elements' keys match the type T. If any check fails, branch to block B.
+  Like CheckMixedArrayOffset, this check is allowed to have false negatives -
+  it may fail even if the array has keys of the given type.
 
 | CheckMixedArrayOffset<pos>, ND, S(AK(Mixed)) S(Int,Str), B
 
@@ -3469,7 +3550,7 @@ fields of that struct for holding intermediate values.
   Process extra arguments, if present. Either shuffle them to the `...$args`
   local, or discard them. Also, in case of MayUseVV, set m_varEnv to nullptr.
   S1 contains call arguments.
-  
+
 | InitCtx, ND, S(FramePtr) S(Ctx,Nullptr), CRc
 
   Store S1 to the m_this/m_cls field in the frame pointer S0.

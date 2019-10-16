@@ -88,12 +88,16 @@ ArrayIterProfile::Result ArrayIterProfile::result() const {
     key_types_total += m_key_types_counts[i];
   }
   auto const counts  = m_key_types_counts;
-  auto const ints    = m_empty_count + counts[IterSpecialization::Int];
   auto const statics = m_empty_count + counts[IterSpecialization::StaticStr];
+  auto const ints    = m_empty_count + counts[IterSpecialization::Int];
   auto const strs    = statics + counts[IterSpecialization::Str];
   result.top_specialization.key_types = [&]{
-    if (ints    == key_types_total) return IterSpecialization::Int;
+    auto const type = result.top_specialization.base_type;
+    if (type == IterSpecialization::Packed || type == IterSpecialization::Vec) {
+      return IterSpecialization::Int;
+    }
     if (statics == key_types_total) return IterSpecialization::StaticStr;
+    if (ints    == key_types_total) return IterSpecialization::Int;
     if (strs    == key_types_total) return IterSpecialization::Str;
     return IterSpecialization::ArrayKey;
   }();

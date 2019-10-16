@@ -579,6 +579,8 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
 #define DCns
 #define DMemoKey
 #define DLvalOfPtr
+#define DPtrIter
+#define DPtrIterVal
 
 #define O(opcode, dstinfo, srcinfo, flags) \
   case opcode: dstinfo srcinfo countCheck(); return true;

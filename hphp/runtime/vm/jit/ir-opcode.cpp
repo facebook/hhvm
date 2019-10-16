@@ -86,6 +86,8 @@ TRACE_SET_MOD(hhir);
 #define DUnion(...)    HasDest
 #define DMemoKey       HasDest
 #define DLvalOfPtr     HasDest
+#define DPtrIter       HasDest
+#define DPtrIterVal    HasDest
 
 namespace {
 template<Opcode op, uint64_t flags>
@@ -548,6 +550,8 @@ bool opcodeMayRaise(Opcode opc) {
   case AddInt:
   case AddIntO:
   case AddNewElemVec:
+  case AdvanceMixedPtrIter:
+  case AdvancePackedPtrIter:
   case AFWHBlockOn:
   case AKExistsArr:
   case AKExistsDict:
@@ -578,9 +582,11 @@ bool opcodeMayRaise(Opcode opc) {
   case CheckDictOffset:
   case CheckInit:
   case CheckInitMem:
+  case CheckIter:
   case CheckKeysetOffset:
   case CheckLoc:
   case CheckMBase:
+  case CheckMixedArrayKeys:
   case CheckMixedArrayOffset:
   case CheckNonNull:
   case CheckNullptr:
@@ -707,6 +713,7 @@ bool opcodeMayRaise(Opcode opc) {
   case EqFunc:
   case EqInt:
   case EqKeyset:
+  case EqPtrIter:
   case EqRes:
   case EqStr:
   case EqStrInt:
@@ -720,6 +727,8 @@ bool opcodeMayRaise(Opcode opc) {
   case FwdCtxStaticCall:
   case GenericRetDecRefs:
   case GetMemoKeyScalar:
+  case GetMixedPtrIter:
+  case GetPackedPtrIter:
   case GetTime:
   case GetTimeNs:
   case GtBool:
@@ -785,6 +794,7 @@ bool opcodeMayRaise(Opcode opc) {
   case KeysetIdx:
   case KeysetIsset:
   case KeysetLast:
+  case KillIter:
   case LdAFWHActRec:
   case LdARNumArgsAndFlags:
   case LdARNumParams:
@@ -826,6 +836,9 @@ bool opcodeMayRaise(Opcode opc) {
   case LdIfaceMethod:
   case LdInitPropAddr:
   case LdInitRDSAddr:
+  case LdIterBase:
+  case LdIterPos:
+  case LdIterEnd:
   case LdLoc:
   case LdLocAddr:
   case LdLocPseudoMain:
@@ -834,6 +847,8 @@ bool opcodeMayRaise(Opcode opc) {
   case LdMethCallerName:
   case LdMIPropStateAddr:
   case LdMIStateAddr:
+  case LdPtrIterKey:
+  case LdPtrIterVal:
   case LdRecDesc:
   case LdObjClass:
   case LdObjInvoke:
@@ -968,6 +983,10 @@ bool opcodeMayRaise(Opcode opc) {
   case StContArState:
   case StContArValue:
   case StElem:
+  case StIterBase:
+  case StIterType:
+  case StIterPos:
+  case StIterEnd:
   case StLoc:
   case StLocPseudoMain:
   case StLocRange:

@@ -194,6 +194,116 @@ void implIterFree(IRLS& env, const IRInstruction* inst, CallSpec meth) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+namespace {
+
+template<typename T>
+Vptr iteratorPtr(IRLS& env, const IRInstruction* inst, const T* extra) {
+  assertx(inst->src(0)->isA(TFramePtr));
+  auto const fp = srcLoc(env, inst, 0).reg();
+  return fp[iterOffset(inst->marker(), extra->iterId)];
+}
+
+int32_t iteratorType(IterSpecialization specialization) {
+  auto const nextHelperIndex = [&]{
+    using S = IterSpecialization;
+    switch (specialization.base_type) {
+      case S::Packed:
+      case S::Vec: {
+        return specialization.base_const && !specialization.output_key
+          ? IterNextIndex::ArrayPackedPointer
+          : IterNextIndex::ArrayPacked;
+      }
+      case S::Mixed:
+      case S::Dict: {
+        return specialization.base_const
+          ? IterNextIndex::ArrayMixedPointer
+          : IterNextIndex::ArrayMixed;
+      }
+    }
+    always_assert(false);
+  }();
+
+  auto const type = ArrayIter::packTypeFields(
+    ArrayIter::TypeArray, nextHelperIndex, specialization);
+  return safe_cast<int32_t>(type);
+}
+
+}
+
+void cgCheckIter(IRLS& env, const IRInstruction* inst) {
+  static_assert(sizeof(IterSpecialization) == 1, "");
+  auto const iter = iteratorPtr(env, inst, inst->extra<CheckIter>());
+  auto const type = inst->extra<CheckIter>()->type;
+  auto& v = vmain(env);
+  auto const sf = v.makeReg();
+  v << cmpbim{type.as_byte, iter + ArrayIter::specializationOffset(), sf};
+  v << jcc{CC_NE, sf, {label(env, inst->next()), label(env, inst->taken())}};
+}
+
+void cgLdIterBase(IRLS& env, const IRInstruction* inst) {
+  static_assert(ArrayIter::baseSize() == 8, "");
+  static_assert(TVOFF(m_data) == 0, "");
+  assertx(!inst->dst()->type().needsReg());
+  auto const iter = iteratorPtr(env, inst, inst->extra<LdIterBase>());
+  auto const base = iter + ArrayIter::baseOffset();
+  loadTV(vmain(env), inst->dst(), dstLoc(env, inst, 0), base);
+}
+
+void cgLdIterPos(IRLS& env, const IRInstruction* inst) {
+  static_assert(ArrayIter::posSize() == 8, "");
+  auto const dst  = dstLoc(env, inst, 0).reg();
+  auto const iter = iteratorPtr(env, inst, inst->extra<LdIterPos>());
+  vmain(env) << load{iter + ArrayIter::posOffset(), dst};
+}
+
+void cgLdIterEnd(IRLS& env, const IRInstruction* inst) {
+  static_assert(ArrayIter::endSize() == 8, "");
+  auto const dst  = dstLoc(env, inst, 0).reg();
+  auto const iter = iteratorPtr(env, inst, inst->extra<LdIterEnd>());
+  vmain(env) << load{iter + ArrayIter::endOffset(), dst};
+}
+
+void cgStIterBase(IRLS& env, const IRInstruction* inst) {
+  static_assert(ArrayIter::baseSize() == 8, "");
+  auto const src  = srcLoc(env, inst, 1).reg();
+  auto const iter = iteratorPtr(env, inst, inst->extra<StIterBase>());
+  vmain(env) << store{src, iter + ArrayIter::baseOffset()};
+}
+
+void cgStIterType(IRLS& env, const IRInstruction* inst) {
+  static_assert(ArrayIter::typeSize() == 4, "");
+  auto const type = inst->extra<StIterType>()->type;
+  auto const iter = iteratorPtr(env, inst, inst->extra<StIterType>());
+  vmain(env) << storeli{iteratorType(type), iter + ArrayIter::typeOffset()};
+}
+
+void cgStIterPos(IRLS& env, const IRInstruction* inst) {
+  static_assert(ArrayIter::posSize() == 8, "");
+  auto const src  = srcLoc(env, inst, 1).reg();
+  auto const iter = iteratorPtr(env, inst, inst->extra<StIterPos>());
+  vmain(env) << store{src, iter + ArrayIter::posOffset()};
+}
+
+void cgStIterEnd(IRLS& env, const IRInstruction* inst) {
+  static_assert(ArrayIter::endSize() == 8, "");
+  auto const src  = srcLoc(env, inst, 1).reg();
+  auto const iter = iteratorPtr(env, inst, inst->extra<StIterEnd>());
+  vmain(env) << store{src, iter + ArrayIter::endOffset()};
+}
+
+void cgKillIter(IRLS& env, const IRInstruction* inst) {
+  if (!debug) return;
+  int32_t trash;
+  memset(&trash, kIterTrashFill, sizeof(trash));
+  auto const iter = iteratorPtr(env, inst, inst->extra<KillIter>());
+  auto& v = vmain(env);
+  for (auto i = 0; i < sizeof(ArrayIter); i += sizeof(trash)) {
+    v << storeli{trash, iter + i};
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void cgIterInit(IRLS& env, const IRInstruction* inst) {
   implIterInit(env, inst);
 }

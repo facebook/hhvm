@@ -24,12 +24,26 @@
 #include "hphp/runtime/vm/jit/dce.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
+#include "hphp/runtime/vm/jit/type-array-elem.h"
 
 #include <folly/Optional.h>
 
 namespace HPHP { namespace jit {
 
 namespace {
+
+uint32_t iterId(const IRInstruction& inst) {
+  return inst.extra<IterId>()->iterId;
+}
+
+AliasClass allIterFields(SSATmp* fp, uint32_t iterId) {
+  assertx(fp->isA(TFramePtr));
+  AliasClass const iterBase = AIterBase { fp, iterId };
+  AliasClass const iterType = AIterType { fp, iterId };
+  AliasClass const iterPos  = AIterPos  { fp, iterId };
+  AliasClass const iterEnd  = AIterEnd  { fp, iterId };
+  return iterBase | iterType | iterPos | iterEnd;
+}
 
 AliasClass pointee(
   const SSATmp* ptr,
@@ -447,17 +461,12 @@ GeneralEffects may_load_store_move(AliasClass loads,
 GeneralEffects iter_effects(const IRInstruction& inst,
                             SSATmp* fp,
                             AliasClass locals) {
-  auto const iterID = inst.extra<IterData>()->iterId;
-  AliasClass const iterBase = AIterBase { fp, iterID };
-  AliasClass const iterType = AIterType { fp, iterID };
-  AliasClass const iterPos  = AIterPos  { fp, iterID };
-  AliasClass const iterEnd  = AIterEnd  { fp, iterID };
-  auto const iterMem = iterBase | iterType | iterPos | iterEnd;
+  auto const iters = allIterFields(fp, inst.extra<IterData>()->iterId);
   return may_reenter(
     inst,
     may_load_store_kill(
-      locals | AHeapAny | iterMem,
-      locals | AHeapAny | iterMem,
+      iters | locals | AHeapAny,
+      iters | locals | AHeapAny,
       AMIStateAny
     )
   );
@@ -1030,8 +1039,43 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       return iter_effects(inst, inst.src(0), key | val);
     }
 
-  case IterFree:
-    return may_reenter(inst, may_load_store(AHeapAny, AHeapAny));
+  case IterFree: {
+    auto const base = AIterBase { inst.src(0), iterId(inst) };
+    return may_reenter(inst, may_load_store(AHeapAny | base, AHeapAny));
+  }
+
+  case CheckIter: {
+    auto const iter = inst.extra<CheckIter>()->iterId;
+    return may_load_store(AIterType { inst.src(0), iter }, AEmpty);
+  }
+
+  case LdIterBase:
+    return PureLoad { AIterBase { inst.src(0), iterId(inst) } };
+
+  case LdIterPos:
+    return PureLoad { AIterPos { inst.src(0), iterId(inst) } };
+
+  case LdIterEnd:
+    return PureLoad { AIterEnd { inst.src(0), iterId(inst) } };
+
+  case StIterBase:
+    return PureStore { AIterBase { inst.src(0), iterId(inst) }, inst.src(1) };
+
+  case StIterType: {
+    auto const iter = inst.extra<StIterType>()->iterId;
+    return PureStore { AIterType { inst.src(0), iter }, nullptr };
+  }
+
+  case StIterPos:
+    return PureStore { AIterPos { inst.src(0), iterId(inst) }, inst.src(1) };
+
+  case StIterEnd:
+    return PureStore { AIterEnd { inst.src(0), iterId(inst) }, inst.src(1) };
+
+  case KillIter: {
+    auto const iters = allIterFields(inst.src(0), iterId(inst));
+    return may_load_store_kill(AEmpty, AEmpty, iters);
+  }
 
   //////////////////////////////////////////////////////////////////////
   // Instructions that explicitly manipulate locals
@@ -1345,6 +1389,17 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return PureLoad { AElemAny };
   }
 
+  case LdPtrIterKey:
+    // Array element keys are not tracked by memory effects right now.
+    return may_load_store(AEmpty, AEmpty);
+
+  case LdPtrIterVal: {
+    // NOTE: The type param for this op restricts the key, not the value.
+    if (inst.typeParam() <= TInt) return PureLoad { AElemIAny };
+    if (inst.typeParam() <= TStr) return PureLoad { AElemSAny };
+    return PureLoad { AElemAny };
+  }
+
   case ElemMixedArrayK:
   case ElemDictK:
   case ElemKeysetK:
@@ -1373,13 +1428,14 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case DictLastKey:
     return may_load_store(AEmpty, AEmpty);
 
-  case ProfileMixedArrayAccess:
+  case CheckMixedArrayKeys:
   case CheckMixedArrayOffset:
-  case CheckArrayCOW:
-  case ProfileDictAccess:
-  case ProfileKeysetAccess:
   case CheckDictOffset:
   case CheckKeysetOffset:
+  case ProfileMixedArrayAccess:
+  case ProfileDictAccess:
+  case ProfileKeysetAccess:
+  case CheckArrayCOW:
     return may_load_store(AHeapAny, AEmpty);
 
   case ArrayIsset:
@@ -1617,6 +1673,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case AddDbl:
   case AddInt:
   case AddIntO:
+  case AdvanceMixedPtrIter:
+  case AdvancePackedPtrIter:
   case AndInt:
   case AssertType:
   case AssertLoc:
@@ -1634,6 +1692,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case EqArrayDataPtr:
   case EqDbl:
   case EqInt:
+  case EqPtrIter:
+  case GetMixedPtrIter:
+  case GetPackedPtrIter:
   case GteBool:
   case GteInt:
   case GtBool:

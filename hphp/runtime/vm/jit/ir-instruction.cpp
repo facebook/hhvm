@@ -527,6 +527,42 @@ Type ptrToLvalReturn(const IRInstruction* inst) {
   return ptr.deref().mem(Mem::Lval, ptr.ptrKind());
 }
 
+// A pointer iterator type has three components:
+//   - The pointer type: it's always PtrToElem, for now
+//   - The target type: the union of the possible values of the base array
+//   - The constant value: e.g. a specific pointer to the end of a static array
+//
+// The target type is the key aspect of this type. Because it's the union of
+// the possible values of the base array, the type of the pointer iterator
+// doesn't change when we advance it. This definition also allows us to type
+// the pointer to the end of an array (even though its target is invalid).
+//
+// This definition makes sense by analogy to regular int* types in C: the type
+// of the end of the array is an int* even though its target is invalid.
+Type ptrIterReturn(const IRInstruction* inst) {
+  if (inst->is(AdvanceMixedPtrIter, AdvancePackedPtrIter)) {
+    auto const ptr = inst->src(0)->type();
+    assertx(ptr <= TPtrToElemGen);
+    return ptr;
+  }
+  assertx(inst->is(GetMixedPtrIter, GetPackedPtrIter));
+  auto const arr = inst->src(0)->type();
+  assertx(arr <= TArrLike);
+  auto const value = [&]{
+    if (arr <= TArr)  return arrElemType(arr, TInt | TStr, inst->ctx()).first;
+    if (arr <= TVec)  return vecElemType(arr, TInt, inst->ctx()).first;
+    if (arr <= TDict) return dictElemType(arr, TInt | TStr).first;
+    return TGen;
+  }();
+  return value.ptr(Ptr::Elem);
+}
+
+Type ptrIterValReturn(const IRInstruction* inst) {
+  auto const ptr = inst->src(0)->type();
+  assertx(ptr <= TPtrToElemGen);
+  return ptr.deref();
+}
+
 template <uint32_t...> struct IdxSeq {};
 
 inline Type unionReturn(const IRInstruction* /*inst*/, IdxSeq<>) {
@@ -602,6 +638,8 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #define DUnion(...)     return unionReturn(inst, IdxSeq<__VA_ARGS__>{});
 #define DMemoKey        return memoKeyReturn(inst);
 #define DLvalOfPtr      return ptrToLvalReturn(inst);
+#define DPtrIter        return ptrIterReturn(inst);
+#define DPtrIterVal     return ptrIterValReturn(inst);
 
 #define O(name, dstinfo, srcinfo, flags) case name: dstinfo not_reached();
 
@@ -655,6 +693,8 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef DUnion
 #undef DMemoKey
 #undef DLvalOfPtr
+#undef DPtrIter
+#undef DPtrIterVal
 }
 
 }}

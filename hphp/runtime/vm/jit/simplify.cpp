@@ -285,6 +285,7 @@ SSATmp* mergeBranchDests(State& env, const IRInstruction* inst) {
                    CheckInitMem,
                    CheckRDSInitialized,
                    CheckPackedArrayDataBounds,
+                   CheckMixedArrayKeys,
                    CheckMixedArrayOffset,
                    CheckDictOffset,
                    CheckKeysetOffset,
@@ -3358,6 +3359,42 @@ SSATmp* simplifyKeysetGetK(State& env, const IRInstruction* inst) {
   return cns(env, *tv);
 }
 
+SSATmp* simplifyGetMixedPtrIter(State& env, const IRInstruction* inst) {
+  auto const arr = inst->src(0);
+  auto const idx = inst->src(1);
+  if (!arr->hasConstVal(TArrLike)) return nullptr;
+  if (!idx->hasConstVal(TInt)) return nullptr;
+  auto const ad  = MixedArray::asMixed(arr->arrLikeVal());
+  auto const elm = ad->data() + idx->intVal();
+  return cns(env, Type::cns(elm, outputType(inst)));
+}
+
+SSATmp* simplifyGetPackedPtrIter(State& env, const IRInstruction* inst) {
+  auto const arr = inst->src(0);
+  auto const idx = inst->src(1);
+  if (!arr->hasConstVal(TArrLike)) return nullptr;
+  if (!idx->hasConstVal(TInt)) return nullptr;
+  auto const elm = packedData(arr->arrLikeVal()) + idx->intVal();
+  return cns(env, Type::cns(elm, outputType(inst)));
+}
+
+SSATmp* simplifyCheckMixedArrayKeys(State& env, const IRInstruction* inst) {
+  auto const arr = [&]() -> const ArrayData* {
+    auto const src = inst->src(0);
+    if (src->hasConstVal(TArr))  return src->arrVal();
+    if (src->hasConstVal(TDict)) return src->dictVal();
+    return nullptr;
+  }();
+  if (arr == nullptr) return mergeBranchDests(env, inst);
+
+  auto match = true;
+  IterateKVNoInc(arr, [&](Cell key, TypedValue val){
+    match &= Type::cns(key) <= inst->typeParam();
+    return !match;
+  });
+  return match ? gen(env, Nop) : gen(env, Jmp, inst->taken());
+}
+
 SSATmp* simplifyCheckMixedArrayOffset(State& env, const IRInstruction* inst) {
   return checkOffsetImpl(env, inst, [](SSATmp* a) { return a->arrVal(); });
 }
@@ -4033,6 +4070,9 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(KeysetGet)
   X(KeysetGetQuiet)
   X(KeysetGetK)
+  X(GetMixedPtrIter)
+  X(GetPackedPtrIter)
+  X(CheckMixedArrayKeys)
   X(CheckMixedArrayOffset)
   X(CheckDictOffset)
   X(CheckKeysetOffset)

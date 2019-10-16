@@ -337,7 +337,10 @@ inline Type Type::cns(const TypedValue& tv) {
 
 inline Type Type::dropConstVal() const {
   if (!m_hasConstVal) return *this;
-  assertx(!isUnion());
+
+  // A constant pointer iterator type will still have a target that's a union
+  // of possible values for the array it points into.
+  assertx(*this <= TPtrToElemGen || !isUnion());
 
   if (*this <= TStaticArr)    return Type::StaticArray(arrVal()->kind());
   if (*this <= TStaticVec)    return TStaticVec;

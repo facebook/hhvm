@@ -175,6 +175,9 @@ bool canDCE(IRInstruction* inst) {
   case LdMem:
   case LdContField:
   case LdElem:
+  case LdIterBase:
+  case LdIterPos:
+  case LdIterEnd:
   case LdRef:
   case LdCtx:
   case LdCctx:
@@ -292,6 +295,13 @@ bool canDCE(IRInstruction* inst) {
   case AllocPackedArray:
   case AllocVArray:
   case AllocVecArray:
+  case GetMixedPtrIter:
+  case GetPackedPtrIter:
+  case AdvanceMixedPtrIter:
+  case AdvancePackedPtrIter:
+  case LdPtrIterKey:
+  case LdPtrIterVal:
+  case EqPtrIter:
     assertx(!inst->isControlFlow());
     return true;
 
@@ -369,11 +379,13 @@ bool canDCE(IRInstruction* inst) {
   case AKExistsObj:
   case StStk:
   case StOutValue:
+  case CheckIter:
   case CheckType:
   case CheckNullptr:
   case CheckTypeMem:
   case CheckVArray:
   case CheckDArray:
+  case CheckMixedArrayKeys:
   case CheckSmashableClass:
   case HintLocInner:
   case HintStkInner:
@@ -512,6 +524,10 @@ bool canDCE(IRInstruction* inst) {
   case GenericRetDecRefs:
   case StMem:
   case StElem:
+  case StIterBase:
+  case StIterType:
+  case StIterEnd:
+  case StIterPos:
   case StLoc:
   case StLocPseudoMain:
   case StLocRange:
@@ -615,6 +631,7 @@ bool canDCE(IRInstruction* inst) {
   case LIterNext:
   case LIterNextK:
   case IterFree:
+  case KillIter:
   case BaseG:
   case PropX:
   case PropQ:

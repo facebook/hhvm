@@ -9,3 +9,5 @@
 let update ~(file : string) : (string, string) result =
   ignore file;
   Ok "Experiments config update: nothing to do"
+
+let get_primary_owner () : string option = Some "user"

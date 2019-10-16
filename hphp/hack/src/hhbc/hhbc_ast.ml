@@ -126,6 +126,10 @@ module CollectionType = struct
     | ImmVector
     | ImmMap
     | ImmSet
+    | Dict
+    | Array
+    | Keyset
+    | Vec
 
   let to_string = function
     | Vector -> "Vector"
@@ -135,6 +139,10 @@ module CollectionType = struct
     | ImmVector -> "ImmVector"
     | ImmMap -> "ImmMap"
     | ImmSet -> "ImmSet"
+    | Dict -> "dict"
+    | Array -> "array"
+    | Keyset -> "keyset"
+    | Vec -> "vec"
 end
 
 (* of CollectionType *)

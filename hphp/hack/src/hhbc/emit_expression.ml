@@ -349,16 +349,6 @@ let unop_to_incdec_op op =
   | Ast_defs.Updecr -> PostDec
   | _ -> failwith "invalid incdec op"
 
-let collection_type = function
-  | "Vector" -> CollectionType.Vector
-  | "Map" -> CollectionType.Map
-  | "Set" -> CollectionType.Set
-  | "Pair" -> CollectionType.Pair
-  | "ImmVector" -> CollectionType.ImmVector
-  | "ImmMap" -> CollectionType.ImmMap
-  | "ImmSet" -> CollectionType.ImmSet
-  | x -> failwith ("unknown collection type '" ^ x ^ "'")
-
 let istype_op lower_fq_id =
   match lower_fq_id with
   | "is_int"
@@ -1664,25 +1654,25 @@ and emit_expr (env : Emit_env.t) (expr : Tast.expr) =
     let varray_e = (fst expr, A.Varray (ta, es)) in
     emit_collection env varray_e es2
   | A.Collection ((pos, name), _, fields) ->
-    emit_named_collection env expr pos name fields
+    emit_named_collection_str env expr pos name fields
   | A.ValCollection (name, _, el) ->
     let fields = List.map el ~f:(fun e -> A.AFvalue e) in
     let emit n = emit_named_collection env expr pos n fields in
     (match name with
-    | A.Vector -> emit "Vector"
-    | A.ImmVector -> emit "ImmVector"
-    | A.Set -> emit "Set"
-    | A.ImmSet -> emit "ImmSet"
+    | A.Vector -> emit CollectionType.Vector
+    | A.ImmVector -> emit CollectionType.ImmVector
+    | A.Set -> emit CollectionType.Set
+    | A.ImmSet -> emit CollectionType.ImmSet
     | _ -> emit_collection env expr fields)
   | A.Pair (e1, e2) ->
     let fields = [A.AFvalue e1; A.AFvalue e2] in
-    emit_named_collection env expr pos "Pair" fields
+    emit_named_collection env expr pos CollectionType.Pair fields
   | A.KeyValCollection (name, _, fields) ->
     let fields = List.map fields ~f:(fun (e1, e2) -> A.AFkvalue (e1, e2)) in
     let emit n = emit_named_collection env expr pos n fields in
     (match name with
-    | A.Map -> emit "Map"
-    | A.ImmMap -> emit "ImmMap"
+    | A.Map -> emit CollectionType.Map
+    | A.ImmMap -> emit CollectionType.ImmMap
     | _ -> emit_collection env expr fields)
   | A.Clone e -> emit_pos_then pos @@ emit_clone env e
   | A.Shape fl -> emit_pos_then pos @@ emit_shape env expr fl
@@ -1786,20 +1776,13 @@ and emit_value_only_collection env pos es constructor =
   | [x1] -> inline x1
   | x1 :: x2 :: _ -> gather [inline x1; outofline x2]
 
-and emit_keyvalue_collection name env pos es constructor =
-  let name = SU.strip_ns name in
-  let transform_instr =
-    if name = "dict" || name = "array" then
-      empty
-    else
-      let collection_type = collection_type name in
-      instr_colfromarray collection_type
-  in
-  let add_elem_instr =
-    if name = "array" then
-      instr_add_new_elemc
-    else
-      gather [instr_dup; instr_add_elemc]
+and emit_keyvalue_collection ctype env pos es constructor =
+  let (transform_instr, add_elem_instr) =
+    match ctype with
+    | CollectionType.Dict
+    | CollectionType.Array ->
+      (empty, instr_add_new_elemc)
+    | _ -> (instr_colfromarray ctype, gather [instr_dup; instr_add_elemc])
   in
   gather
     [
@@ -1910,6 +1893,17 @@ and is_struct_init env es allow_numerics =
 and emit_dynamic_collection env (expr : Tast.expr) es =
   let ((pos, _), expr_) = expr in
   let count = List.length es in
+  let emit_collection_helper ctype =
+    if is_struct_init env es true then
+      gather
+        [
+          emit_struct_array env pos es instr_newstructdict;
+          emit_pos pos;
+          instr_colfromarray ctype;
+        ]
+    else
+      emit_keyvalue_collection ctype env pos es (NewDictArray count)
+  in
   match expr_ with
   | A.ValCollection (A.Vec, _, _)
   | A.Collection ((_, "vec"), _, _) ->
@@ -1922,61 +1916,27 @@ and emit_dynamic_collection env (expr : Tast.expr) es =
     if is_struct_init env es true then
       emit_struct_array env pos es instr_newstructdict
     else
-      emit_keyvalue_collection "dict" env pos es (NewDictArray count)
-  | A.ValCollection (A.Set, _, _) ->
-    if is_struct_init env es true then
-      gather
-        [
-          emit_struct_array env pos es instr_newstructdict;
-          emit_pos pos;
-          instr_colfromarray (collection_type "Set");
-        ]
-    else
-      emit_keyvalue_collection "Set" env pos es (NewDictArray count)
+      emit_keyvalue_collection
+        CollectionType.Dict
+        env
+        pos
+        es
+        (NewDictArray count)
+  | A.Collection ((_, name), _, _) when SU.strip_ns name = "Set" ->
+    emit_collection_helper CollectionType.Set
+  | A.ValCollection (A.Set, _, _) -> emit_collection_helper CollectionType.Set
+  | A.Collection ((_, name), _, _) when SU.strip_ns name = "ImmSet" ->
+    emit_collection_helper CollectionType.ImmSet
   | A.ValCollection (A.ImmSet, _, _) ->
-    if is_struct_init env es true then
-      gather
-        [
-          emit_struct_array env pos es instr_newstructdict;
-          emit_pos pos;
-          instr_colfromarray (collection_type "ImmSet");
-        ]
-    else
-      emit_keyvalue_collection "ImmSet" env pos es (NewDictArray count)
+    emit_collection_helper CollectionType.ImmSet
+  | A.Collection ((_, name), _, _) when SU.strip_ns name = "Map" ->
+    emit_collection_helper CollectionType.Map
   | A.KeyValCollection (A.Map, _, _) ->
-    if is_struct_init env es true then
-      gather
-        [
-          emit_struct_array env pos es instr_newstructdict;
-          emit_pos pos;
-          instr_colfromarray (collection_type "Map");
-        ]
-    else
-      emit_keyvalue_collection "Map" env pos es (NewDictArray count)
+    emit_collection_helper CollectionType.Map
+  | A.Collection ((_, name), _, _) when SU.strip_ns name = "ImmMap" ->
+    emit_collection_helper CollectionType.ImmMap
   | A.KeyValCollection (A.ImmMap, _, _) ->
-    if is_struct_init env es true then
-      gather
-        [
-          emit_struct_array env pos es instr_newstructdict;
-          emit_pos pos;
-          instr_colfromarray (collection_type "ImmMap");
-        ]
-    else
-      emit_keyvalue_collection "ImmMap" env pos es (NewDictArray count)
-  | A.Collection ((_, name), _, _)
-    when SU.strip_ns name = "Set"
-         || SU.strip_ns name = "ImmSet"
-         || SU.strip_ns name = "Map"
-         || SU.strip_ns name = "ImmMap" ->
-    if is_struct_init env es true then
-      gather
-        [
-          emit_struct_array env pos es instr_newstructdict;
-          emit_pos pos;
-          instr_colfromarray (collection_type (SU.strip_ns name));
-        ]
-    else
-      emit_keyvalue_collection name env pos es (NewDictArray count)
+    emit_collection_helper CollectionType.ImmMap
   | A.Varray _ ->
     emit_value_only_collection env pos es (fun n ->
         if hack_arr_dv_arrs () then
@@ -1994,7 +1954,7 @@ and emit_dynamic_collection env (expr : Tast.expr) es =
             instr_newstructdarray arg)
     else
       emit_keyvalue_collection
-        "array"
+        CollectionType.Array
         env
         pos
         es
@@ -2009,20 +1969,35 @@ and emit_dynamic_collection env (expr : Tast.expr) es =
     else if is_struct_init env es false then
       emit_struct_array env pos es instr_newstructarray
     else if is_packed_init ~hack_arr_compat:false es then
-      emit_keyvalue_collection "array" env pos es (NewArray count)
+      emit_keyvalue_collection CollectionType.Array env pos es (NewArray count)
     else
-      emit_keyvalue_collection "array" env pos es (NewMixedArray count)
+      emit_keyvalue_collection
+        CollectionType.Array
+        env
+        pos
+        es
+        (NewMixedArray count)
 
-and emit_named_collection env (expr : Tast.expr) pos name fields =
+and emit_named_collection_str env (expr : Tast.expr) pos name fields =
   let name = SU.Types.fix_casing @@ SU.strip_ns name in
-  match name with
-  | "dict"
-  | "vec"
-  | "keyset" ->
-    emit_pos_then pos @@ emit_collection env expr fields
-  | "Vector"
-  | "ImmVector" ->
-    let collection_type = collection_type name in
+  let ctype =
+    match name with
+    | "dict" -> CollectionType.Dict
+    | "vec" -> CollectionType.Vec
+    | "keyset" -> CollectionType.Keyset
+    | "Vector" -> CollectionType.Vector
+    | "ImmVector" -> CollectionType.ImmVector
+    | "Map" -> CollectionType.Map
+    | "ImmMap" -> CollectionType.ImmMap
+    | "Set" -> CollectionType.Set
+    | "ImmSet" -> CollectionType.ImmSet
+    | "Pair" -> CollectionType.Pair
+    | _ -> failwith @@ "collection: " ^ name ^ " does not exist"
+  in
+  emit_named_collection env expr pos ctype fields
+
+and emit_named_collection env (expr : Tast.expr) pos ctype fields =
+  let emit_vector_like collection_type =
     if fields = [] then
       emit_pos_then pos @@ instr_newcol collection_type
     else
@@ -2036,16 +2011,27 @@ and emit_named_collection env (expr : Tast.expr) pos name fields =
             fields;
           instr_colfromarray collection_type;
         ]
-  | "Map"
-  | "ImmMap"
-  | "Set"
-  | "ImmSet" ->
-    let collection_type = collection_type name in
+  in
+  let emit_map_or_set collection_type =
     if fields = [] then
       emit_pos_then pos @@ instr_newcol collection_type
     else
       emit_collection ~transform_to_collection:collection_type env expr fields
-  | "Pair" ->
+  in
+  match ctype with
+  | CollectionType.Dict
+  | CollectionType.Vec
+  | CollectionType.Keyset ->
+    emit_pos_then pos @@ emit_collection env expr fields
+  | CollectionType.Vector
+  | CollectionType.ImmVector ->
+    emit_vector_like ctype
+  | CollectionType.Map
+  | CollectionType.ImmMap
+  | CollectionType.Set
+  | CollectionType.ImmSet ->
+    emit_map_or_set ctype
+  | CollectionType.Pair ->
     gather
       [
         gather
@@ -2054,7 +2040,7 @@ and emit_named_collection env (expr : Tast.expr) pos name fields =
               | _ -> failwith "impossible Pair argument"));
         instr (ILitConst NewPair);
       ]
-  | _ -> failwith @@ "collection: " ^ name ^ " does not exist"
+  | _ -> failwith "Unexpected named collection type"
 
 and is_php_array = function
   | (_, A.Array _) -> true

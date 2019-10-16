@@ -307,9 +307,12 @@ let apply_overrides ~silent ~current_version ~config ~overrides =
           ~current_version
           config
       in
+      let ttl =
+        float_of_int (int_ "ttl_seconds" ~prefix ~default:86400 config)
+      in
       let meta =
         if update then
-          match Experiments_config_file.update ~file with
+          match Experiments_config_file.update ~file ~ttl with
           | Ok meta -> meta
           | Error message -> message
         else

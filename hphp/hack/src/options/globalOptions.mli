@@ -35,18 +35,6 @@ module InferMissing : sig
 end
 
 type t = {
-  (*
-   * Enforces that a vector-like array may not be used where a hashtable-like
-   * array is required.
-   *
-   * When disabled, Hack assumes the following:
-   *
-   *   array<T> <: array<int, T>
-   *
-   * When enabled, there is no subtyping relationship between array<T> and
-   * array<int, T>.
-   *)
-  tco_safe_vector_array: bool;
   (* Set of experimental features, in lowercase. *)
   tco_experimental_features: SSet.t;
   (* Set of opt-in migration behavior flags, in lowercase. *)
@@ -253,7 +241,6 @@ type t = {
 [@@deriving show]
 
 val make :
-  ?tco_safe_vector_array:bool ->
   ?po_deregister_php_stdlib:bool ->
   ?po_disallow_execution_operator:bool ->
   ?po_disallow_toplevel_requires:bool ->
@@ -331,8 +318,6 @@ val make :
   ?po_disallow_func_ptrs_in_constants:bool ->
   unit ->
   t
-
-val tco_safe_vector_array : t -> bool
 
 val tco_experimental_feature_enabled : t -> SSet.elt -> bool
 

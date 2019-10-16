@@ -11,8 +11,6 @@ type t = GlobalOptions.t [@@deriving show]
 
 module InferMissing = GlobalOptions.InferMissing
 
-let safe_vector_array = GlobalOptions.tco_safe_vector_array
-
 let disallow_ambiguous_lambda = GlobalOptions.tco_disallow_ambiguous_lambda
 
 let defer_class_declaration_threshold =

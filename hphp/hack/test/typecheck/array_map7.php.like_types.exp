@@ -2,4 +2,9 @@ File "array_map7.php", line 24, characters 3-32:
   ~varray<bool>
 File "array_map7.php", line 27, characters 3-34:
   ~varray<bool>
-No errors
+File "array_map7.php", line 26, characters 21-51:
+Invalid argument (Typing[4110])
+File "array_map7.php", line 35, characters 28-41:
+Expected ~darray<arraykey, bool> because it is an unenforceable type
+File "stdlib/builtins_array.hhi", line 115, characters 10-18:
+But got varray<[unresolved]>

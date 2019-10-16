@@ -1351,7 +1351,6 @@ and simplify_subtype_i
     | (Tabstract ((AKnewtype _ | AKdependent _), Some ty), Tarraykind _) ->
       simplify_subtype ~subtype_env ~this_ty ty ety_super env
     | (Tarraykind ak_sub, Tarraykind ak_super) ->
-      let r = fst ety_sub in
       begin
         match (ak_sub, ak_super) with
         (* An array of any kind is a subtype of an array of AKany *)
@@ -1380,17 +1379,6 @@ and simplify_subtype_i
           env
           |> simplify_subtype ~subtype_env ~this_ty tk_sub tk_super
           &&& simplify_subtype ~subtype_env ~this_ty tv_sub tv_super
-        | (AKvarray elt_ty, AKdarray _)
-          when not (TypecheckerOptions.safe_vector_array (Env.get_tcopt env))
-          ->
-          let int_reason = Reason.Ridx (Reason.to_pos r, Reason.Rnone) in
-          let int_type = MakeType.int int_reason in
-          simplify_subtype
-            ~subtype_env
-            ~this_ty
-            (r, Tarraykind (AKdarray (int_type, elt_ty)))
-            ety_super
-            env
         (* any other array subtyping is unsatisfiable *)
         | _ -> invalid ()
       end

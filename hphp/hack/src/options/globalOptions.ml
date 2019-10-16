@@ -39,7 +39,6 @@ module InferMissing = struct
 end
 
 type t = {
-  tco_safe_vector_array: bool;
   tco_experimental_features: SSet.t;
   tco_migration_flags: SSet.t;
   tco_dynamic_view: bool;
@@ -193,7 +192,6 @@ let tco_migration_flags_all =
 
 let default =
   {
-    tco_safe_vector_array = true;
     (* Default all features for testing. Actual options are set by reading
   * from hhconfig, which defaults to empty. *)
     tco_experimental_features = tco_experimental_all;
@@ -275,7 +273,6 @@ let default =
   }
 
 let make
-    ?(tco_safe_vector_array = default.tco_safe_vector_array)
     ?(po_deregister_php_stdlib = default.po_deregister_php_stdlib)
     ?(po_disallow_execution_operator = default.po_disallow_execution_operator)
     ?(po_disallow_toplevel_requires = default.po_disallow_toplevel_requires)
@@ -368,7 +365,6 @@ let make
       default.po_disallow_func_ptrs_in_constants)
     () =
   {
-    tco_safe_vector_array;
     tco_experimental_features;
     tco_migration_flags;
     tco_dynamic_view;
@@ -446,8 +442,6 @@ let make
     glean_reponame;
     po_disallow_func_ptrs_in_constants;
   }
-
-let tco_safe_vector_array t = t.tco_safe_vector_array
 
 let tco_experimental_feature_enabled t s =
   SSet.mem s t.tco_experimental_features

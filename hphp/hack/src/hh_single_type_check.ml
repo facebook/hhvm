@@ -179,7 +179,6 @@ let parse_options () =
   in
   let set_ai x = set_mode (Ai (Ai_options.prepare ~server:false x)) () in
   let error_format = ref Errors.Context in
-  let safe_vector_array = ref (Some false) in
   let forbid_nullable_cast = ref false in
   let deregister_attributes = ref None in
   let disallow_ambiguous_lambda = ref None in
@@ -346,10 +345,6 @@ let parse_options () =
       ( "--shallow-class-diff",
         Arg.Unit (set_mode Shallow_class_diff),
         "Test shallow class comparison used in incremental mode on shallow class declarations"
-      );
-      ( "--safe_vector_array",
-        Arg.Unit (set_bool safe_vector_array),
-        " Enforce array subtyping relationships so that array<T> is not a of array<int, T>."
       );
       ( "--forbid_nullable_cast",
         Arg.Set forbid_nullable_cast,
@@ -534,7 +529,6 @@ let parse_options () =
   let tcopt =
     GlobalOptions.make
       ?tco_unsafe_rx:!unsafe_rx
-      ?tco_safe_vector_array:!safe_vector_array
       ?po_deregister_php_stdlib:!deregister_attributes
       ?tco_disallow_ambiguous_lambda:!disallow_ambiguous_lambda
       ?tco_disallow_array_typehint:!disallow_array_typehint

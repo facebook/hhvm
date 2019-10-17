@@ -31,23 +31,33 @@ where
         F: FnMut(&Vec<Syntax<T, V>>, Syntax<T, V>, &mut A) -> (Option<Syntax<T, V>>, bool),
     {
         let kind = node.kind();
+        let mut children_changed = false;
         match kind {
             SyntaxKind::Token(_) | SyntaxKind::Missing => (),
             _ => {
                 let mut new_children = vec![];
                 path.push(node);
                 for owned_child in path.last_mut().unwrap().drain_children() {
-                    if let (Some(new_child), _) =
-                        Self::parented_aggregating_rewrite_post_helper(path, owned_child, acc, f)
+                    match Self::parented_aggregating_rewrite_post_helper(path, owned_child, acc, f)
                     {
-                        new_children.push(new_child);
+                        (Some(new_child), child_changed) => {
+                            new_children.push(new_child);
+                            children_changed = children_changed || child_changed;
+                        }
+                        (None, true) => {
+                            children_changed = true;
+                        }
+                        (None, false) => panic!("node can't be the same after it's been removed"),
                     }
                 }
                 node = path.pop().unwrap();
-                node.replace_children(kind, new_children);
+                node.replace_children(kind, new_children, children_changed);
             }
         };
-        f(path, node, acc)
+        match f(path, node, acc) {
+            (Some(new_node), node_changed) => (Some(new_node), node_changed || children_changed),
+            (None, node_changed) => (None, node_changed),
+        }
     }
 
     pub fn parented_aggregating_rewrite_post<F>(
@@ -100,7 +110,7 @@ where
                     }
                 }
                 node = path.pop().unwrap();
-                node.replace_children(kind, new_children);
+                node.replace_children(kind, new_children, true /* children_changed */);
             }
         };
         Some(node)
@@ -131,32 +141,38 @@ where
         node: Syntax<T, V>,
         acc: &mut A,
         f: &mut F,
-    ) -> Option<Syntax<T, V>>
+    ) -> (Option<Syntax<T, V>>, bool)
     where
         F: FnMut(Syntax<T, V>, &mut A) -> (Option<Syntax<T, V>>, bool),
     {
         let mut node = match f(node, acc) {
-            (None, _) => return None,
-            (node, true) => return node,
+            (None, _) => return (None, true),
+            (node, true) => return (node, true),
             (node, _) => node.unwrap(),
         };
 
         let kind = node.kind();
+        let mut children_changed = false;
         match kind {
             SyntaxKind::Token(_) | SyntaxKind::Missing => (),
             _ => {
                 let mut new_children = vec![];
                 for owned_child in node.drain_children() {
-                    if let Some(new_child) =
-                        Self::rewrite_pre_and_stop_with_acc_helper(owned_child, acc, f)
-                    {
-                        new_children.push(new_child);
+                    match Self::rewrite_pre_and_stop_with_acc_helper(owned_child, acc, f) {
+                        (Some(new_child), child_changed) => {
+                            new_children.push(new_child);
+                            children_changed = children_changed || child_changed;
+                        }
+                        (None, true) => {
+                            children_changed = true;
+                        }
+                        (None, false) => panic!("node can't be the same after it's been removed"),
                     }
                 }
-                node.replace_children(kind, new_children);
+                node.replace_children(kind, new_children, children_changed);
             }
         }
-        Some(node)
+        (Some(node), children_changed)
     }
 
     pub fn rewrite_pre_and_stop_with_acc<F>(
@@ -168,6 +184,7 @@ where
         F: FnMut(Syntax<T, V>, &mut A) -> (Option<Syntax<T, V>>, bool),
     {
         let node = Self::rewrite_pre_and_stop_with_acc_helper(node, &mut acc, &mut f)
+            .0
             .expect("rewriter removed root node");
         (node, acc)
     }

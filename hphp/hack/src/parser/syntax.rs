@@ -289,15 +289,20 @@ where
         Self::fold_over_children_owned(&f, vec![], syntax)
     }
 
-    pub fn node_from_children(kind: SyntaxKind, offset: usize, nodes: Vec<Self>) -> Self {
-        let value_nodes = &nodes.iter().map(|x| &x.value).collect::<Vec<_>>();
-        let value = V::from_children(kind, offset, value_nodes);
-        let syntax = Syntax::from_children(kind, nodes);
-        Self::make(syntax, value)
-    }
-
-    pub fn replace_children(&mut self, kind: SyntaxKind, children: Vec<Self>) {
-        std::mem::replace(self, Self::node_from_children(kind, 0, children));
+    pub fn replace_children(
+        &mut self,
+        kind: SyntaxKind,
+        children: Vec<Self>,
+        children_changed: bool,
+    ) {
+        if !children_changed {
+            std::mem::replace(&mut self.syntax, Syntax::from_children(kind, children));
+        } else {
+            let children_values = &children.iter().map(|x| &x.value).collect::<Vec<_>>();
+            let value = V::from_children(kind, 0, children_values);
+            let syntax = Syntax::from_children(kind, children);
+            std::mem::replace(self, Self::make(syntax, value));
+        }
     }
 
     pub fn get_token(&self) -> Option<&T> {

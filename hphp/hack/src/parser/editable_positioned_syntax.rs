@@ -51,10 +51,10 @@ impl<'a> SyntaxValueType<EditablePositionedToken<'a>> for EditablePositionedValu
     }
 
     fn from_children(_: SyntaxKind, _offset: usize, nodes: &[&Self]) -> Self {
-        if let Some((&first, rest)) = nodes.split_first() {
-            match (first, rest.split_last()) {
-                (_, None) => first.clone(),
-                (Self::Positioned(fst), Some((&Self::Positioned(lst), _))) => {
+        if let Some((&last, rest)) = nodes.split_last() {
+            match (last, rest.split_first()) {
+                (_, None) => last.clone(),
+                (Self::Positioned(lst), Some((&Self::Positioned(fst), _))) => {
                     Self::Positioned(SourceData::spanning_between(fst, lst))
                 }
                 _ => Self::Synthetic,

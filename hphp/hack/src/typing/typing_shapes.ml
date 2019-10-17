@@ -102,22 +102,22 @@ let rec shrink_shape pos field_name env shape =
  * useful typechecking of incomplete code (code in the process of being
  * written). *)
 let shapes_idx_not_null env shape_ty (p, field) =
-  let (env, (r, shape_ty)) = Env.expand_type env shape_ty in
+  let (env, shape_ty) = Env.expand_type env shape_ty in
   match TUtils.shape_field_name env (p, field) with
-  | None -> (env, (r, shape_ty))
+  | None -> (env, shape_ty)
   | Some field ->
-    let (env, (r, shape_ty)) =
+    let (env, shape_ty) =
       Typing_solver.expand_type_and_narrow
         ~description_of_expected:"a shape"
         env
         (widen_for_refine_shape ~expr_pos:p field)
         p
-        (r, shape_ty)
+        shape_ty
         Errors.unify_error
     in
-    begin
+    let refine_type env shape_ty =
       match shape_ty with
-      | Tshape (shape_kind, ftm) ->
+      | (r, Tshape (shape_kind, ftm)) ->
         let (env, field_type) =
           match ShapeMap.find_opt field ftm with
           | Some { sft_ty; _ } ->
@@ -135,8 +135,14 @@ let shapes_idx_not_null env shape_ty (p, field) =
       | _ ->
         (* This should be an error, but it is already raised when
       typechecking the call to Shapes::idx *)
-        (env, (r, shape_ty))
-    end
+        (env, shape_ty)
+    in
+    (match shape_ty with
+    | (_, Tshape _) -> refine_type env shape_ty
+    | (r, Tunion tyl) ->
+      let (env, tyl) = List.map_env env tyl refine_type in
+      Typing_union.union_list env r tyl
+    | _ -> (env, shape_ty))
 
 let experiment_enabled env experiment =
   TypecheckerOptions.experimental_feature_enabled

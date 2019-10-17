@@ -152,6 +152,10 @@ where
         self.is_specific_token(TokenKind::Async)
     }
 
+    pub fn is_coroutine(&self) -> bool {
+        self.is_specific_token(TokenKind::Coroutine)
+    }
+
     pub fn is_yield(&self) -> bool {
         self.is_specific_token(TokenKind::Yield)
     }
@@ -174,6 +178,10 @@ where
 
     pub fn is_inout(&self) -> bool {
         self.is_specific_token(TokenKind::Inout)
+    }
+
+    pub fn is_this(&self) -> bool {
+        self.is_specific_token(TokenKind::This)
     }
 
     pub fn is_name(&self) -> bool {
@@ -236,10 +244,23 @@ where
         self.kind() == SyntaxKind::BracedExpression
     }
 
+    pub fn is_syntax_list(&self) -> bool {
+        self.kind() == SyntaxKind::SyntaxList
+    }
+
     pub fn syntax_node_to_list<'a>(&'a self) -> impl DoubleEndedIterator<Item = &'a Self> {
         use std::iter::{empty, once};
         match &self.syntax {
             SyntaxVariant::SyntaxList(x) => Left(x.iter()),
+            SyntaxVariant::Missing => Right(Left(empty())),
+            _ => Right(Right(once(self))),
+        }
+    }
+
+    pub fn syntax_node_into_list(self) -> impl DoubleEndedIterator<Item = Self> {
+        use std::iter::{empty, once};
+        match self.syntax {
+            SyntaxVariant::SyntaxList(x) => Left(x.into_iter()),
             SyntaxVariant::Missing => Right(Left(empty())),
             _ => Right(Right(once(self))),
         }
@@ -268,8 +289,15 @@ where
         Self::fold_over_children_owned(&f, vec![], syntax)
     }
 
+    pub fn node_from_children(kind: SyntaxKind, offset: usize, nodes: Vec<Self>) -> Self {
+        let value_nodes = &nodes.iter().map(|x| &x.value).collect::<Vec<_>>();
+        let value = V::from_children(kind, offset, value_nodes);
+        let syntax = Syntax::from_children(kind, nodes);
+        Self::make(syntax, value)
+    }
+
     pub fn replace_children(&mut self, kind: SyntaxKind, children: Vec<Self>) {
-        std::mem::replace(&mut self.syntax, Syntax::from_children(kind, children));
+        std::mem::replace(self, Self::node_from_children(kind, 0, children));
     }
 
     pub fn get_token(&self) -> Option<&T> {
@@ -309,6 +337,22 @@ where
 
     pub fn iter_children<'a>(&'a self) -> SyntaxChildrenIterator<'a, T, V> {
         self.syntax.iter_children()
+    }
+
+    pub fn all_tokens<'a>(node: &'a Self) -> Vec<&'a T> {
+        Self::all_tokens_with_acc(node, vec![])
+    }
+
+    fn all_tokens_with_acc<'a>(node: &'a Self, mut acc: Vec<&'a T>) -> Vec<&'a T> {
+        match &node.syntax {
+            SyntaxVariant::Token(t) => acc.push(t),
+            _ => {
+                for child in node.iter_children() {
+                    acc = Self::all_tokens_with_acc(child, acc)
+                }
+            }
+        };
+        acc
     }
 }
 

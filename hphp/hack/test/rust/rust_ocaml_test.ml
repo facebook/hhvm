@@ -56,6 +56,7 @@ type args = {
   keep_going: bool;
   filter: string;
   dir: string option;
+  no_tree_compare: bool;
 }
 
 module type TreeBuilder_S = sig
@@ -172,26 +173,28 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
               Printf.printf
                 "Tree to source transformation is not supported for this syntax type\n";
               failed := true );
-          if syntax_from_rust <> syntax_from_ocaml then (
-            let syntax_from_rust_as_json = to_json syntax_from_rust in
-            let syntax_from_ocaml_as_json = to_json syntax_from_ocaml in
-            let oc = Pervasives.open_out "/tmp/rust.json" in
-            Printf.fprintf oc "%s\n" syntax_from_rust_as_json;
-            close_out oc;
-            let oc = Pervasives.open_out "/tmp/ocaml.json" in
-            Printf.fprintf oc "%s\n" syntax_from_ocaml_as_json;
-            close_out oc;
+          if not @@ args.no_tree_compare then (
+            if syntax_from_rust <> syntax_from_ocaml then (
+              let syntax_from_rust_as_json = to_json syntax_from_rust in
+              let syntax_from_ocaml_as_json = to_json syntax_from_ocaml in
+              let oc = Pervasives.open_out "/tmp/rust.json" in
+              Printf.fprintf oc "%s\n" syntax_from_rust_as_json;
+              close_out oc;
+              let oc = Pervasives.open_out "/tmp/ocaml.json" in
+              Printf.fprintf oc "%s\n" syntax_from_ocaml_as_json;
+              close_out oc;
 
-            if syntax_from_rust_as_json <> syntax_from_ocaml_as_json then (
-              Printf.printf "JSONs not equal: %s\n" path;
-              failed := true
-            ) else
-              Printf.printf "Structurally not equal: %s\n" path;
-            failed := not @@ args.check_json_equal_only
-          );
-          if state_from_rust <> state_from_ocaml then (
-            failed := true;
-            Printf.printf "States not equal: %s\n" path
+              if syntax_from_rust_as_json <> syntax_from_ocaml_as_json then (
+                Printf.printf "JSONs not equal: %s\n" path;
+                failed := true
+              ) else
+                Printf.printf "Structurally not equal: %s\n" path;
+              failed := not @@ args.check_json_equal_only
+            );
+            if state_from_rust <> state_from_ocaml then (
+              failed := true;
+              Printf.printf "States not equal: %s\n" path
+            )
           );
           if args.check_sizes && rust_reachable_words <> ocaml_reachable_words
           then (
@@ -377,6 +380,7 @@ let parse_args () =
   let check_json_equal_only = ref false in
   let check_printed_tree = ref false in
   let keep_going = ref false in
+  let no_tree_compare = ref false in
   let filter = ref "" in
   let dir = ref None in
   let options =
@@ -403,6 +407,7 @@ let parse_args () =
       ("--check-sizes", Arg.Set check_sizes, "");
       ("--check-json-equal-only", Arg.Set check_json_equal_only, "");
       ("--check-printed-tree", Arg.Set check_printed_tree, "");
+      ("--no-tree-compare", Arg.Set no_tree_compare, "");
       ("--keep-going", Arg.Set keep_going, "");
       ("--filter", Arg.String (fun s -> filter := s), "");
       ("--dir", Arg.String (fun s -> dir := Some s), "");
@@ -425,6 +430,7 @@ let parse_args () =
     keep_going = !keep_going;
     filter = !filter;
     dir = !dir;
+    no_tree_compare = !no_tree_compare;
   }
 
 module MinimalTest = Runner (WithSyntax (MinimalSyntax))

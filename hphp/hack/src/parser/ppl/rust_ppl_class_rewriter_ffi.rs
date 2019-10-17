@@ -14,6 +14,7 @@ use parser_rust::{
 };
 use positioned_parser::positioned_smart_constructors::PositionedSmartConstructors;
 use rust_editable_positioned_syntax::{EditablePositionedSyntax, EditablePositionedSyntaxTrait};
+use rust_ppl_class_rewriter::PplClassRewriter;
 use rust_to_ocaml::{SerializationContext, ToOcaml};
 
 type PositionedSyntaxParser<'a> = Parser<'a, WithKind<PositionedSmartConstructors>, NoState>;
@@ -45,11 +46,11 @@ caml!(parse_and_rewrite_ppl_classes, |ocaml_source_text|, <res>, {
 
     let context = SerializationContext::new(ocaml_source_text_value);
 
-    let editable_root = EditablePositionedSyntax::from_positioned_syntax(&root, &Rc::new(source_text));
-    let rewritten_editable_root = rust_ppl_class_rewriter::rewrite_ppl_classes(editable_root);
+    let mut editable_root = EditablePositionedSyntax::from_positioned_syntax(&root, &Rc::new(source_text));
+    PplClassRewriter::rewrite_ppl_classes(&mut editable_root);
 
     ocamlpool_enter();
-    let ocaml_root = rewritten_editable_root.to_ocaml(&context);
+    let ocaml_root = editable_root.to_ocaml(&context);
     ocamlpool_leave();
     res = ocaml::Value::new(ocaml_root);
 } -> res);

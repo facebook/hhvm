@@ -26,18 +26,18 @@ where
         mut node: Syntax<T, V>,
         acc: &mut A,
         f: &mut F,
-    ) -> Option<Syntax<T, V>>
+    ) -> (Option<Syntax<T, V>>, bool)
     where
-        F: FnMut(&Vec<Syntax<T, V>>, Syntax<T, V>, &mut A) -> Option<Syntax<T, V>>,
+        F: FnMut(&Vec<Syntax<T, V>>, Syntax<T, V>, &mut A) -> (Option<Syntax<T, V>>, bool),
     {
         let kind = node.kind();
         match kind {
-            SyntaxKind::Token(_) => (),
+            SyntaxKind::Token(_) | SyntaxKind::Missing => (),
             _ => {
                 let mut new_children = vec![];
                 path.push(node);
                 for owned_child in path.last_mut().unwrap().drain_children() {
-                    if let Some(new_child) =
+                    if let (Some(new_child), _) =
                         Self::parented_aggregating_rewrite_post_helper(path, owned_child, acc, f)
                     {
                         new_children.push(new_child);
@@ -56,17 +56,18 @@ where
         mut f: F,
     ) -> (Syntax<T, V>, A)
     where
-        F: FnMut(&Vec<Syntax<T, V>>, Syntax<T, V>, &mut A) -> Option<Syntax<T, V>>,
+        F: FnMut(&Vec<Syntax<T, V>>, Syntax<T, V>, &mut A) -> (Option<Syntax<T, V>>, bool),
     {
         let node =
             Self::parented_aggregating_rewrite_post_helper(&mut vec![], node, &mut acc, &mut f)
+                .0
                 .expect("rewriter removed root node");
         (node, acc)
     }
 
     pub fn aggregating_rewrite_post<F>(node: Syntax<T, V>, acc: A, mut f: F) -> (Syntax<T, V>, A)
     where
-        F: FnMut(Syntax<T, V>, &mut A) -> Option<Syntax<T, V>>,
+        F: FnMut(Syntax<T, V>, &mut A) -> (Option<Syntax<T, V>>, bool),
     {
         Self::parented_aggregating_rewrite_post(node, acc, |_, node, acc| f(node, acc))
     }
@@ -87,6 +88,7 @@ where
         let kind = node.kind();
         match kind {
             SyntaxKind::Token(_) => (),
+            SyntaxKind::Missing => (),
             _ => {
                 let mut new_children = vec![];
                 path.push(node);
@@ -141,7 +143,7 @@ where
 
         let kind = node.kind();
         match kind {
-            SyntaxKind::Token(_) => (),
+            SyntaxKind::Token(_) | SyntaxKind::Missing => (),
             _ => {
                 let mut new_children = vec![];
                 for owned_child in node.drain_children() {
@@ -153,7 +155,7 @@ where
                 }
                 node.replace_children(kind, new_children);
             }
-        };
+        }
         Some(node)
     }
 
@@ -178,14 +180,14 @@ where
 {
     pub fn parented_rewrite_post<F>(node: Syntax<T, V>, mut f: F) -> Syntax<T, V>
     where
-        F: FnMut(&Vec<Syntax<T, V>>, Syntax<T, V>) -> Option<Syntax<T, V>>,
+        F: FnMut(&Vec<Syntax<T, V>>, Syntax<T, V>) -> (Option<Syntax<T, V>>, bool),
     {
         Self::parented_aggregating_rewrite_post(node, (), |parents, node, _| f(parents, node)).0
     }
 
     pub fn rewrite_post<F>(node: Syntax<T, V>, mut f: F) -> Syntax<T, V>
     where
-        F: FnMut(Syntax<T, V>) -> Option<Syntax<T, V>>,
+        F: FnMut(Syntax<T, V>) -> (Option<Syntax<T, V>>, bool),
     {
         Self::parented_aggregating_rewrite_post(node, (), |_, node, _| f(node)).0
     }

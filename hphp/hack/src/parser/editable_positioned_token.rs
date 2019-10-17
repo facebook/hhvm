@@ -13,19 +13,19 @@ use parser_rust::positioned_trivia::PositionedTrivia;
 
 use crate::editable_positioned_original_source_data::SourceData;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SyntheticTokenData {
     pub text: String,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum TokenData<'a> {
     Original(SourceData<'a>),
     SynthesizedFromOriginal(SyntheticTokenData, SourceData<'a>),
     Synthetic(SyntheticTokenData),
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct EditablePositionedToken<'a> {
     pub kind: TokenKind,
     pub leading_text: String,
@@ -109,6 +109,38 @@ impl<'a> EditablePositionedToken<'a> {
                 positioned_token,
                 source_text,
             )),
+        }
+    }
+
+    pub fn synthesize_new(
+        kind: TokenKind,
+        leading_text: String,
+        trailing_text: String,
+        text: String,
+    ) -> Self {
+        let token_data = TokenData::Synthetic(SyntheticTokenData { text });
+        Self {
+            kind,
+            leading_text,
+            trailing_text,
+            token_data,
+        }
+    }
+
+    pub fn full_text(token: &Self) -> String {
+        [
+            token.leading_text.to_string(),
+            Self::text(token),
+            token.trailing_text.to_string(),
+        ]
+        .join("")
+    }
+
+    pub fn text(token: &Self) -> String {
+        match &token.token_data {
+            TokenData::Original(source_data) => SourceData::text(source_data),
+            TokenData::SynthesizedFromOriginal(token_data, _)
+            | TokenData::Synthetic(token_data) => token_data.text.clone(),
         }
     }
 }

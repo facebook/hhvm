@@ -25,7 +25,17 @@ let start_server_daemon ~informant_managed options log_link daemon_entry =
   let log_fds =
     let in_fd = Daemon.null_fd () in
     if ServerArgs.should_detach options then (
-      (try Sys.rename log_link (log_link ^ ".old") with _ -> ());
+      (try
+         let old_log_name i = Printf.sprintf "%s.%d.old" log_link i in
+         let max_n_log_files = 20 in
+         for i = max_n_log_files - 1 downto 1 do
+           if Sys.file_exists (old_log_name i) then
+             Sys.rename (old_log_name i) (old_log_name (i + 1))
+         done;
+         let old = log_link ^ ".old" in
+         if Sys.file_exists old then Sys.rename old (old_log_name 1);
+         if Sys.file_exists log_link then Sys.rename log_link old
+       with _ -> ());
       let log_file = Sys_utils.make_link_of_timestamped log_link in
       Hh_logger.log
         "About to spawn typechecker daemon. Logs will go to %s\n%!"

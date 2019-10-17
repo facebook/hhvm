@@ -58,13 +58,13 @@ pub fn without_xhp_mangling<T>(f: impl FnOnce() -> T) -> T {
     })
 }
 
+pub fn is_xhp(name: &str) -> bool {
+    name.chars().next().map_or(false, |c| c == ':')
+}
+
 pub fn mangle_xhp_id(mut name: String) -> String {
     fn ignore_id(name: &str) -> bool {
         name.starts_with("class@anonymous") || name.starts_with("Closure$")
-    }
-
-    fn is_xhp(name: &str) -> bool {
-        name.chars().next().map_or(false, |c| c == ':')
     }
 
     if !ignore_id(&name) && MANGLE_XHP_MODE.with(|x| x.get()) {

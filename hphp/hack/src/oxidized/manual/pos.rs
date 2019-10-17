@@ -163,6 +163,98 @@ impl Pos {
         }
     }
 
+    pub fn merge(x1: Self, x2: Self) -> Result<Self, String> {
+        if x1.filename() != x2.filename() {
+            // see comment above (T52404885)
+            return Err(String::from("Position in separate files ")
+                + &x1.filename().to_string()
+                + " and "
+                + &x2.filename().to_string());
+        }
+        match (x1.0, x2.0) {
+            (
+                Small {
+                    file,
+                    start: start1,
+                    end: end1,
+                },
+                Small {
+                    file: _,
+                    start: start2,
+                    end: end2,
+                },
+            ) => {
+                let start = if start1.is_dummy() {
+                    start2
+                } else if start2.is_dummy() {
+                    start1
+                } else if start1.offset() < start2.offset() {
+                    start1
+                } else {
+                    start2
+                };
+                let end = if end1.is_dummy() {
+                    end2
+                } else if end2.is_dummy() {
+                    end1
+                } else if end1.offset() < end2.offset() {
+                    end2
+                } else {
+                    end1
+                };
+                Ok(Pos(Small { file, start, end }))
+            }
+            (
+                Large {
+                    file,
+                    start: start1,
+                    end: end1,
+                },
+                Large {
+                    file: _,
+                    start: start2,
+                    end: end2,
+                },
+            ) => {
+                let start = if start1.is_dummy() {
+                    start2
+                } else if start2.is_dummy() {
+                    start1
+                } else if start1.offset() < start2.offset() {
+                    start1
+                } else {
+                    start2
+                };
+                let end = if end1.is_dummy() {
+                    end2
+                } else if end2.is_dummy() {
+                    end1
+                } else if end1.offset() < end2.offset() {
+                    end2
+                } else {
+                    end1
+                };
+                Ok(Pos(Large { file, start, end }))
+            }
+            (Small { file, start, end }, x2 @ Large { .. }) => Self::merge(
+                Pos(Large {
+                    file,
+                    start: Box::new(Self::small_to_large_file_pos(&start)),
+                    end: Box::new(Self::small_to_large_file_pos(&end)),
+                }),
+                Pos(x2),
+            ),
+            (x1 @ Large { .. }, Small { file, start, end }) => Self::merge(
+                Pos(x1),
+                Pos(Large {
+                    file,
+                    start: Box::new(Self::small_to_large_file_pos(&start)),
+                    end: Box::new(Self::small_to_large_file_pos(&end)),
+                }),
+            ),
+        }
+    }
+
     pub fn end_cnum(&self) -> usize {
         match &self.0 {
             Small { end, .. } => end.offset(),
@@ -207,6 +299,14 @@ mod tests {
     use super::*;
     use pretty_assertions::assert_eq;
 
+    fn make_pos(name: &str, start: (usize, usize, usize), end: (usize, usize, usize)) -> Pos {
+        Pos::from_lnum_bol_cnum(
+            RelativePath::make(Prefix::Dummy, PathBuf::from(name)),
+            start,
+            end,
+        )
+    }
+
     #[test]
     fn test() {
         assert_eq!(Pos::make_none().is_none(), true);
@@ -227,6 +327,66 @@ mod tests {
             )
             .is_none(),
             false
+        );
+    }
+
+    #[test]
+    fn test_merge() {
+        let test = |name, (exp_start, exp_end), ((fst_start, fst_end), (snd_start, snd_end))| {
+            assert_eq!(
+                Ok(make_pos("a", exp_start, exp_end)),
+                Pos::merge(
+                    make_pos("a", fst_start, fst_end),
+                    make_pos("a", snd_start, snd_end)
+                ),
+                "{}",
+                name
+            );
+
+            // Run this again because we want to test that we get the same
+            // result regardless of order.
+            assert_eq!(
+                Ok(make_pos("a", exp_start, exp_end)),
+                Pos::merge(
+                    make_pos("a", snd_start, snd_end),
+                    make_pos("a", fst_start, fst_end),
+                ),
+                "{} (reversed)",
+                name
+            );
+        };
+
+        test(
+            "basic test",
+            ((0, 0, 0), (0, 0, 5)),
+            (((0, 0, 0), (0, 0, 2)), ((0, 0, 2), (0, 0, 5))),
+        );
+
+        test(
+            "merge should work with gaps",
+            ((0, 0, 0), (0, 0, 15)),
+            (((0, 0, 0), (0, 0, 5)), ((0, 0, 10), (0, 0, 15))),
+        );
+
+        test(
+            "merge should work with overlaps",
+            ((0, 0, 0), (0, 0, 15)),
+            (((0, 0, 0), (0, 0, 12)), ((0, 0, 7), (0, 0, 15))),
+        );
+
+        test(
+            "merge should work between lines",
+            ((0, 0, 0), (2, 20, 25)),
+            (((0, 0, 0), (1, 10, 15)), ((1, 10, 20), (2, 20, 25))),
+        );
+
+        assert_eq!(
+            Err("Position in separate files dummy a and dummy b".to_string()),
+            Pos::merge(
+                make_pos("a", (0, 0, 0), (0, 0, 0)),
+                make_pos("b", (0, 0, 0), (0, 0, 0))
+            ),
+            "should reject merges with different filenames"
         );
     }
 }

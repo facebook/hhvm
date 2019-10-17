@@ -849,6 +849,19 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
     }
   }
 
+  if (callee->cls()) {
+    if (callee->isStatic() && !ctxType.maybe(TCls|TCctx)) {
+      traceRefusal(sk, callee, "calling a static method with an instance",
+                   annotationsPtr);
+      return nullptr;
+    }
+    if (!callee->isStatic() && !ctxType.maybe(TObj)) {
+      traceRefusal(sk, callee, "calling an instance method without an instance",
+                   annotationsPtr);
+      return nullptr;
+    }
+  }
+
   FTRACE(2, "selectCalleeRegion: callee = {}\n", callee->fullName()->data());
   auto const firstArgPos = static_cast<int32_t>(fca.numInputs()) - 1;
   std::vector<Type> argTypes;

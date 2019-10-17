@@ -77,6 +77,7 @@ struct FuncChecker {
   ~FuncChecker();
   bool checkOffsets();
   bool checkFlow();
+  bool checkDef();
 
  private:
   struct unknown_length : std::runtime_error {
@@ -216,7 +217,8 @@ bool checkFunc(const FuncEmitter* func, ErrorMode mode) {
     }
   }
   FuncChecker v(func, mode);
-  return v.checkOffsets() &&
+  return v.checkDef() &&
+         v.checkOffsets() &&
          v.checkFlow();
 }
 
@@ -246,6 +248,23 @@ Offset findSection(SectionMap& sections, Offset off) {
   SectionMap::iterator i = sections.upper_bound(off);
   --i;
   return i->first;
+}
+
+/**
+ * Make sure that internally special functions are properly defined.
+ */
+bool FuncChecker::checkDef() {
+  auto const s = m_func->name->toCppString();
+  if (s.compare("86pinit") == 0 ||
+      s.compare("86sinit") == 0 ||
+      s.compare("86linit") == 0 ||
+      s.compare("86cinit") == 0) {
+    if (!(m_func->attrs & AttrStatic)) {
+      error("%s functions must be static\n", s.data());
+      return false;
+    }
+  }
+  return true;
 }
 
 /**

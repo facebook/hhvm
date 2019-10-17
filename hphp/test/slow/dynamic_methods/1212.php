@@ -8,7 +8,7 @@ class z {
     $x = array(1,2,3);
     array_map(array('z', 'p'), $x);
   }
-  function p($x) {
+  static function p($x) {
     var_dump($x);
   }
 }

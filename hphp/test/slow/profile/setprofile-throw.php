@@ -3,11 +3,11 @@
 function foo($t) { echo "From $t: This shouldn't happen!\n"; }
 
 class X {
-  public function foo() {
+  public static function foo() {
     try {
       return true;
     } catch (Exception $e) {
-      foo(get_class($this));
+      foo(static::class);
       return false;
     }
   }

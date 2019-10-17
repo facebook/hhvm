@@ -336,12 +336,7 @@ const Func* vm_decode_func_from_name(
   }
 
   if (!this_ && !f->isStaticInPrologue()) {
-    if (flags == DecodeFlags::Warn) throw_missing_this(f);
-    if (flags != DecodeFlags::LookupOnly) {
-      if (f->attrs() & AttrRequiresThis) return nullptr;
-      raise_warning(
-        "Decoding instance method %s without $this!", funcName.data());
-    }
+    if (flags != DecodeFlags::LookupOnly) throw_missing_this(f);
   }
 
   assertx(f && f->preClass());

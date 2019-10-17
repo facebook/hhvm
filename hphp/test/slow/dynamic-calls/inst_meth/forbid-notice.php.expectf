@@ -1,21 +1,5 @@
 =============== positive tests =====================
 
-Warning: Decoding instance method func without $this! in %s on line 173
-
-Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s on line 173
-
-Warning: Decoding instance method async_func without $this! in %s on line 175
-
-Notice: 'A::async_func' called dynamically but is not __DynamicallyCallable in %s on line 175
-
-Warning: Decoding instance method func without $this! in %s on line 178
-
-Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s on line 178
-
-Warning: Decoding instance method async_func without $this! in %s on line 180
-
-Notice: 'A::async_func' called dynamically but is not __DynamicallyCallable in %s on line 180
-
 Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s on line 183
 
 Notice: 'A::async_func' called dynamically but is not __DynamicallyCallable in %s on line 185
@@ -27,14 +11,6 @@ Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s on l
 Notice: 'A::async_func' called dynamically but is not __DynamicallyCallable in %s on line 205
 
 Notice: 'C::__call' called dynamically but is not __DynamicallyCallable in %s on line 207
-
-Warning: Decoding instance method func without $this! in %s on line 210
-
-Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s on line 210
-
-Warning: Decoding instance method func without $this! in %s on line 213
-
-Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s on line 213
 
 Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s on line 216
 
@@ -54,31 +30,13 @@ Notice: 'A::cmp' called dynamically but is not __DynamicallyCallable in %s on li
 
 Notice: 'CCmp::__call' called dynamically but is not __DynamicallyCallable in %s on line 260
 =============== negative tests =====================
-
-Warning: Decoding instance method func2 without $this! in %s on line 349
-
-Warning: Decoding instance method async_func2 without $this! in %s on line 351
-
-Warning: Decoding instance method func2 without $this! in %s on line 354
-
-Warning: Decoding instance method async_func2 without $this! in %s on line 356
-
-Warning: Decoding instance method func2 without $this! in %s on line 383
-
-Warning: Decoding instance method func2 without $this! in %s on line 386
 =============== positive tests (exceptions) ========
-Exception: Decoding instance method func without $this!
-Exception: Decoding instance method async_func without $this!
-Exception: Decoding instance method func without $this!
-Exception: Decoding instance method async_func without $this!
 Exception: 'A::func' called dynamically but is not __DynamicallyCallable
 Exception: 'A::async_func' called dynamically but is not __DynamicallyCallable
 Exception: 'C::__call' called dynamically but is not __DynamicallyCallable
 Exception: 'A::func' called dynamically but is not __DynamicallyCallable
 Exception: 'A::async_func' called dynamically but is not __DynamicallyCallable
 Exception: 'C::__call' called dynamically but is not __DynamicallyCallable
-Exception: Decoding instance method func without $this!
-Exception: Decoding instance method func without $this!
 Exception: 'A::func' called dynamically but is not __DynamicallyCallable
 Exception: 'C::__call' called dynamically but is not __DynamicallyCallable
 Exception: 'A::func' called dynamically but is not __DynamicallyCallable

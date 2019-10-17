@@ -33,7 +33,7 @@
   .property [static public] foo = uninit;
   .property [public] nonstat = uninit;
 
-  .method [public] 86cinit($which) {
+  .method [static public] 86cinit($which) {
     CGetL $which
     String "BAR"
     Same
@@ -47,7 +47,7 @@
     Fatal Runtime
   }
 
-  .method [public] 86sinit() {
+  .method [static public] 86sinit() {
     String "default ::foo value"
     InitProp "foo" Static
 
@@ -55,7 +55,7 @@
     RetC
   }
 
-  .method [public] 86pinit() {
+  .method [static public] 86pinit() {
     CheckProp "nonstat"
     JmpNZ isset
     String "code-created prop value"

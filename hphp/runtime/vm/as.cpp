@@ -2547,10 +2547,6 @@ MaybeDataType type_constraint_to_data_type(LowStringPtr user_type,
     return folly::none;
 }
 
-static const StaticString
-  s_AllowStatic("__AllowStatic");
-
-
 /*
  * Checks whether the current function is native by looking at the user
  * attribute map and sets the isNative flag accoringly
@@ -2663,13 +2659,8 @@ void parse_method(AsmState& as) {
   UserAttributeMap userAttrs;
   Attr attrs = parse_attribute_list(as, AttrContext::Func, &userAttrs);
 
-  if (!SystemLib::s_inited) {
-    attrs |= AttrBuiltin;
-
-    if (!(attrs & AttrStatic) && !userAttrs.count(s_AllowStatic.get())) {
-      attrs |= AttrRequiresThis;
-    }
-  }
+  if (!SystemLib::s_inited) attrs |= AttrBuiltin;
+  if (!(attrs & AttrStatic)) attrs |= AttrRequiresThis;
 
   int line0;
   int line1;

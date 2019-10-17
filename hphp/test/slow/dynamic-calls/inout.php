@@ -21,10 +21,8 @@ function positive_tests() {
   $v = 123;
 
   try { $x = 'func1'; $x(inout $v); } catch (Exception $e) { wrap($e); }
-  try { $x = 'A::func2'; $x(inout $v); } catch (Exception $e) { wrap($e); }
   try { $x = 'A::func3'; $x(inout $v); } catch (Exception $e) { wrap($e); }
 
-  try { $x = ['A', 'func2']; $x(inout $v); } catch (Exception $e) { wrap($e); }
   try { $x = ['A', 'func3']; $x(inout $v); } catch (Exception $e) { wrap($e); }
 
   try { $x = [new A, 'func2']; $x(inout $v); } catch (Exception $e) { wrap($e); }

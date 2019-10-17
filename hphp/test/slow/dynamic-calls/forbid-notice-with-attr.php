@@ -23,7 +23,7 @@ function test() {
   $foo = 'foo';
   $a_obj = new A();
   $a_bar = 'A::bar';
-  $a_foo = ['A', 'foo'];
+  $a_foo = [new A, 'foo'];
   $a = 'A';
   $bar = 'bar';
 
@@ -41,7 +41,7 @@ function test() {
   $corge = 'corge';
   $a1_obj = new A1();
   $a1_flob = 'A1::flob';
-  $a1_corge = ['A1', 'corge'];
+  $a1_corge = [new A1, 'corge'];
   $a1 = 'A1';
   $flob = 'flob';
 

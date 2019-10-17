@@ -1,4 +1,0 @@
-
-Warning: Decoding instance method foo without $this! in %s on line 23
-Throwing from X::foo
-Exception with message: Surprise!

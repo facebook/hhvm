@@ -6,8 +6,8 @@ class A {
 
 <<__EntryPoint>>
 function main() {
-    $a = "A::f1";
-    var_dump($a(1));
+
+
 
     $o = new A();
     $a = HH\inst_meth($o, "f1");

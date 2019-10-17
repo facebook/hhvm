@@ -1,18 +1,10 @@
 =============== positive tests =====================
 
-Warning: Decoding instance method func without $this! in %s on line 173
-
 Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 174
-
-Warning: Decoding instance method async_func without $this! in %s on line 175
 
 Notice: 'A::static_async_func' called dynamically but is not __DynamicallyCallable in %s on line 176
 
-Warning: Decoding instance method func without $this! in %s on line 178
-
 Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 179
-
-Warning: Decoding instance method async_func without $this! in %s on line 180
 
 Notice: 'A::static_async_func' called dynamically but is not __DynamicallyCallable in %s on line 181
 
@@ -40,11 +32,7 @@ Notice: 'A::static_async_func' called dynamically but is not __DynamicallyCallab
 
 Notice: 'B::static_async_func' called dynamically but is not __DynamicallyCallable in %s on line 119
 
-Warning: Decoding instance method func without $this! in %s on line 210
-
 Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 211
-
-Warning: Decoding instance method func without $this! in %s on line 213
 
 Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 214
 
@@ -74,26 +62,10 @@ Notice: 'A::static_cmp' called dynamically but is not __DynamicallyCallable in %
 
 Notice: 'A::static_cmp' called dynamically but is not __DynamicallyCallable in %s on line 259
 =============== negative tests =====================
-
-Warning: Decoding instance method func2 without $this! in %s on line 349
-
-Warning: Decoding instance method async_func2 without $this! in %s on line 351
-
-Warning: Decoding instance method func2 without $this! in %s on line 354
-
-Warning: Decoding instance method async_func2 without $this! in %s on line 356
-
-Warning: Decoding instance method func2 without $this! in %s on line 383
-
-Warning: Decoding instance method func2 without $this! in %s on line 386
 =============== positive tests (exceptions) ========
-Exception: Decoding instance method func without $this!
 Exception: 'A::static_func' called dynamically but is not __DynamicallyCallable
-Exception: Decoding instance method async_func without $this!
 Exception: 'A::static_async_func' called dynamically but is not __DynamicallyCallable
-Exception: Decoding instance method func without $this!
 Exception: 'A::static_func' called dynamically but is not __DynamicallyCallable
-Exception: Decoding instance method async_func without $this!
 Exception: 'A::static_async_func' called dynamically but is not __DynamicallyCallable
 Exception: 'A::static_func' called dynamically but is not __DynamicallyCallable
 Exception: 'A::static_async_func' called dynamically but is not __DynamicallyCallable
@@ -107,9 +79,7 @@ Exception: 'B::static_func' called dynamically but is not __DynamicallyCallable
 Exception: 'A::static_async_func' called dynamically but is not __DynamicallyCallable
 Exception: 'A::static_async_func' called dynamically but is not __DynamicallyCallable
 Exception: 'B::static_async_func' called dynamically but is not __DynamicallyCallable
-Exception: Decoding instance method func without $this!
 Exception: 'A::static_func' called dynamically but is not __DynamicallyCallable
-Exception: Decoding instance method func without $this!
 Exception: 'A::static_func' called dynamically but is not __DynamicallyCallable
 Exception: 'A::static_func' called dynamically but is not __DynamicallyCallable
 Exception: 'A::static_func' called dynamically but is not __DynamicallyCallable

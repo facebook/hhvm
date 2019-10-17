@@ -19,7 +19,7 @@
 .class C {
   .default_ctor;
 
-  .method [public] 86sinit() {
+  .method [static public] 86sinit() {
     String "default ::foo value"
     InitProp "foo" Static
 
@@ -27,7 +27,7 @@
     RetC
   }
 
-  .method [public] 86pinit() {
+  .method [static public] 86pinit() {
     CheckProp "bar"
     String "string"
     InitProp "baz" Static

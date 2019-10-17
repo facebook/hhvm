@@ -9,54 +9,42 @@ D D D
 ****************
 ****************
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'C' in %s on line 115
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'C' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'D' in %s on line 116
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'D' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'F' in %s on line 117
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'F' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'G' in %s on line 118
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'G' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'H' in %s on line 119
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'H' in %s on line %d
 ****************
 B D D
 A D D
 B D D
 ****************
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'B' in %s on line 134
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'B' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'C' in %s on line 135
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'C' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'D' in %s on line 136
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'D' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'H' in %s on line 139
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'H' in %s on line %d
 ****************
-
-Warning: Decoding instance method meth without $this! in %s on line 147
-F F
-
-Warning: Decoding instance method meth without $this! in %s on line 148
-G G
-
-Warning: Decoding instance method meth without $this! in %s on line 150
-F F
-
-Warning: Decoding instance method meth without $this! in %s on line 151
-G G
 ****************
 B B B
 B B B
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'C' in %s on line 157
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'C' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'D' in %s on line 158
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'D' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'F' in %s on line 159
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'F' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'G' in %s on line 160
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'G' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'H' in %s on line 161
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'H' in %s on line %d
 A B B
 B B B
 B B B
@@ -68,15 +56,15 @@ B B B
 ****************
 G G G
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'B' in %s on line 180
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'B' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'C' in %s on line 181
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'C' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'D' in %s on line 182
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'D' in %s on line %d
 F G G
 G G G
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'H' in %s on line 185
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'H' in %s on line %d
 F G G
 G G G
 G G G
@@ -91,89 +79,23 @@ G G G
 ****************
 ****************
 ****************
-
-Warning: Decoding instance method meth without $this! in %s on line 235
-B B
-
-Warning: Decoding instance method meth without $this! in %s on line 236
-C C
-
-Warning: Decoding instance method meth without $this! in %s on line 237
-D D
-
-Warning: Decoding instance method meth without $this! in %s on line 238
-F F
-
-Warning: Decoding instance method meth without $this! in %s on line 239
-G G
-
-Warning: Decoding instance method meth without $this! in %s on line 240
-H H
-
-Warning: Decoding instance method meth without $this! in %s on line 241
-B D
-
-Warning: Decoding instance method meth without $this! in %s on line 242
-C D
-
-Warning: Decoding instance method meth without $this! in %s on line 243
-D D
 ****************
-
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'C' in %s on line 246
-
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'D' in %s on line 247
-
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'F' in %s on line 248
-
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'G' in %s on line 249
-
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'H' in %s on line 250
 ****************
-
-Warning: Decoding instance method meth without $this! in %s on line 255
-B B
-
-Warning: Decoding instance method meth without $this! in %s on line 261
-A D
-
-Warning: Decoding instance method meth without $this! in %s on line 262
-B D
 ****************
-
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'B' in %s on line 265
-
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'C' in %s on line 266
-
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'D' in %s on line 267
-
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'H' in %s on line 270
 ****************
-
-Warning: Decoding instance method meth without $this! in %s on line 278
-F F
-
-Warning: Decoding instance method meth without $this! in %s on line 279
-G G
-
-Warning: Decoding instance method meth without $this! in %s on line 281
-F F
-
-Warning: Decoding instance method meth without $this! in %s on line 282
-G G
 ****************
 B B B
 B B B
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'C' in %s on line 288
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'C' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'D' in %s on line 289
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'D' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'F' in %s on line 290
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'F' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'G' in %s on line 291
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'G' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'H' in %s on line 292
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'H' in %s on line %d
 A B B
 B B B
 B B B
@@ -185,15 +107,15 @@ B B B
 ****************
 G G G
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'B' in %s on line 311
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'B' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'C' in %s on line 312
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'C' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'D' in %s on line 313
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'D' in %s on line %d
 F G G
 G G G
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'H' in %s on line 316
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'H' in %s on line %d
 F G G
 G G G
 G G G
@@ -247,21 +169,21 @@ D D
 ****************
 B B
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'C' in %s on line 377
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'C' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'D' in %s on line 378
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'D' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'F' in %s on line 379
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'F' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'G' in %s on line 380
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'G' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'H' in %s on line 381
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'H' in %s on line %d
 A A
 
-Warning: behavior of call_user_func(array('B', 'self::staticMeth')) is undefined in %s on line 383
+Warning: behavior of call_user_func(array('B', 'self::staticMeth')) is undefined in %s on line %d
 B B
 
-Warning: behavior of call_user_func(array('B', 'static::staticMeth')) is undefined in %s on line 384
+Warning: behavior of call_user_func(array('B', 'static::staticMeth')) is undefined in %s on line %d
 B B
 ****************
 B B
@@ -269,21 +191,21 @@ A D
 B D
 ****************
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'B' in %s on line 396
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'B' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'C' in %s on line 397
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'C' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'D' in %s on line 398
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'D' in %s on line %d
 F F
 G G
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'H' in %s on line 401
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'H' in %s on line %d
 F F
 
-Warning: behavior of call_user_func(array('G', 'self::staticMeth')) is undefined in %s on line 403
+Warning: behavior of call_user_func(array('G', 'self::staticMeth')) is undefined in %s on line %d
 G G
 
-Warning: behavior of call_user_func(array('G', 'static::staticMeth')) is undefined in %s on line 404
+Warning: behavior of call_user_func(array('G', 'static::staticMeth')) is undefined in %s on line %d
 G G
 ****************
 F F
@@ -294,15 +216,15 @@ G G
 B B
 B B
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'C' in %s on line 419
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'C' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'D' in %s on line 420
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'D' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'F' in %s on line 421
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'F' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'G' in %s on line 422
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'G' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'H' in %s on line 423
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'H' in %s on line %d
 A B
 B B
 B B
@@ -314,15 +236,15 @@ B B
 ****************
 G G
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'B' in %s on line 442
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'B' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'C' in %s on line 443
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'C' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'D' in %s on line 444
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'D' in %s on line %d
 F G
 G G
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'H' in %s on line 447
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'H' in %s on line %d
 F G
 G G
 G G
@@ -376,21 +298,21 @@ D D
 ****************
 B B
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'C' in %s on line 508
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'C' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'D' in %s on line 509
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'D' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'F' in %s on line 510
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'F' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'G' in %s on line 511
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'G' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'H' in %s on line 512
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'H' in %s on line %d
 A A
 
-Warning: behavior of call_user_func(array('B', 'self::staticMeth')) is undefined in %s on line 514
+Warning: behavior of call_user_func(array('B', 'self::staticMeth')) is undefined in %s on line %d
 B B
 
-Warning: behavior of call_user_func(array('B', 'static::staticMeth')) is undefined in %s on line 515
+Warning: behavior of call_user_func(array('B', 'static::staticMeth')) is undefined in %s on line %d
 B B
 ****************
 B B
@@ -398,21 +320,21 @@ A D
 B D
 ****************
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'B' in %s on line 527
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'B' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'C' in %s on line 528
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'C' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'D' in %s on line 529
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'D' in %s on line %d
 F F
 G G
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'H' in %s on line 532
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'H' in %s on line %d
 F F
 
-Warning: behavior of call_user_func(array('G', 'self::staticMeth')) is undefined in %s on line 534
+Warning: behavior of call_user_func(array('G', 'self::staticMeth')) is undefined in %s on line %d
 G G
 
-Warning: behavior of call_user_func(array('G', 'static::staticMeth')) is undefined in %s on line 535
+Warning: behavior of call_user_func(array('G', 'static::staticMeth')) is undefined in %s on line %d
 G G
 ****************
 F F
@@ -423,20 +345,20 @@ G G
 B B
 B B
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'C' in %s on line 550
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'C' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'D' in %s on line 551
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'D' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'F' in %s on line 552
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'F' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'G' in %s on line 553
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'G' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'H' in %s on line 554
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'H' in %s on line %d
 B B
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'C' in %s on line 556
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'C' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'D' in %s on line 557
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'D' in %s on line %d
 ****************
 B B
 B B
@@ -445,21 +367,21 @@ B B
 ****************
 G G
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'B' in %s on line 573
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'B' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'C' in %s on line 574
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'C' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'D' in %s on line 575
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'D' in %s on line %d
 F G
 G G
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'H' in %s on line 578
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'H' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'B' in %s on line 579
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'B' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'C' in %s on line 580
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'C' in %s on line %d
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'D' in %s on line 581
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'D' in %s on line %d
 ****************
 G G
 F G

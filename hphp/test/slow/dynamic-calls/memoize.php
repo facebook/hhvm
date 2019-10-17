@@ -17,13 +17,13 @@ class A {
     try { $x = 'func1'; $x($v); } catch (Exception $e) { wrap($e); }
     try { $x = 'func1$memoize_impl'; $x($v); } catch (Exception $e) { wrap($e); }
     try { $x = 'func4$memoize_impl'; $x($v); } catch (Exception $e) { wrap($e); }
-    try { $x = 'A::func2'; $x($v); } catch (Exception $e) { wrap($e); }
-    try { $x = 'A::func2$memoize_impl'; $x($v); } catch (Exception $e) { wrap($e); }
+    //try { $x = 'A::func2'; $x($v); } catch (Exception $e) { wrap($e); } // fatal
+    //try { $x = 'A::func2$memoize_impl'; $x($v); } catch (Exception $e) { wrap($e); } // fatal
     try { $x = 'A::func3'; $x($v); } catch (Exception $e) { wrap($e); }
     try { $x = 'A::func3$memoize_impl'; $x($v); } catch (Exception $e) { wrap($e); }
 
-    try { $x = ['A', 'func2']; $x($v); } catch (Exception $e) { wrap($e); }
-    try { $x = ['A', 'func2$memoize_impl']; $x($v); } catch (Exception $e) { wrap($e); }
+    //try { $x = ['A', 'func2']; $x($v); } catch (Exception $e) { wrap($e); } // fatal
+    //try { $x = ['A', 'func2$memoize_impl']; $x($v); } catch (Exception $e) { wrap($e); } // fatal
     try { $x = ['A', 'func3']; $x($v); } catch (Exception $e) { wrap($e); }
     try { $x = ['A', 'func3$memoize_impl']; $x($v); } catch (Exception $e) { wrap($e); }
 
@@ -58,7 +58,7 @@ class B {
     try { $x = 'func4$memoize_impl'; $x($v); } catch (Exception $e) { wrap($e); }
     try { $x = 'B::func6$memoize_impl'; $x($v); } catch (Exception $e) { wrap($e); }
 
-    try { $x = ['B', 'func5$memoize_impl']; $x($v); } catch (Exception $e) { wrap($e); }
+    //try { $x = ['B', 'func5$memoize_impl']; $x($v); } catch (Exception $e) { wrap($e); } // fatal
     try { $x = ['B', 'func6$memoize_impl']; $x($v); } catch (Exception $e) { wrap($e); }
 
     try { $x = [new B, 'func5$memoize_impl']; $x($v); } catch (Exception $e) { wrap($e); }

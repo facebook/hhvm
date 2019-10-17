@@ -5323,7 +5323,8 @@ Type Index::lookup_return_type_raw(const php::Func* f) const {
 }
 
 bool Index::lookup_this_available(const php::Func* f) const {
-  return (f->attrs & AttrRequiresThis) && !f->isClosureBody;
+  if (f->isClosureBody || (f->cls->attrs & AttrTrait)) return false;
+  return f->attrs & AttrRequiresThis;
 }
 
 PrepKind Index::lookup_param_prep(Context /*ctx*/, res::Func rfunc,

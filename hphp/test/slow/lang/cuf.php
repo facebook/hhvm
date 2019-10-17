@@ -144,11 +144,11 @@ class C extends B {
     // $call = array('G','B::meth'); $call(); // expected fatal
     // $call = array('G','C::meth'); $call(); // expected fatal
     // $call = array('G','D::meth'); $call(); // expected fatal
-    $call = array('G','F::meth'); $call(); // F F
-    $call = array('G','G::meth'); $call(); // G G
+    // $call = array('G','F::meth'); $call(); // expected fatal
+    // $call = array('G','G::meth'); $call(); // expected fatal
     // $call = array('G','H::meth'); $call(); // expected fatal
-    $call = array('G','parent::meth'); $call(); // F F  (Zend: F D D) (Rule 1)
-    $call = array('G','self::meth'); $call();   // G G  (Zend: G D D) (Rule 1)
+    // $call = array('G','parent::meth'); $call(); // expected fatal
+    // $call = array('G','self::meth'); $call();   // expected fatal
     // $call = array('G','static::meth'); $call(); // expected fatal
     echo "****************\n";
     $b = new B;
@@ -232,55 +232,55 @@ class C extends B {
 
 
     echo "****************\n";
-    $call = array('B','meth'); $call(); // B B
-    $call = array('C','meth'); $call(); // C C
-    $call = array('D','meth'); $call(); // D D
-    $call = array('F','meth'); $call(); // F F
-    $call = array('G','meth'); $call(); // G G
-    $call = array('H','meth'); $call(); // H H
-    $call = array('parent','meth'); $call(); // B D
-    $call = array('self','meth'); $call();   // C D
-    $call = array('static','meth'); $call(); // D D
+    // $call = array('B','meth'); $call(); // expected fatal
+    // $call = array('C','meth'); $call(); // expected fatal
+    // $call = array('D','meth'); $call(); // expected fatal
+    // $call = array('F','meth'); $call(); // expected fatal
+    // $call = array('G','meth'); $call(); // expected fatal
+    // $call = array('H','meth'); $call(); // expected fatal
+    // $call = array('parent','meth'); $call(); // expected fatal
+    // $call = array('self','meth'); $call();   // expected fatal
+    // $call = array('static','meth'); $call(); // expected fatal
     echo "****************\n";
 
-    call_user_func(array('B','C::meth')); // warning
-    call_user_func(array('B','D::meth')); // warning
-    call_user_func(array('B','F::meth')); // warning
-    call_user_func(array('B','G::meth')); // warning
-    call_user_func(array('B','H::meth')); // warning
+    // call_user_func(array('B','C::meth')); // expected fatal
+    // call_user_func(array('B','D::meth')); // expected fatal
+    // call_user_func(array('B','F::meth')); // expected fatal
+    // call_user_func(array('B','G::meth')); // expected fatal
+    // call_user_func(array('B','H::meth')); // expected fatal
 
 
 
     echo "****************\n";
-    $call = array('B','B::meth'); $call(); // B B
+    // $call = array('B','B::meth'); $call(); // expected fatal
     // $call = array('B','C::meth'); $call(); // expected fatal
     // $call = array('B','D::meth'); $call(); // expected fatal
     // $call = array('B','F::meth'); $call(); // expected fatal
     // $call = array('B','G::meth'); $call(); // expected fatal
     // $call = array('B','H::meth'); $call(); // expected fatal
-    $call = array('B','parent::meth'); $call(); // A D
-    $call = array('B','self::meth'); $call();   // B D
+    // $call = array('B','parent::meth'); $call(); // expected fatal
+    // $call = array('B','self::meth'); $call();   // expected fatal
     // $call = array('B','static::meth'); $call(); // expected fatal
     echo "****************\n";
-    call_user_func(array('G','B::meth')); // warning
-    call_user_func(array('G','C::meth')); // warning
-    call_user_func(array('G','D::meth')); // warning
+    // call_user_func(array('G','B::meth')); // expected fatal
+    // call_user_func(array('G','C::meth')); // expected fatal
+    // call_user_func(array('G','D::meth')); // expected fatal
 
 
-    call_user_func(array('G','H::meth')); // warning
+    // call_user_func(array('G','H::meth')); // expected fatal
 
 
 
     echo "****************\n";
-    // $call = array('G','B::meth'); $call(); // warning
-    // $call = array('G','C::meth'); $call(); // warning
-    // $call = array('G','D::meth'); $call(); // warning
-    $call = array('G','F::meth'); $call(); // F F
-    $call = array('G','G::meth'); $call(); // G G
-    // $call = array('G','H::meth'); $call(); // warning
-    $call = array('G','parent::meth'); $call(); // F F   (Zend: F D) (Rule 4)
-    $call = array('G','self::meth'); $call();   // G G   (Zend: G D) (Rule 4)
-    // $call = array('G','static::meth'); $call(); // warning
+    // $call = array('G','B::meth'); $call(); // expected fatal
+    // $call = array('G','C::meth'); $call(); // expected fatal
+    // $call = array('G','D::meth'); $call(); // expected fatal
+    // $call = array('G','F::meth'); $call(); // expected fatal
+    // $call = array('G','G::meth'); $call(); // expected fatal
+    // $call = array('G','H::meth'); $call(); // expected fatal
+    // $call = array('G','parent::meth'); $call(); // expected fatal
+    // $call = array('G','self::meth'); $call();   // expected fatal
+    // $call = array('G','static::meth'); $call(); // expected fatal
     echo "****************\n";
     $b = new B;
     call_user_func(array($b,'meth'));    // B B B

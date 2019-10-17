@@ -169,14 +169,14 @@ class F extends A {
 async function positive_tests() {
   try { $x = 'func'; $x(); } catch (Exception $e) { wrap($e); }
   try { $x = 'async_func'; await $x(); } catch (Exception $e) { wrap($e); }
-  try { $x = 'A::func'; $x(); } catch (Exception $e) { wrap($e); }
+  //try { $x = 'A::func'; $x(); } catch (Exception $e) { wrap($e); } // fatal
   try { $x = 'A::static_func'; $x(); } catch (Exception $e) { wrap($e); }
-  try { $x = 'A::async_func'; await $x(); } catch (Exception $e) { wrap($e); }
+  //try { $x = 'A::async_func'; await $x(); } catch (Exception $e) { wrap($e); } // fatal
   try { $x = 'A::static_async_func'; await $x(); } catch (Exception $e) { wrap($e); }
 
-  try { $x = ['A', 'func']; $x(); } catch (Exception $e) { wrap($e); }
+  //try { $x = ['A', 'func']; $x(); } catch (Exception $e) { wrap($e); }
   try { $x = ['A', 'static_func']; $x(); } catch (Exception $e) { wrap($e); }
-  try { $x = ['A', 'async_func']; await $x(); } catch (Exception $e) { wrap($e); }
+  //try { $x = ['A', 'async_func']; await $x(); } catch (Exception $e) { wrap($e); }
   try { $x = ['A', 'static_async_func']; await $x(); } catch (Exception $e) { wrap($e); }
 
   try { $x = [new A, 'func']; $x(); } catch (Exception $e) { wrap($e); }
@@ -206,10 +206,10 @@ async function positive_tests() {
   try { $obj = new C; $x = 'foobar'; $obj->$x(); } catch (Exception $e) { wrap($e); }
 
   try { array_map('func', [true]); } catch (Exception $e) { wrap($e); }
-  try { array_map('A::func', [true]); } catch (Exception $e) { wrap($e); }
+  //try { array_map('A::func', [true]); } catch (Exception $e) { wrap($e); }
   try { array_map('A::static_func', [true]); } catch (Exception $e) { wrap($e); }
 
-  try { array_map(['A', 'func'], [true]); } catch (Exception $e) { wrap($e); }
+  //try { array_map(['A', 'func'], [true]); } catch (Exception $e) { wrap($e); }
   try { array_map(['A', 'static_func'], [true]); } catch (Exception $e) { wrap($e); }
 
   try { array_map([new A, 'func'], [true]); } catch (Exception $e) { wrap($e); }
@@ -345,14 +345,14 @@ async function negative_tests() {
 
   $x = 'func2'; $x();
   $x = 'async_func2'; await $x();
-  $x = 'A::func2'; $x();
+  //$x = 'A::func2'; $x(); // fatal
   $x = 'A::static_func2'; $x();
-  $x = 'A::async_func2'; await $x();
+  //$x = 'A::async_func2'; await $x(); // fatal
   $x = 'A::static_async_func2'; await $x();
 
-  $x = ['A', 'func2']; $x();
+  //$x = ['A', 'func2']; $x(); // fatal
   $x = ['A', 'static_func2']; $x();
-  $x = ['A', 'async_func2']; await $x();
+  //$x = ['A', 'async_func2']; await $x(); // fatal
   $x = ['A', 'static_async_func2']; await $x();
 
   $x = [new A, 'func2']; $x();
@@ -379,10 +379,10 @@ async function negative_tests() {
   $obj = new E; $x = 'foobar'; $obj->$x();
 
   array_map('func2', [true]);
-  array_map('A::func2', [true]);
+  //array_map('A::func2', [true]); // fatal
   array_map('A::static_func2', [true]);
 
-  array_map(['A', 'func2'], [true]);
+  //array_map(['A', 'func2'], [true]); // fatal
   array_map(['A', 'static_func2'], [true]);
 
   array_map([new A, 'func2'], [true]);

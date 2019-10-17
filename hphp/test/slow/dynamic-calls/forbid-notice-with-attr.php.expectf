@@ -7,8 +7,6 @@ Notice: 'A::foo' called dynamically without using a function pointer in %s/forbi
 
 Notice: 'A::bar' called dynamically without using a function pointer in %s/forbid-notice-with-attr.php on line 32
 
-Warning: Decoding instance method foo without $this! in %s/forbid-notice-with-attr.php on line 33
-
 Notice: 'A::foo' called dynamically without using a function pointer in %s/forbid-notice-with-attr.php on line 33
 ======== Negative tests (no notices) ========
 
@@ -20,8 +18,6 @@ Notice: 'corge' called dynamically but is not __DynamicallyCallable in %s/forbid
 Notice: 'A1::corge' called dynamically but is not __DynamicallyCallable in %s/forbid-notice-with-attr.php on line 49
 
 Notice: 'A1::flob' called dynamically but is not __DynamicallyCallable in %s/forbid-notice-with-attr.php on line 50
-
-Warning: Decoding instance method corge without $this! in %s/forbid-notice-with-attr.php on line 51
 
 Notice: 'A1::corge' called dynamically but is not __DynamicallyCallable in %s/forbid-notice-with-attr.php on line 51
 ======== Not marked dynamic ========

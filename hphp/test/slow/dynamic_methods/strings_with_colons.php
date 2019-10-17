@@ -1,10 +1,10 @@
 <?hh
 
 class W {
-  public function dyn() {
-    var_dump(static::class);
-    var_dump(isset($this) ? $this : null);
-  }
+
+
+
+
   public static function stc() {
     var_dump(static::class);
   }
@@ -42,6 +42,6 @@ function test_all($str) {
 <<__EntryPoint>>
 function main_strings_with_colons() {
 test_all("stc");
-test_all("dyn");
+
 X::sbar("W::non");
 }

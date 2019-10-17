@@ -26,7 +26,7 @@ function main_callable_bad() {
     dict[0 => 'A'],
     dict[2 => 'meth', 0 => new A],
     dict[0 => A::class, 1 => 'func3'],
-    dict[1 => 'meth', 0 => 'A'],
+    dict[1 => 'meth', 0 => new A],
   ];
   $tests = vec[];
   foreach (varray['call1', 'call2', 'call3'] as $t) {

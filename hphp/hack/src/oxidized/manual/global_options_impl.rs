@@ -38,7 +38,6 @@ impl Default for GlobalOptions {
             tco_disallow_array_literal: false,
             tco_language_feature_logging: false,
             tco_unsafe_rx: false,
-            tco_disallow_unset_on_varray: false,
             tco_disallow_scrutinee_case_value_type_mismatch: false,
             tco_new_inference_lambda: false,
             tco_timeout: 0,

@@ -1,5 +1,5 @@
 File "unset_const_prop.php", line 28, characters 3-32:
-In strict mode, unset is banned except on dynamic, array, keyset, or dict indexing (Typing[4135])
+In strict mode, unset is banned except on dynamic, darray, keyset, or dict indexing (Typing[4135])
 File "unset_const_prop.php", line 27, characters 12-15:
 Cannot mutate a __Const property (Typing[4196])
 File "unset_const_prop.php", line 28, characters 12-15:

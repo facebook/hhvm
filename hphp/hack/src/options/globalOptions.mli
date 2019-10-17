@@ -115,10 +115,6 @@ type t = {
    *)
   tco_unsafe_rx: bool;
   (*
-   * Flag to disable unsetting on varray / varray_or_darray.
-   *)
-  tco_disallow_unset_on_varray: bool;
-  (*
    * When enabled, mismatches between the types of the scrutinee and case value
    * of a switch expression are reported as type errors.
    *)
@@ -269,7 +265,6 @@ val make :
   ?tco_disallow_array_literal:bool ->
   ?tco_language_feature_logging:bool ->
   ?tco_unsafe_rx:bool ->
-  ?tco_disallow_unset_on_varray:bool ->
   ?tco_disallow_scrutinee_case_value_type_mismatch:bool ->
   ?tco_new_inference_lambda:bool ->
   ?tco_timeout:int ->
@@ -376,8 +371,6 @@ val tco_disallow_array_literal : t -> bool
 val tco_language_feature_logging : t -> bool
 
 val tco_unsafe_rx : t -> bool
-
-val tco_disallow_unset_on_varray : t -> bool
 
 val tco_disallow_scrutinee_case_value_type_mismatch : t -> bool
 

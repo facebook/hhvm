@@ -187,7 +187,6 @@ let parse_options () =
   let no_fallback_in_namespaces = ref None in
   let dynamic_view = ref None in
   let allow_user_attributes = ref None in
-  let disallow_unset_on_varray = ref None in
   let auto_namespace_map = ref None in
   let unsafe_rx = ref (Some false) in
   let log_inference_constraints = ref None in
@@ -365,9 +364,6 @@ let parse_options () =
       ( "--dynamic-view",
         Arg.Unit (set_bool dynamic_view),
         " Turns on dynamic view, replacing Tany with dynamic" );
-      ( "--disallow-unset-on-varray",
-        Arg.Unit (set_bool disallow_unset_on_varray),
-        " Disallow unsetting indices from varrays" );
       ( "--unsafe-rx",
         Arg.Unit (set_bool unsafe_rx),
         " Disables reactivity related errors" );
@@ -534,7 +530,6 @@ let parse_options () =
       ?tco_disallow_array_typehint:!disallow_array_typehint
       ?tco_disallow_array_literal:!disallow_array_literal
       ?tco_dynamic_view:!dynamic_view
-      ?tco_disallow_unset_on_varray:!disallow_unset_on_varray
       ?tco_log_inference_constraints:!log_inference_constraints
       ?tco_new_inference_lambda:!new_inference_lambda
       ?tco_timeout:!timeout

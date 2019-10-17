@@ -2721,17 +2721,7 @@ let unset_nonidx_in_strict pos msgs =
     (Typing.err_code Typing.UnsetNonidxInStrict)
     ( [
         ( pos,
-          "In strict mode, unset is banned except on dynamic, array, keyset, "
-          ^ "or dict indexing" );
-      ]
-    @ msgs )
-
-let unset_nonidx_in_strict_no_varray pos msgs =
-  add_list
-    (Typing.err_code Typing.UnsetNonidxInStrict)
-    ( [
-        ( pos,
-          "In strict mode, unset is banned except on dynamic, dict-like array, "
+          "In strict mode, unset is banned except on dynamic, "
           ^ "darray, keyset, or dict indexing" );
       ]
     @ msgs )

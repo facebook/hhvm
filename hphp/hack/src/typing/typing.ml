@@ -4801,18 +4801,9 @@ and dispatch_call
     let (env, tel, _) = exprs env el in
     if uel <> [] then
       Errors.unpacking_disallowed_builtin_function p pseudo_func;
-    let disallow_varray =
-      TypecheckerOptions.disallow_unset_on_varray (Env.get_tcopt env)
-    in
-    let unset_error =
-      if disallow_varray then
-        Errors.unset_nonidx_in_strict_no_varray
-      else
-        Errors.unset_nonidx_in_strict
-    in
     let checked_unset_error =
       if Partial.should_check_error (Env.get_mode env) 4135 then
-        unset_error
+        Errors.unset_nonidx_in_strict
       else
         fun _ _ ->
       ()
@@ -4834,10 +4825,7 @@ and dispatch_call
                 MakeType.dynamic r;
                 MakeType.dict r tmixed tmixed;
                 MakeType.keyset r tmixed;
-                ( if disallow_varray then
-                  (r, Tarraykind (AKdarray (tmixed, tmixed)))
-                else
-                  (r, Tarraykind AKany) );
+                (r, Tarraykind (AKdarray (tmixed, tmixed)));
               ] )
         in
         Errors.try_

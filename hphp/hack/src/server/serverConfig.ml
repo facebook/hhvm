@@ -316,8 +316,6 @@ let load config_filename options =
       ?tco_language_feature_logging:
         (bool_opt "language_feature_logging" config)
       ?tco_unsafe_rx:(bool_opt "unsafe_rx" config)
-      ?tco_disallow_unset_on_varray:
-        (bool_opt "disallow_unset_on_varray" config)
       ?tco_disallow_scrutinee_case_value_type_mismatch:
         (bool_opt "disallow_scrutinee_case_value_type_mismatch" config)
       ?tco_new_inference_lambda:(bool_opt "new_inference_lambda" config)

@@ -694,19 +694,6 @@ Variant o_invoke_failed(const char *cls, const char *meth,
   }
 }
 
-template<class EF, class NF>
-void missing_this_check_helper(const Func* f, EF ef, NF nf) {
-  if (f->attrs() & AttrRequiresThis) {
-    ef();
-    return;
-  }
-
-  if (!f->isStatic()) {
-    nf();
-    return;
-  }
-}
-
 void throw_has_this_need_static(const Func* f) {
   auto const msg = folly::sformat(
     "Static method {}() cannot be called on instance",

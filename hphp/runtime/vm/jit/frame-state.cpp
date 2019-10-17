@@ -601,9 +601,6 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     break;
   }
 
-  case CheckCtxThis:
-    break;
-
   case IterInitK:
   case LIterInitK:
     // kill the locals to which this instruction stores iter's key and value

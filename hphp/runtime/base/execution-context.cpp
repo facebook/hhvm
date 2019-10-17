@@ -1285,7 +1285,7 @@ bool checkPopc(Op op, PC lastOp) {
 }
 
 void pseudomainHelper(const Unit* unit, bool callByHPHPInvoke) {
-  auto pseudomain = unit->getMain(nullptr);
+  auto pseudomain = unit->getMain(nullptr, false);
   auto e = pseudomain->getEntry();
   bool isLast = false;
   PC lastOp = e;
@@ -1336,7 +1336,7 @@ TypedValue ExecutionContext::invokeUnit(const Unit* unit,
     throw PhpNotSupportedException(unit->filepath()->data());
   }
 
-  auto ret = invokePseudoMain(unit->getMain(nullptr), m_globalVarEnv);
+  auto ret = invokePseudoMain(unit->getMain(nullptr, false), m_globalVarEnv);
 
   pseudomainHelper(unit, callByHPHPInvoke);
 
@@ -1923,12 +1923,13 @@ bool ExecutionContext::evalUnit(Unit* unit, PC callPC, PC& pc, int funcType) {
 
   ActRec* ar = vmStack().allocA();
   auto const cls = vmfp()->func()->cls();
-  auto const func = unit->getMain(cls);
+  auto const hasThis = cls && !vmfp()->func()->isStatic();
+  auto const func = unit->getMain(cls, hasThis);
   assertx(!func->isCPPBuiltin());
   ar->m_func = func;
   if (cls) {
     ar->setThisOrClass(vmfp()->getThisOrClass());
-    if (ar->hasThis()) ar->getThis()->incRefCount();
+    if (hasThis) ar->getThis()->incRefCount();
   } else {
     ar->trashThis();
   }
@@ -1983,7 +1984,7 @@ Variant ExecutionContext::getEvaledArg(const StringData* val,
   assertx(unit != nullptr);
   // Default arg values are not currently allowed to depend on class context.
   auto v = Variant::attach(
-    g_context->invokePseudoMain(unit->getMain(nullptr))
+    g_context->invokePseudoMain(unit->getMain(nullptr, false))
   );
   auto const lv = m_evaledArgs.lvalForce(key, AccessFlags::Key);
   tvSet(*v.asTypedValue(), lv);
@@ -2183,7 +2184,7 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
     // current function on the stack, optionally passing a this pointer or
     // class used to execute the current function.
     return {false, Variant::attach(
-      invokePseudoMain(unit->getMain(functionClass),
+      invokePseudoMain(unit->getMain(functionClass, this_),
                        fp ? fp->m_varEnv : nullptr, this_, frameClass)
     ), ""};
   } catch (FatalErrorException& e) {
@@ -2238,7 +2239,7 @@ void ExecutionContext::enterDebuggerDummyEnv() {
   assertx(m_nesting == 0);
   assertx(vmStack().count() == 0);
   ActRec* ar = vmStack().allocA();
-  ar->m_func = s_debuggerDummy->getMain(nullptr);
+  ar->m_func = s_debuggerDummy->getMain(nullptr, false);
   ar->initNumArgs(0);
   ar->trashThis();
   ar->setReturnVMExit();

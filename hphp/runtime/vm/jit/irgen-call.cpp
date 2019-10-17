@@ -540,7 +540,7 @@ inline SSATmp* ldCtxForClsMethod(IRGS& env,
   }
 
   auto skipAT = [] (SSATmp* val) {
-    while (val->inst()->is(AssertType, CheckType, CheckCtxThis)) {
+    while (val->inst()->is(AssertType, CheckType)) {
       val = val->inst()->src(0);
     }
     return val;

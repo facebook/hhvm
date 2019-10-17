@@ -1172,11 +1172,6 @@ To string conversions:
   is a closure object of type T.  Unlike LdCtx and LdCctx, there are no special
   rules about the relative positions of LdClosure and InitCtx instructions.
 
-| CheckCtxThis, ND, S(Ctx), B
-
-  Check that the context (m_this or m_cls) in S0 is a non-null $this
-  pointer. If not, branch to B.
-
 | LdClsCtx, DCtxCls, S(Ctx), NF
 
   Loads into D the class representing the context in S0, which can be either

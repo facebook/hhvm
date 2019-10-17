@@ -577,7 +577,6 @@ bool opcodeMayRaise(Opcode opc) {
   case Ceil:
   case CheckArrayCOW:
   case CheckCold:
-  case CheckCtxThis:
   case CheckDArray:
   case CheckDictOffset:
   case CheckInit:

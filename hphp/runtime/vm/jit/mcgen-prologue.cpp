@@ -77,16 +77,6 @@ TCA checkCachedPrologue(const Func* func, int paramIdx) {
   return nullptr;
 }
 
-template <class F>
-void withThis(const Func* func, F f) {
-  if (!func->hasThisVaries()) {
-    f(func->mayHaveThis());
-    return;
-  }
-  f(true);
-  f(false);
-}
-
 /**
  * Given the proflogueTransId for a TransProflogue translation, regenerate the
  * prologue (as a TransPrologue).
@@ -125,26 +115,25 @@ bool regeneratePrologue(TransID prologueTransId, tc::FuncMetaInfo& info) {
     auto paramInfo = func->params()[nArgs];
     if (paramInfo.hasDefaultValue()) {
       bool ret = false;
-      auto genPrologue = [&] (bool hasThis) {
-        SrcKey funcletSK(func, paramInfo.funcletOff, ResumeMode::None, hasThis);
-        if (profData()->optimized(funcletSK)) return;
+      SrcKey funcletSK(func, paramInfo.funcletOff, ResumeMode::None, func->hasThisInBody());
+      if (!profData()->optimized(funcletSK)) {
         auto funcletTransId = profData()->dvFuncletTransId(funcletSK);
-        if (funcletTransId == kInvalidTransID) return;
-        auto args = TransArgs{funcletSK};
-        args.transId = funcletTransId;
-        args.kind = TransKind::Optimize;
-        args.region = selectHotRegion(funcletTransId);
-        auto const spOff = args.region->entry()->initialSpOffset();
-        tc::createSrcRec(funcletSK, spOff);
-        if (auto res = translate(args, spOff, info.tcBuf.view())) {
-          // Flag that this translation has been retranslated, so that
-          // it's not retranslated again along with the function body.
-          profData()->setOptimized(funcletSK);
-          ret = true;
-          info.add(std::move(res.value()));
+        if (funcletTransId != kInvalidTransID) {
+          auto args = TransArgs{funcletSK};
+          args.transId = funcletTransId;
+          args.kind = TransKind::Optimize;
+          args.region = selectHotRegion(funcletTransId);
+          auto const spOff = args.region->entry()->initialSpOffset();
+          tc::createSrcRec(funcletSK, spOff);
+          if (auto res = translate(args, spOff, info.tcBuf.view())) {
+            // Flag that this translation has been retranslated, so that
+            // it's not retranslated again along with the function body.
+            profData()->setOptimized(funcletSK);
+            ret = true;
+            info.add(std::move(res.value()));
+          }
         }
-      };
-      withThis(func, genPrologue);
+      }
       if (ret) return true;
     }
   }
@@ -194,16 +183,10 @@ bool regeneratePrologues(Func* func, tc::FuncMetaInfo& info) {
     return SrcKey{func, func->base(), ResumeMode::None, hasThis};
   };
   if (!includedBody) {
-    withThis(func,
-            [&] (bool hasThis) {
-              profData()->setOptimized(funcBodySk(hasThis));
-            });
+    profData()->setOptimized(funcBodySk(func->hasThisInBody()));
   }
   SCOPE_EXIT{
-    withThis(func,
-             [&] (bool hasThis) {
-               profData()->clearOptimized(funcBodySk(hasThis));
-             });
+    profData()->clearOptimized(funcBodySk(func->hasThisInBody()));
   };
 
   bool emittedAnyDVInit = false;

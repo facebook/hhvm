@@ -1618,22 +1618,8 @@ const StaticString
   s_debugInfo("__debugInfo"),
   s_clone("__clone");
 
-static Func* markNonStatic(Func* meth) {
-  // Do not use isStaticInPrologue here, since that uses the
-  // AttrRequiresThis flag.
-  if (meth && (!meth->isStatic() || meth->isClosureBody() ||
-      s_construct.equal(meth->name()))) {
-    meth->setAttrs(meth->attrs() | AttrRequiresThis);
-  }
-  return meth;
-}
-
-static Func* markNonStatic(const Class* thiz, const String& meth) {
-  return markNonStatic(thiz->lookupMethod(meth.get()));
-}
-
 void Class::setSpecial() {
-  m_toString = markNonStatic(this, s_toString);
+  m_toString = lookupMethod(s_toString.get());
 
   /*
    * The invoke method is only cached in the Class for a fast path JIT
@@ -1647,7 +1633,7 @@ void Class::setSpecial() {
    * here.  (The closure prologue uninstalls the $this and installs
    * the appropriate static context.)
    */
-  m_invoke = markNonStatic(this, s_invoke);
+  m_invoke = lookupMethod(s_invoke.get());
   if (m_invoke && m_invoke->isStaticInPrologue()) {
     m_invoke = nullptr;
   }
@@ -2054,18 +2040,12 @@ void Class::setMethods() {
  */
 void Class::setRTAttributes() {
   m_RTAttrs = 0;
-  if (lookupMethod(s_sleep.get()     )) { m_RTAttrs |= Class::HasSleep; }
-  if (markNonStatic(this, s_get      )) { m_RTAttrs |= Class::UseGet;   }
-  if (markNonStatic(this, s_set      )) { m_RTAttrs |= Class::UseSet;   }
-  if (markNonStatic(this, s_isset    )) { m_RTAttrs |= Class::UseIsset; }
-  if (markNonStatic(this, s_unset    )) { m_RTAttrs |= Class::UseUnset; }
-  if (markNonStatic(this, s_clone    )) { m_RTAttrs |= Class::HasClone; }
-
-  markNonStatic(this, s_call);
-  markNonStatic(this, s_debugInfo);
-  if (!((attrs() & AttrAbstract) && (attrs() & AttrFinal))) {
-    markNonStatic(m_ctor);
-  }
+  if (lookupMethod(s_sleep.get())) { m_RTAttrs |= Class::HasSleep; }
+  if (lookupMethod(s_get.get()  )) { m_RTAttrs |= Class::UseGet;   }
+  if (lookupMethod(s_set.get()  )) { m_RTAttrs |= Class::UseSet;   }
+  if (lookupMethod(s_isset.get())) { m_RTAttrs |= Class::UseIsset; }
+  if (lookupMethod(s_unset.get())) { m_RTAttrs |= Class::UseUnset; }
+  if (lookupMethod(s_clone.get())) { m_RTAttrs |= Class::HasClone; }
 
   if ((isBuiltin() && Native::getNativePropHandler(name())) ||
       (m_parent && m_parent->hasNativePropHandler())) {

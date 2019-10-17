@@ -695,7 +695,7 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
     assertx(ix == fe->id());
     mi->mergeableObj(ix++) = func;
   }
-  assertx(u->getMain(nullptr)->isPseudoMain());
+  assertx(u->getMain(nullptr, false)->isPseudoMain());
   if (!mi->m_firstHoistableFunc) {
     mi->m_firstHoistableFunc =  ix;
   }

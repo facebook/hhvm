@@ -415,19 +415,15 @@ Type ctxReturn(const IRInstruction* inst) {
     ? inst->extra<LdClosureCtx>()->func : inst->func();
   if (!func) return TCtx;
 
-  if (func->requiresThisInBody()) {
+  if (func->hasThisInBody()) {
     return thisTypeFromFunc(func);
   }
-  if (func->hasForeignThis()) {
-    return func->isStatic() ? TCctx : TCtx;
+  assertx(func->isStatic());
+  auto const cls = func->cls();
+  if (!func->hasForeignThis() && (cls->attrs() & AttrNoOverride)) {
+    return Type::cns(ConstCctx::cctx(cls));
   }
-  if (inst->is(LdCctx) || func->isStatic()) {
-    if (func->cls()->attrs() & AttrNoOverride) {
-      return Type::cns(ConstCctx::cctx(func->cls()));
-    }
-    return TCctx;
-  }
-  return thisTypeFromFunc(func) | TCctx;
+  return TCctx;
 }
 
 Type ctxClsReturn(const IRInstruction* inst) {

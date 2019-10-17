@@ -562,7 +562,6 @@ void Func::print_attrs(std::ostream& out, Attr attrs) {
   if (attrs & AttrInterceptable) { out << " (interceptable)"; }
   if (attrs & AttrPersistent) { out << " (persistent)"; }
   if (attrs & AttrMayUseVV) { out << " (mayusevv)"; }
-  if (attrs & AttrRequiresThis) { out << " (requiresthis)"; }
   if (attrs & AttrBuiltin) { out << " (builtin)"; }
   if (attrs & AttrIsFoldable) { out << " (foldable)"; }
   if (attrs & AttrNoInjection) { out << " (no_injection)"; }
@@ -726,7 +725,6 @@ void logFunc(const Func* func, StructuredLogEntry& ent) {
   if (func->isPairGenerator()) attrSet.emplace("pair_generator");
   if (func->hasVariadicCaptureParam()) attrSet.emplace("variadic_param");
   if (func->attrs() & AttrMayUseVV) attrSet.emplace("may_use_vv");
-  if (func->attrs() & AttrRequiresThis) attrSet.emplace("must_have_this");
   if (func->isPhpLeafFn()) attrSet.emplace("leaf_function");
   if (func->cls() && func->cls()->isPersistent()) attrSet.emplace("persistent");
 

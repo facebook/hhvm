@@ -257,7 +257,7 @@ void beginInlining(IRGS& env,
       return gen(env, AssertType, ty, clsCtx);
     }
 
-    if (target->attrs() & AttrRequiresThis ||
+    if ((target->cls() && !target->isStatic()) ||
         isFCallObjMethod(writeArOpc) ||
         ctx->isA(TObj)) {
       auto const ty = ctx->type() & thisTypeFromFunc(target);
@@ -372,23 +372,9 @@ void beginInlining(IRGS& env,
       );
     };
 
-    ifThenElse(
-      env,
-      [&] (Block* taken) {
-        auto const maybeThis = gen(env, LdCtx, fp(env));
-        gen(env, CheckCtxThis, taken, maybeThis);
-      },
-      [&] {
-        if (!startSk.hasThis()) {
-          sideExit(true);
-        }
-      },
-      [&] {
-        if (startSk.hasThis()) {
-          sideExit(false);
-        }
-      }
-    );
+    if (startSk.hasThis() != startSk.func()->hasThisInBody()) {
+      sideExit(startSk.func()->hasThisInBody());
+    }
 
     env.bcState = startSk;
     updateMarker(env);

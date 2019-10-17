@@ -455,7 +455,6 @@ bool canDCE(IRInstruction* inst) {
   case LdVectorBase:
   case LdPairBase:
   case CheckRefInner:
-  case CheckCtxThis:
   case DefCls:
   case LdClsCtor:
   case LdCls:

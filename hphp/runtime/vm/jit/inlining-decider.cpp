@@ -677,10 +677,8 @@ RegionDescPtr selectCalleeTracelet(const Func* callee,
   bool hasThis;
   if (ctxType <= TObj || !ctxType.maybe(TObj)) {
     hasThis = ctxType <= TObj;
-  } else if (!callee->hasThisVaries()) {
-    hasThis = callee->mayHaveThis();
   } else {
-    return RegionDescPtr{};
+    hasThis = callee->hasThisInBody();
   }
 
   // Set up the RegionContext for the tracelet selector.
@@ -723,18 +721,14 @@ TransID findTransIDForCallee(const ProfData* profData,
 
   auto const offset = callee->getEntryForNumArgs(numArgs);
   TransID ret = kInvalidTransID;
-  bool hasThisVaries = callee->hasThisVaries() &&
-    ctxType.maybe(TObj) && !(ctxType <= TObj);
-  FTRACE(2, "findTransIDForCallee: offset={}  hasThisVaries={}\n",
-         offset, hasThisVaries);
+  FTRACE(2, "findTransIDForCallee: offset={}\n", offset);
   for (auto const id : idvec) {
     auto const rec = profData->transRec(id);
     if (rec->startBcOff() != offset) continue;
     auto const region = rec->region();
 
     auto const isvalid = [&] () {
-      if (!hasThisVaries &&
-          (rec->srcKey().hasThis() != ctxType.maybe(TObj))) {
+      if (rec->srcKey().hasThis() != ctxType.maybe(TObj)) {
         return false;
       }
       for (auto const& typeloc : region->entry()->typePreConditions()) {
@@ -833,8 +827,8 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
   if (callee->isClosureBody()) {
     if (!callee->cls()) {
       ctxType = TNullptr;
-    } else if (callee->mayHaveThis()) {
-      ctxType = TCtx;
+    } else if (callee->hasThisInBody()) {
+      ctxType = TObj;
     } else {
       ctxType = TCctx;
     }

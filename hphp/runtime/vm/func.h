@@ -658,29 +658,12 @@ struct Func final {
 
   /*
    * Whether a method is guaranteed to have a valid this in the body.
-   * A method with AttrRequiresThis is guaranteed to be called with a
-   * valid this, but closures swap out the closure object for the
-   * closure context in the prologue, so may not have a this in the
-   * body.
+   * A method which is !isStatic() || isClosureBody() is guaranteed to
+   * be called with a valid this, but closures swap out the closure
+   * object for the closure context in the prologue, so may not have
+   * a this in the body.
    */
-  bool requiresThisInBody() const;
-
-  /*
-   * Whether the function could sometimes have this, and sometimes not
-   * depending on how it's called.
-   */
-  bool hasThisVaries() const;
-
-  /*
-   * Could this function have a valid $this?
-   *
-   * Instance methods certainly have $this, but pseudomains may as well, if
-   * they were included in the context of an instance method definition.
-   *
-   * Note that closure __invoke() methods that are scoped outside the context
-   * of a class (e.g., in a toplevel non-method function) may /not/ have $this.
-   */
-  bool mayHaveThis() const;
+  bool hasThisInBody() const;
 
   /*
    * Is this Func owned by a PreClass?

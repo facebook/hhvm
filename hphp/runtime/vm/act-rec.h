@@ -279,8 +279,7 @@ struct ActRec {
   /*
    * Encode and set `val' to m_this/m_cls
    *
-   * @requires: m_func->implClass() and
-   *            !(m_func->attrs() & AttrRequiresThis)
+   * @requires: m_func->implClass() and m_func->isStaticInPrologue()
    */
   void setClass(Class* val);
 

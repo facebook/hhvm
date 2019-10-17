@@ -272,7 +272,7 @@ AutoloadHandler::loadFromMapImpl(const String& clsName,
                                  RuntimeOption::TrustAutoloaderPath);
     if (unit) {
       if (initial) {
-        tvDecRefGen(ec->invokePseudoMain(unit->getMain(nullptr)));
+        tvDecRefGen(ec->invokePseudoMain(unit->getMain(nullptr, false)));
       }
       ok = true;
     }

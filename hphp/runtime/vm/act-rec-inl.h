@@ -170,7 +170,7 @@ inline void ActRec::setThis(ObjectData* val) {
 }
 
 inline void ActRec::setClass(Class* val) {
-  assertx(val && m_func->implCls() && !(m_func->attrs() & AttrRequiresThis));
+  assertx(val && m_func->implCls() && (m_func->isStaticInPrologue()));
   m_clsUnsafe = reinterpret_cast<Class*>(
     reinterpret_cast<uintptr_t>(val) | kHasClassBit);
 }

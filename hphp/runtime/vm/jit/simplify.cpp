@@ -289,24 +289,11 @@ SSATmp* mergeBranchDests(State& env, const IRInstruction* inst) {
                    CheckMixedArrayOffset,
                    CheckDictOffset,
                    CheckKeysetOffset,
-                   CheckRefInner,
-                   CheckCtxThis));
+                   CheckRefInner));
   if (inst->next() != nullptr && inst->next() == inst->taken()) {
     return gen(env, Jmp, inst->next());
   }
   return nullptr;
-}
-
-SSATmp* simplifyCheckCtxThis(State& env, const IRInstruction* inst) {
-  auto const func = inst->marker().func();
-  auto const srcTy = inst->src(0)->type();
-  if (srcTy <= TObj || func->requiresThisInBody()) {
-    return gen(env, Nop);
-  }
-  if (!func->mayHaveThis() || !srcTy.maybe(TObj)) {
-    return gen(env, Jmp, inst->taken());
-  }
-  return mergeBranchDests(env, inst);
 }
 
 SSATmp* simplifyEqFunc(State& env, const IRInstruction* inst) {
@@ -3965,7 +3952,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(LdVecElem)
   X(LdPackedElem)
   X(MethodExists)
-  X(CheckCtxThis)
   X(FuncHasAttr)
   X(IsClsDynConstructible)
   X(LdFuncRxLevel)

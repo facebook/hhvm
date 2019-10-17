@@ -64,21 +64,6 @@ void cgConvClsToCctx(IRLS& env, const IRInstruction* inst) {
   v << orqi{ActRec::kHasClassBit, cls, dst, v.makeReg()};
 }
 
-void cgCheckCtxThis(IRLS& env, const IRInstruction* inst) {
-  auto const ctx = srcLoc(env, inst, 0).reg();
-  auto& v = vmain(env);
-
-  auto const func = inst->marker().func();
-  if (!func->mayHaveThis()) {
-    v << jmp{label(env, inst->taken())};
-    return;
-  }
-
-  auto const sf = v.makeReg();
-  v << testqi{ActRec::kHasClassBit, ctx, sf};
-  v << jcc{CC_NZ, sf, {label(env, inst->next()), label(env, inst->taken())}};
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 }}}

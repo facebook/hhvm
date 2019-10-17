@@ -1,0 +1,8 @@
+object(Foo) (0) {
+}
+string(3) "Foo"
+NULL
+string(3) "Foo"
+NULL
+
+Fatal error: Cannot access static:: when no class scope is active in %s/this-in-pseudomain.inc on line 4

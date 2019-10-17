@@ -1007,7 +1007,7 @@ inline void decRefLocalsInline(IRGS& env) {
 }
 
 inline void decRefThis(IRGS& env) {
-  if (!curFunc(env)->mayHaveThis()) return;
+  if (!curFunc(env)->hasThisInBody()) return;
   auto const ctx = ldCtx(env);
   decRef(env, ctx);
 }

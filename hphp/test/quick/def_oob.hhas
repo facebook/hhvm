@@ -29,7 +29,7 @@
   }
 }
 .class [unique] C extends Closure {
-  .method [public] __invoke() isClosureBody {
+  .method [static public] __invoke() isClosureBody {
     Int 1
     RetC
   }

@@ -168,9 +168,6 @@ enum Attr {
                                          //       |          |         //
   AttrIsMethCaller         = (1u << 24), //       |          |    X    //
                                          //       |          |         //
-  // Is this a (non-static) method that *must* have a non-null this?   //
-  AttrRequiresThis         = (1u << 25), //       |          |    X    //
-                                         //       |          |         //
   // Indicates that this function can be constant-folded if it is called with
   // all constant arguments.             //       |          |         //
   AttrIsFoldable           = (1u << 26), //       |          |    X    //

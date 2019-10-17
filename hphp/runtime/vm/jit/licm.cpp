@@ -438,15 +438,6 @@ bool try_hoistable_as_side_exit(LoopEnv& env, IRInstruction& inst) {
   return true;
 }
 
-bool try_hoistable_check(LoopEnv& env, IRInstruction& inst) {
-  switch (inst.op()) {
-  case CheckCtxThis:
-    return impl_hoistable_check(env, inst);
-  default:
-    return false;
-  }
-}
-
 bool try_invariant_memory(LoopEnv& env,
                           IRInstruction& inst,
                           bool may_still_hoist_checks,
@@ -583,7 +574,6 @@ void find_invariant_code(LoopEnv& env) {
       }
 
       if (may_still_hoist_checks) {
-        if (try_hoistable_check(env, inst)) continue;
         if (may_have_side_effects(inst)) {
           FTRACE(5, "      may_still_hoist_checks = false\n");
           may_still_hoist_checks = false;

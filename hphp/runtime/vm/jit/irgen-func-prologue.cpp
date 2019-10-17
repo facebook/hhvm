@@ -47,35 +47,6 @@ namespace HPHP { namespace jit { namespace irgen {
 namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
-template <class Body>
-void prologueDispatch(IRGS& env, const Func* func, Body body) {
-  assertx(env.irb->curMarker().prologue());
-
-  if (!func->mayHaveThis()) {
-    body(false);
-    return;
-  }
-
-  if (func->requiresThisInBody()) {
-    body(true);
-    return;
-  }
-
-  ifThenElse(
-    env,
-    [&] (Block* taken) {
-      auto const ctx = gen(env, LdCtx, fp(env));
-      gen(env, CheckCtxThis, taken, ctx);
-    },
-    [&] {
-      body(true);
-    },
-    [&] {
-      hint(env, Block::Hint::Unlikely);
-      body(false);
-    }
-  );
-}
 
 /*
  * Initialize parameters.
@@ -375,24 +346,20 @@ void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID) {
     gen(env, CheckSurpriseFlagsEnter, FuncEntryData { func, argc }, fp(env));
   }
 
-  prologueDispatch(
-    env, func,
-    [&] (bool hasThis) {
-      // Emit the bindjmp for the function body.
-      gen(
-        env,
-        ReqBindJmp,
-        ReqBindJmpData {
-          SrcKey { func, func->getEntryForNumArgs(argc), ResumeMode::None,
-                   hasThis },
-          FPInvOffset { func->numSlotsInFrame() },
-          spOffBCFromIRSP(env),
-          TransFlags{}
-        },
-        sp(env),
-        fp(env)
-      );
-    }
+
+  // Emit the bindjmp for the function body.
+  gen(
+    env,
+    ReqBindJmp,
+    ReqBindJmpData {
+      SrcKey { func, func->getEntryForNumArgs(argc), ResumeMode::None,
+               func->hasThisInBody() },
+      FPInvOffset { func->numSlotsInFrame() },
+      spOffBCFromIRSP(env),
+      TransFlags{}
+    },
+    sp(env),
+    fp(env)
   );
 }
 
@@ -426,46 +393,41 @@ void emitFuncBodyDispatch(IRGS& env, const DVFuncletsVec& dvs) {
     profData()->setProfiling(func->getFuncId());
   }
 
-  prologueDispatch(
-    env, func,
-    [&] (bool hasThis) {
-      for (auto const& dv : dvs) {
-        ifThen(
+  for (auto const& dv : dvs) {
+    ifThen(
+      env,
+      [&] (Block* taken) {
+        auto const lte = gen(env, LteInt, num_args, cns(env, dv.first));
+        gen(env, JmpNZero, taken, lte);
+      },
+      [&] {
+        gen(
           env,
-          [&] (Block* taken) {
-            auto const lte = gen(env, LteInt, num_args, cns(env, dv.first));
-            gen(env, JmpNZero, taken, lte);
+          ReqBindJmp,
+          ReqBindJmpData {
+            SrcKey { func, dv.second, ResumeMode::None, func->hasThisInBody() },
+            FPInvOffset { func->numSlotsInFrame() },
+            spOffBCFromIRSP(env),
+            TransFlags{}
           },
-          [&] {
-            gen(
-              env,
-              ReqBindJmp,
-              ReqBindJmpData {
-                SrcKey { func, dv.second, ResumeMode::None, hasThis },
-                FPInvOffset { func->numSlotsInFrame() },
-                spOffBCFromIRSP(env),
-                TransFlags{}
-              },
-              sp(env),
-              fp(env)
-            );
-          }
+          sp(env),
+          fp(env)
         );
       }
+    );
+  }
 
-      gen(
-        env,
-        ReqBindJmp,
-        ReqBindJmpData {
-          SrcKey { func, func->base(), ResumeMode::None, hasThis },
-          FPInvOffset { func->numSlotsInFrame() },
-          spOffBCFromIRSP(env),
-          TransFlags{}
-        },
-        sp(env),
-        fp(env)
-      );
-    }
+  gen(
+    env,
+    ReqBindJmp,
+    ReqBindJmpData {
+      SrcKey { func, func->base(), ResumeMode::None, func->hasThisInBody() },
+      FPInvOffset { func->numSlotsInFrame() },
+      spOffBCFromIRSP(env),
+      TransFlags{}
+    },
+    sp(env),
+    fp(env)
   );
 }
 

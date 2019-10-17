@@ -1286,10 +1286,10 @@ and convert_lambda env st p fd use_vars_opt =
     match scope with
     | ScopeItem.LongLambda (is_static, _, _) :: scope ->
       is_static || is_scope_static scope
-    | ScopeItem.Function _ :: _ -> false
+    | ScopeItem.Function _ :: _ -> true
     | ScopeItem.Method md :: _ -> md.m_static
     | ScopeItem.Lambda _ :: scope -> is_scope_static scope
-    | _ -> false
+    | _ -> true
   in
   let is_static =
     let is_static =

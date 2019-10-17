@@ -318,16 +318,6 @@ SSATmp* IRBuilder::preOptimizeAssertStk(IRInstruction* inst) {
   return preOptimizeAssertLocation(inst, stk(inst->extra<AssertStk>()->offset));
 }
 
-SSATmp* IRBuilder::preOptimizeCheckCtxThis(IRInstruction* inst) {
-  auto const func = inst->marker().func();
-  if (!func->mayHaveThis()) {
-    auto const taken = inst->taken();
-    inst->convertToNop();
-    return gen(Jmp, taken);
-  }
-  return nullptr;
-}
-
 SSATmp* IRBuilder::preOptimizeLdCtxHelper(IRInstruction* inst) {
   // Change LdCtx in static functions to LdCctx, or if we're inlining try to
   // fish out a constant context.
@@ -356,7 +346,7 @@ SSATmp* IRBuilder::preOptimizeLdCtxHelper(IRInstruction* inst) {
     }
   }
 
-  if (!func->mayHaveThis()) {
+  if (!func->hasThisInBody()) {
     // ActRec->m_cls of a static function is always a valid class pointer with
     // the bottom bit set
     if (func->cls()->attrs() & AttrNoOverride) {
@@ -426,7 +416,6 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
   X(CheckMBase)
   X(LdLoc)
   X(LdStk)
-  X(CheckCtxThis)
   X(LdCtx)
   X(LdCctx)
   X(LdMBase)

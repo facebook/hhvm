@@ -1138,6 +1138,13 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
                preCls->name(), numBound, preCls->numProperties());
         return false;
       }
+      if (!m_func->pce() || (m_func->attrs & AttrStatic)) {
+        if (!(invoke->attrs & AttrStatic)) {
+          ferror("CreateCl bound Closure {} without AttrStatic in a {}\n",
+                 preCls->name(), m_func->pce() ? "static method" : "function");
+          return false;
+        }
+      }
       break;
     }
     case Op::DefTypeAlias: {
@@ -1890,8 +1897,7 @@ void FuncChecker::initState(State* s) {
   s->mbr_live = false;
   s->mbr_mode.clear();
   s->silences.clear();
-  s->guaranteedThis =
-    !m_func->isClosureBody && (m_func->attrs & AttrRequiresThis);
+  s->guaranteedThis = m_func->pce() && !(m_func->attrs & AttrStatic);
   s->mbrMustContainMutableLocalOrThis = false;
   s->afterDim = false;
 }

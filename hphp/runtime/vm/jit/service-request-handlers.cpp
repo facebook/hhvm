@@ -177,7 +177,7 @@ TCA getFuncBody(Func* func) {
   if (tca != tc::ustubs().funcBodyHelperThunk) return tca;
 
   auto const dvs = func->getDVFunclets();
-  if (dvs.size() || func->hasThisVaries()) {
+  if (dvs.size()) {
     if (UNLIKELY(RID().isJittingDisabled())) {
       TRACE(2, "punting because jitting code was disabled\n");
       return nullptr;
@@ -186,7 +186,7 @@ TCA getFuncBody(Func* func) {
                                             : TransKind::Live;
     tca = tc::emitFuncBodyDispatch(func, dvs, kind);
   } else {
-    SrcKey sk(func, func->base(), ResumeMode::None, func->mayHaveThis());
+    SrcKey sk(func, func->base(), ResumeMode::None, func->hasThisInBody());
     tca = getTranslation(TransArgs{sk});
     if (tca) func->setFuncBody(tca);
   }

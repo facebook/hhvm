@@ -620,21 +620,24 @@ void stashExtendedLineTable(const Unit* unit, SourceLocTable table) {
 ///////////////////////////////////////////////////////////////////////////////
 // Funcs and PreClasses.
 
-Func* Unit::getMain(Class* cls /* = nullptr */) const {
+Func* Unit::getMain(Class* cls, bool hasThis) const {
   auto const mi = mergeInfo();
   if (!cls) return *mi->funcBegin();
   Lock lock(g_classesMutex);
   if (!m_pseudoMainCache) {
     m_pseudoMainCache = new PseudoMainCacheMap;
   }
-  auto it = m_pseudoMainCache->find(cls);
+  auto const key = reinterpret_cast<Class*>(intptr_t(cls)|hasThis);
+  auto it = m_pseudoMainCache->find(key);
   if (it != m_pseudoMainCache->end()) {
     return it->second;
   }
   Func* f = (*mi->funcBegin())->clone(cls);
+  auto const attrs = f->attrs();
   f->setNewFuncId();
   f->setBaseCls(cls);
-  (*m_pseudoMainCache)[cls] = f;
+  f->setAttrs(Attr(hasThis ? (attrs & ~AttrStatic) : (attrs | AttrStatic)));
+  (*m_pseudoMainCache)[key] = f;
   return f;
 }
 
@@ -785,7 +788,7 @@ struct FrameRestore : private VMRegAnchor {
       ActRec &tmp = *vmStack().allocA();
       tmp.m_sfp = fp;
       tmp.m_savedRip = 0;
-      tmp.m_func = unit->getMain(nullptr);
+      tmp.m_func = unit->getMain(nullptr, false);
       tmp.m_callOff = !fp
         ? 0
         : fp->m_func->unit()->offsetOf(m_pc) - fp->m_func->base();
@@ -2124,7 +2127,7 @@ void Unit::mergeImpl(MergeInfo* mi) {
             Stats::inc(Stats::PseudoMain_Executed, -1);
 
             tvDecRefGen(
-              g_context->invokePseudoMain(unit->getMain(nullptr), ve)
+              g_context->invokePseudoMain(unit->getMain(nullptr, false), ve)
             );
           } else {
             Stats::inc(Stats::PseudoMain_SkipDeep);
@@ -2332,7 +2335,7 @@ std::string Unit::toString() const {
 // Other methods.
 
 bool Unit::compileTimeFatal(const StringData*& msg, int& line) const {
-  auto entry = getMain(nullptr)->getEntry();
+  auto entry = getMain(nullptr, false)->getEntry();
   auto pc = entry;
   // String <id>; Fatal;
   // ^^^^^^
@@ -2358,7 +2361,7 @@ bool Unit::parseFatal(const StringData*& msg, int& line) const {
     return false;
   }
 
-  auto pc = getMain(nullptr)->getEntry();
+  auto pc = getMain(nullptr, false)->getEntry();
 
   // String <id>
   decode_op(pc);

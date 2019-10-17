@@ -2660,7 +2660,6 @@ void parse_method(AsmState& as) {
   Attr attrs = parse_attribute_list(as, AttrContext::Func, &userAttrs);
 
   if (!SystemLib::s_inited) attrs |= AttrBuiltin;
-  if (!(attrs & AttrStatic)) attrs |= AttrRequiresThis;
 
   int line0;
   int line1;

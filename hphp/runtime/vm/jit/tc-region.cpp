@@ -343,7 +343,7 @@ void relocateOptFunc(FuncMetaInfo& info, SrcKeyTransMap& srcKeyTrans,
   // If the function had a body dispatch emitted during profiling, then emit it
   // again right before the optimized prologues.
   if (func->getFuncBody() != tc::ustubs().funcBodyHelperThunk &&
-      (func->getDVFunclets().size() > 0 || func->hasThisVaries())) {
+      func->getDVFunclets().size() > 0) {
     const auto& view = code().view(TransKind::OptPrologue);
     const auto tca = emitFuncBodyDispatchInternal(func, func->getDVFunclets(),
                                                   TransKind::OptPrologue, view);
@@ -482,7 +482,6 @@ void publishOptFuncCode(FuncMetaInfo& info,
           publishTranslationCode(std::move(transInfo));
           if (publishedSet) publishedSet->insert(loc.mainStart());
           if (regionSk.offset() == func->base() &&
-              !func->hasThisVaries() &&
               func->getDVFunclets().size() == 0) {
             func->setFuncBody(loc.mainStart());
           }

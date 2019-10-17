@@ -500,7 +500,7 @@ public:
    * We clone the toplevel pseudomain for each context class and cache the
    * results in m_pseudoMainCache.
    */
-  Func* getMain(Class* cls) const;
+  Func* getMain(Class* cls, bool hasThis) const;
 
   // Return the cached EntryPoint
   Func* getCachedEntryPoint() const;

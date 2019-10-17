@@ -1,6 +1,0 @@
-File "bad_contra_constraint.php", line 22, characters 21-25:
-Invalid argument (Typing[4110])
-File "bad_contra_constraint.php", line 7, characters 13-46:
-Expected ~ConstVector<Pair<Base<[unresolved]>, float>> because it is an unenforceable type
-File "bad_contra_constraint.php", line 10, characters 13-21:
-But got Vector<[unresolved]>

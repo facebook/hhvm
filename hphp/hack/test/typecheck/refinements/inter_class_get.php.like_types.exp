@@ -1,6 +1,0 @@
-File "inter_class_get.php", line 26, characters 17-18:
-Invalid argument (Typing[4110])
-File "inter_class_get.php", line 30, characters 20-20:
-Expected ~int because it is an unenforceable type
-File "inter_class_get.php", line 13, characters 43-48:
-But got string

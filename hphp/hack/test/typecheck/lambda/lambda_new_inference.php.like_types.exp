@@ -1,6 +1,0 @@
-File "lambda_new_inference.php", line 26, characters 16-27:
-Invalid return type (Typing[4110])
-File "lambda_new_inference.php", line 14, characters 3-24:
-Expected ~KeyedContainer<string, nothing> because it is an unenforceable type
-File "lambda_new_inference.php", line 28, characters 7-12:
-But got dict<([unresolved] | [unresolved]), ([unresolved] | vec<(string | [unresolved])>)>

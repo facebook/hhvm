@@ -1,6 +1,0 @@
-File "shape_unification_disallows_providing_required_field_where_optional_field_is_consumed.php", line 8, characters 14-15:
-Invalid argument (Typing[4110])
-File "shape_unification_disallows_providing_required_field_where_optional_field_is_consumed.php", line 5, characters 21-49:
-Expected ~MyWrapper<shape(?'x' => int)> because it is an unenforceable type
-File "shape_unification_disallows_providing_required_field_where_optional_field_is_consumed.php", line 7, characters 15-42:
-But got <expr#1> because it is an unenforceable type

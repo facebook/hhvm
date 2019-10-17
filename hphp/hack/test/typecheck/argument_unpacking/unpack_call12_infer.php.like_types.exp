@@ -1,6 +1,0 @@
-File "unpack_call12_infer.php", line 18, characters 21-22:
-Invalid argument (Typing[4110])
-File "unpack_call12_infer.php", line 22, characters 28-35:
-Expected ~vec<int> because it is an unenforceable type
-File "unpack_call12_infer.php", line 4, characters 49-55:
-But got vec<string>

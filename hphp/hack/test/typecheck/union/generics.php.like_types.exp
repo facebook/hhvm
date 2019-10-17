@@ -70,8 +70,10 @@ File "generics.php--file2.php", line 31, characters 5-15:
   ~?int
 File "generics.php--file2.php", line 102, characters 32-33:
 Invalid argument (Typing[4110])
+File "generics.php--file2.php", line 100, characters 20-22:
+Expected int
 File "generics.php--file2.php", line 16, characters 36-36:
-Expected ~int because it is an unenforceable type
+  via this generic T
 File "generics.php--file2.php", line 102, characters 32-33:
 But got string
 File "generics.php--file2.php", line 20, characters 47-50:

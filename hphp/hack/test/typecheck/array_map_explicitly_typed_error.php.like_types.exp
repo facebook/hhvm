@@ -1,6 +1,0 @@
-File "array_map_explicitly_typed_error.php", line 8, characters 5-13:
-Invalid argument (Typing[4110])
-File "stdlib/builtins_array.hhi", line 115, characters 31-35:
-Expected ~Container<string>
-File "array_map_explicitly_typed_error.php", line 8, characters 5-13:
-But got vec<int>

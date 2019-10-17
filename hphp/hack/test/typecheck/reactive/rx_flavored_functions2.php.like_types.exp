@@ -1,6 +1,0 @@
-File "rx_flavored_functions2.php", line 11, characters 13-34:
-Invalid argument (Typing[4110])
-File "rx_flavored_functions2.php", line 4, characters 13-40:
-Expected ~(function(): int) because it is an unenforceable type
-File "rx_flavored_functions2.php", line 11, characters 13-34:
-But got (function(): int)

@@ -1,6 +1,0 @@
-File "newtype5.php--file2.php", line 5, characters 8-9:
-Invalid argument (Typing[4110])
-File "newtype5.php--file2.php", line 3, characters 15-20:
-Expected ~a<int> because it is an unenforceable type
-File "newtype5.php--file2.php", line 4, characters 16-22:
-But got a<bool>

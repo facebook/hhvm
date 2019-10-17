@@ -1,6 +1,0 @@
-File "generic_fun_2.php", line 18, characters 10-22:
-Invalid return type (Typing[4110])
-File "generic_fun_2.php", line 12, characters 16-16:
-Expected ~[unresolved] because it is an unenforceable type
-File "generic_fun_2.php", line 16, characters 29-31:
-But got int

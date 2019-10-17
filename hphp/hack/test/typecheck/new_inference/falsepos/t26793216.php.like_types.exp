@@ -1,6 +1,0 @@
-File "t26793216.php", line 7, characters 5-6:
-Invalid argument (Typing[4110])
-File "t26793216.php", line 4, characters 23-25:
-Expected ~[unresolved] because it is an unenforceable type
-File "t26793216.php", line 6, characters 21-24:
-But got null

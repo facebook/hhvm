@@ -1,6 +1,0 @@
-File "super_constraint_11.php", line 22, characters 19-33:
-Invalid argument (Typing[4110])
-File "super_constraint_11.php", line 14, characters 45-55:
-Expected ~MyWidget<[unresolved]> because it is an unenforceable type
-File "super_constraint_11.php", line 22, characters 23-31:
-But got MyWidgetB

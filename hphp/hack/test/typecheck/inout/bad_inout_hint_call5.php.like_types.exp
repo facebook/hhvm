@@ -1,6 +1,0 @@
-File "bad_inout_hint_call5.php", line 7, characters 5-33:
-Invalid argument (Typing[4110])
-File "bad_inout_hint_call5.php", line 3, characters 14-40:
-Expected ~(function(inout int): void) because it is an unenforceable type
-File "bad_inout_hint_call5.php", line 7, characters 5-33:
-But got (function(inout string $v): void)

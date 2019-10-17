@@ -1,6 +1,0 @@
-File "array_foreach.php", line 20, characters 8-11:
-Invalid argument (Typing[4110])
-File "array_foreach.php", line 31, characters 15-27:
-Expected ~varray<string> because it is an unenforceable type
-File "array_foreach.php", line 12, characters 15-19:
-But got array

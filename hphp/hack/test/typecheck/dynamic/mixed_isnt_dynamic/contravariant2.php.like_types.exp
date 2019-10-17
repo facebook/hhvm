@@ -1,6 +1,0 @@
-File "contravariant2.php", line 17, characters 7-8:
-Invalid argument (Typing[4110])
-File "contravariant2.php", line 5, characters 14-30:
-Expected ~Foo<mixed, mixed> because it is an unenforceable type
-File "contravariant2.php", line 16, characters 12-14:
-But got Foo<dynamic, dynamic>

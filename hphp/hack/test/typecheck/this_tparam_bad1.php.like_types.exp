@@ -1,6 +1,0 @@
-File "this_tparam_bad1.php", line 36, characters 13-21:
-Invalid argument (Typing[4110])
-File "this_tparam_bad1.php", line 18, characters 23-23:
-Expected ~<expr#1> because it is an unenforceable type
-File "this_tparam_bad1.php", line 36, characters 17-19:
-But got Foo

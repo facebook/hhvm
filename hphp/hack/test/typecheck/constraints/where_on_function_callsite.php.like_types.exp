@@ -1,6 +1,0 @@
-File "where_on_function_callsite.php", line 11, characters 12-13:
-Invalid argument (Typing[4110])
-File "where_on_function_callsite.php", line 4, characters 18-18:
-Expected ~[unresolved] because it is an unenforceable type
-File "where_on_function_callsite.php", line 10, characters 8-14:
-But got string

@@ -1,6 +1,0 @@
-File "shape_structural_subtyping_disallows_receiving_wrong_type_for_known_fields.php", line 16, characters 7-30:
-Invalid argument (Typing[4110])
-File "shape_structural_subtyping_disallows_receiving_wrong_type_for_known_fields.php", line 13, characters 14-43:
-Expected ~shape('a' => int, ...) because it is an unenforceable type
-File "shape_structural_subtyping_disallows_receiving_wrong_type_for_known_fields.php", line 16, characters 7-30:
-But got shape('a' => string)

@@ -1,6 +1,0 @@
-File "mutable_as_hint3.php", line 18, characters 5-28:
-Invalid argument (Typing[4110])
-File "mutable_as_hint3.php", line 10, characters 12-43:
-Expected ~(function(A): void) because it is an unenforceable type
-File "mutable_as_hint3.php", line 18, characters 5-28:
-But got (function(A $a): void)

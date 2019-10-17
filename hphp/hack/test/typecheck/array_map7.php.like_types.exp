@@ -5,6 +5,6 @@ File "array_map7.php", line 27, characters 3-34:
 File "array_map7.php", line 26, characters 21-51:
 Invalid argument (Typing[4110])
 File "array_map7.php", line 35, characters 28-41:
-Expected ~darray<arraykey, bool> because it is an unenforceable type
+Expected darray<arraykey, bool>
 File "stdlib/builtins_array.hhi", line 115, characters 10-18:
 But got varray<[unresolved]>

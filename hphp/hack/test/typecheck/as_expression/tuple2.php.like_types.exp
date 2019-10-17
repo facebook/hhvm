@@ -1,6 +1,0 @@
-File "tuple2.php", line 7, characters 5-6:
-Invalid argument (Typing[4110])
-File "tuple2.php", line 3, characters 12-29:
-Expected ~(int, int, string) because it is an unenforceable type
-File "tuple2.php", line 6, characters 9-29:
-But got (int, string, string)

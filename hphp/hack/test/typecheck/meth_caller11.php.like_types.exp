@@ -1,6 +1,0 @@
-File "meth_caller11.php", line 31, characters 17-23:
-Invalid argument (Typing[4110])
-File "meth_caller11.php", line 24, characters 24-50:
-Expected ~(function(Wrapper<int>): C) because it is an unenforceable type
-File "meth_caller11.php", line 19, characters 19-21:
-But got (function(Wrapper<[unresolved]>): ~[unresolved])

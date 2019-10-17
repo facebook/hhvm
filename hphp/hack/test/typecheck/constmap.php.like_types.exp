@@ -1,6 +1,0 @@
-File "constmap.php", line 14, characters 14-15:
-Invalid argument (Typing[4110])
-File "constmap.php", line 12, characters 21-45:
-Expected ~ConstMap<arraykey, mixed> because it is an unenforceable type
-File "constmap.php", line 13, characters 16-31:
-But got Map<string, int>

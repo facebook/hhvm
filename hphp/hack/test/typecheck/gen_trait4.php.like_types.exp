@@ -1,6 +1,0 @@
-File "gen_trait4.php", line 27, characters 18-19:
-Invalid argument (Typing[4110])
-File "gen_trait4.php", line 18, characters 23-31:
-Expected ~Vector<A> because it is an unenforceable type
-File "gen_trait4.php", line 25, characters 10-25:
-But got Vector<[unresolved]>

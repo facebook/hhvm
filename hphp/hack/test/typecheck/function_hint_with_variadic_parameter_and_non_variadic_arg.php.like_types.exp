@@ -1,6 +1,0 @@
-File "function_hint_with_variadic_parameter_and_non_variadic_arg.php", line 8, characters 17-35:
-Invalid argument (Typing[4110])
-File "function_hint_with_variadic_parameter_and_non_variadic_arg.php", line 5, characters 24-49:
-Expected ~(function(mixed...): void) because it is an unenforceable type
-File "function_hint_with_variadic_parameter_and_non_variadic_arg.php", line 3, characters 10-21:
-But got (function(int $a, string $y): void)

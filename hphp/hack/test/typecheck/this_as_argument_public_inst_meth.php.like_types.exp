@@ -1,8 +1,0 @@
-File "this_as_argument_public_inst_meth.php", line 20, characters 14-16:
-Invalid argument (Typing[4110])
-File "this_as_argument_public_inst_meth.php", line 7, characters 23-26:
-Expected ~<expr#1> because it is an unenforceable type
-File "this_as_argument_public_inst_meth.php", line 11, characters 24-24:
-But got <expr#2>
-File "this_as_argument_public_inst_meth.php", line 20, characters 14-16:
-  where '<expr#2>' is a reference to this expression

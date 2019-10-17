@@ -1,8 +1,0 @@
-File "explicit_type_collection_passing_map3.php", line 6, characters 3-13:
-  Map<arraykey, bool>
-File "explicit_type_collection_passing_map3.php", line 7, characters 10-11:
-Invalid argument (Typing[4110])
-File "explicit_type_collection_passing_map3.php", line 3, characters 17-32:
-Expected ~Map<string, bool> because it is an unenforceable type
-File "explicit_type_collection_passing_map3.php", line 5, characters 8-52:
-But got Map<arraykey, bool>

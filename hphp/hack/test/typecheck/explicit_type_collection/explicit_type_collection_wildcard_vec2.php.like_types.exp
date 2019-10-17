@@ -1,6 +1,0 @@
-File "explicit_type_collection_wildcard_vec2.php", line 5, characters 7-19:
-Invalid argument (Typing[4110])
-File "explicit_type_collection_wildcard_vec2.php", line 3, characters 14-21:
-Expected ~vec<int> because it is an unenforceable type
-File "explicit_type_collection_wildcard_vec2.php", line 5, characters 7-19:
-But got vec<string>

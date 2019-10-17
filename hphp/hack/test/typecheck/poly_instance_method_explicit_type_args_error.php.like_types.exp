@@ -1,6 +1,0 @@
-File "poly_instance_method_explicit_type_args_error.php", line 11, characters 25-29:
-Invalid argument (Typing[4110])
-File "poly_instance_method_explicit_type_args_error.php", line 4, characters 27-28:
-Expected ~int because it is an unenforceable type
-File "poly_instance_method_explicit_type_args_error.php", line 11, characters 25-29:
-But got string

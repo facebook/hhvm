@@ -1,4 +1,0 @@
-File "lambda_bad_as_pair_argument.php", line 32, characters 11-14:
-Was expecting an object but type is unknown (Typing[4297])
-File "lambda_bad_as_pair_argument.php", line 31, characters 18-21:
-It is unknown because the type of the lambda parameter could not be determined. Please add a type hint to the parameter

@@ -1,6 +1,6 @@
 <?hh
 
-class Collection extends ArrayObject
+class MyCollection extends ArrayObject
 {
     public function add($dataArray)
     {
@@ -16,7 +16,7 @@ class Collection extends ArrayObject
 $data1=array('one', 'two', 'three');
 $data2=array('four', 'five');
 
-$foo=new Collection($data1);
+$foo=new MyCollection($data1);
 $foo->add($data2);
 
 print_r($foo->getArrayCopy());

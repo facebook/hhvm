@@ -1,4 +1,1 @@
-object(foo\int) (0) {
-}
-
-Catchable fatal error: Argument 1 passed to foo\bar() must be an instance of foo\int, int given in %s/reserved_type_in_a_namespace.php on line 13
+Fatal error: Class undefined: HH\int in %s on line %d

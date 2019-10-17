@@ -29,8 +29,6 @@ let get_autoimport_name_namespace id kind =
   | ElaborateFun -> Hh_autoimport.lookup_func id
   | ElaborateConst -> Hh_autoimport.lookup_const id
 
-let is_autoimport_name id kind = get_autoimport_name_namespace id kind <> None
-
 let elaborate_into_ns ns_name id =
   match ns_name with
   | None -> "\\" ^ id
@@ -39,19 +37,9 @@ let elaborate_into_ns ns_name id =
 let elaborate_into_current_ns nsenv id = elaborate_into_ns nsenv.ns_name id
 
 (* Elaborate a defined identifier in a given namespace environment. For example,
- * a class might be defined inside a namespace. Return new environment if
- * ID is auto imported (e.g. Map) and so must be mapped when used.
+ * a class might be defined inside a namespace.
  *)
-let elaborate_defined_id nsenv kind (p, id) =
-  let newid = elaborate_into_current_ns nsenv id in
-  let update_nsenv = kind = ElaborateClass && is_autoimport_name id kind in
-  let nsenv =
-    if update_nsenv then
-      { nsenv with ns_class_uses = SMap.add id newid nsenv.ns_class_uses }
-    else
-      nsenv
-  in
-  ((p, newid), nsenv, update_nsenv)
+let elaborate_defined_id nsenv (p, id) = (p, elaborate_into_current_ns nsenv id)
 
 (* Resolves an identifier in a given namespace environment. For example, if we
  * are in the namespace "N\O", the identifier "P\Q" is resolved to "\N\O\P\Q".
@@ -146,12 +134,6 @@ module ElaborateDefs = struct
     | XhpAttrUse h -> XhpAttrUse (hint nsenv h)
     | other -> other
 
-  let finish nsenv updated_nsenv stmt =
-    if updated_nsenv then
-      (nsenv, [stmt; SetNamespaceEnv nsenv])
-    else
-      (nsenv, [stmt])
-
   let rec def nsenv = function
     (*
       The default namespace in php is the global namespace specified by
@@ -195,61 +177,33 @@ module ElaborateDefs = struct
       in
       (nsenv, [SetNamespaceEnv nsenv])
     | Class c ->
-      let (name, nsenv, updated_nsenv) =
-        elaborate_defined_id nsenv ElaborateClass c.c_name
-      in
-      finish
-        nsenv
-        updated_nsenv
-        (Class
-           {
-             c with
-             c_name = name;
-             c_extends = List.map c.c_extends (hint nsenv);
-             c_implements = List.map c.c_implements (hint nsenv);
-             c_body = List.map c.c_body (class_def nsenv);
-             c_namespace = nsenv;
-           })
-    | RecordDef rd ->
-      let (name, nsenv, updated_nsenv) =
-        elaborate_defined_id nsenv ElaborateRecord rd.rd_name
-      in
-      finish
-        nsenv
-        updated_nsenv
-        (RecordDef { rd with rd_name = name; rd_namespace = nsenv })
-    | Fun f ->
-      let (name, nsenv, updated_nsenv) =
-        elaborate_defined_id nsenv ElaborateFun f.f_name
-      in
-      finish
-        nsenv
-        updated_nsenv
-        (Fun { f with f_name = name; f_namespace = nsenv })
-    | Typedef t ->
-      let (name, nsenv, updated_nsenv) =
-        elaborate_defined_id nsenv ElaborateClass t.t_id
-      in
-      finish
-        nsenv
-        updated_nsenv
-        (Typedef { t with t_id = name; t_namespace = nsenv })
-    | Constant cst ->
+      let name = elaborate_defined_id nsenv c.c_name in
       ( nsenv,
         [
-          Constant
+          Class
             {
-              cst with
-              cst_name =
-                (let (name, _, _) =
-                   elaborate_defined_id nsenv ElaborateConst cst.cst_name
-                 in
-                 name);
-              cst_namespace = nsenv;
+              c with
+              c_name = name;
+              c_extends = List.map c.c_extends (hint nsenv);
+              c_implements = List.map c.c_implements (hint nsenv);
+              c_body = List.map c.c_body (class_def nsenv);
+              c_namespace = nsenv;
             };
         ] )
+    | RecordDef rd ->
+      let name = elaborate_defined_id nsenv rd.rd_name in
+      (nsenv, [RecordDef { rd with rd_name = name; rd_namespace = nsenv }])
+    | Fun f ->
+      let name = elaborate_defined_id nsenv f.f_name in
+      (nsenv, [Fun { f with f_name = name; f_namespace = nsenv }])
+    | Typedef t ->
+      let name = elaborate_defined_id nsenv t.t_id in
+      (nsenv, [Typedef { t with t_id = name; t_namespace = nsenv }])
+    | Constant cst ->
+      let name = elaborate_defined_id nsenv cst.cst_name in
+      (nsenv, [Constant { cst with cst_name = name; cst_namespace = nsenv }])
     | FileAttributes fa ->
-      finish nsenv false (FileAttributes { fa with fa_namespace = nsenv })
+      (nsenv, [FileAttributes { fa with fa_namespace = nsenv }])
     | other -> (nsenv, [other])
 
   and attach_file_attributes p =

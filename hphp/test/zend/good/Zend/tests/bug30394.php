@@ -1,5 +1,5 @@
 <?hh
-class Container
+class MyContainer
 {
     public function __get( $what )
     {
@@ -14,7 +14,7 @@ class Container
     private $_p = array();
 }
 <<__EntryPoint>> function main(): void {
-$c = new Container();
+$c = new MyContainer();
 $c->a = 1;
 $c->a += 1;
 print $c->a;    // --> 2

@@ -116,15 +116,16 @@ void cgLdARNumParams(IRLS& env, const IRInstruction* inst) {
   v << andqi{ActRec::kNumArgsMask, naaf, dst, v.makeReg()};
 }
 
-void cgLdCtx(IRLS& env, const IRInstruction* inst) {
-  assertx(!inst->func() || inst->ctx());
+
+void cgLdFrameThis(IRLS& env, const IRInstruction* inst) {
+  assertx(!inst->func() || inst->ctx() || inst->func()->isClosureBody());
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const fp = srcLoc(env, inst, 0).reg();
   vmain(env) << load{fp[AROFF(m_thisUnsafe)], dst};
 }
 
-void cgLdCctx(IRLS& env, const IRInstruction* inst) {
-  return cgLdCtx(env, inst);
+void cgLdFrameCls(IRLS& env, const IRInstruction* inst) {
+  return cgLdFrameThis(env, inst);
 }
 
 void cgInitCtx(IRLS& env, const IRInstruction* inst) {

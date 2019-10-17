@@ -318,49 +318,6 @@ SSATmp* IRBuilder::preOptimizeAssertStk(IRInstruction* inst) {
   return preOptimizeAssertLocation(inst, stk(inst->extra<AssertStk>()->offset));
 }
 
-SSATmp* IRBuilder::preOptimizeLdCtxHelper(IRInstruction* inst) {
-  // Change LdCtx in static functions to LdCctx, or if we're inlining try to
-  // fish out a constant context.
-  auto const func = inst->marker().func();
-  assertx(func->cls());
-  auto const ctx = [&]() -> SSATmp* {
-    auto ret = m_state.ctx();
-    if (!ret) return nullptr;
-    if (ret->inst()->is(DefConst)) return ret;
-    if (ret->hasConstVal() ||
-        ret->type().subtypeOfAny(TInitNull, TUninit, TNullptr)) {
-      return m_unit.cns(ret->type());
-    }
-    return ret;
-  }();
-
-  if (ctx) {
-    if (ctx->hasConstVal(TCls)) {
-      return m_unit.cns(ConstCctx::cctx(ctx->clsVal()));
-    }
-    if (ctx->isA(TCls)) {
-      return gen(ConvClsToCctx, ctx);
-    }
-    if (ctx->isA(TCtx)) {
-      return ctx;
-    }
-  }
-
-  if (!func->hasThisInBody()) {
-    // ActRec->m_cls of a static function is always a valid class pointer with
-    // the bottom bit set
-    if (func->cls()->attrs() & AttrNoOverride) {
-      return m_unit.cns(ConstCctx::cctx(func->cls()));
-    }
-    if (inst->op() == LdCtx) {
-      auto const src = inst->src(0);
-      return gen(LdCctx, src);
-    }
-  }
-
-  return nullptr;
-}
-
 SSATmp* IRBuilder::preOptimizeLdLocation(IRInstruction* inst, Location l) {
   if (auto tmp = valueOf(l, DataTypeGeneric)) return tmp;
 
@@ -403,6 +360,49 @@ SSATmp* IRBuilder::preOptimizeLdMBase(IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* IRBuilder::preOptimizeLdFrameCtx(IRInstruction* inst) {
+  auto const func = inst->marker().func();
+  assertx(func->cls() || func->isClosureBody());
+  if (auto ctx = m_state.ctx()) {
+    assertx(!inst->is(LdFrameCls) || ctx->type() <= TCls);
+    assertx(!inst->is(LdFrameThis) || ctx->type() <= TObj);
+    if (ctx->inst()->is(DefConst)) return ctx;
+    if (ctx->hasConstVal() ||
+        ctx->type().subtypeOfAny(TInitNull, TUninit, TNullptr)) {
+      return m_unit.cns(ctx->type());
+    }
+    return ctx;
+  }
+
+  if (inst->is(LdFrameCls)) {
+    // ActRec->m_cls of a static function is always a valid class pointer with
+    // the bottom bit set
+    assertx(func->cls());
+    if (func->cls()->attrs() & AttrNoOverride) {
+      return m_unit.cns(func->cls());
+    }
+  }
+
+  return nullptr;
+}
+
+SSATmp* IRBuilder::preOptimizeLdObjClass(IRInstruction* inst) {
+  if (auto const spec = inst->src(0)->type().clsSpec()) {
+    if (spec.exact() || spec.cls()->attrs() & AttrNoOverride) {
+      return m_unit.cns(spec.cls());
+    }
+  }
+  return nullptr;
+}
+
+SSATmp* IRBuilder::preOptimizeLdFrameThis(IRInstruction* inst) {
+  return preOptimizeLdFrameCtx(inst);
+}
+
+SSATmp* IRBuilder::preOptimizeLdFrameCls(IRInstruction* inst) {
+  return preOptimizeLdFrameCtx(inst);
+}
+
 SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
 #define X(op) case op: return preOptimize##op(inst);
   switch (inst->op()) {
@@ -416,9 +416,10 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
   X(CheckMBase)
   X(LdLoc)
   X(LdStk)
-  X(LdCtx)
-  X(LdCctx)
   X(LdMBase)
+  X(LdFrameCls)
+  X(LdFrameThis)
+  X(LdObjClass)
   default: break;
   }
 #undef X

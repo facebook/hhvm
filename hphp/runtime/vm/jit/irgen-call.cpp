@@ -183,8 +183,7 @@ void callUnpack(IRGS& env, SSATmp* callee, const FCallArgs& fca,
   assertx(fca.hasUnpack());
 
   if (objOrClass == nullptr) objOrClass = cns(env, TNullptr);
-  if (objOrClass->isA(TCls)) objOrClass = gen(env, ConvClsToCctx, objOrClass);
-  assertx(objOrClass->isA(TNullptr) || objOrClass->isA(TCtx));
+  assertx(objOrClass->isA(TNullptr) || objOrClass->isA(TObj|TCls));
 
   auto const data = CallUnpackData {
     spOffBCFromIRSP(env),
@@ -218,8 +217,7 @@ SSATmp* callImpl(IRGS& env, SSATmp* callee, const FCallArgs& fca,
   }();
 
   if (objOrClass == nullptr) objOrClass = cns(env, TNullptr);
-  if (objOrClass->isA(TCls)) objOrClass = gen(env, ConvClsToCctx, objOrClass);
-  assertx(objOrClass->isA(TNullptr) || objOrClass->isA(TCtx));
+  assertx(objOrClass->isA(TNullptr) || objOrClass->isA(TObj|TCls));
 
   auto const data = CallData {
     spOffBCFromIRSP(env),
@@ -550,15 +548,15 @@ inline SSATmp* ldCtxForClsMethod(IRGS& env,
     // A static::foo() call can always pass through a $this
     // from the caller (if it has one). Match the common patterns
     auto cc = skipAT(callCtx);
-    if (cc->inst()->is(LdObjClass, LdClsCtx, LdClsCctx)) {
+    if (cc->inst()->is(LdFrameCls)) return true;
+    if (cc->inst()->is(LdObjClass)) {
       cc = skipAT(cc->inst()->src(0));
-      if (cc->inst()->is(LdCtx, LdCctx)) return true;
+      if (cc->inst()->is(LdFrameThis)) return true;
     }
     return maybeUseThis && (exact || cls->attrs() & AttrNoOverride);
   }();
 
-  auto const ctx = gen(env, LdCtx, fp(env));
-  auto thiz = castCtxThis(env, ctx);
+  auto thiz = ldThis(env);
 
   if (canUseThis) {
     gen(env, IncRef, thiz);
@@ -580,8 +578,7 @@ inline SSATmp* ldCtxForClsMethod(IRGS& env,
     },
     [&] {
       hint(env, Block::Hint::Unlikely);
-      gen_missing_this();
-      return gen(env, ConvClsToCctx, callCtx);
+      return gen_missing_this();
     });
 }
 
@@ -1021,7 +1018,7 @@ SSATmp* specialClsRefToCls(IRGS& env, SpecialClsRef ref) {
   switch (ref) {
     case SpecialClsRef::Static:
       if (!curClass(env)) return nullptr;
-      return gen(env, LdClsCtx, ldCtx(env));
+      return ldCtxCls(env);
     case SpecialClsRef::Self:
       if (auto const clss = curClass(env)) return cns(env, clss);
       return nullptr;
@@ -1422,16 +1419,16 @@ SSATmp* forwardCtx(IRGS& env, const Func* parentFunc, SSATmp* funcTmp) {
   assertx(funcTmp->type() <= TFunc);
 
   if (parentFunc->isStatic()) {
-    return gen(env, FwdCtxStaticCall, ldCtx(env));
+    return ldCtxCls(env);
   }
 
   if (!hasThis(env)) {
     assertx(!parentFunc->isStaticInPrologue());
     gen(env, ThrowMissingThis, funcTmp);
-    return ldCtx(env);
+    return cns(env, TBottom);
   }
 
-  auto const obj = castCtxThis(env, ldCtx(env));
+  auto const obj = ldThis(env);
   gen(env, IncRef, obj);
   return obj;
 }
@@ -1482,7 +1479,7 @@ void fcallClsMethodCommon(IRGS& env,
       gen(env, ProfileMethod, pctData, clsVal, func);
     }
 
-    auto const ctx = forward ? gen(env, FwdCtxStaticCall, ldCtx(env)) : clsVal;
+    auto const ctx = forward ? ldCtxCls(env) : clsVal;
     auto const mightCareAboutDynCall = allowLogAsDynCall &&
       RuntimeOption::EvalForbidDynamicCallsToClsMeth > 0;
     decRef(env, methVal);

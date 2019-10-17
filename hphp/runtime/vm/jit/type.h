@@ -378,18 +378,16 @@ constexpr bool operator>(Mem a, Mem b) {
 #define IRT_RUNTIME                                                     \
   IRT(VarEnv,      bits_t::bit<kRuntime>())                             \
   IRT(NamedEntity, bits_t::bit<kRuntime+1>())                           \
-  IRT(Cctx,        bits_t::bit<kRuntime+2>()) /* Class* with */         \
-                                              /* the lowest bit set,*/  \
-                                      /* as stored in ActRec.m_cls field  */ \
-  IRT(RetAddr,     bits_t::bit<kRuntime+3>()) /* Return address */      \
-  IRT(StkPtr,      bits_t::bit<kRuntime+4>()) /* Stack pointer */       \
-  IRT(FramePtr,    bits_t::bit<kRuntime+5>()) /* Frame pointer */       \
-  IRT(TCA,         bits_t::bit<kRuntime+6>())                           \
-  IRT(ABC,         bits_t::bit<kRuntime+7>()) /* AsioBlockableChain */  \
-  IRT(RDSHandle,   bits_t::bit<kRuntime+8>()) /* rds::Handle */         \
-  IRT(Nullptr,     bits_t::bit<kRuntime+9>())                           \
-  IRT(MIPropSPtr,  bits_t::bit<kRuntime+10>()) /* Ptr to MInstrPropState */ \
-  IRT(Smashable,   bits_t::bit<kRuntime+11>()) /* Smashable uint64_t */
+  IRT(RetAddr,     bits_t::bit<kRuntime+2>()) /* Return address */      \
+  IRT(StkPtr,      bits_t::bit<kRuntime+3>()) /* Stack pointer */       \
+  IRT(FramePtr,    bits_t::bit<kRuntime+4>()) /* Frame pointer */       \
+  IRT(TCA,         bits_t::bit<kRuntime+5>())                           \
+  IRT(ABC,         bits_t::bit<kRuntime+6>()) /* AsioBlockableChain */  \
+  IRT(RDSHandle,   bits_t::bit<kRuntime+7>()) /* rds::Handle */         \
+  IRT(Nullptr,     bits_t::bit<kRuntime+8>())                           \
+  IRT(MIPropSPtr,  bits_t::bit<kRuntime+9>()) /* Ptr to MInstrPropState */ \
+  IRT(Smashable,   bits_t::bit<kRuntime+10>()) /* Smashable uint64_t */     \
+                                      /* bit set indicating magic call */
   /* bits above this are unused */
 
 /*
@@ -409,7 +407,6 @@ constexpr bool operator>(Mem a, Mem b) {
   /* Bottom and Top use IRTX to specify a custom Ptr kind */  \
   IRTX(Bottom,       Bottom, kBottom)                         \
   IRTX(Top,          Top,    kTop)                            \
-  IRT(Ctx,                   kObj|kCctx)                      \
   IRTX(AnyObj,       Top,    kAnyObj)                         \
   IRTX(AnyArr,       Top,    kAnyArr)                         \
   IRTX(AnyVec,       Top,    kAnyVec)                         \
@@ -451,20 +448,6 @@ constexpr bool operator>(Mem a, Mem b) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct ConstCctx {
-  static ConstCctx cctx(const Class* c) {
-    return ConstCctx { reinterpret_cast<uintptr_t>(c) };
-  }
-
-  const Class* cls() const {
-    return reinterpret_cast<const Class*>(m_val);
-  }
-
-  uintptr_t m_val;
-};
-
-///////////////////////////////////////////////////////////////////////////////
-
 /*
  * Type is used to represent the types of values in the jit.  Every Type
  * represents a set of types, with TTop being a superset of all Types and
@@ -485,7 +468,7 @@ struct Type {
 private:
   static constexpr size_t kBoxShift = 27;
   static constexpr size_t kRuntime = kBoxShift * 2;
-  static constexpr size_t numRuntime = 13;
+  static constexpr size_t numRuntime = 11;
   using bits_t = BitSet<kRuntime + numRuntime>;
 
 public:
@@ -759,7 +742,6 @@ public:
   const Class* clsVal() const;
   const RecordDesc* recVal() const;
   ClsMethDataRef clsmethVal() const;
-  ConstCctx cctxVal() const;
   rds::Handle rdsHandleVal() const;
   jit::TCA tcaVal() const;
   const TypedValue* ptrVal() const;
@@ -969,7 +951,6 @@ private:
     const Class* m_clsVal;
     const RecordDesc* m_recVal;
     ClsMethDataRef m_clsmethVal;
-    ConstCctx m_cctxVal;
     jit::TCA m_tcaVal;
     rds::Handle m_rdsHandleVal;
     TypedValue* m_ptrVal;

@@ -154,13 +154,6 @@ std::string Type::constValString() const {
     return folly::format("RecDesc({})", m_recVal ? m_recVal->name()->data()
                                                  : "nullptr").str();
   }
-  if (*this <= TCctx) {
-    if (!m_intVal) {
-      return "Cctx(Cls(nullptr))";
-    }
-    auto const cls = m_cctxVal.cls();
-    return folly::format("Cctx(Cls({}))", cls->name()).str();
-  }
   if (*this <= TTCA) {
     auto name = getNativeFunctionName(m_tcaVal);
     const char* hphp = "HPHP::";
@@ -408,7 +401,6 @@ void Type::serialize(ProfDataSerializer& ser) const {
     if (t < TArrLike) {
       return write_array(ser, t.m_arrVal);
     }
-    if (t <= TCctx)      return write_class(ser, t.m_cctxVal.cls());
     if (use_lowptr && (t <= TClsMeth)) {
       return write_clsmeth(ser, t.m_clsmethVal);
     }
@@ -450,10 +442,6 @@ Type Type::deserialize(ProfDataDeserializer& ser) {
       }
       if (t < TArrLike) {
         t.m_arrVal = read_array(ser);
-        return t;
-      }
-      if (t <= TCctx) {
-        t.m_cctxVal = ConstCctx::cctx(read_class(ser));
         return t;
       }
       if (use_lowptr && (t <= TClsMeth)) {

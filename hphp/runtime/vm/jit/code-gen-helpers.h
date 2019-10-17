@@ -221,14 +221,6 @@ Vreg emitLdRecDesc(Vout& v, Vreg val, Vreg d);
 Vreg emitLdObjClass(Vout& v, Vreg obj, Vreg d);
 
 /*
- * Load the Class* underlying the Cctx `src' into `d', then return `d'.
- *
- * (This just unmasks the lowest-order bit, which designates `src' as a Cctx
- * rather than a This.)
- */
-Vreg emitLdClsCctx(Vout& v, Vreg src, Vreg d);
-
-/*
  * Internal helpers for LowPtr comparisons.
  */
 void cmpLowPtrImpl(Vout& v, Vreg sf, const void* ptr, Vptr mem, size_t size);

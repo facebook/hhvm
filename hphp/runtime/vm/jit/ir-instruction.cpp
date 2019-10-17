@@ -410,32 +410,6 @@ Type keysetElemReturn(const IRInstruction* inst) {
   return elem.first;
 }
 
-Type ctxReturn(const IRInstruction* inst) {
-  auto const func = inst->is(LdClosureCtx)
-    ? inst->extra<LdClosureCtx>()->func : inst->func();
-  if (!func) return TCtx;
-
-  if (func->hasThisInBody()) {
-    return thisTypeFromFunc(func);
-  }
-  assertx(func->isStatic());
-  auto const cls = func->cls();
-  if (!func->hasForeignThis() && (cls->attrs() & AttrNoOverride)) {
-    return Type::cns(ConstCctx::cctx(cls));
-  }
-  return TCctx;
-}
-
-Type ctxClsReturn(const IRInstruction* inst) {
-  // If we aren't loading the cls from the ctx of the current function doing
-  // this makes no sense.
-  if (!canonical(inst->src(0))->inst()->is(LdCtx, LdCctx)) return TCls;
-
-  auto const func = inst->func();
-  if (!func || func->hasForeignThis()) return TCls;
-  return Type::SubCls(inst->ctx());
-}
-
 Type setElemReturn(const IRInstruction* inst) {
   assertx(inst->op() == SetElem);
   auto baseType = inst->src(minstrBaseIdx(inst->op()))->type().strip();
@@ -620,8 +594,6 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
                                 ? TStaticDict \
                                 : Type::StaticArray(ArrayData::kMixedKind));
 #define DCol            return newColReturn(inst);
-#define DCtx            return ctxReturn(inst);
-#define DCtxCls         return ctxClsReturn(inst);
 #define DMulti          return TBottom;
 #define DSetElem        return setElemReturn(inst);
 #define DBuiltin        return builtinReturn(inst);
@@ -677,8 +649,6 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef DDArr
 #undef DStaticDArr
 #undef DCol
-#undef DCtx
-#undef DCtxCls
 #undef DMulti
 #undef DSetElem
 #undef DBuiltin

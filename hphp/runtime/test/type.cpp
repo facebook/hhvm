@@ -563,8 +563,6 @@ TEST(Type, SpecializedObjects) {
 
   EXPECT_EQ(TObj, TObj - subA);  // conservative
   EXPECT_EQ(subA, subA - exactA);  // conservative
-
-  EXPECT_LT(subA | TCctx, TCtx);
 }
 
 TEST(Type, SpecializedClass) {

@@ -822,7 +822,7 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
     } else if (callee->hasThisInBody()) {
       ctxType = TObj;
     } else {
-      ctxType = TCctx;
+      ctxType = TCls;
     }
   } else {
     // Bail out if calling a static methods with an object ctx.
@@ -836,7 +836,7 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
   }
 
   if (callee->cls()) {
-    if (callee->isStatic() && !ctxType.maybe(TCls|TCctx)) {
+    if (callee->isStatic() && !ctxType.maybe(TCls)) {
       traceRefusal(sk, callee, "calling a static method with an instance",
                    annotationsPtr);
       return nullptr;

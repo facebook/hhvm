@@ -606,22 +606,27 @@ inline void updateMarker(IRGS& env) {
 //////////////////////////////////////////////////////////////////////
 // Frame
 
-inline SSATmp* castCtxThis(IRGS& env, SSATmp* val) {
-  assertx(val->isA(TCtx));
+inline SSATmp* ldThis(IRGS& env) {
+  assertx(hasThis(env));
   auto const func = curFunc(env);
   auto const thisType = func ? thisTypeFromFunc(func) : TObj;
-  return gen(env, AssertType, thisType, val);
-}
-
-inline SSATmp* ldThis(IRGS& env) {
-  auto const ctx = gen(env, LdCtx, fp(env));
-  return castCtxThis(env, ctx);
+  return gen(env, LdFrameThis, thisType, fp(env));
 }
 
 inline SSATmp* ldCtx(IRGS& env) {
   if (!curClass(env))                return cns(env, nullptr);
   if (hasThis(env))                  return ldThis(env);
-  return gen(env, LdCctx, fp(env));
+
+  auto const func = curFunc(env);
+  auto const clsType = func ? Type::SubCls(func->cls()) : TCls;
+  return gen(env, LdFrameCls, clsType, fp(env));
+}
+
+inline SSATmp* ldCtxCls(IRGS& env) {
+  auto const ctx = ldCtx(env);
+  if (ctx->isA(TCls) || ctx->isA(TNullptr)) return ctx;
+  assertx(ctx->isA(TObj));
+  return gen(env, LdObjClass, ctx);
 }
 
 inline SSATmp* unbox(IRGS& env, SSATmp* val, Block* exit) {

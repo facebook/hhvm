@@ -386,8 +386,7 @@ void emitEmptyG(IRGS& env) {
 //////////////////////////////////////////////////////////////////////
 
 void emitCheckProp(IRGS& env, const StringData* propName) {
-  auto const cctx = gen(env, LdCctx, fp(env));
-  auto const cls = gen(env, LdClsCtx, cctx);
+  auto const cls = ldCtxCls(env);
   auto const propInitVec = gen(env, LdClsInitData, cls);
 
   auto const ctx = curClass(env);
@@ -441,8 +440,7 @@ void emitInitProp(IRGS& env, const StringData* propName, InitPropOp op) {
   case InitPropOp::NonStatic:
     {
       // The above is not the case for pinit, so we need to load.
-      auto const cctx = gen(env, LdCctx, fp(env));
-      auto const cls = gen(env, LdClsCtx, cctx);
+      auto const cls = ldCtxCls(env);
 
       const auto slot = ctx->lookupDeclProp(propName);
       idx = ctx->propSlotToIndex(slot);

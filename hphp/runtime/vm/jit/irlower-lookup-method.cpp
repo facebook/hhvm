@@ -288,18 +288,4 @@ void cgLdClsMethodFCacheFunc(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void cgFwdCtxStaticCall(IRLS& env, const IRInstruction* inst) {
-  auto const dstCtx = dstLoc(env, inst, 0).reg();
-  auto const srcCtx = srcLoc(env, inst, 0).reg();
-
-  auto& v = vmain(env);
-  if (inst->marker().hasThis()) {
-    emitLdObjClass(v, srcCtx, dstCtx);
-  } else {
-    v << copy{srcCtx, dstCtx};
-  }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 }}}

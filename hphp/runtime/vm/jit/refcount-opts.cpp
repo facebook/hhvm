@@ -585,7 +585,7 @@ struct MustAliasSet {
    * information.
    *
    * Because of how we build MustAliasSets (essentially canonical(), or groups
-   * of LdCtx instructions), it is guaranteed that this widestType includes all
+   * of LdFrameThis instructions), it is guaranteed that this widestType includes all
    * possible values for the set.  However it is not the case that every tmp in
    * the set necessarily has a subtype of widestType, because of situations
    * that can occur with AssertType and interface types.  This does not affect
@@ -597,7 +597,7 @@ struct MustAliasSet {
    * A representative of the set.  This is only used for debug tracing, and is
    * currently the first instruction (in an rpo traversal) that defined a tmp
    * in the must-alias-set.  (I.e. it'll be the canonical() tmp, or the first
-   * LdCtx we saw.)
+   * LdFrameThis we saw.)
    */
   SSATmp* representative;
 

@@ -318,17 +318,14 @@ private:
   SSATmp* preOptimizeAssertLocation(IRInstruction*, Location);
   SSATmp* preOptimizeAssertLoc(IRInstruction*);
   SSATmp* preOptimizeAssertStk(IRInstruction*);
-  SSATmp* preOptimizeLdCtxHelper(IRInstruction*);
-  SSATmp* preOptimizeLdCtx(IRInstruction* i) {
-    return preOptimizeLdCtxHelper(i);
-  }
-  SSATmp* preOptimizeLdCctx(IRInstruction* i) {
-    return preOptimizeLdCtxHelper(i);
-  }
   SSATmp* preOptimizeLdLocation(IRInstruction*, Location);
   SSATmp* preOptimizeLdLoc(IRInstruction*);
   SSATmp* preOptimizeLdStk(IRInstruction*);
   SSATmp* preOptimizeLdMBase(IRInstruction*);
+  SSATmp* preOptimizeLdFrameCtx(IRInstruction*);
+  SSATmp* preOptimizeLdFrameThis(IRInstruction*);
+  SSATmp* preOptimizeLdFrameCls(IRInstruction*);
+  SSATmp* preOptimizeLdObjClass(IRInstruction*);
   SSATmp* preOptimize(IRInstruction*);
 
   void appendInstruction(IRInstruction* inst);

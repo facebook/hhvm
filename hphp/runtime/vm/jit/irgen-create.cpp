@@ -353,13 +353,9 @@ void emitCreateCl(IRGS& env, uint32_t numParams, uint32_t clsIx) {
   auto const closure = gen(env, ConstructClosure, ClassData(cls));
 
   auto const live_ctx = [&] {
-    auto const ldctx = ldCtx(env);
-    if (!ldctx->type().maybe(TObj)) {
-      return ldctx;
-    }
-    if (func->isStatic()) {
-      return gen(env, FwdCtxStaticCall, ldctx);
-    }
+    if (func->isStatic()) return ldCtxCls(env);
+    assertx(hasThis(env));
+    auto const ldctx = ldThis(env);
     gen(env, IncRef, ldctx);
     return ldctx;
   }();

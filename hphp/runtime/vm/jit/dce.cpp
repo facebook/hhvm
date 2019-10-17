@@ -85,7 +85,6 @@ bool canDCE(IRInstruction* inst) {
   case ConvResToInt:
   case ConvDblToStr:
   case ConvIntToStr:
-  case ConvClsToCctx:
   case DblAsBits:
   case ConvPtrToLval:
   case NewColFromArray:
@@ -179,17 +178,13 @@ bool canDCE(IRInstruction* inst) {
   case LdIterPos:
   case LdIterEnd:
   case LdRef:
-  case LdCtx:
-  case LdCctx:
-  case LdClosure:
-  case LdClsCtx:
-  case LdClsCctx:
+  case LdFrameThis:
+  case LdFrameCls:
   case LdSmashable:
   case LdSmashableFunc:
   case LdClsFromClsMeth:
   case LdFuncFromClsMeth:
   case LdRecDesc:
-  case FwdCtxStaticCall:
   case DefConst:
   case Conjure:
   case LdClsInitData:
@@ -236,7 +231,8 @@ bool canDCE(IRInstruction* inst) {
   case LdSwitchDblIndex:
   case LdSwitchStrIndex:
   case LdSSwitchDestFast:
-  case LdClosureCtx:
+  case LdClosureCls:
+  case LdClosureThis:
   case CreateSSWH:
   case LdContActRec:
   case LdContArValue:

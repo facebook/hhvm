@@ -73,8 +73,6 @@ TRACE_SET_MOD(hhir);
 #define DDArr          HasDest
 #define DStaticDArr    HasDest
 #define DCol           HasDest
-#define DCtx           HasDest
-#define DCtxCls        HasDest
 #define DMulti         NaryDest
 #define DSetElem       HasDest
 #define DPtrToParam    HasDest
@@ -155,8 +153,6 @@ OpInfo g_opInfo[] = {
 #undef DStaticDArr
 #undef DCol
 #undef DAllocObj
-#undef DCtx
-#undef DCtxCls
 #undef DMulti
 #undef DSetElem
 #undef DPtrToParam
@@ -628,7 +624,6 @@ bool opcodeMayRaise(Opcode opc) {
   case ConvBoolToArr:
   case ConvBoolToDbl:
   case ConvBoolToInt:
-  case ConvClsToCctx:
   case ConvDblToArr:
   case ConvDblToBool:
   case ConvDblToInt:
@@ -723,7 +718,6 @@ bool opcodeMayRaise(Opcode opc) {
   case Floor:
   case FuncCred:
   case FuncHasAttr:
-  case FwdCtxStaticCall:
   case GenericRetDecRefs:
   case GetMemoKeyScalar:
   case GetMixedPtrIter:
@@ -798,15 +792,12 @@ bool opcodeMayRaise(Opcode opc) {
   case LdARNumArgsAndFlags:
   case LdARNumParams:
   case LdBindAddr:
-  case LdCctx:
-  case LdClosure:
-  case LdClosureCtx:
+  case LdClosureCls:
+  case LdClosureThis:
   case LdClsCachedSafe:
   case LdRecDescCachedSafe:
-  case LdClsCctx:
   case LdClsCns:
   case LdClsCnsVecLen:
-  case LdClsCtx:
   case LdClsFromClsMeth:
   case LdClsInitData:
   case LdClsMethod:
@@ -822,9 +813,10 @@ bool opcodeMayRaise(Opcode opc) {
   case LdContArValue:
   case LdContField:
   case LdContResumeAddr:
-  case LdCtx:
   case LdElem:
   case LdFuncCls:
+  case LdFrameCls:
+  case LdFrameThis:
   case LdFuncFromClsMeth:
   case LdFuncNumParams:
   case LdFuncName:

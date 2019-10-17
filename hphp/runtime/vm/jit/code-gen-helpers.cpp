@@ -484,11 +484,6 @@ Vreg emitLdObjClass(Vout& v, Vreg obj, Vreg d) {
   return d;
 }
 
-Vreg emitLdClsCctx(Vout& v, Vreg src, Vreg dst) {
-  v << copy{src, dst};
-  return dst;
-}
-
 void cmpLowPtrImpl(Vout& v, Vreg sf, const void* ptr, Vptr mem, size_t size) {
   if (size == 8) {
     v << cmpqm{v.cns(ptr), mem, sf};

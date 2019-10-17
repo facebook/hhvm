@@ -29,6 +29,7 @@
 #include "hphp/runtime/vm/jit/type.h"
 
 #include "hphp/runtime/base/perf-warning.h"
+#include "hphp/runtime/ext/std/ext_std_closure.h"
 
 #include <folly/Format.h>
 
@@ -132,8 +133,8 @@ bool checkBlock(Block* b) {
 /*
  * Check some invariants around InitCtx(fp):
  * 1. For each fp, at most one should exist in a given unit.
- * 2. If present, InitCtx must dominate all occurrences of LdCtx and LdCctx
- *    with the same fp.
+ * 2. If present, InitCtx must dominate all occurrences of LdFrameThis and
+ *    LdFrameCls with the same fp (unless the This is a closure).
  */
 bool DEBUG_ONLY checkInitCtxInvariants(const IRUnit& unit) {
   auto const blocks = rpoSortCfg(unit);
@@ -162,10 +163,16 @@ bool DEBUG_ONLY checkInitCtxInvariants(const IRUnit& unit) {
         init_ctx_src = inst.src(0);
         continue;
       }
-      if (!inst.is(LdCtx, LdCctx)) continue;
+      if (!inst.is(LdFrameThis, LdFrameCls)) continue;
 
       auto const init_ctx_block = init_ctx_blocks[inst.src(0)];
       if (!init_ctx_block) continue;
+
+      if (inst.is(LdFrameThis) && inst.func()->isClosureBody() &&
+          inst.typeParam() <= Type::SubObj(c_Closure::classof())) {
+        continue;
+      }
+
       if (init_ctx_block == blk && init_ctx_src != inst.src(0)) return false;
       if (!dominates(init_ctx_block, blk, idoms)) return false;
     }
@@ -574,8 +581,6 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
 #define DDArr
 #define DStaticDArr
 #define DCol
-#define DCtx
-#define DCtxCls
 #define DCns
 #define DMemoKey
 #define DLvalOfPtr
@@ -640,8 +645,6 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
 #undef DDArr
 #undef DStaticDArr
 #undef DCol
-#undef DCtx
-#undef DCtxCls
 #undef DCns
 #undef DUnion
 #undef DMemoKey

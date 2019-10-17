@@ -1761,7 +1761,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case IsNType:
   case IsType:
   case Mov:
-  case ConvClsToCctx:
   case ConvDblToBool:
   case ConvDblToInt:
   case DblAsBits:
@@ -1821,7 +1820,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ProfileDecRef:
   case AFWHBlockOn:
   case IncRef:
-  case LdClosureCtx:
+  case LdClosureCls:
+  case LdClosureThis:
   case StClosureCtx:
   case StContArKey:
   case StContArValue:
@@ -1833,7 +1833,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CreateSSWH:
   case NewLikeArray:
   case CheckRefs:
-  case LdClsCctx:
   case BeginCatch:
   case CheckSurpriseFlags:
   case CheckType:
@@ -1911,12 +1910,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case EagerSyncVMRegs:
   case ExtendsClass:
   case LdUnwinderValue:
-  case LdCtx:
-  case LdCctx:
-  case LdClosure:
+  case LdFrameThis:
+  case LdFrameCls:
   case LdClsName:
   case LdAFWHActRec:
-  case LdClsCtx:
   case LdContActRec:
   case LdContArKey:
   case LdContArValue:
@@ -1934,7 +1931,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdClsMethodFCacheFunc:
   case LdClsTypeCns:
   case LdClsTypeCnsClsName:
-  case FwdCtxStaticCall:
   case ProfileArrayKind:
   case ProfileSwitchDest:
   case LdFuncCls:

@@ -37,14 +37,13 @@ TRACE_SET_MOD(irlower);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void cgLdClosure(IRLS& env, const IRInstruction* inst) {
-  assertx(!inst->func() || inst->func()->isClosureBody());
-  auto const dst = dstLoc(env, inst, 0).reg();
-  auto const fp = srcLoc(env, inst, 0).reg();
-  vmain(env) << load{fp[AROFF(m_thisUnsafe)], dst};
+void cgLdClosureCls(IRLS& env, const IRInstruction* inst) {
+  auto const ctx = dstLoc(env, inst, 0).reg();
+  auto const obj = srcLoc(env, inst, 0).reg();
+  vmain(env) << load{obj[c_Closure::ctxOffset()], ctx};
 }
 
-void cgLdClosureCtx(IRLS& env, const IRInstruction* inst) {
+void cgLdClosureThis(IRLS& env, const IRInstruction* inst) {
   auto const ctx = dstLoc(env, inst, 0).reg();
   auto const obj = srcLoc(env, inst, 0).reg();
   vmain(env) << load{obj[c_Closure::ctxOffset()], ctx};

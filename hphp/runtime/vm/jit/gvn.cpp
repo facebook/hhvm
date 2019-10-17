@@ -199,7 +199,6 @@ bool supportsGVN(const IRInstruction* inst) {
   case ConvIntToDbl:
   case ConvBoolToInt:
   case ConvDblToInt:
-  case ConvClsToCctx:
   case DblAsBits:
   case GtInt:
   case GteInt:
@@ -278,10 +277,8 @@ bool supportsGVN(const IRInstruction* inst) {
   case IsCol:
   case IsDVArray:
   case LdRDSAddr:
-  case LdCtx:
-  case LdCctx:
-  case LdClsCtx:
-  case LdClsCctx:
+  case LdFrameThis:
+  case LdFrameCls:
   case LdClsCtor:
   case DefConst:
   case DefCls:

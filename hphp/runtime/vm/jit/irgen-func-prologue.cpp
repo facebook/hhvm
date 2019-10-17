@@ -142,12 +142,18 @@ SSATmp* juggle_closure_ctx(IRGS& env, const Func* func, SSATmp* closure) {
   assertx(func->isClosureBody());
 
   if (closure == nullptr) {
-    closure = gen(env, LdClosure, Type::ExactObj(func->implCls()), fp(env));
+    closure = gen(env, LdFrameThis, Type::ExactObj(func->implCls()), fp(env));
     if (func->cls()) {
-      auto const ctx = gen(env, LdClosureCtx, FuncData{func}, closure);
-      // We can skip the incref for static closures, which have a Cctx.
-      if (!func->isStatic()) gen(env, IncRef, ctx);
-      gen(env, InitCtx, fp(env), ctx);
+      if (func->isStatic()) {
+        auto const cls =
+          gen(env, LdClosureCls, Type::SubCls(func->cls()), closure);
+        gen(env, InitCtx, fp(env), cls);
+      } else {
+        auto const thiz =
+          gen(env, LdClosureThis, Type::SubObj(func->cls()), closure);
+        gen(env, IncRef, thiz);
+        gen(env, InitCtx, fp(env), thiz);
+      }
     }
   }
 

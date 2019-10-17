@@ -1872,12 +1872,7 @@ void nativeImplInlined(IRGS& env) {
   assertx(callee->nativeFuncPtr());
 
   auto const numArgs = callee->numParams();
-  auto const paramThis = [&] () -> SSATmp* {
-    if (!callee->isMethod()) return nullptr;
-    auto ctx = ldCtx(env);
-    if (callee->isStatic()) return gen(env, LdClsCtx, ctx);
-    return castCtxThis(env, ctx);
-  }();
+  auto const paramThis = callee->isMethod() ? ldCtx(env) : nullptr;
 
   auto numNonDefault = fp(env)->inst()->extra<DefInlineFP>()->numArgs;
   auto params = prepare_params(
@@ -1998,13 +1993,6 @@ void emitNativeImpl(IRGS& env) {
   }
 
   auto ctx = callee->isMethod() ? ldCtx(env) : nullptr;
-  if (ctx) {
-    if (!hasThis(env)) {
-      ctx = gen(env, LdClsCtx, ctx);
-    } else {
-      ctx = castCtxThis(env, ctx);
-    }
-  }
 
   auto params = prepare_params(
     env,
@@ -2631,7 +2619,7 @@ void memoGetImpl(IRGS& env,
 
     if (func->isMemoizeWrapperLSB()) {
       /* For LSB memoization, we need the LSB class */
-      auto const lsbCls = gen(env, LdClsCtx, ldCtx(env));
+      auto const lsbCls = ldCtxCls(env);
       if (keys.count > 0) {
         return gen(
           env,
@@ -2811,7 +2799,7 @@ void memoSetImpl(IRGS& env, LocalRange keys, bool eager) {
 
   if (func->isMemoizeWrapperLSB()) {
     /* For LSB memoization, we need the LSB class */
-    auto const lsbCls = gen(env, LdClsCtx, ldCtx(env));
+    auto const lsbCls = ldCtxCls(env);
     if (keys.count > 0) {
       gen(
         env,

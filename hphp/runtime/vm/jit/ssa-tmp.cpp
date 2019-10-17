@@ -48,8 +48,8 @@ int typeNeededWords(Type t) {
   if (t.maybe(TNullptr)) {
     return typeNeededWords(t - TNullptr);
   }
-  if (t <= TCtx || t <= TPtrToGen) {
-    // Ctx and PtrTo* may be statically unknown but always need just one
+  if (t <= TPtrToGen) {
+    // PtrTo* may be statically unknown but always need just one
     // register.
     return 1;
   }

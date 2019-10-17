@@ -357,7 +357,7 @@ void verifyTypeImpl(IRGS& env,
   // At this point we know valType is Obj.
   if (tc.isThis() && (propCls || RuntimeOption::EvalThisTypeHintLevel >= 2)) {
     // For this type checks, the class needs to be an exact match.
-    auto const ctxCls = propCls ? propCls : gen(env, LdClsCtx, ldCtx(env));
+    auto const ctxCls = propCls ? propCls : ldCtxCls(env);
     auto const objClass = gen(env, LdObjClass, val);
     ifThen(
       env,
@@ -827,7 +827,7 @@ void emitIsLateBoundCls(IRGS& env) {
   if (isTrait(cls)) PUNT(IsLateBoundCls-Trait);
   auto const obj = popC(env);
   if (obj->isA(TObj)) {
-    auto const rhs = gen(env, LdClsCtx, ldCtx(env));
+    auto const rhs = ldCtxCls(env);
     auto const lhs  = gen(env, LdObjClass, obj);
     push(env, gen(env, InstanceOf, lhs, rhs));
   } else if (!obj->type().maybe(TObj)) {
@@ -876,7 +876,7 @@ SSATmp* resolveTypeStructImpl(
   auto const declaringCls = curFunc(env) ? curClass(env) : nullptr;
   auto const calledCls =
     declaringCls && typeStructureCouldBeNonStatic
-      ? gen(env, LdClsCtx, ldCtx(env))
+      ? ldCtxCls(env)
       : cns(env, nullptr);
   auto const result = resolveTypeStructureAndCacheInRDS(
     env,

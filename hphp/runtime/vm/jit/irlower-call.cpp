@@ -91,8 +91,9 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
     ActRec::encodeNumArgsAndFlags(extra->numArgs, flags));
   v << storeli{naaf, calleeAR + AROFF(m_numArgsAndFlags)};
 
-  assertx(inst->src(3)->isA(TCtx) || inst->src(3)->isA(TNullptr));
-  if (inst->src(3)->isA(TCtx)) {
+  assertx(inst->src(3)->isA(TObj) || inst->src(3)->isA(TCls) ||
+          inst->src(3)->isA(TNullptr));
+  if (inst->src(3)->isA(TObj) || inst->src(3)->isA(TCls)) {
     v << store{ctx, calleeAR + AROFF(m_thisUnsafe)};
   } else if (RuntimeOption::EvalHHIRGenerateAsserts) {
     emitImmStoreq(v, ActRec::kTrashedThisSlot, calleeAR + AROFF(m_thisUnsafe));
@@ -163,8 +164,9 @@ void cgCallUnpack(IRLS& env, const IRInstruction* inst) {
     ActRec::encodeNumArgsAndFlags(extra->numArgs + 1, ActRec::Flags::None));
   v << storeli{naaf, calleeAR + AROFF(m_numArgsAndFlags)};
 
-  assertx(inst->src(3)->isA(TCtx) || inst->src(3)->isA(TNullptr));
-  if (inst->src(3)->isA(TCtx)) {
+  assertx(inst->src(3)->isA(TObj) || inst->src(3)->isA(TCls) ||
+          inst->src(3)->isA(TNullptr));
+  if (inst->src(3)->isA(TObj) || inst->src(3)->isA(TCls)) {
     v << store{ctx, calleeAR + AROFF(m_thisUnsafe)};
   } else if (RuntimeOption::EvalHHIRGenerateAsserts) {
     emitImmStoreq(v, ActRec::kTrashedThisSlot, calleeAR + AROFF(m_thisUnsafe));

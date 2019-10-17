@@ -63,7 +63,6 @@ struct SSATmp {
   const Class*       clsVal() const       { return type().clsVal(); }
   const RecordDesc*  recVal() const       { return type().recVal(); }
   const ClsMethDataRef clsmethVal() const { return type().clsmethVal(); }
-  ConstCctx          cctxVal() const      { return type().cctxVal(); }
   rds::Handle        rdsHandleVal() const { return type().rdsHandleVal(); }
   TCA                tcaVal() const       { return type().tcaVal(); }
   Variant            variantVal() const;

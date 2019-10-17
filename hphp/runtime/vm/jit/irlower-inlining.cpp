@@ -75,14 +75,12 @@ void cgDefInlineFP(IRLS& env, const IRInstruction* inst) {
 
   // Set m_this/m_cls.
   auto const ctxTmp = inst->src(2);
-  assertx(ctxTmp->isA(TCls) || ctxTmp->isA(TCtx) || ctxTmp->isA(TNullptr));
+  assertx(ctxTmp->isA(TCls) || ctxTmp->isA(TObj) || ctxTmp->isA(TNullptr));
   if (ctxTmp->hasConstVal(TCls)) {
     auto const ctxVal = uintptr_t(ctxTmp->clsVal());
     emitImmStoreq(v, ctxVal, ar + AROFF(m_thisUnsafe));
-  } else if (ctxTmp->isA(TCls)) {
-    // Store the Class* as a Cctx.
-    v << store{ctx, ar + AROFF(m_thisUnsafe)};
-  } else if (ctxTmp->isA(TCtx)) {
+  } else if (ctxTmp->isA(TCls) || ctxTmp->isA(TObj)) {
+    // Store the ObjectData* or Class*
     v << store{ctx, ar + AROFF(m_thisUnsafe)};
   } else if (RuntimeOption::EvalHHIRGenerateAsserts) {
     // No $this or class; this happens in FCallFunc*.

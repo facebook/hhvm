@@ -331,54 +331,18 @@ SSATmp* simplifyLdCls(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* simplifyLdClsCtx(State& env, const IRInstruction* inst) {
-  auto const ctx = inst->src(0);
-
-  if (ctx->hasConstVal(TCctx)) {
-    return cns(env, ctx->cctxVal().cls());
-  }
-  Type ctxType = ctx->type();
-  if (ctxType <= TObj) {
-    // this pointer... load its class ptr
-    return gen(env, LdObjClass, ctx);
-  }
-  if (ctxType <= TCctx) {
-    return gen(env, LdClsCctx, ctx);
-  }
-  return nullptr;
-}
-
-SSATmp* simplifyLdClsCctx(State& env, const IRInstruction* inst) {
-  SSATmp* ctx = inst->src(0);
-
-  if (ctx->hasConstVal(TCctx)) {
-    return cns(env, ctx->cctxVal().cls());
-  }
-  if (ctx->inst()->op() == ConvClsToCctx) {
-    return ctx->inst()->src(0);
-  }
-  return nullptr;
-}
-
 SSATmp* simplifyLdClsMethod(State& env, const IRInstruction* inst) {
   auto const ctx = inst->src(0);
 
   if (ctx->hasConstVal()) {
     auto const idx = inst->src(1);
     if (idx->hasConstVal()) {
-      auto const cls = ctx->hasConstVal(TCls) ?
-        ctx->clsVal() : ctx->cctxVal().cls();
+      auto const cls = ctx->clsVal();
       return cns(env, cls->getMethod(-idx->intVal() - 1));
     }
     return nullptr;
   }
 
-  if (ctx->isA(TCls)) {
-    auto const src = ctx->inst();
-    if (src->op() == LdClsCctx) {
-      return gen(env, LdClsMethod, src->src(0), inst->src(1));
-    }
-  }
   return nullptr;
 }
 
@@ -391,35 +355,24 @@ SSATmp* simplifyLdObjClass(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* simplifyLdFrameCls(State& env, const IRInstruction* inst) {
+  auto const ty = inst->typeParam();
+
+  if (!(ty < TCls)) return nullptr;
+
+  if (auto const cls = ty.clsSpec().exactCls()) {
+    return cns(env, cls);
+  }
+
+  return nullptr;
+}
+
 SSATmp* simplifyLdObjInvoke(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   if (!src->hasConstVal(TCls)) return nullptr;
 
   auto const meth = src->clsVal()->getCachedInvoke();
   return meth == nullptr ? nullptr : cns(env, meth);
-}
-
-SSATmp* simplifyFwdCtxStaticCall(State& env, const IRInstruction* inst) {
-  auto const srcCtx = inst->src(0);
-
-  if (srcCtx->isA(TCctx)) return srcCtx;
-  if (srcCtx->isA(TObj)) {
-    auto const cls = gen(env, LdObjClass, srcCtx);
-    return gen(env, ConvClsToCctx, cls);
-  }
-  return nullptr;
-}
-
-SSATmp* simplifyConvClsToCctx(State& env, const IRInstruction* inst) {
-  auto const src = inst->src(0);
-
-  if (src->hasConstVal(TCls)) {
-    return cns(env, ConstCctx::cctx(src->clsVal()));
-  }
-
-  auto const srcInst = src->inst();
-  if (srcInst->is(LdClsCctx)) return srcInst->src(0);
-  return nullptr;
 }
 
 SSATmp* simplifyMov(State& /*env*/, const IRInstruction* inst) {
@@ -3867,7 +3820,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(ConvCellToInt)
   X(ConvCellToStr)
   X(ConvCellToArr)
-  X(ConvClsToCctx)
   X(ConvDblToArr)
   X(ConvDblToBool)
   X(ConvDblToInt)
@@ -3925,7 +3877,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(InstanceOfBitmask)
   X(NInstanceOfBitmask)
   X(Floor)
-  X(FwdCtxStaticCall)
   X(IncRef)
   X(InitObjProps)
   X(InitObjMemoSlots)
@@ -3939,8 +3890,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(IsDVArray)
   X(HasToString)
   X(LdCls)
-  X(LdClsCtx)
-  X(LdClsCctx)
   X(LdClsName)
   X(LdWHResult)
   X(LdWHState)
@@ -4082,6 +4031,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(GetMemoKeyScalar)
   X(StrictlyIntegerConv)
   X(RaiseErrorOnInvalidIsAsExpressionType)
+  X(LdFrameCls)
   default: break;
   }
 #undef X

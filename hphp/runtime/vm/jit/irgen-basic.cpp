@@ -235,9 +235,8 @@ void emitInitThisLoc(IRGS& env, int32_t id) {
     return;
   }
   auto const ldrefExit = makeExit(env);
-  auto const ctx       = ldCtx(env);
   auto const oldLoc = ldLoc(env, id, ldrefExit, DataTypeBoxAndCountness);
-  auto const this_  = castCtxThis(env, ctx);
+  auto const this_  = ldThis(env);
   gen(env, IncRef, this_);
   stLocRaw(env, id, fp(env), this_);
   decRef(env, oldLoc);
@@ -288,7 +287,6 @@ void emitCheckThis(IRGS& env) {
 }
 
 void emitBareThis(IRGS& env, BareThisOp subop) {
-  auto const ctx = ldCtx(env);
   if (!hasThis(env)) {
     if (subop == BareThisOp::NoNotice) {
       push(env, cns(env, TInitNull));
@@ -299,7 +297,7 @@ void emitBareThis(IRGS& env, BareThisOp subop) {
     return;
   }
 
-  pushIncRef(env, castCtxThis(env, ctx));
+  pushIncRef(env, ldThis(env));
 }
 
 void emitClone(IRGS& env) {
@@ -316,8 +314,7 @@ void emitLateBoundCls(IRGS& env) {
     interpOne(env);
     return;
   }
-  auto const ctx = ldCtx(env);
-  push(env, gen(env, LdClsCtx, ctx));
+  push(env, ldCtxCls(env));
 }
 
 void emitSelf(IRGS& env) {

@@ -99,12 +99,6 @@ GuardConstraint relaxConstraint(GuardConstraint origGc,
          origGc, knownType, toRelax);
   Trace::Indent _i;
 
-  // AssertType can be given TCtx, which should never relax.
-  if (toRelax.maybe(TCctx)) {
-    always_assert(toRelax <= TCtx);
-    return origGc;
-  }
-
   auto const dstType = knownType & toRelax;
   always_assert_flog(typeFitsConstraint(dstType, origGc),
                      "refine({}, {}) doesn't fit {}",

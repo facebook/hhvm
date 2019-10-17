@@ -59,7 +59,7 @@ value moved into the caller. The sequence for this is annotated below.
   DecRef tx       # emitted for inlined regions, in the hopes that IncRefs from
   ...             # pushing arguments will cancel DecRefs from the return.
 
-  ty := LdCtx     # The context is DecRef'ed
+  ty := LdFrameThis     # The context is DecRef'ed
   DecRef ty
 
   tz := LdStk     # The InlineReturn instruction will kill the callee frame
@@ -231,7 +231,11 @@ void beginInlining(IRGS& env,
   ctx = [&] () -> SSATmp* {
     if (target->isClosureBody()) {
       if (!target->cls()) return cns(env, nullptr);
-      auto const closureCtx = gen(env, LdClosureCtx, FuncData{target}, closure);
+      if (target->isStatic()) {
+        return gen(env, LdClosureCls, Type::SubCls(target->cls()), closure);
+      }
+      auto const closureCtx =
+        gen(env, LdClosureThis, Type::SubObj(target->cls()), closure);
       gen(env, IncRef, closureCtx);
       return closureCtx;
     }
@@ -242,30 +246,23 @@ void beginInlining(IRGS& env,
     }
     assertx(!ctx->type().maybe(TNullptr));
 
-    if (target->isStaticInPrologue() ||
-        (!hasThis(env) && isFCallClsMethod(writeArOpc))) {
-      assertx(ctx->isA(TCls) || ctx->isA(TCctx));
-      if (ctx->hasConstVal(TCctx)) {
-        return cns(env, ctx->cctxVal().cls());
-      } else if (ctx->hasConstVal(TCls)) {
+    if (ctx->isA(TBottom)) return ctx;
+
+    if (target->isStatic()) {
+      assertx(ctx->isA(TCls));
+      if (ctx->hasConstVal(TCls)) {
         return ctx;
       }
 
-      auto const clsCtx = ctx->isA(TCctx) ? gen(env, LdClsCctx, ctx) : ctx;
-      auto const ty = clsCtx->type() & Type::SubCls(target->cls());
-      if (clsCtx->type() <= ty) return clsCtx;
-      return gen(env, AssertType, ty, clsCtx);
-    }
-
-    if ((target->cls() && !target->isStatic()) ||
-        isFCallObjMethod(writeArOpc) ||
-        ctx->isA(TObj)) {
-      auto const ty = ctx->type() & thisTypeFromFunc(target);
+      auto const ty = ctx->type() & Type::SubCls(target->cls());
       if (ctx->type() <= ty) return ctx;
       return gen(env, AssertType, ty, ctx);
     }
 
-    return ctx;
+    assertx(ctx->type().maybe(TObj));
+    auto const ty = ctx->type() & thisTypeFromFunc(target);
+    if (ctx->type() <= ty) return ctx;
+    return gen(env, AssertType, ty, ctx);
   }();
 
   auto const generics = [&]() -> SSATmp* {
@@ -339,14 +336,13 @@ void beginInlining(IRGS& env,
   emitGenericsMismatchCheck(env, callFlags);
   emitCalleeDynamicCallCheck(env, callFlags);
 
-  if (ctx->isA(TBottom)) return;
-  if (ctx->isA(TObj)) {
-    assertx(startSk.hasThis());
-  } else if (!ctx->type().maybe(TObj)) {
-    assertx(!startSk.hasThis());
-  } else if (target->cls()) {
-    assertx(startSk.hasThis() == startSk.func()->hasThisInBody());
-  }
+  assertx(startSk.hasThis() == startSk.func()->hasThisInBody());
+  assertx(
+    ctx->isA(TBottom) ||
+    (ctx->isA(TNullptr) && !target->cls()) ||
+    (ctx->isA(TCls) && target->cls() && target->isStatic()) ||
+    (ctx->isA(TObj) && target->cls() && !target->isStatic())
+  );
 }
 
 void conjureBeginInlining(IRGS& env,

@@ -135,7 +135,6 @@ inline Type for_const(const Func*)   { return TFunc; }
 inline Type for_const(const Class*)  { return TCls; }
 inline Type for_const(const RecordDesc*)  { return TRecDesc; }
 inline Type for_const(ClsMethDataRef) { return TClsMeth; }
-inline Type for_const(ConstCctx)     { return TCctx; }
 inline Type for_const(TCA)           { return TTCA; }
 ///////////////////////////////////////////////////////////////////////////////
 }
@@ -393,7 +392,6 @@ IMPLEMENT_CNS_VAL(TFunc,       func, const HPHP::Func*)
 IMPLEMENT_CNS_VAL(TCls,        cls,  const Class*)
 IMPLEMENT_CNS_VAL(TRecDesc,    rec,  const RecordDesc*)
 IMPLEMENT_CNS_VAL(TClsMeth,    clsmeth,  ClsMethDataRef)
-IMPLEMENT_CNS_VAL(TCctx,       cctx, ConstCctx)
 IMPLEMENT_CNS_VAL(TTCA,        tca,  jit::TCA)
 IMPLEMENT_CNS_VAL(TRDSHandle,  rdsHandle,  rds::Handle)
 IMPLEMENT_CNS_VAL(TMemToGen,   ptr, const TypedValue*)

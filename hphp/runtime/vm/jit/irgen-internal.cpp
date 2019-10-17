@@ -28,8 +28,7 @@ SSATmp* checkAndLoadThis(IRGS& env) {
     gen(env, RaiseError, err);
     return cns(env, TBottom);
   }
-  auto const ctx = ldCtx(env);
-  return castCtxThis(env, ctx);
+  return ldThis(env);
 }
 
 SSATmp* convertClsMethToVec(IRGS& env, SSATmp* clsMeth) {

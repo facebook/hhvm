@@ -61,6 +61,16 @@ function testKeyTypes() {
   }
 }
 
+function testInvalidKeys() {
+    // Reject keys with null bytes
+    apc_add("bar\x00baz", 10);
+    apc_store("test\x00xyz", "hello");
+    apc_store(array("validkey" => "validvalue", "invalid\x00key" => "value"));
+    foreach (array('bar', 'test', 'validkey', 'invalid') as $k) {
+        var_dump(__hhvm_intrinsics\apc_fetch_no_check($k));
+    }
+}
+
 <<__EntryPoint>> function main(): void {
   testApc(array(7, 4, 1776));
   testApc(array("sv0", "sv1"));
@@ -73,4 +83,5 @@ function testKeyTypes() {
   var_dump($b);
 
   testKeyTypes();
+  testInvalidKeys();
 }

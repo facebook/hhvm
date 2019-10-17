@@ -72,3 +72,13 @@ string(3) "two"
 Undefined index: 3
 Undefined index: 2
 string(5) "three"
+
+Warning: Invalid argument: apc key: (contains invalid characters)%S
+
+Warning: Invalid argument: apc key: (contains invalid characters)%S
+
+Warning: Invalid argument: apc key: (contains invalid characters)%S
+bool(false)
+bool(false)
+string(10) "validvalue"
+bool(false)

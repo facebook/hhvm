@@ -662,7 +662,13 @@ std::string RuntimeOption::TLSClientCipherSpec;
 bool RuntimeOption::EnableSSLWithPlainText = false;
 int RuntimeOption::SSLClientAuthLevel = 0;
 std::string RuntimeOption::SSLClientCAFile = "";
+
+std::string RuntimeOption::ClientAuthAclIdentity;
+std::string RuntimeOption::ClientAuthAclAction;
+bool RuntimeOption::ClientAuthFailClose = false;
 uint32_t RuntimeOption::SSLClientAuthLoggingSampleRatio = 0;
+uint32_t RuntimeOption::ClientAuthSuccessLogSampleRatio = 0;
+uint32_t RuntimeOption::ClientAuthFailureLogSampleRatio = 0;
 
 std::vector<std::shared_ptr<VirtualHost>> RuntimeOption::VirtualHosts;
 std::shared_ptr<IpBlockMap> RuntimeOption::IpBlocks;
@@ -2205,6 +2211,13 @@ void RuntimeOption::Load(
           "SSLClientCAFile is required to enable client auth");
     }
 
+    Config::Bind(ClientAuthAclIdentity, ini, config,
+                 "Server.ClientAuthAclIdentity", "");
+    Config::Bind(ClientAuthAclAction, ini, config,
+                 "Server.ClientAuthAclAction", "");
+    Config::Bind(ClientAuthFailClose, ini, config,
+                 "Server.ClientAuthFailClose", false);
+
     Config::Bind(SSLClientAuthLoggingSampleRatio, ini, config,
                  "Server.SSLClientAuthLoggingSampleRatio", 0);
     if (SSLClientAuthLoggingSampleRatio < 0) {
@@ -2212,6 +2225,26 @@ void RuntimeOption::Load(
     }
     if (SSLClientAuthLoggingSampleRatio > 100) {
       SSLClientAuthLoggingSampleRatio = 100;
+    }
+
+    Config::Bind(ClientAuthSuccessLogSampleRatio, ini, config,
+                 "Server.ClientAuthSuccessLogSampleRatio", 0);
+    if (ClientAuthSuccessLogSampleRatio <
+          SSLClientAuthLoggingSampleRatio) {
+      ClientAuthSuccessLogSampleRatio = SSLClientAuthLoggingSampleRatio;
+    }
+    if (ClientAuthSuccessLogSampleRatio > 100) {
+      ClientAuthSuccessLogSampleRatio = 100;
+    }
+
+    Config::Bind(ClientAuthFailureLogSampleRatio, ini, config,
+                 "Server.ClientAuthFailureLogSampleRatio", 0);
+    if (ClientAuthFailureLogSampleRatio <
+          SSLClientAuthLoggingSampleRatio) {
+      ClientAuthFailureLogSampleRatio = SSLClientAuthLoggingSampleRatio;
+    }
+    if (ClientAuthFailureLogSampleRatio > 100) {
+      ClientAuthFailureLogSampleRatio = 100;
     }
 
     // SourceRoot has been default to: Process::GetCurrentDirectory() + '/'

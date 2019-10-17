@@ -73,7 +73,7 @@ let handler =
     inherit Nast_visitor.handler_base
 
     method! at_class_ _env c =
-      let (c_pos, c_name) = c.c_name in
+      let c_name = snd c.c_name in
       (* We restrict PU definition to only happen in a proper class.
        * This limits PU to single inheritance, which we use here by
        * collpasing parent information into single set/maps *)
@@ -173,51 +173,43 @@ let handler =
           ~f:
             (fun ( enum_name,
                    { tpu_case_types; tpu_case_values; tpu_members; _ } ) ->
-            let (enum_pos, atom_pos_map) =
-              match SMap.find_opt enum_name pos_map with
-              | None ->
-                (* Should not happen.. means the provider is not
-                           in sync with the file *)
-                let pos = Caml.Format.asprintf "PU check at %a" Pos.pp c_pos in
-                failwith
-                @@ Printf.sprintf
-                     "%s\nIn class %s, unknown enumeration %s\n"
-                     pos
-                     c_name
-                     enum_name
-              | Some (pos, map) -> (pos, map)
-            in
-            let types = keys tpu_case_types in
-            let exprs = keys tpu_case_values in
-            SMap.iter
-              (fun atom_name { tpum_types; tpum_exprs; _ } ->
-                (* I wish I add Base.Set.iter2 for that purpose :D *)
-                let atom_types = keys tpum_types in
-                let atom_exprs = keys tpum_exprs in
-                let diff_types = SSet.diff types atom_types in
-                let diff_exprs = SSet.diff exprs atom_exprs in
-                let diff_types2 = SSet.diff atom_types types in
-                let diff_exprs2 = SSet.diff atom_exprs exprs in
-                let loc = build c_name enum_name in
-                let p =
-                  match SMap.find_opt atom_name atom_pos_map with
-                  | None -> enum_pos
-                  | Some p -> p
-                in
-                SSet.iter
-                  (fun ty -> Errors.pu_atom_missing p atom_name "type" loc ty)
-                  diff_types;
-                SSet.iter
-                  (fun expr ->
-                    Errors.pu_atom_missing p atom_name "value" loc expr)
-                  diff_exprs;
-                SSet.iter
-                  (fun ty -> Errors.pu_atom_unknown p atom_name "type" loc ty)
-                  diff_types2;
-                SSet.iter
-                  (fun expr ->
-                    Errors.pu_atom_unknown p atom_name "value" loc expr)
-                  diff_exprs2)
-              tpu_members)
+            match SMap.find_opt enum_name pos_map with
+            (* This enum is not defined in the current file, skip it *)
+            | None -> ()
+            | Some (enum_pos, atom_pos_map) ->
+              let types = keys tpu_case_types in
+              let exprs = keys tpu_case_values in
+              SMap.iter
+                (fun atom_name { tpum_types; tpum_exprs; _ } ->
+                  (* I wish I add Base.Set.iter2 for that purpose :D *)
+                  let atom_types = keys tpum_types in
+                  let atom_exprs = keys tpum_exprs in
+                  let diff_types = SSet.diff types atom_types in
+                  let diff_exprs = SSet.diff exprs atom_exprs in
+                  let diff_types2 = SSet.diff atom_types types in
+                  let diff_exprs2 = SSet.diff atom_exprs exprs in
+                  let loc = build c_name enum_name in
+                  let p =
+                    match SMap.find_opt atom_name atom_pos_map with
+                    | None -> enum_pos
+                    | Some p -> p
+                  in
+                  SSet.iter
+                    (fun ty ->
+                      Errors.pu_atom_missing p atom_name "type" loc ty)
+                    diff_types;
+                  SSet.iter
+                    (fun expr ->
+                      Errors.pu_atom_missing p atom_name "value" loc expr)
+                    diff_exprs;
+                  SSet.iter
+                    (fun ty ->
+                      Errors.pu_atom_unknown p atom_name "type" loc ty)
+                    diff_types2;
+                  SSet.iter
+                    (fun expr ->
+                      Errors.pu_atom_unknown p atom_name "value" loc expr)
+                    diff_exprs2)
+                tpu_members)
           pu_enums
   end

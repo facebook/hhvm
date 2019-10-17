@@ -10,7 +10,7 @@ use parser_rust as parser;
 
 use escaper::{extract_unquoted_string, unescape_double, unescape_single};
 use flatten_smart_constructors::{FlattenOp, FlattenSmartConstructors};
-use hhbc_rust::string_utils::GetName;
+use hhbc_string_utils_rust::GetName;
 use oxidized::{
     aast,
     ast_defs::Id,

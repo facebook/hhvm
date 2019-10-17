@@ -3,7 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+extern crate lazy_static;
+
 use escaper::*;
+use lazy_static::lazy_static;
 use naming_special_names_rust::{classes, members};
 use regex::Regex;
 use std::borrow::Cow;

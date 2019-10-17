@@ -14,7 +14,7 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use hhbc_rust::string_utils;
+    use hhbc_string_utils_rust as string_utils;
     use test::Bencher;
 
     #[bench]

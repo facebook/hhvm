@@ -4,7 +4,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hhbc_rust::string_utils::mangle_xhp_id;
+use hhbc_string_utils_rust::mangle_xhp_id;
 use oxidized::{file_info::Mode, relative_path::RelativePath};
 use parser_rust::{
     parser::Parser, parser_env::ParserEnv, smart_constructors_wrappers::WithKind,

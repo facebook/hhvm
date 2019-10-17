@@ -10,7 +10,7 @@ path = "lib.rs"
 [dependencies]
 escaper = { path = "../utils/escaper", package = "hack_escaper" }
 flatten_smart_constructors = { path = "../parser/cargo/flatten_smart_constructors", package = "flatten_smart_constructors" }
-hhbc_rust = {path = "../hhbc", package = "hack_hhbc" }
+hhbc_string_utils_rust = {path = "../hhbc/cargo/string_utils", package = "hack_hhbc_string_utils" }
 oxidized = {path = "../oxidized", package = "hack_oxidized" }
 parser_rust = { path = "../parser", package = "hack_parser" }
 syntax_tree = { path = "../parser/cargo/syntax_tree", package = "syntax_tree" }

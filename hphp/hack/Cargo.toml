@@ -4,6 +4,7 @@ members = [
     "src/decl/ffi",
     "src/facts",
     "src/facts/ffi",
+    "src/hhbc/cargo/string_utils",
     "src/parser",
     "src/parser/cargo/core_types",
     "src/parser/cargo/errors",

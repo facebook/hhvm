@@ -5,7 +5,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use facts_rust as facts;
-use hhbc_rust::string_utils::without_xhp_mangling;
+use hhbc_string_utils_rust::without_xhp_mangling;
 use ocaml::caml;
 use oxidized::relative_path::RelativePath;
 

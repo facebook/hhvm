@@ -77,7 +77,7 @@ let compare_decl verbosity fn =
       compare
         "class(es)"
         (Facts.InvSMap.keys facts.Facts.types)
-        (SMap.keys decls.classes);
+        (SMap.keys decls.classes @ SMap.keys decls.typedefs);
     ]
     |> List.reduce_exn ~f:( && )
   in
@@ -102,6 +102,20 @@ let compare_decl verbosity fn =
                 const
                 (fst (Decl.declare_const_in_file fn ("\\" ^ const)))
                 old_decls.consts;
+          })
+    in
+    let old_decls =
+      List.fold
+        facts.Facts.type_aliases
+        ~init:old_decls
+        ~f:(fun old_decls typedef ->
+          {
+            old_decls with
+            typedefs =
+              SMap.add
+                typedef
+                (Decl.declare_typedef_in_file fn ("\\" ^ typedef))
+                old_decls.typedefs;
           })
     in
     (* These can't be compared directly because the parsed decls are allocated into a Rust arena

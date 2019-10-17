@@ -17,7 +17,7 @@ use oxidized::{
     direct_decl_parser::Decls,
     pos::Pos,
     s_map::SMap,
-    typing_defs::{Ty, Ty_},
+    typing_defs::{Ty, Ty_, TypedefType},
     typing_reason::Reason,
 };
 use parser::{
@@ -61,18 +61,22 @@ fn mangle_xhp_id(mut name: String) -> String {
     }
 }
 
-pub fn get_name(namespace: &str, name: &Node_) -> Result<String, String> {
-    fn qualified_name_from_parts(namespace: &str, parts: &Vec<Node_>) -> Result<String, String> {
+pub fn get_name(namespace: &str, name: &Node_) -> Result<(String, Pos), String> {
+    fn qualified_name_from_parts(
+        namespace: &str,
+        parts: &Vec<Node_>,
+        pos: &Pos,
+    ) -> Result<(String, Pos), String> {
         let mut qualified_name = String::new();
         let mut leading_backslash = false;
         for (index, part) in parts.into_iter().enumerate() {
             match part {
-                Node_::Name(name) => {
+                Node_::Name(name, _pos) => {
                     qualified_name.push_str(&String::from_utf8_lossy(name.get().as_slice()))
                 }
                 Node_::Backslash if index == 0 => leading_backslash = true,
                 Node_::ListItem(listitem) => {
-                    if let (Node_::Name(name), Node_::Backslash) = &**listitem {
+                    if let (Node_::Name(name, _pos), Node_::Backslash) = &**listitem {
                         qualified_name.push_str(&String::from_utf8_lossy(name.get().as_slice()));
                         qualified_name.push_str("\\");
                     } else {
@@ -90,29 +94,33 @@ pub fn get_name(namespace: &str, name: &Node_) -> Result<String, String> {
                 }
             }
         }
-        Ok(if leading_backslash || namespace.is_empty() {
+        let name = if leading_backslash || namespace.is_empty() {
             qualified_name // globally qualified name
         } else {
             namespace.to_owned() + "\\" + &qualified_name
-        })
+        };
+        let pos = pos.clone();
+        Ok((name, pos))
     }
 
     match name {
-        Node_::Name(name) => {
+        Node_::Name(name, pos) => {
             // always a simple name
             let name = name.to_string();
-            Ok(if namespace.is_empty() {
+            let name = if namespace.is_empty() {
                 name
             } else {
                 namespace.to_owned() + "\\" + &name
-            })
+            };
+            let pos = pos.clone();
+            Ok((name, pos))
         }
-        Node_::XhpName(name) => {
+        Node_::XhpName(name, pos) => {
             // xhp names are always unqualified
             let name = name.to_string();
-            Ok(mangle_xhp_id(name))
+            Ok((mangle_xhp_id(name), pos.clone()))
         }
-        Node_::QualifiedName(parts) => qualified_name_from_parts(namespace, &parts),
+        Node_::QualifiedName(parts, pos) => qualified_name_from_parts(namespace, &parts, pos),
         n => {
             return Err(format!(
                 "Expected a name, XHP name, or qualified name, but got {:?}",
@@ -120,6 +128,22 @@ pub fn get_name(namespace: &str, name: &Node_) -> Result<String, String> {
             ))
         }
     }
+}
+
+fn hint_to_ty(hint: &HintValue, pos: &Pos) -> Ty {
+    let reason = Reason::Rhint(pos.clone());
+    let ty_ = match hint {
+        HintValue::String => Ty_::Tprim(aast::Tprim::Tstring),
+        HintValue::Int => Ty_::Tprim(aast::Tprim::Tint),
+        HintValue::Float => Ty_::Tprim(aast::Tprim::Tfloat),
+        HintValue::Num => Ty_::Tprim(aast::Tprim::Tnum),
+        HintValue::Bool => Ty_::Tprim(aast::Tprim::Tbool),
+        HintValue::Apply(gn) => Ty_::Tapply(
+            Id(pos.clone(), "\\".to_string() + &(gn.to_unescaped_string())),
+            Vec::new(),
+        ),
+    };
+    Ty(reason, Box::new(ty_))
 }
 
 #[derive(Clone, Debug)]
@@ -143,9 +167,9 @@ pub enum Node_ {
     List(Vec<Node_>),
     Ignored,
     // tokens
-    Name(GetName),
+    Name(GetName, Pos),
     String(GetName),
-    XhpName(GetName),
+    XhpName(GetName, Pos),
     Hint(HintValue, Pos),
     Backslash,
     ListItem(Box<(Node_, Node_)>),
@@ -157,7 +181,7 @@ pub enum Node_ {
     Abstract,
     Final,
     Static,
-    QualifiedName(Vec<Node_>),
+    QualifiedName(Vec<Node_>, Pos),
     ScopeResolutionExpression(Box<(Node_, Node_)>),
     // declarations
     ClassDecl(Box<ClassDeclChildren>),
@@ -168,9 +192,19 @@ pub enum Node_ {
     RequireExtendsClause(Box<Node_>),
     RequireImplementsClause(Box<Node_>),
     Define(Box<Node_>),
-    TypeAliasDecl(Box<TypeAliasDeclChildren>),
     NamespaceDecl(Box<Node_>, Box<Node_>),
     EmptyBody,
+}
+
+impl Node_ {
+    pub fn get_pos(&self) -> Result<Pos, String> {
+        match self {
+            Node_::Name(_, pos) => Ok(pos.clone()),
+            Node_::Hint(_, pos) => Ok(pos.clone()),
+            Node_::List(_) => panic!("Handle this!"),
+            _ => Err(format!("No pos found for node {:?}", self)),
+        }
+    }
 }
 
 pub type Node = Result<Node_, String>;
@@ -189,12 +223,6 @@ pub struct ClassDeclChildren {
 
 #[derive(Clone, Debug)]
 pub struct EnumDeclChildren {
-    pub name: Node_,
-    pub attributes: Node_,
-}
-
-#[derive(Clone, Debug)]
-pub struct TypeAliasDeclChildren {
     pub name: Node_,
     pub attributes: Node_,
 }
@@ -234,9 +262,9 @@ impl<'a> FlattenOp for DirectDeclSmartConstructors<'_> {
             match s {
                 Node_::Ignored |
                 // tokens
-                Node_::Name(_) |
+                Node_::Name(_, _) |
                 Node_::String(_) |
-                Node_::XhpName(_) |
+                Node_::XhpName(_, _) |
                 Node_::Hint(_, _) |
                 Node_::Backslash |
                 Node_::ListItem(_) |
@@ -248,7 +276,7 @@ impl<'a> FlattenOp for DirectDeclSmartConstructors<'_> {
                 Node_::Abstract |
                 Node_::Final |
                 Node_::Static |
-                Node_::QualifiedName(_) => true,
+                Node_::QualifiedName(_, _) => true,
                 _ => false,
             }
         } else {
@@ -276,7 +304,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         };
         let kind = token.kind();
         Ok(match kind {
-            TokenKind::Name => Node_::Name(GetName::new(token_text(), |string| string)),
+            TokenKind::Name => {
+                Node_::Name(GetName::new(token_text(), |string| string), token_pos())
+            }
             TokenKind::DecimalLiteral => Node_::String(GetName::new(token_text(), |string| string)),
             TokenKind::SingleQuotedStringLiteral => {
                 Node_::String(GetName::new(token_text(), |string| {
@@ -290,7 +320,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     extract_unquoted_string(&tmp, 0, tmp.len()).ok().unwrap()
                 }))
             }
-            TokenKind::XHPClassName => Node_::XhpName(GetName::new(token_text(), |string| string)),
+            TokenKind::XHPClassName => {
+                Node_::XhpName(GetName::new(token_text(), |string| string), token_pos())
+            }
             TokenKind::String => Node_::Hint(HintValue::String, token_pos()),
             TokenKind::Int => Node_::Hint(HintValue::Int, token_pos()),
             TokenKind::Float => Node_::Hint(HintValue::Float, token_pos()),
@@ -336,10 +368,12 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     }
 
     fn make_qualified_name(&mut self, arg0: Self::R) -> Self::R {
-        Ok(match arg0? {
+        let arg0 = arg0?;
+        let pos = arg0.get_pos();
+        Ok(match arg0 {
             Node_::Ignored => Node_::Ignored,
-            Node_::List(nodes) => Node_::QualifiedName(nodes),
-            node => Node_::QualifiedName(vec![node]),
+            Node_::List(nodes) => Node_::QualifiedName(nodes, pos?),
+            node => Node_::QualifiedName(vec![node], pos?),
         })
     }
 
@@ -398,14 +432,39 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _generic_params: Self::R,
         _constraint: Self::R,
         _equal: Self::R,
-        _type: Self::R,
+        aliased_type: Self::R,
         _semicolon: Self::R,
     ) -> Self::R {
-        let (name, attributes) = (name?, attributes?);
-        Ok(match name {
-            Node_::Ignored => Node_::Ignored,
-            _ => Node_::TypeAliasDecl(Box::new(TypeAliasDeclChildren { name, attributes })),
-        })
+        let (name, aliased_type) = (name?, aliased_type?);
+        match name {
+            Node_::Ignored => (),
+            _ => {
+                let (name, pos) = get_name("", &name)?;
+                match aliased_type {
+                    Node_::Hint(hv, hint_pos) => {
+                        let ty = hint_to_ty(&hv, &hint_pos);
+                        self.state.decls.typedefs.insert(
+                            name,
+                            TypedefType {
+                                pos,
+                                vis: aast::TypedefVisibility::Transparent,
+                                tparams: Vec::new(),
+                                constraint: None,
+                                type_: ty,
+                                decl_errors: None,
+                            },
+                        );
+                    }
+                    n => {
+                        return Err(format!(
+                            "Expected hint for type alias {}, but was {:?}",
+                            name, n
+                        ))
+                    }
+                }
+            }
+        };
+        Ok(Node_::Ignored)
     }
 
     fn make_define_expression(
@@ -505,26 +564,12 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         Ok(match decls? {
             Node_::List(nodes) => match nodes.as_slice() {
                 [Node_::List(nodes)] => match nodes.as_slice() {
-                    [name, _] => {
-                        let name = get_name("", name)?;
+                    [name, _initializer] => {
+                        let (name, _) = get_name("", name)?;
                         match hint {
                             Node_::Hint(hv, pos) => {
-                                let reason = Reason::Rhint(pos.clone());
-                                let ty_ = match hv {
-                                    HintValue::String => Ty_::Tprim(aast::Tprim::Tstring),
-                                    HintValue::Int => Ty_::Tprim(aast::Tprim::Tint),
-                                    HintValue::Float => Ty_::Tprim(aast::Tprim::Tfloat),
-                                    HintValue::Num => Ty_::Tprim(aast::Tprim::Tnum),
-                                    HintValue::Bool => Ty_::Tprim(aast::Tprim::Tbool),
-                                    HintValue::Apply(gn) => Ty_::Tapply(
-                                        Id(pos, "\\".to_string() + &(gn.to_unescaped_string())),
-                                        Vec::new(),
-                                    ),
-                                };
-                                self.state
-                                    .decls
-                                    .consts
-                                    .insert(name, Ty(reason, Box::new(ty_)));
+                                let ty = hint_to_ty(&hv, &pos);
+                                self.state.decls.consts.insert(name, ty);
                             }
                             n => {
                                 return Err(format!(

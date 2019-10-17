@@ -674,19 +674,11 @@ RegionDescPtr selectCalleeTracelet(const Func* callee,
                                    int32_t maxBCInstrs) {
   auto const numParams = callee->numParams();
 
-  bool hasThis;
-  if (ctxType <= TObj || !ctxType.maybe(TObj)) {
-    hasThis = ctxType <= TObj;
-  } else {
-    hasThis = callee->hasThisInBody();
-  }
-
   // Set up the RegionContext for the tracelet selector.
   RegionContext ctx{
     callee, callee->getEntryForNumArgs(numArgs),
     FPInvOffset{safe_cast<int32_t>(callee->numSlotsInFrame())},
-    ResumeMode::None,
-    hasThis
+    ResumeMode::None
   };
 
   for (uint32_t i = 0; i < numArgs; ++i) {

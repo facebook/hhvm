@@ -39,7 +39,7 @@ inline Class* liveClass() { return liveFunc()->cls(); }
 inline ResumeMode liveResumeMode() { return resumeModeFromActRec(liveFrame()); }
 inline bool liveHasThis() { return liveClass() && liveFrame()->hasThis(); }
 inline SrcKey liveSK() {
-  return { liveFunc(), vmpc(), liveResumeMode(), liveHasThis() };
+  return { liveFunc(), vmpc(), liveResumeMode() };
 }
 inline jit::FPInvOffset liveSpOff() {
   Cell* fp = reinterpret_cast<Cell*>(vmfp());

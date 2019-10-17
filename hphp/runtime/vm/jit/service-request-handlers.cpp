@@ -52,10 +52,7 @@ namespace {
 ///////////////////////////////////////////////////////////////////////////////
 
 RegionContext getContext(SrcKey sk) {
-  RegionContext ctx {
-    sk.func(), sk.offset(), liveSpOff(),
-    sk.resumeMode(), sk.hasThis()
-  };
+  RegionContext ctx { sk.func(), sk.offset(), liveSpOff(), sk.resumeMode() };
 
   auto const fp = vmfp();
   auto const sp = vmsp();
@@ -186,7 +183,7 @@ TCA getFuncBody(Func* func) {
                                             : TransKind::Live;
     tca = tc::emitFuncBodyDispatch(func, dvs, kind);
   } else {
-    SrcKey sk(func, func->base(), ResumeMode::None, func->hasThisInBody());
+    SrcKey sk(func, func->base(), ResumeMode::None);
     tca = getTranslation(TransArgs{sk});
     if (tca) func->setFuncBody(tca);
   }
@@ -286,9 +283,7 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
 
     case REQ_RETRANSLATE: {
       INC_TPC(retranslate);
-      sk = SrcKey{
-        liveFunc(), info.args[0].offset, liveResumeMode(), liveHasThis()
-      };
+      sk = SrcKey{ liveFunc(), info.args[0].offset, liveResumeMode() };
       auto trflags = info.args[1].trflags;
       auto args = TransArgs{sk};
       args.flags = trflags;

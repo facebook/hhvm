@@ -272,7 +272,7 @@ struct RegionDesc::Block {
   using TypedLocVec   = jit::vector<TypedLocation>;
   using GuardedLocVec = jit::vector<GuardedLocation>;
 
-  Block(BlockId id, const Func* func, ResumeMode resumeMode, bool hasThis,
+  Block(BlockId id, const Func* func, ResumeMode resumeMode,
         Offset start, int length, FPInvOffset initSpOff);
 
   Block& operator=(const Block&) = delete;
@@ -285,10 +285,10 @@ struct RegionDesc::Block {
   const Unit* unit()              const { return m_func->unit(); }
   const Func* func()              const { return m_func; }
   SrcKey      start()             const {
-    return SrcKey { m_func, m_start, m_resumeMode, m_hasThis };
+    return SrcKey { m_func, m_start, m_resumeMode };
   }
   SrcKey      last()              const {
-    return SrcKey { m_func, m_last, m_resumeMode, m_hasThis };
+    return SrcKey { m_func, m_last, m_resumeMode };
   }
   int         length()            const { return m_length; }
   bool        empty()             const { return length() == 0; }
@@ -353,7 +353,6 @@ private:
   BlockId          m_id;
   const Func*      m_func;
   const ResumeMode m_resumeMode;
-  const bool       m_hasThis;
   const Offset     m_start;
   Offset           m_last;
   int              m_length;
@@ -377,15 +376,13 @@ private:
 struct RegionContext {
   struct LiveType;
 
-  RegionContext(const Func* f, Offset bcOff, FPInvOffset spOff,
-                ResumeMode rm, bool ht) :
-      func(f), bcOffset(bcOff), spOffset(spOff), resumeMode(rm), hasThis(ht) {}
+  RegionContext(const Func* f, Offset bcOff, FPInvOffset spOff, ResumeMode rm)
+    : func(f), bcOffset(bcOff), spOffset(spOff), resumeMode(rm) {}
 
   const Func* func;
   Offset bcOffset;
   FPInvOffset spOffset;
   ResumeMode resumeMode;
-  bool hasThis;
   jit::vector<LiveType> liveTypes;
 };
 

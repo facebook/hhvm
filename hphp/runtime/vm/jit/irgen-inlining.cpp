@@ -339,45 +339,13 @@ void beginInlining(IRGS& env,
   emitGenericsMismatchCheck(env, callFlags);
   emitCalleeDynamicCallCheck(env, callFlags);
 
-  auto const needsStaticnessGuard = [&] {
-    if (!target->cls()) return false;
-    if (target->isClosureBody()) return true;
-    if (ctx->isA(TBottom)) return false;
-
-    assertx(IMPLIES(ctx->isA(TObj), startSk.hasThis()));
-    assertx(IMPLIES(!ctx->type().maybe(TObj), !startSk.hasThis()));
-    return ctx->type().maybe(TObj) && !ctx->isA(TObj);
-  }();
-
-  if (needsStaticnessGuard) {
-    env.bcState =
-      SrcKey{startSk.func(), startSk.offset(), SrcKey::PrologueTag{}};
-    updateMarker(env);
-
-    auto sideExit = [&] (bool hasThis) {
-      hint(env, Block::Hint::Unlikely);
-      auto const sk =
-        SrcKey { startSk.func(), startSk.offset(), ResumeMode::None, hasThis };
-      gen(
-        env,
-        ReqBindJmp,
-        ReqBindJmpData {
-          sk,
-          FPInvOffset { startSk.func()->numSlotsInFrame() },
-          spOffBCFromIRSP(env),
-          TransFlags{}
-        },
-        sp(env),
-        fp(env)
-      );
-    };
-
-    if (startSk.hasThis() != startSk.func()->hasThisInBody()) {
-      sideExit(startSk.func()->hasThisInBody());
-    }
-
-    env.bcState = startSk;
-    updateMarker(env);
+  if (ctx->isA(TBottom)) return;
+  if (ctx->isA(TObj)) {
+    assertx(startSk.hasThis());
+  } else if (!ctx->type().maybe(TObj)) {
+    assertx(!startSk.hasThis());
+  } else if (target->cls()) {
+    assertx(startSk.hasThis() == startSk.func()->hasThisInBody());
   }
 }
 

@@ -69,8 +69,7 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset resumeOffset) {
 
   // Bind address at which the execution should resume after awaiting.
   auto const func = curFunc(env);
-  auto const resumeSk = SrcKey(func, resumeOffset, ResumeMode::Async,
-                               hasThis(env));
+  auto const resumeSk = SrcKey(func, resumeOffset, ResumeMode::Async);
   auto const bindData = LdBindAddrData { resumeSk, spOffBCFromFP(env) + 1 };
   auto const resumeAddr = gen(env, LdBindAddr, bindData);
 
@@ -142,8 +141,7 @@ void implAwaitR(IRGS& env, SSATmp* child, Offset resumeOffset) {
   gen(env, AFWHPrepareChild, fp(env), child);
 
   // Suspend the async function.
-  auto const resumeSk = SrcKey(curFunc(env), resumeOffset, ResumeMode::Async,
-                               hasThis(env));
+  auto const resumeSk = SrcKey(curFunc(env), resumeOffset, ResumeMode::Async);
   auto const data = LdBindAddrData { resumeSk, spOffBCFromFP(env) + 1 };
   auto const resumeAddr = gen(env, LdBindAddr, data);
   gen(env, StArResumeAddr, ResumeOffset { resumeOffset }, fp(env),
@@ -216,8 +214,7 @@ void implYield(IRGS& env, bool withKey) {
 
   // Resumable::setResumeAddr(resumeAddr, resumeOffset)
   auto const resumeOffset = nextBcOff(env);
-  auto const resumeSk = SrcKey(curFunc(env), resumeOffset, ResumeMode::GenIter,
-                               hasThis(env));
+  auto const resumeSk = SrcKey(curFunc(env), resumeOffset, ResumeMode::GenIter);
   auto const data = LdBindAddrData { resumeSk, spOffBCFromFP(env) };
   auto const resumeAddr = gen(env, LdBindAddr, data);
   gen(env, StArResumeAddr, ResumeOffset { resumeOffset }, fp(env), resumeAddr);
@@ -504,8 +501,7 @@ void emitCreateCont(IRGS& env) {
   // Create the Generator object. CreateCont takes care of copying local
   // variables and iterators.
   auto const func = curFunc(env);
-  auto const resumeSk = SrcKey(func, resumeOffset, ResumeMode::GenIter,
-                               hasThis(env));
+  auto const resumeSk = SrcKey(func, resumeOffset, ResumeMode::GenIter);
   auto const bind_data = LdBindAddrData { resumeSk, spOffBCFromFP(env) + 1 };
   auto const resumeAddr = gen(env, LdBindAddr, bind_data);
   auto const cont =

@@ -43,7 +43,7 @@ struct BCMarker {
    */
   static BCMarker Dummy() {
     return BCMarker {
-      SrcKey(DummyFuncId, 0, ResumeMode::None, false),
+      SrcKey(DummyFuncId, 0, ResumeMode::None),
       FPInvOffset{0},
       kInvalidTransID,
       nullptr

@@ -239,7 +239,6 @@ RegionDesc::BlockPtr read_region_block(ProfDataDeserializer& ser) {
   auto const block = std::make_shared<RegionDesc::Block>(id,
                                                          start.func(),
                                                          start.resumeMode(),
-                                                         start.hasThis(),
                                                          start.offset(),
                                                          length,
                                                          initialSpOffset);

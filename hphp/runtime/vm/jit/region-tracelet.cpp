@@ -63,7 +63,7 @@ struct Env {
     : ctx(ctx)
     , interp(interp)
     , breakAt(breakAt)
-    , sk{ctx.func, ctx.bcOffset, ctx.resumeMode, ctx.hasThis}
+    , sk{ctx.func, ctx.bcOffset, ctx.resumeMode}
     , startSk(sk)
     , region(std::make_shared<RegionDesc>())
     , curBlock(region->addBlock(sk, 0, ctx.spOffset))

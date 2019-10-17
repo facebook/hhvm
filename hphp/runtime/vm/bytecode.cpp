@@ -6799,8 +6799,7 @@ OPTBLD_INLINE TCA switchModeForDebugger(TCA retAddr) {
 
 TCA dispatchBB() {
   auto sk = [] {
-    return SrcKey(vmfp()->func(), vmpc(), resumeModeFromActRec(vmfp()),
-                  vmfp()->func()->cls() && vmfp()->hasThis());
+    return SrcKey(vmfp()->func(), vmpc(), resumeModeFromActRec(vmfp()));
   };
 
   if (Trace::moduleEnabled(Trace::dispatchBB)) {

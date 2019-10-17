@@ -134,7 +134,7 @@ RegionDesc::Block* RegionDesc::addBlock(SrcKey      sk,
                                         FPInvOffset spOffset) {
   m_blocks.push_back(
     std::make_shared<Block>(kInvalidTransID, sk.func(), sk.resumeMode(),
-                            sk.hasThis(), sk.offset(), length, spOffset));
+                            sk.offset(), length, spOffset));
   BlockPtr block = m_blocks.back();
   m_data[block->id()] = BlockData(block);
   return block.get();
@@ -589,13 +589,11 @@ bool hasTransID(RegionDesc::BlockId blockId) {
 RegionDesc::Block::Block(BlockId     id,
                          const Func* func,
                          ResumeMode  resumeMode,
-                         bool        hasThis,
                          Offset      start,
                          int         length,
                          FPInvOffset initSpOff)
   : m_func(func)
   , m_resumeMode(resumeMode)
-  , m_hasThis(hasThis)
   , m_start(start)
   , m_last(kInvalidOffset)
   , m_length(length)
@@ -618,7 +616,7 @@ RegionDesc::Block::Block(BlockId     id,
 
   assertx(length >= 0);
   if (length > 0) {
-    SrcKey sk(func, start, resumeMode, hasThis);
+    SrcKey sk(func, start, resumeMode);
     for (unsigned i = 1; i < length; ++i) sk.advance();
     m_last = sk.offset();
   }

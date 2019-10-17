@@ -115,7 +115,7 @@ bool regeneratePrologue(TransID prologueTransId, tc::FuncMetaInfo& info) {
     auto paramInfo = func->params()[nArgs];
     if (paramInfo.hasDefaultValue()) {
       bool ret = false;
-      SrcKey funcletSK(func, paramInfo.funcletOff, ResumeMode::None, func->hasThisInBody());
+      SrcKey funcletSK(func, paramInfo.funcletOff, ResumeMode::None);
       if (!profData()->optimized(funcletSK)) {
         auto funcletTransId = profData()->dvFuncletTransId(funcletSK);
         if (funcletTransId != kInvalidTransID) {
@@ -179,14 +179,12 @@ bool regeneratePrologues(Func* func, tc::FuncMetaInfo& info) {
   auto const includedBody = prologTransIDs.size() <= 1 &&
     func->past() - func->base() <= RuntimeOption::EvalJitPGOMaxFuncSizeDupBody;
 
-  auto funcBodySk = [&] (bool hasThis) {
-    return SrcKey{func, func->base(), ResumeMode::None, hasThis};
-  };
+  auto funcBodySk = SrcKey{func, func->base(), ResumeMode::None};
   if (!includedBody) {
-    profData()->setOptimized(funcBodySk(func->hasThisInBody()));
+    profData()->setOptimized(funcBodySk);
   }
   SCOPE_EXIT{
-    profData()->clearOptimized(funcBodySk(func->hasThisInBody()));
+    profData()->clearOptimized(funcBodySk);
   };
 
   bool emittedAnyDVInit = false;

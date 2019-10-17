@@ -169,13 +169,11 @@ std::string TransRec::print() const {
     "  src.funcId = {}\n"
     "  src.funcName = {}\n"
     "  src.resumeMode = {}\n"
-    "  src.hasThis = {}\n"
     "  src.bcStart = {}\n"
     "  src.blocks = {}\n",
     id, sha1, src.funcID(),
     funcName.empty() ? "Pseudo-main" : funcName,
     (int32_t)src.resumeMode(),
-    (int32_t)src.hasThis(),
     src.offset(),
     blocks.size());
 

@@ -128,9 +128,8 @@ bool addDbgGuards(const Func* func) {
   return true;
 }
 
-bool addDbgGuardHelper(const Func* func, Offset offset,
-                       ResumeMode resumeMode, bool hasThis) {
-  SrcKey sk{func, offset, resumeMode, hasThis};
+bool addDbgGuard(const Func* func, Offset offset, ResumeMode resumeMode) {
+  SrcKey sk{func, offset, resumeMode};
   if (auto const sr = srcDB().find(sk)) {
     if (sr->hasDebuggerGuard()) {
       return true;
@@ -156,12 +155,6 @@ bool addDbgGuardHelper(const Func* func, Offset offset,
   }
   fixups.process(nullptr);
   return true;
-}
-
-bool addDbgGuard(const Func* func, Offset offset, ResumeMode resumeMode) {
-  auto const ret = addDbgGuardHelper(func, offset, resumeMode, false);
-  if (!ret || !func->cls() || func->isStatic()) return ret;
-  return addDbgGuardHelper(func, offset, resumeMode, true);
 }
 
 }}}

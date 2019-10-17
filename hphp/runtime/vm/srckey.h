@@ -61,9 +61,9 @@ struct SrcKey : private boost::totally_ordered<SrcKey> {
    */
   SrcKey();
 
-  SrcKey(const Func* f, Offset off, ResumeMode resumeMode, bool hasThis);
-  SrcKey(const Func* f, PC pc, ResumeMode resumeMode, bool hasThis);
-  SrcKey(FuncId funcId, Offset off, ResumeMode resumeMode, bool hasThis);
+  SrcKey(const Func* f, Offset off, ResumeMode resumeMode);
+  SrcKey(const Func* f, PC pc, ResumeMode resumeMode);
+  SrcKey(FuncId funcId, Offset off, ResumeMode resumeMode);
 
   SrcKey(const Func* f, Offset off, PrologueTag);
   SrcKey(const Func* f, PC pc, PrologueTag);
@@ -163,8 +163,7 @@ private:
     AtomicInt m_atomicInt;
     struct {
       FuncId m_funcID;
-      uint32_t m_offset : 29;
-      uint32_t m_hasThis : 1;
+      uint32_t m_offset : 30;
       uint32_t m_resumeModeAndPrologue : 2;
     };
   };

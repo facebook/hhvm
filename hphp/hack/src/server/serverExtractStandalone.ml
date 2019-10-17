@@ -177,9 +177,6 @@ let is_strict_fun name = is_strict_dep (Typing_deps.Dep.Fun name)
 
 let is_strict_class name = is_strict_dep (Typing_deps.Dep.Class name)
 
-let is_hhi file_name =
-  String_utils.string_ends_with (Relative_path.suffix file_name) ".hhi"
-
 let is_builtin_dep dep =
   let open Typing_deps.Dep in
   match dep with
@@ -199,7 +196,7 @@ let is_builtin_dep dep =
   | Extends _ ->
     let msg = Typing_deps.Dep.to_string dep in
     let pos = value_or_not_found msg (get_dep_pos dep) in
-    is_hhi (Pos.filename pos)
+    Relative_path.prefix (Pos.filename pos) = Relative_path.Hhi
   | RecordDef _ -> records_not_supported ()
 
 let is_relevant_dependency (target : target) (dep : Typing_deps.Dep.variant) =

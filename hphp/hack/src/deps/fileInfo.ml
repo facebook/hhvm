@@ -30,7 +30,7 @@ type mode =
   | Mstrict (* check everything! *)
   | Mpartial (* Don't fail if you see a function/class you don't know *)
   | Mexperimental (* Strict mode + experimental features *)
-[@@deriving eq, show]
+[@@deriving eq, show, enum]
 
 let parse_mode = function
   | "strict"

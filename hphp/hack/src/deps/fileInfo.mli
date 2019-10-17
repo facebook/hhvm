@@ -29,7 +29,7 @@ type mode =
   | Mstrict (* check everything! *)
   | Mpartial (* Don't fail if you see a function/class you don't know *)
   | Mexperimental (* Experimental mode - strict mode plus experimental features *)
-[@@deriving eq, show]
+[@@deriving eq, show, enum]
 
 val is_strict : mode -> bool
 

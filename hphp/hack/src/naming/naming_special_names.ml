@@ -54,9 +54,9 @@ module Classes = struct
 
   let cIMemoizeParam = "\\IMemoizeParam"
 
-  let cClassname = "\\classname"
+  let cClassname = "\\HH\\classname"
 
-  let cTypename = "\\typename"
+  let cTypename = "\\HH\\typename"
 
   let cIDisposable = "\\IDisposable"
 

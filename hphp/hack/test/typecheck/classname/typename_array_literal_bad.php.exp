@@ -8,5 +8,5 @@ File "typename_array_literal_bad.php", line 9, characters 46-46:
 But got D
 File "typename_array_literal_bad.php", line 9, characters 46-46:
   where the class 'D' was referenced here
-File "classname.hhi", line 15, characters 35-35:
+File "classname.hhi", line 17, characters 35-35:
   via this generic T

@@ -27,7 +27,7 @@ enum SomeEnum: int {
   SECOND = 0;
   FIRST = 0;
 }
-const \classname<\WithConst> CLASSNAME = \WithConst::class;
+const \HH\classname<\WithConst> CLASSNAME = \WithConst::class;
 enum SecondEnum: string {
   SECOND = "";
   FIRST = "";

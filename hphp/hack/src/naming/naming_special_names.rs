@@ -58,9 +58,9 @@ pub mod classes {
 
     pub const IMEMOIZE_PARAM: &str = "\\IMemoizeParam";
 
-    pub const CLASS_NAME: &str = "\\classname";
+    pub const CLASS_NAME: &str = "\\HH\\classname";
 
-    pub const TYPE_NAME: &str = "\\typename";
+    pub const TYPE_NAME: &str = "\\HH\\typename";
 
     pub const IDISPOSABLE: &str = "\\IDisposable";
 

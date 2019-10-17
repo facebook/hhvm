@@ -39,7 +39,7 @@ let types =
       ("AsyncKeyedIterator", Global);
       ("Awaitable", Global);
       ("AwaitAllWaitHandle", Global);
-      ("classname", Global);
+      ("classname", HH);
       ("Collection", HH);
       ("ConditionWaitHandle", Global);
       ("Container", Global);
@@ -71,7 +71,7 @@ let types =
       ("StaticWaitHandle", Global);
       ("this", Global);
       ("Traversable", Global);
-      ("typename", Global);
+      ("typename", HH);
       ("TypeStructure", HH);
       ("TypeStructureKind", HH);
       ("varray_or_darray", HH);

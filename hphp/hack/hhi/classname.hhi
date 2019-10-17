@@ -1,5 +1,7 @@
 <?hh
 
+namespace HH {
+
 /**
  * The constant ::class works for types besides classes, including type defs.
  * For any type def TypeDef, TypeDef::class creates a typename<TypeDef>. Unlike
@@ -13,3 +15,5 @@ newtype typename<+T> as string = string;
  * of opaque types, C::class is the only way of obtaining a classname.
  */
 newtype classname<+T> as typename<T> = typename<T>;
+
+} // namespace HH

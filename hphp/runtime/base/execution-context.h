@@ -462,6 +462,8 @@ public:
                               ObjectData* this_ = nullptr,
                               Class* class_ = nullptr);
 
+  using ThisOrClass = Either<ObjectData*, Class*>;
+
   TypedValue invokeFunc(const Func* f,
                         const Variant& args_ = init_null_variant,
                         ObjectData* this_ = nullptr,
@@ -476,7 +478,7 @@ public:
                         const Variant& args_);
 
   TypedValue invokeFuncFew(const Func* f,
-                           void* thisOrCls,
+                           ThisOrClass thisOrCls,
                            StringData* invName,
                            uint32_t numArgs,
                            const TypedValue* argv,
@@ -484,7 +486,7 @@ public:
                            bool allowDynCallNoPointer = false);
 
   TypedValue invokeFuncFew(const Func* f,
-                           void* thisOrCls,
+                           ThisOrClass thisOrCls,
                            StringData* invName = nullptr);
 
   TypedValue invokeFuncFew(const CallCtx& ctx,

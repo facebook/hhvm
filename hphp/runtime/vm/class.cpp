@@ -1407,7 +1407,7 @@ Cell Class::clsCnsGet(const StringData* clsCnsName, ClsCnsLookup what) const {
 
   auto ret = g_context->invokeFuncFew(
     meth86cinit,
-    ActRec::encodeClass(this),
+    const_cast<Class*>(this),
     nullptr,
     1,
     args,

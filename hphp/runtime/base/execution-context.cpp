@@ -1740,14 +1740,16 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
   return invokeFuncImpl(f, thiz, cls, numArgs, doEnterVM);
 }
 
-TypedValue ExecutionContext::invokeFuncFew(const Func* f,
-                                           void* thisOrCls,
-                                           StringData* invName,
-                                           uint32_t numArgs,
-                                           const TypedValue* argv,
-                                           bool dynamic /* = true */,
-                                           bool allowDynCallNoPointer
-                                                                /* = false */) {
+TypedValue ExecutionContext::invokeFuncFew(
+  const Func* f,
+  ExecutionContext::ThisOrClass thisOrCls,
+  StringData* invName,
+  uint32_t numArgs,
+  const TypedValue* argv,
+  bool dynamic /* = true */,
+  bool allowDynCallNoPointer
+  /* = false */
+) {
   VMRegAnchor _;
 
   // See comments in invokeFunc().
@@ -1786,8 +1788,8 @@ TypedValue ExecutionContext::invokeFuncFew(const Func* f,
   };
 
   return invokeFuncImpl(f,
-                        ActRec::decodeThis(thisOrCls),
-                        ActRec::decodeClass(thisOrCls),
+                        thisOrCls.left(),
+                        thisOrCls.right(),
                         numArgs, doEnterVM);
 }
 

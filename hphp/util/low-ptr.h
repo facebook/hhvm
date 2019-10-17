@@ -218,6 +218,13 @@ using low_storage_t = uintptr_t;
 }
 #endif
 
+inline bool is_low_mem(void* m) {
+  assertx(use_lowptr);
+  const uint32_t mask = ~0;
+  auto const i = reinterpret_cast<intptr_t>(m);
+  return (mask & i) == i;
+}
+
 template<class T>
 using LowPtr =
   detail::LowPtrImpl<T, detail::RawStorage<detail::low_storage_t>>;

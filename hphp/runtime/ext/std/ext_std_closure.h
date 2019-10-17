@@ -37,21 +37,17 @@ struct ClosureHdr : HeapObject {
     // we need to set this here, because the next thing 'new Closure'
     // will do is call the constructor, which will throw, and the
     // destructor will examine this field.
-    ctx_bits = 0;
+    ctx = nullptr;
   }
   uint32_t& size() { return m_aux32; }
   uint32_t size() const { return m_aux32; }
-  static constexpr uintptr_t kClassBit = 0x1;
-  bool ctxIsClass() const {
-    return ctx_bits & kClassBit;
-  }
   TYPE_SCAN_CUSTOM_FIELD(ctx) {
-    if (!ctxIsClass()) scanner.scan(ctx_this);
+    scanner.scan(ctx_this);
   }
  public:
   union {
     void* ctx;
-    uintptr_t ctx_bits;
+    Class* ctx_class;
     ObjectData* ctx_this;
   };
 };
@@ -117,25 +113,31 @@ struct c_Closure final : ObjectData {
   void* getThisOrClass() const { return hdr()->ctx; }
   void setThisOrClass(void* p) { hdr()->ctx = p; }
   ObjectData* getThisUnchecked() const {
-    assertx(!hdr()->ctxIsClass());
+    assertx(hasThis());
     return hdr()->ctx_this;
   }
   ObjectData* getThis() const {
-    return UNLIKELY(hdr()->ctxIsClass()) ? nullptr : getThisUnchecked();
+    return UNLIKELY(hasThis()) ? getThisUnchecked() : nullptr;
   }
   void setThis(ObjectData* od) { hdr()->ctx_this = od; }
-  bool hasThis() const { return hdr()->ctx && !hdr()->ctxIsClass(); }
+  bool hasThis() const {
+    if (use_lowptr) return !is_low_mem(hdr()->ctx);
+    return
+      getInvokeFunc() && getInvokeFunc()->cls() && !getInvokeFunc()->isStatic();
+  }
 
   Class* getClass() const {
-    return LIKELY(hdr()->ctxIsClass()) ?
-      reinterpret_cast<Class*>(hdr()->ctx_bits & ~ClosureHdr::kClassBit) :
-      nullptr;
+    return LIKELY(hasClass()) ? hdr()->ctx_class : nullptr;
   }
   void setClass(Class* cls) {
     assertx(cls);
-    hdr()->ctx_bits = reinterpret_cast<uintptr_t>(cls) | ClosureHdr::kClassBit;
+    hdr()->ctx_class = cls;
   }
-  bool hasClass() const { return hdr()->ctxIsClass(); }
+  bool hasClass() const {
+    if (use_lowptr) return hdr()->ctx && is_low_mem(hdr()->ctx);
+    return
+      getInvokeFunc() && getInvokeFunc()->cls() && getInvokeFunc()->isStatic();
+  }
 
   ObjectData* clone();
 

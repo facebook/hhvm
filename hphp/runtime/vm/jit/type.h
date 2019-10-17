@@ -453,11 +453,11 @@ constexpr bool operator>(Mem a, Mem b) {
 
 struct ConstCctx {
   static ConstCctx cctx(const Class* c) {
-    return ConstCctx { reinterpret_cast<uintptr_t>(c) | 0x1 };
+    return ConstCctx { reinterpret_cast<uintptr_t>(c) };
   }
 
   const Class* cls() const {
-    return reinterpret_cast<const Class*>(m_val & ~0x1);
+    return reinterpret_cast<const Class*>(m_val);
   }
 
   uintptr_t m_val;

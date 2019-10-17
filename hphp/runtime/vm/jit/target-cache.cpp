@@ -431,7 +431,7 @@ StaticMethodCache::lookup(rds::Handle handle, const NamedEntity *ne,
     TRACE(1, "fill %s :: %s -> %p\n", clsName->data(),
           methName->data(), f);
     // Do the | here instead of on every call.
-    thiz->m_cls = (Class*)(uintptr_t(cls) | 1);
+    thiz->m_cls = cls;
     thiz->m_func = f;
     rds::initHandle(handle);
     return f;

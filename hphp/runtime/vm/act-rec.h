@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/rx.h"
 #include "hphp/util/compact-tagged-ptrs.h"
 
@@ -85,8 +86,7 @@ struct ActRec {
   VarEnv* m_varEnv;       // Variable environment when live
 
   TYPE_SCAN_CUSTOM_FIELD(m_thisUnsafe) {
-    // skip if "this" is a class
-    if (checkThisOrNull(m_thisUnsafe)) scanner.scan(m_thisUnsafe);
+    if (m_func->implCls()) scanner.scan(m_thisUnsafe);
   }
   TYPE_SCAN_CUSTOM_FIELD(m_varEnv) {
     // All three union members could be heap pointers, but we don't care
@@ -122,7 +122,6 @@ struct ActRec {
    * that we can distinguish at runtime which field is valid.  We define
    * accessors (below) to encapsulate this logic.
    */
-  static auto constexpr      kHasClassBit  = 0x1;  // unset for m_this
 
   static constexpr uintptr_t kTrashedVarEnvSlot = 0xfeeefeee000f000f;
   static constexpr uintptr_t kTrashedThisSlot = 0xfeeefeeef00fe00e;
@@ -206,35 +205,6 @@ struct ActRec {
   // This / Class.
 
   /*
-   * Encode `obj' or `cls' for the m_this/m_cls union.
-   */
-  static void* encodeThis(ObjectData* obj);
-  static void* encodeClass(const Class* cls);
-
-  /*
-   * Determine whether p is a Class* or an ObjectData* based
-   * on kHasClassBit.
-   *
-   * @requires: p != nullptr
-   */
-  static bool checkThis(void* p);
-
-  /*
-   * Determine whether p is a Class* based on kHasClassBit.
-   *
-   * @requires: p is a Cctx, an ObjectData* or a nullptr
-   */
-  static bool checkThisOrNull(void* p);
-
-  /*
-   * Decode `p', encoded in the format of m_this/m_cls.
-   *
-   * If `p' has the other encoding (or is nullptr), return nullptr.
-   */
-  static ObjectData* decodeThis(void* p);
-  static Class* decodeClass(void* p);
-
-  /*
    * Set m_this/m_cls to the pre-encoded `objOrCls'.
    *
    * One of these asserts if `objOrCls' is null, but it is a mystery which one.
@@ -243,12 +213,22 @@ struct ActRec {
   void setThisOrClassAllowNull(void* objOrCls);
 
   /*
-   * Whether the m_this/m_cls union is discriminated in the desired way.
+   * Whether the m_this/m_cls union is discriminated in the desired way in the
+   * function body.
    *
    * @requires: m_func->implCls() != nullptr
    */
   bool hasThis() const;
   bool hasClass() const;
+
+  /*
+   * Whether the m_this/m_cls union is discriminated in the desired way in the
+   * function prologue.
+   *
+   * @requires: m_func->implCls() != nullptr
+   */
+  bool hasThisInPrologue() const;
+  bool hasClassInPrologue() const;
 
   /*
    * Get the (encoded) value of the m_this/m_cls union.
@@ -261,13 +241,22 @@ struct ActRec {
    * Get m_thisUnsafe. Caller takes responsibility for its meaning.
    */
   ObjectData* getThisUnsafe() const;
+
   /*
-   * Get and decode the value of m_this/m_cls.
+   * Get and decode the value of m_this/m_cls in the function body.
    *
    * @requires: hasThis() or hasClass(), respectively
    */
   ObjectData* getThis() const;
   Class* getClass() const;
+
+  /*
+   * Get and decode the value of m_this/m_cls in the prologue.
+   *
+   * @requires: hasThis() or hasClass(), respectively
+   */
+  ObjectData* getThisInPrologue() const;
+  Class* getClassInPrologue() const;
 
   /*
    * Encode and set `val' to m_this/m_cls

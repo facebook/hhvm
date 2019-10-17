@@ -16,8 +16,6 @@
 
 #include "hphp/util/compilation-flags.h"
 
-#include "hphp/runtime/vm/func.h"
-
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -96,34 +94,6 @@ inline void ActRec::setAsyncEagerReturn() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-inline void* ActRec::encodeThis(ObjectData* obj) {
-  return obj;
-}
-
-inline void* ActRec::encodeClass(const Class* cls) {
-  return cls
-    ? (void*)(reinterpret_cast<uintptr_t>(cls) | kHasClassBit)
-    : nullptr;
-}
-
-inline bool ActRec::checkThis(void* p) {
-  assertx(p);
-  return !(reinterpret_cast<uintptr_t>(p) & kHasClassBit);
-}
-
-inline bool ActRec::checkThisOrNull(void* p) {
-  return !(reinterpret_cast<uintptr_t>(p) & kHasClassBit);
-}
-
-inline ObjectData* ActRec::decodeThis(void* p) {
-  return checkThisOrNull(p) ? (ObjectData*)p : nullptr;
-}
-
-inline Class* ActRec::decodeClass(void* p) {
-  return checkThisOrNull(p) ? nullptr :
-    (Class*)(reinterpret_cast<uintptr_t>(p) - kHasClassBit);
-}
-
 inline void ActRec::setThisOrClass(void* objOrCls) {
   assertx(m_func->implCls());
   setThisOrClassAllowNull(objOrCls);
@@ -136,12 +106,27 @@ inline void ActRec::setThisOrClassAllowNull(void* objOrCls) {
 inline bool ActRec::hasThis() const {
   assertx(m_func->implCls());
   assertx(reinterpret_cast<uintptr_t>(m_thisUnsafe) != kTrashedThisSlot);
-  return checkThis(m_thisUnsafe);
+  return use_lowptr ? !is_low_mem(m_thisUnsafe) : !m_func->isStatic();
 }
 
 inline bool ActRec::hasClass() const {
   assertx(m_func->implCls());
-  return !checkThis(m_thisUnsafe);
+  assertx(reinterpret_cast<uintptr_t>(m_thisUnsafe) != kTrashedThisSlot);
+  return use_lowptr ? is_low_mem(m_thisUnsafe) : m_func->isStatic();
+}
+
+inline bool ActRec::hasThisInPrologue() const {
+  assertx(m_func->implCls());
+  return use_lowptr
+    ? !is_low_mem(m_thisUnsafe)
+    : !m_func->isStaticInPrologue();
+}
+
+inline bool ActRec::hasClassInPrologue() const {
+  assertx(m_func->implCls());
+  return use_lowptr
+    ? is_low_mem(m_thisUnsafe)
+    : m_func->isStaticInPrologue();
 }
 
 inline void* ActRec::getThisOrClass() const {
@@ -160,8 +145,17 @@ inline ObjectData* ActRec::getThis() const {
 
 inline Class* ActRec::getClass() const {
   assertx(hasClass());
-  return reinterpret_cast<Class*>(
-    reinterpret_cast<uintptr_t>(m_clsUnsafe) - kHasClassBit);
+  return m_clsUnsafe;
+}
+
+inline ObjectData* ActRec::getThisInPrologue() const {
+  assertx(hasThisInPrologue());
+  return m_thisUnsafe;
+}
+
+inline Class* ActRec::getClassInPrologue() const {
+  assertx(hasClassInPrologue());
+  return m_clsUnsafe;
 }
 
 inline void ActRec::setThis(ObjectData* val) {
@@ -171,8 +165,7 @@ inline void ActRec::setThis(ObjectData* val) {
 
 inline void ActRec::setClass(Class* val) {
   assertx(val && m_func->implCls() && (m_func->isStaticInPrologue()));
-  m_clsUnsafe = reinterpret_cast<Class*>(
-    reinterpret_cast<uintptr_t>(val) | kHasClassBit);
+  m_clsUnsafe = val;
 }
 
 inline void ActRec::trashThis() {

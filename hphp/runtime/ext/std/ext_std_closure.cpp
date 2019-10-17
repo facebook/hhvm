@@ -92,12 +92,10 @@ void c_Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
   auto const invokeFunc = getInvokeFunc();
 
   if (invokeFunc->cls()) {
-    setThisOrClass(ar->getThisOrClass());
     if (invokeFunc->isStatic()) {
-      if (!hasClass()) {
-        setClass(getThisUnchecked()->getVMClass());
-      }
-    } else if (!hasClass()) {
+      setClass(ar->hasClass() ? ar->getClass() : ar->getThis()->getVMClass());
+    } else {
+      setThis(ar->getThis());
       getThisUnchecked()->incRefCount();
     }
   } else {
@@ -123,7 +121,7 @@ void c_Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
 }
 
 int c_Closure::initActRecFromClosure(ActRec* ar, TypedValue* sp) {
-  auto closure = c_Closure::fromObject(ar->getThis());
+  auto closure = c_Closure::fromObject(ar->getThisInPrologue());
 
   // Put in the correct context
   ar->m_func = closure->getInvokeFunc();

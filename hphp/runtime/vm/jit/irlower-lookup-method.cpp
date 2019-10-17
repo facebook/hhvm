@@ -291,28 +291,12 @@ void cgLdClsMethodFCacheFunc(IRLS& env, const IRInstruction* inst) {
 void cgFwdCtxStaticCall(IRLS& env, const IRInstruction* inst) {
   auto const dstCtx = dstLoc(env, inst, 0).reg();
   auto const srcCtx = srcLoc(env, inst, 0).reg();
-  auto const ty = inst->src(0)->type();
 
   auto& v = vmain(env);
-
-  auto ctx_from_this =  [] (Vout& v, Vreg rthis, Vreg dst) {
-    // Load (this->m_cls | 0x1) into `dst'.
-    auto const cls = emitLdObjClass(v, rthis, v.makeReg());
-    v << orqi{ActRec::kHasClassBit, cls, dst, v.makeReg()};
-    return dst;
-  };
-
-  if (ty <= TCctx) {
-    v << copy{srcCtx, dstCtx};
-  } else if (ty <= TObj) {
-    ctx_from_this(v, srcCtx, dstCtx);
+  if (inst->marker().hasThis()) {
+    emitLdObjClass(v, srcCtx, dstCtx);
   } else {
-    // If we don't know whether we have a $this, we need to check dynamically.
-    auto const sf = v.makeReg();
-    v << testqi{ActRec::kHasClassBit, srcCtx, sf};
-    unlikelyCond(
-      v, vcold(env), CC_NZ, sf, dstCtx, [&](Vout& /*v*/) { return srcCtx; },
-      [&](Vout& v) { return ctx_from_this(v, srcCtx, v.makeReg()); });
+    v << copy{srcCtx, dstCtx};
   }
 }
 

@@ -77,13 +77,11 @@ void cgDefInlineFP(IRLS& env, const IRInstruction* inst) {
   auto const ctxTmp = inst->src(2);
   assertx(ctxTmp->isA(TCls) || ctxTmp->isA(TCtx) || ctxTmp->isA(TNullptr));
   if (ctxTmp->hasConstVal(TCls)) {
-    auto const ctxVal = uintptr_t(ctxTmp->clsVal()) | ActRec::kHasClassBit;
+    auto const ctxVal = uintptr_t(ctxTmp->clsVal());
     emitImmStoreq(v, ctxVal, ar + AROFF(m_thisUnsafe));
   } else if (ctxTmp->isA(TCls)) {
     // Store the Class* as a Cctx.
-    auto const cctx = v.makeReg();
-    v << orqi{ActRec::kHasClassBit, ctx, cctx, v.makeReg()};
-    v << store{cctx, ar + AROFF(m_thisUnsafe)};
+    v << store{ctx, ar + AROFF(m_thisUnsafe)};
   } else if (ctxTmp->isA(TCtx)) {
     v << store{ctx, ar + AROFF(m_thisUnsafe)};
   } else if (RuntimeOption::EvalHHIRGenerateAsserts) {

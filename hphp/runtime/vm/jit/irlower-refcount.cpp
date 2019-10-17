@@ -90,14 +90,8 @@ void ifRefCountedType(Vout& v, Vout& vtaken, Type ty, Vloc loc, Then then) {
     return;
   }
   auto const sf = v.makeReg();
-  ConditionCode cond;
-  if (ty <= TCtx) {
-    v << testqi{ActRec::kHasClassBit, loc.reg(0), sf};
-    cond = CC_E;
-  } else {
-    assertx(ty <= TGen);
-    cond = emitIsTVTypeRefCounted(v, sf, loc.reg(1));
-  }
+  assertx(ty <= TGen);
+  auto const cond = emitIsTVTypeRefCounted(v, sf, loc.reg(1));
   unlikelyIfThen(v, vtaken, cond, sf, then);
 }
 
@@ -181,20 +175,6 @@ void cgIncRef(IRLS& env, const IRInstruction* inst) {
                data, *inst);
       }
     }
-  }
-
-  if (ty.maybe(TCctx)) {
-    always_assert(ty <= TCtx && ty.maybe(TObj));
-    auto const sf = v.makeReg();
-    v << testqi{ActRec::kHasClassBit, loc.reg(), sf};
-    ifThen(v, vcold(env), CC_Z, sf,
-           [&] (Vout& v) {
-             incrementProfile(v, profile, incr,
-                              offsetof(IncRefProfile, incremented));
-             emitIncRef(v, loc.reg(), TRAP_REASON);
-           },
-           unlikelyIncrement);
-    return;
   }
 
   if (useAddrForCountedCheck() &&
@@ -670,19 +650,6 @@ void cgDecRef(IRLS& env, const IRInstruction *inst) {
     implDecRefProf(v, env, inst, t, profile, incr);
   };
 
-  if (ty.maybe(TCctx)) {
-    always_assert(ty <= TCtx && ty.maybe(TObj));
-    auto const loc = srcLoc(env, inst, 0);
-    auto const sf = v.makeReg();
-    v << testqi{ActRec::kHasClassBit, loc.reg(), sf};
-    if (profile.profiling()) {
-      ifThen(v, CC_Z, sf, [&] (Vout& v) { implProf(v, TObj); });
-    } else {
-      ifThen(v, CC_Z, sf, [&] (Vout& v) { impl(v, TObj); });
-    }
-    return;
-  }
-
   if (RuntimeOption::EvalHHIROutlineGenericIncDecRef &&
       profile.optimizing() &&
       !ty.isKnownDataType()) {
@@ -779,24 +746,6 @@ void cgDecRefNZ(IRLS& env, const IRInstruction* inst) {
                data, *inst);
       }
     }
-  }
-
-  if (ty.maybe(TCctx)) {
-    always_assert(ty <= TCtx);
-    if (ty.maybe(TObj)) {
-      auto const sf = v.makeReg();
-      v << testqi{ActRec::kHasClassBit, loc.reg(), sf};
-      ifThen(
-        v, vcold(env), CC_Z, sf,
-        [&] (Vout& v) {
-          incrementProfile(v, profile, incr,
-                           offsetof(DecRefProfile, decremented));
-          emitDecRef(v, loc.reg(), TRAP_REASON);
-        },
-        unlikelyDecrement
-      );
-    }
-    return;
   }
 
   emitIncStat(v, Stats::TC_DecRef_NZ);

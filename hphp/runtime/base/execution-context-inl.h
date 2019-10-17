@@ -217,7 +217,7 @@ inline TypedValue ExecutionContext::invokeFunc(
 
 inline TypedValue ExecutionContext::invokeFuncFew(
   const Func* f,
-  void* thisOrCls,
+  ExecutionContext::ThisOrClass thisOrCls,
   StringData* invName
 ) {
   return invokeFuncFew(f, thisOrCls, invName, 0, nullptr);
@@ -228,9 +228,9 @@ inline TypedValue ExecutionContext::invokeFuncFew(
   uint32_t numArgs,
   const TypedValue* argv
 ) {
-  auto const thisOrCls = [&] () -> void* {
-    if (ctx.this_) return (void*)(ctx.this_);
-    if (ctx.cls) return (void*)((char*)(ctx.cls) + 1);
+  auto const thisOrCls = [&] () -> ExecutionContext::ThisOrClass {
+    if (ctx.this_) return ctx.this_;
+    if (ctx.cls) return ctx.cls;
     return nullptr;
   }();
 
@@ -252,7 +252,7 @@ inline TypedValue ExecutionContext::invokeMethod(
 ) {
   return invokeFuncFew(
     meth,
-    ActRec::encodeThis(obj),
+    obj,
     nullptr /* invName */,
     args.size(),
     args.start(),

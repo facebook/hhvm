@@ -331,7 +331,13 @@ end = struct
         FILE_INFO_ID INTEGER PRIMARY KEY AUTOINCREMENT,
         PATH_PREFIX_TYPE INTEGER NOT NULL,
         PATH_SUFFIX TEXT NOT NULL,
-        FILE_INFO BLOB
+        TYPE_CHECKER_MODE INTEGER,
+        DECL_HASH BLOB,
+        CLASSES TEXT,
+        CONSTS TEXT,
+        FUNS TEXT,
+        RECS TEXT,
+        TYPEDEFS TEXT
       );
       "
         table_name
@@ -346,9 +352,18 @@ end = struct
     let insert_sqlite =
       Printf.sprintf
         "
-        INSERT INTO %s
-        (PATH_PREFIX_TYPE, PATH_SUFFIX, FILE_INFO)
-        VALUES (?, ?, ?);
+        INSERT INTO %s(
+          PATH_PREFIX_TYPE,
+          PATH_SUFFIX,
+          TYPE_CHECKER_MODE,
+          DECL_HASH,
+          CLASSES,
+          CONSTS,
+          FUNS,
+          RECS,
+          TYPEDEFS
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
       "
         table_name
 
@@ -356,7 +371,7 @@ end = struct
       Printf.sprintf
         "
         SELECT
-          FILE_INFO
+          TYPE_CHECKER_MODE, DECL_HASH, CLASSES, CONSTS, FUNS, RECS, TYPEDEFS
         FROM %s
         WHERE PATH_PREFIX_TYPE = ? AND PATH_SUFFIX = ?;
       "
@@ -368,28 +383,122 @@ end = struct
         SELECT
           PATH_PREFIX_TYPE,
           PATH_SUFFIX,
-          FILE_INFO
+          TYPE_CHECKER_MODE,
+          DECL_HASH,
+          CLASSES,
+          CONSTS,
+          FUNS,
+          RECS,
+          TYPEDEFS
         FROM %s
         ORDER BY PATH_PREFIX_TYPE, PATH_SUFFIX;
       "
         table_name
 
-    let insert db relative_path file_info =
+    let insert
+        db
+        relative_path
+        ~(type_checker_mode : FileInfo.mode option)
+        ~(decl_hash : OpaqueDigest.t option)
+        ~(classes : FileInfo.id list)
+        ~(consts : FileInfo.id list)
+        ~(funs : FileInfo.id list)
+        ~(recs : FileInfo.id list)
+        ~(typedefs : FileInfo.id list) =
       let prefix_type =
-        Relative_path.prefix_to_enum (Relative_path.prefix relative_path)
+        Sqlite3.Data.INT
+          (Int64.of_int
+             (Relative_path.prefix_to_enum (Relative_path.prefix relative_path)))
       in
-      let suffix = Relative_path.suffix relative_path in
-      let file_info_blob =
-        Marshal.to_string (FileInfo.to_saved file_info) [Marshal.No_sharing]
+      let suffix = Sqlite3.Data.TEXT (Relative_path.suffix relative_path) in
+      let type_checker_mode =
+        match type_checker_mode with
+        | Some type_checker_mode ->
+          Sqlite3.Data.INT
+            (Int64.of_int (FileInfo.mode_to_enum type_checker_mode))
+        | None -> Sqlite3.Data.NULL
+      in
+      let decl_hash =
+        match decl_hash with
+        | Some decl_hash ->
+          Sqlite3.Data.BLOB (OpaqueDigest.to_raw_contents decl_hash)
+        | None -> Sqlite3.Data.NULL
+      in
+      let names_to_data_type names =
+        let open Core_kernel in
+        let names = String.concat ~sep:"|" (List.map names ~f:snd) in
+        match String.length names with
+        | 0 -> Sqlite3.Data.NULL
+        | _ -> Sqlite3.Data.TEXT names
       in
       let insert_stmt = Sqlite3.prepare db insert_sqlite in
-      Sqlite3.bind insert_stmt 1 (Sqlite3.Data.INT (Int64.of_int prefix_type))
-      |> check_rc db;
-      Sqlite3.bind insert_stmt 2 (Sqlite3.Data.TEXT suffix) |> check_rc db;
-      Sqlite3.bind insert_stmt 3 (Sqlite3.Data.BLOB file_info_blob)
-      |> check_rc db;
+      Sqlite3.bind insert_stmt 1 prefix_type |> check_rc db;
+
+      Sqlite3.bind insert_stmt 2 suffix |> check_rc db;
+
+      Sqlite3.bind insert_stmt 3 type_checker_mode |> check_rc db;
+
+      Sqlite3.bind insert_stmt 4 decl_hash |> check_rc db;
+      Sqlite3.bind insert_stmt 5 (names_to_data_type classes) |> check_rc db;
+      Sqlite3.bind insert_stmt 6 (names_to_data_type consts) |> check_rc db;
+      Sqlite3.bind insert_stmt 7 (names_to_data_type funs) |> check_rc db;
+      Sqlite3.bind insert_stmt 8 (names_to_data_type recs) |> check_rc db;
+      Sqlite3.bind insert_stmt 9 (names_to_data_type typedefs) |> check_rc db;
       Sqlite3.step insert_stmt |> check_rc db;
       Sqlite3.finalize insert_stmt |> check_rc db
+
+    let read_row ~stmt ~path ~base_index =
+      let file_mode =
+        FileInfo.mode_of_enum (Int64.to_int (column_int64 stmt base_index))
+      in
+      let hash =
+        OpaqueDigest.from_raw_contents (column_blob stmt (base_index + 1))
+      in
+      let to_ids ~value ~name_type =
+        match value with
+        | Sqlite3.Data.TEXT s ->
+          Core_kernel.(
+            List.map (String.split s ~on:'|') ~f:(fun name ->
+                (FileInfo.File (name_type, path), name)))
+        | Sqlite3.Data.NULL -> []
+        | _ -> failwith "Unexpected column type when retrieving names"
+      in
+      let classes =
+        to_ids
+          ~value:(Sqlite3.column stmt (base_index + 2))
+          ~name_type:FileInfo.Class
+      in
+      let consts =
+        to_ids
+          ~value:(Sqlite3.column stmt (base_index + 3))
+          ~name_type:FileInfo.Const
+      in
+      let funs =
+        to_ids
+          ~value:(Sqlite3.column stmt (base_index + 4))
+          ~name_type:FileInfo.Fun
+      in
+      let record_defs =
+        to_ids
+          ~value:(Sqlite3.column stmt (base_index + 5))
+          ~name_type:FileInfo.RecordDef
+      in
+      let typedefs =
+        to_ids
+          ~value:(Sqlite3.column stmt (base_index + 6))
+          ~name_type:FileInfo.Typedef
+      in
+      FileInfo.
+        {
+          hash;
+          file_mode;
+          funs;
+          classes;
+          record_defs;
+          typedefs;
+          consts;
+          comments = None;
+        }
 
     let get_file_info db path =
       let get_stmt = Sqlite3.prepare db get_sqlite in
@@ -402,9 +511,7 @@ end = struct
       Sqlite3.bind get_stmt 2 (Sqlite3.Data.TEXT suffix) |> check_rc db;
       match Sqlite3.step get_stmt with
       | Sqlite3.Rc.DONE -> None
-      | Sqlite3.Rc.ROW ->
-        let file_info_blob = column_blob get_stmt 0 in
-        Some (FileInfo.from_saved path (Marshal.from_string file_info_blob 0))
+      | Sqlite3.Rc.ROW -> Some (read_row ~stmt:get_stmt ~path ~base_index:0)
       | rc ->
         failwith
           (Printf.sprintf
@@ -416,14 +523,9 @@ end = struct
       let f iter_stmt acc =
         let prefix_int = column_int64 iter_stmt 0 in
         let suffix = column_str iter_stmt 1 in
-        let file_info_blob = column_blob iter_stmt 2 in
-        let relative_path = make_relative_path ~prefix_int ~suffix in
-        let fi =
-          FileInfo.from_saved
-            relative_path
-            (Marshal.from_string file_info_blob 0)
-        in
-        f relative_path fi acc
+        let path = make_relative_path ~prefix_int ~suffix in
+        let fi = read_row ~stmt:iter_stmt ~path ~base_index:2 in
+        f path fi acc
       in
       fold_sqlite iter_stmt ~f ~init
   end
@@ -457,7 +559,12 @@ end = struct
     let insert_sqlite =
       Printf.sprintf
         "
-        INSERT INTO %s (HASH, CANON_HASH, FLAGS, FILE_INFO_ID) VALUES (?, ?, ?, ?);
+        INSERT INTO %s(
+          HASH,
+          CANON_HASH,
+          FLAGS,
+          FILE_INFO_ID)
+        VALUES (?, ?, ?, ?);
       "
         table_name
 
@@ -721,7 +828,16 @@ end = struct
 
   let save_file_info db relative_path file_info =
     Core_kernel.(
-      FileInfoTable.insert db relative_path file_info;
+      FileInfoTable.insert
+        db
+        relative_path
+        ~type_checker_mode:file_info.FileInfo.file_mode
+        ~decl_hash:file_info.FileInfo.hash
+        ~consts:file_info.FileInfo.consts
+        ~classes:file_info.FileInfo.classes
+        ~funs:file_info.FileInfo.funs
+        ~recs:file_info.FileInfo.record_defs
+        ~typedefs:file_info.FileInfo.typedefs;
       let file_info_id = ref None in
       Sqlite3.exec_not_null_no_headers
         db

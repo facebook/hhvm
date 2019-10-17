@@ -1,6 +1,0 @@
-File "shape_constant_missing_field.php", line 9, characters 18-20:
-Wrong type hint (Typing[4338])
-File "shape_constant_missing_field.php", line 9, characters 9-16:
-Expected ~shape('bar' => string, 'foo' => int) because it is an unenforceable type
-File "shape_constant_missing_field.php", line 9, characters 24-40:
-But got shape('foo' => int)

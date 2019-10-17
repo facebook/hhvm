@@ -8152,9 +8152,7 @@ and class_const_def env cc =
       (env, MakeType.unenforced ty, None)
     | Some h ->
       let ty = Decl_hint.hint env.decl_env h in
-      let ty =
-        Typing_enforceability.compute_enforced_and_pessimize_ty env ty
-      in
+      let ty = Typing_enforceability.compute_enforced_ty env ty in
       let (env, ty) = Phase.localize_possibly_enforced_with_self env ty in
       ( env,
         ty,
@@ -8206,9 +8204,7 @@ and class_var_def ~is_static env cv =
     | None -> (env, None)
     | Some ((p, _) as cty) ->
       let decl_cty = Decl_hint.hint env.decl_env cty in
-      let decl_cty =
-        Typing_enforceability.compute_enforced_and_pessimize_ty env decl_cty
-      in
+      let decl_cty = Typing_enforceability.compute_enforced_ty env decl_cty in
       let (env, cty) =
         Phase.localize_possibly_enforced_with_self env decl_cty
       in
@@ -8762,9 +8758,7 @@ and gconst_def tcopt cst =
     match cst.cst_type with
     | Some hint ->
       let ty = Decl_hint.hint env.decl_env hint in
-      let ty =
-        Typing_enforceability.compute_enforced_and_pessimize_ty env ty
-      in
+      let ty = Typing_enforceability.compute_enforced_ty env ty in
       let (env, dty) = Phase.localize_possibly_enforced_with_self env ty in
       let (env, te, value_type) =
         let expected =

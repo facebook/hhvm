@@ -910,37 +910,40 @@ private:
 
 struct MonitorThread final {
   explicit MonitorThread(int client);
-  void detach() {
+  MonitorThread(const MonitorThread&) = delete;
+  MonitorThread& operator=(const MonitorThread&) = delete;
+  ~MonitorThread() {
+    join();
+    ::close(m_rpipe);
+    ::close(m_wpipe);
+  }
+  void join() {
     if (m_monitor.joinable()) {
-      write(m_wpipe, "stop", 5);
+      ::write(m_wpipe, "stop", 5);
       m_monitor.join();
     }
   }
-  ~MonitorThread() { detach(); }
 
 private:
+  int m_rpipe{-1};
   int m_wpipe{-1};
   std::thread m_monitor;
 };
 
 MonitorThread::MonitorThread(int client) {
   int monitor_pipe[2];
-  if (pipe(monitor_pipe) == -1) {
+  if (::pipe(monitor_pipe) == -1) {
     throw Exception("Unable to construct pipe for monitor: %s",
                     folly::errnoStr(errno).c_str());
   }
 
-  int rpipe = monitor_pipe[0];
-  int wpipe = monitor_pipe[1];
+  m_rpipe = monitor_pipe[0];
+  m_wpipe = monitor_pipe[1];
   auto flags = &stackLimitAndSurprise();
   try {
-    m_monitor = std::thread([wpipe,rpipe,client,flags] {
-      SCOPE_EXIT {
-        close(rpipe);
-        close(wpipe);
-      };
+    m_monitor = std::thread([this,client,flags] {
       int ret = 0;
-      pollfd pfd[] = {{client, 0, 0}, {rpipe, POLLIN, 0}};
+      ::pollfd pfd[] = {{client, 0, 0}, {m_rpipe, POLLIN, 0}};
       while ((ret = poll(pfd, 2, -1)) != -1) {
         if (ret == 0) continue;
         if (pfd[0].revents & (POLLHUP | POLLERR | POLLNVAL)) {
@@ -963,12 +966,8 @@ MonitorThread::MonitorThread(int client) {
              client, folly::errnoStr(errno));
     });
   } catch (const std::system_error& err) {
-    close(rpipe);
-    close(wpipe);
     throw Exception("Could not start monitor thread: %s", err.what());
   }
-
-  m_wpipe = wpipe;
 }
 
 const StaticString s_hhvm_prelude_path("hhvm.prelude_path");
@@ -1142,7 +1141,7 @@ void CLIWorker::doJob(int client) {
       if (invoke_result) {
         ret = *rl_exit_code;
       }
-      monitor.detach();
+      monitor.join();
       guard.dismiss();
       finish();
       FTRACE(2, "CLIWorker::doJob({}): waiting for monitor...\n", client);

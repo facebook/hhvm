@@ -2,8 +2,8 @@ File "reifiable3.php", line 10, characters 28-43:
 Invalid type (Typing[4322])
 File "reifiable3.php", line 9, characters 5-15:
 This type constant has the __Reifiable attribute
-File "reifiable3.php", line 10, characters 32-42:
-It cannot contain an array type
+File "reifiable3.php", line 10, characters 28-43:
+It cannot contain a vec
 File "reifiable3.php", line 17, characters 19-26:
 Invalid type (Typing[4322])
 File "reifiable3.php", line 16, characters 5-15:

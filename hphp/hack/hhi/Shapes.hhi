@@ -8,6 +8,8 @@
  *
  */
 
+namespace HH {
+
 abstract final class Shapes {
 
 /**
@@ -78,3 +80,5 @@ abstract final class Shapes {
   );
 
 }
+
+} // namespace HH

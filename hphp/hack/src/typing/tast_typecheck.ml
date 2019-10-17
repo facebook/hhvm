@@ -52,7 +52,7 @@ let refine ((_p, (_r, cond_ty)), cond_expr) _cond_is_true gamma =
     ->
     raise Not_implemented
   | Call
-      (_, (_, Class_const ((_, CI (_, "\\Shapes")), (_, "keyExists"))), _, _, _)
+      (_, (_, Class_const ((_, CI (_, "\\HH\\Shapes")), (_, "keyExists"))), _, _, _)
     ->
     raise Not_implemented
   | Is _
@@ -132,7 +132,7 @@ let check_expr env (expr : ETast.expr) (gamma : gamma) : gamma =
 
       method! on_Class_const env class_id const_name =
         match (class_id, const_name) with
-        | ((_, CI (_, "\\Shapes")), (_, "removeKey")) -> raise Not_implemented
+        | ((_, CI (_, "\\HH\\Shapes")), (_, "removeKey")) -> raise Not_implemented
         | _ -> super#on_Class_const env class_id const_name
 
       method! on_Eif _env _cond _e1 _e2 = raise Not_implemented

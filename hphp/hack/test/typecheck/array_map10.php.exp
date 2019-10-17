@@ -6,5 +6,5 @@ File "array_map10.php", line 3, characters 54-55:
 But got TC
 File "hackarray.hhi", line 13, characters 61-61:
   via this generic T
-File "interfaces.hhi", line 118, characters 99-100:
+File "interfaces.hhi", line 120, characters 99-100:
   via this generic Tv

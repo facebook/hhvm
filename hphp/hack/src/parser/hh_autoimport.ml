@@ -46,7 +46,7 @@ let types =
       ("darray", HH);
       ("dict", Global);
       ("ExternalThreadEventWaitHandle", Global);
-      ("IMemoizeParam", Global);
+      ("IMemoizeParam", HH);
       ("ImmMap", HH);
       ("ImmSet", HH);
       ("ImmVector", HH);
@@ -66,7 +66,7 @@ let types =
       ("RescheduleWaitHandle", Global);
       ("ResumableWaitHandle", Global);
       ("Set", HH);
-      ("Shapes", Global);
+      ("Shapes", HH);
       ("SleepWaitHandle", Global);
       ("StaticWaitHandle", Global);
       ("this", Global);

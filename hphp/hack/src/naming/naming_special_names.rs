@@ -56,7 +56,7 @@ pub mod classes {
 
     pub const XHP_CHILD: &str = "\\XHPChild";
 
-    pub const IMEMOIZE_PARAM: &str = "\\IMemoizeParam";
+    pub const IMEMOIZE_PARAM: &str = "\\HH\\IMemoizeParam";
 
     pub const CLASS_NAME: &str = "\\HH\\classname";
 
@@ -685,7 +685,7 @@ pub mod rx {
 }
 
 pub mod shapes {
-    pub const SHAPES: &str = "\\Shapes";
+    pub const SHAPES: &str = "\\HH\\Shapes";
 
     pub const IDX: &str = "idx";
 

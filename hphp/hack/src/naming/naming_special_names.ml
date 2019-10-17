@@ -52,7 +52,7 @@ module Classes = struct
 
   let cXHPChild = "\\XHPChild"
 
-  let cIMemoizeParam = "\\IMemoizeParam"
+  let cIMemoizeParam = "\\HH\\IMemoizeParam"
 
   let cClassname = "\\HH\\classname"
 
@@ -624,7 +624,7 @@ module Rx = struct
 end
 
 module Shapes = struct
-  let cShapes = "\\Shapes"
+  let cShapes = "\\HH\\Shapes"
 
   let idx = "idx"
 

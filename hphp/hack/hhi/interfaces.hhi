@@ -14,6 +14,8 @@
  * YOU SHOULD NEVER INCLUDE THIS FILE ANYWHERE!!!
  */
 
+namespace {
+
 /**
  * Represents an entity that can be iterated over using `foreach`, without
  * requiring a key.
@@ -873,6 +875,10 @@ interface Stringish extends XHPChild {
   public function __toString(): string;
 }
 
+} // namespace
+
+namespace HH {
+
 /**
   * Classes that implement IMemoizeParam may be used as parameters on
   * <<__Memoize>> functions
@@ -888,6 +894,10 @@ interface IMemoizeParam {
    */
   public function getInstanceKey(): string;
 }
+
+} // namespace HH
+
+namespace {
 
 /**
   * Objects that implement IDisposable may be used in using statements
@@ -912,3 +922,5 @@ interface IAsyncDisposable {
    */
   public function __disposeAsync(): Awaitable<void>;
 }
+
+} // namespace

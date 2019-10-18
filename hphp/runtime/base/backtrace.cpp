@@ -59,20 +59,23 @@ const StaticString
 namespace backtrace_detail {
 
 BTContext::BTContext() {
-  auto const flags = ActRec::LocalsDecRefd; // don't attempt to read locals
+  // don't attempt to read locals
+  auto const flags = 1U << ActRec::LocalsDecRefd;
   auto const handler = (intptr_t)jit::tc::ustubs().retInlHelper;
   fakeAR[0].m_sfp = &fakeAR[1];
   fakeAR[1].m_sfp = &fakeAR[0];
   fakeAR[0].m_savedRip = fakeAR[1].m_savedRip = handler;
-  fakeAR[0].m_numArgsAndFlags = fakeAR[1].m_numArgsAndFlags = flags;
+  fakeAR[0].m_numArgs = fakeAR[1].m_numArgs = 0;
+  fakeAR[0].m_callOffAndFlags = fakeAR[1].m_callOffAndFlags =
+    ActRec::encodeCallOffsetAndFlags(0, flags);
 }
 
 const ActRec* BTContext::clone(const BTContext& src, const ActRec* fp) {
   fakeAR[0].m_func = src.fakeAR[0].m_func;
-  fakeAR[0].m_callOff = src.fakeAR[0].m_callOff;
+  fakeAR[0].m_callOffAndFlags = src.fakeAR[0].m_callOffAndFlags;
 
   fakeAR[1].m_func = src.fakeAR[1].m_func;
-  fakeAR[1].m_callOff = src.fakeAR[1].m_callOff;
+  fakeAR[1].m_callOffAndFlags = src.fakeAR[1].m_callOffAndFlags;
 
   stashedFrm = src.stashedFrm;
   inlineStack = src.inlineStack;
@@ -165,7 +168,10 @@ BTFrame initBTContextAt(BTContext& ctx, jit::CTCA ip, BTFrame frm) {
 
     auto const prevFP = &ctx.fakeAR[0];
     prevFP->m_func = ifr.func;
-    prevFP->m_callOff = ifr.callOff;
+    prevFP->m_callOffAndFlags = ActRec::encodeCallOffsetAndFlags(
+      ifr.callOff,
+      1 << ActRec::LocalsDecRefd  // don't attempt to read locals
+    );
 
     ctx.prevIFID = stk->frame;
     ctx.inlineStack = *stk;
@@ -199,7 +205,10 @@ BTFrame initBTContextAt(BTContext& ctx, jit::CTCA ip, BTFrame frm) {
   if (auto const f = getBuiltin()) {
     auto const prevFP = &ctx.fakeAR[0];
     prevFP->m_func = f;
-    prevFP->m_callOff = frm.pc - frm.fp->func()->base();
+    prevFP->m_callOffAndFlags = ActRec::encodeCallOffsetAndFlags(
+      frm.pc - frm.fp->func()->base(),
+      1 << ActRec::LocalsDecRefd  // don't attempt to read locals
+    );
 
     ctx.stashedFrm = frm;
 
@@ -226,8 +235,11 @@ BTFrame getPrevActRec(
     auto prev = BTFrame{};
     prev.fp = fp->m_sfp;
     prev.fp->m_func = ifr.func;
-    prev.fp->m_callOff = ifr.callOff;
-    prev.pc = fp->m_callOff + ifr.func->base();
+    prev.fp->m_callOffAndFlags = ActRec::encodeCallOffsetAndFlags(
+      ifr.callOff,
+      1 << ActRec::LocalsDecRefd  // don't attempt to read locals
+    );
+    prev.pc = fp->callOffset() + ifr.func->base();
 
     ctx.prevIFID = ctx.inlineStack.frame;
     ctx.inlineStack.frame = ifr.parent;

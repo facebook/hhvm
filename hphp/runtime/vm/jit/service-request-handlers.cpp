@@ -335,7 +335,8 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
       }
       Unit* destUnit = caller->func()->unit();
       // Set PC so logging code in getTranslation doesn't get confused.
-      vmpc() = skipCall(destUnit->at(caller->m_func->base() + ar->m_callOff));
+      vmpc() = skipCall(
+        destUnit->at(caller->m_func->base() + ar->callOffset()));
       if (ar->isAsyncEagerReturn()) {
         // When returning to the interpreted FCall, the execution continues at
         // the next opcode, not honoring the request for async eager return.

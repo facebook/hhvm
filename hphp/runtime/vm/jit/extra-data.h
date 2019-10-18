@@ -828,7 +828,7 @@ struct CallData : IRExtraData {
   IRSPRelOffset spOffset; // offset from StkPtr to bottom of call's ActRec+args
   uint32_t numArgs;
   uint32_t numOut;     // number of values returned via stack from the callee
-  Offset callOffset;   // m_callOff style: offset from func->base()
+  Offset callOffset;   // offset from func->base()
   uint32_t genericsBitmap;
   bool hasGenerics;
   bool dynamicCall;
@@ -869,7 +869,7 @@ struct CallUnpackData : IRExtraData {
   IRSPRelOffset spOffset; // offset from StkPtr to bottom of call's ActRec+args
   uint32_t numArgs;
   uint32_t numOut;
-  Offset callOffset;  // offset from unit m_bc (unlike m_callOff in ActRec)
+  Offset callOffset;  // offset from unit m_bc (unlike the one in CallData)
   bool hasGenerics;
   bool dynamicCall;
   bool formingRegion;

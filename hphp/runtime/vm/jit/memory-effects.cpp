@@ -1787,7 +1787,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ProfileType:
   case LdIfaceMethod:
   case InstanceOfIfaceVtable:
-  case LdARNumArgsAndFlags:
+  case LdARFlags:
   case LdTVAux:
   case MethodExists:
   case GetTime:

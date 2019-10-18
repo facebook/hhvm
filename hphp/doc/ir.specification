@@ -3537,10 +3537,10 @@ fields of that struct for holding intermediate values.
 
   Test surprise flags and stack overflow at the same time.
 
-| LdARNumArgsAndFlags, D(Int), S(FramePtr), NF
+| LdARFlags, D(Int), S(FramePtr), NF
 
-  Load the value of m_numArgsAndFlags on the ActRec pointed to by the frame
-  pointer S0.
+  Load the flags stored on the ActRec pointed to by the frame
+  pointer S0. Bits not defined as flags may contain arbitrary garbage.
 
 | LdTVAux<ValidBits>, D(Int), S(Gen), NF
 

@@ -53,12 +53,16 @@ bool isDebuggerReturnHelper(void* address) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void ActRec::setReturn(ActRec* fp, PC callPC, void* retAddr) {
+void ActRec::setReturn(ActRec* fp, PC callPC, void* retAddr,
+                       bool asyncEagerReturn) {
   assertx(fp->func()->contains(callPC));
   assertx(isReturnHelper(retAddr));
   m_sfp = fp;
   m_savedRip = reinterpret_cast<uintptr_t>(retAddr);
-  m_callOff = Offset(callPC - fp->func()->getEntry());
+  m_callOffAndFlags = encodeCallOffsetAndFlags(
+    Offset(callPC - fp->func()->getEntry()),
+    asyncEagerReturn ? (1 << AsyncEagerRet) : 0
+  );
 }
 
 void ActRec::setJitReturn(void* retAddr) {

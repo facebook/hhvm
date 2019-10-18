@@ -228,9 +228,7 @@ TCA emitFuncPrologueRedispatch(CodeBlock& cb, DataBlock& data) {
     v << load{rvmfp()[AROFF(m_func)], func};
 
     auto const argc = v.makeReg();
-    auto const naaf = v.makeReg();
-    v << loadl{rvmfp()[AROFF(m_numArgsAndFlags)], naaf};
-    v << andli{ActRec::kNumArgsMask, naaf, argc, v.makeReg()};
+    v << loadl{rvmfp()[AROFF(m_numArgs)], argc};
 
     auto const nparams = v.makeReg();
     auto const pcounts = v.makeReg();
@@ -451,9 +449,12 @@ void loadGenFrame(Vout& v, Vreg d) {
 }
 
 void debuggerRetImpl(Vout& v, Vreg ar) {
+  auto const callOffAndFlags = v.makeReg();
   auto const callOff = v.makeReg();
 
-  v << loadl{ar[AROFF(m_callOff)], callOff};
+  v << loadl{ar[AROFF(m_callOffAndFlags)], callOffAndFlags};
+  v << shrli{int32_t{ActRec::CallOffsetStart}, callOffAndFlags, callOff,
+             v.makeReg()};
   v << storel{callOff, rvmtl()[unwinderDebuggerCallOffOff()]};
   v << store{rvmsp(), rvmtl()[unwinderDebuggerReturnSPOff()]};
 

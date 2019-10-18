@@ -799,7 +799,7 @@ static void toStringFrame(std::ostream& os, const ActRec* fp,
   func->validate();
   std::string funcName(func->fullName()->data());
   os << "{func:" << funcName
-     << ",callOff:" << fp->m_callOff
+     << ",callOff:" << fp->callOffset()
      << ",this:0x"
      << std::hex << (func->cls() && fp->hasThis() ? fp->getThis() : nullptr)
      << std::dec << "}";
@@ -2720,7 +2720,7 @@ struct JitReturn {
   uint64_t savedRip;
   ActRec* fp;
   ActRec* sfp;
-  uint32_t callOff;
+  Offset callOff;
 };
 
 OPTBLD_INLINE JitReturn jitReturnPre(ActRec* fp) {
@@ -2742,7 +2742,7 @@ OPTBLD_INLINE JitReturn jitReturnPre(ActRec* fp) {
     throw VMSwitchMode();
   }
 
-  return {savedRip, fp, fp->sfp(), fp->m_callOff};
+  return {savedRip, fp, fp->sfp(), fp->callOffset()};
 }
 
 OPTBLD_INLINE TCA jitReturnPost(JitReturn retInfo) {
@@ -2832,7 +2832,7 @@ OPTBLD_INLINE TCA ret(PC& pc) {
 
   // Grab caller info from ActRec.
   ActRec* sfp = vmfp()->sfp();
-  Offset callOff = vmfp()->m_callOff;
+  Offset callOff = vmfp()->callOffset();
 
   if (LIKELY(!isResumed(vmfp()))) {
     // If in an eagerly executed async function, wrap the return value into
@@ -2921,7 +2921,7 @@ OPTBLD_INLINE TCA iopRetM(PC& pc, uint32_t numRet) {
 
   // Grab caller info from ActRec.
   ActRec* sfp = vmfp()->sfp();
-  Offset callOff = vmfp()->m_callOff;
+  Offset callOff = vmfp()->callOffset();
 
   // Free ActRec and store the return value.
   vmStack().ndiscard(vmfp()->func()->numSlotsInFrame());
@@ -4327,11 +4327,10 @@ void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
   assertx(kNumActRecCells == 3);
   ActRec* ar = vmStack().indA(fca.numInputs());
   ar->m_func = func;
-  ar->initNumArgs(fca.numArgs + (fca.hasUnpack() ? 1 : 0));
+  ar->setNumArgs(fca.numArgs + (fca.hasUnpack() ? 1 : 0));
   auto const asyncEagerReturn =
     fca.asyncEagerOffset != kInvalidOffset && func->supportsAsyncEagerReturn();
-  if (asyncEagerReturn) ar->setAsyncEagerReturn();
-  ar->setReturn(vmfp(), origpc, jit::tc::ustubs().retHelper);
+  ar->setReturn(vmfp(), origpc, jit::tc::ustubs().retHelper, asyncEagerReturn);
   ar->trashVarEnv();
 
   initActRec(ar);
@@ -5099,7 +5098,7 @@ bool doFCallUnpackTC(PC origpc, int32_t numInputs, CallFlags callFlags,
   auto const ar = vmStack().indA(numInputs);
   if (callFlags.hasGenerics()) --numInputs;
   assertx(ar->numArgs() == numInputs);
-  ar->setReturn(vmfp(), origpc, jit::tc::ustubs().retHelper);
+  ar->setReturn(vmfp(), origpc, jit::tc::ustubs().retHelper, false);
   ar->setJitReturn(retAddr);
   auto const ret = doFCall(ar, numInputs - 1, true, callFlags);
   tl_regState = VMRegState::DIRTY;
@@ -5603,7 +5602,7 @@ OPTBLD_INLINE TCA iopNativeImpl(PC& pc) {
 
   // Grab caller info from ActRec.
   ActRec* sfp = vmfp()->sfp();
-  Offset callOff = vmfp()->m_callOff;
+  Offset callOff = vmfp()->callOffset();
 
   // Adjust the stack; the native implementation put the return value in the
   // right place for us already
@@ -5694,7 +5693,7 @@ OPTBLD_INLINE TCA iopCreateCont(PC& pc) {
 
   // Grab caller info from ActRec.
   ActRec* sfp = fp->sfp();
-  Offset callOff = fp->m_callOff;
+  Offset callOff = fp->callOffset();
 
   // Free ActRec and store the return value.
   vmStack().ndiscard(numSlots);
@@ -5711,9 +5710,10 @@ OPTBLD_INLINE TCA iopCreateCont(PC& pc) {
 OPTBLD_INLINE void movePCIntoGenerator(PC origpc, BaseGenerator* gen) {
   assertx(gen->isRunning());
   ActRec* genAR = gen->actRec();
-  genAR->setReturn(vmfp(), origpc, genAR->func()->isAsync() ?
-    jit::tc::ustubs().asyncGenRetHelper :
-    jit::tc::ustubs().genRetHelper);
+  auto const retHelper = genAR->func()->isAsync()
+    ? jit::tc::ustubs().asyncGenRetHelper
+    : jit::tc::ustubs().genRetHelper;
+  genAR->setReturn(vmfp(), origpc, retHelper, false);
 
   vmfp() = genAR;
 
@@ -5778,7 +5778,7 @@ OPTBLD_INLINE TCA yield(PC& pc, const Cell* key, const Cell value) {
   EventHook::FunctionSuspendYield(fp);
 
   auto const sfp = fp->sfp();
-  auto const callOff = fp->m_callOff;
+  auto const callOff = fp->callOffset();
 
   if (!func->isAsync()) {
     // Non-async generator.
@@ -5912,7 +5912,7 @@ TCA yieldFromGenerator(PC& pc, Generator* gen, Offset resumeOffset) {
 
   EventHook::FunctionSuspendYield(fp);
   auto const sfp = fp->sfp();
-  auto const callOff = fp->m_callOff;
+  auto const callOff = fp->callOffset();
 
   // We don't actually want to "yield" anything here. The implementation of
   // key/current are smart enough to dive into our delegate generator, so
@@ -5951,7 +5951,7 @@ TCA yieldFromIterator(PC& pc, Generator* gen, Iter* it, Offset resumeOffset) {
 
   EventHook::FunctionSuspendYield(fp);
   auto const sfp = fp->sfp();
-  auto const callOff = fp->m_callOff;
+  auto const callOff = fp->callOffset();
 
   auto key = *it->key().asTypedValue();
   auto val = *it->val().asTypedValue();
@@ -6065,7 +6065,7 @@ OPTBLD_INLINE void asyncSuspendE(PC& pc) {
 
     // Grab caller info from ActRec.
     ActRec* sfp = fp->sfp();
-    Offset callOff = fp->m_callOff;
+    Offset callOff = fp->callOffset();
 
     // Free ActRec and store the return value. In case async eager return was
     // requested by the caller, let it know that we did not finish eagerly.
@@ -6091,7 +6091,7 @@ OPTBLD_INLINE void asyncSuspendE(PC& pc) {
 
     // Return control to the caller (AG::next()).
     assertx(fp->sfp());
-    returnToCaller(pc, fp->sfp(), fp->m_callOff);
+    returnToCaller(pc, fp->sfp(), fp->callOffset());
   }
 }
 

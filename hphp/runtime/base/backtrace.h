@@ -235,14 +235,14 @@ private:
  *    ActRec:  ________________
  *            |                |
  *            |  func: top     |
- *            |  m_callOff     |
+ *            |  callOffset()  |
  *            |________________|
  *                     |
  *                     | <---------+
  *    ActRec:  ________v_______    |
  *            |                |   | (relative to top->base())
  * vmfp() --> |  func: caller  |   |
- *            |  m_callOff ----+---+
+ *            |  callOffset() -+---+
  *            |________________|
  *                     |
  *                     | <---------+
@@ -286,7 +286,7 @@ constexpr IFrameID kInvalidIFrameID = std::numeric_limits<IFrameID>::max();
 
 struct IFrame {
   const Func* func; // callee (m_func)
-  int32_t callOff;  // caller offset (m_callOff)
+  int32_t callOff;  // caller offset (callOffset())
   IFrameID parent;  // parent frame (m_sfp)
 };
 

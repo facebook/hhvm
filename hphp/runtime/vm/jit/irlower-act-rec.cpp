@@ -100,20 +100,16 @@ void cgIsFunReifiedGenericsMatched(IRLS& env, const IRInstruction* inst) {
   v << setcc{CC_Z, sf, dst};
 }
 
-void cgLdARNumArgsAndFlags(IRLS& env, const IRInstruction* inst) {
+void cgLdARFlags(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const fp = srcLoc(env, inst, 0).reg();
-  vmain(env) << loadzlq{fp[AROFF(m_numArgsAndFlags)], dst};
+  vmain(env) << loadzlq{fp[AROFF(m_callOffAndFlags)], dst};
 }
 
 void cgLdARNumParams(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const fp = srcLoc(env, inst, 0).reg();
-  auto& v = vmain(env);
-
-  auto const naaf = v.makeReg();
-  v << loadzlq{fp[AROFF(m_numArgsAndFlags)], naaf};
-  v << andqi{ActRec::kNumArgsMask, naaf, dst, v.makeReg()};
+  vmain(env) << loadzlq{fp[AROFF(m_numArgs)], dst};
 }
 
 
@@ -167,7 +163,7 @@ static void sync_regstate_to_caller(ActRec* preLive) {
     ? ec->m_nestedVMs.back().fp
     : preLive->m_sfp;
   regs.fp = fp;
-  regs.pc = fp->func()->unit()->at(fp->func()->base() + preLive->m_callOff);
+  regs.pc = fp->func()->unit()->at(fp->func()->base() + preLive->callOffset());
   regs.jitReturnAddr = (TCA)preLive->m_savedRip;
 
   tl_regState = VMRegState::CLEAN;

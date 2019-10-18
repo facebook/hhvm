@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
 #include "hphp/runtime/base/object-data.h"
+#include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/resumable.h"
 
 #include "hphp/runtime/vm/jit/types.h"
@@ -81,14 +82,15 @@ void cgContEnter(IRLS& env, const IRInstruction* inst) {
 
   auto const extra = inst->extra<ContEnter>();
   auto const spOff = extra->spOffset;
-  auto const callOff = extra->callBCOffset;
+  auto const callOffAndFlags = safe_cast<int32_t>(
+    ActRec::encodeCallOffsetAndFlags(extra->callBCOffset, 0));
 
   auto& v = vmain(env);
 
   auto const next = v.makeBlock();
 
   v << store{fp, genFP[AROFF(m_sfp)]};
-  v << storeli{callOff, genFP[AROFF(m_callOff)]};
+  v << storeli{callOffAndFlags, genFP[AROFF(m_callOffAndFlags)]};
 
   v << copy{genFP, fp};
   auto const sync_sp = v.makeReg();

@@ -275,7 +275,7 @@ inline void ObjectData::scan(type_scan::Scanner& scanner) const {
 //     m_sfp                prev ActRec*
 //     m_savedRIP           return addr
 //     m_func               Func*
-//     m_callOff            caller's vmpc
+//     m_callOffAndFlags    caller's vmpc
 //     m_argc_flags
 //     m_this|m_cls         ObjectData* or Class*
 //     m_varenv|extraArgs

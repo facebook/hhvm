@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/func.h"
 
 #include "hphp/runtime/vm/jit/types.h"
@@ -64,14 +65,16 @@ void cgDefInlineFP(IRLS& env, const IRInstruction* inst) {
   emitImmStoreq(v, uintptr_t(tc::ustubs().retInlHelper),
                 ar + AROFF(m_savedRip));
   emitImmStoreq(v, uintptr_t(extra->target), ar + AROFF(m_func));
-  v << storeli{extra->callBCOff, ar + AROFF(m_callOff)};
 
-  // Set m_numArgsAndFlags.
-  auto const flags = extra->asyncEagerReturn
-    ? ActRec::Flags::AsyncEagerRet : ActRec::Flags::None;
-  auto const naaf = static_cast<int32_t>(
-    ActRec::encodeNumArgsAndFlags(extra->numArgs, flags));
-  v << storeli{naaf, ar + AROFF(m_numArgsAndFlags)};
+  // Set m_callOffAndFlags.
+  auto const coaf = safe_cast<int32_t>(ActRec::encodeCallOffsetAndFlags(
+    extra->callBCOff,
+    extra->asyncEagerReturn ? (1 << ActRec::AsyncEagerRet) : 0
+  ));
+  v << storeli{coaf, ar + AROFF(m_callOffAndFlags)};
+
+  // Set m_numArgs.
+  v << storeli{safe_cast<int32_t>(extra->numArgs), ar + AROFF(m_numArgs)};
 
   // Set m_this/m_cls.
   auto const ctxTmp = inst->src(2);
@@ -167,13 +170,20 @@ void cgInlineReturnNoFrame(IRLS& env, const IRInstruction* inst) {
 
 void cgSyncReturnBC(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<SyncReturnBC>();
+  auto const coaf = extra->callBCOffset << ActRec::CallOffsetStart;
   auto const spOffset = cellsToBytes(extra->spOffset.offset);
-  auto const callBCOffset = safe_cast<int32_t>(extra->callBCOffset);
   auto const sp = srcLoc(env, inst, 0).reg();
   auto const fp = srcLoc(env, inst, 1).reg();
+  auto const mask = (1 << ActRec::CallOffsetStart) - 1;
 
   auto& v = vmain(env);
-  v << storeli{callBCOffset, sp[spOffset + AROFF(m_callOff)]};
+  auto const oldCoaf = v.makeReg();
+  auto const newCoaf = v.makeReg();
+  auto const flags = v.makeReg();
+  v << loadl{sp[spOffset + AROFF(m_callOffAndFlags)], oldCoaf};
+  v << andli{mask, oldCoaf, flags, v.makeReg()};
+  v << orli{coaf, flags, newCoaf, v.makeReg()};
+  v << storel{newCoaf, sp[spOffset + AROFF(m_callOffAndFlags)]};
   v << store{fp, sp[spOffset + AROFF(m_sfp)]};
 }
 

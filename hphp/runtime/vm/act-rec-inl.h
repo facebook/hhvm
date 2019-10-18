@@ -38,46 +38,38 @@ inline ActRec* ActRec::sfp() const {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-inline int32_t ActRec::numArgs() const {
-  return m_numArgsAndFlags & kNumArgsMask;
-}
-
-inline ActRec::Flags ActRec::flags() const {
-  return static_cast<Flags>(m_numArgsAndFlags & kFlagsMask);
-}
-
 inline bool ActRec::localsDecRefd() const {
-  return flags() & LocalsDecRefd;
+  return m_callOffAndFlags & (1 << LocalsDecRefd);
 }
 
 inline bool ActRec::isAsyncEagerReturn() const {
-  return flags() & AsyncEagerRet;
+  return m_callOffAndFlags & (1 << AsyncEagerRet);
 }
 
-inline uint32_t ActRec::encodeNumArgsAndFlags(uint32_t numArgs, Flags flags) {
-  assertx((numArgs & kFlagsMask) == 0);
-  assertx((uint32_t{flags} & kNumArgsMask) == 0);
-  return numArgs | flags;
+inline Offset ActRec::callOffset() const {
+  return m_callOffAndFlags >> CallOffsetStart;
 }
 
-inline void ActRec::initNumArgs(uint32_t numArgs) {
-  m_numArgsAndFlags = encodeNumArgsAndFlags(numArgs, Flags::None);
+inline void ActRec::initCallOffset(Offset offset) {
+  m_callOffAndFlags = offset << CallOffsetStart;
 }
 
-inline void ActRec::setNumArgs(uint32_t numArgs) {
-  m_numArgsAndFlags = encodeNumArgsAndFlags(numArgs, flags());
+inline uint32_t ActRec::encodeCallOffsetAndFlags(Offset offset,
+                                                 uint32_t flags) {
+  assertx(!(flags & ~((1 << AsyncEagerRet)|(1 << LocalsDecRefd))));
+  return (offset << CallOffsetStart) | flags;
 }
 
 inline void ActRec::setLocalsDecRefd() {
-  m_numArgsAndFlags |= LocalsDecRefd;
+  m_callOffAndFlags |= 1 << LocalsDecRefd;
 }
 
-inline void ActRec::setAsyncEagerReturn() {
-  assertx(flags() == Flags::None);
-  m_numArgsAndFlags = encodeNumArgsAndFlags(
-    numArgs(),
-    static_cast<Flags>(AsyncEagerRet)
-  );
+inline int32_t ActRec::numArgs() const {
+  return m_numArgs;
+}
+
+inline void ActRec::setNumArgs(uint32_t numArgs) {
+  m_numArgs = numArgs;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

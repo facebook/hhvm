@@ -77,8 +77,11 @@ struct ActRec {
   uint64_t m_savedRip; // native (in-TC) return address
 #endif
   const Func* m_func;  // Function.
-  uint32_t m_callOff;  // bc offset of call opcode from caller func entry.
-  uint32_t m_numArgsAndFlags; // arg_count:29, flags:3
+  // bit 0: LocalsDecRefd
+  // bit 1: AsyncEagerRet
+  // bits 2-31: bc offset of call opcode from caller func entry
+  uint32_t m_callOffAndFlags;
+  uint32_t m_numArgs;
   union {
     ObjectData* m_thisUnsafe; // This.
     Class* m_clsUnsafe;       // Late bound class.
@@ -97,20 +100,17 @@ struct ActRec {
   /////////////////////////////////////////////////////////////////////////////
 
   enum Flags : uint32_t {
-    None          = 0,
-
     // This bit can be independently set on ActRecs with any other flag state.
     // It's used by the unwinder to know that an ActRec has been partially torn
     // down (locals freed).
-    LocalsDecRefd = (1u << 30),
+    LocalsDecRefd,
 
     // Async eager return was requested.
-    AsyncEagerRet = (1u << 31),
-  };
+    AsyncEagerRet,
 
-  static constexpr int kNumArgsBits = 30;
-  static constexpr int kNumArgsMask = (1 << kNumArgsBits) - 1;
-  static constexpr int kFlagsMask = ~kNumArgsMask;
+    // The first bit of the call offset.
+    CallOffsetStart,
+  };
 
   /*
    * To conserve space, we use unions for pairs of mutually exclusive fields
@@ -141,7 +141,7 @@ struct ActRec {
   /*
    * Set up frame linkage with the caller ActRec.
    */
-  void setReturn(ActRec* fp, PC callPC, void* retAddr);
+  void setReturn(ActRec* fp, PC callPC, void* retAddr, bool asyncEagerReturn);
   void setJitReturn(void* retAddr);
 
   /*
@@ -163,7 +163,28 @@ struct ActRec {
   bool isInlined() const;
 
   /////////////////////////////////////////////////////////////////////////////
-  // NumArgs / Flags.
+  // Flags, call offset, number of args.
+
+  /*
+   * Raw flags accessors.
+   */
+  bool localsDecRefd() const;
+  bool isAsyncEagerReturn() const;
+
+  /*
+   * BC offset of call opcode from caller func entry.
+   */
+  Offset callOffset() const;
+
+  /*
+   * Initialize call offset. Assumes flags were not written yet.
+   */
+  void initCallOffset(Offset offset);
+
+  /*
+   * Combine offset with flags.
+   */
+  static uint32_t encodeCallOffsetAndFlags(Offset offset, uint32_t flags);
 
   /*
    * Number of arguments passed for this invocation.
@@ -171,31 +192,14 @@ struct ActRec {
   int32_t numArgs() const;
 
   /*
-   * Raw flags accessors.
+   * Set the number of arguments.
    */
-  Flags flags() const;
-  bool localsDecRefd() const;
-  bool isAsyncEagerReturn() const;
-
-  /*
-   * Pack `numArgs' and `flags' into the format expected by m_numArgsAndFlags.
-   */
-  static uint32_t encodeNumArgsAndFlags(uint32_t numArgs, Flags flags);
-
-  /*
-   * Set the numArgs component of m_numArgsAndFlags to `numArgs'.
-   *
-   * The init* flavor zeroes the flags component, whereas the set* flavor
-   * preserves flags.
-   */
-  void initNumArgs(uint32_t numArgs);
   void setNumArgs(uint32_t numArgs);
 
   /*
    * Flags setters.
    */
   void setLocalsDecRefd();
-  void setAsyncEagerReturn();
 
   /////////////////////////////////////////////////////////////////////////////
   // This / Class.

@@ -789,12 +789,13 @@ struct FrameRestore : private VMRegAnchor {
       tmp.m_sfp = fp;
       tmp.m_savedRip = 0;
       tmp.m_func = unit->getMain(nullptr, false);
-      tmp.m_callOff = !fp
+      tmp.initCallOffset(!fp
         ? 0
-        : fp->m_func->unit()->offsetOf(m_pc) - fp->m_func->base();
+        : fp->m_func->unit()->offsetOf(m_pc) - fp->m_func->base()
+      );
       tmp.trashThis();
       tmp.m_varEnv = 0;
-      tmp.initNumArgs(0);
+      tmp.setNumArgs(0);
       vmfp() = &tmp;
       auto const offset = [&] {
         if (offsetOrOp < kInvalidOffset) return static_cast<Offset>(offsetOrOp);

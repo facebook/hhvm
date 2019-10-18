@@ -47,7 +47,7 @@ VMRegAnchor::VMRegAnchor(CallFlags callFlags, ActRec* ar)
   auto const numInputs = ar->numArgs() + (callFlags.hasGenerics() ? 1 : 0);
   regs.stack.top() = (TypedValue*)ar - numInputs;
   assertx(vmStack().isValidAddress((uintptr_t)vmsp()));
-  regs.pc = prevF->unit()->at(prevF->base() + ar->m_callOff);
+  regs.pc = prevF->unit()->at(prevF->base() + ar->callOffset());
   regs.fp = prevAr;
 }
 

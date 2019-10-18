@@ -278,7 +278,7 @@ bool canDCE(IRInstruction* inst) {
   case GetTime:
   case GetTimeNs:
   case Select:
-  case LdARNumArgsAndFlags:
+  case LdARFlags:
   case FuncHasAttr:
   case IsFunReifiedGenericsMatched:
   case IsClsDynConstructible:

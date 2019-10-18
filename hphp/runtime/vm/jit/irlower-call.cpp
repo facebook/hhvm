@@ -73,7 +73,6 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
   auto const callee = srcLoc(env, inst, 2).reg();
   auto const ctx = srcLoc(env, inst, 3).reg();
   auto const extra = inst->extra<Call>();
-  auto const callOff = safe_cast<int32_t>(extra->callOffset);
 
   auto& v = vmain(env);
   auto const catchBlock = label(env, inst->taken());
@@ -83,13 +82,14 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
 
   v << store{fp, calleeAR + AROFF(m_sfp)};
   v << store{callee, calleeAR + AROFF(m_func)};
-  v << storeli{callOff, calleeAR + AROFF(m_callOff)};
 
-  auto const flags = extra->asyncEagerReturn
-    ? ActRec::Flags::AsyncEagerRet : ActRec::Flags::None;
-  auto const naaf = static_cast<int32_t>(
-    ActRec::encodeNumArgsAndFlags(extra->numArgs, flags));
-  v << storeli{naaf, calleeAR + AROFF(m_numArgsAndFlags)};
+  auto const coaf = safe_cast<int32_t>(ActRec::encodeCallOffsetAndFlags(
+    extra->callOffset,
+    extra->asyncEagerReturn ? (1 << ActRec::AsyncEagerRet) : 0
+  ));
+  v << storeli{coaf, calleeAR + AROFF(m_callOffAndFlags)};
+
+  v << storeli{safe_cast<int32_t>(extra->numArgs), calleeAR + AROFF(m_numArgs)};
 
   assertx(inst->src(3)->isA(TObj) || inst->src(3)->isA(TCls) ||
           inst->src(3)->isA(TNullptr));
@@ -159,10 +159,8 @@ void cgCallUnpack(IRLS& env, const IRInstruction* inst) {
   auto const calleeSP = sp[cellsToBytes(extra->spOffset.offset)];
   auto const calleeAR = calleeSP + cellsToBytes(extra->numInputs());
   v << store{callee, calleeAR + AROFF(m_func)};
-
-  auto const naaf = static_cast<int32_t>(
-    ActRec::encodeNumArgsAndFlags(extra->numArgs + 1, ActRec::Flags::None));
-  v << storeli{naaf, calleeAR + AROFF(m_numArgsAndFlags)};
+  v << storeli{safe_cast<int32_t>(extra->numArgs) + 1,
+               calleeAR + AROFF(m_numArgs)};
 
   assertx(inst->src(3)->isA(TObj) || inst->src(3)->isA(TCls) ||
           inst->src(3)->isA(TNullptr));

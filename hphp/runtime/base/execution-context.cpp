@@ -1572,7 +1572,7 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
   } else {
     ar->trashThis();
   }
-  ar->initNumArgs(numArgsInclUnpack);
+  ar->setNumArgs(numArgsInclUnpack);
   ar->trashVarEnv();
 
 #ifdef HPHP_TRACE
@@ -1627,7 +1627,7 @@ static inline void enterVMCustomHandler(ActRec* ar, Action action) {
   assertx(ar);
   assertx(!ar->sfp());
   assertx(isReturnHelper(reinterpret_cast<void*>(ar->m_savedRip)));
-  assertx(ar->m_callOff == 0);
+  assertx(ar->callOffset() == 0);
 
   vmFirstAR() = ar;
   vmJitCalledFrame() = nullptr;
@@ -1882,7 +1882,7 @@ ActRec* ExecutionContext::getPrevVMState(const ActRec* fp,
         *prevSp = (TypedValue*)(fp + 1);
       }
     }
-    if (prevPc) *prevPc = prevFp->func()->base() + fp->m_callOff;
+    if (prevPc) *prevPc = prevFp->func()->base() + fp->callOffset();
     if (fromVMEntry) *fromVMEntry = false;
     return prevFp;
   }
@@ -1936,9 +1936,9 @@ bool ExecutionContext::evalUnit(Unit* unit, PC callPC, PC& pc, int funcType) {
   } else {
     ar->trashThis();
   }
-  ar->initNumArgs(0);
+  ar->setNumArgs(0);
   assertx(vmfp());
-  ar->setReturn(vmfp(), callPC, jit::tc::ustubs().retHelper);
+  ar->setReturn(vmfp(), callPC, jit::tc::ustubs().retHelper, false);
   pushFrameSlots(func);
 
   auto prevFp = vmfp();
@@ -2158,7 +2158,9 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
       while (true) {
         auto prevFp = getPrevVMState(fp);
         if (!prevFp) break;
-        if (prevFp == target) return prevFp->func()->getEntry() + fp->m_callOff;
+        if (prevFp == target) {
+          return prevFp->func()->getEntry() + fp->callOffset();
+        }
         fp = prevFp;
       }
     }
@@ -2243,7 +2245,7 @@ void ExecutionContext::enterDebuggerDummyEnv() {
   assertx(vmStack().count() == 0);
   ActRec* ar = vmStack().allocA();
   ar->m_func = s_debuggerDummy->getMain(nullptr, false);
-  ar->initNumArgs(0);
+  ar->setNumArgs(0);
   ar->trashThis();
   ar->setReturnVMExit();
   vmfp() = ar;

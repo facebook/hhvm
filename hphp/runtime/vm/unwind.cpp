@@ -100,7 +100,7 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
                           ObjectData* phpException) {
   auto const func = fp->func();
   auto const prevFp = fp->sfp();
-  auto const callOff = fp->m_callOff;
+  auto const callOff = fp->callOffset();
 
   ITRACE(1, "tearDownFrame: {} ({})\n",
          func->fullName()->data(),

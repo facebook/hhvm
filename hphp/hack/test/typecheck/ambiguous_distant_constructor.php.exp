@@ -1,0 +1,8 @@
+File "ambiguous_distant_constructor.php", line 9, characters 19-29:
+T2 and TX both declare ambiguous implementations of __construct. (Typing[4285])
+File "ambiguous_distant_constructor.php", line 9, characters 19-29:
+T2's definition is here.
+File "ambiguous_distant_constructor.php", line 3, characters 19-29:
+TX's definition is here.
+File "ambiguous_distant_constructor.php", line 9, characters 19-29:
+Redeclare __construct in C with a compatible signature.

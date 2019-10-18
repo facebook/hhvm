@@ -1,7 +1,5 @@
 File "ambiguous_declaration_concrete.php", line 6, characters 19-21:
-Member foo has the wrong type (Typing[4341])
-File "ambiguous_declaration_concrete.php", line 6, characters 19-21:
-T2 and T1 both declare ambiguous implementations of foo.
+T2 and T1 both declare ambiguous implementations of foo. (Typing[4285])
 File "ambiguous_declaration_concrete.php", line 6, characters 19-21:
 T2's definition is here.
 File "ambiguous_declaration_concrete.php", line 3, characters 19-21:

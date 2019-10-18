@@ -130,6 +130,8 @@ let should_check_params parent_class class_ =
 
 let check_final_method member_source parent_class_elt class_elt =
   (* we only check for final overrides on methods, not properties *)
+  (* we don't check constructors, as they are already checked
+   * in the decl phase *)
   let is_method =
     match member_source with
     | `FromMethod
@@ -303,8 +305,15 @@ let check_override
                   (Cls.name class_)
               | _ -> () );
 
-            (* these unify errors are collected into errorl *)
-            subtype_funs env r2 ft2 r1 ft1 Errors.unify_error
+            match mem_source with
+            | `FromConstructor ->
+              (* we don't check that constructor signatures follow
+               * subtyping rules except with __ConsistentConstruct,
+               * which is checked elsewhere *)
+              env
+            | _ ->
+              (* these unify errors are collected into errorl *)
+              subtype_funs env r2 ft2 r1 ft1 Errors.unify_error
           in
           check_ambiguous_inheritance
             check
@@ -349,7 +358,11 @@ let check_override
               fty_child;
           env)
       (fun errorl ->
-        Errors.bad_method_override pos member_name errorl;
+        let err_code = Errors.get_code errorl in
+        if err_code = Error_codes.Typing.(to_enum MultipleConcreteDefs) then
+          Errors.add_error errorl
+        else
+          Errors.bad_method_override pos member_name errorl;
         env)
   else
     env
@@ -471,6 +484,7 @@ let check_members
               | `FromSProp ->
                 Dep.SProp (parent_class_elt.ce_origin, member_name)
               | `FromProp -> Dep.Prop (parent_class_elt.ce_origin, member_name)
+              | `FromConstructor -> Dep.Cstr parent_class_elt.ce_origin
             in
             Typing_deps.add_idep (Dep.Class (Cls.name class_)) dep );
           check_override
@@ -497,11 +511,18 @@ let instantiate_consts subst consts =
   Sequence.map consts (fun (id, cc) -> (id, Inst.instantiate_cc subst cc))
 
 let make_all_members ~child_class ~parent_class =
+  let wrap_constructor = function
+    | None -> Sequence.empty
+    | Some x -> Sequence.singleton (Naming_special_names.Members.__construct, x)
+  in
   [
     (`FromProp, Cls.props parent_class, Cls.get_prop child_class);
     (`FromSProp, Cls.sprops parent_class, Cls.get_sprop child_class);
     (`FromMethod, Cls.methods parent_class, Cls.get_method child_class);
     (`FromSMethod, Cls.smethods parent_class, Cls.get_smethod child_class);
+    ( `FromConstructor,
+      fst (Cls.construct parent_class) |> wrap_constructor,
+      (fun _ -> fst (Cls.construct child_class)) );
   ]
 
 (* The phantom class element that represents the default constructor:

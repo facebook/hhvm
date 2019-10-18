@@ -17,3 +17,8 @@ interface CompletionInterface {
 class CompletionClass {
   public function interfaceDocBlockMethod(): void {}
 }
+
+function testing_area_for_shapes(): void {
+  $point1 = shape('x' => -3, 'y' => 6);
+
+}

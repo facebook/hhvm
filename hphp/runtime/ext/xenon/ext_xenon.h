@@ -131,9 +131,7 @@ struct Xenon final {
   bool      m_stopping;
  private:
   std::atomic<int64_t> m_missedSampleCount;
-  sem_t     m_timerTriggered;
 #if !defined(__APPLE__) && !defined(_MSC_VER)
-  pthread_t m_triggerThread;
   timer_t   m_timerid;
 #endif
 };

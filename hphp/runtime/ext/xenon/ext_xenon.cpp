@@ -39,27 +39,6 @@ namespace HPHP {
 
 TRACE_SET_MOD(xenon);
 
-void *s_waitThread(void *arg) {
-  TRACE(1, "s_waitThread Starting\n");
-  sem_t* sem = static_cast<sem_t*>(arg);
-  while (true) {
-    if (sem_wait(sem) == 0) {
-      TRACE(1, "s_waitThread Fired\n");
-      if (Xenon::getInstance().m_stopping) {
-        TRACE(1, "s_waitThread is exiting\n");
-        return nullptr;
-      }
-      Xenon::getInstance().surpriseAll();
-    } else if (errno != EINTR) {
-      break;
-    }
-  }
-  TRACE(1, "s_waitThread Ending\n");
-  return nullptr;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 // Data that is kept per request and is only valid per request.
 // This structure gathers a php and async stack trace when log is called.
 // These logged stacks can be then gathered via a php call, xenon_get_data.
@@ -71,8 +50,7 @@ void *s_waitThread(void *arg) {
 struct XenonRequestLocalData final {
   XenonRequestLocalData();
   ~XenonRequestLocalData();
-  void log(Xenon::SampleType t,
-           c_WaitableWaitHandle* wh = nullptr);
+  void log(Xenon::SampleType t, c_WaitableWaitHandle* wh = nullptr);
   Array createResponse();
 
   void requestInit();
@@ -176,18 +154,11 @@ static void onXenonTimer(int signo) {
 // XenonForceAlwaysOn is active - it doesn't need a timer, it is always on.
 // Xenon needs to be started once per process.
 // The number of milliseconds has to be greater than zero.
-// We need to create a semaphore and a thread.
 // If all of those happen, then we need a timer attached to a signal handler.
 void Xenon::start(uint64_t msec) {
 #if !defined(__APPLE__) && !defined(_MSC_VER)
   TRACE(1, "XenonForceAlwaysOn %d\n", RuntimeOption::XenonForceAlwaysOn);
-  if (!RuntimeOption::XenonForceAlwaysOn
-      && m_timerid == 0
-      && msec > 0
-      && sem_init(&m_timerTriggered, 0, 0) == 0
-      && pthread_create(&m_triggerThread, nullptr, s_waitThread,
-          static_cast<void*>(&m_timerTriggered)) == 0) {
-
+  if (!RuntimeOption::XenonForceAlwaysOn && !m_timerid && msec > 0) {
     time_t sec = msec / 1000;
     long nsec = (msec % 1000) * 1000000;
     TRACE(1, "Xenon::start periodic %ld seconds, %ld nanoseconds\n", sec, nsec);
@@ -222,11 +193,8 @@ void Xenon::stop() {
 #if !defined(__APPLE__) && !defined(_MSC_VER)
   if (m_timerid) {
     m_stopping = true;
-    sem_post(&m_timerTriggered);
-    pthread_join(m_triggerThread, nullptr);
     TRACE(1, "Xenon::stop has stopped the waiting thread\n");
     timer_delete(m_timerid);
-    sem_destroy(&m_timerTriggered);
   }
 #endif
 }
@@ -249,7 +217,9 @@ void Xenon::log(SampleType t, c_WaitableWaitHandle* wh) const {
 
 // Called from timer handler, Lets non-signal code know the timer was fired.
 void Xenon::onTimer() {
-  sem_post(&m_timerTriggered);
+  auto& instance = getInstance();
+  if (instance.m_stopping) return;
+  instance.surpriseAll();
 }
 
 // Turns on the Xenon Surprise flag for every thread via a lambda function

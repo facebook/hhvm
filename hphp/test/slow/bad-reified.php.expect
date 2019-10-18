@@ -1,0 +1,15 @@
+Not persistent!
+array(2) {
+  ["kind"]=>
+  int(20)
+  ["generic_types"]=>
+  array(1) {
+    [0]=>
+    array(2) {
+      ["kind"]=>
+      int(1)
+      ["alias"]=>
+      string(10) "HelloAlias"
+    }
+  }
+}

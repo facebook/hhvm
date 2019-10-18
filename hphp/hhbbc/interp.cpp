@@ -3289,9 +3289,9 @@ void isAsTypeStructImpl(ISS& env, SArray inputTS) {
   not_reached();
 }
 
-bool canReduceToDontResolveList(SArray tsList);
+bool canReduceToDontResolveList(SArray tsList, bool checkArrays);
 
-bool canReduceToDontResolve(SArray ts) {
+bool canReduceToDontResolve(SArray ts, bool checkArrays) {
   switch (get_ts_kind(ts)) {
     case TypeStructure::Kind::T_int:
     case TypeStructure::Kind::T_bool:
@@ -3307,13 +3307,14 @@ bool canReduceToDontResolve(SArray ts) {
     case TypeStructure::Kind::T_dynamic:
     case TypeStructure::Kind::T_nonnull:
     case TypeStructure::Kind::T_resource:
-    // Following ones don't reify, so no need to check the generics
+      return true;
+    // Following have generic parameters that may need to be resolved
     case TypeStructure::Kind::T_dict:
     case TypeStructure::Kind::T_vec:
     case TypeStructure::Kind::T_keyset:
     case TypeStructure::Kind::T_vec_or_dict:
     case TypeStructure::Kind::T_arraylike:
-      return true;
+      return !checkArrays;
     case TypeStructure::Kind::T_class:
     case TypeStructure::Kind::T_interface:
     case TypeStructure::Kind::T_xhp:
@@ -3323,7 +3324,7 @@ bool canReduceToDontResolve(SArray ts) {
       // Otherwise, we can't.
       return isTSAllWildcards(ts);
     case TypeStructure::Kind::T_tuple:
-      return canReduceToDontResolveList(get_ts_elem_types(ts));
+      return canReduceToDontResolveList(get_ts_elem_types(ts), checkArrays);
     case TypeStructure::Kind::T_shape: {
       auto result = true;
       IterateV(
@@ -3335,7 +3336,7 @@ bool canReduceToDontResolve(SArray ts) {
             result = false;
             return true; // short circuit
           }
-          result &= canReduceToDontResolve(get_ts_value(arr));
+          result &= canReduceToDontResolve(get_ts_value(arr), checkArrays);
            // when result is false, we can short circuit
           return !result;
         }
@@ -3344,9 +3345,9 @@ bool canReduceToDontResolve(SArray ts) {
     }
     case TypeStructure::Kind::T_fun: {
       auto const variadicType = get_ts_variadic_type_opt(ts);
-      return canReduceToDontResolve(get_ts_return_type(ts))
-        && canReduceToDontResolveList(get_ts_param_types(ts))
-        && (!variadicType || canReduceToDontResolve(variadicType));
+      return canReduceToDontResolve(get_ts_return_type(ts), checkArrays)
+        && canReduceToDontResolveList(get_ts_param_types(ts), checkArrays)
+        && (!variadicType || canReduceToDontResolve(variadicType, checkArrays));
     }
     // Following needs to be resolved
     case TypeStructure::Kind::T_unresolved:
@@ -3366,13 +3367,13 @@ bool canReduceToDontResolve(SArray ts) {
   not_reached();
 }
 
-bool canReduceToDontResolveList(SArray tsList) {
+bool canReduceToDontResolveList(SArray tsList, bool checkArrays) {
   auto result = true;
   IterateV(
     tsList,
     [&](TypedValue v) {
       assertx(isArrayLikeType(v.m_type));
-      result &= canReduceToDontResolve(v.m_data.parr);
+      result &= canReduceToDontResolve(v.m_data.parr, checkArrays);
        // when result is false, we can short circuit
       return !result;
     }
@@ -3403,7 +3404,7 @@ void in(ISS& env, const bc::IsTypeStructC& op) {
     return push(env, TBool);
   }
   if (op.subop1 == TypeStructResolveOp::Resolve &&
-      canReduceToDontResolve(a->m_data.parr)) {
+      canReduceToDontResolve(a->m_data.parr, false)) {
     return reduce(env, bc::IsTypeStructC { TypeStructResolveOp::DontResolve });
   }
   isAsTypeStructImpl<false>(env, a->m_data.parr);
@@ -3425,9 +3426,9 @@ void in(ISS& env, const bc::CombineAndResolveTypeStruct& op) {
     auto const ts = first->m_data.parr;
     // Optimize single input that does not need any combination
     if (op.arg1 == 1) {
-      if (canReduceToDontResolve(ts)) return reduce(env);
+      if (canReduceToDontResolve(ts, true)) return reduce(env);
       if (auto const resolved = resolveTSStatically(env, ts, env.ctx.cls,
-                                                    false)) {
+                                                    true)) {
         return RuntimeOption::EvalHackArrDVArrs
           ? reduce(env, bc::PopC {}, bc::Dict  { resolved })
           : reduce(env, bc::PopC {}, bc::Array { resolved });

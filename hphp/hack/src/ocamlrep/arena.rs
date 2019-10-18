@@ -5,6 +5,7 @@
 
 use std::cell::RefCell;
 use std::cmp::max;
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 use crate::{BlockBuilder, OcamlRep, Value};
 
@@ -41,7 +42,21 @@ impl<'a> Chunk<'a> {
     }
 }
 
+// The generation number is used solely to identify which arena a cached value
+// belongs to in `RcOc`.
+//
+// We use usize::max_value() / 2 here to avoid colliding with ocamlpool
+// generation numbers. This generation trick isn't sound with the use of
+// multiple generation counters, but this mitigation should make it extremely
+// difficult to mix up values allocated with ocamlpool and Arena in practice
+// (one would have to serialize the same value with both, and only after
+// increasing the ocamlpool generation by an absurd amount).
+//
+// If we add a third kind of allocator, we might want to rethink this strategy.
+static NEXT_GENERATION: AtomicUsize = AtomicUsize::new(usize::max_value() / 2);
+
 pub struct Arena<'a> {
+    generation: usize,
     current_chunk: RefCell<Chunk<'a>>,
 }
 
@@ -53,10 +68,16 @@ impl<'a> Arena<'a> {
 
     /// Create a new Arena with `capacity_in_bytes` preallocated.
     pub fn with_capacity(capacity_in_bytes: usize) -> Self {
+        let generation = NEXT_GENERATION.fetch_add(1, Ordering::SeqCst);
         let capacity_in_words = max(2, capacity_in_bytes / std::mem::size_of::<Value<'_>>());
         Self {
+            generation,
             current_chunk: RefCell::new(Chunk::with_capacity(capacity_in_words)),
         }
+    }
+
+    pub fn generation(&self) -> usize {
+        self.generation
     }
 
     #[inline]

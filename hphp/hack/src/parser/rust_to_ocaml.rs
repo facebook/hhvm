@@ -186,18 +186,15 @@ fn build_lazy_trivia(trivia_list: &[PositionedTrivia], acc: Option<usize>) -> Op
         })
 }
 
-unsafe fn get_forward_pointer(token: &PositionedToken) -> Value {
-    if token.0.ocamlpool_generation == ocamlpool_generation {
-        return token.0.ocamlpool_forward_pointer;
-    } else {
-        return ocaml::core::mlvalues::UNIT;
-    }
+fn get_forward_pointer(token: &PositionedToken) -> Value {
+    let rc = &token.0;
+    rc.get_cached_value_in_generation(unsafe { ocamlpool_generation })
+        .unwrap_or(ocaml::core::mlvalues::UNIT)
 }
 
-unsafe fn set_forward_pointer(token: &PositionedToken, value: Value) {
-    *std::mem::transmute::<&usize, *mut Value>(&token.0.ocamlpool_forward_pointer) = value;
-    *std::mem::transmute::<&usize, *mut usize>(&token.0.ocamlpool_generation) =
-        ocamlpool_generation;
+fn set_forward_pointer(token: &PositionedToken, value: Value) {
+    let rc = &token.0;
+    rc.set_cached_value(value, unsafe { ocamlpool_generation });
 }
 
 impl ToOcaml for PositionedToken {

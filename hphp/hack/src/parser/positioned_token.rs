@@ -4,8 +4,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::hash::{Hash, Hasher};
-use std::rc::Rc;
+use ocamlrep::rc::RcOc;
 
 use crate::lexable_token::{LexablePositionedToken, LexableToken};
 use crate::positioned_trivia::PositionedTrivia;
@@ -22,8 +21,6 @@ pub struct PositionedTokenImpl {
     // TODO (kasper): implement LazyTrivia
     pub leading: Vec<PositionedTrivia>,
     pub trailing: Vec<PositionedTrivia>,
-    pub ocamlpool_generation: usize,
-    pub ocamlpool_forward_pointer: usize,
 }
 
 // Positioned tokens, when used as part of positioned syntax are shared - same leaf token can be
@@ -32,7 +29,7 @@ pub struct PositionedTokenImpl {
 // We don't want to have to clone and store multiple copies of the token, so we define it as ref
 // counted pointer (wrapped in newtype) to the actual shared struct
 #[derive(Debug, Clone)]
-pub struct PositionedToken(pub Rc<PositionedTokenImpl>);
+pub struct PositionedToken(pub RcOc<PositionedTokenImpl>);
 
 impl<'a> LexableToken<'a> for PositionedToken {
     type Trivia = PositionedTrivia;
@@ -48,7 +45,7 @@ impl<'a> LexableToken<'a> for PositionedToken {
         let leading_width = leading.iter().map(|x| x.width).sum();
         let trailing_width = trailing.iter().map(|x| x.width).sum();
 
-        Self(Rc::new(PositionedTokenImpl {
+        Self(RcOc::new(PositionedTokenImpl {
             kind,
             offset,
             leading_width,
@@ -56,8 +53,6 @@ impl<'a> LexableToken<'a> for PositionedToken {
             trailing_width,
             leading,
             trailing,
-            ocamlpool_generation: 0,
-            ocamlpool_forward_pointer: 0,
         }))
     }
 
@@ -97,22 +92,22 @@ impl<'a> LexableToken<'a> for PositionedToken {
     // Fortunately, they are used only in lexer/parser BEFORE the tokens are embedded in syntax, so
     // before any sharing occurs
     fn with_leading(self, leading: Vec<Self::Trivia>) -> Self {
-        let mut token = Rc::clone(&self.0);
-        let mut token_impl = Rc::make_mut(&mut token);
+        let mut token = RcOc::clone(&self.0);
+        let mut token_impl = RcOc::make_mut(&mut token);
         token_impl.leading = leading;
         Self(token)
     }
 
     fn with_trailing(self, trailing: Vec<Self::Trivia>) -> Self {
-        let mut token = Rc::clone(&self.0);
-        let mut token_impl = Rc::make_mut(&mut token);
+        let mut token = RcOc::clone(&self.0);
+        let mut token_impl = RcOc::make_mut(&mut token);
         token_impl.trailing = trailing;
         Self(token)
     }
 
     fn with_kind(self, kind: TokenKind) -> Self {
-        let mut token = Rc::clone(&self.0);
-        let mut token_impl = Rc::make_mut(&mut token);
+        let mut token = RcOc::clone(&self.0);
+        let mut token_impl = RcOc::make_mut(&mut token);
         token_impl.kind = kind;
         Self(token)
     }
@@ -144,24 +139,13 @@ impl PositionedToken {
     // Similar convention to calling Rc::clone(x) instead of x.clone() to make it more explicit
     // that we are only cloning the reference, not the value
     pub fn clone_rc(x: &Self) -> Self {
-        Self(Rc::clone(&x.0))
-    }
-}
-
-impl Hash for PositionedToken {
-    fn hash<H>(&self, state: &mut H)
-    where
-        H: Hasher,
-    {
-        let ptr = Rc::into_raw((*self).0.clone());
-        ptr.hash(state);
-        let _ = unsafe { Rc::from_raw(ptr) };
+        Self(RcOc::clone(&x.0))
     }
 }
 
 impl PartialEq for PositionedToken {
     fn eq(&self, other: &Self) -> bool {
-        Rc::ptr_eq(&(*self).0, &(*other).0)
+        RcOc::ptr_eq(&(*self).0, &(*other).0)
     }
 }
 impl Eq for PositionedToken {}
@@ -178,21 +162,19 @@ impl<'a> LexablePositionedToken<'a> for PositionedToken {
     // TODO: PositionedToken auto derives Clone trait, and it also
     // has clone_rc(..), two are the same.
     fn clone_value(&self) -> Self {
-        let mut inner = self.0.as_ref().clone();
-        inner.ocamlpool_generation = 0;
-        inner.ocamlpool_forward_pointer = 0;
-        Self(Rc::new(inner))
+        let inner = self.0.as_ref().clone();
+        Self(RcOc::new(inner))
     }
 
     fn trim_left(&mut self, n: usize) -> Result<(), String> {
-        let inner = Rc::get_mut(&mut self.0).ok_or("could not get mutable")?;
+        let inner = RcOc::get_mut(&mut self.0).ok_or("could not get mutable")?;
         inner.leading_width = inner.leading_width + n;
         inner.width = inner.width - n;
         Ok(())
     }
 
     fn trim_right(&mut self, n: usize) -> Result<(), String> {
-        let inner = Rc::get_mut(&mut self.0).ok_or("could not get mutable")?;
+        let inner = RcOc::get_mut(&mut self.0).ok_or("could not get mutable")?;
         inner.trailing_width = inner.trailing_width + n;
         inner.width = inner.width - n;
         Ok(())
@@ -200,7 +182,7 @@ impl<'a> LexablePositionedToken<'a> for PositionedToken {
 
     fn concatenate(s: &Self, e: &Self) -> Result<Self, String> {
         let mut t = s.clone_value();
-        let inner = Rc::get_mut(&mut t.0).ok_or("could not get mutable")?;
+        let inner = RcOc::get_mut(&mut t.0).ok_or("could not get mutable")?;
         inner.width = e.end_offset() + 1 - s.start_offset();
         inner.trailing_width = e.trailing_width();
         inner.trailing = e.trailing().to_vec();

@@ -8,15 +8,15 @@ use std::marker::PhantomData;
 
 use crate::block::{Block, Header};
 
-fn is_ocaml_int(value: usize) -> bool {
+pub const fn is_ocaml_int(value: usize) -> bool {
     value & 1 == 1
 }
 
-fn isize_to_ocaml_int(value: isize) -> usize {
+pub const fn isize_to_ocaml_int(value: isize) -> usize {
     ((value as usize) << 1) | 1
 }
 
-fn ocaml_int_to_isize(value: usize) -> isize {
+pub const fn ocaml_int_to_isize(value: usize) -> isize {
     (value as isize) >> 1
 }
 

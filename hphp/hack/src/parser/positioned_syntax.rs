@@ -4,14 +4,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::rc::Rc;
-
 use crate::{
     indexed_source_text::IndexedSourceText, lexable_token::LexableToken,
     positioned_token::PositionedToken, source_text::SourceText, syntax::*, syntax_kind::SyntaxKind,
     syntax_trait::SyntaxTrait, token_kind::TokenKind,
 };
 
+use ocamlrep::rc::RcOc;
 use oxidized::pos::Pos;
 
 #[derive(Debug, Clone)]
@@ -81,7 +80,7 @@ impl PositionedValue {
             | (TokenSpan { left: l, .. }, TokenValue(r))
             | (TokenValue(l), TokenSpan { right: r, .. })
             | (TokenSpan { left: l, .. }, TokenSpan { right: r, .. }) => {
-                if Rc::ptr_eq(&l.0, &r.0) {
+                if RcOc::ptr_eq(&l.0, &r.0) {
                     TokenValue(PositionedToken::clone_rc(l))
                 } else {
                     TokenSpan {

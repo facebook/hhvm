@@ -1340,7 +1340,7 @@ static Variant HHVM_METHOD(SimpleXMLElement, xpath, const String& path) {
 
   xmlNodeSetPtr result = retval->nodesetval;
 
-  Array ret = Array::Create();
+  Array ret = Array::CreateVArray();
   if (result != nullptr) {
     for (int64_t i = 0; i < result->nodeNr; ++i) {
       nodeptr = result->nodeTab[i];
@@ -1474,7 +1474,7 @@ static Variant HHVM_METHOD(SimpleXMLElement, asXML,
 static Array HHVM_METHOD(SimpleXMLElement, getNamespaces,
                          bool recursive /* = false */) {
   auto data = Native::data<SimpleXMLElement>(this_);
-  Array ret = Array::Create();
+  Array ret = Array::CreateDArray();
   xmlNodePtr node = data->nodep();
   node = php_sxe_get_first_node(data, node);
   if (node) {
@@ -1494,7 +1494,7 @@ static Array HHVM_METHOD(SimpleXMLElement, getDocNamespaces,
   xmlNodePtr node =
     from_root ? xmlDocGetRootElement(data->docp())
               : data->nodep();
-  Array ret = Array::Create();
+  Array ret = Array::CreateDArray();
   sxe_add_registered_namespaces(data, node, recursive, ret);
   return ret;
 }

@@ -5170,8 +5170,7 @@ void hoist_spills_in_loop(State& state,
         switch (inst.op) {
           case Vinstr::reload:
             assertx(!inst.reload_.s.isPhys() && !inst.reload_.d.isPhys());
-            assertx(loopInfo.uses[inst.reload_.s]);
-            assertx(!candidates[canonicalize(inst.reload_.s)]);
+            changed |= unify(inst.reload_.s, inst.reload_.d);
             break;
           case Vinstr::spill: {
             assertx(!inst.spill_.s.isPhys() && !inst.spill_.d.isPhys());
@@ -5318,16 +5317,24 @@ void hoist_spills_in_loop(State& state,
     // loop, so it's a gain since we can get rid of them.
     for (size_t i = 0; i < unit.blocks[b].code.size(); ++i) {
       auto const& inst = unit.blocks[b].code[i];
-      if (inst.op != Vinstr::spill) continue;
-      auto const r1 = canonicalize(inst.spill_.s);
-      auto const r2 = canonicalize(inst.spill_.d);
-      if (r1 != r2) continue;
-      if (!candidates[r1]) continue;
-      credit(
-        r1, b,
-        is_trivial_remat(state, inst.spill_.s, b, i),
-        false
-      );
+
+      auto const process = [&] (Vreg r1, Vreg r2, bool reload) {
+        auto const c1 = canonicalize(r1);
+        auto const c2 = canonicalize(r2);
+        if (c1 != c2) return;
+        if (!candidates[c1]) return;
+        credit(
+          c1, b,
+          is_trivial_remat(state, r1, b, i),
+          reload
+        );
+      };
+
+      if (inst.op == Vinstr::spill) {
+        process(inst.spill_.s, inst.spill_.d, false);
+      } else if (inst.op == Vinstr::reload) {
+        process(inst.reload_.s, inst.reload_.d, true);
+      }
     }
 
     // Now do the opposite of what we did for the entry block. Look at
@@ -5546,11 +5553,11 @@ void hoist_spills_in_loop(State& state,
               }
               return false;
             case Vinstr::reload:
-              // We shouldn't see a reload because that counts as a
-              // use, and the hoisted Vregs don't have uses within the
-              // loop.
-              assertx(!candidates[canonicalize(inst.reload_.s)]);
-              assertx(!candidates[canonicalize(inst.reload_.d)]);
+              // Reloads should be removed
+              if (candidates[canonicalize(inst.reload_.s)]) {
+                assertx(candidates[canonicalize(inst.reload_.d)]);
+                return true;
+              }
               return false;
             default:
               // Never remove non-pure instructions

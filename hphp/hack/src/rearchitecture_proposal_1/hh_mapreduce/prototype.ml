@@ -8,6 +8,11 @@
 
 open Core_kernel
 
+type sharedmem_base_address
+
+external map_shared_memory_ffi :
+  string -> (sharedmem_base_address, string) result = "map_shared_memory"
+
 type file_descr = Prototype_file_descr of Unix.file_descr
 
 let file_descr (fd : Unix.file_descr) : file_descr = Prototype_file_descr fd
@@ -147,7 +152,16 @@ let run () : unit =
   Unix.bind socket (Unix.ADDR_UNIX (Args.prototype_sock_file !root));
   Unix.listen socket 10;
 
-  Printf.printf "Prototype cache base address: 0x4000\n%!";
+  (* Map cachelib shared-memory *)
+  begin
+    match map_shared_memory_ffi !cache_directory with
+    | Ok base_addr ->
+      let base_addr_int = ((Obj.magic base_addr : int) lsl 1) + 1 in
+      Printf.printf "Prototype cache base address: 0x%x\n%!" base_addr_int
+    | Error message ->
+      Printf.eprintf "Prototype failed to map shared-mem: %s\n%!" message;
+      exit 1
+  end;
 
   (* Loop: fork upon client requests; die upon stdin *)
   let rec loop () : unit =

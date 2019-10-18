@@ -17,4 +17,4 @@ val get_adata : unit -> Hhas_adata.t list
 
 val reset : unit -> unit
 
-val rewrite_typed_value : Typed_value.t -> Hhbc_ast.instruct
+val rewrite_typed_values : Instruction_sequence.t -> Instruction_sequence.t

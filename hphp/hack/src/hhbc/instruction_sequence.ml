@@ -610,13 +610,6 @@ let rewrite_user_labels instrseq =
   in
   fst @@ aux instrseq SMap.empty
 
-let rewrite_tv instruction =
-  match instruction with
-  | ILitConst (TypedValue tv) -> Emit_adata.rewrite_typed_value tv
-  | _ -> instruction
-
-let rewrite_tvs instrseq = InstrSeq.map instrseq rewrite_tv
-
 let is_srcloc i =
   match i with
   | ISrcLoc _ -> true

@@ -192,4 +192,12 @@ let rewrite_typed_value tv =
     | TV.Keyset _ -> Keyset (get_array_identifier tv)
     | TV.Dict _ -> Dict (get_array_identifier tv))
 
+let rewrite_tv instruction =
+  match instruction with
+  | ILitConst (TypedValue tv) -> rewrite_typed_value tv
+  | _ -> instruction
+
+let rewrite_typed_values instrseq =
+  Instruction_sequence.InstrSeq.map instrseq rewrite_tv
+
 let get_adata () = List.rev !adata

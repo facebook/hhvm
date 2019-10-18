@@ -161,7 +161,7 @@ let make_body
     doc_comment
     env =
   let body_instrs = rewrite_user_labels body_instrs in
-  let body_instrs = rewrite_tvs body_instrs in
+  let body_instrs = Emit_adata.rewrite_typed_values body_instrs in
   let (params, body_instrs) =
     if Hhbc_options.relabel !Hhbc_options.compiler_options then
       Label_rewriter.relabel_function params body_instrs

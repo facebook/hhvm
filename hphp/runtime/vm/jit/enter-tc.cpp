@@ -68,11 +68,4 @@ void enterTC(TCA start) {
   postExit();
 }
 
-void enterTCAtPrologue(CallFlags callFlags, TCA start, ActRec* calleeAR) {
-  assertx(vmFirstAR() == calleeAR);
-  preEnter(start);
-  enterTCAtPrologueImpl(callFlags, start, calleeAR);
-  postExit();
-}
-
 }}

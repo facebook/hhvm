@@ -1313,32 +1313,6 @@ void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk, Array&& generics,
   assertx(!isResumed(enterFnAr));
   Stats::inc(Stats::VMEnter);
 
-  const bool useJit = RID().getJit() && !RID().getJitFolding();
-  const bool useJitPrologue = useJit && vmfp()
-    && (stk != StackArgsState::Trimmed);
-  // The jit prologues only know how to do limited amounts of work; cannot
-  // be used for magic call/extra-args already determined or ... or if the
-  // stack args have been explicitly been prepared (e.g. via entry as part
-  // of invoke func).
-
-  if (LIKELY(useJitPrologue)) {
-    if (!generics.isNull()) {
-      if (RuntimeOption::EvalHackArrDVArrs) {
-        vmStack().pushVecNoRc(generics.detach());
-      } else {
-        vmStack().pushArrayNoRc(generics.detach());
-      }
-    }
-    const int np = enterFnAr->m_func->numNonVariadicParams();
-    int na = enterFnAr->numArgs();
-    if (na > np) na = np + 1;
-    auto const callFlags = CallFlags(
-      !generics.isNull(), hasInOut, dynamicCall, 0);
-    jit::TCA start = enterFnAr->m_func->getPrologue(na);
-    jit::enterTCAtPrologue(callFlags, start, enterFnAr);
-    return;
-  }
-
   auto const hasGenerics = !generics.isNull();
   prepareFuncEntry(enterFnAr, stk, std::move(generics));
 
@@ -1350,7 +1324,7 @@ void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk, Array&& generics,
   checkStack(vmStack(), enterFnAr->m_func, 0);
   assertx(vmfp()->func()->contains(vmpc()));
 
-  if (useJit) {
+  if (RID().getJit() && !RID().getJitFolding()) {
     jit::TCA start = enterFnAr->m_func->getFuncBody();
     assert_flog(jit::tc::isValidCodeAddress(start),
                 "start = {} ; func = {} ({})\n",

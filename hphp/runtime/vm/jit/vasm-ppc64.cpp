@@ -465,7 +465,6 @@ struct Vgen {
   void emit(const callr& i);
   void emit(const calls& i);
   void emit(const callstub& i);
-  void emit(const calltc& i);
   void emit(const cmovq&);
   void emit(const contenter&);
   void emit(const cvtsi2sd& i);
@@ -758,29 +757,10 @@ void Vgen::emit(const inittc&) {
 }
 
 void Vgen::emit(const leavetc&) {
-  // should read enterTCExit address that was pushed by calltc/resumetc
+  // should read enterTCExit address that was pushed by resumetc
   emit(pop{rAsm});
   a.mtlr(rAsm);
   a.blr();
-}
-
-void Vgen::emit(const calltc& i) {
-  // Dummy call for branch predictor's sake:
-  // the link stack would be wrong otherwise and mispredictions would occur
-  a.bl(instr_size_in_bytes);  // jump to next instruction
-
-  // this will be verified by emitCallToExit
-  a.limmediate(rAsm, reinterpret_cast<int64_t>(i.exittc));
-  emit(push{rAsm});
-
-  // keep the return address as initialized by the vm frame
-  a.ld(rfuncln(), i.fp[AROFF(m_savedRip)]);
-  a.mtlr(rfuncln());
-
-  // and jump. When it returns, it'll be to enterTCExit
-  a.mr(rfuncentry(), i.target.asReg());
-  a.mtctr(rfuncentry());
-  a.bctr();
 }
 
 void Vgen::emit(const resumetc& i) {

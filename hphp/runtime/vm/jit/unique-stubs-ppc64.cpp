@@ -241,7 +241,7 @@ TCA emitCallToExit(CodeBlock& cb, DataBlock& data, const UniqueStubs& /*us*/) {
       // Not doing it directly as rret(0) == rarg(0) on ppc64
       Vreg ret_addr = v.makeReg();
 
-      // exittc address pushed on calltc/resumetc.
+      // exittc address pushed on resumetc.
       v << copy{rsp(), ret_addr};
 
       // We need to spill the return registers around the assert call.
@@ -256,7 +256,7 @@ TCA emitCallToExit(CodeBlock& cb, DataBlock& data, const UniqueStubs& /*us*/) {
     });
   }
 
-  // Discard the exittc address pushed on calltc/resumetc for balancing the
+  // Discard the exittc address pushed on resumetc for balancing the
   // stack next.
   a.addi(rsp(), rsp(), 8);
 

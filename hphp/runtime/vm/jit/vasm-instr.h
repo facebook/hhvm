@@ -129,7 +129,6 @@ struct Vunit;
   O(vcallunpack, I(target), U(args) U(extraArgs), Dn)\
   O(contenter, Inone, U(fp) U(target) U(args), Dn)\
   /* vm entry intrinsics */\
-  O(calltc, Inone, U(target) U(fp) U(args), Dn)\
   O(resumetc, Inone, U(target) U(args), Dn)\
   O(inittc, Inone, Un, Dn)\
   O(leavetc, Inone, U(args), Dn)\
@@ -891,12 +890,11 @@ struct contenter { Vreg64 fp, target; RegSet args; Vlabel targets[2]; };
 // VM entry ABI.
 
 /*
- * Call into the TC at a function prologue.
+ * Resume execution in the middle of a TC function.
  *
- * This sets up for a phplogue{} and transfers control to `target'---which
- * logically executes said phplogue{} before doing anything else.
- *
- * Before calltc{} is executed, the stack will always be set up like this:
+ * This must set up the native stack in the same way as a phplogue{} would,
+ * before transferring control to `target'.  Before resumetc{} is executed,
+ * the native stack will always be set up like this:
  *
  *    +-----------------------+   <- 16-byte alignment
  *    |   <8 bytes of junk>   |
@@ -906,19 +904,6 @@ struct contenter { Vreg64 fp, target; RegSet args; Vlabel targets[2]; };
  * course, be aliged once phplogue{} finishes executing).  Using a native call
  * in the implementation (and likewise, using native returns for leavetc{}) is
  * recommended, in order to take advantage of return branch predictions.
- *
- * `fp' is the callee's ActRec, which will have already been set up
- * appropriately.  `exittc' is the address to resume execution at after
- * returning from the TC.
- */
-struct calltc { Vreg64 target, fp; TCA exittc; RegSet args; };
-
-/*
- * Resume execution in the middle of a TC function.
- *
- * This must set up the native stack in the same way as a phplogue{} would,
- * before transferring control to `target'.  As with calltc{}, the native stack
- * pointer is misaligned coming in, and using a native call is recommended.
  *
  * `exittc' is the address to resume execution at after returning from the TC.
  */

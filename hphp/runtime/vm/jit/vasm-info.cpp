@@ -348,7 +348,6 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::callr:
     case Vinstr::calls:
     case Vinstr::callstub:
-    case Vinstr::calltc:
     case Vinstr::callunpack:
     case Vinstr::conjure:
     case Vinstr::conjureuse:

@@ -266,7 +266,6 @@ struct Vgen {
   void emit(const phpret& i);
 
   // vm entry abi
-  void emit(const calltc& i);
   void emit(const inittc& /*i*/) {}
   void emit(const leavetc& i);
 
@@ -836,26 +835,8 @@ void Vgen::emit(const contenter& i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void Vgen::emit(const calltc& i) {
-  vixl::Label stub;
-
-  // Preserve the LR (exittc) on the stack, pushing twice for SP alignment.
-  recordAddressImmediate();
-  a->Mov(rAsm, i.exittc);
-  a->Stp(rAsm, rAsm, MemOperand(sp, -16, PreIndex));
-
-  // Branch and link to nowhere to balance the LR stack.
-  recordAddressImmediate();
-  a->bl(&stub);
-  a->bind(&stub);
-
-  // Load the saved RIP into LR and branch without link.
-  a->Ldr(X(rlr()), M(i.fp[AROFF(m_savedRip)]));
-  a->Br(X(i.target));
-}
-
 void Vgen::emit(const leavetc& /*i*/) {
-  // The LR was preserved on the stack by calltc above. Pop it while preserving
+  // The LR was preserved on the stack by resumetc. Pop it while preserving
   // SP alignment and return.
   a->Ldp(rAsm, X(rlr()), MemOperand(sp, 16, PostIndex));
   a->Ret();

@@ -861,7 +861,7 @@ TCA emitEnterTCExit(CodeBlock& cb, DataBlock& data, UniqueStubs& /*us*/) {
     // that's suspending, etc), and moreover, we must be executing the return
     // that leaves this level of VM reentry (i.e. the only way we get here is
     // by coming from the callToExit stub or by a phpret{} or leavetc{} that
-    // undoes the calltc{} or resumetc{} in enterTCHelper).
+    // undoes the resumetc{} in enterTCHelper).
     //
     // Either way, we have a live PHP return value in the return registers,
     // which we need to put on the top of the evaluation stack.
@@ -912,38 +912,6 @@ TCA emitEnterTCHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     alignNativeStack(v, false);
 
     v << resumetc{start, us.enterTCExit, vm_regs_with_sp()};
-  });
-}
-
-TCA
-emitEnterTCAtPrologueHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
-  alignCacheLine(cb);
-
-  UNUSED auto const callFlags = rarg(0);
-  auto const start     = rarg(1);
-  auto const fp        = rarg(2);
-  auto const tl        = rarg(3);
-  assertx(callFlags == r_php_call_flags());
-
-  return vwrap2(cb, cb, data, [&] (Vout& v, Vout& vc) {
-    // Architecture-specific setup for entering the TC.
-    v << inittc{};
-
-    // Native func prologue.
-    v << stublogue{arch() != Arch::PPC64};
-
-    // Set up linkage with the top VM frame in this nesting.
-    v << store{rsp(), fp[AROFF(m_sfp)]};
-
-    // Set up the VM registers.
-    v << copy{fp, rvmfp()};
-    v << copy{tl, rvmtl()};
-
-    // Unalign the native stack.
-    alignNativeStack(v, false);
-
-    // Set rvmfp() to the callee and call the prologue.
-    v << calltc{start, rvmfp(), us.enterTCExit, php_call_regs()};
   });
 }
 
@@ -1103,9 +1071,6 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
   enterTCHelper = decltype(enterTCHelper)(
     EMIT("enterTCHelper", view,
       [&] { return emitEnterTCHelper(main, data, *this); }));
-  enterTCAtPrologueHelper = decltype(enterTCAtPrologueHelper)(
-    EMIT("enterTCAtPrologueHelper", view,
-      [&] { return emitEnterTCAtPrologueHelper(main, data, *this); }));
 
   // These guys are required by a number of other stubs.
   ADD(handleSRHelper, hotView(), emitHandleSRHelper(hot(), data));
@@ -1276,22 +1241,6 @@ void enterTCImpl(TCA start) {
   auto& regs = vmRegsUnsafe();
   tc::ustubs().enterTCHelper(start, regs.fp, rds::tl_base, regs.stack.top(),
                              vmFirstAR());
-  CALLEE_SAVED_BARRIER();
-}
-
-// see T39604764: inlining-specific issue that might also affect GCC
-#ifdef __clang__
-NEVER_INLINE
-#endif
-void enterTCAtPrologueImpl(CallFlags callFlags, TCA start, ActRec* calleeAR) {
-  assert_flog(tc::isValidCodeAddress(start), "start = {} ; func = {} ({})\n",
-              start, calleeAR->func(), calleeAR->func()->fullName());
-
-  // We have to force C++ to spill anything that might be in a callee-saved
-  // register (aside from rvmfp()), since enterTCHelper does not save them.
-  CALLEE_SAVED_BARRIER();
-  tc::ustubs().enterTCAtPrologueHelper(callFlags, start, calleeAR,
-                                       rds::tl_base);
   CALLEE_SAVED_BARRIER();
 }
 

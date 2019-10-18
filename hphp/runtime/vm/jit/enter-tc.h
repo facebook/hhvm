@@ -32,9 +32,4 @@ namespace jit {
  */
 void enterTC(TCA start);
 
-/*
- * The version of enterTC() that enters TC at a prologue.
- */
-void enterTCAtPrologue(CallFlags callFlags, TCA start, ActRec* calleeAR);
-
 }}

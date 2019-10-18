@@ -113,7 +113,6 @@ struct Vgen {
 
   // vm entry abi
   void emit(const inittc& /*i*/) {}
-  void emit(const calltc&);
   void emit(const leavetc&) { a.ret(); }
 
   // exceptions
@@ -729,21 +728,6 @@ void Vgen<X64Asm>::emit(const contenter& i) {
   a.call(Stub);
   // m_savedRip will point here.
   emit(unwind{{i.targets[0], i.targets[1]}});
-}
-
-///////////////////////////////////////////////////////////////////////////////
-template<class X64Asm>
-void Vgen<X64Asm>::emit(const calltc& i) {
-  a.push(i.exittc);
-  a.push(i.fp[AROFF(m_savedRip)]);
-
-  Label stub;
-  a.call(stub);
-
-  asm_label(a, stub);
-  assertx(!i.args.contains(reg::rax));
-  a.pop(reg::rax);  // unused
-  a.jmp(i.target);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

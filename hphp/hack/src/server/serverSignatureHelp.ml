@@ -147,16 +147,15 @@ let go
   let source_text = ServerCommandTypesUtils.source_tree_of_file_input file in
   let relative_path = source_text.SourceText.file_path in
   let parser_env = Full_fidelity_ast.make_env relative_path in
-  let (mode, tree) = Full_fidelity_ast.parse_text parser_env source_text in
-  let results =
-    Full_fidelity_ast.lower_tree_with_legacy parser_env source_text mode tree
+  let (cst, results) =
+    Full_fidelity_ast.from_text_with_legacy_and_cst parser_env source_text
   in
   let nast = results.Parser_return.ast in
   let tast = ServerIdeUtils.check_ast tcopt nast in
   let offset = SourceText.position_to_offset source_text (line, column) in
   match
     get_positional_info
-      (Full_fidelity_ast.PositionedSyntaxTree.root tree)
+      (Full_fidelity_ast.PositionedSyntaxTree.root cst)
       offset
   with
   | None -> None

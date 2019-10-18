@@ -4517,6 +4517,11 @@ let lower_tree_with_legacy
     (tree : PositionedSyntaxTree.t) =
   legacy @@ lower_tree env source_text mode tree
 
+let from_text_with_legacy_and_cst (env : env) (source_text : SourceText.t) :
+    PositionedSyntaxTree.t * Parser_return.t =
+  let (mode, tree) = parse_text env source_text in
+  (tree, lower_tree_with_legacy env source_text mode tree)
+
 (******************************************************************************(
  * For cut-over purposes only; this should be removed as soon as Parser_hack
  * is removed.

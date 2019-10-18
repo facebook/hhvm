@@ -903,12 +903,18 @@ void fixTypeConstraint(const Index& index, TypeConstraint& tc) {
            resolved.type != AnnotType::DArray));
 
   if (resolved.type == AnnotType::Object) {
-    if (!resolved.value || !resolved.value->resolved()) return;
+    auto const resolvedValue = match<folly::Optional<res::Class>>(
+      resolved.value,
+      [&] (boost::blank) { return folly::none; },
+      [&] (const res::Class& c) { return folly::make_optional(c); },
+      [&] (const res::Record&) { always_assert(false); return folly::none; }
+    );
+    if (!resolvedValue || !resolvedValue->resolved()) return;
     // Can't resolve if it resolves to a magic interface. If we mark it as
     // resolved, we'll think its an object and not do the special magic
     // interface checks at runtime.
-    if (interface_supports_non_objects(resolved.value->name())) return;
-    if (!resolved.value->couldHaveMockedDerivedClass()) tc.setNoMockObjects();
+    if (interface_supports_non_objects(resolvedValue->name())) return;
+    if (!resolvedValue->couldHaveMockedDerivedClass()) tc.setNoMockObjects();
   }
 
   tc.resolveType(resolved.type, tc.isNullable() || resolved.nullable);

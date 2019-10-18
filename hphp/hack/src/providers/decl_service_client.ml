@@ -6,14 +6,23 @@
  *
  *)
 
+open Core_kernel
+
 type sharedmem_base_address
 
 type t = { rpc_get_gconst: string -> (string, Marshal_tools.error) result }
 
+external get_gconst_ffi :
+  Unix.file_descr -> sharedmem_base_address -> string -> int = "get_gconst"
+
 let rpc_get_gconst
-    (_fd : Unix.file_descr) (_base : sharedmem_base_address) (name : string) :
+    (fd : Unix.file_descr) (base : sharedmem_base_address) (name : string) :
     (string, Marshal_tools.error) result =
-  Error (Marshal_tools.Rpc_malformed ("not implemented", Utils.Callstack name))
+  (* TODO: this is just a placeholder for now *)
+  Printf.printf "GET GCONST... %s\n%!" name;
+  let i = get_gconst_ffi fd base name in
+  Printf.printf "GOT GCONST... %s = %d\n%!" name i;
+  Ok (Printf.sprintf "%d" i)
 
 let init (decl_sock_file : string) (base : sharedmem_base_address) :
     (t, Marshal_tools.error) result =

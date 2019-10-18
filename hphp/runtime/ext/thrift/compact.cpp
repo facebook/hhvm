@@ -183,11 +183,11 @@ struct FieldInfo {
   Class* cls = nullptr;
   // A pointer to a property which may be set lazily by calling
   // cls->lookupDeclProp(fieldName) first time we need the property.
-  const Class::Prop *prop = nullptr;
+  mutable const Class::Prop *prop = nullptr;
   const StringData* fieldName = nullptr;
   int16_t fieldNum = 0;
 
-  const Class::Prop* getProp() {
+  const Class::Prop* getProp() const {
     if (!prop) {
       auto slot = cls->lookupDeclProp(fieldName);
       if (slot != kInvalidSlot) {
@@ -334,7 +334,7 @@ struct CompactWriter {
     void writeField(const Variant& value,
                     const Array& valueSpec,
                     TType type,
-                    FieldInfo& fieldInfo) {
+                    const FieldInfo& fieldInfo) {
       switch (type) {
         case T_STOP:
         case T_VOID:
@@ -436,7 +436,7 @@ struct CompactWriter {
     }
 
     void writeMap(
-        const Variant& map, const Array& spec, FieldInfo& fieldInfo) {
+        const Variant& map, const Array& spec, const FieldInfo& fieldInfo) {
       TType keyType = (TType)(char)tvCastToInt64(
         spec.rval(s_ktype, AccessFlags::ErrorKey).tv()
       );
@@ -474,7 +474,7 @@ struct CompactWriter {
         const Variant& list,
         const Array& spec,
         CListType listType,
-        FieldInfo& fieldInfo) {
+        const FieldInfo& fieldInfo) {
       TType valueType = (TType)(char)tvCastToInt64(
         spec.rval(s_etype, AccessFlags::ErrorKey).tv()
       );
@@ -557,7 +557,7 @@ struct CompactWriter {
     }
 
     template <typename T>
-    void writeIChecked(const Variant& value, FieldInfo& fieldInfo) {
+    void writeIChecked(const Variant& value, const FieldInfo& fieldInfo) {
       static_assert(std::is_integral<T>::value, "not an integral type");
       auto n = value.toInt64();
       using limits = std::numeric_limits<T>;
@@ -576,8 +576,10 @@ struct CompactWriter {
             prop->preProp->userAttributes().count(
                 LowStringPtr(SKIP_CHECKS_ATTR.get())) != 0;
         };
-        if (forbidInvalid == 1 || hasSkipChecksAttr()) {
-          raise_warning(message);
+        if (hasSkipChecksAttr()) {
+          raise_warning("[Suppressed] " + message);
+        } else if (forbidInvalid == 1) {
+          raise_warning("[Unsuppressed] " + message);
         } else {
           thrift_error(message, ERR_INVALID_DATA);
         }

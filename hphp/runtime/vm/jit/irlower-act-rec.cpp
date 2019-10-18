@@ -64,6 +64,52 @@ TRACE_SET_MOD(irlower);
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void cgDefFuncEntryFP(IRLS& env, const IRInstruction* inst) {
+  auto const func = inst->extra<DefFuncEntryFP>()->func;
+  auto const prevFP = srcLoc(env, inst, 0).reg();
+  auto const newFP = srcLoc(env, inst, 1).reg();
+  auto const callFlags = srcLoc(env, inst, 2).reg();
+  auto const numArgs = srcLoc(env, inst, 3).reg();
+  auto const ctx = srcLoc(env, inst, 4).reg();
+  auto& v = vmain(env);
+
+  v << store{prevFP, newFP + AROFF(m_sfp)};
+  v << phplogue{newFP};
+  emitImmStoreq(v, uintptr_t(func), newFP + AROFF(m_func));
+
+  int32_t constexpr flagsDelta =
+    CallFlags::Flags::CallOffsetStart - ActRec::CallOffsetStart;
+  assertx(ActRec::LocalsDecRefd == 0);
+  assertx(ActRec::AsyncEagerRet == 1);
+  assertx(ActRec::CallOffsetStart == 2);
+  assertx(CallFlags::Flags::ReservedZero == flagsDelta + 0);
+  assertx(CallFlags::Flags::AsyncEagerReturn == flagsDelta + 1);
+  assertx(CallFlags::Flags::CallOffsetStart == flagsDelta + 2);
+  auto const callFlagsLow32 = v.makeReg();
+  auto const callOffAndFlags = v.makeReg();
+  v << movtql{callFlags, callFlagsLow32};
+  v << shrli{flagsDelta, callFlagsLow32, callOffAndFlags, v.makeReg()};
+  v << storel{callOffAndFlags, newFP + AROFF(m_callOffAndFlags)};
+
+  auto const numArgs32 = v.makeReg();
+  v << movtql{numArgs, numArgs32};
+  v << storel{numArgs32, newFP + AROFF(m_numArgs)};
+
+  if (func->implCls()) {
+    v << store{ctx, newFP + AROFF(m_thisUnsafe)};
+  } else if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    emitImmStoreq(v, ActRec::kTrashedThisSlot, newFP + AROFF(m_thisUnsafe));
+  }
+
+  if (func->attrs() & AttrMayUseVV) {
+    v << storeqi{0, newFP + AROFF(m_varEnv)};
+  } else if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    emitImmStoreq(v, ActRec::kTrashedVarEnvSlot, newFP + AROFF(m_varEnv));
+  }
+
+  v << copy{newFP, dstLoc(env, inst, 0).reg()};
+}
+
 void cgIsFunReifiedGenericsMatched(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const callFlags = srcLoc(env, inst, 0).reg();
@@ -122,13 +168,6 @@ void cgLdFrameThis(IRLS& env, const IRInstruction* inst) {
 
 void cgLdFrameCls(IRLS& env, const IRInstruction* inst) {
   return cgLdFrameThis(env, inst);
-}
-
-void cgInitCtx(IRLS& env, const IRInstruction* inst) {
-  assertx(!inst->func() || inst->func()->isClosureBody());
-  auto const fp = srcLoc(env, inst, 0).reg();
-  auto const ctx = srcLoc(env, inst, 1).reg();
-  vmain(env) << store{ctx, fp[AROFF(m_thisUnsafe)]};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

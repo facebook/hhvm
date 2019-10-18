@@ -69,7 +69,6 @@ TRACE_SET_MOD(irlower);
 
 void cgCall(IRLS& env, const IRInstruction* inst) {
   auto const sp = srcLoc(env, inst, 0).reg();
-  auto const fp = srcLoc(env, inst, 1).reg();
   auto const callee = srcLoc(env, inst, 2).reg();
   auto const ctx = srcLoc(env, inst, 3).reg();
   auto const extra = inst->extra<Call>();
@@ -77,64 +76,44 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   auto const catchBlock = label(env, inst->taken());
 
-  auto const calleeSP = sp[cellsToBytes(extra->spOffset.offset)];
-  auto const calleeAR = calleeSP + cellsToBytes(extra->numInputs());
-
-  v << store{fp, calleeAR + AROFF(m_sfp)};
-  v << store{callee, calleeAR + AROFF(m_func)};
-
-  auto const coaf = safe_cast<int32_t>(ActRec::encodeCallOffsetAndFlags(
-    extra->callOffset,
-    extra->asyncEagerReturn ? (1 << ActRec::AsyncEagerRet) : 0
-  ));
-  v << storeli{coaf, calleeAR + AROFF(m_callOffAndFlags)};
-
-  v << storeli{safe_cast<int32_t>(extra->numArgs), calleeAR + AROFF(m_numArgs)};
-
-  assertx(inst->src(3)->isA(TObj) || inst->src(3)->isA(TCls) ||
-          inst->src(3)->isA(TNullptr));
-  if (inst->src(3)->isA(TObj) || inst->src(3)->isA(TCls)) {
-    v << store{ctx, calleeAR + AROFF(m_thisUnsafe)};
-  } else if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    emitImmStoreq(v, ActRec::kTrashedThisSlot, calleeAR + AROFF(m_thisUnsafe));
-  }
-
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    emitImmStoreq(v, ActRec::kTrashedVarEnvSlot, calleeAR + AROFF(m_varEnv));
-  }
-
   auto const callFlags = CallFlags(
     extra->hasGenerics,
     extra->numOut != 0,
     extra->dynamicCall,
+    extra->asyncEagerReturn,
+    extra->callOffset,
     extra->genericsBitmap
   );
+
   v << copy{v.cns(callFlags.value()), r_php_call_flags()};
+  v << copy{callee, r_php_call_func()};
+  v << copy{v.cns(extra->numArgs), r_php_call_num_args()};
 
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    v << syncvmsp{v.cns(0x42)};
-
-    constexpr uint64_t kUninitializedRIP = 0xba5eba11acc01ade;
-    emitImmStoreq(v, kUninitializedRIP, calleeAR + AROFF(m_savedRip));
+  auto withCtx = false;
+  assertx(inst->src(3)->isA(TObj) || inst->src(3)->isA(TCls) ||
+          inst->src(3)->isA(TNullptr));
+  if (inst->src(3)->isA(TObj) || inst->src(3)->isA(TCls)) {
+    withCtx = true;
+    v << copy{ctx, r_php_call_ctx()};
+  } else if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    withCtx = true;
+    v << copy{v.cns(ActRec::kTrashedThisSlot), r_php_call_ctx()};
   }
 
-  // A few vasm passes depend on the particular instruction sequence here:
-  //  - vasm-copy expects this lea{} to be immediately followed by the
-  //    callphp{} below.
-  //  - vasm-prof-branch requires that this lea{} fall through straight to the
-  //    callphp{}, with no intervening control flow (though it doesn't care if
-  //    they're contiguous).
-  v << lea{calleeAR, rvmfp()};
+  // Make vmsp() point to the future vmfp().
+  auto const ssp = v.makeReg();
+  v << lea{sp[cellsToBytes(extra->spOffset.offset + extra->numInputs())], ssp};
+  v << syncvmsp{ssp};
 
   // Emit a smashable call that initially calls a recyclable service request
   // stub.  The stub and the eventual targets take rvmfp() as an argument,
   // pointing to the callee ActRec.
   auto const done = v.makeBlock();
   if (inst->src(2)->hasConstVal(TFunc)) {
-    v << callphp{tc::ustubs().immutableBindCallStub, php_call_regs(),
+    v << callphp{tc::ustubs().immutableBindCallStub, php_call_regs(withCtx),
                  {{done, catchBlock}}, inst->src(2)->funcVal(), extra->numArgs};
   } else {
-    v << callphp{tc::ustubs().funcPrologueRedispatch, php_call_regs(),
+    v << callphp{tc::ustubs().funcPrologueRedispatch, php_call_regs(withCtx),
                  {{done, catchBlock}}, nullptr, extra->numArgs};
   }
   v = done;
@@ -182,6 +161,8 @@ void cgCallUnpack(IRLS& env, const IRInstruction* inst) {
     extra->hasGenerics,
     extra->numOut != 0,
     extra->dynamicCall,
+    false,  // async eager return unsupported with unpack
+    0, // call offset passed differently to unpack
     0  // generics bitmap not used with unpack
   );
 
@@ -469,13 +450,6 @@ void cgDbgTraceCall(IRLS& env, const IRInstruction* inst) {
 
   cgCallHelper(vmain(env), env, CallSpec::direct(traceCallback),
                callDest(env, inst), SyncOptions::None, args);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void cgEnterFrame(IRLS& env, const IRInstruction* inst) {
-  auto const fp = srcLoc(env, inst, 0).reg();
-  vmain(env) << phplogue{fp};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

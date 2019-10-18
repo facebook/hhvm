@@ -494,6 +494,7 @@ struct Vgen {
   void emit(const stubunwind& i);
   void emit(const syncpoint& i);
   void emit(const tailcallstub& i);
+  void emit(const tailcallstubr& i);
   void emit(const testqi& i);
   void emit(const ucomisd& i);
   void emit(const unwind& i);
@@ -900,6 +901,15 @@ void Vgen::emit(const tailcallstub& i) {
   emit(jmpi{i.target, i.args});
 }
 
+void Vgen::emit(const tailcallstubr& i) {
+  // tail call: perform a jmp instead of a call. Use current return address on
+  // frame and undo stublogue allocation.
+  a.ld(rfuncln(), rsp()[AROFF(m_savedRip)]);
+  a.mtlr(rfuncln());
+  a.mr(rsfp(), rsp());
+  emit(jmpr{i.target, i.args});
+}
+
 void Vgen::emit(const loadstubret& i) {
   // grab the return address and store this return address for phplogue
   a.ld(i.d, rsp()[AROFF(m_savedRip)]);
@@ -1254,16 +1264,6 @@ void lowerForPPC64(const VLS& /*e*/, Vout& v, phpret& inst) {
   // for balancing the link stack (branch predictor), this should perform blr
   v << mtlr{rfuncln()};
   v << ret{RegSet()};
-}
-
-/*
- * Tail call elimination on ppc64: call without creating a stack and keep LR
- * contents as prior to the call.
- */
-void lowerForPPC64(const VLS& /*e*/, Vout& v, tailcallphp& inst) {
-  v << load{inst.fp[AROFF(m_savedRip)], rfuncln()};
-  v << mtlr{rfuncln()};
-  v << jmpr{inst.target, inst.args};
 }
 
 /////////////////////////////////////////////////////////////////////////////

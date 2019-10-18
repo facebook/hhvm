@@ -20,6 +20,7 @@
 #include <functional>
 
 #include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/types.h"  // TransFlags
 
 #include "hphp/runtime/vm/jit/ir-builder.h"
@@ -79,6 +80,11 @@ Block* makeExitOpt(IRGS&);
  */
 Block* makeExitSlow(IRGS&);
 Block* makeExitSurprise(IRGS&, Offset);
+
+/*
+ * Create a block that should never be reached. Useful for debug assertions.
+ */
+Block* makeUnreachable(IRGS&, AssertReason);
 
 //////////////////////////////////////////////////////////////////////
 

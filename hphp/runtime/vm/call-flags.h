@@ -18,6 +18,7 @@
 
 #include <cstdint>
 
+#include "hphp/runtime/base/types.h"
 #include "hphp/util/assertions.h"
 
 namespace HPHP {
@@ -31,7 +32,9 @@ namespace HPHP {
  * Bit 0: flag indicating whether generics are on the stack
  * Bit 1: flag indicating whether any inout arguments were passed
  * Bit 2: flag indicating whether this is a dynamic call
- * Bits 1-31: currently unused
+ * Bit 3: always set to 0
+ * Bit 4: flag indicating whether async eager return was requested
+ * Bits 5-31: call offset (from the beginning of the function's entry point)
  * Bits 32-47: generics bitmap
  * Bits 48-63: currently unused
  */
@@ -40,21 +43,35 @@ struct CallFlags {
     HasGenerics,
     HasInOut,
     IsDynamicCall,
+    ReservedZero,
+    AsyncEagerReturn,
+    CallOffsetStart,
+    GenericsBitmapStart = 32,
   };
 
   CallFlags(bool hasGenerics, bool hasInOut, bool isDynamicCall,
-            uint32_t genericsBitmap) {
+            bool asyncEagerReturn, Offset callOffset, uint32_t genericsBitmap) {
+    auto const callOffsetBits = (uint64_t)callOffset << Flags::CallOffsetStart;
+    assertx((callOffsetBits >> Flags::GenericsBitmapStart) == 0);
     assertx(hasGenerics || genericsBitmap == 0);
     m_bits =
       ((hasGenerics ? 1 : 0) << Flags::HasGenerics) |
       ((hasInOut ? 1 : 0) << Flags::HasInOut) |
       ((isDynamicCall ? 1 : 0) << Flags::IsDynamicCall) |
-      ((uint64_t)genericsBitmap << 32);
+      ((asyncEagerReturn ? 1 : 0) << Flags::AsyncEagerReturn) |
+      callOffsetBits |
+      ((uint64_t)genericsBitmap << Flags::GenericsBitmapStart);
   }
 
   bool hasGenerics() const { return m_bits & (1 << Flags::HasGenerics); }
   bool hasInOut() const { return m_bits & (1 << Flags::HasInOut); }
   bool isDynamicCall() const { return m_bits & (1 << Flags::IsDynamicCall); }
+  bool asyncEagerReturn() const {
+    return m_bits & (1 << Flags::AsyncEagerReturn);
+  }
+  Offset callOffset() const {
+    return ((uint32_t)m_bits) >> Flags::CallOffsetStart;
+  }
   int64_t value() const { return static_cast<int64_t>(m_bits); }
 
 private:

@@ -1705,6 +1705,15 @@ void lower(const VLS& e, tailcallstub& i, Vlabel b, size_t z) {
   });
 }
 
+void lower(const VLS& e, tailcallstubr& i, Vlabel b, size_t z) {
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
+    // Restore LR from native stack and adjust SP.
+    v << popp{PhysReg(rAsm), rlr()};
+
+    v << jmpr{i.target, i.args};
+  });
+}
+
 void lower(const VLS& e, stubunwind& /*i*/, Vlabel b, size_t z) {
   lower_impl(e.unit, b, z, [&] (Vout& v) {
     // Pop the call frame.
@@ -1731,15 +1740,6 @@ void lower(const VLS& e, loadstubret& i, Vlabel b, size_t z) {
 void lower(const VLS& e, phplogue& i, Vlabel b, size_t z) {
   lower_impl(e.unit, b, z, [&] (Vout& v) {
     v << store{rlr(), i.fp[AROFF(m_savedRip)]};
-  });
-}
-
-void lower(const VLS& e, tailcallphp& i, Vlabel b, size_t z) {
-  lower_impl(e.unit, b, z, [&] (Vout& v) {
-    // Undoes the prologue by restoring LR from saved RIP.
-    v << load{i.fp[AROFF(m_savedRip)], rlr()};
-
-    v << jmpr{i.target, i.args};
   });
 }
 

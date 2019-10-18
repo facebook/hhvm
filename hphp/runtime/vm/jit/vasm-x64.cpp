@@ -104,10 +104,10 @@ struct Vgen {
   void emit(const callstub& i);
   void emit(const callfaststub& i);
   void emit(const tailcallstub& i);
+  void emit(const tailcallstubr& i);
 
   // php function abi
   void emit(const phpret& i);
-  void emit(const tailcallphp& i);
   void emit(const callunpack& i);
   void emit(const contenter& i);
 
@@ -133,6 +133,7 @@ struct Vgen {
   void emit(andq i) { commuteSF(i); a.andq(i.s0, i.d); }
   void emit(andqi i);
   void emit(const addwm& i) { a.addw(i.s0, i.m); }
+  void emit(addl i) { commuteSF(i); a.addl(i.s0, i.d); }
   void emit(addli i) { binary(i); a.addl(i.s0, i.d); }
   void emit(const addlm& i) { a.addl(i.s0, i.m); }
   void emit(const addlim& i);
@@ -692,6 +693,12 @@ void Vgen<X64Asm>::emit(const tailcallstub& i) {
   emit(jmpi{i.target, i.args});
 }
 
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const tailcallstubr& i) {
+  a.addq(8, reg::rsp);
+  emit(jmpr{i.target, i.args});
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 template<class X64Asm>
@@ -701,12 +708,6 @@ void Vgen<X64Asm>::emit(const phpret& i) {
     a.loadq(i.fp[AROFF(m_sfp)], i.d);
   }
   a.ret();
-}
-
-template<class X64Asm>
-void Vgen<X64Asm>::emit(const tailcallphp& i) {
-  emit(pushm{i.fp[AROFF(m_savedRip)]});
-  emit(jmpr{i.target, i.args});
 }
 
 template<class X64Asm>

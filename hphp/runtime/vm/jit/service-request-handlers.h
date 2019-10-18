@@ -42,12 +42,13 @@ TCA handleServiceRequest(ReqInfo& info) noexcept;
 
 /*
  * Handle a bindcall request---i.e., look up (or create) the appropriate func
- * prologue for `calleeFrame', then smash the call instruction at `toSmash'.
+ * prologue for `func' and `numArgs', then smash the call instruction
+ * at `toSmash'.
  *
  * If we can't find or make a translation, may return fcallHelperThunk instead,
  * which uses C++ helpers to act like a prologue.
  */
-TCA handleBindCall(TCA toSmash, ActRec* calleeFrame);
+TCA handleBindCall(TCA toSmash, Func* func, int32_t numArgs);
 
 /*
  * Look up (or create) and return the address of a translation for the current

@@ -130,59 +130,6 @@ bool checkBlock(Block* b) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-/*
- * Check some invariants around InitCtx(fp):
- * 1. For each fp, at most one should exist in a given unit.
- * 2. If present, InitCtx must dominate all occurrences of LdFrameThis and
- *    LdFrameCls with the same fp (unless the This is a closure).
- */
-bool DEBUG_ONLY checkInitCtxInvariants(const IRUnit& unit) {
-  auto const blocks = rpoSortCfg(unit);
-
-  jit::fast_map<SSATmp*, Block*> init_ctx_blocks;
-
-  for (auto& blk : blocks) {
-    for (auto& inst : blk->instrs()) {
-      if (!inst.is(InitCtx)) continue;
-      auto& init_ctx_block = init_ctx_blocks[inst.src(0)];
-      if (init_ctx_block) return false;
-      init_ctx_block = blk;
-    }
-  }
-
-  if (init_ctx_blocks.empty()) return true;
-
-  auto const rpoIDs = numberBlocks(unit, blocks);
-  auto const idoms = findDominators(unit, blocks, rpoIDs);
-
-  for (auto& blk : blocks) {
-    SSATmp* init_ctx_src = nullptr;
-
-    for (auto& inst : blk->instrs()) {
-      if (inst.is(InitCtx)) {
-        init_ctx_src = inst.src(0);
-        continue;
-      }
-      if (!inst.is(LdFrameThis, LdFrameCls)) continue;
-
-      auto const init_ctx_block = init_ctx_blocks[inst.src(0)];
-      if (!init_ctx_block) continue;
-
-      if (inst.is(LdFrameThis) && inst.func()->isClosureBody() &&
-          inst.typeParam() <= Type::SubObj(c_Closure::classof())) {
-        continue;
-      }
-
-      if (init_ctx_block == blk && init_ctx_src != inst.src(0)) return false;
-      if (!dominates(init_ctx_block, blk, idoms)) return false;
-    }
-  }
-
-  return true;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -654,7 +601,6 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
 
 bool checkEverything(const IRUnit& unit) {
   assertx(checkCfg(unit));
-  assertx(checkInitCtxInvariants(unit));
   if (debug) {
     checkTmpsSpanningCalls(unit);
     forEachInst(rpoSortCfg(unit), [&](IRInstruction* inst) {

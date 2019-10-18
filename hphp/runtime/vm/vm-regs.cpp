@@ -34,23 +34,6 @@ VMRegAnchor::VMRegAnchor(Mode mode)
   jit::syncVMRegs(mode == Soft);
 }
 
-VMRegAnchor::VMRegAnchor(CallFlags callFlags, ActRec* ar)
-  : m_old(tl_regState)
-{
-  assertx(tl_regState == VMRegState::DIRTY);
-  tl_regState = VMRegState::CLEAN;
-
-  auto prevAr = g_context->getOuterVMFrame(ar);
-  const Func* prevF = prevAr->m_func;
-  assertx(!isResumed(ar));
-  auto& regs = vmRegs();
-  auto const numInputs = ar->numArgs() + (callFlags.hasGenerics() ? 1 : 0);
-  regs.stack.top() = (TypedValue*)ar - numInputs;
-  assertx(vmStack().isValidAddress((uintptr_t)vmsp()));
-  regs.pc = prevF->unit()->at(prevF->base() + ar->callOffset());
-  regs.fp = prevAr;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 }

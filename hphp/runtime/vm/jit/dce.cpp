@@ -213,7 +213,11 @@ bool canDCE(IRInstruction* inst) {
   case NewLikeArray:
   case NewCol:
   case NewPair:
+  case DefCallFP:
   case DefCallFlags:
+  case DefCallFunc:
+  case DefCallNumArgs:
+  case DefCallCtx:
   case DefInlineFP:
   case LdRetVal:
   case Mov:
@@ -539,6 +543,7 @@ bool canDCE(IRInstruction* inst) {
   case ProfileDecRef:
   case DefFP:
   case DefSP:
+  case DefFuncEntryFP:
   case Count:
   case VerifyParamCls:
   case VerifyParamCallable:
@@ -710,10 +715,8 @@ bool canDCE(IRInstruction* inst) {
   case DbgTrashFrame:
   case DbgTrashMem:
   case DbgTrashRetVal:
-  case EnterFrame:
   case CheckStackOverflow:
   case InitExtraArgs:
-  case InitCtx:
   case CheckSurpriseFlagsEnter:
   case ExitPlaceholder:
   case ThrowOutOfBounds:
@@ -962,12 +965,6 @@ bool findWeakActRecUses(const BlockList& blocks,
       if (inst->src(0)->isA(TFramePtr)) incWeak(inst, inst->src(0));
       break;
 
-    // InitCtx can just be deleted, if no one is reading the frame, no one is
-    // extracting the ctx.
-    case InitCtx:
-      incWeak(inst, inst->src(0));
-      break;
-
     case InlineReturn:
       {
         auto const frameInst = inst->src(0)->inst();
@@ -1065,12 +1062,6 @@ void performActRecFixups(const BlockList& blocks,
       case DefInlineFP:
         ITRACE(3, "DefInlineFP ({}): weak/strong uses: {}/{}\n",
              inst, state[inst].weakUseCount(), uses[inst.dst()]);
-        break;
-
-      case InitCtx:
-        if (state[inst.src(0)->inst()].isDead()) {
-          state[&inst].setDead();
-        }
         break;
 
       case StLoc:

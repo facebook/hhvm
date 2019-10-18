@@ -140,7 +140,7 @@ FPRelOffset frame_base_offset(SSATmp* fp) {
   fp = canonical(fp);
   auto fpInst = fp->inst();
   if (UNLIKELY(fpInst->is(DefLabel))) fpInst = resolveFpDefLabel(fp);
-  if (fpInst->is(DefFP)) return FPRelOffset{0};
+  if (fpInst->is(DefFP, DefFuncEntryFP)) return FPRelOffset{0};
   always_assert(fpInst->is(DefInlineFP));
   auto const offsetOfSp = fpInst->src(0)->inst()->extra<DefSP>()->offset;
 
@@ -170,7 +170,7 @@ AStack::AStack(SSATmp* fp, FPRelOffset o, int32_t s)
   // outer) and (offset relative to inner frame).
   offset += innerFPRel.offset;
 
-  always_assert_flog(sp->src(0)->inst()->is(DefFP),
+  always_assert_flog(sp->src(0)->inst()->is(DefFP, DefFuncEntryFP),
                      "failed to canonicalize to outermost FramePtr: {}\n",
                      sp->src(0)->toString());
 }

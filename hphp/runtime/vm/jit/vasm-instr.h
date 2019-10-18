@@ -111,8 +111,9 @@ struct Vunit;
   O(callstub, I(target), U(args), Dn)\
   O(callfaststub, I(fix), U(args), Dn)\
   O(tailcallstub, I(target), U(args), Dn)\
+  O(tailcallstubr, Inone, U(target) U(args), Dn)\
   O(stubunwind, Inone, Un, Dn)\
-  O(stubtophp, Inone, U(fp), Dn)\
+  O(stubtophp, Inone, Un, Dn)\
   O(loadstubret, Inone, Un, D(d))\
   /* php function abi */\
   O(defvmsp, Inone, Un, D(d))\
@@ -124,7 +125,6 @@ struct Vunit;
   O(phplogue, Inone, U(fp), Dn)\
   O(phpret, Inone, U(fp) U(args), D(d))\
   O(callphp, I(stub), U(args), Dn)\
-  O(tailcallphp, Inone, U(target) U(fp) U(args), Dn)\
   O(callunpack, I(target), U(args), Dn)\
   O(vcallunpack, I(target), U(args) U(extraArgs), Dn)\
   O(contenter, Inone, U(fp) U(target) U(args), Dn)\
@@ -702,7 +702,7 @@ struct callstub { CodeAddress target; RegSet args; };
 struct callfaststub { TCA target; Fixup fix; RegSet args; };
 
 /*
- * Make a direct tail call to a stub.
+ * Make a direct tail call to another stub.
  *
  * As in the usual sense of tail call, this is really a jmp which will cause
  * the callee's return to serve as the caller's return.
@@ -712,6 +712,13 @@ struct callfaststub { TCA target; Fixup fix; RegSet args; };
  * the world to a pre-stublogue{} state before jumping.
  */
 struct tailcallstub { CodeAddress target; RegSet args; };
+
+/*
+ * Make an indirect tail call to another stub or a func prologue.
+ *
+ * Analogous to tailcallstub{}; except the target is indirect.
+ */
+struct tailcallstubr { Vreg target; RegSet args; };
 
 /*
  * Restore %rsp when leaving a stub context via an exception edge.
@@ -725,19 +732,17 @@ struct tailcallstub { CodeAddress target; RegSet args; };
 struct stubunwind {};
 
 /*
- * Convert from a stublogue{} context to a phplogue{} context.  `fp' is the
- * target PHP context's frame.
+ * Convert from a stublogue{} context to a phplogue{} context.
  *
- * This is only used by fcallUnpackHelper, which needs to begin with a
- * stublogue{} (see unique-stubs.cpp) and later perform the work of phplogue{}.
+ * Users of this instruction are responsible for storing the return address into
+ * the PHP frame's m_savedRip prior to the usage, as this instruction loses that
+ * information.
  *
- * This instruction should, in theory, teleport the stub frame's saved %rip
- * onto the PHP callee's frame.  However, since fcallUnpackHelper is the only
- * user, and since the PHP frame's m_savedRip always gets updated by a native
- * helper before stubtophp{} is hit, for now, implementations of stubtophp{}
- * needn't touch the callee frame at all.
+ * This is only used by fcallHelper and fcallUnpackHelper, which needs to begin
+ * with a stublogue{} (see unique-stubs.cpp) and later perform the work of
+ * phplogue{}.
  */
-struct stubtophp { Vreg fp; };
+struct stubtophp {};
 
 /*
  * Load the saved return address from the stub's frame record.
@@ -849,14 +854,6 @@ struct callphp {
   const Func* func;
   uint32_t nargs;
 };
-
-/*
- * Make an indirect tail call to a PHP function.
- *
- * Analogous to tailcallstub{}; undoes phplogue{} and then jumps to `target',
- * which begins with a logically identical phplogue{}.
- */
-struct tailcallphp { Vreg target; Vreg fp; RegSet args; };
 
 /*
  * Non-smashable PHP function call with (almost) the same ABI as callphp{}.

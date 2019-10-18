@@ -177,45 +177,42 @@ TCA emitCallToExit(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct FCallHelperRet {
-  TCA destAddr;
-  TCA retAddr;
-};
-
-FCallHelperRet fcallHelper(CallFlags callFlags, ActRec* ar) {
+bool fcallHelper(CallFlags callFlags, Func* func, int32_t numArgs, void* ctx,
+                 TCA savedRip) {
   assert_native_stack_aligned();
-  assertx(!isResumed(ar));
 
-  auto const tca = mcgen::getFuncPrologue(
-    const_cast<Func*>(ar->func()),
-    ar->numArgs()
+  // The stub already synced the registers, but the vmsp() is pointing to
+  // the space reserved for the ActRec, so let's adjust it first.
+  assertx(tl_regState == VMRegState::DIRTY);
+  tl_regState = VMRegState::CLEAN;
+  ActRec* ar = vmStack().indA(0);
+  vmStack().nalloc(numArgs + (callFlags.hasGenerics() ? 1 : 0));
+  vmRegs().pc = vmfp()->unit()->at(
+    vmfp()->func()->base() + callFlags.callOffset());
+
+  // Write ActRec.
+  ar->m_sfp = vmfp();
+  ar->setJitReturn(savedRip);
+  ar->m_func = func;
+  ar->m_callOffAndFlags = ActRec::encodeCallOffsetAndFlags(
+    callFlags.callOffset(),
+    callFlags.asyncEagerReturn() ? (1 << ActRec::AsyncEagerRet) : 0
   );
-  if (tca) return { tca, nullptr };
+  ar->setNumArgs(numArgs);
+  ar->m_thisUnsafe = reinterpret_cast<ObjectData*>(ctx);
+  ar->trashVarEnv();
 
   // Check for stack overflow in the same place func prologues make their
   // StackCheck::Early check (see irgen-func-prologue.cpp).  This handler also
   // cleans and syncs vmRegs for us.
   if (checkCalleeStackOverflow(ar)) handleStackOverflow(ar);
 
-  // If doFCall indicates that the function was intercepted and should be
-  // skipped, it will have already torn down the callee's frame. So, we need to
-  // save the return value thats in it.
-  auto const retAddr = (TCA)ar->m_savedRip;
-
-  try {
-    VMRegAnchor _(callFlags, ar);
-    if (doFCall(ar, ar->numArgs(), false, callFlags)) {
-      return { tc::ustubs().resumeHelperRet, nullptr };
-    }
-    // We've been asked to skip the function body (fb_intercept).  The vmregs
-    // have already been fixed; indicate this with a nullptr return.
-    return { nullptr, retAddr };
-  } catch (...) {
-    // The VMRegAnchor above took care of us, but we need to tell the unwinder
-    // (since ~VMRegAnchor() will have reset tl_regState).
-    tl_regState = VMRegState::CLEAN;
-    throw;
-  }
+  // If doFCall() returns false, we've been asked to skip the function body due
+  // to fb_intercept, so indicate that via the return value. If we did not
+  // throw, we are going to reenter TC, so set the registers as dirty.
+  auto const notIntercepted = doFCall(ar, ar->numArgs(), false, callFlags);
+  tl_regState = VMRegState::DIRTY;
+  return notIntercepted;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -224,22 +221,18 @@ TCA emitFuncPrologueRedispatch(CodeBlock& cb, DataBlock& data) {
   alignCacheLine(cb);
 
   return vwrap(cb, data, [] (Vout& v) {
-    auto const func = v.makeReg();
-    v << load{rvmfp()[AROFF(m_func)], func};
-
-    auto const argc = v.makeReg();
-    v << loadl{rvmfp()[AROFF(m_numArgs)], argc};
-
     auto const nparams = v.makeReg();
     auto const pcounts = v.makeReg();
-    v << loadl{func[Func::paramCountsOff()], pcounts};
-    v << shrli{0x1, pcounts, nparams, v.makeReg()};
+    v << loadl{r_php_call_func()[Func::paramCountsOff()], pcounts};
+    v << shrli{1, pcounts, nparams, v.makeReg()};
 
     auto const sf = v.makeReg();
-    v << cmpl{argc, nparams, sf};
+    v << cmpl{r_php_call_num_args(), nparams, sf};
 
     auto const pTabOff = safe_cast<int32_t>(Func::prologueTableOff());
     auto const ptrSize = safe_cast<int32_t>(sizeof(LowPtr<uint8_t>));
+    auto const func = v.makeReg();
+    v << copy{r_php_call_func(), func};
 
     // If we passed more args than declared, we need to dispatch to the
     // "too many arguments" prologue.
@@ -251,60 +244,85 @@ TCA emitFuncPrologueRedispatch(CodeBlock& cb, DataBlock& data) {
 
       emitLdLowPtr(v, func[nargs * ptrSize + (pTabOff + ptrSize)],
                    dest, sizeof(LowPtr<uint8_t>));
-      v << jmpr{dest, php_call_regs()};
+      v << jmpr{dest, php_call_regs(true)};
     });
 
-    auto const nargs = v.makeReg();
-    v << movzlq{argc, nargs};
-
     auto const dest = v.makeReg();
-    emitLdLowPtr(v, func[nargs * ptrSize + pTabOff],
+    emitLdLowPtr(v, func[r_php_call_num_args() * ptrSize + pTabOff],
                  dest, sizeof(LowPtr<uint8_t>));
-    v << jmpr{dest, php_call_regs()};
+    v << jmpr{dest, php_call_regs(true)};
   });
 }
 
-TCA emitFCallHelperThunk(CodeBlock& main, CodeBlock& cold, DataBlock& data) {
+TCA emitFCallHelperThunk(CodeBlock& main, CodeBlock& cold, DataBlock& data,
+                         TCA resumeHelper) {
   alignJmpTarget(main);
 
-  return vwrap2(main, cold, data, [] (Vout& v, Vout& vc) {
-    v << phplogue{rvmfp()};
+  return vwrap2(main, cold, data, [&] (Vout& v, Vout& vc) {
+    v << stublogue{false};
 
-    // fcallHelper asserts native stack alignment for us.
-    FCallHelperRet (*helper)(CallFlags, ActRec*) = &fcallHelper;
-    auto const callFlags = v.makeReg();
-    auto const dest = v.makeReg();
-    auto const saved_rip = v.makeReg();
-    v << copy{r_php_call_flags(), callFlags};
+    // Save all inputs.
+    auto const func = v.makeReg();
+    auto const numArgs = v.makeReg();
+    v << copy{r_php_call_func(), func};
+    v << copy{r_php_call_num_args(), numArgs};
+
+    // Try to JIT the prologue first.
+    auto const target = v.makeReg();
+    {
+      PhysRegSaver prs{v, r_php_call_flags()|r_php_call_ctx()};
+      v << vcall{
+        CallSpec::direct(mcgen::getFuncPrologue),
+        v.makeVcallArgs({{func, numArgs}}),
+        v.makeTuple({target}),
+        Fixup{},
+        DestType::SSA
+      };
+    }
+
+    auto const targetSF = v.makeReg();
+    v << testq{target, target, targetSF};
+    ifThen(v, CC_NZ, targetSF, [&] (Vout& v) {
+      // Restore all inputs and call the resolved prologue.
+      v << copy{func, r_php_call_func()};
+      v << copy{numArgs, r_php_call_num_args()};
+      v << tailcallstubr{target, php_call_regs(true)};
+    });
+
+    auto const flags = v.makeReg();
+    auto const ctx = v.makeReg();
+    auto const savedRip = v.makeReg();
+    v << copy{r_php_call_flags(), flags};
+    v << copy{r_php_call_ctx(), ctx};
+    v << loadstubret{savedRip};
+
+    // Call C++ helper to perform the equivalent of the func prologue logic.
+    auto const notIntercepted = v.makeReg();
+    storeVMRegs(v);
     v << vcall{
-      CallSpec::direct(helper, nullptr),
-      v.makeVcallArgs({{callFlags, rvmfp()}}),
-      v.makeTuple({dest, saved_rip}),
+      CallSpec::direct(fcallHelper),
+      v.makeVcallArgs({{flags, func, numArgs, ctx, savedRip}}),
+      v.makeTuple({notIntercepted}),
       Fixup{},
       DestType::SSA
     };
 
-    // Clobber rvmsp in debug builds.
-    if (debug) v << copy{v.cns(0x1), rvmsp()};
+    auto const notInterceptedSF = v.makeReg();
+    v << testb{notIntercepted, notIntercepted, notInterceptedSF};
 
-    auto const sf = v.makeReg();
-    v << testq{dest, dest, sf};
-
-    unlikelyIfThen(v, vc, CC_Z, sf, [&] (Vout& v) {
-      // A nullptr dest means the callee was intercepted and should be
-      // skipped. In that case, saved_rip will contain the return address that
-      // was in the callee's ActRec before it was torn down by the intercept.
+    unlikelyIfThen(v, vc, CC_Z, notInterceptedSF, [&] (Vout& v) {
+      // The callee was intercepted and should be skipped. In that case, sync
+      // the registers and return to the caller.
       loadVMRegs(v);
       loadReturnRegs(v);
-
-      // Return to the caller. This unbalances the return stack buffer, but if
-      // we're intercepting, we probably don't care.
-      v << jmpr{saved_rip, php_return_regs()};
+      v << stubret{php_return_regs(), false};
     });
 
-    // Jump to the func prologue.
-    v << copy{callFlags, r_php_call_flags()};
-    v << tailcallphp{dest, rvmfp(), php_call_regs()};
+    // Use resumeHelper stub to resume the execution. It assumes phplogue{}
+    // context, so convert the context first. Note that the VM registers are
+    // not synced yet, but that's fine as resumeHelper operates on TLS data.
+    v << stubtophp{};
+    v << jmpi{resumeHelper, RegSet(rvmtl())};
   });
 }
 
@@ -528,32 +546,38 @@ TCA emitDebuggerInterpGenRet(CodeBlock& cb, DataBlock& data) {
 
 TCA emitBindCallStub(CodeBlock& cb, DataBlock& data) {
   return vwrap(cb, data, [] (Vout& v) {
-    v << phplogue{rvmfp()};
+    v << stublogue{false};
 
-    auto args = VregList { v.makeReg(), v.makeReg() };
+    // Save all inputs.
+    auto const func = v.makeReg();
+    auto const numArgs = v.makeReg();
+    v << copy{r_php_call_func(), func};
+    v << copy{r_php_call_num_args(), numArgs};
 
     // Reconstruct the address of the call from the saved RIP.
-    auto const callFlags = v.makeReg();
-    auto const savedRIP = v.makeReg();
+    auto const savedRip = v.makeReg();
+    auto const toSmash = v.makeReg();
     auto const callLen = safe_cast<int>(smashableCallLen());
-    v << copy{r_php_call_flags(), callFlags};
-    v << load{rvmfp()[AROFF(m_savedRip)], savedRIP};
-    v << subqi{callLen, savedRIP, args[0], v.makeReg()};
+    v << loadstubret{savedRip};
+    v << subqi{callLen, savedRip, toSmash, v.makeReg()};
 
-    v << copy{rvmfp(), args[1]};
+    // Call C++ helper to bind the call.
+    auto const target = v.makeReg();
+    {
+      PhysRegSaver prs{v, r_php_call_flags()|r_php_call_ctx()};
+      v << vcall{
+        CallSpec::direct(svcreq::handleBindCall),
+        v.makeVcallArgs({{toSmash, func, numArgs}}),
+        v.makeTuple({target}),
+        Fixup{},
+        DestType::SSA
+      };
+    }
 
-    auto const ret = v.makeReg();
-
-    v << vcall{
-      CallSpec::direct(svcreq::handleBindCall),
-      v.makeVcallArgs({args}),
-      v.makeTuple({ret}),
-      Fixup{},
-      DestType::SSA
-    };
-
-    v << copy{callFlags, r_php_call_flags()};
-    v << tailcallphp{ret, rvmfp(), php_call_regs()};
+    // Restore all inputs and call the resolved prologue.
+    v << copy{func, r_php_call_func()};
+    v << copy{numArgs, r_php_call_num_args()};
+    v << tailcallstubr{target, php_call_regs(true)};
   });
 }
 
@@ -634,7 +658,7 @@ TCA emitFCallUnpackHelper(CodeBlock& main, CodeBlock& cold,
 
     // If true was returned, we're calling the callee, so undo the stublogue{}
     // and convert to a phplogue{}.
-    v << stubtophp{rvmfp()};
+    v << stubtophp{};
 
     auto const callee = v.makeReg();
     auto const body = v.makeReg();
@@ -654,7 +678,6 @@ TCA emitFCallUnpackHelper(CodeBlock& main, CodeBlock& cold,
 ///////////////////////////////////////////////////////////////////////////////
 
 struct ResumeHelperEntryPoints {
-  TCA resumeHelperRet;
   TCA resumeHelper;
   TCA handleResume;
   TCA reenterTC;
@@ -663,19 +686,16 @@ struct ResumeHelperEntryPoints {
 ResumeHelperEntryPoints emitResumeHelpers(CodeBlock& cb, DataBlock& data) {
   ResumeHelperEntryPoints rh;
 
-  rh.resumeHelperRet = vwrap(cb, data, [] (Vout& v) {
-    v << phplogue{rvmfp()};
-  });
   rh.resumeHelper = vwrap(cb, data, [] (Vout& v) {
     v << ldimmb{0, rarg(0)};
-    v << fallthru{RegSet{rarg(0)}};
+    v << fallthru{arg_regs(1)};
   });
 
   rh.handleResume = vwrap(cb, data, [] (Vout& v) {
     v << load{rvmtl()[rds::kVmfpOff], rvmfp()};
 
     auto const handler = reinterpret_cast<TCA>(svcreq::handleResume);
-    v << call{handler, arg_regs(2)};
+    v << call{handler, arg_regs(1)};
   });
 
   rh.reenterTC = vwrap(cb, data, [] (Vout& v) {
@@ -698,7 +718,6 @@ TCA emitResumeInterpHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us,
 
   rh = emitResumeHelpers(cb, data);
 
-  us.resumeHelperRet = rh.resumeHelperRet;
   us.resumeHelper = rh.resumeHelper;
 
   us.interpHelper = vwrap(cb, data, [] (Vout& v) {
@@ -710,7 +729,7 @@ TCA emitResumeInterpHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us,
     v << jmpi{rh.handleResume, RegSet(rarg(0))};
   });
 
-  return us.resumeHelperRet;
+  return us.resumeHelper;
 }
 
 TCA emitInterpOneCFHelper(CodeBlock& cb, DataBlock& data, Op op,
@@ -1082,7 +1101,6 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
   ADD(funcPrologueRedispatch,
       hotView(),
       emitFuncPrologueRedispatch(hot(), data));
-  ADD(fcallHelperThunk,       view, emitFCallHelperThunk(cold, frozen, data));
   ADD(funcBodyHelperThunk,    view, emitFuncBodyHelperThunk(cold, data));
   ADD(functionEnterHelper,
       hotView(),
@@ -1110,7 +1128,6 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
 
   ADD(callToExit,         hotView(), emitCallToExit(hot(), data, *this));
   ADD(throwSwitchMode,    view, emitThrowSwitchMode(frozen, data));
-#undef ADD
 
   EMIT(
     "freeLocalsHelpers",
@@ -1125,6 +1142,11 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
     [&] { return emitResumeInterpHelpers(hot(), data, *this, rh); }
   );
   emitInterpOneCFHelpers(cold, data, *this, view, rh, code, dbg);
+
+  ADD(fcallHelperThunk,
+      view,
+      emitFCallHelperThunk(cold, frozen, data, resumeHelper));
+#undef ADD
 
   emitAllResumable(code, dbg);
   if (cti_enabled()) compile_cti_stubs();

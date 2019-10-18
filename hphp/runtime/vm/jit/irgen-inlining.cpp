@@ -331,6 +331,8 @@ void beginInlining(IRGS& env,
     generics != nullptr,
     fca.numRets != 1,
     dynamicCall,
+    returnTarget.asyncEagerOffset != kInvalidOffset,
+    0, // call offset unused by the logic below
     0
   ).value());
 

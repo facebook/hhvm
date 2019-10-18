@@ -177,13 +177,6 @@ struct VMRegAnchor {
 
   explicit VMRegAnchor(Mode mode = Hard);
 
-  /*
-   * Some C++ entry points have an ActRec prepared from after a call
-   * instruction.  Instantiating a VMRegAnchor with an ActRec argument syncs us
-   * to right after the call instruction.
-   */
-  explicit VMRegAnchor(CallFlags callFlags, ActRec* ar);
-
   ~VMRegAnchor() {
     if (m_old < VMRegState::GUARDED_THRESHOLD) {
       tl_regState = m_old;

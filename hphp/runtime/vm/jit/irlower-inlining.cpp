@@ -113,7 +113,7 @@ bool isResumedParent(const IRInstruction* inst) {
       i = resolveFpDefLabel(s);
       assertx(i);
     }
-    always_assert(i->is(DefFP, DefInlineFP));
+    always_assert(i->is(DefInlineFP));
     return i->dst();
   };
 

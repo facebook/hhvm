@@ -116,10 +116,10 @@ struct UniqueStubs {
   // Function entry.
 
   /*
-   * Dynamically dispatch to the appropriate func prologue, when the called
-   * function fails the prologue's func guard.
+   * Dynamically dispatch to the appropriate func prologue based on the
+   * information in php_call_regs.
    *
-   * @reached:  jmp from func guard
+   * @reached:  callphp from TC
    * @context:  func guard
    */
   TCA funcPrologueRedispatch;
@@ -290,18 +290,11 @@ struct UniqueStubs {
    * Expects that all VM registers are synced.
    *
    * @reached:  jmp from funcBodyHelperThunk
+   *            jmp from fcallHelperThunk
    *            call from enterTCHelper
    * @context:  func body
    */
   TCA resumeHelper;
-
-  /*
-   * Like resumeHelper, but specifically for an interpreted FCall.
-   *
-   * @reached:  jmp from fcallHelperThunk
-   * @context:  func prologue
-   */
-  TCA resumeHelperRet;
 
   /*
    * Like resumeHelper, but interpret a basic block first to ensure we make

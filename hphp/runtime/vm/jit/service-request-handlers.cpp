@@ -392,17 +392,15 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
   return start;
 }
 
-TCA handleBindCall(TCA toSmash, ActRec* calleeFrame) {
-  Func* func = const_cast<Func*>(calleeFrame->m_func);
-  int nArgs = calleeFrame->numArgs();
-  TRACE(2, "bindCall %s, ActRec %p\n", func->fullName()->data(), calleeFrame);
-  TCA start = mcgen::getFuncPrologue(func, nArgs);
+TCA handleBindCall(TCA toSmash, Func* func, int32_t numArgs) {
+  TRACE(2, "bindCall %s, numArgs %d\n", func->fullName()->data(), numArgs);
+  TCA start = mcgen::getFuncPrologue(func, numArgs);
   TRACE(2, "bindCall immutably %s -> %p\n", func->fullName()->data(), start);
 
   if (start) {
     // Using start is racy but bindCall will recheck the start address after
     // acquiring a lock on the ProfTransRec
-    tc::bindCall(toSmash, start, func, nArgs);
+    tc::bindCall(toSmash, start, func, numArgs);
   } else {
     // We couldn't get a prologue address. Return a stub that will finish
     // entering the callee frame in C++, then call handleResume at the callee's

@@ -181,8 +181,9 @@ const Func* funcFromFp(const SSATmp* fp) {
     inst = resolveFpDefLabel(fp);
     assertx(inst);
   }
-  assertx(inst->is(DefFP, DefInlineFP));
+  assertx(inst->is(DefFP, DefFuncEntryFP, DefInlineFP));
   if (inst->is(DefFP)) return inst->marker().func();
+  if (inst->is(DefFuncEntryFP)) return inst->extra<DefFuncEntryFP>()->func;
   if (inst->is(DefInlineFP)) return inst->extra<DefInlineFP>()->target;
   always_assert(false);
 }

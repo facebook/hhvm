@@ -75,7 +75,7 @@ TCA genFuncPrologue(TransID transID, TransKind kind, Func* func, int argc,
   auto context = prologue_context(transID, kind, func,
                                   func->getEntryForNumArgs(argc));
   IRUnit unit{context, std::make_unique<AnnotationData>()};
-  irgen::IRGS env{unit, nullptr, 0, nullptr};
+  irgen::IRGS env{unit, nullptr, 0, nullptr, true};
 
   irgen::emitFuncPrologue(env, argc, transID);
   irgen::sealUnit(env);

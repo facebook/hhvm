@@ -425,8 +425,8 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::syncvmret:
     case Vinstr::syncvmrettype:
     case Vinstr::syncvmsp:
-    case Vinstr::tailcallphp:
     case Vinstr::tailcallstub:
+    case Vinstr::tailcallstubr:
     case Vinstr::trap:
     case Vinstr::unwind:
     case Vinstr::vcall:

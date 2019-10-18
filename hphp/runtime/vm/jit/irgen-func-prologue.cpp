@@ -31,6 +31,7 @@
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/irgen.h"
+#include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/irgen-state.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
@@ -126,38 +127,6 @@ void init_params(IRGS& env, const Func* func, uint32_t argc,
     env.irb->exceptionStackBoundary();
     gen(env, InitExtraArgs, FuncEntryData{func, argc}, fp(env), callFlags);
   }
-}
-
-/*
- * Set up the closure object and class context.
- *
- * We swap out the Closure object stored in m_this, and replace it with the
- * closure's bound Ctx, which may be either an object or a class context.  We
- * then teleport the object onto the stack as the first local after the params.
- *
- * If closure is non-nullptr, we skip the juggling and just store the closure
- * to the proper local.
- */
-SSATmp* juggle_closure_ctx(IRGS& env, const Func* func, SSATmp* closure) {
-  assertx(func->isClosureBody());
-
-  if (closure == nullptr) {
-    closure = gen(env, LdFrameThis, Type::ExactObj(func->implCls()), fp(env));
-    if (func->cls()) {
-      if (func->isStatic()) {
-        auto const cls =
-          gen(env, LdClosureCls, Type::SubCls(func->cls()), closure);
-        gen(env, InitCtx, fp(env), cls);
-      } else {
-        auto const thiz =
-          gen(env, LdClosureThis, Type::SubObj(func->cls()), closure);
-        gen(env, IncRef, thiz);
-        gen(env, InitCtx, fp(env), thiz);
-      }
-    }
-  }
-
-  return closure;
 }
 
 /*
@@ -294,7 +263,8 @@ StackCheck stack_check_kind(const Func* func, uint32_t argc) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void emitPrologueEntry(IRGS& env, uint32_t argc) {
+void emitPrologueEntry(IRGS& env, uint32_t argc, SSATmp* callFlags,
+                       SSATmp* numArgs, SSATmp* closure) {
   auto const func = curFunc(env);
 
   // Emit debug code.
@@ -303,7 +273,45 @@ void emitPrologueEntry(IRGS& env, uint32_t argc) {
     gen(env, RBTraceMsg, msg);
   }
 
-  gen(env, EnterFrame, fp(env));
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    // Make sure we are at the right function.
+    auto const callFunc = gen(env, DefCallFunc);
+    auto const callFuncOK = gen(env, EqFunc, callFunc, cns(env, func));
+    gen(env, JmpZero, makeUnreachable(env, ASSERT_REASON), callFuncOK);
+
+    // Make sure we are at the right prologue.
+    auto const numArgsFromReg = gen(env, DefCallNumArgs);
+    auto const numArgsOK = argc <= func->numNonVariadicParams()
+      ? gen(env, EqInt, numArgsFromReg, cns(env, argc))
+      : gen(env, GtInt, numArgsFromReg, cns(env, func->numNonVariadicParams()));
+    gen(env, JmpZero, makeUnreachable(env, ASSERT_REASON), numArgsOK);
+  }
+
+  auto const callerFP = gen(env, DefCallFP);
+  auto const ctx = [&] {
+    assertx(func->isClosureBody() == (closure != nullptr));
+    if (func->isClosureBody()) {
+      if (!func->cls()) return cns(env, nullptr);
+      if (func->isStatic()) {
+        return gen(env, LdClosureCls, Type::SubCls(func->cls()), closure);
+      }
+      auto const closureThis =
+        gen(env, LdClosureThis, Type::SubObj(func->cls()), closure);
+      gen(env, IncRef, closureThis);
+      return closureThis;
+    }
+
+    if (!func->cls()) return cns(env, nullptr);
+    auto const ctxType = func->isStatic()
+      ? Type::SubCls(func->cls())
+      : thisTypeFromFunc(func);
+    return gen(env, DefCallCtx, ctxType);
+  }();
+
+  gen(env, DefFuncEntryFP, FuncData { func },
+      fp(env), callerFP, callFlags, numArgs, ctx);
+  auto const spOffset = FPInvOffset { func->numSlotsInFrame() };
+  gen(env, DefSP, FPInvOffsetData { spOffset }, fp(env));
 
   // Emit early stack overflow check if necessary.
   if (stack_check_kind(func, argc) == StackCheck::Early) {
@@ -312,9 +320,9 @@ void emitPrologueEntry(IRGS& env, uint32_t argc) {
   }
 }
 
-void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID) {
+void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID,
+                      SSATmp* callFlags, SSATmp* numArgs, SSATmp* closure) {
   auto const func = curFunc(env);
-  auto const callFlags = gen(env, DefCallFlags);
 
   // Increment profiling counter.
   if (isProfiling(env.context.kind)) {
@@ -327,12 +335,12 @@ void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID) {
   // We can't use argc, as there is only one prologue for argc > nparams.
   auto const numTooManyArgs =
     !func->hasVariadicCaptureParam() && argc > func->numNonVariadicParams()
-      ? gen(env, LdARNumParams, fp(env))
+      ? numArgs
       : nullptr;
 
   // Initialize params, locals, and---if we have a closure---the closure's
   // bound class context and use vars.
-  emitPrologueLocals(env, argc, callFlags, nullptr);
+  emitPrologueLocals(env, argc, callFlags, closure);
 
   warn_argument_arity(env, argc, numTooManyArgs);
 
@@ -372,20 +380,31 @@ void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void emitPrologueLocals(IRGS& env, uint32_t argc, SSATmp* callFlags,
-                        SSATmp* closureOpt) {
+                        SSATmp* closure) {
   auto const func = curFunc(env);
   init_params(env, func, argc, callFlags);
+
+  assertx(func->isClosureBody() == (closure != nullptr));
   if (func->isClosureBody()) {
-    auto const closure = juggle_closure_ctx(env, func, closureOpt);
     init_use_vars(env, func, closure);
     decRef(env, closure);
   }
+
   init_locals(env, func);
 }
 
 void emitFuncPrologue(IRGS& env, uint32_t argc, TransID transID) {
-  emitPrologueEntry(env, argc);
-  emitPrologueBody(env, argc, transID);
+  auto const func = curFunc(env);
+  auto const callFlags = gen(env, DefCallFlags);
+  auto const numArgs = argc <= func->numNonVariadicParams()
+    ? cns(env, argc)
+    : gen(env, DefCallNumArgs);
+  auto const closure = func->isClosureBody()
+    ? gen(env, DefCallCtx, Type::ExactObj(func->implCls()))
+    : nullptr;
+
+  emitPrologueEntry(env, argc, callFlags, numArgs, closure);
+  emitPrologueBody(env, argc, transID, callFlags, numArgs, closure);
 }
 
 void emitFuncBodyDispatch(IRGS& env, const DVFuncletsVec& dvs) {

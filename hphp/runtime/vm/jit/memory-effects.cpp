@@ -314,6 +314,7 @@ AliasClass backtrace_locals(const IRInstruction& inst) {
       assertx(fpInst);
     }
     if (fpInst->is(DefFP)) return fpInst->marker().func();
+    if (fpInst->is(DefFuncEntryFP)) return fpInst->extra<DefFuncEntryFP>()->func;
     if (fpInst->is(DefInlineFP)) return fpInst->extra<DefInlineFP>()->target;
     always_assert(false);
   }();
@@ -947,7 +948,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     auto fpInst = fp->inst();
     if (fpInst->is(DefLabel)) fpInst = resolveFpDefLabel(fp);
     auto const frame = [&] () -> AliasClass {
-      if (fpInst->is(DefFP)) return AFrameAny;
+      if (fpInst->is(DefFP, DefFuncEntryFP)) return AFrameAny;
       assertx(fpInst->is(DefInlineFP));
       auto const nlocals = fpInst->extra<DefInlineFP>()->target->numLocals();
       return nlocals
@@ -1682,7 +1683,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case AssertMBase:
   case DefFP:
   case DefSP:
+  case DefFuncEntryFP:
+  case DefCallFP:
   case DefCallFlags:
+  case DefCallFunc:
+  case DefCallNumArgs:
+  case DefCallCtx:
   case EndGuards:
   case EqBool:
   case EqCls:
@@ -1954,7 +1960,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdWHNotDone:
   case LookupClsMethod:
   case LookupClsRDS:
-  case InitCtx:
   case StrictlyIntegerConv:
   case DbgAssertFunc:
   case ProfileCall:
@@ -1971,7 +1976,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CheckPackedArrayDataBounds:
   case LdColVec:
   case LdColDict:
-  case EnterFrame:
     return may_load_store(AEmpty, AEmpty);
 
   //////////////////////////////////////////////////////////////////////

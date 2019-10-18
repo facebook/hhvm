@@ -35,7 +35,7 @@ BCMarker initial_marker(TransContext ctx) {
 //////////////////////////////////////////////////////////////////////
 
 IRGS::IRGS(IRUnit& unit, const RegionDesc* region, int32_t budgetBCInstrs,
-           TranslateRetryContext* retryContext)
+           TranslateRetryContext* retryContext, bool skipSetup)
   : context(unit.context())
   , transFlags(unit.context().flags)
   , region(region)
@@ -50,6 +50,10 @@ IRGS::IRGS(IRUnit& unit, const RegionDesc* region, int32_t budgetBCInstrs,
 
   // Now that we've defined the FP, update the BC marker appropriately.
   updateMarker(*this);
+
+  // Prologues have custom setup.
+  if (skipSetup) return;
+
   gen(*this, DefSP, FPInvOffsetData { context.initSpOffset }, frame);
 
   if (RuntimeOption::EvalHHIRGenerateAsserts) {

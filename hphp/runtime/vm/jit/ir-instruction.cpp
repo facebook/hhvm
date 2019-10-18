@@ -157,9 +157,6 @@ bool consumesRefImpl(const IRInstruction* inst, int srcNo) {
     case CallUnpack:
       return move != MustMove && srcNo == 3;
 
-    case InitCtx:
-      return srcNo == 1;
-
     case AFWHBlockOn:
       // Consume the value being stored, not the thing it's being stored into
       return srcNo == 1;

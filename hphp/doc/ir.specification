@@ -1732,6 +1732,20 @@ To string conversions:
   after return everything below InlineFrameStart is dead. InlineFrameStart is
   the caller FP-relative offset of the start of the callee frame.
 
+| DefFuncEntryFP<func>,
+|   D(FramePtr),
+|   S(FramePtr) S(StkPtr) S(Int) S(Int) S(Cls,Obj,Nullptr),
+|   NF
+
+  Writes a callee's frame and defines a frame pointer.
+
+  `func': the function being called
+  S0: frame pointer of the caller
+  S1: stack pointer pointing to the space reserved for the callee's frame
+  S2: call flags (see CallFlags)
+  S3: number of passed arguments
+  S4: call context
+
 | CallUnpack<spOffset,numParams,callOff,destroyLocals>,
 |   DCall,
 |   S(StkPtr) S(FramePtr) S(Func) S(Obj,Cls,Nullptr),
@@ -2014,9 +2028,22 @@ To string conversions:
   This instruction is used at the beginning of tracelets to represent the state
   of the stack on entry and does not emit code.
 
+| DefCallFP, D(StkPtr), NA, NF
+
 | DefCallFlags, D(Int), NA, NF
 
-  Creates a temporary D representing the flags passed to the prologue.
+| DefCallFunc, D(Func), NA, NF
+
+| DefCallNumArgs, D(Int), NA, NF
+
+| DefCallCtx, DParam(Cls|Obj), NA, NF
+
+  Creates a temporary D representing the address of the stack location reserved
+  for the frame, flags, function pointer, number of arguments, or context passed
+  to the prologue.
+
+  May be used only at the beginning of a prologue or a stub used in a prologue
+  context.
 
 | Count, D(Int), S(Cell), NF
 
@@ -3509,10 +3536,6 @@ fields of that struct for holding intermediate values.
 
 20. Function prologues
 
-| EnterFrame, ND, S(FramePtr), NF
-
-  Stash the return address of the call in m_savedRip.
-
 | CheckStackOverflow, ND, S(FramePtr), NF
 
   Check if the stack depth has exceeded its limit.  If it has, jump to the
@@ -3523,10 +3546,6 @@ fields of that struct for holding intermediate values.
   Process extra arguments, if present. Either shuffle them to the `...$args`
   local, or discard them. Also, in case of MayUseVV, set m_varEnv to nullptr.
   S1 contains call arguments.
-
-| InitCtx, ND, S(FramePtr) S(Cls,Obj,Nullptr), CRc
-
-  Store S1 to the m_this/m_cls field in the frame pointer S0.
 
 | CheckSurpriseFlagsEnter<func,argc>, ND, S(FramePtr), NF
 

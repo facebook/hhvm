@@ -143,6 +143,12 @@ Block* makeExitOpt(IRGS& env) {
   return exit;
 }
 
+Block* makeUnreachable(IRGS& env, AssertReason reason) {
+  auto const unreachable = defBlock(env, Block::Hint::Unlikely);
+  BlockPusher blockPusher(*env.irb, makeMarker(env, bcOff(env)), unreachable);
+  gen(env, Unreachable, reason);
+  return unreachable;
+}
 
 //////////////////////////////////////////////////////////////////////
 

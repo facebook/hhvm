@@ -330,11 +330,6 @@ void FrameStateMgr::update(const IRInstruction* inst) {
   case DefInlineFP:    trackDefInlineFP(inst);  break;
   case InlineSuspend:
   case InlineReturn:   trackInlineReturn(); break;
-  case InitCtx: {
-    always_assert(!cur().ctx);
-    cur().ctx = inst->src(1);
-    break;
-  }
   case Call:
     {
       auto const extra = inst->extra<Call>();
@@ -406,6 +401,11 @@ void FrameStateMgr::update(const IRInstruction* inst) {
 
   case DefFP:
     cur().fpValue = inst->dst();
+    break;
+
+  case DefFuncEntryFP:
+    cur().fpValue = inst->dst();
+    cur().ctx = inst->src(4);
     break;
 
   case RetCtrl:

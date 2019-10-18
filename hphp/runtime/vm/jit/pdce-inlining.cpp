@@ -253,12 +253,6 @@ struct OptimizeContext {
    * region.
    */
   FPMap fpMap;
-
-  /*
-   * If the region contains an InitCtx with a *constant* value it can be pushed
-   * into a side exit along with the DefInlineFP.
-   */
-  const IRInstruction* initCtx{nullptr};
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -289,8 +283,8 @@ bool isDangerousActRecInst(IRInstruction& inst) {
 
 /*
  * Given a FramePtr defined by a DefLabel, return the "resolved"
- * operands of that DefLabel. That is, the set of all SSA tmps defined
- * by a DefFP or DefInlineFP (not a DefLabel) that ultimately feed
+ * operands of that DefLabel. That is, the set of all SSA tmps defined by
+ * a DefFP, DefFuncEntryFP or DefInlineFP (not a DefLabel) that ultimately feed
  * into that DefLabel (perhaps through intermediate DefLabels).
  */
 void resolveDefLabel(InlineAnalysis& ia,
@@ -321,7 +315,7 @@ void resolveDefLabel(InlineAnalysis& ia,
         resolveDefLabel(ia, resolved, src, visited);
         return;
       }
-      if (src->inst()->is(DefFP) || src->inst()->is(DefInlineFP)) {
+      if (src->inst()->is(DefFP, DefFuncEntryFP, DefInlineFP)) {
         resolved.add(src);
       }
     }
@@ -330,10 +324,9 @@ void resolveDefLabel(InlineAnalysis& ia,
 
 /*
  * If 'tmp' is defined by a DefLabel, resolve its operands (using
- * resolveDefLabel) and call 'f' on each operand. Otherwise if 'tmp'
- * is defined by DefFP or DefInlineFP, call 'f' with it. This is used
- * to canonicalize a frame pointer to a set of actual non-Phi'd frame
- * pointers.
+ * resolveDefLabel) and call 'f' on each operand. Otherwise if 'tmp' is defined
+ * by DefFP, DefFuncEntryFP or DefInlineFP, call 'f' with it. This is used to
+ * canonicalize a frame pointer to a set of actual non-Phi'd frame pointers.
  */
 template <typename F>
 void resolve(InlineAnalysis& ia, SSATmp* tmp, F&& f) {
@@ -355,7 +348,7 @@ void resolve(InlineAnalysis& ia, SSATmp* tmp, F&& f) {
     );
     return;
   }
-  if (tmp->inst()->is(DefFP, DefInlineFP)) f(tmp);
+  if (tmp->inst()->is(DefFP, DefFuncEntryFP, DefInlineFP)) f(tmp);
 }
 
 /*
@@ -465,10 +458,10 @@ InlineAnalysis analyze(IRUnit& unit) {
         possibleFps = std::move(prevFps);
         ITRACE(2, "Found InlineSuspend (depth = {}, fp = {}): {}\n",
                depth, inst, showSet(possibleFps));
-      } else if (inst.is(DefFP)) {
+      } else if (inst.is(DefFP, DefFuncEntryFP)) {
         assertx(!depth && possibleFps.none());
         possibleFps.add(inst.dst());
-        ITRACE(3, "Found DefFP: {}\n", inst);
+        ITRACE(3, "Found DefFP/DefFuncEntryFP: {}\n", inst);
       } else if (isDangerousActRecInst(inst)) {
         possibleFps.forEach(
           [&] (size_t id) { addFPUse(inst, unit.findSSATmp(id)); }
@@ -785,11 +778,6 @@ bool insertDefInlineFP(InlineAnalysis& ia, OptimizeContext& ctx, Block* block) {
   assertx(block->numPreds() == 1);
   auto newDef = ctx.unit->clone(ctx.deadFp->inst());
   auto newFp  = newDef->dst();
-  if (ctx.initCtx) {
-    auto newInit = ctx.unit->clone(ctx.initCtx);
-    newInit->setSrc(0, newFp);
-    block->prepend(newInit);
-  }
   block->prepend(newDef);
   auto const inlineExit = replaceFP(block, ctx.deadFp, newFp, *ctx.fpUses);
   ctx.fpMap[block] = newFp;
@@ -935,10 +923,6 @@ void transformUses(InlineAnalysis& ia,
     } else if (isDangerousActRecInst(*inst)) {
       // It's okay to have these in side exits
       always_assert(ctx.mainBlocks.count(block) == 0);
-    } else if (inst->is(InitCtx)) {
-      always_assert(inst->src(1)->type().admitsSingleVal());
-      always_assert(ctx.initCtx == inst);
-      inst->convertToNop();
     } else {
       /*
        * All uses that weren't dealt with in side exiting traces need to be
@@ -965,7 +949,7 @@ folly::Optional<int32_t> findSPOffset(const IRUnit& unit,
   if (inst->is(DefInlineFP)) {
     return inst->extra<DefInlineFP>()->spOffset.offset;
   }
-  if (inst->is(DefFP)) {
+  if (inst->is(DefFP, DefFuncEntryFP)) {
     return unit.mainSP()->inst()->extra<DefSP>()->offset.offset;
   }
 
@@ -1113,22 +1097,12 @@ bool optimize(InlineAnalysis& env, IRInstruction* inlineReturn, bool& reflow) {
   OptimizeContext ctx {env.unit, fp, inlineReturn, &env.fpUses};
   ctx.mainBlocks = findMainBlocks(def->block(), inlineReturn->block());
 
-  auto canMoveInitCtx = [&] (const IRInstruction& inst) {
-    if (ctx.initCtx && ctx.initCtx != &inst) return false;
-    if (inst.is(InitCtx) && inst.src(1)->type().admitsSingleVal()) {
-      ctx.initCtx = &inst;
-      return true;
-    }
-    return false;
-  };
-
   // Check if this callee is a candidate for DefInlineFP sinking
   auto& uses = env.fpUses[fp];
   auto const hasMainUse = [&](IRInstruction* inst) {
     return ctx.mainBlocks.count(inst->block()) &&
            !canConvertToStack(*inst) &&
-           !canAdjustFrame(*inst) &&
-           !canMoveInitCtx(*inst);
+           !canAdjustFrame(*inst);
   };
   auto numMainUses = std::count_if(uses.begin(), uses.end(), hasMainUse);
   if (numMainUses > 0) {

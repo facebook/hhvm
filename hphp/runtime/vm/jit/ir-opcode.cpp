@@ -674,9 +674,14 @@ bool opcodeMayRaise(Opcode opc) {
   case DebugBacktraceFast:
   case DecRef:
   case DecRefNZ:
+  case DefCallFP:
   case DefCallFlags:
+  case DefCallFunc:
+  case DefCallNumArgs:
+  case DefCallCtx:
   case DefConst:
   case DefFP:
+  case DefFuncEntryFP:
   case DefInlineFP:
   case DefLabel:
   case DefSP:
@@ -698,7 +703,6 @@ bool opcodeMayRaise(Opcode opc) {
   case EndBlock:
   case EndCatch:
   case EndGuards:
-  case EnterFrame:
   case EqArrayDataPtr:
   case EqBool:
   case EqCls:
@@ -743,7 +747,6 @@ bool opcodeMayRaise(Opcode opc) {
   case IncProfCounter:
   case IncRef:
   case IncStat:
-  case InitCtx:
   case InitObjProps:
   case InitObjMemoSlots:
   case InitPackedLayoutArray:

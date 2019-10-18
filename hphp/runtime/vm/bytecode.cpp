@@ -4313,6 +4313,8 @@ void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
     fca.hasGenerics(),
     fca.numRets != 1,
     dynamic,
+    asyncEagerReturn,
+    0, // call offset already set on the ActRec
     0  // generics bitmap not used by interpreter
   );
 

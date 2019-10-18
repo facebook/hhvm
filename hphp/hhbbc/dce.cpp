@@ -1899,15 +1899,31 @@ dce_visit(const Index& index,
   dceState.usedLocals = dceOutState.locLive;
   dceState.isLocal    = dceOutState.isLocal;
 
+  auto const blk = fa.ctx.func->blocks[bid].get();
+  auto const dceStkSz = [&] {
+    switch (blk->hhbcs.back().op) {
+      case Op::MemoGet:
+      case Op::MemoGetEager:
+        // These only push on the "hit" path. If we can prove they
+        // never hit, the final stack state won't have an extra
+        // element. But their dce implementations assume that they
+        // push something. Fix it by just adding one to their in
+        // state.  Note that when dceState.dceStack is populated, we
+        // already did the equivalent during global analysis (see
+        // isCFPushTaken below).
+        return states[states.size() - 2].first.stack.size() + 1;
+      default:
+        return states.back().first.stack.size();
+    }
+  }();
+
   if (dceOutState.dceStack) {
     dceState.stack = *dceOutState.dceStack;
-    assert(dceState.stack.size() == states.back().first.stack.size());
+    assert(dceState.stack.size() == dceStkSz);
   } else {
-    dceState.stack.resize(states.back().first.stack.size(),
-                          UseInfo { Use::Used });
+    dceState.stack.resize(dceStkSz, UseInfo { Use::Used });
   }
 
-  auto const blk = fa.ctx.func->blocks[bid].get();
   for (uint32_t idx = blk->hhbcs.size(); idx-- > 0;) {
     auto const& op = blk->hhbcs[idx];
 

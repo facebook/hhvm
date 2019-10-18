@@ -7,7 +7,7 @@ use std::fmt;
 
 pub type Id = usize;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Label {
     Regular(Id),
     DefaultArg(Id),

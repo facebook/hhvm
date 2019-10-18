@@ -50,6 +50,7 @@ macro_rules! impl_id {
     ($type: ident, mangle = $mangle:expr, { $($trait_impl: tt)* }) => {
         use std::borrow::Cow;
 
+        #[derive(Clone)]
         pub struct $type<'a>(Cow<'a, str>);
         impl<'a> crate::Id<'a> for $type<'a> {
             const MANGLE: bool = $mangle;
@@ -77,6 +78,14 @@ macro_rules! impl_id {
                 $type(s.into())
             }
         }
+
+        impl<'a> std::fmt::Debug for $type<'a> {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                use crate::Id;
+                write!(f, "{}({})", module_path!(), self.to_raw_string())
+            }
+        }
+
     };
 }
 

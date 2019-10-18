@@ -5,7 +5,7 @@
 
 use std::fmt;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Id(usize);
 
 impl fmt::Display for Id {
@@ -14,7 +14,7 @@ impl fmt::Display for Id {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Iter {
     next: Id,
     count: usize,

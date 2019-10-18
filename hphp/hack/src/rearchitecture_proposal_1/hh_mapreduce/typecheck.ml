@@ -71,7 +71,7 @@ let run_worker (fd : Unix.file_descr) : unit =
   let (root, hhi_root) : Path.t * Path.t =
     match Prototype.rpc_read pfd with
     | Ok v -> v
-    | Error e -> failwith (Prototype.rpc_error_to_verbose_string e)
+    | Error e -> failwith (Marshal_tools.error_to_verbose_string e)
   in
   let tcopt = global_init_and_get_tcopt ~root ~hhi_root in
   let ctx = Provider_context.empty ~tcopt in
@@ -79,7 +79,7 @@ let run_worker (fd : Unix.file_descr) : unit =
   let fn : string =
     match Prototype.rpc_read pfd with
     | Ok v -> v
-    | Error e -> failwith (Prototype.rpc_error_to_verbose_string e)
+    | Error e -> failwith (Marshal_tools.error_to_verbose_string e)
   in
   let relative_path = Relative_path.create_detect_prefix fn in
   let file_input = ServerCommandTypes.FileName fn in
@@ -95,7 +95,7 @@ let run_worker (fd : Unix.file_descr) : unit =
   in
   match Prototype.rpc_write pfd result with
   | Ok () -> ()
-  | Error e -> failwith (Prototype.rpc_error_to_verbose_string e)
+  | Error e -> failwith (Marshal_tools.error_to_verbose_string e)
 
 let run () : unit =
   (* Parse command-line arguments *)
@@ -141,7 +141,7 @@ let run () : unit =
     | Error e ->
       Printf.eprintf
         "Prototype error: %s"
-        (Prototype.rpc_error_to_verbose_string e);
+        (Marshal_tools.error_to_verbose_string e);
       exit 1
   in
   List.iter files ~f:per_file;

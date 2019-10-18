@@ -17,26 +17,12 @@ type file_descr = Prototype_file_descr of Unix.file_descr
 
 let file_descr (fd : Unix.file_descr) : file_descr = Prototype_file_descr fd
 
-type rpc_error =
-  | Absent of Exception.t
-  | Disconnected of Exception.t
-  | Malformed of string * Utils.callstack
-  | Panic of Marshal_tools.remote_exception_data
-
 type 'a rpc_payload =
   | Ok_payload of 'a
   | Exception_payload of Marshal_tools.remote_exception_data
 
-let rpc_error_to_verbose_string (err : rpc_error) : string =
-  match err with
-  | Absent e -> "Absent: " ^ Exception.to_string e
-  | Disconnected e -> "Disconnected: " ^ Exception.to_string e
-  | Malformed (s, Utils.Callstack stack) ->
-    Printf.sprintf "Malformed: %s\n%s" s stack
-  | Panic { Marshal_tools.message; stack } ->
-    Printf.sprintf "Worker panic: %s\n%s" message stack
-
-let rpc_write (pfd : file_descr) (value : 'a) : (unit, rpc_error) result =
+let rpc_write (pfd : file_descr) (value : 'a) :
+    (unit, Marshal_tools.error) result =
   let (Prototype_file_descr fd) = pfd in
   try
     let _written : int =
@@ -46,18 +32,18 @@ let rpc_write (pfd : file_descr) (value : 'a) : (unit, rpc_error) result =
   with
   | (Unix.Unix_error (Unix.EPIPE, _, _) as e)
   | (Unix.Unix_error (Unix.ECONNRESET, _, _) as e) ->
-    Error (Disconnected (Exception.wrap e))
+    Error (Marshal_tools.Rpc_disconnected (Exception.wrap e))
 
-let rpc_read (pfd : file_descr) : ('a, rpc_error) result =
+let rpc_read (pfd : file_descr) : ('a, Marshal_tools.error) result =
   let (Prototype_file_descr fd) = pfd in
   try
     match (Marshal_tools.from_fd_with_preamble fd : 'a rpc_payload) with
     | Ok_payload value -> Ok value
-    | Exception_payload edata -> Error (Panic edata)
+    | Exception_payload edata -> Error (Marshal_tools.Rpc_remote_panic edata)
   with
   | (End_of_file as e)
   | (Unix.Unix_error (Unix.ECONNRESET, _, _) as e) ->
-    Error (Disconnected (Exception.wrap e))
+    Error (Marshal_tools.Rpc_disconnected (Exception.wrap e))
 
 let rpc_close_no_err (pfd : file_descr) : unit =
   let (Prototype_file_descr fd) = pfd in
@@ -66,7 +52,7 @@ let rpc_close_no_err (pfd : file_descr) : unit =
   ()
 
 let rpc_write_init_message (pfd : file_descr) (kind : Dispatch.kind) :
-    (unit, rpc_error) result =
+    (unit, Marshal_tools.error) result =
   Hh_json.(
     let info = Dispatch.find_by_kind kind in
     let name = info.Dispatch.name in
@@ -75,7 +61,7 @@ let rpc_write_init_message (pfd : file_descr) (kind : Dispatch.kind) :
     rpc_write pfd value)
 
 let rpc_read_init_message (pfd : file_descr) :
-    (Dispatch.kind, rpc_error) result =
+    (Dispatch.kind, Marshal_tools.error) result =
   let rpc_res = rpc_read pfd in
   match rpc_res with
   | Error error -> Error error
@@ -83,7 +69,9 @@ let rpc_read_init_message (pfd : file_descr) :
     let json_res =
       try Ok (Hh_json.json_of_string value)
       with Hh_json.Syntax_error s ->
-        Error (Malformed (s, Utils.Callstack (Printexc.get_backtrace ())))
+        Error
+          (Marshal_tools.Rpc_malformed
+             (s, Utils.Callstack (Printexc.get_backtrace ())))
     in
     (match json_res with
     | Error error -> Error error
@@ -94,24 +82,27 @@ let rpc_read_init_message (pfd : file_descr) :
       (match command_opt with
       | None ->
         let stack = Utils.Callstack (Printexc.get_backtrace ()) in
-        Error (Malformed (Printf.sprintf "No 'command' in %s" value, stack))
+        Error
+          (Marshal_tools.Rpc_malformed
+             (Printf.sprintf "No 'command' in %s" value, stack))
       | Some command ->
         let info_opt = Dispatch.find_by_name command in
         (match info_opt with
         | None ->
           let stack = Utils.Callstack (Printexc.get_backtrace ()) in
           Error
-            (Malformed (Printf.sprintf "Unknown command '%s'" command, stack))
+            (Marshal_tools.Rpc_malformed
+               (Printf.sprintf "Unknown command '%s'" command, stack))
         | Some info -> Ok info.Dispatch.kind)))
 
 let rpc_request_new_worker (root : string) (kind : Dispatch.kind) :
-    (file_descr, rpc_error) result =
+    (file_descr, Marshal_tools.error) result =
   let sockaddr = Unix.ADDR_UNIX (Args.prototype_sock_file root) in
   let connect_res =
     try Ok (Timeout.open_connection sockaddr) with
     | Unix.Unix_error (Unix.ECONNREFUSED, _, _) as e ->
-      Error (Absent (Exception.wrap e))
-    | e -> Error (Disconnected (Exception.wrap e))
+      Error (Marshal_tools.Rpc_absent (Exception.wrap e))
+    | e -> Error (Marshal_tools.Rpc_disconnected (Exception.wrap e))
   in
   match connect_res with
   | Error error -> Error error
@@ -153,16 +144,16 @@ let run () : unit =
   Unix.listen socket 10;
 
   (* Map cachelib shared-memory *)
-  begin
+  let _base_addr =
     match map_shared_memory_ffi !cache_directory with
     | Ok base_addr ->
       let base_addr_int = ((Obj.magic base_addr : int) lsl 1) + 1 in
-      Printf.printf "Prototype cache base address: 0x%x\n%!" base_addr_int
+      Printf.printf "Prototype cache base address: 0x%x\n%!" base_addr_int;
+      base_addr
     | Error message ->
       Printf.eprintf "Prototype failed to map shared-mem: %s\n%!" message;
       exit 1
-  end;
-
+  in
   (* Loop: fork upon client requests; die upon stdin *)
   let rec loop () : unit =
     match Unix.select [socket; Unix.stdin] [] [] (-1.) with
@@ -182,7 +173,7 @@ let run () : unit =
         | Error err ->
           Printf.eprintf
             "error reading init response from worker - %s"
-            (rpc_error_to_verbose_string err);
+            (Marshal_tools.error_to_verbose_string err);
           exit 1
         | Ok kind ->
           (try

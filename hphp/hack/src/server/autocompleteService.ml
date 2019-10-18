@@ -305,16 +305,22 @@ let resolve_ty
   (*   <class1 :attr="a"  -- do strip it                                      *)
   (* The logic is thorny here because we're relying upon regexes to figure    *)
   (* out the context. Once we switch autocomplete to FFP, it'll be cleaner.   *)
-  let name =
+  let (name, fullname) =
     match (x.kind_, autocomplete_context) with
     | ( SearchUtils.SI_Property,
         { AutocompleteTypes.is_instance_member = false; _ } ) ->
-      lstrip x.name ":"
+      let n = lstrip x.name ":" in
+      (n, n)
     | (SearchUtils.SI_XHP, { AutocompleteTypes.is_xhp_classname = true; _ })
     | (SearchUtils.SI_Class, { AutocompleteTypes.is_xhp_classname = true; _ })
       ->
-      lstrip x.name ":"
-    | _ -> x.name
+      let n = lstrip x.name ":" in
+      (n, n)
+    | (SearchUtils.SI_Function, _)
+    | (SearchUtils.SI_ClassMethod, _)
+    | (SearchUtils.SI_Constructor, _) ->
+      (x.name ^ "()", x.name)
+    | _ -> (x.name, x.name)
   in
   let pos =
     match x.ty with
@@ -327,7 +333,7 @@ let resolve_ty
     res_base_class = x.base_class;
     res_ty = get_desc_string_for env x.ty x.kind_;
     res_name = name;
-    res_fullname = name;
+    res_fullname = fullname;
     res_kind = x.kind_;
     func_details = get_func_details_for env x.ty;
     ranking_details = None;

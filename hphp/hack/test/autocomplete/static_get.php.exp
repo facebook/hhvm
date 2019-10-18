@@ -1,4 +1,4 @@
 class classname<this>
 X int
 $x int
-f (function(): _)
+f() (function(): _)

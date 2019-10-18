@@ -1056,12 +1056,12 @@ class TestLsp(TestCase[LspTestDriver]):
                             },
                         },
                         {
-                            "label": "isValid",
+                            "label": "isValid()",
                             "kind": 2,
                             "detail": "function(mixed $value): bool",
                             "inlineDetail": "(mixed $value)",
                             "itemType": "bool",
-                            "insertText": "isValid",
+                            "insertText": "isValid()",
                             "insertTextFormat": 1,
                             "data": {
                                 "fullname": "isValid",
@@ -1072,12 +1072,12 @@ class TestLsp(TestCase[LspTestDriver]):
                             },
                         },
                         {
-                            "label": "getValues",
+                            "label": "getValues()",
                             "kind": 2,
                             "detail": "function(): darray<string, Elsa>",
                             "inlineDetail": "()",
                             "itemType": "darray<string, Elsa>",
-                            "insertText": "getValues",
+                            "insertText": "getValues()",
                             "insertTextFormat": 1,
                             "data": {
                                 "fullname": "getValues",
@@ -1088,12 +1088,12 @@ class TestLsp(TestCase[LspTestDriver]):
                             },
                         },
                         {
-                            "label": "getNames",
+                            "label": "getNames()",
                             "kind": 2,
                             "detail": "function(): darray<Elsa, string>",
                             "inlineDetail": "()",
                             "itemType": "darray<Elsa, string>",
-                            "insertText": "getNames",
+                            "insertText": "getNames()",
                             "insertTextFormat": 1,
                             "data": {
                                 "fullname": "getNames",
@@ -1104,12 +1104,12 @@ class TestLsp(TestCase[LspTestDriver]):
                             },
                         },
                         {
-                            "label": "coerce",
+                            "label": "coerce()",
                             "kind": 2,
                             "detail": "function(mixed $value): ?Elsa",
                             "inlineDetail": "(mixed $value)",
                             "itemType": "?Elsa",
-                            "insertText": "coerce",
+                            "insertText": "coerce()",
                             "insertTextFormat": 1,
                             "data": {
                                 "fullname": "coerce",
@@ -1120,12 +1120,12 @@ class TestLsp(TestCase[LspTestDriver]):
                             },
                         },
                         {
-                            "label": "assertAll",
+                            "label": "assertAll()",
                             "kind": 2,
                             "detail": "function(Traversable<mixed> $values): Container<Elsa>",
                             "inlineDetail": "(Traversable<mixed> $values)",
                             "itemType": "Container<Elsa>",
-                            "insertText": "assertAll",
+                            "insertText": "assertAll()",
                             "insertTextFormat": 1,
                             "data": {
                                 "fullname": "assertAll",
@@ -1136,12 +1136,12 @@ class TestLsp(TestCase[LspTestDriver]):
                             },
                         },
                         {
-                            "label": "assert",
+                            "label": "assert()",
                             "kind": 2,
                             "detail": "function(mixed $value): Elsa",
                             "inlineDetail": "(mixed $value)",
                             "itemType": "Elsa",
-                            "insertText": "assert",
+                            "insertText": "assert()",
                             "insertTextFormat": 1,
                             "data": {
                                 "fullname": "assert",
@@ -1299,12 +1299,12 @@ class TestLsp(TestCase[LspTestDriver]):
                     "isIncomplete": False,
                     "items": [
                         {
-                            "label": "interfaceDocBlockMethod",
+                            "label": "interfaceDocBlockMethod()",
                             "kind": 2,
                             "detail": "function(): void",
                             "inlineDetail": "()",
                             "itemType": "void",
-                            "insertText": "interfaceDocBlockMethod",
+                            "insertText": "interfaceDocBlockMethod()",
                             "insertTextFormat": 1,
                             "data": {
                                 "fullname": "interfaceDocBlockMethod",

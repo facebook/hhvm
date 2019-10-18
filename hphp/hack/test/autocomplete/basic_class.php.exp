@@ -1,1 +1,1 @@
-frob (function(): void)
+frob() (function(): void)

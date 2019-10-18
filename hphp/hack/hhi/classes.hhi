@@ -14,6 +14,8 @@
  * YOU SHOULD NEVER INCLUDE THIS FILE ANYWHERE!!!
  */
 
+namespace {
+
 /**
  * Async generators are similar to
  * [PHP Generators](http://php.net/manual/en/language.generators.overview.php),
@@ -105,6 +107,12 @@ final class Generator<+Tk, +Tv, -Ts> implements KeyedIterator<Tk, Tv> {
   public function rewind(): void {}
 }
 
+final class stdClass {}
+
+} // namespace
+
+namespace HH {
+
 <<__Sealed(
   AwaitAllWaitHandle::class,
   ConditionWaitHandle::class,
@@ -126,6 +134,9 @@ final class AsyncGeneratorWaitHandle<Tk, +Tv>
   extends ResumableWaitHandle<?(Tk, Tv)> {
 }
 
+} // namespace HH
+
+namespace {
 
 <<__Sealed(StaticWaitHandle::class, WaitableWaitHandle::class)>>
 abstract class Awaitable<+T> {
@@ -134,12 +145,16 @@ abstract class Awaitable<+T> {
   public static function setOnJoinCallback(?(function(WaitableWaitHandle<mixed>): void) $callback) {}
 }
 
+} // namespace
+
+namespace HH {
+
 <<__Sealed(AsyncFunctionWaitHandle::class, AsyncGeneratorWaitHandle::class)>>
 abstract class ResumableWaitHandle<+T> extends WaitableWaitHandle<T> {
   public static function setOnCreateCallback(?(function(AsyncFunctionWaitHandle<mixed>, WaitableWaitHandle<mixed>): void) $callback) {}
   public static function setOnAwaitCallback(?(function(AsyncFunctionWaitHandle<mixed>, WaitableWaitHandle<mixed>): void) $callback) {}
   public static function setOnSuccessCallback(?(function(AsyncFunctionWaitHandle<mixed>, mixed): void) $callback) {}
-  public static function setOnFailCallback(?(function(AsyncFunctionWaitHandle<mixed>, Exception): void) $callback) {}
+  public static function setOnFailCallback(?(function(AsyncFunctionWaitHandle<mixed>, \Exception): void) $callback) {}
 }
 
 final class AwaitAllWaitHandle extends WaitableWaitHandle<void> {
@@ -157,13 +172,13 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle<void> {
     dict<arraykey, Awaitable<mixed>> $deps
   ): Awaitable<void>;
   public static function fromMap(
-    ConstMap<arraykey, Awaitable<mixed>> $deps
+    \ConstMap<arraykey, Awaitable<mixed>> $deps
   ): Awaitable<void>;
   public static function fromVec(
     vec<Awaitable<mixed>> $deps
   ): Awaitable<void>;
   public static function fromVector(
-    ConstVector<Awaitable<mixed>> $deps
+    \ConstVector<Awaitable<mixed>> $deps
   ): Awaitable<void>;
   public static function fromContainer(
     Container<Awaitable<mixed>> $deps,
@@ -177,7 +192,7 @@ final class ConditionWaitHandle<T> extends WaitableWaitHandle<T> {
   public static function create(Awaitable<void> $child): ConditionWaitHandle<T> {}
   public static function setOnCreateCallback(?(function(ConditionWaitHandle<T>, WaitableWaitHandle<void>): void) $callback) {}
   public function succeed(T $result): void {}
-  public function fail(Exception $exception): void {}
+  public function fail(\Exception $exception): void {}
 }
 
 final class RescheduleWaitHandle extends WaitableWaitHandle<void> {
@@ -195,7 +210,7 @@ final class SleepWaitHandle extends WaitableWaitHandle<void> {
 final class ExternalThreadEventWaitHandle<+T> extends WaitableWaitHandle<T> {
   public static function setOnCreateCallback(?(function(ExternalThreadEventWaitHandle<mixed>): void) $callback) {}
   public static function setOnSuccessCallback(?(function(ExternalThreadEventWaitHandle<mixed>, mixed): void) $callback) {}
-  public static function setOnFailCallback(?(function(ExternalThreadEventWaitHandle<mixed>, Exception): void) $callback) {}
+  public static function setOnFailCallback(?(function(ExternalThreadEventWaitHandle<mixed>, \Exception): void) $callback) {}
 }
 
-final class stdClass {}
+} // namespace HH

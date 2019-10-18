@@ -32,20 +32,20 @@ let types =
   autoimport_map_of_tuples
     [
       ("arraylike", HH);
-      ("AsyncFunctionWaitHandle", Global);
+      ("AsyncFunctionWaitHandle", HH);
       ("AsyncGenerator", Global);
-      ("AsyncGeneratorWaitHandle", Global);
+      ("AsyncGeneratorWaitHandle", HH);
       ("AsyncIterator", Global);
       ("AsyncKeyedIterator", Global);
       ("Awaitable", Global);
-      ("AwaitAllWaitHandle", Global);
+      ("AwaitAllWaitHandle", HH);
       ("classname", HH);
       ("Collection", HH);
-      ("ConditionWaitHandle", Global);
+      ("ConditionWaitHandle", HH);
       ("Container", Global);
       ("darray", HH);
       ("dict", Global);
-      ("ExternalThreadEventWaitHandle", Global);
+      ("ExternalThreadEventWaitHandle", HH);
       ("IMemoizeParam", HH);
       ("ImmMap", HH);
       ("ImmSet", HH);
@@ -63,12 +63,12 @@ let types =
       ("ObjprofPathsStats", HH);
       ("ObjprofStringStats", HH);
       ("Pair", HH);
-      ("RescheduleWaitHandle", Global);
-      ("ResumableWaitHandle", Global);
+      ("RescheduleWaitHandle", HH);
+      ("ResumableWaitHandle", HH);
       ("Set", HH);
       ("Shapes", HH);
-      ("SleepWaitHandle", Global);
-      ("StaticWaitHandle", Global);
+      ("SleepWaitHandle", HH);
+      ("StaticWaitHandle", HH);
       ("this", Global);
       ("Traversable", Global);
       ("typename", HH);
@@ -79,7 +79,7 @@ let types =
       ("vec_or_dict", HH);
       ("vec", Global);
       ("Vector", HH);
-      ("WaitableWaitHandle", Global);
+      ("WaitableWaitHandle", HH);
       ("XenonSample", HH);
     ]
 

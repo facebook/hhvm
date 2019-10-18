@@ -4,7 +4,7 @@ File "yield_from_generic.php", line 6, characters 33-35:
 Expected int
 File "yield_from_generic.php", line 8, characters 16-18:
 But got string
-File "classes.hhi", line 97, characters 67-68:
+File "classes.hhi", line 99, characters 67-68:
   via this generic Tv
 File "interfaces.hhi", line 241, characters 63-64:
   via this generic Tv

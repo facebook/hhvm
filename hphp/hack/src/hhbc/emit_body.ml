@@ -482,7 +482,7 @@ let emit_body
         List.map ~f:aux cvl
       in
       let captured_vars = filter_vars ast_class.A.c_vars in
-      ("$0Closure" :: captured_vars)
+      captured_vars
       @ List.filter (move_this decl_vars) ~f:(fun v ->
             not (List.mem ~equal:( = ) captured_vars v))
     else

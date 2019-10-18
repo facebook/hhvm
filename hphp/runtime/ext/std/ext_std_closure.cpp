@@ -121,7 +121,9 @@ void c_Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
 }
 
 int c_Closure::initActRecFromClosure(ActRec* ar, TypedValue* sp) {
-  auto closure = c_Closure::fromObject(ar->getThisInPrologue());
+  // Request pointer so that we decref once we are done.
+  auto closure = req::ptr<c_Closure>::attach(
+    c_Closure::fromObject(ar->getThisInPrologue()));
 
   // Put in the correct context
   ar->m_func = closure->getInvokeFunc();
@@ -138,13 +140,6 @@ int c_Closure::initActRecFromClosure(ActRec* ar, TypedValue* sp) {
     ar->trashThis();
   }
 
-  // The closure is the first local.
-  // Similar to tvWriteObject() but we don't incref because it used to be $this
-  // and now it is a local, so they cancel out
-  TypedValue* firstLocal = --sp;
-  firstLocal->m_type = KindOfObject;
-  firstLocal->m_data.pobj = closure;
-
   // Copy in all the use vars
   auto prop = closure->propVec();
   int n = closure->getNumUseVars();
@@ -152,7 +147,7 @@ int c_Closure::initActRecFromClosure(ActRec* ar, TypedValue* sp) {
     cellDup(*prop++, *--sp);
   }
 
-  return n + 1;
+  return n;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

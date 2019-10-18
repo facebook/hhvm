@@ -184,9 +184,8 @@ void emitEntryAssertions(irgen::IRGS& irgs, const Func* func, SrcKey sk) {
 
   if (func->isClosureBody()) {
     // In a closure, non-parameter locals can have types other than Uninit
-    // after the prologue runs.  (Local 0 will be the closure itself, and other
-    // locals will have used vars unpacked into them.)  We rely on hhbbc to
-    // assert these types.
+    // after the prologue runs, as use vars gets unpacked into them. We rely
+    // on hhbbc to assert these types.
     return;
   }
   if (func->isPseudoMain()) {

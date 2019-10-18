@@ -446,7 +446,6 @@ bool VarEnv::unset(const StringData* name) {
   return true;
 }
 
-const StaticString s_closure_var("0Closure");
 const StaticString s_reified_generics_var("0ReifiedGenerics");
 
 Array VarEnv::getDefinedVariables() const {
@@ -456,9 +455,8 @@ Array VarEnv::getDefinedVariables() const {
   for (; iter.valid(); iter.next()) {
     auto const sd = iter.curKey();
     auto const tv = iter.curVal();
-    // Closures have an internal 0Closure variable
     // Reified functions have an internal 0ReifiedGenerics variable
-    if (s_closure_var.equal(sd) || s_reified_generics_var.equal(sd)) {
+    if (s_reified_generics_var.equal(sd)) {
       continue;
     }
     if (tvAsCVarRef(tv).isReferenced()) {

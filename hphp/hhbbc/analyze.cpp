@@ -156,18 +156,7 @@ State entry_state(const Index& index, Context const ctx,
         : TCell;
   }
 
-  /*
-   * Closures have a hidden local that's always the first (non-parameter)
-   * local, which stores the closure itself. Due to Class rescoping in the
-   * runtime, the strongest type we can assert here is <= Closure. We also need
-   * to look up the types of use vars from the index.
-   */
-  if (ctx.func->isClosureBody) {
-    assert(locId < ret.locals.size());
-    assert(ctx.func->cls);
-    auto const rcls = index.builtin_class(s_Closure.get());
-    ret.locals[locId++] = subObj(rcls);
-  }
+  // Closures have use vars, we need to look up their types from the index.
   auto const useVars = ctx.func->isClosureBody
     ? index.lookup_closure_use_vars(ctx.func)
     : CompactVector<Type>{};

@@ -4999,7 +4999,7 @@ bool Index::satisfies_constraint(Context ctx, const Type& t,
 bool Index::could_have_reified_type(Context ctx,
                                     const TypeConstraint& tc) const {
   if (ctx.func->isClosureBody) {
-    for (auto i = ctx.func->params.size() + 1;
+    for (auto i = ctx.func->params.size();
          i < ctx.func->locals.size();
          ++i) {
       auto const name = ctx.func->locals[i].name;

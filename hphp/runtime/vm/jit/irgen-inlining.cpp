@@ -322,16 +322,19 @@ void beginInlining(IRGS& env,
   }
   if (generics != nullptr) stLocRaw(env, fca.numArgs, calleeFP, generics);
 
+  // All the code below may reenter, so update the marker so we don't
+  // accidentally overwrite the locals.
+  updateMarker(env);
+  env.irb->exceptionStackBoundary();
+
   auto const callFlags = cns(env, CallFlags(
     generics != nullptr,
     fca.numRets != 1,
     dynamicCall,
     0
   ).value());
-  emitPrologueLocals(env, fca.numArgs, callFlags, closure);
 
-  updateMarker(env);
-  env.irb->exceptionStackBoundary();
+  emitPrologueLocals(env, fca.numArgs, callFlags, closure);
 
   emitGenericsMismatchCheck(env, callFlags);
   emitCalleeDynamicCallCheck(env, callFlags);

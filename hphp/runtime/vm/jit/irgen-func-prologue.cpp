@@ -157,9 +157,6 @@ SSATmp* juggle_closure_ctx(IRGS& env, const Func* func, SSATmp* closure) {
     }
   }
 
-  // Teleport the closure to the next local.  There's no need to incref since
-  // it came from m_this.
-  gen(env, StLoc, LocalId{func->numParams()}, fp(env), closure);
   return closure;
 }
 
@@ -188,7 +185,7 @@ void init_use_vars(IRGS& env, const Func* func, SSATmp* closure) {
       closure
     );
     auto const prop = gen(env, LdMem, ty, addr);
-    gen(env, StLoc, LocalId{nparams + 1 + i}, fp(env), prop);
+    gen(env, StLoc, LocalId{nparams + i}, fp(env), prop);
     gen(env, IncRef, prop);
   }
 }
@@ -212,7 +209,7 @@ void init_locals(IRGS& env, const Func* func) {
 
   if (func->isClosureBody()) {
     auto const nuse = func->implCls()->numDeclProperties();
-    num_inited += 1 + nuse;
+    num_inited += nuse;
   }
 
   if (func->hasReifiedGenerics()) num_inited++;
@@ -381,6 +378,7 @@ void emitPrologueLocals(IRGS& env, uint32_t argc, SSATmp* callFlags,
   if (func->isClosureBody()) {
     auto const closure = juggle_closure_ctx(env, func, closureOpt);
     init_use_vars(env, func, closure);
+    decRef(env, closure);
   }
   init_locals(env, func);
 }

@@ -211,12 +211,6 @@ let emit_wrapper_method
     ~is_closure ~decl_vars ~original_id ~renamed_id ast_class ast_method =
   (* Wrapper methods may not have iterators *)
   Iterator.reset_iterator ();
-  let decl_vars =
-    if is_closure then
-      List.filter decl_vars (( <> ) "$0Closure")
-    else
-      decl_vars
-  in
   let scope =
     [
       Ast_scope.ScopeItem.Method ast_method;

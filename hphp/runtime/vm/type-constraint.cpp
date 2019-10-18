@@ -1451,9 +1451,9 @@ bool tcCouldBeReified(const Func* func, uint32_t paramId) {
     auto const lNames = func->localNames();
     auto const nParams = func->numParams();
     auto const nDeclaredProps = func->baseCls()->numDeclProperties();
-    assertx(nParams + 1 + nDeclaredProps <= func->numNamedLocals());
-    // Skip over params and 0Closure
-    for (int i = nParams + 1; i < nParams + 1 + nDeclaredProps; ++i) {
+    assertx(nParams + nDeclaredProps <= func->numNamedLocals());
+    // Skip over params
+    for (int i = nParams; i < nParams + nDeclaredProps; ++i) {
       if (isMangledReifiedGenericInClosure(lNames[i])) return true;
     }
     return false;

@@ -236,10 +236,10 @@ void emitLIterNext(IRGS& env,
                    int32_t valLocalId,
                    IterTypeOp subop) {
   if (curFunc(env)->isPseudoMain()) PUNT(LIterNext-pseudomain);
-  auto const base = ldLoc(env, baseLocalId, nullptr, DataTypeSpecific);
   auto const data = IterData(iterId, uint32_t(-1), valLocalId);
   if (!areLocalsCells(env, data)) PUNT(LIterNext-refs);
 
+  auto const base = ldLoc(env, baseLocalId, nullptr, DataTypeSpecific);
   auto const result = base->isA(TArrLike)
     ? gen(env, LIterNext, data, base, fp(env))
     : gen(env, IterNext, data, fp(env));
@@ -254,10 +254,10 @@ void emitLIterNextK(IRGS& env,
                     int32_t keyLocalId,
                     IterTypeOp subop) {
   if (curFunc(env)->isPseudoMain()) PUNT(LIterNextK-pseudomain);
-  auto const base = ldLoc(env, baseLocalId, nullptr, DataTypeSpecific);
   auto const data = IterData(iterId, keyLocalId, valLocalId);
   if (!areLocalsCells(env, data)) PUNT(LIterNextK-refs);
 
+  auto const base = ldLoc(env, baseLocalId, nullptr, DataTypeSpecific);
   auto const result = base->isA(TArrLike)
     ? gen(env, LIterNextK, data, base, fp(env))
     : gen(env, IterNextK, data, fp(env));

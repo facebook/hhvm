@@ -22,6 +22,8 @@
 #include <set>
 #include <vector>
 
+#include <folly/Optional.h>
+
 #include "hphp/util/file-cache.h"
 #include "hphp/util/mutex.h"
 #include "hphp/hhbbc/hhbbc.h"
@@ -66,6 +68,7 @@ struct Package {
   std::shared_ptr<FileCache> getFileCache();
 
   void cache_only() { m_cache_only = true; }
+  void addUnitEmitter(std::unique_ptr<UnitEmitter> ue);
 private:
   std::string m_root;
   std::set<std::string> m_filesToParse;
@@ -82,7 +85,7 @@ private:
   std::set<std::string> m_staticDirectories;
   std::set<std::string> m_extraStaticFiles;
   std::map<std::string,std::string> m_discoveredStaticFiles;
-  HHBBC::UnitEmitterQueue m_ueq;
+  folly::Optional<HHBBC::UnitEmitterQueue> m_ueq;
   std::atomic<bool> m_stop_caching{};
   hphp_fast_set<std::string> m_locally_cached_bytecode;
   bool m_cache_only{};

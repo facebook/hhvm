@@ -55,6 +55,30 @@ using OpcodeSet = hphp_fast_set<Op,OpHash>;
 
 //////////////////////////////////////////////////////////////////////
 
+namespace php {
+struct Program;
+// basically a unique_ptr<Program>, but we want to be able to use it on a
+// forward declared Program
+struct ProgramPtr {
+  ProgramPtr() = default;
+  explicit ProgramPtr(Program* program) : m_program{program} {}
+  ~ProgramPtr() { if (m_program) clear(); }
+  ProgramPtr(ProgramPtr&& o) : m_program{o.m_program} {
+    o.m_program = nullptr;
+  }
+  ProgramPtr& operator=(ProgramPtr&& o) {
+    std::swap(m_program, o.m_program);
+    return *this;
+  }
+  Program* get() const { return m_program; }
+  Program& operator*() const { return *m_program; }
+  Program* operator->() const { return m_program; }
+private:
+  void clear();
+  Program* m_program{};
+};
+}
+
 // Create a method map for the options structure from a SinglePassReadableRange
 // containing a list of Class::methodName strings.
 template<class SinglePassReadableRange>
@@ -85,13 +109,23 @@ struct UnitEmitterQueue : Synchronizable {
 };
 
 /*
+ * Create a php::Program, and wrap it in a ProgramPtr.
+ */
+php::ProgramPtr make_program();
+
+/*
+ * Add the given unit to the program. May be called asynchronously.
+ */
+void add_unit_to_program(const UnitEmitter* ue, php::Program& program);
+
+/*
  * Perform whole-program optimization on a set of UnitEmitters.
  *
  * Currently this process relies on some information from HPHPc.  It
  * expects traits are already flattened (it might be wrong if they
  * aren't).
  */
-void whole_program(std::vector<std::unique_ptr<UnitEmitter>>,
+void whole_program(php::ProgramPtr program,
                    UnitEmitterQueue& ueq,
                    std::unique_ptr<ArrayTypeTable::Builder>& arrTable,
                    int num_threads = 0);

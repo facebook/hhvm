@@ -70,7 +70,7 @@ const StaticString s_Awaitable("HH\\Awaitable");
 
 // A test program so we can actually test things involving object or
 // class or record types.
-std::unique_ptr<php::Unit> make_test_unit(php::Program& program) {
+void add_test_unit(php::Program& program) {
   assert(SystemLib::s_inited);
   std::string const hhas = R"(
     .main {
@@ -171,13 +171,13 @@ std::unique_ptr<php::Unit> make_test_unit(php::Program& program) {
     SHA1("1234543212345432123454321234543212345432"),
     Native::s_noNativeFuncs
   ));
-  return parse_unit(program, std::move(ue));
+  parse_unit(program, ue.get());
 }
 
-std::unique_ptr<php::Program> make_program() {
+php::ProgramPtr make_test_program() {
   RuntimeOption::EvalHackRecords = true;
-  auto program = std::make_unique<php::Program>(1);
-  program->units.push_back(make_test_unit(*program));
+  auto program = make_program();
+  add_test_unit(*program);
   return program;
 }
 
@@ -441,7 +441,7 @@ std::vector<Type> all_with_waithandles(const Index& index) {
 }
 
 TEST(Type, Top) {
-  auto const program = make_program();
+  auto const program = make_test_program();
   Index index { program.get() };
 
   // Everything is a subtype of Top, couldBe Top, and the union of Top
@@ -455,7 +455,7 @@ TEST(Type, Top) {
 }
 
 TEST(Type, Bottom) {
-  auto const program = make_program();
+  auto const program = make_test_program();
   Index index { program.get() };
 
   // Bottom is a subtype of everything, nothing couldBe Bottom, and
@@ -469,7 +469,7 @@ TEST(Type, Bottom) {
 }
 
 TEST(Type, Prims) {
-  auto const program = make_program();
+  auto const program = make_test_program();
   Index index { program.get() };
 
   // All pairs of non-equivalent primitives are not related by either
@@ -492,7 +492,7 @@ TEST(Type, Prims) {
 }
 
 TEST(Type, Relations) {
-  auto const program = make_program();
+  auto const program = make_test_program();
   Index index { program.get() };
 
   // couldBe is symmetric and reflexive
@@ -672,7 +672,7 @@ TEST(Type, DblNan) {
 }
 
 TEST(Type, Option) {
-  auto const program = make_program();
+  auto const program = make_test_program();
   Index index { program.get() };
 
   EXPECT_TRUE(TTrue.subtypeOf(BOptTrue));
@@ -802,7 +802,7 @@ TEST(Type, OptUnionOf) {
   EXPECT_EQ(TOptNum, union_of(TInitNull, TNum));
   EXPECT_EQ(TOptNum, union_of(TInitNull, union_of(dval(1), ival(0))));
 
-  auto const program = make_program();
+  auto const program = make_test_program();
   Index index { program.get() };
   auto const rcls = index.builtin_class(s_Awaitable.get());
 
@@ -972,7 +972,7 @@ TEST(Type, SpecificExamples) {
 }
 
 TEST(Type, IndexBased) {
-  auto const program = make_program();
+  auto const program = make_test_program();
   auto const unit = program->units.back().get();
   auto const func = [&]() -> php::Func* {
     for (auto& f : unit->funcs) {
@@ -1107,7 +1107,7 @@ TEST(Type, IndexBased) {
 }
 
 TEST(Type, Hierarchies) {
-  auto const program = make_program();
+  auto const program = make_test_program();
   auto const unit = program->units.back().get();
   auto const func = [&]() -> php::Func* {
     for (auto& f : unit->funcs) {
@@ -1494,7 +1494,7 @@ TEST(Type, Hierarchies) {
 }
 
 TEST(Type, Interface) {
-  auto const program = make_program();
+  auto const program = make_test_program();
   auto const unit = program->units.back().get();
   auto const func = [&]() -> php::Func* {
     for (auto& f : unit->funcs) {
@@ -1562,7 +1562,7 @@ TEST(Type, Interface) {
 }
 
 TEST(Type, NonUnique) {
-  auto const program = make_program();
+  auto const program = make_test_program();
   auto const unit = program->units.back().get();
   auto const func = [&]() -> php::Func* {
     for (auto& f : unit->funcs) {
@@ -1598,7 +1598,7 @@ TEST(Type, NonUnique) {
 }
 
 TEST(Type, WaitH) {
-  auto const program = make_program();
+  auto const program = make_test_program();
   Index index { program.get() };
 
   for (auto& t : wait_handles_of(index, all())) {
@@ -2273,7 +2273,7 @@ TEST(Type, ArrKey) {
 }
 
 TEST(Type, LoosenStaticness) {
-  auto const program = make_program();
+  auto const program = make_test_program();
   Index index{ program.get() };
 
   for (auto const& t : all()) {
@@ -2348,7 +2348,7 @@ TEST(Type, LoosenStaticness) {
 }
 
 TEST(Type, LoosenEmptiness) {
-  auto const program = make_program();
+  auto const program = make_test_program();
   Index index{ program.get() };
 
   for (auto const& t : all_with_waithandles(index)) {
@@ -2403,7 +2403,7 @@ TEST(Type, LoosenEmptiness) {
 }
 
 TEST(Type, LoosenValues) {
-  auto const program = make_program();
+  auto const program = make_test_program();
   auto const unit = program->units.back().get();
     auto const func = [&]() -> php::Func* {
     for (auto& f : unit->funcs) {
@@ -2465,7 +2465,7 @@ TEST(Type, LoosenValues) {
 }
 
 TEST(Type, AddNonEmptiness) {
-  auto const program = make_program();
+  auto const program = make_test_program();
   Index index{ program.get() };
 
   for (auto const& t : all_with_waithandles(index)) {
@@ -2497,7 +2497,7 @@ TEST(Type, AddNonEmptiness) {
 }
 
 TEST(Type, LoosenDVArrayness) {
-  auto const program = make_program();
+  auto const program = make_test_program();
   Index index{ program.get() };
 
   for (auto const& t : all_with_waithandles(index)) {
@@ -2601,7 +2601,7 @@ TEST(Type, StrValues) {
 TEST(Type, ContextDependent) {
   // This only covers basic cases involving objects.  More testing should
   // be added for non object types, and nested types.
-  auto const program = make_program();
+  auto const program = make_test_program();
   auto const unit = program->units.back().get();
   auto const func = [&]() -> php::Func* {
     for (auto& f : unit->funcs) {

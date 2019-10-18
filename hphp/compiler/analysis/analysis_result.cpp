@@ -27,6 +27,7 @@
 #include <utility>
 #include <vector>
 
+#include "hphp/compiler/builtin_symbols.h"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/package.h"
 #include "hphp/runtime/base/program-functions.h"
@@ -44,8 +45,10 @@ using namespace HPHP;
 // initialization
 
 AnalysisResult::AnalysisResult()
-  : m_package(nullptr),
-    m_parseOnDemand(false) {
+    : m_package(nullptr), m_parseOnDemand(false) {
+  if (RuntimeOption::EvalUseHHBBC) {
+    m_program = HHBBC::make_program();
+  }
 }
 
 AnalysisResult::~AnalysisResult() {
@@ -66,9 +69,7 @@ void AnalysisResult::finish() {
 // general functions
 
 void AnalysisResult::addHhasFile(std::unique_ptr<UnitEmitter>&& ue) {
-  const uint64_t sz = m_hhasFiles.size();
-  ue->setSha1(SHA1 { sz });
-  ue->m_symbol_refs.clear();
+  Lock lock(getMutex());
   m_hhasFiles.emplace_back(std::move(ue));
 }
 

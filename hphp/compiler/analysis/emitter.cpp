@@ -225,7 +225,14 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
         emitters.clear();
       };
 
-      if (!RuntimeOption::EvalUseHHBBC && ues.size()) {
+      auto program = std::move(ar->program());
+      if (ues.size()) {
+        assertx(!program.get());
+        uint32_t id = 0;
+        for (auto& ue : ues) {
+          ue->m_symbol_refs.clear();
+          ue->setSha1(SHA1 { id++ });
+        }
         commitSome(ues);
       }
 
@@ -256,7 +263,7 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
       ar->finish();
       ar.reset();
 
-      if (!RuntimeOption::EvalUseHHBBC) {
+      if (!program.get()) {
         if (Option::GenerateBinaryHHBC) {
           commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder>{});
         }
@@ -268,16 +275,9 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
 
       wp_thread = std::thread([&] {
           Timer timer(Timer::WallTime, "running HHBBC");
-          hphp_thread_init();
-          hphp_session_init(Treadmill::SessionKind::CompilerEmit);
-          SCOPE_EXIT {
-            hphp_context_exit();
-            hphp_session_exit();
-            hphp_thread_exit();
-          };
-
+          HphpSessionAndThread _(Treadmill::SessionKind::CompilerEmit);
           HHBBC::whole_program(
-            std::move(ues), ueq, arrTable,
+            std::move(program), ueq, arrTable,
             Option::ParserThreadCount > 0 ? Option::ParserThreadCount : 0);
         });
 

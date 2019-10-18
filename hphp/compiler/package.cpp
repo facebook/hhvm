@@ -279,47 +279,51 @@ bool Package::parse(bool check) {
   auto const threadCount = Option::ParserThreadCount <= 0 ?
     1 : Option::ParserThreadCount;
 
-  std::thread unit_emitter_thread {
-    [&] {
-      hphp_thread_init();
-      hphp_session_init(Treadmill::SessionKind::CompilerEmit);
-      SCOPE_EXIT {
-        hphp_context_exit();
-        hphp_session_exit();
-        hphp_thread_exit();
-      };
+  // process system lib files which were deferred during process-init
+  // (if necessary).
+  auto syslib_ues = m_ar->getHhasFiles();
 
-      static const unsigned kBatchSize = 8;
+  std::thread unit_emitter_thread;
+  if (RuntimeOption::RepoCommit &&
+      RuntimeOption::RepoLocalPath.size() &&
+      RuntimeOption::RepoLocalMode == "rw") {
+    m_ueq.emplace();
+    unit_emitter_thread = std::thread {
+      [&] {
+        HphpSessionAndThread _(Treadmill::SessionKind::CompilerEmit);
 
-      std::vector<std::unique_ptr<UnitEmitter>> batched_ues;
+        static const unsigned kBatchSize = 8;
 
-      auto commitSome = [&] {
-        batchCommit(batched_ues);
-        {
-          Lock lock(m_ar->getMutex());
-          for (auto& ue : batched_ues) {
-            m_ar->addHhasFile(std::move(ue));
+        std::vector<std::unique_ptr<UnitEmitter>> batched_ues;
+
+        auto commitSome = [&] {
+          batchCommit(batched_ues);
+          if (!m_ar->program().get()) {
+            for (auto& ue : batched_ues) {
+              m_ar->addHhasFile(std::move(ue));
+            }
+          }
+          batched_ues.clear();
+        };
+
+        while (auto ue = m_ueq->pop()) {
+          if (m_stop_caching.load(std::memory_order_relaxed)) {
+            do {
+              if (!m_ar->program().get()) {
+                m_ar->addHhasFile(std::move(ue));
+              }
+            } while ((ue = m_ueq->pop()) != nullptr);
+            break;
+          }
+          batched_ues.push_back(std::move(ue));
+          if (batched_ues.size() == kBatchSize) {
+            commitSome();
           }
         }
-        batched_ues.clear();
-      };
-
-      while (auto ue = m_ueq.pop()) {
-        if (m_stop_caching.load(std::memory_order_relaxed)) {
-          Lock lock(m_ar->getMutex());
-          do {
-            m_ar->addHhasFile(std::move(ue));
-          } while ((ue = m_ueq.pop()) != nullptr);
-          break;
-        }
-        batched_ues.push_back(std::move(ue));
-        if (batched_ues.size() == kBatchSize) {
-          commitSome();
-        }
+        if (batched_ues.size()) commitSome();
       }
-      if (batched_ues.size()) commitSome();
-    }
-  };
+    };
+  }
 
   if (RuntimeOption::RepoLocalPath.size() &&
       RuntimeOption::RepoLocalMode != "--") {
@@ -328,6 +332,8 @@ bool Package::parse(bool check) {
       m_locally_cached_bytecode.insert(elm.first);
     }
   }
+
+  HphpSession _(Treadmill::SessionKind::CompilerEmit);
 
   // If we're using the hack compiler, make sure it agrees on the thread count.
   RuntimeOption::EvalHackCompilerWorkers = threadCount;
@@ -344,12 +350,21 @@ bool Package::parse(bool check) {
   for (auto const& dir : m_directories) {
     addSourceDirectory(dir.first, dir.second);
   }
+
+  for (auto& ue : syslib_ues) {
+    addUnitEmitter(std::move(ue));
+  }
+  syslib_ues.clear();
+
   dispatcher.waitEmpty();
   if (!m_cache_only) {
     m_stop_caching.store(true, std::memory_order_relaxed);
   }
-  m_ueq.push(nullptr);
-  unit_emitter_thread.join();
+
+  if (m_ueq) {
+    m_ueq->push(nullptr);
+    unit_emitter_thread.join();
+  }
 
   m_dispatcher = nullptr;
 
@@ -360,6 +375,22 @@ bool Package::parse(bool check) {
   }
 
   return true;
+}
+
+void Package::addUnitEmitter(std::unique_ptr<UnitEmitter> ue) {
+  for (auto& ent : ue->m_symbol_refs) {
+    m_ar->parseOnDemandBy(ent.first, ent.second);
+  }
+  if (m_ar->program().get()) {
+    HHBBC::add_unit_to_program(ue.get(), *m_ar->program());
+  }
+  // m_repoId != -1 means it was read from the local repo - so there's
+  // no need to write it back.
+  if (m_ueq && ue->m_repoId == -1) {
+    m_ueq->push(std::move(ue));
+  } else if (!m_ar->program().get()) {
+    m_ar->addHhasFile(std::move(ue));
+  }
 }
 
 /*
@@ -402,8 +433,7 @@ bool Package::parseImpl(const std::string* fileName) {
         assemble_string(content.data(), content.size(), fileName->c_str(), sha1,
                         Native::s_noNativeFuncs)
       };
-      Lock lock(m_ar->getMutex());
-      m_ar->addHhasFile(std::move(ue));
+      addUnitEmitter(std::move(ue));
       return true;
     }
   }
@@ -441,11 +471,7 @@ bool Package::parseImpl(const std::string* fileName) {
     if (auto ue = Repo::get().urp().loadEmitter(
           *fileName, sha1, Native::s_noNativeFuncs
         )) {
-      for (auto& ent : ue->m_symbol_refs) {
-        m_ar->parseOnDemandBy(ent.first, ent.second);
-      }
-      Lock lock(m_ar->getMutex());
-      m_ar->addHhasFile(std::move(ue));
+      addUnitEmitter(std::move(ue));
       return true;
     }
   }
@@ -459,17 +485,7 @@ bool Package::parseImpl(const std::string* fileName) {
   try {
     auto ue = uc->compile(true);
     if (ue && !ue->m_ICE) {
-      for (auto& ent : ue->m_symbol_refs) {
-        m_ar->parseOnDemandBy(ent.first, ent.second);
-      }
-      if (RuntimeOption::RepoCommit &&
-          RuntimeOption::RepoLocalPath.size() &&
-          RuntimeOption::RepoLocalMode == "rw") {
-        m_ueq.push(std::move(ue));
-      } else {
-        Lock lock(m_ar->getMutex());
-        m_ar->addHhasFile(std::move(ue));
-      }
+      addUnitEmitter(std::move(ue));
       report(0);
       return true;
     } else {

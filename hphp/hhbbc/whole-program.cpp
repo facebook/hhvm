@@ -148,11 +148,10 @@ void all_unit_contexts(const php::Unit* u, F&& fun) {
 std::vector<Context> const_pass_contexts(const php::Program& program) {
   std::vector<Context> ret;
   ret.reserve(program.constInits.size());
-  program.constInits.foreach([&](auto func) {
-      if (func) {
-        ret.push_back(Context { func->unit, func, func->cls });
-      }
-    });
+  for (auto func : program.constInits) {
+    assertx(func);
+    ret.push_back(Context { func->unit, func, func->cls });
+  }
   return ret;
 }
 
@@ -495,21 +494,6 @@ void final_pass(Index& index,
 
 //////////////////////////////////////////////////////////////////////
 
-template<class Container>
-std::unique_ptr<php::Program> parse_program(Container units) {
-  trace_time tracer("parse");
-  auto ret = std::make_unique<php::Program>(units.size());
-  ret->units = parallel::map(
-    units,
-    [&] (std::unique_ptr<UnitEmitter>& ue) {
-      return parse_unit(*ret, std::move(ue));
-    }
-  );
-  return ret;
-}
-
-//////////////////////////////////////////////////////////////////////
-
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -555,7 +539,21 @@ void hard_constprop(bool f) {
 
 //////////////////////////////////////////////////////////////////////
 
-void whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues,
+namespace php {
+
+void ProgramPtr::clear() { delete m_program; }
+
+}
+
+php::ProgramPtr make_program() {
+  return php::ProgramPtr{ new php::Program };
+}
+
+void add_unit_to_program(const UnitEmitter* ue, php::Program& program) {
+  parse_unit(program, ue);
+}
+
+void whole_program(php::ProgramPtr program,
                    UnitEmitterQueue& ueq,
                    std::unique_ptr<ArrayTypeTable::Builder>& arrTable,
                    int num_threads) {
@@ -566,8 +564,6 @@ void whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues,
   if (num_threads > 0) {
     parallel::num_threads = num_threads;
   }
-
-  auto program = parse_program(std::move(ues));
 
   state_after("parse", *program);
 

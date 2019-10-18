@@ -617,16 +617,10 @@ struct Unit {
  * A php Program is a set of compilation units.
  */
 struct Program {
-  explicit Program(size_t numUnitsGuess) :
-      nextFuncId(0),
-      nextConstInit(0),
-      constInits(100 + (numUnitsGuess / 4), 0) {
-  }
-
+  std::mutex lock;
+  std::atomic<uint32_t> nextFuncId{};
   std::vector<std::unique_ptr<Unit>> units;
-  std::atomic<uint32_t> nextFuncId;
-  std::atomic<size_t> nextConstInit;
-  AtomicVector<php::Func*> constInits;
+  std::vector<php::Func*> constInits;
 };
 
 //////////////////////////////////////////////////////////////////////

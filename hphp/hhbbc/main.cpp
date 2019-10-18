@@ -46,6 +46,7 @@
 #include "hphp/hhbbc/options.h"
 #include "hphp/hhbbc/stats.h"
 #include "hphp/hhbbc/parallel.h"
+#include "hphp/hhbbc/representation.h"
 
 #include "hphp/util/rds-local.h"
 
@@ -266,8 +267,8 @@ void open_repo(const std::string& path) {
   Repo::get();
 }
 
-std::pair<std::vector<std::unique_ptr<UnitEmitter>>,
-          std::vector<SString>> load_input() {
+template<typename F>
+std::vector<SString> load_input(F&& fun) {
   trace_time timer("load units");
 
   open_repo(input_repo);
@@ -318,15 +319,21 @@ std::pair<std::vector<std::unique_ptr<UnitEmitter>>,
   RuntimeOption::EvalArrayProvenance = gd.ArrayProvenance;
   RuntimeOption::StrictArrayFillKeys = gd.StrictArrayFillKeys;
 
-  return {
-    parallel::map(Repo::get().enumerateUnits(RepoIdCentral, true),
-      [&] (const std::pair<std::string,SHA1>& kv) {
-        return Repo::get().urp().loadEmitter(
+  auto const units = Repo::get().enumerateUnits(RepoIdCentral, true);
+  auto const size = units.size();
+  fun(size, nullptr);
+  parallel::for_each(
+    units,
+    [&] (const std::pair<std::string,SHA1>& kv) {
+      fun(
+        size,
+        Repo::get().urp().loadEmitter(
           kv.first, kv.second, Native::s_noNativeFuncs
-        );
-      }),
-    Repo().get().global().APCProfile
-  };
+        )
+      );
+    }
+  );
+  return Repo().get().global().APCProfile;
 }
 
 void write_units(UnitEmitterQueue& ueq) {
@@ -423,10 +430,19 @@ void write_global_data(
 }
 
 void compile_repo() {
-  auto input = load_input();
-  if (logging) {
-    std::cout << folly::format("{} units\n", input.first.size());
-  }
+  auto program = make_program();
+
+  auto apcProfile = load_input(
+    [&] (size_t size, std::unique_ptr<UnitEmitter> ue) {
+      if (!ue) {
+        if (logging) {
+          std::cout << folly::format("{} units\n", size);
+        }
+        return;
+      }
+      add_unit_to_program(ue.get(), *program);
+    }
+  );
 
   UnitEmitterQueue ueq;
   std::unique_ptr<ArrayTypeTable::Builder> arrTable;
@@ -434,32 +450,35 @@ void compile_repo() {
     [&] {
       HphpSession _{Treadmill::SessionKind::CompileRepo};
       Trace::BumpRelease bumper(Trace::hhbbc_time, -1, logging);
-      whole_program(std::move(input.first), ueq, arrTable);
+      whole_program(std::move(program), ueq, arrTable);
     }
   );
   wp_thread.start();
   write_units(ueq);
-  write_global_data(arrTable, input.second);
+  write_global_data(arrTable, apcProfile);
   wp_thread.waitForEnd();
 }
 
 void print_repo_bytecode_stats() {
-  std::array<uint64_t,Op_count> op_counts{};
+  std::array<std::atomic<uint64_t>,Op_count> op_counts{};
 
-  auto const input = load_input();
-  for (auto const& ue : input.first) {
-    auto pc = ue->bc();
-    auto const end = pc + ue->bcPos();
-    for (; pc < end; pc += instrLen(pc)) {
-      op_counts[static_cast<uint16_t>(peek_op(pc))]++;
+  auto const input = load_input(
+    [&] (size_t, std::unique_ptr<UnitEmitter> ue) {
+      if (!ue) return;
+      auto pc = ue->bc();
+      auto const end = pc + ue->bcPos();
+      for (; pc < end; pc += instrLen(pc)) {
+        auto &opc = op_counts[static_cast<uint16_t>(peek_op(pc))];
+        opc.fetch_add(1, std::memory_order_relaxed);
+      }
     }
-  }
+  );
 
   for (auto i = uint32_t{}; i < op_counts.size(); ++i) {
     std::cout << folly::format(
       "{: <20} {}\n",
       opcodeToName(static_cast<Op>(i)),
-      op_counts[i]
+      op_counts[i].load(std::memory_order_relaxed)
     );
   }
 }

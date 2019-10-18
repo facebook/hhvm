@@ -19,6 +19,8 @@
 
 #include "hphp/compiler/option.h"
 
+#include "hphp/hhbbc/hhbbc.h"
+
 #include "hphp/runtime/vm/as.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 
@@ -82,14 +84,15 @@ struct AnalysisResult : std::enable_shared_from_this<AnalysisResult> {
 
   void addHhasFile(std::unique_ptr<UnitEmitter>&& ue);
   std::vector<std::unique_ptr<UnitEmitter>> getHhasFiles();
+  HHBBC::php::ProgramPtr& program() { return m_program; }
 private:
   std::function<void(AnalysisResultPtr)> m_finish;
   Package *m_package;
   bool m_parseOnDemand;
   std::vector<std::string> m_parseOnDemandDirs;
   std::vector<std::unique_ptr<UnitEmitter>> m_hhasFiles;
-
   std::string m_outputPath;
+  HHBBC::php::ProgramPtr m_program;
 
   Mutex m_mutex;
 

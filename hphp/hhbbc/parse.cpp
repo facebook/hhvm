@@ -68,16 +68,6 @@ const StaticString s___NoContextSensitiveAnalysis(
 
 //////////////////////////////////////////////////////////////////////
 
-void record_const_init(php::Program& prog, php::Func* func) {
-  auto id = prog.nextConstInit.fetch_add(1, std::memory_order_relaxed);
-  prog.constInits.ensureSize(id + 1);
-
-  DEBUG_ONLY auto const oldVal = prog.constInits.exchange(id, func);
-  assert(oldVal == 0);
-}
-
-//////////////////////////////////////////////////////////////////////
-
 struct ParseUnitState {
   std::atomic<uint32_t>& nextFuncId;
 
@@ -1083,8 +1073,7 @@ void find_additional_metadata(const ParseUnitState& puState,
 
 }
 
-std::unique_ptr<php::Unit> parse_unit(php::Program& prog,
-                                      std::unique_ptr<UnitEmitter> uep) {
+void parse_unit(php::Program& prog, const UnitEmitter* uep) {
   Trace::Bump bumper{Trace::hhbbc_parse, kSystemLibBump, uep->isASystemLib()};
   FTRACE(2, "parse_unit {}\n", uep->m_filepath->data());
 
@@ -1101,7 +1090,6 @@ std::unique_ptr<php::Unit> parse_unit(php::Program& prog,
   auto const& ue = *uep;
 
   auto ret      = std::make_unique<php::Unit>();
-  ret->sha1     = ue.sha1();
   ret->filename = ue.m_filepath;
   ret->isHHFile = ue.m_isHHFile;
   ret->metaData = ue.m_metaData;
@@ -1150,12 +1138,14 @@ std::unique_ptr<php::Unit> parse_unit(php::Program& prog,
 
   find_additional_metadata(puState, ret.get());
 
-  for (auto const item : puState.constPassFuncs) {
-    record_const_init(prog, item);
-  }
-
   assert(check(*ret));
-  return ret;
+
+  std::lock_guard<std::mutex> _{prog.lock};
+  for (auto const item : puState.constPassFuncs) {
+    prog.constInits.push_back(item);
+  }
+  ret->sha1 = SHA1 { prog.units.size() };
+  prog.units.push_back(std::move(ret));
 }
 
 //////////////////////////////////////////////////////////////////////

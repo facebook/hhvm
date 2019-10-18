@@ -143,8 +143,6 @@ int phpTarget(const CompilerOptions &po, AnalysisResultPtr ar);
 void hhbcTargetInit(const CompilerOptions &po, AnalysisResultPtr ar);
 int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr&& ar,
                AsyncFileCacheSaver &fcThread);
-int runTargetCheck(const CompilerOptions &po, AnalysisResultPtr&& ar,
-                   AsyncFileCacheSaver &fcThread);
 int runTarget(const CompilerOptions &po);
 void pcre_init();
 
@@ -607,10 +605,8 @@ int process(const CompilerOptions &po) {
     });
 
   int ret = 0;
-  if (po.target == "hhbc") {
+  if (po.target == "hhbc" || po.target == "run") {
     ret = hhbcTarget(po, std::move(ar), fileCacheThread);
-  } else if (po.target == "run") {
-    ret = runTargetCheck(po, std::move(ar), fileCacheThread);
   } else if (po.target == "filecache" || po.target == "cache") {
     ar->finish();
   } else {
@@ -727,16 +723,6 @@ int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr&& ar,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-int runTargetCheck(const CompilerOptions &po, AnalysisResultPtr&& ar,
-                   AsyncFileCacheSaver &fcThread) {
-  // generate code
-  if (hhbcTarget(po, std::move(ar), fcThread)) {
-    return 1;
-  }
-
-  return 0;
-}
 
 int runTarget(const CompilerOptions &po) {
   int ret = 0;

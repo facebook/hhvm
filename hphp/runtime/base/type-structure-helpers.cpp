@@ -723,11 +723,25 @@ bool checkTypeStructureMatchesCellImpl(
         break;
       }
       auto const elems = data.parr;
+      bool willProvenanceLog = false;
+      auto const checkProvLogAtExit = [&] {
+        if (UNLIKELY(result && willProvenanceLog)) {
+          raise_array_serialization_notice("is_tuple", elems);
+          result = false;
+        }
+      };
       if (!elems->isVecOrVArray()) {
         if (!RuntimeOption::EvalHackArrDVArrs && elems->isPHPArray()) {
           // TODO(T29967020) If this is pre-migration, we should allow darrays
           // and plain PHP arrays for tuples and log a warning.
           // Fall through here.
+        } else if (UNLIKELY(!genErrorMessage &&
+                            RuntimeOption::EvalLogArrayProvenance &&
+                            isVecType(type))) {
+          // We want to log proevnance only for the vecs that _would_ have
+          // passed the remainder of this check, so we still need to do the work
+          willProvenanceLog = true;
+          // fall through
         } else {
           result = false;
           break;
@@ -735,6 +749,7 @@ bool checkTypeStructureMatchesCellImpl(
       }
       if (!isOrAsOp) {
         result = true;
+        checkProvLogAtExit();
         break;
       }
       assertx(ts.exists(s_elem_types));
@@ -789,6 +804,7 @@ bool checkTypeStructureMatchesCellImpl(
         }
       }
       result = elemsDidMatch;
+      checkProvLogAtExit();
       break;
     }
     case TypeStructure::Kind::T_shape: {
@@ -797,11 +813,25 @@ bool checkTypeStructureMatchesCellImpl(
         break;
       }
       auto const fields = data.parr;
+      bool willProvenanceLog = false;
+      auto const checkProvLogAtExit = [&] {
+        if (UNLIKELY(result && willProvenanceLog)) {
+          raise_array_serialization_notice("is_shape", fields);
+          result = false;
+        }
+      };
       if (!fields->isDictOrDArray()) {
         if (!RuntimeOption::EvalHackArrDVArrs && fields->isPHPArray()) {
           // TODO(T29967020) If this is pre-migration, we should allow varrays
           // and plain PHP arrays for shapes and log a warning.
           // Fall through here.
+        } else if (UNLIKELY(!genErrorMessage &&
+                            RuntimeOption::EvalLogArrayProvenance &&
+                            isDictType(type))) {
+          // We want to log proevnance only for the dicts that _would_ have
+          // passed the remainder of this check, so we still need to do the work
+          willProvenanceLog = true;
+          // fall through
         } else {
           result = false;
           break;
@@ -809,6 +839,7 @@ bool checkTypeStructureMatchesCellImpl(
       }
       if (!isOrAsOp) {
         result = true;
+        checkProvLogAtExit();
         break;
       }
       assertx(ts.exists(s_fields));
@@ -885,6 +916,7 @@ bool checkTypeStructureMatchesCellImpl(
         }
       }
       result = !warn;
+      checkProvLogAtExit();
       break;
     }
     case TypeStructure::Kind::T_array:

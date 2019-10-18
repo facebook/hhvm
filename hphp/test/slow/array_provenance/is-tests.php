@@ -1,5 +1,8 @@
 <?hh
 
+type AShape = shape("foo" => int, "bar" => int);
+type ATuple = (int, int, int);
+
 function coerce_dict($arr) {
     try {
         var_dump($arr as dict<_,_>);
@@ -24,10 +27,26 @@ function coerce_vec_or_dict($arr) {
     }
 }
 
+function coerce_shape($arr) {
+    try {
+        var_dump($arr as AShape);
+    } catch (Exception $e) {
+        var_dump("failed");
+    }
+}
+
+function coerce_tuple($arr) {
+    try {
+        var_dump($arr as ATuple);
+    } catch (Exception $e) {
+        var_dump("failed");
+    }
+}
+
 <<__EntryPoint>>
 function main() {
     $a = vec[1, 2, 3];
-    $b = dict[4 => 5, 5 => 6];
+    $b = dict["foo" => 5, "bar" => 6];
     print "---- is vec_or_dict ----\n";
     var_dump($a is vec_or_dict);
     var_dump($b is vec_or_dict);
@@ -52,4 +71,31 @@ function main() {
     print "---- is_dict ----\n";
     var_dump(is_dict($a));
     var_dump(is_dict($b));
+    print "--- is \$tuple ----\n";
+    var_dump($a is ATuple);
+    var_dump($b is ATuple);
+    print "--- as \$tuple ----\n";
+    coerce_tuple($a);
+    coerce_tuple($b);
+    print "--- is \$shape ----\n";
+    var_dump($a is AShape);
+    var_dump($b is AShape);
+    print "--- as \$tuple ----\n";
+    coerce_shape($a);
+    coerce_shape($b);
+
+    $c = vec[false, true, dict[]];
+    $d = dict["george"=> "curious"];
+    print "--- is \$tuple  (no match) ----\n";
+    var_dump($c is ATuple);
+    var_dump($d is ATuple);
+    print "--- as \$tuple (no match) ----\n";
+    coerce_tuple($c);
+    coerce_tuple($d);
+    print "--- is \$shape (no match) ----\n";
+    var_dump($c is AShape);
+    var_dump($d is AShape);
+    print "--- as \$tuple (no match) ----\n";
+    coerce_shape($c);
+    coerce_shape($d);
 }

@@ -36,6 +36,7 @@
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/interp-helpers.h"
 #include "hphp/runtime/vm/unit-util.h"
@@ -406,7 +407,7 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
   if (LIKELY(func->maybeIntercepted() == 0)) return true;
 
   // Intercept only original generator / async function calls, not resumption.
-  if (ar->resumed()) return true;
+  if (isResumed(ar)) return true;
 
   // Don't intercept inout wrappers. We'll intercept the inner function.
   if (func->isInOutWrapper()) return true;
@@ -785,7 +786,7 @@ void EventHook::onFunctionSuspendAwaitEF(ActRec* suspending,
                                          const ActRec* resumableAR) {
   assertx(suspending->func()->isAsyncFunction());
   assertx(suspending->func() == resumableAR->func());
-  assertx(resumableAR->resumed());
+  assertx(isResumed(resumableAR));
 
   // The locals were already teleported from suspending to resumableAR.
   suspending->setLocalsDecRefd();
@@ -813,7 +814,7 @@ void EventHook::onFunctionSuspendAwaitEF(ActRec* suspending,
 // at Await.
 void EventHook::onFunctionSuspendAwaitEG(ActRec* suspending) {
   assertx(suspending->func()->isAsyncGenerator());
-  assertx(suspending->resumed());
+  assertx(isResumed(suspending));
 
   // The generator is still being executed eagerly, make it look like that.
   auto const gen = frame_async_generator(suspending);
@@ -841,7 +842,7 @@ void EventHook::onFunctionSuspendAwaitEG(ActRec* suspending) {
 // is the WH we are going to block on.
 void EventHook::onFunctionSuspendAwaitR(ActRec* suspending, ObjectData* child) {
   assertx(suspending->func()->isAsync());
-  assertx(suspending->resumed());
+  assertx(isResumed(suspending));
   assertx(child->isWaitHandle());
 
   auto const flags = handle_request_surprise();
@@ -871,7 +872,7 @@ void EventHook::onFunctionSuspendCreateCont(ActRec* suspending,
                                             const ActRec* resumableAR) {
   assertx(suspending->func()->isGenerator());
   assertx(suspending->func() == resumableAR->func());
-  assertx(resumableAR->resumed());
+  assertx(isResumed(resumableAR));
 
   // The locals were already teleported from suspending to resumableAR.
   suspending->setLocalsDecRefd();
@@ -895,7 +896,7 @@ void EventHook::onFunctionSuspendCreateCont(ActRec* suspending,
 // Generator or async generator suspending at Yield.
 void EventHook::onFunctionSuspendYield(ActRec* suspending) {
   assertx(suspending->func()->isGenerator());
-  assertx(suspending->resumed());
+  assertx(isResumed(suspending));
 
   auto const flags = handle_request_surprise();
   onFunctionExit(suspending, nullptr, false, nullptr, flags, true);
@@ -923,7 +924,7 @@ void EventHook::onFunctionReturn(ActRec* ar, TypedValue retval) {
     onFunctionExit(ar, &retval, false, nullptr, flags, false);
 
     // Async profiler
-    if ((flags & AsyncEventHookFlag) && ar->resumed() &&
+    if ((flags & AsyncEventHookFlag) && isResumed(ar) &&
         ar->func()->isAsync()) {
       auto session = AsioSession::Get();
       if (session->hasOnResumableSuccess()) {

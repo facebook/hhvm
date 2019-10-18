@@ -23,6 +23,7 @@
 #include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/runtime.h"
 
 namespace HPHP {
@@ -50,7 +51,7 @@ void HHVM_STATIC_METHOD(ResumableWaitHandle, setOnFailCallback,
 
 c_ResumableWaitHandle* c_ResumableWaitHandle::getRunning(ActRec* fp) {
   for (; fp; fp = g_context->getPrevVMState(fp)) {
-    if (fp->resumed() && fp->func()->isAsync()) {
+    if (isResumed(fp) && fp->func()->isAsync()) {
       if (fp->func()->isGenerator()) {
         // async generator
         auto generator = frame_async_generator(fp);

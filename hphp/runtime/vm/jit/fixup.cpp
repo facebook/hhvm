@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/fixup.h"
 
 #include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/vm/jit/abi-arm.h"
@@ -36,8 +37,7 @@ bool isVMFrame(const ActRec* ar, bool may_be_non_runtime) {
   assertx(
     !ret ||
     may_be_non_runtime ||
-    isValidVMStackAddress(ar) ||
-    (ar->m_func->validate(), ar->resumed())
+    (ar->m_func->validate(), true)
   );
   return ret;
 }
@@ -118,7 +118,7 @@ void regsFromActRec(TCA tca, const ActRec* ar, const Fixup& fixup,
   outRegs->fp = ar;
   outRegs->retAddr = tca;
 
-  if (UNLIKELY(ar->resumed())) {
+  if (UNLIKELY(isResumed(ar))) {
     TypedValue* stackBase = Stack::resumableStackBase(ar);
     outRegs->sp = stackBase - fixup.spOffset;
   } else {

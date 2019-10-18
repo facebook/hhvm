@@ -28,6 +28,7 @@
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/std/ext_std_misc.h"
 #include "hphp/runtime/vm/event-hook.h"
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/cycles.h"
@@ -1147,7 +1148,7 @@ struct MemoProfiler final : Profiler {
     ActRec *ar = vmfp();
     // Lots of random cases to skip just to keep this simple for
     // now. There's no reason not to do more later.
-    if (ar->m_func->isCPPBuiltin() || ar->resumed()) return;
+    if (ar->m_func->isCPPBuiltin() || isResumed(ar)) return;
     auto ret = tvAsCVarRef(retval);
     if (ret.isNull()) return;
     if (!(ret.isString() || ret.isObject() || ret.isArray())) return;

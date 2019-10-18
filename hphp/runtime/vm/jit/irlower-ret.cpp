@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/resumable.h"
 
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi.h"
@@ -136,7 +137,7 @@ void asyncFuncRetImpl(IRLS& env, const IRInstruction* inst, TCA target) {
 void traceRet(ActRec* fp, Cell* sp, void* rip) {
   if (rip == tc::ustubs().callToExit) return;
   checkFrame(fp, sp, false /* fullCheck */);
-  assertx(sp <= (Cell*)fp || fp->resumed());
+  assertx(sp <= (Cell*)fp || isResumed(fp));
 }
 
 void cgRetCtrl(IRLS& env, const IRInstruction* inst) {

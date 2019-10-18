@@ -52,7 +52,7 @@ ObjectData*
 AsyncGenerator::Create(const ActRec* fp, size_t numSlots,
                        jit::TCA resumeAddr, Offset resumeOffset) {
   assertx(fp);
-  assertx(!fp->resumed());
+  assertx(!isResumed(fp));
   assertx(fp->func()->isAsyncGenerator());
   const size_t frameSz = Resumable::getFrameSize(numSlots);
   const size_t genSz = genSize(sizeof(AsyncGenerator), frameSz);

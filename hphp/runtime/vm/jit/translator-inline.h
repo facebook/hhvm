@@ -43,7 +43,7 @@ inline SrcKey liveSK() {
 }
 inline jit::FPInvOffset liveSpOff() {
   Cell* fp = reinterpret_cast<Cell*>(vmfp());
-  if (liveFrame()->resumed()) {
+  if (isResumed(liveFrame())) {
     fp = (Cell*)Stack::resumableStackBase((ActRec*)fp);
   }
   return jit::FPInvOffset{safe_cast<int32_t>(fp - vmsp())};

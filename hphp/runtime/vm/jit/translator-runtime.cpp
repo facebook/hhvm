@@ -51,6 +51,7 @@
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/method-lookup.h"
 #include "hphp/runtime/vm/reified-generics.h"
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/unit-util.h"
@@ -779,13 +780,13 @@ void checkFrame(ActRec* fp, Cell* sp, bool fullCheck) {
     assertx(fp->getVarEnv()->getFP() == fp);
   }
   int numLocals = func->numLocals();
-  assertx(sp <= (Cell*)fp - func->numSlotsInFrame() || fp->resumed());
+  assertx(sp <= (Cell*)fp - func->numSlotsInFrame() || isResumed(fp));
 
   if (!fullCheck) return;
 
   int numParams = func->numParams();
   for (int i = 0; i < numLocals; i++) {
-    if (i >= numParams && fp->resumed() && i < func->numNamedLocals()) {
+    if (i >= numParams && isResumed(fp) && i < func->numNamedLocals()) {
       continue;
     }
     assertx(tvIsPlausible(*frame_local(fp, i)));

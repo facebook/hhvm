@@ -21,6 +21,7 @@
 #include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/hhbc-codec.h"
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
@@ -215,7 +216,7 @@ void CmdNext::stepCurrentLine(CmdInterrupt& interrupt, ActRec* fp, PC pc) {
     auto wh = c_Awaitable::fromCell(*vmsp());
     if (wh && !wh->isFinished()) {
       TRACE(2, "CmdNext: encountered blocking await\n");
-      if (fp->resumed()) {
+      if (isResumed(fp)) {
         setupStepSuspend(fp, pc);
         removeLocationFilter();
       } else {
@@ -231,14 +232,14 @@ void CmdNext::stepCurrentLine(CmdInterrupt& interrupt, ActRec* fp, PC pc) {
       return;
     }
   } else if (op == OpYield || op == OpYieldK) {
-    assertx(fp->resumed());
+    assertx(isResumed(fp));
     assertx(fp->func()->isGenerator());
     TRACE(2, "CmdNext: encountered yield from generator\n");
     setupStepOuts();
     setupStepSuspend(fp, pc);
     removeLocationFilter();
     return;
-  } else if (op == OpRetC && fp->resumed()) {
+  } else if (op == OpRetC && isResumed(fp)) {
     assertx(fp->func()->isResumable());
     TRACE(2, "CmdNext: encountered return from resumed resumable\n");
     setupStepOuts();
@@ -309,7 +310,7 @@ void CmdNext::cleanupStepResumable() {
 // resumable, or we'll stop when we get back into it, we know the object
 // will remain alive.
 void* CmdNext::getResumableId(ActRec* fp) {
-  assertx(fp->resumed());
+  assertx(isResumed(fp));
   assertx(fp->func()->isResumable());
   TRACE(2, "CmdNext: resumable tag %p for %s\n", fp,
         fp->func()->name()->data());

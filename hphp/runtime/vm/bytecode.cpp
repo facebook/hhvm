@@ -892,17 +892,17 @@ bool Stack::wouldOverflow(int numCells) const {
 }
 
 TypedValue* Stack::anyFrameStackBase(const ActRec* fp) {
-  return fp->resumed() ? Stack::resumableStackBase(fp)
+  return isResumed(fp) ? Stack::resumableStackBase(fp)
                        : Stack::frameStackBase(fp);
 }
 
 TypedValue* Stack::frameStackBase(const ActRec* fp) {
-  assertx(!fp->resumed());
+  assertx(!isResumed(fp));
   return (TypedValue*)fp - fp->func()->numSlotsInFrame();
 }
 
 TypedValue* Stack::resumableStackBase(const ActRec* fp) {
-  assertx(fp->resumed());
+  assertx(isResumed(fp));
   auto sfp = fp->sfp();
   if (sfp) {
     // The non-reentrant case occurs when a non-async or async generator is
@@ -1148,7 +1148,7 @@ uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
 }
 
 static void prepareFuncEntry(ActRec *ar, StackArgsState stk, Array&& generics) {
-  assertx(!ar->resumed());
+  assertx(!isResumed(ar));
   const Func* func = ar->m_func;
   Offset firstDVInitializer = InvalidAbsoluteOffset;
   bool raiseMissingArgumentWarnings = false;
@@ -1276,7 +1276,7 @@ static void dispatch();
 void enterVMAtPseudoMain(ActRec* enterFnAr, VarEnv* varEnv) {
   assertx(enterFnAr);
   assertx(enterFnAr->func()->isPseudoMain());
-  assertx(!enterFnAr->resumed());
+  assertx(!isResumed(enterFnAr));
   Stats::inc(Stats::VMEnter);
 
   enterFnAr->setVarEnv(varEnv);
@@ -1310,7 +1310,7 @@ void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk, Array&& generics,
                    bool hasInOut, bool dynamicCall,
                    bool allowDynCallNoPointer) {
   assertx(enterFnAr);
-  assertx(!enterFnAr->resumed());
+  assertx(!isResumed(enterFnAr));
   Stats::inc(Stats::VMEnter);
 
   const bool useJit = RID().getJit() && !RID().getJitFolding();
@@ -1396,7 +1396,7 @@ void unwindPreventReturnToTC(ActRec* ar) {
   if (isReturnHelper(savedRip)) return;
 
   auto& ustubs = jit::tc::ustubs();
-  if (ar->resumed()) {
+  if (isResumed(ar)) {
     // async functions use callToExit stub
     assertx(ar->func()->isGenerator());
     ar->setJitReturn(ar->func()->isAsync()
@@ -1420,7 +1420,7 @@ void debuggerPreventReturnToTC(ActRec* ar) {
   jit::stashDebuggerCatch(ar);
 
   auto& ustubs = jit::tc::ustubs();
-  if (ar->resumed()) {
+  if (isResumed(ar)) {
     // async functions use callToExit stub
     assertx(ar->func()->isGenerator());
     ar->setJitReturn(ar->func()->isAsync()
@@ -2812,7 +2812,7 @@ OPTBLD_INLINE void returnToCaller(PC& pc, ActRec* sfp, Offset callOff) {
 template <bool suspended>
 OPTBLD_INLINE TCA ret(PC& pc) {
   assertx(!suspended || vmfp()->func()->isAsyncFunction());
-  assertx(!suspended || !vmfp()->resumed());
+  assertx(!suspended || !isResumed(vmfp()));
 
   auto const jitReturn = jitReturnPre(vmfp());
 
@@ -2834,7 +2834,7 @@ OPTBLD_INLINE TCA ret(PC& pc) {
   ActRec* sfp = vmfp()->sfp();
   Offset callOff = vmfp()->m_callOff;
 
-  if (LIKELY(!vmfp()->resumed())) {
+  if (LIKELY(!isResumed(vmfp()))) {
     // If in an eagerly executed async function, wrap the return value into
     // succeeded StaticWaitHandle. Async eager return requests are currently
     // not respected, as we don't have a way to obtain the async eager offset.
@@ -2895,7 +2895,7 @@ OPTBLD_INLINE TCA iopRetC(PC& pc) {
 
 OPTBLD_INLINE TCA iopRetCSuspended(PC& pc) {
   assertx(vmfp()->func()->isAsyncFunction());
-  assertx(!vmfp()->resumed());
+  assertx(!isResumed(vmfp()));
   return ret<true>(pc);
 }
 
@@ -3609,7 +3609,7 @@ OPTBLD_INLINE void iopMemoGetEager(PC& pc,
                                    PC suspended,
                                    LocalRange keys) {
   assertx(vmfp()->m_func->isAsyncFunction());
-  assertx(!vmfp()->resumed());
+  assertx(!isResumed(vmfp()));
 
   if (auto const c = memoGetImpl(keys)) {
     cellDup(*c, *vmStack().allocC());
@@ -3737,7 +3737,7 @@ OPTBLD_INLINE void iopMemoSet(LocalRange keys) {
 
 OPTBLD_INLINE void iopMemoSetEager(LocalRange keys) {
   assertx(vmfp()->m_func->isAsyncFunction());
-  assertx(!vmfp()->resumed());
+  assertx(!isResumed(vmfp()));
   auto val = *vmStack().topC();
   assertx(val.m_type != KindOfUninit);
   val.m_aux.u_asyncEagerReturnFlag = static_cast<uint32_t>(-1);
@@ -5677,7 +5677,7 @@ OPTBLD_INLINE TCA iopCreateCont(PC& pc) {
   auto const func = fp->func();
   auto const numSlots = func->numSlotsInFrame();
   auto const resumeOffset = func->unit()->offsetOf(pc);
-  assertx(!fp->resumed());
+  assertx(!isResumed(fp));
   assertx(func->isGenerator());
 
   // Create the {Async,}Generator object. Create takes care of copying local
@@ -5772,7 +5772,7 @@ OPTBLD_INLINE TCA yield(PC& pc, const Cell* key, const Cell value) {
   auto const fp = vmfp();
   auto const func = fp->func();
   auto const resumeOffset = func->unit()->offsetOf(pc);
-  assertx(fp->resumed());
+  assertx(isResumed(fp));
   assertx(func->isGenerator());
 
   EventHook::FunctionSuspendYield(fp);

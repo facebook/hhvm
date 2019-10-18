@@ -70,6 +70,7 @@
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/vm/hh-utils.h"
 #include "hphp/runtime/vm/interp-helpers.h"
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/runtime-compiler.h"
 #include "hphp/runtime/vm/treadmill.h"
@@ -1796,7 +1797,7 @@ TypedValue ExecutionContext::invokeFuncFew(
 static void prepareAsyncFuncEntry(ActRec* enterFnAr, Resumable* resumable) {
   assertx(enterFnAr);
   assertx(enterFnAr->func()->isAsync());
-  assertx(enterFnAr->resumed());
+  assertx(isResumed(enterFnAr));
   assertx(resumable);
 
   vmfp() = enterFnAr;
@@ -1874,7 +1875,7 @@ ActRec* ExecutionContext::getPrevVMState(const ActRec* fp,
   ActRec* prevFp = fp->sfp();
   if (LIKELY(prevFp != nullptr)) {
     if (prevSp) {
-      if (UNLIKELY(fp->resumed())) {
+      if (UNLIKELY(isResumed(fp))) {
         assertx(fp->func()->isGenerator());
         *prevSp = (TypedValue*)prevFp - prevFp->func()->numSlotsInFrame();
       } else {

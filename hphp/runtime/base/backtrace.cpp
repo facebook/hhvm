@@ -25,6 +25,7 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/reified-generics.h"
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/runtime/vm/jit/tc.h"
@@ -247,7 +248,7 @@ BTFrame getPrevActRec(
   }
 
    auto const wh = [&]() -> c_WaitableWaitHandle* {
-    if (!fp || !fp->func() || !fp->resumed()) return nullptr;
+    if (!fp || !fp->func() || !isResumed(fp)) return nullptr;
 
     if (fp->func()->isAsyncFunction()) {
       return frame_afwh(fp);

@@ -50,12 +50,8 @@ inline bool ActRec::localsDecRefd() const {
   return flags() & LocalsDecRefd;
 }
 
-inline bool ActRec::resumed() const {
-  return (flags() & kExecutionModeMask) == InResumed;
-}
-
 inline bool ActRec::isAsyncEagerReturn() const {
-  return (flags() & kExecutionModeMask) == AsyncEagerRet;
+  return flags() & AsyncEagerRet;
 }
 
 inline uint32_t ActRec::encodeNumArgsAndFlags(uint32_t numArgs, Flags flags) {
@@ -74,14 +70,6 @@ inline void ActRec::setNumArgs(uint32_t numArgs) {
 
 inline void ActRec::setLocalsDecRefd() {
   m_numArgsAndFlags |= LocalsDecRefd;
-}
-
-inline void ActRec::setResumed() {
-  assertx((flags() & ~AsyncEagerRet) == Flags::None);
-  m_numArgsAndFlags = encodeNumArgsAndFlags(
-    numArgs(),
-    static_cast<Flags>(InResumed)
-  );
 }
 
 inline void ActRec::setAsyncEagerReturn() {

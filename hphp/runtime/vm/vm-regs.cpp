@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/vm/call-flags.h"
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/jit/fixup.h"
 
 namespace HPHP {
@@ -41,7 +42,7 @@ VMRegAnchor::VMRegAnchor(CallFlags callFlags, ActRec* ar)
 
   auto prevAr = g_context->getOuterVMFrame(ar);
   const Func* prevF = prevAr->m_func;
-  assertx(!ar->resumed());
+  assertx(!isResumed(ar));
   auto& regs = vmRegs();
   auto const numInputs = ar->numArgs() + (callFlags.hasGenerics() ? 1 : 0);
   regs.stack.top() = (TypedValue*)ar - numInputs;

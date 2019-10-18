@@ -102,17 +102,15 @@ struct ActRec {
     // This bit can be independently set on ActRecs with any other flag state.
     // It's used by the unwinder to know that an ActRec has been partially torn
     // down (locals freed).
-    LocalsDecRefd = (1u << 29),
+    LocalsDecRefd = (1u << 30),
 
-    // Three mutually exclusive execution mode states in these 2 bits.
-    InResumed     = (1u << 30),
+    // Async eager return was requested.
     AsyncEagerRet = (1u << 31),
   };
 
-  static constexpr int kNumArgsBits = 29;
+  static constexpr int kNumArgsBits = 30;
   static constexpr int kNumArgsMask = (1 << kNumArgsBits) - 1;
   static constexpr int kFlagsMask = ~kNumArgsMask;
-  static constexpr int kExecutionModeMask = ~LocalsDecRefd;
 
   /*
    * To conserve space, we use unions for pairs of mutually exclusive fields
@@ -177,7 +175,6 @@ struct ActRec {
    */
   Flags flags() const;
   bool localsDecRefd() const;
-  bool resumed() const;
   bool isAsyncEagerReturn() const;
 
   /*
@@ -198,7 +195,6 @@ struct ActRec {
    * Flags setters.
    */
   void setLocalsDecRefd();
-  void setResumed();
   void setAsyncEagerReturn();
 
   /////////////////////////////////////////////////////////////////////////////

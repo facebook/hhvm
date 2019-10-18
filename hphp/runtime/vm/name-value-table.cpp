@@ -94,8 +94,8 @@ NameValueTable::~NameValueTable() {
 void NameValueTable::suspend(const ActRec* oldFP, ActRec* newFP) {
   assertx(m_fp == oldFP);
   assertx(oldFP->func() == newFP->func());
-  assertx(!oldFP->resumed());
-  assertx(newFP->resumed());
+  assertx(!isResumed(oldFP));
+  assertx(isResumed(newFP));
 
   m_fp = newFP;
 }

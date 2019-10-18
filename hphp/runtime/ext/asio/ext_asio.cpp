@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
@@ -40,7 +41,7 @@ namespace {
 c_ResumableWaitHandle* GetResumedWaitHandle() {
   c_ResumableWaitHandle* ret = nullptr;
   walkStack([&] (const ActRec* fp, Offset) {
-    if (fp->resumed() && fp->func()->isAsync()) {
+    if (isResumed(fp) && fp->func()->isAsync()) {
       if (fp->func()->isGenerator()) {
         // async generator
         auto generator = frame_async_generator(fp);

@@ -44,7 +44,7 @@ folly::Optional<ResumeMode> nameToResumeMode(const std::string& name) {
 }
 
 ResumeMode resumeModeFromActRecImpl(ActRec* ar) {
-  assertx(ar->resumed());
+  assertx(isResumed(ar));
   auto const func = ar->func();
   if (LIKELY(func->isAsyncFunction())) return ResumeMode::Async;
   if (func->isNonAsyncGenerator()) return ResumeMode::GenIter;

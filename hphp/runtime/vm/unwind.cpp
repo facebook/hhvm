@@ -33,6 +33,7 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/hhbc-codec.h"
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/vm-regs.h"
@@ -139,7 +140,7 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
     }
   };
 
-  if (LIKELY(!fp->resumed())) {
+  if (LIKELY(!isResumed(fp))) {
     decRefLocals();
     if (UNLIKELY(func->isAsyncFunction()) &&
         phpException &&
@@ -213,7 +214,7 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
   }
 
   assertx(stack.isValidAddress(reinterpret_cast<uintptr_t>(prevFp)) ||
-         prevFp->resumed());
+          isResumed(prevFp));
   pc = prevFp->func()->unit()->at(callOff + prevFp->func()->base());
   fp = prevFp;
   return phpException;

@@ -53,7 +53,7 @@ c_AsyncFunctionWaitHandle::Create(const ActRec* fp,
                                   Offset resumeOffset,
                                   c_WaitableWaitHandle* child) {
   assertx(fp);
-  assertx(!fp->resumed());
+  assertx(!isResumed(fp));
   assertx(fp->func()->isAsyncFunction());
   assertx(child);
   assertx(child->instanceof(c_WaitableWaitHandle::classof()));

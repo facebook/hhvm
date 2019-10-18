@@ -48,7 +48,7 @@ c_AsyncGeneratorWaitHandle::Create(const ActRec* fp,
                                    Offset resumeOffset,
                                    c_WaitableWaitHandle* child) {
   assertx(fp);
-  assertx(fp->resumed());
+  assertx(isResumed(fp));
   assertx(fp->func()->isAsyncGenerator());
   assertx(child);
   assertx(child->instanceof(c_WaitableWaitHandle::classof()));

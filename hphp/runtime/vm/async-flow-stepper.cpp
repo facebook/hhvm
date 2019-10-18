@@ -20,6 +20,7 @@
 #include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/vm/debugger-hook.h"
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 namespace HPHP {
@@ -191,7 +192,7 @@ void AsyncFlowStepper::handleBlockedAwaitOpcode(PC pc) {
   TRACE(2, "AsyncFlowStepper: encountered blocking await\n");
   setResumeInternalBreakpoint(pc);
   auto fp = vmfp();
-  if (fp->resumed()) {
+  if (isResumed(fp)) {
     // Already in resumed execution mode.
     m_asyncResumableId = fp;
     m_stage = AsyncStepperStage::WaitResume;
@@ -252,7 +253,7 @@ bool AsyncFlowStepper::didResumeBreakpointTrigger(PC pc) {
 }
 
 const ActRec* AsyncFlowStepper::getAsyncResumableId(const ActRec* fp) {
-  assertx(fp->resumed());
+  assertx(isResumed(fp));
   assertx(fp->func()->isResumable());
   return fp;
 }

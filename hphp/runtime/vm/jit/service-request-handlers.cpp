@@ -319,7 +319,7 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
       // cause an assumption that we made earlier to be violated (that `ar` is
       // on the stack), so if we detect this situation we need to fix up the
       // value of `ar`.
-      if (UNLIKELY(caller->resumed() &&
+      if (UNLIKELY(isResumed(caller) &&
                    caller->func()->isNonAsyncGenerator())) {
         auto gen = frame_generator(caller);
         if (gen->m_delegate.m_type == KindOfObject) {

@@ -23,7 +23,9 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/native-data.h"
+#include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/runtime/vm/jit/types.h"
+#include "hphp/util/alloc.h"
 
 namespace HPHP {
 
@@ -60,9 +62,19 @@ enum class ResumeMode : uint8_t {
 char* resumeModeShortName(ResumeMode resumeMode);
 folly::Optional<ResumeMode> nameToResumeMode(const std::string& name);
 
+ALWAYS_INLINE bool isResumed(const ActRec* ar) {
+  assertx(ar && ar->func()->validate());
+  // VM stack does not have resumed ActRecs.
+  if (LIKELY(isValidVMStackAddress(ar))) return false;
+  // Native stack may have fake ActRecs, which are not resumed.
+  if (UNLIKELY(((uintptr_t)ar - s_stackLimit) < s_stackSize)) return false;
+  // All ActRecs on the heap must be resumed.
+  return true;
+}
+
 ResumeMode resumeModeFromActRecImpl(ActRec* ar);
 ALWAYS_INLINE ResumeMode resumeModeFromActRec(ActRec* ar) {
-  if (LIKELY(!ar->resumed())) return ResumeMode::None;
+  if (LIKELY(!isResumed(ar))) return ResumeMode::None;
   return resumeModeFromActRecImpl(ar);
 }
 
@@ -137,7 +149,7 @@ struct alignas(16) Resumable {
   void initialize(const ActRec* fp, jit::TCA resumeAddr,
                   Offset resumeOffset, size_t frameSize, size_t totalSize) {
     assertx(fp);
-    assertx(fp->resumed() == clone);
+    assertx(isResumed(fp) == clone);
     auto const func = fp->func();
     assertx(func);
     assertx(func->isResumable());
@@ -150,9 +162,6 @@ struct alignas(16) Resumable {
       auto src = reinterpret_cast<const char*>(fp) - frameSize;
       auto dst = reinterpret_cast<char*>(actRec()) - frameSize;
       wordcpy(dst, src, frameSize + sizeof(ActRec));
-
-      // Set resumed flag.
-      actRec()->setResumed();
 
       // Suspend VarEnv if needed
       assertx(mayUseVV || !(func->attrs() & AttrMayUseVV));

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<00f8b2ed566bab5c601fe7de82c6db89>>
+// @generated SignedSource<<6b808e404dd398feb50e64b2206d3ff8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -587,7 +587,7 @@ pub struct Gconst<Ex, Fb, En, Hi> {
 pub struct RecordDef<Ex, Fb, En, Hi> {
     pub name: Sid,
     pub extends: Option<Hint>,
-    pub final_: bool,
+    pub abstract_: bool,
     pub fields: Vec<(Sid, Hint, Option<Expr<Ex, Fb, En, Hi>>)>,
     pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
     pub namespace: Nsenv,

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1b0d2e6b08f0315cf1b693fbb683cbd1>>
+// @generated SignedSource<<7faf522d6b46889c615e6a1c2e1f9ea3>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -19,7 +19,6 @@ pub use crate::infer_missing;
 
 #[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 pub struct GlobalOptions {
-    pub tco_safe_vector_array: bool,
     pub tco_experimental_features: s_set::SSet,
     pub tco_migration_flags: s_set::SSet,
     pub tco_dynamic_view: bool,
@@ -69,8 +68,6 @@ pub struct GlobalOptions {
     pub tco_union_intersection_type_hints: bool,
     pub tco_like_casts: bool,
     pub tco_simple_pessimize: f64,
-    pub tco_coercion_from_dynamic: bool,
-    pub tco_coercion_from_union: bool,
     pub tco_complex_coercion: bool,
     pub tco_disable_partially_abstract_typeconsts: bool,
     pub error_codes_treated_strictly: i_set::ISet,

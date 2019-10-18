@@ -4703,7 +4703,7 @@ where
                     extends: Self::could_map(Self::p_hint, &c.record_extends_list, env)?
                         .into_iter()
                         .next(),
-                    final_: Self::token_kind(&c.record_modifier) == Some(TK::Final),
+                    abstract_: Self::token_kind(&c.record_modifier) == Some(TK::Abstract),
                     user_attributes: Self::p_user_attributes(&c.record_attribute_spec, env)?,
                     fields: Self::could_map(p_field, &c.record_fields, env)?,
                     namespace: Self::mk_empty_ns_env(env),

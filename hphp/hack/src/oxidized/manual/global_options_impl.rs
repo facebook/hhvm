@@ -8,7 +8,6 @@ use crate::{gen::global_options::GlobalOptions, i_set, infer_missing, s_map, s_s
 impl Default for GlobalOptions {
     fn default() -> Self {
         Self {
-            tco_safe_vector_array: false,
             tco_experimental_features: s_set::SSet::new(),
             tco_migration_flags: s_set::SSet::new(),
             tco_dynamic_view: false,
@@ -58,8 +57,6 @@ impl Default for GlobalOptions {
             tco_union_intersection_type_hints: false,
             tco_like_casts: false,
             tco_simple_pessimize: 0.0,
-            tco_coercion_from_dynamic: false,
-            tco_coercion_from_union: false,
             tco_complex_coercion: false,
             tco_disable_partially_abstract_typeconsts: false,
             error_codes_treated_strictly: i_set::ISet::new(),

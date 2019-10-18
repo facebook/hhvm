@@ -271,7 +271,7 @@ void Package::addSourceDirectory(const std::string& path,
     });
 }
 
-bool Package::parse(bool check) {
+bool Package::parse(bool check, std::thread& unit_emitter_thread) {
   if (m_filesToParse.empty() && m_directories.empty()) {
     return true;
   }
@@ -282,23 +282,25 @@ bool Package::parse(bool check) {
   // process system lib files which were deferred during process-init
   // (if necessary).
   auto syslib_ues = m_ar->getHhasFiles();
-
-  std::thread unit_emitter_thread;
   if (RuntimeOption::RepoCommit &&
       RuntimeOption::RepoLocalPath.size() &&
       RuntimeOption::RepoLocalMode == "rw") {
     m_ueq.emplace();
+    // note useHHBBC is needed because when program is set, m_ar might
+    // be cleared before the thread finishes running, so we would
+    // segfault trying to check it. Note that when program is *not*
+    // set, we wait for the thread to finish before clearing m_ar (so
+    // the guarded addHhasFile is safe).
     unit_emitter_thread = std::thread {
-      [&] {
+      [&, useHHBBC{m_ar->program().get() != nullptr}] {
         HphpSessionAndThread _(Treadmill::SessionKind::CompilerEmit);
-
         static const unsigned kBatchSize = 8;
-
         std::vector<std::unique_ptr<UnitEmitter>> batched_ues;
+        folly::Optional<Timer> timer;
 
         auto commitSome = [&] {
           batchCommit(batched_ues);
-          if (!m_ar->program().get()) {
+          if (!useHHBBC) {
             for (auto& ue : batched_ues) {
               m_ar->addHhasFile(std::move(ue));
             }
@@ -307,14 +309,7 @@ bool Package::parse(bool check) {
         };
 
         while (auto ue = m_ueq->pop()) {
-          if (m_stop_caching.load(std::memory_order_relaxed)) {
-            do {
-              if (!m_ar->program().get()) {
-                m_ar->addHhasFile(std::move(ue));
-              }
-            } while ((ue = m_ueq->pop()) != nullptr);
-            break;
-          }
+          if (!timer) timer.emplace(Timer::WallTime, "Caching parsed units...");
           batched_ues.push_back(std::move(ue));
           if (batched_ues.size() == kBatchSize) {
             commitSome();
@@ -357,13 +352,12 @@ bool Package::parse(bool check) {
   syslib_ues.clear();
 
   dispatcher.waitEmpty();
-  if (!m_cache_only) {
-    m_stop_caching.store(true, std::memory_order_relaxed);
-  }
 
   if (m_ueq) {
     m_ueq->push(nullptr);
-    unit_emitter_thread.join();
+    if (!m_ar->program().get()) {
+      unit_emitter_thread.join();
+    }
   }
 
   m_dispatcher = nullptr;

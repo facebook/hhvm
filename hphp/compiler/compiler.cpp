@@ -545,9 +545,9 @@ int process(const CompilerOptions &po) {
   LitstrTable::init();
   LitstrTable::get().setWriting();
 
+  std::thread unit_cache_thread;
   {
     Timer timer2(Timer::WallTime, "parsing inputs");
-    if (po.target == "cache") package.cache_only();
     ar->setPackage(&package);
     ar->setParseOnDemand(po.parseOnDemand);
     if (!po.parseOnDemand) {
@@ -580,7 +580,7 @@ int process(const CompilerOptions &po) {
       }
     }
     if (po.target != "filecache") {
-      if (!package.parse(!po.force)) {
+      if (!package.parse(!po.force, unit_cache_thread)) {
         return 1;
       }
     }
@@ -612,6 +612,10 @@ int process(const CompilerOptions &po) {
   } else {
     Logger::Error("Unknown target: %s", po.target.c_str());
     return 1;
+  }
+
+  if (unit_cache_thread.joinable()) {
+    unit_cache_thread.join();
   }
 
   if (!po.filecache.empty()) {

@@ -53,7 +53,7 @@ struct Package {
   void addStaticDirectory(const std::string& path);
   void addSourceDirectory(const std::string& path, bool force);
 
-  bool parse(bool check);
+  bool parse(bool check, std::thread& unit_emitter_thread);
   bool parseImpl(const std::string* fileName);
 
   AnalysisResultPtr getAnalysisResult() { return m_ar;}
@@ -67,7 +67,6 @@ struct Package {
   const std::string& getRoot() const { return m_root;}
   std::shared_ptr<FileCache> getFileCache();
 
-  void cache_only() { m_cache_only = true; }
   void addUnitEmitter(std::unique_ptr<UnitEmitter> ue);
 private:
   std::string m_root;
@@ -86,9 +85,7 @@ private:
   std::set<std::string> m_extraStaticFiles;
   std::map<std::string,std::string> m_discoveredStaticFiles;
   folly::Optional<HHBBC::UnitEmitterQueue> m_ueq;
-  std::atomic<bool> m_stop_caching{};
   hphp_fast_set<std::string> m_locally_cached_bytecode;
-  bool m_cache_only{};
 };
 
 ///////////////////////////////////////////////////////////////////////////////

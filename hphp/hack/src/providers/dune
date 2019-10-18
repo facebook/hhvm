@@ -3,6 +3,7 @@
   (wrapped false)
   (modules provider_config)
   (libraries
+    decl_service_client
     heap_shared_mem
     memory_bounded_lru_cache)
   (preprocess (pps ppx_deriving.std)))
@@ -27,6 +28,16 @@
   (modules memory_bounded_lru_cache)
   (libraries
     core_kernel)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name decl_service_client)
+  (wrapped false)
+  (modules decl_service_client)
+  (libraries
+    core_kernel
+    marshal_tools
+    utils_core)
   (preprocess (pps ppx_deriving.std)))
 
 (library

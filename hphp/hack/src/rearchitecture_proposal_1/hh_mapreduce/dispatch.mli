@@ -17,7 +17,7 @@ type info = {
       (** String name is used (1) at CLI, (2) for initial orchestrator->worker json handshake *)
   kind: kind;
   run: unit -> unit;  (** run is used at CLI *)
-  run_worker: Unix.file_descr -> unit;
+  run_worker: Unix.file_descr -> Decl_service_client.t -> unit;
       (** run_worker is how prototype dispatches the worker *)
 }
 

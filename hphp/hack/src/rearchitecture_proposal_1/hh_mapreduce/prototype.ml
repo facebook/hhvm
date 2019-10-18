@@ -8,10 +8,9 @@
 
 open Core_kernel
 
-type sharedmem_base_address
-
 external map_shared_memory_ffi :
-  string -> (sharedmem_base_address, string) result = "map_shared_memory"
+  string -> (Decl_service_client.sharedmem_base_address, string) result
+  = "map_shared_memory"
 
 type file_descr = Prototype_file_descr of Unix.file_descr
 
@@ -144,7 +143,7 @@ let run () : unit =
   Unix.listen socket 10;
 
   (* Map cachelib shared-memory *)
-  let _base_addr =
+  let base_addr =
     match map_shared_memory_ffi !cache_directory with
     | Ok base_addr ->
       let base_addr_int = ((Obj.magic base_addr : int) lsl 1) + 1 in
@@ -178,7 +177,15 @@ let run () : unit =
         | Ok kind ->
           (try
              let info = Dispatch.find_by_kind kind in
-             info.Dispatch.run_worker fd;
+             let decl =
+               match Decl_service_client.init !decl_socket_file base_addr with
+               | Ok decl -> decl
+               | Error err ->
+                 failwith
+                   ( "Worker can't connect to decl service - %s"
+                   ^ Marshal_tools.error_to_verbose_string err )
+             in
+             info.Dispatch.run_worker fd decl;
              exit 0
              (* we won't even bother closing 'fd' *)
            with exn ->

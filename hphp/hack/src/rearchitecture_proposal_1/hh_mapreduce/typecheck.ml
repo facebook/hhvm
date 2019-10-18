@@ -8,7 +8,8 @@
 
 open Core_kernel
 
-let global_init_and_get_tcopt ~(root : Path.t) ~(hhi_root : Path.t) :
+let global_init_and_get_tcopt
+    ~(root : Path.t) ~(hhi_root : Path.t) ~(decl : Decl_service_client.t) :
     GlobalOptions.t =
   Relative_path.set_path_prefix Relative_path.Root root;
   Relative_path.set_path_prefix Relative_path.Hhi hhi_root;
@@ -44,7 +45,7 @@ let global_init_and_get_tcopt ~(root : Path.t) ~(hhi_root : Path.t) :
         };
     }
   in
-  Provider_config.set_decl_service_backend ();
+  Provider_config.set_decl_service_backend decl;
   Parser_options_provider.set server_env.ServerEnv.popt;
   GlobalNamingOptions.set server_env.ServerEnv.tcopt;
   server_env.ServerEnv.tcopt
@@ -65,7 +66,7 @@ let errors_to_string (errors : Errors.t) : string =
   in
   String.concat error_list
 
-let run_worker (fd : Unix.file_descr) : unit =
+let run_worker (fd : Unix.file_descr) (decl : Decl_service_client.t) : unit =
   let pfd = Prototype.file_descr fd in
   (* Message1: receive root *)
   let (root, hhi_root) : Path.t * Path.t =
@@ -73,7 +74,7 @@ let run_worker (fd : Unix.file_descr) : unit =
     | Ok v -> v
     | Error e -> failwith (Marshal_tools.error_to_verbose_string e)
   in
-  let tcopt = global_init_and_get_tcopt ~root ~hhi_root in
+  let tcopt = global_init_and_get_tcopt ~root ~hhi_root ~decl in
   let ctx = Provider_context.empty ~tcopt in
   (* Message2: receive filename to check *)
   let fn : string =

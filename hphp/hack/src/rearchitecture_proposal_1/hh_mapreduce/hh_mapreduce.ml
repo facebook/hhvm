@@ -66,7 +66,8 @@ let () =
           name = "prototype";
           kind = Dispatch.Prototype;
           run = Prototype.run;
-          run_worker = (fun _ -> failwith "Shouldn't ask for prototype worker");
+          run_worker =
+            (fun _ _ -> failwith "Shouldn't ask for prototype worker");
         };
         {
           name = "typecheck";

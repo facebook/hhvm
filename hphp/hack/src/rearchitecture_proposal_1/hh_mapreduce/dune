@@ -12,6 +12,7 @@
   (ocamlc_flags (:standard -custom))
   (link_flags (:standard (:include ../../dune_config/ld-opts.sexp)))
   (libraries
+    decl_service_client
     default_injector_config
     errors
     global_config

@@ -16,7 +16,7 @@ type info = {
   name: string;
   kind: kind;
   run: unit -> unit;
-  run_worker: Unix.file_descr -> unit;
+  run_worker: Unix.file_descr -> Decl_service_client.t -> unit;
 }
 
 let dispatch_list : info list ref = ref []

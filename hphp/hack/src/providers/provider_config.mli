@@ -22,7 +22,7 @@ type backend = private
   | Shared_memory
   | Local_memory of { decl_cache: decl_cache }
   (* In Decl_service, 'unit' left for further expansion *)
-  | Decl_service of unit
+  | Decl_service of Decl_service_client.t
 
 val set_lru_shared_memory_backend : unit -> unit
 
@@ -30,6 +30,6 @@ val set_shared_memory_backend : unit -> unit
 
 val set_local_memory_backend : max_size_in_words:int -> unit
 
-val set_decl_service_backend : unit -> unit
+val set_decl_service_backend : Decl_service_client.t -> unit
 
 val get_backend : unit -> backend

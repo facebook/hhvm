@@ -1153,6 +1153,13 @@ void merge_repo_auth_type(UnitEmitter& ue, RepoAuthType rat) {
   case T::ExactCls:
     ue.mergeLitstr(rat.clsName());
     return;
+
+  case T::OptSubRecord:
+  case T::OptExactRecord:
+  case T::SubRecord:
+  case T::ExactRecord:
+    ue.mergeLitstr(rat.recordName());
+    return;
   }
 }
 

@@ -664,6 +664,7 @@ private:
   friend bool is_specialized_obj(const Type&);
   friend bool is_specialized_record(const Type&);
   friend bool is_specialized_cls(const Type&);
+  friend bool is_specialized_record(const Type&);
   friend bool is_ref_with_inner(const Type&);
   friend bool is_specialized_string(const Type&);
   friend Type wait_handle_inner(const Type&);

@@ -983,9 +983,9 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
 #define Y(what, tag)                                  \
   if (parse.startsWith(what)) {                       \
     parse.removePrefix(what);                         \
-    auto const cls = makeStaticString(parse.data());  \
-    as.ue->mergeLitstr(cls);                          \
-    return RepoAuthType{tag, cls};                    \
+    auto const name = makeStaticString(parse.data());  \
+    as.ue->mergeLitstr(name);                          \
+    return RepoAuthType{tag, name};                    \
   }
 
   Y("Obj=",     T::ExactObj);
@@ -996,6 +996,10 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   Y("?Cls=",    T::OptExactCls);
   Y("?Cls<=",   T::OptSubCls);
   Y("Cls<=",    T::SubCls);
+  Y("Record=",  T::ExactRecord);
+  Y("?Record=", T::OptExactRecord);
+  Y("?Record<=",T::OptSubRecord);
+  Y("Record<=", T::SubRecord);
   X("Arr",      T::Arr);
   X("?Arr",     T::OptArr);
   X("VArr",     T::VArr);
@@ -1139,6 +1143,10 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   case T::SubCls:
   case T::OptExactCls:
   case T::OptSubCls:
+  case T::ExactRecord:
+  case T::SubRecord:
+  case T::OptExactRecord:
+  case T::OptSubRecord:
     break;
   }
 

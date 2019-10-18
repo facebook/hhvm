@@ -17,6 +17,12 @@ val only : string -> string -> unit
     then Args.parse will throw an exception. *)
 val root : string ref -> string * Arg.spec * string
 
+(** e.g. Args.parse [decl my_ref] anon, to show that "--decl" argument can be used. *)
+val decl : string ref -> string * Arg.spec * string
+
+(** e.g. Args.parse [cache my_ref] anon, to show that "--cache" argument can be used. *)
+val cache : string ref -> string * Arg.spec * string
+
 (** Minor helper function for the '--root' argument, to get the filename of the
     corresponding /tmp/hh_server/[root].prototype.lock file.
     e.g. "Lock.grab (prototype_lock_file root)"

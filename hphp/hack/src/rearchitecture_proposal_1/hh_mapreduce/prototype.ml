@@ -122,8 +122,16 @@ let rpc_request_new_worker (root : string) (kind : Dispatch.kind) :
 let run () : unit =
   (* Parse command-line arguments *)
   let root = ref "" in
-  let options = [Args.root root] in
-  let usage = Printf.sprintf "Usage: %s prototype --root ..." Sys.argv.(0) in
+  let decl_socket_file = ref "" in
+  let cache_directory = ref "" in
+  let options =
+    [Args.root root; Args.decl decl_socket_file; Args.cache cache_directory]
+  in
+  let usage =
+    Printf.sprintf
+      "Usage: %s prototype --root ... --decl ... --cache ..."
+      Sys.argv.(0)
+  in
   Arg.parse options (Args.only "prototype") usage;
 
   (* TODO: handle exceptions in argument parsing *)
@@ -139,7 +147,7 @@ let run () : unit =
   Unix.bind socket (Unix.ADDR_UNIX (Args.prototype_sock_file !root));
   Unix.listen socket 10;
 
-  Printf.printf "0x4000\n%!";
+  Printf.printf "Prototype cache base address: 0x4000\n%!";
 
   (* Loop: fork upon client requests; die upon stdin *)
   let rec loop () : unit =

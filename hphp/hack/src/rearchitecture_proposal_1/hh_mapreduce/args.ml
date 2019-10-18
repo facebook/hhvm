@@ -18,6 +18,16 @@ let root (value_ref : string ref) : string * Arg.spec * string =
         value_ref := s),
     " root of project, where .hhconfig is" )
 
+let decl (value_ref : string ref) : string * Arg.spec * string =
+  ( "--decl",
+    Arg.String (fun s -> value_ref := s),
+    " socket to communicate with decl service" )
+
+let cache (value_ref : string ref) : string * Arg.spec * string =
+  ( "--cache",
+    Arg.String (fun s -> value_ref := s),
+    " cachelib directory for shared mem" )
+
 let only (cmd : string) : string -> unit =
   let has_been_invoked = ref false in
   fun s ->

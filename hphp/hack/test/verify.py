@@ -116,9 +116,20 @@ def check_output(
         return Result(test_case=case, output=out, is_failure=failed)
     else:
         out_path = case.file_path + out_extension
-        with open(out_path, "r") as f:
-            output: str = f.read()
-            return check_result(case, default_expect_regex, ignore_error_text, output)
+        try:
+            with open(out_path, "r") as f:
+                output: str = f.read()
+        except FileNotFoundError:
+            out_path = os.path.realpath(out_path)
+            output = "Output file " + out_path + " was not found!"
+        return check_result(case, default_expect_regex, ignore_error_text, output)
+
+
+def debug_cmd(cwd: str, cmd: List[str]) -> None:
+    if verbose:
+        print("From directory", os.path.realpath(cwd))
+        print("Executing", " ".join(cmd))
+        print()
 
 
 def run_batch_tests(
@@ -156,10 +167,9 @@ def run_batch_tests(
         cmd = [program, "--batch-files", "--out-extension", out_extension]
         cmd += flags + test_flags
         cmd += [os.path.basename(case.file_path) for case in test_cases]
-        if verbose:
-            print("Executing", " ".join(cmd))
+        debug_cmd(test_dir, cmd)
         try:
-            subprocess.call(
+            return_code = subprocess.call(
                 cmd,
                 stderr=None if no_stderr else subprocess.STDOUT,
                 cwd=test_dir,
@@ -169,6 +179,14 @@ def run_batch_tests(
             # we don't care about nonzero exit codes... for instance, type
             # errors cause hh_single_type_check to produce them
             pass
+        if return_code == -11:
+            print(
+                "Segmentation fault while running the following command "
+                + "from directory "
+                + os.path.realpath(test_dir)
+            )
+            print(" ".join(cmd))
+            print()
         results = []
         for case in test_cases:
             result = check_output(
@@ -223,8 +241,7 @@ def run_test_program(
         if test_case.input is None:
             cmd.append(test_name)
         cmd += flags + test_flags
-        if verbose:
-            print("Executing", " ".join(cmd))
+        debug_cmd(test_dir, cmd)
         try:
             output = subprocess.check_output(
                 cmd,

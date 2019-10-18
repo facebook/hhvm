@@ -25,14 +25,8 @@ let () =
   let rev =
     try read_process_output "git" [|"git"; "rev-parse"; "HEAD"|]
     with Failure _ ->
-      (* If buck is available, do what buck would have done, i.e. return an 
-      empty version. Saved state loading relies on that, unfortunately. *)
-      try 
-        let _ = read_process_output "buck" [|"buck"; "--version"|] in
-        ""
-      with Failure _ ->
-        try read_process_output "hg" [|"hg"; "log"; "-r"; "."; "--template"; "{node}\\n"|]
-        with Failure _ -> ""
+      try read_process_output "hg" [|"hg"; "id"; "-i"|]
+      with Failure _ -> ""
   in
   let time =
     try read_process_output "git" [|"git"; "log"; "-1"; "--pretty=tformat:%ct"|]

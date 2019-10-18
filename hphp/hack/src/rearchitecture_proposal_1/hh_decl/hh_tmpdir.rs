@@ -34,7 +34,6 @@ fn slash_escaped_string_of_path(path: &std::path::Path) -> String {
             '\0' => buf.push_str("z0"),
             c => buf.push(c),
         }
-        buf.push(c);
     }
     return buf;
 }

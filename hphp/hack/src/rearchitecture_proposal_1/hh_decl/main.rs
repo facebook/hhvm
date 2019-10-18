@@ -3,35 +3,23 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-//! hh_decl is the "local decl service" as described in the architecture
-//! writeup. It is responsible for owning the decl cache and exposes two
-//! service endpoints:
-//!  1) The control service, which receives requests to update the naming table
-//!     and requests for status,
-//!  2) The decl service, which serves decls to typecheck clients.
-//!
+//! hh_decl is the "local decl service", a singleton-per-root process.
+//! It owns the decl cachelib, the naming table, and the prototype process.
+//! It listens to /tmp/hh_server/[root].decl.sock for decl requests
+//! It listens to /tmp/hh_server/[root].decl.control.sock for control requests
 
-use control_service::ControlService;
-use decl_service::DeclService;
-use server::UnixDomainServer;
+use bytes::Bytes;
+use std::collections::HashMap;
 use std::path::PathBuf;
-use std::thread;
+use std::sync::{Arc, Mutex};
+use std::thread::JoinHandle;
 use structopt::StructOpt;
 
 mod control_service;
 mod decl_service;
 mod hh_tmpdir;
-mod server;
+mod prototype;
 
-/// The well-known socket that the control service listens on.
-const CONTROL_SERVICE_SOCKET: &'static str = "/tmp/hh_server/control_service";
-
-/// The well-known socket that the decl service listens on.
-const DECL_SERVICE_SOCKET: &'static str = "/tmp/hh_server/decl_service";
-
-/// CommandLineArgs declaratively defines the command-line interface of hh_decl.
-/// Structopt is responsible for deriving a command-line parser from this
-/// structure.
 #[derive(Debug, StructOpt)]
 #[structopt(no_version)] // don't consult CARGO_PKG_VERSION (buck doesn't set it)
 #[structopt(rename_all = "kebab")] // rename every option to kebab-case
@@ -49,7 +37,8 @@ struct CommandLineArgs {
     cachelib_size: u64,
 }
 
-fn main() {
+#[fbinit::main]
+fn main(fb: fbinit::FacebookInit) {
     let args = CommandLineArgs::from_args();
 
     // TODO: validate root (canonicalize, make sure .hhconfig exists)
@@ -63,21 +52,102 @@ fn main() {
         }
         Some(fd) => fd,
     };
-    println!("hh_decl starting...");
 
-    // Spawn our two services: the decl service and control service. The control
-    // service runs on the main thread (arbitrarily).
-    thread::spawn(move || {
-        let decl_svr: UnixDomainServer<DeclService> =
-            UnixDomainServer::new(&PathBuf::from(DECL_SERVICE_SOCKET))
-                .expect("failed to start decl service");
-        decl_svr.start();
+    // Spin up cachelib
+    let cache_size = 1 * 1024 * 1024 * 1024; // 1 GB
+    let cache_directory = hh_tmpdir::tmp_path_of_root(&args.root, ".decl.cache");
+    let _ = nix::unistd::unlink(&cache_directory);
+    let cache_config = cachelib::LruCacheConfig::new(cache_size).set_cache_dir(&cache_directory);
+    cachelib::init_cache_once(fb, cache_config).unwrap();
+    cachelib::init_cacheadmin("hh_decl_cache").unwrap();
+    let available_space = cachelib::get_available_space().unwrap();
+    let default_pool = cachelib::get_or_create_pool("default", available_space).unwrap();
+
+    // Here's just a dummy entry in the cachelib so I can test retrieving it later
+    let key = Bytes::from(&b"hello"[..]);
+    let value = Bytes::from(&b"world"[..]);
+    default_pool.set(&key, value).unwrap();
+
+    // TODO: cancellation tokens for graceful shutdown
+
+    // Create control socket
+    let control_sock_file = hh_tmpdir::tmp_path_of_root(&args.root, ".decl.control.sock");
+    let _ = nix::unistd::unlink(&control_sock_file); // ignored because failure will be reported later upon bind
+    let control_listener = match std::os::unix::net::UnixListener::bind(&control_sock_file) {
+        Err(e) => {
+            println!("failed to listen on {:?} - {:?}", &control_sock_file, e);
+            std::process::exit(1);
+        }
+        Ok(listener) => listener,
+    };
+
+    // Create decl socket
+    let decl_sock_file = hh_tmpdir::tmp_path_of_root(&args.root, ".decl.sock");
+    let _ = nix::unistd::unlink(&decl_sock_file); // ignored because failure will be reported later upon bind
+    let decl_listener = match std::os::unix::net::UnixListener::bind(&decl_sock_file) {
+        Err(e) => {
+            println!("failed to listen on {:?} - {:?}", &decl_sock_file, e);
+            std::process::exit(1);
+        }
+        Ok(listener) => listener,
+    };
+
+    // Spin up prototype
+    let _base_address = match prototype::spawn(&args.root, &decl_sock_file, &cache_directory) {
+        Err(e) => {
+            println!("failed to launch prototype: {:?}", e);
+            std::process::exit(1);
+        }
+        Ok(r) => r,
+    };
+
+    // Spin up control service thread.
+    // It will handle all connections sequentially.
+    let control_thread = std::thread::spawn(move || {
+        for stream in control_listener.incoming() {
+            match stream {
+                Err(e) => println!("decl control: malformed {:?}; continuing", e),
+                Ok(stream) => control_service::handle(stream),
+            };
+        }
     });
 
-    let svr: UnixDomainServer<ControlService> =
-        UnixDomainServer::new(&PathBuf::from(CONTROL_SERVICE_SOCKET))
-            .expect("failed to start control service");
-    svr.start();
+    // Spin up decl service thread.
+    // It will spin up a new thread for each connection.
+    // It will wait until all those threads have finished.
+    let decl_thread = std::thread::spawn(move || {
+        let mut worker_id = 0u64;
+        let worker_threads = Arc::new(Mutex::new(HashMap::<u64, JoinHandle<()>>::new()));
+        for stream in decl_listener.incoming() {
+            match stream {
+                Err(e) => println!("decl: malformed {:?}; continuing", e),
+                Ok(stream) => {
+                    worker_id += 1;
+                    let worker_threads2 = worker_threads.clone();
+                    let worker_id2 = worker_id;
+                    let worker_thread = std::thread::spawn(move || {
+                        decl_service::handle(stream);
+                        worker_threads2.lock().unwrap().remove(&worker_id2);
+                    });
+                    worker_threads
+                        .lock()
+                        .unwrap()
+                        .insert(worker_id, worker_thread);
+                }
+            }
+        }
+        // We'll wait until all threads have finished.
+        // We don't want to be holding the mutex as we iter over those threads
+        // (since the threads need the mutex to finish up). Hence, drain.
+        let mut locked_hashmap = worker_threads.lock().unwrap();
+        let remaining_threads = locked_hashmap.drain();
+        for (_, remaining_thread) in remaining_threads {
+            remaining_thread.join().unwrap();
+        }
+    });
+
+    control_thread.join().unwrap();
+    decl_thread.join().unwrap();
 
     std::mem::drop(lock);
 }

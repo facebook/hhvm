@@ -18,6 +18,7 @@ use oxidized::relative_path::RelativePath;
 macro_rules! parse {
     ($name:ident, $parser:ident, $syntax:ty) => {
         use ocamlpool_rust::caml_raise;
+        use std::panic::AssertUnwindSafe;
         use $name::{ocamlpool_enter, ocamlpool_leave};
         mod $name {
             use super::*;
@@ -95,10 +96,11 @@ macro_rules! parse {
                             let stack_limit_ref = &stack_limit;
                             let relative_path = RelativePath::from_ocamlvalue(&relative_path_raw);
                             let file_path = relative_path.path_str().to_owned();
+                            let relative_path = AssertUnwindSafe(relative_path);
                             ocamlpool_enter();
                             let maybe_l = std::panic::catch_unwind(move || {
                                 let source_text = SourceText::make_with_raw(
-                                    &relative_path,
+                                    &*relative_path,
                                     &content.data(),
                                     ocaml_source_text_value,
                                 );

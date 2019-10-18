@@ -140,6 +140,19 @@ impl<T: Ocamlvalue> Ocamlvalue for Rc<T> {
     }
 }
 
+impl<T: Ocamlvalue> Ocamlvalue for ocamlrep::rc::RcOc<T> {
+    fn ocamlvalue(&self) -> Value {
+        match self.get_cached_value_in_generation(get_ocamlpool_generation()) {
+            Some(v) => v,
+            None => {
+                let v = self.as_ref().ocamlvalue();
+                self.set_cached_value(v, get_ocamlpool_generation());
+                v
+            }
+        }
+    }
+}
+
 impl Ocamlvalue for PathBuf {
     fn ocamlvalue(&self) -> Value {
         self.to_str().unwrap().ocamlvalue()

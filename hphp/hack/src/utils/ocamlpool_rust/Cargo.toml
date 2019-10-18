@@ -5,6 +5,7 @@ edition = "2018"
 
 [dependencies]
 ocaml = "^0.7"
+ocamlrep = { path = "../../ocamlrep", package = "hack_ocamlrep" }
 
 [lib]
 name = "ocamlpool_rust"

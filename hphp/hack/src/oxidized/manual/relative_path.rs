@@ -2,14 +2,13 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-
 use ocamlpool_rust::utils::*;
+use ocamlrep::rc::RcOc;
 use ocamlrep_derive::OcamlRep;
 use ocamlvalue_macro::Ocamlvalue;
 use std::convert::TryFrom;
 use std::fmt::{Display, Formatter, Result};
 use std::path::{Path, PathBuf};
-use std::rc::Rc;
 
 #[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
 pub enum Prefix {
@@ -46,7 +45,7 @@ impl Display for Prefix {
 }
 
 #[derive(Clone, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
-pub struct RelativePath(Rc<(Prefix, PathBuf)>);
+pub struct RelativePath(RcOc<(Prefix, PathBuf)>);
 
 impl RelativePath {
     // TODO(shiqicao): consider adding a FromOcamlvalue derive
@@ -57,7 +56,7 @@ impl RelativePath {
     }
 
     pub fn make(prefix: Prefix, pathbuf: PathBuf) -> Self {
-        RelativePath(Rc::new((prefix, pathbuf)))
+        RelativePath(RcOc::new((prefix, pathbuf)))
     }
 
     pub fn is_empty(&self) -> bool {

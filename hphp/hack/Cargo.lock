@@ -354,6 +354,7 @@ dependencies = [
 name = "hack_utils_ocamlpool"
 version = "3.49.0"
 dependencies = [
+ "hack_ocamlrep 3.49.0",
  "ocaml 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 

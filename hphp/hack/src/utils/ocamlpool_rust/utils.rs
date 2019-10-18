@@ -14,6 +14,7 @@ extern "C" {
     static ocamlpool_bound: *mut Value;
     static mut ocamlpool_cursor: *mut Value;
     static ocamlpool_color: Color;
+    static mut ocamlpool_generation: usize;
 }
 
 pub unsafe fn reserve_block(tag: Tag, size: Size) -> Value {
@@ -92,4 +93,8 @@ pub unsafe fn str_field(block: &ocaml::Value, field: usize) -> ocaml::Str {
     ocaml::Str::from(ocaml::Value::new(*ocaml::core::mlvalues::field(
         block.0, field,
     )))
+}
+
+pub fn get_ocamlpool_generation() -> usize {
+    unsafe { ocamlpool_generation }
 }

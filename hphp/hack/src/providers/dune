@@ -37,7 +37,8 @@
   (libraries
     core_kernel
     marshal_tools
-    utils_core)
+    utils_core
+    sys_utils)
   (preprocess (pps ppx_deriving.std)))
 
 (library

@@ -322,6 +322,9 @@ private:
   SSATmp* preOptimizeLdLoc(IRInstruction*);
   SSATmp* preOptimizeLdStk(IRInstruction*);
   SSATmp* preOptimizeLdMBase(IRInstruction*);
+  SSATmp* preOptimizeLdClosureCtx(IRInstruction*);
+  SSATmp* preOptimizeLdClosureThis(IRInstruction*);
+  SSATmp* preOptimizeLdClosureCls(IRInstruction*);
   SSATmp* preOptimizeLdFrameCtx(IRInstruction*);
   SSATmp* preOptimizeLdFrameThis(IRInstruction*);
   SSATmp* preOptimizeLdFrameCls(IRInstruction*);

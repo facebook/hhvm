@@ -592,7 +592,6 @@ bool canDCE(IRInstruction* inst) {
   case InterpOne:
   case InterpOneCF:
   case OODeclExists:
-  case StClosureCtx:
   case StClosureArg:
   case CreateGen:
   case CreateAGen:

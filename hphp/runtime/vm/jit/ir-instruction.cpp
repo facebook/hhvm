@@ -147,8 +147,10 @@ bool consumesRefImpl(const IRInstruction* inst, int srcNo) {
       // Call a helper that decrefs the first argument
       return move == Consume && srcNo == 0;
 
+    case ConstructClosure:
+      return srcNo == 0;
+
     case StClosureArg:
-    case StClosureCtx:
     case StContArValue:
     case StContArKey:
       return srcNo == 1;

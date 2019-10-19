@@ -357,6 +357,20 @@ SSATmp* IRBuilder::preOptimizeLdMBase(IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* IRBuilder::preOptimizeLdClosureCtx(IRInstruction* inst) {
+  auto const closure = canonical(inst->src(0));
+  if (!closure->inst()->is(ConstructClosure)) return nullptr;
+  return gen(AssertType, inst->typeParam(), closure->inst()->src(0));
+}
+
+SSATmp* IRBuilder::preOptimizeLdClosureCls(IRInstruction* inst) {
+  return preOptimizeLdClosureCtx(inst);
+}
+
+SSATmp* IRBuilder::preOptimizeLdClosureThis(IRInstruction* inst) {
+  return preOptimizeLdClosureCtx(inst);
+}
+
 SSATmp* IRBuilder::preOptimizeLdFrameCtx(IRInstruction* inst) {
   auto const func = inst->marker().func();
   assertx(func->cls() || func->isClosureBody());
@@ -414,6 +428,8 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
   X(LdLoc)
   X(LdStk)
   X(LdMBase)
+  X(LdClosureCls)
+  X(LdClosureThis)
   X(LdFrameCls)
   X(LdFrameThis)
   X(LdObjClass)

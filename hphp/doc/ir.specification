@@ -1551,9 +1551,13 @@ To string conversions:
 
   Call the custom instance constructor of an extension class.
 
-| ConstructClosure<class>, DAllocObj, NA, PRc
+| ConstructClosure<class>, DAllocObj, S(Cls,Obj,Nullptr), CRc|PRc
 
   Call the custom instance constructor of a Closure.
+
+  Store the context represented by S0 into the newly constructed closure object.
+  S0 may be a Nullptr when there is no context (i.e. the closure is being used
+  in a non-method).
 
 | LockObj, ND, S(Obj), NF
 
@@ -2506,12 +2510,6 @@ To string conversions:
 
   Load the context from the closure object S0 into D, assuming `func' is
   S0's closure Func.
-
-| StClosureCtx, ND, S(Obj) S(Cls,Obj,Nullptr), CRc
-
-  Store the context represented by S1 into the closure object S0. S1 may be a
-  Nullptr when there is no context (i.e. the closure is being used in a
-  non-method).
 
 | StClosureArg<offsetBytes>, ND, S(Obj) S(Cell), CRc
 

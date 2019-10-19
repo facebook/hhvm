@@ -350,8 +350,6 @@ void emitCreateCl(IRGS& env, uint32_t numParams, uint32_t clsIx) {
 
   auto const func = cls->getCachedInvoke();
 
-  auto const closure = gen(env, ConstructClosure, ClassData(cls));
-
   auto const live_ctx = [&] {
     if (func->isStatic()) return ldCtxCls(env);
     assertx(hasThis(env));
@@ -360,7 +358,7 @@ void emitCreateCl(IRGS& env, uint32_t numParams, uint32_t clsIx) {
     return ldctx;
   }();
 
-  gen(env, StClosureCtx, closure, live_ctx);
+  auto const closure = gen(env, ConstructClosure, ClassData(cls), live_ctx);
 
   SSATmp** args = (SSATmp**)alloca(sizeof(SSATmp*) * numParams);
   for (int32_t i = 0; i < numParams; ++i) {

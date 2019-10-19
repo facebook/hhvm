@@ -49,18 +49,6 @@ void cgLdClosureThis(IRLS& env, const IRInstruction* inst) {
   vmain(env) << load{obj[c_Closure::ctxOffset()], ctx};
 }
 
-void cgStClosureCtx(IRLS& env, const IRInstruction* inst) {
-  auto const obj = srcLoc(env, inst, 0).reg();
-  auto& v = vmain(env);
-
-  if (inst->src(1)->isA(TNullptr)) {
-    v << storeqi{0, obj[c_Closure::ctxOffset()]};
-  } else {
-    auto const ctx = srcLoc(env, inst, 1).reg();
-    v << store{ctx, obj[c_Closure::ctxOffset()]};
-  }
-}
-
 void cgStClosureArg(IRLS& env, const IRInstruction* inst) {
   auto const obj = srcLoc(env, inst, 0).reg();
   auto const off = inst->extra<StClosureArg>()->offsetBytes;

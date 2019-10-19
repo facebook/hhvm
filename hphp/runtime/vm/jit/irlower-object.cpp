@@ -111,12 +111,20 @@ void cgConstructInstance(IRLS& env, const IRInstruction* inst) {
 void cgConstructClosure(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const cls = inst->extra<ConstructClosure>()->cls;
+  auto& v = vmain(env);
 
   auto const args = argGroup(env, inst).immPtr(cls);
-  cgCallHelper(vmain(env), env,
+  cgCallHelper(v, env,
                CallSpec::direct(RuntimeOption::RepoAuthoritative
                  ? createClosureRepoAuth : createClosure),
                callDest(dst), SyncOptions::None, args);
+
+  if (inst->src(0)->isA(TNullptr)) {
+    v << storeqi{0, dst[c_Closure::ctxOffset()]};
+  } else {
+    auto const ctx = srcLoc(env, inst, 0).reg();
+    v << store{ctx, dst[c_Closure::ctxOffset()]};
+  }
 }
 
 IMPL_OPCODE_CALL(Clone)

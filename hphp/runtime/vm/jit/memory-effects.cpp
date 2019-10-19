@@ -1828,7 +1828,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case IncRef:
   case LdClosureCls:
   case LdClosureThis:
-  case StClosureCtx:
   case StContArKey:
   case StContArValue:
   case LdRetVal:

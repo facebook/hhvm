@@ -175,17 +175,17 @@ where
 pub fn make_syntax_tree<'a, S, T>(
     source: &'a SourceText<'a>,
     env: ParserEnv,
-) -> SyntaxTree<<S::R as NodeType>::R, S>
+) -> SyntaxTree<<S::R as NodeType>::R, T>
 where
     T: Clone,
     S: SmartConstructors<'a, T>,
     S::R: NodeType,
 {
-    let mode = parse_mode(&source);
-    let mut parser = Parser::make(&source, env);
+    let mode = parse_mode(source);
+    let mut parser = Parser::<S, T>::make(&source, env);
     let root = parser.parse_script(None);
-    let (_, errors, _, state) = parser.into_parts();
-    SyntaxTree::create(source, root, errors, mode, state, None)
+    let (_, errors, _, sc) = parser.into_parts();
+    SyntaxTree::create(source, root, errors, mode, sc.into_state(), None)
 }
 
 #[cfg(test)]

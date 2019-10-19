@@ -389,7 +389,7 @@ fn collect(mut acc: CollectAcc, node: Node) -> CollectAcc {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use hhbc_rust::string_utils::without_xhp_mangling;
+    use hhbc_string_utils_rust::without_xhp_mangling;
 
     #[test]
     fn xhp_mangling() {

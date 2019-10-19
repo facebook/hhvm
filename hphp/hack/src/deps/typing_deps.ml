@@ -62,21 +62,41 @@ module Dep = struct
 
   let compare = ( - )
 
-  let to_string = function
-    | GConst s -> "GConst " ^ Utils.strip_ns s
-    | GConstName s -> "GConstName " ^ Utils.strip_ns s
-    | Const (cls, s) -> spf "Const %s::%s" (Utils.strip_ns cls) s
-    | Class s -> "Class " ^ Utils.strip_ns s
-    | RecordDef s -> "RecordDef " ^ Utils.strip_ns s
-    | Fun s -> "Fun " ^ Utils.strip_ns s
-    | FunName s -> "FunName " ^ Utils.strip_ns s
-    | Prop (cls, s) -> spf "Prop %s::%s" (Utils.strip_ns cls) s
-    | SProp (cls, s) -> spf "SProp %s::%s" (Utils.strip_ns cls) s
-    | Method (cls, s) -> spf "Method %s::%s" (Utils.strip_ns cls) s
-    | SMethod (cls, s) -> spf "SMethod %s::%s" (Utils.strip_ns cls) s
-    | Cstr s -> "Cstr " ^ Utils.strip_ns s
-    | AllMembers s -> "AllMembers " ^ Utils.strip_ns s
-    | Extends s -> "Extends " ^ Utils.strip_ns s
+  let extract_name = function
+    | GConst s -> Utils.strip_ns s
+    | GConstName s -> Utils.strip_ns s
+    | Const (cls, s) -> spf "%s::%s" (Utils.strip_ns cls) s
+    | Class s -> Utils.strip_ns s
+    | RecordDef s -> Utils.strip_ns s
+    | Fun s -> Utils.strip_ns s
+    | FunName s -> Utils.strip_ns s
+    | Prop (cls, s) -> spf "%s::%s" (Utils.strip_ns cls) s
+    | SProp (cls, s) -> spf "%s::%s" (Utils.strip_ns cls) s
+    | Method (cls, s) -> spf "%s::%s" (Utils.strip_ns cls) s
+    | SMethod (cls, s) -> spf "%s::%s" (Utils.strip_ns cls) s
+    | Cstr s -> Utils.strip_ns s
+    | AllMembers s -> Utils.strip_ns s
+    | Extends s -> Utils.strip_ns s
+
+  let to_string dep =
+    let prefix =
+      match dep with
+      | GConst _ -> "GConst"
+      | GConstName _ -> "GConstName"
+      | Const _ -> "Const"
+      | Class _ -> "Class"
+      | RecordDef _ -> "RecordDef"
+      | Fun _ -> "Fun"
+      | FunName _ -> "FunName"
+      | Prop _ -> "Prop"
+      | SProp _ -> "SProp"
+      | Method _ -> "Method"
+      | SMethod _ -> "SMethod"
+      | Cstr _ -> "Cstr"
+      | AllMembers _ -> "AllMembers"
+      | Extends _ -> "Extends"
+    in
+    prefix ^ " " ^ extract_name dep
 end
 
 module DepSet = struct

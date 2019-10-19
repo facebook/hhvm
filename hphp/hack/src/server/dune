@@ -209,6 +209,7 @@
     serverFileSync
     serverFindRefs
     serverFormat
+    serverGleanDependencyGraph
     serverGoToDefinition
     serverGoToImpl
     serverHighlightRefs

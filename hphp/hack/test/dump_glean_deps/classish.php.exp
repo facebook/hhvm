@@ -1,0 +1,13 @@
+[
+  {
+    "predicate":"hackdependency.inheritanceInfo.1",
+    "facts":[
+      {"key":{"parentName":"Foo","childName":"Bar"}},
+      {"key":{"parentName":"Bar","childName":"Baz"}},
+      {"key":{"parentName":"IFoo","childName":"Foo"}},
+      {"key":{"parentName":"IBar","childName":"IBaz"}},
+      {"key":{"parentName":"IBaz","childName":"Bar"}},
+      {"key":{"parentName":"IFoo","childName":"IBaz"}}
+    ]
+  }
+]

@@ -52,6 +52,7 @@ type mode =
   | Shallow_class_diff
   | Linearization
   | Go_to_impl of int * int
+  | Dump_glean_deps
 
 type options = {
   files: string list;
@@ -285,6 +286,9 @@ let parse_options () =
         Arg.String (fun s -> out_extension := s),
         "output file extension (default .out)" );
       ("--dump-deps", Arg.Unit (set_mode Dump_deps), " Print dependencies");
+      ( "--dump-glean-deps",
+        Arg.Unit (set_mode Dump_glean_deps),
+        " Print dependencies in the Glean format" );
       ( "--dump-inheritance",
         Arg.Unit (set_mode Dump_inheritance),
         " Print inheritance" );
@@ -978,6 +982,17 @@ let sort_debug_deps deps =
 let dump_debug_deps dbg_deps =
   dbg_deps |> sort_debug_deps |> show_debug_deps |> Printf.printf "%s\n"
 
+let dump_debug_glean_deps
+    (dbg_glean_deps :
+      (Typing_deps.Dep.variant * Typing_deps.Dep.variant) HashSet.t) =
+  let json_opt =
+    ServerGleanDependencyGraph.convert_deps_to_json dbg_glean_deps
+  in
+  match json_opt with
+  | Some json_obj ->
+    Printf.printf "%s\n" (Hh_json.json_to_string ~pretty:true json_obj)
+  | None -> Printf.printf "No dependencies\n"
+
 let scan_files_for_symbol_index
     (filename : Relative_path.t)
     (popt : ParserOptions.t)
@@ -1010,6 +1025,7 @@ let handle_mode
     batch_mode
     out_extension
     dbg_deps
+    dbg_glean_deps
     (sienv : SearchUtils.si_env) =
   let expect_single_file () : Relative_path.t =
     match filenames with
@@ -1177,6 +1193,19 @@ let handle_mode
     Relative_path.Map.iter files_info (fun fn fileinfo ->
         ignore @@ Typing_check_utils.check_defs tcopt fn fileinfo);
     if Caml.Hashtbl.length dbg_deps > 0 then dump_debug_deps dbg_deps
+  | Dump_glean_deps ->
+    (* Don't typecheck builtins *)
+    let files_info =
+      Relative_path.Map.fold
+        builtins
+        ~f:begin
+             fun k _ acc -> Relative_path.Map.remove acc k
+           end
+        ~init:files_info
+    in
+    Relative_path.Map.iter files_info (fun fn fileinfo ->
+        ignore @@ Typing_check_utils.check_defs tcopt fn fileinfo);
+    dump_debug_glean_deps dbg_glean_deps
   | Dump_inheritance ->
     ServerCommandTypes.Method_jumps.(
       let naming_table = Naming_table.create files_info in
@@ -1586,6 +1615,15 @@ let decl_and_run_mode
         Caml.Hashtbl.replace dbg_deps obj set
     in
     Typing_deps.add_dependency_callback "get_debug_trace" get_debug_trace );
+  let dbg_glean_deps = HashSet.create 0 in
+  ( if mode = Dump_glean_deps then
+    (* In addition to actually recording the dependencies in shared memory,
+     we build a non-hashed respresentation of the dependency graph
+     for printing. In the callback we receive this as dep_right uses dep_left. *)
+    let get_debug_trace dep_right dep_left =
+      HashSet.add dbg_glean_deps (dep_left, dep_right)
+    in
+    Typing_deps.add_dependency_callback "get_debug_trace" get_debug_trace );
   let (errors, files_info) = parse_name_and_decl popt to_decl in
   handle_mode
     mode
@@ -1601,6 +1639,7 @@ let decl_and_run_mode
     batch_mode
     out_extension
     dbg_deps
+    dbg_glean_deps
     sienv
 
 let main_hack ({ files; mode; tcopt; _ } as opts) (sienv : SearchUtils.si_env)

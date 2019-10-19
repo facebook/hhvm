@@ -34,6 +34,8 @@ module Dep : sig
 
   val compare : t -> t -> int
 
+  val extract_name : variant -> string
+
   val to_string : variant -> string
 end
 

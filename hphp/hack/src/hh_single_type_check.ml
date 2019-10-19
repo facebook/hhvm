@@ -1181,28 +1181,10 @@ let handle_mode
     ) else
       Printf.printf "No lint errors\n"
   | Dump_deps ->
-    (* Don't typecheck builtins *)
-    let files_info =
-      Relative_path.Map.fold
-        builtins
-        ~f:begin
-             fun k _ acc -> Relative_path.Map.remove acc k
-           end
-        ~init:files_info
-    in
     Relative_path.Map.iter files_info (fun fn fileinfo ->
         ignore @@ Typing_check_utils.check_defs tcopt fn fileinfo);
     if Caml.Hashtbl.length dbg_deps > 0 then dump_debug_deps dbg_deps
   | Dump_glean_deps ->
-    (* Don't typecheck builtins *)
-    let files_info =
-      Relative_path.Map.fold
-        builtins
-        ~f:begin
-             fun k _ acc -> Relative_path.Map.remove acc k
-           end
-        ~init:files_info
-    in
     Relative_path.Map.iter files_info (fun fn fileinfo ->
         ignore @@ Typing_check_utils.check_defs tcopt fn fileinfo);
     dump_debug_glean_deps dbg_glean_deps

@@ -7135,6 +7135,68 @@ struct FreeRegs {
     // Find best physical register for a Vreg, choosing from the set
     // of registers in "mask".
     auto const findBest = [&] (RegSet mask) -> Coloring {
+      // Comparator for two physical registers
+      auto const better = [&] (PhysReg r1,
+                               PhysReg r2,
+                               int64_t w1,
+                               int64_t w2,
+                               Vreg seed) {
+        // The weight is the most important factor. A lesser weight
+        // is always better.
+        if (w1 != w2) return w1 < w2;
+
+        // If they have the same weight, prefer a register which is
+        // available to one that is not (which would require a
+        // displacement).
+        auto const avail1 = regs.contains(r1);
+        auto const avail2 = regs.contains(r2);
+        if (avail1 != avail2) return avail1 > avail2;
+
+        // If they both have the same weight and the same
+        // availability, then break the tie using a pseudo-random
+        // function. Hash the physical register and the Vreg we're
+        // selecting for. This is preferred to just using the lesser
+        // register, for example, because it helps provide a wider
+        // dispersion of register uses (which potentially prevents
+        // conflicts later).
+        auto const perturb1 = hash_int64_pair(seed, Vreg{r1});
+        auto const perturb2 = hash_int64_pair(seed, Vreg{r2});
+        if (perturb1 != perturb2) return perturb1 < perturb2;
+
+        // In the extremely rare case everything is identical, prefer
+        // the lesser register.
+        return Vreg{r1} < Vreg{r2};
+      };
+
+      if (r.isPhys()) {
+        // If the Vreg is physical, we can only ever assign it its
+        // associated physical register. Check if it's free. If not,
+        // we have to displace something which we'll do below.
+        auto const p = r.physReg();
+        if (regs.contains(p)) return p;
+      } else {
+        // Otherwise iterate over all the available physical registers
+        // and select the best one.
+        auto const& info = reg_info(*state, r);
+        assertx(info.penaltyIdx > 0 &&
+                info.penaltyIdx < state->penalties.size());
+        auto const& penalties = state->penalties[info.penaltyIdx];
+
+        PhysReg best = InvalidReg;
+        mask.forEach(
+          [&] (PhysReg r2) {
+            if (best == InvalidReg ||
+                better(r2, best, penalties[r2], penalties[best], r)) {
+              best = r2;
+              return;
+            }
+          }
+        );
+
+        // If we found a best one, and it's free, use that.
+        if (best != InvalidReg && regs.contains(best)) return best;
+      }
+
       struct PhysWeight {
         PhysReg reg;
         int64_t weight;
@@ -7147,9 +7209,9 @@ struct FreeRegs {
       // Build a list of candidate physical registers from
       // 'candidates', sorted by their weight ascending (calculated by
       // "calc").
-      auto const buildPhysWeights = [this] (Vreg seed,
-                                            RegSet candidates,
-                                            auto&& calc) {
+      auto const buildPhysWeights = [&] (Vreg seed,
+                                         RegSet candidates,
+                                         auto&& calc) {
         PhysWeightArray weights;
         // Build the weights
         candidates.forEach(
@@ -7167,16 +7229,7 @@ struct FreeRegs {
         std::sort(
           weights.pairs.begin(), weights.pairs.begin() + weights.size,
           [&] (const PhysWeight& p1, const PhysWeight& p2) {
-            if (p1.weight != p2.weight) return p1.weight < p2.weight;
-            auto const avail1 = regs.contains(p1.reg);
-            auto const avail2 = regs.contains(p2.reg);
-            if (avail1 != avail2) return avail1 > avail2;
-
-            auto const perturb1 = hash_int64_pair(seed, Vreg{p1.reg});
-            auto const perturb2 = hash_int64_pair(seed, Vreg{p2.reg});
-            if (perturb1 != perturb2) return perturb1 < perturb2;
-
-            return Vreg{p1.reg} < Vreg{p2.reg};
+            return better(p1.reg, p2.reg, p1.weight, p2.weight, seed);
           }
         );
         return weights;

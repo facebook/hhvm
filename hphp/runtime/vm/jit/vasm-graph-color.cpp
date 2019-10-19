@@ -9800,14 +9800,16 @@ void lower_spills(State& state) {
   // Actually transform the spills
   materialize_spills(state, spillSpace);
 
-  // If we split any side exits, try to unsplit any that we can again. If we
-  // didn't insert any adjustment code, they can be transformed back. This can
-  // change the CFG again, but nothing after this needs anything but RPO
-  // information right now.
+  // If we split any side exits, try to unsplit any that we can
+  // again. If we didn't insert any adjustment code, they can be
+  // transformed back. This can change the CFG again, but nothing
+  // after this needs any of the pre-calculated information. The
+  // exception is if we're in debug builds and we're going to call
+  // calculate_sp_offsets() below.
   if (split) {
     optimizeExits(state.unit, 0);
     optimizeJmps(state.unit, 0);
-    compute_rpo(state);
+    if (debug) compute_rpo(state);
   }
 
   // Do a second stack pointer offset calculation which will check if the

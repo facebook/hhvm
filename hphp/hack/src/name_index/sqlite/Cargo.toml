@@ -1,0 +1,12 @@
+[package]
+name = "name_index_sqlite"
+version = "1.0.0"
+edition = "2018"
+
+[lib]
+name = "name_index_sqlite"
+path = "lib.rs"
+
+[dependencies]
+rust-crypto = "*"
+rusqlite = { version = "*", features = ["bundled"] }

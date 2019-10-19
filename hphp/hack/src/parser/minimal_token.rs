@@ -4,10 +4,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::lexable_token::LexableToken;
-use crate::minimal_trivia::MinimalTrivia;
-use crate::source_text::SourceText;
-use crate::token_kind::TokenKind;
+use crate::{
+    lexable_token::LexableToken, minimal_trivia::MinimalTrivia, source_text::SourceText,
+    token_kind::TokenKind, trivia_kind::TriviaKind,
+};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct MinimalToken {
@@ -81,5 +81,9 @@ impl<'a> LexableToken<'a> for MinimalToken {
     fn with_kind(mut self, kind: TokenKind) -> Self {
         self.kind = kind;
         self
+    }
+
+    fn has_trivia_kind(&self, kind: TriviaKind) -> bool {
+        self.leading.iter().any(|t| t.kind == kind) || self.trailing.iter().any(|t| t.kind == kind)
     }
 }

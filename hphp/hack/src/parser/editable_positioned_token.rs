@@ -9,6 +9,7 @@ use parser::lexable_token::LexableToken;
 use parser::positioned_token::PositionedToken;
 use parser::source_text::SourceText;
 use parser::token_kind::TokenKind;
+use parser::trivia_kind::TriviaKind;
 use parser_rust::positioned_trivia::PositionedTrivia;
 
 use crate::editable_positioned_original_source_data::SourceData;
@@ -88,6 +89,10 @@ impl<'a> LexableToken<'a> for EditablePositionedToken<'a> {
     }
 
     fn with_kind(self, _kind: TokenKind) -> Self {
+        panic!("TODO")
+    }
+
+    fn has_trivia_kind(&self, kind: TriviaKind) -> bool {
         panic!("TODO")
     }
 }

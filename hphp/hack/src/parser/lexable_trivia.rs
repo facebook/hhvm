@@ -21,3 +21,9 @@ pub trait LexableTrivia: Clone + PartialEq {
     fn kind(&self) -> TriviaKind;
     fn width(&self) -> usize;
 }
+
+pub trait LexablePositionedTrivia: LexableTrivia {
+    fn start_offset(&self) -> usize;
+    fn end_offset(&self) -> usize;
+    fn text_raw<'b>(&self, source_text: &'b SourceText) -> &'b [u8];
+}

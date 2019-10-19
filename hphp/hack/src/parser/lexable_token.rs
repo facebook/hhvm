@@ -4,9 +4,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::lexable_trivia::LexableTrivia;
-use crate::source_text::SourceText;
-use crate::token_kind::TokenKind;
+use crate::{
+    lexable_trivia::LexableTrivia, source_text::SourceText, token_kind::TokenKind,
+    trivia_kind::TriviaKind,
+};
 use std::fmt::Debug;
 
 pub trait LexableToken<'a>: Clone {
@@ -36,6 +37,8 @@ pub trait LexableToken<'a>: Clone {
     fn with_leading(self, trailing: Vec<Self::Trivia>) -> Self;
     fn with_trailing(self, trailing: Vec<Self::Trivia>) -> Self;
     fn with_kind(self, kind: TokenKind) -> Self;
+
+    fn has_trivia_kind(&self, kind: TriviaKind) -> bool;
 }
 
 pub trait LexablePositionedToken<'a>: LexableToken<'a>

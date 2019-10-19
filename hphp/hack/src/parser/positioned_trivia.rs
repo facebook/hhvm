@@ -4,7 +4,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::lexable_trivia::LexableTrivia;
+use crate::lexable_trivia::{LexablePositionedTrivia, LexableTrivia};
 use crate::source_text::SourceText;
 use crate::trivia_kind::TriviaKind;
 
@@ -94,5 +94,19 @@ impl LexableTrivia for PositionedTrivia {
             offset,
             width,
         }
+    }
+}
+
+impl LexablePositionedTrivia for PositionedTrivia {
+    fn start_offset(&self) -> usize {
+        self.offset
+    }
+
+    fn end_offset(&self) -> usize {
+        self.offset + self.width - 1
+    }
+
+    fn text_raw<'b>(&self, source_text: &'b SourceText) -> &'b [u8] {
+        source_text.sub(self.start_offset(), self.width())
     }
 }

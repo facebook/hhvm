@@ -11,6 +11,7 @@ module SyntaxError = Full_fidelity_syntax_error
 module SN = Naming_special_names
 open Core_kernel
 open Prim_defs
+open Scoured_comments
 
 (* What we are lowering to *)
 open Ast
@@ -3975,14 +3976,7 @@ if there already is one, since that one will likely be better than this one. *)
    * Inlining the scrape for comments in the lowering code would be prohibitively
    * complicated, but a separate pass is fine.
    *)
-
-  type fixmes = Pos.t IMap.t IMap.t
-
-  type scoured_comment = Pos.t * comment
-
-  type scoured_comments = scoured_comment list
-
-  type accumulator = scoured_comments * fixmes * fixmes
+  type accumulator = Scoured_comments.t
 
   let scour_comments
       (path : Relative_path.t)
@@ -3995,7 +3989,8 @@ if there already is one, since that one will likely be better than this one. *)
     let go
         (node : node)
         (in_block : bool)
-        ((cmts, fm, mu) as acc : accumulator)
+        ({ sc_comments; sc_fixmes; sc_misuses; sc_error_pos } as acc :
+          accumulator)
         (t : Trivia.t) : accumulator =
       match Trivia.kind t with
       | TriviaKind.WhiteSpace
@@ -4013,10 +4008,10 @@ if there already is one, since that one will likely be better than this one. *)
         let len = end_ - start - 1 in
         let p = pos_of_offset (end_ - 1) end_ in
         let t = String.sub (Trivia.text t) 2 len in
-        ((p, CmtBlock t) :: cmts, fm, mu)
+        { acc with sc_comments = (p, CmtBlock t) :: sc_comments }
       | TriviaKind.SingleLineComment ->
         if not include_line_comments then
-          (cmts, fm, mu)
+          acc
         else
           let text = SourceText.text (Trivia.source_text t) in
           let start = Trivia.start_offset t in
@@ -4032,11 +4027,11 @@ if there already is one, since that one will likely be better than this one. *)
           let len = end_ - start + 1 in
           let p = pos_of_offset start end_ in
           let t = String.sub text start len in
-          ((p, CmtLine (t ^ "\n")) :: cmts, fm, mu)
+          { acc with sc_comments = (p, CmtLine (t ^ "\n")) :: sc_comments }
       | TriviaKind.FixMe
       | TriviaKind.IgnoreError ->
         if not collect_fixmes then
-          (cmts, fm, mu)
+          acc
         else
           Str.(
             let txt = Trivia.text t in
@@ -4046,15 +4041,17 @@ if there already is one, since that one will likely be better than this one. *)
               | None -> false
             in
             if ignore_fixme then
-              (cmts, fm, mu)
+              acc
             else
               let pos = pPos node env in
               let line = Pos.line pos in
               let ignores =
-                (try IMap.find line fm with Caml.Not_found -> IMap.empty)
+                try IMap.find line sc_fixmes
+                with Caml.Not_found -> IMap.empty
               in
               let misuses =
-                (try IMap.find line mu with Caml.Not_found -> IMap.empty)
+                try IMap.find line sc_misuses
+                with Caml.Not_found -> IMap.empty
               in
               (try
                  ignore (search_forward ignore_error txt 0);
@@ -4070,20 +4067,18 @@ if there already is one, since that one will likely be better than this one. *)
                            env.parser_options)
                  then
                    let misuses = IMap.add code p misuses in
-                   (cmts, fm, IMap.add line misuses mu)
+                   { acc with sc_misuses = IMap.add line misuses sc_misuses }
                  else
                    let ignores = IMap.add code p ignores in
-                   (cmts, IMap.add line ignores fm, mu)
+                   { acc with sc_fixmes = IMap.add line ignores sc_fixmes }
                with
               | Not_found_s _
               | Caml.Not_found ->
                 Errors.fixme_format pos;
-                (cmts, fm, mu)))
+                { acc with sc_error_pos = pos :: sc_error_pos }))
     in
-    let rec aux
-        (in_block : bool)
-        ((_cmts, _fm, _mu) as acc : accumulator)
-        (node : node) : accumulator =
+    let rec aux (in_block : bool) (acc : accumulator) (node : node) :
+        accumulator =
       let recurse (in_block : bool) =
         List.fold_left ~f:(aux in_block) ~init:acc (children node)
       in
@@ -4107,7 +4102,15 @@ if there already is one, since that one will likely be better than this one. *)
           recurse in_block
       | _ -> recurse in_block
     in
-    aux false ([], IMap.empty, IMap.empty) tree
+    aux
+      false
+      {
+        sc_comments = [];
+        sc_fixmes = IMap.empty;
+        sc_misuses = IMap.empty;
+        sc_error_pos = [];
+      }
+      tree
 
   (*****************************************************************************(
    * Front-end matter
@@ -4268,7 +4271,7 @@ let parse_text (env : env) (source_text : SourceText.t) :
   (mode, tree)
 
 let scour_comments_and_add_fixmes (env : env) source_text script =
-  let (comments, fixmes, misuses) =
+  let sc =
     FromPositionedSyntax.scour_comments
       env.file
       source_text
@@ -4279,14 +4282,14 @@ let scour_comments_and_add_fixmes (env : env) source_text script =
   in
   let () =
     if env.keep_errors then (
-      Fixme_provider.provide_disallowed_fixmes env.file misuses;
+      Fixme_provider.provide_disallowed_fixmes env.file sc.sc_misuses;
       if env.quick_mode then
-        Fixme_provider.provide_decl_hh_fixmes env.file fixmes
+        Fixme_provider.provide_decl_hh_fixmes env.file sc.sc_fixmes
       else
-        Fixme_provider.provide_hh_fixmes env.file fixmes
+        Fixme_provider.provide_hh_fixmes env.file sc.sc_fixmes
     )
   in
-  comments
+  sc.sc_comments
 
 let flush_parsing_errors env =
   let lowpri_errors = List.rev !(env.lowpri_errors) in

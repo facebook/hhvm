@@ -6,10 +6,13 @@
 
 use ocamlrep::rc::RcOc;
 
-use crate::lexable_token::{LexablePositionedToken, LexableToken};
-use crate::positioned_trivia::PositionedTrivia;
-use crate::source_text::SourceText;
-use crate::token_kind::TokenKind;
+use crate::{
+    lexable_token::{LexablePositionedToken, LexableToken},
+    positioned_trivia::PositionedTrivia,
+    source_text::SourceText,
+    token_kind::TokenKind,
+    trivia_kind::TriviaKind,
+};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct PositionedTokenImpl {
@@ -110,6 +113,11 @@ impl<'a> LexableToken<'a> for PositionedToken {
         let mut token_impl = RcOc::make_mut(&mut token);
         token_impl.kind = kind;
         Self(token)
+    }
+
+    fn has_trivia_kind(&self, kind: TriviaKind) -> bool {
+        self.leading().iter().any(|t| t.kind == kind)
+            || self.trailing().iter().any(|t| t.kind == kind)
     }
 }
 

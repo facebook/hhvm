@@ -21,6 +21,7 @@ pub use manual::pos;
 pub use manual::relative_path;
 pub use manual::s_map;
 pub use manual::s_set;
+pub use manual::scoured_comments_impl;
 pub use manual::shape_map;
 pub use manual::tany_sentinel;
 
@@ -48,6 +49,7 @@ pub use gen::namespace_env;
 pub use gen::nast;
 pub use gen::parser_options;
 pub use gen::prim_defs;
+pub use gen::scoured_comments;
 pub use gen::shallow_decl_defs;
 pub use gen::typechecker_options;
 pub use gen::typing_defs;

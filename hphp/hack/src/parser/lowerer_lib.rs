@@ -11,6 +11,7 @@ extern crate lazy_static;
 
 mod lowerer;
 mod lowerer_modifier;
+mod scour_comment;
 
-pub use lowerer::Env;
-pub use lowerer::Lowerer;
+pub use lowerer::{Env, Lowerer};
+pub use scour_comment::ScourComment;

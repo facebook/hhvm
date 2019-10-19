@@ -84,6 +84,7 @@
     docblock_finder
     docblock_parser
     full_fidelity_ast
+    scoured_comments
     hack_grammar_descriptor_helper
     ide_parser_cache
     limited_width_pretty_printing_library

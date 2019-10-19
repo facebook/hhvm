@@ -385,7 +385,7 @@ struct SSAConverter {
   void fillPhi(Vlabel block,
                Vreg phi,
                Vreg pre,
-               const jit::vector<Vlabel>& preds) {
+               const PredVector::value_type& preds) {
     assertx(block != unit.entry);
     VregList phiInputs;
     phiInputs.reserve(preds.size());

@@ -412,7 +412,7 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-using PredVector = jit::vector<jit::vector<Vlabel>>;
+using PredVector = jit::vector<TinyVector<Vlabel, 3>>;
 PredVector computePreds(const Vunit& unit);
 
 }}

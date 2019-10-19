@@ -9313,19 +9313,26 @@ struct SPAdjustLiveness {
   folly::Optional<size_t> end;
 };
 
-// Calculate liveness information for the spill slots.
-jit::vector<SPAdjustLiveness> find_spill_liveness(const State& state) {
+// Implementation of spill liveness algorithm, templated to allow for
+// different set representations for the slots.
+template <typename T, typename Resize, typename Subtract>
+jit::vector<SPAdjustLiveness> find_spill_liveness_impl(const State& state,
+                                                       Resize resize,
+                                                       Subtract subtract) {
   auto const& unit = state.unit;
 
-  // First calculate the spill slot liveness in the conventional manner using
-  // dataflow.
+  // First calculate the spill slot liveness in the conventional
+  // manner using dataflow.
   struct SlotLiveness {
-    boost::dynamic_bitset<> in;
-    boost::dynamic_bitset<> out;
-    boost::dynamic_bitset<> gen;
-    boost::dynamic_bitset<> kill;
+    T in;
+    T out;
+    T gen;
+    T kill;
   };
   jit::vector<SlotLiveness> slotLiveness(unit.blocks.size());
+
+  dataflow_worklist<size_t, std::less<size_t>> worklist(state.rpo.size());
+  for (size_t i = 0; i < state.rpo.size(); ++i) worklist.push(i);
 
   auto const offset = [&] (Vreg r) {
     auto const& info = reg_info(state, r);
@@ -9337,17 +9344,12 @@ jit::vector<SPAdjustLiveness> find_spill_liveness(const State& state) {
     }
   };
 
-  auto const numSlots = state.numSpillSlots + state.numWideSpillSlots;
-
-  dataflow_worklist<size_t, std::less<size_t>> worklist(state.rpo.size());
-  for (size_t i = 0; i < state.rpo.size(); ++i) worklist.push(i);
-
   for (auto const b : state.rpo) {
     auto& live = slotLiveness[b];
-    live.in.resize(numSlots);
-    live.out.resize(numSlots);
-    live.gen.resize(numSlots);
-    live.kill.resize(numSlots);
+    resize(live.in);
+    resize(live.out);
+    resize(live.gen);
+    resize(live.kill);
 
     auto const& block = unit.blocks[b];
     for (auto const& inst : boost::adaptors::reverse(block.code)) {
@@ -9375,7 +9377,7 @@ jit::vector<SPAdjustLiveness> find_spill_liveness(const State& state) {
       live.out |= slotLiveness[succ].in;
     }
 
-    auto in = (live.out - live.kill) | live.gen;
+    auto in = subtract(live.out, live.kill) | live.gen;
     if (in != live.in) {
       for (auto const pred : state.preds[b]) {
         worklist.push(state.rpoOrder[pred]);
@@ -9424,6 +9426,33 @@ jit::vector<SPAdjustLiveness> find_spill_liveness(const State& state) {
   }
 
   return liveness;
+}
+
+// Calculate liveness information for the spill slots.
+jit::vector<SPAdjustLiveness> find_spill_liveness(const State& state) {
+  auto const numSlots = state.numSpillSlots + state.numWideSpillSlots;
+
+  static constexpr size_t kSmallLimit = 128;
+  if (numSlots <= kSmallLimit) {
+    // In the common case we have a small number of spills and we can
+    // use a fixed size bitset to represent them, which is much
+    // faster.
+    using Bitset = std::bitset<kSmallLimit>;
+    return find_spill_liveness_impl<Bitset>(
+      state,
+      [] (const Bitset&) {},
+      [] (const Bitset& a, const Bitset& b) { return a & ~b; }
+    );
+  } else {
+    // Otherwise use a dynamic bitset, which is slower but can handle
+    // an arbitrary number of spills.
+    using Bitset = boost::dynamic_bitset<>;
+    return find_spill_liveness_impl<Bitset>(
+      state,
+      [&] (Bitset& s) { s.resize(numSlots); },
+      [] (const Bitset& a, const Bitset& b) { return a - b; }
+    );
+  }
 }
 
 // Calculate liveness information for the stack pointer offset

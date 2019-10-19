@@ -98,17 +98,9 @@ impl PositionedValue {
         }
     }
 
-    fn from_<'b, 'a: 'b, NS, F>(x: &'a NS, folder: &'b F) -> Self
-    where
-        F: for<'aa, 'bb> Fn(
-            Acc<'aa>,
-            &'aa NS,
-            &'bb dyn Fn(&'aa Self, Acc<'aa>) -> Acc<'aa>,
-        ) -> Acc<'aa>,
-        NS: ?Sized,
-    {
+    fn from_<'a>(child_values: impl Iterator<Item = &'a Self>) -> Self {
         use PositionedValue::*;
-        let f = |node: &'a Self, (first, first_not_zero, last_not_zero, _last): Acc<'a>| {
+        let f = |(first, first_not_zero, last_not_zero, _last): Acc<'a>, node: &'a Self| {
             match (first.is_some(), first_not_zero.is_some(), node) {
                 (false, false, TokenValue { .. }) | (false, false, TokenSpan { .. }) => {
                     // first iteration and first node has some token representation -
@@ -138,7 +130,7 @@ impl PositionedValue {
             }
         };
         let mut acc = (None, None, None, None);
-        acc = folder(acc, x, &f);
+        acc = child_values.fold(acc, f);
         match acc {
             (_, Some(first_not_zero), Some(last_not_zero), _) => {
                 Self::value_from_outer_children(first_not_zero, last_not_zero)
@@ -146,30 +138,6 @@ impl PositionedValue {
             (Some(first), None, None, Some(last)) => Self::value_from_outer_children(first, last),
             _ => panic!("how did we get a node with no children in value_from_syntax?"),
         }
-    }
-
-    // This function should be a closure in the caller,
-    // but lifetime can't be declared on closure.
-    fn from_syntax_variant_fold<'a, 'b>(
-        acc: Acc<'a>,
-        syntax_variant: &'a SyntaxVariant<PositionedToken, Self>,
-        f: &'b dyn Fn(&'a Self, Acc<'a>) -> Acc<'a>,
-    ) -> Acc<'a> {
-        let f_ = |acc: Acc<'a>, n: &'a Syntax<PositionedToken, Self>| f(&n.value, acc);
-        syntax_variant.iter_children().fold(acc, f_)
-    }
-
-    // This function should be a closure in the caller,
-    // but lifetime can't be declared on closure.
-    fn from_values_fold<'a, 'b>(
-        mut acc: Acc<'a>,
-        nodes: &'a [&Self],
-        f: &'b dyn Fn(&'a Self, Acc<'a>) -> Acc<'a>,
-    ) -> Acc<'a> {
-        for n in nodes.iter() {
-            acc = f(n, acc);
-        }
-        acc
     }
 }
 
@@ -191,12 +159,12 @@ impl SyntaxValueWithKind for PositionedValue {
 }
 
 impl SyntaxValueType<PositionedToken> for PositionedValue {
-    fn from_values(nodes: &[&Self]) -> Self {
-        Self::from_(nodes, &Self::from_values_fold)
+    fn from_values(values: &[&Self]) -> Self {
+        Self::from_(values.iter().map(|v| *v))
     }
 
     fn from_syntax(variant: &SyntaxVariant<PositionedToken, Self>) -> Self {
-        Self::from_(variant, &Self::from_syntax_variant_fold)
+        Self::from_(variant.iter_children().map(|child| &child.value))
     }
 
     fn from_children(_: SyntaxKind, offset: usize, nodes: &[&Self]) -> Self {

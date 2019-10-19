@@ -283,6 +283,66 @@ MixedArray* MixedArray::MakeStructDArray(uint32_t size,
                         ArrayData::kDArray);
 }
 
+ALWAYS_INLINE
+MixedArray* MixedArray::AllocStructImpl(uint32_t size,
+                                        const int32_t* hash,
+                                        HeaderKind hk,
+                                        ArrayData::DVArray dvArray) {
+  assertx(size > 0);
+  assertx(hk == HeaderKind::Mixed || hk == HeaderKind::Dict);
+  assertx(dvArray == ArrayData::kNotDVArray ||
+          dvArray == ArrayData::kDArray);
+  assertx(hk != HeaderKind::Dict || dvArray == ArrayData::kNotDVArray);
+  assertx(!RuntimeOption::EvalHackArrDVArrs ||
+          dvArray == ArrayData::kNotDVArray);
+
+  auto const scale = computeScaleFromSize(size);
+  auto const ad    = reqAlloc(scale);
+
+  auto const aux = MixedArrayKeys::packStaticStrsForAux() |
+                   static_cast<uint16_t>(dvArray);
+
+  ad->m_sizeAndPos       = size; // pos=0
+  ad->initHeader_16(hk, OneReference, aux);
+  ad->m_scale_used       = scale | uint64_t{size} << 32; // used=size
+  ad->m_nextKI           = 0;
+
+  CopyHash(ad->hashTab(), hash, scale);
+
+  // If we don't trash the elements here, `ad` may fail checkInvariants
+  // because some of its element's type bytes happen to be tombstones.
+  //
+  // Trashing the elements isn't likely to hide real failures, because if we
+  // fail to initialize them later, any lookups will return implausible TVs.
+  if (debug) memset(ad->data(), kMixedElmFill, sizeof(MixedArrayElm) * size);
+
+  assertx(ad->m_size == size);
+  assertx(ad->dvArray() == dvArray);
+  assertx(ad->m_pos == 0);
+  assertx(ad->m_kind == hk);
+  assertx(ad->m_scale == scale);
+  assertx(ad->hasExactlyOneRef());
+  assertx(ad->m_used == size);
+  assertx(ad->m_nextKI == 0);
+  assertx(ad->checkInvariants());
+  return ad;
+}
+
+MixedArray* MixedArray::AllocStruct(uint32_t size, const int32_t* hash) {
+  return AllocStructImpl(size, hash, HeaderKind::Mixed, ArrayData::kNotDVArray);
+}
+
+MixedArray* MixedArray::AllocStructDict(uint32_t size, const int32_t* hash) {
+  auto const ad = AllocStructImpl(size, hash, HeaderKind::Dict,
+                                  ArrayData::kNotDVArray);
+  return asMixed(tryTagArrProvDict(ad));
+}
+
+MixedArray* MixedArray::AllocStructDArray(uint32_t size, const int32_t* hash) {
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
+  return AllocStructImpl(size, hash, HeaderKind::Mixed, ArrayData::kDArray);
+}
+
 template<HeaderKind hdr, ArrayData::DVArray dv>
 MixedArray* MixedArray::MakeMixedImpl(uint32_t size, const TypedValue* kvs) {
   assertx(size > 0);

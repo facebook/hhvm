@@ -553,6 +553,9 @@ bool opcodeMayRaise(Opcode opc) {
   case AKExistsDict:
   case AKExistsKeyset:
   case AllocPackedArray:
+  case AllocStructArray:
+  case AllocStructDArray:
+  case AllocStructDict:
   case AllocVArray:
   case AllocVecArray:
   case AndInt:
@@ -747,6 +750,7 @@ bool opcodeMayRaise(Opcode opc) {
   case IncProfCounter:
   case IncRef:
   case IncStat:
+  case InitMixedLayoutArray:
   case InitObjProps:
   case InitObjMemoSlots:
   case InitPackedLayoutArray:

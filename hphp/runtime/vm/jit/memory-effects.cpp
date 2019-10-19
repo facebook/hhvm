@@ -1223,12 +1223,19 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   //////////////////////////////////////////////////////////////////////
   // Array loads and stores
 
-  case InitPackedLayoutArray:
-    return PureStore {
-      AElemI { inst.src(0), inst.extra<InitPackedLayoutArray>()->index },
-      inst.src(1),
-      inst.src(0)
-    };
+  case InitPackedLayoutArray: {
+    auto const arr = inst.src(0);
+    auto const val = inst.src(1);
+    auto const idx = inst.extra<InitPackedLayoutArray>()->index;
+    return PureStore { AElemI { arr, idx }, val, arr };
+  }
+
+  case InitMixedLayoutArray: {
+    auto const arr = inst.src(0);
+    auto const val = inst.src(1);
+    auto const key = inst.extra<InitMixedLayoutArray>()->key;
+    return PureStore { AElemS { arr, key }, val, arr };
+  }
 
   case LdVecElem:
   case LdPackedElem: {
@@ -1602,6 +1609,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case AllocPackedArray:
   case AllocVArray:
   case AllocVecArray:
+  case AllocStructArray:
+  case AllocStructDArray:
+  case AllocStructDict:
   case ConvBoolToArr:
   case ConvDblToStr:
   case ConvDblToArr:

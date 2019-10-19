@@ -295,6 +295,9 @@ bool canDCE(IRInstruction* inst) {
   case ConstructClosure:
   case Box:
   case AllocPackedArray:
+  case AllocStructArray:
+  case AllocStructDArray:
+  case AllocStructDict:
   case AllocVArray:
   case AllocVecArray:
   case GetMixedPtrIter:
@@ -502,6 +505,7 @@ bool canDCE(IRInstruction* inst) {
   case DebugBacktraceFast:
   case InitThrowableFileAndLine:
   case ConstructInstance:
+  case InitMixedLayoutArray:
   case InitPackedLayoutArray:
   case InitPackedLayoutArrayLoop:
   case NewKeysetArray:

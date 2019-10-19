@@ -24,6 +24,11 @@
 
 namespace HPHP { namespace jit {
 
+std::string KeyedIndexData::show() const {
+  auto const escaped = escapeStringForCPP(key->data(), key->size());
+  return folly::format("{},\"{}\"", index, key->data()).str();
+}
+
 std::string NewStructData::show() const {
   std::ostringstream os;
   os << offset.offset << ',';

@@ -277,6 +277,14 @@ public:
                                       const TypedValue* values);
 
   /*
+   * Allocate a struct-like array (with string literal keys), but only init
+   * the hash table and the header, leaving elms uninit. Requires size > 0.
+   */
+  static MixedArray* AllocStruct(uint32_t size, const int32_t* hash);
+  static MixedArray* AllocStructDict(uint32_t size, const int32_t* hash);
+  static MixedArray* AllocStructDArray(uint32_t size, const int32_t* hash);
+
+  /*
    * Allocate an uncounted MixedArray and copy the values from the
    * input 'array' into the uncounted one. All values copied are made
    * uncounted as well.  An uncounted array can only contain uncounted
@@ -517,7 +525,8 @@ private:
   static MixedArray* MakeStructImpl(uint32_t, const StringData* const*,
                                     const TypedValue*, HeaderKind,
                                     ArrayData::DVArray);
-
+  static MixedArray* AllocStructImpl(uint32_t, const int32_t*,
+                                    HeaderKind, ArrayData::DVArray);
 
   template <IntishCast IC>
   static ArrayData* FromDictImpl(ArrayData*, bool, bool);

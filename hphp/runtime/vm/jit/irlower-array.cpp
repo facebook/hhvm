@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/mixed-array.h"
@@ -373,6 +374,69 @@ void cgNewKeysetArray(IRLS& env, const IRInstruction* inst) {
 
   cgCallHelper(v, env, CallSpec::direct(SetArray::MakeSet),
                callDest(env, inst), SyncOptions::Sync, args);
+}
+
+namespace {
+
+template<typename ArrayInit>
+void allocStructImpl(
+  IRLS& env,
+  const IRInstruction* inst,
+  MixedArray* (*f)(uint32_t, const int32_t*),
+  SyncOptions sync = SyncOptions::None
+) {
+  auto const extra = inst->extra<NewStructData>();
+  auto init = ArrayInit{extra->numKeys};
+  for (auto i = 0; i < extra->numKeys; ++i) {
+    init.set(extra->keys[i], make_tv<KindOfNull>());
+  }
+  auto const array = init.toArray();
+  auto const ad = MixedArray::asMixed(array.get());
+
+  auto const scale = MixedArray::computeScaleFromSize(extra->numKeys);
+  always_assert(MixedArray::HashSize(scale) == ad->hashSize());
+
+  using HashTableEntry = std::remove_pointer_t<decltype(ad->hashTab())>;
+
+  auto& v = vmain(env);
+  auto table = v.allocData<HashTableEntry>(ad->hashSize());
+  memcpy(table, ad->hashTab(), ad->hashSize() * sizeof(HashTableEntry));
+
+  auto const args = argGroup(env, inst).imm(extra->numKeys).dataPtr(table);
+  cgCallHelper(v, env, CallSpec::direct(f), callDest(env, inst), sync, args);
+}
+
+}
+
+void cgAllocStructArray(IRLS& env, const IRInstruction* inst) {
+  allocStructImpl<MixedArrayInit>(env, inst, MixedArray::AllocStruct);
+}
+
+void cgAllocStructDArray(IRLS& env, const IRInstruction* inst) {
+  allocStructImpl<DArrayInit>(env, inst, MixedArray::AllocStructDArray);
+}
+
+void cgAllocStructDict(IRLS& env, const IRInstruction* inst) {
+  allocStructImpl<DictInit>(
+    env, inst, MixedArray::AllocStructDict,
+    RuntimeOption::EvalArrayProvenance ? SyncOptions::Sync : SyncOptions::None
+  );
+}
+
+void cgInitMixedLayoutArray(IRLS& env, const IRInstruction* inst) {
+  auto const arr = srcLoc(env, inst, 0).reg();
+  auto const key = inst->extra<InitMixedLayoutArray>()->key;
+  auto const idx = inst->extra<InitMixedLayoutArray>()->index;
+
+  auto const elm_off  = MixedArray::elmOff(idx);
+  auto const key_ptr  = arr[elm_off + MixedArrayElm::keyOff()];
+  auto const data_ptr = arr[elm_off + MixedArrayElm::dataOff()];
+  auto const hash_ptr = arr[elm_off + MixedArrayElm::hashOff()];
+
+  auto& v = vmain(env);
+  storeTV(v, data_ptr, srcLoc(env, inst, 1), inst->src(1));
+  v << storeli { key->hash(), hash_ptr };
+  v << store { v.cns(key), key_ptr };
 }
 
 void cgInitPackedLayoutArray(IRLS& env, const IRInstruction* inst) {

@@ -494,7 +494,10 @@ void emitNewVArray(IRGS& env, uint32_t numArgs) {
 
 namespace {
 
-void newStructImpl(IRGS& env, const ImmVector& immVec, Opcode op) {
+// `make` is an op that allocates the new struct and stores the values to it.
+// `alloc` is an op that just does the allocation, letting us inline stores.
+void newStructImpl(IRGS& env, const ImmVector& immVec,
+                   Opcode make, Opcode alloc) {
   auto const numArgs = immVec.size();
   auto const ids = immVec.vec32();
 
@@ -506,24 +509,36 @@ void newStructImpl(IRGS& env, const ImmVector& immVec, Opcode op) {
     extra.keys[i] = curUnit(env)->lookupLitstrId(ids[i]);
   }
 
-  auto const structData = gen(env, op, extra, sp(env));
-  discard(env, numArgs);
-  push(env, structData);
+  static constexpr auto kMaxUnrolledInitArray = 8;
+  if (numArgs > kMaxUnrolledInitArray) {
+    auto const arr = gen(env, make, extra, sp(env));
+    discard(env, numArgs);
+    push(env, arr);
+    return;
+  }
+
+  auto const arr = gen(env, alloc, extra);
+  for (int i = 0; i < numArgs; ++i) {
+    auto const index = numArgs - i - 1;
+    auto const data = KeyedIndexData(index, extra.keys[index]);
+    gen(env, InitMixedLayoutArray, data, arr, popC(env, DataTypeGeneric));
+  }
+  push(env, arr);
 }
 
 }
 
 void emitNewStructArray(IRGS& env, const ImmVector& immVec) {
-  newStructImpl(env, immVec, NewStructArray);
+  newStructImpl(env, immVec, NewStructArray, AllocStructArray);
 }
 
 void emitNewStructDArray(IRGS& env, const ImmVector& immVec) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
-  newStructImpl(env, immVec, NewStructDArray);
+  newStructImpl(env, immVec, NewStructDArray, AllocStructDArray);
 }
 
 void emitNewStructDict(IRGS& env, const ImmVector& immVec) {
-  newStructImpl(env, immVec, NewStructDict);
+  newStructImpl(env, immVec, NewStructDict, AllocStructDict);
 }
 
 void emitAddElemC(IRGS& env) {

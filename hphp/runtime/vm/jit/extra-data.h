@@ -369,6 +369,21 @@ struct IndexData : IRExtraData {
 };
 
 /*
+ * An index and a key used to initialized a dict-ish array element.
+ */
+struct KeyedIndexData : IRExtraData {
+  explicit KeyedIndexData(uint32_t index, const StringData* key)
+    : index(index)
+    , key(key)
+    {}
+
+  std::string show() const;
+
+  uint32_t index;
+  const StringData* key;
+};
+
+/*
  * Used to optimize array accesses. Does not change semantics, but changes how
  * we do the lookup - e.g. we scan small static arrays for static string keys.
  *
@@ -1717,12 +1732,16 @@ X(NewStructDArray,              NewStructData);
 X(NewStructDict,                NewStructData);
 X(NewRecord,                    NewStructData);
 X(NewRecordArray,               NewStructData);
+X(AllocStructArray,             NewStructData);
+X(AllocStructDArray,            NewStructData);
+X(AllocStructDict,              NewStructData);
 X(AllocPackedArray,             PackedArrayData);
 X(AllocVArray,                  PackedArrayData);
 X(AllocVecArray,                PackedArrayData);
 X(NewKeysetArray,               NewKeysetArrayData);
 X(InitPackedLayoutArrayLoop,    InitPackedArrayLoopData);
 X(InitPackedLayoutArray,        IndexData);
+X(InitMixedLayoutArray,         KeyedIndexData);
 X(CreateAAWH,                   CreateAAWHData);
 X(CountWHNotDone,               CountWHNotDoneData);
 X(CheckMixedArrayOffset,        IndexData);

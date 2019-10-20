@@ -1003,9 +1003,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CheckSurpriseAndStack:
     return may_load_store(AEmpty, AEmpty);
 
-  case InitExtraArgs:
-    return UnknownEffects {};
-
   //////////////////////////////////////////////////////////////////////
   // Iterator instructions
 

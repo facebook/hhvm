@@ -68,7 +68,7 @@ void init_params(IRGS& env, const Func* func, uint32_t argc,
   // move generics to the correct slot ($0ReifiedGenerics is the first
   // non-parameter local).
   // FIXME: leaks memory if generics were given but not expected.
-  if (func->hasReifiedGenerics() && argc <= nparams) {
+  if (func->hasReifiedGenerics()) {
     ifThenElse(
       env,
       [&] (Block* taken) {
@@ -94,8 +94,18 @@ void init_params(IRGS& env, const Func* func, uint32_t argc,
         if (argc == func->numParams()) return;
 
         auto const type = RuntimeOption::EvalHackArrDVArrs ? TVec : TArr;
-        gen(env, AssertLoc, type, LocalId{argc}, fp(env));
-        auto const generics = gen(env, LdLoc, type, LocalId{argc}, fp(env));
+        auto const generics = [&] {
+          if (argc < func->numParams()) {
+            gen(env, AssertLoc, type, LocalId{argc}, fp(env));
+            return gen(env, LdLoc, type, LocalId{argc}, fp(env));
+          } else {
+            assertx(!isInlining(env));
+            auto const genericsOff = IRSPRelOffsetData(offsetFromIRSP(
+              env, BCSPRelOffset{func->numSlotsInFrame() - int32_t(argc) - 1}));
+            gen(env, AssertStk, type, genericsOff, sp(env));
+            return gen(env, LdStk, type, genericsOff, sp(env));
+          }
+        }();
         gen(env, StLoc, LocalId{func->numParams()}, fp(env), generics);
       }
     );
@@ -117,15 +127,6 @@ void init_params(IRGS& env, const Func* func, uint32_t argc,
     // Need to initialize `...$args'.
     gen(env, StLoc, LocalId{nparams}, fp(env),
         cns(env, ArrayData::CreateVArray()));
-  }
-
-  assertx(!isInlining(env) || argc <= nparams);
-  if (!isInlining(env)) {
-    // Shuffle extra args to variadic capture parameter or trim them.
-    // Also sets m_varEnv to nullptr if MayUseVV and takes care of moving
-    // generics to the correct slot if there were too many args.
-    env.irb->exceptionStackBoundary();
-    gen(env, InitExtraArgs, FuncEntryData{func, argc}, fp(env), callFlags);
   }
 }
 
@@ -197,9 +198,9 @@ void init_locals(IRGS& env, const Func* func) {
 }
 
 /*
- * Emit raise-warnings for any missing or too many arguments.
+ * Emit raise-warnings for any missing arguments.
  */
-void warn_argument_arity(IRGS& env, uint32_t argc, SSATmp* numTooManyArgs) {
+void warnOnMissingArgs(IRGS& env, uint32_t argc) {
   auto const func = curFunc(env);
   auto const nparams = func->numNonVariadicParams();
   auto const& paramInfo = func->params();
@@ -210,9 +211,6 @@ void warn_argument_arity(IRGS& env, uint32_t argc, SSATmp* numTooManyArgs) {
       gen(env, RaiseMissingArg, FuncArgData { func, argc });
       break;
     }
-  }
-  if (numTooManyArgs) {
-    gen(env, RaiseTooManyArg, FuncData { func }, numTooManyArgs);
   }
 }
 
@@ -264,7 +262,7 @@ StackCheck stack_check_kind(const Func* func, uint32_t argc) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void emitPrologueEntry(IRGS& env, uint32_t argc, SSATmp* callFlags,
-                       SSATmp* numArgs, SSATmp* closure) {
+                       SSATmp* closure) {
   auto const func = curFunc(env);
 
   // Emit debug code.
@@ -280,10 +278,8 @@ void emitPrologueEntry(IRGS& env, uint32_t argc, SSATmp* callFlags,
     gen(env, JmpZero, makeUnreachable(env, ASSERT_REASON), callFuncOK);
 
     // Make sure we are at the right prologue.
-    auto const numArgsFromReg = gen(env, DefCallNumArgs);
-    auto const numArgsOK = argc <= func->numNonVariadicParams()
-      ? gen(env, EqInt, numArgsFromReg, cns(env, argc))
-      : gen(env, GtInt, numArgsFromReg, cns(env, func->numNonVariadicParams()));
+    auto const numArgs = gen(env, DefCallNumArgs);
+    auto const numArgsOK = gen(env, EqInt, numArgs, cns(env, argc));
     gen(env, JmpZero, makeUnreachable(env, ASSERT_REASON), numArgsOK);
   }
 
@@ -308,8 +304,11 @@ void emitPrologueEntry(IRGS& env, uint32_t argc, SSATmp* callFlags,
     return gen(env, DefCallCtx, ctxType);
   }();
 
+  // If we don't have variadics, unpack arg will be dropped.
+  auto const arNumArgs = std::min(argc, func->numParams());
+
   gen(env, DefFuncEntryFP, FuncData { func },
-      fp(env), callerFP, callFlags, numArgs, ctx);
+      fp(env), callerFP, callFlags, cns(env, arNumArgs), ctx);
   auto const spOffset = FPInvOffset { func->numSlotsInFrame() };
   gen(env, DefSP, FPInvOffsetData { spOffset }, fp(env));
 
@@ -321,7 +320,7 @@ void emitPrologueEntry(IRGS& env, uint32_t argc, SSATmp* callFlags,
 }
 
 void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID,
-                      SSATmp* callFlags, SSATmp* numArgs, SSATmp* closure) {
+                      SSATmp* callFlags, SSATmp* closure) {
   auto const func = curFunc(env);
 
   // Increment profiling counter.
@@ -330,19 +329,33 @@ void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID,
     profData()->setProfiling(func->getFuncId());
   }
 
-  // If too many arguments were passed, load the actual number of arguments
-  // from ActRec before m_numArgs gets overwritten by emitPrologueLocals().
-  // We can't use argc, as there is only one prologue for argc > nparams.
-  auto const numTooManyArgs =
-    !func->hasVariadicCaptureParam() && argc > func->numNonVariadicParams()
-      ? numArgs
-      : nullptr;
+  auto const unpackArgsForTooManyArgs = [&]() -> SSATmp* {
+    if (argc <= func->numParams()) return nullptr;
+
+    // If too many arguments were passed, load the array containing the unpack
+    // args, as it is about to get overridden by emitPrologueLocals(). Need to
+    // use LdStk instead of LdLoc, as there may be no such local.
+    assertx(!func->hasVariadicCaptureParam());
+    assertx(argc == func->numNonVariadicParams() + 1);
+    auto const type = RuntimeOption::EvalHackArrDVArrs ? TVec : TArr;
+    auto const unpackOff = IRSPRelOffsetData(offsetFromIRSP(
+      env, BCSPRelOffset{func->numSlotsInFrame() - int32_t(argc)}));
+    gen(env, AssertStk, type, unpackOff, sp(env));
+    return gen(env, LdStk, type, unpackOff, sp(env));
+  }();
 
   // Initialize params, locals, and---if we have a closure---the closure's
   // bound class context and use vars.
   emitPrologueLocals(env, argc, callFlags, closure);
 
-  warn_argument_arity(env, argc, numTooManyArgs);
+  env.irb->exceptionStackBoundary();
+
+  warnOnMissingArgs(env, argc);
+  if (unpackArgsForTooManyArgs != nullptr) {
+    // RaiseTooManyArg will free unpackArgsForTooManyArgs and also use it to
+    // report the correct numbers.
+    gen(env, RaiseTooManyArg, FuncData { func }, unpackArgsForTooManyArgs);
+  }
 
   emitGenericsMismatchCheck(env, callFlags);
   emitCallInOutCheck(env, callFlags);
@@ -395,16 +408,15 @@ void emitPrologueLocals(IRGS& env, uint32_t argc, SSATmp* callFlags,
 
 void emitFuncPrologue(IRGS& env, uint32_t argc, TransID transID) {
   auto const func = curFunc(env);
+  assertx(argc <= func->numNonVariadicParams() + 1);
+
   auto const callFlags = gen(env, DefCallFlags);
-  auto const numArgs = argc <= func->numNonVariadicParams()
-    ? cns(env, argc)
-    : gen(env, DefCallNumArgs);
   auto const closure = func->isClosureBody()
     ? gen(env, DefCallCtx, Type::ExactObj(func->implCls()))
     : nullptr;
 
-  emitPrologueEntry(env, argc, callFlags, numArgs, closure);
-  emitPrologueBody(env, argc, transID, callFlags, numArgs, closure);
+  emitPrologueEntry(env, argc, callFlags, closure);
+  emitPrologueBody(env, argc, transID, callFlags, closure);
 }
 
 void emitFuncBodyDispatch(IRGS& env, const DVFuncletsVec& dvs) {

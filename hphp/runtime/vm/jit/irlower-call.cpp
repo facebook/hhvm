@@ -72,6 +72,7 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
   auto const callee = srcLoc(env, inst, 2).reg();
   auto const ctx = srcLoc(env, inst, 3).reg();
   auto const extra = inst->extra<Call>();
+  auto const numArgsInclUnpack = extra->numArgs + (extra->hasUnpack ? 1 : 0);
 
   auto& v = vmain(env);
   auto const catchBlock = label(env, inst->taken());
@@ -87,7 +88,7 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
 
   v << copy{v.cns(callFlags.value()), r_php_call_flags()};
   v << copy{callee, r_php_call_func()};
-  v << copy{v.cns(extra->numArgs), r_php_call_num_args()};
+  v << copy{v.cns(numArgsInclUnpack), r_php_call_num_args()};
 
   auto withCtx = false;
   assertx(inst->src(3)->isA(TObj) || inst->src(3)->isA(TCls) ||
@@ -105,14 +106,23 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
   v << lea{sp[cellsToBytes(extra->spOffset.offset + extra->numInputs())], ssp};
   v << syncvmsp{ssp};
 
-  // Emit a smashable call that initially calls a recyclable service request
-  // stub.  The stub and the eventual targets take rvmfp() as an argument,
-  // pointing to the callee ActRec.
   auto const done = v.makeBlock();
-  if (inst->src(2)->hasConstVal(TFunc)) {
+  if (inst->src(2)->hasConstVal(TFunc) &&
+      extra->numArgs <= inst->src(2)->funcVal()->numNonVariadicParams()) {
+    // Emit a smashable call that initially calls a recyclable service request
+    // stub.  The stub and the eventual targets take rvmfp() as an argument,
+    // pointing to the callee ActRec.
+    auto const func = inst->src(2)->funcVal();
+    assertx(!extra->hasUnpack ||
+            extra->numArgs == func->numNonVariadicParams());
     v << callphp{tc::ustubs().immutableBindCallStub, php_call_regs(withCtx),
-                 {{done, catchBlock}}, inst->src(2)->funcVal(), extra->numArgs};
+                 {{done, catchBlock}}, func, numArgsInclUnpack};
   } else {
+    // If the callee is not known statically, or it was determined later, but
+    // we have too many arguments for prologue to handle, go to the redispatch
+    // stub that will pack any extra arguments and transfer control to the
+    // appropriate prologue.
+    assertx(!extra->hasUnpack);
     v << callphp{tc::ustubs().funcPrologueRedispatch, php_call_regs(withCtx),
                  {{done, catchBlock}}, nullptr, extra->numArgs};
   }

@@ -175,6 +175,7 @@ void shuffleExtraArgsVariadic(ActRec* ar);
 
 void raiseMissingArgument(const Func* func, int got);
 void raiseTooManyArguments(const Func* func, int got);
+void raiseTooManyArgumentsPrologue(const Func* func, ArrayData* unpackArgs);
 
 Class* lookupClsRDS(const StringData* name);
 

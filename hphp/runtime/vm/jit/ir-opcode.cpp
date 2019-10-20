@@ -409,7 +409,6 @@ bool opcodeMayRaise(Opcode opc) {
   case IncDecElem:
   case IncDecProp:
   case InitClsCns:
-  case InitExtraArgs:
   case InitProps:
   case InitSProps:
   case InterpOne:

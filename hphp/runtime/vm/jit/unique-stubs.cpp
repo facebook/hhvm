@@ -180,6 +180,7 @@ TCA emitCallToExit(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
 bool fcallHelper(CallFlags callFlags, Func* func, int32_t numArgs, void* ctx,
                  TCA savedRip) {
   assert_native_stack_aligned();
+  assertx(numArgs <= func->numNonVariadicParams() + 1);
 
   // The stub already synced the registers, but the vmsp() is pointing to
   // the space reserved for the ActRec, so let's adjust it first.
@@ -210,7 +211,9 @@ bool fcallHelper(CallFlags callFlags, Func* func, int32_t numArgs, void* ctx,
   // If doFCall() returns false, we've been asked to skip the function body due
   // to fb_intercept, so indicate that via the return value. If we did not
   // throw, we are going to reenter TC, so set the registers as dirty.
-  auto const notIntercepted = doFCall(ar, ar->numArgs(), false, callFlags);
+  auto const hasUnpack = numArgs == func->numNonVariadicParams() + 1;
+  if (hasUnpack) --numArgs;
+  auto const notIntercepted = doFCall(ar, numArgs, hasUnpack, callFlags);
   tl_regState = VMRegState::DIRTY;
   return notIntercepted;
 }
@@ -221,36 +224,97 @@ TCA emitFuncPrologueRedispatch(CodeBlock& cb, DataBlock& data) {
   alignCacheLine(cb);
 
   return vwrap(cb, data, [] (Vout& v) {
-    auto const nparams = v.makeReg();
-    auto const pcounts = v.makeReg();
-    v << loadl{r_php_call_func()[Func::paramCountsOff()], pcounts};
-    v << shrli{1, pcounts, nparams, v.makeReg()};
+    auto const func = v.makeReg();
+    auto const numArgs = v.makeReg();
+    v << copy{r_php_call_func(), func};
+    v << copy{r_php_call_num_args(), numArgs};
+
+    auto const paramCounts = v.makeReg();
+    auto const paramCountsMinusOne = v.makeReg();
+    auto const numNonVariadicParams = v.makeReg();
+    v << loadl{func[Func::paramCountsOff()], paramCounts};
+    v << decl{paramCounts, paramCountsMinusOne, v.makeReg()};
+    v << shrli{1, paramCountsMinusOne, numNonVariadicParams, v.makeReg()};
 
     auto const sf = v.makeReg();
-    v << cmpl{r_php_call_num_args(), nparams, sf};
+    v << cmpl{numNonVariadicParams, numArgs, sf};
 
     auto const pTabOff = safe_cast<int32_t>(Func::prologueTableOff());
     auto const ptrSize = safe_cast<int32_t>(sizeof(LowPtr<uint8_t>));
-    auto const func = v.makeReg();
-    v << copy{r_php_call_func(), func};
 
-    // If we passed more args than declared, we need to dispatch to the
-    // "too many arguments" prologue.
-    ifThen(v, CC_L, sf, [&] (Vout& v) {
+    ifThen(v, CC_LE, sf, [&] (Vout& v) {
+      // Fast path (numArgs <= numNonVariadicParams). Call the numArgs prologue.
       auto const dest = v.makeReg();
-
-      auto const nargs = v.makeReg();
-      v << movzlq{nparams, nargs};
-
-      emitLdLowPtr(v, func[nargs * ptrSize + (pTabOff + ptrSize)],
+      emitLdLowPtr(v, func[numArgs * ptrSize + pTabOff],
                    dest, sizeof(LowPtr<uint8_t>));
       v << jmpr{dest, php_call_regs(true)};
     });
 
+    // Slow path: we passed more arguments than declared. Need to pack the extra
+    // args and dispatch to the "too many arguments" prologue.
+
+    // We are going to do a C++ call, need to ensure native stack is aligned.
+    v << stublogue{false};
+
+    // Figure out the range of stack values to pack.
+    auto const stackTopOff = v.makeReg();
+    auto const stackTopPtr = v.makeReg();
+    auto const numToPack = v.makeReg();
+    assertx(sizeof(Cell) == (1 << 4));
+    v << shlqi{4, numArgs, stackTopOff, v.makeReg()};
+    v << subq{stackTopOff, rvmsp(), stackTopPtr, v.makeReg()};
+    v << subl{numNonVariadicParams, numArgs, numToPack, v.makeReg()};
+
+    // Pack the extra args into a vec/varray.
+    auto const helper = RuntimeOption::EvalHackArrDVArrs
+      ? PackedArray::MakeVec
+      : PackedArray::MakeVArray;
+    auto const packedArr = v.makeReg();
+    {
+      auto const save = r_php_call_flags()|r_php_call_func()|r_php_call_ctx();
+      PhysRegSaver prs{v, save};
+      v << vcall{
+        CallSpec::direct(helper),
+        v.makeVcallArgs({{numToPack, stackTopPtr}}),
+        v.makeTuple({packedArr}),
+        Fixup{},
+        DestType::SSA
+      };
+    }
+
+    // Calculate the new number of arguments.
+    auto const numNewArgs32 = v.makeReg();
+    auto const numNewArgs = v.makeReg();
+    v << incl{numNonVariadicParams, numNewArgs32, v.makeReg()};
+    v << movzlq{numNewArgs32, numNewArgs};
+
+    // Figure out where to store the packed array.
+    auto const unpackCellOff = v.makeReg();
+    auto const unpackCellPtr = v.makeReg();
+    assertx(sizeof(Cell) == (1 << 4));
+    v << shlqi{4, numNewArgs, unpackCellOff, v.makeReg()};
+    v << subq{unpackCellOff, rvmsp(), unpackCellPtr, v.makeReg()};
+
+    // Store it.
+    auto const type = RuntimeOption::EvalHackArrDVArrs
+      ? DataType::Vec
+      : DataType::Array;
+    v << store{packedArr, unpackCellPtr + TVOFF(m_data)};
+    v << storeb{v.cns(type), unpackCellPtr + TVOFF(m_type)};
+
+    // Move generics to the correct place.
+    auto const generics = v.makeReg();
+    v << loadups{stackTopPtr[-int32_t(sizeof(Cell))], generics};
+    v << storeups{generics, unpackCellPtr[-int32_t(sizeof(Cell))]};
+
+    // Restore all inputs.
+    v << copy{numNewArgs, r_php_call_num_args()};
+
+    // Call the numNonVariadicParams + 1 prologue.
     auto const dest = v.makeReg();
-    emitLdLowPtr(v, func[r_php_call_num_args() * ptrSize + pTabOff],
+    emitLdLowPtr(v, Vreg(r_php_call_func())[numNewArgs * ptrSize + pTabOff],
                  dest, sizeof(LowPtr<uint8_t>));
-    v << jmpr{dest, php_call_regs(true)};
+    v << tailcallstubr{dest, php_call_regs(true)};
   });
 }
 

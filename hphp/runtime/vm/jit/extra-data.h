@@ -810,6 +810,7 @@ struct CallData : IRExtraData {
                     Offset callOffset,
                     uint32_t genericsBitmap,
                     bool hasGenerics,
+                    bool hasUnpack,
                     bool dynamicCall,
                     bool asyncEagerReturn,
                     bool formingRegion)
@@ -819,6 +820,7 @@ struct CallData : IRExtraData {
     , callOffset(callOffset)
     , genericsBitmap(genericsBitmap)
     , hasGenerics(hasGenerics)
+    , hasUnpack(hasUnpack)
     , dynamicCall(dynamicCall)
     , asyncEagerReturn(asyncEagerReturn)
     , formingRegion(formingRegion)
@@ -830,6 +832,7 @@ struct CallData : IRExtraData {
       hasGenerics
         ? folly::sformat(",hasGenerics({})", genericsBitmap)
         : std::string{},
+      hasUnpack ? ",unpack" : "",
       dynamicCall ? ",dynamicCall" : "",
       asyncEagerReturn ? ",asyncEagerReturn" : "",
       formingRegion ? ",formingRegion" : ""
@@ -837,7 +840,7 @@ struct CallData : IRExtraData {
   }
 
   uint32_t numInputs() const {
-    return numArgs + (hasGenerics ? 1 : 0);
+    return numArgs + (hasUnpack ? 1 : 0) + (hasGenerics ? 1 : 0);
   }
 
   IRSPRelOffset spOffset; // offset from StkPtr to bottom of call's ActRec+args
@@ -846,6 +849,7 @@ struct CallData : IRExtraData {
   Offset callOffset;   // offset from func->base()
   uint32_t genericsBitmap;
   bool hasGenerics;
+  bool hasUnpack;
   bool dynamicCall;
   bool asyncEagerReturn;
   bool formingRegion;
@@ -1806,7 +1810,6 @@ X(LdPropAddr,                   ByteOffsetData);
 X(LdInitPropAddr,               ByteOffsetData);
 X(NewCol,                       NewColData);
 X(NewColFromArray,              NewColData);
-X(InitExtraArgs,                FuncEntryData);
 X(CheckSurpriseFlagsEnter,      FuncEntryData);
 X(CheckSurpriseAndStack,        FuncEntryData);
 X(ContPreNext,                  IsAsyncData);

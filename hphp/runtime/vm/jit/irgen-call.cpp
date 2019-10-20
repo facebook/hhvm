@@ -200,7 +200,8 @@ void callUnpack(IRGS& env, SSATmp* callee, const FCallArgs& fca,
 
 SSATmp* callImpl(IRGS& env, SSATmp* callee, const FCallArgs& fca,
                  SSATmp* objOrClass, bool dynamicCall, bool asyncEagerReturn) {
-  assertx(!fca.hasUnpack());
+  assertx(!fca.hasUnpack() ||
+          callee->funcVal()->numNonVariadicParams() == fca.numArgs);
 
   // TODO: extend hhbc with bitmap of passed generics, or even better, use one
   // stack value per generic argument and extend hhbc with their count
@@ -226,6 +227,7 @@ SSATmp* callImpl(IRGS& env, SSATmp* callee, const FCallArgs& fca,
     bcOff(env) - curFunc(env)->base(),
     genericsBitmap,
     fca.hasGenerics(),
+    fca.hasUnpack(),
     dynamicCall,
     asyncEagerReturn,
     env.formingRegion,
@@ -360,22 +362,57 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
     if (inlined) return;
   }
 
-  // We may have updated the stack, make sure Call opcode can set up its Catch.
-  updateMarker(env);
-  env.irb->exceptionStackBoundary();
-
   if (fca.hasUnpack()) {
+    // We may have updated the stack, make sure CallUnpack can set up its Catch.
+    updateMarker(env);
+    env.irb->exceptionStackBoundary();
+
     return callUnpack(env, cns(env, callee), fca, objOrClass, dynamicCall,
                       false /* unlikely */);
   }
 
-  auto const asyncEagerReturn =
-    fca.asyncEagerOffset != kInvalidOffset &&
-    callee->supportsAsyncEagerReturn();
-  auto const retVal = callImpl(env, cns(env, callee), fca, objOrClass,
-                               dynamicCall, asyncEagerReturn);
-  handleCallReturn(env, callee, fca, retVal, asyncEagerReturn,
-                   false /* unlikely */);
+  auto const doCall = [&](const FCallArgs& fca) {
+    // We may have updated the stack, make sure Call can set up its Catch.
+    updateMarker(env);
+    env.irb->exceptionStackBoundary();
+
+    auto const asyncEagerReturn =
+      fca.asyncEagerOffset != kInvalidOffset &&
+      callee->supportsAsyncEagerReturn();
+    auto const retVal = callImpl(env, cns(env, callee), fca, objOrClass,
+                                 dynamicCall, asyncEagerReturn);
+    handleCallReturn(env, callee, fca, retVal, asyncEagerReturn,
+                     false /* unlikely */);
+  };
+
+  if (fca.numArgs <= callee->numNonVariadicParams()) {
+    return doCall(fca);
+  }
+
+  // Pack extra arguments. The prologue can handle this even if the function
+  // does not accept variadic arguments.
+  auto const generics = fca.hasGenerics() ? popC(env) : nullptr;
+  auto const numToPack = fca.numArgs - callee->numNonVariadicParams();
+  for (auto i = 0; i < numToPack; ++i) {
+    // The emitNew*Array() helpers assume non-refs. We already checked for
+    // reffiness mismatch so this is safe.
+    assertTypeStack(env, BCSPRelOffset{i}, TInitCell);
+  }
+  if (RuntimeOption::EvalHackArrDVArrs) {
+    emitNewVecArray(env, numToPack);
+  } else {
+    emitNewVArray(env, numToPack);
+  }
+  if (generics) push(env, generics);
+
+  doCall(FCallArgs(
+    static_cast<FCallArgs::Flags>(fca.flags | FCallArgs::Flags::HasUnpack),
+    callee->numNonVariadicParams(),
+    fca.numRets,
+    nullptr,  // reffiness already checked
+    fca.asyncEagerOffset,
+    fca.lockWhileUnwinding
+  ));
 }
 
 void prepareAndCallUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca,

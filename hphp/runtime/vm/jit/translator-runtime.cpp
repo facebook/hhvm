@@ -882,6 +882,13 @@ void raiseTooManyArguments(const Func* func, int got) {
   raiseArgumentImpl(func, got, false);
 }
 
+void raiseTooManyArgumentsPrologue(const Func* func, ArrayData* unpackArgs) {
+  SCOPE_EXIT { decRefArr(unpackArgs); };
+  if (unpackArgs->empty()) return;
+  auto const got = func->numNonVariadicParams() + unpackArgs->size();
+  raiseArgumentImpl(func, got, false);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 Class* lookupClsRDS(const StringData* name) {

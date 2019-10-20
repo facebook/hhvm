@@ -316,7 +316,7 @@ static CallMap s_callMap {
     {RaiseMissingArg,    raiseMissingArgument, DNone, SSync,
                            {extra(&FuncArgData::func),
                             extra(&FuncArgData::argNum)}},
-    {RaiseTooManyArg,    raiseTooManyArguments, DNone, SSync,
+    {RaiseTooManyArg,    raiseTooManyArgumentsPrologue, DNone, SSync,
                            {extra(&FuncData::func), {SSA, 0}}},
     {RaiseRxCallViolation, raiseRxCallViolation,
                           DNone, SSync, {{SSA, 0}, {SSA, 1}}},

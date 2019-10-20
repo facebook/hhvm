@@ -255,10 +255,11 @@ TCA emitFuncPrologueRedispatch(CodeBlock& cb, DataBlock& data) {
 }
 
 TCA emitFCallHelperThunk(CodeBlock& main, CodeBlock& cold, DataBlock& data,
-                         TCA resumeHelper) {
+                         UniqueStubs& us) {
   alignJmpTarget(main);
+  CGMeta meta;
 
-  return vwrap2(main, cold, data, [&] (Vout& v, Vout& vc) {
+  auto const start = vwrap2(main, cold, data, meta, [&] (Vout& v, Vout& vc) {
     v << stublogue{false};
 
     // Save all inputs.
@@ -297,15 +298,26 @@ TCA emitFCallHelperThunk(CodeBlock& main, CodeBlock& cold, DataBlock& data,
     v << loadstubret{savedRip};
 
     // Call C++ helper to perform the equivalent of the func prologue logic.
+    auto const done = v.makeBlock();
+    auto const ctch = vc.makeBlock();
     auto const notIntercepted = v.makeReg();
     storeVMRegs(v);
-    v << vcall{
+    v << vinvoke{
       CallSpec::direct(fcallHelper),
       v.makeVcallArgs({{flags, func, numArgs, ctx, savedRip}}),
       v.makeTuple({notIntercepted}),
+      {done, ctch},
       Fixup{},
       DestType::SSA
     };
+
+    vc = ctch;
+    emitStubCatch(vc, us, [] (Vout& v) {
+      loadVMRegs(v);
+      return vm_regs_with_sp();
+    });
+
+    v = done;
 
     auto const notInterceptedSF = v.makeReg();
     v << testb{notIntercepted, notIntercepted, notInterceptedSF};
@@ -322,8 +334,11 @@ TCA emitFCallHelperThunk(CodeBlock& main, CodeBlock& cold, DataBlock& data,
     // context, so convert the context first. Note that the VM registers are
     // not synced yet, but that's fine as resumeHelper operates on TLS data.
     v << stubtophp{};
-    v << jmpi{resumeHelper, RegSet(rvmtl())};
+    v << jmpi{us.resumeHelper, RegSet(rvmtl())};
   });
+
+  meta.process(nullptr);
+  return start;
 }
 
 TCA emitFuncBodyHelperThunk(CodeBlock& cb, DataBlock& data) {
@@ -1145,7 +1160,7 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
 
   ADD(fcallHelperThunk,
       view,
-      emitFCallHelperThunk(cold, frozen, data, resumeHelper));
+      emitFCallHelperThunk(cold, frozen, data, *this));
 #undef ADD
 
   emitAllResumable(code, dbg);

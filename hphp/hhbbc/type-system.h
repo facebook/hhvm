@@ -52,13 +52,13 @@ struct Type;
  *                 |     |    |
  *              Cls<=c  Cell  Ref
  *                 |     |
- *              Cls=c    +-------------+--------+-------+-------+------------+
- *                       |             |        |       |       |            |
- *                      Unc            |        |      Obj     Res         Record
- *                       | \           |        |      /  \                  |
- *                       |  \          |        |  Obj<=c Obj<=WaitHandle Record<=c
- *                     Prim  \         |        |    |       |               |
- *                     / |   InitUnc   |        |  Obj=c   WaitH<T>       Record=c
+ *              Cls=c    +-------------+--------+-------+-------+-----+
+ *                       |             |        |       |       |     |
+ *                      Unc            |        |      Obj     Res   Record
+ *                       | \           |        |      /  \
+ *                       |  \          |        |  Obj<=c Obj<=WaitHandle
+ *                     Prim  \         |        |    |       |
+ *                     / |   InitUnc   |        |  Obj=c   WaitH<T>
  *                    /  |   /  |  |   |        |
  *                   /   |  /   |  |   |        |
  *                  /    | /    |  |   |        |
@@ -436,7 +436,6 @@ constexpr auto BSArrLike = BSArr | BSVec | BSDict | BSKeyset;
   DT(ArrLikeVal, SArray, aval)                                  \
   DT(Obj, DObj, dobj)                                           \
   DT(Cls, DCls, dcls)                                           \
-  DT(Record, DRecord, drec)                                     \
   DT(RefInner, copy_ptr<Type>, inner)                           \
   DT(ArrLikePacked, copy_ptr<DArrLikePacked>, packed)           \
   DT(ArrLikePackedN, copy_ptr<DArrLikePackedN>, packedn)        \
@@ -489,22 +488,6 @@ struct DObj {
   bool isCtx = false;
   res::Class cls;
   copy_ptr<Type> whType;
-};
-
-/*
- * Information about a specific record type.  The record type is either
- * exact or a subtype of the supplied record.
- */
-struct DRecord {
-  enum Tag : uint16_t { Exact, Sub };
-
-  DRecord(Tag type, res::Record rec)
-    : type(type)
-    , rec(rec)
-  {}
-
-  Tag type;
-  res::Record rec;
 };
 
 struct DArrLikePacked;
@@ -662,9 +645,7 @@ private:
   friend bool is_specialized_wait_handle(const Type&);
   friend bool is_specialized_array_like(const Type& t);
   friend bool is_specialized_obj(const Type&);
-  friend bool is_specialized_record(const Type&);
   friend bool is_specialized_cls(const Type&);
-  friend bool is_specialized_record(const Type&);
   friend bool is_ref_with_inner(const Type&);
   friend bool is_specialized_string(const Type&);
   friend Type wait_handle_inner(const Type&);
@@ -677,8 +658,6 @@ private:
   friend Type objExact(res::Class);
   friend Type subCls(res::Class);
   friend Type clsExact(res::Class);
-  friend Type exactRecord(res::Record);
-  friend Type subRecord(res::Record);
   friend Type ref_to(Type);
   friend Type rname(SString);
   friend Type packed_impl(trep, std::vector<Type>, ProvTag);
@@ -687,7 +666,6 @@ private:
   friend Type mapn_impl(trep bits, Type k, Type v, ProvTag);
   friend Type mapn_impl_from_map(trep bits, Type k, Type v, ProvTag);
   friend DObj dobj_of(const Type&);
-  friend DRecord drec_of(const Type&);
   friend DCls dcls_of(Type);
   friend SString sval_of(const Type&);
   friend Type union_of(Type, Type);
@@ -1104,13 +1082,6 @@ Type subObj(res::Class);
 Type objExact(res::Class);
 Type subCls(res::Class);
 Type clsExact(res::Class);
-
-/*
- * Create types for records with some known constraint on an associated
- * res::Record.
- */
-Type exactRecord(res::Record);
-Type subRecord(res::Record);
 
 /*
  * Packed array types with known size.

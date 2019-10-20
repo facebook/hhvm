@@ -429,6 +429,7 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
+namespace {
 /* Known information about a particular possible instantiation of a
  * PHP record. The php::Record will be marked AttrUnique if there is a unique
  * RecordInfo with a given name.
@@ -436,12 +437,8 @@ private:
 struct RecordInfo {
   const php::Record* rec = nullptr;
   const RecordInfo* parent = nullptr;
-  /*
-   * A vector of RecordInfo that encodes the inheritance hierarchy.
-   */
-  CompactVector<RecordInfo*> baseList;
-  const php::Record* phpType() const { return rec; }
 };
+}
 
 /*
  * Known information about a particular possible instantiation of a
@@ -579,8 +576,6 @@ struct ClassInfo {
    */
   bool derivedHasConstProp{false};
 
-  const php::Class* phpType() const { return cls; }
-
   /*
    * Flags about the existence of various magic methods, or whether
    * any derived classes may have those methods.  The non-derived
@@ -617,90 +612,6 @@ const MagicMapInfo magicMethods[] {
 //////////////////////////////////////////////////////////////////////
 
 namespace res {
-Record::Record(const Index* idx, Either<SString, RecordInfo*> val)
-  : index(idx)
-  , val(val)
-{}
-
-bool Record::same(const Record& o) const {
-  return val == o.val;
-}
-
-bool Record::couldBe(const Record& o) const {
-  // If either types are not unique return true
-  if (val.left() || o.val.left()) return true;
-
-  auto r1 = val.right();
-  auto r2 = o.val.right();
-  assertx(r1 && r2);
-  // Both types are unique records so they "could be" if they are in an
-  // inheritance relationship
-  if (r1->baseList.size() >= r2->baseList.size()) {
-    return r1->baseList[r2->baseList.size() - 1] == r2;
-  } else {
-    return r2->baseList[r1->baseList.size() - 1] == r1;
-  }
-}
-
-SString Record::name() const {
-  return val.match(
-    [] (SString s) { return s; },
-    [] (RecordInfo* ri) { return ri->rec->name.get(); }
-  );
-}
-
-bool Record::mustBeSubtypeOf(const Record& o) const {
-  auto s1 = val.left();
-  auto s2 = o.val.left();
-  if (s1 || s2) return s1 == s2;
-  auto r1 = val.right();
-  auto r2 = o.val.right();
-  assertx(r1 && r2);
-  if (r1->baseList.size() >= r2->baseList.size()) {
-    return r1->baseList[r2->baseList.size() - 1] == r2;
-  }
-  return false;
-}
-
-bool Record::couldBeOverriden() const {
-  return val.match(
-    [] (SString) { return true; },
-    [] (RecordInfo* rinfo) {
-      return !(rinfo->rec->attrs & AttrFinal);
-    }
-  );
-}
-
-std::string show(const Record& r) {
-  return r.val.match(
-    [] (SString s) -> std::string {
-      return s->data();
-    },
-    [] (RecordInfo* rinfo) {
-      return folly::sformat("{}*", rinfo->rec->name);
-    }
-  );
-}
-
-folly::Optional<Record> Record::commonAncestor(const Record& r) const {
-  if (val.left() || r.val.left()) return folly::none;
-  auto const c1 = val.right();
-  auto const c2 = r.val.right();
-  // Walk the arrays of base classes until they match. For common ancestors
-  // to exist they must be on both sides of the baseList at the same positions
-  RecordInfo* ancestor = nullptr;
-  auto it1 = c1->baseList.begin();
-  auto it2 = c2->baseList.begin();
-  while (it1 != c1->baseList.end() && it2 != c2->baseList.end()) {
-    if (*it1 != *it2) break;
-    ancestor = *it1;
-    ++it1; ++it2;
-  }
-  if (ancestor == nullptr) {
-    return folly::none;
-  }
-  return res::Record { index, ancestor };
-}
 
 Class::Class(const Index* idx,
              Either<SString,ClassInfo*> val)
@@ -1064,25 +975,6 @@ using IfaceSlotMap = hphp_hash_map<const php::Class*, Slot>;
 using ConstInfoConcurrentMap =
   tbb::concurrent_hash_map<SString, ConstInfo, StringDataHashCompare>;
 
-template <typename T>
-struct ResTypeHelper;
-
-template <>
-struct ResTypeHelper<res::Class> {
-  using InfoT = ClassInfo;
-  using InfoMapT = ISStringToMany<InfoT>;
-  using OtherT = res::Record;
-  static std::string name() { return "class"; }
-};
-
-template <>
-struct ResTypeHelper<res::Record> {
-  using InfoT = RecordInfo;
-  using InfoMapT = ISStringToMany<InfoT>;
-  using OtherT = res::Class;
-  static std::string name() { return "record"; }
-};
-
 struct Index::IndexData {
   explicit IndexData(Index* index) : m_index{index} {}
   IndexData(const IndexData&) = delete;
@@ -1250,21 +1142,7 @@ struct Index::IndexData {
   std::mutex pending_class_aliases_mutex;
 
   std::thread compute_iface_vtables;
-
-  template<typename T>
-  const typename ResTypeHelper<T>::InfoMapT& infoMap() const;
 };
-
-template<>
-const typename ResTypeHelper<res::Class>::InfoMapT&
-Index::IndexData::infoMap<res::Class>() const {
-  return classInfo;
-}
-template<>
-const typename ResTypeHelper<res::Record>::InfoMapT&
-Index::IndexData::infoMap<res::Record>() const {
-  return recordInfo;
-}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -1929,14 +1807,13 @@ void add_system_constants_to_index(IndexData& index) {
 }
 
 //////////////////////////////////////////////////////////////////////
-
 template<typename T> struct NamingEnv;
 
 template<class T>
-struct PhpTypeHelper;
+struct TypeHelper;
 
 template<>
-struct PhpTypeHelper<php::Class> {
+struct TypeHelper<php::Class> {
   template<class Fn>
   static void process_bases(const php::Class* cls, Fn&& fn) {
     if (cls->parentName) fn(cls->parentName);
@@ -1952,7 +1829,7 @@ struct PhpTypeHelper<php::Class> {
 };
 
 template<>
-struct PhpTypeHelper<php::Record> {
+struct TypeHelper<php::Record> {
   template<class Fn>
   static void process_bases(const php::Record* rec, Fn&& fn) {
     if (rec->parentName) fn(rec->parentName);
@@ -2176,7 +2053,7 @@ template<typename T>
 struct NamingEnv<T>::Define {
   explicit Define(NamingEnv& env, SString n, TypeInfo<T>* ti, const T* t)
       : env(env), n(n) {
-    ITRACE(2, "defining {} {} for {}\n", PhpTypeHelper<T>::name(), n, t->name);
+    ITRACE(2, "defining {} {} for {}\n", TypeHelper<T>::name(), n, t->name);
     always_assert(!env.names.count(n));
     env.names[n] = ti;
   }
@@ -2196,7 +2073,7 @@ private:
 using ClassNamingEnv = NamingEnv<php::Class>;
 using RecordNamingEnv = NamingEnv<php::Record>;
 
-void PhpTypeHelper<php::Class>::assert_bases(NamingEnv<php::Class>& env,
+void TypeHelper<php::Class>::assert_bases(NamingEnv<php::Class>& env,
                                           const php::Class* cls) {
   if (cls->parentName) {
     assertx(env.index.classInfo.count(cls->parentName));
@@ -2209,7 +2086,7 @@ void PhpTypeHelper<php::Class>::assert_bases(NamingEnv<php::Class>& env,
   }
 }
 
-void PhpTypeHelper<php::Record>::assert_bases(NamingEnv<php::Record>& env,
+void TypeHelper<php::Record>::assert_bases(NamingEnv<php::Record>& env,
                                            const php::Record* rec) {
   if (rec->parentName) {
     assertx(env.index.recordInfo.count(rec->parentName));
@@ -2617,10 +2494,7 @@ void resolve_combinations(RecordNamingEnv& env,
       return;
     }
     rinfo->parent = parent;
-    rinfo->baseList = rinfo->parent->baseList;
   }
-  rinfo->baseList.push_back(rinfo.get());
-  rinfo->baseList.shrink_to_fit();
   ITRACE(2, "  resolved: {}\n", rec->name);
   env.resolved.emplace(rec, rinfo.get());
   env.index.recordInfo.emplace(rec->name, rinfo.get());
@@ -2719,11 +2593,11 @@ void resolve_combinations(ClassNamingEnv& env,
 
 
 
-void PhpTypeHelper<php::Record>::try_flatten_traits(NamingEnv<php::Record>&,
+void TypeHelper<php::Record>::try_flatten_traits(NamingEnv<php::Record>&,
                                                 const php::Record*,
                                                 RecordInfo*) {}
 
-void PhpTypeHelper<php::Class>::try_flatten_traits(NamingEnv<php::Class>& env,
+void TypeHelper<php::Class>::try_flatten_traits(NamingEnv<php::Class>& env,
                                                 const php::Class* cls,
                                                 ClassInfo* cinfo) {
   if (options.FlattenTraits &&
@@ -2740,11 +2614,11 @@ void preresolve(NamingEnv<T>& env, const T* type) {
   assertx(!env.resolved.count(type));
 
   ITRACE(2, "preresolve {}: {}:{}\n",
-      PhpTypeHelper<T>::name(), type->name, (void*)type);
+      TypeHelper<T>::name(), type->name, (void*)type);
   {
     Trace::Indent indent;
     if (debug) {
-      PhpTypeHelper<T>::assert_bases(env, type);
+      TypeHelper<T>::assert_bases(env, type);
     }
     resolve_combinations(env, type);
   }
@@ -2772,7 +2646,7 @@ void preresolve(NamingEnv<T>& env, const T* type) {
       }
     }
     if (std::next(begin(range)) == end(range)) {
-      PhpTypeHelper<T>::try_flatten_traits(env, type, begin(range)->second);
+      TypeHelper<T>::try_flatten_traits(env, type, begin(range)->second);
     }
   }
 }
@@ -3799,11 +3673,11 @@ void buildTypeInfoData(TypeInfoData<T>& tid,
       auto const count = tmap.count(rName);
       tid.depCounts[t] += count ? count : 1;
     };
-    PhpTypeHelper<T>::process_bases(t, addUser);
+    TypeHelper<T>::process_bases(t, addUser);
 
     if (!tid.depCounts.count(t)) {
       FTRACE(5, "Adding no-dep {} {}:{} to queue\n",
-             PhpTypeHelper<T>::name(), t->name, (void*)t);
+             TypeHelper<T>::name(), t->name, (void*)t);
       // make sure that closure is first, because we end up calling
       // preresolve directly on closures created by trait
       // flattening, which assumes all dependencies are satisfied.
@@ -3815,7 +3689,7 @@ void buildTypeInfoData(TypeInfoData<T>& tid,
       }
     } else {
       FTRACE(6, "{} {}:{} has {} deps\n",
-             PhpTypeHelper<T>::name(), t->name, (void*)t, tid.depCounts[t]);
+             TypeHelper<T>::name(), t->name, (void*)t, tid.depCounts[t]);
     }
   }
   tid.cqBack = tid.queue.size();
@@ -3844,10 +3718,10 @@ void preresolveTypes(NamingEnv<T>& env,
         auto const checkCanResolve = [&] (SString name) {
           if (canResolve) canResolve = tmap.count(name);
         };
-        PhpTypeHelper<T>::process_bases(it->first, checkCanResolve);
+        TypeHelper<T>::process_bases(it->first, checkCanResolve);
         if (canResolve) {
           FTRACE(2, "Breaking pseudo-cycle for {} {}:{}\n",
-                 PhpTypeHelper<T>::name(), it->first->name, (void*)it->first);
+                 TypeHelper<T>::name(), it->first->name, (void*)it->first);
           tid.queue[tid.cqBack++] = it->first;
           it = tid.depCounts.erase(it);
           tid.hasPseudoCycles = true;
@@ -4395,66 +4269,6 @@ Index::lookup_extra_methods(const php::Class* cls) const {
   }
   return nullptr;
 }
-//////////////////////////////////////////////////////////////////////
-
-template<typename T>
-folly::Optional<T> Index::resolve_type_impl(SString name) const {
-  auto const infomap = m_data->infoMap<T>();
-  auto const omap = m_data->infoMap<typename ResTypeHelper<T>::OtherT>();
-  auto const tinfos = find_range(infomap, name);
-  for (auto it = begin(tinfos); it != end(tinfos); ++it) {
-    auto const tinfo = it->second;
-    /*
-     * If there's only one preresolved [Class|Record]Info, we can give out a
-     * specific res::Class or res::Record for it.
-     * (Any other possible resolutions were known to fatal,
-     * or it was actually unique.)
-     */
-    if (tinfo->phpType()->attrs & AttrUnique) {
-      if (debug &&
-          (std::next(it) != end(tinfos) ||
-           omap.count(name) ||
-           m_data->typeAliases.count(name))) {
-        std::fprintf(stderr, "non unique \"unique\" %s: %s\n",
-                     ResTypeHelper<T>::name().c_str(),
-                     tinfo->phpType()->name->data());
-        while (++it != end(tinfos)) {
-          std::fprintf(stderr, "   and %s\n",
-                       it->second->phpType()->name->data());
-        }
-
-        auto const typeAliases = find_range(m_data->typeAliases, name);
-        for (auto ta = begin(typeAliases); ta != end(typeAliases); ++ta) {
-          std::fprintf(stderr, "   and type-alias %s\n",
-                       ta->second->name->data());
-        }
-
-        auto const others = find_range(omap, name);
-        for (auto to = begin(others); to != end(others); ++to) {
-          std::fprintf(stderr, "   and %s %s\n",
-                       ResTypeHelper<typename ResTypeHelper<T>::OtherT>::
-                       name().c_str(),
-                       to->second->phpType()->name->data());
-        }
-        always_assert(0);
-      }
-      return T { this, tinfo };
-    }
-    break;
-  }
-  // We refuse to have name-only resolutions of typeAliases,
-  // so that all name only resolutions can be treated as records or classes.
-  if (!m_data->typeAliases.count(name) && !omap.count(name)) {
-    return T { this, name };
-  }
-
-  return folly::none;
-}
-
-folly::Optional<res::Record> Index::resolve_record(SString recName) const {
-  recName = normalizeNS(recName);
-  return resolve_type_impl<res::Record>(recName);
-}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -4502,7 +4316,44 @@ folly::Optional<res::Class> Index::resolve_class(Context ctx,
     }
   }
 
-  return resolve_type_impl<res::Class>(clsName);
+  /*
+   * If there's only one preresolved ClassInfo, we can give out a
+   * specific res::Class for it.  (Any other possible resolutions were
+   * known to fatal, or it was actually unique.)
+   */
+  auto const classes = find_range(m_data->classInfo, clsName);
+  for (auto it = begin(classes); it != end(classes); ++it) {
+    auto const cinfo = it->second;
+    if (cinfo->cls->attrs & AttrUnique) {
+      if (debug &&
+          (std::next(it) != end(classes) ||
+           m_data->typeAliases.count(clsName))) {
+        std::fprintf(stderr, "non unique \"unique\" class: %s\n",
+          cinfo->cls->name->data());
+        while (++it != end(classes)) {
+          std::fprintf(stderr, "   and %s\n", it->second->cls->name->data());
+        }
+        auto const typeAliases = find_range(m_data->typeAliases, clsName);
+
+        for (auto ta = begin(typeAliases); ta != end(typeAliases); ++ta) {
+          std::fprintf(stderr, "   and type-alias %s\n",
+                       ta->second->name->data());
+        }
+        always_assert(0);
+      }
+      return res::Class { this, cinfo };
+    }
+    break;
+  }
+
+  // We refuse to have name-only resolutions of enums, or typeAliases,
+  // so that all name only resolutions can be treated as objects.
+  if (!m_data->enums.count(clsName) &&
+      !m_data->typeAliases.count(clsName)) {
+    return res::Class { this, clsName };
+  }
+
+  return folly::none;
 }
 
 folly::Optional<res::Class> Index::selfCls(const Context& ctx) const {
@@ -4516,24 +4367,19 @@ folly::Optional<res::Class> Index::parentCls(const Context& ctx) const {
   return resolve_class(ctx, ctx.cls->parentName);
 }
 
-Index::ResolvedInfo<boost::variant<boost::blank,res::Class,res::Record>>
+Index::ResolvedInfo<folly::Optional<res::Class>>
 Index::resolve_type_name(SString inName) const {
   auto const res = resolve_type_name_internal(inName);
-  using Ret = boost::variant<boost::blank,res::Class,res::Record>;
-  auto const val = match<Ret>(
-    res.value,
-    [&] (boost::blank) { return Ret{}; },
-    [&] (SString s) {
-      return (res.type == AnnotType::Record) ?
-             Ret{res::Record{this, s}} : Ret{res::Class{this, s}};
-    },
-    [&] (ClassInfo* c) { return res::Class{this, c}; },
-    [&] (RecordInfo* r) { return res::Record{this, r}; }
-  );
-  return { res.type, res.nullable, val };
+  return {
+    res.type,
+    res.nullable,
+    res.value.isNull()
+      ? folly::none
+      : folly::make_optional(res::Class{this, res.value})
+  };
 }
 
-Index::ResolvedInfo<boost::variant<boost::blank,SString,ClassInfo*,RecordInfo*>>
+Index::ResolvedInfo<Either<SString,ClassInfo*>>
 Index::resolve_type_name_internal(SString inName) const {
   folly::Optional<hphp_fast_set<const void*>> seen;
 
@@ -4542,15 +4388,9 @@ Index::resolve_type_name_internal(SString inName) const {
 
   for (unsigned i = 0; ; ++i) {
     name = normalizeNS(name);
-    auto const records = find_range(m_data->recordInfo, name);
-    auto const rec_it = begin(records);
-    if (rec_it != end(records)) {
-      auto const rinfo = rec_it->second;
-      if (rinfo->rec->attrs & AttrUnique) {
-        return { AnnotType::Record, nullable, rinfo };
-      } else {
-        return { AnnotType::Record, nullable, name };
-      }
+    auto const rec_it = m_data->records.find(name);
+    if (rec_it != m_data->records.end()) {
+      return { AnnotType::Record, nullable, nullptr };
     }
     auto const classes = find_range(m_data->classInfo, name);
     auto const cls_it = begin(classes);
@@ -4560,7 +4400,7 @@ Index::resolve_type_name_internal(SString inName) const {
         if (!m_data->enums.count(name) && !m_data->typeAliases.count(name)) {
           break;
         }
-        return { AnnotType::Object, false, {} };
+        return { AnnotType::Object, false, nullptr };
       }
       if (!(cinfo->cls->attrs & AttrEnum)) {
         return { AnnotType::Object, nullable, cinfo };
@@ -4579,7 +4419,7 @@ Index::resolve_type_name_internal(SString inName) const {
       if (ta_it == end(typeAliases)) break;
       auto const ta = ta_it->second;
       if (!(ta->attrs & AttrUnique)) {
-        return { AnnotType::Object, false, {} };
+        return { AnnotType::Object, false, nullptr };
       }
       nullable = nullable || ta->nullable;
       if (ta->type != AnnotType::Object) {
@@ -4596,7 +4436,7 @@ Index::resolve_type_name_internal(SString inName) const {
       seen->insert(name);
     } else if (i > 10) {
       if (!seen->insert(name).second) {
-        return { AnnotType::Object, false, {} };
+        return { AnnotType::Object, false, nullptr };
       }
     }
   }
@@ -4648,31 +4488,18 @@ Index::ConstraintResolution Index::resolve_named_type(
       return folly::none;
     };
 
-    auto const val = match<Either<SString, ClassInfo*>>(
-      res.value,
-      [&] (boost::blank) { return nullptr; },
-      [&] (SString s) { return s; },
-      [&] (ClassInfo* c) { return c; },
-      [&] (RecordInfo*) { always_assert(false); return nullptr; }
-    );
-    if (val.isNull()) return ConstraintResolution{ folly::none, true };
-    auto ty = resolve({ this, val });
+    if (res.value.isNull()) return ConstraintResolution{ folly::none, true };
+
+    auto ty = res.value.right() ?
+      resolve({ this, res.value.right() }) :
+      resolve({ this, res.value.left() });
+
     if (ty && res.nullable) *ty = opt(std::move(*ty));
     return ConstraintResolution{ std::move(ty), false };
-  } else if (res.type == AnnotType::Record) {
-    auto const val = match<Either<SString, RecordInfo*>>(
-      res.value,
-      [&] (boost::blank) { return nullptr; },
-      [&] (SString s) { return s; },
-      [&] (ClassInfo* c) { always_assert(false); return nullptr; },
-      [&] (RecordInfo* r) { return r; }
-    );
-    if (val.isNull()) return ConstraintResolution{ folly::none, true };
-    return subRecord({ this, val });
   }
 
   return get_type_for_annotated_type(ctx, res.type, res.nullable,
-                                     boost::get<SString>(res.value), candidate);
+                                     res.value.left(), candidate);
 }
 
 std::pair<res::Class,php::Class*>
@@ -5063,7 +4890,7 @@ Index::ConstraintResolution Index::get_type_for_annotated_type(
       case KindOfArray:        return TPArr;
       case KindOfResource:     return TRes;
       case KindOfClsMeth:      return TClsMeth;
-      case KindOfRecord:       // fallthrough
+      case KindOfRecord:       return TRecord;
       case KindOfObject:
         return resolve_named_type(ctx, name, candidate);
       case KindOfUninit:
@@ -5151,6 +4978,9 @@ Type Index::lookup_constraint(Context ctx,
 
 bool Index::satisfies_constraint(Context ctx, const Type& t,
                                  const TypeConstraint& tc) const {
+  // T45709201: Currently record types in HHBBC are not specialized.
+  // Therefore, they can never satisfy a constrant.
+  if (t.subtypeOf(BOptRecord)) return false;
   auto const tcType = get_type_for_constraint<false>(ctx, tc, t);
   if (t.moreRefined(loosen_dvarrayness(tcType))) {
     // For d/varrays, we might satisfy the constraint, but still not want to
@@ -5182,14 +5012,7 @@ bool Index::could_have_reified_type(Context ctx,
   auto const name = tc.typeName();
   auto const resolved = resolve_type_name_internal(name);
   if (resolved.type != AnnotType::Object) return false;
-  auto const val = match<Either<SString, ClassInfo*>>(
-    resolved.value,
-    [&] (boost::blank) { return nullptr; },
-    [&] (SString s) { return s; },
-    [&] (ClassInfo* c) { return c; },
-    [&] (RecordInfo*) { always_assert(false); return nullptr; }
-  );
-  res::Class rcls{this, val};
+  res::Class rcls{this, resolved.value};
   return rcls.couldHaveReifiedGenerics();
 }
 

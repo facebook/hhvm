@@ -1,0 +1,5 @@
+Verification Error (unit %s func ): Generics passed to FCallFuncD contain unresolved generics. Call CombineAndResolveTypeStruct to resolve them
+
+Verification failed for unit %s. Re-run with HHVM_VERIFY_VERBOSE=1 to see more details.
+%A
+Fatal error: A bytecode verification error was detected in %s on line -1

@@ -134,6 +134,11 @@ bool checkTypeStructureMatchesCell(const Array& ts, Cell c1, bool& warn);
   std::string& errorKey
 );
 
+/*
+ * Checks to see whether the input type structure contains a T_Unresolved
+ */
+bool doesTypeStructureContainTUnresolved(const ArrayData* ts);
+
 }
 
 #endif

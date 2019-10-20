@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/repo-auth-type-codec.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/type-structure-helpers.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/rx.h"
 
@@ -102,7 +103,7 @@ struct FuncChecker {
   ARGTYPES
 #undef ARGTYPE
 #undef ARGTYPEVEC
-  bool checkOp(State*, PC, Op, Block*);
+  bool checkOp(State*, PC, Op, Block*, PC);
   template<typename Subop> bool checkImmOAImpl(PC& pc, PC instr);
   bool checkMemberKey(State* cur, PC, Op);
   bool checkInputs(State* cur, PC, Block* b);
@@ -1041,7 +1042,7 @@ std::set<int> localImmediates(Op op) {
   return imms;
 }
 
-bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
+bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
   switch (op) {
     case Op::BreakTraceHint:
       if (cur->mbr_live) {
@@ -1331,6 +1332,33 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
                opcodeToName(op));
         return false;
       }
+      break;
+
+    case Op::FCallClsMethodD:
+    case Op::FCallClsMethodSD:
+    case Op::FCallCtor:
+    case Op::FCallFuncD:
+    case Op::FCallObjMethodD: {
+      auto const fca = getImm(pc, 0).u_FCA;
+      if (prev_pc && fca.hasGenerics()) {
+        auto const prev_op = peek_op(prev_pc);
+        if (prev_op == Op::Array || prev_op == Op::Vec) {
+          auto const id = getImm(prev_pc, 0).u_AA;
+          if (id < 0 || id >= unit()->numArrays()) {
+            ferror("Generics passed to {} don't exist\n", opcodeToName(op));
+            return false;
+          }
+          auto const arr = unit()->lookupArray(id);
+          if (doesTypeStructureContainTUnresolved(arr)) {
+            ferror("Generics passed to {} contain unresolved generics. "
+                   "Call CombineAndResolveTypeStruct to resolve them\n",
+                   opcodeToName(op));
+            return false;
+          }
+        }
+      }
+      break;
+    }
 
     default:
       break;
@@ -1940,6 +1968,7 @@ bool FuncChecker::checkBlock(State& cur, Block* b) {
   if (m_errmode == kVerbose) {
     std::cout << blockToString(b, m_graph, unit()) << std::endl;
   }
+  PC prev_pc = nullptr;
   for (InstrRange i = blockInstrs(b); !i.empty(); ) {
     PC pc = i.popFront();
     if (m_errmode == kVerbose) {
@@ -1961,7 +1990,7 @@ bool FuncChecker::checkBlock(State& cur, Block* b) {
       exnVisited = true;
     }
     if (isMemberFinalOp(op)) ok &= checkMemberKey(&cur, pc, op);
-    ok &= checkOp(&cur, pc, op, b);
+    ok &= checkOp(&cur, pc, op, b, prev_pc);
     ok &= checkInputs(&cur, pc, b);
     auto const flags = instrFlags(op);
     if (flags & TF) ok &= checkTerminal(&cur, pc);
@@ -1969,6 +1998,7 @@ bool FuncChecker::checkBlock(State& cur, Block* b) {
     if (op == Op::IterBreak) ok &= checkIterBreak(&cur, pc);
     ok &= checkOutputs(&cur, pc, b);
     if (verify_rx) ok &= checkRxOp(&cur, pc, op);
+    prev_pc = pc;
   }
   // If we did not visit the exn edge yet because the block contained only
   // Silence End opcodes, visit the edge to initialize its state. The silence

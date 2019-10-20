@@ -1203,4 +1203,25 @@ void throwTypeStructureDoesNotMatchCellException(
   SystemLib::throwTypeAssertionExceptionObject(error);
 }
 
+bool doesTypeStructureContainTUnresolved(const ArrayData* ts) {
+  bool result = false;
+  IterateKV(
+    ts,
+    [&] (Cell k, TypedValue v) {
+      if (tvIsInt(v) && tvIsString(k) && k.m_data.pstr->isame(s_kind.get()) &&
+          static_cast<TypeStructure::Kind>(v.m_data.num) ==
+          TypeStructure::Kind::T_unresolved) {
+        result = true;
+        return true; // short circuit
+      }
+      if (tvIsDictOrDArray(v) || tvIsVecOrVArray(v)) {
+        result |= doesTypeStructureContainTUnresolved(v.m_data.parr);
+        return result; // short circuit if need be
+      }
+      return false;
+    }
+  );
+  return result;
+}
+
 } // namespace HPHP

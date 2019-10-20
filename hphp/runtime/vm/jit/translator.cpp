@@ -762,8 +762,9 @@ InputInfoVec getInputs(const NormalizedInstruction& ni, FPInvOffset bcSPOff) {
     SKTRACE(1, sk, "getInputs: %s %d %d\n",
             opcodeToName(ni.op()), stackOff.offset, fca.numInputs());
 
-    if (fca.hasGenerics()) inputs.emplace_back(Location::Stack { stackOff });
-    stackOff -= fca.numInputs() + 2;
+    if (fca.hasGenerics()) inputs.emplace_back(Location::Stack { stackOff-- });
+    if (fca.hasUnpack()) inputs.emplace_back(Location::Stack { stackOff-- });
+    stackOff -= fca.numArgs + 2;
 
     switch (ni.op()) {
       case Op::FCallCtor:

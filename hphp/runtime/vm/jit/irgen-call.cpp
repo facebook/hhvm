@@ -362,15 +362,6 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
     if (inlined) return;
   }
 
-  if (fca.hasUnpack()) {
-    // We may have updated the stack, make sure CallUnpack can set up its Catch.
-    updateMarker(env);
-    env.irb->exceptionStackBoundary();
-
-    return callUnpack(env, cns(env, callee), fca, objOrClass, dynamicCall,
-                      false /* unlikely */);
-  }
-
   auto const doCall = [&](const FCallArgs& fca) {
     // We may have updated the stack, make sure Call can set up its Catch.
     updateMarker(env);
@@ -384,6 +375,48 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
     handleCallReturn(env, callee, fca, retVal, asyncEagerReturn,
                      false /* unlikely */);
   };
+
+  if (fca.hasUnpack()) {
+    // We may have updated the stack, make sure the conversions below plus
+    // CallUnpack can set up its Catch.
+    updateMarker(env);
+    env.irb->exceptionStackBoundary();
+
+    if (fca.numArgs == callee->numNonVariadicParams()) {
+      auto const unpackOff = BCSPRelOffset{fca.hasGenerics() ? 1 : 0};
+      auto const unpack = topC(env, unpackOff);
+      auto const doConvertAndCallImpl = [&](SSATmp* converted) {
+        auto const offset = offsetFromIRSP(env, unpackOff);
+        gen(env, StStk, IRSPRelOffsetData{offset}, sp(env), converted);
+        doCall(fca);
+      };
+      auto const doConvertAndCall = [&](Opcode op) {
+        doConvertAndCallImpl(gen(env, op, unpack));
+      };
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        if (unpack->isA(TVec)) return doCall(fca);
+        if (unpack->isA(TArr)) return doConvertAndCall(ConvArrToVec);
+        if (unpack->isA(TDict)) return doConvertAndCall(ConvDictToVec);
+        if (unpack->isA(TKeyset)) return doConvertAndCall(ConvKeysetToVec);
+      } else {
+        if (unpack->isA(TArr)) {
+          return doConvertAndCallImpl(cond(
+            env,
+            [&](Block* taken) { return gen(env, CheckVArray, taken, unpack); },
+            [&](SSATmp* varr) { return varr; },
+            [&] { return gen(env, ConvArrToVArr, unpack); }
+          ));
+        }
+        if (unpack->isA(TVec)) return doConvertAndCall(ConvVecToVArr);
+        if (unpack->isA(TDict)) return doConvertAndCall(ConvDictToVArr);
+        if (unpack->isA(TKeyset)) return doConvertAndCall(ConvKeysetToVArr);
+      }
+    }
+
+    // Slow path. TODO: remove and use interpreter once confirmed this is cold
+    return callUnpack(env, cns(env, callee), fca, objOrClass, dynamicCall,
+                      false /* unlikely */);
+  }
 
   if (fca.numArgs <= callee->numNonVariadicParams()) {
     return doCall(fca);

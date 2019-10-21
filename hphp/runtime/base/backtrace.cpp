@@ -385,7 +385,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       frame.set(s_line, func->unit()->getLineNumber(curFrm.pc));
       if (btArgs.m_parserFrame) {
         frame.set(s_function, s_include);
-        frame.set(s_args, make_packed_array(btArgs.m_parserFrame->filename));
+        frame.set(s_args, make_varray(btArgs.m_parserFrame->filename));
       }
       bt.append(frame.toVariant());
       depth++;
@@ -484,9 +484,9 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       // do nothing
     } else if (funcname.same(s_include)) {
       auto filepath = const_cast<StringData*>(curUnit->filepath());
-      frame.set(s_args, make_packed_array(filepath));
+      frame.set(s_args, make_varray(filepath));
     } else if (isReturning) {
-      frame.set(s_args, empty_array());
+      frame.set(s_args, empty_varray());
     } else {
       auto args = Array::CreateVArray();
       auto const nparams = fp->func()->numNonVariadicParams();
@@ -784,7 +784,7 @@ Array CompactTrace::Key::extract() const {
       }
     } else {
       auto filepath = const_cast<StringData*>(f->unit()->filepath());
-      frame.set(s_args, make_packed_array(filepath));
+      frame.set(s_args, make_varray(filepath));
     }
 
     aInit.append(frame.toVariant());

@@ -27,15 +27,6 @@ pub enum PositionedValue {
     },
 }
 
-// Use alias to short the type, current rustc complains
-// type association with generic(lifetime) in `impl`.
-type Acc<'a> = (
-    Option<&'a PositionedValue>,
-    Option<&'a PositionedValue>,
-    Option<&'a PositionedValue>,
-    Option<&'a PositionedValue>,
-);
-
 impl PositionedValue {
     pub fn width(&self) -> usize {
         match self {
@@ -100,40 +91,51 @@ impl PositionedValue {
 
     fn from_<'a>(child_values: impl Iterator<Item = &'a Self>) -> Self {
         use PositionedValue::*;
-        let f = |(first, first_not_zero, last_not_zero, _last): Acc<'a>, node: &'a Self| {
-            match (first.is_some(), first_not_zero.is_some(), node) {
+        let mut first = None;
+        let mut first_non_zero = None;
+        let mut last_non_zero = None;
+        let mut last = None;
+        for value in child_values {
+            match (first.is_some(), first_non_zero.is_some(), value) {
                 (false, false, TokenValue { .. }) | (false, false, TokenSpan { .. }) => {
                     // first iteration and first node has some token representation -
                     // record it as first, first_non_zero, last and last_non_zero
-                    (Some(node), Some(node), Some(node), Some(node))
+                    first = Some(value);
+                    first_non_zero = Some(value);
+                    last_non_zero = Some(value);
+                    last = Some(value);
                 }
-                (false, false, _) => {
+                (false, false, Missing { .. }) => {
                     // first iteration - first node is missing -
                     // record it as first and last
-                    (Some(node), None, None, Some(node))
+                    first = Some(value);
+                    first_non_zero = None;
+                    last_non_zero = None;
+                    last = Some(value);
                 }
                 (true, false, TokenValue { .. }) | (true, false, TokenSpan { .. }) => {
                     // in progress, found first node that include tokens -
                     // record it as first_non_zero, last and last_non_zero
-                    (first, Some(node), Some(node), Some(node))
+                    first_non_zero = Some(value);
+                    last_non_zero = Some(value);
+                    last = Some(value);
                 }
                 (true, true, TokenValue { .. }) | (true, true, TokenSpan { .. }) => {
-                    // in progress found Some (node) that include tokens -
+                    // in progress found some node that includes tokens -
                     // record it as last_non_zero and last
-                    (first, first_not_zero, Some(node), Some(node))
+                    last_non_zero = Some(value);
+                    last = Some(value);
                 }
                 _ => {
                     // in progress, stepped on missing node -
                     // record it as last and move on
-                    (first, first_not_zero, last_not_zero, Some(node))
+                    last = Some(value);
                 }
             }
-        };
-        let mut acc = (None, None, None, None);
-        acc = child_values.fold(acc, f);
-        match acc {
-            (_, Some(first_not_zero), Some(last_not_zero), _) => {
-                Self::value_from_outer_children(first_not_zero, last_not_zero)
+        }
+        match (first, first_non_zero, last_non_zero, last) {
+            (_, Some(first_non_zero), Some(last_non_zero), _) => {
+                Self::value_from_outer_children(first_non_zero, last_non_zero)
             }
             (Some(first), None, None, Some(last)) => Self::value_from_outer_children(first, last),
             _ => panic!("how did we get a node with no children in value_from_syntax?"),

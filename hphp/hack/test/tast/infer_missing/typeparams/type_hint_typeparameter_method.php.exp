@@ -1,5 +1,5 @@
 Errors:
-  [3:14-17] The type HH\Map expects 2 type parameter(s)
+  [3:14-17] The type Map expects 2 type parameter(s)
   [59:13-16] Definition is here
 [(Fun
     { f_span = [3:1-6:2]; f_annotation = (); f_mode = Mpartial;

@@ -8,7 +8,6 @@
  *)
 
 open Core_kernel
-open Utils
 open Reordered_argument_collections
 open String_utils
 
@@ -608,7 +607,7 @@ let add_error error =
     let msg = error |> to_absolute |> to_string in
     match !in_lazy_decl with
     | Some _ -> lazy_decl_error_logging msg error_map to_absolute to_string
-    | None -> assert_false_log_backtrace (Some msg)
+    | None -> Utils.assert_false_log_backtrace (Some msg)
 
 (* Whether we've found at least one error *)
 let currently_has_errors () = get_current_list !error_map <> []
@@ -915,6 +914,8 @@ let unimplemented_feature pos msg =
 let experimental_feature pos msg =
   add 0 pos ("Cannot use experimental feature: " ^ msg)
 
+let strip_ns id = id |> Utils.strip_ns |> Hh_autoimport.reverse_type
+
 (*****************************************************************************)
 (* Parsing errors. *)
 (*****************************************************************************)
@@ -999,8 +1000,8 @@ let reference_in_rx pos =
     "References are not allowed in reactive code."
 
 let error_name_already_bound name name_prev p p_prev =
-  let name = Utils.strip_ns name in
-  let name_prev = Utils.strip_ns name_prev in
+  let name = strip_ns name in
+  let name_prev = strip_ns name_prev in
   let errs =
     [
       (p, "Name already bound: " ^ name);
@@ -1031,8 +1032,8 @@ let error_name_already_bound name name_prev p p_prev =
   add_list (Naming.err_code Naming.ErrorNameAlreadyBound) errs
 
 let error_class_attribute_already_bound name name_prev p p_prev =
-  let name = Utils.strip_ns name in
-  let name_prev = Utils.strip_ns name_prev in
+  let name = strip_ns name in
+  let name_prev = strip_ns name_prev in
   let errs =
     [
       ( p,
@@ -1161,7 +1162,7 @@ let unbound_attribute_name pos name =
   add
     (Naming.err_code Naming.UnboundName)
     pos
-    ("Unrecognized user attribute: " ^ Utils.strip_ns name ^ " " ^ reason)
+    ("Unrecognized user attribute: " ^ strip_ns name ^ " " ^ reason)
 
 let this_no_argument pos =
   add
@@ -1265,7 +1266,7 @@ let expected_collection pos cn =
   add
     (Naming.err_code Naming.ExpectedCollection)
     pos
-    ("Unexpected collection type " ^ Utils.strip_ns cn)
+    ("Unexpected collection type " ^ strip_ns cn)
 
 let illegal_CLASS pos =
   add
@@ -1528,24 +1529,24 @@ let invalid_mutability_in_return_type_hint pos =
     "OwnedMutable is the only mutability related hint allowed in return type annotation for reactive function types."
 
 let pu_duplication pos kind name seen =
-  let name = Utils.strip_ns name in
-  let seen = Utils.strip_ns seen in
+  let name = strip_ns name in
+  let seen = strip_ns seen in
   add
     (Naming.err_code Naming.PocketUniversesDuplication)
     pos
     (sprintf "Pocket Universe %s %s is already declared in %s" kind name seen)
 
 let pu_not_in_class pos name loc =
-  let name = Utils.strip_ns name in
-  let loc = Utils.strip_ns loc in
+  let name = strip_ns name in
+  let loc = strip_ns loc in
   add
     (Naming.err_code Naming.PocketUniversesNotInClass)
     pos
     (sprintf "Pocket Universe %s is defined outside a class (%s)" name loc)
 
 let pu_atom_missing pos name kind loc missing =
-  let name = Utils.strip_ns name in
-  let loc = Utils.strip_ns loc in
+  let name = strip_ns name in
+  let loc = strip_ns loc in
   add
     (Naming.err_code Naming.PocketUniversesAtomMissing)
     pos
@@ -1557,8 +1558,8 @@ let pu_atom_missing pos name kind loc missing =
        missing)
 
 let pu_atom_unknown pos name kind loc unk =
-  let name = Utils.strip_ns name in
-  let loc = Utils.strip_ns loc in
+  let name = strip_ns name in
+  let loc = strip_ns loc in
   add
     (Naming.err_code Naming.PocketUniversesAtomUnknown)
     pos
@@ -1585,7 +1586,7 @@ let no_construct_parent pos =
   add
     (NastCheck.err_code NastCheck.NoConstructParent)
     pos
-    (sl
+    (Utils.sl
        [
          "You are extending a class that needs to be initialized\n";
          "Make sure you call parent::__construct.\n";
@@ -1598,7 +1599,7 @@ let nonstatic_method_in_abstract_final_class pos =
     "Abstract final classes cannot have nonstatic methods or constructors."
 
 let constructor_required (pos, name) prop_names =
-  let name = Utils.strip_ns name in
+  let name = strip_ns name in
   let props_str =
     SSet.fold ~f:(fun x acc -> x ^ " " ^ acc) prop_names ~init:""
   in
@@ -1611,7 +1612,7 @@ let constructor_required (pos, name) prop_names =
     ^ props_str )
 
 let not_initialized (pos, cname) prop_names =
-  let cname = Utils.strip_ns cname in
+  let cname = strip_ns cname in
   let props_str =
     List.fold_right prop_names ~f:(fun x acc -> x ^ " " ^ acc) ~init:""
   in
@@ -1630,7 +1631,7 @@ let not_initialized (pos, cname) prop_names =
   add
     (NastCheck.err_code NastCheck.NotInitialized)
     pos
-    (sl
+    (Utils.sl
        [
          "Class ";
          cname;
@@ -1650,7 +1651,7 @@ let call_before_init pos cv =
   add
     (NastCheck.err_code NastCheck.CallBeforeInit)
     pos
-    (sl
+    (Utils.sl
        ( [
            "Until the initialization of $this is over,";
            " you can only call private methods\n";
@@ -1672,7 +1673,7 @@ let type_arity pos name nargs c_pos =
     [
       ( pos,
         "The type "
-        ^ Utils.strip_ns name
+        ^ strip_ns name
         ^ " expects "
         ^ nargs
         ^ " type parameter(s)" );
@@ -1823,19 +1824,19 @@ let uses_non_trait (p : Pos.t) (n : string) (t : string) =
   add
     (NastCheck.err_code NastCheck.UsesNonTrait)
     p
-    (Utils.strip_ns n ^ " is not a trait. It is " ^ t ^ ".")
+    (strip_ns n ^ " is not a trait. It is " ^ t ^ ".")
 
 let requires_non_class (p : Pos.t) (n : string) (t : string) =
   add
     (NastCheck.err_code NastCheck.RequiresNonClass)
     p
-    (Utils.strip_ns n ^ " is not a class. It is " ^ t ^ ".")
+    (strip_ns n ^ " is not a class. It is " ^ t ^ ".")
 
 let requires_final_class (p : Pos.t) (n : string) =
   add
     (NastCheck.err_code NastCheck.RequiresFinalClass)
     p
-    (Utils.strip_ns n ^ " is not an extendable class.")
+    (strip_ns n ^ " is not an extendable class.")
 
 let abstract_body pos =
   add
@@ -2307,7 +2308,7 @@ let explain_constraint ~use_pos ~definition_pos ~param_name (error : error) =
     | (p, x) :: rest when x = inst_msg && p = use_pos -> rest
     | _ -> msgl
   in
-  let name = Utils.strip_ns param_name in
+  let name = strip_ns param_name in
   add_list
     (Typing.err_code Typing.TypeConstraintViolation)
     ( [
@@ -2382,7 +2383,7 @@ let generic_array_strict p =
     "You cannot have an array without generics in strict mode"
 
 let strict_members_not_known p name =
-  let name = Utils.strip_ns name in
+  let name = strip_ns name in
   add
     (Typing.err_code Typing.StrictMembersNotKnown)
     p
@@ -2631,7 +2632,7 @@ let self_outside_class pos =
     "'self' is undefined outside of a class"
 
 let new_inconsistent_construct new_pos (cpos, cname) kind =
-  let name = Utils.strip_ns cname in
+  let name = strip_ns cname in
   let preamble =
     match kind with
     | `static -> "Can't use new static() for " ^ name
@@ -2683,7 +2684,7 @@ let self_abstract_call meth_name call_pos decl_pos =
     ]
 
 let classname_abstract_call cname meth_name call_pos decl_pos =
-  let cname = Utils.strip_ns cname in
+  let cname = strip_ns cname in
   add_list
     (Typing.err_code Typing.AbstractCall)
     [
@@ -2693,7 +2694,7 @@ let classname_abstract_call cname meth_name call_pos decl_pos =
     ]
 
 let static_synthetic_method cname meth_name call_pos decl_pos =
-  let cname = Utils.strip_ns cname in
+  let cname = strip_ns cname in
   add_list
     (Typing.err_code Typing.StaticSyntheticMethod)
     [
@@ -2727,7 +2728,7 @@ let unset_nonidx_in_strict pos msgs =
     @ msgs )
 
 let unpacking_disallowed_builtin_function pos name =
-  let name = Utils.strip_ns name in
+  let name = strip_ns name in
   add
     (Typing.err_code Typing.UnpackingDisallowed)
     pos
@@ -2737,7 +2738,7 @@ let array_get_arity pos1 name pos2 =
   add_list
     (Typing.err_code Typing.ArrayGetArity)
     [
-      (pos1, "You cannot use this " ^ Utils.strip_ns name);
+      (pos1, "You cannot use this " ^ strip_ns name);
       (pos2, "It is missing its type parameters");
     ]
 
@@ -2959,7 +2960,7 @@ let read_before_write (pos, v) =
   add
     (Typing.err_code Typing.ReadBeforeWrite)
     pos
-    (sl ["Read access to $this->"; v; " before initialization"])
+    (Utils.sl ["Read access to $this->"; v; " before initialization"])
 
 let final_property pos =
   add
@@ -3080,14 +3081,14 @@ let type_arity_mismatch pos1 n1 pos2 n2 =
     ]
 
 let this_final id pos2 (error : error) =
-  let n = Utils.strip_ns (snd id) in
+  let n = strip_ns (snd id) in
   let message1 = "Since " ^ n ^ " is not final" in
   let message2 = "this might not be a " ^ n in
   let (code, msgl) = (get_code error, to_list error) in
   add_list code (msgl @ [(fst id, message1); (pos2, message2)])
 
 let exact_class_final id pos2 (error : error) =
-  let n = Utils.strip_ns (snd id) in
+  let n = strip_ns (snd id) in
   let message1 = "This requires the late-bound type to be exactly " ^ n in
   let message2 =
     "Since " ^ n ^ " is not final this might be an instance of a child class"
@@ -3985,7 +3986,7 @@ let wrong_extend_kind child_pos child parent_pos parent =
   add_list (Typing.err_code Typing.WrongExtendKind) [msg1; msg2]
 
 let unsatisfied_req parent_pos req_name req_pos =
-  let s1 = "Failure to satisfy requirement: " ^ Utils.strip_ns req_name in
+  let s1 = "Failure to satisfy requirement: " ^ strip_ns req_name in
   let s2 = "Required here" in
   if req_pos = parent_pos then
     add (Typing.err_code Typing.UnsatisfiedReq) parent_pos s1
@@ -3995,9 +3996,7 @@ let unsatisfied_req parent_pos req_name req_pos =
       [(parent_pos, s1); (req_pos, s2)]
 
 let cyclic_class_def stack pos =
-  let stack =
-    SSet.fold ~f:(fun x y -> Utils.strip_ns x ^ " " ^ y) stack ~init:""
-  in
+  let stack = SSet.fold ~f:(fun x y -> strip_ns x ^ " " ^ y) stack ~init:"" in
   add
     (Typing.err_code Typing.CyclicClassDef)
     pos
@@ -4005,12 +4004,12 @@ let cyclic_class_def stack pos =
 
 let trait_reuse p_pos p_name class_name trait =
   let (c_pos, c_name) = class_name in
-  let c_name = Utils.strip_ns c_name in
-  let trait = Utils.strip_ns trait in
+  let c_name = strip_ns c_name in
+  let trait = strip_ns trait in
   let err =
     "Class " ^ c_name ^ " reuses trait " ^ trait ^ " in its hierarchy"
   in
-  let err' = "It is already used through " ^ Utils.strip_ns p_name in
+  let err' = "It is already used through " ^ strip_ns p_name in
   add_list (Typing.err_code Typing.TraitReuse) [(c_pos, err); (p_pos, err')]
 
 let invalid_is_as_expression_hint op hint_pos ty_pos ty_str =
@@ -4059,7 +4058,7 @@ let invalid_newable_type_param_constraints
       "No constraints"
     else
       "The constraints "
-      ^ String.concat ~sep:", " (List.map ~f:Utils.strip_ns constraint_list)
+      ^ String.concat ~sep:", " (List.map ~f:strip_ns constraint_list)
   in
   let msg =
     "The type parameter "
@@ -4104,7 +4103,7 @@ let should_be_override pos class_id id =
   add
     (Typing.err_code Typing.ShouldBeOverride)
     pos
-    ( Utils.strip_ns class_id
+    ( strip_ns class_id
     ^ "::"
     ^ id
     ^ "() is marked as override; no non-private parent definition found or overridden parent is defined in non-<?hh code"
@@ -4114,7 +4113,7 @@ let override_per_trait class_name id m_pos =
   let (c_pos, c_name) = class_name in
   let err_msg =
     "Method "
-    ^ Utils.strip_ns c_name
+    ^ strip_ns c_name
     ^ "::"
     ^ id
     ^ " should be an override per the declaring trait; no non-private parent definition found or overridden parent is defined in non-<?hh code"
@@ -4130,7 +4129,7 @@ let private_override pos class_id id =
   add
     (Typing.err_code Typing.PrivateOverride)
     pos
-    ( Utils.strip_ns class_id
+    ( strip_ns class_id
     ^ "::"
     ^ id
     ^ ": combining private and override is nonsensical" )
@@ -4527,15 +4526,15 @@ let wrong_expression_kind_attribute
   let msg1 =
     Printf.sprintf
       "The %s attribute cannot be used on %s."
-      (Utils.strip_ns attr)
+      (strip_ns attr)
       expr_kind
   in
   let msg2 =
     Printf.sprintf
       "The attribute's class is defined here. To be available for use on %s, the %s class must implement %s."
       expr_kind
-      (Utils.strip_ns attr_class_name)
-      (Utils.strip_ns intf_name)
+      (strip_ns attr_class_name)
+      (strip_ns intf_name)
   in
   add_list
     (Typing.err_code Typing.WrongExpressionKindAttribute)
@@ -4545,7 +4544,7 @@ let wrong_expression_kind_builtin_attribute expr_kind pos attr =
   let msg1 =
     Printf.sprintf
       "The %s attribute cannot be used on %s."
-      (Utils.strip_ns attr)
+      (strip_ns attr)
       expr_kind
   in
   add_list (Typing.err_code Typing.WrongExpressionKindAttribute) [(pos, msg1)]
@@ -4671,8 +4670,8 @@ let shape_access_with_non_existent_field pos1 name pos2 reason =
 
 let ambiguous_object_access
     pos name self_pos vis subclass_pos class_self class_subclass =
-  let class_self = Utils.strip_ns class_self in
-  let class_subclass = Utils.strip_ns class_subclass in
+  let class_self = strip_ns class_self in
+  let class_subclass = strip_ns class_subclass in
   add_list
     (Typing.err_code Typing.AmbiguousObjectAccess)
     [

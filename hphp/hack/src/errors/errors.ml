@@ -653,6 +653,7 @@ let default_ignored_fixme_codes =
       Typing.err_code Typing.InvalidIsAsExpressionHint;
       Typing.err_code Typing.InvalidEnforceableTypeArgument;
       Typing.err_code Typing.RequireArgsReify;
+      Typing.err_code Typing.InvalidReifiedArgument;
       Typing.err_code Typing.GenericsNotAllowed;
       Typing.err_code Typing.InvalidNewableTypeArgument;
       Typing.err_code Typing.InvalidNewableTypeParamConstraints;

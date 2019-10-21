@@ -26,12 +26,6 @@ let validator =
         this#invalid acc r "a typename"
       else if h = SN.Classes.cClassname then
         this#invalid acc r "a classname"
-      else if h = SN.Collections.cDict then
-        this#invalid acc r "a dict"
-      else if h = SN.Collections.cVec then
-        this#invalid acc r "a vec"
-      else if h = SN.Collections.cKeyset then
-        this#invalid acc r "a keyset"
       else if
         h = SN.Typehints.wildcard && not (Env.get_allow_wildcards acc.env)
       then

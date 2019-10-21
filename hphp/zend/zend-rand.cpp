@@ -19,8 +19,8 @@
 
 #include <openssl/rand.h>
 
-#include "hphp/runtime/base/zend-math.h"
 #include "hphp/util/rds-local.h"
+#include "hphp/zend/zend-math.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -19,10 +19,12 @@
 
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-printf.h"
-#include "hphp/runtime/base/zend-math.h"
 
 #include "hphp/util/lock.h"
 #include "hphp/util/overflow.h"
+
+#include "hphp/zend/zend-math.h"
+
 #include <algorithm>
 #include <cmath>
 

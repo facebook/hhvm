@@ -23,7 +23,6 @@
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/system-profiler.h"
 #include "hphp/runtime/base/variable-serializer.h"
-#include "hphp/runtime/base/zend-math.h"
 #include "hphp/runtime/ext/extension-registry.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/std/ext_std_misc.h"
@@ -34,6 +33,7 @@
 #include "hphp/util/cycles.h"
 #include "hphp/util/rds-local.h"
 #include "hphp/util/timer.h"
+#include "hphp/zend/zend-math.h"
 
 #include <iostream>
 #include <fstream>

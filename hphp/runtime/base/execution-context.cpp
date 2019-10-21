@@ -52,7 +52,6 @@
 #include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/base/apc-typed-value.h"
 #include "hphp/runtime/base/extended-logger.h"
-#include "hphp/runtime/base/zend-math.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/ext/std/ext_std_output.h"
 #include "hphp/runtime/ext/string/ext_string.h"
@@ -77,6 +76,7 @@
 #include "hphp/runtime/vm/unwind.h"
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/exceptions.h"
+#include "hphp/zend/zend-math.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

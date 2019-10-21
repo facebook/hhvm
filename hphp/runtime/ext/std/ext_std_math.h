@@ -20,7 +20,7 @@
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/zend-string.h"
-#include "hphp/runtime/base/zend-math.h"
+#include "hphp/zend/zend-math.h"
 #include <cmath>
 
 namespace HPHP {

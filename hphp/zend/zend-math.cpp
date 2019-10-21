@@ -15,7 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/zend-math.h"
+#include "hphp/zend/zend-math.h"
 
 #include <cstdio>
 #include <cstdlib>

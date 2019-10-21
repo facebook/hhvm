@@ -10,8 +10,8 @@
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/tv-type.h"
-#include "hphp/runtime/base/zend-math.h"
 #include "hphp/runtime/vm/vm-regs.h"
+#include "hphp/zend/zend-math.h"
 
 namespace HPHP { namespace collections {
 /////////////////////////////////////////////////////////////////////////////

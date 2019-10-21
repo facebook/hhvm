@@ -98,7 +98,7 @@ let test () =
 
   (* Check that edit is reflected in autocomplete results *)
   let (env, loop_output) = Test.autocomplete env autocomplete_contents in
-  Test.assert_autocomplete loop_output ["bar()"; "test()"];
+  Test.assert_autocomplete loop_output ["bar"; "test"];
 
   (* Trigger global analysis *)
   let (_, loop_output) =

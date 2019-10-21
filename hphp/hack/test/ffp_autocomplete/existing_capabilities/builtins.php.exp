@@ -1,8 +1,8 @@
-current()
-getOrigFuncName()
-key()
-next()
-raise()
-rewind()
-send()
-valid()
+current
+getOrigFuncName
+key
+next
+raise
+rewind
+send
+valid

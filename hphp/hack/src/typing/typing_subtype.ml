@@ -194,13 +194,13 @@ let check_mutability
   (* immutable is not compatible with mutable *)
   | (None, Some (Param_borrowed_mutable | Param_owned_mutable))
   (* mutable is not compatible with immutable  *)
-
+  
   | (Some (Param_borrowed_mutable | Param_owned_mutable), None)
   (* borrowed mutable is not compatible with owned mutable *)
-
+  
   | (Some Param_borrowed_mutable, Some Param_owned_mutable)
   (* maybe-mutable is not compatible with immutable/mutable *)
-
+  
   | ( Some Param_maybe_mutable,
       (None | Some (Param_borrowed_mutable | Param_owned_mutable)) ) ->
     ( env,
@@ -1821,7 +1821,7 @@ and subtype_reactivity
   (* ok:
      <<__Rx>>
      function f(<<__AtMostRxAsFunc>> (function(): int) $f) { return $f() }  *)
-
+  
   | (RxVar None, RxVar _, _) ->
     true
   | (RxVar (Some sub), RxVar (Some super), _)
@@ -2593,6 +2593,16 @@ and is_sub_type env ty1 ty2 =
     ~ignore_generic_params:false
     ~no_top_bottom:false
     ~treat_dynamic_as_bottom:false
+    env
+    ty1
+    ty2
+  = Some true
+
+and is_sub_type_for_coercion env ty1 ty2 =
+  is_sub_type_alt
+    ~ignore_generic_params:false
+    ~no_top_bottom:false
+    ~treat_dynamic_as_bottom:true
     env
     ty1
     ty2

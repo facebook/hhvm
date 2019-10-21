@@ -149,12 +149,9 @@ let experiment_enabled env experiment =
     (Env.get_tcopt env)
     experiment
 
-let make_idx_fake_super_shape env shape_pos fun_name field_name field_ty =
-  let ty =
-    ( Reason.Rshape (shape_pos, fun_name),
-      Tshape (Open_shape, Nast.ShapeMap.singleton field_name field_ty) )
-  in
-  Typing_enforceability.make_locl_like_type env ty
+let make_idx_fake_super_shape shape_pos fun_name field_name field_ty =
+  ( Reason.Rshape (shape_pos, fun_name),
+    Tshape (Open_shape, Nast.ShapeMap.singleton field_name field_ty) )
 
 (* Is a given field required in a given shape?
  *
@@ -173,10 +170,19 @@ let is_shape_field_required env shape_pos fun_name field_name shape_ty =
   let field_ty =
     { sft_optional = false; sft_ty = MakeType.mixed Reason.Rnone }
   in
-  let (env, super_shape_ty) =
-    make_idx_fake_super_shape env shape_pos fun_name field_name field_ty
+  let super_shape_ty =
+    make_idx_fake_super_shape shape_pos fun_name field_name field_ty
   in
-  Typing_solver.is_sub_type env shape_ty super_shape_ty
+  let (env, ty1) =
+    Typing_solver.expand_type_and_solve_eq env shape_ty Errors.unify_error
+  in
+  let (env, ty2) =
+    Typing_solver.expand_type_and_solve_eq
+      env
+      super_shape_ty
+      Errors.unify_error
+  in
+  Typing_subtype.is_sub_type_for_coercion env ty1 ty2
 
 (* Typing rules for Shapes::idx
  *
@@ -201,9 +207,8 @@ let idx env ~expr_pos ~fun_pos ~shape_pos shape_ty field default =
     match TUtils.shape_field_name env field with
     | None -> (env, (Reason.Rwitness (fst field), TUtils.tany env))
     | Some field_name ->
-      let (env, fake_super_shape_ty) =
+      let fake_super_shape_ty =
         make_idx_fake_super_shape
-          env
           shape_pos
           "Shapes::idx"
           field_name
@@ -212,12 +217,12 @@ let idx env ~expr_pos ~fun_pos ~shape_pos shape_ty field default =
       (match default with
       | None ->
         let env =
-          Type.sub_type
+          Typing_coercion.coerce_type
             shape_pos
             Reason.URparam
             env
             shape_ty
-            fake_super_shape_ty
+            { et_type = fake_super_shape_ty; et_enforced = false }
             Errors.unify_error
         in
         ( env,
@@ -237,12 +242,12 @@ let idx env ~expr_pos ~fun_pos ~shape_pos shape_ty field default =
             TUtils.ensure_option env fun_pos res )
       | Some (default_pos, default_ty) ->
         let env =
-          Type.sub_type
+          Typing_coercion.coerce_type
             shape_pos
             Reason.URparam
             env
             shape_ty
-            fake_super_shape_ty
+            { et_type = fake_super_shape_ty; et_enforced = false }
             Errors.unify_error
         in
         let env =
@@ -265,21 +270,20 @@ let at env ~expr_pos ~shape_pos shape_ty field =
     match TUtils.shape_field_name env field with
     | None -> (env, (Reason.Rwitness (fst field), TUtils.tany env))
     | Some field_name ->
-      let (env, fake_super_shape_ty) =
+      let fake_super_shape_ty =
         make_idx_fake_super_shape
-          env
           shape_pos
           "Shapes::at"
           field_name
           { sft_optional = true; sft_ty = res }
       in
       let env =
-        Type.sub_type
+        Typing_coercion.coerce_type
           shape_pos
           Reason.URparam
           env
           shape_ty
-          fake_super_shape_ty
+          { et_type = fake_super_shape_ty; et_enforced = false }
           Errors.unify_error
       in
       (env, res)

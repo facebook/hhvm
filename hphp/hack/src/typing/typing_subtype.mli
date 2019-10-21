@@ -28,6 +28,8 @@ val is_sub_type_LEGACY_DEPRECATED : env -> locl_ty -> locl_ty -> bool
 *)
 val is_sub_type : env -> locl_ty -> locl_ty -> bool
 
+val is_sub_type_for_coercion : env -> locl_ty -> locl_ty -> bool
+
 val is_sub_type_ignore_generic_params : env -> locl_ty -> locl_ty -> bool
 
 val is_sub_type_for_union : env -> locl_ty -> locl_ty -> bool

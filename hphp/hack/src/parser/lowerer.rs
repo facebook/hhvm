@@ -151,16 +151,16 @@ pub struct Env<'a> {
     codegen: bool,
     elaborate_namespaces: bool,
     include_line_comments: bool,
-    keep_errors: bool,
+    pub keep_errors: bool,
     quick_mode: bool,
     /* Show errors even in quick mode. Does not override keep_errors. Hotfix
      * until we can properly set up saved states to surface parse errors during
      * typechecking properly. */
-    show_all_errors: bool,
+    pub show_all_errors: bool,
     lower_coroutines: bool,
     fail_open: bool,
     file_mode: file_info::Mode,
-    top_level_statements: bool, /* Whether we are (still) considering TLSs*/
+    pub top_level_statements: bool, /* Whether we are (still) considering TLSs*/
 
     // Cache none pos, lazy_static doesn't allow Rc.
     pos_none: Pos,
@@ -260,7 +260,7 @@ impl<'a> Env<'a> {
         RefMut::map(self.state.borrow_mut(), |s| &mut s.parent_maybe_reified)
     }
 
-    fn lowpri_errors(&mut self) -> RefMut<Vec<(Pos, String)>> {
+    pub fn lowpri_errors(&mut self) -> RefMut<Vec<(Pos, String)>> {
         RefMut::map(self.state.borrow_mut(), |s| &mut s.lowpri_errors)
     }
 
@@ -833,7 +833,10 @@ where
                     _ => Self::missing_syntax(None, "generic type arguments", args, env)?,
                 };
                 if env.codegen() {
-                    not_impl!()
+                    // aorenste: Not sure why the original code had this as
+                    // not_impl, but returning the type is better than
+                    // nothing...
+                    Ok(Happly(name, type_args))
                 } else {
                     Ok(Happly(name, type_args))
                 }
@@ -997,6 +1000,7 @@ where
                 (),
                 tys.next().unwrap(),
             ))),
+            0 => None,
             _ => {
                 Self::raise_parsing_error(
                     node,
@@ -4830,7 +4834,7 @@ where
                 } else {
                     env.keep_errors && env.is_typechecker() && Self::partial_should_check_error()
                 };
-                if raise_error {
+                if raise_error && !env.top_level_statements {
                     Self::raise_parsing_error_pos(&s.0, env, &syntax_error::toplevel_statements);
                 }
             }

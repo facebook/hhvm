@@ -131,6 +131,9 @@ pub enum LiteralKind {
 }
 
 fn unescape_literal(literal_kind: LiteralKind, s: &str) -> Result<String, InvalidString> {
+    if s.is_empty() {
+        return Ok(String::new());
+    }
     let len = s.len();
     let mut output: Vec<u8> = Vec::with_capacity(len);
     let mut idx = 0;
@@ -270,6 +273,9 @@ pub fn unescape_heredoc(s: &str) -> Result<String, InvalidString> {
 }
 
 fn unescape_single_or_nowdoc(is_nowdoc: bool, s: &str) -> Result<String, InvalidString> {
+    if s.is_empty() {
+        return Ok(String::new());
+    }
     let len = s.len();
     let mut output: Vec<u8> = Vec::with_capacity(len);
     let mut idx = 0;

@@ -497,12 +497,12 @@
           }
         },
         {
-          "label": "isValid()",
+          "label": "isValid",
           "kind": 2,
           "detail": "function(mixed $value): bool",
           "inlineDetail": "(mixed $value)",
           "itemType": "bool",
-          "insertText": "isValid()",
+          "insertText": "isValid",
           "insertTextFormat": 1,
           "data": {
             "fullname": "isValid",
@@ -513,12 +513,12 @@
           }
         },
         {
-          "label": "getValues()",
+          "label": "getValues",
           "kind": 2,
           "detail": "function(): darray<string, Elsa>",
           "inlineDetail": "()",
           "itemType": "darray<string, Elsa>",
-          "insertText": "getValues()",
+          "insertText": "getValues",
           "insertTextFormat": 1,
           "data": {
             "fullname": "getValues",
@@ -529,12 +529,12 @@
           }
         },
         {
-          "label": "getNames()",
+          "label": "getNames",
           "kind": 2,
           "detail": "function(): darray<Elsa, string>",
           "inlineDetail": "()",
           "itemType": "darray<Elsa, string>",
-          "insertText": "getNames()",
+          "insertText": "getNames",
           "insertTextFormat": 1,
           "data": {
             "fullname": "getNames",
@@ -545,12 +545,12 @@
           }
         },
         {
-          "label": "coerce()",
+          "label": "coerce",
           "kind": 2,
           "detail": "function(mixed $value): ?Elsa",
           "inlineDetail": "(mixed $value)",
           "itemType": "?Elsa",
-          "insertText": "coerce()",
+          "insertText": "coerce",
           "insertTextFormat": 1,
           "data": {
             "fullname": "coerce",
@@ -561,12 +561,12 @@
           }
         },
         {
-          "label": "assertAll()",
+          "label": "assertAll",
           "kind": 2,
           "detail": "function(Traversable<mixed> $values): Container<Elsa>",
           "inlineDetail": "(Traversable<mixed> $values)",
           "itemType": "Container<Elsa>",
-          "insertText": "assertAll()",
+          "insertText": "assertAll",
           "insertTextFormat": 1,
           "data": {
             "fullname": "assertAll",
@@ -577,12 +577,12 @@
           }
         },
         {
-          "label": "assert()",
+          "label": "assert",
           "kind": 2,
           "detail": "function(mixed $value): Elsa",
           "inlineDetail": "(mixed $value)",
           "itemType": "Elsa",
-          "insertText": "assert()",
+          "insertText": "assert",
           "insertTextFormat": 1,
           "data": {
             "fullname": "assert",

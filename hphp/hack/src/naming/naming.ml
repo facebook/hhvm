@@ -749,12 +749,7 @@ module Make (GetLocals : GetLocals) = struct
       N.Hlike (hint ~allow_retonly env h)
     | Aast.Hsoft h ->
       let h = hint ~allow_retonly env h in
-      let pessimize_coefficient = TypecheckerOptions.simple_pessimize tcopt in
-      let pessimize = Pos.pessimize_enabled (fst h) pessimize_coefficient in
-      if pessimize then
-        Aast.Hlike h
-      else
-        snd h
+      snd h
     | Aast.Hfun
         Aast.
           {

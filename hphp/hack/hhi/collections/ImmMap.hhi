@@ -82,17 +82,6 @@ final class ImmMap<Tk as arraykey, +Tv> implements \ConstMap<Tk, Tv> {
   public function toKeysArray(): varray<Tk>;
 
   /**
-   * Returns a `Vector` with the values of the current `ImmMap`.
-   *
-   * @return - a `Vector` that contains the values of the current `ImmMap`.
-   */
-  <<__Rx, __MutableReturn, __MaybeMutable>>
-  /* HH_FIXME[4120]: While this violates our variance annotations, we are
-   * returning a copy of the underlying collection, so it is actually safe
-   * See #6853603. */
-  public function toVector(): Vector<Tv>;
-
-  /**
    * Returns an immutable vector (`ImmVector`) with the values of the current
    * `ImmMap`.
    *
@@ -102,34 +91,12 @@ final class ImmMap<Tk as arraykey, +Tv> implements \ConstMap<Tk, Tv> {
   public function toImmVector(): ImmVector<Tv>;
 
   /**
-   * Returns a mutable copy (`Map`) of this `ImmMap`.
-   *
-   * @return - a mutable `Map` that is a copy of the current `ImmMap`.
-   */
-  <<__Rx, __MutableReturn, __MaybeMutable>>
-  /* HH_FIXME[4120]: While this violates our variance annotations, we are
-   * returning a copy of the underlying collection, so it is actually safe
-   * See #6853603. */
-  public function toMap(): Map<Tk, Tv>;
-
-  /**
    * Returns an immutable copy (`ImmMap`) of the current `ImmMap`.
    *
    * @return - an `ImmMap` that is a copy of the current `ImmMap`.
    */
   <<__Rx, __MaybeMutable>>
   public function toImmMap(): ImmMap<Tk, Tv>;
-
-  /**
-   * Returns a `Set` based on the values of the current `ImmMap`.
-   *
-   * @return - a `Set` with the current values of the current `ImmMap`.
-   */
-  <<__Rx, __MutableReturn, __MaybeMutable>>
-  /* HH_FIXME[4120]: While this violates our variance annotations, we are
-   * returning a copy of the underlying collection, so it is actually safe
-   * See #6853603. */
-  public function toSet(): Set<Tv> where Tv as arraykey;
 
   /**
    * Returns an immutable set (`ImmSet`) based on the values of the current

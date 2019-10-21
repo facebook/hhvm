@@ -156,19 +156,6 @@ interface Iterable<+Tv>
   <<__Rx, __MaybeMutable>>
   public function toValuesArray(): varray<Tv>;
   /**
-   * Returns a `Vector` converted from the current `Iterable`.
-   *
-   * Any keys in the current `Iterable` are discarded and replaced with integer
-   * indices, starting with 0.
-   *
-   * @return - a `Vector` converted from the current `Iterable`.
-   */
-  <<__Rx, __MutableReturn, __MaybeMutable>>
-  /* HH_FIXME[4120]: While this violates our variance annotations, we are
-   * returning a copy of the underlying collection, so it is actually safe
-   * See #6853603. */
-  public function toVector(): Vector<Tv>;
-  /**
    * Returns an immutable vector (`ImmVector`) converted from the current
    * `Iterable`.
    *
@@ -179,18 +166,6 @@ interface Iterable<+Tv>
    */
   <<__Rx, __MaybeMutable>>
   public function toImmVector(): ImmVector<Tv>;
-  /**
-   * Returns a `Set` converted from the current `Iterable`.
-   *
-   * Any keys in the current `Iterable` are discarded.
-   *
-   * @return - a `Set` converted from the current `Iterable`.
-   */
-  <<__Rx, __MutableReturn, __MaybeMutable>>
-  /* HH_FIXME[4120]: While this violates our variance annotations, we are
-   * returning a copy of the underlying collection, so it is actually safe.
-   * See #6853603. */
-  public function toSet(): Set<Tv> where Tv as arraykey;
   /**
    * Returns an immutable set (`ImmSet`) converted from the current `Iterable`.
    *
@@ -431,19 +406,7 @@ interface KeyedIterable<Tk, +Tv>
    */
   <<__Rx, __MaybeMutable>>
   public function toKeysArray(): varray;
-  /**
-   * Returns a `Map` based on the keys and values of the current
-   * `KeyedIterable`.
-   *
-   * @return - a `Map` that has the keys and associated values of the current
-   *           `KeyedIterable`.
-   */
-  <<__Rx, __MutableReturn, __MaybeMutable>>
-  /* HH_FIXME[4120]: While this violates our variance annotations, we are
-   * returning a copy of the underlying collection, so it is actually safe
-   * See #6853603. */
-  public function toMap(): Map<Tk, Tv> where Tk as arraykey;
-  /**
+ /**
    * Returns an immutable map (`ImmMap`) based on the keys and values of the
    * current `KeyedIterable`.
    *

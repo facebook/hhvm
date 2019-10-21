@@ -241,34 +241,6 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
   <<__Rx, __MaybeMutable>>
   public function toImmVector(): ImmVector<Tv>;
 
- /**
-   * Returns a `Vector` containing the elemnts of the current `ImmVector`.
-   *
-   * The returned `Vector` will, of course, be mutable.
-   *
-   * @return - A `Vector` with the elements of the current `ImmVector`.
-   */
-  <<__Rx, __MutableReturn, __MaybeMutable>>
-  /* HH_FIXME[4120]: While this violates our variance annotations, we are
-   * returning a copy of the underlying collection, so it is actually safe
-   * See #6853603. */
-  public function toVector(): Vector<Tv>;
-
-  /**
-   * Returns an integer-keyed `Map` based on the elements of the current
-   * `ImmVector`.
-   *
-   * The keys are `0... count() - 1`.
-   *
-   * @return - An integer-keyed `Map` with the values of the current
-   *           `ImmVector`.
-   */
-  <<__Rx, __MutableReturn, __MaybeMutable>>
-  /* HH_FIXME[4120]: While this violates our variance annotations, we are
-   * returning a copy of the underlying collection, so it is actually safe
-   * See #6853603. */
-  public function toMap(): Map<int, Tv>;
-
   /**
    * Returns an immutable integer-keyed Map (`ImmMap`) based on the elements of
    * the current `ImmVector`.
@@ -280,17 +252,6 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
    */
   <<__Rx, __MaybeMutable>>
   public function toImmMap(): ImmMap<int, Tv>;
-
-  /**
-   * Returns a `Set` with the values of the current `ImmVector`.
-   *
-   * @return - A `Set` with the values of the current `ImmVector`.
-   */
-  <<__Rx, __MutableReturn, __MaybeMutable>>
-  /* HH_FIXME[4120]: While this violates our variance annotations, we are
-   * returning a copy of the underlying collection, so it is actually safe
-   * See #6853603. */
-  public function toSet(): Set<Tv> where Tv as arraykey;
 
   /**
    * Returns an immutable Set (`ImmSet`) with the values of the current

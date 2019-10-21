@@ -179,18 +179,6 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
   public function __toString(): string;
 
   /**
-   * Returns a `Vector` of the current `ImmSet` values.
-   *
-   * @return - a `Vector` (integer-indexed) that contains the values of the
-   *           current `ImmSet`.
-   */
-  <<__Rx, __MutableReturn, __MaybeMutable>>
-  /* HH_FIXME[4120]: While this violates our variance annotations, we are
-   * returning a copy of the underlying collection, so it is actually safe
-   * See #6853603. */
-  public function toVector(): Vector<Tv>;
-
-  /**
    * Returns an immutable vector (`ImmVector`) with the values of the current
    * `ImmSet`.
    *
@@ -199,19 +187,6 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    */
   <<__Rx, __MaybeMutable>>
   public function toImmVector(): ImmVector<Tv>;
-
-  /**
-   * Returns a `Map` based on the values of the current `ImmSet`.
-   *
-   * Each key of the `Map` will be the same as its value.
-   *
-   * @return - a `Map` that that contains the values of the current `ImmSet`,
-   *           with each key of the `Map` being the same as its value.
-   */
-  <<__Rx, __MutableReturn, __MaybeMutable>>  /* HH_FIXME[4120]: While this violates our variance annotations, we are
-   * returning a copy of the underlying collection, so it is actually safe
-   * See #6853603. */
-  public function toMap(): Map<arraykey, Tv>;
 
   /**
    * Returns an immutable map (`ImmMap`) based on the values of the current
@@ -225,17 +200,6 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
    */
   <<__Rx, __MaybeMutable>>
   public function toImmMap(): ImmMap<arraykey, Tv>;
-
-  /**
-   * Returns a mutable copy (`Set`) of the current `ImmSet`.
-   *
-   * @return - a `Set` that is a copy of the current `ImmSet`.
-   */
-  <<__Rx, __MutableReturn, __MaybeMutable>>
-  /* HH_FIXME[4120]: While this violates our variance annotations, we are
-   * returning a copy of the underlying collection, so it is actually safe
-   * See #6853603. */
-  public function toSet(): Set<Tv>;
 
   /**
    * Returns an immutable copy (`ImmSet`) of the current `ImmSet`.

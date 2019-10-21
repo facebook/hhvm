@@ -300,18 +300,6 @@ interface Iterable<+Tv> extends IteratorAggregate<Tv> {
    * @return - an `array` containing the values from the current `Iterable`.
    */
   public function toValuesArray(): varray<Tv>;
-  /* HH_FIXME[4120]: While this violates our variance annotations, we are
-   * returning a copy of the underlying collection, so it is actually safe
-   * See #6853603. */
-  /**
-   * Returns a `Vector` converted from the current `Iterable`.
-   *
-   * Any keys in the current `Iterable` are discarded and replaced with integer
-   * indices, starting with 0.
-   *
-   * @return - a `Vector` converted from the current `Iterable`.
-   */
-  public function toVector(): Vector<Tv>;
   /**
    * Returns an immutable vector (`ImmVector`) converted from the current
    * `Iterable`.
@@ -322,17 +310,6 @@ interface Iterable<+Tv> extends IteratorAggregate<Tv> {
    * @return - an `ImmVector` converted from the current `Iterable`.
    */
   public function toImmVector(): ImmVector<Tv>;
-  /* HH_FIXME[4120]: While this violates our variance annotations, we are
-   * returning a copy of the underlying collection, so it is actually safe.
-   * See #6853603. */
-  /**
-   * Returns a `Set` converted from the current `Iterable`.
-   *
-   * Any keys in the current `Iterable` are discarded.
-   *
-   * @return - a `Set` converted from the current `Iterable`.
-   */
-  public function toSet(): Set<Tv> where Tv as arraykey;
   /**
    * Returns an immutable set (`ImmSet`) converted from the current `Iterable`.
    *
@@ -552,17 +529,6 @@ interface KeyedIterable<Tk, +Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> 
    *           `KeyedIterable`.
    */
   public function toKeysArray(): varray;
-  /* HH_FIXME[4120]: While this violates our variance annotations, we are
-   * returning a copy of the underlying collection, so it is actually safe
-   * See #6853603. */
-  /**
-   * Returns a `Map` based on the keys and values of the current
-   * `KeyedIterable`.
-   *
-   * @return - a `Map` that has the keys and associated values of the current
-   *           `KeyedIterable`.
-   */
-  public function toMap(): Map<Tk, Tv> where Tk as arraykey;
   /**
    * Returns an immutable map (`ImmMap`) based on the keys and values of the
    * current `KeyedIterable`.

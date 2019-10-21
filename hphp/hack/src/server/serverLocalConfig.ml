@@ -287,15 +287,19 @@ let apply_overrides ~silent ~current_version ~config ~overrides =
   let config = Config_file.apply_overrides ~silent ~config ~overrides in
   let prefix = Some "experiments_config" in
   let enabled =
-    bool_if_min_version "enabled" ~prefix ~default:true ~current_version config
+    bool_if_min_version
+      "enabled"
+      ~prefix
+      ~default:false
+      ~current_version
+      config
   in
-  if enabled then
+  if enabled then (
     match Experiments_config_file.get_primary_owner () with
     | None -> ("No primary owner", config)
     | Some owner ->
-      let dir =
-        string_ "path" ~prefix ~default:BuildOptions.system_config_path config
-      in
+      Disk.mkdir_p GlobalConfig.tmp_dir;
+      let dir = string_ "path" ~prefix ~default:GlobalConfig.tmp_dir config in
       let file =
         Filename.concat dir (Printf.sprintf "hh.%s.experiments" owner)
       in
@@ -303,7 +307,7 @@ let apply_overrides ~silent ~current_version ~config ~overrides =
         bool_if_min_version
           "update"
           ~prefix
-          ~default:true
+          ~default:false
           ~current_version
           config
       in
@@ -334,7 +338,7 @@ let apply_overrides ~silent ~current_version ~config ~overrides =
         (meta, Config_file.apply_overrides ~silent ~config ~overrides)
       else
         ("Experimental config not found on disk", config)
-  else
+  ) else
     ("Experimental config not enabled", config)
 
 let load_ fn ~silent ~current_version overrides =

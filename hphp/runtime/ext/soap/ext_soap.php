@@ -175,7 +175,7 @@ class SoapClient {
     darray $options = darray[],
     mixed $input_headers = null,
   ): mixed {
-    $args = self::cleanArrays($args, array());
+    $args = self::cleanArrays($args, darray[]);
     $ret = $this->soapcallImpl(
       $name,
       varray($args),

@@ -621,7 +621,14 @@ bool MimePart::parse(const char *buf, int bufsize) {
     if (len < bufsize && buf[len] == '\n') {
       ++len;
       m_parsedata.workbuf += String(buf, len, CopyString);
-      ProcessLine(req::ptr<MimePart>(this), m_parsedata.workbuf);
+      if (!ProcessLine(req::ptr<MimePart>(this), m_parsedata.workbuf)) {
+        // ProcessLine() only returns FAILURE in case the count of children
+        // have exceeded MAXPARTS at the very beginning, without doing any work.
+        // Short-circuit since the exceeded state won't change on subsequent
+        // calls.
+        return false;
+      }
+
       m_parsedata.workbuf.clear();
     } else {
       m_parsedata.workbuf += String(buf, len, CopyString);

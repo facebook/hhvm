@@ -1,3 +1,5 @@
+Warning: MIME message too complex in %s/ext_mailparse.php on line %d
+bool(true)
 bool(true)
 Message: mime
 

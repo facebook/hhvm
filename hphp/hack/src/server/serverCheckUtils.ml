@@ -119,7 +119,7 @@ let set_up_remote_logging (env : ServerEnv.env) : unit =
     ~send_progress
     ~send_percentage_progress
 
-let maybe_remote_type_check genv env fnl =
+let maybe_remote_type_check genv env (fnl : Relative_path.t list) =
   let t = Unix.gettimeofday () in
   let (do_remote, _t) =
     if ServerArgs.remote genv.ServerEnv.options || env.remote then
@@ -145,12 +145,14 @@ let maybe_remote_type_check genv env fnl =
   ) else
     None
 
-let maybe_remote_type_check_without_interrupt genv env fnl ~local =
+let maybe_remote_type_check_without_interrupt
+    genv env (fnl : Relative_path.t list) ~local =
   match maybe_remote_type_check genv env fnl with
   | Some remote_errors -> remote_errors
   | None -> local ()
 
-let maybe_remote_type_check_with_interrupt genv env fnl ~local =
+let maybe_remote_type_check_with_interrupt
+    genv env (fnl : Relative_path.t list) ~local =
   (* TODO: remote type check should actually respond to interruption *)
   match maybe_remote_type_check genv env fnl with
   | Some remote_errors -> (remote_errors, env, [])

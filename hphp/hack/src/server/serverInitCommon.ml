@@ -12,8 +12,6 @@ module Bucket = Hack_bucket
 open Hh_core
 open ServerEnv
 
-type file_info = Relative_path.t * FileInfo.names
-
 let no_incremental_check (options : ServerArgs.options) : bool =
   let in_check_mode = ServerArgs.check_mode options in
   let full_init = Option.is_none (SharedMem.loaded_dep_table_filename ()) in
@@ -133,10 +131,10 @@ let does_path_match_specs path (specs : ServerArgs.files_to_check_spec list) :
   | Some _ -> true
 
 let filter_filenames_by_spec
-    (fnl : file_info list) (spec : ServerArgs.save_state_spec_info) :
-    file_info list =
+    (fnl : Relative_path.t list) (spec : ServerArgs.save_state_spec_info) :
+    Relative_path.t list =
   let filtered_filenames =
-    List.filter fnl ~f:(fun ((fn : Relative_path.t), _names) ->
+    List.filter fnl ~f:(fun (fn : Relative_path.t) ->
         (* TODO: not sure how to include the prefix *)
         does_path_match_specs
           (Relative_path.suffix fn)
@@ -166,8 +164,10 @@ let type_check
     let logstring = Printf.sprintf "Filter %d files" count in
     Hh_logger.log "Begin %s" logstring;
 
-    let (files_to_check : file_info list) = Relative_path.Map.elements fast in
-    let (files_to_check : file_info list) =
+    let (files_to_check : Relative_path.t list) =
+      Relative_path.Map.keys fast
+    in
+    let (files_to_check : Relative_path.t list) =
       match ServerArgs.save_with_spec genv.options with
       | None -> files_to_check
       | Some (spec : ServerArgs.save_state_spec_info) ->

@@ -52,10 +52,10 @@ let update_rechecked_files env rechecked =
   let t = Unix.gettimeofday () in
   let add_rechecked dirty_deps =
     let rechecked_files =
-      Relative_path.Map.fold
+      Relative_path.Set.fold
         rechecked
         ~init:dirty_deps.rechecked_files
-        ~f:(fun path _ acc -> Relative_path.Set.add acc path)
+        ~f:(fun path acc -> Relative_path.Set.add acc path)
     in
     { dirty_deps with rechecked_files }
   in

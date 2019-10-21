@@ -53,7 +53,7 @@ let test () =
 
   (* Run the recheck *)
   let interrupt = MultiThreadedCall.no_interrupt () in
-  let fnl = Relative_path.Map.elements fast in
+  let fnl = Relative_path.Map.keys fast in
   let check_info =
     Typing_check_service.{ init_id = ""; recheck_id = Some "" }
   in

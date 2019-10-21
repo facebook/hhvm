@@ -264,9 +264,18 @@ let get_files_with_stale_errors
 (* Even when we remove an IDE file that failed after parsing stage, it might
  * appear again in later stages - we need to filter it every time we extend
  * the set of files to process *)
-let remove_failed_parsing fast ~stop_at_errors env failed_parsing =
+let remove_failed_parsing_map fast ~stop_at_errors env failed_parsing =
   if stop_at_errors then
     Relative_path.Map.filter fast ~f:(fun k _ ->
+        not
+        @@ Relative_path.(
+             Set.mem failed_parsing k && Set.mem env.editor_open_files k))
+  else
+    fast
+
+let remove_failed_parsing_set fast ~stop_at_errors env failed_parsing =
+  if stop_at_errors then
+    Relative_path.Set.filter fast ~f:(fun k ->
         not
         @@ Relative_path.(
              Set.mem failed_parsing k && Set.mem env.editor_open_files k))
@@ -321,7 +330,7 @@ let parsing genv env to_check ~stop_at_errors =
       Relative_path.Set.inter failed_parsing ide_files
     in
     let fast =
-      remove_failed_parsing fast stop_at_errors env ide_failed_parsing
+      remove_failed_parsing_map fast stop_at_errors env ide_failed_parsing
     in
     let ide_success_parsing =
       Relative_path.Set.diff ide_files ide_failed_parsing
@@ -444,13 +453,11 @@ module type CheckKindType = sig
 
   (* Which files to typecheck, based on results of declaration phase *)
   val get_defs_to_recheck :
-    ServerEnv.genv ->
     reparsed:Relative_path.Set.t ->
     phase_2_decl_defs:Naming_table.fast ->
-    naming_table:Naming_table.t ->
     to_recheck:Relative_path.Set.t ->
     env:ServerEnv.env ->
-    Naming_table.fast * Relative_path.Set.t
+    Relative_path.Set.t * Relative_path.Set.t
 
   (* Update the global state based on resuts of parsing, naming and decl *)
   val get_env_after_decl :
@@ -500,12 +507,10 @@ module FullCheckKind : CheckKindType = struct
      * to approximate anything *)
     Relative_path.Set.empty
 
-  let get_defs_to_recheck
-      genv ~reparsed ~phase_2_decl_defs ~naming_table ~to_recheck ~env =
+  let get_defs_to_recheck ~reparsed ~phase_2_decl_defs ~to_recheck ~env =
     (* Besides the files that actually changed, we want to also recheck
      * those that have typing errors referring to files that were
-     * reparsed, since positions in those errors can be now stale. TODO: do we
-     * really also need to add decl errors? We always did, but I don't know why.
+     * reparsed, since positions in those errors can be now stale.
      *)
     let stale_errors =
       get_files_with_stale_errors
@@ -516,8 +521,12 @@ module FullCheckKind : CheckKindType = struct
     in
     let to_recheck = Relative_path.Set.union stale_errors to_recheck in
     let to_recheck = Relative_path.Set.union env.needs_recheck to_recheck in
-    ( extend_fast genv phase_2_decl_defs naming_table to_recheck,
-      Relative_path.Set.empty )
+    let to_recheck =
+      Relative_path.Set.union
+        (Relative_path.Set.of_list (Relative_path.Map.keys phase_2_decl_defs))
+        to_recheck
+    in
+    (to_recheck, Relative_path.Set.empty)
 
   let get_env_after_decl ~old_env ~naming_table ~failed_naming =
     {
@@ -610,8 +619,7 @@ module LazyCheckKind : CheckKindType = struct
         ~f:(fun x acc -> Relative_path.Set.union acc @@ get_related_files x)
       |> Relative_path.Set.filter ~f:(is_ide_file env)
 
-  let get_defs_to_recheck
-      genv ~reparsed ~phase_2_decl_defs ~naming_table ~to_recheck ~env =
+  let get_defs_to_recheck ~reparsed ~phase_2_decl_defs ~to_recheck ~env =
     (* Same as FullCheckKind.get_defs_to_recheck, but we limit returned set only
      * to files that are relevant to IDE *)
     let stale_errors =
@@ -625,8 +633,12 @@ module LazyCheckKind : CheckKindType = struct
     let (to_recheck_now, to_recheck_later) =
       Relative_path.Set.partition (is_ide_file env) to_recheck
     in
-    ( extend_fast genv phase_2_decl_defs naming_table to_recheck_now,
-      to_recheck_later )
+    let to_recheck_now =
+      Relative_path.Set.union
+        (Relative_path.Set.of_list (Relative_path.Map.keys phase_2_decl_defs))
+        to_recheck_now
+    in
+    (to_recheck_now, to_recheck_later)
 
   let get_env_after_decl ~old_env ~naming_table ~failed_naming =
     {
@@ -766,7 +778,7 @@ functor
       let fast = extend_fast genv fast naming_table failed_decl in
       let fast = add_old_decls env.naming_table fast in
       let fast =
-        remove_failed_parsing fast stop_at_errors env failed_parsing
+        remove_failed_parsing_map fast stop_at_errors env failed_parsing
       in
       { errors_after_naming = errors; failed_naming; fast }
 
@@ -875,7 +887,7 @@ functor
       env: ServerEnv.env;
       diag_subscribe: Diagnostic_subscription.t option;
       errors: Errors.t;
-      fast: FileInfo.names Relative_path.Map.t;
+      files_checked: Relative_path.Set.t;
       full_check_done: bool;
       needs_recheck: Relative_path.Set.t;
       total_rechecked_count: int;
@@ -885,11 +897,11 @@ functor
         (genv : genv)
         (env : env)
         ~(errors : Errors.t)
-        ~(fast : FileInfo.names Relative_path.Map.t)
+        ~(files_to_check : Relative_path.Set.t)
         ~(files_to_parse : Relative_path.Set.t)
         ~(lazy_check_later : Relative_path.Set.t)
         ~(old_env : env) : type_checking_result =
-      if Relative_path.(Map.mem fast default) then
+      if Relative_path.(Set.mem files_to_check default) then
         Hh_logger.log "WARNING: rechecking defintion in a dummy file";
       let dynamic_view_files =
         if ServerDynamicView.dynamic_view_on () then
@@ -901,7 +913,7 @@ functor
       let memory_cap =
         genv.local_config.ServerLocalConfig.max_typechecker_worker_memory_mb
       in
-      let fnl = Relative_path.Map.elements fast in
+      let fnl = Relative_path.Set.elements files_to_check in
       let (errorl', env', cancelled) =
         maybe_remote_type_check_with_interrupt genv env fnl ~local:(fun () ->
             match genv.lru_host_env with
@@ -932,19 +944,21 @@ functor
         Relative_path.Set.union env.needs_recheck lazy_check_later
       in
       (* Remove things that were cancelled from things we started rechecking... *)
-      let (fast, needs_recheck) =
+      let (files_to_check, needs_recheck) =
         List.fold
           cancelled
-          ~init:(fast, needs_recheck)
-          ~f:(fun (fast, needs_recheck) path ->
-            ( Relative_path.Map.remove fast path,
+          ~init:(files_to_check, needs_recheck)
+          ~f:(fun (files_to_check, needs_recheck) path ->
+            ( Relative_path.Set.remove files_to_check path,
               Relative_path.Set.add needs_recheck path ))
       in
       (* ... leaving only things that we actually checked, and which can be
        * removed from needs_recheck *)
-      let needs_recheck = diff_set_and_map_keys needs_recheck fast in
+      let needs_recheck =
+        Relative_path.Set.diff needs_recheck files_to_check
+      in
       let errors =
-        Errors.(incremental_update_map errors errorl' fast Typing)
+        Errors.(incremental_update_set errors errorl' files_to_check Typing)
       in
       let full_check_done =
         CheckKind.is_full && Relative_path.Set.is_empty needs_recheck
@@ -955,7 +969,7 @@ functor
               x
               ~priority_files:env.editor_open_files
               ~reparsed:files_to_parse
-              ~rechecked:fast
+              ~rechecked:files_to_check
               ~global_errors:errors
               ~full_check_done)
       in
@@ -972,12 +986,12 @@ functor
         ~before:old_env.diag_subscribe
         ~after:diag_subscribe;
 
-      let total_rechecked_count = Relative_path.Map.cardinal fast in
+      let total_rechecked_count = Relative_path.Set.cardinal files_to_check in
       {
         env;
         diag_subscribe;
         errors;
-        fast;
+        files_checked = files_to_check;
         full_check_done;
         needs_recheck;
         total_rechecked_count;
@@ -1148,7 +1162,7 @@ functor
             env
       in
       let fast_redecl_phase2_now =
-        remove_failed_parsing
+        remove_failed_parsing_map
           fast_redecl_phase2_now
           stop_at_errors
           env
@@ -1247,19 +1261,17 @@ functor
        changes. For a lazy check, typecheck only the affected files which are
        open in the IDE, leaving other affected files to be lazily checked later.
        In either case, don't attempt to typecheck files with parse errors. *)
-      let (fast, lazy_check_later) =
-        CheckKind.get_defs_to_recheck
-          genv
-          files_to_parse
-          fast
-          naming_table
-          to_recheck
+      let (files_to_check, lazy_check_later) =
+        CheckKind.get_defs_to_recheck files_to_parse fast to_recheck env
+      in
+      let files_to_check =
+        remove_failed_parsing_set
+          files_to_check
+          stop_at_errors
           env
+          failed_parsing
       in
-      let fast =
-        remove_failed_parsing fast stop_at_errors env failed_parsing
-      in
-      let to_recheck_count = Relative_path.Map.cardinal fast in
+      let to_recheck_count = Relative_path.Set.cardinal files_to_check in
       ServerProgress.send_progress_to_monitor
         ~include_in_logs:false
         "typechecking %d files"
@@ -1267,10 +1279,10 @@ functor
       let logstring = Printf.sprintf "Typechecking %d files" in
       Hh_logger.log "Begin %s" (logstring to_recheck_count);
 
-      debug_print_fast_keys genv "to_recheck" fast;
+      debug_print_path_set genv "to_recheck" files_to_check;
       debug_print_path_set genv "lazy_check_later" lazy_check_later;
 
-      ServerCheckpoint.process_updates fast;
+      ServerCheckpoint.process_updates files_to_check;
 
       (* Typecheck all of the files we determined might need rechecking as a
        consequence of the changes (or, in a lazy check, the subset of those
@@ -1279,7 +1291,7 @@ functor
         env;
         diag_subscribe;
         errors;
-        fast;
+        files_checked;
         full_check_done;
         needs_recheck;
         total_rechecked_count;
@@ -1288,7 +1300,7 @@ functor
           genv
           env
           ~errors
-          ~fast
+          ~files_to_check
           ~files_to_parse
           ~lazy_check_later
           ~old_env
@@ -1317,7 +1329,7 @@ functor
       Hh_logger.log "Total: %f\n%!" (t -. start_t);
 
       (* INVALIDATE FILES (EXPERIMENTAL TYPES IN CODEGEN) **********************)
-      ServerInvalidateUnits.go genv fast fast_parsed naming_table;
+      ServerInvalidateUnits.go genv files_checked fast_parsed naming_table;
 
       let env =
         CheckKind.get_env_after_typing
@@ -1348,7 +1360,9 @@ functor
 
       (* HANDLE PRECHECKED FILES AFTER RECHECK *********************************)
       let deptable_unlocked = Typing_deps.allow_dependency_table_reads true in
-      let env = ServerPrecheckedFiles.update_after_recheck genv env fast in
+      let env =
+        ServerPrecheckedFiles.update_after_recheck genv env files_checked
+      in
       let (_ : bool) =
         Typing_deps.allow_dependency_table_reads deptable_unlocked
       in

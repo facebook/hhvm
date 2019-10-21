@@ -74,7 +74,6 @@ the chain of jobs could be used to minimize the number of restarts.
 
 type check_file_computation = {
   path: Relative_path.t;
-  names: FileInfo.names;
   deferred_count: int;
 }
 
@@ -138,7 +137,7 @@ let type_class
     def_opt
   | None -> None
 
-let type_record_def opts fn x =
+let type_record_def opts fn (x : string) =
   match Ast_provider.find_record_def_in_file ~full:true fn x with
   | Some rd ->
     let rd = Naming.record_def rd in
@@ -151,9 +150,8 @@ let type_record_def opts fn x =
   | None -> None
 
 let check_typedef
-    (opts : TypecheckerOptions.t)
-    (fn : Relative_path.t)
-    (x : Decl_provider.typedef_key) : Tast.def option =
+    (opts : TypecheckerOptions.t) (fn : Relative_path.t) (x : string) :
+    Tast.def option =
   match Ast_provider.find_typedef_in_file ~full:true fn x with
   | Some t ->
     let typedef = Naming.typedef t in
@@ -190,16 +188,14 @@ let process_file
     (file : check_file_computation) : Errors.t * file_computation list =
   Deferred_decl.reset ~enable:(should_enable_deferring opts file);
   let fn = file.path in
-  let file_infos = file.names in
+  let ast = Ast_provider.get_ast ~full:true fn in
+  let (funs, classes, record_defs, typedefs, gconsts) = Nast.get_defs ast in
   let opts =
     {
       opts with
       GlobalOptions.tco_dynamic_view =
         Relative_path.Set.mem dynamic_view_files fn;
     }
-  in
-  let { FileInfo.n_funs; n_classes; n_record_defs; n_types; n_consts } =
-    file_infos
   in
   let ignore_type_record_def opts fn name =
     ignore (type_record_def opts fn name)
@@ -212,19 +208,21 @@ let process_file
     let (errors', global_tvenvs) =
       Errors.do_with_context fn Errors.Typing (fun () ->
           let fun_global_tvenvs =
-            SSet.elements n_funs
+            List.map funs ~f:snd
             |> List.filter_map ~f:(type_fun opts fn)
             |> List.map ~f:snd
           in
           let class_global_tvenvs =
-            SSet.elements n_classes
+            List.map classes ~f:snd
             |> List.filter_map ~f:(type_class opts fn)
             |> List.map ~f:snd
             |> List.concat
           in
-          SSet.iter (ignore_type_record_def opts fn) n_record_defs;
-          SSet.iter (ignore_check_typedef opts fn) n_types;
-          SSet.iter (ignore_check_const opts fn) n_consts;
+          List.map record_defs ~f:snd
+          |> List.iter ~f:(ignore_type_record_def opts fn);
+          List.map typedefs ~f:snd
+          |> List.iter ~f:(ignore_check_typedef opts fn);
+          List.map gconsts ~f:snd |> List.iter ~f:(ignore_check_const opts fn);
           fun_global_tvenvs @ class_global_tvenvs)
     in
     if
@@ -569,14 +567,11 @@ let go_with_interrupt
     (workers : MultiWorker.worker list option)
     (opts : TypecheckerOptions.t)
     (dynamic_view_files : Relative_path.Set.t)
-    (fnl : (Relative_path.t * FileInfo.names) list)
+    (fnl : Relative_path.t list)
     ~(interrupt : 'a MultiWorker.interrupt_config)
     ~(memory_cap : int option)
     ~(check_info : check_info) : (Errors.t, 'a) job_result =
-  let fnl =
-    List.map fnl ~f:(fun (path, names) ->
-        Check { path; names; deferred_count = 0 })
-  in
+  let fnl = List.map fnl ~f:(fun path -> Check { path; deferred_count = 0 }) in
   Mocking.with_test_mocking fnl
   @@ fun fnl ->
   let result =
@@ -615,7 +610,7 @@ let go
     (workers : MultiWorker.worker list option)
     (opts : TypecheckerOptions.t)
     (dynamic_view_files : Relative_path.Set.t)
-    (fnl : (Relative_path.t * FileInfo.names) list)
+    (fnl : Relative_path.t list)
     ~(memory_cap : int option)
     ~(check_info : check_info) : Errors.t =
   let interrupt = MultiThreadedCall.no_interrupt () in

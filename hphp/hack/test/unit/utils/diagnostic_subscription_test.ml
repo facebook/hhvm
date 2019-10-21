@@ -68,8 +68,8 @@ let test_update () =
   let ds = DS.of_id ~id:1 ~init:Errors.empty in
   let priority_files = Relative_path.Set.empty in
   let reparsed = Relative_path.Set.empty in
-  let rechecked_a = Relative_path.Map.singleton a_path FileInfo.empty_names in
-  let rechecked_b = Relative_path.Map.singleton b_path FileInfo.empty_names in
+  let rechecked_a = Relative_path.Set.singleton a_path in
+  let rechecked_b = Relative_path.Set.singleton b_path in
   let (ds, diagnostics) =
     DS.update
       ds
@@ -172,9 +172,8 @@ let test_error_sources () =
   let ds = DS.of_id ~id:1 ~init:Errors.empty in
   let priority_files = Relative_path.Set.empty in
   let rechecked =
-    Relative_path.Map.(
-      singleton a_path FileInfo.empty_names
-      |> union (singleton b_path FileInfo.empty_names))
+    Relative_path.Set.(
+      Relative_path.Set.singleton a_path |> union (singleton b_path))
   in
   let ds =
     DS.update

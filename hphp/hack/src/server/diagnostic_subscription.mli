@@ -19,7 +19,7 @@ val update :
   t ->
   priority_files:Relative_path.Set.t ->
   reparsed:Relative_path.Set.t ->
-  rechecked:Naming_table.fast ->
+  rechecked:Relative_path.Set.t ->
   global_errors:Errors.t ->
   full_check_done:bool ->
   t

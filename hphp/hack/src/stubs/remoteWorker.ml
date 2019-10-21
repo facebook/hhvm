@@ -6,7 +6,7 @@
  *
  *)
 
-type type_check_input = (Relative_path.t * FileInfo.names) list
+type type_check_input = Relative_path.t list
 
 type work_env = {
   bin_root: Path.t;

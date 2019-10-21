@@ -11,9 +11,8 @@ open Core_kernel
 module Bucket = Hack_bucket
 
 let should_do_remote
-    (opts : TypecheckerOptions.t)
-    (fnl : (Relative_path.t * FileInfo.names) list)
-    ~(t : float) : bool * float =
+    (opts : TypecheckerOptions.t) (fnl : Relative_path.t list) ~(t : float) :
+    bool * float =
   let remote_type_check = TypecheckerOptions.remote_type_check opts in
   let remote_type_check_threshold =
     TypecheckerOptions.remote_type_check_threshold opts
@@ -47,7 +46,7 @@ let go
     ~(naming_table : Naming_table.t option)
     ~(naming_sqlite_path : string option)
     ~(eden_threshold : int)
-    (fnl : (Relative_path.t * FileInfo.names) list) : Errors.t =
+    (fnl : Relative_path.t list) : Errors.t =
   let t = Unix.gettimeofday () in
   let num_remote_workers = TypecheckerOptions.num_remote_workers opts in
   let version_specifier = TypecheckerOptions.remote_version_specifier opts in

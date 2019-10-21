@@ -43,7 +43,7 @@ let update_diagnostics diag_subscribe editor_open_files errorl =
         diag_subscribe
         ~priority_files:editor_open_files
         ~reparsed:Relative_path.Set.empty
-        ~rechecked:Relative_path.Map.empty
+        ~rechecked:Relative_path.Set.empty
         ~global_errors:errorl
         ~full_check_done:true)
 

@@ -196,14 +196,7 @@ let test_process_file_deferring () =
     GlobalNamingOptions.get ()
   in
   let errors = Errors.empty in
-  let file =
-    Typing_check_service.
-      {
-        path = foo_path;
-        names = Relative_path.Map.find foo_path fast;
-        deferred_count = 0;
-      }
-  in
+  let file = Typing_check_service.{ path = foo_path; deferred_count = 0 } in
   (* Finally, this is what all the setup was for: process this file *)
   let (_errors, file_computations) =
     Typing_check_service.process_file dynamic_view_files opts errors file
@@ -217,8 +210,7 @@ let test_process_file_deferring () =
   let found_check =
     List.exists file_computations ~f:(fun file_computation ->
         match file_computation with
-        | Typing_check_service.(Check { path; names = _names; deferred_count })
-          ->
+        | Typing_check_service.(Check { path; deferred_count }) ->
           Asserter.String_asserter.assert_equals
             "Foo.php"
             (Relative_path.suffix path)
@@ -265,7 +257,6 @@ let test_should_enable_deferring () =
     Typing_check_service.
       {
         path = Relative_path.create Relative_path.Root "/fake/www/Foo.php";
-        names = FileInfo.empty_names;
         deferred_count = 1;
       }
   in

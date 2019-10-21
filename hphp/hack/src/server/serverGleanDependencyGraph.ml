@@ -15,6 +15,14 @@ type inheritanceInfo = {
   childName: string;
 }
 
+let create_predicate_json (predicate_name : string) (facts : json list) : json
+    =
+  JSON_Object
+    [("predicate", JSON_String predicate_name); ("facts", JSON_Array facts)]
+
+let convert_single_class_to_json (class_name : string) : json =
+  JSON_Object [("key", JSON_String class_name)]
+
 let convert_inheritance_to_json (inheritances : inheritanceInfo list) :
     json option =
   match inheritances with
@@ -23,28 +31,22 @@ let convert_inheritance_to_json (inheritances : inheritanceInfo list) :
     let facts =
       List.map
         ~f:(fun inheritance_info ->
-          (* TODO: parentName/childName schema still subject to change *)
           JSON_Object
             [
               ( "key",
                 JSON_Object
                   [
-                    ("parentName", JSON_String inheritance_info.parentName);
-                    ("childName", JSON_String inheritance_info.childName);
+                    ( "parent",
+                      convert_single_class_to_json inheritance_info.parentName
+                    );
+                    ( "child",
+                      convert_single_class_to_json inheritance_info.childName
+                    );
                   ] );
             ])
         inheritances
     in
-    (* TODO: predicate name still subject to change *)
-    Some
-      (JSON_Array
-         [
-           JSON_Object
-             [
-               ("predicate", JSON_String "hackdependency.inheritanceInfo.1");
-               ("facts", JSON_Array facts);
-             ];
-         ])
+    Some (create_predicate_json "hackdependency.inheritance.1" facts)
 
 let convert_deps_to_json (deps : (Dep.variant * Dep.variant) HashSet.t) :
     json option =
@@ -75,4 +77,10 @@ let convert_deps_to_json (deps : (Dep.variant * Dep.variant) HashSet.t) :
       deps
       []
   in
-  convert_inheritance_to_json inheritance_list
+  let inheritance_predicate = convert_inheritance_to_json inheritance_list in
+  match inheritance_predicate with
+  | None -> None
+  | Some inheritance_predicate ->
+    (* Eventually there will be multiple predicates,
+     * so we'll want to build them up and convert them to a json array *)
+    Some (JSON_Array [inheritance_predicate])

@@ -1959,7 +1959,7 @@ if there already is one, since that one will likely be better than this one. *)
             | (_, Some TK.HexadecimalLiteral)
             (* We allow underscores while lexing the integer literals. This gets rid of them before
              * the literal is created. *)
-            
+
             | (_, Some TK.BinaryLiteral) ->
               Int (Str.global_replace underscore "" s)
             | (_, Some TK.FloatingLiteral) -> Float s
@@ -3918,7 +3918,7 @@ if there already is one, since that one will likely be better than this one. *)
     let rec aux env acc = function
       | []
       (* EOF happens only as the last token in the list. *)
-      
+
       | [{ syntax = EndOfFile _; _ }] ->
         List.concat (List.rev acc)
       (* HaltCompiler stops processing the list in PHP but can be disabled in Hack *)
@@ -4150,12 +4150,6 @@ if there already is one, since that one will likely be better than this one. *)
 
   let lower env ~source_text ~script comments : result =
     let ast = runP pScript script env in
-    let ast =
-      if env.elaborate_namespaces then
-        Namespaces.elaborate_toplevel_defs env.parser_options ast
-      else
-        ast
-    in
     let ast = elaborate_halt_compiler ast env source_text in
     let content =
       if env.codegen then
@@ -4303,6 +4297,12 @@ let flush_parsing_errors env =
       let e = SyntaxError.make ~error_type:SyntaxError.ParseError s e msg in
       raise @@ SyntaxError.ParserFatal (e, p)
     | _ -> ()
+
+let elaborate_top_level_defs env aast =
+  if env.elaborate_namespaces then
+    Namespaces.elaborate_toplevel_defs env.parser_options aast
+  else
+    aast
 
 type rust_lowerer_result = { aast: (Pos.t, unit, unit, unit) Aast.program }
 
@@ -4478,6 +4478,7 @@ let from_text_to_custom_aast env source_text to_ex fb en hi =
   let legacy_ast_result = from_text env source_text in
   let tast =
     Ast_to_aast.convert_program to_ex fb en hi legacy_ast_result.ast
+    |> elaborate_top_level_defs env
   in
   let is_hh_file = legacy_ast_result.is_hh_file in
   (tast, is_hh_file)
@@ -4497,28 +4498,29 @@ let from_text_to_empty_tast env source_text =
  * Backward compatibility matter (should be short-lived)
 )*****************************************************************************)
 
-let legacy (x : result) : Parser_return.t =
+let legacy env (x : result) : Parser_return.t =
   {
     Parser_return.file_mode =
       Option.some_if (x.fi_mode <> FileInfo.Mphp) x.fi_mode;
     Parser_return.is_hh_file = x.is_hh_file;
     Parser_return.comments = x.comments;
-    Parser_return.ast = Ast_to_nast.convert x.ast;
+    Parser_return.ast =
+      Ast_to_nast.convert x.ast |> elaborate_top_level_defs env;
     Parser_return.content = x.content;
   }
 
 let from_text_with_legacy (env : env) (content : string) : Parser_return.t =
   let source_text = SourceText.make env.file content in
-  legacy @@ from_text env source_text
+  legacy env @@ from_text env source_text
 
-let from_file_with_legacy env = legacy (from_file env)
+let from_file_with_legacy env = legacy env (from_file env)
 
 let lower_tree_with_legacy
     (env : env)
     (source_text : SourceText.t)
     (mode : FileInfo.mode option)
     (tree : PositionedSyntaxTree.t) =
-  legacy @@ lower_tree env source_text mode tree
+  legacy env @@ lower_tree env source_text mode tree
 
 let from_text_with_legacy_and_cst (env : env) (source_text : SourceText.t) :
     PositionedSyntaxTree.t * Parser_return.t =
@@ -4556,7 +4558,7 @@ let defensive_program
         ~include_line_comments
         fn
     in
-    legacy @@ from_text env source
+    legacy env @@ from_text env source
   with e ->
     Rust_pointer.free_leaked_pointer ();
 

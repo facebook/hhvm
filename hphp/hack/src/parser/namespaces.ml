@@ -8,7 +8,6 @@
  *)
 
 open Core_kernel
-open Ast
 open Namespace_env
 module SN = Naming_special_names
 
@@ -124,14 +123,11 @@ let elaborate_id nsenv kind (p, id) = (p, elaborate_raw_id nsenv kind id)
  * allow us to fix those up during a second pass during naming.
  *)
 module ElaborateDefs = struct
+  open Aast
+
   let hint nsenv = function
     | (p, Happly (id, args)) ->
       (p, Happly (elaborate_id nsenv ElaborateClass id, args))
-    | other -> other
-
-  let class_def nsenv = function
-    | ClassUse h -> ClassUse (hint nsenv h)
-    | XhpAttrUse h -> XhpAttrUse (hint nsenv h)
     | other -> other
 
   let rec def nsenv = function
@@ -186,7 +182,8 @@ module ElaborateDefs = struct
               c_name = name;
               c_extends = List.map c.c_extends (hint nsenv);
               c_implements = List.map c.c_implements (hint nsenv);
-              c_body = List.map c.c_body (class_def nsenv);
+              c_uses = List.map c.c_uses (hint nsenv);
+              c_xhp_attr_uses = List.map c.c_xhp_attr_uses (hint nsenv);
               c_namespace = nsenv;
             };
         ] )
@@ -197,8 +194,8 @@ module ElaborateDefs = struct
       let name = elaborate_defined_id nsenv f.f_name in
       (nsenv, [Fun { f with f_name = name; f_namespace = nsenv }])
     | Typedef t ->
-      let name = elaborate_defined_id nsenv t.t_id in
-      (nsenv, [Typedef { t with t_id = name; t_namespace = nsenv }])
+      let name = elaborate_defined_id nsenv t.t_name in
+      (nsenv, [Typedef { t with t_name = name; t_namespace = nsenv }])
     | Constant cst ->
       let name = elaborate_defined_id nsenv cst.cst_name in
       (nsenv, [Constant { cst with cst_name = name; cst_namespace = nsenv }])

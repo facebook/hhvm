@@ -21,4 +21,7 @@ val elaborate_id :
   incur a perf hit that everybody will have to pay. For codegen purposed
   namespaces are propagated to inline declarations
   during closure conversion process *)
-val elaborate_toplevel_defs : ParserOptions.t -> Ast.program -> Ast.program
+val elaborate_toplevel_defs :
+  ParserOptions.t ->
+  ('a, 'b, 'c, 'd) Aast.program ->
+  ('a, 'b, 'c, 'd) Aast.program

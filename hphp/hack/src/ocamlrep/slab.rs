@@ -396,6 +396,10 @@ impl OwnedSlab {
         // The boxed slice can't be moved, so we should never need to rebase.
         self.0.value().unwrap()
     }
+
+    pub fn leak(this: Self) -> Value<'static> {
+        Box::leak(this.0).value().unwrap()
+    }
 }
 
 impl Debug for OwnedSlab {

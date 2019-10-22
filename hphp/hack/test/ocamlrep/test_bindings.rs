@@ -4,85 +4,92 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::collections::{BTreeMap, BTreeSet};
-use std::mem;
 
-use ocaml::caml;
 use ocamlrep::OcamlRep;
 use ocamlrep_derive::OcamlRep;
 
-fn val<T: OcamlRep>(value: T) -> ocaml::Value {
-    let mut arena = ocamlrep::Arena::new();
+fn val<T: OcamlRep>(value: T) -> usize {
+    let arena = Box::leak(Box::new(ocamlrep::Arena::new()));
     let value = arena.add(&value);
     // Round-trip back to T to exercise from_ocamlrep.
     let value = T::from_ocamlrep(value).unwrap();
     let value = arena.add(&value);
-    mem::forget(arena);
-    ocaml::Value::new(unsafe { value.to_bits() })
+    unsafe { value.to_bits() }
 }
 
-caml!(convert_to_ocamlrep, |value|, <result>, {
-    let mut slab = ocamlrep::OwnedSlab::from_ocaml(value.0);
-    let value = match &mut slab {
-        Some(slab) => slab.value().to_bits(),
-        None => value.0,
-    };
-    mem::forget(slab);
-    result = ocaml::Value::new(value);
-} -> result);
+#[no_mangle]
+pub unsafe extern "C" fn convert_to_ocamlrep(value: usize) -> usize {
+    match ocamlrep::OwnedSlab::from_ocaml(value) {
+        Some(slab) => ocamlrep::OwnedSlab::leak(slab).to_bits(),
+        None => value,
+    }
+}
 
 // Primitive Tests
 
-caml!(get_a, |_unit|, <result>, {
-    result = val('a');
-} -> result);
+#[no_mangle]
+pub extern "C" fn get_a(_unit: usize) -> usize {
+    val('a')
+}
 
-caml!(get_five, |_unit|, <result>, {
-    result = val(5);
-} -> result);
+#[no_mangle]
+pub extern "C" fn get_five(_unit: usize) -> usize {
+    val(5)
+}
 
-caml!(get_true, |_unit|, <result>, {
-    result = val(true);
-} -> result);
+#[no_mangle]
+pub extern "C" fn get_true(_unit: usize) -> usize {
+    val(true)
+}
 
-caml!(get_false, |_unit|, <result>, {
-    result = val(false);
-} -> result);
+#[no_mangle]
+pub extern "C" fn get_false(_unit: usize) -> usize {
+    val(false)
+}
 
 // Option Tests
 
-caml!(get_none, |_unit|, <result>, {
-    result = val(None::<isize>);
-} -> result);
+#[no_mangle]
+pub extern "C" fn get_none(_unit: usize) -> usize {
+    val(None::<isize>)
+}
 
-caml!(get_some_five, |_unit|, <result>, {
-    result = val(Some(5));
-} -> result);
+#[no_mangle]
+pub extern "C" fn get_some_five(_unit: usize) -> usize {
+    val(Some(5))
+}
 
-caml!(get_some_none, |_unit|, <result>, {
-    result = val(Some(None::<isize>));
-} -> result);
+#[no_mangle]
+pub extern "C" fn get_some_none(_unit: usize) -> usize {
+    val(Some(None::<isize>))
+}
 
-caml!(get_some_some_five, |_unit|, <result>, {
-    result = val(Some(Some(5)));
-} -> result);
+#[no_mangle]
+pub extern "C" fn get_some_some_five(_unit: usize) -> usize {
+    val(Some(Some(5)))
+}
 
 // List Tests
 
-caml!(get_empty_list, |_unit|, <result>, {
-    result = val(Vec::<isize>::new());
-} -> result);
+#[no_mangle]
+pub extern "C" fn get_empty_list(_unit: usize) -> usize {
+    val(Vec::<isize>::new())
+}
 
-caml!(get_five_list, |_unit|, <result>, {
-    result = val(vec![5]);
-} -> result);
+#[no_mangle]
+pub extern "C" fn get_five_list(_unit: usize) -> usize {
+    val(vec![5])
+}
 
-caml!(get_one_two_three_list, |_unit|, <result>, {
-    result = val(vec![1, 2, 3]);
-} -> result);
+#[no_mangle]
+pub extern "C" fn get_one_two_three_list(_unit: usize) -> usize {
+    val(vec![1, 2, 3])
+}
 
-caml!(get_float_list, |_unit|, <result>, {
-    result = val(vec![1.0, 2.0, 3.0]);
-} -> result);
+#[no_mangle]
+pub extern "C" fn get_float_list(_unit: usize) -> usize {
+    val(vec![1.0, 2.0, 3.0])
+}
 
 // Struct tests
 
@@ -98,50 +105,60 @@ struct Bar {
     d: Option<Vec<Option<isize>>>,
 }
 
-caml!(get_foo, |_unit|, <result>, {
-    result = val(Foo { a: 25, b: true });
-} -> result);
+#[no_mangle]
+pub extern "C" fn get_foo(_unit: usize) -> usize {
+    val(Foo { a: 25, b: true })
+}
 
-caml!(get_bar, |_unit|, <result>, {
-    result = val(Bar {
+#[no_mangle]
+pub extern "C" fn get_bar(_unit: usize) -> usize {
+    val(Bar {
         c: Foo { a: 42, b: false },
-        d: Some(vec![Some(88), None, Some(66)])
-    });
-} -> result);
+        d: Some(vec![Some(88), None, Some(66)]),
+    })
+}
 
 // String Tests
 
-caml!(get_empty_string, |_unit|, <result>, {
-    result = val(String::from(""));
-} -> result);
+#[no_mangle]
+pub extern "C" fn get_empty_string(_unit: usize) -> usize {
+    val(String::from(""))
+}
 
-caml!(get_a_string, |_unit|, <result>, {
-    result = val(String::from("a"));
-} -> result);
+#[no_mangle]
+pub extern "C" fn get_a_string(_unit: usize) -> usize {
+    val(String::from("a"))
+}
 
-caml!(get_ab_string, |_unit|, <result>, {
-    result = val(String::from("ab"));
-} -> result);
+#[no_mangle]
+pub extern "C" fn get_ab_string(_unit: usize) -> usize {
+    val(String::from("ab"))
+}
 
-caml!(get_abcde_string, |_unit|, <result>, {
-    result = val(String::from("abcde"));
-} -> result);
+#[no_mangle]
+pub extern "C" fn get_abcde_string(_unit: usize) -> usize {
+    val(String::from("abcde"))
+}
 
-caml!(get_abcdefg_string, |_unit|, <result>, {
-    result = val(String::from("abcdefg"));
-} -> result);
+#[no_mangle]
+pub extern "C" fn get_abcdefg_string(_unit: usize) -> usize {
+    val(String::from("abcdefg"))
+}
 
-caml!(get_abcdefgh_string, |_unit|, <result>, {
-    result = val(String::from("abcdefgh"));
-} -> result);
+#[no_mangle]
+pub extern "C" fn get_abcdefgh_string(_unit: usize) -> usize {
+    val(String::from("abcdefgh"))
+}
 
-caml!(get_zero_float, |_unit|, <result>, {
-    result = val(0.0 as f64);
-} -> result);
+#[no_mangle]
+pub extern "C" fn get_zero_float(_unit: usize) -> usize {
+    val(0.0 as f64)
+}
 
-caml!(get_one_two_float, |_unit|, <result>, {
-    result = val(1.2 as f64);
-} -> result);
+#[no_mangle]
+pub extern "C" fn get_one_two_float(_unit: usize) -> usize {
+    val(1.2 as f64)
+}
 
 // Variant tests
 
@@ -153,60 +170,70 @@ enum Fruit {
     Kiwi,
 }
 
-caml!(get_apple, |_unit|, <result>, {
-    result = val(Fruit::Apple);
-} -> result);
+#[no_mangle]
+pub extern "C" fn get_apple(_unit: usize) -> usize {
+    val(Fruit::Apple)
+}
 
-caml!(get_orange, |_unit|, <result>, {
-    result = val(Fruit::Orange(39));
-} -> result);
+#[no_mangle]
+pub extern "C" fn get_orange(_unit: usize) -> usize {
+    val(Fruit::Orange(39))
+}
 
-caml!(get_pear, |_unit|, <result>, {
-    result = val(Fruit::Pear { num: 76 });
-} -> result);
+#[no_mangle]
+pub extern "C" fn get_pear(_unit: usize) -> usize {
+    val(Fruit::Pear { num: 76 })
+}
 
-caml!(get_kiwi, |_unit|, <result>, {
-    result = val(Fruit::Kiwi);
-} -> result);
+#[no_mangle]
+pub extern "C" fn get_kiwi(_unit: usize) -> usize {
+    val(Fruit::Kiwi)
+}
 
 // Map tests
 
-caml!(get_empty_smap, |_unit|, <result>, {
+#[no_mangle]
+pub extern "C" fn get_empty_smap(_unit: usize) -> usize {
     let map: BTreeMap<String, isize> = BTreeMap::new();
-    result = val(map);
-} -> result);
+    val(map)
+}
 
-caml!(get_int_smap_singleton, |_unit|, <result>, {
+#[no_mangle]
+pub extern "C" fn get_int_smap_singleton(_unit: usize) -> usize {
     let mut map = BTreeMap::new();
     map.insert(String::from("a"), 1);
-    result = val(map);
-} -> result);
+    val(map)
+}
 
-caml!(get_int_smap, |_unit|, <result>, {
+#[no_mangle]
+pub extern "C" fn get_int_smap(_unit: usize) -> usize {
     let mut map = BTreeMap::new();
     map.insert(String::from("a"), 1);
     map.insert(String::from("b"), 2);
     map.insert(String::from("c"), 3);
-    result = val(map);
-} -> result);
+    val(map)
+}
 
 // Set tests
 
-caml!(get_empty_sset, |_unit|, <result>, {
+#[no_mangle]
+pub extern "C" fn get_empty_sset(_unit: usize) -> usize {
     let set: BTreeSet<String> = BTreeSet::new();
-    result = val(set);
-} -> result);
+    val(set)
+}
 
-caml!(get_sset_singleton, |_unit|, <result>, {
+#[no_mangle]
+pub extern "C" fn get_sset_singleton(_unit: usize) -> usize {
     let mut set = BTreeSet::new();
     set.insert(String::from("a"));
-    result = val(set);
-} -> result);
+    val(set)
+}
 
-caml!(get_sset, |_unit|, <result>, {
+#[no_mangle]
+pub extern "C" fn get_sset(_unit: usize) -> usize {
     let mut set = BTreeSet::new();
     set.insert(String::from("a"));
     set.insert(String::from("b"));
     set.insert(String::from("c"));
-    result = val(set);
-} -> result);
+    val(set)
+}

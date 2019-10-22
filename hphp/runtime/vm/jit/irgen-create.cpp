@@ -448,8 +448,7 @@ void emitNewPackedLayoutArray(IRGS& env, uint32_t numArgs, Opcode op) {
     op,
     PackedArrayData { numArgs }
   );
-  static constexpr auto kMaxUnrolledInitArray = 8;
-  if (numArgs > kMaxUnrolledInitArray) {
+  if (numArgs > RuntimeOption::EvalHHIRMaxInlineInitPackedElements) {
     gen(
       env,
       InitPackedLayoutArrayLoop,
@@ -509,8 +508,7 @@ void newStructImpl(IRGS& env, const ImmVector& immVec,
     extra.keys[i] = curUnit(env)->lookupLitstrId(ids[i]);
   }
 
-  static constexpr auto kMaxUnrolledInitArray = 8;
-  if (numArgs > kMaxUnrolledInitArray) {
+  if (numArgs > RuntimeOption::EvalHHIRMaxInlineInitMixedElements) {
     auto const arr = gen(env, make, extra, sp(env));
     discard(env, numArgs);
     push(env, arr);

@@ -885,6 +885,9 @@ struct RuntimeOption {
   F(uint32_t, HHIRLoadElimMaxIters,    10)                              \
   F(bool, HHIRStorePRE,                true)                            \
   F(bool, HHIROutlineGenericIncDecRef, true)                            \
+  /* How many elements to inline for packed- or mixed-array inits. */   \
+  F(uint32_t, HHIRMaxInlineInitPackedElements, 8)                       \
+  F(uint32_t, HHIRMaxInlineInitMixedElements,  4)                       \
   F(double, HHIRMixedArrayProfileThreshold, 0.8554)                     \
   F(double, HHIRSmallArrayProfileThreshold, 0.8)                        \
   /* Register allocation flags */                                       \

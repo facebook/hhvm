@@ -7,7 +7,7 @@
 
 use proc_macro2::TokenStream;
 use quote::quote;
-use synstructure::decl_derive;
+use synstructure::{decl_derive, BindingInfo, VariantInfo};
 
 decl_derive!([OcamlRep] => derive_ocamlrep);
 
@@ -118,7 +118,11 @@ fn enum_impl(s: &synstructure::Structure) -> (TokenStream, TokenStream) {
         if size == 0 {
             quote!(::ocamlrep::Value::int(#tag))
         } else {
-            allocate_block(v, tag as u8)
+            let tag = tag as u8;
+            match get_boxed_tuple_len(v) {
+                None => allocate_block(v, tag),
+                Some(len) => boxed_tuple_variant_to_block(&v.bindings()[0], tag, len),
+            }
         }
     });
 
@@ -138,9 +142,10 @@ fn enum_impl(s: &synstructure::Structure) -> (TokenStream, TokenStream) {
     for (variant, tag) in block_variants.iter() {
         let tag = *tag as u8;
         let size = variant.bindings().len();
-        let constructor = variant.construct(|_, i| {
-            quote! { ::ocamlrep::from::field(block, #i)? }
-        });
+        let constructor = match get_boxed_tuple_len(variant) {
+            None => variant.construct(|_, i| quote! { ::ocamlrep::from::field(block, #i)? }),
+            Some(len) => boxed_tuple_variant_constructor(variant, len),
+        };
         block_arms.extend(quote! { #tag => {
             ::ocamlrep::from::expect_block_size(block, #size)?;
             Ok(#constructor)
@@ -178,7 +183,7 @@ fn enum_impl(s: &synstructure::Structure) -> (TokenStream, TokenStream) {
     (to, from)
 }
 
-fn allocate_block(variant: &synstructure::VariantInfo, tag: u8) -> TokenStream {
+fn allocate_block(variant: &VariantInfo, tag: u8) -> TokenStream {
     let size = variant.bindings().len();
     let mut fields = TokenStream::new();
     for (i, bi) in variant.bindings().iter().enumerate() {
@@ -193,4 +198,68 @@ fn allocate_block(variant: &synstructure::VariantInfo, tag: u8) -> TokenStream {
             ::ocamlrep::Value::from_ptr(block)
         }
     }
+}
+
+fn boxed_tuple_variant_to_block(bi: &BindingInfo, tag: u8, len: usize) -> TokenStream {
+    let mut fields = TokenStream::new();
+    for i in 0..len {
+        let idx = syn::Index::from(i);
+        fields.extend(quote! {
+            ::ocamlrep::Arena::set_field(block, #i, arena.add(&#bi.#idx));
+        });
+    }
+    quote! {
+        let block = arena.block_with_size_and_tag(#len, #tag);
+        unsafe {
+            #fields
+            ::ocamlrep::Value::from_ptr(block)
+        }
+    }
+}
+
+fn boxed_tuple_variant_constructor(variant: &VariantInfo, len: usize) -> TokenStream {
+    let mut ident = TokenStream::new();
+    if let Some(prefix) = variant.prefix {
+        ident.extend(quote!(#prefix ::));
+    }
+    let id = variant.ast().ident;
+    ident.extend(quote!(#id));
+
+    let mut fields = TokenStream::new();
+    for i in 0..len {
+        let idx = syn::Index::from(i);
+        fields.extend(quote! { ::ocamlrep::from::field(block, #idx)?, });
+    }
+    quote! { #ident(::std::boxed::Box::new((#fields))) }
+}
+
+fn get_boxed_tuple_len(variant: &VariantInfo) -> Option<usize> {
+    use syn::{Fields, GenericArgument, PathArguments, Type, TypePath};
+
+    match &variant.ast().fields {
+        Fields::Unnamed(_) => (),
+        _ => return None,
+    }
+    let bi = match variant.bindings() {
+        [bi] => bi,
+        _ => return None,
+    };
+    let path = match &bi.ast().ty {
+        Type::Path(TypePath { path, .. }) => path,
+        _ => return None,
+    };
+    let path_seg = match path.segments.first() {
+        Some(s) if s.ident == "Box" => s,
+        _ => return None,
+    };
+    let args = match &path_seg.arguments {
+        PathArguments::AngleBracketed(args) => args,
+        _ => return None,
+    };
+    let tuple = match args.args.first() {
+        Some(GenericArgument::Type(Type::Tuple(tuple))) => tuple,
+        _ => return None,
+    };
+
+    Some(tuple.elems.len())
 }

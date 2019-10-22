@@ -118,9 +118,8 @@ let compare_decl verbosity fn =
                 old_decls.typedefs;
           })
     in
-    (* These can't be compared directly because the parsed decls are allocated into a Rust arena
-       that doesn't live in the OCaml major heap, so it refuses to compare them using polymorphic
-       compare. *)
+    (* These can't be compared directly because they contain stdlib Maps, so
+       polymorphic compare won't behave correctly. *)
     if
       Direct_decl_parser.show_decls decls
       = Direct_decl_parser.show_decls old_decls

@@ -115,18 +115,6 @@ bool isCalleeInlinable(SrcKey callSK, const Func* callee,
   if (callee == callSK.func()) {
     return refuse("call is recursive");
   }
-  if (callee->hasVariadicCaptureParam()) {
-    if (callee->attrs() & AttrMayUseVV) {
-      return refuse("callee has variadic capture and MayUseVV");
-    }
-    // Refuse if the variadic parameter actually captures something.
-    auto pc = callSK.pc();
-    auto const numArgs = getImm(pc, 0).u_FCA.numArgs;
-    auto const numParams = callee->numParams();
-    if (numArgs >= numParams) {
-      return refuse("callee has variadic capture with non-empty value");
-    }
-  }
   if (callee->hasReifiedGenerics() && !callee->cls()) {
     return refuse("reified generics on non-method");
   }
@@ -163,7 +151,7 @@ bool checkNumArgs(SrcKey callSK,
   auto const fca = getImm(pc, 0).u_FCA;
   auto const numParams = callee->numParams();
 
-  if (fca.numArgs > numParams) {
+  if (fca.numArgs > numParams && !callee->hasVariadicCaptureParam()) {
     return refuse("callee called with too many arguments");
   }
 
@@ -248,41 +236,6 @@ bool isInlinableCPPBuiltin(const Func* f) {
   }
 
   return true;
-}
-
-/*
- * Conservative whitelist for HHBC opcodes we know are safe to inline, even if
- * the entire callee body required a AttrMayUseVV.
- *
- * This affects cases where we're able to eliminate control flow while inlining
- * due to the parameter types, and the AttrMayUseVV flag was due to something
- * happening in a block we won't inline.
- */
-bool isInliningVVSafe(Op op) {
-  switch (op) {
-    case Op::Array:
-    case Op::Null:
-    case Op::PopC:
-    case Op::PopL:
-    case Op::CGetL:
-    case Op::SetL:
-    case Op::IsTypeL:
-    case Op::JmpNS:
-    case Op::JmpNZ:
-    case Op::JmpZ:
-    case Op::AssertRATL:
-    case Op::AssertRATStk:
-    case Op::VerifyParamType:
-    case Op::VerifyParamTypeTS:
-    case Op::VerifyRetTypeC:
-    case Op::VerifyRetTypeTS:
-    case Op::RetC:
-    case Op::RetCSuspended:
-      return true;
-    default:
-      break;
-  }
-  return false;
 }
 
 struct InlineRegionKey {
@@ -574,11 +527,6 @@ bool shouldInline(const irgen::IRGS& irgs,
     return refuse("non-inlinable CPP builtin");
   }
 
-  // If the function may use a VarEnv (which is stored in the ActRec) or may be
-  // variadic, we restrict inlined callees to certain whitelisted instructions
-  // which we know won't actually require these features.
-  const bool needsCheckVVSafe = callee->attrs() & AttrMayUseVV;
-
   bool hasRet = false;
 
   // Iterate through the region, checking its suitability for inlining.
@@ -592,12 +540,6 @@ bool shouldInline(const irgen::IRGS& irgs,
       // expected to disable inlining for the region it gives us to peek.
       if (sk.func() != callee) {
         return refuse("got region with inlined calls");
-      }
-
-      // Restrict to VV-safe opcodes if necessary.
-      if (needsCheckVVSafe && !isInliningVVSafe(op)) {
-        return refuse(folly::format("{} may use dynamic environment",
-                                    opcodeToName(op)).str().c_str());
       }
 
       // Detect that the region contains a return.
@@ -851,6 +793,9 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
   FTRACE(2, "selectCalleeRegion: callee = {}\n", callee->fullName()->data());
   auto const firstArgPos = static_cast<int32_t>(fca.numInputs()) - 1;
   std::vector<Type> argTypes;
+  auto numArgs = std::min<uint32_t>(
+    fca.numArgs, callee->numNonVariadicParams()
+  );
   for (int32_t i = 0; i < fca.numArgs; ++i) {
     // DataTypeGeneric is used because we're just passing the locals into the
     // callee.  It's up to the callee to constrain further if needed.
@@ -866,12 +811,12 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
       return nullptr;
     }
     FTRACE(2, "arg {}: {}\n", i + 1, type);
-    argTypes.push_back(type);
+    if (i < numArgs) argTypes.push_back(type);
   }
 
   const auto depth = inlineDepth(irgs);
   if (profData()) {
-    auto region = selectCalleeCFG(sk, callee, fca.numArgs, ctxType, argTypes,
+    auto region = selectCalleeCFG(sk, callee, numArgs, ctxType, argTypes,
                                   irgs.budgetBCInstrs, annotationsPtr);
     if (region &&
         shouldInline(irgs, sk, callee, *region,
@@ -881,7 +826,7 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
     return nullptr;
   }
 
-  auto region = selectCalleeTracelet(callee, fca.numArgs, ctxType, argTypes,
+  auto region = selectCalleeTracelet(callee, numArgs, ctxType, argTypes,
                                      irgs.budgetBCInstrs);
 
   if (region &&

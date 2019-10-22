@@ -1,6 +1,6 @@
 <?hh
 
-function test(...$x) {
+<<__NEVER_INLINE>> function test(...$x) {
   echo "not folding\n";
 }
 

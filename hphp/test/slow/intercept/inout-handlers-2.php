@@ -32,12 +32,12 @@ class W {
   }
 }
 
-function foo(inout $x) { echo "fail!\n"; }
-function bar(inout $x) { echo "fail!\n"; }
-function fiz(inout $x) { echo "fail!\n"; }
-function buz(inout $x) { echo "fail!\n"; }
-function biz(inout $x) { echo "fail!\n"; }
-function far(inout $x) { echo "fail!\n"; }
+<<__NEVER_INLINE>> function foo(inout $x) { echo "fail!\n"; }
+<<__NEVER_INLINE>> function bar(inout $x) { echo "fail!\n"; }
+<<__NEVER_INLINE>> function fiz(inout $x) { echo "fail!\n"; }
+<<__NEVER_INLINE>> function buz(inout $x) { echo "fail!\n"; }
+<<__NEVER_INLINE>> function biz(inout $x) { echo "fail!\n"; }
+<<__NEVER_INLINE>> function far(inout $x) { echo "fail!\n"; }
 
 <<__EntryPoint>>
 function main() {

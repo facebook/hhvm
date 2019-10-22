@@ -189,6 +189,7 @@ Outer:                                 | Inner:
 
 #include "hphp/runtime/vm/jit/irgen-call.h"
 #include "hphp/runtime/vm/jit/irgen-control.h"
+#include "hphp/runtime/vm/jit/irgen-create.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-func-prologue.h"
 #include "hphp/runtime/vm/jit/irgen-sprop-global.h"
@@ -273,9 +274,21 @@ void beginInlining(IRGS& env,
   }();
   assertx(!fca.hasUnpack());
 
-  jit::vector<SSATmp*> params{fca.numArgs};
-  for (unsigned i = 0; i < fca.numArgs; ++i) {
-    params[fca.numArgs - i - 1] = popF(env);
+  auto numArgs = std::min<uint32_t>(
+    target->numNonVariadicParams(), fca.numArgs);
+  jit::vector<SSATmp*> params{numArgs + 1};
+
+  if (target->hasVariadicCaptureParam() && numArgs < fca.numArgs) {
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      emitNewVecArray(env, fca.numArgs - numArgs);
+    } else {
+      emitNewVArray(env, fca.numArgs - numArgs);
+    }
+    ++numArgs;
+  }
+
+  for (unsigned i = 0; i < numArgs; ++i) {
+    params[numArgs - i - 1] = popF(env);
   }
 
   // NB: Now that we've popped the callee's arguments off the stack
@@ -299,11 +312,11 @@ void beginInlining(IRGS& env,
   data.callBCOff     = callBcOffset;
   data.retSPOff      = offsetFromFP(env, calleeAROff) - kNumActRecCells;
   data.spOffset      = calleeAROff;
-  data.numArgs       = fca.numArgs;
+  data.numArgs       = numArgs;
   data.asyncEagerReturn = returnTarget.asyncEagerOffset != kInvalidOffset;
 
   assertx(startSk.func() == target &&
-          startSk.offset() == target->getEntryForNumArgs(fca.numArgs) &&
+          startSk.offset() == target->getEntryForNumArgs(numArgs) &&
           startSk.resumeMode() == ResumeMode::None);
 
   env.inlineState.depth++;
@@ -317,10 +330,10 @@ void beginInlining(IRGS& env,
 
   auto const calleeFP = gen(env, DefInlineFP, data, sp(env), fp(env), ctx);
 
-  for (unsigned i = 0; i < fca.numArgs; ++i) {
+  for (unsigned i = 0; i < numArgs; ++i) {
     stLocRaw(env, i, calleeFP, params[i]);
   }
-  if (generics != nullptr) stLocRaw(env, fca.numArgs, calleeFP, generics);
+  if (generics != nullptr) stLocRaw(env, numArgs, calleeFP, generics);
 
   // All the code below may reenter, so update the marker so we don't
   // accidentally overwrite the locals.
@@ -336,7 +349,7 @@ void beginInlining(IRGS& env,
     0
   ).value());
 
-  emitPrologueLocals(env, fca.numArgs, callFlags, closure);
+  emitPrologueLocals(env, numArgs, callFlags, closure);
 
   emitGenericsMismatchCheck(env, callFlags);
   emitCalleeDynamicCallCheck(env, callFlags);

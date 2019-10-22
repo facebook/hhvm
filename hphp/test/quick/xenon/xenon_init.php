@@ -47,7 +47,6 @@ $stacks = xenon_get_data();
 $required_functions = array(
   'HH\Asio\join',
   'HH\Asio\v',
-  'HH\Asio\result',
 
   'fa0',
   'fa1',
@@ -58,6 +57,7 @@ $required_functions = array(
   'main',
 );
 $optional_functions = array(
+  'HH\Asio\result',
   'include',
   'count',
   Vector::class.'::__construct',

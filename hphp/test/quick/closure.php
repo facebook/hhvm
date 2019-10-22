@@ -2,7 +2,7 @@
 
 function funk($alice, $bob) {
   echo "Args: $alice $bob\n";
-  debug_print_backtrace();
+  debug_print_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
 }
 
 

@@ -1,6 +1,6 @@
 <?hh
 
-function foo(inout $x) { echo "fail!\n"; }
+<<__NEVER_INLINE>> function foo(inout $x) { echo "fail!\n"; }
 
 function takes_varray(varray $x) {}
 

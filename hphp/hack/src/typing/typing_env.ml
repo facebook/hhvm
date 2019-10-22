@@ -1576,7 +1576,7 @@ let remove_tyvar_lower_bound env var lower_var =
   in
   update_tyvar_info env var { tvinfo with lower_bounds }
 
-(* Add a single new upper bound [ty] to type variable [var] in [env.tvenv].
+(* Add a single new lower bound [ty] to type variable [var] in [env.tvenv].
  * If the optional [union] operation is supplied, then use this to avoid
  * adding redundant bounds by merging the type with existing bounds. This makes
  * sense because a conjunction of lower bounds

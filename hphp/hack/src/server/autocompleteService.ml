@@ -38,7 +38,8 @@ let add_position_to_results (raw_results : SearchUtils.si_results) :
   SearchUtils.(
     List.filter_map raw_results ~f:(fun r ->
         match SymbolIndex.get_pos_for_item_opt r with
-        | Some pos -> Some { name = r.si_name; pos; result_type = r.si_kind }
+        | Some pos ->
+          Some { name = r.si_fullname; pos; result_type = r.si_kind }
         | None -> None))
 
 let (argument_global_type : autocomplete_type option ref) = ref None

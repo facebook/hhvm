@@ -300,11 +300,11 @@ let absolute_none = Pos.none |> Pos.to_absolute
 
 (* Shortcut to use the above method to get an absolute pos *)
 let get_pos_for_item_opt (item : si_item) : Pos.absolute option =
-  let result = get_position_for_symbol item.si_name item.si_kind in
+  let result = get_position_for_symbol item.si_fullname item.si_kind in
   match result with
   | None -> None
   | Some (relpath, line, col) ->
-    let symbol_len = String.length item.si_name in
+    let symbol_len = String.length item.si_fullname in
     let pos =
       Pos.make_from_lnum_bol_cnum
         ~pos_file:relpath

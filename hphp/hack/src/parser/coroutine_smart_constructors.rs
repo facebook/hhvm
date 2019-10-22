@@ -35,6 +35,22 @@ pub struct State<'src, S> {
     is_codegen: bool,
     phantom_s: PhantomData<*const S>,
 }
+
+impl<'src, S> State<'src, S> {
+    pub fn new(source: &SourceText<'src>, is_codegen: bool) -> Self {
+        State {
+            seen_ppl: false,
+            source: source.clone(),
+            is_codegen,
+            phantom_s: PhantomData,
+        }
+    }
+
+    pub fn seen_ppl(&self) -> bool {
+        self.seen_ppl
+    }
+}
+
 impl<'src, S> Clone for State<'src, S> {
     fn clone(&self) -> Self {
         Self {
@@ -66,12 +82,7 @@ impl<'src, S> CoroutineStateType for State<'src, S> {
 
 impl<'src, S> StateType<'src, S> for State<'src, S> {
     fn initial(env0: &ParserEnv, src: &SourceText<'src>) -> Self {
-        State {
-            seen_ppl: false,
-            source: src.clone(),
-            is_codegen: env0.codegen,
-            phantom_s: PhantomData,
-        }
+        State::new(src, env0.codegen)
     }
 
     fn next(&mut self, _inputs: &[&S]) {}

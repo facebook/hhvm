@@ -92,7 +92,7 @@ impl<'a> LexableToken<'a> for EditablePositionedToken<'a> {
         panic!("TODO")
     }
 
-    fn has_trivia_kind(&self, kind: TriviaKind) -> bool {
+    fn has_trivia_kind(&self, _kind: TriviaKind) -> bool {
         panic!("TODO")
     }
 }

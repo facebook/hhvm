@@ -1,0 +1,17 @@
+[package]
+name = "aast_parser_ffi"
+version = "3.49.0"
+edition = "2018"
+
+[lib]
+name = "aast_parser_ffi"
+path = "../../aast_parser_ffi.rs"
+
+[dependencies]
+aast_parser = { path = "../aast_parser", package = "aast_parser" }
+parser_core_types = { path = "../core_types", package = "hack_parser_core_types" }
+oxidized = {path = "../../../oxidized", package = "hack_oxidized" }
+ocamlpool_rust = { path = "../../../utils/ocamlpool_rust", package = "hack_utils_ocamlpool" }
+ocamlrep = { path = "../../../ocamlrep", package = "hack_ocamlrep" }
+ocaml = "^0.7"
+libc = "^0.2.60"

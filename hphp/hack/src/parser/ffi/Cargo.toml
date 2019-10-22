@@ -10,6 +10,7 @@ decl_mode_parser_ffi = { path = "../cargo/decl_mode_parser_ffi", package = "decl
 coroutine_parser_leak_tree_ffi = { path = "../cargo/coroutine_parser_leak_tree_ffi", package = "coroutine_parser_leak_tree_ffi" }
 verify_parser_ffi = { path = "../cargo/verify_parser_ffi", package = "verify_parser_ffi" }
 positioned_parser_ffi = { path = "../cargo/positioned_parser_ffi", package = "positioned_parser_ffi" }
+aast_parser_ffi = { path = "../cargo/aast_parser_ffi", package = "aast_parser_ffi" }
 
 [lib]
 name = "rust_parser_ffi"

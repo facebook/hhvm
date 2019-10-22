@@ -85,6 +85,7 @@
     docblock_parser
     full_fidelity_ast
     scoured_comments
+    rust_aast_parser_types
     hack_grammar_descriptor_helper
     ide_parser_cache
     limited_width_pretty_printing_library
@@ -107,7 +108,6 @@
     nast
     parser_ppl
     partial_provider
-    rust_lowerer_ffi
     rust_parser_ffi
     typing_ast
     utils_lint

@@ -70,12 +70,11 @@ impl<'a> AastParser {
         }
         let quick_mode = match mode {
             None | Some(Mode::Mdecl) | Some(Mode::Mphp) => !env.codegen,
-            _ => env.quick_mode,
+            _ => !env.codegen && env.quick_mode,
         };
         let parser_env = ParserEnv {
             codegen: env.codegen,
-            // TODO: is_experimental_mode isn't defined in Full_fidelity_parser_env!!
-            is_experimental_mode: false,
+            is_experimental_mode: mode == Some(Mode::Mexperimental),
             hhvm_compat_mode: env.codegen,
             php5_compat_mode: env.php5_compat_mode,
             allow_new_attribute_syntax: env.parser_options.po_allow_new_attribute_syntax,

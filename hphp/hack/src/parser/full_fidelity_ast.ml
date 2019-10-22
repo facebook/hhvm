@@ -1959,7 +1959,7 @@ if there already is one, since that one will likely be better than this one. *)
             | (_, Some TK.HexadecimalLiteral)
             (* We allow underscores while lexing the integer literals. This gets rid of them before
              * the literal is created. *)
-
+            
             | (_, Some TK.BinaryLiteral) ->
               Int (Str.global_replace underscore "" s)
             | (_, Some TK.FloatingLiteral) -> Float s
@@ -3918,7 +3918,7 @@ if there already is one, since that one will likely be better than this one. *)
     let rec aux env acc = function
       | []
       (* EOF happens only as the last token in the list. *)
-
+      
       | [{ syntax = EndOfFile _; _ }] ->
         List.concat (List.rev acc)
       (* HaltCompiler stops processing the list in PHP but can be disabled in Hack *)
@@ -4304,37 +4304,9 @@ let elaborate_top_level_defs env aast =
   else
     aast
 
-type rust_lowerer_result = { aast: (Pos.t, unit, unit, unit) Aast.program }
-
-external rust_lower_ffi :
-  env ->
-  SourceText.t ->
-  Rust_pointer.t ->
-  (rust_lowerer_result, string) Result.t = "lower"
-
-let rust_lower env ~source_text ~tree comments =
-  let rust_tree =
-    match PositionedSyntaxTree.rust_tree tree with
-    | Some t -> t
-    | None -> raise (Failure "missing rust tree ")
-  in
-  let aast =
-    match rust_lower_ffi env source_text rust_tree with
-    | Ok r -> r.aast
-    | Error e -> raise (Failure e)
-  in
-  {
-    fi_mode = env.fi_mode;
-    is_hh_file = env.is_hh_file;
-    ast = aast;
-    content =
-      ( if env.codegen then
-        ""
-      else
-        SourceText.text source_text );
-    comments;
-    file = env.file;
-  }
+external rust_from_text_ffi :
+  Rust_aast_parser_types.env -> SourceText.t -> Rust_aast_parser_types.result
+  = "from_text"
 
 let lower_tree_
     editable_lower
@@ -4449,18 +4421,42 @@ let lower_tree =
   in
   lower_tree_ FromEditablePositionedSyntax.lower lower check_syntax_error
 
-let lower_tree_rust =
-  let ni _ ~source_text:_ ~script:_ _ = raise (Failure "not implemented") in
-  let empty_checker _ _ _ _ = () in
-  lower_tree_ ni rust_lower empty_checker
-
 let from_text (env : env) (source_text : SourceText.t) : result =
   let (mode, tree) = parse_text env source_text in
   lower_tree env source_text mode tree
 
 let from_text_rust (env : env) (source_text : SourceText.t) : rust_result =
-  let (mode, tree) = parse_text env source_text in
-  lower_tree_rust env source_text mode tree
+  let rust_env =
+    Rust_aast_parser_types.
+      {
+        is_hh_file = env.is_hh_file;
+        codegen = env.codegen;
+        elaborate_namespaces = env.elaborate_namespaces;
+        php5_compat_mode = env.php5_compat_mode;
+        include_line_comments = env.include_line_comments;
+        keep_errors = env.keep_errors;
+        quick_mode = env.quick_mode;
+        show_all_errors = env.show_all_errors;
+        lower_coroutines = env.lower_coroutines;
+        fail_open = env.fail_open;
+        parser_options = env.parser_options;
+        hacksperimental = env.hacksperimental;
+      }
+  in
+  let result = rust_from_text_ffi rust_env source_text in
+  {
+    fi_mode = FileInfo.Mstrict;
+    (* TODO *)
+    is_hh_file = env.is_hh_file;
+    ast = result.Rust_aast_parser_types.aast;
+    content =
+      ( if env.codegen then
+        ""
+      else
+        SourceText.text source_text );
+    comments = [];
+    file = env.file;
+  }
 
 let from_file (env : env) : result =
   let source_text = SourceText.from_file env.file in

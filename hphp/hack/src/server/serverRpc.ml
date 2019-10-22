@@ -111,6 +111,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         is_after_double_right_angle_bracket = false;
         is_after_open_square_bracket = false;
         is_after_quote = false;
+        is_before_apostrophe = false;
       }
     in
     (* Since this is being executed from the command line,

@@ -305,16 +305,23 @@ let resolve_ty
   (*   <class1 :attr="a"  -- do strip it                                      *)
   (* The logic is thorny here because we're relying upon regexes to figure    *)
   (* out the context. Once we switch autocomplete to FFP, it'll be cleaner.   *)
-  let name =
-    match (x.kind_, autocomplete_context) with
+  let (res_name, res_fullname) =
+    match (x.kind_, autocomplete_context, !argument_global_type) with
     | ( SearchUtils.SI_Property,
-        { AutocompleteTypes.is_instance_member = false; _ } ) ->
-      lstrip x.name ":"
-    | (SearchUtils.SI_XHP, { AutocompleteTypes.is_xhp_classname = true; _ })
-    | (SearchUtils.SI_Class, { AutocompleteTypes.is_xhp_classname = true; _ })
-      ->
-      lstrip x.name ":"
-    | _ -> x.name
+        { AutocompleteTypes.is_instance_member = false; _ },
+        _ )
+    | (SearchUtils.SI_XHP, { AutocompleteTypes.is_xhp_classname = true; _ }, _)
+    | ( SearchUtils.SI_Class,
+        { AutocompleteTypes.is_xhp_classname = true; _ },
+        _ ) ->
+      let newname = lstrip x.name ":" in
+      (newname, newname)
+    | ( SearchUtils.SI_Literal,
+        { AutocompleteTypes.is_before_apostrophe = true; _ },
+        Some Acshape_key ) ->
+      let n = rstrip x.name "'" in
+      (n, x.name)
+    | _ -> (x.name, x.name)
   in
   let pos =
     match x.ty with
@@ -326,8 +333,8 @@ let resolve_ty
     res_replace_pos = replace_pos;
     res_base_class = x.base_class;
     res_ty = get_desc_string_for env x.ty x.kind_;
-    res_name = name;
-    res_fullname = name;
+    res_name;
+    res_fullname;
     res_kind = x.kind_;
     func_details = get_func_details_for env x.ty;
     ranking_details = None;

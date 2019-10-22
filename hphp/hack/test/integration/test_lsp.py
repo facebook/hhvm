@@ -430,6 +430,66 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .notification(
+                comment="Add automatically closed apostrophes when typing a shape key, the way visual studio code does it",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 22, "character": 0},
+                                "end": {"line": 22, "character": 14},
+                            },
+                            "text": "$x = $point1['']",
+                        }
+                    ],
+                },
+            )
+            .request(
+                comment="autocomplete after a shape, with VS Code automatically closed apostrophes",
+                method="textDocument/completion",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 22, "character": 14},
+                },
+                result={
+                    "isIncomplete": False,
+                    "items": [
+                        {
+                            "label": "'x",
+                            "kind": 12,
+                            "detail": "literal",
+                            "inlineDetail": "literal",
+                            "insertText": "'x",
+                            "insertTextFormat": 1,
+                            "data": {
+                                "fullname": "'x'",
+                                "filename": "${root_path}/completion.php",
+                                "line": 22,
+                                "char": 19,
+                                "base_class": None,
+                            },
+                        },
+                        {
+                            "label": "'y",
+                            "kind": 12,
+                            "detail": "literal",
+                            "inlineDetail": "literal",
+                            "insertText": "'y",
+                            "insertTextFormat": 1,
+                            "data": {
+                                "fullname": "'y'",
+                                "filename": "${root_path}/completion.php",
+                                "line": 22,
+                                "char": 30,
+                                "base_class": None,
+                            },
+                        },
+                    ],
+                },
+                powered_by="serverless_ide",
+            )
+            .notification(
                 comment="Add '$x = <'",
                 method="textDocument/didChange",
                 params={

@@ -68,30 +68,41 @@ let get_autocomplete_context
       is_after_double_right_angle_bracket = false;
       is_after_open_square_bracket = false;
       is_after_quote = false;
+      is_before_apostrophe = false;
     }
   else
     let pos_start = { pos with File_content.column = 1 } in
     let (offset_start, offset) =
       File_content.get_offsets content (pos_start, pos)
     in
-    let text = String.sub content offset_start (offset - offset_start) in
+    let leading_text =
+      String.sub content offset_start (offset - offset_start)
+    in
     (* text is the text from the start of the line up to the caret position *)
     let is_xhp_classname =
-      Str.string_match context_xhp_classname_regex text 0
+      Str.string_match context_xhp_classname_regex leading_text 0
     in
     let is_instance_member =
-      Str.string_match context_xhp_member_regex text 0
+      Str.string_match context_xhp_member_regex leading_text 0
     in
     let is_after_single_colon =
-      Str.string_match context_after_single_colon_regex text 0
+      Str.string_match context_after_single_colon_regex leading_text 0
     in
     let is_after_double_right_angle_bracket =
-      Str.string_match context_after_double_right_angle_bracket_regex text 0
+      Str.string_match
+        context_after_double_right_angle_bracket_regex
+        leading_text
+        0
     in
     let is_after_open_square_bracket =
-      String.length text >= 1 && Str.last_chars text 1 = "["
+      String.length leading_text >= 1 && Str.last_chars leading_text 1 = "["
     in
-    let is_after_quote = Str.string_match context_after_quote text 0 in
+    let is_after_quote = Str.string_match context_after_quote leading_text 0 in
+    (* Detect what comes next *)
+    let next_character =
+      (try String.sub content (offset + 7) 1 with _ -> "")
+    in
+    let is_before_apostrophe = next_character = "'" in
     {
       AutocompleteTypes.is_manually_invoked;
       is_xhp_classname;
@@ -100,6 +111,7 @@ let get_autocomplete_context
       is_after_double_right_angle_bracket;
       is_after_open_square_bracket;
       is_after_quote;
+      is_before_apostrophe;
     }
 
 let auto_complete_at_position

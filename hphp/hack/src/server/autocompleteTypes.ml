@@ -70,6 +70,7 @@ type legacy_autocomplete_context = {
   is_after_double_right_angle_bracket: bool;
   is_after_open_square_bracket: bool;
   is_after_quote: bool;
+  is_before_apostrophe: bool;
 }
 
 (* Ranked autocomplete context: prev tokens, prev token types *)

@@ -310,20 +310,13 @@ struct Global {
   AliasAnalysis ainfo;
 
   /*
-   * Keep a mapping from ssaTmps to ALocs that might depend on them.
-   * Normally we don't need to worry about this, because ssa
-   * guarantees that a store is dominated by the def of its
-   * address. But in a loop, a store might be partially available at
-   * the point where its address is defined.
-   *
-   * Note that we can generate this table lazily, because we will see
-   * the def for the first time before we see the store for the first
-   * time (and until we see the store for the first time, it can't be
-   * partially available anywhere). So its sufficient to populate the
-   * table as we see the stores, and it will be used if we ever
-   * revisit the def.
+   * Keep a mapping from DefLabel blocks, to the Alocs of stores that
+   * might depend on them.  Normally we don't need to worry about
+   * this, because ssa guarantees that a store is dominated by the def
+   * of its address. But in a loop, if the store's address depends on
+   * a phi, the store might be partially available at the DefLabel.
    */
-  hphp_fast_map<SSATmp*,ALocBits> ssa2Aloc;
+  hphp_fast_map<Block*,ALocBits> blk2Aloc;
 
   MovableStoreMap trackedStoreMap;
   // Block states are indexed by block->id().  These are only meaningful after
@@ -512,19 +505,27 @@ void kill(Local& env, AliasClass acls) {
 
 //////////////////////////////////////////////////////////////////////
 
+void addPhiDeps(Local& env, uint32_t bit, SSATmp* dep) {
+  if (dep->inst()->is(DefLabel) || dep->inst()->producesReference()) {
+    FTRACE(2, "      B{} alters {} due to potential address change\n",
+           dep->inst()->block()->id(), bit);
+    env.global.blk2Aloc[dep->inst()->block()][bit] = 1;
+    return;
+  }
+
+  for (auto src : dep->inst()->srcs()) {
+    addPhiDeps(env, bit, src);
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+
 void visit(Local& env, IRInstruction& inst) {
   auto const effects = memory_effects(inst);
   FTRACE(3, "    {}\n"
          "      {}\n",
          inst.toString(),
          show(effects));
-
-  for (auto dst : inst.dsts()) {
-    auto const it = env.global.ssa2Aloc.find(dst);
-    if (it != env.global.ssa2Aloc.end()) {
-      addLoadSet(env, it->second);
-    }
-  }
 
   match<void>(
     effects,
@@ -635,7 +636,7 @@ void visit(Local& env, IRInstruction& inst) {
 
     [&] (PureStore l) {
       if (auto bit = pure_store_bit(env, l.dst)) {
-        if (l.dep) env.global.ssa2Aloc[l.dep][*bit] = 1;
+        if (l.dep) addPhiDeps(env, *bit, l.dep);
         if (isDead(env, *bit)) {
           if (!removeDead(env, inst, true)) {
             mayStore(env, l.dst);
@@ -1439,9 +1440,17 @@ void optimizeStores(IRUnit& unit) {
   auto const blockAnalysis = [&] () -> jit::vector<BlockAnalysis> {
     auto ret = jit::vector<BlockAnalysis>{};
     ret.reserve(unit.numBlocks());
-    for (auto id = uint32_t{0}; id < poBlockList.size(); ++id) {
-      ret.push_back(analyze_block(genv, poBlockList[id]));
+    for (auto poId : poBlockList) {
+      ret.push_back(analyze_block(genv, poId));
     }
+    for (auto& elm : genv.blk2Aloc) {
+      auto poId = genv.blockStates[elm.first].id;
+      auto& ba = ret[poId];
+      ba.antLoc &= ~elm.second;
+      ba.alteredAnt |= elm.second;
+      ba.alteredAvl |= elm.second;
+    }
+    genv.blk2Aloc.clear();
     return ret;
   }();
 

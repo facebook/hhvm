@@ -497,11 +497,9 @@ module Typehints = struct
   let wildcard = "_"
 
   let is_reserved_global_name x =
-    let x = String.lowercase x in
     x = array || x = callable || x = Classes.cSelf || x = Classes.cParent
 
   let is_reserved_hh_name x =
-    let x = String.lowercase x in
     x = void
     || x = noreturn
     || x = int

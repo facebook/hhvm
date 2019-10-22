@@ -216,11 +216,14 @@ let validate_class_name ns (p, class_name) =
   let is_special_class = String_utils.is_substring "$" class_name in
   let check_hh_name = is_global_namespace ns || is_hh_namespace ns in
   let name = SU.strip_ns class_name in
-  let is_reserved_global_name = SN.Typehints.is_reserved_global_name name in
+  let lower_name = String.lowercase name in
+  let is_reserved_global_name =
+    SN.Typehints.is_reserved_global_name lower_name
+  in
   let name_is_reserved =
     (not is_special_class)
     && ( is_reserved_global_name
-       || (check_hh_name && SN.Typehints.is_reserved_hh_name name) )
+       || (check_hh_name && SN.Typehints.is_reserved_hh_name lower_name) )
   in
   if name_is_reserved then
     let message =
@@ -326,7 +329,7 @@ let emit_reified_init_method env ast_class =
           (Some (Hhas_type_info.make (Some "HH\\varray") tc))
           None;
           (* default value *)
-        
+
       ]
     in
     let instrs = emit_reified_init_body env num_reified ast_class in

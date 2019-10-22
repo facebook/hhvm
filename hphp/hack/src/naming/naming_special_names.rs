@@ -546,11 +546,19 @@ pub mod typehints {
 
     pub const WILDCARD: &str = "_";
 
+    lazy_static! {
+        static ref RESERVED_GLOBAL_NAMES: HashSet<&'static str> = vec![
+            ARRAY,
+            CALLABLE,
+            crate::classes::SELF,
+            crate::classes::PARENT
+        ]
+        .into_iter()
+        .collect();
+    }
+
     pub fn is_reserved_global_name(x: &str) -> bool {
-        x.eq_ignore_ascii_case(ARRAY)
-            || x.eq_ignore_ascii_case(CALLABLE)
-            || x.eq_ignore_ascii_case(crate::classes::SELF)
-            || x.eq_ignore_ascii_case(crate::classes::PARENT)
+        RESERVED_GLOBAL_NAMES.contains(x)
     }
 
     lazy_static! {
@@ -558,14 +566,12 @@ pub mod typehints {
             VOID, NORETURN, INT, BOOL, FLOAT, NUM, STRING, RESOURCE, MIXED, ARRAY, ARRAYKEY,
             INTEGER, BOOLEAN, DOUBLE, REAL, DYNAMIC, WILDCARD, NONNULL, NOTHING
         ]
-        .iter()
-        .cloned()
+        .into_iter()
         .collect();
     }
 
     pub fn is_reserved_hh_name(x: &str) -> bool {
-        let lower_x: String = x.to_ascii_lowercase();
-        RESERVED_HH_NAMES.contains(&lower_x[..])
+        RESERVED_HH_NAMES.contains(x)
     }
 
     // This function checks if this is a namespace of the "(not HH)\\(...)*\\(reserved_name)"

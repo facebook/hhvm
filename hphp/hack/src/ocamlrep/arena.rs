@@ -116,8 +116,8 @@ impl<'a> Arena<'a> {
     }
 
     #[inline(always)]
-    pub fn add<T: OcamlRep>(&mut self, value: T) -> Value<'a> {
-        value.into_ocamlrep(self)
+    pub fn add<T: OcamlRep>(&mut self, value: &T) -> Value<'a> {
+        value.to_ocamlrep(self)
     }
 }
 

@@ -20,7 +20,7 @@ pub use slab::OwnedSlab;
 pub use value::{OpaqueValue, Value};
 
 pub trait OcamlRep: Sized {
-    fn into_ocamlrep<'a>(self, arena: &mut Arena<'a>) -> Value<'a>;
+    fn to_ocamlrep<'a>(&self, arena: &mut Arena<'a>) -> Value<'a>;
     fn from_ocamlrep(value: Value<'_>) -> Result<Self, FromError>;
 
     unsafe fn from_ocaml(value: usize) -> Result<Self, FromError> {

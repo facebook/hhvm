@@ -34,7 +34,7 @@ caml!(parse_decls_ffi(
     if trace { println!("Returning {:?}", decls);
 }
     let mut arena = Arena::new();
-    let value = arena.add(decls);
+    let value = arena.add(&decls);
     PARSE_RESULTS.lock().unwrap().insert(relative_path.path_str().to_string(), arena);
     ocaml::Value::new(value.to_bits())
 });

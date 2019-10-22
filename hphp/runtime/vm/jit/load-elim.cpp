@@ -482,6 +482,16 @@ Flags handle_general_effects(Local& env,
     break;
   }
 
+  case UnboxPtr:
+    if (auto const meta = env.global.ainfo.find(canonicalize(m.loads))) {
+      if (!env.state.avail[meta->index]) break;
+      auto const tloc = &env.state.tracked[meta->index];
+      if (!tloc->knownType.maybe(TBoxedCell)) {
+        return FReducible{inst.src(0), inst.dst()->type(), meta->index};
+      }
+    }
+    break;
+
   default:
     break;
   }
@@ -826,6 +836,10 @@ void reduce_inst(Global& env, IRInstruction& inst, const FReducible& flags) {
   case AssertLoc:
   case AssertStk:
     reduce_to(AssertType, flags.knownType);
+    break;
+
+  case UnboxPtr:
+    env.unit.replace(&inst, AssertType, flags.knownType, resolved);
     break;
 
   default: always_assert(false);

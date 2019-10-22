@@ -620,8 +620,16 @@ resolveTSStatically(ISS& env, SArray ts, const php::Class* declaringCls,
     case TypeStructure::Kind::T_keyset:
     case TypeStructure::Kind::T_vec_or_dict:
     case TypeStructure::Kind::T_arraylike:
-      if (!checkArrays || isTSAllWildcards(ts)) return finish(ts);
-      return nullptr;
+      if (checkArrays) {
+        if (!ts->exists(s_generic_types)) return finish(ts);
+        auto const generics = get_ts_generic_types(ts);
+        auto rgenerics =
+          resolveTSListStatically(env, generics, declaringCls, checkArrays);
+        if (!rgenerics) return nullptr;
+        auto result = const_cast<ArrayData*>(ts);
+        return finish(result->set(s_generic_types.get(), Variant(rgenerics)));
+      }
+      return isTSAllWildcards(ts) ? finish(ts) : nullptr;
     case TypeStructure::Kind::T_class:
     case TypeStructure::Kind::T_interface:
     case TypeStructure::Kind::T_xhp:
@@ -3292,6 +3300,10 @@ void isAsTypeStructImpl(ISS& env, SArray inputTS) {
 bool canReduceToDontResolveList(SArray tsList, bool checkArrays);
 
 bool canReduceToDontResolve(SArray ts, bool checkArrays) {
+  auto const checkGenerics = [&](SArray arr) {
+    if (!ts->exists(s_generic_types)) return true;
+    return canReduceToDontResolveList(get_ts_generic_types(ts), true);
+  };
   switch (get_ts_kind(ts)) {
     case TypeStructure::Kind::T_int:
     case TypeStructure::Kind::T_bool:
@@ -3314,15 +3326,12 @@ bool canReduceToDontResolve(SArray ts, bool checkArrays) {
     case TypeStructure::Kind::T_keyset:
     case TypeStructure::Kind::T_vec_or_dict:
     case TypeStructure::Kind::T_arraylike:
-      return !checkArrays;
+      return !checkArrays || checkGenerics(ts);
     case TypeStructure::Kind::T_class:
     case TypeStructure::Kind::T_interface:
     case TypeStructure::Kind::T_xhp:
     case TypeStructure::Kind::T_enum:
-      // If it does not have generics, then we can reduce
-      // If it has generics but all of them are wildcards, then we can reduce
-      // Otherwise, we can't.
-      return isTSAllWildcards(ts);
+      return isTSAllWildcards(ts) || checkGenerics(ts);
     case TypeStructure::Kind::T_tuple:
       return canReduceToDontResolveList(get_ts_elem_types(ts), checkArrays);
     case TypeStructure::Kind::T_shape: {

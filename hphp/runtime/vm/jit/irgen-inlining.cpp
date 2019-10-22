@@ -272,13 +272,32 @@ void beginInlining(IRGS& env,
     popDecRef(env, DataTypeGeneric);
     return nullptr;
   }();
-  assertx(!fca.hasUnpack());
 
   auto numArgs = std::min<uint32_t>(
     target->numNonVariadicParams(), fca.numArgs);
   jit::vector<SSATmp*> params{numArgs + 1};
 
-  if (target->hasVariadicCaptureParam() && numArgs < fca.numArgs) {
+  if (fca.hasUnpack()) {
+    assertx(fca.numArgs == target->numNonVariadicParams());
+    assertx(target->hasVariadicCaptureParam());
+    assertx(numArgs == fca.numArgs);
+    auto const ty = topC(env)->type();
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      if (ty <= TArr)         push(env, gen(env, ConvArrToVec, popC(env)));
+      else if (ty <= TDict)   push(env, gen(env, ConvDictToVec, popC(env)));
+      else if (ty <= TKeyset) push(env, gen(env, ConvKeysetToVec, popC(env)));
+      else                    assertx(ty <= TVec);
+    } else {
+      if (ty <= TVec)         push(env, gen(env, ConvVecToVArr, popC(env)));
+      else if (ty <= TDict)   push(env, gen(env, ConvDictToVArr, popC(env)));
+      else if (ty <= TKeyset) push(env, gen(env, ConvKeysetToVArr, popC(env)));
+      else if (ty.arrSpec().kind() != ArrayData::kPackedKind) {
+        assertx(ty <= TArr);
+        push(env, gen(env, ConvArrToVArr, popC(env)));
+      }
+    }
+    ++numArgs;
+  } else if (target->hasVariadicCaptureParam() && numArgs < fca.numArgs) {
     if (RuntimeOption::EvalHackArrDVArrs) {
       emitNewVecArray(env, fca.numArgs - numArgs);
     } else {

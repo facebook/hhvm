@@ -156,7 +156,10 @@ bool checkNumArgs(SrcKey callSK,
   }
 
   if (fca.hasUnpack()) {
-    return refuse("callee called with variadic arguments");
+    if (fca.numArgs != callee->numNonVariadicParams() ||
+        !callee->hasVariadicCaptureParam()) {
+      return refuse("callee called with variadic arguments");
+    }
   }
 
   if (fca.enforceReffiness()) {
@@ -812,6 +815,21 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
     }
     FTRACE(2, "arg {}: {}\n", i + 1, type);
     if (i < numArgs) argTypes.push_back(type);
+  }
+
+  if (fca.hasUnpack()) {
+    const int32_t ix = fca.numArgs;
+    auto const ty = irgen::publicTopType(irgs, BCSPRelOffset{firstArgPos - ix});
+    if (!ty.subtypeOfAny(TVec, TDict, TArr, TKeyset)) {
+      traceRefusal(
+        sk,
+        callee,
+        folly::sformat("unpacked argument may not be a container ({})",
+                       ty.toString()),
+        annotationsPtr
+      );
+      return nullptr;
+    }
   }
 
   const auto depth = inlineDepth(irgs);

@@ -494,27 +494,11 @@ let make_defrecord rd n =
   * let add_record env st cd =
   *   st, make_defrecord cd env.defined_record_count *)
 
-let make_closure_name env st name =
+let make_closure_name env st =
   let per_fun_idx = st.closure_cnt_per_fun in
   SU.Closures.mangle_closure
     (make_scope_name st.namespace env.scope)
     per_fun_idx
-    name
-
-(* Get the user-provided closure name from the set of user attributes. This is
- * only allowed in systemlib otherwise we ignore the attribute.
- *
- * Returns the filtered list of attributes and the closure name
- *)
-let get_closure_name attrs =
-  let is_closure_name attr = snd attr.ua_name = "__ClosureName" in
-  if Emit_env.is_systemlib () then
-    match List.find attrs is_closure_name with
-    | Some { ua_params = [(_, String s)]; _ } ->
-      (List.filter attrs (Fn.compose not is_closure_name), Some s)
-    | _ -> (attrs, None)
-  else
-    (attrs, None)
 
 let make_closure
     ~class_num
@@ -527,7 +511,6 @@ let make_closure
     is_static
     fd
     (body : func_body) =
-  let (user_attrs, name) = get_closure_name fd.f_user_attributes in
   let md =
     {
       m_span = fd.f_span;
@@ -543,7 +526,7 @@ let make_closure
       m_params = fd.f_params;
       m_body = body;
       m_fun_kind = fd.f_fun_kind;
-      m_user_attributes = user_attrs;
+      m_user_attributes = fd.f_user_attributes;
       m_ret = fd.f_ret;
       m_external = false;
       m_doc_comment = fd.f_doc_comment;
@@ -579,7 +562,7 @@ let make_closure
       c_final = false;
       c_is_xhp = false;
       c_kind = Ast_defs.Cnormal;
-      c_name = (p, make_closure_name env st name);
+      c_name = (p, make_closure_name env st);
       c_tparams = class_tparams;
       c_extends = [(p, Aast.Happly ((p, "Closure"), []))];
       c_uses = [];

@@ -174,11 +174,8 @@ module Closures = struct
   let is_closure_name s = String_utils.string_starts_with s "Closure$"
 
   (* Closure classes have names of the form
-   *   Closure prefix $ scope ix ; num
+   *   Closure$ scope ix ; num
    * where
-   *   prefix ::=
-   *     $ <prefix-attribute>
-   *   |
    *   scope  ::=
    *     <function-name>
    *   | <class-name> :: <method-name>
@@ -187,21 +184,17 @@ module Closures = struct
    *     # <digits>
    *)
   let unmangle_closure =
-    let strip_index s =
-      match String.lsplit2 s ~on:'#' with
-      | Some (prefix, _) -> prefix
-      | None -> s
-    in
+    let rx = Str.regexp "#" in
     fun s ->
-      match String.split s ~on:'$' with
-      | ["Closure"; _prefix; scope] -> Some (strip_index scope)
-      | ["Closure"; scope] -> Some (strip_index scope)
-      | _ -> None
+      if is_closure_name s then
+        let suffix = String_utils.lstrip s "Closure$" in
+        match Str.split_delim rx suffix with
+        | [prefix; _] -> Some prefix
+        | _ -> Some suffix
+      else
+        None
 
-  let mangle_closure scope ix name =
-    match name with
-    | Some s -> Classes.mangle_class ("Closure$" ^ s) scope ix
-    | None -> Classes.mangle_class "Closure" scope ix
+  let mangle_closure scope ix = Classes.mangle_class "Closure" scope ix
 end
 
 (* XHP name mangling *)

@@ -1592,7 +1592,7 @@ void fullDCE(IRUnit& unit) {
         if (inst->is(DecRef)) {
           rcInsts[srcInst].decs.emplace_back(inst);
         }
-        if (inst->is(InitPackedLayoutArray)) {
+        if (inst->is(InitPackedLayoutArray, StClosureArg)) {
           if (ix == 0) rcInsts[srcInst].aux.emplace_back(inst);
         }
       }

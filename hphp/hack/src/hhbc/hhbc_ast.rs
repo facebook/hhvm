@@ -200,7 +200,7 @@ pub enum IsLogAsDynamicCallOp {
     DontLogAsDynamicCall,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum InstructLitConst {
     Null,
     True,
@@ -636,7 +636,7 @@ pub struct Srcloc {
     pub col_end: isize,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum Instruct {
     IBasic(InstructBasic),
     IIterator(InstructIterator),

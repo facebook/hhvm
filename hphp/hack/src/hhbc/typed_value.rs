@@ -13,7 +13,7 @@ use std::convert::{Into, TryInto};
 /// ensure independence from usage: for example, it can be used for optimization
 /// on ASTs, or on bytecode, or (in future) on a compiler intermediate language.
 /// HHVM takes a similar approach: see runtime/base/typed-value.h
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum TypedValue {
     /// Used for fields that are initialized in the 86pinit method
     Uninit,

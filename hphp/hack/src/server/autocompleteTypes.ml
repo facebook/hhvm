@@ -75,3 +75,9 @@ type legacy_autocomplete_context = {
 
 (* Ranked autocomplete context: prev tokens, prev token types *)
 type autocomplete_ranking_context = string * string
+
+(* Autocomplete token *)
+let autocomplete_token = "AUTO332"
+
+(* Autocomplete token length *)
+let autocomplete_token_length = 7

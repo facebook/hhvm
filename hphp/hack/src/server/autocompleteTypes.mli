@@ -81,3 +81,9 @@ type legacy_autocomplete_context = {
 
 (* Ranked autocomplete context: prev tokens, prev token types *)
 type autocomplete_ranking_context = string * string
+
+(* The standard autocomplete token, which is currently "AUTO332" *)
+val autocomplete_token : string
+
+(* The length of the standard autocomplete token *)
+val autocomplete_token_length : int

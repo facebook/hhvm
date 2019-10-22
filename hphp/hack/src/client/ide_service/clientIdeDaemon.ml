@@ -376,7 +376,12 @@ let handle_message :
         let tcopt = server_env.ServerEnv.tcopt in
         let pos = { line; column } in
         let edits =
-          [{ range = Some { st = pos; ed = pos }; text = "AUTO332" }]
+          [
+            {
+              range = Some { st = pos; ed = pos };
+              text = AutocompleteTypes.autocomplete_token;
+            };
+          ]
         in
         let content = File_content.edit_file_unsafe file_content edits in
         (* Assemble the server IDE context *)

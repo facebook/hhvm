@@ -1039,17 +1039,21 @@ let handle_mode
   | Autocomplete_manually_invoked ->
     let filename = expect_single_file () in
     let sienv = scan_files_for_symbol_index filename popt sienv in
-    let token = "AUTO332" in
-    let token_len = String.length token in
     let file = cat (Relative_path.to_absolute filename) in
     (* Search backwards: there should only be one /real/ case. If there's multiple, *)
     (* guess that the others are preceding explanation comments *)
     let offset =
-      Str.search_backward (Str.regexp token) file (String.length file)
+      Str.search_backward
+        (Str.regexp AutocompleteTypes.autocomplete_token)
+        file
+        (String.length file)
     in
     let pos = File_content.offset_to_position file offset in
     let file =
-      Str.string_before file offset ^ Str.string_after file (offset + token_len)
+      Str.string_before file offset
+      ^ Str.string_after
+          file
+          (offset + AutocompleteTypes.autocomplete_token_length)
     in
     let is_manually_invoked = mode = Autocomplete_manually_invoked in
     let result =

@@ -45,17 +45,19 @@ let (argument_global_type : autocomplete_type option ref) = ref None
 
 let auto_complete_for_global = ref ""
 
-let auto_complete_suffix = "AUTO332"
-
-let suffix_len = String.length auto_complete_suffix
-
-let strip_suffix s = String.sub s 0 (String.length s - suffix_len)
+let strip_suffix s =
+  String.sub s 0 (String.length s - AutocompleteTypes.autocomplete_token_length)
 
 let matches_auto_complete_suffix x =
-  String.length x >= suffix_len
+  String.length x >= AutocompleteTypes.autocomplete_token_length
   &&
-  let suffix = String.sub x (String.length x - suffix_len) suffix_len in
-  suffix = auto_complete_suffix
+  let suffix =
+    String.sub
+      x
+      (String.length x - AutocompleteTypes.autocomplete_token_length)
+      AutocompleteTypes.autocomplete_token_length
+  in
+  suffix = AutocompleteTypes.autocomplete_token
 
 let is_auto_complete x =
   if !autocomplete_results = [] then
@@ -76,7 +78,13 @@ let get_replace_pos_exn () =
     in
     Ide_api_types.(
       let range = pos_to_range pos in
-      let ed = { range.ed with column = range.ed.column - suffix_len } in
+      let ed =
+        {
+          range.ed with
+          column =
+            range.ed.column - AutocompleteTypes.autocomplete_token_length;
+        }
+      in
       let st = { range.st with column = ed.column - String.length name } in
       { st; ed })
 
@@ -158,7 +166,9 @@ let autocomplete_shape_key env fields id =
     argument_global_type := Some Acshape_key;
 
     (* not the same as `prefix == ""` in namespaces *)
-    let have_prefix = Pos.length (fst id) > suffix_len in
+    let have_prefix =
+      Pos.length (fst id) > AutocompleteTypes.autocomplete_token_length
+    in
     let prefix = strip_suffix (snd id) in
     let add (name : Ast_defs.shape_field_name) =
       let (code, kind, ty) =
@@ -407,18 +417,29 @@ let visitor =
               (* autocomplete generally assumes that there's a token ending with the suffix; *)
               (* This isn't the case for `$shape['a`, unless it's at the end of the file *)
               let offset =
-                String_utils.substring_index auto_complete_suffix mid
+                String_utils.substring_index
+                  AutocompleteTypes.autocomplete_token
+                  mid
               in
               if offset = -1 then
                 autocomplete_shape_key env fields (pos, mid)
               else
-                let mid = Str.string_before mid (offset + suffix_len) in
+                let mid =
+                  Str.string_before
+                    mid
+                    (offset + AutocompleteTypes.autocomplete_token_length)
+                in
                 let (line, bol, cnum) = Pos.line_beg_offset pos in
                 let pos =
                   Pos.make_from_lnum_bol_cnum
                     ~pos_file:(Pos.filename pos)
                     ~pos_start:(line, bol, cnum)
-                    ~pos_end:(line, bol, cnum + offset + suffix_len)
+                    ~pos_end:
+                      ( line,
+                        bol,
+                        cnum
+                        + offset
+                        + AutocompleteTypes.autocomplete_token_length )
                 in
                 autocomplete_shape_key env fields (pos, mid)
             | _ -> ())
@@ -665,7 +686,8 @@ let find_global_results
   let have_user_prefix =
     match !autocomplete_identifier with
     | None -> failwith "No autocomplete position was set"
-    | Some (pos, _) -> Pos.length pos > suffix_len
+    | Some (pos, _) ->
+      Pos.length pos > AutocompleteTypes.autocomplete_token_length
   in
   let ctx = autocomplete_context in
   if

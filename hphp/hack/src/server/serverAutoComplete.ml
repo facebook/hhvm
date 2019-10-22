@@ -100,7 +100,12 @@ let get_autocomplete_context
     let is_after_quote = Str.string_match context_after_quote leading_text 0 in
     (* Detect what comes next *)
     let next_character =
-      (try String.sub content (offset + 7) 1 with _ -> "")
+      try
+        String.sub
+          content
+          (offset + AutocompleteTypes.autocomplete_token_length)
+          1
+      with _ -> ""
     in
     let is_before_apostrophe = next_character = "'" in
     {
@@ -127,6 +132,13 @@ let auto_complete_at_position
     let autocomplete_context =
       get_autocomplete_context file_content pos ~is_manually_invoked
     in
-    let edits = [{ range = Some { st = pos; ed = pos }; text = "AUTO332" }] in
+    let edits =
+      [
+        {
+          range = Some { st = pos; ed = pos };
+          text = AutocompleteTypes.autocomplete_token;
+        };
+      ]
+    in
     let content = File_content.edit_file_unsafe file_content edits in
     auto_complete ~tcopt ~autocomplete_context ~sienv content)

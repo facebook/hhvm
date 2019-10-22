@@ -6,7 +6,7 @@
 use std::cmp::max;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
-use crate::{block::Header, OcamlRep, Value};
+use crate::{block::Header, Allocator, OcamlRep, Value};
 
 struct Chunk<'a> {
     data: Box<[Value<'a>]>,
@@ -75,10 +75,6 @@ impl<'a> Arena<'a> {
         }
     }
 
-    pub fn generation(&self) -> usize {
-        self.generation
-    }
-
     #[inline]
     fn alloc(&mut self, requested_size: usize) -> *mut Value<'a> {
         if !self.current_chunk.can_fit(requested_size) {
@@ -92,8 +88,19 @@ impl<'a> Arena<'a> {
         self.current_chunk.alloc(requested_size)
     }
 
-    #[inline]
-    pub fn block_with_size_and_tag(&mut self, size: usize, tag: u8) -> *mut Value<'a> {
+    #[inline(always)]
+    pub fn add<T: OcamlRep>(&mut self, value: &T) -> Value<'a> {
+        value.to_ocamlrep(self)
+    }
+}
+
+impl<'a> Allocator<'a> for Arena<'a> {
+    #[inline(always)]
+    fn generation(&self) -> usize {
+        self.generation
+    }
+
+    fn block_with_size_and_tag(&mut self, size: usize, tag: u8) -> *mut Value<'a> {
         assert!(size > 0);
         let block = self.alloc(size + 1);
         let header = Header::new(size, tag);
@@ -104,20 +111,8 @@ impl<'a> Arena<'a> {
     }
 
     #[inline(always)]
-    pub fn block_with_size(&mut self, size: usize) -> *mut Value<'a> {
-        self.block_with_size_and_tag(size, 0)
-    }
-
-    /// This method is marked unsafe because there is no bounds checking for
-    /// this write. Take care that the index is less than the size of the block.
-    #[inline(always)]
-    pub unsafe fn set_field(block: *mut Value<'a>, index: usize, value: Value<'a>) {
+    unsafe fn set_field(block: *mut Value<'a>, index: usize, value: Value<'a>) {
         *block.add(index) = value;
-    }
-
-    #[inline(always)]
-    pub fn add<T: OcamlRep>(&mut self, value: &T) -> Value<'a> {
-        value.to_ocamlrep(self)
     }
 }
 

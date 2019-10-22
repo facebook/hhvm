@@ -26,9 +26,9 @@ fn derive_ocamlrep(mut s: synstructure::Structure) -> TokenStream {
     };
 
     s.gen_impl(quote! {
-        use ::ocamlrep::OcamlRep;
+        use ::ocamlrep::{Allocator, OcamlRep};
         gen impl ::ocamlrep::OcamlRep for @Self {
-            fn to_ocamlrep<'a>(&self, arena: &mut ::ocamlrep::Arena<'a>) -> ::ocamlrep::Value<'a> {
+            fn to_ocamlrep<'a, Alloc: ::ocamlrep::Allocator<'a>>(&self, arena: &mut Alloc) -> ::ocamlrep::Value<'a> {
                 match self { #to_body }
             }
 
@@ -188,7 +188,7 @@ fn allocate_block(variant: &VariantInfo, tag: u8) -> TokenStream {
     let mut fields = TokenStream::new();
     for (i, bi) in variant.bindings().iter().enumerate() {
         fields.extend(quote! {
-            ::ocamlrep::Arena::set_field(block, #i, arena.add(#bi));
+            Alloc::set_field(block, #i, arena.add(#bi));
         });
     }
     quote! {
@@ -205,7 +205,7 @@ fn boxed_tuple_variant_to_block(bi: &BindingInfo, tag: u8, len: usize) -> TokenS
     for i in 0..len {
         let idx = syn::Index::from(i);
         fields.extend(quote! {
-            ::ocamlrep::Arena::set_field(block, #i, arena.add(&#bi.#idx));
+            Alloc::set_field(block, #i, arena.add(&#bi.#idx));
         });
     }
     quote! {

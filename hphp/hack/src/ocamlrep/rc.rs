@@ -20,7 +20,7 @@ use std::hash::{Hash, Hasher};
 use std::ops::Deref;
 use std::rc::Rc;
 
-use crate::{Arena, FromError, OcamlRep, Value};
+use crate::{Allocator, FromError, OcamlRep, Value};
 
 const UNIT: usize = crate::value::isize_to_ocaml_int(0);
 const INVALID_GENERATION: usize = usize::max_value();
@@ -238,12 +238,12 @@ impl<T> fmt::Pointer for RcOc<T> {
 }
 
 impl<T: OcamlRep> OcamlRep for RcOc<T> {
-    fn to_ocamlrep<'a>(&self, arena: &mut Arena<'a>) -> Value<'a> {
-        let generation = arena.generation();
+    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &mut A) -> Value<'a> {
+        let generation = alloc.generation();
         match self.get_cached_value_in_generation(generation) {
             Some(value) => unsafe { Value::from_bits(value) },
             None => {
-                let value = arena.add(self.as_ref());
+                let value = alloc.add(self.as_ref());
                 self.set_cached_value(unsafe { value.to_bits() }, generation);
                 value
             }

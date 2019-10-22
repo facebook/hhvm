@@ -9,7 +9,7 @@ use ocamlrep::OcamlRep;
 pub struct Sequence<T>(T);
 
 impl<T: OcamlRep> OcamlRep for Sequence<T> {
-    fn to_ocamlrep<'a>(&self, _arena: &mut ocamlrep::Arena<'a>) -> ocamlrep::Value<'a> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator<'a>>(&self, _alloc: &mut A) -> ocamlrep::Value<'a> {
         unimplemented!()
     }
 

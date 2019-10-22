@@ -9,7 +9,7 @@ use std::path::PathBuf;
 use std::rc::Rc;
 
 use crate::{block, from};
-use crate::{Arena, FromError, OcamlRep, Value};
+use crate::{Allocator, FromError, OcamlRep, Value};
 
 const WORD_SIZE: usize = std::mem::size_of::<Value<'_>>();
 
@@ -25,7 +25,7 @@ fn expect_block_with_size_and_tag<'a>(
 }
 
 impl OcamlRep for () {
-    fn to_ocamlrep<'a>(&self, _arena: &mut Arena<'a>) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, _alloc: &mut A) -> Value<'a> {
         Value::int(0)
     }
 
@@ -38,7 +38,7 @@ impl OcamlRep for () {
 }
 
 impl OcamlRep for isize {
-    fn to_ocamlrep<'a>(&self, _arena: &mut Arena<'a>) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, _alloc: &mut A) -> Value<'a> {
         Value::int(*self)
     }
 
@@ -48,7 +48,7 @@ impl OcamlRep for isize {
 }
 
 impl OcamlRep for usize {
-    fn to_ocamlrep<'a>(&self, _arena: &mut Arena<'a>) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, _alloc: &mut A) -> Value<'a> {
         Value::int((*self).try_into().unwrap())
     }
 
@@ -58,7 +58,7 @@ impl OcamlRep for usize {
 }
 
 impl OcamlRep for i64 {
-    fn to_ocamlrep<'a>(&self, _arena: &mut Arena<'a>) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, _alloc: &mut A) -> Value<'a> {
         Value::int((*self).try_into().unwrap())
     }
 
@@ -68,7 +68,7 @@ impl OcamlRep for i64 {
 }
 
 impl OcamlRep for u64 {
-    fn to_ocamlrep<'a>(&self, _arena: &mut Arena<'a>) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, _alloc: &mut A) -> Value<'a> {
         Value::int((*self).try_into().unwrap())
     }
 
@@ -78,7 +78,7 @@ impl OcamlRep for u64 {
 }
 
 impl OcamlRep for i32 {
-    fn to_ocamlrep<'a>(&self, _arena: &mut Arena<'a>) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, _alloc: &mut A) -> Value<'a> {
         Value::int((*self).try_into().unwrap())
     }
 
@@ -88,7 +88,7 @@ impl OcamlRep for i32 {
 }
 
 impl OcamlRep for u32 {
-    fn to_ocamlrep<'a>(&self, _arena: &mut Arena<'a>) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, _alloc: &mut A) -> Value<'a> {
         Value::int((*self).try_into().unwrap())
     }
 
@@ -98,7 +98,7 @@ impl OcamlRep for u32 {
 }
 
 impl OcamlRep for bool {
-    fn to_ocamlrep<'a>(&self, _arena: &mut Arena<'a>) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, _alloc: &mut A) -> Value<'a> {
         Value::int((*self).into())
     }
 
@@ -112,7 +112,7 @@ impl OcamlRep for bool {
 }
 
 impl OcamlRep for char {
-    fn to_ocamlrep<'a>(&self, _arena: &mut Arena<'a>) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, _alloc: &mut A) -> Value<'a> {
         if *self as u32 > 255 {
             panic!("char out of range: {}", self.to_string())
         }
@@ -130,10 +130,10 @@ impl OcamlRep for char {
 }
 
 impl OcamlRep for f64 {
-    fn to_ocamlrep<'a>(&self, arena: &mut Arena<'a>) -> Value<'a> {
-        let block = arena.block_with_size_and_tag(1, block::DOUBLE_TAG);
+    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &mut A) -> Value<'a> {
+        let block = alloc.block_with_size_and_tag(1, block::DOUBLE_TAG);
         unsafe {
-            Arena::set_field(block, 0, Value::from_bits(self.to_bits() as usize));
+            A::set_field(block, 0, Value::from_bits(self.to_bits() as usize));
             Value::from_ptr(block)
         }
     }
@@ -145,8 +145,8 @@ impl OcamlRep for f64 {
 }
 
 impl<T: OcamlRep> OcamlRep for Box<T> {
-    fn to_ocamlrep<'a>(&self, arena: &mut Arena<'a>) -> Value<'a> {
-        arena.add(&**self)
+    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &mut A) -> Value<'a> {
+        alloc.add(&**self)
     }
 
     fn from_ocamlrep(value: Value<'_>) -> Result<Self, FromError> {
@@ -155,8 +155,8 @@ impl<T: OcamlRep> OcamlRep for Box<T> {
 }
 
 impl<T: OcamlRep> OcamlRep for Rc<T> {
-    fn to_ocamlrep<'a>(&self, arena: &mut Arena<'a>) -> Value<'a> {
-        arena.add(self.as_ref())
+    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &mut A) -> Value<'a> {
+        alloc.add(self.as_ref())
     }
 
     fn from_ocamlrep(value: Value<'_>) -> Result<Self, FromError> {
@@ -166,13 +166,13 @@ impl<T: OcamlRep> OcamlRep for Rc<T> {
 }
 
 impl<T: OcamlRep> OcamlRep for Option<T> {
-    fn to_ocamlrep<'a>(&self, arena: &mut Arena<'a>) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &mut A) -> Value<'a> {
         match self {
             None => Value::int(0),
             Some(val) => {
-                let block = arena.block_with_size(1);
+                let block = alloc.block_with_size(1);
                 unsafe {
-                    Arena::set_field(block, 0, arena.add(val));
+                    A::set_field(block, 0, alloc.add(val));
                     Value::from_ptr(block)
                 }
             }
@@ -191,19 +191,19 @@ impl<T: OcamlRep> OcamlRep for Option<T> {
 }
 
 impl<T: OcamlRep, E: OcamlRep> OcamlRep for Result<T, E> {
-    fn to_ocamlrep<'a>(&self, arena: &mut Arena<'a>) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &mut A) -> Value<'a> {
         match self {
             Ok(val) => {
-                let block = arena.block_with_size(1);
+                let block = alloc.block_with_size(1);
                 unsafe {
-                    Arena::set_field(block, 0, arena.add(val));
+                    A::set_field(block, 0, alloc.add(val));
                     Value::from_ptr(block)
                 }
             }
             Err(val) => {
-                let block = arena.block_with_size_and_tag(1, 1);
+                let block = alloc.block_with_size_and_tag(1, 1);
                 unsafe {
-                    Arena::set_field(block, 0, arena.add(val));
+                    A::set_field(block, 0, alloc.add(val));
                     Value::from_ptr(block)
                 }
             }
@@ -221,13 +221,13 @@ impl<T: OcamlRep, E: OcamlRep> OcamlRep for Result<T, E> {
 }
 
 impl<T: OcamlRep> OcamlRep for Vec<T> {
-    fn to_ocamlrep<'a>(&self, arena: &mut Arena<'a>) -> Value<'a> {
-        let mut hd = arena.add(&());
+    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &mut A) -> Value<'a> {
+        let mut hd = alloc.add(&());
         for val in self.iter().rev() {
-            let block = arena.block_with_size(2);
+            let block = alloc.block_with_size(2);
             unsafe {
-                Arena::set_field(block, 0, arena.add(val));
-                Arena::set_field(block, 1, hd);
+                A::set_field(block, 0, alloc.add(val));
+                A::set_field(block, 1, hd);
                 hd = Value::from_ptr(block)
             };
         }
@@ -251,13 +251,13 @@ impl<T: OcamlRep> OcamlRep for Vec<T> {
 }
 
 impl<K: OcamlRep + Ord, V: OcamlRep> OcamlRep for BTreeMap<K, V> {
-    fn to_ocamlrep<'a>(&self, arena: &mut Arena<'a>) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &mut A) -> Value<'a> {
         if self.is_empty() {
             return Value::int(0);
         }
         let len = self.len();
         let mut iter = self.iter();
-        let (res, _) = btree_map_to_ocamlrep(&mut iter, arena, len);
+        let (res, _) = btree_map_to_ocamlrep(&mut iter, alloc, len);
         res
     }
 
@@ -268,25 +268,25 @@ impl<K: OcamlRep + Ord, V: OcamlRep> OcamlRep for BTreeMap<K, V> {
     }
 }
 
-fn btree_map_to_ocamlrep<'a, K: OcamlRep, V: OcamlRep>(
+fn btree_map_to_ocamlrep<'a, A: Allocator<'a>, K: OcamlRep, V: OcamlRep>(
     iter: &mut btree_map::Iter<K, V>,
-    arena: &mut Arena<'a>,
+    alloc: &mut A,
     size: usize,
 ) -> (Value<'a>, usize) {
     if size == 0 {
         return (Value::int(0), 0);
     }
-    let (left, left_height) = btree_map_to_ocamlrep(iter, arena, size / 2);
+    let (left, left_height) = btree_map_to_ocamlrep(iter, alloc, size / 2);
     let (key, val) = iter.next().unwrap();
-    let (right, right_height) = btree_map_to_ocamlrep(iter, arena, size - 1 - size / 2);
+    let (right, right_height) = btree_map_to_ocamlrep(iter, alloc, size - 1 - size / 2);
     let height = std::cmp::max(left_height, right_height) + 1;
-    let block = arena.block_with_size(5);
+    let block = alloc.block_with_size(5);
     unsafe {
-        Arena::set_field(block, 0, left);
-        Arena::set_field(block, 1, arena.add(key));
-        Arena::set_field(block, 2, arena.add(val));
-        Arena::set_field(block, 3, right);
-        Arena::set_field(block, 4, arena.add(&height));
+        A::set_field(block, 0, left);
+        A::set_field(block, 1, alloc.add(key));
+        A::set_field(block, 2, alloc.add(val));
+        A::set_field(block, 3, right);
+        A::set_field(block, 4, alloc.add(&height));
         (Value::from_ptr(block), height)
     }
 }
@@ -309,13 +309,13 @@ fn btree_map_from_ocamlrep<K: OcamlRep + Ord, V: OcamlRep>(
 }
 
 impl<T: OcamlRep + Ord> OcamlRep for BTreeSet<T> {
-    fn to_ocamlrep<'a>(&self, arena: &mut Arena<'a>) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &mut A) -> Value<'a> {
         if self.is_empty() {
             return Value::int(0);
         }
         let len = self.len();
         let mut iter = self.iter();
-        let (res, _) = btree_set_to_ocamlrep(&mut iter, arena, len);
+        let (res, _) = btree_set_to_ocamlrep(&mut iter, alloc, len);
         res
     }
 
@@ -326,24 +326,24 @@ impl<T: OcamlRep + Ord> OcamlRep for BTreeSet<T> {
     }
 }
 
-fn btree_set_to_ocamlrep<'a, T: OcamlRep>(
+fn btree_set_to_ocamlrep<'a, A: Allocator<'a>, T: OcamlRep>(
     iter: &mut btree_set::Iter<T>,
-    arena: &mut Arena<'a>,
+    alloc: &mut A,
     size: usize,
 ) -> (Value<'a>, usize) {
     if size == 0 {
         return (Value::int(0), 0);
     }
-    let (left, left_height) = btree_set_to_ocamlrep(iter, arena, size / 2);
+    let (left, left_height) = btree_set_to_ocamlrep(iter, alloc, size / 2);
     let val = iter.next().unwrap();
-    let (right, right_height) = btree_set_to_ocamlrep(iter, arena, size - 1 - size / 2);
+    let (right, right_height) = btree_set_to_ocamlrep(iter, alloc, size - 1 - size / 2);
     let height = std::cmp::max(left_height, right_height) + 1;
-    let block = arena.block_with_size(4);
+    let block = alloc.block_with_size(4);
     unsafe {
-        Arena::set_field(block, 0, left);
-        Arena::set_field(block, 1, arena.add(val));
-        Arena::set_field(block, 2, right);
-        Arena::set_field(block, 3, arena.add(&height));
+        A::set_field(block, 0, left);
+        A::set_field(block, 1, alloc.add(val));
+        A::set_field(block, 2, right);
+        A::set_field(block, 3, alloc.add(&height));
         (Value::from_ptr(block), height)
     }
 }
@@ -364,8 +364,8 @@ fn btree_set_from_ocamlrep<T: OcamlRep + Ord>(
 }
 
 impl OcamlRep for PathBuf {
-    fn to_ocamlrep<'a>(&self, arena: &mut Arena<'a>) -> Value<'a> {
-        str_to_ocamlrep(self.to_str().unwrap(), arena)
+    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &mut A) -> Value<'a> {
+        str_to_ocamlrep(self.to_str().unwrap(), alloc)
     }
 
     fn from_ocamlrep(value: Value<'_>) -> Result<Self, FromError> {
@@ -374,8 +374,8 @@ impl OcamlRep for PathBuf {
 }
 
 impl OcamlRep for String {
-    fn to_ocamlrep<'a>(&self, arena: &mut Arena<'a>) -> Value<'a> {
-        str_to_ocamlrep(self.as_str(), arena)
+    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &mut A) -> Value<'a> {
+        str_to_ocamlrep(self.as_str(), alloc)
     }
 
     fn from_ocamlrep(value: Value<'_>) -> Result<Self, FromError> {
@@ -383,10 +383,10 @@ impl OcamlRep for String {
     }
 }
 
-fn str_to_ocamlrep<'a>(s: &str, arena: &mut Arena<'a>) -> Value<'a> {
+fn str_to_ocamlrep<'a, A: Allocator<'a>>(s: &str, alloc: &mut A) -> Value<'a> {
     let words = (s.len() + 1 /*null-ending*/ + (WORD_SIZE - 1)/*rounding*/) / WORD_SIZE;
     let length = words * WORD_SIZE;
-    let block = arena.block_with_size_and_tag(words, block::STRING_TAG);
+    let block = alloc.block_with_size_and_tag(words, block::STRING_TAG);
     unsafe {
         *block.add(words - 1) = Value::from_bits(0);
         let block_bytes = block as *mut u8;
@@ -415,11 +415,11 @@ where
     T0: OcamlRep,
     T1: OcamlRep,
 {
-    fn to_ocamlrep<'a>(&self, arena: &mut Arena<'a>) -> Value<'a> {
-        let block = arena.block_with_size(2);
+    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &mut A) -> Value<'a> {
+        let block = alloc.block_with_size(2);
         unsafe {
-            Arena::set_field(block, 0, arena.add(&self.0));
-            Arena::set_field(block, 1, arena.add(&self.1));
+            A::set_field(block, 0, alloc.add(&self.0));
+            A::set_field(block, 1, alloc.add(&self.1));
             Value::from_ptr(block)
         }
     }
@@ -438,12 +438,12 @@ where
     T1: OcamlRep,
     T2: OcamlRep,
 {
-    fn to_ocamlrep<'a>(&self, arena: &mut Arena<'a>) -> Value<'a> {
-        let block = arena.block_with_size(3);
+    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &mut A) -> Value<'a> {
+        let block = alloc.block_with_size(3);
         unsafe {
-            Arena::set_field(block, 0, arena.add(&self.0));
-            Arena::set_field(block, 1, arena.add(&self.1));
-            Arena::set_field(block, 2, arena.add(&self.2));
+            A::set_field(block, 0, alloc.add(&self.0));
+            A::set_field(block, 1, alloc.add(&self.1));
+            A::set_field(block, 2, alloc.add(&self.2));
             Value::from_ptr(block)
         }
     }
@@ -464,13 +464,13 @@ where
     T2: OcamlRep,
     T3: OcamlRep,
 {
-    fn to_ocamlrep<'a>(&self, arena: &mut Arena<'a>) -> Value<'a> {
-        let block = arena.block_with_size(4);
+    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &mut A) -> Value<'a> {
+        let block = alloc.block_with_size(4);
         unsafe {
-            Arena::set_field(block, 0, arena.add(&self.0));
-            Arena::set_field(block, 1, arena.add(&self.1));
-            Arena::set_field(block, 2, arena.add(&self.2));
-            Arena::set_field(block, 3, arena.add(&self.3));
+            A::set_field(block, 0, alloc.add(&self.0));
+            A::set_field(block, 1, alloc.add(&self.1));
+            A::set_field(block, 2, alloc.add(&self.2));
+            A::set_field(block, 3, alloc.add(&self.3));
             Value::from_ptr(block)
         }
     }
@@ -493,14 +493,14 @@ where
     T3: OcamlRep,
     T4: OcamlRep,
 {
-    fn to_ocamlrep<'a>(&self, arena: &mut Arena<'a>) -> Value<'a> {
-        let block = arena.block_with_size(5);
+    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &mut A) -> Value<'a> {
+        let block = alloc.block_with_size(5);
         unsafe {
-            Arena::set_field(block, 0, arena.add(&self.0));
-            Arena::set_field(block, 1, arena.add(&self.1));
-            Arena::set_field(block, 2, arena.add(&self.2));
-            Arena::set_field(block, 3, arena.add(&self.3));
-            Arena::set_field(block, 4, arena.add(&self.4));
+            A::set_field(block, 0, alloc.add(&self.0));
+            A::set_field(block, 1, alloc.add(&self.1));
+            A::set_field(block, 2, alloc.add(&self.2));
+            A::set_field(block, 3, alloc.add(&self.3));
+            A::set_field(block, 4, alloc.add(&self.4));
             Value::from_ptr(block)
         }
     }
@@ -525,15 +525,15 @@ where
     T4: OcamlRep,
     T5: OcamlRep,
 {
-    fn to_ocamlrep<'a>(&self, arena: &mut Arena<'a>) -> Value<'a> {
-        let block = arena.block_with_size(6);
+    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &mut A) -> Value<'a> {
+        let block = alloc.block_with_size(6);
         unsafe {
-            Arena::set_field(block, 0, arena.add(&self.0));
-            Arena::set_field(block, 1, arena.add(&self.1));
-            Arena::set_field(block, 2, arena.add(&self.2));
-            Arena::set_field(block, 3, arena.add(&self.3));
-            Arena::set_field(block, 4, arena.add(&self.4));
-            Arena::set_field(block, 5, arena.add(&self.5));
+            A::set_field(block, 0, alloc.add(&self.0));
+            A::set_field(block, 1, alloc.add(&self.1));
+            A::set_field(block, 2, alloc.add(&self.2));
+            A::set_field(block, 3, alloc.add(&self.3));
+            A::set_field(block, 4, alloc.add(&self.4));
+            A::set_field(block, 5, alloc.add(&self.5));
             Value::from_ptr(block)
         }
     }
@@ -560,16 +560,16 @@ where
     T5: OcamlRep,
     T6: OcamlRep,
 {
-    fn to_ocamlrep<'a>(&self, arena: &mut Arena<'a>) -> Value<'a> {
-        let block = arena.block_with_size(7);
+    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &mut A) -> Value<'a> {
+        let block = alloc.block_with_size(7);
         unsafe {
-            Arena::set_field(block, 0, arena.add(&self.0));
-            Arena::set_field(block, 1, arena.add(&self.1));
-            Arena::set_field(block, 2, arena.add(&self.2));
-            Arena::set_field(block, 3, arena.add(&self.3));
-            Arena::set_field(block, 4, arena.add(&self.4));
-            Arena::set_field(block, 5, arena.add(&self.5));
-            Arena::set_field(block, 6, arena.add(&self.6));
+            A::set_field(block, 0, alloc.add(&self.0));
+            A::set_field(block, 1, alloc.add(&self.1));
+            A::set_field(block, 2, alloc.add(&self.2));
+            A::set_field(block, 3, alloc.add(&self.3));
+            A::set_field(block, 4, alloc.add(&self.4));
+            A::set_field(block, 5, alloc.add(&self.5));
+            A::set_field(block, 6, alloc.add(&self.6));
             Value::from_ptr(block)
         }
     }
@@ -598,17 +598,17 @@ where
     T6: OcamlRep,
     T7: OcamlRep,
 {
-    fn to_ocamlrep<'a>(&self, arena: &mut Arena<'a>) -> Value<'a> {
-        let block = arena.block_with_size(8);
+    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &mut A) -> Value<'a> {
+        let block = alloc.block_with_size(8);
         unsafe {
-            Arena::set_field(block, 0, arena.add(&self.0));
-            Arena::set_field(block, 1, arena.add(&self.1));
-            Arena::set_field(block, 2, arena.add(&self.2));
-            Arena::set_field(block, 3, arena.add(&self.3));
-            Arena::set_field(block, 4, arena.add(&self.4));
-            Arena::set_field(block, 5, arena.add(&self.5));
-            Arena::set_field(block, 6, arena.add(&self.6));
-            Arena::set_field(block, 7, arena.add(&self.7));
+            A::set_field(block, 0, alloc.add(&self.0));
+            A::set_field(block, 1, alloc.add(&self.1));
+            A::set_field(block, 2, alloc.add(&self.2));
+            A::set_field(block, 3, alloc.add(&self.3));
+            A::set_field(block, 4, alloc.add(&self.4));
+            A::set_field(block, 5, alloc.add(&self.5));
+            A::set_field(block, 6, alloc.add(&self.6));
+            A::set_field(block, 7, alloc.add(&self.7));
             Value::from_ptr(block)
         }
     }

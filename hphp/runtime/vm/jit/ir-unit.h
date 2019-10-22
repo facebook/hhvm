@@ -192,9 +192,10 @@ struct IRUnit {
   SSATmp* mainFP() const;
 
   /*
-   * Return the main StkPtr for the unit.  This is the result of the DefSP
-   * instruction on the entry block. (note that tere should be no other stack
-   * pointers in the unit).
+   * Return the main StkPtr for the unit, a result of DefFrameRelSP or DefRegSP
+   * instruction on the entry block. This is used only when eliding DefInlineFP,
+   * which assumes that there are no other stack pointers in the unit. This
+   * assumption is no true in general, as prologues redefine their SP.
    */
   SSATmp* mainSP() const;
 

@@ -2031,17 +2031,27 @@ To string conversions:
 
   Creates a temporary D representing the current vm frame pointer.
 
-| DefSP<stackOff>, D(StkPtr), S(FramePtr), NF
+| DefFrameRelSP<stackOff>, D(StkPtr), S(FramePtr), NF
 
-  Creates a temporary D representing the current vm stack pointer. S0 is a
-  pointer to the current frame. The 'stackOff' is the logical offset between S0
-  and the stack pointer, but in the case of generators this is not the
-  physical offset at runtime.
+  Creates a temporary D representing the current VM stack pointer as an offset
+  `stackOff' from the frame pointer S0.
 
-  This instruction is used at the beginning of tracelets to represent the state
-  of the stack on entry and does not emit code.
+  This instruction is used at the beginning of translations of non-resumed
+  functions to represent the state of the stack on entry.
 
-| DefCallFP, D(StkPtr), NA, NF
+| DefRegSP<stackOff>, D(StkPtr), NA, NF
+
+  Creates a temporary D representing the current VM stack pointer given by
+  the rvmsp register. The `stackOff' is a logical offset from a stack base,
+  which is a stack pointer to the empty logical stack within the translation.
+
+  This instruction is used at the beginning of translations of prologues and
+  resumed functions to represent the state of the stack on entry.
+
+  In prologues, the stack base represents a stack without any func arguments,
+  i.e. it is pointing to the empty space reserved for an ActRec.
+
+  In resumables, the stack base represents an empty VM stack.
 
 | DefCallFlags, D(Int), NA, NF
 
@@ -2051,9 +2061,8 @@ To string conversions:
 
 | DefCallCtx, DParam(Cls|Obj), NA, NF
 
-  Creates a temporary D representing the address of the stack location reserved
-  for the frame, flags, function pointer, number of arguments, or context passed
-  to the prologue.
+  Creates a temporary D representing flags, function pointer, number of
+  arguments, or context passed to the prologue.
 
   May be used only at the beginning of a prologue or a stub used in a prologue
   context.

@@ -142,7 +142,9 @@ FPRelOffset frame_base_offset(SSATmp* fp) {
   if (UNLIKELY(fpInst->is(DefLabel))) fpInst = resolveFpDefLabel(fp);
   if (fpInst->is(DefFP, DefFuncEntryFP)) return FPRelOffset{0};
   always_assert(fpInst->is(DefInlineFP));
-  auto const offsetOfSp = fpInst->src(0)->inst()->extra<DefSP>()->offset;
+  auto const spInst = fpInst->src(0)->inst();
+  assertx(spInst->is(DefFrameRelSP, DefRegSP));
+  auto const offsetOfSp = spInst->extra<FPInvOffsetData>()->offset;
 
   // FP-relative offset of the inlined frame.
   return fpInst->extra<DefInlineFP>()->spOffset.to<FPRelOffset>(offsetOfSp);
@@ -160,19 +162,16 @@ AStack::AStack(SSATmp* fp, FPRelOffset o, int32_t s)
   if (UNLIKELY(defInlineFP->is(DefLabel))) defInlineFP = resolveFpDefLabel(fp);
   if (!defInlineFP->is(DefInlineFP)) return;
   auto const sp = defInlineFP->src(0)->inst();
+  assertx(sp->is(DefFrameRelSP, DefRegSP));
 
   // FP-relative offset of the inlined frame.
   auto const innerFPRel =
     defInlineFP->extra<DefInlineFP>()->spOffset.to<FPRelOffset>(
-      sp->extra<DefSP>()->offset);
+      sp->extra<FPInvOffsetData>()->offset);
 
   // Offset from the outermost FP is simply the sum of (inner frame relative to
   // outer) and (offset relative to inner frame).
   offset += innerFPRel.offset;
-
-  always_assert_flog(sp->src(0)->inst()->is(DefFP, DefFuncEntryFP),
-                     "failed to canonicalize to outermost FramePtr: {}\n",
-                     sp->src(0)->toString());
 }
 
 AStack::AStack(SSATmp* sp, IRSPRelOffset spRel, int32_t s)
@@ -182,9 +181,9 @@ AStack::AStack(SSATmp* sp, IRSPRelOffset spRel, int32_t s)
   always_assert(sp->isA(TStkPtr));
 
   auto const defSP = sp->inst();
-  always_assert_flog(defSP->is(DefSP),
+  always_assert_flog(defSP->is(DefFrameRelSP, DefRegSP),
                      "unexpected StkPtr: {}\n", sp->toString());
-  offset = spRel.to<FPRelOffset>(defSP->extra<DefSP>()->offset);
+  offset = spRel.to<FPRelOffset>(defSP->extra<FPInvOffsetData>()->offset);
 }
 
 //////////////////////////////////////////////////////////////////////

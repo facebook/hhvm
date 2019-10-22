@@ -950,7 +950,9 @@ folly::Optional<int32_t> findSPOffset(const IRUnit& unit,
     return inst->extra<DefInlineFP>()->spOffset.offset;
   }
   if (inst->is(DefFP, DefFuncEntryFP)) {
-    return unit.mainSP()->inst()->extra<DefSP>()->offset.offset;
+    auto const defSP = unit.mainSP()->inst();
+    assertx(defSP->is(DefFrameRelSP, DefRegSP));
+    return defSP->extra<FPInvOffsetData>()->offset.offset;
   }
 
   assertx(inst->is(DefLabel));

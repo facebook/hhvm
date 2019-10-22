@@ -130,8 +130,8 @@ struct Block {
   // then return an iterator to the newly inserted instruction.
   iterator prepend(IRInstruction* inst);
 
-  // return iterator to first instruction after any DefFP, DefSP, DefLabel,
-  // and/or BeginCatch instructions.
+  // return iterator to first instruction after any DefFP, DefFrameRelSP,
+  // DefRegSP, DefLabel, and/or BeginCatch instructions.
   iterator skipHeader();
   const_iterator skipHeader() const;
 
@@ -256,7 +256,10 @@ inline Block::iterator Block::prepend(IRInstruction* inst) {
 inline Block::iterator Block::skipHeader() {
   auto it = begin();
   auto e = end();
-  while (it != e && it->is(DefFP, DefSP, DefLabel, BeginCatch)) ++it;
+  while (it != e &&
+         it->is(DefFP, DefFrameRelSP, DefRegSP, DefLabel, BeginCatch)) {
+    ++it;
+  }
   return it;
 }
 

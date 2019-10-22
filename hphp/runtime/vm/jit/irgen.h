@@ -205,7 +205,7 @@ uint16_t inlineDepth(const IRGS& env);
  * looks like this:
  *
  *   fp0  = DefFP
- *   sp   = DefSP<offset>
+ *   sp   = DefFrameRelSP<offset>/DefRegSP<offset>
  *
  *   // ... normal stuff happens ...
  *   // ... probably some StStks due to argument expressions

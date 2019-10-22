@@ -62,22 +62,17 @@ void cgExitPlaceholder(IRLS&, const IRInstruction*) {}
 
 void cgDefFP(IRLS&, const IRInstruction*) {}
 
-void cgDefSP(IRLS& env, const IRInstruction* inst) {
+void cgDefFrameRelSP(IRLS& env, const IRInstruction* inst) {
+  auto const fp = srcLoc(env, inst, 0).reg();
   auto const sp = dstLoc(env, inst, 0).reg();
   auto& v = vmain(env);
-
-  if (inst->marker().resumeMode() != ResumeMode::None) {
-    v << defvmsp{sp};
-    return;
-  }
-
-  auto const fp = srcLoc(env, inst, 0).reg();
-  v << lea{fp[-cellsToBytes(inst->extra<DefSP>()->offset.offset)], sp};
+  v << lea{fp[-cellsToBytes(inst->extra<DefFrameRelSP>()->offset.offset)], sp};
 }
 
-void cgDefCallFP(IRLS& env, const IRInstruction* inst) {
+void cgDefRegSP(IRLS& env, const IRInstruction* inst) {
+  auto const sp = dstLoc(env, inst, 0).reg();
   auto& v = vmain(env);
-  v << copy{rvmsp(), dstLoc(env, inst, 0).reg()};
+  v << defvmsp{sp};
 }
 
 void cgDefCallFlags(IRLS& env, const IRInstruction* inst) {

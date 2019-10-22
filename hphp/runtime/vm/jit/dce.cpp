@@ -213,7 +213,6 @@ bool canDCE(IRInstruction* inst) {
   case NewLikeArray:
   case NewCol:
   case NewPair:
-  case DefCallFP:
   case DefCallFlags:
   case DefCallFunc:
   case DefCallNumArgs:
@@ -546,8 +545,9 @@ bool canDCE(IRInstruction* inst) {
   case DecRefNZ:
   case ProfileDecRef:
   case DefFP:
-  case DefSP:
   case DefFuncEntryFP:
+  case DefFrameRelSP:
+  case DefRegSP:
   case Count:
   case VerifyParamCls:
   case VerifyParamCallable:
@@ -1453,9 +1453,10 @@ void convertToInlineReturnNoFrame(IRUnit& unit, IRInstruction& inst) {
   assertx(inst.is(InlineReturn));
   auto const frameInst = inst.src(0)->inst();
   auto const spInst = frameInst->src(0)->inst();
+  assertx(spInst->is(DefFrameRelSP, DefRegSP));
 
   auto const calleeAROff = frameInst->extra<DefInlineFP>()->spOffset;
-  auto const spOff = spInst->extra<DefSP>()->offset;
+  auto const spOff = spInst->extra<FPInvOffsetData>()->offset;
 
   auto const data = FPRelOffsetData {
     // Offset of the callee's return value relative to the frame pointer.

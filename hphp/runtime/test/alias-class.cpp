@@ -50,7 +50,8 @@ std::vector<AliasClass> specialized_classes(IRUnit& unit) {
   // make some instructions.
   auto const mainFP = unit.gen(DefFP, bcctx)->dst();
   auto const SP = unit.gen(
-    DefSP, bcctx, FPInvOffsetData { FPInvOffset { 10 } }, mainFP)->dst();
+    DefFrameRelSP, bcctx, FPInvOffsetData { FPInvOffset { 10 } }, mainFP
+  )->dst();
 
   return {
     // Frame locals.
@@ -215,7 +216,7 @@ TEST(AliasClass, StackBasics) {
   auto const bcctx = BCContext { BCMarker::Dummy(), 0 };
   auto const FP = unit.gen(DefFP, bcctx)->dst();
   auto const SP = unit.gen(
-    DefSP, bcctx, FPInvOffsetData { FPInvOffset { 5 } }, FP)->dst();
+    DefFrameRelSP, bcctx, FPInvOffsetData { FPInvOffset { 5 } }, FP)->dst();
 
   // Some basic canonicalization and maybe.
   {
@@ -335,7 +336,7 @@ TEST(AliasClass, StackUnions) {
   auto const bcctx = BCContext { BCMarker::Dummy(), 0 };
   auto const FP = unit.gen(DefFP, bcctx)->dst();
   auto const SP = unit.gen(
-    DefSP, bcctx, FPInvOffsetData { FPInvOffset { 1 } }, FP)->dst();
+    DefFrameRelSP, bcctx, FPInvOffsetData { FPInvOffset { 1 } }, FP)->dst();
 
   {
     AliasClass const stk1  = AStack { FP, FPRelOffset { -3 }, 1 };

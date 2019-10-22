@@ -283,7 +283,6 @@ void emitPrologueEntry(IRGS& env, uint32_t argc, SSATmp* callFlags,
     gen(env, JmpZero, makeUnreachable(env, ASSERT_REASON), numArgsOK);
   }
 
-  auto const callerFP = gen(env, DefCallFP);
   auto const ctx = [&] {
     assertx(func->isClosureBody() == (closure != nullptr));
     if (func->isClosureBody()) {
@@ -308,9 +307,9 @@ void emitPrologueEntry(IRGS& env, uint32_t argc, SSATmp* callFlags,
   auto const arNumArgs = std::min(argc, func->numParams());
 
   gen(env, DefFuncEntryFP, FuncData { func },
-      fp(env), callerFP, callFlags, cns(env, arNumArgs), ctx);
+      fp(env), sp(env), callFlags, cns(env, arNumArgs), ctx);
   auto const spOffset = FPInvOffset { func->numSlotsInFrame() };
-  gen(env, DefSP, FPInvOffsetData { spOffset }, fp(env));
+  gen(env, DefFrameRelSP, FPInvOffsetData { spOffset }, fp(env));
 
   // Emit early stack overflow check if necessary.
   if (stack_check_kind(func, argc) == StackCheck::Early) {

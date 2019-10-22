@@ -274,7 +274,7 @@ inline SSATmp* IRUnit::mainFP() const {
 inline SSATmp* IRUnit::mainSP() const {
   assertx(!entry()->empty() && entry()->begin()->is(DefFP));
   auto it = ++entry()->begin();
-  assertx(it != entry()->end() && it->is(DefSP));
+  assertx(it != entry()->end() && it->is(DefFrameRelSP, DefRegSP));
   return it->dst();
 }
 

@@ -413,9 +413,10 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     cur().fpValue = nullptr;
     break;
 
-  case DefSP:
+  case DefFrameRelSP:
+  case DefRegSP:
     cur().spValue = inst->dst();
-    cur().irSPOff = inst->extra<DefSP>()->offset;
+    cur().irSPOff = inst->extra<FPInvOffsetData>()->offset;
     break;
 
   case LdMem:

@@ -1689,9 +1689,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case AssertStk:
   case AssertMBase:
   case DefFP:
-  case DefSP:
   case DefFuncEntryFP:
-  case DefCallFP:
+  case DefFrameRelSP:
+  case DefRegSP:
   case DefCallFlags:
   case DefCallFunc:
   case DefCallNumArgs:

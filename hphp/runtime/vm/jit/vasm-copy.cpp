@@ -839,8 +839,8 @@ void optimize(Env& env) {
  * when a register holds a value that is the same as another register plus some
  * offset.  It then folds offsets in memory operands to try to require fewer
  * registers.  The main motivation for this is to generally eliminate the need
- * for a separate stack pointer (the result of HHIR's DefSP instruction, which
- * will just be an lea off of the rvmfp() physical register).
+ * for a separate stack pointer (the result of HHIR's DefFrameRelSP instruction,
+ * which will just be an lea off of the rvmfp() physical register).
  */
 void optimizeCopies(Vunit& unit, const Abi& abi) {
   Timer timer(Timer::vasm_copy);

@@ -53,6 +53,7 @@ namespace {
 TransContext prologue_context(TransID transID,
                               TransKind kind,
                               const Func* func,
+                              int initSpOffset,
                               Offset entry) {
   return TransContext(
     transID,
@@ -72,7 +73,7 @@ TransContext prologue_context(TransID transID,
 
 TCA genFuncPrologue(TransID transID, TransKind kind, Func* func, int argc,
                     CodeCache::View code, CGMeta& fixups) {
-  auto context = prologue_context(transID, kind, func,
+  auto context = prologue_context(transID, kind, func, argc,
                                   func->getEntryForNumArgs(argc));
   IRUnit unit{context, std::make_unique<AnnotationData>()};
   irgen::IRGS env{unit, nullptr, 0, nullptr, true};
@@ -90,7 +91,8 @@ TCA genFuncPrologue(TransID transID, TransKind kind, Func* func, int argc,
 
 TCA genFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs,
                         TransKind kind, CodeCache::View code) {
-  auto context = prologue_context(kInvalidTransID, kind, func, func->base());
+  auto context = prologue_context(kInvalidTransID, kind, func,
+                                  func->numSlotsInFrame(), func->base());
   IRUnit unit{context,
               dumpIREnabled(kind) || RuntimeOption::EvalDumpInlDecision ?
                 std::make_unique<AnnotationData>() :

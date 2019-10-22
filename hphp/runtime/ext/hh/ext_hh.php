@@ -243,6 +243,7 @@ namespace HH\ReifiedGenerics {
   /**
    * Returns the type structure representation of the reified type
    */
+  <<__Rx>>
   function get_type_structure<reify T>(): mixed {
     return ${'0ReifiedGenerics'}[0];
   }
@@ -251,6 +252,7 @@ namespace HH\ReifiedGenerics {
    * Returns the name of the class represented by this reified type.
    * If this type does not represent a class, throws an exception
    */
+  <<__Rx>>
   function get_classname<reify T>(): classname<T> {
     $clsname = idx(namespace\get_type_structure<T>(), 'classname', null);
     if ($clsname is null) {

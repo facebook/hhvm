@@ -117,7 +117,6 @@ let expand_ty ?var_hook ?pos env ty =
     { sft_optional; sft_ty = exp_ty sft_ty }
   and exp_array_kind ak =
     match ak with
-    | AKany -> AKany
     | AKvarray ty -> AKvarray (exp_ty ty)
     | AKdarray (ty1, ty2) -> AKdarray (exp_ty ty1, exp_ty ty2)
     | AKvarray_or_darray ty -> AKvarray_or_darray (exp_ty ty)

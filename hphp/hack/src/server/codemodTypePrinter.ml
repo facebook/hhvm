@@ -41,7 +41,7 @@ let rec print_ty_exn ?(allow_nothing = false) ty =
   | Tunion _
   | Tintersection _
   | Tobject
-  | Tarraykind (AKany | AKempty) ->
+  | Tarraykind AKempty ->
     raise Non_denotable
   | Tnonnull -> "nonnull"
   | Tdynamic -> "dynamic"

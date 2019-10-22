@@ -1,5 +1,5 @@
 File "array_map7.php", line 24, characters 3-32:
-  array
+  darray<arraykey, bool>
 File "array_map7.php", line 27, characters 3-34:
   _
 File "array_map7.php", line 29, characters 25-52:

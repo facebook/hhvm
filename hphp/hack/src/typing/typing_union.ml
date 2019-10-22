@@ -309,10 +309,6 @@ and union_arraykind env ak1 ak2 =
   | (AKempty, ak)
   | (ak, AKempty) ->
     (env, ak)
-  | (AKany, AKany) -> (env, AKany)
-  | (AKany, _)
-  | (_, AKany) ->
-    raise Dont_simplify
   | (AKvarray ty1, AKvarray ty2) ->
     let (env, ty) = union env ty1 ty2 in
     (env, AKvarray ty)

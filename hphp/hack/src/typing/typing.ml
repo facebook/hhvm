@@ -4871,7 +4871,7 @@ and dispatch_call
     let rec get_array_filter_return_type env ty =
       let (env, ety) = Env.expand_type env ty in
       match ety with
-      | (_, Tarraykind (AKany | AKempty)) as array_type -> (env, array_type)
+      | (_, Tarraykind AKempty) as array_type -> (env, array_type)
       | (r, Tarraykind (AKvarray tv)) ->
         let (env, tv) = get_value_type env tv in
         (env, (r, Tarraykind (AKvarray tv)))
@@ -4968,8 +4968,7 @@ and dispatch_call
         env * (locl_ty -> locl_ty) =
       let (env, x) = Env.expand_type env x in
       match x with
-      | (_, Tarraykind (AKany | AKempty)) as array_type ->
-        (env, (fun _ -> array_type))
+      | (_, Tarraykind AKempty) as array_type -> (env, (fun _ -> array_type))
       | (r, Tarraykind (AKvarray _)) ->
         (env, (fun tr -> (r, Tarraykind (AKvarray tr))))
       | (r, Tany _) -> (env, (fun _ -> (r, Typing_utils.tany env)))
@@ -7163,7 +7162,7 @@ and condition
   | T.Binop (Ast_defs.Eq None, _, _) ->
     let (env, ety) = Env.expand_type env ty in
     (match ety with
-    | (_, Tarraykind (AKany | AKempty))
+    | (_, Tarraykind AKempty)
     | (_, Tprim Tbool) ->
       env
     | ( _,
@@ -7490,10 +7489,13 @@ and is_array env ty p pred_name arg_expr =
               (Env.get_tcopt env)
               TypecheckerOptions.experimental_isarray
           in
-          if safe_isarray_enabled then
-            (r, Tarraykind (AKvarray_or_darray tfresh))
-          else
-            (r, Tarraykind AKany)
+          let tv =
+            if safe_isarray_enabled then
+              tfresh
+            else
+              (r, TUtils.tany env)
+          in
+          (r, Tarraykind (AKvarray_or_darray tv))
       in
       (* Add constraints on generic parameters that must
        * hold for refined_ty <:arg_ty. For example, if arg_ty is Traversable<T>

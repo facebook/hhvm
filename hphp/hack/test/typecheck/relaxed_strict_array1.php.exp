@@ -1,1 +1,4 @@
-No errors
+File "relaxed_strict_array1.php--FileB.php", line 19, characters 5-16:
+a varray_or_darray does not allow array append (Typing[4006])
+File "relaxed_strict_array1.php--FileA.php", line 4, characters 33-37:
+Definition is here

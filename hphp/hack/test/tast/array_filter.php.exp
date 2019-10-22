@@ -4,8 +4,9 @@
       f_name = ([3:10-27], "\\test_array_filter"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
-      [{ param_annotation = ([4:9-23], array);
-         param_type_hint = ((array), (Some ([4:3-8], (Harray (None, None)))));
+      [{ param_annotation = ([4:9-23], varray_or_darray<_>);
+         param_type_hint =
+         ((varray_or_darray<_>), (Some ([4:3-8], (Harray (None, None)))));
          param_is_reference = false; param_is_variadic = false;
          param_pos = [4:9-23]; param_name = "$untyped_array";
          param_expr = None; param_callconv = None;
@@ -73,13 +74,13 @@
                  )))));
           ([13:3-32],
            (Expr
-              (([13:3-31], array),
+              (([13:3-31], darray<arraykey, _>),
                (Call (Cnormal,
-                  (([13:3-15], (function<Tv>(Container<_> $input, ?(function(_): bool) $callback): array)),
+                  (([13:3-15], (function<Tv>(Container<_> $input, ?(function(_): bool) $callback): darray<arraykey, _>)),
                    (Id ([13:3-15], "\\array_filter"))),
                   [((_), ([13:3-15], (Happly (([Pos.none], "_"), []))))],
-                  [(([13:16-30], array), (Lvar ([13:16-30], $untyped_array)))
-                    ],
+                  [(([13:16-30], varray_or_darray<_>),
+                    (Lvar ([13:16-30], $untyped_array)))],
                   [])))));
           ([14:3-31],
            (Expr
@@ -176,12 +177,13 @@
                   )))));
           ([22:3-36],
            (Expr
-              (([22:3-35], array),
+              (([22:3-35], darray<arraykey, _>),
                (Call (Cnormal,
-                  (([22:3-15], (function<Tv>(Container<_> $input, ?(function(_): bool) $callback): array)),
+                  (([22:3-15], (function<Tv>(Container<_> $input, ?(function(_): bool) $callback): darray<arraykey, _>)),
                    (Id ([22:3-15], "\\array_filter"))),
                   [((_), ([22:3-15], (Happly (([Pos.none], "_"), []))))],
-                  [(([22:16-30], array), (Lvar ([22:16-30], $untyped_array)));
+                  [(([22:16-30], varray_or_darray<_>),
+                    (Lvar ([22:16-30], $untyped_array)));
                     (([22:32-34], (function(?string $x): bool)),
                      (Lvar ([22:32-34], $f)))
                     ],

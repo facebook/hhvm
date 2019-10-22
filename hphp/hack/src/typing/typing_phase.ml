@@ -133,7 +133,9 @@ let rec localize ~ety_env env (dty : decl_ty) =
   | (r, Tarray (ty1, ty2)) ->
     let (env, ty) =
       match (ty1, ty2) with
-      | (None, None) -> (env, Tarraykind AKany)
+      | (None, None) ->
+        let tany = (r, TUtils.tany env) in
+        (env, Tarraykind (AKvarray_or_darray tany))
       | (Some tv, None) ->
         let (env, tv) = localize ~ety_env env tv in
         (env, Tarraykind (AKvarray tv))

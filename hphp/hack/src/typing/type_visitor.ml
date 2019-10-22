@@ -273,7 +273,6 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
 
     method on_tarraykind acc _ array_kind =
       match array_kind with
-      | AKany -> acc
       | AKempty -> acc
       | AKvarray_or_darray ty
       | AKvarray ty ->

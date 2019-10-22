@@ -1281,13 +1281,6 @@ and simplify_subtype_i
            || coll = SN.Collections.cContainer ->
       (match akind with
       (* array <: Traversable<_> and emptyarray <: Traversable<t> for any t *)
-      | AKany ->
-        simplify_subtype
-          ~subtype_env
-          ~this_ty
-          (fst ety_sub, Typing_defs.make_tany ())
-          tv_super
-          env
       | AKempty -> valid ()
       (* vec<tv> <: Traversable<tv_super>
        * iff tv <: tv_super
@@ -1305,18 +1298,6 @@ and simplify_subtype_i
            || coll = SN.Collections.cKeyedContainer ->
       let r = fst ety_sub in
       (match akind with
-      | AKany ->
-        env
-        |> simplify_subtype
-             ~subtype_env
-             ~this_ty
-             (fst ety_sub, Typing_defs.make_tany ())
-             tk_super
-        &&& simplify_subtype
-              ~subtype_env
-              ~this_ty
-              (fst ety_sub, Typing_defs.make_tany ())
-              tv_super
       | AKempty -> valid ()
       | AKvarray tv ->
         env
@@ -1353,13 +1334,8 @@ and simplify_subtype_i
     | (Tarraykind ak_sub, Tarraykind ak_super) ->
       begin
         match (ak_sub, ak_super) with
-        (* An array of any kind is a subtype of an array of AKany *)
-        | (_, AKany) -> valid ()
         (* An empty array is a subtype of any array type *)
         | (AKempty, _) -> valid ()
-        (* array is a subtype of varray_or_darray<_> *)
-        | (AKany, AKvarray_or_darray (_, Tany _)) -> valid ()
-        | (AKany, _) -> invalid ()
         (* varray_or_darray<ty1> <: varray_or_darray<ty2> iff t1 <: ty2
        But, varray_or_darray<ty1> is never a subtype of a vect-like array *)
         | (AKvarray_or_darray ty_sub, AKvarray_or_darray ty_super) ->
@@ -1418,7 +1394,7 @@ and simplify_subtype_i
       List.fold tyl_dest ~init:(env, TL.valid) ~f:(fun res ty_dest ->
           res &&& simplify_subtype ~subtype_env ~this_ty ety_sub ty_dest)
     (* TODO: should remove these any cases *)
-    | (Tarraykind (AKany | AKempty), Tdestructure tyl_dest)
+    | (Tarraykind AKempty, Tdestructure tyl_dest)
     | (Tany _, Tdestructure tyl_dest) ->
       let any = (fst ety_super, Typing_defs.make_tany ()) in
       List.fold tyl_dest ~init:(env, TL.valid) ~f:(fun res ty_dest ->

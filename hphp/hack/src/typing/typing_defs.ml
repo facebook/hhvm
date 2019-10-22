@@ -319,9 +319,6 @@ and internal_type =
   | ConstraintType of constraint_type
 
 and array_kind =
-  (* Those three types directly correspond to their decl_phase level counterparts:
-   * array, array<_> and array<_, _> *)
-  | AKany
   (* An array declared as a varray. *)
   | AKvarray of locl_ty
   (* An array declared as a darray. *)
@@ -832,7 +829,6 @@ let decl_ty_con_ordinal ty =
 
 let array_kind_con_ordinal ak =
   match ak with
-  | AKany -> 0
   | AKvarray _ -> 1
   | AKdarray _ -> 3
   | AKvarray_or_darray _ -> 4

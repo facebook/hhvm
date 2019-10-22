@@ -345,7 +345,6 @@ module Full = struct
     | Tdynamic -> text "dynamic"
     | Tnonnull -> text "nonnull"
     | Tarraykind (AKvarray_or_darray x) -> tvarray_or_darray k x
-    | Tarraykind AKany -> tarray k None None
     | Tarraykind AKempty -> text "array (empty)"
     | Tarraykind (AKvarray x) -> tvarray k x
     | Tarraykind (AKdarray (x, y)) -> tdarray k x y
@@ -720,7 +719,6 @@ module ErrorString = struct
     | Tintersection l -> intersection env l
     | Tarraykind (AKvarray_or_darray _) -> varray_or_darray
     | Tarraykind AKempty -> "an empty array"
-    | Tarraykind AKany -> array (None, None)
     | Tarraykind (AKvarray _) -> varray
     | Tarraykind (AKdarray (_, _)) -> darray
     | Ttuple l -> "a tuple of size " ^ string_of_int (List.length l)
@@ -775,12 +773,6 @@ module ErrorString = struct
         | _ -> "..."
       in
       "pocket universe dependent type " ^ ty ^ ":@" ^ access
-
-  and array = function
-    | (None, None) -> "an untyped array"
-    | (Some _, None) -> "an array (used like a vector)"
-    | (Some _, Some _) -> "an array (used like a hashtable)"
-    | _ -> assert false
 
   and inst env tyl =
     if List.is_empty tyl then
@@ -984,7 +976,6 @@ module Json = struct
         | Tanon _ -> obj @@ kind "anon"
         | Tarraykind (AKvarray_or_darray ty) ->
           obj @@ kind "varray_or_darray" @ args [ty]
-        | Tarraykind AKany -> obj @@ kind "array" @ empty false @ args []
         | Tarraykind (AKdarray (ty1, ty2)) ->
           obj @@ kind "darray" @ args [ty1; ty2]
         | Tarraykind (AKvarray ty) -> obj @@ kind "varray" @ args [ty]
@@ -1196,7 +1187,8 @@ module Json = struct
               if empty then
                 ty (Tarraykind AKempty)
               else
-                ty (Tarraykind AKany)
+                let tany = (Reason.Rnone, Typing_defs.make_tany ()) in
+                ty (Tarraykind (AKvarray_or_darray tany))
             | [ty1] ->
               aux ty1 ~keytrace:("0" :: keytrace)
               >>= (fun ty1 -> ty (Tarraykind (AKvarray ty1)))

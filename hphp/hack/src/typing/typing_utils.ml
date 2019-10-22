@@ -474,9 +474,8 @@ end = struct
 
       method! on_tany _ r = Some r
 
-      method! on_tarraykind acc r akind =
+      method! on_tarraykind acc _r akind =
         match akind with
-        | AKany -> Some r
         | AKempty -> acc
         | AKvarray_or_darray ty
         | AKvarray ty ->

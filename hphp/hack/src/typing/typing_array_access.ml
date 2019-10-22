@@ -347,7 +347,7 @@ let rec array_get
       | Terr -> (env, err_witness env expr_pos)
       | Tdynamic -> (env, ety1)
       | Tany _ -> (env, (Reason.Rnone, TUtils.tany env))
-      | Tarraykind (AKany | AKempty) ->
+      | Tarraykind AKempty ->
         let env = check_arraykey_index env expr_pos ety1 ty2 in
         (env, (Reason.Rnone, TUtils.tany env))
       | Tprim Tstring ->
@@ -529,7 +529,7 @@ let assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
   in
   GenericRules.apply_rules env ty1 (fun env ty1 ->
       match ty1 with
-      | (_, (Tany _ | Tarraykind (AKany | AKempty))) -> (env, ty1)
+      | (_, (Tany _ | Tarraykind AKempty)) -> (env, ty1)
       | (_, Terr) -> (env, ty1)
       | (_, Tclass ((_, n), _, [tv]))
         when n = SN.Collections.cVector || n = SN.Collections.cSet ->
@@ -763,9 +763,7 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
         (env, (r, Tarraykind (AKdarray (tk', tv'))))
       | Terr -> error
       | Tdynamic -> (env, ety1)
-      | Tany _
-      | Tarraykind AKany ->
-        (env, ety1)
+      | Tany _ -> (env, ety1)
       | Tarraykind AKempty ->
         let env = check_arraykey_index env expr_pos ety1 tkey in
         let tk =

@@ -31,7 +31,7 @@ let rec strip_ty ty =
     | Tprim _ -> ty
     | Tvar _ -> ty
     | Tanon _ -> ty
-    | Tarraykind (AKany | AKempty) -> ty
+    | Tarraykind AKempty -> ty
     | Tarraykind (AKdarray (ty1, ty2)) ->
       Tarraykind (AKdarray (strip_ty ty1, strip_ty ty2))
     | Tarraykind (AKvarray ty) -> Tarraykind (AKvarray (strip_ty ty))

@@ -239,7 +239,6 @@ and show_ty_ : type a. a ty_ -> string =
 and pp_array_kind : Format.formatter -> array_kind -> unit =
  fun fmt ak ->
   match ak with
-  | AKany -> Format.pp_print_string fmt "AKany"
   | AKvarray a0 ->
     Format.fprintf fmt "(@[<2>AKvarray@ ";
     pp_ty fmt a0;

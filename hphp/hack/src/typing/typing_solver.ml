@@ -109,9 +109,7 @@ let rec freshen_inside_ty env ((r, ty_) as ty) =
   | Tarraykind ak ->
     begin
       match ak with
-      | AKany
-      | AKempty ->
-        default ()
+      | AKempty -> default ()
       | AKvarray ty ->
         let (env, ty) = freshen_ty env ty in
         (env, (r, Tarraykind (AKvarray ty)))

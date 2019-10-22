@@ -1,6 +1,4 @@
-File "array_foreach.php", line 20, characters 8-11:
-Invalid argument (Typing[4110])
-File "array_foreach.php", line 31, characters 15-27:
-Expected varray<string>
+File "array_foreach.php", line 16, characters 3-16:
+a varray_or_darray does not allow array append (Typing[4006])
 File "array_foreach.php", line 12, characters 15-19:
-But got array
+Definition is here

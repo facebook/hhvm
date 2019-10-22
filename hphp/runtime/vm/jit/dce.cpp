@@ -1349,6 +1349,78 @@ void optimizeCatchBlocks(const BlockList& blocks,
   }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
+void killInstrAdjustRC(
+  DceState& state,
+  IRUnit& unit,
+  IRInstruction* inst,
+  jit::vector<IRInstruction*>& decs
+) {
+  auto anyRemaining = false;
+  if (inst->consumesReferences()) {
+    // ConsumesReference inputs that are definitely not moved can
+    // simply be decreffed as a replacement for the dead consumesref
+    // instruction
+    auto srcIx = 0;
+    for (auto src : inst->srcs()) {
+      auto const ix = srcIx++;
+      if (inst->consumesReference(ix) && src->type().maybe(TCounted)) {
+        if (inst->mayMoveReference(ix)) {
+          anyRemaining = true;
+          continue;
+        }
+        auto const blk = inst->block();
+        auto const ins = unit.gen(DecRef, inst->bcctx(), DecRefData{}, src);
+        blk->insert(blk->iteratorTo(inst), ins);
+        FTRACE(3, "Inserting {} to replace {}\n",
+               ins->toString(), inst->toString());
+        state[ins].setLive();
+      }
+    }
+  }
+  for (auto dec : decs) {
+    auto replaced = dec->src(0) != inst->dst();
+    auto srcIx = 0;
+    if (anyRemaining) {
+      // The remaining inputs might be moved, so may need to survive
+      // until this instruction is decreffed
+      for (auto src : inst->srcs()) {
+        if (inst->mayMoveReference(srcIx++) && src->type().maybe(TCounted)) {
+          if (!replaced) {
+            FTRACE(3, "Converting {} to ", dec->toString());
+            dec->setSrc(0, src);
+            FTRACE(3, "{} for {}\n", dec->toString(), inst->toString());
+            replaced = true;
+            state[dec].setLive();
+          } else {
+            auto const blk = dec->block();
+            auto const ins = unit.gen(DecRef, dec->bcctx(), DecRefData{}, src);
+            blk->insert(blk->iteratorTo(dec), ins);
+            FTRACE(3, "Inserting {} before {} for {}\n",
+                   ins->toString(), dec->toString(), inst->toString());
+            state[ins].setLive();
+          }
+        }
+      }
+    }
+    if (!replaced) {
+      FTRACE(3, "Killing {} for {}\n", dec->toString(), inst->toString());
+      state[dec].setDead();
+    }
+  }
+  state[inst].setDead();
+}
+
+struct TrackedInstr {
+  // DecRefs which refer to the tracked instruction.
+  jit::vector<IRInstruction*> decs;
+
+  // Auxiliary instructions which must be killed if the tracked instruction is
+  // killed.
+  jit::vector<IRInstruction*> aux;
+};
+
 //////////////////////////////////////////////////////////////////////
 
 } // anonymous namespace
@@ -1497,13 +1569,14 @@ void fullDCE(IRUnit& unit) {
   WorkList wl = initInstructions(unit, blocks, state);
 
   UseCounts uses(unit, 0);
-  jit::fast_map<IRInstruction*, jit::vector<IRInstruction*>> decs;
+  jit::fast_map<IRInstruction*, TrackedInstr> rcInsts;
 
   // process the worklist
   while (!wl.empty()) {
     auto* inst = wl.back();
     wl.pop_back();
-    for (auto src : inst->srcs()) {
+    for (uint32_t ix = 0; ix < inst->numSrcs(); ++ix) {
+      auto const src = inst->src(ix);
       IRInstruction* srcInst = src->inst();
       if (srcInst->op() == DefConst) continue;
 
@@ -1517,7 +1590,10 @@ void fullDCE(IRUnit& unit) {
       if (srcInst->producesReference() && canDCE(srcInst)) {
         ++uses[src];
         if (inst->is(DecRef)) {
-          decs[srcInst].emplace_back(inst);
+          rcInsts[srcInst].decs.emplace_back(inst);
+        }
+        if (inst->is(InitPackedLayoutArray)) {
+          if (ix == 0) rcInsts[srcInst].aux.emplace_back(inst);
         }
       }
 
@@ -1528,68 +1604,14 @@ void fullDCE(IRUnit& unit) {
     }
   }
 
-  // If every use of a dce-able PRc instruction is a DecRef, then we
-  // can kill it, and DecRef any of its consumesReference inputs.
-  for (auto& pair : decs) {
-    if (uses[pair.first->dst()] != pair.second.size()) continue;
-    auto anyRemaining = false;
-    if (pair.first->consumesReferences()) {
-      // ConsumesReference inputs that are definitely not moved can
-      // simply be decreffed as a replacement for the dead consumesref
-      // instruction
-      auto srcIx = 0;
-      for (auto src : pair.first->srcs()) {
-        auto const ix = srcIx++;
-        if (pair.first->consumesReference(ix) &&
-            src->type().maybe(TCounted)) {
-          if (pair.first->mayMoveReference(ix)) {
-            anyRemaining = true;
-            continue;
-          }
-          auto const blk = pair.first->block();
-          auto const ins = unit.gen(DecRef, pair.first->bcctx(),
-                                    DecRefData{}, src);
-          blk->insert(blk->iteratorTo(pair.first), ins);
-          FTRACE(3, "Inserting {} to replace {}\n",
-                 ins->toString(), pair.first->toString());
-          state[ins].setLive();
-        }
-      }
-    }
-    for (auto dec : pair.second) {
-      auto replaced = false;
-      auto srcIx = 0;
-      if (anyRemaining) {
-        // The remaining inputs might be moved, so may need to survive
-        // until this instruction is decreffed
-        for (auto src : pair.first->srcs()) {
-          if (pair.first->mayMoveReference(srcIx++) &&
-              src->type().maybe(TCounted) ) {
-            if (!replaced) {
-              FTRACE(3, "Converting {} to ", dec->toString());
-              dec->setSrc(0, src);
-              FTRACE(3, "{} for {}\n",
-                     dec->toString(), pair.first->toString());
-              replaced = true;
-            } else {
-              auto const blk = dec->block();
-              auto const ins = unit.gen(DecRef, dec->bcctx(),
-                                        DecRefData{}, src);
-              blk->insert(blk->iteratorTo(dec), ins);
-              FTRACE(3, "Inserting {} before {} for {}\n",
-                     ins->toString(), dec->toString(), pair.first->toString());
-              state[ins].setLive();
-            }
-          }
-        }
-      }
-      if (!replaced) {
-        FTRACE(3, "Killing {} for {}\n",
-               dec->toString(), pair.first->toString());
-        state[dec].setDead();
-      }
-    }
-    state[pair.first].setDead();
+  // If every use of a dce-able PRc instruction is a DecRef or PureStore based
+  // on its dst, then we can kill it, and DecRef any of its consumesReference
+  // inputs.
+  for (auto& pair : rcInsts) {
+    auto& info = pair.second;
+    if (uses[pair.first->dst()] != info.decs.size() + info.aux.size()) continue;
+    killInstrAdjustRC(state, unit, pair.first, info.decs);
+    for (auto inst : info.aux) killInstrAdjustRC(state, unit, inst, info.decs);
   }
 
   optimizeCatchBlocks(blocks, state, unit, uses);

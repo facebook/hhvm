@@ -492,6 +492,22 @@ Flags handle_general_effects(Local& env,
     }
     break;
 
+  case CheckPackedArrayDataBounds: {
+    if (!(inst.src(0)->type() <= (TVec|Type::Array(ArrayData::kPackedKind)))) {
+      break;
+    }
+    if (!inst.src(1)->hasConstVal(TInt)) break;
+
+    auto const idx = inst.src(1)->intVal();
+    auto const acls = canonicalize(AElemI { inst.src(0), idx });
+    auto const meta = env.global.ainfo.find(acls);
+    if (!meta) break;
+    if (!env.state.avail[meta->index]) break;
+    if (env.state.tracked[meta->index].knownType.maybe(TUninit)) break;
+
+    return Flags{FJmpNext{}};
+  }
+
   default:
     break;
   }

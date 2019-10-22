@@ -3,11 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::cell::RefCell;
 use std::cmp::max;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
-use crate::{BlockBuilder, OcamlRep, Value};
+use crate::{block::Header, OcamlRep, Value};
 
 struct Chunk<'a> {
     data: Box<[Value<'a>]>,
@@ -38,7 +37,7 @@ impl<'a> Chunk<'a> {
     pub fn alloc(&mut self, requested_size: usize) -> *mut Value<'a> {
         let previous_index = self.index;
         self.index += requested_size;
-        &mut self.data[previous_index] as *mut Value<'a>
+        unsafe { self.data.as_mut_ptr().add(previous_index) }
     }
 }
 
@@ -57,7 +56,7 @@ static NEXT_GENERATION: AtomicUsize = AtomicUsize::new(usize::max_value() / 2);
 
 pub struct Arena<'a> {
     generation: usize,
-    current_chunk: RefCell<Chunk<'a>>,
+    current_chunk: Chunk<'a>,
 }
 
 impl<'a> Arena<'a> {
@@ -72,7 +71,7 @@ impl<'a> Arena<'a> {
         let capacity_in_words = max(2, capacity_in_bytes / std::mem::size_of::<Value<'_>>());
         Self {
             generation,
-            current_chunk: RefCell::new(Chunk::with_capacity(capacity_in_words)),
+            current_chunk: Chunk::with_capacity(capacity_in_words),
         }
     }
 
@@ -81,32 +80,43 @@ impl<'a> Arena<'a> {
     }
 
     #[inline]
-    fn alloc(&self, requested_size: usize) -> &mut [Value<'a>] {
-        if !self.current_chunk.borrow().can_fit(requested_size) {
-            let prev_chunk_capacity = self.current_chunk.borrow().capacity();
-            let prev_chunk = self.current_chunk.replace(Chunk::with_capacity(max(
-                requested_size * 2,
-                prev_chunk_capacity,
-            )));
-            self.current_chunk.borrow_mut().prev = Some(Box::new(prev_chunk));
+    fn alloc(&mut self, requested_size: usize) -> *mut Value<'a> {
+        if !self.current_chunk.can_fit(requested_size) {
+            let prev_chunk_capacity = self.current_chunk.capacity();
+            let prev_chunk = std::mem::replace(
+                &mut self.current_chunk,
+                Chunk::with_capacity(max(requested_size * 2, prev_chunk_capacity)),
+            );
+            self.current_chunk.prev = Some(Box::new(prev_chunk));
         }
-        let ptr = self.current_chunk.borrow_mut().alloc(requested_size);
-        unsafe { std::slice::from_raw_parts_mut(ptr, requested_size) }
+        self.current_chunk.alloc(requested_size)
     }
 
     #[inline]
-    pub fn block_with_size<'b>(&'b self, size: usize) -> BlockBuilder<'a, 'b> {
+    pub fn block_with_size_and_tag(&mut self, size: usize, tag: u8) -> *mut Value<'a> {
+        assert!(size > 0);
+        let block = self.alloc(size + 1);
+        let header = Header::new(size, tag);
+        unsafe {
+            *block = Value::from_bits(header.to_bits());
+            block.add(1)
+        }
+    }
+
+    #[inline(always)]
+    pub fn block_with_size(&mut self, size: usize) -> *mut Value<'a> {
         self.block_with_size_and_tag(size, 0)
     }
 
-    #[inline]
-    pub fn block_with_size_and_tag<'b>(&'b self, size: usize, tag: u8) -> BlockBuilder<'a, 'b> {
-        let slice = self.alloc(size + 1);
-        BlockBuilder::new(size, tag, slice)
+    /// This method is marked unsafe because there is no bounds checking for
+    /// this write. Take care that the index is less than the size of the block.
+    #[inline(always)]
+    pub unsafe fn set_field(block: *mut Value<'a>, index: usize, value: Value<'a>) {
+        *block.add(index) = value;
     }
 
-    #[inline]
-    pub fn add<T: OcamlRep>(&self, value: T) -> Value<'a> {
+    #[inline(always)]
+    pub fn add<T: OcamlRep>(&mut self, value: T) -> Value<'a> {
         value.into_ocamlrep(self)
     }
 }
@@ -119,12 +129,15 @@ mod tests {
 
     #[test]
     fn test_alloc_block_of_three_fields() {
-        let arena = Arena::with_capacity(1000);
-        let mut block = arena.block_with_size(3);
-        block[0] = Value::int(1);
-        block[1] = Value::int(2);
-        block[2] = Value::int(3);
-        let block = block.build().as_block().unwrap();
+        let mut arena = Arena::with_capacity(1000);
+
+        let block = unsafe {
+            let block = arena.block_with_size(3);
+            Arena::set_field(block, 0, Value::int(1));
+            Arena::set_field(block, 1, Value::int(2));
+            Arena::set_field(block, 2, Value::int(3));
+            Value::from_ptr(block).as_block().unwrap()
+        };
 
         assert_eq!(block.size(), 3);
         assert_eq!(block[0].as_int().unwrap(), 1);
@@ -134,20 +147,33 @@ mod tests {
 
     #[test]
     fn test_large_allocs() {
-        let arena = Arena::with_capacity(1000);
-        let max = arena.block_with_size(1000).build().as_block().unwrap();
+        let mut arena = Arena::with_capacity(1000);
+
+        let mut alloc_block = |size| {
+            unsafe { Value::from_ptr(arena.block_with_size(size)) }
+                .as_block()
+                .unwrap()
+        };
+
+        let max = alloc_block(1000);
         assert_eq!(max.size(), 1000);
 
-        let two_thousand = arena.block_with_size(2000).build().as_block().unwrap();
+        let two_thousand = alloc_block(2000);
         assert_eq!(two_thousand.size(), 2000);
 
-        let four_thousand = arena.block_with_size(4000).build().as_block().unwrap();
+        let four_thousand = alloc_block(4000);
         assert_eq!(four_thousand.size(), 4000);
     }
 
     #[test]
     fn perf_test() {
-        let arena = Arena::with_capacity(10_000);
+        let mut arena = Arena::with_capacity(10_000);
+
+        let mut alloc_block = |size| {
+            unsafe { Value::from_ptr(arena.block_with_size(size)) }
+                .as_block()
+                .unwrap()
+        };
 
         println!("Benchmarks for allocating [1] 200,000 times");
         let now = Instant::now();
@@ -158,7 +184,7 @@ mod tests {
 
         let now = Instant::now();
         for _ in 0..200_000 {
-            arena.block_with_size(1).build().as_block().unwrap();
+            alloc_block(1);
         }
         println!("Arena: {:?}", now.elapsed());
 
@@ -171,7 +197,7 @@ mod tests {
 
         let now = Instant::now();
         for _ in 0..200_000 {
-            arena.block_with_size(5).build().as_block().unwrap();
+            alloc_block(5);
         }
         println!("Arena: {:?}", now.elapsed());
 
@@ -184,7 +210,7 @@ mod tests {
 
         let now = Instant::now();
         for _ in 0..200_000 {
-            arena.block_with_size(10).build().as_block().unwrap();
+            alloc_block(10);
         }
         println!("Arena: {:?}", now.elapsed());
     }

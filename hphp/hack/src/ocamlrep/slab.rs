@@ -430,7 +430,7 @@ mod test_integrity_check {
     const TUPLE_42_A_SIZE_IN_BYTES: usize = TUPLE_42_A_SIZE_IN_WORDS * WORD_SIZE;
 
     fn write_tuple_42_a(mut slab: &mut Slab) {
-        let arena = Arena::new();
+        let mut arena = Arena::new();
         let value = arena.add((42, "a".to_string()));
         unsafe { SlabBuilder::build_from_value(&mut slab, value) };
     }

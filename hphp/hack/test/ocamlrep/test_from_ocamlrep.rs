@@ -15,8 +15,8 @@ fn expected_block_but_got_int() {
 
 #[test]
 fn expected_int_but_got_block() {
-    let arena = Arena::new();
-    let value = arena.block_with_size_and_tag(1, 0).build();
+    let mut arena = Arena::new();
+    let value = unsafe { Value::from_ptr(arena.block_with_size_and_tag(1, 0)) };
     let err = isize::from_ocamlrep(value).err().unwrap();
     match err {
         ExpectedImmediate(..) => (),
@@ -33,8 +33,8 @@ fn wrong_tag_for_none() {
 
 #[test]
 fn wrong_tag_for_some() {
-    let arena = Arena::new();
-    let value = arena.block_with_size_and_tag(1, 1).build();
+    let mut arena = Arena::new();
+    let value = unsafe { Value::from_ptr(arena.block_with_size_and_tag(1, 1)) };
     let err = <Option<isize>>::from_ocamlrep(value).err().unwrap();
     assert_eq!(
         err,
@@ -67,11 +67,13 @@ struct Foo {
 
 #[test]
 fn bad_struct_field() {
-    let arena = Arena::new();
-    let mut foo = arena.block_with_size_and_tag(2, 0);
-    foo[0] = Value::int(0);
-    foo[1] = Value::int(42);
-    let value = foo.build();
+    let mut arena = Arena::new();
+    let value = unsafe {
+        let foo = arena.block_with_size_and_tag(2, 0);
+        Arena::set_field(foo, 0, Value::int(0));
+        Arena::set_field(foo, 1, Value::int(42));
+        Value::from_ptr(foo)
+    };
     let err = Foo::from_ocamlrep(value).err().unwrap();
     assert_eq!(err, ErrorInField(1, Box::new(ExpectedBool(42))));
 }
@@ -84,17 +86,21 @@ struct Bar {
 
 #[test]
 fn bad_nested_struct_field() {
-    let arena = Arena::new();
+    let mut arena = Arena::new();
 
-    let mut foo = arena.block_with_size_and_tag(2, 0);
-    foo[0] = Value::int(0);
-    foo[1] = Value::int(42);
-    let foo = foo.build();
+    let foo = unsafe {
+        let foo = arena.block_with_size_and_tag(2, 0);
+        Arena::set_field(foo, 0, Value::int(0));
+        Arena::set_field(foo, 1, Value::int(42));
+        Value::from_ptr(foo)
+    };
 
-    let mut bar = arena.block_with_size_and_tag(2, 0);
-    bar[0] = foo;
-    bar[1] = Value::int(0);
-    let bar = bar.build();
+    let bar = unsafe {
+        let bar = arena.block_with_size_and_tag(2, 0);
+        Arena::set_field(bar, 0, foo);
+        Arena::set_field(bar, 1, Value::int(0));
+        Value::from_ptr(bar)
+    };
 
     let err = Bar::from_ocamlrep(bar).err().unwrap();
     assert_eq!(
@@ -115,8 +121,8 @@ fn expected_unit_struct_but_got_nonzero() {
 
 #[test]
 fn expected_unit_struct_but_got_block() {
-    let arena = Arena::new();
-    let value = arena.block_with_size_and_tag(1, 0).build();
+    let mut arena = Arena::new();
+    let value = unsafe { Value::from_ptr(arena.block_with_size_and_tag(1, 0)) };
     let err = UnitStruct::from_ocamlrep(value).err().unwrap();
     match err {
         ExpectedImmediate(..) => (),
@@ -151,16 +157,16 @@ fn nullary_variant_tag_out_of_range() {
 
 #[test]
 fn block_variant_tag_out_of_range() {
-    let arena = Arena::new();
-    let value = arena.block_with_size_and_tag(1, 42).build();
+    let mut arena = Arena::new();
+    let value = unsafe { Value::from_ptr(arena.block_with_size_and_tag(1, 42)) };
     let err = Fruit::from_ocamlrep(value).err().unwrap();
     assert_eq!(err, BlockTagOutOfRange { max: 1, actual: 42 });
 }
 
 #[test]
 fn wrong_block_variant_size() {
-    let arena = Arena::new();
-    let value = arena.block_with_size_and_tag(42, 0).build();
+    let mut arena = Arena::new();
+    let value = unsafe { Value::from_ptr(arena.block_with_size_and_tag(42, 0)) };
     let err = Fruit::from_ocamlrep(value).err().unwrap();
     assert_eq!(
         err,
@@ -173,20 +179,24 @@ fn wrong_block_variant_size() {
 
 #[test]
 fn bad_tuple_variant_value() {
-    let arena = Arena::new();
-    let mut orange = arena.block_with_size_and_tag(1, 0);
-    orange[0] = Value::int(42);
-    let orange = orange.build();
+    let mut arena = Arena::new();
+    let orange = unsafe {
+        let orange = arena.block_with_size_and_tag(1, 0);
+        Arena::set_field(orange, 0, Value::int(42));
+        Value::from_ptr(orange)
+    };
     let err = Fruit::from_ocamlrep(orange).err().unwrap();
     assert_eq!(err, ErrorInField(0, Box::new(ExpectedBool(42))));
 }
 
 #[test]
 fn bad_struct_variant_value() {
-    let arena = Arena::new();
-    let mut pear = arena.block_with_size_and_tag(1, 1);
-    pear[0] = Value::int(42);
-    let pear = pear.build();
+    let mut arena = Arena::new();
+    let pear = unsafe {
+        let pear = arena.block_with_size_and_tag(1, 1);
+        Arena::set_field(pear, 0, Value::int(42));
+        Value::from_ptr(pear)
+    };
     let err = Fruit::from_ocamlrep(pear).err().unwrap();
     assert_eq!(err, ErrorInField(0, Box::new(ExpectedBool(42))));
 }

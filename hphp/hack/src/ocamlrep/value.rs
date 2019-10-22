@@ -54,6 +54,15 @@ impl<'a> Value<'a> {
         Some(Block(block))
     }
 
+    /// This method is unsafe because it requires that the pointed-to Value is
+    /// the first field of a block, which must be preceded by a valid Header
+    /// correctly describing the block's size and tag (i.e., value.offset(1)
+    /// should point to that Header). To be used only with pointers returned by
+    /// Arena allocation methods.
+    pub unsafe fn from_ptr(value: *const Value<'a>) -> Value<'a> {
+        Value(value as usize, PhantomData)
+    }
+
     pub unsafe fn from_bits(value: usize) -> Value<'a> {
         Value(value, PhantomData)
     }

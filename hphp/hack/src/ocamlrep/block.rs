@@ -5,46 +5,13 @@
 
 use std::borrow::Cow;
 use std::fmt::{self, Debug};
-use std::ops::{Index, IndexMut};
+use std::ops::Index;
 
 use crate::Value;
 
 pub const NO_SCAN_TAG: u8 = 251;
 pub const STRING_TAG: u8 = 252;
 pub const DOUBLE_TAG: u8 = 253;
-
-#[repr(transparent)]
-pub struct BlockBuilder<'arena: 'builder, 'builder>(pub(crate) &'builder mut [Value<'arena>]);
-
-impl<'a, 'b> BlockBuilder<'a, 'b> {
-    pub fn new(size: usize, tag: u8, block: &'b mut [Value<'a>]) -> Self {
-        if size == 0 {
-            panic!()
-        }
-        let header = Header::new(size, tag);
-        let header = unsafe { Value::from_bits(header.to_bits()) };
-        block[0] = header;
-        BlockBuilder(block)
-    }
-
-    pub fn build(self) -> Value<'a> {
-        unsafe { Value::from_bits(self.0.as_ptr().add(1) as usize) }
-    }
-}
-
-impl<'a, 'b> Index<usize> for BlockBuilder<'a, 'b> {
-    type Output = Value<'a>;
-
-    fn index(&self, index: usize) -> &Self::Output {
-        &self.0[index + 1]
-    }
-}
-
-impl IndexMut<usize> for BlockBuilder<'_, '_> {
-    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        &mut self.0[index + 1]
-    }
-}
 
 #[repr(transparent)]
 #[derive(Clone, Copy)]
@@ -122,7 +89,7 @@ impl Debug for Block<'_> {
 pub struct Header(usize);
 
 impl Header {
-    fn new(size: usize, tag: u8) -> Self {
+    pub(crate) fn new(size: usize, tag: u8) -> Self {
         let bits = size << 10 | (tag as usize);
         Header(bits)
     }

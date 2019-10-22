@@ -11,11 +11,11 @@ use ocamlrep::OcamlRep;
 use ocamlrep_derive::OcamlRep;
 
 fn val<T: OcamlRep>(value: T) -> ocaml::Value {
-    let arena = ocamlrep::Arena::new();
-    let value = value.into_ocamlrep(&arena);
+    let mut arena = ocamlrep::Arena::new();
+    let value = arena.add(value);
     // Round-trip back to T to exercise from_ocamlrep.
     let value = T::from_ocamlrep(value).unwrap();
-    let value = value.into_ocamlrep(&arena);
+    let value = arena.add(value);
     mem::forget(arena);
     ocaml::Value::new(unsafe { value.to_bits() })
 }

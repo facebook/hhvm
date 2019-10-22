@@ -34,7 +34,7 @@ fn derive_ocamlrep(mut s: synstructure::Structure) -> TokenStream {
     s.gen_impl(quote! {
         use ::ocamlrep::OcamlRep;
         gen impl ::ocamlrep::OcamlRep for @Self {
-            fn into_ocamlrep<'a>(self, arena: &::ocamlrep::Arena<'a>) -> ::ocamlrep::Value<'a> {
+            fn into_ocamlrep<'a>(self, arena: &mut ::ocamlrep::Arena<'a>) -> ::ocamlrep::Value<'a> {
                 match self { #into_body }
             }
 
@@ -188,11 +188,15 @@ fn allocate_block(variant: &synstructure::VariantInfo, tag: u8) -> TokenStream {
     let size = variant.bindings().len();
     let mut fields = TokenStream::new();
     for (i, bi) in variant.bindings().iter().enumerate() {
-        fields.extend(quote! { block[#i] = arena.add(#bi); });
+        fields.extend(quote! {
+            ::ocamlrep::Arena::set_field(block, #i, arena.add(#bi));
+        });
     }
     quote! {
-        let mut block = arena.block_with_size_and_tag(#size, #tag);
-        #fields
-        block.build()
+        let block = arena.block_with_size_and_tag(#size, #tag);
+        unsafe {
+            #fields
+            ::ocamlrep::Value::from_ptr(block)
+        }
     }
 }

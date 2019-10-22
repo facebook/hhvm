@@ -238,7 +238,7 @@ impl<T> fmt::Pointer for RcOc<T> {
 }
 
 impl<T: OcamlRep + Clone> OcamlRep for RcOc<T> {
-    fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
+    fn into_ocamlrep<'a>(self, arena: &mut Arena<'a>) -> Value<'a> {
         let generation = arena.generation();
         match self.get_cached_value_in_generation(generation) {
             Some(value) => unsafe { Value::from_bits(value) },

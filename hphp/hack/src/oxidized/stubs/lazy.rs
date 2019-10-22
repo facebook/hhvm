@@ -10,7 +10,7 @@ use ocamlrep::OcamlRep;
 pub struct Lazy<T>(T);
 
 impl<T: OcamlRep> OcamlRep for Lazy<T> {
-    fn into_ocamlrep<'a>(self, _arena: &ocamlrep::Arena<'a>) -> ocamlrep::Value<'a> {
+    fn into_ocamlrep<'a>(self, _arena: &mut ocamlrep::Arena<'a>) -> ocamlrep::Value<'a> {
         unimplemented!()
     }
 

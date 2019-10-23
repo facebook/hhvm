@@ -690,8 +690,8 @@ where
                 if is_valid_shape_literal(t) {
                     let ast_defs::Id(p, n) = Self::pos_name(node, env)?;
                     let str_ = Self::mk_str(node, env, Self::unesc_dbl, &n);
-                    match isize::from_str_radix(&str_, 10) {
-                        Ok(_) => Self::raise_parsing_error(
+                    match ocaml_helper::int_of_string_opt(&str_.as_bytes()) {
+                        Some(_) => Self::raise_parsing_error(
                             node,
                             env,
                             &syntax_error::shape_field_int_like_string,
@@ -728,7 +728,7 @@ where
                 })
             }
             _ => {
-                let (name, hint) = Self::mp_shape_expression_field(&Self::p_hint, node, env)?;
+                let (name, hint) = Self::mp_shape_expression_field(Self::p_hint, node, env)?;
                 Ok(aast::ShapeFieldInfo {
                     optional: false,
                     name,

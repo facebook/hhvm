@@ -12,6 +12,7 @@ ocamlpool_rust = { path = "../../../utils/ocamlpool_rust", package = "hack_utils
 ocamlvalue_macro = {path = "../../../utils/ocamlpool_rust/macro", package = "hack_utils_ocamlvalue_macro" }
 oxidized = {path = "../../../oxidized", package = "hack_oxidized" }
 escaper = {path = "../../../utils/escaper", package = "hack_escaper" }
+ocaml_helper = {path = "../../../utils/ocaml_helper", package = "hack_ocaml_helper" }
 html_entities = {path = "../../../utils/html_entities", package = "html_entities" }
 parser_core_types = { path = "../core_types", package = "hack_parser_core_types" }
 parser_rust = { path = "../..", package = "hack_parser" }

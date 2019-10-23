@@ -82,56 +82,47 @@ let compare_decl verbosity fn =
     |> List.reduce_exn ~f:( && )
   in
   let passes_decl_check () =
-    let old_decls =
-      {
-        classes = SMap.empty;
-        funs = SMap.empty;
-        consts = SMap.empty;
-        typedefs = SMap.empty;
-      }
+    let compare name get_decl show_decl parsed_decls =
+      let different_decls =
+        SMap.fold
+          (fun key parsed_decl acc ->
+            let legacy_decl = get_decl fn ("\\" ^ key) in
+            let legacy_decl_str = show_decl legacy_decl in
+            let parsed_decl_str = show_decl parsed_decl in
+            if legacy_decl_str <> parsed_decl_str then
+              (key, legacy_decl_str, parsed_decl_str) :: acc
+            else
+              acc)
+          parsed_decls
+          []
+      in
+      match different_decls with
+      | [] -> true
+      | different_decls ->
+        Printf.eprintf
+          "The following %s differed between the legacy and parsed versions:\n"
+          name;
+        List.iter different_decls ~f:(fun (key, legacy_decl, parsed_decl) ->
+            Printf.eprintf
+              "\n\n[%s]\nLegacy decl:\n%s\n\nParsed decl:\n%s\n"
+              key
+              legacy_decl
+              parsed_decl);
+        false
     in
-    let old_decls =
-      List.fold
-        facts.Facts.constants
-        ~init:old_decls
-        ~f:(fun old_decls const ->
-          {
-            old_decls with
-            consts =
-              SMap.add
-                const
-                (fst (Decl.declare_const_in_file fn ("\\" ^ const)))
-                old_decls.consts;
-          })
-    in
-    let old_decls =
-      List.fold
-        facts.Facts.type_aliases
-        ~init:old_decls
-        ~f:(fun old_decls typedef ->
-          {
-            old_decls with
-            typedefs =
-              SMap.add
-                typedef
-                (Decl.declare_typedef_in_file fn ("\\" ^ typedef))
-                old_decls.typedefs;
-          })
-    in
-    (* These can't be compared directly because they contain stdlib Maps, so
-       polymorphic compare won't behave correctly. *)
-    if
-      Direct_decl_parser.show_decls decls
-      = Direct_decl_parser.show_decls old_decls
-    then
-      true
-    else (
-      Printf.eprintf
-        "Decls differed. Parsed decls:\n%s\n\nGenerated decls:\n%s"
-        (show_decls decls)
-        (show_decls old_decls);
-      false
-    )
+    [
+      compare
+        "typedef(s)"
+        Decl.declare_typedef_in_file
+        Pp_type.show_typedef_type
+        decls.typedefs;
+      compare
+        "constant(s)"
+        (fun a b -> Decl.declare_const_in_file a b |> fst)
+        (Pp_type.show_decl_ty ())
+        decls.consts;
+    ]
+    |> List.reduce_exn ~f:( && )
   in
   passes_symbol_check () && passes_decl_check ()
 

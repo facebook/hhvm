@@ -143,11 +143,6 @@ struct VariableUnserializer {
   tv_lval getByVal(int id);
 
   /*
-   * Used by the 'R' encoding to get a reference.
-   */
-  tv_lval getByRef(int id);
-
-  /*
    * Store properties/array elements that get overwritten incase they are
    * referenced later during unserialization
    */

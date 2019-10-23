@@ -347,26 +347,6 @@ tv_lval VariableUnserializer::getByVal(int id) {
   return ret;
 }
 
-tv_lval VariableUnserializer::getByRef(int id) {
-  if (id <= 0 || id > (int)m_refs.size()) return nullptr;
-  auto const& info = m_refs[id-1];
-  if (UNLIKELY(!info.canBeReferenced())) {
-    if (info.isColValue()) {
-      throwColRefValue();
-    } else if (info.isVecValue()) {
-      throwVecRefValue();
-    } else {
-      assertx(info.isDictValue());
-      throwDictRefValue();
-    }
-  } else if (checkHACRefBind()) {
-    raiseHackArrCompatRefNew();
-  }
-  auto ret = info.var();
-  if (!ret) throwColRefKey();
-  return ret;
-}
-
 void VariableUnserializer::check() const {
   if (m_buf >= m_end) throwUnexpectedEOB();
 }
@@ -814,27 +794,12 @@ void VariableUnserializer::unserializeVariant(
 
   switch (type) {
   case 'r':
+  case 'R':
     {
       int64_t id = readInt();
       auto v = getByVal(id);
       if (!v) throwOutOfRange(id);
       tvSet(tvToInitCell(*v), self);
-    }
-    break;
-  case 'R':
-    {
-      if (UNLIKELY(mode == UnserializeMode::VecValue)) {
-        throwVecRefValue();
-      } else if (UNLIKELY(mode == UnserializeMode::DictValue)) {
-        throwDictRefValue();
-      } else if (checkHACRefBind()) {
-        raiseHackArrCompatRefNew();
-      }
-
-      int64_t id = readInt();
-      auto v = getByRef(id);
-      if (!v) throwOutOfRange(id);
-      tvSetRef(v, self);
     }
     break;
   case 'b':

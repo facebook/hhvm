@@ -224,24 +224,33 @@ vec(2) {
 }
 ====================================================
 string(22) "v:2:{v:1:{i:123;}R:2;}"
-
-Notice: Unable to unserialize: [v:2:{v:1:{i:123;}R:2;}]. Vecs cannot contain references. in %s on line %d
-bool(false)
+vec(2) {
+  vec(1) {
+    int(123)
+  }
+  vec(1) {
+    int(123)
+  }
+}
 ====================================================
 string(26) "v:2:{i:123;a:1:{i:1;R:2;}}"
-
-Notice: Unable to unserialize: [v:2:{i:123;a:1:{i:1;R:2;}}]. Vecs cannot contain references. in %s on line %d
-bool(false)
+vec(2) {
+  int(123)
+  array(1) {
+    [1]=>
+    int(123)
+  }
+}
 ====================================================
 string(36) "v:2:{a:1:{i:0;i:123;}a:1:{i:0;R:3;}}"
 vec(2) {
   array(1) {
     [0]=>
-    &int(123)
+    int(123)
   }
   array(1) {
     [0]=>
-    &int(123)
+    int(123)
   }
 }
 ====================================================

@@ -1,10 +1,16 @@
 array(3) {
   [0]=>
-  &string(5) "awake"
+  object(stdClass) (1) {
+    ["0"]=>
+    array(1) {
+      [0]=>
+      int(1)
+    }
+  }
   [1]=>
   object(obj) (1) {
     ["prop"]=>
-    &string(5) "awake"
+    string(5) "awake"
   }
   [2]=>
   array(1) {

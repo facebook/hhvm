@@ -169,7 +169,9 @@ void optimize(IRUnit& unit, TransKind kind) {
 
   assertx(checkEverything(unit));
 
-  fullDCE(unit);
+  // We use ExitPlaceholders to hide specialized iterators until we use them.
+  // Any placeholders that survive irgen are just another kind of dead code.
+  doPass(unit, removeExitPlaceholders, DCE::Full);
   printUnit(6, unit, " after initial DCE ");
   assertx(checkEverything(unit));
 
@@ -235,8 +237,6 @@ void optimize(IRUnit& unit, TransKind kind) {
   }
 
   doPass(unit, simplifyOrdStrIdx, DCE::Minimal);
-
-  doPass(unit, removeExitPlaceholders, DCE::Full);
 
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     doPass(unit, insertAsserts, DCE::None);

@@ -226,6 +226,11 @@ struct FrameStateMgr final {
   FrameStateMgr& operator=(FrameStateMgr&&) = default;
 
   /*
+   * Called when we are manually creating diamonds in the CFG.
+   */
+  void clearForUnprocessedPred();
+
+  /*
    * Update state by computing the effects of an instruction.
    */
   void update(const IRInstruction*);
@@ -404,7 +409,6 @@ private:
    * Per-block state helpers.
    */
   bool save(Block* b, Block* pred = nullptr);
-  void clearForUnprocessedPred();
   void collectPostConds(Block* exitBlock);
 
   /*

@@ -158,7 +158,7 @@ private:
   //
   // If this flag is unset, we'll never be able to successfully prove that a
   // MixedArray only contains int keys using this bitset.
-  static constexpr bool kTrackStaticStrKeys = false;
+  static constexpr bool kTrackStaticStrKeys = true;
 
   static constexpr uint8_t kNonStaticStrKey = 0b0001;
   static constexpr uint8_t kStaticStrKey    = 0b0010;

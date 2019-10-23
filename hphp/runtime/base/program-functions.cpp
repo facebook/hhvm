@@ -313,15 +313,9 @@ void register_variable(Array& variables, char *name, const Variant& value,
     return;
   }
 
-  // GPC elements holds Variants that are acting as smart pointers to
-  // RefDatas that we've created in the process of a multi-dim key.
-  std::vector<Variant> gpc_elements;
-  if (is_array) gpc_elements.reserve(MAX_INPUT_NESTING_LEVEL);
-
   // The array pointer we're currently adding to.  If we're doing a
-  // multi-dimensional set, this will point at the m_data.parr inside
-  // of a RefData sometimes (via toArrRef on the variants in
-  // gpc_elements).
+  // multi-dimensional set. Note that as we're essentially using this as an
+  // interior array pointer it's not safe to allow reentry here.
   Array* symtable = &variables;
 
   char* index = var;
@@ -364,8 +358,7 @@ void register_variable(Array& variables, char *name, const Variant& value,
         auto lval = symtable->lvalForce();
         type(lval) = KindOfPersistentArray;
         val(lval).parr = ArrayData::Create();
-        gpc_elements.push_back(uninit_null());
-        gpc_elements.back().assignRef(lval);
+        symtable = &asArrRef(lval);
       } else {
         String key_str(index, index_len, CopyString);
         auto const key =
@@ -374,10 +367,8 @@ void register_variable(Array& variables, char *name, const Variant& value,
         if (isNullType(v.type()) || !isArrayLikeType(v.type())) {
           symtable->set(key, make_tv<KindOfPersistentArray>(ArrayData::Create()));
         }
-        gpc_elements.push_back(uninit_null());
-        gpc_elements.back().assignRef(symtable->lval(key));
+        symtable = &asArrRef(symtable->lval(key));
       }
-      symtable = &gpc_elements.back().toArrRef();
       /* ip pointed to the '[' character, now obtain the key */
       index = index_s;
       index_len = new_idx_len;

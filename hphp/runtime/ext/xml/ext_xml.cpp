@@ -447,7 +447,8 @@ void _xml_endElementHandler(void *userData, const XML_Char *name) {
 
     if (!parser->data.isNull()) {
       if (parser->lastwasopen) {
-        parser->ctag.toArrRef().set(s_type, s_complete);
+        asArrRef(parser->data.toArrRef().lval(parser->ctag))
+          .set(s_type, s_complete);
       } else {
         DArrayInit tag(3);
         _xml_add_to_info(parser, tag_name.substr(parser->toffset));
@@ -506,13 +507,14 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
       if (doprint || (! parser->skipwhite)) {
         if (parser->lastwasopen) {
           String myval;
+          auto ctag = parser->data.toArrRef().lval(parser->ctag);
           // check if value exists, if yes append to that
-          if (parser->ctag.toArrRef().exists(s_value)) {
-            myval = tvCastToString(parser->ctag.toArray().rval(s_value).tv());
+          if (asCArrRef(ctag).exists(s_value)) {
+            myval = tvCastToString(asCArrRef(ctag).rval(s_value).tv());
             myval += decoded_value;
-            parser->ctag.toArrRef().set(s_value, myval);
+            asArrRef(ctag).set(s_value, myval);
           } else {
-            parser->ctag.toArrRef().set(
+            asArrRef(ctag).set(
               s_value,
               decoded_value
             );
@@ -630,10 +632,11 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
         if (atcnt) {
           tag.set(s_attributes,atr);
         }
-        auto lval = parser->data.toArrRef().lvalForce();
+        auto& arr = parser->data.toArrRef();
+        auto lval = arr.lvalForce();
         type(lval) = KindOfArray;
         val(lval).parr = tag.detach();
-        parser->ctag.assignRef(lval);
+        parser->ctag = arr->getKey(arr->iter_last());
       } else if (parser->level == (XML_MAXLEVEL + 1)) {
         raise_warning("Maximum depth exceeded - Results truncated");
       }

@@ -340,7 +340,7 @@ pub const error2057: Error = Cow::Borrowed("First bracketed namespace occurrence
 pub const invalid_shape_field_name: Error =
     Cow::Borrowed("Shape field name must be a nonempty single-quoted string or a class constant");
 pub const shape_field_int_like_string: Error =
-    Cow::Borrowed("Shape field name must not be an int-like string (i.e. \"123\");");
+    Cow::Borrowed("Shape field name must not be an int-like string (i.e. \"123\")");
 pub const error2061: Error = Cow::Borrowed(concat!(
     "Non-static instance variables are not allowed in abstract ",
     "final classes."
@@ -434,12 +434,6 @@ pub const invalid_variable_name: Error = Cow::Borrowed(
 );
 pub const invalid_reference: Error = Cow::Borrowed("Only variables can be used as references");
 pub const invalid_variable_variable: Error = Cow::Borrowed("Variable Variables are not legal");
-pub fn function_modifier(s: &str) -> Error {
-    Cow::Owned(format!(
-        "Top-level function cannot have modifier '{}'",
-        s.to_string(),
-    ))
-}
 pub const invalid_yield: Error =
     Cow::Borrowed("Yield can only appear as a statement or on the right of an assignment");
 pub const invalid_yield_from: Error = Cow::Borrowed(
@@ -739,8 +733,6 @@ pub const no_async_before_lambda_body: Error =
     Cow::Borrowed("Unexpected use of async {...} as lambda expression");
 pub const halt_compiler_top_level_only: Error =
     Cow::Borrowed("__halt_compiler function should appear only at the top level");
-pub const trait_alias_rule_allows_only_final_and_visibility_modifiers: Error =
-    Cow::Borrowed("Only 'final' and visibility modifiers are allowed in trait alias rule");
 pub fn invalid_number_of_args(name: &str, n: usize) -> Error {
     Cow::Owned(format!(
         "Method {} must take exactly {} arguments",

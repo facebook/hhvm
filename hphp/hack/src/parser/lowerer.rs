@@ -3058,15 +3058,12 @@ where
         }
     }
 
-    fn p_modifiers<F, R>(
+    fn p_modifiers<F: Fn(R, modifier::Kind) -> R, R>(
         on_kind: F,
         mut init: R,
         node: &Syntax<T, V>,
         env: &mut Env,
-    ) -> ret!((modifier::KindSet, R))
-    where
-        F: Fn(R, modifier::Kind, &Syntax<T, V>, &mut Env) -> R,
-    {
+    ) -> ret!((modifier::KindSet, R)) {
         let nodes = Self::as_list(node);
         let mut kind_set = modifier::KindSet::new();
         for n in nodes.iter() {
@@ -3074,7 +3071,7 @@ where
             match token_kind {
                 Some(kind) => {
                     kind_set.add(kind);
-                    init = on_kind(init, kind, n, env);
+                    init = on_kind(init, kind);
                 }
                 _ => Self::missing_syntax(None, "kind", n, env)?,
             }
@@ -3083,7 +3080,7 @@ where
     }
 
     fn p_kinds(node: &Syntax<T, V>, env: &mut Env) -> ret!(modifier::KindSet) {
-        Self::p_modifiers(|_, _, _, _| {}, (), node, env).map(|r| r.0)
+        Self::p_modifiers(|_, _| {}, (), node, env).map(|r| r.0)
     }
 
     // TODO: change name to map_flatten after porting
@@ -3127,9 +3124,8 @@ where
     }
 
     fn p_visibility(node: &Syntax<T, V>, env: &mut Env) -> ret!(Option<aast!(Visibility)>) {
-        let first_vis = |r: Option<aast!(Visibility)>, kind, _: &Syntax<T, V>, _: &mut Env| {
-            r.or_else(|| modifier::to_visibility(kind))
-        };
+        let first_vis =
+            |r: Option<aast!(Visibility)>, kind| r.or_else(|| modifier::to_visibility(kind));
         Self::p_modifiers(first_vis, None, node, env).map(|r| r.1)
     }
 
@@ -3145,7 +3141,7 @@ where
         node: &Syntax<T, V>,
         env: &mut Env,
     ) -> ret!(Option<aast!(Visibility)>) {
-        let last_vis = |r, kind, _: &Syntax<T, V>, _: &mut Env| modifier::to_visibility(kind).or(r);
+        let last_vis = |r, kind| modifier::to_visibility(kind).or(r);
         Self::p_modifiers(last_vis, None, node, env).map(|r| r.1)
     }
 
@@ -3296,14 +3292,14 @@ where
                     Some(TK::Equal) => ast_defs::ConstraintKind::ConstraintEq,
                     _ => Self::missing_syntax(
                         None,
-                        "constriant operator",
+                        "constraint operator",
                         &c.constraint_keyword,
                         env,
                     )?,
                 },
                 Self::p_hint(&c.constraint_type, env)?,
             )),
-            _ => Self::missing_syntax(None, "type constriant", node, env),
+            _ => Self::missing_syntax(None, "type constraint", node, env),
         }
     }
 
@@ -3361,10 +3357,7 @@ where
         }
     }
 
-    fn p_fun_hdr<F>(modifier_checker: F, node: &Syntax<T, V>, env: &mut Env) -> ret!(FunHdr)
-    where
-        F: Fn((), modifier::Kind, &Syntax<T, V>, &mut Env),
-    {
+    fn p_fun_hdr(node: &Syntax<T, V>, env: &mut Env) -> ret!(FunHdr) {
         match &node.syntax {
             FunctionDeclarationHeader(c) => {
                 let function_modifiers = &c.function_modifiers;
@@ -3386,7 +3379,7 @@ where
                         &syntax_error::autoload_takes_one_argument,
                     );
                 }
-                let (kinds, _) = Self::p_modifiers(modifier_checker, (), function_modifiers, env)?;
+                let kinds = Self::p_kinds(function_modifiers, env)?;
                 let has_async = kinds.has(modifier::ASYNC);
                 let has_coroutine = kinds.has(modifier::COROUTINE);
                 let parameters = Self::could_map(Self::p_fun_param, function_parameter_list, env)?;
@@ -3854,12 +3847,7 @@ where
                 let user_attributes = Self::p_user_attributes(&c.property_attribute_spec, env)?;
                 let type_ = Self::mp_optional(Self::p_hint, &c.property_type, env)?
                     .map(|t| Self::soften_hint(&user_attributes, t));
-                let modifier_checker = |_, _, n: &Syntax<T, V>, e: &mut Env| -> () {
-                    if n.is_final() {
-                        Self::raise_parsing_error(n, e, &syntax_error::declared_final("Properties"))
-                    }
-                };
-                let kinds = Self::p_modifiers(modifier_checker, (), &c.property_modifiers, env)?.0;
+                let kinds = Self::p_kinds(&c.property_modifiers, env)?;
                 let vis = Self::p_visibility_last_win_or(
                     &c.property_modifiers,
                     env,
@@ -3960,7 +3948,7 @@ where
                     FunctionDeclarationHeader(h) => h,
                     _ => panic!(),
                 };
-                let hdr = Self::p_fun_hdr(|_, _, _, _| {}, header, env)?;
+                let hdr = Self::p_fun_hdr(header, env)?;
                 if hdr.name.1 == "__construct" && !hdr.type_parameters.is_empty() {
                     Self::raise_parsing_error(
                         header,
@@ -4023,7 +4011,7 @@ where
                     FunctionDeclarationHeader(h) => h,
                     _ => panic!(),
                 };
-                let hdr = Self::p_fun_hdr(|_, _, _, _| {}, header, env)?;
+                let hdr = Self::p_fun_hdr(header, env)?;
                 let kind = Self::p_kinds(&h.function_modifiers, env)?;
                 let (qualifier, name) = match &c.methodish_trait_name.syntax {
                     ScopeResolutionExpression(c) => (
@@ -4086,7 +4074,7 @@ where
                                 _ => (None, Self::p_pstring(aliasing_name, e)?),
                             };
                             let (kinds, mut vis_raw) = Self::p_modifiers(
-                                |mut acc, kind, n, e| -> Vec<aast_defs::UseAsVisibility> {
+                                |mut acc, kind| -> Vec<aast_defs::UseAsVisibility> {
                                     if let Some(v) = modifier::to_use_as_visibility(kind) {
                                         acc.push(v);
                                     }
@@ -4096,9 +4084,6 @@ where
                                 modifiers,
                                 e,
                             )?;
-                            if !kinds.has_any(modifier::USE_AS_VISIBILITY) {
-                                Self::raise_parsing_error(n, e, &syntax_error::trait_alias_rule_allows_only_final_and_visibility_modifiers);
-                            }
                             let vis = if kinds.is_empty() || kinds.has_any(modifier::VISIBILITIES) {
                                 vis_raw
                             } else {
@@ -4359,7 +4344,7 @@ where
                                 Some(TK::Equal) => ConstraintEq,
                                 Some(TK::As) => ConstraintAs,
                                 Some(TK::Super) => ConstraintSuper,
-                                _ => Self::missing_syntax(None, "constriant operator", o, e)?,
+                                _ => Self::missing_syntax(None, "constraint operator", o, e)?,
                             };
                             let r = Self::p_hint(&c.where_constraint_right_type, e)?;
                             Ok(aast::WhereConstraint(l, o, r))
@@ -4454,19 +4439,7 @@ where
                 let function_body = &c.function_body;
                 let mut env = Env::clone_and_unset_toplevel_if_toplevel(env);
                 let env = env.as_mut();
-                let allowed_kinds =
-                    modifier::KindSet::from_kinds(&[modifier::ASYNC, modifier::COROUTINE]);
-                let modifier_checker =
-                    |_: (), kind: modifier::Kind, node: &Syntax<T, V>, env: &mut Env| {
-                        if !allowed_kinds.has(kind) {
-                            Self::raise_parsing_error(
-                                node,
-                                env,
-                                &syntax_error::function_modifier(Self::text_str(node, env)),
-                            );
-                        }
-                    };
-                let hdr = Self::p_fun_hdr(&modifier_checker, function_declaration_header, env)?;
+                let hdr = Self::p_fun_hdr(function_declaration_header, env)?;
                 let is_external = function_body.is_external();
                 let (block, yield_) = if is_external {
                     (vec![], false)

@@ -16,6 +16,7 @@ pub mod rc;
 pub use arena::Arena;
 pub use block::Block;
 pub use error::{FromError, SlabIntegrityError};
+pub use impls::{bytes_from_ocamlrep, bytes_to_ocamlrep, str_from_ocamlrep, str_to_ocamlrep};
 pub use slab::OwnedSlab;
 pub use value::{OpaqueValue, Value};
 

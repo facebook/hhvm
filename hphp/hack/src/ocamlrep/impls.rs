@@ -364,13 +364,22 @@ fn btree_set_from_ocamlrep<T: OcamlRep + Ord>(
 }
 
 impl OcamlRep for PathBuf {
+    #[cfg(unix)]
     fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &mut A) -> Value<'a> {
-        str_to_ocamlrep(self.to_str().unwrap(), alloc)
+        use std::os::unix::ffi::OsStrExt;
+        bytes_to_ocamlrep(self.as_os_str().as_bytes(), alloc)
     }
 
+    #[cfg(unix)]
     fn from_ocamlrep(value: Value<'_>) -> Result<Self, FromError> {
-        Ok(PathBuf::from(str_from_ocamlrep(value)?))
+        use std::os::unix::ffi::OsStrExt;
+        Ok(PathBuf::from(std::ffi::OsStr::from_bytes(
+            bytes_from_ocamlrep(value)?,
+        )))
     }
+
+    // TODO: A Windows implementation would be nice, but what does the OCaml
+    // runtime do? If we need Windows support, we'll have to find out.
 }
 
 impl OcamlRep for String {
@@ -383,7 +392,25 @@ impl OcamlRep for String {
     }
 }
 
-fn str_to_ocamlrep<'a, A: Allocator<'a>>(s: &str, alloc: &mut A) -> Value<'a> {
+pub fn str_to_ocamlrep<'a, A: Allocator<'a>>(s: &str, alloc: &mut A) -> Value<'a> {
+    bytes_to_ocamlrep(s.as_bytes(), alloc)
+}
+
+pub fn str_from_ocamlrep<'a>(value: Value<'a>) -> Result<&'a str, FromError> {
+    Ok(std::str::from_utf8(bytes_from_ocamlrep(value)?)?)
+}
+
+impl OcamlRep for Vec<u8> {
+    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &mut A) -> Value<'a> {
+        bytes_to_ocamlrep(self, alloc)
+    }
+
+    fn from_ocamlrep(value: Value<'_>) -> Result<Self, FromError> {
+        Ok(Vec::from(bytes_from_ocamlrep(value)?))
+    }
+}
+
+pub fn bytes_to_ocamlrep<'a, A: Allocator<'a>>(s: &[u8], alloc: &mut A) -> Value<'a> {
     let words = (s.len() + 1 /*null-ending*/ + (WORD_SIZE - 1)/*rounding*/) / WORD_SIZE;
     let length = words * WORD_SIZE;
     let block = alloc.block_with_size_and_tag(words, block::STRING_TAG);
@@ -392,12 +419,12 @@ fn str_to_ocamlrep<'a, A: Allocator<'a>>(s: &str, alloc: &mut A) -> Value<'a> {
         let block_bytes = block as *mut u8;
         *block_bytes.add(length - 1) = (length - s.len() - 1) as u8;
         let slice: &mut [u8] = std::slice::from_raw_parts_mut(block_bytes, s.len());
-        slice.copy_from_slice(s.as_bytes());
+        slice.copy_from_slice(s);
         Value::from_ptr(block)
     }
 }
 
-fn str_from_ocamlrep<'a>(value: Value<'a>) -> Result<&'a str, FromError> {
+pub fn bytes_from_ocamlrep<'a>(value: Value<'a>) -> Result<&'a [u8], FromError> {
     let block = from::expect_block(value)?;
     from::expect_block_tag(block, block::STRING_TAG)?;
     let block_size_in_bytes = block.size() * std::mem::size_of::<Value>();
@@ -407,7 +434,7 @@ fn str_from_ocamlrep<'a>(value: Value<'a>) -> Result<&'a str, FromError> {
         let len = block_size_in_bytes - padding as usize - 1;
         std::slice::from_raw_parts(ptr, len)
     };
-    Ok(std::str::from_utf8(slice)?)
+    Ok(slice)
 }
 
 impl<T0, T1> OcamlRep for (T0, T1)

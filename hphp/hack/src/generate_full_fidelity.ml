@@ -1906,7 +1906,7 @@ impl<'src> SmartConstructors<'src, State<'src>> for DirectDeclSmartConstructors<
     type R = Node;
 
     fn new(_: &ParserEnv, src: &SourceText<'src>) -> Self {
-        Self { state: State { source_text: IndexedSourceText::new(src.clone()), decls: empty_decls() } }
+        Self { state: State::new(IndexedSourceText::new(src.clone())) }
     }
 
     fn state_mut(&mut self) -> &mut State<'src> {

@@ -147,9 +147,89 @@ fn hint_to_ty(hint: &HintValue, pos: &Pos) -> Ty {
 }
 
 #[derive(Clone, Debug)]
+enum NamespaceType {
+    Simple(String),
+    Delimited(Vec<String>),
+}
+
+#[derive(Clone, Debug)]
+struct NamespaceBuilder {
+    namespace: NamespaceType,
+    in_progress_namespace: String,
+    is_building_namespace: bool,
+}
+
+impl NamespaceBuilder {
+    fn new() -> NamespaceBuilder {
+        NamespaceBuilder {
+            namespace: NamespaceType::Delimited(Vec::new()),
+            in_progress_namespace: String::new(),
+            is_building_namespace: false,
+        }
+    }
+
+    fn set_namespace(&mut self) {
+        // This clone isn't a perf mistake because we might keep mutating
+        // self.in_progress_namespace and we don't want the current namespace to
+        // reflect those changes.
+        self.namespace = NamespaceType::Simple(self.in_progress_namespace.clone());
+    }
+
+    fn push_namespace(&mut self) {
+        // If we're currently in a simple namespace, then having a delimited
+        // namespace (the kind we'd be in if we're calling this method) is an
+        // error. We're not in the business of handling errors in this parser,
+        // so just ignore it.
+        if let NamespaceType::Delimited(ref mut vec) = self.namespace {
+            // This clone isn't a perf mistake because we might keep mutating
+            // self.in_progress_namespace and we don't want the namespace stack
+            // to reflect those changes.
+            vec.push(self.in_progress_namespace.clone());
+        }
+    }
+
+    fn pop_namespace(&mut self) {
+        // If we're currently in a simple namespace, then having a delimited
+        // namespace (the kind we'd be in if we're calling this method) is an
+        // error. We're not in the business of handling errors in this parser,
+        // so just ignore it.
+        if let NamespaceType::Delimited(ref mut vec) = self.namespace {
+            // This clone isn't a perf mistake because we might keep mutating
+            // self.in_progress_namespace and we don't want the namespace stack
+            // to reflect those changes.
+            // Also, while we normally try to use the Result type to surface
+            // errors that we see as part of the file being malformed, the only
+            // way we can hit this pop without having hit the push first is
+            // through coding error, so we panic instead.
+            vec.pop()
+                .expect("Attempted to pop from the namespace stack when there were no entries");
+            self.in_progress_namespace = self.current_namespace().to_string();
+        }
+    }
+
+    fn current_namespace(&self) -> &str {
+        match &self.namespace {
+            NamespaceType::Simple(s) => &s,
+            NamespaceType::Delimited(stack) => stack.last().map(|ns| ns.as_str()).unwrap_or(""),
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
 pub struct State<'a> {
     pub source_text: IndexedSourceText<'a>,
     pub decls: Decls,
+    namespace_builder: NamespaceBuilder,
+}
+
+impl<'a> State<'a> {
+    pub fn new(source_text: IndexedSourceText) -> State {
+        State {
+            source_text,
+            decls: empty_decls(),
+            namespace_builder: NamespaceBuilder::new(),
+        }
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -303,9 +383,72 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 .relative_pos(token.start_offset(), token.end_offset() + 1)
         };
         let kind = token.kind();
+
+        // So... this part gets pretty disgusting. We're setting a lot of parser
+        // state in here, and we're unsetting a lot of it down in the actual
+        // make_namespace_XXXX methods. I tried a few other ways of handling
+        // namespaces, but ultimately rejected them.
+        //
+        // The reason we even need this code at all is because we insert entries
+        // into our state.decls struct as soon as we see them, but because the
+        // FFP calls its make_XXXX functions in inside out order (which is the
+        // most reasonable thing for a parser to do), we don't actually know
+        // which namespace we're in until we leave it, at which point we've
+        // already inserted all of the decls from inside that namespace.
+        //
+        // One idea I attempted was having both the state.decls struct as well
+        // as a new state.in_progress_decls struct, and if we hit a
+        // make_namespace_XXXX method, we would rename every decl within that
+        // struct to have the correct namespace, then merge
+        // state.in_progress_decls into state.decls. The problem that I ran into
+        // with this approach had to do with the insides of the decls. While
+        // it's easy enough to rename every decl's name, it's much harder to dig
+        // into each decl and rename every single Tapply, which we have to do if
+        // a decl references a type within the same namespace.
+        //
+        // The facts parser, meanwhile, solves this problem by keeping track of
+        // a micro-AST, and only inserting names into the returned facts struct
+        // at the very end. This would be convenient for us, but it would
+        // require going back to allocating and returning a micro-AST, then
+        // walking over that again, instead of building up the decls struct as
+        // we go, which is what we do now. Unfortunately, since decls are much
+        // more complex than facts (which are just lists of toplevel symbols),
+        // the cost of doing things that way is too high for our purposes.
+        //
+        // So we can't allocate sub-trees for each namespace, and we can't just
+        // wait until we hit make_namespace_XXXX then rewrite all the names, so
+        // what can we do? The answer is that we can encode a really gross
+        // namespace-tracking state machine inside of our parser, and take
+        // advantage of some mildly unspoken quasi-implementation details. We
+        // always call the make_XXXX methods after we finish the full parsing of
+        // whatever we're making... but since make_token() only depends on a
+        // single token, it gets called *before* we enter the namespace!
+        //
+        // The general idea, then, is that when we see a namespace token we know
+        // that we're about to parse a namespace name, so we enter a state where
+        // we know we're building up a namespace name (as opposed to the many,
+        // many other kinds of names). While we're in that state, every name and
+        // backslash token gets appended to the in-progress namespace name. Once
+        // we see either an opening curly brace or a semicolon, we know that
+        // we've finished building the namespace name, so we exit the "building
+        // a namespace" state and push the newly created namespace onto our
+        // namespace stack. Then, in all of the various make_namespace_XXXX
+        // methods, we pop the namespace (since we know we've just exited it).
+        //
+        // So there we have it. Fully inline namespace tracking, and all it cost
+        // was a little elbow grease and a lot of dignity.
         Ok(match kind {
             TokenKind::Name => {
-                Node_::Name(GetName::new(token_text(), |string| string), token_pos())
+                let name = GetName::new(token_text(), |string| string);
+                if self.state.namespace_builder.is_building_namespace {
+                    self.state
+                        .namespace_builder
+                        .in_progress_namespace
+                        .push_str(&name.to_string());
+                    Node_::Ignored
+                } else {
+                    Node_::Name(name, token_pos())
+                }
             }
             TokenKind::DecimalLiteral => Node_::String(GetName::new(token_text(), |string| string)),
             TokenKind::SingleQuotedStringLiteral => {
@@ -336,7 +479,17 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 HintValue::Apply(GetName::new(token_text(), |string| string)),
                 token_pos(),
             ),
-            TokenKind::Backslash => Node_::Backslash,
+            TokenKind::Backslash => {
+                if self.state.namespace_builder.is_building_namespace {
+                    self.state
+                        .namespace_builder
+                        .in_progress_namespace
+                        .push('\\');
+                    Node_::Ignored
+                } else {
+                    Node_::Backslash
+                }
+            }
             TokenKind::Class => Node_::Class,
             TokenKind::Trait => Node_::Trait,
             TokenKind::Interface => Node_::Interface,
@@ -345,6 +498,27 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             TokenKind::Abstract => Node_::Abstract,
             TokenKind::Final => Node_::Final,
             TokenKind::Static => Node_::Static,
+            TokenKind::Namespace => {
+                self.state.namespace_builder.is_building_namespace = true;
+                if !self.state.namespace_builder.current_namespace().is_empty() {
+                    self.state
+                        .namespace_builder
+                        .in_progress_namespace
+                        .push('\\')
+                }
+                Node_::Ignored
+            }
+            TokenKind::LeftBrace | TokenKind::Semicolon => {
+                if self.state.namespace_builder.is_building_namespace {
+                    if kind == TokenKind::LeftBrace {
+                        self.state.namespace_builder.push_namespace();
+                    } else {
+                        self.state.namespace_builder.set_namespace();
+                    }
+                    self.state.namespace_builder.is_building_namespace = false;
+                }
+                Node_::Ignored
+            }
             _ => Node_::Ignored,
         })
     }
@@ -426,7 +600,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
     fn make_alias_declaration(
         &mut self,
-        attributes: Self::R,
+        _attributes: Self::R,
         _keyword: Self::R,
         name: Self::R,
         _generic_params: Self::R,
@@ -439,7 +613,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         match name {
             Node_::Ignored => (),
             _ => {
-                let (name, pos) = get_name("", &name)?;
+                let (name, pos) =
+                    get_name(self.state.namespace_builder.current_namespace(), &name)?;
                 match aliased_type {
                     Node_::Hint(hv, hint_pos) => {
                         let ty = hint_to_ty(&hv, &hint_pos);
@@ -565,7 +740,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             Node_::List(nodes) => match nodes.as_slice() {
                 [Node_::List(nodes)] => match nodes.as_slice() {
                     [name, _initializer] => {
-                        let (name, _) = get_name("", name)?;
+                        let (name, _) =
+                            get_name(self.state.namespace_builder.current_namespace(), name)?;
                         match hint {
                             Node_::Hint(hv, pos) => {
                                 let ty = hint_to_ty(&hv, &pos);
@@ -602,6 +778,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         name: Self::R,
         body: Self::R,
     ) -> Self::R {
+        self.state.namespace_builder.pop_namespace();
         let (name, body) = (name?, body?);
         Ok(match body {
             Node_::Ignored => Node_::Ignored,

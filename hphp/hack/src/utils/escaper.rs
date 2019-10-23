@@ -7,9 +7,7 @@
 // Implementation of string escaping logic.
 // See http://php.net/manual/en/language.types.string.php
 
-use std::char;
-use std::error::Error;
-use std::fmt;
+use std::{error::Error, fmt, io::Write};
 
 #[derive(Debug)]
 pub struct InvalidString {
@@ -28,20 +26,28 @@ impl Error for InvalidString {
     }
 }
 
-fn is_printable(c: char) -> bool {
-    c >= ' ' && c <= '~'
+impl<'a> From<&'a str> for InvalidString {
+    fn from(x: &'a str) -> Self {
+        Self {
+            msg: String::from(x),
+        }
+    }
 }
 
-pub fn is_lit_printable(c: char) -> bool {
-    is_printable(c) && c != '\\' && c != '\"'
+fn is_printable(c: u8) -> bool {
+    c >= b' ' && c <= b'~'
 }
 
-fn is_hex(c: char) -> bool {
-    (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')
+pub fn is_lit_printable(c: u8) -> bool {
+    is_printable(c) && c != b'\\' && c != b'\"'
 }
 
-fn is_oct(c: char) -> bool {
-    c >= '0' && c <= '7'
+fn is_hex(c: u8) -> bool {
+    (c >= b'0' && c <= b'9') || (c >= b'a' && c <= b'f') || (c >= b'A' && c <= b'F')
+}
+
+fn is_oct(c: u8) -> bool {
+    c >= b'0' && c <= b'7'
 }
 
 // This escapes a string using the format understood by the assembler
@@ -50,33 +56,36 @@ fn is_oct(c: char) -> bool {
 // It will escape $ in octal so that it can also be used as a PHP double
 // string.
 
-pub fn escape_char<'a>(c: char, output: &mut Vec<u8>) {
+pub fn escape_char<'a>(c: u8, output: &mut Vec<u8>) {
     match c {
-        '\n' => output.extend_from_slice("\\n".as_bytes()),
-        '\r' => output.extend_from_slice("\\r".as_bytes()),
-        '\t' => output.extend_from_slice("\\t".as_bytes()),
-        '\\' => output.extend_from_slice("\\\\".as_bytes()),
-        '"' => output.extend_from_slice("\\\"".as_bytes()),
-        '$' => output.extend_from_slice("$".as_bytes()),
-        '?' => output.extend_from_slice("\\?".as_bytes()),
-        c if is_lit_printable(c) => output.push(c as u8),
-        c => output.extend_from_slice(format!("\\{:o}", c as u8).as_bytes()),
+        b'\n' => output.extend_from_slice(b"\\n"),
+        b'\r' => output.extend_from_slice(b"\\r"),
+        b'\t' => output.extend_from_slice(b"\\t"),
+        b'\\' => output.extend_from_slice(b"\\\\"),
+        b'"' => output.extend_from_slice(b"\\\""),
+        b'$' => output.extend_from_slice(b"$"),
+        b'?' => output.extend_from_slice(b"\\?"),
+        c if is_lit_printable(c) => output.push(c),
+        c => write!(output, "\\{:o}", c).unwrap(),
     }
 }
 
 pub fn escape(s: &str) -> String {
+    let r = escape_(s.as_bytes());
+    unsafe { String::from_utf8_unchecked(r) }
+}
+
+fn escape_(s: &[u8]) -> Vec<u8> {
     let mut output: Vec<u8> = Vec::with_capacity(s.len());
-    for c in s.chars() {
-        escape_char(c, &mut output);
+    for c in s.iter() {
+        escape_char(*c, &mut output);
     }
-    unsafe { String::from_utf8_unchecked(output) }
+    output
 }
 
 fn codepoint_to_utf8(n: u32, output: &mut Vec<u8>) -> Result<(), InvalidString> {
     match std::char::from_u32(n) {
-        None => Err(InvalidString {
-            msg: String::from("UTF-8 codepoint too large"),
-        }),
+        None => Err("UTF-8 codepoint too large".into()),
         Some(v) => {
             match v.len_utf8() {
                 1 => output.push(v as u8),
@@ -87,38 +96,32 @@ fn codepoint_to_utf8(n: u32, output: &mut Vec<u8>) -> Result<(), InvalidString> 
     }
 }
 
-fn parse_int(s: &str, base: u32) -> Result<u32, InvalidString> {
+fn parse_int(s: &[u8], base: u32) -> Result<u32, InvalidString> {
+    // input `s` can be assumed only contains ascii digits and 'aA' - 'fF',
+    // it is safe to call from_utf8 here.
+    let s = match std::str::from_utf8(s) {
+        Ok(s) => s,
+        _ => {
+            return Err("invalid numeric escape".into());
+        }
+    };
     let s = u32::from_str_radix(s, base);
     match s {
         Ok(v) => Ok(v),
-        _ => Err(InvalidString {
-            msg: String::from("invalid numeric escape"),
-        }),
+        _ => Err("invalid numeric escape".into()),
     }
 }
 
-fn parse_numeric_escape(trim_to_byte: bool, s: &str, base: u32) -> Result<char, InvalidString> {
+fn parse_numeric_escape(trim_to_byte: bool, s: &[u8], base: u32) -> Result<u8, InvalidString> {
     match parse_int(s, base) {
         Ok(v) => {
-            if trim_to_byte {
-                match char::from_u32(v & 0xFF) {
-                    Some(v) => Ok(v),
-                    None => Err(InvalidString {
-                        msg: String::from("Invalid UTF-8 code point."),
-                    }),
-                }
+            if !trim_to_byte && (v > 255) {
+                Err("Invalid UTF-8 code point.".into())
             } else {
-                match char::from_u32(v) {
-                    Some(v) => Ok(v),
-                    None => Err(InvalidString {
-                        msg: String::from("Invalid UTF-8 code point."),
-                    }),
-                }
+                Ok(v as u8)
             }
         }
-        Err(_) => Err(InvalidString {
-            msg: String::from("Invalid UTF-8 code point."),
-        }),
+        Err(_) => Err("Invalid UTF-8 code point.".into()),
     }
 }
 
@@ -144,9 +147,7 @@ fn unescape_literal(literal_kind: LiteralKind, s: &str) -> Result<String, Invali
         }
         fn next(&mut self) -> Result<u8, InvalidString> {
             if self.i >= self.s.len() {
-                return Err(InvalidString {
-                    msg: String::from("string ended early"),
-                });
+                return Err("string ended early".into());
             }
             let r = self.s[self.i];
             self.i += 1;
@@ -219,38 +220,27 @@ fn unescape_literal(literal_kind: LiteralKind, s: &str) -> Result<String, Invali
                 {
                     let _ = s.next()?;
                     let unicode = s.take_if(|c| c != b'}', 6);
-                    let n = parse_int(unsafe { std::str::from_utf8_unchecked(unicode) }, 16)?;
+                    let n = parse_int(unicode, 16)?;
                     codepoint_to_utf8(n, &mut output)?;
                     let n = s.next()?;
                     if n != b'}' {
-                        return Err(InvalidString {
-                            msg: String::from("Invalid UTF-8 escape sequence"),
-                        });
+                        return Err("Invalid UTF-8 escape sequence".into());
                     }
                 }
                 b'x' | b'X' => {
-                    let hex = s.take_if(|c| is_hex(c as char), 2);
+                    let hex = s.take_if(is_hex, 2);
                     if hex.len() == 0 {
                         output.push(b'\\');
                         output.push(c);
                     } else {
-                        // TODO: change parse_numeric_escape to return u8
-                        let c = parse_numeric_escape(
-                            false,
-                            unsafe { std::str::from_utf8_unchecked(hex) },
-                            16,
-                        )?;
+                        let c = parse_numeric_escape(false, hex, 16)?;
                         output.push(c as u8);
                     }
                 }
-                c if is_oct(c as char) => {
+                c if is_oct(c) => {
                     s.back();
-                    let oct = s.take_if(|c| is_oct(c as char), 3);
-                    let c = parse_numeric_escape(
-                        true,
-                        unsafe { std::str::from_utf8_unchecked(oct) },
-                        8,
-                    )?;
+                    let oct = s.take_if(is_oct, 3);
+                    let c = parse_numeric_escape(true, oct, 8)?;
                     output.push(c as u8);
                 }
                 c => {
@@ -275,14 +265,10 @@ pub fn unescape_heredoc(s: &str) -> Result<String, InvalidString> {
     unescape_literal(LiteralKind::LiteralHeredoc, s)
 }
 
-fn unescape_single_or_nowdoc(is_nowdoc: bool, s: &str) -> Result<String, InvalidString> {
-    if s.is_empty() {
-        return Ok(String::new());
-    }
+fn unescape_single_or_nowdoc(is_nowdoc: bool, s: &[u8]) -> Result<String, InvalidString> {
     let len = s.len();
     let mut output: Vec<u8> = Vec::with_capacity(len);
     let mut idx = 0;
-    let s = s.as_bytes();
     while idx < len {
         let c = s[idx];
         if is_nowdoc || c != b'\\' {
@@ -290,9 +276,7 @@ fn unescape_single_or_nowdoc(is_nowdoc: bool, s: &str) -> Result<String, Invalid
         } else {
             idx += 1;
             if !idx < len {
-                return Err(InvalidString {
-                    msg: String::from("string ended early"),
-                });
+                return Err("string ended early".into());
             }
             let c = s[idx];
             match c {
@@ -310,11 +294,11 @@ fn unescape_single_or_nowdoc(is_nowdoc: bool, s: &str) -> Result<String, Invalid
 }
 
 pub fn unescape_single(s: &str) -> Result<String, InvalidString> {
-    unescape_single_or_nowdoc(false, s)
+    unescape_single_or_nowdoc(false, s.as_bytes())
 }
 
 pub fn unescape_nowdoc(s: &str) -> Result<String, InvalidString> {
-    unescape_single_or_nowdoc(true, s)
+    unescape_single_or_nowdoc(true, s.as_bytes())
 }
 
 pub fn unescape_long_string(s: &str) -> Result<String, InvalidString> {
@@ -326,52 +310,79 @@ pub fn extract_unquoted_string(
     start: usize,
     len: usize,
 ) -> Result<String, InvalidString> {
+    let r = extract_unquoted_string_(content.as_bytes(), start, len)?;
+    unsafe { Ok(String::from_utf8_unchecked(r)) }
+}
+
+fn find(s: &[u8], needle: u8) -> Option<usize> {
+    for i in 0..s.len() {
+        if s[i] == needle {
+            return Some(i);
+        }
+    }
+    None
+}
+
+fn rfind(s: &[u8], needle: u8) -> Option<usize> {
+    let mut i = s.len() - 1;
+    while i < s.len() {
+        if s[i] == needle {
+            return Some(i);
+        }
+        i -= 1
+    }
+    None
+}
+
+fn extract_unquoted_string_(
+    content: &[u8],
+    start: usize,
+    len: usize,
+) -> Result<Vec<u8>, InvalidString> {
     if len == 0 {
-        Ok("".to_string())
-    } else if content.len() > 3 && content.starts_with("<<<") {
+        Ok(vec![])
+    } else if content.len() > 3 && content.starts_with(b"<<<") {
         // The heredoc case
         // These types of strings begin with an opening line containing <<<
         // followed by a string to use as a terminator (which is optionally
         // quoted) and end with a line containing only the terminator and a
         // semicolon followed by a blank line. We need to drop the opening line
         // as well as the blank line and preceding terminator line.
-        match (content.find('\n'), content[..start + len - 1].rfind('\n')) {
+        match (
+            find(content, b'\n'),
+            rfind(&content[..start + len - 1], b'\n'),
+        ) {
             (Some(start_), Some(end_)) =>
             // An empty heredoc, this way, will have start >= end
             {
                 if start_ >= end_ {
-                    Ok("".to_string())
+                    Ok(vec![])
                 } else {
-                    Ok(content[start_ + 1..end_].to_string())
+                    Ok(content[start_ + 1..end_].into())
                 }
             }
-            _ => Ok(String::from(content)),
+            _ => Ok(content.into()),
         }
     } else {
-        static SINGLE_QUOTE: u8 = '\'' as u8;
-        static DOUBLE_QUOTE: u8 = '"' as u8;
-        static BACK_TICK: u8 = '`' as u8;
-        match (
-            content.as_bytes().get(start),
-            content.as_bytes().get(start + len - 1),
-        ) {
+        static SINGLE_QUOTE: u8 = b'\'';
+        static DOUBLE_QUOTE: u8 = b'"';
+        static BACK_TICK: u8 = b'`';
+        match (content.get(start), content.get(start + len - 1)) {
             (Some(&c1), Some(&c2))
                 if (c1 == DOUBLE_QUOTE && c2 == DOUBLE_QUOTE)
                     || c1 == SINGLE_QUOTE && c2 == SINGLE_QUOTE
                     || c1 == BACK_TICK && c2 == BACK_TICK =>
             {
-                Ok(content[start + 1..len - 1].to_string())
+                Ok(content[start + 1..len - 1].into())
             }
             (Some(_), Some(_)) => {
                 if start == 0 && content.len() == len {
-                    Ok(content.to_string())
+                    Ok(content.into())
                 } else {
-                    Ok(content[start..start + len].to_string())
+                    Ok(content[start..start + len].into())
                 }
             }
-            _ => Err(InvalidString {
-                msg: String::from("out of bounds"),
-            }),
+            _ => Err("out of bounds".into()),
         }
     }
 }
@@ -445,27 +456,27 @@ mod tests {
 
     #[test]
     fn parse_int_test() {
-        assert_eq!(parse_int("2", 10).unwrap(), 2);
-        assert!(parse_int("h", 10).is_err());
-        assert_eq!(parse_int("12", 8).unwrap(), 10);
-        assert_eq!(parse_int("b1", 16).unwrap(), 177)
+        assert_eq!(parse_int(b"2", 10).unwrap(), 2);
+        assert!(parse_int(b"h", 10).is_err());
+        assert_eq!(parse_int(b"12", 8).unwrap(), 10);
+        assert_eq!(parse_int(b"b1", 16).unwrap(), 177)
     }
 
     #[test]
     fn escape_char_test() {
-        let escape_char_ = |c: char| -> String {
+        let escape_char_ = |c: u8| -> String {
             let mut s = vec![];
             escape_char(c, &mut s);
             unsafe { String::from_utf8_unchecked(s) }
         };
 
-        assert_eq!(escape_char_('a'), "a");
-        assert_eq!(escape_char_('$'), "$");
-        assert_eq!(escape_char_('\"'), "\\\"");
+        assert_eq!(escape_char_(b'a'), "a");
+        assert_eq!(escape_char_(b'$'), "$");
+        assert_eq!(escape_char_(b'\"'), "\\\"");
         assert_eq!(escape("house"), "house");
         assert_eq!(escape("red\n\t\r$?"), "red\\n\\t\\r$\\?");
-        assert_eq!(is_oct('5'), true);
-        assert_eq!(is_oct('a'), false);
+        assert_eq!(is_oct(b'5'), true);
+        assert_eq!(is_oct(b'a'), false);
     }
 
     #[test]

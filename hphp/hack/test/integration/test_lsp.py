@@ -3987,3 +3987,33 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
             .request(method="shutdown", params={}, result=None)
         )
         self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=True)
+
+    def test_workspace_symbol(self) -> None:
+        self.prepare_server_environment()
+        variables = self.setup_php_file("didchange.php")
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("test_workspace_symbol"), use_serverless_ide=False
+            )
+            .wait_for_hh_server_ready()
+            .request(
+                comment="Look up symbols",
+                method="workspace/symbol",
+                params={"query": "TestNS\\test"},
+                result=[
+                    {
+                        "name": "TestNS\\test_func",
+                        "kind": 12,
+                        "location": {
+                            "uri": "file://${root_path}/completion_extras_namespace.php",
+                            "range": {
+                                "start": {"line": 4, "character": 9},
+                                "end": {"line": 4, "character": 25},
+                            },
+                        },
+                    }
+                ],
+            )
+            .request(method="shutdown", params={}, result=None)
+        )
+        self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)

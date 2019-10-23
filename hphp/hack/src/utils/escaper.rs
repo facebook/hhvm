@@ -131,133 +131,136 @@ pub enum LiteralKind {
 }
 
 fn unescape_literal(literal_kind: LiteralKind, s: &str) -> Result<String, InvalidString> {
-    if s.is_empty() {
-        return Ok(String::new());
+    struct Scanner<'a> {
+        s: &'a [u8],
+        i: usize,
     }
-    let len = s.len();
-    let mut output: Vec<u8> = Vec::with_capacity(len);
-    let mut idx = 0;
-    let next = |idx: usize| -> Result<(char, usize), InvalidString> {
-        if idx >= len {
-            Err(InvalidString {
-                msg: String::from("string ended early"),
-            })
-        } else {
-            let c = s.as_bytes()[idx] as char;
-            Ok((c, idx + 1))
+    impl<'a> Scanner<'a> {
+        fn new(s: &'a [u8]) -> Self {
+            Self { s, i: 0 }
         }
-    };
-    // Count how many characters, starting at the current string index.
-    // Will always stop at i=max.
-    fn count_f(
-        f: impl Fn(char) -> bool,
-        max: Option<usize>,
-        mut i: usize,
-        idx: usize,
-        len: usize,
-        s: &str,
-    ) -> usize {
-        let max = match max {
-            None => len,
-            Some(x) => x,
-        };
-        while i < max && idx + i < len && (f(s.as_bytes()[idx + i] as char)) {
-            i += 1
+        fn is_empty(&self) -> bool {
+            self.i >= self.s.len()
         }
-        i
-    };
-    let push = |s: &mut Vec<u8>, c: char| s.push(c as u8);
-    let push_str = |s: &mut Vec<u8>, st: &str| s.extend_from_slice(st.as_bytes());
-    while {
-        let (c, new_idx) = next(idx)?;
-        idx = new_idx;
-        if c != '\\' || idx == len {
-            push(&mut output, c)
+        fn next(&mut self) -> Result<u8, InvalidString> {
+            if self.i >= self.s.len() {
+                return Err(InvalidString {
+                    msg: String::from("string ended early"),
+                });
+            }
+            let r = self.s[self.i];
+            self.i += 1;
+            Ok(r)
+        }
+        fn take_if(&mut self, f: impl Fn(u8) -> bool, size: usize) -> &'a [u8] {
+            let l = usize::min(size + self.i, self.s.len());
+            let mut c = self.i;
+            while c < l && f(self.s[c]) {
+                c += 1;
+            }
+            let r = &self.s[self.i..c];
+            self.i = c;
+            r
+        }
+        fn peek(&self) -> Option<u8> {
+            if self.i < self.s.len() {
+                Some(self.s[self.i])
+            } else {
+                None
+            }
+        }
+        fn back(&mut self) {
+            if self.i > 0 {
+                self.i -= 1;
+            }
+        }
+    }
+
+    let mut output: Vec<u8> = Vec::with_capacity(s.len());
+
+    let mut s = Scanner::new(s.as_bytes());
+    while !s.is_empty() {
+        let c = s.next()?;
+        if c != b'\\' || s.is_empty() {
+            output.push(c);
         } else {
-            let (c, new_idx) = next(idx)?;
-            idx = new_idx;
+            let c = s.next()?;
             match c {
-                'a' if literal_kind == LiteralKind::LiteralLongString => push(&mut output, '\x07'),
-                'b' if literal_kind == LiteralKind::LiteralLongString => push(&mut output, '\x08'),
-                '\'' => push_str(&mut output, "\\\'"),
-                'n' => {
-                    if literal_kind != LiteralKind::LiteralLongString {
-                        push(&mut output, '\n')
+                b'a' if literal_kind == LiteralKind::LiteralLongString => output.push(b'\x07'),
+                b'b' if literal_kind == LiteralKind::LiteralLongString => output.push(b'\x08'),
+                b'\'' => output.extend_from_slice(b"\\\'"),
+                b'n' => match literal_kind {
+                    LiteralKind::LiteralLongString => (),
+                    _ => output.push(b'\n'),
+                },
+                b'r' => match literal_kind {
+                    LiteralKind::LiteralLongString => (),
+                    _ => output.push(b'\r'),
+                },
+                b't' => output.push(b'\t'),
+                b'v' => output.push(b'\x0b'),
+                b'e' => output.push(b'\x1b'),
+                b'f' => output.push(b'\x0c'),
+                b'\\' => output.push(b'\\'),
+                b'?' if literal_kind == LiteralKind::LiteralLongString => output.push(b'\x3f'),
+                b'$' if literal_kind != LiteralKind::LiteralLongString => output.push(b'$'),
+                b'`' if literal_kind != LiteralKind::LiteralLongString => match literal_kind {
+                    LiteralKind::LiteralBacktick => output.push(b'`'),
+                    _ => output.extend_from_slice(b"\\`"),
+                },
+                b'\"' => match literal_kind {
+                    LiteralKind::LiteralDoubleQuote | LiteralKind::LiteralLongString => {
+                        output.push(b'\"')
                     }
-                }
-                'r' => {
-                    if literal_kind != LiteralKind::LiteralLongString {
-                        push(&mut output, '\r')
-                    }
-                }
-                't' => push(&mut output, '\t'),
-                'v' => push(&mut output, '\x0b'),
-                'e' => push(&mut output, '\x1b'),
-                'f' => push(&mut output, '\x0c'),
-                '\\' => push(&mut output, '\\'),
-                '?' if literal_kind == LiteralKind::LiteralLongString => push(&mut output, '\x3f'),
-                '$' if literal_kind != LiteralKind::LiteralLongString => push(&mut output, '$'),
-                '`' if literal_kind != LiteralKind::LiteralLongString => {
-                    if literal_kind == LiteralKind::LiteralBacktick {
-                        push(&mut output, '`')
-                    } else {
-                        push_str(&mut output, "\\`")
-                    }
-                }
-                '\"' => {
-                    if literal_kind == LiteralKind::LiteralDoubleQuote
-                        || literal_kind == LiteralKind::LiteralLongString
-                    {
-                        push(&mut output, '\"')
-                    } else {
-                        push_str(&mut output, "\\\"")
-                    }
-                }
-                'u' if literal_kind != LiteralKind::LiteralLongString
-                    && idx < len
-                    && s.as_bytes()[idx] as char == '{' =>
+                    _ => output.extend_from_slice(b"\\\""),
+                },
+                b'u' if literal_kind != LiteralKind::LiteralLongString
+                    && s.peek() == Some(b'{') =>
                 {
-                    let (_, new_idx) = next(idx)?;
-                    idx = new_idx;
-                    let unicode_count = count_f(&|c: char| c != '}', Some(6), 0, idx, len, s);
-                    let n = parse_int(&s[idx..(unicode_count + idx)], 16)?;
+                    let _ = s.next()?;
+                    let unicode = s.take_if(|c| c != b'}', 6);
+                    let n = parse_int(unsafe { std::str::from_utf8_unchecked(unicode) }, 16)?;
                     codepoint_to_utf8(n, &mut output)?;
-                    idx += unicode_count;
-                    let (n, new_idx) = next(idx)?;
-                    idx = new_idx;
-                    if n != '}' {
+                    let n = s.next()?;
+                    if n != b'}' {
                         return Err(InvalidString {
                             msg: String::from("Invalid UTF-8 escape sequence"),
                         });
                     }
                 }
-                'x' | 'X' => {
-                    let hex_count = count_f(&is_hex, Some(2), 0, idx, len, s);
-                    if hex_count == 0 {
-                        push(&mut output, '\\');
-                        push(&mut output, c)
+                b'x' | b'X' => {
+                    let hex = s.take_if(|c| is_hex(c as char), 2);
+                    if hex.len() == 0 {
+                        output.push(b'\\');
+                        output.push(c);
                     } else {
-                        let c = parse_numeric_escape(false, &s[idx..(hex_count + idx)], 16)?;
-                        push(&mut output, c);
-                        idx += hex_count
+                        // TODO: change parse_numeric_escape to return u8
+                        let c = parse_numeric_escape(
+                            false,
+                            unsafe { std::str::from_utf8_unchecked(hex) },
+                            16,
+                        )?;
+                        output.push(c as u8);
                     }
                 }
-                c if is_oct(c) => {
-                    idx -= 1;
-                    let oct_count = count_f(&is_oct, Some(3), 0, idx, len, s);
-                    let c = parse_numeric_escape(true, &s[idx..(oct_count + idx)], 8)?;
-                    push(&mut output, c);
-                    idx += oct_count
+                c if is_oct(c as char) => {
+                    s.back();
+                    let oct = s.take_if(|c| is_oct(c as char), 3);
+                    let c = parse_numeric_escape(
+                        true,
+                        unsafe { std::str::from_utf8_unchecked(oct) },
+                        8,
+                    )?;
+                    output.push(c as u8);
                 }
                 c => {
-                    push(&mut output, '\\');
-                    push(&mut output, c)
+                    output.push(b'\\');
+                    output.push(c);
                 }
             }
         }
-        idx < len
-    } {}
-    unsafe { Ok(String::from_utf8_unchecked(output)) }
+    }
+    return Ok(unsafe { String::from_utf8_unchecked(output) });
 }
 
 pub fn unescape_double(s: &str) -> Result<String, InvalidString> {
@@ -279,36 +282,30 @@ fn unescape_single_or_nowdoc(is_nowdoc: bool, s: &str) -> Result<String, Invalid
     let len = s.len();
     let mut output: Vec<u8> = Vec::with_capacity(len);
     let mut idx = 0;
-    let next = |idx: usize| -> Result<(char, usize), InvalidString> {
-        if idx >= len {
-            Err(InvalidString {
-                msg: String::from("string ended early"),
-            })
+    let s = s.as_bytes();
+    while idx < len {
+        let c = s[idx];
+        if is_nowdoc || c != b'\\' {
+            output.push(c)
         } else {
-            let c = s.as_bytes()[idx] as char;
-            Ok((c, idx + 1))
-        }
-    };
-    while {
-        let (c, new_idx) = next(idx)?;
-        idx = new_idx;
-        if is_nowdoc || c != '\\' {
-            output.push(c as u8)
-        } else {
-            let (c, new_idx) = next(idx)?;
-            idx = new_idx;
+            idx += 1;
+            if !idx < len {
+                return Err(InvalidString {
+                    msg: String::from("string ended early"),
+                });
+            }
+            let c = s[idx];
             match c {
-                '\'' => output.push('\'' as u8),
-                '\\' => output.push('\\' as u8),
+                b'\'' | b'\\' => output.push(c),
                 // unrecognized escapes are just copied over
                 _ => {
-                    output.push('\\' as u8);
-                    output.push(c as u8)
+                    output.push(b'\\');
+                    output.push(c);
                 }
             }
         }
-        idx < len
-    } {}
+        idx += 1;
+    }
     unsafe { Ok(String::from_utf8_unchecked(output)) }
 }
 
@@ -386,6 +383,13 @@ mod tests {
 
     #[test]
     fn unescape_single_or_nowdoc() {
+        assert_eq!(unescape_single("").unwrap(), "");
+        assert_eq!(unescape_nowdoc("").unwrap(), "");
+        assert_eq!(unescape_long_string("").unwrap(), "");
+        assert_eq!(unescape_double("").unwrap(), "");
+        assert_eq!(unescape_backtick("").unwrap(), "");
+        assert_eq!(unescape_heredoc("").unwrap(), "");
+
         assert_eq!(
             unescape_single("home \\\\$").unwrap(),
             "home \\$".to_string()

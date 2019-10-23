@@ -1151,7 +1151,6 @@ static void prepareFuncEntry(ActRec *ar, StackArgsState stk, Array&& generics) {
   assertx(!isResumed(ar));
   const Func* func = ar->m_func;
   Offset firstDVInitializer = InvalidAbsoluteOffset;
-  bool raiseMissingArgumentWarnings = false;
   folly::Optional<uint32_t> raiseTooManyArgumentsWarnings;
   const int nparams = func->numNonVariadicParams();
   auto& stack = vmStack();
@@ -1180,23 +1179,15 @@ static void prepareFuncEntry(ActRec *ar, StackArgsState stk, Array&& generics) {
     raiseTooManyArgumentsWarnings = nargs;
   } else {
     if (nargs < nparams) {
-      // Push uninitialized nulls for missing arguments. Some of them may
-      // end up getting default-initialized, but regardless, we need to
-      // make space for them on the stack.
-      const Func::ParamInfoVec& paramInfo = func->params();
+      // This is where we are going to enter, assuming we don't fail on
+      // a missing argument check.
+      firstDVInitializer = func->params()[nargs].funcletOff;
+
+      // Push uninitialized nulls for missing arguments. They will end up
+      // getting default-initialized, but regardless, we need to make space
+      // for them on the stack.
       for (int i = nargs; i < nparams; ++i) {
         stack.pushUninit();
-        Offset dvInitializer = paramInfo[i].funcletOff;
-        if (dvInitializer == InvalidAbsoluteOffset) {
-          // We wait to raise warnings until after all the locals have been
-          // initialized. This is important because things need to be in a
-          // consistent state in case the user error handler throws.
-          raiseMissingArgumentWarnings = true;
-        } else if (firstDVInitializer == InvalidAbsoluteOffset) {
-          // This is the first unpassed arg with a default value, so
-          // this is where we'll need to jump to.
-          firstDVInitializer = dvInitializer;
-        }
       }
     }
     if (UNLIKELY(func->hasVariadicCaptureParam())) {
@@ -1243,8 +1234,8 @@ static void prepareFuncEntry(ActRec *ar, StackArgsState stk, Array&& generics) {
     : func->getEntry();
   vmJitReturnAddr() = nullptr;
 
-  if (raiseMissingArgumentWarnings) {
-    HPHP::jit::raiseMissingArgument(func, ar->numArgs());
+  if (nargs < func->numRequiredParams()) {
+    HPHP::jit::throwMissingArgument(func, nargs);
   }
   if (raiseTooManyArgumentsWarnings) {
     // since shuffleExtraStackArgs changes ar->numArgs() we need to communicate

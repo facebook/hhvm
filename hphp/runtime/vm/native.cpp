@@ -400,18 +400,6 @@ void coerceFCallArgs(TypedValue* args,
 #undef CASE
 #undef COERCE_OR_CAST
 
-static inline int32_t minNumArgs(ActRec* ar) {
-  auto func = ar->m_func;
-  auto numArgs = func->numNonVariadicParams();
-  int32_t num = numArgs;
-  const Func::ParamInfoVec& paramInfo = func->params();
-  while (num &&
-         (paramInfo[num-1].funcletOff != InvalidAbsoluteOffset)) {
-    --num;
-  }
-  return num;
-}
-
 TypedValue* functionWrapper(ActRec* ar) {
   assertx(ar);
   auto func = ar->m_func;

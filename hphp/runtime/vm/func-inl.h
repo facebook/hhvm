@@ -328,6 +328,13 @@ inline uint32_t Func::numNonVariadicParams() const {
   return (m_paramCounts - 1) >> 1;
 }
 
+inline uint32_t Func::numRequiredParams() const {
+  for (auto i = numNonVariadicParams(); i > 0; --i) {
+    if (!params()[i - 1].hasDefaultValue()) return i;
+  }
+  return 0;
+}
+
 inline bool Func::hasVariadicCaptureParam() const {
 #ifndef NDEBUG
   assertx(bool(m_attrs & AttrVariadicParam) ==

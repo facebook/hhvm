@@ -528,6 +528,12 @@ struct Func final {
   uint32_t numNonVariadicParams() const;
 
   /*
+   * Number of required parameters, i.e. all arguments starting from
+   * the returned position have default value.
+   */
+  uint32_t numRequiredParams() const;
+
+  /*
    * Whether the arg-th parameter are taken by reference.
    */
   bool byRef(int32_t arg) const;

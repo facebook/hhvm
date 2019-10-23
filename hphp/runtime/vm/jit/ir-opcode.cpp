@@ -471,7 +471,6 @@ bool opcodeMayRaise(Opcode opc) {
   case RaiseHackArrCompatNotice:
   case RaiseHackArrParamNotice:
   case RaiseHackArrPropNotice:
-  case RaiseMissingArg:
   case RaiseNotice:
   case RaiseRxCallViolation:
   case RaiseStrToClassNotice:
@@ -511,6 +510,7 @@ bool opcodeMayRaise(Opcode opc) {
   case ThrowInvalidArrayKey:
   case ThrowInvalidOperation:
   case ThrowLateInitPropError:
+  case ThrowMissingArg:
   case ThrowMissingThis:
   case ThrowOutOfBounds:
   case ThrowParameterWrongType:

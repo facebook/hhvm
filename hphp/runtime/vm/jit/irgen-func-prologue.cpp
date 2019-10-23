@@ -202,15 +202,9 @@ void init_locals(IRGS& env, const Func* func) {
  */
 void warnOnMissingArgs(IRGS& env, uint32_t argc) {
   auto const func = curFunc(env);
-  auto const nparams = func->numNonVariadicParams();
-  auto const& paramInfo = func->params();
-
-  for (auto i = argc; i < nparams; ++i) {
-    if (paramInfo[i].funcletOff == InvalidAbsoluteOffset) {
-      env.irb->exceptionStackBoundary();
-      gen(env, RaiseMissingArg, FuncArgData { func, argc });
-      break;
-    }
+  if (argc < func->numRequiredParams()) {
+    env.irb->exceptionStackBoundary();
+    gen(env, ThrowMissingArg, FuncArgData { func, argc });
   }
 }
 

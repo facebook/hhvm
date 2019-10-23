@@ -570,7 +570,6 @@ bool canDCE(IRInstruction* inst) {
   case RaiseHackArrPropNotice:
   case RaiseUninitLoc:
   case RaiseUndefProp:
-  case RaiseMissingArg:
   case RaiseTooManyArg:
   case RaiseError:
   case RaiseErrorOnInvalidIsAsExpressionType:
@@ -730,6 +729,7 @@ bool canDCE(IRInstruction* inst) {
   case ThrowDivisionByZeroException:
   case ThrowHasThisNeedStatic:
   case ThrowLateInitPropError:
+  case ThrowMissingArg:
   case ThrowMissingThis:
   case ThrowParameterWrongType:
   case ThrowParamRefMismatch:

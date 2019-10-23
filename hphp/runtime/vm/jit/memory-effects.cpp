@@ -2029,7 +2029,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case RaiseArraySerializeNotice:
   case RaiseUninitLoc:
   case RaiseUndefProp:
-  case RaiseMissingArg:
   case RaiseTooManyArg:
   case RaiseError:
   case RaiseErrorOnInvalidIsAsExpressionType:
@@ -2137,6 +2136,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ThrowDivisionByZeroException:
   case ThrowHasThisNeedStatic:
   case ThrowLateInitPropError:
+  case ThrowMissingArg:
   case ThrowMissingThis:
   case ThrowParameterWrongType:
   case ThrowParamRefMismatch:

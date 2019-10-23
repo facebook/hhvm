@@ -2237,11 +2237,6 @@ To string conversions:
 
   Raise a notice for an undefined property named S1 on the class of S0.
 
-| RaiseMissingArg<func,argc>, ND, NA, NF
-
-  Raise a missing argument warning because only argc arguments were passed to
-  function func.
-
 | RaiseTooManyArg<func>, ND, S(Arr,Vec), CRc
 
   Raise a too many argument warning because extra arguments stored in S0 were
@@ -2263,6 +2258,11 @@ To string conversions:
 
   Throws a BadMethodCallException to indicate that func was called on an object
   but is a static method.
+
+| ThrowMissingArg<func,argc>, ND, NA, T
+
+  Throws a RuntimeExceptionObject to indicate that only argc arguments were
+  passed to function func.
 
 | ThrowMissingThis, ND, S(Func), T
 

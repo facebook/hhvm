@@ -832,61 +832,54 @@ const Func* lookupClsMethodHelper(const Class* cls, const StringData* methName,
 
 //////////////////////////////////////////////////////////////////////
 
-void raiseArgumentImpl(const Func* func, int got, bool missing) {
-  if (!missing && !RuntimeOption::EvalWarnOnTooManyArguments &&
-      !func->isCPPBuiltin()) {
-    return;
-  }
-  const auto total = func->numNonVariadicParams();
-  const auto variadic = func->hasVariadicCaptureParam();
-  const Func::ParamInfoVec& params = func->params();
-  if (variadic && !missing) return;
-  int expected = 0;
-  bool atmost = false;
-  // We subtract the number of parameters with default value at the end
-  for (size_t i = total; i--; ) {
-    if (!params[i].hasDefaultValue()) {
-      expected = i + 1;
-      break;
-    }
-  }
-  auto const amount = [&] {
-    if (!missing) {
-      atmost = expected < total;
-      return atmost ? "at most" : "exactly";
-    }
-    return variadic || expected < total ? "at least" : "exactly";
-  }();
+namespace {
 
-  auto const value = atmost ? total : expected;
-  auto const msg = folly::sformat("{}() expects {} {} parameter{}, {} given",
-                                  func->fullDisplayName()->data(),
-                                  amount,
-                                  value,
-                                  value == 1 ? "" : "s",
-                                  got);
-
-  if (missing || RuntimeOption::EvalWarnOnTooManyArguments > 1 ||
-      func->isCPPBuiltin()) {
-    SystemLib::throwRuntimeExceptionObject(Variant(msg));
-  } else {
-    raise_warning(msg);
-  }
+std::string formatArgumentErrMsg(const Func* func, const char* amount,
+                                 uint32_t expected, uint32_t got) {
+  return folly::sformat(
+    "{}() expects {} {} parameter{}, {} given",
+    func->fullDisplayName()->data(),
+    amount,
+    expected,
+    expected == 1 ? "" : "s",
+    got
+  );
 }
 
-void raiseMissingArgument(const Func* func, int got) {
-  raiseArgumentImpl(func, got, true);
+}
+
+void throwMissingArgument(const Func* func, int got) {
+  auto const expected = func->numRequiredParams();
+  assertx(got < expected);
+  auto const amount = expected < func->numParams() ? "at least" : "exactly";
+  auto const errMsg = formatArgumentErrMsg(func, amount, expected, got);
+  SystemLib::throwRuntimeExceptionObject(Variant(errMsg));
 }
 
 void raiseTooManyArguments(const Func* func, int got) {
-  raiseArgumentImpl(func, got, false);
+  if (!RuntimeOption::EvalWarnOnTooManyArguments && !func->isCPPBuiltin()) {
+    return;
+  }
+  // FIXME: assert that this is not true
+  if (func->hasVariadicCaptureParam()) return;
+
+  auto const total = func->numNonVariadicParams();
+  assertx(got > total);
+  auto const amount = func->numRequiredParams() < total ? "at most" : "exactly";
+  auto const errMsg = formatArgumentErrMsg(func, amount, total, got);
+
+  if (RuntimeOption::EvalWarnOnTooManyArguments > 1 || func->isCPPBuiltin()) {
+    SystemLib::throwRuntimeExceptionObject(Variant(errMsg));
+  } else {
+    raise_warning(errMsg);
+  }
 }
 
 void raiseTooManyArgumentsPrologue(const Func* func, ArrayData* unpackArgs) {
   SCOPE_EXIT { decRefArr(unpackArgs); };
   if (unpackArgs->empty()) return;
   auto const got = func->numNonVariadicParams() + unpackArgs->size();
-  raiseArgumentImpl(func, got, false);
+  raiseTooManyArguments(func, got);
 }
 
 //////////////////////////////////////////////////////////////////////

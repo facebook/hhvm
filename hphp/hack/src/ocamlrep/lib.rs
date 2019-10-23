@@ -11,6 +11,7 @@ mod slab;
 mod value;
 
 pub mod from;
+pub mod ptr;
 pub mod rc;
 
 pub use arena::Arena;

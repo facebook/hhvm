@@ -4,6 +4,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use ocamlrep::ptr::UnsafeOcamlPtr;
 use ocamlrep::OcamlRep;
 use oxidized::relative_path::RelativePath;
 use std::rc::Rc;
@@ -23,7 +24,7 @@ struct SourceTextImpl<'a> {
 
     file_path: RelativePath,
 
-    ocaml_source_text: usize,
+    ocaml_source_text: Option<UnsafeOcamlPtr>,
 }
 #[derive(Debug, Clone)]
 pub struct SourceText<'a>(Rc<SourceTextImpl<'a>>);
@@ -41,7 +42,11 @@ impl<'a> SourceText<'a> {
         Self(Rc::new(SourceTextImpl {
             file_path: file_path.clone(),
             text,
-            ocaml_source_text,
+            ocaml_source_text: if ocaml_source_text == 0 {
+                None
+            } else {
+                unsafe { Some(UnsafeOcamlPtr::new(ocaml_source_text)) }
+            },
         }))
     }
 
@@ -57,7 +62,7 @@ impl<'a> SourceText<'a> {
         self.text().len()
     }
 
-    pub fn ocaml_source_text(&self) -> usize {
+    pub fn ocaml_source_text(&self) -> Option<UnsafeOcamlPtr> {
         self.0.ocaml_source_text
     }
 
@@ -86,12 +91,11 @@ impl<'a> SourceText<'a> {
 }
 
 impl<'content> OcamlRep for SourceText<'content> {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator<'a>>(&self, _alloc: &mut A) -> ocamlrep::Value<'a> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator<'a>>(&self, alloc: &mut A) -> ocamlrep::Value<'a> {
         // A SourceText with no associated ocaml_source_text cannot be converted
         // to OCaml yet (we'd need to construct the OffsetMap). We still
         // construct some in test cases, so just panic upon attempts to convert.
-        assert!(self.0.ocaml_source_text != 0);
-        unsafe { ocamlrep::Value::from_bits(self.0.ocaml_source_text) }
+        alloc.add(&self.0.ocaml_source_text.unwrap())
     }
 
     fn from_ocamlrep(value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
@@ -109,7 +113,7 @@ impl<'content> OcamlRep for SourceText<'content> {
                     .map_err(|e| ocamlrep::FromError::ErrorInField(2, Box::new(e)))?,
             )
         };
-        let ocaml_source_text = unsafe { value.to_bits() };
+        let ocaml_source_text = Some(UnsafeOcamlPtr::from_ocamlrep(value)?);
         Ok(Self(Rc::new(SourceTextImpl {
             file_path,
             text,

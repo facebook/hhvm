@@ -50,7 +50,9 @@ impl<'src, S: Clone> StateType<'src, S> for OcamlCoroutineState<'src, S> {
             seen_ppl: false,
             source: src.clone(),
             is_codegen: env.codegen,
-            context: Rc::new(SerializationContext::new(src.ocaml_source_text())),
+            context: Rc::new(SerializationContext::new(
+                src.ocaml_source_text().unwrap().as_usize(),
+            )),
             phantom_s: PhantomData,
         }
     }

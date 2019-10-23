@@ -17,8 +17,10 @@
  *
  */
 
+use ocamlrep_derive::OcamlRep;
+
 #[allow(non_camel_case_types)] // allow Include_once and Require_once
-#[derive(Debug, Copy, Clone, PartialEq, Ord, Eq, PartialOrd)]
+#[derive(Debug, Copy, Clone, PartialEq, Ord, Eq, PartialOrd, OcamlRep)]
 pub enum TokenKind {
     // No text tokens
     EndOfFile,

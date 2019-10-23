@@ -2896,8 +2896,10 @@ module GenerateFFRustTokenKind = struct
     make_header CStyle ""
     ^ "
 
+use ocamlrep_derive::OcamlRep;
+
 #[allow(non_camel_case_types)] // allow Include_once and Require_once
-#[derive(Debug, Copy, Clone, PartialEq, Ord, Eq, PartialOrd)]
+#[derive(Debug, Copy, Clone, PartialEq, Ord, Eq, PartialOrd, OcamlRep)]
 pub enum TokenKind {
     // No text tokens
 KIND_DECLARATIONS_NO_TEXT    // Given text tokens
@@ -2991,7 +2993,14 @@ end
 (* GenerateFFTRustTokenKind *)
 
 module GenerateFFOperatorRust = struct
-  let template = make_header CStyle "" ^ "
+  let template =
+    make_header CStyle ""
+    ^ "
+
+use ocamlvalue_macro::Ocamlvalue;
+use ocamlrep_derive::OcamlRep;
+
+#[derive(Ocamlvalue, OcamlRep)]
 pub enum Operator {
 OPERATORS}
 "

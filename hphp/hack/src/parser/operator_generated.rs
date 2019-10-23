@@ -16,6 +16,11 @@
  **
  *
  */
+
+use ocamlvalue_macro::Ocamlvalue;
+use ocamlrep_derive::OcamlRep;
+
+#[derive(Ocamlvalue, OcamlRep)]
 pub enum Operator {
     DollarOperator,
     ScopeResolutionOperator,

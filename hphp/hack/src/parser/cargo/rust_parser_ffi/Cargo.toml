@@ -12,6 +12,7 @@ ocaml = "^0.7"
 oxidized = {path = "../../../oxidized", package = "hack_oxidized" }
 syntax_tree = {path = "../syntax_tree", package = "syntax_tree" }
 rust_to_ocaml = {path = "../rust_to_ocaml", package = "rust_to_ocaml" }
+ocamlrep = {path = "../../../ocamlrep", package = "hack_ocamlrep"}
 
 [lib]
 name = "rust_parser_ffi"

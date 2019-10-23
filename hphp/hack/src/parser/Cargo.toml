@@ -13,3 +13,6 @@ ocaml = "^0.7"
 lazy_static = "^1.3.0"
 parser_core_types = { path = "cargo/core_types", package = "hack_parser_core_types" }
 oxidized = {path = "../oxidized", package = "hack_oxidized" }
+ocamlvalue_macro = { path = "../utils/ocamlpool_rust/macro", package = "hack_utils_ocamlvalue_macro" }
+ocamlrep = {path = "../ocamlrep", package = "hack_ocamlrep"}
+ocamlrep_derive = {path = "../ocamlrep_derive", package = "hack_ocamlrep_derive"}

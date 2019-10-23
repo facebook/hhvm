@@ -5,9 +5,10 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ocamlpool_rust::{caml_raise, ocamlvalue::Ocamlvalue, utils::*};
+use ocamlrep::OcamlRep;
 use parser_rust::{
-    lexer::Lexer, minimal_token::MinimalToken, minimal_trivia::MinimalTrivia,
-    source_text::SourceText,
+    lexer::Lexer, minimal_token::MinimalToken, minimal_trivia::MinimalTrivia, operator::Operator,
+    source_text::SourceText, token_kind::TokenKind,
 };
 use rust_to_ocaml::{to_list, SerializationContext};
 use syntax_tree::mode_parser::parse_mode;
@@ -234,3 +235,62 @@ scan_trivia!(scan_leading_xhp_trivia);
 scan_trivia!(scan_trailing_xhp_trivia);
 scan_trivia!(scan_leading_php_trivia);
 scan_trivia!(scan_trailing_php_trivia);
+
+macro_rules! from_token {
+    ($name:ident) => {
+        caml_raise!($name, |token|, <l>, {
+            let token = TokenKind::from_ocaml(token.0);
+            let res = Operator::$name(token.unwrap());
+            let res = res.ocamlvalue();
+            l = ocaml::Value::new(res);
+        } -> l);
+    };
+}
+
+from_token!(trailing_from_token);
+from_token!(prefix_unary_from_token);
+from_token!(is_trailing_operator_token);
+from_token!(is_binary_operator_token);
+
+macro_rules! from_operator {
+    ($name:ident) => {
+        caml_raise!($name, |op|, <l>, {
+            let op = Operator::from_ocaml(op.0);
+            let op = op.unwrap();
+            let res = op.$name();
+            let res = res.ocamlvalue();
+            l = ocaml::Value::new(res);
+        } -> l);
+    };
+}
+
+from_operator!(is_comparison);
+from_operator!(is_assignment);
+
+caml_raise!(rust_precedence_helper, |op|, <l>, {
+    let op = Operator::from_ocaml(op.0);
+    let op = op.unwrap();
+    // NOTE: ParserEnv is not used in operator::precedence(), so we just create an empty ParserEnv
+    // If operator::precedence() starts using ParserEnv, this macro and the callsites in OCaml must be updated
+    let env = parser_rust::parser_env::ParserEnv::default();
+    let res = op.precedence(&env);
+    let res = res.ocamlvalue();
+    l = ocaml::Value::new(res);
+} -> l);
+
+caml_raise!(rust_precedence_for_assignment_in_expressions_helper, |_val|, <l>, {
+    let res = Operator::precedence_for_assignment_in_expressions();
+    let res = res.ocamlvalue();
+    l = ocaml::Value::new(res);
+} -> l);
+
+caml_raise!(rust_associativity_helper, |op|, <l>, {
+    let op = Operator::from_ocaml(op.0);
+    let op = op.unwrap();
+    // NOTE: ParserEnv is not used in operator::associativity(), so we just create an empty ParserEnv
+    // If operator::associativity() starts using ParserEnv, this macro and the callsites in OCaml must be updated
+    let env = parser_rust::parser_env::ParserEnv::default();
+    let res = op.associativity(&env);
+    let res = res.ocamlvalue();
+    l = ocaml::Value::new(res);
+} -> l);

@@ -5,11 +5,13 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::parser_env::ParserEnv;
+use ocamlrep_derive::OcamlRep;
+use ocamlvalue_macro::Ocamlvalue;
 use parser_core_types::token_kind::TokenKind;
 
 pub use crate::operator_generated::*;
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Ocamlvalue, OcamlRep)]
 pub enum Assoc {
     LeftAssociative,
     RightAssociative,
@@ -19,7 +21,10 @@ pub enum Assoc {
 use self::Operator::*;
 
 impl Operator {
-    pub fn precedence(&self, _env: &ParserEnv) -> usize {
+    // NOTE: ParserEnv is not used in operator::precedence(). The macro rust_precedence_helper (defined in rust_parser_ffi.rs)
+    // assumes that ParserEnv is not used. If operator::precedence() starts using ParserEnv, the macro and the callsites in OCaml
+    // must be updated.
+    pub fn precedence(&self, _: &ParserEnv) -> usize {
         // TODO: eval
         // TODO: Comma
         // TODO: elseif
@@ -90,7 +95,10 @@ impl Operator {
         25
     }
 
-    pub fn associativity(&self, _env: &ParserEnv) -> Assoc {
+    // NOTE: ParserEnv is not used in operator::associativity(). The macro rust_associativity_helper (defined in rust_parser_ffi.rs)
+    // assumes that ParserEnv is not used. If operator::associativity() starts using ParserEnv, the macro and the callsites in OCaml
+    // must be updated.
+    pub fn associativity(&self, _: &ParserEnv) -> Assoc {
         match self {
             | EqualOperator | StrictEqualOperator | NotEqualOperator | PhpNotEqualOperator
             | StrictNotEqualOperator | LessThanOperator | LessThanOrEqualOperator

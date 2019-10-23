@@ -139,27 +139,23 @@ bool isCalleeInlinable(SrcKey callSK, const Func* callee,
  */
 bool checkNumArgs(SrcKey callSK,
                   const Func* callee,
+                  const FCallArgs& fca,
                   AnnotationData* annotations) {
-  assertx(isFCall(callSK.op()));
   assertx(callee);
 
   auto refuse = [&] (const char* why) {
     return traceRefusal(callSK, callee, why, annotations);
   };
 
-  auto pc = callSK.pc();
-  auto const fca = getImm(pc, 0).u_FCA;
-  auto const numParams = callee->numParams();
+  assertx(fca.numArgs <= callee->numNonVariadicParams());
+  assertx(!fca.hasUnpack() || fca.numArgs == callee->numNonVariadicParams());
 
-  if (fca.numArgs > numParams && !callee->hasVariadicCaptureParam()) {
+  if (fca.hasUnpack() && !callee->hasVariadicCaptureParam()) {
     return refuse("callee called with too many arguments");
   }
 
-  if (fca.hasUnpack()) {
-    if (fca.numArgs != callee->numNonVariadicParams() ||
-        !callee->hasVariadicCaptureParam()) {
-      return refuse("callee called with variadic arguments");
-    }
+  if (fca.numArgs < callee->numRequiredParams()) {
+    return refuse("callee called with too few arguments");
   }
 
   if (fca.enforceReffiness()) {
@@ -167,16 +163,6 @@ bool checkNumArgs(SrcKey callSK,
       if (callee->byRef(i) != fca.byRef(i)) {
         return refuse("callee called with arguments of mismatched reffiness");
       }
-    }
-  }
-
-  // It's okay if we passed fewer arguments than there are parameters as long
-  // as the gap can be filled in by DV funclets.
-  for (auto i = fca.numArgs; i < numParams; ++i) {
-    auto const& param = callee->params()[i];
-    if (!param.hasDefaultValue() &&
-        (i < numParams - 1 || !callee->hasVariadicCaptureParam())) {
-      return refuse("callee called with too few arguments");
     }
   }
 
@@ -188,6 +174,7 @@ bool checkNumArgs(SrcKey callSK,
 
 bool canInlineAt(SrcKey callSK,
                  const Func* callee,
+                 const FCallArgs& fca,
                  AnnotationData* annotations) {
   assertx(isFCall(callSK.op()));
 
@@ -212,7 +199,7 @@ bool canInlineAt(SrcKey callSK,
   }
 
   if (!isCalleeInlinable(callSK, callee, annotations) ||
-      !checkNumArgs(callSK, callee, annotations)) {
+      !checkNumArgs(callSK, callee, fca, annotations)) {
     return false;
   }
 
@@ -613,26 +600,24 @@ bool shouldInline(const irgen::IRGS& irgs,
 
 namespace {
 RegionDescPtr selectCalleeTracelet(const Func* callee,
-                                   const int numArgs,
                                    Type ctxType,
                                    std::vector<Type>& argTypes,
                                    int32_t maxBCInstrs) {
-  auto const numParams = callee->numParams();
-
   // Set up the RegionContext for the tracelet selector.
   RegionContext ctx{
-    callee, callee->getEntryForNumArgs(numArgs),
+    callee, callee->getEntryForNumArgs(argTypes.size()),
     FPInvOffset{safe_cast<int32_t>(callee->numSlotsInFrame())},
     ResumeMode::None
   };
 
-  for (uint32_t i = 0; i < numArgs; ++i) {
+  for (uint32_t i = 0; i < argTypes.size(); ++i) {
     auto type = argTypes[i];
     assertx(type <= TGen);
     ctx.liveTypes.push_back({Location::Local{i}, type});
   }
 
-  for (unsigned i = numArgs; i < numParams; ++i) {
+  auto const numParams = callee->numParams();
+  for (uint32_t i = argTypes.size(); i < numParams; ++i) {
     // These locals will be populated by DV init funclets but they'll start out
     // as Uninit.
     ctx.liveTypes.push_back({Location::Local{i}, TUninit});
@@ -651,12 +636,11 @@ RegionDescPtr selectCalleeTracelet(const Func* callee,
   return r;
 }
 
-TransID findTransIDForCallee(const ProfData* profData,
-                             const Func* callee, const int numArgs,
+TransID findTransIDForCallee(const ProfData* profData, const Func* callee,
                              Type ctxType, std::vector<Type>& argTypes) {
   auto const idvec = profData->funcProfTransIDs(callee->getFuncId());
 
-  auto const offset = callee->getEntryForNumArgs(numArgs);
+  auto const offset = callee->getEntryForNumArgs(argTypes.size());
   TransID ret = kInvalidTransID;
   FTRACE(2, "findTransIDForCallee: offset={}\n", offset);
   for (auto const id : idvec) {
@@ -672,7 +656,7 @@ TransID findTransIDForCallee(const ProfData* profData,
         if (typeloc.location.tag() != LTag::Local) continue;
         auto const locId = typeloc.location.localId();
 
-        if (locId < numArgs && !(argTypes[locId].maybe(typeloc.type))) {
+        if (locId < argTypes.size() && !(argTypes[locId].maybe(typeloc.type))) {
           return false;
         }
       }
@@ -689,7 +673,6 @@ TransID findTransIDForCallee(const ProfData* profData,
 }
 
 RegionDescPtr selectCalleeCFG(SrcKey callerSk, const Func* callee,
-                              const int numArgs,
                               Type ctxType, std::vector<Type>& argTypes,
                               int32_t maxBCInstrs,
                               AnnotationData* annotations) {
@@ -707,8 +690,7 @@ RegionDescPtr selectCalleeCFG(SrcKey callerSk, const Func* callee,
     return nullptr;
   }
 
-  auto const dvID = findTransIDForCallee(profData, callee,
-                                         numArgs, ctxType, argTypes);
+  auto const dvID = findTransIDForCallee(profData, callee, ctxType, argTypes);
 
   if (dvID == kInvalidTransID) {
     traceRefusal(callerSk, callee, "didn't find entry TransID for callee",
@@ -796,10 +778,8 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
   FTRACE(2, "selectCalleeRegion: callee = {}\n", callee->fullName()->data());
   auto const firstArgPos = static_cast<int32_t>(fca.numInputs()) - 1;
   std::vector<Type> argTypes;
-  auto numArgs = std::min<uint32_t>(
-    fca.numArgs, callee->numNonVariadicParams()
-  );
-  for (int32_t i = 0; i < fca.numArgs; ++i) {
+  auto const numArgsInclUnpack = fca.numArgs + (fca.hasUnpack() ? 1 : 0);
+  for (int32_t i = 0; i < numArgsInclUnpack; ++i) {
     // DataTypeGeneric is used because we're just passing the locals into the
     // callee.  It's up to the callee to constrain further if needed.
     auto type = irgen::publicTopType(irgs, BCSPRelOffset{firstArgPos - i});
@@ -814,17 +794,17 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
       return nullptr;
     }
     FTRACE(2, "arg {}: {}\n", i + 1, type);
-    if (i < numArgs) argTypes.push_back(type);
+    argTypes.push_back(type);
   }
 
   if (fca.hasUnpack()) {
     const int32_t ix = fca.numArgs;
     auto const ty = irgen::publicTopType(irgs, BCSPRelOffset{firstArgPos - ix});
-    if (!ty.subtypeOfAny(TVec, TDict, TArr, TKeyset)) {
+    if (!(ty <= (RuntimeOption::EvalHackArrDVArrs ? TVec : TArr))) {
       traceRefusal(
         sk,
         callee,
-        folly::sformat("unpacked argument may not be a container ({})",
+        folly::sformat("unpacked argument has a wrong type ({})",
                        ty.toString()),
         annotationsPtr
       );
@@ -834,7 +814,7 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
 
   const auto depth = inlineDepth(irgs);
   if (profData()) {
-    auto region = selectCalleeCFG(sk, callee, numArgs, ctxType, argTypes,
+    auto region = selectCalleeCFG(sk, callee, ctxType, argTypes,
                                   irgs.budgetBCInstrs, annotationsPtr);
     if (region &&
         shouldInline(irgs, sk, callee, *region,
@@ -844,7 +824,7 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
     return nullptr;
   }
 
-  auto region = selectCalleeTracelet(callee, numArgs, ctxType, argTypes,
+  auto region = selectCalleeTracelet(callee, ctxType, argTypes,
                                      irgs.budgetBCInstrs);
 
   if (region &&

@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_JIT_INLINING_H_
 #define incl_HPHP_JIT_INLINING_H_
 
+#include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/jit/annotation-data.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 
@@ -74,6 +75,7 @@ namespace irgen { struct IRGS; }
  */
 bool canInlineAt(SrcKey callSK,
                  const Func* callee,
+                 const FCallArgs& fca,
                  AnnotationData* annotations);
 
 /*

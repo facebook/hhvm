@@ -341,7 +341,7 @@ RegionDescPtr getInlinableCalleeRegion(const irgen::IRGS& irgs,
   }
   auto annotationsPtr = mcgen::dumpTCAnnotation(irgs.context.kind) ?
                         irgs.unit.annotationData.get() : nullptr;
-  if (!canInlineAt(psk.srcKey, callee, annotationsPtr)) return nullptr;
+  if (!canInlineAt(psk.srcKey, callee, fca, annotationsPtr)) return nullptr;
 
   auto const& inlineBlacklist = irgs.retryContext->inlineBlacklist;
   if (inlineBlacklist.find(psk) != inlineBlacklist.end()) {

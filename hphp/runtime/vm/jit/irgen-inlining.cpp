@@ -222,6 +222,9 @@ void beginInlining(IRGS& env,
   assertx((!curFunc(env) ||
           curFunc(env)->base() + callBcOffset < curFunc(env)->past()) &&
          "callBcOffset past end of caller");
+  assertx(fca.numArgs <= target->numNonVariadicParams());
+  assertx(!fca.hasUnpack() || fca.numArgs == target->numNonVariadicParams());
+  assertx(!fca.hasUnpack() || target->hasVariadicCaptureParam());
 
   FTRACE(1, "[[[ begin inlining: {}\n", target->fullName()->data());
 
@@ -273,38 +276,8 @@ void beginInlining(IRGS& env,
     return nullptr;
   }();
 
-  auto numArgs = std::min<uint32_t>(
-    target->numNonVariadicParams(), fca.numArgs);
+  auto const numArgs = fca.numArgs + (fca.hasUnpack() ? 1 : 0);
   jit::vector<SSATmp*> params{numArgs + 1};
-
-  if (fca.hasUnpack()) {
-    assertx(fca.numArgs == target->numNonVariadicParams());
-    assertx(target->hasVariadicCaptureParam());
-    assertx(numArgs == fca.numArgs);
-    auto const ty = topC(env)->type();
-    if (RuntimeOption::EvalHackArrDVArrs) {
-      if (ty <= TArr)         push(env, gen(env, ConvArrToVec, popC(env)));
-      else if (ty <= TDict)   push(env, gen(env, ConvDictToVec, popC(env)));
-      else if (ty <= TKeyset) push(env, gen(env, ConvKeysetToVec, popC(env)));
-      else                    assertx(ty <= TVec);
-    } else {
-      if (ty <= TVec)         push(env, gen(env, ConvVecToVArr, popC(env)));
-      else if (ty <= TDict)   push(env, gen(env, ConvDictToVArr, popC(env)));
-      else if (ty <= TKeyset) push(env, gen(env, ConvKeysetToVArr, popC(env)));
-      else if (ty.arrSpec().kind() != ArrayData::kPackedKind) {
-        assertx(ty <= TArr);
-        push(env, gen(env, ConvArrToVArr, popC(env)));
-      }
-    }
-    ++numArgs;
-  } else if (target->hasVariadicCaptureParam() && numArgs < fca.numArgs) {
-    if (RuntimeOption::EvalHackArrDVArrs) {
-      emitNewVecArray(env, fca.numArgs - numArgs);
-    } else {
-      emitNewVArray(env, fca.numArgs - numArgs);
-    }
-    ++numArgs;
-  }
 
   for (unsigned i = 0; i < numArgs; ++i) {
     params[numArgs - i - 1] = popF(env);
@@ -394,7 +367,8 @@ void conjureBeginInlining(IRGS& env,
 
   always_assert(isFCall(env.context.initSrcKey.op()));
   always_assert(thisType != TBottom);
-  auto const numParams = static_cast<uint32_t>(args.size());
+  auto const hasUnpack = args.size() > func->numNonVariadicParams();
+  auto const numParams = safe_cast<uint32_t>(args.size()) - (hasUnpack ? 1 : 0);
 
   // Push space for out parameters
   for (auto i = 0; i < func->numInOutParams(); i++) {
@@ -405,6 +379,9 @@ void conjureBeginInlining(IRGS& env,
   for (auto const argType : args) {
     push(env, conjure(argType));
   }
+
+  auto const flags = hasUnpack
+    ? FCallArgs::Flags::HasUnpack : FCallArgs::Flags::None;
 
   // thisType is the context type inside the closure, but beginInlining()'s ctx
   // is a context given to the prologue.
@@ -418,8 +395,7 @@ void conjureBeginInlining(IRGS& env,
   beginInlining(
     env,
     func,
-    FCallArgs(FCallArgs::Flags::None, numParams, 1, nullptr, kInvalidOffset,
-              false),
+    FCallArgs(flags, numParams, 1, nullptr, kInvalidOffset, false),
     ctx,
     false,
     env.context.initSrcKey.op(),

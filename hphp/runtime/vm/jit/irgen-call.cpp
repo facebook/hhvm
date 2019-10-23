@@ -356,16 +356,19 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
   if (dynamicCall) emitCallerDynamicCallChecksKnown(env, callee);
   emitCallerRxChecksKnown(env, callee);
 
-  if (isFCall(curSrcKey(env).op())) {
-    auto const inlined = irGenTryInlineFCall(
-      env, callee, fca, objOrClass, dynamicCall);
-    if (inlined) return;
-  }
-
   auto const doCall = [&](const FCallArgs& fca) {
+    assertx(fca.numArgs <= callee->numNonVariadicParams());
+    assertx(!fca.hasUnpack() || fca.numArgs == callee->numNonVariadicParams());
+
     // We may have updated the stack, make sure Call can set up its Catch.
     updateMarker(env);
     env.irb->exceptionStackBoundary();
+
+    if (isFCall(curSrcKey(env).op())) {
+      if (irGenTryInlineFCall(env, callee, fca, objOrClass, dynamicCall)) {
+        return;
+      }
+    }
 
     auto const asyncEagerReturn =
       fca.asyncEagerOffset != kInvalidOffset &&

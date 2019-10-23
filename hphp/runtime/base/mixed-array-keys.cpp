@@ -25,27 +25,26 @@ namespace HPHP {
 folly::Optional<uint8_t> MixedArrayKeys::getMask(const jit::Type& type) {
   using namespace jit;
   auto const str = kNonStaticStrKey | kStaticStrKey;
-  if (type == TInt && kTrackStaticStrKeys) return ~kIntKey;
-  if (type == (TInt | TStr))               return ~(kIntKey | str);
-  if (type == TStaticStr)                  return ~kStaticStrKey;
-  if (type == TStr)                        return ~str;
+  if (type == (TInt | TStr)) return ~(kIntKey | str);
+  if (type == TStaticStr)    return ~kStaticStrKey;
+  if (type == TInt)          return ~kIntKey;
+  if (type == TStr)          return ~str;
   return folly::none;
 }
 
 bool MixedArrayKeys::checkInvariants(const MixedArray* ad) const {
   uint8_t true_bits = 0;
   MixedArrayElm* elm = ad->data();
-  auto const static_str = kTrackStaticStrKeys ? kStaticStrKey : uint8_t(0x00);
   for (auto const end = elm + ad->iterLimit(); elm < end; elm++) {
     true_bits |= [&]{
       if (elm->isTombstone())        return kTombstoneKey;
       if (elm->hasIntKey())          return kIntKey;
-      if (elm->strKey()->isStatic()) return static_str;
+      if (elm->strKey()->isStatic()) return kStaticStrKey;
       else                           return kNonStaticStrKey;
     }();
   }
   DEBUG_ONLY auto const all =
-    kTombstoneKey | kIntKey | static_str | kNonStaticStrKey;
+    kTombstoneKey | kIntKey | kStaticStrKey | kNonStaticStrKey;
   assert_flog((true_bits & ~m_bits) == 0,
               "Untracked key type: true = {}, pred = {}\n",
               true_bits, m_bits);

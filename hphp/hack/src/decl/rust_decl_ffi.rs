@@ -5,18 +5,12 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use decl_rust::direct_decl_parser::parse_decls;
-use ocamlrep::OcamlRep;
-use ocamlrep_ocamlpool::to_ocaml;
+use ocamlrep_ocamlpool::ocaml_ffi;
+use oxidized::direct_decl_parser::Decls;
 use oxidized::relative_path::RelativePath;
 
-#[no_mangle]
-pub extern "C" fn parse_decls_ffi(filename: usize, text: usize, trace: usize) -> usize {
-    let filename = unsafe { RelativePath::from_ocaml(filename).unwrap() };
-    let text = unsafe { String::from_ocaml(text).unwrap() };
-    let trace = unsafe { bool::from_ocaml(trace).unwrap() };
-    let decls = parse_decls(&filename, &text, trace);
-    if trace {
-        println!("Returning {:?}", decls);
+ocaml_ffi! {
+    fn parse_decls_ffi(filename: RelativePath, text: String, trace: bool) -> Result<Decls, String> {
+        parse_decls(&filename, &text, trace)
     }
-    to_ocaml(&decls)
 }

@@ -28,11 +28,15 @@ pub fn parse_decls(filename: &RelativePath, text: &str, trace: bool) -> Result<D
     };
     let mut parser = DirectDeclParser::make(&text, env);
     let root = parser.parse_script(None);
-    root.map(|root| {
+    let decls = root.map(|root| {
         if trace {
             println!("Parsed:");
             println!("{:?}", &root);
         }
         parser.into_sc_state().decls
-    })
+    });
+    if trace {
+        println!("Returning {:?}", decls);
+    }
+    decls
 }

@@ -183,11 +183,7 @@ def create_php(idx, ar, rip='0x????????', pc=None):
 
     # Pull the PC from Func::base() and ar->m_callOff if necessary.
     if pc is None:
-        pc = shared['m_base'] + ar['m_callOff']
-
-    # Adjust it for calls.
-    op_ptype = T('HPHP::Op').pointer()
-    op = (func['m_unit']['m_bc'] + pc).cast(op_ptype).dereference()
+        pc = shared['m_base'] + (ar['m_callOffAndFlags'] >> 2)
 
     frame['file'] = php_filename(func)
     frame['line'] = php_line_number(func, pc)

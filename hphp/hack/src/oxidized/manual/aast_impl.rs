@@ -40,6 +40,13 @@ impl<Ex, Fb, En, Hi> Expr<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
+
+    pub fn is_import(&self) -> bool {
+        match &self.1 {
+            Expr_::Import(_) => true,
+            _ => false,
+        }
+    }
 }
 
 impl<Fb, En, Hi> Expr<Pos, Fb, En, Hi> {

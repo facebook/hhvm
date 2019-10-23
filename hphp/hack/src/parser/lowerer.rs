@@ -1049,13 +1049,12 @@ where
         if i >= s.len() {
             return Self::failwith("index out of range");
         }
-        while {
+        while i < s.len() {
             if s[i] == c {
                 return Ok(i);
             }
             i -= 1;
-            i > 0
-        } {}
+        }
         Self::failwith("char not found")
     }
 
@@ -4784,9 +4783,13 @@ where
         }
     }
 
-    // TODO:
-    fn partial_should_check_error() -> bool {
-        true
+    fn partial_should_check_error(mode: file_info::Mode, code: usize) -> bool {
+        use file_info::Mode::*;
+        match mode {
+            Mexperimental | Mstrict => true,
+            Mdecl | Mphp => false,
+            Mpartial => false, // TODO: Error.is_strict_code code
+        }
     }
 
     fn post_process(env: &mut Env, program: aast!(Program<,>), acc: &mut aast!(Program<,>)) {
@@ -4817,16 +4820,19 @@ where
                 if Self::is_noop(&s) {
                     continue;
                 }
-                let raise_error = if let Markup(_) = &s.1 {
-                    false
-                } else if let Expr(expr) = &s.1 {
-                    if let aast::Expr(_, aast::Expr_::Import(_)) = expr.as_ref() {
-                        env.parser_options.po_disallow_toplevel_requires
-                    } else {
-                        true
+                let raise_error = match &s.1 {
+                    Markup(_) => false,
+                    Expr(expr)
+                        if expr.as_ref().is_import()
+                            && !env.parser_options.po_disallow_toplevel_requires =>
+                    {
+                        false
                     }
-                } else {
-                    env.keep_errors && env.is_typechecker() && Self::partial_should_check_error()
+                    _ => {
+                        env.keep_errors
+                            && env.is_typechecker()
+                            && Self::partial_should_check_error(env.file_mode(), 1002)
+                    }
                 };
                 if raise_error && !env.top_level_statements {
                     Self::raise_parsing_error_pos(&s.0, env, &syntax_error::toplevel_statements);

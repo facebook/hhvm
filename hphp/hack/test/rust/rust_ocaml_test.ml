@@ -504,7 +504,7 @@ module LowererTest_ = struct
   module Lowerer = Full_fidelity_ast
 
   type r =
-    | Tree of (Ast_defs.pos, unit, unit, unit) Aast.program
+    | Tree of Full_fidelity_ast.aast_result
     | Crash of string
     | Skip
 
@@ -517,47 +517,42 @@ module LowererTest_ = struct
       fmt
       (Format.asprintf "(%d, %s)" (Local_id.to_int lid) (Local_id.get_name lid))
 
-  let print_aast path aast =
+  let print_result path result =
     Local_id.pp_ref := print_lid;
     let print_pos pos = Format.asprintf "(%a)" Pos.pp pos in
     let pp_pos fmt pos = Format.pp_print_string fmt (print_pos pos) in
     let pp_unit fmt _ = Format.pp_print_string fmt "" in
     let oc = Pervasives.open_out path in
-    Printf.fprintf
-      oc
-      "%s\n"
-      (Aast.show_program pp_pos pp_unit pp_unit pp_unit aast)
+    Lowerer.(
+      Printf.fprintf
+        oc
+        "%s\n%s"
+        (Aast.show_program pp_pos pp_unit pp_unit pp_unit result.ast)
+        (Scoured_comments.show result.comments))
 
   let build_tree _env is_rust file source_text =
-    let i x = x in
     let lower_env =
       Lowerer.make_env
         file
-        ~keep_errors:false
+        ~rust_compare_mode:true
+        ~show_all_errors:true
+        ~keep_errors:true
         ~elaborate_namespaces:false
         ~lower_coroutines:false
         ~parser_options:
-          { ParserOptions.default with GlobalOptions.po_rust_lowerer = true }
+          {
+            ParserOptions.default with
+            GlobalOptions.po_rust_lowerer = is_rust;
+          }
     in
-    let ocaml_lower lower_env source_text =
+    let lower lower_env source_text =
       (Errors.is_hh_fixme := (fun _ _ -> false));
       (Errors.get_hh_fixme_pos := (fun _ _ -> None));
       (Errors.is_hh_fixme_disallowed := (fun _ _ -> false));
-      let (_err, (aast, _)) =
-        Errors.do_ (fun () ->
-            Lowerer.from_text_to_custom_aast lower_env source_text i () () ())
+      let (_err, r) =
+        Errors.do_ (fun () -> Lowerer.from_text lower_env source_text)
       in
-      aast
-    in
-    let rust_lower lower_env source_text =
-      let result = Lowerer.from_text_rust lower_env source_text in
-      result.Lowerer.ast
-    in
-    let lower =
-      if is_rust then
-        rust_lower
-      else
-        ocaml_lower
+      r
     in
     try Tree (lower lower_env source_text)
     with e -> Crash (Caml.Printexc.to_string e)
@@ -577,9 +572,33 @@ module LowererTest_ = struct
       | OCAML -> Skip
       | _ -> build_tree rust_env true file source_text
     in
+    let compare_result r1 r2 =
+      Lowerer.(
+        if
+          r1.ast = r2.ast
+          && r1.is_hh_file = r2.is_hh_file
+          && Scoured_comments.equal r1.comments r2.comments
+          && r1.fi_mode = r2.fi_mode
+        then
+          Printf.printf ":EQUAL: "
+        else
+          let print s r =
+            Printf.printf
+              ":%s_%sEQUAL: "
+              s
+              ( if r then
+                ""
+              else
+                "NOT_" )
+          in
+          Printf.printf ":NOT_EQUAL: ";
+          print "Tree" (r1.ast = r2.ast);
+          print "HH_File" (r1.is_hh_file = r2.is_hh_file);
+          print "Comments" (Scoured_comments.equal r1.comments r2.comments);
+          print "Mode" (r1.fi_mode = r2.fi_mode))
+    in
     (match (ocaml_tree, rust_tree) with
-    | (Tree ot, Tree rt) when ot = rt -> Printf.printf ":EQUAL: "
-    | (Tree _, Tree _) -> Printf.printf ":NOT_EQUAL: "
+    | (Tree ot, Tree rt) -> compare_result ot rt
     | (_, _) -> ());
     (match ocaml_tree with
     | Tree _ -> Printf.printf ":OCAML_PASS: "
@@ -593,11 +612,11 @@ module LowererTest_ = struct
     flush stdout;
     if args.check_printed_tree then (
       (match ocaml_tree with
-      | Tree t -> print_aast "/tmp/ocaml.aast" t
+      | Tree r -> print_result "/tmp/ocaml.aast" r
       | Crash e -> print_err "/tmp/ocaml.aast" e
       | _ -> ());
       match rust_tree with
-      | Tree t -> print_aast "/tmp/rust.aast" t
+      | Tree r -> print_result "/tmp/rust.aast" r
       | Crash e -> print_err "/tmp/rust.aast" e
       | _ -> ()
     )

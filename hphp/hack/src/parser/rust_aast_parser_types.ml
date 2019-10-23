@@ -25,4 +25,9 @@ type env = {
   hacksperimental: bool;
 }
 
-type result = { aast: (Pos.t, unit, unit, unit) Aast.program }
+type result = {
+  file_mode: FileInfo.mode;
+  scoured_comments: Scoured_comments.t;
+  aast: (Pos.t, unit, unit, unit) Aast.program;
+  lowpri_errors: (Pos.t * string) list;
+}

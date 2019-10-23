@@ -7,7 +7,9 @@
  *
  *)
 
-type fixmes = Pos.t IMap.t IMap.t
+type fixmes = Pos.t IMap.t IMap.t [@@deriving show]
+
+let equal_fixmes = IMap.equal (IMap.equal ( = ))
 
 type t = {
   sc_comments: (Pos.t * Prim_defs.comment) list;
@@ -15,3 +17,4 @@ type t = {
   sc_misuses: fixmes;
   sc_error_pos: Pos.t list;
 }
+[@@deriving show, eq]

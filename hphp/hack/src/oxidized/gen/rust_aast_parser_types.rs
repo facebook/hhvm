@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<08a1f9d7d028830bf37e8178ad3595c9>>
+// @generated SignedSource<<4584477f983a19dd917180106c96f3b2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -12,8 +12,10 @@ use ocamlrep_derive::OcamlRep;
 use ocamlvalue_macro::Ocamlvalue;
 
 use crate::aast;
+use crate::file_info;
 use crate::parser_options;
 use crate::pos;
+use crate::scoured_comments;
 
 #[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 pub struct Env {
@@ -33,5 +35,8 @@ pub struct Env {
 
 #[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
 pub struct Result {
+    pub file_mode: file_info::Mode,
+    pub scoured_comments: scoured_comments::ScouredComments,
     pub aast: aast::Program<pos::Pos, (), (), ()>,
+    pub lowpri_errors: Vec<(pos::Pos, String)>,
 }

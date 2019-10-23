@@ -85,6 +85,10 @@ type env = {
    * and raised _after_ FFP error checking (unless we run the lowerer twice,
    * which would be expensive). *)
   lowpri_errors: (Pos.t * string) list ref;
+  (*
+    true if running Ocaml/Rust compare tests
+  *)
+  rust_compare_mode: bool;
 }
 [@@deriving show]
 
@@ -101,6 +105,7 @@ let make_env
     ?(fail_open = true)
     ?(parser_options = ParserOptions.default)
     ?(is_hh_file = false)
+    ?(rust_compare_mode = false)
     ?(hacksperimental = false)
     (file : Relative_path.t) : env =
   let parser_options = ParserOptions.with_codegen parser_options codegen in
@@ -131,7 +136,10 @@ let make_env
     lifted_awaits = None;
     tmp_var_counter = 1;
     lowpri_errors = ref [];
+    rust_compare_mode;
   }
+
+let lowpri_errors env = !(env.lowpri_errors)
 
 let should_surface_errors env =
   (* env.show_all_errors is a hotfix until we can retool how saved states handle
@@ -144,13 +152,13 @@ type 'a result_ = {
   ast: 'a;
   content: string;
   file: Relative_path.t;
-  comments: (Pos.t * comment) list;
+  comments: Scoured_comments.t;
 }
 [@@deriving show]
 
-type result = Ast.program result_
+type ast_result = Ast.program result_
 
-type rust_result = (pos, unit, unit, unit) Aast.program result_
+type aast_result = (pos, unit, unit, unit) Aast.program result_
 
 module WithPositionedSyntax (Syntax : Positioned_syntax_sig.PositionedSyntax_S) =
 struct
@@ -4148,7 +4156,7 @@ if there already is one, since that one will likely be better than this one. *)
       elaborate_halt_compiler_const ast
     | None -> ast
 
-  let lower env ~source_text ~script comments : result =
+  let lower env ~source_text ~script comments : ast_result =
     let ast = runP pScript script env in
     let ast = elaborate_halt_compiler ast env source_text in
     let content =
@@ -4275,7 +4283,7 @@ let scour_comments_and_add_fixmes (env : env) source_text script =
       ~include_line_comments:env.include_line_comments
   in
   let () =
-    if env.keep_errors then (
+    if (not env.rust_compare_mode) && env.keep_errors then (
       Fixme_provider.provide_disallowed_fixmes env.file sc.sc_misuses;
       if env.quick_mode then
         Fixme_provider.provide_decl_hh_fixmes env.file sc.sc_fixmes
@@ -4283,7 +4291,7 @@ let scour_comments_and_add_fixmes (env : env) source_text script =
         Fixme_provider.provide_hh_fixmes env.file sc.sc_fixmes
     )
   in
-  sc.sc_comments
+  sc
 
 let flush_parsing_errors env =
   let lowpri_errors = List.rev !(env.lowpri_errors) in
@@ -4421,11 +4429,15 @@ let lower_tree =
   in
   lower_tree_ FromEditablePositionedSyntax.lower lower check_syntax_error
 
-let from_text (env : env) (source_text : SourceText.t) : result =
+let from_text_ocaml (env : env) (source_text : SourceText.t) : aast_result =
   let (mode, tree) = parse_text env source_text in
-  lower_tree env source_text mode tree
+  let ast_result = lower_tree env source_text mode tree in
+  let aast =
+    Ast_to_aast.convert_program (fun x -> x) () () () ast_result.ast
+  in
+  { ast_result with ast = aast }
 
-let from_text_rust (env : env) (source_text : SourceText.t) : rust_result =
+let from_text_rust (env : env) (source_text : SourceText.t) : aast_result =
   let rust_env =
     Rust_aast_parser_types.
       {
@@ -4444,23 +4456,66 @@ let from_text_rust (env : env) (source_text : SourceText.t) : rust_result =
       }
   in
   let result = rust_from_text_ffi rust_env source_text in
-  {
-    fi_mode = FileInfo.Mstrict;
-    (* TODO *)
-    is_hh_file = env.is_hh_file;
-    ast = result.Rust_aast_parser_types.aast;
-    content =
-      ( if env.codegen then
-        ""
-      else
-        SourceText.text source_text );
-    comments = [];
-    file = env.file;
-  }
+  Rust_aast_parser_types.
+    {
+      fi_mode = result.file_mode;
+      is_hh_file = result.file_mode <> FileInfo.Mphp;
+      ast = result.aast;
+      content =
+        ( if env.codegen then
+          ""
+        else
+          SourceText.text source_text );
+      comments = result.scoured_comments;
+      file = env.file;
+    }
 
-let from_file (env : env) : result =
+let from_text (env : env) (source_text : SourceText.t) : aast_result =
+  let result =
+    if ParserOptions.rust_lowerer env.parser_options then
+      from_text_rust env source_text
+    else
+      from_text_ocaml env source_text
+  in
+  { result with ast = elaborate_top_level_defs env result.ast }
+
+let from_file (env : env) : aast_result =
   let source_text = SourceText.from_file env.file in
   from_text env source_text
+
+let aast_to_tast aast =
+  let tany = (Typing_reason.Rnone, Typing_defs.make_tany ()) in
+  let endo =
+    object
+      inherit [_] Aast.map
+
+      method on_'ex _ pos = (pos, tany)
+
+      method on_'fb _ _ = Tast.HasUnsafeBlocks
+
+      method on_'en _ _ = Tast.dummy_saved_env
+
+      method on_'hi _ _ = tany
+    end
+  in
+  endo#on_program () aast
+
+let aast_to_nast aast =
+  let i _ x = x in
+  let endo =
+    object
+      inherit [_] Aast.map
+
+      method on_'fb _ _ = Nast.NamedWithUnsafeBlocks
+
+      method on_'ex = i
+
+      method on_'hi = i
+
+      method on_'en = i
+    end
+  in
+  endo#on_program () aast
 
 (**
  * Converts a legacy ast (ast.ml) into a typed ast (tast.ml / aast.ml)
@@ -4470,58 +4525,43 @@ let from_file (env : env) : result =
  * to produce valid bytecode. hh_single_compile is expected to catch
  * these errors.
  *)
-let from_text_to_custom_aast env source_text to_ex fb en hi =
-  let legacy_ast_result = from_text env source_text in
-  let tast =
-    Ast_to_aast.convert_program to_ex fb en hi legacy_ast_result.ast
-    |> elaborate_top_level_defs env
-  in
-  let is_hh_file = legacy_ast_result.is_hh_file in
-  (tast, is_hh_file)
-
 let from_text_to_empty_tast env source_text =
-  let tany = (Typing_reason.Rnone, Typing_defs.make_tany ()) in
-  let get_expr_annotation (p : Ast_defs.pos) = (p, tany) in
-  from_text_to_custom_aast
-    env
-    source_text
-    get_expr_annotation
-    Tast.HasUnsafeBlocks
-    Tast.dummy_saved_env
-    tany
+  let aast_result = from_text env source_text in
+  (aast_to_tast aast_result.ast, aast_result.is_hh_file)
 
 (*****************************************************************************(
  * Backward compatibility matter (should be short-lived)
 )*****************************************************************************)
 
-let legacy env (x : result) : Parser_return.t =
+let legacy (x : aast_result) : Parser_return.t =
   {
     Parser_return.file_mode =
       Option.some_if (x.fi_mode <> FileInfo.Mphp) x.fi_mode;
     Parser_return.is_hh_file = x.is_hh_file;
-    Parser_return.comments = x.comments;
-    Parser_return.ast =
-      Ast_to_nast.convert x.ast |> elaborate_top_level_defs env;
+    Parser_return.comments = x.comments.sc_comments;
+    Parser_return.ast = aast_to_nast x.ast;
     Parser_return.content = x.content;
   }
 
 let from_text_with_legacy (env : env) (content : string) : Parser_return.t =
   let source_text = SourceText.make env.file content in
-  legacy env @@ from_text env source_text
+  legacy @@ from_text env source_text
 
-let from_file_with_legacy env = legacy env (from_file env)
-
-let lower_tree_with_legacy
-    (env : env)
-    (source_text : SourceText.t)
-    (mode : FileInfo.mode option)
-    (tree : PositionedSyntaxTree.t) =
-  legacy env @@ lower_tree env source_text mode tree
+let from_file_with_legacy env = legacy (from_file env)
 
 let from_text_with_legacy_and_cst (env : env) (source_text : SourceText.t) :
     PositionedSyntaxTree.t * Parser_return.t =
   let (mode, tree) = parse_text env source_text in
-  (tree, lower_tree_with_legacy env source_text mode tree)
+  let ast_result = lower_tree env source_text mode tree in
+  let aast_result =
+    {
+      ast_result with
+      ast =
+        Ast_to_aast.convert_program (fun x -> x) () () () ast_result.ast
+        |> elaborate_top_level_defs env;
+    }
+  in
+  (tree, legacy aast_result)
 
 (******************************************************************************(
  * For cut-over purposes only; this should be removed as soon as Parser_hack
@@ -4554,7 +4594,7 @@ let defensive_program
         ~include_line_comments
         fn
     in
-    legacy env @@ from_text env source
+    legacy @@ from_text env source
   with e ->
     Rust_pointer.free_leaked_pointer ();
 

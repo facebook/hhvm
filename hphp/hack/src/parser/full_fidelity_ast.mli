@@ -32,9 +32,12 @@ val make_env (* Optional parts *) :
   ?fail_open:bool ->
   ?parser_options:ParserOptions.t ->
   ?is_hh_file:bool ->
+  ?rust_compare_mode:bool ->
   ?hacksperimental:bool (* Required parts *) ->
   Relative_path.t ->
   env
+
+val lowpri_errors : env -> (Pos.t * string) list
 
 type 'a result_ = {
   fi_mode: FileInfo.mode;
@@ -42,11 +45,11 @@ type 'a result_ = {
   ast: 'a;
   content: string;
   file: Relative_path.t;
-  comments: (Pos.t * Prim_defs.comment) list;
+  comments: Scoured_comments.t;
 }
 [@@deriving show]
 
-type rust_result = (Pos.t, unit, unit, unit) Aast.program result_
+type aast_result = (Pos.t, unit, unit, unit) Aast.program result_
 
 (**
  * A `result` contains some information from the original `env`; the information
@@ -54,7 +57,7 @@ type rust_result = (Pos.t, unit, unit, unit) Aast.program result_
  * redesigned properly at some point.
  *)
 
-val from_text_rust : env -> Full_fidelity_source_text.t -> rust_result
+val from_text : env -> Full_fidelity_source_text.t -> aast_result
 
 val from_text_with_legacy : env -> string -> Parser_return.t
 
@@ -62,15 +65,6 @@ val from_text_with_legacy_and_cst :
   env ->
   Full_fidelity_source_text.t ->
   PositionedSyntaxTree.t * Parser_return.t
-
-val from_text_to_custom_aast :
-  env ->
-  Full_fidelity_source_text.t ->
-  (Ast_defs.pos -> 'ex) ->
-  'fb ->
-  'en ->
-  'hi ->
-  ('ex, 'fb, 'en, 'hi) Aast.program * bool
 
 (* Only for hh_single_compile at the moment. *)
 val from_text_to_empty_tast :
@@ -114,9 +108,3 @@ val defensive_program_with_default_popt :
   Relative_path.t ->
   string ->
   Parser_return.t
-
-val scour_comments_and_add_fixmes :
-  env ->
-  Full_fidelity_source_text.t ->
-  Full_fidelity_positioned_syntax.t ->
-  (Pos.t * Prim_defs.comment) list

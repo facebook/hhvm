@@ -20,6 +20,7 @@ use parser_core_types::{
 };
 use parser_rust::{parser_env::ParserEnv, smart_constructors_wrappers::WithKind};
 use regex::bytes::Regex;
+use std::borrow::Borrow;
 use syntax_tree::{make_syntax_tree, mode_parser::parse_mode, SyntaxTree};
 
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
@@ -37,7 +38,8 @@ impl<'a> AastParser {
     // Full_fidelity_ast.lower_tree_ is inlined
     pub fn from_text(env: &Env, source: &'a IndexedSourceText<'a>) -> Result<ParserResult> {
         let (mode, tree) = Self::parse_text(env, source.source_text())?;
-        let _scoured_comments = Self::scour_comments_and_add_fixmes(env, source, &tree.root())?;
+        let mode = mode.unwrap_or(Mode::Mpartial);
+        let scoured_comments = Self::scour_comments_and_add_fixmes(env, source, &tree.root())?;
         let lower_coroutines = env.lower_coroutines && env.codegen && tree.sc_state().seen_ppl();
         if lower_coroutines {
             // TODO:
@@ -47,12 +49,18 @@ impl<'a> AastParser {
                 env.codegen,
                 env.elaborate_namespaces,
                 env.quick_mode,
-                mode.unwrap_or(Mode::Mpartial),
+                mode,
                 source,
                 &env.parser_options,
             );
             let ret = PositionedSyntaxLowerer::lower(&mut env, tree.root())?;
-            Ok(ParserResult { aast: ret.aast })
+            let lowpri_errors = env.lowpri_errors().borrow().to_vec();
+            Ok(ParserResult {
+                file_mode: mode,
+                scoured_comments,
+                aast: ret.aast,
+                lowpri_errors,
+            })
         }
     }
 

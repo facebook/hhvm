@@ -604,6 +604,17 @@ module LowererTest_ = struct
           print "Mode" (r1.fi_mode = r2.fi_mode);
           print "Lerr" (!(r1.lowpri_errors_) = !(r2.lowpri_errors_)))
     in
+    let print_lowpri_errs o_le r_le =
+      let print_pos pos = Format.asprintf "(%a)" Pos.pp pos in
+      let print_err pre (p, e) =
+        Printf.printf "%s: %s, %s\n%s_MSG:%s\n" pre (print_pos p) e pre e
+      in
+      let print_errs pre es = List.iter es ~f:(print_err pre) in
+      Printf.printf "OCAML_LP_ERR: %s\n" path;
+      print_errs "OCAML_LP_ERR" o_le;
+      Printf.printf "RUST_LP_ERR: %s\n" path;
+      print_errs "RUST_LP_ERR" r_le
+    in
     (match (ocaml_tree, rust_tree) with
     | (Tree ot, Tree rt) -> compare_result ot rt
     | (_, _) -> ());
@@ -616,6 +627,11 @@ module LowererTest_ = struct
     | Crash e -> Printf.printf ":RUST_CRASH(%s): " e
     | Skip -> Printf.printf ":RUST_SKIP: ");
     Printf.printf "%s\n" path;
+    Lowerer.(
+      match (ocaml_tree, rust_tree) with
+      | (Tree ot, Tree rt) when !(ot.lowpri_errors_) <> !(rt.lowpri_errors_) ->
+        print_lowpri_errs !(ot.lowpri_errors_) !(rt.lowpri_errors_)
+      | (_, _) -> ());
     flush stdout;
     if args.check_printed_tree then (
       (match ocaml_tree with

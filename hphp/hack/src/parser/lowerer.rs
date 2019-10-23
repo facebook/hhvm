@@ -1811,7 +1811,7 @@ where
                 let bop_ast_node = Self::p_bop(pos, &c.binary_operator, left, right, env)?;
                 if let E_::Binop(bop) = &bop_ast_node {
                     if let (ast_defs::Bop::Eq(_), lhs, _) = bop.as_ref() {
-                        // TODO: Ast_check.check_lvalue (fun pos error -> raise_parsing_error env (`Pos pos) error) lhs
+                        Self::check_lvalue(lhs, env);
                     }
                 }
                 Ok(bop_ast_node)
@@ -2221,6 +2221,45 @@ where
                 Ok(E_::mk_puidentifier(qual, field, name))
             }
             _ => Self::missing_syntax(Some(E_::Null), "expression", node, env),
+        }
+    }
+
+    fn check_lvalue(aast::Expr(p, expr_): &aast!(Expr<,>), env: &mut Env) {
+        use E_::*;
+        let mut raise = |s| Self::raise_parsing_error_pos(p, env, s);
+        match expr_ {
+            ObjGet(og) => match og.as_ref() {
+                (_, aast::Expr(_, Id(_)), ast_defs::OgNullFlavor::OGNullsafe) => {
+                    raise("?-> syntax is not supported for lvalues")
+                }
+                (_, aast::Expr(_, Id(sid)), _) if sid.1.as_bytes()[0] == b':' => {
+                    raise("->: syntax is not supported for lvalues")
+                }
+                _ => {}
+            },
+            ArrayGet(ag) => {
+                if let ClassConst(_) = (ag.0).1 {
+                    raise("Array-like class consts are not valid lvalues");
+                }
+            }
+            Call(c) => match &(c.1).1 {
+                Id(sid) if sid.1 == "tuple" => {
+                    raise("Tuple cannot be used as an lvalue. Maybe you meant list?")
+                }
+                _ => raise("Invalid lvalue"),
+            },
+            List(l) => {
+                for i in l.iter() {
+                    Self::check_lvalue(i, env);
+                }
+            }
+            Array(_) | Darray(_) | Varray(_) | Shape(_) | Collection(_) | Record(_) | Null
+            | True | False | Id(_) | Clone(_) | ClassConst(_) | Int(_) | Float(_)
+            | PrefixedString(_) | String(_) | String2(_) | Yield(_) | YieldBreak | YieldFrom(_)
+            | Await(_) | Suspend(_) | ExprList(_) | Cast(_) | Unop(_) | Binop(_) | Eif(_)
+            | New(_) | Efun(_) | Lfun(_) | Xml(_) | Import(_) | Pipe(_) | Callconv(_) | Is(_)
+            | As(_) | ParenthesizedExpr(_) | PUIdentifier(_) => raise("Invalid lvalue"),
+            _ => {}
         }
     }
 
@@ -3237,6 +3276,13 @@ where
                 let user_attributes = Self::p_user_attributes(&parameter_attribute, env)?;
                 let hint = Self::mp_optional(Self::p_hint, parameter_type, env)?
                     .map(|h| Self::soften_hint(&user_attributes, h));
+                if is_variadic && !user_attributes.is_empty() {
+                    Self::raise_parsing_error(
+                        node,
+                        env,
+                        &syntax_error::no_attributes_on_variadic_parameter,
+                    );
+                }
                 let pos = Self::p_pos(name, env);
                 Ok(aast::FunParam {
                     annotation: pos.clone(),
@@ -3369,7 +3415,7 @@ where
                 let is_autoload = Self::text_str(function_name, env)
                     .eq_ignore_ascii_case(special_functions::AUTOLOAD);
                 if function_name.value.is_missing() {
-                    Self::raise_parsing_error(node, env, &syntax_error::empty_method_name);
+                    Self::raise_parsing_error(function_name, env, &syntax_error::empty_method_name);
                 }
                 let num_params = Self::syntax_to_list(false, function_parameter_list).len();
                 if is_autoload && num_params > 1 {
@@ -4124,12 +4170,12 @@ where
                 Ok(class.uses.append(&mut uses))
             }
             RequireClause(c) => {
+                let hint = Self::p_hint(&c.require_name, env)?;
                 let is_extends = match Self::token_kind(&c.require_kind) {
                     Some(TK::Implements) => false,
                     Some(TK::Extends) => true,
                     _ => Self::missing_syntax(None, "trait require kind", &c.require_kind, env)?,
                 };
-                let hint = Self::p_hint(&c.require_name, env)?;
                 Ok(class.reqs.push((hint, is_extends)))
             }
             XHPClassAttributeDeclaration(c) => {

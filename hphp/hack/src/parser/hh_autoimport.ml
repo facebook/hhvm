@@ -50,7 +50,7 @@ let types =
       ("ImmMap", HH);
       ("ImmSet", HH);
       ("ImmVector", HH);
-      ("InvariantException", Global);
+      ("InvariantException", HH);
       ("Iterable", Global);
       ("Iterator", Global);
       ("KeyedContainer", Global);
@@ -69,7 +69,6 @@ let types =
       ("Shapes", HH);
       ("SleepWaitHandle", HH);
       ("StaticWaitHandle", HH);
-      ("this", Global);
       ("Traversable", Global);
       ("typename", HH);
       ("TypeStructure", HH);

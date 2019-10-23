@@ -520,6 +520,7 @@ module Typehints = struct
     || x = null
     || x = nonnull
     || x = nothing
+    || x = this
 
   let is_namespace_with_reserved_hh_name x =
     let unqualify qualified_name =

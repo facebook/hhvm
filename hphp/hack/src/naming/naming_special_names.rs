@@ -564,7 +564,7 @@ pub mod typehints {
     lazy_static! {
         static ref RESERVED_HH_NAMES: HashSet<&'static str> = vec![
             VOID, NORETURN, INT, BOOL, FLOAT, NUM, STRING, RESOURCE, MIXED, ARRAY, ARRAYKEY,
-            INTEGER, BOOLEAN, DOUBLE, REAL, DYNAMIC, WILDCARD, NONNULL, NOTHING
+            INTEGER, BOOLEAN, DOUBLE, REAL, DYNAMIC, WILDCARD, NONNULL, NOTHING, THIS
         ]
         .into_iter()
         .collect();

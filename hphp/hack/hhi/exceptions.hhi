@@ -14,6 +14,8 @@
  * YOU SHOULD NEVER INCLUDE THIS FILE ANYWHERE!!!
  */
 
+namespace {
+
 <<__Sealed(Error::class, Exception::class)>>
 interface Throwable {
   public function getMessage(): string;
@@ -131,3 +133,11 @@ class UnexpectedValueException extends RuntimeException {}
 class InvariantException extends Exception {}
 final class TypeAssertionException extends Exception {}
 class DivisionByZeroException extends Exception {}
+
+} // namespace
+
+namespace HH {
+
+class InvariantException extends \Exception {}
+
+} // namespace HH

@@ -139,8 +139,6 @@ let make_env
     rust_compare_mode;
   }
 
-let lowpri_errors env = !(env.lowpri_errors)
-
 let should_surface_errors env =
   (* env.show_all_errors is a hotfix until we can retool how saved states handle
    * parse errors. *)
@@ -153,6 +151,10 @@ type 'a result_ = {
   content: string;
   file: Relative_path.t;
   comments: Scoured_comments.t;
+  (*
+    lowpri_errors_ are exposed to test, it shouldn't be used in prod
+  *)
+  lowpri_errors_: (Pos.t * string) list ref;
 }
 [@@deriving show]
 
@@ -4172,6 +4174,7 @@ if there already is one, since that one will likely be better than this one. *)
       content;
       comments;
       file = env.file;
+      lowpri_errors_ = ref (List.rev !(env.lowpri_errors));
     }
 end
 
@@ -4468,6 +4471,7 @@ let from_text_rust (env : env) (source_text : SourceText.t) : aast_result =
           SourceText.text source_text );
       comments = result.scoured_comments;
       file = env.file;
+      lowpri_errors_ = ref result.lowpri_errors;
     }
 
 let from_text (env : env) (source_text : SourceText.t) : aast_result =

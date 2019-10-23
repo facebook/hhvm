@@ -522,13 +522,18 @@ module LowererTest_ = struct
     let print_pos pos = Format.asprintf "(%a)" Pos.pp pos in
     let pp_pos fmt pos = Format.pp_print_string fmt (print_pos pos) in
     let pp_unit fmt _ = Format.pp_print_string fmt "" in
+    let print_lowpri_err (p, e) = Printf.sprintf "[%s %s]" (print_pos p) e in
+    let print_lowpri_errs errs =
+      String.concat ~sep:"\n" @@ List.map ~f:print_lowpri_err errs
+    in
     let oc = Pervasives.open_out path in
     Lowerer.(
       Printf.fprintf
         oc
-        "%s\n%s"
+        "%s\n%s\n%s"
         (Aast.show_program pp_pos pp_unit pp_unit pp_unit result.ast)
-        (Scoured_comments.show result.comments))
+        (Scoured_comments.show result.comments)
+        (print_lowpri_errs !(result.lowpri_errors_)))
 
   let build_tree _env is_rust file source_text =
     let lower_env =
@@ -579,6 +584,7 @@ module LowererTest_ = struct
           && r1.is_hh_file = r2.is_hh_file
           && Scoured_comments.equal r1.comments r2.comments
           && r1.fi_mode = r2.fi_mode
+          && !(r1.lowpri_errors_) = !(r2.lowpri_errors_)
         then
           Printf.printf ":EQUAL: "
         else
@@ -595,7 +601,8 @@ module LowererTest_ = struct
           print "Tree" (r1.ast = r2.ast);
           print "HH_File" (r1.is_hh_file = r2.is_hh_file);
           print "Comments" (Scoured_comments.equal r1.comments r2.comments);
-          print "Mode" (r1.fi_mode = r2.fi_mode))
+          print "Mode" (r1.fi_mode = r2.fi_mode);
+          print "Lerr" (!(r1.lowpri_errors_) = !(r2.lowpri_errors_)))
     in
     (match (ocaml_tree, rust_tree) with
     | (Tree ot, Tree rt) -> compare_result ot rt

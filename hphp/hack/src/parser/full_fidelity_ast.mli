@@ -37,8 +37,6 @@ val make_env (* Optional parts *) :
   Relative_path.t ->
   env
 
-val lowpri_errors : env -> (Pos.t * string) list
-
 type 'a result_ = {
   fi_mode: FileInfo.mode;
   is_hh_file: bool;
@@ -46,6 +44,7 @@ type 'a result_ = {
   content: string;
   file: Relative_path.t;
   comments: Scoured_comments.t;
+  lowpri_errors_: (Pos.t * string) list ref;
 }
 [@@deriving show]
 

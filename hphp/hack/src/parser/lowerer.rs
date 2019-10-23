@@ -150,14 +150,12 @@ pub struct State {
 pub struct Env<'a> {
     codegen: bool,
     elaborate_namespaces: bool,
-    include_line_comments: bool,
     pub keep_errors: bool,
     quick_mode: bool,
     /* Show errors even in quick mode. Does not override keep_errors. Hotfix
      * until we can properly set up saved states to surface parse errors during
      * typechecking properly. */
     pub show_all_errors: bool,
-    lower_coroutines: bool,
     fail_open: bool,
     file_mode: file_info::Mode,
     pub top_level_statements: bool, /* Whether we are (still) considering TLSs*/
@@ -181,6 +179,8 @@ impl<'a> Env<'a> {
         codegen: bool,
         elaborate_namespaces: bool,
         quick_mode: bool,
+        keep_errors: bool,
+        show_all_errors: bool,
         mode: file_info::Mode,
         indexed_source_text: &'a IndexedSourceText<'a>,
         parser_options: &'a GlobalOptions,
@@ -188,11 +188,9 @@ impl<'a> Env<'a> {
         Env {
             codegen,
             elaborate_namespaces,
-            include_line_comments: false,
-            keep_errors: false,
+            keep_errors,
             quick_mode,
-            show_all_errors: false,
-            lower_coroutines: true,
+            show_all_errors,
             fail_open: true,
             file_mode: mode,
             top_level_statements: true,
@@ -234,10 +232,6 @@ impl<'a> Env<'a> {
 
     fn source_text(&self) -> &SourceText<'a> {
         self.indexed_source_text.source_text()
-    }
-
-    fn lower_coroutines(&self) -> bool {
-        self.lower_coroutines
     }
 
     fn fail_open(&self) -> bool {

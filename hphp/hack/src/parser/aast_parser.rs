@@ -49,6 +49,8 @@ impl<'a> AastParser {
                 env.codegen,
                 env.elaborate_namespaces,
                 env.quick_mode,
+                env.keep_errors,
+                env.show_all_errors,
                 mode,
                 source,
                 &env.parser_options,

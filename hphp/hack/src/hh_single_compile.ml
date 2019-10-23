@@ -348,10 +348,10 @@ let handle_conversion_errors errors =
       (* Ignore these errors to match legacy AST behavior *)
       | 2086
       (* Naming.MethodNeedsVisibility *)
-
+      
       | 2102
       (* Naming.UnsupportedTraitUseAs *)
-
+      
       | 2103 (* Naming.UnsupportedInsteadOf *) ->
         false
       | _ (* Emit fatal parse otherwise *) -> true)
@@ -387,7 +387,7 @@ let do_compile filename compiler_options popt fail_or_ast debug_time =
           ~is_hh_file
           ~is_evaled:(is_file_path_for_evaled_code filename)
           ~for_debugger_eval:compiler_options.for_debugger_eval
-          ~popt
+          ~empty_namespace:(Namespace_env.empty_from_popt popt)
           tast
       else
         Emit_program.emit_fatal_program

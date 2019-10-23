@@ -18,4 +18,4 @@ type convert_result = {
 
 (* Convert entire program *)
 val convert_toplevel_prog :
-  popt:ParserOptions.t -> Tast.program -> convert_result
+  empty_namespace:Namespace_env.env -> Tast.program -> convert_result

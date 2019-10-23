@@ -72,7 +72,6 @@ let empty_per_function_state =
   else empty_goto_state *)
 
 type state = {
-  popt: ParserOptions.t;
   (* Number of closures created in the current function *)
   closure_cnt_per_fun: int;
   (* Free variables computed so far *)
@@ -89,6 +88,8 @@ type state = {
   inout_wrappers: fun_ list;
   (* The current namespace environment *)
   namespace: Namespace_env.env;
+  (* Empty namespace as constructed by parser *)
+  empty_namespace: Namespace_env.env;
   (* Set of closure names that used to have explicit 'use' language construct
     in original anonymous function *)
   explicit_use_set: SSet.t;
@@ -143,9 +144,9 @@ let set_has_goto (st : state) =
         { st.current_function_state with has_goto = true };
     }
 
-let initial_state popt =
+let initial_state empty_namespace =
   {
-    popt;
+    empty_namespace;
     closure_cnt_per_fun = 0;
     captured_vars = ULS.empty;
     captured_this = false;
@@ -154,7 +155,7 @@ let initial_state popt =
     hoisted_functions = [];
     named_hoisted_functions = SMap.empty;
     inout_wrappers = [];
-    namespace = Namespace_env.empty_from_popt popt;
+    namespace = empty_namespace;
     explicit_use_set = SSet.empty;
     closure_namespaces = SMap.empty;
     closure_enclosing_classes = SMap.empty;
@@ -581,7 +582,7 @@ let make_closure
       c_attributes = [];
       c_xhp_children = [];
       c_xhp_attrs = [];
-      c_namespace = Namespace_env.empty_from_popt st.popt;
+      c_namespace = st.empty_namespace;
       c_enum = None;
       c_doc_comment = None;
       c_pu_enums = [];
@@ -791,7 +792,7 @@ let convert_meth_caller_to_func_ptr env st ann pc cls pf func =
         f_user_attributes = [{ ua_name = (p, "__MethCaller"); ua_params = [] }];
         f_file_attributes = [];
         f_external = false;
-        f_namespace = Namespace_env.empty_from_popt st.popt;
+        f_namespace = st.empty_namespace;
         f_doc_comment = None;
         f_static = false;
       }
@@ -1833,10 +1834,10 @@ let hoist_toplevel_functions all_defs =
  * The closure classes and hoisted definitions are placed after the existing
  * definitions.
  *)
-let convert_toplevel_prog ~popt defs =
+let convert_toplevel_prog ~empty_namespace defs =
   let defs =
     if constant_folding () then
-      Ast_constant_folder.fold_program ~popt defs
+      Ast_constant_folder.fold_program ~empty_namespace defs
     else
       defs
   in
@@ -1844,7 +1845,7 @@ let convert_toplevel_prog ~popt defs =
    * integer identifiers for the generated classes. .main counts as a top-level
    * function and we place hoisted functions just after that *)
   let env = env_toplevel (count_classes defs) (count_records defs) 1 defs in
-  let st = initial_state popt in
+  let st = initial_state empty_namespace in
   let (st, original_defs) = convert_defs env 0 0 0 st defs in
   let main_state = st.current_function_state in
   let st =

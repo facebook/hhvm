@@ -61,7 +61,7 @@ struct MixedArrayKeys {
     return (m_bits & kTombstoneKey) != 0;
   }
   bool mustBeInts() const {
-    return (m_bits & ~kIntKey) == 0;
+    return kTrackStaticStrKeys ? (m_bits & ~kIntKey) == 0 : false;
   }
   bool mustBeStrs() const {
     return (m_bits & ~(kStaticStrKey | kNonStaticStrKey)) == 0;
@@ -103,7 +103,7 @@ struct MixedArrayKeys {
     return kIntKey << 8;
   }
   static uint16_t packStaticStrsForAux() {
-    return kStaticStrKey << 8;
+    return kTrackStaticStrKeys ? (kStaticStrKey << 8) : 0;
   }
   static uint16_t compactPacked(uint16_t aux) {
     return aux & ~(static_cast<uint16_t>(kTombstoneKey) << 8);
@@ -119,8 +119,10 @@ struct MixedArrayKeys {
     m_bits &= ~kTombstoneKey;
   }
   void makeUncounted() {
-    if (m_bits & kNonStaticStrKey) {
+    if (kTrackStaticStrKeys && (m_bits & kNonStaticStrKey)) {
       m_bits = (m_bits & ~kNonStaticStrKey) | kStaticStrKey;
+    } else {
+      m_bits &= ~kNonStaticStrKey;
     }
   }
   void renumberKeys() {
@@ -134,7 +136,11 @@ struct MixedArrayKeys {
     m_bits |= kIntKey;
   }
   void recordStr(const StringData* sd) {
-    m_bits |= sd->isStatic() ? kStaticStrKey : kNonStaticStrKey;
+    if (kTrackStaticStrKeys) {
+      m_bits |= sd->isStatic() ? kStaticStrKey : kNonStaticStrKey;
+    } else {
+      if (!sd->isStatic()) m_bits |= kNonStaticStrKey;
+    }
   }
   void recordTombstone() {
     m_bits |= kTombstoneKey;
@@ -147,6 +153,13 @@ struct MixedArrayKeys {
   bool checkInvariants(const MixedArray* ad) const;
 
 private:
+  // To save on stores, we can avoid tracking static string keys; we'll leave
+  // the bit unset and always assume that every MixedArray contains one.
+  //
+  // If this flag is unset, we'll never be able to successfully prove that a
+  // MixedArray only contains int keys using this bitset.
+  static constexpr bool kTrackStaticStrKeys = false;
+
   static constexpr uint8_t kNonStaticStrKey = 0b0001;
   static constexpr uint8_t kStaticStrKey    = 0b0010;
   static constexpr uint8_t kIntKey          = 0b0100;

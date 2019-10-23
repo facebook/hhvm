@@ -1285,7 +1285,14 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
           empty }
         */
       case -9:
-        attach_zval(json, json->stack[json->top].key, assoc, container_type);
+        /*<fb>*/
+        if (json->top == 1) z = json->stack[json->top].val;
+        else {
+        /*</fb>*/
+          attach_zval(json, json->stack[json->top].key, assoc, container_type);
+        /*<fb>*/
+        }
+        /*</fb>*/
         if (!pop(json, Mode::KEY)) {
           return false;
         }
@@ -1303,11 +1310,6 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
         state = 1;
         if (json->top > 0) {
           Variant &top = json->stack[json->top].val;
-          if (json->top == 1) {
-            top.assignRef(z);
-          } else {
-            top.unset();
-          }
           /*<fb>*/
           if (container_type == JSONContainerType::COLLECTIONS) {
             // stable_maps is meaningless
@@ -1368,9 +1370,15 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
           reset_type();
         }
 
-        attach_zval(json, json->stack[json->top].key,
-          assoc, container_type);
-
+        /*<fb>*/
+        if (json->top == 1) z = json->stack[json->top].val;
+        else {
+        /*</fb>*/
+          attach_zval(json, json->stack[json->top].key,
+            assoc, container_type);
+        /*<fb>*/
+        }
+        /*</fb>*/
         if (!pop(json, Mode::OBJECT)) {
           s_json_parser->error_code = JSON_ERROR_STATE_MISMATCH;
           return false;
@@ -1389,11 +1397,6 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
 
         if (json->top > 0) {
           Variant &top = json->stack[json->top].val;
-          if (json->top == 1) {
-            top.assignRef(z);
-          } else {
-            top.unset();
-          }
           /*<fb>*/
           if (container_type == JSONContainerType::COLLECTIONS) {
             top = req::make<c_Vector>();
@@ -1434,8 +1437,15 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
             reset_type();
           }
 
-          attach_zval(json, json->stack[json->top].key, assoc, container_type);
-
+          /*<fb>*/
+          if (json->top == 1) z = json->stack[json->top].val;
+          else {
+          /*</fb>*/
+            attach_zval(json, json->stack[json->top].key, assoc,
+              container_type);
+          /*<fb>*/
+          }
+          /*</fb>*/
           if (!pop(json, Mode::ARRAY)) {
             s_json_parser->error_code = JSON_ERROR_STATE_MISMATCH;
             return false;

@@ -277,7 +277,7 @@ struct ArrayIter {
   // This method returns null for local iterators, and for non-local iterators
   // with an empty array base. It must be checked in end() for this reason.
   bool hasArrayData() const {
-    return !((intptr_t)m_data & 1);
+    return !((intptr_t)m_data & objectBaseTag());
   }
 
   const ArrayData* getArrayData() const {
@@ -313,7 +313,7 @@ struct ArrayIter {
 
   ObjectData* getObject() const {
     assertx(!hasArrayData());
-    return (ObjectData*)((intptr_t)m_obj & ~1);
+    return (ObjectData*)((intptr_t)m_obj & ~objectBaseTag());
   }
 
   // Used by native code and by the JIT to pack the m_typeFields components.
@@ -357,6 +357,11 @@ struct ArrayIter {
     return offsetof(ArrayIter, m_specialization);
   }
 
+  // ObjectData bases have this additional bit set; ArrayData bases do not.
+  static constexpr intptr_t objectBaseTag() {
+    return 0b1;
+  }
+
 private:
   template<IterTypeOp Type>
   friend int64_t new_iter_array(Iter*, ArrayData*, TypedValue*);
@@ -384,7 +389,7 @@ private:
   //  - m_pos and m_end are set based on its virtual iter helpers.
   template <bool Local = false>
   void setArrayData(const ArrayData* ad) {
-    assertx((intptr_t(ad) & 1) == 0);
+    assertx((intptr_t(ad) & objectBaseTag()) == 0);
     assertx(!Local || ad);
     m_data = Local ? nullptr : ad;
     setArrayNext(IterNextIndex::Array);
@@ -403,8 +408,8 @@ private:
   //  - m_data is is always the object, with the lowest bit set as a flag.
   //  - We set the type fields union here.
   void setObject(ObjectData* obj) {
-    assertx((intptr_t(obj) & 1) == 0);
-    m_obj = (ObjectData*)((intptr_t)obj | 1);
+    assertx((intptr_t(obj) & objectBaseTag()) == 0);
+    m_obj = (ObjectData*)((intptr_t)obj | objectBaseTag());
     m_typeFields = packTypeFields(TypeIterator, IterNextIndex::Object);
     assertx(m_itype == TypeIterator);
     assertx(m_nextHelperIdx == IterNextIndex::Object);

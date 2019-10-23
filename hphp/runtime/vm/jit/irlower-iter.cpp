@@ -196,6 +196,36 @@ void implIterFree(IRLS& env, const IRInstruction* inst, CallSpec meth) {
 
 namespace {
 
+// A function mapping HeaderKind to DataType, for HeaderKinds that are valid
+// iter base kinds. It takes size_t because make_index_sequence doesn't allow
+// enum classes, but we check at compile time that index is a valid HeaderKind.
+constexpr DataType baseKindToDataType(size_t index) {
+  assertx(index < NumHeaderKinds);
+  auto const kind = (HeaderKind)index;
+
+  // Hack arrays are included in isArrayKind, so check them first.
+  if (kind == HeaderKind::Dict) return KindOfDict;
+  if (kind == HeaderKind::VecArray) return KindOfVec;
+  if (kind == HeaderKind::Keyset) return KindOfKeyset;
+  assertx(!isHackArrayKind(kind));
+
+  // All other iterator bases are either arrays or objects.
+  if (isArrayKind(kind)) return KindOfArray;
+  if (isObjectKind(kind)) return KindOfObject;
+  return kInvalidDataType;
+}
+
+template<typename Fn, typename T, T... Values>
+constexpr std::array<std::result_of_t<Fn(T)>, sizeof...(Values)>
+make_array(Fn&& fn, std::integer_sequence<T, Values...>) {
+   return std::array<std::result_of_t<Fn(T)>, sizeof...(Values)>{fn(Values)...};
+}
+
+alignas(64) constexpr std::array<DataType, NumHeaderKinds>
+kBaseKindToDataType = make_array(
+  baseKindToDataType,
+  std::make_index_sequence<NumHeaderKinds>());
+
 template<typename T>
 Vptr iteratorPtr(IRLS& env, const IRInstruction* inst, const T* extra) {
   assertx(inst->src(0)->isA(TFramePtr));
@@ -242,11 +272,33 @@ void cgCheckIter(IRLS& env, const IRInstruction* inst) {
 
 void cgLdIterBase(IRLS& env, const IRInstruction* inst) {
   static_assert(ArrayIter::baseSize() == 8, "");
-  static_assert(TVOFF(m_data) == 0, "");
-  assertx(!inst->dst()->type().needsReg());
+
+  auto& v = vmain(env);
   auto const iter = iteratorPtr(env, inst, inst->extra<LdIterBase>());
-  auto const base = iter + ArrayIter::baseOffset();
-  loadTV(vmain(env), inst->dst(), dstLoc(env, inst, 0), base);
+  auto const& type = inst->dst()->type();
+
+  // Load the result's data field. Skip masking the object tag bit if we know
+  // the base is array-like. Then, if we don't need the type byte, return.
+  auto const dst = dstLoc(env, inst, 0);
+  auto const dst_data = dst.reg(0);
+  if (type <= TArrLike) {
+    v << load{iter + ArrayIter::baseOffset(), dst_data};
+  } else {
+    auto const base = v.makeReg();
+    auto const mask = ~safe_cast<int32_t>(ArrayIter::objectBaseTag());
+    v << load{iter + ArrayIter::baseOffset(), base};
+    v << andqi{mask, base, dst_data, v.makeReg()};
+  }
+  if (!type.needsReg()) return;
+
+  // The iterator doesn't store the base's type byte. To recover it, we load
+  // the header kind and look up the data type from our lookup table.
+  auto const dst_type = dst.reg(1);
+  auto const kind = v.makeReg();
+  auto const kind_to_data_type = v.makeReg();
+  v << ldimmq{intptr_t(kBaseKindToDataType.data()), kind_to_data_type};
+  v << loadzbq{dst_data[HeaderKindOffset], kind};
+  v << loadb{kind_to_data_type[kind], dst_type};
 }
 
 void cgLdIterPos(IRLS& env, const IRInstruction* inst) {

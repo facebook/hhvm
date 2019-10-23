@@ -267,15 +267,15 @@ static_assert(sizeof(HeapObject) == sizeof(uint64_t),
 constexpr auto HeaderKindOffset = HeapObject::kind_offset();
 constexpr auto HeaderAuxOffset = HeapObject::aux_offset();
 
-inline bool isObjectKind(HeaderKind k) {
+inline constexpr bool isObjectKind(HeaderKind k) {
   return k >= HeaderKind::Object && k <= HeaderKind::ImmSet;
 }
 
-inline bool isArrayKind(HeaderKind k) {
+inline constexpr bool isArrayKind(HeaderKind k) {
   return k >= HeaderKind::Packed && k <= HeaderKind::Keyset;
 }
 
-inline bool isFreeKind(HeaderKind k) {
+inline constexpr bool isFreeKind(HeaderKind k) {
   return k >= HeaderKind::Free;
 }
 
@@ -290,24 +290,24 @@ static_assert(uint8_t(LastCppBuiltin) - uint8_t(FirstCppBuiltin) == 10,
 
 // legacy CppBuiltins have custom C++ types (not plain ObjectData layouts)
 // are not considered HNI objects, and do not have NativeData headers.
-inline bool isCppBuiltin(HeaderKind k) {
+inline constexpr bool isCppBuiltin(HeaderKind k) {
   return k >= detail::FirstCppBuiltin && k <= detail::LastCppBuiltin;
 }
 
-inline bool hasInstanceDtor(HeaderKind k) {
+inline constexpr bool hasInstanceDtor(HeaderKind k) {
   static_assert(uint8_t(HeaderKind::NativeObject) + 1 ==
                 uint8_t(detail::FirstCppBuiltin), "");
   return k >= HeaderKind::NativeObject && k <= detail::LastCppBuiltin;
 }
 
-inline bool isHackArrayKind(HeaderKind k) {
+inline constexpr bool isHackArrayKind(HeaderKind k) {
   return
     k == HeaderKind::Dict     ||
     k == HeaderKind::VecArray ||
     k == HeaderKind::Keyset;
 }
 
-inline bool isWaithandleKind(HeaderKind k) {
+inline constexpr bool isWaithandleKind(HeaderKind k) {
   return k >= HeaderKind::WaitHandle && k <= HeaderKind::AwaitAllWH;
   static_assert((int)HeaderKind::AwaitAllWH - (int)HeaderKind::WaitHandle == 2,
                 "isWaithandleKind requires updating");
@@ -319,29 +319,29 @@ enum class CollectionType : uint8_t {
 #undef COL
 };
 
-inline bool isVectorCollection(CollectionType ctype) {
+inline constexpr bool isVectorCollection(CollectionType ctype) {
   return ctype == CollectionType::Vector || ctype == CollectionType::ImmVector;
 }
-inline bool isMapCollection(CollectionType ctype) {
+inline constexpr bool isMapCollection(CollectionType ctype) {
   return ctype == CollectionType::Map || ctype == CollectionType::ImmMap;
 }
-inline bool isSetCollection(CollectionType ctype) {
+inline constexpr bool isSetCollection(CollectionType ctype) {
   return ctype == CollectionType::Set || ctype == CollectionType::ImmSet;
 }
-inline bool isValidCollection(CollectionType ctype) {
+inline constexpr bool isValidCollection(CollectionType ctype) {
   return uint8_t(ctype) >= uint8_t(CollectionType::Vector) &&
          uint8_t(ctype) <= uint8_t(CollectionType::ImmSet);
 }
-inline bool isMutableCollection(CollectionType ctype) {
+inline constexpr bool isMutableCollection(CollectionType ctype) {
   return ctype == CollectionType::Vector ||
          ctype == CollectionType::Map ||
          ctype == CollectionType::Set;
 }
-inline bool isImmutableCollection(CollectionType ctype) {
+inline constexpr bool isImmutableCollection(CollectionType ctype) {
   return !isMutableCollection(ctype);
 }
 
-inline bool collectionAllowsIntStringKeys(CollectionType ctype) {
+inline constexpr bool collectionAllowsIntStringKeys(CollectionType ctype) {
   return isSetCollection(ctype) || isMapCollection(ctype);
 }
 

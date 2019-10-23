@@ -2101,12 +2101,12 @@ To string conversions:
   Does nothing. It's sometimes useful for the simplifier to insert one of these
   in the instruction stream.
 
-| ExitPlaceholder, ND, NA, B
+| JmpPlaceholder, ND, NA, B
 
   Does nothing if executed. Semantically, this instruction carries a taken edge
-  to a block that was a pure side-exit during initial IR generation.  This
-  allows later passes to test conditions and create new exits from the region
-  at this point in the program.
+  to a block of speculatively-generated code during initial IR generation, such
+  as specialized code for an iterator init or next which we may or may not use.
+  If it survives irgen, it should be eliminated in the first DCE pass.
 
 14. Runtime helpers
 

@@ -173,7 +173,7 @@ namespace HPHP { namespace jit { namespace irgen {
  * When we encounter the first IterInit for a given group, we'll initialize
  * this struct, choosing `iter_type` based on ArrayIterProfile profiling.
  * However, we don't know that there's an IterNext in this region yet, so we
- * emit the code behind an ExitPlaceholder and also generate generic code.
+ * emit the code behind a JmpPlaceholder and also generate generic code.
  * We store these placeholders in the `placeholders` list. We'll generate the
  * `header` block at this time, but we'll leave the `footer` block null.
  *
@@ -773,9 +773,9 @@ void specializeIterInit(IRGS& env, Offset doneOffset,
   // a placeholder so that we won't use it unless we also specialize the next.
   auto const main = env.unit.defBlock(env.irb->curBlock()->profCount());
   auto const init = env.unit.defBlock(env.irb->curBlock()->profCount());
-  gen(env, ExitPlaceholder, init);
+  gen(env, JmpPlaceholder, init);
   auto const inst = &env.irb->curBlock()->back();
-  always_assert(inst->is(ExitPlaceholder));
+  always_assert(inst->is(JmpPlaceholder));
   gen(env, Jmp, main);
 
   env.irb->appendBlock(init);
@@ -818,7 +818,7 @@ bool specializeIterNext(IRGS& env, Offset loopOffset,
   // We're committing to specialization for this loop. Replace the placeholders
   // for the inits with uncondition jumps into the specialized code.
   for (auto inst : iter->placeholders) {
-    assertx(inst->is(ExitPlaceholder));
+    assertx(inst->is(JmpPlaceholder));
     env.unit.replace(inst, Jmp, inst->taken());
   }
   iter->placeholders.clear();

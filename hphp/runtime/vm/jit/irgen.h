@@ -132,14 +132,6 @@ void prepareEntry(IRGS&);
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Creates a no-op IR instruction that branches to an exit.
- *
- * These placeholder instructions are later removed after any passes that want
- * to use them for their exits.
- */
-void makeExitPlaceholder(IRGS&);
-
-/*
  * Support for Profiling counters, including reoptimization (CheckCold).
  */
 void incProfCounter(IRGS&, TransID);

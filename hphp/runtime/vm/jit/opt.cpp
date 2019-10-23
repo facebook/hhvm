@@ -49,9 +49,9 @@ bool doPass(IRUnit& unit, PassFN fn, DCE dce) {
   return result;
 }
 
-void removeExitPlaceholders(IRUnit& unit) {
+void removeJmpPlaceholders(IRUnit& unit) {
   for (auto& block : rpoSortCfg(unit)) {
-    if (block->back().is(ExitPlaceholder)) {
+    if (block->back().is(JmpPlaceholder)) {
       unit.replace(&block->back(), Jmp, block->next());
     }
   }
@@ -169,9 +169,9 @@ void optimize(IRUnit& unit, TransKind kind) {
 
   assertx(checkEverything(unit));
 
-  // We use ExitPlaceholders to hide specialized iterators until we use them.
+  // We use JmpPlaceholders to hide specialized iterators until we use them.
   // Any placeholders that survive irgen are just another kind of dead code.
-  doPass(unit, removeExitPlaceholders, DCE::Full);
+  doPass(unit, removeJmpPlaceholders, DCE::Full);
   printUnit(6, unit, " after initial DCE ");
   assertx(checkEverything(unit));
 
@@ -227,13 +227,6 @@ void optimize(IRUnit& unit, TransKind kind) {
     rqtrace::EventGuard trace{"OPT_REFS"};
     doPass(unit, optimizeRefcounts, DCE::Full);
     printUnit(6, unit, " after optimizeRefCounts ");
-  }
-
-  if (RuntimeOption::EvalHHIRLICM && cfgHasLoop(unit) &&
-      kind != TransKind::Profile) {
-    rqtrace::EventGuard trace{"OPT_LICM"};
-    doPass(unit, optimizeLoopInvariantCode, DCE::Minimal);
-    printUnit(6, unit, " after optimizeLoopInvariantCode ");
   }
 
   doPass(unit, simplifyOrdStrIdx, DCE::Minimal);

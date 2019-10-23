@@ -859,7 +859,6 @@ struct RuntimeOption {
    * of all profiled loops. If `Rate` is > 1.0, we won't specialize. */ \
   F(uint32_t, ArrayIterSpecializationCount, arrayIterDefaultCount())    \
   F(double,   ArrayIterSpecializationRate,  arrayIterDefaultRate())     \
-  F(bool, HHIRLICM,                    false)                           \
   F(bool, HHIRSimplification,          true)                            \
   F(bool, HHIRGenOpts,                 true)                            \
   F(bool, HHIRRefcountOpts,            true)                            \

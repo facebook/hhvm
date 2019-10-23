@@ -719,7 +719,7 @@ bool canDCE(IRInstruction* inst) {
   case DbgTrashRetVal:
   case CheckStackOverflow:
   case CheckSurpriseFlagsEnter:
-  case ExitPlaceholder:
+  case JmpPlaceholder:
   case ThrowOutOfBounds:
   case ThrowInvalidArrayKey:
   case ThrowInvalidOperation:

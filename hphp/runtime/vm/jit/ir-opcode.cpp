@@ -718,7 +718,6 @@ bool opcodeMayRaise(Opcode opc) {
   case EqStr:
   case EqStrInt:
   case EqStrPtr:
-  case ExitPlaceholder:
   case ExtendsClass:
   case FinishMemberOp:
   case Floor:
@@ -786,6 +785,7 @@ bool opcodeMayRaise(Opcode opc) {
   case JmpSSwitchDest:
   case JmpSwitchDest:
   case JmpZero:
+  case JmpPlaceholder:
   case KeysetEmptyElem:
   case KeysetFirst:
   case KeysetGetK:

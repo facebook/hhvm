@@ -368,9 +368,7 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function zip<Tu>(
     <<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> Traversable<Tu> $traversable
-  /* HH_FIXME[4110] need bottom type as generic */
-  /* HH_FIXME[4323] need bottom type as generic */
-  ): ImmSet<Pair<Tv, Tu>>;
+  ): ImmSet<nothing>;
 
   /**
    * Returns an `ImmSet` containing the first n values of the current `ImmSet`.

@@ -339,10 +339,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function zip<Tu>(
     <<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> Traversable<Tu> $traversable
-  /* HH_FIXME[4110] need bottom type as generic */
-  /* HH_FIXME[4323] need bottom type as generic */
-  /* HH_FIXME[4322] */
-  ): Set<Pair<Tv, Tu>>;
+  ): Set<nothing>;
 
   /**
    * Returns a `Set` containing the first `n` values of the current `Set`.

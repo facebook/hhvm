@@ -996,7 +996,11 @@ module Make (GetLocals : GetLocals) = struct
         | x when x = SN.Typehints.this ->
           Errors.this_type_forbidden p;
           N.Herr
-        | x when x = SN.Classes.cClassname && List.length hl <> 1 ->
+        (* TODO: Duplicate of a Typing[4101] error if namespaced correctly
+         * T56198838 *)
+        | x
+          when (x = SN.Classes.cClassname || x = "classname")
+               && List.length hl <> 1 ->
           Errors.classname_param p;
           N.Hprim N.Tstring
         | _ when String.lowercase x = SN.Typehints.this ->

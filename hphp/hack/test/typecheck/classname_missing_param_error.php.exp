@@ -1,0 +1,2 @@
+File "classname_missing_param_error.php", line 4, characters 18-26:
+Missing type parameter to classname; classname is entirely meaningless without one (Naming[2066])

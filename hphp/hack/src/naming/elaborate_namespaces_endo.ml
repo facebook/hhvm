@@ -14,11 +14,24 @@ module SN = Naming_special_names
 type env = {
   namespace: Namespace_env.env;
   let_locals: SSet.t;
+  type_params: SSet.t;
   in_ppl: bool;
 }
 
-let elaborate_type_name env id =
-  NS.elaborate_id env.namespace NS.ElaborateClass id
+let elaborate_type_name env ((_, name) as id) =
+  if SSet.mem name env.type_params then
+    id
+  else
+    NS.elaborate_id env.namespace NS.ElaborateClass id
+
+let extend_tparams env tparaml =
+  let type_params =
+    List.fold
+      tparaml
+      ~f:(fun acc tparam -> SSet.add (snd tparam.tp_name) acc)
+      ~init:env.type_params
+  in
+  { env with type_params }
 
 let namespace_elaborater =
   object (self)
@@ -42,15 +55,27 @@ let namespace_elaborater =
           c.c_user_attributes
       in
       let env = { env with namespace = c.c_namespace; in_ppl } in
+      let env = extend_tparams env c.c_tparams.c_tparam_list in
       super#on_class_ env c
 
     method! on_typedef env td =
       let env = { env with namespace = td.t_namespace } in
+      let env = extend_tparams env td.t_tparams in
       super#on_typedef env td
 
+    (* Difference between fun_def and fun_ is that fun_ is also lambdas *)
     method! on_fun_def env f =
       let env = { env with namespace = f.f_namespace } in
+      let env = extend_tparams env f.f_tparams in
       super#on_fun_def env f
+
+    method! on_method_ env m =
+      let env = extend_tparams env m.m_tparams in
+      super#on_method_ env m
+
+    method! on_method_redeclaration env mt =
+      let env = extend_tparams env mt.mt_tparams in
+      super#on_method_redeclaration env mt
 
     method! on_gconst env gc =
       let env = { env with namespace = gc.cst_namespace } in
@@ -254,4 +279,10 @@ let namespace_elaborater =
   end
 
 (* Toplevel environment *)
-let make_env namespace = { namespace; let_locals = SSet.empty; in_ppl = false }
+let make_env namespace =
+  {
+    namespace;
+    let_locals = SSet.empty;
+    type_params = SSet.empty;
+    in_ppl = false;
+  }

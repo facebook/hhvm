@@ -88,15 +88,15 @@ let make_hover_attr_docs name =
   | "__AtMostRxAsArgs" ->
     [
       "Marks a reactive function as being conditionally reactive, depending on the type of its arguments."
-      ^ "\n\nThe function is 'at most as reactive as its arguments'.."
-      ^ " For example, a `__RxLocal` argument makes this function `__RxLocal`"
+      ^ "\n\nThe function is 'at most as reactive as its arguments'."
+      ^ " For example, a `__RxShallow` argument makes this function `__RxShallow`"
       ^ "\n\nThis attribute must be used with `__OnlyRxIfImpl` or `__AtMostRxAsFunc` parameters.";
     ]
   | "__AtMostRxAsFunc" ->
     [
-      "Marks a reactive function as being conditionally reactive, depending on the type of this function argument."
+      "Marks a reactive function as being conditionally reactive, depending on the reactivity of this function argument."
       ^ "\n\nThe enclosing function is 'at most as reactive as this function'."
-      ^ " For example, a `__RxLocal` function argument makes the enclosing function `__RxLocal`";
+      ^ " For example, a `__RxShallow` function argument makes the enclosing function `__RxShallow`";
     ]
   | "__ALWAYS_INLINE" ->
     [
@@ -193,19 +193,21 @@ let make_hover_attr_docs name =
     ]
   | "__MaybeMutable" ->
     [
-      "Allows a reactive function/method to accept both mutable and immutable values."
-      ^ " This combines the restrictions of immutable values (no modification) with `__Mutable` (no aliases)."
-      ^ "\n\nThis applies to the parameter specified, or `$this` when `__MaybeMutable` is used on a method.";
+      "Allows a reactive function/method to accept both mutable and immutable objects."
+      ^ " This combines the restrictions of immutable objects (no modification) with mutable ones (no aliases)."
+      ^ "\n\nThis applies to the parameter specified, or `$this` when used on a method.";
     ]
   | "__Mutable" ->
     [
-      "Allows mutation of this parameter inside this reactive function/method. "
+      "Allows mutation of the annotated object inside this reactive function/method."
       ^ " When `__Mutable` is used on a method, allows mutation of `$this`."
-      ^ "\n\nAnnotated values are marked as borrowed mutable, unliked `__OwnedMutable`.";
+      ^ "\n\nAnnotated objects are mutably borrowed."
+      ^ "\n\nSee `__OwnedMutable` for exlusively owned objects.";
     ]
   | "__MutableReturn" ->
     [
-      "Marks this reactive function/method as returning a mutable value that is owned by the caller.";
+      "Marks this reactive function/method as returning a mutable object that is owned by the caller."
+      ^ "\n\nUse Rx\\mutable at the callsite to maintain mutability of the returned object.";
     ]
   | "__Native" ->
     [
@@ -225,7 +227,7 @@ let make_hover_attr_docs name =
     ]
   | "__NonRx" ->
     [
-      "Mark this function as intentionally not reactive, so readers do not attempt to refactor it to being reactive."
+      "Mark this function or closure as intentionally not reactive."
       ^ " When used on methods and global functions, a reason argument is required.";
     ]
   | "__NoFlatten" ->
@@ -241,10 +243,16 @@ let make_hover_attr_docs name =
     ]
   | "__OnlyRxIfImpl" ->
     [
-      "Marks a reactive function as being conditionally reactive, depending on the type of this argument."
-      ^ " If the argument implements the interface or extends the class specified, then the function is reactive.";
+      "Marks a reactive function as being conditionally reactive, depending on the type of the object."
+      ^ " If the object `is` the class specified, then the function is reactive."
+      ^ "\n\nWhen used on a method, refers to the type of `$this`.";
     ]
   | "__Override" -> ["Ensures there's a parent method being overridden."]
+  | "__OwnedMutable" ->
+    [
+      "Denotes that an argument to a reactive function/method is exclusively owned by that function/method, once called."
+      ^ "\n\nThe annotated argument must be passed in via `Rx\\move` or come from an Rx\\mutable expression.";
+    ]
   | "__PHPStdLib" ->
     [
       "Ignore this built-in function or class, so the type checker errors if code uses it."
@@ -286,21 +294,21 @@ let make_hover_attr_docs name =
     ]
   | "__Rx" ->
     [
-      "Ensures this function/method is fully reactive (pure)."
-      ^ " It cannot access global state, cannot read from unmanaged sources, and cannot have side effects."
+      "Ensures this function/method is fully reactive."
+      ^ " It cannot access global state, read from unmanaged sources, or have side effects."
       ^ " Function calls are only permitted to other `__Rx` functions."
       ^ "\n\nFully reactive functions can use the reactive runtime, unlike `__RxShallow` and `__RxLocal`.";
     ]
   | "__RxLocal" ->
     [
-      "Ensures this function/method is reactive, ignoring function calls."
-      ^ " All the restrictions of `__Rx` apply, but calls to non-rx functions are permitted."
-      ^ "\n\nThis allows gradual migration of code to being fully reactive, and permits calls from `__RxShallow`.";
+      "Ensures this function/method follows the function-local rules of reactivity."
+      ^ " All the restrictions of `__Rx` apply, but calls to non-reactive functions are permitted."
+      ^ "\n\nThis allows gradual migration of code to being fully reactive.";
     ]
   | "__RxShallow" ->
     [
-      "Ensures this function/method is reactive, but allows calls to `__RxShallow` and `__RxLocal` functions."
-      ^ " All the restrictions of `__Rx` apply otherwise."
+      "Ensures this function/method follows the function-local rules of reactivity."
+      ^ " All the restrictions of `__Rx` apply, but calls to `__RxLocal` and other `__RxShallow` functions are also permitted."
       ^ "\n\nThis allows gradual migration of code to being fully reactive.";
     ]
   | "__Sealed" ->

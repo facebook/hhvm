@@ -12,6 +12,6 @@ type t = shape(
 );
 
 function test(s $s): t {
-  Shapes::removeKey(&$s, 'z');
+  Shapes::removeKey(inout $s, 'z');
   return $s;
 }

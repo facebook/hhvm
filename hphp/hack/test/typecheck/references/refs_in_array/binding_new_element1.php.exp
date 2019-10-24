@@ -1,2 +1,2 @@
-File "binding_new_element1.php", line 6, characters 10-11:
-References are only allowed as function call arguments (Parsing[1002])
+File "binding_new_element1.php", line 6, characters 11-11:
+An expression is expected here. (Parsing[1002])

@@ -8,7 +8,7 @@ function testObjGet(dynamic $x): void {
   hh_show($z);
   $w = "5";
   hh_show($w);
-  $y = $x->method(&$w);
+  $y = $x->method(inout $w);
   hh_show($y);
   hh_show($w);
 }

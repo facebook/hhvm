@@ -426,7 +426,6 @@ where
             | TokenKind::Tilde
             | TokenKind::Minus
             | TokenKind::Plus
-            | TokenKind::Ampersand
             | TokenKind::Await
             | TokenKind::Clone
             | TokenKind::Print => self.parse_prefix_unary_expression(),

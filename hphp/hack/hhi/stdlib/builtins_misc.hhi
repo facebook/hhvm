@@ -38,8 +38,6 @@ function ignore_user_abort(bool $setting = false);
 <<__PHPStdLib, __Rx>>
 function pack(string $format, ...$args);
 <<__PHPStdLib>>
-function php_check_syntax($filename, &$error_message = null);
-<<__PHPStdLib>>
 function sleep(int $seconds);
 <<__PHPStdLib>>
 function usleep(int $micro_seconds);

@@ -1738,7 +1738,6 @@ where
                     Some(TK::Tilde) => mk_unop(Utild, expr),
                     Some(TK::Plus) => mk_unop(Uplus, expr),
                     Some(TK::Minus) => mk_unop(Uminus, expr),
-                    Some(TK::Ampersand) => mk_unop(Uref, expr),
                     Some(TK::At) => {
                         if env.parser_options.po_disallow_silence {
                             Self::raise_parsing_error(op, env, &syntax_error::no_silence);

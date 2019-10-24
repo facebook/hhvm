@@ -78,9 +78,9 @@
                      (Lvar ([8:21-23], $p)));
                      (([8:25-28], string), (String "y"))],
                    [])))));
-           ([9:3-31],
+           ([9:3-36],
             (Expr
-               (([9:3-30], void),
+               (([9:3-35], void),
                 (Call (Cnormal,
                    (([9:3-20], (function<T as shape(...)>(inout shape('x' => int, ?'y' => int) $shape, arraykey $index): void)),
                     (Class_const (
@@ -88,12 +88,12 @@
                        ([9:11-20], "removeKey")))),
                    [((shape('x' => int, ?'y' => int)),
                      ([9:11-20], (Happly (([Pos.none], "_"), []))))],
-                   [(([9:21-24], shape('x' => int, ?'y' => int)),
-                     (Unop (Uref,
-                        (([9:22-24], shape('x' => int, ?'y' => int)),
-                         (Lvar ([9:22-24], $p)))
+                   [(([9:21-29], shape('x' => int, ?'y' => int)),
+                     (Callconv (Pinout,
+                        (([9:27-29], shape('x' => int, ?'y' => int)),
+                         (Lvar ([9:27-29], $p)))
                         )));
-                     (([9:26-29], string), (String "y"))],
+                     (([9:31-34], string), (String "y"))],
                    [])))));
            ([10:3-23],
             (Expr

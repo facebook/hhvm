@@ -5,7 +5,7 @@ abstract class Base {
 }
 
 class Unrelated {
-  public function foo(string& $x, string& $y) { $l = $x . $y; return $l; }
+  public function foo(inout string $x, inout string $y) { $l = $x . $y; return $l; }
 }
 
 class D1 extends Base {

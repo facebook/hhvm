@@ -1,5 +1,5 @@
-((script 1217
-  ((list 1217
+((script 1106
+  ((list 1106
     ((markup_section 4
       ((missing 0 ()) (() markup 0 ())
        (markup_suffix 4
@@ -339,7 +339,7 @@
              (literal 4 ((() boolean_literal 4 ())))
              (() ";" 1 ((end_of_line 1)))))))
          (() } 1 ((end_of_line 1)))))))
-     (function_declaration 536
+     (function_declaration 425
       ((missing 0 ())
        (function_declaration_header 21
         ((missing 0 ()) (((end_of_line 1)) function 8 ((whitespace 1)))
@@ -347,9 +347,9 @@
          (() ")" 1 ()) (() : 1 ((whitespace 1)))
          (simple_type_specifier 4 ((() void 4 ((whitespace 1)))))
          (missing 0 ())))
-       (compound_statement 514
+       (compound_statement 403
         ((() { 1 ((end_of_line 1)))
-         (list 508
+         (list 397
           ((expression_statement 8
             ((binary_expression 7
               ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
@@ -408,50 +408,6 @@
                    (missing 0 ())))))
                (() ")" 1 ())))
              (() ";" 1 ((end_of_line 1)))))
-           (expression_statement 20
-            ((function_call_expression 19
-              ((((whitespace 2)) name 4 ()) (missing 0 ()) (() "(" 1 ())
-               (list 13
-                ((list_item 4
-                  ((prefix_unary_expression 3
-                    ((() & 1 ()) (variable 2 ((() variable 2 ())))))
-                   (() , 1 ((whitespace 1)))))
-                 (list_item 8
-                  ((decorated_expression 8
-                    ((() inout 5 ((whitespace 1)))
-                     (variable 2 ((() variable 2 ())))))
-                   (missing 0 ())))))
-               (() ")" 1 ())))
-             (() ";" 1 ((end_of_line 1)))))
-           (expression_statement 20
-            ((function_call_expression 19
-              ((((whitespace 2)) name 4 ()) (missing 0 ()) (() "(" 1 ())
-               (list 13
-                ((list_item 9
-                  ((decorated_expression 8
-                    ((() inout 5 ((whitespace 1)))
-                     (variable 2 ((() variable 2 ())))))
-                   (() , 1 ((whitespace 1)))))
-                 (list_item 3
-                  ((prefix_unary_expression 3
-                    ((() & 1 ()) (variable 2 ((() variable 2 ())))))
-                   (missing 0 ())))))
-               (() ")" 1 ())))
-             (() ";" 1 ((end_of_line 1)))))
-           (expression_statement 15
-            ((function_call_expression 14
-              ((((whitespace 2)) name 4 ()) (missing 0 ()) (() "(" 1 ())
-               (list 8
-                ((list_item 4
-                  ((prefix_unary_expression 3
-                    ((() & 1 ()) (variable 2 ((() variable 2 ())))))
-                   (() , 1 ((whitespace 1)))))
-                 (list_item 3
-                  ((prefix_unary_expression 3
-                    ((() & 1 ()) (variable 2 ((() variable 2 ())))))
-                   (missing 0 ())))))
-               (() ")" 1 ())))
-             (() ";" 1 ((end_of_line 1)))))
            (expression_statement 11
             ((binary_expression 10
               ((variable 2
@@ -483,38 +439,6 @@
                          (() , 1 ((whitespace 1)))))
                        (list_item 1
                         ((literal 1 ((() decimal_literal 1 ())))
-                         (missing 0 ())))))
-                     (() ] 1 ())))
-                   (missing 0 ())))))
-               (() ")" 1 ())))
-             (() ";" 1 ((end_of_line 1)))))
-           (expression_statement 44
-            ((function_call_expression 43
-              ((((whitespace 2)) name 6 ()) (missing 0 ()) (() "(" 1 ())
-               (list 35
-                ((list_item 4
-                  ((prefix_unary_expression 3
-                    ((() & 1 ()) (variable 2 ((() variable 2 ())))))
-                   (() , 1 ((whitespace 1)))))
-                 (list_item 30
-                  ((dictionary_intrinsic_expression 30
-                    ((() dict 4 ()) (missing 0 ()) (() [ 1 ())
-                     (list 24
-                      ((list_item 12
-                        ((element_initializer 11
-                          ((literal 6
-                            ((() single_quoted_string_literal 6
-                              ((whitespace 1)))))
-                           (() => 2 ((whitespace 1)))
-                           (literal 1 ((() decimal_literal 1 ())))))
-                         (() , 1 ((whitespace 1)))))
-                       (list_item 11
-                        ((element_initializer 11
-                          ((literal 6
-                            ((() single_quoted_string_literal 6
-                              ((whitespace 1)))))
-                           (() => 2 ((whitespace 1)))
-                           (literal 1 ((() decimal_literal 1 ())))))
                          (missing 0 ())))))
                      (() ] 1 ())))
                    (missing 0 ())))))

@@ -15,19 +15,16 @@
        (compound_statement 20
         ((() { 1 ((end_of_line 1)))
          (list 14
-          ((expression_statement 14
-            ((function_call_expression 13
+          ((expression_statement 5
+            ((function_call_expression 5
               ((((whitespace 2)) name 3 ()) (missing 0 ()) (() "(" 1 ())
-               (list 8
-                ((list_item 8
-                  ((prefix_unary_expression 8
-                    ((() & 1 ())
-                     (array_intrinsic_expression 7
-                      ((() array 5 ()) (() "(" 1 ()) (missing 0 ())
-                       (() ")" 1 ())))))
-                   (missing 0 ())))))
-               (() ")" 1 ())))
-             (() ";" 1 ((end_of_line 1)))))))
+               (list 1 ((list_item 1 ((() & 1 ()) (missing 0 ())))))
+               (missing 0 ())))
+             (missing 0 ())))
+           (expression_statement 9
+            ((array_intrinsic_expression 7
+              ((() array 5 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))
+             (((extra_token_error 1)) ";" 1 ((end_of_line 1)))))))
          (() } 1 ((end_of_line 1)))))))
      (function_declaration 28
       ((missing 0 ())
@@ -37,9 +34,8 @@
          (list 3
           ((list_item 3
             ((parameter_declaration 3
-              ((missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-               (decorated_expression 3 ((() & 1 ()) (() variable 2 ())))
-               (missing 0 ())))
+              ((missing 0 ()) (missing 0 ()) (missing 0 ())
+               (error 1 ((() & 1 ()))) (() variable 2 ()) (missing 0 ())))
              (missing 0 ())))))
          (() ")" 1 ((whitespace 1))) (() : 1 ((whitespace 1)))
          (simple_type_specifier 4 ((() void 4 ((whitespace 1)))))

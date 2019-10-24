@@ -8,8 +8,6 @@ function g2(string $s = 'g2', inout int $i): void {} // ERROR
 
 function g3(inout int $i, string $s = 'g3'): void {} // no error
 
-function h(mixed $m, inout bool &$res): void {} // ERROR
-
 function q(inout $x): void {} // ERROR
 
 function v((function(inout mixed ...): void) $f): void {} // ERROR
@@ -31,7 +29,6 @@ function test(): void {
   g3(inout $i, 'ok'); // no error
 
   $v = vec[];
-  z(inout &$v); // ERROR
 
   $c = async function(inout $v) {}; // ERROR
   $c = async (inout $v) ==> 42; // ERROR

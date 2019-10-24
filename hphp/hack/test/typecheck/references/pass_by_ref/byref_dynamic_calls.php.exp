@@ -1,11 +1,21 @@
-File "byref_dynamic_calls.php", line 35, characters 14-16:
-Arguments can not be passed by reference to dynamic function calls (NastCheck[3078])
-File "byref_dynamic_calls.php", line 43, characters 15-17:
-Arguments can not be passed by reference to dynamic function calls (NastCheck[3078])
-File "byref_dynamic_calls.php", line 55, characters 11-13:
-Arguments can not be passed by reference to dynamic function calls (NastCheck[3078])
-File "byref_dynamic_calls.php", line 61, characters 13-15:
-Arguments can not be passed by reference to dynamic function calls (NastCheck[3078])
+File "byref_dynamic_calls.php", line 4, characters 19-19:
+Encountered unexpected token '&'. (Parsing[1002])
+File "byref_dynamic_calls.php", line 22, characters 16-16:
+Unbound name: & (a global constant) (Naming[2049])
+File "byref_dynamic_calls.php", line 24, characters 17-17:
+Unbound name: & (a global constant) (Naming[2049])
+File "byref_dynamic_calls.php", line 27, characters 21-21:
+Unbound name: & (a global constant) (Naming[2049])
+File "byref_dynamic_calls.php", line 35, characters 14-14:
+Unbound name: & (a global constant) (Naming[2049])
+File "byref_dynamic_calls.php", line 43, characters 15-15:
+Unbound name: & (a global constant) (Naming[2049])
+File "byref_dynamic_calls.php", line 49, characters 22-22:
+Unbound name: & (a global constant) (Naming[2049])
+File "byref_dynamic_calls.php", line 55, characters 11-11:
+Unbound name: & (a global constant) (Naming[2049])
+File "byref_dynamic_calls.php", line 61, characters 13-13:
+Unbound name: & (a global constant) (Naming[2049])
 File "byref_dynamic_calls.php", line 61, characters 8-11:
 No class variable '$str' in Foo (Typing[4090])
 File "byref_dynamic_calls.php", line 8, characters 7-9:

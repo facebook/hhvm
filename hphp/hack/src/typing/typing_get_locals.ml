@@ -32,8 +32,6 @@ let rec lvalue ((nsenv, m) as acc) (p, e) =
   match e with
   | Aast.List lv -> List.fold_left ~init:acc ~f:lvalue lv
   | Aast.Lvar (_, lid) -> (nsenv, SMap.add (Local_id.to_string lid) p m)
-  | Aast.Unop (Uref, (p, Aast.Lvar (_, lid))) ->
-    (nsenv, SMap.add (Local_id.to_string lid) p m)
   | _ -> acc
 
 (* TODO It really sucks that this and Nast_terminality.Terminal are very

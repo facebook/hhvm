@@ -1,4 +1,2 @@
-File "bad_inout_decl_byref1.php", line 3, characters 15-26:
-An 'inout' parameter cannot be passed by reference ('&'). (Parsing[1002])
-File "bad_inout_decl_byref1.php", line 3, characters 15-26:
-Functions may not use both reference and inout parameters (Parsing[1002])
+File "bad_inout_decl_byref1.php", line 3, characters 25-25:
+Encountered unexpected token '&'. (Parsing[1002])

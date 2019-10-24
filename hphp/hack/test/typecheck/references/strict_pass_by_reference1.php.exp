@@ -1,1 +1,2 @@
-No errors
+File "strict_pass_by_reference1.php", line 4, characters 9-9:
+An expression is expected here. (Parsing[1002])

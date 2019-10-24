@@ -1,1 +1,4 @@
-No errors
+File "pass_by_ref_annotation1.php", line 7, characters 17-17:
+A type specifier is expected here. (Parsing[1002])
+File "pass_by_ref_annotation1.php", line 7, characters 17-17:
+Encountered unexpected text '&', was expecting a type hint. (Parsing[1002])

@@ -1,2 +1,2 @@
-File "references_in_rx1.php", line 4, characters 10-12:
-References are not allowed in reactive code. (Naming[2088])
+File "references_in_rx1.php", line 5, characters 3-3:
+A type specifier is expected here. (Parsing[1002])

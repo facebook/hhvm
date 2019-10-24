@@ -336,11 +336,6 @@ let fun_reactivity env attrs params =
   in
   r
 
-type array_ctx =
-  | NoArray
-  | ElementAssignment
-  | ElementAccess
-
 let merge_hint_with_decl_hint env type_hint decl_hint =
   match (type_hint, decl_hint) with
   | (None, Some hint) -> Some hint
@@ -1557,8 +1552,6 @@ and expr
     ?(expected : ExpectedTy.t option)
     ?(accept_using_var = false)
     ?(is_using_clause = false)
-    ?is_func_arg
-    ?array_ref_ctx
     ?(valkind = `other)
     ?(check_defined = true)
     env
@@ -1584,8 +1577,6 @@ and expr
       ~is_using_clause
       ~valkind
       ~check_defined
-      ?is_func_arg
-      ?array_ref_ctx
       ?expected
       env
       e
@@ -1603,8 +1594,6 @@ and raw_expr
     ?(is_using_clause = false)
     ?(expected : ExpectedTy.t option)
     ?lhs_of_null_coalesce
-    ?is_func_arg
-    ?array_ref_ctx
     ?(valkind = `other)
     ?(check_defined = true)
     env
@@ -1616,8 +1605,6 @@ and raw_expr
       ~is_using_clause
       ?expected
       ?lhs_of_null_coalesce
-      ?is_func_arg
-      ?array_ref_ctx
       ~valkind
       ~check_defined
       env
@@ -1702,7 +1689,6 @@ and check_escaping_var env (pos, x) =
 
 and exprs
     ?(accept_using_var = false)
-    ?is_func_arg
     ?(expected : ExpectedTy.t option)
     ?(valkind = `other)
     ?(check_defined = true)
@@ -1712,24 +1698,10 @@ and exprs
   | [] -> (env, [], [])
   | e :: el ->
     let (env, te, ty) =
-      expr
-        ~accept_using_var
-        ?is_func_arg
-        ?expected
-        ~valkind
-        ~check_defined
-        env
-        e
+      expr ~accept_using_var ?expected ~valkind ~check_defined env e
     in
     let (env, tel, tyl) =
-      exprs
-        ~accept_using_var
-        ?is_func_arg
-        ?expected
-        ~valkind
-        ~check_defined
-        env
-        el
+      exprs ~accept_using_var ?expected ~valkind ~check_defined env el
     in
     (env, te :: tel, ty :: tyl)
 
@@ -1759,8 +1731,6 @@ and expr_
     ?(accept_using_var = false)
     ?(is_using_clause = false)
     ?lhs_of_null_coalesce
-    ?(is_func_arg = false)
-    ?(array_ref_ctx = NoArray)
     ~(valkind : [> `lvalue | `lvalue_subexpr | `other ])
     ~check_defined
     env
@@ -2656,19 +2626,13 @@ and expr_
         end
     end
   | Binop (Ast_defs.Eq None, e1, e2) ->
-    let array_ref_ctx =
-      match (e1, e2) with
-      | ((_, Array_get _), (_, Unop (Ast_defs.Uref, _))) -> ElementAssignment
-      | (_, (_, Unop (Ast_defs.Uref, (_, Array_get _)))) -> ElementAccess
-      | _ -> NoArray
-    in
     begin
       match e1 with
       | (_, ImmutableVar (p, x)) ->
         Errors.let_var_immutability_violation p (Local_id.get_name x)
       | _ -> ()
     end;
-    let (env, te2, ty2) = raw_expr ~array_ref_ctx env e2 in
+    let (env, te2, ty2) = raw_expr env e2 in
     let (env, te1, ty) = assign p env e1 ty2 in
     let env =
       if Env.env_local_reactive env then
@@ -2746,7 +2710,7 @@ and expr_
   | Unop (uop, e) ->
     let (env, te, ty) = raw_expr env e in
     let env = might_throw env in
-    unop ~is_func_arg ~array_ref_ctx p env uop te ty outer
+    unop p env uop te ty outer
   | Eif (c, e1, e2) -> eif env ~expected p c e1 e2
   | Typename sid ->
     begin
@@ -4513,11 +4477,6 @@ and assign_ p ur env e1 ty2 =
         (env, te1)
     in
     (env, ((pos, ty2), T.Array_get (te1, Some te)), ty2)
-  | (pref, Unop (Ast_defs.Uref, e1')) ->
-    (* references can be "lvalues" in foreach bindings *)
-    Errors.binding_ref_to_array pref;
-    let (env, texpr, ty) = assign p env e1' ty2 in
-    make_result env (fst e1) (T.Unop (Ast_defs.Uref, texpr)) ty
   | _ -> assign_simple p ur env e1 ty2
 
 and assign_simple pos ur env e1 ty2 =
@@ -4543,7 +4502,7 @@ and array_field env = function
     (env, (T.AFkvalue (tke, tve), Some tk, tv))
 
 and array_value ~(expected : ExpectedTy.t option) env x =
-  let (env, te, ty) = expr ?expected ~array_ref_ctx:ElementAssignment env x in
+  let (env, te, ty) = expr ?expected env x in
   (env, (te, ty))
 
 and array_field_value ~(expected : ExpectedTy.t option) env = function
@@ -5112,9 +5071,8 @@ and dispatch_call
           begin
             match shape with
             | (_, Lvar (_, lvar))
-            | (_, Callconv (Ast_defs.Pinout, (_, Lvar (_, lvar))))
-            | (_, Unop (Ast_defs.Uref, (_, Lvar (_, lvar)))) ->
-              let (env, _te, shape_ty) = expr ~is_func_arg:true env shape in
+            | (_, Callconv (Ast_defs.Pinout, (_, Lvar (_, lvar)))) ->
+              let (env, _te, shape_ty) = expr env shape in
               let (env, shape_ty) =
                 Typing_shapes.remove_key p env shape_ty field
               in
@@ -6103,22 +6061,16 @@ and variadic_param env ft =
 
 and param_modes ?(is_variadic = false) { fp_pos; fp_kind; _ } (pos, e) =
   match (fp_kind, e) with
-  | (FPnormal, Unop (Ast_defs.Uref, _)) ->
-    Errors.pass_by_ref_annotation_unexpected pos fp_pos is_variadic
   | (FPnormal, Callconv _) ->
     Errors.inout_annotation_unexpected pos fp_pos is_variadic
-  | (FPnormal, _)
-  | (FPref, Unop (Ast_defs.Uref, _)) ->
-    ()
+  | (FPnormal, _) -> ()
   | (FPref, Callconv (kind, _)) ->
     (match kind with
     (* HHVM supports pass-by-ref for arguments annotated as 'inout'. *)
     | Ast_defs.Pinout -> ())
   | (FPref, _) -> Errors.pass_by_ref_annotation_missing pos fp_pos
   (* HHVM also allows '&' on arguments to inout parameters via interop layer. *)
-  | (FPinout, Unop (Ast_defs.Uref, _))
-  | (FPinout, Callconv (Ast_defs.Pinout, _)) ->
-    ()
+  | (FPinout, Callconv (Ast_defs.Pinout, _)) -> ()
   | (FPinout, _) -> Errors.inout_annotation_missing pos fp_pos
 
 and inout_write_back env { fp_type; _ } (_, e) =
@@ -6184,9 +6136,7 @@ and call
                       Reason.URparam
                       (Reason.Rnone, Typing_utils.tany env)
                   in
-                  let (env, te, _) =
-                    expr ~expected ~is_func_arg:true env elt
-                  in
+                  let (env, te, _) = expr ~expected env elt in
                   (env, te))
             in
             let env = call_untyped_unpack env uel in
@@ -6202,7 +6152,7 @@ and call
                         Reason.URparam
                         (Reason.Rnone, Typing_utils.tany env)
                     in
-                    expr ~expected ~is_func_arg:true env elt
+                    expr ~expected env elt
                   in
                   let env =
                     if IM.is_on @@ TCO.infer_missing (Env.get_tcopt env) then
@@ -6224,11 +6174,6 @@ and call
                     | (_, Callconv (Ast_defs.Pinout, e1)) ->
                       let (env, _te, _ty) =
                         assign_ (fst e1) Reason.URparam_inout env e1 efty
-                      in
-                      env
-                    | (_, Unop (Ast_defs.Uref, e1)) ->
-                      let (env, _te, _ty) =
-                        assign_ (fst e1) Reason.URparam env e1 efty
                       in
                       env
                     | _ -> env
@@ -6309,7 +6254,6 @@ and call
                       param.fp_type
                   in
                   expr
-                    ~is_func_arg:true
                     ~accept_using_var:param.fp_accept_disposable
                     ~expected
                     env
@@ -6324,7 +6268,7 @@ and call
                     Reason.URparam
                     (Reason.Rnone, Typing_utils.tany env)
                 in
-                let (env, te, ty) = expr ~expected ~is_func_arg:true env e in
+                let (env, te, ty) = expr ~expected env e in
                 (env, Some (te, ty))
             in
             let set_tyvar_variance_from_lambda_param env opt_param =
@@ -6467,7 +6411,7 @@ and call
             in
             (env, (tel, tuel, ret_ty))
           | (r2, Tanon (arity, id)) ->
-            let (env, tel, tyl) = exprs ~is_func_arg:true env el in
+            let (env, tel, tyl) = exprs env el in
             let expr_for_unpacked_expr_list env = function
               | [] -> (env, [], None, Pos.none)
               | ((pos, _) as e) :: _ ->
@@ -6719,7 +6663,7 @@ and is_num env t =
 and is_super_num env t =
   SubType.is_sub_type_for_union env (MakeType.num Reason.Rnone) t
 
-and unop ~is_func_arg ~array_ref_ctx p env uop te ty outer =
+and unop p env uop te ty outer =
   let make_result env te result_ty =
     (env, Tast.make_typed_expr p result_ty (T.Unop (uop, te)), result_ty)
   in
@@ -6805,34 +6749,6 @@ and unop ~is_func_arg ~array_ref_ctx p env uop te ty outer =
           MakeType.num (Reason.Rarith_ret_num (p, fst ty, Reason.Aonly))
       in
       make_result env te result_ty
-  | Ast_defs.Uref ->
-    if
-      Env.env_local_reactive env
-      && not (TypecheckerOptions.unsafe_rx (Env.get_tcopt env))
-    then
-      Errors.reference_in_rx p;
-
-    if array_ref_ctx <> NoArray then
-      match array_ref_ctx with
-      | ElementAccess -> Errors.binding_ref_to_array p (* &$x[0]; *)
-      | ElementAssignment -> Errors.binding_ref_in_array p (* $x[0] = &y; *)
-      | NoArray -> ()
-    else if is_func_arg (* Normal function calls, excludes e.g. isset(&x); *)
-    then
-      match snd te with
-      | T.Array_get _ ->
-        (* foo(&x[0]); *)
-        Errors.passing_array_cell_by_ref p
-      | _ ->
-        (* foo(&x); // permitted *)
-        ()
-    else
-      Errors.reference_expr p;
-
-    (* &$x; *)
-
-    (* any check omitted because would return the same anyway *)
-    make_result env te ty
   | Ast_defs.Usilence ->
     (* Silencing does not change the type *)
     (* any check omitted because would return the same anyway *)
@@ -8788,7 +8704,7 @@ and overload_function
   let (env, _tal, tcid, ty) =
     static_class_id ~check_constraints:false cpos env [] class_id
   in
-  let (env, _tel, _) = exprs ~is_func_arg:true env el in
+  let (env, _tel, _) = exprs env el in
   let (env, (fty, tal)) =
     class_get
       ~is_method:true

@@ -1,1 +1,2 @@
-No errors
+File "prim_by_reference.php", line 5, characters 34-34:
+Encountered unexpected token '&'. (Parsing[1002])

@@ -1611,9 +1611,7 @@ where
         let callconv = self.parse_call_convention_opt();
         let token = self.peek_token();
         let type_specifier = match token.kind() {
-            TokenKind::Variable | TokenKind::DotDotDot | TokenKind::Ampersand => {
-                S!(make_missing, self, self.pos())
-            }
+            TokenKind::Variable | TokenKind::DotDotDot => S!(make_missing, self, self.pos()),
             _ => {
                 self.parse_type_specifier(/* allow_var = */ false, /* allow_attr */ false)
             }
@@ -1634,7 +1632,7 @@ where
 
     fn parse_decorated_variable_opt(&mut self) -> S::R {
         match self.peek_token_kind() {
-            TokenKind::DotDotDot | TokenKind::Ampersand => self.parse_decorated_variable(),
+            TokenKind::DotDotDot => self.parse_decorated_variable(),
             _ => self.require_variable(),
         }
     }
@@ -1651,7 +1649,7 @@ where
         // an error in a later pass.
         let decorator = self.fetch_token();
         let variable = match self.peek_token_kind() {
-            TokenKind::DotDotDot | TokenKind::Ampersand => self.parse_decorated_variable(),
+            TokenKind::DotDotDot => self.parse_decorated_variable(),
             _ => self.require_variable(),
         };
         S!(make_decorated_expression, self, decorator, variable)

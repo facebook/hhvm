@@ -17,16 +17,16 @@
        (compound_statement 19
         ((() { 1 ((end_of_line 1)))
          (list 13
-          ((expression_statement 13
-            ((binary_expression 12
+          ((expression_statement 6
+            ((binary_expression 6
               ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
-               (() = 1 ((whitespace 1)))
-               (binary_expression 7
-                ((prefix_unary_expression 3
-                  ((() & 1 ())
-                   (variable 2 ((() variable 2 ((whitespace 1)))))))
-                 (() + 1 ((whitespace 1)))
-                 (literal 1 ((() decimal_literal 1 ())))))))
+               (() = 1 ((whitespace 1))) (() & 1 ())))
+             (missing 0 ())))
+           (expression_statement 7
+            ((binary_expression 6
+              ((variable 2 ((() variable 2 ((whitespace 1)))))
+               (() + 1 ((whitespace 1)))
+               (literal 1 ((() decimal_literal 1 ())))))
              (() ";" 1 ((end_of_line 1)))))))
          (() } 1 ((end_of_line 1)))))))
      (end_of_file 0 ((() end_of_file 0 ()))))))))

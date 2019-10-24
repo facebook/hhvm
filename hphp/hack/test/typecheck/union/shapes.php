@@ -24,7 +24,7 @@ function test(bool $b, s $s, t $t, sdots $sdots, tdots $tdots): void {
     $x = $s;
   } else {
     $x = $tdots;
-    Shapes::removeKey(&$x, 't');
+    Shapes::removeKey(inout $x, 't');
   }
   hh_show($x);
 

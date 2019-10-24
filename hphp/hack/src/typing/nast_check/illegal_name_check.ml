@@ -37,31 +37,8 @@ let handler =
           error_if_is_named_class tc.c_tconst_name);
       List.iter c.c_consts ~f:(fun cc -> error_if_is_named_class cc.cc_id)
 
-    method! at_expr env (pos, e) =
+    method! at_expr env (_, e) =
       match e with
-      | Binop (Ast_defs.Eq None, e1, e2) ->
-        begin
-          match (e1, e2) with
-          | ((_, Lvar (_, x)), (_, Unop (Ast_defs.Uref, _)))
-            when Local_id.to_string x |> SN.Superglobals.is_superglobal
-                 || SN.Superglobals.globals = Local_id.to_string x ->
-            Errors.illegal_by_ref_expr
-              pos
-              ("Superglobal " ^ Local_id.to_string x)
-              "bound"
-          | _ -> ()
-        end
-      | Unop (Ast_defs.Uref, e) ->
-        let ref_expr ident = Errors.illegal_by_ref_expr pos ident "passed" in
-        begin
-          match snd e with
-          | Lvar (_, x) when Local_id.to_string x = SN.SpecialIdents.this ->
-            ref_expr SN.SpecialIdents.this
-          | Lvar (_, x)
-            when Local_id.to_string x = SN.SpecialIdents.dollardollar ->
-            ref_expr SN.SpecialIdents.dollardollar
-          | _ -> ()
-        end
       | Id (pos, const) ->
         let const = add_ns const in
         let ck = env.class_kind in

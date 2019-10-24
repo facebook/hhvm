@@ -1,6 +1,4 @@
-File "pass_by_ref_annotation5.php", line 8, characters 14-14:
-Only variables can be used as references (Parsing[1002])
-File "pass_by_ref_annotation5.php", line 7, characters 7-12:
-$this cannot be passed by reference (NastCheck[3067])
-File "pass_by_ref_annotation5.php", line 8, characters 13-15:
-$$ cannot be passed by reference (NastCheck[3067])
+File "pass_by_ref_annotation5.php", line 3, characters 12-12:
+A type specifier is expected here. (Parsing[1002])
+File "pass_by_ref_annotation5.php", line 3, characters 12-12:
+Encountered unexpected text '&', was expecting a type hint. (Parsing[1002])

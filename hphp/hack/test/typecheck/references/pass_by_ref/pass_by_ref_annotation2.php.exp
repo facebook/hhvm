@@ -1,74 +1,88 @@
-File "pass_by_ref_annotation2.php", line 23, characters 12-14:
-Arguments can not be passed by reference to dynamic function calls (NastCheck[3078])
-File "pass_by_ref_annotation2.php", line 24, characters 16-18:
-Arguments can not be passed by reference to dynamic function calls (NastCheck[3078])
-File "pass_by_ref_annotation2.php", line 25, characters 20-22:
-Arguments can not be passed by reference to dynamic function calls (NastCheck[3078])
-File "pass_by_ref_annotation2.php", line 12, characters 10-12:
-This argument should be annotated with & (Typing[4168])
-  File "pass_by_ref_annotation2.php", line 3, characters 30-31:
-  Because this parameter is passed by reference
-File "pass_by_ref_annotation2.php", line 14, characters 11-12:
-This argument should be annotated with & (Typing[4168])
-  File "pass_by_ref_annotation2.php", line 3, characters 30-31:
-  Because this parameter is passed by reference
-File "pass_by_ref_annotation2.php", line 15, characters 11-12:
-This argument should be annotated with & (Typing[4168])
-  File "pass_by_ref_annotation2.php", line 3, characters 30-31:
-  Because this parameter is passed by reference
-File "pass_by_ref_annotation2.php", line 15, characters 15-17:
-This argument should not be annotated with & (Typing[4181])
-  File "pass_by_ref_annotation2.php", line 3, characters 39-40:
-  Because this parameter is passed by value
-File "pass_by_ref_annotation2.php", line 16, characters 7-9:
-This argument should not be annotated with & (Typing[4181])
-  File "pass_by_ref_annotation2.php", line 3, characters 18-19:
-  Because this parameter is passed by value
-File "pass_by_ref_annotation2.php", line 16, characters 12-13:
-This argument should be annotated with & (Typing[4168])
-  File "pass_by_ref_annotation2.php", line 3, characters 30-31:
-  Because this parameter is passed by reference
-File "pass_by_ref_annotation2.php", line 17, characters 7-9:
-This argument should not be annotated with & (Typing[4181])
-  File "pass_by_ref_annotation2.php", line 3, characters 18-19:
-  Because this parameter is passed by value
-File "pass_by_ref_annotation2.php", line 17, characters 12-13:
-This argument should be annotated with & (Typing[4168])
-  File "pass_by_ref_annotation2.php", line 3, characters 30-31:
-  Because this parameter is passed by reference
-File "pass_by_ref_annotation2.php", line 17, characters 16-18:
-This argument should not be annotated with & (Typing[4181])
-  File "pass_by_ref_annotation2.php", line 3, characters 39-40:
-  Because this parameter is passed by value
-File "pass_by_ref_annotation2.php", line 19, characters 16-18:
-This argument should not be annotated with & (Typing[4181])
-  File "pass_by_ref_annotation2.php", line 3, characters 39-40:
-  Because this parameter is passed by value
-File "pass_by_ref_annotation2.php", line 20, characters 7-9:
-This argument should not be annotated with & (Typing[4181])
-  File "pass_by_ref_annotation2.php", line 3, characters 18-19:
-  Because this parameter is passed by value
-File "pass_by_ref_annotation2.php", line 21, characters 7-9:
-This argument should not be annotated with & (Typing[4181])
-  File "pass_by_ref_annotation2.php", line 3, characters 18-19:
-  Because this parameter is passed by value
-File "pass_by_ref_annotation2.php", line 21, characters 17-19:
-This argument should not be annotated with & (Typing[4181])
-  File "pass_by_ref_annotation2.php", line 3, characters 39-40:
-  Because this parameter is passed by value
-File "pass_by_ref_annotation2.php", line 23, characters 12-14:
-This argument should not be annotated with & (Typing[4181])
-  File "pass_by_ref_annotation2.php", line 3, characters 18-19:
-  Because this parameter is passed by value
-File "pass_by_ref_annotation2.php", line 23, characters 17-18:
-This argument should be annotated with & (Typing[4168])
-  File "pass_by_ref_annotation2.php", line 3, characters 30-31:
-  Because this parameter is passed by reference
-File "pass_by_ref_annotation2.php", line 25, characters 16-17:
-This argument should be annotated with & (Typing[4168])
-  File "pass_by_ref_annotation2.php", line 3, characters 30-31:
-  Because this parameter is passed by reference
-File "pass_by_ref_annotation2.php", line 25, characters 20-22:
-This argument should not be annotated with & (Typing[4181])
-  File "pass_by_ref_annotation2.php", line 3, characters 39-40:
-  Because this parameter is passed by value
+File "pass_by_ref_annotation2.php", line 3, characters 28-28:
+Encountered unexpected token '&'. (Parsing[1002])
+File "pass_by_ref_annotation2.php", line 11, characters 11-11:
+Unbound name: & (a global constant) (Naming[2049])
+File "pass_by_ref_annotation2.php", line 11, characters 14-14:
+Unbound name: , (a global constant) (Naming[2049])
+File "pass_by_ref_annotation2.php", line 15, characters 15-15:
+Unbound name: & (a global constant) (Naming[2049])
+File "pass_by_ref_annotation2.php", line 16, characters 7-7:
+Unbound name: & (a global constant) (Naming[2049])
+File "pass_by_ref_annotation2.php", line 16, characters 10-10:
+Unbound name: , (a global constant) (Naming[2049])
+File "pass_by_ref_annotation2.php", line 16, characters 14-14:
+Unbound name: , (a global constant) (Naming[2049])
+File "pass_by_ref_annotation2.php", line 17, characters 7-7:
+Unbound name: & (a global constant) (Naming[2049])
+File "pass_by_ref_annotation2.php", line 17, characters 10-10:
+Unbound name: , (a global constant) (Naming[2049])
+File "pass_by_ref_annotation2.php", line 17, characters 14-14:
+Unbound name: , (a global constant) (Naming[2049])
+File "pass_by_ref_annotation2.php", line 18, characters 11-11:
+Unbound name: & (a global constant) (Naming[2049])
+File "pass_by_ref_annotation2.php", line 18, characters 14-14:
+Unbound name: , (a global constant) (Naming[2049])
+File "pass_by_ref_annotation2.php", line 19, characters 11-11:
+Unbound name: & (a global constant) (Naming[2049])
+File "pass_by_ref_annotation2.php", line 19, characters 14-14:
+Unbound name: , (a global constant) (Naming[2049])
+File "pass_by_ref_annotation2.php", line 20, characters 7-7:
+Unbound name: & (a global constant) (Naming[2049])
+File "pass_by_ref_annotation2.php", line 20, characters 10-10:
+Unbound name: , (a global constant) (Naming[2049])
+File "pass_by_ref_annotation2.php", line 20, characters 15-15:
+Unbound name: , (a global constant) (Naming[2049])
+File "pass_by_ref_annotation2.php", line 21, characters 7-7:
+Unbound name: & (a global constant) (Naming[2049])
+File "pass_by_ref_annotation2.php", line 21, characters 10-10:
+Unbound name: , (a global constant) (Naming[2049])
+File "pass_by_ref_annotation2.php", line 21, characters 15-15:
+Unbound name: , (a global constant) (Naming[2049])
+File "pass_by_ref_annotation2.php", line 23, characters 12-12:
+Unbound name: & (a global constant) (Naming[2049])
+File "pass_by_ref_annotation2.php", line 23, characters 15-15:
+Unbound name: , (a global constant) (Naming[2049])
+File "pass_by_ref_annotation2.php", line 23, characters 19-19:
+Unbound name: , (a global constant) (Naming[2049])
+File "pass_by_ref_annotation2.php", line 24, characters 16-16:
+Unbound name: & (a global constant) (Naming[2049])
+File "pass_by_ref_annotation2.php", line 24, characters 19-19:
+Unbound name: , (a global constant) (Naming[2049])
+File "pass_by_ref_annotation2.php", line 25, characters 20-20:
+Unbound name: & (a global constant) (Naming[2049])
+File "pass_by_ref_annotation2.php", line 11, characters 3-11:
+Too few arguments (required 3 but got 2) (Typing[4104])
+File "pass_by_ref_annotation2.php", line 3, characters 10-12:
+Definition is here
+File "pass_by_ref_annotation2.php", line 16, characters 3-7:
+Too few arguments (required 3 but got 1) (Typing[4104])
+File "pass_by_ref_annotation2.php", line 3, characters 10-12:
+Definition is here
+File "pass_by_ref_annotation2.php", line 17, characters 3-7:
+Too few arguments (required 3 but got 1) (Typing[4104])
+File "pass_by_ref_annotation2.php", line 3, characters 10-12:
+Definition is here
+File "pass_by_ref_annotation2.php", line 18, characters 3-11:
+Too few arguments (required 3 but got 2) (Typing[4104])
+File "pass_by_ref_annotation2.php", line 3, characters 10-12:
+Definition is here
+File "pass_by_ref_annotation2.php", line 19, characters 3-11:
+Too few arguments (required 3 but got 2) (Typing[4104])
+File "pass_by_ref_annotation2.php", line 3, characters 10-12:
+Definition is here
+File "pass_by_ref_annotation2.php", line 20, characters 3-7:
+Too few arguments (required 3 but got 1) (Typing[4104])
+File "pass_by_ref_annotation2.php", line 3, characters 10-12:
+Definition is here
+File "pass_by_ref_annotation2.php", line 21, characters 3-7:
+Too few arguments (required 3 but got 1) (Typing[4104])
+File "pass_by_ref_annotation2.php", line 3, characters 10-12:
+Definition is here
+File "pass_by_ref_annotation2.php", line 23, characters 3-12:
+Too few arguments (required 3 but got 1) (Typing[4104])
+File "pass_by_ref_annotation2.php", line 3, characters 10-12:
+Definition is here
+File "pass_by_ref_annotation2.php", line 24, characters 3-16:
+Too few arguments (required 3 but got 2) (Typing[4104])
+File "pass_by_ref_annotation2.php", line 3, characters 10-12:
+Definition is here

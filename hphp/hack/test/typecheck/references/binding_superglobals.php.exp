@@ -1,2 +1,2 @@
-File "binding_superglobals.php", line 5, characters 11-12:
-References are only allowed as function call arguments (Parsing[1002])
+File "binding_superglobals.php", line 5, characters 12-12:
+An expression is expected here. (Parsing[1002])

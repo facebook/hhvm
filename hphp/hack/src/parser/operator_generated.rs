@@ -29,7 +29,6 @@ pub enum Operator {
     MemberSelectionOperator,
     NewOperator,
     FunctionCallOperator,
-    ReferenceOperator,
     CloneOperator,
     PostfixIncrementOperator,
     PostfixDecrementOperator,

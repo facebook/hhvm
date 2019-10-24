@@ -119,9 +119,6 @@ let declvar_visitor explicit_use_set_opt is_in_static_method is_closure_body =
           state :=
             add_local ~barethis:Bare_this !state (pos, Local_id.get_name id)
         | _ -> super#on_expr () prop_e)
-      | Aast.Unop (Ast_defs.Uref, (_, Aast.Lvar (_, id)))
-        when Local_id.get_name id = "$this" ->
-        state := with_this Bare_this_as_ref !state
       | Aast.Binop (binop, e1, e2) ->
         (match (binop, e2) with
         | (Ast_defs.Eq _, (_, Aast.Await _))
@@ -182,9 +179,6 @@ let declvar_visitor explicit_use_set_opt is_in_static_method is_closure_body =
           (* Only add $this to locals if it's bare *)
           | (_, Aast.Lvar (_, id)) when Local_id.get_name id = "$this" ->
             state := with_this barethis !state
-          | (_, Aast.Unop (Ast_defs.Uref, (_, Aast.Lvar (pos, id)))) ->
-            state :=
-              add_local ~barethis:Bare_this !state (pos, Local_id.get_name id)
           | _ -> self#on_expr () e
         in
         (match snd func_e with

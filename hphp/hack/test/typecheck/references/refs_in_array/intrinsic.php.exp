@@ -1,2 +1,2 @@
-File "intrinsic.php", line 5, characters 12-13:
-Collection element cannot be marked as reference (Parsing[1002])
+File "intrinsic.php", line 5, characters 13-13:
+An expression is expected here. (Parsing[1002])

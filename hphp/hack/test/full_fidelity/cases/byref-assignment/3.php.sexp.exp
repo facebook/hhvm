@@ -17,32 +17,34 @@
        (compound_statement 45
         ((() { 1 ((end_of_line 1)))
          (list 39
-          ((expression_statement 39
-            ((binary_expression 38
+          ((expression_statement 22
+            ((binary_expression 22
               ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
                (() = 1 ((whitespace 1)))
-               (conditional_expression 33
+               (conditional_expression 17
                 ((variable 2 ((() variable 2 ((whitespace 1)))))
                  (() ? 1 ((whitespace 1)))
-                 (binary_expression 12
+                 (binary_expression 6
                   ((variable 2 ((() variable 2 ((whitespace 1)))))
-                   (() = 1 ((whitespace 1)))
-                   (binary_expression 7
-                    ((prefix_unary_expression 3
-                      ((() & 1 ())
-                       (variable 2 ((() variable 2 ((whitespace 1)))))))
-                     (() + 1 ((whitespace 1)))
-                     (literal 1 ((() decimal_literal 1 ((whitespace 1)))))))))
-                 (() : 1 ((whitespace 1)))
-                 (binary_expression 13
+                   (() = 1 ((whitespace 1))) (() & 1 ())))
+                 (missing 0 ())
+                 (binary_expression 6
                   ((variable 2 ((() variable 2 ((whitespace 1)))))
-                   (() = 1 ((whitespace 1)))
-                   (binary_expression 8
-                    ((prefix_unary_expression 4
-                      ((() & 1 ())
-                       (variable 3 ((() variable 3 ((whitespace 1)))))))
-                     (() * 1 ((whitespace 1)))
-                     (literal 1 ((() decimal_literal 1 ())))))))))))
+                   (() + 1 ((whitespace 1)))
+                   (literal 1 ((() decimal_literal 1 ((whitespace 1)))))))))))
+             (missing 0 ())))
+           (expression_statement 1
+            ((() : 1 ((whitespace 1))) (missing 0 ())))
+           (expression_statement 6
+            ((binary_expression 6
+              ((variable 2 ((() variable 2 ((whitespace 1)))))
+               (() = 1 ((whitespace 1))) (() & 1 ())))
+             (missing 0 ())))
+           (expression_statement 8
+            ((binary_expression 7
+              ((variable 3 ((() variable 3 ((whitespace 1)))))
+               (() * 1 ((whitespace 1)))
+               (literal 1 ((() decimal_literal 1 ())))))
              (() ";" 1 ((end_of_line 1)))))))
          (() } 1 ((end_of_line 1)))))))
      (end_of_file 0 ((() end_of_file 0 ()))))))))

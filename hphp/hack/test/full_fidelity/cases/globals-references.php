@@ -3,5 +3,5 @@
 
 function f($_) {}
 function g() {
-  f(&$GLOBALS);
+  f(inout $GLOBALS);
 }

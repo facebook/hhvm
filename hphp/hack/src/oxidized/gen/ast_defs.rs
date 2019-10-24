@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2709da57c03569cf6378c43557a82145>>
+// @generated SignedSource<<cec038d0cef9bcbb40aca0c49a65e2f4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -114,7 +114,6 @@ pub enum Uop {
     Udecr,
     Upincr,
     Updecr,
-    Uref,
     Usilence,
 }
 

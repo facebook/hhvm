@@ -25,7 +25,6 @@ module type Sig = sig
   | MemberSelectionOperator
   | NewOperator
   | FunctionCallOperator
-  | ReferenceOperator
   | CloneOperator
   | PostfixIncrementOperator
   | PostfixDecrementOperator
@@ -102,7 +101,6 @@ module Impl : Sig = struct
   | MemberSelectionOperator
   | NewOperator
   | FunctionCallOperator
-  | ReferenceOperator
   | CloneOperator
   | PostfixIncrementOperator
   | PostfixDecrementOperator

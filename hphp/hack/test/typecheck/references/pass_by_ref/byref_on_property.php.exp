@@ -1,8 +1,8 @@
-File "byref_on_property.php", line 17, characters 22-31:
-Only variables can be used as references (Parsing[1002])
-File "byref_on_property.php", line 19, characters 22-32:
-Only variables can be used as references (Parsing[1002])
-File "byref_on_property.php", line 17, characters 21-32:
-Properties cannot be passed by reference (NastCheck[3079])
-File "byref_on_property.php", line 19, characters 21-33:
-Properties cannot be passed by reference (NastCheck[3079])
+File "byref_on_property.php", line 8, characters 32-32:
+Encountered unexpected token '&'. (Parsing[1002])
+File "byref_on_property.php", line 15, characters 21-21:
+Unbound name: & (a global constant) (Naming[2049])
+File "byref_on_property.php", line 17, characters 21-21:
+Unbound name: & (a global constant) (Naming[2049])
+File "byref_on_property.php", line 19, characters 21-21:
+Unbound name: & (a global constant) (Naming[2049])

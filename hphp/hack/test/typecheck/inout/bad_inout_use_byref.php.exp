@@ -1,10 +1,6 @@
-File "bad_inout_use_byref.php", line 7, characters 5-12:
-Cannot use both 'inout' and '&' on the same argument. (Parsing[1002])
-File "bad_inout_use_byref.php", line 7, characters 11-12:
-& is not allowed in write context (Parsing[1002])
-File "bad_inout_use_byref.php", line 7, characters 11-13:
+File "bad_inout_use_byref.php", line 7, characters 12-12:
+An expression is expected here. (Parsing[1002])
+File "bad_inout_use_byref.php", line 7, characters 11-11:
 Arguments for inout parameters must be local variables or simple subscript expressions on vecs, dicts, keysets, or arrays (NastCheck[3050])
-File "bad_inout_use_byref.php", line 7, characters 11-13:
-References are only allowed as function call arguments (Typing[4299])
-File "bad_inout_use_byref.php", line 7, characters 11-13:
-Cannot take references to array elements. (Typing[4225])
+File "bad_inout_use_byref.php", line 7, characters 11-11:
+Unbound name: & (a global constant) (Naming[2049])

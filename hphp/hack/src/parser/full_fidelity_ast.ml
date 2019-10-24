@@ -1720,7 +1720,6 @@ if there already is one, since that one will likely be better than this one. *)
           | Some TK.Tilde -> Unop (Utild, expr)
           | Some TK.Plus -> Unop (Uplus, expr)
           | Some TK.Minus -> Unop (Uminus, expr)
-          | Some TK.Ampersand -> Unop (Uref, expr)
           | Some TK.At ->
             if ParserOptions.disallow_silence env.parser_options then
               raise_parsing_error env (`Node operator) SyntaxError.no_silence;

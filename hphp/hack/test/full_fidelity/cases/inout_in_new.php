@@ -1,7 +1,7 @@
 <?hh // strict
 
 class Foo {
-  public function __construct(&$bar) {}
+  public function __construct(inout $bar) {}
 }
 
 function foo($bar) {

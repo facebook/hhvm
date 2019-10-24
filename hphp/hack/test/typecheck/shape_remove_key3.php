@@ -4,6 +4,6 @@
 
 function test(): string {
   $s = shape('x' => 4, 'y' => 'aaa');
-  Shapes::removeKey(&$s, 'x');
+  Shapes::removeKey(inout $s, 'x');
   return $s;
 }

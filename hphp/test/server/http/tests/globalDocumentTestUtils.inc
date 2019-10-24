@@ -6,7 +6,7 @@ function runTestWith404HealthCheck($testController, $customArgs = '', $repoArgs 
   try {
     $serverProc = $serverPort = $adminPort = null;
     $debugPort = false;
-    $serverProc = startServer(&$serverPort, &$adminPort, &$debugPort,
+    $serverProc = startServer(inout $serverPort, inout $adminPort, inout $debugPort,
                               __DIR__.'/..', __DIR__.'/../server_root',
                               $customArgs, null, $repoArgs, true);
     $testController($serverPort);

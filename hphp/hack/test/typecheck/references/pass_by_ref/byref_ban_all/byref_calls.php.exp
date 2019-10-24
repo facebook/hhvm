@@ -1,8 +1,10 @@
-File "byref_calls.php", line 22, characters 8-10:
-Arguments can not be passed by reference (NastCheck[3080])
-File "byref_calls.php", line 26, characters 16-18:
-Arguments can not be passed by reference (NastCheck[3080])
-File "byref_calls.php", line 28, characters 17-19:
-Arguments can not be passed by reference (NastCheck[3080])
-File "byref_calls.php", line 31, characters 21-23:
-Arguments can not be passed by reference (NastCheck[3080])
+File "byref_calls.php", line 4, characters 19-19:
+Encountered unexpected token '&'. (Parsing[1002])
+File "byref_calls.php", line 22, characters 8-8:
+Unbound name: & (a global constant) (Naming[2049])
+File "byref_calls.php", line 26, characters 16-16:
+Unbound name: & (a global constant) (Naming[2049])
+File "byref_calls.php", line 28, characters 17-17:
+Unbound name: & (a global constant) (Naming[2049])
+File "byref_calls.php", line 31, characters 21-21:
+Unbound name: & (a global constant) (Naming[2049])

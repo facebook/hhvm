@@ -17,18 +17,17 @@
        (compound_statement 20
         ((() { 1 ((end_of_line 1)))
          (list 14
-          ((expression_statement 14
-            ((binary_expression 13
+          ((expression_statement 6
+            ((binary_expression 6
               ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
-               (() = 1 ((whitespace 1)))
-               (binary_expression 8
-                ((prefix_unary_expression 4
-                  ((() & 1 ())
-                   (prefix_unary_expression 3
-                    ((() $ 1 ())
-                     (variable 2 ((() variable 2 ((whitespace 1)))))))))
-                 (() + 1 ((whitespace 1)))
-                 (literal 1 ((() decimal_literal 1 ())))))))
+               (() = 1 ((whitespace 1))) (() & 1 ())))
+             (missing 0 ())))
+           (expression_statement 8
+            ((binary_expression 7
+              ((prefix_unary_expression 3
+                ((() $ 1 ()) (variable 2 ((() variable 2 ((whitespace 1)))))))
+               (() + 1 ((whitespace 1)))
+               (literal 1 ((() decimal_literal 1 ())))))
              (() ";" 1 ((end_of_line 1)))))))
          (() } 1 ((end_of_line 1)))))))
      (function_declaration 43
@@ -42,24 +41,24 @@
        (compound_statement 23
         ((() { 1 ((end_of_line 1)))
          (list 17
-          ((expression_statement 17
-            ((binary_expression 16
+          ((expression_statement 6
+            ((binary_expression 6
               ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
-               (() = 1 ((whitespace 1)))
-               (binary_expression 11
-                ((prefix_unary_expression 7
-                  ((() & 1 ())
-                   (prefix_unary_expression 6
+               (() = 1 ((whitespace 1))) (() & 1 ())))
+             (missing 0 ())))
+           (expression_statement 11
+            ((binary_expression 10
+              ((prefix_unary_expression 6
+                ((() $ 1 ())
+                 (prefix_unary_expression 5
+                  ((() $ 1 ())
+                   (prefix_unary_expression 4
                     ((() $ 1 ())
-                     (prefix_unary_expression 5
+                     (prefix_unary_expression 3
                       ((() $ 1 ())
-                       (prefix_unary_expression 4
-                        ((() $ 1 ())
-                         (prefix_unary_expression 3
-                          ((() $ 1 ())
-                           (variable 2 ((() variable 2 ((whitespace 1)))))))))))))))
-                 (() + 1 ((whitespace 1)))
-                 (literal 1 ((() decimal_literal 1 ())))))))
+                       (variable 2 ((() variable 2 ((whitespace 1)))))))))))))
+               (() + 1 ((whitespace 1)))
+               (literal 1 ((() decimal_literal 1 ())))))
              (() ";" 1 ((end_of_line 1)))))))
          (() } 1 ((end_of_line 1)))))))
      (end_of_file 0 ((() end_of_file 0 ()))))))))

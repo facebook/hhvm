@@ -31,14 +31,13 @@ let make_operator
 
 let operators =
   [
-    make_operator "Dollar" Right 32 ();
-    make_operator "ScopeResolution" Left 31 ();
-    make_operator "Indexing" Left 30 ();
-    make_operator "NullSafeMemberSelection" Left 29 ();
-    make_operator "MemberSelection" Left 29 ();
-    make_operator "New" None 28 ();
-    make_operator "FunctionCall" Left 27 ();
-    make_operator "Reference" Right 26 ();
+    make_operator "Dollar" Right 31 ();
+    make_operator "ScopeResolution" Left 30 ();
+    make_operator "Indexing" Left 29 ();
+    make_operator "NullSafeMemberSelection" Left 28 ();
+    make_operator "MemberSelection" Left 28 ();
+    make_operator "New" None 27 ();
+    make_operator "FunctionCall" Left 26 ();
     make_operator "Clone" None 24 ();
     make_operator "PostfixIncrement" Right 23 ();
     make_operator "PostfixDecrement" Right 23 ();

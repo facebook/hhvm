@@ -81,13 +81,12 @@ impl Operator {
             PostfixIncrementOperator | PostfixDecrementOperator | AwaitOperator => 23,
             CloneOperator => 24,
             // value 25 is reserved for assignment that appear in expressions
-            ReferenceOperator => 26,
-            FunctionCallOperator => 27,
-            NewOperator => 28,
-            MemberSelectionOperator | NullSafeMemberSelectionOperator => 29,
-            IndexingOperator => 30,
-            ScopeResolutionOperator => 31,
-            DollarOperator => 32,
+            FunctionCallOperator => 26,
+            NewOperator => 27,
+            MemberSelectionOperator | NullSafeMemberSelectionOperator => 28,
+            IndexingOperator => 29,
+            ScopeResolutionOperator => 30,
+            DollarOperator => 31,
         }
     }
 
@@ -122,7 +121,7 @@ impl Operator {
                 => Assoc::LeftAssociative,
             | CoalesceOperator | CoalesceAssignmentOperator | LogicalNotOperator | NotOperator | CastOperator
             | DollarOperator | UnaryPlusOperator | UnaryMinusOperator  // TODO: Correct?
-            | ErrorControlOperator | ReferenceOperator // TODO: Correct?
+            | ErrorControlOperator // TODO: Correct?
             | PostfixIncrementOperator | PostfixDecrementOperator
             | PrefixIncrementOperator | PrefixDecrementOperator | ExponentOperator
             | AssignmentOperator | AdditionAssignmentOperator
@@ -147,7 +146,6 @@ impl Operator {
             TokenKind::Dollar => DollarOperator,
             TokenKind::Plus => UnaryPlusOperator,
             TokenKind::Minus => UnaryMinusOperator,
-            TokenKind::Ampersand => ReferenceOperator,
             TokenKind::At => ErrorControlOperator,
             TokenKind::New => NewOperator,
             TokenKind::Clone => CloneOperator,

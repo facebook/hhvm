@@ -893,7 +893,6 @@ and get_id_of_simple_lvar_opt v =
   | A.Lvar (pos, id) when Local_id.get_name id = SN.SpecialIdents.this ->
     Emit_fatal.raise_fatal_parse pos "Cannot re-assign $this"
   | A.Lvar (_, id)
-  | A.Unop (Ast_defs.Uref, (_, A.Lvar (_, id)))
     when not
            ( SN.Superglobals.is_superglobal (Local_id.get_name id)
            || Local_id.get_name id = SN.Superglobals.globals ) ->

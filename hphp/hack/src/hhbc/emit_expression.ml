@@ -117,10 +117,6 @@ module InoutLocals = struct
           add_inout id i acc
         else
           add_write id i acc
-      (* &$v *)
-      | A.Unop (Ast_defs.Uref, (_, A.Lvar (_, id))) ->
-        let acc = add_use id i acc in
-        add_write id i acc
       (* $v *)
       | A.Lvar (_, id) ->
         let acc = add_use id i acc in
@@ -3440,31 +3436,6 @@ and emit_args_and_inout_setters env (args : Tast.expr list) =
     (* unsupported inout *)
     | A.Callconv (Ast_defs.Pinout, _) ->
       failwith "emit_arg_and_inout_setter: Unexpected inout expression type"
-    (* by-ref annotated argument *)
-    | A.Unop (Ast_defs.Uref, expr) ->
-      let pos = fst @@ fst expr in
-      ( begin
-          match snd expr with
-          (* passed by reference *)
-          | A.Array_get _ ->
-            Emit_fatal.raise_fatal_parse
-              pos
-              "references of subscript expressions should not parse"
-          | A.Class_get _ ->
-            Emit_fatal.raise_fatal_parse
-              pos
-              "references of static properties should not parse"
-          | A.Lvar id ->
-            emit_pos_then pos
-            @@ emit_local ~notice:Notice ~need_ref:true env id
-          | A.Obj_get _ ->
-            Emit_fatal.raise_fatal_parse
-              pos
-              "references of instance properties should not parse"
-          (* passed by value *)
-          | _ -> emit_expr env expr
-        end,
-        empty )
     (* regular argument *)
     | _ -> (emit_expr env arg, empty)
   in
@@ -4376,7 +4347,6 @@ and emit_lval_op_list
     (lhs, rest)
 
 and expr_starts_with_ref = function
-  | (_, A.Unop (Ast_defs.Uref, _)) -> true
   | _ -> false
 
 (* Emit code for an l-value operation *)
@@ -4432,17 +4402,6 @@ and emit_lval_op
               instr_pushl temp;
             ],
           1 )
-      | Some
-          ( (pos, _),
-            A.Unop
-              ( Ast_defs.Uref,
-                ( (_, A.Obj_get (_, _, Ast_defs.OG_nullsafe))
-                | ( _,
-                    A.Array_get ((_, A.Obj_get (_, _, Ast_defs.OG_nullsafe)), _)
-                  ) ) ) ) ->
-        Emit_fatal.raise_fatal_runtime
-          pos
-          "?-> is not allowed in write context"
       | Some e -> (emit_expr env e, 1)
     in
     emit_lval_op_nonlist
@@ -4683,7 +4642,6 @@ and from_unop op =
   | Ast_defs.Udecr
   | Ast_defs.Upincr
   | Ast_defs.Updecr
-  | Ast_defs.Uref
   | Ast_defs.Usilence ->
     failwith "this unary operation cannot be translated"
 
@@ -4714,7 +4672,6 @@ and emit_unop env pos op e =
   | Ast_defs.Upincr
   | Ast_defs.Updecr ->
     emit_lval_op env pos (LValOp.IncDec (unop_to_incdec_op op)) e None
-  | Ast_defs.Uref -> failwith "Ast_defs.Uref is used only for argument passing"
   | Ast_defs.Usilence ->
     Local.scope
     @@ fun () ->

@@ -981,7 +981,6 @@ and string_of_uop = function
   | Ast_defs.Uminus -> "-"
   | Ast_defs.Uincr -> "++"
   | Ast_defs.Udecr -> "--"
-  | Ast_defs.Uref -> "&"
   | Ast_defs.Usilence -> "@"
   | Ast_defs.Upincr
   | Ast_defs.Updecr ->

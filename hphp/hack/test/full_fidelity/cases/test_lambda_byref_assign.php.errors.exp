@@ -1,28 +1,21 @@
-(3,6)-(3,35) References are only allowed as function call arguments
-(3,7)-(3,35) lambda_expression is not allowed in write context
-(3,7)-(3,35) Only variables can be used as references
-(4,6)-(4,21) References are only allowed as function call arguments
-(4,7)-(4,21) ?-> operator is not allowed in write context
-(4,7)-(4,21) Only variables can be used as references
-(5,6)-(5,8) References are only allowed as function call arguments
-(6,6)-(6,15) References are only allowed as function call arguments
-(6,7)-(6,15) Only variables can be used as references
-(7,6)-(7,16) References are only allowed as function call arguments
-(7,7)-(7,16) Only variables can be used as references
-(8,6)-(8,18) References are only allowed as function call arguments
-(8,7)-(8,18) Only variables can be used as references
-(9,6)-(9,13) References are only allowed as function call arguments
-(9,7)-(9,13) Only variables can be used as references
-(10,6)-(10,13) References are only allowed as function call arguments
-(11,6)-(11,24) References are only allowed as function call arguments
-(11,7)-(11,24) Only variables can be used as references
-(12,6)-(12,9) References are only allowed as function call arguments
-(13,6)-(13,13) References are only allowed as function call arguments
-(13,7)-(13,13) Only variables can be used as references
-(14,6)-(14,13) References are only allowed as function call arguments
-(15,6)-(15,19) References are only allowed as function call arguments
-(15,8)-(15,18) Only variables can be used as references
-(16,6)-(16,64) References are only allowed as function call arguments
-(16,8)-(16,63) Only variables can be used as references
-(17,6)-(17,46) References are only allowed as function call arguments
-(17,8)-(17,45) Only variables can be used as references
+(3,7)-(3,7) An expression is expected here.
+(3,10)-(3,10) A semicolon (';') is expected here.
+(3,10)-(3,21) Use of the '{}' subscript operator is deprecated;  use '[]' instead.
+(3,14)-(3,14) An expression is expected here.
+(3,22)-(3,22) A right brace ('}') is expected here.
+(3,36)-(3,36) An expression is expected here.
+(4,7)-(4,7) An expression is expected here.
+(5,7)-(5,7) An expression is expected here.
+(5,7)-(5,9) Encountered unexpected token '$x'.
+(6,7)-(6,7) An expression is expected here.
+(7,7)-(7,7) An expression is expected here.
+(8,7)-(8,7) An expression is expected here.
+(9,7)-(9,7) An expression is expected here.
+(10,7)-(10,7) An expression is expected here.
+(11,7)-(11,7) An expression is expected here.
+(12,7)-(12,7) An expression is expected here.
+(13,7)-(13,7) An expression is expected here.
+(14,7)-(14,7) An expression is expected here.
+(15,7)-(15,7) An expression is expected here.
+(16,7)-(16,7) An expression is expected here.
+(17,7)-(17,7) An expression is expected here.

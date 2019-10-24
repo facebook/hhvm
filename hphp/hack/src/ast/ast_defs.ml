@@ -93,7 +93,6 @@ and uop =
   | Udecr
   | Upincr
   | Updecr
-  | Uref
   | Usilence
 [@@deriving
   show { with_path = false },

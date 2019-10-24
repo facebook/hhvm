@@ -1,9 +1,5 @@
 (3,20)-(3,37) A variadic parameter ('...') cannot have a modifier that changes the calling convention, like 'inout'.
 (5,29)-(5,34) An 'inout' parameter must not have a default value.
-(11,12)-(11,37) Functions may not use both reference and inout parameters
-(11,22)-(11,37) An 'inout' parameter cannot be passed by reference ('&').
-(15,22)-(15,36) A variadic parameter ('...') cannot have a modifier that changes the calling convention, like 'inout'.
-(34,5)-(34,13) Cannot use both 'inout' and '&' on the same argument.
-(34,11)-(34,13) & is not allowed in write context
-(36,23)-(36,30) Parameters may not be marked inout on async functions
-(37,15)-(37,22) Parameters may not be marked inout on async functions
+(13,22)-(13,36) A variadic parameter ('...') cannot have a modifier that changes the calling convention, like 'inout'.
+(33,23)-(33,30) Parameters may not be marked inout on async functions
+(34,15)-(34,22) Parameters may not be marked inout on async functions

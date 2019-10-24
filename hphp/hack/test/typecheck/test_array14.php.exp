@@ -1,1 +1,2 @@
-No errors
+File "test_array14.php", line 12, characters 26-26:
+Encountered unexpected token '&'. (Parsing[1002])

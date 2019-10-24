@@ -1,5 +1,5 @@
-((script 79
-  ((list 79
+((script 75
+  ((list 75
     ((markup_section 4
       ((missing 0 ()) (() markup 0 ())
        (markup_suffix 4
@@ -7,41 +7,35 @@
          (() name 2
           ((whitespace 1) (single_line_comment 10) (end_of_line 1)))))
        (missing 0 ())))
-     (function_declaration 62
+     (function_declaration 58
       ((missing 0 ())
        (function_declaration_header 12
         ((missing 0 ()) (((end_of_line 1)) function 8 ((whitespace 1)))
          (() name 1 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
          (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
          (missing 0 ())))
-       (compound_statement 49
+       (compound_statement 45
         ((() { 1 ((end_of_line 1)))
-         (list 43
-          ((expression_statement 20
-            ((function_call_expression 19
+         (list 39
+          ((expression_statement 18
+            ((function_call_expression 17
               ((((whitespace 2)) name 1 ()) (missing 0 ()) (() "(" 1 ())
-               (list 16
-                ((list_item 16
-                  ((prefix_unary_expression 16
-                    ((() & 1 ())
-                     (subscript_expression 15
-                      ((variable 8 ((() variable 8 ()))) (() [ 1 ())
-                       (literal 5 ((() single_quoted_string_literal 5 ())))
-                       (() ] 1 ())))))
+               (list 14
+                ((list_item 14
+                  ((decorated_expression 14
+                    ((() inout 5 ((whitespace 1)))
+                     (variable 8 ((() variable 8 ())))))
                    (missing 0 ())))))
                (() ")" 1 ())))
              (() ";" 1 ((end_of_line 1)))))
-           (expression_statement 20
-            ((function_call_expression 19
+           (expression_statement 18
+            ((function_call_expression 17
               ((((whitespace 2)) name 1 ()) (missing 0 ()) (() "(" 1 ())
-               (list 16
-                ((list_item 16
-                  ((prefix_unary_expression 16
-                    ((() & 1 ())
-                     (subscript_expression 15
-                      ((variable 8 ((() variable 8 ()))) (() [ 1 ())
-                       (literal 5 ((() single_quoted_string_literal 5 ())))
-                       (() ] 1 ())))))
+               (list 14
+                ((list_item 14
+                  ((decorated_expression 14
+                    ((() inout 5 ((whitespace 1)))
+                     (variable 8 ((() variable 8 ())))))
                    (missing 0 ())))))
                (() ")" 1 ())))
              (() ";" 1 ((end_of_line 1)))))))

@@ -9,7 +9,6 @@
 
 open Core_kernel
 open Aast
-open Nast_check_env
 module SN = Naming_special_names
 
 let check_param _env params p user_attributes f_type name =
@@ -49,19 +48,6 @@ let is_dynamic_call func_expr =
   (* everything else *)
   | _ -> true
 
-let check_call_expr env func_expr func_args =
-  List.iter func_args (fun (arg_pos, arg) ->
-      match arg with
-      | Unop (Ast_defs.Uref, _)
-        when TypecheckerOptions.disallow_byref_calls env.tcopt ->
-        Errors.byref_call arg_pos
-      | Unop (Ast_defs.Uref, (_, (Class_get _ | Obj_get _))) ->
-        Errors.byref_on_property arg_pos
-      | Unop (Ast_defs.Uref, _) when is_dynamic_call func_expr ->
-        if TypecheckerOptions.disallow_byref_dynamic_calls env.tcopt then
-          Errors.byref_dynamic_call arg_pos
-      | _ -> ())
-
 let check_callconv_expr e =
   let rec check_callconv_expr_helper e1 =
     match snd e1 with
@@ -89,10 +75,8 @@ let handler =
       let f_type = m.m_fun_kind in
       check_param env m.m_params p m.m_user_attributes f_type name
 
-    method! at_expr env (_, e) =
+    method! at_expr _ (_, e) =
       match e with
-      | Call (_, (_, func_expr), _, func_args, _) ->
-        check_call_expr env func_expr func_args
       | Callconv (_, e) -> check_callconv_expr e
       | _ -> ()
   end

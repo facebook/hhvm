@@ -1,6 +1,6 @@
 <?hh // partial
 
 function f() {
-  x(&$_SERVER['foo']);
-  y(&$GLOBALS['bar']);
+  x(inout $_SERVER);
+  y(inout $GLOBALS);
 }

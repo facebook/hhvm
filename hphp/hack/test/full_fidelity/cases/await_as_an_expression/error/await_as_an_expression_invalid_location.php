@@ -38,5 +38,4 @@ async function foo(): Awaitable<void> {
   ++$a[(await genx())];
   --$a[(await genx())];
   foo(inout (await genx()));
-  foo(& $a[(await genx())]);
 }

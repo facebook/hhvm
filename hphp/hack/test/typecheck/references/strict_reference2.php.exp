@@ -1,2 +1,2 @@
-File "strict_reference2.php", line 4, characters 14-15:
-Collection element cannot be marked as reference (Parsing[1002])
+File "strict_reference2.php", line 4, characters 15-15:
+An expression is expected here. (Parsing[1002])

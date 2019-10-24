@@ -1,5 +1,5 @@
-((script 950
-  ((list 950
+((script 867
+  ((list 867
     ((markup_section 4
       ((missing 0 ()) (() markup 0 ())
        (markup_suffix 4
@@ -106,31 +106,6 @@
        (compound_statement 2
         ((() { 1 ()) (missing 0 ())
          (() } 1 ((whitespace 1) (single_line_comment 11) (end_of_line 1)))))))
-     (function_declaration 47
-      ((missing 0 ())
-       (function_declaration_header 44
-        ((missing 0 ()) (((end_of_line 1)) function 8 ((whitespace 1)))
-         (() name 1 ()) (missing 0 ()) (() "(" 1 ())
-         (list 26
-          ((list_item 9
-            ((parameter_declaration 8
-              ((missing 0 ()) (missing 0 ()) (missing 0 ())
-               (simple_type_specifier 5 ((() mixed 5 ((whitespace 1)))))
-               (() variable 2 ()) (missing 0 ())))
-             (() , 1 ((whitespace 1)))))
-           (list_item 16
-            ((parameter_declaration 16
-              ((missing 0 ()) (missing 0 ()) (() inout 5 ((whitespace 1)))
-               (simple_type_specifier 4 ((() bool 4 ((whitespace 1)))))
-               (decorated_expression 5 ((() & 1 ()) (() variable 4 ())))
-               (missing 0 ())))
-             (missing 0 ())))))
-         (() ")" 1 ()) (() : 1 ((whitespace 1)))
-         (simple_type_specifier 4 ((() void 4 ((whitespace 1)))))
-         (missing 0 ())))
-       (compound_statement 2
-        ((() { 1 ()) (missing 0 ())
-         (() } 1 ((whitespace 1) (single_line_comment 8) (end_of_line 1)))))))
      (function_declaration 29
       ((missing 0 ())
        (function_declaration_header 26
@@ -279,7 +254,7 @@
                 ((whitespace 1) (single_line_comment 11) (end_of_line 1)))))
              (missing 0 ())))))
          (() } 1 ((end_of_line 1)))))))
-     (function_declaration 198
+     (function_declaration 173
       ((missing 0 ())
        (function_declaration_header 21
         ((missing 0 ()) (((end_of_line 1)) function 8 ((whitespace 1)))
@@ -287,9 +262,9 @@
          (() ")" 1 ()) (() : 1 ((whitespace 1)))
          (simple_type_specifier 4 ((() void 4 ((whitespace 1)))))
          (missing 0 ())))
-       (compound_statement 176
+       (compound_statement 151
         ((() { 1 ((end_of_line 1)))
-         (list 161
+         (list 136
           ((expression_statement 9
             ((binary_expression 8
               ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
@@ -321,19 +296,6 @@
                 ((() vec 3 ()) (missing 0 ()) (() [ 1 ()) (missing 0 ())
                  (() ] 1 ())))))
              (() ";" 1 ((end_of_line 1)))))
-           (expression_statement 13
-            ((function_call_expression 12
-              ((((whitespace 2)) name 1 ()) (missing 0 ()) (() "(" 1 ())
-               (list 9
-                ((list_item 9
-                  ((decorated_expression 9
-                    ((() inout 5 ((whitespace 1)))
-                     (prefix_unary_expression 3
-                      ((() & 1 ()) (variable 2 ((() variable 2 ())))))))
-                   (missing 0 ())))))
-               (() ")" 1 ())))
-             (() ";" 1
-              ((whitespace 1) (single_line_comment 8) (end_of_line 1)))))
            (expression_statement 33
             ((binary_expression 32
               ((variable 2

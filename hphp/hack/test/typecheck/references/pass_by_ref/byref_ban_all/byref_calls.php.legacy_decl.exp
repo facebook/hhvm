@@ -1,8 +1,0 @@
-File "byref_calls.php", line 22, characters 8-10:
-Arguments can not be passed by reference (NastCheck[3080])
-File "byref_calls.php", line 26, characters 16-18:
-Arguments can not be passed by reference (NastCheck[3080])
-File "byref_calls.php", line 28, characters 17-19:
-Arguments can not be passed by reference (NastCheck[3080])
-File "byref_calls.php", line 31, characters 21-23:
-Arguments can not be passed by reference (NastCheck[3080])

@@ -3427,16 +3427,23 @@ spill_weight_at_impl(State& state,
     assertx(state.rpoOrder[b] >= startRpo);
 
     if (processed[b]) break;
+    processed[b] = true;
 
     // Remove any interesting Vregs which are no longer live. If
     // there's none left, we're done and can report our
     // results. Don't do this for the start block because the
     // Vreg(s) may not be live in to that block (they may be defined
     // in it).
-    if (b != startBlock) regs &= state.liveIn[b];
+    if (b != startBlock) {
+      assertx(instIdx == 0);
+      auto& firstInst = unit.blocks[b].code[0];
+      if (firstInst.op == Vinstr::phidef) {
+        regs &= (state.liveIn[b] | defs_set_cached(state, firstInst));
+      } else {
+        regs &= state.liveIn[b];
+      }
+    }
     if (regs.none()) break;
-
-    processed[b] = true;
 
     auto const recordUse = [&] (Vreg r, size_t idx) {
       auto weight = block_weight(state, b);

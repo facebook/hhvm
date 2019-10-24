@@ -226,6 +226,34 @@ let namespace_elaborater =
             List.map tal ~f:(self#on_targ env),
             List.map el ~f:(self#on_expr env),
             List.map uel ~f:(self#on_expr env) )
+      | Call
+          ( ct,
+            (p1, Id (p2, cn)),
+            targs,
+            [(p3, String cl); (p4, String meth)],
+            uel )
+        when cn = SN.SpecialFunctions.meth_caller ->
+        let cl = Utils.add_ns cl in
+        Call
+          ( self#on_call_type env ct,
+            (p1, Id (p2, cn)),
+            List.map targs ~f:(self#on_targ env),
+            [(p3, String cl); (p4, String meth)],
+            List.map uel ~f:(self#on_expr env) )
+      | Call
+          ( ct,
+            (p1, Id (p2, cn)),
+            targs,
+            [(p3, Class_const ((p4, CI cl), (p5, mem))); (p6, String meth)],
+            uel )
+        when cn = SN.SpecialFunctions.meth_caller && mem = SN.Members.mClass ->
+        let cl = elaborate_type_name env cl in
+        Call
+          ( self#on_call_type env ct,
+            (p1, Id (p2, cn)),
+            List.map targs ~f:(self#on_targ env),
+            [(p3, Class_const ((p4, CI cl), (p5, mem))); (p6, String meth)],
+            List.map uel ~f:(self#on_expr env) )
       | Call (ct, (p, Id (p2, cn)), targs, el, uargs)
         when SN.SpecialFunctions.is_special_function cn
              || (SN.PPLFunctions.is_reserved cn && env.in_ppl) ->

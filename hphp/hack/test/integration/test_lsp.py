@@ -3848,10 +3848,6 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
         self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)
 
     def test_serverless_ide_status_stopped(self) -> None:
-        raise unittest.SkipTest(
-            "Skip this test until we can ignore initializing messages"
-        )
-
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("hover.php"))
         self.test_driver.stop_hh_server()
@@ -3862,15 +3858,14 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 use_serverless_ide=True,
                 supports_status=True,
             )
-            .wait_for_server_request(
+            .ignore_requests(
                 method="window/showStatus",
                 params={
-                    "message": "IDE services: initializing. hh_server: stopped.",
-                    "actions": [{"title": "Restart Hack Server"}],
                     "type": 1,
+                    "actions": [{"title": "Restart Hack Server"}],
+                    "message": "IDE services: initializing. hh_server: stopped.",
                     "shortMessage": "Hack IDE: initializing",
                 },
-                result=NoResponse(),
             )
             .wait_for_server_request(
                 method="window/showStatus",
@@ -3886,9 +3881,6 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_status_restart(self) -> None:
-        raise unittest.SkipTest(
-            "Skip this test until we can ignore initializing messages"
-        )
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("hover.php"))
 
@@ -3898,7 +3890,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 use_serverless_ide=True,
                 supports_status=True,
             )
-            .wait_for_server_request(
+            .ignore_requests(
                 method="window/showStatus",
                 params={
                     "type": 2,
@@ -3906,7 +3898,6 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                     "message": "IDE services: initializing. hh_server: ready.",
                     "shortMessage": "Hack IDE: initializing",
                 },
-                result=NoResponse(),
             )
             .wait_for_server_request(
                 method="window/showStatus",
@@ -3938,16 +3929,6 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
             .wait_for_server_request(
                 method="window/showStatus",
                 params={
-                    "type": 2,
-                    "actions": [],
-                    "message": "IDE services: initializing. hh_server: ready.",
-                    "shortMessage": "Hack IDE: initializing",
-                },
-                result=NoResponse(),
-            )
-            .wait_for_server_request(
-                method="window/showStatus",
-                params={
                     "actions": [],
                     "message": "IDE services: ready. hh_server: ready.",
                     "type": 3,
@@ -3959,9 +3940,6 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
         self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=True)
 
     def test_serverless_ide_failed_to_load_saved_state(self) -> None:
-        raise unittest.SkipTest(
-            "Skip this test until we can ignore initializing messages"
-        )
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("hover.php"))
         assert "naming_table_saved_state_path" in variables
@@ -3973,7 +3951,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 use_serverless_ide=True,
                 supports_status=True,
             )
-            .wait_for_server_request(
+            .ignore_requests(
                 method="window/showStatus",
                 params={
                     "type": 2,
@@ -3981,7 +3959,6 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                     "message": "IDE services: initializing. hh_server: ready.",
                     "shortMessage": "Hack IDE: initializing",
                 },
-                result=NoResponse(),
             )
             .wait_for_server_request(
                 method="window/showStatus",

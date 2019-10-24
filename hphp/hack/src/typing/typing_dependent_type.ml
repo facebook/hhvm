@@ -24,7 +24,7 @@ module ExprDepTy = struct
     let (pos, expr_dep_reason, dep) =
       match cid with
       | N.CIparent ->
-        (match Env.get_parent env with
+        (match Env.get_parent_ty env with
         | (_, Tapply ((_, cls), _)) -> (pos, Reason.ERparent cls, DTcls cls)
         | (_, _) ->
           let (ereason, dep) = new_ () in

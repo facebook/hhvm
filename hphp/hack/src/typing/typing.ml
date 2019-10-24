@@ -4622,7 +4622,7 @@ and check_class_get env p def_pos cid mid ce e =
   | _ -> ()
 
 and call_parent_construct pos env el uel =
-  let parent = Env.get_parent env in
+  let parent = Env.get_parent_ty env in
   match parent with
   | (_, Tapply _) -> check_parent_construct pos env el uel parent
   | ( _,
@@ -5881,7 +5881,7 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
           let (env, parent_ty) = Phase.localize_with_self env parent_ty in
           make_result env [] T.CIparent (r, TUtils.this_of parent_ty))
       | _ ->
-        let parent = Env.get_parent env in
+        let parent = Env.get_parent_ty env in
         let parent_defined = snd parent <> Typing_utils.decl_tany env in
         if not parent_defined then Errors.parent_undefined p;
         let r = Reason.Rwitness p in
@@ -5895,7 +5895,7 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
         | Tunion _ | Tintersection _
         | Tabstract (_, _)
         | Tobject | Tpu _ | Tpu_access _ ) ) ->
-      let parent = Env.get_parent env in
+      let parent = Env.get_parent_ty env in
       let parent_defined = snd parent <> Typing_utils.decl_tany env in
       if not parent_defined then Errors.parent_undefined p;
       let r = Reason.Rwitness p in
@@ -7793,7 +7793,7 @@ and class_def_ env c tc =
     check_extend_abstract_const ~is_final pc (Cls.consts tc);
     check_extend_abstract_typeconst ~is_final pc (Cls.typeconsts tc)
   );
-  let env = Env.set_parent env parent in
+  let env = Env.set_parent_ty env parent in
   let env =
     match parent_id with
     | None -> env

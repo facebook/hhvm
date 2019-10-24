@@ -554,7 +554,7 @@ let genv_as_value env genv =
     params;
     condition_types;
     parent_id;
-    parent;
+    parent_ty;
     self_id;
     self;
     static;
@@ -573,7 +573,7 @@ let genv_as_value env genv =
         ( "condition_types",
           smap_as_value (decl_type_as_value env) condition_types );
         ("parent_id", string_as_value parent_id);
-        ("parent", decl_type_as_value env parent);
+        ("parent_ty", decl_type_as_value env parent_ty);
         ("self_id", string_as_value self_id);
         ("self", type_as_value env self);
         ("static", bool_as_value static);

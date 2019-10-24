@@ -350,8 +350,6 @@ module SpecialFunctions = struct
 
   let invariant = "invariant"
 
-  let invariant_violation = "invariant_violation"
-
   let fun_ = "fun"
 
   let inst_meth = "inst_meth"
@@ -365,6 +363,30 @@ module SpecialFunctions = struct
   let autoload = "__autoload"
 
   let clone = "__clone"
+
+  let is_special_function =
+    let all_special_functions =
+      [
+        tuple;
+        echo;
+        assert_;
+        invariant;
+        fun_;
+        inst_meth;
+        class_meth;
+        meth_caller;
+        call_user_func;
+        autoload;
+        clone;
+      ]
+    in
+    let h = HashSet.create (List.length all_special_functions) in
+    List.iter all_special_functions (HashSet.add h);
+    (fun x -> HashSet.mem h x)
+end
+
+module AutoimportedFunctions = struct
+  let invariant_violation = "\\HH\\invariant_violation"
 end
 
 module SpecialIdents = struct

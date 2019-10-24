@@ -436,20 +436,7 @@ end = struct
       (* is the only one who'll tell us whether a name is unbound. *)
       x
 
-  (* For dealing with namespace resolution on functions *)
-  let elaborate_and_get_name_with_canonicalized_fallback
-      genv
-      (get_pos : string -> FileInfo.pos option)
-      (get_full_pos : string -> Pos.t option)
-      get_canon
-      x =
-    let canonicalize = canonicalize genv get_pos get_full_pos get_canon in
-    let fq_x = NS.elaborate_id genv.namespace NS.ElaborateFun x in
-    canonicalize fq_x `func
-
-  let global_const (genv, _env) x =
-    let fq_x = NS.elaborate_id genv.namespace NS.ElaborateConst x in
-    get_name genv Naming_table.Consts.get_pos fq_x
+  let global_const (genv, _env) x = get_name genv Naming_table.Consts.get_pos x
 
   let type_name
       ?(elaborate_kind = NS.ElaborateClass)
@@ -484,12 +471,14 @@ end = struct
         handle_unbound_name genv GEnv.type_pos GEnv.type_canon_name x `cls)
 
   let fun_id (genv, _) x =
-    elaborate_and_get_name_with_canonicalized_fallback
-      genv
-      Naming_table.Funs.get_pos
-      GEnv.fun_pos
-      GEnv.fun_canon_name
-      x
+    let canonicalize =
+      canonicalize
+        genv
+        Naming_table.Funs.get_pos
+        GEnv.fun_pos
+        GEnv.fun_canon_name
+    in
+    canonicalize x `func
 
   (**
    * Returns the position of the goto label declaration, if it exists.
@@ -1826,6 +1815,7 @@ module Make (GetLocals : GetLocals) = struct
         (Elaborate_namespaces_endo.make_env (fst env).namespace)
         f
     in
+    let name = Env.fun_id env f.Aast.f_name in
     let where_constraints =
       type_where_constraints env f.Aast.f_where_constraints
     in
@@ -1833,7 +1823,6 @@ module Make (GetLocals : GetLocals) = struct
       Aast.type_hint_option_map ~f:(hint ~allow_retonly:true env) f.Aast.f_ret
     in
     let (variadicity, paraml) = fun_paraml env f.Aast.f_params in
-    let x = Env.fun_id env f.Aast.f_name in
     let f_tparams = type_paraml env f.Aast.f_tparams in
     let f_kind = f.Aast.f_fun_kind in
     let body =
@@ -1858,7 +1847,7 @@ module Make (GetLocals : GetLocals) = struct
         f_span = f.Aast.f_span;
         f_mode = f.Aast.f_mode;
         f_ret = h;
-        f_name = x;
+        f_name = name;
         f_tparams;
         f_where_constraints = where_constraints;
         f_params = paraml;
@@ -1941,8 +1930,7 @@ module Make (GetLocals : GetLocals) = struct
                 Aast.Call
                   ( Aast.Cnormal,
                     ( p,
-                      Aast.Id
-                        (fp, "\\HH\\" ^ SN.SpecialFunctions.invariant_violation)
+                      Aast.Id (fp, SN.AutoimportedFunctions.invariant_violation)
                     ),
                     hl,
                     el,
@@ -3107,6 +3095,11 @@ module Make (GetLocals : GetLocals) = struct
   (**************************************************************************)
 
   let program ast =
+    let ast =
+      Elaborate_namespaces_endo.namespace_elaborater#on_program
+        (Elaborate_namespaces_endo.make_env Namespace_env.empty_with_default)
+        ast
+    in
     let top_level_env = ref (Env.make_top_level_env ()) in
     let rec aux acc def =
       match def with

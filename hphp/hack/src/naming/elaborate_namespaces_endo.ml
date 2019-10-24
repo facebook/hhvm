@@ -18,8 +18,24 @@ type env = {
   in_ppl: bool;
 }
 
+let is_special_identifier =
+  let special_identifiers =
+    [
+      SN.Classes.cParent;
+      SN.Classes.cSelf;
+      SN.Classes.cStatic;
+      SN.SpecialIdents.this;
+      SN.SpecialIdents.dollardollar;
+    ]
+  in
+  (fun name -> List.exists ~f:(fun ident -> ident = name) special_identifiers)
+
 let elaborate_type_name env ((_, name) as id) =
-  if SSet.mem name env.type_params then
+  if
+    SSet.mem name env.type_params
+    || is_special_identifier name
+    || name.[0] = '$'
+  then
     id
   else
     NS.elaborate_id env.namespace NS.ElaborateClass id
@@ -240,7 +256,6 @@ let namespace_elaborater =
         else
           Id (NS.elaborate_id env.namespace NS.ElaborateConst sid)
       | Class_get ((_, CIexpr (_, Id _)), CGstring _) -> expr
-      | Class_const ((_, Aast.CIexpr (_, Aast.Id _)), _) -> expr
       | PU_identifier ((_, CIexpr (_, Id _)), _, _) -> expr
       | New ((p1, CIexpr (p2, Id x)), tal, el, uel, ex) ->
         New
@@ -255,6 +270,9 @@ let namespace_elaborater =
               (self#on_expr env e1, self#on_expr env e2))
         in
         Record (n, is_array, l)
+      | Class_const ((p1, CIexpr (p2, Id x1)), pstr) ->
+        let name = elaborate_type_name env x1 in
+        Class_const ((p1, CIexpr (p2, Id name)), pstr)
       | _ -> super#on_expr_ env expr
 
     method! on_user_attribute env ua =
@@ -264,7 +282,7 @@ let namespace_elaborater =
         else
           elaborate_type_name env ua.ua_name
       in
-      { ua with ua_name }
+      { ua_name; ua_params = List.map ~f:(self#on_expr env) ua.ua_params }
 
     method! on_program (env : env) (p : Nast.program) =
       let aux (env, defs) def =

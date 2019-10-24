@@ -1832,7 +1832,7 @@ module Make (GetLocals : GetLocals) = struct
     let lenv = Env.empty_local None in
     let env = (genv, lenv) in
     let f =
-      Elaborate_namespaces_endo.namespace_elaborater#on_fun_
+      Elaborate_namespaces_endo.namespace_elaborater#on_fun_def
         (Elaborate_namespaces_endo.make_env (fst env).namespace)
         f
     in
@@ -2284,12 +2284,12 @@ module Make (GetLocals : GetLocals) = struct
         | Some (_, Naming_table.TTypedef) when snd x2 = "class" ->
           N.Typename
             (Env.type_name
-               ~elaborate_namespace:true
+               ~elaborate_namespace:false
                env
                x1
                ~allow_typedef:true
                ~allow_generics:false)
-        | _ -> N.Class_const (make_class_id env x1, x2)
+        | _ -> N.Class_const (make_class_id_without_elaboration env x1, x2)
       end
     | Aast.Class_const ((_, Aast.CIexpr (_, Aast.Lvar (p, lid))), x2) ->
       let x1 = (p, Local_id.to_string lid) in
@@ -2300,12 +2300,12 @@ module Make (GetLocals : GetLocals) = struct
         | Some (_, Naming_table.TTypedef) when snd x2 = "class" ->
           N.Typename
             (Env.type_name
-               ~elaborate_namespace:true
+               ~elaborate_namespace:false
                env
                x1
                ~allow_typedef:true
                ~allow_generics:false)
-        | _ -> N.Class_const (make_class_id env x1, x2)
+        | _ -> N.Class_const (make_class_id_without_elaboration env x1, x2)
       end
     | Aast.Class_const _ -> (* TODO: report error in strict mode *) N.Any
     | Aast.PU_identifier ((_, c), s1, s2) ->
@@ -2797,6 +2797,47 @@ module Make (GetLocals : GetLocals) = struct
         N.CI
           (Env.type_name
              ~elaborate_namespace:true
+             env
+             cid
+             ~allow_typedef:false
+             ~allow_generics:true) )
+
+  and make_class_id_without_elaboration env ((p, x) as cid) =
+    ( p,
+      match x with
+      | x when x = SN.Classes.cParent ->
+        if (fst env).current_cls = None then
+          let () = Errors.parent_outside_class p in
+          N.CI (p, SN.Classes.cUnknown)
+        else
+          N.CIparent
+      | x when x = SN.Classes.cSelf ->
+        if (fst env).current_cls = None then
+          let () = Errors.self_outside_class p in
+          N.CI (p, SN.Classes.cUnknown)
+        else
+          N.CIself
+      | x when x = SN.Classes.cStatic ->
+        if (fst env).current_cls = None then
+          let () = Errors.static_outside_class p in
+          N.CI (p, SN.Classes.cUnknown)
+        else
+          N.CIstatic
+      | x when x = SN.SpecialIdents.this -> N.CIexpr (p, N.This)
+      | x when x = SN.SpecialIdents.dollardollar ->
+        (* We won't reach here for "new $$" because the parser creates a
+         * proper Ast_defs.Dollardollar node, so make_class_id won't be called with
+         * that node. In fact, the parser creates an Ast_defs.Dollardollar for all
+         * "$$" except in positions where a classname is expected, like in
+         * static member access. So, we only reach here for things
+         * like "$$::someMethod()". *)
+        N.CIexpr
+          (p, N.Lvar (p, Local_id.make_unscoped SN.SpecialIdents.dollardollar))
+      | x when x.[0] = '$' -> N.CIexpr (p, N.Lvar (Env.lvar env cid))
+      | _ ->
+        N.CI
+          (Env.type_name
+             ~elaborate_namespace:false
              env
              cid
              ~allow_typedef:false

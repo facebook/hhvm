@@ -789,11 +789,6 @@ void optimize_copy(const Env& env, const RegState& state, Vinstr& inst) {
  * Rewrite the srcs of `inst' as the expressions used to def them.
  */
 void optimize_inst(const Env& env, const RegState& state, Vinstr& inst) {
-  // For specialized iterators, we'd like to use a physical single register for
-  // the position. On exit traces, we intentionally recompute the old position
-  // in order to avoid extending Vreg lifetimes. Don't overoptimize this case.
-  if (inst.origin != nullptr && inst.origin->is(StIterPos)) return;
-
   auto visit = OptVisit { env, state };
   visitOperands(inst, visit);
 

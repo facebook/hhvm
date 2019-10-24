@@ -169,8 +169,6 @@ void optimize(IRUnit& unit, TransKind kind) {
 
   assertx(checkEverything(unit));
 
-  // We use JmpPlaceholders to hide specialized iterators until we use them.
-  // Any placeholders that survive irgen are just another kind of dead code.
   doPass(unit, removeJmpPlaceholders, DCE::Full);
   printUnit(6, unit, " after initial DCE ");
   assertx(checkEverything(unit));

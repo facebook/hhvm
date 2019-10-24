@@ -23,12 +23,10 @@
 #include <string>
 #include <functional>
 
-#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/vm/jit/bc-marker.h"
 #include "hphp/runtime/vm/jit/inline-state.h"
 #include "hphp/runtime/vm/jit/ir-builder.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
-#include "hphp/runtime/vm/jit/irgen-iter-spec.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/types.h"
 
@@ -111,12 +109,6 @@ struct IRGS {
    * Context for translation retries.
    */
   TranslateRetryContext* retryContext;
-
-  /*
-   * Used to reuse blocks of code between specialized IterInits and IterNexts.
-   * See irgen-iter-spec for details.
-   */
-  jit::fast_map<Block*, std::unique_ptr<SpecializedIterator>> iters;
 };
 
 //////////////////////////////////////////////////////////////////////

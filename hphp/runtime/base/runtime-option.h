@@ -851,14 +851,6 @@ struct RuntimeOption {
   F(int, JitRetargetJumps,             1)                               \
   /* Sync VM reg state for all native calls. */                         \
   F(bool, JitForceVMRegSync,           false)                           \
-  /* ArrayIterSpecialization{Count,Rate} control profiling-based array  \
-   * iterator specialization. See irgen-iter-spec for details.          \
-   *                                                                    \
-   * We'll specialize iterators that a) are executed at least `Count`   \
-   * times and that b) have a specialization covering a fraction `Rate` \
-   * of all profiled loops. If `Rate` is > 1.0, we won't specialize. */ \
-  F(uint32_t, ArrayIterSpecializationCount, arrayIterDefaultCount())    \
-  F(double,   ArrayIterSpecializationRate,  arrayIterDefaultRate())     \
   F(bool, HHIRSimplification,          true)                            \
   F(bool, HHIRGenOpts,                 true)                            \
   F(bool, HHIRRefcountOpts,            true)                            \

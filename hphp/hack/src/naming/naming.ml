@@ -2263,11 +2263,11 @@ module Make (GetLocals : GetLocals) = struct
       N.Array_get (id, None)
     | Aast.Array_get (e1, e2) -> N.Array_get (expr env e1, oexpr env e2)
     | Aast.Class_get ((_, Aast.CIexpr (_, Aast.Id x1)), Aast.CGstring x2) ->
-      N.Class_get (make_class_id env x1, N.CGstring x2)
+      N.Class_get (make_class_id_without_elaboration env x1, N.CGstring x2)
     | Aast.Class_get
         ((_, Aast.CIexpr (_, Aast.Lvar (p, lid))), Aast.CGstring x2) ->
       let x1 = (p, Local_id.to_string lid) in
-      N.Class_get (make_class_id env x1, N.CGstring x2)
+      N.Class_get (make_class_id_without_elaboration env x1, N.CGstring x2)
     | Aast.Class_get ((_, Aast.CIexpr x1), Aast.CGstring _) ->
       ensure_name_not_dynamic env x1;
       N.Any

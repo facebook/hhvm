@@ -288,7 +288,6 @@ let namespace_elaborater =
           expr
         else
           Id (NS.elaborate_id env.namespace NS.ElaborateConst sid)
-      | Class_get ((_, CIexpr (_, Id _)), CGstring _) -> expr
       | PU_identifier ((_, CIexpr (_, Id _)), _, _) -> expr
       | New ((p1, CIexpr (p2, Id x)), tal, el, uel, ex) ->
         New
@@ -306,6 +305,9 @@ let namespace_elaborater =
       | Class_const ((p1, CIexpr (p2, Id x1)), pstr) ->
         let name = elaborate_type_name env x1 in
         Class_const ((p1, CIexpr (p2, Id name)), pstr)
+      | Class_get ((p1, CIexpr (p2, Id x1)), CGstring x2) ->
+        let x1 = elaborate_type_name env x1 in
+        Class_get ((p1, CIexpr (p2, Id x1)), CGstring x2)
       | Xml (id, al, el) ->
         let id = elaborate_type_name env id in
         Xml

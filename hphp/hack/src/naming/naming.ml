@@ -2684,7 +2684,7 @@ module Make (GetLocals : GetLocals) = struct
     | Aast.Xml (x, al, el) ->
       N.Xml
         ( Env.type_name
-            ~elaborate_namespace:true
+            ~elaborate_namespace:false
             env
             x
             ~allow_typedef:false

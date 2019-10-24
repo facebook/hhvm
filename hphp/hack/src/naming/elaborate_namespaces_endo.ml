@@ -304,6 +304,12 @@ let namespace_elaborater =
       | Class_const ((p1, CIexpr (p2, Id x1)), pstr) ->
         let name = elaborate_type_name env x1 in
         Class_const ((p1, CIexpr (p2, Id name)), pstr)
+      | Xml (id, al, el) ->
+        let id = elaborate_type_name env id in
+        Xml
+          ( id,
+            List.map al ~f:(self#on_xhp_attribute env),
+            List.map el ~f:(self#on_expr env) )
       | _ -> super#on_expr_ env expr
 
     method! on_user_attribute env ua =

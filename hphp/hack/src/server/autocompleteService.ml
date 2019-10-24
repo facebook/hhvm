@@ -604,6 +604,7 @@ class ranking_context_extract =
         token_types <- token_type :: token_types
 
     method! on_Id env id =
+      self#find_cursor id;
       self#add_token (snd id);
       self#add_token_type "id";
       super#on_Id env id
@@ -631,6 +632,11 @@ class ranking_context_extract =
       self#add_token_type "this";
       super#on_This env
 
+    method! on_CIself env =
+      self#add_token "self";
+      self#add_token_type "self";
+      super#on_This env
+
     (* Only visit the method that the cursor is in *)
     method! on_method_ env m =
       if class_get_cursor_finder#on_method_ () m then (
@@ -642,21 +648,33 @@ class ranking_context_extract =
         super#on_method_ env m
       )
 
+    method! on_fun_ env f =
+      if class_get_cursor_finder#on_fun_ () f then (
+        visit_method <- true;
+
+        (* add methodname to context token list *)
+        self#add_token (snd f.Tast.f_name);
+        self#add_token_type "methodname";
+        super#on_fun_ env f
+      )
+
     (* Track whether we are visiting before the cursor for Acclass_get completion type *)
     method find_cursor mid =
       if matches_auto_complete_suffix (snd mid) then after_cursor <- true
 
     method! on_Obj_get env obj mid ognf =
+      let res = super#on_Obj_get env obj mid ognf in
       (match mid with
       | (_, Tast.Id mid) -> self#find_cursor mid
       | _ -> ());
-      super#on_Obj_get env obj mid ognf
+      res
 
     method! on_Class_get env cid mid =
+      let res = super#on_Class_get env cid mid in
       (match mid with
       | Tast.CGstring p -> self#find_cursor p
       | _ -> ());
-      super#on_Class_get env cid mid
+      res
   end
 
 let reset () =

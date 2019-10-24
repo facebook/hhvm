@@ -191,7 +191,8 @@ void VSDebugLogger::Log(const char* level, const char* fmt, ...) {
   struct tm tm = *localtime(&t);
 
   fprintf(s_logger.m_logFile,
-    "[%d-%d-%d %d:%d:%d]",
+    "[%" PRId64 "][%d-%d-%d %d:%d:%d]",
+    (int64_t)getpid(),
     tm.tm_year + 1900,
     tm.tm_mon + 1,
     tm.tm_mday,

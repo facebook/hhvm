@@ -2263,11 +2263,11 @@ module Make (GetLocals : GetLocals) = struct
       N.Array_get (id, None)
     | Aast.Array_get (e1, e2) -> N.Array_get (expr env e1, oexpr env e2)
     | Aast.Class_get ((_, Aast.CIexpr (_, Aast.Id x1)), Aast.CGstring x2) ->
-      N.Class_get (make_class_id_without_elaboration env x1, N.CGstring x2)
+      N.Class_get (make_class_id env x1, N.CGstring x2)
     | Aast.Class_get
         ((_, Aast.CIexpr (_, Aast.Lvar (p, lid))), Aast.CGstring x2) ->
       let x1 = (p, Local_id.to_string lid) in
-      N.Class_get (make_class_id_without_elaboration env x1, N.CGstring x2)
+      N.Class_get (make_class_id env x1, N.CGstring x2)
     | Aast.Class_get ((_, Aast.CIexpr x1), Aast.CGstring _) ->
       ensure_name_not_dynamic env x1;
       N.Any
@@ -2289,7 +2289,7 @@ module Make (GetLocals : GetLocals) = struct
                x1
                ~allow_typedef:true
                ~allow_generics:false)
-        | _ -> N.Class_const (make_class_id_without_elaboration env x1, x2)
+        | _ -> N.Class_const (make_class_id env x1, x2)
       end
     | Aast.Class_const ((_, Aast.CIexpr (_, Aast.Lvar (p, lid))), x2) ->
       let x1 = (p, Local_id.to_string lid) in
@@ -2305,14 +2305,14 @@ module Make (GetLocals : GetLocals) = struct
                x1
                ~allow_typedef:true
                ~allow_generics:false)
-        | _ -> N.Class_const (make_class_id_without_elaboration env x1, x2)
+        | _ -> N.Class_const (make_class_id env x1, x2)
       end
     | Aast.Class_const _ -> (* TODO: report error in strict mode *) N.Any
     | Aast.PU_identifier ((_, c), s1, s2) ->
       begin
         match c with
         | Aast.CIexpr (_, Aast.Id x1) ->
-          N.PU_identifier (make_class_id_without_elaboration env x1, s1, s2)
+          N.PU_identifier (make_class_id env x1, s1, s2)
         | _ ->
           failwith "TODO(T35357243): Error during parsing of PU_identifier"
       end
@@ -2762,47 +2762,6 @@ module Make (GetLocals : GetLocals) = struct
       failwith "Malformed f_body: unexpected UnnamedBody from ast_to_nast"
 
   and make_class_id env ((p, x) as cid) =
-    ( p,
-      match x with
-      | x when x = SN.Classes.cParent ->
-        if (fst env).current_cls = None then
-          let () = Errors.parent_outside_class p in
-          N.CI (p, SN.Classes.cUnknown)
-        else
-          N.CIparent
-      | x when x = SN.Classes.cSelf ->
-        if (fst env).current_cls = None then
-          let () = Errors.self_outside_class p in
-          N.CI (p, SN.Classes.cUnknown)
-        else
-          N.CIself
-      | x when x = SN.Classes.cStatic ->
-        if (fst env).current_cls = None then
-          let () = Errors.static_outside_class p in
-          N.CI (p, SN.Classes.cUnknown)
-        else
-          N.CIstatic
-      | x when x = SN.SpecialIdents.this -> N.CIexpr (p, N.This)
-      | x when x = SN.SpecialIdents.dollardollar ->
-        (* We won't reach here for "new $$" because the parser creates a
-         * proper Ast_defs.Dollardollar node, so make_class_id won't be called with
-         * that node. In fact, the parser creates an Ast_defs.Dollardollar for all
-         * "$$" except in positions where a classname is expected, like in
-         * static member access. So, we only reach here for things
-         * like "$$::someMethod()". *)
-        N.CIexpr
-          (p, N.Lvar (p, Local_id.make_unscoped SN.SpecialIdents.dollardollar))
-      | x when x.[0] = '$' -> N.CIexpr (p, N.Lvar (Env.lvar env cid))
-      | _ ->
-        N.CI
-          (Env.type_name
-             ~elaborate_namespace:true
-             env
-             cid
-             ~allow_typedef:false
-             ~allow_generics:true) )
-
-  and make_class_id_without_elaboration env ((p, x) as cid) =
     ( p,
       match x with
       | x when x = SN.Classes.cParent ->

@@ -67,11 +67,17 @@ class LspTestSpec:
         self.name = name
         self._messages: Sequence["_MessageSpec"] = []
         self._ignored_notification_methods: AbstractSet[str] = set()
+        self._ignored_requests: Sequence[Tuple[str, Json]] = []
 
     def ignore_notifications(self, *, method: str) -> "LspTestSpec":
         ignored_notification_methods = set(self._ignored_notification_methods)
         ignored_notification_methods.add(method)
         return self._update(ignored_notification_methods=ignored_notification_methods)
+
+    def ignore_requests(self, *, method: str, params: Json) -> "LspTestSpec":
+        ignored_requests = list(self._ignored_requests)
+        ignored_requests.append((method, params))
+        return self._update(ignored_requests=ignored_requests)
 
     def request(
         self,
@@ -232,12 +238,15 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
         self,
         messages: Optional[Sequence["_MessageSpec"]] = None,
         ignored_notification_methods: Optional[AbstractSet[str]] = None,
+        ignored_requests: Optional[Sequence[Tuple[str, Json]]] = None,
     ) -> "LspTestSpec":
         spec = copy.copy(self)
         if messages is not None:
             spec._messages = messages
         if ignored_notification_methods is not None:
             spec._ignored_notification_methods = ignored_notification_methods
+        if ignored_requests is not None:
+            spec._ignored_requests = ignored_requests
         return spec
 
     def _get_json_commands(
@@ -409,7 +418,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 raise ValueError(f"unhandled message type {message.__class__.__name__}")
 
         handled_entries |= set(self._find_ignored_transcript_ids(transcript))
-        yield from self._flag_unhandled_notifications(
+        yield from self._flag_unhandled_messages(
             handled_entries, variables, transcript, lsp_id_map
         )
 
@@ -584,11 +593,22 @@ make it match:
         for transcript_id, entry in transcript.items():
             if (
                 entry.received is not None
+                and "id" not in entry.received
                 and entry.received.get("method") in self._ignored_notification_methods
             ):
                 yield transcript_id
 
-    def _flag_unhandled_notifications(
+            if (
+                entry.received is not None
+                and "id" in entry.received
+                and "method" in entry.received
+                and "params" in entry.received
+                and (entry.received["method"], entry.received["params"])
+                in self._ignored_requests
+            ):
+                yield transcript_id
+
+    def _flag_unhandled_messages(
         self,
         handled_entries: AbstractSet[str],
         variables: VariableMap,
@@ -622,7 +642,12 @@ Here is the request payload:
 1) If this was unexpected, then the language server is buggy and should be
 fixed.
 
-2) To handle this request, add this directive to your test to wait for it and
+2) If all requests of type {method!r} with theses params should be ignored,
+add this directive anywhere in your test:
+
+    .{self.ignore_requests.__name__}(method={method!r}, params={params!r})
+
+3) To handle this request, add this directive to your test to wait for it and
 respond to it before proceeding:
 
     .{self.wait_for_server_request.__name__}(

@@ -101,18 +101,8 @@ module Env = struct
     class_init_props: SSet.t;
   }
 
-  let parent_id c =
-    match c.c_extends with
-    | [(_, Happly ((_, parent_id), _))] -> Some parent_id
-    | _ -> None
-
   let rec make tenv c =
     let tenv = Typing_env.set_self_id tenv (snd c.c_name) in
-    let tenv =
-      match parent_id c with
-      | None -> tenv
-      | Some parent_id -> Typing_env.set_parent_id tenv parent_id
-    in
     let (_, _, methods) = split_methods c in
     let methods = List.fold_left ~f:method_ ~init:SMap.empty methods in
     let sc = Shallow_decl.class_ c in

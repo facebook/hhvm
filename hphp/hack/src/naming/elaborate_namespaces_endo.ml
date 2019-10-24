@@ -34,7 +34,7 @@ let elaborate_type_name env ((_, name) as id) =
   if
     SSet.mem name env.type_params
     || is_special_identifier name
-    || name.[0] = '$'
+    || (String.length name <> 0 && name.[0] = '$')
   then
     id
   else
@@ -232,7 +232,8 @@ let namespace_elaborater =
             targs,
             [(p3, String cl); (p4, String meth)],
             uel )
-        when cn = SN.SpecialFunctions.meth_caller ->
+        when cn = SN.SpecialFunctions.meth_caller
+             || cn = SN.SpecialFunctions.class_meth ->
         let cl = Utils.add_ns cl in
         Call
           ( self#on_call_type env ct,
@@ -246,7 +247,9 @@ let namespace_elaborater =
             targs,
             [(p3, Class_const ((p4, CI cl), (p5, mem))); (p6, String meth)],
             uel )
-        when cn = SN.SpecialFunctions.meth_caller && mem = SN.Members.mClass ->
+        when ( cn = SN.SpecialFunctions.meth_caller
+             || cn = SN.SpecialFunctions.class_meth )
+             && mem = SN.Members.mClass ->
         let cl = elaborate_type_name env cl in
         Call
           ( self#on_call_type env ct,

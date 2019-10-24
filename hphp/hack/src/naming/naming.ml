@@ -2430,7 +2430,7 @@ module Make (GetLocals : GetLocals) = struct
             | ((pc, N.String cl), (pm, N.String meth)) ->
               N.Smethod_id
                 ( Env.type_name
-                    ~elaborate_namespace:true
+                    ~elaborate_namespace:false
                     env
                     (pc, cl)
                     ~allow_typedef:false
@@ -2453,7 +2453,7 @@ module Make (GetLocals : GetLocals) = struct
               when mem = SN.Members.mClass ->
               N.Smethod_id
                 ( Env.type_name
-                    ~elaborate_namespace:true
+                    ~elaborate_namespace:false
                     env
                     cl
                     ~allow_typedef:false

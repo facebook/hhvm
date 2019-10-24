@@ -1211,15 +1211,13 @@ static void prepareFuncEntry(ActRec *ar, StackArgsState stk, Array&& generics) {
   if (ar->m_func->hasReifiedGenerics()) {
     // Currently does not work with closures
     assertx(!func->isClosureBody());
-    if (generics.isNull()) {
-      stack.pushUninit();
+    // push for first local
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      stack.pushVecNoRc(generics.isNull() ? ArrayData::CreateVec()
+                                          : generics.detach());
     } else {
-      // push for first local
-      if (RuntimeOption::EvalHackArrDVArrs) {
-        stack.pushVecNoRc(generics.detach());
-      } else {
-        stack.pushArrayNoRc(generics.detach());
-      }
+      stack.pushArrayNoRc(generics.isNull() ? ArrayData::CreateVArray()
+                                            : generics.detach());
     }
     nlocals++;
   } else {

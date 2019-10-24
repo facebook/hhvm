@@ -7,6 +7,7 @@ extern crate bitflags;
 
 /// Type info has additional optional user type *)
 #[allow(dead_code)]
+#[derive(Clone)]
 pub struct Info {
     pub user_type: Option<String>,
     pub type_constraint: constraint::Type,
@@ -17,12 +18,14 @@ pub mod constraint {
 
     use bitflags::bitflags;
 
+    #[derive(Clone, Default)]
     pub struct Type {
         pub name: Option<String>,
         pub flags: Flags,
     }
 
     bitflags! {
+        #[derive(Default)]
         pub struct Flags: u8 {
             const NULLABLE =         0b0000_0001;
             const HH_TYPE =          0b0000_0010;
@@ -44,6 +47,21 @@ pub mod constraint {
                 .collect::<Vec<_>>()
                 .join(" ");
             write!(f, "{}", set_names.to_string())
+        }
+    }
+
+    impl Type {
+        pub fn make(name: Option<String>, flags: Flags) -> Type {
+            Type { name, flags }
+        }
+    }
+}
+
+impl Info {
+    pub fn make(user_type: Option<String>, type_constraint: constraint::Type) -> Info {
+        Info {
+            user_type,
+            type_constraint,
         }
     }
 }

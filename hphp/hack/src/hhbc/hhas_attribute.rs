@@ -19,6 +19,8 @@ use runtime::TypedValue;
 ///       attrs.iter().any(|a| a.name == ua::DYNAMICALLY_CALLABLE)
 ///   }
 /// ```
+
+#[derive(Clone)]
 pub struct HhasAttribute {
     pub name: String,
     pub arguments: Vec<TypedValue>,

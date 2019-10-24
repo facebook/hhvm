@@ -338,6 +338,8 @@ module UserAttributes = struct
           (uaNeverInline, [fn; mthd]);
           (uaDisableTypecheckerInternal, [fn; mthd]);
         ])
+
+  let is_reserved name = String.is_prefix name ~prefix:"__"
 end
 
 (* Tested before \\-prepending name-canonicalization *)

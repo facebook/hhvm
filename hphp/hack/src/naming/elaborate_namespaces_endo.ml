@@ -17,6 +17,9 @@ type env = {
   in_ppl: bool;
 }
 
+let elaborate_type_name env id =
+  NS.elaborate_id env.namespace NS.ElaborateClass id
+
 let namespace_elaborater =
   object (self)
     inherit [_] Aast.endo as super
@@ -228,6 +231,15 @@ let namespace_elaborater =
         in
         Record (n, is_array, l)
       | _ -> super#on_expr_ env expr
+
+    method! on_user_attribute env ua =
+      let ua_name =
+        if SN.UserAttributes.is_reserved (snd ua.ua_name) then
+          ua.ua_name
+        else
+          elaborate_type_name env ua.ua_name
+      in
+      { ua with ua_name }
 
     method! on_program (env : env) (p : Nast.program) =
       let aux (env, defs) def =

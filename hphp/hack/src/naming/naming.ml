@@ -112,6 +112,7 @@ module Env : sig
 
   val type_name :
     ?elaborate_kind:NS.elaborate_kind ->
+    elaborate_namespace:bool ->
     genv * lenv ->
     Ast_defs.id ->
     allow_typedef:bool ->
@@ -440,6 +441,7 @@ end = struct
 
   let type_name
       ?(elaborate_kind = NS.ElaborateClass)
+      ~elaborate_namespace
       (genv, _)
       x
       ~allow_typedef
@@ -457,7 +459,10 @@ end = struct
       x
     | None ->
       let ((pos, name) as x) =
-        NS.elaborate_id genv.namespace elaborate_kind x
+        if elaborate_namespace then
+          NS.elaborate_id genv.namespace elaborate_kind x
+        else
+          x
       in
       (match Naming_table.Types.get_pos name with
       | Some (_def_pos, Naming_table.TClass) -> (pos, name)
@@ -567,7 +572,12 @@ let convert_shape_name env = function
           Errors.self_outside_class pos;
           (pos, SN.Classes.cUnknown)
       ) else
-        Env.type_name env x ~allow_typedef:false ~allow_generics:false
+        Env.type_name
+          ~elaborate_namespace:true
+          env
+          x
+          ~allow_typedef:false
+          ~allow_generics:false
     in
     Ast_defs.SFclass_const (class_name, (pos, y))
 
@@ -990,7 +1000,12 @@ module Make (GetLocals : GetLocals) = struct
           N.Habstr x
         | _ ->
           let name =
-            Env.type_name env id ~allow_typedef ~allow_generics:false
+            Env.type_name
+              ~elaborate_namespace:true
+              env
+              id
+              ~allow_typedef
+              ~allow_generics:false
           in
           (* Note that we are intentionally setting allow_typedef to `true` here.
            * In general, generics arguments can be typedefs -- there is no
@@ -1166,6 +1181,7 @@ module Make (GetLocals : GetLocals) = struct
     in
     let name =
       Env.type_name
+        ~elaborate_namespace:false
         env
         c.Aast.c_name
         ~allow_typedef:false
@@ -1313,10 +1329,15 @@ module Make (GetLocals : GetLocals) = struct
     let on_attr acc { Aast.ua_name; ua_params } =
       let name = snd ua_name in
       let ua_name =
-        if String.is_prefix name ~prefix:"__" then
+        if SN.UserAttributes.is_reserved name then
           ua_name
         else
-          Env.type_name env ua_name ~allow_typedef:false ~allow_generics:false
+          Env.type_name
+            ~elaborate_namespace:false
+            env
+            ua_name
+            ~allow_typedef:false
+            ~allow_generics:false
       in
       if not (validate_seen ua_name) then
         acc
@@ -2262,7 +2283,12 @@ module Make (GetLocals : GetLocals) = struct
         match Naming_table.Types.get_pos name with
         | Some (_, Naming_table.TTypedef) when snd x2 = "class" ->
           N.Typename
-            (Env.type_name env x1 ~allow_typedef:true ~allow_generics:false)
+            (Env.type_name
+               ~elaborate_namespace:true
+               env
+               x1
+               ~allow_typedef:true
+               ~allow_generics:false)
         | _ -> N.Class_const (make_class_id env x1, x2)
       end
     | Aast.Class_const ((_, Aast.CIexpr (_, Aast.Lvar (p, lid))), x2) ->
@@ -2273,7 +2299,12 @@ module Make (GetLocals : GetLocals) = struct
         match Naming_table.Types.get_pos name with
         | Some (_, Naming_table.TTypedef) when snd x2 = "class" ->
           N.Typename
-            (Env.type_name env x1 ~allow_typedef:true ~allow_generics:false)
+            (Env.type_name
+               ~elaborate_namespace:true
+               env
+               x1
+               ~allow_typedef:true
+               ~allow_generics:false)
         | _ -> N.Class_const (make_class_id env x1, x2)
       end
     | Aast.Class_const _ -> (* TODO: report error in strict mode *) N.Any
@@ -2360,6 +2391,7 @@ module Make (GetLocals : GetLocals) = struct
             | ((pc, N.String cl), (pm, N.String meth)) ->
               N.Method_caller
                 ( Env.type_name
+                    ~elaborate_namespace:true
                     env
                     (pc, cl)
                     ~allow_typedef:false
@@ -2369,6 +2401,7 @@ module Make (GetLocals : GetLocals) = struct
               when mem = SN.Members.mClass ->
               N.Method_caller
                 ( Env.type_name
+                    ~elaborate_namespace:true
                     env
                     cl
                     ~allow_typedef:false
@@ -2397,6 +2430,7 @@ module Make (GetLocals : GetLocals) = struct
             | ((pc, N.String cl), (pm, N.String meth)) ->
               N.Smethod_id
                 ( Env.type_name
+                    ~elaborate_namespace:true
                     env
                     (pc, cl)
                     ~allow_typedef:false
@@ -2419,6 +2453,7 @@ module Make (GetLocals : GetLocals) = struct
               when mem = SN.Members.mClass ->
               N.Smethod_id
                 ( Env.type_name
+                    ~elaborate_namespace:true
                     env
                     cl
                     ~allow_typedef:false
@@ -2648,7 +2683,12 @@ module Make (GetLocals : GetLocals) = struct
       N.Lfun (f, !to_capture)
     | Aast.Xml (x, al, el) ->
       N.Xml
-        ( Env.type_name env x ~allow_typedef:false ~allow_generics:false,
+        ( Env.type_name
+            ~elaborate_namespace:true
+            env
+            x
+            ~allow_typedef:false
+            ~allow_generics:false,
           attrl env al,
           exprl env el )
     | Aast.Shape fdl ->
@@ -2754,14 +2794,20 @@ module Make (GetLocals : GetLocals) = struct
           (p, N.Lvar (p, Local_id.make_unscoped SN.SpecialIdents.dollardollar))
       | x when x.[0] = '$' -> N.CIexpr (p, N.Lvar (Env.lvar env cid))
       | _ ->
-        N.CI (Env.type_name env cid ~allow_typedef:false ~allow_generics:true)
-    )
+        N.CI
+          (Env.type_name
+             ~elaborate_namespace:true
+             env
+             cid
+             ~allow_typedef:false
+             ~allow_generics:true) )
 
   and make_record_id env ((p, _) as rdid) =
     ( p,
       N.CI
         (Env.type_name
            ~elaborate_kind:NS.ElaborateRecord
+           ~elaborate_namespace:true
            env
            rdid
            ~allow_typedef:false
@@ -2795,7 +2841,12 @@ module Make (GetLocals : GetLocals) = struct
             Env.new_let_local env (p2, name2)
         in
         let b = branch env b in
-        ( Env.type_name env (p1, lid1) ~allow_typedef:true ~allow_generics:false,
+        ( Env.type_name
+            ~elaborate_namespace:true
+            env
+            (p1, lid1)
+            ~allow_typedef:true
+            ~allow_generics:false,
           x2,
           b ))
 

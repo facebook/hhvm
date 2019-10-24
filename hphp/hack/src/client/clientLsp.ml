@@ -2309,23 +2309,7 @@ let get_client_ide_status (ide_service : ClientIdeService.t) :
       total = None;
       shortMessage = Some "Hack IDE: initializing";
     }
-  | ClientIdeService.Status.Processing_files
-      { ClientIdeMessage.Processing_files.processed; total } ->
-    {
-      ShowStatus.request =
-        {
-          ShowMessageRequest.type_ = MessageType.WarningMessage;
-          message =
-            Printf.sprintf
-              "IDE services: processing %d/%d changes."
-              processed
-              total;
-          actions = [];
-        };
-      progress = Some processed;
-      total = Some total;
-      shortMessage = Some "Hack IDE: processing";
-    }
+  | ClientIdeService.Status.Processing_files _
   | ClientIdeService.Status.Ready ->
     {
       ShowStatus.request =

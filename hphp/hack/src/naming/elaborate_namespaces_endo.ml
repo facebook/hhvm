@@ -7,6 +7,7 @@
  *)
 
 open Aast
+open Ast_defs
 open Core_kernel
 module NS = Namespaces
 module SN = Naming_special_names
@@ -140,6 +141,7 @@ let namespace_elaborater =
       stmts
 
     method! on_catch env (x1, ((_, lid2) as x2), b) =
+      let x1 = elaborate_type_name env x1 in
       (* If the variable does not begin with $, it is an immutable binding *)
       let name2 = Local_id.get_name lid2 in
       let let_locals =
@@ -311,6 +313,13 @@ let namespace_elaborater =
             List.map al ~f:(self#on_xhp_attribute env),
             List.map el ~f:(self#on_expr env) )
       | _ -> super#on_expr_ env expr
+
+    method! on_shape_field_name env sfn =
+      match sfn with
+      | SFclass_const (x, (pos, y)) ->
+        let x = elaborate_type_name env x in
+        SFclass_const (x, (pos, y))
+      | _ -> sfn
 
     method! on_user_attribute env ua =
       let ua_name =

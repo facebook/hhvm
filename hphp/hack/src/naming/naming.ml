@@ -573,7 +573,7 @@ let convert_shape_name env = function
           (pos, SN.Classes.cUnknown)
       ) else
         Env.type_name
-          ~elaborate_namespace:true
+          ~elaborate_namespace:false
           env
           x
           ~allow_typedef:false
@@ -2883,7 +2883,7 @@ module Make (GetLocals : GetLocals) = struct
         in
         let b = branch env b in
         ( Env.type_name
-            ~elaborate_namespace:true
+            ~elaborate_namespace:false
             env
             (p1, lid1)
             ~allow_typedef:true

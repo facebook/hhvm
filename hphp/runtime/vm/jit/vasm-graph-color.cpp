@@ -4866,10 +4866,6 @@ size_t process_inst_spills(State& state,
     defs | acrosses | uses
   );
 
-  // Some of the defs or acrosses may not be live (if the defs are never used),
-  // so remove them.
-  spiller.dropDead(defs | acrosses, nullptr, b, instIdx);
-
   // Make sure we can spill.
   always_assert_flog(
     IMPLIES(!state.abi.canSpill, spills.none() && reloads.none()),
@@ -4880,6 +4876,10 @@ size_t process_inst_spills(State& state,
     show(spills),
     show(reloads)
   );
+
+  // Some of the defs or acrosses may not be live (if the defs are never used),
+  // so remove them.
+  spiller.dropDead(defs | acrosses, nullptr, b, instIdx);
 
   // Bail out if we don't need to emit anything (hopefully the common case).
   if (spills.none() && reloads.none()) return 0;
@@ -4995,6 +4995,12 @@ SpillerResults process_spills(State& state,
     // Initialize the state for this block and get the initial (in) state.
     auto instIdx = setup_initial_spiller_state(state, b, results);
     auto spiller = *results.perBlock[b].in;
+    SCOPE_ASSERT_DETAIL("Current Spiller") {
+      return folly::sformat(
+        "Block: {}\n{}",
+        b, spiller.toString()
+      );
+    };
 
     if (!needsSpilling[b] && spiller.allRegs()) {
       // Be efficient if there's no potential spills to worry about.

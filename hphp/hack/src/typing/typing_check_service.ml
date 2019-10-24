@@ -118,7 +118,6 @@ let type_fun (opts : TypecheckerOptions.t) (fn : Relative_path.t) (x : string)
       |> Option.map ~f:(fun (f, global_tvenv) -> (Aast.Fun f, global_tvenv))
     in
     Option.iter def_opt (fun (f, _) -> Tast_check.def opts f);
-
     def_opt
   | None -> None
 

@@ -120,8 +120,6 @@ module Env : sig
 
   val fun_id : genv * lenv -> Ast_defs.id -> Ast_defs.id
 
-  val fun_id_special : genv * lenv -> Ast_defs.id -> Ast_defs.id
-
   val goto_label : genv * lenv -> string -> Pos.t option
 
   val new_goto_label : genv * lenv -> Aast.pstring -> unit
@@ -491,14 +489,6 @@ end = struct
       Naming_table.Funs.get_pos
       GEnv.fun_pos
       GEnv.fun_canon_name
-      x
-
-  let fun_id_special (genv, _) x =
-    let ((p, name) as x) = NS.elaborate_id genv.namespace NS.ElaborateFun x in
-    match Naming_table.Funs.get_pos name with
-    | Some _ -> x
-    | None ->
-      Errors.invalid_fun_pointer p name;
       x
 
   (**
@@ -1177,6 +1167,11 @@ module Make (GetLocals : GetLocals) = struct
   let rec class_ c =
     let constraints = make_constraints c.Aast.c_tparams.Aast.c_tparam_list in
     let env = Env.make_class_env constraints c in
+    let c =
+      Elaborate_namespaces_endo.namespace_elaborater#on_class_
+        (Elaborate_namespaces_endo.make_env (fst env).namespace)
+        c
+    in
     let where_constraints =
       type_where_constraints env c.Aast.c_where_constraints
     in
@@ -1826,6 +1821,11 @@ module Make (GetLocals : GetLocals) = struct
     let genv = Env.make_fun_decl_genv tparams f in
     let lenv = Env.empty_local None in
     let env = (genv, lenv) in
+    let f =
+      Elaborate_namespaces_endo.namespace_elaborater#on_fun_
+        (Elaborate_namespaces_endo.make_env (fst env).namespace)
+        f
+    in
     let where_constraints =
       type_where_constraints env f.Aast.f_where_constraints
     in
@@ -2326,22 +2326,12 @@ module Make (GetLocals : GetLocals) = struct
         | [] ->
           Errors.naming_too_few_arguments p;
           N.Any
-        | [(_, Aast.String s)] when String.contains s ':' ->
-          Errors.illegal_meth_fun p;
-          N.Any
+        | [(_, Aast.String s)] when String.contains s ':' -> N.Any
         | [(_, Aast.String s)]
           when genv.in_ppl && SN.PPLFunctions.is_reserved s ->
           Errors.ppl_meth_pointer p ("fun(" ^ s ^ ")");
           N.Any
-        | [(p, Aast.String x)] ->
-          (* Functions referenced by fun() are always fully-qualified *)
-          let x =
-            if x <> "" && x.[0] <> '\\' then
-              "\\" ^ x
-            else
-              x
-          in
-          N.Fun_id (Env.fun_id_special env (p, x))
+        | [(p, Aast.String x)] -> N.Fun_id (p, x)
         | [(p, _)] ->
           Errors.illegal_fun p;
           N.Any
@@ -3044,6 +3034,11 @@ module Make (GetLocals : GetLocals) = struct
 
   let record_def rd =
     let env = Env.make_top_level_env () in
+    let rd =
+      Elaborate_namespaces_endo.namespace_elaborater#on_record_def
+        (Elaborate_namespaces_endo.make_env (fst env).namespace)
+        rd
+    in
     let attrs = user_attributes env rd.Aast.rd_user_attributes in
     {
       N.rd_name = rd.Aast.rd_name;
@@ -3064,6 +3059,11 @@ module Make (GetLocals : GetLocals) = struct
   let typedef tdef =
     let cstrs = make_constraints tdef.Aast.t_tparams in
     let env = Env.make_typedef_env cstrs tdef in
+    let tdef =
+      Elaborate_namespaces_endo.namespace_elaborater#on_typedef
+        (Elaborate_namespaces_endo.make_env (fst env).namespace)
+        tdef
+    in
     let tconstraint = Option.map tdef.Aast.t_constraint (hint env) in
     let tparaml = type_paraml env tdef.Aast.t_tparams in
     let attrs = user_attributes env tdef.Aast.t_user_attributes in
@@ -3085,6 +3085,11 @@ module Make (GetLocals : GetLocals) = struct
 
   let global_const cst =
     let env = Env.make_const_env cst in
+    let cst =
+      Elaborate_namespaces_endo.namespace_elaborater#on_gconst
+        (Elaborate_namespaces_endo.make_env (fst env).namespace)
+        cst
+    in
     let hint = Option.map cst.Aast.cst_type (hint env) in
     let e = constant_expr env cst.Aast.cst_value in
     {

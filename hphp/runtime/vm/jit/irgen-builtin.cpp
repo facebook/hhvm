@@ -1201,13 +1201,10 @@ SSATmp* optimizedFCallBuiltin(IRGS& env,
 Type param_target_type(const Func* callee, uint32_t paramIdx) {
   auto const& pi = callee->params()[paramIdx];
   auto const& tc = pi.typeConstraint;
-  if (tc.isNullable() && !callee->byRef(paramIdx)) {
+  if (tc.isNullable()) {
     auto const dt = tc.underlyingDataType();
     if (!dt) return TBottom;
     return TNull | Type(*dt);
-  }
-  if (callee->byRef(paramIdx) && pi.nativeArg) {
-    return TBoxedCell;
   }
   if (!pi.builtinType) return tc.isVArrayOrDArray() ? TArr : TBottom;
   if (pi.builtinType == KindOfObject &&

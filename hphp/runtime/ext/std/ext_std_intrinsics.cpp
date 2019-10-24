@@ -158,13 +158,6 @@ void HHVM_FUNCTION(
   g.finish(from_micros(end_us));
 }
 
-static String HHVM_STATIC_METHOD(ReffyNativeMeth, meth, VRefParam& i) {
-  String ret = "Got: ";
-  ret += i.toInt64();
-  i.assignIfRef(i.toInt64() * i.toInt64());
-  return ret;
-}
-
 void HHVM_FUNCTION(hhbbc_fail_verification) {
   g_context->write("PASS\n", 5);
 }
@@ -271,9 +264,6 @@ void StandardExtension::initIntrinsics() {
 
   HHVM_FALIAS(__hhvm_intrinsics\\hhbbc_fail_verification,
               hhbbc_fail_verification);
-
-  HHVM_STATIC_MALIAS(__hhvm_intrinsics\\ReffyNativeMeth, meth,
-                     ReffyNativeMeth, meth);
 
   loadSystemlib("std_intrinsics");
 }

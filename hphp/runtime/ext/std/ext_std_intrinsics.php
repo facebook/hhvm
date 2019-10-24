@@ -10,8 +10,6 @@ namespace __hhvm_intrinsics {
 <<__Native, __HipHopSpecific>>
 function trigger_oom(bool $oom): void;
 
-class ReffyNativeMeth { <<__Native>> static function meth(mixed &$i): string; }
-
 /**
  * Return the given value. This function is purposefully not optimized. It can
  * be used to hide information about values from the optimizer for unit testing.

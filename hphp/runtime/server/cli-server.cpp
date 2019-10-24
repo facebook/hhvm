@@ -1127,7 +1127,7 @@ void CLIWorker::doJob(int client) {
         args[0],
         false,
         null_array,
-        uninit_null(),
+        nullptr,
         "",
         "",
         error,

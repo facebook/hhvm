@@ -118,10 +118,6 @@ inline Cell* castClsmethToContainerInplace(Cell* c) {
   return c;
 }
 
-inline Cell* castClsmethToContainerInplace(VRefParam ref) {
-  return castClsmethToContainerInplace(const_cast<Cell*>(ref->toCell()));
-}
-
 //////////////////////////////////////////////////////////////////////
 }
 

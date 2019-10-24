@@ -2684,7 +2684,7 @@ bool hphp_invoke_simple(const std::string& filename, bool warmupOnly) {
   bool error;
   std::string errorMsg;
   return hphp_invoke(g_context.getNoCheck(), filename, false, null_array,
-                     uninit_null(), "", "", error, errorMsg,
+                     nullptr, "", "", error, errorMsg,
                      true /* once */,
                      warmupOnly,
                      false /* richErrorMsg */,
@@ -2692,7 +2692,7 @@ bool hphp_invoke_simple(const std::string& filename, bool warmupOnly) {
 }
 
 bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
-                 bool func, const Array& funcParams, VRefParam funcRet,
+                 bool func, const Array& funcParams, Variant* funcRet,
                  const std::string &reqInitFunc, const std::string &reqInitDoc,
                  bool &error, std::string &errorMsg,
                  bool once, bool warmupOnly,
@@ -2732,7 +2732,8 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
                 context->getCwd().data(), true);
       }
       if (func) {
-        funcRet.assignIfRef(invoke(cmd, funcParams, allowDynCallNoPointer));
+        auto const ret = invoke(cmd, funcParams, allowDynCallNoPointer);
+        if (funcRet) *funcRet = ret;
       } else {
         if (isServer) hphp_chdir_file(cmd);
         include_impl_invoke(cmd.c_str(), once, "", true);

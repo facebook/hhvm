@@ -312,14 +312,6 @@ function match_arg_type(string $php, string $cpp): bool {
         break;
     }
   }
-  // References must be a variant type
-  if ($php[strlen($php)-1] == '&') {
-    if ($expected != 'const Variant&') {
-      return false;
-    } else {
-      $expected = 'VRefParam';
-    }
-  }
   $cpp = trim($cpp);
   // Special case for ints
   if ($cpp == 'int') {

@@ -351,7 +351,7 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
       if (!forbidden) {
         rpcFile = (std::string) canonicalize_path(rpcFile, "", 0);
         rpcFile = getSourceFilename(rpcFile, sourceRootInfo);
-        ret = hphp_invoke(m_context, rpcFile, false, Array(), uninit_null(),
+        ret = hphp_invoke(m_context, rpcFile, false, Array(), nullptr,
                           reqInitFunc, reqInitDoc, error, errorMsg, runOnce,
                           false /* warmupOnly */,
                           false /* richErrorMessage */,
@@ -363,7 +363,7 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
       reqInitDoc.clear();
     }
     if (ret && !rpcFunc.empty()) {
-      ret = hphp_invoke(m_context, rpcFunc, true, params, ref(funcRet),
+      ret = hphp_invoke(m_context, rpcFunc, true, params, &funcRet,
                         reqInitFunc, reqInitDoc, error, errorMsg,
                         true /* once */,
                         false /* warmupOnly */,

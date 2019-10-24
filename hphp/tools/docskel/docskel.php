@@ -126,7 +126,6 @@ function generateCPPStub(array $func, array $classes): string {
     'resource' =>  ['Resource', 'const Resource&',  'KindOfResource'],
     'mixed' =>     ['Variant',  'const Variant&',   'KindOfAny'],
     'void' =>      ['void'],
-    'reference' => ['Variant',  'VRefParam',        'KindOfRef'],
   ];
 
   $actrec = count($func['args']) > MAX_BUILTIN_ARGS;

@@ -264,7 +264,6 @@ void callFunc(const Func* func, const void* ctx,
   X(ResourceArg,ResourceArg,          ResourceArg)    \
   X(OutputArg,  OutputArg,            OutputArg)      \
   X(MixedTV,    TypedValue,           TypedValue)     \
-  X(MixedRef,   const VRefParamValue&,VRefParamValue) \
   X(This,       ObjectData*,          ObjectData*)    \
   X(Void,       void,                 void)           \
   X(IntIO,      int64_t&,             int64_t&)       \

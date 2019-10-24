@@ -102,7 +102,7 @@ void DebuggerSession::invokeDummyStartupDocument() {
                          m_dummyStartupDoc,
                          false,
                          null_array,
-                         uninit_null(),
+                         nullptr,
                          "",
                          "",
                          error,

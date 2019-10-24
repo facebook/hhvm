@@ -110,7 +110,7 @@ void DummySandbox::run() {
                        doc.c_str(), cwd);
           bool error; std::string errorMsg;
           bool ret = hphp_invoke(g_context.getNoCheck(), doc, false, null_array,
-                                 uninit_null(), "", "", error, errorMsg, true,
+                                 nullptr, "", "", error, errorMsg, true,
                                  false, true, RuntimeOption::EvalPreludePath);
           if (!ret || error) {
             msg += "Unable to pre-load " + doc;

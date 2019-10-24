@@ -972,7 +972,6 @@ struct Variant : private TypedValue {
   Variant& assignRef(Variant& v) noexcept {
     return assignRef(v.asTypedValue());
   }
-  Variant& assignRef(VRefParam v) = delete;
 
   // Generic assignment operator. Forward argument (preserving rvalue-ness and
   // lvalue-ness) to the appropriate set function, as long as its not a Variant.
@@ -1554,81 +1553,6 @@ inline variant_ref& variant_ref::operator=(Variant &&rhs) noexcept {
 
   return *this;
 }
-
-///////////////////////////////////////////////////////////////////////////////
-
-struct RefResultValue {
-  const Variant& get() const { return m_var; }
-private:
-  Variant m_var;
-};
-
-struct VRefParamValue {
-  template <class T> /* implicit */ VRefParamValue(const T &v) : m_var(v) {}
-
-  /* implicit */ VRefParamValue() : m_var(Variant::NullInit()) {}
-  /* implicit */ VRefParamValue(RefResult v)
-    : m_var(Variant::StrongBind{},
-            const_cast<Variant&>(reinterpret_cast<const Variant&>(v))) {} // XXX
-  template <typename T>
-  Variant &operator=(const T &v) const = delete;
-  operator const Variant&() const { return m_var; }
-  const Variant *operator&() const { return &m_var; } // FIXME
-  const Variant *operator->() const { return &m_var; }
-
-  const Variant& wrapped() const { return m_var; }
-
-  explicit operator bool   () const { return m_var.toBoolean();}
-  operator int    () const { return m_var.toInt32();}
-  operator int64_t() const { return m_var.toInt64();}
-  operator double () const { return m_var.toDouble();}
-  operator String () const { return m_var.toString();}
-  operator Array  () const { return m_var.toArray();}
-  operator Object () const { return m_var.toObject();}
-  explicit operator Resource () const { return m_var.toResource();}
-
-  bool is(DataType type) const { return m_var.is(type); }
-  bool isString() const { return m_var.isString(); }
-  bool isObject() const { return m_var.isObject(); }
-  bool isReferenced() const { return m_var.isReferenced(); }
-  bool isNull() const { return m_var.isNull(); }
-  bool isRefData() const { return isRefType(m_var.asTypedValue()->m_type); }
-
-  bool toBoolean() const { return m_var.toBoolean(); }
-  int64_t toInt64() const { return m_var.toInt64(); }
-  double toDouble() const { return m_var.toDouble(); }
-  String toString() const { return m_var.toString(); }
-  StringData *getStringData() const { return m_var.getStringData(); }
-  Array toArray() const { return m_var.toArray(); }
-  Object toObject() const { return m_var.toObject(); }
-  Resource toResource() const { return m_var.toResource(); }
-  ObjectData *getObjectData() const { return m_var.getObjectData(); }
-
-  bool isArray() const { return m_var.isArray(); }
-  bool isHackArray() const { return m_var.isHackArray(); }
-  bool isPHPArray() const { return m_var.isPHPArray(); }
-  bool isClsMeth() const { return m_var.isClsMeth(); }
-  ArrNR toArrNR() const { return m_var.toArrNR(); }
-
-  RefData* getRefData() const {
-    assertx(isRefData());
-    return m_var.asTypedValue()->m_data.pref;
-  }
-  RefData* getRefDataOrNull() const {
-    return isRefData() ? m_var.asTypedValue()->m_data.pref : nullptr;
-  }
-  Variant* getVariantOrNull() const {
-    return isRefData() ? m_var.asTypedValue()->m_data.pref->var() : nullptr;
-  }
-  void assignIfRef(const Variant& other) const {
-    if (auto ref = getVariantOrNull()) *ref = other;
-  }
-  void assignIfRef(Variant&& other) const {
-    if (auto ref = getVariantOrNull()) *ref = std::move(other);
-  }
-private:
-  Variant m_var;
-};
 
 ///////////////////////////////////////////////////////////////////////////////
 // VarNR

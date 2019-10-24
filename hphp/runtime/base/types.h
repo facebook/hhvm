@@ -48,26 +48,6 @@ using LowStringPtr = LowPtr<const StringData>;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-using VRefParam = const struct VRefParamValue&;
-using RefResult = const struct RefResultValue&;
-
-/**
- * ref() can be used to cause strong binding.
- *
- *   a = ref(b); // strong binding: now both a and b point to the same data
- *   a = b;      // weak binding: a will copy or copy-on-write
- *
- */
-inline RefResult ref(const Variant& v) {
-  return *(RefResultValue*)&v;
-}
-
-inline RefResult ref(Variant& v) {
-  return *(RefResultValue*)&v;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 /*
  * Program counters in the bytecode interpreter.
  *

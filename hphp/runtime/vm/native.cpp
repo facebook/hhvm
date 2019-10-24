@@ -123,12 +123,6 @@ void pushNativeArg(Registers& regs, const Func* const func, const int i,
   // If the param type is known, just pass the value.
   if (builtinType) return pushInt(regs, val(arg).num);
 
-  // For OutputArgs, if the param is not a KindOfRef, pass a nullptr.
-  if (func->byRef(i)) {
-    auto const isRef = isRefType(type(arg));
-    return pushInt(regs, isRef ? val(arg).num : 0);
-  }
-
   // Pass both the type and value for TypedValue parameters.
   pushTypedValue(regs, arg);
 }
@@ -297,7 +291,7 @@ void coerceFCallArgs(TypedValue* args,
 
     auto tc = pi.typeConstraint;
     auto targetType = pi.builtinType;
-    if (tc.isNullable() && !func->byRef(i)) {
+    if (tc.isNullable()) {
       if (isNullType(args[-i].m_type)) {
         // No need to coerce when passed a null for a nullable type
         continue;
@@ -306,7 +300,7 @@ void coerceFCallArgs(TypedValue* args,
       // purposes.  The ABI-passed type will still be mixed/Variant.
       targetType = tc.underlyingDataType();
     }
-    if (!targetType && !func->byRef(i)) {
+    if (!targetType) {
       targetType = tc.underlyingDataType();
     }
 
@@ -610,11 +604,11 @@ static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
     case KindOfResource:     return ty == T::Resource || ty == T::ResourceArg;
     case KindOfUninit:
     case KindOfNull:         return ty == T::Void;
-    case KindOfRef:          return ty == T::Mixed    || ty == T::OutputArg;
     case KindOfInt64:        return ty == T::Int64    || ty == T::Int32;
     case KindOfFunc:         return ty == T::Func;
     case KindOfClass:        return ty == T::Class;
     case KindOfClsMeth:      return ty == T::ClsMeth;
+    case KindOfRef:
     case KindOfRecord:       return false; // TODO (T41031632)
   }
   not_reached();
@@ -643,11 +637,11 @@ static bool tcCheckNativeIO(
       case KindOfResource:     return ty == T::ResourceIO;
       case KindOfUninit:
       case KindOfNull:         return false;
-      case KindOfRef:          return ty == T::MixedIO;
       case KindOfInt64:        return ty == T::IntIO;
       case KindOfFunc:         return ty == T::FuncIO;
       case KindOfClass:        return ty == T::ClassIO;
       case KindOfClsMeth:      return ty == T::ClsMethIO;
+      case KindOfRef:
       case KindOfRecord:       return false; // TODO (T41031632)
     }
     not_reached();
@@ -710,14 +704,6 @@ const char* checkTypeFunc(const NativeSig& sig,
     if (argIt == endIt) return kInvalidArgCountMessage;
 
     auto const argTy = *argIt++;
-
-    if (pInfo.byRef) {
-      if (argTy != T::MixedRef &&
-          argTy != T::OutputArg) {
-        return kInvalidArgTypeMessage;
-      }
-      continue;
-    }
 
     if (pInfo.variadic) {
       if (argTy != T::Array) return kInvalidArgTypeMessage;
@@ -813,7 +799,6 @@ static std::string nativeTypeString(NativeSig::Type ty) {
   case T::OutputArg:  return "mixed&";
   case T::Mixed:      return "mixed";
   case T::MixedTV:    return "mixed";
-  case T::MixedRef:   return "mixed&";
   case T::This:       return "this";
   case T::Class:      return "class";
   case T::Void:       return "void";

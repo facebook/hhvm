@@ -116,7 +116,6 @@ inline bool opcodeBreaksBB(const Op op, bool inlining) {
 
 inline bool opcodeIgnoresInnerType(const Op op) {
   switch (op) {
-    case Op::PopV:
     case Op::RetC:
     case Op::RetCSuspended:
     case Op::RetM:

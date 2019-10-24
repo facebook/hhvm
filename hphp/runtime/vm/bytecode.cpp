@@ -1534,10 +1534,6 @@ OPTBLD_INLINE void iopPopC() {
   vmStack().popC();
 }
 
-OPTBLD_INLINE void iopPopV() {
-  vmStack().popV();
-}
-
 OPTBLD_INLINE void iopPopU() {
   vmStack().popU();
 }

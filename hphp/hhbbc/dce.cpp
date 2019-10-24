@@ -985,7 +985,6 @@ void pushRemovableIfNoThrow(Env& env) {
  */
 
 void dce(Env& env, const bc::PopC&)          { discard(env); }
-void dce(Env& env, const bc::PopV&)          { discard(env); }
 void dce(Env& env, const bc::PopU&)          { discard(env); }
 void dce(Env& env, const bc::PopU2&)         {
   auto ui = std::move(env.dceState.stack.back());

@@ -800,7 +800,6 @@ void in(ISS& env, const bc::PopU2&) {
   popU(env);
   push(env, std::move(val), equiv != StackDupId ? equiv : NoLocalId);
 }
-void in(ISS& env, const bc::PopV&) { nothrow(env); popV(env); }
 
 void in(ISS& env, const bc::PopFrame& op) {
   effect_free(env);
@@ -4136,12 +4135,8 @@ void fcallObjMethodNullsafe(ISS& env, const FCallArgs& fca, bool extraInput) {
   if (fca.hasGenerics()) repl.push_back(bc::PopC {});
   if (fca.hasUnpack()) repl.push_back(bc::PopC {});
   for (uint32_t i = 0; i < fca.numArgs; ++i) {
-    if (topC(env, repl.size()).subtypeOf(BRef)) {
-      repl.push_back(bc::PopV {});
-    } else {
-      assertx(topC(env, repl.size()).subtypeOf(BInitCell));
-      repl.push_back(bc::PopC {});
-    }
+    assertx(topC(env, repl.size()).subtypeOf(BInitCell));
+    repl.push_back(bc::PopC {});
   }
   repl.push_back(bc::PopU {});
   repl.push_back(bc::PopU {});
@@ -5894,9 +5889,7 @@ void interpStep(ISS& env, const Bytecode& bc) {
         case Flavor::C:
           interpStep(env, bc::PopC {});
           break;
-        case Flavor::V:
-          interpStep(env, bc::PopV {});
-          break;
+        case Flavor::V:  not_reached();
         case Flavor::U:  not_reached();
         case Flavor::CV: not_reached();
       }

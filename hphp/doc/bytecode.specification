@@ -775,7 +775,6 @@ EntryNop []  ->  []
   is guaranteed to not be optimized away.
 
 PopC                  [C]  ->  []
-PopV                  [V]  ->  []
 PopU                  [U]  ->  []
 
   Pop. Discards the value on the top of the stack.

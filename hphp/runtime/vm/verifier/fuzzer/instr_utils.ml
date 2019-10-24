@@ -46,7 +46,6 @@ let rec empty_stk (stk : stack) (remaining : int) : instruct list =
   match stk with
   | [] -> []
   | "C" :: t -> IBasic PopC :: empty_stk t remaining
-  | "V" :: t -> IBasic PopV :: empty_stk t remaining
   | "U" :: t -> IBasic PopU :: empty_stk t remaining
   | _   :: t -> remaining - 1 |> empty_stk t
 
@@ -86,7 +85,6 @@ let stk_data : instruct -> stack_sig = function
   | IMisc CheckReifiedGenericMismatch
   | IBasic PopC                            -> ["C"], []
   | IBasic PopU                            -> ["U"], []
-  | IBasic PopV                            -> ["V"], []
   | IGet CGetL2 _
   | IBasic Dup                             -> ["C"], ["C"; "C"]
   | IMisc CGetCUNop                        -> ["U"], ["C"]

@@ -284,12 +284,6 @@ Type popC(ISS& env) {
   return v;
 }
 
-Type popV(ISS& env) {
-  auto const v = popT(env);
-  assert(v.subtypeOf(BRef));
-  return v;
-}
-
 Type popU(ISS& env) {
   auto const v = popT(env);
   assert(v.subtypeOf(BUninit));
@@ -321,11 +315,6 @@ const Type& topC(ISS& env, uint32_t i = 0) {
 }
 
 const Type& topCV(ISS& env, uint32_t i = 0) { return topT(env, i); }
-
-const Type& topV(ISS& env, uint32_t i = 0) {
-  assert(topT(env, i).subtypeOf(BRef));
-  return topT(env, i);
-}
 
 void push(ISS& env, Type t) {
   FTRACE(2, "    push: {}\n", show(t));

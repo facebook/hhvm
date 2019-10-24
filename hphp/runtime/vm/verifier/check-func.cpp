@@ -1795,7 +1795,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     }
 
     // unsafe: operations definitely involving boxes
-    case Op::PopV:
     case Op::VGetL:
       ferror("references are forbidden in Rx functions: {}\n",
              opcodeToName(op));

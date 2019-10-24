@@ -55,7 +55,6 @@ let string_of_basic instruction =
   | Nop -> "Nop"
   | EntryNop -> "EntryNop"
   | PopC -> "PopC"
-  | PopV -> "PopV"
   | PopU -> "PopU"
   | Dup -> "Dup"
 

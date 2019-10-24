@@ -499,7 +499,6 @@ constexpr uint32_t kMaxConcatN = 4;
   O(EntryNop,        NA,               NOV,             NOV,        NF) \
   O(BreakTraceHint,  NA,               NOV,             NOV,        NF) \
   O(PopC,            NA,               ONE(CV),         NOV,        NF) \
-  O(PopV,            NA,               ONE(VV),         NOV,        NF) \
   O(PopU,            NA,               ONE(UV),         NOV,        NF) \
   O(PopU2,           NA,               TWO(CV,UV),      ONE(CV),    NF) \
   O(PopFrame,        ONE(IVA),         CMANY_U3,        CMANY,      NF) \

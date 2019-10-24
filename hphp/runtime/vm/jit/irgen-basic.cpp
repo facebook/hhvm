@@ -269,14 +269,6 @@ void emitPrint(IRGS& env) {
   push(env, cns(env, 1));
 }
 
-void emitUnbox(IRGS& env) {
-  auto const exit = makeExit(env);
-  auto const srcBox = popV(env);
-  auto const unboxed = unbox(env, srcBox, exit);
-  pushIncRef(env, unboxed);
-  decRef(env, srcBox);
-}
-
 void emitThis(IRGS& env) {
   auto const this_ = checkAndLoadThis(env);
   pushIncRef(env, this_);
@@ -596,7 +588,6 @@ void implIncStat(IRGS& env, uint32_t counter) {
 //////////////////////////////////////////////////////////////////////
 
 void emitPopC(IRGS& env)   { popDecRef(env, DataTypeGeneric); }
-void emitPopV(IRGS& env)   { popDecRef(env, DataTypeGeneric); }
 void emitPopU(IRGS& env)   { popU(env); }
 void emitPopU2(IRGS& env) {
   auto const src = popC(env, DataTypeGeneric);

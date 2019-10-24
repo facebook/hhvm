@@ -296,15 +296,6 @@ public:
   }
 
   ALWAYS_INLINE
-  void popV() {
-    assertx(m_top != m_base);
-    assertx(refIsPlausible(*m_top));
-    tvDecRefRef(m_top);
-    tvDebugTrash(m_top);
-    m_top++;
-  }
-
-  ALWAYS_INLINE
   void popU() {
     assertx(m_top != m_base);
     assertx(m_top->m_type == KindOfUninit);
@@ -680,13 +671,6 @@ public:
   Cell* topC() {
     assertx(m_top != m_base);
     return tvAssertCell(m_top);
-  }
-
-  ALWAYS_INLINE
-  Ref* topV() {
-    assertx(m_top != m_base);
-    assertx(isRefType(m_top->m_type));
-    return (Ref*)m_top;
   }
 
   ALWAYS_INLINE

@@ -89,8 +89,6 @@ static const struct {
 
   { OpPopC,        {Stack1|
                     DontGuardStack1,  None,         OutNone         }},
-  { OpPopV,        {Stack1|
-                    DontGuardStack1,  None,         OutNone         }},
   { OpPopU,        {Stack1|
                     DontGuardStack1,  None,         OutNone         }},
   { OpPopU2,       {StackTop2|
@@ -1012,7 +1010,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::OODeclExists:
   case Op::Parent:
   case Op::PopC:
-  case Op::PopV:
   case Op::PopU:
   case Op::PopU2:
   case Op::PopFrame:

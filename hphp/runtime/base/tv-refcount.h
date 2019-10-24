@@ -182,12 +182,6 @@ enable_if_lval_t<T, void> tvDecRefRes(T tv) {
 }
 
 template<typename T> ALWAYS_INLINE
-enable_if_lval_t<T, void> tvDecRefRef(T tv) {
-  assertx(isRefType(type(tv)));
-  decRefRef(val(tv).pref);
-}
-
-template<typename T> ALWAYS_INLINE
 enable_if_lval_t<T, void> tvDecRefClsMeth(T tv) {
   assertx(isClsMethType(type(tv)));
   decRefClsMeth(val(tv).pclsmeth);

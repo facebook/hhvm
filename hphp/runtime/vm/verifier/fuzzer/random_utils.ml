@@ -142,7 +142,6 @@ let all_instrs (_ : IS.t) : lazy_instruct list =
     (fun () -> ILitConst NullUninit);
     (fun () -> IBasic PopC);
     (fun () -> IBasic PopU);
-    (fun () -> IBasic PopV);
     (fun () -> ILitConst (ColFromArray (random_collection_type ())));
     (*(fun () -> IOp Abs);*)
     (*(fun () -> IOp Sqrt);*)

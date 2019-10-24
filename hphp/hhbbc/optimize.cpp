@@ -429,7 +429,7 @@ bool propagate_constants(const Bytecode& op, State& state, Gen gen) {
   for (auto i = size_t{0}; i < numPop; ++i) {
     switch (op.popFlavor(i)) {
     case Flavor::C:  gen(bc::PopC {}); break;
-    case Flavor::V:  gen(bc::PopV {}); break;
+    case Flavor::V:  not_reached();    break;
     case Flavor::U:  not_reached();    break;
     case Flavor::CU:
       // We only support C's for CU right now.

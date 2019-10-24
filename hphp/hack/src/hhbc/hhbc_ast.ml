@@ -181,7 +181,6 @@ type instruct_basic =
   | Nop
   | EntryNop
   | PopC
-  | PopV
   | PopU
   | Dup
 

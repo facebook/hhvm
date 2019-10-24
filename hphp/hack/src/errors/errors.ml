@@ -4799,6 +4799,15 @@ let to_json (error : Pos.absolute error_) =
   in
   Hh_json.JSON_Object [("message", Hh_json.JSON_Array elts)]
 
+let print_errors_if_present (errors : error list) =
+  if not (List.is_empty errors) then (
+    Printf.printf "Errors:\n";
+    List.iter errors (fun err ->
+        List.iter (to_list err) (fun (pos, msg) ->
+            Format.printf "  %a %s" Pos.pp pos msg;
+            Format.print_newline ()))
+  )
+
 (*****************************************************************************)
 (* Try if errors. *)
 (*****************************************************************************)

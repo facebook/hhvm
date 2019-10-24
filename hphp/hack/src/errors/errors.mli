@@ -766,6 +766,8 @@ val invalid_switch_case_value_type : Pos.t -> string -> string -> unit
 
 val to_json : Pos.absolute error_ -> Hh_json.json
 
+val print_errors_if_present : error list -> unit
+
 val to_string : ?indent:bool -> Pos.absolute error_ -> string
 
 val to_contextual_string : Pos.absolute error_ -> string
